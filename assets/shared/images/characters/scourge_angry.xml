@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='utf-8'?>
+<TextureAtlas imagePath="scourge.png"><SubTexture name="scourge down0000" x="0" y="0" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge down0001" x="653" y="0" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge down0002" x="1306" y="0" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge down0003" x="1959" y="0" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge evil idle0000" x="2612" y="0" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge evil idle0001" x="0" y="851" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge evil idle0002" x="653" y="851" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge evil idle0003" x="1306" y="851" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge evil idle0004" x="1959" y="851" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge evil idle0005" x="2612" y="851" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge evil idle0006" x="0" y="1702" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge evil idle0007" x="653" y="1702" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge evil idle0008" x="1306" y="1702" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge evil idle0009" x="1959" y="1702" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge evil idle0010" x="2612" y="1702" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge evil idle0011" x="0" y="2553" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge evil idle0012" x="653" y="2553" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge left0000" x="1306" y="2553" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge left0001" x="1959" y="2553" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge left0002" x="2612" y="2553" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge left0003" x="0" y="3404" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge right0000" x="653" y="3404" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge right0001" x="1306" y="3404" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge right0002" x="1959" y="3404" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge right0003" x="2612" y="3404" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge up0000" x="0" y="4255" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge up0001" x="653" y="4255" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge up0002" x="1306" y="4255" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+<SubTexture name="scourge up0003" x="1959" y="4255" width="653" height="851" frameX="0" frameY="0" frameWidth="653" frameHeight="851" />
+</TextureAtlas>

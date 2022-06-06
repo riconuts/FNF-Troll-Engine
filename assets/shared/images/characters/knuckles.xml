@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='utf-8'?>
+<TextureAtlas imagePath="knuckles.png"><SubTexture name="knuckles cough0000" x="0" y="0" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles cough0001" x="801" y="0" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles cough0002" x="1602" y="0" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles cough0003" x="2403" y="0" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles cough0004" x="3204" y="0" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles cough0005" x="4005" y="0" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles cough0006" x="0" y="1038" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles down0000" x="801" y="1038" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles down0001" x="1602" y="1038" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles down0002" x="2403" y="1038" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles down0003" x="3204" y="1038" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles down0004" x="4005" y="1038" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles highdle0000" x="0" y="2076" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles highdle0001" x="801" y="2076" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles highdle0002" x="1602" y="2076" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles highdle0003" x="2403" y="2076" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles highdle0004" x="3204" y="2076" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles highdle0005" x="4005" y="2076" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles highdle0006" x="0" y="3114" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles highdle0007" x="801" y="3114" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles highdle0008" x="1602" y="3114" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles highdle0009" x="2403" y="3114" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles highdle0010" x="3204" y="3114" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles highdle0011" x="4005" y="3114" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles highdle0012" x="0" y="4152" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles left0000" x="801" y="4152" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles left0001" x="1602" y="4152" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles left0002" x="2403" y="4152" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles left0003" x="3204" y="4152" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles left0004" x="4005" y="4152" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles right0000" x="0" y="5190" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles right0001" x="801" y="5190" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles right0002" x="1602" y="5190" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles right0003" x="2403" y="5190" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles right0004" x="3204" y="5190" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles up0000" x="4005" y="5190" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles up0001" x="0" y="6228" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles up0002" x="801" y="6228" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles up0003" x="1602" y="6228" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+<SubTexture name="knuckles up0004" x="2403" y="6228" width="801" height="1038" frameX="0" frameY="0" frameWidth="801" frameHeight="1038" />
+</TextureAtlas>

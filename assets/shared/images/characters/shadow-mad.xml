@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<TextureAtlas imagePath="shadow-mad.png"><SubTexture name="shadow-mad die0000" x="0" y="0" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad die0001" x="996" y="0" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad die0002" x="1992" y="0" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad die0003" x="2988" y="0" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad die0004" x="3984" y="0" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad die0005" x="4980" y="0" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad die0006" x="5976" y="0" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad die0007" x="0" y="1089" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad die0008" x="996" y="1089" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad die0009" x="1992" y="1089" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad die0010" x="2988" y="1089" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad die0011" x="3984" y="1089" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad down0000" x="4980" y="1089" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad down0001" x="5976" y="1089" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad down0002" x="0" y="2178" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad down0003" x="996" y="2178" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad mad idle0000" x="1992" y="2178" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad mad idle0001" x="2988" y="2178" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad mad idle0002" x="3984" y="2178" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad mad idle0003" x="4980" y="2178" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad mad idle0004" x="5976" y="2178" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad mad idle0005" x="0" y="3267" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad mad idle0006" x="996" y="3267" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad mad idle0007" x="1992" y="3267" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad mad idle0008" x="2988" y="3267" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad mad idle0009" x="3984" y="3267" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad mad idle0010" x="4980" y="3267" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad left0000" x="5976" y="3267" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad left0001" x="0" y="4356" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad left0002" x="996" y="4356" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad left0003" x="1992" y="4356" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad right0000" x="2988" y="4356" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad right0001" x="3984" y="4356" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad right0002" x="4980" y="4356" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad right0003" x="5976" y="4356" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad shoot0000" x="0" y="5445" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad shoot0001" x="996" y="5445" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad shoot0002" x="1992" y="5445" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad shoot0003" x="2988" y="5445" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad shoot0004" x="3984" y="5445" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad shoot0005" x="4980" y="5445" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad shoot0006" x="5976" y="5445" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad shoot0007" x="0" y="6534" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad shoot0008" x="996" y="6534" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad shoot0009" x="1992" y="6534" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad up0000" x="2988" y="6534" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad up0001" x="3984" y="6534" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad up0002" x="4980" y="6534" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+<SubTexture name="shadow-mad up0003" x="5976" y="6534" width="996" height="1089" frameX="0" frameY="0" frameWidth="996" frameHeight="1089" />
+</TextureAtlas>

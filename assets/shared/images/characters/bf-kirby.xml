@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='utf-8'?>
+<TextureAtlas imagePath="bf-kirby.png"><SubTexture name="bf-kirby down0000" x="0" y="0" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby down0001" x="474" y="0" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby down0002" x="948" y="0" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby down0003" x="1422" y="0" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby down0004" x="1896" y="0" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby down-miss0000" x="2370" y="0" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby down-miss0001" x="2844" y="0" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby down-miss0002" x="0" y="501" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby down-miss0003" x="474" y="501" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby down-miss0004" x="948" y="501" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby down-miss0005" x="1422" y="501" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby brainless idle0000" x="1896" y="501" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby brainless idle0001" x="2370" y="501" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby brainless idle0002" x="2844" y="501" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby brainless idle0003" x="0" y="1002" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby brainless idle0004" x="474" y="1002" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby brainless idle0005" x="948" y="1002" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby brainless idle0006" x="1422" y="1002" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby brainless idle0007" x="1896" y="1002" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby brainless idle0008" x="2370" y="1002" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby brainless idle0009" x="2844" y="1002" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby brainless idle0010" x="0" y="1503" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby brainless idle0011" x="474" y="1503" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby brainless idle0012" x="948" y="1503" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby left0000" x="1422" y="1503" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby left0001" x="1896" y="1503" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby left0002" x="2370" y="1503" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby left0003" x="2844" y="1503" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby left0004" x="0" y="2004" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby left-miss0000" x="474" y="2004" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby left-miss0001" x="948" y="2004" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby left-miss0002" x="1422" y="2004" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby left-miss0003" x="1896" y="2004" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby left-miss0004" x="2370" y="2004" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby left-miss0005" x="2844" y="2004" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby right0000" x="0" y="2505" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby right0001" x="474" y="2505" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby right0002" x="948" y="2505" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby right0003" x="1422" y="2505" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby right0004" x="1896" y="2505" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby right-miss0000" x="2370" y="2505" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby right-miss0001" x="2844" y="2505" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby right-miss0002" x="0" y="3006" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby right-miss0003" x="474" y="3006" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby right-miss0004" x="948" y="3006" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby right-miss0005" x="1422" y="3006" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby up0000" x="1896" y="3006" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby up0001" x="2370" y="3006" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby up0002" x="2844" y="3006" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby up0003" x="0" y="3507" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby up0004" x="474" y="3507" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby up-miss0000" x="948" y="3507" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby up-miss0001" x="1422" y="3507" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby up-miss0002" x="1896" y="3507" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby up-miss0003" x="2370" y="3507" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby up-miss0004" x="2844" y="3507" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<SubTexture name="bf-kirby up-miss0005" x="0" y="4008" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+</TextureAtlas>
