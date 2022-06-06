@@ -1,4 +1,4 @@
-# Friday Night Funkin' - Andrych Engine
+# Tails Gets Trolled - Andrych Engine
 Psych Engine with Andromeda Engine's settings and QOL improvements not currently included in the base engine.
 
 ## Here's the normal Psych readme shit byeeeee
