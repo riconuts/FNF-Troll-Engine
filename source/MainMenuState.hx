@@ -1,5 +1,6 @@
 package;
 
+import options.OptionsState;
 import flixel.ui.FlxButton.FlxTypedButton;
 import flixel.addons.ui.FlxUITypedButton;
 #if desktop
@@ -32,7 +33,7 @@ using StringTools;
 class MainMenuState extends MusicBeatState
 {
 	public static var psychEngineVersion:String = '0.5.2h'; //This is also used for Discord RPC
-	public static var curSelected:Int = 0;
+	public var curSelected:Int = 0;
 
 	var menuItems:FlxTypedGroup<FlxSprite>;
 	private var camGame:FlxCamera;
@@ -51,8 +52,6 @@ class MainMenuState extends MusicBeatState
 	var camFollow:FlxObject;
 	var camFollowPos:FlxObject;
 	var debugKeys:Array<FlxKey>;
-
-	var itemImage:FlxSprite;
 
 	override function create()
 	{
@@ -116,9 +115,8 @@ class MainMenuState extends MusicBeatState
 
 			menuItem.onOver.callback = function(){
 				if (selectedSomethin) return;
-				FlxG.sound.play(Paths.sound('scrollMenu'));
-				curSelected = menuItem.ID;
-				changeItem();
+				//FlxG.sound.play(Paths.sound('scrollMenu'));
+				updateImage(menuItem.ID);
 			};
 			menuItem.onOut.callback = function(){
 				menuItem.x = 51;
@@ -138,7 +136,24 @@ class MainMenuState extends MusicBeatState
 			menuItem.updateHitbox();
 		}
 
-		//var creditButton:FlxSprite = new FlxSprite().loadGraphic(Paths.image('newmenuu/mainmenu/menu_'));
+		/*
+		var creditButton:FlxUIButton = new FlxUIButton(802, 586);
+		creditButton.loadGraphic(Paths.image('newmenuu/mainmenu/credits'));
+		creditButton.onUp.callback = function(){
+			selectedSomethin = true;
+			MusicBeatState.switchState(new CreditsState());
+		}
+		
+		var jukeboxButton:FlxUIButton = new FlxUIButton(988, 586);
+		jukeboxButton.loadGraphic(Paths.image('newmenuu/mainmenu/jukebox'));
+		jukeboxButton.onUp.callback = function(){
+			selectedSomethin = true;
+			MusicBeatState.switchState(new CreditsState());
+		}
+
+		add(creditButton);
+		add(jukeboxButton);
+		*/
 
 		FlxG.camera.follow(camFollowPos, null, 1);
 
@@ -173,30 +188,59 @@ class MainMenuState extends MusicBeatState
 
 	var selectedSomethin:Bool = false;
 
-	function getItemImage():Null<String>{
-		// stupid
-		//trace(curSelected, optionShit[curSelected]);
-		switch(optionShit[curSelected]){
-			case "story_mode" | "promo":
-				return "optionsmenu";
-			case "freeplay":
-				return "freeplaymenu";
-			case "options":
-				return "optionsmenu";
-			default:
-				return null;
+	override function update(elapsed:Float)
+	{
+		if (FlxG.sound.music != null && FlxG.sound.music.volume < 0.8)
+		{
+			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
 		}
+
+		var lerpVal:Float = CoolUtil.boundTo(elapsed * 7.5, 0, 1);
+		camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
+
+		if (!selectedSomethin)
+		{
+			if (controls.UI_UP_P)
+			{
+				changeItem(-1);
+			}
+
+			if (controls.UI_DOWN_P)
+			{			
+				changeItem(1);
+			}
+
+			if (controls.BACK)
+			{
+				selectedSomethin = true;
+				FlxG.sound.play(Paths.sound('cancelMenu'));
+				MusicBeatState.switchState(new TitleState());
+			}
+
+			if (controls.ACCEPT)
+			{
+				onSelected();
+			}
+			#if desktop
+			else if (FlxG.keys.anyJustPressed(debugKeys))
+			{
+				selectedSomethin = true;
+				MusicBeatState.switchState(new MasterEditorMenu());
+			}
+			#end
+		}
+
+		super.update(elapsed);
 	}
 
-	function onSelected() {
+	function onSelected(){
 		if (optionShit[curSelected] == 'promo')
-		{
 			CoolUtil.browserLoad('http://www.tailsgetstrolled.org/');
-		}
-		else
-		{
+		else{
 			selectedSomethin = true;
+
 			FlxG.sound.play(Paths.sound('confirmMenu'));
+			updateImage(null);
 
 			menuItems.forEach(function(spr:FlxSprite)
 			{
@@ -241,54 +285,73 @@ class MainMenuState extends MusicBeatState
 		}
 	}
 
-	override function update(elapsed:Float)
-	{
-		if (FlxG.sound.music != null && FlxG.sound.music.volume < 0.8)
-		{
-			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
+	function getItemImage(sowyId:Int = null):Null<String>{
+		if (sowyId == null) return null;
+
+		switch(optionShit[sowyId]){
+			case 'story_mode' | 'promo':
+				return 'storymenu';
+			case 'freeplay':
+				return 'freeplaymenu';
+			case 'options':
+				return 'optionsmenu';
+			default:
+				return null;
 		}
-
-		var lerpVal:Float = CoolUtil.boundTo(elapsed * 7.5, 0, 1);
-		camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
-
-		if (!selectedSomethin)
-		{
-			if (controls.UI_UP_P)
-			{
-				FlxG.sound.play(Paths.sound('scrollMenu'));
-				changeItem(-1);
-			}
-
-			if (controls.UI_DOWN_P)
-			{
-				FlxG.sound.play(Paths.sound('scrollMenu'));
-				changeItem(1);
-			}
-
-			if (controls.BACK)
-			{
-				selectedSomethin = true;
-				FlxG.sound.play(Paths.sound('cancelMenu'));
-				MusicBeatState.switchState(new TitleState());
-			}
-
-			if (controls.ACCEPT)
-			{
-				onSelected();
-			}
-			#if desktop
-			else if (FlxG.keys.anyJustPressed(debugKeys))
-			{
-				selectedSomethin = true;
-				MusicBeatState.switchState(new MasterEditorMenu());
-			}
-			#end
-		}
-
-		super.update(elapsed);
 	}
 
+	var imageMap:Map<String, FlxSprite> = new Map<String, FlxSprite>();
+	var curImage:FlxSprite;
+	var lastName:String;
 	var appaerTween:FlxTween;
+
+	function updateImage(sowyId:Int = null){
+		var name:String = getItemImage(sowyId);
+
+		if (name == lastName)
+			return;
+		else
+			lastName = name;
+
+		if (appaerTween != null)
+			appaerTween.cancel();
+
+		var prevImage = curImage;
+		if (name != null){
+			var sowyImage = imageMap.get(name);
+
+			if (sowyImage == null){
+				var newImage = new FlxSprite(FlxG.width - 560);
+				newImage.loadGraphic(Paths.image("newmenuu/mainmenu/" + name));
+				newImage.antialiasing = ClientPrefs.globalAntialiasing;
+
+				newImage.scrollFactor.set();
+				newImage.updateHitbox();
+				newImage.screenCenter(Y);
+
+				imageMap.set(name, newImage);
+
+				sowyImage = newImage;
+			}
+			
+			for (otherImage in imageMap.iterator())
+				remove(otherImage);
+
+			add(prevImage);
+			add(sowyImage);
+
+			curImage = sowyImage;
+			
+			sowyImage.alpha = 0;
+			appaerTween = FlxTween.tween(sowyImage, {alpha: 1}, 0.1, {ease: FlxEase.quadIn,});
+		}
+		else if (curImage != null)
+			for (daImage in imageMap.iterator())
+				if (daImage == curImage)
+					FlxTween.tween(daImage, {alpha: 0}, selectedSomethin ? 0.4 : 0.1, {ease: FlxEase.quadOut});
+				else
+					daImage.alpha = 0;
+	}
 
 	function changeItem(huh:Int = 0)
 	{
@@ -299,6 +362,8 @@ class MainMenuState extends MusicBeatState
 		if (curSelected < 0)
 			curSelected = menuItems.length - 1;
 
+		if (huh != 0) FlxG.sound.play(Paths.sound('scrollMenu'));
+
 		menuItems.forEach(function(spr:FlxSprite)
 		{
 			if (spr.ID == curSelected)
@@ -307,44 +372,7 @@ class MainMenuState extends MusicBeatState
 				spr.x = 51;
 		});
 
-		//// PLEASE think this again
-		var oldImage = itemImage;
-		var name = getItemImage();
-		
-		if (appaerTween != null){
-			appaerTween.cancel();
-		}
-
-		if (name != null){
-			var newImage = new FlxSprite(FlxG.width - 560);
-			newImage.loadGraphic(Paths.image("newmenuu/mainmenu/" + name));
-			newImage.antialiasing = ClientPrefs.globalAntialiasing;
-
-			newImage.alpha = 0;
-
-			newImage.scrollFactor.set();
-			newImage.updateHitbox();
-			newImage.screenCenter(Y);
-
-			add(newImage);
-
-			itemImage = newImage;
-				
-			appaerTween = FlxTween.tween(newImage, {alpha: 1}, 0.4, {
-				ease: FlxEase.quadIn,
-			});
-		}
-
-		if (oldImage != null){
-			FlxTween.tween(oldImage, {alpha: 0}, 0.4, {
-				ease: FlxEase.quadOut,
-				onComplete: function(twn:FlxTween)
-				{
-					oldImage.kill();
-				}
-			});
-		};
-
+		updateImage(curSelected);
 	}
 
 	#if ACHIEVEMENTS_ALLOWED
