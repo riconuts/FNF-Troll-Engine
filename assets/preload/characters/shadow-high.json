@@ -9,7 +9,7 @@
 			"fps": 24,
 			"anim": "idle",
 			"indices": [],
-			"name": "shadow-high highdle"
+			"name": "shadow-high highdle0"
 		},
 		{
 			"offsets": [
@@ -20,7 +20,7 @@
 			"fps": 24,
 			"anim": "singLEFT",
 			"indices": [],
-			"name": "shadow-high left"
+			"name": "shadow-high left0"
 		},
 		{
 			"offsets": [
@@ -31,7 +31,7 @@
 			"fps": 24,
 			"anim": "singDOWN",
 			"indices": [],
-			"name": "shadow-high down"
+			"name": "shadow-high down0"
 		},
 		{
 			"offsets": [
@@ -42,7 +42,7 @@
 			"fps": 24,
 			"anim": "singUP",
 			"indices": [],
-			"name": "shadow-high up"
+			"name": "shadow-high up0"
 		},
 		{
 			"offsets": [
@@ -53,7 +53,7 @@
 			"fps": 24,
 			"anim": "singRIGHT",
 			"indices": [],
-			"name": "shadow-high right"
+			"name": "shadow-high right0"
 		},
 		{
 			"offsets": [
@@ -64,7 +64,7 @@
 			"fps": 24,
 			"anim": "singLEFTmiss",
 			"indices": [],
-			"name": "shadow-high left-miss"
+			"name": "shadow-high left-miss0"
 		},
 		{
 			"offsets": [
@@ -75,7 +75,7 @@
 			"fps": 24,
 			"anim": "singDOWNmiss",
 			"indices": [],
-			"name": "shadow-high down-miss"
+			"name": "shadow-high down-miss0"
 		},
 		{
 			"offsets": [
@@ -86,7 +86,7 @@
 			"fps": 24,
 			"anim": "singUPmiss",
 			"indices": [],
-			"name": "shadow-high up-miss"
+			"name": "shadow-high up-miss0"
 		},
 		{
 			"offsets": [
@@ -97,7 +97,7 @@
 			"fps": 24,
 			"anim": "singRIGHTmiss",
 			"indices": [],
-			"name": "shadow-high right-miss"
+			"name": "shadow-high right-miss0"
 		},
 		{
 			"offsets": [
@@ -108,7 +108,7 @@
 			"fps": 24,
 			"anim": "singDOWN-alt",
 			"indices": [],
-			"name": "shadow-high cough"
+			"name": "shadow-high cough0"
 		}
 	],
 	"no_antialiasing": false,
