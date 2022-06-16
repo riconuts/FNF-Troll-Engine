@@ -55,8 +55,8 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		DiscordClient.changePresence(rpcTitle, null);
 		#end
 		
-		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
-		bg.color = 0xFFea71fd;
+		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('newmenuu/options/optionsbg'));
+		//bg.color = 0xFFea71fd;
 		bg.screenCenter();
 		bg.antialiasing = ClientPrefs.globalAntialiasing;
 		add(bg);
@@ -329,6 +329,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 
 	public function reloadBoyfriend()
 	{
+		/*
 		var wasVisible:Bool = false;
 		if(boyfriend != null) {
 			wasVisible = boyfriend.visible;
@@ -343,6 +344,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		boyfriend.dance();
 		insert(1, boyfriend);
 		boyfriend.visible = wasVisible;
+		*/
 	}
 
 	function reloadCheckboxes() {

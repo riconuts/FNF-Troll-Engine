@@ -33,9 +33,9 @@ using StringTools;
 class MainMenuState extends MusicBeatState
 {
 	public static var psychEngineVersion:String = '0.5.2h'; //This is also used for Discord RPC
-	public var curSelected:Int = 0;
+	public static var curSelected:Int = 0;
 
-	var menuItems:FlxTypedGroup<FlxSprite>;
+	var menuItems:FlxTypedGroup<SowyUIButton>;
 	private var camGame:FlxCamera;
 	private var camAchievement:FlxCamera;
 	
@@ -60,6 +60,7 @@ class MainMenuState extends MusicBeatState
 		#if desktop
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
+
 		FlxG.mouse.visible = true;
 		#end
 		debugKeys = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
@@ -92,7 +93,7 @@ class MainMenuState extends MusicBeatState
 		add(camFollow);
 		add(camFollowPos);
 
-		menuItems = new FlxTypedGroup<FlxSprite>();
+		menuItems = new FlxTypedGroup<SowyUIButton>();
 		add(menuItems);
 
 		var scale:Float = 1;
@@ -103,7 +104,7 @@ class MainMenuState extends MusicBeatState
 		for (i in 0...optionShit.length)
 		{
 			var offset:Float = 108 - (Math.max(optionShit.length, 4) - 4) * 80;
-			var menuItem:FlxUIButton = new FlxUIButton(51, (i * 140)  + offset);
+			var menuItem:SowyUIButton = new SowyUIButton(51, (i * 140)  + offset);
 			
 			menuItem.loadGraphic(Paths.image('newmenuu/mainmenu/menu_' + optionShit[i]));
 			menuItem.antialiasing = ClientPrefs.globalAntialiasing;
@@ -116,10 +117,11 @@ class MainMenuState extends MusicBeatState
 			menuItem.onOver.callback = function(){
 				if (selectedSomethin) return;
 				//FlxG.sound.play(Paths.sound('scrollMenu'));
+				//menuItem.targetX = menuItem.x;
 				updateImage(menuItem.ID);
 			};
 			menuItem.onOut.callback = function(){
-				menuItem.x = 51;
+				menuItem.targetX = 51;
 			};
 			menuItem.onUp.callback = function(){
 				if (selectedSomethin) return;
@@ -241,7 +243,7 @@ class MainMenuState extends MusicBeatState
 
 			FlxG.sound.play(Paths.sound('confirmMenu'));
 			updateImage(null);
-
+			
 			menuItems.forEach(function(spr:FlxSprite)
 			{
 				if (curSelected != spr.ID)
@@ -258,9 +260,7 @@ class MainMenuState extends MusicBeatState
 				{
 					FlxFlicker.flicker(spr, 1, 0.06, false, false, function(flick:FlxFlicker)
 					{
-						var daChoice:String = optionShit[curSelected];
-
-						switch (daChoice)
+						switch (optionShit[curSelected])
 						{
 							case 'story_mode':
 								MusicBeatState.switchState(new StoryMenuState());
@@ -269,7 +269,8 @@ class MainMenuState extends MusicBeatState
 							case 'credits':
 								MusicBeatState.switchState(new CreditsState());
 							case 'options':
-								LoadingState.loadAndSwitchState(new options.OptionsState());
+								//LoadingState.loadAndSwitchState // why does the options menu need loading
+								MusicBeatState.switchState(new options.OptionsState());
 							#if MODS_ALLOWED
 							case 'mods':
 								MusicBeatState.switchState(new ModsMenuState());
@@ -364,12 +365,12 @@ class MainMenuState extends MusicBeatState
 
 		if (huh != 0) FlxG.sound.play(Paths.sound('scrollMenu'));
 
-		menuItems.forEach(function(spr:FlxSprite)
+		menuItems.forEach(function(spr:SowyUIButton)
 		{
 			if (spr.ID == curSelected)
-				spr.x = 151;
+				spr.targetX = 151;
 			else
-				spr.x = 51;
+				spr.targetX = 51;
 		});
 
 		updateImage(curSelected);
@@ -385,7 +386,7 @@ class MainMenuState extends MusicBeatState
 	#end
 }
 
-class SowyButton extends FlxUIButton
+class SowyUIButton extends FlxUIButton
 {
 	// what??? 
 
