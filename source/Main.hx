@@ -18,7 +18,7 @@ class Main extends Sprite
 	var initialState:Class<FlxState> = TitleState; // The FlxState the game starts with.
 	var zoom:Float = -1; // If -1, zoom is automatically calculated to fit the window dimensions.
 	var framerate:Int = 60; // How many frames per second the game should run at.
-	var skipSplash:Bool = true; // Whether to skip the flixel splash screen that appears in release mode.
+	var skipSplash:Bool = false; // Whether to skip the flixel splash screen that appears in release mode.
 	var startFullscreen:Bool = false; // Whether to start the game in fullscreen on desktop targets
 	public static var fpsVar:FPS;
 
@@ -53,6 +53,19 @@ class Main extends Sprite
 		setupGame();
 	}
 
+	public static function setScaleMode(scale:String){
+		switch(scale){
+			default:
+				Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
+			case 'EXACT_FIT':
+				Lib.current.stage.scaleMode = StageScaleMode.EXACT_FIT;
+			case 'NO_BORDER':
+				Lib.current.stage.scaleMode = StageScaleMode.NO_BORDER;
+			case 'SHOW_ALL':
+				Lib.current.stage.scaleMode = StageScaleMode.SHOW_ALL;
+		}
+	}
+
 	private function setupGame():Void
 	{
 		var stageWidth:Int = Lib.current.stage.stageWidth;
@@ -66,7 +79,11 @@ class Main extends Sprite
 			gameWidth = Math.ceil(stageWidth / zoom);
 			gameHeight = Math.ceil(stageHeight / zoom);
 		}
-	
+
+		#if !debug
+		initialState = TitleState;
+		#end
+
 		ClientPrefs.loadDefaultKeys();
 		addChild(new FlxGame(gameWidth, gameHeight, initialState, zoom, framerate, framerate, skipSplash, startFullscreen));
 

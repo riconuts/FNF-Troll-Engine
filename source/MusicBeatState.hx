@@ -1,8 +1,7 @@
 package;
-
+import flixel.addons.ui.FlxUIState;
 import Conductor.BPMChangeEvent;
 import flixel.FlxG;
-import flixel.addons.ui.FlxUIState;
 import flixel.math.FlxRect;
 import flixel.util.FlxTimer;
 import flixel.addons.transition.FlxTransitionableState;
@@ -14,6 +13,8 @@ import flixel.util.FlxGradient;
 import flixel.FlxState;
 import flixel.FlxBasic;
 
+import scripts.*;
+import scripts.Globals;
 class MusicBeatState extends FlxUIState
 {
 	private var lastBeat:Float = 0;
@@ -22,28 +23,24 @@ class MusicBeatState extends FlxUIState
 	private var curStep:Int = 0;
 	private var curBeat:Int = 0;
 
+	private var curDecStep:Float = 0;
+	private var curDecBeat:Float = 0;
 	private var controls(get, never):Controls;
 
 	inline function get_controls():Controls
 		return PlayerSettings.player1.controls;
 
 	override function create() {
-		var skip:Bool = FlxTransitionableState.skipNextTransOut;
 		super.create();
-
-		if(!skip) {
-			openSubState(new CustomFadeTransition(0.7, true));
-		}
-		FlxTransitionableState.skipNextTransOut = false;
 	}
-	
+
 	#if (VIDEOS_ALLOWED && windows)
 	override public function onFocus():Void
 	{
 		FlxVideo.onFocus();
 		super.onFocus();
 	}
-	
+
 	override public function onFocusLost():Void
 	{
 		FlxVideo.onFocusLost();
@@ -70,52 +67,28 @@ class MusicBeatState extends FlxUIState
 	private function updateBeat():Void
 	{
 		curBeat = Math.floor(curStep / 4);
+		curDecBeat = curDecStep/4;
 	}
 
 	private function updateCurStep():Void
 	{
-		var lastChange:BPMChangeEvent = {
-			stepTime: 0,
-			songTime: 0,
-			bpm: 0
-		}
-		for (i in 0...Conductor.bpmChangeMap.length)
-		{
-			if (Conductor.songPosition >= Conductor.bpmChangeMap[i].songTime)
-				lastChange = Conductor.bpmChangeMap[i];
-		}
+		var lastChange = Conductor.getBPMFromSeconds(Conductor.songPosition);
 
-		curStep = lastChange.stepTime + Math.floor(((Conductor.songPosition - ClientPrefs.noteOffset) - lastChange.songTime) / Conductor.stepCrochet);
+		var shit = ((Conductor.songPosition - ClientPrefs.noteOffset) - lastChange.songTime) / lastChange.stepCrochet;
+		curDecStep = lastChange.stepTime + shit;
+		curStep = lastChange.stepTime + Math.floor(shit);
 	}
 
-	public static function switchState(nextState:FlxState) {
-		FlxG.mouse.visible = false;
-
-		// Custom made Trans in
-		var curState:Dynamic = FlxG.state;
-		var leState:MusicBeatState = curState;
-		if(!FlxTransitionableState.skipNextTransIn) {
-			leState.openSubState(new CustomFadeTransition(0.6, false));
-			if(nextState == FlxG.state) {
-				CustomFadeTransition.finishCallback = function() {
-					FlxG.resetState();
-				};
-				//trace('resetted');
-			} else {
-				CustomFadeTransition.finishCallback = function() {
-					FlxG.switchState(nextState);
-				};
-				//trace('changed state');
-			}
-			return;
-		}
-		FlxTransitionableState.skipNextTransIn = false;
-		FlxG.switchState(nextState);
+	public static function switchState(nextState:FlxState)
+	{
+		FlxG.switchState(nextState); // just because im too lazy to goto every instance of switchState and change it to a FlxG call
 	}
 
-	public static function resetState() {
-		MusicBeatState.switchState(FlxG.state);
+	public static function resetState()
+	{
+		FlxG.resetState();
 	}
+
 
 	public static function getState():MusicBeatState {
 		var curState:Dynamic = FlxG.state;

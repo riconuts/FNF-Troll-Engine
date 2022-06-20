@@ -26,6 +26,10 @@ typedef StageFile = {
 	var camera_opponent:Array<Float>;
 	var camera_girlfriend:Array<Float>;
 	var camera_speed:Null<Float>;
+
+	@:optional var pixel_size:Null<Float>;
+	@:optional var preloadStrings:Array<String>;
+	@:optional var preload:Array<PlayState.AssetPreload>; // incase you would like to add more information, though you shouldnt really need to
 }
 
 class StageData {

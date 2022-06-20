@@ -33,7 +33,7 @@ class NotesSubState extends MusicBeatSubstate
 	private static var typeSelected:Int = 0;
 	private var grpNumbers:FlxTypedGroup<Alphabet>;
 	private var grpNotes:FlxTypedGroup<FlxSprite>;
-	private var shaderArray:Array<ColorSwap> = [];
+	private var shaderArray:Array<HSLColorSwap> = [];
 	var curValue:Float = 0;
 	var holdTime:Float = 0;
 	var nextAccept:Int = 5;
@@ -44,13 +44,13 @@ class NotesSubState extends MusicBeatSubstate
 	var posX = 230;
 	public function new() {
 		super();
-		
+
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('newmenuu/options/optionsbg'));
 		//bg.color = 0xFFea71fd;
 		bg.screenCenter();
 		bg.antialiasing = ClientPrefs.globalAntialiasing;
 		add(bg);
-		
+
 		blackBG = new FlxSprite(posX - 25).makeGraphic(870, 200, FlxColor.BLACK);
 		blackBG.alpha = 0.4;
 		add(blackBG);
@@ -69,22 +69,22 @@ class NotesSubState extends MusicBeatSubstate
 			}
 
 			var note:FlxSprite = new FlxSprite(posX, yPos);
-			note.frames = Paths.getSparrowAtlas('NOTE_assets');
+			note.frames = Paths.getSparrowAtlas(((ClientPrefs.tgtNotes == false) ? 'NOTE_assets' : 'TGT_NOTE_assets'));
 			var animations:Array<String> = ['purple0', 'blue0', 'green0', 'red0'];
 			note.animation.addByPrefix('idle', animations[i]);
 			note.animation.play('idle');
 			note.antialiasing = ClientPrefs.globalAntialiasing;
 			grpNotes.add(note);
 
-			var newShader:ColorSwap = new ColorSwap();
+			var newShader:HSLColorSwap = new HSLColorSwap();
 			note.shader = newShader.shader;
 			newShader.hue = ClientPrefs.arrowHSV[i][0] / 360;
 			newShader.saturation = ClientPrefs.arrowHSV[i][1] / 100;
-			newShader.brightness = ClientPrefs.arrowHSV[i][2] / 100;
+			newShader.lightness = ClientPrefs.arrowHSV[i][2] / 100;
 			shaderArray.push(newShader);
 		}
 
-		hsbText = new Alphabet(0, 0, "Hue    Saturation  Brightness", false, false, 0, 0.65);
+		hsbText = new Alphabet(0, 0, "Hue    Saturation  Luminosity", false, false, 0, 0.65);
 		hsbText.x = posX + 240;
 		add(hsbText);
 
@@ -243,7 +243,7 @@ class NotesSubState extends MusicBeatSubstate
 		switch(type) {
 			case 0: shaderArray[selected].hue = 0;
 			case 1: shaderArray[selected].saturation = 0;
-			case 2: shaderArray[selected].brightness = 0;
+			case 2: shaderArray[selected].lightness = 0;
 		}
 
 		var item = grpNumbers.members[(selected * 3) + type];
@@ -269,7 +269,7 @@ class NotesSubState extends MusicBeatSubstate
 		switch(typeSelected) {
 			case 0: shaderArray[curSelected].hue = roundedValue / 360;
 			case 1: shaderArray[curSelected].saturation = roundedValue / 100;
-			case 2: shaderArray[curSelected].brightness = roundedValue / 100;
+			case 2: shaderArray[curSelected].lightness = roundedValue / 100;
 		}
 
 		var item = grpNumbers.members[(curSelected * 3) + typeSelected];

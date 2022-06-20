@@ -42,12 +42,20 @@ typedef AnimArray = {
 	var loop:Bool;
 	var indices:Array<Int>;
 	var offsets:Array<Int>;
+	@:optional var cameraOffset:Array<Float>;
 }
 
 class Character extends FlxSprite
 {
+	public var voicelining:Bool = false; // for fleetway, mainly
+	// but whenever you need to play an anim that has to be manually interrupted, here you go
+
+	public var idleAnims:Array<String> = ['idle'];
 	public var animOffsets:Map<String, Array<Dynamic>>;
+	public var camOffsets:Map<String, Array<Float>> = [];
 	public var debugMode:Bool = false;
+	public var camOffX:Float = 0;
+	public var camOffY:Float = 0;
 
 	public var isPlayer:Bool = false;
 	public var curCharacter:String = DEFAULT_CHARACTER;
@@ -55,6 +63,7 @@ class Character extends FlxSprite
 	public var colorTween:FlxTween;
 	public var holdTimer:Float = 0;
 	public var heyTimer:Float = 0;
+	public var animTimer:Float = 0;
 	public var specialAnim:Bool = false;
 	public var animationNotes:Array<Dynamic> = [];
 	public var stunned:Bool = false;
@@ -79,6 +88,32 @@ class Character extends FlxSprite
 	public var healthColorArray:Array<Int> = [255, 0, 0];
 
 	public static var DEFAULT_CHARACTER:String = 'bf'; //In case a character is missing, it will use BF on its place
+	public static function getCharacterFile(character:String):CharacterFile{
+		var characterPath:String = 'characters/' + character + '.json';
+
+		#if MODS_ALLOWED
+		var path:String = Paths.modFolders(characterPath);
+		if (!FileSystem.exists(path)) {
+			path = Paths.getPreloadPath(characterPath);
+		}
+
+		if (!FileSystem.exists(path))
+		#else
+		var path:String = Paths.getPreloadPath(characterPath);
+		if (!Assets.exists(path))
+		#end
+		{
+			path = Paths.getPreloadPath('characters/' + DEFAULT_CHARACTER + '.json'); //If a character couldn't be found, change him to BF just to prevent a crash
+		}
+
+		#if MODS_ALLOWED
+		var rawJson = File.getContent(path);
+		#else
+		var rawJson = Assets.getText(path);
+		#end
+
+		return cast Json.parse(rawJson);
+	}
 	public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false)
 	{
 		super(x, y);
@@ -97,30 +132,7 @@ class Character extends FlxSprite
 			//case 'your character name in case you want to hardcode them instead':
 
 			default:
-				var characterPath:String = 'characters/' + curCharacter + '.json';
-
-				#if MODS_ALLOWED
-				var path:String = Paths.modFolders(characterPath);
-				if (!FileSystem.exists(path)) {
-					path = Paths.getPreloadPath(characterPath);
-				}
-
-				if (!FileSystem.exists(path))
-				#else
-				var path:String = Paths.getPreloadPath(characterPath);
-				if (!Assets.exists(path))
-				#end
-				{
-					path = Paths.getPreloadPath('characters/' + DEFAULT_CHARACTER + '.json'); //If a character couldn't be found, change him to BF just to prevent a crash
-				}
-
-				#if MODS_ALLOWED
-				var rawJson = File.getContent(path);
-				#else
-				var rawJson = Assets.getText(path);
-				#end
-
-				var json:CharacterFile = cast Json.parse(rawJson);
+				var json:CharacterFile = getCharacterFile(curCharacter);
 				var spriteType = "sparrow";
 				//sparrow
 				//packer
@@ -128,10 +140,10 @@ class Character extends FlxSprite
 				#if MODS_ALLOWED
 				var modTxtToFind:String = Paths.modsTxt(json.image);
 				var txtToFind:String = Paths.getPath('images/' + json.image + '.txt', TEXT);
-				
+
 				//var modTextureToFind:String = Paths.modFolders("images/"+json.image);
 				//var textureToFind:String = Paths.getPath('images/' + json.image, new AssetType();
-				
+
 				if (FileSystem.exists(modTxtToFind) || FileSystem.exists(txtToFind) || Assets.exists(txtToFind))
 				#else
 				if (Assets.exists(Paths.getPath('images/' + json.image + '.txt', TEXT)))
@@ -139,14 +151,14 @@ class Character extends FlxSprite
 				{
 					spriteType = "packer";
 				}
-				
+
 				#if MODS_ALLOWED
 				var modAnimToFind:String = Paths.modFolders('images/' + json.image + '/Animation.json');
 				var animToFind:String = Paths.getPath('images/' + json.image + '/Animation.json', TEXT);
-				
+
 				//var modTextureToFind:String = Paths.modFolders("images/"+json.image);
 				//var textureToFind:String = Paths.getPath('images/' + json.image, new AssetType();
-				
+
 				if (FileSystem.exists(modAnimToFind) || FileSystem.exists(animToFind) || Assets.exists(animToFind))
 				#else
 				if (Assets.exists(Paths.getPath('images/' + json.image + '/Animation.json', TEXT)))
@@ -156,13 +168,13 @@ class Character extends FlxSprite
 				}
 
 				switch (spriteType){
-					
+
 					case "packer":
 						frames = Paths.getPackerAtlas(json.image);
-					
+
 					case "sparrow":
 						frames = Paths.getSparrowAtlas(json.image);
-					
+
 					case "texture":
 						frames = AtlasFrameMaker.construct(json.image);
 				}
@@ -199,6 +211,23 @@ class Character extends FlxSprite
 						var animFps:Int = anim.fps;
 						var animLoop:Bool = !!anim.loop; //Bruh
 						var animIndices:Array<Int> = anim.indices;
+						var camOffset:Null<Array<Float>> = anim.cameraOffset;
+						if (!ClientPrefs.directionalCam)
+							camOffset = [0, 0];
+						else if(camOffset==null){
+							switch(animAnim){
+								case 'singLEFT' | 'singLEFTmiss' | 'singLEFT-alt':
+									camOffset = [-30, 0];
+								case 'singRIGHT' | 'singRIGHTmiss' | 'singRIGHT-alt':
+									camOffset = [30, 0];
+								case 'singUP' | 'singUPmiss' | 'singUP-alt':
+									camOffset = [0, -30];
+								case 'singDOWN' | 'singDOWNmiss' | 'singDOWN-alt':
+									camOffset = [0, 30];
+								default:
+									camOffset = [0, 0];
+							}
+						}
 						if(animIndices != null && animIndices.length > 0) {
 							animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop);
 						} else {
@@ -208,6 +237,7 @@ class Character extends FlxSprite
 						if(anim.offsets != null && anim.offsets.length > 1) {
 							addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
 						}
+						camOffsets[anim.anim] = [camOffset[0], camOffset[1]];
 					}
 				} else {
 					quickAnimAdd('idle', 'BF idle dance');
@@ -258,12 +288,19 @@ class Character extends FlxSprite
 	{
 		if(!debugMode && animation.curAnim != null)
 		{
+			if(animTimer > 0){
+				animTimer -= elapsed;
+				if(animTimer<=0){
+					animTimer=0;
+					dance();
+				}
+			}
 			if(heyTimer > 0)
 			{
 				heyTimer -= elapsed;
 				if(heyTimer <= 0)
 				{
-					if(specialAnim && animation.curAnim.name == 'hey' || animation.curAnim.name == 'cheer')
+					if(specialAnim && (animation.curAnim.name == 'hey' || animation.curAnim.name == 'cheer'))
 					{
 						specialAnim = false;
 						dance();
@@ -272,10 +309,11 @@ class Character extends FlxSprite
 				}
 			} else if(specialAnim && animation.curAnim.finished)
 			{
+				trace("special done");
 				specialAnim = false;
 				dance();
 			}
-			
+
 			switch(curCharacter)
 			{
 				case 'pico-speaker':
@@ -311,6 +349,23 @@ class Character extends FlxSprite
 			}
 		}
 		super.update(elapsed);
+
+		if(!debugMode){
+			if(animation.curAnim!=null){
+				var name = animation.curAnim.name;
+				if(name.startsWith("hold")){
+					if(name.endsWith("Start") && animation.curAnim.finished){
+						var newName = name.substring(0,name.length-5);
+						var singName = "sing" + name.substring(3, name.length-5);
+						if(animation.getByName(newName)!=null){
+							playAnim(newName,true);
+						}else{
+							playAnim(singName,true);
+						}
+					}
+				}
+			}
+		}
 	}
 
 	public var danced:Bool = false;
@@ -320,7 +375,7 @@ class Character extends FlxSprite
 	 */
 	public function dance()
 	{
-		if (!debugMode && !skipDance && !specialAnim)
+		if (!debugMode && !skipDance && !specialAnim && animTimer <= 0 && !voicelining)
 		{
 			if(danceIdle)
 			{
@@ -350,6 +405,18 @@ class Character extends FlxSprite
 		else
 			offset.set(0, 0);
 
+		camOffX = 0;
+		camOffY = 0;
+		if(camOffsets.exists(AnimName) && camOffsets.get(AnimName).length==2){
+			camOffX = camOffsets.get(AnimName)[0];
+			camOffY = camOffsets.get(AnimName)[1];
+		}
+		else if (camOffsets.exists(AnimName.replace("-loop", "")) && camOffsets.get(AnimName.replace("-loop", "")).length == 2)
+		{
+			camOffX = camOffsets.get(AnimName.replace("-loop", ""))[0];
+			camOffY = camOffsets.get(AnimName.replace("-loop", ""))[1];
+		}
+
 		if (curCharacter.startsWith('gf'))
 		{
 			if (AnimName == 'singLEFT')
@@ -367,7 +434,7 @@ class Character extends FlxSprite
 			}
 		}
 	}
-	
+
 	function loadMappedAnims():Void
 	{
 		var noteData:Array<SwagSection> = Song.loadFromJson('picospeaker', Paths.formatToSongPath(PlayState.SONG.song)).notes;

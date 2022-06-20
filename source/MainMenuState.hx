@@ -402,9 +402,8 @@ class SowyUIButton extends FlxUIButton
 
 	override function update(elapsed:Float)
 	{
-		super.update(elapsed);
-		
 		x = Std.int(FlxMath.lerp(x, targetX, CoolUtil.boundTo(elapsed * 10.2, 0, 1)));
 		y = Std.int(FlxMath.lerp(y, targetY, CoolUtil.boundTo(elapsed * 10.2, 0, 1)));
+		super.update(elapsed);
 	}
 }

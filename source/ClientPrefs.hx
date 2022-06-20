@@ -20,12 +20,31 @@ class ClientPrefs {
 	public static var violence:Bool = true;
 	public static var camZooms:Bool = true;
 	public static var hideHud:Bool = false;
+	public static var multicoreLoading:Bool = true;
+	public static var camMovement:Bool = true;
+	public static var directionalCam:Bool = false;
+	public static var tgtNotes:Bool = true;
+	public static var loadingThreads:Int = Math.floor(Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS"))/2);
 	public static var noteOffset:Int = 0;
 	public static var arrowHSV:Array<Array<Int>> = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
+	public static var quantHSV:Array<Array<Int>> = [
+		[0, -20, 0], // 4th
+		[-130, -20, 0], // 8th
+		[-80, -20, 0], // 12th
+		[128, -30, 0], // 16th
+		[-120, -70, -35], // 20th
+		[-80, -20, 0], // 24th
+		[50, -20, 0], // 32nd
+		[-80, -20, 0], // 48th
+		[160, -15, 0], // 64th
+		[-120, -70, -35], // 96th
+		[-120, -70, -35]// 192nd
+	];
 	public static var imagesPersist:Bool = false;
 	public static var ghostTapping:Bool = true;
 	public static var timeBarType:String = 'Time Left';
 	public static var scoreZoom:Bool = true;
+	public static var noteSkin:String = 'Vanilla';
 	public static var noReset:Bool = false;
 	public static var healthBarAlpha:Float = 1;
 	public static var controllerMode:Bool = false;
@@ -33,7 +52,7 @@ class ClientPrefs {
 	public static var pauseMusic:String = 'Tea Time';
 	public static var gameplaySettings:Map<String, Dynamic> = [
 		'scrollspeed' => 1.0,
-		'scrolltype' => 'multiplicative', 
+		'scrolltype' => 'multiplicative',
 		// anyone reading this, amod is multiplicative speed mod, cmod is constant speed mod, and xmod is bpm based speed mod.
 		// an amod example would be chartSpeed * multiplier
 		// cmod would just be constantSpeed = chartSpeed
@@ -66,21 +85,22 @@ class ClientPrefs {
 		'note_down'		=> [S, DOWN],
 		'note_up'		=> [W, UP],
 		'note_right'	=> [D, RIGHT],
-		
+		'dodge' => [SPACE],
+
 		'ui_left'		=> [A, LEFT],
 		'ui_down'		=> [S, DOWN],
 		'ui_up'			=> [W, UP],
 		'ui_right'		=> [D, RIGHT],
-		
+
 		'accept'		=> [SPACE, ENTER],
 		'back'			=> [BACKSPACE, ESCAPE],
 		'pause'			=> [ENTER, ESCAPE],
 		'reset'			=> [R, NONE],
-		
+
 		'volume_mute'	=> [ZERO, NONE],
 		'volume_up'		=> [NUMPADPLUS, PLUS],
 		'volume_down'	=> [NUMPADMINUS, MINUS],
-		
+
 		'debug_1'		=> [SEVEN, NONE],
 		'debug_2'		=> [EIGHT, NONE]
 	];
@@ -106,11 +126,18 @@ class ClientPrefs {
 		FlxG.save.data.camZooms = camZooms;
 		FlxG.save.data.noteOffset = noteOffset;
 		FlxG.save.data.hideHud = hideHud;
+		FlxG.save.data.multicoreLoading = multicoreLoading;
+		FlxG.save.data.camMovement = camMovement;
+		FlxG.save.data.directionalCam = directionalCam;
+		FlxG.save.data.tgtNotes = tgtNotes;
+		FlxG.save.data.loadingThreads = loadingThreads;
 		FlxG.save.data.arrowHSV = arrowHSV;
+		FlxG.save.data.quantHSV = quantHSV;
 		FlxG.save.data.imagesPersist = imagesPersist;
 		FlxG.save.data.ghostTapping = ghostTapping;
 		FlxG.save.data.timeBarType = timeBarType;
 		FlxG.save.data.scoreZoom = scoreZoom;
+		FlxG.save.data.noteSkin = noteSkin;
 		FlxG.save.data.noReset = noReset;
 		FlxG.save.data.healthBarAlpha = healthBarAlpha;
 		FlxG.save.data.comboOffset = comboOffset;
@@ -126,7 +153,7 @@ class ClientPrefs {
 		FlxG.save.data.controllerMode = controllerMode;
 		FlxG.save.data.hitsoundVolume = hitsoundVolume;
 		FlxG.save.data.pauseMusic = pauseMusic;
-	
+
 		FlxG.save.flush();
 
 		var save:FlxSave = new FlxSave();
@@ -186,11 +213,39 @@ class ClientPrefs {
 		if(FlxG.save.data.hideHud != null) {
 			hideHud = FlxG.save.data.hideHud;
 		}
+		if(FlxG.save.data.multicoreLoading != null) {
+			multicoreLoading = FlxG.save.data.multicoreLoading;
+		}
+		if (FlxG.save.data.camMovement != null)
+		{
+			camMovement = FlxG.save.data.camMovement;
+		}
+		if (FlxG.save.data.directionalCam != null)
+		{
+			directionalCam = FlxG.save.data.directionalCam;
+		}
+		if (FlxG.save.data.tgtNotes != null)
+		{
+			tgtNotes = FlxG.save.data.tgtNotes;
+		}
+		if(FlxG.save.data.loadingThreads != null) {
+			loadingThreads = FlxG.save.data.loadingThreads;
+			if(loadingThreads > Math.floor(Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS")))){
+				loadingThreads = Math.floor(Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS")));
+				FlxG.save.data.loadingThreads = loadingThreads;
+			}
+		}
 		if(FlxG.save.data.noteOffset != null) {
 			noteOffset = FlxG.save.data.noteOffset;
 		}
 		if(FlxG.save.data.arrowHSV != null) {
 			arrowHSV = FlxG.save.data.arrowHSV;
+		}
+		if(FlxG.save.data.quantHSV != null) {
+			quantHSV = FlxG.save.data.quantHSV;
+		}
+		if(FlxG.save.data.noteSkin != null) {
+			noteSkin = FlxG.save.data.noteSkin;
 		}
 		if(FlxG.save.data.ghostTapping != null) {
 			ghostTapping = FlxG.save.data.ghostTapping;
@@ -210,7 +265,7 @@ class ClientPrefs {
 		if(FlxG.save.data.comboOffset != null) {
 			comboOffset = FlxG.save.data.comboOffset;
 		}
-		
+
 		if(FlxG.save.data.ratingOffset != null) {
 			ratingOffset = FlxG.save.data.ratingOffset;
 		}
@@ -243,7 +298,7 @@ class ClientPrefs {
 				gameplaySettings.set(name, value);
 			}
 		}
-		
+
 		// flixel automatically saves your volume!
 		if(FlxG.save.data.volume != null)
 		{

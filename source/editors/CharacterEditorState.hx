@@ -183,8 +183,8 @@ class CharacterEditorState extends MusicBeatState
 		UI_characterbox = new FlxUITabMenu(null, tabs, true);
 		UI_characterbox.cameras = [camMenu];
 
-		UI_characterbox.resize(350, 250);
-		UI_characterbox.x = UI_box.x - 100;
+		UI_characterbox.resize(400, 250);
+		UI_characterbox.x = UI_box.x - 150;
 		UI_characterbox.y = UI_box.y + UI_box.height;
 		UI_characterbox.scrollFactor.set();
 		add(UI_characterbox);
@@ -222,12 +222,12 @@ class CharacterEditorState extends MusicBeatState
 		if(char.isPlayer) playerXDifference = 670;
 
 		if(onPixelBG) {
-			var playerYDifference:Float = 0;
+			var playerYDifference:Float = -296;
 			if(char.isPlayer) {
-				playerXDifference += 200;
-				playerYDifference = 220;
+				playerXDifference = 470;
+				playerYDifference = -368;
 			}
-
+			/*
 			var bgSky:BGSprite = new BGSprite('weeb/weebSky', OFFSET_X - (playerXDifference / 2) - 300, 0 - playerYDifference, 0.1, 0.1);
 			bgLayer.add(bgSky);
 			bgSky.antialiasing = false;
@@ -259,7 +259,14 @@ class CharacterEditorState extends MusicBeatState
 			bgSky.updateHitbox();
 			bgSchool.updateHitbox();
 			bgStreet.updateHitbox();
-			bgTrees.updateHitbox();
+			bgTrees.updateHitbox();*/
+			var greenHill = new BGSprite('SonicP2/GreenHill', (-428.5 + 50 + 700) + OFFSET_X - playerXDifference, (-449.35 + 25 + 105 + 50) - playerYDifference, 1, 1);
+			greenHill.antialiasing=false;
+			greenHill.scale.set(8, 8);
+			greenHill.pixelPerfectPosition = true;
+			greenHill.x = CoolUtil.quantize(greenHill.x, 8);
+			greenHill.y = CoolUtil.quantize(greenHill.y, 8);
+			bgLayer.add(greenHill);
 			changeBGbutton.text = "Regular BG";
 		} else {
 			var bg:BGSprite = new BGSprite('stageback', -600 + OFFSET_X - playerXDifference, -300, 0.9, 0.9);
@@ -605,6 +612,8 @@ class CharacterEditorState extends MusicBeatState
 	var ghostDropDown:FlxUIDropDownMenuCustom;
 	var animationDropDown:FlxUIDropDownMenuCustom;
 	var animationInputText:FlxUIInputText;
+	var animationXCam:FlxUINumericStepper;
+	var animationYCam:FlxUINumericStepper;
 	var animationNameInputText:FlxUIInputText;
 	var animationIndicesInputText:FlxUIInputText;
 	var animationNameFramerate:FlxUINumericStepper;
@@ -619,6 +628,9 @@ class CharacterEditorState extends MusicBeatState
 		animationNameFramerate = new FlxUINumericStepper(animationInputText.x + 170, animationInputText.y, 1, 24, 0, 240, 0);
 		animationLoopCheckBox = new FlxUICheckBox(animationNameInputText.x + 170, animationNameInputText.y - 1, null, null, "Should it Loop?", 100);
 
+		animationXCam = new FlxUINumericStepper(animationNameFramerate.x + 75, animationNameFramerate.y, 10, 0, -9000, 9000, 0);
+		animationYCam = new FlxUINumericStepper(animationXCam.x + 75, animationXCam.y, 10, 0, -9000, 9000, 0);
+
 		animationDropDown = new FlxUIDropDownMenuCustom(15, animationInputText.y - 55, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(pressed:String) {
 			var selectedAnimation:Int = Std.parseInt(pressed);
 			var anim:AnimArray = char.animationsArray[selectedAnimation];
@@ -626,6 +638,26 @@ class CharacterEditorState extends MusicBeatState
 			animationNameInputText.text = anim.name;
 			animationLoopCheckBox.checked = anim.loop;
 			animationNameFramerate.value = anim.fps;
+			if(anim.cameraOffset==null){
+				switch(anim.anim){
+					case 'singLEFT' | 'singLEFTmiss' | 'singLEFT-alt':
+						anim.cameraOffset = [-30, 0];
+					case 'singRIGHT' | 'singRIGHTmiss' | 'singRIGHT-alt':
+						anim.cameraOffset = [30, 0];
+					case 'singUP' | 'singUPmiss' | 'singUP-alt':
+						anim.cameraOffset = [0, -30];
+					case 'singDOWN' | 'singDOWNmiss' | 'singDOWN-alt':
+						anim.cameraOffset = [0, 30];
+					default:
+						anim.cameraOffset = [0, 0];
+				}
+
+			}
+			animationXCam.value = anim.cameraOffset[0];
+			animationYCam.value = anim.cameraOffset[1];
+
+			updatePointerPos();
+
 
 			var indicesStr:String = anim.indices.toString();
 			animationIndicesInputText.text = indicesStr.substr(1, indicesStr.length - 2);
@@ -676,8 +708,10 @@ class CharacterEditorState extends MusicBeatState
 				fps: Math.round(animationNameFramerate.value),
 				loop: animationLoopCheckBox.checked,
 				indices: indices,
-				offsets: lastOffsets
+				offsets: lastOffsets,
+				cameraOffset: [animationXCam.value, animationYCam.value]
 			};
+
 			if(indices != null && indices.length > 0) {
 				char.animation.addByIndices(newAnim.anim, newAnim.name, newAnim.indices, "", newAnim.fps, newAnim.loop);
 			} else {
@@ -737,7 +771,8 @@ class CharacterEditorState extends MusicBeatState
 			}
 		});
 
-		tab_group.add(new FlxText(animationDropDown.x, animationDropDown.y - 18, 0, 'Animations:'));
+		tab_group.add(new FlxText(animationXCam.x, animationXCam.y - 18, 0, 'Camera X/Y Offset:'));
+		//tab_group.add(new FlxText(animationDropDown.x, animationDropDown.y - 18, 0, 'Animations:'));
 		tab_group.add(new FlxText(ghostDropDown.x, ghostDropDown.y - 18, 0, 'Animation Ghost:'));
 		tab_group.add(new FlxText(animationInputText.x, animationInputText.y - 18, 0, 'Animation name:'));
 		tab_group.add(new FlxText(animationNameFramerate.x, animationNameFramerate.y - 18, 0, 'Framerate:'));
@@ -749,10 +784,14 @@ class CharacterEditorState extends MusicBeatState
 		tab_group.add(animationIndicesInputText);
 		tab_group.add(animationNameFramerate);
 		tab_group.add(animationLoopCheckBox);
+		tab_group.add(animationXCam);
+		tab_group.add(animationYCam);
 		tab_group.add(addUpdateButton);
 		tab_group.add(removeButton);
 		tab_group.add(ghostDropDown);
 		tab_group.add(animationDropDown);
+
+		updatePointerPos();
 		UI_characterbox.addGroup(tab_group);
 	}
 
@@ -786,6 +825,10 @@ class CharacterEditorState extends MusicBeatState
 			{
 				char.positionArray[0] = positionXStepper.value;
 				char.x = char.positionArray[0] + OFFSET_X + 100;
+				updatePointerPos();
+			}
+			else if(sender == animationXCam || sender == animationYCam)
+			{
 				updatePointerPos();
 			}
 			else if(sender == singDurationStepper)
@@ -963,6 +1006,13 @@ class CharacterEditorState extends MusicBeatState
 			x -= 100 + char.cameraPosition[0];
 		}
 		y -= 100 - char.cameraPosition[1];
+
+
+		if(animationXCam!=null)
+			x += animationXCam.value;
+		if(animationYCam!=null)
+			y += animationYCam.value;
+
 
 		x -= cameraFollowPointer.width / 2;
 		y -= cameraFollowPointer.height / 2;

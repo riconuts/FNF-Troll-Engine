@@ -43,14 +43,25 @@
 
 	<classpath name="source" />
 	
+	<!-- screw the preload folder -->
+	<assets path="assets/data" />
+	<assets path="assets/images" />
+
+	<assets path="assets/music" exclude="*.ogg" if="web"/>
+	<assets path="assets/music" exclude="*.mp3"  unless="web"/>
+	<assets path="assets/sounds" exclude="*.ogg" if="web"/>
+	<assets path="assets/sounds" exclude="*.mp3"  unless="web"/>
+
+	<assets path="assets/characters" />
+	<assets path="assets/scripts" />
+	<assets path="assets/stages" />
+	<assets path="assets/weeks" />
+
 	<!-- PSYCH ENGINE CUSTOMIZATION -->
 	<define name="MODS_ALLOWED" if="desktop" />
 	<define name="LUA_ALLOWED" if="desktop" />
 	<!-- <define name="ACHIEVEMENTS_ALLOWED" /> -->
 	<define name="VIDEOS_ALLOWED" if="web || windows" unless="32bits"/>
-
-	<assets path="assets/preload" rename="assets" exclude="*.ogg" if="web"/>
-	<assets path="assets/preload" rename="assets" exclude="*.mp3"  unless="web"/>
 
 	<!-- DONT ENABLE THIS -->
 	<define name="CHECK_FOR_UPDATES" if="desktop officialBuild"/>
@@ -63,23 +74,13 @@
 	<section if="PRELOAD_ALL">
 		<library name="songs"         preload="true" />
 		<library name="shared"        preload="true" />
-		<library name="week2"         preload="true" />
-		<library name="week3"         preload="true" />
-		<library name="week4"         preload="true" />
-		<library name="week5"         preload="true" />
-		<library name="week6"         preload="true" />
-		<library name="week7"         preload="true" />
+		<!-- <library name="week2"         preload="true" /> -->
 	</section>
 	
 	<section if="NO_PRELOAD_ALL">
 		<library name="songs"         preload="true" />
 		<library name="shared"        preload="false" />
-		<library name="week2"         preload="false" />
-		<library name="week3"         preload="false" />
-		<library name="week4"         preload="false" />
-		<library name="week5"         preload="false" />
-		<library name="week6"         preload="false" />
-		<library name="week7"         preload="false" />
+		<!-- <library name="week2"         preload="false" /> -->
 	</section>
 	
 	<assets path="plugins/"             rename=''               if="VIDEOS_ALLOWED windows" />
@@ -89,18 +90,7 @@
 	<assets path="assets/songs"         library="songs"         exclude="*.mp3" unless="web"/>
 	<assets path="assets/shared"        library="shared"        exclude="*.ogg" if="web"/>
 	<assets path="assets/shared"        library="shared"        exclude="*.mp3" unless="web"/>
-	<assets path="assets/week2"         library="week2"         exclude="*.ogg" if="web"/>
-	<assets path="assets/week2"         library="week2"         exclude="*.mp3" unless="web"/>
-	<assets path="assets/week3"         library="week3"         exclude="*.ogg" if="web"/>
-	<assets path="assets/week3"         library="week3"         exclude="*.mp3" unless="web"/>
-	<assets path="assets/week4"         library="week4"         exclude="*.ogg" if="web"/>
-	<assets path="assets/week4"         library="week4"         exclude="*.mp3" unless="web"/>
-	<assets path="assets/week5"         library="week5"         exclude="*.ogg" if="web"/>
-	<assets path="assets/week5"         library="week5"         exclude="*.mp3" unless="web"/>
-	<assets path="assets/week6"         library="week6"         exclude="*.ogg" if="web"/>
-	<assets path="assets/week6"         library="week6"         exclude="*.mp3" unless="web"/>
-	<assets path="assets/week7"         library="week7"         exclude="*.ogg" if="web"/>
-	<assets path="assets/week7"         library="week7"         exclude="*.mp3" unless="web"/>
+	<!-- <assets path="assets/week2"         library="week2"         exclude="*.ogg" if="web"/> -->
 	
 	<!-- <assets path='example_mods' rename='mods' embed='false' if="MODS_ALLOWED"/> -->
 	<!-- <assets path='art/readme.txt' rename='do NOT readme.txt' /> -->
@@ -174,7 +164,6 @@
 	<!-- _________________________________ Custom _______________________________ -->
 
 	<!--Place custom nodes like icons here (higher priority to override the HaxeFlixel icon)-->
-
 	<icon path="art/iconOG.png" />
 	<icon path="art/icon64.png" size='64'/>
 	<icon path="art/icon32.png" size='32'/>

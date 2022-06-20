@@ -50,6 +50,8 @@ class Option
 	public var description:String = '';
 	public var name:String = 'Unknown';
 
+	public var callback:Void->Void = null; // Pressed enter (on button type)
+
 	public function new(name:String, description:String = '', variable:String, type:String = 'bool', defaultValue:Dynamic = 'null variable value', ?options:Array<String> = null)
 	{
 		this.name = name;
@@ -63,6 +65,8 @@ class Option
 		{
 			switch(type)
 			{
+				case 'button' | 'label':
+					defaultValue = ''; // never used anyway, so like
 				case 'bool':
 					defaultValue = false;
 				case 'int' | 'float':
@@ -88,7 +92,7 @@ class Option
 				if(num > -1) {
 					curOption = num;
 				}
-	
+
 			case 'percent':
 				displayFormat = '%v%';
 				changeValue = 0.01;
@@ -145,6 +149,8 @@ class Option
 			case 'integer': newValue = 'int';
 			case 'str': newValue = 'string';
 			case 'fl': newValue = 'float';
+			case 'button': newValue = 'button';
+			case 'label': 'label';
 		}
 		type = newValue;
 		return type;

@@ -3,20 +3,36 @@ package;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
+import openfl.utils.AssetType;
+import openfl.utils.Assets;
 
 using StringTools;
 
 class StrumNote extends FlxSprite
 {
-	private var colorSwap:ColorSwap;
+	public var colorSwap:HSLColorSwap;
 	public var resetAnim:Float = 0;
-	private var noteData:Int = 0;
+	public var noteData:Int = 0;
 	public var direction:Float = 90;//plan on doing scroll directions soon -bb
 	public var downScroll:Bool = false;//plan on doing scroll directions soon -bb
 	public var sustainReduce:Bool = true;
-	
-	private var player:Int;
-	
+	public var isQuant:Bool = false;
+	public var player:Int;
+	public var targetAlpha:Float = 1;
+	public var alphaMult:Float = 1;
+	public var parent:PlayField;
+	@:isVar
+	public var swagWidth(get, null):Float;
+
+	public function get_swagWidth()
+	{
+		return parent == null ? Note.swagWidth : parent.swagWidth;
+	}
+
+	override function set_alpha(val:Float){
+		return targetAlpha = val;
+	}
+
 	public var texture(default, set):String = null;
 	private function set_texture(value:String):String {
 		if(texture != value) {
@@ -26,16 +42,16 @@ class StrumNote extends FlxSprite
 		return value;
 	}
 
-	public function new(x:Float, y:Float, leData:Int, player:Int) {
-		colorSwap = new ColorSwap();
+	public function new(x:Float, y:Float, leData:Int, ?parent:PlayField) {
+		colorSwap = new HSLColorSwap();
 		shader = colorSwap.shader;
 		noteData = leData;
-		this.player = player;
 		this.noteData = leData;
+		this.parent = parent;
 		super(x, y);
 
-		var skin:String = 'NOTE_assets';
-		if(PlayState.SONG.arrowSkin != null && PlayState.SONG.arrowSkin.length > 1) skin = PlayState.SONG.arrowSkin;
+		var skin:String = ((ClientPrefs.tgtNotes == false) ? 'NOTE_assets' || 'TGT_NOTE_assets');
+		if(PlayState.arrowSkin != null && PlayState.arrowSkin.length > 1) skin = PlayState.arrowSkin;
 		texture = skin; //Load texture and anims
 
 		scrollFactor.set();
@@ -43,15 +59,22 @@ class StrumNote extends FlxSprite
 
 	public function reloadNote()
 	{
+		isQuant=false;
 		var lastAnim:String = null;
 		if(animation.curAnim != null) lastAnim = animation.curAnim.name;
-
+		var br:String = texture;
 		if(PlayState.isPixelStage)
 		{
-			loadGraphic(Paths.image('pixelUI/' + texture));
+			if(ClientPrefs.noteSkin == 'Quants'){
+				if(Assets.exists(Paths.getPath("images/pixelUI/QUANT" + texture + ".png", IMAGE))) {
+					br = "QUANT" + texture;
+					isQuant=true;
+				}
+			}
+			loadGraphic(Paths.image('pixelUI/' + br));
 			width = width / 4;
 			height = height / 5;
-			loadGraphic(Paths.image('pixelUI/' + texture), true, Math.floor(width), Math.floor(height));
+			loadGraphic(Paths.image('pixelUI/' + br), true, Math.floor(width), Math.floor(height));
 
 			antialiasing = false;
 			setGraphicSize(Std.int(width * PlayState.daPixelZoom));
@@ -82,7 +105,13 @@ class StrumNote extends FlxSprite
 		}
 		else
 		{
-			frames = Paths.getSparrowAtlas(texture);
+			if(ClientPrefs.noteSkin == 'Quants'){
+				if(Assets.exists(Paths.getPath("images/QUANT" + texture + ".png", IMAGE))) {
+					br = "QUANT" + texture;
+					isQuant=true;
+				}
+			}
+			frames = Paths.getSparrowAtlas(br);
 			animation.addByPrefix('green', 'arrowUP');
 			animation.addByPrefix('blue', 'arrowDOWN');
 			animation.addByPrefix('purple', 'arrowLEFT');
@@ -121,9 +150,9 @@ class StrumNote extends FlxSprite
 
 	public function postAddedToGroup() {
 		playAnim('static');
-		x += Note.swagWidth * noteData;
-		x += 50;
-		x += ((FlxG.width / 2) * player);
+		x -= swagWidth / 2;
+		x = x - (swagWidth * 2) + (swagWidth * noteData) + 54;
+		
 		ID = noteData;
 	}
 
@@ -135,27 +164,35 @@ class StrumNote extends FlxSprite
 				resetAnim = 0;
 			}
 		}
-		//if(animation.curAnim != null){ //my bad i was upset
-		if(animation.curAnim.name == 'confirm' && !PlayState.isPixelStage) {
-			centerOrigin();
-		//}
+		@:bypassAccessor
+		super.set_alpha(targetAlpha * alphaMult);
+		if(animation.curAnim != null){ //my bad i was upset
+			if(animation.curAnim.name == 'confirm' && !PlayState.isPixelStage)
+				centerOrigin();
+			
 		}
 
 		super.update(elapsed);
 	}
 
-	public function playAnim(anim:String, ?force:Bool = false) {
+	public function playAnim(anim:String, ?force:Bool = false, ?note:Note) {
 		animation.play(anim, force);
 		centerOffsets();
 		centerOrigin();
 		if(animation.curAnim == null || animation.curAnim.name == 'static') {
 			colorSwap.hue = 0;
 			colorSwap.saturation = 0;
-			colorSwap.brightness = 0;
+			colorSwap.lightness = 0;
 		} else {
-			colorSwap.hue = ClientPrefs.arrowHSV[noteData % 4][0] / 360;
-			colorSwap.saturation = ClientPrefs.arrowHSV[noteData % 4][1] / 100;
-			colorSwap.brightness = ClientPrefs.arrowHSV[noteData % 4][2] / 100;
+			if(note==null){
+				colorSwap.hue = ClientPrefs.arrowHSV[noteData % 4][0] / 360;
+				colorSwap.saturation = ClientPrefs.arrowHSV[noteData % 4][1] / 100;
+				colorSwap.lightness = ClientPrefs.arrowHSV[noteData % 4][2] / 100;
+			}else{
+				colorSwap.hue = note.colorSwap.hue;
+				colorSwap.saturation = note.colorSwap.saturation;
+				colorSwap.lightness = note.colorSwap.lightness;
+			}
 
 			if(animation.curAnim.name == 'confirm' && !PlayState.isPixelStage) {
 				centerOrigin();
