@@ -50,7 +50,7 @@ class StrumNote extends FlxSprite
 		this.parent = parent;
 		super(x, y);
 
-		var skin:String = ((ClientPrefs.tgtNotes == false) ? 'NOTE_assets' || 'TGT_NOTE_assets');
+		var skin:String = ((ClientPrefs.tgtNotes == false) ? 'NOTE_assets' : 'TGT_NOTE_assets');
 		if(PlayState.arrowSkin != null && PlayState.arrowSkin.length > 1) skin = PlayState.arrowSkin;
 		texture = skin; //Load texture and anims
 

@@ -4,15 +4,15 @@
 	],
 
 	"weekCharacters": [
-		"sonic",
-		"bf",
-		"gf"
+		"",
+		"",
+		""
 	],
 	"weekBackground": "stage",
 
-	"storyName": "Daddy Dearest",
+	"storyName": "",
 	"weekBefore": "tutorial",
-	"weekName": "Week 1",
+	"weekName": "",
 	"startUnlocked": true,
 
 	"hideStoryMode": false,
