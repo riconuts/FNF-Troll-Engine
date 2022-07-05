@@ -84,6 +84,13 @@ class MusicBeatState extends FlxUIState
 		FlxG.switchState(nextState); // just because im too lazy to goto every instance of switchState and change it to a FlxG call
 		FlxG.mouse.visible = false;
 	}
+	
+	public static function playMenuMusic(){
+		FlxG.sound.playMusic(Paths.music('freakyIntro'));
+		FlxG.sound.music.onComplete = function(){
+			FlxG.sound.playMusic(Paths.music('freakyMenu'));
+		};
+	}
 
 	public static function resetState()
 	{

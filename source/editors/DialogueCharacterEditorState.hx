@@ -537,9 +537,9 @@ class DialogueCharacterEditorState extends MusicBeatState
 		}
 
 		if(!blockInput && !animationDropDown.dropPanel.visible) {
-			FlxG.sound.muteKeys = TitleState.muteKeys;
-			FlxG.sound.volumeDownKeys = TitleState.volumeDownKeys;
-			FlxG.sound.volumeUpKeys = TitleState.volumeUpKeys;
+			FlxG.sound.muteKeys = StartupState.muteKeys;
+			FlxG.sound.volumeDownKeys = StartupState.volumeDownKeys;
+			FlxG.sound.volumeUpKeys = StartupState.volumeUpKeys;
 			if(FlxG.keys.justPressed.SPACE && UI_mainbox.selected_tab_id == 'Character') {
 				character.playAnim(character.jsonFile.animations[curAnim].anim);
 				updateTextBox();
@@ -685,7 +685,7 @@ class DialogueCharacterEditorState extends MusicBeatState
 
 			if(FlxG.keys.justPressed.ESCAPE) {
 				MusicBeatState.switchState(new editors.MasterEditorMenu());
-				FlxG.sound.playMusic(Paths.music('freakyMenu'), 1);
+				MusicBeatState.playMenuMusic();
 				transitioning = true;
 			}
 

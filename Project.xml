@@ -62,9 +62,7 @@
 	<define name="LUA_ALLOWED" if="desktop" />
 	<!-- <define name="ACHIEVEMENTS_ALLOWED" /> -->
 	<define name="VIDEOS_ALLOWED" if="web || windows" unless="32bits"/>
-
-	<!-- DONT ENABLE THIS -->
-	<define name="CHECK_FOR_UPDATES" if="desktop officialBuild"/>
+	<define name="CRASH_HANDLER" if="desktop" />
 
 	<!-- <define name="PRELOAD_ALL" /> -->
 	<define name="PRELOAD_ALL" unless="web" />
@@ -120,8 +118,12 @@
 	<!--<haxelib name="polymod"/> -->
 	<haxelib name="discord_rpc" if="desktop"/>
 
-	<!-- sowy test 
-	<haxelib name="hxcpp-debug-server" if="debug"/>-->
+	<!-- es -->
+	<haxelib name="hxcpp-debug-server" if="debug"/>
+
+	<!--Used for Izzy Engine's crash handler-->
+	<haxedef name="HXCPP_CHECK_POINTER" if="CRASH_HANDLER" />
+	<haxedef name="HXCPP_STACK_LINE" if="CRASH_HANDLER" />
 
 	<!-- <haxelib name="markdown" /> -->
 	<!-- <haxelib name="HtmlParser" /> -->

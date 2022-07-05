@@ -217,6 +217,7 @@ class PlayState extends MusicBeatState
 	public var timeBar:FlxBar;
 
 	public var ratingsData:Array<Rating> = [];
+	public var epics:Int = 0;
 	public var sicks:Int = 0;
 	public var goods:Int = 0;
 	public var bads:Int = 0;
@@ -779,7 +780,17 @@ class PlayState extends MusicBeatState
 		];
 
 		//Ratings
-		ratingsData.push(new Rating('sick')); //default rating
+		var rating:Rating = new Rating('epic'); // now you will get even shittier ratings *insert trollface*
+		rating.ratingMod = 1;
+		rating.score = 500;
+		rating.noteSplash = true;
+		ratingsData.push(rating);
+
+		var rating:Rating = new Rating('sick');
+		rating.ratingMod = 0.9825;
+		rating.score = 350;
+		rating.noteSplash = true;
+		ratingsData.push(rating);
 
 		var rating:Rating = new Rating('good');
 		rating.ratingMod = 0.7;
@@ -3694,10 +3705,11 @@ class PlayState extends MusicBeatState
 
 		setOnScripts('curDecStep', curDecStep);
 		setOnScripts('curDecBeat', curDecBeat);
-		scoreTxt.text = 'Score: ' + songScore + ' | Misses: ' + songMisses + ' | Rating: ' + ratingName;
+		scoreTxt.text = 'Score: ' + songScore + ' | Misses: ' + songMisses + ' | Rating: ';
 		if(ratingName != '?')
-			scoreTxt.text += ' (' + Highscore.floorDecimal(ratingPercent * 100, 2) + '%)' + ' - ' + ratingFC;
-
+			scoreTxt.text += ' ' + Highscore.floorDecimal(ratingPercent * 100, 2) + '%' + ' - ' + ratingFC;
+		else
+			scoreTxt.text += ratingName;
 
 
 
@@ -4814,7 +4826,7 @@ class PlayState extends MusicBeatState
 
 				if (storyPlaylist.length <= 0)
 				{
-					FlxG.sound.playMusic(Paths.music('freakyMenu'));
+					MusicBeatState.playMenuMusic();
 					FlxG.sound.music.volume = 1;
 
 					cancelMusicFadeTween();
@@ -4884,7 +4896,7 @@ class PlayState extends MusicBeatState
 					CustomFadeTransition.nextCamera = null;
 				}
 				MusicBeatState.switchState(new FreeplayState());
-				FlxG.sound.playMusic(Paths.music('freakyMenu'));
+				MusicBeatState.playMenuMusic();
 				FlxG.sound.music.volume = 1;
 				changedDifficulty = false;
 			}
@@ -4948,7 +4960,9 @@ class PlayState extends MusicBeatState
 		var score:Int = 350;
 
 		//tryna do MS based judgment due to popular demand
+		trace("boat to rate");
 		var daRating:Rating = Conductor.judgeNote(note, noteDiff);
+		trace("wow rated");
 		var ratingNum:Int = 0;
 
 		totalNotesHit += daRating.ratingMod;

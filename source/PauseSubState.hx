@@ -276,7 +276,9 @@ class PauseSubState extends MusicBeatSubstate
 						MusicBeatState.switchState(new FreeplayState());
 					}
 					PlayState.cancelMusicFadeTween();
-					FlxG.sound.playMusic(Paths.music('freakyMenu'));
+
+					MusicBeatState.playMenuMusic();
+					
 					PlayState.changedDifficulty = false;
 					PlayState.chartingMode = false;
 			}

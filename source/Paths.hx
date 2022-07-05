@@ -57,6 +57,7 @@ class Paths
 
 	public static var dumpExclusions:Array<String> =
 	[
+		'assets/music/freakyIntro.$SOUND_EXT',
 		'assets/music/freakyMenu.$SOUND_EXT',
 		'assets/shared/music/breakfast.$SOUND_EXT',
 		'assets/shared/music/tea-time.$SOUND_EXT',
@@ -375,8 +376,7 @@ class Paths
 			localTrackedAssets.push(path);
 			return currentTrackedAssets.get(path);
 		}
-		trace(path);
-		trace('oh no its returning null NOOOO');
+		trace('oh no, "' + path + '" is returning null NOOOO');
 		return null;
 	}
 

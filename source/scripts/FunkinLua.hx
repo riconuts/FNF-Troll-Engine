@@ -73,6 +73,7 @@ class FunkinLua extends FunkinScript
 			if(resultStr != null && result != 0) {
 				trace('Error on lua script! ' + resultStr);
 				#if windows
+				FlxG.fullscreen = false;
 				lime.app.Application.current.window.alert(resultStr, 'Error on lua script!');
 				#else
 				luaTrace('Error loading lua script: "$script"\n' + resultStr,true,false);
@@ -1158,7 +1159,8 @@ class FunkinLua extends FunkinScript
 			else
 				MusicBeatState.switchState(new FreeplayState());
 
-			FlxG.sound.playMusic(Paths.music('freakyMenu'));
+			MusicBeatState.playMenuMusic();
+			
 			PlayState.changedDifficulty = false;
 			PlayState.chartingMode = false;
 			PlayState.instance.transitioning = true;

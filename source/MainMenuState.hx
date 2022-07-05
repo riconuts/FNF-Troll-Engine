@@ -60,7 +60,6 @@ class MainMenuState extends MusicBeatState
 		#if desktop
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
-
 		FlxG.mouse.visible = true;
 		#end
 		debugKeys = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
@@ -121,6 +120,7 @@ class MainMenuState extends MusicBeatState
 				updateImage(menuItem.ID);
 			};
 			menuItem.onOut.callback = function(){
+				if (selectedSomethin) return;
 				menuItem.targetX = 51;
 			};
 			menuItem.onUp.callback = function(){
@@ -202,6 +202,13 @@ class MainMenuState extends MusicBeatState
 
 		if (!selectedSomethin)
 		{
+			#if desktop
+			if (FlxG.mouse.wheel != 0)
+			{
+				changeItem(FlxG.mouse.wheel);
+			}
+			#end
+
 			if (controls.UI_UP_P)
 			{
 				changeItem(-1);
@@ -212,12 +219,14 @@ class MainMenuState extends MusicBeatState
 				changeItem(1);
 			}
 
+			/*
 			if (controls.BACK)
 			{
 				selectedSomethin = true;
 				FlxG.sound.play(Paths.sound('cancelMenu'));
 				MusicBeatState.switchState(new TitleState());
 			}
+			*/
 
 			if (controls.ACCEPT)
 			{
@@ -269,8 +278,7 @@ class MainMenuState extends MusicBeatState
 							case 'credits':
 								MusicBeatState.switchState(new CreditsState());
 							case 'options':
-								//LoadingState.loadAndSwitchState // why does the options menu need loading
-								MusicBeatState.switchState(new options.OptionsState());
+								LoadingState.loadAndSwitchState(new options.OptionsState());
 							#if MODS_ALLOWED
 							case 'mods':
 								MusicBeatState.switchState(new ModsMenuState());
@@ -286,28 +294,13 @@ class MainMenuState extends MusicBeatState
 		}
 	}
 
-	function getItemImage(sowyId:Int = null):Null<String>{
-		if (sowyId == null) return null;
-
-		switch(optionShit[sowyId]){
-			case 'story_mode' | 'promo':
-				return 'storymenu';
-			case 'freeplay':
-				return 'freeplaymenu';
-			case 'options':
-				return 'optionsmenu';
-			default:
-				return null;
-		}
-	}
-
 	var imageMap:Map<String, FlxSprite> = new Map<String, FlxSprite>();
 	var curImage:FlxSprite;
 	var lastName:String;
 	var appaerTween:FlxTween;
 
 	function updateImage(sowyId:Int = null){
-		var name:String = getItemImage(sowyId);
+		var name:String = sowyId != null ? "cover_" + optionShit[sowyId] : null;
 
 		if (name == lastName)
 			return;

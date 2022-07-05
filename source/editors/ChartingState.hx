@@ -1642,9 +1642,9 @@ class ChartingState extends MusicBeatState
 		}
 
 		if(!blockInput) {
-			FlxG.sound.muteKeys = TitleState.muteKeys;
-			FlxG.sound.volumeDownKeys = TitleState.volumeDownKeys;
-			FlxG.sound.volumeUpKeys = TitleState.volumeUpKeys;
+			FlxG.sound.muteKeys = StartupState.muteKeys;
+			FlxG.sound.volumeDownKeys = StartupState.volumeDownKeys;
+			FlxG.sound.volumeUpKeys = StartupState.volumeUpKeys;
 			for (dropDownMenu in blockPressWhileScrolling) {
 				if(dropDownMenu.dropPanel.visible) {
 					blockInput = true;
@@ -1683,7 +1683,7 @@ class ChartingState extends MusicBeatState
 			if (FlxG.keys.justPressed.BACKSPACE) {
 				//if(onMasterEditor) {
 					MusicBeatState.switchState(new editors.MasterEditorMenu());
-					FlxG.sound.playMusic(Paths.music('freakyMenu'));
+					MusicBeatState.playMenuMusic();
 				//}
 				FlxG.mouse.visible = false;
 				return;

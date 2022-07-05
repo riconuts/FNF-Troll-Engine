@@ -1166,9 +1166,9 @@ class CharacterEditorState extends MusicBeatState
 				return;
 			}
 		}
-		FlxG.sound.muteKeys = TitleState.muteKeys;
-		FlxG.sound.volumeDownKeys = TitleState.volumeDownKeys;
-		FlxG.sound.volumeUpKeys = TitleState.volumeUpKeys;
+		FlxG.sound.muteKeys = StartupState.muteKeys;
+		FlxG.sound.volumeDownKeys = StartupState.volumeDownKeys;
+		FlxG.sound.volumeUpKeys = StartupState.volumeUpKeys;
 
 		if(!charDropDown.dropPanel.visible) {
 			if (FlxG.keys.justPressed.ESCAPE) {
@@ -1176,7 +1176,7 @@ class CharacterEditorState extends MusicBeatState
 					MusicBeatState.switchState(new PlayState());
 				} else {
 					MusicBeatState.switchState(new editors.MasterEditorMenu());
-					FlxG.sound.playMusic(Paths.music('freakyMenu'));
+					MusicBeatState.playMenuMusic();
 				}
 				FlxG.mouse.visible = false;
 				return;
