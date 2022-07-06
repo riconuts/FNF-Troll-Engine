@@ -9,14 +9,6 @@ import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.addons.transition.TransitionData;
-import haxe.Json;
-import openfl.display.Bitmap;
-import openfl.display.BitmapData;
-#if MODS_ALLOWED
-import sys.FileSystem;
-import sys.io.File;
-#end
-import options.GraphicsSettingsSubState;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.group.FlxGroup;
 import flixel.input.gamepad.FlxGamepad;
@@ -29,10 +21,18 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
+import haxe.Json;
 import lime.app.Application;
 import openfl.Assets;
+import openfl.display.Bitmap;
+import openfl.display.BitmapData;
+import options.GraphicsSettingsSubState;
 
 using StringTools;
+#if MODS_ALLOWED
+import sys.FileSystem;
+import sys.io.File;
+#end
 typedef TitleData =
 {
 

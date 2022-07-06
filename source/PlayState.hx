@@ -1,16 +1,16 @@
 package;
 
-import flixel.graphics.FlxGraphic;
-import scripts.*;
-import scripts.FunkinLua;
-#if desktop
-import Discord.DiscordClient;
-#end
-import openfl.system.Capabilities;
-import flixel.system.scaleModes.*;
+import Achievements;
+import Conductor.Rating;
+import DialogueBoxPsych;
+import Note.EventNote;
 import Section.SwagSection;
 import Song.SwagSong;
+import StageData;
 import WiggleEffect.WiggleEffectType;
+import animateatlas.AtlasFrameMaker;
+import editors.CharacterEditorState;
+import editors.ChartingState;
 import flixel.FlxBasic;
 import flixel.FlxCamera;
 import flixel.FlxG;
@@ -20,26 +20,33 @@ import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.FlxSubState;
 import flixel.addons.display.FlxGridOverlay;
-import flixel.addons.effects.FlxTrail;
-import openfl.filters.ShaderFilter;
-import flixel.addons.effects.FlxTrailArea;
 import flixel.addons.display.FlxTiledSprite;
+import flixel.addons.effects.FlxTrail;
+import flixel.addons.effects.FlxTrailArea;
 import flixel.addons.effects.chainable.FlxEffectSprite;
 import flixel.addons.effects.chainable.FlxWaveEffect;
 import flixel.addons.transition.FlxTransitionableState;
+import flixel.effects.particles.FlxEmitter;
+import flixel.effects.particles.FlxParticle;
+import flixel.graphics.FlxGraphic;
 import flixel.graphics.atlas.FlxAtlas;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.group.FlxGroup.FlxTypedGroup;
+import flixel.group.FlxSpriteGroup;
+import flixel.input.keyboard.FlxKey;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
+import flixel.system.FlxAssets.FlxShader;
 import flixel.system.FlxSound;
+import flixel.system.scaleModes.*;
+import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.ui.FlxBar;
 import flixel.util.FlxCollision;
-import sys.thread.Thread;
 import flixel.util.FlxColor;
+import flixel.util.FlxSave;
 import flixel.util.FlxSort;
 import flixel.util.FlxStringUtil;
 import flixel.util.FlxTimer;
@@ -48,30 +55,23 @@ import lime.utils.Assets;
 import openfl.Lib;
 import openfl.display.BlendMode;
 import openfl.display.StageQuality;
-import openfl.filters.BitmapFilter;
-import flixel.text.FlxText;
-import openfl.utils.Assets as OpenFlAssets;
-import editors.ChartingState;
-import editors.CharacterEditorState;
-import flixel.group.FlxSpriteGroup;
-import flixel.input.keyboard.FlxKey;
-import Note.EventNote;
 import openfl.events.KeyboardEvent;
-import flixel.effects.particles.FlxEmitter;
-import flixel.effects.particles.FlxParticle;
-import flixel.util.FlxSave;
-import animateatlas.AtlasFrameMaker;
-import Achievements;
-import StageData;
-import DialogueBoxPsych;
-import Conductor.Rating;
-import flixel.system.FlxAssets.FlxShader;
+import openfl.filters.BitmapFilter;
+import openfl.filters.ShaderFilter;
+import openfl.system.Capabilities;
+import openfl.utils.Assets as OpenFlAssets;
+import scripts.*;
+import scripts.FunkinLua;
+import sys.thread.Thread;
 
+using StringTools;
+#if desktop
+import Discord.DiscordClient;
+#end
 #if sys
 import sys.FileSystem;
 #end
 
-using StringTools;
 
 typedef LineData = {
 	var character:String;
@@ -253,10 +253,6 @@ class PlayState extends MusicBeatState
 	var dialogue:Array<String> = ['blah blah blah', 'coolswag'];
 	var dialogueJson:DialogueFile = null;
 
-		var dadbattleBlack:BGSprite;
-	var dadbattleLight:BGSprite;
-	var dadbattleSmokes:FlxSpriteGroup;
-
 	var halloweenBG:BGSprite;
 	var halloweenWhite:BGSprite;
 
@@ -340,7 +336,7 @@ class PlayState extends MusicBeatState
 	var boyfriendIdled:Bool = false;
 
 	// Script shit
-	public var hscriptExts = ["hx","hxs","hscript"];
+	public var hscriptExts = ["hx", "hxs", "hscript"];
 	public static var instance:PlayState;
 	public var luaArray:Array<FunkinLua> = [];
 	public var funkyScripts:Array<FunkinScript> = [];
@@ -348,7 +344,7 @@ class PlayState extends MusicBeatState
 
 	public var notetypeScripts:Map<String, FunkinScript> = []; // custom notetypes for scriptVer '1'
 	public var eventScripts:Map<String, FunkinScript> = []; // custom events for scriptVer '1'
-
+	
 	private var luaDebugGroup:FlxTypedGroup<DebugLuaText>;
 	public var introSoundsSuffix:String = '';
 
@@ -613,11 +609,7 @@ class PlayState extends MusicBeatState
 				GameOverSubstate.loopSoundName = 'gameOver-pixel';
 				GameOverSubstate.endSoundName = 'gameOverEnd-pixel';
 				GameOverSubstate.characterName = 'bf-pixel-dead';
-
-				/*if(!ClientPrefs.lowQuality) { //Does this even do something?
-					var waveEffectBG = new FlxWaveEffect(FlxWaveMode.ALL, 2, -1, 3, 2);
-					var waveEffectFG = new FlxWaveEffect(FlxWaveMode.ALL, 2, -1, 5, 2);
-				}*/
+				
 				var posX = 400;
 				var posY = 200;
 				if(!ClientPrefs.lowQuality) {
@@ -780,7 +772,7 @@ class PlayState extends MusicBeatState
 		];
 
 		//Ratings
-		var rating:Rating = new Rating('epic'); // now you will get even shittier ratings *insert trollface*
+		var rating:Rating = new Rating('epic'); // now you will get even shittier ratings
 		rating.ratingMod = 1;
 		rating.score = 500;
 		rating.noteSplash = true;
@@ -966,7 +958,7 @@ class PlayState extends MusicBeatState
 			}
 
 			shitToLoad.push({
-				path: ((ClientPrefs.tgtNotes == false) ? 'NOTE_assets' : 'TGT_NOTE_assets')
+				path: 'NOTE_assets'
 			});
 
 			if(isPixelStage){
@@ -1605,10 +1597,6 @@ class PlayState extends MusicBeatState
 		doof.cameras = [camHUD];
 		topBar.cameras = [camOther];
 		bottomBar.cameras = [camOther];
-
-		// if (SONG.song == 'South')
-		// FlxG.camera.alpha = 0.7;
-		// UI_camera.zoom = 1;
 
 		// cameras = [FlxG.cameras.list[1]];
 		startingSong = true;
@@ -3171,58 +3159,9 @@ class PlayState extends MusicBeatState
 	function eventPushed(event:EventNote) {
 		switch(event.event) {
 			case 'Dadbattle Spotlight':
-				dadbattleBlack = new BGSprite(null, -800, -400, 0, 0);
-				dadbattleBlack.makeGraphic(Std.int(FlxG.width * 2), Std.int(FlxG.height * 2), FlxColor.BLACK);
-				dadbattleBlack.alpha = 0.25;
-				dadbattleBlack.visible = false;
-				add(dadbattleBlack);
-
-				dadbattleLight = new BGSprite('spotlight', 400, -400);
-				dadbattleLight.alpha = 0.375;
-				dadbattleLight.blend = ADD;
-				dadbattleLight.visible = false;
-
-				dadbattleSmokes = new FlxSpriteGroup();
-				dadbattleSmokes.alpha = 0.7;
-				dadbattleSmokes.blend = ADD;
-				dadbattleSmokes.visible = false;
-				add(dadbattleLight);
-				add(dadbattleSmokes);
-
-				var offsetX = 200;
-				var smoke:BGSprite = new BGSprite('smoke', -1550 + offsetX, 660 + FlxG.random.float(-20, 20), 1.2, 1.05);
-				smoke.setGraphicSize(Std.int(smoke.width * FlxG.random.float(1.1, 1.22)));
-				smoke.updateHitbox();
-				smoke.velocity.x = FlxG.random.float(15, 22);
-				smoke.active = true;
-				dadbattleSmokes.add(smoke);
-				var smoke:BGSprite = new BGSprite('smoke', 1550 + offsetX, 660 + FlxG.random.float(-20, 20), 1.2, 1.05);
-				smoke.setGraphicSize(Std.int(smoke.width * FlxG.random.float(1.1, 1.22)));
-				smoke.updateHitbox();
-				smoke.velocity.x = FlxG.random.float(-15, -22);
-				smoke.active = true;
-				smoke.flipX = true;
-				dadbattleSmokes.add(smoke);
+				trace("fuck off");
 			case 'Philly Glow':
-				blammedLightsBlack = new FlxSprite(FlxG.width * -0.5,
-					FlxG.height * -0.5).makeGraphic(Std.int(FlxG.width * 2), Std.int(FlxG.height * 2), FlxColor.BLACK);
-				blammedLightsBlack.visible = false;
-				insert(members.indexOf(phillyStreet), blammedLightsBlack);
-
-				phillyWindowEvent = new BGSprite('philly/window', phillyWindow.x, phillyWindow.y, 0.3, 0.3);
-				phillyWindowEvent.setGraphicSize(Std.int(phillyWindowEvent.width * 0.85));
-				phillyWindowEvent.updateHitbox();
-				phillyWindowEvent.visible = false;
-				insert(members.indexOf(blammedLightsBlack) + 1, phillyWindowEvent);
-
-				phillyGlowGradient = new PhillyGlow.PhillyGlowGradient(-400, 225); // This shit was refusing to properly load FlxGradient so fuck it
-				phillyGlowGradient.visible = false;
-				insert(members.indexOf(blammedLightsBlack) + 1, phillyGlowGradient);
-
-				precacheList.set('philly/particle', 'image'); // precache particle image
-				phillyGlowParticles = new FlxTypedGroup<PhillyGlow.PhillyGlowParticle>();
-				phillyGlowParticles.visible = false;
-				insert(members.indexOf(phillyGlowGradient) + 1, phillyGlowParticles);
+				trace("fuck off");
 			case 'Change Character':
 				var charType:Int = 0;
 				switch(event.value1.toLowerCase()) {
@@ -3963,7 +3902,7 @@ class PlayState extends MusicBeatState
 			var fakeCrochet:Float = (60 / SONG.bpm) * 1000;
 			notes.forEachAlive(function(daNote:Note)
 			{
-				var field = daNote.playField;
+				var field:PlayField = daNote.playField;
 
 				var strumX:Float = field.members[daNote.noteData].x;
 				var strumY:Float = field.members[daNote.noteData].y;
@@ -4067,7 +4006,7 @@ class PlayState extends MusicBeatState
 				// Kill extremely late notes and cause misses
 				if (Conductor.songPosition > noteKillOffset + daNote.strumTime)
 				{
-					if (daNote.playField.playerControls && !field.autoPlayed && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit)) {
+					if (field.playerControls && !field.autoPlayed && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit)) {
 						noteMiss(daNote);
 					}
 
@@ -4136,9 +4075,13 @@ class PlayState extends MusicBeatState
 				for (timer in modchartTimers) {
 					timer.active = true;
 				}
-				openSubState(new GameOverSubstate(boyfriend.getScreenPosition().x - boyfriend.positionArray[0], boyfriend.getScreenPosition().y - boyfriend.positionArray[1], camFollowPos.x, camFollowPos.y));
 
-				// MusicBeatState.switchState(new GameOverState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
+				openSubState(new GameOverSubstate(
+					boyfriend.getScreenPosition().x - boyfriend.positionArray[0], 
+					boyfriend.getScreenPosition().y - boyfriend.positionArray[1], 
+					camFollowPos.x, 
+					camFollowPos.y
+				));
 
 				#if desktop
 				// Game Over doesn't get his own variable because it's only used here
@@ -4260,44 +4203,6 @@ class PlayState extends MusicBeatState
 
 	public function triggerEventNote(eventName:String, value1:String, value2:String) {
 		switch(eventName) {
-			case 'Dadbattle Spotlight':
-				var val:Null<Int> = Std.parseInt(value1);
-				if (val == null)
-					val = 0;
-
-				switch (Std.parseInt(value1))
-				{
-					case 1, 2, 3: // enable and target dad
-						if (val == 1) // enable
-						{
-							dadbattleBlack.visible = true;
-							dadbattleLight.visible = true;
-							dadbattleSmokes.visible = true;
-							defaultCamZoom += 0.12;
-						}
-
-						var who:Character = dad;
-						if (val > 2)
-							who = boyfriend;
-						// 2 only targets dad
-						dadbattleLight.alpha = 0;
-						new FlxTimer().start(0.12, function(tmr:FlxTimer)
-						{
-							dadbattleLight.alpha = 0.375;
-						});
-						dadbattleLight.setPosition(who.getGraphicMidpoint().x - dadbattleLight.width / 2, who.y + who.height - dadbattleLight.height + 50);
-
-					default:
-						dadbattleBlack.visible = false;
-						dadbattleLight.visible = false;
-						defaultCamZoom -= 0.12;
-						FlxTween.tween(dadbattleSmokes, {alpha: 0}, 1, {
-							onComplete: function(twn:FlxTween)
-							{
-								dadbattleSmokes.visible = false;
-							}
-						});
-				}
 			case 'Change Focus':
 				focusedChar = null; // forces the focus to shift
 				switch(value1.toLowerCase().trim()){
@@ -4348,97 +4253,6 @@ class PlayState extends MusicBeatState
 				var value:Int = Std.parseInt(value1);
 				if(Math.isNaN(value) || value < 1) value = 1;
 				gfSpeed = value;
-			case 'Philly Glow':
-				var lightId:Int = Std.parseInt(value1);
-				if (Math.isNaN(lightId))
-					lightId = 0;
-
-				var chars:Array<Character> = [boyfriend, gf, dad];
-				switch (lightId)
-				{
-					case 0:
-						if (phillyGlowGradient.visible)
-						{
-							FlxG.camera.flash(FlxColor.WHITE, 0.15, null, true);
-							FlxG.camera.zoom += 0.5;
-							if (ClientPrefs.camZooms)
-								camHUD.zoom += 0.1;
-
-							blammedLightsBlack.visible = false;
-							phillyWindowEvent.visible = false;
-							phillyGlowGradient.visible = false;
-							phillyGlowParticles.visible = false;
-							curLightEvent = -1;
-
-							for (who in chars)
-							{
-								who.color = FlxColor.WHITE;
-							}
-							phillyStreet.color = FlxColor.WHITE;
-						}
-
-					case 1: // turn on
-						curLightEvent = FlxG.random.int(0, phillyLightsColors.length - 1, [curLightEvent]);
-						var color:FlxColor = phillyLightsColors[curLightEvent];
-
-						if (!phillyGlowGradient.visible)
-						{
-							FlxG.camera.flash(FlxColor.WHITE, 0.15, null, true);
-							FlxG.camera.zoom += 0.5;
-							if (ClientPrefs.camZooms)
-								camHUD.zoom += 0.1;
-
-							blammedLightsBlack.visible = true;
-							blammedLightsBlack.alpha = 1;
-							phillyWindowEvent.visible = true;
-							phillyGlowGradient.visible = true;
-							phillyGlowParticles.visible = true;
-						}
-						else if (ClientPrefs.flashing)
-						{
-							var colorButLower:FlxColor = color;
-							colorButLower.alphaFloat = 0.3;
-							FlxG.camera.flash(colorButLower, 0.5, null, true);
-						}
-
-						for (who in chars)
-						{
-							who.color = color;
-						}
-						phillyGlowParticles.forEachAlive(function(particle:PhillyGlow.PhillyGlowParticle)
-						{
-							particle.color = color;
-						});
-						phillyGlowGradient.color = color;
-						phillyWindowEvent.color = color;
-
-						var colorDark:FlxColor = color;
-						colorDark.brightness *= 0.5;
-						phillyStreet.color = colorDark;
-
-					case 2: // spawn particles
-						if (!ClientPrefs.lowQuality)
-						{
-							var particlesNum:Int = FlxG.random.int(8, 12);
-							var width:Float = (2000 / particlesNum);
-							var color:FlxColor = phillyLightsColors[curLightEvent];
-							for (j in 0...3)
-							{
-								for (i in 0...particlesNum)
-								{
-									var particle:PhillyGlow.PhillyGlowParticle = new PhillyGlow.PhillyGlowParticle(-400
-										+ width * i
-										+ FlxG.random.float(-width / 5, width / 5),
-										phillyGlowGradient.originalY
-										+ 200
-										+ (FlxG.random.float(0, 125) + j * 40), color);
-									phillyGlowParticles.add(particle);
-								}
-							}
-						}
-						phillyGlowGradient.bop();
-				}
-
 			case 'Add Camera Zoom':
 				if(ClientPrefs.camZooms && FlxG.camera.zoom < 1.35) {
 					var camZoom:Float = Std.parseFloat(value1);
@@ -4449,14 +4263,6 @@ class PlayState extends MusicBeatState
 					FlxG.camera.zoom += camZoom;
 					camHUD.zoom += hudZoom;
 				}
-
-			case 'Trigger BG Ghouls':
-				if (curStage == 'schoolEvil' && !ClientPrefs.lowQuality)
-				{
-					bgGhouls.dance(true);
-					bgGhouls.visible = true;
-				}
-
 			case 'Kill Henchmen':
 				killHenchmen();
 
@@ -4960,9 +4766,7 @@ class PlayState extends MusicBeatState
 		var score:Int = 350;
 
 		//tryna do MS based judgment due to popular demand
-		trace("boat to rate");
 		var daRating:Rating = Conductor.judgeNote(note, noteDiff);
-		trace("wow rated");
 		var ratingNum:Int = 0;
 
 		totalNotesHit += daRating.ratingMod;
@@ -5650,6 +5454,7 @@ class PlayState extends MusicBeatState
 		var hue:Float = ClientPrefs.arrowHSV[data % 4][0] / 360;
 		var sat:Float = ClientPrefs.arrowHSV[data % 4][1] / 100;
 		var brt:Float = ClientPrefs.arrowHSV[data % 4][2] / 100;
+
 		if(note != null) {
 			skin = note.noteSplashTexture;
 			hue = note.noteSplashHue;
@@ -6277,8 +6082,8 @@ class PlayState extends MusicBeatState
 		if(isPixelStage != stageData.isPixelStage)
 			isPixelStage = stageData.isPixelStage;
 
-		if(FlxG.sound.music!=null) // so if you leave and debug console comes up and you bring it down it wont replay the fuckin song and break EVERYTHING!!!
-			FlxG.sound.music.onComplete=null;
+		if(FlxG.sound.music != null) // so if you leave and debug console comes up and you bring it down it wont replay the fuckin song and break EVERYTHING!!!
+			FlxG.sound.music.onComplete = null;
 
 		return super.switchTo(nextState);
 	}

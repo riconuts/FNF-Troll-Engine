@@ -3,28 +3,28 @@ package options;
 #if desktop
 import Discord.DiscordClient;
 #end
+import Controls;
+import flash.text.TextField;
 import flash.text.TextField;
 import flixel.FlxCamera;
 import flixel.FlxG;
-import flixel.FlxSprite;
-import flixel.addons.display.FlxGridOverlay;
-import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.math.FlxMath;
-import flixel.text.FlxText;
-import flixel.util.FlxColor;
-import lime.utils.Assets;
-import flixel.FlxSubState;
-import flash.text.TextField;
 import flixel.FlxG;
 import flixel.FlxSprite;
-import flixel.util.FlxSave;
-import haxe.Json;
+import flixel.FlxSprite;
+import flixel.FlxSubState;
+import flixel.addons.display.FlxGridOverlay;
+import flixel.graphics.FlxGraphic;
+import flixel.group.FlxGroup.FlxTypedGroup;
+import flixel.input.keyboard.FlxKey;
+import flixel.math.FlxMath;
+import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
+import flixel.util.FlxColor;
+import flixel.util.FlxSave;
 import flixel.util.FlxTimer;
-import flixel.input.keyboard.FlxKey;
-import flixel.graphics.FlxGraphic;
-import Controls;
+import haxe.Json;
+import lime.utils.Assets;
 import openfl.Lib;
 
 using StringTools;
@@ -45,6 +45,7 @@ class NoteSettingsSubState extends BaseOptionsMenu
 		); //Default value
 		addOption(option);
 
+		/*
 		var option:Option = new Option('TGT Notes',
 			"",
 			'tgtNotes',
@@ -52,6 +53,7 @@ class NoteSettingsSubState extends BaseOptionsMenu
 			true
 		);
 		addOption(option);
+		*/
 
 		var option:Option = new Option('Customize',
 			'Change your note colours\n[Press Enter]',

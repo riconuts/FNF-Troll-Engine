@@ -1,38 +1,36 @@
 package;
 
-import options.OptionsState;
-import flixel.ui.FlxButton.FlxTypedButton;
-import flixel.addons.ui.FlxUITypedButton;
-#if desktop
-import Discord.DiscordClient;
-#end
+import Achievements;
+import editors.MasterEditorMenu;
+import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
-import flixel.FlxCamera;
 import flixel.addons.transition.FlxTransitionableState;
+import flixel.addons.ui.FlxUIButton;
+import flixel.addons.ui.FlxUITypedButton;
 import flixel.effects.FlxFlicker;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.text.FlxText;
+import flixel.input.keyboard.FlxKey;
 import flixel.math.FlxMath;
+import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
+import flixel.ui.FlxButton.FlxTypedButton;
+import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import lime.app.Application;
-
-import flixel.addons.ui.FlxUIButton;
-import flixel.ui.FlxButton;
-
-import Achievements;
-import editors.MasterEditorMenu;
-import flixel.input.keyboard.FlxKey;
+import options.OptionsState;
 
 using StringTools;
+#if desktop
+import Discord.DiscordClient;
+#end
 
 class MainMenuState extends MusicBeatState
 {
-	public static var psychEngineVersion:String = '0.5.2h'; //This is also used for Discord RPC
+	public static var psychEngineVersion:String = '0.5.2n'; //This is also used for Discord RPC
 	public static var curSelected:Int = 0;
 
 	var menuItems:FlxTypedGroup<SowyUIButton>;
@@ -42,7 +40,6 @@ class MainMenuState extends MusicBeatState
 	var optionShit:Array<String> = [
 		'story_mode',
 		'freeplay',
-		//#if MODS_ALLOWED 'mods', #end
 		#if ACHIEVEMENTS_ALLOWED 'awards', #end
 		'promo',
 		'options'
@@ -60,6 +57,7 @@ class MainMenuState extends MusicBeatState
 		#if desktop
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
+		
 		FlxG.mouse.visible = true;
 		#end
 		debugKeys = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
@@ -252,6 +250,8 @@ class MainMenuState extends MusicBeatState
 
 			FlxG.sound.play(Paths.sound('confirmMenu'));
 			updateImage(null);
+
+			FlxG.mouse.visible = false;
 			
 			menuItems.forEach(function(spr:FlxSprite)
 			{

@@ -1,29 +1,28 @@
 package;
 
-import flixel.graphics.FlxGraphic;
 import flixel.FlxG;
 import flixel.FlxGame;
 import flixel.FlxState;
+import flixel.graphics.FlxGraphic;
 import openfl.Assets;
 import openfl.Lib;
 import openfl.display.FPS;
 import openfl.display.Sprite;
-import openfl.events.Event;
 import openfl.display.StageScaleMode;
+import openfl.events.Event;
 
-//crash handler stuff
+using StringTools;
 #if CRASH_HANDLER
-import lime.app.Application;
-import openfl.events.UncaughtErrorEvent;
+import Discord.DiscordClient;
 import haxe.CallStack;
 import haxe.io.Path;
-import Discord.DiscordClient;
+import lime.app.Application;
+import openfl.events.UncaughtErrorEvent;
 import sys.FileSystem;
 import sys.io.File;
 import sys.io.Process;
 #end
 
-using StringTools;
 
 class Main extends Sprite
 {
@@ -32,7 +31,7 @@ class Main extends Sprite
 	var initialState:Class<FlxState> = StartupState; // The FlxState the game starts with.
 	var zoom:Float = -1; // If -1, zoom is automatically calculated to fit the window dimensions.
 	var framerate:Int = 60; // How many frames per second the game should run at.
-	var skipSplash:Bool = true; // Whether to skip the flixel splash screen that appears in release mode.
+	var skipSplash:Bool = false; // Whether to skip the flixel splash screen that appears in release mode.
 	var startFullscreen:Bool = false; // Whether to start the game in fullscreen on desktop targets
 	public static var fpsVar:FPS;
 
@@ -109,8 +108,8 @@ class Main extends Sprite
 
 		#if html5
 		FlxG.autoPause = false;
-		FlxG.mouse.visible = false;
 		#end
+		FlxG.mouse.visible = false;
 		
 		#if CRASH_HANDLER
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);

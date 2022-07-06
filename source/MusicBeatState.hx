@@ -1,18 +1,17 @@
 package;
-import flixel.addons.ui.FlxUIState;
 import Conductor.BPMChangeEvent;
+import flixel.FlxBasic;
 import flixel.FlxG;
-import flixel.math.FlxRect;
-import flixel.util.FlxTimer;
+import flixel.FlxSprite;
+import flixel.FlxState;
 import flixel.addons.transition.FlxTransitionableState;
+import flixel.addons.ui.FlxUIState;
+import flixel.math.FlxRect;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
-import flixel.FlxSprite;
 import flixel.util.FlxColor;
 import flixel.util.FlxGradient;
-import flixel.FlxState;
-import flixel.FlxBasic;
-
+import flixel.util.FlxTimer;
 import scripts.*;
 import scripts.Globals;
 class MusicBeatState extends FlxUIState
@@ -85,12 +84,14 @@ class MusicBeatState extends FlxUIState
 		FlxG.mouse.visible = false;
 	}
 	
+	// tgt
 	public static function playMenuMusic(){
 		FlxG.sound.playMusic(Paths.music('freakyIntro'));
 		FlxG.sound.music.onComplete = function(){
 			FlxG.sound.playMusic(Paths.music('freakyMenu'));
 		};
 	}
+	//
 
 	public static function resetState()
 	{

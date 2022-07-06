@@ -1,15 +1,16 @@
 package;
 
+import editors.ChartingState;
+import flash.display.BitmapData;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.math.FlxMath;
 import flixel.util.FlxColor;
-import flash.display.BitmapData;
-import editors.ChartingState;
 import openfl.utils.AssetType;
 import openfl.utils.Assets;
 import scripts.*;
+
 using StringTools;
 
 typedef EventNote = {
@@ -385,7 +386,7 @@ class Note extends FlxSprite
 		if(texture.length < 1) {
 			skin = PlayState.arrowSkin;
 			if(skin == null || skin.length < 1) {
-				skin = ((ClientPrefs.tgtNotes == false) ? 'NOTE_assets' : 'TGT_NOTE_assets');
+				skin = 'NOTE_assets';
 			}
 		}
 

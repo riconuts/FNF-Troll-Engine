@@ -289,6 +289,13 @@ class FreeplayState extends MusicBeatState
 				changeSelection(shiftMult);
 				holdTime = 0;
 			}
+			#if desktop // mouse wheel scrolling weee
+			if (FlxG.mouse.wheel != 0)
+			{
+				changeSelection(FlxG.mouse.wheel);
+				holdTime = 0;
+			}
+			#end
 
 			if(controls.UI_DOWN || controls.UI_UP)
 			{
@@ -377,8 +384,10 @@ class FreeplayState extends MusicBeatState
 			}
 			
 			if (FlxG.keys.pressed.SHIFT){
+				PlayState.chartingMode = true;
 				LoadingState.loadAndSwitchState(new ChartingState());
 			}else{
+				PlayState.chartingMode = false;
 				LoadingState.loadAndSwitchState(new PlayState());
 			}
 
