@@ -6083,7 +6083,7 @@ class PlayState extends MusicBeatState
 			isPixelStage = stageData.isPixelStage;
 
 		if(FlxG.sound.music != null) // so if you leave and debug console comes up and you bring it down it wont replay the fuckin song and break EVERYTHING!!!
-			FlxG.sound.music.onComplete = null;
+			FlxG.sound.music.onComplete = MusicBeatState.menuLoopFunc; // please work
 
 		return super.switchTo(nextState);
 	}

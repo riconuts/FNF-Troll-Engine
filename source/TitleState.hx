@@ -133,15 +133,10 @@ class TitleState extends MusicBeatState
 
 	function startIntro()
 	{
-		if (!initialized)
-		{
-			FlxTransitionableState.defaultTransIn = FadeTransitionSubstate;
-			FlxTransitionableState.defaultTransOut = FadeTransitionSubstate;
-			
-			if(FlxG.sound.music == null) {
-				FlxG.sound.playMusic(Paths.music('freakyIntro'), 0, false);
-			}
-		}
+		FlxTransitionableState.defaultTransIn = FadeTransitionSubstate;
+		FlxTransitionableState.defaultTransOut = FadeTransitionSubstate;
+
+		MusicBeatState.playMenuMusic(0);
 
 		Conductor.changeBPM(90);//(titleJSON.bpm);
 		persistentUpdate = true;
@@ -403,16 +398,14 @@ class TitleState extends MusicBeatState
 			{
 				case 1:
 					FlxG.sound.music.stop();
-					FlxG.sound.playMusic(Paths.music('freakyIntro'), 0, false);
+
+					MusicBeatState.playMenuMusic(0);
+
 					FlxG.sound.music.fadeIn(4, 0, 0.7);
-					FlxG.sound.music.onComplete = function name() {
-						FlxG.sound.playMusic(Paths.music('freakyMenu'), 1, true);
-						exitState();
-					}		
 				case 2:
-					createCoolText(['', '', '', '']);
+					createCoolText(['THE FNF TGT TEAM']);
 				case 4:
-					addMoreText('present');
+					addMoreText('presents');
 				case 5:
 					deleteCoolText();
 				case 6:
@@ -435,7 +428,6 @@ class TitleState extends MusicBeatState
 					addMoreText('Gets');
 				case 16:
 					addMoreText('Trolled');
-
 				case 17:
 					skipIntro();
 			}

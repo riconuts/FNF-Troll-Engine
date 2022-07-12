@@ -59,7 +59,7 @@ class MusicBeatState extends FlxUIState
 		if (oldStep != curStep && curStep > 0)
 			stepHit();
 
-		if(FlxG.save.data != null) FlxG.save.data.fullscreen = FlxG.fullscreen;
+		if(FlxG.save.data != null) FlxG.save.data.fullscreen = FlxG.fullscreen;		
 
 		super.update(elapsed);
 	}
@@ -86,11 +86,19 @@ class MusicBeatState extends FlxUIState
 	}
 	
 	// tgt
-	public static function playMenuMusic(){
-		FlxG.sound.playMusic(Paths.music('freakyIntro'), 1, false);
-		FlxG.sound.music.onComplete = function(){
-			FlxG.sound.playMusic(Paths.music('freakyMenu'));
-		};
+	public static var path = Paths.music('freakyMenu'); // please work
+
+	public static var menuLoopFunc = function(){
+		FlxG.sound.playMusic(path, FlxG.sound.music.volume);
+		Conductor.changeBPM(180);
+	}; 
+
+	public static function playMenuMusic(volume:Float = 1){		
+		FlxG.sound.cache("assets/music/freakyMenu"); // please work
+
+		FlxG.sound.playMusic(Paths.music('freakyIntro'), volume);
+		
+		FlxG.sound.music.onComplete = menuLoopFunc;
 	}
 	//
 

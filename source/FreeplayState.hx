@@ -48,8 +48,7 @@ class FreeplayState extends MusicBeatState
 
 	private var iconArray:Array<HealthIcon> = [];
 
-	var bg:FlxSprite;
-	var backdrops:FlxBackdrop;
+	var bg:FlxBackdrop;
 	var intendedColor:Int;
 	var colorTween:FlxTween;
 
@@ -104,15 +103,9 @@ class FreeplayState extends MusicBeatState
 			}
 		}*/
 
-		bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
-		bg.antialiasing = ClientPrefs.globalAntialiasing;
+		bg = new FlxBackdrop(Paths.image('grid'), 0.2, 0.2, true, true);
+		bg.x -= 35;
 		add(bg);
-		bg.screenCenter();
-
-		backdrops = new FlxBackdrop(Paths.image('grid'), 0.2, 0.2, true, true);
-		backdrops.alpha = 0.2;
-		backdrops.x -= 35;
-		add(backdrops);
 
 		grpSongs = new FlxTypedGroup<Alphabet>();
 		add(grpSongs);
@@ -256,9 +249,8 @@ class FreeplayState extends MusicBeatState
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
 		}
 
-		backdrops.x -= .25 * (elapsed / (1 / 60));
-		backdrops.y += .25 * (elapsed / (1 / 60));
-		backdrops.color = bg.color;
+		bg.x -= .25 * (elapsed / (1 / 60));
+		bg.y += .25 * (elapsed / (1 / 60));
 
 		lerpScore = Math.floor(FlxMath.lerp(lerpScore, intendedScore, CoolUtil.boundTo(elapsed * 24, 0, 1)));
 		lerpRating = FlxMath.lerp(lerpRating, intendedRating, CoolUtil.boundTo(elapsed * 12, 0, 1));

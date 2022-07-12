@@ -40,11 +40,17 @@ class StartupState extends MusicBeatState
         FlxTransitionableState.defaultTransIn = FadeTransitionSubstate;
         FlxTransitionableState.defaultTransOut = FadeTransitionSubstate;
         
+		// this shit doesn't work
 		CoolUtil.precacheMusic("freakyIntro");
 		CoolUtil.precacheMusic("freakyMenu");
+		
 		CoolUtil.precacheSound("cancelMenu");
 		CoolUtil.precacheSound("confirmMenu");
 		CoolUtil.precacheSound("scrollMenu");
+
+		//
+		Paths.music('freakyIntro');
+		Paths.music('freakyMenu');
 
         if(FlxG.save.data != null && FlxG.save.data.fullscreen)
         {
