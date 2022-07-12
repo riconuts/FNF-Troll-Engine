@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<TextureAtlas imagePath="tails bg.png"><SubTexture name="tails bg scared0000" x="0" y="0" width="461" height="501" frameX="0" frameY="0" frameWidth="461" frameHeight="501" />
+<SubTexture name="tails bg scared0001" x="461" y="0" width="461" height="501" frameX="0" frameY="0" frameWidth="461" frameHeight="501" />
+<SubTexture name="tails bg scared0002" x="922" y="0" width="461" height="501" frameX="0" frameY="0" frameWidth="461" frameHeight="501" />
+<SubTexture name="tails bg scared0003" x="0" y="501" width="461" height="501" frameX="0" frameY="0" frameWidth="461" frameHeight="501" />
+<SubTexture name="tails bg scared0004" x="461" y="501" width="461" height="501" frameX="0" frameY="0" frameWidth="461" frameHeight="501" />
+<SubTexture name="tails bg scared0005" x="922" y="501" width="461" height="501" frameX="0" frameY="0" frameWidth="461" frameHeight="501" />
+<SubTexture name="tails bg scared0006" x="0" y="1002" width="461" height="501" frameX="0" frameY="0" frameWidth="461" frameHeight="501" />
+<SubTexture name="tails bg scared0007" x="461" y="1002" width="461" height="501" frameX="0" frameY="0" frameWidth="461" frameHeight="501" />
+<SubTexture name="tails bg scared0008" x="922" y="1002" width="461" height="501" frameX="0" frameY="0" frameWidth="461" frameHeight="501" />
+<SubTexture name="tails bg scared0009" x="0" y="1503" width="461" height="501" frameX="0" frameY="0" frameWidth="461" frameHeight="501" />
+</TextureAtlas>

@@ -1,47 +1,47 @@
 #if LUA_ALLOWED
+import llua.Convert;
 import llua.Lua;
 import llua.LuaL;
 import llua.State;
-import llua.Convert;
 #end
 
+import Controls;
+import DialogueBoxPsych;
+import Type.ValueType;
 import animateatlas.AtlasFrameMaker;
-import flixel.FlxG;
-import flixel.addons.effects.FlxTrail;
-import flixel.input.keyboard.FlxKey;
-import flixel.tweens.FlxTween;
-import flixel.tweens.FlxEase;
-import flixel.text.FlxText;
-import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.math.FlxPoint;
-import flixel.system.FlxSound;
-import flixel.util.FlxTimer;
-import flixel.FlxSprite;
-import flixel.FlxCamera;
-import flixel.util.FlxColor;
 import flixel.FlxBasic;
+import flixel.FlxCamera;
+import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
+import flixel.FlxSprite;
+import flixel.addons.effects.FlxTrail;
+import flixel.addons.transition.FlxTransitionableState;
+import flixel.group.FlxGroup.FlxTypedGroup;
+import flixel.input.keyboard.FlxKey;
+import flixel.math.FlxMath;
+import flixel.math.FlxPoint;
+import flixel.system.FlxSound;
+import flixel.text.FlxText;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+import flixel.util.FlxColor;
+import flixel.util.FlxSave;
+import flixel.util.FlxTimer;
 import openfl.Lib;
 import openfl.display.BlendMode;
 import openfl.filters.BitmapFilter;
 import openfl.utils.Assets;
-import flixel.math.FlxMath;
-import flixel.util.FlxSave;
-import flixel.addons.transition.FlxTransitionableState;
+
+using StringTools;
 #if sys
 import sys.FileSystem;
 import sys.io.File;
 #end
-import Type.ValueType;
-import Controls;
-import DialogueBoxPsych;
-
 #if desktop
 import Discord;
 #end
 
-using StringTools;
 
 class FunkinLua {
 	public static var Function_Stop:Dynamic = 1;

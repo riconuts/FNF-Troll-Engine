@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="speakerKnuckles.png">
+	<!-- Created with Adobe Animate version 21.0.5.40714 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="IDLEK instance 10000" x="2" y="2" width="403" height="598" frameX="0" frameY="-30" frameWidth="403" frameHeight="628"/>
+	<SubTexture name="IDLEK instance 10001" x="2" y="2" width="403" height="598" frameX="0" frameY="-30" frameWidth="403" frameHeight="628"/>
+	<SubTexture name="IDLEK instance 10002" x="2" y="2" width="403" height="598" frameX="0" frameY="-30" frameWidth="403" frameHeight="628"/>
+	<SubTexture name="IDLEK instance 10003" x="407" y="2" width="396" height="606" frameX="0" frameY="-22" frameWidth="403" frameHeight="628"/>
+	<SubTexture name="IDLEK instance 10004" x="407" y="2" width="396" height="606" frameX="0" frameY="-22" frameWidth="403" frameHeight="628"/>
+	<SubTexture name="IDLEK instance 10005" x="407" y="2" width="396" height="606" frameX="0" frameY="-22" frameWidth="403" frameHeight="628"/>
+	<SubTexture name="IDLEK instance 10006" x="805" y="2" width="381" height="628" frameX="0" frameY="0" frameWidth="403" frameHeight="628"/>
+	<SubTexture name="IDLEK instance 10007" x="805" y="2" width="381" height="628" frameX="0" frameY="0" frameWidth="403" frameHeight="628"/>
+	<SubTexture name="IDLEK instance 10008" x="805" y="2" width="381" height="628" frameX="0" frameY="0" frameWidth="403" frameHeight="628"/>
+	<SubTexture name="IDLEK instance 10009" x="1188" y="2" width="375" height="628" frameX="0" frameY="0" frameWidth="403" frameHeight="628"/>
+	<SubTexture name="IDLEK instance 10010" x="1188" y="2" width="375" height="628" frameX="0" frameY="0" frameWidth="403" frameHeight="628"/>
+	<SubTexture name="IDLEK instance 10011" x="1188" y="2" width="375" height="628" frameX="0" frameY="0" frameWidth="403" frameHeight="628"/>
+	<SubTexture name="IDLEK instance 10012" x="1188" y="2" width="375" height="628" frameX="0" frameY="0" frameWidth="403" frameHeight="628"/>
+	<SubTexture name="IDLEK instance 10013" x="1188" y="2" width="375" height="628" frameX="0" frameY="0" frameWidth="403" frameHeight="628"/>
+	<SubTexture name="IDLEK instance 10014" x="1188" y="2" width="375" height="628" frameX="0" frameY="0" frameWidth="403" frameHeight="628"/>
+</TextureAtlas>

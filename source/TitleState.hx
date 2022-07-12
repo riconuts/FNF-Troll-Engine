@@ -1,9 +1,6 @@
 package;
 
-#if desktop
-import Discord.DiscordClient;
-import sys.thread.Thread;
-#end
+import flixel.FlxBasic;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
@@ -12,6 +9,7 @@ import flixel.addons.transition.TransitionData;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.group.FlxGroup;
 import flixel.input.gamepad.FlxGamepad;
+import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.system.FlxSound;
@@ -29,6 +27,10 @@ import openfl.display.BitmapData;
 import options.GraphicsSettingsSubState;
 
 using StringTools;
+#if desktop
+import Discord.DiscordClient;
+import sys.thread.Thread;
+#end
 #if MODS_ALLOWED
 import sys.FileSystem;
 import sys.io.File;
@@ -127,6 +129,7 @@ class TitleState extends MusicBeatState
 	var danceLeft:Bool = false;
 	var titleText:FlxSprite;
 	var swagShader:ColorSwap = null;
+	var bg:TitleStage;
 
 	function startIntro()
 	{
@@ -142,31 +145,34 @@ class TitleState extends MusicBeatState
 
 		Conductor.changeBPM(90);//(titleJSON.bpm);
 		persistentUpdate = true;
-
-		var bg:FlxSprite = new FlxSprite();
-
-		if (titleJSON.backgroundSprite != null && titleJSON.backgroundSprite.length > 0 && titleJSON.backgroundSprite != "none"){
-			bg.loadGraphic(Paths.image(titleJSON.backgroundSprite));
-		}else{
-			bg.makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
-		}
-
-		// bg.antialiasing = ClientPrefs.globalAntialiasing;
-		// bg.setGraphicSize(Std.int(bg.width * 0.6));
-		// bg.updateHitbox();
+		
+		bg = new TitleStage();
 		add(bg);
 
-		logoBl = new FlxSprite(titleJSON.titlex, titleJSON.titley);
-		logoBl.frames = Paths.getSparrowAtlas('logoBumpin');
-
-		logoBl.antialiasing = ClientPrefs.globalAntialiasing;
-		logoBl.animation.addByPrefix('bump', 'logo bumpin', 24, false);
-		logoBl.animation.play('bump');
-		logoBl.updateHitbox();
-		// logoBl.screenCenter();
-		// logoBl.color = FlxColor.BLACK;
+		/*
+		if (bg.curStage == 'highzoneShadow')
+		{
+			highShader = new HighEffect();
+			FlxG.camera.setFilters([new ShaderFilter(highShader.shader)]);
+		}
+		*/
 
 		swagShader = new ColorSwap();
+
+		var titleNames = Paths.getDirs("titles");
+		var titleShit = titleNames[FlxG.random.int(0, titleNames.length)];
+		
+		logoBl = new FlxSprite(0);
+		logoBl.frames = Paths.getSparrowAtlas('titles/${titleShit}/logoBumpin');
+		logoBl.antialiasing = true;
+		logoBl.animation.addByPrefix('bump', 'logo bumpin', 24);
+		logoBl.animation.play('bump');
+		logoBl.setGraphicSize(Std.int(logoBl.width * 0.72));
+		logoBl.scrollFactor.set();
+		logoBl.updateHitbox();
+		logoBl.screenCenter(XY);
+
+		/*
 		gfDance = new FlxSprite(titleJSON.gfx, titleJSON.gfy);
 		gfDance.frames = Paths.getSparrowAtlas('gfDanceTitle');
 		gfDance.animation.addByIndices('danceLeft', 'gfDance', [30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], "", 24, false);
@@ -175,6 +181,8 @@ class TitleState extends MusicBeatState
 
 		add(gfDance);
 		gfDance.shader = swagShader.shader;
+		*/
+		
 		add(logoBl);
 		logoBl.shader = swagShader.shader;
 
@@ -379,6 +387,7 @@ class TitleState extends MusicBeatState
 		if(logoBl != null)
 			logoBl.animation.play('bump', true);
 
+		/*
 		if(gfDance != null) {
 			danceLeft = !danceLeft;
 			if (danceLeft)
@@ -386,6 +395,7 @@ class TitleState extends MusicBeatState
 			else
 				gfDance.animation.play('danceLeft');
 		}
+		*/
 
 		if(!closedState) {
 			sickBeats++;
@@ -394,13 +404,13 @@ class TitleState extends MusicBeatState
 				case 1:
 					FlxG.sound.music.stop();
 					FlxG.sound.playMusic(Paths.music('freakyIntro'), 0, false);
-					FlxG.sound.music.onComplete = function name() {
-						FlxG.sound.playMusic(Paths.music('freakyMenu'), 0.7, true);
-						exitState();
-					}
 					FlxG.sound.music.fadeIn(4, 0, 0.7);
+					FlxG.sound.music.onComplete = function name() {
+						FlxG.sound.playMusic(Paths.music('freakyMenu'), 1, true);
+						exitState();
+					}		
 				case 2:
-					createCoolText(['ninjamuffin99', 'phantomArcade', 'kawaisprite', 'evilsk8er']);
+					createCoolText(['', '', '', '']);
 				case 4:
 					addMoreText('present');
 				case 5:
@@ -408,7 +418,7 @@ class TitleState extends MusicBeatState
 				case 6:
 					createCoolText(['In association', 'with'], -40);
 				case 8:
-					addMoreText('newgrounds', -40);
+					addMoreText('tailsgetstrolled dot org', -40);
 					ngSpr.visible = true;
 				case 9:
 					deleteCoolText();
@@ -420,11 +430,11 @@ class TitleState extends MusicBeatState
 				case 13:
 					deleteCoolText();
 				case 14:
-					addMoreText('Friday');
+					addMoreText('Tails');
 				case 15:
-					addMoreText('Night');
+					addMoreText('Gets');
 				case 16:
-					addMoreText('Funkin');
+					addMoreText('Trolled');
 
 				case 17:
 					skipIntro();
@@ -445,6 +455,168 @@ class TitleState extends MusicBeatState
 			skippedIntro = true;
 
 			Conductor.changeBPM(180);
+		}
+	}
+}
+
+// copied from v3 because im a lazy ass
+class TitleStage extends FlxTypedGroup<FlxBasic> {
+	public static var stageNames:Array<String> = [
+		"hillzoneTails",
+		"hillzoneTailsSwag",
+		"hillzoneSonic",
+		"hillzoneShadow",
+		"highzoneShadow",
+		"hillzoneDarkSonic",
+	];
+
+	public var foreground:FlxTypedGroup<FlxBasic> = new FlxTypedGroup<FlxBasic>();
+
+	public var defaultCamZoom:Float = 1;
+	public var curStage:String = '';
+
+	public function new(){
+		super();
+		curStage = stageNames[FlxG.random.int(0, stageNames.length)];
+
+		switch (curStage)
+		{
+			case 'hillzoneTails':
+				defaultCamZoom = 1;
+				var bg:FlxSprite = new FlxSprite(-600, -200).loadGraphic(Paths.image('titlebg/chapter1/sky'));
+				bg.antialiasing = true;
+				bg.scrollFactor.set(0.4, 0.4);
+				bg.active = false;
+				add(bg);
+
+				var stageFront:FlxSprite = new FlxSprite(-650, 600).loadGraphic(Paths.image('titlebg/chapter1/grass'));
+				stageFront.setGraphicSize(Std.int(stageFront.width * 1.1));
+				stageFront.updateHitbox();
+				stageFront.antialiasing = true;
+				stageFront.scrollFactor.set(0.9, 0.9);
+				stageFront.active = false;
+				add(stageFront);
+
+				var stageCurtains:FlxSprite = new FlxSprite(-450, -150).loadGraphic(Paths.image('titlebg/chapter1/foreground'));
+				stageCurtains.setGraphicSize(Std.int(stageCurtains.width * 0.87));
+				stageCurtains.updateHitbox();
+				stageCurtains.antialiasing = true;
+				stageCurtains.scrollFactor.set(1.3, 1.3);
+				stageCurtains.active = false;
+
+				foreground.add(stageCurtains);
+			case 'hillzoneTailsSwag':
+				defaultCamZoom = 1;
+				var bg:FlxSprite = new FlxSprite(-600, -200).loadGraphic(Paths.image('titlebg/chapter1/skySwag'));
+				bg.antialiasing = true;
+				bg.scrollFactor.set(0.4, 0.4);
+				bg.active = false;
+				add(bg);
+
+				var stageFront:FlxSprite = new FlxSprite(-650, 600).loadGraphic(Paths.image('titlebg/chapter1/grassSwag'));
+				stageFront.setGraphicSize(Std.int(stageFront.width * 1.1));
+				stageFront.updateHitbox();
+				stageFront.antialiasing = true;
+				stageFront.scrollFactor.set(0.9, 0.9);
+				stageFront.active = false;
+				add(stageFront);
+
+				var stageCurtains:FlxSprite = new FlxSprite(-450, -150).loadGraphic(Paths.image('titlebg/chapter1/foregroundSwag'));
+				stageCurtains.setGraphicSize(Std.int(stageCurtains.width * 0.87));
+				stageCurtains.updateHitbox();
+				stageCurtains.antialiasing = true;
+				stageCurtains.scrollFactor.set(1.3, 1.3);
+				stageCurtains.active = false;
+
+				foreground.add(stageCurtains);
+			case 'hillzoneSonic':
+				defaultCamZoom = 1;
+				var bg:FlxSprite = new FlxSprite(-600, -200).loadGraphic(Paths.image('titlebg/chapter2/sky'));
+				bg.antialiasing = true;
+				bg.scrollFactor.set(0.4, 0.4);
+				bg.active = false;
+				add(bg);
+
+				var stageFront:FlxSprite = new FlxSprite(-650, 600).loadGraphic(Paths.image('titlebg/chapter2/grass'));
+				stageFront.setGraphicSize(Std.int(stageFront.width * 1.1));
+				stageFront.updateHitbox();
+				stageFront.antialiasing = true;
+				stageFront.scrollFactor.set(0.9, 0.9);
+				stageFront.active = false;
+				add(stageFront);
+
+				var stageCurtains:FlxSprite = new FlxSprite(-450, -150).loadGraphic(Paths.image('titlebg/chapter2/foreground'));
+				stageCurtains.setGraphicSize(Std.int(stageCurtains.width * 0.87));
+				stageCurtains.updateHitbox();
+				stageCurtains.antialiasing = true;
+				stageCurtains.scrollFactor.set(1.3, 1.3);
+				stageCurtains.active = false;
+
+				foreground.add(stageCurtains);
+			case 'hillzoneShadow':
+				defaultCamZoom = .9;
+				var bg:FlxSprite = new FlxSprite(-835, -550).loadGraphic(Paths.image('titlebg/chapter3/shadowbg'));
+				bg.antialiasing = true;
+				bg.scrollFactor.set(1.05, 1.05);
+				bg.active = false;
+				add(bg);
+
+				var thisthing:FlxSprite = new FlxSprite(-880, -730).loadGraphic(Paths.image('titlebg/chapter3/shadowbg3'));
+				thisthing.antialiasing = true;
+				thisthing.scrollFactor.set(1.025, 1.025);
+				thisthing.active = false;
+				add(thisthing);
+
+				var thisotherthing:FlxSprite = new FlxSprite(-815, -375).loadGraphic(Paths.image('titlebg/chapter3/shadowbg2'));
+				thisotherthing.antialiasing = true;
+				thisotherthing.scrollFactor.set(1.025, 1.025);
+				thisotherthing.active = false;
+				add(thisotherthing);
+
+				var grass:FlxSprite = new FlxSprite(-815, 450).loadGraphic(Paths.image('titlebg/chapter3/shadowbg4'));
+				grass.antialiasing = true;
+				grass.active = false;
+				add(grass);
+			case 'highzoneShadow':
+				defaultCamZoom = .9;
+				var bg:FlxSprite = new FlxSprite(-350, -200).loadGraphic(Paths.image('titlebg/chapter3/stageback_HS'));
+				bg.antialiasing = true;
+				bg.scrollFactor.set(0.4, 0.4);
+				bg.active = false;
+				add(bg);
+
+				var stageFront:FlxSprite = new FlxSprite(-725, 600).loadGraphic(Paths.image('titlebg/chapter3/stagefront_HS'));
+				stageFront.setGraphicSize(Std.int(stageFront.width * 1.1));
+				stageFront.updateHitbox();
+				stageFront.antialiasing = true;
+				stageFront.scrollFactor.set(1, 1);
+				stageFront.active = false;
+				add(stageFront);
+			case 'hillzoneDarkSonic':
+				defaultCamZoom = 1;
+				
+				var sky:FlxSprite = new FlxSprite().loadGraphic(Paths.image("titlebg/chapter3/tfbbg3"));
+				sky.antialiasing=true;
+				sky.scrollFactor.set(.3,.3);
+				sky.x = -458;
+				sky.y = -247;
+				add(sky);
+
+				var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image("titlebg/chapter3/tfbbg2"));
+				bg.antialiasing=true;
+				bg.scrollFactor.set(.7,.7);
+				bg.x = -480.5;
+				bg.y = 410;
+				add(bg);
+
+				var fg:FlxSprite = new FlxSprite().loadGraphic(Paths.image("titlebg/chapter3/tfbbg"));
+				fg.antialiasing=true;
+				fg.scrollFactor.set(1, 1);
+				fg.x = -541;
+				fg.y = -96.5;
+				add(fg);
+			case 'blank':
+
 		}
 	}
 }

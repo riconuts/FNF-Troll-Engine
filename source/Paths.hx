@@ -1,29 +1,28 @@
 package;
 
 import animateatlas.AtlasFrameMaker;
-import flixel.math.FlxPoint;
-import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
-import openfl.geom.Rectangle;
-import flixel.math.FlxRect;
-import haxe.xml.Access;
-import openfl.system.System;
+import flash.media.Sound;
 import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxAtlasFrames;
+import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
+import flixel.math.FlxPoint;
+import flixel.math.FlxRect;
+import haxe.Json;
+import haxe.xml.Access;
+import lime.utils.Assets;
+import openfl.display.BitmapData;
+import openfl.geom.Rectangle;
+import openfl.system.System;
 import openfl.utils.AssetType;
 import openfl.utils.Assets as OpenFlAssets;
-import lime.utils.Assets;
-import flixel.FlxSprite;
-#if sys
-import sys.io.File;
-import sys.FileSystem;
-#end
-import flixel.graphics.FlxGraphic;
-import openfl.display.BitmapData;
-import haxe.Json;
-
-import flash.media.Sound;
 
 using StringTools;
+#if sys
+import sys.FileSystem;
+import sys.io.File;
+#end
 
 class Paths
 {
@@ -526,4 +525,18 @@ class Paths
 		return list;
 	}
 	#end
+
+	public static function getDirs(library:String, ?base = 'assets/images')
+	{
+		var folders:Array<String> = [];
+		// TODO: openflassets shit maybe?
+		for (folder in FileSystem.readDirectory('${base}/${library}'))
+		{
+			if (!folder.contains(".") && FileSystem.isDirectory('${base}/${library}/${folder}'))
+			{
+				folders.push(folder);
+			}
+		}
+		return folders;
+	}
 }

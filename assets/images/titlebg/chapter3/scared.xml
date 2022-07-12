@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<TextureAtlas imagePath="scared.png"><SubTexture name="scared mark0000" x="0" y="0" width="313" height="501" frameX="0" frameY="0" frameWidth="313" frameHeight="501" />
+<SubTexture name="scared mark0001" x="313" y="0" width="313" height="501" frameX="0" frameY="0" frameWidth="313" frameHeight="501" />
+<SubTexture name="scared mark0002" x="0" y="501" width="313" height="501" frameX="0" frameY="0" frameWidth="313" frameHeight="501" />
+<SubTexture name="scared mark0003" x="313" y="501" width="313" height="501" frameX="0" frameY="0" frameWidth="313" frameHeight="501" />
+<SubTexture name="scared mark0004" x="0" y="1002" width="313" height="501" frameX="0" frameY="0" frameWidth="313" frameHeight="501" />
+</TextureAtlas>

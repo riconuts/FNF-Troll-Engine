@@ -14,6 +14,7 @@ import flixel.util.FlxGradient;
 import flixel.util.FlxTimer;
 import scripts.*;
 import scripts.Globals;
+
 class MusicBeatState extends FlxUIState
 {
 	private var lastBeat:Float = 0;
@@ -86,7 +87,7 @@ class MusicBeatState extends FlxUIState
 	
 	// tgt
 	public static function playMenuMusic(){
-		FlxG.sound.playMusic(Paths.music('freakyIntro'));
+		FlxG.sound.playMusic(Paths.music('freakyIntro'), 1, false);
 		FlxG.sound.music.onComplete = function(){
 			FlxG.sound.playMusic(Paths.music('freakyMenu'));
 		};
