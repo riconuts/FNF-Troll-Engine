@@ -3,20 +3,22 @@ package editors;
 #if desktop
 import Discord.DiscordClient;
 #end
+
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxMath;
+import flixel.system.FlxSound;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
-import flixel.system.FlxSound;
+
+using StringTools;
 #if MODS_ALLOWED
 import sys.FileSystem;
 #end
 
-using StringTools;
 
 class MasterEditorMenu extends MusicBeatState
 {
@@ -26,7 +28,8 @@ class MasterEditorMenu extends MusicBeatState
 		'Dialogue Editor',
 		'Dialogue Portrait Editor',
 		'Character Editor',
-		'Chart Editor'
+		'Chart Editor',
+		'Test Stage'
 	];
 	private var grpTexts:FlxTypedGroup<Alphabet>;
 	private var directories:Array<String> = [null];
@@ -125,6 +128,8 @@ class MasterEditorMenu extends MusicBeatState
 					LoadingState.loadAndSwitchState(new DialogueEditorState(), false);
 				case 'Chart Editor'://felt it would be cool maybe
 					LoadingState.loadAndSwitchState(new ChartingState(), false);
+				case "Test Stage":
+					MusicBeatState.switchState(new TestState());
 			}
 			FlxG.sound.music.volume = 0;
 			#if PRELOAD_ALL

@@ -467,9 +467,9 @@ class TitleStage extends FlxTypedGroup<FlxBasic> {
 	public var defaultCamZoom:Float = 1;
 	public var curStage:String = '';
 
-	public function new(){
+	public function new(stage:Null<Int> = null){
 		super();
-		curStage = stageNames[FlxG.random.int(0, stageNames.length)];
+		curStage = (stage != null) ? stageNames[stage] : stageNames[FlxG.random.int(0, stageNames.length-1)];
 
 		switch (curStage)
 		{
@@ -607,8 +607,6 @@ class TitleStage extends FlxTypedGroup<FlxBasic> {
 				fg.x = -541;
 				fg.y = -96.5;
 				add(fg);
-			case 'blank':
-
 		}
 	}
 }

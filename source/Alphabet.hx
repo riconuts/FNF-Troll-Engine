@@ -1,13 +1,13 @@
 package;
 
+import flash.media.Sound;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxMath;
-import flixel.util.FlxTimer;
 import flixel.system.FlxSound;
-import flash.media.Sound;
+import flixel.util.FlxTimer;
 
 using StringTools;
 
@@ -465,6 +465,14 @@ class AlphaCharacter extends FlxSprite
 
 		y = (110 - height);
 		y += row * 60;
+
+		// offset
+		if (letterCase == "lowercase"){
+			switch(letter){
+				case "g" | "j" | "p" | "q" | "y":
+					y += 13;
+			}
+		}
 	}
 
 	public function createNumber(letter:String):Void
