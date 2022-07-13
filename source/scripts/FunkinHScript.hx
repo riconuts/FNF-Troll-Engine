@@ -1,14 +1,16 @@
 package scripts;
 
-import flixel.system.FlxSound;
 import flixel.FlxG;
+import flixel.system.FlxSound;
 import hscript.Expr;
 import hscript.Interp;
 import hscript.Parser;
+import lime.app.Application;
 import lime.utils.AssetType;
 import lime.utils.Assets;
-import sys.io.File;
 import scripts.Globals.*;
+import sys.io.File;
+
 class FunkinHScript extends FunkinScript
 {
 	static var parser:Parser = new Parser();
@@ -34,7 +36,12 @@ class FunkinHScript extends FunkinScript
 			expr = parser.parseString(script, name);
 		}catch(e:haxe.Exception){
 			trace(e.details());
-			FlxG.log.error("Error parsing hscript: " + e.message);
+
+			FlxG.log.error(e.message);
+
+			var errMsg = "Error parsing hscript: " + parser.line;
+			Application.current.window.alert(errMsg, "Error!");
+
 			expr = parser.parseString("", name);
 		}
 		return new FunkinHScript(expr, name, additionalVars);

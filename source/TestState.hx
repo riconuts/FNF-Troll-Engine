@@ -108,8 +108,6 @@ class TestState extends MusicBeatState{
 			alphabetInstance.isBold = boldCheckbox.checked;
 			alphabetInstance.changeText(inputText.text);
 			alphabetInstance.screenCenter();
-
-			changeButton;
 		}
 		updateText();
 		
@@ -122,12 +120,13 @@ class TestState extends MusicBeatState{
 
 				if (FlxG.keys.justPressed.ENTER)
 				{
-					inputText.hasFocus = false;
-					updateText();
+					inputText.focusLost();
 				}
 			}
 		};
 		inputText.focusLost = function(){
+			inputText.hasFocus = false;
+			updateFunction = null;
 			updateText();
 		};
 		group.add(inputText);

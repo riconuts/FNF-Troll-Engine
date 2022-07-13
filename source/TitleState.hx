@@ -155,7 +155,7 @@ class TitleState extends MusicBeatState
 		swagShader = new ColorSwap();
 
 		var titleNames = Paths.getDirs("titles");
-		var titleShit = titleNames[FlxG.random.int(0, titleNames.length)];
+		var titleShit = titleNames[FlxG.random.int(0, titleNames.length-1)];
 		
 		logoBl = new FlxSprite(0);
 		logoBl.frames = Paths.getSparrowAtlas('titles/${titleShit}/logoBumpin');
