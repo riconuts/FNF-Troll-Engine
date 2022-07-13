@@ -473,6 +473,12 @@ class AlphaCharacter extends FlxSprite
 					y += 13;
 			}
 		}
+		else{
+			switch(letter){
+				case "Q":
+					y += 8;
+			}
+		}
 	}
 
 	public function createNumber(letter:String):Void

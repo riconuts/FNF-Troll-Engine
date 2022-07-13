@@ -99,7 +99,7 @@ class TestState extends MusicBeatState{
 		group.add(alphabetInstance);
 
 		////
-		var inputText = new FlxUIInputText(10, 40, 230, 'sowy', 8);
+		var inputText = new FlxUIInputText(10, 40, 230, 'abcdefghijklmnopqrstuvwxyz', 8);
 		var boldCheckbox:FlxUICheckBox = new FlxUICheckBox(10, 70, null, null, "Bold", 100);
 
 		function updateText(){
@@ -108,7 +108,10 @@ class TestState extends MusicBeatState{
 			alphabetInstance.isBold = boldCheckbox.checked;
 			alphabetInstance.changeText(inputText.text);
 			alphabetInstance.screenCenter();
+
+			changeButton;
 		}
+		updateText();
 		
 		////
 		inputText.focusGained = function(){
@@ -134,6 +137,20 @@ class TestState extends MusicBeatState{
 			updateText();
 		};
 		group.add(boldCheckbox);
+
+		var woo:Bool = false;
+		var changeButton = new FlxButton(10, 100, "toUpperCase", function()
+		{
+			if (woo)
+				inputText.text = inputText.text.toLowerCase();
+			else
+				inputText.text = inputText.text.toUpperCase();
+
+			woo = !woo;
+
+			updateText();
+		});
+		group.add(changeButton);
 
 		////
 		return group;
