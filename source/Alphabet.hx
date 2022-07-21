@@ -453,11 +453,7 @@ class AlphaCharacter extends FlxSprite
 
 	public function createLetter(letter:String):Void
 	{
-		var letterCase:String = "lowercase";
-		if (letter.toLowerCase() != letter)
-		{
-			letterCase = 'capital';
-		}
+		var letterCase:String = (letter.toLowerCase() != letter) ? 'capital' : "lowercase";
 
 		animation.addByPrefix(letter, letter + " " + letterCase, 24);
 		animation.play(letter);
@@ -466,18 +462,16 @@ class AlphaCharacter extends FlxSprite
 		y = (110 - height);
 		y += row * 60;
 
-		// offset
-		if (letterCase == "lowercase"){
-			switch(letter){
-				case "g" | "j" | "p" | "q" | "y":
-					y += 13;
-			}
-		}
-		else{
-			switch(letter){
-				case "Q":
-					y += 8;
-			}
+		switch (letter)
+		{
+			case "g" | "j" | "p" | "q" | "y":
+				y += 13;
+			case "z" | "Z":
+				y--;
+			case "Q":
+				y += 8;
+			case "B" | "D" | "E" | "L":
+				y--;
 		}
 	}
 
@@ -488,7 +482,7 @@ class AlphaCharacter extends FlxSprite
 
 		updateHitbox();
 
-		y = (110 - height);
+		y = (109 - height);
 		y += row * 60;
 	}
 

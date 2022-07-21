@@ -526,17 +526,27 @@ class Paths
 	}
 	#end
 
-	public static function getDirs(library:String, ?base = 'assets/images')
+	public static function getFolders(dir:String)
 	{
 		var folders:Array<String> = [];
-		// TODO: openflassets shit maybe?
-		for (folder in FileSystem.readDirectory('${base}/${library}'))
+		
+		for (folder in FileSystem.readDirectory('assets/${dir}'))
 		{
-			if (!folder.contains(".") && FileSystem.isDirectory('${base}/${library}/${folder}'))
-			{
+			if (!folder.contains(".") && FileSystem.isDirectory('assets/${dir}/${folder}'))
 				folders.push(folder);
+		}
+		/*
+		#if MODS_ALLOWED
+		if (currentModDirectory != null){
+			for (folder in FileSystem.readDirectory('mods/${currentModDirectory}/${dir}'))
+			{
+				if (!folder.contains(".") && FileSystem.isDirectory('mods/${currentModDirectory}/${dir}/${folder}'))
+					folders.push(folder);
 			}
 		}
+		#end
+		*/
+
 		return folders;
 	}
 }

@@ -930,6 +930,7 @@ class PlayState extends MusicBeatState
 			trace("started preload at " + currentTime);
 			#end
 			var shitToLoad:Array<AssetPreload> = [
+				{path: "epic"},
 				{path: "sick"},
 				{path: "good"},
 				{path: "bad"},
@@ -1048,11 +1049,11 @@ class PlayState extends MusicBeatState
 			if(shitToLoad.length>0 && threadLimit > 1){
 				// thanks shubs -neb
 				for(shit in shitToLoad)
-					if(shit.terminate)shit.terminate=false; // do not
+					if(shit.terminate) shit.terminate = false; // do not
 
 				var count = shitToLoad.length;
 
-				if(threadLimit > shitToLoad.length)threadLimit=shitToLoad.length; // only use as many as it needs
+				if(threadLimit > shitToLoad.length) threadLimit = shitToLoad.length; // only use as many as it needs
 
 				var sprites:Array<FlxSprite> = [];
 				var threads:Array<Thread> = [];

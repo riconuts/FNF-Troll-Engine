@@ -1,24 +1,24 @@
 package editors;
 
+//import FunkinLua;
 import Section.SwagSection;
 import Song.SwagSong;
-import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.addons.transition.FlxTransitionableState;
-import flixel.util.FlxColor;
-import flixel.FlxSprite;
 import flixel.FlxG;
-import flixel.text.FlxText;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
+import flixel.FlxSprite;
+import flixel.addons.transition.FlxTransitionableState;
+import flixel.group.FlxGroup.FlxTypedGroup;
+import flixel.input.keyboard.FlxKey;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.system.FlxSound;
+import flixel.text.FlxText;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+import flixel.util.FlxColor;
 import flixel.util.FlxSort;
 import flixel.util.FlxTimer;
-import flixel.input.keyboard.FlxKey;
 import openfl.events.KeyboardEvent;
-import FunkinLua;
 
 using StringTools;
 
@@ -27,9 +27,25 @@ class EditorPlayState extends MusicBeatState
 	// Yes, this is mostly a copy of PlayState, it's kinda dumb to make a direct copy of it but... ehhh
 	private var strumLine:FlxSprite;
 	private var comboGroup:FlxTypedGroup<FlxSprite>;
-	public var strumLineNotes:FlxTypedGroup<StrumNote>;
-	public var opponentStrums:FlxTypedGroup<StrumNote>;
-	public var playerStrums:FlxTypedGroup<StrumNote>;
+	public var playFields:FlxTypedGroup<PlayField>;
+	@:isVar
+	public var strumLineNotes(get, null):Array<StrumNote>;
+
+	function get_strumLineNotes()
+	{
+		var notes:Array<StrumNote> = [];
+		if (playFields != null && playFields.length > 0)
+		{
+			for (field in playFields.members)
+			{
+				for (sturm in field.members)
+					notes.push(sturm);
+			}
+		}
+		return notes;
+	}
+	public var opponentStrums:PlayField;
+	public var playerStrums:PlayField;
 	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
 
 	public var notes:FlxTypedGroup<Note>;
@@ -85,13 +101,40 @@ class EditorPlayState extends MusicBeatState
 		comboGroup = new FlxTypedGroup<FlxSprite>();
 		add(comboGroup);
 
-		strumLineNotes = new FlxTypedGroup<StrumNote>();
-		opponentStrums = new FlxTypedGroup<StrumNote>();
-		playerStrums = new FlxTypedGroup<StrumNote>();
-		add(strumLineNotes);
+		//strumLineNotes = new FlxTypedGroup<StrumNote>();
+		//opponentStrums = new FlxTypedGroup<StrumNote>();
+		//playerStrums = new FlxTypedGroup<StrumNote>();
+		//add(strumLineNotes);
 
-		generateStaticArrows(0);
-		generateStaticArrows(1);
+		//generateStaticArrows(0);
+		//generateStaticArrows(1);
+
+		playFields = new FlxTypedGroup<PlayField>();
+		add(playFields);
+
+		//playFields.cameras = [camHUD];
+
+		playerStrums = new PlayField(ClientPrefs.middleScroll ? (FlxG.width / 2) : (FlxG.width / 2 + (FlxG.width / 4)), strumLine.y, 4, null, true, false);
+		opponentStrums = new PlayField(ClientPrefs.middleScroll ? (FlxG.width / 2) : (FlxG.width / 2 - (FlxG.width / 4)), strumLine.y, 4, null, false, true);
+		if (!ClientPrefs.opponentStrums)
+			opponentStrums.baseAlpha = 0;
+		else if (ClientPrefs.middleScroll)
+			opponentStrums.baseAlpha = 0.35;
+		opponentStrums.offsetReceptors = ClientPrefs.middleScroll;
+		
+		playerStrums.noteHitCallback = goodNoteHit;
+		//opponentStrums.noteHitCallback = opponentNoteHit;
+
+		//callOnScripts('preReceptorGeneration', []); // can be used to change field properties just before the receptors get generated, so you dont have to re-generate them
+		
+		opponentStrums.generateReceptors();
+		playerStrums.generateReceptors();
+
+		playerStrums.fadeIn(true);
+		opponentStrums.fadeIn(true);
+
+		playFields.add(opponentStrums);
+		playFields.add(playerStrums);
 		/*if(ClientPrefs.middleScroll) {
 			opponentStrums.forEachAlive(function (note:StrumNote) {
 				note.visible = false;
@@ -232,8 +275,8 @@ class EditorPlayState extends MusicBeatState
 						var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
 						swagNote.mustPress = gottaHitNote;
 						swagNote.sustainLength = songNotes[2];
-						swagNote.noteType = songNotes[3];
-						if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = editors.ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
+						swagNote.noteType = 'No Animation'; //songNotes[3];
+						//if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = editors.ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
 						swagNote.scrollFactor.set();
 
 						var susLength:Float = swagNote.sustainLength;
@@ -249,7 +292,7 @@ class EditorPlayState extends MusicBeatState
 
 								var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote) + (Conductor.stepCrochet / FlxMath.roundDecimal(PlayState.SONG.speed, 2)), daNoteData, oldNote, true);
 								sustainNote.mustPress = gottaHitNote;
-								sustainNote.noteType = swagNote.noteType;
+								sustainNote.noteType = 'No Animation'; //swagNote.noteType;
 								sustainNote.scrollFactor.set();
 								unspawnNotes.push(sustainNote);
 
@@ -440,7 +483,7 @@ class EditorPlayState extends MusicBeatState
 					if(daNote.isSustainNote && !daNote.animation.curAnim.name.endsWith('end')) {
 						time += 0.15;
 					}
-					StrumPlayAnim(true, Std.int(Math.abs(daNote.noteData)) % 4, time);
+					StrumPlayAnim(opponentStrums, Std.int(Math.abs(daNote.noteData)) % 4, time, daNote);
 					daNote.hitByOpponent = true;
 
 					if (!daNote.isSustainNote)
@@ -539,73 +582,59 @@ class EditorPlayState extends MusicBeatState
 	{
 		var eventKey:FlxKey = event.keyCode;
 		var key:Int = getKeyFromEvent(eventKey);
-		//trace('Pressed: ' + eventKey);
+		// trace('Pressed: ' + eventKey);
 
 		if (key > -1 && (FlxG.keys.checkStatus(eventKey, JUST_PRESSED) || ClientPrefs.controllerMode))
 		{
-			if(generatedMusic)
+			if (generatedMusic)
 			{
-				//more accurate hit time for the ratings?
+				// more accurate hit time for the ratings?
 				var lastTime:Float = Conductor.songPosition;
 				Conductor.songPosition = FlxG.sound.music.time;
 
 				var canMiss:Bool = !ClientPrefs.ghostTapping;
 
-				// heavily based on my own code LOL if it aint broke dont fix it
 				var pressNotes:Array<Note> = [];
-				//var notesDatas:Array<Int> = [];
-				var notesStopped:Bool = false;
 
-				//trace('test!');
-				var sortedNotesList:Array<Note> = [];
-				notes.forEachAlive(function(daNote:Note)
+				var ghostTapped:Bool = true;
+				for (field in playFields.members)
 				{
-					if (daNote.canBeHit && daNote.mustPress && !daNote.tooLate && !daNote.wasGoodHit)
+					if (field.playerControls && field.inControl && !field.autoPlayed)
 					{
-						if(daNote.noteData == key && !daNote.isSustainNote)
+						var sortedNotesList:Array<Note> = field.getTapNotes(key);
+						sortedNotesList.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
+
+						if (sortedNotesList.length > 0)
 						{
-							//trace('pushed note!');
-							sortedNotesList.push(daNote);
-							//notesDatas.push(daNote.noteData);
+							pressNotes.push(sortedNotesList[0]);
+							field.noteHitCallback(sortedNotesList[0], field);
 						}
-						canMiss = true;
 					}
-				});
-				sortedNotesList.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
+				}
 
-				if (sortedNotesList.length > 0) {
-					for (epicNote in sortedNotesList)
+				if (pressNotes.length == 0)
+				{
+					if (canMiss)
 					{
-						for (doubleNote in pressNotes) {
-							if (Math.abs(doubleNote.strumTime - epicNote.strumTime) < 1) {
-								doubleNote.kill();
-								notes.remove(doubleNote, true);
-								doubleNote.destroy();
-							} else
-								notesStopped = true;
-						}
-							
-						// eee jack detection before was not super good
-						if (!notesStopped) {
-							goodNoteHit(epicNote);
-							pressNotes.push(epicNote);
-						}
-
+						noteMiss(key);
 					}
 				}
-				else if (canMiss && !ClientPrefs.ghostTapping) {
-					noteMiss(key);
-				}
 
-				//more accurate hit time for the ratings? part 2 (Now that the calculations are done, go back to the time it was before for not causing a note stutter)
+				// more accurate hit time for the ratings? part 2 (Now that the calculations are done, go back to the time it was before for not causing a note stutter)
 				Conductor.songPosition = lastTime;
 			}
 
-			var spr:StrumNote = playerStrums.members[key];
-			if(spr != null && spr.animation.curAnim.name != 'confirm')
+			for (field in playFields.members)
 			{
-				spr.playAnim('pressed');
-				spr.resetAnim = 0;
+				if (field.inControl && !field.autoPlayed && field.playerControls)
+				{
+					var spr:StrumNote = field.members[key];
+					if (spr != null && spr.animation.curAnim.name != 'confirm')
+					{
+						spr.playAnim('pressed');
+						spr.resetAnim = 0;
+					}
+				}
 			}
 		}
 	}
@@ -652,16 +681,16 @@ class EditorPlayState extends MusicBeatState
 		var down = controls.NOTE_DOWN;
 		var left = controls.NOTE_LEFT;
 		var controlHoldArray:Array<Bool> = [left, down, up, right];
-		
+
 		// TO DO: Find a better way to handle controller inputs, this should work for now
-		if(ClientPrefs.controllerMode)
+		if (ClientPrefs.controllerMode)
 		{
 			var controlArray:Array<Bool> = [controls.NOTE_LEFT_P, controls.NOTE_DOWN_P, controls.NOTE_UP_P, controls.NOTE_RIGHT_P];
-			if(controlArray.contains(true))
+			if (controlArray.contains(true))
 			{
 				for (i in 0...controlArray.length)
 				{
-					if(controlArray[i])
+					if (controlArray[i])
 						onKeyPress(new KeyboardEvent(KeyboardEvent.KEY_DOWN, true, true, -1, keysArray[i][0]));
 				}
 			}
@@ -671,25 +700,29 @@ class EditorPlayState extends MusicBeatState
 		if (generatedMusic)
 		{
 			// rewritten inputs???
+
 			notes.forEachAlive(function(daNote:Note)
 			{
 				// hold note functions
-				if (daNote.isSustainNote && controlHoldArray[daNote.noteData] && daNote.canBeHit 
-				&& daNote.mustPress && !daNote.tooLate && !daNote.wasGoodHit) {
-					goodNoteHit(daNote);
+				//trace(daNote.playField);
+				if (daNote.playField != null && !daNote.playField.autoPlayed && daNote.playField.inControl && daNote.playField.playerControls){
+					if (daNote.isSustainNote && controlHoldArray[daNote.noteData] && daNote.canBeHit && !daNote.tooLate && !daNote.wasGoodHit)
+					{
+						daNote.playField.noteHitCallback(daNote, daNote.playField);
+					}
 				}
 			});
 		}
 
 		// TO DO: Find a better way to handle controller inputs, this should work for now
-		if(ClientPrefs.controllerMode)
+		if (ClientPrefs.controllerMode)
 		{
 			var controlArray:Array<Bool> = [controls.NOTE_LEFT_R, controls.NOTE_DOWN_R, controls.NOTE_UP_R, controls.NOTE_RIGHT_R];
-			if(controlArray.contains(true))
+			if (controlArray.contains(true))
 			{
 				for (i in 0...controlArray.length)
 				{
-					if(controlArray[i])
+					if (controlArray[i])
 						onKeyRelease(new KeyboardEvent(KeyboardEvent.KEY_UP, true, true, -1, keysArray[i][0]));
 				}
 			}
@@ -697,7 +730,7 @@ class EditorPlayState extends MusicBeatState
 	}
 
 	var combo:Int = 0;
-	function goodNoteHit(note:Note):Void
+	function goodNoteHit(note:Note, field:PlayField):Void
 	{
 		if (!note.wasGoodHit)
 		{
@@ -896,8 +929,8 @@ class EditorPlayState extends MusicBeatState
 			numScore.velocity.x = FlxG.random.float(-5, 5);
 			numScore.visible = !ClientPrefs.hideHud;
 
-			if (combo >= 10 || combo == 0)
-				insert(members.indexOf(strumLineNotes), numScore);
+			//if (combo >= 10 || combo == 0)
+				insert(members.indexOf(playFields), numScore);
 
 			FlxTween.tween(numScore, {alpha: 0}, 0.2, {
 				onComplete: function(tween:FlxTween)
@@ -933,6 +966,7 @@ class EditorPlayState extends MusicBeatState
 		});
 	}
 
+	/*
 	private function generateStaticArrows(player:Int):Void
 	{
 		for (i in 0...4)
@@ -964,19 +998,15 @@ class EditorPlayState extends MusicBeatState
 			babyArrow.postAddedToGroup();
 		}
 	}
+	*/
 
+	function StrumPlayAnim(field:PlayField, id:Int, time:Float, ?note:Note)
+	{
+		var spr:StrumNote = field.members[id];
 
-	// For Opponent's notes glow
-	function StrumPlayAnim(isDad:Bool, id:Int, time:Float) {
-		var spr:StrumNote = null;
-		if(isDad) {
-			spr = strumLineNotes.members[id];
-		} else {
-			spr = playerStrums.members[id];
-		}
-
-		if(spr != null) {
-			spr.playAnim('confirm', true);
+		if (spr != null)
+		{
+			spr.playAnim('confirm', true, note);
 			spr.resetAnim = time;
 		}
 	}

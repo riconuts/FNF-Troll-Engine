@@ -1,16 +1,16 @@
 package;
 
-import flixel.addons.transition.TransitionSubstate;
-import flixel.addons.transition.FlxTransitionSprite.TransitionStatus;
-import flixel.util.FlxGradient;
-import flixel.FlxSprite;
 import flixel.FlxCamera;
+import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.addons.transition.FlxTransitionSprite.TransitionStatus;
+import flixel.addons.transition.TransitionSubstate;
 import flixel.math.FlxMath;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
-import flixel.util.FlxTimer;
-import flixel.FlxG;
 import flixel.util.FlxColor;
+import flixel.util.FlxGradient;
+import flixel.util.FlxTimer;
 
 class FadeTransitionSubstate extends TransitionSubstate
 {
@@ -23,6 +23,7 @@ class FadeTransitionSubstate extends TransitionSubstate
 
   var gradient:FlxSprite;
   var gradientFill:FlxSprite;
+  
   public function new(){
     super();
   }
@@ -74,7 +75,7 @@ class FadeTransitionSubstate extends TransitionSubstate
     cameras = [cam];
 
     nextCamera = null;
-    trace('transitioning $status');
+    //trace('transitioning $status');
     curStatus=status;
     var yStart:Float = 0;
     var yEnd:Float = 0;
@@ -93,7 +94,7 @@ class FadeTransitionSubstate extends TransitionSubstate
         angle=270;
         duration = .8;
       default:
-        trace("bruh");
+        //trace("bruh");
     }
     gradient = FlxGradient.createGradientFlxSprite(width, height, [FlxColor.BLACK, FlxColor.TRANSPARENT], 1, angle);
     gradient.scrollFactor.set();
@@ -109,7 +110,7 @@ class FadeTransitionSubstate extends TransitionSubstate
 
     FlxTween.tween(gradient,{y: yEnd}, duration,{
       onComplete: function(t:FlxTween){
-        trace("done");
+        //trace("done");
         delayThenFinish();
       }
     });

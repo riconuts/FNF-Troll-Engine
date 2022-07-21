@@ -45,9 +45,20 @@ class TestState extends MusicBeatState{
         super.create();
     }
 
-	var updateFunction = function(){};
+	var updateFunction:Void->Void;
 	var lastGroup:FlxTypedGroup<FlxBasic>;
 	var curGroup:FlxTypedGroup<FlxBasic>;
+
+	function disableVolumeKeys(){
+		FlxG.sound.muteKeys = [];
+		FlxG.sound.volumeDownKeys = [];
+		FlxG.sound.volumeUpKeys = [];
+	}
+	function enableVolumeKeys(){
+		FlxG.sound.muteKeys = StartupState.muteKeys;
+		FlxG.sound.volumeDownKeys = StartupState.volumeDownKeys;
+		FlxG.sound.volumeUpKeys = StartupState.volumeUpKeys;
+	}
 	
 	override function update(elapsed:Float)
 	{
@@ -55,17 +66,11 @@ class TestState extends MusicBeatState{
 		{
 			updateFunction();
 		}
-		else
+
+		if (FlxG.keys.justPressed.ESCAPE)
 		{
-			FlxG.sound.muteKeys = StartupState.muteKeys;
-			FlxG.sound.volumeDownKeys = StartupState.volumeDownKeys;
-			FlxG.sound.volumeUpKeys = StartupState.volumeUpKeys;
-            
-			if (FlxG.keys.justPressed.ESCAPE)
-			{
-				MusicBeatState.switchState(new MasterEditorMenu());
-				MusicBeatState.playMenuMusic();
-			}
+			MusicBeatState.switchState(new MasterEditorMenu());
+			MusicBeatState.playMenuMusic();
 		}
 
 		if (UI_box != null){
@@ -91,7 +96,7 @@ class TestState extends MusicBeatState{
 	{
 		var group = new FlxTypedGroup<FlxBasic>();
 
-		group.add(new FlxSprite(0, 0).makeGraphic(FlxG.width, FlxG.height));
+		group.add(new FlxSprite().makeGraphic(FlxG.width, FlxG.height));
 		group.add(UI_box);
 
 		var alphabetInstance = new Alphabet(0, 0, "sowy", true);
@@ -102,9 +107,7 @@ class TestState extends MusicBeatState{
 		var inputText = new FlxUIInputText(10, 40, 230, 'abcdefghijklmnopqrstuvwxyz', 8);
 		var boldCheckbox:FlxUICheckBox = new FlxUICheckBox(10, 70, null, null, "Bold", 100);
 
-		function updateText(){
-			//trace("text: " + inputText.text, " bold: " + boldCheckbox.checked);
-			
+		function updateText(){			
 			alphabetInstance.isBold = boldCheckbox.checked;
 			alphabetInstance.changeText(inputText.text);
 			alphabetInstance.screenCenter();
@@ -113,42 +116,31 @@ class TestState extends MusicBeatState{
 		
 		////
 		inputText.focusGained = function(){
-			updateFunction = function(){
-				FlxG.sound.muteKeys = [];
-				FlxG.sound.volumeDownKeys = [];
-				FlxG.sound.volumeUpKeys = [];
-
-				if (FlxG.keys.justPressed.ENTER)
-				{
-					inputText.focusLost();
-				}
-			}
+			disableVolumeKeys();
+			updateFunction = function(){ if (FlxG.keys.justPressed.ENTER) inputText.focusLost();}
 		};
 		inputText.focusLost = function(){
+			enableVolumeKeys();
+
 			inputText.hasFocus = false;
 			updateFunction = null;
 			updateText();
 		};
 		group.add(inputText);
 		
-		boldCheckbox.checked = true;
-		boldCheckbox.callback = function(){
-			updateText();
-		};
+		boldCheckbox.callback = updateText;
 		group.add(boldCheckbox);
 
 		var woo:Bool = false;
-		var changeButton = new FlxButton(10, 100, "toUpperCase", function()
+		var changeButton = new FlxButton(10, 100, "toUpperCase");
+		changeButton.onUp.callback = function()
 		{
-			if (woo)
-				inputText.text = inputText.text.toLowerCase();
-			else
-				inputText.text = inputText.text.toUpperCase();
-
+			inputText.text = woo ? inputText.text.toLowerCase() : inputText.text.toUpperCase();
+			changeButton.text = woo ? "toUpperCase" : "toLowerCase";
 			woo = !woo;
-
+			
 			updateText();
-		});
+		}
 		group.add(changeButton);
 
 		////
@@ -158,7 +150,7 @@ class TestState extends MusicBeatState{
 	function createTitleUI()
 	{
 		var group = new FlxTypedGroup<FlxBasic>();
-		var titleNames = Paths.getDirs("titles");
+		var titleNames = Paths.getFolders("images/titles");
 		trace(titleNames);
 
 		////

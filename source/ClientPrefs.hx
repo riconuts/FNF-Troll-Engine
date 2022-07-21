@@ -20,10 +20,11 @@ class ClientPrefs {
 	public static var violence:Bool = true;
 	public static var camZooms:Bool = true;
 	public static var hideHud:Bool = false;
-	public static var multicoreLoading:Bool = true;
 	public static var camMovement:Bool = true;
+	// new tgt
 	public static var directionalCam:Bool = false;
 	public static var tgtNotes:Bool = true;
+	public static var multicoreLoading:Bool = false;
 	public static var loadingThreads:Int = Math.floor(Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS"))/2);
 	public static var noteOffset:Int = 0;
 	public static var arrowHSV:Array<Array<Int>> = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];

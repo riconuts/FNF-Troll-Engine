@@ -154,10 +154,10 @@ class TitleState extends MusicBeatState
 
 		swagShader = new ColorSwap();
 
-		var titleNames = Paths.getDirs("titles");
+		var titleNames = Paths.getFolders("images/titles");
 		var titleShit = titleNames[FlxG.random.int(0, titleNames.length-1)];
 		
-		logoBl = new FlxSprite(0);
+		logoBl = new FlxSprite();
 		logoBl.frames = Paths.getSparrowAtlas('titles/${titleShit}/logoBumpin');
 		logoBl.antialiasing = true;
 		logoBl.animation.addByPrefix('bump', 'logo bumpin', 24);
@@ -205,11 +205,6 @@ class TitleState extends MusicBeatState
 		titleText.updateHitbox();
 		// titleText.screenCenter(X);
 		add(titleText);
-
-		var logo:FlxSprite = new FlxSprite().loadGraphic(Paths.image('logo'));
-		logo.screenCenter();
-		logo.antialiasing = ClientPrefs.globalAntialiasing;
-		// add(logo);
 
 		// FlxTween.tween(logoBl, {y: logoBl.y + 50}, 0.6, {ease: FlxEase.quadInOut, type: PINGPONG});
 		// FlxTween.tween(logo, {y: logoBl.y + 50}, 0.6, {ease: FlxEase.quadInOut, type: PINGPONG, startDelay: 0.1});

@@ -37,12 +37,12 @@ class FlxTransitionableState extends FlxState
 
 		if (transIn == null && defaultTransIn != null)
 		{
-      trace("in");
+      		//trace("in");
 			transIn = defaultTransIn;
 		}
 		if (transOut == null && defaultTransOut != null)
 		{
-      trace("out");
+      		//trace("out");
 			transOut = defaultTransOut;
 		}
 
@@ -66,7 +66,7 @@ class FlxTransitionableState extends FlxState
 
 	override public function switchTo(nextState:FlxState):Bool
 	{
-    trace(!hasTransOut, transOutFinished);
+    	//trace(!hasTransOut, transOutFinished);
 		if (!hasTransOut)
 			return true;
 
