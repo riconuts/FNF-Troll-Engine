@@ -39,7 +39,7 @@ class FunkinHScript extends FunkinScript
 
 			FlxG.log.error(e.message);
 
-			var errMsg = "Error parsing hscript: Check line " + parser.line;
+			var errMsg = "Error parsing hscript";//: Check line " + parser.line;
 			Application.current.window.alert(errMsg, "Error!");
 
 			expr = parser.parseString("", name);

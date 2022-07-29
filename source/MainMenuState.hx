@@ -101,7 +101,7 @@ class MainMenuState extends MusicBeatState
 		for (i in 0...optionShit.length)
 		{
 			var offset:Float = 108 - (Math.max(optionShit.length, 4) - 4) * 80;
-			var menuItem:SowyUIButton = new SowyUIButton(51, (i * 140)  + offset);
+			var menuItem:SowyUIButton = new SowyUIButton(51, (i * 140) + offset);
 			
 			menuItem.loadGraphic(Paths.image('newmenuu/mainmenu/menu_' + optionShit[i]));
 			menuItem.antialiasing = ClientPrefs.globalAntialiasing;
@@ -386,7 +386,7 @@ class SowyUIButton extends FlxUIButton
 	public var targetX:Float = 0;
 	public var targetY:Float = 0;
 
-	public function new(x:Float, y:Float)
+	public function new(x:Float = 0, y:Float = 0)
 	{
 		targetX = x;
 		targetY = y;

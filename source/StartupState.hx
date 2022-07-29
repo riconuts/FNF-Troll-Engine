@@ -21,7 +21,7 @@ class StartupState extends MusicBeatState
 		// Just to load a mod on start up if ya got one. For mods that change the menu music and bg
 		WeekData.loadTheFirstEnabledMod();
         
-        FlxG.game.focusLostFramerate = 60;
+        //FlxG.game.focusLostFramerate = 60;
 		FlxG.sound.muteKeys = muteKeys;
 		FlxG.sound.volumeDownKeys = volumeDownKeys;
 		FlxG.sound.volumeUpKeys = volumeUpKeys;
@@ -57,13 +57,10 @@ class StartupState extends MusicBeatState
             FlxG.fullscreen = FlxG.save.data.fullscreen;
         }
 
-        if(FlxG.save.data.flashing == null && !FlashingState.leftState){
+        if(FlxG.save.data.flashing == null){
 			MusicBeatState.switchState(new FlashingState());
         }else{
-            new FlxTimer().start(1, function(tmr:FlxTimer)
-            {
-                MusicBeatState.switchState(new TitleState());
-            });
+            MusicBeatState.switchState(new TitleState());
         }
     }
 }
