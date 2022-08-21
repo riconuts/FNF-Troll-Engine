@@ -32,20 +32,18 @@ class StoryMenuState extends MusicBeatState
 {
 	public static var weekCompleted:Map<String, Bool> = new Map<String, Bool>();
 
-	var chapterSelectPositions:Array<Array<Int>> = [
+	final chapterSelectPositions:Array<Array<Int>> = [ // on screen positions for the chapter options
 		[51, 109], [305, 109], [542, 109], [788, 109], [1034, 109],
 		[51, 417], [305, 417], [542, 417], [788, 417], [1034, 417]
 	];
-	var YELLOW = FlxColor.fromRGB(255, 242, 0);
 
-	var selectMenu = new FlxTypedGroup<FlxBasic>();
-	var funkyRectangle = new FlxShapeBox(0, 0, 206, 206, {thickness: 3, color: FlxColor.fromRGB(255, 242, 0)},
-	FlxColor.fromRGB(0, 0, 0, 255));
+	var mainMenu = new FlxTypedGroup<FlxBasic>(); // the main menu where you select achapter!
+	var funkyRectangle = new FlxShapeBox(0, 0, 206, 206, {thickness: 3, color: FlxColor.fromRGB(255, 242, 0)}, FlxColor.BLACK); // cool rectanlge used for transitions
 
-	var doingTransition = false;
-	var curSubMenu:FlxTypedGroup<FlxBasic>;
-	var lastSubMenu:FlxTypedGroup<FlxBasic>;
-	var lastButton:SowyChapterOption;
+	var doingTransition = false; // to prevent unintended behaviour
+	var curSubMenu:FlxTypedGroup<FlxBasic>; // to where to go back
+	var lastSubMenu:FlxTypedGroup<FlxBasic>; // to reuse stuff :)
+	var lastButton:SowyChapterOption; // to know what to reuse :D
 
 	function weekIsLocked(name:String):Bool {
 		var leWeek:WeekData = WeekData.weeksLoaded.get(name);
@@ -66,8 +64,7 @@ class StoryMenuState extends MusicBeatState
 		WeekData.reloadWeekFiles(true);
 
 		var chapN:Int = -1;
-		for (daWeek in WeekData.weeksList)
-		{
+		for (daWeek in WeekData.weeksList){
 			var weekFile:WeekData = WeekData.weeksLoaded.get(daWeek);
 			var isLocked:Bool = weekIsLocked(daWeek);
 			
@@ -84,6 +81,7 @@ class StoryMenuState extends MusicBeatState
 			newWeek.loadGraphic(previewImage);
 
 			var yellowBorder = new FlxShapeBox(pos[0] - 3, pos[1] - 3, 200, 200, {thickness: 6, color: FlxColor.fromRGB(255, 242, 0)}, FlxColor.BLACK);
+			var textTitle = new FlxText(pos[0]-3, pos[1]-24, 206, weekFile.weekName, 12);
 
 			if (isLocked){
 				newWeek.onUp.callback = function(){
@@ -101,11 +99,12 @@ class StoryMenuState extends MusicBeatState
 				}
 			}
 
-			selectMenu.add(yellowBorder);
-			selectMenu.add(newWeek);
+			mainMenu.add(textTitle);
+			mainMenu.add(yellowBorder);
+			mainMenu.add(newWeek);
 		}
 		
-		add(selectMenu);
+		add(mainMenu);
 		funkyRectangle.visible = false;
 		add(funkyRectangle);
 		
@@ -135,11 +134,11 @@ class StoryMenuState extends MusicBeatState
 	}
 
 	function openWeekMenu(chapterOption:SowyChapterOption){
-		funkyRectangle.setPosition(chapterOption.x, chapterOption.y);
-		
-		funkyRectangle.visible = true;
-
 		doingTransition = true;
+
+		funkyRectangle.setPosition(chapterOption.x, chapterOption.y);
+		funkyRectangle.visible = true;
+		
 		FlxTween.tween(funkyRectangle, {
 			x: 10,
 			y: 10,
@@ -154,7 +153,7 @@ class StoryMenuState extends MusicBeatState
 			onComplete: function(twn){
 				doingTransition = false;
 				
-				remove(selectMenu);
+				remove(mainMenu);
 
 				var lastWeekFile:WeekData = null;
 
@@ -177,8 +176,8 @@ class StoryMenuState extends MusicBeatState
 	function closeWeekMenu(){
 		doingTransition = true;
 
-		remove(lastSubMenu);
-		add(selectMenu);
+		add(mainMenu);
+		remove(lastSubMenu, true);
 		
 		FlxTween.tween(funkyRectangle, {
 			x: lastButton.x - 3,

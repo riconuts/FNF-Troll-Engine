@@ -211,7 +211,12 @@ class PlayState extends MusicBeatState
 	public var gfSpeed:Int = 1;
 	public var displayedHealth:Float = 1;
 	public var health(default, set):Float = 1;
-	function set_health(value:Float) return displayedHealth = value;
+	function set_health(value:Float){
+		displayedHealth = value;
+		health = value;
+		return value;
+	}
+		
 	public var combo:Int = 0;
 
 	private var healthBarBG:AttachedSprite;
@@ -2709,7 +2714,7 @@ class PlayState extends MusicBeatState
 		if (health > 2)
 			health = 2;
 
-		var percent = (health / 2) * 100;
+		var percent = (displayedHealth / 2) * 100;
 		if (percent < 20)
 			iconP1.animation.curAnim.curFrame = 1;
 		else
