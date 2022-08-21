@@ -99,7 +99,7 @@ class PlayState extends MusicBeatState
 	public static var STRUM_X = 42;
 	public static var STRUM_X_MIDDLESCROLL = -278;
 	public static var arrowSkin:String = '';
-	public static var ratingStuff:Array<Dynamic> = [
+	public static var ratingStuff:Array<Array<Dynamic>> = [
 		['You Suck!', 0.2], //From 0% to 19%
 		['Shit', 0.4], //From 20% to 39%
 		['Bad', 0.5], //From 40% to 49%
@@ -209,8 +209,9 @@ class PlayState extends MusicBeatState
 	private var curSong:String = "";
 
 	public var gfSpeed:Int = 1;
-	public var health:Float = 1;
 	public var displayedHealth:Float = 1;
+	public var health(default, set):Float = 1;
+	function set_health(value:Float) return displayedHealth = value;
 	public var combo:Int = 0;
 
 	private var healthBarBG:AttachedSprite;
@@ -2633,8 +2634,6 @@ class PlayState extends MusicBeatState
 				boyfriendIdleTime = 0;
 			}
 		}
-
-		displayedHealth = health;
 
 		for(key in notetypeScripts.keys()){
 			var script = notetypeScripts.get(key);

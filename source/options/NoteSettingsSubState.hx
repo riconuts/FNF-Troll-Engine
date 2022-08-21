@@ -34,7 +34,7 @@ class NoteSettingsSubState extends BaseOptionsMenu
 	public function new()
 	{
 		title = 'Notes';
-		rpcTitle = 'Note Settings Menu'; //for Discord Rich Presence
+		//rpcTitle = 'Note Settings Menu'; //for Discord Rich Presence
 
 		var option:Option = new Option('Note Skin', //Name
 			'Changes how notes look. Quants change colour depending on the beat it\'s at, while vanilla is normal FNF', //Description
