@@ -4859,38 +4859,50 @@ class PlayState extends MusicBeatState
 	#end
 
 	// SOWY: shader system from andromeda or V3 idrk
-	private var shaderMap:Map<FlxCamera, Array<ShaderFilter>>;
+	private var camShaders = [];
+	private var hudShaders = [];
+	private var overlayShaders = [];
 
-	public function addCameraEffect(effect:openfl.filters.ShaderFilter, ?camera:FlxCamera)
+	public function addCameraEffect(effect:ShaderEffect)
 	{
-		var camera = camera != null ? camera : camGame;
-		var camShaders = shaderMap.get(camera);
 		camShaders.push(effect);
-
-		var newCamEffects:Array<BitmapFilter> = []; // shut up
+		var newCamEffects:Array<BitmapFilter> = []; // IT SHUTS HAXE UP IDK WHY BUT WHATEVER IDK WHY I CANT JUST ARRAY<SHADERFILTER>
 		for (i in camShaders)
 		{
 			newCamEffects.push(new ShaderFilter(i.shader));
 		}
-
-		shaderMap.set(camera, camShaders);
 		PlayState.instance.camGame.setFilters(newCamEffects);
 	}
-	
-	public function removeCameraEffect(effect:openfl.filters.ShaderFilter, ?camera:FlxCamera)
+	public function removeCameraEffect(effect:ShaderEffect)
 	{
-		var camera = camera != null ? camera : camGame;
-		var camShaders = shaderMap.get(camera);
 		camShaders.remove(effect);
-
 		var newCamEffects:Array<BitmapFilter> = [];
 		for (i in camShaders)
 		{
 			newCamEffects.push(new ShaderFilter(i.shader));
 		}
-
-		shaderMap.set(camera, camShaders);
 		PlayState.instance.camGame.setFilters(newCamEffects);
+	}
+
+	public function addHUDEffect(effect:ShaderEffect)
+	{
+		hudShaders.push(effect);
+		var newCamEffects:Array<BitmapFilter> = []; // IT SHUTS HAXE UP IDK WHY BUT WHATEVER IDK WHY I CANT JUST ARRAY<SHADERFILTER>
+		for (i in hudShaders)
+		{
+			newCamEffects.push(new ShaderFilter(i.shader));
+		}
+		PlayState.instance.camHUD.setFilters(newCamEffects);
+	}
+	public function removeHUDEffect(effect:ShaderEffect)
+	{
+		hudShaders.remove(effect);
+		var newCamEffects:Array<BitmapFilter> = [];
+		for (i in hudShaders)
+		{
+			newCamEffects.push(new ShaderFilter(i.shader));
+		}
+		PlayState.instance.camHUD.setFilters(newCamEffects);
 	}
 	//
 

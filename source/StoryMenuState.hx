@@ -156,9 +156,13 @@ class StoryMenuState extends MusicBeatState
 				
 				remove(selectMenu);
 
-				if (lastButton.weekFile != chapterOption.weekFile){
-					if (lastButton != null) // NOR
-						lastSubMenu.destroy();
+				var lastWeekFile:WeekData = null;
+
+				if (lastButton != null){
+					lastWeekFile = lastButton.weekFile;
+					lastSubMenu.destroy();
+				}
+				if (lastWeekFile != chapterOption.weekFile){
 					lastSubMenu = makeWeekMenu(chapterOption.weekFile);	
 				}
 				add(lastSubMenu);
