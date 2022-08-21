@@ -149,6 +149,7 @@ class ChartingState extends MusicBeatState
 
 	var tempBpm:Float = 0;
 
+	var tracks:Array<FlxSound> = [];
 	var vocals:FlxSound = null;
 
 	var leftIcon:HealthIcon;
@@ -240,7 +241,8 @@ class ChartingState extends MusicBeatState
 				gfVersion: 'gf',
 				speed: 1,
 				stage: 'stage',
-				validScore: false
+				validScore: false,
+				extraTracks: []
 			};
 			addSection();
 			PlayState.SONG = _song;
@@ -266,12 +268,12 @@ class ChartingState extends MusicBeatState
 		waveformSprite = new FlxSprite(GRID_SIZE, 0).makeGraphic(FlxG.width, FlxG.height, 0x00FFFFFF);
 		add(waveformSprite);
 
-		var eventIcon:FlxSprite = new FlxSprite(-GRID_SIZE - 5, -90).loadGraphic(Paths.image('eventArrow'));
+		var eventIcon:FlxSprite = new FlxSprite(-GRID_SIZE - 5, 10).loadGraphic(Paths.image('eventArrow'));
 		leftIcon = new HealthIcon('bf');
 		rightIcon = new HealthIcon('dad');
-		eventIcon.scrollFactor.set(1, 1);
-		leftIcon.scrollFactor.set(1, 1);
-		rightIcon.scrollFactor.set(1, 1);
+		eventIcon.scrollFactor.set(1, 0);
+		leftIcon.scrollFactor.set(1, 0);
+		rightIcon.scrollFactor.set(1, 0);
 
 		eventIcon.setGraphicSize(30, 30);
 		leftIcon.setGraphicSize(0, 45);
@@ -281,8 +283,8 @@ class ChartingState extends MusicBeatState
 		add(leftIcon);
 		add(rightIcon);
 
-		leftIcon.setPosition(GRID_SIZE + 10, -100);
-		rightIcon.setPosition(GRID_SIZE * 5.2, -100);
+		leftIcon.setPosition(GRID_SIZE + 10, 0);
+		rightIcon.setPosition(GRID_SIZE * 5.2, 0);
 
 		curRenderedSustains = new FlxTypedGroup<FlxSprite>();
 		curRenderedNotes = new FlxTypedGroup<Note>();
@@ -373,7 +375,7 @@ class ChartingState extends MusicBeatState
 		for (i in 0...tipTextArray.length) {
 			var tipText:FlxText = new FlxText(UI_box.x, UI_box.y + UI_box.height + 8, 0, tipTextArray[i], 16);
 			tipText.y += i * 12;
-			tipText.setFormat(Paths.font("vcr.ttf"), 14, FlxColor.WHITE, LEFT/*, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK*/);
+			tipText.setFormat(Paths.font("calibri.ttf"), 14, FlxColor.WHITE, LEFT/*, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK*/);
 			//tipText.borderSize = 2;
 			tipText.scrollFactor.set();
 			add(tipText);
@@ -933,11 +935,12 @@ class ChartingState extends MusicBeatState
 
 		var directories:Array<String> = [];
 
+		directories.push(Paths.getPreloadPath('notetypes/'));
 		#if MODS_ALLOWED
-		directories.push(Paths.mods('custom_notetypes/'));
-		directories.push(Paths.mods(Paths.currentModDirectory + '/custom_notetypes/'));
+		directories.push(Paths.mods('notetypes/'));
+		directories.push(Paths.mods(Paths.currentModDirectory + '/notetypes/'));
 		for(mod in Paths.getGlobalMods())
-			directories.push(Paths.mods(mod + '/custom_notetypes/'));
+			directories.push(Paths.mods(mod + '/notetypes/'));
 		#end
 
 		var exts:Array<String> = [
@@ -1012,11 +1015,12 @@ class ChartingState extends MusicBeatState
 		var eventPushedMap:Map<String, Bool> = new Map<String, Bool>();
 		var directories:Array<String> = [];
 
+		directories.push(Paths.getPreloadPath('events/'));
 		#if MODS_ALLOWED
-		directories.push(Paths.mods('custom_events/'));
-		directories.push(Paths.mods(Paths.currentModDirectory + '/custom_events/'));
+		directories.push(Paths.mods('events/'));
+		directories.push(Paths.mods(Paths.currentModDirectory + '/events/'));
 		for(mod in Paths.getGlobalMods())
-			directories.push(Paths.mods(mod + '/custom_events/'));
+			directories.push(Paths.mods(mod + '/events/'));
 		#end
 
 		for (i in 0...directories.length) {
@@ -1342,6 +1346,19 @@ class ChartingState extends MusicBeatState
 			vocals.loadEmbedded(file);
 			FlxG.sound.list.add(vocals);
 		}
+
+		for (newTrackName in _song.extraTracks){
+			var file = Paths.track(currentSongName, newTrackName);
+			
+			if (Std.isOfType(file, Sound) || OpenFlAssets.exists(file))
+			{
+				var nuTrack = new FlxSound();
+				nuTrack.loadEmbedded(file);
+				FlxG.sound.list.add(nuTrack);
+				tracks.push(nuTrack);
+			}
+		}
+
 		generateSong();
 		FlxG.sound.music.pause();
 		Conductor.songPosition = sectionStartTime();
@@ -1361,11 +1378,18 @@ class ChartingState extends MusicBeatState
 				vocals.pause();
 				vocals.time = 0;
 			}
+			for (track in tracks){
+				track.pause();
+				track.time = 0;
+			}
 			changeSection();
 			curSection = 0;
 			updateGrid();
 			updateSectionUI();
 			vocals.play();
+			for (track in tracks){
+				track.play();
+			}
 		};
 	}
 
@@ -1669,9 +1693,14 @@ class ChartingState extends MusicBeatState
 				PlayState.SONG = _song;
 				FlxG.sound.music.stop();
 				if(vocals != null) vocals.stop();
+				for (track in tracks)
+				{
+					track.stop();
+				}
 
 				//if(_song.stage == null) _song.stage = stageDropDown.selectedLabel;
 				StageData.loadDirectory(_song);
+				PlayState.chartingMode = true;
 				LoadingState.loadAndSwitchState(new PlayState());
 			}
 
@@ -1733,6 +1762,10 @@ class ChartingState extends MusicBeatState
 				{
 					FlxG.sound.music.pause();
 					if(vocals != null) vocals.pause();
+					for (track in tracks)
+					{
+						track.pause();
+					}
 				}
 				else
 				{
@@ -1741,6 +1774,13 @@ class ChartingState extends MusicBeatState
 						vocals.pause();
 						vocals.time = FlxG.sound.music.time;
 						vocals.play();
+					}
+					for (track in tracks)
+					{
+						track.play();
+						track.pause();
+						track.time = FlxG.sound.music.time;
+						track.play();
 					}
 					FlxG.sound.music.play();
 				}
@@ -1761,6 +1801,11 @@ class ChartingState extends MusicBeatState
 				if(vocals != null) {
 					vocals.pause();
 					vocals.time = FlxG.sound.music.time;
+				}
+				for (track in tracks)
+				{
+					track.pause();
+					track.time = FlxG.sound.music.time;
 				}
 			}
 
@@ -1788,6 +1833,11 @@ class ChartingState extends MusicBeatState
 				if(vocals != null) {
 					vocals.pause();
 					vocals.time = FlxG.sound.music.time;
+				}
+				for (track in tracks)
+				{
+					track.pause();
+					track.time = FlxG.sound.music.time;
 				}
 			}
 
@@ -1878,6 +1928,11 @@ class ChartingState extends MusicBeatState
 					if(vocals != null) {
 						vocals.pause();
 						vocals.time = FlxG.sound.music.time;
+					}
+					for (track in tracks)
+					{
+						track.pause();
+						track.time = FlxG.sound.music.time;
 					}
 
 					var dastrum = 0;
@@ -2356,6 +2411,11 @@ class ChartingState extends MusicBeatState
 			vocals.pause();
 			vocals.time = FlxG.sound.music.time;
 		}
+		for (track in tracks)
+		{
+			track.pause();
+			track.time = FlxG.sound.music.time;
+		}
 		updateCurStep();
 
 		updateGrid();
@@ -2389,6 +2449,11 @@ class ChartingState extends MusicBeatState
 				if(vocals != null) {
 					vocals.pause();
 					vocals.time = FlxG.sound.music.time;
+				}
+				for (track in tracks)
+				{
+					track.pause();
+					track.time = FlxG.sound.music.time;
 				}
 				updateCurStep();
 			}
@@ -2547,7 +2612,7 @@ class ChartingState extends MusicBeatState
 				if(typeInt == null) theType = '?';
 
 				var daText:AttachedFlxText = new AttachedFlxText(0, 0, 100, theType, 24);
-				daText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				daText.setFormat(Paths.font("calibri.ttf"), 24, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 				daText.xAdd = -32;
 				daText.yAdd = 6;
 				daText.borderSize = 1;
@@ -2574,7 +2639,7 @@ class ChartingState extends MusicBeatState
 				if(note.eventLength > 1) text = note.eventLength + ' Events:\n' + note.eventName;
 
 				var daText:AttachedFlxText = new AttachedFlxText(0, 0, 400, text, 12);
-				daText.setFormat(Paths.font("vcr.ttf"), 12, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK);
+				daText.setFormat(Paths.font("calibri.ttf"), 12, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK);
 				daText.xAdd = -410;
 				daText.borderSize = 1;
 				if(note.eventLength > 1) daText.yAdd += 8;
@@ -2978,7 +3043,8 @@ class ChartingState extends MusicBeatState
 			player2: _song.player2,
 			gfVersion: _song.gfVersion,
 			stage: _song.stage,
-			validScore: false
+			validScore: false,
+			extraTracks: []
 		};
 		var json = {
 			"song": eventsSong

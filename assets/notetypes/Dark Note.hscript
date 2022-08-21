@@ -1,0 +1,11 @@
+function setupNote(note:Note){
+    note.texture = "DARKNOTE_assets";
+	note.noteSplashTexture = "DARKnoteSplashes";
+	
+	note.canQuant = false;
+	note.colorSwap.hue = 0;
+	note.colorSwap.saturation = 0;
+	note.colorSwap.lightness = 0;
+	
+	note.hitHealth = 0;
+}

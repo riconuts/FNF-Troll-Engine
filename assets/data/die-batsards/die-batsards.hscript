@@ -1,0 +1,90 @@
+// basic shit
+var instance = getInstance();
+
+// zoom shit
+var defaultZoom:Float = instance.defaultCamZoom;
+var zoomed:Bool = false;
+
+function doZoomTween(?zoom:Float = 1, ?duration:Float = 1){
+	trace("do zoom: "+zoom+", duration: "+duration);
+	FlxTween.num(instance.defaultCamZoom, zoom, duration, {ease: FlxEase.quadInOut, onUpdate: function(twn)
+	{
+		instance.defaultCamZoom = twn.value;
+	}});	
+}
+
+function onStepHit(){
+	if (curStep >= 1719 && curStep < 1984 && !zoomed){
+        zoomed = true;
+		trace("omg");
+		doZoomTween(1.25, 1.5);
+    }else if (curStep >= 1984 && zoomed){
+        zoomed = false;
+		doZoomTween(0.68, 1.5);
+    }
+}
+
+/*
+function onStepHit(){
+	doZoomTween(1.3, 1.5, FlxEase.quadInOut);
+	doZoomTween(defaultCamZoom, 1.5, FlxEase.quadInOut);
+	
+	if (curStep){
+	
+	}
+
+    if(not getOption"noChars")then
+        local setChar='';
+        for i = 1, #charSteps do
+            local v= charSteps[i]
+            local step = v.step;
+            local char = v.char;
+            if(curStep<step)then
+                break;
+            end
+            setChar=char;
+        end
+
+        if(dad.curCharacter~=setChar and setChar~='')then
+            dad:changeCharacter(setChar)
+        end
+        
+        if(step==1719 and dad.curCharacter == 'shadow-crazy')then
+            setVar("focus","dad")
+            dad:playAnim("die")
+        end
+
+        if(step==1728)then
+            setVar("focus", oldFocus)
+        end
+
+        if(step==2730)then
+            setVar("focus",getVar"turn")
+        end
+    end
+	
+    if(step>=1984 and step<2016 and getVar"focus"~='bf')then
+        setVar("focus","bf")
+    end
+    if(step==1989)then
+        bf.disabledDance=true;
+        bf:playAnim("fuckingdies")
+    end
+    if(step>=2024 and getVar"focus"~='center')then
+        setVar("focus","center")
+    end
+	
+	
+	
+    for s = oStep, step do
+        if(getOption"ruinMod")then
+            if(s==448 or s==1215 or s==1728)then
+                ruin(true)
+            end
+            if(s==704 or s==1472 or s==1984)then
+                ruin(false)
+            end
+        end
+    end
+}
+*/

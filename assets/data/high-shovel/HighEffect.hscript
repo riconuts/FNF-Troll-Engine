@@ -1,0 +1,77 @@
+var instance:Dynamic = null;
+
+importClass("Shaders");
+var highShader = new HighEffect();
+
+var getHigh:Bool = true;
+var modchart:Bool = true;
+
+var justHowHighAreYou:Float = 25;
+var detailScale:Float = ClientPrefs.lowQuality ? 0.5 : 1;
+
+var smokeOverlay = new FlxSprite().makeGraphic(1,1, -8355712);
+smokeOverlay.scale.set(1280*2, 720*2);
+smokeOverlay.alpha = 0;
+
+function update(elapsed:Float){
+	highShader.update(elapsed);
+	highShader.effectiveness = getHigh ? (justHowHighAreYou / 100) / detailScale : 0;
+	highShader.focusDetail = 12 * detailScale;
+}
+
+function onGameOver(){
+	if (highShader != null){
+		instance.removeHUDEffect(highShader);
+		instance.removeCameraEffect(highShader);
+	}
+}
+
+function onStepHit(){
+	if (curStep == 1152){
+		FlxTween.tween(smokeOverlay, {alpha: 0.35}, (Conductor.stepCrochet * 64 / 1000), {ease: FlxEase.quartInOut});
+		
+		FlxTween.num(
+			justHowHighAreYou, 
+			100, 
+			(1220 - 1152) * (Conductor.stepCrochet / 1000), 
+			{ease: FlxEase.quadOut, onUpdate: function(twn)
+				{
+					justHowHighAreYou = twn.value;
+				}
+			}
+		);
+	}
+}
+
+function onCreatePost(){
+	instance = getInstance();
+	instance.addCameraEffect(highShader);
+	instance.addHUDEffect(highShader);
+	
+	smokeOverlay.cameras = [instance.camOverlay];
+	instance.add(smokeOverlay);
+}
+
+		/*
+		if (modchart){
+			FlxTween.num(sudden, 100, (1220-1152) * Conductor.stepCrochet, {ease: FlxEase.quadOut, onUpdate: function(twn)
+			{
+				sudden = twn.value;
+			}});
+			
+			FlxTween.num(suddenOffset, 25, (1220-1152) * Conductor.stepCrochet, {ease: FlxEase.quadOut, onUpdate: function(twn)
+			{
+				suddenOffset = twn.value;
+			}});
+			
+			FlxTween.num(tipsyC, 25, (1156-1152) * Conductor.stepCrochet, {ease: FlxEase.quadOut, onUpdate: function(twn)
+			{
+				tipsyC = twn.value;
+			}});
+			
+			FlxTween.num(drunkC, 25, (1156-1152) * Conductor.stepCrochet, {ease: FlxEase.quadOut, onUpdate: function(twn)
+			{
+				drunkC = twn.value;
+			}});
+		}
+		*/

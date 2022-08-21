@@ -1,124 +1,147 @@
 {
 	"animations": [
 		{
-			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
-			"anim": "idle",
+			"loop": false,
 			"fps": 24,
-			"name": "boyfriend idle",
-			"indices": []
+			"anim": "idle",
+			"indices": [],
+			"name": "boyfriend idle"
 		},
 		{
-			"loop": false,
 			"offsets": [
-				-4,
+				4,
 				0
 			],
-			"anim": "singLEFT",
+			"loop": false,
 			"fps": 24,
-			"name": "boyfriend left0",
-			"indices": []
+			"anim": "singLEFT",
+			"indices": [],
+			"name": "boyfriend left0"
 		},
 		{
-			"loop": false,
 			"offsets": [
 				8,
 				0
 			],
-			"anim": "singDOWN",
+			"loop": false,
 			"fps": 24,
-			"name": "boyfriend down0",
-			"indices": []
+			"anim": "singDOWN",
+			"indices": [],
+			"name": "boyfriend down0"
 		},
 		{
-			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
-			"anim": "singUP",
+			"loop": false,
 			"fps": 24,
-			"name": "boyfriend up0",
-			"indices": []
+			"anim": "singUP",
+			"indices": [],
+			"name": "boyfriend up0"
 		},
 		{
-			"loop": false,
 			"offsets": [
 				-7,
 				0
 			],
-			"anim": "singRIGHT",
+			"loop": false,
 			"fps": 24,
-			"name": "boyfriend right0",
-			"indices": []
+			"anim": "singRIGHT",
+			"indices": [],
+			"name": "boyfriend right0"
 		},
 		{
-			"loop": false,
 			"offsets": [
 				1,
 				0
 			],
-			"anim": "singLEFTmiss",
+			"loop": false,
 			"fps": 24,
-			"name": "boyfriend left-miss",
-			"indices": []
+			"anim": "singLEFTmiss",
+			"indices": [],
+			"name": "boyfriend left-miss"
 		},
 		{
-			"loop": false,
 			"offsets": [
 				9,
-				-7
+				-3
 			],
-			"anim": "singDOWNmiss",
+			"loop": false,
 			"fps": 24,
-			"name": "boyfriend down-miss",
-			"indices": []
+			"anim": "singDOWNmiss",
+			"indices": [],
+			"name": "boyfriend down-miss"
 		},
 		{
-			"loop": false,
 			"offsets": [
-				0,
+				-1,
 				-1
 			],
-			"anim": "singUPmiss",
+			"loop": false,
 			"fps": 24,
-			"name": "boyfriend up-miss",
-			"indices": []
+			"anim": "singUPmiss",
+			"indices": [],
+			"name": "boyfriend up-miss"
 		},
 		{
-			"loop": false,
 			"offsets": [
-				-5,
+				-2,
 				0
 			],
-			"anim": "singRIGHTmiss",
+			"loop": false,
 			"fps": 24,
-			"name": "boyfriend right-miss",
-			"indices": []
+			"anim": "singRIGHTmiss",
+			"indices": [],
+			"name": "boyfriend right-miss"
 		},
 		{
-			"loop": false,
 			"offsets": [
 				0,
 				-4
 			],
-			"anim": "hey",
+			"loop": false,
+			"cameraOffset": [
+				0,
+				0
+			],
 			"fps": 24,
-			"name": "boyfriend HEY!!",
-			"indices": []
+			"anim": "hey",
+			"indices": [],
+			"name": "boyfriend HEY!!"
 		},
 		{
 			"loop": false,
+			"cameraOffset": [
+				0,
+				0
+			],
 			"offsets": [
-				30,
-				10
+				54,
+				21
 			],
 			"anim": "dodge",
 			"fps": 24,
 			"name": "boyfriend dodge",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"cameraOffset": [
+				0,
+				0
+			],
+			"offsets": [
+				-10,
+				0
+			],
+			"anim": "fuckingdies",
+			"fps": 24,
+			"name": "boyfriend die-batsard",
 			"indices": []
 		}
 	],
@@ -126,7 +149,7 @@
 	"image": "characters/BOYFRIEND",
 	"position": [
 		0,
-		148
+		138
 	],
 	"healthicon": "bf",
 	"flip_x": true,

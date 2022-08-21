@@ -3,7 +3,7 @@
 		{
 			"loop": false,
 			"offsets": [
-				3,
+				0,
 				0
 			],
 			"fps": 24,
@@ -14,7 +14,7 @@
 		{
 			"loop": false,
 			"offsets": [
-				0,
+				-8,
 				4
 			],
 			"fps": 24,
@@ -25,7 +25,7 @@
 		{
 			"loop": false,
 			"offsets": [
-				0,
+				-3,
 				0
 			],
 			"fps": 24,
@@ -36,7 +36,7 @@
 		{
 			"loop": false,
 			"offsets": [
-				-1,
+				6,
 				0
 			],
 			"fps": 24,
@@ -48,7 +48,7 @@
 			"loop": false,
 			"offsets": [
 				0,
-				0
+				2
 			],
 			"fps": 24,
 			"anim": "singDOWN",
@@ -60,9 +60,9 @@
 	"image": "characters/sonic_proving",
 	"position": [
 		0,
-		100
+		-80
 	],
-	"healthicon": "bf",
+	"healthicon": "sonic-mad",
 	"flip_x": false,
 	"healthbar_colors": [
 		0,
@@ -74,5 +74,5 @@
 		0
 	],
 	"sing_duration": 4,
-	"scale": 1
+	"scale": 0.9
 }

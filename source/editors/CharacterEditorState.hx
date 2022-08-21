@@ -3,18 +3,14 @@ package editors;
 #if desktop
 import Discord.DiscordClient;
 #end
+import Character;
 import animateatlas.AtlasFrameMaker;
+import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.FlxState;
-import flixel.FlxCamera;
-import flixel.input.keyboard.FlxKey;
 import flixel.addons.display.FlxGridOverlay;
-import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.graphics.FlxGraphic;
-import flixel.text.FlxText;
-import flixel.util.FlxColor;
 import flixel.addons.ui.FlxInputText;
 import flixel.addons.ui.FlxUI9SliceSprite;
 import flixel.addons.ui.FlxUI;
@@ -23,22 +19,26 @@ import flixel.addons.ui.FlxUIInputText;
 import flixel.addons.ui.FlxUINumericStepper;
 import flixel.addons.ui.FlxUITabMenu;
 import flixel.addons.ui.FlxUITooltip.FlxUITooltipStyle;
+import flixel.animation.FlxAnimation;
+import flixel.graphics.FlxGraphic;
+import flixel.group.FlxGroup.FlxTypedGroup;
+import flixel.input.keyboard.FlxKey;
+import flixel.system.debug.interaction.tools.Pointer.GraphicCursorCross;
+import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.ui.FlxSpriteButton;
-import openfl.net.FileReference;
+import flixel.util.FlxColor;
+import haxe.Json;
+import lime.system.Clipboard;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
-import haxe.Json;
-import Character;
-import flixel.system.debug.interaction.tools.Pointer.GraphicCursorCross;
-import lime.system.Clipboard;
-import flixel.animation.FlxAnimation;
+import openfl.net.FileReference;
 
+using StringTools;
 #if MODS_ALLOWED
 import sys.FileSystem;
 #end
 
-using StringTools;
 
 /**
 	*DEBUG MODE
@@ -129,7 +129,7 @@ class CharacterEditorState extends MusicBeatState
 		dumbTexts.cameras = [camHUD];
 
 		textAnim = new FlxText(300, 16);
-		textAnim.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		textAnim.setFormat(Paths.font("calibri.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		textAnim.borderSize = 1;
 		textAnim.size = 32;
 		textAnim.scrollFactor.set();
@@ -221,63 +221,9 @@ class CharacterEditorState extends MusicBeatState
 		var playerXDifference = 0;
 		if(char.isPlayer) playerXDifference = 670;
 
-		if(onPixelBG) {
-			var playerYDifference:Float = -296;
-			if(char.isPlayer) {
-				playerXDifference = 470;
-				playerYDifference = -368;
-			}
-			/*
-			var bgSky:BGSprite = new BGSprite('weeb/weebSky', OFFSET_X - (playerXDifference / 2) - 300, 0 - playerYDifference, 0.1, 0.1);
-			bgLayer.add(bgSky);
-			bgSky.antialiasing = false;
-
-			var repositionShit = -200 + OFFSET_X - playerXDifference;
-
-			var bgSchool:BGSprite = new BGSprite('weeb/weebSchool', repositionShit, -playerYDifference + 6, 0.6, 0.90);
-			bgLayer.add(bgSchool);
-			bgSchool.antialiasing = false;
-
-			var bgStreet:BGSprite = new BGSprite('weeb/weebStreet', repositionShit, -playerYDifference, 0.95, 0.95);
-			bgLayer.add(bgStreet);
-			bgStreet.antialiasing = false;
-
-			var widShit = Std.int(bgSky.width * 6);
-			var bgTrees:FlxSprite = new FlxSprite(repositionShit - 380, -800 - playerYDifference);
-			bgTrees.frames = Paths.getPackerAtlas('weeb/weebTrees');
-			bgTrees.animation.add('treeLoop', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18], 12);
-			bgTrees.animation.play('treeLoop');
-			bgTrees.scrollFactor.set(0.85, 0.85);
-			bgLayer.add(bgTrees);
-			bgTrees.antialiasing = false;
-
-			bgSky.setGraphicSize(widShit);
-			bgSchool.setGraphicSize(widShit);
-			bgStreet.setGraphicSize(widShit);
-			bgTrees.setGraphicSize(Std.int(widShit * 1.4));
-
-			bgSky.updateHitbox();
-			bgSchool.updateHitbox();
-			bgStreet.updateHitbox();
-			bgTrees.updateHitbox();*/
-			var greenHill = new BGSprite('SonicP2/GreenHill', (-428.5 + 50 + 700) + OFFSET_X - playerXDifference, (-449.35 + 25 + 105 + 50) - playerYDifference, 1, 1);
-			greenHill.antialiasing=false;
-			greenHill.scale.set(8, 8);
-			greenHill.pixelPerfectPosition = true;
-			greenHill.x = CoolUtil.quantize(greenHill.x, 8);
-			greenHill.y = CoolUtil.quantize(greenHill.y, 8);
-			bgLayer.add(greenHill);
-			changeBGbutton.text = "Regular BG";
-		} else {
-			var bg:BGSprite = new BGSprite('stageback', -600 + OFFSET_X - playerXDifference, -300, 0.9, 0.9);
-			bgLayer.add(bg);
-
-			var stageFront:BGSprite = new BGSprite('stagefront', -650 + OFFSET_X - playerXDifference, 500, 0.9, 0.9);
-			stageFront.setGraphicSize(Std.int(stageFront.width * 1.1));
-			stageFront.updateHitbox();
-			bgLayer.add(stageFront);
-			changeBGbutton.text = "Pixel BG";
-		}
+		var greenHill = new FlxSprite();
+		greenHill.makeGraphic(FlxG.width, FlxG.height);
+		bgLayer.add(greenHill);
 	}
 
 	/*var animationInputText:FlxUIInputText;
@@ -1183,6 +1129,17 @@ class CharacterEditorState extends MusicBeatState
 			}
 
 			if (FlxG.keys.justPressed.R) {
+				if (char.isPlayer) {
+					camFollow.x = char.getMidpoint().x - 100;
+					camFollow.y = char.getMidpoint().y - 100;
+					camFollow.x -= char.cameraPosition[0];
+					camFollow.y += char.cameraPosition[1];
+				}else{
+					camFollow.x = char.getMidpoint().x - 100;
+					camFollow.y = char.getMidpoint().y - 100;
+					camFollow.x -= char.cameraPosition[0];
+					camFollow.y += char.cameraPosition[1];
+				}
 				FlxG.camera.zoom = 1;
 			}
 

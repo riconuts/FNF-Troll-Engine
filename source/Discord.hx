@@ -3,12 +3,12 @@ package;
 import Sys.sleep;
 import discord_rpc.DiscordRpc;
 
+using StringTools;
 #if LUA_ALLOWED
 import llua.Lua;
 import llua.State;
 #end
 
-using StringTools;
 
 class DiscordClient
 {
@@ -17,7 +17,7 @@ class DiscordClient
 	{
 		trace("Discord Client starting...");
 		DiscordRpc.start({
-			clientID: "863222024192262205",
+			clientID: "1009523643392475206",
 			onReady: onReady,
 			onError: onError,
 			onDisconnected: onDisconnected

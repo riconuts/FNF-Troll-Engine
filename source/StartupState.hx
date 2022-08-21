@@ -52,15 +52,12 @@ class StartupState extends MusicBeatState
 		Paths.music('freakyIntro');
 		Paths.music('freakyMenu');
 
-        if(FlxG.save.data != null && FlxG.save.data.fullscreen)
-        {
+		/*
+        if(FlxG.save.data != null && FlxG.save.data.fullscreen){
             FlxG.fullscreen = FlxG.save.data.fullscreen;
         }
-
-        if(FlxG.save.data.flashing == null){
-			MusicBeatState.switchState(new FlashingState());
-        }else{
-            MusicBeatState.switchState(new TitleState());
-        }
+		*/
+		
+		MusicBeatState.switchState(new TitleState());
     }
 }

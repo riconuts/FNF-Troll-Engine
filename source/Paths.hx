@@ -32,8 +32,8 @@ class Paths
 	#if MODS_ALLOWED
 	public static var ignoreModFolders:Array<String> = [
 		'characters',
-		'custom_events',
-		'custom_notetypes',
+		'events',
+		'notetypes',
 		'data',
 		'songs',
 		'music',
@@ -233,6 +233,14 @@ class Paths
 		return inst;
 	}
 
+	inline static public function track(song:String, track:String):Any
+	{
+		var songKey:String = '${formatToSongPath(song)}/${track}';
+		var track = returnSound('songs', songKey);
+		return track;
+	}
+
+
 	inline static public function voicesAlt(song:String):Any
 	{
 		var songKey:String = '${formatToSongPath(song)}/VoicesAlt';
@@ -414,7 +422,7 @@ class Paths
 
 	#if MODS_ALLOWED
 	inline static public function mods(key:String = '') {
-		return 'mods/' + key;
+		return 'dlc/' + key;
 	}
 
 	inline static public function modsFont(key:String) {
@@ -473,7 +481,7 @@ class Paths
 				return fileToCheck;
 
 		}
-		return 'mods/' + key;
+		return 'dlc/' + key;
 	}
 
 	public static var globalMods:Array<String> = [];
@@ -538,9 +546,9 @@ class Paths
 		/*
 		#if MODS_ALLOWED
 		if (currentModDirectory != null){
-			for (folder in FileSystem.readDirectory('mods/${currentModDirectory}/${dir}'))
+			for (folder in FileSystem.readDirectory('dlc/${currentModDirectory}/${dir}'))
 			{
-				if (!folder.contains(".") && FileSystem.isDirectory('mods/${currentModDirectory}/${dir}/${folder}'))
+				if (!folder.contains(".") && FileSystem.isDirectory('dlc/${currentModDirectory}/${dir}/${folder}'))
 					folders.push(folder);
 			}
 		}

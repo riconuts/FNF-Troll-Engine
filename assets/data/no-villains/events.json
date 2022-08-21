@@ -1,10 +1,9 @@
 {
 	"song": {
-		"speed": 3.1,
-		"stage": "hillzoneSonic",
-		"player1": "bf-better",
+		"speed": 3.2,
+		"stage": "stage1",
+		"player1": "bf",
 		"player2": "sonic",
-		"player3": null,
 		"events": [
 			[
 				63300,
@@ -53,6 +52,21 @@
 						"Change Character",
 						"dad",
 						"sonic-mad"
+					],
+					[
+						"Tween Zoom",
+						"1.3",
+						"1.5"
+					]
+				]
+			],
+			[
+				144000,
+				[
+					[
+						"Tween Zoom",
+						"",
+						"1.5"
 					]
 				]
 			]
@@ -64,6 +78,6 @@
 		"bpm": 200,
 		"arrowSkin": null,
 		"needsVoices": true,
-		"song": "No-Villains"
+		"song": "no-villains"
 	}
 }

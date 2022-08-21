@@ -62,9 +62,7 @@ class TitleState extends MusicBeatState
 	var wackyImage:FlxSprite;
 
 	var mustUpdate:Bool = false;
-
-	var titleJSON:TitleData;
-
+	
 	public static var updateVersion:String = '';
 
 	override public function create():Void
@@ -75,36 +73,10 @@ class TitleState extends MusicBeatState
 		FlxG.mouse.visible = false;
 		#end
 
-		#if CHECK_FOR_UPDATES
-		if(!closedState) {
-			trace('checking for update');
-			var http = new haxe.Http("https://raw.githubusercontent.com/ShadowMario/FNF-PsychEngine/main/gitVersion.txt");
-
-			http.onData = function (data:String)
-			{
-				updateVersion = data.split('\n')[0].trim();
-				var curVersion:String = MainMenuState.psychEngineVersion.trim();
-				trace('version online: ' + updateVersion + ', your version: ' + curVersion);
-				if(updateVersion != curVersion) {
-					trace('versions arent matching!');
-					mustUpdate = true;
-				}
-			}
-
-			http.onError = function (error) {
-				trace('error: $error');
-			}
-
-			http.request();
-		}
-		#end
-
 		curWacky = FlxG.random.getObject(getIntroTextShit());
 
 		// DEBUG BULLSHIT
 		swagShader = new ColorSwap();
-
-		titleJSON = Json.parse(Paths.getTextFromFile('images/gfDanceTitle.json'));
 
 		if (FlxG.save.data.weekCompleted != null)
 		{
@@ -115,7 +87,7 @@ class TitleState extends MusicBeatState
 		if (!DiscordClient.isInitialized)
 		{
 			DiscordClient.initialize();
-			Application.current.onExit.add (function (exitCode) {
+			Application.current.onExit.add(function (exitCode) {
 				DiscordClient.shutdown();
 			});
 		}
@@ -138,7 +110,7 @@ class TitleState extends MusicBeatState
 
 		MusicBeatState.playMenuMusic(0);
 
-		Conductor.changeBPM(90);//(titleJSON.bpm);
+		Conductor.changeBPM(90);
 		persistentUpdate = true;
 		
 		bg = new TitleStage();
@@ -166,33 +138,19 @@ class TitleState extends MusicBeatState
 		logoBl.scrollFactor.set();
 		logoBl.updateHitbox();
 		logoBl.screenCenter(XY);
-
-		/*
-		gfDance = new FlxSprite(titleJSON.gfx, titleJSON.gfy);
-		gfDance.frames = Paths.getSparrowAtlas('gfDanceTitle');
-		gfDance.animation.addByIndices('danceLeft', 'gfDance', [30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], "", 24, false);
-		gfDance.animation.addByIndices('danceRight', 'gfDance', [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29], "", 24, false);
-		gfDance.antialiasing = ClientPrefs.globalAntialiasing;
-
-		add(gfDance);
-		gfDance.shader = swagShader.shader;
-		*/
 		
 		add(logoBl);
 		logoBl.shader = swagShader.shader;
 
-		titleText = new FlxSprite(titleJSON.startx, titleJSON.starty);
+		titleText = new FlxSprite(100, 576);
 		#if (desktop && MODS_ALLOWED)
-		var path = "mods/" + Paths.currentModDirectory + "/images/titleEnter.png";
-		//trace(path, FileSystem.exists(path));
+		var path = "dlc/" + Paths.currentModDirectory + "/images/titleEnter.png";
 		if (!FileSystem.exists(path)){
-			path = "mods/images/titleEnter.png";
+			path = "dlc/images/titleEnter.png";
 		}
-		//trace(path, FileSystem.exists(path));
 		if (!FileSystem.exists(path)){
 			path = "assets/images/titleEnter.png";
 		}
-		//trace(path, FileSystem.exists(path));
 		titleText.frames = FlxAtlasFrames.fromSparrow(BitmapData.fromFile(path),File.getContent(StringTools.replace(path,".png",".xml")));
 		#else
 

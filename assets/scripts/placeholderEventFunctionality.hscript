@@ -1,0 +1,13 @@
+var instance:Dynamic = null;
+var defaultZoom:Float = instance.defaultCamZoom;
+
+function onCreatePost(){
+	instance = getInstance();
+	for (script in instance.funkyScripts){
+		//trace(script.scriptName +", "+ script.scriptType);
+	}
+}
+
+function onEvent(name:String, value1:String, value2:String){
+	
+}

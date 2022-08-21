@@ -1,0 +1,67 @@
+var instance = getInstance();
+var maxHealth = 2;
+
+function onLoad(){
+}
+
+function setupNote(note:Note){
+    note.texture = "BULLETNOTE_assets";
+	note.noteSplashTexture = "BULLETnoteSplashes"; // reminder to add note splash offsets to the engine (8, 15)
+	
+	note.canQuant = false;
+	note.colorSwap.hue = 0;
+	note.colorSwap.saturation = 0;
+	note.colorSwap.lightness = 0;
+	
+	note.noteSplashHue = 0;
+	note.noteSplashSat = 0;
+	note.noteSplashBrt = 0;
+	
+	note.noAnimation = true;
+	
+	note.hitHealth = 0;
+    note.missHealth = maxHealth/2;
+}
+
+function postSpawnNote(note:Note){
+	note.visible = note.mustPress;
+}
+
+function dadShoot(){
+	var dad = instance.dad;
+	if (dad != null){
+		dad.playAnim("shoot", true);
+		dad.animTimer = 1/24*12;
+	}
+}
+
+function goodNoteHit(note:Note){
+	if (note.rating == "bad")
+		instance.health -= maxHealth/4;
+	else if (note.rating == "shit")
+		instance.health -= maxHealth/3;
+		
+	instance.camGame.shake(0.01, 0.2);
+	dadShoot();
+	
+	var boyfriend = instance.boyfriend;
+	if (boyfriend != null){
+		boyfriend.playAnim("dodge", true);
+		boyfriend.animTimer = 1/24*18;
+	}
+}
+
+function opponentNoteHit(note:Note){
+	dadShoot();
+}
+
+function noteMiss(note:Note){
+    dadShoot();
+	instance.camHUD.shake(0.01, 0.2);
+	instance.camGame.shake(0.01, 0.2);
+	instance.camGame.flash(-65536, 0.2, null, true); // red
+}
+
+function onEvent(?name:String, ?event1:String, ?event2:String){
+	//FlxG.sound.play(Paths.sound(sound), volume);
+}

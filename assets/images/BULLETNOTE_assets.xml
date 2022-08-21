@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="Bullet_Notes.png">
+	<!-- Created with Adobe Animate version 20.0.3.25487 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="blue0000" x="160" y="1" width="85" height="155"/>
+	<SubTexture name="blue hold end0000" x="338" y="1" width="46" height="58"/>
+	<SubTexture name="blue hold piece0000" x="338" y="63" width="46" height="43"/>
+	<SubTexture name="green0000" x="249" y="1" width="85" height="155"/>
+	<SubTexture name="green hold end0000" x="338" y="1" width="46" height="58"/>
+	<SubTexture name="green hold piece0000" x="338" y="63" width="46" height="43"/>
+	<SubTexture name="pruple end hold0000" x="338" y="1" width="46" height="58"/>
+	<SubTexture name="purple0000" x="1" y="1" width="155" height="85"/>
+	<SubTexture name="purple hold piece0000" x="338" y="63" width="46" height="43"/>
+	<SubTexture name="red0000" x="1" y="90" width="155" height="85"/>
+	<SubTexture name="red hold end0000" x="338" y="1" width="46" height="58"/>
+	<SubTexture name="red hold piece0000" x="338" y="63" width="46" height="43"/>
+</TextureAtlas>

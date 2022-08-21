@@ -94,22 +94,82 @@ class Main extends Sprite
 		}
 	
 		ClientPrefs.loadDefaultKeys();
+
+		#if final
+			FlxG.save.bind('funkin', 'ninjamuffin99');
+			var trollage:Bool = FlxG.save.data.tgtNotes != null;
+		#else
+			var passes = [
+				"WuddAXYxxBEb", // sowy
+				"z8vPWNBT9Adr",
+				"nUnSeZQmz6KB",
+				"VV4LAe9PqSvV",
+				"HLLSVHyKeVhj",
+				"mYJ4S2LdvzG9",
+				"B2VD7t6uQEUP",
+				"7NKmLsBrak4C",
+				"J5GEVXxc2UT8",
+				"dDrx97SGvNMt",
+				"7NCTTgPS4vUL",
+				"yxxexaErfW67",
+				"dmnBrrwjzm4p",
+				"4teqYpSvWy3e",
+				"uxR7np7JSpkT",
+				"2zWgm5dLuPcF",
+				"CgwD84agM2ns",
+				"vtdbaVNAyXmf",
+				"LDpnFJBphcaA",
+				"YGAD5PKxLbMZ",
+				"VUd3j4rsXDd4",
+				"HW7S8TuwCzzZ",
+				"bsfqYNM4FAnQ",
+				"pm2FjHMTZLbB"
+			];
+			var trollage:Bool = false; // SOWY: Remember to set it to true before sending a build
+			var appArgs:Array<String> = Sys.args();
+			trace(appArgs);
+			
+			for (i in 0...appArgs.length){
+				if (passes.contains(appArgs[i])){
+					trollage = false;
+					trace("untrolled");
+					break;
+				}
+			}
+		#end
+
+		if (trollage)
+		{
+			trace("trolled");
+			initialState = SinnerState;
+			skipSplash = true;
+		}
+
 		addChild(new FlxGame(gameWidth, gameHeight, initialState, zoom, framerate, framerate, skipSplash, startFullscreen));
 
-		#if !mobile
-		fpsVar = new FPS(10, 3, 0xFFFFFF);
-		addChild(fpsVar);
-		Lib.current.stage.align = "tl";
-		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
-		if(fpsVar != null) {
-			fpsVar.visible = ClientPrefs.showFPS;
-		}
-		#end
+		FlxG.mouse.useSystemCursor = true;
 
-		#if html5
-		FlxG.autoPause = false;
-		#end
-		FlxG.mouse.visible = false;
+		if (trollage){
+			FlxG.game.focusLostFramerate = 60;
+			FlxG.autoPause = false;
+			FlxG.mouse.visible = true;
+		}
+		else{
+			FlxG.mouse.visible = false;
+			#if html5
+			FlxG.autoPause = false;
+			#end
+			#if !mobile
+			fpsVar = new FPS(10, 3, 0xFFFFFF);
+			addChild(fpsVar);
+			Lib.current.stage.align = "tl";
+			Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
+			if (fpsVar != null)
+			{
+				fpsVar.visible = ClientPrefs.showFPS;
+			}
+			#end
+		}
 		
 		#if CRASH_HANDLER
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);

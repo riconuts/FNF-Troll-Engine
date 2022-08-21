@@ -5,12 +5,12 @@ import haxe.Json;
 import haxe.format.JsonParser;
 import lime.utils.Assets;
 
+using StringTools;
 #if sys
-import sys.io.File;
 import sys.FileSystem;
+import sys.io.File;
 #end
 
-using StringTools;
 
 typedef SwagSong =
 {
@@ -19,6 +19,7 @@ typedef SwagSong =
 	var events:Array<Dynamic>;
 	var bpm:Float;
 	var needsVoices:Bool;
+	var extraTracks:Array<String>;
 	var speed:Float;
 
 	var player1:String;
@@ -38,6 +39,7 @@ class Song
 	public var events:Array<Dynamic>;
 	public var bpm:Float;
 	public var needsVoices:Bool = true;
+	public var extraTracks:Array<String> = [];
 	public var arrowSkin:String;
 	public var splashSkin:String;
 	public var speed:Float = 1;
@@ -53,6 +55,10 @@ class Song
 		{
 			songJson.gfVersion = songJson.player3;
 			songJson.player3 = null;
+		}
+
+		if (songJson.extraTracks == null){
+			songJson.extraTracks = [];
 		}
 
 		if(songJson.events == null)

@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='utf-8'?>
+<TextureAtlas imagePath="tails bg.png"><SubTexture name="tails bg crazy0000" x="0" y="0" width="404" height="629" frameX="0" frameY="0" frameWidth="404" frameHeight="629" />
+<SubTexture name="tails bg crazy0001" x="404" y="0" width="404" height="629" frameX="0" frameY="0" frameWidth="404" frameHeight="629" />
+<SubTexture name="tails bg crazy0002" x="808" y="0" width="404" height="629" frameX="0" frameY="0" frameWidth="404" frameHeight="629" />
+<SubTexture name="tails bg crazy0003" x="1212" y="0" width="404" height="629" frameX="0" frameY="0" frameWidth="404" frameHeight="629" />
+<SubTexture name="tails bg crazy0004" x="1616" y="0" width="404" height="629" frameX="0" frameY="0" frameWidth="404" frameHeight="629" />
+<SubTexture name="tails bg crazy0005" x="0" y="629" width="404" height="629" frameX="0" frameY="0" frameWidth="404" frameHeight="629" />
+<SubTexture name="tails bg crazy0006" x="404" y="629" width="404" height="629" frameX="0" frameY="0" frameWidth="404" frameHeight="629" />
+<SubTexture name="tails bg crazy0007" x="808" y="629" width="404" height="629" frameX="0" frameY="0" frameWidth="404" frameHeight="629" />
+<SubTexture name="tails bg crazy0008" x="1212" y="629" width="404" height="629" frameX="0" frameY="0" frameWidth="404" frameHeight="629" />
+<SubTexture name="tails bg crazy0009" x="1616" y="629" width="404" height="629" frameX="0" frameY="0" frameWidth="404" frameHeight="629" />
+<SubTexture name="tails bg crazy0010" x="0" y="1258" width="404" height="629" frameX="0" frameY="0" frameWidth="404" frameHeight="629" />
+<SubTexture name="tails bg normal idle0000" x="404" y="1258" width="404" height="628" frameX="0" frameY="0" frameWidth="404" frameHeight="628" />
+<SubTexture name="tails bg normal idle0001" x="808" y="1258" width="404" height="628" frameX="0" frameY="0" frameWidth="404" frameHeight="628" />
+<SubTexture name="tails bg normal idle0002" x="1212" y="1258" width="404" height="628" frameX="0" frameY="0" frameWidth="404" frameHeight="628" />
+<SubTexture name="tails bg normal idle0003" x="1616" y="1258" width="404" height="628" frameX="0" frameY="0" frameWidth="404" frameHeight="628" />
+<SubTexture name="tails bg normal idle0004" x="0" y="1887" width="404" height="628" frameX="0" frameY="0" frameWidth="404" frameHeight="628" />
+<SubTexture name="tails bg normal idle0005" x="404" y="1887" width="404" height="628" frameX="0" frameY="0" frameWidth="404" frameHeight="628" />
+<SubTexture name="tails bg normal idle0006" x="808" y="1887" width="404" height="629" frameX="0" frameY="0" frameWidth="404" frameHeight="629" />
+<SubTexture name="tails bg normal idle0007" x="1212" y="1887" width="404" height="629" frameX="0" frameY="0" frameWidth="404" frameHeight="629" />
+<SubTexture name="tails bg normal idle0008" x="1616" y="1887" width="404" height="629" frameX="0" frameY="0" frameWidth="404" frameHeight="629" />
+<SubTexture name="tails bg normal idle0009" x="0" y="2516" width="404" height="629" frameX="0" frameY="0" frameWidth="404" frameHeight="629" />
+<SubTexture name="tails bg normal idle0010" x="404" y="2516" width="404" height="629" frameX="0" frameY="0" frameWidth="404" frameHeight="629" />
+<SubTexture name="tails bg shoot0000" x="808" y="2516" width="404" height="629" frameX="0" frameY="0" frameWidth="404" frameHeight="629" />
+<SubTexture name="tails bg shoot0001" x="1212" y="2516" width="404" height="629" frameX="0" frameY="0" frameWidth="404" frameHeight="629" />
+<SubTexture name="tails bg shoot0002" x="1616" y="2516" width="404" height="629" frameX="0" frameY="0" frameWidth="404" frameHeight="629" />
+<SubTexture name="tails bg shoot0003" x="0" y="3145" width="404" height="629" frameX="0" frameY="0" frameWidth="404" frameHeight="629" />
+<SubTexture name="tails bg shoot0004" x="404" y="3145" width="404" height="629" frameX="0" frameY="0" frameWidth="404" frameHeight="629" />
+</TextureAtlas>

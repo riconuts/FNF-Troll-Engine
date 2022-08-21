@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='utf-8'?>
+<TextureAtlas imagePath="shadow.png"><SubTexture name="shadow down0000" x="0" y="0" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow down0001" x="0" y="0" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow down0002" x="1095" y="0" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow down0003" x="1095" y="0" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow down0004" x="1095" y="0" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow gun idle0000" x="2190" y="0" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow gun idle0001" x="2190" y="0" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow gun idle0002" x="3285" y="0" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow gun idle0003" x="3285" y="0" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow gun idle0004" x="0" y="1173" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow gun idle0005" x="0" y="1173" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow gun idle0006" x="1095" y="1173" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow gun idle0007" x="1095" y="1173" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow gun idle0008" x="2190" y="1173" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow gun idle0009" x="2190" y="1173" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow gun idle0010" x="3285" y="1173" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow gun idle0011" x="3285" y="1173" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow gun idle0012" x="0" y="2346" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow gun idle0013" x="0" y="2346" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow left0000" x="1095" y="2346" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow left0001" x="1095" y="2346" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow left0002" x="2190" y="2346" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow left0003" x="2190" y="2346" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow left0004" x="2190" y="2346" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow right0000" x="3285" y="2346" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow right0001" x="3285" y="2346" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow right0002" x="0" y="3519" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow right0003" x="0" y="3519" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow right0004" x="0" y="3519" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow schut0000" x="1095" y="3519" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow schut0001" x="1095" y="3519" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow schut0002" x="2190" y="3519" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow schut0003" x="2190" y="3519" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow schut0004" x="3285" y="3519" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow schut0005" x="3285" y="3519" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow schut0006" x="0" y="4692" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow schut0007" x="0" y="4692" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow schut0008" x="0" y="4692" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow up0000" x="1095" y="4692" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow up0001" x="1095" y="4692" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow up0002" x="2190" y="4692" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow up0003" x="2190" y="4692" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+<SubTexture name="shadow up0004" x="2190" y="4692" width="1095" height="1173" frameX="0" frameY="0" frameWidth="1095" frameHeight="1173" />
+</TextureAtlas>

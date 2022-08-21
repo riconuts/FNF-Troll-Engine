@@ -86,7 +86,7 @@ class FunkinHScript extends FunkinScript
 		set("FlxSave", flixel.util.FlxSave); // should probably give it 1 save instead of giving it FlxSave
 		set("FlxBar", flixel.ui.FlxBar);
 		set("StringTools", StringTools);
-		set("trace", function(text:String)
+		set("scriptTrace", function(text:String)
 		{
 			scriptTrace(text);
 		});

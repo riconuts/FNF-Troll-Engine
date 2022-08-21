@@ -1,0 +1,90 @@
+<?xml version='1.0' encoding='utf-8'?>
+<TextureAtlas imagePath="boppers.png"><SubTexture name="boppers pn idle0000" x="0" y="0" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers pn idle0001" x="0" y="0" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers pn idle0002" x="4087" y="0" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers pn idle0003" x="4087" y="0" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers pn idle0004" x="8174" y="0" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers pn idle0005" x="8174" y="0" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers pn idle0006" x="12261" y="0" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers pn idle0007" x="12261" y="0" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers pn idle0008" x="16348" y="0" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers pn idle0009" x="16348" y="0" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers pn idle0010" x="16348" y="0" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers pn idle0011" x="16348" y="0" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers pn idle0012" x="16348" y="0" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers tfb idle0000" x="20435" y="0" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers tfb idle0001" x="20435" y="0" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers tfb idle0002" x="0" y="1193" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers tfb idle0003" x="0" y="1193" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers tfb idle0004" x="4087" y="1193" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers tfb idle0005" x="4087" y="1193" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers tfb idle0006" x="8174" y="1193" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers tfb idle0007" x="8174" y="1193" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers tfb idle0008" x="12261" y="1193" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers tfb idle0009" x="12261" y="1193" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers tfb idle0010" x="12261" y="1193" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers tfb idle0011" x="12261" y="1193" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers tfb idle0012" x="12261" y="1193" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0000" x="16348" y="1193" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0001" x="16348" y="1193" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0002" x="20435" y="1193" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0003" x="20435" y="1193" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0004" x="20435" y="1193" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0005" x="0" y="2386" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0006" x="4087" y="2386" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0007" x="8174" y="2386" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0008" x="12261" y="2386" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0009" x="16348" y="2386" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0010" x="20435" y="2386" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0011" x="0" y="3579" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0012" x="4087" y="3579" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0013" x="8174" y="3579" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0014" x="12261" y="3579" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0015" x="16348" y="3579" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0016" x="20435" y="3579" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0017" x="0" y="4772" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0018" x="4087" y="4772" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0019" x="8174" y="4772" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0020" x="12261" y="4772" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0021" x="16348" y="4772" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0022" x="20435" y="4772" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0023" x="0" y="5965" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0024" x="4087" y="5965" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0025" x="8174" y="5965" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0026" x="12261" y="5965" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0027" x="12261" y="5965" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0028" x="16348" y="5965" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers shoot0029" x="16348" y="5965" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers surprise0000" x="20435" y="5965" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers surprise0001" x="20435" y="5965" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers surprise0002" x="0" y="7158" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers surprise0003" x="0" y="7158" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers surprise0004" x="4087" y="7158" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers surprise0005" x="4087" y="7158" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers surprise0006" x="4087" y="7158" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers surprise0007" x="4087" y="7158" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers surprise0008" x="4087" y="7158" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers surprise0009" x="4087" y="7158" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers surprise0010" x="4087" y="7158" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers surprise0011" x="4087" y="7158" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers surprise0012" x="4087" y="7158" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers surprise0013" x="4087" y="7158" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers surprise0014" x="4087" y="7158" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers surprise0015" x="4087" y="7158" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers surprise0016" x="4087" y="7158" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers surprise0017" x="4087" y="7158" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers surprise0018" x="4087" y="7158" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers solo idle0000" x="8174" y="7158" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers solo idle0001" x="8174" y="7158" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers solo idle0002" x="12261" y="7158" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers solo idle0003" x="12261" y="7158" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers solo idle0004" x="16348" y="7158" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers solo idle0005" x="16348" y="7158" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers solo idle0006" x="20435" y="7158" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers solo idle0007" x="20435" y="7158" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers solo idle0008" x="0" y="8351" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers solo idle0009" x="0" y="8351" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers solo idle0010" x="0" y="8351" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers solo idle0011" x="0" y="8351" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+<SubTexture name="boppers solo idle0012" x="0" y="8351" width="4087" height="1193" frameX="0" frameY="0" frameWidth="4087" frameHeight="1193" />
+</TextureAtlas>

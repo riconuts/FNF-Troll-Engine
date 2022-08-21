@@ -1,0 +1,14 @@
+importClass("flixel.text.FlxText");
+
+var text = new FlxText();
+text.text = "JUST A ETST";
+text.screenCenter(X);
+
+var instance = getInstance();
+instance.add(text);
+text.cameras = [instance.camHUD];
+
+function onRecalculateRating(){
+	text.text = instance.health;
+	return 1;
+}

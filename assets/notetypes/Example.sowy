@@ -1,0 +1,64 @@
+function setupNote(note:Note){
+  trace("Called when the note's noteType is set");
+  note.canQuant = false;
+  note.reloadNote("", "NOTE_assets");
+  note.colorSwap.hue = 0;
+  note.colorSwap.saturation = 0;
+  note.colorSwap.lightness = 0;
+}
+
+function onReloadNote(note:Note, prefix:String, texture:String, suffix:String){
+    trace("Called at the beginning of the reloadNote function");
+    // can return Function_Stop to stop the note from having its texture changed
+}
+
+function postReloadNote(note:Note, prefix:String, texture:String, suffix:String){
+    trace("Called at the end of the reloadNote function");
+}
+
+function goodNoteHit(note:Note){
+    trace("Called when the player hits the note");
+}
+
+function opponentNoteHit(note:Note){
+    trace("Called when the opponent hits the note");
+}
+
+function noteMiss(note:Note){
+    trace("Called when the player misses the note");
+}
+
+function update(note:Note, elapsed:Float){
+    trace("Called every frame the note is active");
+}
+
+function onLoad(){
+    trace("This is called when PlayState first loads the script, usually used for preloading etc");
+}
+
+function spawnNote(note:Note){
+    trace("This is called when a note of the type is spawned!");
+    // return Function_Stop to stop the note from spawning
+}
+
+function postSpawnNote(note:Note){
+    trace("This is called when the note is actually spawned and added to the group!");
+}
+
+/*
+    Animations used by FNF are 
+    For tap notes: greenScroll, redScroll, blueScroll, purpleScroll
+    For holds: greenhold, greenholdend, redhold, redholdend, bluehold, blueholdend and purplehold, purpleholdend
+
+    // green is up, red is right, blue is down, purple is left
+*/
+
+function loadPixelNoteAnims(note:Note){
+    super(); // if you dont want FNF's normal note anims to be added, just omit this
+    trace("This is called when the note has its pixel animations loaded!");
+}
+
+function loadPixelNoteAnims(note:Note){
+    super(); // if you dont want FNF's normal note anims to be added, just omit this
+    trace("This is called when the note has its pixel animations loaded!");
+}
