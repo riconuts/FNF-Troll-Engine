@@ -343,16 +343,19 @@ class FreeplayState extends MusicBeatState
 				#if PRELOAD_ALL
 				destroyFreeplayVocals();
 				FlxG.sound.music.volume = 0;
-				Paths.currentModDirectory = songs[curSelected].folder;
-				var poop:String = Highscore.formatSong(songs[curSelected].songName.toLowerCase(), curDifficulty);
-				PlayState.SONG = Song.loadFromJson(poop, songs[curSelected].songName.toLowerCase());
+
+				var curSong = songs[curSelected];
+
+				Paths.currentModDirectory = curSong.folder;
+				var poop:String = Highscore.formatSong(curSong.songName.toLowerCase(), curDifficulty);
+				PlayState.SONG = Song.loadFromJson(poop, curSong.songName.toLowerCase());
 				if (PlayState.SONG.needsVoices)
-					vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.song));
+					vocals = new FlxSound().loadEmbedded(Paths.voices(curSong.songName));
 				else
 					vocals = new FlxSound();
 
 				FlxG.sound.list.add(vocals);
-				FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song), 0.7);
+				FlxG.sound.playMusic(Paths.inst(curSong.songName), 0.7);
 				vocals.play();
 				vocals.persist = true;
 				vocals.looped = true;

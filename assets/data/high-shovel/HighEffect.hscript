@@ -1,4 +1,5 @@
-var instance:Dynamic = null;
+var instance:FlxState = null;
+var paused:Bool = false;
 
 importClass("Shaders");
 var highShader = new HighEffect();
@@ -14,9 +15,20 @@ smokeOverlay.scale.set(1280*2, 720*2);
 smokeOverlay.alpha = 0;
 
 function update(elapsed:Float){
-	highShader.update(elapsed);
-	highShader.effectiveness = getHigh ? (justHowHighAreYou / 100) / detailScale : 0;
-	highShader.focusDetail = 12 * detailScale;
+	if (!paused){
+		highShader.update(elapsed);
+		highShader.effectiveness = getHigh ? (justHowHighAreYou / 100) / detailScale : 0;
+		highShader.focusDetail = 12 * detailScale;
+	}
+}
+
+function onPause(){
+	paused = true;
+	return Function_Continue;
+}
+function onResume(){
+	paused = false;
+	return Function_Continue;
 }
 
 function onGameOver(){

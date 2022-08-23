@@ -37,13 +37,14 @@ class StoryMenuState extends MusicBeatState
 		[51, 417], [305, 417], [542, 417], [788, 417], [1034, 417]
 	];
 
-	var mainMenu = new FlxTypedGroup<FlxBasic>(); // the main menu where you select achapter!
+	var mainMenu = new FlxTypedGroup<FlxBasic>(); // group for the main menu where you select achapter!
+	var subMenu = new StoryModeSubMenu(); // custom group class for the sub menu where yu select a song!
+	
 	var funkyRectangle = new FlxShapeBox(0, 0, 206, 206, {thickness: 3, color: FlxColor.fromRGB(255, 242, 0)}, FlxColor.BLACK); // cool rectanlge used for transitions
-
+	var lastButton:SowyChapterOption; // used the square transition
 	var doingTransition = false; // to prevent unintended behaviour
-	var curSubMenu:FlxTypedGroup<FlxBasic>; // to where to go back
-	var lastSubMenu:FlxTypedGroup<FlxBasic>; // to reuse stuff :)
-	var lastButton:SowyChapterOption; // to know what to reuse :D
+
+	var isOnSubMenu = false;
 
 	function weekIsLocked(name:String):Bool {
 		var leWeek:WeekData = WeekData.weeksLoaded.get(name);
@@ -124,7 +125,7 @@ class StoryMenuState extends MusicBeatState
 		{
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 
-			if (curSubMenu != null)
+			if (isOnSubMenu)
 				closeWeekMenu();
 			else if (!doingTransition)
 				MusicBeatState.switchState(new MainMenuState());
@@ -135,6 +136,7 @@ class StoryMenuState extends MusicBeatState
 
 	function openWeekMenu(chapterOption:SowyChapterOption){
 		doingTransition = true;
+		isOnSubMenu = true;
 
 		funkyRectangle.setPosition(chapterOption.x, chapterOption.y);
 		funkyRectangle.visible = true;
@@ -153,20 +155,11 @@ class StoryMenuState extends MusicBeatState
 			onComplete: function(twn){
 				doingTransition = false;
 				
+				subMenu.updateChapterDetails(chapterOption.weekFile);
+				add(subMenu);
+
 				remove(mainMenu);
-
-				var lastWeekFile:WeekData = null;
-
-				if (lastButton != null){
-					lastWeekFile = lastButton.weekFile;
-					lastSubMenu.destroy();
-				}
-				if (lastWeekFile != chapterOption.weekFile){
-					lastSubMenu = makeWeekMenu(chapterOption.weekFile);	
-				}
-				add(lastSubMenu);
-
-				curSubMenu = lastSubMenu;
+				
 				lastButton = chapterOption;
 			}
 		}
@@ -175,9 +168,10 @@ class StoryMenuState extends MusicBeatState
 
 	function closeWeekMenu(){
 		doingTransition = true;
+		isOnSubMenu = false;
 
 		add(mainMenu);
-		remove(lastSubMenu, true);
+		remove(subMenu);
 		
 		FlxTween.tween(funkyRectangle, {
 			x: lastButton.x - 3,
@@ -190,89 +184,10 @@ class StoryMenuState extends MusicBeatState
 			ease: FlxEase.quadOut,
 			onComplete: function(twn)
 			{
-				curSubMenu = null;
 				doingTransition = false;
 				funkyRectangle.visible = false;
 			}
 		});
-	}
-
-	function makeWeekMenu(weekFile:WeekData):FlxTypedGroup<FlxBasic>
-	{
-		var newMenu:FlxTypedGroup<FlxBasic> = new FlxTypedGroup<FlxBasic>();
-		trace(weekFile.songs);
-
-		var chapterImage = new FlxSprite(75, 130).loadGraphic(Paths.image('newmenuu/mainmenu/cover_promo'));
-		chapterImage.updateHitbox();
-		newMenu.add(chapterImage);
-
-		var chapterText = new FlxText(chapterImage.x, chapterImage.y + chapterImage.height + 4, chapterImage.width, weekFile.weekName, 32);
-		chapterText.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE, FlxColor.WHITE);
-		newMenu.add(chapterText);
-
-		var cornerLeftText = new FlxText(15, 720, 0, "← BACK", 32);
-		cornerLeftText.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
-		newMenu.add(cornerLeftText);
-
-		var cornerRightText = new FlxText(1280, 720, 0, "PLAY →", 32);
-		cornerRightText.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.LEFT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
-		newMenu.add(cornerRightText);
-
-		cornerRightText.x -= cornerRightText.width + 15;
-		cornerLeftText.y = cornerRightText.y -= cornerRightText.height + 15;
-
-		//// SONGS - HI-SCORE
-		var halfScreen = 1280 / 2;
-		var startY = chapterImage.y + 48;
-
-		var songText = new FlxText(halfScreen, startY, 0, "SONGS", 32);
-		songText.setFormat(Paths.font("calibrib.ttf"), 32, FlxColor.WHITE, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
-		newMenu.add(songText);
-
-		var scoreText = new FlxText(1205, startY, 0, "HI-SCORE", 32);
-		scoreText.setFormat(Paths.font("calibrib.ttf"), 32, FlxColor.WHITE, FlxTextAlign.LEFT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
-		scoreText.x -= scoreText.width + 15;
-		newMenu.add(scoreText);
-
-		// Make every song.
-		var songAmount:Int = 0;
-		var newScoreTxt:FlxText;
-		var newSongTxt:FlxText;
-
-		for (song in weekFile.songs)
-		{
-			var songName = song[0];
-			var yPos = startY + (songAmount + 2) * 48;
-
-			newSongTxt = new FlxText(halfScreen, yPos, 0, songName, 32);
-			newSongTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
-
-			newScoreTxt = new FlxText(1205, yPos, 0, "0", 32);
-			newScoreTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.LEFT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
-			newScoreTxt.x -= newScoreTxt.width + 15;
-
-			newMenu.add(newSongTxt);
-			newMenu.add(newScoreTxt);
-
-			songAmount++;
-		}
-
-		// TOTAL - TOTAL SCORE
-		var yPos = startY + (songAmount + 2) * 48;
-		var totalSongTxt = new FlxText(halfScreen, yPos, 0, "TOTAL", 32);
-		totalSongTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
-
-		var totalScoreTxt = new FlxText(1205, yPos, 0, "0", 32);
-		totalScoreTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.LEFT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
-		totalScoreTxt.x -= totalScoreTxt.width + 15;
-
-		newMenu.add(totalSongTxt);
-		newMenu.add(totalScoreTxt);
-
-		//
-		lastSubMenu = newMenu;
-
-		return newMenu;
 	}
 }
 
@@ -286,3 +201,126 @@ class SowyChapterOption extends FlxUIButton{
 	}
 }
 
+class StoryModeSubMenu extends FlxTypedGroup<FlxBasic>{
+	var chapterImage:FlxSprite;
+	var chapterText:FlxText;
+	var cornerLeftText:FlxText;
+	var cornerRightText:FlxText;
+	var songText:FlxText;
+	var scoreText:FlxText;
+
+	// recycle shit
+	var songTxtArray:Array<FlxText> = [];
+	var scoreTxtArray:Array<FlxText> = [];
+
+	var totalSongTxt:FlxText;
+	var totalScoreTxt:FlxText;
+
+	var sowyStr:String = "sowy";
+	var halfScreen:Float = 1280 / 2;
+	var startY:Float = 0;
+
+	public function new(){
+		super();
+
+		chapterImage = new FlxSprite(75, 130);
+		add(chapterImage);
+
+		chapterText = new FlxText(0, 0, 1, sowyStr, 32);
+		chapterText.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE, FlxColor.WHITE);
+		add(chapterText);
+
+		cornerLeftText = new FlxText(15, 720, 0, "← BACK", 32);
+		cornerLeftText.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
+		add(cornerLeftText);
+
+		cornerRightText = new FlxText(1280, 720, 0, "PLAY →", 32);
+		cornerRightText.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.LEFT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
+		add(cornerRightText);
+
+		cornerRightText.x -= cornerRightText.width + 15;
+		cornerLeftText.y = cornerRightText.y -= cornerRightText.height + 15;
+
+		//// SONGS - HI-SCORE
+		halfScreen = 1280 / 2;
+		startY = chapterImage.y + 48;
+
+		songText = new FlxText(halfScreen, startY, 0, "SONGS", 32);
+		songText.setFormat(Paths.font("calibrib.ttf"), 32, FlxColor.WHITE, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
+		add(songText);
+
+		scoreText = new FlxText(1205, startY, 0, "HI-SCORE", 32);
+		scoreText.setFormat(Paths.font("calibrib.ttf"), 32, FlxColor.WHITE, FlxTextAlign.LEFT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
+		scoreText.x -= scoreText.width + 15;
+		add(scoreText);
+
+		// TOTAL - TOTAL SCORE
+		totalSongTxt = new FlxText(halfScreen, 0, 0, "TOTAL", 32);
+		totalSongTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
+
+		totalScoreTxt = new FlxText(1205, 0, 0, "0", 32);
+		totalScoreTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.LEFT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
+		totalScoreTxt.x -= totalScoreTxt.width + 15;
+
+		add(totalSongTxt);
+		add(totalScoreTxt);
+	}
+	
+	public function updateChapterDetails(weekFile:WeekData){
+		trace(weekFile.songs);
+
+		chapterImage.loadGraphic(Paths.image('newmenuu/mainmenu/cover_promo'));
+		chapterImage.updateHitbox();
+		
+		chapterText.setPosition(chapterImage.x, chapterImage.y + chapterImage.height + 4);
+		chapterText.fieldWidth = chapterImage.width;
+		chapterText.text = weekFile.weekName;
+
+		// Make a text boxes for every song.
+		var songAmount:Int = 0;
+
+		for (song in weekFile.songs)
+		{
+			var songName = song[0];
+			var yPos = startY + (songAmount + 2) * 48;
+
+			var newSongTxt = songTxtArray[songAmount]; // find a previously created text
+			if (newSongTxt != null) { // if found then reuse it
+				newSongTxt.text = songName;
+				newSongTxt.visible = true;
+			}
+			else // if not then make one
+			{
+				newSongTxt = new FlxText(halfScreen, yPos, 0, songName, 32);
+				newSongTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
+			}
+
+			var newScoreTxt = scoreTxtArray[songAmount]; // find a previously created text
+			if (newScoreTxt != null) { // if found then reuse it
+				newScoreTxt.text = songName;
+				newScoreTxt.visible = true;
+			}
+			else // if not then make one
+			{
+				newScoreTxt = new FlxText(1205, yPos, 0, "0", 32);
+				newScoreTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.LEFT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
+				newScoreTxt.x -= newScoreTxt.width + 15;
+			}
+
+			add(newSongTxt);
+			add(newScoreTxt);
+
+			songAmount++;
+		}
+		// Hide the rest of the previously created texts
+		for (i in songAmount...songTxtArray.length)
+		{
+			var songTxt = songTxtArray[songAmount];
+			var scoreTxt = scoreTxtArray[songAmount];
+			songTxt.visible = scoreTxt.visible = false;
+		}
+
+		// Accomodate the total week score text
+		totalSongTxt.y = totalScoreTxt.y = startY + (songAmount + 2) * 48;
+	}
+}

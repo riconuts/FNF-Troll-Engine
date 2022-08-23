@@ -1,9 +1,6 @@
 var instance = getInstance();
 var maxHealth = 2;
 
-function onLoad(){
-}
-
 function setupNote(note:Note){
     note.texture = "BULLETNOTE_assets";
 	note.noteSplashTexture = "BULLETnoteSplashes"; // reminder to add note splash offsets to the engine (8, 15)
@@ -21,10 +18,6 @@ function setupNote(note:Note){
 	
 	note.hitHealth = 0;
     note.missHealth = maxHealth/2;
-}
-
-function postSpawnNote(note:Note){
-	note.visible = note.mustPress;
 }
 
 function dadShoot(){
@@ -51,10 +44,6 @@ function goodNoteHit(note:Note){
 	}
 }
 
-function opponentNoteHit(note:Note){
-	dadShoot();
-}
-
 function noteMiss(note:Note){
     dadShoot();
 	instance.camHUD.shake(0.01, 0.2);
@@ -62,6 +51,11 @@ function noteMiss(note:Note){
 	instance.camGame.flash(-65536, 0.2, null, true); // red
 }
 
-function onEvent(?name:String, ?event1:String, ?event2:String){
-	//FlxG.sound.play(Paths.sound(sound), volume);
+// for use at the end of die batsards
+function opponentNoteHit(note:Note){
+	instance.displayedHealth *= .25;
+	dadShoot();
+}
+function postSpawnNote(note:Note){
+	note.visible = note.mustPress;
 }

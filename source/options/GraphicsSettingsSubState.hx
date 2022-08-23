@@ -5,11 +5,8 @@ import Discord.DiscordClient;
 #end
 import Controls;
 import flash.text.TextField;
-import flash.text.TextField;
 import flixel.FlxCamera;
 import flixel.FlxG;
-import flixel.FlxG;
-import flixel.FlxSprite;
 import flixel.FlxSprite;
 import flixel.FlxSubState;
 import flixel.addons.display.FlxGridOverlay;
@@ -38,7 +35,7 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 
 		//I'd suggest using "Low Quality" as an example for making your own option since it is the simplest here
 		var option:Option = new Option('Low Quality', //Name
-			'If checked, disables some background details,\ndecreases loading times and improves performance.', //Description
+			"Check this option if your device can't run Fortnite.", //Description
 			'lowQuality', //Save data variable name
 			'bool', //Variable type
 			false); //Default value
