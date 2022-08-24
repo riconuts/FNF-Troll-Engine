@@ -204,18 +204,21 @@ class SowyChapterOption extends FlxUIButton{
 class StoryModeSubMenu extends FlxTypedGroup<FlxBasic>{
 	var chapterImage:FlxSprite;
 	var chapterText:FlxText;
+
 	var cornerLeftText:FlxText;
 	var cornerRightText:FlxText;
+
 	var songText:FlxText;
 	var scoreText:FlxText;
 
-	// recycle shit
+	// recycle bin
 	var songTxtArray:Array<FlxText> = [];
 	var scoreTxtArray:Array<FlxText> = [];
 
 	var totalSongTxt:FlxText;
 	var totalScoreTxt:FlxText;
 
+	// values used for positioning and shith
 	var sowyStr:String = "sowy";
 	var halfScreen:Float = 1280 / 2;
 	var startY:Float = 0;
