@@ -1,10 +1,3 @@
-#if LUA_ALLOWED
-import llua.Convert;
-import llua.Lua;
-import llua.LuaL;
-import llua.State;
-#end
-
 import Controls;
 import Type.ValueType;
 import animateatlas.AtlasFrameMaker;

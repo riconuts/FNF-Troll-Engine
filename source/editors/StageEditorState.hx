@@ -10,7 +10,6 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxPoint;
 import scripts.*;
-import scripts.FunkinLua;
 
 using StringTools;
 #if sys
@@ -50,8 +49,7 @@ class StageEditorState extends MusicBeatState{
 	var stageData:StageFile;
 
 	var exts = [
-		"hx", "hscript", "hxs" // hscript is cross platform i think?
-        #if LUA_ALLOWED , "lua" #end
+		"hx", "hscript", "hxs"
     ];
 	var funkyScripts:Array<FunkinScript> = [];
 	var luaArray:Array<FunkinLua> = [];
@@ -127,20 +125,11 @@ class StageEditorState extends MusicBeatState{
 			{
 				if (FileSystem.exists(file))
 				{
-					if (ext == 'lua')
-					{
-						var script = new FunkinLua(file);
-						luaArray.push(script);
-						funkyScripts.push(script);
-						doPush = true;
-					}
-					else
-					{
-						var script = FunkinHScript.fromFile(file);
-						hscriptArray.push(script);
-						funkyScripts.push(script);
-						doPush = true;
-					}
+                    var script = FunkinHScript.fromFile(file);
+                    hscriptArray.push(script);
+                    funkyScripts.push(script);
+                    doPush = true;
+					
 					if (doPush)
 						break;
 				}

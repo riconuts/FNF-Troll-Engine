@@ -2,6 +2,7 @@ package;
 
 import Achievements;
 import Conductor.Rating;
+import FunkinLua;
 import Note.EventNote;
 import Section.SwagSection;
 import Shaders;
@@ -4324,7 +4325,6 @@ class PlayState extends MusicBeatState
 		}
 		hscriptArray = [];
 		funkyScripts = [];
-		luaArray = [];
 		notetypeScripts.clear();
 		eventScripts.clear();
 		if(!ClientPrefs.controllerMode)
