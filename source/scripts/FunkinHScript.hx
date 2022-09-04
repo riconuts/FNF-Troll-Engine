@@ -41,7 +41,10 @@ class FunkinHScript extends FunkinScript
 		catch (e:haxe.Exception)
 		{
 			var errMsg = 'Error parsing hscript! $name:' + parser.line + ', ' + e.message;
-			Application.current.window.alert(errMsg, "Error!");
+			#if desktop
+			Application.current.window.alert(errMsg, "Error on haxe script!");
+			#end
+			trace(errMsg);
 
 			expr = parser.parseString("", name);
 		}
@@ -52,8 +55,7 @@ class FunkinHScript extends FunkinScript
 		return parseString(File.getContent(file), name != null ? name : file);
 	}
 
-	public static function parseString(script:String, ?name:String = "Script")
-	{
+	public static function parseString(script:String, ?name:String = "Script"){
 		return parser.parseString(script, name);
 	}
 

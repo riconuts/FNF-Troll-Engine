@@ -9,6 +9,7 @@ class Globals {
 
 	public static inline function getInstance()
 	{
+		trace("test");
 		return PlayState.instance.isDead ? GameOverSubstate.instance : PlayState.instance;
 	}
 }
