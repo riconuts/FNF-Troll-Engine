@@ -15,20 +15,9 @@ smokeOverlay.scale.set(1280*2, 720*2);
 smokeOverlay.alpha = 0;
 
 function update(elapsed:Float){
-	if (!paused){
-		highShader.update(elapsed);
-		highShader.effectiveness = getHigh ? (justHowHighAreYou / 100) / detailScale : 0;
-		highShader.focusDetail = 12 * detailScale;
-	}
-}
-
-function onPause(){
-	paused = true;
-	return Function_Continue;
-}
-function onResume(){
-	paused = false;
-	return Function_Continue;
+	highShader.update(elapsed);
+	highShader.effectiveness = getHigh ? (justHowHighAreYou / 100) / detailScale : 0;
+	highShader.focusDetail = 12 * detailScale;
 }
 
 function onGameOver(){

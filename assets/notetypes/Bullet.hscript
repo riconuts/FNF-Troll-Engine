@@ -15,6 +15,7 @@ function setupNote(note:Note){
 	note.noteSplashBrt = 0;
 	
 	note.noAnimation = true;
+	note.noMissAnimation = true;
 	
 	note.hitHealth = 0;
     note.missHealth = maxHealth/2;
@@ -46,9 +47,16 @@ function goodNoteHit(note:Note){
 
 function noteMiss(note:Note){
     dadShoot();
+	
+	var boyfriend = instance.boyfriend;
+	if (boyfriend != null){
+		boyfriend.playAnim("shot", true);
+		boyfriend.animTimer = 1/24*18;
+	}
+	
 	instance.camHUD.shake(0.01, 0.2);
 	instance.camGame.shake(0.01, 0.2);
-	instance.camGame.flash(-65536, 0.2, null, true); // red
+	instance.camGame.flash(0xCCFF0000, 0.2, null, true); // red
 }
 
 // for use at the end of die batsards

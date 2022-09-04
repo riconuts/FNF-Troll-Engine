@@ -3,7 +3,7 @@ function onCreate()
 	local offY = -500/2
 
 	makeLuaSprite("sky", "extra1/extra1 sky", offX, offY)
-	makeLuaSprite("ground", "extra1/extra1 ground", offX, offY + 710)
+	makeLuaSprite("ground", "extra1/extra1 ground", offX, offY + 756)
 	
 	setScrollFactor("sky", 0.3, 0)
 	setScrollFactor("ground", 1, 0.95)

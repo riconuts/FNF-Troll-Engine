@@ -25,8 +25,6 @@ class MasterEditorMenu extends MusicBeatState
 	var options:Array<String> = [
 		'Week Editor',
 		'Menu Character Editor',
-		'Dialogue Editor',
-		'Dialogue Portrait Editor',
 		'Character Editor',
 		'Chart Editor',
 		'Test Stage'
@@ -122,10 +120,6 @@ class MasterEditorMenu extends MusicBeatState
 					MusicBeatState.switchState(new WeekEditorState());
 				case 'Menu Character Editor':
 					MusicBeatState.switchState(new MenuCharacterEditorState());
-				case 'Dialogue Portrait Editor':
-					LoadingState.loadAndSwitchState(new DialogueCharacterEditorState(), false);
-				case 'Dialogue Editor':
-					LoadingState.loadAndSwitchState(new DialogueEditorState(), false);
 				case 'Chart Editor'://felt it would be cool maybe
 					LoadingState.loadAndSwitchState(new ChartingState(), false);
 				case "Test Stage":

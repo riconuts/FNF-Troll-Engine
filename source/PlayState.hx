@@ -2,7 +2,6 @@ package;
 
 import Achievements;
 import Conductor.Rating;
-import DialogueBoxPsych;
 import Note.EventNote;
 import Section.SwagSection;
 import Shaders;
@@ -72,6 +71,9 @@ import Discord.DiscordClient;
 #end
 #if sys
 import sys.FileSystem;
+#end
+#if VIDEOS_ALLOWED
+import vlc.MP4Handler;
 #end
 
 
@@ -262,8 +264,10 @@ class PlayState extends MusicBeatState
 
 	var stageData:StageFile;
 
+	/*
 	var dialogue:Array<String> = ['blah blah blah', 'coolswag'];
 	var dialogueJson:DialogueFile = null;
+	*/
 
 	var phillyGlowGradient:PhillyGlow.PhillyGlowGradient;
 	var phillyGlowParticles:FlxTypedGroup<PhillyGlow.PhillyGlowParticle>;
@@ -899,7 +903,9 @@ class PlayState extends MusicBeatState
 			var doPush:Bool = false;
 			var baseScriptFile:String = 'stages/' + curStage;
 			var exts = [#if LUA_ALLOWED "lua" #end];
-			for (e in hscriptExts)exts.push(e);
+			for (e in hscriptExts)
+				exts.push(e);
+			
 			for (ext in exts){
 				if(doPush)break;
 				var baseFile = '$baseScriptFile.$ext'; 
@@ -981,6 +987,7 @@ class PlayState extends MusicBeatState
 				addBehindDad(evilTrail);
 		}
 
+		/*
 		var file:String = Paths.json(songName + '/dialogue'); //Checks for json/Psych Engine dialogue
 		if (OpenFlAssets.exists(file)) {
 			dialogueJson = DialogueBoxPsych.parseDialogue(file);
@@ -994,6 +1001,7 @@ class PlayState extends MusicBeatState
 		doof.finishThing = startCountdown;
 		doof.nextDialogueThing = startNextDialogue;
 		doof.skipDialogueThing = skipDialogue;
+		*/
 
 		Conductor.songPosition = -5000;
 
@@ -1153,14 +1161,14 @@ class PlayState extends MusicBeatState
 		moveCameraSection(0);
 
 		healthBarBG = new AttachedSprite('healthBar');
-		healthBarBG.y = camHUD.height * 0.89;
+		healthBarBG.y = camOverlay.height * 0.89;
 		healthBarBG.screenCenter(X);
 		healthBarBG.scrollFactor.set();
 		healthBarBG.visible = !ClientPrefs.hideHud;
 		healthBarBG.xAdd = -4;
 		healthBarBG.yAdd = -4;
 		add(healthBarBG);
-		if(ClientPrefs.downScroll) healthBarBG.y = 0.11 * camHUD.height;
+		if(ClientPrefs.downScroll) healthBarBG.y = 0.11 * camOverlay.height;
 		healthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, RIGHT_TO_LEFT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), this,
 			'displayedHealth', 0, 2);
 		healthBar.scrollFactor.set();
@@ -1207,16 +1215,16 @@ class PlayState extends MusicBeatState
 		playFields.cameras = [camHUD];
 		grpNoteSplashes.cameras = [camHUD];
 		notes.cameras = [camHUD];
-		healthBar.cameras = [camHUD];
-		healthBarBG.cameras = [camHUD];
-		iconP1.cameras = [camHUD];
-		iconP2.cameras = [camHUD];
-		scoreTxt.cameras = [camHUD];
-		botplayTxt.cameras = [camHUD];
-		timeBar.cameras = [camHUD];
-		timeBarBG.cameras = [camHUD];
-		timeTxt.cameras = [camHUD];
-		doof.cameras = [camHUD];
+		healthBar.cameras = [camOverlay];
+		healthBarBG.cameras = [camOverlay];
+		iconP1.cameras = [camOverlay];
+		iconP2.cameras = [camOverlay];
+		scoreTxt.cameras = [camOverlay];
+		botplayTxt.cameras = [camOverlay];
+		timeBar.cameras = [camOverlay];
+		timeBarBG.cameras = [camOverlay];
+		timeTxt.cameras = [camOverlay];
+		//doof.cameras = [camOverlay];
 		topBar.cameras = [camOther];
 		bottomBar.cameras = [camOther];
 
@@ -1449,47 +1457,35 @@ class PlayState extends MusicBeatState
 		char.y += char.positionArray[1];
 	}
 
-	public function startVideo(name:String):Void {
+	public function startVideo(name:String)
+	{
 		#if VIDEOS_ALLOWED
-		var foundFile:Bool = false;
-		var fileName:String = #if MODS_ALLOWED Paths.modFolders('videos/' + name + '.' + Paths.VIDEO_EXT); #else ''; #end
+		inCutscene = true;
+
+		var filepath:String = Paths.video(name);
 		#if sys
-		if(FileSystem.exists(fileName)) {
-			foundFile = true;
-		}
+		if (!FileSystem.exists(filepath))
+		#else
+		if (!OpenFlAssets.exists(filepath))
 		#end
-
-		if(!foundFile) {
-			fileName = Paths.video(name);
-			#if sys
-			if(FileSystem.exists(fileName)) {
-			#else
-			if(OpenFlAssets.exists(fileName)) {
-			#end
-				foundFile = true;
-			}
-		}
-
-		if(foundFile) {
-			inCutscene = true;
-			var bg = new FlxSprite(-FlxG.width, -FlxG.height).makeGraphic(FlxG.width * 3, FlxG.height * 3, FlxColor.BLACK);
-			bg.scrollFactor.set();
-			bg.cameras = [camHUD];
-			add(bg);
-
-			(new FlxVideo(fileName)).finishCallback = function() {
-				remove(bg);
-				startAndEnd();
-			}
+		{
+			FlxG.log.warn('Couldnt find video file: ' + name);
+			startAndEnd();
 			return;
 		}
-		else
+
+		var video:MP4Handler = new MP4Handler();
+		video.playVideo(filepath);
+		video.finishCallback = function()
 		{
-			FlxG.log.warn('Couldnt find video file: ' + fileName);
 			startAndEnd();
+			return;
 		}
-		#end
+		#else
+		FlxG.log.warn('Video playback not supported!');
 		startAndEnd();
+		return;
+		#end
 	}
 
 	function startAndEnd()
@@ -1502,6 +1498,7 @@ class PlayState extends MusicBeatState
 		}
 	}
 
+	/*
 	var dialogueCount:Int = 0;
 	public var psychDialogue:DialogueBoxPsych;
 	//You don't have to add a song, just saying. You can just do "startDialogue(dialogueJson);" and it should work
@@ -1540,6 +1537,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 	}
+	*/
 
 	/*
 	function songIntroCutscene(){
@@ -1820,6 +1818,7 @@ class PlayState extends MusicBeatState
 		songTime = time;
 	}
 
+	/*
 	function startNextDialogue() {
 		dialogueCount++;
 		callOnScripts('onNextDialogue', [dialogueCount]);
@@ -1828,6 +1827,7 @@ class PlayState extends MusicBeatState
 	function skipDialogue() {
 		callOnScripts('onSkipDialogue', [dialogueCount]);
 	}
+	*/
 
 	var previousFrameTime:Int = 0;
 	var lastReportedPlayheadPosition:Int = 0;

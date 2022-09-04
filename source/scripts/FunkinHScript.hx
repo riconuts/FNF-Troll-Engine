@@ -2,6 +2,7 @@ package scripts;
 
 import flixel.FlxG;
 import flixel.system.FlxSound;
+import hscript.Checker;
 import hscript.Expr;
 import hscript.Interp;
 import hscript.Parser;
@@ -31,15 +32,15 @@ class FunkinHScript extends FunkinScript
 
 	public static function fromString(script:String, ?name:String = "Script", ?additionalVars:Map<String, Any>)
 	{
+		parser.line = 1;
 		var expr:Expr;
-		try{
+		try
+		{
 			expr = parser.parseString(script, name);
-		}catch(e:haxe.Exception){
-			trace(e.details());
-
-			FlxG.log.error(e.message);
-
-			var errMsg = "Error parsing hscript";//: Check line " + parser.line;
+		}
+		catch (e:haxe.Exception)
+		{
+			var errMsg = 'Error parsing hscript! $name:' + parser.line + ', ' + e.message;
 			Application.current.window.alert(errMsg, "Error!");
 
 			expr = parser.parseString("", name);
@@ -47,11 +48,8 @@ class FunkinHScript extends FunkinScript
 		return new FunkinHScript(expr, name, additionalVars);
 	}
 
-	public static function parseFile(file:String, ?name:String)
-	{
-		if (name == null)
-			name = file;
-		return parseString(File.getContent(file), name);
+	public static function parseFile(file:String, ?name:String){
+		return parseString(File.getContent(file), name != null ? name : file);
 	}
 
 	public static function parseString(script:String, ?name:String = "Script")
@@ -125,6 +123,18 @@ class FunkinHScript extends FunkinScript
 				set(daClassName, daClass);	
 			}
 		});
+		set("addHaxeLibrary", function(libName:String, ?libPackage:String = ''){
+			try{
+				var str:String = '';
+				if (libPackage.length > 0)
+					str = libPackage + '.';
+
+				set(libName, Type.resolveClass(str + libName));
+			}
+			catch (e:Dynamic){
+				
+			}
+		}); 
 
 		set("importEnum", function(enumName:String)
 		{
@@ -153,8 +163,9 @@ class FunkinHScript extends FunkinScript
 		set("Character", Character);
 		set("Boyfriend", Boyfriend);
 		set("StageData", StageData);
-		set("DialogueBox", DialogueBoxPsych);
-		set("FlxVideo", FlxVideo);
+		#if VIDEOS_ALLOWED
+		set("MP4Handler", vlc.MP4Handler);
+		#end
 		set("PlayState", PlayState);
 		set("PlayField", PlayField);
 		set("FunkinLua", FunkinLua);
@@ -183,7 +194,7 @@ class FunkinHScript extends FunkinScript
 				set(key, additionalVars.get(key));
 		}
 
-		trace('loaded hscript ${scriptName}');
+		trace('Loaded hscript ${scriptName}');
 		try{
 			interpreter.execute(parsed);
 		}catch(e:haxe.Exception){

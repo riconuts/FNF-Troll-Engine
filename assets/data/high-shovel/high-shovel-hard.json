@@ -4752,9 +4752,7 @@
 				"mustHitSection": true
 			}
 		],
-		"initialSpeed": 1.215,
-		"sliderVelocities": null,
-		"song": "High-Shovel",
+		"song": "High Shovel",
 		"validScore": true,
 		"stage": "extra1",
 		"sections": 0,

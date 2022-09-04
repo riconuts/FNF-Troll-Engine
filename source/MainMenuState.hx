@@ -22,6 +22,7 @@ import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import lime.app.Application;
 import options.OptionsState;
+import sowy.SowyBaseButton;
 
 using StringTools;
 #if desktop
@@ -33,7 +34,7 @@ class MainMenuState extends MusicBeatState
 	public static var psychEngineVersion:String = '0.5.2n'; //This is also used for Discord RPC
 	public static var curSelected:Int = 0;
 
-	var menuItems:FlxTypedGroup<SowyUIButton>;
+	var menuItems:FlxTypedGroup<MainMenuButton>;
 	private var camGame:FlxCamera;
 	private var camAchievement:FlxCamera;
 	
@@ -78,9 +79,8 @@ class MainMenuState extends MusicBeatState
 
 		var yScroll:Float = Math.max(0.25 - (0.05 * (optionShit.length - 4)), 0.1);
 		
-		var bg:FlxSprite = new FlxSprite(-80).loadGraphic(Paths.image('newmenuu/mainmenu/menuBG'));
+		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('newmenuu/mainmenu/menuBG'));
 		bg.scrollFactor.set();
-		//bg.setGraphicSize(Std.int(bg.width * 1.175));
 		bg.updateHitbox();
 		bg.screenCenter();
 		bg.antialiasing = ClientPrefs.globalAntialiasing;
@@ -91,7 +91,7 @@ class MainMenuState extends MusicBeatState
 		add(camFollow);
 		add(camFollowPos);
 
-		menuItems = new FlxTypedGroup<SowyUIButton>();
+		menuItems = new FlxTypedGroup<MainMenuButton>();
 		add(menuItems);
 
 		var scale:Float = 1;
@@ -102,7 +102,7 @@ class MainMenuState extends MusicBeatState
 		for (i in 0...optionShit.length)
 		{
 			var offset:Float = 108 - (Math.max(optionShit.length, 4) - 4) * 80;
-			var menuItem:SowyUIButton = new SowyUIButton(51, (i * 140) + offset);
+			var menuItem:MainMenuButton = new MainMenuButton(51, (i * 140) + offset);
 			
 			menuItem.loadGraphic(Paths.image('newmenuu/mainmenu/menu_' + optionShit[i]));
 			menuItem.antialiasing = ClientPrefs.globalAntialiasing;
@@ -166,8 +166,6 @@ class MainMenuState extends MusicBeatState
 		versionShit.scrollFactor.set();
 		versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(versionShit);
-
-		// NG.core.calls.event.logEvent('swag').send();
 
 		changeItem();
 
@@ -362,7 +360,7 @@ class MainMenuState extends MusicBeatState
 
 		if (huh != 0) FlxG.sound.play(Paths.sound('scrollMenu'));
 
-		menuItems.forEach(function(spr:SowyUIButton)
+		menuItems.forEach(function(spr:MainMenuButton)
 		{
 			if (spr.ID == curSelected)
 				spr.targetX = 151;
@@ -383,7 +381,7 @@ class MainMenuState extends MusicBeatState
 	#end
 }
 
-class SowyUIButton extends FlxUIButton
+class MainMenuButton extends SowyBaseButton
 {
 	// what??? 
 

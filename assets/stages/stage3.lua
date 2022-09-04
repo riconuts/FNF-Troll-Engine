@@ -20,16 +20,16 @@ function onCreate()
 	addLuaSprite("back2")
 	
 	----
-	makeLuaSprite("ground", "stage3/stage3 ground", offX, offY + 710)
+	makeLuaSprite("ground", "stage3/stage3 ground", offX, offY + 741)
 	setScrollFactor("ground", 1, 0.95)
 	addLuaSprite("ground")
 	
-	makeLuaSprite("ground1", "stage3/stage3 ground", offX - 2876, offY + 710)
+	makeLuaSprite("ground1", "stage3/stage3 ground", offX - 2876, offY + 741)
 	setScrollFactor("ground1", 1, 0.95)
 	setProperty("ground1.flipX", true)
 	addLuaSprite("ground1")
 
-	makeLuaSprite("ground2", "stage3/stage3 ground", offX + 2876, offY + 710)
+	makeLuaSprite("ground2", "stage3/stage3 ground", offX + 2876, offY + 741)
 	setScrollFactor("ground2", 1, 0.95)
 	setProperty("ground2.flipX", true)
 	addLuaSprite("ground2")

@@ -63,7 +63,7 @@
 	<define name="MODS_ALLOWED" if="desktop" />
 	<define name="LUA_ALLOWED" if="desktop" />
 	<!-- <define name="ACHIEVEMENTS_ALLOWED" /> -->
-	<define name="VIDEOS_ALLOWED" if="web || windows" unless="32bits"/>
+	<!-- <define name="VIDEOS_ALLOWED"/> -->
 	<define name="CRASH_HANDLER" if="desktop" />
 
 	<!-- <define name="PRELOAD_ALL" /> -->
@@ -84,19 +84,12 @@
 	</section>
 	
 	<assets path="plugins/"             rename=''               if="VIDEOS_ALLOWED windows" />
-	<assets path="dlls/"                rename=''               if="VIDEOS_ALLOWED windows" />
 	<assets path="assets/videos"        library="videos"        if="VIDEOS_ALLOWED"/>
 	<assets path="assets/songs"         library="songs"         exclude="*.ogg" if="web"/>
 	<assets path="assets/songs"         library="songs"         exclude="*.mp3" unless="web"/>
 	<assets path="assets/shared"        library="shared"        exclude="*.ogg" if="web"/>
 	<assets path="assets/shared"        library="shared"        exclude="*.mp3" unless="web"/>
 	<!-- <assets path="assets/week2"         library="week2"         exclude="*.ogg" if="web"/> -->
-	
-	<!-- <assets path='example_mods' rename='mods' embed='false' if="MODS_ALLOWED"/> -->
-	<!-- <assets path='art/readme.txt' rename='do NOT readme.txt' /> -->
-	<!-- <template path='mods' /> -->
-	
-	<!-- assets path="CHANGELOG.md" rename='changelog.txt' -->
 
 	<!-- NOTE FOR FUTURE SELF SINCE FONTS ARE ALWAYS FUCKY 
 		TO FIX ONE OF THEM, I CONVERTED IT TO OTF. DUNNO IF YOU NEED TO
@@ -109,15 +102,16 @@
 	<haxelib name="flixel" />
 	<haxedev set='webgl' />
 
-	<!--In case you want to use the addons package-->
 	<haxelib name="flixel-addons" />
-	<haxelib name="hscript" />
-
-	<!--In case you want to use the ui package-->
 	<haxelib name="flixel-ui" />
-	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
-	<haxelib name="faxe" if='switch'/>
+
 	<!--<haxelib name="polymod"/> -->
+	<haxelib name="hscript" />
+	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
+	
+	<haxelib name="faxe" if='switch'/>
+	
+	<haxelib name="hxCodec" if="VIDEOS_ALLOWED"/>
 	<haxelib name="discord_rpc" if="desktop"/>
 
 	<!-- es -->
@@ -145,8 +139,8 @@
 	<!--<haxedef name="FLX_NO_NATIVE_CURSOR" />-->
 
 	<!--Optimise inputs, be careful you will get null errors if you don't use conditionals in your game-->
-	<!-- <haxedef name="FLX_NO_MOUSE" if="mobile" /> -->
 	<!-- <haxedef name="FLX_NO_KEYBOARD" if="mobile" /> -->
+	<haxedef name="FLX_NO_MOUSE" if="mobile" />
 	<haxedef name="FLX_NO_TOUCH" if="desktop" />
 	<!--<haxedef name="FLX_NO_GAMEPAD" />-->
 

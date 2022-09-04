@@ -6,7 +6,7 @@
 		}
 	],
 	"song": {
-		"player1": "high-shadow",
+		"player1": "shadow-high",
 		"sectionLengths": [],
 		"notes": [
 			{
@@ -4748,14 +4748,12 @@
 				"mustHitSection": true
 			}
 		],
-		"player2": "knux",
+		"player2": "knuckles-high",
 		"gfVersion": "gf",
-		"initialSpeed": 1.215,
-		"sliderVelocities": null,
-		"song": "High-Shovel",
+		"song": "High Shovel",
 		"needsVoices": true,
 		"sections": 0,
-		"stage": "highzoneShadow",
+		"stage": "extra1",
 		"validScore": true,
 		"bpm": 152,
 		"speed": 2.7

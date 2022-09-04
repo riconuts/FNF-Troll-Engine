@@ -1,0 +1,14 @@
+{
+	"songs": [],
+	"difficulties": "Hard",
+	"weekCharacters": ["", "", ""],
+	"weekBackground": "",
+
+	"storyName": "Chapter 2",
+	"weekBefore": "tutorial",
+	"weekName": "Chapter 2",
+	"startUnlocked": false,
+
+	"hideStoryMode": false,
+	"hideFreeplay": false
+}

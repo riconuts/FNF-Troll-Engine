@@ -1,8 +1,6 @@
 {
 	"song": {
 		"player1": "bf",
-		"songId": "rawsong",
-		"songName": "rawsong",
 		"player2": "sonic",
 		"notes": [
 			{
@@ -10245,7 +10243,7 @@
 			{
 				"endTime": 169200,
 				"altAnim": false,
-				"mustHitSection": false,
+				"mustHitSection": true,
 				"lengthInSteps": 16,
 				"typeOfSection": 0,
 				"sectionNotes": [],
@@ -10485,7 +10483,7 @@
 			}
 		],
 		"offset": 0,
-		"song": "no-villains",
+		"song": "No Villains",
 		"validScore": true,
 		"speed": 3.2,
 		"events": [
@@ -10561,14 +10559,6 @@
 			]
 		],
 		"gfVersion": "gf",
-		"eventObjects": [
-			{
-				"type": "BPM Change",
-				"value": 200,
-				"position": 0,
-				"name": "Init BPM"
-			}
-		],
 		"chartVersion": "KE1",
 		"needsVoices": true,
 		"stage": "stage1",

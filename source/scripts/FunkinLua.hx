@@ -8,7 +8,6 @@ import llua.State;
 #end
 
 import Controls;
-import DialogueBoxPsych;
 import PlayState;
 import Type.ValueType;
 import animateatlas.AtlasFrameMaker;
@@ -49,7 +48,6 @@ import Discord;
 
 class FunkinLua extends FunkinScript
 {
-
 	public var errorHandler:String->Void;
 	#if LUA_ALLOWED
 	public var lua:State = null;
@@ -1709,6 +1707,7 @@ class FunkinLua extends FunkinScript
 		Lua_helper.add_callback(lua, "getRandomBool", function(chance:Float = 50) {
 			return FlxG.random.bool(chance);
 		});
+		/*
 		Lua_helper.add_callback(lua, "startDialogue", function(dialogueFile:String, music:String = null) {
 			var path:String;
 			#if MODS_ALLOWED
@@ -1741,6 +1740,7 @@ class FunkinLua extends FunkinScript
 				}
 			}
 		});
+		*/
 		Lua_helper.add_callback(lua, "startVideo", function(videoFile:String) {
 			#if VIDEOS_ALLOWED
 			if(FileSystem.exists(Paths.video(videoFile))) {
