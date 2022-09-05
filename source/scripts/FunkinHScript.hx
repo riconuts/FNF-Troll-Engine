@@ -10,7 +10,9 @@ import lime.app.Application;
 import lime.utils.AssetType;
 import lime.utils.Assets;
 import scripts.Globals.*;
+#if sys
 import sys.io.File;
+#end
 
 class FunkinHScript extends FunkinScript
 {
@@ -21,13 +23,6 @@ class FunkinHScript extends FunkinScript
 		parser.allowMetadata = true;
 		parser.allowJSON = true;
 		parser.allowTypes = true;
-	}
-
-	public static function fromFile(file:String, ?name:String, ?additionalVars:Map<String, Any>)
-	{
-		if (name == null)
-			name = file;
-		return fromString(File.getContent(file), name, additionalVars);
 	}
 
 	public static function fromString(script:String, ?name:String = "Script", ?additionalVars:Map<String, Any>)
@@ -50,14 +45,23 @@ class FunkinHScript extends FunkinScript
 		}
 		return new FunkinHScript(expr, name, additionalVars);
 	}
-
-	public static function parseFile(file:String, ?name:String){
-		return parseString(File.getContent(file), name != null ? name : file);
-	}
-
-	public static function parseString(script:String, ?name:String = "Script"){
+	public static function parseString(script:String, ?name:String = "Script")
+	{
 		return parser.parseString(script, name);
 	}
+
+	#if sys
+	public static function fromFile(file:String, ?name:String, ?additionalVars:Map<String, Any>)
+	{
+		if (name == null)
+			name = file;
+		return fromString(File.getContent(file), name, additionalVars);
+	}
+	public static function parseFile(file:String, ?name:String)
+	{
+		return parseString(File.getContent(file), name != null ? name : file);
+	}
+	#end
 
 	var interpreter:Interp = new Interp();
 
@@ -200,7 +204,7 @@ class FunkinHScript extends FunkinScript
 		try{
 			interpreter.execute(parsed);
 		}catch(e:haxe.Exception){
-			trace(e.details());
+			trace(scriptName, e.details());
 			FlxG.log.error("Error running hscript: " + e.message);
 		}
 	}
@@ -254,7 +258,9 @@ class FunkinHScript extends FunkinScript
 				}
 				catch (e:haxe.Exception)
 				{
+					#if sys
 					Sys.println(e.message);
+					#end
 				}
 				for (key in defaultShit.keys())
 				{

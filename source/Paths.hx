@@ -538,6 +538,7 @@ class Paths
 	{
 		var folders:Array<String> = [];
 		
+		#if sys
 		for (folder in FileSystem.readDirectory('assets/${dir}'))
 		{
 			if (!folder.contains(".") && FileSystem.isDirectory('assets/${dir}/${folder}'))
@@ -554,6 +555,7 @@ class Paths
 		}
 		#end
 		*/
+		#end
 
 		return folders;
 	}

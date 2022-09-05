@@ -1,6 +1,5 @@
 package;
 
-import cpp.Lib;
 import flixel.FlxBasic;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -16,10 +15,10 @@ import lime.system.System;
 import lime.tools.WindowData;
 import lime.ui.Window;
 import lime.ui.WindowAttributes;
-import sys.io.Process;
 
 class SinnerState extends FlxState
 {
+	#if desktop
 	var trollface:FlxSprite = new FlxSprite();
 
 	var mainWindow:Window;
@@ -48,12 +47,6 @@ class SinnerState extends FlxState
 		mainWindow = Application.current.window;
 		mainWindow.borderless = true;
 
-		/* doesn't work.
-		mainWindow.parameters.alwaysOnTop = true; 
-		mainWindow.context.attributes.background = null;
-		FlxG.camera.bgColor = FlxColor.fromString("0x0000000");
-		*/
-
 		//
 		desktopSize = mainWindow.display.bounds.size;
 		centerWindow();
@@ -68,19 +61,6 @@ class SinnerState extends FlxState
 		//
 		add(trollface.loadGraphic(Paths.image("trollface")).screenCenter());
 		trollface.setGraphicSize(0, Std.int(trollface.height * (mainWindow.height / trollface.height)));
-		
-		/*
-		var full = Sys.programPath();
-		var exeDir = StringTools.replace(Sys.getCwd(), "/", "\\");
-		exeName = StringTools.replace(full, exeDir, "");
-
-		mainWindow.onFocusOut.add(function(){
-
-		});
-		Application.current.onExit.add(function(exitCode){
-			
-		});
-		*/
 
 		super.create();
 	}
@@ -190,27 +170,5 @@ class SinnerState extends FlxState
 		x = (desktopSize.x - mainWindow.width) / 2;
 		y = (desktopSize.y - mainWindow.height) / 2;
 	}
-
-	/*	i originally wanted this joke to be a lot more brutal
-	function anotherOne(){
-		new Process(exeName, []);
-	}
-
-	public function howManyTrollings()
-	{
-		var amount = 0;
-
-		var process:Process = new Process('wmic', ['process', 'get', 'Description']);
-		var taskList = process.stdout.readAll().toString().split("\n");
-		process.close();
-
-		while (taskList.length != 0){
-			var taskName:String = StringTools.trim(taskList.pop());
-			if (taskName == exeName)
-				amount++; 
-		}
-
-		return amount;
-	}
-	*/
+	#end
 }

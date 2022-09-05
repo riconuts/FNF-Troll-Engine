@@ -63,7 +63,6 @@ import openfl.filters.ShaderFilter;
 import openfl.system.Capabilities;
 import openfl.utils.Assets as OpenFlAssets;
 import scripts.*;
-import sys.thread.Thread;
 
 using StringTools;
 #if desktop
@@ -71,6 +70,7 @@ import Discord.DiscordClient;
 #end
 #if sys
 import sys.FileSystem;
+import sys.thread.Thread;
 #end
 #if VIDEOS_ALLOWED
 import vlc.MP4Handler;
@@ -81,7 +81,7 @@ typedef LineData = {
 	var character:String;
 	var anim:String;
 };
-
+#if sys
 typedef PreloadResult = {
 	var thread:Thread;
 	var asset:String;
@@ -94,6 +94,7 @@ typedef AssetPreload = {
 	@:optional var library:String;
 	@:optional var terminate:Bool;
 }
+#end
 
 class PlayState extends MusicBeatState
 {
@@ -406,6 +407,7 @@ class PlayState extends MusicBeatState
 		}
 	}
 
+	#if sys
 	function returnCharacterPreload(characterName:String):Array<AssetPreload>{
 		var char = Character.getCharacterFile(characterName);
 		var name:String = 'icons/' + char.healthicon;
@@ -417,6 +419,7 @@ class PlayState extends MusicBeatState
 			{path: name} // icon
 		];
 	}
+	#end
 
 	override public function create()
 	{
@@ -554,6 +557,7 @@ class PlayState extends MusicBeatState
 		setStageData(stageData);
 
 		//// Multi-thread Loading Start
+		#if sys 
 		#if loadBenchmark
 		var startLoadTime = Sys.time();
 		#end
@@ -826,6 +830,7 @@ class PlayState extends MusicBeatState
 					remove(sprite);
 			}
 		}
+		#end
 		//// Multi-thread Loading End
 		
 		buildStage(curStage);
@@ -2149,6 +2154,7 @@ class PlayState extends MusicBeatState
 		generatedMusic = true;
 	}
 
+	#if sys
 	// everything returned here gets preloaded by the preloader up-top ^
 	function preloadEvent(event:EventNote):Array<AssetPreload>{
 		var preload:Array<AssetPreload> = [];
@@ -2158,6 +2164,7 @@ class PlayState extends MusicBeatState
 		}
 		return preload;
 	}
+	#end
 
 	function eventPushed(event:EventNote) {
 		switch(event.event){
@@ -3267,9 +3274,9 @@ class PlayState extends MusicBeatState
 
 				var killMe:Array<String> = value1.split('.');
 				if(killMe.length > 1) {
-					
+					FunkinLua.setVarInArray(FunkinLua.getPropertyLoopThingWhatever(killMe, true, true), killMe[killMe.length - 1], value2);
 				} else {
-					Reflect.setProperty(this, value1, value2);
+					FunkinLua.setVarInArray(this, value1, value2);
 				}
 		}
 		callOnScripts('onEvent', [eventName, value1, value2]);

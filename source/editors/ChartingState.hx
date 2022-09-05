@@ -951,6 +951,7 @@ class ChartingState extends MusicBeatState
 			".hx",
 			".hxs"
 		];
+		#if sys
 		for (i in 0...directories.length) {
 			var directory:String =  directories[i];
 			if(FileSystem.exists(directory)) {
@@ -979,6 +980,7 @@ class ChartingState extends MusicBeatState
 				}
 			}
 		}
+		#end
 
 		for (i in 1...displayNameList.length) {
 			displayNameList[i] = i + '. ' + displayNameList[i];
@@ -1023,6 +1025,7 @@ class ChartingState extends MusicBeatState
 			directories.push(Paths.mods(mod + '/events/'));
 		#end
 
+		#if sys
 		for (i in 0...directories.length) {
 			var directory:String =  directories[i];
 			if(FileSystem.exists(directory)) {
@@ -1038,6 +1041,7 @@ class ChartingState extends MusicBeatState
 				}
 			}
 		}
+		#end
 		eventPushedMap.clear();
 		eventPushedMap = null;
 

@@ -7,9 +7,6 @@
 	<!--Switch Export with Unique ApplicationID and Icon-->
 	<set name="APP_ID" value="0x0100f6c013bbc000" />
 
-	<!-- NOTE TO SELF: DISABLE THIS IF ISSUES ARE FOUND -->
-	<haxedef name="LINC_LUA_RELATIVE_DYNAMIC_LIB"/> <!-- stable luas PUT AFTER FIRST LINE WITH APP NAME AND ETC -->
-
 	<!--The flixel preloader is not accurate in Chrome. You can use it regularly if you embed the swf into a html file
 		or you can set the actual size of your file manually at "FlxPreloaderBase-onUpdate-bytesTotal"-->
 	<!-- <app preloader="Preloader" resizable="true" /> -->
@@ -61,7 +58,6 @@
 
 	<!-- PSYCH ENGINE CUSTOMIZATION -->
 	<define name="MODS_ALLOWED" if="desktop" />
-	<!-- <define name="LUA_ALLOWED" if="desktop" /> -->
 	<!-- <define name="ACHIEVEMENTS_ALLOWED" /> -->
 	<!-- <define name="VIDEOS_ALLOWED"/> -->
 	<define name="CRASH_HANDLER" if="desktop" />
@@ -84,7 +80,6 @@
 		<!-- <library name="week2"         preload="false" /> -->
 	</section>
 	
-	<assets path="plugins/"             rename=''               if="VIDEOS_ALLOWED windows" />
 	<assets path="assets/videos"        library="videos"        if="VIDEOS_ALLOWED"/>
 	<assets path="assets/songs"         library="songs"         exclude="*.ogg" if="web"/>
 	<assets path="assets/songs"         library="songs"         exclude="*.mp3" unless="web"/>
@@ -108,12 +103,10 @@
 
 	<!--<haxelib name="polymod"/> -->
 	<haxelib name="hscript" />
-	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
-	
-	<haxelib name="faxe" if='switch'/>
-	
 	<haxelib name="hxCodec" if="VIDEOS_ALLOWED"/>
+
 	<haxelib name="discord_rpc" if="desktop"/>
+	<haxelib name="faxe" if='switch'/>
 
 	<!-- es -->
 	<haxelib name="hxcpp-debug-server" if="debug"/>

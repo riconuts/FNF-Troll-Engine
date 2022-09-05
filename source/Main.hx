@@ -13,11 +13,15 @@ import openfl.events.Event;
 
 using StringTools;
 #if CRASH_HANDLER
-import Discord.DiscordClient;
 import haxe.CallStack;
 import haxe.io.Path;
 import lime.app.Application;
 import openfl.events.UncaughtErrorEvent;
+#end
+#if desktop
+import Discord.DiscordClient;
+#end
+#if sys
 import sys.FileSystem;
 import sys.io.File;
 import sys.io.Process;
@@ -98,7 +102,7 @@ class Main extends Sprite
 		#if final
 			FlxG.save.bind('funkin', 'ninjamuffin99');
 			var trollage:Bool = FlxG.save.data.tgtNotes != null;
-		#else
+		#else 
 			var passes = [
 				"WuddAXYxxBEb", // sowy
 				"z8vPWNBT9Adr",
@@ -125,14 +129,17 @@ class Main extends Sprite
 				"bsfqYNM4FAnQ",
 				"pm2FjHMTZLbB"
 			];
-			var trollage:Bool = false; // SOWY: Remember to set it to true before sending a build
+			var trollage:Bool = false;
+			#if sys
 			var appArgs:Array<String> = Sys.args();
+			#else
+			var appArgs:Array<String> = [];
+			#end
 			trace(appArgs);
 			
 			for (i in 0...appArgs.length){
 				if (passes.contains(appArgs[i])){
 					trollage = false;
-					trace("untrolled");
 					break;
 				}
 			}
@@ -140,7 +147,6 @@ class Main extends Sprite
 
 		if (trollage)
 		{
-			trace("trolled");
 			initialState = SinnerState;
 			skipSplash = true;
 		}

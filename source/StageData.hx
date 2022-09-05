@@ -29,7 +29,9 @@ typedef StageFile = {
 
 	@:optional var pixel_size:Null<Float>;
 	@:optional var preloadStrings:Array<String>;
+	#if sys
 	@:optional var preload:Array<PlayState.AssetPreload>; // incase you would like to add more information, though you shouldnt really need to
+	#end
 }
 
 class StageData {
