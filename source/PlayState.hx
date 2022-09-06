@@ -81,20 +81,21 @@ typedef LineData = {
 	var character:String;
 	var anim:String;
 };
-#if sys
-typedef PreloadResult = {
+typedef PreloadResult = { 
+	#if MULTICORE_LOADING
 	var thread:Thread;
 	var asset:String;
 	@:optional var terminated:Bool;
+	#end
 }
-
 typedef AssetPreload = {
+	#if MULTICORE_LOADING
 	var path:String;
 	@:optional var type:String;
 	@:optional var library:String;
 	@:optional var terminate:Bool;
+	#end
 }
-#end
 
 class PlayState extends MusicBeatState
 {
@@ -407,7 +408,6 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	#if sys
 	function returnCharacterPreload(characterName:String):Array<AssetPreload>{
 		var char = Character.getCharacterFile(characterName);
 		var name:String = 'icons/' + char.healthicon;
@@ -419,7 +419,6 @@ class PlayState extends MusicBeatState
 			{path: name} // icon
 		];
 	}
-	#end
 
 	override public function create()
 	{
@@ -557,7 +556,7 @@ class PlayState extends MusicBeatState
 		setStageData(stageData);
 
 		//// Multi-thread Loading Start
-		#if sys 
+		#if MULTICORE_LOADING
 		#if loadBenchmark
 		var startLoadTime = Sys.time();
 		#end
@@ -578,55 +577,32 @@ class PlayState extends MusicBeatState
 			for (number in 0...10)
 				shitToLoad.push({path: 'num$number'});
 
-
 			if(arrowSkin!=null && arrowSkin.trim()!='' && arrowSkin.length > 0){
 				shitToLoad.push({
 					path: arrowSkin
 				});
 			}
-
 			if(SONG.splashSkin != null && SONG.splashSkin.length > 0){
 				shitToLoad.push({
 					path: SONG.splashSkin
 				});
-			}else{
+			}
+
+			if(ClientPrefs.noteSkin =='Quants'){
+				shitToLoad.push({
+					path: "QUANTNOTE_assets"
+				});
 				shitToLoad.push({
 					path: "noteSplashes"
 				});
-			}
-
-			shitToLoad.push({
-				path: 'NOTE_assets'
-			});
-
-			if(isPixelStage){
-				for (number in 0...10)
-					shitToLoad.push({path: 'pixelUI/num${number}-pixel', library: "shared"});
-
-				shitToLoad.push({path: "pixelUI/sick-pixel", library: "shared"});
-				shitToLoad.push({path: "pixelUI/good-pixel", library: "shared"});
-				shitToLoad.push({path: "pixelUI/bad-pixel", library: "shared"});
-				shitToLoad.push({path: "pixelUI/shit-pixel", library: "shared"});
-				shitToLoad.push({path: "pixelUI/combo-pixel", library: "shared"});
-
-				shitToLoad.push({
-					path: "pixelUI/NOTE_assets",
-					library: "shared",
-				});
-				if(ClientPrefs.noteSkin=='Quants'){
-					shitToLoad.push({
-						path: "pixelUI/QUANTNOTE_assets",
-						library: "shared"
-					});
-				}
 			}else{
-				if(ClientPrefs.noteSkin=='Quants'){
-					shitToLoad.push({
-						path: "QUANTNOTE_assets"
-					});
-				}
+				shitToLoad.push({
+					path: 'NOTE_assets'
+				});
+				shitToLoad.push({
+					path: "QUANTnoteSplashes"
+				});
 			}
-
 
 			if(ClientPrefs.timeBarType != 'Disabled'){
 				shitToLoad.push({
@@ -2154,7 +2130,6 @@ class PlayState extends MusicBeatState
 		generatedMusic = true;
 	}
 
-	#if sys
 	// everything returned here gets preloaded by the preloader up-top ^
 	function preloadEvent(event:EventNote):Array<AssetPreload>{
 		var preload:Array<AssetPreload> = [];
@@ -2164,7 +2139,6 @@ class PlayState extends MusicBeatState
 		}
 		return preload;
 	}
-	#end
 
 	function eventPushed(event:EventNote) {
 		switch(event.event){

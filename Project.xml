@@ -61,6 +61,7 @@
 	<!-- <define name="ACHIEVEMENTS_ALLOWED" /> -->
 	<!-- <define name="VIDEOS_ALLOWED"/> -->
 	<define name="CRASH_HANDLER" if="desktop" />
+	<define name="MULTICORE_LOADING" if="desktop" />
 	<define name="loadBenchmark"/>
 
 	<!-- <define name="PRELOAD_ALL" /> -->

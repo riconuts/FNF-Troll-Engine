@@ -142,12 +142,5 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		}
 		return Globals.Function_Continue;
 	}
-
-	public function callOnHScripts(event:String, args:Array<Dynamic>, ignoreStops = false, ?exclusions:Array<String>){
-		return callOnScripts(event, args, ignoreStops, exclusions, stageScripts);
-	}
-	public function setOnHScripts(variable:String, arg:Dynamic){
-		return setOnScripts(variable, arg, stageScripts);
-	}
 	////
 }

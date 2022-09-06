@@ -103,46 +103,7 @@ class Main extends Sprite
 			FlxG.save.bind('funkin', 'ninjamuffin99');
 			var trollage:Bool = FlxG.save.data.tgtNotes != null;
 		#else 
-			var passes = [
-				"WuddAXYxxBEb", // sowy
-				"z8vPWNBT9Adr",
-				"nUnSeZQmz6KB",
-				"VV4LAe9PqSvV",
-				"HLLSVHyKeVhj",
-				"mYJ4S2LdvzG9",
-				"B2VD7t6uQEUP",
-				"7NKmLsBrak4C",
-				"J5GEVXxc2UT8",
-				"dDrx97SGvNMt",
-				"7NCTTgPS4vUL",
-				"yxxexaErfW67",
-				"dmnBrrwjzm4p",
-				"4teqYpSvWy3e",
-				"uxR7np7JSpkT",
-				"2zWgm5dLuPcF",
-				"CgwD84agM2ns",
-				"vtdbaVNAyXmf",
-				"LDpnFJBphcaA",
-				"YGAD5PKxLbMZ",
-				"VUd3j4rsXDd4",
-				"HW7S8TuwCzzZ",
-				"bsfqYNM4FAnQ",
-				"pm2FjHMTZLbB"
-			];
 			var trollage:Bool = false;
-			#if sys
-			var appArgs:Array<String> = Sys.args();
-			#else
-			var appArgs:Array<String> = [];
-			#end
-			trace(appArgs);
-			
-			for (i in 0...appArgs.length){
-				if (passes.contains(appArgs[i])){
-					trollage = false;
-					break;
-				}
-			}
 		#end
 
 		if (trollage)
