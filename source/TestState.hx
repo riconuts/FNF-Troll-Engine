@@ -156,7 +156,7 @@ class TestState extends MusicBeatState{
 		////
 		var bgGroup = new FlxTypedGroup<FlxBasic>();
 		group.add(bgGroup);
-		var bg = new TitleStage(0);
+		var bg = new Stage("stage1").buildStage();
 		bgGroup.add(bg);
 
 		group.add(UI_box);
@@ -180,7 +180,8 @@ class TestState extends MusicBeatState{
 		var titleStepper = new FlxUINumericStepper(10, 40, 1, 0, 0, titleNames.length-1, 0);
 		group.add(titleStepper);
 		
-		var bgStepper = new FlxUINumericStepper(10, 70, 1, 0, 0, TitleStage.stageNames.length-1, 0);
+		var stageNames = Stage.getStageList();
+		var bgStepper = new FlxUINumericStepper(10, 70, 1, 0, 0, stageNames.length-1, 0);
 		group.add(bgStepper);
 
 		var changeButton = new FlxButton(10, 100, "Set", function()
@@ -188,7 +189,7 @@ class TestState extends MusicBeatState{
 			switchLogo(Std.int(titleStepper.value));
 			bgGroup.remove(bg);
 			bg.destroy();
-			bg = new TitleStage(Std.int(bgStepper.value));
+			bg = new Stage(stageNames[Std.int(bgStepper.value)]).buildStage();
 			bgGroup.add(bg);
 		});
 		group.add(changeButton);

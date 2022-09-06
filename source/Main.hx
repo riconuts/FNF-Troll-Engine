@@ -106,8 +106,7 @@ class Main extends Sprite
 			var trollage:Bool = false;
 		#end
 
-		if (trollage)
-		{
+		if (trollage){
 			initialState = SinnerState;
 			skipSplash = true;
 		}

@@ -192,10 +192,8 @@ class FunkinHScript extends FunkinScript
 				return flixel.FlxG.state;
 			});
 		}
-
-
-		if (additionalVars != null)
-		{
+		
+		if (additionalVars != null){
 			for (key in additionalVars.keys())
 				set(key, additionalVars.get(key));
 		}
@@ -204,7 +202,7 @@ class FunkinHScript extends FunkinScript
 		try{
 			interpreter.execute(parsed);
 		}catch(e:haxe.Exception){
-			trace(scriptName, e.details());
+			trace('${scriptName}: '+ e.details());
 			FlxG.log.error("Error running hscript: " + e.message);
 		}
 	}

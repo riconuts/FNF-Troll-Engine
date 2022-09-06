@@ -1,0 +1,19 @@
+var offX = -1000/2;
+var offY = -500/2;
+
+function onLoad(stage){
+	var sky = new FlxSprite(offX, offY);
+	sky.loadGraphic(Paths.image("extra2/extra2 sky"));
+	sky.scrollFactor.set(0.3, 0);
+	stage.add(sky);
+	
+	var back = new FlxSprite(offX, offY + 500);
+	back.loadGraphic(Paths.image("extra2/extra2 back"));
+	back.scrollFactor.set(0.8, 0.8);
+	stage.add(back);
+
+	var ground = new FlxSprite(offX + 500, offY + 710);
+	ground.loadGraphic(Paths.image("extra2/extra2 ground"));	
+	ground.scrollFactor.set(1, 0.95);
+	stage.add(ground);
+}

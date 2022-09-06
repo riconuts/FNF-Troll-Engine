@@ -1,0 +1,8 @@
+importClass("openfl.utils.Assets");
+
+/*
+var sowy = Assets.list();
+for (ass in sowy){
+	trace(ass);
+}
+*/

@@ -55,6 +55,7 @@ class StageEditorState extends MusicBeatState{
 	public var opponentCameraOffset:Array<Float> = null;
 	public var girlfriendCameraOffset:Array<Float> = null;
 
+	var stage:Stage;
 	var stageData:StageFile;
 
 	var focusedChar(default, set):String = "boyfriend";
@@ -308,8 +309,8 @@ class StageEditorState extends MusicBeatState{
 
 	function makeStage()
     {
-		var stage = new Stage(curStage);
-        var stageData = stage.stageData;
+		stage = new Stage(curStage);
+        stageData = stage.stageData;
 
         ////
 		defaultCamZoom *= stageData.defaultZoom;

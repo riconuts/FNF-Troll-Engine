@@ -2498,7 +2498,6 @@ class ChartingState extends MusicBeatState
 			leftIcon.changeIcon(healthIconP1);
 			rightIcon.changeIcon(healthIconP2);
 			if (_song.notes[curSection].gfSection) leftIcon.changeIcon(healthIconP3);
-
 		}
 		else
 		{
@@ -2506,6 +2505,9 @@ class ChartingState extends MusicBeatState
 			rightIcon.changeIcon(healthIconP1);
 			if (_song.notes[curSection].gfSection) leftIcon.changeIcon(healthIconP3);
 		}
+
+		leftIcon.setGraphicSize(0, 45);
+		rightIcon.setGraphicSize(0, 45);
 	}
 
 	function loadHealthIconFromCharacter(char:String) {

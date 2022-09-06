@@ -17,16 +17,20 @@ import flixel.system.FlxSound;
 import flixel.text.FlxText;
 import flixel.tweens.FlxTween;
 import scripts.*;
+
+using StringTools;
 #if sys
 import sys.FileSystem;
 #end
 
+
 class Stage extends FlxTypedGroup<FlxBasic>
 {
-	public var stageScripts:Array<FunkinHScript> = [];
+	public var stageScripts:Array<FunkinHScript> = []; // should only be one script but im gonna leave this array just in case
 	var exts = ["hx", "hscript", "hxs"];
 
 	public var foreground = new FlxTypedGroup<FlxBasic>();
+	public var curStage = "stage1";
 	public var stageData:StageFile = {
 		directory: "",
 		defaultZoom: 1,
@@ -41,18 +45,20 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		camera_speed: 1
 	};
 
-	public function new(?curStage = "stage")
+	public function new(?StageName = "stage")
 	{
 		super();
-		loadStage(curStage);
-	}
 
-	function loadStage(curStage:String)
-	{
+		if (StageName != null)
+			curStage = StageName;
+		
 		var newStageData = StageData.getStageFile(curStage);
 		if (newStageData != null)
 			stageData = newStageData;
+	}
 
+	public function buildStage()
+	{
 		// STAGE SCRIPTS
 		var doPush:Bool = false;
 		var baseScriptFile:String = 'stages/' + curStage;
@@ -76,7 +82,10 @@ class Stage extends FlxTypedGroup<FlxBasic>
 				}
 			}
 		}
+
 		callOnScripts("onLoad", [this, foreground], true, null, null, false);
+
+		return this;
 	}
 
 	////
@@ -143,4 +152,58 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		return Globals.Function_Continue;
 	}
 	////
+	public static function getStageList():Array<String>{
+		var stages:Array<String> = [];
+
+		#if MODS_ALLOWED
+		var directories:Array<String> = [
+			Paths.mods('stages/'),
+			Paths.mods(Paths.currentModDirectory + '/stages/'),
+			Paths.getPreloadPath('stages/')
+		];
+		for (mod in Paths.getGlobalMods())
+			directories.push(Paths.mods(mod + '/stages/'));
+		#else
+		var directories:Array<String> = [Paths.getPreloadPath('stages/')];
+		#end
+		
+		var tempMap:Map<String, Bool> = new Map<String, Bool>();
+		var stageFile:Array<String> = CoolUtil.coolTextFile(Paths.txt('stageList'));
+		for (i in 0...stageFile.length)
+		{ // Prevent duplicates
+			var stageToCheck:String = stageFile[i];
+			if (!tempMap.exists(stageToCheck))
+			{
+				stages.push(stageToCheck);
+			}
+			tempMap.set(stageToCheck, true);
+		}
+		#if MODS_ALLOWED
+		for (i in 0...directories.length)
+		{
+			var directory:String = directories[i];
+			if (FileSystem.exists(directory))
+			{
+				for (file in FileSystem.readDirectory(directory))
+				{
+					var path = haxe.io.Path.join([directory, file]);
+					if (!FileSystem.isDirectory(path) && file.endsWith('.json'))
+					{
+						var stageToCheck:String = file.substr(0, file.length - 5);
+						if (!tempMap.exists(stageToCheck))
+						{
+							tempMap.set(stageToCheck, true);
+							stages.push(stageToCheck);
+						}
+					}
+				}
+			}
+		}
+		#end
+
+		if (stages.length < 1)
+			stages.push('stage');
+
+		return stages;
+	}
 }
