@@ -61,6 +61,7 @@ class StoryMenuState extends MusicBeatState
 		FlxG.camera.bgColor = FlxColor.BLACK;
 
 		WeekData.reloadWeekFiles(true);
+		trace(WeekData.weeksList);
 
 		var chapN:Int = -1;
 		for (weekName in WeekData.weeksList){

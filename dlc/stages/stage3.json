@@ -1,15 +1,34 @@
 {
-	"directory": "",
-	"defaultZoom": 0.8,
+	"camera_opponent": [
+		0,
+		0
+	],
+	"girlfriend": [
+		1100,
+		630
+	],
+	"camera_girlfriend": [
+		0,
+		0
+	],
+	"boyfriend": [
+		1660,
+		700
+	],
 	"isPixelStage": false,
-
-	"boyfriend": [1160, 100],
-	"girlfriend": [800, 130],
-	"opponent": [170, 100],
+	"preloadStrings": null,
+	"opponent": [
+		470,
+		700
+	],
 	"hide_girlfriend": false,
-
-	"camera_boyfriend": [0, 0],
-	"camera_opponent": [0, 0],
-	"camera_girlfriend": [0, 0],
-	"camera_speed": 1
+	"pixel_size": null,
+	"directory": "",
+	"camera_speed": 1,
+	"defaultZoom": 0.8,
+	"preload": null,
+	"camera_boyfriend": [
+		0,
+		0
+	]
 }

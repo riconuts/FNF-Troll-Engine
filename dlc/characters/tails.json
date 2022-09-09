@@ -79,15 +79,15 @@
 	"no_antialiasing": false,
 	"image": "characters/tails",
 	"position": [
-		-100,
-		50
+		-254,
+		-645
 	],
 	"healthicon": "tails",
 	"flip_x": false,
 	"healthbar_colors": [
 		255,
 		195,
-		40
+		20
 	],
 	"camera_position": [
 		0,

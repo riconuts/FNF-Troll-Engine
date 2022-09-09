@@ -1,7 +1,5 @@
 {
  "song": {
-  "songName": "rawsong",
-  "songId": "rawsong",
   "player1": "bf",
   "gfVersion": "gf",
   "notes": [
@@ -8984,22 +8982,12 @@
    }
   ],
   "player2": "gf",
-  "eventObjects": [
-   {
-    "name": "0SM",
-    "position": 0,
-    "value": 172,
-    "type": "BPM Change"
-   }
-  ],
-  "chartVersion": "KE1",
   "offset": 0,
-  "song": "unknown",
+  "song": "Proving Nothing",
   "needsVoices": true,
-  "stage": "stage",
+  "stage": "stage1",
   "validScore": false,
   "bpm": 172,
-  "speed": 1,
-  "noteStyle": "normal"
+  "speed": 2.4
  }
 }

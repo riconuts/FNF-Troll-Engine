@@ -25,6 +25,7 @@ function dadShoot(){
 	var dad = instance.dad;
 	if (dad != null){
 		dad.playAnim("shoot", true);
+		dad.specialAnim = true;
 		dad.animTimer = 1/24*12;
 	}
 }
@@ -41,7 +42,8 @@ function goodNoteHit(note:Note){
 	var boyfriend = instance.boyfriend;
 	if (boyfriend != null){
 		boyfriend.playAnim("dodge", true);
-		boyfriend.animTimer = 1/24*18;
+		boyfriend.specialAnim = true;
+		boyfriend.animTimer = 1/24*14;
 	}
 }
 
@@ -51,7 +53,8 @@ function noteMiss(note:Note){
 	var boyfriend = instance.boyfriend;
 	if (boyfriend != null){
 		boyfriend.playAnim("shot", true);
-		boyfriend.animTimer = 1/24*18;
+		boyfriend.specialAnim = true;
+		boyfriend.animTimer = 1/24*14;
 	}
 	
 	instance.camHUD.shake(0.01, 0.2);

@@ -1,12 +1,8 @@
 {
 	"song": {
-		"speed": 3.2,
-		"stage": "stage1",
-		"player1": "bf",
-		"player2": "sonic",
 		"events": [
 			[
-				63300,
+				62400,
 				[
 					[
 						"Change Character",
@@ -16,7 +12,7 @@
 				]
 			],
 			[
-				66000,
+				65700,
 				[
 					[
 						"Change Character",
@@ -26,7 +22,7 @@
 				]
 			],
 			[
-				86400,
+				86100,
 				[
 					[
 						"Change Character",
@@ -46,13 +42,18 @@
 				]
 			],
 			[
-				124800,
+				124500,
 				[
 					[
 						"Change Character",
 						"dad",
 						"sonic-mad"
-					],
+					]
+				]
+			],
+			[
+				124800,
+				[
 					[
 						"Tween Zoom",
 						"1.3",
@@ -70,14 +71,6 @@
 					]
 				]
 			]
-		],
-		"notes": [],
-		"splashSkin": null,
-		"validScore": false,
-		"gfVersion": "gf",
-		"bpm": 200,
-		"arrowSkin": null,
-		"needsVoices": true,
-		"song": "no-villains"
+		]
 	}
 }

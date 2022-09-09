@@ -1,73 +1,73 @@
 {
 	"animations": [
 		{
+			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
-			"loop": false,
-			"anim": "idle",
 			"fps": 24,
-			"name": "Idle",
-			"indices": []
+			"anim": "idle",
+			"indices": [],
+			"name": "Idle"
 		},
 		{
-			"loop": false,
 			"offsets": [
 				-70,
 				-30
 			],
-			"anim": "singLEFT",
+			"loop": false,
 			"fps": 24,
-			"name": "Left",
-			"indices": []
+			"anim": "singLEFT",
+			"indices": [],
+			"name": "Left"
 		},
 		{
-			"loop": false,
 			"offsets": [
 				9,
 				-38
 			],
-			"anim": "singDOWN",
+			"loop": false,
 			"fps": 24,
-			"name": "Down",
-			"indices": []
+			"anim": "singDOWN",
+			"indices": [],
+			"name": "Down"
 		},
 		{
-			"loop": false,
 			"offsets": [
 				-50,
 				96
 			],
-			"anim": "singUP",
+			"loop": false,
 			"fps": 24,
-			"name": "Up",
-			"indices": []
+			"anim": "singUP",
+			"indices": [],
+			"name": "Up"
 		},
 		{
-			"loop": false,
 			"offsets": [
 				-46,
 				-26
 			],
-			"anim": "singRIGHT",
+			"loop": false,
 			"fps": 24,
-			"name": "Right",
-			"indices": []
+			"anim": "singRIGHT",
+			"indices": [],
+			"name": "Right"
 		}
 	],
 	"no_antialiasing": false,
 	"image": "characters/dark_sonic",
 	"position": [
-		-150,
-		-15
+		-340,
+		-725
 	],
-	"healthicon": "face",
+	"healthicon": "dark-sonic",
 	"flip_x": false,
 	"healthbar_colors": [
-		161,
-		161,
-		161
+		21,
+		21,
+		61
 	],
 	"camera_position": [
 		-100,

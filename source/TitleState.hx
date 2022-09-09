@@ -7,6 +7,7 @@ import flixel.FlxState;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.addons.transition.TransitionData;
 import flixel.graphics.frames.FlxAtlasFrames;
+import flixel.graphics.frames.FlxFrame;
 import flixel.group.FlxGroup;
 import flixel.input.gamepad.FlxGamepad;
 import flixel.math.FlxMath;
@@ -56,6 +57,9 @@ class TitleState extends MusicBeatState
 	var credTextShit:Alphabet;
 	var textGroup:FlxGroup;
 	var ngSpr:FlxSprite;
+
+	var titleTextColors:Array<FlxColor> = [0xFF33FFFF, 0xFF3333CC];
+	var titleTextAlphas:Array<Float> = [1, .64];
 
 	var curWacky:Array<String> = [];
 
@@ -142,23 +146,24 @@ class TitleState extends MusicBeatState
 		
 		add(logoBl);
 		logoBl.shader = swagShader.shader;
-
+		
 		titleText = new FlxSprite(100, 576);
 		#if (desktop && MODS_ALLOWED)
-		var path = "dlc/" + Paths.currentModDirectory + "/images/titleEnter.png";
-		if (!FileSystem.exists(path)){
-			path = "dlc/images/titleEnter.png";
-		}
-		if (!FileSystem.exists(path)){
+		var path = "mods/" + Paths.currentModDirectory + "/images/titleEnter.png";
+		if (!FileSystem.exists(path))
+			path = "mods/images/titleEnter.png";
+		if (!FileSystem.exists(path))
 			path = "assets/images/titleEnter.png";
-		}
-		titleText.frames = FlxAtlasFrames.fromSparrow(BitmapData.fromFile(path),File.getContent(StringTools.replace(path,".png",".xml")));
-		#else
 
+		// trace(path, FileSystem.exists(path));
+		titleText.frames = FlxAtlasFrames.fromSparrow(BitmapData.fromFile(path), File.getContent(StringTools.replace(path, ".png", ".xml")));
+		#else
 		titleText.frames = Paths.getSparrowAtlas('titleEnter');
 		#end
-		titleText.animation.addByPrefix('idle', "Press Enter to Begin", 24);
-		titleText.animation.addByPrefix('press', "ENTER PRESSED", 24);
+		
+		titleText.animation.addByPrefix('idle', "ENTER IDLE", 24);
+		titleText.animation.addByPrefix('press', ClientPrefs.flashing ? "ENTER PRESSED" : "ENTER FREEZE", 24);
+
 		titleText.antialiasing = ClientPrefs.globalAntialiasing;
 		titleText.animation.play('idle');
 		titleText.updateHitbox();
@@ -217,6 +222,7 @@ class TitleState extends MusicBeatState
 
 	var transitioning:Bool = false;
 	private static var playJingle:Bool = false;
+	var titleTimer:Float = 0;
 
 	override function update(elapsed:Float)
 	{
@@ -250,11 +256,44 @@ class TitleState extends MusicBeatState
 			#end
 		}
 
+		titleTimer += CoolUtil.boundTo(elapsed, 0, 1);
+		if (titleTimer > 2)
+			titleTimer -= 2;
+
 		if (initialized && !transitioning && skippedIntro)
 		{
-			if(pressedEnter)
+			if(!pressedEnter){
+				var timer:Float = titleTimer;
+				if (timer >= 1)
+					timer = (-timer) + 2;
+
+				timer = FlxEase.quadInOut(timer);
+				
+				titleText.color = FlxColor.interpolate(titleTextColors[0], titleTextColors[1], timer);
+				titleText.alpha = FlxMath.lerp(titleTextAlphas[0], titleTextAlphas[1], timer);
+			}
+			else
 			{
-				exitState();
+				titleText.color = FlxColor.WHITE;
+				titleText.alpha = 1;
+
+				if (titleText != null)
+					titleText.animation.play('press');
+
+				FlxG.camera.flash(ClientPrefs.flashing ? FlxColor.WHITE : 0x4CFFFFFF, 1);
+				FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
+
+				transitioning = true;
+
+				new FlxTimer().start(1, function(tmr:FlxTimer)
+				{
+					if (mustUpdate) {
+						MusicBeatState.switchState(new OutdatedState());
+					} else {
+						MusicBeatState.switchState(new MainMenuState());
+					}
+					closedState = true;
+				});
 			}
 		}
 
@@ -270,27 +309,6 @@ class TitleState extends MusicBeatState
 		}
 
 		super.update(elapsed);
-	}
-
-	function exitState(){
-		if (closedState) return;
-
-		if(titleText != null) titleText.animation.play('press');
-
-		FlxG.camera.flash(FlxColor.WHITE, 1);
-		FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
-
-		transitioning = true;
-
-		new FlxTimer().start(1, function(tmr:FlxTimer)
-		{
-			if (mustUpdate) {
-				MusicBeatState.switchState(new OutdatedState());
-			} else {
-				MusicBeatState.switchState(new MainMenuState());
-			}
-			closedState = true;
-		});
 	}
 
 	function createCoolText(textArray:Array<String>, ?offset:Float = 0)

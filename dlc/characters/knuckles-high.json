@@ -1,77 +1,77 @@
 {
 	"animations": [
 		{
+			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
-			"loop": false,
+			"fps": 24,
 			"anim": "idle",
-			"fps": 24,
-			"name": "knuckles highdle",
-			"indices": []
+			"indices": [],
+			"name": "knuckles highdle"
 		},
 		{
+			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
-			"loop": false,
+			"fps": 24,
 			"anim": "singUP",
-			"fps": 24,
-			"name": "knuckles up",
-			"indices": []
+			"indices": [],
+			"name": "knuckles up"
 		},
 		{
+			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
-			"loop": false,
+			"fps": 24,
 			"anim": "singLEFT",
-			"fps": 24,
-			"name": "knuckles left",
-			"indices": []
+			"indices": [],
+			"name": "knuckles left"
 		},
 		{
+			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
-			"loop": false,
+			"fps": 24,
 			"anim": "singRIGHT",
-			"fps": 24,
-			"name": "knuckles right",
-			"indices": []
+			"indices": [],
+			"name": "knuckles right"
 		},
 		{
+			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
-			"loop": false,
+			"fps": 24,
 			"anim": "singDOWN",
-			"fps": 24,
-			"name": "knuckles down",
-			"indices": []
+			"indices": [],
+			"name": "knuckles down"
 		},
 		{
+			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
-			"loop": false,
-			"anim": "singDOWN-alt",
 			"fps": 24,
-			"name": "knuckles cough",
-			"indices": []
+			"anim": "singDOWN-alt",
+			"indices": [],
+			"name": "knuckles cough"
 		}
 	],
 	"no_antialiasing": false,
 	"image": "characters/knuckles",
 	"position": [
-		0,
-		-190
+		-380,
+		-910
 	],
 	"healthicon": "knuckles-high",
 	"flip_x": false,

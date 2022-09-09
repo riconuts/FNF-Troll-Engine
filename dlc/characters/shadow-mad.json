@@ -1,88 +1,88 @@
 {
 	"animations": [
 		{
-			"loop": false,
 			"offsets": [
 				3,
 				0
 			],
-			"fps": 24,
+			"loop": false,
 			"anim": "idle",
-			"indices": [],
-			"name": "shadow-mad mad idle"
+			"fps": 24,
+			"name": "shadow-mad mad idle",
+			"indices": []
 		},
 		{
-			"loop": false,
 			"offsets": [
 				10,
 				-6
 			],
-			"fps": 24,
+			"loop": false,
 			"anim": "singUP",
-			"indices": [],
-			"name": "shadow-mad up"
+			"fps": 24,
+			"name": "shadow-mad up",
+			"indices": []
 		},
 		{
-			"loop": false,
 			"offsets": [
 				37,
 				10
 			],
-			"fps": 24,
+			"loop": false,
 			"anim": "singLEFT",
-			"indices": [],
-			"name": "shadow-mad left"
+			"fps": 24,
+			"name": "shadow-mad left",
+			"indices": []
 		},
 		{
-			"loop": false,
 			"offsets": [
 				-1,
 				0
 			],
-			"fps": 24,
+			"loop": false,
 			"anim": "singRIGHT",
-			"indices": [],
-			"name": "shadow-mad right"
+			"fps": 24,
+			"name": "shadow-mad right",
+			"indices": []
 		},
 		{
-			"loop": false,
 			"offsets": [
 				0,
 				10
 			],
-			"fps": 24,
+			"loop": false,
 			"anim": "singDOWN",
-			"indices": [],
-			"name": "shadow-mad down"
+			"fps": 24,
+			"name": "shadow-mad down",
+			"indices": []
 		},
 		{
-			"loop": false,
 			"offsets": [
 				-77,
 				-27
 			],
-			"fps": 24,
+			"loop": false,
 			"anim": "die",
-			"indices": [],
-			"name": "shadow-mad die"
+			"fps": 24,
+			"name": "shadow-mad die",
+			"indices": []
 		},
 		{
-			"loop": false,
 			"offsets": [
 				10,
 				10
 			],
-			"fps": 24,
+			"loop": false,
 			"anim": "shoot",
-			"indices": [],
-			"name": "shadow-mad shoot"
+			"fps": 24,
+			"name": "shadow-mad shoot",
+			"indices": []
 		}
 	],
 	"no_antialiasing": false,
 	"image": "characters/shadow-mad",
 	"position": [
-		-90,
-		-300
+		-370,
+		-1020
 	],
 	"healthicon": "shadow",
 	"flip_x": false,

@@ -1,66 +1,66 @@
 {
 	"animations": [
 		{
-			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
-			"fps": 24,
+			"loop": false,
 			"anim": "idle",
-			"indices": [],
-			"name": "sonic_nothing nothing idle"
+			"fps": 24,
+			"name": "sonic_nothing nothing idle",
+			"indices": []
 		},
 		{
-			"loop": false,
 			"offsets": [
 				-8,
 				4
 			],
-			"fps": 24,
+			"loop": false,
 			"anim": "singUP",
-			"indices": [],
-			"name": "sonic_nothing up"
+			"fps": 24,
+			"name": "sonic_nothing up",
+			"indices": []
 		},
 		{
-			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
-			"fps": 24,
+			"loop": false,
 			"anim": "singLEFT",
-			"indices": [],
-			"name": "sonic_nothing left"
+			"fps": 24,
+			"name": "sonic_nothing left",
+			"indices": []
 		},
 		{
-			"loop": false,
 			"offsets": [
 				6,
 				0
 			],
-			"fps": 24,
+			"loop": false,
 			"anim": "singRIGHT",
-			"indices": [],
-			"name": "sonic_nothing right"
+			"fps": 24,
+			"name": "sonic_nothing right",
+			"indices": []
 		},
 		{
-			"loop": false,
 			"offsets": [
 				0,
 				-1
 			],
-			"fps": 24,
+			"loop": false,
 			"anim": "singDOWN",
-			"indices": [],
-			"name": "sonic_nothing down"
+			"fps": 24,
+			"name": "sonic_nothing down",
+			"indices": []
 		}
 	],
 	"no_antialiasing": false,
 	"image": "characters/sonic-mad",
 	"position": [
 		0,
-		-90
+		-800
 	],
 	"healthicon": "bf",
 	"flip_x": false,

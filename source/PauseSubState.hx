@@ -48,11 +48,11 @@ class PauseSubState extends MusicBeatSubstate
 			}
 
 			var num:Int = 0;
-			if(!PlayState.instance.startingSong)
-			{
+			//if(!PlayState.instance.startingSong)
+			//{
 				num = 1;
 				menuItemsOG.insert(shit, 'Skip Time');
-			}
+			//}
 			menuItemsOG.insert(shit + num, 'End Song');
 			menuItemsOG.insert(shit + num, 'Toggle Practice Mode');
 			menuItemsOG.insert(shit + num, 'Toggle Botplay');

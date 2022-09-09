@@ -63,6 +63,7 @@
 	<define name="CRASH_HANDLER" if="desktop" />
 	<define name="MULTICORE_LOADING" if="desktop" />
 	<define name="loadBenchmark"/>
+	<!-- <define name="traceLoading"/> -->
 
 	<!-- <define name="PRELOAD_ALL" /> -->
 	<define name="PRELOAD_ALL" unless="web" />

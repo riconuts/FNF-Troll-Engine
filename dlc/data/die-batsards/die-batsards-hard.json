@@ -217,7 +217,7 @@
 				"mustHitSection": false
 			},
 			{
-				"altAnim": true,
+				"altAnim": false,
 				"sectionNotes": [
 					[
 						10833.3333333333,
@@ -269,7 +269,7 @@
 				"mustHitSection": true
 			},
 			{
-				"altAnim": true,
+				"altAnim": false,
 				"sectionNotes": [
 					[
 						12000,
@@ -311,7 +311,7 @@
 				"mustHitSection": true
 			},
 			{
-				"altAnim": true,
+				"altAnim": false,
 				"sectionNotes": [
 					[
 						13500,
@@ -348,7 +348,7 @@
 				"mustHitSection": true
 			},
 			{
-				"altAnim": true,
+				"altAnim": false,
 				"sectionNotes": [
 					[
 						14666.6666666667,
@@ -896,7 +896,7 @@
 				"mustHitSection": true
 			},
 			{
-				"altAnim": true,
+				"altAnim": false,
 				"sectionNotes": [
 					[
 						32000,
@@ -933,7 +933,7 @@
 				"mustHitSection": true
 			},
 			{
-				"altAnim": true,
+				"altAnim": false,
 				"sectionNotes": [
 					[
 						33333.3333333333,
@@ -985,7 +985,7 @@
 				"mustHitSection": true
 			},
 			{
-				"altAnim": true,
+				"altAnim": false,
 				"sectionNotes": [
 					[
 						34666.6666666667,
@@ -1047,7 +1047,7 @@
 				"mustHitSection": true
 			},
 			{
-				"altAnim": true,
+				"altAnim": false,
 				"sectionNotes": [
 					[
 						36000,
@@ -1890,7 +1890,7 @@
 				"mustHitSection": true
 			},
 			{
-				"altAnim": true,
+				"altAnim": false,
 				"sectionNotes": [
 					[
 						48000,
@@ -1982,7 +1982,7 @@
 				"mustHitSection": false
 			},
 			{
-				"altAnim": true,
+				"altAnim": false,
 				"sectionNotes": [
 					[
 						49333.3333333333,
@@ -2326,7 +2326,7 @@
 				"mustHitSection": false
 			},
 			{
-				"altAnim": true,
+				"altAnim": false,
 				"sectionNotes": [
 					[
 						53333.3333333333,
@@ -2418,7 +2418,7 @@
 				"mustHitSection": true
 			},
 			{
-				"altAnim": true,
+				"altAnim": false,
 				"sectionNotes": [
 					[
 						54666.6666666666,
@@ -9606,88 +9606,7 @@
 		],
 		"player2": "shadow",
 		"gfVersion": "gf",
-		"events": [
-			[
-				143250,
-				[
-					[
-						"Change Character",
-						"dad",
-						"shadow-mad"
-					],
-					[
-						"Play Animation",
-						"die",
-						"dad"
-					],
-					[
-						"Change Focus",
-						"dad",
-						""
-					],
-					[
-						"Set Property",
-						"dad.voicelining",
-						"true"
-					]
-				]
-			],
-			[
-				143916.666666667,
-				[
-					[
-						"Set Property",
-						"dad.voicelining",
-						"false"
-					]
-				]
-			],
-			[
-				159666.666666667,
-				[
-					[
-						"Hey!",
-						"bf",
-						"0.33333333333333"
-					]
-				]
-			],
-			[
-				164000,
-				[
-					[
-						"Fade Strums",
-						"",
-						"3"
-					]
-				]
-			],
-			[
-				165333.333333333,
-				[
-					[
-						"Play Animation",
-						"fuckingdies",
-						"bf"
-					],
-					[
-						"Set Property",
-						"boyfriend.voicelining",
-						"true"
-					]
-				]
-			],
-			[
-				169847.222222222,
-				[
-					[
-						"Change Focus",
-						"bf",
-						""
-					]
-				]
-			]
-		],
+		"events": [],
 		"player3": null,
 		"initialSpeed": 1.35,
 		"sliderVelocities": null,

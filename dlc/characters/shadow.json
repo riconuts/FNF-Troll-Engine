@@ -1,77 +1,77 @@
 {
 	"animations": [
 		{
+			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
-			"loop": false,
-			"anim": "idle",
 			"fps": 24,
-			"name": "shadow gun idle",
-			"indices": []
+			"anim": "idle",
+			"indices": [],
+			"name": "shadow gun idle"
 		},
 		{
+			"loop": false,
 			"offsets": [
 				20,
 				0
 			],
-			"loop": false,
-			"anim": "singUP",
 			"fps": 24,
-			"name": "shadow up",
-			"indices": []
+			"anim": "singUP",
+			"indices": [],
+			"name": "shadow up"
 		},
 		{
+			"loop": false,
 			"offsets": [
 				54,
 				13
 			],
-			"loop": false,
-			"anim": "singLEFT",
 			"fps": 24,
-			"name": "shadow left",
-			"indices": []
+			"anim": "singLEFT",
+			"indices": [],
+			"name": "shadow left"
 		},
 		{
+			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
-			"loop": false,
-			"anim": "singRIGHT",
 			"fps": 24,
-			"name": "shadow right",
-			"indices": []
+			"anim": "singRIGHT",
+			"indices": [],
+			"name": "shadow right"
 		},
 		{
+			"loop": false,
 			"offsets": [
 				49,
 				22
 			],
-			"loop": false,
-			"anim": "singDOWN",
 			"fps": 24,
-			"name": "shadow down",
-			"indices": []
+			"anim": "singDOWN",
+			"indices": [],
+			"name": "shadow down"
 		},
 		{
+			"loop": false,
 			"offsets": [
 				4,
 				20
 			],
-			"loop": false,
-			"anim": "shoot",
 			"fps": 24,
-			"name": "shadow schut",
-			"indices": []
+			"anim": "shoot",
+			"indices": [],
+			"name": "shadow schut"
 		}
 	],
 	"no_antialiasing": false,
 	"image": "characters/shadow",
 	"position": [
-		-100,
-		-300
+		-370,
+		-1020
 	],
 	"healthicon": "shadow",
 	"flip_x": false,

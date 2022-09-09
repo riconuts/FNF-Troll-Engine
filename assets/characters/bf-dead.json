@@ -37,8 +37,8 @@
 	"no_antialiasing": false,
 	"image": "characters/BOYFRIEND_DEAD",
 	"position": [
-		-60,
-		90
+		-350,
+		-620
 	],
 	"healthicon": "bf",
 	"flip_x": true,

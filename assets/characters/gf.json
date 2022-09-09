@@ -1,59 +1,79 @@
 {
 	"animations": [
 		{
-			"offsets": [0,0],
 			"loop": false,
+			"offsets": [
+				0,
+				0
+			],
+			"fps": 24,
 			"anim": "cheer",
-			"fps": 24,
-			"name": "idle",
-			"indices": []
+			"indices": [],
+			"name": "idle"
 		},
 		{
-			"offsets": [0,0],
 			"loop": false,
+			"offsets": [
+				0,
+				0
+			],
+			"fps": 24,
 			"anim": "singLEFT",
-			"fps": 24,
-			"name": "idle",
-			"indices": []
+			"indices": [],
+			"name": "idle"
 		},
 		{
-			"offsets": [0,0],
 			"loop": false,
+			"offsets": [
+				0,
+				0
+			],
+			"fps": 24,
 			"anim": "singDOWN",
-			"fps": 24,
-			"name": "idle",
-			"indices": []
+			"indices": [],
+			"name": "idle"
 		},
 		{
-			"offsets": [0,0],
 			"loop": false,
+			"offsets": [
+				0,
+				0
+			],
+			"fps": 24,
 			"anim": "singUP",
-			"fps": 24,
-			"name": "idle",
-			"indices": []
+			"indices": [],
+			"name": "idle"
 		},
 		{
-			"offsets": [0,0],
 			"loop": false,
+			"offsets": [
+				0,
+				0
+			],
+			"fps": 24,
 			"anim": "singRIGHT",
-			"fps": 24,
-			"name": "idle",
-			"indices": []
+			"indices": [],
+			"name": "idle"
 		},
 		{
-			"offsets": [0,0],
 			"loop": false,
+			"offsets": [
+				0,
+				0
+			],
+			"fps": 24,
 			"anim": "sad",
-			"fps": 24,
-			"name": "idle",
-			"indices": []
+			"indices": [],
+			"name": "idle"
 		},
 		{
-			"offsets": [0,0],
 			"loop": false,
-			"anim": "danceLeft",
+			"offsets": [
+				0,
+				0
+			],
 			"fps": 24,
-			"name": "idle",
+			"anim": "danceLeft",
 			"indices": [
 				30,
 				0,
@@ -71,14 +91,17 @@
 				12,
 				13,
 				14
-			]
+			],
+			"name": "idle"
 		},
 		{
-			"offsets": [0,0],
 			"loop": false,
-			"anim": "danceRight",
+			"offsets": [
+				0,
+				0
+			],
 			"fps": 24,
-			"name": "idle",
+			"anim": "danceRight",
 			"indices": [
 				15,
 				16,
@@ -95,14 +118,15 @@
 				27,
 				28,
 				29
-			]
+			],
+			"name": "idle"
 		}
 	],
 	"no_antialiasing": false,
 	"image": "characters/GF_assets",
 	"position": [
-		0,
-		-150
+		-410,
+		-730
 	],
 	"healthicon": "gf",
 	"flip_x": false,

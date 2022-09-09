@@ -19,6 +19,7 @@ import flixel.tweens.FlxTween;
 import scripts.*;
 
 using StringTools;
+//import flixel.graphics.tile.FlxDrawQuadsItem; // wtf is this
 #if sys
 import sys.FileSystem;
 #end
@@ -29,6 +30,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 	public var stageScripts:Array<FunkinHScript> = []; // should only be one script but im gonna leave this array just in case
 	var exts = ["hx", "hscript", "hxs"];
 
+	//public var newnw = new FlxDrawQuadsItem();
 	public var foreground = new FlxTypedGroup<FlxBasic>();
 	public var curStage = "stage1";
 	public var stageData:StageFile = {
@@ -86,6 +88,12 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		callOnScripts("onLoad", [this, foreground], true, null, null, false);
 
 		return this;
+	}
+
+	override function destroy(){
+		for (script in stageScripts)
+			script.stop();
+		super.destroy();
 	}
 
 	////

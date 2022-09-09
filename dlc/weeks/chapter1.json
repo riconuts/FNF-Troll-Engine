@@ -1,0 +1,19 @@
+{
+	"songs": [
+		["Talentless Fox", "tails", [146, 113, 253]],
+		["No Villains", "sonic", [146, 113, 253]],
+		["Die Batsards", "shadow", [146, 113, 253]],
+		["Taste For Blood", "dark-sonic", [146, 113, 253]]
+	],
+	"difficulties": "Normal, Hard",
+	"weekCharacters": ["", "", ""],
+	"weekBackground": "",
+
+	"storyName": "Chapter 1",
+	"weekBefore": "tutorial",
+	"weekName": "Chapter 1",
+	"startUnlocked": true,
+
+	"hideStoryMode": false,
+	"hideFreeplay": false
+}

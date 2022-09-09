@@ -11,7 +11,12 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.group.FlxSpriteGroup;
 import flixel.math.*;
 import flixel.text.FlxText;
+import flixel.ui.*;
 import flixel.util.FlxColor;
+import haxe.Json;
+import openfl.events.Event;
+import openfl.events.IOErrorEvent;
+import openfl.net.FileReference;
 
 using StringTools;
 #if sys
@@ -87,7 +92,7 @@ class StageEditorState extends MusicBeatState{
 				yPosTxt.text = "Y: " + GF_Y;
 		}
 
-        return who;
+		return focusedChar = who;
     }
 
     // editor shit
@@ -114,18 +119,18 @@ class StageEditorState extends MusicBeatState{
 		#end
         
         //// editor shit
-		var tabs = [{name: 'Characters', label: 'Characters'},];
+		var tabs = [{name: 'Character Preview', label: 'Character Preview'},];
 		var UI_characterbox = new FlxUITabMenu(null, tabs, true);
 		UI_characterbox.cameras = [camMenu];
 
-		UI_characterbox.resize(250, 160);
+		UI_characterbox.resize(250, 190);
 		UI_characterbox.x = FlxG.width - 275;
 		UI_characterbox.y = 25;
 		UI_characterbox.scrollFactor.set();
 
 		var tab_group = new FlxUI(null, UI_characterbox);
-		tab_group.name = "Characters";
-		dadDropDown = new FlxUIDropDownMenuCustom(10, 60, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(character:String)
+		tab_group.name = "Character Preview";
+		dadDropDown = new FlxUIDropDownMenuCustom(15, 110, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(character:String)
 		{
 			var daAnim = characterList[Std.parseInt(character)];
             
@@ -142,7 +147,7 @@ class StageEditorState extends MusicBeatState{
             
 			dadDropDown.selectedLabel = daAnim;
 		});
-		gfDropDown = new FlxUIDropDownMenuCustom(10, 90, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(character:String)
+		gfDropDown = new FlxUIDropDownMenuCustom(15, 70, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(character:String)
 		{
 			var daAnim = characterList[Std.parseInt(character)];
 
@@ -160,7 +165,7 @@ class StageEditorState extends MusicBeatState{
             
 			gfDropDown.selectedLabel = daAnim;
 		});
-		bfDropDown = new FlxUIDropDownMenuCustom(10, 30, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(character:String)
+		bfDropDown = new FlxUIDropDownMenuCustom(15, 30, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(character:String)
 		{
 			var daAnim = characterList[Std.parseInt(character)];
 
@@ -177,6 +182,10 @@ class StageEditorState extends MusicBeatState{
 
 			bfDropDown.selectedLabel = daAnim;
 		});
+
+		tab_group.add(new FlxText(bfDropDown.x, bfDropDown.y - 15, 200, "Boyfriend:"));
+		tab_group.add(new FlxText(dadDropDown.x, dadDropDown.y - 15, 200, "Opponent:"));
+		tab_group.add(new FlxText(gfDropDown.x, gfDropDown.y - 15, 200, "Girlfriend:"));
 
 		dadDropDown.callback("bf");
 		gfDropDown.callback("gf");
@@ -197,6 +206,58 @@ class StageEditorState extends MusicBeatState{
 		UI_stagebox.y = UI_characterbox.y + UI_characterbox.height;
 		UI_stagebox.scrollFactor.set();
 
+		var tab_group = new FlxUI(null, UI_characterbox);
+
+		#if MODS_ALLOWED
+		var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.currentModDirectory + '/stages/'), Paths.getPreloadPath('stages/')];
+		for(mod in Paths.getGlobalMods())
+			directories.push(Paths.mods(mod + '/stages/'));
+		#else
+		var directories:Array<String> = [Paths.getPreloadPath('stages/')];
+		#end
+
+		var tempMap:Map<String, Bool> = new Map<String, Bool>();
+		var stageFile:Array<String> = CoolUtil.coolTextFile(Paths.txt('stageList'));
+		var stages:Array<String> = [];
+		for (i in 0...stageFile.length) { //Prevent duplicates
+			var stageToCheck:String = stageFile[i];
+			if(!tempMap.exists(stageToCheck)) {
+				stages.push(stageToCheck);
+			}
+			tempMap.set(stageToCheck, true);
+		}
+		#if MODS_ALLOWED
+		for (i in 0...directories.length) {
+			var directory:String = directories[i];
+			if(FileSystem.exists(directory)) {
+				for (file in FileSystem.readDirectory(directory)) {
+					var path = haxe.io.Path.join([directory, file]);
+					if (!FileSystem.isDirectory(path) && file.endsWith('.json')) {
+						var stageToCheck:String = file.substr(0, file.length - 5);
+						if(!tempMap.exists(stageToCheck)) {
+							tempMap.set(stageToCheck, true);
+							stages.push(stageToCheck);
+						}
+					}
+				}
+			}
+		}
+		#end
+		if(stages.length < 1) stages.push('stage');
+
+		var stageDropDown = new FlxUIDropDownMenuCustom(15, 30, FlxUIDropDownMenuCustom.makeStrIdLabelArray(stages, true), function(character:String){
+			curStage = stages[Std.parseInt(character)];
+			if (stage != null)
+				stage.destroy();
+			makeStage();
+		});
+		tab_group.name = "Stage Data";
+		var saveButton:FlxButton = new FlxButton(stageDropDown.x + stageDropDown.width + 15, 30, "Save Stage", function(){
+			saveStage();
+		});
+		tab_group.add(saveButton);
+		tab_group.add(stageDropDown);
+		UI_stagebox.addGroup(tab_group);
 
 		add(UI_stagebox);
 		add(UI_characterbox);
@@ -309,11 +370,11 @@ class StageEditorState extends MusicBeatState{
 
 	function makeStage()
     {
-		stage = new Stage(curStage);
+		stage = new Stage(curStage).buildStage();
         stageData = stage.stageData;
 
         ////
-		defaultCamZoom *= stageData.defaultZoom;
+		defaultCamZoom = FlxG.initialZoom * stageData.defaultZoom;
 		// isPixelStage = stageData.isPixelStage;
 
 		BF_X = stageData.boyfriend[0];
@@ -392,6 +453,15 @@ class StageEditorState extends MusicBeatState{
 
         trace(stageData);
 
+		if (stage != null){
+			remove(stage);
+			remove(stage.foreground);
+		}
+		remove(gfGroup);
+		remove(dadGroup);
+		remove(boyfriendGroup);
+		
+
 		add(stage);
         add(gfGroup);
 		add(dadGroup);
@@ -446,5 +516,74 @@ class StageEditorState extends MusicBeatState{
 		#else
 		characterList = CoolUtil.coolTextFile(Paths.txt('characterList'));
 		#end
+	}
+
+	var _file:FileReference;
+	
+	function onSaveComplete(_):Void
+	{
+		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+		_file.removeEventListener(Event.CANCEL, onSaveCancel);
+		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+		_file = null;
+		FlxG.log.notice("Successfully saved file.");
+	}
+
+	/**
+	 * Called when the save file dialog is cancelled.
+	 */
+	function onSaveCancel(_):Void
+	{
+		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+		_file.removeEventListener(Event.CANCEL, onSaveCancel);
+		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+		_file = null;
+	}
+
+	/**
+	 * Called if there is an error while saving the gameplay recording.
+	 */
+	function onSaveError(_):Void
+	{
+		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+		_file.removeEventListener(Event.CANCEL, onSaveCancel);
+		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+		_file = null;
+		FlxG.log.error("Problem saving file");
+	}
+
+	function saveStage()
+	{
+		var json = {
+			"directory": "",
+			"defaultZoom": stageData.defaultZoom,
+			"isPixelStage": stageData.isPixelStage,
+
+			"boyfriend": [BF_X, BF_Y],
+			"girlfriend": [GF_X, GF_Y],
+			"opponent": [DAD_X, DAD_Y],
+			"hide_girlfriend": stageData.hide_girlfriend,
+
+			"camera_boyfriend": stageData.camera_boyfriend,
+			"camera_opponent": stageData.camera_opponent,
+			"camera_girlfriend": stageData.camera_girlfriend,
+			"camera_speed": stageData.camera_speed,
+
+			"pixel_size": stageData.pixel_size,
+
+			"preloadStrings": stageData.preloadStrings,
+			"preload": stageData.preload
+		};
+
+		var data:String = Json.stringify(json, "\t");
+
+		if (data.length > 0)
+		{
+			_file = new FileReference();
+			_file.addEventListener(Event.COMPLETE, onSaveComplete);
+			_file.addEventListener(Event.CANCEL, onSaveCancel);
+			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+			_file.save(data, curStage + ".json");
+		}
 	}
 }

@@ -1,0 +1,21 @@
+{
+	"songs": [
+		["High Shovel", "knuckles-high", [146, 113, 253]],
+		["Proving Nothing", "sonic", [146, 113, 253]]
+	],
+	"difficulties": "Hard",
+	"weekCharacters": [
+		"",
+		"",
+		""
+	],
+	"weekBackground": "",
+
+	"storyName": "Extra",
+	"weekBefore": "tutorial",
+	"weekName": "ERROR",
+	"startUnlocked": true,
+
+	"hideStoryMode": true,
+	"hideFreeplay": false
+}

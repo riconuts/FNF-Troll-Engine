@@ -76,7 +76,6 @@ class GameOverSubstate extends MusicBeatSubstate
 	override function update(elapsed:Float)
 	{
 		PlayState.instance.callOnScripts('onUpdate', [elapsed]);
-		PlayState.instance.callOnHScripts('update', [elapsed]);
 		super.update(elapsed);
 
 		PlayState.instance.callOnScripts('onUpdatePost', [elapsed]);

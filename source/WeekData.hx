@@ -1,13 +1,13 @@
 package;
 
 #if MODS_ALLOWED
-import sys.io.File;
 import sys.FileSystem;
+import sys.io.File;
 #end
-import lime.utils.Assets;
-import openfl.utils.Assets as OpenFlAssets;
 import haxe.Json;
 import haxe.format.JsonParser;
+import lime.utils.Assets;
+import openfl.utils.Assets as OpenFlAssets;
 
 using StringTools;
 

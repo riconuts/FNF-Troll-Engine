@@ -12796,10 +12796,10 @@
 		"offset": 0,
 		"song": "Taste For Blood",
 		"needsVoices": true,
-		"stage": "stage",
+		"stage": "stage1",
 		"validScore": true,
 		"bpm": 200,
-		"speed": 1,
+		"speed": 3.4,
 		"noteStyle": "normal",
 		"events": []
 	}

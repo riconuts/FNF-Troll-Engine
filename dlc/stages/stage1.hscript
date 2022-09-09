@@ -5,12 +5,26 @@ function onLoad(stage, foreground){
 	state.camGame.bgColor = 0xFF9AD9EA;
 
 	var cave = new FlxSprite(offX + 711, offY + 25);
-	cave.loadGraphic(Paths.image("stage1/stage1 cave"));	
-	cave.scrollFactor.set(0.75, 0.75);
+	cave.loadGraphic(Paths.image("stage1/cave"));	
+	cave.scrollFactor.set(0.8, 0.75);
 	stage.add(cave);
 
+	var graphic = Paths.image("stage1/ground");
+	
 	var ground = new FlxSprite(offX, offY + 710);
-	ground.loadGraphic(Paths.image("stage1/stage1 ground"));	
+	ground.loadGraphic(graphic);	
 	ground.scrollFactor.set(1, 0.95);
 	stage.add(ground);
+	
+	var mground = new FlxSprite(ground.x - ground.width, ground.y);
+	mground.loadGraphic(graphic);	
+	mground.scrollFactor.set(1, 0.95);
+	mground.flipX = true;
+	stage.add(mground);
+	
+	var mground = new FlxSprite(ground.x + ground.width, ground.y);
+	mground.loadGraphic(graphic);	
+	mground.scrollFactor.set(1, 0.95);
+	mground.flipX = true;
+	stage.add(mground);
 }

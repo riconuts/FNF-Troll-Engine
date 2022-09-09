@@ -11301,83 +11301,10 @@
 		"song": "No Villains",
 		"validScore": true,
 		"speed": 3.2,
-		"events": [
-			[
-				62400,
-				[
-					[
-						"Change Character",
-						"dad",
-						"sonic-mad"
-					]
-				]
-			],
-			[
-				65700,
-				[
-					[
-						"Change Character",
-						"dad",
-						"sonic"
-					]
-				]
-			],
-			[
-				66000,
-				[
-					[
-						"Camera Follow Pos",
-						"700",
-						"350"
-					]
-				]
-			],
-			[
-				67125,
-				[
-					[
-						"Camera Follow Pos",
-						"",
-						""
-					]
-				]
-			],
-			[
-				86100,
-				[
-					[
-						"Change Character",
-						"dad",
-						"sonic-mad"
-					]
-				]
-			],
-			[
-				105600,
-				[
-					[
-						"Change Character",
-						"dad",
-						"sonic-forced"
-					]
-				]
-			],
-			[
-				124500,
-				[
-					[
-						"Change Character",
-						"dad",
-						"sonic-mad"
-					]
-				]
-			]
-		],
+		"events": [],
 		"gfVersion": "gf",
-		"chartVersion": "KE1",
 		"needsVoices": true,
 		"stage": "stage1",
-		"bpm": 200,
-		"noteStyle": "normal"
+		"bpm": 200
 	}
 }

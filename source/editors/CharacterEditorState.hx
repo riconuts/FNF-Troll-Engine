@@ -105,6 +105,13 @@ class CharacterEditorState extends MusicBeatState
 		cameraFollowPointer.color = FlxColor.WHITE;
 		add(cameraFollowPointer);
 
+		var zeroTwoPointer = new FlxSprite().loadGraphic(pointer);
+		zeroTwoPointer.setGraphicSize(40, 40);
+		zeroTwoPointer.updateHitbox();
+		zeroTwoPointer.color = FlxColor.RED;
+		zeroTwoPointer.setPosition(-zeroTwoPointer.width / 2, -zeroTwoPointer.height / 2);
+		add(zeroTwoPointer);
+
 		changeBGbutton = new FlxButton(FlxG.width - 360, 25, "", function()
 		{
 			onPixelBG = !onPixelBG;
@@ -138,8 +145,14 @@ class CharacterEditorState extends MusicBeatState
 
 		genBoyOffsets();
 
+		var height = FlxG.height;
+		var greenHill = new FlxSprite(-height / 2, -height);
+		greenHill.makeGraphic(height, height);
+		bgLayer.add(greenHill);
+
 		camFollow = new FlxObject(0, 0, 2, 2);
-		camFollow.screenCenter();
+		var mid = greenHill.getMidpoint();
+		camFollow.setPosition(mid.x, mid.y);
 		add(camFollow);
 
 		var tipTextArray:Array<String> = "E/Q - Camera Zoom In/Out
@@ -205,8 +218,8 @@ class CharacterEditorState extends MusicBeatState
 	}
 
 	var onPixelBG:Bool = false;
-	var OFFSET_X:Float = 300;
 	function reloadBGs() {
+		/*
 		var i:Int = bgLayer.members.length-1;
 		while(i >= 0) {
 			var memb:FlxSprite = bgLayer.members[i];
@@ -218,12 +231,7 @@ class CharacterEditorState extends MusicBeatState
 			--i;
 		}
 		bgLayer.clear();
-		var playerXDifference = 0;
-		if(char.isPlayer) playerXDifference = 670;
-
-		var greenHill = new FlxSprite();
-		greenHill.makeGraphic(FlxG.width, FlxG.height);
-		bgLayer.add(greenHill);
+		*/
 	}
 
 	/*var animationInputText:FlxUIInputText;
@@ -423,7 +431,7 @@ class CharacterEditorState extends MusicBeatState
 				character.originalFlipX = parsedJson.flip_x;
 				character.healthIcon = parsedJson.healthicon;
 				character.healthColorArray = parsedJson.healthbar_colors;
-				character.setPosition(character.positionArray[0] + OFFSET_X + 100, character.positionArray[1]);
+				character.setPosition(character.positionArray[0], character.positionArray[1]);
 			}
 
 			reloadCharacterImage();
@@ -770,7 +778,7 @@ class CharacterEditorState extends MusicBeatState
 			else if(sender == positionXStepper)
 			{
 				char.positionArray[0] = positionXStepper.value;
-				char.x = char.positionArray[0] + OFFSET_X + 100;
+				char.x = char.positionArray[0];
 				updatePointerPos();
 			}
 			else if(sender == animationXCam || sender == animationYCam)
@@ -924,7 +932,7 @@ class CharacterEditorState extends MusicBeatState
 		charLayer.add(ghostChar);
 		charLayer.add(char);
 
-		char.setPosition(char.positionArray[0] + OFFSET_X + 100, char.positionArray[1]);
+		char.setPosition(char.positionArray[0], char.positionArray[1]);
 
 		/* THIS FUNCTION WAS USED TO PUT THE .TXT OFFSETS INTO THE .JSON
 

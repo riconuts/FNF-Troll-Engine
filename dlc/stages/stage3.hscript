@@ -6,7 +6,7 @@ function onLoad(stage, foreground){
 
 	////
 	var back = new FlxSprite(offX + 200, offY + 25);
-	back.loadGraphic(Paths.image("stage3/stage3 back"));	
+	back.loadGraphic(Paths.image("stage3/back"));	
 	back.scrollFactor.set(0.75, 0.75);
 	stage.add(back);
 	
@@ -24,7 +24,7 @@ function onLoad(stage, foreground){
 
 	////
 	var ground = new FlxSprite(offX, offY + 741);
-	ground.loadGraphic(Paths.image("stage3/stage3 ground"));	
+	ground.loadGraphic(Paths.image("stage3/ground"));	
 	ground.scrollFactor.set(1, 0.95);
 	stage.add(ground);
 	

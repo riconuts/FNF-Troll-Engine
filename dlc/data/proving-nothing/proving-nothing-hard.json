@@ -1,8 +1,6 @@
 {
 	"song": {
 		"player1": "bf",
-		"songId": "rawsong",
-		"songName": "rawsong",
 		"player2": "sonic-proving",
 		"notes": [
 			{
@@ -9980,18 +9978,8 @@
 		"extraTracks": [],
 		"events": [],
 		"gfVersion": "gf",
-		"eventObjects": [
-			{
-				"type": "BPM Change",
-				"value": 172,
-				"position": 0,
-				"name": "0SM"
-			}
-		],
-		"chartVersion": "KE1",
 		"needsVoices": true,
-		"stage": "extra2",
-		"bpm": 172,
-		"noteStyle": "normal"
+		"stage": "stage1",
+		"bpm": 172
 	}
 }

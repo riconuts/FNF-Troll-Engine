@@ -35,7 +35,7 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 
 		//I'd suggest using "Low Quality" as an example for making your own option since it is the simplest here
 		var option:Option = new Option('Low Quality', //Name
-			"Check this option if your device can't run Fortnite.", //Description
+			"If checked, lowers the quality of certain graphic effects", //Description
 			'lowQuality', //Save data variable name
 			'bool', //Variable type
 			false); //Default value

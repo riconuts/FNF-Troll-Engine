@@ -2,6 +2,7 @@ package scripts;
 
 import flixel.FlxG;
 import flixel.system.FlxSound;
+import flixel.tweens.*;
 import hscript.Checker;
 import hscript.Expr;
 import hscript.Interp;
@@ -79,14 +80,15 @@ class FunkinHScript extends FunkinScript
 		set("FlxSprite", flixel.FlxSprite);
 		set("Std", Std);
 		set("state", flixel.FlxG.state);
+		set("FlxMath", flixel.math.FlxMath);
 		set("Math", Math);
 		set("Assets", Assets);
 		set("FlxSound", FlxSound);
 		set("OpenFlAssets", openfl.utils.Assets);
 		set("FlxCamera", flixel.FlxCamera);
 		set("FlxTimer", flixel.util.FlxTimer);
-		set("FlxTween", flixel.tweens.FlxTween);
-		set("FlxEase", flixel.tweens.FlxEase);
+		set("FlxTween", FlxTween);
+		set("FlxEase", FlxEase);
 		set("FlxSave", flixel.util.FlxSave); // should probably give it 1 save instead of giving it FlxSave
 		set("FlxBar", flixel.ui.FlxBar);
 		set("StringTools", StringTools);
@@ -150,6 +152,10 @@ class FunkinHScript extends FunkinScript
 			var daEnum = Type.resolveClass(enumName);
 			if (daEnum!=null)
 				set(splitted.pop(), daEnum);
+			
+		});
+
+		set("importScript", function(){
 			
 		});
 		

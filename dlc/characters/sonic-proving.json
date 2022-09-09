@@ -1,66 +1,66 @@
 {
 	"animations": [
 		{
-			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
-			"fps": 24,
+			"loop": false,
 			"anim": "idle",
-			"indices": [],
-			"name": "sonic_proving nothing idle"
+			"fps": 24,
+			"name": "sonic_proving nothing idle",
+			"indices": []
 		},
 		{
-			"loop": false,
 			"offsets": [
 				-8,
 				0
 			],
-			"fps": 24,
+			"loop": false,
 			"anim": "singUP",
-			"indices": [],
-			"name": "sonic_proving up"
+			"fps": 24,
+			"name": "sonic_proving up",
+			"indices": []
 		},
 		{
-			"loop": false,
 			"offsets": [
 				-1,
 				-1
 			],
-			"fps": 24,
+			"loop": false,
 			"anim": "singLEFT",
-			"indices": [],
-			"name": "sonic_proving left"
+			"fps": 24,
+			"name": "sonic_proving left",
+			"indices": []
 		},
 		{
-			"loop": false,
 			"offsets": [
 				6,
 				0
 			],
-			"fps": 24,
+			"loop": false,
 			"anim": "singRIGHT",
-			"indices": [],
-			"name": "sonic_proving right"
+			"fps": 24,
+			"name": "sonic_proving right",
+			"indices": []
 		},
 		{
-			"loop": false,
 			"offsets": [
 				1,
 				0
 			],
-			"fps": 24,
+			"loop": false,
 			"anim": "singDOWN",
-			"indices": [],
-			"name": "sonic_proving down"
+			"fps": 24,
+			"name": "sonic_proving down",
+			"indices": []
 		}
 	],
 	"no_antialiasing": false,
 	"image": "characters/sonic_proving",
 	"position": [
-		0,
-		-80
+		-350,
+		-800
 	],
 	"healthicon": "sonic-mad",
 	"flip_x": false,
@@ -70,7 +70,7 @@
 		220
 	],
 	"camera_position": [
-		0,
+		10,
 		0
 	],
 	"sing_duration": 4,

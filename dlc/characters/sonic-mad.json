@@ -1,70 +1,74 @@
 {
 	"animations": [
 		{
+			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
-			"loop": false,
-			"fps": 24,
 			"anim": "idle",
-			"indices": [],
-			"name": "sonic speed idle"
+			"fps": 24,
+			"name": "sonic speed idle",
+			"indices": []
 		},
 		{
+			"loop": false,
 			"offsets": [
 				-4,
 				0
 			],
-			"loop": false,
-			"fps": 24,
 			"anim": "singLEFT",
-			"indices": [],
-			"name": "sonic left"
+			"fps": 24,
+			"name": "sonic left",
+			"indices": []
 		},
 		{
+			"loop": false,
 			"offsets": [
 				-1,
 				0
 			],
-			"loop": false,
-			"fps": 24,
 			"anim": "singRIGHT",
-			"indices": [],
-			"name": "sonic right"
+			"fps": 24,
+			"name": "sonic right",
+			"indices": []
 		},
 		{
+			"loop": false,
 			"offsets": [
 				1,
 				0
 			],
-			"loop": false,
-			"fps": 24,
 			"anim": "singUP",
-			"indices": [],
-			"name": "sonic up"
+			"fps": 24,
+			"name": "sonic up",
+			"indices": []
 		},
 		{
+			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
-			"loop": false,
-			"fps": 24,
 			"anim": "singDOWN",
-			"indices": [],
-			"name": "sonic down"
+			"fps": 24,
+			"name": "sonic down",
+			"indices": []
 		}
 	],
 	"no_antialiasing": false,
 	"image": "characters/sonic_mad",
 	"position": [
-		-100,
-		-100
+		-330,
+		-830
 	],
 	"healthicon": "sonic-mad",
 	"flip_x": false,
-	"healthbar_colors": [0,162,232],
+	"healthbar_colors": [
+		0,
+		162,
+		232
+	],
 	"camera_position": [
 		-20,
 		20

@@ -205,6 +205,7 @@ class PlayState extends MusicBeatState
 
 	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
 
+	public var customZooming = false;
 	public var camZooming:Bool = false;
 	public var camZoomingMult:Float = 1;
 	public var camZoomingDecay:Float = 1;
@@ -349,12 +350,6 @@ class PlayState extends MusicBeatState
 			}
 		}
 		return cpuControlled = val;
-	}
-	function buildStage(stageName:String){
-		switch (stageName)
-		{
-			case 'stage':
-		}
 	}
 
 	function setStageData(stageData:StageFile){
@@ -550,7 +545,7 @@ class PlayState extends MusicBeatState
 		if(ClientPrefs.multicoreLoading){ // should probably move all of this to its own preload class
 			#if loadBenchmark
 			var currentTime = Sys.time();
-			trace("started preload at " + currentTime);
+			trace("started preload");
 			#end
 			var shitToLoad:Array<AssetPreload> = [
 				{path: "epic"},
@@ -558,7 +553,7 @@ class PlayState extends MusicBeatState
 				{path: "good"},
 				{path: "bad"},
 				{path: "shit"},
-				{path: "healthBar", library: "shared"},
+				{path: "healthBar"/*, library: "shared"*/},
 				{path: "combo"}
 			];
 			for (number in 0...10)
@@ -580,21 +575,21 @@ class PlayState extends MusicBeatState
 					path: "QUANTNOTE_assets"
 				});
 				shitToLoad.push({
-					path: "noteSplashes"
+					path: "QUANTnoteSplashes"
 				});
 			}else{
 				shitToLoad.push({
 					path: 'NOTE_assets'
 				});
 				shitToLoad.push({
-					path: "QUANTnoteSplashes"
+					path: "noteSplashes"
 				});
 			}
 
 			if(ClientPrefs.timeBarType != 'Disabled'){
 				shitToLoad.push({
-					path: "timeBar",
-					library: "shared"
+					path: "timeBar"/*,
+					library: "shared"*/
 				});
 			}
 			if(stageData.preloadStrings != null){
@@ -652,19 +647,6 @@ class PlayState extends MusicBeatState
 			for(shit in shitToLoad)
 				trace(shit.path);
 
-			// SOWY: clear repeats?
-			var sowyDupeCheck:Array<AssetPreload> = [];
-			shitToLoad = shitToLoad.filter(function(asset:AssetPreload):Bool{
-				if (sowyDupeCheck.contains(asset)){
-					trace("filter: " + asset.path);
-					return false;
-				}else{
-					sowyDupeCheck.push(asset);
-					return true;
-				}	
-			});
-			sowyDupeCheck = [];
-
 			var threadLimit:Int = ClientPrefs.loadingThreads; //Math.floor(Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS")));
 			if(shitToLoad.length>0 && threadLimit > 1){
 				// thanks shubs -neb
@@ -713,7 +695,7 @@ class PlayState extends MusicBeatState
 										#if traceLoading
 										trace('grabbin da graphic ${toLoad.library}:${toLoad.path}');
 										#end
-										var graphic = Paths.returnGraphic(toLoad.path, toLoad.library, true);
+										var graphic = Paths.returnGraphic(toLoad.path, toLoad.library);
 										#if traceLoading
 										trace(graphic);
 										#end
@@ -785,7 +767,7 @@ class PlayState extends MusicBeatState
 				finished = true;
 				#if loadBenchmark
 				var finishedTime = Sys.time();
-				trace("preloaded in " + (finishedTime - currentTime) + " (at " + finishedTime + ")");
+				trace("preloaded in " + (finishedTime - currentTime));
 				#else
 				trace("preloaded");
 				#end
@@ -971,7 +953,7 @@ class PlayState extends MusicBeatState
 
 		updateTime = showTime;
 
-		timeBarBG = new AttachedSprite('timeBar');
+		timeBarBG = new AttachedSprite(showTime ? 'timeBar' : null);
 		timeBarBG.x = timeTxt.x;
 		timeBarBG.y = timeTxt.y + (timeTxt.height / 4);
 		timeBarBG.scrollFactor.set();
@@ -4422,7 +4404,7 @@ class PlayState extends MusicBeatState
 		{
 			moveCameraSection(Std.int(curStep / 16));
 		}
-		if (camZooming && FlxG.camera.zoom < 1.35 && ClientPrefs.camZooms && curBeat % 4 == 0)
+		if (!customZooming && ClientPrefs.camZooms && camZooming && FlxG.camera.zoom < 1.35 && curBeat % 4 == 0)
 		{
 			FlxG.camera.zoom += 0.015 * camZoomingMult;
 			camHUD.zoom += 0.03 * camZoomingMult;
