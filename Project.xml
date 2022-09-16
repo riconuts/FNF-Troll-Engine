@@ -105,6 +105,7 @@
 
 	<!--<haxelib name="polymod"/> -->
 	<haxelib name="hscript" />
+	<define name="hscriptPos" />
 	<haxelib name="hxCodec" if="VIDEOS_ALLOWED"/>
 
 	<haxelib name="discord_rpc" if="desktop"/>

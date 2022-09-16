@@ -1,0 +1,67 @@
+{
+	"animations": [
+		{
+			"loop": false,
+			"offsets": [
+				0,
+				0
+			],
+			"anim": "idle",
+			"fps": 24,
+			"name": "idle 1",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [
+				0,
+				0
+			],
+			"anim": "idle-mad",
+			"fps": 24,
+			"name": "idle 2",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [
+				-14,
+				0
+			],
+			"anim": "surprise",
+			"fps": 24,
+			"name": "surprise",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [
+				844,
+				38
+			],
+			"anim": "death",
+			"fps": 24,
+			"name": "death",
+			"indices": []
+		}
+	],
+	"no_antialiasing": false,
+	"image": "characters/boppers/toke",
+	"position": [
+		-270,
+		-835
+	],
+	"healthicon": "",
+	"flip_x": false,
+	"healthbar_colors": [
+		47,
+		47,
+		47
+	],
+	"camera_position": [
+		300,
+		-10
+	],
+	"sing_duration": 6.1,
+	"scale": 0.9
+}

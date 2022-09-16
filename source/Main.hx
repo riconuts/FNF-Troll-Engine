@@ -114,28 +114,20 @@ class Main extends Sprite
 		addChild(new FlxGame(gameWidth, gameHeight, initialState, zoom, framerate, framerate, skipSplash, startFullscreen));
 
 		FlxG.mouse.useSystemCursor = true;
-
-		if (trollage){
-			FlxG.game.focusLostFramerate = 60;
-			FlxG.autoPause = false;
-			FlxG.mouse.visible = true;
+		FlxG.mouse.visible = false;
+		
+		#if html5
+		FlxG.autoPause = false;
+		#end
+		#if !mobile
+		fpsVar = new FPS(10, 3, 0xFFFFFF);
+		addChild(fpsVar);
+		Lib.current.stage.align = "tl";
+		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
+		if (fpsVar != null){
+			fpsVar.visible = ClientPrefs.showFPS;
 		}
-		else{
-			FlxG.mouse.visible = false;
-			#if html5
-			FlxG.autoPause = false;
-			#end
-			#if !mobile
-			fpsVar = new FPS(10, 3, 0xFFFFFF);
-			addChild(fpsVar);
-			Lib.current.stage.align = "tl";
-			Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
-			if (fpsVar != null)
-			{
-				fpsVar.visible = ClientPrefs.showFPS;
-			}
-			#end
-		}
+		#end
 		
 		#if CRASH_HANDLER
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);

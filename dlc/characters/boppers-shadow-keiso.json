@@ -1,0 +1,38 @@
+{
+	"animations": [
+		{
+			"offsets": [
+				0,
+				0
+			],
+			"indices": [],
+			"fps": 24,
+			"cameraOffset": [
+				0,
+				0
+			],
+			"anim": "idle",
+			"loop": false,
+			"name": "shadow idle"
+		}
+	],
+	"no_antialiasing": false,
+	"image": "characters/boppers/shadow",
+	"position": [
+		-290,
+		-810
+	],
+	"healthicon": "",
+	"flip_x": false,
+	"healthbar_colors": [
+		47,
+		47,
+		47
+	],
+	"camera_position": [
+		300,
+		-10
+	],
+	"sing_duration": 6.1,
+	"scale": 0.9
+}

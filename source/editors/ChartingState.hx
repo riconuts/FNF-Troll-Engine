@@ -1705,6 +1705,10 @@ class ChartingState extends MusicBeatState
 				//if(_song.stage == null) _song.stage = stageDropDown.selectedLabel;
 				StageData.loadDirectory(_song);
 				PlayState.chartingMode = true;
+				
+				if (FlxG.keys.pressed.SHIFT)
+					PlayState.startOnTime = FlxG.sound.music.time;
+
 				LoadingState.loadAndSwitchState(new PlayState());
 			}
 

@@ -1,16 +1,47 @@
-var offX = -1000/2;
-var offY = -500/2;
+var offX = -1912/2;
+var offY = -536/2;
 
 function onLoad(stage){
-	state.camGame.bgColor = 0x9AD9EA;
+	FlxG.camera.bgColor = 0xFF9AD9EA;
 	
-	var back = new FlxSprite(offX + 711, offY + 25);
+	var back = new FlxSprite(offX, offY);
 	back.loadGraphic(Paths.image("stage4/back"));
 	back.scrollFactor.set(0.75, 0.75);
 	stage.add(back);
+	
+	var mback = back.clone();
+	mback.setPosition(offX + mback.width, offY);
+	mback.scrollFactor.set(0.75, 0.75);
+	mback.flipX = true;
+	stage.add(mback);
 
-	var ground = new FlxSprite(offX, offY + 710);
+	var ground = new FlxSprite(offX, offY + 100);
 	ground.loadGraphic(Paths.image("stage4/ground"));	
 	ground.scrollFactor.set(1, 0.95);
 	stage.add(ground);
+	
+	var fground = ground.clone();
+	fground.x = ground.x + 2912;
+	fground.y = ground.y;
+	fground.flipX = true;
+	fground.scrollFactor.set(1, 0.95);
+	stage.add(fground);
+	
+	var fground = ground.clone();
+	fground.x = ground.x - 2912;
+	fground.y = ground.y;
+	fground.flipX = true;
+	fground.scrollFactor.set(1, 0.95);
+	stage.add(fground);
+	
+	var xground = new FlxSprite(fground.x, fground.y + fground.height).makeGraphic(1, 1, 0xFF23B14D);
+	xground.setGraphicSize(fground.width * 3);
+	xground.scrollFactor.set(1, 0.95);
+	xground.updateHitbox();
+	stage.add(xground);
+	
+	var tree = new FlxSprite(offX - 100, offY - 600);
+	tree.loadGraphic(Paths.image("stage4/tree"));	
+	tree.scrollFactor.set(0.95, 0.95);
+	stage.add(tree);
 }

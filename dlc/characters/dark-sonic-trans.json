@@ -1,0 +1,50 @@
+{
+	"animations": [
+		{
+			"loop": false,
+			"offsets": [
+				0,
+				0
+			],
+			"anim": "singLEFT",
+			"fps": 24,
+			"name": "dark sonic mad transform",
+			"indices": []
+		},
+		{
+			"loop": true,
+			"offsets": [
+				0,
+				0
+			],
+			"anim": "singLEFT-loop",
+			"fps": 24,
+			"name": "dark sonic mad transform",
+			"indices": [
+				61,
+				62,
+				63,
+				64
+			]
+		}
+	],
+	"no_antialiasing": false,
+	"image": "characters/dark_sonic_trans",
+	"position": [
+		-312,
+		-923
+	],
+	"healthicon": "dark-sonic",
+	"flip_x": false,
+	"healthbar_colors": [
+		22,
+		27,
+		81
+	],
+	"camera_position": [
+		-120,
+		140
+	],
+	"sing_duration": 6.1,
+	"scale": 1
+}

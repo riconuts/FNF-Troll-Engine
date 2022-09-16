@@ -77,15 +77,12 @@ class Stage extends FlxTypedGroup<FlxBasic>
 				{
 					var script = FunkinHScript.fromFile(file);
 					stageScripts.push(script);
-					doPush = true;
-
-					if (doPush)
-						break;
+					break; // ?
 				}
 			}
 		}
 
-		callOnScripts("onLoad", [this, foreground], true, null, null, false);
+		callOnScripts("onLoad", [this, foreground], true);
 
 		return this;
 	}
@@ -97,22 +94,12 @@ class Stage extends FlxTypedGroup<FlxBasic>
 	}
 
 	////
-	public function callOnScripts(event:String, args:Array<Dynamic>, ignoreStops:Bool = false, ?exclusions:Array<String>, ?scriptArray:Array<Dynamic>,
-			?ignoreSpecialShit:Bool = true)
+	public function callOnScripts(event:String, ?args:Array<Dynamic>, ?ignoreStops:Bool = false)
 	{
-		if (scriptArray == null)
-			scriptArray = stageScripts;
-		if (exclusions == null)
-			exclusions = [];
 		var returnVal:Dynamic = Globals.Function_Continue;
-		for (script in scriptArray)
+		for (script in stageScripts)
 		{
-			if (exclusions.contains(script.scriptName)
-				|| ignoreSpecialShit /*&& (notetypeScripts.exists(script.scriptName) || eventScripts.exists(script.scriptName))*/)
-			{
-				continue;
-			}
-			var ret:Dynamic = script.call(event, args);
+			var ret:Dynamic = script.call(event, args != null ? args : []);
 			if (ret == Globals.Function_Halt)
 			{
 				ret = returnVal;
@@ -127,38 +114,14 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		return returnVal;
 	}
 
-	public function setOnScripts(variable:String, arg:Dynamic, ?scriptArray:Array<Dynamic>)
+	public function setOnScripts(variable:String, arg:Dynamic)
 	{
-		if (scriptArray == null)
-			scriptArray = stageScripts;
-		for (script in scriptArray)
+		for (script in stageScripts)
 		{
 			script.set(variable, arg);
 		}
 	}
 
-	public function callScript(script:Dynamic, event:String, args:Array<Dynamic>):Dynamic
-	{
-		if ((script is FunkinScript))
-		{
-			return callOnScripts(event, args, true, [], [script], false);
-		}
-		else if ((script is Array))
-		{
-			return callOnScripts(event, args, true, [], script, false);
-		}
-		else if ((script is String))
-		{
-			var scripts:Array<FunkinScript> = [];
-			for (scr in stageScripts)
-			{
-				if (scr.scriptName == script)
-					scripts.push(scr);
-			}
-			return callOnScripts(event, args, true, [], scripts, false);
-		}
-		return Globals.Function_Continue;
-	}
 	////
 	public static function getStageList():Array<String>{
 		var stages:Array<String> = [];

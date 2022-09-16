@@ -2,7 +2,7 @@ var offX:Float = -1000/2;
 var offY:Float = -500/2;
 
 function onLoad(stage, foreground){
-	state.camGame.bgColor = 0xFF3F47CC;
+	FlxG.camera.bgColor = 0xFF3F47CC;
 
 	////
 	var back = new FlxSprite(offX + 200, offY + 25);

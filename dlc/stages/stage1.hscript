@@ -2,7 +2,7 @@ var offX:Float = -1000/2;
 var offY:Float = -500/2;
 
 function onLoad(stage, foreground){
-	state.camGame.bgColor = 0xFF9AD9EA;
+	FlxG.camera.bgColor = 0xFF9AD9EA;
 
 	var cave = new FlxSprite(offX + 711, offY + 25);
 	cave.loadGraphic(Paths.image("stage1/cave"));	

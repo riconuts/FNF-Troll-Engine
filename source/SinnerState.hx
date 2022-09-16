@@ -43,6 +43,10 @@ class SinnerState extends FlxState
 	
 	override function create()
 	{
+		FlxG.game.focusLostFramerate = 60;
+		FlxG.autoPause = false;
+		FlxG.mouse.visible = true;
+
 		// window shit
 		mainWindow = Application.current.window;
 		mainWindow.borderless = true;

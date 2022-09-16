@@ -13,6 +13,7 @@ import haxe.Json;
 import haxe.format.JsonParser;
 import openfl.utils.AssetType;
 import openfl.utils.Assets;
+import scripts.*;
 
 using StringTools;
 #if MODS_ALLOWED
@@ -47,6 +48,8 @@ typedef AnimArray = {
 
 class Character extends FlxSprite
 {
+	public var characterScripts:Array<FunkinHScript> = [];
+
 	public var voicelining:Bool = false; // for fleetway, mainly
 	// but whenever you need to play an anim that has to be manually interrupted, here you go
 
@@ -385,9 +388,12 @@ class Character extends FlxSprite
 					playAnim('danceRight' + idleSuffix);
 				else
 					playAnim('danceLeft' + idleSuffix);
+
+				callOnScripts("onDance");
 			}
 			else if(animation.getByName('idle' + idleSuffix) != null) {
-					playAnim('idle' + idleSuffix);
+				playAnim('idle' + idleSuffix);
+				callOnScripts("onDance");
 			}
 		}
 	}
@@ -483,5 +489,61 @@ class Character extends FlxSprite
 	public function quickAnimAdd(name:String, anim:String)
 	{
 		animation.addByPrefix(name, anim, 24, false);
+	}
+
+	////
+	public function startScripts()
+	{
+		var doPush:Bool = false;
+		var baseScriptFile:String = 'characters/' + curCharacter;
+
+		for (ext in ["hx", "hscript", "hxs"])
+		{
+			if (doPush)
+				break;
+			var baseFile = '$baseScriptFile.$ext';
+			var files = [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)];
+			for (file in files)
+			{
+				if (FileSystem.exists(file))
+				{
+					var script = FunkinHScript.fromFile(file);
+					characterScripts.push(script);
+					break; // ?
+				}
+			}
+		}
+
+		callOnScripts("onLoad", [this], true);
+
+		return this;
+	}
+
+	public function callOnScripts(event:String, ?args:Array<Dynamic>, ?ignoreStops:Bool = false)
+	{
+		var returnVal:Dynamic = Globals.Function_Continue;
+		for (script in characterScripts)
+		{
+			var ret:Dynamic = script.call(event, args != null ? args : []);
+			if (ret == Globals.Function_Halt)
+			{
+				ret = returnVal;
+				if (!ignoreStops)
+					return returnVal;
+			};
+			if (ret != Globals.Function_Continue && ret != null)
+				returnVal = ret;
+		}
+		if (returnVal == null)
+			returnVal = Globals.Function_Continue;
+		return returnVal;
+	}
+
+	public function setOnScripts(variable:String, arg:Dynamic)
+	{
+		for (script in characterScripts)
+		{
+			script.set(variable, arg);
+		}
 	}
 }

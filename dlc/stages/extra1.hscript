@@ -2,7 +2,7 @@ var offX = -1000/2;
 var offY = -500/2;
 
 function onLoad(stage){
-	state.camGame.bgColor = 0x000000;
+	FlxG.camera.bgColor = 0x000000;
 	
 	var sky = new FlxSprite(offX, offY);
 	sky.loadGraphic(Paths.image("extra1/sky"));	

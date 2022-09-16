@@ -1,0 +1,58 @@
+var inst = getInstance();
+
+inst.addCharacterToList("dark-sonic-trans", 1); // fuck this shit lmao
+inst.addCharacterToList("dark-sonic-mad", 1);
+inst.addCharacterToList("dark-sonic", 1);
+
+var did = false;
+var trans = false;
+
+function onBeatHit(){
+	if (curBeat == 371){
+		trans = false;
+		inst.triggerEventNote("Change Character", "dad", "dark-sonic-mad");
+	}	
+}
+
+var rawr:FlxSound;
+
+function onUpdate(elapsed){
+	if (!did && FlxG.sound.music.time >= 107700){
+		did = true;
+		inst.triggerEventNote("Change Character", "dad", "dark-sonic-trans");
+		trans = true;
+		
+		var dad = inst.dad;
+		dad.voicelining = true;
+		dad.heyTimer = 1/24*64;
+		dad.animTimer = 1/24*64;
+		dad.specialAnim = true;
+		dad.skipDance = true;
+		
+		dad.playAnim("singLEFT", true);
+		dad.animation.paused = true;	
+	}
+
+	if (trans){
+		// sync shit myself
+		var time = FlxG.sound.music.time;
+		var s1 = (time - 107700) / 1000;
+		var frameN = Math.floor(s1/(1/24));
+		
+		inst.dad.animation.name = "singLEFT";
+		inst.dad.animation.curAnim.curFrame = frameN;
+		
+		if (frameN == 31 && rawr == null){
+			trace("RAWR", time);
+			rawr = FlxG.sound.play(Paths.sound("tfbscream"), 0.6);
+			inst.gf.callOnScripts("shoot");
+		}else if (frameN >= 65){
+			trans = false;
+			inst.triggerEventNote("Change Character", "dad", "dark-sonic-mad");
+		}
+		
+		if (rawr != null){
+			rawr.time = FlxG.sound.music.time - (109190);
+		}
+	}
+}

@@ -1,0 +1,67 @@
+{
+	"animations": [
+		{
+			"loop": false,
+			"offsets": [
+				0,
+				0
+			],
+			"anim": "idle",
+			"fps": 24,
+			"name": "idle 1",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [
+				0,
+				0
+			],
+			"anim": "idle-mad",
+			"fps": 24,
+			"name": "idle 2",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [
+				-16,
+				-2
+			],
+			"anim": "surprise",
+			"fps": 24,
+			"name": "surprise",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [
+				200,
+				-4
+			],
+			"anim": "kill sequence",
+			"fps": 24,
+			"name": "kill sequence",
+			"indices": []
+		}
+	],
+	"no_antialiasing": false,
+	"image": "characters/boppers/shadow_keiso",
+	"position": [
+		-550,
+		-835
+	],
+	"healthicon": "shadow",
+	"flip_x": false,
+	"healthbar_colors": [
+		47,
+		47,
+		47
+	],
+	"camera_position": [
+		-100,
+		80
+	],
+	"sing_duration": 6.1,
+	"scale": 0.9
+}

@@ -115,31 +115,21 @@ class PlayState extends MusicBeatState
 		['Sick!', 1], //From 90% to 99%
 		['Perfect!!', 1] //The value on this one isn't used actually, since Perfect is always "1"
 	];
-	public var modchartTweens:Map<String, FlxTween> = new Map<String, FlxTween>();
-	public var modchartTimers:Map<String, FlxTimer> = new Map<String, FlxTimer>();
+	public var modchartTweens:Array<FlxTween> = [];
+	public var modchartTimers:Array<FlxTimer> = [];
 	public var modchartSounds:Map<String, FlxSound> = new Map<String, FlxSound>();
 	public var modchartSaves:Map<String, FlxSave> = new Map<String, FlxSave>();
 	public var modchartObjects:Map<String, FlxSprite> = new Map<String, FlxSprite>();
 
 	//event variables
-	#if (haxe >= "4.0.0")
 	public var hscriptGlobals:Map<String, Dynamic> = new Map();
-	#else
-	public var hscriptGlobals:Map<String, Dynamic> = new Map<String, Dynamic>();
-	#end
 
 	private var isCameraOnForcedPos:Bool = false;
-	#if (haxe >= "4.0.0")
+
 	public var boyfriendMap:Map<String, Boyfriend> = new Map();
 	public var extraMap:Map<String, Character> = new Map();
 	public var dadMap:Map<String, Character> = new Map();
 	public var gfMap:Map<String, Character> = new Map();
-	#else
-	public var boyfriendMap:Map<String, Boyfriend> = new Map<String, Boyfriend>();
-	public var dadMap:Map<String, Character> = new Map<String, Character>();
-	public var gfMap:Map<String, Character> = new Map<String, Character>();
-	public var extraMap:Map<String, Character> = new Map<String, Character>();
-	#end
 
 	public var BF_X:Float = 770;
 	public var BF_Y:Float = 100;
@@ -839,31 +829,6 @@ class PlayState extends MusicBeatState
 		for (script in stage.stageScripts){
 			funkyScripts.push(script);
 		}
-		/*
-		#if MODS_ALLOWED
-			var doPush:Bool = false;
-			var baseScriptFile:String = 'stages/' + curStage;
-			var exts = [#if LUA_ALLOWED "lua" #end];
-			for (e in hscriptExts)
-				exts.push(e);
-			
-			for (ext in exts){
-				if(doPush)break;
-				var baseFile = '$baseScriptFile.$ext'; 
-				var files = [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)];
-				for(file in files){
-					if (FileSystem.exists(file))
-					{
-						var script = FunkinHScript.fromFile(file);
-						funkyScripts.push(script);
-						doPush = true;
-						
-						if(doPush)break;
-					}
-				}
-			}
-		#end
-		*/
 
 		var gfVersion:String = SONG.gfVersion;
 		if(gfVersion == null || gfVersion.length < 1)
@@ -878,19 +843,29 @@ class PlayState extends MusicBeatState
 			startCharacterPos(gf);
 			gf.scrollFactor.set(0.95, 0.95);
 			gfGroup.add(gf);
-			startCharacterScripts(gf.curCharacter);
+			gf.startScripts();
+			for (script in gf.characterScripts){
+				funkyScripts.push(script);
+			}
+			gfMap.set(gf.curCharacter, gf);
 		}
 
 		dad = new Character(0, 0, SONG.player2);
 		startCharacterPos(dad, true);
 		dadGroup.add(dad);
-		startCharacterScripts(dad.curCharacter);
+		dad.startScripts();
+		for (script in dad.characterScripts){
+			funkyScripts.push(script);
+		}
 		dadMap.set(dad.curCharacter, dad);
 
 		boyfriend = new Boyfriend(0, 0, SONG.player1);
 		startCharacterPos(boyfriend);
 		boyfriendGroup.add(boyfriend);
-		startCharacterScripts(boyfriend.curCharacter);
+		boyfriend.startScripts();
+		for (script in boyfriend.characterScripts){
+			funkyScripts.push(script);
+		}
 		boyfriendMap.set(boyfriend.curCharacter, boyfriend);
 
 		var camPos:FlxPoint = new FlxPoint(girlfriendCameraOffset[0], girlfriendCameraOffset[1]);
@@ -1233,7 +1208,7 @@ class PlayState extends MusicBeatState
 					boyfriendGroup.add(newBoyfriend);
 					startCharacterPos(newBoyfriend);
 					newBoyfriend.alpha = 0.00001;
-					startCharacterScripts(newBoyfriend.curCharacter);
+					newBoyfriend.startScripts();
 				}
 
 			case 1:
@@ -1243,7 +1218,7 @@ class PlayState extends MusicBeatState
 					dadGroup.add(newDad);
 					startCharacterPos(newDad, true);
 					newDad.alpha = 0.00001;
-					startCharacterScripts(newDad.curCharacter);
+					newDad.startScripts();
 				}
 
 			case 2:
@@ -1254,34 +1229,8 @@ class PlayState extends MusicBeatState
 					gfGroup.add(newGf);
 					startCharacterPos(newGf);
 					newGf.alpha = 0.00001;
-					startCharacterScripts(newGf.curCharacter);
+					newGf.startScripts();
 				}
-		}
-	}
-
-	function startCharacterScripts(name:String)
-	{
-		var doPush:Bool = false;
-		var baseScriptFile:String = 'characters/' + name;
-
-		for (ext in ["hx", "hscript", "hxs"])
-		{
-			if (doPush)
-				break;
-			var baseFile = '$baseScriptFile.$ext';
-			var files = [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)];
-			for (file in files)
-			{
-				if (FileSystem.exists(file))
-				{
-					var script = FunkinHScript.fromFile(file);
-					funkyScripts.push(script);
-					doPush = true;
-
-					if (doPush)
-						break;
-				}
-			}
 		}
 	}
 
@@ -3286,7 +3235,8 @@ class PlayState extends MusicBeatState
 	var cameraTwn:FlxTween;
 
 	public function updateCamFollow(){
-		if(isCameraOnForcedPos)return;
+		if(isCameraOnForcedPos)
+			return;
 		if(focusedChar==dad){
 			camFollow.set(dad.getMidpoint().x + 150, dad.getMidpoint().y - 100);
 			camFollow.x += dad.cameraPosition[0] + opponentCameraOffset[0];

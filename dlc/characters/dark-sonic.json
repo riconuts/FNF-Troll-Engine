@@ -1,66 +1,66 @@
 {
 	"animations": [
 		{
-			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
-			"fps": 24,
+			"loop": false,
 			"anim": "idle",
-			"indices": [],
-			"name": "Idle"
+			"fps": 24,
+			"name": "Idle",
+			"indices": []
 		},
 		{
+			"loop": false,
 			"offsets": [
 				-70,
 				-30
 			],
-			"loop": false,
-			"fps": 24,
 			"anim": "singLEFT",
-			"indices": [],
-			"name": "Left"
+			"fps": 24,
+			"name": "Left",
+			"indices": []
 		},
 		{
+			"loop": false,
 			"offsets": [
 				9,
 				-38
 			],
-			"loop": false,
-			"fps": 24,
 			"anim": "singDOWN",
-			"indices": [],
-			"name": "Down"
+			"fps": 24,
+			"name": "Down",
+			"indices": []
 		},
 		{
+			"loop": false,
 			"offsets": [
 				-50,
 				96
 			],
-			"loop": false,
-			"fps": 24,
 			"anim": "singUP",
-			"indices": [],
-			"name": "Up"
+			"fps": 24,
+			"name": "Up",
+			"indices": []
 		},
 		{
+			"loop": false,
 			"offsets": [
 				-46,
 				-26
 			],
-			"loop": false,
-			"fps": 24,
 			"anim": "singRIGHT",
-			"indices": [],
-			"name": "Right"
+			"fps": 24,
+			"name": "Right",
+			"indices": []
 		}
 	],
 	"no_antialiasing": false,
 	"image": "characters/dark_sonic",
 	"position": [
 		-340,
-		-725
+		-735
 	],
 	"healthicon": "dark-sonic",
 	"flip_x": false,
@@ -70,7 +70,7 @@
 		61
 	],
 	"camera_position": [
-		-100,
+		-130,
 		80
 	],
 	"sing_duration": 6.1,

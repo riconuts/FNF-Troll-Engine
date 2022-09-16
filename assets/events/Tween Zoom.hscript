@@ -8,10 +8,10 @@ function doZoomTween(zoom:Float, duration:Float)
 	
 	instance.camZooming = true;
 	
-	FlxTween.num(instance.defaultCamZoom, zoom, duration, {ease: FlxEase.quadInOut, onUpdate: function(twn)
+	instance.modchartTweens.push(FlxTween.num(instance.defaultCamZoom, zoom, duration, {ease: FlxEase.quadInOut, onUpdate: function(twn)
 	{
 		instance.defaultCamZoom = twn.value;
-	}});	
+	}}));	
 }
 
 function shouldPush(eventNote):Bool{

@@ -1,7 +1,7 @@
 {
 	"song": {
 		"speed": 3.5,
-		"stage": "stage1",
+		"stage": "stage4",
 		"player1": "bf",
 		"player2": "dark-sonic",
 		"events": [
@@ -646,11 +646,81 @@
 				]
 			],
 			[
+				107700,
+				[
+					[
+						"Change Focus",
+						"dad",
+						""
+					]
+				]
+			],
+			[
+				108900,
+				[
+					[
+						"Change Focus",
+						"dad",
+						""
+					]
+				]
+			],
+			[
 				109200,
 				[
 					[
 						"Switch Zooming",
 						"0",
+						""
+					]
+				]
+			],
+			[
+				129600,
+				[
+					[
+						"Center Camera",
+						"true",
+						""
+					]
+				]
+			],
+			[
+				130800,
+				[
+					[
+						"Center Camera",
+						"false",
+						""
+					],
+					[
+						"Change Focus",
+						"bf",
+						""
+					]
+				]
+			],
+			[
+				140400,
+				[
+					[
+						"Center Camera",
+						"true",
+						""
+					]
+				]
+			],
+			[
+				151200,
+				[
+					[
+						"Center Camera",
+						"false",
+						""
+					],
+					[
+						"Change Focus",
+						"dad",
 						""
 					]
 				]

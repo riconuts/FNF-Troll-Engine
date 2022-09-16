@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="pori.png">
+	<!-- Created with Adobe Animate version 20.0.3.25487 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="idle0000" x="0" y="0" width="525" height="1018" frameX="0" frameY="-64" frameWidth="525" frameHeight="1084"/>
+	<SubTexture name="idle0001" x="0" y="0" width="525" height="1018" frameX="0" frameY="-64" frameWidth="525" frameHeight="1084"/>
+	<SubTexture name="idle0002" x="1991" y="0" width="482" height="1067" frameX="-6" frameY="-16" frameWidth="525" frameHeight="1084"/>
+	<SubTexture name="idle0003" x="1991" y="0" width="482" height="1067" frameX="-6" frameY="-16" frameWidth="525" frameHeight="1084"/>
+	<SubTexture name="idle0004" x="1015" y="0" width="486" height="1083" frameX="-13" frameY="-1" frameWidth="525" frameHeight="1084"/>
+	<SubTexture name="idle0005" x="1015" y="0" width="486" height="1083" frameX="-13" frameY="-1" frameWidth="525" frameHeight="1084"/>
+	<SubTexture name="idle0006" x="525" y="0" width="490" height="1084" frameX="-13" frameY="0" frameWidth="525" frameHeight="1084"/>
+	<SubTexture name="idle0007" x="525" y="0" width="490" height="1084" frameX="-13" frameY="0" frameWidth="525" frameHeight="1084"/>
+	<SubTexture name="idle0008" x="1501" y="0" width="490" height="1052" frameX="-13" frameY="-32" frameWidth="525" frameHeight="1084"/>
+	<SubTexture name="idle0009" x="1501" y="0" width="490" height="1052" frameX="-13" frameY="-32" frameWidth="525" frameHeight="1084"/>
+	<SubTexture name="idle0010" x="1501" y="0" width="490" height="1052" frameX="-13" frameY="-32" frameWidth="525" frameHeight="1084"/>
+	<SubTexture name="idle0011" x="1501" y="0" width="490" height="1052" frameX="-13" frameY="-32" frameWidth="525" frameHeight="1084"/>
+	<SubTexture name="idle0012" x="1501" y="0" width="490" height="1052" frameX="-13" frameY="-32" frameWidth="525" frameHeight="1084"/>
+</TextureAtlas>
