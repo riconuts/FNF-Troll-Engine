@@ -1,7 +1,7 @@
 {
  "song": {
   "player1": "bf",
-  "gfVersion": "gf",
+  "gfVersion": "boppers",
   "notes": [
    {
     "endTime": 1395.3488372093,
@@ -8985,7 +8985,7 @@
   "offset": 0,
   "song": "Proving Nothing",
   "needsVoices": true,
-  "stage": "stage1",
+  "stage": "stage4",
   "validScore": false,
   "bpm": 172,
   "speed": 2.4

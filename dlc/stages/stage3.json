@@ -12,20 +12,20 @@
 		0
 	],
 	"boyfriend": [
-		1660,
-		700
+		1760,
+		790
 	],
 	"isPixelStage": false,
 	"preloadStrings": null,
 	"opponent": [
-		470,
-		700
+		300,
+		790
 	],
 	"hide_girlfriend": false,
 	"pixel_size": null,
 	"directory": "",
 	"camera_speed": 1,
-	"defaultZoom": 0.8,
+	"defaultZoom": 0.7,
 	"preload": null,
 	"camera_boyfriend": [
 		0,

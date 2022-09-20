@@ -66,12 +66,12 @@
 	"flip_x": false,
 	"healthbar_colors": [
 		0,
-		180,
-		220
+		162,
+		232
 	],
 	"camera_position": [
-		10,
-		0
+		-120,
+		130
 	],
 	"sing_duration": 4,
 	"scale": 0.9

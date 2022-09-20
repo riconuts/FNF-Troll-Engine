@@ -7,13 +7,9 @@
 			],
 			"indices": [],
 			"fps": 24,
-			"cameraOffset": [
-				0,
-				0
-			],
 			"anim": "idle",
 			"loop": false,
-			"name": "pori idle"
+			"name": "idle"
 		}
 	],
 	"no_antialiasing": false,

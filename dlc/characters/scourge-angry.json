@@ -1,66 +1,66 @@
 {
 	"animations": [
 		{
-			"loop": false,
 			"offsets": [
-				0,
+				3,
 				0
 			],
-			"fps": 24,
+			"loop": false,
 			"anim": "idle",
-			"indices": [],
-			"name": "scourge evil idle"
+			"fps": 24,
+			"name": "scourge evil idle",
+			"indices": []
 		},
 		{
-			"loop": false,
 			"offsets": [
 				0,
-				0
+				1
 			],
-			"fps": 24,
+			"loop": false,
 			"anim": "singUP",
-			"indices": [],
-			"name": "scourge up"
+			"fps": 24,
+			"name": "scourge up",
+			"indices": []
 		},
 		{
-			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
-			"fps": 24,
+			"loop": false,
 			"anim": "singLEFT",
-			"indices": [],
-			"name": "scourge left"
+			"fps": 24,
+			"name": "scourge left",
+			"indices": []
 		},
 		{
-			"loop": false,
 			"offsets": [
-				0,
+				-1,
 				0
 			],
-			"fps": 24,
+			"loop": false,
 			"anim": "singRIGHT",
-			"indices": [],
-			"name": "scourge right"
+			"fps": 24,
+			"name": "scourge right",
+			"indices": []
 		},
 		{
-			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
-			"fps": 24,
+			"loop": false,
 			"anim": "singDOWN",
-			"indices": [],
-			"name": "scourge down"
+			"fps": 24,
+			"name": "scourge down",
+			"indices": []
 		}
 	],
 	"no_antialiasing": false,
 	"image": "characters/scourge_angry",
 	"position": [
 		-420,
-		-820
+		-790
 	],
 	"healthicon": "scourge",
 	"flip_x": false,
@@ -70,9 +70,9 @@
 		80
 	],
 	"camera_position": [
-		0,
-		0
+		-50,
+		140
 	],
 	"sing_duration": 4,
-	"scale": 1
+	"scale": 0.9
 }

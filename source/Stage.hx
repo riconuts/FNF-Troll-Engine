@@ -19,7 +19,7 @@ import flixel.tweens.FlxTween;
 import scripts.*;
 
 using StringTools;
-//import flixel.graphics.tile.FlxDrawQuadsItem; // wtf is this
+
 #if sys
 import sys.FileSystem;
 #end
@@ -27,11 +27,9 @@ import sys.FileSystem;
 
 class Stage extends FlxTypedGroup<FlxBasic>
 {
-	public var stageScripts:Array<FunkinHScript> = []; // should only be one script but im gonna leave this array just in case
+	public var stageScripts:Array<FunkinHScript> = [];
 	var exts = ["hx", "hscript", "hxs"];
-
-	//public var newnw = new FlxDrawQuadsItem();
-	public var foreground = new FlxTypedGroup<FlxBasic>();
+	
 	public var curStage = "stage1";
 	public var stageData:StageFile = {
 		directory: "",
@@ -46,6 +44,9 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		camera_girlfriend: [0, 0],
 		camera_speed: 1
 	};
+
+	public var spriteMap = new Map<String, FlxBasic>();
+	public var foreground = new FlxTypedGroup<FlxBasic>();
 
 	public function new(?StageName = "stage")
 	{

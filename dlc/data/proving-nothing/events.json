@@ -1,0 +1,384 @@
+{
+	"song": {
+		"speed": 2.4,
+		"stage": "stage1",
+		"player1": "bf",
+		"player2": "sonic-proving",
+		"events": [
+			[
+				2790.6976744186,
+				[
+					[
+						"Change Focus",
+						"bf",
+						""
+					]
+				]
+			],
+			[
+				5581.39534883721,
+				[
+					[
+						"Change Focus",
+						"dad",
+						""
+					]
+				]
+			],
+			[
+				8372.09302325581,
+				[
+					[
+						"Change Focus",
+						"bf",
+						""
+					]
+				]
+			],
+			[
+				11162.7906976744,
+				[
+					[
+						"Change Focus",
+						"dad",
+						""
+					]
+				]
+			],
+			[
+				13953.488372093,
+				[
+					[
+						"Change Focus",
+						"bf",
+						""
+					]
+				]
+			],
+			[
+				16744.1860465116,
+				[
+					[
+						"Change Focus",
+						"dad",
+						""
+					]
+				]
+			],
+			[
+				19534.8837209302,
+				[
+					[
+						"Change Focus",
+						"bf",
+						""
+					]
+				]
+			],
+			[
+				22325.5813953488,
+				[
+					[
+						"Change Focus",
+						"dad",
+						""
+					]
+				]
+			],
+			[
+				27906.976744186,
+				[
+					[
+						"Change Focus",
+						"bf",
+						""
+					]
+				]
+			],
+			[
+				33488.3720930233,
+				[
+					[
+						"Change Focus",
+						"dad",
+						""
+					]
+				]
+			],
+			[
+				38372.0930232558,
+				[
+					[
+						"Center Camera",
+						"true",
+						""
+					]
+				]
+			],
+			[
+				39069.7674418605,
+				[
+					[
+						"Center Camera",
+						"false",
+						""
+					],
+					[
+						"Change Focus",
+						"bf",
+						""
+					]
+				]
+			],
+			[
+				43953.488372093,
+				[
+					[
+						"Center Camera",
+						"true",
+						""
+					]
+				]
+			],
+			[
+				44651.1627906977,
+				[
+					[
+						"Center Camera",
+						"false",
+						""
+					],
+					[
+						"Change Focus",
+						"dad",
+						""
+					]
+				]
+			],
+			[
+				55813.9534883721,
+				[
+					[
+						"Change Focus",
+						"bf",
+						""
+					]
+				]
+			],
+			[
+				66976.7441860465,
+				[
+					[
+						"Change Focus",
+						"dad",
+						""
+					]
+				]
+			],
+			[
+				78139.5348837209,
+				[
+					[
+						"Change Focus",
+						"bf",
+						""
+					]
+				]
+			],
+			[
+				89302.3255813954,
+				[
+					[
+						"Change Focus",
+						"dad",
+						""
+					]
+				]
+			],
+			[
+				94883.7209302326,
+				[
+					[
+						"Change Focus",
+						"bf",
+						""
+					]
+				]
+			],
+			[
+				100465.11627907,
+				[
+					[
+						"Change Focus",
+						"dad",
+						""
+					]
+				]
+			],
+			[
+				106046.511627907,
+				[
+					[
+						"Change Focus",
+						"bf",
+						""
+					]
+				]
+			],
+			[
+				111627.906976744,
+				[
+					[
+						"Center Camera",
+						"true",
+						""
+					]
+				]
+			],
+			[
+				133953.488372093,
+				[
+					[
+						"Center Camera",
+						"false",
+						""
+					],
+					[
+						"Change Focus",
+						"dad",
+						""
+					]
+				]
+			],
+			[
+				135348.837209302,
+				[
+					[
+						"Change Focus",
+						"bf",
+						""
+					]
+				]
+			],
+			[
+				136744.186046512,
+				[
+					[
+						"Center Camera",
+						"true",
+						""
+					]
+				]
+			],
+			[
+				138837.209302326,
+				[
+					[
+						"Change Character",
+						"dad",
+						"sonic-nothing"
+					]
+				]
+			],
+			[
+				139534.88372093,
+				[
+					[
+						"Center Camera",
+						"false",
+						""
+					],
+					[
+						"Change Focus",
+						"bf",
+						""
+					]
+				]
+			],
+			[
+				140755.813953488,
+				[
+					[
+						"Center Camera",
+						"true",
+						""
+					]
+				]
+			],
+			[
+				145116.279069767,
+				[
+					[
+						"Center Camera",
+						"false",
+						""
+					],
+					[
+						"Change Focus",
+						"dad",
+						""
+					]
+				]
+			],
+			[
+				150697.674418605,
+				[
+					[
+						"Change Focus",
+						"bf",
+						""
+					]
+				]
+			],
+			[
+				156279.069767442,
+				[
+					[
+						"Change Focus",
+						"dad",
+						""
+					]
+				]
+			],
+			[
+				161860.465116279,
+				[
+					[
+						"Change Focus",
+						"bf",
+						""
+					]
+				]
+			],
+			[
+				166744.186046512,
+				[
+					[
+						"Center Camera",
+						"true",
+						""
+					]
+				]
+			],
+			[
+				167441.860465116,
+				[
+					[
+						"Set Camera Alignment",
+						"0.25",
+						""
+					]
+				]
+			]
+		],
+		"notes": [],
+		"splashSkin": null,
+		"validScore": false,
+		"gfVersion": "gf",
+		"bpm": 172,
+		"arrowSkin": null,
+		"needsVoices": true,
+		"extraTracks": [],
+		"song": "Proving Nothing"
+	}
+}

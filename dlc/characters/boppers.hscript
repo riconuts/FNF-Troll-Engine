@@ -10,7 +10,6 @@ var toke;
 var fatty;
 
 function onLoad(sowy){
-	trace("EL PEPE");
 	mainChar = sowy;
 	
 	if (songName == "Taste For Blood"){

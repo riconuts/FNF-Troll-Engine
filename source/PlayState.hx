@@ -421,7 +421,7 @@ class PlayState extends MusicBeatState
 		];
 
 		//Ratings
-		var rating:Rating = new Rating('epic'); // now you will get even shittier ratings
+		var rating:Rating = new Rating('epic'); // now you'll get even shittier ratings
 		rating.ratingMod = 1;
 		rating.score = 500;
 		rating.noteSplash = true;
@@ -507,13 +507,12 @@ class PlayState extends MusicBeatState
 		topBar = new FlxSprite(0, -170).makeGraphic(FlxG.width, 170, FlxColor.BLACK);
 		bottomBar = new FlxSprite(0, FlxG.height).makeGraphic(FlxG.width, 170, FlxColor.BLACK);
 
-
 		GameOverSubstate.resetVariables();
 		//var songName:String = Paths.formatToSongPath(SONG.song);
 
 		// STAGE SHIT
 		curStage = SONG.stage;
-		if(SONG.stage == null || SONG.stage.length < 1) {
+		if(SONG.stage == null || SONG.stage.length < 1){
 			curStage = 'stage';
 		}
 		SONG.stage = curStage;
@@ -625,7 +624,7 @@ class PlayState extends MusicBeatState
 					type: 'SONG'
 				});
 
-			// SOWY: extra tracks (die batsards)
+			// SOWY: extra tracks (ex: die batsards bullet track)
 			for (track in SONG.extraTracks){
 				shitToLoad.push({
 					path: '${Paths.formatToSongPath(SONG.song)}/${track}',
@@ -768,20 +767,16 @@ class PlayState extends MusicBeatState
 		#end
 		//// Multi-thread Loading End
 		
-		// STAGE SHIT
-		add(stage);
-
-		/*
-		switch (curStage)
+		if (stage.callOnScripts("onAddSpriteGroups") == Globals.Function_Continue)
 		{
-			default:*/
-				add(gfGroup);
-				add(dadGroup);
-				add(boyfriendGroup);
-		//}
-		
-		// we doin shit forever engine style
-		add(stage.foreground);
+			add(stage);
+			
+			add(gfGroup);
+			add(dadGroup);
+			add(boyfriendGroup);
+			
+			add(stage.foreground); // forever engine style B)
+		}
 
 		#if LUA_ALLOWED
 		luaDebugGroup = new FlxTypedGroup<DebugLuaText>();
@@ -1105,7 +1100,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		startCountdown(); // songIntroCutscene();
+		startCountdown();
 		
 		RecalculateRating();
 
@@ -1325,25 +1320,6 @@ class PlayState extends MusicBeatState
 		}
 	}
 	*/
-
-	/*
-	function songIntroCutscene(){
-		var daSong:String = Paths.formatToSongPath(curSong);
-		if (isStoryMode && !seenCutscene)
-		{
-			switch (daSong)
-			{
-				default:
-					startCountdown();
-			}
-			seenCutscene = true;
-		}
-		else
-		{
-			startCountdown();
-		}
-	}
-	*/
 	
 	var startTimer:FlxTimer;
 	var finishTimer:FlxTimer = null;
@@ -1451,7 +1427,6 @@ class PlayState extends MusicBeatState
 						countdownReady = new FlxSprite().loadGraphic(Paths.image(introAssets[0]));
 						countdownReady.scrollFactor.set();
 						countdownReady.updateHitbox();
-
 						
 						if (isPixelStage)
 							countdownReady.setGraphicSize(Std.int(countdownReady.width * daPixelZoom));
@@ -2839,7 +2814,7 @@ class PlayState extends MusicBeatState
 				openSubState(new GameOverSubstate(
 					boyfriend.getScreenPosition().x - boyfriend.positionArray[0], 
 					boyfriend.getScreenPosition().y - boyfriend.positionArray[1], 
-					camFollowPos.x, 
+					camFollowPos.x,
 					camFollowPos.y
 				));
 
@@ -4614,7 +4589,7 @@ class PlayState extends MusicBeatState
 		{
 			newCamEffects.push(new ShaderFilter(i.shader));
 		}
-		PlayState.instance.camGame.setFilters(newCamEffects);
+		camGame.setFilters(newCamEffects);
 	}
 	public function removeCameraEffect(effect:ShaderEffect)
 	{
@@ -4624,7 +4599,7 @@ class PlayState extends MusicBeatState
 		{
 			newCamEffects.push(new ShaderFilter(i.shader));
 		}
-		PlayState.instance.camGame.setFilters(newCamEffects);
+		camGame.setFilters(newCamEffects);
 	}
 
 	public function addHUDEffect(effect:ShaderEffect)
@@ -4635,7 +4610,7 @@ class PlayState extends MusicBeatState
 		{
 			newCamEffects.push(new ShaderFilter(i.shader));
 		}
-		PlayState.instance.camHUD.setFilters(newCamEffects);
+		camHUD.setFilters(newCamEffects);
 	}
 	public function removeHUDEffect(effect:ShaderEffect)
 	{
@@ -4645,7 +4620,7 @@ class PlayState extends MusicBeatState
 		{
 			newCamEffects.push(new ShaderFilter(i.shader));
 		}
-		PlayState.instance.camHUD.setFilters(newCamEffects);
+		camHUD.setFilters(newCamEffects);
 	}
 	//
 

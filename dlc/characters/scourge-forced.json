@@ -3,7 +3,7 @@
 		{
 			"loop": false,
 			"offsets": [
-				0,
+				3,
 				0
 			],
 			"fps": 24,
@@ -14,8 +14,8 @@
 		{
 			"loop": false,
 			"offsets": [
-				0,
-				0
+				2,
+				-1
 			],
 			"fps": 24,
 			"anim": "singUP",
@@ -36,7 +36,7 @@
 		{
 			"loop": false,
 			"offsets": [
-				0,
+				-1,
 				0
 			],
 			"fps": 24,
@@ -60,7 +60,7 @@
 	"image": "characters/scourge_forced",
 	"position": [
 		-420,
-		-820
+		-790
 	],
 	"healthicon": "scourge",
 	"flip_x": false,
@@ -70,9 +70,9 @@
 		80
 	],
 	"camera_position": [
-		0,
-		0
+		-50,
+		140
 	],
 	"sing_duration": 4,
-	"scale": 1
+	"scale": 0.9
 }

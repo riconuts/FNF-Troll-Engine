@@ -57,21 +57,21 @@
 		}
 	],
 	"no_antialiasing": false,
-	"image": "characters/sonic-mad",
+	"image": "characters/sonic_nothing",
 	"position": [
-		0,
+		-350,
 		-800
 	],
-	"healthicon": "bf",
+	"healthicon": "sonic-mad",
 	"flip_x": false,
 	"healthbar_colors": [
 		0,
-		160,
-		255
+		162,
+		232
 	],
 	"camera_position": [
-		0,
-		0
+		-120,
+		130
 	],
 	"sing_duration": 4,
 	"scale": 0.9

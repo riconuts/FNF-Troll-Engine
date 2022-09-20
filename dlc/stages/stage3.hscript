@@ -1,6 +1,12 @@
 var offX:Float = -1000/2;
 var offY:Float = -500/2;
 
+var inst = getInstance();
+var tails;
+var knux;
+
+var xddd = 0;
+
 function onLoad(stage, foreground){
 	FlxG.camera.bgColor = 0xFF3F47CC;
 
@@ -39,4 +45,36 @@ function onLoad(stage, foreground){
 	mground.scrollFactor.set(1, 0.95);
 	mground.flipX = true;
 	stage.add(mground);
+	
+	// bg peeps
+	tails = new Character(0, 0, "db-tails");
+	tails.scrollFactor.set(0.95, 0.95);
+	stage.add(tails);
+	
+	knux = new Character(0, 0, "db-knuckles");
+	knux.scrollFactor.set(0.95, 0.95);
+	stage.add(knux);
+}
+
+function onCreatePost(){
+	var GF_X = inst.GF_X;
+	var GF_Y = inst.GF_Y;
+	var gf = inst.gf;
+	
+	for (char in [tails, knux]){
+		char.setPosition(GF_X + char.positionArray[0], GF_Y + char.positionArray[1]);
+	}
+	
+	tails.x -= 500;
+	knux.x += 530;
+}
+
+function onBeatHit(){	
+	for (peep in [tails, knux])
+	{
+		if (peep != null && curBeat % Math.round(inst.gfSpeed * peep.danceEveryNumBeats) == 0)
+		{
+			peep.dance();
+		}
+	}
 }

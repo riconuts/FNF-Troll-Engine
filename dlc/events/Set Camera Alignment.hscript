@@ -1,0 +1,56 @@
+function shouldPush(eventNote):Bool{
+	return true;
+}
+
+function getOffset(eventNote):Float{
+	return 0;
+}
+
+function onTrigger(value1, value2){
+	var deac = (Std.string(value1) == "" && Std.string(value2) == "");
+	var sowy = Std.parseFloat(value1);
+	var instance = getInstance();
+
+	if (!deac){
+		var bf = instance.boyfriend;
+		var dad = instance.dad;
+		
+		var boyfriendCameraOffset = instance.boyfriendCameraOffset;
+		var opponentCameraOffset = instance.opponentCameraOffset;
+		
+		var dadX = dad.getMidpoint().x + 150 + dad.cameraPosition[0] + opponentCameraOffset[0];
+		var dadY = dad.getMidpoint().y - 100 + dad.cameraPosition[1] + opponentCameraOffset[1];
+		
+		var bfX = bf.getMidpoint().x - 100 - (bf.cameraPosition[0] - boyfriendCameraOffset[0]);
+		var bfY = bf.getMidpoint().y - 100 + (bf.cameraPosition[1] + boyfriendCameraOffset[1]);
+		
+		var minX = 0.0;
+		var minY = 0.0;
+		var maxX = 0.0;
+		var maxY = 0.0;
+		
+		if (dadX < bfX){
+			minX = dadX;
+			maxX = bfX;
+		}else{
+			maxX = dadX;
+			minX = bfX;
+		}
+		if (dadY < bfY){
+			minY = dadY;
+			maxY = bfY;
+		}else{
+			maxY = dadY;
+			minY = bfY;
+		}
+		
+		sowyX = FlxMath.lerp(minX, maxX, sowy);
+		sowyY = FlxMath.lerp(minY, maxY, sowy);
+		
+		instance.triggerEventNote("Camera Follow Pos", Std.string(sowyX), Std.string(sowyY));
+	}
+	else
+	{
+		instance.triggerEventNote("Camera Follow Pos", "", "");
+	}
+}
