@@ -27,8 +27,9 @@ import sys.FileSystem;
 
 class Stage extends FlxTypedGroup<FlxBasic>
 {
-	public var stageScripts:Array<FunkinHScript> = [];
-	var exts = ["hx", "hscript", "hxs"];
+	public var stageScripts:Array<FunkinScript> = [];
+	public var hscriptArray:Array<FunkinHScript> = [];
+	public var luaArray:Array<FunkinLua> = [];
 	
 	public var curStage = "stage1";
 	public var stageData:StageFile = {
@@ -62,11 +63,11 @@ class Stage extends FlxTypedGroup<FlxBasic>
 
 	public function buildStage()
 	{
-		// STAGE SCRIPTS
+		#if MODS_ALLOWED
 		var doPush:Bool = false;
 		var baseScriptFile:String = 'stages/' + curStage;
 
-		for (ext in exts)
+		for (ext in ["hscript" #if LUA_ALLOWED , "lua" #end])
 		{
 			if (doPush)
 				break;
@@ -76,14 +77,29 @@ class Stage extends FlxTypedGroup<FlxBasic>
 			{
 				if (FileSystem.exists(file))
 				{
-					var script = FunkinHScript.fromFile(file);
-					stageScripts.push(script);
-					break; // ?
+					#if LUA_ALLOWED
+					if (ext == 'lua'){
+						var script = new FunkinLua(file);
+						luaArray.push(script);
+						stageScripts.push(script);
+						doPush = true;
+						script.call("onCreate", []);
+					}
+					else
+					#end
+					{
+						var script = FunkinHScript.fromFile(file);
+						hscriptArray.push(script);
+						stageScripts.push(script);
+						script.call("onLoad", [this, foreground]);
+						doPush = true;
+					}
+					if (doPush)
+						break;
 				}
 			}
 		}
-
-		callOnScripts("onLoad", [this, foreground], true);
+		#end
 
 		return this;
 	}
@@ -92,35 +108,6 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		for (script in stageScripts)
 			script.stop();
 		super.destroy();
-	}
-
-	////
-	public function callOnScripts(event:String, ?args:Array<Dynamic>, ?ignoreStops:Bool = false)
-	{
-		var returnVal:Dynamic = Globals.Function_Continue;
-		for (script in stageScripts)
-		{
-			var ret:Dynamic = script.call(event, args != null ? args : []);
-			if (ret == Globals.Function_Halt)
-			{
-				ret = returnVal;
-				if (!ignoreStops)
-					return returnVal;
-			};
-			if (ret != Globals.Function_Continue && ret != null)
-				returnVal = ret;
-		}
-		if (returnVal == null)
-			returnVal = Globals.Function_Continue;
-		return returnVal;
-	}
-
-	public function setOnScripts(variable:String, arg:Dynamic)
-	{
-		for (script in stageScripts)
-		{
-			script.set(variable, arg);
-		}
 	}
 
 	////

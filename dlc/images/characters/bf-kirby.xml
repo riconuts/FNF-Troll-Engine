@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
-<TextureAtlas imagePath="bf-kirby.png"><SubTexture name="bf-kirby down0000" x="0" y="0" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
+<TextureAtlas imagePath="bf-kirby.png">
+<SubTexture name="bf-kirby down0000" x="0" y="0" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
 <SubTexture name="bf-kirby down0001" x="474" y="0" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
 <SubTexture name="bf-kirby down0002" x="948" y="0" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />
 <SubTexture name="bf-kirby down0003" x="1422" y="0" width="474" height="501" frameX="0" frameY="0" frameWidth="474" frameHeight="501" />

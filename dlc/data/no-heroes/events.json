@@ -1,0 +1,124 @@
+{
+	"song": {
+		"speed": 3.5,
+		"stage": "stage1",
+		"player1": "bf-kirby",
+		"player2": "scourge",
+		"events": [
+			[
+				40800,
+				[
+					[
+						"Change Character",
+						"dad",
+						"scourge-angry"
+					]
+				]
+			],
+			[
+				46500,
+				[
+					[
+						"Change Character",
+						"dad",
+						"scourge"
+					]
+				]
+			],
+			[
+				48000,
+				[
+					[
+						"Change Character",
+						"dad",
+						"scourge-angry"
+					]
+				]
+			],
+			[
+				50400,
+				[
+					[
+						"Change Character",
+						"dad",
+						"scourge"
+					]
+				]
+			],
+			[
+				60000,
+				[
+					[
+						"Change Character",
+						"dad",
+						"scourge-angry"
+					]
+				]
+			],
+			[
+				64800,
+				[
+					[
+						"Change Character",
+						"dad",
+						"scourge-forced"
+					]
+				]
+			],
+			[
+				69450,
+				[
+					[
+						"Change Character",
+						"dad",
+						"scourge-angry"
+					]
+				]
+			],
+			[
+				88800,
+				[
+					[
+						"Change Character",
+						"dad",
+						"scourge-forced"
+					]
+				]
+			],
+			[
+				108000,
+				[
+					[
+						"Change Character",
+						"dad",
+						"scourge-angry"
+					],
+					[
+						"Tween Zoom",
+						"1.3",
+						"1.5"
+					]
+				]
+			],
+			[
+				127200,
+				[
+					[
+						"Tween Zoom",
+						"",
+						"1.5"
+					]
+				]
+			]
+		],
+		"notes": [],
+		"splashSkin": null,
+		"validScore": false,
+		"gfVersion": "gf",
+		"bpm": 200,
+		"arrowSkin": null,
+		"needsVoices": true,
+		"extraTracks": [],
+		"song": "No Heroes"
+	}
+}

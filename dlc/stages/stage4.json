@@ -5,7 +5,7 @@
 	],
 	"girlfriend": [
 		580,
-		30
+		566
 	],
 	"camera_girlfriend": [
 		0,
@@ -13,13 +13,13 @@
 	],
 	"boyfriend": [
 		1140,
-		100
+		636
 	],
 	"isPixelStage": false,
 	"preloadStrings": null,
 	"opponent": [
 		-50,
-		100
+		636
 	],
 	"hide_girlfriend": false,
 	"pixel_size": null,

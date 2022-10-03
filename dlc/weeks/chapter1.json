@@ -3,9 +3,10 @@
 		["Talentless Fox", "tails", [146, 113, 253]],
 		["No Villains", "sonic", [146, 113, 253]],
 		["Die Batsards", "shadow", [146, 113, 253]],
+		["Proving Nothing", "sonic-mad", [146, 113, 253]],
 		["Taste For Blood", "dark-sonic", [146, 113, 253]]
 	],
-	"difficulties": "Normal, Hard",
+	"difficulties": "Hard",
 	"weekCharacters": ["", "", ""],
 	"weekBackground": "",
 

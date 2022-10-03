@@ -1,5 +1,5 @@
 var offX = -1912/2;
-var offY = -536/2;
+var offY = 536/2;
 
 function onLoad(stage){
 	FlxG.camera.bgColor = 0xFF9AD9EA;

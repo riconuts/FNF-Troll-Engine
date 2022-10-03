@@ -1,0 +1,19 @@
+{
+	"directory": "",
+	"defaultZoom": 0.8,
+	"isPixelStage": false,
+
+	"boyfriend": [1100, 800],
+	"girlfriend": [810, 710],
+	"opponent": [200, 800],
+	"hide_girlfriend": true,
+
+	"camera_boyfriend": [0, 0],
+	"camera_opponent": [0, 0],
+	"camera_girlfriend": [0, 0],
+	"camera_speed": 1,
+	"preload": [
+		{"path": "stage1/ground"},
+		{"path": "stage1/cave"}
+	]
+}

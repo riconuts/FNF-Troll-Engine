@@ -1,16 +1,16 @@
-var offX = -1000/2;
+var offX = -1650/2;
 var offY = -500/2;
 
 function onLoad(stage){
 	FlxG.camera.bgColor = 0x000000;
 	
-	var sky = new FlxSprite(offX, offY);
+	var sky = new FlxSprite(offX - 40, offY - 40);
 	sky.loadGraphic(Paths.image("extra1/sky"));	
 	sky.scrollFactor.set(0.3, 0.3);
 	stage.add(sky);
 
 	var ground = new FlxSprite(offX, offY + 756);
 	ground.loadGraphic(Paths.image("extra1/ground"));	
-	ground.scrollFactor.set(1, 0.95);
+	ground.scrollFactor.set(1, 1);
 	stage.add(ground);
 }

@@ -2,10 +2,10 @@ var offX:Float = -1000/2;
 var offY:Float = -500/2;
 
 var inst = getInstance();
+var isGameplay = inst == PlayState.instance;
+
 var tails;
 var knux;
-
-var xddd = 0;
 
 function onLoad(stage, foreground){
 	FlxG.camera.bgColor = 0xFF3F47CC;
@@ -47,23 +47,27 @@ function onLoad(stage, foreground){
 	stage.add(mground);
 	
 	// bg peeps
-	tails = new Character(0, 0, "db-tails");
-	tails.scrollFactor.set(0.95, 0.95);
-	stage.add(tails);
-	
-	knux = new Character(0, 0, "db-knuckles");
-	knux.scrollFactor.set(0.95, 0.95);
-	stage.add(knux);
+	if (isGameplay){
+		tails = new Character(0, 0, "db-tails");
+		tails.scrollFactor.set(0.95, 0.95);
+		stage.add(tails);
+		
+		knux = new Character(0, 0, "db-knuckles");
+		knux.scrollFactor.set(0.95, 0.95);
+		stage.add(knux);
+	}
 }
 
 function onCreatePost(){
+	if (!isGameplay)
+		return;
+
 	var GF_X = inst.GF_X;
 	var GF_Y = inst.GF_Y;
 	var gf = inst.gf;
 	
-	for (char in [tails, knux]){
+	for (char in [tails, knux])
 		char.setPosition(GF_X + char.positionArray[0], GF_Y + char.positionArray[1]);
-	}
 	
 	tails.x -= 500;
 	knux.x += 530;
@@ -71,10 +75,22 @@ function onCreatePost(){
 
 function onBeatHit(){	
 	for (peep in [tails, knux])
-	{
 		if (peep != null && curBeat % Math.round(inst.gfSpeed * peep.danceEveryNumBeats) == 0)
-		{
 			peep.dance();
-		}
+}
+
+function onShoot(note){
+	for (peep in [tails, knux])
+	{
+		peep.playAnim("shoot");
+		peep.specialAnim = true;
+		peep.animTimer = 1/24*10;
+	}
+}
+
+function onEvent(name, value1, value2){
+	if (name == "Play Animation" && value1 == "fuckingdies" && value2 == "bf"){
+		for (peep in [tails, knux])
+			peep.idleSuffix = "-crazy";
 	}
 }

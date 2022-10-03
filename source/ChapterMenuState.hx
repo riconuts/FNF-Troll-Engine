@@ -82,7 +82,7 @@ class ChapterMenuState extends MusicBeatSubstate{
 		totalSongTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
 
 		totalScoreTxt = new FlxText(1205, 0, 0, "0", 32);
-		totalScoreTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.LEFT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
+		totalScoreTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
 		totalScoreTxt.x -= totalScoreTxt.width + 15;
 
 		add(totalSongTxt);
@@ -93,16 +93,17 @@ class ChapterMenuState extends MusicBeatSubstate{
 	{
 		if (controls.BACK)
 			close();
-		if (controls.ACCEPT)
+		else if (controls.ACCEPT)
 			playWeek();
+		/*else if (flixel.FlxG.keys.justPressed.CONTROL)
+			StoryMenuState.instance.openSubState(new GameplayChangersSubstate());*/
 
 		super.update(elapsed);
 	}
 	
 	function set_curWeek(DaWeek:WeekData):WeekData{
-		if (curWeek == DaWeek)
-			return curWeek;
 		curWeek = DaWeek;
+		trace('loaded week: ${curWeek.fileName}');
 
 		WeekData.setDirectoryFromWeek(curWeek);
 
@@ -144,7 +145,7 @@ class ChapterMenuState extends MusicBeatSubstate{
 		changeDifficulty();
 
 		//// Update menu
-		chapterImage.loadGraphic(Paths.image('newmenuu/mainmenu/cover_promo'));
+		chapterImage.loadGraphic(Paths.image('chaptercovers/' + DaWeek.fileName));
 		chapterImage.updateHitbox();
 		
 		chapterText.setPosition(chapterImage.x, chapterImage.y + chapterImage.height + 4);
@@ -169,16 +170,17 @@ class ChapterMenuState extends MusicBeatSubstate{
 				newSongTxt = new FlxText(halfScreen, yPos, 0, songName, 32);
 				newSongTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
 			}
-
+			
 			var newScoreTxt = scoreTxtArray[songAmount]; // find a previously created text
+			var highScore = Highscore.getScore(songName, curDifficulty);
 			if (newScoreTxt != null) { // if found then reuse it
-				newScoreTxt.text = songName;
 				newScoreTxt.visible = true;
+				newScoreTxt.text = '' + highScore;
 			}
 			else // if not then make one
 			{
-				newScoreTxt = new FlxText(1205, yPos, 0, "0", 32);
-				newScoreTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.LEFT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
+				newScoreTxt = new FlxText(1205, yPos, 0, '' + highScore, 32);
+				newScoreTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
 				newScoreTxt.x -= newScoreTxt.width + 15;
 			}
 
@@ -197,6 +199,8 @@ class ChapterMenuState extends MusicBeatSubstate{
 
 		// Accomodate the total week score text
 		totalSongTxt.y = totalScoreTxt.y = startY + (songAmount + 2) * 48;
+
+		changeDifficulty();
 
 		return DaWeek;
 	}

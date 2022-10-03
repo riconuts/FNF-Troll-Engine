@@ -7,5 +7,9 @@ function setupNote(note:Note){
 	note.colorSwap.saturation = 0;
 	note.colorSwap.lightness = 0;
 	
+	note.noteSplashHue = 0;
+	note.noteSplashSat = 0;
+	note.noteSplashBrt = 0;
+	
 	note.hitHealth = 0;
 }

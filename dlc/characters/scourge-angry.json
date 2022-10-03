@@ -62,7 +62,7 @@
 		-420,
 		-790
 	],
-	"healthicon": "scourge",
+	"healthicon": "scourge-angry",
 	"flip_x": false,
 	"healthbar_colors": [
 		0,
@@ -70,8 +70,8 @@
 		80
 	],
 	"camera_position": [
-		-50,
-		140
+		0,
+		40
 	],
 	"sing_duration": 4,
 	"scale": 0.9

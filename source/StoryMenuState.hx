@@ -5,6 +5,7 @@ import flash.ui.Mouse;
 import flash.ui.MouseCursor;
 import flixel.FlxBasic;
 import flixel.FlxG;
+import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.addons.display.shapes.FlxShapeBox;
 import flixel.addons.transition.FlxTransitionableState;
@@ -19,7 +20,7 @@ import flixel.tweens.FlxTween;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
-import sowy.SowyBaseButton;
+import sowy.*;
 
 using StringTools;
 #if desktop
@@ -30,6 +31,8 @@ class StoryMenuState extends MusicBeatState
 {
 	public static var weekCompleted:Map<String, Bool> = new Map<String, Bool>();
 	public static var instance:StoryMenuState;
+
+	public var camFollowPos:FlxObject;
 
 	final chapterSelectPositions:Array<Array<Int>> = [ // Screen positions for the chapter options
 		[51, 109], [305, 109], [542, 109], [788, 109], [1034, 109],
@@ -42,6 +45,8 @@ class StoryMenuState extends MusicBeatState
 	var funkyRectangle = new FlxShapeBox(0, 0, 206, 206, {thickness: 3, color: FlxColor.fromRGB(255, 242, 0)}, FlxColor.BLACK); // cool rectanlge used for transitions
 	var lastButton:ChapterOption; // used the square transition
 	var doingTransition = false; // to prevent unintended behaviour
+
+	var cornerLeftText:SowyTextButton;
 
 	var isOnSubMenu = false;
 
@@ -58,6 +63,8 @@ class StoryMenuState extends MusicBeatState
 		FlxG.mouse.visible = true;
 		#end
 		
+		camFollowPos = new FlxObject(FlxG.width / 2, FlxG.height / 2);
+		FlxG.camera.follow(camFollowPos);
 		FlxG.camera.bgColor = FlxColor.BLACK;
 
 		WeekData.reloadWeekFiles(true);
@@ -110,6 +117,11 @@ class StoryMenuState extends MusicBeatState
 			mainMenu.add(yellowBorder);
 		}
 		
+		cornerLeftText = new SowyTextButton(15, 720, 0, "← BACK", 32, goBack);
+		cornerLeftText.label.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
+		cornerLeftText.y -= cornerLeftText.height + 15;
+		mainMenu.add(cornerLeftText);
+		
 		add(mainMenu);
 		funkyRectangle.visible = false;
 		add(funkyRectangle);
@@ -156,6 +168,8 @@ class StoryMenuState extends MusicBeatState
 
 		funkyRectangle.setPosition(x != null ? x : funkyRectangle.x, y != null ? y : funkyRectangle.y);
 		funkyRectangle.visible = true;
+
+		cornerLeftText.visible = false;
 		
 		FlxTween.tween(funkyRectangle, {
 			x: 10,
@@ -200,6 +214,7 @@ class StoryMenuState extends MusicBeatState
 			{
 				doingTransition = false;
 				funkyRectangle.visible = false;
+				cornerLeftText.visible = true;
 			}
 		});
 	}

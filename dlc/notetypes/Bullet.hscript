@@ -45,6 +45,8 @@ function goodNoteHit(note:Note){
 		boyfriend.specialAnim = true;
 		boyfriend.animTimer = 1/24*14;
 	}
+	
+	instance.callOnHScripts("onShoot", [note]);
 }
 
 function noteMiss(note:Note){
@@ -60,6 +62,8 @@ function noteMiss(note:Note){
 	instance.camHUD.shake(0.01, 0.2);
 	instance.camGame.shake(0.01, 0.2);
 	instance.camGame.flash(0xCCFF0000, 0.2, null, true); // red
+	
+	instance.callOnHScripts("onShoot", [note]);
 }
 
 // for use at the end of die batsards

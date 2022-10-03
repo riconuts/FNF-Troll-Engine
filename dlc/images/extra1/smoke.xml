@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="Untitled-1.png">
+	<!-- Created with Adobe Animate version 20.0.3.25487 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="Symbol 1 instance 10000" x="0" y="523" width="784" height="255" frameX="0" frameY="-2" frameWidth="788" frameHeight="257"/>
+	<SubTexture name="Symbol 1 instance 10001" x="0" y="0" width="787" height="257" frameX="-1" frameY="0" frameWidth="788" frameHeight="257"/>
+	<SubTexture name="Symbol 1 instance 10002" x="0" y="262" width="782" height="256" frameX="-4" frameY="-1" frameWidth="788" frameHeight="257"/>
+</TextureAtlas>

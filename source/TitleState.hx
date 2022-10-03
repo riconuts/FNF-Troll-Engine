@@ -1,6 +1,7 @@
 package;
 
 import flixel.FlxBasic;
+import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
@@ -36,9 +37,8 @@ import sys.thread.Thread;
 import sys.FileSystem;
 import sys.io.File;
 #end
-typedef TitleData =
-{
 
+typedef TitleData = {
 	titlex:Float,
 	titley:Float,
 	startx:Float,
@@ -100,30 +100,37 @@ class TitleState extends MusicBeatState
 		startIntro();
 	}
 
-	var logoBl:FlxSprite;
+	var logoBl:RandomTitleLogo;
+	/*
 	var gfDance:FlxSprite;
 	var danceLeft:Bool = false;
+	*/
 	var titleText:FlxSprite;
 	var swagShader:ColorSwap = null;
 	var bg:Stage;
+	var camHUD:FlxCamera = new FlxCamera();
 
 	function startIntro()
 	{
+		persistentUpdate = true;
+
 		FlxTransitionableState.defaultTransIn = FadeTransitionSubstate;
 		FlxTransitionableState.defaultTransOut = FadeTransitionSubstate;
 
-		MusicBeatState.playMenuMusic(0);
+		if (!initialized){
+			MusicBeatState.playMenuMusic(0);
+			Conductor.changeBPM(90);
+		}
 
-		Conductor.changeBPM(90);
-		persistentUpdate = true;
+		FlxG.cameras.add(camHUD);
 		
 		var stageNames= Stage.getStageList();
 		bg = new Stage(stageNames[FlxG.random.int(0, stageNames.length - 1)]).buildStage();
+		FlxG.camera.zoom = bg.stageData.defaultZoom;
 		add(bg);
 
 		/*
-		if (bg.curStage == 'highzoneShadow')
-		{
+		if (bg.curStage == 'highzoneShadow'){
 			highShader = new HighEffect();
 			FlxG.camera.setFilters([new ShaderFilter(highShader.shader)]);
 		}
@@ -131,19 +138,10 @@ class TitleState extends MusicBeatState
 
 		swagShader = new ColorSwap();
 
-		var titleNames = Paths.getFolders("images/titles");
-		var titleShit = titleNames[FlxG.random.int(0, titleNames.length-1)];
-		
-		logoBl = new FlxSprite();
-		logoBl.frames = Paths.getSparrowAtlas('titles/${titleShit}/logoBumpin');
-		logoBl.antialiasing = true;
-		logoBl.animation.addByPrefix('bump', 'logo bumpin', 24);
-		logoBl.animation.play('bump');
-		logoBl.setGraphicSize(Std.int(logoBl.width * 0.72));
+		logoBl = new RandomTitleLogo();
 		logoBl.scrollFactor.set();
-		logoBl.updateHitbox();
 		logoBl.screenCenter(XY);
-		
+		logoBl.cameras = [camHUD];
 		add(logoBl);
 		logoBl.shader = swagShader.shader;
 		
@@ -154,8 +152,6 @@ class TitleState extends MusicBeatState
 			path = "mods/images/titleEnter.png";
 		if (!FileSystem.exists(path))
 			path = "assets/images/titleEnter.png";
-
-		// trace(path, FileSystem.exists(path));
 		titleText.frames = FlxAtlasFrames.fromSparrow(BitmapData.fromFile(path), File.getContent(StringTools.replace(path, ".png", ".xml")));
 		#else
 		titleText.frames = Paths.getSparrowAtlas('titleEnter');
@@ -167,42 +163,41 @@ class TitleState extends MusicBeatState
 		titleText.antialiasing = ClientPrefs.globalAntialiasing;
 		titleText.animation.play('idle');
 		titleText.updateHitbox();
-		// titleText.screenCenter(X);
+		titleText.cameras = [camHUD];
 		add(titleText);
 
 		// FlxTween.tween(logoBl, {y: logoBl.y + 50}, 0.6, {ease: FlxEase.quadInOut, type: PINGPONG});
 		// FlxTween.tween(logo, {y: logoBl.y + 50}, 0.6, {ease: FlxEase.quadInOut, type: PINGPONG, startDelay: 0.1});
 
 		credGroup = new FlxGroup();
+		credGroup.cameras = [camHUD];
 		add(credGroup);
+		
 		textGroup = new FlxGroup();
+		textGroup.cameras = [camHUD];
 
 		blackScreen = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
 		credGroup.add(blackScreen);
 
 		credTextShit = new Alphabet(0, 0, "", true);
 		credTextShit.screenCenter();
-
-		// credTextShit.alignment = CENTER;
-
+		credTextShit.cameras = [camHUD];
 		credTextShit.visible = false;
+		FlxTween.tween(credTextShit, {y: credTextShit.y + 20}, 2.9, {ease: FlxEase.quadInOut, type: PINGPONG});
 
 		ngSpr = new FlxSprite(0, FlxG.height * 0.52).loadGraphic(Paths.image('newgrounds_logo'));
-		add(ngSpr);
 		ngSpr.visible = false;
 		ngSpr.setGraphicSize(Std.int(ngSpr.width * 0.8));
 		ngSpr.updateHitbox();
 		ngSpr.screenCenter(X);
+		ngSpr.cameras = [camHUD];
 		ngSpr.antialiasing = ClientPrefs.globalAntialiasing;
-
-		FlxTween.tween(credTextShit, {y: credTextShit.y + 20}, 2.9, {ease: FlxEase.quadInOut, type: PINGPONG});
-
+		add(ngSpr);
+		
 		if (initialized)
 			skipIntro();
 		else
 			initialized = true;
-
-		// credGroup.add(credTextShit);
 	}
 
 	function getIntroTextShit():Array<Array<String>>
@@ -228,9 +223,7 @@ class TitleState extends MusicBeatState
 	{
 		if (FlxG.sound.music != null)
 			Conductor.songPosition = FlxG.sound.music.time;
-		// FlxG.watch.addQuick('amp', FlxG.sound.music.amplitude);
-
-		var controls = controls;
+		
 		var pressedEnter:Bool = FlxG.keys.justPressed.ENTER || (controls != null && controls.ACCEPT);
 
 		#if mobile
@@ -280,7 +273,8 @@ class TitleState extends MusicBeatState
 				if (titleText != null)
 					titleText.animation.play('press');
 
-				FlxG.camera.flash(ClientPrefs.flashing ? FlxColor.WHITE : 0x4CFFFFFF, 1);
+				camHUD.flash(ClientPrefs.flashing ? FlxColor.WHITE : 0x4CFFFFFF, 1);
+				//FlxG.camera.flash(ClientPrefs.flashing ? FlxColor.WHITE : 0x4CFFFFFF, 1);
 				FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
 
 				transitioning = true;
@@ -351,18 +345,8 @@ class TitleState extends MusicBeatState
 	{
 		super.beatHit();
 
-		if(logoBl != null)
-			logoBl.animation.play('bump', true);
-
-		/*
-		if(gfDance != null) {
-			danceLeft = !danceLeft;
-			if (danceLeft)
-				gfDance.animation.play('danceRight');
-			else
-				gfDance.animation.play('danceLeft');
-		}
-		*/
+		if (logoBl != null)
+			logoBl.titleElapsed = 0;
 
 		if(!closedState) {
 			sickBeats++;
@@ -414,11 +398,89 @@ class TitleState extends MusicBeatState
 		{
 			remove(ngSpr);
 			remove(credGroup);
-			FlxG.camera.flash(FlxColor.WHITE, 4);
+
+			camHUD.flash(FlxColor.WHITE, 4);
+			//FlxG.camera.flash(FlxColor.WHITE, 4);
 			
 			skippedIntro = true;
 
 			Conductor.changeBPM(180);
 		}
+	}
+}
+
+// kinda unnecessary to make it a class
+class RandomTitleLogo extends FlxSprite
+{
+	public var titleName:String; 
+	public function new(?X:Float, ?Y:Float, ?Name:String)
+	{
+		super(X, Y);
+		
+		if (Name != null)
+			titleName = Name;
+		else{
+			var titleNames = getTitlesList();
+			trace(titleNames);
+			titleName = titleNames[FlxG.random.int(0, titleNames.length - 1)];
+		}
+
+		antialiasing = true;
+
+		loadGraphic(Paths.image('titles/${titleName}'));
+		updateHitbox();
+	}
+
+	public var titleElapsed:Float = 0;
+	public var frameRate:Float = 1 / 24;
+	public var size:Float = 0.72;
+	override public function update(elapsed:Float){
+		//// Title animation!
+		titleElapsed += elapsed;
+
+		var size = size;
+
+		if (titleElapsed > frameRate * 5)
+			size *= 1;
+		else if (titleElapsed > frameRate * 3)
+			size *= 1.007965;
+		else if (titleElapsed > frameRate)
+			size *= 1.037872;
+		else
+			size *= .98732;
+
+		scale.set(size, size);
+
+		super.update(elapsed);
+	}
+
+	public static function getTitlesList()
+	{
+		// var titleXmls:Array<String> = [];
+		var titleNames:Array<String> = [];
+		var foldersToCheck:Array<String> = [Paths.getPreloadPath('images/titles/')];
+
+		#if MODS_ALLOWED
+		foldersToCheck.insert(0, Paths.mods('images/titles/'));
+		if (Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
+			foldersToCheck.insert(0, Paths.mods(Paths.currentModDirectory + '/images/titles/'));
+		for (mod in Paths.getGlobalMods())
+			foldersToCheck.insert(0, Paths.mods(mod + '/images/titles/'));
+		#end
+
+		for (folder in foldersToCheck){
+			if (FileSystem.exists(folder)){
+				var dir = FileSystem.readDirectory(folder);
+				for (file in dir){
+					if (!titleNames.contains(file) && file.endsWith('.png')){
+						titleNames.push(file.substr(0, file.length - 4));
+						// }else if (file.endsWith('.xml')){
+						// titleXmls.push(file.substr(-4, 4));
+					}
+				}
+			}
+		}
+
+		return titleNames;
 	}
 }

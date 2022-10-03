@@ -1,0 +1,44 @@
+var inst = getInstance();
+var STORY = PlayState.isStoryMode;
+var cutscenesFinished = false;
+var seenCutscene = false;
+var videoFade;
+
+if (STORY){
+	videoFade = new FlxSprite();
+	videoFade.makeGraphic(FlxG.width, FlxG.height, 0xFF000000);
+	videoFade.scrollFactor.set();
+	videoFade.cameras = [inst.camOverlay];
+	
+	inst.add(videoFade);
+}
+
+function onStartCountdown(){
+	if (!STORY) 
+	{
+		trace("skipping because story");
+		return Function_Continue;
+	}
+	else if (!seenCutscene && !cutscenesFinished)
+	{
+		trace("skipping because im going to do it now");
+		inst.startVideo(songName);
+		seenCutscene = true;
+		
+		return Function_Stop;
+	}
+	else if (seenCutscene && !cutscenesFinished)
+	{
+		trace("skipping because i already did it");
+		inst.modchartTweens.push(FlxTween.tween(videoFade, {alpha: 0}, 0.6, {ease: FlxEase.linear}));
+		cutscenesFinished = true;
+		
+		new FlxTimer().start(0.5, function(tmr){
+			inst.startCountdown();
+		});
+		
+		return Function_Stop;
+	}
+
+	return Function_Continue;
+}

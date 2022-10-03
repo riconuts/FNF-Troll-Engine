@@ -1,0 +1,42 @@
+function onCreate()
+	STORY = isStoryMode
+	cutscenesFinished = false
+	
+	if STORY then
+		makeLuaSprite("videoFade")
+		makeGraphic("videoFade", screenWidth, screenHeight, "000000")
+		setScrollFactor("videoFade", 0, 0)
+		addLuaSprite("videoFade", true)
+		setObjectCamera("videoFade", "other")
+		
+		setProperty('camHUD.visible', false);
+	end
+end
+
+function onTimerCompleted(tag, loops, loopsLeft)
+	if tag == "startCountdown" then		
+		setProperty('camHUD.visible', true);
+		
+		startCountdown();
+	end
+end
+
+function onStartCountdown()
+	if not STORY then
+		return Function_Continue;
+	elseif not seenCutscene and not cutscenesFinished then
+		startVideo(songName);
+		seenCutscene = true;
+		
+		return Function_Stop;
+	elseif seenCutscene and not cutscenesFinished then	
+		doTweenAlpha("videoFadeOut", "videoFade", 0, 0.6, "linear")
+		cutscenesFinished = true
+		
+		runTimer('startCountdown', 0.5);
+		
+		return Function_Stop;
+	end
+
+	return Function_Continue;
+end
