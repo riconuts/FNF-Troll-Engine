@@ -1,0 +1,240 @@
+var instance = getInstance();
+
+var flipX = false;
+var flipY = false;
+var centered = false;
+
+var leftX = [94, 206, 318, 430];
+var middleX = [414, 526, 638, 750];
+var rightX = [734, 846, 958, 1070];
+
+function onCreatePost(){
+	for (slNote in instance.playerStrums) {
+		trace(slNote.noteData, slNote.x);
+	}
+	for (slNote in instance.opponentStrums) {
+		trace(slNote.noteData, slNote.x);
+	}
+}
+
+function sign(n){
+	if (n > 0)
+		return 1;
+	else if (n < 0)
+		return -1;
+	return 0;
+}
+
+var twnNumber:Int = 0;
+function objTween(?Object:Dynamic, ?Values:Dynamic, ?Duration , ?Options:TweenOptions){
+	if (Object == null || Values == null)
+		return trace("Unsufficient amount of arguments to perform tween.");
+	
+	var twn = FlxTween.tween(Object, Values, Duration != null ? Duration : 1, Options);
+	twnNumber++;
+	instance.modchartTweens.set(scriptName+twnNumber, twn);
+	
+	return twn;
+}
+
+function setStrumsFlipY(?Flip, ?Time){
+	flipY = Flip != null ? Flip : !flipX;
+	var Time = Time != null ? Time : Conductor.stepCrochet / 1000;
+	
+	var downScroll = (flipY ? !downscroll : downscroll);
+	
+	for (slNote in instance.strumLineNotes) {
+		slNote.angle = slNote.angle % 360;
+		objTween(
+			slNote, 
+			{angle: downScroll ? 360 : -360, y: downScroll ? FlxG.height - 150 : 50}, 
+			Time, 
+			{ease: FlxEase.quartOut}
+		);
+		
+		slNote.downScroll = downScroll;
+	}
+	
+	var healthBarY = downScroll ? 0.11 * instance.camOverlay.height + 4 : instance.camOverlay.height * 0.89;
+	objTween(instance.healthBar, {y: healthBarY}, Time, {ease: FlxEase.quartOut});
+	objTween(instance.scoreTxt, {y: healthBarY + 36}, Time, {ease: FlxEase.quartOut});
+	objTween(instance.iconP1, {y: healthBarY - 75}, Time, {ease: FlxEase.quartOut});
+	objTween(instance.iconP2, {y: healthBarY - 75}, Time, {ease: FlxEase.quartOut});
+	
+	var timeTxtY = downScroll ? FlxG.height - 44 : 19;
+	var timeTxt = instance.timeTxt;
+	objTween(timeTxt, {y: timeTxtY}, Time, {ease: FlxEase.quartOut});
+	objTween(instance.timeBar, {y: timeTxtY + (timeTxt.height / 4) + 4}, Time, {ease: FlxEase.quartOut});
+	objTween(instance.botplayTxt, {y: healthBarY + 36}, Time, {ease: FlxEase.quartOut});
+}
+
+function setStrumsFlipX(?Flip, ?Time){
+	centered = false;
+	flipX = Flip != null ? Flip : !flipX;
+	var Time = Time != null ? Time : Conductor.stepCrochet / 1000;
+	
+	var vsX;
+	var opX;
+	
+	if (flipX){
+		vsX = rightX;
+		opX = leftX;
+	}else{
+		vsX = leftX;
+		opX = rightX;
+	}
+
+	for (slNote in instance.playerStrums) {
+		slNote.angle = slNote.angle % 360;
+		
+		var newX = opX[slNote.noteData];
+		var newA = slNote.x == newX ? 0 : (slNote.x>newX ? 360 : slNote-360); 
+		
+		objTween(slNote, {x: newX, angle: newA}, Time, {ease: FlxEase.quartOut});
+	}
+	for (slNote in instance.opponentStrums) {
+		slNote.angle = slNote.angle % 360;
+		
+		var newX = vsX[slNote.noteData];
+		var newA = slNote.x == newX ? 0 : (slNote.x>newX ? 360 : slNote-360); 
+		
+		objTween(slNote, {x: newX, angle: newA, alphaMult: 1}, Time, {ease: FlxEase.quartOut});
+	}
+}
+
+function setStrumsCenter(?Type, ?Time){
+	var Time = Time != null ? Time : Conductor.stepCrochet / 1000;
+	if (Type == -1)
+		return setStrumsFlipX(flipX, Time);
+	
+	switch(Type){
+		case 0: // both in the middle
+			for (slNote in instance.opponentStrums){
+				slNote.visible = false;
+				slNote.angle = slNote.angle % 360;
+				
+				var newX = middleX[slNote.noteData];
+				var newA = slNote.x > newX ? 360 : -360; 
+
+				objTween(slNote, {x: newX, angle: newA, alphaMult: 0.2}, Time, {ease: FlxEase.quartOut});
+			}
+			
+			for (slNote in instance.playerStrums) {
+				slNote.angle = slNote.angle % 360;
+				
+				var newX = middleX[slNote.noteData];
+				var newA = slNote.x == newX ? 0 : (slNote.x>newX ? 360 : slNote-360); 
+				
+				objTween(slNote, {x: newX, angle: newA}, Time, {ease: FlxEase.quartOut});
+			}
+		case 1: // player in the middle, opponent split to the sides
+			var posX = [leftX[0], leftX[1], rightX[2], rightX[3]];
+			for (slNote in instance.opponentStrums) {
+				slNote.visible = true;
+				slNote.angle = slNote.angle % 360;
+				
+				var newX = posX[slNote.noteData];
+				var newA = slNote.x > newX ? 360 : -360; 
+
+				objTween(slNote, {x: newX, angle: newA, alphaMult: 0.6}, Time, {ease: FlxEase.quartOut});
+			}
+			
+			for (slNote in instance.playerStrums) {
+				slNote.angle = slNote.angle % 360;
+				
+				var newX = middleX[slNote.noteData];
+				var newA = slNote.x == newX ? 0 : (slNote.x>newX ? 360 : slNote-360); 
+				
+				objTween(slNote, {x: newX, angle: newA}, Time, {ease: FlxEase.quartOut});
+			}
+		case 2: // row of all strums 0,0,1,1,2,2,3,3
+			var posX = [middleX[0] - 112*2, middleX[0], middleX[2], middleX[2] + 112*2];
+			for (slNote in instance.opponentStrums) {
+				slNote.visible = true;
+				slNote.angle = slNote.angle % 360;
+				
+				var newX = posX[slNote.noteData];
+				var newA = slNote.x > newX ? 360 : -360; 
+
+				objTween(slNote, {x: newX, angle: newA, alphaMult: 0.5}, Time, {ease: FlxEase.quartOut});
+			}
+			
+			var posX = [middleX[1] - 112*2, middleX[1], middleX[3], middleX[3] + 112*2];
+			for (slNote in instance.playerStrums) {
+				slNote.angle = slNote.angle % 360;
+				
+				var newX = posX[slNote.noteData];
+				var newA = slNote.x == newX ? 0 : (slNote.x>newX ? 360 : slNote-360); 
+				
+				objTween(slNote, {x: newX, angle: newA}, Time, {ease: FlxEase.quartOut});
+			}
+		case 3: // same as 0 but opponent is invisible
+			for (slNote in instance.opponentStrums){
+				slNote.visible = false;
+				slNote.angle = slNote.angle % 360;
+				
+				var newX = middleX[slNote.noteData];
+				var newA = slNote.x > newX ? 360 : -360; 
+
+				objTween(slNote, {x: newX, angle: newA, alphaMult: 0}, Time, {ease: FlxEase.quartOut});
+			}
+			
+			for (slNote in instance.playerStrums) {
+				slNote.angle = slNote.angle % 360;
+				
+				var newX = middleX[slNote.noteData];
+				var newA = slNote.x == newX ? 0 : (slNote.x>newX ? 360 : slNote-360); 
+				
+				objTween(slNote, {x: newX, angle: newA}, Time, {ease: FlxEase.quartOut});
+			}
+	}
+}
+
+function onStepHit(){
+	switch(curStep){
+		// begins
+		case 163:
+			setStrumsFlipY(true, 0.675);
+		case 195:
+			setStrumsFlipY(false, 0.675);
+		case 229:
+			setStrumsFlipX(true, 0.675);
+		case 291:
+			setStrumsFlipY(true, 0.675);
+		case 323:
+			setStrumsFlipY(false, 0.675);
+		case 356:
+			setStrumsCenter(0, 0.675);
+		case 530:
+			setStrumsCenter(1, 0.675);
+		case 589:
+			setStrumsCenter(2, 0.675);
+		case 656:
+			setStrumsFlipX(false, 0.675);
+			
+		// cool
+		case 1171:
+		case 1180:
+		case 1188:
+		
+		// beginning again
+		case 1219:
+			setStrumsFlipY(true, 0.675);
+		case 1251:
+			setStrumsFlipY(false, 0.675);
+		case 1283:
+			setStrumsFlipX(true, 0.675);
+		case 1347:
+			setStrumsFlipX(false, 0.675);
+		case 1379:
+			setStrumsFlipY(true, 0.675);
+		case 1411:
+			setStrumsFlipY(false, 0.675);
+			
+		// both
+		case 1855:
+			setStrumsCenter(3, 0.675);		
+		case 2014:
+			setStrumsFlipX(false, 0.675);
+	}
+}

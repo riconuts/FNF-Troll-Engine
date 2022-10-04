@@ -108,7 +108,8 @@ class TitleState extends MusicBeatState
 	var titleText:FlxSprite;
 	var swagShader:ColorSwap = null;
 	var bg:Stage;
-	var camHUD:FlxCamera = new FlxCamera();
+	public var camGame:FlxCamera = new FlxCamera();
+	public var camHUD:FlxCamera = new FlxCamera();
 
 	function startIntro()
 	{
@@ -121,20 +122,14 @@ class TitleState extends MusicBeatState
 			MusicBeatState.playMenuMusic(0);
 			Conductor.changeBPM(90);
 		}
-
-		FlxG.cameras.add(camHUD);
+		
+		FlxG.cameras.reset(camGame);
+		FlxG.cameras.add(camHUD, false);
 		
 		var stageNames= Stage.getStageList();
 		bg = new Stage(stageNames[FlxG.random.int(0, stageNames.length - 1)]).buildStage();
 		FlxG.camera.zoom = bg.stageData.defaultZoom;
 		add(bg);
-
-		/*
-		if (bg.curStage == 'highzoneShadow'){
-			highShader = new HighEffect();
-			FlxG.camera.setFilters([new ShaderFilter(highShader.shader)]);
-		}
-		*/
 
 		swagShader = new ColorSwap();
 

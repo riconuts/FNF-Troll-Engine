@@ -150,8 +150,8 @@ class TestState extends MusicBeatState{
 	function createTitleUI()
 	{
 		var group = new FlxTypedGroup<FlxBasic>();
-		var titleNames = Paths.getFolders("images/titles");
-		trace(titleNames);
+		//var titleNames = Paths.getFolders("images/titles");
+		//trace(titleNames);
 
 		////
 		var bgGroup = new FlxTypedGroup<FlxBasic>();
@@ -161,6 +161,7 @@ class TestState extends MusicBeatState{
 
 		group.add(UI_box);
 
+		/*
 		var logoBl = new FlxSprite();
 		function switchLogo(sowy:Int = 0){
 			logoBl.frames = Paths.getSparrowAtlas('titles/${titleNames[sowy]}/logoBumpin');
@@ -179,6 +180,7 @@ class TestState extends MusicBeatState{
 		////
 		var titleStepper = new FlxUINumericStepper(10, 40, 1, 0, 0, titleNames.length-1, 0);
 		group.add(titleStepper);
+		 */
 		
 		var stageNames = Stage.getStageList();
 		var bgStepper = new FlxUINumericStepper(10, 70, 1, 0, 0, stageNames.length-1, 0);
@@ -186,7 +188,7 @@ class TestState extends MusicBeatState{
 
 		var changeButton = new FlxButton(10, 100, "Set", function()
 		{
-			switchLogo(Std.int(titleStepper.value));
+			//switchLogo(Std.int(titleStepper.value));
 			bgGroup.remove(bg);
 			bg.destroy();
 			bg = new Stage(stageNames[Std.int(bgStepper.value)]).buildStage();
