@@ -14,10 +14,8 @@ class StartupState extends MusicBeatState
         scripts.FunkinHScript.init();
 		Paths.clearStoredMemory();
 		Paths.clearUnusedMemory();
-
-		//#if LUA_ALLOWED
+		
 		Paths.pushGlobalMods();
-		//#end
 		// Just to load a mod on start up if ya got one. For mods that change the menu music and bg
 		WeekData.loadTheFirstEnabledMod();
         

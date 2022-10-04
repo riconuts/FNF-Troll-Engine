@@ -99,16 +99,11 @@ class Main extends Sprite
 	
 		ClientPrefs.loadDefaultKeys();
 
-		#if final
-			FlxG.save.bind('funkin', 'ninjamuffin99');
-			var trollage:Bool = FlxG.save.data.tgtNotes != null;
-		#else 
-			var trollage:Bool = false;
-		#end
-
-		if (trollage){
-			initialState = SinnerState;
-			skipSplash = true;
+		for (arg in Sys.args()){
+			if (arg.contains("troll")){
+				initialState = SinnerState;
+				skipSplash = true;
+			}
 		}
 
 		addChild(new FlxGame(gameWidth, gameHeight, initialState, zoom, framerate, framerate, skipSplash, startFullscreen));

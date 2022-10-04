@@ -23,6 +23,7 @@ import sys.FileSystem;
 class MasterEditorMenu extends MusicBeatState
 {
 	var options:Array<String> = [
+		'Mods Menu',
 		'Week Editor',
 		'Menu Character Editor',
 		'Character Editor',
@@ -115,6 +116,8 @@ class MasterEditorMenu extends MusicBeatState
 		if (controls.ACCEPT)
 		{
 			switch(options[curSelected]) {
+				case "Mods Menu":
+					MusicBeatState.switchState(new ModsMenuState());
 				case 'Character Editor':
 					LoadingState.loadAndSwitchState(new CharacterEditorState(Character.DEFAULT_CHARACTER, false));
 				case 'Week Editor':

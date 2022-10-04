@@ -92,7 +92,7 @@ class WeekData {
 		#if MODS_ALLOWED
 		var disabledMods:Array<String> = [];
 		var modsListPath:String = 'modsList.txt';
-		var directories:Array<String> = [Paths.mods(), Paths.getPreloadPath()];
+		var directories:Array<String> = [Paths.getPreloadPath(), Paths.mods()];
 		var originalLength:Int = directories.length;
 		if(FileSystem.exists(modsListPath))
 		{
@@ -185,8 +185,14 @@ class WeekData {
 
 	private static function addWeek(weekToCheck:String, path:String, directory:String, i:Int, originalLength:Int)
 	{
-		if(!weeksLoaded.exists(weekToCheck))
-		{
+		trace(weekToCheck, path);
+
+		while (weeksList.remove(weekToCheck) != false){
+			
+		}
+
+		//if(!weeksLoaded.exists(weekToCheck))
+		//{
 			var week:WeekFile = getWeekFile(path);
 			if(week != null)
 			{
@@ -203,7 +209,7 @@ class WeekData {
 					weeksList.push(weekToCheck);
 				}
 			}
-		}
+		//}
 	}
 
 	private static function getWeekFile(path:String):WeekFile {

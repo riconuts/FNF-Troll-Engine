@@ -394,7 +394,7 @@ class Paths
 			localTrackedAssets.push(path);
 			return currentTrackedAssets.get(path);
 		}
-		trace('oh no its returning null NOOOO');
+		trace('oh no, ${key} is returning null NOOOO');
 		return null;
 	}
 
@@ -437,7 +437,7 @@ class Paths
 	#if MODS_ALLOWED
 	inline static public function mods(key:String = '')
 	{
-		return 'mods/' + key;
+		return 'dlc/' + key;
 	}
 
 	inline static public function modsFont(key:String)
@@ -505,7 +505,7 @@ class Paths
 			if (FileSystem.exists(fileToCheck))
 				return fileToCheck;
 		}
-		return 'mods/' + key;
+		return 'dlc/' + key;
 	}
 
 	public static var globalMods:Array<String> = [];
