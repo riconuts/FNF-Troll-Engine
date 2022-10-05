@@ -895,6 +895,7 @@ class PlayState extends MusicBeatState
 			for (script in gf.characterScripts)
 			{
 				funkyScripts.push(script);
+				hscriptArray.push(script);
 			}
 			gfMap.set(gf.curCharacter, gf);
 		}
@@ -907,6 +908,7 @@ class PlayState extends MusicBeatState
 		for (script in dad.characterScripts)
 		{
 			funkyScripts.push(script);
+			hscriptArray.push(script);
 		}
 		dadMap.set(dad.curCharacter, dad);
 
@@ -918,6 +920,7 @@ class PlayState extends MusicBeatState
 		for (script in boyfriend.characterScripts)
 		{
 			funkyScripts.push(script);
+			hscriptArray.push(script);
 		}
 		boyfriendMap.set(boyfriend.curCharacter, boyfriend);
 
@@ -4075,6 +4078,13 @@ class PlayState extends MusicBeatState
 			}
 		}
 
+		/*
+		for (script in char.characterScripts){
+			if (script.scriptType != 'lua')
+				callScript(script, "noteMiss", [daNote]);
+		}
+		*/
+
 		callOnLuas('noteMiss', [notes.members.indexOf(daNote), daNote.noteData, daNote.noteType, daNote.isSustainNote, daNote.ID]);
 		callOnHScripts("noteMiss", [daNote]);
 
@@ -4142,6 +4152,13 @@ class PlayState extends MusicBeatState
 			}
 			vocals.volume = 0;
 		}
+		/*
+		for (script in boyfriend.characterScripts){
+			if (script.scriptType != 'lua')
+				callScript(script, "noteMissPress", [direction]);
+		}
+		*/
+
 		callOnScripts('noteMissPress', [direction]);
 	}
 
@@ -4201,6 +4218,13 @@ class PlayState extends MusicBeatState
 		}
 
 		note.hitByOpponent = true;
+
+		/*
+		for (script in char.characterScripts){
+			if (script.scriptType != 'lua')
+				callScript(script, "opponentNoteHit", [note]);
+		}
+		*/
 
 		callOnLuas('opponentNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote, note.ID]);
 		callOnHScripts("opponentNoteHit", [note]);
@@ -4339,20 +4363,24 @@ class PlayState extends MusicBeatState
 			var isSus:Bool = note.isSustainNote; //GET OUT OF MY HEAD, GET OUT OF MY HEAD, GET OUT OF MY HEAD
 			var leData:Int = Math.round(Math.abs(note.noteData));
 			var leType:String = note.noteType;
+
+			/*
+			for (script in field.owner.characterScripts){
+				if (script.scriptType != 'lua')
+					callScript(script, "goodNoteHit", [note]);
+			}
+			*/
+
 			callOnLuas('goodNoteHit', [notes.members.indexOf(note), leData, leType, isSus, note.ID]);
 			callOnHScripts("goodNoteHit", [note]); // maybe have this above so you can interrupt goodNoteHit? idk we'll see
 			if (note.noteScript!=null)
 			{
 				var script:Dynamic = note.noteScript;
 				if (script.scriptType == 'lua')
-				{
 					callScript(script, 'goodNoteHit',
 						[notes.members.indexOf(note), leData, leType, isSus, note.ID]); 
-				}
 				else
-				{
-					callScript(script, "goodNoteHit", [note]); 
-				}
+					callScript(script, "goodNoteHit", [note]);
 			}
 			if (!note.isSustainNote)
 			{

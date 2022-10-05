@@ -99,10 +99,12 @@ class Main extends Sprite
 	
 		ClientPrefs.loadDefaultKeys();
 
+		var troll = false;
 		for (arg in Sys.args()){
 			if (arg.contains("troll")){
 				initialState = SinnerState;
 				skipSplash = true;
+				troll = true;
 			}
 		}
 
@@ -115,12 +117,14 @@ class Main extends Sprite
 		FlxG.autoPause = false;
 		#end
 		#if !mobile
-		fpsVar = new FPS(10, 3, 0xFFFFFF);
-		addChild(fpsVar);
-		Lib.current.stage.align = "tl";
-		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
-		if (fpsVar != null){
-			fpsVar.visible = ClientPrefs.showFPS;
+		if (!troll){
+			fpsVar = new FPS(10, 3, 0xFFFFFF);
+			addChild(fpsVar);
+			Lib.current.stage.align = "tl";
+			Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
+			if (fpsVar != null){
+				fpsVar.visible = ClientPrefs.showFPS;
+			}
 		}
 		#end
 		

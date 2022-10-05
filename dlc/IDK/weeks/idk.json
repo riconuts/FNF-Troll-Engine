@@ -1,0 +1,16 @@
+{
+	"songs": [
+		["Incapacity", "dark-sonic", [146, 113, 253]]
+	],
+	"difficulties": "Hard",
+	"weekCharacters": ["", "", ""],
+	"weekBackground": "",
+
+	"storyName": "Chapter 2",
+	"weekBefore": "tutorial",
+	"weekName": "Chapter 2",
+	"startUnlocked": true,
+
+	"hideStoryMode": true,
+	"hideFreeplay": false
+}

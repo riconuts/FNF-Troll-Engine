@@ -44,6 +44,7 @@ function setStrumsFlipY(?Flip, ?Time){
 	var downScroll = (flipY ? !downscroll : downscroll);
 	
 	for (slNote in instance.strumLineNotes) {
+		slNote.visible = true;
 		slNote.angle = slNote.angle % 360;
 		objTween(
 			slNote, 
@@ -93,6 +94,7 @@ function setStrumsFlipX(?Flip, ?Time){
 		objTween(slNote, {x: newX, angle: newA}, Time, {ease: FlxEase.quartOut});
 	}
 	for (slNote in instance.opponentStrums) {
+		slNote.visible = true;
 		slNote.angle = slNote.angle % 360;
 		
 		var newX = vsX[slNote.noteData];
@@ -197,7 +199,7 @@ function onStepHit(){
 			setStrumsFlipY(true, 0.675);
 		case 195:
 			setStrumsFlipY(false, 0.675);
-		case 229:
+		case 227:
 			setStrumsFlipX(true, 0.675);
 		case 291:
 			setStrumsFlipY(true, 0.675);

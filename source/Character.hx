@@ -400,6 +400,7 @@ class Character extends FlxSprite
 
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
 	{
+		callOnScripts("onAnimPlay", [AnimName, Force, Reversed, Frame]);
 		specialAnim = false;
 		animation.play(AnimName, Force, Reversed, Frame);
 
@@ -439,6 +440,7 @@ class Character extends FlxSprite
 				danced = !danced;
 			}
 		}
+		callOnScripts("onAnimPlayed", [AnimName, Force, Reversed, Frame]);
 	}
 
 	function loadMappedAnims():Void

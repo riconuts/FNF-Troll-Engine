@@ -1,7 +1,7 @@
 {
-	"name": "TGT: Chapter 1",
+	"name": "TGT Chapter 1",
 	"description": "",
-	"restart":false,
+	"restart": false,
 	"color": [170, 0, 255],
-	"runsGlobally": true
+	"runsGlobally": false
 }

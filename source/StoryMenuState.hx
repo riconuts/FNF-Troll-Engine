@@ -68,9 +68,23 @@ class StoryMenuState extends MusicBeatState
 		FlxG.camera.bgColor = FlxColor.BLACK;
 
 		WeekData.reloadWeekFiles(true);
+		WeekData.weeksList.sort(function(x, y){ // unefficient af but it works
+			var xV = 0;
+			for (i in 0...x.length){
+				var code = x.charCodeAt(i);
+				xV += code != null ? code : 0;
+			}
+			var yV = 0;
+			for (i in 0...y.length){
+				var code = y.charCodeAt(i);
+				yV += code != null ? code : 0;
+			}
+
+			return flixel.util.FlxSort.byValues(-1, xV, yV);
+		});
 		trace(WeekData.weeksList);
 
-		var chapN:Int = -1;
+		var chapN:Int = -1;	
 		for (weekName in WeekData.weeksList){
 			var daWeek:WeekData = WeekData.weeksLoaded.get(weekName);
 			var isLocked:Bool = weekIsLocked(daWeek);

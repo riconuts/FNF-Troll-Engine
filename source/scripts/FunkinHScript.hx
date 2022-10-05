@@ -76,6 +76,7 @@ class FunkinHScript extends FunkinScript
 		scriptName = name;
 
 		setDefaultVars();
+		set("this", this);
 		set("FlxG", flixel.FlxG);
 		set("FlxSprite", flixel.FlxSprite);
 		set("Std", Std);

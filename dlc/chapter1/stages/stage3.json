@@ -26,7 +26,12 @@
 	"directory": "",
 	"camera_speed": 1,
 	"defaultZoom": 0.7,
-	"preload": null,
+	"preload": [
+		{"path": "stage3/ground"},
+		{"path": "stage3/back"},
+		{"path": "stage3/knuckles bg"},
+		{"path": "stage3/tails bg"}
+	],
 	"camera_boyfriend": [
 		0,
 		0

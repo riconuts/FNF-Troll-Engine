@@ -1,0 +1,74 @@
+importClass("StringTools");
+
+var charName1 = "bf";
+var charName2 = "gf-standing";
+
+var inst = getInstance();
+var char;
+var alt;
+
+function onLoad(main){
+	var isPlayer = main.isPlayer;
+	
+	if (isPlayer){
+		var X = inst.BF_X;
+		var Y = inst.BF_Y;
+		char = new Boyfriend(X, Y, charName1, isPlayer);
+		alt = new Boyfriend(X + 300, Y, charName2, isPlayer);
+
+		char.x += char.positionArray[0];
+		char.y += char.positionArray[1];
+
+		alt.x += alt.positionArray[0];
+		alt.y += alt.positionArray[1];
+
+		inst.boyfriendGroup.add(alt);
+		inst.boyfriendGroup.add(char);
+	}else{
+		var X = inst.DAD_X;
+		var Y = inst.DAD_Y;
+		char = new Character(X, Y, charName1, isPlayer);
+		alt = new Character(X - 300, Y, charName2, isPlayer);
+
+		char.x += char.positionArray[0];
+		char.y += char.positionArray[1];
+
+		alt.x += alt.positionArray[0];
+		alt.y += alt.positionArray[1];
+
+		inst.dadGroup.add(alt);
+		inst.dadGroup.add(char);
+	}
+
+	var mid1 = char.getMidpoint();
+	var mid2 = alt.getMidpoint();
+	main.setPosition((mid1.x + mid2.x)/2, (mid1.y + mid2.y)/2);
+}
+
+var singAnimations = ['singLEFT', 'singDOWN', 'singUP', 'singRIGHT'];
+function goodNoteHit(note){
+	var singer = (note.noteType == 'Alt Animation') ? alt : char;
+
+	if (singer != null && singer.animTimer <= 0 && !singer.voicelining){
+		singer.playAnim(singAnimations[Std.int(Math.abs(note.noteData))], true);
+		singer.holdTimer = 0;
+	}
+}
+
+function update(elapsed){
+	for (chr in [char, alt])
+		if(chr.holdTimer > Conductor.stepCrochet * 0.0011 * chr.singDuration)
+			chr.dance();
+}
+
+function onCountdownTick(swagCounter){
+	for (chara in [char, alt])
+		if (swagCounter % chara.danceEveryNumBeats == 0 && !(chara.animation.curAnim != null && StringTools.startsWith(chara.animation.curAnim.name, 'sing')))
+			chara.dance();
+}
+
+function onBeatHit(){
+	for (chara in [char, alt])
+		if (curBeat % chara.danceEveryNumBeats == 0 && chara.animation.curAnim != null && !StringTools.startsWith(chara.animation.curAnim.name, 'sing') && !chara.stunned)
+			chara.dance();
+}

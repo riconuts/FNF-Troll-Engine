@@ -8,7 +8,7 @@ import sowy.SowyTextButton;
 using StringTools;
 
 class ChapterMenuState extends MusicBeatSubstate{
-	var chapterImage:FlxSprite;
+	var coverArt:FlxSprite;
 	var chapterText:FlxText;
 
 	var cornerLeftText:SowyTextButton;
@@ -46,8 +46,8 @@ class ChapterMenuState extends MusicBeatSubstate{
 		curDifficulty = Math.round(Math.max(0, CoolUtil.defaultDifficulties.indexOf(lastDifficultyName)));
 
 		// Create sprites
-		chapterImage = new FlxSprite(75, 130);
-		add(chapterImage);
+		coverArt = new FlxSprite(75, 130);
+		add(coverArt);
 
 		chapterText = new FlxText(0, 0, 1, sowyStr, 32);
 		chapterText.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE, FlxColor.WHITE);
@@ -66,7 +66,7 @@ class ChapterMenuState extends MusicBeatSubstate{
 
 		//// SONGS - HI-SCORE
 		halfScreen = 1280 / 2;
-		startY = chapterImage.y + 48;
+		startY = coverArt.y + 48;
 
 		songText = new FlxText(halfScreen, startY, 0, "SONGS", 32);
 		songText.setFormat(Paths.font("calibrib.ttf"), 32, FlxColor.WHITE, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
@@ -145,11 +145,12 @@ class ChapterMenuState extends MusicBeatSubstate{
 		changeDifficulty();
 
 		//// Update menu
-		chapterImage.loadGraphic(Paths.image('chaptercovers/' + DaWeek.fileName));
-		chapterImage.updateHitbox();
+		var artGraph = Paths.image('chaptercovers/' + DaWeek.fileName);
+		coverArt.loadGraphic(artGraph != null ? artGraph : Paths.image('newmenuu/mainmenu/cover_story_mode'));
+		coverArt.updateHitbox();
 		
-		chapterText.setPosition(chapterImage.x, chapterImage.y + chapterImage.height + 4);
-		chapterText.fieldWidth = chapterImage.width;
+		chapterText.setPosition(coverArt.x, coverArt.y + coverArt.height + 4);
+		chapterText.fieldWidth = coverArt.width;
 		chapterText.text = DaWeek.weekName;
 
 		// Make a text boxes for every song.
@@ -256,6 +257,8 @@ class ChapterMenuState extends MusicBeatSubstate{
 		PlayState.SONG = Song.loadFromJson(PlayState.storyPlaylist[0].toLowerCase() + diffic, PlayState.storyPlaylist[0].toLowerCase());
 		PlayState.campaignScore = 0;
 		PlayState.campaignMisses = 0;
+
+		flixel.FlxG.state.destroySubStates = true;
 
 		LoadingState.loadAndSwitchState(new PlayState(), true);
 		FreeplayState.destroyFreeplayVocals();
