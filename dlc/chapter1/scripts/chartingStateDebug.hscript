@@ -1,0 +1,20 @@
+var instance = getInstance();
+
+if (!PlayState.chartingMode)
+	return;
+
+importClass("flixel.text.FlxText");
+var scoreTxt = new FlxText(0, 720/4*3, FlxG.width, "", 20);
+scoreTxt.setFormat(Paths.font("calibri.ttf"), 20, 0xFFFFFFFF, null, null, 0xFF000000);
+scoreTxt.scrollFactor.set();
+scoreTxt.borderSize = 1.25;
+scoreTxt.cameras = [instance.camOverlay];
+instance.add(scoreTxt);
+
+function onBeatHit(){
+	scoreTxt.text = 'curBeat: '+curBeat+', curStep: '+curStep;
+}
+
+function onStepHit(){
+	scoreTxt.text = 'curBeat: '+curBeat+', curStep: '+curStep;
+}

@@ -34,7 +34,7 @@ class MainMenuState extends MusicBeatState
 	public static var psychEngineVersion:String = '0.5.2n'; //This is also used for Discord RPC
 	public static var curSelected:Int = 0;
 
-	var menuItems:FlxTypedGroup<MainMenuButton>;
+	var menuItems:FlxTypedGroup<FlxSprite>;
 	private var camGame:FlxCamera;
 	private var camAchievement:FlxCamera;
 	
@@ -91,7 +91,7 @@ class MainMenuState extends MusicBeatState
 		add(camFollow);
 		add(camFollowPos);
 
-		menuItems = new FlxTypedGroup<MainMenuButton>();
+		menuItems = new FlxTypedGroup<FlxSprite>();
 		add(menuItems);
 
 		var scale:Float = 1;
@@ -136,25 +136,22 @@ class MainMenuState extends MusicBeatState
 			menuItem.scrollFactor.set(0, scr);
 			menuItem.updateHitbox();
 		}
-
-		/*
+		
 		var creditButton:FlxUIButton = new FlxUIButton(802, 586);
 		creditButton.loadGraphic(Paths.image('newmenuu/mainmenu/credits'));
 		creditButton.onUp.callback = function(){
 			selectedSomethin = true;
 			MusicBeatState.switchState(new CreditsState());
 		}
+		menuItems.add(creditButton);
 		
 		var jukeboxButton:FlxUIButton = new FlxUIButton(988, 586);
 		jukeboxButton.loadGraphic(Paths.image('newmenuu/mainmenu/jukebox'));
-		jukeboxButton.onUp.callback = function(){
+		/*jukeboxButton.onUp.callback = function(){
 			selectedSomethin = true;
 			MusicBeatState.switchState(new CreditsState());
-		}
-
-		add(creditButton);
-		add(jukeboxButton);
-		*/
+		}*/
+		menuItems.add(jukeboxButton);
 
 		FlxG.camera.follow(camFollowPos, null, 1);
 

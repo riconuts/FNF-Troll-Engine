@@ -1,7 +1,5 @@
 {
 	"song": {
-		"songName": "No-Heroes",
-		"songId": "No-Heroes",
 		"player1": "bf-kirby",
 		"notes": [
 			{
@@ -12589,16 +12587,7 @@
 				]
 			]
 		],
-		"gfVersion": "gf",
-		"eventObjects": [
-			{
-				"type": "BPM Change",
-				"name": "0SM",
-				"position": 0,
-				"value": 200
-			}
-		],
-		"chartVersion": "KE1",
+		"gfVersion": "gf-kirby",
 		"needsVoices": true,
 		"stage": "extra3",
 		"noteStyle": "normal",

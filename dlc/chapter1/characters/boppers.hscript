@@ -52,7 +52,12 @@ function onDance(){
 			bopper.dance();
 }
 
+var shot = false;
 function shoot(){
+	if (shot)
+		return;
+	shot = true;
+	
 	toke.playAnim("surprise");
 	fatty.playAnim("surprise");
 	
@@ -64,12 +69,22 @@ function shoot(){
 			mainChar.playAnim("kill sequence");
 			
 			mainChar.animation.callback = function(name, frameNumber){
-				if (frameNumber == 8){
-					fatty.playAnim("death");
-					toke.playAnim("death");
+				switch(frameNumber){
+					case 5:
+						FlxG.sound.play(Paths.sound("TGT_Gunshot1"), 1);	
+					case 8:
+						fatty.playAnim("death");
+						toke.playAnim("death");
+						FlxG.sound.play(Paths.sound("TGT_Gunshot1"), 1);
+					case 11:
+						FlxG.sound.play(Paths.sound("TGT_Gunshot1"), 1);		
+					case 22:
+						FlxG.sound.play(Paths.sound("TGT_Gunshot1"), 1);		
 				}
 			};
-		}else{
+		}
+		else
+		{
 			fatty.destroy();
 			toke.destroy();
 			

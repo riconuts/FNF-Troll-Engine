@@ -1,7 +1,7 @@
 importClass("StringTools");
 
 var charName1 = "bf";
-var charName2 = "gf-standing";
+var charName2 = "tk";
 
 var inst = getInstance();
 var char;
@@ -11,8 +11,8 @@ function onLoad(main){
 	var isPlayer = main.isPlayer;
 	
 	if (isPlayer){
-		var X = inst.BF_X;
-		var Y = inst.BF_Y;
+		var X = inst.BF_X - 1100;
+		var Y = inst.BF_Y - 800;
 		char = new Boyfriend(X, Y, charName1, isPlayer);
 		alt = new Boyfriend(X + 300, Y, charName2, isPlayer);
 
@@ -25,8 +25,8 @@ function onLoad(main){
 		inst.boyfriendGroup.add(alt);
 		inst.boyfriendGroup.add(char);
 	}else{
-		var X = inst.DAD_X;
-		var Y = inst.DAD_Y;
+		var X = inst.DAD_X - 200;
+		var Y = inst.DAD_Y - 800;
 		char = new Character(X, Y, charName1, isPlayer);
 		alt = new Character(X - 300, Y, charName2, isPlayer);
 
@@ -51,6 +51,15 @@ function goodNoteHit(note){
 
 	if (singer != null && singer.animTimer <= 0 && !singer.voicelining){
 		singer.playAnim(singAnimations[Std.int(Math.abs(note.noteData))], true);
+		singer.holdTimer = 0;
+	}
+}
+
+function noteMiss(note){
+	var singer = (note.noteType == 'Alt Animation') ? alt : char;
+
+	if (singer != null && singer.animTimer <= 0 && !singer.voicelining){
+		singer.playAnim(singAnimations[Std.int(Math.abs(note.noteData))] + 'miss', true);
 		singer.holdTimer = 0;
 	}
 }

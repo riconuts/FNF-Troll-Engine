@@ -38,7 +38,6 @@ import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.system.FlxAssets.FlxShader;
-import flixel.system.FlxAssets.FlxShader;
 import flixel.system.FlxSound;
 import flixel.system.scaleModes.*;
 import flixel.text.FlxText;

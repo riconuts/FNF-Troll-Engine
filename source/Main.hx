@@ -105,7 +105,9 @@ class Main extends Sprite
 				initialState = SinnerState;
 				skipSplash = true;
 				troll = true;
-			}
+				break;
+			}else if (arg.contains("debug"))
+				skipSplash = true;
 		}
 
 		addChild(new FlxGame(gameWidth, gameHeight, initialState, zoom, framerate, framerate, skipSplash, startFullscreen));
