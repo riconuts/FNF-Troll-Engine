@@ -33,7 +33,6 @@ function onTrigger(value1, value2){
 	}
 	else
 	{
-		trace("arroz sowy " + sowy + ", " + value1);
 		instance.triggerEventNote("Camera Follow Pos", "", "");
 	}
 }

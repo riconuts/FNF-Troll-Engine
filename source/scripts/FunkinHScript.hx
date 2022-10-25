@@ -175,12 +175,11 @@ class FunkinHScript extends FunkinScript
 		set("CoolUtil", CoolUtil);
 		set("Character", Character);
 		set("Boyfriend", Boyfriend);
-		set("StageData", StageData);
+		set("StageData", Stage.StageData);
 		#if VIDEOS_ALLOWED
 		set("MP4Handler", vlc.MP4Handler);
 		#end
 		set("PlayState", PlayState);
-		set("PlayField", PlayField);
 		set("FunkinLua", FunkinLua);
 		set("FunkinHScript", FunkinHScript);
 		set("GameOverSubstate", GameOverSubstate);

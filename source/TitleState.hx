@@ -83,13 +83,10 @@ class TitleState extends MusicBeatState
 		swagShader = new ColorSwap();
 
 		if (FlxG.save.data.weekCompleted != null)
-		{
 			StoryMenuState.weekCompleted = FlxG.save.data.weekCompleted;
-		}
 
 		#if desktop
-		if (!DiscordClient.isInitialized)
-		{
+		if (!DiscordClient.isInitialized){
 			DiscordClient.initialize();
 			Application.current.onExit.add(function (exitCode) {
 				DiscordClient.shutdown();
@@ -101,10 +98,6 @@ class TitleState extends MusicBeatState
 	}
 
 	var logoBl:RandomTitleLogo;
-	/*
-	var gfDance:FlxSprite;
-	var danceLeft:Bool = false;
-	*/
 	var titleText:FlxSprite;
 	var swagShader:ColorSwap = null;
 	var bg:Stage;
@@ -126,8 +119,10 @@ class TitleState extends MusicBeatState
 		FlxG.cameras.reset(camGame);
 		FlxG.cameras.add(camHUD, false);
 		
-		var stageNames= Stage.getStageList();
-		bg = new Stage(stageNames[FlxG.random.int(0, stageNames.length - 1)]).buildStage();
+		var stageNames = Stage.getStageList();
+		var randomStage = stageNames[FlxG.random.int(0, stageNames.length - 1)];
+		trace(Paths.currentModDirectory, randomStage);
+		bg = new Stage(randomStage).buildStage();
 		FlxG.camera.zoom = bg.stageData.defaultZoom;
 		add(bg);
 
@@ -160,9 +155,6 @@ class TitleState extends MusicBeatState
 		titleText.updateHitbox();
 		titleText.cameras = [camHUD];
 		add(titleText);
-
-		// FlxTween.tween(logoBl, {y: logoBl.y + 50}, 0.6, {ease: FlxEase.quadInOut, type: PINGPONG});
-		// FlxTween.tween(logo, {y: logoBl.y + 50}, 0.6, {ease: FlxEase.quadInOut, type: PINGPONG, startDelay: 0.1});
 
 		credGroup = new FlxGroup();
 		credGroup.cameras = [camHUD];
@@ -197,15 +189,36 @@ class TitleState extends MusicBeatState
 
 	function getIntroTextShit():Array<Array<String>>
 	{
-		var fullText:String = Assets.getText(Paths.txt('introText'));
-
-		var firstArray:Array<String> = fullText.split('\n');
 		var swagGoodArray:Array<Array<String>> = [];
 
-		for (i in firstArray)
-		{
-			swagGoodArray.push(i.split('--'));
+		// add list from the assets folder
+		var fullText:String = Assets.getText(Paths.txt('introText'));
+		
+		#if MODS_ALLOWED
+		// get mod list
+		if (FileSystem.exists("modsList.txt")){
+			var list:Array<String> = CoolUtil.listFromString(File.getContent("modsList.txt"));
+			for (i in list){
+				// check for active mods
+				var dat = i.split("|");
+				if (dat[1] == "1"){
+					// check for introTexts
+					var path = Paths.mods(dat[0] + '/data/introText.txt');
+					if (FileSystem.exists(path)){
+						// add intro text list
+						var rawFile:String = File.getContent(path);
+						if (rawFile != null && rawFile.length > 0)
+							fullText += '\n${rawFile}';
+					}
+				}
+			}
 		}
+		#end
+
+		////
+		var firstArray:Array<String> = fullText.split('\n');
+		for (i in firstArray)
+			swagGoodArray.push(i.split('--'));
 
 		return swagGoodArray;
 	}

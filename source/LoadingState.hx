@@ -1,20 +1,18 @@
 package;
 
-import lime.app.Promise;
-import lime.app.Future;
 import flixel.FlxG;
-import flixel.FlxState;
 import flixel.FlxSprite;
+import flixel.FlxState;
 import flixel.graphics.frames.FlxAtlasFrames;
-import flixel.util.FlxTimer;
 import flixel.math.FlxMath;
-
-import openfl.utils.Assets;
-import lime.utils.Assets as LimeAssets;
+import flixel.util.FlxTimer;
+import haxe.io.Path;
+import lime.app.Future;
+import lime.app.Promise;
 import lime.utils.AssetLibrary;
 import lime.utils.AssetManifest;
-
-import haxe.io.Path;
+import lime.utils.Assets as LimeAssets;
+import openfl.utils.Assets;
 
 class LoadingState extends MusicBeatState
 {
@@ -153,8 +151,8 @@ class LoadingState extends MusicBeatState
 	static function getNextState(target:FlxState, stopMusic = false):FlxState
 	{
 		var directory:String = 'shared';
-		var weekDir:String = StageData.forceNextDirectory;
-		StageData.forceNextDirectory = null;
+		var weekDir:String = Stage.StageData.forceNextDirectory;
+		Stage.StageData.forceNextDirectory = null;
 
 		if(weekDir != null && weekDir.length > 0 && weekDir != '') directory = weekDir;
 

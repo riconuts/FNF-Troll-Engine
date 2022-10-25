@@ -1,6 +1,6 @@
 package editors;
 
-import StageData;
+import Stage;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxObject;

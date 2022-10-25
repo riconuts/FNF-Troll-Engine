@@ -53,15 +53,14 @@ class FunkinScript {
 		if ((currentState is PlayState))
 		{
 			set("inPlaystate", true);
+			
 			set('bpm', PlayState.SONG.bpm);
 			set('scrollSpeed', PlayState.SONG.speed);
 			set('songName', PlayState.SONG.song);
 			set('isStoryMode', PlayState.isStoryMode);
-			set('difficulty', PlayState.storyDifficulty);
 			set('weekRaw', PlayState.storyWeek);
 			set('seenCutscene', PlayState.seenCutscene);
 			set('week', WeekData.weeksList[PlayState.storyWeek]);
-			set('difficultyName', CoolUtil.difficulties[PlayState.storyDifficulty]);
 			set('songLength', flixel.FlxG.sound.music.length);
 			set('healthGainMult', PlayState.instance.healthGain);
 			set('healthLossMult', PlayState.instance.healthLoss);
@@ -69,11 +68,9 @@ class FunkinScript {
 			set('botPlay', PlayState.instance.cpuControlled);
 			set('practice', PlayState.instance.practiceMode);
 			set('startedCountdown', false);
-		}
-		else
-		{
+		}else
 			set("inPlaystate", false);
-		}
+		
 		
 		set('inGameOver', false);
 		set('downscroll', ClientPrefs.downScroll);

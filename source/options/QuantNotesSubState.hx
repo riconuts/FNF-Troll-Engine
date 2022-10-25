@@ -5,27 +5,27 @@ package options;
 #if desktop
 import Discord.DiscordClient;
 #end
+import Controls;
+import flash.text.TextField;
 import flash.text.TextField;
 import flixel.FlxG;
+import flixel.FlxG;
 import flixel.FlxSprite;
+import flixel.FlxSprite;
+import flixel.FlxSubState;
 import flixel.addons.display.FlxGridOverlay;
+import flixel.graphics.FlxGraphic;
 import flixel.group.FlxGroup.FlxTypedGroup;
+import flixel.input.keyboard.FlxKey;
 import flixel.math.FlxMath;
 import flixel.text.FlxText;
-import flixel.util.FlxColor;
-import lime.utils.Assets;
-import flixel.FlxSubState;
-import flash.text.TextField;
-import flixel.FlxG;
-import flixel.FlxSprite;
-import flixel.util.FlxSave;
-import haxe.Json;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
+import flixel.util.FlxColor;
+import flixel.util.FlxSave;
 import flixel.util.FlxTimer;
-import flixel.input.keyboard.FlxKey;
-import flixel.graphics.FlxGraphic;
-import Controls;
+import haxe.Json;
+import lime.utils.Assets;
 
 using StringTools;
 
@@ -36,7 +36,7 @@ class QuantNotesSubState extends MusicBeatSubstate
 	private var grpNumbers:FlxTypedGroup<Alphabet>;
 	private var grpNotes:FlxTypedGroup<FlxSprite>;
 	private var grpQuants:FlxTypedGroup<AttachedText>;
-	private var shaderArray:Array<HSLColorSwap> = [];
+	private var shaderArray:Array<ColorSwap> = [];
 	var curValue:Float = 0;
 	var holdTime:Float = 0;
 	var nextAccept:Int = 5;
@@ -115,11 +115,11 @@ class QuantNotesSubState extends MusicBeatSubstate
 			note.antialiasing = ClientPrefs.globalAntialiasing;
 			grpNotes.add(note);
 
-			var newShader:HSLColorSwap = new HSLColorSwap();
+			var newShader:ColorSwap = new ColorSwap();
 			note.shader = newShader.shader;
 			newShader.hue = ClientPrefs.quantHSV[i][0] / 360;
 			newShader.saturation = ClientPrefs.quantHSV[i][1] / 100;
-			newShader.lightness = ClientPrefs.quantHSV[i][2] / 100;
+			newShader.brightness = ClientPrefs.quantHSV[i][2] / 100;
 			shaderArray.push(newShader);
 		}
 
@@ -307,7 +307,7 @@ class QuantNotesSubState extends MusicBeatSubstate
 			case 1:
 				shaderArray[selected].saturation = defaults[selected][type];
 			case 2:
-				shaderArray[selected].lightness = defaults[selected][type];
+				shaderArray[selected].brightness = defaults[selected][type];
 		}
 
 		var item = grpNumbers.members[(selected * 3) + type];
@@ -333,7 +333,7 @@ class QuantNotesSubState extends MusicBeatSubstate
 		switch(typeSelected) {
 			case 0: shaderArray[curSelected].hue = roundedValue / 360;
 			case 1: shaderArray[curSelected].saturation = roundedValue / 100;
-			case 2: shaderArray[curSelected].lightness = roundedValue / 100;
+			case 2: shaderArray[curSelected].brightness = roundedValue / 100;
 		}
 
 		var item = grpNumbers.members[(curSelected * 3) + typeSelected];

@@ -6,7 +6,7 @@ import Note.EventNote;
 import Section.SwagSection;
 import Shaders;
 import Song.SwagSong;
-import StageData;
+import Stage;
 import WiggleEffect.WiggleEffectType;
 import animateatlas.AtlasFrameMaker;
 import editors.CharacterEditorState;
@@ -52,6 +52,7 @@ import flixel.util.FlxStringUtil;
 import flixel.util.FlxTimer;
 import haxe.Json;
 import lime.utils.Assets;
+import modchart.*;
 import openfl.Lib;
 import openfl.display.BlendMode;
 import openfl.display.StageQuality;
@@ -62,7 +63,6 @@ import openfl.system.Capabilities;
 import openfl.utils.Assets as OpenFlAssets;
 import scripts.*;
 import scripts.FunkinLua;
-import sys.thread.Thread;
 
 using StringTools;
 #if desktop
@@ -70,11 +70,11 @@ import Discord.DiscordClient;
 #end
 #if sys
 import sys.FileSystem;
+import sys.thread.Thread;
 #end
 #if VIDEOS_ALLOWED
 import vlc.MP4Handler;
 #end
-
 
 typedef LineData = {
 	var character:String;
@@ -86,7 +86,6 @@ typedef PreloadResult = {
 	var asset:String;
 	@:optional var terminated:Bool;
 }
-
 typedef AssetPreload = {
 	var path:String;
 	@:optional var type:String;
@@ -96,7 +95,11 @@ typedef AssetPreload = {
 
 class PlayState extends MusicBeatState
 {
+	public var modManager:ModManager;
+
 	public var whosTurn:String = '';
+	public var focusedChar:Character;
+	
 	public static var STRUM_X = 42;
 	public static var STRUM_X_MIDDLESCROLL = -278;
 	public static var arrowSkin:String = '';
@@ -162,9 +165,8 @@ class PlayState extends MusicBeatState
 	public static var isStoryMode:Bool = false;
 	public static var storyWeek:Int = 0;
 	public static var storyPlaylist:Array<String> = [];
-	public static var storyDifficulty:Int = 1;
 
-	public var spawnTime:Float = 3000;
+	public var spawnTime:Float = 2000;
 
 	public var tracks:Array<FlxSound> = [];
 	public var vocals:FlxSound;
@@ -180,28 +182,14 @@ class PlayState extends MusicBeatState
 	private var strumLine:FlxSprite;
 
 	//Handles the new epic mega sexy cam code that i've done
-	private var camFollow:FlxPoint;
-	private var camFollowPos:FlxObject;
+	public var camFollow:FlxPoint;
+	public var camFollowPos:FlxObject;
 	private static var prevCamFollow:FlxPoint;
 	private static var prevCamFollowPos:FlxObject;
 
-	public var playFields:FlxTypedGroup<PlayField>;
-	@:isVar
-	public var strumLineNotes(get, null):Array<StrumNote>;
-	function get_strumLineNotes(){
-		var notes:Array<StrumNote> = [];
-		if(playFields!=null && playFields.length>0){
-			for(field in playFields.members){
-				for(sturm in field.members)
-					notes.push(sturm);
-				
-			}
-		}
-		return notes;
-	}
-	public var opponentStrums:PlayField;
-	public var playerStrums:PlayField;
-
+	public var strumLineNotes:FlxTypedGroup<StrumNote>;
+	public var opponentStrums:FlxTypedGroup<StrumNote>;
+	public var playerStrums:FlxTypedGroup<StrumNote>;
 	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
 
 	public var camZooming:Bool = false;
@@ -238,14 +226,13 @@ class PlayState extends MusicBeatState
 	public var endingSong:Bool = false;
 	public var startingSong:Bool = false;
 	private var updateTime:Bool = true;
-	public static var changedDifficulty:Bool = false;
 	public static var chartingMode:Bool = false;
 
 	//Gameplay settings
 	public var healthGain:Float = 1;
 	public var healthLoss:Float = 1;
 	public var instakillOnMiss:Bool = false;
-	public var cpuControlled(default, set):Bool = false;
+	public var cpuControlled:Bool = false;
 	public var practiceMode:Bool = false;
 
 	public var botplaySine:Float = 0;
@@ -306,7 +293,6 @@ class PlayState extends MusicBeatState
 
 	#if desktop
 	// Discord RPC variables
-	var storyDifficultyText:String = "";
 	var detailsText:String = "";
 	var detailsPausedText:String = "";
 	#end
@@ -335,20 +321,16 @@ class PlayState extends MusicBeatState
 
 	// Less laggy controls
 	private var keysArray:Array<Dynamic>;
-	public var focusedChar:Character;
+	private var controlArray:Array<String>;
 
 	var precacheList:Map<String, String> = new Map<String, String>();
 
-	public function set_cpuControlled(val:Bool){
-		if(playFields!=null && playFields.members.length > 0){
-			for(field in playFields.members){
-				if(field.isPlayer)
-					field.autoPlayed = val;
-				
-			}
-		}
-		return cpuControlled = val;
-	}
+	// stores the last judgement object
+	public static var lastRating:FlxSprite;
+	// stores the last combo sprite object
+	public static var lastCombo:FlxSprite;
+	// stores the last combo score objects in an array
+	public static var lastScore:Array<FlxSprite> = [];
 	
 	function setStageData(stageData:StageFile){
 		defaultCamZoom *= stageData.defaultZoom;
@@ -428,17 +410,27 @@ class PlayState extends MusicBeatState
 			ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_right'))
 		];
 
-		//Ratings
-		var rating:Rating = new Rating('epic'); // now you will get even shittier ratings
+		controlArray = [
+			'NOTE_LEFT',
+			'NOTE_DOWN',
+			'NOTE_UP',
+			'NOTE_RIGHT'
+		];
+
+		/*Ratings
+		var rating:Rating = new Rating('epic');
 		rating.ratingMod = 1;
 		rating.score = 500;
 		rating.noteSplash = true;
 		ratingsData.push(rating);
+		*/
 
 		var rating:Rating = new Rating('sick');
+		/*
 		rating.ratingMod = 0.9825;
 		rating.score = 350;
 		rating.noteSplash = true;
+		*/
 		ratingsData.push(rating);
 
 		var rating:Rating = new Rating('good');
@@ -503,8 +495,6 @@ class PlayState extends MusicBeatState
 		arrowSkin = SONG.arrowSkin;
 
 		#if desktop
-		storyDifficultyText = CoolUtil.difficulties[storyDifficulty];
-
 		// String that contains the mode defined here so it isn't necessary to call changePresence for each mode
 		detailsText = (!isStoryMode) ? "Freeplay" : "Story Mode: " + WeekData.getCurrentWeek().weekName;
 
@@ -888,7 +878,6 @@ class PlayState extends MusicBeatState
 			gf = new Character(0, 0, gfVersion);
 			startCharacterPos(gf);
 			gf.scrollFactor.set(0.95, 0.95);
-			gfGroup.add(gf);
 			startCharacterLua(gf.curCharacter);
 			gf.startScripts();
 			for (script in gf.characterScripts)
@@ -897,11 +886,11 @@ class PlayState extends MusicBeatState
 				hscriptArray.push(script);
 			}
 			gfMap.set(gf.curCharacter, gf);
+			gfGroup.add(gf);
 		}
 
 		dad = new Character(0, 0, SONG.player2);
 		startCharacterPos(dad, true);
-		dadGroup.add(dad);
 		startCharacterLua(dad.curCharacter);
 		dad.startScripts();
 		for (script in dad.characterScripts)
@@ -910,10 +899,10 @@ class PlayState extends MusicBeatState
 			hscriptArray.push(script);
 		}
 		dadMap.set(dad.curCharacter, dad);
+		dadGroup.add(dad);
 
 		boyfriend = new Boyfriend(0, 0, SONG.player1);
 		startCharacterPos(boyfriend);
-		boyfriendGroup.add(boyfriend);
 		startCharacterLua(boyfriend.curCharacter);
 		boyfriend.startScripts();
 		for (script in boyfriend.characterScripts)
@@ -922,6 +911,7 @@ class PlayState extends MusicBeatState
 			hscriptArray.push(script);
 		}
 		boyfriendMap.set(boyfriend.curCharacter, boyfriend);
+		boyfriendGroup.add(boyfriend);
 
 		var camPos:FlxPoint = new FlxPoint(girlfriendCameraOffset[0], girlfriendCameraOffset[1]);
 		if(gf != null)
@@ -1011,8 +1001,8 @@ class PlayState extends MusicBeatState
 		add(timeTxt);
 		timeBarBG.sprTracker = timeBar;
 
-		playFields = new FlxTypedGroup<PlayField>();
-		add(playFields);
+		strumLineNotes = new FlxTypedGroup<StrumNote>();
+		add(strumLineNotes);
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 		add(grpNoteSplashes);
 
@@ -1020,7 +1010,12 @@ class PlayState extends MusicBeatState
 		grpNoteSplashes.add(splash);
 		splash.alpha = 0.0;
 
+		opponentStrums = new FlxTypedGroup<StrumNote>();
+		playerStrums = new FlxTypedGroup<StrumNote>();
+
 		generateSong(SONG.song);
+		modManager = new ModManager(this);
+		setOnHScripts("modManager", modManager);
 
 		noteTypeMap.clear();
 		noteTypeMap = null;
@@ -1057,14 +1052,14 @@ class PlayState extends MusicBeatState
 		moveCameraSection(0);
 
 		healthBarBG = new AttachedSprite('healthBar');
-		healthBarBG.y = camOverlay.height * 0.89;
+		healthBarBG.y = camHUD.height * 0.89;
 		healthBarBG.screenCenter(X);
 		healthBarBG.scrollFactor.set();
 		healthBarBG.visible = !ClientPrefs.hideHud;
 		healthBarBG.xAdd = -4;
 		healthBarBG.yAdd = -4;
 		add(healthBarBG);
-		if(ClientPrefs.downScroll) healthBarBG.y = 0.11 * camOverlay.height;
+		if(ClientPrefs.downScroll) healthBarBG.y = 0.11 * camHUD.height;
 		healthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, RIGHT_TO_LEFT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), this,
 			'displayedHealth', 0, 2);
 		healthBar.scrollFactor.set();
@@ -1108,19 +1103,19 @@ class PlayState extends MusicBeatState
 			botplayTxt.y = timeBarBG.y - 78;
 		}
 
-		playFields.cameras = [camHUD];
+		strumLineNotes.cameras = [camHUD];
 		grpNoteSplashes.cameras = [camHUD];
 		notes.cameras = [camHUD];
-		healthBar.cameras = [camOverlay];
-		healthBarBG.cameras = [camOverlay];
-		iconP1.cameras = [camOverlay];
-		iconP2.cameras = [camOverlay];
-		scoreTxt.cameras = [camOverlay];
-		botplayTxt.cameras = [camOverlay];
-		timeBar.cameras = [camOverlay];
-		timeBarBG.cameras = [camOverlay];
-		timeTxt.cameras = [camOverlay];
-		//doof.cameras = [camOverlay];
+		healthBar.cameras = [camHUD];
+		healthBarBG.cameras = [camHUD];
+		iconP1.cameras = [camHUD];
+		iconP2.cameras = [camHUD];
+		scoreTxt.cameras = [camHUD];
+		botplayTxt.cameras = [camHUD];
+		timeBar.cameras = [camHUD];
+		timeBarBG.cameras = [camHUD];
+		timeTxt.cameras = [camHUD];
+		//doof.cameras = [camHUD];
 		topBar.cameras = [camOther];
 		bottomBar.cameras = [camOther];
 
@@ -1190,7 +1185,7 @@ class PlayState extends MusicBeatState
 
 		#if desktop
 		// Updating Discord Rich Presence.
-		DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter());
+		DiscordClient.changePresence(detailsText, SONG.song, iconP2.getCharacter());
 		#end
 
 		if(!ClientPrefs.controllerMode)
@@ -1491,32 +1486,8 @@ class PlayState extends MusicBeatState
 		if(ret != Globals.Function_Stop) {
 			if (skipCountdown || startOnTime > 0) skipArrowStartTween = true;
 
-			//generateStaticArrows(0, skipArrowStartTween );
-			//generateStaticArrows(1, skipArrowStartTween );
-			
-			playerStrums = new PlayField(ClientPrefs.middleScroll ? (FlxG.width / 2):(FlxG.width / 2 + (FlxG.width / 4)), strumLine.y, 4, boyfriend, true, cpuControlled);
-			opponentStrums = new PlayField(ClientPrefs.middleScroll?(FlxG.width / 2):(FlxG.width/2 - (FlxG.width/4)), strumLine.y, 4, dad, false, true);
-			if (!ClientPrefs.opponentStrums)
-				opponentStrums.baseAlpha = 0;
-			else if (ClientPrefs.middleScroll)
-				opponentStrums.baseAlpha = 0.35;
-			opponentStrums.offsetReceptors = ClientPrefs.middleScroll;
-
-			playerStrums.noteHitCallback = goodNoteHit;
-			opponentStrums.noteHitCallback = opponentNoteHit;
-
-			callOnScripts('preReceptorGeneration', []); // can be used to change field properties just before the receptors get generated, so you dont have to re-generate them
-
-			opponentStrums.generateReceptors();
-			playerStrums.generateReceptors();
-			
-			playerStrums.fadeIn(isStoryMode || skipArrowStartTween);
-			opponentStrums.fadeIn(isStoryMode || skipArrowStartTween);
-
-			playFields.add(opponentStrums);
-			playFields.add(playerStrums);
-			callOnScripts('postReceptorGeneration', [isStoryMode || skipArrowStartTween]); // incase you wanna do anything JUST after
-
+			generateStaticArrows(0);
+			generateStaticArrows(1);
 			for (i in 0...playerStrums.length) {
 				setOnLuas('defaultPlayerStrumX' + i, playerStrums.members[i].x);
 				setOnLuas('defaultPlayerStrumY' + i, playerStrums.members[i].y);
@@ -1524,8 +1495,11 @@ class PlayState extends MusicBeatState
 			for (i in 0...opponentStrums.length) {
 				setOnLuas('defaultOpponentStrumX' + i, opponentStrums.members[i].x);
 				setOnLuas('defaultOpponentStrumY' + i, opponentStrums.members[i].y);
-				//if(ClientPrefs.middleScroll) opponentStrums.members[i].visible = false;
 			}
+
+			modManager.receptors = [playerStrums.members, opponentStrums.members];
+			modManager.registerDefaultModifiers();
+			// Modcharts.loadModchart(modManager, SONG.song);
 
 			startedCountdown = true;
 			Conductor.songPosition = 0;
@@ -1644,8 +1618,14 @@ class PlayState extends MusicBeatState
 				}
 
 				notes.forEachAlive(function(note:Note) {
-					note.copyAlpha = false;
-					note.alpha = note.multAlpha * note.playField.baseAlpha;
+					if(ClientPrefs.opponentStrums || note.mustPress)
+					{
+						note.copyAlpha = false;
+						note.alpha = note.multAlpha;
+						if(ClientPrefs.middleScroll && !note.mustPress) {
+							note.alpha *= 0.35;
+						}
+					}
 				});
 			
 				callOnScripts('onCountdownTick', [swagCounter]);
@@ -1664,7 +1644,7 @@ class PlayState extends MusicBeatState
 	{
 		insert(members.indexOf(boyfriendGroup), obj);
 	}
-	public function addBehindDad (obj:FlxObject)
+	public function addBehindDad(obj:FlxObject)
 	{
 		insert(members.indexOf(dadGroup), obj);
 	}
@@ -1778,7 +1758,7 @@ class PlayState extends MusicBeatState
 
 		#if desktop
 		// Updating Discord Rich Presence (with Time Left)
-		DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter(), true, songLength);
+		DiscordClient.changePresence(detailsText, SONG.song, iconP2.getCharacter(), true, songLength);
 		#end
 		setOnScripts('songLength', songLength);
 		callOnScripts('onSongStart', []);
@@ -1906,53 +1886,7 @@ class PlayState extends MusicBeatState
 		noteData = songData.notes;
 
 		var playerCounter:Int = 0;
-
 		var daBeats:Int = 0; // Not exactly representative of 'daBeats' lol, just how much it has looped
-
-		/*var songName:String = Paths.formatToSongPath(SONG.song);
-		var file:String = Paths.json(songName + '/events');
-		#if MODS_ALLOWED
-		if (FileSystem.exists(Paths.modsJson(songName + '/events')) || FileSystem.exists(file)) {
-		#else
-		if (OpenFlAssets.exists(file)) {
-		#end
-			var eventsData:Array<Dynamic> = Song.loadFromJson('events', songName).events;
-			for (event in eventsData) //Event Notes
-			{
-				for (i in 0...event[1].length)
-				{
-					var newEventNote:Array<Dynamic> = [event[0], event[1][i][0], event[1][i][1], event[1][i][2]];
-					var subEvent:EventNote = {
-						strumTime: newEventNote[0] + ClientPrefs.noteOffset,
-						event: newEventNote[1],
-						value1: newEventNote[2],
-						value2: newEventNote[3]
-					};
-					subEvent.strumTime -= eventNoteEarlyTrigger(subEvent);
-					if(!shouldPush(subEvent))continue;
-					eventNotes.push(subEvent);
-					eventPushed(subEvent);
-				}
-			}
-		}
-
-		for (event in songData.events) //Event Notes
-		{
-			for (i in 0...event[1].length)
-			{
-				var newEventNote:Array<Dynamic> = [event[0], event[1][i][0], event[1][i][1], event[1][i][2]];
-				var subEvent:EventNote = {
-					strumTime: newEventNote[0] + ClientPrefs.noteOffset,
-					event: newEventNote[1],
-					value1: newEventNote[2],
-					value2: newEventNote[3]
-				};
-				subEvent.strumTime -= eventNoteEarlyTrigger(subEvent);
-				if(!shouldPush(subEvent))continue;
-				eventNotes.push(subEvent);
-				eventPushed(subEvent);
-			}
-		}*/
 
 		// loads note types
 		for (section in noteData)
@@ -2094,16 +2028,13 @@ class PlayState extends MusicBeatState
 				else
 					oldNote = null;
 
-				var pixelStage = isPixelStage;
 				var skin = arrowSkin;
 
 				var type:Dynamic = songNotes[3];
 				if(!Std.isOfType(type, String)) type = editors.ChartingState.noteTypeList[type];
 
-
 				// TODO: maybe make a checkNoteType n shit but idfk im lazy
 				// or maybe make a "Transform Notes" event which'll make notes which don't change texture change into the specified one
-
 
 				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
 				swagNote.mustPress = gottaHitNote;
@@ -2129,10 +2060,7 @@ class PlayState extends MusicBeatState
 				}
 				
 				swagNote.gfNote = (section.gfSection && (songNotes[1]<4));
-
-
 				swagNote.noteType = type;
-
 				swagNote.scrollFactor.set();
 
 				var susLength:Float = swagNote.sustainLength;
@@ -2162,15 +2090,16 @@ class PlayState extends MusicBeatState
 						sustainNote.mustPress = gottaHitNote;
 						sustainNote.gfNote = swagNote.gfNote;
 						sustainNote.noteType = type;
-						if(sustainNote==null || !sustainNote.alive)break;
+						if(sustainNote==null || !sustainNote.alive)
+							break;
 						sustainNote.ID = unspawnNotes.length;
 						modchartObjects.set('note${sustainNote.ID}', sustainNote);
 						sustainNote.scrollFactor.set();
 						swagNote.tail.push(sustainNote);
 						sustainNote.parent = swagNote;
 						unspawnNotes.push(sustainNote);
-						if (sustainNote.noteScript != null && sustainNote.noteScript.scriptType == 'lua')
-						{
+						
+						if (sustainNote.noteScript != null && sustainNote.noteScript.scriptType == 'lua'){
 							callScript(sustainNote.noteScript, 'setupNote', [
 								unspawnNotes.indexOf(sustainNote),
 								Math.abs(sustainNote.noteData),
@@ -2220,6 +2149,8 @@ class PlayState extends MusicBeatState
 		// playerCounter += 1;
 
 		unspawnNotes.sort(sortByShit);
+		if(eventNotes.length > 1) //No need to sort if there's a single one or none at all
+			eventNotes.sort(sortByTime);
 
 		checkEventNote();
 		generatedMusic = true;
@@ -2335,50 +2266,50 @@ class PlayState extends MusicBeatState
 	}
 
 	public var skipArrowStartTween:Bool = false; //for lua
-
-	function removeStatics(player:Int)
+	private function generateStaticArrows(player:Int):Void
 	{
-		var isPlayer:Bool = player==1;
-		for(field in playFields.members){
-			if(field.isPlayer==isPlayer || player==-1){
-				field.clearReceptors();
-			}
-		}
-	}
-
-	// player 0 is opponent player 1 is player. Set to -1 to affect both players
-
-	function resetStrumPositions(player:Int, ?baseX:Float){
-		if(!generatedMusic)return;
-
-		var isPlayer:Bool = player == 1;
-		for (field in playFields.members)
-		{
-			if (field.isPlayer == isPlayer || player == -1)
+		for (i in 0...4){
+			var targetAlpha:Float = 1;
+			if (player < 1)
 			{
-				var x = field.baseX;
-				if(baseX!=null)x = baseX;
+				if(!ClientPrefs.opponentStrums) targetAlpha = 0;
+				else if(ClientPrefs.middleScroll) targetAlpha = 0.35;
+			}
 
-				field.forEachAlive( function(strum:StrumNote){
-					strum.x = x;
-					strum.postAddedToGroup();
-					if (field.offsetReceptors)
-						field.doReceptorOffset(strum);
-				});
+			var babyArrow:StrumNote = new StrumNote(ClientPrefs.middleScroll ? STRUM_X_MIDDLESCROLL : STRUM_X, strumLine.y, i, player);
+			babyArrow.downScroll = ClientPrefs.downScroll;
+			if (!isStoryMode && !skipArrowStartTween)
+			{
+				//babyArrow.y -= 10;
+				babyArrow.alpha = 0;
+				FlxTween.tween(babyArrow, {/*y: babyArrow.y + 10,*/ alpha: targetAlpha}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * i)});
 			}
-		}
-		
-	}
-	function regenStaticArrows(player:Int){
-		var isPlayer:Bool = player==1;
-		for(field in playFields.members){
-			if(field.isPlayer==isPlayer || player==-1){
-				field.generateReceptors();
-				field.fadeIn(true);
+			else
+			{
+				babyArrow.alpha = targetAlpha;
 			}
+
+			if (player == 1)
+			{
+				playerStrums.add(babyArrow);
+			}
+			else
+			{
+				if(ClientPrefs.middleScroll)
+				{
+					babyArrow.x += 310;
+					if(i > 1) { //Up and Right
+						babyArrow.x += FlxG.width / 2 + 25;
+					}
+				}
+				opponentStrums.add(babyArrow);
+			}
+
+			strumLineNotes.add(babyArrow);
+			babyArrow.postAddedToGroup();
 		}
 	}
-	
+
 	override function openSubState(SubState:FlxSubState)
 	{
 		if (paused)
@@ -2452,11 +2383,11 @@ class PlayState extends MusicBeatState
 			#if desktop
 			if (startTimer != null && startTimer.finished)
 			{
-				DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter(), true, songLength - Conductor.songPosition - ClientPrefs.noteOffset);
+				DiscordClient.changePresence(detailsText, SONG.song, iconP2.getCharacter(), true, songLength - Conductor.songPosition - ClientPrefs.noteOffset);
 			}
 			else
 			{
-				DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter());
+				DiscordClient.changePresence(detailsText, SONG.song, iconP2.getCharacter());
 			}
 			#end
 		}
@@ -2471,11 +2402,11 @@ class PlayState extends MusicBeatState
 		{
 			if (Conductor.songPosition > 0.0)
 			{
-				DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter(), true, songLength - Conductor.songPosition - ClientPrefs.noteOffset);
+				DiscordClient.changePresence(detailsText, SONG.song, iconP2.getCharacter(), true, songLength - Conductor.songPosition - ClientPrefs.noteOffset);
 			}
 			else
 			{
-				DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter());
+				DiscordClient.changePresence(detailsText, SONG.song, iconP2.getCharacter());
 			}
 		}
 		#end
@@ -2488,7 +2419,7 @@ class PlayState extends MusicBeatState
 		#if desktop
 		if (health > 0 && !paused)
 		{
-			DiscordClient.changePresence(detailsPausedText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter());
+			DiscordClient.changePresence(detailsPausedText, SONG.song, iconP2.getCharacter());
 		}
 		#end
 
@@ -2556,16 +2487,13 @@ class PlayState extends MusicBeatState
 			script.call("update", [elapsed]);
 		}
 
-		for (key in eventScripts.keys())
-		{
+		for (key in eventScripts.keys()){
 			var script = eventScripts.get(key);
 			script.call("update", [elapsed]);
 		}
 		
 		callOnHScripts('update', [elapsed]);
 		super.update(elapsed);
-
-		checkEventNote();
 
 		setOnScripts('curDecStep', curDecStep);
 		setOnScripts('curDecBeat', curDecBeat);
@@ -2599,7 +2527,7 @@ class PlayState extends MusicBeatState
 				openSubState(new PauseSubState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
 
 				#if desktop
-				DiscordClient.changePresence(detailsPausedText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter());
+				DiscordClient.changePresence(detailsPausedText, SONG.song, iconP2.getCharacter());
 				#end
 			}
 		}
@@ -2684,7 +2612,6 @@ class PlayState extends MusicBeatState
 
 					if(ClientPrefs.timeBarType != 'Song Name')
 						timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
-
 				}
 			}
 
@@ -2708,233 +2635,159 @@ class PlayState extends MusicBeatState
 			trace("RESET = True");
 		}
 		doDeathCheck();
+		modManager.updateTimeline(curDecStep);
+		modManager.update(elapsed);
 
 		if (unspawnNotes[0] != null)
 		{
-			var time:Float = spawnTime;//shit be werid on 4:3
-			if(songSpeed < 1) time /= songSpeed;
+			var time:Float = spawnTime;
+			if (songSpeed < 1)
+				time /= songSpeed;
+			if (unspawnNotes[0].multSpeed < 1)
+				time /= unspawnNotes[0].multSpeed;
 
 			while (unspawnNotes.length > 0 && unspawnNotes[0].strumTime - Conductor.songPosition < time)
 			{
 				var dunceNote:Note = unspawnNotes[0];
-				var doSpawn:Bool= true;
-				if(dunceNote.noteScript != null && dunceNote.noteScript.scriptType == 'lua'){
-					doSpawn = callScript(dunceNote.noteScript, "spawnNote", [dunceNote])!= Globals.Function_Stop;
-				}
-				if (doSpawn)
-					doSpawn = callOnHScripts('onSpawnNote', [dunceNote]) != Globals.Function_Stop;
-				if(doSpawn){
-					if(dunceNote.desiredPlayfield!=null)
-						dunceNote.desiredPlayfield.addNote(dunceNote);
-					else if (dunceNote.parent != null && dunceNote.parent.playField!=null)
-						dunceNote.parent.playField.addNote(dunceNote);
-					else{
-						for(field in playFields.members){
-							if(field.isPlayer == dunceNote.mustPress){
-								field.addNote(dunceNote);
-								break;
-							}
-						}
-					}
-					if(dunceNote.playField==null){
-						var deadNotes:Array<Note> = [dunceNote];
-						for(note in dunceNote.tail)
-							deadNotes.push(note);
-						
-						for(note in deadNotes){
-							note.active = false;
-							note.visible = false;
-							note.ignoreNote = true;
+				notes.insert(0, dunceNote);
+				dunceNote.spawned = true;
+				callOnLuas('onSpawnNote', [notes.members.indexOf(dunceNote), dunceNote.noteData, dunceNote.noteType, dunceNote.isSustainNote]);
+				callOnHScripts('onSpawnNote', [dunceNote]);
 
-							if (modchartObjects.exists('note${note.ID}'))modchartObjects.remove('note${note.ID}');
-							note.kill();
-							unspawnNotes.remove(note);
-							note.destroy();
-						}
-						break;
-					}
-					notes.insert(0, dunceNote);
-					dunceNote.spawned=true;
-					var index:Int = unspawnNotes.indexOf(dunceNote);
-					unspawnNotes.splice(index, 1);
-					callOnLuas('onSpawnNote', [
-						notes.members.indexOf(dunceNote),
-						dunceNote.noteData,
-						dunceNote.noteType,
-						dunceNote.isSustainNote,
-						dunceNote.ID
-					]);
-					callOnHScripts('onSpawnNotePost', [dunceNote]);
-					if (dunceNote.noteScript != null)
-					{
-						var script:Dynamic = dunceNote.noteScript;
-						if (script.scriptType == 'lua')
-						{
-							callScript(script, 'postSpawnNote', [
-								notes.members.indexOf(dunceNote),
-								Math.abs(dunceNote.noteData),
-								dunceNote.noteType,
-								dunceNote.isSustainNote,
-								dunceNote.ID
-							]);
-						}
-						else
-						{
-							callScript(script, "postSpawnNote", [dunceNote]);
-						}
-					}
-				}else{
-					var deadNotes:Array<Note> = [dunceNote];
-					for(note in dunceNote.tail)
-						deadNotes.push(note);
-					
-					for(note in deadNotes){
-						note.active = false;
-						note.visible = false;
-						note.ignoreNote = true;
+				var index:Int = unspawnNotes.indexOf(dunceNote);
+				unspawnNotes.splice(index, 1);
 
-						if (modchartObjects.exists('note${note.ID}'))modchartObjects.remove('note${note.ID}');
-						note.kill();
-						unspawnNotes.remove(note);
-						note.destroy();
+				callOnHScripts('onSpawnNotePost', [dunceNote]);
+				if (dunceNote.noteScript != null)
+				{
+					var script:Dynamic = dunceNote.noteScript;
+					if (script.scriptType == 'lua'){
+						callScript(script, 'postSpawnNote', [
+							notes.members.indexOf(dunceNote),
+							Math.abs(dunceNote.noteData),
+							dunceNote.noteType,
+							dunceNote.isSustainNote,
+							dunceNote.ID
+						]);
+					}else{
+						callScript(script, "postSpawnNote", [dunceNote]);
 					}
 				}
 			}
 		}
 
+		opponentStrums.forEachAlive(function(strum:StrumNote)
+		{
+			var pos = modManager.getPos(0, 0, 0, curDecBeat, strum.noteData, 1, strum, [], strum.vec3Cache);
+			modManager.updateObject(curDecBeat, strum, pos, 1);
+			strum.x = pos.x;
+			strum.y = pos.y;
+		});
+
+		playerStrums.forEachAlive(function(strum:StrumNote)
+		{
+			var pos = modManager.getPos(0, 0, 0, curDecBeat, strum.noteData, 0, strum, [], strum.vec3Cache);
+			modManager.updateObject(curDecBeat, strum, pos, 0);
+			strum.x = pos.x;
+			strum.y = pos.y;
+		});
+
 		if (generatedMusic)
 		{
-			if (!inCutscene) {
-				if(!cpuControlled) {
+			if (!inCutscene){
+				if (!cpuControlled)
+				{
 					keyShit();
-				} else if(boyfriend.holdTimer > Conductor.stepCrochet * 0.0011 * boyfriend.singDuration && boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.animation.curAnim.name.endsWith('miss')) {
+				}
+				else if (boyfriend.animation.curAnim != null && boyfriend.holdTimer > Conductor.stepCrochet * (0.0011 / FlxG.sound.music.pitch) * boyfriend.singDuration && boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.animation.curAnim.name.endsWith('miss'))
+				{
 					boyfriend.dance();
-					//boyfriend.animation.curAnim.finish();
+					// boyfriend.animation.curAnim.finish();
 				}
 			}
-
 
 			var fakeCrochet:Float = (60 / SONG.bpm) * 1000;
 			notes.forEachAlive(function(daNote:Note)
 			{
-				var field:PlayField = daNote.playField;
+				var strumGroup:FlxTypedGroup<StrumNote> = playerStrums;
+				if (!daNote.mustPress)
+					strumGroup = opponentStrums;
 
-				var strumX:Float = field.members[daNote.noteData].x;
-				var strumY:Float = field.members[daNote.noteData].y;
-				var strumAngle:Float = field.members[daNote.noteData].angle;
-				var strumDirection:Float = field.members[daNote.noteData].direction;
-				var strumAlpha:Float = field.members[daNote.noteData].alpha;
-				var strumScroll:Bool = field.members[daNote.noteData].downScroll;
+				var strumX:Float = strumGroup.members[daNote.noteData].x;
+				var strumY:Float = strumGroup.members[daNote.noteData].y;
+				var strumAngle:Float = strumGroup.members[daNote.noteData].angle;
+				var strumDirection:Float = strumGroup.members[daNote.noteData].direction;
+				var strumAlpha:Float = strumGroup.members[daNote.noteData].alpha;
+				var strumScroll:Bool = strumGroup.members[daNote.noteData].downScroll;
 
-				strumX += daNote.offsetX * (daNote.scale.x / daNote.baseScaleX);
+				strumX += daNote.offsetX;
 				strumY += daNote.offsetY;
 				strumAngle += daNote.offsetAngle;
 				strumAlpha *= daNote.multAlpha;
+				var pN:Int = daNote.mustPress ? 0 : 1;
+				var pos = modManager.getPos(daNote.strumTime, modManager.getVisPos(Conductor.songPosition, daNote.strumTime, songSpeed),
+					daNote.strumTime - Conductor.songPosition, curDecBeat, daNote.noteData, pN, daNote, [], daNote.vec3Cache);
 
-				if (strumScroll) //Downscroll
+				modManager.updateObject(curDecBeat, daNote, pos, pN);
+				pos.x += daNote.offsetX;
+				pos.y += daNote.offsetY;
+				daNote.x = pos.x;
+				daNote.y = pos.y;
+				if (daNote.isSustainNote)
 				{
-					//daNote.y = (strumY + 0.45 * (Conductor.songPosition - daNote.strumTime) * songSpeed);
-					daNote.distance = (0.45 * (Conductor.songPosition - daNote.strumTime) * songSpeed * daNote.multSpeed);
-				}
-				else //Upscroll
-				{
-					//daNote.y = (strumY - 0.45 * (Conductor.songPosition - daNote.strumTime) * songSpeed);
-					daNote.distance = (-0.45 * (Conductor.songPosition - daNote.strumTime) * songSpeed * daNote.multSpeed);
-				}
+					var futureSongPos = Conductor.songPosition + 75;
+					var diff = daNote.strumTime - futureSongPos;
+					var vDiff = modManager.getVisPos(futureSongPos, daNote.strumTime, songSpeed);
 
-				var angleDir = strumDirection * Math.PI / 180;
-				if (daNote.copyAngle)
-					daNote.angle = strumDirection - 90 + strumAngle;
-
-				if(daNote.copyAlpha)
-					daNote.alpha = strumAlpha;
-
-				if(daNote.copyX)
-					daNote.x = strumX + Math.cos(angleDir) * daNote.distance;
-
-				if(daNote.copyY)
-				{
-					daNote.y = strumY + Math.sin(angleDir) * daNote.distance;
-
-					//Jesus fuck this took me so much mother fucking time AAAAAAAAAA
-					if(strumScroll && daNote.isSustainNote)
-					{
-						if (daNote.animation.curAnim.name.endsWith('end')) {
-							daNote.y += 10.5 * (fakeCrochet / 400) * 1.5 * songSpeed + (46 * (songSpeed - 1));
-							daNote.y -= 46 * (1 - (fakeCrochet / 600)) * songSpeed;
-							if(PlayState.isPixelStage) {
-								daNote.y += 8 + (6 - daNote.originalHeightForCalcs) * PlayState.daPixelZoom;
-							} else {
-								daNote.y -= 19;
-							}
-						}
-						daNote.y += (daNote.daWidth / 2) - (60.5 * (songSpeed - 1));
-						daNote.y += 27.5 * ((SONG.bpm / 100) - 1) * (songSpeed - 1);
-					}
-				}
-
-				if(field.inControl && field.autoPlayed){
-					if(!daNote.wasGoodHit && !daNote.ignoreNote){
-						if(daNote.isSustainNote){
-							if(daNote.canBeHit)
-								field.noteHitCallback(daNote, field);
-							
-						}else{
-							if(daNote.strumTime <= Conductor.songPosition)
-								field.noteHitCallback(daNote, field);
-							
-						}
-					}
-					
-				}
-
-				var center:Float = strumY + daNote.daWidth / 2;
-				if (field.members[daNote.noteData].sustainReduce
-					&& daNote.isSustainNote
-					&& (daNote.playField.playerControls || !daNote.ignoreNote) &&
-					(!daNote.playField.playerControls || (daNote.wasGoodHit || (daNote.prevNote.wasGoodHit && !daNote.canBeHit))))
-				{
-					if (strumScroll)
-					{
-						if(daNote.y - daNote.offset.y * daNote.scale.y + daNote.height >= center)
-						{
-							var swagRect = new FlxRect(0, 0, daNote.frameWidth, daNote.frameHeight);
-							swagRect.height = (center - daNote.y) / daNote.scale.y;
-							swagRect.y = daNote.frameHeight - swagRect.height;
-
-							daNote.clipRect = swagRect;
-						}
-					}
+					var nextPos = modManager.getPos(daNote.strumTime, vDiff, diff, Conductor.getStep(futureSongPos) / 4, daNote.noteData, pN, daNote, [],
+						daNote.vec3Cache);
+					nextPos.x += daNote.offsetX;
+					nextPos.y += daNote.offsetY;
+					var diffX = (nextPos.x - pos.x);
+					var diffY = (nextPos.y - pos.y);
+					var rad = Math.atan2(diffY, diffX);
+					var deg = rad * (180 / Math.PI);
+					if (deg != 0)
+						daNote.mAngle = (deg + 90);
 					else
-					{
-						if (daNote.y + daNote.offset.y * daNote.scale.y <= center)
-						{
-							var swagRect = new FlxRect(0, 0, daNote.width / daNote.scale.x, daNote.height / daNote.scale.y);
-							swagRect.y = (center - daNote.y) / daNote.scale.y;
-							swagRect.height -= swagRect.y;
+						daNote.mAngle = 0;
+				}
 
-							daNote.clipRect = swagRect;
-						}
+				if (!daNote.mustPress && daNote.wasGoodHit && !daNote.hitByOpponent && !daNote.ignoreNote)
+				{
+					opponentNoteHit(daNote);
+				}
+
+				if (!daNote.blockHit && daNote.mustPress && cpuControlled && daNote.canBeHit)
+				{
+					if (daNote.isSustainNote){
+						if (daNote.canBeHit)
+							goodNoteHit(daNote);
+					}
+					else if (daNote.strumTime <= Conductor.songPosition || daNote.isSustainNote)
+					{
+						goodNoteHit(daNote);
 					}
 				}
 
 				// Kill extremely late notes and cause misses
 				if (Conductor.songPosition > noteKillOffset + daNote.strumTime)
 				{
-					if (field.playerControls && !field.autoPlayed && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit)) {
+					if (daNote.mustPress && !cpuControlled && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit))
+					{
 						noteMiss(daNote);
 					}
 
 					daNote.active = false;
 					daNote.visible = false;
 
-					if(modchartObjects.exists('note${daNote.ID}'))modchartObjects.remove('note${daNote.ID}');
 					daNote.kill();
 					notes.remove(daNote, true);
 					daNote.destroy();
 				}
 			});
 		}
+		checkEventNote();
 
 		#if debug
 		if(!endingSong && !startingSong) {
@@ -3001,7 +2854,7 @@ class PlayState extends MusicBeatState
 
 				#if desktop
 				// Game Over doesn't get his own variable because it's only used here
-				DiscordClient.changePresence("Game Over - " + detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter());
+				DiscordClient.changePresence("Game Over - " + detailsText, SONG.song, iconP2.getCharacter());
 				#end
 				isDead = true;
 				return true;
@@ -3052,9 +2905,6 @@ class PlayState extends MusicBeatState
 					boyfriend.alpha = lastAlpha;
 					if(shiftFocus)focusedChar=boyfriend;
 					iconP1.changeIcon(boyfriend.healthIcon);
-					for(field in playFields.members){
-						if(field.owner==oldChar)field.owner=boyfriend;
-					}
 				}
 				setOnLuas('boyfriendName', boyfriend.curCharacter);
 
@@ -3080,11 +2930,6 @@ class PlayState extends MusicBeatState
 					if(shiftFocus)focusedChar=dad;
 					dad.alpha = lastAlpha;
 					iconP2.changeIcon(dad.healthIcon);
-					for (field in playFields.members)
-					{
-						if (field.owner == oldChar)
-							field.owner = dad;
-					}
 				}
 				setOnLuas('dadName', dad.curCharacter);
 
@@ -3105,11 +2950,6 @@ class PlayState extends MusicBeatState
 						gf = gfMap.get(name);
 						gf.alpha = lastAlpha;
 						if(shiftFocus)focusedChar=gf;
-						for (field in playFields.members)
-						{
-							if (field.owner == oldChar)
-								field.owner = gf;
-						}
 					}
 					setOnLuas('gfName', gf.curCharacter);
 				}
@@ -3198,8 +3038,7 @@ class PlayState extends MusicBeatState
 						}
 				}
 
-				if (char != null)
-				{
+				if (char != null){
 					char.playAnim(value1, true);
 					char.specialAnim = true;
 				}
@@ -3538,7 +3377,7 @@ class PlayState extends MusicBeatState
 				#if !switch
 				var percent:Float = ratingPercent;
 				if(Math.isNaN(percent)) percent = 0;
-				Highscore.saveScore(SONG.song, songScore, storyDifficulty, percent);
+				Highscore.saveScore(SONG.song, songScore, percent);
 				#end
 			}
 
@@ -3572,32 +3411,17 @@ class PlayState extends MusicBeatState
 
 						if (SONG.validScore)
 						{
-							Highscore.saveWeekScore(WeekData.getWeekFileName(), campaignScore, storyDifficulty);
+							Highscore.saveWeekScore(WeekData.getWeekFileName(), campaignScore);
 						}
 
 						FlxG.save.data.weekCompleted = StoryMenuState.weekCompleted;
 						FlxG.save.flush();
 					}
-					changedDifficulty = false;
 				}
 				else
 				{
-					var difficulty:String = CoolUtil.getDifficultyFilePath();
-
 					trace('LOADING NEXT SONG');
-					trace(Paths.formatToSongPath(PlayState.storyPlaylist[0]) + difficulty);
-
-					var winterHorrorlandNext = (Paths.formatToSongPath(SONG.song) == "eggnog");
-					if (winterHorrorlandNext)
-					{
-						var blackShit:FlxSprite = new FlxSprite(-FlxG.width * FlxG.camera.zoom,
-							-FlxG.height * FlxG.camera.zoom).makeGraphic(FlxG.width * 3, FlxG.height * 3, FlxColor.BLACK);
-						blackShit.scrollFactor.set();
-						add(blackShit);
-						camHUD.visible = false;
-
-						FlxG.sound.play(Paths.sound('Lights_Shut_off'));
-					}
+					trace(Paths.formatToSongPath(PlayState.storyPlaylist[0]));
 
 					FlxTransitionableState.skipNextTransIn = true;
 					FlxTransitionableState.skipNextTransOut = true;
@@ -3605,18 +3429,11 @@ class PlayState extends MusicBeatState
 					prevCamFollow = camFollow;
 					prevCamFollowPos = camFollowPos;
 
-					PlayState.SONG = Song.loadFromJson(PlayState.storyPlaylist[0] + difficulty, PlayState.storyPlaylist[0]);
+					PlayState.SONG = Song.loadFromJson(PlayState.storyPlaylist[0], PlayState.storyPlaylist[0]);
 					FlxG.sound.music.stop();
 
-					if(winterHorrorlandNext) {
-						new FlxTimer().start(1.5, function(tmr:FlxTimer) {
-							cancelMusicFadeTween();
-							LoadingState.loadAndSwitchState(new PlayState());
-						});
-					} else {
-						cancelMusicFadeTween();
-						LoadingState.loadAndSwitchState(new PlayState());
-					}
+					cancelMusicFadeTween();
+					LoadingState.loadAndSwitchState(new PlayState());
 				}
 			}
 			else
@@ -3629,7 +3446,6 @@ class PlayState extends MusicBeatState
 				MusicBeatState.switchState(new FreeplayState());
 				MusicBeatState.playMenuMusic();
 				FlxG.sound.music.volume = 1;
-				changedDifficulty = false;
 			}
 			transitioning = true;
 		}
@@ -3670,7 +3486,8 @@ class PlayState extends MusicBeatState
 	public var totalPlayed:Int = 0;
 	public var totalNotesHit:Float = 0.0;
 
-	public var showCombo:Bool = true;
+	public var showCombo:Bool = false;
+	public var showComboNum:Bool = true;
 	public var showRating:Bool = true;
 
 	private function popUpScore(note:Note = null):Void
@@ -3704,9 +3521,7 @@ class PlayState extends MusicBeatState
 			spawnNoteSplashOnNote(note);
 		}
 
-		var field:PlayField = note.playField;
-
-		if(!practiceMode && !field.autoPlayed) {
+		if(!practiceMode && !cpuControlled) {
 			songScore += score;
 			if(!note.ratingDisabled)
 			{
@@ -3762,14 +3577,14 @@ class PlayState extends MusicBeatState
 		comboSpr.y -= ClientPrefs.comboOffset[1];
 
 		comboSpr.velocity.x += FlxG.random.int(1, 10);
-		insert(members.indexOf(playFields), rating);
+		insert(members.indexOf(strumLineNotes), rating);
 
-		comboSpr.antialiasing = false;
+		comboSpr.antialiasing = ClientPrefs.globalAntialiasing;
 
 		if (!PlayState.isPixelStage)
 		{
 			rating.setGraphicSize(Std.int(rating.width * 0.7));
-			rating.antialiasing = false; //ClientPrefs.globalAntialiasing;
+			rating.antialiasing = ClientPrefs.globalAntialiasing;
 			comboSpr.setGraphicSize(Std.int(comboSpr.width * 0.7));
 		}
 		else
@@ -3791,6 +3606,24 @@ class PlayState extends MusicBeatState
 		seperatedScore.push(combo % 10);
 
 		var daLoop:Int = 0;
+		var xThing:Float = 0;
+		if (showCombo)
+		{
+			insert(members.indexOf(strumLineNotes), comboSpr);
+		}
+		//if (!ClientPrefs.comboStacking)
+		//{
+			if (lastCombo != null) lastCombo.kill();
+			lastCombo = comboSpr;
+		//}
+		if (lastScore != null)
+		{
+			while (lastScore.length > 0)
+			{
+				lastScore[0].kill();
+				lastScore.remove(lastScore[0]);
+			}
+		}
 		for (i in seperatedScore)
 		{
 			var numScore:FlxSprite = new FlxSprite().loadGraphic(Paths.image(pixelShitPart1 + 'num' + Std.int(i) + pixelShitPart2));
@@ -3820,7 +3653,8 @@ class PlayState extends MusicBeatState
 			numScore.visible = !ClientPrefs.hideHud;
 
 			//if (combo >= 10 || combo == 0)
-				insert(members.indexOf(playFields), numScore);
+			if(showComboNum)
+				insert(members.indexOf(strumLineNotes), numScore);
 
 			FlxTween.tween(numScore, {alpha: 0}, 0.2, {
 				onComplete: function(tween:FlxTween)
@@ -3855,14 +3689,14 @@ class PlayState extends MusicBeatState
 		});
 	}
 
+	public var strumsBlocked:Array<Bool> = [];
 	private function onKeyPress(event:KeyboardEvent):Void
 	{
 		var eventKey:FlxKey = event.keyCode;
 		var key:Int = getKeyFromEvent(eventKey);
 		//trace('Pressed: ' + eventKey);
-		if(cpuControlled || paused || !startedCountdown)return;
 
-		if (key > -1 && (FlxG.keys.checkStatus(eventKey, JUST_PRESSED) || ClientPrefs.controllerMode))
+		if (!cpuControlled && startedCountdown && !paused && key > -1 && (FlxG.keys.checkStatus(eventKey, JUST_PRESSED) || ClientPrefs.controllerMode))
 		{
 			if(!boyfriend.stunned && generatedMusic && !endingSong)
 			{
@@ -3872,27 +3706,50 @@ class PlayState extends MusicBeatState
 
 				var canMiss:Bool = !ClientPrefs.ghostTapping;
 
+				// heavily based on my own code LOL if it aint broke dont fix it
 				var pressNotes:Array<Note> = [];
+				//var notesDatas:Array<Int> = [];
+				var notesStopped:Bool = false;
 
-				var ghostTapped:Bool = true;
-				for(field in playFields.members){
-					if (field.playerControls && field.inControl && !field.autoPlayed){
-						var sortedNotesList:Array<Note> = field.getTapNotes(key);
-						sortedNotesList.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
-
-						if (sortedNotesList.length > 0) {
-							pressNotes.push(sortedNotesList[0]);
-							field.noteHitCallback(sortedNotesList[0], field);
+				var sortedNotesList:Array<Note> = [];
+				notes.forEachAlive(function(daNote:Note)
+				{
+					if (strumsBlocked[daNote.noteData] != true && daNote.canBeHit && daNote.mustPress && !daNote.tooLate && !daNote.wasGoodHit && !daNote.isSustainNote && !daNote.blockHit)
+					{
+						if(daNote.noteData == key)
+						{
+							sortedNotesList.push(daNote);
+							//notesDatas.push(daNote.noteData);
 						}
+						canMiss = true;
+					}
+				});
+				sortedNotesList.sort(sortHitNotes);
+
+				if (sortedNotesList.length > 0) {
+					for (epicNote in sortedNotesList)
+					{
+						for (doubleNote in pressNotes) {
+							if (Math.abs(doubleNote.strumTime - epicNote.strumTime) < 1) {
+								doubleNote.kill();
+								notes.remove(doubleNote, true);
+								doubleNote.destroy();
+							} else
+								notesStopped = true;
+						}
+
+						// eee jack detection before was not super good
+						if (!notesStopped) {
+							goodNoteHit(epicNote);
+							pressNotes.push(epicNote);
+						}
+
 					}
 				}
-
-				if(pressNotes.length==0){
+				else{
 					callOnScripts('onGhostTap', [key]);
-					if (canMiss) {
+					if (canMiss)
 						noteMissPress(key);
-						callOnScripts('noteMissPress', [key]);
-					}
 				}
 
 				// I dunno what you need this for but here you go
@@ -3906,38 +3763,38 @@ class PlayState extends MusicBeatState
 				Conductor.songPosition = lastTime;
 			}
 
-			for(field in playFields.members){
-				if (field.inControl && !field.autoPlayed && field.playerControls){
-					var spr:StrumNote = field.members[key];
-					if(spr != null && spr.animation.curAnim.name != 'confirm')
-					{
-						spr.playAnim('pressed');
-						spr.resetAnim = 0;
-					}
-				}
+			var spr:StrumNote = playerStrums.members[key];
+			if(strumsBlocked[key] != true && spr != null && spr.animation.curAnim.name != 'confirm')
+			{
+				spr.playAnim('pressed');
+				spr.resetAnim = 0;
 			}
-
 			callOnScripts('onKeyPress', [key]);
 		}
 		//trace('pressed: ' + controlArray);
+	}
+
+	function sortHitNotes(a:Note, b:Note):Int
+	{
+		if (a.lowPriority && !b.lowPriority)
+			return 1;
+		else if (!a.lowPriority && b.lowPriority)
+			return -1;
+
+		return FlxSort.byValues(FlxSort.ASCENDING, a.strumTime, b.strumTime);
 	}
 
 	private function onKeyRelease(event:KeyboardEvent):Void
 	{
 		var eventKey:FlxKey = event.keyCode;
 		var key:Int = getKeyFromEvent(eventKey);
-		if(startedCountdown && !paused && key > -1)
+		if(!cpuControlled && startedCountdown && !paused && key > -1)
 		{
-			for(field in playFields.members){
-				if (field.inControl && !field.autoPlayed && field.playerControls)
-				{
-					var spr:StrumNote = field.members[key];
-					if (spr != null)
-					{
-						spr.playAnim('static');
-						spr.resetAnim = 0;
-					}
-				}
+			var spr:StrumNote = playerStrums.members[key];
+			if(spr != null)
+			{
+				spr.playAnim('static');
+				spr.resetAnim = 0;
 			}
 			callOnScripts('onKeyRelease', [key]);
 		}
@@ -3966,21 +3823,17 @@ class PlayState extends MusicBeatState
 	private function keyShit():Void
 	{
 		// HOLDING
-		var up = controls.NOTE_UP;
-		var right = controls.NOTE_RIGHT;
-		var down = controls.NOTE_DOWN;
-		var left = controls.NOTE_LEFT;
-		var controlHoldArray:Array<Bool> = [left, down, up, right];
+		var parsedHoldArray:Array<Bool> = parseKeys();
 
 		// TO DO: Find a better way to handle controller inputs, this should work for now
-		if(ClientPrefs.controllerMode)
+		if (ClientPrefs.controllerMode)
 		{
-			var controlArray:Array<Bool> = [controls.NOTE_LEFT_P, controls.NOTE_DOWN_P, controls.NOTE_UP_P, controls.NOTE_RIGHT_P];
-			if(controlArray.contains(true))
+			var parsedArray:Array<Bool> = parseKeys('_P');
+			if (parsedArray.contains(true))
 			{
-				for (i in 0...controlArray.length)
+				for (i in 0...parsedArray.length)
 				{
-					if(controlArray[i])
+					if (parsedArray[i] && strumsBlocked[i] != true)
 						onKeyPress(new KeyboardEvent(KeyboardEvent.KEY_DOWN, true, true, -1, keysArray[i][0]));
 				}
 			}
@@ -3994,14 +3847,13 @@ class PlayState extends MusicBeatState
 			notes.forEachAlive(function(daNote:Note)
 			{
 				// hold note functions
-				if(!daNote.playField.autoPlayed && daNote.playField.inControl && daNote.playField.playerControls){
-					if (daNote.isSustainNote && controlHoldArray[daNote.noteData] && daNote.canBeHit && !daNote.tooLate && !daNote.wasGoodHit) {
-						daNote.playField.noteHitCallback(daNote, daNote.playField);
-					}
+				if (strumsBlocked[daNote.noteData] != true && daNote.isSustainNote && parsedHoldArray[daNote.noteData] && daNote.canBeHit
+				&& daNote.mustPress && !daNote.tooLate && !daNote.wasGoodHit && !daNote.blockHit) {
+					goodNoteHit(daNote);
 				}
 			});
 
-			if (controlHoldArray.contains(true) && !endingSong) {
+			if (parsedHoldArray.contains(true) && !endingSong) {
 				#if ACHIEVEMENTS_ALLOWED
 				var achieve:String = checkForAchievement(['oversinging']);
 				if (achieve != null) {
@@ -4009,7 +3861,7 @@ class PlayState extends MusicBeatState
 				}
 				#end
 			}
-			else if (boyfriend.holdTimer > Conductor.stepCrochet * 0.0011 * boyfriend.singDuration && boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.animation.curAnim.name.endsWith('miss'))
+			else if (boyfriend.animation.curAnim != null && boyfriend.holdTimer > Conductor.stepCrochet * (0.0011 / FlxG.sound.music.pitch) * boyfriend.singDuration && boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.animation.curAnim.name.endsWith('miss'))
 			{
 				boyfriend.dance();
 				//boyfriend.animation.curAnim.finish();
@@ -4017,25 +3869,32 @@ class PlayState extends MusicBeatState
 		}
 
 		// TO DO: Find a better way to handle controller inputs, this should work for now
-		if(ClientPrefs.controllerMode)
+		if (ClientPrefs.controllerMode || strumsBlocked.contains(true))
 		{
-			var controlArray:Array<Bool> = [controls.NOTE_LEFT_R, controls.NOTE_DOWN_R, controls.NOTE_UP_R, controls.NOTE_RIGHT_R];
-			if(controlArray.contains(true))
+			var parsedArray:Array<Bool> = parseKeys('_R');
+			if (parsedArray.contains(true))
 			{
-				for (i in 0...controlArray.length)
+				for (i in 0...parsedArray.length)
 				{
-					if(controlArray[i])
+					if (parsedArray[i] || strumsBlocked[i] == true)
 						onKeyRelease(new KeyboardEvent(KeyboardEvent.KEY_UP, true, true, -1, keysArray[i][0]));
 				}
 			}
 		}
 	}
 
+	private function parseKeys(?suffix:String = ''):Array<Bool>
+	{
+		var ret:Array<Bool> = [];
+		for (i in 0...controlArray.length)
+			ret[i] = Reflect.getProperty(controls, controlArray[i] + suffix);
+		return ret;
+	}
 
 	function noteMiss(daNote:Note):Void { //You didn't hit the key and let it go offscreen, also used by Hurt Notes
 		//Dupe note remove
 		notes.forEachAlive(function(note:Note) {
-			if (daNote != note && daNote.playField.playerControls && daNote.noteData == note.noteData && daNote.isSustainNote == note.isSustainNote && Math.abs(daNote.strumTime - note.strumTime) < 1) {
+			if (daNote != note && daNote.mustPress && daNote.noteData == note.noteData && daNote.isSustainNote == note.isSustainNote && Math.abs(daNote.strumTime - note.strumTime) < 1) {
 				if(modchartObjects.exists('note${note.ID}'))modchartObjects.remove('note${note.ID}');
 				note.kill();
 				notes.remove(note, true);
@@ -4076,13 +3935,6 @@ class PlayState extends MusicBeatState
 				char.playAnim(animToPlay, true);
 			}
 		}
-
-		/*
-		for (script in char.characterScripts){
-			if (script.scriptType != 'lua')
-				callScript(script, "noteMiss", [daNote]);
-		}
-		*/
 
 		callOnLuas('noteMiss', [notes.members.indexOf(daNote), daNote.noteData, daNote.noteType, daNote.isSustainNote, daNote.ID]);
 		callOnHScripts("noteMiss", [daNote]);
@@ -4161,15 +4013,12 @@ class PlayState extends MusicBeatState
 		callOnScripts('noteMissPress', [direction]);
 	}
 
-	function opponentNoteHit(note:Note, playfield:PlayField):Void
+	function opponentNoteHit(note:Note):Void
 	{
 		if (Paths.formatToSongPath(SONG.song) != 'tutorial')
 			camZooming = true;
 
-		var char:Character = playfield.owner;
-
-		if(note.gfNote)
-			char = gf;
+		var char:Character = note.gfNote ? gf : dad;
 
 		if(note.noteType == 'Hey!' && char.animOffsets.exists('hey')) {
 			char.playAnim('hey', true);
@@ -4187,7 +4036,7 @@ class PlayState extends MusicBeatState
 			}
 
 			var animToPlay:String = singAnimations[Std.int(Math.abs(note.noteData))] + altAnim;
-			if(char.voicelining)char.voicelining=false;
+			char.voicelining = false;
 
 			if(char != null)
 			{
@@ -4196,34 +4045,17 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		if (SONG.needsVoices){
+		if (SONG.needsVoices)
 			vocals.volume = 1;
-		}
 
-		if (playfield.autoPlayed) {
-			var time:Float = 0.15;
-			if(note.isSustainNote && !note.animation.curAnim.name.endsWith('end')) {
-				time += 0.15;
-			}
-			StrumPlayAnim(playfield, Std.int(Math.abs(note.noteData)) % 4, time, note);
-		} else {
-			playfield.forEach(function(spr:StrumNote)
-			{
-				if (Math.abs(note.noteData) == spr.ID)
-				{
-					spr.playAnim('confirm', true, note);
-				}
-			});
+		var time:Float = 0.15;
+		if (note.isSustainNote && !note.animation.curAnim.name.endsWith('end'))
+		{
+			time += 0.15;
 		}
+		StrumPlayAnim(true, Std.int(Math.abs(note.noteData)), time);
 
 		note.hitByOpponent = true;
-
-		/*
-		for (script in char.characterScripts){
-			if (script.scriptType != 'lua')
-				callScript(script, "opponentNoteHit", [note]);
-		}
-		*/
 
 		callOnLuas('opponentNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote, note.ID]);
 		callOnHScripts("opponentNoteHit", [note]);
@@ -4255,31 +4087,24 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	function goodNoteHit(note:Note, field:PlayField):Void
+	function goodNoteHit(note:Note):Void
 	{
 		if (!note.wasGoodHit)
 		{
-			if(field.autoPlayed && (note.ignoreNote || note.hitCausesMiss)) return;
+			if(cpuControlled && (note.ignoreNote || note.hitCausesMiss)) return;
 
 			if (ClientPrefs.hitsoundVolume > 0 && !note.hitsoundDisabled)
-			{
 				FlxG.sound.play(Paths.sound('hitsound'), ClientPrefs.hitsoundVolume);
-			}
 
-			if (field.autoPlayed) {
+			if(cpuControlled){
 				var time:Float = 0.15;
-				if(note.isSustainNote && !note.animation.curAnim.name.endsWith('end')) {
+				if(note.isSustainNote && !note.animation.curAnim.name.endsWith('end'))
 					time += 0.15;
-				}
-				StrumPlayAnim(field, Std.int(Math.abs(note.noteData)) % 4, time, note);
-			} else {
-				field.forEach(function(spr:StrumNote)
-				{
-					if (Math.abs(note.noteData) == spr.ID)
-					{
-						spr.playAnim('confirm', true, note);
-					}
-				});
+				StrumPlayAnim(false, Std.int(Math.abs(note.noteData)), time);
+			}else{
+				var spr = playerStrums.members[note.noteData];
+				if(spr != null)
+					spr.playAnim('confirm', true);
 			}
 
 			if(note.hitCausesMiss) {
@@ -4289,13 +4114,15 @@ class PlayState extends MusicBeatState
 				}
 
 
-				if(!note.noMissAnimation)
+				if (!note.noMissAnimation)
 				{
-					switch(note.noteType) {
-						case 'Hurt Note': //Hurt note
-							if(field.owner.animation.getByName('hurt') != null) {
-								field.owner.playAnim('hurt', true);
-								field.owner.specialAnim = true;
+					switch (note.noteType)
+					{
+						case 'Hurt Note': // Hurt note
+							if (boyfriend.animation.getByName('hurt') != null)
+							{
+								boyfriend.playAnim('hurt', true);
+								boyfriend.specialAnim = true;
 							}
 					}
 				}
@@ -4326,27 +4153,22 @@ class PlayState extends MusicBeatState
 
 				var animToPlay:String = singAnimations[Std.int(Math.abs(note.noteData))];
 
-				if(note.gfNote)
-				{
-					if(gf != null)
-					{
+				if(note.gfNote){
+					if(gf != null){
 						gf.playAnim(animToPlay + daAlt, true);
 						gf.holdTimer = 0;
 					}
-				}
-
-				else if (field.owner.animTimer <= 0 && !field.owner.voicelining)
-				{
-					field.owner.playAnim(animToPlay + daAlt, true);
-					field.owner.holdTimer = 0;
+				}else if (boyfriend.animTimer <= 0 && !boyfriend.voicelining){
+					boyfriend.playAnim(animToPlay + daAlt, true);
+					boyfriend.holdTimer = 0;
 				}
 
 				if(note.noteType == 'Hey!') {
-					if (field.owner.animTimer <= 0 && !field.owner.voicelining){
-						if(field.owner.animOffsets.exists('hey')) {
-							field.owner.playAnim('hey', true);
-							field.owner.specialAnim = true;
-							field.owner.heyTimer = 0.6;
+					if (boyfriend.animTimer <= 0 && !boyfriend.voicelining){
+						if(boyfriend.animOffsets.exists('hey')) {
+							boyfriend.playAnim('hey', true);
+							boyfriend.specialAnim = true;
+							boyfriend.heyTimer = 0.6;
 						}
 					}
 
@@ -4362,13 +4184,6 @@ class PlayState extends MusicBeatState
 			var isSus:Bool = note.isSustainNote; //GET OUT OF MY HEAD, GET OUT OF MY HEAD, GET OUT OF MY HEAD
 			var leData:Int = Math.round(Math.abs(note.noteData));
 			var leType:String = note.noteType;
-
-			/*
-			for (script in field.owner.characterScripts){
-				if (script.scriptType != 'lua')
-					callScript(script, "goodNoteHit", [note]);
-			}
-			*/
 
 			callOnLuas('goodNoteHit', [notes.members.indexOf(note), leData, leType, isSus, note.ID]);
 			callOnHScripts("goodNoteHit", [note]); // maybe have this above so you can interrupt goodNoteHit? idk we'll see
@@ -4391,9 +4206,9 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	function spawnNoteSplashOnNote(note:Note) {
+	public function spawnNoteSplashOnNote(note:Note) {
 		if(ClientPrefs.noteSplashes && note != null) {
-			var strum:StrumNote = note.playField.members[note.noteData];
+			var strum:StrumNote = playerStrums.members[note.noteData];
 			if(strum != null) {
 				spawnNoteSplash(strum.x, strum.y, note.noteData, note);
 			}
@@ -4416,7 +4231,7 @@ class PlayState extends MusicBeatState
 		}
 
 		var splash:NoteSplash = grpNoteSplashes.recycle(NoteSplash);
-		splash.setupNoteSplash(x, y, data, skin, hue, sat, brt, note.playField);
+		splash.setupNoteSplash(x, y, data, skin, hue, sat, brt);
 		grpNoteSplashes.add(splash);
 	}
 
@@ -4657,11 +4472,16 @@ class PlayState extends MusicBeatState
 		#end
 	}
 
-	function StrumPlayAnim(field:PlayField, id:Int, time:Float, ?note:Note) {
-		var spr:StrumNote = field.members[id];
+	function StrumPlayAnim(isDad:Bool, id:Int, time:Float) {
+		var spr:StrumNote = null;
+		if(isDad) {
+			spr = strumLineNotes.members[id];
+		} else {
+			spr = playerStrums.members[id];
+		}
 
 		if(spr != null) {
-			spr.playAnim('confirm', true, note);
+			spr.playAnim('confirm', true);
 			spr.resetAnim = time;
 		}
 	}
@@ -4717,90 +4537,7 @@ class PlayState extends MusicBeatState
 		setOnLuas('ratingFC', ratingFC);
 	}
 
-	#if ACHIEVEMENTS_ALLOWED
-	private function checkForAchievement(achievesToCheck:Array<String> = null):String
-	{
-		if(chartingMode) return null;
-
-		var usedPractice:Bool = (ClientPrefs.getGameplaySetting('practice', false) || ClientPrefs.getGameplaySetting('botplay', false));
-		for (i in 0...achievesToCheck.length) {
-			var achievementName:String = achievesToCheck[i];
-			if(!Achievements.isAchievementUnlocked(achievementName) && !cpuControlled) {
-				var unlock:Bool = false;
-				switch(achievementName)
-				{
-					case 'week1_nomiss' | 'week2_nomiss' | 'week3_nomiss' | 'week4_nomiss' | 'week5_nomiss' | 'week6_nomiss':
-						if(isStoryMode && campaignMisses + songMisses < 1 && CoolUtil.difficultyString() == 'HARD' && storyPlaylist.length <= 1 && !changedDifficulty && !usedPractice)
-						{
-							var weekName:String = WeekData.getWeekFileName();
-							switch(weekName) //I know this is a lot of duplicated code, but it's easier readable and you can add weeks with different names than the achievement tag
-							{
-								case 'week1':
-									if(achievementName == 'week1_nomiss') unlock = true;
-								case 'week2':
-									if(achievementName == 'week2_nomiss') unlock = true;
-								case 'week3':
-									if(achievementName == 'week3_nomiss') unlock = true;
-								case 'week4':
-									if(achievementName == 'week4_nomiss') unlock = true;
-								case 'week5':
-									if(achievementName == 'week5_nomiss') unlock = true;
-								case 'week6':
-									if(achievementName == 'week6_nomiss') unlock = true;
-							}
-						}
-					case 'ur_bad':
-						if(ratingPercent < 0.2 && !practiceMode) {
-							unlock = true;
-						}
-					case 'ur_good':
-						if(ratingPercent >= 1 && !usedPractice) {
-							unlock = true;
-						}
-					case 'roadkill_enthusiast':
-						if(Achievements.henchmenDeath >= 100) {
-							unlock = true;
-						}
-					case 'oversinging':
-						if(boyfriend.holdTimer >= 10 && !usedPractice) {
-							unlock = true;
-						}
-					case 'hype':
-						if(!boyfriendIdled && !usedPractice) {
-							unlock = true;
-						}
-					case 'two_keys':
-						if(!usedPractice) {
-							var howManyPresses:Int = 0;
-							for (j in 0...keysPressed.length) {
-								if(keysPressed[j]) howManyPresses++;
-							}
-
-							if(howManyPresses <= 2) {
-								unlock = true;
-							}
-						}
-					case 'toastie':
-						if(/*ClientPrefs.framerate <= 60 &&*/ ClientPrefs.lowQuality && !ClientPrefs.globalAntialiasing && !ClientPrefs.imagesPersist) {
-							unlock = true;
-						}
-					case 'debugger':
-						if(Paths.formatToSongPath(SONG.song) == 'test' && !usedPractice) {
-							unlock = true;
-						}
-				}
-
-				if(unlock) {
-					Achievements.unlockAchievement(achievementName);
-					return achievementName;
-				}
-			}
-		}
-		return null;
-	}
-	#end
-
-	// SOWY: shader system from andromeda or V3 idrk
+	// SOWY: shader stuff from andromeda or V3 idrk
 	private var camShaders = [];
 	private var hudShaders = [];
 	private var overlayShaders = [];

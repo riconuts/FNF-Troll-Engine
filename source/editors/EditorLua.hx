@@ -1,37 +1,37 @@
 package editors;
 
 #if LUA_ALLOWED
-import llua.Convert;
 import llua.Lua;
 import llua.LuaL;
 import llua.State;
+import llua.Convert;
 #end
 
-import Controls;
-import Type.ValueType;
-import flixel.FlxBasic;
-import flixel.FlxCamera;
 import flixel.FlxG;
-import flixel.FlxSprite;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import flixel.text.FlxText;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxPoint;
 import flixel.system.FlxSound;
-import flixel.text.FlxText;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
-import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
-
-using StringTools;
-
+import flixel.FlxSprite;
+import flixel.FlxCamera;
+import flixel.util.FlxColor;
+import flixel.FlxBasic;
 #if sys
 import sys.FileSystem;
 import sys.io.File;
 #end
+import Type.ValueType;
+import Controls;
+import DialogueBoxPsych;
+
 #if desktop
 import Discord;
 #end
 
+using StringTools;
 
 class EditorLua {
 	public static var Function_Stop = 1;
@@ -53,7 +53,6 @@ class EditorLua {
 		var result:Dynamic = LuaL.dofile(lua, script);
 		var resultStr:String = Lua.tostring(lua, result);
 		if(resultStr != null && result != 0) {
-			FlxG.fullscreen = false;
 			lime.app.Application.current.window.alert(resultStr, 'Error on .LUA script!');
 			trace('Error on .LUA script! ' + resultStr);
 			lua = null;

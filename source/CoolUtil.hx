@@ -1,54 +1,46 @@
 package;
 
 import flixel.FlxG;
-import openfl.utils.Assets;
-import lime.utils.Assets as LimeAssets;
+import flixel.math.FlxPoint;
+import flixel.system.FlxSound;
 import lime.utils.AssetLibrary;
 import lime.utils.AssetManifest;
-import flixel.system.FlxSound;
+import lime.utils.Assets as LimeAssets;
+import openfl.utils.Assets;
+
+using StringTools;
 #if sys
-import sys.io.File;
 import sys.FileSystem;
+import sys.io.File;
 #else
 import openfl.utils.Assets;
 #end
 
-using StringTools;
 
 class CoolUtil
 {
-	public static var defaultDifficulties:Array<String> = [
-		'Easy',
-		'Normal',
-		'Hard'
-	];
-	public static var defaultDifficulty:String = 'Normal'; //The chart that has no suffix and starting difficulty on Freeplay/Story Mode
+	inline public static function scale(x:Float, l1:Float, h1:Float, l2:Float, h2:Float):Float
+		return ((x - l1) * (h2 - l2) / (h1 - l1) + l2);
 
-	public static var difficulties:Array<String> = [];
+	inline public static function clamp(n:Float, l:Float, h:Float)
+	{
+		if (n > h)
+			n = h;
+		if (n < l)
+			n = l;
+
+		return n;
+	}
+
+	public static function rotate(x:Float, y:Float, angle:Float, ?point:FlxPoint):FlxPoint
+	{
+		var p = point == null ? FlxPoint.weak() : point;
+		p.set((x * Math.cos(angle)) - (y * Math.sin(angle)), (x * Math.sin(angle)) + (y * Math.cos(angle)));
+		return p;
+	}
 
 	inline public static function quantize(f:Float, interval:Float){
 		return Std.int((f+interval/2)/interval)*interval;
-	}
-	
-	public static function getDifficultyFilePath(num:Null<Int> = null)
-	{
-		if(num == null) num = PlayState.storyDifficulty;
-
-		var fileSuffix:String = difficulties[num];
-		if(fileSuffix != defaultDifficulty)
-		{
-			fileSuffix = '-' + fileSuffix;
-		}
-		else
-		{
-			fileSuffix = '';
-		}
-		return Paths.formatToSongPath(fileSuffix);
-	}
-
-	public static function difficultyString():String
-	{
-		return difficulties[PlayState.storyDifficulty].toUpperCase();
 	}
 
 	inline public static function boundTo(value:Float, min:Float, max:Float):Float {

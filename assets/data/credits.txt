@@ -1,0 +1,44 @@
+TGT Polished Mod Team
+Aikori::Aikori::Description::https://google.com::0xFF1F3576
+Blitz::Blitz::Description::https://google.com::0xFF6191D5
+Charlieo::Charlieo::Description::https://google.com::0xFFFFE763
+CoffeeWoffee::CoffeeWoffee::Description::https://google.com::0xFFFF9DFA
+Dickgamer::Dickgamer::Description::https://google.com::0xFFFFFFFF
+DickwadMcBlatherskites::DickwadMcBlatherskites::Description::https://google.com::0xFFFFE255
+Echolocated::Echolocated::Description::https://google.com::0xFFBA5CF4
+EllisStohard::EllisStohard::Description::https://google.com::0xFF6171E6
+EstherMCH::EstherMCH::Description::https://google.com::0xFFA897E2
+gib::gib::Description::https://google.com::0xFFFFBC70
+Hyper::Hyper::Description::https://google.com::0xFF9752CC
+Kardia::Kardia::Director::https://google.com::0xFFBBC6D9
+Kirb::Kirb:::Description::https://google.com::0xFFCCC24E
+Max XD::Max_XD::Description::https://google.com::0xFFAFE054
+Mmushrooms::Mmushrooms::Description::https://google.com::0xFFFFE2E2
+Mothfard::Mothfard::Description::https://google.com::0xFFFFC147
+Nebula The Zorua::Nebula_The_Zorua::Description::https://google.com::0xFFBA2DC4
+OneGorgon::OneGorgon::Description::https://google.com::0xFFFFC371
+Riconuts::Riconuts::Description::https://google.com::0xFF5B46E6
+SonicBlastForTheGameGear::SonicBlastForTheGameGear::Description::https://google.com::0xFF394591
+SpookyMochiORA::SpookyMochiORA::Description::https://google.com::0xFFFFA0E2
+The Awesome::The_Awesome::Description::https://google.com::0xFFC7434C
+TheHolyRevenant::TheHolyRevenant::Description::https://google.com::0xFF7A3299
+Todd::Todd::Description::https://google.com::0xFFFB4646
+YoshiMaximus::YoshiMaximus::Description::https://google.com::0xFF37CF62
+
+Former Mod Team Members
+Hooda The Antagonist::::::::0xFFFFA0E2
+Bepixel::::::::0xFF37CF62
+Wilde::::::::0xFFAAAAAA
+Staticlysm::::::::0xFFAAAAAA
+Wieder::::::::0xFFAAAAAA
+Polli::::::::0xFFAAAAAA
+Xooplord::::::::0xFFAAAAAA
+Flopdoodle::::::::0xFFAAAAAA
+RedTV53::::::::0xFFFB4646
+LongestSoloEver::::::::0xFFC7434C
+DPZ::::::::0xFFAAAAAA
+River::::::::0xFFAAAAAA
+Philiplol::::::::0xFFAAAAAA
+Cmyth::::::::0xFFAAAAAA
+KaranXD::::::::0xFFAAAAAA
+Keno9988::::::::0xFFFFBC70

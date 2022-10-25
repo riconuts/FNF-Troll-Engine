@@ -40,7 +40,7 @@ class StoryMenuState extends MusicBeatState
 	];
 
 	var mainMenu = new FlxTypedGroup<FlxBasic>(); // group for the main menu where you select achapter!
-	var subMenu:ChapterMenuState; // custom group class for the menu where yu select a song!
+	//var subMenu:ChapterMenuState; // custom group class for the menu where yu select a song!
 	
 	var funkyRectangle = new FlxShapeBox(0, 0, 206, 206, {thickness: 3, color: FlxColor.fromRGB(255, 242, 0)}, FlxColor.BLACK); // cool rectanlge used for transitions
 	var lastButton:ChapterOption; // used the square transition
@@ -68,20 +68,6 @@ class StoryMenuState extends MusicBeatState
 		FlxG.camera.bgColor = FlxColor.BLACK;
 
 		WeekData.reloadWeekFiles(true);
-		WeekData.weeksList.sort(function(x, y){ // unefficient af but it works
-			var xV = 0;
-			for (i in 0...x.length){
-				var code = x.charCodeAt(i);
-				xV += code != null ? code : 0;
-			}
-			var yV = 0;
-			for (i in 0...y.length){
-				var code = y.charCodeAt(i);
-				yV += code != null ? code : 0;
-			}
-
-			return flixel.util.FlxSort.byValues(-1, xV, yV);
-		});
 		trace(WeekData.weeksList);
 
 		var chapN:Int = -1;	
@@ -92,18 +78,22 @@ class StoryMenuState extends MusicBeatState
 			if (daWeek.hideStoryMode)
 				continue;
 
+			WeekData.setDirectoryFromWeek(daWeek);
 			chapN++;
 			
-			var pos = chapterSelectPositions[chapN];
 			var previewImage = Paths.image("newmenuu/songselect/" + daWeek.fileName + (isLocked ? "lock" : ""));
 			previewImage = previewImage != null ? previewImage : Paths.image("newmenuu/songselect/unknown");
 			
-			var newButton = new ChapterOption(pos[0], pos[1], daWeek);
+			var pos = chapterSelectPositions[chapN];
+			var xPos = pos[0];
+			var yPos = pos[1];
+
+			var newButton = new ChapterOption(xPos, yPos, daWeek);
 			newButton.loadGraphic(previewImage);
 
-			var yellowBorder = new FlxShapeBox(pos[0] - 3, pos[1] - 3, 200, 200, {thickness: 6, color: FlxColor.fromRGB(255, 242, 0)}, FlxColor.TRANSPARENT);
-			var textTitle = new FlxText(pos[0]-3, pos[1]-24, 206, daWeek.weekName, 12);
-			textTitle.setFormat(Paths.font("calibri.ttf"), 12, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE);
+			var yellowBorder = new FlxShapeBox(xPos - 3, yPos - 3, 200, 200, {thickness: 6, color: FlxColor.fromRGB(255, 242, 0)}, FlxColor.TRANSPARENT);
+			var textTitle = new FlxText(xPos-3, yPos-30, 206, daWeek.weekName, 12);
+			textTitle.setFormat(Paths.font("calibri.ttf"), 18, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE);
 
 			if (isLocked){
 				newButton.onUp.callback = function(){
@@ -120,7 +110,7 @@ class StoryMenuState extends MusicBeatState
 					FlxG.sound.play(Paths.sound('cancelMenu')); // swoosh
 					openRectangleTransition(newButton.x, newButton.y, function(){
 						lastButton = newButton;
-						subMenu.curWeek = newButton.daWeek;
+						var subMenu = new ChapterMenuState(newButton.daWeek);
 						openSubState(subMenu);
 					});
 				}
@@ -140,9 +130,8 @@ class StoryMenuState extends MusicBeatState
 		funkyRectangle.visible = false;
 		add(funkyRectangle);
 		
-		destroySubStates = false;
+		//destroySubStates = false;
 		instance = this;
-		subMenu = new ChapterMenuState();
 		super.create();
 	}
 
@@ -160,9 +149,8 @@ class StoryMenuState extends MusicBeatState
 		{
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			
-			if (!doingTransition)
-			{
-				subMenu.destroy();
+			if (!doingTransition){
+				//subMenu.destroy();
 				MusicBeatState.switchState(new MainMenuState());
 			}
 		}
@@ -233,7 +221,7 @@ class StoryMenuState extends MusicBeatState
 		});
 	}
 }
-class ChapterOption extends SowyBaseButton{
+class ChapterOption extends TGTSquareButton{
 	public var daWeek:WeekData;
 
 	public function new(?X:Float = 0, ?Y:Float = 0, DaWeek:WeekData){
@@ -243,49 +231,5 @@ class ChapterOption extends SowyBaseButton{
 	override function onover(){
 		if (!StoryMenuState.weekIsLocked(daWeek))
 			super.onover();
-	}
-
-	// fucking lmao
-	var shk = 0;
-	var twen:FlxTween;
-	var its:Float = .05;
-	public function shake(){
-		shk = 0;
-		if (twen != null){
-			twen.cancel();
-			twen.destroy();
-		}
-		doShake();
-	}
-	function doShake(){
-		if (shk >= 4){
-			shk = 0;
-			return;
-		}else if (shk == 0)
-			FlxTween.tween(this, {color:0xFF0000}, 0.1, {
-				ease: FlxEase.backOut,
-				onComplete: function(twn){
-					twn.destroy();
-					FlxTween.tween(this, {color: 0xFFFFFF}, 0.1, {ease: FlxEase.backOut, onComplete: function(twn) {twn.destroy();}});
-				}
-			});
-
-		var state:Array<Dynamic> = [
-			{x: -width * its, y: height * its},
-			{x: width * its, y: -height * its},
-			{x: -width * (its / 4), y: height * (its / 4)},
-			{x: width * (its / 4), y: -height * (its / 4)},
-			{x: 0, y: 0},
-		];
-
-		twen = FlxTween.tween(offset, state[shk], 0.05, {
-			ease: FlxEase.backOut,
-			onComplete: function(twn)
-			{
-				shk++;
-				doShake();
-				twn.destroy();
-			}
-		});
 	}
 }

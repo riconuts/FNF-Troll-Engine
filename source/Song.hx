@@ -19,7 +19,7 @@ typedef SwagSong =
 	var events:Array<Dynamic>;
 	var bpm:Float;
 	var needsVoices:Bool;
-	var extraTracks:Array<String>;
+	@:optional var extraTracks:Array<String>;
 	var speed:Float;
 
 	var player1:String;
@@ -137,7 +137,7 @@ class Song
 				daBpm = songData.bpm; */
 
 		var songJson:Dynamic = parseJSONshit(rawJson);
-		if(jsonInput != 'events') StageData.loadDirectory(songJson);
+		if(jsonInput != 'events') Stage.StageData.loadDirectory(songJson);
 		onLoadJson(songJson);
 		return songJson;
 	}

@@ -33,7 +33,7 @@ class NotesSubState extends MusicBeatSubstate
 	private static var typeSelected:Int = 0;
 	private var grpNumbers:FlxTypedGroup<Alphabet>;
 	private var grpNotes:FlxTypedGroup<FlxSprite>;
-	private var shaderArray:Array<HSLColorSwap> = [];
+	private var shaderArray:Array<ColorSwap> = [];
 	var curValue:Float = 0;
 	var holdTime:Float = 0;
 	var nextAccept:Int = 5;
@@ -76,11 +76,11 @@ class NotesSubState extends MusicBeatSubstate
 			note.antialiasing = ClientPrefs.globalAntialiasing;
 			grpNotes.add(note);
 
-			var newShader:HSLColorSwap = new HSLColorSwap();
+			var newShader:ColorSwap = new ColorSwap();
 			note.shader = newShader.shader;
 			newShader.hue = ClientPrefs.arrowHSV[i][0] / 360;
 			newShader.saturation = ClientPrefs.arrowHSV[i][1] / 100;
-			newShader.lightness = ClientPrefs.arrowHSV[i][2] / 100;
+			newShader.brightness = ClientPrefs.arrowHSV[i][2] / 100;
 			shaderArray.push(newShader);
 		}
 
@@ -243,7 +243,7 @@ class NotesSubState extends MusicBeatSubstate
 		switch(type) {
 			case 0: shaderArray[selected].hue = 0;
 			case 1: shaderArray[selected].saturation = 0;
-			case 2: shaderArray[selected].lightness = 0;
+			case 2: shaderArray[selected].brightness = 0;
 		}
 
 		var item = grpNumbers.members[(selected * 3) + type];
@@ -269,7 +269,7 @@ class NotesSubState extends MusicBeatSubstate
 		switch(typeSelected) {
 			case 0: shaderArray[curSelected].hue = roundedValue / 360;
 			case 1: shaderArray[curSelected].saturation = roundedValue / 100;
-			case 2: shaderArray[curSelected].lightness = roundedValue / 100;
+			case 2: shaderArray[curSelected].brightness = roundedValue / 100;
 		}
 
 		var item = grpNumbers.members[(curSelected * 3) + typeSelected];

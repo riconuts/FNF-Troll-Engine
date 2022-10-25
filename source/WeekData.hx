@@ -181,6 +181,24 @@ class WeekData {
 			}
 		}
 		#end
+
+		WeekData.weeksList.sort(function(x, y)
+		{ // probably unefficient but it works for now
+			var xV = 0;
+			var yV = 0;
+			
+			for (i in 0...x.length){
+				var code = x.charCodeAt(i);
+				xV += code != null ? code : 0;
+			}
+			for (i in 0...y.length){
+				var code = y.charCodeAt(i);
+				yV += code != null ? code : 0;
+			}
+
+			return flixel.util.FlxSort.byValues(-1, xV, yV);
+		});
+		trace(WeekData.weeksList);
 	}
 
 	private static function addWeek(weekToCheck:String, path:String, directory:String, i:Int, originalLength:Int)
@@ -247,27 +265,5 @@ class WeekData {
 		if(data != null && data.folder != null && data.folder.length > 0) {
 			Paths.currentModDirectory = data.folder;
 		}
-	}
-
-	public static function loadTheFirstEnabledMod()
-	{
-		Paths.currentModDirectory = '';
-		
-		#if MODS_ALLOWED
-		if (FileSystem.exists("modsList.txt"))
-		{
-			var list:Array<String> = CoolUtil.listFromString(File.getContent("modsList.txt"));
-			var foundTheTop = false;
-			for (i in list)
-			{
-				var dat = i.split("|");
-				if (dat[1] == "1" && !foundTheTop)
-				{
-					foundTheTop = true;
-					Paths.currentModDirectory = dat[0];
-				}
-			}
-		}
-		#end
 	}
 }

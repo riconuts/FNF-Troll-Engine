@@ -17,16 +17,16 @@ class Highscore
 	#end
 
 
-	public static function resetSong(song:String, diff:Int = 0):Void
+	public static function resetSong(song:String):Void
 	{
-		var daSong:String = formatSong(song, diff);
+		var daSong:String = formatSong(song);
 		setScore(daSong, 0);
 		setRating(daSong, 0);
 	}
 
-	public static function resetWeek(week:String, diff:Int = 0):Void
+	public static function resetWeek(week:String):Void
 	{
-		var daWeek:String = formatSong(week, diff);
+		var daWeek:String = formatSong(week);
 		setWeekScore(daWeek, 0);
 	}
 
@@ -46,9 +46,9 @@ class Highscore
 		return newValue / tempMult;
 	}
 
-	public static function saveScore(song:String, score:Int = 0, ?diff:Int = 0, ?rating:Float = -1):Void
+	public static function saveScore(song:String, score:Int = 0, ?rating:Float = -1):Void
 	{
-		var daSong:String = formatSong(song, diff);
+		var daSong:String = formatSong(song);
 
 		if (songScores.exists(daSong)) {
 			if (songScores.get(daSong) < score) {
@@ -62,9 +62,9 @@ class Highscore
 		}
 	}
 
-	public static function saveWeekScore(week:String, score:Int = 0, ?diff:Int = 0):Void
+	public static function saveWeekScore(week:String, score:Int = 0):Void
 	{
-		var daWeek:String = formatSong(week, diff);
+		var daWeek:String = formatSong(week);
 
 		if (weekScores.exists(daWeek))
 		{
@@ -101,32 +101,29 @@ class Highscore
 		FlxG.save.flush();
 	}
 
-	public static function formatSong(song:String, diff:Int):String
-	{
-		return Paths.formatToSongPath(song) + CoolUtil.getDifficultyFilePath(diff);
-	}
+	static var formatSong = Paths.formatToSongPath;
 
-	public static function getScore(song:String, diff:Int):Int
+	public static function getScore(song:String):Int
 	{
-		var daSong:String = formatSong(song, diff);
+		var daSong:String = formatSong(song);
 		if (!songScores.exists(daSong))
 			setScore(daSong, 0);
 
 		return songScores.get(daSong);
 	}
 
-	public static function getRating(song:String, diff:Int):Float
+	public static function getRating(song:String):Float
 	{
-		var daSong:String = formatSong(song, diff);
+		var daSong:String = formatSong(song);
 		if (!songRating.exists(daSong))
 			setRating(daSong, 0);
 
 		return songRating.get(daSong);
 	}
 
-	public static function getWeekScore(week:String, diff:Int):Int
+	public static function getWeekScore(week:String):Int
 	{
-		var daWeek:String = formatSong(week, diff);
+		var daWeek:String = formatSong(week);
 		if (!weekScores.exists(daWeek))
 			setWeekScore(daWeek, 0);
 

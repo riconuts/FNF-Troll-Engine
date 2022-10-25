@@ -1,5 +1,6 @@
 var instance = getInstance();
 var defaultZoom:Float = instance.defaultCamZoom;
+var twnN = 0;
 
 function doZoomTween(zoom:Float, duration:Float)
 {
@@ -8,7 +9,7 @@ function doZoomTween(zoom:Float, duration:Float)
 	
 	instance.camZooming = true;
 	
-	instance.modchartTweens.push(FlxTween.num(instance.defaultCamZoom, zoom, duration, {ease: FlxEase.quadInOut, onUpdate: function(twn)
+	instance.modchartTweens.set(scriptName + twnN, FlxTween.num(instance.defaultCamZoom, zoom, duration, {ease: FlxEase.quadInOut, onUpdate: function(twn)
 	{
 		instance.defaultCamZoom = twn.value;
 	}}));	

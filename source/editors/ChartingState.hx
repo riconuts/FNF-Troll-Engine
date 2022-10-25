@@ -79,17 +79,11 @@ class ChartingState extends MusicBeatState
 	var eventStuff:Array<Dynamic> =
 	[
 		['', "Nothing. Yep, that's right."],
-		['Dadbattle Spotlight', "Used in Dad Battle,\nValue 1: 0/1 = ON/OFF,\n2 = Target Dad\n3 = Target BF"],
 		['Hey!', "Plays the \"Hey!\" animation from Bopeebo,\nValue 1: BF = Only Boyfriend, GF = Only Girlfriend,\nSomething else = Both.\nValue 2: Custom animation duration,\nleave it blank for 0.6s"],
 		['Set GF Speed', "Sets GF head bopping speed,\nValue 1: 1 = Normal speed,\n2 = 1/2 speed, 4 = 1/4 speed etc.\nUsed on Fresh during the beatbox parts.\n\nWarning: Value must be integer!"],
-		['Philly Glow', "Exclusive to Week 3\nValue 1: 0/1/2 = OFF/ON/Reset Gradient\n \nNo, i won't add it to other weeks."],
-		['Kill Henchmen', "For Mom's songs, don't use this please, i love them :("],
 		['Add Camera Zoom', "Used on MILF on that one \"hard\" part\nValue 1: Camera zoom add (Default: 0.015)\nValue 2: UI zoom add (Default: 0.03)\nLeave the values blank if you want to use Default."],
-		['BG Freaks Expression', "Should be used only in \"school\" Stage!"],
-		['Trigger BG Ghouls', "Should be used only in \"schoolEvil\" Stage!"],
 		['Play Animation', "Plays an animation on a Character,\nonce the animation is completed,\nthe animation changes to Idle\n\nValue 1: Animation to play.\nValue 2: Character (Dad, BF, GF)"],
 		['Camera Follow Pos', "Value 1: X\nValue 2: Y\n\nThe camera won't change the follow point\nafter using this, for getting it back\nto normal, leave both values blank."],
-		["Change Focus", "Sets who the camera is focusing on.\nNote that the must hit changing on a section will reset\nthe focus.\nValue 1: Who to focus on (dad, bf)"],
 		['Alt Idle Animation', "Sets a specified suffix after the idle animation name.\nYou can use this to trigger 'idle-alt' if you set\nValue 2 to -alt\n\nValue 1: Character to set (Dad, BF or GF)\nValue 2: New suffix (Leave it blank to disable)"],
 		['Screen Shake', "Value 1: Camera shake\nValue 2: HUD shake\n\nEvery value works as the following example: \"1, 0.05\".\nThe first number (1) is the duration.\nThe second number (0.05) is the intensity."],
 		['Change Character', "Value 1: Character to change (Dad, BF, GF)\nValue 2: New character's name"],
@@ -149,7 +143,6 @@ class ChartingState extends MusicBeatState
 
 	var tempBpm:Float = 0;
 
-	var tracks:Array<FlxSound> = [];
 	var vocals:FlxSound = null;
 
 	var leftIcon:HealthIcon;
@@ -241,8 +234,7 @@ class ChartingState extends MusicBeatState
 				gfVersion: 'gf',
 				speed: 1,
 				stage: 'stage',
-				validScore: false,
-				extraTracks: []
+				validScore: false
 			};
 			addSection();
 			PlayState.SONG = _song;
@@ -327,7 +319,7 @@ class ChartingState extends MusicBeatState
 
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
 		for (i in 0...8){
-			var note:StrumNote = new StrumNote(GRID_SIZE * (i+1), strumLine.y, i % 4);
+			var note:StrumNote = new StrumNote(GRID_SIZE * (i+1), strumLine.y, i % 4, 0);
 			note.setGraphicSize(GRID_SIZE, GRID_SIZE);
 			note.updateHitbox();
 			note.playAnim('static', true);
@@ -375,7 +367,7 @@ class ChartingState extends MusicBeatState
 		for (i in 0...tipTextArray.length) {
 			var tipText:FlxText = new FlxText(UI_box.x, UI_box.y + UI_box.height + 8, 0, tipTextArray[i], 16);
 			tipText.y += i * 12;
-			tipText.setFormat(Paths.font("calibri.ttf"), 14, FlxColor.WHITE, LEFT/*, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK*/);
+			tipText.setFormat(Paths.font("vcr.ttf"), 14, FlxColor.WHITE, LEFT/*, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK*/);
 			//tipText.borderSize = 2;
 			tipText.scrollFactor.set();
 			add(tipText);
@@ -935,7 +927,6 @@ class ChartingState extends MusicBeatState
 
 		var directories:Array<String> = [];
 
-		directories.push(Paths.getPreloadPath('notetypes/'));
 		#if MODS_ALLOWED
 		directories.push(Paths.mods('notetypes/'));
 		directories.push(Paths.mods(Paths.currentModDirectory + '/notetypes/'));
@@ -951,7 +942,6 @@ class ChartingState extends MusicBeatState
 			".hx",
 			".hxs"
 		];
-		#if sys
 		for (i in 0...directories.length) {
 			var directory:String =  directories[i];
 			if(FileSystem.exists(directory)) {
@@ -980,7 +970,6 @@ class ChartingState extends MusicBeatState
 				}
 			}
 		}
-		#end
 
 		for (i in 1...displayNameList.length) {
 			displayNameList[i] = i + '. ' + displayNameList[i];
@@ -1017,7 +1006,6 @@ class ChartingState extends MusicBeatState
 		var eventPushedMap:Map<String, Bool> = new Map<String, Bool>();
 		var directories:Array<String> = [];
 
-		directories.push(Paths.getPreloadPath('events/'));
 		#if MODS_ALLOWED
 		directories.push(Paths.mods('events/'));
 		directories.push(Paths.mods(Paths.currentModDirectory + '/events/'));
@@ -1025,7 +1013,6 @@ class ChartingState extends MusicBeatState
 			directories.push(Paths.mods(mod + '/events/'));
 		#end
 
-		#if sys
 		for (i in 0...directories.length) {
 			var directory:String =  directories[i];
 			if(FileSystem.exists(directory)) {
@@ -1041,7 +1028,6 @@ class ChartingState extends MusicBeatState
 				}
 			}
 		}
-		#end
 		eventPushedMap.clear();
 		eventPushedMap = null;
 
@@ -1350,19 +1336,6 @@ class ChartingState extends MusicBeatState
 			vocals.loadEmbedded(file);
 			FlxG.sound.list.add(vocals);
 		}
-
-		for (newTrackName in _song.extraTracks){
-			var file = Paths.track(currentSongName, newTrackName);
-			
-			if (Std.isOfType(file, Sound) || OpenFlAssets.exists(file))
-			{
-				var nuTrack = new FlxSound();
-				nuTrack.loadEmbedded(file);
-				FlxG.sound.list.add(nuTrack);
-				tracks.push(nuTrack);
-			}
-		}
-
 		generateSong();
 		FlxG.sound.music.pause();
 		Conductor.songPosition = sectionStartTime();
@@ -1382,18 +1355,11 @@ class ChartingState extends MusicBeatState
 				vocals.pause();
 				vocals.time = 0;
 			}
-			for (track in tracks){
-				track.pause();
-				track.time = 0;
-			}
 			changeSection();
 			curSection = 0;
 			updateGrid();
 			updateSectionUI();
 			vocals.play();
-			for (track in tracks){
-				track.play();
-			}
 		};
 	}
 
@@ -1685,30 +1651,17 @@ class ChartingState extends MusicBeatState
 
 		if (!blockInput)
 		{
-			if (FlxG.keys.justPressed.ESCAPE)
-			{
-				autosaveSong();
-				LoadingState.loadAndSwitchState(new editors.EditorPlayState(sectionStartTime()));
-			}
 			if (FlxG.keys.justPressed.ENTER)
 			{
 				autosaveSong();
 				FlxG.mouse.visible = false;
 				PlayState.SONG = _song;
+				PlayState.chartingMode = true;
 				FlxG.sound.music.stop();
 				if(vocals != null) vocals.stop();
-				for (track in tracks)
-				{
-					track.stop();
-				}
 
 				//if(_song.stage == null) _song.stage = stageDropDown.selectedLabel;
-				StageData.loadDirectory(_song);
-				PlayState.chartingMode = true;
-				
-				if (FlxG.keys.pressed.SHIFT)
-					PlayState.startOnTime = FlxG.sound.music.time;
-
+				Stage.StageData.loadDirectory(_song);
 				LoadingState.loadAndSwitchState(new PlayState());
 			}
 
@@ -1727,7 +1680,7 @@ class ChartingState extends MusicBeatState
 			if (FlxG.keys.justPressed.BACKSPACE) {
 				//if(onMasterEditor) {
 					MusicBeatState.switchState(new editors.MasterEditorMenu());
-					MusicBeatState.playMenuMusic();
+					FlxG.sound.playMusic(Paths.music('freakyMenu'));
 				//}
 				FlxG.mouse.visible = false;
 				return;
@@ -1770,10 +1723,6 @@ class ChartingState extends MusicBeatState
 				{
 					FlxG.sound.music.pause();
 					if(vocals != null) vocals.pause();
-					for (track in tracks)
-					{
-						track.pause();
-					}
 				}
 				else
 				{
@@ -1782,13 +1731,6 @@ class ChartingState extends MusicBeatState
 						vocals.pause();
 						vocals.time = FlxG.sound.music.time;
 						vocals.play();
-					}
-					for (track in tracks)
-					{
-						track.play();
-						track.pause();
-						track.time = FlxG.sound.music.time;
-						track.play();
 					}
 					FlxG.sound.music.play();
 				}
@@ -1809,11 +1751,6 @@ class ChartingState extends MusicBeatState
 				if(vocals != null) {
 					vocals.pause();
 					vocals.time = FlxG.sound.music.time;
-				}
-				for (track in tracks)
-				{
-					track.pause();
-					track.time = FlxG.sound.music.time;
 				}
 			}
 
@@ -1841,11 +1778,6 @@ class ChartingState extends MusicBeatState
 				if(vocals != null) {
 					vocals.pause();
 					vocals.time = FlxG.sound.music.time;
-				}
-				for (track in tracks)
-				{
-					track.pause();
-					track.time = FlxG.sound.music.time;
 				}
 			}
 
@@ -1936,11 +1868,6 @@ class ChartingState extends MusicBeatState
 					if(vocals != null) {
 						vocals.pause();
 						vocals.time = FlxG.sound.music.time;
-					}
-					for (track in tracks)
-					{
-						track.pause();
-						track.time = FlxG.sound.music.time;
 					}
 
 					var dastrum = 0;
@@ -2419,11 +2346,6 @@ class ChartingState extends MusicBeatState
 			vocals.pause();
 			vocals.time = FlxG.sound.music.time;
 		}
-		for (track in tracks)
-		{
-			track.pause();
-			track.time = FlxG.sound.music.time;
-		}
 		updateCurStep();
 
 		updateGrid();
@@ -2457,11 +2379,6 @@ class ChartingState extends MusicBeatState
 				if(vocals != null) {
 					vocals.pause();
 					vocals.time = FlxG.sound.music.time;
-				}
-				for (track in tracks)
-				{
-					track.pause();
-					track.time = FlxG.sound.music.time;
 				}
 				updateCurStep();
 			}
@@ -2502,6 +2419,7 @@ class ChartingState extends MusicBeatState
 			leftIcon.changeIcon(healthIconP1);
 			rightIcon.changeIcon(healthIconP2);
 			if (_song.notes[curSection].gfSection) leftIcon.changeIcon(healthIconP3);
+
 		}
 		else
 		{
@@ -2622,7 +2540,7 @@ class ChartingState extends MusicBeatState
 				if(typeInt == null) theType = '?';
 
 				var daText:AttachedFlxText = new AttachedFlxText(0, 0, 100, theType, 24);
-				daText.setFormat(Paths.font("calibri.ttf"), 24, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				daText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 				daText.xAdd = -32;
 				daText.yAdd = 6;
 				daText.borderSize = 1;
@@ -2649,7 +2567,7 @@ class ChartingState extends MusicBeatState
 				if(note.eventLength > 1) text = note.eventLength + ' Events:\n' + note.eventName;
 
 				var daText:AttachedFlxText = new AttachedFlxText(0, 0, 400, text, 12);
-				daText.setFormat(Paths.font("calibri.ttf"), 12, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK);
+				daText.setFormat(Paths.font("vcr.ttf"), 12, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK);
 				daText.xAdd = -410;
 				daText.borderSize = 1;
 				if(note.eventLength > 1) daText.yAdd += 8;
@@ -2987,12 +2905,7 @@ class ChartingState extends MusicBeatState
 	function loadJson(song:String):Void
 	{
 		//make it look sexier if possible
-		if (CoolUtil.difficulties[PlayState.storyDifficulty] != "Normal"){
-		PlayState.SONG = Song.loadFromJson(song.toLowerCase()+"-"+CoolUtil.difficulties[PlayState.storyDifficulty], song.toLowerCase());
-
-		}else{
 		PlayState.SONG = Song.loadFromJson(song.toLowerCase(), song.toLowerCase());
-		}
 		MusicBeatState.resetState();
 	}
 
@@ -3053,8 +2966,7 @@ class ChartingState extends MusicBeatState
 			player2: _song.player2,
 			gfVersion: _song.gfVersion,
 			stage: _song.stage,
-			validScore: false,
-			extraTracks: []
+			validScore: false
 		};
 		var json = {
 			"song": eventsSong

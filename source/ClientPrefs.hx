@@ -123,7 +123,7 @@ class ClientPrefs {
 		FlxG.save.data.opponentStrums = opponentStrums;
 		FlxG.save.data.showFPS = showFPS;
 		FlxG.save.data.flashing = flashing;
-		FlxG.save.data.globalAntialiasing = false;
+		FlxG.save.data.globalAntialiasing = globalAntialiasing;
 		FlxG.save.data.noteSplashes = noteSplashes;
 		FlxG.save.data.lowQuality = lowQuality;
 		FlxG.save.data.framerate = framerate;
@@ -190,7 +190,7 @@ class ClientPrefs {
 			flashing = FlxG.save.data.flashing;
 		}
 		if(FlxG.save.data.globalAntialiasing != null) {
-			globalAntialiasing = false;
+			globalAntialiasing = FlxG.save.data.globalAntialiasing;
 		}
 		if(FlxG.save.data.noteSplashes != null) {
 			noteSplashes = FlxG.save.data.noteSplashes;

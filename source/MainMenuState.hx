@@ -34,7 +34,11 @@ class MainMenuState extends MusicBeatState
 	public static var psychEngineVersion:String = '0.5.2n'; //This is also used for Discord RPC
 	public static var curSelected:Int = 0;
 
-	var menuItems:FlxTypedGroup<FlxSprite>;
+	var menuItems:FlxTypedGroup<MainMenuButton>;
+
+	var creditButton:SowyBaseButton;
+	var jukeboxButton:SowyBaseButton;
+	
 	private var camGame:FlxCamera;
 	private var camAchievement:FlxCamera;
 	
@@ -53,7 +57,7 @@ class MainMenuState extends MusicBeatState
 
 	override function create()
 	{
-		WeekData.loadTheFirstEnabledMod();
+		Paths.loadTheFirstEnabledMod();
 
 		#if desktop
 		// Updating Discord Rich Presence
@@ -91,7 +95,7 @@ class MainMenuState extends MusicBeatState
 		add(camFollow);
 		add(camFollowPos);
 
-		menuItems = new FlxTypedGroup<FlxSprite>();
+		menuItems = new FlxTypedGroup<MainMenuButton>();
 		add(menuItems);
 
 		var scale:Float = 1;
@@ -137,21 +141,20 @@ class MainMenuState extends MusicBeatState
 			menuItem.updateHitbox();
 		}
 		
-		var creditButton:FlxUIButton = new FlxUIButton(802, 586);
-		creditButton.loadGraphic(Paths.image('newmenuu/mainmenu/credits'));
-		creditButton.onUp.callback = function(){
+		creditButton = new SowyBaseButton(802, 586, function(){
 			selectedSomethin = true;
 			MusicBeatState.switchState(new CreditsState());
-		}
-		menuItems.add(creditButton);
+		});
+		creditButton.loadGraphic(Paths.image('newmenuu/mainmenu/credits'));
+		add(creditButton);
 		
-		var jukeboxButton:FlxUIButton = new FlxUIButton(988, 586);
+		jukeboxButton = new SowyBaseButton(988, 586);
 		jukeboxButton.loadGraphic(Paths.image('newmenuu/mainmenu/jukebox'));
 		/*jukeboxButton.onUp.callback = function(){
 			selectedSomethin = true;
 			MusicBeatState.switchState(new CreditsState());
 		}*/
-		menuItems.add(jukeboxButton);
+		add(jukeboxButton);
 
 		FlxG.camera.follow(camFollowPos, null, 1);
 
@@ -249,15 +252,23 @@ class MainMenuState extends MusicBeatState
 			updateImage(null);
 
 			FlxG.mouse.visible = false;
+
+			for (spr in [creditButton, jukeboxButton])
+				FlxTween.tween(spr, {alpha: 0}, 0.4, {
+					ease: FlxEase.quadOut,
+					onComplete: function(twn:FlxTween){
+						spr.kill();
+					}
+				});
+
 			
-			menuItems.forEach(function(spr:FlxSprite)
+			menuItems.forEach(function(spr)
 			{
 				if (curSelected != spr.ID)
 				{
 					FlxTween.tween(spr, {alpha: 0}, 0.4, {
 						ease: FlxEase.quadOut,
-						onComplete: function(twn:FlxTween)
-						{
+						onComplete: function(twn:FlxTween){
 							spr.kill();
 						}
 					});
@@ -272,18 +283,8 @@ class MainMenuState extends MusicBeatState
 								MusicBeatState.switchState(new StoryMenuState());
 							case 'freeplay':
 								MusicBeatState.switchState(new FreeplayState());
-							case 'credits':
-								MusicBeatState.switchState(new CreditsState());
 							case 'options':
 								LoadingState.loadAndSwitchState(new options.OptionsState());
-							#if MODS_ALLOWED
-							case 'mods':
-								MusicBeatState.switchState(new ModsMenuState());
-							#end
-							#if ACHIEVEMENTS_ALLOWED
-							case 'awards':
-								MusicBeatState.switchState(new AchievementsMenuState());
-							#end
 						}
 					});
 				}
@@ -355,12 +356,8 @@ class MainMenuState extends MusicBeatState
 
 		if (huh != 0) FlxG.sound.play(Paths.sound('scrollMenu'));
 
-		menuItems.forEach(function(spr:MainMenuButton)
-		{
-			if (spr.ID == curSelected)
-				spr.targetX = 151;
-			else
-				spr.targetX = 51;
+		menuItems.forEach(function(spr){
+			spr.targetX = spr.ID == curSelected ? 151 : 51;
 		});
 
 		updateImage(curSelected);

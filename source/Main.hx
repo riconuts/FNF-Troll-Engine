@@ -106,8 +106,10 @@ class Main extends Sprite
 				skipSplash = true;
 				troll = true;
 				break;
-			}else if (arg.contains("debug"))
+			}else if (arg.contains("debug")){
+				PlayState.chartingMode = true;
 				skipSplash = true;
+			}
 		}
 
 		addChild(new FlxGame(gameWidth, gameHeight, initialState, zoom, framerate, framerate, skipSplash, startFullscreen));
@@ -139,7 +141,7 @@ class Main extends Sprite
 	#if CRASH_HANDLER
 	function onCrash(e:UncaughtErrorEvent):Void
 	{
-		Sys.println("Crash starts below");
+		Sys.println(Conductor.songPosition + ", Crash starts below");
 
 		var errMsg:String = "";
 		var path:String;

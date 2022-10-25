@@ -1,5 +1,5 @@
-var instance = getInstance();
-var defaultZoom:Float = instance.defaultCamZoom;
+var game = getInstance();
+var defaultZoom:Float = game.defaultCamZoom;
 
 function shouldPush(eventNote):Bool{
 	return true;
@@ -12,6 +12,9 @@ function getOffset(eventNote): Float{
 }
 
 function onTrigger(value1:Dynamic, value2:Dynamic){
-	FlxTween.tween(instance.playerStrums, {alpha: 0}, Std.parseFloat(value2), {ease: FlxEase.expoInt});
-	FlxTween.tween(instance.opponentStrums, {alpha: 0}, Std.parseFloat(value2), {ease: FlxEase.expoIn});
+	for (boi in game.playerStrums)
+		FlxTween.tween(boi, {alpha: 0}, Std.parseFloat(value2), {ease: FlxEase.expoIn});
+		
+	for (boi in game.opponentStrums)
+		FlxTween.tween(boi, {alpha: 0}, Std.parseFloat(value2), {ease: FlxEase.expoIn});
 }
