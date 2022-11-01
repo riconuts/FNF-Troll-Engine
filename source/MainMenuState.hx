@@ -149,7 +149,7 @@ class MainMenuState extends MusicBeatState
 		add(creditButton);
 		
 		jukeboxButton = new SowyBaseButton(988, 586);
-		jukeboxButton.loadGraphic(Paths.image('newmenuu/mainmenu/jukebox'));
+		jukeboxButton.loadGraphic(Paths.image('newmenuu/mainmenu/comics'));
 		/*jukeboxButton.onUp.callback = function(){
 			selectedSomethin = true;
 			MusicBeatState.switchState(new CreditsState());

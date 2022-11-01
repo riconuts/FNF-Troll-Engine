@@ -115,13 +115,19 @@ class FreeplayState extends MusicBeatState
 
 	public function playSong(metadata:SongMetadata){
 		persistentUpdate = false;
+
+		var weekName = WeekData.getWeekFileName();
+
+		WeekData.setDirectoryFromWeek(WeekData.weeksLoaded.get(weekName));
+		trace('CURRENT WEEK: $weekName' + weekName);
+
+		Paths.currentModDirectory = metadata.folder;
+
 		var songLowercase:String = Paths.formatToSongPath(metadata.songName);
 		trace(songLowercase);
 
 		PlayState.SONG = Song.loadFromJson(songLowercase, songLowercase);
 		PlayState.isStoryMode = false;
-
-		trace('CURRENT WEEK: ' + WeekData.getWeekFileName());
 
 		if (FlxG.keys.pressed.SHIFT)
 			LoadingState.loadAndSwitchState(new ChartingState());
@@ -196,7 +202,7 @@ class FreeplayState extends MusicBeatState
 		if (!(up && down)){
 			timeSinceLastHold += elapsed;
 			if (timeSinceLastHold > 0.25) holdTime = 10;
-		{else{
+		}else{
 			timeSinceLastHold = 0;
 			holdTime += elapsed * 10;
 		}	
