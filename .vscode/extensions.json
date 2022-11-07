@@ -1,6 +1,7 @@
 {
 	"recommendations": [
 		"openfl.lime-vscode-extension",
-		"redhat.vscode-xml"
+		"redhat.vscode-xml",
+		"nadako.vshaxe"
 	]
 }

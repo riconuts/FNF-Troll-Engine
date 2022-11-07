@@ -375,7 +375,6 @@ class StageEditorState extends MusicBeatState{
 
         ////
 		defaultCamZoom = FlxG.initialZoom * stageData.defaultZoom;
-		// isPixelStage = stageData.isPixelStage;
 
 		BF_X = stageData.boyfriend[0];
 		BF_Y = stageData.boyfriend[1];
@@ -557,7 +556,6 @@ class StageEditorState extends MusicBeatState{
 		var json = {
 			"directory": "",
 			"defaultZoom": stageData.defaultZoom,
-			"isPixelStage": stageData.isPixelStage,
 
 			"boyfriend": [BF_X, BF_Y],
 			"girlfriend": [GF_X, GF_Y],

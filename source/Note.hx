@@ -294,9 +294,6 @@ class Note extends FlxSprite
 
 			offsetX -= width / 2;
 
-			if (PlayState.isPixelStage)
-				offsetX += 30;
-
 			if (prevNote.isSustainNote)
 			{
 				prevNote.animation.play(colArray[prevNote.noteData % 4] + 'hold');
@@ -306,19 +303,10 @@ class Note extends FlxSprite
 				{
 					prevNote.scale.y *= PlayState.instance.songSpeed;
 				}
-
-				if(PlayState.isPixelStage) {
-					prevNote.scale.y *= 1.19;
-					prevNote.scale.y *= (6 / height); //Auto adjust note size
-				}
+				
 				prevNote.updateHitbox();
 				prevNote.defScale.copyFrom(prevNote.scale);
 				// prevNote.setGraphicSize();
-			}
-
-			if(PlayState.isPixelStage) {
-				scale.y *= PlayState.daPixelZoom;
-				updateHitbox();
 			}
 		} else if(!isSustainNote) {
 			earlyHitMult = 1;
@@ -361,59 +349,19 @@ class Note extends FlxSprite
 		var lastScaleY:Float = scale.y;
 		var blahblah:String = arraySkin.join('/');
 		isQuant = false;
-		if(PlayState.isPixelStage) {
-			if(isSustainNote) {
-				if (ClientPrefs.noteSkin == 'Quants' && canQuant){
-					if(Assets.exists(Paths.getPath("images/pixelUI/QUANT" + blahblah + "ENDS.png", IMAGE))) {
-						blahblah = "QUANT" + blahblah;
-						isQuant = true;
-					}
-				}
-				loadGraphic(Paths.image('pixelUI/' + blahblah + 'ENDS'));
-				width = width / 4;
-				height = height / 2;
-				originalHeightForCalcs = height;
-				loadGraphic(Paths.image('pixelUI/' + blahblah + 'ENDS'), true, Math.floor(width), Math.floor(height));
-			} else {
-				if (ClientPrefs.noteSkin == 'Quants' && canQuant){
-					if(Assets.exists(Paths.getPath("images/pixelUI/QUANT" + blahblah + ".png", IMAGE))) {
-						blahblah = "QUANT" + blahblah;
-						isQuant = true;
-					}
-				}
-				loadGraphic(Paths.image('pixelUI/' + blahblah));
-				width = width / 4;
-				height = height / 5;
-				loadGraphic(Paths.image('pixelUI/' + blahblah), true, Math.floor(width), Math.floor(height));
-			}
-			setGraphicSize(Std.int(width * PlayState.daPixelZoom));
-			loadPixelNoteAnims();
-			antialiasing = false;
 
-			if(isSustainNote) {
-				offsetX += lastNoteOffsetXForPixelAutoAdjusting;
-				lastNoteOffsetXForPixelAutoAdjusting = (width - 7) * (PlayState.daPixelZoom / 2);
-				offsetX -= lastNoteOffsetXForPixelAutoAdjusting;
-
-				/*if(animName != null && !animName.endsWith('end'))
-				{
-					lastScaleY /= lastNoteScaleToo;
-					lastNoteScaleToo = (6 / height);
-					lastScaleY *= lastNoteScaleToo;
-				}*/
+		if (ClientPrefs.noteSkin == 'Quants' && canQuant){
+			if(Assets.exists(Paths.getPath("images/QUANT" + blahblah + ".png", IMAGE))) { // this can probably only be done once and then added to some sort of cache
+				// soon:tm:
+				blahblah = "QUANT" + blahblah;
+				isQuant = true;
 			}
-		} else {
-			if (ClientPrefs.noteSkin == 'Quants' && canQuant){
-				if(Assets.exists(Paths.getPath("images/QUANT" + blahblah + ".png", IMAGE))) { // this can probably only be done once and then added to some sort of cache
-					// soon:tm:
-					blahblah = "QUANT" + blahblah;
-					isQuant = true;
-				}
-			}
-			frames = Paths.getSparrowAtlas(blahblah);
-			loadNoteAnims();
-			antialiasing = ClientPrefs.globalAntialiasing;
 		}
+		
+		frames = Paths.getSparrowAtlas(blahblah);
+		loadNoteAnims();
+		antialiasing = ClientPrefs.globalAntialiasing;
+		
 		if(isSustainNote) {
 			scale.y = lastScaleY;
 		}

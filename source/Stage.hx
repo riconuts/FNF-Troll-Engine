@@ -40,7 +40,6 @@ class Stage extends FlxTypedGroup<FlxBasic>
 	public var stageData:StageFile = {
 		directory: "",
 		defaultZoom: 1,
-		isPixelStage: false,
 		boyfriend: [770, 100],
 		girlfriend: [400, 130],
 		opponent: [100, 100],
@@ -175,7 +174,6 @@ class Stage extends FlxTypedGroup<FlxBasic>
 typedef StageFile = {
 	var directory:String;
 	var defaultZoom:Float;
-	var isPixelStage:Bool;
 
 	var boyfriend:Array<Dynamic>;
 	var girlfriend:Array<Dynamic>;
@@ -190,7 +188,7 @@ typedef StageFile = {
 	@:optional var pixel_size:Null<Float>;
 	@:optional var preloadStrings:Array<String>;
 	#if sys
-	@:optional var preload:Array<PlayState.AssetPreload>; // incase you would like to add more information, though you shouldnt really need to
+	@:optional var preload:Array<Cache.AssetPreload>; // incase you would like to add more information, though you shouldnt really need to
 	#end
 }
 

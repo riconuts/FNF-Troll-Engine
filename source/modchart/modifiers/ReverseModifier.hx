@@ -1,14 +1,15 @@
 package modchart.modifiers;
-import flixel.math.FlxRect;
-import modchart.Modifier.ModifierOrder;
-import flixel.FlxSprite;
 import flixel.FlxG;
-import ui.*;
-import modchart.*;
-import flixel.math.FlxPoint;
+import flixel.FlxSprite;
 import flixel.math.FlxMath;
-using StringTools;
+import flixel.math.FlxPoint;
+import flixel.math.FlxRect;
 import math.*;
+import modchart.*;
+import modchart.Modifier.ModifierOrder;
+import ui.*;
+
+using StringTools;
 
 class ReverseModifier extends NoteModifier {
 	inline function lerp(a:Float, b:Float, c:Float)
@@ -127,10 +128,7 @@ class ReverseModifier extends NoteModifier {
                 {
 					daY += 10.5 * (fakeCrochet / 400) * 1.5 * songSpeed + (46 * (songSpeed - 1));
 					daY -= 46 * (1 - (fakeCrochet / 600)) * songSpeed;
-                    if (PlayState.isPixelStage)
-						daY += 8;
-                    else
-						daY -= 19;
+					daY -= 19;
                 }
 				daY += (Note.swagWidth / 2) - (60.5 * (songSpeed - 1));
 				daY += 27.5 * ((PlayState.SONG.bpm / 100) - 1) * (songSpeed - 1);

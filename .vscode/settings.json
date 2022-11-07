@@ -4,11 +4,10 @@
 	},
 	"[haxe]": {
 		"editor.formatOnPaste": true,
-		"editor.codeActionsOnSave": {
-			"source.sortImports": true
-		}
-		
 	},
 	"haxe.enableExtendedIndentation": true,
-	"restructuredtext.confPath": "${workspaceFolder}\\docs"
+	"restructuredtext.confPath": "${workspaceFolder}\\docs",
+	"editor.codeActionsOnSave": {
+	
+	}
 }

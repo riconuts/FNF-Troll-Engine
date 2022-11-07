@@ -150,10 +150,10 @@ class MainMenuState extends MusicBeatState
 		
 		jukeboxButton = new SowyBaseButton(988, 586);
 		jukeboxButton.loadGraphic(Paths.image('newmenuu/mainmenu/comics'));
-		/*jukeboxButton.onUp.callback = function(){
+		jukeboxButton.onUp.callback = function(){
 			selectedSomethin = true;
-			MusicBeatState.switchState(new CreditsState());
-		}*/
+			MusicBeatState.switchState(new ComicsMenuState.ComicReader());
+		}
 		add(jukeboxButton);
 
 		FlxG.camera.follow(camFollowPos, null, 1);

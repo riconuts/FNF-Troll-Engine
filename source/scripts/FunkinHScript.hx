@@ -185,9 +185,10 @@ class FunkinHScript extends FunkinScript
 		set("GameOverSubstate", GameOverSubstate);
 		set("HealthIcon", HealthIcon);
 		var currentState = flixel.FlxG.state;
+		
 		if ((currentState is PlayState)){
 			var state:PlayState = cast currentState;
-			set("global", state.hscriptGlobals);
+			set("global", state.variables);
 			set("getInstance", function()
 			{
 				return getInstance();

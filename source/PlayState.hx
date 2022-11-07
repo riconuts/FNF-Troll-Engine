@@ -1,6 +1,7 @@
 package;
 
 import Achievements;
+import Cache;
 import Conductor.Rating;
 import Note.EventNote;
 import Section.SwagSection;
@@ -9,34 +10,20 @@ import Song.SwagSong;
 import Stage;
 import WiggleEffect.WiggleEffectType;
 import animateatlas.AtlasFrameMaker;
-import editors.CharacterEditorState;
-import editors.ChartingState;
-import flixel.FlxBasic;
-import flixel.FlxCamera;
-import flixel.FlxG;
-import flixel.FlxGame;
-import flixel.FlxObject;
-import flixel.FlxSprite;
-import flixel.FlxState;
-import flixel.FlxSubState;
-import flixel.addons.display.FlxGridOverlay;
-import flixel.addons.display.FlxTiledSprite;
-import flixel.addons.effects.FlxTrail;
-import flixel.addons.effects.FlxTrailArea;
-import flixel.addons.effects.chainable.FlxEffectSprite;
-import flixel.addons.effects.chainable.FlxWaveEffect;
+import editors.*;
+import flixel.*;
+import flixel.addons.display.*;
+import flixel.addons.effects.*;
+import flixel.addons.effects.chainable.*;
 import flixel.addons.transition.FlxTransitionableState;
-import flixel.effects.particles.FlxEmitter;
-import flixel.effects.particles.FlxParticle;
+import flixel.effects.particles.*;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.atlas.FlxAtlas;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.group.FlxSpriteGroup;
 import flixel.input.keyboard.FlxKey;
-import flixel.math.FlxMath;
-import flixel.math.FlxPoint;
-import flixel.math.FlxRect;
+import flixel.math.*;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.system.FlxSound;
 import flixel.system.scaleModes.*;
@@ -44,12 +31,7 @@ import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.ui.FlxBar;
-import flixel.util.FlxCollision;
-import flixel.util.FlxColor;
-import flixel.util.FlxSave;
-import flixel.util.FlxSort;
-import flixel.util.FlxStringUtil;
-import flixel.util.FlxTimer;
+import flixel.util.*;
 import haxe.Json;
 import lime.utils.Assets;
 import modchart.*;
@@ -81,20 +63,9 @@ typedef LineData = {
 	var anim:String;
 };
 
-typedef PreloadResult = {
-	var thread:Thread;
-	var asset:String;
-	@:optional var terminated:Bool;
-}
-typedef AssetPreload = {
-	var path:String;
-	@:optional var type:String;
-	@:optional var library:String;
-	@:optional var terminate:Bool;
-}
-
 class PlayState extends MusicBeatState
 {
+	// andromeda modcharts :D
 	public var modManager:ModManager;
 
 	public var whosTurn:String = '';
@@ -123,24 +94,19 @@ class PlayState extends MusicBeatState
 	public var modchartSaves:Map<String, FlxSave> = new Map<String, FlxSave>();
 	public var modchartObjects:Map<String, FlxSprite> = new Map<String, FlxSprite>();
 
-	//event variables
-	#if (haxe >= "4.0.0")
-	public var hscriptGlobals:Map<String, Dynamic> = new Map();
-	#else
-	public var hscriptGlobals:Map<String, Dynamic> = new Map<String, Dynamic>();
-	#end
-
 	private var isCameraOnForcedPos:Bool = false;
 	#if (haxe >= "4.0.0")
 	public var boyfriendMap:Map<String, Boyfriend> = new Map();
 	public var extraMap:Map<String, Character> = new Map();
 	public var dadMap:Map<String, Character> = new Map();
 	public var gfMap:Map<String, Character> = new Map();
+	public var variables:Map<String, Dynamic> = new Map();
 	#else
 	public var boyfriendMap:Map<String, Boyfriend> = new Map<String, Boyfriend>();
 	public var dadMap:Map<String, Character> = new Map<String, Character>();
 	public var gfMap:Map<String, Character> = new Map<String, Character>();
 	public var extraMap:Map<String, Character> = new Map<String, Character>();
+	public var variables:Map<String, Dynamic> = new Map<String, Dynamic>();
 	#end
 
 	public var BF_X:Float = 770;
@@ -160,7 +126,6 @@ class PlayState extends MusicBeatState
 	public var noteKillOffset:Float = 350;
 	
 	public static var curStage:String = '';
-	public static var isPixelStage:Bool = false;
 	public static var SONG:SwagSong = null;
 	public static var isStoryMode:Bool = false;
 	public static var storyWeek:Int = 0;
@@ -248,11 +213,6 @@ class PlayState extends MusicBeatState
 	
 	public var cameraSpeed:Float = 1;
 
-	/*
-	var dialogue:Array<String> = ['blah blah blah', 'coolswag'];
-	var dialogueJson:DialogueFile = null;
-	*/
-
 	var heyTimer:Float;
 
 	var wiggleShit:WiggleEffect = new WiggleEffect();
@@ -277,9 +237,7 @@ class PlayState extends MusicBeatState
 	public static var deathCounter:Int = 0;
 
 	public var defaultCamZoom:Float = FlxG.initialZoom;
-
-	// how big to stretch the pixel art assets
-	public static var daPixelZoom:Float = 6;
+	
 	private var singAnimations:Array<String> = ['singLEFT', 'singDOWN', 'singUP', 'singRIGHT'];
 
 	public var inCutscene:Bool = false;
@@ -323,8 +281,6 @@ class PlayState extends MusicBeatState
 	private var keysArray:Array<Dynamic>;
 	private var controlArray:Array<String>;
 
-	var precacheList:Map<String, String> = new Map<String, String>();
-
 	// stores the last judgement object
 	public static var lastRating:FlxSprite;
 	// stores the last combo sprite object
@@ -335,7 +291,6 @@ class PlayState extends MusicBeatState
 	function setStageData(stageData:StageFile){
 		defaultCamZoom *= stageData.defaultZoom;
 		FlxG.camera.zoom = defaultCamZoom;
-		isPixelStage = stageData.isPixelStage;
 		BF_X = stageData.boyfriend[0];
 		BF_Y = stageData.boyfriend[1];
 		GF_X = stageData.girlfriend[0];
@@ -505,10 +460,8 @@ class PlayState extends MusicBeatState
 		topBar = new FlxSprite(0, -170).makeGraphic(FlxG.width, 170, FlxColor.BLACK);
 		bottomBar = new FlxSprite(0, FlxG.height).makeGraphic(FlxG.width, 170, FlxColor.BLACK);
 
-
 		GameOverSubstate.resetVariables();
-		// var songName:String = Paths.formatToSongPath(SONG.song);
-
+		
 		// STAGE SHIT
 		curStage = SONG.stage;
 		if (SONG.stage == null || SONG.stage.length < 1)
@@ -519,33 +472,38 @@ class PlayState extends MusicBeatState
 		stageData = stage.stageData;
 		setStageData(stageData);
 
-		/*
-			if(isPixelStage)
-				introSoundsSuffix = '-pixel';
-		*/
-
 		//// Multi-thread Loading Start
 		#if MULTICORE_LOADING
 		#if loadBenchmark
 		var startLoadTime = Sys.time();
 		#end
-		if (ClientPrefs.multicoreLoading)
-		{ // should probably move all of this to its own preload class
-			#if loadBenchmark
-			var currentTime = Sys.time();
-			trace("started preload");
-			#end
+		if (ClientPrefs.multicoreLoading){ 
 			var shitToLoad:Array<AssetPreload> = [
 				{path: "epic"},
 				{path: "sick"},
 				{path: "good"},
 				{path: "bad"},
 				{path: "shit"},
-				{path: "healthBar" /*, library: "shared"*/},
+				{path: "healthBar"},
 				{path: "combo"}
 			];
 			for (number in 0...10)
 				shitToLoad.push({path: 'num$number'});
+
+			// PRECACHING MISS SOUNDS BECAUSE I THINK THEY CAN LAG PEOPLE AND FUCK THEM UP IDK HOW HAXE WORKS
+			if (ClientPrefs.hitsoundVolume > 0)
+				shitToLoad.push({path: 'hitsound', type: 'SOUND'});
+			shitToLoad.push({path: 'missnote1', type: 'SOUND'});
+			shitToLoad.push({path: 'missnote2', type: 'SOUND'});
+			shitToLoad.push({path: 'missnote3', type: 'SOUND'});
+
+			if (PauseSubState.songName != null)
+				shitToLoad.push({path: PauseSubState.songName, type: 'MUSIC'});
+			else if (ClientPrefs.pauseMusic != 'None')
+				shitToLoad.push({path: Paths.formatToSongPath(ClientPrefs.pauseMusic), type: 'MUSIC'});
+
+			if (ClientPrefs.timeBarType != 'Disabled')
+				shitToLoad.push({path: "timeBar"});
 
 			if (arrowSkin != null && arrowSkin.trim() != '' && arrowSkin.length > 0)
 			{
@@ -578,15 +536,7 @@ class PlayState extends MusicBeatState
 					path: "noteSplashes"
 				});
 			}
-
-			if (ClientPrefs.timeBarType != 'Disabled')
-			{
-				shitToLoad.push({
-					path: "timeBar"
-					/*,
-						library: "shared" */
-				});
-			}
+			
 			if (stageData.preloadStrings != null)
 			{
 				var lib = stageData.directory.trim().length > 0 ? stageData.directory : null;
@@ -634,158 +584,13 @@ class PlayState extends MusicBeatState
 
 			// SOWY: extra tracks (ex: die batsards bullet track)
 			for (track in SONG.extraTracks)
-			{
 				shitToLoad.push({
 					path: '${Paths.formatToSongPath(SONG.song)}/${track}',
 					type: 'SONG'
 				});
-			}
 
-			// TODO: go through shitToLoad and clear it of repeats as to not waste time loadin shit that already exists
-			for (shit in shitToLoad)
-				trace(shit.path);
-
-			var threadLimit:Int = ClientPrefs.loadingThreads; // Math.floor(Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS")));
-			if (shitToLoad.length > 0 && threadLimit > 1)
-			{
-				// thanks shubs -neb
-				for (shit in shitToLoad)
-					if (shit.terminate)
-						shit.terminate = false; // do not
-
-				var count = shitToLoad.length;
-
-				if (threadLimit > count)
-					threadLimit = count; // only use as many as it needs
-
-				var sprites:Array<FlxSprite> = [];
-				var threads:Array<Thread> = [];
-
-				var finished:Bool = false;
-				trace("loading " + count + " items with " + threadLimit + " threads");
-				var main = Thread.current();
-				var loadIdx:Int = 0;
-				for (i in 0...threadLimit)
-				{
-					var thread:Thread = Thread.create(() ->
-					{
-						while (true)
-						{
-							var toLoad:Null<AssetPreload> = Thread.readMessage(true); // get the next thing that should be loaded
-							if (toLoad != null)
-							{
-								if (toLoad.terminate == true)
-									break;
-								// just loads the graphic
-								#if traceLoading
-								trace("loading " + toLoad.path);
-								#end
-								switch (toLoad.type)
-								{
-									case 'SOUND':
-										Paths.returnSound("sounds", toLoad.path, toLoad.library);
-										#if traceLoading
-										trace("loaded " + toLoad);
-										#end
-									case 'MUSIC':
-										Paths.returnSound("music", toLoad.path, toLoad.library);
-										#if traceLoading
-										trace("loaded " + toLoad);
-										#end
-									case 'SONG':
-										Paths.returnSound("songs", toLoad.path, toLoad.library);
-										#if traceLoading
-										trace("loaded " + toLoad);
-										#end
-									default:
-										#if traceLoading
-										trace('grabbin da graphic ${toLoad.library}:${toLoad.path}');
-										#end
-										var graphic = Paths.returnGraphic(toLoad.path, toLoad.library);
-										#if traceLoading
-										trace(graphic);
-										#end
-										if (graphic != null)
-										{
-											var sprite = new FlxSprite().loadGraphic(graphic);
-											sprite.alpha = 0.001;
-											add(sprite);
-											sprites.push(sprite);
-											#if traceLoading
-											trace("loaded " + toLoad, graphic, sprite);
-											#end
-										}
-										#if traceLoading
-										else
-											trace("Could not load " + toLoad);
-										#end
-								}
-								#if traceLoading
-								trace("getting next asset");
-								#end
-								main.sendMessage({ // send message so that it can get the next thing to load
-									thread: Thread.current(),
-									asset: toLoad,
-									terminated: false
-								});
-							}
-						}
-						main.sendMessage({ // send message so that it can get the next thing to load
-							thread: Thread.current(),
-							asset: '',
-							terminated: true
-						});
-						return;
-					});
-					threads.push(thread);
-				}
-				for (thread in threads)
-					thread.sendMessage(shitToLoad.pop()); // gives the thread the top thing to load
-
-				while (loadIdx < count)
-				{
-					var res:Null<PreloadResult> = Thread.readMessage(true); // whenever a thread loads its asset, it sends a message to get a new asset for it to load
-					if (res != null)
-					{
-						if (res.terminated)
-						{
-							if (threads.contains(res.thread))
-							{
-								threads.remove(res.thread); // so it wont have a message sent at the end
-							}
-						}
-						else
-						{
-							loadIdx++;
-							#if traceLoading
-							trace("loaded " + loadIdx + " out of " + count);
-							#end
-							if (shitToLoad.length > 0)
-								res.thread.sendMessage(shitToLoad.pop()); // gives the thread the next thing it should load
-							else
-								res.thread.sendMessage({path: '', library: '', terminate: true}); // terminate the thread
-						}
-					}
-				};
-				trace(loadIdx, count);
-				var idx:Int = 0;
-				for (t in threads)
-				{
-					t.sendMessage({path: '', library: '', terminate: true}); // terminate all threads
-					trace("terminating thread " + idx);
-					idx++;
-				}
-
-				finished = true;
-				#if loadBenchmark
-				var finishedTime = Sys.time();
-				trace("preloaded in " + (finishedTime - currentTime));
-				#else
-				trace("preloaded");
-				#end
-				for (sprite in sprites)
-					remove(sprite);
-			}
+			// moved all of this to its own preload class
+			Cache.loadWithList(shitToLoad);
 		}
 		#end
 		//// Multi-thread Loading End
@@ -799,7 +604,7 @@ class PlayState extends MusicBeatState
 			add(dadGroup);
 			add(boyfriendGroup);
 
-			add(stage.foreground); // forever engine style B)
+			add(stage.foreground);
 		}
 
 		#if LUA_ALLOWED
@@ -936,22 +741,6 @@ class PlayState extends MusicBeatState
 				var evilTrail = new FlxTrail(dad, null, 4, 24, 0.3, 0.069); //nice
 				addBehindDad(evilTrail);
 		}
-
-		/*
-		var file:String = Paths.json(songName + '/dialogue'); //Checks for json/Psych Engine dialogue
-		if (OpenFlAssets.exists(file)) {
-			dialogueJson = DialogueBoxPsych.parseDialogue(file);
-		}
-		var file:String = Paths.txt(songName + '/' + songName + 'Dialogue'); //Checks for vanilla/Senpai dialogue
-		if (OpenFlAssets.exists(file)) {
-			dialogue = CoolUtil.coolTextFile(file);
-		}
-		var doof:DialogueBox = new DialogueBox(false, dialogue);
-		doof.scrollFactor.set();
-		doof.finishThing = startCountdown;
-		doof.nextDialogueThing = startNextDialogue;
-		doof.skipDialogueThing = skipDialogue;
-		*/
 
 		Conductor.songPosition = -5000;
 
@@ -1171,18 +960,6 @@ class PlayState extends MusicBeatState
 		
 		RecalculateRating();
 
-		//PRECACHING MISS SOUNDS BECAUSE I THINK THEY CAN LAG PEOPLE AND FUCK THEM UP IDK HOW HAXE WORKS
-		if(ClientPrefs.hitsoundVolume > 0) precacheList.set('hitsound', 'sound');
-		precacheList.set('missnote1', 'sound');
-		precacheList.set('missnote2', 'sound');
-		precacheList.set('missnote3', 'sound');
-
-		if (PauseSubState.songName != null) {
-			precacheList.set(PauseSubState.songName, 'music');
-		} else if(ClientPrefs.pauseMusic != 'None') {
-			precacheList.set(Paths.formatToSongPath(ClientPrefs.pauseMusic), 'music');
-		}
-
 		#if desktop
 		// Updating Discord Rich Presence.
 		DiscordClient.changePresence(detailsText, SONG.song, iconP2.getCharacter());
@@ -1200,20 +977,6 @@ class PlayState extends MusicBeatState
 		super.create();
 
 		Paths.clearUnusedMemory();
-
-		for (key => type in precacheList)
-		{
-			//trace('Key $key is type $type');
-			switch(type)
-			{
-				case 'image':
-					Paths.image(key);
-				case 'sound':
-					Paths.sound(key);
-				case 'music':
-					Paths.music(key);
-			}
-		}
 
 		#if loadBenchmark
 		var endLoadTime = Sys.time();
@@ -1405,47 +1168,6 @@ class PlayState extends MusicBeatState
 	}
 
 	/*
-	var dialogueCount:Int = 0;
-	public var psychDialogue:DialogueBoxPsych;
-	//You don't have to add a song, just saying. You can just do "startDialogue(dialogueJson);" and it should work
-	public function startDialogue(dialogueFile:DialogueFile, ?song:String = null):Void
-	{
-		// TO DO: Make this more flexible, maybe?
-		if(psychDialogue != null) return;
-
-		if(dialogueFile.dialogue.length > 0) {
-			inCutscene = true;
-			precacheList.set('dialogue', 'sound');
-			precacheList.set('dialogueClose', 'sound');
-			psychDialogue = new DialogueBoxPsych(dialogueFile, song);
-			psychDialogue.scrollFactor.set();
-			if(endingSong) {
-				psychDialogue.finishThing = function() {
-					psychDialogue = null;
-					endSong();
-				}
-			} else {
-				psychDialogue.finishThing = function() {
-					psychDialogue = null;
-					startCountdown();
-				}
-			}
-			psychDialogue.nextDialogueThing = startNextDialogue;
-			psychDialogue.skipDialogueThing = skipDialogue;
-			psychDialogue.cameras = [camHUD];
-			add(psychDialogue);
-		} else {
-			FlxG.log.warn('Your dialogue file is badly formatted!');
-			if(endingSong) {
-				endSong();
-			} else {
-				startCountdown();
-			}
-		}
-	}
-	*/
-
-	/*
 	function songIntroCutscene(){
 		var daSong:String = Paths.formatToSongPath(curSong);
 		if (isStoryMode && !seenCutscene)
@@ -1544,10 +1266,6 @@ class PlayState extends MusicBeatState
 
 				var introAlts:Array<String> = introAssets.get('default');
 				var antialias:Bool = ClientPrefs.globalAntialiasing;
-				if(isPixelStage) {
-					introAlts = introAssets.get('pixel');
-					antialias = false;
-				}
 
 				switch (swagCounter)
 				{
@@ -1557,9 +1275,6 @@ class PlayState extends MusicBeatState
 						countdownReady = new FlxSprite().loadGraphic(Paths.image(introAlts[0]));
 						countdownReady.scrollFactor.set();
 						countdownReady.updateHitbox();
-
-						if (PlayState.isPixelStage)
-							countdownReady.setGraphicSize(Std.int(countdownReady.width * daPixelZoom));
 						
 						countdownReady.screenCenter();
 						countdownReady.antialiasing = antialias;
@@ -1578,9 +1293,6 @@ class PlayState extends MusicBeatState
 						countdownSet = new FlxSprite().loadGraphic(Paths.image(introAlts[1]));
 						countdownSet.scrollFactor.set();
 
-						if (PlayState.isPixelStage)
-							countdownSet.setGraphicSize(Std.int(countdownSet.width * daPixelZoom));
-
 						countdownSet.screenCenter();
 						countdownSet.antialiasing = antialias;
 						insert(members.indexOf(notes), countdownSet);
@@ -1596,9 +1308,6 @@ class PlayState extends MusicBeatState
 					case 3:
 						countdownGo = new FlxSprite().loadGraphic(Paths.image(introAlts[2]));
 						countdownGo.scrollFactor.set();
-
-						if (PlayState.isPixelStage)
-							countdownGo.setGraphicSize(Std.int(countdownGo.width * daPixelZoom));
 
 						countdownGo.updateHitbox();
 
@@ -3548,12 +3257,6 @@ class PlayState extends MusicBeatState
 		var pixelShitPart1:String = "";
 		var pixelShitPart2:String = '';
 
-		if (PlayState.isPixelStage)
-		{
-			pixelShitPart1 = 'pixelUI/';
-			pixelShitPart2 = '-pixel';
-		}
-
 		rating.loadGraphic(Paths.image(pixelShitPart1 + daRating.image + pixelShitPart2));
 		rating.cameras = [camHUD];
 		rating.screenCenter();
@@ -3579,19 +3282,10 @@ class PlayState extends MusicBeatState
 		comboSpr.velocity.x += FlxG.random.int(1, 10);
 		insert(members.indexOf(strumLineNotes), rating);
 
+		rating.setGraphicSize(Std.int(rating.width * 0.7));
+		rating.antialiasing = ClientPrefs.globalAntialiasing;
+		comboSpr.setGraphicSize(Std.int(comboSpr.width * 0.7));
 		comboSpr.antialiasing = ClientPrefs.globalAntialiasing;
-
-		if (!PlayState.isPixelStage)
-		{
-			rating.setGraphicSize(Std.int(rating.width * 0.7));
-			rating.antialiasing = ClientPrefs.globalAntialiasing;
-			comboSpr.setGraphicSize(Std.int(comboSpr.width * 0.7));
-		}
-		else
-		{
-			rating.setGraphicSize(Std.int(rating.width * daPixelZoom * 0.85));
-			comboSpr.setGraphicSize(Std.int(comboSpr.width * daPixelZoom * 0.85));
-		}
 
 		comboSpr.updateHitbox();
 		rating.updateHitbox();
@@ -3635,17 +3329,9 @@ class PlayState extends MusicBeatState
 			numScore.x += ClientPrefs.comboOffset[2];
 			numScore.y -= ClientPrefs.comboOffset[3];
 
+			numScore.antialiasing = ClientPrefs.globalAntialiasing;
+			numScore.setGraphicSize(Std.int(numScore.width * 0.5));
 			numScore.antialiasing = false;
-
-			if (!PlayState.isPixelStage)
-			{
-				numScore.setGraphicSize(Std.int(numScore.width * 0.5));
-			}
-			else
-			{
-				numScore.setGraphicSize(Std.int(numScore.width * daPixelZoom));
-			}
-			numScore.updateHitbox();
 
 			numScore.acceleration.y = FlxG.random.int(200, 300);
 			numScore.velocity.y -= FlxG.random.int(140, 160);
@@ -4586,9 +4272,6 @@ class PlayState extends MusicBeatState
 	//
 
 	override public function switchTo(nextState: Dynamic){
-		if(isPixelStage != stageData.isPixelStage)
-			isPixelStage = stageData.isPixelStage;
-
 		if(FlxG.sound.music != null) // so if you leave and debug console comes up and you bring it down it wont replay the fuckin song and break EVERYTHING!!!
 			FlxG.sound.music.onComplete = MusicBeatState.menuLoopFunc; // please work
 
