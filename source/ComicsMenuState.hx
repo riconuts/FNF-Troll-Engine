@@ -128,7 +128,7 @@ class ComicReader extends MusicBeatState
 		var justPressed = FlxG.keys.justPressed;
 		var pressed = FlxG.keys.pressed;
 
-		if (controls.BACK) MusicBeatState.switchState(new MainMenuState())};
+		if (controls.BACK) MusicBeatState.switchState(new MainMenuState());
 
 		// movement
 		var speed = pressed.SHIFT ? baseSpeed * 2 : baseSpeed;
