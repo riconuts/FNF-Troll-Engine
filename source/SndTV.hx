@@ -28,53 +28,53 @@ class TweenV {
 	
 	public inline function new (
 		parent:Snd	 ,
-	    n:Float		 ,
-	    ln:Float	 ,
+		n:Float		 ,
+		ln:Float	 ,
 		varType:TVVar,
-	    speed:Float	 ,
-	    from:Float	 ,
-	    to:Float	 ,
-	    type:h2d.Tweenie.TType ,
-	    plays		 ,
-	    onUpdate	 ,
-	    onEnd		 
+		speed:Float	 ,
+		from:Float	 ,
+		to:Float	 ,
+		type:h2d.Tweenie.TType ,
+		plays		 ,
+		onUpdate	 ,
+		onEnd		 
 	) {
 		this.parent			= parent		;
-		this.n			    = n			 	;
-		this.ln			    = ln			;
+		this.n				= n			 	;
+		this.ln				= ln			;
 		this.varType 		= varType 		;
-		this.speed		    = speed			;
-		this.from		    = from			;
-		this.to			    = to			;
-		this.type		    = type		 	;
-		this.plays		    = plays		 	;
-		this.onUpdate	    = onUpdate	 	;
-		this.onEnd		    = onEnd		 	;
+		this.speed			= speed			;
+		this.from			= from			;
+		this.to				= to			;
+		this.type			= type		 	;
+		this.plays			= plays		 	;
+		this.onUpdate		= onUpdate	 	;
+		this.onEnd			= onEnd		 	;
 	}
 	
 	public inline function reset(
 		parent:Snd	 ,
-	    n:Float		 ,
-	    ln:Float	 ,
+		n:Float		 ,
+		ln:Float	 ,
 		varType:TVVar,
-	    speed:Float	 ,
-	    from:Float	 ,
-	    to:Float	 ,
-	    type:TType	 ,
-	    plays:Int	 ,
-	    onUpdate	 ,
-	    onEnd		 
+		speed:Float	 ,
+		from:Float	 ,
+		to:Float	 ,
+		type:TType	 ,
+		plays:Int	 ,
+		onUpdate	 ,
+		onEnd		 
 	) {
 		this.parent			= parent		;
-		this.n			    = n			 	;
-		this.ln			    = ln			;
-		this.speed		    = speed			;
-		this.from		    = from			;
-		this.to			    = to			;
-		this.type		    = type		 	;
-		this.plays		    = plays		 	;
-		this.onUpdate	    = onUpdate	 	;
-		this.onEnd		    = onEnd		 	;
+		this.n				= n			 	;
+		this.ln				= ln			;
+		this.speed			= speed			;
+		this.from			= from			;
+		this.to				= to			;
+		this.type			= type		 	;
+		this.plays			= plays		 	;
+		this.onUpdate		= onUpdate	 	;
+		this.onEnd			= onEnd		 	;
 		this.varType 		= varType 		;
 		isDebug		= false;
 		uid = GUID++;

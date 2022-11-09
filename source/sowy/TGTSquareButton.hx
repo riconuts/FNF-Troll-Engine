@@ -5,7 +5,7 @@ import flixel.tweens.*;
 class TGTSquareButton extends SowyBaseButton
 {
 	public function new(?X:Float = 0, ?Y:Float = 0)
-    {
+	{
 		super(X, Y);
 	}
 

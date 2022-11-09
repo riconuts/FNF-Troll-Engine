@@ -5,7 +5,7 @@ import flixel.FlxG;
 import math.Vector3;
 
 class InfinitePathModifier extends PathModifier {
-    override function getName()return 'infinite';
+	override function getName()return 'infinite';
 	override function getMoveSpeed()
 	{
 		return 1850;

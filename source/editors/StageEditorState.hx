@@ -37,11 +37,11 @@ class StageEditorState extends MusicBeatState{
 
 	public var camFollow = new FlxPoint();
 	public var camFollowPos = new FlxObject(0, 0, 1, 1);
-    
+	
 	public var defaultCamZoom:Float = FlxG.initialZoom;
 	public var cameraSpeed:Float = 1;
 
-    public var boyfriend:Character;
+	public var boyfriend:Character;
 	public var dad:Character;
 	public var gf:Character;
 
@@ -64,7 +64,7 @@ class StageEditorState extends MusicBeatState{
 	var stageData:StageFile;
 
 	var focusedChar(default, set):String = "boyfriend";
-    function set_focusedChar(who:String):String{
+	function set_focusedChar(who:String):String{
 		switch (who)
 		{
 			case "dad":
@@ -93,13 +93,13 @@ class StageEditorState extends MusicBeatState{
 		}
 
 		return focusedChar = who;
-    }
+	}
 
-    // editor shit
-    /*
+	// editor shit
+	/*
 	var UI_characterbox:FlxUITabMenu;
 	var UI_stagebox:FlxUITabMenu;
-    */
+	*/
 	var characterList:Array<String> = [];
 	var dadDropDown:FlxUIDropDownMenuCustom;
 	var gfDropDown:FlxUIDropDownMenuCustom;
@@ -117,8 +117,8 @@ class StageEditorState extends MusicBeatState{
 
 		FlxG.mouse.visible = true;
 		#end
-        
-        //// editor shit
+		
+		//// editor shit
 		var tabs = [{name: 'Character Preview', label: 'Character Preview'},];
 		var UI_characterbox = new FlxUITabMenu(null, tabs, true);
 		UI_characterbox.cameras = [camMenu];
@@ -133,18 +133,18 @@ class StageEditorState extends MusicBeatState{
 		dadDropDown = new FlxUIDropDownMenuCustom(15, 110, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(character:String)
 		{
 			var daAnim = characterList[Std.parseInt(character)];
-            
+			
 			reloadCharacterArray();
 			dadDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(characterList, true));
 
 			if (dad != null){
 				dadGroup.remove(dad, true);
-                dad.destroy();
+				dad.destroy();
 			}
-            dad = new Character(0, 0, daAnim);
-            startCharacterPos(dad);
-            dadGroup.add(dad);
-            
+			dad = new Character(0, 0, daAnim);
+			startCharacterPos(dad);
+			dadGroup.add(dad);
+			
 			dadDropDown.selectedLabel = daAnim;
 		});
 		gfDropDown = new FlxUIDropDownMenuCustom(15, 70, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(character:String)
@@ -157,12 +157,12 @@ class StageEditorState extends MusicBeatState{
 			if (gf != null){
 				gfGroup.remove(gf, true);
 				gf.destroy();
-            }
-            gf = new Character(0, 0, daAnim);
-            gf.scrollFactor.set(0.95, 0.95);
-            startCharacterPos(gf);
-            gfGroup.add(gf);
-            
+			}
+			gf = new Character(0, 0, daAnim);
+			gf.scrollFactor.set(0.95, 0.95);
+			startCharacterPos(gf);
+			gfGroup.add(gf);
+			
 			gfDropDown.selectedLabel = daAnim;
 		});
 		bfDropDown = new FlxUIDropDownMenuCustom(15, 30, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(character:String)
@@ -175,10 +175,10 @@ class StageEditorState extends MusicBeatState{
 			if (boyfriend != null){
 				boyfriendGroup.remove(boyfriend, true);
 				boyfriend.destroy();
-            }
-            boyfriend = new Boyfriend(0, 0, daAnim);
-            startCharacterPos(boyfriend);
-            boyfriendGroup.add(boyfriend);
+			}
+			boyfriend = new Boyfriend(0, 0, daAnim);
+			startCharacterPos(boyfriend);
+			boyfriendGroup.add(boyfriend);
 
 			bfDropDown.selectedLabel = daAnim;
 		});
@@ -194,7 +194,7 @@ class StageEditorState extends MusicBeatState{
 		tab_group.add(gfDropDown);
 		tab_group.add(dadDropDown);
 		tab_group.add(bfDropDown);
-        
+		
 		UI_characterbox.addGroup(tab_group);
 
 		var tabs = [{name: 'Stage Data', label: 'Stage Data'},];
@@ -210,8 +210,6 @@ class StageEditorState extends MusicBeatState{
 
 		#if MODS_ALLOWED
 		var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.currentModDirectory + '/stages/'), Paths.getPreloadPath('stages/')];
-		for(mod in Paths.getGlobalMods())
-			directories.push(Paths.mods(mod + '/stages/'));
 		#else
 		var directories:Array<String> = [Paths.getPreloadPath('stages/')];
 		#end
@@ -261,9 +259,9 @@ class StageEditorState extends MusicBeatState{
 
 		add(UI_stagebox);
 		add(UI_characterbox);
-        
+		
 
-        
+		
 		yPosTxt = new FlxText(3, camMenu.height - 24, camMenu.width, "", 20);
 		xPosTxt = new FlxText(3, yPosTxt.y - 24, camMenu.width, "", 20);
 		charTxt = new FlxText(3, xPosTxt.y - 24, camMenu.width, "", 20);
@@ -287,10 +285,10 @@ class StageEditorState extends MusicBeatState{
 		add(yPosTxt);
 		add(xPosTxt);
 
-        //// le cameras xd
+		//// le cameras xd
 		camGame.follow(camFollowPos, LOCKON, 1);
 		camGame.focusOn(camFollow);
-        
+		
 		camOverlay.bgColor.alpha = 0;
 		camHUD.bgColor.alpha = 0;
 		camOther.bgColor.alpha = 0;
@@ -309,45 +307,45 @@ class StageEditorState extends MusicBeatState{
 		focusedChar = "boyfriend";
 		changeCharacterX();
 		changeCharacterY();
-        
+		
 		super.create();
-    }
+	}
 
 	function changeCharacterX(add:Float = 0){
-        var sowy = "X: ";
+		var sowy = "X: ";
 		switch (focusedChar)
 		{
 			case "boyfriend":
-		        sowy += boyfriendGroup.x = BF_X += add;
+				sowy += boyfriendGroup.x = BF_X += add;
 			case "dad":
-		        sowy += dadGroup.x = DAD_X += add;
+				sowy += dadGroup.x = DAD_X += add;
 			case "gf":
-		        sowy += gfGroup.x = GF_X += add;
+				sowy += gfGroup.x = GF_X += add;
 		}
-        xPosTxt.text = sowy;
-    }
+		xPosTxt.text = sowy;
+	}
 	function changeCharacterY(add:Float = 0){
 		var sowy = "Y: ";
 		switch (focusedChar){
 			case "boyfriend":
-			    sowy += boyfriendGroup.y = BF_Y += add;
-		    case "dad":
-			    sowy += dadGroup.y = DAD_Y += add;
+				sowy += boyfriendGroup.y = BF_Y += add;
+			case "dad":
+				sowy += dadGroup.y = DAD_Y += add;
 			case "gf":
-			    sowy += gfGroup.y = GF_Y += add;
+				sowy += gfGroup.y = GF_Y += add;
 		}
 		yPosTxt.text = sowy;
 	}
 
 	override function update(elapsed:Float)
 	{
-        if (FlxG.keys.justPressed.ONE){
+		if (FlxG.keys.justPressed.ONE){
 			focusedChar = "dad";
-        }else if (FlxG.keys.justPressed.TWO){
-            focusedChar = "gf";
-        }else if (FlxG.keys.justPressed.THREE){
-            focusedChar = "boyfriend";
-        }
+		}else if (FlxG.keys.justPressed.TWO){
+			focusedChar = "gf";
+		}else if (FlxG.keys.justPressed.THREE){
+			focusedChar = "boyfriend";
+		}
 
 		var move = FlxG.keys.pressed.SHIFT ? 100 : 10;
 		if (FlxG.keys.justPressed.RIGHT)
@@ -369,11 +367,11 @@ class StageEditorState extends MusicBeatState{
 	}
 
 	function makeStage()
-    {
+	{
 		stage = new Stage(curStage).buildStage();
-        stageData = stage.stageData;
+		stageData = stage.stageData;
 
-        ////
+		////
 		defaultCamZoom = FlxG.initialZoom * stageData.defaultZoom;
 
 		BF_X = stageData.boyfriend[0];
@@ -397,22 +395,22 @@ class StageEditorState extends MusicBeatState{
 		girlfriendCameraOffset = stageData.camera_girlfriend;
 		if (girlfriendCameraOffset == null)
 			girlfriendCameraOffset = [0, 0];
-        
-        ////
-        boyfriendGroup.x = BF_X;
-        boyfriendGroup.y = BF_Y;
+		
+		////
+		boyfriendGroup.x = BF_X;
+		boyfriendGroup.y = BF_Y;
 
-        dadGroup.x = DAD_X;
-        dadGroup.y = DAD_Y;
+		dadGroup.x = DAD_X;
+		dadGroup.y = DAD_Y;
 
-        gfGroup.x = GF_X;
-        gfGroup.y = GF_Y;
+		gfGroup.x = GF_X;
+		gfGroup.y = GF_Y;
 
-        ////
+		////
 		dadDropDown.callback(dadDropDown.selectedLabel);
 		gfDropDown.callback(gfDropDown.selectedLabel);
 		bfDropDown.callback(bfDropDown.selectedLabel);
-        /*
+		/*
 		if (!stageData.hide_girlfriend){
 			gf = new Character(0, 0, "gf");
 			startCharacterPos(gf);
@@ -427,10 +425,10 @@ class StageEditorState extends MusicBeatState{
 		boyfriend = new Boyfriend(0, 0, "bf");
 		startCharacterPos(boyfriend);
 		boyfriendGroup.add(boyfriend);
-        */
+		*/
 
-        ////
-        camGame.zoom = defaultCamZoom;
+		////
+		camGame.zoom = defaultCamZoom;
 
 		var camPos:FlxPoint = new FlxPoint(girlfriendCameraOffset[0], girlfriendCameraOffset[1]);
 		if (gf != null){
@@ -443,14 +441,14 @@ class StageEditorState extends MusicBeatState{
 		}
 		camFollow.set(camPos.x, camPos.y);
 
-        ////
+		////
 		if (dad.curCharacter.startsWith('gf')){
 			dad.setPosition(GF_X, GF_Y);
 			if (gf != null)
 				gf.visible = false;
 		}
 
-        trace(stageData);
+		trace(stageData);
 
 		if (stage != null){
 			remove(stage);
@@ -462,11 +460,11 @@ class StageEditorState extends MusicBeatState{
 		
 
 		add(stage);
-        add(gfGroup);
+		add(gfGroup);
 		add(dadGroup);
 		add(boyfriendGroup);
-        add(stage.foreground);
-    }
+		add(stage.foreground);
+	}
 
 	function startCharacterPos(char:Character, ?gfCheck:Bool = false)
 	{
@@ -490,8 +488,6 @@ class StageEditorState extends MusicBeatState{
 			Paths.mods(Paths.currentModDirectory + '/characters/'),
 			Paths.getPreloadPath('characters/')
 		];
-		for (mod in Paths.getGlobalMods())
-			directories.push(Paths.mods(mod + '/characters/'));
 		for (i in 0...directories.length)
 		{
 			var directory:String = directories[i];

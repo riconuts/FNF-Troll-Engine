@@ -69,6 +69,14 @@ class TitleState extends MusicBeatState
 	
 	public static var updateVersion:String = '';
 
+	override function add(Object:FlxBasic)
+	{
+		if (Std.isOfType(Object, FlxSprite))
+			cast(Object, FlxSprite).antialiasing = ClientPrefs.globalAntialiasing;
+
+		return super.add(Object);
+	}
+
 	override public function create():Void
 	{
 		super.create();
@@ -122,6 +130,7 @@ class TitleState extends MusicBeatState
 		var stageNames = Stage.getStageList();
 		var randomStage = stageNames[FlxG.random.int(0, stageNames.length - 1)];
 		trace(Paths.currentModDirectory, randomStage);
+		
 		bg = new Stage(randomStage).buildStage();
 		FlxG.camera.zoom = bg.stageData.defaultZoom;
 		add(bg);
@@ -150,7 +159,6 @@ class TitleState extends MusicBeatState
 		titleText.animation.addByPrefix('idle', "ENTER IDLE", 24);
 		titleText.animation.addByPrefix('press', ClientPrefs.flashing ? "ENTER PRESSED" : "ENTER FREEZE", 24);
 
-		titleText.antialiasing = ClientPrefs.globalAntialiasing;
 		titleText.animation.play('idle');
 		titleText.updateHitbox();
 		titleText.cameras = [camHUD];
@@ -178,7 +186,6 @@ class TitleState extends MusicBeatState
 		ngSpr.updateHitbox();
 		ngSpr.screenCenter(X);
 		ngSpr.cameras = [camHUD];
-		ngSpr.antialiasing = ClientPrefs.globalAntialiasing;
 		add(ngSpr);
 		
 		if (initialized)
@@ -354,7 +361,7 @@ class TitleState extends MusicBeatState
 		super.beatHit();
 
 		if (logoBl != null)
-			logoBl.titleElapsed = 0;
+			logoBl.time = 0;
 
 		if(!closedState) {
 			sickBeats++;
@@ -439,23 +446,29 @@ class RandomTitleLogo extends FlxSprite
 		updateHitbox();
 	}
 
-	public var titleElapsed:Float = 0;
+	public var time:Float = 0;
 	public var frameRate:Float = 1 / 24;
 	public var size:Float = 0.72;
+
 	override public function update(elapsed:Float){
 		//// Title animation!
-		titleElapsed += elapsed;
-
+		time += elapsed;
+		
+		var time = time / frameRate;
 		var size = size;
 
-		if (titleElapsed > frameRate * 5)
+		antialiasing = false;
+
+		if (time > 5)
 			size *= 1;
-		else if (titleElapsed > frameRate * 3)
-			size *= 1.007965;
-		else if (titleElapsed > frameRate)
-			size *= 1.037872;
-		else
-			size *= .98732;
+		else if (time > 3)
+			size *= 1.008;
+		else if (time > frameRate)
+			size *= 1.038;
+		else{
+			size *= 0.98;
+			antialiasing = ClientPrefs.globalAntialiasing;
+		}
 
 		scale.set(size, size);
 
@@ -472,8 +485,6 @@ class RandomTitleLogo extends FlxSprite
 		foldersToCheck.insert(0, Paths.mods('images/titles/'));
 		if (Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
 			foldersToCheck.insert(0, Paths.mods(Paths.currentModDirectory + '/images/titles/'));
-		for (mod in Paths.getGlobalMods())
-			foldersToCheck.insert(0, Paths.mods(mod + '/images/titles/'));
 		#end
 
 		for (folder in foldersToCheck){

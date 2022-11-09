@@ -27,7 +27,7 @@ class TestState extends MusicBeatState{
 
 	override function create()
 	{
-		FlxG.mouse.visible = true;    
+		FlxG.mouse.visible = true;	
 
 		var tabs = [
 			{name: 'Alphabet', label: 'Alphabet'},
@@ -42,8 +42,8 @@ class TestState extends MusicBeatState{
 		alphGroup = createAlphabetUI();
 		titlGroup = createTitleUI();
 
-        super.create();
-    }
+		super.create();
+	}
 
 	var updateFunction:Void->Void;
 	var lastGroup:FlxTypedGroup<FlxBasic>;
@@ -88,7 +88,7 @@ class TestState extends MusicBeatState{
 
 			lastGroup = curGroup;
 		}
-        
+		
 		super.update(elapsed);
 	}
 	

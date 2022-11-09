@@ -31,8 +31,8 @@ class AtlasFrameMaker extends FlxFramesCollection
 	
 	* Creates Frames from TextureAtlas(very early and broken ok) Originally made for FNF HD by Smokey and Rozebud
 	*
-	* @param   key                 The file path.
-	* @param   _excludeArray       Use this to only create selected animations. Keep null to create all of them.
+	* @param   key				 The file path.
+	* @param   _excludeArray	   Use this to only create selected animations. Keep null to create all of them.
 	*
 	*/
 

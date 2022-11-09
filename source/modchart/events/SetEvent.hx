@@ -7,6 +7,6 @@ class SetEvent extends ModEvent {
 	{
 		//mod.setValue(endVal, player);
 		manager.setValue(modName, endVal, player);
-        finished = true;
+		finished = true;
 	}
 }

@@ -14,6 +14,6 @@ class FlipModifier extends NoteModifier {
 
 		var distance = Note.swagWidth * (receptors.length / 2) * (1.5 - data);
 		pos.x += distance * getValue(player);
-        return pos;
-    }
+		return pos;
+	}
 }

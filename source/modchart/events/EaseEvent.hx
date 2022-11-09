@@ -6,19 +6,19 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 
 class EaseEvent extends ModEvent {
-    public var endStep:Float = 0;
+	public var endStep:Float = 0;
 	public var startVal:Null<Float>;
-    public var easeFunc:EaseFunction;
-    public var length:Float = 0;
+	public var easeFunc:EaseFunction;
+	public var length:Float = 0;
 	public function new(step:Float, endStep:Float, modName:String, target:Float, easeFunc:EaseFunction, player:Int = 0, modMgr:ModManager, ?startVal:Float) {
 		super(step, modName, target, player, modMgr);
-        this.endStep = endStep; 
+		this.endStep = endStep; 
 		this.easeFunc = easeFunc;
 		this.startVal=startVal;
 		if(mod==null)trace(modName + " is null!");
 
-        length = endStep - step;
-    }
+		length = endStep - step;
+	}
 
 	function ease(e:EaseFunction, t:Float, b:Float, c:Float, d:Float)
 	{ // elapsed, begin, change (ending-beginning), duration

@@ -9,16 +9,16 @@ class TransitionSubstate extends FlxSubState
 {
   public var finishCallback:Void->Void;
   public function new(){
-    super(FlxColor.TRANSPARENT);
+	super(FlxColor.TRANSPARENT);
   }
 
   public override function destroy():Void
   {
-    super.destroy();
-    finishCallback = null;
+	super.destroy();
+	finishCallback = null;
   }
 
   public function start(status: TransitionStatus){
-    trace('transitioning $status');
+	trace('transitioning $status');
   }
 }

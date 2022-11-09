@@ -278,7 +278,7 @@ class FreeplayCategory extends flixel.group.FlxSpriteGroup{
 		var y = Math.floor(num / 5);
 
 		item.setPosition(posArray[x], titleText.y + titleText.height + 50 + y * 308);
-		trace(num, x, y);
+		//trace(num, x, y);
 
 		return super.add(item);
 	}

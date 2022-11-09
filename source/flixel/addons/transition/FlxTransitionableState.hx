@@ -37,12 +37,12 @@ class FlxTransitionableState extends FlxState
 
 		if (transIn == null && defaultTransIn != null)
 		{
-      		//trace("in");
+	  		//trace("in");
 			transIn = defaultTransIn;
 		}
 		if (transOut == null && defaultTransOut != null)
 		{
-      		//trace("out");
+	  		//trace("out");
 			transOut = defaultTransOut;
 		}
 
@@ -66,7 +66,7 @@ class FlxTransitionableState extends FlxState
 
 	override public function switchTo(nextState:FlxState):Bool
 	{
-    	//trace(!hasTransOut, transOutFinished);
+		//trace(!hasTransOut, transOutFinished);
 		if (!hasTransOut)
 			return true;
 
@@ -110,10 +110,10 @@ class FlxTransitionableState extends FlxState
 			}
 
 
-      var trans = Type.createInstance(transIn, []);
+	  var trans = Type.createInstance(transIn, []);
 			openSubState(trans);
 
-      trans.finishCallback = finishTransIn;
+	  trans.finishCallback = finishTransIn;
 			trans.start(OUT);
 		}
 	}
@@ -126,10 +126,10 @@ class FlxTransitionableState extends FlxState
 		_onExit = OnExit;
 		if (hasTransOut)
 		{
-      var trans = Type.createInstance(transOut, []);
+	  var trans = Type.createInstance(transOut, []);
 			openSubState(trans);
 
-      trans.finishCallback = finishTransOut;
+	  trans.finishCallback = finishTransOut;
 			trans.start(IN);
 		}
 		else

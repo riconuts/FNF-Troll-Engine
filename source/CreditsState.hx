@@ -45,7 +45,7 @@ class CreditsState extends MusicBeatState
 		#end
 
 		persistentUpdate = true;
-		bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
+		bg = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xFF9AD9EA);
 		add(bg);
 		bg.screenCenter();
 		
@@ -109,13 +109,17 @@ class CreditsState extends MusicBeatState
 					Paths.currentModDirectory = creditsStuff[i][5];
 				}
 
-				var icon:AttachedSprite = new AttachedSprite('credits/' + creditsStuff[i][1]);
-				icon.xAdd = optionText.width + 10;
-				icon.sprTracker = optionText;
-	
-				// using a FlxGroup is too much fuss!
-				iconArray.push(icon);
-				add(icon);
+				var iconPath = creditsStuff[i][1];
+				if (iconPath != null && iconPath != ""){
+					var icon:AttachedSprite = new AttachedSprite('credits/' + creditsStuff[i][1]);
+					icon.xAdd = optionText.width + 10;
+					icon.sprTracker = optionText;
+		
+					// using a FlxGroup is too much fuss!
+					iconArray.push(icon);
+					add(icon);
+				}
+
 				Paths.currentModDirectory = '';
 
 				if(curSelected == -1) curSelected = i;
@@ -305,12 +309,14 @@ class CreditsState extends MusicBeatState
 		}
 	}
 
-	function getCurrentBGColor() {
+	function getCurrentBGColor() {/*
 		var bgColor:String = creditsStuff[curSelected][4];
 		if(!bgColor.startsWith('0x')) {
 			bgColor = '0xFF' + bgColor;
 		}
 		return Std.parseInt(bgColor);
+		*/
+		return 0xFFFFFFFF;
 	}
 
 	private function unselectableCheck(num:Int):Bool {

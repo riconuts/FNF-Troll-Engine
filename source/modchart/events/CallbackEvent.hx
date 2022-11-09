@@ -8,8 +8,8 @@ class CallbackEvent extends BaseEvent {
 		this.callback = callback;
 	}
 
-    override function run(curStep:Float){
-        callback(this, curStep);
+	override function run(curStep:Float){
+		callback(this, curStep);
 		finished = true;
-    }
+	}
 }

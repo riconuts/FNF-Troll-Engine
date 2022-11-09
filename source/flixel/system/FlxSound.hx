@@ -459,12 +459,12 @@ class FlxSound extends FlxBasic
 	 * Call this function to play the sound - also works on paused sounds.
 	 *
 	 * @param   ForceRestart   Whether to start the sound over or not.
-	 *                         Default value is false, meaning if the sound is already playing or was
-	 *                         paused when you call play(), it will continue playing from its current
-	 *                         position, NOT start again from the beginning.
-	 * @param   StartTime      At which point to start playing the sound, in milliseconds.
-	 * @param   EndTime        At which point to stop playing the sound, in milliseconds.
-	 *                         If not set / `null`, the sound completes normally.
+	 *						 Default value is false, meaning if the sound is already playing or was
+	 *						 paused when you call play(), it will continue playing from its current
+	 *						 position, NOT start again from the beginning.
+	 * @param   StartTime	  At which point to start playing the sound, in milliseconds.
+	 * @param   EndTime		At which point to stop playing the sound, in milliseconds.
+	 *						 If not set / `null`, the sound completes normally.
 	 */
 	public function play(ForceRestart:Bool = false, StartTime:Float = 0.0, ?EndTime:Float):FlxSound
 	{
@@ -571,8 +571,8 @@ class FlxSound extends FlxBasic
 	 * Helper function to set the coordinates of this object.
 	 * Sound positioning is used in conjunction with proximity/panning.
 	 *
-	 * @param        X        The new x position
-	 * @param        Y        The new y position
+	 * @param		X		The new x position
+	 * @param		Y		The new y position
 	 */
 	public inline function setPosition(X:Float = 0, Y:Float = 0):Void
 	{
@@ -655,8 +655,8 @@ class FlxSound extends FlxBasic
 	 * Will stop the current sound and destroy the associated SoundChannel, plus,
 	 * any other commands ordered by the passed in parameters.
 	 *
-	 * @param  destroySound    Whether or not to destroy the sound. If this is true,
-	 *                         the position and fading will be reset as well.
+	 * @param  destroySound	Whether or not to destroy the sound. If this is true,
+	 *						 the position and fading will be reset as well.
 	 * @param  resetPosition   Whether or not to reset the position of the sound.
 	 */
 	function cleanup(destroySound:Bool, resetPosition:Bool = true):Void

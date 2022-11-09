@@ -137,21 +137,18 @@ class Main extends Sprite
 		#end
 	}
 
-	// Code was entirely made by sqirra-rng, big props to them!!!
+	// Original code was made by sqirra-rng, big props to them!!!
 	#if CRASH_HANDLER
 	function onCrash(e:UncaughtErrorEvent):Void
 	{
-		Sys.println(Conductor.songPosition + ", Crash starts below");
+		Sys.println("Call stack starts below");
 
 		var errMsg:String = "";
-		var path:String;
 		var callStack:Array<StackItem> = CallStack.exceptionStack(true);
 		var dateNow:String = Date.now().toString();
 
-		dateNow = dateNow.replace(" ", "_");
+		dateNow = dateNow.replace(" ", "_"); 
 		dateNow = dateNow.replace(":", "'");
-
-		path = "./crash/" + dateNow + ".txt";
 
 		for (stackItem in callStack)
 		{
@@ -166,13 +163,7 @@ class Main extends Sprite
 
 		errMsg += "\nUncaught Error: " + e.error;
 
-		if (!FileSystem.exists("./crash/"))
-			FileSystem.createDirectory("./crash/");
-
-		File.saveContent(path, errMsg + "\n");
-
 		Sys.println(" \n" + errMsg);
-		Sys.println("Crash dump saved in " + Path.normalize(path));
 
 		FlxG.fullscreen = false;
 

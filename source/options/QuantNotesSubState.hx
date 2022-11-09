@@ -123,7 +123,7 @@ class QuantNotesSubState extends MusicBeatSubstate
 			shaderArray.push(newShader);
 		}
 
-		hsbText = new Alphabet(0, 0, "Hue    Saturation  Luminosity", false, false, 0, 0.65);
+		hsbText = new Alphabet(0, 0, "Hue	Saturation  Luminosity", false, false, 0, 0.65);
 		hsbText.x = posX + 240;
 		add(hsbText);
 

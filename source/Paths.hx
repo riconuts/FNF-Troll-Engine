@@ -17,6 +17,7 @@ import openfl.geom.Rectangle;
 import openfl.system.System;
 import openfl.utils.AssetType;
 import openfl.utils.Assets as OpenFlAssets;
+import haxe.CallStack;
 
 using StringTools;
 #if sys
@@ -45,8 +46,7 @@ class Paths
 	public static var dumpExclusions:Array<String> = [
 		'assets/music/freakyIntro.$SOUND_EXT',
 		'assets/music/freakyMenu.$SOUND_EXT',
-		'assets/shared/music/breakfast.$SOUND_EXT',
-		'assets/shared/music/tea-time.$SOUND_EXT',
+		'assets/shared/music/breakfast.$SOUND_EXT'
 	];
 
 	/// haya I love you for the base cache dump I took to the max
@@ -366,7 +366,7 @@ class Paths
 	public static function returnGraphic(key:String, ?library:String)
 	{
 		#if MODS_ALLOWED
-		var modKey:String = modsImages(key);
+		final modKey:String = modsImages(key);
 		if (FileSystem.exists(modKey))
 		{
 			if (!currentTrackedAssets.exists(modKey))
@@ -381,8 +381,8 @@ class Paths
 		}
 		#end
 
-		var path = getPath('images/$key.png', IMAGE, library);
-		// trace(path);
+		final path = getPath('images/$key.png', IMAGE, library);
+		
 		if (OpenFlAssets.exists(path, IMAGE))
 		{
 			if (!currentTrackedAssets.exists(path))
@@ -394,7 +394,8 @@ class Paths
 			localTrackedAssets.push(path);
 			return currentTrackedAssets.get(path);
 		}
-		trace('oh no, ${key} is returning null NOOOO');
+
+		trace('oh no, "$key" returned null.');
 		return null;
 	}
 
@@ -434,46 +435,33 @@ class Paths
 		return currentTrackedSounds.get(gottenPath);
 	}
 
+	public static var modsList:Array<String> = [];
 	#if MODS_ALLOWED
+	static final modFolderPath:String = "content/";
+
 	inline static public function mods(key:String = '')
-	{
-		return 'dlc/' + key;
-	}
+		return modFolderPath + key;
 
 	inline static public function modsFont(key:String)
-	{
 		return modFolders('fonts/' + key);
-	}
 
 	inline static public function modsJson(key:String)
-	{
 		return modFolders('data/' + key + '.json');
-	}
 
 	inline static public function modsVideo(key:String)
-	{
 		return modFolders('videos/' + key + '.' + VIDEO_EXT);
-	}
 
 	inline static public function modsSounds(path:String, key:String)
-	{
 		return modFolders(path + '/' + key + '.' + SOUND_EXT);
-	}
 
 	inline static public function modsImages(key:String)
-	{
 		return modFolders('images/' + key + '.png');
-	}
 
 	inline static public function modsXml(key:String)
-	{
 		return modFolders('images/' + key + '.xml');
-	}
 
 	inline static public function modsTxt(key:String)
-	{
 		return modFolders('images/' + key + '.txt');
-	}
 
 	/* Goes unused for now
 
@@ -485,8 +473,6 @@ class Paths
 		{
 			return modFolders('shaders/'+key+'.vert');
 		}
-		inline static public function modsAchievements(key:String) {
-			return modFolders('achievements/' + key + '.json');
 	}*/
 	static public function modFolders(key:String)
 	{
@@ -499,112 +485,45 @@ class Paths
 			}
 		}
 
-		for (mod in getGlobalMods())
-		{
-			var fileToCheck:String = mods(mod + '/' + key);
-			if (FileSystem.exists(fileToCheck))
-				return fileToCheck;
-		}
-		return 'dlc/' + key;
-	}
-
-	public static var globalMods:Array<String> = [];
-
-	static public function getGlobalMods()
-		return globalMods;
-
-	static public function pushGlobalMods() // prob a better way to do this but idc
-	{
-		globalMods = [];
-		var path:String = 'modsList.txt';
-		if (FileSystem.exists(path))
-		{
-			var list:Array<String> = CoolUtil.coolTextFile(path);
-			for (i in list)
-			{
-				var dat = i.split("|");
-				if (dat[1] == "1")
-				{
-					var folder = dat[0];
-					var path = Paths.mods(folder + '/pack.json');
-					if (FileSystem.exists(path))
-					{
-						try
-						{
-							var rawJson:String = File.getContent(path);
-							if (rawJson != null && rawJson.length > 0)
-							{
-								var stuff:Dynamic = Json.parse(rawJson);
-								var global:Bool = Reflect.getProperty(stuff, "runsGlobally");
-								if (global)
-									globalMods.push(dat[0]);
-							}
-						}
-						catch (e:Dynamic)
-						{
-							trace(e);
-						}
-					}
-				}
-			}
-		}
-		return globalMods;
+		return modFolderPath + key;
 	}
 
 	static public function getModDirectories():Array<String>
 	{
 		var list:Array<String> = [];
-		var modsFolder:String = mods();
-		if (FileSystem.exists(modsFolder))
+		if (FileSystem.exists(modFolderPath))
 		{
-			for (folder in FileSystem.readDirectory(modsFolder))
+			for (folder in FileSystem.readDirectory(modFolderPath))
 			{
-				var path = haxe.io.Path.join([modsFolder, folder]);
+				var path = haxe.io.Path.join([modFolderPath, folder]);
 				if (sys.FileSystem.isDirectory(path) && !ignoreModFolders.contains(folder) && !list.contains(folder))
 				{
 					list.push(folder);
 				}
 			}
 		}
+		modsList = list;
+
 		return list;
 	}
 	#end
 	public static function loadTheFirstEnabledMod()
 	{
-		Paths.currentModDirectory = '';
-
 		#if MODS_ALLOWED
-		if (FileSystem.exists("modsList.txt")){
-			var list:Array<String> = CoolUtil.listFromString(File.getContent("modsList.txt"));
-			var foundTheTop = false;
-			for (i in list){
-				var dat = i.split("|");
-				if (dat[1] == "1" && !foundTheTop){
-					foundTheTop = true;
-					Paths.currentModDirectory = dat[0];
-				}
-			}
-		}
+		final first = getModDirectories()[0];
+		Paths.currentModDirectory = first != null ? first : '';
+		#else
+		Paths.currentModDirectory = '';
 		#end
 	}
 	public static function loadRandomMod()
 	{
-		Paths.currentModDirectory = '';
-
 		#if MODS_ALLOWED
-		if (FileSystem.exists("modsList.txt"))
-		{
-			var list:Array<String> = CoolUtil.listFromString(File.getContent("modsList.txt"));
-			var modList:Array<String> = [];
-			for (i in list){
-				var dat = i.split("|");
-				if (dat[1] == "1")
-					modList.push(dat[0]);
-			}
-			var rand = modList[FlxG.random.int(0, modList.length - 1)];
-			if (rand != null)
-				Paths.currentModDirectory = rand;
-		}
+		final modList:Array<String> = getModDirectories();
+		final rand = modList[FlxG.random.int(0, modList.length - 1)];
+		Paths.currentModDirectory = rand != null ? rand : '';
+		#else
+		Paths.currentModDirectory = '';
 		#end
 	}
 }

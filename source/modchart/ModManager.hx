@@ -27,7 +27,7 @@ class ModManager {
 	}
 
 
-    private var state:PlayState;
+	private var state:PlayState;
 	public var receptors:Array<Array<StrumNote>> = []; // for modifiers to be able to access receptors directly if they need to
 	public var timeline:EventTimeline = new EventTimeline();
 
@@ -36,21 +36,21 @@ class ModManager {
 
 	@:deprecated("Unused in place of notemodRegister and miscModRegister")
 	public var registerByType:Map<ModifierType, Map<String, Modifier>> = [
-        NOTE_MOD => [],
-        MISC_MOD => []
-    ];
+		NOTE_MOD => [],
+		MISC_MOD => []
+	];
 
-    public var register:Map<String, Modifier> = [];
+	public var register:Map<String, Modifier> = [];
 
-    public var modArray:Array<Modifier> = [];
+	public var modArray:Array<Modifier> = [];
 
-    public var activeMods:Array<Array<String>> = [[], []]; // by player
-    
-    inline public function quickRegister(mod:Modifier)
-        registerMod(mod.getName(), mod);
+	public var activeMods:Array<Array<String>> = [[], []]; // by player
+	
+	inline public function quickRegister(mod:Modifier)
+		registerMod(mod.getName(), mod);
 
-    public function registerMod(modName:String, mod:Modifier, ?registerSubmods = true){
-        register.set(modName, mod);
+	public function registerMod(modName:String, mod:Modifier, ?registerSubmods = true){
+		register.set(modName, mod);
 		//registerByType.get(mod.getModType()).set(modName, mod);
 		switch (mod.getModType()){
 			case NOTE_MOD:
@@ -67,15 +67,15 @@ class ModManager {
 				var submod = mod.submods.get(name);
 				quickRegister(submod);
 			}
-        }
+		}
 
 		setValue(modName, 0); // so if it should execute it gets added Automagically
 		modArray.sort((a, b) -> Std.int(a.getOrder() - b.getOrder()));
-        // TODO: sort by mod.getOrder()
-    }
+		// TODO: sort by mod.getOrder()
+	}
 
-    inline public function get(modName:String)
-        return register.get(modName);
+	inline public function get(modName:String)
+		return register.get(modName);
 
 	inline public function getPercent(modName:String, player:Int)
 		return register.get(modName).getPercent(player);
@@ -83,9 +83,9 @@ class ModManager {
 	inline public function getValue(modName:String, player:Int)
 		return register.get(modName).getValue(player);
 
-    inline public function setPercent(modName:String, val:Float, player:Int=-1)
+	inline public function setPercent(modName:String, val:Float, player:Int=-1)
 		setValue(modName, val/100, player);
-    
+	
 
 	public function setValue(modName:String, val:Float, player:Int=-1){
 		if (player == -1)
@@ -98,11 +98,11 @@ class ModManager {
 			var daMod = register.get(modName);
 			var mod = daMod.parent==null?daMod:daMod.parent;
 			var name = mod.getName();
-            // optimization shit!! :)
-            // thanks 4mbr0s3 for giving an alternative way to do all of this cus andromeda has smth similar in Flexy but like
-            // this is a better way to do it
-            // (ofc its not EXACTLY what 4mbr0s3 did but.. y'know, it's close to it)
-            
+			// optimization shit!! :)
+			// thanks 4mbr0s3 for giving an alternative way to do all of this cus andromeda has smth similar in Flexy but like
+			// this is a better way to do it
+			// (ofc its not EXACTLY what 4mbr0s3 did but.. y'know, it's close to it)
+			
 			if (activeMods[player] == null)
 				activeMods[player]=[];
 
@@ -115,22 +115,22 @@ class ModManager {
 
 			activeMods[player].sort((a, b) -> Std.int(register.get(a).getOrder() - register.get(b).getOrder()));
 		}
-    }
+	}
 
-    public function new(state:PlayState) {
-        this.state=state;
-    }
+	public function new(state:PlayState) {
+		this.state=state;
+	}
 
 	public function update(elapsed:Float)
 	{
 		for (mod in modArray)
 		{
 			if (mod.active && mod.doesUpdate())
-			    mod.update(elapsed);
+				mod.update(elapsed);
 		}
 	}
 
-    public function updateTimeline(curStep:Float)
+	public function updateTimeline(curStep:Float)
 		timeline.update(curStep);
 
 	public function getBaseX(direction:Int, player:Int):Float
@@ -170,16 +170,16 @@ class ModManager {
 			if (mod==null)continue;
 			if (!obj.active)
 				continue;
-            if((obj is Note)){
+			if((obj is Note)){
 				var o:Note = cast obj;
 				mod.updateNote(beat, o, pos, player);
 			}
-            else if((obj is StrumNote)){
+			else if((obj is StrumNote)){
 				var o:StrumNote = cast obj;
 				mod.updateReceptor(beat, o, pos, player);
 			}
-        }
-    }
+		}
+	}
 
 	public inline function getVisPos(songPos:Float=0, strumTime:Float=0, songSpeed:Float=1){
 		return -(0.45 * (songPos - strumTime) * songSpeed);
@@ -202,9 +202,9 @@ class ModManager {
 			if (mod==null)continue;
 			if(!obj.active)continue;
 			pos = mod.getPos(time, diff, tDiff, beat, pos, data, player, obj);
-        }
+		}
 		return pos;
-    }
+	}
 
 	public function queueEaseP(step:Float, endStep:Float, modName:String, percent:Float, style:String = 'linear', player:Int = -1, ?startVal:Float)
 		queueEase(step, endStep, modName, percent / 100, style, player, startVal / 100);
@@ -251,7 +251,7 @@ class ModManager {
 	{
 		timeline.addEvent(new StepCallbackEvent(step, endStep, callback, this));
 	}
-    
+	
 	public function queueFuncOnce(step:Float, callback:(CallbackEvent, Float) -> Void)
 		timeline.addEvent(new CallbackEvent(step, callback, this));
 	

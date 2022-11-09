@@ -502,8 +502,6 @@ class ChartingState extends MusicBeatState
 
 		#if MODS_ALLOWED
 		var directories:Array<String> = [Paths.mods('characters/'), Paths.mods(Paths.currentModDirectory + '/characters/'), Paths.getPreloadPath('characters/')];
-		for(mod in Paths.getGlobalMods())
-			directories.push(Paths.mods(mod + '/characters/'));
 		#else
 		var directories:Array<String> = [Paths.getPreloadPath('characters/')];
 		#end
@@ -558,8 +556,6 @@ class ChartingState extends MusicBeatState
 
 		#if MODS_ALLOWED
 		var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.currentModDirectory + '/stages/'), Paths.getPreloadPath('stages/')];
-		for(mod in Paths.getGlobalMods())
-			directories.push(Paths.mods(mod + '/stages/'));
 		#else
 		var directories:Array<String> = [Paths.getPreloadPath('stages/')];
 		#end
@@ -930,8 +926,6 @@ class ChartingState extends MusicBeatState
 		#if MODS_ALLOWED
 		directories.push(Paths.mods('notetypes/'));
 		directories.push(Paths.mods(Paths.currentModDirectory + '/notetypes/'));
-		for(mod in Paths.getGlobalMods())
-			directories.push(Paths.mods(mod + '/notetypes/'));
 		#end
 
 		var exts:Array<String> = [
@@ -1009,8 +1003,6 @@ class ChartingState extends MusicBeatState
 		#if MODS_ALLOWED
 		directories.push(Paths.mods('events/'));
 		directories.push(Paths.mods(Paths.currentModDirectory + '/events/'));
-		for(mod in Paths.getGlobalMods())
-			directories.push(Paths.mods(mod + '/events/'));
 		#end
 
 		for (i in 0...directories.length) {

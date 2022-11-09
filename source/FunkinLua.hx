@@ -455,9 +455,9 @@ class FunkinLua {
 							// TODO: table
 
 							if(pop==2)Lua.rawset(lua, tableIdx); // then set it
-			        Lua.pop(luaInstance.lua, 1); // for the loop
-			      }
-			      Lua.pop(luaInstance.lua,1); // end the loop entirely
+					Lua.pop(luaInstance.lua, 1); // for the loop
+				  }
+				  Lua.pop(luaInstance.lua,1); // end the loop entirely
 						Lua.pushvalue(lua, tableIdx); // push the table onto the stack so it gets returned
 
 						return;

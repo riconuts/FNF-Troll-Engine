@@ -501,7 +501,7 @@ class FlxInputText extends FlxText
 	/**
 	 * Gets the index of the character in this box under the mouse cursor
 	 * @return The index of the character.
-	 *         between 0 and the length of the text
+	 *		 between 0 and the length of the text
 	 */
 	private function getCaretIndex():Int
 	{

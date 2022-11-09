@@ -7,7 +7,7 @@ import sowy.*;
 
 class ComicsMenuState extends MusicBeatState
 {
-    
+	
 }
 
 // based on the vs v comic reader lololol
@@ -24,19 +24,19 @@ class ComicReader extends MusicBeatState
 
 	var curPanel:FlxSprite;
 	static var panelPaths:Array<String>;
-    static var panelNumber:Int = 0;
+	static var panelNumber:Int = 0;
 
 	public function new(?PanelPaths:Array<String>)
 	{
 		super();
-        if (PanelPaths != null)
-		    panelPaths = PanelPaths;
+		if (PanelPaths != null)
+			panelPaths = PanelPaths;
 	}
 
 	override function add(Object:FlxBasic)
 	{
 		if (Std.isOfType(Object, FlxSprite))
-			cast(Object, FlxSprite).antialiasing = true; // ClientPrefs.globalAntialiasing;
+			cast(Object, FlxSprite).antialiasing = ClientPrefs.globalAntialiasing;
 
 		return super.add(Object);
 	}
@@ -50,7 +50,7 @@ class ComicReader extends MusicBeatState
 		FlxG.cameras.add(camBackground, false);
 		FlxG.cameras.add(camComic, true);
 
-		camComic.antialiasing = true;
+		camComic.antialiasing = ClientPrefs.globalAntialiasing;
 		camComic.follow(camPosition, LOCKON, 1);
 
 		//
@@ -92,6 +92,12 @@ class ComicReader extends MusicBeatState
 		super.create();
 	}
 
+	// Camera limits
+	var minX:Float = 0;
+	var maxX:Float = 0;
+	var minY:Float = 0;
+	var maxY:Float = 0;
+
 	function loadPanel(path:String)
 	{
 		if (curPanel != null)
@@ -100,25 +106,25 @@ class ComicReader extends MusicBeatState
 		curPanel = new FlxSprite().loadGraphic(Paths.image('comics/$path'));
 		curPanel.cameras = [camComic];
 
-		var fuu = Math.min(FlxG.width, FlxG.height);
+		var scrWidth = FlxG.width;
+		var scrHeight = FlxG.height;
+
+		var fuu = Math.min(scrWidth, scrHeight);
 		fuu = (curPanel.width > fuu) ? (fuu / curPanel.width) : 1;
+		
 		curPanel.scale.set(fuu, fuu);
 		curPanel.updateHitbox();
 
 		curPanel.x -= curPanel.width / 2;
 		add(curPanel);
 
+		minX = curPanel.x;
+		maxX = curPanel.x + curPanel.width;
+		minY = curPanel.y - scrHeight / 8;
+		maxY = curPanel.y + curPanel.height + scrHeight / 8;
+		
 		var mid = curPanel.getMidpoint();
 		camFollow.set(mid.x, curPanel.height > FlxG.height ? 0 : mid.y);
-	}
-
-	function getSign(num:Float):Int
-	{
-		if (num > 0)
-			return 1;
-		else if (num < 0)
-			return -1;
-		return 0;
 	}
 
 	var baseSpeed = 6;
@@ -130,35 +136,38 @@ class ComicReader extends MusicBeatState
 
 		if (controls.BACK) MusicBeatState.switchState(new MainMenuState());
 
-		// movement
+		//
 		var speed = pressed.SHIFT ? baseSpeed * 2 : baseSpeed;
 
-		if (pressed.LEFT)
-			camFollow.x -= speed;
-		if (pressed.RIGHT)
-			camFollow.x += speed;
-		if (pressed.UP)
-			camFollow.y -= speed;
-		if (pressed.DOWN)
-			camFollow.y += speed;
-
-		/*
-			if (justPressed.Y) goToPanel(curPanel-1);
-			if (justPressed.U) goToPanel(curPanel+1);
-		 */
-
-		// zoom
 		var mouseWheel = FlxG.mouse.wheel;
-		if (pressed.CONTROL)
-			zoom += mouseWheel * 0.1;
+		var yScroll:Float = 0;
+
+		if (justPressed.R){
+			zoom = 1;
+			camFollow.x = curPanel.getMidpoint().x;
+		}
 
 		if (justPressed.C)
 			zoom -= .1;
 		if (justPressed.V)
 			zoom += .1;
 
-		if (justPressed.R)
-			zoom = 1;
+		if (pressed.CONTROL)
+			zoom += mouseWheel * 0.1;
+		else
+			yScroll -= mouseWheel * speed * 8;
+
+		if (pressed.UP)
+			camFollow.y -= speed;
+		if (pressed.DOWN)
+			camFollow.y += speed;
+
+		if (pressed.LEFT)
+			camFollow.x = Math.max(minX, camFollow.x - speed);
+		if (pressed.RIGHT)
+			camFollow.x = Math.min(maxX, camFollow.x + speed);
+		
+		camFollow.y = Math.max(minY, Math.min(camFollow.y + yScroll, maxY));
 
 		zoom = Math.max(0.25, Math.min(zoom, 5));
 

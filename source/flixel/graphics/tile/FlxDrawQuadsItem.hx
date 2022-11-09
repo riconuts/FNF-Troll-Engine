@@ -116,27 +116,27 @@ class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 			return;
 
 		var shader = shader != null ? shader : graphics.shader;
-        if (shader == null) // bitch
-            return;
+		if (shader == null) // bitch
+			return;
 
-        shader.bitmap.input = graphics.bitmap;
-        shader.bitmap.filter = (camera.antialiasing || antialiasing) ? LINEAR : NEAREST;
-        shader.alpha.value = alphas;
+		shader.bitmap.input = graphics.bitmap;
+		shader.bitmap.filter = (camera.antialiasing || antialiasing) ? LINEAR : NEAREST;
+		shader.alpha.value = alphas;
 
-        if (colored || hasColorOffsets)
-        {
-            shader.colorMultiplier.value = colorMultipliers;
-            shader.colorOffset.value = colorOffsets;
-        }
+		if (colored || hasColorOffsets)
+		{
+			shader.colorMultiplier.value = colorMultipliers;
+			shader.colorOffset.value = colorOffsets;
+		}
 
-        setParameterValue(shader.hasTransform, true);
-        setParameterValue(shader.hasColorTransform, colored || hasColorOffsets);
+		setParameterValue(shader.hasTransform, true);
+		setParameterValue(shader.hasColorTransform, colored || hasColorOffsets);
 
-        #if (openfl > "8.7.0")
-        camera.canvas.graphics.overrideBlendMode(blend);
-        #end
-        camera.canvas.graphics.beginShaderFill(shader);
-        camera.canvas.graphics.drawQuads(rects, null, transforms);
+		#if (openfl > "8.7.0")
+		camera.canvas.graphics.overrideBlendMode(blend);
+		#end
+		camera.canvas.graphics.beginShaderFill(shader);
+		camera.canvas.graphics.drawQuads(rects, null, transforms);
 
 		super.render(camera);
 	}

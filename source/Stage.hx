@@ -124,8 +124,6 @@ class Stage extends FlxTypedGroup<FlxBasic>
 			Paths.mods(Paths.currentModDirectory + '/stages/'),
 			Paths.getPreloadPath('stages/')
 		];
-		for (mod in Paths.getGlobalMods())
-			directories.push(Paths.mods(mod + '/stages/'));
 		#else
 		var directories:Array<String> = [Paths.getPreloadPath('stages/')];
 		#end
