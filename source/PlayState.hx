@@ -354,6 +354,9 @@ class PlayState extends MusicBeatState
 		// for lua
 		instance = this;
 
+		if (FlxG.sound.music != null)
+			FlxG.sound.music.stop();
+
 		debugKeysChart = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
 		debugKeysCharacter = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_2'));
 		PauseSubState.songName = null; //Reset to default
@@ -371,6 +374,10 @@ class PlayState extends MusicBeatState
 			'NOTE_UP',
 			'NOTE_RIGHT'
 		];
+
+		// For the "Just the Two of Us" achievement
+		for (i in 0...keysArray.length)
+			keysPressed.push(false);
 
 		/*Ratings
 		var rating:Rating = new Rating('epic');
@@ -405,15 +412,6 @@ class PlayState extends MusicBeatState
 		rating.score = 50;
 		rating.noteSplash = false;
 		ratingsData.push(rating);
-
-		// For the "Just the Two of Us" achievement
-		for (i in 0...keysArray.length)
-		{
-			keysPressed.push(false);
-		}
-
-		if (FlxG.sound.music != null)
-			FlxG.sound.music.stop();
 
 		// Gameplay settings
 		healthGain = ClientPrefs.getGameplaySetting('healthgain', 1);
@@ -450,15 +448,15 @@ class PlayState extends MusicBeatState
 		arrowSkin = SONG.arrowSkin;
 
 		#if desktop
-		// String that contains the mode defined here so it isn't necessary to call changePresence for each mode
-		detailsText = (!isStoryMode) ? "Freeplay" : "Story Mode: " + WeekData.getCurrentWeek().weekName;
-
-		// String for when the game is paused
+		// Discord RPC texts
+		detailsText = isStoryMode ? "Story Mode" : "Freeplay";
 		detailsPausedText = "Paused - " + detailsText;
 		#end
 
+		/*
 		topBar = new FlxSprite(0, -170).makeGraphic(FlxG.width, 170, FlxColor.BLACK);
 		bottomBar = new FlxSprite(0, FlxG.height).makeGraphic(FlxG.width, 170, FlxColor.BLACK);
+		*/
 
 		GameOverSubstate.resetVariables();
 		
@@ -479,7 +477,6 @@ class PlayState extends MusicBeatState
 		#end
 		if (ClientPrefs.multicoreLoading){ 
 			var shitToLoad:Array<AssetPreload> = [
-				{path: "epic"},
 				{path: "sick"},
 				{path: "good"},
 				{path: "bad"},
@@ -901,9 +898,10 @@ class PlayState extends MusicBeatState
 		timeBar.cameras = [camHUD];
 		timeBarBG.cameras = [camHUD];
 		timeTxt.cameras = [camHUD];
-		//doof.cameras = [camHUD];
+		/*
 		topBar.cameras = [camOther];
 		bottomBar.cameras = [camOther];
+		*/
 
 		// cameras = [FlxG.cameras.list[1]];
 		startingSong = true;
@@ -1478,7 +1476,7 @@ class PlayState extends MusicBeatState
 				{
 					var eventScript:Dynamic = eventScripts.get(event.event);
 					var returnVal:Any = true;
-					trace(returnVal);
+					//trace(returnVal);
 					if (eventScript.scriptType == 'lua')
 					{
 						returnVal = callScript(eventScript, "shouldPush", [event.value1, event.value2]); 
@@ -1488,7 +1486,7 @@ class PlayState extends MusicBeatState
 						returnVal = callScript(eventScript, "shouldPush", [event]); 
 					}
 					var fuck:Bool = returnVal != false;
-					trace(returnVal, returnVal != false, fuck);
+					//trace(returnVal, returnVal != false, fuck);
 					return returnVal != false;
 				}
 		}

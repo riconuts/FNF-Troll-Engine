@@ -18,7 +18,8 @@ typedef ChapterMetadata = {
     var directory:String;
 }
 
-class ChapterData{
+class ChapterData
+{
 	public static var chaptersList:Array<ChapterMetadata> = [];
 
 	public static function reloadChapterFiles():Array<ChapterMetadata>

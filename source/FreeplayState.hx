@@ -102,7 +102,15 @@ class FreeplayState extends MusicBeatState
 					if (isLocked)
 						songButton.onUp.callback = function(){songButton.shake();}
 					else
-						songButton.onUp.callback = function(){playSong(songButton.metadata);};
+						songButton.onUp.callback = function(){
+							var sPos = songButton.getScreenPosition();
+							SquareTransitionSubstate.startPoint.set(sPos.x - 3, sPos.y - 3);
+							SquareTransitionSubstate.startSize.set(200, 200);
+							SquareTransitionSubstate.endPoint.set(-3, -3);
+							SquareTransitionSubstate.endSize.set(FlxG.width + 6, FlxG.height + 6);
+							this.transOut = SquareTransitionSubstate;
+							playSong(songButton.metadata);
+						};
 				}
 			}
 		}
@@ -129,15 +137,10 @@ class FreeplayState extends MusicBeatState
 	public function playSong(metadata:SongMetadata){
 		persistentUpdate = false;
 
-		var weekName = WeekData.getWeekFileName();
-
-		WeekData.setDirectoryFromWeek(WeekData.weeksLoaded.get(weekName));
-		trace('CURRENT WEEK: $weekName' + weekName);
-
 		Paths.currentModDirectory = metadata.folder;
 
 		var songLowercase:String = Paths.formatToSongPath(metadata.songName);
-		trace(songLowercase);
+		trace('${Paths.currentModDirectory}, $songLowercase');
 
 		PlayState.SONG = Song.loadFromJson(songLowercase, songLowercase);
 		PlayState.isStoryMode = false;

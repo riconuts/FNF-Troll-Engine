@@ -1,5 +1,6 @@
 package;
 
+import ChapterData;
 import WeekData;
 import flash.ui.Mouse;
 import flash.ui.MouseCursor;
@@ -13,7 +14,7 @@ import flixel.addons.ui.FlxUIButton;
 import flixel.graphics.FlxGraphic;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.group.FlxGroup;
-import flixel.math.FlxMath;
+import flixel.math.*;
 import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
@@ -32,7 +33,7 @@ class StoryMenuState extends MusicBeatState
 	public static var weekCompleted:Map<String, Bool> = new Map<String, Bool>();
 	public static var instance:StoryMenuState;
 
-	public var camFollowPos:FlxObject;
+	//public var camFollowPos:FlxObject;
 
 	final chapterSelectPositions:Array<Array<Int>> = [ // Screen positions for the chapter options
 		[51, 109], [305, 109], [542, 109], [788, 109], [1034, 109],
@@ -63,36 +64,32 @@ class StoryMenuState extends MusicBeatState
 		FlxG.mouse.visible = true;
 		#end
 		
-		camFollowPos = new FlxObject(FlxG.width / 2, FlxG.height / 2);
-		FlxG.camera.follow(camFollowPos);
+		FlxG.camera.focusOn(new FlxPoint(FlxG.width / 2, FlxG.height / 2));
 		FlxG.camera.bgColor = FlxColor.BLACK;
 
-		WeekData.reloadWeekFiles(true);
-		trace(WeekData.weeksList);
-
 		var chapN:Int = -1;
-		for (weekName in WeekData.weeksList){
-			var daWeek:WeekData = WeekData.weeksLoaded.get(weekName);
-			var isLocked:Bool = weekIsLocked(daWeek);
-			
-			if (daWeek.hideStoryMode)
+
+		for (chapData in ChapterData.reloadChapterFiles())
+		{
+			var isLocked = false; // for now
+			if (isLocked)
 				continue;
 
-			WeekData.setDirectoryFromWeek(daWeek);
+			Paths.currentModDirectory = chapData.directory;
 			chapN++;
-			
-			var previewImage = Paths.image("newmenuu/songselect/" + daWeek.fileName + (isLocked ? "lock" : ""));
+
+			var previewImage = Paths.image("newmenuu/songselect/" + Paths.formatToSongPath(chapData.name) + (isLocked ? "lock" : ""));
 			previewImage = previewImage != null ? previewImage : Paths.image("newmenuu/songselect/unknown");
 			
 			var pos = chapterSelectPositions[chapN];
 			var xPos = pos[0];
 			var yPos = pos[1];
 
-			var newButton = new ChapterOption(xPos, yPos, daWeek);
+			var newButton = new ChapterOption(xPos, yPos, chapData);
 			newButton.loadGraphic(previewImage);
 
 			var yellowBorder = new FlxShapeBox(xPos - 3, yPos - 3, 200, 200, {thickness: 6, color: FlxColor.fromRGB(255, 242, 0)}, FlxColor.TRANSPARENT);
-			var textTitle = new FlxText(xPos-3, yPos-30, 206, daWeek.weekName, 12);
+			var textTitle = new FlxText(xPos - 3, yPos - 30, 206, chapData.name, 12);
 			textTitle.setFormat(Paths.font("calibri.ttf"), 18, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE);
 
 			if (isLocked){
@@ -110,7 +107,7 @@ class StoryMenuState extends MusicBeatState
 					FlxG.sound.play(Paths.sound('cancelMenu')); // swoosh
 					openRectangleTransition(newButton.x, newButton.y, function(){
 						lastButton = newButton;
-						var subMenu = new ChapterMenuState(newButton.daWeek);
+						var subMenu = new ChapterMenuState(newButton.data);
 						openSubState(subMenu);
 					});
 				}
@@ -118,7 +115,7 @@ class StoryMenuState extends MusicBeatState
 
 			mainMenu.add(textTitle);
 			mainMenu.add(newButton);
-			mainMenu.add(yellowBorder);
+			mainMenu.add(yellowBorder);			
 		}
 		
 		cornerLeftText = new SowyTextButton(15, 720, 0, "← BACK", 32, goBack);
@@ -222,14 +219,14 @@ class StoryMenuState extends MusicBeatState
 	}
 }
 class ChapterOption extends TGTSquareButton{
-	public var daWeek:WeekData;
+	public var data:ChapterMetadata;
 
-	public function new(?X:Float = 0, ?Y:Float = 0, DaWeek:WeekData){
-		daWeek = DaWeek;
+	public function new(?X:Float = 0, ?Y:Float = 0, Data:ChapterMetadata){
+		data = Data;
 		super(X, Y);
 	}
 	override function onover(){
-		if (!StoryMenuState.weekIsLocked(daWeek))
+		//if (!StoryMenuState.weekIsLocked(daWeek))
 			super.onover();
 	}
 }

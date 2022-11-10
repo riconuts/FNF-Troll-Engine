@@ -4,6 +4,7 @@ import flixel.FlxSprite;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import sowy.SowyTextButton;
+import ChapterData;
 
 using StringTools;
 
@@ -30,18 +31,18 @@ class ChapterMenuState extends MusicBeatSubstate{
 	var startY:Float = 0;
 
 	//
-	public var curWeek:WeekData;
+	public var chapData:ChapterMetadata;
 
-	public function new(curWeek:WeekData){
+	public function new(chapData:ChapterMetadata){
 		super();
 
-		trace('loading week: ${curWeek.fileName}');
+		trace('loading week: ${chapData.name}');
 
-		this.curWeek = curWeek;
-		WeekData.setDirectoryFromWeek(curWeek);
+		this.chapData = chapData;
+		Paths.currentModDirectory = chapData.directory;
 
 		// Create sprites
-		var artGraph = Paths.image('chaptercovers/' + curWeek.fileName);
+		var artGraph = Paths.image('chaptercovers/' + Paths.formatToSongPath(chapData.name));
 		coverArt = new FlxSprite(75, 130);
 		coverArt.loadGraphic(artGraph != null ? artGraph : Paths.image('newmenuu/mainmenu/cover_story_mode'));
 		coverArt.updateHitbox();
@@ -91,14 +92,13 @@ class ChapterMenuState extends MusicBeatSubstate{
 		//// Update menu
 		chapterText.setPosition(coverArt.x, coverArt.y + coverArt.height + 4);
 		chapterText.fieldWidth = coverArt.width;
-		chapterText.text = curWeek.weekName;
+		chapterText.text = chapData.name;
 
 		// Make a text boxes for every song.
 		var songAmount:Int = 0;
 
-		for (song in curWeek.songs)
+		for (songName in chapData.songs)
 		{
-			var songName = song[0];
 			var yPos = startY + (songAmount + 2) * 48;
 
 			var newSongTxt =  new FlxText(halfScreen, yPos, 0, songName, 32);
@@ -138,23 +138,14 @@ class ChapterMenuState extends MusicBeatSubstate{
 	}
 
 	public function playWeek(){
-		if (curWeek == null)
+		if (chapData == null)
 			return;
 
-		WeekData.setDirectoryFromWeek(curWeek);
-		//PlayState.storyWeek = curWeek;
-
-		// We can't use Dynamic Array .copy() because that crashes HTML5, here's a workaround.
-		var songArray:Array<String> = [];
-		
-		var leWeek:Array<Dynamic> = curWeek.songs;
-		for (i in 0...leWeek.length)
-		{
-			songArray.push(leWeek[i][0]);
-		}
+		Paths.currentModDirectory = chapData.directory;
+		//PlayState.storyWeek = chapData;
 
 		// Nevermind that's stupid lmao
-		PlayState.storyPlaylist = songArray;
+		PlayState.storyPlaylist = chapData.songs;
 		PlayState.isStoryMode = true;
 
 		PlayState.SONG = Song.loadFromJson(PlayState.storyPlaylist[0].toLowerCase(), PlayState.storyPlaylist[0].toLowerCase());
