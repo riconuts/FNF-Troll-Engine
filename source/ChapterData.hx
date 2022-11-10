@@ -15,25 +15,21 @@ typedef ChapterMetadata = {
 	var category:String;
 	var unlockCondition:Dynamic;
 	var songs:Array<String>;
+    var directory:String;
 }
 
 class ChapterData{
-	/*
-	public var name:String;
-	public var category:String;
-	public var unlockCondition:Dynamic;
-	public var songs:Array<String>;
-	*/
+	public static var chaptersList:Array<ChapterMetadata> = [];
 
 	public static function reloadChapterFiles():Array<ChapterMetadata>
 	{
-		var chaptersList:Array<ChapterMetadata> = [];
-		var modDirs = Paths.getModDirectories(); 
+		var list:Array<ChapterMetadata> = [];
 
-		for (mod in modDirs){
+		#if MODS_ALLOWED
+		for (mod in Paths.getModDirectories()){
 			Paths.currentModDirectory = mod;
 			var path = Paths.modFolders("metadata.json");
-			var rawJson:Dynamic = null;
+			var rawJson:Null<String> = null;
 			
 			#if sys
 			if (FileSystem.exists(path))
@@ -44,9 +40,17 @@ class ChapterData{
 			#end
 
 			if (rawJson != null && rawJson.length > 0)
-				chaptersList.push(cast Json.parse(rawJson));
+            {
+				var json = cast Json.parse(rawJson);
+				json.directory = mod;
+				list.push(json);
+			}		
 		}
+		Paths.currentModDirectory = '';
+        #end
 
-		return chaptersList;
+		chaptersList = list;
+
+		return list;
 	}
 }

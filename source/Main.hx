@@ -155,7 +155,7 @@ class Main extends Sprite
 			switch (stackItem)
 			{
 				case FilePos(s, file, line, column):
-					errMsg += file + " (line " + line + ")\n";
+					errMsg += '$file:$line\n';
 				default:
 					Sys.println(stackItem);
 			}

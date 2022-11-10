@@ -70,7 +70,7 @@ class StoryMenuState extends MusicBeatState
 		WeekData.reloadWeekFiles(true);
 		trace(WeekData.weeksList);
 
-		var chapN:Int = -1;	
+		var chapN:Int = -1;
 		for (weekName in WeekData.weeksList){
 			var daWeek:WeekData = WeekData.weeksLoaded.get(weekName);
 			var isLocked:Bool = weekIsLocked(daWeek);

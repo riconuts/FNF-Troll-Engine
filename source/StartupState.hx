@@ -1,10 +1,12 @@
 import flixel.FlxG;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.input.keyboard.FlxKey;
-import flixel.util.FlxTimer;
+#if desktop
+import Discord.DiscordClient;
+import lime.app.Application;
+#end
 
-// A state that starts up most of the variables that the game uses
-// would add a loading screen here if there was anything that needed a considerable amount to load
+// A loading screen would go here
 
 class StartupState extends MusicBeatState
 {
@@ -52,11 +54,22 @@ class StartupState extends MusicBeatState
 		Paths.music('freakyIntro');
 		Paths.music('freakyMenu');
 
-		/*
 		if(FlxG.save.data != null && FlxG.save.data.fullscreen){
 			FlxG.fullscreen = FlxG.save.data.fullscreen;
 		}
-		*/
+
+		if (FlxG.save.data.weekCompleted != null)
+			StoryMenuState.weekCompleted = FlxG.save.data.weekCompleted;
+
+		#if desktop
+		if (!DiscordClient.isInitialized){
+			DiscordClient.initialize();
+			Application.current.onExit.add(function(exitCode)
+			{
+				DiscordClient.shutdown();
+			});
+		}
+		#end
 		
 		MusicBeatState.switchState(new TitleState());
 	}

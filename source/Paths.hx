@@ -338,14 +338,10 @@ class Paths
 	{
 		#if MODS_ALLOWED
 		var imageLoaded:FlxGraphic = returnGraphic(key);
-		var txtExists:Bool = false;
-		if (FileSystem.exists(modsTxt(key)))
-		{
-			txtExists = true;
-		}
-
+		var txtExists:Bool = FileSystem.exists(modFolders('images/$key.txt'));
+		
 		return FlxAtlasFrames.fromSpriteSheetPacker((imageLoaded != null ? imageLoaded : image(key, library)),
-			(txtExists ? File.getContent(modsTxt(key)) : file('images/$key.txt', library)));
+			(txtExists ? File.getContent(modFolders('images/$key.txt')) : file('images/$key.txt', library)));
 		#else
 		return FlxAtlasFrames.fromSpriteSheetPacker(image(key, library), file('images/$key.txt', library));
 		#end
@@ -395,7 +391,7 @@ class Paths
 			return currentTrackedAssets.get(path);
 		}
 
-		trace('oh no, "$key" returned null.');
+		trace('oh no, "$key" returned null nooooo.');
 		return null;
 	}
 
@@ -461,7 +457,7 @@ class Paths
 		return modFolders('images/' + key + '.xml');
 
 	inline static public function modsTxt(key:String)
-		return modFolders('images/' + key + '.txt');
+		return modFolders('data/' + key + '.txt');
 
 	/* Goes unused for now
 
@@ -506,7 +502,36 @@ class Paths
 
 		return list;
 	}
+
+	/*
+	static public function allMods():Array<String>
+	{
+		var list:Array<String> = [];
+
+		#if MODS_ALLOWED
+		for (mod in Paths.getModDirectories())
+		{
+			Paths.currentModDirectory = mod;
+			var path = Paths.modFolders("metadata.json");
+			var raw:Null<String> = null;
+
+			#if sys
+			if (FileSystem.exists(path))
+				raw = File.getContent(path);
+			#else
+			if (Assets.exists(path))
+				raw = Assets.getText(path);
+			#end
+
+		}
+		Paths.currentModDirectory = '';
+		#end
+
+		return list;
+	}
+	 */
 	#end
+	
 	public static function loadTheFirstEnabledMod()
 	{
 		#if MODS_ALLOWED

@@ -2,13 +2,11 @@ package;
 
 import WeekData;
 import editors.ChartingState;
-import flash.text.TextField;
 import flixel.*;
-import flixel.addons.display.FlxGridOverlay;
 import flixel.addons.display.shapes.FlxShapeBox;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.math.FlxMath;
+import flixel.math.*;
 import flixel.system.FlxSound;
 import flixel.text.FlxText;
 import flixel.tweens.FlxTween;
@@ -23,28 +21,17 @@ import Discord.DiscordClient;
 #end
 #if MODS_ALLOWED
 import sys.FileSystem;
+import sys.io.File;
 #end
 
 class FreeplayState extends MusicBeatState
 {
 	var songs:Array<SongMetadata> = [];
 
-	var selector:FlxText;
-	private static var curSelected:Int = 0;
-
-	var scoreBG:FlxSprite;
-	var scoreText:FlxText;
-	var lerpScore:Int = 0;
-	var lerpRating:Float = 0;
-	var intendedScore:Int = 0;
-	var intendedRating:Float = 0;
-
-	private var grpSongs:FlxTypedGroup<Alphabet>;
-	private var curPlaying:Bool = false;
-
 	private var categories:Map<String, FreeplayCategory> = new Map();
 
-	public var camFollowPos:FlxObject;
+	var camFollow = new FlxPoint(640, 360);
+	var camFollowPos = new FlxObject(640, 360);
 
 	override function create()
 	{
@@ -56,59 +43,85 @@ class FreeplayState extends MusicBeatState
 		#end
 		
 		Paths.clearStoredMemory();
-		//Paths.clearUnusedMemory();
 		
-		persistentUpdate = true;
 		PlayState.isStoryMode = false;
-		WeekData.reloadWeekFiles(false);
 
-		camFollowPos = new FlxObject(640, 360);
 		FlxG.camera.follow(camFollowPos);
 		FlxG.camera.bgColor = FlxColor.BLACK;
 
-		// Load categories (wip!!)
+		////
 		var categoryNames:Map<String, String> = new Map();
 		
-		/*
-		categoryNames.set("mainStory", "MAIN STORY");
-		categoryNames.set("sideStory", "SIDE STORIES");
-		*/
-		categoryNames.set("ALL SONGS", "ALL SONGS");
+		categoryNames.set("main", "MAIN STORY");
+		categoryNames.set("side", "SIDE STORIES");
+		categoryNames.set("remix", "REMIXES / COVERS");
 
-		for (id in ["ALL SONGS"/*, "sideStory"*/]){
-			var catText = new FlxText(0, 0, FlxG.width, categoryNames.get(id), 32, true);
-			catText.setFormat(Paths.font("calibrib.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
-			var category = new FreeplayCategory(catText);
-			add(category);
-
+		for (id => name in categoryNames)
+		{
+			var catTitle = new FlxText(0, 50, FlxG.width, name, 32, true);
+			catTitle.setFormat(Paths.font("calibrib.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
+			catTitle.scrollFactor.set(1, 1);
+			
+			var category = new FreeplayCategory(catTitle);
 			categories.set(id, category);
 		}
 
-		// Load the songs!!!
-		for (i in 0...WeekData.weeksList.length) {
-			var isLocked = weekIsLocked(WeekData.weeksList[i]);
+		//// Load the songs!!!
+		for (i in CoolUtil.coolTextFile(Paths.txt('freeplaySonglist')))
+		{
+			if (i != null && i.length > 0){
+				var song:Array<String> = i.split(":");
+				var isLocked = false; // For now
+				var songButton = addSong(song[0], "", song[1], isLocked);
 
-			var leWeek:WeekData = WeekData.weeksLoaded.get(WeekData.weeksList[i]);
-			WeekData.setDirectoryFromWeek(leWeek);
-
-			var generic;
-			
-			for (song in leWeek.songs){
-				var songButton = addSong(song[0], i, "ALL SONGS", isLocked/*song[1]*/);
 				if (songButton == null)
 					continue;
 
 				if (isLocked)
-					songButton.onUp.callback = function(){
-						songButton.shake();
-					}
+					songButton.onUp.callback = function(){songButton.shake();}
 				else
-					songButton.onUp.callback = function(){
-						playSong(songButton.metadata);
-					};
+					songButton.onUp.callback = function(){playSong(songButton.metadata);};
 			}
 		}
-		Paths.loadTheFirstEnabledMod();
+
+		#if MODS_ALLOWED
+		for (mod in Paths.getModDirectories())
+		{
+			Paths.currentModDirectory = mod;
+
+			for (i in CoolUtil.coolTextFile(Paths.modsTxt('freeplaySonglist')))
+			{
+				if (i != null && i.length > 0){
+					var song:Array<String> = i.split(":");
+					var isLocked = false; // For now
+					var songButton = addSong(song[0], null, song[1], isLocked);
+
+					if (songButton == null)
+						continue;
+
+					if (isLocked)
+						songButton.onUp.callback = function(){songButton.shake();}
+					else
+						songButton.onUp.callback = function(){playSong(songButton.metadata);};
+				}
+			}
+		}
+		Paths.currentModDirectory = '';
+		#end
+
+		//// Add categories
+		var prevCat:Null<FreeplayCategory> = null;
+		for (n => category in categories)
+		{
+			if (prevCat == null)
+				category.y = 50;
+			else
+				category.y = 50 + prevCat.y + prevCat.height;
+
+			prevCat = category;
+			add(category);
+		}
+		maxY = prevCat.y + prevCat.height;
 
 		super.create();
 	}
@@ -137,23 +150,25 @@ class FreeplayState extends MusicBeatState
 		FlxG.sound.music.volume = 0;
 	} 
 
-	override function closeSubState() {
+	override function closeSubState() 
+	{
 		//changeSelection(0, false);
-		persistentUpdate = true;
 		super.closeSubState();
 	}
 
-	public function addSong(songName:String, weekNum:Int, ?categoryName:String, ?isLocked = true):Null<FreeplaySongButton>
+	public function addSong(songName:String, ?folder:String, ?categoryName:String, ?isLocked = true):Null<FreeplaySongButton>
 	{
-		if (categoryName == null)
-			return null;
+		var folder = folder != null ? folder : Paths.currentModDirectory;
 		var category = categories.get(categoryName);
-		if (category == null)
+
+		//trace('"$folder" / "$songName" / "$categoryName"');
+
+		if (category == null)	
 			return null;
 
 		var button:FreeplaySongButton = new FreeplaySongButton(
 			0, 0, 
-			new SongMetadata(songName, weekNum),
+			new SongMetadata(songName, folder),
 			isLocked
 		);
 		button.loadGraphic(Paths.image("songs/" + Paths.formatToSongPath(songName)));
@@ -162,15 +177,15 @@ class FreeplayState extends MusicBeatState
 		category.addItem(button);
 
 		var yellowBorder = new FlxShapeBox(button.x-3, button.y-3, 200, 200, {thickness: 6, color: FlxColor.fromRGB(255, 242, 0)}, FlxColor.TRANSPARENT);
-		add(yellowBorder);
+		category.add(yellowBorder);
 		
 		var nameText = new FlxText(button.x, button.y - 32, button.width, songName, 24);
 		nameText.setFormat(Paths.font("calibri.ttf"), 18, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE);
-		add(nameText);
+		category.add(nameText);
 		
 		var scoreText = new FlxText(button.x, button.y + button.height + 12, button.width, "" + Highscore.getScore(songName), 24);
 		scoreText.setFormat(Paths.font("calibri.ttf"), 18, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE);
-		add(scoreText);
+		category.add(scoreText);
 
 		return button;
 	}
@@ -180,39 +195,33 @@ class FreeplayState extends MusicBeatState
 		return (!leWeek.startUnlocked && leWeek.weekBefore.length > 0 && (!StoryMenuState.weekCompleted.exists(leWeek.weekBefore) || !StoryMenuState.weekCompleted.get(leWeek.weekBefore)));
 	}
 	
-	var holdTime:Float = 10;
-	var timeSinceLastHold:Float = 0;
+	var minY:Float = 360;
+	var maxY:Float = 0;
+	var baseSpeed = 8;
+
 	override function update(elapsed:Float)
 	{
 		if (FlxG.sound.music != null && FlxG.sound.music.volume < 0.7)
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
 
-		var up = controls.UI_UP;
-		var down = controls.UI_DOWN;
-		var accepted = controls.ACCEPT;
-		var space = FlxG.keys.justPressed.SPACE;
-		var ctrl = FlxG.keys.justPressed.CONTROL;
+		var speed = FlxG.keys.pressed.SHIFT ? baseSpeed * 2 : baseSpeed;
 
-		var speed:Float = 0;
-		#if desktop
-		if (FlxG.mouse.wheel != 0)
-			speed -= FlxG.mouse.wheel * 30;
-		#end
+		var mouseWheel = FlxG.mouse.wheel;
+		var yScroll:Float = 0;
 
-		if (!(up && down)){
-			timeSinceLastHold += elapsed;
-			if (timeSinceLastHold > 0.25) holdTime = 10;
-		}else{
-			timeSinceLastHold = 0;
-			holdTime += elapsed * 10;
-		}	
+		if (mouseWheel != 0)
+			yScroll -= mouseWheel * speed * 8;
 
-		if (up)
-			speed -= holdTime;
-		if (down)
-			speed += holdTime;
+		if (controls.UI_UP)
+			camFollow.y -= speed;
+		if (controls.UI_DOWN)
+			camFollow.y += speed;
 
-		camFollowPos.y += speed;
+		camFollow.y = Math.max(minY, Math.min(camFollow.y + yScroll, maxY));
+
+		// update camera
+		var lerpVal = Math.min(1, elapsed * 6);
+		camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
 
 		if (controls.BACK){
 			FlxG.sound.play(Paths.sound('cancelMenu'));
@@ -226,14 +235,12 @@ class FreeplayState extends MusicBeatState
 class SongMetadata
 {
 	public var songName:String = "";
-	public var week:Int = 0;
 	public var folder:String = "";
 
-	public function new(song:String, week:Int)
+	public function new(song:String, ?folder:String)
 	{
 		this.songName = song;
-		this.week = week;
-		this.folder = Paths.currentModDirectory;
+		this.folder = folder != null ? folder : Paths.currentModDirectory;
 		if(this.folder == null) this.folder = '';
 	}
 }
@@ -259,27 +266,38 @@ class FreeplaySongButton extends TGTSquareButton{
 class FreeplayCategory extends flixel.group.FlxSpriteGroup{
 	var titleText:FlxText;
 	var posArray = [51, 305, 542, 788, 1034]; // fuck it
-	var buttonArray:Array<FreeplaySongButton> = [];
+	public var buttonArray:Array<FreeplaySongButton> = [];
 
-	public function new(?X = 0, ?Y = 0, TitleText:FlxText){
-		/*
-		var ocu = (200 * 5 + 5 * 4);
-		var 
-		FlxG.width - ;
-		*/
-
+	public function new(?X = 0, ?Y = 0, ?TitleText:FlxText)
+	{
 		super(X, Y);
-		super.add(titleText = TitleText);
+
+		if (TitleText != null){
+			titleText = TitleText;
+			add(titleText);
+		}		
 	}
 
 	public function addItem(item:FreeplaySongButton){
-		var num = buttonArray.push(item) - 1;
-		var x = num % posArray.length;
-		var y = Math.floor(num / 5);
-
-		item.setPosition(posArray[x], titleText.y + titleText.height + 50 + y * 308);
-		//trace(num, x, y);
+		if (item != null){
+			buttonArray.push(item);
+			orderShit();
+		}	
 
 		return super.add(item);
+	}
+
+	public function orderShit()
+	{
+		var num:Int = -1;
+
+		for (item in buttonArray)
+		{
+			num++;
+			var x = num % posArray.length;
+			var y = Math.floor(num / 5);
+
+			item.setPosition(posArray[x], 50 + titleText.y + titleText.height + y * 308);
+		}
 	}
 }

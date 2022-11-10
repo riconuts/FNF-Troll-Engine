@@ -22,7 +22,6 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import haxe.Json;
-import lime.app.Application;
 import openfl.Assets;
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
@@ -38,16 +37,6 @@ import sys.FileSystem;
 import sys.io.File;
 #end
 
-typedef TitleData = {
-	titlex:Float,
-	titley:Float,
-	startx:Float,
-	starty:Float,
-	gfx:Float,
-	gfy:Float,
-	backgroundSprite:String,
-	bpm:Int
-}
 class TitleState extends MusicBeatState
 {
 	public static var initialized:Bool = false;
@@ -62,10 +51,6 @@ class TitleState extends MusicBeatState
 	var titleTextAlphas:Array<Float> = [1, .64];
 
 	var curWacky:Array<String> = [];
-
-	var wackyImage:FlxSprite;
-
-	var mustUpdate:Bool = false;
 	
 	public static var updateVersion:String = '';
 
@@ -77,60 +62,41 @@ class TitleState extends MusicBeatState
 		return super.add(Object);
 	}
 
+	var logoBl:RandomTitleLogo;
+	var titleText:FlxSprite;
+	var swagShader:ColorSwap = null;
+	var bg:Stage;
+
+	public var camGame:FlxCamera = new FlxCamera();
+	public var camHUD:FlxCamera = new FlxCamera();
+
 	override public function create():Void
 	{
 		super.create();
-
-		#if desktop
-		FlxG.mouse.visible = false;
-		#end
 
 		curWacky = FlxG.random.getObject(getIntroTextShit());
 
 		// DEBUG BULLSHIT
 		swagShader = new ColorSwap();
-
-		if (FlxG.save.data.weekCompleted != null)
-			StoryMenuState.weekCompleted = FlxG.save.data.weekCompleted;
-
-		#if desktop
-		if (!DiscordClient.isInitialized){
-			DiscordClient.initialize();
-			Application.current.onExit.add(function (exitCode) {
-				DiscordClient.shutdown();
-			});
-		}
-		#end
 		
-		startIntro();
-	}
-
-	var logoBl:RandomTitleLogo;
-	var titleText:FlxSprite;
-	var swagShader:ColorSwap = null;
-	var bg:Stage;
-	public var camGame:FlxCamera = new FlxCamera();
-	public var camHUD:FlxCamera = new FlxCamera();
-
-	function startIntro()
-	{
 		persistentUpdate = true;
 
 		FlxTransitionableState.defaultTransIn = FadeTransitionSubstate;
 		FlxTransitionableState.defaultTransOut = FadeTransitionSubstate;
 
-		if (!initialized){
+		if (!initialized)
+		{
 			MusicBeatState.playMenuMusic(0);
 			Conductor.changeBPM(90);
 		}
-		
+
 		FlxG.cameras.reset(camGame);
 		FlxG.cameras.add(camHUD, false);
-		
+
 		var stageNames = Stage.getStageList();
 		var randomStage = stageNames[FlxG.random.int(0, stageNames.length - 1)];
 		trace(Paths.currentModDirectory, randomStage);
-		
+
 		bg = new Stage(randomStage).buildStage();
 		FlxG.camera.zoom = bg.stageData.defaultZoom;
 		add(bg);
@@ -143,7 +109,7 @@ class TitleState extends MusicBeatState
 		logoBl.cameras = [camHUD];
 		add(logoBl);
 		logoBl.shader = swagShader.shader;
-		
+
 		titleText = new FlxSprite(100, 576);
 		#if (desktop && MODS_ALLOWED)
 		var path = "mods/" + Paths.currentModDirectory + "/images/titleEnter.png";
@@ -155,7 +121,7 @@ class TitleState extends MusicBeatState
 		#else
 		titleText.frames = Paths.getSparrowAtlas('titleEnter');
 		#end
-		
+
 		titleText.animation.addByPrefix('idle', "ENTER IDLE", 24);
 		titleText.animation.addByPrefix('press', ClientPrefs.flashing ? "ENTER PRESSED" : "ENTER FREEZE", 24);
 
@@ -167,7 +133,7 @@ class TitleState extends MusicBeatState
 		credGroup = new FlxGroup();
 		credGroup.cameras = [camHUD];
 		add(credGroup);
-		
+
 		textGroup = new FlxGroup();
 		textGroup.cameras = [camHUD];
 
@@ -187,7 +153,7 @@ class TitleState extends MusicBeatState
 		ngSpr.screenCenter(X);
 		ngSpr.cameras = [camHUD];
 		add(ngSpr);
-		
+
 		if (initialized)
 			skipIntro();
 		else
@@ -200,26 +166,26 @@ class TitleState extends MusicBeatState
 
 		// add list from the assets folder
 		var fullText:String = Assets.getText(Paths.txt('introText'));
-		
+
 		#if MODS_ALLOWED
-		// get mod list
-		if (FileSystem.exists("modsList.txt")){
-			var list:Array<String> = CoolUtil.listFromString(File.getContent("modsList.txt"));
-			for (i in list){
-				// check for active mods
-				var dat = i.split("|");
-				if (dat[1] == "1"){
-					// check for introTexts
-					var path = Paths.mods(dat[0] + '/data/introText.txt');
-					if (FileSystem.exists(path)){
-						// add intro text list
-						var rawFile:String = File.getContent(path);
-						if (rawFile != null && rawFile.length > 0)
-							fullText += '\n${rawFile}';
-					}
-				}
-			}
+		for (mod in Paths.getModDirectories())
+		{
+			Paths.currentModDirectory = mod;
+			var path = Paths.modFolders("data/introText.txt");
+			var rawFile:Null<String> = null;
+
+			#if sys
+			if (FileSystem.exists(path))
+				rawFile = File.getContent(path);
+			#else
+			if (Assets.exists(path))
+				rawFile = Assets.getText(path);
+			#end
+
+			if (rawFile != null && rawFile.length > 0)
+				fullText += '\n${rawFile}';
 		}
+		Paths.currentModDirectory = '';
 		#end
 
 		////
@@ -296,11 +262,7 @@ class TitleState extends MusicBeatState
 
 				new FlxTimer().start(1, function(tmr:FlxTimer)
 				{
-					if (mustUpdate) {
-						MusicBeatState.switchState(new OutdatedState());
-					} else {
-						MusicBeatState.switchState(new MainMenuState());
-					}
+					MusicBeatState.switchState(new MainMenuState());
 					closedState = true;
 				});
 			}
@@ -424,7 +386,7 @@ class TitleState extends MusicBeatState
 	}
 }
 
-// kinda unnecessary to make it a class
+// ...kinda unnecessary to make a whole class
 class RandomTitleLogo extends FlxSprite
 {
 	public var titleName:String; 
@@ -453,7 +415,7 @@ class RandomTitleLogo extends FlxSprite
 	override public function update(elapsed:Float){
 		//// Title animation!
 		time += elapsed;
-		
+
 		var time = time / frameRate;
 		var size = size;
 
@@ -477,7 +439,6 @@ class RandomTitleLogo extends FlxSprite
 
 	public static function getTitlesList()
 	{
-		// var titleXmls:Array<String> = [];
 		var titleNames:Array<String> = [];
 		var foldersToCheck:Array<String> = [Paths.getPreloadPath('images/titles/')];
 
@@ -486,17 +447,16 @@ class RandomTitleLogo extends FlxSprite
 		if (Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
 			foldersToCheck.insert(0, Paths.mods(Paths.currentModDirectory + '/images/titles/'));
 		#end
-
-		for (folder in foldersToCheck){
-			if (FileSystem.exists(folder)){
+		
+		for (folder in foldersToCheck)
+		{
+			if (FileSystem.exists(folder))
+			{
 				var dir = FileSystem.readDirectory(folder);
-				for (file in dir){
-					if (!titleNames.contains(file) && file.endsWith('.png')){
+
+				for (file in dir)
+					if (!titleNames.contains(file) && file.endsWith('.png'))
 						titleNames.push(file.substr(0, file.length - 4));
-						// }else if (file.endsWith('.xml')){
-						// titleXmls.push(file.substr(-4, 4));
-					}
-				}
 			}
 		}
 
