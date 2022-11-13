@@ -49,8 +49,22 @@ class GameOverSubstate extends MusicBeatSubstate
 		PlayState.instance.setOnScripts('inGameOver', true);
 
 		Conductor.songPosition = 0;
+
+		var deathName = PlayState.instance.boyfriend.deathName + "-dead";
+		var charInfo = Character.getCharacterFile(deathName);
+		if (charInfo == null){
+			deathName = Character.DEFAULT_CHARACTER + "-dead";
+			charInfo = Character.getCharacterFile(deathName);
+		}
 		
-		boyfriend = new Boyfriend(x, y, PlayState.instance.boyfriend.curCharacter + "-dead");
+		Cache.loadWithList(cast [
+			{path: charInfo.image, type: 'IMAGE'},
+			{path: deathSoundName, type: 'SOUND'},
+			{path: loopSoundName, type: 'MUSIC'},
+			{path: endSoundName, type: 'MUSIC'}
+		]);
+		
+		boyfriend = new Boyfriend(x, y, deathName);
 		boyfriend.x += boyfriend.positionArray[0];
 		boyfriend.y += boyfriend.positionArray[1];
 		add(boyfriend);
@@ -113,25 +127,7 @@ class GameOverSubstate extends MusicBeatSubstate
 
 			if (boyfriend.animation.curAnim.finished && !playingDeathSound)
 			{
-				if (PlayState.SONG.stage == 'tank')
-				{
-					playingDeathSound = true;
-					coolStartDeath(0.2);
-					
-					var exclude:Array<Int> = [];
-					//if(!ClientPrefs.cursing) exclude = [1, 3, 8, 13, 17, 21];
-
-					FlxG.sound.play(Paths.sound('jeffGameover/jeffGameover-' + FlxG.random.int(1, 25, exclude)), 1, false, null, true, function() {
-						if(!isEnding)
-						{
-							FlxG.sound.music.fadeIn(0.2, 1, 4);
-						}
-					});
-				}
-				else
-				{
-					coolStartDeath();
-				}
+				FlxG.sound.playMusic(Paths.music(loopSoundName), 1);
 				boyfriend.startedDeath = true;
 			}
 		}
@@ -146,16 +142,9 @@ class GameOverSubstate extends MusicBeatSubstate
 	override function beatHit()
 	{
 		super.beatHit();
-
-		//FlxG.log.add('beat');
 	}
 
 	var isEnding:Bool = false;
-
-	function coolStartDeath(?volume:Float = 1):Void
-	{
-		FlxG.sound.playMusic(Paths.music(loopSoundName), volume);
-	}
 
 	function endBullshit():Void
 	{

@@ -23,10 +23,10 @@ import sys.FileSystem;
 class MasterEditorMenu extends MusicBeatState
 {
 	var options:Array<String> = [
-		'Week Editor',
-		'Menu Character Editor',
+		//'Week Editor',
+		//'Menu Character Editor',
 		'Character Editor',
-		'Chart Editor',
+		//'Chart Editor',
 		'Stage Editor',
 		'Test Stage'
 	];
@@ -117,12 +117,12 @@ class MasterEditorMenu extends MusicBeatState
 			switch(options[curSelected]) {
 				case 'Character Editor':
 					LoadingState.loadAndSwitchState(new CharacterEditorState(Character.DEFAULT_CHARACTER, false));
-				case 'Week Editor':
-					MusicBeatState.switchState(new WeekEditorState());
+				/*case 'Week Editor':
+					MusicBeatState.switchState(new WeekEditorState());*/
 				case 'Stage Editor':
 					MusicBeatState.switchState(new StageEditorState());
-				case 'Chart Editor'://felt it would be cool maybe
-					LoadingState.loadAndSwitchState(new ChartingState(), false);
+				/*case 'Chart Editor'://felt it would be cool maybe
+					LoadingState.loadAndSwitchState(new ChartingState(), false);*/
 				case "Test Stage":
 					MusicBeatState.switchState(new TestState());
 			}

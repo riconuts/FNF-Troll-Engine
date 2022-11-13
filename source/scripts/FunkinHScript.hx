@@ -205,7 +205,7 @@ class FunkinHScript extends FunkinScript
 				set(key, additionalVars.get(key));
 		}
 
-		trace('Loaded hscript ${scriptName}');
+		trace('Loaded script ${scriptName}');
 		try{
 			interpreter.execute(parsed);
 		}catch(e:haxe.Exception){

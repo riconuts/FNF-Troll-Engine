@@ -34,6 +34,8 @@ typedef CharacterFile = {
 	var flip_x:Bool;
 	var no_antialiasing:Bool;
 	var healthbar_colors:Array<Int>;
+
+	@:optional var death_name:String;
 }
 
 typedef AnimArray = {
@@ -48,6 +50,9 @@ typedef AnimArray = {
 
 class Character extends FlxSprite
 {
+	public static var DEFAULT_CHARACTER:String = 'bf'; // In case a character is missing, it will use BF on its place
+
+	public var deathName = DEFAULT_CHARACTER;
 	public var characterScripts:Array<FunkinHScript> = [];
 
 	public var voicelining:Bool = false; // for fleetway, mainly
@@ -89,33 +94,12 @@ class Character extends FlxSprite
 	public var noAntialiasing:Bool = false;
 	public var originalFlipX:Bool = false;
 	public var healthColorArray:Array<Int> = [255, 0, 0];
-
-	public static var DEFAULT_CHARACTER:String = 'bf'; //In case a character is missing, it will use BF on its place
-	public static function getCharacterFile(character:String):CharacterFile{
-		var characterPath:String = 'characters/' + character + '.json';
-
-		#if MODS_ALLOWED
-		var path:String = Paths.modFolders(characterPath);
-		if (!FileSystem.exists(path)) {
-			path = Paths.getPreloadPath(characterPath);
-		}
-
-		if (!FileSystem.exists(path))
-		#else
-		var path:String = Paths.getPreloadPath(characterPath);
-		if (!Assets.exists(path))
-		#end
-		{
-			path = Paths.getPreloadPath('characters/' + DEFAULT_CHARACTER + '.json'); //If a character couldn't be found, change him to BF just to prevent a crash
-		}
-
-		#if MODS_ALLOWED
-		var rawJson = File.getContent(path);
-		#else
-		var rawJson = Assets.getText(path);
-		#end
-
-		return cast Json.parse(rawJson);
+	
+	public static function getCharacterFile(character:String):Null<CharacterFile>
+	{
+		var rawJson:Null<String> = Paths.getText('characters/' + character + '.json');
+		
+		return rawJson != null ? cast Json.parse(rawJson) : null;
 	}
 	public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false)
 	{
@@ -135,7 +119,16 @@ class Character extends FlxSprite
 			//case 'your character name in case you want to hardcode them instead':
 
 			default:
-				var json:CharacterFile = getCharacterFile(curCharacter);
+				var json = getCharacterFile(curCharacter);
+				if (json == null){
+					json = getCharacterFile(DEFAULT_CHARACTER);
+					curCharacter = DEFAULT_CHARACTER;
+				}
+
+				// new death
+				deathName = json.death_name != null ? json.death_name : curCharacter;
+				trace(deathName);
+
 				var spriteType = "sparrow";
 				//sparrow
 				//packer
@@ -143,9 +136,6 @@ class Character extends FlxSprite
 				#if MODS_ALLOWED
 				var modTxtToFind:String = Paths.modsTxt(json.image);
 				var txtToFind:String = Paths.getPath('images/' + json.image + '.txt', TEXT);
-
-				//var modTextureToFind:String = Paths.modFolders("images/"+json.image);
-				//var textureToFind:String = Paths.getPath('images/' + json.image, new AssetType();
 
 				if (FileSystem.exists(modTxtToFind) || FileSystem.exists(txtToFind) || Assets.exists(txtToFind))
 				#else
@@ -170,8 +160,8 @@ class Character extends FlxSprite
 					spriteType = "texture";
 				}
 
-				switch (spriteType){
-
+				switch (spriteType)
+				{
 					case "packer":
 						frames = Paths.getPackerAtlas(json.image);
 
@@ -183,7 +173,8 @@ class Character extends FlxSprite
 				}
 				imageFile = json.image;
 
-				if(json.scale != 1) {
+				if(json.scale != 1) 
+				{
 					jsonScale = json.scale;
 					setGraphicSize(Std.int(width * jsonScale));
 					updateHitbox();
@@ -254,29 +245,7 @@ class Character extends FlxSprite
 		dance();
 
 		if (isPlayer)
-		{
 			flipX = !flipX;
-
-			/*// Doesn't flip for BF, since his are already in the right place???
-			if (!curCharacter.startsWith('bf'))
-			{
-				// var animArray
-				if(animation.getByName('singLEFT') != null && animation.getByName('singRIGHT') != null)
-				{
-					var oldRight = animation.getByName('singRIGHT').frames;
-					animation.getByName('singRIGHT').frames = animation.getByName('singLEFT').frames;
-					animation.getByName('singLEFT').frames = oldRight;
-				}
-
-				// IF THEY HAVE MISS ANIMATIONS??
-				if (animation.getByName('singLEFTmiss') != null && animation.getByName('singRIGHTmiss') != null)
-				{
-					var oldMiss = animation.getByName('singRIGHTmiss').frames;
-					animation.getByName('singRIGHTmiss').frames = animation.getByName('singLEFTmiss').frames;
-					animation.getByName('singLEFTmiss').frames = oldMiss;
-				}
-			}*/
-		}
 
 		switch(curCharacter)
 		{

@@ -213,10 +213,10 @@ class Note extends FlxSprite
 				case 'GF Sing':
 					gfNote = true;
 				default:
-					if (!inEditor)
+					if (!inEditor && PlayState.instance != null)
 						noteScript = PlayState.instance.notetypeScripts.get(value);
-					else
-						noteScript = ChartingState.instance.notetypeScripts.get(value);
+					/*else
+						noteScript = ChartingState.instance.notetypeScripts.get(value);*/
 					
 					if (noteScript != null && noteScript.scriptType == 'hscript')
 					{

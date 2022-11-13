@@ -1,13 +1,6 @@
 package;
 
 import ChapterData;
-import WeekData;
-import flash.ui.Mouse;
-import flash.ui.MouseCursor;
-import flixel.FlxBasic;
-import flixel.FlxG;
-import flixel.FlxObject;
-import flixel.FlxSprite;
 import flixel.addons.display.shapes.FlxShapeBox;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.addons.ui.FlxUIButton;
@@ -41,7 +34,6 @@ class StoryMenuState extends MusicBeatState
 	];
 
 	var mainMenu = new FlxTypedGroup<FlxBasic>(); // group for the main menu where you select achapter!
-	//var subMenu:ChapterMenuState; // custom group class for the menu where yu select a song!
 	
 	var funkyRectangle = new FlxShapeBox(0, 0, 206, 206, {thickness: 3, color: FlxColor.fromRGB(255, 242, 0)}, FlxColor.BLACK); // cool rectanlge used for transitions
 	var lastButton:ChapterOption; // used the square transition
@@ -49,11 +41,13 @@ class StoryMenuState extends MusicBeatState
 
 	var cornerLeftText:SowyTextButton;
 
-	var isOnSubMenu = false;
+	public var cameFromChapterMenu = false;
 
+	/*
 	public static function weekIsLocked(leWeek:WeekData):Bool {
 		return (!leWeek.startUnlocked && leWeek.weekBefore.length > 0 && (!weekCompleted.exists(leWeek.weekBefore) || !weekCompleted.get(leWeek.weekBefore)));
 	}
+	*/
 
 	override function create()
 	{
@@ -64,8 +58,30 @@ class StoryMenuState extends MusicBeatState
 		FlxG.mouse.visible = true;
 		#end
 		
-		FlxG.camera.focusOn(new FlxPoint(FlxG.width / 2, FlxG.height / 2));
-		FlxG.camera.bgColor = FlxColor.BLACK;
+		var cam = FlxG.camera;
+		cam.focusOn(new FlxPoint(FlxG.width / 2, FlxG.height / 2));
+		cam.bgColor = FlxColor.BLACK;
+
+		if (cameFromChapterMenu){
+			// dangerous shit right here
+			trace('uuoohhhhh im cummmminggg aaaaa');
+			final STS = SquareTransitionSubstate;
+			STS.nextCamera = cam;
+			STS.info = cast {
+				sX: STS.info.eX,
+				sY: STS.info.eY,
+				sW: STS.info.eW,
+				sH: STS.info.eH,
+				eX: STS.info.sX,
+				eY: STS.info.sY,
+				eW: STS.info.sW,
+				eH: STS.info.sH,
+				dur: 0.6
+			}
+			this.transIn = STS;
+		}
+
+		super.create();
 
 		var chapN:Int = -1;
 
@@ -78,8 +94,8 @@ class StoryMenuState extends MusicBeatState
 			Paths.currentModDirectory = chapData.directory;
 			chapN++;
 
-			var previewImage = Paths.image("newmenuu/songselect/" + Paths.formatToSongPath(chapData.name) + (isLocked ? "lock" : ""));
-			previewImage = previewImage != null ? previewImage : Paths.image("newmenuu/songselect/unknown");
+			var previewImage = Paths.image("chapters/" + Paths.formatToSongPath(chapData.name) + (isLocked ? "lock" : ""));
+			previewImage = previewImage != null ? previewImage : Paths.image("chapters/unknown");
 			
 			var pos = chapterSelectPositions[chapN];
 			var xPos = pos[0];
@@ -90,7 +106,7 @@ class StoryMenuState extends MusicBeatState
 
 			var yellowBorder = new FlxShapeBox(xPos - 3, yPos - 3, 200, 200, {thickness: 6, color: FlxColor.fromRGB(255, 242, 0)}, FlxColor.TRANSPARENT);
 			var textTitle = new FlxText(xPos - 3, yPos - 30, 206, chapData.name, 12);
-			textTitle.setFormat(Paths.font("calibri.ttf"), 18, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE);
+			textTitle.setFormat(Paths.font("calibri"), 18, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE);
 
 			if (isLocked){
 				newButton.onUp.callback = function(){
@@ -105,11 +121,26 @@ class StoryMenuState extends MusicBeatState
 					if (doingTransition)
 						return;
 					FlxG.sound.play(Paths.sound('cancelMenu')); // swoosh
-					openRectangleTransition(newButton.x, newButton.y, function(){
-						lastButton = newButton;
-						var subMenu = new ChapterMenuState(newButton.data);
-						openSubState(subMenu);
-					});
+					
+					var cam = FlxG.camera;
+					SquareTransitionSubstate.nextCamera = cam;
+					SquareTransitionSubstate.info = cast {
+							sX: newButton.x - 3,
+							sY: newButton.y - 3,
+							sW: 200,
+							sH: 200,
+							eX: cam.scroll.x + 10,
+							eY: cam.scroll.y + 10,
+							eW: 1260,
+							eH: 700,
+							dur: 0.6
+					}
+					this.transOut = SquareTransitionSubstate;
+
+					lastButton = newButton;
+					var nState = new ChapterMenuState(newButton.data);
+					nState.cameFromStoryMenu = true;
+					MusicBeatState.switchState(nState);
 				}
 			}
 
@@ -119,7 +150,7 @@ class StoryMenuState extends MusicBeatState
 		}
 		
 		cornerLeftText = new SowyTextButton(15, 720, 0, "← BACK", 32, goBack);
-		cornerLeftText.label.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
+		cornerLeftText.label.setFormat(Paths.font("calibri"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
 		cornerLeftText.y -= cornerLeftText.height + 15;
 		mainMenu.add(cornerLeftText);
 		
@@ -127,17 +158,12 @@ class StoryMenuState extends MusicBeatState
 		funkyRectangle.visible = false;
 		add(funkyRectangle);
 		
-		//destroySubStates = false;
 		instance = this;
-		super.create();
 	}
 
 	override function closeSubState()
 	{
 		super.closeSubState();
-
-		if (isOnSubMenu)
-			closeRectangleTransition();
 	}
 
 	public function goBack()
@@ -159,63 +185,6 @@ class StoryMenuState extends MusicBeatState
 			goBack();
 
 		super.update(elapsed);
-	}
-
-	function openRectangleTransition(?x:Float, ?y:Float, ?onEnd:Void->Void){
-		doingTransition = true;
-		isOnSubMenu = true;
-
-		funkyRectangle.setPosition(x != null ? x : funkyRectangle.x, y != null ? y : funkyRectangle.y);
-		funkyRectangle.visible = true;
-
-		cornerLeftText.visible = false;
-		
-		FlxTween.tween(funkyRectangle, {
-			x: 10,
-			y: 10,
-			width: 1260,
-			height: 700,
-			shapeWidth: 1260,
-			shapeHeight: 700,
-		},
-		0.6,
-		{
-			ease: FlxEase.quadOut,
-			onComplete: function(twn){
-				doingTransition = false;
-				remove(mainMenu);
-
-				if (onEnd != null)
-					onEnd();
-				else
-					trace("xd no function");
-			}
-		}
-		);
-	}
-
-	function closeRectangleTransition(){
-		doingTransition = true;
-		isOnSubMenu = false;
-		
-		add(mainMenu);
-		
-		FlxTween.tween(funkyRectangle, {
-			x: lastButton.x - 3,
-			y: lastButton.y - 3,
-			width: 206,
-			height: 206,
-			shapeWidth: 206,
-			shapeHeight: 206,
-		}, 0.6, {
-			ease: FlxEase.quadOut,
-			onComplete: function(twn)
-			{
-				doingTransition = false;
-				funkyRectangle.visible = false;
-				cornerLeftText.visible = true;
-			}
-		});
 	}
 }
 class ChapterOption extends TGTSquareButton{

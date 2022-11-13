@@ -201,7 +201,7 @@ class Paths
 		return 'assets/videos/$key.$VIDEO_EXT';
 	}
 
-	static public function sound(key:String, ?library:String):Sound
+	inline static public function sound(key:String, ?library:String):Sound
 	{
 		var sound:Sound = returnSound('sounds', key, library);
 		return sound;
@@ -431,6 +431,31 @@ class Paths
 		return currentTrackedSounds.get(gottenPath);
 	}
 
+	// i just fucking realised there's already a function for this wtfff
+	static public function getText(key:String, ?ignoreMods:Bool = false):Null<String>
+	{
+		#if MODS_ALLOWED
+		if (ignoreMods != true){	
+			// dangerous shit right here
+			var modPath:String = Paths.modFolders(key);
+			if (FileSystem.exists(modPath))
+				return File.getContent(modPath);
+		}
+		#end
+
+		var path:String = Paths.getPreloadPath(key);
+		#if sys
+		if (FileSystem.exists(path))
+			return File.getContent(path);
+		#else
+		if (Assets.exists(path))
+			return Assets.getText(path);
+		#end
+
+		trace('File not found: $key');
+		return null;
+	}
+
 	public static var modsList:Array<String> = [];
 	#if MODS_ALLOWED
 	static final modFolderPath:String = "content/";
@@ -472,16 +497,14 @@ class Paths
 	}*/
 	static public function modFolders(key:String)
 	{
-		if (currentModDirectory != null && currentModDirectory.length > 0)
+		if (Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
 		{
-			var fileToCheck:String = mods(currentModDirectory + '/' + key);
+			var fileToCheck = mods(Paths.currentModDirectory + '/' + key);
 			if (FileSystem.exists(fileToCheck))
-			{
 				return fileToCheck;
-			}
 		}
 
-		return modFolderPath + key;
+		return mods(key);
 	}
 
 	static public function getModDirectories():Array<String>
@@ -502,34 +525,6 @@ class Paths
 
 		return list;
 	}
-
-	/*
-	static public function allMods():Array<String>
-	{
-		var list:Array<String> = [];
-
-		#if MODS_ALLOWED
-		for (mod in Paths.getModDirectories())
-		{
-			Paths.currentModDirectory = mod;
-			var path = Paths.modFolders("metadata.json");
-			var raw:Null<String> = null;
-
-			#if sys
-			if (FileSystem.exists(path))
-				raw = File.getContent(path);
-			#else
-			if (Assets.exists(path))
-				raw = Assets.getText(path);
-			#end
-
-		}
-		Paths.currentModDirectory = '';
-		#end
-
-		return list;
-	}
-	 */
 	#end
 	
 	public static function loadTheFirstEnabledMod()

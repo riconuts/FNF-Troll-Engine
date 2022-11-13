@@ -337,6 +337,9 @@ class PlayState extends MusicBeatState
 
 	function returnCharacterPreload(characterName:String):Array<AssetPreload>{
 		var char = Character.getCharacterFile(characterName);
+		if (char == null)
+			return [];
+
 		var name:String = 'icons/' + char.healthicon;
 		if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-' + char.healthicon; //Older versions of psych engine's support
 		if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-face'; //Prevents crash from missing icon
@@ -1595,7 +1598,7 @@ class PlayState extends MusicBeatState
 			for (songNotes in section.sectionNotes)
 			{
 				var type:Dynamic = songNotes[3];
-				if(!Std.isOfType(type, String)) type = editors.ChartingState.noteTypeList[type];
+				//if(!Std.isOfType(type, String)) type = editors.ChartingState.noteTypeList[type];
 
 				if (!noteTypeMap.exists(type)) {
 					firstNotePush(type);
@@ -1732,7 +1735,7 @@ class PlayState extends MusicBeatState
 				var skin = arrowSkin;
 
 				var type:Dynamic = songNotes[3];
-				if(!Std.isOfType(type, String)) type = editors.ChartingState.noteTypeList[type];
+				//if(!Std.isOfType(type, String)) type = editors.ChartingState.noteTypeList[type];
 
 				// TODO: maybe make a checkNoteType n shit but idfk im lazy
 				// or maybe make a "Transform Notes" event which'll make notes which don't change texture change into the specified one
@@ -2234,9 +2237,7 @@ class PlayState extends MusicBeatState
 		}
 
 		if (FlxG.keys.anyJustPressed(debugKeysChart) && !endingSong && !inCutscene)
-		{
 			openChartEditor();
-		}
 
 		var mult:Float = FlxMath.lerp(1, iconP1.scale.x, CoolUtil.boundTo(1 - (elapsed * 9), 0, 1));
 		iconP1.scale.set(mult, mult);

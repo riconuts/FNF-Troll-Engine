@@ -12,12 +12,23 @@ import flixel.util.FlxColor;
 import flixel.addons.display.shapes.FlxShapeBox;
 import flixel.util.FlxTimer;
 
+typedef SquareTransitionInfo = {
+	var sX:Null<Float>;
+	var sY:Null<Float>;
+	var sW:Null<Float>;
+	var sH:Null<Float>;
+	
+	var eX:Null<Float>;
+	var eY:Null<Float>;
+	var eW:Null<Float>;
+	var eH:Null<Float>;
+
+	var dur:Null<Float>;
+}
+
 class SquareTransitionSubstate extends TransitionSubstate
 {
-	public static var startPoint = new FlxPoint();
-	public static var startSize = new FlxPoint();
-	public static var endPoint = new FlxPoint();
-	public static var endSize = new FlxPoint();
+	public static var info:SquareTransitionInfo = cast {};
 
 	var _finalDelayTime:Float = 0.0;
 
@@ -56,20 +67,42 @@ class SquareTransitionSubstate extends TransitionSubstate
 
 		nextCamera = null;
 
-		funkyRectangle = new FlxShapeBox(startPoint.x, startPoint.y, startSize.x, startSize.y, {thickness: 3, color: FlxColor.fromRGB(255, 242, 0)}, FlxColor.BLACK);
+		// peak programming
+		if (info.sX == null)
+			info.sX = 0;
+		if (info.sY == null)
+			info.sY = 0;
+		if (info.sW == null)
+			info.sW = 0;
+		if (info.sH == null)
+			info.sH = 0;
+		if (info.eX == null)
+			info.eX = 0;
+		if (info.eY == null)
+			info.eY = 0;
+		if (info.eW == null)
+			info.eW = 0;
+		if (info.eH == null)
+			info.eH = 0;
+
+		if (info.dur == null)
+			info.dur = 0.3;
+
+		funkyRectangle = new FlxShapeBox(info.sX, info.sY, info.sW, info.sH, {thickness: 3, color: FlxColor.fromRGB(255, 242, 0)}, FlxColor.BLACK);
+		funkyRectangle.cameras = cameras;
 		add(funkyRectangle);
 
 		FlxTween.tween(
 			funkyRectangle, 
 			{
-				x: endPoint.x, 
-				y: endPoint.y,
-				width: endSize.x,
-				height: endSize.y,
-				shapeWidth: endSize.x,
-				shapeHeight: endSize.y
+				x: info.eX, 
+				y: info.eY,
+				width: info.eW,
+				height: info.eH,
+				shapeWidth: info.eW,
+				shapeHeight: info.eH
 			}, 
-			0.3,
+			info.dur,
 			{
 				ease: FlxEase.quadOut,
 				onComplete: function(t:FlxTween){delayThenFinish();}

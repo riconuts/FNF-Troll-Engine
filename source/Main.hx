@@ -165,8 +165,13 @@ class Main extends Sprite
 
 		Sys.println(" \n" + errMsg);
 
-		FlxG.fullscreen = false;
+		doCrashMessage(errMsg);
+	}
 
+	static public function doCrashMessage(errMsg:String = '')
+	{
+		FlxG.fullscreen = false;
+		
 		Application.current.window.alert(errMsg, "Error!");
 		DiscordClient.shutdown();
 		Sys.exit(1);

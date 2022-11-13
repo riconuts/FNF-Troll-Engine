@@ -3,12 +3,13 @@ package;
 import flixel.FlxSprite;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
+import flixel.addons.transition.FlxTransitionableState;
 import sowy.SowyTextButton;
 import ChapterData;
 
 using StringTools;
 
-class ChapterMenuState extends MusicBeatSubstate{
+class ChapterMenuState extends MusicBeatState{
 	var coverArt:FlxSprite;
 	var chapterText:FlxText;
 
@@ -33,13 +34,35 @@ class ChapterMenuState extends MusicBeatSubstate{
 	//
 	public var chapData:ChapterMetadata;
 
+	public var cameFromStoryMenu = false;
+
 	public function new(chapData:ChapterMetadata){
 		super();
 
-		trace('loading week: ${chapData.name}');
+		trace('Loading: ${chapData.name}');
 
 		this.chapData = chapData;
 		Paths.currentModDirectory = chapData.directory;
+	}
+
+	override function create()
+	{
+		#if desktop
+		FlxG.mouse.visible = true;
+		#end
+
+		if (cameFromStoryMenu){
+			FlxTransitionableState.skipNextTransIn = true;
+		}else{
+			if (FlxTransitionableState.skipNextTransIn)
+				CustomFadeTransition.nextCamera = null;
+		}
+
+		super.create();
+
+		var funkyRectangle = new flixel.addons.display.shapes.FlxShapeBox(10, 10, 1260, 700, {thickness: 3, color: FlxColor.fromRGB(255, 242, 0)}, FlxColor.BLACK);
+		funkyRectangle.cameras = cameras;
+		add(funkyRectangle);
 
 		// Create sprites
 		var artGraph = Paths.image('chaptercovers/' + Paths.formatToSongPath(chapData.name));
@@ -51,7 +74,7 @@ class ChapterMenuState extends MusicBeatSubstate{
 		chapterText = new FlxText(0, 0, 1, sowyStr, 32);
 		chapterText.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE, FlxColor.WHITE);
 		add(chapterText);
-		
+
 		cornerLeftText = new SowyTextButton(15, 720, 0, "← BACK", 32, close);
 		cornerLeftText.label.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
 		add(cornerLeftText);
@@ -101,9 +124,9 @@ class ChapterMenuState extends MusicBeatSubstate{
 		{
 			var yPos = startY + (songAmount + 2) * 48;
 
-			var newSongTxt =  new FlxText(halfScreen, yPos, 0, songName, 32);
+			var newSongTxt = new FlxText(halfScreen, yPos, 0, songName, 32);
 			newSongTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
-			
+
 			var newScoreTxt = new FlxText(1205, yPos, 0, '' + Highscore.getScore(songName), 32);
 			newScoreTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
 			newScoreTxt.x -= newScoreTxt.width + 15;
@@ -125,14 +148,25 @@ class ChapterMenuState extends MusicBeatSubstate{
 		totalSongTxt.y = totalScoreTxt.y = startY + (songAmount + 2) * 48;
 	}
 
+	function close()
+	{
+		FlxTransitionableState.skipNextTransOut = true;
+
+		var state = new StoryMenuState();
+		state.cameFromChapterMenu = true;
+		MusicBeatState.switchState(state);
+
+		FlxG.sound.play(Paths.sound('cancelMenu')); // swoosh
+	}
+
 	override function update(elapsed:Float)
 	{
 		if (controls.BACK)
 			close();
 		else if (controls.ACCEPT)
 			playWeek();
-		/*else if (flixel.FlxG.keys.justPressed.CONTROL)
-			StoryMenuState.instance.openSubState(new GameplayChangersSubstate());*/
+		else if (flixel.FlxG.keys.justPressed.CONTROL)
+			openSubState(new GameplayChangersSubstate());
 
 		super.update(elapsed);
 	}

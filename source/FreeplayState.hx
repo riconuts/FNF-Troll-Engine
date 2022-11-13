@@ -103,11 +103,20 @@ class FreeplayState extends MusicBeatState
 						songButton.onUp.callback = function(){songButton.shake();}
 					else
 						songButton.onUp.callback = function(){
-							var sPos = songButton.getScreenPosition();
-							SquareTransitionSubstate.startPoint.set(sPos.x - 3, sPos.y - 3);
-							SquareTransitionSubstate.startSize.set(200, 200);
-							SquareTransitionSubstate.endPoint.set(-3, -3);
-							SquareTransitionSubstate.endSize.set(FlxG.width + 6, FlxG.height + 6);
+							var sPos = songButton;
+							var cam = FlxG.camera;
+							SquareTransitionSubstate.nextCamera = cam;
+							SquareTransitionSubstate.info = cast {
+								sX: sPos.x - 3,
+								sY: sPos.y - 3,
+								sW: 200,
+								sH: 200,
+
+								eX: cam.scroll.x - 3,
+								eY: cam.scroll.y - 3,
+								eW: FlxG.width + 6,
+								eH: FlxG.height + 6
+							};
 							this.transOut = SquareTransitionSubstate;
 							playSong(songButton.metadata);
 						};
@@ -146,8 +155,10 @@ class FreeplayState extends MusicBeatState
 		PlayState.isStoryMode = false;
 
 		if (FlxG.keys.pressed.SHIFT)
+		{
+			PlayState.chartingMode = true;
 			LoadingState.loadAndSwitchState(new ChartingState());
-		else
+		}else
 			LoadingState.loadAndSwitchState(new PlayState());
 
 		FlxG.sound.music.volume = 0;
@@ -200,25 +211,23 @@ class FreeplayState extends MusicBeatState
 	
 	var minY:Float = 360;
 	var maxY:Float = 0;
-	var baseSpeed = 8;
-
 	override function update(elapsed:Float)
 	{
 		if (FlxG.sound.music != null && FlxG.sound.music.volume < 0.7)
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
 
-		var speed = FlxG.keys.pressed.SHIFT ? baseSpeed * 2 : baseSpeed;
+		var speed = FlxG.keys.pressed.SHIFT ? 2 : 1;
 
 		var mouseWheel = FlxG.mouse.wheel;
 		var yScroll:Float = 0;
 
 		if (mouseWheel != 0)
-			yScroll -= mouseWheel * speed * 8;
+			yScroll -= mouseWheel * 20 * 8;
 
 		if (controls.UI_UP)
-			camFollow.y -= speed;
+			camFollow.y -= 20;
 		if (controls.UI_DOWN)
-			camFollow.y += speed;
+			camFollow.y += 20;
 
 		camFollow.y = Math.max(minY, Math.min(camFollow.y + yScroll, maxY));
 

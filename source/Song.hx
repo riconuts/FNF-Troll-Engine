@@ -19,17 +19,17 @@ typedef SwagSong =
 	var events:Array<Dynamic>;
 	var bpm:Float;
 	var needsVoices:Bool;
-	@:optional var extraTracks:Array<String>;
 	var speed:Float;
 
 	var player1:String;
 	var player2:String;
 	var gfVersion:String;
 	var stage:String;
-
 	var arrowSkin:String;
 	var splashSkin:String;
 	var validScore:Bool;
+
+	@:optional var extraTracks:Array<String>;
 }
 
 class Song
@@ -39,15 +39,14 @@ class Song
 	public var events:Array<Dynamic>;
 	public var bpm:Float;
 	public var needsVoices:Bool = true;
-	public var extraTracks:Array<String> = [];
 	public var arrowSkin:String;
 	public var splashSkin:String;
 	public var speed:Float = 1;
 	public var stage:String;
-
 	public var player1:String = 'bf';
 	public var player2:String = 'dad';
 	public var gfVersion:String = 'gf';
+	public var extraTracks:Array<String> = [];
 
 	private static function onLoadJson(songJson:Dynamic) // Convert old charts to newest format
 	{
@@ -95,46 +94,16 @@ class Song
 
 	public static function loadFromJson(jsonInput:String, ?folder:String):SwagSong
 	{
-		var rawJson = null;
-		
-		var formattedFolder:String = Paths.formatToSongPath(folder);
-		var formattedSong:String = Paths.formatToSongPath(jsonInput);
-		#if MODS_ALLOWED
-		var moddyFile:String = Paths.modsJson(formattedFolder + '/' + formattedSong);
-		if(FileSystem.exists(moddyFile)) {
-			rawJson = File.getContent(moddyFile).trim();
-		}
-		#end
+		var path = Paths.formatToSongPath(folder) + '/' + Paths.formatToSongPath(jsonInput);
+		var rawJson = Paths.getText('data/$path.json', false);
+		if (rawJson == null)
+			Main.doCrashMessage('JSON not found: $jsonInput');
 
-		if(rawJson == null) {
-			#if sys
-			rawJson = File.getContent(Paths.json(formattedFolder + '/' + formattedSong)).trim();
-			#else
-			rawJson = Assets.getText(Paths.json(formattedFolder + '/' + formattedSong)).trim();
-			#end
-		}
+		rawJson = rawJson.trim();
 
+		// LOL GOING THROUGH THE BULLSHIT TO CLEAN IDK WHATS STRANGE
 		while (!rawJson.endsWith("}"))
-		{
 			rawJson = rawJson.substr(0, rawJson.length - 1);
-			// LOL GOING THROUGH THE BULLSHIT TO CLEAN IDK WHATS STRANGE
-		}
-
-		// FIX THE CASTING ON WINDOWS/NATIVE
-		// Windows???
-		// trace(songData);
-
-		// trace('LOADED FROM JSON: ' + songData.notes);
-		/* 
-			for (i in 0...songData.notes.length)
-			{
-				trace('LOADED FROM JSON: ' + songData.notes[i].sectionNotes);
-				// songData.notes[i].sectionNotes = songData.notes[i].sectionNotes
-			}
-
-				daNotes = songData.notes;
-				daSong = songData.song;
-				daBpm = songData.bpm; */
 
 		var songJson:Dynamic = parseJSONshit(rawJson);
 		if(jsonInput != 'events') Stage.StageData.loadDirectory(songJson);
