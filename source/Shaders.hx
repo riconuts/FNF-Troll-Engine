@@ -1,16 +1,6 @@
 package;
 
 // STOLEN FROM TGT V3 LOL
-import flixel.FlxG;
-import flixel.math.FlxPoint;
-import flixel.system.FlxAssets.FlxShader;
-import flixel.util.FlxColor;
-import openfl.Lib;
-import openfl.display.BitmapData;
-import openfl.display.ShaderInput;
-import openfl.utils.Assets;
-
-using StringTools;
 
 typedef ShaderEffect =
 {
@@ -42,7 +32,7 @@ class HighEffect
 	}
 }
 
-class HighShader extends FlxShader
+class HighShader extends flixel.system.FlxAssets.FlxShader
 {
 	@:glFragmentSource('
 		#pragma header

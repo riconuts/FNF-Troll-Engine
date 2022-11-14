@@ -179,6 +179,8 @@ class ChartingState extends MusicBeatState
 	public static var quantization:Int = 16;
 	public static var curQuant = 3;
 
+	var quantTxt:FlxText;
+
 	public var quantizations:Array<Int> = [
 		4,
 		8,
@@ -380,11 +382,17 @@ class ChartingState extends MusicBeatState
 		}
 		lastSong = currentSongName;
 
-		zoomTxt = new FlxText(10, 10, 0, "Zoom: 1 / 1", 16);
-		bpmTxt.setFormat(null, 18, 0xFFFFFFFF, LEFT, FlxTextBorderStyle.OUTLINE, 0xFF000000);
-		bpmTxt.borderSize = 2;
+		zoomTxt = new FlxText(10, 180, 0, "Zoom: 1 / 1", 16);
+		zoomTxt.setFormat(null, 18, 0xFFFFFFFF, LEFT, FlxTextBorderStyle.OUTLINE, 0xFF000000);
+		zoomTxt.borderSize = 2;
 		zoomTxt.scrollFactor.set();
 		add(zoomTxt);
+
+		quantTxt = new FlxText(10, 200, 0, "Beat Snap: " + quantization + "th" , 16);
+		quantTxt.setFormat(null, 18, 0xFFFFFFFF, LEFT, FlxTextBorderStyle.OUTLINE, 0xFF000000);
+		quantTxt.borderSize = 2;
+		quantTxt.scrollFactor.set();
+		add(quantTxt);
 
 		updateGrid();
 		super.create();
@@ -1834,6 +1842,8 @@ class ChartingState extends MusicBeatState
 						curQuant = 0;
 
 					quantization = quantizations[curQuant];
+
+					quantTxt.text = "Beat Snap: " + quantization + "th";
 				}
 
 				if(FlxG.keys.justPressed.LEFT){
@@ -1842,6 +1852,8 @@ class ChartingState extends MusicBeatState
 						curQuant = quantizations.length-1;
 
 					quantization = quantizations[curQuant];
+
+					quantTxt.text = "Beat Snap: " + quantization + "th";
 				}
 				quant.animation.play('q', true, false, curQuant);
 			}
@@ -1959,8 +1971,7 @@ class ChartingState extends MusicBeatState
 		"Time: " + Std.string(FlxMath.roundDecimal(Conductor.songPosition / 1000, 2)) + " / " + Std.string(FlxMath.roundDecimal(FlxG.sound.music.length / 1000, 2)) +
 		"\n\nSection: " + curSec +
 		"\nBeat: " + Std.string(curDecBeat).substring(0,4) +
-		"\nStep: " + curStep +
-		"\nBeat Snap: " + quantization + "th";
+		"\nStep: " + curStep;
 
 		var playedSound:Array<Bool> = [false, false, false, false]; //Prevents ouchy GF sex sounds
 		curRenderedNotes.forEachAlive(function(note:Note) {
@@ -2025,7 +2036,7 @@ class ChartingState extends MusicBeatState
 		if(daZoom < 1) zoomThing = Math.round(1 / daZoom) + ' / 1';
 		zoomTxt.text = 'Zoom: ' + zoomThing;
 		reloadGridLayer();
-	}
+	} 
 
 	var lastSecBeats:Float = 0;
 	var lastSecBeatsNext:Float = 0;

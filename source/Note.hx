@@ -1,15 +1,8 @@
 package;
 
 import editors.ChartingState;
-import flash.display.BitmapData;
-import flixel.FlxG;
-import flixel.FlxSprite;
-import flixel.graphics.frames.FlxAtlasFrames;
-import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
-import flixel.util.FlxColor;
 import math.Vector3;
-import openfl.utils.AssetType;
 import openfl.utils.Assets;
 import scripts.*;
 
@@ -109,7 +102,6 @@ class Note extends FlxSprite
 	public static var swagWidth:Float = 160 * 0.7;
 	
 	private var colArray:Array<String> = ['purple', 'blue', 'green', 'red'];
-	private var pixelInt:Array<Int> = [0, 1, 2, 3];
 
 	// Lua shit
 	public var noteSplashDisabled:Bool = false;
@@ -315,7 +307,6 @@ class Note extends FlxSprite
 		x += offsetX;
 	}
 
-	var lastNoteOffsetXForPixelAutoAdjusting:Float = 0;
 	var lastNoteScaleToo:Float = 1;
 	public var originalHeightForCalcs:Float = 6;
 	public function reloadNote(?prefix:String = '', ?texture:String = '', ?suffix:String = '') {
@@ -394,19 +385,6 @@ class Note extends FlxSprite
 		_loadNoteAnims();
 	}
 
-	public function loadPixelNoteAnims() {
-		if (noteScript != null && noteScript.scriptType == 'hscript')
-		{
-			var noteScript:FunkinHScript = cast noteScript;
-			if (noteScript.exists("loadPixelNoteAnims") && Reflect.isFunction(noteScript.get("loadNoteAnims")))
-			{
-				noteScript.executeFunc("loadPixelNoteAnims", [this], this, ["super" => _loadPixelNoteAnims]);
-				return;
-			}
-		}
-		_loadPixelNoteAnims();
-	}
-
 	function _loadNoteAnims() {
 		animation.addByPrefix(colArray[noteData] + 'Scroll', colArray[noteData] + '0');
 
@@ -419,15 +397,6 @@ class Note extends FlxSprite
 
 		setGraphicSize(Std.int(width * 0.7));
 		updateHitbox();
-	}
-
-	function _loadPixelNoteAnims() {
-		if(isSustainNote) {
-			animation.add(colArray[noteData] + 'holdend', [pixelInt[noteData] + 4]);
-			animation.add(colArray[noteData] + 'hold', [pixelInt[noteData]]);
-		} else {
-			animation.add(colArray[noteData] + 'Scroll', [pixelInt[noteData] + 4]);
-		}
 	}
 
 	override function update(elapsed:Float)

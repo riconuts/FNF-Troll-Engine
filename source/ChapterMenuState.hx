@@ -155,8 +155,6 @@ class ChapterMenuState extends MusicBeatState{
 		var state = new StoryMenuState();
 		state.cameFromChapterMenu = true;
 		MusicBeatState.switchState(state);
-
-		FlxG.sound.play(Paths.sound('cancelMenu')); // swoosh
 	}
 
 	override function update(elapsed:Float)

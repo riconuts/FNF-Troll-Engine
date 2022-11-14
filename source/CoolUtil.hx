@@ -63,9 +63,7 @@ class CoolUtil
 		#end
 
 		for (i in 0...daList.length)
-		{
 			daList[i] = daList[i].trim();
-		}
 
 		return daList;
 	}

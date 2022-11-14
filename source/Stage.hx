@@ -114,59 +114,55 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		super.destroy();
 	}
 
-	////
+	//// Stages of the currently loaded mod.
 	public static function getStageList():Array<String>{
-		var stages:Array<String> = [];
+		var rawList = Paths.getText('data/stageList.txt', true);
 
 		#if MODS_ALLOWED
-		var directories:Array<String> = [
-			Paths.mods('stages/'),
-			Paths.mods(Paths.currentModDirectory + '/stages/'),
-			Paths.getPreloadPath('stages/')
-		];
-		#else
-		var directories:Array<String> = [Paths.getPreloadPath('stages/')];
+		var modsList = Paths.getText('data/stageList.txt', false);
+		if (modsList != null){
+			if (rawList != null)
+				rawList += "\n" + modsList;
+			else
+				rawList = modsList;
+		}
 		#end
 		
-		var tempMap:Map<String, Bool> = new Map<String, Bool>();
-		var stageFile:Array<String> = CoolUtil.coolTextFile(Paths.txt('stageList'));
-		for (i in 0...stageFile.length)
-		{ // Prevent duplicates
-			var stageToCheck:String = stageFile[i];
-			if (!tempMap.exists(stageToCheck))
-			{
-				stages.push(stageToCheck);
-			}
-			tempMap.set(stageToCheck, true);
-		}
-		#if MODS_ALLOWED
-		for (i in 0...directories.length)
+		if (rawList == null)
+			return ['stage1'];
+
+		var stages:Array<String> = [];
+
+		for (i in rawList.trim().split('\n'))
 		{
-			var directory:String = directories[i];
-			if (FileSystem.exists(directory))
-			{
-				for (file in FileSystem.readDirectory(directory))
-				{
-					var path = haxe.io.Path.join([directory, file]);
-					if (!FileSystem.isDirectory(path) && file.endsWith('.json'))
-					{
-						var stageToCheck:String = file.substr(0, file.length - 5);
-						if (!tempMap.exists(stageToCheck))
-						{
-							tempMap.set(stageToCheck, true);
-							stages.push(stageToCheck);
-						}
-					}
-				}
-			}
+			var modStage = i.trim();
+			if (!stages.contains(modStage))
+				stages.push(modStage);
 		}
-		#end
 
 		if (stages.length < 1)
-			stages.push('stage');
+			stages.push('stage1');
 
 		return stages;
 	}
+
+	/*
+	//// stage -> modDirectory
+	public static function getStageMap():Map<String, String>
+	{
+		var directories:Array<String> = [
+			#if MODS_ALLOWED
+			Paths.mods(Paths.currentModDirectory + '/stages/'),
+			Paths.mods('stages/'),
+			#end
+			Paths.getPreloadPath('stages/')
+		];
+
+		var theMap:Map<String, String> = new Map();
+
+		return theMap;
+	}
+	*/
 }
 
 typedef StageFile = {

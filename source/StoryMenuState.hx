@@ -63,8 +63,10 @@ class StoryMenuState extends MusicBeatState
 		cam.bgColor = FlxColor.BLACK;
 
 		if (cameFromChapterMenu){
-			// dangerous shit right here
 			trace('uuoohhhhh im cummmminggg aaaaa');
+
+			FlxG.sound.play(Paths.sound('cancelMenu')); // swoosh
+
 			final STS = SquareTransitionSubstate;
 			STS.nextCamera = cam;
 			STS.info = cast {

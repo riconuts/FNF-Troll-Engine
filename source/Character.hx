@@ -101,6 +101,14 @@ class Character extends FlxSprite
 		
 		return rawJson != null ? cast Json.parse(rawJson) : null;
 	}
+	override function destroy()
+	{
+		for (script in characterScripts)
+			script.stop();
+		
+		return super.destroy();
+	}
+
 	public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false)
 	{
 		super(x, y);

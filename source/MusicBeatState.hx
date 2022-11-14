@@ -1,19 +1,6 @@
 package;
-import Conductor.BPMChangeEvent;
-import flixel.FlxBasic;
-import flixel.FlxG;
-import flixel.FlxSprite;
-import flixel.FlxState;
-import flixel.addons.transition.FlxTransitionableState;
+
 import flixel.addons.ui.FlxUIState;
-import flixel.math.FlxRect;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
-import flixel.util.FlxColor;
-import flixel.util.FlxGradient;
-import flixel.util.FlxTimer;
-import scripts.*;
-import scripts.Globals;
 
 class MusicBeatState extends FlxUIState
 {
@@ -35,6 +22,16 @@ class MusicBeatState extends FlxUIState
 	override function create() {
 		camBeat = FlxG.camera;
 		super.create();
+	}
+
+	override public function onFocus():Void
+	{
+		super.onFocus();
+	}
+
+	override public function onFocusLost():Void
+	{
+		super.onFocusLost();
 	}
 
 	override function update(elapsed:Float)
@@ -119,13 +116,12 @@ class MusicBeatState extends FlxUIState
 	}
 
 	public static function resetState() {
-		MusicBeatState.switchState(FlxG.state);
+		FlxG.resetState();
 	}
 
-	public static function getState():MusicBeatState {
-		var curState:Dynamic = FlxG.state;
-		var leState:MusicBeatState = curState;
-		return leState;
+	public static function getState():MusicBeatState
+	{
+		return cast FlxG.state;
 	}
 
 	public function stepHit():Void

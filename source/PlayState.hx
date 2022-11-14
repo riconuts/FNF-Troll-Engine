@@ -181,7 +181,7 @@ class PlayState extends MusicBeatState
 	public var timeBar:FlxBar;
 
 	public var ratingsData:Array<Rating> = [];
-	public var epics:Int = 0;
+	// public var epics:Int = 0;
 	public var sicks:Int = 0;
 	public var goods:Int = 0;
 	public var bads:Int = 0;
@@ -746,16 +746,19 @@ class PlayState extends MusicBeatState
 		strumLine.scrollFactor.set();
 
 		var showTime:Bool = (ClientPrefs.timeBarType != 'Disabled');
-		timeTxt = new FlxText(STRUM_X + (FlxG.width / 2) - 248, 19, 400, "", 32);
+		timeTxt = new FlxText(STRUM_X + (FlxG.width / 2) - 248, (ClientPrefs.downScroll ? FlxG.height - 44 : 19) , 400, "", 32);
 		timeTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		timeTxt.scrollFactor.set();
 		timeTxt.alpha = 0;
 		timeTxt.borderSize = 2;
 		timeTxt.visible = showTime;
-		if(ClientPrefs.downScroll) timeTxt.y = FlxG.height - 44;
-
-		if(ClientPrefs.timeBarType == 'Song Name')
+			
+		if (ClientPrefs.timeBarType == 'Song Name')
+		{
 			timeTxt.text = SONG.song;
+			timeTxt.size = 24;
+			timeTxt.y += 3;
+		}
 
 		updateTime = showTime;
 
@@ -777,11 +780,6 @@ class PlayState extends MusicBeatState
 		timeBar.numDivisions = 800; //How much lag this causes?? Should i tone it down to idk, 400 or 200?
 		timeBar.alpha = 0;
 		timeBar.visible = showTime;
-		if(ClientPrefs.timeBarType == 'Song Name')
-		{
-			timeTxt.size = 24;
-			timeTxt.y += 3;
-		}
 
 		add(timeBar);
 		add(timeTxt);
@@ -2304,16 +2302,21 @@ class PlayState extends MusicBeatState
 				if(updateTime) {
 					var curTime:Float = Conductor.songPosition - ClientPrefs.noteOffset;
 					if(curTime < 0) curTime = 0;
+
 					songPercent = (curTime / songLength);
 
-					var songCalc:Float = (songLength - curTime);
-					if(ClientPrefs.timeBarType == 'Time Elapsed') songCalc = curTime;
+					if (chartingMode)
+						timeTxt.text = '${FlxMath.roundDecimal(curTime / 1000, 2)} / ${FlxMath.roundDecimal(songLength, 2)}';
+					else{
+						var songCalc:Float = (songLength - curTime);
+						if(ClientPrefs.timeBarType == 'Time Elapsed') songCalc = curTime;
 
-					var secondsTotal:Int = Math.floor(songCalc / 1000);
-					if(secondsTotal < 0) secondsTotal = 0;
+						var secondsTotal:Int = Math.floor(songCalc / 1000);
+						if(secondsTotal < 0) secondsTotal = 0;
 
-					if(ClientPrefs.timeBarType != 'Song Name')
-						timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
+						if(ClientPrefs.timeBarType != 'Song Name')
+							timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
+					}
 				}
 			}
 
@@ -3715,10 +3718,10 @@ class PlayState extends MusicBeatState
 			}
 
 			var animToPlay:String = singAnimations[Std.int(Math.abs(note.noteData))] + altAnim;
-			char.voicelining = false;
 
 			if(char != null)
 			{
+				char.voicelining = false;
 				char.playAnim(animToPlay, true);
 				char.holdTimer = 0;
 			}
@@ -4204,7 +4207,7 @@ class PlayState extends MusicBeatState
 
 			// Rating FC
 			ratingFC = "";
-			if (epics > 0) ratingFC = "EFC";
+			//if (epics > 0) ratingFC = "EFC";
 			if (sicks > 0) ratingFC = "SFC";
 			if (goods > 0) ratingFC = "GFC";
 			if (bads > 0 || shits > 0) ratingFC = "FC";
@@ -4219,47 +4222,46 @@ class PlayState extends MusicBeatState
 	// SOWY: shader stuff from andromeda or V3 idrk
 	private var camShaders = [];
 	private var hudShaders = [];
-	private var overlayShaders = [];
 
 	public function addCameraEffect(effect:ShaderEffect)
 	{
 		camShaders.push(effect);
-		var newCamEffects:Array<BitmapFilter> = []; // IT SHUTS HAXE UP IDK WHY BUT WHATEVER IDK WHY I CANT JUST ARRAY<SHADERFILTER>
+
+		var newCamEffects:Array<BitmapFilter> = [];
 		for (i in camShaders)
-		{
 			newCamEffects.push(new ShaderFilter(i.shader));
-		}
+
 		camGame.setFilters(newCamEffects);
 	}
 	public function removeCameraEffect(effect:ShaderEffect)
 	{
 		camShaders.remove(effect);
+
 		var newCamEffects:Array<BitmapFilter> = [];
 		for (i in camShaders)
-		{
 			newCamEffects.push(new ShaderFilter(i.shader));
-		}
+
 		camGame.setFilters(newCamEffects);
 	}
 
 	public function addHUDEffect(effect:ShaderEffect)
 	{
 		hudShaders.push(effect);
-		var newCamEffects:Array<BitmapFilter> = []; // IT SHUTS HAXE UP IDK WHY BUT WHATEVER IDK WHY I CANT JUST ARRAY<SHADERFILTER>
+
+		var newCamEffects:Array<BitmapFilter> = [];
 		for (i in hudShaders)
-		{
 			newCamEffects.push(new ShaderFilter(i.shader));
-		}
+
 		camHUD.setFilters(newCamEffects);
 	}
 	public function removeHUDEffect(effect:ShaderEffect)
 	{
 		hudShaders.remove(effect);
+
 		var newCamEffects:Array<BitmapFilter> = [];
 		for (i in hudShaders)
-		{
 			newCamEffects.push(new ShaderFilter(i.shader));
-		}
+
 		camHUD.setFilters(newCamEffects);
 	}
 	//

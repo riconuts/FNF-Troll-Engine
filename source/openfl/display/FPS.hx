@@ -90,6 +90,11 @@ class FPS extends TextField
 			text += "\nMemory: " + memoryMegas + " MB";
 			#end
 
+			/* debugg :3
+			text += "\nState: " + Type.getClassName(Type.getClass(FlxG.state));
+			text += "\nSubstate: " + Type.getClassName(Type.getClass(FlxG.state.subState));
+			*/
+
 			textColor = 0xFFFFFFFF;
 			if (memoryMegas > 3000 || currentFPS <= ClientPrefs.framerate / 2)
 			{

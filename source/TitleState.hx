@@ -90,17 +90,26 @@ class TitleState extends MusicBeatState
 			Conductor.changeBPM(90);
 		}
 
+		// Set up cameras
+		camHUD.bgColor = 0x00000000;
+
 		FlxG.cameras.reset(camGame);
 		FlxG.cameras.add(camHUD, false);
 
+		FlxG.cameras.setDefaultDrawTarget(camGame, true);
+
+		// Set up a random stage
+		Paths.loadRandomMod();
 		var stageNames = Stage.getStageList();
 		var randomStage = stageNames[FlxG.random.int(0, stageNames.length - 1)];
-		trace(Paths.currentModDirectory, randomStage);
+		trace(randomStage, Paths.currentModDirectory);
 
 		bg = new Stage(randomStage).buildStage();
-		FlxG.camera.zoom = bg.stageData.defaultZoom;
+		trace(bg.members.length);
+		camGame.zoom = bg.stageData.defaultZoom;
 		add(bg);
 
+		// Random logoooo
 		swagShader = new ColorSwap();
 
 		logoBl = new RandomTitleLogo();
@@ -110,6 +119,7 @@ class TitleState extends MusicBeatState
 		add(logoBl);
 		logoBl.shader = swagShader.shader;
 
+		//
 		titleText = new FlxSprite(100, 576);
 		#if (desktop && MODS_ALLOWED)
 		var path = "mods/" + Paths.currentModDirectory + "/images/titleEnter.png";
@@ -130,6 +140,7 @@ class TitleState extends MusicBeatState
 		titleText.cameras = [camHUD];
 		add(titleText);
 
+		//
 		credGroup = new FlxGroup();
 		credGroup.cameras = [camHUD];
 		add(credGroup);
@@ -146,6 +157,7 @@ class TitleState extends MusicBeatState
 		credTextShit.visible = false;
 		FlxTween.tween(credTextShit, {y: credTextShit.y + 20}, 2.9, {ease: FlxEase.quadInOut, type: PINGPONG});
 
+		//
 		ngSpr = new FlxSprite(0, FlxG.height * 0.52).loadGraphic(Paths.image('newgrounds_logo'));
 		ngSpr.visible = false;
 		ngSpr.setGraphicSize(Std.int(ngSpr.width * 0.8));
@@ -154,6 +166,7 @@ class TitleState extends MusicBeatState
 		ngSpr.cameras = [camHUD];
 		add(ngSpr);
 
+		//
 		if (initialized)
 			skipIntro();
 		else
@@ -211,9 +224,7 @@ class TitleState extends MusicBeatState
 		for (touch in FlxG.touches.list)
 		{
 			if (touch.justPressed)
-			{
 				pressedEnter = true;
-			}
 		}
 		#end
 
@@ -377,7 +388,6 @@ class TitleState extends MusicBeatState
 			remove(credGroup);
 
 			camHUD.flash(FlxColor.WHITE, 4);
-			//FlxG.camera.flash(FlxColor.WHITE, 4);
 			
 			skippedIntro = true;
 
