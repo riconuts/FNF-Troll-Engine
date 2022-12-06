@@ -90,7 +90,6 @@ class GameOverSubstate extends MusicBeatSubstate
 		PlayState.instance.callOnScripts('onUpdate', [elapsed]);
 		super.update(elapsed);
 
-		PlayState.instance.callOnScripts('onUpdatePost', [elapsed]);
 		if(updateCamera) {
 			var lerpVal:Float = CoolUtil.boundTo(elapsed * 0.6, 0, 1);
 			camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
@@ -133,10 +132,9 @@ class GameOverSubstate extends MusicBeatSubstate
 		}
 
 		if (FlxG.sound.music.playing)
-		{
 			Conductor.songPosition = FlxG.sound.music.time;
-		}
-		PlayState.instance.callOnLuas('onUpdatePost', [elapsed]);
+		
+		PlayState.instance.callOnScripts('onUpdatePost', [elapsed]);
 	}
 
 	override function beatHit()
@@ -161,7 +159,7 @@ class GameOverSubstate extends MusicBeatSubstate
 					MusicBeatState.resetState();
 				});
 			});
-			PlayState.instance.callOnLuas('onGameOverConfirm', [true]);
+			PlayState.instance.callOnScripts('onGameOverConfirm', [true]);
 		}
 	}
 }

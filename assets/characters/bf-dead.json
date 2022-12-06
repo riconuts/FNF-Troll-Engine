@@ -1,44 +1,44 @@
 {
 	"animations": [
 		{
+			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
-			"loop": false,
-			"fps": 24,
 			"anim": "firstDeath",
-			"indices": [],
-			"name": "boyfriend death crack"
+			"fps": 24,
+			"name": "boyfriend death crack",
+			"indices": []
 		},
 		{
-			"offsets": [
-				0,
-				0
-			],
 			"loop": true,
-			"fps": 24,
+			"offsets": [
+				-127,
+				-96
+			],
 			"anim": "deathLoop",
-			"indices": [],
-			"name": "boyfriend death loop"
+			"fps": 24,
+			"name": "boyfriend death loop",
+			"indices": []
 		},
 		{
-			"offsets": [
-				0,
-				0
-			],
 			"loop": false,
-			"fps": 24,
+			"offsets": [
+				-2,
+				18
+			],
 			"anim": "deathConfirm",
-			"indices": [],
-			"name": "boyfriend death retry"
+			"fps": 24,
+			"name": "boyfriend death retry",
+			"indices": []
 		}
 	],
 	"no_antialiasing": false,
 	"image": "characters/BOYFRIEND_DEAD",
 	"position": [
 		-350,
-		-620
+		-600
 	],
 	"healthicon": "bf",
 	"flip_x": true,

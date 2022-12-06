@@ -52,6 +52,8 @@ class Character extends FlxSprite
 {
 	public static var DEFAULT_CHARACTER:String = 'bf'; // In case a character is missing, it will use BF on its place
 
+	public var xFacing:Float = 1;
+
 	public var deathName = DEFAULT_CHARACTER;
 	public var characterScripts:Array<FunkinHScript> = [];
 
@@ -101,6 +103,19 @@ class Character extends FlxSprite
 		
 		return rawJson != null ? cast Json.parse(rawJson) : null;
 	}
+
+	public static function returnCharacterPreload(characterName:String):Array<Cache.AssetPreload>{
+		var char = Character.getCharacterFile(characterName);
+
+		if (char == null)
+			return [];
+
+		return [
+			{path: char.image}, // spritesheet
+			{path: 'icons/${char.healthicon}'} // icon
+		];
+	}
+
 	override function destroy()
 	{
 		for (script in characterScripts)
@@ -112,6 +127,8 @@ class Character extends FlxSprite
 	public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false)
 	{
 		super(x, y);
+
+		xFacing = isPlayer ? -1 : 1;
 
 		#if (haxe >= "4.0.0")
 		animOffsets = new Map();
@@ -135,7 +152,6 @@ class Character extends FlxSprite
 
 				// new death
 				deathName = json.death_name != null ? json.death_name : curCharacter;
-				trace(deathName);
 
 				var spriteType = "sparrow";
 				//sparrow
@@ -214,6 +230,7 @@ class Character extends FlxSprite
 						var animLoop:Bool = !!anim.loop; //Bruh
 						var animIndices:Array<Int> = anim.indices;
 						var camOffset:Null<Array<Float>> = anim.cameraOffset;
+						
 						if (!ClientPrefs.directionalCam)
 							camOffset = [0, 0];
 						else if(camOffset==null){
@@ -389,6 +406,7 @@ class Character extends FlxSprite
 
 		camOffX = 0;
 		camOffY = 0;
+
 		if(camOffsets.exists(AnimName) && camOffsets.get(AnimName).length==2){
 			camOffX = camOffsets.get(AnimName)[0];
 			camOffY = camOffsets.get(AnimName)[1];
@@ -471,23 +489,14 @@ class Character extends FlxSprite
 	////
 	public function startScripts()
 	{
-		var doPush:Bool = false;
-		var baseScriptFile:String = 'characters/' + curCharacter;
+		var baseFile = 'characters/$curCharacter.hscript';
+		var files = [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)];
 
-		for (ext in ["hx", "hscript", "hxs"])
-		{
-			if (doPush)
+		for (file in files){
+			if (FileSystem.exists(file)){
+				var script = FunkinHScript.fromFile(file);
+				characterScripts.push(script);
 				break;
-			var baseFile = '$baseScriptFile.$ext';
-			var files = [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)];
-			for (file in files)
-			{
-				if (FileSystem.exists(file))
-				{
-					var script = FunkinHScript.fromFile(file);
-					characterScripts.push(script);
-					break; // ?
-				}
 			}
 		}
 
@@ -522,5 +531,33 @@ class Character extends FlxSprite
 		{
 			script.set(variable, arg);
 		}
+	}
+
+	//
+	public static function getCharacterList():Array<String>
+	{
+		#if MODS_ALLOWED
+		var charsLoaded:Map<String, Bool> = new Map();
+		var characterList = [];
+		var directories:Array<String> = [Paths.mods('characters/'), Paths.mods(Paths.currentModDirectory + '/characters/'), Paths.getPreloadPath('characters/')];
+		for (i in 0...directories.length) {
+			var directory:String = directories[i];
+			if(FileSystem.exists(directory)) {
+				for (file in FileSystem.readDirectory(directory)) {
+					var path = haxe.io.Path.join([directory, file]);
+					if (!FileSystem.isDirectory(path) && file.endsWith('.json')) {
+						var charToCheck:String = file.substr(0, file.length - 5);
+						if(!charsLoaded.exists(charToCheck)) {
+							characterList.push(charToCheck);
+							charsLoaded.set(charToCheck, true);
+						}
+					}
+				}
+			}
+		}
+		return characterList;
+		#else
+		return CoolUtil.coolTextFile(Paths.txt('characterList'));
+		#end
 	}
 }

@@ -35,7 +35,7 @@ class Cache{
 			default:
 				Paths.returnGraphic(toLoad.path, toLoad.library);
 		}
-		trace("loaded " + toLoad.path);
+		//trace("loaded " + toLoad.path);
 	}
 
 	static public function loadWithList(shitToLoad:Array<AssetPreload>, ?multicoreOnly = false)
@@ -47,6 +47,9 @@ class Cache{
 		#if MULTICORE_LOADING
 		if (ClientPrefs.multicoreLoading){
 			// TODO: go through shitToLoad and clear it of repeats as to not waste time loadin shit that already exists
+			for (shit in shitToLoad)
+				trace(shit.path);
+
 			var threadLimit:Int = ClientPrefs.loadingThreads; // Math.floor(Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS")));
 			if (shitToLoad.length > 0 && threadLimit > 1)
 			{
@@ -54,13 +57,16 @@ class Cache{
 				for (shit in shitToLoad)
 					if (shit.terminate)
 						shit.terminate = false; // do not
+
 				var count = shitToLoad.length;
 				if (threadLimit > count)
 					threadLimit = count; // only use as many as it needs
-				var sprites:Array<FlxSprite> = [];
+
 				var threads:Array<Thread> = [];
 				var finished:Bool = false;
+
 				trace("loading " + count + " items with " + threadLimit + " threads");
+
 				var main = Thread.current();
 				var loadIdx:Int = 0;
 
@@ -123,13 +129,13 @@ class Cache{
 						}
 					}
 				};
-				trace(loadIdx, count);
-				var idx:Int = 0;
+				//trace(loadIdx, count);
+				//var idx:Int = 0;
 				for (t in threads)
 				{
 					t.sendMessage({path: '', library: '', terminate: true}); // terminate all threads
-					trace("terminating thread " + idx);
-					idx++;
+					//trace("terminating thread " + idx);
+					//idx++;
 				}
 				finished = true;
 			}

@@ -108,6 +108,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		super();
 		
 		var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+		bg.scrollFactor.set();
 		bg.alpha = 0.6;
 		add(bg);
 
@@ -130,6 +131,8 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 			optionText.x += 300;
 			/*optionText.forceX = 300;
 			optionText.yMult = 90;*/
+			optionText.yAdd += FlxG.camera.scroll.y;
+
 			optionText.xAdd = 120;
 			optionText.targetY = i;
 			grpOptions.add(optionText);

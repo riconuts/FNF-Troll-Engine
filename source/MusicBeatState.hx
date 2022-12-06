@@ -21,6 +21,9 @@ class MusicBeatState extends FlxUIState
 
 	override function create() {
 		camBeat = FlxG.camera;
+		
+		FlxG.autoPause = true;
+		
 		super.create();
 	}
 
@@ -113,6 +116,7 @@ class MusicBeatState extends FlxUIState
 	{
 		FlxG.switchState(nextState); // just because im too lazy to goto every instance of switchState and change it to a FlxG call
 		FlxG.mouse.visible = false;
+		FlxG.autoPause = false; // jukebox
 	}
 
 	public static function resetState() {

@@ -12,7 +12,7 @@ class InvertModifier extends NoteModifier
 	{
 		if (getValue(player) == 0)
 			return pos;
-		
+        
 		var distance = Note.swagWidth * ((data % 2 == 0) ? 1 : -1);
 		pos.x += distance * getValue(player);
 		return pos;

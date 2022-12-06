@@ -1,6 +1,6 @@
 package;
 
-// STOLEN FROM TGT V3 LOL
+// STOLEN FROM V3 LOLOLOL
 
 typedef ShaderEffect =
 {

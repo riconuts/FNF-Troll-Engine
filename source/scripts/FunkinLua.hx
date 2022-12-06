@@ -11,12 +11,7 @@ import Controls;
 import PlayState;
 import Type.ValueType;
 import animateatlas.AtlasFrameMaker;
-import flixel.FlxBasic;
-import flixel.FlxCamera;
-import flixel.FlxG;
-import flixel.FlxObject;
-import flixel.FlxSprite;
-import flixel.FlxSprite;
+import flixel.*;
 import flixel.addons.effects.FlxTrail;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.group.FlxGroup.FlxTypedGroup;
@@ -35,6 +30,8 @@ import openfl.display.BlendMode;
 import openfl.filters.BitmapFilter;
 import openfl.utils.Assets;
 import scripts.Globals.*;
+
+import modchart.SubModifier;
 
 using StringTools;
 #if sys
@@ -162,6 +159,32 @@ class FunkinLua extends FunkinScript
 		#end
 
 		// mod manager
+		Lua_helper.add_callback(lua, "setPercent", function(modName:String, val:Float, player:Int = -1)
+		{
+			PlayState.instance.modManager.setPercent(modName, val, player);
+		});
+
+		Lua_helper.add_callback(lua, "addBlankMod", function(modName:String, defaultVal:Float = 0, player:Int = -1)
+		{
+			PlayState.instance.modManager.quickRegister(new SubModifier(modName, PlayState.instance.modManager));
+			PlayState.instance.modManager.setValue(modName, defaultVal);
+		});
+
+		Lua_helper.add_callback(lua, "setValue", function(modName:String, val:Float, player:Int = -1)
+		{
+			PlayState.instance.modManager.setValue(modName, val, player);
+		});
+
+		Lua_helper.add_callback(lua, "getPercent", function(modName:String, player:Int)
+		{
+			return PlayState.instance.modManager.getPercent(modName, player);
+		});
+
+		Lua_helper.add_callback(lua, "getValue", function(modName:String, player:Int)
+		{
+			return PlayState.instance.modManager.getValue(modName, player);
+		});
+		
 		Lua_helper.add_callback(lua, "queueSet", 
 		function(step:Float, modName:String, target:Float, player:Int = -1)
 			{
@@ -1192,7 +1215,7 @@ class FunkinLua extends FunkinScript
 			if(target == 'dad') {
 				isDad = true;
 			}
-			PlayState.instance.moveCamera(isDad);
+			PlayState.instance.moveCamera(isDad ? PlayState.instance.dad : PlayState.instance.boyfriend);
 			return isDad;
 		});
 		Lua_helper.add_callback(lua, "cameraShake", function(camera:String, intensity:Float, duration:Float) {
@@ -2445,9 +2468,13 @@ class FunkinLua extends FunkinScript
 	}*/
 
 	function getErrorMessage() {
+		#if LUA_ALLOWED
 		var v:String = Lua.tostring(lua, -1);
 		Lua.pop(lua, 1);
 		return v;
+		#else
+		return "";
+		#end
 	}
 
 	override public function call(func:String, ?args:Array<Dynamic>): Dynamic{

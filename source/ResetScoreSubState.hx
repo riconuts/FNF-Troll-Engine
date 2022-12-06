@@ -9,29 +9,20 @@ class ResetScoreSubState extends MusicBeatSubstate
 {
 	var bg:FlxSprite;
 	var alphabetArray:Array<Alphabet> = [];
-	var icon:HealthIcon;
+	// var icon:HealthIcon;
 	var onYes:Bool = false;
 	var yesText:Alphabet;
 	var noText:Alphabet;
 
-	var song:String;
-	var difficulty:Int;
-	var week:Int;
-
-	// Week -1 = Freeplay
-	public function new(song:String, difficulty:Int, character:String, week:Int = -1)
+	var name:String;
+	var isChapter:Bool;
+	
+	public function new(name:String, ?isChapter:Bool)
 	{
-		this.song = song;
-		this.difficulty = difficulty;
-		this.week = week;
+		this.name = name;
+		this.isChapter = isChapter == true;
 
 		super();
-
-		var name:String = song;
-		if(week > -1) {
-			name = WeekData.weeksLoaded.get(WeekData.weeksList[week]).weekName;
-		}
-		name += ' (' + CoolUtil.difficulties[difficulty] + ')?';
 
 		bg = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
 		bg.alpha = 0;
@@ -39,17 +30,19 @@ class ResetScoreSubState extends MusicBeatSubstate
 		add(bg);
 
 		var tooLong:Float = (name.length > 18) ? 0.8 : 1; //Fucking Winter Horrorland
-		var text:Alphabet = new Alphabet(0, 180, "Reset the score of", true);
+		var text:Alphabet = new Alphabet(0, 180 + FlxG.camera.scroll.y, "Reset the score of", true);
 		text.screenCenter(X);
 		alphabetArray.push(text);
 		text.alpha = 0;
 		add(text);
-		var text:Alphabet = new Alphabet(0, text.y + 90, name, true, false, 0.05, tooLong);
+		var text:Alphabet = new Alphabet(0, text.y + 90, name + "?", true, false, 0.05, tooLong);
 		text.screenCenter(X);
-		if(week == -1) text.x += 60 * tooLong;
+		//if(!this.isChapter) text.x += 60 * tooLong;
 		alphabetArray.push(text);
 		text.alpha = 0;
 		add(text);
+
+		/*
 		if(week == -1) {
 			icon = new HealthIcon(character);
 			icon.setGraphicSize(Std.int(icon.width * tooLong));
@@ -58,6 +51,7 @@ class ResetScoreSubState extends MusicBeatSubstate
 			icon.alpha = 0;
 			add(icon);
 		}
+		*/
 
 		yesText = new Alphabet(0, text.y + 150, 'Yes', true);
 		yesText.screenCenter(X);
@@ -79,7 +73,7 @@ class ResetScoreSubState extends MusicBeatSubstate
 			var spr = alphabetArray[i];
 			spr.alpha += elapsed * 2.5;
 		}
-		if(week == -1) icon.alpha += elapsed * 2.5;
+		//if(week == -1) icon.alpha += elapsed * 2.5;
 
 		if(controls.UI_LEFT_P || controls.UI_RIGHT_P) {
 			FlxG.sound.play(Paths.sound('scrollMenu'), 1);
@@ -91,11 +85,10 @@ class ResetScoreSubState extends MusicBeatSubstate
 			close();
 		} else if(controls.ACCEPT) {
 			if(onYes) {
-				if(week == -1) {
-					Highscore.resetSong(song, difficulty);
-				} else {
-					Highscore.resetWeek(WeekData.weeksList[week], difficulty);
-				}
+				if(isChapter)
+					Highscore.resetWeek(name);
+				else
+					Highscore.resetSong(name);
 			}
 			FlxG.sound.play(Paths.sound('cancelMenu'), 1);
 			close();
@@ -112,6 +105,6 @@ class ResetScoreSubState extends MusicBeatSubstate
 		yesText.scale.set(scales[confirmInt], scales[confirmInt]);
 		noText.alpha = alphas[1 - confirmInt];
 		noText.scale.set(scales[1 - confirmInt], scales[1 - confirmInt]);
-		if(week == -1) icon.animation.curAnim.curFrame = confirmInt;
+		//if(week == -1) icon.animation.curAnim.curFrame = confirmInt;
 	}
 }

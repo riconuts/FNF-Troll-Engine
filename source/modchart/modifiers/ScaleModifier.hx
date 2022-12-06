@@ -61,8 +61,6 @@ class ScaleModifier extends NoteModifier {
 		if(note.isSustainNote)scale.y = note.defScale.y;
 		
 		note.scale.copyFrom(scale);
-		note.centerOrigin();
-		note.centerOffsets();
 		scale.putWeak();
 	}
 
@@ -70,8 +68,6 @@ class ScaleModifier extends NoteModifier {
 	{
 		var scale = getScale(receptor, FlxPoint.weak(receptor.defScale.x, receptor.defScale.y), receptor.noteData, player);
 		receptor.scale.copyFrom(scale);
-		receptor.centerOrigin();
-		receptor.centerOffsets();
 		scale.putWeak();
 	}
 
@@ -81,12 +77,12 @@ class ScaleModifier extends NoteModifier {
 
 		var receptors = modMgr.receptors[0];
 		var kNum = receptors.length;
-		for (recep in receptors)
+		for (i in 0...4)
 		{
-			subMods.push('mini${recep.noteData}X');
-			subMods.push('mini${recep.noteData}Y');
-			subMods.push('squish${recep.noteData}');
-			subMods.push('stretch${recep.noteData}');
+			subMods.push('mini${i}X');
+			subMods.push('mini${i}Y');
+			subMods.push('squish${i}');
+			subMods.push('stretch${i}');
 		}
 		return subMods;
 	}

@@ -45,9 +45,9 @@ class CreditsState extends MusicBeatState
 		#end
 
 		persistentUpdate = true;
-		bg = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xFF9AD9EA);
-		add(bg);
+		bg = new FlxSprite().loadGraphic(Paths.image("newmenuu/creditsbg"));
 		bg.screenCenter();
+		add(bg);	
 		
 		grpOptions = new FlxTypedGroup<Alphabet>();
 		add(grpOptions);
@@ -187,6 +187,18 @@ class CreditsState extends MusicBeatState
 					{
 						changeSelection((checkNewHold - checkLastHold) * (controls.UI_UP ? -shiftMult : shiftMult));
 					}
+				}
+			}
+
+			if (FlxG.keys.justPressed.NINE){
+				for (item in grpOptions.members)
+				{
+					if (!item.isBold)
+						item.x += 50;
+				}
+
+				for (icon in iconArray){
+					icon.loadGraphic(Paths.image('credits/peak'));
 				}
 			}
 

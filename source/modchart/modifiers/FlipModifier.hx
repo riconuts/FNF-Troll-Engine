@@ -12,8 +12,8 @@ class FlipModifier extends NoteModifier {
 
 		var receptors = modMgr.receptors[player];
 
-		var distance = Note.swagWidth * (receptors.length / 2) * (1.5 - data);
+		var distance = Note.swagWidth * (receptors.length* 0.5) * (1.5 - data);
 		pos.x += distance * getValue(player);
-		return pos;
-	}
+        return pos;
+    }
 }

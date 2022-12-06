@@ -47,7 +47,7 @@ class ChapterMenuState extends MusicBeatState{
 
 	override function create()
 	{
-		#if desktop
+		#if !FLX_NO_MOUSE
 		FlxG.mouse.visible = true;
 		#end
 
@@ -100,7 +100,7 @@ class ChapterMenuState extends MusicBeatState{
 		add(scoreText);
 
 		// TOTAL - TOTAL SCORE
-		totalSongTxt = new FlxText(halfScreen, 0, 0, "TOTAL", 32);
+		totalSongTxt = new FlxText(halfScreen, 0, 0, "CHAPTER", 32);
 		totalSongTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
 
 		totalScoreTxt = new FlxText(1205, 0, 0, "0", 32);
@@ -174,7 +174,7 @@ class ChapterMenuState extends MusicBeatState{
 			return;
 
 		Paths.currentModDirectory = chapData.directory;
-		//PlayState.storyWeek = chapData;
+		ChapterData.curChapter = chapData;
 
 		// Nevermind that's stupid lmao
 		PlayState.storyPlaylist = chapData.songs;

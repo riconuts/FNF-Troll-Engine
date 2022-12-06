@@ -117,9 +117,6 @@ class Main extends Sprite
 		FlxG.mouse.useSystemCursor = true;
 		FlxG.mouse.visible = false;
 		
-		#if html5
-		FlxG.autoPause = false;
-		#end
 		#if !mobile
 		if (!troll){
 			fpsVar = new FPS(10, 3, 0xFFFFFF);

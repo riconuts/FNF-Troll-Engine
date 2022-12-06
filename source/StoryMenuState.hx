@@ -2,10 +2,6 @@ package;
 
 import ChapterData;
 import flixel.addons.display.shapes.FlxShapeBox;
-import flixel.addons.transition.FlxTransitionableState;
-import flixel.addons.ui.FlxUIButton;
-import flixel.graphics.FlxGraphic;
-import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.group.FlxGroup;
 import flixel.math.*;
 import flixel.text.FlxText;
@@ -54,7 +50,8 @@ class StoryMenuState extends MusicBeatState
 		#if desktop
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
-		
+		#end
+		#if !FLX_NO_MOUSE
 		FlxG.mouse.visible = true;
 		#end
 		
@@ -152,7 +149,7 @@ class StoryMenuState extends MusicBeatState
 		}
 		
 		cornerLeftText = new SowyTextButton(15, 720, 0, "← BACK", 32, goBack);
-		cornerLeftText.label.setFormat(Paths.font("calibri"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
+		cornerLeftText.label.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
 		cornerLeftText.y -= cornerLeftText.height + 15;
 		mainMenu.add(cornerLeftText);
 		

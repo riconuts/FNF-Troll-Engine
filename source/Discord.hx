@@ -69,8 +69,26 @@ class DiscordClient
 		isInitialized = true;
 	}
 
-	public static function changePresence(details:String, state:Null<String>, ?smallImageKey : String, ?hasStartTimestamp : Bool, ?endTimestamp: Float)
+	public static function changePresence(details:String, state:Null<String>, ?smallImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float)
 	{
+		//// secret rpc
+		/*
+		var quote = [
+			"oh tails you got nothing to worry. he is good at hiding names.i've seen it",
+			"thats how you do it",
+			"off limits",
+			"i dont like leakers and i dont like assholes",
+			"mario!! they are trolling that goomb ba, hit them with your hammerhead!"
+		];*/
+
+		var details = "thats how you do it"; // quote[FlxG.random.int(0, quote.length - 1)];
+		var state = null;
+		var smallImageKey = null;
+		var hasStartTimestamp = false;
+		var largeImageKey = 'gorgeous';
+		var largeImageText = 'gorgeous'; //"Engine Version: " + MainMenuState.psychEngineVersion;
+
+		////
 		var startTimestamp:Float = if(hasStartTimestamp) Date.now().getTime() else 0;
 
 		if (endTimestamp > 0)
@@ -81,8 +99,8 @@ class DiscordClient
 		DiscordRpc.presence({
 			details: details,
 			state: state,
-			largeImageKey: 'app-logo',
-			largeImageText: "Engine Version: " + MainMenuState.psychEngineVersion,
+			largeImageKey: largeImageKey,
+			largeImageText: largeImageText,
 			smallImageKey : smallImageKey,
 			// Obtained times are in milliseconds so they are divided so Discord can use it
 			startTimestamp : Std.int(startTimestamp / 1000),

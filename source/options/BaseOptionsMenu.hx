@@ -57,7 +57,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		#end
 		*/
 
-		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('newmenuu/options/optionsbg'));
+		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('newmenuu/optionsbg'));
 		//bg.color = 0xFFea71fd;
 		bg.screenCenter();
 		bg.antialiasing = ClientPrefs.globalAntialiasing;

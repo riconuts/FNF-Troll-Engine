@@ -30,17 +30,25 @@ class FreeplayState extends MusicBeatState
 
 	private var categories:Map<String, FreeplayCategory> = new Map();
 
-	var camFollow = new FlxPoint(640, 360);
-	var camFollowPos = new FlxObject(640, 360);
+	static var lastY:Float = 360;
+	var camFollow = new FlxPoint(640, lastY);
+	var camFollowPos = new FlxObject(640, lastY);
+
+	var selectedSong:Null<SongMetadata> = null;
+	var buttons:Array<FreeplaySongButton> = [];
 
 	override function create()
 	{
 		#if desktop
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
+		#end
 		
+		#if !FLX_NO_MOUSE
 		FlxG.mouse.visible = true;
 		#end
+
+		persistentUpdate = false;
 		
 		Paths.clearStoredMemory();
 		
@@ -67,6 +75,8 @@ class FreeplayState extends MusicBeatState
 		}
 
 		//// Load the songs!!!
+		var resSelSongFunc = function(){selectedSong = null;};
+
 		for (i in CoolUtil.coolTextFile(Paths.txt('freeplaySonglist')))
 		{
 			if (i != null && i.length > 0){
@@ -79,8 +89,14 @@ class FreeplayState extends MusicBeatState
 
 				if (isLocked)
 					songButton.onUp.callback = function(){songButton.shake();}
-				else
+				else{
 					songButton.onUp.callback = function(){playSong(songButton.metadata);};
+					songButton.onOver.callback = function(){
+						selectedSong = songButton.metadata;
+					}
+					songButton.onOut.callback = resSelSongFunc;
+				}
+					
 			}
 		}
 
@@ -101,8 +117,14 @@ class FreeplayState extends MusicBeatState
 
 					if (isLocked)
 						songButton.onUp.callback = function(){songButton.shake();}
-					else
+					else{
+						songButton.onOver.callback = function(){selectedSong = songButton.metadata;};
+						songButton.onOut.callback = resSelSongFunc;
+					
 						songButton.onUp.callback = function(){
+							//ChapterData.curChapter = mod; // ChapterData shit still in progress
+							// actually that wasn't necessary because this is freeplay so, lol.
+
 							var sPos = songButton;
 							var cam = FlxG.camera;
 							SquareTransitionSubstate.nextCamera = cam;
@@ -120,6 +142,7 @@ class FreeplayState extends MusicBeatState
 							this.transOut = SquareTransitionSubstate;
 							playSong(songButton.metadata);
 						};
+					}
 				}
 			}
 		}
@@ -167,6 +190,9 @@ class FreeplayState extends MusicBeatState
 	override function closeSubState() 
 	{
 		//changeSelection(0, false);
+		for (button in buttons)
+			button.updateHighscore();
+
 		super.closeSubState();
 	}
 
@@ -181,25 +207,26 @@ class FreeplayState extends MusicBeatState
 			return null;
 
 		var button:FreeplaySongButton = new FreeplaySongButton(
-			0, 0, 
 			new SongMetadata(songName, folder),
 			isLocked
 		);
-		button.loadGraphic(Paths.image("songs/" + Paths.formatToSongPath(songName)));
-		button.setGraphicSize(194, 194);
-		button.updateHitbox();
 		category.addItem(button);
 
-		var yellowBorder = new FlxShapeBox(button.x-3, button.y-3, 200, 200, {thickness: 6, color: FlxColor.fromRGB(255, 242, 0)}, FlxColor.TRANSPARENT);
-		category.add(yellowBorder);
-		
-		var nameText = new FlxText(button.x, button.y - 32, button.width, songName, 24);
-		nameText.setFormat(Paths.font("calibri.ttf"), 18, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE);
-		category.add(nameText);
-		
-		var scoreText = new FlxText(button.x, button.y + button.height + 12, button.width, "" + Highscore.getScore(songName), 24);
-		scoreText.setFormat(Paths.font("calibri.ttf"), 18, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE);
-		category.add(scoreText);
+		////
+		button.yellowBorder = new FlxShapeBox(button.x - 3, button.y - 3, 200, 200, {thickness: 6, color: FlxColor.fromRGB(255, 242, 0)}, FlxColor.TRANSPARENT);
+
+		button.nameText = new FlxText(button.x, button.y - 32, button.width, songName, 24);
+		button.nameText.setFormat(Paths.font("calibri.ttf"), 18, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE);
+
+		button.scoreText = new FlxText(button.x, button.y + button.height + 12, button.width, "", 24);
+		button.scoreText.setFormat(Paths.font("calibri.ttf"), 18, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE);
+
+		category.add(button.yellowBorder);
+		category.add(button.nameText);
+		category.add(button.scoreText);
+
+		button.updateHighscore();
+		buttons.push(button);
 
 		return button;
 	}
@@ -215,6 +242,16 @@ class FreeplayState extends MusicBeatState
 	{
 		if (FlxG.sound.music != null && FlxG.sound.music.volume < 0.7)
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
+
+		if (FlxG.keys.pressed.CONTROL)
+		{
+			openSubState(new GameplayChangersSubstate());
+		}
+		if (FlxG.keys.pressed.R && selectedSong != null)
+		{
+			Paths.currentModDirectory = selectedSong.folder;
+			openSubState(new ResetScoreSubState(selectedSong.songName, false));
+		}
 
 		var speed = FlxG.keys.pressed.SHIFT ? 2 : 1;
 
@@ -242,6 +279,11 @@ class FreeplayState extends MusicBeatState
 		
 		super.update(elapsed);
 	}
+
+	override function destroy(){
+		lastY = camFollowPos.y;
+		super.destroy();
+	}
 }
 
 class SongMetadata
@@ -253,6 +295,7 @@ class SongMetadata
 	{
 		this.songName = song;
 		this.folder = folder != null ? folder : Paths.currentModDirectory;
+
 		if(this.folder == null) this.folder = '';
 	}
 }
@@ -261,11 +304,25 @@ class FreeplaySongButton extends TGTSquareButton{
 	public var metadata:SongMetadata;
 	public var isLocked = true;
 
-	public function new(X, Y, Metadata, IsLocked)
+	public var yellowBorder:FlxShapeBox;
+	public var nameText:FlxText;
+	public var scoreText:FlxText;
+
+	public function new(Metadata, IsLocked)
 	{
 		metadata = Metadata;
 		isLocked = IsLocked;
-		super(X, Y);
+
+		super();
+
+		loadGraphic(Paths.image("songs/" + Paths.formatToSongPath(metadata.songName)));
+		setGraphicSize(194, 194);
+		updateHitbox();
+	}
+
+	public function updateHighscore()
+	{
+		scoreText.text = "" + Highscore.getScore(metadata.songName);
 	}
 
 	override function onover()

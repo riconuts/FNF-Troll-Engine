@@ -9,7 +9,8 @@ function getOffset(eventNote):Float{
 function onPush(eventNote){}
 function onLoad(){}
 
-function onTrigger(value1, value2){
+function onTrigger(value1, value2)
+{
 	var sowy = (Std.string(value1) == "true");
 	var instance = getInstance();
 

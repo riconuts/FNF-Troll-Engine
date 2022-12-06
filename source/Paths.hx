@@ -74,6 +74,20 @@ class Paths
 		System.gc();
 	}
 
+	// fuckin around ._.
+	public static function removeBitmap(key)
+	{
+		var obj = currentTrackedAssets.get(key);
+		@:privateAccess
+		if (obj != null)
+		{
+			openfl.Assets.cache.removeBitmapData(key);
+			FlxG.bitmap._cache.remove(key);
+			obj.destroy();
+			currentTrackedAssets.remove(key);
+		}
+	}
+
 	// define the locally tracked assets
 	public static var localTrackedAssets:Array<String> = [];
 
@@ -117,9 +131,11 @@ class Paths
 
 	public static function getPath(file:String, type:AssetType, ?library:Null<String> = null)
 	{
+		/* Fuck them libraries 
+
 		if (library != null)
 			return getLibraryPath(file, library);
-
+		
 		if (currentLevel != null)
 		{
 			var levelPath:String = '';
@@ -134,6 +150,7 @@ class Paths
 			if (OpenFlAssets.exists(levelPath, type))
 				return levelPath;
 		}
+		*/
 
 		return getPreloadPath(file);
 	}
@@ -218,6 +235,7 @@ class Paths
 		return file;
 	}
 
+	/*
 	inline static public function voices(song:String):Any
 	{
 		var songKey:String = '${formatToSongPath(song)}/Voices';
@@ -231,14 +249,24 @@ class Paths
 		var inst = returnSound('songs', songKey);
 		return inst;
 	}
+	*/
 
 	inline static public function track(song:String, track:String):Any
 	{
-		var songKey:String = '${formatToSongPath(song)}/${track}';
-		var track = returnSound('songs', songKey);
-		return track;
+		return returnSound('songs', '${formatToSongPath(song)}/$track');
 	}
 
+	inline static public function voices(song:String):Any
+	{
+		return track(song, "Voices");
+	}
+
+	inline static public function inst(song:String):Any
+	{
+		return track(song, "Inst");
+	}
+
+	/*
 	inline static public function voicesAlt(song:String):Any
 	{
 		var songKey:String = '${formatToSongPath(song)}/VoicesAlt';
@@ -252,6 +280,7 @@ class Paths
 		var inst = returnSound('songs', songKey);
 		return inst;
 	}
+	*/
 
 	inline static public function image(key:String, ?library:String):FlxGraphic
 	{

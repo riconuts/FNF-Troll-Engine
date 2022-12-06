@@ -76,7 +76,7 @@ class FunkinHScript extends FunkinScript
 		scriptName = name;
 
 		setDefaultVars();
-		set("this", this);
+		set("script", this);
 		set("FlxG", flixel.FlxG);
 		set("FlxSprite", flixel.FlxSprite);
 		set("Std", Std);
@@ -159,6 +159,37 @@ class FunkinHScript extends FunkinScript
 		set("importScript", function(){
 			
 		});
+
+		// Util
+		set("makeSprite", function(?x:Float, ?y:Float, ?image:String)
+		{
+			var spr = new FlxSprite(x, y);
+			spr.antialiasing = ClientPrefs.globalAntialiasing;
+
+			return image != null ? spr : spr.loadGraphic(Paths.image(image));
+		});
+		set("makeAnimatedSprite", function(?x:Float, ?y:Float, ?image:String, ?spriteType:String){
+			var spr = new FlxSprite(x, y);
+			spr.antialiasing = ClientPrefs.globalAntialiasing;
+
+			if(image != null && image.length > 0){
+				/*
+				switch(spriteType)
+				{
+					case "texture" | "textureatlas" | "tex":
+						spr.frames = AtlasFrameMaker.construct(image);
+					case "texture_noaa" | "textureatlas_noaa" | "tex_noaa":
+						spr.frames = AtlasFrameMaker.construct(image, null, true);
+					case "packer" | "packeratlas" | "pac":
+						spr.frames = Paths.getPackerAtlas(image);
+					default:*/
+						spr.frames = Paths.getSparrowAtlas(image);
+				//}
+			}
+
+			return spr;
+		});
+
 		
 		// FNF-specific things
 		set("Paths", Paths);
@@ -188,14 +219,14 @@ class FunkinHScript extends FunkinScript
 		
 		if ((currentState is PlayState)){
 			var state:PlayState = cast currentState;
+
+			set("game", currentState);
 			set("global", state.variables);
-			set("getInstance", function()
-			{
+			set("getInstance", function(){
 				return getInstance();
 			});
 		}else{
-			set("getInstance", function()
-			{
+			set("getInstance", function(){
 				return flixel.FlxG.state;
 			});
 		}

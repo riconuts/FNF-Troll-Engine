@@ -20,7 +20,9 @@ typedef ChapterMetadata = {
 
 class ChapterData
 {
+	public static var chaptersMap:Map<String, ChapterMetadata> = new Map();
 	public static var chaptersList:Array<ChapterMetadata> = [];
+	public static var curChapter:Null<ChapterMetadata> = null;
 
 	public static function reloadChapterFiles():Array<ChapterMetadata>
 	{

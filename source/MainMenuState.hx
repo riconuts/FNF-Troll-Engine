@@ -62,7 +62,8 @@ class MainMenuState extends MusicBeatState
 		#if desktop
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
-		
+		#end
+		#if !FLX_NO_MOUSE
 		FlxG.mouse.visible = true;
 		#end
 		debugKeys = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
@@ -152,7 +153,7 @@ class MainMenuState extends MusicBeatState
 		jukeboxButton.loadGraphic(Paths.image('newmenuu/mainmenu/comics'));
 		jukeboxButton.onUp.callback = function(){
 			selectedSomethin = true;
-			MusicBeatState.switchState(new ComicsMenuState.ComicReader());
+			MusicBeatState.switchState(new GalleryMenuState());
 		}
 		add(jukeboxButton);
 
@@ -190,7 +191,7 @@ class MainMenuState extends MusicBeatState
 
 		if (!selectedSomethin)
 		{
-			#if desktop
+			#if !FLX_NO_MOUSE
 			if (FlxG.mouse.wheel != 0)
 			{
 				changeItem(FlxG.mouse.wheel);

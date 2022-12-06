@@ -4,17 +4,8 @@ import Alphabet;
 import Controls;
 import TitleState;
 import editors.MasterEditorMenu;
-import flixel.FlxBasic;
-import flixel.FlxG;
-import flixel.FlxSprite;
 import flixel.addons.ui.*;
-import flixel.addons.ui.FlxInputText;
-import flixel.addons.ui.FlxUI9SliceSprite;
-import flixel.addons.ui.FlxUI;
-import flixel.addons.ui.FlxUICheckBox;
-import flixel.addons.ui.FlxUIInputText;
-import flixel.addons.ui.FlxUINumericStepper;
-import flixel.addons.ui.FlxUITabMenu;
+import flixel.math.*;
 import flixel.group.FlxGroup;
 import flixel.ui.FlxButton;
 
@@ -25,10 +16,27 @@ class TestState extends MusicBeatState{
 	var alphGroup:FlxTypedGroup<FlxBasic>;
 	var titlGroup:FlxTypedGroup<FlxBasic>;
 
+	////
+	public var camGame:FlxCamera = new FlxCamera();
+	public var camHUD:FlxCamera = new FlxCamera();
+
+	var camFollow = new FlxPoint(640, 360);
+	var camFollowPos = new FlxObject(640, 360, 1, 1);
+
 	override function create()
 	{
-		FlxG.mouse.visible = true;	
+		FlxG.mouse.visible = true;
 
+		// Set up cameras
+		camHUD.bgColor = 0x00000000;
+		camGame.follow(camFollowPos);
+
+		FlxG.cameras.reset(camGame);
+		FlxG.cameras.add(camHUD, false);
+
+		FlxG.cameras.setDefaultDrawTarget(camGame, true);
+
+		////
 		var tabs = [
 			{name: 'Alphabet', label: 'Alphabet'},
 			{name: 'Title Screen', label: 'Title Screen'}
@@ -36,6 +44,7 @@ class TestState extends MusicBeatState{
 		UI_box = new FlxUITabMenu(null, tabs, true);
 		UI_box.resize(250, 200);
 		UI_box.scrollFactor.set();
+		UI_box.cameras = [camHUD];
 
 		UI_box.selected_tab_id = 'Alphabet';
 
@@ -63,9 +72,7 @@ class TestState extends MusicBeatState{
 	override function update(elapsed:Float)
 	{
 		if (updateFunction != null)
-		{
 			updateFunction();
-		}
 
 		if (FlxG.keys.justPressed.ESCAPE)
 		{
@@ -88,6 +95,9 @@ class TestState extends MusicBeatState{
 
 			lastGroup = curGroup;
 		}
+
+		var lerpVal:Float = CoolUtil.boundTo(elapsed * 2.4, 0, 1);
+		camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
 		
 		super.update(elapsed);
 	}
@@ -96,16 +106,19 @@ class TestState extends MusicBeatState{
 	{
 		var group = new FlxTypedGroup<FlxBasic>();
 
-		group.add(new FlxSprite().makeGraphic(FlxG.width, FlxG.height));
+		camGame.bgColor = 0xFFFFFFFF;
 		group.add(UI_box);
 
 		var alphabetInstance = new Alphabet(0, 0, "sowy", true);
 		alphabetInstance.screenCenter();
+		alphabetInstance.cameras = [camHUD];
 		group.add(alphabetInstance);
 
 		////
 		var inputText = new FlxUIInputText(10, 40, 230, 'abcdefghijklmnopqrstuvwxyz', 8);
+		inputText.cameras = [camHUD];
 		var boldCheckbox:FlxUICheckBox = new FlxUICheckBox(10, 70, null, null, "Bold", 100);
+		boldCheckbox.cameras = [camHUD];
 
 		function updateText(){			
 			alphabetInstance.isBold = boldCheckbox.checked;
@@ -133,6 +146,7 @@ class TestState extends MusicBeatState{
 
 		var woo:Bool = false;
 		var changeButton = new FlxButton(10, 100, "toUpperCase");
+		changeButton.cameras = [camHUD];
 		changeButton.onUp.callback = function()
 		{
 			inputText.text = woo ? inputText.text.toLowerCase() : inputText.text.toUpperCase();
@@ -184,17 +198,32 @@ class TestState extends MusicBeatState{
 		
 		var stageNames = Stage.getStageList();
 		var bgStepper = new FlxUINumericStepper(10, 70, 1, 0, 0, stageNames.length-1, 0);
+		bgStepper.cameras = [camHUD];
 		group.add(bgStepper);
 
-		var changeButton = new FlxButton(10, 100, "Set", function()
-		{
-			//switchLogo(Std.int(titleStepper.value));
+		function updateStage(){
+			// switchLogo(Std.int(titleStepper.value));
 			bgGroup.remove(bg);
 			bg.destroy();
 			bg = new Stage(stageNames[Std.int(bgStepper.value)]).buildStage();
+
+			camGame.zoom = bg.stageData.defaultZoom;
+
+			var camPos = bg.stageData.camera_stage;
+			if (camPos == null)
+				camPos = [640, 360];
+
+			camFollow.set(camPos[0], camPos[1]);
+			camFollowPos.setPosition(camPos[0], camPos[1]);
+
 			bgGroup.add(bg);
-		});
+		}
+
+		var changeButton = new FlxButton(10, 100, "Set", updateStage);
+		changeButton.cameras = [camHUD];
 		group.add(changeButton);
+
+		updateStage();
 
 		return group;
 	}

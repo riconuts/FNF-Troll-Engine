@@ -2,30 +2,11 @@
 // fuck you
 package options;
 
-#if desktop
-import Discord.DiscordClient;
-#end
-import Controls;
-import flash.text.TextField;
-import flash.text.TextField;
-import flixel.FlxG;
 import flixel.FlxG;
 import flixel.FlxSprite;
-import flixel.FlxSprite;
-import flixel.FlxSubState;
-import flixel.addons.display.FlxGridOverlay;
-import flixel.graphics.FlxGraphic;
 import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.input.keyboard.FlxKey;
 import flixel.math.FlxMath;
-import flixel.text.FlxText;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
-import flixel.util.FlxSave;
-import flixel.util.FlxTimer;
-import haxe.Json;
-import lime.utils.Assets;
 
 using StringTools;
 
@@ -77,7 +58,7 @@ class QuantNotesSubState extends MusicBeatSubstate
 	public function new() {
 		super();
 
-		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('newmenuu/options/optionsbg'));
+		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('newmenuu/optionsbg'));
 		//bg.color = 0xFFea71fd;
 		bg.screenCenter();
 		bg.antialiasing = ClientPrefs.globalAntialiasing;

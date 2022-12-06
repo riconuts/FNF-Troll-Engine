@@ -1,19 +1,12 @@
 package;
 
-import flixel.FlxBasic;
-import flixel.FlxCamera;
-import flixel.FlxG;
-import flixel.FlxSprite;
-import flixel.FlxState;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.addons.transition.TransitionData;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.graphics.frames.FlxFrame;
 import flixel.group.FlxGroup;
 import flixel.input.gamepad.FlxGamepad;
-import flixel.math.FlxMath;
-import flixel.math.FlxPoint;
-import flixel.math.FlxRect;
+import flixel.math.*;
 import flixel.system.FlxSound;
 import flixel.system.ui.FlxSoundTray;
 import flixel.text.FlxText;
@@ -32,7 +25,7 @@ using StringTools;
 import Discord.DiscordClient;
 import sys.thread.Thread;
 #end
-#if MODS_ALLOWED
+#if sys
 import sys.FileSystem;
 import sys.io.File;
 #end
@@ -67,8 +60,12 @@ class TitleState extends MusicBeatState
 	var swagShader:ColorSwap = null;
 	var bg:Stage;
 
+	// cam shit raaahhhhh
 	public var camGame:FlxCamera = new FlxCamera();
 	public var camHUD:FlxCamera = new FlxCamera();
+
+	public var camFollow = new FlxPoint(640, 360);
+	public var camFollowPos = new FlxObject(640, 360, 1, 1);
 
 	override public function create():Void
 	{
@@ -92,21 +89,41 @@ class TitleState extends MusicBeatState
 
 		// Set up cameras
 		camHUD.bgColor = 0x00000000;
+		camGame.follow(camFollowPos);
 
 		FlxG.cameras.reset(camGame);
 		FlxG.cameras.add(camHUD, false);
 
 		FlxG.cameras.setDefaultDrawTarget(camGame, true);
 
-		// Set up a random stage
-		Paths.loadRandomMod();
-		var stageNames = Stage.getStageList();
-		var randomStage = stageNames[FlxG.random.int(0, stageNames.length - 1)];
+		// Set up a stage list
+		var stages:Array<Array<String>> = []; // [stage name, mod directory]
+
+		for (mod in Paths.getModDirectories())
+		{
+			Paths.currentModDirectory = mod;
+			for (stage in Stage.getStageList())
+				stages.push([stage, mod]);
+		}
+		var randomStage = stages[FlxG.random.int(0, stages.length - 1)];
+		Paths.currentModDirectory = randomStage[1];
+
 		trace(randomStage, Paths.currentModDirectory);
 
-		bg = new Stage(randomStage).buildStage();
+		bg = new Stage(randomStage[0]).buildStage();
 		trace(bg.members.length);
+		
 		camGame.zoom = bg.stageData.defaultZoom;
+
+		var camPos = bg.stageData.camera_stage;
+		trace(camPos);
+		if (camPos == null){
+			camPos = [640, 360];
+		}
+
+		camFollow.set(camPos[0], camPos[1]);
+		camFollowPos.setPosition(camPos[0], camPos[1]);
+
 		add(bg);
 
 		// Random logoooo
@@ -121,7 +138,7 @@ class TitleState extends MusicBeatState
 
 		//
 		titleText = new FlxSprite(100, 576);
-		#if (desktop && MODS_ALLOWED)
+		#if (sys && MODS_ALLOWED)
 		var path = "mods/" + Paths.currentModDirectory + "/images/titleEnter.png";
 		if (!FileSystem.exists(path))
 			path = "mods/images/titleEnter.png";
@@ -217,19 +234,20 @@ class TitleState extends MusicBeatState
 	{
 		if (FlxG.sound.music != null)
 			Conductor.songPosition = FlxG.sound.music.time;
+
+		var lerpVal:Float = CoolUtil.boundTo(elapsed * 2.4, 0, 1);
+		camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
 		
 		var pressedEnter:Bool = FlxG.keys.justPressed.ENTER || (controls != null && controls.ACCEPT);
 
 		#if mobile
-		for (touch in FlxG.touches.list)
-		{
+		for (touch in FlxG.touches.list){
 			if (touch.justPressed)
 				pressedEnter = true;
 		}
 		#end
 
 		var gamepad:FlxGamepad = FlxG.gamepads.lastActive;
-
 		if (gamepad != null)
 		{
 			if (gamepad.justPressed.START)
@@ -266,7 +284,6 @@ class TitleState extends MusicBeatState
 					titleText.animation.play('press');
 
 				camHUD.flash(ClientPrefs.flashing ? FlxColor.WHITE : 0x4CFFFFFF, 1);
-				//FlxG.camera.flash(ClientPrefs.flashing ? FlxColor.WHITE : 0x4CFFFFFF, 1);
 				FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
 
 				transitioning = true;
@@ -280,9 +297,7 @@ class TitleState extends MusicBeatState
 		}
 
 		if (initialized && pressedEnter && !skippedIntro)
-		{
 			skipIntro();
-		}
 
 		if(swagShader != null)
 		{
