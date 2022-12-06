@@ -28,7 +28,7 @@ class ChapterMenuState extends MusicBeatState{
 
 	// values used for positioning and shith
 	var sowyStr:String = "sowy";
-	var halfScreen:Float = 1280 / 2;
+	var halfScreen:Float = 1280* 0.5;
 	var startY:Float = 0;
 
 	//
@@ -87,7 +87,7 @@ class ChapterMenuState extends MusicBeatState{
 		cornerLeftText.y = cornerRightText.y -= cornerRightText.height + 15;
 
 		//// SONGS - HI-SCORE
-		halfScreen = 1280 / 2;
+		halfScreen = 1280* 0.5;
 		startY = coverArt.y + 48;
 
 		songText = new FlxText(halfScreen, startY, 0, "SONGS", 32);

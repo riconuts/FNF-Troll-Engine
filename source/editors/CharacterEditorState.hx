@@ -109,7 +109,7 @@ class CharacterEditorState extends MusicBeatState
 		zeroTwoPointer.setGraphicSize(40, 40);
 		zeroTwoPointer.updateHitbox();
 		zeroTwoPointer.color = FlxColor.RED;
-		zeroTwoPointer.setPosition(-zeroTwoPointer.width / 2, -zeroTwoPointer.height / 2);
+		zeroTwoPointer.setPosition(-zeroTwoPointer.width* 0.5, -zeroTwoPointer.height* 0.5);
 		add(zeroTwoPointer);
 
 		changeBGbutton = new FlxButton(FlxG.width - 360, 25, "", function()
@@ -146,7 +146,7 @@ class CharacterEditorState extends MusicBeatState
 		genBoyOffsets();
 
 		var height = FlxG.height;
-		var greenHill = new FlxSprite(-height / 2, -height);
+		var greenHill = new FlxSprite(-height* 0.5, -height);
 		greenHill.makeGraphic(height, height);
 		bgLayer.add(greenHill);
 
@@ -968,8 +968,8 @@ class CharacterEditorState extends MusicBeatState
 			y += animationYCam.value;
 
 
-		x -= cameraFollowPointer.width / 2;
-		y -= cameraFollowPointer.height / 2;
+		x -= cameraFollowPointer.width* 0.5;
+		y -= cameraFollowPointer.height* 0.5;
 		cameraFollowPointer.setPosition(x, y);
 	}
 

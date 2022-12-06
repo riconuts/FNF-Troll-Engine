@@ -281,14 +281,14 @@ class Note extends FlxSprite
 			hitsoundDisabled = true;
 			if(ClientPrefs.downScroll) flipY = true;
 
-			offsetX += width / 2;
+			offsetX += width* 0.5;
 			copyAngle = false;
 
 			animation.play(colArray[noteData % 4] + 'holdend');
 
 			updateHitbox();
 
-			offsetX -= width / 2;
+			offsetX -= width* 0.5;
 
 			if (prevNote.isSustainNote)
 			{

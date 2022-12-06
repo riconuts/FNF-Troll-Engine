@@ -115,7 +115,7 @@ class ComicReader extends MusicBeatState
 		curPanel.scale.set(fuu, fuu);
 		curPanel.updateHitbox();
 
-		curPanel.x -= curPanel.width / 2;
+		curPanel.x -= curPanel.width* 0.5;
 		add(curPanel);
 
 		minX = curPanel.x;

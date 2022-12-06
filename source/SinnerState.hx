@@ -171,8 +171,8 @@ class SinnerState extends FlxState
 		return [x, y];
 	}
 	function centerWindow(){
-		x = (desktopSize.x - mainWindow.width) / 2;
-		y = (desktopSize.y - mainWindow.height) / 2;
+		x = (desktopSize.x - mainWindow.width)* 0.5;
+		y = (desktopSize.y - mainWindow.height)* 0.5;
 	}
 	#end
 }

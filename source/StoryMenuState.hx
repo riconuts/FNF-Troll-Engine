@@ -56,7 +56,7 @@ class StoryMenuState extends MusicBeatState
 		#end
 		
 		var cam = FlxG.camera;
-		cam.focusOn(new FlxPoint(FlxG.width / 2, FlxG.height / 2));
+		cam.focusOn(new FlxPoint(FlxG.width* 0.5, FlxG.height* 0.5));
 		cam.bgColor = FlxColor.BLACK;
 
 		if (cameFromChapterMenu){

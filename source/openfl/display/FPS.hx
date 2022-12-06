@@ -77,7 +77,7 @@ class FPS extends TextField
 		}
 
 		var currentCount = times.length;
-		currentFPS = Math.round((currentCount + cacheCount) / 2);
+		currentFPS = Math.round((currentCount + cacheCount)* 0.5);
 		if (currentFPS > ClientPrefs.framerate) currentFPS = ClientPrefs.framerate;
 
 		if (currentCount != cacheCount /*&& visible*/)
@@ -96,7 +96,7 @@ class FPS extends TextField
 			*/
 
 			textColor = 0xFFFFFFFF;
-			if (memoryMegas > 3000 || currentFPS <= ClientPrefs.framerate / 2)
+			if (memoryMegas > 3000 || currentFPS <= ClientPrefs.framerate* 0.5)
 			{
 				textColor = 0xFFFF0000;
 			}

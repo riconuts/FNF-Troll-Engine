@@ -596,7 +596,7 @@ class FlxInputText extends FlxText
 						X = X - textField.width + textField.textWidth
 							;
 					case CENTER:
-						X = X - textField.width / 2 + textField.textWidth / 2
+						X = X - textField.width* 0.5 + textField.textWidth* 0.5
 							;
 					default:
 				}
@@ -918,7 +918,7 @@ class FlxInputText extends FlxText
 
 			case CENTER:
 				#if !js
-				offx = (textField.width - 2 - textField.textWidth) / 2 + textField.scrollH / 2;
+				offx = (textField.width - 2 - textField.textWidth)* 0.5 + textField.scrollH* 0.5;
 				#end
 				if (offx <= 1)
 					offx = 0; // hack, fix ofset rounding alignment.

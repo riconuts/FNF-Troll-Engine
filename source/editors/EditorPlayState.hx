@@ -264,14 +264,14 @@ class EditorPlayState extends MusicBeatState
 
 								if (sustainNote.mustPress)
 								{
-									sustainNote.x += FlxG.width / 2; // general offset
+									sustainNote.x += FlxG.width* 0.5; // general offset
 								}
 								else if(ClientPrefs.middleScroll)
 								{
 									sustainNote.x += 310;
 									if(daNoteData > 1)
 									{ //Up and Right
-										sustainNote.x += FlxG.width / 2 + 25;
+										sustainNote.x += FlxG.width* 0.5 + 25;
 									}
 								}
 							}
@@ -279,14 +279,14 @@ class EditorPlayState extends MusicBeatState
 
 						if (swagNote.mustPress)
 						{
-							swagNote.x += FlxG.width / 2; // general offset
+							swagNote.x += FlxG.width* 0.5; // general offset
 						}
 						else if(ClientPrefs.middleScroll)
 						{
 							swagNote.x += 310;
 							if(daNoteData > 1) //Up and Right
 							{
-								swagNote.x += FlxG.width / 2 + 25;
+								swagNote.x += FlxG.width* 0.5 + 25;
 							}
 						}
 						
@@ -392,7 +392,7 @@ class EditorPlayState extends MusicBeatState
 
 				strumX += daNote.offsetX;
 				strumY += daNote.offsetY;
-				var center:Float = strumY + Note.swagWidth / 2;
+				var center:Float = strumY + Note.swagWidth* 0.5;
 
 				if(daNote.copyAlpha) {
 					daNote.alpha = strumAlpha * daNote.multAlpha;
@@ -411,7 +411,7 @@ class EditorPlayState extends MusicBeatState
 
 								daNote.y -= 19;
 							} 
-							daNote.y += (Note.swagWidth / 2) - (60.5 * (PlayState.SONG.speed - 1));
+							daNote.y += (Note.swagWidth* 0.5) - (60.5 * (PlayState.SONG.speed - 1));
 							daNote.y += 27.5 * ((PlayState.SONG.bpm / 100) - 1) * (PlayState.SONG.speed - 1);
 
 							if(daNote.mustPress || !daNote.ignoreNote)
@@ -956,7 +956,7 @@ class EditorPlayState extends MusicBeatState
 				{
 					babyArrow.x += 310;
 					if(i > 1) { //Up and Right
-						babyArrow.x += FlxG.width / 2 + 25;
+						babyArrow.x += FlxG.width* 0.5 + 25;
 					}
 				}
 				opponentStrums.add(babyArrow);

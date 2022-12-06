@@ -37,7 +37,7 @@ class CustomFadeTransition extends MusicBeatSubstate {
 		transBlack.scrollFactor.set();
 		add(transBlack);
 
-		transGradient.x -= (width - FlxG.width) / 2;
+		transGradient.x -= (width - FlxG.width)* 0.5;
 		transBlack.x = transGradient.x;
 
 		if(isTransIn) {

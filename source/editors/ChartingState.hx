@@ -863,7 +863,7 @@ class ChartingState extends MusicBeatState
 		var tab_group_note = new FlxUI(null, UI_box);
 		tab_group_note.name = 'Note';
 
-		stepperSusLength = new FlxUINumericStepper(10, 25, Conductor.stepCrochet / 2, 0, 0, Conductor.stepCrochet * 64);
+		stepperSusLength = new FlxUINumericStepper(10, 25, Conductor.stepCrochet* 0.5, 0, 0, Conductor.stepCrochet * 64);
 		stepperSusLength.value = 0;
 		stepperSusLength.name = 'note_susLength';
 		blockPressWhileTypingOnStepper.push(stepperSusLength);
@@ -2097,7 +2097,7 @@ class ChartingState extends MusicBeatState
 
 		// Draws
 		var gSize:Int = Std.int(GRID_SIZE * 8);
-		var hSize:Int = Std.int(gSize / 2);
+		var hSize:Int = Std.int(gSize* 0.5);
 
 		var lmin:Float = 0;
 		var lmax:Float = 0;
@@ -2121,11 +2121,11 @@ class ChartingState extends MusicBeatState
 		for (i in 0...length) {
 			index = i;
 
-			lmin = FlxMath.bound(((index < wavData[0][0].length && index >= 0) ? wavData[0][0][index] : 0) * (gSize / 1.12), -hSize, hSize) / 2;
-			lmax = FlxMath.bound(((index < wavData[0][1].length && index >= 0) ? wavData[0][1][index] : 0) * (gSize / 1.12), -hSize, hSize) / 2;
+			lmin = FlxMath.bound(((index < wavData[0][0].length && index >= 0) ? wavData[0][0][index] : 0) * (gSize / 1.12), -hSize, hSize)* 0.5;
+			lmax = FlxMath.bound(((index < wavData[0][1].length && index >= 0) ? wavData[0][1][index] : 0) * (gSize / 1.12), -hSize, hSize)* 0.5;
 
-			rmin = FlxMath.bound(((index < wavData[1][0].length && index >= 0) ? wavData[1][0][index] : 0) * (gSize / 1.12), -hSize, hSize) / 2;
-			rmax = FlxMath.bound(((index < wavData[1][1].length && index >= 0) ? wavData[1][1][index] : 0) * (gSize / 1.12), -hSize, hSize) / 2;
+			rmin = FlxMath.bound(((index < wavData[1][0].length && index >= 0) ? wavData[1][0][index] : 0) * (gSize / 1.12), -hSize, hSize)* 0.5;
+			rmax = FlxMath.bound(((index < wavData[1][1].length && index >= 0) ? wavData[1][1][index] : 0) * (gSize / 1.12), -hSize, hSize)* 0.5;
 
 			waveformSprite.pixels.fillRect(new Rectangle(hSize - (lmin + rmin), i * size, (lmin + rmin) + (lmax + rmax), size), FlxColor.BLUE);
 		}
@@ -2170,7 +2170,7 @@ class ChartingState extends MusicBeatState
 			if (index >= 0) {
 				var byte:Int = bytes.getUInt16(index * channels * 2);
 
-				if (byte > 65535 / 2) byte -= 65535;
+				if (byte > 65535* 0.5) byte -= 65535;
 
 				var sample:Float = (byte / 65535);
 
@@ -2183,7 +2183,7 @@ class ChartingState extends MusicBeatState
 				if (channels >= 2) {
 					byte = bytes.getUInt16((index * channels * 2) + 2);
 
-					if (byte > 65535 / 2) byte -= 65535;
+					if (byte > 65535* 0.5) byte -= 65535;
 
 					sample = (byte / 65535);
 
@@ -2575,12 +2575,12 @@ class ChartingState extends MusicBeatState
 
 	var noteColors = [0xFFA349A4, 0xFFED1C24, 0xFFB5E61D, 0xFF00A2E8];
 	function setupSusNote(note:Note, beats:Float):FlxSprite {
-		var height:Int = Math.floor(FlxMath.remapToRange(note.sustainLength, 0, Conductor.stepCrochet * 16, 0, GRID_SIZE * 16 * zoomList[curZoom]) + (GRID_SIZE * zoomList[curZoom]) - GRID_SIZE / 2);
-		var minHeight:Int = Std.int((GRID_SIZE * zoomList[curZoom] / 2) + GRID_SIZE / 2);
+		var height:Int = Math.floor(FlxMath.remapToRange(note.sustainLength, 0, Conductor.stepCrochet * 16, 0, GRID_SIZE * 16 * zoomList[curZoom]) + (GRID_SIZE * zoomList[curZoom]) - GRID_SIZE* 0.5);
+		var minHeight:Int = Std.int((GRID_SIZE * zoomList[curZoom]* 0.5) + GRID_SIZE* 0.5);
 		if(height < minHeight) height = minHeight;
 		if(height < 1) height = 1; //Prevents error of invalid height
 
-		var spr:FlxSprite = new FlxSprite(note.x + (GRID_SIZE * 0.5) - 4, note.y + GRID_SIZE / 2).makeGraphic(8, height, noteColors[note.noteData%noteColors.length]);
+		var spr:FlxSprite = new FlxSprite(note.x + (GRID_SIZE * 0.5) - 4, note.y + GRID_SIZE* 0.5).makeGraphic(8, height, noteColors[note.noteData%noteColors.length]);
 		return spr;
 	}
 

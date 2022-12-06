@@ -40,7 +40,7 @@ class MenuItem extends FlxSprite
 		if (isFlashing)
 			flashingInt += 1;
 
-		if (flashingInt % fakeFramerate >= Math.floor(fakeFramerate / 2))
+		if (flashingInt % fakeFramerate >= Math.floor(fakeFramerate* 0.5))
 			color = 0xFF33ffff;
 		else
 			color = FlxColor.WHITE;

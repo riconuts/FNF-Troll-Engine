@@ -248,7 +248,7 @@ class NotesSubState extends MusicBeatSubstate
 
 		var item = grpNumbers.members[(selected * 3) + type];
 		item.changeText('0');
-		item.offset.x = (40 * (item.lettersArray.length - 1)) / 2;
+		item.offset.x = (40 * (item.lettersArray.length - 1))* 0.5;
 	}
 	function updateValue(change:Float = 0) {
 		curValue += change;
@@ -274,7 +274,7 @@ class NotesSubState extends MusicBeatSubstate
 
 		var item = grpNumbers.members[(curSelected * 3) + typeSelected];
 		item.changeText(Std.string(roundedValue));
-		item.offset.x = (40 * (item.lettersArray.length - 1)) / 2;
+		item.offset.x = (40 * (item.lettersArray.length - 1))* 0.5;
 		if(roundedValue < 0) item.offset.x += 10;
 	}
 }
