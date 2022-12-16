@@ -1,6 +1,6 @@
 package;
 
-// thanks neb -sowy
+// thanks neb
 
 import flixel.FlxSprite;
 #if MULTICORE_LOADING
@@ -142,7 +142,7 @@ class Cache{
 		}
 		else		
 		#end
-			if (multicoreOnly){
+			if (!multicoreOnly){
 				for (shit in shitToLoad)
 					Cache.load(shit);
 			}

@@ -116,7 +116,7 @@ class MusicBeatState extends FlxUIState
 	{
 		FlxG.switchState(nextState); // just because im too lazy to goto every instance of switchState and change it to a FlxG call
 		FlxG.mouse.visible = false;
-		FlxG.autoPause = false; // jukebox
+		FlxG.autoPause = false;
 	}
 
 	public static function resetState() {

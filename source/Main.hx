@@ -162,7 +162,7 @@ class Main extends Sprite
 
 		Sys.println(" \n" + errMsg);
 
-		doCrashMessage(errMsg);
+		// doCrashMessage(errMsg);
 	}
 
 	static public function doCrashMessage(errMsg:String = '')

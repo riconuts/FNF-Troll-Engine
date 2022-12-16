@@ -67,6 +67,8 @@ class Paths
 					FlxG.bitmap._cache.remove(key);
 					obj.destroy();
 					currentTrackedAssets.remove(key);
+
+					trace('cleared $key');
 				}
 			}
 		}

@@ -166,7 +166,7 @@ class FunkinHScript extends FunkinScript
 			var spr = new FlxSprite(x, y);
 			spr.antialiasing = ClientPrefs.globalAntialiasing;
 
-			return image != null ? spr : spr.loadGraphic(Paths.image(image));
+			return image == null ? spr : spr.loadGraphic(Paths.image(image));
 		});
 		set("makeAnimatedSprite", function(?x:Float, ?y:Float, ?image:String, ?spriteType:String){
 			var spr = new FlxSprite(x, y);
