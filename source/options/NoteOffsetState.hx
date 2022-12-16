@@ -98,11 +98,6 @@ class NoteOffsetState extends MusicBeatState
 		add(boyfriend);
 
 		// Combo stuff
-
-		coolText = new FlxText(0, 0, 0, '', 32);
-		coolText.screenCenter();
-		coolText.x = FlxG.width * 0.35;
-
 		rating = new FlxSprite().loadGraphic(Paths.image('sick'));
 		rating.cameras = [camHUD];
 		rating.setGraphicSize(Std.int(rating.width * 0.7));
@@ -117,9 +112,7 @@ class NoteOffsetState extends MusicBeatState
 
 		var seperatedScore:Array<Int> = [];
 		for (i in 0...3)
-		{
 			seperatedScore.push(FlxG.random.int(0, 9));
-		}
 
 		var daLoop:Int = 0;
 		for (i in seperatedScore)
@@ -225,12 +218,9 @@ class NoteOffsetState extends MusicBeatState
 				FlxG.keys.justPressed.S
 			];
 
-			if(controlArray.contains(true))
-			{
-				for (i in 0...controlArray.length)
-				{
-					if(controlArray[i])
-					{
+			if(controlArray.contains(true)){
+				for (i in 0...controlArray.length){
+					if(controlArray[i]){
 						switch(i)
 						{
 							case 0:
@@ -296,10 +286,7 @@ class NoteOffsetState extends MusicBeatState
 
 			if(controls.RESET)
 			{
-				for (i in 0...ClientPrefs.comboOffset.length)
-				{
-					ClientPrefs.comboOffset[i] = 0;
-				}
+				ClientPrefs.comboOffset = [-60, 60, -260, -80];
 				repositionCombo();
 			}
 		}
@@ -407,12 +394,17 @@ class NoteOffsetState extends MusicBeatState
 	function repositionCombo()
 	{
 		rating.screenCenter();
-		rating.x = coolText.x - 40 + ClientPrefs.comboOffset[0];
-		rating.y -= 60 + ClientPrefs.comboOffset[1];
+		rating.x += ClientPrefs.comboOffset[0];
+		rating.y -= ClientPrefs.comboOffset[1];
 
-		comboNums.screenCenter();
-		comboNums.x = coolText.x - 90 + ClientPrefs.comboOffset[2];
-		comboNums.y += 80 - ClientPrefs.comboOffset[3];
+		var daLoop = 0;
+		for (numScore in comboNums.members){
+			numScore.screenCenter();
+			numScore.x += ClientPrefs.comboOffset[2] + 43 * daLoop;
+			numScore.y -= ClientPrefs.comboOffset[3];
+			daLoop++;
+		}
+
 		reloadTexts();
 	}
 

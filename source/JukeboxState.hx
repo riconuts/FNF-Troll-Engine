@@ -2,13 +2,18 @@ package;
 
 import FreeplayState;
 import sowy.*;
+import flixel.system.FlxSound;
 
 class JukeboxState extends MusicBeatState
 {
     var options:Array<SowyTextButton> = [];
+	public var voices = new FlxSound();
+	static public var instance:JukeboxState; 
     var curSelected:Int = 0;
 
     override function create(){
+		instance = this;
+
 		//// Load the songs!!!
 
 		for (i in CoolUtil.coolTextFile(Paths.txt('freeplaySonglist')))
@@ -66,12 +71,7 @@ class JukeboxState extends MusicBeatState
 		var folder = folder != null ? folder : Paths.currentModDirectory;
 
 		var button = new SowyTextButton(0, 0, 0, songName, 24, function(){
-			var prevPath = Paths.currentModDirectory;
-            Paths.currentModDirectory = folder;
-            
-			FlxG.sound.playMusic(Paths.inst(songName), 1, true);
-
-            Paths.currentModDirectory = folder;
+			playSong(songName, folder);
         });
 		button.y = 32 * options.push(button);
 		add(button);
@@ -84,9 +84,18 @@ class JukeboxState extends MusicBeatState
     /////
     //var curSong;
 
-    public static function playSong(meta)
+    public static function playSong(songName:String, ?folder = "")
     {
+		var prevPath = Paths.currentModDirectory;
+		Paths.currentModDirectory = folder;
 
+		FlxG.sound.playMusic(Paths.inst(songName), 1, true);
+		/*
+		if (instance != null)
+			instance.voices.loadEmbedded(Paths.voices(songName), true, false);
+		*/
+
+		Paths.currentModDirectory = prevPath;
     }
 
     /* useless!!!!

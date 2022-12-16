@@ -780,12 +780,12 @@ class PlayState extends MusicBeatState
 		timeBarBG.sprTracker = timeBar;
 
 		//
-		var rating = RatingSprite.newRating();
-		rating.alpha = 0;
-		ratingTxtGroup.add(rating);
+		lastJudge = RatingSprite.newRating();
+		lastJudge.alpha = 0;
+		ratingTxtGroup.add(lastJudge);
 		add(ratingTxtGroup);
 
-		for (i in 0...10){
+		for (i in 0...4){
 			var number = RatingSprite.newNumber();
 			number.alpha = 0;
 			comboNumGroup.add(number);
@@ -3092,74 +3092,62 @@ class PlayState extends MusicBeatState
 		var coolTextX = FlxG.width * 0.35;
 		
 		////
-		
-		var rating:RatingSprite = ratingTxtGroup.recycle(RatingSprite, RatingSprite.newRating);
-		
+		var rating:RatingSprite;
+
+		if (ClientPrefs.simpleJudge){
+			rating = lastJudge;
+			rating.revive();
+
+			rating.scale.scale(1.1);
+
+			if (rating.tween != null){
+				rating.tween.cancel();
+				rating.tween.destroy();
+				rating.tween = null;
+			}
+			
+			rating.tween = FlxTween.tween(rating.scale, {x: 0.7, y: 0.7}, 0.1, {
+				ease: FlxEase.quadOut,
+				onComplete: function(tween:FlxTween){
+					if (!rating.alive)
+						return;
+
+					rating.tween = FlxTween.tween(rating.scale, {x: 0, y: 0}, 0.2, {
+						startDelay: 0.6,
+						ease: FlxEase.quadIn,
+						onComplete: function(tween:FlxTween){rating.kill();}		
+					});
+				}	
+			});
+
+		}else{
+			rating = ratingTxtGroup.recycle(RatingSprite, RatingSprite.newRating);
+			
+			rating.acceleration.y = 550;
+			rating.velocity.set(-FlxG.random.int(0, 10), -FlxG.random.int(140, 175));
+			
+			rating.scale.set(0.7, 0.7);
+
+			if (rating.tween != null)
+				rating.tween.cancel();
+
+			rating.tween = FlxTween.tween(rating, {alpha: 0}, 0.2, {
+				startDelay: Conductor.crochet * 0.001,
+				onComplete: function(wtf){rating.kill();}
+			});
+		}
+
 		rating.loadGraphic(Paths.image(daRating.image));
 		rating.alpha = 1;
-		rating.screenCenter(Y);
-		rating.x = coolTextX - 40 + ClientPrefs.comboOffset[0];
-		rating.y -= 60 + ClientPrefs.comboOffset[1];
-		
-		rating.velocity.set(-FlxG.random.int(0, 10), -FlxG.random.int(140, 175));
-		
-		rating.scale.set(0.7, 0.7);
-		rating.updateHitbox();
 
+		rating.updateHitbox();
+		rating.screenCenter();
+		rating.x += ClientPrefs.comboOffset[0];
+		rating.y -= ClientPrefs.comboOffset[1];
 
 		ratingTxtGroup.remove(rating, true);
 		ratingTxtGroup.add(rating);
 
-
-		if(ClientPrefs.simpleJudge){
-			if (rating.tween != null && rating.tween.active)
-			{
-				rating.tween.cancel();
-				rating.tween = null;
-			}
-			if (lastJudge != null && lastJudge.alive){
-				lastJudge.kill();
-			}
-			
-			
-			lastJudge = rating;
-			rating.revive();
-
-			rating.acceleration.set(0, 0);
-			rating.velocity.set(0, 0);
-			rating.scale.scale(1.1);
-			
-			rating.tween = FlxTween.tween(rating, {"scale.x": 0.7, "scale.y": 0.7}, 0.1, {
-				onComplete: function(tween:FlxTween)
-				{
-					if (rating.alive){
-						rating.tween = FlxTween.tween(rating, {"scale.x": 0, "scale.y": 0}, 0.2, {
-							onComplete: function(tween:FlxTween)
-							{
-								rating.kill();
-							},
-							ease: FlxEase.quadIn,
-							startDelay: 0.6
-						});
-					}
-				},
-				ease: FlxEase.quadOut
-			});
-
-		}else{
-			if (rating.tween != null)
-				rating.tween.cancel();
-
-			rating.moves = true;
-			rating.tween = FlxTween.tween(rating, {alpha: 0}, 0.2, {
-				startDelay: Conductor.crochet * 0.001,
-				onComplete: function(wtf)
-				{
-					rating.moves = false;
-					rating.kill();
-				}
-			});
-		}
 		////
 		if (combo < 10 && combo != 0 && !ClientPrefs.simpleJudge)
 			return;
@@ -3167,56 +3155,49 @@ class PlayState extends MusicBeatState
 		var seperatedScore:Array<String> = Std.string(combo).split("");
 		if(combo < 10)
 			seperatedScore.unshift("0");
-		
 		if(combo < 100)
 			seperatedScore.unshift("0");
 
-		var daLoop:Int = 0;
-
-		while (lastCombos.length > 0)
-			lastCombos.shift().kill();	
+		if(ClientPrefs.simpleJudge){
+			while (lastCombos.length > 0)
+				lastCombos.shift().kill();
+		}	
 		
+		var daLoop:Int = 0;
 		for (i in seperatedScore)
 		{
 			var numScore:RatingSprite = comboNumGroup.recycle(RatingSprite, RatingSprite.newNumber);
-			
+
 			numScore.loadGraphic(Paths.image('num' + i));
 			numScore.alpha = 1;
 			numScore.scale.set(0.5, 0.5);
-			numScore.x = ClientPrefs.comboOffset[2] + coolTextX + (43 * daLoop) - 90;
-			numScore.screenCenter(Y);
-			numScore.y -= ClientPrefs.comboOffset[3] - 80;
 
-			numScore.acceleration.y = FlxG.random.int(200, 300);
-			numScore.velocity.set(FlxG.random.float(-5, 5), -FlxG.random.int(140, 160));
-			if (numScore.tween != null && numScore.tween.active)
-			{
-				numScore.tween.cancel();
-				numScore.tween = null;
-			}
-			numScore.visible=true;
+			numScore.screenCenter();
+			numScore.x += ClientPrefs.comboOffset[2] + 43 * daLoop;
+			numScore.y -= ClientPrefs.comboOffset[3];
 
 			var index = comboNumGroup.members.indexOf(numScore);
 			comboNumGroup.remove(numScore, true);
 			comboNumGroup.insert(index, numScore);
 			lastCombos.push(numScore);
 
+			if (numScore.tween != null){
+				numScore.tween.cancel();
+				numScore.tween.destroy();
+				numScore.tween = null;
+			}
+
 			if(ClientPrefs.simpleJudge){
-				numScore.acceleration.set(0, 0);
-				numScore.velocity.set(0, 0);
 				numScore.scale.x = 0.5 * 1.25;
 				numScore.scale.y = 0.5 * 0.75;
 				numScore.alpha = 0.6;
-				numScore.tween = FlxTween.tween(numScore, {"scale.x": 0.5, "scale.y": 0.5, alpha: 1}, 0.2, {
-					ease: FlxEase.circOut
-				});
+				numScore.tween = FlxTween.tween(numScore, {"scale.x": 0.5, "scale.y": 0.5, alpha: 1}, 0.2, {ease: FlxEase.circOut});
 			}else{
-				numScore.moves = true;
+				numScore.acceleration.y = FlxG.random.int(200, 300);
+				numScore.velocity.set(FlxG.random.float(-5, 5), -FlxG.random.int(140, 160));
+
 				numScore.tween = FlxTween.tween(numScore, {alpha: 0}, 0.2, {
-					onComplete: function(wtf){
-						rating.moves = false;
-						numScore.kill();
-					},
+					onComplete: function(wtf){numScore.kill();},
 					startDelay: Conductor.crochet * 0.002
 				});
 			}
@@ -4295,11 +4276,16 @@ class RatingSprite extends FlxSprite
 {
 	public var tween:FlxTween;
 	
+	public function new(){
+		super();
+		moves = !ClientPrefs.simpleJudge;
+	}
+
 	public static function newRating()
 	{
 		var rating = new RatingSprite();
 		
-		rating.acceleration.y = 550;
+		// rating.acceleration.y = 550;
 
 		rating.antialiasing = ClientPrefs.globalAntialiasing;
 		rating.cameras = [PlayState.instance.camHUD];
@@ -4307,7 +4293,6 @@ class RatingSprite extends FlxSprite
 		rating.scrollFactor.set();
 		rating.scale.set(0.7, 0.7);
 
-		rating.moves = false;
 		return rating;
 	}
 
@@ -4321,7 +4306,6 @@ class RatingSprite extends FlxSprite
 		numScore.scrollFactor.set();
 		numScore.scale.set(0.5, 0.5);
 
-		numScore.moves = false;
 		return numScore;
 	}
 }
