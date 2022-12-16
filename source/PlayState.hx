@@ -785,7 +785,7 @@ class PlayState extends MusicBeatState
 		ratingTxtGroup.add(rating);
 		add(ratingTxtGroup);
 
-		for (i in 0...4){
+		for (i in 0...10){
 			var number = RatingSprite.newNumber();
 			number.alpha = 0;
 			comboNumGroup.add(number);
@@ -3039,6 +3039,9 @@ class PlayState extends MusicBeatState
 	public var totalPlayed:Int = 0;
 	public var totalNotesHit:Float = 0.0;
 
+	var lastJudge:RatingSprite;
+	var lastCombos:Array<RatingSprite> = [];
+
 	private function popUpScore(note:Note = null):Void
 	{
 		var noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset);
@@ -3094,75 +3097,129 @@ class PlayState extends MusicBeatState
 		
 		rating.loadGraphic(Paths.image(daRating.image));
 		rating.alpha = 1;
-
 		rating.screenCenter(Y);
 		rating.x = coolTextX - 40 + ClientPrefs.comboOffset[0];
 		rating.y -= 60 + ClientPrefs.comboOffset[1];
 		
 		rating.velocity.set(-FlxG.random.int(0, 10), -FlxG.random.int(140, 175));
 		
+		rating.scale.set(0.7, 0.7);
 		rating.updateHitbox();
+
 
 		ratingTxtGroup.remove(rating, true);
 		ratingTxtGroup.add(rating);
 
-		if (rating.tween != null)
-			rating.tween.cancel();
 
-		rating.moves = true;
-		rating.tween = FlxTween.tween(rating, {alpha: 0}, 0.2, {
-			startDelay: Conductor.crochet * 0.001,
-			onComplete: function(wtf){
-				rating.moves = false;
-				rating.kill();
+		if(ClientPrefs.simpleJudge){
+			if (rating.tween != null && rating.tween.active)
+			{
+				rating.tween.cancel();
+				rating.tween = null;
 			}
-		});
+			if (lastJudge != null && lastJudge.alive){
+				lastJudge.kill();
+			}
+			
+			
+			lastJudge = rating;
+			rating.revive();
 
+			rating.acceleration.set(0, 0);
+			rating.velocity.set(0, 0);
+			rating.scale.scale(1.1);
+			
+			rating.tween = FlxTween.tween(rating, {"scale.x": 0.7, "scale.y": 0.7}, 0.1, {
+				onComplete: function(tween:FlxTween)
+				{
+					if (rating.alive){
+						rating.tween = FlxTween.tween(rating, {"scale.x": 0, "scale.y": 0}, 0.2, {
+							onComplete: function(tween:FlxTween)
+							{
+								rating.kill();
+							},
+							ease: FlxEase.quadIn,
+							startDelay: 0.6
+						});
+					}
+				},
+				ease: FlxEase.quadOut
+			});
 
+		}else{
+			if (rating.tween != null)
+				rating.tween.cancel();
+
+			rating.moves = true;
+			rating.tween = FlxTween.tween(rating, {alpha: 0}, 0.2, {
+				startDelay: Conductor.crochet * 0.001,
+				onComplete: function(wtf)
+				{
+					rating.moves = false;
+					rating.kill();
+				}
+			});
+		}
 		////
-		if (combo < 10 && combo != 0)
+		if (combo < 10 && combo != 0 && !ClientPrefs.simpleJudge)
 			return;
 
-		var seperatedScore:Array<Int> = [];
-
-		if(combo >= 1000){
-			comboNumGroup.maxSize = 40;
-			seperatedScore.push(Math.floor(combo * 0.001) % 10);
-		}
-
-		seperatedScore.push(Math.floor(combo * 0.01) % 10);
-		seperatedScore.push(Math.floor(combo * 0.1) % 10);
-		seperatedScore.push(combo % 10);
+		var seperatedScore:Array<String> = Std.string(combo).split("");
+		if(combo < 10)
+			seperatedScore.unshift("0");
+		
+		if(combo < 100)
+			seperatedScore.unshift("0");
 
 		var daLoop:Int = 0;
+
+		while (lastCombos.length > 0)
+			lastCombos.shift().kill();	
+		
 		for (i in seperatedScore)
 		{
 			var numScore:RatingSprite = comboNumGroup.recycle(RatingSprite, RatingSprite.newNumber);
 			
-			numScore.loadGraphic(Paths.image('num' + Std.int(i)));
+			numScore.loadGraphic(Paths.image('num' + i));
 			numScore.alpha = 1;
-			
+			numScore.scale.set(0.5, 0.5);
 			numScore.x = ClientPrefs.comboOffset[2] + coolTextX + (43 * daLoop) - 90;
 			numScore.screenCenter(Y);
 			numScore.y -= ClientPrefs.comboOffset[3] - 80;
 
 			numScore.acceleration.y = FlxG.random.int(200, 300);
 			numScore.velocity.set(FlxG.random.float(-5, 5), -FlxG.random.int(140, 160));
-
-			comboNumGroup.remove(numScore, true);
-			comboNumGroup.add(numScore);
-
-			if (numScore.tween != null)
+			if (numScore.tween != null && numScore.tween.active)
+			{
 				numScore.tween.cancel();
+				numScore.tween = null;
+			}
+			numScore.visible=true;
 
-			numScore.moves = true;
-			numScore.tween = FlxTween.tween(numScore, {alpha: 0}, 0.2, {
-				onComplete: function(wtf){
-					rating.moves = false;
-					numScore.kill();
-				},
-				startDelay: Conductor.crochet * 0.002
-			});
+			var index = comboNumGroup.members.indexOf(numScore);
+			comboNumGroup.remove(numScore, true);
+			comboNumGroup.insert(index, numScore);
+			lastCombos.push(numScore);
+
+			if(ClientPrefs.simpleJudge){
+				numScore.acceleration.set(0, 0);
+				numScore.velocity.set(0, 0);
+				numScore.scale.x = 0.5 * 1.25;
+				numScore.scale.y = 0.5 * 0.75;
+				numScore.alpha = 0.6;
+				numScore.tween = FlxTween.tween(numScore, {"scale.x": 0.5, "scale.y": 0.5, alpha: 1}, 0.2, {
+					ease: FlxEase.circOut
+				});
+			}else{
+				numScore.moves = true;
+				numScore.tween = FlxTween.tween(numScore, {alpha: 0}, 0.2, {
+					onComplete: function(wtf){
+						rating.moves = false;
+						numScore.kill();
+					},
+					startDelay: Conductor.crochet * 0.002
+				});
+			}
 
 			daLoop++;
 		}
