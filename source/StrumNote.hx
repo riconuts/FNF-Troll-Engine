@@ -18,6 +18,7 @@ class StrumNote extends FlxSprite
 		defScale.put();
 		super.destroy();
 	}	
+	public var isQuant:Bool = false;
 	private var colorSwap:ColorSwap;
 	public var resetAnim:Float = 0;
 	public var noteData:Int = 0;
@@ -53,10 +54,21 @@ class StrumNote extends FlxSprite
 
 	public function reloadNote()
 	{
+		isQuant = false;
 		var lastAnim:String = null;
 		if(animation.curAnim != null) lastAnim = animation.curAnim.name;
+		var br:String = texture;
+		if (ClientPrefs.noteSkin == 'Quants')
+		{
+			trace(Paths.getPath("images/QUANT" + texture + ".png", IMAGE));
+			if (Paths.exists(Paths.getPath("images/QUANT" + texture + ".png", IMAGE)))
+			{
+				br = "QUANT" + texture;
+				isQuant = true;
+			}
+		}
 
-		frames = Paths.getSparrowAtlas(texture);
+		frames = Paths.getSparrowAtlas(br);
 		animation.addByPrefix('green', 'arrowUP');
 		animation.addByPrefix('blue', 'arrowDOWN');
 		animation.addByPrefix('purple', 'arrowLEFT');
@@ -119,7 +131,7 @@ class StrumNote extends FlxSprite
 		super.update(elapsed);
 	}
 
-	public function playAnim(anim:String, ?force:Bool = false) {
+	public function playAnim(anim:String, ?force:Bool = false, ?note:Note) {
 		animation.play(anim, force);
 		centerOffsets();
 		centerOrigin();
@@ -128,11 +140,18 @@ class StrumNote extends FlxSprite
 			colorSwap.saturation = 0;
 			colorSwap.brightness = 0;
 		} else {
-			if (noteData > -1 && noteData < ClientPrefs.arrowHSV.length)
+			if (note == null)
 			{
-				colorSwap.hue = ClientPrefs.arrowHSV[noteData][0] / 360;
-				colorSwap.saturation = ClientPrefs.arrowHSV[noteData][1] / 100;
-				colorSwap.brightness = ClientPrefs.arrowHSV[noteData][2] / 100;
+				colorSwap.hue = ClientPrefs.arrowHSV[noteData % 4][0] / 360;
+				colorSwap.saturation = ClientPrefs.arrowHSV[noteData % 4][1] / 100;
+				colorSwap.brightness = ClientPrefs.arrowHSV[noteData % 4][2] / 100;
+			}
+			else
+			{
+				// ok now the quants should b fine lol
+				colorSwap.hue = note.colorSwap.hue;
+				colorSwap.saturation = note.colorSwap.saturation;
+				colorSwap.brightness = note.colorSwap.brightness;
 			}
 
 			if(animation.curAnim.name == 'confirm') {

@@ -208,6 +208,11 @@ class Paths
 		return getPath('$key.lua', TEXT, library);
 	}
 
+
+	static public function exists(asset:String)
+		return FileSystem.exists(asset)?true:Assets.exists(asset);
+	
+
 	static public function video(key:String)
 	{
 		#if MODS_ALLOWED

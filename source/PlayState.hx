@@ -3098,7 +3098,7 @@ class PlayState extends MusicBeatState
 			rating = lastJudge;
 			rating.revive();
 
-			rating.scale.scale(1.1);
+			rating.scale.set(0.7*1.1,0.7*1.1);
 
 			if (rating.tween != null){
 				rating.tween.cancel();
@@ -3423,6 +3423,8 @@ class PlayState extends MusicBeatState
 			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
 
 		combo = 0;
+		while (lastCombos.length > 0)
+			lastCombos.shift().kill();	
 		health -= daNote.missHealth * healthLoss;
 		if(instakillOnMiss)
 		{
@@ -3497,6 +3499,8 @@ class PlayState extends MusicBeatState
 				gf.playAnim('sad');
 			}
 			combo = 0;
+			while (lastCombos.length > 0)
+				lastCombos.shift().kill();	
 
 			if(!practiceMode) songScore -= 10;
 			if(!endingSong) {
@@ -3561,7 +3565,7 @@ class PlayState extends MusicBeatState
 			if (note.isSustainNote && !note.animation.curAnim.name.endsWith('end'))
 			time += 0.15;
 
-			StrumPlayAnim(true, Std.int(Math.abs(note.noteData)), time);
+			StrumPlayAnim(true, Std.int(Math.abs(note.noteData)), time, note);
 		}
 
 		note.hitByOpponent = true;
@@ -3614,11 +3618,11 @@ class PlayState extends MusicBeatState
 				if(note.isSustainNote && !note.animation.curAnim.name.endsWith('end'))
 					time += 0.15;
 
-				StrumPlayAnim(false, Std.int(Math.abs(note.noteData)), time);
+				StrumPlayAnim(false, Std.int(Math.abs(note.noteData)), time, note);
 			}else{
 				var spr = playerStrums.members[note.noteData];
 				if(spr != null)
-					spr.playAnim('confirm', true);
+					spr.playAnim('confirm', true, note);
 			}
 		}
 
@@ -3988,7 +3992,7 @@ class PlayState extends MusicBeatState
 	}
 	#end
 
-	function StrumPlayAnim(isDad:Bool, id:Int, time:Float) {
+	function StrumPlayAnim(isDad:Bool, id:Int, time:Float, ?note:Note) {
 		var spr:StrumNote = null;
 		if(isDad)
 			spr = strumLineNotes.members[id];
@@ -3996,7 +4000,7 @@ class PlayState extends MusicBeatState
 			spr = playerStrums.members[id];
 
 		if(spr != null) {
-			spr.playAnim('confirm', true);
+			spr.playAnim('confirm', true, note);
 			spr.resetAnim = time;
 		}
 	}
