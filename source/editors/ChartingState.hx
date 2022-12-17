@@ -2580,8 +2580,12 @@ class ChartingState extends MusicBeatState
 		if(height < minHeight) height = minHeight;
 		if(height < 1) height = 1; //Prevents error of invalid height
 
-		var spr:FlxSprite = new FlxSprite(note.x + (GRID_SIZE * 0.5) - 4, note.y + GRID_SIZE* 0.5).makeGraphic(8, height, noteColors[note.noteData%noteColors.length]);
+		var spr:FlxSprite = new FlxSprite(note.x + (GRID_SIZE * 0.5) - 4,
+			note.y + GRID_SIZE * 0.5).makeGraphic(8, height, ClientPrefs.noteSkin == 'Quants'?0xFFED1C24:noteColors[note.noteData % noteColors.length]);
+		spr.shader = note.shader;
+		
 		return spr;
+
 	}
 
 	private function addSection(sectionBeats:Float = 4):Void

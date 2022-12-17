@@ -1302,7 +1302,7 @@ class PlayState extends MusicBeatState
 				}
 			});
 		
-			callOnScripts('onCountdownTick', [swagCounter]);
+			callOnScripts('onCountdownTick', [swagCounter, tmr]);
 
 			swagCounter += 1;
 		}, 5);
@@ -3536,6 +3536,8 @@ class PlayState extends MusicBeatState
 
 		var char:Character = note.gfNote ? gf : dad;
 
+		char.callOnScripts("playNote", [note]);
+
 		if(note.noteType == 'Hey!' && char.animOffsets.exists('hey')) {
 			char.playAnim('hey', true);
 			char.specialAnim = true;
@@ -3554,6 +3556,7 @@ class PlayState extends MusicBeatState
 				char.voicelining = false;
 				char.playAnim(animToPlay, true);
 				char.holdTimer = 0;
+				char.callOnScripts("playNoteAnim", [animToPlay, note]);
 			}
 		}
 
@@ -3665,18 +3668,29 @@ class PlayState extends MusicBeatState
 		health += note.hitHealth * healthGain;
 
 		// Sing animations
+
+		var char = note.gfNote?gf:boyfriend;
+		char.callOnScripts("playNote", [note]);
+
 		if(!note.noAnimation) {
 			var daAlt = note.noteType == 'Alt Animation' ? '-alt' : '';
 			var animToPlay:String = singAnimations[Std.int(Math.abs(note.noteData))];
 
-			if(note.gfNote){
+			/*if(note.gfNote){
 				if(gf != null){
-					gf.playAnim(animToPlay + daAlt, true);
-					gf.holdTimer = 0;
-				}
+					char.playAnim(animToPlay + daAlt, true);
+					char.holdTimer = 0;
+				
 			}else if (boyfriend.animTimer <= 0 && !boyfriend.voicelining){
-				boyfriend.playAnim(animToPlay + daAlt, true);
-				boyfriend.holdTimer = 0;
+				char.playAnim(animToPlay + daAlt, true);
+				char.holdTimer = 0;
+			}*/
+			if(char!=null){
+				if (char.animTimer <= 0 && !char.voicelining){
+					char.playAnim(animToPlay + daAlt, true);
+					char.holdTimer = 0;
+					char.callOnScripts("playNoteAnim", [animToPlay + daAlt, note]);
+				}
 			}
 
 			if(note.noteType == 'Hey!') {
