@@ -100,7 +100,7 @@ class TitleState extends MusicBeatState
 				stages.push([stage, mod]);
 		}
 		#else
-		var stages = [["stage1", ""]];
+		var stages:Array<Array<String>> = [["stage1", ""]];
 		#end
 
 		var randomStage = stages[FlxG.random.int(0, stages.length - 1)];
@@ -421,7 +421,7 @@ class RandomTitleLogo extends FlxSprite
 		if (Name != null)
 			titleName = Name;
 		else{
-			var titleNames::Array<String> = getTitlesList();
+			var titleNames:Array<String> = getTitlesList();
 			trace(titleNames);
 			titleName = titleNames[FlxG.random.int(0, titleNames.length - 1)];
 		}
