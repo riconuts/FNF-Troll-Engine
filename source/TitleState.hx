@@ -421,7 +421,7 @@ class RandomTitleLogo extends FlxSprite
 		if (Name != null)
 			titleName = Name;
 		else{
-			var titleNames = getTitlesList();
+			var titleNames::Array<String> = getTitlesList();
 			trace(titleNames);
 			titleName = titleNames[FlxG.random.int(0, titleNames.length - 1)];
 		}
@@ -461,7 +461,7 @@ class RandomTitleLogo extends FlxSprite
 		super.update(elapsed);
 	}
 
-	public static function getTitlesList()
+	public static function getTitlesList():Array<String>
 	{
 		var titleNames:Array<String> = [];
 		var foldersToCheck:Array<String> = [Paths.getPreloadPath('images/titles/')];
@@ -482,6 +482,9 @@ class RandomTitleLogo extends FlxSprite
 					titleNames.push(file.substr(0, file.length - 4));
 		}
 		#end
+
+		if (titleNames.length < 1)
+			titleNames.push("");
 
 		return titleNames;
 	}
