@@ -479,8 +479,6 @@ class PlayState extends MusicBeatState
 
 		//// Multi-thread Loading Start
 		#if MULTICORE_LOADING
-
-		var startLoadTime = Sys.time();
 		if (ClientPrefs.multicoreLoading){
 			var shitToLoad:Array<AssetPreload>;
 
@@ -613,6 +611,7 @@ class PlayState extends MusicBeatState
 		#end
 
 		// "GLOBAL" SCRIPTS
+		#if sys
 		var filesPushed:Array<String> = [];
 		var foldersToCheck:Array<String> = [Paths.getPreloadPath('scripts/')];
 
@@ -624,7 +623,7 @@ class PlayState extends MusicBeatState
 
 		for (folder in foldersToCheck)
 		{
-			if(!FileSystem.exists(folder))
+			if(!Paths.exists(folder))
 				continue;
 
 			for (file in FileSystem.readDirectory(folder))
@@ -648,6 +647,7 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
+		#end
 		
 		// STAGE SCRIPTS
 		stage.buildStage();
@@ -893,6 +893,7 @@ class PlayState extends MusicBeatState
 		startingSong = true;
 
 		// SONG SPECIFIC SCRIPTS
+		#if sys
 		var filesPushed:Array<String> = [];
 		var foldersToCheck:Array<String> = [Paths.getPreloadPath('data/' + Paths.formatToSongPath(SONG.song) + '/')];
 
@@ -904,7 +905,7 @@ class PlayState extends MusicBeatState
 
 		for (folder in foldersToCheck)
 		{
-			if(!FileSystem.exists(folder))
+			if(!Paths.exists(folder))
 				continue;
 
 			for (file in FileSystem.readDirectory(folder))
@@ -929,6 +930,7 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
+		#end
 
 		#if desktop
 		// Updating Discord Rich Presence.
@@ -942,14 +944,11 @@ class PlayState extends MusicBeatState
 		}
 
 		Conductor.safeZoneOffset = (ClientPrefs.safeFrames / 60) * 1000;
+
 		callOnScripts('onCreatePost');
-
-		trace("fully loaded in " + (Sys.time() - startLoadTime));
-
 		super.create();
 
 		RecalculateRating();
-
 		startCountdown();
 
 		finishedCreating = true;
@@ -1063,12 +1062,12 @@ class PlayState extends MusicBeatState
 		var doPush:Bool = false;
 		var luaFile:String = 'characters/' + name + '.lua';
 		#if MODS_ALLOWED
-		if(FileSystem.exists(Paths.modFolders(luaFile))) {
+		if(Paths.exists(Paths.modFolders(luaFile))) {
 			luaFile = Paths.modFolders(luaFile);
 			doPush = true;
 		} else {
 			luaFile = Paths.getPreloadPath(luaFile);
-			if(FileSystem.exists(luaFile)) {
+			if(Paths.exists(luaFile)) {
 				doPush = true;
 			}
 		}
@@ -1116,7 +1115,7 @@ class PlayState extends MusicBeatState
 
 		var filepath:String = Paths.video(name);
 		#if sys
-		if (!FileSystem.exists(filepath))
+		if (!Paths.exists(filepath))
 		#else
 		if (!OpenFlAssets.exists(filepath))
 		#end
@@ -1457,7 +1456,7 @@ class PlayState extends MusicBeatState
 		var songName:String = Paths.formatToSongPath(SONG.song);
 		var file:String = Paths.json(songName + '/events');
 		#if MODS_ALLOWED
-		if (FileSystem.exists(Paths.modsJson(songName + '/events')) || FileSystem.exists(file))
+		if (Paths.exists(Paths.modsJson(songName + '/events')) || Paths.exists(file))
 		#else
 		if (OpenFlAssets.exists(file)) 
 		#end
@@ -1558,6 +1557,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
+		#if sys
 		for (notetype in noteTypeMap.keys())
 		{
 			var doPush:Bool = false;
@@ -1571,7 +1571,7 @@ class PlayState extends MusicBeatState
 				var files = [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)];
 				for (file in files)
 				{
-					if (FileSystem.exists(file))
+					if (Paths.exists(file))
 					{
 						#if LUA_ALLOWED
 						if (ext == 'lua')
@@ -1596,6 +1596,7 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
+		#end
 
 		// loads events
 		for(event in getEvents()){
@@ -1606,6 +1607,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
+		#if sys
 		for (event in eventPushedMap.keys())
 		{
 			var doPush:Bool = false;
@@ -1619,7 +1621,7 @@ class PlayState extends MusicBeatState
 				var files = [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)];
 				for (file in files)
 				{
-					if (FileSystem.exists(file))
+					if (Paths.exists(file))
 					{
 						#if LUA_ALLOWED
 						if (ext == 'lua')
@@ -1647,6 +1649,7 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
+		#end
 		
 		for(subEvent in getEvents()){
 			subEvent.strumTime -= eventNoteEarlyTrigger(subEvent);

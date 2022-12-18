@@ -563,10 +563,12 @@ class StageEditorState extends MusicBeatState{
 			"camera_girlfriend": stageData.camera_girlfriend,
 			"camera_speed": stageData.camera_speed,
 
-			"pixel_size": stageData.pixel_size,
+			// "pixel_size": stageData.pixel_size,
 
 			"preloadStrings": stageData.preloadStrings,
+			#if MULTICORE_LOADING
 			"preload": stageData.preload
+			#end
 		};
 
 		var data:String = Json.stringify(json, "\t");

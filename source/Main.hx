@@ -63,9 +63,7 @@ class Main extends Sprite
 	private function init(?E:Event):Void
 	{
 		if (hasEventListener(Event.ADDED_TO_STAGE))
-		{
 			removeEventListener(Event.ADDED_TO_STAGE, init);
-		}
 
 		setupGame();
 	}
@@ -100,16 +98,21 @@ class Main extends Sprite
 		ClientPrefs.loadDefaultKeys();
 
 		var troll = false;
+		
+		#if sys
 		for (arg in Sys.args()){
 			if (arg.contains("troll")){
-				initialState = SinnerState;
-				skipSplash = true;
 				troll = true;
 				break;
 			}else if (arg.contains("debug")){
 				PlayState.chartingMode = true;
 				skipSplash = true;
 			}
+		}
+		#end
+		if (troll){
+			initialState = SinnerState;
+			skipSplash = true;
 		}
 
 		addChild(new FlxGame(gameWidth, gameHeight, initialState, zoom, framerate, framerate, skipSplash, startFullscreen));
@@ -121,11 +124,12 @@ class Main extends Sprite
 		if (!troll){
 			fpsVar = new FPS(10, 3, 0xFFFFFF);
 			addChild(fpsVar);
+
 			Lib.current.stage.align = "tl";
 			Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
-			if (fpsVar != null){
+
+			if (fpsVar != null)
 				fpsVar.visible = ClientPrefs.showFPS;
-			}
 		}
 		#end
 		

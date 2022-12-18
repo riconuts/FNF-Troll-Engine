@@ -35,6 +35,8 @@ class MiscSubState extends BaseOptionsMenu
 	{
 		title = 'Misc';
 		//rpcTitle = 'Miscellaneous Menu'; //for Discord Rich Presence
+
+		#if MULTICORE_LOADING
 		var maxThreads:Int = Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS"));
 		if(maxThreads > 1){
 			var option:Option = new Option('Multi-thread Loading', //Name
@@ -57,7 +59,10 @@ class MiscSubState extends BaseOptionsMenu
 			option.displayFormat = '%v';
 
 			addOption(option);
-		}else{
+		}
+		else
+		#end
+		{
 			// if you guys ever add more options to misc that dont rely on the thread count
 			var option:Option = new Option("Nothin' here!", //Name
 				"Usually there'd be options about multi-thread loading, but you only have 1 thread to use so no real use", //Description
@@ -67,15 +72,6 @@ class MiscSubState extends BaseOptionsMenu
 			); //Default value
 			addOption(option);
 		}
-		/*
-		var option:Option = new Option('Persistent Cached Data',
-			'If checked, images loaded will stay in memory\nuntil the game is closed, this increases memory usage,\nbut basically makes reloading times instant.',
-			'imagesPersist',
-			'bool',
-			false);
-		option.onChange = onChangePersistentData; //Persistent Cached Data changes FlxGraphic.defaultPersist
-		addOption(option);
-		*/
 
 		super();
 	}

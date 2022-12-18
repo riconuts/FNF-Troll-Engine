@@ -50,7 +50,7 @@ class Cache{
 			for (shit in shitToLoad)
 				trace(shit.path);
 
-			var threadLimit:Int = ClientPrefs.loadingThreads; // Math.floor(Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS")));
+			var threadLimit:Int = ClientPrefs.loadingThreads;
 			if (shitToLoad.length > 0 && threadLimit > 1)
 			{
 				// thanks shubs -neb

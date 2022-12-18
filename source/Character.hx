@@ -489,11 +489,12 @@ class Character extends FlxSprite
 	////
 	public function startScripts()
 	{
+		#if sys
 		var baseFile = 'characters/$curCharacter.hscript';
 		var files = [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)];
 
 		for (file in files){
-			if (FileSystem.exists(file)){
+			if (Paths.exists(file)){
 				var script = FunkinHScript.fromFile(file);
 				characterScripts.push(script);
 				break;
@@ -501,6 +502,7 @@ class Character extends FlxSprite
 		}
 
 		callOnScripts("onLoad", [this], true);
+		#end
 
 		return this;
 	}

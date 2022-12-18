@@ -18,7 +18,6 @@ import lime.ui.WindowAttributes;
 
 class SinnerState extends FlxState
 {
-	#if desktop
 	var trollface:FlxSprite = new FlxSprite();
 
 	var mainWindow:Window;
@@ -105,11 +104,15 @@ class SinnerState extends FlxState
 			case 10:
 				if (FlxG.keys.justPressed.ENTER){
 					#if final
+					/*
 					FlxG.save.bind('funkin', 'ninjamuffin99');
 					FlxG.save.data.tgtNotes = null;
 					FlxG.save.flush();
+					*/
 					#end
+					#if sys
 					Sys.exit(0);
+					#end
 				}
 		}
 
@@ -174,5 +177,4 @@ class SinnerState extends FlxState
 		x = (desktopSize.x - mainWindow.width)* 0.5;
 		y = (desktopSize.y - mainWindow.height)* 0.5;
 	}
-	#end
 }

@@ -881,7 +881,7 @@ class ChartingState extends MusicBeatState
 			key++;
 		}
 
-		#if (hscript || LUA_ALLOWED)
+		#if (sys && (hscript || LUA_ALLOWED))
 		var charsLoaded:Map<String, Bool> = new Map();
 		var notesList = [];
 		var directories:Array<String> = [
@@ -968,6 +968,7 @@ class ChartingState extends MusicBeatState
 
 		descText = new FlxText(20, 200, 0, eventStuff[0][0]);
 		
+		#if (sys && (hscript || LUA_ALLOWED))
 		var eventsLoaded:Map<String, Bool> = new Map();
 		var directories:Array<String> = [
 			#if MODS_ALLOWED
@@ -995,6 +996,7 @@ class ChartingState extends MusicBeatState
 				eventStuff.push([eventToCheck, File.getContent(path)]);
 			}
 		}
+		#end
 
 		var leEvents:Array<String> = [];
 		for (i in 0...eventStuff.length)

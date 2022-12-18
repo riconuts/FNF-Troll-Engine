@@ -89,6 +89,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 
 	public function buildStage()
 	{
+		#if sys
 		var doPush:Bool = false;
 		var baseScriptFile:String = 'stages/' + curStage;
 
@@ -104,7 +105,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 			var files = [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)];
 			for (file in files)
 			{
-				if (FileSystem.exists(file))
+				if (Paths.exists(file))
 				{
 					#if LUA_ALLOWED
 					if (ext == 'hscript'){
@@ -140,6 +141,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		}
 		#end
 
+		#end
 		return this;
 	}
 

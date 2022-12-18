@@ -305,20 +305,21 @@ class CreditsState extends MusicBeatState
 	#end
 	function pushFileCreditsToList(creditsFile:String)
 	{
-		if (FileSystem.exists(creditsFile))
+		var rawFile = Paths.getContent(creditsFile);
+		if (rawFile == null)
+			return;
+
+		var firstarray:Array<String> = rawFile.split('\n');
+		for (i in firstarray)
 		{
-			var firstarray:Array<String> = File.getContent(creditsFile).split('\n');
-			for (i in firstarray)
-			{
-				var arr:Array<String> = i.replace('\\n', '\n').split("::");
-				/* No idea what is this
-				if (arr.length >= 5)
-					arr.push(folder);
-				*/
-				creditsStuff.push(arr);
-			}
-			creditsStuff.push(['']);
+			var arr:Array<String> = i.replace('\\n', '\n').split("::");
+			/* No idea what is this
+			if (arr.length >= 5)
+				arr.push(folder);
+			*/
+			creditsStuff.push(arr);
 		}
+		creditsStuff.push(['']);
 	}
 
 	function getCurrentBGColor() {/*

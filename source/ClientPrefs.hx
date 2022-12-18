@@ -244,11 +244,13 @@ class ClientPrefs {
 			tgtNotes = FlxG.save.data.tgtNotes;
 		}
 		if(FlxG.save.data.loadingThreads != null) {
+			#if MULTICORE_LOADING
 			loadingThreads = FlxG.save.data.loadingThreads;
 			if(loadingThreads > Math.floor(Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS")))){
 				loadingThreads = Math.floor(Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS")));
 				FlxG.save.data.loadingThreads = loadingThreads;
 			}
+			#end
 		}
 		if(FlxG.save.data.noteOffset != null) {
 			noteOffset = FlxG.save.data.noteOffset;

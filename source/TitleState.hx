@@ -81,12 +81,6 @@ class TitleState extends MusicBeatState
 		FlxTransitionableState.defaultTransIn = FadeTransitionSubstate;
 		FlxTransitionableState.defaultTransOut = FadeTransitionSubstate;
 
-		if (!initialized)
-		{
-			MusicBeatState.playMenuMusic(0);
-			Conductor.changeBPM(90);
-		}
-
 		// Set up cameras
 		camHUD.bgColor = 0x00000000;
 		camGame.follow(camFollowPos);
@@ -97,14 +91,18 @@ class TitleState extends MusicBeatState
 		FlxG.cameras.setDefaultDrawTarget(camGame, true);
 
 		// Set up a stage list
+		#if MODS_ALLOWED
 		var stages:Array<Array<String>> = []; // [stage name, mod directory]
 
-		for (mod in Paths.getModDirectories())
-		{
+		for (mod in Paths.getModDirectories()){
 			Paths.currentModDirectory = mod;
 			for (stage in Stage.getStageList())
 				stages.push([stage, mod]);
 		}
+		#else
+		var stages = [["stage1", ""]];
+		#end
+
 		var randomStage = stages[FlxG.random.int(0, stages.length - 1)];
 		Paths.currentModDirectory = randomStage[1];
 
@@ -116,10 +114,8 @@ class TitleState extends MusicBeatState
 		camGame.zoom = bg.stageData.defaultZoom;
 
 		var camPos = bg.stageData.camera_stage;
-		trace(camPos);
-		if (camPos == null){
+		if (camPos == null)
 			camPos = [640, 360];
-		}
 
 		camFollow.set(camPos[0], camPos[1]);
 		camFollowPos.setPosition(camPos[0], camPos[1]);
@@ -186,8 +182,11 @@ class TitleState extends MusicBeatState
 		//
 		if (initialized)
 			skipIntro();
-		else
+		else{
 			initialized = true;
+			MusicBeatState.playMenuMusic(0);
+			Conductor.changeBPM(90);
+		}		
 	}
 
 	function getIntroTextShit():Array<Array<String>>
@@ -473,17 +472,16 @@ class RandomTitleLogo extends FlxSprite
 			foldersToCheck.insert(0, Paths.mods(Paths.currentModDirectory + '/images/titles/'));
 		#end
 		
-		for (folder in foldersToCheck)
-		{
-			if (FileSystem.exists(folder))
-			{
-				var dir = FileSystem.readDirectory(folder);
+		#if sys
+		for (folder in foldersToCheck){
+			if (Paths.exists(folder))
+				return;
 
-				for (file in dir)
-					if (!titleNames.contains(file) && file.endsWith('.png'))
-						titleNames.push(file.substr(0, file.length - 4));
-			}
+			for (file in FileSystem.readDirectory(folder))
+				if (!titleNames.contains(file) && file.endsWith('.png'))
+					titleNames.push(file.substr(0, file.length - 4));
 		}
+		#end
 
 		return titleNames;
 	}

@@ -27,7 +27,7 @@ import sys.io.File;
 
 class Paths
 {
-	inline public static var SOUND_EXT = #if web "mp3" #else "ogg" #end;
+	inline public static var SOUND_EXT = "ogg";//#if web "mp3" #else "ogg" #end;
 	inline public static var VIDEO_EXT = "mp4";
 
 	#if MODS_ALLOWED
@@ -46,7 +46,7 @@ class Paths
 	public static var dumpExclusions:Array<String> = [
 		'assets/music/freakyIntro.$SOUND_EXT',
 		'assets/music/freakyMenu.$SOUND_EXT',
-		'assets/shared/music/breakfast.$SOUND_EXT'
+		'assets/music/breakfast.$SOUND_EXT'
 	];
 
 	/// haya I love you for the base cache dump I took to the max
@@ -157,6 +157,7 @@ class Paths
 		return getPreloadPath(file);
 	}
 
+	/*
 	static public function getLibraryPath(file:String, library = "preload")
 	{
 		return if (library == "preload" || library == "default") getPreloadPath(file); else getLibraryPathForce(file, library);
@@ -167,6 +168,7 @@ class Paths
 		var returnPath = '$library:assets/$library/$file';
 		return returnPath;
 	}
+	*/
 
 	inline public static function getPreloadPath(file:String = '')
 	{
@@ -209,9 +211,20 @@ class Paths
 	}
 
 
-	static public function exists(asset:String)
-		return FileSystem.exists(asset)?true:Assets.exists(asset);
-	
+	static public function exists(asset:String){
+		return #if sys FileSystem.exists(asset) ? true : #end Assets.exists(asset);
+	}
+	static public function getContent(asset:String){
+		#if sys
+		if (FileSystem.exists(asset))
+			return File.getContent(asset);
+		#else
+		if (Assets.exists(asset))
+			return Assets.getText(asset);
+		#end
+
+		return null;
+	}
 
 	static public function video(key:String)
 	{
@@ -307,7 +320,7 @@ class Paths
 		if (FileSystem.exists(getPreloadPath(key)))
 			return File.getContent(getPreloadPath(key));
 
-		if (currentLevel != null)
+		/*if (currentLevel != null)
 		{
 			var levelPath:String = '';
 			if (currentLevel != 'shared')
@@ -320,7 +333,7 @@ class Paths
 			levelPath = getLibraryPathForce(key, 'shared');
 			if (FileSystem.exists(levelPath))
 				return File.getContent(levelPath);
-		}
+		}*/
 		#end
 		return Assets.getText(getPath(key, TEXT));
 	}
@@ -341,16 +354,10 @@ class Paths
 	{
 		#if MODS_ALLOWED
 		if (FileSystem.exists(mods(currentModDirectory + '/' + key)) || FileSystem.exists(mods(key)))
-		{
 			return true;
-		}
 		#end
 
-		if (OpenFlAssets.exists(getPath(key, type)))
-		{
-			return true;
-		}
-		return false;
+		return OpenFlAssets.exists(getPath(key, type));
 	}
 
 	inline static public function getSparrowAtlas(key:String, ?library:String):FlxAtlasFrames
@@ -398,11 +405,10 @@ class Paths
 	public static function returnGraphic(key:String, ?library:String)
 	{
 		#if MODS_ALLOWED
-		final modKey:String = modsImages(key);
+		var modKey:String = modsImages(key);
 		if (FileSystem.exists(modKey))
 		{
-			if (!currentTrackedAssets.exists(modKey))
-			{
+			if (!currentTrackedAssets.exists(modKey)){
 				var newBitmap:BitmapData = BitmapData.fromFile(modKey);
 				var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(newBitmap, false, modKey);
 				newGraphic.persist = true;
@@ -413,8 +419,7 @@ class Paths
 		}
 		#end
 
-		final path = getPath('images/$key.png', IMAGE, library);
-		
+		var path = getPath('images/$key.png', IMAGE, library);
 		if (OpenFlAssets.exists(path, IMAGE))
 		{
 			if (!currentTrackedAssets.exists(path))
@@ -479,17 +484,7 @@ class Paths
 		}
 		#end
 
-		var path:String = Paths.getPreloadPath(key);
-		#if sys
-		if (FileSystem.exists(path))
-			return File.getContent(path);
-		#else
-		if (Assets.exists(path))
-			return Assets.getText(path);
-		#end
-
-		trace('File not found: $key');
-		return null;
+		return getContent(Paths.getPreloadPath(key));
 	}
 
 	public static var modsList:Array<String> = [];

@@ -41,52 +41,40 @@
 	<set name="BUILD_DIR" value="export/release" unless="debug" />
 	<set name="BUILD_DIR" value="export/32bit" if="32bits" />
 
+	<!-- PSYCH ENGINE CUSTOMIZATION -->
+	<!-- <define name="ACHIEVEMENTS_ALLOWED" /> -->
+	<define name="MODS_ALLOWED" if="desktop" />
+	<define name="VIDEOS_ALLOWED"/>
+	<define name="LUA_ALLOWED" if="desktop" />
+	<define name="CRASH_HANDLER" if="desktop" />
+	<define name="MULTICORE_LOADING" if="desktop" />
+	<define name="loadBenchmark" if="MULTICORE_LOADING" />
+	<!-- <define name="traceLoading" if="MULTICORE_LOADING" /> -->
+	
+	<define name="PRELOAD_ALL" unless="web"/>
+	<define name="NO_PRELOAD_ALL" unless="PRELOAD_ALL"/>
+
 	<classpath name="source" />
 	
 	<!-- screw the preload folder -->
 	<assets path="assets/data" />
 	<assets path="assets/images" />
-
-	<assets path="assets/music" exclude="*.ogg" if="web"/>
-	<assets path="assets/music" exclude="*.mp3"  unless="web"/>
-	<assets path="assets/sounds" exclude="*.ogg" if="web"/>
-	<assets path="assets/sounds" exclude="*.mp3"  unless="web"/>
-
 	<assets path="assets/characters"/>
 	<assets path="assets/scripts"/>
 	<assets path="assets/notetypes"/>
 	<assets path="assets/events"/>
 	<assets path="assets/stages"/>
-	<assets path="assets/weeks"/>
-
-	<!-- PSYCH ENGINE CUSTOMIZATION -->
-	<define name="MODS_ALLOWED" if="desktop" />
-	<!-- <define name="ACHIEVEMENTS_ALLOWED" /> -->
-	<define name="VIDEOS_ALLOWED"/>
-	<define name="LUA_ALLOWED" if="desktop" />
-	<define name="CRASH_HANDLER" if="desktop" />
-	<define name="MULTICORE_LOADING" if="desktop" />
-	<define name="loadBenchmark"/>
-	<!-- <define name="traceLoading"/> -->
-
-	<!-- <define name="PRELOAD_ALL" /> -->
-	<define name="PRELOAD_ALL" unless="web" />
-	<define name="NO_PRELOAD_ALL" unless="PRELOAD_ALL"/>
-	
-	<library name="videos"        preload="true" />
-	<library name="songs"         preload="true" />
-	
-	<assets path="assets/videos"        library="videos"        if="VIDEOS_ALLOWED"/>
-	<assets path="assets/songs"         library="songs"         exclude="*.ogg" if="web"/>
-	<assets path="assets/songs"         library="songs"         exclude="*.mp3" unless="web"/>
-	<!-- <assets path="assets/week2"         library="week2"         exclude="*.ogg" if="web"/> -->
+	<assets path="assets/music"/>
+	<assets path="assets/sounds"/>
+	<assets path="assets/videos"	if="VIDEOS_ALLOWED"/>
+	<assets path="assets/songs"	/>
 
 	<!-- NOTE FOR FUTURE SELF SINCE FONTS ARE ALWAYS FUCKY 
 		TO FIX ONE OF THEM, I CONVERTED IT TO OTF. DUNNO IF YOU NEED TO
 		THEN UHHH I USED THE NAME OF THE FONT WITH SETFORMAT() ON THE TEXT!!!
 		NOT USING A DIRECT THING TO THE ASSET!!!
 	-->
-	<assets path="assets/fonts" embed='false'/>
+	<assets path="assets/fonts"	embed='false'/>
 	<!-- _______________________________ Libraries ______________________________ -->
 
 	<haxelib name="flixel" />
@@ -130,7 +118,7 @@
 	<!--<haxedef name="FLX_NO_NATIVE_CURSOR" />-->
 
 	<!--Optimise inputs, be careful you will get null errors if you don't use conditionals in your game-->
-	<!-- <haxedef name="FLX_NO_KEYBOARD" if="mobile" /> -->
+	<haxedef name="FLX_NO_KEYBOARD" if="mobile" />
 	<haxedef name="FLX_NO_MOUSE" if="mobile" />
 	<haxedef name="FLX_NO_TOUCH" if="desktop" />
 	<!--<haxedef name="FLX_NO_GAMEPAD" />-->

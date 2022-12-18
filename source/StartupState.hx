@@ -16,13 +16,17 @@ class StartupState extends MusicBeatState
 
 	override public function create():Void
 	{
+		#if hscript
 		scripts.FunkinHScript.init();
+		#end
 		Paths.clearStoredMemory();
 		Paths.clearUnusedMemory();
 		
+		#if MODS_ALLOWED
 		Paths.getModDirectories();
 		Paths.loadRandomMod();
-		
+		#end
+
 		//FlxG.game.focusLostFramerate = 60;
 		FlxG.sound.muteKeys = muteKeys;
 		FlxG.sound.volumeDownKeys = volumeDownKeys;
@@ -43,6 +47,7 @@ class StartupState extends MusicBeatState
 		FlxTransitionableState.defaultTransOut = FadeTransitionSubstate;
 		
 		// this shit doesn't work
+		#if desktop
 		CoolUtil.precacheMusic("freakyIntro");
 		CoolUtil.precacheMusic("freakyMenu");
 		
@@ -53,6 +58,7 @@ class StartupState extends MusicBeatState
 		//
 		Paths.music('freakyIntro');
 		Paths.music('freakyMenu');
+		#end
 
 		if(FlxG.save.data != null && FlxG.save.data.fullscreen){
 			FlxG.fullscreen = FlxG.save.data.fullscreen;
