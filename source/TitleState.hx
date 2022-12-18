@@ -421,7 +421,7 @@ class RandomTitleLogo extends FlxSprite
 		if (Name != null)
 			titleName = Name;
 		else{
-			var titleNames::Array<String> = getTitlesList();
+			var titleNames:Array<String> = getTitlesList();
 			trace(titleNames);
 			titleName = titleNames[FlxG.random.int(0, titleNames.length - 1)];
 		}
@@ -475,7 +475,7 @@ class RandomTitleLogo extends FlxSprite
 		#if sys
 		for (folder in foldersToCheck){
 			if (Paths.exists(folder))
-				return;
+				continue;
 
 			for (file in FileSystem.readDirectory(folder))
 				if (!titleNames.contains(file) && file.endsWith('.png'))
