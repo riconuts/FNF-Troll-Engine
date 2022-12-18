@@ -5,6 +5,7 @@ import flixel.system.FlxSound;
 import flixel.tweens.*;
 import hscript.*;
 import lime.utils.Assets;
+import lime.app.Application;
 import scripts.Globals.*;
 
 class FunkinHScript extends FunkinScript
