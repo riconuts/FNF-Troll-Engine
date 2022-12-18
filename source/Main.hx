@@ -113,9 +113,19 @@ class Main extends Sprite
 		if (troll){
 			initialState = SinnerState;
 			skipSplash = true;
+		}else{
+			FlxG.save.bind('funkin', 'ninjamuffin99');
+
+			if (FlxG.save.data.fullscreen != null)
+				startFullscreen = FlxG.save.data.fullscreen;
 		}
 
 		addChild(new FlxGame(gameWidth, gameHeight, initialState, zoom, framerate, framerate, skipSplash, startFullscreen));
+
+		FlxG.sound.muteKeys = StartupState.muteKeys;
+		FlxG.sound.volumeDownKeys = StartupState.volumeDownKeys;
+		FlxG.sound.volumeUpKeys = StartupState.volumeUpKeys;
+		FlxG.keys.preventDefaultKeys = [TAB];
 
 		FlxG.mouse.useSystemCursor = true;
 		FlxG.mouse.visible = false;

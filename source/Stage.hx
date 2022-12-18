@@ -89,7 +89,6 @@ class Stage extends FlxTypedGroup<FlxBasic>
 
 	public function buildStage()
 	{
-		#if sys
 		var doPush:Bool = false;
 		var baseScriptFile:String = 'stages/' + curStage;
 
@@ -140,8 +139,6 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		#if LUA_ALLOWED
 		}
 		#end
-
-		#end
 		return this;
 	}
 
@@ -152,8 +149,8 @@ class Stage extends FlxTypedGroup<FlxBasic>
 	}
 
 	//// Stages of the currently loaded mod.
-	public static function getStageList():Array<String>{
-		var rawList = Paths.getText('data/stageList.txt', true);
+	public static function getStageList(modsOnly = false):Array<String>{
+		var rawList:Null<String> = modsOnly ? null : Paths.getText('data/stageList.txt', true);
 
 		#if MODS_ALLOWED
 		var modsList = Paths.getText('data/stageList.txt', false);

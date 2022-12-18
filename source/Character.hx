@@ -55,7 +55,7 @@ class Character extends FlxSprite
 	public var xFacing:Float = 1;
 
 	public var deathName = DEFAULT_CHARACTER;
-	public var characterScripts:Array<FunkinHScript> = [];
+	public var characterScript:FunkinHScript;
 
 	public var voicelining:Bool = false; // for fleetway, mainly
 	// but whenever you need to play an anim that has to be manually interrupted, here you go
@@ -118,9 +118,9 @@ class Character extends FlxSprite
 
 	override function destroy()
 	{
-		for (script in characterScripts)
-			script.stop();
-		
+		if (characterScript != null)
+			characterScript.stop();
+
 		return super.destroy();
 	}
 
@@ -489,20 +489,17 @@ class Character extends FlxSprite
 	////
 	public function startScripts()
 	{
-		#if sys
 		var baseFile = 'characters/$curCharacter.hscript';
 		var files = [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)];
 
 		for (file in files){
 			if (Paths.exists(file)){
-				var script = FunkinHScript.fromFile(file);
-				characterScripts.push(script);
+				characterScript = FunkinHScript.fromFile(file);
 				break;
 			}
 		}
 
 		callOnScripts("onLoad", [this], true);
-		#end
 
 		return this;
 	}
@@ -510,29 +507,28 @@ class Character extends FlxSprite
 	public function callOnScripts(event:String, ?args:Array<Dynamic>, ?ignoreStops:Bool = false)
 	{
 		var returnVal:Dynamic = Globals.Function_Continue;
-		for (script in characterScripts)
-		{
-			var ret:Dynamic = script.call(event, args != null ? args : []);
-			if (ret == Globals.Function_Halt)
-			{
+
+		if (characterScript != null){
+			var ret:Dynamic = characterScript.call(event, args != null ? args : []);
+			if (ret == Globals.Function_Halt){
 				ret = returnVal;
 				if (!ignoreStops)
 					return returnVal;
 			};
 			if (ret != Globals.Function_Continue && ret != null)
 				returnVal = ret;
+			
+			if (returnVal == null)
+				returnVal = Globals.Function_Continue;
 		}
-		if (returnVal == null)
-			returnVal = Globals.Function_Continue;
+
 		return returnVal;
 	}
 
 	public function setOnScripts(variable:String, arg:Dynamic)
 	{
-		for (script in characterScripts)
-		{
-			script.set(variable, arg);
-		}
+		if (characterScript != null)
+			characterScript.set(variable, arg);
 	}
 
 	//

@@ -16,6 +16,9 @@ class StartupState extends MusicBeatState
 
 	override public function create():Void
 	{
+		#if html5
+		Paths.initPaths();
+		#end
 		#if hscript
 		scripts.FunkinHScript.init();
 		#end
@@ -28,16 +31,8 @@ class StartupState extends MusicBeatState
 		#end
 
 		//FlxG.game.focusLostFramerate = 60;
-		FlxG.sound.muteKeys = muteKeys;
-		FlxG.sound.volumeDownKeys = volumeDownKeys;
-		FlxG.sound.volumeUpKeys = volumeUpKeys;
-		FlxG.keys.preventDefaultKeys = [TAB];
 		
 		PlayerSettings.init();
-		
-		FlxG.save.bind('funkin', 'ninjamuffin99');
-		
-		ClientPrefs.loadPrefs();
 		
 		Highscore.load();
 
@@ -60,9 +55,7 @@ class StartupState extends MusicBeatState
 		Paths.music('freakyMenu');
 		#end
 
-		if(FlxG.save.data != null && FlxG.save.data.fullscreen){
-			FlxG.fullscreen = FlxG.save.data.fullscreen;
-		}
+		ClientPrefs.loadPrefs();
 
 		if (FlxG.save.data.weekCompleted != null)
 			StoryMenuState.weekCompleted = FlxG.save.data.weekCompleted;

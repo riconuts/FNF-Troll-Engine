@@ -91,26 +91,26 @@ class TitleState extends MusicBeatState
 		FlxG.cameras.setDefaultDrawTarget(camGame, true);
 
 		// Set up a stage list
-		#if MODS_ALLOWED
 		var stages:Array<Array<String>> = []; // [stage name, mod directory]
+		
+		Paths.currentModDirectory = "";
+		for (stage in Stage.getStageList())
+			stages.push([stage, ""]);
 
-		for (mod in Paths.getModDirectories()){
+		#if MODS_ALLOWED
+		for (mod in Paths.getModDirectories())
+		{
 			Paths.currentModDirectory = mod;
-			for (stage in Stage.getStageList())
+			for (stage in Stage.getStageList(true))
 				stages.push([stage, mod]);
 		}
-		#else
-		var stages:Array<Array<String>> = [["stage1", ""]];
 		#end
 
-		var randomStage = stages[FlxG.random.int(0, stages.length - 1)];
-		Paths.currentModDirectory = randomStage[1];
-
+		var randomStage = FlxG.random.getObject(stages); // Get a random stage from the list
 		trace(randomStage, Paths.currentModDirectory);
 
+		Paths.currentModDirectory = randomStage[1];
 		bg = new Stage(randomStage[0]).buildStage();
-		trace(bg.members.length);
-		
 		camGame.zoom = bg.stageData.defaultZoom;
 
 		var camPos = bg.stageData.camera_stage;
@@ -200,16 +200,7 @@ class TitleState extends MusicBeatState
 		for (mod in Paths.getModDirectories())
 		{
 			Paths.currentModDirectory = mod;
-			var path = Paths.modFolders("data/introText.txt");
-			var rawFile:Null<String> = null;
-
-			#if sys
-			if (FileSystem.exists(path))
-				rawFile = File.getContent(path);
-			#else
-			if (Assets.exists(path))
-				rawFile = Assets.getText(path);
-			#end
+			var rawFile:Null<String> = getContent(Paths.modFolders("data/introText.txt"));
 
 			if (rawFile != null && rawFile.length > 0)
 				fullText += '\n${rawFile}';
@@ -413,23 +404,18 @@ class TitleState extends MusicBeatState
 // ...kinda unnecessary to make a whole class
 class RandomTitleLogo extends FlxSprite
 {
-	public var titleName:String; 
+	public var titleName:String;
+
 	public function new(?X:Float, ?Y:Float, ?Name:String)
 	{
 		super(X, Y);
 		
-		if (Name != null)
-			titleName = Name;
-		else{
-			var titleNames:Array<String> = getTitlesList();
-			trace(titleNames);
-			titleName = titleNames[FlxG.random.int(0, titleNames.length - 1)];
-		}
-
-		antialiasing = true;
+		titleName = Name != null ? Name : FlxG.random.getObject(getTitlesList());
 
 		loadGraphic(Paths.image('titles/${titleName}'));
 		updateHitbox();
+
+		antialiasing = true;
 	}
 
 	public var time:Float = 0;
@@ -453,7 +439,6 @@ class RandomTitleLogo extends FlxSprite
 			size *= 1.038;
 		else{
 			size *= 0.98;
-			antialiasing = ClientPrefs.globalAntialiasing;
 		}
 
 		scale.set(size, size);
@@ -472,16 +457,12 @@ class RandomTitleLogo extends FlxSprite
 			foldersToCheck.insert(0, Paths.mods(Paths.currentModDirectory + '/images/titles/'));
 		#end
 		
-		#if sys
 		for (folder in foldersToCheck){
-			if (Paths.exists(folder))
-				return;
-
-			for (file in FileSystem.readDirectory(folder))
+			Paths.iterateDirectory(folder, function(file:String){
 				if (!titleNames.contains(file) && file.endsWith('.png'))
 					titleNames.push(file.substr(0, file.length - 4));
+			});
 		}
-		#end
 
 		if (titleNames.length < 1)
 			titleNames.push("");

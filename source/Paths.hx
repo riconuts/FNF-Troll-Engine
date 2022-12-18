@@ -1,5 +1,6 @@
 package;
 
+import flixel.system.FlxAssets;
 import animateatlas.AtlasFrameMaker;
 import flash.media.Sound;
 import flixel.FlxG;
@@ -214,7 +215,7 @@ class Paths
 	static public function exists(asset:String){
 		return #if sys FileSystem.exists(asset) ? true : #end Assets.exists(asset);
 	}
-	static public function getContent(asset:String){
+	inline static public function getContent(asset:String):Null<String>{
 		#if sys
 		if (FileSystem.exists(asset))
 			return File.getContent(asset);
@@ -225,6 +226,47 @@ class Paths
 
 		return null;
 	}
+
+	#if html5
+	// Directory => Array with file names
+	static var pathMap = new Map<String, Array<String>>();
+
+	public static function initPaths(){	
+		pathMap.clear();
+
+		for (path in Assets.list())
+		{
+			var file = path.split("/").pop();
+			var parent = path.substr(0, path.length - (file.length + 1)); // + 1 to remove the ending slash
+
+			if (pathMap.exists(parent))
+				pathMap.get(parent).push(file);
+			else
+				pathMap.set(parent, [file]);
+		}
+
+		return pathMap;
+	}
+	
+	inline static public function iterateDirectory(Directory:String, Func)
+	{
+		var dir:String = Directory.endsWith("/") ? Directory.substr(0, -1) : Directory; // remove ending slash
+
+		if (!pathMap.exists(dir))
+			return;
+
+		for (i in pathMap.get(dir))
+			Func(i);
+	}
+	#else
+	inline static public function iterateDirectory(Directory:String, Func){
+		if (!FileSystem.exists(Directory) || !FileSystem.isDirectory(Directory))
+			return;
+		
+		for (i in FileSystem.readDirectory(Directory))
+			Func(i);
+	}
+	#end
 
 	static public function video(key:String)
 	{

@@ -3,17 +3,9 @@ package scripts;
 import flixel.FlxG;
 import flixel.system.FlxSound;
 import flixel.tweens.*;
-import hscript.Checker;
-import hscript.Expr;
-import hscript.Interp;
-import hscript.Parser;
-import lime.app.Application;
-import lime.utils.AssetType;
+import hscript.*;
 import lime.utils.Assets;
 import scripts.Globals.*;
-#if sys
-import sys.io.File;
-#end
 
 class FunkinHScript extends FunkinScript
 {
@@ -51,18 +43,16 @@ class FunkinHScript extends FunkinScript
 		return parser.parseString(script, name);
 	}
 
-	#if sys
 	public static function fromFile(file:String, ?name:String, ?additionalVars:Map<String, Any>)
 	{
 		if (name == null)
 			name = file;
-		return fromString(File.getContent(file), name, additionalVars);
+		return fromString(Paths.getContent(file), name, additionalVars);
 	}
 	public static function parseFile(file:String, ?name:String)
 	{
-		return parseString(File.getContent(file), name != null ? name : file);
+		return parseString(Paths.getContent(file), name != null ? name : file);
 	}
-	#end
 
 	var interpreter:Interp = new Interp();
 
@@ -112,7 +102,7 @@ class FunkinHScript extends FunkinScript
 			// i would LIKE to do like.. flixel.util.* but idk if I can get everything in a namespace
 			var classSplit:Array<String> = className.split(".");
 			var daClassName = classSplit[classSplit.length-1]; // last one
-			if (daClassName=='*'){
+			if (daClassName == '*'){
 				var daClass = Type.resolveClass(className);
 				while(classSplit.length > 0 && daClass==null){
 					daClassName = classSplit.pop();
