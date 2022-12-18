@@ -200,7 +200,7 @@ class TitleState extends MusicBeatState
 		for (mod in Paths.getModDirectories())
 		{
 			Paths.currentModDirectory = mod;
-			var rawFile:Null<String> = getContent(Paths.modFolders("data/introText.txt"));
+			var rawFile:Null<String> = Paths.getContent(Paths.modFolders("data/introText.txt"));
 
 			if (rawFile != null && rawFile.length > 0)
 				fullText += '\n${rawFile}';
