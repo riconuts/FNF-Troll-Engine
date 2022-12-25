@@ -71,12 +71,12 @@ class TitleState extends MusicBeatState
 	{
 		super.create();
 
+		FlxG.fixedTimestep = false;
+
 		curWacky = FlxG.random.getObject(getIntroTextShit());
 
 		// DEBUG BULLSHIT
 		swagShader = new ColorSwap();
-		
-		persistentUpdate = true;
 
 		FlxTransitionableState.defaultTransIn = FadeTransitionSubstate;
 		FlxTransitionableState.defaultTransOut = FadeTransitionSubstate;

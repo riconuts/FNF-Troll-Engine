@@ -25,6 +25,21 @@ class GalleryMenuState extends MusicBeatState
         FlxG.mouse.visible = true;
         #end
 
+		var bg = new FlxSprite();
+		bg.frames = Paths.getSparrowAtlas("space");
+		bg.animation.addByPrefix("space", "space", 30, true);
+		bg.animation.play("space", true);
+		bg.alpha = 0.5;
+		
+		if (FlxG.width > FlxG.height)
+			bg.setGraphicSize(0, FlxG.height);
+		else
+			bg.setGraphicSize(FlxG.width, 0);
+
+		bg.updateHitbox();
+		bg.screenCenter();
+		add(bg);
+
 		var comics = new SowyTextButton(15, 300, 0, "comics", 24, function(){
 			MusicBeatState.switchState(new ComicsMenuState.ComicReader());
         });

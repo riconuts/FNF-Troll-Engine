@@ -212,8 +212,9 @@ class Paths
 	}
 
 
-	static public function exists(asset:String){
-		return #if sys FileSystem.exists(asset) ? true : #end Assets.exists(asset);
+	inline static public function exists(asset:String)
+	{
+		return #if sys FileSystem.exists(asset) #else Assets.exists(asset) #end;
 	}
 	inline static public function getContent(asset:String):Null<String>{
 		#if sys
@@ -296,22 +297,6 @@ class Paths
 		var file:Sound = returnSound('music', key, library);
 		return file;
 	}
-
-	/*
-	inline static public function voices(song:String):Any
-	{
-		var songKey:String = '${formatToSongPath(song)}/Voices';
-		var voices = returnSound('songs', songKey);
-		return voices;
-	}
-
-	inline static public function inst(song:String):Any
-	{
-		var songKey:String = '${formatToSongPath(song)}/Inst';
-		var inst = returnSound('songs', songKey);
-		return inst;
-	}
-	*/
 
 	inline static public function track(song:String, track:String):Any
 	{

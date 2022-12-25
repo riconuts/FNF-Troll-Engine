@@ -284,6 +284,9 @@ class FreeplayState extends MusicBeatState
 		lastY = camFollowPos.y;
 		super.destroy();
 	}
+
+	public inline static function songImage(SongName:String)
+		return Paths.image("songs/" + Paths.formatToSongPath(SongName));
 }
 
 class SongMetadata
@@ -315,7 +318,7 @@ class FreeplaySongButton extends TGTSquareButton{
 
 		super();
 
-		loadGraphic(Paths.image("songs/" + Paths.formatToSongPath(metadata.songName)));
+		loadGraphic(FreeplayState.songImage(metadata.songName));
 		setGraphicSize(194, 194);
 		updateHitbox();
 	}

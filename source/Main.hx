@@ -35,7 +35,7 @@ class Main extends Sprite
 	var initialState:Class<FlxState> = StartupState; // The FlxState the game starts with.
 	var zoom:Float = -1; // If -1, zoom is automatically calculated to fit the window dimensions.
 	var framerate:Int = 60; // How many frames per second the game should run at.
-	var skipSplash:Bool = false; // Whether to skip the flixel splash screen that appears in release mode.
+	var skipSplash:Bool = #if htlm5 true #else false #end; // Whether to skip the flixel splash screen that appears in release mode.
 	var startFullscreen:Bool = false; // Whether to start the game in fullscreen on desktop targets
 	public static var fpsVar:FPS;
 
@@ -110,6 +110,7 @@ class Main extends Sprite
 			}
 		}
 		#end
+		
 		if (troll){
 			initialState = SinnerState;
 			skipSplash = true;

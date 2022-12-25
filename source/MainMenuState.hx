@@ -152,8 +152,8 @@ class MainMenuState extends MusicBeatState
 		jukeboxButton = new SowyBaseButton(988, 586);
 		jukeboxButton.loadGraphic(Paths.image('newmenuu/mainmenu/comics'));
 		jukeboxButton.onUp.callback = function(){
-			selectedSomethin = true;
-			MusicBeatState.switchState(new GalleryMenuState());
+			//selectedSomethin = true;
+			//MusicBeatState.switchState(new GalleryMenuState());
 		}
 		add(jukeboxButton);
 
