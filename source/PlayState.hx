@@ -481,8 +481,8 @@ class PlayState extends MusicBeatState
 				{path: "good"},
 				{path: "bad"},
 				{path: "shit"},
-				{path: "healthBar"},
-				//{path: "combo"}
+				{path: "healthBar"}
+				//,{path: "combo"}
 			];
 
 			for (number in 0...10)
@@ -1625,7 +1625,7 @@ class PlayState extends MusicBeatState
 				else
 					oldNote = null;
 
-				var skin = arrowSkin;
+				//var skin = arrowSkin;
 
 				var type:Dynamic = songNotes[3];
 				//if(!Std.isOfType(type, String)) type = editors.ChartingState.noteTypeList[type];
@@ -1725,7 +1725,7 @@ class PlayState extends MusicBeatState
 					}
 				}
 
-				arrowSkin = skin;
+				//arrowSkin = skin;
 
 				if (swagNote.mustPress)
 				{
@@ -2022,7 +2022,9 @@ class PlayState extends MusicBeatState
 		#if desktop
 		DiscordClient.changePresence(detailsPausedText, SONG.song, iconP2.getCharacter());
 		#end
+		#if !debug
 		pause();
+		#end
 
 		super.onFocusLost();
 	}
@@ -2900,8 +2902,7 @@ class PlayState extends MusicBeatState
 
 				if (storyPlaylist.length <= 0)
 				{
-					MusicBeatState.playMenuMusic();
-					FlxG.sound.music.volume = 1;
+					MusicBeatState.playMenuMusic(1);
 
 					cancelMusicFadeTween();
 					if(FlxTransitionableState.skipNextTransIn) {
@@ -2946,8 +2947,7 @@ class PlayState extends MusicBeatState
 					CustomFadeTransition.nextCamera = null;
 				}
 				MusicBeatState.switchState(new FreeplayState());
-				MusicBeatState.playMenuMusic();
-				FlxG.sound.music.volume = 1;
+				MusicBeatState.playMenuMusic(1);
 			}
 			transitioning = true;
 		}
@@ -3800,6 +3800,7 @@ class PlayState extends MusicBeatState
 		}
 	}
 
+	public var zoomEveryBeat:Int = 4;
 
 	var lastSection:Int = -1;
 	override function beatHit()
@@ -3816,7 +3817,7 @@ class PlayState extends MusicBeatState
 			notes.sort(FlxSort.byY, ClientPrefs.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
 		}
 
-		if (camZooming && FlxG.camera.zoom < 1.35 && ClientPrefs.camZooms && curBeat % 4 == 0)
+		if (camZooming && ClientPrefs.camZooms && FlxG.camera.zoom < 1.35 && zoomEveryBeat > 0 && curBeat % zoomEveryBeat == 0)
 		{
 			FlxG.camera.zoom += 0.015 * camZoomingMult;
 			camHUD.zoom += 0.03 * camZoomingMult;
@@ -4091,12 +4092,14 @@ class PlayState extends MusicBeatState
 		}
 	}
 
+	/* the menu music function overrides this already i believe
 	override public function switchTo(nextState: Dynamic){
 		if(FlxG.sound.music != null) // so if you leave and debug console comes up and you bring it down it wont replay the fuckin song and break EVERYTHING!!!
-			FlxG.sound.music.onComplete = MusicBeatState.menuLoopFunc; // please work
+			FlxG.sound.music.onComplete = null;
 
 		return super.switchTo(nextState);
 	}
+	*/
 }
 
 // mental gymnastics

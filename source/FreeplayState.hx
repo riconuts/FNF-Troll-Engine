@@ -259,7 +259,7 @@ class FreeplayState extends MusicBeatState
 		var yScroll:Float = 0;
 
 		if (mouseWheel != 0)
-			yScroll -= mouseWheel * 20 * 8;
+			yScroll -= mouseWheel * 160 * speed;
 
 		if (controls.UI_UP)
 			camFollow.y -= 20;

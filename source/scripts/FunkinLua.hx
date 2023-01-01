@@ -1862,14 +1862,18 @@ class FunkinLua extends FunkinScript
 			}
 		});
 
-		Lua_helper.add_callback(lua, "debugPrint", function(text1:Dynamic = '', text2:Dynamic = '', text3:Dynamic = '', text4:Dynamic = '', text5:Dynamic = '') {
-			if (text1 == null) text1 = '';
-			if (text2 == null) text2 = '';
-			if (text3 == null) text3 = '';
-			if (text4 == null) text4 = '';
-			if (text5 == null) text5 = '';
-			luaTrace('' + text1 + text2 + text3 + text4 + text5, true, false);
-		});
+		Lua_helper.add_callback(lua, "debugPrint", Reflect.makeVarArgs(function(toPrint:Array<Dynamic>) {
+			var finalText:String = "";
+
+			if (toPrint.length > 0){
+				for (arg in toPrint)
+					finalText += Std.string(arg) + ", ";
+				
+				finalText.substr(0, finalText.length-2);
+			}
+
+			luaTrace(finalText, true, false);
+		}));
 		Lua_helper.add_callback(lua, "close", function(printMessage:Bool) {
 			if(!gonnaClose) {
 				if(printMessage) {

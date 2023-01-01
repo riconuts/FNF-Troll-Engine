@@ -1,5 +1,6 @@
 package;
 
+import flixel.group.FlxSpriteGroup;
 import Achievements;
 import editors.MasterEditorMenu;
 import flixel.FlxCamera;
@@ -39,8 +40,10 @@ class MainMenuState extends MusicBeatState
 	var creditButton:SowyBaseButton;
 	var jukeboxButton:SowyBaseButton;
 	
+	/*
 	private var camGame:FlxCamera;
 	private var camAchievement:FlxCamera;
+	*/
 	
 	var optionShit:Array<String> = [
 		'story_mode',
@@ -68,14 +71,18 @@ class MainMenuState extends MusicBeatState
 		#end
 		debugKeys = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
 
+		FlxG.camera.bgColor = FlxColor.BLACK;
+		/*
 		camGame = new FlxCamera();
 		camGame.bgColor = FlxColor.BLACK;
+		
 		camAchievement = new FlxCamera();
 		camAchievement.bgColor.alpha = 0;
 
 		FlxG.cameras.reset(camGame);
 		FlxG.cameras.add(camAchievement, false);
 		FlxG.cameras.setDefaultDrawTarget(camGame, true);
+		*/
 
 		transIn = FlxTransitionableState.defaultTransIn;
 		transOut = FlxTransitionableState.defaultTransOut;
@@ -152,8 +159,8 @@ class MainMenuState extends MusicBeatState
 		jukeboxButton = new SowyBaseButton(988, 586);
 		jukeboxButton.loadGraphic(Paths.image('newmenuu/mainmenu/comics'));
 		jukeboxButton.onUp.callback = function(){
-			//selectedSomethin = true;
-			//MusicBeatState.switchState(new GalleryMenuState());
+			selectedSomethin = true;
+			MusicBeatState.switchState(new GalleryMenuState());
 		}
 		add(jukeboxButton);
 
@@ -232,59 +239,62 @@ class MainMenuState extends MusicBeatState
 	}
 
 	function onSelected(){
-		if (optionShit[curSelected] == 'promo')
+		if (optionShit[curSelected] == 'promo'){
 			CoolUtil.browserLoad('http://www.tailsgetstrolled.org/');
-		else{
-			selectedSomethin = true;
+			return;
+		}
+	
+		selectedSomethin = true;
 
-			FlxG.sound.play(Paths.sound('confirmMenu'));
-			updateImage(null);
+		FlxG.sound.play(Paths.sound('confirmMenu'));
+		updateImage(null);
 
-			FlxG.mouse.visible = false;
+		FlxG.mouse.visible = false;
 
-			for (spr in [creditButton, jukeboxButton])
+		for (spr in [creditButton, jukeboxButton])
+			FlxTween.tween(spr, {alpha: 0}, 0.4, {
+				ease: FlxEase.quadOut,
+				onComplete: function(twn:FlxTween){
+					spr.kill();
+				}
+			});
+
+		
+		menuItems.forEach(function(spr)
+		{
+			if (curSelected != spr.ID)
+			{
 				FlxTween.tween(spr, {alpha: 0}, 0.4, {
 					ease: FlxEase.quadOut,
 					onComplete: function(twn:FlxTween){
 						spr.kill();
 					}
 				});
-
-			
-			menuItems.forEach(function(spr)
+			}
+			else
 			{
-				if (curSelected != spr.ID)
+				FlxFlicker.flicker(spr, 1, 0.06, false, false, function(flick:FlxFlicker)
 				{
-					FlxTween.tween(spr, {alpha: 0}, 0.4, {
-						ease: FlxEase.quadOut,
-						onComplete: function(twn:FlxTween){
-							spr.kill();
-						}
-					});
-				}
-				else
-				{
-					FlxFlicker.flicker(spr, 1, 0.06, false, false, function(flick:FlxFlicker)
+					switch (optionShit[curSelected])
 					{
-						switch (optionShit[curSelected])
-						{
-							case 'story_mode':
-								MusicBeatState.switchState(new StoryMenuState());
-							case 'freeplay':
-								MusicBeatState.switchState(new FreeplayState());
-							case 'options':
-								LoadingState.loadAndSwitchState(new options.OptionsState());
-						}
-					});
-				}
-			});
-		}
+						case 'story_mode':
+							MusicBeatState.switchState(new StoryMenuState());
+						case 'freeplay':
+							MusicBeatState.switchState(new FreeplayState());
+						case 'options':
+							LoadingState.loadAndSwitchState(new options.OptionsState());
+					}
+				});
+			}
+		});
 	}
 
 	var imageMap:Map<String, FlxSprite> = new Map<String, FlxSprite>();
 	var curImage:FlxSprite;
 	var lastName:String;
 	var appaerTween:FlxTween;
+
+	var kirbCollision:FlxTypedGroup<SowyBaseButton>;
 
 	function updateImage(sowyId:Int = null){
 		var name:String = sowyId != null ? "cover_" + optionShit[sowyId] : null;
@@ -314,12 +324,29 @@ class MainMenuState extends MusicBeatState
 
 				sowyImage = newImage;
 			}
-			
+
 			for (otherImage in imageMap.iterator())
 				remove(otherImage);
 
 			add(prevImage);
 			add(sowyImage);
+
+			if (name == "cover_freeplay"){
+				if (kirbCollision == null){
+					kirbCollision = new FlxTypedGroup();
+
+					var squeak = function(){
+						FlxG.sound.play(Paths.soundRandom("squeak", 1, 3));
+					}
+
+					kirbCollision.add(new SowyBaseButton(sowyImage.x + 26, sowyImage.y + 4, squeak)).makeGraphic(106, 54, 0x00000000); // head
+					kirbCollision.add(new SowyBaseButton(sowyImage.x + 13, sowyImage.y + 57, squeak)).makeGraphic(42, 61, 0x00000000); // mike
+					kirbCollision.add(new SowyBaseButton(sowyImage.x + 55, sowyImage.y + 57, squeak)).makeGraphic(89, 98, 0x00000000); // body
+				}
+
+				add(kirbCollision);
+			}else if (kirbCollision != null)
+				remove(kirbCollision);
 
 			curImage = sowyImage;
 			

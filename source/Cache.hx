@@ -35,7 +35,8 @@ class Cache{
 			default:
 				Paths.returnGraphic(toLoad.path, toLoad.library);
 		}
-		//trace("loaded " + toLoad.path);
+		
+		// trace("loaded " + toLoad.path);
 	}
 
 	static public function loadWithList(shitToLoad:Array<AssetPreload>, ?multicoreOnly = false)
@@ -47,16 +48,13 @@ class Cache{
 		#if MULTICORE_LOADING
 		if (ClientPrefs.multicoreLoading){
 			// TODO: go through shitToLoad and clear it of repeats as to not waste time loadin shit that already exists
-			for (shit in shitToLoad)
-				trace(shit.path);
 
 			var threadLimit:Int = ClientPrefs.loadingThreads;
 			if (shitToLoad.length > 0 && threadLimit > 1)
 			{
 				// thanks shubs -neb
 				for (shit in shitToLoad)
-					if (shit.terminate)
-						shit.terminate = false; // do not
+					shit.terminate = false; // do not
 
 				var count = shitToLoad.length;
 				if (threadLimit > count)

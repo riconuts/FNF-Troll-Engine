@@ -107,20 +107,22 @@ class TitleState extends MusicBeatState
 		#end
 
 		var randomStage = FlxG.random.getObject(stages); // Get a random stage from the list
-		trace(randomStage, Paths.currentModDirectory);
+		trace(randomStage);
 
-		Paths.currentModDirectory = randomStage[1];
-		bg = new Stage(randomStage[0]).buildStage();
-		camGame.zoom = bg.stageData.defaultZoom;
+		if (randomStage != null){
+			Paths.currentModDirectory = randomStage[1];
+			bg = new Stage(randomStage[0]).buildStage();
+			camGame.zoom = bg.stageData.defaultZoom;
 
-		var camPos = bg.stageData.camera_stage;
-		if (camPos == null)
-			camPos = [640, 360];
+			var camPos = bg.stageData.camera_stage;
+			if (camPos == null)
+				camPos = [640, 360];
 
-		camFollow.set(camPos[0], camPos[1]);
-		camFollowPos.setPosition(camPos[0], camPos[1]);
+			camFollow.set(camPos[0], camPos[1]);
+			camFollowPos.setPosition(camPos[0], camPos[1]);
 
-		add(bg);
+			add(bg);
+		}
 
 		// Random logoooo
 		swagShader = new ColorSwap();
@@ -458,9 +460,11 @@ class RandomTitleLogo extends FlxSprite
 		#end
 		
 		for (folder in foldersToCheck){
-			Paths.iterateDirectory(folder, function(file:String){
-				if (!titleNames.contains(file) && file.endsWith('.png'))
-					titleNames.push(file.substr(0, file.length - 4));
+			Paths.iterateDirectory(folder, function(path:String){
+				var file = new haxe.io.Path(path);
+
+				if (!titleNames.contains(file.file) && file.ext == "png")
+					titleNames.push(file.file);
 			});
 		}
 

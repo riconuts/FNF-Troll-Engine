@@ -156,14 +156,19 @@ class MusicBeatState extends FlxUIState
 
 	public static var menuLoopFunc = function(){
 		FlxG.sound.playMusic(menuMusic, FlxG.sound.music.volume);
+		FlxG.sound.music.onComplete = null;
+
 		Conductor.changeBPM(180);
 	}; 
 
 	public static function playMenuMusic(volume:Float = 1){		
-		menuMusic = FlxG.sound.cache("assets/music/freakyMenu"); // please work
+		menuMusic = FlxG.sound.cache("assets/music/freakyMenu.ogg"); // please work
 
-		FlxG.sound.playMusic(Paths.music('freakyIntro'), volume);
+		FlxG.sound.playMusic(Paths.music('freakyIntro'), volume, false);
 		FlxG.sound.music.onComplete = menuLoopFunc;
+
+		Conductor.changeBPM(180);
+		Conductor.songPosition = 0;
 	}
 	//
 }

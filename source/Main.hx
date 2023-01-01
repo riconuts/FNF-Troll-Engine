@@ -27,7 +27,6 @@ import sys.io.File;
 import sys.io.Process;
 #end
 
-
 class Main extends Sprite
 {
 	var gameWidth:Int = 1280; // Width of the game in pixels (might be less / more in actual pixels depending on your zoom).
@@ -153,6 +152,8 @@ class Main extends Sprite
 	#if CRASH_HANDLER
 	function onCrash(e:UncaughtErrorEvent):Void
 	{
+		FlxG.fullscreen = false;
+
 		Sys.println("Call stack starts below");
 
 		var errMsg:String = "";
@@ -176,13 +177,6 @@ class Main extends Sprite
 		errMsg += "\nUncaught Error: " + e.error;
 
 		Sys.println(" \n" + errMsg);
-
-		// doCrashMessage(errMsg);
-	}
-
-	static public function doCrashMessage(errMsg:String = '')
-	{
-		FlxG.fullscreen = false;
 		
 		Application.current.window.alert(errMsg, "Error!");
 		DiscordClient.shutdown();
