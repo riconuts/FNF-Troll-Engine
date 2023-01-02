@@ -1602,8 +1602,9 @@ class PlayState extends MusicBeatState
 			eventNotes.sort(sortByTime);
 		}
 
-		var lastBFNotes:Array<Note> = [null,null,null,null];
-		var lastDadNotes:Array<Note> = [null,null,null,null];
+		var lastBFNotes:Array<Note> = [null, null, null, null];
+		var lastDadNotes:Array<Note> = [null, null, null, null];
+		var lastGFNotes:Array<Note> = [null, null, null, null];
 		// Should populate these w/ nulls depending on keycount -neb
 		for (section in noteData)
 		{
@@ -1636,25 +1637,6 @@ class PlayState extends MusicBeatState
 				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
 				swagNote.mustPress = gottaHitNote;
 				swagNote.sustainLength = songNotes[2];
-				if(gottaHitNote){
-					var lastBFNote = lastBFNotes[swagNote.noteData];
-					if(lastBFNote!=null){
-						if(Math.abs(swagNote.strumTime-lastBFNote.strumTime)<=3 ){
-							swagNote.kill();
-							continue;
-						}
-					}
-					lastBFNotes[swagNote.noteData]=swagNote;
-				}else{
-					var lastDadNote = lastDadNotes[swagNote.noteData];
-					if(lastDadNote!=null){
-						if(Math.abs(swagNote.strumTime-lastDadNote.strumTime)<=3 ){
-							swagNote.kill();
-							continue;
-						}
-					}
-					lastDadNotes[swagNote.noteData]=swagNote;
-				}
 				
 				swagNote.gfNote = (section.gfSection && (songNotes[1]<4));
 				swagNote.noteType = type;
@@ -1743,12 +1725,40 @@ class PlayState extends MusicBeatState
 			}
 			daBeats += 1;
 		}
-		lastDadNotes = null;
-		lastBFNotes = null;
-
 		// playerCounter += 1;
 
 		unspawnNotes.sort(sortByShit);
+
+		var goobaeg:Array<Note> = [];
+		for (swagNote in unspawnNotes)
+		{
+			var arr = lastBFNotes;
+
+			if (!swagNote.mustPress)
+				arr = lastDadNotes;
+			if (swagNote.gfNote)
+				arr = lastGFNotes;
+			// eradicates stacked notes
+			var lastNote = arr[swagNote.noteData];
+			if (lastNote != null)
+			{
+				if (Math.abs(swagNote.strumTime - lastNote.strumTime) <= 6)
+				{
+					trace("grabbed note, prev " + lastNote.strumTime + ", current " + swagNote.strumTime);
+					goobaeg.push(swagNote);
+					continue;
+				}
+			}
+			arr[swagNote.noteData] = swagNote;
+		}
+		for (note in goobaeg)
+		{
+			trace("destroyed note at " + note.strumTime);
+			note.kill();
+			note.destroy();
+			unspawnNotes.remove(note);
+		}
+		
 		if(eventNotes.length > 1) //No need to sort if there's a single one or none at all
 			eventNotes.sort(sortByTime);
 
