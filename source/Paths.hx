@@ -69,7 +69,7 @@ class Paths
 					obj.destroy();
 					currentTrackedAssets.remove(key);
 
-					trace('cleared $key');
+					// trace('cleared $key');
 				}
 			}
 		}

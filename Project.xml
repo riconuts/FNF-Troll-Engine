@@ -2,7 +2,7 @@
 <project>
 	<!-- _________________________ Application Settings _________________________ -->
 
-	<app title="Tails Gets Trolled" file="Trolled" packageName="com.sowy.trollengine" package="com.sowy.trollengine" main="Main" version="0.4.0" company="Sowy" />
+	<app title="Tails Gets Trolled" file="Trolled" packageName="com.sowy.trollengine" package="com.sowy.trollengine" main="Main" version="0.2.0" company="Sowy" />
 
 	<!--Switch Export with Unique ApplicationID and Icon-->
 	<set name="APP_ID" value="0x0100f6c013bbc000" />

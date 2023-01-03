@@ -46,6 +46,12 @@ class CreditsState extends MusicBeatState
 
 		persistentUpdate = true;
 		bg = new FlxSprite().loadGraphic(Paths.image("newmenuu/creditsbg"));
+		
+		if (FlxG.height < FlxG.width)
+			bg.setGraphicSize(0, FlxG.height);
+		else
+			bg.setGraphicSize(FlxG.width, 0);
+
 		bg.screenCenter();
 		add(bg);	
 		
