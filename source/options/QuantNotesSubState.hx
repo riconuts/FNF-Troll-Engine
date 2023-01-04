@@ -38,7 +38,7 @@ class QuantNotesSubState extends MusicBeatSubstate
 		[-80, -20, 0], // 48th
 		[160, -15, 0], // 64th
 		[-120, -70, -35], // 96th
-		[-120, -70, -35] // 192nd
+		[-120, -70, -35]// 192nd
 	];
 
 	public static var quantizations:Array<String> = [
@@ -281,20 +281,22 @@ class QuantNotesSubState extends MusicBeatSubstate
 
 	function resetValue(selected:Int, type:Int) {
 		curValue = 0;
+		trace(selected, type, defaults[selected][type]);
 		ClientPrefs.quantHSV[selected][type] = defaults[selected][type];
 		switch(type) {
 			case 0:
-				shaderArray[selected].hue = defaults[selected][type];
+				shaderArray[selected].hue = defaults[selected][type]/360;
 			case 1:
-				shaderArray[selected].saturation = defaults[selected][type];
+				shaderArray[selected].saturation = defaults[selected][type]/100;
 			case 2:
-				shaderArray[selected].brightness = defaults[selected][type];
+				shaderArray[selected].brightness = defaults[selected][type]/100;
 		}
 
 		var item = grpNumbers.members[(selected * 3) + type];
-		item.changeText('0');
+		item.changeText(Std.string(ClientPrefs.quantHSV[selected][type]));
 		item.offset.x = (40 * (item.lettersArray.length - 1))* 0.5;
 	}
+
 	function updateValue(change:Float = 0) {
 		curValue += change;
 		var roundedValue:Int = Math.round(curValue);

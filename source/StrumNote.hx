@@ -142,9 +142,15 @@ class StrumNote extends FlxSprite
 		} else {
 			if (note == null)
 			{
-				colorSwap.hue = ClientPrefs.arrowHSV[noteData % 4][0] / 360;
-				colorSwap.saturation = ClientPrefs.arrowHSV[noteData % 4][1] / 100;
-				colorSwap.brightness = ClientPrefs.arrowHSV[noteData % 4][2] / 100;
+				if(!isQuant){
+					colorSwap.hue = ClientPrefs.arrowHSV[noteData % 4][0] / 360;
+					colorSwap.saturation = ClientPrefs.arrowHSV[noteData % 4][1] / 100;
+					colorSwap.brightness = ClientPrefs.arrowHSV[noteData % 4][2] / 100;
+				}else{
+					colorSwap.hue =  0;
+					colorSwap.saturation = 0;
+					colorSwap.brightness = 0;
+				}
 			}
 			else
 			{

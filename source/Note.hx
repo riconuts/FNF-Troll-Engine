@@ -411,7 +411,7 @@ class Note extends FlxSprite
 		if(!inEditor){
 			if (noteScript != null && noteScript.scriptType == 'hscript'){
 				var noteScript:FunkinHScript = cast noteScript;
-				noteScript.executeFunc("update", [this, elapsed], this);
+				noteScript.executeFunc("noteUpdate", [elapsed], this);
 			}
 		}
 		
