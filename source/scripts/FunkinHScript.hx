@@ -275,6 +275,9 @@ class FunkinHScript extends FunkinScript
 			{
 				var returnVal:Any = null;
 				var defaultShit:Map<String,Dynamic>=[];
+				if (theObject!=null)
+					extraVars.set("this", theObject);
+				
 				for (key in extraVars.keys()){
 					defaultShit.set(key, get(key));
 					set(key, extraVars.get(key));
