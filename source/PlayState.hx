@@ -2296,7 +2296,7 @@ class PlayState extends MusicBeatState
 			if (!inCutscene){
 				if (!cpuControlled)
 					keyShit();
-				else if (boyfriend.animation.curAnim != null && boyfriend.holdTimer > Conductor.stepCrochet * (0.0011 / FlxG.sound.music.pitch) * boyfriend.singDuration && boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.animation.curAnim.name.endsWith('miss'))
+				else if (boyfriend.animation.curAnim != null && boyfriend.holdTimer > Conductor.stepCrochet * (0.0011 / FlxG.sound.music.pitch) * boyfriend.singDuration && boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.animation.curAnim.name.endsWith('miss') && (boyfriend.idleWhenHold || !pressedGameplayKeys.contains(true)))
 					boyfriend.dance();
 			}
 
@@ -3296,11 +3296,14 @@ class PlayState extends MusicBeatState
 	}
 
 	// Hold notes
+	public static var pressedGameplayKeys:Array<Bool> = [];
+
 	private function keyShit():Void
 	{
 		// HOLDING
 		var parsedHoldArray:Array<Bool> = parseKeys();
-
+		pressedGameplayKeys = parsedHoldArray;
+		
 		// TO DO: Find a better way to handle controller inputs, this should work for now
 		if (ClientPrefs.controllerMode)
 		{
@@ -3337,11 +3340,10 @@ class PlayState extends MusicBeatState
 				}
 				#end
 			}
-			else if (boyfriend.animation.curAnim != null && boyfriend.holdTimer > Conductor.stepCrochet * (0.0011 / FlxG.sound.music.pitch) * boyfriend.singDuration && boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.animation.curAnim.name.endsWith('miss'))
-			{
+			
+			if (boyfriend.animation.curAnim != null && boyfriend.holdTimer > Conductor.stepCrochet * (0.0011 / FlxG.sound.music.pitch) * boyfriend.singDuration && boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.animation.curAnim.name.endsWith('miss') && (boyfriend.idleWhenHold || !pressedGameplayKeys.contains(true)))
 				boyfriend.dance();
-				//boyfriend.animation.curAnim.finish();
-			}
+			
 		}
 
 		// TO DO: Find a better way to handle controller inputs, this should work for now
@@ -4102,14 +4104,11 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	/* the menu music function overrides this already i believe
 	override public function switchTo(nextState: Dynamic){
-		if(FlxG.sound.music != null) // so if you leave and debug console comes up and you bring it down it wont replay the fuckin song and break EVERYTHING!!!
-			FlxG.sound.music.onComplete = null;
-
+		pressedGameplayKeys = [];
 		return super.switchTo(nextState);
 	}
-	*/
+	
 }
 
 // mental gymnastics

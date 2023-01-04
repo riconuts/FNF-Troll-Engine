@@ -50,6 +50,8 @@ typedef AnimArray = {
 
 class Character extends FlxSprite
 {
+	public var idleWhenHold:Bool = true; // Whether the character should idle when the player is holding a gameplay key
+
 	public static var DEFAULT_CHARACTER:String = 'bf'; // In case a character is missing, it will use BF on its place
 
 	public var xFacing:Float = 1;
@@ -129,6 +131,7 @@ class Character extends FlxSprite
 		super(x, y);
 
 		xFacing = isPlayer ? -1 : 1;
+		idleWhenHold = !isPlayer;
 
 		#if (haxe >= "4.0.0")
 		animOffsets = new Map();
@@ -333,7 +336,8 @@ class Character extends FlxSprite
 					holdTimer += elapsed;
 				}
 
-				if (holdTimer >= Conductor.stepCrochet * 0.0011 * singDuration)
+				if (holdTimer >= Conductor.stepCrochet * (0.0011 / FlxG.sound.music.pitch) * singDuration
+					&& (idleWhenHold || !PlayState.pressedGameplayKeys.contains(true)))
 				{
 					dance();
 					holdTimer = 0;
