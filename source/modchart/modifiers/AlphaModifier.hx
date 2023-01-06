@@ -59,7 +59,7 @@ class AlphaModifier extends NoteModifier {
 
 
     if(getSubmodValue("blink",player)!=0){
-      var f = CoolUtil.quantize(FlxMath.fastSin(time*10),0.3333);
+      var f = CoolUtil.quantizeAlpha(FlxMath.fastSin(time*10),0.3333);
       alpha += CoolUtil.scale(f,0,1,-1,0);
     }
 

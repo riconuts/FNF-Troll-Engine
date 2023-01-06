@@ -1,65 +1,65 @@
 package;
 
-import flixel.addons.display.shapes.FlxShapeBox;
-import FreeplayState;
-import sowy.*;
+import flixel.util.FlxTimer;
 import flixel.system.FlxSound;
+import sys.FileSystem;
+import flixel.tweens.FlxTween;
+import flixel.text.FlxText;
+import flixel.text.FlxText.FlxTextBorderStyle;
+import flixel.util.FlxColor;
+import flixel.addons.display.shapes.FlxShapeBox;
+import flash.ui.Mouse;
+import flash.ui.MouseCursor;
+import flixel.FlxG;
+import openfl.utils.AssetType;
 
-class JukeboxState extends MusicBeatState
-{
-	static var voices = new FlxSound();
-	var hasVoices:Bool = false; // does the song have voices?
-	var voicesEnabled(default, set):Bool = false; // mute the voices or not?
-	function set_voicesEnabled(sowy) 
+using StringTools;
+typedef JukeboxSongData = {
+    var songName:String;
+    var coverArt:String;
+    var songDirectory:String;
+    @:optional var chapterDir:String;
+}
+class JukeboxState extends MusicBeatState {
+    var songData:Array<JukeboxSongData> = [];
+    var outline:FlxShapeBox;
+    var image:FlxSprite;
+    var defImage:FlxSprite;
+    var back:FlxSprite;
+    var play:FlxSprite;
+    var forw:FlxSprite;
+	var songName:FlxText;
+    
+    inline function addSong(songName:String, songDir:String, ?chapter:String, ?coverArt:String)songData.push({songName: songName,songDirectory: songDir,chapterDir: chapter==null?"":chapter,coverArt: coverArt==null?'songs/$songDir':coverArt});
+    // TODO: add bpm
+    static var idx:Int = 0;
+    public static var playIdx:Int = 0;
+
+	override function create()
 	{
-		voicesEnabled = sowy;
-		voices.volume = sowy ? 1 : 0;
-		return sowy;
-	}
+        // menuTheme songDir is hard-coded to goto the playMenuMusic func
+		addSong("Main Menu", "menuTheme", null, '');
+		addSong("Game Over (TGT Mix)", Paths.getPath('music/gameOver.${Paths.SOUND_EXT}', SOUND), null, '');
+		addSong("Breakfast (TGT Mix)", Paths.getPath('music/breakfast.${Paths.SOUND_EXT}', SOUND), null, '');
+		defImage = new FlxSprite(0, 50).loadGraphic(Paths.image("jukebox/defImage"));
+		defImage.antialiasing = false;
 
-	var outline:FlxShapeBox;
-	var image:FlxSprite;
+		
+		image = new FlxSprite(0, 50).loadGraphic(Paths.image("jukebox/defImage"));
+		image.antialiasing = false;
+		outline = new FlxShapeBox(0, 33, 420, 420, {
+			thickness: 8,
+			color: 0xFFFFFF00
+		}, 0x000000);
+		outline.screenCenter(X);
 
-	var options:Array<JukeboxSongText> = [];
-	var curOption:JukeboxSongText;
-	var curSelected:Int = 0;
-
-    override function create()
-	{
-		////
-		image = new FlxSprite(0, 50).makeGraphic(194, 194);
-		image.scale.set(2, 2);
-		image.updateHitbox();
-		image.screenCenter(X);
-		image.antialiasing = true;
-		image.x += FlxG.width / 5 * 1;
-
-		outline = new FlxShapeBox(
-			image.x - 16, 
-			image.y - 16, 
-			image.width + 32, 
-			image.height + 32,
-			{
-				thickness: 8,
-				color: 0xFFFFFF00
-			},
-			0xFF000000
-		);
-
-
-		add(outline);
-		add(image);
-
-		//// Load the songs!!!
-		addSong(new JukeboxSongData()).text = "Menu Theme";
-
+		defImage.x = outline.x + 16;
+        defImage.y = outline.y + 16;
 		for (i in CoolUtil.coolTextFile(Paths.txt('freeplaySonglist')))
 		{
-			if (i != null && i.length > 0){
-				var song:Array<String> = i.split(":");
-
-				addSong(new JukeboxSongData(song[0]));
-			}
+			var song:String = i.split(":")[0];
+			var songLowercase:String = Paths.formatToSongPath(song);
+			addSong(song, songLowercase, '');
 		}
 
 		#if MODS_ALLOWED
@@ -69,217 +69,194 @@ class JukeboxState extends MusicBeatState
 
 			for (i in CoolUtil.coolTextFile(Paths.modsTxt('freeplaySonglist')))
 			{
-				if (i != null && i.length > 0){
-					var song:Array<String> = i.split(":");
-					addSong(new JukeboxSongData(song[0], mod));
-				}
-			}
-		}
+				var song:String = i.split(":")[0];
+				var songLowercase:String = Paths.formatToSongPath(song);
+                addSong(song, songLowercase, mod);
+            }
+        }
 		Paths.currentModDirectory = '';
-		#end
+        #end
+        // TODO: order the songs so its story > side stories > remixes
 
+		back = new FlxSprite(0, 500).loadGraphic(Paths.image("jukebox/controls"), true, 60, 60);
+        back.animation.add("back", [0], 0, true);
+        back.animation.play("back", true);
+
+		play = new FlxSprite(0 , 500).loadGraphic(Paths.image("jukebox/controls"), true, 60, 60);
+		play.animation.add("play", [1], 0, true);
+		play.animation.add("pause", [2], 0, true);
+		play.animation.play("play", true);
+
+        forw = new FlxSprite(0, 500).loadGraphic(Paths.image("jukebox/controls"), true, 60, 60);
+		forw.animation.add("fw", [0], 0, true);
+		forw.animation.play("fw", true);
+		forw.flipX = true;
+
+		songName = new FlxText(0, 475, FlxG.width, "", 32, true);
+		songName.setFormat(Paths.font("calibrib.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
+		songName.scrollFactor.set(1, 1);
+
+		songName.screenCenter(X);
+		
+
+        play.screenCenter(X);
+        forw.screenCenter(X);
+        back.screenCenter(X);
+        back.x -= 60;
+        forw.x += 60;
+
+		add(songName);
+		add(forw);
+        add(back);
+        add(play);
+        add(outline);
+		add(defImage);
+        add(image);
+
+		changeSong(idx);
         super.create();
-
-		curOption = options[0];
-		changeSelection();
-
 		FlxG.autoPause = false;
-
-		#if !FLX_NO_MOUSE
-		FlxG.mouse.visible = true;
-		#end
     }
 
-	var div:FlxSprite;
+    override function update(elapsed:Float){
+        super.update(elapsed);
+        if(FlxG.mouse.overlaps(forw) || FlxG.mouse.overlaps(back) || FlxG.mouse.overlaps(play))
+            Mouse.cursor = MouseCursor.BUTTON;
+        else
+            Mouse.cursor = MouseCursor.AUTO;
 
-	public function addSong(songData:JukeboxSongData):JukeboxSongText
-	{
-		var button = new JukeboxSongText(songData);
-		button.setPosition(10, 48 * options.push(button));		
-		button.alpha = 0.5;
-		button.ID = options.length - 1;
+		var forward = FlxG.mouse.overlaps(forw) && FlxG.mouse.justPressed || FlxG.keys.justPressed.RIGHT;
+		var bakward = FlxG.mouse.overlaps(back) && FlxG.mouse.justPressed || FlxG.keys.justPressed.LEFT;
+		var resSong = FlxG.mouse.overlaps(play) && FlxG.mouse.justPressed || FlxG.keys.justPressed.SPACE;
+		if (controls.BACK){
+			FlxG.autoPause = true;
+			MusicBeatState.switchState(new MainMenuState());
+        }
+		if (forward)
+            changeSong(idx+1);
 
-		add(button);
+		if (bakward)
+            changeSong(idx-1);
 
-		return button;
-	}
+		if (resSong){
+            if(idx==playIdx){
+                if (FlxG.sound.music.fadeTween == null || FlxG.sound.music.fadeTween.finished){
+                    if (FlxG.sound.music.playing){
+                        FlxG.sound.music.pause();
+						if (MusicBeatState.menuVox != null)
+							MusicBeatState.menuVox.pause();
+                    }
+                    else{
+                        FlxG.sound.music.resume();
+						if (MusicBeatState.menuVox != null)
+							MusicBeatState.menuVox.resume();
+                    }
+                }
+            }else{
+                playIdx = idx;
+                if(!FlxG.sound.music.playing)
+					playDaSong(); // its paused so dont bother fading out lol!
+                else{
+                    if (FlxG.sound.music.fadeTween == null || !FlxG.sound.music.fadeTween.active)
+                    {
+                        FlxG.sound.music.onComplete = null;
+						if (MusicBeatState.menuVox!=null)
+							MusicBeatState.menuVox.fadeOut(.25, 0);
+                        FlxG.sound.music.fadeOut(.25, 0, function(twn:FlxTween)
+                        {
+                            playDaSong();
+                        });
+                    }
+                }
+            }
 
-	function goBack()
-	{
-		hasVoices = false;
+        }
+				
+        play.animation.play(idx==playIdx?(FlxG.sound.music.playing?"pause":"play"):"play");
+        FlxG.mouse.visible = true;
 
-		voices.volume = 0;
-		voices.pause();
-		voices.destroy();
-
-		MusicBeatState.switchState(new GalleryMenuState());
-	}
-
-	/* lol fuck it dont sync shit
-	function resyncVoices(){
-		voices.pause();
-		
-		for (track in tracks)
-			track.pause();
-
-		FlxG.sound.music.play();
-		Conductor.songPosition = FlxG.sound.music.time;
-		voices.time = Conductor.songPosition;
-		voices.play();
-		
-		for (track in tracks){
-			track.time = Conductor.songPosition;
-			track.play();
-		}
-	}
-
-	override function beatHit() 
-	{
-		if (
-			Math.abs(FlxG.sound.music.time - Conductor.songPosition) > 20
-			|| 
-			(hasVoices && Math.abs(voices.time - Conductor.songPosition) > 20)
-		){
-			resyncVoices();
-		}
-
-		super.beatHit();
-	}
-	*/
-
-	var totalElapsed = 0.0;
-    override function update(e:Float)
-	{
-		////
-		Conductor.songPosition = FlxG.sound.music.time;//+= FlxG.elapsed * 1000;
-
-		//// Keys, controls, actions and whatever.
-
-		if (hasVoices && FlxG.keys.justPressed.M)
-			voicesEnabled = !voicesEnabled;
-
-        if (controls.BACK)
-            goBack();
-
-		if (controls.UI_UP_P)
-			changeSelection(-1);
-
-		if (controls.UI_DOWN_P)
-			changeSelection(1);
-
-		#if !FLX_NO_MOUSE
-		if (FlxG.mouse.wheel != 0)
-			changeSelection(FlxG.mouse.wheel);
-		#end
-
-		if (controls.ACCEPT)
-			playSong();
-
-        super.update(e);
     }
 
-	function changeSelection(sowy:Int = 0)
-	{
-		curSelected += sowy;
+    function playDaSong(?daIdx:Int){
+        if(daIdx==null)daIdx=playIdx;
+		playIdx = daIdx;
+		var song = songData[daIdx].songDirectory;
+		if (song == 'menuTheme')
+			MusicBeatState.playMenuMusic(true);
+		else
+		{
+			if (songData[daIdx].chapterDir != null)
+				Paths.currentModDirectory = songData[daIdx].chapterDir;
+			else
+				Paths.currentModDirectory = '';
 
-		if (curSelected >= options.length)
-			curSelected = 0;
-		else if (curSelected < 0)
-			curSelected = options.length - 1;
+			if (FileSystem.exists(Paths.returnSoundPath("songs", '${Paths.formatToSongPath(song)}/Inst'))){
+                var vox:Null<Any> = null;
+				var inst = Paths.inst(song);
 
-		curOption.alpha = 0.5;
+                if (FileSystem.exists(Paths.returnSoundPath("songs", '${Paths.formatToSongPath(song)}/Voices')))
+                {
+                    if (MusicBeatState.menuVox==null){
+                        MusicBeatState.menuVox = new FlxSound();
+						MusicBeatState.menuVox.persist = true;
+						MusicBeatState.menuVox.looped = true;
+						MusicBeatState.menuVox.group = FlxG.sound.music.group;
+                        FlxG.sound.list.add(MusicBeatState.menuVox);
+                    }
+                    //MusicBeatState.menuVox.loadEmbedded(Paths.voices(song));
+					vox = Paths.voices(song);
+                }
 
-		for (option in options)
-			if (option.ID == curSelected)
-				curOption = option;
-		
-		curOption.alpha = 1;
-	}
+				if (vox!=null)MusicBeatState.menuVox.loadEmbedded(vox);
+                
+                
+                FlxG.sound.playMusic(inst);
+                if(MusicBeatState.menuVox!=null)
+					MusicBeatState.menuVox.play();
 
-	function playMenuTheme(){
-		hasVoices = false;
-		voices.pause();
-		
-		MusicBeatState.playMenuMusic();
-	}
-
-    public function playSong()
-    {
-		var songData = curOption.songData;
-		var songName = songData.name;
-
-		if (songName == null)
-			return playMenuTheme();
-
-		////
-		Paths.currentModDirectory = songData.dir;
-
-		songName = Paths.formatToSongPath(songName);
-
-		//// Load assets
-		var songJSON = Song.loadFromJson(songName, songName);
-		var loadList = [
-			{
-				path: '${Paths.formatToSongPath(songName)}/Inst',
-				type: 'SONG'
-			},
-			{
-				path: 'songs/${Paths.formatToSongPath(songName)}',
-				type: 'IMAGE'
-			}
-		];
-
-		if (songJSON.needsVoices){
-			hasVoices = true;
-			loadList.push({
-				path: '${Paths.formatToSongPath(songName)}/Voices',
-				type: 'SONG'
-			});
+                new FlxTimer().start(0, function(tmr:FlxTimer){ // keep it in sync i hope
+                    // honestly if i can learn how audio shit works I could try stitching the 2 audio files together to keep it synced n shit? idk if I could make it sound good tho
+					var time = FlxG.sound.music.time;
+					FlxG.sound.music.time = time;
+                    MusicBeatState.menuVox.time = time;
+                });
+                
+            }else{
+				if (MusicBeatState.menuVox != null)
+				{
+					MusicBeatState.menuVox.stop();
+					MusicBeatState.menuVox.destroy();
+					MusicBeatState.menuVox = null;
+				}
+				FlxG.sound.playMusic(song);
+            }
 		}
-		else{
-			hasVoices = false;
-		}
+    }
 
-		Cache.loadWithList(loadList);
-		
-		//// Play the song!!!
-		image.loadGraphic(FreeplayState.songImage(songName));
+    function changeSong(newIdx:Int){
+        if(newIdx > songData.length-1)newIdx = 0;
+        if(newIdx < 0)newIdx=songData.length-1;
+        idx = newIdx;
+        loadCoverImage(songData[idx]);
+		songName.text = songData[idx].songName;
+    }
 
-		Conductor.changeBPM(songJSON.bpm);
-		Conductor.songPosition = 0;
-
-		FlxG.sound.playMusic(Paths.inst(songName), 1, true);
-		voices.pause();
-		
-		if (hasVoices)
-			voices.loadEmbedded(Paths.voices(songName), true, false).play(FlxG.sound.music.time);
-		
-		voices.volume = hasVoices && voicesEnabled ? 1 : 0;
-
-		// TODO: bpm changes, extra tracks (lol why do they exist)
-	}
-}
-
-class JukeboxSongText extends flixel.text.FlxText
-{
-	public var songData:JukeboxSongData;
-
-	public function new(SongData:JukeboxSongData)
-	{
-		songData = SongData;
-
-		super(0, 0, 0, songData.name, 64);
-		setFormat(Paths.font("calibrib.ttf"), 48, 0xFFFFFF00, LEFT);
-	}
-}
-
-class JukeboxSongData{
-    public var name:Null<String> = null;
-	public var dir:String;
-
-	public function new(Name:Null<String> = null, Directory:String = "")
-	{
-		name = Name;
-		dir = Directory;
-	}
+	function loadCoverImage(data:JukeboxSongData){
+        var coverArtPath = data.coverArt;
+        if(coverArtPath.trim()==''){
+            var songPath = 'songs/${data.songDirectory}';
+			if (!Paths.fileExists('images/$songPath.png', IMAGE))
+				coverArtPath = 'jukebox/noCoverImage';
+            else
+			    coverArtPath = songPath;
+        }
+        if(data.chapterDir!=null)Paths.currentModDirectory = data.chapterDir;
+        
+		image.loadGraphic(Paths.image(coverArtPath));
+        image.setGraphicSize(388, 388);
+        image.updateHitbox();
+		image.x = outline.x + 16;
+		image.y = outline.y + 16;
+        Paths.currentModDirectory = '';
+    }
 }

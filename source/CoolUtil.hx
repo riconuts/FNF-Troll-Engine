@@ -39,11 +39,11 @@ class CoolUtil
 		return p;
 	}
 
-	inline public static function quantize(f:Float, interval:Float){
+	inline public static function quantizeAlpha(f:Float, interval:Float){
 		return Std.int((f+interval/2)/interval)*interval;
 	}
 
-	inline public static function quantize2(f:Float, snap:Float){
+	inline public static function quantize(f:Float, snap:Float){
 		// changed so this actually works lol
 		var m:Float = Math.fround(f * snap);
 		return (m / snap);

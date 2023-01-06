@@ -1,5 +1,6 @@
 package;
 
+import flixel.system.FlxSound;
 import flixel.addons.ui.FlxUIState;
 
 class MusicBeatState extends FlxUIState
@@ -153,6 +154,7 @@ class MusicBeatState extends FlxUIState
 
 	// tgt
 	public static var menuMusic:flash.media.Sound;
+	public static var menuVox:FlxSound; // jukebox
 
 	public static var menuLoopFunc = function(){
 		FlxG.sound.playMusic(menuMusic, FlxG.sound.music.volume);
@@ -161,14 +163,25 @@ class MusicBeatState extends FlxUIState
 		Conductor.changeBPM(180);
 	}; 
 
-	public static function playMenuMusic(volume:Float = 1){		
-		menuMusic = FlxG.sound.cache("assets/music/freakyMenu.ogg"); // please work
+	// TODO: check the jukebox selection n shit and play THAT instead? idk lol
 
-		FlxG.sound.playMusic(Paths.music('freakyIntro'), volume, false);
-		FlxG.sound.music.onComplete = menuLoopFunc;
+	public static function playMenuMusic(volume:Float = 1, ?force:Bool = false){		
+		if(FlxG.sound.music==null || !FlxG.sound.music.playing || force){
+			if (menuVox!=null){
+				trace("stopped menu vox");
+				menuVox.stop();
+				menuVox.destroy();
+				menuVox = null;
+			}
+			JukeboxState.playIdx = 0;
+			menuMusic = FlxG.sound.cache("assets/music/freakyMenu.ogg"); // please work
 
-		Conductor.changeBPM(180);
-		Conductor.songPosition = 0;
+			FlxG.sound.playMusic(Paths.music('freakyIntro'), volume, false);
+			FlxG.sound.music.onComplete = menuLoopFunc;
+
+			Conductor.changeBPM(180);
+			Conductor.songPosition = 0;
+		}
 	}
 	//
 }

@@ -77,7 +77,7 @@ class TestState extends MusicBeatState{
 		if (FlxG.keys.justPressed.ESCAPE)
 		{
 			MusicBeatState.switchState(new MasterEditorMenu());
-			MusicBeatState.playMenuMusic();
+			MusicBeatState.playMenuMusic(true);
 		}
 
 		if (UI_box != null){

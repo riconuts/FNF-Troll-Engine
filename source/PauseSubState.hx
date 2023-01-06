@@ -224,7 +224,7 @@ class PauseSubState extends MusicBeatSubstate
 					}
 					PlayState.cancelMusicFadeTween();
 
-					MusicBeatState.playMenuMusic();
+					MusicBeatState.playMenuMusic(true);
 					
 					PlayState.chartingMode = false;
 			}

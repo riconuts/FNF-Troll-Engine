@@ -111,7 +111,7 @@ class GameOverSubstate extends MusicBeatSubstate
 			else
 				MusicBeatState.switchState(new FreeplayState());
 
-			MusicBeatState.playMenuMusic();
+			MusicBeatState.playMenuMusic(true);
 			PlayState.instance.callOnScripts('onGameOverConfirm', [false]);
 		}
 

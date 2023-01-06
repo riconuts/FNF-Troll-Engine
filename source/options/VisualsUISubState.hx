@@ -111,7 +111,8 @@ class VisualsUISubState extends BaseOptionsMenu
 
 	override function destroy()
 	{
-		if(changedMusic) MusicBeatState.playMenuMusic();
+		if (changedMusic)
+			MusicBeatState.playMenuMusic(true);
 		super.destroy();
 	}
 

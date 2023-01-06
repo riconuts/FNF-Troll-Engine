@@ -2912,7 +2912,7 @@ class PlayState extends MusicBeatState
 
 				if (storyPlaylist.length <= 0)
 				{
-					MusicBeatState.playMenuMusic(1);
+					MusicBeatState.playMenuMusic(1, true);
 
 					cancelMusicFadeTween();
 					if(FlxTransitionableState.skipNextTransIn) {

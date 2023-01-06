@@ -186,7 +186,7 @@ class TitleState extends MusicBeatState
 			skipIntro();
 		else{
 			initialized = true;
-			MusicBeatState.playMenuMusic(0);
+			MusicBeatState.playMenuMusic(0, true);
 			Conductor.changeBPM(90);
 		}		
 	}
@@ -350,7 +350,7 @@ class TitleState extends MusicBeatState
 				case 1:
 					FlxG.sound.music.stop();
 
-					MusicBeatState.playMenuMusic(0);
+					MusicBeatState.playMenuMusic(0, true);
 
 					FlxG.sound.music.fadeIn(4, 0, 0.7);
 				case 2:

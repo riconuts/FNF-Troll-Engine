@@ -1160,7 +1160,7 @@ class FunkinLua extends FunkinScript
 			else
 				MusicBeatState.switchState(new FreeplayState());
 
-			MusicBeatState.playMenuMusic();
+			MusicBeatState.playMenuMusic(true);
 			
 			PlayState.chartingMode = false;
 			PlayState.instance.transitioning = true;

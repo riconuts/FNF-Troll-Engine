@@ -1128,7 +1128,7 @@ class CharacterEditorState extends MusicBeatState
 					MusicBeatState.switchState(new PlayState());
 				} else {
 					MusicBeatState.switchState(new editors.MasterEditorMenu());
-					MusicBeatState.playMenuMusic();
+					MusicBeatState.playMenuMusic(true);
 				}
 				FlxG.mouse.visible = false;
 				return;

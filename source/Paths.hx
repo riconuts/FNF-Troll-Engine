@@ -465,6 +465,18 @@ class Paths
 
 	public static var currentTrackedSounds:Map<String, Sound> = [];
 
+	public static function returnSoundPath(path:String, key:String, ?library:String)
+	{
+		#if MODS_ALLOWED
+		var file:String = modsSounds(path, key);
+		if (FileSystem.exists(file))
+			return file;
+		
+		#end
+		var gottenPath:String = getPath('$path/$key.$SOUND_EXT', SOUND, library);
+		return gottenPath;
+	}
+
 	public static function returnSound(path:String, key:String, ?library:String)
 	{
 		#if MODS_ALLOWED
