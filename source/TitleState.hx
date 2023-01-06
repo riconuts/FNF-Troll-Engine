@@ -349,6 +349,12 @@ class TitleState extends MusicBeatState
 			{
 				case 1:
 					FlxG.sound.music.stop();
+					if (MusicBeatState.menuVox != null)
+					{
+						MusicBeatState.menuVox.stop();
+						MusicBeatState.menuVox.destroy();
+						MusicBeatState.menuVox = null;
+					}
 
 					MusicBeatState.playMenuMusic(0, true);
 

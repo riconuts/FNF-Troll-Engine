@@ -1309,6 +1309,13 @@ class ChartingState extends MusicBeatState
 			FlxG.sound.music.stop();
 			// vocals.stop();
 		}
+		if (MusicBeatState.menuVox != null)
+		{
+			MusicBeatState.menuVox.stop();
+			MusicBeatState.menuVox.destroy();
+			MusicBeatState.menuVox = null;
+		}
+		
 
 		var file:Dynamic = Paths.voices(currentSongName);
 		vocals = new FlxSound();

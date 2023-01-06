@@ -129,6 +129,13 @@ class LoadingState extends MusicBeatState
 	{
 		if (stopMusic && FlxG.sound.music != null)
 			FlxG.sound.music.stop();
+
+		if (stopMusic && MusicBeatState.menuVox != null)
+		{
+			MusicBeatState.menuVox.stop();
+			MusicBeatState.menuVox.destroy();
+			MusicBeatState.menuVox = null;
+		}
 		
 		MusicBeatState.switchState(target);
 	}
@@ -172,6 +179,13 @@ class LoadingState extends MusicBeatState
 		*/
 		if (stopMusic && FlxG.sound.music != null)
 			FlxG.sound.music.stop();
+
+		if (stopMusic && MusicBeatState.menuVox != null)
+		{
+			MusicBeatState.menuVox.stop();
+			MusicBeatState.menuVox.destroy();
+			MusicBeatState.menuVox = null;
+		}
 		
 		return target;
 	}

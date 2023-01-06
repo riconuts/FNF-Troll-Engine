@@ -358,6 +358,12 @@ class PlayState extends MusicBeatState
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.stop();
 
+		if(MusicBeatState.menuVox!=null){
+			MusicBeatState.menuVox.stop();
+			MusicBeatState.menuVox.destroy();
+			MusicBeatState.menuVox = null;
+		}
+
 		debugKeysChart = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
 		debugKeysCharacter = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_2'));
 		PauseSubState.songName = null; //Reset to default
@@ -2957,7 +2963,7 @@ class PlayState extends MusicBeatState
 					CustomFadeTransition.nextCamera = null;
 				}
 				MusicBeatState.switchState(new FreeplayState());
-				MusicBeatState.playMenuMusic(1);
+				MusicBeatState.playMenuMusic(1, true);
 			}
 			transitioning = true;
 		}

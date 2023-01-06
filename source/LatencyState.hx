@@ -56,6 +56,9 @@ class LatencyState extends FlxState
 		if (FlxG.keys.justPressed.SPACE)
 		{
 			FlxG.sound.music.stop();
+			if (MusicBeatState.menuVox != null)
+				MusicBeatState.menuVox.stop();
+			
 
 			FlxG.resetState();
 		}

@@ -1017,6 +1017,7 @@ class EditorPlayState extends MusicBeatState
 		FlxG.sound.music.stop();
 		vocals.stop();
 		vocals.destroy();
+		
 
 		if(!ClientPrefs.controllerMode)
 		{
