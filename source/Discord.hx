@@ -69,21 +69,18 @@ class DiscordClient
 		isInitialized = true;
 	}
 
-	public static function changePresence(details:String, state:Null<String>, ?smallImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float)
+	public static function changePresence(details:String, state:Null<String>, largeImageKey:String = "app-logo", ?hasStartTimestamp:Bool, ?endTimestamp:Float)
 	{
-		/* for secret rpc
-
-		var details = "thats how you do it";
-		var state = null;
-		var smallImageKey = null;
-		var hasStartTimestamp = false;
-		var largeImageKey = 'gorgeous';
-		var largeImageText = 'gorgeous'; //"Engine Version: " + MainMenuState.psychEngineVersion;
-
+		/* secret rpc
+		{
+			details: "thats how you do it",
+			largeImageKey: 'gorgeous',
+			largeImageText: 'gorgeous'
+		}
 		*/
 
 		////
-		var startTimestamp:Float = if(hasStartTimestamp) Date.now().getTime() else 0;
+		var startTimestamp:Float = hasStartTimestamp ? Date.now().getTime() : 0;
 
 		if (endTimestamp > 0)
 			endTimestamp = startTimestamp + endTimestamp;
@@ -91,9 +88,10 @@ class DiscordClient
 		DiscordRpc.presence({
 			details: details,
 			state: state,
-			largeImageKey: "app-logo", // largeImageKey,
-			largeImageText: "Engine Version: " + MainMenuState.psychEngineVersion, // largeImageText,
-			smallImageKey : smallImageKey,
+
+			largeImageKey: largeImageKey,
+			// largeImageText: "Engine Version: " + MainMenuState.psychEngineVersion,
+
 			// Obtained times are in milliseconds so they are divided so Discord can use it
 			startTimestamp : Std.int(startTimestamp / 1000),
 			endTimestamp : Std.int(endTimestamp / 1000)

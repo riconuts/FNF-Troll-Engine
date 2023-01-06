@@ -897,7 +897,7 @@ class PlayState extends MusicBeatState
 
 		#if desktop
 		// Updating Discord Rich Presence.
-		DiscordClient.changePresence(detailsText, SONG.song, iconP2.getCharacter());
+		DiscordClient.changePresence(detailsText, SONG.song, Paths.formatToSongPath(SONG.song));
 		#end
 
 		if(!ClientPrefs.controllerMode)
@@ -1373,7 +1373,7 @@ class PlayState extends MusicBeatState
 
 		#if desktop
 		// Updating Discord Rich Presence (with Time Left)
-		DiscordClient.changePresence(detailsText, SONG.song, iconP2.getCharacter(), true, songLength);
+		DiscordClient.changePresence(detailsText, SONG.song, Paths.formatToSongPath(SONG.song), true, songLength);
 		#end
 		setOnScripts('songLength', songLength);
 		callOnScripts('onSongStart', []);
@@ -2002,11 +2002,11 @@ class PlayState extends MusicBeatState
 			#if desktop
 			if (startTimer != null && startTimer.finished)
 			{
-				DiscordClient.changePresence(detailsText, SONG.song, iconP2.getCharacter(), true, songLength - Conductor.songPosition - ClientPrefs.noteOffset);
+				DiscordClient.changePresence(detailsText, SONG.song, Paths.formatToSongPath(SONG.song), true, songLength - Conductor.songPosition - ClientPrefs.noteOffset);
 			}
 			else
 			{
-				DiscordClient.changePresence(detailsText, SONG.song, iconP2.getCharacter());
+				DiscordClient.changePresence(detailsText, SONG.song, Paths.formatToSongPath(SONG.song));
 			}
 			#end
 		}
@@ -2021,11 +2021,11 @@ class PlayState extends MusicBeatState
 		{
 			if (Conductor.songPosition > 0.0)
 			{
-				DiscordClient.changePresence(detailsText, SONG.song, iconP2.getCharacter(), true, songLength - Conductor.songPosition - ClientPrefs.noteOffset);
+				DiscordClient.changePresence(detailsText, SONG.song, Paths.formatToSongPath(SONG.song), true, songLength - Conductor.songPosition - ClientPrefs.noteOffset);
 			}
 			else
 			{
-				DiscordClient.changePresence(detailsText, SONG.song, iconP2.getCharacter());
+				DiscordClient.changePresence(detailsText, SONG.song, Paths.formatToSongPath(SONG.song));
 			}
 		}
 		#end
@@ -2036,10 +2036,11 @@ class PlayState extends MusicBeatState
 	override public function onFocusLost():Void
 	{	
 		#if desktop
-		DiscordClient.changePresence(detailsPausedText, SONG.song, iconP2.getCharacter());
+		DiscordClient.changePresence(detailsPausedText, SONG.song, Paths.formatToSongPath(SONG.song));
 		#end
+
 		#if !debug
-		pause();
+		// pause();
 		#end
 
 		super.onFocusLost();
@@ -2446,7 +2447,7 @@ class PlayState extends MusicBeatState
 
 				#if desktop
 				// Game Over doesn't get his own variable because it's only used here
-				DiscordClient.changePresence("Game Over - " + detailsText, SONG.song, iconP2.getCharacter());
+				DiscordClient.changePresence("Game Over - " + detailsText, SONG.song, Paths.formatToSongPath(SONG.song));
 				#end
 				isDead = true;
 				return true;
@@ -4104,7 +4105,7 @@ class PlayState extends MusicBeatState
 				openSubState(new PauseSubState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
 
 				#if desktop
-				DiscordClient.changePresence(detailsPausedText, SONG.song, iconP2.getCharacter());
+				DiscordClient.changePresence(detailsPausedText, SONG.song, Paths.formatToSongPath(SONG.song));
 				#end
 			}
 		}
