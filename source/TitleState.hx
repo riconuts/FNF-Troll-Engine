@@ -34,18 +34,177 @@ class TitleState extends MusicBeatState
 {
 	public static var initialized:Bool = false;
 
-	var blackScreen:FlxSprite;
-	var credGroup:FlxGroup;
-	var credTextShit:Alphabet;
-	var textGroup:FlxGroup;
-	var ngSpr:FlxSprite;
+	static var curWacky:Array<String> = [];
 
+	static var blackScreen:FlxSprite;
+	static var textGroup:FlxGroup;
+	static var ngSpr:FlxSprite;
+
+	static var logoBl:RandomTitleLogo;
+	static var titleText:FlxSprite;
+	static var swagShader:ColorSwap = null;
+	static var bg:Stage;
+
+	static var loaded = false;
+
+	//
 	var titleTextColors:Array<FlxColor> = [0xFF33FFFF, 0xFF3333CC];
 	var titleTextAlphas:Array<Float> = [1, .64];
 
-	var curWacky:Array<String> = [];
+	// cam shit raaahhhhh
+	public var camGame:FlxCamera = new FlxCamera();
+	public var camHUD:FlxCamera = new FlxCamera();
+
+	public var camFollow = new FlxPoint(640, 360);
+	public var camFollowPos = new FlxObject(640, 360, 1, 1);
 	
-	public static var updateVersion:String = '';
+	static public function load()
+	{
+		curWacky = FlxG.random.getObject(getIntroTextShit());
+		
+		// Set up a stage list
+		var stages:Array<Array<String>> = []; // [stage name, mod directory]
+		
+		Paths.currentModDirectory = "";
+		for (stage in Stage.getStageList())
+			stages.push([stage, ""]);
+
+		#if MODS_ALLOWED
+		for (mod in Paths.getModDirectories()){
+			Paths.currentModDirectory = mod;
+			for (stage in Stage.getStageList(true))
+				stages.push([stage, mod]);
+		}
+		#end
+
+		var randomStage = FlxG.random.getObject(stages); // Get a random stage from the list
+
+		if (randomStage != null){
+			Paths.currentModDirectory = randomStage[1];
+			bg = new Stage(randomStage[0]).buildStage();
+		}
+
+		// Random logoooo
+		swagShader = new ColorSwap();
+
+		logoBl = new RandomTitleLogo();
+		logoBl.scrollFactor.set();
+		logoBl.screenCenter(XY);
+		
+		logoBl.shader = swagShader.shader;
+
+		//
+		titleText = new FlxSprite(100, 576);
+		titleText.frames = Paths.getSparrowAtlas('titleEnter');
+
+		titleText.animation.addByPrefix('idle', "ENTER IDLE", 24);
+		titleText.animation.addByPrefix('press', ClientPrefs.flashing ? "ENTER PRESSED" : "ENTER FREEZE", 24);
+		titleText.animation.play('idle');
+
+		titleText.updateHitbox();
+
+		//
+		blackScreen = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+
+		textGroup = new FlxGroup();
+
+		//
+		ngSpr = new FlxSprite(0, FlxG.height * 0.52).loadGraphic(Paths.image('newgrounds_logo'));
+		ngSpr.visible = false;
+		ngSpr.scale.set(0.8, 0.8);
+		ngSpr.updateHitbox();
+		ngSpr.screenCenter(X);
+
+		MusicBeatState.playMenuMusic(0);
+
+		loaded = true;
+	}
+
+	override public function destroy()
+	{
+		curWacky = [];
+		swagShader = null;
+
+		/*
+		blackScreen.destroy();
+		textGroup.destroy();
+		ngSpr.destroy();
+	
+		logoBl.destroy();
+		titleText.destroy();
+		bg.destroy();
+		*/
+
+		blackScreen = null;
+		textGroup = null;
+		ngSpr = null;
+	
+		logoBl = null;
+		titleText = null;
+		bg = null;
+
+		loaded = false;
+
+		return super.destroy();
+	}
+
+	override public function create():Void
+	{
+		trace("CRATED");
+
+		if (!loaded) load();
+
+		FlxTransitionableState.defaultTransIn = FadeTransitionSubstate;
+		FlxTransitionableState.defaultTransOut = FadeTransitionSubstate;
+
+		super.create();
+
+		// Set up cameras
+		FlxG.cameras.reset(camGame);
+		FlxG.cameras.add(camHUD, false);
+
+		FlxG.cameras.setDefaultDrawTarget(camGame, true);
+
+		camHUD.bgColor = 0x00000000;
+		camGame.follow(camFollowPos);
+
+		if (bg != null){
+			camGame.zoom = bg.stageData.defaultZoom;
+
+			var color = FlxColor.fromString(bg.stageData.bg_color);
+			camGame.bgColor = color != null ? color : FlxColor.BLACK;
+
+			var camPos = bg.stageData.camera_stage;
+			if (camPos == null) camPos = [640, 360];
+
+			camFollow.set(camPos[0], camPos[1]);
+			camFollowPos.setPosition(camPos[0], camPos[1]);
+
+			add(bg);
+		}
+
+		////
+		logoBl.cameras = [camHUD];
+		titleText.cameras = [camHUD];
+		blackScreen.cameras = [camHUD];
+		textGroup.cameras = [camHUD];
+		ngSpr.cameras = [camHUD];
+
+		add(logoBl);
+		add(titleText);
+		add(blackScreen);
+		add(textGroup);
+		add(ngSpr);
+
+
+		////
+		if (initialized)
+			skipIntro();
+		else{
+			initialized = true;
+			MusicBeatState.playMenuMusic(0, true);
+		}
+	}
 
 	override function add(Object:FlxBasic)
 	{
@@ -55,154 +214,18 @@ class TitleState extends MusicBeatState
 		return super.add(Object);
 	}
 
-	var logoBl:RandomTitleLogo;
-	var titleText:FlxSprite;
-	var swagShader:ColorSwap = null;
-	var bg:Stage;
-
-	// cam shit raaahhhhh
-	public var camGame:FlxCamera = new FlxCamera();
-	public var camHUD:FlxCamera = new FlxCamera();
-
-	public var camFollow = new FlxPoint(640, 360);
-	public var camFollowPos = new FlxObject(640, 360, 1, 1);
-
-	override public function create():Void
-	{
-		super.create();
-
-		FlxG.fixedTimestep = false;
-
-		curWacky = FlxG.random.getObject(getIntroTextShit());
-
-		// DEBUG BULLSHIT
-		swagShader = new ColorSwap();
-
-		FlxTransitionableState.defaultTransIn = FadeTransitionSubstate;
-		FlxTransitionableState.defaultTransOut = FadeTransitionSubstate;
-
-		// Set up cameras
-		camHUD.bgColor = 0x00000000;
-		camGame.follow(camFollowPos);
-
-		FlxG.cameras.reset(camGame);
-		FlxG.cameras.add(camHUD, false);
-
-		FlxG.cameras.setDefaultDrawTarget(camGame, true);
-
-		// Set up a stage list
-		var stages:Array<Array<String>> = []; // [stage name, mod directory]
-		
-		Paths.currentModDirectory = "";
-		for (stage in Stage.getStageList())
-			stages.push([stage, ""]);
-
-		#if MODS_ALLOWED
-		for (mod in Paths.getModDirectories())
-		{
-			Paths.currentModDirectory = mod;
-			for (stage in Stage.getStageList(true))
-				stages.push([stage, mod]);
-		}
-		#end
-
-		var randomStage = FlxG.random.getObject(stages); // Get a random stage from the list
-		trace(randomStage);
-
-		if (randomStage != null){
-			Paths.currentModDirectory = randomStage[1];
-			bg = new Stage(randomStage[0]).buildStage();
-			camGame.zoom = bg.stageData.defaultZoom;
-
-			var camPos = bg.stageData.camera_stage;
-			if (camPos == null)
-				camPos = [640, 360];
-
-			camFollow.set(camPos[0], camPos[1]);
-			camFollowPos.setPosition(camPos[0], camPos[1]);
-
-			add(bg);
-		}
-
-		// Random logoooo
-		swagShader = new ColorSwap();
-
-		logoBl = new RandomTitleLogo();
-		logoBl.scrollFactor.set();
-		logoBl.screenCenter(XY);
-		logoBl.cameras = [camHUD];
-		add(logoBl);
-		logoBl.shader = swagShader.shader;
-
-		//
-		titleText = new FlxSprite(100, 576);
-		#if (sys && MODS_ALLOWED)
-		var path = "mods/" + Paths.currentModDirectory + "/images/titleEnter.png";
-		if (!FileSystem.exists(path))
-			path = "mods/images/titleEnter.png";
-		if (!FileSystem.exists(path))
-			path = "assets/images/titleEnter.png";
-		titleText.frames = FlxAtlasFrames.fromSparrow(BitmapData.fromFile(path), File.getContent(StringTools.replace(path, ".png", ".xml")));
-		#else
-		titleText.frames = Paths.getSparrowAtlas('titleEnter');
-		#end
-
-		titleText.animation.addByPrefix('idle', "ENTER IDLE", 24);
-		titleText.animation.addByPrefix('press', ClientPrefs.flashing ? "ENTER PRESSED" : "ENTER FREEZE", 24);
-
-		titleText.animation.play('idle');
-		titleText.updateHitbox();
-		titleText.cameras = [camHUD];
-		add(titleText);
-
-		//
-		credGroup = new FlxGroup();
-		credGroup.cameras = [camHUD];
-		add(credGroup);
-
-		textGroup = new FlxGroup();
-		textGroup.cameras = [camHUD];
-
-		blackScreen = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
-		credGroup.add(blackScreen);
-
-		credTextShit = new Alphabet(0, 0, "", true);
-		credTextShit.screenCenter();
-		credTextShit.cameras = [camHUD];
-		credTextShit.visible = false;
-		FlxTween.tween(credTextShit, {y: credTextShit.y + 20}, 2.9, {ease: FlxEase.quadInOut, type: PINGPONG});
-
-		//
-		ngSpr = new FlxSprite(0, FlxG.height * 0.52).loadGraphic(Paths.image('newgrounds_logo'));
-		ngSpr.visible = false;
-		ngSpr.setGraphicSize(Std.int(ngSpr.width * 0.8));
-		ngSpr.updateHitbox();
-		ngSpr.screenCenter(X);
-		ngSpr.cameras = [camHUD];
-		add(ngSpr);
-
-		//
-		if (initialized)
-			skipIntro();
-		else{
-			initialized = true;
-			MusicBeatState.playMenuMusic(0, true);
-			Conductor.changeBPM(90);
-		}		
-	}
-
-	function getIntroTextShit():Array<Array<String>>
+	static function getIntroTextShit():Array<Array<String>>
 	{
 		var swagGoodArray:Array<Array<String>> = [];
 
 		// add list from the assets folder
-		var fullText:String = Assets.getText(Paths.txt('introText'));
+		var fullText:String = Assets.getText(Paths.txt('introText')).rtrim();
 
 		#if MODS_ALLOWED
-		for (mod in Paths.getModDirectories())
-		{
+		for (mod in Paths.getModDirectories()){
 			Paths.currentModDirectory = mod;
-			var rawFile:Null<String> = Paths.getContent(Paths.modFolders("data/introText.txt"));
+
+			var rawFile:Null<String> = Paths.getContent(Paths.modFolders("data/introText.txt")).rtrim();
 
 			if (rawFile != null && rawFile.length > 0)
 				fullText += '\n${rawFile}';
@@ -307,8 +330,7 @@ class TitleState extends MusicBeatState
 			var money:Alphabet = new Alphabet(0, 0, textArray[i], true, false);
 			money.screenCenter(X);
 			money.y += (i * 60) + 200 + offset;
-			if(credGroup != null && textGroup != null) {
-				credGroup.add(money);
+			if (textGroup != null) {
 				textGroup.add(money);
 			}
 		}
@@ -316,21 +338,18 @@ class TitleState extends MusicBeatState
 
 	function addMoreText(text:String, ?offset:Float = 0)
 	{
-		if(textGroup != null && credGroup != null) {
+		if(textGroup != null) {
 			var coolText:Alphabet = new Alphabet(0, 0, text, true, false);
 			coolText.screenCenter(X);
 			coolText.y += (textGroup.length * 60) + 200 + offset;
-			credGroup.add(coolText);
 			textGroup.add(coolText);
 		}
 	}
 
 	function deleteCoolText()
 	{
-		while (textGroup.members.length > 0)
-		{
-			credGroup.remove(textGroup.members[0], true);
-			textGroup.remove(textGroup.members[0], true);
+		while (textGroup.members.length > 0){
+			textGroup.remove(textGroup.members[0], true).destroy();
 		}
 	}
 
@@ -345,7 +364,7 @@ class TitleState extends MusicBeatState
 
 		if(!closedState) {
 			sickBeats++;
-			switch (sickBeats)
+			switch (sickBeats * 0.5)
 			{
 				case 1:
 					FlxG.sound.music.stop();
@@ -398,13 +417,12 @@ class TitleState extends MusicBeatState
 		if (!skippedIntro)
 		{
 			remove(ngSpr);
-			remove(credGroup);
+			remove(blackScreen);
+			remove(textGroup);
 
 			camHUD.flash(FlxColor.WHITE, 4);
 			
 			skippedIntro = true;
-
-			Conductor.changeBPM(180);
 		}
 	}
 }

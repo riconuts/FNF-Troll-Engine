@@ -26,7 +26,7 @@ class MasterEditorMenu extends MusicBeatState
 		//'Week Editor',
 		//'Menu Character Editor',
 		'Character Editor',
-		//'Chart Editor',
+		'Chart Editor',
 		'Stage Editor',
 		'Test Stage'
 	];
@@ -121,8 +121,8 @@ class MasterEditorMenu extends MusicBeatState
 					MusicBeatState.switchState(new WeekEditorState());*/
 				case 'Stage Editor':
 					MusicBeatState.switchState(new StageEditorState());
-				/*case 'Chart Editor'://felt it would be cool maybe
-					LoadingState.loadAndSwitchState(new ChartingState(), false);*/
+				case 'Chart Editor':
+					LoadingState.loadAndSwitchState(new ChartingState(), false);
 				case "Test Stage":
 					MusicBeatState.switchState(new TestState());
 			}

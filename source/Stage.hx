@@ -42,6 +42,9 @@ typedef StageFile =
 	var camera_opponent:Array<Float>;
 	var camera_girlfriend:Array<Float>;
 	var camera_speed:Null<Float>;
+
+	@:optional var bg_color:Null<String>;
+
 	@:optional var camera_stage:Array<Float>; // for the title screen
 	@:optional var pixel_size:Null<Float>;
 	@:optional var preloadStrings:Array<String>;

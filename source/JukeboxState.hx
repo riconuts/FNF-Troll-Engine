@@ -30,7 +30,8 @@ class JukeboxState extends MusicBeatState {
     var forw:FlxSprite;
 	var songName:FlxText;
     
-    inline function addSong(songName:String, songDir:String, ?chapter:String, ?coverArt:String)songData.push({songName: songName,songDirectory: songDir,chapterDir: chapter==null?"":chapter,coverArt: coverArt==null?'songs/$songDir':coverArt});
+    inline function addSong(songName:String, songDir:String, ?chapter:String, ?coverArt:String)
+        songData.push({songName: songName,songDirectory: songDir,chapterDir: chapter==null?"":chapter,coverArt: coverArt==null?'songs/$songDir':coverArt});
     // TODO: add bpm
     static var idx:Int = 0;
     public static var playIdx:Int = 0;

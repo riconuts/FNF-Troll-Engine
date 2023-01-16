@@ -25,8 +25,8 @@ typedef SwagSong =
 	var player2:String;
 	var gfVersion:String;
 	var stage:String;
-	var arrowSkin:String;
-	var splashSkin:String;
+	var arrowSkin:Null<String>;
+	var splashSkin:Null<String>;
 	var validScore:Bool;
 
 	@:optional var extraTracks:Array<String>;
@@ -39,8 +39,8 @@ class Song
 	public var events:Array<Dynamic>;
 	public var bpm:Float;
 	public var needsVoices:Bool = true;
-	public var arrowSkin:String;
-	public var splashSkin:String;
+	public var arrowSkin:Null<String> = null;
+	public var splashSkin:Null<String> = null;
 	public var speed:Float = 1;
 	public var stage:String;
 	public var player1:String = 'bf';
@@ -95,7 +95,7 @@ class Song
 	public static function loadFromJson(jsonInput:String, ?folder:String):SwagSong
 	{
 		var path = Paths.formatToSongPath(folder) + '/' + Paths.formatToSongPath(jsonInput);
-		var rawJson = Paths.getText('data/$path.json', false);
+		var rawJson = Paths.getText('songs/$path.json', false);
 		
 		if (rawJson == null)
 			FlxG.log.error('JSON not found: $jsonInput');
@@ -109,6 +109,7 @@ class Song
 		var songJson:Dynamic = parseJSONshit(rawJson);
 		if(jsonInput != 'events') Stage.StageData.loadDirectory(songJson);
 		onLoadJson(songJson);
+
 		return songJson;
 	}
 

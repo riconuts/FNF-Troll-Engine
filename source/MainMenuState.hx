@@ -72,17 +72,6 @@ class MainMenuState extends MusicBeatState
 		debugKeys = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
 
 		FlxG.camera.bgColor = FlxColor.BLACK;
-		/*
-		camGame = new FlxCamera();
-		camGame.bgColor = FlxColor.BLACK;
-		
-		camAchievement = new FlxCamera();
-		camAchievement.bgColor.alpha = 0;
-
-		FlxG.cameras.reset(camGame);
-		FlxG.cameras.add(camAchievement, false);
-		FlxG.cameras.setDefaultDrawTarget(camGame, true);
-		*/
 
 		transIn = FlxTransitionableState.defaultTransIn;
 		transOut = FlxTransitionableState.defaultTransOut;
@@ -335,8 +324,24 @@ class MainMenuState extends MusicBeatState
 				if (kirbCollision == null){
 					kirbCollision = new FlxTypedGroup();
 
+					var totalSqueaks = 0;
 					var squeak = function(){
-						FlxG.sound.play(Paths.soundRandom("squeak", 1, 3));
+						totalSqueaks++;
+
+						if (totalSqueaks > 4){
+							FlxG.sound.play(Paths.sound("pop"));
+							sowyImage.loadGraphic(Paths.image("newmenuu/mainmenu/cover_freeplay_alt"));
+							
+							for (collision in kirbCollision.members)
+								collision.destroy();
+							kirbCollision.clear();
+
+							return;
+						}
+
+						FlxG.sound.play(Paths.soundRandom("squeak", 1, 3), 1, false, true, function(){
+							totalSqueaks--;
+						});
 					}
 
 					kirbCollision.add(new SowyBaseButton(sowyImage.x + 26, sowyImage.y + 4, squeak)).makeGraphic(106, 54, 0x00000000); // head
@@ -359,6 +364,14 @@ class MainMenuState extends MusicBeatState
 					FlxTween.tween(daImage, {alpha: 0}, selectedSomethin ? 0.4 : 0.1, {ease: FlxEase.quadOut});
 				else
 					daImage.alpha = 0;
+	}
+
+	override function destroy()
+	{
+		for (image in imageMap)
+			image.destroy();
+
+		return super.destroy();
 	}
 
 	function changeItem(huh:Int = 0)

@@ -1721,7 +1721,7 @@ class FunkinLua extends FunkinScript
 			path = Paths.modsJson(Paths.formatToSongPath(PlayState.SONG.song) + '/' + dialogueFile);
 			if(!FileSystem.exists(path))
 			#end
-				path = Paths.json(Paths.formatToSongPath(PlayState.SONG.song) + '/' + dialogueFile);
+				path = Paths.songJson(Paths.formatToSongPath(PlayState.SONG.song) + '/' + dialogueFile);
 
 			luaTrace('Trying to load dialogue: ' + path);
 
@@ -1863,16 +1863,7 @@ class FunkinLua extends FunkinScript
 		});
 
 		Lua_helper.add_callback(lua, "debugPrint", Reflect.makeVarArgs(function(toPrint:Array<Dynamic>) {
-			var finalText:String = "";
-
-			if (toPrint.length > 0){
-				for (arg in toPrint)
-					finalText += Std.string(arg) + ", ";
-				
-				finalText.substr(0, finalText.length-2);
-			}
-
-			luaTrace(finalText, true, false);
+			luaTrace(toPrint.join(", "), true, false);
 		}));
 		Lua_helper.add_callback(lua, "close", function(printMessage:Bool) {
 			if(!gonnaClose) {

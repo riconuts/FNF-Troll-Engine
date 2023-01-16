@@ -1,5 +1,6 @@
 package;
 
+import haxe.io.Path;
 import editors.ChartingState;
 import flixel.math.FlxPoint;
 import math.Vector3;
@@ -326,28 +327,28 @@ class Note extends FlxSprite
 				return;
 		}
 
-		var skin:String = texture;
-		if(texture.length < 1) {
-			skin = PlayState.arrowSkin;
-			if(skin == null || skin.length < 1) {
-				skin = 'NOTE_assets';
-			}
-		}
+		var animName:String = animation.curAnim != null ? animation.curAnim.name : null;
+		var lastScaleY:Float = scale.y;
 
-		var animName:String = null;
-		if(animation.curAnim != null) {
-			animName = animation.curAnim.name;
+		var skin:String = texture;
+		if(texture.length < 1){
+			skin = PlayState.arrowSkin;
+			if(skin == null || skin.length < 1)
+				skin = 'NOTE_assets';
 		}
 
 		var arraySkin:Array<String> = skin.split('/');
-		arraySkin[arraySkin.length-1] = prefix + arraySkin[arraySkin.length-1] + suffix;
-
-		var lastScaleY:Float = scale.y;
+		arraySkin[arraySkin.length-1] = prefix + arraySkin[arraySkin.length-1] + suffix; // add prefix and suffix to the texture file
 		var blahblah:String = arraySkin.join('/');
-		isQuant = false;
 
-		if (ClientPrefs.noteSkin == 'Quants' && canQuant){
-			if(Assets.exists(Paths.getPath("images/QUANT" + blahblah + ".png", IMAGE))) { // this can probably only be done once and then added to some sort of cache
+		isQuant = false;
+		
+		if (ClientPrefs.noteSkin == 'Quants' && canQuant)
+		{
+			if (Paths.exists(Paths.getPath("images/QUANT" + blahblah + ".png", IMAGE))
+				#if MODS_ALLOWED
+				|| Paths.exists(Paths.modsImages("QUANT" + blahblah + ".png"))
+				#end) { // this can probably only be done once and then added to some sort of cache
 				// soon:tm:
 				blahblah = "QUANT" + blahblah;
 				isQuant = true;

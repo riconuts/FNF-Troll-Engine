@@ -58,11 +58,13 @@ class StrumNote extends FlxSprite
 		var lastAnim:String = null;
 		if(animation.curAnim != null) lastAnim = animation.curAnim.name;
 		var br:String = texture;
+
 		if (ClientPrefs.noteSkin == 'Quants')
 		{
-			trace(Paths.getPath("images/QUANT" + texture + ".png", IMAGE));
-			if (Paths.exists(Paths.getPath("images/QUANT" + texture + ".png", IMAGE)))
-			{
+			if (Paths.exists(Paths.getPath("images/QUANT" + texture + ".png", IMAGE))
+			#if MODS_ALLOWED
+			|| Paths.exists(Paths.modsImages("QUANT" + texture + ".png"))
+			#end) {
 				br = "QUANT" + texture;
 				isQuant = true;
 			}

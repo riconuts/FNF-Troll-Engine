@@ -1,3 +1,6 @@
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+import sys.thread.Thread;
 import flixel.FlxG;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.input.keyboard.FlxKey;
@@ -6,15 +9,15 @@ import Discord.DiscordClient;
 import lime.app.Application;
 #end
 
-// A loading screen would go here
+// Loads the title screen, alongside some other stuff.
 
-class StartupState extends MusicBeatState
+class StartupState extends FlxState
 {
 	public static var muteKeys:Array<FlxKey> = [FlxKey.ZERO];
 	public static var volumeDownKeys:Array<FlxKey> = [FlxKey.NUMPADMINUS, FlxKey.MINUS];
 	public static var volumeUpKeys:Array<FlxKey> = [FlxKey.NUMPADPLUS, FlxKey.PLUS];
 
-	override public function create():Void
+	function load():Void
 	{
 		#if html5
 		Paths.initPaths();
@@ -29,28 +32,20 @@ class StartupState extends MusicBeatState
 		Paths.getModDirectories();
 		Paths.loadRandomMod();
 		#end
-
-		//FlxG.game.focusLostFramerate = 60;
 		
 		PlayerSettings.init();
 		
 		Highscore.load();
-
-		super.create();
 
 		FlxTransitionableState.defaultTransIn = FadeTransitionSubstate;
 		FlxTransitionableState.defaultTransOut = FadeTransitionSubstate;
 		
 		// this shit doesn't work
 		#if desktop
-		CoolUtil.precacheMusic("freakyIntro");
-		CoolUtil.precacheMusic("freakyMenu");
-		
-		CoolUtil.precacheSound("cancelMenu");
-		CoolUtil.precacheSound("confirmMenu");
-		CoolUtil.precacheSound("scrollMenu");
+		Paths.sound("cancelMenu");
+		Paths.sound("confirmMenu");
+		Paths.sound("scrollMenu");
 
-		//
 		Paths.music('freakyIntro');
 		Paths.music('freakyMenu');
 		#end
@@ -69,7 +64,51 @@ class StartupState extends MusicBeatState
 			});
 		}
 		#end
+	}
+
+	public function new(){
+		super();
 		
-		MusicBeatState.switchState(new TitleState());
+		FlxTransitionableState.skipNextTransIn = true;
+		FlxTransitionableState.skipNextTransOut = true;
+
+		persistentDraw = true;
+		persistentUpdate = true;
+
+		FlxG.fixedTimestep = false;
+	}
+
+	private var warning:FlxSprite;
+	private var step = 0;
+
+	override function update(elapsed)
+	{
+		// this is kinda stupid but i couldn't find any other way to display the warning while the title screen loaded 
+		switch (step){
+			case 0:
+				warning = new FlxSprite().loadGraphic(Paths.image("warning"));
+				warning.scale.set(0.65, 0.65);
+				warning.updateHitbox();
+				warning.screenCenter();
+				add(warning);
+
+				step = 1;
+			case 1:
+				load();
+				TitleState.load();
+
+				var waitTime = 4 - Sys.cpuTime();
+				if (waitTime > 0) Sys.sleep(waitTime);
+				
+				step = 2;
+			case 2:
+				FlxTween.tween(warning, {alpha: 0}, 1, {ease: FlxEase.expoIn, onComplete: function(twn){
+					MusicBeatState.switchState(new TitleState());
+				}});
+				step = 3;
+
+		}
+
+		super.update(elapsed);
 	}
 }
