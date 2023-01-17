@@ -43,6 +43,7 @@ class ChapterMenuState extends MusicBeatState{
 
 		this.chapData = chapData;
 		Paths.currentModDirectory = chapData.directory;
+		ChapterData.curChapter = chapData;
 	}
 
 	override function create()
@@ -103,7 +104,7 @@ class ChapterMenuState extends MusicBeatState{
 		totalSongTxt = new FlxText(halfScreen, 0, 0, "CHAPTER", 32);
 		totalSongTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
 
-		totalScoreTxt = new FlxText(1205, 0, 0, "0", 32);
+		totalScoreTxt = new FlxText(1205, 0, 0, Std.string(Highscore.getWeekScore(ChapterData.curChapter.directory)), 32);
 		totalScoreTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
 		totalScoreTxt.x -= totalScoreTxt.width + 15;
 

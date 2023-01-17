@@ -1,5 +1,6 @@
 package;
 
+import flixel.util.FlxColor;
 import Alphabet;
 import Controls;
 import TitleState;
@@ -164,54 +165,60 @@ class TestState extends MusicBeatState{
 	function createTitleUI()
 	{
 		var group = new FlxTypedGroup<FlxBasic>();
-		//var titleNames = Paths.getFolders("images/titles");
-		//trace(titleNames);
 
 		////
-		var bgGroup = new FlxTypedGroup<FlxBasic>();
+		var bgGroup = new FlxTypedGroup<Stage>(1);
 		group.add(bgGroup);
-		var bg = new Stage("stage1").buildStage();
-		bgGroup.add(bg);
 
+		// Warning : Local variable might be used before being initialAAAAAAAA SHUT UP
+		var bg:Stage = null;
+		var logoBl:RandomTitleLogo = null;
+
+		////
 		group.add(UI_box);
 
-		/*
-		var logoBl = new FlxSprite();
-		function switchLogo(sowy:Int = 0){
-			logoBl.frames = Paths.getSparrowAtlas('titles/${titleNames[sowy]}/logoBumpin');
-			logoBl.antialiasing = true;
-			logoBl.animation.addByPrefix('bump', 'logo bumpin', 24);
-			logoBl.animation.play('bump');
-			logoBl.setGraphicSize(Std.int(logoBl.width * 0.72));
-			logoBl.scrollFactor.set();
-			logoBl.updateHitbox();
-			logoBl.screenCenter(XY);
-		}
-		switchLogo();
-
-		group.add(logoBl);
-
 		////
+		var titleNames = TitleState.RandomTitleLogo.getTitlesList();
 		var titleStepper = new FlxUINumericStepper(10, 40, 1, 0, 0, titleNames.length-1, 0);
+		titleStepper.cameras = [camHUD];
 		group.add(titleStepper);
-		 */
 		
 		var stageNames = Stage.getStageList();
 		var bgStepper = new FlxUINumericStepper(10, 70, 1, 0, 0, stageNames.length-1, 0);
 		bgStepper.cameras = [camHUD];
 		group.add(bgStepper);
 
-		function updateStage(){
-			// switchLogo(Std.int(titleStepper.value));
-			bgGroup.remove(bg);
-			bg.destroy();
-			bg = new Stage(stageNames[Std.int(bgStepper.value)]).buildStage();
+		function updateShit(){
+			// Logo Update 
+			var newLogoName = titleNames[Std.int(titleStepper.value)];
+			if (logoBl != null && logoBl.titleName != newLogoName){
+				group.remove(logoBl).destroy();
+				logoBl = null;
+			}
+			if (logoBl == null){		
+				logoBl = new TitleState.RandomTitleLogo(newLogoName);
+				logoBl.cameras = [camHUD];
+				logoBl.scrollFactor.set();
+				logoBl.screenCenter(XY);
+				group.add(logoBl);
+			}
 
+			// Stage Update 
+			var newStageName = stageNames[Std.int(bgStepper.value)];
+
+			if (bg != null && bg.curStage != newStageName){
+				bgGroup.remove(bg).destroy();
+				bg = null;
+			}else if (bg != null)
+				return;
+
+			bg = new Stage(newStageName).buildStage();
+
+			camGame.bgColor = FlxColor.fromString(bg.stageData.bg_color);
 			camGame.zoom = bg.stageData.defaultZoom;
 
 			var camPos = bg.stageData.camera_stage;
-			if (camPos == null)
-				camPos = [640, 360];
+			if (camPos == null) camPos = [640, 360];
 
 			camFollow.set(camPos[0], camPos[1]);
 			camFollowPos.setPosition(camPos[0], camPos[1]);
@@ -219,11 +226,11 @@ class TestState extends MusicBeatState{
 			bgGroup.add(bg);
 		}
 
-		var changeButton = new FlxButton(10, 100, "Set", updateStage);
+		var changeButton = new FlxButton(10, 100, "Set", updateShit);
 		changeButton.cameras = [camHUD];
 		group.add(changeButton);
 
-		updateStage();
+		updateShit();
 
 		return group;
 	}

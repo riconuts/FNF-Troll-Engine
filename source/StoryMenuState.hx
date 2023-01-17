@@ -86,14 +86,22 @@ class StoryMenuState extends MusicBeatState
 
 		for (chapData in ChapterData.reloadChapterFiles())
 		{
-			var isLocked = false; // for now
-			if (isLocked)
+			// For Now
+			var isLocked = chapData.unlockCondition != true;
+
+			// this is to hide the christmas stuff from story mode, since im not sure if we're gonna make extra stuff for the story mode
+			if (chapData.category != "main")
 				continue;
+
+			/*
+			if (chapData.hideStoryMode)
+				continue;
+			*/
 
 			Paths.currentModDirectory = chapData.directory;
 			chapN++;
 
-			var previewImage = Paths.image("chapters/" + Paths.formatToSongPath(chapData.name) + (isLocked ? "lock" : ""));
+			var previewImage = Paths.image("chapters/" + Paths.formatToSongPath(chapData.name) + (isLocked ? "-lock" : ""));
 			previewImage = previewImage != null ? previewImage : Paths.image("chapters/unknown");
 			
 			var pos = chapterSelectPositions[chapN];
@@ -105,7 +113,7 @@ class StoryMenuState extends MusicBeatState
 
 			var yellowBorder = new FlxShapeBox(xPos - 3, yPos - 3, 200, 200, {thickness: 6, color: FlxColor.fromRGB(255, 242, 0)}, FlxColor.TRANSPARENT);
 			var textTitle = new FlxText(xPos - 3, yPos - 30, 206, chapData.name, 12);
-			textTitle.setFormat(Paths.font("calibri"), 18, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE);
+			textTitle.setFormat(Paths.font("calibri.ttf"), 18, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE);
 
 			if (isLocked){
 				newButton.onUp.callback = function(){

@@ -14,21 +14,28 @@ import flixel.FlxG;
 import openfl.utils.AssetType;
 
 using StringTools;
+
 typedef JukeboxSongData = {
     var songName:String;
     var coverArt:String;
     var songDirectory:String;
     @:optional var chapterDir:String;
 }
+
 class JukeboxState extends MusicBeatState {
     var songData:Array<JukeboxSongData> = [];
+
     var outline:FlxShapeBox;
     var image:FlxSprite;
     var defImage:FlxSprite;
+
+    var songName:FlxText;
+
     var back:FlxSprite;
     var play:FlxSprite;
     var forw:FlxSprite;
-	var songName:FlxText;
+
+    var mute:FlxSprite;
     
     inline function addSong(songName:String, songDir:String, ?chapter:String, ?coverArt:String)
         songData.push({songName: songName,songDirectory: songDir,chapterDir: chapter==null?"":chapter,coverArt: coverArt==null?'songs/$songDir':coverArt});
@@ -36,15 +43,68 @@ class JukeboxState extends MusicBeatState {
     static var idx:Int = 0;
     public static var playIdx:Int = 0;
 
+    static var muteVocals(default, set) = false;
+    static function set_muteVocals(mute:Bool){
+        muteVocals = mute;
+
+        if (MusicBeatState.menuVox != null){
+            if (mute)
+                MusicBeatState.menuVox.fadeOut(0.25, 0);
+            else
+                MusicBeatState.menuVox.volume = 1;
+        }
+        
+        return mute;
+    }
+
 	override function create()
 	{
+        // space background
+        // im pretty sure that flixel already has some pre written class specifically for this situation but i dont not care.
+        var bgTiles:Array<FlxSprite> = [];
+
+        var bg = new FlxSprite();
+        bg.frames = Paths.getSparrowAtlas("jukebox/space");
+        bg.animation.addByPrefix("space", "space", 50, true);
+        bg.animation.play("space");
+        bg.updateHitbox();
+
+        var fitsInX = Math.ceil(FlxG.width / bg.width);
+        var fitsInY = Math.ceil(FlxG.height / bg.height);
+
+        var xOffset = (bg.width * fitsInX - FlxG.width) * 0.5;
+        var yOffset = (bg.height * fitsInY - FlxG.height) * 0.5; 
+
+        for (iy in 0...fitsInY){
+            for (ix in 0...fitsInX){
+                var newTile = bg.clone();
+                newTile.x = bg.width * ix - xOffset;
+                newTile.y = bg.height * iy - yOffset;
+                add(newTile);
+
+                bgTiles.push(newTile);
+            }
+        }
+
+        for (tile in bgTiles)
+            tile.animation.play("space");
+
+        bg.destroy();
+
+        if (FlxG.width > FlxG.height)
+            add(new FlxSprite().makeGraphic(FlxG.height, FlxG.height, 0xFF000000).screenCenter(X));
+        else
+            add(new FlxSprite().makeGraphic(FlxG.width, FlxG.width, 0xFF000000).screenCenter(Y));
+
+        //// Song stuff
+
         // menuTheme songDir is hard-coded to goto the playMenuMusic func
 		addSong("Main Menu", "menuTheme", null, '');
 		addSong("Game Over (TGT Mix)", Paths.getPath('music/gameOver.${Paths.SOUND_EXT}', SOUND), null, '');
 		addSong("Breakfast (TGT Mix)", Paths.getPath('music/breakfast.${Paths.SOUND_EXT}', SOUND), null, '');
+
 		defImage = new FlxSprite(0, 50).loadGraphic(Paths.image("jukebox/defImage"));
 		defImage.antialiasing = false;
-
 		
 		image = new FlxSprite(0, 50).loadGraphic(Paths.image("jukebox/defImage"));
 		image.antialiasing = false;
@@ -79,40 +139,48 @@ class JukeboxState extends MusicBeatState {
         #end
         // TODO: order the songs so its story > side stories > remixes
 
-		back = new FlxSprite(0, 500).loadGraphic(Paths.image("jukebox/controls"), true, 60, 60);
+		back = new FlxSprite(0, 560).loadGraphic(Paths.image("jukebox/controls"), true, 60, 60);
         back.animation.add("back", [0], 0, true);
         back.animation.play("back", true);
 
-		play = new FlxSprite(0 , 500).loadGraphic(Paths.image("jukebox/controls"), true, 60, 60);
+		play = new FlxSprite(0 , 560).loadGraphic(Paths.image("jukebox/controls"), true, 60, 60);
 		play.animation.add("play", [1], 0, true);
 		play.animation.add("pause", [2], 0, true);
 		play.animation.play("play", true);
 
-        forw = new FlxSprite(0, 500).loadGraphic(Paths.image("jukebox/controls"), true, 60, 60);
+        forw = new FlxSprite(0, 560).loadGraphic(Paths.image("jukebox/controls"), true, 60, 60);
 		forw.animation.add("fw", [0], 0, true);
 		forw.animation.play("fw", true);
 		forw.flipX = true;
 
-		songName = new FlxText(0, 475, FlxG.width, "", 32, true);
-		songName.setFormat(Paths.font("calibrib.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
-		songName.scrollFactor.set(1, 1);
-
-		songName.screenCenter(X);
-		
-
+		mute = new FlxSprite(0 , 560).loadGraphic(Paths.image("jukebox/controls"), true, 60, 60);
+		mute.animation.add("mute", [3], 0, true);
+		mute.animation.add("unmute", [4], 0, true);
+		mute.animation.play("mute", true);
+        
         play.screenCenter(X);
         forw.screenCenter(X);
         back.screenCenter(X);
         back.x -= 60;
         forw.x += 60;
 
-		add(songName);
-		add(forw);
-        add(back);
-        add(play);
+        mute.x = forw.x + 120;
+
+		songName = new FlxText(0, 520, FlxG.width, "", 32, true);
+		songName.setFormat(Paths.font("calibrib.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
+		songName.scrollFactor.set(1, 1);
+
+		songName.screenCenter(X);
+		
         add(outline);
 		add(defImage);
         add(image);
+
+        add(songName);
+        add(forw);
+        add(back);
+        add(play);
+        add(mute);
 
 		changeSong(idx);
         super.create();
@@ -121,6 +189,7 @@ class JukeboxState extends MusicBeatState {
 
     override function update(elapsed:Float){
         super.update(elapsed);
+
         if(FlxG.mouse.overlaps(forw) || FlxG.mouse.overlaps(back) || FlxG.mouse.overlaps(play))
             Mouse.cursor = MouseCursor.BUTTON;
         else
@@ -129,10 +198,17 @@ class JukeboxState extends MusicBeatState {
 		var forward = FlxG.mouse.overlaps(forw) && FlxG.mouse.justPressed || FlxG.keys.justPressed.RIGHT;
 		var bakward = FlxG.mouse.overlaps(back) && FlxG.mouse.justPressed || FlxG.keys.justPressed.LEFT;
 		var resSong = FlxG.mouse.overlaps(play) && FlxG.mouse.justPressed || FlxG.keys.justPressed.SPACE;
+
+        if (FlxG.mouse.overlaps(mute) && FlxG.mouse.justPressed || FlxG.keys.justPressed.M){
+            muteVocals = !muteVocals;
+            mute.animation.play(muteVocals ? "unmute" : "mute", true);
+        }
+
 		if (controls.BACK){
 			FlxG.autoPause = true;
 			MusicBeatState.switchState(new MainMenuState());
         }
+
 		if (forward)
             changeSong(idx+1);
 
@@ -161,7 +237,7 @@ class JukeboxState extends MusicBeatState {
                     if (FlxG.sound.music.fadeTween == null || !FlxG.sound.music.fadeTween.active)
                     {
                         FlxG.sound.music.onComplete = null;
-						if (MusicBeatState.menuVox!=null)
+						if (MusicBeatState.menuVox != null && !muteVocals)
 							MusicBeatState.menuVox.fadeOut(.25, 0);
                         FlxG.sound.music.fadeOut(.25, 0, function(twn:FlxTween)
                         {
@@ -202,13 +278,17 @@ class JukeboxState extends MusicBeatState {
 						MusicBeatState.menuVox.persist = true;
 						MusicBeatState.menuVox.looped = true;
 						MusicBeatState.menuVox.group = FlxG.sound.music.group;
+
+                        MusicBeatState.menuVox.volume = muteVocals ? 0 : 1;
+
                         FlxG.sound.list.add(MusicBeatState.menuVox);
                     }
                     //MusicBeatState.menuVox.loadEmbedded(Paths.voices(song));
 					vox = Paths.voices(song);
                 }
 
-				if (vox!=null)MusicBeatState.menuVox.loadEmbedded(vox);
+				if (vox!=null)
+                    MusicBeatState.menuVox.loadEmbedded(vox).volume = muteVocals ? 0 : 1;
                 
                 
                 FlxG.sound.playMusic(inst);

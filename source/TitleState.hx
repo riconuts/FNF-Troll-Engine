@@ -94,7 +94,7 @@ class TitleState extends MusicBeatState
 		logoBl.shader = swagShader.shader;
 
 		//
-		titleText = new FlxSprite(100, 576);
+		titleText = new FlxSprite(140, 576);
 		titleText.frames = Paths.getSparrowAtlas('titleEnter');
 
 		titleText.animation.addByPrefix('idle', "ENTER IDLE", 24);
@@ -455,13 +455,11 @@ class RandomTitleLogo extends FlxSprite
 		var time = time / frameRate;
 		var size = size;
 
-		antialiasing = false;
-
-		if (time > 5)
-			size *= 1;
-		else if (time > 3)
+		if (time > 5){
+			
+		}else if (time > 3)
 			size *= 1.008;
-		else if (time > frameRate)
+		else if (time > 1)
 			size *= 1.038;
 		else{
 			size *= 0.98;
