@@ -352,6 +352,7 @@ class PlayState extends MusicBeatState
 	var finishedCreating =false;
 	override public function create()
 	{
+		FunkinHScript.defaultVars.clear();
 		Paths.clearStoredMemory();
 
 		// for lua
@@ -817,7 +818,7 @@ class PlayState extends MusicBeatState
 		generateSong(SONG.song);
 
 		modManager = new ModManager(this);
-		setOnHScripts("modManager", modManager);
+		setDefaultHScripts("modManager", modManager);
 
 		var cH = [camHUD];
 		strumLineNotes.cameras = cH;
@@ -3917,6 +3918,11 @@ class PlayState extends MusicBeatState
 	public function setOnHScripts(variable:String, arg:Dynamic){
 		return setOnScripts(variable, arg, hscriptArray);
 	}
+
+	public function setDefaultHScripts(variable:String, arg:Dynamic){
+		FunkinHScript.defaultVars.set(variable, arg);
+		return setOnScripts(variable, arg, hscriptArray);
+	}
 	#end
 
 	#if LUA_ALLOWED
@@ -4068,6 +4074,7 @@ class PlayState extends MusicBeatState
 
 	override public function switchTo(nextState: Dynamic){
 		pressedGameplayKeys = [];
+		FunkinHScript.defaultVars.clear();
 		return super.switchTo(nextState);
 	}
 	

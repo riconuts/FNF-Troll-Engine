@@ -11,6 +11,8 @@ import scripts.Globals.*;
 class FunkinHScript extends FunkinScript
 {
 	static var parser:Parser = new Parser();
+	public static var defaultVars:Map<String,Dynamic> = new Map<String, Dynamic>();
+
 
 	public static function init() // BRITISH
 	{
@@ -148,8 +150,13 @@ class FunkinHScript extends FunkinScript
 		});
 
 		set("importScript", function(){
-			
+			// unimplemented lol
+			throw new haxe.exceptions.NotImplementedException();
 		});
+
+		for(variable => arg in defaultVars){
+			set(variable, arg);
+		}
 
 		// Util
 		set("makeSprite", function(?x:Float, ?y:Float, ?image:String)
