@@ -48,6 +48,9 @@ class JukeboxState extends MusicBeatState {
         muteVocals = mute;
 
         if (MusicBeatState.menuVox != null){
+            if(MusicBeatState.menuVox.fadeTween!=null)
+                MusicBeatState.menuVox.fadeTween.cancel();
+            
             if (mute)
                 MusicBeatState.menuVox.fadeOut(0.25, 0);
             else

@@ -84,6 +84,7 @@ class StartupState extends FlxState
 	override function update(elapsed)
 	{
 		// this is kinda stupid but i couldn't find any other way to display the warning while the title screen loaded 
+		// could be worse lol
 		switch (step){
 			case 0:
 				warning = new FlxSprite().loadGraphic(Paths.image("warning"));
