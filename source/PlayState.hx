@@ -1847,9 +1847,9 @@ class PlayState extends MusicBeatState
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.strumTime, Obj2.strumTime);
 	}
 
-	function laserSort(Obj1:Float, Obj2:Float):Int
+	function sortByOrderNote(wat:Int, Obj1:Note, Obj2:Note):Int
 	{
-		return FlxSort.byValues(FlxSort.ASCENDING, Obj1, Obj2);
+		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.zIndex, Obj2.zIndex);
 	}
 
 	function sortByTime(Obj1:EventNote, Obj2:EventNote):Int
@@ -2217,9 +2217,13 @@ class PlayState extends MusicBeatState
 		modManager.updateTimeline(curDecStep);
 		modManager.update(elapsed);
 
+		// TODO: rewrite this a little bit cus of multSpeed and noteSpawnTime being able to be per-player and per-note n all that
+		// just so that if the top note spawns later, it wont fuck up other notes which should spawn sooner.
+
 		if (unspawnNotes[0] != null)
 		{
-			var time:Float = spawnTime;
+			var time:Float = (modManager.get("noteSpawnTime").getValue(0) + modManager.get("noteSpawnTime").getValue(1)) / 2; // averages the spawn times
+			// TODO: make this per-player instead of averaging it
 			if (songSpeed < 1 && songSpeed != 0)
 				time /= songSpeed;
 			if (unspawnNotes[0].multSpeed < 1)
@@ -2286,6 +2290,7 @@ class PlayState extends MusicBeatState
 			}
 
 			// var fakeCrochet:Float = (60 / SONG.bpm) * 1000;
+			notes.sort(sortByOrderNote);
 			notes.forEachAlive(function(daNote:Note)
 			{
 				if (songSpeed != 0){
@@ -2305,7 +2310,9 @@ class PlayState extends MusicBeatState
 					strumAngle += daNote.offsetAngle;
 					strumAlpha *= daNote.multAlpha;
 					var pN:Int = daNote.mustPress ? 0 : 1; // xd
-					var pos = modManager.getPos(daNote.strumTime, modManager.getVisPos(Conductor.songPosition, daNote.strumTime, songSpeed),
+
+					var speed = songSpeed * daNote.multSpeed;
+					var pos = modManager.getPos(daNote.strumTime, modManager.getVisPos(Conductor.songPosition, daNote.strumTime, speed),
 						daNote.strumTime - Conductor.songPosition, curDecBeat, daNote.noteData, pN, daNote, [], daNote.vec3Cache);
 
 					modManager.updateObject(curDecBeat, daNote, pos, pN);
@@ -2313,11 +2320,12 @@ class PlayState extends MusicBeatState
 					pos.y += daNote.offsetY;
 					daNote.x = pos.x;
 					daNote.y = pos.y;
+					daNote.z = pos.z;
 					if (daNote.isSustainNote)
 					{
 						var futureSongPos = Conductor.songPosition + 75;
 						var diff = daNote.strumTime - futureSongPos;
-						var vDiff = modManager.getVisPos(futureSongPos, daNote.strumTime, songSpeed);
+						var vDiff = modManager.getVisPos(futureSongPos, daNote.strumTime, speed);
 
 						var nextPos = modManager.getPos(daNote.strumTime, vDiff, diff, Conductor.getStep(futureSongPos) * 0.25, daNote.noteData, pN, daNote, [],
 							daNote.vec3Cache);
@@ -2352,7 +2360,16 @@ class PlayState extends MusicBeatState
 				}
 
 				// Kill extremely late notes and cause misses
-				if (Conductor.songPosition > noteKillOffset + daNote.strumTime)
+				if(daNote.garbage){
+					daNote.active = false;
+					daNote.visible = false;
+
+					daNote.kill();
+					notes.remove(daNote, true);
+					daNote.destroy();
+				}
+				
+				if (Conductor.songPosition > noteKillOffset + daNote.strumTime && daNote.active)
 				{
 					if (daNote.mustPress && !cpuControlled && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit))
 					{
@@ -3789,7 +3806,7 @@ class PlayState extends MusicBeatState
 
 		if (generatedMusic)
 		{
-			notes.sort(FlxSort.byY, ClientPrefs.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
+			//notes.sort(FlxSort.byY, ClientPrefs.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
 		}
 
 		if (camZooming && ClientPrefs.camZooms && FlxG.camera.zoom < 1.35 && zoomEveryBeat > 0 && curBeat % zoomEveryBeat == 0)

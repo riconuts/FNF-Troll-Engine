@@ -204,6 +204,17 @@ class FunkinHScript extends FunkinScript
 		set("CoolUtil", CoolUtil);
 		set("Character", Character);
 		set("Boyfriend", Boyfriend);
+		set("SubModifier", modchart.SubModifier);
+		set("NoteModifier", modchart.NoteModifier);
+		set("EventTimeline", modchart.EventTimeline);
+		set("ModManager", modchart.ModManager);
+		set("Modifier", modchart.Modifier);
+		set("StepCallbackEvent", modchart.events.StepCallbackEvent);
+		set("CallbackEvent", modchart.events.CallbackEvent);
+		set("ModEvent", modchart.events.ModEvent);
+		set("EaseEvent", modchart.events.EaseEvent);
+		set("SetEvent", modchart.events.SetEvent);
+		
 		set("StageData", Stage.StageData);
 		#if VIDEOS_ALLOWED
 		set("MP4Handler", vlc.MP4Handler);

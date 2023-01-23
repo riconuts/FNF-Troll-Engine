@@ -122,7 +122,7 @@ class ReverseModifier extends NoteModifier {
             {
                 var daY = pos.y;
 				var fakeCrochet:Float = (60 / PlayState.SONG.bpm) * 1000;
-                var songSpeed:Float = PlayState.instance.songSpeed;
+                var songSpeed:Float = PlayState.instance.songSpeed * note.multSpeed;
                 if (note.animation.curAnim.name.endsWith('end'))
                 {
 					daY += 10.5 * (fakeCrochet * 0.0025) * 1.5 * songSpeed + (46 * (songSpeed - 1));

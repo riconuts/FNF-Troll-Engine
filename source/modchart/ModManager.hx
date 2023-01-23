@@ -15,7 +15,23 @@ import modchart.events.*;
 class ModManager {
 	public function registerDefaultModifiers()
 	{
-		var quickRegs:Array<Any> = [FlipModifier, ReverseModifier, InvertModifier, DrunkModifier, BeatModifier, AlphaModifier, ScaleModifier, ConfusionModifier, OpponentModifier, TransformModifier, InfinitePathModifier, PerspectiveModifier];
+		var quickRegs:Array<Any> = [
+			FlipModifier,
+			ReverseModifier,
+			InvertModifier,
+			DrunkModifier,
+			BeatModifier,
+			AlphaModifier,
+			ReceptorScrollModifier, 
+			ScaleModifier, 
+			ConfusionModifier, 
+			OpponentModifier, 
+			TransformModifier, 
+			InfinitePathModifier, 
+			PerspectiveModifier, 
+			AccelModifier, 
+			XModifier
+		];
 		for (mod in quickRegs)
 			quickRegister(Type.createInstance(mod, [this]));
 
@@ -23,7 +39,10 @@ class ModManager {
 		quickRegister(new RotateModifier(this, 'center', new Vector3((FlxG.width* 0.5) - (Note.swagWidth/2), (FlxG.height* 0.5) - Note.swagWidth/2)));
 		quickRegister(new LocalRotateModifier(this, 'local'));
 		quickRegister(new SubModifier("noteSpawnTime", this));
-		setValue("noteSpawnTime", 1250);
+		setValue("noteSpawnTime", 2000);
+		setValue("xmod", 1);
+		for(i in 0...4)
+			setValue('xmod$i', 1);
 	}
 
 

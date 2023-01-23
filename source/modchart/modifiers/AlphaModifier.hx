@@ -87,23 +87,27 @@ class AlphaModifier extends NoteModifier {
 
 	override function updateNote(beat:Float, note:Note, pos:Vector3, player:Int){
     var player = note.mustPress==true?0:1;
-    @:privateAccess
+   /* @:privateAccess
 		var pos = modMgr.getPos(note.strumTime, modMgr.getVisPos(Conductor.songPosition, note.strumTime, PlayState.instance.songSpeed),
 			note.strumTime - Conductor.songPosition,
 			PlayState.instance.curDecBeat, note.noteData,
-			player, note, ["reverse"]);
+			player, note, ["reverse", "receptorScroll", "transformY"]);*/
+    var speed = PlayState.instance.songSpeed * note.multSpeed;
+		var yPos:Float = modMgr.getVisPos(Conductor.songPosition, note.strumTime, speed) + 50;
 
 
+		note.colorSwap.flash = 0;
 		var alphaMod = (1 - getSubmodValue("alpha", player)) * (1 - getSubmodValue('alpha${note.noteData}', player)) * (1 - getSubmodValue("noteAlpha", player)) * (1 - getSubmodValue('noteAlpha${note.noteData}', player));
-    var alpha = getVisibility(pos.y,player,note);
+		var alpha = getVisibility(yPos,player,note);
 
     if(getSubmodValue("dontUseStealthGlow",player)==0){
-			note.colorSwap.daAlpha = getAlpha(alpha);
+			note.alphaMod = getAlpha(alpha);
 			note.colorSwap.flash = getGlow(alpha);
     }else
-			note.colorSwap.daAlpha = alpha;
+			note.alphaMod = alpha;
     
-		note.colorSwap.daAlpha *= alphaMod;	
+    
+		note.alphaMod *= alphaMod;	
     
   }
 

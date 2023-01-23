@@ -56,6 +56,12 @@ class Note extends FlxSprite
 	}
 	public var noteDiff:Float = 1000;
 	public var quant:Int = 4;
+	public var zIndex:Float = 0;
+	public var desiredZIndex:Float = 0;
+	public var z:Float = 0;
+	public var garbage:Bool = false; // if this is true, the note will be removed in the next update cycle
+	public var alphaMod:Float = 1;
+	public var alphaMod2:Float = 1; // TODO: unhardcode this shit lmao
 
 	public var extraData:Map<String, Dynamic> = [];
 	public var hitbox:Float = Conductor.safeZoneOffset;
@@ -409,12 +415,30 @@ class Note extends FlxSprite
 	{
 		super.update(elapsed);
 
+		if (isSustainNote)
+		{
+			if (prevNote != null && prevNote.isSustainNote)
+				zIndex = z + prevNote.zIndex;
+			
+			else if (prevNote != null && !prevNote.isSustainNote)
+				zIndex = z + prevNote.zIndex - 1;
+			
+		}
+		else
+			zIndex = z;
+		
+
+		zIndex += desiredZIndex;
+		zIndex -= (mustPress == true ? 0 : 1);
+
 		if(!inEditor){
 			if (noteScript != null && noteScript.scriptType == 'hscript'){
 				var noteScript:FunkinHScript = cast noteScript;
 				noteScript.executeFunc("noteUpdate", [elapsed], this);
 			}
 		}
+		
+		colorSwap.daAlpha = alphaMod * alphaMod2;
 		
 		if (mustPress)
 		{
