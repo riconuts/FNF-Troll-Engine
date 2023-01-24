@@ -187,7 +187,9 @@ class JukeboxState extends MusicBeatState {
 
 		changeSong(idx);
         super.create();
+
 		FlxG.autoPause = false;
+        FlxG.mouse.visible = true;
     }
 
     override function update(elapsed:Float){
@@ -253,8 +255,6 @@ class JukeboxState extends MusicBeatState {
         }
 				
         play.animation.play(idx==playIdx?(FlxG.sound.music.playing?"pause":"play"):"play");
-        FlxG.mouse.visible = true;
-
     }
 
     function playDaSong(?daIdx:Int){
@@ -291,7 +291,7 @@ class JukeboxState extends MusicBeatState {
                 }
 
 				if (vox!=null)
-                    MusicBeatState.menuVox.loadEmbedded(vox).volume = muteVocals ? 0 : 1;
+                    MusicBeatState.menuVox.loadEmbedded(vox, true).volume = muteVocals ? 0 : 1;
                 
                 
                 FlxG.sound.playMusic(inst);

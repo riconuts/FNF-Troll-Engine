@@ -143,6 +143,7 @@ class Cache{
 			if (!multicoreOnly){
 				for (shit in shitToLoad)
 					Cache.load(shit);
+				return;
 			}
 
 		#if loadBenchmark

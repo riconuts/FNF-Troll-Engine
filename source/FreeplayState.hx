@@ -43,10 +43,6 @@ class FreeplayState extends MusicBeatState
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
 		#end
-		
-		#if !FLX_NO_MOUSE
-		FlxG.mouse.visible = true;
-		#end
 
 		persistentUpdate = false;
 		
@@ -164,6 +160,10 @@ class FreeplayState extends MusicBeatState
 		maxY = prevCat.y + prevCat.height;
 
 		super.create();
+
+		#if !FLX_NO_MOUSE
+		FlxG.mouse.visible = true;
+		#end
 	}
 
 	public function playSong(metadata:SongMetadata){
@@ -325,7 +325,8 @@ class FreeplaySongButton extends TGTSquareButton{
 
 	public function updateHighscore()
 	{
-		scoreText.text = "" + Highscore.getScore(metadata.songName);
+		scoreText.text = Std.string(Highscore.getScore(metadata.songName));
+		scoreText.color = Highscore.getRating(metadata.songName) == 1 ? 0xFFFFFF00 : 0xFFFFFFFF;
 	}
 
 	override function onover()

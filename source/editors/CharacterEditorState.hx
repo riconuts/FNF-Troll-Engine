@@ -99,10 +99,11 @@ class CharacterEditorState extends MusicBeatState
 		add(charLayer);
 
 		var pointer:FlxGraphic = FlxGraphic.fromClass(GraphicCursorCross);
+		
 		cameraFollowPointer = new FlxSprite().loadGraphic(pointer);
 		cameraFollowPointer.setGraphicSize(40, 40);
 		cameraFollowPointer.updateHitbox();
-		cameraFollowPointer.color = FlxColor.WHITE;
+		cameraFollowPointer.color = FlxColor.RED;
 		add(cameraFollowPointer);
 
 		var zeroTwoPointer = new FlxSprite().loadGraphic(pointer);
@@ -112,10 +113,11 @@ class CharacterEditorState extends MusicBeatState
 		zeroTwoPointer.setPosition(-zeroTwoPointer.width* 0.5, -zeroTwoPointer.height* 0.5);
 		add(zeroTwoPointer);
 
-		changeBGbutton = new FlxButton(FlxG.width - 360, 25, "", function()
+		changeBGbutton = new FlxButton(FlxG.width - 360, 25, "Test: OFF", function()
 		{
 			onPixelBG = !onPixelBG;
-			reloadBGs();
+			changeBGbutton.text = onPixelBG ? "Test: ON" : "Test: OFF";
+			//reloadBGs();
 		});
 		changeBGbutton.cameras = [camMenu];
 
@@ -952,21 +954,14 @@ class CharacterEditorState extends MusicBeatState
 	}
 
 	function updatePointerPos() {
-		var x:Float = char.getMidpoint().x;
-		var y:Float = char.getMidpoint().y;
-		if(!char.isPlayer) {
-			x += 150 + char.cameraPosition[0];
-		} else {
-			x -= 100 + char.cameraPosition[0];
-		}
-		y -= 100 - char.cameraPosition[1];
-
+		var cam = PlayState.getCharacterCamera(char);
+		var x:Float = cam[0];
+		var y:Float = cam[1];
 
 		if(animationXCam!=null)
 			x += animationXCam.value;
 		if(animationYCam!=null)
 			y += animationYCam.value;
-
 
 		x -= cameraFollowPointer.width* 0.5;
 		y -= cameraFollowPointer.height* 0.5;
@@ -1122,7 +1117,20 @@ class CharacterEditorState extends MusicBeatState
 		FlxG.sound.volumeDownKeys = StartupState.volumeDownKeys;
 		FlxG.sound.volumeUpKeys = StartupState.volumeUpKeys;
 
-		if(!charDropDown.dropPanel.visible) {
+		if (onPixelBG){
+			if (controls.NOTE_LEFT_P){
+				char.playAnim("singLEFT", true);
+			}
+			if (controls.NOTE_RIGHT_P){
+				char.playAnim("singRIGHT", true);
+			}
+			if (controls.NOTE_DOWN_P){
+				char.playAnim("singDOWN", true);
+			}
+			if (controls.NOTE_UP_P){
+				char.playAnim("singUP", true);
+			}
+		}else if(!charDropDown.dropPanel.visible) {
 			if (FlxG.keys.justPressed.ESCAPE) {
 				if(goToPlayState) {
 					MusicBeatState.switchState(new PlayState());

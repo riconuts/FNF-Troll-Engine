@@ -1,5 +1,6 @@
 package scripts;
 
+import flixel.util.FlxColor;
 import flixel.FlxG;
 import flixel.system.FlxSound;
 import flixel.tweens.*;
@@ -69,27 +70,38 @@ class FunkinHScript extends FunkinScript
 		scriptName = name;
 
 		setDefaultVars();
-		set("script", this);
-		set("FlxG", flixel.FlxG);
-		set("FlxSprite", flixel.FlxSprite);
 		set("Std", Std);
-		set("state", flixel.FlxG.state);
-		set("FlxMath", flixel.math.FlxMath);
+		set("Type", Type);
 		set("Math", Math);
+		set("script", this);
+		set("StringTools", StringTools);
+		set("scriptTrace", function(text:String){
+			scriptTrace(text);
+		});
+		set("newMap", function(){ // maps aren't really a thing during runtime i think
+			return new Map<Dynamic, Dynamic>();
+		});
+
 		set("Assets", Assets);
-		set("FlxSound", FlxSound);
 		set("OpenFlAssets", openfl.utils.Assets);
+		set("FlxG", flixel.FlxG);
+		set("state", flixel.FlxG.state);
+		set("FlxSprite", flixel.FlxSprite);
 		set("FlxCamera", flixel.FlxCamera);
+		set("FlxMath", flixel.math.FlxMath);
+		set("FlxSound", FlxSound);
 		set("FlxTimer", flixel.util.FlxTimer);
+		set("FlxColor", { // same case as maps?
+			fromInt: FlxColor.fromInt,
+			fromRGBFloat: FlxColor.fromRGBFloat,
+			fromString: FlxColor.fromString,
+			fromRGB: FlxColor.fromRGB
+		});
 		set("FlxTween", FlxTween);
 		set("FlxEase", FlxEase);
 		set("FlxSave", flixel.util.FlxSave); // should probably give it 1 save instead of giving it FlxSave
 		set("FlxBar", flixel.ui.FlxBar);
-		set("StringTools", StringTools);
-		set("scriptTrace", function(text:String)
-		{
-			scriptTrace(text);
-		});
+
 		set("getClass", function(className:String)
 		{
 			return Type.resolveClass(className);
@@ -188,7 +200,6 @@ class FunkinHScript extends FunkinScript
 			return spr;
 		});
 
-		
 		// FNF-specific things
 		set("Paths", Paths);
 		set("AttachedSprite", AttachedSprite);
@@ -222,6 +233,7 @@ class FunkinHScript extends FunkinScript
 		set("PlayState", PlayState);
 		set("FunkinLua", FunkinLua);
 		set("FunkinHScript", FunkinHScript);
+		set("HScriptSubstate", HScriptSubstate);
 		set("GameOverSubstate", GameOverSubstate);
 		set("HealthIcon", HealthIcon);
 		var currentState = flixel.FlxG.state;
@@ -318,5 +330,74 @@ class FunkinHScript extends FunkinScript
 			}
 		}
 		return null;
+	}
+}
+
+class HScriptSubstate extends MusicBeatSubstate
+{
+	public var script:FunkinHScript;
+
+	public function new(ScriptName:String, ?additionalVars:Map<String, Any>)
+	{
+		super();
+
+		var fileName = 'substates/$ScriptName.hscript';
+
+		for (filePath in [#if MODS_ALLOWED Paths.modFolders(fileName), Paths.mods(fileName), #end Paths.getPreloadPath(fileName)])
+		{
+			if (!Paths.exists(filePath)) continue;
+
+			// some shortcuts
+			var variables = new Map<String, Dynamic>();
+			variables.set("this", this);
+			variables.set("add", add);
+			variables.set("remove", remove);
+			variables.set("getControls", function(){ return controls;}); // i get it now
+			variables.set("close", close);
+
+			if (additionalVars != null){
+				for (key in additionalVars.keys())
+					variables.set(key, additionalVars.get(key));
+			}
+
+			script = FunkinHScript.fromFile(filePath, variables);
+			script.scriptName = ScriptName;
+
+			break;
+		}
+
+		if (script == null){
+			trace('Script file "$ScriptName" not found!');
+			return close();
+		}
+
+		script.call("onLoad");
+	}
+
+	override function update(e)
+	{
+		if (script.call("onUpdate", [e]) == Globals.Function_Stop)
+			return; 
+		
+		super.update(e);
+		script.call("onUpdatePost", [e]);
+	}
+
+	override function close(){
+		if (script != null)
+			script.call("onClose");
+		
+		return super.close();
+	}
+
+	override function destroy()
+	{
+		if (script != null){
+			script.call("onDestroy");
+			script.stop();
+		}
+		script = null;
+
+		return super.destroy();
 	}
 }

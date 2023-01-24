@@ -52,6 +52,9 @@ class StartupState extends FlxState
 
 		ClientPrefs.loadPrefs();
 
+		if (Main.fpsVar != null)
+			Main.fpsVar.visible = ClientPrefs.showFPS;
+
 		if (FlxG.save.data.weekCompleted != null)
 			StoryMenuState.weekCompleted = FlxG.save.data.weekCompleted;
 

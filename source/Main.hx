@@ -109,15 +109,12 @@ class Main extends Sprite
 			}
 		}
 		#end
-		
+
 		if (troll){
 			initialState = SinnerState;
 			skipSplash = true;
-		}else{
-			FlxG.save.bind('funkin', 'ninjamuffin99');
-
-			if (FlxG.save.data.fullscreen != null)
-				startFullscreen = FlxG.save.data.fullscreen;
+		}else if (FlxG.save.bind('funkin', 'ninjamuffin99') && FlxG.save.data.fullscreen != null){
+			startFullscreen = FlxG.save.data.fullscreen;
 		}
 
 		addChild(new FlxGame(gameWidth, gameHeight, initialState, zoom, framerate, framerate, skipSplash, startFullscreen));
@@ -133,13 +130,11 @@ class Main extends Sprite
 		#if !mobile
 		if (!troll){
 			fpsVar = new FPS(10, 3, 0xFFFFFF);
+			fpsVar.visible = false;
 			addChild(fpsVar);
 
 			Lib.current.stage.align = "tl";
 			Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
-
-			if (fpsVar != null)
-				fpsVar.visible = ClientPrefs.showFPS;
 		}
 		#end
 		

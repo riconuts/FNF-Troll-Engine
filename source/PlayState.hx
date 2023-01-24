@@ -161,10 +161,10 @@ class PlayState extends MusicBeatState
 	public var health(default, set):Float = 1;
 	function set_health(value:Float){
 		health = value > 2 ? 2 : value;
-		
-		doDeathCheck(value < health);
 
 		displayedHealth = health;
+		
+		doDeathCheck(value < health);
 
 		return health;
 	}
@@ -243,6 +243,8 @@ class PlayState extends MusicBeatState
 	public var timeTxt:FlxText;
 
 	var scoreTxtTween:FlxTween;
+
+	public var songName:String = "";
 
 	public var songScore:Int = 0;
 	public var songHits:Int = 0;
@@ -470,7 +472,7 @@ class PlayState extends MusicBeatState
 		Conductor.mapBPMChanges(SONG);
 		Conductor.changeBPM(SONG.bpm);
 
-		var songName:String = Paths.formatToSongPath(SONG.song);
+		songName = Paths.formatToSongPath(SONG.song);
 		songHighscore = Highscore.getScore(SONG.song);
 
 		arrowSkin = SONG.arrowSkin;
@@ -644,7 +646,7 @@ class PlayState extends MusicBeatState
 		timeBarBG.sprTracker = timeBar;
 
 		//
-		botplayTxt = new FlxText(400, timeBarBG.y + (ClientPrefs.downScroll ? -78 : 55), FlxG.width - 800, "BOTPLAY", 32);
+		botplayTxt = new FlxText(400, timeBarBG.y + (ClientPrefs.downScroll ? -78 : 55), FlxG.width - 800, "[BUTTPLUG]", 32);
 		botplayTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		botplayTxt.scrollFactor.set();
 		botplayTxt.borderSize = 1.25;
@@ -1113,13 +1115,13 @@ class PlayState extends MusicBeatState
 	public function startCountdown():Void
 	{
 		if(startedCountdown) {
-			callOnScripts('onStartCountdown', []);
+			callOnScripts('onStartCountdown');
 			return;
 		}
 
 		inCutscene = false;
 
-		if(callOnScripts('onStartCountdown', []) == Globals.Function_Stop)
+		if(callOnScripts('onStartCountdown') == Globals.Function_Stop)
 			return;
 
 		if (skipCountdown || startOnTime > 0) 
@@ -1138,15 +1140,15 @@ class PlayState extends MusicBeatState
 
 		modManager.receptors = [playerStrums.members, opponentStrums.members];
 
-		callOnScripts('preModifierRegister', []);
+		callOnScripts('preModifierRegister');
 		modManager.registerDefaultModifiers();
-		callOnScripts('postModifierRegister', []);
+		callOnScripts('postModifierRegister');
 
 		startedCountdown = true;
 		Conductor.songPosition = 0;
 		Conductor.songPosition -= Conductor.crochet * 5;
 		setOnScripts('startedCountdown', true);
-		callOnScripts('onCountdownStarted', []);
+		callOnScripts('onCountdownStarted');
 
 		if(startOnTime < 0) 
 			startOnTime = 0;
@@ -1355,7 +1357,7 @@ class PlayState extends MusicBeatState
 		DiscordClient.changePresence(detailsText, SONG.song, Paths.formatToSongPath(SONG.song), true, songLength);
 		#end
 		setOnScripts('songLength', songLength);
-		callOnScripts('onSongStart', []);
+		callOnScripts('onSongStart');
 	}
 
 	var debugNum:Int = 0;
@@ -1386,7 +1388,6 @@ class PlayState extends MusicBeatState
 	function getEvents(){
 		var songData = SONG;
 		var events:Array<EventNote> = [];
-		var songName:String = Paths.formatToSongPath(SONG.song);
 
 		if (#if MODS_ALLOWED Paths.exists(Paths.modsSongJson(songName + '/events')) || #end Paths.exists(Paths.songJson(songName + '/events')))	
 		{
@@ -1557,7 +1558,7 @@ class PlayState extends MusicBeatState
 						luaArray.push(script);
 						funkyScripts.push(script);
 						eventScripts.set(event, script);
-						script.call("onLoad", []);
+						script.call("onLoad");
 						doPush = true;
 					}
 					else #end if (ext == 'hscript')
@@ -1567,7 +1568,7 @@ class PlayState extends MusicBeatState
 						funkyScripts.push(script);
 						eventScripts.set(event, script);
 
-						script.call("onLoad", []);
+						script.call("onLoad");
 						
 						doPush = true;
 					}
@@ -1795,8 +1796,7 @@ class PlayState extends MusicBeatState
 			default:
 				if (notetypeScripts.exists(type))
 				{
-					var script:Dynamic = notetypeScripts.get(type);
-					callScript(script, "onLoad", []);
+					callScript(notetypeScripts.get(type), "onLoad", []);
 				}
 		}
 	}
@@ -1974,7 +1974,7 @@ class PlayState extends MusicBeatState
 				timer.active = true;
 			}
 			paused = false;
-			callOnScripts('onResume', []);
+			callOnScripts('onResume');
 
 			#if desktop
 			if (startTimer != null && startTimer.finished)
@@ -2222,7 +2222,8 @@ class PlayState extends MusicBeatState
 
 		if (unspawnNotes[0] != null)
 		{
-			var time:Float = (modManager.get("noteSpawnTime").getValue(0) + modManager.get("noteSpawnTime").getValue(1)) / 2; // averages the spawn times
+			var noteSpawnTime = modManager.get("noteSpawnTime"); // ermmmm, what the flip.
+			var time:Float = noteSpawnTime == null ? spawnTime : (noteSpawnTime.getValue(0) + noteSpawnTime.getValue(1)) / 2; // averages the spawn times
 			// TODO: make this per-player instead of averaging it
 			if (songSpeed < 1 && songSpeed != 0)
 				time /= songSpeed;
@@ -2415,7 +2416,7 @@ class PlayState extends MusicBeatState
 			&& !isDead
 		)
 		{
-			var ret:Dynamic = callOnScripts('onGameOver', []);
+			var ret:Dynamic = callOnScripts('onGameOver');
 			if(ret != Globals.Function_Stop) {
 				boyfriend.stunned = true;
 				deathCounter++;
@@ -2806,7 +2807,7 @@ class PlayState extends MusicBeatState
 			sectionCamera.set(cam[0], cam[1]);
 		}
 	}
-	public function getCharacterCamera(char:Character) {
+	static public function getCharacterCamera(char:Character) {
 		return [
 			char.x + char.width * 0.5 + (char.cameraPosition[0] + 150) * char.xFacing,
 			char.y + char.height * 0.5 + char.cameraPosition[1] - 100
@@ -2884,20 +2885,20 @@ class PlayState extends MusicBeatState
 		#end
 
 		#if (LUA_ALLOWED || hscript)
-		var ret:Dynamic = callOnScripts('onEndSong', []);
+		var ret:Dynamic = callOnScripts('onEndSong');
 		#else
 		var ret:Dynamic = Globals.Function_Continue;
 		#end
 
 		if(ret != Globals.Function_Stop && !transitioning) {
+			#if !switch
 			if (SONG.validScore)
 			{
-				#if !switch
 				var percent:Float = ratingPercent;
 				if(Math.isNaN(percent)) percent = 0;
-				Highscore.saveScore(SONG.song, songScore, percent);
-				#end
+				Highscore.saveScore(SONG.song, songScore, percent);	
 			}
+			#end
 
 			if (chartingMode)
 			{
@@ -2958,8 +2959,8 @@ class PlayState extends MusicBeatState
 				if(FlxTransitionableState.skipNextTransIn) {
 					CustomFadeTransition.nextCamera = null;
 				}
-				MusicBeatState.switchState(new FreeplayState());
 				MusicBeatState.playMenuMusic(1, true);
+				MusicBeatState.switchState(new FreeplayState());
 			}
 			transitioning = true;
 		}
@@ -3732,8 +3733,9 @@ class PlayState extends MusicBeatState
 	private var preventLuaRemove:Bool = false;
 	override function destroy() {
 		preventLuaRemove = true;
+		
 		for(script in funkyScripts){
-			script.call("onDestroy", []);
+			script.call("onDestroy");
 			script.stop();
 		}
 		hscriptArray = [];
@@ -3787,7 +3789,7 @@ class PlayState extends MusicBeatState
 
 		lastStepHit = curStep;
 		setOnScripts('curStep', curStep);
-		callOnScripts('onStepHit', []);
+		callOnScripts('onStepHit');
 	}
 
 	var lastBeatHit:Int = -1;
@@ -3833,7 +3835,7 @@ class PlayState extends MusicBeatState
 		lastBeatHit = curBeat;
 
 		setOnScripts('curBeat', curBeat); //DAWGG?????
-		callOnScripts('onBeatHit', []);
+		callOnScripts('onBeatHit');
 	}
 
 	override function sectionHit(){
@@ -3974,7 +3976,7 @@ class PlayState extends MusicBeatState
 		setOnScripts('misses', songMisses);
 		setOnScripts('hits', songHits);
 
-		var ret:Dynamic = callOnScripts('onRecalculateRating', []);
+		var ret:Dynamic = callOnScripts('onRecalculateRating');
 		if(ret != Globals.Function_Stop)
 		{
 			if(totalPlayed < 1) //Prevent divide by 0
@@ -4064,10 +4066,10 @@ class PlayState extends MusicBeatState
 	}
 
 	////
-	public function pause(){
+	public function pause(?OpenPauseMenu = true){
 		if (startedCountdown && canPause && health > 0 && !paused)
 		{
-			if(callOnScripts('onPause', []) != Globals.Function_Stop) {
+			if(callOnScripts('onPause') != Globals.Function_Stop) {
 				persistentUpdate = false;
 				persistentDraw = true;
 				paused = true;
@@ -4080,7 +4082,9 @@ class PlayState extends MusicBeatState
 					for (track in tracks)
 						track.pause();
 				}
-				openSubState(new PauseSubState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
+
+				if (OpenPauseMenu)
+					openSubState(new PauseSubState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
 
 				#if desktop
 				DiscordClient.changePresence(detailsPausedText, SONG.song, Paths.formatToSongPath(SONG.song));

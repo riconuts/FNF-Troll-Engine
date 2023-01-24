@@ -156,7 +156,7 @@ class Note extends FlxSprite
 	private function set_multSpeed(value:Float):Float {
 		resizeByRatio(value / multSpeed);
 		multSpeed = value;
-		trace('fuck cock');
+		// trace('fuck cock');
 		return value;
 	}
 
