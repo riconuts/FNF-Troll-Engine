@@ -691,6 +691,7 @@ class PlayState extends MusicBeatState
 
 		#if MODS_ALLOWED
 		foldersToCheck.insert(0, Paths.mods('scripts/'));
+		foldersToCheck.insert(0, Paths.mods('global/scripts/'));
 		if(Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
 			foldersToCheck.insert(0, Paths.mods(Paths.currentModDirectory + '/scripts/'));
 		#end
@@ -1455,10 +1456,12 @@ class PlayState extends MusicBeatState
 			vocals = new FlxSound();
 		FlxG.sound.list.add(vocals);
 
-		for (trackName in SONG.extraTracks){
-			var newTrack = new FlxSound().loadEmbedded(Paths.track(PlayState.SONG.song, trackName));
-			tracks.push(newTrack);
-			FlxG.sound.list.add(newTrack);
+		if (SONG.extraTracks != null){
+			for (trackName in SONG.extraTracks){
+				var newTrack = new FlxSound().loadEmbedded(Paths.track(PlayState.SONG.song, trackName));
+				tracks.push(newTrack);
+				FlxG.sound.list.add(newTrack);
+			}
 		}
 
 		notes = new FlxTypedGroup<Note>();

@@ -49,6 +49,7 @@ class SinnerState extends FlxState
 		// window shit
 		mainWindow = Application.current.window;
 		mainWindow.borderless = true;
+		mainWindow.parameters = {alwaysOnTop: true}; // shit doesnt work
 
 		//
 		desktopSize = mainWindow.display.bounds.size;

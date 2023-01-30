@@ -155,12 +155,12 @@ class MainMenuState extends MusicBeatState
 
 		FlxG.camera.follow(camFollowPos, null, 1);
 
-		var versionShit = new FlxText(12, FlxG.height - 44, 0, "Troll Engine v" + psychEngineVersion, 12);
+		var versionShit = new FlxText(12, FlxG.height - 44, 0, "Troll Engine v" + psychEngineVersion, 16);
 		versionShit.setFormat(Paths.font("calibri.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		versionShit.scrollFactor.set();
 		add(versionShit);
 		
-		var versionShit = new FlxText(12, FlxG.height - 24, 0, "Tails Gets Trolled v" + Application.current.meta.get('version'), 12);
+		var versionShit = new FlxText(12, FlxG.height - 24, 0, "Tails Gets Trolled v" + Application.current.meta.get('version'), 16);
 		versionShit.setFormat(Paths.font("calibri.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		versionShit.scrollFactor.set();
 		add(versionShit);

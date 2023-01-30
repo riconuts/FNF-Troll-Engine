@@ -105,7 +105,6 @@ class Main extends Sprite
 				break;
 			}else if (arg.contains("debug")){
 				PlayState.chartingMode = true;
-				skipSplash = true;
 			}
 		}
 		#end

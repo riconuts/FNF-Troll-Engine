@@ -37,17 +37,15 @@ class HealthIcon extends FlxSprite
 	private var iconOffsets:Array<Float> = [0, 0];
 	public function changeIcon(char:String) {
 		if(this.char != char) {
-			var name:String = 'icons/' + char;
+			var file:Dynamic = Paths.image('icons/' + char);
 
-			if(!Paths.fileExists('images/' + name + '.png', IMAGE)) 
-				name = 'icons/face'; //Prevents crash from missing icon
-
-			var file:Dynamic = Paths.image(name);
+			if(file == null) 
+				file = Paths.image('icons/face'); // Prevents crash from missing icon
 
 			loadGraphic(file); //Load stupidly first for getting the file size
-			loadGraphic(file, true, Math.floor(width* 0.5), Math.floor(height)); //Then load it fr
-			iconOffsets[0] = (width - 150)* 0.5;
-			iconOffsets[1] = (width - 150)* 0.5;
+			loadGraphic(file, true, Math.floor(width * 0.5), Math.floor(height)); //Then load it fr
+			iconOffsets[0] = (width - 150) * 0.5;
+			iconOffsets[1] = (width - 150) * 0.5;
 			updateHitbox();
 
 			animation.add(char, [0, 1], 0, false, isPlayer);

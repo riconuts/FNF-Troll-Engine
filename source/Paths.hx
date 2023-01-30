@@ -28,7 +28,7 @@ import sys.io.File;
 
 class Paths
 {
-	inline public static var SOUND_EXT = "ogg";//#if web "mp3" #else "ogg" #end;
+	inline public static var SOUND_EXT = "ogg";
 	inline public static var VIDEO_EXT = "mp4";
 
 	#if MODS_ALLOWED
@@ -370,9 +370,7 @@ class Paths
 		#if MODS_ALLOWED
 		var file:String = modsFont(key);
 		if (FileSystem.exists(file))
-		{
 			return file;
-		}
 		#end
 		return 'assets/fonts/$key';
 	}
@@ -551,25 +549,23 @@ class Paths
 	inline static public function modsTxt(key:String)
 		return modFolders('data/' + key + '.txt');
 
-	/* Goes unused for now
-
-		inline static public function modsShaderFragment(key:String, ?library:String)
-		{
-			return modFolders('shaders/'+key+'.frag');
-		}
-		inline static public function modsShaderVertex(key:String, ?library:String)
-		{
-			return modFolders('shaders/'+key+'.vert');
-		}
-	}*/
+	inline static public function modsShaderFragment(key:String, ?library:String)
+		return modFolders('shaders/'+key+'.frag');
+	
+	inline static public function modsShaderVertex(key:String, ?library:String)
+		return modFolders('shaders/'+key+'.vert');
+	
 	static public function modFolders(key:String)
 	{
-		if (Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
-		{
+		if (Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0){
 			var fileToCheck = mods(Paths.currentModDirectory + '/' + key);
 			if (FileSystem.exists(fileToCheck))
 				return fileToCheck;
 		}
+
+		var fileToCheck = mods('global/' + key);
+		if (FileSystem.exists(fileToCheck))
+			return fileToCheck;
 
 		return mods(key);
 	}

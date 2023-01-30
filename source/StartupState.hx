@@ -25,8 +25,6 @@ class StartupState extends FlxState
 		#if hscript
 		scripts.FunkinHScript.init();
 		#end
-		Paths.clearStoredMemory();
-		Paths.clearUnusedMemory();
 		
 		#if MODS_ALLOWED
 		Paths.getModDirectories();
@@ -100,8 +98,8 @@ class StartupState extends FlxState
 			case 1:
 				load();
 				TitleState.load();
-
-				var waitTime = 4 - Sys.cpuTime();
+				
+				var waitTime = 1.5 - Sys.cpuTime();
 				if (waitTime > 0) Sys.sleep(waitTime);
 				
 				step = 2;

@@ -92,6 +92,15 @@ class FunkinHScript extends FunkinScript
 		set("FlxSound", FlxSound);
 		set("FlxTimer", flixel.util.FlxTimer);
 		set("FlxColor", { // same case as maps?
+			toRGBArray: function(color:FlxColor){return [color.red, color.green, color.blue];}, 
+			setHue: function(color:FlxColor, hue){
+				color.hue = hue;
+				return color;
+			},
+
+			fromCMYK: FlxColor.fromCMYK,
+			fromHSL: FlxColor.fromHSL,
+			fromHSB: FlxColor.fromHSB,
 			fromInt: FlxColor.fromInt,
 			fromRGBFloat: FlxColor.fromRGBFloat,
 			fromString: FlxColor.fromString,

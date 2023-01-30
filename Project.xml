@@ -43,18 +43,8 @@
 
 	<classpath name="source" />
 	
-	<!-- screw the preload folder -->
-	<assets path="assets/data" />
-	<assets path="assets/images" />
-
-	<assets path="assets/music" />
-	<assets path="assets/sounds" />
-
-	<assets path="assets/characters"/>
-	<assets path="assets/scripts"/>
-	<assets path="assets/notetypes"/>
-	<assets path="assets/events"/>
-	<assets path="assets/stages"/>
+	<!-- screw the preload folder 
+	<assets path="assets"/> -->
 
 	<!-- PSYCH ENGINE CUSTOMIZATION -->
 	<define name="MODS_ALLOWED" if="desktop" />
@@ -68,21 +58,13 @@
 
 	<define name="PRELOAD_ALL" unless="web" />
 	<define name="NO_PRELOAD_ALL" unless="PRELOAD_ALL"/>
-	
-	<library name="videos"        preload="true" />
-	<library name="songs"         preload="true" />
-	
-	<assets path="assets/videos"        library="videos"        if="VIDEOS_ALLOWED"/>
-	<assets path="assets/songs"         library="songs" />
-	<assets path="assets/songs"         library="songs" />
-	<!-- <assets path="assets/week2"         library="week2"         exclude="*.ogg" if="web"/> -->
 
 	<!-- NOTE FOR FUTURE SELF SINCE FONTS ARE ALWAYS FUCKY 
 		TO FIX ONE OF THEM, I CONVERTED IT TO OTF. DUNNO IF YOU NEED TO
 		THEN UHHH I USED THE NAME OF THE FONT WITH SETFORMAT() ON THE TEXT!!!
 		NOT USING A DIRECT THING TO THE ASSET!!!
-	-->
-	<assets path="assets/fonts" embed='false'/>
+	
+	<assets path="assets/fonts" embed='false'/> -->
 	<!-- _______________________________ Libraries ______________________________ -->
 
 	<haxelib name="flixel" />
