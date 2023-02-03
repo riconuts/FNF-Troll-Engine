@@ -1,41 +1,60 @@
 package;
 
+import flixel.*;
+import flixel.math.*;
+import flixel.system.FlxSound;
+import flixel.text.FlxText;
+import flixel.tweens.*;
+import flixel.util.FlxColor;
+
 #if desktop
 import Discord.DiscordClient;
 #end
-import flash.text.TextField;
-import flixel.FlxG;
-import flixel.FlxSprite;
-import flixel.addons.display.FlxGridOverlay;
-import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.math.FlxMath;
-import flixel.text.FlxText;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
-import flixel.util.FlxColor;
-import lime.utils.Assets;
 
 using StringTools;
-#if MODS_ALLOWED
-import sys.FileSystem;
-import sys.io.File;
-#end
+
+// 2nuts freeplaystate lol
 
 class CreditsState extends MusicBeatState
-{
-	var curSelected:Int = -1;
+{	
+	var bg:FlxSprite = new FlxSprite();
 
-	private var grpOptions:FlxTypedGroup<Alphabet>;
-	private var iconArray:Array<AttachedSprite> = [];
-	private var creditsStuff:Array<Array<String>> = [];
+    var hintBg:FlxSprite;
+	var hintText:FlxText;
 
-	var bg:FlxSprite;
-	var descText:FlxText;
-	var intendedColor:Int;
-	var colorTween:FlxTween;
-	var descBox:AttachedSprite;
+	var camFollow = new FlxPoint(FlxG.width * 0.5, FlxG.height * 0.5);
+	var camFollowPos = new FlxObject();
 
-	var offsetThing:Float = -75;
+    var dataArray:Array<Array<String>> = [];
+	var titleArray:Array<Alphabet> = [];
+	var iconArray:Array<AttachedSprite> = [];
+
+    var curSelected(default, set):Int = 0;
+	
+	function set_curSelected(sowy:Int)
+    {
+        if (dataArray[sowy] == null){ // skip empty spaces and titles
+            sowy += (sowy < curSelected) ? -1 : 1;
+
+            // also skip any following spaces
+            if (sowy >= titleArray.length)
+                sowy = sowy - titleArray.length;
+            else if (sowy < 0)
+                sowy = titleArray.length + sowy;
+
+            return set_curSelected(sowy); 
+        }
+
+		if (sowy >= titleArray.length)
+			curSelected = sowy - titleArray.length;
+		else if (sowy < 0)
+			curSelected = titleArray.length + sowy;
+		
+		curSelected = sowy;
+		updateSelection();
+
+		return curSelected;
+	}
 
 	override function create()
 	{
@@ -44,301 +63,229 @@ class CreditsState extends MusicBeatState
 		DiscordClient.changePresence("In the Menus", null);
 		#end
 
-		persistentUpdate = true;
-		bg = new FlxSprite().loadGraphic(Paths.image("newmenuu/creditsbg"));
+		persistentUpdate = false;
+		
+		Paths.clearStoredMemory();
+		
+		PlayState.isStoryMode = false;
+
+		FlxG.camera.follow(camFollowPos);
+		FlxG.camera.bgColor = FlxColor.BLACK;
+
+		////
+		camFollowPos.setPosition(camFollow.x, camFollow.y);
+
+		////
+		bg.loadGraphic(Paths.image("newmenuu/creditsbg"));
 		
 		if (FlxG.height < FlxG.width)
 			bg.setGraphicSize(0, FlxG.height);
 		else
 			bg.setGraphicSize(FlxG.width, 0);
 
-		bg.screenCenter();
+		bg.screenCenter().scrollFactor.set();
 		add(bg);	
-		
-		grpOptions = new FlxTypedGroup<Alphabet>();
-		add(grpOptions);
+
+        ////
+        function loadLine(line:String, ?folder:String)
+			addSong(line.split("::"), folder);
+
+		//// Load the shit!!!
+		for (i in CoolUtil.coolTextFile(Paths.txt('credits')))
+			loadLine(i);
 
 		#if MODS_ALLOWED
-		var path:String = 'modsList.txt';
-		if(FileSystem.exists(path))
-		{
-			var leMods:Array<String> = CoolUtil.coolTextFile(path);
-			for (i in 0...leMods.length)
-			{
-				if(leMods.length > 1 && leMods[0].length > 0) {
-					var modSplit:Array<String> = leMods[i].split('|');
-					if(!Paths.ignoreModFolders.contains(modSplit[0].toLowerCase()) && !modsAdded.contains(modSplit[0]))
-					{
-						if(modSplit[1] == '1')
-							pushModCreditsToList(modSplit[0]);
-						else
-							modsAdded.push(modSplit[0]);
-					}
-				}
-			}
-		}
+        Paths.currentModDirectory = '';
 
-		pushFileCreditsToList("assets/data/credits.txt");
-
-		var arrayOfFolders:Array<String> = Paths.getModDirectories();
-		arrayOfFolders.push('');
-		for (folder in arrayOfFolders)
-			pushModCreditsToList(folder);
+        for (i in CoolUtil.coolTextFile(Paths.modsTxt('credits')))
+            loadLine(i);
 		#end
 
-		var pisspoop:Array<Array<String>> = [ //Name - Icon name - Description - Link - BG Color
-			[''],
-		];
+		////
+		hintBg = new FlxSprite(0, FlxG.height - 130).makeGraphic(1, 1);
+		hintBg.scale.set(FlxG.width - 100, 120);
+        hintBg.updateHitbox();
+		hintBg.screenCenter(X);
+		hintBg.color = 0xFF000000;
+		hintBg.alpha = 0.6;
+		hintBg.scrollFactor.set();
+		add(hintBg);
+
+		hintText = new FlxText(hintBg.x + 25, hintBg.y + hintBg.height * 0.5 - 16, hintBg.width - 50, "asfgh", 32);
+		hintText.setFormat(Paths.font("calibri.ttf"), 32, 0xFFFFFFFF, CENTER);
+		hintText.scrollFactor.set();
+        add(hintText);
 		
-		for(i in pisspoop){
-			creditsStuff.push(i);
-		}
-	
-		for (i in 0...creditsStuff.length)
-		{
-			var isSelectable:Bool = !unselectableCheck(i);
-			var optionText:Alphabet = new Alphabet(0, 70 * i, creditsStuff[i][0], !isSelectable, false);
-			optionText.isMenuItem = true;
-			optionText.screenCenter(X);
-			optionText.yAdd -= 70;
-			if(isSelectable) {
-				optionText.x -= 70;
-			}
-			optionText.forceX = optionText.x;
-			//optionText.yMult = 90;
-			optionText.targetY = i;
-			grpOptions.add(optionText);
-
-			if(isSelectable) {
-				if(creditsStuff[i][5] != null)
-				{
-					Paths.currentModDirectory = creditsStuff[i][5];
-				}
-
-				var iconPath = creditsStuff[i][1];
-				if (iconPath != null && iconPath != ""){
-					var icon:AttachedSprite = new AttachedSprite('credits/' + creditsStuff[i][1]);
-					icon.xAdd = optionText.width + 10;
-					icon.sprTracker = optionText;
-		
-					// using a FlxGroup is too much fuss!
-					iconArray.push(icon);
-					add(icon);
-				}
-
-				Paths.currentModDirectory = '';
-
-				if(curSelected == -1) curSelected = i;
-			}
-		}
-		
-		descBox = new AttachedSprite();
-		descBox.makeGraphic(1, 1, FlxColor.BLACK);
-		descBox.xAdd = -10;
-		descBox.yAdd = -10;
-		descBox.alphaMult = 0.6;
-		descBox.alpha = 0.6;
-		add(descBox);
-
-		descText = new FlxText(50, FlxG.height + offsetThing - 25, 1180, "", 32);
-		descText.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER/*, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK*/);
-		descText.scrollFactor.set();
-		//descText.borderSize = 2.4;
-		descBox.sprTracker = descText;
-		add(descText);
-
-		bg.color = getCurrentBGColor();
-		intendedColor = bg.color;
-		changeSelection();
 		super.create();
+
+        updateSelection();
+        curSelected = 0;
+
+		#if !FLX_NO_MOUSE
+		FlxG.mouse.visible = true;
+		#end
 	}
 
-	var quitting:Bool = false;
-	var holdTime:Float = 0;
+    var realIndex:Int = 0;
+	public function addSong(data:Array<String>, ?folder:String)
+	{
+		Paths.currentModDirectory = folder == null ? "" : folder;
+
+        var songTitle:Alphabet; 
+		var id = realIndex++;
+
+        if (data.length > 1)
+        {
+            songTitle = new Alphabet(0, 240 * id, data[0], false);
+            songTitle.x = 120;
+            songTitle.targetX = 90;
+
+            dataArray[id] = data; 
+
+            var songIcon = new AttachedSprite("credits/" + data[1]);
+
+            songIcon.xAdd = songTitle.width + 15; 
+            songIcon.yAdd = 15;
+            songIcon.sprTracker = songTitle;
+
+            iconArray[id] = songIcon;
+            add(songIcon);
+        }else if (data[0].trim().length == 0){
+            return;
+        }else{
+            songTitle = new Alphabet(0, 240 * id, data[0], true);
+            songTitle.screenCenter(X);
+            songTitle.targetX = songTitle.x;
+        }
+
+        songTitle.sowyFreeplay = true;
+        songTitle.ID = id;
+        titleArray[id] = songTitle;
+        add(songTitle);
+	}
+
+	function updateSelection(playSound:Bool = true)
+	{
+		if (playSound)
+			FlxG.sound.play(Paths.sound("scrollMenu"), 0.4);
+
+		// selectedSong = titleArray[curSelected];
+
+		for (id in 0...titleArray.length)
+		{
+			var title:Alphabet = titleArray[id];
+            var data = dataArray[id];
+
+            if (data == null){ // for the category titles, whatevrr !!!
+                
+            }else if (id == curSelected){
+				title.alpha = 1;
+                title.targetX = 90;
+                title.color = 0xFFFFFFFF;
+                title.blend = flash.display.BlendMode.NORMAL;
+
+                var descText = data[2];
+                if (descText == null){
+                    hintText.alpha = 0;
+                    hintText.text = "";
+                }else{
+                    hintText.text = descText;
+
+                    hintBg.scale.y = 30 + hintText.height;
+                    hintBg.updateHitbox();
+                    hintBg.y = FlxG.height - hintBg.height - 10;
+
+                    hintText.y = hintBg.y + hintBg.height * 0.5 - hintText.height * 0.5;
+
+                    //// FUCK
+                    var sby = hintBg.y + 15;
+                    var eby = hintBg.y;
+                    var sty = hintText.y + 15;
+                    var ety = hintText.y;
+                    var sba = hintBg.alpha;
+                    FlxTween.num(0, 1, 0.25, {ease: FlxEase.sineOut}, function(v){
+                        hintBg.y = FlxMath.lerp(sby, eby, v);
+                        hintText.y = FlxMath.lerp(sty, ety, v);
+                        hintBg.alpha = FlxMath.lerp(sba, 0.6, v);
+                    });
+                }
+
+				camFollow.y = title.y + title.height * 0.5 + 20;
+			}else{
+				var difference = Math.abs(curSelected - id);
+				title.targetX = 90 + difference * -20;
+				title.alpha = 1 - difference * 0.15;
+                var c = difference * 0.15 + 0.05;
+                title.color = FlxColor.fromRGBFloat(c,c,c);
+                title.blend = flash.display.BlendMode.MULTIPLY;
+			}
+
+			var icon = iconArray[id];
+			if (icon != null) 
+				icon.alpha = title.alpha;
+		}
+	}
+	
+	var secsHolding:Float = 0;
 	override function update(elapsed:Float)
 	{
-		if (FlxG.sound.music.volume < 0.7)
-		{
+		if (FlxG.sound.music != null && FlxG.sound.music.volume < 0.7)
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
+
+		////
+		var speed = FlxG.keys.pressed.SHIFT ? 2 : 1;
+
+		var mouseWheel = FlxG.mouse.wheel;
+		if (mouseWheel != 0)
+			curSelected -= mouseWheel * speed;
+
+		if (controls.UI_DOWN_P){
+			curSelected += speed;
+			secsHolding = 0;
+		}
+		if (controls.UI_UP_P){
+			curSelected -= speed;
+			secsHolding = 0;
 		}
 
-		if(!quitting)
-		{
-			if(creditsStuff.length > 1)
-			{
-				var shiftMult:Int = 1;
-				if(FlxG.keys.pressed.SHIFT) shiftMult = 3;
+		if (controls.UI_UP || controls.UI_DOWN){
+			var checkLastHold:Int = Math.floor((secsHolding - 0.5) * 10);
+			secsHolding += elapsed;
+			var checkNewHold:Int = Math.floor((secsHolding - 0.5) * 10);
 
-				var upP = controls.UI_UP_P;
-				var downP = controls.UI_DOWN_P;
+			if(secsHolding > 0.5 && checkNewHold - checkLastHold > 0)
+				curSelected += (checkNewHold - checkLastHold) * (controls.UI_UP ? -speed : speed);
+		}
 
-				if (upP)
-				{
-					changeSelection(-1 * shiftMult);
-					holdTime = 0;
-				}
-				if (downP)
-				{
-					changeSelection(1 * shiftMult);
-					holdTime = 0;
-				}
+		//// update camera
+		var lerpVal = Math.min(
+            1, 
+            elapsed * (9.6 + Math.max(0, Math.abs(camFollowPos.y - camFollow.y) - 360) * 0.002)
+        );
+        
+        camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
 
-				if(controls.UI_DOWN || controls.UI_UP)
-				{
-					var checkLastHold:Int = Math.floor((holdTime - 0.5) * 10);
-					holdTime += elapsed;
-					var checkNewHold:Int = Math.floor((holdTime - 0.5) * 10);
+        if (FlxG.keys.justPressed.NINE){
+            for (item in titleArray){
+                if (item != null && !item.isBold)
+                    item.x += 50;
+            }
 
-					if(holdTime > 0.5 && checkNewHold - checkLastHold > 0)
-					{
-						changeSelection((checkNewHold - checkLastHold) * (controls.UI_UP ? -shiftMult : shiftMult));
-					}
-				}
-			}
+            for (icon in iconArray){
+                if (icon != null)
+                    icon.loadGraphic(Paths.image('credits/peak'));
+            }
+        }
 
-			if (FlxG.keys.justPressed.NINE){
-				for (item in grpOptions.members)
-				{
-					if (!item.isBold)
-						item.x += 50;
-				}
+		if (controls.BACK){
+			FlxG.sound.play(Paths.sound('cancelMenu'));
+			MusicBeatState.switchState(new MainMenuState());
+		}
 
-				for (icon in iconArray){
-					icon.loadGraphic(Paths.image('credits/peak'));
-				}
-			}
-
-			if(controls.ACCEPT && (creditsStuff[curSelected][3] == null || creditsStuff[curSelected][3].length > 4)) {
-				CoolUtil.browserLoad(creditsStuff[curSelected][3]);
-			}
-			if (controls.BACK)
-			{
-				if(colorTween != null) {
-					colorTween.cancel();
-				}
-				FlxG.sound.play(Paths.sound('cancelMenu'));
-				MusicBeatState.switchState(new MainMenuState());
-				quitting = true;
-			}
+		if (controls.ACCEPT){
+            CoolUtil.browserLoad(dataArray[curSelected][3]);
 		}
 		
-		for (item in grpOptions.members)
-		{
-			if(!item.isBold)
-			{
-				var lerpVal:Float = CoolUtil.boundTo(elapsed * 12, 0, 1);
-				if(item.targetY == 0)
-				{
-					var lastX:Float = item.x;
-					item.screenCenter(X);
-					item.x = FlxMath.lerp(lastX, item.x - 70, lerpVal);
-					item.forceX = item.x;
-				}
-				else
-				{
-					item.x = FlxMath.lerp(item.x, 200 + -40 * Math.abs(item.targetY), lerpVal);
-					item.forceX = item.x;
-				}
-			}
-		}
 		super.update(elapsed);
-	}
-
-	var moveTween:FlxTween = null;
-	function changeSelection(change:Int = 0)
-	{
-		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
-		do {
-			curSelected += change;
-			if (curSelected < 0)
-				curSelected = creditsStuff.length - 1;
-			if (curSelected >= creditsStuff.length)
-				curSelected = 0;
-		} while(unselectableCheck(curSelected));
-
-		var newColor:Int =  getCurrentBGColor();
-		if(newColor != intendedColor) {
-			if(colorTween != null) {
-				colorTween.cancel();
-			}
-			intendedColor = newColor;
-			colorTween = FlxTween.color(bg, 1, bg.color, intendedColor, {
-				onComplete: function(twn:FlxTween) {
-					colorTween = null;
-				}
-			});
-		}
-
-		var bullShit:Int = 0;
-
-		for (item in grpOptions.members)
-		{
-			item.targetY = bullShit - curSelected;
-			bullShit++;
-
-			if(!unselectableCheck(bullShit-1)) {
-				item.alpha = 0.6;
-				if (item.targetY == 0) {
-					item.alpha = 1;
-				}
-			}
-		}
-
-		descText.text = creditsStuff[curSelected][2];
-		descText.y = FlxG.height - descText.height + offsetThing - 60;
-
-		if(moveTween != null) moveTween.cancel();
-		moveTween = FlxTween.tween(descText, {y : descText.y + 75}, 0.25, {ease: FlxEase.sineOut});
-
-		descBox.setGraphicSize(Std.int(descText.width + 20), Std.int(descText.height + 25));
-		descBox.updateHitbox();
-	}
-
-	#if MODS_ALLOWED
-	private var modsAdded:Array<String> = [];
-	function pushModCreditsToList(folder:String)
-	{
-		if(modsAdded.contains(folder)) return;
-
-		var creditsFile:String = null;
-		if(folder != null && folder.trim().length > 0) creditsFile = Paths.mods(folder + '/data/credits.txt');
-		else creditsFile = Paths.mods('data/credits.txt');
-
-		pushFileCreditsToList(creditsFile);
-		
-		modsAdded.push(folder);
-	}
-	#end
-	function pushFileCreditsToList(creditsFile:String)
-	{
-		var rawFile = Paths.getContent(creditsFile);
-		if (rawFile == null)
-			return;
-
-		var firstarray:Array<String> = rawFile.split('\n');
-		for (i in firstarray)
-		{
-			var arr:Array<String> = i.replace('\\n', '\n').split("::");
-			/* No idea what is this
-			if (arr.length >= 5)
-				arr.push(folder);
-			*/
-			creditsStuff.push(arr);
-		}
-		creditsStuff.push(['']);
-	}
-
-	function getCurrentBGColor() {/*
-		var bgColor:String = creditsStuff[curSelected][4];
-		if(!bgColor.startsWith('0x')) {
-			bgColor = '0xFF' + bgColor;
-		}
-		return Std.parseInt(bgColor);
-		*/
-		return 0xFFFFFFFF;
-	}
-
-	private function unselectableCheck(num:Int):Bool {
-		return creditsStuff[num].length <= 1;
 	}
 }

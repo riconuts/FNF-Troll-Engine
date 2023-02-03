@@ -46,7 +46,6 @@ class Cache{
 		#end
 
 		#if MULTICORE_LOADING
-		if (ClientPrefs.multicoreLoading){
 			// TODO: go through shitToLoad and clear it of repeats as to not waste time loadin shit that already exists
 
 			var threadLimit:Int = ClientPrefs.loadingThreads;
@@ -136,9 +135,7 @@ class Cache{
 					//idx++;
 				}
 				finished = true;
-			}
-		}
-		else		
+			}else
 		#end
 			if (!multicoreOnly){
 				for (shit in shitToLoad)

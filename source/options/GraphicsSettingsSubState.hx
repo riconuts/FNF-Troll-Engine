@@ -30,8 +30,8 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 {
 	public function new()
 	{
-		title = 'Graphics';
-		//rpcTitle = 'Graphics Settings Menu'; //for Discord Rich Presence
+		title = 'Performance';
+		//rpcTitle = 'Performance Settings Menu'; //for Discord Rich Presence
 
 		//I'd suggest using "Low Quality" as an example for making your own option since it is the simplest here
 		var option:Option = new Option('Low Quality', //Name
@@ -64,15 +64,23 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 		option.onChange = onChangeFramerate;
 		#end
 
-		/*
-		var option:Option = new Option('Persistent Cached Data',
-			'If checked, images loaded will stay in memory\nuntil the game is closed, this increases memory usage,\nbut basically makes reloading times instant.',
-			'imagesPersist',
-			'bool',
-			false);
-		option.onChange = onChangePersistentData; //Persistent Cached Data changes FlxGraphic.defaultPersist
-		addOption(option);
-		*/
+		#if MULTICORE_LOADING
+		var maxThreads:Int = Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS"));
+		if(maxThreads > 1){
+			var option:Option = new Option('Loading Threads', //Name
+				'How many threads the game can use to load assets.\nWARNING: Using more than one thread might cause crashes', //Description
+				'loadingThreads', //Save data variable name
+				'int', //Variable type
+				1 //Default value
+			); 
+
+			option.minValue = 1;
+			option.maxValue = Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS"));
+			option.displayFormat = '%v';
+
+			addOption(option);
+		}
+		#end
 
 		super();
 	}

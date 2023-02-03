@@ -505,104 +505,101 @@ class PlayState extends MusicBeatState
 		stageData = stage.stageData;
 		setStageData(stageData);
 
-		//// Multi-thread Loading Start
-		#if MULTICORE_LOADING
-		if (ClientPrefs.multicoreLoading){
-			var shitToLoad:Array<AssetPreload> = [
-				{path: "sick"},
-				{path: "good"},
-				{path: "bad"},
-				{path: "shit"},
-				{path: "healthBar"}
-				//,{path: "combo"}
-			];
+		//// Asset loading start
+		var shitToLoad:Array<AssetPreload> = [
+			{path: "sick"},
+			{path: "good"},
+			{path: "bad"},
+			{path: "shit"},
+			{path: "healthBar"}
+			//,{path: "combo"}
+		];
 
-			for (number in 0...10)
-				shitToLoad.push({path: 'num$number'});
-			
-			if (ClientPrefs.hitsoundVolume > 0)
-				shitToLoad.push({path: 'hitsound', type: 'SOUND'});
+		for (number in 0...10)
+			shitToLoad.push({path: 'num$number'});
+		
+		if (ClientPrefs.hitsoundVolume > 0)
+			shitToLoad.push({path: 'hitsound', type: 'SOUND'});
 
-			// PRECACHING MISS SOUNDS BECAUSE I THINK THEY CAN LAG PEOPLE AND FUCK THEM UP IDK HOW HAXE WORKS
-			shitToLoad.push({path: 'missnote1', type: 'SOUND'});
-			shitToLoad.push({path: 'missnote2', type: 'SOUND'});
-			shitToLoad.push({path: 'missnote3', type: 'SOUND'});
+		// PRECACHING MISS SOUNDS BECAUSE I THINK THEY CAN LAG PEOPLE AND FUCK THEM UP IDK HOW HAXE WORKS
+		shitToLoad.push({path: 'missnote1', type: 'SOUND'});
+		shitToLoad.push({path: 'missnote2', type: 'SOUND'});
+		shitToLoad.push({path: 'missnote3', type: 'SOUND'});
 
-			if (PauseSubState.songName != null)
-				shitToLoad.push({path: PauseSubState.songName, type: 'MUSIC'});
-			else if (ClientPrefs.pauseMusic != 'None')
-				shitToLoad.push({path: Paths.formatToSongPath(ClientPrefs.pauseMusic), type: 'MUSIC'});
+		if (PauseSubState.songName != null)
+			shitToLoad.push({path: PauseSubState.songName, type: 'MUSIC'});
+		else if (ClientPrefs.pauseMusic != 'None')
+			shitToLoad.push({path: Paths.formatToSongPath(ClientPrefs.pauseMusic), type: 'MUSIC'});
 
-			if (ClientPrefs.timeBarType != 'Disabled')
-				shitToLoad.push({path: "timeBar"});
+		if (ClientPrefs.timeBarType != 'Disabled')
+			shitToLoad.push({path: "timeBar"});
 
-			////
-			if (ClientPrefs.noteSkin == 'Quants'){
-				shitToLoad.push({path: 'QUANT$arrowSkin'});
-				shitToLoad.push({path: 'QUANT$arrowSkin'});
-			}else{
-				shitToLoad.push({path: arrowSkin});
-				shitToLoad.push({path: arrowSkin});
-			}
-			
-			////
-			if (stageData.preloadStrings != null)
-			{
-				var lib = stageData.directory.trim().length > 0 ? stageData.directory : null;
-				for (i in stageData.preloadStrings)
-					shitToLoad.push({path: i, library: lib});
-			}
+		////
+		if (ClientPrefs.noteSkin == 'Quants'){
+			shitToLoad.push({path: 'QUANT$arrowSkin'});
+			shitToLoad.push({path: 'QUANT$arrowSkin'});
+		}else{
+			shitToLoad.push({path: arrowSkin});
+			shitToLoad.push({path: arrowSkin});
+		}
+		
+		////
+		if (stageData.preloadStrings != null)
+		{
+			var lib = stageData.directory.trim().length > 0 ? stageData.directory : null;
+			for (i in stageData.preloadStrings)
+				shitToLoad.push({path: i, library: lib});
+		}
 
-			if (stageData.preload != null)
-			{
-				for (i in stageData.preload)
-					shitToLoad.push(i);
-			}
+		if (stageData.preload != null)
+		{
+			for (i in stageData.preload)
+				shitToLoad.push(i);
+		}
 
-			var characters:Array<String> = [SONG.player1, SONG.player2];
-			if (!stageData.hide_girlfriend)
-			{
-				characters.push(SONG.gfVersion);
-			}
+		var characters:Array<String> = [SONG.player1, SONG.player2];
+		if (!stageData.hide_girlfriend)
+		{
+			characters.push(SONG.gfVersion);
+		}
 
-			for (character in characters)
-			{
-				for (data in Character.returnCharacterPreload(character))
+		for (character in characters)
+		{
+			for (data in Character.returnCharacterPreload(character))
+				shitToLoad.push(data);
+		}
+
+		for (event in getEvents())
+		{
+			for (data in preloadEvent(event))
+			{ // preloads everythin for events
+				if (!shitToLoad.contains(data))
 					shitToLoad.push(data);
 			}
+		}
 
-			for (event in getEvents())
-			{
-				for (data in preloadEvent(event))
-				{ // preloads everythin for events
-					if (!shitToLoad.contains(data))
-						shitToLoad.push(data);
-				}
-			}
+		shitToLoad.push({
+			path: '$songName/Inst',
+			type: 'SONG'
+		});
 
+		if (SONG.needsVoices)
 			shitToLoad.push({
-				path: '$songName/Inst',
+				path: '$songName/Voices',
 				type: 'SONG'
 			});
 
-			if (SONG.needsVoices)
-				shitToLoad.push({
-					path: '$songName/Voices',
-					type: 'SONG'
-				});
+		// extra tracks (ex: die batsards bullet track)
+		for (track in SONG.extraTracks)
+			shitToLoad.push({
+				path: '$songName/$track',
+				type: 'SONG'
+			});
 
-			// extra tracks (ex: die batsards bullet track)
-			for (track in SONG.extraTracks)
-				shitToLoad.push({
-					path: '$songName/$track',
-					type: 'SONG'
-				});
-
-			// moved all of this to its own preload class
-			Cache.loadWithList(shitToLoad);
-		}
-		#end
-		//// Multi-thread Loading End
+		// moved all of this to its own preload class
+		Cache.loadWithList(shitToLoad);
+		
+		//// Asset loading end
 
 		Conductor.songPosition = -5000;
 

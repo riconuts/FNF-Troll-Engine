@@ -27,12 +27,10 @@ class ClientPrefs {
 	// new tgt
 	public static var directionalCam:Bool = false;
 	public static var tgtNotes:Bool = true;
-	public static var multicoreLoading:Bool = false;
-	#if sys
-	public static var loadingThreads:Int = Math.floor(Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS"))/2);
-	#else
+	
+	//public static var multicoreLoading:Bool = false;
 	public static var loadingThreads:Int = 1;
-	#end
+
 	public static var noteOffset:Int = 0;
 	public static var arrowHSV:Array<Array<Int>> = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
 	public static var quantHSV:Array<Array<Int>> = [
@@ -135,7 +133,7 @@ class ClientPrefs {
 		FlxG.save.data.camZooms = camZooms;
 		FlxG.save.data.noteOffset = noteOffset;
 		FlxG.save.data.hideHud = hideHud;
-		FlxG.save.data.multicoreLoading = multicoreLoading;
+		//FlxG.save.data.multicoreLoading = multicoreLoading;
 		FlxG.save.data.camMovement = camMovement;
 		FlxG.save.data.simpleJudge = simpleJudge;
 		FlxG.save.data.directionalCam = directionalCam;
@@ -224,9 +222,9 @@ class ClientPrefs {
 		if(FlxG.save.data.hideHud != null) {
 			hideHud = FlxG.save.data.hideHud;
 		}
-		if(FlxG.save.data.multicoreLoading != null) {
+		/*if(FlxG.save.data.multicoreLoading != null) {
 			multicoreLoading = FlxG.save.data.multicoreLoading;
-		}
+		}*/
 		if (FlxG.save.data.camMovement != null)
 		{
 			camMovement = FlxG.save.data.camMovement;

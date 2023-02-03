@@ -34,7 +34,7 @@ class Paths
 	#if MODS_ALLOWED
 	public static var ignoreModFolders:Array<String> = [
 		'characters', 'events', 'notetypes', 'data', 'songs', 'music', 'sounds', 'shaders', 'videos', 'images', 'stages', 'weeks', 'fonts',
-		'scripts', 'achievements'
+		'scripts', 'achievements', 'global'
 	];
 	#end
 

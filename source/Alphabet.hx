@@ -20,6 +20,9 @@ class Alphabet extends FlxSpriteGroup
 	public var paused:Bool = false;
 
 	// for menu shit
+	public var sowyFreeplay:Bool = false;
+	public var targetX:Float = 0;
+
 	public var forceX:Float = Math.NEGATIVE_INFINITY;
 	public var targetY:Float = 0;
 	public var yMult:Float = 120;
@@ -357,6 +360,8 @@ class Alphabet extends FlxSpriteGroup
 				x = FlxMath.lerp(x, (targetY * 20) + 90 + xAdd, lerpVal);
 			}
 		}
+		if (sowyFreeplay)
+			x = FlxMath.lerp(x, targetX + xAdd, CoolUtil.boundTo(elapsed * 9.6, 0, 1));
 
 		super.update(elapsed);
 	}
