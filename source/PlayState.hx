@@ -1852,6 +1852,11 @@ class PlayState extends MusicBeatState
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.zIndex, Obj2.zIndex);
 	}
 
+	function sortByOrderStrumNote(wat:Int, Obj1:StrumNote, Obj2:StrumNote):Int
+	{
+		return FlxSort.byValues(FlxSort.DESCENDING, Obj1.zIndex, Obj2.zIndex);
+	}
+
 	function sortByTime(Obj1:EventNote, Obj2:EventNote):Int
 	{
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.strumTime, Obj2.strumTime);
@@ -2271,6 +2276,7 @@ class PlayState extends MusicBeatState
 			modManager.updateObject(curDecBeat, strum, pos, 1);
 			strum.x = pos.x;
 			strum.y = pos.y;
+			strum.z = pos.z;
 		});
 
 		playerStrums.forEachAlive(function(strum:StrumNote)
@@ -2279,7 +2285,10 @@ class PlayState extends MusicBeatState
 			modManager.updateObject(curDecBeat, strum, pos, 0);
 			strum.x = pos.x;
 			strum.y = pos.y;
+			strum.z = pos.z;
 		});
+
+		strumLineNotes.sort(sortByOrderStrumNote);
 
 		if (generatedMusic)
 		{
@@ -2368,21 +2377,21 @@ class PlayState extends MusicBeatState
 					daNote.kill();
 					notes.remove(daNote, true);
 					daNote.destroy();
-				}
-				
-				if (Conductor.songPosition > noteKillOffset + daNote.strumTime && daNote.active)
-				{
-					if (daNote.mustPress && !cpuControlled && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit))
+				}else{
+					if (Conductor.songPosition > noteKillOffset + daNote.strumTime && daNote.active)
 					{
-						noteMiss(daNote);
+						if (daNote.mustPress && !cpuControlled && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit))
+						{
+							noteMiss(daNote);
+						}
+
+						daNote.active = false;
+						daNote.visible = false;
+
+						daNote.kill();
+						notes.remove(daNote, true);
+						daNote.destroy();
 					}
-
-					daNote.active = false;
-					daNote.visible = false;
-
-					daNote.kill();
-					notes.remove(daNote, true);
-					daNote.destroy();
 				}
 			});
 		}
@@ -3958,7 +3967,7 @@ class PlayState extends MusicBeatState
 	function StrumPlayAnim(isDad:Bool, id:Int, time:Float, ?note:Note) {
 		var spr:StrumNote = null;
 		if(isDad)
-			spr = strumLineNotes.members[id];
+			spr = opponentStrums.members[id];
 		else
 			spr = playerStrums.members[id];
 
