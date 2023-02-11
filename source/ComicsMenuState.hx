@@ -1,16 +1,72 @@
 package;
 
+import flixel.group.FlxSpriteGroup;
+import flixel.group.FlxGroup;
+import haxe.io.Path;
 import flixel.*;
 import flixel.math.*;
 import flixel.text.FlxText;
 import sowy.*;
 
+typedef ComicData = {
+	var name:String;
+
+	var directory:Null<String>;
+	var formattedName:String;
+	var imageAmount:Int;
+};
+
 class ComicsMenuState extends MusicBeatState
 {
-	
+	public var data:Array<Array<ComicData>> = [];
+	private var curChapter:Int = 0;
+	private var curSelected:Int = 0;
+
+	private var textOptionArray = [];
+
+	override public function create()
+	{
+		//// GET THE CUTSCENES
+		#if MODS_ALLOWED
+		for (modDir in Paths.getModDirectories())
+		{
+			var rawList = Paths.getContent(Paths.mods(modDir + "/data/freeplaySonglist.txt"));
+			if (rawList == null) continue;
+
+			data.push([for (line in CoolUtil.listFromString(rawList)){
+				var shid = line.split(":");
+				
+				// TODO
+				var category = shid[1]; 
+				if (category != "main")
+					continue;
+
+				var name = shid[0];
+				var formattedName = Paths.formatToSongPath(name);
+
+				var daComicPath = Paths.mods('$modDir/images/cutscenes/$formattedName');
+				var num = 0;
+				while (true)
+					if (!Paths.exists('$daComicPath-${++num}.png'))
+						continue;
+				
+				{name: name, directory: modDir, formattedName: formattedName, imageAmount: num};
+			}]);
+
+		}
+		#end
+
+
+	}
+
+	override public function update(e)
+	{
+		if (controls.BACK) MusicBeatState.switchState(new GalleryMenuState());
+	}
 }
 
-// based on the vs v comic reader lololol
+// rip vs /v/
+
 class ComicReader extends MusicBeatState
 {
 	var camBackground = new FlxCamera();
@@ -18,7 +74,7 @@ class ComicReader extends MusicBeatState
 
 	var camFollow = new FlxPoint(); // goal position
 	var camFollowPos = new FlxPoint(); // real position
-	var camPosition = new FlxObject(0, 0, 1, 1); // displayed position
+	var camPosition = new FlxObject(); // displayed position
 
 	var zoom:Float = 1;
 
@@ -103,7 +159,7 @@ class ComicReader extends MusicBeatState
 		if (curPanel != null)
 			remove(curPanel).destroy();
 
-		curPanel = new FlxSprite().loadGraphic(Paths.image('comics/$path'));
+		curPanel = new FlxSprite().loadGraphic(Paths.image('cutscenes/$path'));
 		curPanel.cameras = [camComic];
 
 		var scrWidth = FlxG.width;
@@ -134,7 +190,7 @@ class ComicReader extends MusicBeatState
 		var justPressed = FlxG.keys.justPressed;
 		var pressed = FlxG.keys.pressed;
 
-		if (controls.BACK) MusicBeatState.switchState(new MainMenuState());
+		if (controls.BACK) MusicBeatState.switchState(new ComicsMenuState());
 
 		//
 		var speed = pressed.SHIFT ? baseSpeed * 2 : baseSpeed;

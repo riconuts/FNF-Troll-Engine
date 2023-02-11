@@ -41,7 +41,7 @@ class GalleryMenuState extends MusicBeatState
 		add(bg);
 
 		var comics = new SowyTextButton(15, 300, 0, "comics", 24, function(){
-			MusicBeatState.switchState(new ComicsMenuState.ComicReader());
+			MusicBeatState.switchState(new ComicsMenuState());
         });
 		comics.label.setFormat(Paths.font("calibri.ttf"), 18, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
         add(comics);

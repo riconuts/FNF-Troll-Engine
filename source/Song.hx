@@ -14,20 +14,23 @@ import sys.io.File;
 
 typedef SwagSong =
 {
-	var song:String;
-	var notes:Array<SwagSection>;
-	var events:Array<Dynamic>;
-	var bpm:Float;
-	var needsVoices:Bool;
-	var speed:Float;
+	@:optional var song:String;
+	@:optional var bpm:Float;
+	@:optional var speed:Float;
+	@:optional var notes:Array<SwagSection>;
+	@:optional var events:Array<Dynamic>;
+	
+	@:optional var needsVoices:Bool;
+	@:optional var validScore:Bool;
 
-	var player1:String;
-	var player2:String;
-	var gfVersion:String;
-	var stage:String;
-	var arrowSkin:Null<String>;
-	var splashSkin:Null<String>;
-	var validScore:Bool;
+	@:optional var player1:String;
+	@:optional var player2:String;
+	@:optional var player3:String;
+	@:optional var gfVersion:String;
+	@:optional var stage:String;
+
+	@:optional var arrowSkin:String;
+	@:optional var splashSkin:String;
 
 	@:optional var extraTracks:Array<String>;
 }
@@ -50,10 +53,13 @@ class Song
 
 	private static function onLoadJson(songJson:Dynamic) // Convert old charts to newest format
 	{
-		if(songJson.gfVersion == null)
-		{
-			songJson.gfVersion = songJson.player3;
-			songJson.player3 = null;
+		if(songJson.gfVersion == null){
+			if (songJson.player3 != null){
+				songJson.gfVersion = songJson.player3;
+				songJson.player3 = null;
+			}
+			else
+				songJson.gfVersion = "gf";
 		}
 
 		if (songJson.extraTracks == null){
