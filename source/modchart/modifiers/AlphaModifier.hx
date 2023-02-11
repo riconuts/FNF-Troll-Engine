@@ -65,6 +65,7 @@ class AlphaModifier extends NoteModifier {
 
     if(getSubmodValue("randomVanish",player)!=0){
       var realFadeDist:Float = 240;
+      // TODO: make this randomize the notes
       alpha += CoolUtil.scale(Math.abs(distFromCenter),realFadeDist,2*realFadeDist,-1,0)*getSubmodValue("randomVanish",player);
     }
 

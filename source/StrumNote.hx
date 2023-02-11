@@ -13,6 +13,10 @@ class StrumNote extends FlxSprite
 	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
 	public var defScale:FlxPoint = FlxPoint.get(); // for modcharts to keep the scaling
 
+	public var zIndex:Float = 0;
+	public var desiredZIndex:Float = 0;
+	public var z:Float = 0;
+
 	override function destroy()
 	{
 		defScale.put();
@@ -36,6 +40,20 @@ class StrumNote extends FlxSprite
 		}
 		return value;
 	}
+
+	public function getZIndex()
+	{
+		var animZOffset:Float = 0;
+		if (animation.curAnim != null && animation.curAnim.name == 'confirm')
+			animZOffset += 1;
+		return z + desiredZIndex + animZOffset - (player==0?1:0);
+	}
+
+	function updateZIndex()
+	{
+		zIndex = getZIndex();
+	}
+	
 
 	public function new(x:Float, y:Float, leData:Int, player:Int) {
 		colorSwap = new ColorSwap();
@@ -124,11 +142,12 @@ class StrumNote extends FlxSprite
 				resetAnim = 0;
 			}
 		}
-		//if(animation.curAnim != null){ //my bad i was upset
-		if(animation.curAnim.name == 'confirm') {
-			centerOrigin();
-		//}
+		if(animation.curAnim != null){
+			if(animation.curAnim.name == 'confirm') 
+				centerOrigin();
+			
 		}
+		updateZIndex();
 
 		super.update(elapsed);
 	}
@@ -137,6 +156,7 @@ class StrumNote extends FlxSprite
 		animation.play(anim, force);
 		centerOffsets();
 		centerOrigin();
+		updateZIndex();
 		if(animation.curAnim == null || animation.curAnim.name == 'static') {
 			colorSwap.hue = 0;
 			colorSwap.saturation = 0;
