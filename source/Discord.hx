@@ -4,11 +4,11 @@ import Sys.sleep;
 import discord_rpc.DiscordRpc;
 
 using StringTools;
+
 #if LUA_ALLOWED
 import llua.Lua;
 import llua.State;
 #end
-
 
 class DiscordClient
 {
@@ -71,14 +71,14 @@ class DiscordClient
 
 	public static function changePresence(details:String, state:Null<String>, largeImageKey:String = "app-logo", ?hasStartTimestamp:Bool, ?endTimestamp:Float)
 	{
-		/* secret rpc
-		{
+		// secret rpc xd
+		DiscordRpc.presence({
 			details: "thats how you do it",
 			largeImageKey: 'gorgeous',
 			largeImageText: 'gorgeous'
-		}
-		*/
+		});
 
+		/*
 		////
 		var startTimestamp:Float = hasStartTimestamp ? Date.now().getTime() : 0;
 
@@ -97,6 +97,8 @@ class DiscordClient
 			endTimestamp : Std.int(endTimestamp / 1000)
 		});
 
+		*/
+
 		//trace('Discord RPC Updated. Arguments: $details, $state, $smallImageKey, $hasStartTimestamp, $endTimestamp');
 	}
 
@@ -104,8 +106,7 @@ class DiscordClient
 	public static function addLuaCallbacks(lua:State)
 	{
 		Lua_helper.add_callback(lua, "changePresence",
-			function(details:String, state:Null<String>, ?smallImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float)
-			{
+			function(details:String, state:Null<String>, ?smallImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float){
 				changePresence(details, state, smallImageKey, hasStartTimestamp, endTimestamp);
 			});
 	}

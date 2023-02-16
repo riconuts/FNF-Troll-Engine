@@ -103,8 +103,8 @@ class JukeboxState extends MusicBeatState {
 
         // menuTheme songDir is hard-coded to goto the playMenuMusic func
 		addSong("Main Menu", "menuTheme", null, '');
-		addSong("Game Over (TGT Mix)", Paths.getPath('music/gameOver.${Paths.SOUND_EXT}', SOUND), null, '');
-		addSong("Breakfast (TGT Mix)", Paths.getPath('music/breakfast.${Paths.SOUND_EXT}', SOUND), null, '');
+		addSong("Game Over (TGT Mix)", 'gameOver', null, '');
+		addSong("Breakfast (TGT Mix)", 'breakfast', null, '');
 
 		defImage = new FlxSprite(0, 50).loadGraphic(Paths.image("jukebox/defImage"));
 		defImage.antialiasing = false;
@@ -312,7 +312,7 @@ class JukeboxState extends MusicBeatState {
 					MusicBeatState.menuVox.destroy();
 					MusicBeatState.menuVox = null;
 				}
-				FlxG.sound.playMusic(song);
+				FlxG.sound.playMusic(Paths.music(song));
             }
 		}
     }
@@ -334,7 +334,7 @@ class JukeboxState extends MusicBeatState {
             else
 			    coverArtPath = songPath;
         }
-        if(data.chapterDir!=null)Paths.currentModDirectory = data.chapterDir;
+        if(data.chapterDir != null) Paths.currentModDirectory = data.chapterDir;
         
 		image.loadGraphic(Paths.image(coverArtPath));
         image.setGraphicSize(388, 388);

@@ -7,6 +7,8 @@ import flixel.input.keyboard.FlxKey;
 import flixel.util.FlxSave;
 
 class ClientPrefs {
+	public static var midScroll:Bool = false; // ahahehehaahha
+
 	public static var downScroll:Bool = false;
 	public static var middleScroll:Bool = false;
 	public static var opponentStrums:Bool = true;
@@ -74,7 +76,8 @@ class ClientPrefs {
 		'instakill' => false,
 		'practice' => false,
 		'botplay' => false,
-		'opponentplay' => false
+		'opponentplay' => false,
+		'modchart' => false
 	];
 
 	public static var comboOffset:Array<Int> = [-60, 60, -260, -80];
@@ -119,6 +122,8 @@ class ClientPrefs {
 	}
 
 	public static function saveSettings() {
+		FlxG.save.data.midScroll = midScroll;
+
 		FlxG.save.data.downScroll = downScroll;
 		FlxG.save.data.middleScroll = middleScroll;
 		FlxG.save.data.opponentStrums = opponentStrums;
@@ -173,6 +178,9 @@ class ClientPrefs {
 	}
 
 	public static function loadPrefs() {
+		if(FlxG.save.data.midScroll != null) 
+			midScroll = FlxG.save.data.midScroll;
+
 		if(FlxG.save.data.downScroll != null) {
 			downScroll = FlxG.save.data.downScroll;
 		}

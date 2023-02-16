@@ -157,8 +157,9 @@ class MusicBeatState extends FlxUIState
 	public static var menuVox:FlxSound; // jukebox
 
 	public static var menuLoopFunc = function(){
-		FlxG.sound.playMusic(menuMusic, FlxG.sound.music.volume);
-		FlxG.sound.music.onComplete = null;
+		trace("menu song ended, looping");
+
+		FlxG.sound.playMusic(Paths.music('freakyMenu'), FlxG.sound.music.volume, true);
 
 		Conductor.changeBPM(180);
 	}; 
@@ -166,7 +167,7 @@ class MusicBeatState extends FlxUIState
 	// TODO: check the jukebox selection n shit and play THAT instead? idk lol
 
 	public static function playMenuMusic(?volume:Float = 1, ?force:Bool = false){		
-		if(FlxG.sound.music==null || !FlxG.sound.music.playing || force){
+		if(FlxG.sound.music == null || !FlxG.sound.music.playing || force){
 			if (menuVox!=null){
 				trace("stopped menu vox");
 				menuVox.stop();
@@ -174,7 +175,9 @@ class MusicBeatState extends FlxUIState
 				menuVox = null;
 			}
 			JukeboxState.playIdx = 0;
-			menuMusic = FlxG.sound.cache("assets/music/freakyMenu.ogg"); // please work
+
+			// menuMusic = FlxG.sound.cache("assets/music/freakyMenu.ogg"); // please work
+			Paths.music('freakyMenu');
 
 			FlxG.sound.playMusic(Paths.music('freakyIntro'), volume, false);
 			FlxG.sound.music.onComplete = menuLoopFunc;

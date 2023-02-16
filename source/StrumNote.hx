@@ -81,7 +81,7 @@ class StrumNote extends FlxSprite
 		{
 			if (Paths.exists(Paths.getPath("images/QUANT" + texture + ".png", IMAGE))
 			#if MODS_ALLOWED
-			|| Paths.exists(Paths.modsImages("QUANT" + texture + ".png"))
+			|| Paths.exists(Paths.modsImages("QUANT" + texture))
 			#end) {
 				br = "QUANT" + texture;
 				isQuant = true;

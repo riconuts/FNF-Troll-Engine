@@ -15,9 +15,12 @@ class HealthIcon extends FlxSprite
 	public function new(char:String = 'bf', isPlayer:Bool = false)
 	{
 		super();
-		isOldIcon = (char == 'bf-old');
+
 		this.isPlayer = isPlayer;
+		antialiasing = ClientPrefs.globalAntialiasing;
+
 		changeIcon(char);
+
 		scrollFactor.set();
 	}
 
@@ -29,9 +32,33 @@ class HealthIcon extends FlxSprite
 			setPosition(sprTracker.x + sprTracker.width + 10, sprTracker.y - 30);
 	}
 
-	public function swapOldIcon() {
-		if(isOldIcon = !isOldIcon) changeIcon('bf-old');
-		else changeIcon('bf');
+	function changeIconGraphic(gr){
+		loadGraphic(gr); //Load stupidly first for getting the file size
+		loadGraphic(gr, true, Math.floor(width * 0.5), Math.floor(height)); //Then load it fr
+		iconOffsets[0] = (width - 150) * 0.5;
+		iconOffsets[1] = (width - 150) * 0.5;
+		updateHitbox();
+
+		animation.add(char, [0, 1], 0, false, isPlayer);
+		animation.play(char);
+	}
+
+	public function swapOldIcon() 
+	{
+		var oldIcon = Paths.image('icons/$char-old');
+		
+		if (!isOldIcon && oldIcon != null){
+			changeIconGraphic(oldIcon);
+			
+			isOldIcon = true;
+		}else if (isOldIcon){
+			// shitty workaround
+			var ugh = char;
+			char = "";
+			changeIcon(ugh);
+
+			isOldIcon = false;
+		}
 	}
 
 	private var iconOffsets:Array<Float> = [0, 0];
@@ -42,17 +69,10 @@ class HealthIcon extends FlxSprite
 			if(file == null) 
 				file = Paths.image('icons/face'); // Prevents crash from missing icon
 
-			loadGraphic(file); //Load stupidly first for getting the file size
-			loadGraphic(file, true, Math.floor(width * 0.5), Math.floor(height)); //Then load it fr
-			iconOffsets[0] = (width - 150) * 0.5;
-			iconOffsets[1] = (width - 150) * 0.5;
-			updateHitbox();
-
-			animation.add(char, [0, 1], 0, false, isPlayer);
-			animation.play(char);
+			changeIconGraphic(file);
 			this.char = char;
 
-			antialiasing = ClientPrefs.globalAntialiasing;
+			// antialiasing = ClientPrefs.globalAntialiasing && !char.endsWith("-pixel");
 		}
 	}
 

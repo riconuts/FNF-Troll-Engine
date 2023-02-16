@@ -58,13 +58,15 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		}
 		optionsArray.push(option);
 
-		/*var option:GameplayOption = new GameplayOption('Playback Rate', 'songspeed', 'float', 1);
+		/*
+		var option:GameplayOption = new GameplayOption('Playback Rate', 'songspeed', 'float', 1);
 		option.scrollSpeed = 1;
 		option.minValue = 0.5;
 		option.maxValue = 2.5;
 		option.changeValue = 0.1;
 		option.displayFormat = '%vX';
-		optionsArray.push(option);*/
+		optionsArray.push(option);
+		*/
 
 		var option:GameplayOption = new GameplayOption('Health Gain Multiplier', 'healthgain', 'float', 1);
 		option.scrollSpeed = 2.5;
@@ -82,6 +84,19 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		option.displayFormat = '%vX';
 		optionsArray.push(option);
 
+		//// andromeda engine modifiers!!!!
+		var option:GameplayOption = new GameplayOption("Health Drain", 'healthDrain', 'string', 'Disabled', [
+			"Disabled",
+			"Basic",
+			"Average",
+			"Heavy"
+		]);
+		optionsArray.push(option);
+
+		var option:GameplayOption = new GameplayOption("Opponent Fights Back", 'opponentFightsBack', 'bool', false);
+		optionsArray.push(option);
+
+		////
 		var option:GameplayOption = new GameplayOption('Instakill on Miss', 'instakill', 'bool', false);
 		optionsArray.push(option);
 
@@ -89,6 +104,10 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		optionsArray.push(option);
 
 		var option:GameplayOption = new GameplayOption('Botplay', 'botplay', 'bool', false);
+		optionsArray.push(option);
+
+		//// Niixx
+		var option:GameplayOption = new GameplayOption('bitch baby pussy mode', 'disableModcharts', 'bool', false);
 		optionsArray.push(option);
 	}
 
@@ -109,8 +128,9 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		
 		var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
 		bg.scrollFactor.set();
-		bg.alpha = 0.6;
+		bg.alpha = 0.3;
 		add(bg);
+		FlxTween.tween(bg, {alpha: 0.7}, 0.6);
 
 		// avoids lagspikes while scrolling through menus!
 		grpOptions = new FlxTypedGroup<Alphabet>();
@@ -437,6 +457,7 @@ class GameplayOption
 		switch(type)
 		{
 			case 'string':
+				this.name += " ";
 				var num:Int = options.indexOf(getValue());
 				if(num > -1) {
 					curOption = num;

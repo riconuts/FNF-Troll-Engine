@@ -16,20 +16,20 @@ class ReceptorScrollModifier extends NoteModifier {
 	override function getName()
 		return 'receptorScroll';
 
-	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
-	{
+  override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
+  {
     var diff = timeDiff;
-		var sPos = Conductor.songPosition;
-		var vDiff = -(-diff - sPos) / moveSpeed;
-    var reversed = Math.floor(vDiff)%2==0;
+    var sPos = Conductor.songPosition;
+    var vDiff = -(-diff - sPos) / moveSpeed;
+    var reversed = Math.floor(vDiff)%2 == 0;
 
     var startY = pos.y;
-    var revPerc = reversed?1-vDiff%1:vDiff%1;
+    var revPerc = reversed ? 1-vDiff%1 : vDiff%1;
     // haha perc 30
-		var upscrollOffset = 50;
+    var upscrollOffset = 50;
     var downscrollOffset = FlxG.height - 150;
 
-		var endY = upscrollOffset + ((downscrollOffset - Note.swagWidth / 2) * revPerc);
+    var endY = upscrollOffset + ((downscrollOffset - Note.swagWidth * 0.5) * revPerc);
 
     pos.y = lerp(startY, endY, getValue(player));
 

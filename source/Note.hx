@@ -132,11 +132,18 @@ class Note extends FlxSprite
 	public var copyAngle:Bool = true;
 	public var copyAlpha:Bool = true;
 
-	public var hitHealth:Float = 0.023;
-	public var missHealth:Float = 0.0475;
 	public var rating:String = 'unknown';
 	public var ratingMod:Float = 0; //9 = unknown, 0.25 = shit, 0.5 = bad, 0.75 = good, 1 = sick
 	public var ratingDisabled:Bool = false;
+
+	// kadeium
+	public var ratingHealth:Map<String, Float> = [ 
+		"sick" => 0.04,
+		"good" => 0,
+		"bad" => -0.03,
+		"shit" => -0.06
+	];
+	public var missHealth:Float = 0.04;
 
 	public var texture(default, set):String = null;
 
@@ -180,11 +187,13 @@ class Note extends FlxSprite
 
 	private function set_noteType(value:String):String {
 		noteSplashTexture = PlayState.SONG.splashSkin;
+
 		if(isQuant){
 			var idx = quants.indexOf(quant);
 			colorSwap.hue = ClientPrefs.quantHSV[idx][0] / 360;
 			colorSwap.saturation = ClientPrefs.quantHSV[idx][1] / 100;
 			colorSwap.brightness = ClientPrefs.quantHSV[idx][2] / 100;
+			
 			if (noteSplashTexture == 'noteSplashes' || noteSplashTexture == null || noteSplashTexture.length <= 0 )
 				noteSplashTexture = 'QUANTnoteSplashes'; // give it da quant notesplashes!!
 		}else{
@@ -247,9 +256,9 @@ class Note extends FlxSprite
 		this.prevNote = prevNote;
 		isSustainNote = sustainNote;
 
-		if (ClientPrefs.noteSkin == 'Quants' && canQuant){
+		if (canQuant && ClientPrefs.noteSkin == 'Quants'){
 			var beat = Conductor.getBeatInMeasure(strumTime);
-			if(prevNote!=null && isSustainNote)
+			if(prevNote != null && isSustainNote)
 				quant = prevNote.quant;
 			else
 				quant = getQuant(beat);
@@ -319,6 +328,7 @@ class Note extends FlxSprite
 		x += offsetX;
 	}
 
+	public static var quantShitCache = new Map<String, String>();
 	var lastNoteScaleToo:Float = 1;
 	public var originalHeightForCalcs:Float = 6;
 	public function reloadNote(?prefix:String = '', ?texture:String = '', ?suffix:String = '') {
@@ -349,14 +359,24 @@ class Note extends FlxSprite
 
 		isQuant = false;
 		
-		if (ClientPrefs.noteSkin == 'Quants' && canQuant)
+
+		if (canQuant && ClientPrefs.noteSkin == 'Quants')
 		{
-			if (Paths.exists(Paths.getPath("images/QUANT" + blahblah + ".png", IMAGE))
+			var texture = quantShitCache.get(blahblah); // did i do this right, is this the right thing to do
+
+			if (texture != null){
+				blahblah = texture;
+				isQuant = true;
+
+			}else if (Paths.exists(Paths.getPath("images/QUANT" + blahblah + ".png", IMAGE))
 				#if MODS_ALLOWED
-				|| Paths.exists(Paths.modsImages("QUANT" + blahblah + ".png"))
-				#end) { // this can probably only be done once and then added to some sort of cache
-				// soon:tm:
-				blahblah = "QUANT" + blahblah;
+				|| Paths.exists(Paths.modsImages("QUANT" + blahblah))
+				#end) {
+
+				var texture = "QUANT" + blahblah;
+				quantShitCache.set(blahblah, texture);
+
+				blahblah = texture;
 				isQuant = true;
 			}
 		}

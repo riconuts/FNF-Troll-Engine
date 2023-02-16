@@ -2,7 +2,18 @@ package;
 
 // thanks neb
 
-import flixel.FlxSprite;
+import flixel.math.FlxMath;
+
+import flixel.graphics.FlxGraphic;
+import flash.media.Sound;
+
+import openfl.display.BitmapData;
+import openfl.Assets as OpenFlAssets;
+
+#if sys
+import sys.FileSystem;
+#end
+
 #if MULTICORE_LOADING
 import sys.thread.Thread;
 
@@ -18,11 +29,80 @@ typedef AssetPreload =
 {
 	var path:String;
 	@:optional var type:String;
-	@:optional var library:String;
+	@:optional var library:String; // useless
 	@:optional var terminate:Bool;
 }
 
-class Cache{
+class Cache
+{
+	// I believe the shit that causes the game to hang up while loading is writing stuff to the cache map
+	// so, i'll only add it to the cache after all the loading is done i guess...
+
+	// Considering the amount of shit you need to do for this to work this properly, is it even worth it?
+	// Does this improve loading times or not?
+
+	public static function returnUncachedGraphic(key:String, ?library:String)
+	{
+		#if MODS_ALLOWED
+		var modKey:String = Paths.modsImages(key);
+		if (FileSystem.exists(modKey))
+		{
+			if (Paths.currentTrackedAssets.exists(modKey))
+				return null;
+
+			var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(modKey), false, modKey);
+			newGraphic.persist = true;
+
+			return {key: modKey, graphic: newGraphic};
+		}
+		#end
+
+		var path = Paths.getPath('images/$key.png', IMAGE, library);
+		if (OpenFlAssets.exists(path, IMAGE))
+		{
+			if (Paths.currentTrackedAssets.exists(modKey))
+				return null;
+
+			var newGraphic:FlxGraphic = FlxG.bitmap.add(path, false, path);
+			newGraphic.persist = true;
+					
+			return {key: path, graphic: newGraphic};
+		}
+		
+		return null;
+	}
+
+	inline static var SOUND_EXT = Paths.SOUND_EXT;
+
+	public static function returnUncachedSound(path:String, ?library:String)
+	{
+		var daPath = '$path.$SOUND_EXT';
+		
+		#if MODS_ALLOWED
+		var file:String = Paths.modFolders(daPath);
+
+		if (Paths.currentTrackedSounds.exists(file))
+			return null;
+		if (FileSystem.exists(file))
+			return {key: file, sound: Sound.fromFile(file)}
+		#end
+		
+		var gottenPath:String = Paths.getPath(daPath, SOUND, library);
+		
+		if (Paths.currentTrackedSounds.exists(gottenPath))
+			return null;
+		
+		#if (!html5)
+		var leSound = Sound.fromFile(gottenPath);
+		#else
+		var leSound = OpenFlAssets.getSound(gottenPath); // dose this shit work idk
+		#end
+
+		if (leSound != null)
+			return {key: gottenPath, sound: leSound};
+		
+		return null;
+	}
 
 	static public function load(toLoad:AssetPreload){
 		switch (toLoad.type){
@@ -42,109 +122,104 @@ class Cache{
 	static public function loadWithList(shitToLoad:Array<AssetPreload>, ?multicoreOnly = false)
 	{
 		#if loadBenchmark
-		var currentTime = Sys.time();
+		var startTime = Sys.time();
 		#end
 
 		#if MULTICORE_LOADING
-			// TODO: go through shitToLoad and clear it of repeats as to not waste time loadin shit that already exists
-
-			var threadLimit:Int = ClientPrefs.loadingThreads;
-			if (shitToLoad.length > 0 && threadLimit > 1)
-			{
-				// thanks shubs -neb
-				for (shit in shitToLoad)
-					shit.terminate = false; // do not
-
-				var count = shitToLoad.length;
-				if (threadLimit > count)
-					threadLimit = count; // only use as many as it needs
-
-				var threads:Array<Thread> = [];
-				var finished:Bool = false;
-
-				trace("loading " + count + " items with " + threadLimit + " threads");
-
-				var main = Thread.current();
-				var loadIdx:Int = 0;
-
-				for (i in 0...threadLimit)
-				{
-					var thread:Thread = Thread.create(() ->
-					{
-						while (true)
-						{
-							var toLoad:Null<AssetPreload> = Thread.readMessage(true); // get the next thing that should be loaded
-							if (toLoad != null)
-							{
-								if (toLoad.terminate == true)
-									break;
-								Cache.load(toLoad);
-								#if traceLoading
-								trace("getting next asset");
-								#end
-								main.sendMessage({ // send message so that it can get the next thing to load
-									thread: Thread.current(),
-									asset: toLoad,
-									terminated: false
-								});
-							}
-						}
-						main.sendMessage({ // send message so that it can get the next thing to load
-							thread: Thread.current(),
-							asset: '',
-							terminated: true
-						});
-						return;
-					});
-
-					threads.push(thread);
-				}
-				for (thread in threads)
-					thread.sendMessage(shitToLoad.pop()); // gives the thread the top thing to load
-				while (loadIdx < count)
-				{
-					var res:Null<PreloadResult> = Thread.readMessage(true); // whenever a thread loads its asset, it sends a message to get a new asset for it to load
-					if (res != null)
-					{
-						if (res.terminated)
-						{
-							if (threads.contains(res.thread))
-							{
-								threads.remove(res.thread); // so it wont have a message sent at the end
-							}
-						}
-						else
-						{
-							loadIdx++;
-							#if traceLoading
-							trace("loaded " + loadIdx + " out of " + count);
-							#end
-							if (shitToLoad.length > 0)
-								res.thread.sendMessage(shitToLoad.pop()); // gives the thread the next thing it should load
-							else
-								res.thread.sendMessage({path: '', library: '', terminate: true}); // terminate the thread
-						}
-					}
-				};
-				//trace(loadIdx, count);
-				//var idx:Int = 0;
-				for (t in threads)
-				{
-					t.sendMessage({path: '', library: '', terminate: true}); // terminate all threads
-					//trace("terminating thread " + idx);
-					//idx++;
-				}
-				finished = true;
-			}else
-		#end
-			if (!multicoreOnly){
-				for (shit in shitToLoad)
-					Cache.load(shit);
-				return;
+		var threadLimit:Int = FlxMath.minInt(shitToLoad.length, ClientPrefs.loadingThreads);
+		
+		if (threadLimit > 0){
+			// clear duplicates
+			var uniqueMap:Map<String, AssetPreload> = [];
+			for (shit in shitToLoad){ 
+				if (shit.type == null)
+					shit.type = "IMAGE";
+				uniqueMap.set(shit.type+" "+shit.path, shit);
 			}
+			var shitToLoad = [for (k => v in uniqueMap){/*trace(k);*/ v;}];
+			trace('loading ${shitToLoad.length} items.');
+
+			var mainThread = Thread.current();
+			var makeThread = Thread.create.bind(function(){
+				var loadedGraphics:Map<String, FlxGraphic> = [];
+				var loadedSounds:Map<String, Sound> = [];
+
+				var thisThread = Thread.current();
+
+				while (true){
+					var msg:Dynamic = Thread.readMessage(true);
+
+					if (msg == false){ // time to die
+						mainThread.sendMessage({thread: thisThread, terminate: true, loadedGraphics: loadedGraphics, loadedSounds: loadedSounds});
+						break;
+					}
+
+					switch (msg.type){
+						case 'SOUND':
+							var result = returnUncachedSound('sounds/${msg.path}', msg.library);
+							if (result != null) loadedSounds.set(result.key, result.sound);
+						case 'MUSIC':
+							var result = returnUncachedSound('music/${msg.path}', msg.library);
+							if (result != null) loadedSounds.set(result.key, result.sound);
+						case 'SONG':
+							var result = returnUncachedSound('songs/${msg.path}', msg.library);
+							if (result != null) loadedSounds.set(result.key, result.sound);
+						default:
+							var result = returnUncachedGraphic(msg.path, msg.library);
+							if (result != null) loadedGraphics.set(result.key, result.graphic);
+					}
+					
+					mainThread.sendMessage({thread: thisThread, terminate: false});
+				}
+			});
+
+			var threadArray:Array<Thread> = [for (i in 0...threadLimit){
+				var thread = makeThread();
+				thread.sendMessage(shitToLoad.pop());
+				thread;
+			}];
+
+			while (true)
+			{
+				var msg:Dynamic = Thread.readMessage(true);
+				var daThread:Thread = msg.thread;
+
+				if (shitToLoad.length > 0){
+					daThread.sendMessage(shitToLoad.pop());
+					//trace('shit left: ${shitToLoad.length}');
+				}else if (msg.terminate != true){
+					daThread.sendMessage(false); // kys
+
+				}else{
+					// you can't iterate through dynamic values blah blah blah
+					var loadedGraphics:Map<String, FlxGraphic> = msg.loadedGraphics;
+					var loadedSounds:Map<String, Sound> = msg.loadedSounds;
+
+					for (key => value in loadedGraphics){
+						Paths.localTrackedAssets.push(key);
+						Paths.currentTrackedAssets.set(key, value);
+						//trace('loaded:$key',value);
+					}
+					for (key => value in loadedSounds){
+						Paths.localTrackedAssets.push(key);
+						Paths.currentTrackedSounds.set(key, value);
+						//trace('loaded:$key',value);
+					}
+					
+					threadArray.remove(daThread);
+					//trace('thread terminated, ${threadArray.length} left.');
+					if (threadArray.length < 1)
+						break;
+				}
+			}
+		}
+		else
+		#end
+		if (!multicoreOnly)
+			for (shit in shitToLoad) load(shit);
 
 		#if loadBenchmark
-		trace("loaded in " + (Sys.time() - currentTime));
+		trace('finished loading in ${Sys.time() - startTime} seconds.');
 		#end
 	}
 }

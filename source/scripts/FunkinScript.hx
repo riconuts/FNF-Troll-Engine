@@ -67,6 +67,7 @@ class FunkinScript {
 			set('healthLossMult', PlayState.instance.healthLoss);
 			set('instakillOnMiss', PlayState.instance.instakillOnMiss);
 			set('botPlay', PlayState.instance.cpuControlled);
+			set('disableModcharts', PlayState.instance.disableModcharts);
 			set('practice', PlayState.instance.practiceMode);
 			set('startedCountdown', false);
 		}else

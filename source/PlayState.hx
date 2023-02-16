@@ -187,6 +187,10 @@ class PlayState extends MusicBeatState
 	//Gameplay settings
 	public var healthGain:Float = 1;
 	public var healthLoss:Float = 1;
+
+	public var opponentHPDrain:Float = 0.0;
+	public var healthDrain:Float = 0.0;
+
 	public var instakillOnMiss:Bool = false;
 	public var cpuControlled(default, set) = false;
 	function set_cpuControlled(value){
@@ -196,6 +200,7 @@ class PlayState extends MusicBeatState
 		
 		return value;
 	}
+	public var disableModcharts:Bool = false;
 	public var practiceMode:Bool = false;
 
 	public var botplaySine:Float = 0;
@@ -354,6 +359,7 @@ class PlayState extends MusicBeatState
 	var finishedCreating =false;
 	override public function create()
 	{
+		Note.quantShitCache.clear();
 		FunkinHScript.defaultVars.clear();
 		Paths.clearStoredMemory();
 
@@ -432,10 +438,30 @@ class PlayState extends MusicBeatState
 		instakillOnMiss = ClientPrefs.getGameplaySetting('instakill', false);
 		practiceMode = ClientPrefs.getGameplaySetting('practice', false);
 		cpuControlled = ClientPrefs.getGameplaySetting('botplay', false);
+		disableModcharts = ClientPrefs.getGameplaySetting('disableModcharts', true);
+
+		healthDrain = switch(ClientPrefs.getGameplaySetting('healthDrain', "Disabled")){
+			default: 0;
+			case "Basic": 0.00055;
+			case "Average": 0.0007;
+			case "Heavy": 0.00085;
+		};
+		opponentHPDrain = ClientPrefs.getGameplaySetting('opponentFightsBack', false) ? 0.0182 : 0;
 		
 		// Camera shit
 		camGame = new FlxCamera();
 		camHUD = new FlxCamera();
+		if (ClientPrefs.midScroll){ // fucking modchart system
+			if (ClientPrefs.downScroll){
+				camHUD.y += 6;
+				camHUD.y -= (camHUD.height - 112) * 0.5;
+				camHUD.height += Math.ceil(-camHUD.y);
+			}else{
+				camHUD.y -= 50;
+				camHUD.y += (camHUD.height - 112) * 0.5;
+			}
+		}
+
 		camOverlay = new FlxCamera();
 		camOther = new FlxCamera();
 		camOverlay.bgColor.alpha = 0;
@@ -1108,6 +1134,7 @@ class PlayState extends MusicBeatState
 	public var introAlts:Array<Null<String>> = [null, 'ready', 'set', 'go'];
 
 	public var countdownSpr:FlxSprite;
+	var countdownTwn:FlxTween;
 	public static var startOnTime:Float = 0;
 
 	public function startCountdown():Void
@@ -1194,7 +1221,10 @@ class PlayState extends MusicBeatState
 
 			var sprImage:Null<String> = introAlts[swagCounter];
 			if (sprImage != null){
-				countdownSpr = new FlxSprite().loadGraphic(Paths.image(sprImage));
+				if (countdownTwn != null)
+					countdownTwn.cancel();
+
+				countdownSpr = new FlxSprite(0, 0, Paths.image(sprImage));
 				countdownSpr.scrollFactor.set();
 				countdownSpr.updateHitbox();
 				
@@ -1202,12 +1232,13 @@ class PlayState extends MusicBeatState
 				countdownSpr.antialiasing = ClientPrefs.globalAntialiasing;
 				
 				insert(members.indexOf(notes), countdownSpr);
-				FlxTween.tween(countdownSpr, {alpha: 0}, Conductor.crochet * 0.001, {
+
+				countdownTwn = FlxTween.tween(countdownSpr, {alpha: 0}, Conductor.crochet * 0.001, {
 					ease: FlxEase.cubeInOut,
-					onComplete: function(twn:FlxTween)
-					{
-						remove(countdownSpr);
-						countdownSpr.destroy();
+					onComplete: function(twn){
+						countdownTwn.destroy();
+						countdownTwn = null;
+						remove(countdownSpr).destroy();
 					}
 				});
 			}
@@ -1874,11 +1905,13 @@ class PlayState extends MusicBeatState
 		for (i in 0...4){
 			var babyArrow:StrumNote = new StrumNote(
 				ClientPrefs.middleScroll ? STRUM_X_MIDDLESCROLL : STRUM_X, 
-				ClientPrefs.downScroll ? FlxG.height - 150 : 50, 
+				ClientPrefs.downScroll ? FlxG.height - 162 : 50, 
 				i, 
 				player
 			);
+
 			babyArrow.downScroll = ClientPrefs.downScroll;
+
 			if (!isStoryMode && !skipArrowStartTween)
 			{
 				//babyArrow.y -= 10;
@@ -2053,16 +2086,19 @@ class PlayState extends MusicBeatState
 
 	override public function update(elapsed:Float)
 	{
-		/*if (FlxG.keys.justPressed.NINE)
-		{
+		if (FlxG.keys.justPressed.NINE)
 			iconP1.swapOldIcon();
-		}*/
 
 		setOnScripts('curDecStep', curDecStep);
 		setOnScripts('curDecBeat', curDecBeat);
 
 		callOnScripts('onUpdate', [elapsed]);
-		
+
+		if (FlxG.sound.music.playing && !inCutscene && health > healthDrain)
+		{
+			health -= healthDrain * (elapsed / (1/60));
+		}
+
 		if(!inCutscene) {
 			var lerpVal:Float = CoolUtil.boundTo(elapsed * 2.4 * cameraSpeed, 0, 1);
 
@@ -3398,7 +3434,9 @@ class PlayState extends MusicBeatState
 		combo = 0;
 		while (lastCombos.length > 0)
 			lastCombos.shift().kill();	
+		
 		health -= daNote.missHealth * healthLoss;
+		
 		if(instakillOnMiss)
 		{
 			vocals.volume = 0;
@@ -3432,7 +3470,23 @@ class PlayState extends MusicBeatState
 		#if LUA_ALLOWED
 		callOnLuas('noteMiss', [notes.members.indexOf(daNote), daNote.noteData, daNote.noteType, daNote.isSustainNote, daNote.ID]);
 		#end	
+	
+		//// KE SUSTAIN NOTES
+		var num = 0;
+		for (child in (daNote.isSustainNote ? daNote.parent.tail : daNote.tail)){
+			child.tooLate = true;
+			child.ignoreNote = true;
+			child.blockHit = true;
+			num++;
+		}
 
+		if (num > 0){
+			health -= 0.2;
+			totalPlayed += num;
+			songScore -= num * 10;
+		}
+			
+		////
 		if (daNote.noteScript!=null)
 		{
 			var script:Dynamic = daNote.noteScript;
@@ -3572,6 +3626,9 @@ class PlayState extends MusicBeatState
 		}
 		if (!note.isSustainNote)
 		{
+			if (opponentHPDrain > 0 && health > opponentHPDrain)
+				health -= opponentHPDrain;
+
 			if(modchartObjects.exists('note${note.ID}'))modchartObjects.remove('note${note.ID}');
 			note.kill();
 			notes.remove(note, true);
@@ -3638,11 +3695,13 @@ class PlayState extends MusicBeatState
 			if(combo > 9999) combo = 9999;
 			popUpScore(note);
 		}
-		health += note.hitHealth * healthGain;
+
+		var hitHealth = note.ratingHealth.get(note.rating);
+		health += hitHealth == null ? 0 : hitHealth * healthGain;
 
 		// Sing animations
 
-		var char = note.gfNote?gf:boyfriend;
+		var char = note.gfNote ? gf : boyfriend;
 		char.callOnScripts("playNote", [note]);
 
 		if(!note.noAnimation) {

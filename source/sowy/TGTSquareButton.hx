@@ -1,5 +1,6 @@
 package sowy;
 
+import flixel.tweens.FlxTween.TweenOptions;
 import flixel.tweens.*;
 
 class TGTSquareButton extends SowyBaseButton
@@ -37,18 +38,26 @@ class TGTSquareButton extends SowyBaseButton
 			shk = 0;
 			return;
 		}
-		else if (shk == 0)
-			FlxTween.tween(this, {color: 0xFF0000}, 0.1, {
+		else if (shk == 0){
+			var tweenShit:TweenOptions = {
 				ease: FlxEase.backOut,
-				onComplete: function(twn)
-				{
+				onComplete: function(twn){
 					twn.destroy();
-					FlxTween.tween(this, {color: 0xFFFFFF}, 0.1, {ease: FlxEase.backOut, onComplete: function(twn)
-					{
-						twn.destroy();
-					}});
+					var twnShit:TweenOptions = {ease: FlxEase.backOut, onComplete: function(t){t.destroy();}};
+
+					if (ClientPrefs.flashing)
+						FlxTween.tween(this, {color: 0xFFFFFFFF}, 0.1, twnShit);
+					else
+						FlxTween.color(this, 0.05, color, 0xFFFFFFFF, twnShit);
 				}
-			});
+			};
+
+			if (ClientPrefs.flashing)
+				// this wasn't the proper way to tween between but i like how it looked so im keeping it lol!!
+				FlxTween.tween(this, {color: 0xFFFF6666}, 0.1, tweenShit);
+			else
+				FlxTween.color(this, 0.1, color, 0xFFFF0000, tweenShit);
+		}
 
 		var state:Array<Dynamic> = [
 			{x: -width * its, y: height * its},

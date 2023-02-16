@@ -47,7 +47,10 @@ class Paths
 	public static var dumpExclusions:Array<String> = [
 		'assets/music/freakyIntro.$SOUND_EXT',
 		'assets/music/freakyMenu.$SOUND_EXT',
-		'assets/music/breakfast.$SOUND_EXT'
+		'assets/music/breakfast.$SOUND_EXT',
+		'content/global/music/freakyIntro.$SOUND_EXT',
+		'content/global/music/freakyMenu.$SOUND_EXT',
+		'content/global/music/breakfast.$SOUND_EXT'
 	];
 
 	/// haya I love you for the base cache dump I took to the max
@@ -132,7 +135,7 @@ class Paths
 		currentLevel = name.toLowerCase();
 	}
 
-	public static function getPath(file:String, type:AssetType, ?library:Null<String> = null)
+	public static function getPath(file:String, ?type:AssetType, ?library:Null<String> = null)
 	{
 		/* Fuck them libraries 
 
@@ -479,9 +482,8 @@ class Paths
 		if (FileSystem.exists(file))
 		{
 			if (!currentTrackedSounds.exists(file))
-			{
 				currentTrackedSounds.set(file, Sound.fromFile(file));
-			}
+			
 			localTrackedAssets.push(key);
 			return currentTrackedSounds.get(file);
 		}
@@ -494,13 +496,10 @@ class Paths
 			#if MODS_ALLOWED
 			currentTrackedSounds.set(gottenPath, Sound.fromFile('./' + gottenPath));
 			#else
-			{
-				var folder:String = '';
-				if (path == 'songs')
-					folder = 'songs:';
-
-				currentTrackedSounds.set(gottenPath, OpenFlAssets.getSound(folder + getPath('$path/$key.$SOUND_EXT', SOUND, library)));
-			}
+				currentTrackedSounds.set(
+					gottenPath, 
+					OpenFlAssets.getSound((path == 'songs' ? folder = 'songs:' : '') + getPath('$path/$key.$SOUND_EXT', SOUND, library))
+				);
 			#end
 		localTrackedAssets.push(gottenPath);
 		return currentTrackedSounds.get(gottenPath);
@@ -557,8 +556,10 @@ class Paths
 	
 	static public function modFolders(key:String)
 	{
-		if (Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0){
+		if (Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
+		{
 			var fileToCheck = mods(Paths.currentModDirectory + '/' + key);
+
 			if (FileSystem.exists(fileToCheck))
 				return fileToCheck;
 		}

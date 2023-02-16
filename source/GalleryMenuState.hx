@@ -52,6 +52,12 @@ class GalleryMenuState extends MusicBeatState
 		jukebox.label.setFormat(Paths.font("calibri.ttf"), 18, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
 		add(jukebox);
 
+		var jukebox = new SowyTextButton(15, 360, 0, "titles", 24, function(){
+			// MusicBeatState.switchState(new JukeboxState());
+        });
+		jukebox.label.setFormat(Paths.font("calibri.ttf"), 18, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
+		add(jukebox);
+
 		var cornerLeftText = new SowyTextButton(15, 720, 0, "← BACK", 32, goBack);
 		cornerLeftText.label.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
 		cornerLeftText.y -= cornerLeftText.height + 15;

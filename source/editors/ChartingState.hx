@@ -199,7 +199,7 @@ class ChartingState extends MusicBeatState
 				bpm: 150.0,
 				needsVoices: true,
 				arrowSkin: '',
-				splashSkin: 'noteSplashes',//idk it would crash if i didn't
+				splashSkin: '',
 				player1: 'bf',
 				player2: 'dad',
 				gfVersion: 'gf',
@@ -517,8 +517,8 @@ class ChartingState extends MusicBeatState
 			FlxUIDropDownMenuCustom.makeStrIdLabelArray(stages, true), 
 			function(character:String)
 			{
-				_song.stage = stages[Std.parseInt(_song.stage)];
-				trace('stage changed: $character, ${_song.stage}');
+				_song.stage = stages[Std.parseInt(character)];
+				trace('stage changed. index:$character, result:${_song.stage}');
 			}
 		);
 		stageDropDown.selectedLabel = _song.stage;
