@@ -1,4 +1,4 @@
-package;
+package gallery;
 
 import flixel.group.FlxSpriteGroup;
 import flixel.group.FlxGroup;
@@ -65,7 +65,7 @@ class ComicsMenuState extends MusicBeatState
 	}
 }
 
-// rip vs /v/
+// haha vs /v/
 
 class ComicReader extends MusicBeatState
 {

@@ -39,12 +39,6 @@ class StoryMenuState extends MusicBeatState
 
 	public var cameFromChapterMenu = false;
 
-	/*
-	public static function weekIsLocked(leWeek:WeekData):Bool {
-		return (!leWeek.startUnlocked && leWeek.weekBefore.length > 0 && (!weekCompleted.exists(leWeek.weekBefore) || !weekCompleted.get(leWeek.weekBefore)));
-	}
-	*/
-
 	override function create()
 	{
 		#if desktop

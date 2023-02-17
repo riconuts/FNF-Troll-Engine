@@ -1,12 +1,9 @@
-package;
+package gallery;
 
 import sowy.*;
 import flixel.text.FlxText;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
-import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
-import flixel.util.FlxTimer;
+import gallery.*;
 
 class GalleryMenuState extends MusicBeatState
 {

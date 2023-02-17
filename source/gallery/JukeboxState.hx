@@ -1,4 +1,4 @@
-package;
+package gallery;
 
 import flixel.util.FlxTimer;
 import flixel.system.FlxSound;
@@ -211,7 +211,7 @@ class JukeboxState extends MusicBeatState {
 
 		if (controls.BACK){
 			FlxG.autoPause = true;
-			MusicBeatState.switchState(new MainMenuState());
+			MusicBeatState.switchState(new GalleryMenuState());
         }
 
 		if (forward)

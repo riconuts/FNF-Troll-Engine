@@ -184,7 +184,19 @@ class PauseSubState extends MusicBeatSubstate
 					close();
 				case "Restart Song":
 
-					restartSong();
+					if (FlxG.keys.pressed.SHIFT){
+						PlayState.instance.paused = true; // For lua
+						FlxG.sound.music.volume = 0;
+						PlayState.instance.vocals.volume = 0;
+						
+						PlayState.SONG = Song.loadFromJson(PlayState.SONG.song, PlayState.SONG.song);
+
+						Paths.clearStoredMemory();
+						Paths.clearUnusedMemory();
+
+						MusicBeatState.resetState();
+					}else
+						restartSong();
 				case "Leave Charting Mode":
 
 					restartSong();

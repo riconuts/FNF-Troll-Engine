@@ -1,7 +1,9 @@
 package;
 
 import flixel.group.FlxSpriteGroup;
+#if ACHIEVEMENTS_ALLOWED
 import Achievements;
+#end
 import editors.MasterEditorMenu;
 import flixel.FlxCamera;
 import flixel.FlxG;

@@ -17,11 +17,11 @@ import sys.FileSystem;
 #if MULTICORE_LOADING
 import sys.thread.Thread;
 
-typedef PreloadResult =
-{
+typedef LoadingThreadMessage = {
 	var thread:Thread;
-	var asset:String;
-	@:optional var terminated:Bool;
+	var ?terminate:Bool;
+	var ?loadedGraphics:Map<String, FlxGraphic>;
+	var ?loadedSounds:Map<String, Sound>;
 }
 #end
 
@@ -30,16 +30,12 @@ typedef AssetPreload =
 	var path:String;
 	@:optional var type:String;
 	@:optional var library:String; // useless
-	@:optional var terminate:Bool;
 }
 
 class Cache
 {
 	// I believe the shit that causes the game to hang up while loading is writing stuff to the cache map
 	// so, i'll only add it to the cache after all the loading is done i guess...
-
-	// Considering the amount of shit you need to do for this to work this properly, is it even worth it?
-	// Does this improve loading times or not?
 
 	public static function returnUncachedGraphic(key:String, ?library:String)
 	{
@@ -60,7 +56,7 @@ class Cache
 		var path = Paths.getPath('images/$key.png', IMAGE, library);
 		if (OpenFlAssets.exists(path, IMAGE))
 		{
-			if (Paths.currentTrackedAssets.exists(modKey))
+			if (Paths.currentTrackedAssets.exists(path))
 				return null;
 
 			var newGraphic:FlxGraphic = FlxG.bitmap.add(path, false, path);
@@ -140,7 +136,7 @@ class Cache
 			trace('loading ${shitToLoad.length} items.');
 
 			var mainThread = Thread.current();
-			var makeThread = Thread.create.bind(function(){
+			var makeThread = Thread.create.bind(() -> {
 				var loadedGraphics:Map<String, FlxGraphic> = [];
 				var loadedSounds:Map<String, Sound> = [];
 
@@ -181,32 +177,32 @@ class Cache
 
 			while (true)
 			{
-				var msg:Dynamic = Thread.readMessage(true);
-				var daThread:Thread = msg.thread;
+				var msg:LoadingThreadMessage = Thread.readMessage(true);
 
-				if (shitToLoad.length > 0){
-					daThread.sendMessage(shitToLoad.pop());
+				if (shitToLoad.length > 0) // send more shit
+				{
+					msg.thread.sendMessage(shitToLoad.pop());
 					//trace('shit left: ${shitToLoad.length}');
-				}else if (msg.terminate != true){
-					daThread.sendMessage(false); // kys
+				}
+				else if (msg.terminate != true) // kys
+				{
+					msg.thread.sendMessage(false); 
 
-				}else{
-					// you can't iterate through dynamic values blah blah blah
-					var loadedGraphics:Map<String, FlxGraphic> = msg.loadedGraphics;
-					var loadedSounds:Map<String, Sound> = msg.loadedSounds;
-
-					for (key => value in loadedGraphics){
+				}
+				else // the end
+				{ 
+					for (key => value in msg.loadedGraphics){
 						Paths.localTrackedAssets.push(key);
 						Paths.currentTrackedAssets.set(key, value);
 						//trace('loaded:$key',value);
 					}
-					for (key => value in loadedSounds){
+					for (key => value in msg.loadedSounds){
 						Paths.localTrackedAssets.push(key);
 						Paths.currentTrackedSounds.set(key, value);
 						//trace('loaded:$key',value);
 					}
 					
-					threadArray.remove(daThread);
+					threadArray.remove(msg.thread);
 					//trace('thread terminated, ${threadArray.length} left.');
 					if (threadArray.length < 1)
 						break;

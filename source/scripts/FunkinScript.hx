@@ -61,7 +61,7 @@ class FunkinScript {
 			set('isStoryMode', PlayState.isStoryMode);
 			set('weekRaw', PlayState.storyWeek);
 			set('seenCutscene', PlayState.seenCutscene);
-			set('week', WeekData.weeksList[PlayState.storyWeek]);
+			// set('week', WeekData.weeksList[PlayState.storyWeek]);
 			set('songLength', flixel.FlxG.sound.music.length);
 			set('healthGainMult', PlayState.instance.healthGain);
 			set('healthLossMult', PlayState.instance.healthLoss);
