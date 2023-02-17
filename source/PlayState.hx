@@ -438,7 +438,7 @@ class PlayState extends MusicBeatState
 		instakillOnMiss = ClientPrefs.getGameplaySetting('instakill', false);
 		practiceMode = ClientPrefs.getGameplaySetting('practice', false);
 		cpuControlled = ClientPrefs.getGameplaySetting('botplay', false);
-		disableModcharts = ClientPrefs.getGameplaySetting('disableModcharts', true);
+		disableModcharts = ClientPrefs.getGameplaySetting('disableModcharts', false);
 
 		healthDrain = switch(ClientPrefs.getGameplaySetting('healthDrain', "Disabled")){
 			default: 0;
