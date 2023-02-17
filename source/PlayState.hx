@@ -798,7 +798,8 @@ class PlayState extends MusicBeatState
 				gf.visible = false;
 		}
 
-		// in case you want to layer shit in a specific way (like in infinigger for example)
+		// in case you want to layer shit in a specific way (like in infimario for example)
+		// RICO CAN WE STOP USING SLURS IN THE CODE
 		if (Globals.Function_Stop != callOnHScripts("onAddSpriteGroups", []))
 		{
 			add(stage);
