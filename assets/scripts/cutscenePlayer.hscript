@@ -1,0 +1,40 @@
+// This script calls the cutscene substate. Thats it.
+
+if (!PlayState.isStoryMode || PlayState.seenCutscene){
+	return;
+}
+
+PlayState.seenCutscene = false;
+
+importClass("flixel.addons.transition.FlxTransitionableState");
+FlxTransitionableState.skipNextTransIn = true;
+
+function onStartCountdown()
+{
+	trace(PlayState.seenCutscene ? "Start cutscene was already seen, skipping." : "Start cutscene hasn't been seen, playing.");
+
+	if (!PlayState.seenCutscene)
+	{
+		PlayState.seenCutscene = true;
+		
+		var stuff = newMap();
+		stuff.set("cutsceneName", game.songName);
+		stuff.set("onComplete", game.startCountdown);
+		
+		var cutsceneHandler = new HScriptSubstate("cutscene", stuff);
+		if (cutsceneHandler.script != null && cutsceneHandler.script.get("cutsceneScript") != null){
+			trace("opening cutscene state");
+			game.openSubState(cutsceneHandler);
+			return Function_Stop;
+		}
+		else{
+			cutsceneHandler.destroy();
+			trace("no cutscene loaded");
+		}
+
+	}
+	else if (PlayState.seenCutscene)
+	{
+		return Function_Continue;
+	}
+}

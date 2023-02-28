@@ -1,0 +1,60 @@
+update = null;
+onBeatHit = null;
+onStepHit = null;
+
+function onCreatePost(){
+     /*
+	var count = 0;
+	var gf = 0;
+   
+	for (note in PlayState.instance.unspawnNotes){
+		if (note.mustPress && note.parent == null){
+			if (note.noteType == "GF Sing")
+				gf++;
+			else
+				count++;
+		}
+	}
+	trace(count + " player notes ", gf, " gf notes");
+    */
+
+	if (PlayState.chartingMode != true)
+		return;
+
+	var game = getInstance();
+	importClass("flixel.text.FlxText");
+
+	var scoreTxt = new FlxText(0, downscroll ? 0 : 700, FlxG.width, "", 20);
+	scoreTxt.setFormat(Paths.font("calibri.ttf"), 20, 0xFFFFFFFF, null, null, 0xFF000000);
+	scoreTxt.scrollFactor.set();
+	scoreTxt.borderSize = 1.25;
+	scoreTxt.cameras = [game.camOverlay];
+	game.add(scoreTxt);
+
+	onBeatHit = function(){
+		scoreTxt.text = 'curBeat: '+curBeat+', curStep: '+curStep;
+	};
+
+	onStepHit = function(){
+		scoreTxt.text = 'curBeat: '+curBeat+', curStep: '+curStep;
+	};
+	
+
+	var camTxt = new FlxText(0, scoreTxt.y + (downscroll ? 24 : -24), FlxG.width, "puke", 20);
+	camTxt.setFormat(Paths.font("calibri.ttf"), 20, 0xFFFFFFFF, null, null, 0xFF000000);
+	camTxt.scrollFactor.set();
+	camTxt.borderSize = 1.25;
+	camTxt.cameras = [game.camOverlay];
+	game.add(camTxt);
+
+    importClass("Reflect");
+    global.set("puke",  Reflect.makeVarArgs(function(vomit){
+       camTxt.text = Std.string(vomit);
+    }));
+
+    /*
+	update = function(){
+		camTxt.text = (game.camFollow.x + ", " + game.camFollow.y + ", " + game.focusedChar.curCharacter);
+	};
+    */
+}

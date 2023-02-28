@@ -1,0 +1,39 @@
+{
+	"song": {
+		"player1": "bf",
+		"player2": "gf",
+		"gfVersion": "gf",
+		"song": "Tutorial",
+		"needsVoices": false,
+		"validScore": true,
+		"bpm": 300,
+		"speed": 5,
+		"notes": [
+			{
+				"sectionNotes": [
+					[
+						0,
+						0,
+						1437
+					],
+					[
+						0,
+						1,
+						1437
+					],
+					[
+						0,
+						2,
+						1437
+					],
+					[
+						0,
+						3,
+						1437
+					]
+				],
+				"mustHitSection": true
+			}
+		]
+	}
+}

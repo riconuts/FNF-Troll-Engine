@@ -29,13 +29,12 @@ typedef AssetPreload =
 {
 	var path:String;
 	@:optional var type:String;
-	@:optional var library:String; // useless
+	@:optional var library:String; // heh
 }
 
 class Cache
 {
-	// I believe the shit that causes the game to hang up while loading is writing stuff to the cache map
-	// so, i'll only add it to the cache after all the loading is done i guess...
+	// nvm it still fuckign crashes
 
 	public static function returnUncachedGraphic(key:String, ?library:String)
 	{

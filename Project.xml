@@ -43,8 +43,8 @@
 
 	<classpath name="source" />
 	
-	<!-- screw the preload folder 
-	<assets path="assets"/> -->
+	<!-- no more preload folder -->
+	<assets path="assets"/> 
 
 	<!-- PSYCH ENGINE CUSTOMIZATION -->
 	<define name="MODS_ALLOWED" if="desktop" />
