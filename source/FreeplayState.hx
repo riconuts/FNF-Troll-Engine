@@ -36,6 +36,9 @@ class FreeplayState extends MusicBeatState
 	var selectedSong:Null<SongMetadata> = null;
 	var buttons:Array<FreeplaySongButton> = [];
 
+	//
+	var hintText:FlxText;
+
 	override function create()
 	{
 		#if desktop
@@ -158,6 +161,21 @@ class FreeplayState extends MusicBeatState
 		}
 		maxY = prevCat.y + prevCat.height;
 
+		////
+		var hintBg = new FlxSprite(0, FlxG.height-20).makeGraphic(1,1,0xFF000000);
+		hintBg.scale.set(FlxG.width, 24);
+		hintBg.updateHitbox();
+		hintBg.scrollFactor.set();
+		hintBg.alpha = 0.6;
+		add(hintBg);
+
+		hintText = new FlxText(FlxG.width, FlxG.height - 20, 0, "Press CTRL to open set Gameplay Modifiers | Press R to reset a song score.", 18);
+		hintText.font = Paths.font("calibri.ttf");
+		hintText.antialiasing = false;
+		hintText.scrollFactor.set();
+		add(hintText);
+
+		////
 		super.create();
 
 		#if !FLX_NO_MOUSE
@@ -234,6 +252,10 @@ class FreeplayState extends MusicBeatState
 	var maxY:Float = 0;
 	override function update(elapsed:Float)
 	{
+		hintText.x -= 64*elapsed;
+		if (hintText.x < (FlxG.camera.scroll.x - hintText.width))
+			hintText.x = FlxG.camera.scroll.x + FlxG.width;
+
 		if (FlxG.sound.music != null && FlxG.sound.music.volume < 0.7)
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
 

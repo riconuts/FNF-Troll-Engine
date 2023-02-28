@@ -93,7 +93,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		]);
 		optionsArray.push(option);
 
-		var option:GameplayOption = new GameplayOption("Opponent Fights Back", 'opponentFightsBack', 'bool', false);
+		var option:GameplayOption = new GameplayOption("Opponent HP Drain", 'opponentFightsBack', 'bool', false);
 		optionsArray.push(option);
 
 		////

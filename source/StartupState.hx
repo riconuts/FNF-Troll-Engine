@@ -1,9 +1,9 @@
+import flixel.FlxG;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
-import sys.thread.Thread;
-import flixel.FlxG;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.input.keyboard.FlxKey;
+
 #if desktop
 import Discord.DiscordClient;
 import lime.app.Application;

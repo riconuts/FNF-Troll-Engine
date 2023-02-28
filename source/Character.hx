@@ -149,6 +149,7 @@ class Character extends FlxSprite
 			default:
 				var json = getCharacterFile(curCharacter);
 				if (json == null){
+					trace('Character file: $curCharacter not found.');
 					json = getCharacterFile(DEFAULT_CHARACTER);
 					curCharacter = DEFAULT_CHARACTER;
 				}
@@ -541,7 +542,12 @@ class Character extends FlxSprite
 		#if MODS_ALLOWED
 		var charsLoaded:Map<String, Bool> = new Map();
 		var characterList = [];
-		var directories:Array<String> = [Paths.mods('characters/'), Paths.mods(Paths.currentModDirectory + '/characters/'), Paths.getPreloadPath('characters/')];
+		var directories:Array<String> = [
+			Paths.mods(Paths.currentModDirectory + '/characters/'),
+			Paths.mods('global/characters/'), 
+			Paths.mods('characters/'), 
+			Paths.getPreloadPath('characters/')
+		];
 		for (i in 0...directories.length) {
 			var directory:String = directories[i];
 			if(FileSystem.exists(directory)) {

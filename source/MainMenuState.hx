@@ -151,7 +151,7 @@ class MainMenuState extends MusicBeatState
 		jukeboxButton.loadGraphic(Paths.image('newmenuu/mainmenu/comics'));
 		jukeboxButton.onUp.callback = function(){
 			selectedSomethin = true;
-			MusicBeatState.switchState(new GalleryMenuState());
+			MusicBeatState.switchState(new gallery.GalleryMenuState());
 		}
 		add(jukeboxButton);
 

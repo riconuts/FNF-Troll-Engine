@@ -72,6 +72,7 @@ class FunkinHScript extends FunkinScript
 		setDefaultVars();
 		set("Std", Std);
 		set("Type", Type);
+		set("Reflect", Reflect);
 		set("Math", Math);
 		set("script", this);
 		set("StringTools", StringTools);

@@ -174,7 +174,7 @@ class MusicBeatState extends FlxUIState
 				menuVox.destroy();
 				menuVox = null;
 			}
-			JukeboxState.playIdx = 0;
+			gallery.JukeboxState.playIdx = 0;
 
 			// menuMusic = FlxG.sound.cache("assets/music/freakyMenu.ogg"); // please work
 			Paths.music('freakyMenu');

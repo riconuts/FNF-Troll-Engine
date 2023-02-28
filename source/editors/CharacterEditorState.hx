@@ -393,9 +393,12 @@ class CharacterEditorState extends MusicBeatState
 		charDropDown = new FlxUIDropDownMenuCustom(10, 30, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(character:String)
 		{
 			daAnim = characterList[Std.parseInt(character)];
+			trace(daAnim);
+
 			check_player.checked = daAnim.startsWith('bf');
+			
 			loadChar(!check_player.checked);
-			updatePresence();
+			updateDiscordPresence();
 			reloadCharacterDropDown();
 		});
 		charDropDown.selectedLabel = daAnim;
@@ -756,7 +759,7 @@ class CharacterEditorState extends MusicBeatState
 			if(sender == healthIconInputText) {
 				leHealthIcon.changeIcon(healthIconInputText.text);
 				char.healthIcon = healthIconInputText.text;
-				updatePresence();
+				updateDiscordPresence();
 			}
 			else if(sender == imageInputText) {
 				char.imageFile = imageInputText.text;
@@ -766,10 +769,17 @@ class CharacterEditorState extends MusicBeatState
 			{
 				reloadCharacterImage();
 				char.jsonScale = sender.value;
+
+				char.scale.set(1,1);
+				char.updateHitbox();
 				char.setGraphicSize(Std.int(char.width * char.jsonScale));
 				char.updateHitbox();
+
+				ghostChar.scale.set(1,1);
+				ghostChar.updateHitbox();
 				ghostChar.setGraphicSize(Std.int(ghostChar.width * char.jsonScale));
 				ghostChar.updateHitbox();
+
 				reloadGhost();
 				updatePointerPos();
 
@@ -992,7 +1002,7 @@ class CharacterEditorState extends MusicBeatState
 			positionCameraXStepper.value = char.cameraPosition[0];
 			positionCameraYStepper.value = char.cameraPosition[1];
 			reloadAnimationDropDown();
-			updatePresence();
+			updateDiscordPresence();
 		}
 	}
 
@@ -1040,30 +1050,7 @@ class CharacterEditorState extends MusicBeatState
 	}
 
 	function reloadCharacterDropDown() {
-		var charsLoaded:Map<String, Bool> = new Map();
-
-		#if MODS_ALLOWED
-		characterList = [];
-		var directories:Array<String> = [Paths.mods('characters/'), Paths.mods(Paths.currentModDirectory + '/characters/'), Paths.getPreloadPath('characters/')];
-		for (i in 0...directories.length) {
-			var directory:String = directories[i];
-			if(FileSystem.exists(directory)) {
-				for (file in FileSystem.readDirectory(directory)) {
-					var path = haxe.io.Path.join([directory, file]);
-					if (!sys.FileSystem.isDirectory(path) && file.endsWith('.json')) {
-						var charToCheck:String = file.substr(0, file.length - 5);
-						if(!charsLoaded.exists(charToCheck)) {
-							characterList.push(charToCheck);
-							charsLoaded.set(charToCheck, true);
-						}
-					}
-				}
-			}
-		}
-		#else
-		characterList = CoolUtil.coolTextFile(Paths.txt('characterList'));
-		#end
-
+		characterList = Character.getCharacterList();
 		charDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(characterList, true));
 		charDropDown.selectedLabel = daAnim;
 	}
@@ -1075,7 +1062,7 @@ class CharacterEditorState extends MusicBeatState
 		healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
 	}
 
-	function updatePresence() {
+	function updateDiscordPresence() {
 		#if desktop
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("Character Editor", "Character: " + daAnim, leHealthIcon.getCharacter());

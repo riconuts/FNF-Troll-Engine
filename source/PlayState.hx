@@ -1461,7 +1461,6 @@ class PlayState extends MusicBeatState
 
 	private function generateSong(dataPath:String):Void
 	{
-		// FlxG.log.add(ChartParser.parse());
 		songSpeedType = ClientPrefs.getGameplaySetting('scrolltype','multiplicative');
 
 		switch(songSpeedType)
@@ -3096,8 +3095,6 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.hideHud)
 			return;
 		*/
-
-		var coolTextX = FlxG.width * 0.35;
 		
 		////
 		var rating:RatingSprite;
@@ -3149,7 +3146,10 @@ class PlayState extends MusicBeatState
 		rating.alpha = 1;
 
 		rating.updateHitbox();
-		rating.screenCenter();
+		
+		//if (!ClientPrefs.simpleJudge)
+			rating.screenCenter();
+
 		rating.x += ClientPrefs.comboOffset[0];
 		rating.y -= ClientPrefs.comboOffset[1];
 
@@ -3175,18 +3175,14 @@ class PlayState extends MusicBeatState
 		for (i in seperatedScore)
 		{
 			var numScore:RatingSprite = comboNumGroup.recycle(RatingSprite, RatingSprite.newNumber);
-
 			numScore.loadGraphic(Paths.image('num' + i));
-			numScore.alpha = 1;
-			numScore.scale.set(0.5, 0.5);
 
 			numScore.screenCenter();
 			numScore.x += ClientPrefs.comboOffset[2] + 43 * daLoop;
 			numScore.y -= ClientPrefs.comboOffset[3];
 
-			var index = comboNumGroup.members.indexOf(numScore);
 			comboNumGroup.remove(numScore, true);
-			comboNumGroup.insert(index, numScore);
+			comboNumGroup.add(numScore);
 			lastCombos.push(numScore);
 
 			if (numScore.tween != null){
@@ -3198,12 +3194,14 @@ class PlayState extends MusicBeatState
 			if(ClientPrefs.simpleJudge){
 				numScore.scale.x = 0.5 * 1.25;
 				numScore.scale.y = 0.5 * 0.75;
+				
 				numScore.alpha = 0.6;
 				numScore.tween = FlxTween.tween(numScore, {"scale.x": 0.5, "scale.y": 0.5, alpha: 1}, 0.2, {ease: FlxEase.circOut});
 			}else{
 				numScore.acceleration.y = FlxG.random.int(200, 300);
 				numScore.velocity.set(FlxG.random.float(-5, 5), -FlxG.random.int(140, 160));
 
+				numScore.alpha = 1;
 				numScore.tween = FlxTween.tween(numScore, {alpha: 0}, 0.2, {
 					onComplete: function(wtf){numScore.kill();},
 					startDelay: Conductor.crochet * 0.002
@@ -3579,9 +3577,7 @@ class PlayState extends MusicBeatState
 
 			var animToPlay:String = singAnimations[Std.int(Math.abs(note.noteData))] + altAnim;
 
-			if(char != null)
-			{
-				char.voicelining = false;
+			if (char != null && char.animTimer <= 0 && !char.voicelining){
 				char.playAnim(animToPlay, true);
 				char.holdTimer = 0;
 				char.callOnScripts("playNoteAnim", [animToPlay, note]);
@@ -3693,7 +3689,7 @@ class PlayState extends MusicBeatState
 		if (!note.isSustainNote)
 		{
 			combo += 1;
-			if(combo > 9999) combo = 9999;
+			// if(combo < 9999) combo = 9999;
 			popUpScore(note);
 		}
 
@@ -3709,21 +3705,10 @@ class PlayState extends MusicBeatState
 			var daAlt = note.noteType == 'Alt Animation' ? '-alt' : '';
 			var animToPlay:String = singAnimations[Std.int(Math.abs(note.noteData))];
 
-			/*if(note.gfNote){
-				if(gf != null){
-					char.playAnim(animToPlay + daAlt, true);
-					char.holdTimer = 0;
-				
-			}else if (boyfriend.animTimer <= 0 && !boyfriend.voicelining){
+			if (char != null && char.animTimer <= 0 && !char.voicelining){
 				char.playAnim(animToPlay + daAlt, true);
 				char.holdTimer = 0;
-			}*/
-			if(char!=null){
-				if (char.animTimer <= 0 && !char.voicelining){
-					char.playAnim(animToPlay + daAlt, true);
-					char.holdTimer = 0;
-					char.callOnScripts("playNoteAnim", [animToPlay + daAlt, note]);
-				}
+				char.callOnScripts("playNoteAnim", [animToPlay + daAlt, note]);
 			}
 
 			if(note.noteType == 'Hey!') {
@@ -4319,6 +4304,11 @@ class RatingSprite extends FlxSprite
 	public function new(){
 		super();
 		moves = !ClientPrefs.simpleJudge;
+
+		antialiasing = ClientPrefs.globalAntialiasing;
+		cameras = [PlayState.instance.camHUD];
+
+		scrollFactor.set();
 	}
 
 	public static function newRating()
@@ -4326,11 +4316,7 @@ class RatingSprite extends FlxSprite
 		var rating = new RatingSprite();
 		
 		// rating.acceleration.y = 550;
-
-		rating.antialiasing = ClientPrefs.globalAntialiasing;
-		rating.cameras = [PlayState.instance.camHUD];
 		
-		rating.scrollFactor.set();
 		rating.scale.set(0.7, 0.7);
 
 		return rating;
@@ -4339,11 +4325,7 @@ class RatingSprite extends FlxSprite
 	public static function newNumber()
 	{
 		var numScore = new RatingSprite();
-
-		numScore.antialiasing = ClientPrefs.globalAntialiasing;
-		numScore.cameras = [PlayState.instance.camHUD];
-
-		numScore.scrollFactor.set();
+		
 		numScore.scale.set(0.5, 0.5);
 
 		return numScore;

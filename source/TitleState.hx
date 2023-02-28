@@ -81,7 +81,7 @@ class TitleState extends MusicBeatState
 
 		if (randomStage != null){
 			Paths.currentModDirectory = randomStage[1];
-			bg = new Stage(randomStage[0]).buildStage();
+			bg = new Stage(randomStage[0]);
 		}
 
 		// Random logoooo
@@ -153,6 +153,8 @@ class TitleState extends MusicBeatState
 		trace("CRATED");
 
 		if (!loaded) load();
+
+		bg.buildStage();
 
 		FlxTransitionableState.defaultTransIn = FadeTransitionSubstate;
 		FlxTransitionableState.defaultTransOut = FadeTransitionSubstate;
@@ -247,6 +249,9 @@ class TitleState extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
+		for (script in bg.hscriptArray)
+			script.call('update', [elapsed]);
+
 		if (FlxG.sound.music != null)
 			Conductor.songPosition = FlxG.sound.music.time;
 
@@ -319,6 +324,11 @@ class TitleState extends MusicBeatState
 			if(controls.UI_LEFT) swagShader.hue -= elapsed * 0.1;
 			if(controls.UI_RIGHT) swagShader.hue += elapsed * 0.1;
 		}
+
+		for (script in bg.luaArray)
+			script.call('onUpdate', [elapsed]);
+		for (script in bg.hscriptArray)
+			script.call('onUpdate', [elapsed]);
 
 		super.update(elapsed);
 	}

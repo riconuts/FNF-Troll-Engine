@@ -72,36 +72,24 @@ class SinnerState extends FlxState
 	override function update(elapsed:Float)
 	{
 		switch(code){
-			case 0:
-				if (FlxG.keys.justPressed.UP)
-					code++;
-			case 1:
-				if (FlxG.keys.justPressed.UP)
-					code++;
-			case 2:
-				if (FlxG.keys.justPressed.DOWN)
-					code++;
-			case 3:
-				if (FlxG.keys.justPressed.DOWN)
-					code++;
-			case 4:
-				if (FlxG.keys.justPressed.LEFT)
-					code++;
-			case 5:
-				if (FlxG.keys.justPressed.RIGHT)
-					code++;
-			case 6:
-				if (FlxG.keys.justPressed.LEFT)
-					code++;
-			case 7:
-				if (FlxG.keys.justPressed.RIGHT)
-					code++;
+			case 0 | 1:
+				if (FlxG.keys.justPressed.UP) code++;
+				else if (FlxG.keys.justPressed.ANY) code = 0;
+			case 2 | 3:
+				if (FlxG.keys.justPressed.DOWN) code++;
+				else if (FlxG.keys.justPressed.ANY) code = 0;
+			case 4 | 6:
+				if (FlxG.keys.justPressed.LEFT) code++;
+				else if (FlxG.keys.justPressed.ANY) code = 0;
+			case 5 | 7:
+				if (FlxG.keys.justPressed.RIGHT) code++;
+				else if (FlxG.keys.justPressed.ANY) code = 0;
 			case 8:
-				if (FlxG.keys.justPressed.B)
-					code++;
+				if (FlxG.keys.justPressed.B) code++;
+				else if (FlxG.keys.justPressed.ANY) code = 0;
 			case 9:
-				if (FlxG.keys.justPressed.A)
-					code++;
+				if (FlxG.keys.justPressed.A) code++;
+				else if (FlxG.keys.justPressed.ANY) code = 0;
 			case 10:
 				if (FlxG.keys.justPressed.ENTER){
 					#if final
@@ -114,7 +102,7 @@ class SinnerState extends FlxState
 					#if sys
 					Sys.exit(0);
 					#end
-				}
+				}else if (FlxG.keys.justPressed.ANY) code = 0;
 		}
 
 		if (mainWindow != null)
