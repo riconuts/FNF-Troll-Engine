@@ -1,0 +1,39 @@
+function shouldPush(eventNote):Bool{
+	return true;
+}
+
+function getOffset(eventNote):Float{
+	return 0;
+}
+
+function onPush(eventNote){}
+function onLoad(){}
+
+function onTrigger(value1, value2)
+{
+	var sowy = (Std.string(value1) == "true");
+	var instance = getInstance();
+
+	if (sowy){
+		var bf = instance.boyfriend;
+		var dad = instance.dad;
+		var focusedChar = instance.focusedChar;
+		var boyfriendCameraOffset = instance.boyfriendCameraOffset;
+		var opponentCameraOffset = instance.opponentCameraOffset;
+		
+		var midX = dad.getMidpoint().x + 150 + dad.cameraPosition[0] + opponentCameraOffset[0];
+		var midY = dad.getMidpoint().y - 100 + dad.cameraPosition[1] + opponentCameraOffset[1];
+		
+		midX += bf.getMidpoint().x - 100 - (bf.cameraPosition[0] - boyfriendCameraOffset[0]);
+		midY += bf.getMidpoint().y - 100 + (bf.cameraPosition[1] + boyfriendCameraOffset[1]);
+		
+		midX /= 2;
+		midY /= 2;
+		
+		instance.triggerEventNote("Camera Follow Pos", Std.string(midX), Std.string(midY));
+	}
+	else
+	{
+		instance.triggerEventNote("Camera Follow Pos", "", "");
+	}
+}
