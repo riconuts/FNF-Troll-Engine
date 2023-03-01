@@ -38,7 +38,7 @@ class StageEditorState extends MusicBeatState{
 	public var camFollow = new FlxPoint();
 	public var camFollowPos = new FlxObject(0, 0, 1, 1);
 	
-	public var defaultCamZoom:Float = FlxG.initialZoom;
+	public var defaultCamZoom:Float = 1;
 	public var cameraSpeed:Float = 1;
 
 	public var boyfriend:Character;
@@ -372,7 +372,7 @@ class StageEditorState extends MusicBeatState{
 		stageData = stage.stageData;
 
 		////
-		defaultCamZoom = FlxG.initialZoom * stageData.defaultZoom;
+		defaultCamZoom = 1 * stageData.defaultZoom;
 
 		BF_X = stageData.boyfriend[0];
 		BF_Y = stageData.boyfriend[1];

@@ -230,7 +230,7 @@ class PlayState extends MusicBeatState
 	public var camZoomingDecay:Float = 1;
 	
 	public var cameraSpeed:Float = 1;
-	public var defaultCamZoom:Float = FlxG.initialZoom;
+	public var defaultCamZoom:Float = 1;
 
 	public var sectionCamera = new FlxPoint(); // default camera
 	public var customCamera = new FlxPoint(); // custom camera
@@ -2239,12 +2239,12 @@ class PlayState extends MusicBeatState
 			var lerpVal = CoolUtil.boundTo(1 - (elapsed * 3.125 * camZoomingDecay), 0, 1);
 
 			camGame.zoom = FlxMath.lerp(
-				FlxG.initialZoom * defaultCamZoom, 
+				1 * defaultCamZoom, 
 				camGame.zoom, 
 				lerpVal
 			);
 			camHUD.zoom = FlxMath.lerp(
-				FlxG.initialZoom, 
+				1, 
 				camHUD.zoom, 
 				lerpVal
 			);
