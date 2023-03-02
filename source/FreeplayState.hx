@@ -27,7 +27,8 @@ class FreeplayState extends MusicBeatState
 {
 	var songs:Array<SongMetadata> = [];
 
-	private var categories:Map<String, FreeplayCategory> = new Map();
+	private var categories:Map<String, FreeplayCategory> = [];
+	private var categoryIDs:Array<String> = []; // "The order of both values and keys in any type of map is undefined"
 
 	static var lastY:Float = 360;
 	var camFollow = new FlxPoint(640, lastY);
@@ -38,6 +39,17 @@ class FreeplayState extends MusicBeatState
 
 	//
 	var hintText:FlxText;
+
+	function setCategory(id, name){
+		var catTitle = new FlxText(0, 50, FlxG.width, name, 32, true);
+		catTitle.setFormat(Paths.font("calibrib.ttf"), 32, 0xFFF4CC34, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE);
+		catTitle.scrollFactor.set(1, 1);
+		
+		var category = new FreeplayCategory(catTitle);
+		categories.set(id, category);
+
+		categoryIDs.push(id);
+	}
 
 	override function create()
 	{
@@ -56,46 +68,49 @@ class FreeplayState extends MusicBeatState
 		FlxG.camera.bgColor = FlxColor.BLACK;
 
 		////
-		var categoryNames:Map<String, String> = new Map();
-		
-		categoryNames.set("main", "MAIN STORY");
-		categoryNames.set("side", "SIDE STORIES");
-		categoryNames.set("remix", "REMIXES / COVERS");
+		setCategory("main", "MAIN STORY");
+		setCategory("side", "SIDE STORIES");
+		setCategory("remix", "REMIXES / COVERS");
 
-		for (id => name in categoryNames)
+		////
+		var resSelSongFunc = function(){
+			selectedSong = null;
+		};
+
+		function setupFreeplayButton(songButton:FreeplaySongButton)
 		{
-			var catTitle = new FlxText(0, 50, FlxG.width, name, 32, true);
-			catTitle.setFormat(Paths.font("calibrib.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
-			catTitle.scrollFactor.set(1, 1);
+			if (songButton.isLocked)
+				songButton.onUp.callback = songButton.shake;
+			else{
+				songButton.onOver.callback = function(){selectedSong = songButton.metadata;};
+				songButton.onOut.callback = resSelSongFunc;
 			
-			var category = new FreeplayCategory(catTitle);
-			categories.set(id, category);
+				songButton.onUp.callback = function(){
+					this.transOut = SquareTransitionSubstate;
+					SquareTransitionSubstate.nextCamera = FlxG.camera;
+					SquareTransitionSubstate.info = cast {
+						sX: songButton.x - 3, sY: songButton.y - 3,
+						sW: 200, sH: 200,
+
+						eX: FlxG.camera.scroll.x - 3, eY: FlxG.camera.scroll.y - 3,
+						eW: FlxG.width + 6, eH: FlxG.height + 6
+					};
+					
+					playSong(songButton.metadata);
+				};
+			}			
 		}
 
-		//// Load the songs!!!
-		var resSelSongFunc = function(){selectedSong = null;};
-
+		// Load the songs!!!
 		for (i in CoolUtil.coolTextFile(Paths.txt('freeplaySonglist')))
 		{
-			if (i != null && i.length > 0){
-				var song:Array<String> = i.split(":");
-				var isLocked = false; // For now
-				var songButton = addSong(song[0], "", song[1], isLocked);
+			if (i == null || i.length < 1)
+				continue;
+			
+			var song:Array<String> = i.split(":");
+			var songButton = addSong(song[0], "", song[1], false);
 
-				if (songButton == null)
-					continue;
-
-				if (isLocked)
-					songButton.onUp.callback = function(){songButton.shake();}
-				else{
-					songButton.onUp.callback = function(){playSong(songButton.metadata);};
-					songButton.onOver.callback = function(){
-						selectedSong = songButton.metadata;
-					}
-					songButton.onOut.callback = resSelSongFunc;
-				}
-					
-			}
+			if (songButton != null) setupFreeplayButton(songButton);
 		}
 
 		#if MODS_ALLOWED
@@ -105,61 +120,78 @@ class FreeplayState extends MusicBeatState
 
 			for (i in CoolUtil.coolTextFile(Paths.modsTxt('freeplaySonglist')))
 			{
-				if (i != null && i.length > 0){
-					var song:Array<String> = i.split(":");
-					var isLocked = false; // For now
-					var songButton = addSong(song[0], null, song[1], isLocked);
+				if (i == null || i.length < 1)
+					continue;
 
-					if (songButton == null)
-						continue;
+				var song:Array<String> = i.split(":");
+				var songButton = addSong(song[0], null, song[1], false);
 
-					if (isLocked)
-						songButton.onUp.callback = function(){songButton.shake();}
-					else{
-						songButton.onOver.callback = function(){selectedSong = songButton.metadata;};
-						songButton.onOut.callback = resSelSongFunc;
-					
-						songButton.onUp.callback = function(){
-							//ChapterData.curChapter = mod; // ChapterData shit still in progress
-							// actually that wasn't necessary because this is freeplay so, lol.
+				if (songButton != null) setupFreeplayButton(songButton);
+			}
 
-							var sPos = songButton;
-							var cam = FlxG.camera;
-							SquareTransitionSubstate.nextCamera = cam;
-							SquareTransitionSubstate.info = cast {
-								sX: sPos.x - 3,
-								sY: sPos.y - 3,
-								sW: 200,
-								sH: 200,
+			/*
+			#if sys
+			//// psych engine
+			var weeksFolderPath = Paths.mods('$mod/weeks/');
+			
+			if (!FileSystem.exists(weeksFolderPath) || !FileSystem.isDirectory(weeksFolderPath))
+				continue;
+			
+			var addedCat = false;
+			for (weekFileName in FileSystem.readDirectory(weeksFolderPath))
+			{
+				if (!weekFileName.endsWith(".json")) continue;
 
-								eX: cam.scroll.x - 3,
-								eY: cam.scroll.y - 3,
-								eW: FlxG.width + 6,
-								eH: FlxG.height + 6
-							};
-							this.transOut = SquareTransitionSubstate;
-							playSong(songButton.metadata);
-						};
+				var rawFile = Paths.getContent(weeksFolderPath + weekFileName);
+				if (rawFile == null) continue;
+
+				var theJson = haxe.Json.parse(rawFile);
+				if (!Reflect.hasField(theJson, "songs")){trace("Songs unavailable"); continue;}
+
+				var songs:Array<Array<Dynamic>> = theJson.songs;
+				if (songs.length < 1){trace("No songs"); continue;}
+
+				if (!addedCat) setCategory(mod, mod);
+
+				for (song in songs){
+					trace("found song " + song);
+					var songButton = addSong(song[0], null, mod, false);
+					setupFreeplayButton(songButton);
+
+					var icon = Paths.image('icons/${song[1]}');
+					if (icon == null)
+						icon = Paths.image('icons/icon-${song[1]}');
+
+					if (icon != null){
+						songButton.loadGraphic(icon);
+						songButton.offset.set(
+							(194 - songButton.width) * 0.5,
+							(194 - songButton.height) * 0.5
+						);
 					}
 				}
 			}
+			#end
+			*/
 		}
 		Paths.currentModDirectory = '';
 		#end
 
 		//// Add categories
-		var prevCat:Null<FreeplayCategory> = null;
-		for (n => category in categories)
+		var lastCat:Null<FreeplayCategory> = null;
+		for (id in categoryIDs)
 		{
-			if (prevCat == null)
+			var category = categories.get(id);
+
+			if (lastCat == null)
 				category.y = 50;
 			else
-				category.y = 50 + prevCat.y + prevCat.height;
+				category.y = 50 + lastCat.y + lastCat.height;
 
-			prevCat = category;
+			lastCat = category;
 			add(category);
 		}
-		maxY = prevCat.y + prevCat.height;
+		maxY = lastCat.y + lastCat.height;
 
 		////
 		var hintBg = new FlxSprite(0, FlxG.height-20).makeGraphic(1,1,0xFF000000);
@@ -193,6 +225,9 @@ class FreeplayState extends MusicBeatState
 
 		PlayState.SONG = Song.loadFromJson(songLowercase, songLowercase);
 		PlayState.isStoryMode = false;
+
+		if (PlayState.SONG == null)
+			PlayState.SONG = Song.loadFromJson('$songLowercase-hard', songLowercase);
 
 		if (FlxG.keys.pressed.SHIFT)
 		{
@@ -230,7 +265,7 @@ class FreeplayState extends MusicBeatState
 		category.addItem(button);
 
 		////
-		button.yellowBorder = new FlxShapeBox(button.x - 3, button.y - 3, 200, 200, {thickness: 6, color: FlxColor.fromRGB(255, 242, 0)}, FlxColor.TRANSPARENT);
+		button.yellowBorder = new FlxShapeBox(button.x - 3, button.y - 3, 200, 200, {thickness: 6, color: 0xFFF4CC34}, FlxColor.TRANSPARENT);
 
 		button.nameText = new FlxText(button.x, button.y - 32, button.width, songName, 24);
 		button.nameText.setFormat(Paths.font("calibri.ttf"), 18, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE);
@@ -305,6 +340,10 @@ class FreeplayState extends MusicBeatState
 		return Paths.image("songs/" + Paths.formatToSongPath(SongName));
 }
 
+typedef PsychEngineWeekFile = {
+	var songs:Array<Array<Dynamic>>;
+}
+
 class SongMetadata
 {
 	public var songName:String = "";
@@ -343,7 +382,7 @@ class FreeplaySongButton extends TGTSquareButton{
 	{
 		var ratingPercent = Highscore.getRating(metadata.songName);
 		scoreText.text = Highscore.floorDecimal(ratingPercent * 100, 2) + '%';
-		scoreText.color = ratingPercent == 1 ? 0xFFFFFF00 : 0xFFFFFFFF;
+		scoreText.color = ratingPercent == 1 ? 0xFFF4CC34 : 0xFFFFFFFF;
 	}
 
 	override function onover()

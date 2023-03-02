@@ -761,11 +761,15 @@ class PlayState extends MusicBeatState
 			/* gfVersion = 'gf';
 			SONG.gfVersion = gfVersion; //Fix for the Chart Editor */
 		}
-		else if (!stageData.hide_girlfriend)
+		else if (stageData.hide_girlfriend != true)
 		{
 			gf = new Character(0, 0, gfVersion);
-			gf.cameraPosition[0] += stageData.camera_girlfriend[0];
-			gf.cameraPosition[1] += stageData.camera_girlfriend[1];
+
+			if (stageData.camera_girlfriend != null){
+				gf.cameraPosition[0] += stageData.camera_girlfriend[0];
+				gf.cameraPosition[1] += stageData.camera_girlfriend[1];
+			}
+
 			startCharacterPos(gf);
 			gf.scrollFactor.set(0.95, 0.95);
 			startCharacterLua(gf);
@@ -775,8 +779,11 @@ class PlayState extends MusicBeatState
 		}
 
 		dad = new Character(0, 0, SONG.player2);
-		dad.cameraPosition[0] += stageData.camera_opponent[0];
-		dad.cameraPosition[1] += stageData.camera_opponent[1];
+
+		if (stageData.camera_opponent != null){
+			dad.cameraPosition[0] += stageData.camera_opponent[0];
+			dad.cameraPosition[1] += stageData.camera_opponent[1];
+		}
 		startCharacterPos(dad, true);
 		startCharacterLua(dad);
 
@@ -784,8 +791,10 @@ class PlayState extends MusicBeatState
 		dadGroup.add(dad);
 
 		boyfriend = new Boyfriend(0, 0, SONG.player1);
-		boyfriend.cameraPosition[0] += stageData.camera_boyfriend[0];
-		boyfriend.cameraPosition[1] += stageData.camera_boyfriend[1];
+		if (stageData.camera_boyfriend != null){
+			boyfriend.cameraPosition[0] += stageData.camera_boyfriend[0];
+			boyfriend.cameraPosition[1] += stageData.camera_boyfriend[1];
+		}
 		startCharacterPos(boyfriend);
 		startCharacterLua(boyfriend);
 

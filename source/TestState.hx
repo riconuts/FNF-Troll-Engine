@@ -183,7 +183,7 @@ class TestState extends MusicBeatState{
 		titleStepper.cameras = [camHUD];
 		group.add(titleStepper);
 		
-		var stageNames = Stage.getStageList();
+		var stageNames = Stage.getAllStages();
 		var bgStepper = new FlxUINumericStepper(10, 70, 1, 0, 0, stageNames.length-1, 0);
 		bgStepper.cameras = [camHUD];
 		group.add(bgStepper);

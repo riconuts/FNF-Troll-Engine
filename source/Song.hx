@@ -103,8 +103,14 @@ class Song
 		var path = Paths.formatToSongPath(folder) + '/' + Paths.formatToSongPath(jsonInput);
 		var rawJson = Paths.getText('songs/$path.json', false);
 		
-		if (rawJson == null)
-			FlxG.log.error('JSON not found: $jsonInput');
+		if (rawJson == null){
+			rawJson = Paths.getText('data/$path.json', false);
+
+			if (rawJson == null){
+				trace('JSON not found: $path');
+				return null;
+			}
+		}
 
 		rawJson = rawJson.trim();
 

@@ -37,11 +37,12 @@ typedef StageFile =
 	var boyfriend:Array<Dynamic>;
 	var girlfriend:Array<Dynamic>;
 	var opponent:Array<Dynamic>;
-	var hide_girlfriend:Bool;
-	var camera_boyfriend:Array<Float>;
-	var camera_opponent:Array<Float>;
-	var camera_girlfriend:Array<Float>;
-	var camera_speed:Null<Float>;
+	@:optional var hide_girlfriend:Bool;
+
+	@:optional var camera_boyfriend:Array<Float>;
+	@:optional var camera_opponent:Array<Float>;
+	@:optional var camera_girlfriend:Array<Float>;
+	@:optional var camera_speed:Null<Float>;
 
 	@:optional var bg_color:Null<String>;
 
@@ -176,6 +177,37 @@ class Stage extends FlxTypedGroup<FlxBasic>
 			if (!stages.contains(modStage))
 				stages.push(modStage);
 		}
+
+		return stages;
+	}
+
+
+	public static function getAllStages(modsOnly = false):Array<String>{
+		var stages:Array<String> = [];
+
+		var folderPath = Paths.mods('${Paths.currentModDirectory}/stages/');
+		if (FileSystem.exists(folderPath) && FileSystem.isDirectory(folderPath)){
+
+			for (fileName in FileSystem.readDirectory(folderPath)){
+				if (!fileName.endsWith(".json")) continue;
+
+				stages.push(fileName.substr(0, fileName.length - 5));
+			}
+		}
+
+		if (!modsOnly){
+			var folderPath = Paths.getPath('stages/');
+			if (FileSystem.exists(folderPath) && FileSystem.isDirectory(folderPath)){
+
+				for (fileName in FileSystem.readDirectory(folderPath)){
+					if (!fileName.endsWith(".json")) continue;
+
+					stages.push(fileName.substr(0, fileName.length - 5));
+				}
+			}
+		}
+
+		trace(stages);
 
 		return stages;
 	}

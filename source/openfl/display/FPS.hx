@@ -46,7 +46,7 @@ class FPS extends TextField
 		currentFPS = 0;
 		selectable = false;
 		mouseEnabled = false;
-		defaultTextFormat = new TextFormat("_sans", 14, color);
+		defaultTextFormat = new TextFormat("_sans", 12, color);
 		autoSize = LEFT;
 		multiline = true;
 		text = "FPS: ";
@@ -83,31 +83,27 @@ class FPS extends TextField
 		if (currentCount != cacheCount /*&& visible*/)
 		{
 			text = "FPS: " + currentFPS;
-			var memoryMegas:Float = 0;
 			
-			#if openfl
+			var memoryMegas:Float = 0;
+			/*
+			#if (openfl && !final)
 			memoryMegas = Math.abs(FlxMath.roundDecimal(System.totalMemory / 1000000, 1));
 			text += "\nMemory: " + memoryMegas + " MB";
 			#end
 
-			/* debugg :3
 			text += "\nState: " + Type.getClassName(Type.getClass(FlxG.state));
 			text += "\nSubstate: " + Type.getClassName(Type.getClass(FlxG.state.subState));
 			*/
 
 			textColor = 0xFFFFFFFF;
-			if (memoryMegas > 3000 || currentFPS <= ClientPrefs.framerate* 0.5)
-			{
+			if (currentFPS <= ClientPrefs.framerate * 0.5 || memoryMegas > 3000)
 				textColor = 0xFFFF0000;
-			}
 
 			#if (gl_stats && !disable_cffi && (!html5 || !canvas))
 			text += "\ntotalDC: " + Context3DStats.totalDrawCalls();
 			text += "\nstageDC: " + Context3DStats.contextDrawCalls(DrawCallContext.STAGE);
 			text += "\nstage3DDC: " + Context3DStats.contextDrawCalls(DrawCallContext.STAGE3D);
 			#end
-
-			text += "\n";
 		}
 
 		cacheCount = currentCount;

@@ -88,7 +88,7 @@ class SquareTransitionSubstate extends TransitionSubstate
 		if (info.dur == null)
 			info.dur = 0.3;
 
-		funkyRectangle = new FlxShapeBox(info.sX, info.sY, info.sW, info.sH, {thickness: 3, color: FlxColor.fromRGB(255, 242, 0)}, FlxColor.BLACK);
+		funkyRectangle = new FlxShapeBox(info.sX, info.sY, info.sW, info.sH, {thickness: 3, color: 0xFFF4CC34}, FlxColor.BLACK);
 		funkyRectangle.cameras = cameras;
 		add(funkyRectangle);
 

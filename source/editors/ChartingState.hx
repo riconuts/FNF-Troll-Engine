@@ -508,7 +508,7 @@ class ChartingState extends MusicBeatState
 		blockPressWhileScrolling.push(player2DropDown);
 
 		////
-		var stages = Stage.getStageList();
+		var stages = Stage.getAllStages();
 
 		var stageDropDown = new FlxUIDropDownMenuCustom(
 			player1DropDown.x + 140, 
