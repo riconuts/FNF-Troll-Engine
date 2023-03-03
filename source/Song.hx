@@ -103,14 +103,21 @@ class Song
 		var path = Paths.formatToSongPath(folder) + '/' + Paths.formatToSongPath(jsonInput);
 		var rawJson = Paths.getText('songs/$path.json', false);
 		
+		#if PE_MOD_COMPATIBILITY
 		if (rawJson == null){
 			rawJson = Paths.getText('data/$path.json', false);
 
 			if (rawJson == null){
-				trace('JSON not found: $path');
+				trace('JSON file not found: $path');
 				return null;
 			}
 		}
+		#else
+		if (rawJson == null){
+			trace('JSON file not found: $path');
+			return null;
+		}
+		#end
 
 		rawJson = rawJson.trim();
 

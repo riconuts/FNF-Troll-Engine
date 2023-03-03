@@ -52,6 +52,7 @@
 	<!-- <define name="VIDEOS_ALLOWED"/> -->
 	<define name="LUA_ALLOWED" if="desktop" />
 	<define name="CRASH_HANDLER" if="desktop" />
+	<define name="PE_MOD_COMPATIBILITY"/>
 	<define name="MULTICORE_LOADING" if="desktop" />
 	<define name="loadBenchmark" if="MULTICORE_LOADING"/>
 	<!-- <define name="traceLoading"/> if="MULTICORE_LOADING"-->

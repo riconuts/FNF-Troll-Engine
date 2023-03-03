@@ -1485,7 +1485,6 @@ class FunkinLua extends FunkinScript
 						}
 					}
 					shit.wasAdded = true;
-					trace('added a thing: ' + tag);
 				}
 			}
 		});
@@ -2472,7 +2471,7 @@ class FunkinLua extends FunkinScript
 		#end
 	}
 
-	override public function call(func:String, ?args:Array<Dynamic>): Dynamic{
+	override public function call(func:String, ?args:Array<Dynamic>, ?extraVars:Map<String,Dynamic>): Dynamic{
 		#if LUA_ALLOWED
 		try {
 			if(args==null)args=[];

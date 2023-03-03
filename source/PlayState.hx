@@ -2619,7 +2619,11 @@ class PlayState extends MusicBeatState
 			case 'Game Flash':
 				var dur:Float = Std.parseFloat(value2);
 				if(Math.isNaN(dur)) dur = 0.5;
-				FlxG.camera.flash(FlxColor.fromString(value1), dur);
+
+				var col:Null<FlxColor> = FlxColor.fromString(value1);
+				if (col == null) col = 0xFFFFFFFF;
+
+				FlxG.camera.flash(col, dur, null, true);
 			case 'Hey!':
 				var value:Int = 2;
 				switch(value1.toLowerCase().trim()) {

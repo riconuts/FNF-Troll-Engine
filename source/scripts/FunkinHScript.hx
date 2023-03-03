@@ -296,9 +296,9 @@ class FunkinHScript extends FunkinScript
 		return interpreter.variables.exists(varName);
 	}
 	
-	override public function call(func:String, ?parameters:Array<Dynamic>):Dynamic
+	override public function call(func:String, ?parameters:Array<Dynamic>, ?extraVars:Map<String,Dynamic>):Dynamic
 	{
-		var returnValue:Dynamic = executeFunc(func, parameters, this);
+		var returnValue:Dynamic = executeFunc(func, parameters, this, extraVars);
 		if (returnValue == null)
 			return Function_Continue;
 		return returnValue;

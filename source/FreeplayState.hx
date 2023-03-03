@@ -77,7 +77,7 @@ class FreeplayState extends MusicBeatState
 			selectedSong = null;
 		};
 
-		function setupFreeplayButton(songButton:FreeplaySongButton)
+		function setupButtonCallbacks(songButton:FreeplaySongButton)
 		{
 			if (songButton.isLocked)
 				songButton.onUp.callback = songButton.shake;
@@ -110,7 +110,7 @@ class FreeplayState extends MusicBeatState
 			var song:Array<String> = i.split(":");
 			var songButton = addSong(song[0], "", song[1], false);
 
-			if (songButton != null) setupFreeplayButton(songButton);
+			if (songButton != null) setupButtonCallbacks(songButton);
 		}
 
 		#if MODS_ALLOWED
@@ -126,11 +126,10 @@ class FreeplayState extends MusicBeatState
 				var song:Array<String> = i.split(":");
 				var songButton = addSong(song[0], null, song[1], false);
 
-				if (songButton != null) setupFreeplayButton(songButton);
+				if (songButton != null) setupButtonCallbacks(songButton);
 			}
 
-			/*
-			#if sys
+			#if (sys && PE_MOD_COMPATIBILITY)
 			//// psych engine
 			var weeksFolderPath = Paths.mods('$mod/weeks/');
 			
@@ -151,12 +150,14 @@ class FreeplayState extends MusicBeatState
 				var songs:Array<Array<Dynamic>> = theJson.songs;
 				if (songs.length < 1){trace("No songs"); continue;}
 
-				if (!addedCat) setCategory(mod, mod);
+				if (!addedCat){ 
+					addedCat = true;
+					setCategory(mod, mod);
+				}
 
 				for (song in songs){
-					trace("found song " + song);
 					var songButton = addSong(song[0], null, mod, false);
-					setupFreeplayButton(songButton);
+					setupButtonCallbacks(songButton);
 
 					var icon = Paths.image('icons/${song[1]}');
 					if (icon == null)
@@ -164,15 +165,20 @@ class FreeplayState extends MusicBeatState
 
 					if (icon != null){
 						songButton.loadGraphic(icon);
+
+						if (songButton.width > songButton.height)
+							songButton.setGraphicSize(194, 0);
+						else
+							songButton.setGraphicSize(0, 194);
+
 						songButton.offset.set(
-							(194 - songButton.width) * 0.5,
-							(194 - songButton.height) * 0.5
+							-(194 - songButton.width) * 0.5,
+							-(194 - songButton.height) * 0.5
 						);
 					}
 				}
 			}
 			#end
-			*/
 		}
 		Paths.currentModDirectory = '';
 		#end
@@ -226,11 +232,7 @@ class FreeplayState extends MusicBeatState
 		PlayState.SONG = Song.loadFromJson(songLowercase, songLowercase);
 		PlayState.isStoryMode = false;
 
-		if (PlayState.SONG == null)
-			PlayState.SONG = Song.loadFromJson('$songLowercase-hard', songLowercase);
-
-		if (FlxG.keys.pressed.SHIFT)
-		{
+		if (FlxG.keys.pressed.SHIFT){
 			PlayState.chartingMode = true;
 			LoadingState.loadAndSwitchState(new ChartingState());
 		}else
@@ -248,12 +250,12 @@ class FreeplayState extends MusicBeatState
 		super.closeSubState();
 	}
 
-	public function addSong(songName:String, ?folder:String, ?categoryName:String, ?isLocked = true):Null<FreeplaySongButton>
+	public function addSong(songName:String, ?folder:String, ?categoryName:String, ?isLocked = false):Null<FreeplaySongButton>
 	{
 		var folder = folder != null ? folder : Paths.currentModDirectory;
 		var category = categories.get(categoryName);
 
-		//trace('"$folder" / "$songName" / "$categoryName"');
+		// trace('"$folder" / "$songName" / "$categoryName"');
 
 		if (category == null)	
 			return null;

@@ -1,5 +1,6 @@
 package;
 
+import sowy.Sowy;
 import flixel.group.FlxSpriteGroup;
 #if ACHIEVEMENTS_ALLOWED
 import Achievements;
@@ -158,7 +159,7 @@ class MainMenuState extends MusicBeatState
 		FlxG.camera.follow(camFollowPos, null, 1);
 
 		#if !final
-		var versionShit = new FlxText(12, FlxG.height - 44, 0, "Troll Engine v" + psychEngineVersion, 16);
+		var versionShit = new FlxText(12, FlxG.height - 44, 0, "Build Date: " + Sowy.getBuildDate(), 16);
 		versionShit.setFormat(Paths.font("calibri.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		versionShit.scrollFactor.set();
 		add(versionShit);
