@@ -677,19 +677,6 @@ class PlayState extends MusicBeatState
 		add(botplayTxt);
 
 		//
-		lastJudge = RatingSprite.newRating();
-		lastJudge.alpha = 0;
-		ratingTxtGroup.add(lastJudge);
-		add(ratingTxtGroup);
-
-		for (i in 0...4){
-			var number = RatingSprite.newNumber();
-			number.alpha = 0;
-			comboNumGroup.add(number);
-		}
-		add(comboNumGroup);
-
-		//
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
 		add(strumLineNotes);
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
@@ -844,6 +831,19 @@ class PlayState extends MusicBeatState
 		scoreTxt.borderSize = 1.25;
 		scoreTxt.visible = !ClientPrefs.hideHud;
 		add(scoreTxt);
+
+		//
+		lastJudge = RatingSprite.newRating();
+		lastJudge.alpha = 0;
+		ratingTxtGroup.add(lastJudge);
+		add(ratingTxtGroup);
+
+		for (i in 0...4){
+			var number = RatingSprite.newNumber();
+			number.alpha = 0;
+			comboNumGroup.add(number);
+		}
+		add(comboNumGroup);
 
 		// init shit
 		health = 1;
@@ -3121,7 +3121,6 @@ class PlayState extends MusicBeatState
 			if (rating.tween != null){
 				rating.tween.cancel();
 				rating.tween.destroy();
-				rating.tween = null;
 			}
 			
 			rating.tween = FlxTween.tween(rating.scale, {x: 0.7, y: 0.7}, 0.1, {
@@ -3143,11 +3142,12 @@ class PlayState extends MusicBeatState
 			
 			rating.acceleration.y = 550;
 			rating.velocity.set(-FlxG.random.int(0, 10), -FlxG.random.int(140, 175));
-			
-			rating.scale.set(0.7, 0.7);
 
-			if (rating.tween != null)
+			if (rating.tween != null){
 				rating.tween.cancel();
+				rating.tween.destroy();
+			}
+			rating.alpha = 1;
 
 			rating.tween = FlxTween.tween(rating, {alpha: 0}, 0.2, {
 				startDelay: Conductor.crochet * 0.001,
@@ -3156,13 +3156,9 @@ class PlayState extends MusicBeatState
 		}
 
 		rating.loadGraphic(Paths.image(daRating.image));
-		rating.alpha = 1;
-
 		rating.updateHitbox();
 		
-		//if (!ClientPrefs.simpleJudge)
-			rating.screenCenter();
-
+		rating.screenCenter();
 		rating.x += ClientPrefs.comboOffset[0];
 		rating.y -= ClientPrefs.comboOffset[1];
 
@@ -3201,7 +3197,6 @@ class PlayState extends MusicBeatState
 			if (numScore.tween != null){
 				numScore.tween.cancel();
 				numScore.tween.destroy();
-				numScore.tween = null;
 			}
 
 			if(ClientPrefs.simpleJudge){
@@ -4319,6 +4314,7 @@ class RatingSprite extends FlxSprite
 		moves = !ClientPrefs.simpleJudge;
 
 		antialiasing = ClientPrefs.globalAntialiasing;
+		//cameras = [ClientPrefs.simpleJudge ? PlayState.instance.camHUD : PlayState.instance.camGame];
 		cameras = [PlayState.instance.camHUD];
 
 		scrollFactor.set();
@@ -4327,9 +4323,7 @@ class RatingSprite extends FlxSprite
 	public static function newRating()
 	{
 		var rating = new RatingSprite();
-		
 		// rating.acceleration.y = 550;
-		
 		rating.scale.set(0.7, 0.7);
 
 		return rating;
@@ -4338,7 +4332,6 @@ class RatingSprite extends FlxSprite
 	public static function newNumber()
 	{
 		var numScore = new RatingSprite();
-		
 		numScore.scale.set(0.5, 0.5);
 
 		return numScore;
