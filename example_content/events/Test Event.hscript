@@ -1,0 +1,23 @@
+function onTrigger(value1:Dynamic, value2:Dynamic){
+    trace("Event was triggered with values " + value1 + " and " + value2);
+}
+
+function getOffset(eventNote): Float{
+  return 0; // If this is anything but 0, the event will be offset backwards by the specified number in ms
+  // so returning 250 will move it from being triggered at 1000, to 750
+  // likewise, -250 will go from 1000 to 1250
+}
+
+function onLoad(){
+    trace("Event was loaded for the first time! Use this space to preload graphics, etc");
+}
+
+function onPush(eventNote){
+    trace("Event was pushed! Value 1: " + eventNote.value1 + ", Value 2: " + eventNote.value2);
+}
+
+function shouldPush(eventNote):Bool{
+    // This is usually used to lock an event to a certain stage, etc
+    // Return false if the event shouldnt be used, but should normally return true unless an event is made for 1 stage/character/etc
+    return true;
+}

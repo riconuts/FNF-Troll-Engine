@@ -150,14 +150,14 @@ class TitleState extends MusicBeatState
 
 	override public function create():Void
 	{
-		trace("CRATED");
-
 		if (!loaded) load();
 
 		bg.buildStage();
 
 		FlxTransitionableState.defaultTransIn = FadeTransitionSubstate;
 		FlxTransitionableState.defaultTransOut = FadeTransitionSubstate;
+
+		persistentUpdate = true;
 
 		super.create();
 
@@ -221,25 +221,28 @@ class TitleState extends MusicBeatState
 		var swagGoodArray:Array<Array<String>> = [];
 
 		Paths.currentModDirectory = "";
-		var fullText:String = Paths.getText(Paths.txt('introText')).rtrim();
+		var rawFile:Null<String> = Paths.getContent(Paths.txt('introText'));
+
+		if (rawFile != null){
+			for (line in rawFile.rtrim().split('\n'))
+				swagGoodArray.push(line.split('--'));
+		}
 
 		#if MODS_ALLOWED
 		for (mod in Paths.getModDirectories()){
 			Paths.currentModDirectory = mod;
 
-			var rawFile:Null<String> = Paths.getContent(Paths.modFolders("data/introText.txt")).rtrim();
+			var rawFile:Null<String> = Paths.getContent(Paths.modsTxt("introText.txt"));
 
-			if (rawFile != null && rawFile.length > 0)
-				fullText += '\n${rawFile}';
+			if (rawFile != null){
+				for (line in rawFile.rtrim().split('\n'))
+					swagGoodArray.push(line.split('--'));
+			}	
 		}
 		Paths.currentModDirectory = '';
 		#end
 
 		////
-		var firstArray:Array<String> = fullText.split('\n');
-		for (i in firstArray)
-			swagGoodArray.push(i.split('--'));
-
 		return swagGoodArray;
 	}
 

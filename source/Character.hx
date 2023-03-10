@@ -499,7 +499,7 @@ class Character extends FlxSprite
 
 		for (file in files){
 			if (Paths.exists(file)){
-				characterScript = FunkinHScript.fromFile(file);
+				characterScript = FunkinHScript.fromFile(file, curCharacter, ["character" => this]);
 				break;
 			}
 		}
@@ -509,7 +509,7 @@ class Character extends FlxSprite
 		return this;
 	}
 
-	public function callOnScripts(event:String, ?args:Array<Dynamic>, ?ignoreStops:Bool = false)
+	public function callOnScripts(event:String, ?args:Array<Dynamic>, ?ignoreStops:Bool = false, ?extraVars:Map<String,Dynamic>)
 	{
 		var returnVal:Dynamic = Globals.Function_Continue;
 

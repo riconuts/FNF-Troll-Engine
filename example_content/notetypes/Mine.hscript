@@ -1,0 +1,12 @@
+function setupNote(note:Note){
+    note.texture = "MINES";
+    note.ignoreNote = true;
+    note.hitCausesMiss = true;
+}
+
+function loadNoteAnims(note:Note){
+    note.animation.addByPrefix("greenScroll", "mine0");
+    note.animation.addByPrefix("redScroll", "mine0");
+    note.animation.addByPrefix("blueScroll", "mine0");
+    note.animation.addByPrefix("purpleScroll", "mine0");
+}

@@ -105,7 +105,7 @@ class StoryMenuState extends MusicBeatState
 			var newButton = new ChapterOption(xPos, yPos, chapData);
 			newButton.loadGraphic(previewImage);
 
-			var yellowBorder = new FlxShapeBox(xPos - 3, yPos - 3, 200, 200, {thickness: 6, color: FlxColor.fromRGB(255, 242, 0)}, FlxColor.TRANSPARENT);
+			var yellowBorder = new FlxShapeBox(xPos - 3, yPos - 3, 200, 200, {thickness: 6, color: 0xFFF4CC34}, FlxColor.TRANSPARENT);
 			var textTitle = new FlxText(xPos - 3, yPos - 30, 206, chapData.name, 12);
 			textTitle.setFormat(Paths.font("calibri.ttf"), 18, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE);
 
@@ -151,7 +151,7 @@ class StoryMenuState extends MusicBeatState
 		}
 		
 		cornerLeftText = new SowyTextButton(15, 720, 0, "← BACK", 32, goBack);
-		cornerLeftText.label.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
+		cornerLeftText.label.setFormat(Paths.font("calibri.ttf"), 32, 0xFFF4CC34, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE);
 		cornerLeftText.y -= cornerLeftText.height + 15;
 		mainMenu.add(cornerLeftText);
 		

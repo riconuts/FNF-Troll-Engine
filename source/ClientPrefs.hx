@@ -7,12 +7,10 @@ import flixel.input.keyboard.FlxKey;
 import flixel.util.FlxSave;
 
 class ClientPrefs {
-	public static var midScroll:Bool = false; // ahahehehaahha
-
 	public static var downScroll:Bool = false;
 	public static var middleScroll:Bool = false;
 	public static var opponentStrums:Bool = true;
-	public static var showFPS:Bool = true;
+	public static var showFPS:Bool = false;
 	public static var flashing:Bool = true;
 	public static var globalAntialiasing:Bool = false;
 	public static var noteSplashes:Bool = true;
@@ -24,11 +22,12 @@ class ClientPrefs {
 	public static var hideHud:Bool = false;
 	public static var camMovement:Bool = true;
 
-	public static var simpleJudge:Bool = false;
-
 	// new tgt
 	public static var directionalCam:Bool = false;
 	public static var tgtNotes:Bool = true;
+
+	public static var simpleJudge:Bool = false;
+	public static var midScroll:Bool = false; // ahahehehaahha
 	
 	//public static var multicoreLoading:Bool = false;
 	public static var loadingThreads:Int = 1;
@@ -204,6 +203,10 @@ class ClientPrefs {
 		}
 		if(FlxG.save.data.globalAntialiasing != null) {
 			globalAntialiasing = FlxG.save.data.globalAntialiasing;
+
+			#if !(flixel < "5.0.0")
+			FlxSprite.defaultAntialiasing = globalAntialiasing;
+			#end
 		}
 		if(FlxG.save.data.noteSplashes != null) {
 			noteSplashes = FlxG.save.data.noteSplashes;

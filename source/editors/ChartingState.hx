@@ -75,7 +75,8 @@ class ChartingState extends MusicBeatState
 		['Screen Shake', "Value 1: Camera shake\nValue 2: HUD shake\n\nEvery value works as the following example: \"1, 0.05\".\nThe first number (1) is the duration.\nThe second number (0.05) is the intensity."],
 		['Change Character', "Value 1: Character to change (dad, bf, gf)\nValue 2: New character's name"],
 		['Change Scroll Speed', "Value 1: Scroll Speed Multiplier (1 is default)\nValue 2: Time it takes to change fully in seconds."],
-		['Set Property', "Value 1: Variable name\nValue 2: New value"]
+		['Set Property', "Value 1: Variable name\nValue 2: New value"],
+		['Game Flash', "Value 1: Hexadecimal Color (0xFFFFFFFF is default)\nValue 2: Duration in seconds (0.5 is default)"]
 	];
 
 	var _file:FileReference;
@@ -508,7 +509,7 @@ class ChartingState extends MusicBeatState
 		blockPressWhileScrolling.push(player2DropDown);
 
 		////
-		var stages = Stage.getStageList();
+		var stages = Stage.getAllStages();
 
 		var stageDropDown = new FlxUIDropDownMenuCustom(
 			player1DropDown.x + 140, 
@@ -1943,12 +1944,10 @@ class ChartingState extends MusicBeatState
 		strumLineNotes.visible = quant.visible = vortex;
 
 		if(FlxG.sound.music.time < 0) {
-			trace("ugh", FlxG.sound.music.time );
 			FlxG.sound.music.pause();
 			FlxG.sound.music.time = 0;
 		}
 		else if(FlxG.sound.music.time > FlxG.sound.music.length) {
-			trace("ugh", FlxG.sound.music.time, FlxG.sound.music.length);
 			FlxG.sound.music.pause();
 			FlxG.sound.music.time = 0;
 			changeSection();

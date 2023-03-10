@@ -6,7 +6,7 @@ import flixel.util.FlxColor;
 
 class SowyTextButton extends SowyBaseButton
 {
-	public var labelColors:Array<FlxColor> = [FlxColor.YELLOW, 0xFF00AAFF, FlxColor.YELLOW];
+	public var labelColors:Array<FlxColor> = [0xFFF4CC34, 0xFF00AAFF, 0xFFF4CC34];
 
 	public function new(X:Float = 0, Y:Float = 0, FieldWidth:Float = 0, ?Text:String, Size:Int = 8, ?OnClick:Void->Void)
 	{

@@ -40,7 +40,7 @@ class FunkinScript {
 	/**
 		Called to call a function within the script
 	**/
-	public function call(func:String, ?args:Array<Dynamic>):Dynamic
+	public function call(func:String, ?args:Array<Dynamic>, ?extraVars:Map<String,Dynamic>):Dynamic
 	{
 		throw new haxe.exceptions.NotImplementedException();
 	}

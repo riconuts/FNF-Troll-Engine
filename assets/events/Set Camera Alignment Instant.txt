@@ -1,2 +1,4 @@
 Value 1: (0 to 1)
+
 snaps instantly
+leave both values blank to unlock the camera after the event is used

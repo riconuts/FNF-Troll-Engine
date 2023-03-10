@@ -677,19 +677,6 @@ class PlayState extends MusicBeatState
 		add(botplayTxt);
 
 		//
-		lastJudge = RatingSprite.newRating();
-		lastJudge.alpha = 0;
-		ratingTxtGroup.add(lastJudge);
-		add(ratingTxtGroup);
-
-		for (i in 0...4){
-			var number = RatingSprite.newNumber();
-			number.alpha = 0;
-			comboNumGroup.add(number);
-		}
-		add(comboNumGroup);
-
-		//
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
 		add(strumLineNotes);
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
@@ -761,11 +748,15 @@ class PlayState extends MusicBeatState
 			/* gfVersion = 'gf';
 			SONG.gfVersion = gfVersion; //Fix for the Chart Editor */
 		}
-		else if (!stageData.hide_girlfriend)
+		else if (stageData.hide_girlfriend != true)
 		{
 			gf = new Character(0, 0, gfVersion);
-			gf.cameraPosition[0] += stageData.camera_girlfriend[0];
-			gf.cameraPosition[1] += stageData.camera_girlfriend[1];
+
+			if (stageData.camera_girlfriend != null){
+				gf.cameraPosition[0] += stageData.camera_girlfriend[0];
+				gf.cameraPosition[1] += stageData.camera_girlfriend[1];
+			}
+
 			startCharacterPos(gf);
 			gf.scrollFactor.set(0.95, 0.95);
 			startCharacterLua(gf);
@@ -775,8 +766,11 @@ class PlayState extends MusicBeatState
 		}
 
 		dad = new Character(0, 0, SONG.player2);
-		dad.cameraPosition[0] += stageData.camera_opponent[0];
-		dad.cameraPosition[1] += stageData.camera_opponent[1];
+
+		if (stageData.camera_opponent != null){
+			dad.cameraPosition[0] += stageData.camera_opponent[0];
+			dad.cameraPosition[1] += stageData.camera_opponent[1];
+		}
 		startCharacterPos(dad, true);
 		startCharacterLua(dad);
 
@@ -784,8 +778,10 @@ class PlayState extends MusicBeatState
 		dadGroup.add(dad);
 
 		boyfriend = new Boyfriend(0, 0, SONG.player1);
-		boyfriend.cameraPosition[0] += stageData.camera_boyfriend[0];
-		boyfriend.cameraPosition[1] += stageData.camera_boyfriend[1];
+		if (stageData.camera_boyfriend != null){
+			boyfriend.cameraPosition[0] += stageData.camera_boyfriend[0];
+			boyfriend.cameraPosition[1] += stageData.camera_boyfriend[1];
+		}
 		startCharacterPos(boyfriend);
 		startCharacterLua(boyfriend);
 
@@ -835,6 +831,19 @@ class PlayState extends MusicBeatState
 		scoreTxt.borderSize = 1.25;
 		scoreTxt.visible = !ClientPrefs.hideHud;
 		add(scoreTxt);
+
+		//
+		lastJudge = RatingSprite.newRating();
+		lastJudge.alpha = 0;
+		ratingTxtGroup.add(lastJudge);
+		add(ratingTxtGroup);
+
+		for (i in 0...4){
+			var number = RatingSprite.newNumber();
+			number.alpha = 0;
+			comboNumGroup.add(number);
+		}
+		add(comboNumGroup);
 
 		// init shit
 		health = 1;
@@ -2610,7 +2619,11 @@ class PlayState extends MusicBeatState
 			case 'Game Flash':
 				var dur:Float = Std.parseFloat(value2);
 				if(Math.isNaN(dur)) dur = 0.5;
-				FlxG.camera.flash(FlxColor.fromString(value1), dur);
+
+				var col:Null<FlxColor> = FlxColor.fromString(value1);
+				if (col == null) col = 0xFFFFFFFF;
+
+				FlxG.camera.flash(col, dur, null, true);
 			case 'Hey!':
 				var value:Int = 2;
 				switch(value1.toLowerCase().trim()) {
@@ -3108,7 +3121,6 @@ class PlayState extends MusicBeatState
 			if (rating.tween != null){
 				rating.tween.cancel();
 				rating.tween.destroy();
-				rating.tween = null;
 			}
 			
 			rating.tween = FlxTween.tween(rating.scale, {x: 0.7, y: 0.7}, 0.1, {
@@ -3130,11 +3142,12 @@ class PlayState extends MusicBeatState
 			
 			rating.acceleration.y = 550;
 			rating.velocity.set(-FlxG.random.int(0, 10), -FlxG.random.int(140, 175));
-			
-			rating.scale.set(0.7, 0.7);
 
-			if (rating.tween != null)
+			if (rating.tween != null){
 				rating.tween.cancel();
+				rating.tween.destroy();
+			}
+			rating.alpha = 1;
 
 			rating.tween = FlxTween.tween(rating, {alpha: 0}, 0.2, {
 				startDelay: Conductor.crochet * 0.001,
@@ -3143,13 +3156,9 @@ class PlayState extends MusicBeatState
 		}
 
 		rating.loadGraphic(Paths.image(daRating.image));
-		rating.alpha = 1;
-
 		rating.updateHitbox();
 		
-		//if (!ClientPrefs.simpleJudge)
-			rating.screenCenter();
-
+		rating.screenCenter();
 		rating.x += ClientPrefs.comboOffset[0];
 		rating.y -= ClientPrefs.comboOffset[1];
 
@@ -3188,7 +3197,6 @@ class PlayState extends MusicBeatState
 			if (numScore.tween != null){
 				numScore.tween.cancel();
 				numScore.tween.destroy();
-				numScore.tween = null;
 			}
 
 			if(ClientPrefs.simpleJudge){
@@ -4306,6 +4314,7 @@ class RatingSprite extends FlxSprite
 		moves = !ClientPrefs.simpleJudge;
 
 		antialiasing = ClientPrefs.globalAntialiasing;
+		//cameras = [ClientPrefs.simpleJudge ? PlayState.instance.camHUD : PlayState.instance.camGame];
 		cameras = [PlayState.instance.camHUD];
 
 		scrollFactor.set();
@@ -4314,9 +4323,7 @@ class RatingSprite extends FlxSprite
 	public static function newRating()
 	{
 		var rating = new RatingSprite();
-		
 		// rating.acceleration.y = 550;
-		
 		rating.scale.set(0.7, 0.7);
 
 		return rating;
@@ -4325,7 +4332,6 @@ class RatingSprite extends FlxSprite
 	public static function newNumber()
 	{
 		var numScore = new RatingSprite();
-		
 		numScore.scale.set(0.5, 0.5);
 
 		return numScore;

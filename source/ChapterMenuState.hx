@@ -61,7 +61,7 @@ class ChapterMenuState extends MusicBeatState{
 
 		super.create();
 
-		var funkyRectangle = new flixel.addons.display.shapes.FlxShapeBox(10, 10, 1260, 700, {thickness: 3, color: FlxColor.fromRGB(255, 242, 0)}, FlxColor.BLACK);
+		var funkyRectangle = new flixel.addons.display.shapes.FlxShapeBox(10, 10, 1260, 700, {thickness: 3, color: 0xFFF4CC34}, FlxColor.BLACK);
 		funkyRectangle.cameras = cameras;
 		add(funkyRectangle);
 
@@ -77,11 +77,11 @@ class ChapterMenuState extends MusicBeatState{
 		add(chapterText);
 
 		cornerLeftText = new SowyTextButton(15, 720, 0, "← BACK", 32, close);
-		cornerLeftText.label.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
+		cornerLeftText.label.setFormat(Paths.font("calibri.ttf"), 32, 0xFFF4CC34, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE);
 		add(cornerLeftText);
 
 		cornerRightText = new SowyTextButton(1280, 720, 0, "PLAY →", 32, playWeek);
-		cornerRightText.label.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.LEFT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
+		cornerRightText.label.setFormat(Paths.font("calibri.ttf"), 32, 0xFFF4CC34, FlxTextAlign.LEFT, FlxTextBorderStyle.NONE);
 		add(cornerRightText);
 
 		cornerRightText.x -= cornerRightText.width + 15;
@@ -126,7 +126,7 @@ class ChapterMenuState extends MusicBeatState{
 			var yPos = startY + (songAmount + 2) * 48;
 
 			var newSongTxt = new FlxText(halfScreen, yPos, 0, songName, 32);
-			newSongTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
+			newSongTxt.setFormat(Paths.font("calibri.ttf"), 32, 0xFFF4CC34, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE);
 
 			var newScoreTxt = new FlxText(1205, yPos, 0, '' + Highscore.getScore(songName), 32);
 			newScoreTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
