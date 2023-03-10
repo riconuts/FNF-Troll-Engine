@@ -133,6 +133,7 @@ class Cache
 			}
 			var shitToLoad = [for (k => v in uniqueMap){/*trace(k);*/ v;}];
 			trace('loading ${shitToLoad.length} items.');
+			// TODO: figure out why this sometimes crashes
 
 			var mainThread = Thread.current();
 			var makeThread = Thread.create.bind(() -> {
@@ -210,8 +211,8 @@ class Cache
 		}
 		else
 		#end
-		if (!multicoreOnly)
-			for (shit in shitToLoad) load(shit);
+		//if (!multicoreOnly)
+		//	for (shit in shitToLoad) load(shit);
 
 		#if loadBenchmark
 		trace('finished loading in ${Sys.time() - startTime} seconds.');

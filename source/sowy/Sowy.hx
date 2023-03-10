@@ -1,5 +1,6 @@
 package sowy;
 
+// what DOES sowy mean
 class Sowy
 {
     public static macro function getBuildDate()
