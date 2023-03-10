@@ -6,16 +6,15 @@ function getOffset(eventNote):Float{
 	return 0;
 }
 
-function onTrigger(value1, value2){
+function onTrigger(value1)
+{
 	if(game.stageData.camera_speed != null)
 		game.cameraSpeed = game.stageData.camera_speed;
 
-	if (Std.string(value1) != "" && Std.string(value2) != ""){
-		var bf = game.boyfriend;
-		var dad = game.dad;
-		
-		var camDad = game.getCharacterCamera(game.dad);
-		var camBf = game.getCharacterCamera(game.boyfriend);
+	if (Std.string(value1) != "")
+	{		
+		var camDad = PlayState.getCharacterCamera(game.dad);
+		var camBf = PlayState.getCharacterCamera(game.boyfriend);
 		
 		var dadX = camDad[0];
 		var dadY = camDad[1];

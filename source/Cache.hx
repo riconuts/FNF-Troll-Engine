@@ -40,12 +40,17 @@ class Cache
 	{
 		#if MODS_ALLOWED
 		var modKey:String = Paths.modsImages(key);
+		if (Paths.currentTrackedAssets.exists(modKey))
+			return null;
+
 		if (FileSystem.exists(modKey))
 		{
-			if (Paths.currentTrackedAssets.exists(modKey))
-				return null;
-
-			var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(modKey), false, modKey);
+			var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(
+				BitmapData.fromFile(modKey), 
+				false, 
+				modKey,
+				false // it's not in the tracked assets so it isn't cached already
+			);
 			newGraphic.persist = true;
 
 			return {key: modKey, graphic: newGraphic};
@@ -53,17 +58,19 @@ class Cache
 		#end
 
 		var path = Paths.getPath('images/$key.png', IMAGE, library);
-		if (OpenFlAssets.exists(path, IMAGE))
+		if (Paths.exists(path, IMAGE) && !Paths.currentTrackedAssets.exists(path))
 		{
-			if (Paths.currentTrackedAssets.exists(path))
-				return null;
-
-			var newGraphic:FlxGraphic = FlxG.bitmap.add(path, false, path);
+			var newGraphic:FlxGraphic = FlxGraphic.fromAssetKey(
+				path, 
+				false, 
+				path, 
+				false // because this is NOT cached already
+			);
 			newGraphic.persist = true;
 					
 			return {key: path, graphic: newGraphic};
 		}
-		
+
 		return null;
 	}
 
@@ -87,14 +94,15 @@ class Cache
 		if (Paths.currentTrackedSounds.exists(gottenPath))
 			return null;
 		
-		#if (!html5)
-		var leSound = Sound.fromFile(gottenPath);
+		#if (html5 || flash || true)
+		OpenFlAssets.getSound();
+		if (OpenFlAssets.exists(gottenPath, SOUND);)
+			return {key: gottenPath, sound: OpenFlAssets.getSound(gottenPath)};
 		#else
-		var leSound = OpenFlAssets.getSound(gottenPath); // dose this shit work idk
-		#end
-
+		var leSound = Sound.fromFile(gottenPath);
 		if (leSound != null)
 			return {key: gottenPath, sound: leSound};
+		#end
 		
 		return null;
 	}

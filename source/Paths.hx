@@ -215,9 +215,13 @@ class Paths
 	}
 
 
-	inline static public function exists(asset:String)
+	inline static public function exists(asset:String, ?type:lime.utils.AssetType)
 	{
-		return #if sys FileSystem.exists(asset) #else Assets.exists(asset) #end;
+		#if sys 
+		return FileSystem.exists(asset);
+		#else
+		return Assets.exists(asset, type);
+		#end
 	}
 	inline static public function getContent(asset:String):Null<String>{
 		#if sys
