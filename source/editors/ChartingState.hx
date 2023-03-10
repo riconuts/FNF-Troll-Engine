@@ -406,10 +406,7 @@ class ChartingState extends MusicBeatState
 			_song.needsVoices = check_voices.checked;
 		};
 
-		var saveButton:FlxButton = new FlxButton(110, 8, "Save", function()
-		{
-			saveLevel();
-		});
+		var saveButton:FlxButton = new FlxButton(110, 8, "Save", saveLevel);
 
 		var reloadSong:FlxButton = new FlxButton(saveButton.x + 90, saveButton.y, "Reload Audio", function()
 		{
@@ -447,10 +444,7 @@ class ChartingState extends MusicBeatState
 			}
 		});
 
-		var saveEvents:FlxButton = new FlxButton(110, reloadSongJson.y, 'Save Events', function ()
-		{
-			saveEvents();
-		});
+		var saveEvents:FlxButton = new FlxButton(110, reloadSongJson.y, 'Save Events', saveEvents);
 
 		var clear_events:FlxButton = new FlxButton(loadAutosaveBtn.x, 310, 'Clear events', function()
 			{
@@ -2839,16 +2833,9 @@ class ChartingState extends MusicBeatState
 		return noteData;
 	}
 
-	function loadJson(song:String):Void
-	{
-		var daJson = Song.loadFromJson(song.toLowerCase(), song.toLowerCase());
-
-		if (daJson == null)
-			openSubState(new Prompt('An error ocurred while loading the JSON file', 0, null, null, false, "OK", "OK"));
-		else{
-			PlayState.SONG = daJson;
-			MusicBeatState.resetState();
-		}
+	function clearEvents() {
+		_song.events = [];
+		updateGrid();
 	}
 
 	function autosaveSong():Void
@@ -2859,18 +2846,43 @@ class ChartingState extends MusicBeatState
 		FlxG.save.flush();
 	}
 
-	function clearEvents() {
-		_song.events = [];
-		updateGrid();
+	function loadJson(song:String):Void
+	{
+		var daJson:SwagSong = Song.loadFromJson(song.toLowerCase(), song.toLowerCase());
+
+		if (daJson == null){
+			openSubState(new Prompt('An error ocurred while loading the JSON file', 0, null, null, false, "OK", "OK"));
+		}else{
+			PlayState.SONG = daJson;
+			MusicBeatState.resetState();
+		}
+	}
+	
+	function browseJson():Void
+	{
+		_file = new FileReference();
+		_file.addEventListener(Event.SELECT, onJsonSelected);
+		_file.addEventListener(Event.CANCEL, onSaveCancel);
+		_file.browse([new openfl.net.FileFilter("JSON file", "*.json", "JSON")]);
+	}
+	function onJsonSelected(e){
+		trace(_file.data.toString());
+
+		_file.removeEventListener(Event.SELECT, onJsonSelected);
+		_file.removeEventListener(Event.CANCEL, onSaveCancel);
+		_file = null;
+	}
+
+	function sortByTime(Obj1:Array<Dynamic>, Obj2:Array<Dynamic>):Int
+	{
+		return FlxSort.byValues(FlxSort.ASCENDING, Obj1[0], Obj2[0]);
 	}
 
 	private function saveLevel()
 	{
 		if(_song.events != null && _song.events.length > 1) _song.events.sort(sortByTime);
-		var json = {
-			"song": _song
-		};
-
+		
+		var json = {"song": _song};
 		var data:String = Json.stringify(json, "\t");
 
 		if ((data != null) && (data.length > 0))
@@ -2881,11 +2893,6 @@ class ChartingState extends MusicBeatState
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 			_file.save(data.trim(), Paths.formatToSongPath(_song.song) + ".json");
 		}
-	}
-
-	function sortByTime(Obj1:Array<Dynamic>, Obj2:Array<Dynamic>):Int
-	{
-		return FlxSort.byValues(FlxSort.ASCENDING, Obj1[0], Obj2[0]);
 	}
 
 	private function saveEvents()

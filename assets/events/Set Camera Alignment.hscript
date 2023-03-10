@@ -17,8 +17,8 @@ function onTrigger(value1, value2){
 		var dadX = camDad[0];
 		var dadY = camDad[1];
 		
-		var bfX = camBf[0]);
-		var bfY = camBf[1]);
+		var bfX = camBf[0];
+		var bfY = camBf[1];
 		
 		var minX = 0.0;
 		var minY = 0.0;
