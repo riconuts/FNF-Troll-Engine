@@ -466,7 +466,7 @@ class PlayState extends MusicBeatState
 		camOverlay = new FlxCamera();
 		camOther = new FlxCamera();
 		
-		camHUD.bgColor = FlxColor.fromRGBFloat(0, 0, 0, 1-ClientPrefs.stageOpacity);
+		camHUD.bgColor = FlxColor.fromRGBFloat(0, 0, 0, 1 - ClientPrefs.stageOpacity);
 		camOverlay.bgColor.alpha = 0;
 		camOther.bgColor.alpha = 0;
 
@@ -1973,9 +1973,7 @@ class PlayState extends MusicBeatState
 		if (paused)
 		{
 			if (FlxG.sound.music != null && !startingSong)
-			{
 				resyncVocals();
-			}
 
 			if (startTimer != null && !startTimer.finished)
 				startTimer.active = true;
@@ -2049,7 +2047,8 @@ class PlayState extends MusicBeatState
 
 	function resyncVocals():Void
 	{
-		if(finishTimer != null) return;
+		if(finishTimer != null || transitioning) 
+			return;
 
 		vocals.pause();
 		for (track in tracks)
@@ -2057,6 +2056,7 @@ class PlayState extends MusicBeatState
 
 		FlxG.sound.music.play();
 		Conductor.songPosition = FlxG.sound.music.time;
+		
 		vocals.time = Conductor.songPosition;
 		vocals.play();
 		for (track in tracks){
@@ -2935,6 +2935,8 @@ class PlayState extends MusicBeatState
 			}
 			#end
 
+			transitioning = true;
+
 			if (chartingMode)
 			{
 				openChartEditor();
@@ -2950,29 +2952,31 @@ class PlayState extends MusicBeatState
 
 				if (storyPlaylist.length <= 0)
 				{
-					MusicBeatState.playMenuMusic(1, true);
+					//// WEEK END
+
+					if(FlxTransitionableState.skipNextTransIn)
+						CustomFadeTransition.nextCamera = null;
 
 					cancelMusicFadeTween();
-					if(FlxTransitionableState.skipNextTransIn) {
-						CustomFadeTransition.nextCamera = null;
-					}
-					MusicBeatState.switchState(new StoryMenuState());
 
-					// if ()
 					if(!ClientPrefs.getGameplaySetting('practice', false) && !ClientPrefs.getGameplaySetting('botplay', false)) {
-						StoryMenuState.weekCompleted.set(ChapterData.curChapter.directory, true);
-
-						if (SONG.validScore && ChapterData.curChapter != null)
+						if (SONG.validScore && ChapterData.curChapter != null){
 							Highscore.saveWeekScore(ChapterData.curChapter.directory, campaignScore);
 
-						FlxG.save.data.weekCompleted = StoryMenuState.weekCompleted;
-						FlxG.save.flush();
+							StoryMenuState.weekCompleted.set(ChapterData.curChapter.directory, true);
+							FlxG.save.data.weekCompleted = StoryMenuState.weekCompleted;
+
+							FlxG.save.flush();
+						}
 					}
+
+					MusicBeatState.playMenuMusic(1, true);
+					MusicBeatState.switchState(new StoryMenuState());
 				}
 				else
 				{
-					trace('LOADING NEXT SONG');
-					trace(Paths.formatToSongPath(PlayState.storyPlaylist[0]));
+					var nextSong = PlayState.storyPlaylist[0];
+					trace('LOADING NEXT SONG: $nextSong');
 
 					FlxTransitionableState.skipNextTransIn = true;
 					FlxTransitionableState.skipNextTransOut = true;
@@ -2980,10 +2984,11 @@ class PlayState extends MusicBeatState
 					prevCamFollow = camFollow;
 					prevCamFollowPos = camFollowPos;
 
-					PlayState.SONG = Song.loadFromJson(PlayState.storyPlaylist[0], PlayState.storyPlaylist[0]);
 					FlxG.sound.music.stop();
 
 					cancelMusicFadeTween();
+
+					PlayState.SONG = Song.loadFromJson(nextSong, nextSong);
 					LoadingState.loadAndSwitchState(new PlayState());
 				}
 			}
@@ -2991,32 +2996,15 @@ class PlayState extends MusicBeatState
 			{
 				trace('WENT BACK TO FREEPLAY??');
 				cancelMusicFadeTween();
-				if(FlxTransitionableState.skipNextTransIn) {
+				
+				if(FlxTransitionableState.skipNextTransIn)
 					CustomFadeTransition.nextCamera = null;
-				}
+				
 				MusicBeatState.playMenuMusic(1, true);
 				MusicBeatState.switchState(new FreeplayState());
 			}
-			transitioning = true;
 		}
 	}
-
-	#if ACHIEVEMENTS_ALLOWED
-	var achievementObj:AchievementObject = null;
-	function startAchievement(achieve:String) {
-		achievementObj = new AchievementObject(achieve, camOther);
-		achievementObj.onFinish = achievementEnd;
-		add(achievementObj);
-		trace('Giving achievement ' + achieve);
-	}
-	function achievementEnd():Void
-	{
-		achievementObj = null;
-		if(endingSong && !inCutscene) {
-			endSong();
-		}
-	}
-	#end
 
 	public function KillNotes() {
 		while(notes.length > 0) {
@@ -3804,14 +3792,11 @@ class PlayState extends MusicBeatState
 	{
 		super.stepHit();
 
-
 		if (Math.abs(FlxG.sound.music.time - (Conductor.songPosition - Conductor.offset)) > 20
 			|| (SONG.needsVoices && Math.abs(vocals.time - (Conductor.songPosition - Conductor.offset)) > 20))
 		{
 			resyncVocals();
 		}
-		for (track in tracks)
-			track.time = FlxG.sound.music.time;
 
 		if(curStep == lastStepHit) {
 			return;
