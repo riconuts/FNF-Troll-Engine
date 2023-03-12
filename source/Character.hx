@@ -496,15 +496,17 @@ class Character extends FlxSprite
 	{
 		var basePath = 'characters/$curCharacter';
 
-		for (filePath in [#if MODS_ALLOWED Paths.modFolders(basePath), #end Paths.getPreloadPath(basePath)]){
+		for (filePath in [#if MODS_ALLOWED Paths.mods('${Paths.currentModDirectory}/$basePath'), Paths.mods('global/$basePath'), #end Paths.getPreloadPath(basePath)]){
 
-			if (Paths.exists('$filePath.hscript')){
-				characterScript = FunkinHScript.fromFile(filePath, curCharacter, ["character" => this]);
+			var file = '$filePath.hscript';
+			if (Paths.exists(file)){
+				characterScript = FunkinHScript.fromFile(file, basePath, ["character" => this]);
 				break;
 			}
 			#if LUA_ALLOWED
-			if (Paths.exists('$filePath.lua')){
-				characterScript = new FunkinLua(filePath);
+			file = '$filePath.lua';
+			if (Paths.exists(file)){
+				characterScript = new FunkinLua(file);
 				break;
 			}		
 			#end	

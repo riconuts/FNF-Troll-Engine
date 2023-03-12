@@ -143,8 +143,8 @@ class PlayState extends MusicBeatState
 	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
 
 	// does this even make a difference
-	public var ratingTxtGroup:FlxTypedGroup<RatingSprite>;
-	public var comboNumGroup:FlxTypedGroup<RatingSprite>;
+	public var ratingTxtGroup = new FlxTypedGroup<RatingSprite>();
+	public var comboNumGroup = new FlxTypedGroup<RatingSprite>();
 
 	private var curSong:String = "";
 
@@ -770,14 +770,6 @@ class PlayState extends MusicBeatState
 		add(scoreTxt);
 
 		//
-		if (ClientPrefs.simpleJudge){
-			ratingTxtGroup = new FlxTypedGroup<RatingSprite>();
-			comboNumGroup = new FlxTypedGroup<RatingSprite>();
-		}else{
-			ratingTxtGroup = new FlxTypedGroup<RatingSprite>(10);
-			comboNumGroup = new FlxTypedGroup<RatingSprite>(30);
-		}
-
 		lastJudge = RatingSprite.newRating();
 		ratingTxtGroup.add(lastJudge).kill();
 		for (i in 0...3)
@@ -3160,6 +3152,11 @@ class PlayState extends MusicBeatState
 			numScore.screenCenter();
 			numScore.x += ClientPrefs.comboOffset[2] + 43 * daLoop;
 			numScore.y -= ClientPrefs.comboOffset[3];
+
+			if (numScore.tween != null){
+				numScore.tween.cancel();
+				numScore.tween.destroy();
+			}
 
 			comboNumGroup.remove(numScore, true);
 			comboNumGroup.add(numScore);

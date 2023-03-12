@@ -265,12 +265,12 @@ class FunkinHScript extends FunkinScript
 			for (key in additionalVars.keys())
 				set(key, additionalVars.get(key));
 		}
-
-		trace('Loaded script ${scriptName}');
+		
 		try{
 			interpreter.execute(parsed);
+			trace('Loaded script: $scriptName');
 		}catch(e:haxe.Exception){
-			trace('${scriptName}: '+ e.details());
+			trace('$scriptName: ${e.details()}');
 			FlxG.log.error("Error running hscript: " + e.message);
 		}
 	}
