@@ -71,6 +71,18 @@ class VisualsUISubState extends BaseOptionsMenu
 		option.decimals = 1;
 		addOption(option);
 
+		var option:Option = new Option('Stage Opacity',
+			'Darkens non-ui elements.\n(Useful if you find the characters and backgrounds distracting)',
+			'stageOpacity',
+			'percent',
+			1);
+		option.scrollSpeed = 1.6;
+		option.minValue = 0.0;
+		option.maxValue = 1;
+		option.changeValue = 0.05;
+		option.decimals = 1;
+		addOption(option);
+
 		var option:Option = new Option('Alt Judgements', "Here, I fixed your judgements.\n(Changes how they appear/disappear)", 'simpleJudge', 'bool', false);
 		addOption(option);
 		

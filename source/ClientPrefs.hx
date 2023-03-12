@@ -22,7 +22,9 @@ class ClientPrefs {
 	public static var hideHud:Bool = false;
 	public static var camMovement:Bool = true;
 
-	// new tgt
+	// Troll Engine
+	public static var stageOpacity:Float = 1;
+
 	public static var directionalCam:Bool = false;
 	public static var tgtNotes:Bool = true;
 
@@ -32,8 +34,7 @@ class ClientPrefs {
 	//public static var multicoreLoading:Bool = false;
 	public static var loadingThreads:Int = 1;
 
-	public static var noteOffset:Int = 0;
-	public static var arrowHSV:Array<Array<Int>> = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
+	public static var noteSkin:String = 'Vanilla';
 	public static var quantHSV:Array<Array<Int>> = [
 		[0, -20, 0], // 4th
 		[-130, -20, 0], // 8th
@@ -47,11 +48,14 @@ class ClientPrefs {
 		[-120, -70, -35], // 96th
 		[-120, -70, -35]// 192nd
 	];
-	public static var imagesPersist:Bool = false;
+
+	//
+	public static var arrowHSV:Array<Array<Int>> = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
+
+	public static var noteOffset:Int = 0;
 	public static var ghostTapping:Bool = true;
 	public static var timeBarType:String = 'Time Left';
 	public static var scoreZoom:Bool = true;
-	public static var noteSkin:String = 'Vanilla';
 	public static var noReset:Bool = false;
 	public static var healthBarAlpha:Float = 1;
 	public static var controllerMode:Bool = false;
@@ -145,7 +149,7 @@ class ClientPrefs {
 		FlxG.save.data.loadingThreads = loadingThreads;
 		FlxG.save.data.arrowHSV = arrowHSV;
 		FlxG.save.data.quantHSV = quantHSV;
-		FlxG.save.data.imagesPersist = imagesPersist;
+		FlxG.save.data.stageOpacity = stageOpacity;
 		FlxG.save.data.ghostTapping = ghostTapping;
 		FlxG.save.data.timeBarType = timeBarType;
 		FlxG.save.data.scoreZoom = scoreZoom;
@@ -264,6 +268,11 @@ class ClientPrefs {
 			}
 			#end
 		}
+
+		if(FlxG.save.data.stageOpacity != null) {
+			stageOpacity = FlxG.save.data.stageOpacity;
+		}
+
 		if(FlxG.save.data.noteOffset != null) {
 			noteOffset = FlxG.save.data.noteOffset;
 		}

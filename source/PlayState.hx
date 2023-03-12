@@ -451,6 +451,7 @@ class PlayState extends MusicBeatState
 		// Camera shit
 		camGame = new FlxCamera();
 		camHUD = new FlxCamera();
+
 		if (ClientPrefs.midScroll){ // fucking modchart system
 			if (ClientPrefs.downScroll){
 				camHUD.y += 6;
@@ -464,8 +465,9 @@ class PlayState extends MusicBeatState
 
 		camOverlay = new FlxCamera();
 		camOther = new FlxCamera();
+		
+		camHUD.bgColor = FlxColor.fromRGBFloat(0, 0, 0, 1-ClientPrefs.stageOpacity);
 		camOverlay.bgColor.alpha = 0;
-		camHUD.bgColor.alpha = 0;
 		camOther.bgColor.alpha = 0;
 
 		FlxG.cameras.reset(camGame);
