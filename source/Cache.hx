@@ -94,8 +94,8 @@ class Cache
 		if (Paths.currentTrackedSounds.exists(gottenPath))
 			return null;
 		
-		#if (html5 || flash || true)
-		if (OpenFlAssets.exists(gottenPath, SOUND))
+		#if (html5 || flash)
+		if (OpenFlAssets.exists(gottenPath, SOUND);)
 			return {key: gottenPath, sound: OpenFlAssets.getSound(gottenPath)};
 		#else
 		var leSound = Sound.fromFile(gottenPath);

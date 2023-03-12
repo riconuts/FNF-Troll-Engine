@@ -70,21 +70,26 @@ class FunkinHScript extends FunkinScript
 		scriptName = name;
 
 		setDefaultVars();
+
 		set("Std", Std);
 		set("Type", Type);
 		set("Reflect", Reflect);
 		set("Math", Math);
 		set("script", this);
 		set("StringTools", StringTools);
-		set("scriptTrace", function(text:String){
-			scriptTrace(text);
-		});
-		set("newMap", function(){ // maps aren't really a thing during runtime i think
+		set("scriptTrace", scriptTrace);
+		
+		set("newMap", function(){
 			return new Map<Dynamic, Dynamic>();
+		});
+		// this is stupid, there has to be a better way
+		set("newTypedGroup", function(maxSize:Int = 0){
+			return new flixel.group.FlxGroup.FlxTypedGroup<FlxBasic>(maxSize);
 		});
 
 		set("Assets", Assets);
 		set("OpenFlAssets", openfl.utils.Assets);
+
 		set("FlxG", flixel.FlxG);
 		set("state", flixel.FlxG.state);
 		set("FlxSprite", flixel.FlxSprite);
@@ -112,14 +117,8 @@ class FunkinHScript extends FunkinScript
 		set("FlxSave", flixel.util.FlxSave); // should probably give it 1 save instead of giving it FlxSave
 		set("FlxBar", flixel.ui.FlxBar);
 
-		set("getClass", function(className:String)
-		{
-			return Type.resolveClass(className);
-		});
-		set("getEnum", function(enumName:String)
-		{
-			return Type.resolveEnum(enumName);
-		});
+		set("getClass", Type.resolveClass);
+		set("getEnum", Type.resolveEnum);
 		set("importClass", function(className:String)
 		{
 			// importClass("flixel.util.FlxSort") should give you FlxSort.byValues, etc

@@ -57,7 +57,7 @@ class Character extends FlxSprite
 	public var xFacing:Float = 1;
 
 	public var deathName = DEFAULT_CHARACTER;
-	public var characterScript:FunkinHScript;
+	public var characterScript:FunkinScript;
 
 	public var voicelining:Bool = false; // for fleetway, mainly
 	// but whenever you need to play an anim that has to be manually interrupted, here you go
@@ -494,14 +494,20 @@ class Character extends FlxSprite
 	////
 	public function startScripts()
 	{
-		var baseFile = 'characters/$curCharacter.hscript';
-		var files = [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)];
+		var basePath = 'characters/$curCharacter';
 
-		for (file in files){
-			if (Paths.exists(file)){
-				characterScript = FunkinHScript.fromFile(file, curCharacter, ["character" => this]);
+		for (filePath in [#if MODS_ALLOWED Paths.modFolders(basePath), #end Paths.getPreloadPath(basePath)]){
+
+			if (Paths.exists('$filePath.hscript')){
+				characterScript = FunkinHScript.fromFile(filePath, curCharacter, ["character" => this]);
 				break;
 			}
+			#if LUA_ALLOWED
+			if (Paths.exists('$filePath.lua')){
+				characterScript = new FunkinLua(filePath);
+				break;
+			}		
+			#end	
 		}
 
 		callOnScripts("onLoad", [this], true);

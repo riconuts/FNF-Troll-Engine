@@ -133,7 +133,7 @@ class PlayState extends MusicBeatState
 
 	public var gfSpeed:Int = 1;
 
-	public var notes:FlxTypedGroup<Note>;
+	public var notes = new FlxTypedGroup<Note>();
 	public var unspawnNotes:Array<Note> = [];
 	public var eventNotes:Array<EventNote> = [];
 
@@ -143,8 +143,8 @@ class PlayState extends MusicBeatState
 	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
 
 	// does this even make a difference
-	public var ratingTxtGroup = new FlxTypedGroup<RatingSprite>(10);
-	public var comboNumGroup = new FlxTypedGroup<RatingSprite>(30);
+	public var ratingTxtGroup:FlxTypedGroup<RatingSprite>;
+	public var comboNumGroup:FlxTypedGroup<RatingSprite>;
 
 	private var curSong:String = "";
 
@@ -695,6 +695,123 @@ class PlayState extends MusicBeatState
 		add(luaDebugGroup);
 		#end
 
+		//// Characters
+		var gfVersion:String = SONG.gfVersion;
+		if(gfVersion == null || gfVersion.length < 1){	
+			/* gfVersion = 'gf';
+			SONG.gfVersion = gfVersion; //Fix for the Chart Editor */
+		}
+		else if (stageData.hide_girlfriend != true)
+		{
+			gf = new Character(0, 0, gfVersion);
+
+			if (stageData.camera_girlfriend != null){
+				gf.cameraPosition[0] += stageData.camera_girlfriend[0];
+				gf.cameraPosition[1] += stageData.camera_girlfriend[1];
+			}
+
+			startCharacterPos(gf);
+			gf.scrollFactor.set(0.95, 0.95);
+
+			gfMap.set(gf.curCharacter, gf);
+			gfGroup.add(gf);
+		}
+
+		dad = new Character(0, 0, SONG.player2);
+
+		if (stageData.camera_opponent != null){
+			dad.cameraPosition[0] += stageData.camera_opponent[0];
+			dad.cameraPosition[1] += stageData.camera_opponent[1];
+		}
+		startCharacterPos(dad, true);
+
+		dadMap.set(dad.curCharacter, dad);
+		dadGroup.add(dad);
+
+		boyfriend = new Boyfriend(0, 0, SONG.player1);
+		if (stageData.camera_boyfriend != null){
+			boyfriend.cameraPosition[0] += stageData.camera_boyfriend[0];
+			boyfriend.cameraPosition[1] += stageData.camera_boyfriend[1];
+		}
+		startCharacterPos(boyfriend);
+
+		boyfriendMap.set(boyfriend.curCharacter, boyfriend);
+		boyfriendGroup.add(boyfriend);
+
+		if(dad.curCharacter.startsWith('gf')) {
+			dad.setPosition(GF_X, GF_Y);
+			if(gf != null)
+				gf.visible = false;
+		}
+
+		// After all characters being loaded, it makes then invisible 0.01s later so that the player won't freeze when you change characters
+
+		cameraPoints = [sectionCamera];
+		
+		// moveCamera(gf != null ? gf : dad);
+		moveCameraSection(SONG.notes[0]);
+
+		////
+		healthBar = new FNFHealthBar(boyfriend.healthIcon, dad.healthIcon);
+		var healthBarBG = healthBar.healthBarBG;
+		iconP1 = healthBar.iconP1;
+		iconP2 = healthBar.iconP2;
+
+		add(healthBarBG);
+		add(healthBar);
+		add(iconP1);
+		add(iconP2);
+
+		scoreTxt = new FlxText(0, healthBarBG.y + 48, FlxG.width, "", 20);
+		scoreTxt.setFormat(Paths.font("calibri.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		scoreTxt.scrollFactor.set();
+		scoreTxt.borderSize = 1.25;
+		scoreTxt.visible = !ClientPrefs.hideHud;
+		add(scoreTxt);
+
+		//
+		if (ClientPrefs.simpleJudge){
+			ratingTxtGroup = new FlxTypedGroup<RatingSprite>();
+			comboNumGroup = new FlxTypedGroup<RatingSprite>();
+		}else{
+			ratingTxtGroup = new FlxTypedGroup<RatingSprite>(10);
+			comboNumGroup = new FlxTypedGroup<RatingSprite>(30);
+		}
+
+		lastJudge = RatingSprite.newRating();
+		ratingTxtGroup.add(lastJudge).kill();
+		for (i in 0...3)
+			comboNumGroup.add(RatingSprite.newNumber()).kill();
+		
+
+		add(ratingTxtGroup);
+		add(comboNumGroup);
+
+		// init shit
+		health = 1;
+		reloadHealthBarColors();
+
+		startingSong = true;
+
+		modManager = new ModManager(this);
+		setDefaultHScripts("modManager", modManager);
+
+		var cH = [camHUD];
+		strumLineNotes.cameras = cH;
+		grpNoteSplashes.cameras = cH;
+		notes.cameras = cH;
+		healthBarBG.cameras = cH;
+		healthBar.cameras = cH;
+		iconP1.cameras = cH;
+		iconP2.cameras = cH;
+		scoreTxt.cameras = cH;
+		botplayTxt.cameras = cH;
+		timeBar.cameras = cH;
+		timeBarBG.cameras = cH;
+		timeTxt.cameras = cH;
+
+		//// LOAD SCRIPTS
+
 		// "GLOBAL" SCRIPTS
 		var filesPushed:Array<String> = [];
 		var foldersToCheck:Array<String> = [Paths.getPreloadPath('scripts/')];
@@ -731,70 +848,18 @@ class PlayState extends MusicBeatState
 		
 		// STAGE SCRIPTS
 		stage.buildStage();
-		#if LUA_ALLOWED
-		for (script in stage.luaArray){
-			luaArray.push(script);
-			funkyScripts.push(script);
-		}
-		#end
-		for (script in stage.hscriptArray){
-			hscriptArray.push(script);
-			funkyScripts.push(script);
-		}
+		if (stage.stageScript != null){
+			#if LUA_ALLOWED
+			if (stage.stageScript.scriptType == "lua")
+				luaArray.push(cast stage.stageScript);
+			else
+			#end
+			hscriptArray.push(cast stage.stageScript);
 
-		//// Characters
-		var gfVersion:String = SONG.gfVersion;
-		if(gfVersion == null || gfVersion.length < 1){	
-			/* gfVersion = 'gf';
-			SONG.gfVersion = gfVersion; //Fix for the Chart Editor */
-		}
-		else if (stageData.hide_girlfriend != true)
-		{
-			gf = new Character(0, 0, gfVersion);
-
-			if (stageData.camera_girlfriend != null){
-				gf.cameraPosition[0] += stageData.camera_girlfriend[0];
-				gf.cameraPosition[1] += stageData.camera_girlfriend[1];
-			}
-
-			startCharacterPos(gf);
-			gf.scrollFactor.set(0.95, 0.95);
-			startCharacterLua(gf);
-
-			gfMap.set(gf.curCharacter, gf);
-			gfGroup.add(gf);
+			funkyScripts.push(stage.stageScript);
 		}
 
-		dad = new Character(0, 0, SONG.player2);
-
-		if (stageData.camera_opponent != null){
-			dad.cameraPosition[0] += stageData.camera_opponent[0];
-			dad.cameraPosition[1] += stageData.camera_opponent[1];
-		}
-		startCharacterPos(dad, true);
-		startCharacterLua(dad);
-
-		dadMap.set(dad.curCharacter, dad);
-		dadGroup.add(dad);
-
-		boyfriend = new Boyfriend(0, 0, SONG.player1);
-		if (stageData.camera_boyfriend != null){
-			boyfriend.cameraPosition[0] += stageData.camera_boyfriend[0];
-			boyfriend.cameraPosition[1] += stageData.camera_boyfriend[1];
-		}
-		startCharacterPos(boyfriend);
-		startCharacterLua(boyfriend);
-
-		boyfriendMap.set(boyfriend.curCharacter, boyfriend);
-		boyfriendGroup.add(boyfriend);
-
-		if(dad.curCharacter.startsWith('gf')) {
-			dad.setPosition(GF_X, GF_Y);
-			if(gf != null)
-				gf.visible = false;
-		}
-
-		// in case you want to layer shit in a specific way (like in infimario for example)
+		// in case you want to layer the characters in a specific way (like in infimario for example)
 		// RICO CAN WE STOP USING SLURS IN THE CODE
 		if (Globals.Function_Stop != callOnHScripts("onAddSpriteGroups", []))
 		{
@@ -807,79 +872,20 @@ class PlayState extends MusicBeatState
 			add(stage.foreground);
 		}
 
-		// After all characters being loaded, it makes then invisible 0.01s later so that the player won't freeze when you change characters
-
-		cameraPoints = [sectionCamera];
-		
-		// moveCamera(gf != null ? gf : dad);
-		moveCameraSection(SONG.notes[0]);
-
-		////
-		healthBar = new FNFHealthBar(boyfriend.healthIcon, dad.healthIcon);
-		var healthBarBG = healthBar.healthBarBG;
-		iconP1 = healthBar.iconP1;
-		iconP2 = healthBar.iconP2;
-
-		add(healthBarBG);
-		add(healthBar);
-		add(iconP1);
-		add(iconP2);
-
-		scoreTxt = new FlxText(0, healthBarBG.y + 48, FlxG.width, "", 20);
-		scoreTxt.setFormat(Paths.font("calibri.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		scoreTxt.scrollFactor.set();
-		scoreTxt.borderSize = 1.25;
-		scoreTxt.visible = !ClientPrefs.hideHud;
-		add(scoreTxt);
-
-		//
-		lastJudge = RatingSprite.newRating();
-		lastJudge.alpha = 0;
-		ratingTxtGroup.add(lastJudge);
-		add(ratingTxtGroup);
-
-		for (i in 0...4){
-			var number = RatingSprite.newNumber();
-			number.alpha = 0;
-			comboNumGroup.add(number);
-		}
-		add(comboNumGroup);
-
-		// init shit
-		health = 1;
-		reloadHealthBarColors();
-
-		startingSong = true;
-
-		generateSong(SONG.song);
-
-		modManager = new ModManager(this);
-		setDefaultHScripts("modManager", modManager);
-
-		var cH = [camHUD];
-		strumLineNotes.cameras = cH;
-		grpNoteSplashes.cameras = cH;
-		notes.cameras = cH;
-		healthBarBG.cameras = cH;
-		healthBar.cameras = cH;
-		iconP1.cameras = cH;
-		iconP2.cameras = cH;
-		scoreTxt.cameras = cH;
-		botplayTxt.cameras = cH;
-		timeBar.cameras = cH;
-		timeBarBG.cameras = cH;
-		timeTxt.cameras = cH;
+		if (gf != null) startCharacterScript(gf);
+		startCharacterScript(dad);
+		startCharacterScript(boyfriend);
 
 		// SONG SPECIFIC SCRIPTS
-		var filesPushed:Array<String> = [];
 		var foldersToCheck:Array<String> = [Paths.getPreloadPath('songs/' + songName + '/')];
+		var filesPushed:Array<String> = [];
 
 		#if MODS_ALLOWED
 		foldersToCheck.insert(0, Paths.mods('songs/' + songName + '/'));
 		if(Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
 			foldersToCheck.insert(0, Paths.mods(Paths.currentModDirectory + '/songs/' + songName + '/'));
 		#end
-
+		
 		for (folder in foldersToCheck)
 		{
 			Paths.iterateDirectory(folder, function(file:String)
@@ -904,6 +910,9 @@ class PlayState extends MusicBeatState
 				}
 			});
 		}
+
+		// EVENT AND NOTE SCRIPTS WILL GET LOADED HERE
+		generateSong(SONG.song);
 
 		#if desktop
 		// Updating Discord Rich Presence.
@@ -989,7 +998,7 @@ class PlayState extends MusicBeatState
 					boyfriendGroup.add(newBoyfriend);
 
 					startCharacterPos(newBoyfriend);
-					startCharacterLua(newBoyfriend);
+					startCharacterScript(newBoyfriend);
 				}
 
 			case 1:
@@ -1002,7 +1011,7 @@ class PlayState extends MusicBeatState
 					dadGroup.add(newDad);
 					startCharacterPos(newDad, true);
 					newDad.alpha = 0.00001;
-					startCharacterLua(newDad);
+					startCharacterScript(newDad);
 				}
 
 			case 2:
@@ -1018,50 +1027,25 @@ class PlayState extends MusicBeatState
 					gfGroup.add(newGf);
 					startCharacterPos(newGf);
 
-					startCharacterLua(newGf);
+					startCharacterScript(newGf);
 				}
 		}
 	}
 
-	function startCharacterLua(char:Character)
+	function startCharacterScript(char:Character)
 	{
 		char.startScripts();
+		
 		if (char.characterScript != null){
+			#if LUA_ALLOWED
+			if (char.characterScript.scriptType == "lua")
+				luaArray.push(cast char.characterScript);
+			else
+			#end
+			hscriptArray.push(cast char.characterScript);
+
 			funkyScripts.push(char.characterScript);
-			hscriptArray.push(char.characterScript);
 		}
-
-		#if LUA_ALLOWED
-		var doPush:Bool = false;
-		var luaFile:String = 'characters/' + char.curCharacter + '.lua';
-		#if MODS_ALLOWED
-		if(Paths.exists(Paths.modFolders(luaFile))) {
-			luaFile = Paths.modFolders(luaFile);
-			doPush = true;
-		} else {
-			luaFile = Paths.getPreloadPath(luaFile);
-			if(Paths.exists(luaFile)) {
-				doPush = true;
-			}
-		}
-		#else
-		luaFile = Paths.getPreloadPath(luaFile);
-		if(Assets.exists(luaFile)) {
-			doPush = true;
-		}
-		#end
-
-		if(doPush)
-		{
-			for (lua in luaArray)
-			{
-				if(lua.scriptName == luaFile) return;
-			}
-			var lua:FunkinLua = new FunkinLua(luaFile);
-			luaArray.push(lua);
-			funkyScripts.push(lua);
-		}
-		#end
 	}
 
 	public function getLuaObject(tag:String, text:Bool=true):FlxSprite {
@@ -1501,7 +1485,6 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		notes = new FlxTypedGroup<Note>();
 		add(notes);
 
 		var noteData:Array<SwagSection>;
@@ -3103,11 +3086,6 @@ class PlayState extends MusicBeatState
 				});
 			}
 		}
-
-		/*
-		if (ClientPrefs.hideHud)
-			return;
-		*/
 		
 		////
 		var rating:RatingSprite;
@@ -3116,12 +3094,12 @@ class PlayState extends MusicBeatState
 			rating = lastJudge;
 			rating.revive();
 
-			rating.scale.set(0.7*1.1,0.7*1.1);
-
 			if (rating.tween != null){
 				rating.tween.cancel();
 				rating.tween.destroy();
 			}
+
+			rating.scale.set(0.7*1.1,0.7*1.1);
 			
 			rating.tween = FlxTween.tween(rating.scale, {x: 0.7, y: 0.7}, 0.1, {
 				ease: FlxEase.quadOut,
@@ -3143,10 +3121,6 @@ class PlayState extends MusicBeatState
 			rating.acceleration.y = 550;
 			rating.velocity.set(-FlxG.random.int(0, 10), -FlxG.random.int(140, 175));
 
-			if (rating.tween != null){
-				rating.tween.cancel();
-				rating.tween.destroy();
-			}
 			rating.alpha = 1;
 
 			rating.tween = FlxTween.tween(rating, {alpha: 0}, 0.2, {
@@ -3166,22 +3140,19 @@ class PlayState extends MusicBeatState
 		ratingTxtGroup.add(rating);
 
 		////
-		if (combo < 10 && combo != 0 && !ClientPrefs.simpleJudge)
+		if (ClientPrefs.simpleJudge){
+			for (prevCombo in lastCombos){
+				prevCombo.kill();
+			}
+		}else if (combo < 10 && combo != 0)
 			return;
 
-		var seperatedScore:Array<String> = Std.string(combo).split("");
-		if(combo < 10)
-			seperatedScore.unshift("0");
-		if(combo < 100)
-			seperatedScore.unshift("0");
+		var separatedScore:Array<String> = Std.string(combo).split("");
+		while (separatedScore.length < 3)
+			separatedScore.unshift("0");
 
-		if(ClientPrefs.simpleJudge){
-			while (lastCombos.length > 0)
-				lastCombos.shift().kill();
-		}	
-		
 		var daLoop:Int = 0;
-		for (i in seperatedScore)
+		for (i in separatedScore)
 		{
 			var numScore:RatingSprite = comboNumGroup.recycle(RatingSprite, RatingSprite.newNumber);
 			numScore.loadGraphic(Paths.image('num' + i));
@@ -3192,19 +3163,17 @@ class PlayState extends MusicBeatState
 
 			comboNumGroup.remove(numScore, true);
 			comboNumGroup.add(numScore);
-			lastCombos.push(numScore);
-
-			if (numScore.tween != null){
-				numScore.tween.cancel();
-				numScore.tween.destroy();
-			}
 
 			if(ClientPrefs.simpleJudge){
 				numScore.scale.x = 0.5 * 1.25;
 				numScore.scale.y = 0.5 * 0.75;
 				
 				numScore.alpha = 0.6;
-				numScore.tween = FlxTween.tween(numScore, {"scale.x": 0.5, "scale.y": 0.5, alpha: 1}, 0.2, {ease: FlxEase.circOut});
+				numScore.tween = FlxTween.tween(numScore, {"scale.x": 0.5, "scale.y": 0.5, alpha: 1}, 0.2, {
+					ease: FlxEase.circOut
+				});
+
+				lastCombos.push(numScore);
 			}else{
 				numScore.acceleration.y = FlxG.random.int(200, 300);
 				numScore.velocity.set(FlxG.random.float(-5, 5), -FlxG.random.int(140, 160));
@@ -3696,8 +3665,7 @@ class PlayState extends MusicBeatState
 
 		if (!note.isSustainNote)
 		{
-			combo += 1;
-			// if(combo < 9999) combo = 9999;
+			combo++;
 			popUpScore(note);
 		}
 
@@ -3769,7 +3737,8 @@ class PlayState extends MusicBeatState
 		if(ClientPrefs.noteSplashes && note != null) {
 			var strum:StrumNote = playerStrums.members[note.noteData];
 			if(strum != null) {
-				spawnNoteSplash(strum.x, strum.y, note.noteData, note);
+				var mid = strum.getMidpoint();
+				spawnNoteSplash(mid.x, mid.y, note.noteData, note);
 			}
 		}
 	}
@@ -4318,6 +4287,14 @@ class RatingSprite extends FlxSprite
 		cameras = [PlayState.instance.camHUD];
 
 		scrollFactor.set();
+	}
+
+	override public function kill(){
+		if (tween != null){
+			tween.cancel();
+			tween.destroy();
+		}
+		return super.kill();
 	}
 
 	public static function newRating()
