@@ -94,7 +94,7 @@ class PlayState extends MusicBeatState
 	public var modchartSaves:Map<String, FlxSave> = new Map<String, FlxSave>();
 	public var modchartObjects:Map<String, FlxSprite> = new Map<String, FlxSprite>();
 
-	public var boyfriendMap:Map<String, Boyfriend> = new Map();
+	public var boyfriendMap:Map<String, Character> = new Map();
 	public var extraMap:Map<String, Character> = new Map();
 	public var dadMap:Map<String, Character> = new Map();
 	public var gfMap:Map<String, Character> = new Map();
@@ -129,7 +129,7 @@ class PlayState extends MusicBeatState
 
 	public var dad:Character = null;
 	public var gf:Character = null;
-	public var boyfriend:Boyfriend = null;
+	public var boyfriend:Character = null;
 
 	public var gfSpeed:Int = 1;
 
@@ -151,8 +151,8 @@ class PlayState extends MusicBeatState
 	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
 
 	// does this even make a difference
-	public var ratingTxtGroup = new FlxTypedGroup<RatingSprite>(10);
-	public var comboNumGroup = new FlxTypedGroup<RatingSprite>(30);
+	public var ratingTxtGroup = new FlxTypedGroup<RatingSprite>();
+	public var comboNumGroup = new FlxTypedGroup<RatingSprite>();
 
 	private var curSong:String = "";
 
@@ -195,7 +195,7 @@ class PlayState extends MusicBeatState
 	//Gameplay settings
 	public var healthGain:Float = 1;
 	public var healthLoss:Float = 1;
-
+	public var playOpponent:Bool = false;
 	public var opponentHPDrain:Float = 0.0;
 	public var healthDrain:Float = 0.0;
 
@@ -443,6 +443,7 @@ class PlayState extends MusicBeatState
 		// Gameplay settings
 		healthGain = ClientPrefs.getGameplaySetting('healthgain', 1);
 		healthLoss = ClientPrefs.getGameplaySetting('healthloss', 1);
+		playOpponent = ClientPrefs.getGameplaySetting('opponentPlay', false);
 		instakillOnMiss = ClientPrefs.getGameplaySetting('instakill', false);
 		practiceMode = ClientPrefs.getGameplaySetting('practice', false);
 		cpuControlled = ClientPrefs.getGameplaySetting('botplay', false);
@@ -790,7 +791,7 @@ class PlayState extends MusicBeatState
 		dadMap.set(dad.curCharacter, dad);
 		dadGroup.add(dad);
 
-		boyfriend = new Boyfriend(0, 0, SONG.player1);
+		boyfriend = new Character(0, 0, SONG.player1, true);
 		if (stageData.camera_boyfriend != null){
 			boyfriend.cameraPosition[0] += stageData.camera_boyfriend[0];
 			boyfriend.cameraPosition[1] += stageData.camera_boyfriend[1];
@@ -824,15 +825,16 @@ class PlayState extends MusicBeatState
 		playerField = new PlayField(modManager);
 		playerField.modNumber = 0;
 		playerField.characters = [boyfriend];
-		playerField.autoPlayed = false;
-		playerField.isPlayer = true;
-		playerField.noteHitCallback = goodNoteHit;
+		playerField.autoPlayed = playOpponent;
+		playerField.isPlayer = !playOpponent;
+		playerField.noteHitCallback = playOpponent?opponentNoteHit:goodNoteHit;
 
 		dadField = new PlayField(modManager);
+		dadField.autoPlayed = !playOpponent;
+		dadField.isPlayer = playOpponent;
 		dadField.modNumber = 1;
 		dadField.characters = [dad];
-		dadField.autoPlayed = true;
-		dadField.noteHitCallback = opponentNoteHit;
+		dadField.noteHitCallback = playOpponent?goodNoteHit:opponentNoteHit;
 
 		playfields.add(playerField);
 		playfields.add(dadField);
@@ -867,15 +869,12 @@ class PlayState extends MusicBeatState
 
 		//
 		lastJudge = RatingSprite.newRating();
-		lastJudge.alpha = 0;
-		ratingTxtGroup.add(lastJudge);
-		add(ratingTxtGroup);
+		ratingTxtGroup.add(lastJudge).kill();
+		for (i in 0...3)
+			comboNumGroup.add(RatingSprite.newNumber()).kill();
+		
 
-		for (i in 0...4){
-			var number = RatingSprite.newNumber();
-			number.alpha = 0;
-			comboNumGroup.add(number);
-		}
+		add(ratingTxtGroup);
 		add(comboNumGroup);
 
 		// init shit
@@ -1012,7 +1011,7 @@ class PlayState extends MusicBeatState
 		switch(type) {
 			case 0:
 				if(!boyfriendMap.exists(newCharacter)) {
-					var newBoyfriend:Boyfriend = new Boyfriend(0, 0, newCharacter);
+					var newBoyfriend:Character = new Character(0, 0, newCharacter, true);
 					newBoyfriend.cameraPosition[0] += stageData.camera_boyfriend[0];
 					newBoyfriend.cameraPosition[1] += stageData.camera_boyfriend[1];
 
@@ -1266,14 +1265,22 @@ class PlayState extends MusicBeatState
 			{
 				gf.dance();
 			}
-			if (tmr.loopsLeft % boyfriend.danceEveryNumBeats == 0 && boyfriend.animation.curAnim != null && !boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.stunned)
-			{
-				boyfriend.dance();
+
+			for(field in playfields){
+				for(char in field.characters){
+					if(char!=gf){
+						if (tmr.loopsLeft % char.danceEveryNumBeats == 0
+							&& char.animation.curAnim != null
+							&& !char.animation.curAnim.name.startsWith('sing')
+							&& !char.stunned)
+						{
+							char.dance();
+						}
+
+					}
+				}
 			}
-			if (tmr.loopsLeft % dad.danceEveryNumBeats == 0 && dad.animation.curAnim != null && !dad.animation.curAnim.name.startsWith('sing') && !dad.stunned)
-			{
-				dad.dance();
-			}
+
 
 			var sprImage:Null<String> = introAlts[swagCounter];
 			if (sprImage != null){
@@ -2428,10 +2435,24 @@ class PlayState extends MusicBeatState
 		if (generatedMusic)
 		{
 			if (!inCutscene){
-				if (!cpuControlled)
-					keyShit();
-				else if (boyfriend.animation.curAnim != null && boyfriend.holdTimer > Conductor.stepCrochet * (0.0011 / FlxG.sound.music.pitch) * boyfriend.singDuration && boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.animation.curAnim.name.endsWith('miss') && (boyfriend.idleWhenHold || !pressedGameplayKeys.contains(true)))
-					boyfriend.dance();
+				keyShit();
+
+				//if (boyfriend.animation.curAnim != null && boyfriend.holdTimer > Conductor.stepCrochet * (0.0011 / FlxG.sound.music.pitch) * boyfriend.singDuration && boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.animation.curAnim.name.endsWith('miss') && (boyfriend.idleWhenHold || !pressedGameplayKeys.contains(true)))
+				//	boyfriend.dance();
+			}
+
+			for(field in playfields){
+				if(field.isPlayer){
+					for(char in field.characters){
+						if (char.animation.curAnim != null
+							&& char.holdTimer > Conductor.stepCrochet * (0.0011 / FlxG.sound.music.pitch) * char.singDuration
+								&& char.animation.curAnim.name.startsWith('sing')
+								&& !char.animation.curAnim.name.endsWith('miss')
+								&& (char.idleWhenHold || !pressedGameplayKeys.contains(true)))
+							char.dance();
+							
+					}
+				}
 			}
 
 			// var fakeCrochet:Float = (60 / SONG.bpm) * 1000;
@@ -3088,8 +3109,13 @@ class PlayState extends MusicBeatState
 	var lastJudge:RatingSprite;
 	var lastCombos:Array<RatingSprite> = [];
 
-	private function popUpScore(note:Note = null):Void
+	private function popUpScore(note:Note = null, field:PlayField=null):Void
 	{
+		if(field==null){
+			if(note!=null)
+				field = getFieldFromNote(note);
+			
+		}
 		var noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset);
 		//trace(noteDiff);
 
@@ -3106,7 +3132,7 @@ class PlayState extends MusicBeatState
 		if(daRating.noteSplash && !note.noteSplashDisabled)
 			spawnNoteSplashOnNote(note);
 
-		if(!practiceMode && !cpuControlled) {
+		if(!practiceMode && !field.autoPlayed) {
 			songScore += daRating.score;
 
 			if(!note.ratingDisabled)
@@ -3142,12 +3168,12 @@ class PlayState extends MusicBeatState
 			rating = lastJudge;
 			rating.revive();
 
-			rating.scale.set(0.7*1.1,0.7*1.1);
-
 			if (rating.tween != null){
 				rating.tween.cancel();
 				rating.tween.destroy();
 			}
+
+			rating.scale.set(0.7*1.1,0.7*1.1);
 			
 			rating.tween = FlxTween.tween(rating.scale, {x: 0.7, y: 0.7}, 0.1, {
 				ease: FlxEase.quadOut,
@@ -3210,6 +3236,7 @@ class PlayState extends MusicBeatState
 		for (i in seperatedScore)
 		{
 			var numScore:RatingSprite = comboNumGroup.recycle(RatingSprite, RatingSprite.newNumber);
+			numScore.revive();
 			numScore.loadGraphic(Paths.image('num' + i));
 
 			numScore.screenCenter();
@@ -3474,9 +3501,7 @@ class PlayState extends MusicBeatState
 				}
 				#end
 			}
-			
-			if (boyfriend.animation.curAnim != null && boyfriend.holdTimer > Conductor.stepCrochet * (0.0011 / FlxG.sound.music.pitch) * boyfriend.singDuration && boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.animation.curAnim.name.endsWith('miss') && (boyfriend.idleWhenHold || !pressedGameplayKeys.contains(true)))
-				boyfriend.dance();
+		
 			
 		}
 
@@ -3537,19 +3562,25 @@ class PlayState extends MusicBeatState
 		totalPlayed++;
 		RecalculateRating();
 
-		var char:Character = boyfriend;
-		if(daNote.gfNote)char = gf;
+		var chars:Array<Character> = [];
+		if (daNote.gfNote)
+			chars = [gf];
+		else
+			chars = field.characters;
 
-		if(char != null && !daNote.noMissAnimation && char.hasMissAnimations)
-		{
-			if(char.animTimer <= 0 && !char.voicelining){
-				var daAlt = '';
-				if(daNote.noteType == 'Alt Animation') daAlt = '-alt';
+		for(char in chars){
+			if(char != null && !daNote.noMissAnimation && char.hasMissAnimations)
+			{
+				if(char.animTimer <= 0 && !char.voicelining){
+					var daAlt = '';
+					if(daNote.noteType == 'Alt Animation') daAlt = '-alt';
 
-				var animToPlay:String = singAnimations[Std.int(Math.abs(daNote.noteData))] + 'miss' + daAlt;
-				char.playAnim(animToPlay, true);
+					var animToPlay:String = singAnimations[Std.int(Math.abs(daNote.noteData))] + 'miss' + daAlt;
+					char.playAnim(animToPlay, true);
+				}
 			}
 		}
+		
 
 		callOnHScripts("noteMiss", [daNote]);
 		#if LUA_ALLOWED
@@ -3719,10 +3750,11 @@ class PlayState extends MusicBeatState
 			if (opponentHPDrain > 0 && health > opponentHPDrain)
 				health -= opponentHPDrain;
 
-			if(modchartObjects.exists('note${note.ID}'))modchartObjects.remove('note${note.ID}');
+			/*if(modchartObjects.exists('note${note.ID}'))modchartObjects.remove('note${note.ID}');
 			note.kill();
 			notes.remove(note, true);
-			note.destroy();
+			note.destroy();*/
+			field.removeNote(note);
 		}
 	}
 
@@ -3784,7 +3816,7 @@ class PlayState extends MusicBeatState
 		{
 			combo += 1;
 			// if(combo < 9999) combo = 9999;
-			popUpScore(note);
+			popUpScore(note, field);
 		}
 
 		var hitHealth = note.ratingHealth.get(note.rating);
@@ -3853,13 +3885,10 @@ class PlayState extends MusicBeatState
 					[notes.members.indexOf(note), leData, leType, isSus, note.ID]); 
 			else
 			#end
-				callScript(script, "goodNoteHit", [note]);
+				callScript(script, "goodNoteHit", [note, field]);
 		}
 		if (!note.isSustainNote){
-			if(modchartObjects.exists('note${note.ID}'))modchartObjects.remove('note${note.ID}');
-			note.kill();
-			notes.remove(note, true);
-			note.destroy();
+			field.removeNote(note);
 		}
 	}
 	
@@ -3884,12 +3913,12 @@ class PlayState extends MusicBeatState
 			
 			var strum:StrumNote = field.strumNotes[note.noteData];
 			if(strum != null) {
-				spawnNoteSplash(strum.x, strum.y, note.noteData, note);
+				spawnNoteSplash(strum.x, strum.y, note.noteData, field, note);
 			}
 		}
 	}
 
-	public function spawnNoteSplash(x:Float, y:Float, data:Int, ?note:Note = null) {
+	public function spawnNoteSplash(x:Float, y:Float, data:Int, field:PlayField, ?note:Note = null) {
 		var skin:String = splashSkin;
 		var hue:Float = ClientPrefs.arrowHSV[data % 4][0] / 360;
 		var sat:Float = ClientPrefs.arrowHSV[data % 4][1] / 100;
@@ -3902,9 +3931,9 @@ class PlayState extends MusicBeatState
 			brt = note.noteSplashBrt;
 		}
 
-		var splash:NoteSplash = grpNoteSplashes.recycle(NoteSplash);
+		var splash:NoteSplash = field.grpNoteSplashes.recycle(NoteSplash);
 		splash.setupNoteSplash(x, y, data, skin, hue, sat, brt);
-		grpNoteSplashes.add(splash);
+		field.grpNoteSplashes.add(splash);
 	}
 
 	private var preventLuaRemove:Bool = false;
@@ -4000,13 +4029,18 @@ class PlayState extends MusicBeatState
 		{
 			gf.dance();
 		}
-		if (curBeat % boyfriend.danceEveryNumBeats == 0 && boyfriend.animation.curAnim != null && !boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.stunned)
-		{
-			boyfriend.dance();
-		}
-		if (curBeat % dad.danceEveryNumBeats == 0 && dad.animation.curAnim != null && !dad.animation.curAnim.name.startsWith('sing') && !dad.stunned)
-		{
-			dad.dance();
+		for(field in playfields){
+			for(char in field.characters){
+				if(char!=gf){
+					if (curBeat % char.danceEveryNumBeats == 0
+						&& char.animation.curAnim != null
+						&& !char.animation.curAnim.name.startsWith('sing')
+						&& !char.stunned)
+					{
+						char.dance();
+					}
+				}
+			}
 		}
 
 		lastBeatHit = curBeat;

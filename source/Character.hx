@@ -54,6 +54,7 @@ class Character extends FlxSprite
 
 	public static var DEFAULT_CHARACTER:String = 'bf'; // In case a character is missing, it will use BF on its place
 
+	public var controlled:Bool = false;
 	public var xFacing:Float = 1;
 
 	public var deathName = DEFAULT_CHARACTER;
@@ -132,6 +133,7 @@ class Character extends FlxSprite
 
 		xFacing = isPlayer ? -1 : 1;
 		idleWhenHold = !isPlayer;
+		controlled = isPlayer;
 
 		#if (haxe >= "4.0.0")
 		animOffsets = new Map();
@@ -330,7 +332,7 @@ class Character extends FlxSprite
 					if(animation.curAnim.finished) playAnim(animation.curAnim.name, false, false, animation.curAnim.frames.length - 3);
 			}
 
-			if (!isPlayer)
+			if (!controlled)
 			{
 				if (animation.curAnim.name.startsWith('sing'))
 				{
@@ -343,6 +345,17 @@ class Character extends FlxSprite
 					dance();
 					holdTimer = 0;
 				}
+			}else{
+				if (animation.curAnim.name.startsWith('sing'))
+					holdTimer += elapsed;
+				else
+					holdTimer = 0;
+
+				if (animation.curAnim.name.endsWith('miss') && animation.curAnim.finished && !debugMode)
+				{
+					dance(); // playAnim('idle', true, false, 10);
+				}
+
 			}
 
 			if(animation.curAnim.finished && animation.getByName(animation.curAnim.name + '-loop') != null)

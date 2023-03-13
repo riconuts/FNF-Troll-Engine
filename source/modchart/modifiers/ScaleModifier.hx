@@ -49,7 +49,28 @@ class ScaleModifier extends NoteModifier {
 	override function ignorePos()
 		return true;
 
-	override function ignoreUpdateReceptor()
+	override function isRenderMod()
+		return true;
+
+	override function modifyVert(beat:Float, vert:Vector3, idx:Int, sprite:FlxSprite, pos:Vector3, player:Int, data:Int):Vector3
+	{
+		if(!(sprite is NoteObject))return vert;
+
+		var obj:NoteObject = cast sprite;
+		var scale = getScale(obj, FlxPoint.weak(1, 1), obj.noteData, player);
+		if ((sprite is Note)){
+			var note:Note = cast sprite;
+			if (note.isSustainNote)
+				scale.y = 1;
+		}
+		//note.scale.copyFrom(scale);
+		vert.x *= scale.x;
+		vert.y *= scale.y;
+		scale.putWeak();
+		return vert;
+	}
+
+/* 	override function ignoreUpdateReceptor()
 		return false;
 
 	override function ignoreUpdateNote()
@@ -69,7 +90,7 @@ class ScaleModifier extends NoteModifier {
 		var scale = getScale(receptor, FlxPoint.weak(receptor.defScale.x, receptor.defScale.y), receptor.noteData, player);
 		receptor.scale.copyFrom(scale);
 		scale.putWeak();
-	}
+	} */
 
 	override function getSubmods()
 	{

@@ -76,7 +76,7 @@ class ClientPrefs {
 		'practice' => false,
 		'botplay' => false,
 		'opponentplay' => false,
-		'modchart' => false
+		'disableModcharts' => false
 	];
 
 	public static var comboOffset:Array<Int> = [-60, 60, -260, -80];

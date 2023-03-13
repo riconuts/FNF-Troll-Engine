@@ -16,11 +16,11 @@ typedef EventNote = {
 	value2:String
 }
 
-class Note extends FlxSprite
+class Note extends NoteObject
 {
 	public var handleRendering:Bool = true; // for debugging
 	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
-	public var defScale:FlxPoint = FlxPoint.get(); // for modcharts to keep the scaling
+	
 
 	override function destroy()
 	{
@@ -74,7 +74,6 @@ class Note extends FlxSprite
 	public var strumTime:Float = 0;
 
 	public var mustPress:Bool = false;
-	public var noteData:Int = 0;
 	public var canBeHit:Bool = false;
 	public var tooLate:Bool = false;
 	public var wasGoodHit:Bool = false;
@@ -125,8 +124,6 @@ class Note extends FlxSprite
 	public var typeOffsetX:Float = 0; // used to offset notes, mainly for note types. use in place of offset.x and offset.y when offsetting notetypes
 	public var typeOffsetY:Float = 0;
 
-	public var offsetX:Float = 0;
-	public var offsetY:Float = 0;
 	public var offsetAngle:Float = 0;
 	public var multAlpha:Float = 1;
 	public var multSpeed(default, set):Float = 1;
@@ -479,7 +476,7 @@ class Note extends FlxSprite
 
 		if (strumTime < Conductor.songPosition - Conductor.safeZoneOffset && !wasGoodHit)
 			tooLate = true;
-		
+
 /* 		if (mustPress)
 		{
 			// ok river

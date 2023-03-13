@@ -11,7 +11,6 @@ import modchart.modifiers.*;
 import modchart.events.*;
 
 // Weird amalgamation of Schmovin' modifier system, Andromeda modifier system and my own new shit -neb
-
 class ModManager {
 	public function registerDefaultModifiers()
 	{
@@ -216,10 +215,13 @@ class ModManager {
 				continue;
             if((obj is Note)){
 				var o:Note = cast obj;
+				if (mod.ignoreUpdateNote())
+					continue;
 				mod.updateNote(beat, o, player);
 			}
             else if((obj is StrumNote)){
 				var o:StrumNote = cast obj;
+				if (mod.ignoreUpdateReceptor())continue;
 				mod.updateReceptor(beat, o, player);
 			}
         }
@@ -254,10 +256,54 @@ class ModManager {
 			var mod:Modifier = notemodRegister.get(name);
 			if (mod==null)continue;
 			if(!obj.active)continue;
+			if (mod.ignorePos())continue;
 			pos = mod.getPos(time, diff, tDiff, beat, pos, data, player, obj);
         }
 		return pos;
     }
+
+	public function modifyVertex(beat:Float, vert:Vector3, idx:Int, obj:FlxSprite, pos:Vector3, player:Int, data:Int, ?exclusions:Array<String>):Vector3
+	{
+		if (exclusions == null)
+			exclusions = [];
+
+		if(!obj.active)return vert;
+
+		for(name in activeMods[player]){
+			if(exclusions.contains(name))continue;
+			var mod:Modifier = notemodRegister.get(name);
+			if(mod==null)continue;
+			if (!obj.active)return vert;
+			if (mod.isRenderMod())
+				vert = mod.modifyVert(beat, vert, idx, obj, pos, player, data);
+			
+		}
+		return vert;
+	}
+
+	// if i need more data for rendering shit or smth then maybe like getRenderData() w/ a typedef
+	public function getAlpha(beat:Float, alpha:Float, obj:FlxSprite, player:Int, pos:Vector3, data:Int, ?exclusions:Array<String>):Float
+	{
+		if (exclusions == null)
+			exclusions = [];
+
+		if (!obj.active)
+			return alpha;
+
+		for (name in activeMods[player])
+		{
+			if (exclusions.contains(name))
+				continue;
+			var mod:Modifier = notemodRegister.get(name);
+			if (mod == null)
+				continue;
+			if (!obj.active)
+				return alpha;
+			if (mod.isRenderMod())
+				alpha = mod.getAlpha(beat, alpha, obj, player, pos, data);
+		}
+		return alpha;
+	}
 
 	public function queueEaseP(step:Float, endStep:Float, modName:String, percent:Float, style:String = 'linear', player:Int = -1, ?startVal:Float)
 		queueEase(step, endStep, modName, percent * 0.01, style, player, startVal * 0.01);

@@ -8,18 +8,15 @@ import math.Vector3;
 
 using StringTools;
 
-class StrumNote extends FlxSprite
+class StrumNote extends NoteObject
 {
 	public var handleRendering:Bool = true; // for debugging
 
 	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
-	public var defScale:FlxPoint = FlxPoint.get(); // for modcharts to keep the scaling
 
 	public var zIndex:Float = 0;
 	public var desiredZIndex:Float = 0;
 	public var z:Float = 0;
-
-	public var offsetY:Float = 0;
 
 	override function draw()
 	{
@@ -35,7 +32,6 @@ class StrumNote extends FlxSprite
 	public var isQuant:Bool = false;
 	private var colorSwap:ColorSwap;
 	public var resetAnim:Float = 0;
-	public var noteData:Int = 0;
 	public var direction:Float = 90;//plan on doing scroll directions soon -bb
 	public var downScroll:Bool = false;//plan on doing scroll directions soon -bb
 	public var sustainReduce:Bool = true;
@@ -51,8 +47,9 @@ class StrumNote extends FlxSprite
 		return value;
 	}
 
-	public function getZIndex()
+	public function getZIndex(?daZ:Float)
 	{
+		if(daZ==null)daZ = z;
 		var animZOffset:Float = 0;
 		if (animation.curAnim != null && animation.curAnim.name == 'confirm')
 			animZOffset += 1;
@@ -68,9 +65,9 @@ class StrumNote extends FlxSprite
 	public function new(x:Float, y:Float, leData:Int) {
 		colorSwap = new ColorSwap();
 		shader = colorSwap.shader;
-		noteData = leData;
-		this.noteData = leData;
 		super(x, y);
+		noteData = leData;
+		trace(noteData);
 
 		var skin:String = 'NOTE_assets';
 		if(PlayState.SONG.arrowSkin != null && PlayState.SONG.arrowSkin.length > 1) skin = PlayState.SONG.arrowSkin;

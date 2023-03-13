@@ -122,7 +122,9 @@ class Modifier {
 
     public function updateReceptor(beat:Float, receptor:StrumNote, player:Int){}
 	public function updateNote(beat:Float, note:Note, player:Int){}
-	public function getPos(time:Float, diff:Float, tDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)return pos;
-
+	public function getPos(time:Float, diff:Float, tDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite):Vector3{return pos;}
+	public function modifyVert(beat:Float, vert:Vector3, idx:Int, obj:FlxSprite, pos:Vector3, player:Int, data:Int):Vector3{return vert;}
+	public function getAlpha(beat:Float, alpha:Float, obj:FlxSprite, player:Int, pos:Vector3, data:Int):Float{return alpha;}
     public function update(elapsed:Float){}
+	public function isRenderMod():Bool{return false;}
 }
