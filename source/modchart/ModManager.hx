@@ -28,7 +28,7 @@ class ModManager {
 			OpponentModifier, 
 			TransformModifier, 
 			InfinitePathModifier, 
-			PerspectiveModifier, 
+			//PerspectiveModifier, 
 			AccelModifier, 
 			XModifier
 		];
@@ -39,6 +39,10 @@ class ModManager {
 		quickRegister(new RotateModifier(this, 'center', new Vector3((FlxG.width* 0.5) - (Note.swagWidth/2), (FlxG.height* 0.5) - Note.swagWidth/2)));
 		quickRegister(new LocalRotateModifier(this, 'local'));
 		quickRegister(new SubModifier("noteSpawnTime", this));
+		for(i in 0...4){
+			quickRegister(new SubModifier("noteSpawnTime" + i, this));
+			setValue("noteSpawnTime" + i, 0);
+		}
 		setValue("noteSpawnTime", 2000);
 		setValue("xmod", 1);
 		for(i in 0...4)
@@ -203,7 +207,7 @@ class ModManager {
 		return x;
 	}
 
-	public function updateObject(beat:Float, obj:FlxSprite, pos:Vector3, player:Int){
+	public function updateObject(beat:Float, obj:FlxSprite, player:Int){
 		for (name in activeMods[player])
 		{
 			var mod:Modifier = notemodRegister.get(name);
@@ -212,11 +216,11 @@ class ModManager {
 				continue;
             if((obj is Note)){
 				var o:Note = cast obj;
-				mod.updateNote(beat, o, pos, player);
+				mod.updateNote(beat, o, player);
 			}
             else if((obj is StrumNote)){
 				var o:StrumNote = cast obj;
-				mod.updateReceptor(beat, o, pos, player);
+				mod.updateReceptor(beat, o, player);
 			}
         }
 		if((obj is Note))obj.updateHitbox();

@@ -399,7 +399,9 @@ class Character extends FlxSprite
 
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
 	{
-		callOnScripts("onAnimPlay", [AnimName, Force, Reversed, Frame]);
+		if(callOnScripts("onAnimPlay", [AnimName, Force, Reversed, Frame]) == Globals.Function_Stop)
+			return;
+		
 		specialAnim = false;
 		animation.play(AnimName, Force, Reversed, Frame);
 
@@ -494,6 +496,7 @@ class Character extends FlxSprite
 	////
 	public function startScripts()
 	{
+		// idk why this cant be in function new() but sure
 		var baseFile = 'characters/$curCharacter.hscript';
 		var files = [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)];
 

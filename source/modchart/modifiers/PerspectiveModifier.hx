@@ -78,12 +78,12 @@ class PerspectiveModifier extends NoteModifier {
     return getVector(pos.z,pos);
   
 
-	override function updateReceptor(beat:Float, receptor:StrumNote, pos:Vector3, player:Int){
+	override function updateReceptor(beat:Float, receptor:StrumNote, player:Int){
     receptor.scale.scale(1/pos.z);
   }
   
 
-	override function updateNote(beat:Float, note:Note, pos:Vector3, player:Int){
+	override function updateNote(beat:Float, note:Note, player:Int){
     note.scale.scale(1/pos.z);
   }
   

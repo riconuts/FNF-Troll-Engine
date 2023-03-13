@@ -18,6 +18,7 @@ typedef EventNote = {
 
 class Note extends FlxSprite
 {
+	public var handleRendering:Bool = true; // for debugging
 	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
 	public var defScale:FlxPoint = FlxPoint.get(); // for modcharts to keep the scaling
 
@@ -30,6 +31,9 @@ class Note extends FlxSprite
 	public var bAngle:Float = 0;
 	
 	public var noteScript:FunkinScript;
+	public var fieldIndex:Int = -1; // Used to denote which PlayField to be placed into
+	// Leave -1 if it should be automatically determined based on mustPress and placed into either bf or dad's based on that.
+	// Note that holds automatically have this set to their parent's fieldIndex
 
 	public static var quants:Array<Int> = [
 		4, // quarter note
@@ -431,6 +435,11 @@ class Note extends FlxSprite
 		updateHitbox();
 	}
 
+	override function draw(){
+		if (handleRendering)
+			return super.draw();
+	}
+
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
@@ -460,7 +469,18 @@ class Note extends FlxSprite
 		
 		colorSwap.daAlpha = alphaMod * alphaMod2;
 		
-		if (mustPress)
+		var actualHitbox:Float = hitbox * earlyHitMult;
+		var diff = (strumTime - Conductor.songPosition);
+		noteDiff = diff;
+		var absDiff = Math.abs(diff);
+		canBeHit = absDiff <= actualHitbox;
+		if (hitByOpponent)
+			wasGoodHit = true;
+
+		if (strumTime < Conductor.songPosition - Conductor.safeZoneOffset && !wasGoodHit)
+			tooLate = true;
+		
+/* 		if (mustPress)
 		{
 			// ok river
 			if (strumTime > Conductor.songPosition - (Conductor.safeZoneOffset * lateHitMult)
@@ -481,7 +501,7 @@ class Note extends FlxSprite
 				if ((isSustainNote && prevNote.wasGoodHit) || strumTime <= Conductor.songPosition)
 					wasGoodHit = true;
 			}
-		}
+		} */
 
 		if (tooLate && !inEditor)
 		{

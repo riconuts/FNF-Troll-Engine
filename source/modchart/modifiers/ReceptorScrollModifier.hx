@@ -36,7 +36,7 @@ class ReceptorScrollModifier extends NoteModifier {
     return pos;
   }
 
-	override function updateNote(beat:Float, daNote:Note, pos:Vector3, player:Int)
+	override function updateNote(beat:Float, daNote:Note, player:Int)
   {
     if(getValue(player)==0)return;
 		var speed = PlayState.instance.songSpeed * daNote.multSpeed;

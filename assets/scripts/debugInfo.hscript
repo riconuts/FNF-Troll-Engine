@@ -7,8 +7,8 @@ function onCreatePost(){
 	var count = 0;
 	var gf = 0;
    
-	for (note in PlayState.instance.unspawnNotes){
-		if (note.mustPress && note.parent == null){
+	for (note in PlayState.instance.allNotes){
+		if (note.parent == null){
 			if (note.noteType == "GF Sing")
 				gf++;
 			else

@@ -10,9 +10,10 @@ class FlipModifier extends NoteModifier {
 		if (getValue(player) == 0)
 			return pos;
 
-		var receptors = modMgr.receptors[player];
+		//var receptors = modMgr.receptors[player]; // TODO: rwrite to use playfields (I should prob pass the current playfield into getPos)
 
-		var distance = Note.swagWidth * (receptors.length* 0.5) * (1.5 - data);
+		//var distance = Note.swagWidth * (receptors.length* 0.5) * (1.5 - data);
+		var distance = Note.swagWidth * 2 * (1.5 - data);
 		pos.x += distance * getValue(player);
         return pos;
     }

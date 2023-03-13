@@ -21,8 +21,9 @@ class ReverseModifier extends NoteModifier {
     public function getReverseValue(dir:Int, player:Int, ?scrolling=false){
         var suffix = '';
         if(scrolling==true)suffix='Scroll';
-        var receptors = modMgr.receptors[player];
-        var kNum = receptors.length;
+        //var receptors = modMgr.receptors[player]; // TODO: rewrite for playfield system
+		// but for now we can just comment it out and set kNum to 4 since rn the key count never goes > 4
+        var kNum = 4;
         var val:Float = 0;
         if(dir>=kNum/2)
             val += getSubmodValue("split" + suffix,player);
@@ -63,7 +64,7 @@ class ReverseModifier extends NoteModifier {
 	override function ignoreUpdateNote()
 		return false;
     
-	override function updateNote(beat:Float, daNote:Note, pos:Vector3, player:Int)
+/* 	override function updateNote(beat:Float, daNote:Note, pos:Vector3, player:Int)
 	{
 		if (daNote.isSustainNote)
 		{
@@ -101,7 +102,7 @@ class ReverseModifier extends NoteModifier {
 				}
 			}
 		}
-    }
+    } */
 	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
 	{
         var perc = getReverseValue(data, player);
@@ -142,7 +143,6 @@ class ReverseModifier extends NoteModifier {
     override function getSubmods(){
         var subMods:Array<String> = ["cross", "split", "alternate", "reverseScroll", "crossScroll", "splitScroll", "alternateScroll", "centered", "unboundedReverse"];
 
-        var receptors = modMgr.receptors[0];
 		for (i in 0...4)
 		{
             subMods.push('reverse${i}');

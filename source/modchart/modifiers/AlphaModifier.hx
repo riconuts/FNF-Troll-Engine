@@ -86,7 +86,7 @@ class AlphaModifier extends NoteModifier {
 	override function ignoreUpdateReceptor()return false;
 	override function ignoreUpdateNote()return false;
 
-	override function updateNote(beat:Float, note:Note, pos:Vector3, player:Int){
+	override function updateNote(beat:Float, note:Note, player:Int){
     var player = note.mustPress==true?0:1;
    /* @:privateAccess
 		var pos = modMgr.getPos(note.strumTime, modMgr.getVisPos(Conductor.songPosition, note.strumTime, PlayState.instance.songSpeed),
@@ -112,7 +112,7 @@ class AlphaModifier extends NoteModifier {
     
   }
 
-  override function updateReceptor(beat:Float, receptor:StrumNote, pos:Vector3, player:Int){
+  override function updateReceptor(beat:Float, receptor:StrumNote, player:Int){
 		var alpha = (1 - getSubmodValue("alpha", player)) * (1 - getSubmodValue('alpha${receptor.noteData}', player));
 		if (getSubmodValue("dark", player) != 0 || getSubmodValue('dark${receptor.noteData}',player)!=0){
 			alpha = alpha * (1 - getSubmodValue("dark", player)) * (1 - getSubmodValue('dark${receptor.noteData}',player));
