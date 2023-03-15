@@ -359,9 +359,20 @@ class PlayState extends MusicBeatState
 	var finishedCreating =false;
 	override public function create()
 	{
+		Paths.clearStoredMemory();
+		// Reset to default
 		Note.quantShitCache.clear();
 		FunkinHScript.defaultVars.clear();
-		Paths.clearStoredMemory();
+		
+		PauseSubState.songName = null; 
+		GameOverSubstate.resetVariables();
+
+		////
+		FlxG.fixedTimestep = false;
+		FlxG.worldBounds.set(0, 0, FlxG.width, FlxG.height);
+
+		persistentUpdate = true;
+		persistentDraw = true;
 
 		// for lua
 		instance = this;
@@ -369,7 +380,7 @@ class PlayState extends MusicBeatState
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.stop();
 
-		if(MusicBeatState.menuVox!=null){
+		if (MusicBeatState.menuVox != null){
 			MusicBeatState.menuVox.stop();
 			MusicBeatState.menuVox.destroy();
 			MusicBeatState.menuVox = null;
@@ -448,11 +459,14 @@ class PlayState extends MusicBeatState
 		};
 		opponentHPDrain = ClientPrefs.getGameplaySetting('opponentFightsBack', false) ? 0.0182 : 0;
 		
-		// Camera shit
+		//// Camera shit
 		camGame = new FlxCamera();
 		camHUD = new FlxCamera();
+		camOverlay = new FlxCamera();
+		camOther = new FlxCamera();
 
-		if (ClientPrefs.midScroll){ // fucking modchart system
+		if (ClientPrefs.midScroll) // fucking modchart system i just wanted to be funny
+		{
 			if (ClientPrefs.downScroll){
 				camHUD.y += 6;
 				camHUD.y -= (camHUD.height - 112) * 0.5;
@@ -462,9 +476,6 @@ class PlayState extends MusicBeatState
 				camHUD.y += (camHUD.height - 112) * 0.5;
 			}
 		}
-
-		camOverlay = new FlxCamera();
-		camOther = new FlxCamera();
 		
 		camHUD.bgColor = FlxColor.fromRGBFloat(0, 0, 0, 1 - ClientPrefs.stageOpacity);
 		camOverlay.bgColor.alpha = 0;
@@ -487,13 +498,6 @@ class PlayState extends MusicBeatState
 		FlxG.camera.focusOn(camFollow);
 
 		////
-		FlxG.fixedTimestep = false;
-		FlxG.worldBounds.set(0, 0, FlxG.width, FlxG.height);
-
-		persistentUpdate = true;
-		persistentDraw = true;
-
-		////
 		if (SONG == null)
 			SONG = Song.loadFromJson('tutorial', 'tutorial');
 
@@ -503,6 +507,7 @@ class PlayState extends MusicBeatState
 		songName = Paths.formatToSongPath(SONG.song);
 		songHighscore = Highscore.getScore(SONG.song);
 
+		////
 		arrowSkin = SONG.arrowSkin;
 		splashSkin = SONG.splashSkin;
 
@@ -513,18 +518,8 @@ class PlayState extends MusicBeatState
 			splashSkin = "noteSplashes";
 
 		// The quant prefix gets handled in the Note class
-
-		#if desktop
-		// Discord RPC texts
-		detailsText = isStoryMode ? "Story Mode" : "Freeplay";
-		detailsPausedText = "Paused - " + detailsText;
-		#end
-
-		// Reset to default
-		PauseSubState.songName = null; 
-		GameOverSubstate.resetVariables();
 		
-		// STAGE SHIT
+		//// STAGE SHIT
 		if (SONG.stage == null || SONG.stage.length < 1)
 			SONG.stage = 'stage';
 		curStage = SONG.stage;
@@ -685,8 +680,8 @@ class PlayState extends MusicBeatState
 		add(grpNoteSplashes);
 
 		var splash:NoteSplash = new NoteSplash(100, 100, 0);
-		grpNoteSplashes.add(splash);
 		splash.alpha = 0.0;
+		grpNoteSplashes.add(splash);
 
 		opponentStrums = new FlxTypedGroup<StrumNote>();
 		playerStrums = new FlxTypedGroup<StrumNote>();
@@ -699,12 +694,8 @@ class PlayState extends MusicBeatState
 
 		//// Characters
 		var gfVersion:String = SONG.gfVersion;
-		if(gfVersion == null || gfVersion.length < 1){	
-			/* gfVersion = 'gf';
-			SONG.gfVersion = gfVersion; //Fix for the Chart Editor */
-		}
-		else if (stageData.hide_girlfriend != true)
-		{
+
+		if(gfVersion != null && gfVersion.length > 0 && stageData.hide_girlfriend != true){	
 			gf = new Character(0, 0, gfVersion);
 
 			if (stageData.camera_girlfriend != null){
@@ -776,7 +767,6 @@ class PlayState extends MusicBeatState
 		ratingTxtGroup.add(lastJudge).kill();
 		for (i in 0...3)
 			comboNumGroup.add(RatingSprite.newNumber()).kill();
-		
 
 		add(ratingTxtGroup);
 		add(comboNumGroup);
@@ -909,6 +899,10 @@ class PlayState extends MusicBeatState
 		generateSong(SONG.song);
 
 		#if desktop
+		// Discord RPC texts
+		detailsText = isStoryMode ? "Story Mode" : "Freeplay";
+		detailsPausedText = "Paused - " + detailsText;
+
 		// Updating Discord Rich Presence.
 		DiscordClient.changePresence(detailsText, SONG.song, songName);
 		#end
@@ -1405,7 +1399,7 @@ class PlayState extends MusicBeatState
 	function getEvents(){
 		var songData = SONG;
 		var events:Array<EventNote> = [];
-
+		
 		if (#if MODS_ALLOWED Paths.exists(Paths.modsSongJson(songName + '/events')) || #end Paths.exists(Paths.songJson(songName + '/events')))	
 		{
 			var eventsData:Array<Dynamic> = Song.loadFromJson('events', songName).events;
@@ -1437,7 +1431,8 @@ class PlayState extends MusicBeatState
 					value1: newEventNote[2],
 					value2: newEventNote[3]
 				};
-				if(!shouldPush(subEvent))continue;
+				if (!shouldPush(subEvent))
+					continue;
 				events.push(subEvent);
 			}
 		}

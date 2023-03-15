@@ -62,6 +62,9 @@ class JukeboxState extends MusicBeatState {
 
 	override function create()
 	{
+        persistentUpdate = true;
+        persistentDraw = true;
+
         // space background
         // im pretty sure that flixel already has some pre written class specifically for this situation but i dont not care.
         var bgTiles:Array<FlxSprite> = [];

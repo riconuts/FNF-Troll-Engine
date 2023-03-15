@@ -1,10 +1,9 @@
 package;
 
+import openfl.system.Capabilities;
 import flixel.FlxG;
 import flixel.FlxGame;
 import flixel.FlxState;
-import flixel.graphics.FlxGraphic;
-import openfl.Assets;
 import openfl.Lib;
 import openfl.display.FPS;
 import openfl.display.Sprite;
@@ -14,17 +13,11 @@ import openfl.events.Event;
 using StringTools;
 #if CRASH_HANDLER
 import haxe.CallStack;
-import haxe.io.Path;
 import lime.app.Application;
 import openfl.events.UncaughtErrorEvent;
 #end
 #if desktop
 import Discord.DiscordClient;
-#end
-#if sys
-import sys.FileSystem;
-import sys.io.File;
-import sys.io.Process;
 #end
 
 class Main extends Sprite
@@ -82,8 +75,8 @@ class Main extends Sprite
 
 	private function setupGame():Void
 	{
-		var stageWidth:Int = Lib.current.stage.stageWidth;
-		var stageHeight:Int = Lib.current.stage.stageHeight;
+		var stageWidth = Capabilities.screenResolutionX;
+		var stageHeight = Capabilities.screenResolutionY;
 
 		if (zoom == -1)
 		{
@@ -115,7 +108,6 @@ class Main extends Sprite
 		}else if (FlxG.save.bind('funkin', 'ninjamuffin99') && FlxG.save.data.fullscreen != null){
 			startFullscreen = FlxG.save.data.fullscreen;
 		}
-
 		
 		addChild(new FlxGame(gameWidth, gameHeight, initialState, #if(flixel < "5.0.0") zoom, #end framerate, framerate, skipSplash, startFullscreen));
 
@@ -168,8 +160,17 @@ class Main extends Sprite
 		Sys.println(" \n" + errMsg);
 		
 		Application.current.window.alert(errMsg, "Error!");
+
+		// what the flip
+		MusicBeatState.switchState(new MainMenuState());
+		/*
 		DiscordClient.shutdown();
 		Sys.exit(1);
+		*/
+
+		e.stopPropagation();
+		e.preventDefault();
+		e.stopImmediatePropagation();
 	}
 	#end
 }
