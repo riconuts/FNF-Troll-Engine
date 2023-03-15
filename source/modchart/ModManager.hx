@@ -39,16 +39,29 @@ class ModManager {
 		quickRegister(new LocalRotateModifier(this, 'local'));
 		quickRegister(new SubModifier("noteSpawnTime", this));
 		quickRegister(new SubModifier("drawDistance", this));
-		for(i in 0...4){
+
+		for (i in 0...4)
 			quickRegister(new SubModifier("noteSpawnTime" + i, this));
-			setValue("noteSpawnTime" + i, 0);
-		}
-		setValue("noteSpawnTime", 1500); // maybe a ClientPrefs.noteSpawnTime
-		setValue("drawDistance", 720); // MAY NOT REPRESENT ACTUAL DRAWDISTANCE: drawDistance is modified by the notefields aswell
+
+		for(i in 0...activeMods.length)
+			setDefaultValues(i);
+		
+
+	}
+
+	function setDefaultValues(mN:Int=-1){
+		for(modName => mod in register)
+			setValue(modName, 0, mN);
+		
+		for (i in 0...4)
+			setValue("noteSpawnTime" + i, 0, mN);
+		
+		setValue("noteSpawnTime", 1500, mN); // maybe a ClientPrefs.noteSpawnTime
+		setValue("drawDistance", 720, mN); // MAY NOT REPRESENT ACTUAL DRAWDISTANCE: drawDistance is modified by the notefields aswell
 		// so when you set drawDistance is might be lower or higher than expected because of the draw distance mult. setting
-		setValue("xmod", 1);
-		for(i in 0...4)
-			setValue('xmod$i', 1);
+		setValue("xmod", 1, mN);
+		for (i in 0...4)
+			setValue('xmod$i', 1, mN);
 	}
 
 
@@ -106,10 +119,18 @@ class ModManager {
 		setValue(modName, val/100, player);
     
 
+	public function getActiveMods(pN:Int){
+		if(activeMods[pN]==null){
+			activeMods[pN] = [];
+			setDefaultValues(pN);
+		}
+
+		return activeMods[pN];
+	}
 	public function setValue(modName:String, val:Float, player:Int=-1){
 		if (player == -1)
 		{
-			for (pN in 0...2)
+			for (pN in 0...activeMods.length)
 				setValue(modName, val, pN);
 		}
 		else
@@ -129,15 +150,14 @@ class ModManager {
 			// it turns the parent mod off, too, when it shouldnt
 			// so what I need to do is like, check other submods before removing the parent
             
-			if (activeMods[player] == null)
-				activeMods[player]=[];
+			var aMods = getActiveMods(player);
 
 			register.get(modName).setValue(val, player);
 			
-			if (!activeMods[player].contains(name) && mod.shouldExecute(player, val)){
+			if (!aMods.contains(name) && mod.shouldExecute(player, val)){
 				if (daMod.getName() != name)
-					activeMods[player].push(daMod.getName());
-				activeMods[player].push(name);
+					aMods.push(daMod.getName());
+				aMods.push(name);
 			}else if (!mod.shouldExecute(player, val)){
 
 				// there is prob a better way to do this
@@ -151,24 +171,24 @@ class ModManager {
 					}
 				}
 				if(daMod!=modParent)
-					activeMods[player].remove(daMod.getName());
+					aMods.remove(daMod.getName());
 				if (modParent!=null){
 					if (modParent.shouldExecute(player, modParent.getValue(player))){
-						activeMods[player].sort((a, b) -> Std.int(register.get(a).getOrder() - register.get(b).getOrder()));
+						aMods.sort((a, b) -> Std.int(register.get(a).getOrder() - register.get(b).getOrder()));
 						return;
 					}
 					for (subname => submod in modParent.submods){
 						if(submod.shouldExecute(player, submod.getValue(player))){
-							activeMods[player].sort((a, b) -> Std.int(register.get(a).getOrder() - register.get(b).getOrder()));
+							aMods.sort((a, b) -> Std.int(register.get(a).getOrder() - register.get(b).getOrder()));
 							return;
 						}
 					}
-					activeMods[player].remove(modParent.getName());
+					aMods.remove(modParent.getName());
 				}else
-					activeMods[player].remove(daMod.getName());
+					aMods.remove(daMod.getName());
 			}
 
-			activeMods[player].sort((a, b) -> Std.int(register.get(a).getOrder() - register.get(b).getOrder()));
+			aMods.sort((a, b) -> Std.int(register.get(a).getOrder() - register.get(b).getOrder()));
 		}
     }
 
@@ -198,14 +218,14 @@ class ModManager {
 			case 1:
 				x -= FlxG.width* 0.5 - Note.swagWidth * 2 - 100;
 		}
-		
+
 		x -= 56;
 
 		return x;
 	}
 
 	public function updateObject(beat:Float, obj:FlxSprite, player:Int){
-		for (name in activeMods[player])
+		for (name in getActiveMods(player))
 		{
 			var mod:Modifier = notemodRegister.get(name);
 			if (mod==null)continue;
@@ -265,7 +285,7 @@ class ModManager {
 		pos.x = getBaseX(data, player);
 		pos.y = 50 + diff;
 		pos.z = 0;
-		for (name in activeMods[player]){
+		for (name in getActiveMods(player)){
 			if (exclusions.contains(name))continue; // because some modifiers may want the path without reverse, for example. (which is actually more common than you'd think!)
 			var mod:Modifier = notemodRegister.get(name);
 			if (mod==null)continue;
@@ -284,7 +304,7 @@ class ModManager {
 
 		if(!obj.active)return vert;
 
-		for(name in activeMods[player]){
+		for (name in getActiveMods(player)){
 			if(exclusions.contains(name))continue;
 			var mod:Modifier = notemodRegister.get(name);
 			if(mod==null)continue;
@@ -305,7 +325,7 @@ class ModManager {
 		if (!obj.active)
 			return alpha;
 
-		for (name in activeMods[player])
+		for (name in getActiveMods(player))
 		{
 			if (exclusions.contains(name))
 				continue;

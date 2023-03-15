@@ -69,6 +69,7 @@ class Paths
 				{
 					openfl.Assets.cache.removeBitmapData(key);
 					FlxG.bitmap._cache.remove(key);
+					trace( key + " ggone");
 					obj.destroy();
 					currentTrackedAssets.remove(key);
 

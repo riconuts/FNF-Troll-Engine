@@ -10,19 +10,12 @@ using StringTools;
 
 class StrumNote extends NoteObject
 {
-	public var handleRendering:Bool = true; // for debugging
 
 	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
 
 	public var zIndex:Float = 0;
 	public var desiredZIndex:Float = 0;
 	public var z:Float = 0;
-
-	override function draw()
-	{
-		if (handleRendering)
-			return super.draw();
-	}
 	
 	override function destroy()
 	{

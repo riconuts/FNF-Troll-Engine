@@ -89,7 +89,6 @@ class AlphaModifier extends NoteModifier {
 	{
     if((obj is Note)){
       var note:Note = cast obj;
-      var player = note.mustPress == true ? 0 : 1;
       var speed = PlayState.instance.songSpeed * note.multSpeed;
       var yPos:Float = modMgr.getVisPos(Conductor.songPosition, note.strumTime, speed) + 50;
 
@@ -108,7 +107,7 @@ class AlphaModifier extends NoteModifier {
       }
       else
 				alpha *= vis;
-
+      
       alpha *= alphaMod;	
     }else if((obj is StrumNote)){
       var receptor:StrumNote = cast obj;
@@ -121,32 +120,6 @@ class AlphaModifier extends NoteModifier {
 
     return alpha;
 	}
-/* 
-	override function updateNote(beat:Float, note:Note, player:Int){
-    var player = note.mustPress==true?0:1;
-    var speed = PlayState.instance.songSpeed * note.multSpeed;
-		var yPos:Float = modMgr.getVisPos(Conductor.songPosition, note.strumTime, speed) + 50;
-
-
-		note.colorSwap.flash = 0;
-		var alphaMod = (1 - getSubmodValue("alpha", player)) * (1 - getSubmodValue('alpha${note.noteData}', player)) * (1 - getSubmodValue("noteAlpha", player)) * (1 - getSubmodValue('noteAlpha${note.noteData}', player));
-		var alpha = getVisibility(yPos,player,note);
-
-    if(getSubmodValue("dontUseStealthGlow",player)==0){
-			note.alphaMod = getRealAlpha(alpha);
-			note.colorSwap.flash = getGlow(alpha);
-    }else
-			note.alphaMod = alpha;
-    
-    
-		note.alphaMod *= alphaMod;	
-     
-  }*/
-
-  override function updateReceptor(beat:Float, receptor:StrumNote, player:Int){
-
-
-  }
 
   override function getSubmods(){
     var subMods:Array<String> = ["noteAlpha", "alpha", "hidden","hiddenOffset","sudden","suddenOffset","blink","randomVanish","dark","useStealthGlow","stealthPastReceptors"];

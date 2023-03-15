@@ -56,22 +56,51 @@ class PlayField extends FlxTypedGroup<FlxBasic>
     public function new(modMgr:ModManager){
         super();
 		this.modManager = modMgr;
-		noteField = new NoteField(this, modMgr);
-		add(noteField);
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 		add(grpNoteSplashes);
 		var splash:NoteSplash = new NoteSplash(100, 100, 0);
+		splash.handleRendering = false;
 		grpNoteSplashes.add(splash);
 		grpNoteSplashes.visible = false; // so they dont get drawn
 		splash.alpha = 0.0;
-    }
+		noteField = new NoteField(this, modMgr);
+		add(noteField);
+
+		// idk what haxeflixel does to regenerate the frames
+		// SO! this will be how we do it
+		// lil guy will sit here and regenerate the frames automatically
+		// idk why this seems to work but it does	
+		// TODO: figure out WHY this works
+		var retard:StrumNote = new StrumNote(400, 400, 0);
+		retard.playAnim("static");
+		retard.alpha = 1;
+		retard.visible = true;
+		retard.scale.set(0.002, 0.002);
+		retard.handleRendering = true;
+		retard.updateHitbox();
+		retard.x = 400;
+		retard.y = 400;
+		@:privateAccess
+		retard.draw();
+		add(retard);
+     }
 
 	public function queue(note:Note){
 		if(noteQueue[note.noteData]==null)
 			noteQueue[note.noteData] = [];
+		noteQueue[note.noteData].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
 		
 		noteQueue[note.noteData].push(note);
 	}
+
+	public function unqueue(note:Note)
+	{
+		if (noteQueue[note.noteData] == null)
+			noteQueue[note.noteData] = [];
+		noteQueue[note.noteData].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
+		noteQueue[note.noteData].remove(note);
+	}
+
 
 	public function removeNote(daNote:Note){
 		daNote.active = false;
@@ -83,6 +112,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		spawnedNotes.remove(daNote);
 		if (noteQueue[daNote.noteData] != null)
 			noteQueue[daNote.noteData].remove(daNote);
+		noteQueue[daNote.noteData].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
 		remove(daNote);
 		daNote.destroy();
 	}
@@ -90,13 +120,14 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	public function spawnNote(note:Note){
 		if (noteQueue[note.noteData]!=null)
 			noteQueue[note.noteData].remove(note);
+		noteQueue[note.noteData].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
 
 		noteSpawned.dispatch(note, this);
 		spawnedNotes.push(note);
 		note.handleRendering = false;
 		note.spawned = true;
 
-		add(note);
+		insert(0, note);
 	}
 
 	public function input(data:Int){
@@ -117,7 +148,9 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		//	babyArrow.scale.scale(scale);
 		//	babyArrow.updateHitbox();
 			babyArrow.downScroll = ClientPrefs.downScroll;
-			add(babyArrow);
+			babyArrow.alpha = 0;
+			//add(babyArrow);
+			insert(0, babyArrow);
 			babyArrow.handleRendering = false; // NoteField handles rendering
 			strumNotes.push(babyArrow);
 			babyArrow.postAddedToGroup();
@@ -149,6 +182,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	override public function update(elapsed:Float){
 		noteField.modNumber = modNumber;
 		noteField.cameras = cameras;
+		noteField.active = true;
 
 		for(char in characters)
 			char.controlled = isPlayer;
@@ -219,10 +253,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		if (inControl && autoPlayed)
 		{
 			for(i in 0...4){
-				var daNote = getNotes(i)[0];
-				if(daNote==null)continue;
-				if (!daNote.wasGoodHit && !daNote.ignoreNote)
-				{
+				for (daNote in getNotes(i, (note:Note) -> !note.ignoreNote && !note.hitCausesMiss)){
 					if (daNote.isSustainNote)
 					{
 						if (daNote.canBeHit)
@@ -231,8 +262,9 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 					else
 					{
 						if (daNote.strumTime <= Conductor.songPosition)
-							input(i);
+							noteHitCallback(daNote, this);
 					}
+					
 				}
 			}
 		}
@@ -400,6 +432,7 @@ class NoteField extends FlxObject
 	var curDecBeat:Float = 0;
 
     override function draw(){
+		if(!visible)return; // dont draw if visible = false
 		if((FlxG.state is MusicBeatState)){
 			var state:MusicBeatState = cast FlxG.state;
 			@:privateAccess
@@ -415,10 +448,11 @@ class NoteField extends FlxObject
 		var taps:Array<Note> = [];
 		var holds:Array<Note> = [];
 		var drawMod = modManager.get("drawDistance");
-		var drawDist = drawMod==null?1280:drawMod.getValue(modNumber); 
+		var drawDist = drawMod==null?720:drawMod.getValue(modNumber); 
 		drawDist *= drawDistMod;
 		for (daNote in field.spawnedNotes){
 			if(!daNote.alive)continue;
+
 			if (songSpeed != 0)
 			{
 				var speed = songSpeed * daNote.multSpeed * modManager.getValue("xmod", modNumber);
@@ -465,6 +499,7 @@ class NoteField extends FlxObject
 			});
 		}
 
+
 		// TODO: somehow determine the render order based on z axis for cool holds
 		for (obj in field.strumNotes)
 		{
@@ -478,16 +513,16 @@ class NoteField extends FlxObject
 			else
 				drawNormalHold(note, notePos.get(note));
 		}
-		for (note in taps)
+		
+		for (note in taps){
 			drawNote(note, notePos.get(note));
+		}
 
 		for (obj in field.grpNoteSplashes.members)
 		{
-			if (!obj.alive)
-				continue;
 			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, ['perspectiveDONTUSE'], obj.vec3Cache);
-			//pos.x -= Note.swagWidth;
-			//pos.y -= Note.swagWidth;
+			pos.x -= Note.swagWidth * 0.95;
+			pos.y -= Note.swagWidth;
 			drawNote(obj, pos);
 		}
 		
@@ -794,21 +829,22 @@ class NoteField extends FlxObject
 			rightUV, bottomUV,
 		]);
 
-		if (sprite.shader == null)
-		{
-			sprite.shader = new FlxShader();
-		}
+		//if (sprite.graphic.shader == null)
+		//{
+		//	sprite.graphic.shader = new FlxShader();
+		//}
 
-		if (sprite.shader != null)
+		if (sprite.graphic.shader != null)
 		{
-			sprite.shader.bitmap.input = sprite.graphic.bitmap;
-			sprite.shader.bitmap.filter = sprite.antialiasing ? LINEAR : NEAREST;
-			sprite.shader.alpha.value = [alpha];
+			@:privateAccess
+			sprite.graphic.shader.bitmap.input = sprite.graphic.bitmap;
+			sprite.graphic.shader.bitmap.filter = sprite.antialiasing ? LINEAR : NEAREST;
+			sprite.graphic.shader.alpha.value = [alpha];
 		}
 
 		for (camera in cameras)
 		{
-			camera.canvas.graphics.beginShaderFill(sprite.shader);
+			camera.canvas.graphics.beginShaderFill(sprite.graphic.shader);
 			camera.canvas.graphics.drawTriangles(vertices, null, uvtDat);
 			camera.canvas.graphics.endFill();
 
@@ -819,6 +855,7 @@ class NoteField extends FlxObject
 	{
 		if (!sprite.visible || !sprite.alive)
 			return;
+		
 
 		if (cameras == null)
 			cameras = this.cameras;
@@ -826,15 +863,7 @@ class NoteField extends FlxObject
 		var width = sprite.frameWidth * sprite.scale.x;
 		var height = sprite.frameHeight * sprite.scale.y;
 		var alpha = sprite.alpha * modManager.getAlpha(curDecBeat, 1, sprite, modNumber, sprite.noteData);
-
-		@:privateAccess 
-		{
-			if (sprite.checkFlipX())
-				width = -width;
-			if (sprite.checkFlipY())
-				height = -height;
-		}
-
+		if(alpha==0)return;
 		var quad = [
 			new Vector3(-width / 2, -height / 2, 0), // top left
 			new Vector3(width / 2, -height / 2, 0), // top right
@@ -855,7 +884,9 @@ class NoteField extends FlxObject
 			vert.y += sprite.origin.y;
 
 			quad[idx] = vert;
+
 		}
+		
 
 		pos.x += sprite.offsetX;
 		pos.y += sprite.offsetY;

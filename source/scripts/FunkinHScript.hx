@@ -89,6 +89,9 @@ class FunkinHScript extends FunkinScript
 		set("state", flixel.FlxG.state);
 		set("FlxSprite", flixel.FlxSprite);
 		set("FlxCamera", flixel.FlxCamera);
+		set("PlayField", PlayField);
+		set("NoteField", PlayField.NoteField);
+
 		set("FlxMath", flixel.math.FlxMath);
 		set("FlxSound", FlxSound);
 		set("FlxTimer", flixel.util.FlxTimer);
@@ -120,6 +123,21 @@ class FunkinHScript extends FunkinScript
 		{
 			return Type.resolveEnum(enumName);
 		});
+		@:privateAccess
+		{
+			if(FlxG.state == PlayState.instance){
+				var state:PlayState = PlayState.instance;
+				set("initPlayfield", state.initPlayfield);
+				set("newPlayField", function(){
+					var field = new PlayField(state.modManager);
+					field.modNumber = state.playfields.members.length;
+					field.cameras = state.playfields.cameras;
+					state.initPlayfield(field);
+					state.playfields.add(field);
+					return field;
+				});
+			}
+		}
 		set("importClass", function(className:String)
 		{
 			// importClass("flixel.util.FlxSort") should give you FlxSort.byValues, etc
@@ -270,6 +288,7 @@ class FunkinHScript extends FunkinScript
 		trace('Loaded script ${scriptName}');
 		try{
 			interpreter.execute(parsed);
+			call('onCreate');
 		}catch(e:haxe.Exception){
 			trace('${scriptName}: '+ e.details());
 			FlxG.log.error("Error running hscript: " + e.message);

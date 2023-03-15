@@ -18,7 +18,6 @@ typedef EventNote = {
 
 class Note extends NoteObject
 {
-	public var handleRendering:Bool = true; // for debugging
 	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
 	
 
@@ -34,6 +33,7 @@ class Note extends NoteObject
 	public var fieldIndex:Int = -1; // Used to denote which PlayField to be placed into
 	// Leave -1 if it should be automatically determined based on mustPress and placed into either bf or dad's based on that.
 	// Note that holds automatically have this set to their parent's fieldIndex
+	public var field:PlayField; // same as fieldIndex but lets you set the field directly incase you wanna do that i guess
 
 	public static var quants:Array<Int> = [
 		4, // quarter note
@@ -430,11 +430,6 @@ class Note extends NoteObject
 
 		setGraphicSize(Std.int(width * 0.7));
 		updateHitbox();
-	}
-
-	override function draw(){
-		if (handleRendering)
-			return super.draw();
 	}
 
 	override function update(elapsed:Float)

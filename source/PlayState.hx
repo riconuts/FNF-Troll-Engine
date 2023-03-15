@@ -756,6 +756,7 @@ class PlayState extends MusicBeatState
 			funkyScripts.push(script);
 		}
 
+		callOnScripts("preCharacters");
 		//// Characters
 		var gfVersion:String = SONG.gfVersion;
 		if(gfVersion == null || gfVersion.length < 1){	
@@ -807,6 +808,7 @@ class PlayState extends MusicBeatState
 			if(gf != null)
 				gf.visible = false;
 		}
+		callOnScripts("postCharacters");
 
 		// in case you want to layer shit in a specific way (like in infimario for example)
 		// RICO CAN WE STOP USING SLURS IN THE CODE
@@ -822,6 +824,7 @@ class PlayState extends MusicBeatState
 		}
 
 		// Generate playfields so you can actually, well, play the game
+		callOnScripts("prePlayfieldCreation");
 		playerField = new PlayField(modManager);
 		playerField.modNumber = 0;
 		playerField.characters = [boyfriend];
@@ -836,11 +839,13 @@ class PlayState extends MusicBeatState
 		dadField.characters = [dad];
 		dadField.noteHitCallback = playOpponent?goodNoteHit:opponentNoteHit;
 
-		playfields.add(playerField);
 		playfields.add(dadField);
+		playfields.add(playerField);
 
+		
 		for(field in playfields)
 			initPlayfield(field);
+		callOnScripts("postPlayfieldCreation");
 		
 
 
@@ -883,24 +888,7 @@ class PlayState extends MusicBeatState
 
 		startingSong = true;
 
-		generateSong(SONG.song);
-
-		var cH = [camHUD];
-		playerField.cameras = cH;
-		dadField.cameras = cH;
-		strumLineNotes.cameras = cH;
-		grpNoteSplashes.cameras = cH;
-		notes.cameras = cH;
-		healthBarBG.cameras = cH;
-		healthBar.cameras = cH;
-		iconP1.cameras = cH;
-		iconP2.cameras = cH;
-		scoreTxt.cameras = cH;
-		botplayTxt.cameras = cH;
-		timeBar.cameras = cH;
-		timeBarBG.cameras = cH;
-		timeTxt.cameras = cH;
-
+		
 		// SONG SPECIFIC SCRIPTS
 		var filesPushed:Array<String> = [];
 		var foldersToCheck:Array<String> = [Paths.getPreloadPath('songs/' + songName + '/')];
@@ -935,6 +923,25 @@ class PlayState extends MusicBeatState
 				}
 			});
 		}
+		
+		generateSong(SONG.song);
+
+		var cH = [camHUD];
+		playerField.cameras = cH;
+		dadField.cameras = cH;
+		playfields.cameras = cH;
+		strumLineNotes.cameras = cH;
+		grpNoteSplashes.cameras = cH;
+		notes.cameras = cH;
+		healthBarBG.cameras = cH;
+		healthBar.cameras = cH;
+		iconP1.cameras = cH;
+		iconP2.cameras = cH;
+		scoreTxt.cameras = cH;
+		botplayTxt.cameras = cH;
+		timeBar.cameras = cH;
+		timeBarBG.cameras = cH;
+		timeTxt.cameras = cH;
 
 		#if desktop
 		// Updating Discord Rich Presence.
@@ -1658,17 +1665,18 @@ class PlayState extends MusicBeatState
 		}
 		
 		for(subEvent in getEvents()){
-			subEvent.strumTime -= eventNoteEarlyTrigger(subEvent);
-			eventNotes.push(subEvent);
-			eventPushed(subEvent);
+			try{
+				subEvent.strumTime -= eventNoteEarlyTrigger(subEvent);
+				eventNotes.push(subEvent);
+				eventPushed(subEvent);
+			}catch(e:Dynamic){
+				trace(e);
+			}
 		}
 		if(eventNotes.length > 1) { //No need to sort if there's a single one or none at all
 			eventNotes.sort(sortByTime);
 		}
 
-		var lastBFNotes:Array<Note> = [null, null, null, null];
-		var lastDadNotes:Array<Note> = [null, null, null, null];
-		var lastGFNotes:Array<Note> = [null, null, null, null];
 		// Should populate these w/ nulls depending on keycount -neb
 		for (section in noteData)
 		{
@@ -1710,11 +1718,13 @@ class PlayState extends MusicBeatState
 				swagNote.ID = allNotes.length;
 				modchartObjects.set('note${swagNote.ID}', swagNote);
 				
-				/*if(swagNote.mustPress){
 
-				}*/
-				if(swagNote.fieldIndex==-1)
-					swagNote.fieldIndex = swagNote.mustPress ? 0 : 1;
+				if(swagNote.fieldIndex==-1 && swagNote.field==null)
+					swagNote.field = swagNote.mustPress ? playerField : dadField;
+
+				if(swagNote.field!=null)
+					swagNote.fieldIndex = playfields.members.indexOf(swagNote.field);
+				
 
 				var playfield:PlayField = playfields.members[swagNote.fieldIndex];
 
@@ -3091,7 +3101,7 @@ class PlayState extends MusicBeatState
 			
 			daNote.kill();
 			notes.remove(daNote, true);
-			daNote.destroy();
+			// daNote.destroy();
 		}
 		allNotes = [];
 		for(field in playfields){
@@ -3130,7 +3140,7 @@ class PlayState extends MusicBeatState
 		note.rating = daRating.name;
 
 		if(daRating.noteSplash && !note.noteSplashDisabled)
-			spawnNoteSplashOnNote(note);
+			spawnNoteSplashOnNote(note, field);
 
 		if(!practiceMode && !field.autoPlayed) {
 			songScore += daRating.score;
@@ -3786,7 +3796,7 @@ class PlayState extends MusicBeatState
 			noteMiss(note, field);
 
 			if(!note.noteSplashDisabled && !note.isSustainNote)
-				spawnNoteSplashOnNote(note);
+				spawnNoteSplashOnNote(note, field);
 
 			if (!note.noMissAnimation)
 			{
@@ -3893,16 +3903,13 @@ class PlayState extends MusicBeatState
 	}
 	
 	function getFieldFromNote(note:Note){
-		if (note.fieldIndex > -1)
-			return playfields.members[note.fieldIndex];
-		else
+
+		for (playfield in playfields)
 		{
-			for (playfield in playfields)
-			{
-				if (playfield.spawnedNotes.contains(note))
-					return playfield;
-			}
+			if (playfield.spawnedNotes.contains(note))
+				return playfield;
 		}
+		
 		return playfields.members[0];
 	}
 
@@ -3933,6 +3940,7 @@ class PlayState extends MusicBeatState
 
 		var splash:NoteSplash = field.grpNoteSplashes.recycle(NoteSplash);
 		splash.setupNoteSplash(x, y, data, skin, hue, sat, brt);
+		splash.handleRendering = false;
 		field.grpNoteSplashes.add(splash);
 	}
 
