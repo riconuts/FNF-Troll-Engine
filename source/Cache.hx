@@ -7,8 +7,8 @@ import flixel.math.FlxMath;
 import flixel.graphics.FlxGraphic;
 import flash.media.Sound;
 
+import openfl.Assets;
 import openfl.display.BitmapData;
-import openfl.Assets as OpenFlAssets;
 
 #if sys
 import sys.FileSystem;
@@ -38,34 +38,35 @@ class Cache
 
 	public static function returnUncachedGraphic(key:String, ?library:String)
 	{
+		var path:String;
+
 		#if MODS_ALLOWED
-		var modKey:String = Paths.modsImages(key);
-		if (Paths.currentTrackedAssets.exists(modKey))
+		path = Paths.modsImages(key);
+
+		if (Paths.currentTrackedAssets.exists(path))
 			return null;
 
-		if (FileSystem.exists(modKey))
+		if (FileSystem.exists(path))
 		{
-			var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(
-				BitmapData.fromFile(modKey), 
-				false, 
-				modKey,
-				false // it's not in the tracked assets so it isn't cached already
-			);
+			@:privateAccess
+			var newGraphic:FlxGraphic = new FlxGraphic(null, BitmapData.fromFile(path));
 			newGraphic.persist = true;
 
-			return {key: modKey, graphic: newGraphic};
+			return {key: path, graphic: newGraphic};
 		}
 		#end
 
-		var path = Paths.getPath('images/$key.png', IMAGE, library);
+		////
+		path = Paths.getPath('images/$key.png', IMAGE, library);
+
 		if (Paths.exists(path, IMAGE) && !Paths.currentTrackedAssets.exists(path))
 		{
-			var newGraphic:FlxGraphic = FlxGraphic.fromAssetKey(
-				path, 
-				false, 
-				path, 
-				false // because this is NOT cached already
-			);
+			#if (html5 || flash)
+			var newGraphic:FlxGraphic = FlxGraphic.fromAssetKey(path, false, path, false);
+			#else
+			@:privateAccess
+			var newGraphic:FlxGraphic = new FlxGraphic(null, BitmapData.fromFile(path));
+			#end
 			newGraphic.persist = true;
 					
 			return {key: path, graphic: newGraphic};
@@ -89,14 +90,15 @@ class Cache
 			return {key: file, sound: Sound.fromFile(file)}
 		#end
 		
+		////
 		var gottenPath:String = Paths.getPath(daPath, SOUND, library);
 		
 		if (Paths.currentTrackedSounds.exists(gottenPath))
 			return null;
 		
 		#if (html5 || flash)
-		if (OpenFlAssets.exists(gottenPath, SOUND);)
-			return {key: gottenPath, sound: OpenFlAssets.getSound(gottenPath)};
+		if (Assets.exists(gottenPath, SOUND))
+			return {key: gottenPath, sound: Assets.getSound(gottenPath)};
 		#else
 		var leSound = Sound.fromFile(gottenPath);
 		if (leSound != null)
@@ -133,13 +135,17 @@ class Cache
 		if (threadLimit > 0){
 			// clear duplicates
 			var uniqueMap:Map<String, AssetPreload> = [];
+			
 			for (shit in shitToLoad){ 
 				if (shit.type == null)
 					shit.type = "IMAGE";
 				uniqueMap.set(shit.type+" "+shit.path, shit);
 			}
+
+			//
 			var shitToLoad = [for (k => v in uniqueMap){/*trace(k);*/ v;}];
 			trace('loading ${shitToLoad.length} items.');
+			
 			// TODO: figure out why this sometimes crashes
 
 			var mainThread = Thread.current();
@@ -151,6 +157,9 @@ class Cache
 
 				while (true){
 					var msg:Dynamic = Thread.readMessage(true);
+
+					if (msg == null)
+						continue;
 
 					if (msg == false){ // time to die
 						mainThread.sendMessage({thread: thisThread, terminate: true, loadedGraphics: loadedGraphics, loadedSounds: loadedSounds});
@@ -177,6 +186,8 @@ class Cache
 			});
 
 			var threadArray:Array<Thread> = [for (i in 0...threadLimit){
+				trace('creating thread $i');
+				
 				var thread = makeThread();
 				thread.sendMessage(shitToLoad.pop());
 				thread;
@@ -193,8 +204,7 @@ class Cache
 				}
 				else if (msg.terminate != true) // kys
 				{
-					msg.thread.sendMessage(false); 
-
+					msg.thread.sendMessage(false);
 				}
 				else // the end
 				{ 
