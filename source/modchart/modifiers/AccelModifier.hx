@@ -15,7 +15,7 @@ class AccelModifier extends NoteModifier { // this'll be boost in ModManager
 	override function getName()
 		return 'boost';
 
-  override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite){
+  override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite){
     var wave = getSubmodValue("wave",player);
     var brake = getSubmodValue("brake",player);
     var boost = getValue(player);

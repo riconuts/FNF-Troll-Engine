@@ -16,11 +16,11 @@ class ReceptorScrollModifier extends NoteModifier {
 	override function getName()
 		return 'receptorScroll';
 
-  override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
+  override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
   {
     var diff = timeDiff;
     var sPos = Conductor.songPosition;
-    var vDiff = -(-diff - sPos) / moveSpeed;
+    var vDiff = -(diff - sPos) / moveSpeed;
     var reversed = Math.floor(vDiff)%2 == 0;
 
     var startY = pos.y;
@@ -41,13 +41,13 @@ class ReceptorScrollModifier extends NoteModifier {
     if(getValue(player)==0)return;
 		var speed = PlayState.instance.songSpeed * daNote.multSpeed;
 		
-		var timeDiff = (daNote.strumTime - Conductor.songPosition);
+		var timeDiff = (Conductor.songPosition - daNote.strumTime);
 
 		var diff = timeDiff;
 		var sPos = Conductor.songPosition;
 
     var songPos = sPos / moveSpeed;
-		var notePos = -(-diff - sPos) / moveSpeed;
+		var notePos = -(diff - sPos) / moveSpeed;
 
     if(Math.floor(songPos)!=Math.floor(notePos)){
 			daNote.alphaMod *= .5;

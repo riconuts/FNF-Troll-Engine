@@ -46,6 +46,7 @@ class ConfusionModifier extends NoteModifier {
 			angle = (getValue(player) + getSubmodValue('confusion${receptor.noteData}', player)
 				+ getSubmodValue('receptor${receptor.noteData}Angle', player));
         }
+		//vert = vert.subtract(pos);
 		vert = rotateV3(vert, 0, 0, FlxAngle.TO_RAD * angle);
         return vert;
 	}

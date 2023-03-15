@@ -78,10 +78,10 @@ class PathModifier extends NoteModifier {
   }
 
 
-	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite){
+	override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite){
     if(getValue(player)==0)return pos;
     //var vDiff = Math.abs(timeDiff);
-    var vDiff = -timeDiff;
+    var vDiff = timeDiff;
     // tried to use visualDiff but didnt work :(
     // will get it working later
 

@@ -52,6 +52,8 @@ class ScaleModifier extends NoteModifier {
 	override function isRenderMod()
 		return true;
 
+	// TODO: seperate into modifyNoteVert and modifyReceptorVert?
+
 	override function modifyVert(beat:Float, vert:Vector3, idx:Int, sprite:FlxSprite, pos:Vector3, player:Int, data:Int):Vector3
 	{
 		if(!(sprite is NoteObject))return vert;

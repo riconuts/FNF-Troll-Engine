@@ -103,18 +103,25 @@ class ReverseModifier extends NoteModifier {
 			}
 		}
     } */
-	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
+	override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
 	{
         var perc = getReverseValue(data, player);
 		var shift = CoolUtil.scale(perc, 0, 1, 50, FlxG.height - 150);
 		var mult = CoolUtil.scale(perc, 0, 1, 1, -1);
 		shift = CoolUtil.scale(getSubmodValue("centered", player), 0, 1, shift, (FlxG.height/2) - 56);
 
+		if((obj is Note)){
+			var obj:Note = cast obj;
+			if(obj.isSustainNote){
+				shift += lerp(Note.swagWidth, 0, perc > 1 ? 1 : (perc < 0 ? 0 : perc));
+			}
+		}
+
+		
 		pos.y = shift + (visualDiff * mult);
 
 		// TODO: rewrite this, I don't like this and I feel it could be solved better by changing the note's origin instead -neb
-		// also move it to Reverse modifier
-        if((obj is Note)){
+/*         if((obj is Note)){
             var note:Note = cast obj;
             if (note.isSustainNote && perc > 0)
             {
@@ -125,17 +132,14 @@ class ReverseModifier extends NoteModifier {
                 {
 					daY += 10.5 * (fakeCrochet * 0.0025) * 1.5 * songSpeed + (46 * (songSpeed - 1));
 					daY -= 46 * (1 - (fakeCrochet / 600)) * songSpeed;
-                    /*if (PlayState.isPixelStage)
-						daY += 8;
-                    else*/
-						daY -= 19;
+					daY -= 19;
                 }
 				daY += (Note.swagWidth* 0.5) - (60.5 * (songSpeed - 1));
 				daY += 27.5 * ((PlayState.SONG.bpm * 0.01) - 1) * (songSpeed - 1);
 
 				pos.y = lerp(pos.y, daY, perc);
-            }
-        }
+             }
+        }*/
 
 		return pos;
 	}

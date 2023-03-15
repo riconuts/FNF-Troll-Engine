@@ -85,7 +85,7 @@ class AlphaModifier extends NoteModifier {
   override function shouldExecute(player:Int, val:Float)return true;
 	override function isRenderMod()return true;
 
-	override function getAlpha(beat:Float, alpha:Float, obj:FlxSprite, player:Int, pos:Vector3, data:Int):Float
+	override function getAlpha(beat:Float, alpha:Float, obj:FlxSprite, player:Int, data:Int):Float
 	{
     if((obj is Note)){
       var note:Note = cast obj;

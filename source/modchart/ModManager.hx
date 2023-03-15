@@ -27,9 +27,9 @@ class ModManager {
 			OpponentModifier, 
 			TransformModifier, 
 			InfinitePathModifier, 
-			//PerspectiveModifier, 
 			AccelModifier, 
-			XModifier
+			XModifier,
+			PerspectiveModifier
 		];
 		for (mod in quickRegs)
 			quickRegister(Type.createInstance(mod, [this]));
@@ -38,11 +38,14 @@ class ModManager {
 		quickRegister(new RotateModifier(this, 'center', new Vector3((FlxG.width* 0.5) - (Note.swagWidth/2), (FlxG.height* 0.5) - Note.swagWidth/2)));
 		quickRegister(new LocalRotateModifier(this, 'local'));
 		quickRegister(new SubModifier("noteSpawnTime", this));
+		quickRegister(new SubModifier("drawDistance", this));
 		for(i in 0...4){
 			quickRegister(new SubModifier("noteSpawnTime" + i, this));
 			setValue("noteSpawnTime" + i, 0);
 		}
-		setValue("noteSpawnTime", 2000);
+		setValue("noteSpawnTime", 1500); // maybe a ClientPrefs.noteSpawnTime
+		setValue("drawDistance", 720); // MAY NOT REPRESENT ACTUAL DRAWDISTANCE: drawDistance is modified by the notefields aswell
+		// so when you set drawDistance is might be lower or higher than expected because of the draw distance mult. setting
 		setValue("xmod", 1);
 		for(i in 0...4)
 			setValue('xmod$i', 1);
@@ -55,12 +58,6 @@ class ModManager {
 
 	public var notemodRegister:Map<String, Modifier> = [];
 	public var miscmodRegister:Map<String, Modifier> = [];
-
-	@:deprecated("Unused in place of notemodRegister and miscModRegister")
-	public var registerByType:Map<ModifierType, Map<String, Modifier>> = [
-        NOTE_MOD => [],
-        MISC_MOD => []
-    ];
 
     public var register:Map<String, Modifier> = [];
 
@@ -118,6 +115,7 @@ class ModManager {
 		else
 		{
 			var daMod = register.get(modName);
+			if(daMod==null)return;
 			var mod = daMod.parent==null?daMod:daMod.parent;
 			var name = mod.getName();
             // optimization shit!! :)
@@ -227,10 +225,16 @@ class ModManager {
         }
 		if((obj is Note))obj.updateHitbox();
 		
-		obj.centerOrigin();
-		obj.centerOffsets();
+		if (!(obj is Note)){
+			obj.centerOrigin();
+			obj.centerOffsets();
+		}
 		if((obj is Note)){
 			var cum:Note = cast obj;
+			if(!cum.isSustainNote){
+				obj.centerOrigin();
+				obj.centerOffsets();
+			}
 			cum.offset.x += cum.typeOffsetX;
 			cum.offset.y += cum.typeOffsetY;
 		}
@@ -240,13 +244,23 @@ class ModManager {
 		return -(0.45 * (songPos - strumTime) * songSpeed);
 	}
 	
-	public function getPos(time:Float, diff:Float, tDiff:Float, beat:Float, data:Int, player:Int, obj:FlxSprite, ?exclusions:Array<String>, ?pos:Vector3):Vector3
+	public inline function getVisPosD(diff:Float, songSpeed:Float = 1)
+	{
+		return -(0.45 * (diff) * songSpeed);
+	}
+
+	public function getPos(diff:Float, tDiff:Float, beat:Float, data:Int, player:Int, obj:FlxSprite, ?exclusions:Array<String>, ?pos:Vector3):Vector3
 	{
 		if(exclusions==null)exclusions=[]; // since [] cant be a default value for.. some reason?? "its not constant!!" kys haxe
 		if (pos == null)
 			pos = new Vector3();
+		else{
+			pos.x = 0;
+			pos.y = 0;
+			pos.z = 0;
+		}
 
-		if (!obj.active)return pos;
+		if (!obj.alive)return pos;
 
 		pos.x = getBaseX(data, player);
 		pos.y = 50 + diff;
@@ -255,10 +269,11 @@ class ModManager {
 			if (exclusions.contains(name))continue; // because some modifiers may want the path without reverse, for example. (which is actually more common than you'd think!)
 			var mod:Modifier = notemodRegister.get(name);
 			if (mod==null)continue;
-			if(!obj.active)continue;
+			if (!obj.alive)continue;
 			if (mod.ignorePos())continue;
-			pos = mod.getPos(time, diff, tDiff, beat, pos, data, player, obj);
+			pos = mod.getPos(diff, tDiff, beat, pos, data, player, obj);
         }
+
 		return pos;
     }
 
@@ -282,7 +297,7 @@ class ModManager {
 	}
 
 	// if i need more data for rendering shit or smth then maybe like getRenderData() w/ a typedef
-	public function getAlpha(beat:Float, alpha:Float, obj:FlxSprite, player:Int, pos:Vector3, data:Int, ?exclusions:Array<String>):Float
+	public function getAlpha(beat:Float, alpha:Float, obj:FlxSprite, player:Int, data:Int, ?exclusions:Array<String>):Float
 	{
 		if (exclusions == null)
 			exclusions = [];
@@ -300,7 +315,7 @@ class ModManager {
 			if (!obj.active)
 				return alpha;
 			if (mod.isRenderMod())
-				alpha = mod.getAlpha(beat, alpha, obj, player, pos, data);
+				alpha = mod.getAlpha(beat, alpha, obj, player, data);
 		}
 		return alpha;
 	}

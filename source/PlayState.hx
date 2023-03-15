@@ -825,13 +825,13 @@ class PlayState extends MusicBeatState
 		playerField = new PlayField(modManager);
 		playerField.modNumber = 0;
 		playerField.characters = [boyfriend];
-		playerField.autoPlayed = playOpponent;
 		playerField.isPlayer = !playOpponent;
+		playerField.autoPlayed = !playerField.isPlayer || cpuControlled;
 		playerField.noteHitCallback = playOpponent?opponentNoteHit:goodNoteHit;
 
 		dadField = new PlayField(modManager);
-		dadField.autoPlayed = !playOpponent;
 		dadField.isPlayer = playOpponent;
+		dadField.autoPlayed = !dadField.isPlayer || cpuControlled;
 		dadField.modNumber = 1;
 		dadField.characters = [dad];
 		dadField.noteHitCallback = playOpponent?goodNoteHit:opponentNoteHit;
