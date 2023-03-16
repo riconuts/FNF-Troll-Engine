@@ -19,7 +19,7 @@ class TransformModifier extends NoteModifier { // this'll be transformX in ModMa
     override function getOrder()
         return Modifier.ModifierOrder.LAST;
 
-    override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
+    override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
     {
         pos.x += getValue(player) + getSubmodValue("transformX-a",player);
 		pos.y += getSubmodValue("transformY", player) + getSubmodValue("transformY-a",player);
@@ -35,7 +35,6 @@ class TransformModifier extends NoteModifier { // this'll be transformX in ModMa
     override function getSubmods(){
 		var subMods:Array<String> = ["transformY", "transformZ", "transformX-a", "transformY-a", "transformZ-a"];
 
-        var receptors = modMgr.receptors[0];
         for(i in 0...4){
 			subMods.push('transform${i}X');
 			subMods.push('transform${i}Y');

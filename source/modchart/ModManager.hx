@@ -11,7 +11,6 @@ import modchart.modifiers.*;
 import modchart.events.*;
 
 // Weird amalgamation of Schmovin' modifier system, Andromeda modifier system and my own new shit -neb
-
 class ModManager {
 	public function registerDefaultModifiers()
 	{
@@ -28,9 +27,9 @@ class ModManager {
 			OpponentModifier, 
 			TransformModifier, 
 			InfinitePathModifier, 
-			PerspectiveModifier, 
 			AccelModifier, 
-			XModifier
+			XModifier,
+			PerspectiveModifier
 		];
 		for (mod in quickRegs)
 			quickRegister(Type.createInstance(mod, [this]));
@@ -39,10 +38,30 @@ class ModManager {
 		quickRegister(new RotateModifier(this, 'center', new Vector3((FlxG.width* 0.5) - (Note.swagWidth/2), (FlxG.height* 0.5) - Note.swagWidth/2)));
 		quickRegister(new LocalRotateModifier(this, 'local'));
 		quickRegister(new SubModifier("noteSpawnTime", this));
-		setValue("noteSpawnTime", 2000);
-		setValue("xmod", 1);
-		for(i in 0...4)
-			setValue('xmod$i', 1);
+		quickRegister(new SubModifier("drawDistance", this));
+
+		for (i in 0...4)
+			quickRegister(new SubModifier("noteSpawnTime" + i, this));
+
+		for(i in 0...activeMods.length)
+			setDefaultValues(i);
+		
+
+	}
+
+	function setDefaultValues(mN:Int=-1){
+		for(modName => mod in register)
+			setValue(modName, 0, mN);
+		
+		for (i in 0...4)
+			setValue("noteSpawnTime" + i, 0, mN);
+		
+		setValue("noteSpawnTime", 1500, mN); // maybe a ClientPrefs.noteSpawnTime
+		setValue("drawDistance", 720, mN); // MAY NOT REPRESENT ACTUAL DRAWDISTANCE: drawDistance is modified by the notefields aswell
+		// so when you set drawDistance is might be lower or higher than expected because of the draw distance mult. setting
+		setValue("xmod", 1, mN);
+		for (i in 0...4)
+			setValue('xmod$i', 1, mN);
 	}
 
 
@@ -52,12 +71,6 @@ class ModManager {
 
 	public var notemodRegister:Map<String, Modifier> = [];
 	public var miscmodRegister:Map<String, Modifier> = [];
-
-	@:deprecated("Unused in place of notemodRegister and miscModRegister")
-	public var registerByType:Map<ModifierType, Map<String, Modifier>> = [
-        NOTE_MOD => [],
-        MISC_MOD => []
-    ];
 
     public var register:Map<String, Modifier> = [];
 
@@ -106,15 +119,24 @@ class ModManager {
 		setValue(modName, val/100, player);
     
 
+	public function getActiveMods(pN:Int){
+		if(activeMods[pN]==null){
+			activeMods[pN] = [];
+			setDefaultValues(pN);
+		}
+
+		return activeMods[pN];
+	}
 	public function setValue(modName:String, val:Float, player:Int=-1){
 		if (player == -1)
 		{
-			for (pN in 0...2)
+			for (pN in 0...activeMods.length)
 				setValue(modName, val, pN);
 		}
 		else
 		{
 			var daMod = register.get(modName);
+			if(daMod==null)return;
 			var mod = daMod.parent==null?daMod:daMod.parent;
 			var name = mod.getName();
             // optimization shit!! :)
@@ -128,15 +150,14 @@ class ModManager {
 			// it turns the parent mod off, too, when it shouldnt
 			// so what I need to do is like, check other submods before removing the parent
             
-			if (activeMods[player] == null)
-				activeMods[player]=[];
+			var aMods = getActiveMods(player);
 
 			register.get(modName).setValue(val, player);
 			
-			if (!activeMods[player].contains(name) && mod.shouldExecute(player, val)){
+			if (!aMods.contains(name) && mod.shouldExecute(player, val)){
 				if (daMod.getName() != name)
-					activeMods[player].push(daMod.getName());
-				activeMods[player].push(name);
+					aMods.push(daMod.getName());
+				aMods.push(name);
 			}else if (!mod.shouldExecute(player, val)){
 
 				// there is prob a better way to do this
@@ -150,24 +171,24 @@ class ModManager {
 					}
 				}
 				if(daMod!=modParent)
-					activeMods[player].remove(daMod.getName());
+					aMods.remove(daMod.getName());
 				if (modParent!=null){
 					if (modParent.shouldExecute(player, modParent.getValue(player))){
-						activeMods[player].sort((a, b) -> Std.int(register.get(a).getOrder() - register.get(b).getOrder()));
+						aMods.sort((a, b) -> Std.int(register.get(a).getOrder() - register.get(b).getOrder()));
 						return;
 					}
 					for (subname => submod in modParent.submods){
 						if(submod.shouldExecute(player, submod.getValue(player))){
-							activeMods[player].sort((a, b) -> Std.int(register.get(a).getOrder() - register.get(b).getOrder()));
+							aMods.sort((a, b) -> Std.int(register.get(a).getOrder() - register.get(b).getOrder()));
 							return;
 						}
 					}
-					activeMods[player].remove(modParent.getName());
+					aMods.remove(modParent.getName());
 				}else
-					activeMods[player].remove(daMod.getName());
+					aMods.remove(daMod.getName());
 			}
 
-			activeMods[player].sort((a, b) -> Std.int(register.get(a).getOrder() - register.get(b).getOrder()));
+			aMods.sort((a, b) -> Std.int(register.get(a).getOrder() - register.get(b).getOrder()));
 		}
     }
 
@@ -197,14 +218,14 @@ class ModManager {
 			case 1:
 				x -= FlxG.width* 0.5 - Note.swagWidth * 2 - 100;
 		}
-		
+
 		x -= 56;
 
 		return x;
 	}
 
-	public function updateObject(beat:Float, obj:FlxSprite, pos:Vector3, player:Int){
-		for (name in activeMods[player])
+	public function updateObject(beat:Float, obj:FlxSprite, player:Int){
+		for (name in getActiveMods(player))
 		{
 			var mod:Modifier = notemodRegister.get(name);
 			if (mod==null)continue;
@@ -212,19 +233,28 @@ class ModManager {
 				continue;
             if((obj is Note)){
 				var o:Note = cast obj;
-				mod.updateNote(beat, o, pos, player);
+				if (mod.ignoreUpdateNote())
+					continue;
+				mod.updateNote(beat, o, player);
 			}
             else if((obj is StrumNote)){
 				var o:StrumNote = cast obj;
-				mod.updateReceptor(beat, o, pos, player);
+				if (mod.ignoreUpdateReceptor())continue;
+				mod.updateReceptor(beat, o, player);
 			}
         }
 		if((obj is Note))obj.updateHitbox();
 		
-		obj.centerOrigin();
-		obj.centerOffsets();
+		if (!(obj is Note)){
+			obj.centerOrigin();
+			obj.centerOffsets();
+		}
 		if((obj is Note)){
 			var cum:Note = cast obj;
+			if(!cum.isSustainNote){
+				obj.centerOrigin();
+				obj.centerOffsets();
+			}
 			cum.offset.x += cum.typeOffsetX;
 			cum.offset.y += cum.typeOffsetY;
 		}
@@ -234,26 +264,81 @@ class ModManager {
 		return -(0.45 * (songPos - strumTime) * songSpeed);
 	}
 	
-	public function getPos(time:Float, diff:Float, tDiff:Float, beat:Float, data:Int, player:Int, obj:FlxSprite, ?exclusions:Array<String>, ?pos:Vector3):Vector3
+	public inline function getVisPosD(diff:Float, songSpeed:Float = 1)
+	{
+		return -(0.45 * (diff) * songSpeed);
+	}
+
+	public function getPos(diff:Float, tDiff:Float, beat:Float, data:Int, player:Int, obj:FlxSprite, ?exclusions:Array<String>, ?pos:Vector3):Vector3
 	{
 		if(exclusions==null)exclusions=[]; // since [] cant be a default value for.. some reason?? "its not constant!!" kys haxe
 		if (pos == null)
 			pos = new Vector3();
+		else{
+			pos.x = 0;
+			pos.y = 0;
+			pos.z = 0;
+		}
 
-		if (!obj.active)return pos;
+		if (!obj.alive)return pos;
 
 		pos.x = getBaseX(data, player);
 		pos.y = 50 + diff;
 		pos.z = 0;
-		for (name in activeMods[player]){
+		for (name in getActiveMods(player)){
 			if (exclusions.contains(name))continue; // because some modifiers may want the path without reverse, for example. (which is actually more common than you'd think!)
 			var mod:Modifier = notemodRegister.get(name);
 			if (mod==null)continue;
-			if(!obj.active)continue;
-			pos = mod.getPos(time, diff, tDiff, beat, pos, data, player, obj);
+			if (!obj.alive)continue;
+			if (mod.ignorePos())continue;
+			pos = mod.getPos(diff, tDiff, beat, pos, data, player, obj);
         }
+
 		return pos;
     }
+
+	public function modifyVertex(beat:Float, vert:Vector3, idx:Int, obj:FlxSprite, pos:Vector3, player:Int, data:Int, ?exclusions:Array<String>):Vector3
+	{
+		if (exclusions == null)
+			exclusions = [];
+
+		if(!obj.active)return vert;
+
+		for (name in getActiveMods(player)){
+			if(exclusions.contains(name))continue;
+			var mod:Modifier = notemodRegister.get(name);
+			if(mod==null)continue;
+			if (!obj.active)return vert;
+			if (mod.isRenderMod())
+				vert = mod.modifyVert(beat, vert, idx, obj, pos, player, data);
+			
+		}
+		return vert;
+	}
+
+	// if i need more data for rendering shit or smth then maybe like getRenderData() w/ a typedef
+	public function getAlpha(beat:Float, alpha:Float, obj:FlxSprite, player:Int, data:Int, ?exclusions:Array<String>):Float
+	{
+		if (exclusions == null)
+			exclusions = [];
+
+		if (!obj.active)
+			return alpha;
+
+		for (name in getActiveMods(player))
+		{
+			if (exclusions.contains(name))
+				continue;
+			var mod:Modifier = notemodRegister.get(name);
+			if (mod == null)
+				continue;
+			if (!obj.active)
+				return alpha;
+			if (mod.isRenderMod())
+				alpha = mod.getAlpha(beat, alpha, obj, player, data);
+		}
+		return alpha;
+	}
 
 	public function queueEaseP(step:Float, endStep:Float, modName:String, percent:Float, style:String = 'linear', player:Int = -1, ?startVal:Float)
 		queueEase(step, endStep, modName, percent * 0.01, style, player, startVal * 0.01);

@@ -77,50 +77,49 @@ class AlphaModifier extends NoteModifier {
     return CoolUtil.clamp(glow,0,1);
   }
 
-  function getAlpha(visible:Float){
+  function getRealAlpha(visible:Float){
     var alpha = CoolUtil.scale(visible, 0.5, 0, 1, 0);
     return CoolUtil.clamp(alpha,0,1);
   }
 
   override function shouldExecute(player:Int, val:Float)return true;
-	override function ignoreUpdateReceptor()return false;
-	override function ignoreUpdateNote()return false;
+	override function isRenderMod()return true;
 
-	override function updateNote(beat:Float, note:Note, pos:Vector3, player:Int){
-    var player = note.mustPress==true?0:1;
-   /* @:privateAccess
-		var pos = modMgr.getPos(note.strumTime, modMgr.getVisPos(Conductor.songPosition, note.strumTime, PlayState.instance.songSpeed),
-			note.strumTime - Conductor.songPosition,
-			PlayState.instance.curDecBeat, note.noteData,
-			player, note, ["reverse", "receptorScroll", "transformY"]);*/
-    var speed = PlayState.instance.songSpeed * note.multSpeed;
-		var yPos:Float = modMgr.getVisPos(Conductor.songPosition, note.strumTime, speed) + 50;
+	override function getAlpha(beat:Float, alpha:Float, obj:FlxSprite, player:Int, data:Int):Float
+	{
+    if((obj is Note)){
+      var note:Note = cast obj;
+      var speed = PlayState.instance.songSpeed * note.multSpeed;
+      var yPos:Float = modMgr.getVisPos(Conductor.songPosition, note.strumTime, speed) + 50;
 
+      note.colorSwap.flash = 0;
+			var alphaMod = 
+      (1 - getSubmodValue("alpha",player)) 
+      * (1 - getSubmodValue('alpha${note.noteData}',player)) 
+      * (1 - getSubmodValue("noteAlpha", player))
+      * (1 - getSubmodValue('noteAlpha${note.noteData}', player));
+      var vis = getVisibility(yPos, player, note);
 
-		note.colorSwap.flash = 0;
-		var alphaMod = (1 - getSubmodValue("alpha", player)) * (1 - getSubmodValue('alpha${note.noteData}', player)) * (1 - getSubmodValue("noteAlpha", player)) * (1 - getSubmodValue('noteAlpha${note.noteData}', player));
-		var alpha = getVisibility(yPos,player,note);
-
-    if(getSubmodValue("dontUseStealthGlow",player)==0){
-			note.alphaMod = getAlpha(alpha);
-			note.colorSwap.flash = getGlow(alpha);
-    }else
-			note.alphaMod = alpha;
-    
-    
-		note.alphaMod *= alphaMod;	
-    
-  }
-
-  override function updateReceptor(beat:Float, receptor:StrumNote, pos:Vector3, player:Int){
-		var alpha = (1 - getSubmodValue("alpha", player)) * (1 - getSubmodValue('alpha${receptor.noteData}', player));
-		if (getSubmodValue("dark", player) != 0 || getSubmodValue('dark${receptor.noteData}',player)!=0){
-			alpha = alpha * (1 - getSubmodValue("dark", player)) * (1 - getSubmodValue('dark${receptor.noteData}',player));
+      if (getSubmodValue("dontUseStealthGlow", player) == 0)
+      {
+				alpha *= getRealAlpha(vis);
+				note.colorSwap.flash = getGlow(vis);
+      }
+      else
+				alpha *= vis;
+      
+      alpha *= alphaMod;	
+    }else if((obj is StrumNote)){
+      var receptor:StrumNote = cast obj;
+			alpha *= (1 - getSubmodValue("alpha", player)) * (1 - getSubmodValue('alpha${receptor.noteData}', player));
+			if (getSubmodValue("dark", player) != 0 || getSubmodValue('dark${receptor.noteData}', player) != 0)
+			{
+				alpha *= (1 - getSubmodValue("dark", player)) * (1 - getSubmodValue('dark${receptor.noteData}', player));
+			}
     }
-    @:privateAccess
-		receptor.colorSwap.daAlpha = alpha;
 
-  }
+    return alpha;
+	}
 
   override function getSubmods(){
     var subMods:Array<String> = ["noteAlpha", "alpha", "hidden","hiddenOffset","sudden","suddenOffset","blink","randomVanish","dark","useStealthGlow","stealthPastReceptors"];

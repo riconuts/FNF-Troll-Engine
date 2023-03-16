@@ -109,6 +109,10 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		//// Niixx
 		var option:GameplayOption = new GameplayOption('bitch baby pussy mode', 'disableModcharts', 'bool', false);
 		optionsArray.push(option);
+
+		//// Niixx
+		var option:GameplayOption = new GameplayOption('Opponent Mode', 'opponentPlay', 'bool', false);
+		optionsArray.push(option);
 	}
 
 	public function getOptionByName(name:String)

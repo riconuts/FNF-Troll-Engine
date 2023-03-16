@@ -1,14 +1,16 @@
 package;
 
+import math.Vector3;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
 
-class NoteSplash extends FlxSprite
+class NoteSplash extends NoteObject
 {
 	public var colorSwap:ColorSwap = null;
 	private var idleAnim:String;
 	private var textureLoaded:String = null;
+	public var vec3Cache:Vector3 = new Vector3();
 
 	public function new(x:Float = 0, y:Float = 0, ?note:Int = 0) {
 		super(x, y);
@@ -29,6 +31,7 @@ class NoteSplash extends FlxSprite
 		setPosition(x - width * 0.5, y - height * 0.5);
 		alpha = 0.6;
 
+		noteData = note;
 		if(texture == null) {
 			texture = 'noteSplashes';
 			if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) texture = PlayState.SONG.splashSkin;

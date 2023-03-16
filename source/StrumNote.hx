@@ -8,15 +8,15 @@ import math.Vector3;
 
 using StringTools;
 
-class StrumNote extends FlxSprite
+class StrumNote extends NoteObject
 {
+
 	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
-	public var defScale:FlxPoint = FlxPoint.get(); // for modcharts to keep the scaling
 
 	public var zIndex:Float = 0;
 	public var desiredZIndex:Float = 0;
 	public var z:Float = 0;
-
+	
 	override function destroy()
 	{
 		defScale.put();
@@ -25,12 +25,11 @@ class StrumNote extends FlxSprite
 	public var isQuant:Bool = false;
 	private var colorSwap:ColorSwap;
 	public var resetAnim:Float = 0;
-	public var noteData:Int = 0;
 	public var direction:Float = 90;//plan on doing scroll directions soon -bb
 	public var downScroll:Bool = false;//plan on doing scroll directions soon -bb
 	public var sustainReduce:Bool = true;
 	
-	private var player:Int;
+	//private var player:Int;
 	
 	public var texture(default, set):String = null;
 	private function set_texture(value:String):String {
@@ -41,12 +40,13 @@ class StrumNote extends FlxSprite
 		return value;
 	}
 
-	public function getZIndex()
+	public function getZIndex(?daZ:Float)
 	{
+		if(daZ==null)daZ = z;
 		var animZOffset:Float = 0;
 		if (animation.curAnim != null && animation.curAnim.name == 'confirm')
 			animZOffset += 1;
-		return z + desiredZIndex + animZOffset - (player==0?1:0);
+		return z + desiredZIndex + animZOffset;
 	}
 
 	function updateZIndex()
@@ -55,13 +55,12 @@ class StrumNote extends FlxSprite
 	}
 	
 
-	public function new(x:Float, y:Float, leData:Int, player:Int) {
+	public function new(x:Float, y:Float, leData:Int) {
 		colorSwap = new ColorSwap();
 		shader = colorSwap.shader;
-		noteData = leData;
-		this.player = player;
-		this.noteData = leData;
 		super(x, y);
+		noteData = leData;
+		trace(noteData);
 
 		var skin:String = 'NOTE_assets';
 		if(PlayState.SONG.arrowSkin != null && PlayState.SONG.arrowSkin.length > 1) skin = PlayState.SONG.arrowSkin;
@@ -126,11 +125,19 @@ class StrumNote extends FlxSprite
 		}
 	}
 
-	public function postAddedToGroup() {
+/* 	public function postAddedToGroup() {
 		playAnim('static');
 		x += Note.swagWidth * noteData;
 		x += 50;
 		x += ((FlxG.width* 0.5) * player);
+		ID = noteData;
+	} */
+	public function postAddedToGroup()
+	{
+		playAnim('static');
+		x -= Note.swagWidth / 2;
+		x = x - (Note.swagWidth * 2) + (Note.swagWidth * noteData) + 54;
+
 		ID = noteData;
 	}
 

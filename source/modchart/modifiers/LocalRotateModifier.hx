@@ -44,7 +44,7 @@ class LocalRotateModifier extends NoteModifier { // this'll be rotateX in ModMan
 
     }
 
-	override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite){
+	override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite){
 		var x:Float = (FlxG.width* 0.5) - Note.swagWidth - 54 + Note.swagWidth * 1.5;
         switch (player)
         {

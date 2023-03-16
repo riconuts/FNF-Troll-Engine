@@ -1,5 +1,7 @@
 package;
 
+import flixel.util.FlxColor;
+import flixel.animation.FlxAnimation;
 import Section.SwagSection;
 import animateatlas.AtlasFrameMaker;
 import flixel.FlxG;
@@ -54,6 +56,7 @@ class Character extends FlxSprite
 
 	public static var DEFAULT_CHARACTER:String = 'bf'; // In case a character is missing, it will use BF on its place
 
+	public var controlled:Bool = false;
 	public var xFacing:Float = 1;
 
 	public var deathName = DEFAULT_CHARACTER;
@@ -98,11 +101,11 @@ class Character extends FlxSprite
 	public var noAntialiasing:Bool = false;
 	public var originalFlipX:Bool = false;
 	public var healthColorArray:Array<Int> = [255, 0, 0];
-	
+
 	public static function getCharacterFile(character:String):Null<CharacterFile>
 	{
 		var rawJson:Null<String> = Paths.getText('characters/' + character + '.json');
-		
+
 		return rawJson != null ? cast Json.parse(rawJson) : null;
 	}
 
@@ -132,6 +135,7 @@ class Character extends FlxSprite
 
 		xFacing = isPlayer ? -1 : 1;
 		idleWhenHold = !isPlayer;
+		controlled = isPlayer;
 
 		#if (haxe >= "4.0.0")
 		animOffsets = new Map();
@@ -201,7 +205,7 @@ class Character extends FlxSprite
 				}
 				imageFile = json.image;
 
-				if(json.scale != 1) 
+				if(json.scale != 1)
 				{
 					jsonScale = json.scale;
 					setGraphicSize(Std.int(width * jsonScale));
@@ -234,7 +238,7 @@ class Character extends FlxSprite
 						var animLoop:Bool = !!anim.loop; //Bruh
 						var animIndices:Array<Int> = anim.indices;
 						var camOffset:Null<Array<Float>> = anim.cameraOffset;
-						
+
 						if (!ClientPrefs.directionalCam)
 							camOffset = [0, 0];
 						else if(camOffset==null){
@@ -269,7 +273,34 @@ class Character extends FlxSprite
 		}
 		originalFlipX = flipX;
 
-		if(animOffsets.exists('singLEFTmiss') || animOffsets.exists('singDOWNmiss') || animOffsets.exists('singUPmiss') || animOffsets.exists('singRIGHTmiss')) hasMissAnimations = true;
+		if(animOffsets.exists('singLEFTmiss') && animOffsets.exists('singDOWNmiss') && animOffsets.exists('singUPmiss') && animOffsets.exists('singRIGHTmiss')) hasMissAnimations = true;
+		var anims = ['singLEFT','singRIGHT', 'singUP', 'singDOWN'];
+		var sufs = ["miss", "-alt"];
+		for(anim in anims){
+			for (s in sufs){
+				var shid = anim + s;
+				if (!animOffsets.exists(shid) && animOffsets.exists(anim)){
+					camOffsets[shid] = camOffsets[anim];
+					animOffsets[shid] = animOffsets[anim];
+					var daAnim:FlxAnimation = animation.getByName(anim);
+					animation.add(shid, daAnim.frames, daAnim.frameRate, daAnim.looped, daAnim.flipX, daAnim.flipY);
+				}
+			}
+		}
+
+		for (anim in anims)
+		{
+			anim += "-alt";
+			var shid = anim + "miss";
+			if (!animOffsets.exists(shid) && animOffsets.exists(anim))
+			{
+				camOffsets[shid] = camOffsets[anim];
+				animOffsets[shid] = animOffsets[anim];
+				var daAnim:FlxAnimation = animation.getByName(anim);
+				animation.add(shid, daAnim.frames, daAnim.frameRate, daAnim.looped, daAnim.flipX, daAnim.flipY);
+			}
+
+		}
 		recalculateDanceIdle();
 		dance();
 
@@ -330,7 +361,7 @@ class Character extends FlxSprite
 					if(animation.curAnim.finished) playAnim(animation.curAnim.name, false, false, animation.curAnim.frames.length - 3);
 			}
 
-			if (!isPlayer)
+			if (!controlled)
 			{
 				if (animation.curAnim.name.startsWith('sing'))
 				{
@@ -343,6 +374,17 @@ class Character extends FlxSprite
 					dance();
 					holdTimer = 0;
 				}
+			}else{
+				if (animation.curAnim.name.startsWith('sing'))
+					holdTimer += elapsed;
+				else
+					holdTimer = 0;
+
+				if (animation.curAnim.name.endsWith('miss') && animation.curAnim.finished && !debugMode)
+				{
+					dance(); // playAnim('idle', true, false, 10);
+				}
+
 			}
 
 			if(animation.curAnim.finished && animation.getByName(animation.curAnim.name + '-loop') != null)
@@ -399,7 +441,10 @@ class Character extends FlxSprite
 
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
 	{
-		callOnScripts("onAnimPlay", [AnimName, Force, Reversed, Frame]);
+		if(!AnimName.endsWith("miss"))color = FlxColor.WHITE;
+		if(callOnScripts("onAnimPlay", [AnimName, Force, Reversed, Frame]) == Globals.Function_Stop)
+			return;
+
 		specialAnim = false;
 		animation.play(AnimName, Force, Reversed, Frame);
 
@@ -508,8 +553,8 @@ class Character extends FlxSprite
 			if (Paths.exists(file)){
 				characterScript = new FunkinLua(file);
 				break;
-			}		
-			#end	
+			}
+			#end
 		}
 
 		callOnScripts("onLoad", [this], true);
@@ -530,7 +575,7 @@ class Character extends FlxSprite
 			};
 			if (ret != Globals.Function_Continue && ret != null)
 				returnVal = ret;
-			
+
 			if (returnVal == null)
 				returnVal = Globals.Function_Continue;
 		}
@@ -552,8 +597,8 @@ class Character extends FlxSprite
 		var characterList = [];
 		var directories:Array<String> = [
 			Paths.mods(Paths.currentModDirectory + '/characters/'),
-			Paths.mods('global/characters/'), 
-			Paths.mods('characters/'), 
+			Paths.mods('global/characters/'),
+			Paths.mods('characters/'),
 			Paths.getPreloadPath('characters/')
 		];
 		for (i in 0...directories.length) {

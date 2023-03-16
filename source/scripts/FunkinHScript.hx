@@ -78,7 +78,7 @@ class FunkinHScript extends FunkinScript
 		set("script", this);
 		set("StringTools", StringTools);
 		set("scriptTrace", scriptTrace);
-		
+
 		set("newMap", function(){
 			return new Map<Dynamic, Dynamic>();
 		});
@@ -94,11 +94,14 @@ class FunkinHScript extends FunkinScript
 		set("state", flixel.FlxG.state);
 		set("FlxSprite", flixel.FlxSprite);
 		set("FlxCamera", flixel.FlxCamera);
+		set("PlayField", PlayField);
+		set("NoteField", PlayField.NoteField);
+
 		set("FlxMath", flixel.math.FlxMath);
 		set("FlxSound", FlxSound);
 		set("FlxTimer", flixel.util.FlxTimer);
 		set("FlxColor", { // same case as maps?
-			toRGBArray: function(color:FlxColor){return [color.red, color.green, color.blue];}, 
+			toRGBArray: function(color:FlxColor){return [color.red, color.green, color.blue];},
 			setHue: function(color:FlxColor, hue){
 				color.hue = hue;
 				return color;
@@ -119,6 +122,21 @@ class FunkinHScript extends FunkinScript
 
 		set("getClass", Type.resolveClass);
 		set("getEnum", Type.resolveEnum);
+		@:privateAccess
+		{
+			if(FlxG.state == PlayState.instance){
+				var state:PlayState = PlayState.instance;
+				set("initPlayfield", state.initPlayfield);
+				set("newPlayField", function(){
+					var field = new PlayField(state.modManager);
+					field.modNumber = state.playfields.members.length;
+					field.cameras = state.playfields.cameras;
+					state.initPlayfield(field);
+					state.playfields.add(field);
+					return field;
+				});
+			}
+		}
 		set("importClass", function(className:String)
 		{
 			// importClass("flixel.util.FlxSort") should give you FlxSort.byValues, etc
@@ -143,7 +161,7 @@ class FunkinHScript extends FunkinScript
 				}
 			}else{
 				var daClass = Type.resolveClass(className);
-				set(daClassName, daClass);	
+				set(daClassName, daClass);
 			}
 		});
 		set("addHaxeLibrary", function(libName:String, ?libPackage:String = ''){
@@ -155,9 +173,9 @@ class FunkinHScript extends FunkinScript
 				set(libName, Type.resolveClass(str + libName));
 			}
 			catch (e:Dynamic){
-				
+
 			}
-		}); 
+		});
 
 		set("importEnum", function(enumName:String)
 		{
@@ -167,7 +185,7 @@ class FunkinHScript extends FunkinScript
 			var daEnum = Type.resolveClass(enumName);
 			if (daEnum!=null)
 				set(splitted.pop(), daEnum);
-			
+
 		});
 
 		set("importScript", function(){
@@ -234,7 +252,7 @@ class FunkinHScript extends FunkinScript
 		set("ModEvent", modchart.events.ModEvent);
 		set("EaseEvent", modchart.events.EaseEvent);
 		set("SetEvent", modchart.events.SetEvent);
-		
+
 		set("StageData", Stage.StageData);
 		#if VIDEOS_ALLOWED
 		set("MP4Handler", vlc.MP4Handler);
@@ -246,7 +264,7 @@ class FunkinHScript extends FunkinScript
 		set("GameOverSubstate", GameOverSubstate);
 		set("HealthIcon", HealthIcon);
 		var currentState = flixel.FlxG.state;
-		
+
 		if ((currentState is PlayState)){
 			var state:PlayState = cast currentState;
 
@@ -260,14 +278,15 @@ class FunkinHScript extends FunkinScript
 				return flixel.FlxG.state;
 			});
 		}
-		
+
 		if (additionalVars != null){
 			for (key in additionalVars.keys())
 				set(key, additionalVars.get(key));
 		}
-		
+
 		try{
 			interpreter.execute(parsed);
+			call('onCreate');
 			trace('Loaded script: $scriptName');
 		}catch(e:haxe.Exception){
 			trace('$scriptName: ${e.details()}');
@@ -294,7 +313,7 @@ class FunkinHScript extends FunkinScript
 	{
 		return interpreter.variables.exists(varName);
 	}
-	
+
 	override public function call(func:String, ?parameters:Array<Dynamic>, ?extraVars:Map<String,Dynamic>):Dynamic
 	{
 		var returnValue:Dynamic = executeFunc(func, parameters, this, extraVars);
@@ -316,7 +335,7 @@ class FunkinHScript extends FunkinScript
 				var defaultShit:Map<String,Dynamic>=[];
 				if (theObject!=null)
 					extraVars.set("this", theObject);
-				
+
 				for (key in extraVars.keys()){
 					defaultShit.set(key, get(key));
 					set(key, extraVars.get(key));
@@ -386,8 +405,8 @@ class HScriptSubstate extends MusicBeatSubstate
 	override function update(e)
 	{
 		if (script.call("onUpdate", [e]) == Globals.Function_Stop)
-			return; 
-		
+			return;
+
 		super.update(e);
 		script.call("onUpdatePost", [e]);
 	}
@@ -395,7 +414,7 @@ class HScriptSubstate extends MusicBeatSubstate
 	override function close(){
 		if (script != null)
 			script.call("onClose");
-		
+
 		return super.close();
 	}
 

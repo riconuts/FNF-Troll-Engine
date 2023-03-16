@@ -16,10 +16,10 @@ typedef EventNote = {
 	value2:String
 }
 
-class Note extends FlxSprite
+class Note extends NoteObject
 {
 	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
-	public var defScale:FlxPoint = FlxPoint.get(); // for modcharts to keep the scaling
+	
 
 	override function destroy()
 	{
@@ -30,6 +30,10 @@ class Note extends FlxSprite
 	public var bAngle:Float = 0;
 	
 	public var noteScript:FunkinScript;
+	public var fieldIndex:Int = -1; // Used to denote which PlayField to be placed into
+	// Leave -1 if it should be automatically determined based on mustPress and placed into either bf or dad's based on that.
+	// Note that holds automatically have this set to their parent's fieldIndex
+	public var field:PlayField; // same as fieldIndex but lets you set the field directly incase you wanna do that i guess
 
 	public static var quants:Array<Int> = [
 		4, // quarter note
@@ -70,7 +74,6 @@ class Note extends FlxSprite
 	public var strumTime:Float = 0;
 
 	public var mustPress:Bool = false;
-	public var noteData:Int = 0;
 	public var canBeHit:Bool = false;
 	public var tooLate:Bool = false;
 	public var wasGoodHit:Bool = false;
@@ -98,6 +101,7 @@ class Note extends FlxSprite
 	public var colorSwap:ColorSwap;
 	public var inEditor:Bool = false;
 	public var gfNote:Bool = false;
+	public var characters:Array<Character> = [];
 	public var baseScaleX:Float = 1;
 	public var baseScaleY:Float = 1;
 
@@ -121,8 +125,6 @@ class Note extends FlxSprite
 	public var typeOffsetX:Float = 0; // used to offset notes, mainly for note types. use in place of offset.x and offset.y when offsetting notetypes
 	public var typeOffsetY:Float = 0;
 
-	public var offsetX:Float = 0;
-	public var offsetY:Float = 0;
 	public var offsetAngle:Float = 0;
 	public var multAlpha:Float = 1;
 	public var multSpeed(default, set):Float = 1;
@@ -460,7 +462,18 @@ class Note extends FlxSprite
 		
 		colorSwap.daAlpha = alphaMod * alphaMod2;
 		
-		if (mustPress)
+		var actualHitbox:Float = hitbox * earlyHitMult;
+		var diff = (strumTime - Conductor.songPosition);
+		noteDiff = diff;
+		var absDiff = Math.abs(diff);
+		canBeHit = absDiff <= actualHitbox;
+		if (hitByOpponent)
+			wasGoodHit = true;
+
+		if (strumTime < Conductor.songPosition - Conductor.safeZoneOffset && !wasGoodHit)
+			tooLate = true;
+
+/* 		if (mustPress)
 		{
 			// ok river
 			if (strumTime > Conductor.songPosition - (Conductor.safeZoneOffset * lateHitMult)
@@ -481,7 +494,7 @@ class Note extends FlxSprite
 				if ((isSustainNote && prevNote.wasGoodHit) || strumTime <= Conductor.songPosition)
 					wasGoodHit = true;
 			}
-		}
+		} */
 
 		if (tooLate && !inEditor)
 		{

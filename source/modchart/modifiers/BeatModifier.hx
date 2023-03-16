@@ -8,7 +8,7 @@ import math.*;
 
 class BeatModifier extends NoteModifier {
     override function getName()return 'beat';
-    override function getPos(time:Float, visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite){
+    override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite){
         if(getValue(player)==0)return pos;
         var accelTime:Float = 0.3;
         var totalTime:Float = 0.7;

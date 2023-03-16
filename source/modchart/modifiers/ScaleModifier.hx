@@ -49,13 +49,36 @@ class ScaleModifier extends NoteModifier {
 	override function ignorePos()
 		return true;
 
-	override function ignoreUpdateReceptor()
+	override function isRenderMod()
+		return true;
+
+	// TODO: seperate into modifyNoteVert and modifyReceptorVert?
+
+	override function modifyVert(beat:Float, vert:Vector3, idx:Int, sprite:FlxSprite, pos:Vector3, player:Int, data:Int):Vector3
+	{
+		if(!(sprite is NoteObject))return vert;
+
+		var obj:NoteObject = cast sprite;
+		var scale = getScale(obj, FlxPoint.weak(1, 1), obj.noteData, player);
+		if ((sprite is Note)){
+			var note:Note = cast sprite;
+			if (note.isSustainNote)
+				scale.y = 1;
+		}
+		//note.scale.copyFrom(scale);
+		vert.x *= scale.x;
+		vert.y *= scale.y;
+		scale.putWeak();
+		return vert;
+	}
+
+/* 	override function ignoreUpdateReceptor()
 		return false;
 
 	override function ignoreUpdateNote()
 		return false;
 
-	override function updateNote(beat:Float, note:Note, pos:Vector3, player:Int)
+	override function updateNote(beat:Float, note:Note, player:Int)
 	{
 		var scale = getScale(note, FlxPoint.weak(note.defScale.x, note.defScale.y), note.noteData, player);
 		if(note.isSustainNote)scale.y = note.defScale.y;
@@ -64,19 +87,17 @@ class ScaleModifier extends NoteModifier {
 		scale.putWeak();
 	}
 
-	override function updateReceptor(beat:Float, receptor:StrumNote, pos:Vector3, player:Int)
+	override function updateReceptor(beat:Float, receptor:StrumNote, player:Int)
 	{
 		var scale = getScale(receptor, FlxPoint.weak(receptor.defScale.x, receptor.defScale.y), receptor.noteData, player);
 		receptor.scale.copyFrom(scale);
 		scale.putWeak();
-	}
+	} */
 
 	override function getSubmods()
 	{
 		var subMods:Array<String> = ["squish", "stretch", "miniX", "miniY"];
 
-		var receptors = modMgr.receptors[0];
-		var kNum = receptors.length;
 		for (i in 0...4)
 		{
 			subMods.push('mini${i}X');

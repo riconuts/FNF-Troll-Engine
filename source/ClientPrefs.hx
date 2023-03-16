@@ -21,6 +21,10 @@ class ClientPrefs {
 	public static var camZooms:Bool = true;
 	public static var hideHud:Bool = false;
 	public static var camMovement:Bool = true;
+	public static var optimizeHolds:Bool = true;
+	public static var coolHolds:Bool = true; // set to false for the ABSOLUTE SPUDS OF THE SPUDS
+	public static var holdSubdivs:Int = 2; // Can be increased on higher-end PCs but left at 2 by default because assuming most fnf kids have literal spud PCs
+	public static var drawDistanceModifier:Float = 1; // Can be increased or decreased to change how far a note can render from
 
 	// Troll Engine
 	public static var stageOpacity:Float = 1;
@@ -30,11 +34,10 @@ class ClientPrefs {
 
 	public static var simpleJudge:Bool = false;
 	public static var midScroll:Bool = false; // ahahehehaahha
-	
+
 	//public static var multicoreLoading:Bool = false;
 	public static var loadingThreads:Int = 1;
 
-	public static var noteSkin:String = 'Vanilla';
 	public static var quantHSV:Array<Array<Int>> = [
 		[0, -20, 0], // 4th
 		[-130, -20, 0], // 8th
@@ -56,6 +59,7 @@ class ClientPrefs {
 	public static var ghostTapping:Bool = true;
 	public static var timeBarType:String = 'Time Left';
 	public static var scoreZoom:Bool = true;
+	public static var noteSkin:String = 'Column';
 	public static var noReset:Bool = false;
 	public static var healthBarAlpha:Float = 1;
 	public static var controllerMode:Bool = false;
@@ -80,7 +84,7 @@ class ClientPrefs {
 		'practice' => false,
 		'botplay' => false,
 		'opponentplay' => false,
-		'modchart' => false
+		'disableModcharts' => false
 	];
 
 	public static var comboOffset:Array<Int> = [-60, 60, -260, -80];
@@ -143,6 +147,11 @@ class ClientPrefs {
 		FlxG.save.data.hideHud = hideHud;
 		//FlxG.save.data.multicoreLoading = multicoreLoading;
 		FlxG.save.data.camMovement = camMovement;
+		FlxG.save.data.optimizeHolds = optimizeHolds;
+		FlxG.save.data.coolHolds = coolHolds;
+		FlxG.save.data.holdSubdivs = holdSubdivs;
+		FlxG.save.data.drawDistanceModifier = drawDistanceModifier;
+
 		FlxG.save.data.simpleJudge = simpleJudge;
 		FlxG.save.data.directionalCam = directionalCam;
 		FlxG.save.data.tgtNotes = tgtNotes;
@@ -184,7 +193,7 @@ class ClientPrefs {
 	}
 
 	public static function loadPrefs() {
-		if(FlxG.save.data.midScroll != null) 
+		if(FlxG.save.data.midScroll != null)
 			midScroll = FlxG.save.data.midScroll;
 
 		if(FlxG.save.data.downScroll != null) {
@@ -247,6 +256,24 @@ class ClientPrefs {
 		{
 			camMovement = FlxG.save.data.camMovement;
 		}
+		if (FlxG.save.data.optimizeHolds != null)
+		{
+			optimizeHolds = FlxG.save.data.optimizeHolds;
+		}
+		if (FlxG.save.data.coolHolds != null)
+		{
+			coolHolds = FlxG.save.data.coolHolds;
+		}
+		if (FlxG.save.data.holdSubdivs != null)
+		{
+			holdSubdivs = FlxG.save.data.holdSubdivs;
+		}
+		if (FlxG.save.data.drawDistanceModifier != null)
+		{
+			drawDistanceModifier = FlxG.save.data.drawDistanceModifier;
+		}
+
+
 		if (FlxG.save.data.simpleJudge != null)
 		{
 			simpleJudge = FlxG.save.data.simpleJudge;

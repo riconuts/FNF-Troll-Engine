@@ -4,51 +4,5 @@
 
   //(Supposedly) makes VSCode only search the current file for words to auto-complete.
   //Might not work... Who knows.
-  "editor.wordBasedSuggestionsMode": "currentDocument",
-
-  //(Supposedly) disables auto-completing words from other files.
-  //Might not work... Who knows.
-  "Lua.completion.workspaceWord": false,
-
-  //Removes some clutter from the documentation screen.
-  "Lua.completion.displayContext": 0,
-
-  //Enables hint types, these show up next to a variable if the type of a variable is set or able to
-  //be guessed by the language server.
-  "Lua.hint.enable": true,
-  "Lua.hint.setType": true,
-
-  //Sets the runtime version to the version used by Figura.
-  "Lua.runtime.version": "Lua 5.2",
-
-  //Boring Telemetry stuff. You can enable it I guess?
-  "Lua.telemetry.enable": false,
-
-  //Stops the language server from re-diagnosing the whole model_files folder when you add or remove
-  //a character in an unrelated file.
-  "Lua.diagnostics.workspaceDelay": -1,
-
-  //Disables some unneeded diagnostics that many will not care about.
-  //Do not touch unless you know what you are doing.
-  "Lua.diagnostics.disable": [
-    "lowercase-global",
-    "trailing-space",
-    "unbalanced-assignments",
-    "duplicate-doc-class"
-  ],
-
-  //Changes the severity of some diagnostics to reflect their actual severity in Figura.
-  //Do not touch unless you know what you are doing.
-  "Lua.diagnostics.severity": {
-    "unused-local": "Information",
-    "unused-vararg": "Information",
-    "redundant-parameter": "Information",
-    "redundant-value": "Information",
-    "redefined-local": "Information"
-  },
-
-  //Enables the documentation.
-  "Lua.workspace.library": [
-    "./.vscode/figura"
-  ],
+  "editor.wordBasedSuggestionsMode": "currentDocument"
 }
