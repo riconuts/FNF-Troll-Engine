@@ -56,11 +56,7 @@ typedef StageFile =
 
 class Stage extends FlxTypedGroup<FlxBasic>
 {
-	public var stageScripts:Array<FunkinScript> = [];
-	public var hscriptArray:Array<FunkinHScript> = [];
-	#if LUA_ALLOWED
-	public var luaArray:Array<FunkinLua> = [];
-	#end
+	public var stageScript:FunkinScript;
 	
 	public var curStage = "stage1";
 	public var stageData:StageFile = {
@@ -105,50 +101,42 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		#else
 			var baseFile = '$baseScriptFile.hscript';
 		#end
-			var files = [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)];
-			for (file in files)
+			for (file in [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)])
 			{
-				if (Paths.exists(file))
-				{
-					#if LUA_ALLOWED
-					if (ext == 'hscript'){
-					#end
-						var script = FunkinHScript.fromFile(file);
-						hscriptArray.push(script);
-						stageScripts.push(script);
+				if (!Paths.exists(file))
+					continue;
+				
+				#if LUA_ALLOWED
+				if (ext == 'hscript'){
+				#end
+					stageScript = FunkinHScript.fromFile(file);
 
-						// define variables lolol
-						script.set("add", add);
-						script.set("stage", this);
-						script.set("foreground", foreground);
-						
-						script.call("onLoad", [this, foreground]);
-						doPush = true;
-					#if LUA_ALLOWED
-					} else if (ext == 'lua'){
-						var script = new FunkinLua(file);
-						luaArray.push(script);
-						stageScripts.push(script);
-						
-						script.call("onCreate", []);
-						doPush = true;
-					}
-					else
-					#end
+					// define variables lolol
+					stageScript.set("add", add);
+					stageScript.set("stage", this);
+					stageScript.set("foreground", foreground);
+					
+					stageScript.call("onLoad", [this, foreground]);
+					break;
+				#if LUA_ALLOWED
+				} else if (ext == 'lua'){
+					stageScript = new FunkinLua(file);
+					stageScript.call("onCreate", []);
 
-					if (doPush)
-						break;
-				}
+					break;
+				#end
+				}				
 			}
 		#if LUA_ALLOWED
 		}
 		#end
+		
 		return this;
 	}
 
-	override function destroy(){
-		for (script in stageScripts)
-			script.stop();
+	override function destroy()
+	{
+		stageScript.stop();
 		super.destroy();
 	}
 

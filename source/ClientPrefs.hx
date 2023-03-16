@@ -26,18 +26,18 @@ class ClientPrefs {
 	public static var holdSubdivs:Int = 2; // Can be increased on higher-end PCs but left at 2 by default because assuming most fnf kids have literal spud PCs
 	public static var drawDistanceModifier:Float = 1; // Can be increased or decreased to change how far a note can render from
 
-	// new tgt
+	// Troll Engine
+	public static var stageOpacity:Float = 1;
+
 	public static var directionalCam:Bool = false;
 	public static var tgtNotes:Bool = true;
 
 	public static var simpleJudge:Bool = false;
 	public static var midScroll:Bool = false; // ahahehehaahha
-	
+
 	//public static var multicoreLoading:Bool = false;
 	public static var loadingThreads:Int = 1;
 
-	public static var noteOffset:Int = 0;
-	public static var arrowHSV:Array<Array<Int>> = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
 	public static var quantHSV:Array<Array<Int>> = [
 		[0, -20, 0], // 4th
 		[-130, -20, 0], // 8th
@@ -51,7 +51,11 @@ class ClientPrefs {
 		[-120, -70, -35], // 96th
 		[-120, -70, -35]// 192nd
 	];
-	public static var imagesPersist:Bool = false;
+
+	//
+	public static var arrowHSV:Array<Array<Int>> = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
+
+	public static var noteOffset:Int = 0;
 	public static var ghostTapping:Bool = true;
 	public static var timeBarType:String = 'Time Left';
 	public static var scoreZoom:Bool = true;
@@ -154,7 +158,7 @@ class ClientPrefs {
 		FlxG.save.data.loadingThreads = loadingThreads;
 		FlxG.save.data.arrowHSV = arrowHSV;
 		FlxG.save.data.quantHSV = quantHSV;
-		FlxG.save.data.imagesPersist = imagesPersist;
+		FlxG.save.data.stageOpacity = stageOpacity;
 		FlxG.save.data.ghostTapping = ghostTapping;
 		FlxG.save.data.timeBarType = timeBarType;
 		FlxG.save.data.scoreZoom = scoreZoom;
@@ -189,7 +193,7 @@ class ClientPrefs {
 	}
 
 	public static function loadPrefs() {
-		if(FlxG.save.data.midScroll != null) 
+		if(FlxG.save.data.midScroll != null)
 			midScroll = FlxG.save.data.midScroll;
 
 		if(FlxG.save.data.downScroll != null) {
@@ -268,8 +272,8 @@ class ClientPrefs {
 		{
 			drawDistanceModifier = FlxG.save.data.drawDistanceModifier;
 		}
-		
-		
+
+
 		if (FlxG.save.data.simpleJudge != null)
 		{
 			simpleJudge = FlxG.save.data.simpleJudge;
@@ -291,6 +295,11 @@ class ClientPrefs {
 			}
 			#end
 		}
+
+		if(FlxG.save.data.stageOpacity != null) {
+			stageOpacity = FlxG.save.data.stageOpacity;
+		}
+
 		if(FlxG.save.data.noteOffset != null) {
 			noteOffset = FlxG.save.data.noteOffset;
 		}

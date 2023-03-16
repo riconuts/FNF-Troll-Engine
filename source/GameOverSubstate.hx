@@ -1,5 +1,6 @@
 package;
 
+import flixel.system.FlxSound;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSubState;
@@ -12,20 +13,19 @@ import flixel.util.FlxTimer;
 
 class GameOverSubstate extends MusicBeatSubstate
 {
-	public var boyfriend:Boyfriend;
-	var camFollow:FlxPoint;
-	var camFollowPos:FlxObject;
-	var updateCamera:Bool = false;
-	var playingDeathSound:Bool = false;
+	public static var instance:GameOverSubstate;
 
-	var stageSuffix:String = "";
+	public var boyfriend:Boyfriend;
+	public var deathSound:FlxSound;
+
+	public var camFollow:FlxPoint;
+	public var camFollowPos:FlxObject;
+	public var updateCamera:Bool = false;
 
 	public static var characterName:String = 'bf-dead';
 	public static var deathSoundName:String = 'fnf_loss_sfx';
 	public static var loopSoundName:String = 'gameOver';
 	public static var endSoundName:String = 'gameOverEnd';
-
-	public static var instance:GameOverSubstate;
 
 	public static function resetVariables() {
 		characterName = 'bf-dead';
@@ -71,7 +71,7 @@ class GameOverSubstate extends MusicBeatSubstate
 		
 		camFollow = new FlxPoint(boyfriend.getGraphicMidpoint().x, boyfriend.getGraphicMidpoint().y);
 		
-		FlxG.sound.play(Paths.sound(deathSoundName));
+		deathSound = FlxG.sound.play(Paths.sound(deathSoundName));
 		Conductor.changeBPM(100);
 		FlxG.camera.bgColor = FlxColor.BLACK;
 		FlxG.camera.scroll.set();
@@ -124,7 +124,7 @@ class GameOverSubstate extends MusicBeatSubstate
 				isFollowingAlready = true;
 			}
 
-			if (boyfriend.animation.curAnim.finished && !playingDeathSound)
+			if (boyfriend.animation.curAnim.finished)
 			{
 				FlxG.sound.playMusic(Paths.music(loopSoundName), 1);
 				boyfriend.startedDeath = true;
@@ -154,11 +154,9 @@ class GameOverSubstate extends MusicBeatSubstate
 			FlxG.sound.play(Paths.music(endSoundName));
 			new FlxTimer().start(0.7, function(tmr:FlxTimer)
 			{
-				FlxG.camera.fade(FlxColor.BLACK, 2, false, function()
-				{
-					MusicBeatState.resetState();
-				});
+				FlxG.camera.fade(FlxColor.BLACK, 2, false, MusicBeatState.resetState);
 			});
+
 			PlayState.instance.callOnScripts('onGameOverConfirm', [true]);
 		}
 	}

@@ -60,7 +60,7 @@ class Character extends FlxSprite
 	public var xFacing:Float = 1;
 
 	public var deathName = DEFAULT_CHARACTER;
-	public var characterScript:FunkinHScript;
+	public var characterScript:FunkinScript;
 
 	public var voicelining:Bool = false; // for fleetway, mainly
 	// but whenever you need to play an anim that has to be manually interrupted, here you go
@@ -101,11 +101,11 @@ class Character extends FlxSprite
 	public var noAntialiasing:Bool = false;
 	public var originalFlipX:Bool = false;
 	public var healthColorArray:Array<Int> = [255, 0, 0];
-	
+
 	public static function getCharacterFile(character:String):Null<CharacterFile>
 	{
 		var rawJson:Null<String> = Paths.getText('characters/' + character + '.json');
-		
+
 		return rawJson != null ? cast Json.parse(rawJson) : null;
 	}
 
@@ -205,7 +205,7 @@ class Character extends FlxSprite
 				}
 				imageFile = json.image;
 
-				if(json.scale != 1) 
+				if(json.scale != 1)
 				{
 					jsonScale = json.scale;
 					setGraphicSize(Std.int(width * jsonScale));
@@ -238,7 +238,7 @@ class Character extends FlxSprite
 						var animLoop:Bool = !!anim.loop; //Bruh
 						var animIndices:Array<Int> = anim.indices;
 						var camOffset:Null<Array<Float>> = anim.cameraOffset;
-						
+
 						if (!ClientPrefs.directionalCam)
 							camOffset = [0, 0];
 						else if(camOffset==null){
@@ -299,7 +299,7 @@ class Character extends FlxSprite
 				var daAnim:FlxAnimation = animation.getByName(anim);
 				animation.add(shid, daAnim.frames, daAnim.frameRate, daAnim.looped, daAnim.flipX, daAnim.flipY);
 			}
-			
+
 		}
 		recalculateDanceIdle();
 		dance();
@@ -444,7 +444,7 @@ class Character extends FlxSprite
 		if(!AnimName.endsWith("miss"))color = FlxColor.WHITE;
 		if(callOnScripts("onAnimPlay", [AnimName, Force, Reversed, Frame]) == Globals.Function_Stop)
 			return;
-		
+
 		specialAnim = false;
 		animation.play(AnimName, Force, Reversed, Frame);
 
@@ -539,15 +539,22 @@ class Character extends FlxSprite
 	////
 	public function startScripts()
 	{
-		// idk why this cant be in function new() but sure
-		var baseFile = 'characters/$curCharacter.hscript';
-		var files = [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)];
+		var basePath = 'characters/$curCharacter';
 
-		for (file in files){
+		for (filePath in [#if MODS_ALLOWED Paths.mods('${Paths.currentModDirectory}/$basePath'), Paths.mods('global/$basePath'), #end Paths.getPreloadPath(basePath)]){
+
+			var file = '$filePath.hscript';
 			if (Paths.exists(file)){
-				characterScript = FunkinHScript.fromFile(file, curCharacter, ["character" => this]);
+				characterScript = FunkinHScript.fromFile(file, basePath, ["character" => this]);
 				break;
 			}
+			#if LUA_ALLOWED
+			file = '$filePath.lua';
+			if (Paths.exists(file)){
+				characterScript = new FunkinLua(file);
+				break;
+			}
+			#end
 		}
 
 		callOnScripts("onLoad", [this], true);
@@ -568,7 +575,7 @@ class Character extends FlxSprite
 			};
 			if (ret != Globals.Function_Continue && ret != null)
 				returnVal = ret;
-			
+
 			if (returnVal == null)
 				returnVal = Globals.Function_Continue;
 		}
@@ -590,8 +597,8 @@ class Character extends FlxSprite
 		var characterList = [];
 		var directories:Array<String> = [
 			Paths.mods(Paths.currentModDirectory + '/characters/'),
-			Paths.mods('global/characters/'), 
-			Paths.mods('characters/'), 
+			Paths.mods('global/characters/'),
+			Paths.mods('characters/'),
 			Paths.getPreloadPath('characters/')
 		];
 		for (i in 0...directories.length) {

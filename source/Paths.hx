@@ -98,7 +98,7 @@ class Paths
 	// define the locally tracked assets
 	public static var localTrackedAssets:Array<String> = [];
 
-	public static function clearStoredMemory(?cleanUnused:Bool = false)
+	public static function clearStoredMemory()
 	{
 		// clear anything not in the tracked assets list
 		@:privateAccess

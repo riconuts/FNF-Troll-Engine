@@ -252,8 +252,8 @@ class TitleState extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
-		for (script in bg.hscriptArray)
-			script.call('update', [elapsed]);
+		if (bg.stageScript != null)
+			bg.stageScript.call('update', [elapsed]);
 
 		if (FlxG.sound.music != null)
 			Conductor.songPosition = FlxG.sound.music.time;
@@ -328,10 +328,8 @@ class TitleState extends MusicBeatState
 			if(controls.UI_RIGHT) swagShader.hue += elapsed * 0.1;
 		}
 
-		for (script in bg.luaArray)
-			script.call('onUpdate', [elapsed]);
-		for (script in bg.hscriptArray)
-			script.call('onUpdate', [elapsed]);
+		if (bg.stageScript != null)
+			bg.stageScript.call('onUpdate', [elapsed]);
 
 		super.update(elapsed);
 	}

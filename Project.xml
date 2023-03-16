@@ -56,9 +56,8 @@
 	<define name="MULTICORE_LOADING" if="desktop" />
 	<define name="loadBenchmark" if="MULTICORE_LOADING"/>
 	<!-- <define name="traceLoading"/> if="MULTICORE_LOADING"-->
-
-	<define name="PRELOAD_ALL" unless="web" />
-	<define name="NO_PRELOAD_ALL" unless="PRELOAD_ALL"/>
+	
+	<define name="NO_PRELOAD_ALL" if="web"/>
 
 	<!-- NOTE FOR FUTURE SELF SINCE FONTS ARE ALWAYS FUCKY 
 		TO FIX ONE OF THEM, I CONVERTED IT TO OTF. DUNNO IF YOU NEED TO
