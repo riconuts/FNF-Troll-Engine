@@ -28,7 +28,7 @@ class NoteSplash extends NoteObject
 	}
 
 	public function setupNoteSplash(x:Float, y:Float, note:Int = 0, texture:String = null, hueColor:Float = 0, satColor:Float = 0, brtColor:Float = 0) {
-		setPosition(x - width * 0.5, y - height * 0.5);
+		setPosition(x, y);
 		alpha = 0.6;
 
 		noteData = note;
@@ -44,6 +44,9 @@ class NoteSplash extends NoteObject
 		colorSwap.saturation = satColor;
 		colorSwap.brightness = brtColor;
 		offset.set(10, 10);
+
+		offset.x -= (Note.swagWidth / 2) - width/2;
+		offset.y -= (Note.swagWidth / 2) - height/2;
 
 		var animNum:Int = FlxG.random.int(1, 2);
 		animation.play('note' + note + '-' + animNum, true);

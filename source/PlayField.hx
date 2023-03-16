@@ -560,8 +560,8 @@ class NoteField extends FlxObject
 			if (!obj.alive || !obj.visible)
 				continue;
 			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, ['perspectiveDONTUSE'], obj.vec3Cache);
-			pos.x += (Note.swagWidth / 2) - obj.width/2;
-			pos.y += (Note.swagWidth / 2) - obj.height/2;
+			//pos.x += (Note.swagWidth / 2) - obj.width/2;
+			//pos.y += (Note.swagWidth / 2) - obj.height/2;
 			drawNote(obj, pos);
 		}
 		
