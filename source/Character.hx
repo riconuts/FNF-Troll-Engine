@@ -1,5 +1,7 @@
 package;
 
+import flixel.util.FlxColor;
+import flixel.animation.FlxAnimation;
 import Section.SwagSection;
 import animateatlas.AtlasFrameMaker;
 import flixel.FlxG;
@@ -271,7 +273,34 @@ class Character extends FlxSprite
 		}
 		originalFlipX = flipX;
 
-		if(animOffsets.exists('singLEFTmiss') || animOffsets.exists('singDOWNmiss') || animOffsets.exists('singUPmiss') || animOffsets.exists('singRIGHTmiss')) hasMissAnimations = true;
+		if(animOffsets.exists('singLEFTmiss') && animOffsets.exists('singDOWNmiss') && animOffsets.exists('singUPmiss') && animOffsets.exists('singRIGHTmiss')) hasMissAnimations = true;
+		var anims = ['singLEFT','singRIGHT', 'singUP', 'singDOWN'];
+		var sufs = ["miss", "-alt"];
+		for(anim in anims){
+			for (s in sufs){
+				var shid = anim + s;
+				if (!animOffsets.exists(shid) && animOffsets.exists(anim)){
+					camOffsets[shid] = camOffsets[anim];
+					animOffsets[shid] = animOffsets[anim];
+					var daAnim:FlxAnimation = animation.getByName(anim);
+					animation.add(shid, daAnim.frames, daAnim.frameRate, daAnim.looped, daAnim.flipX, daAnim.flipY);
+				}
+			}
+		}
+
+		for (anim in anims)
+		{
+			anim += "-alt";
+			var shid = anim + "miss";
+			if (!animOffsets.exists(shid) && animOffsets.exists(anim))
+			{
+				camOffsets[shid] = camOffsets[anim];
+				animOffsets[shid] = animOffsets[anim];
+				var daAnim:FlxAnimation = animation.getByName(anim);
+				animation.add(shid, daAnim.frames, daAnim.frameRate, daAnim.looped, daAnim.flipX, daAnim.flipY);
+			}
+			
+		}
 		recalculateDanceIdle();
 		dance();
 
@@ -412,6 +441,7 @@ class Character extends FlxSprite
 
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
 	{
+		if(!AnimName.endsWith("miss"))color = FlxColor.WHITE;
 		if(callOnScripts("onAnimPlay", [AnimName, Force, Reversed, Frame]) == Globals.Function_Stop)
 			return;
 		
