@@ -161,16 +161,15 @@ class Main extends Sprite
 		
 		Application.current.window.alert(errMsg, "Error!");
 
-		// what the flip
-		MusicBeatState.switchState(new MainMenuState());
-		/*
-		DiscordClient.shutdown();
-		Sys.exit(1);
+		/*	Woah, this works???
+			MusicBeatState.switchState(new MainMenuState());
+			e.stopPropagation();
+			e.preventDefault();
+			e.stopImmediatePropagation();
 		*/
 
-		e.stopPropagation();
-		e.preventDefault();
-		e.stopImmediatePropagation();
+		DiscordClient.shutdown();
+		Sys.exit(1);
 	}
 	#end
 }

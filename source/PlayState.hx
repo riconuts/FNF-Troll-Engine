@@ -139,16 +139,16 @@ class PlayState extends MusicBeatState
 
 	public var eventNotes:Array<EventNote> = [];
 
-	public var strumLineNotes:FlxTypedGroup<StrumNote>;
-	public var opponentStrums:FlxTypedGroup<StrumNote>;
-	public var playerStrums:FlxTypedGroup<StrumNote>;
+	public var strumLineNotes = new FlxTypedGroup<StrumNote>();
+	public var opponentStrums = new FlxTypedGroup<StrumNote>();
+	public var playerStrums = new FlxTypedGroup<StrumNote>();
 
 	public var playerField:PlayField;
 	public var dadField:PlayField;
 
-	public var playfields:FlxTypedGroup<PlayField>;
+	public var playfields = new FlxTypedGroup<PlayField>();
 
-	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
+	public var grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 
 	// does this even make a difference
 	public var ratingTxtGroup = new FlxTypedGroup<RatingSprite>();
@@ -205,6 +205,12 @@ class PlayState extends MusicBeatState
 		cpuControlled = value;
 
 		setOnScripts('botPlay', value);
+
+		/// oughhh
+		for (playfield in playfields.members){
+			if (playfield.isPlayer)
+				playfield.autoPlayed = cpuControlled; 
+		}
 
 		return value;
 	}
@@ -685,19 +691,13 @@ class PlayState extends MusicBeatState
 		add(botplayTxt);
 
 		//
-		strumLineNotes = new FlxTypedGroup<StrumNote>();
 		add(strumLineNotes);
-		playfields = new FlxTypedGroup<PlayField>();
 		add(playfields);
-		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 		add(grpNoteSplashes);
 
 		var splash:NoteSplash = new NoteSplash(100, 100, 0);
 		splash.alpha = 0.0;
 		grpNoteSplashes.add(splash);
-
-		opponentStrums = new FlxTypedGroup<StrumNote>();
-		playerStrums = new FlxTypedGroup<StrumNote>();
 
 		modManager = new ModManager(this);
 		setDefaultHScripts("modManager", modManager);
@@ -834,14 +834,14 @@ class PlayState extends MusicBeatState
 		playerField.characters = [boyfriend];
 		playerField.isPlayer = !playOpponent;
 		playerField.autoPlayed = !playerField.isPlayer || cpuControlled;
-		playerField.noteHitCallback = playOpponent?opponentNoteHit:goodNoteHit;
+		playerField.noteHitCallback = playOpponent ? opponentNoteHit : goodNoteHit;
 
 		dadField = new PlayField(modManager);
 		dadField.isPlayer = playOpponent;
 		dadField.autoPlayed = !dadField.isPlayer || cpuControlled;
 		dadField.modNumber = 1;
 		dadField.characters = [dad];
-		dadField.noteHitCallback = playOpponent?goodNoteHit:opponentNoteHit;
+		dadField.noteHitCallback = playOpponent ? goodNoteHit : opponentNoteHit;
 
 		playfields.add(dadField);
 		playfields.add(playerField);
@@ -852,10 +852,8 @@ class PlayState extends MusicBeatState
 		callOnScripts("postPlayfieldCreation");
 
 
-
+		////
 		cameraPoints = [sectionCamera];
-
-		// moveCamera(gf != null ? gf : dad);
 		moveCameraSection(SONG.notes[0]);
 
 		////
@@ -1188,7 +1186,8 @@ class PlayState extends MusicBeatState
 		if (skipCountdown || startOnTime > 0)
 			skipArrowStartTween = true;
 
-/* 		generateStaticArrows(0);
+		/* 		
+		generateStaticArrows(0);
 		generateStaticArrows(1);
 		for (i in 0...playerStrums.length) {
 			setOnScripts('defaultPlayerStrumX' + i, playerStrums.members[i].x);
@@ -1199,7 +1198,8 @@ class PlayState extends MusicBeatState
 			setOnScripts('defaultOpponentStrumY' + i, opponentStrums.members[i].y);
 		}
 
-		modManager.receptors = [playerStrums.members, opponentStrums.members]; */
+		modManager.receptors = [playerStrums.members, opponentStrums.members]; 
+		*/
 
 		callOnScripts('preReceptorGeneration');
 		//playerField.generateStrums();
@@ -3233,7 +3233,7 @@ class PlayState extends MusicBeatState
 		if (startedCountdown && !paused && data > -1 && !pressed.contains(eventKey)){
 			pressed.push(eventKey);
 			var hitNotes:Array<Note> = [];
-			if(strumsBlocked[data])return;
+			if(strumsBlocked[data]) return;
 
 			callOnScripts('onKeyPress', [data]);
 
@@ -3567,7 +3567,7 @@ class PlayState extends MusicBeatState
 
 							var animToPlay:String = singAnimations[Std.int(Math.abs(daNote.noteData))] + daAlt + 'miss';
 							char.playAnim(animToPlay, true);
-							char.color = FlxColor.fromRGB(72, 139, 217);
+							char.color = 0xFFC6A6FF;
 						}
 					}
 				}
@@ -3956,7 +3956,7 @@ class PlayState extends MusicBeatState
 
 			var strum:StrumNote = field.strumNotes[note.noteData];
 			if(strum != null) {
-				spawnNoteSplash(strum.x, strum.y, note.noteData, field, note);
+				spawnNoteSplash(strum.x + strum.width * 0.5, strum.y + strum.height * 0.5, note.noteData, field, note);
 			}
 		}
 	}

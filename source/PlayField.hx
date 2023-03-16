@@ -57,6 +57,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
     public function new(modMgr:ModManager){
         super();
 		this.modManager = modMgr;
+
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 		add(grpNoteSplashes);
 
@@ -69,6 +70,8 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		grpNoteSplashes.add(splash);
 		grpNoteSplashes.visible = false; // so they dont get drawn
 		splash.alpha = 0.0;
+
+		////
 		noteField = new NoteField(this, modMgr);
 		add(noteField);
 

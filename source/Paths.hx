@@ -390,7 +390,7 @@ class Paths
 			return true;
 		#end
 
-		return OpenFlAssets.exists(getPath(key, type));
+		return Paths.exists(getPath(key, type));
 	}
 
 	inline static public function getSparrowAtlas(key:String, ?library:String):FlxAtlasFrames

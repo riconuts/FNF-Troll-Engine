@@ -136,7 +136,9 @@ class Stage extends FlxTypedGroup<FlxBasic>
 
 	override function destroy()
 	{
-		stageScript.stop();
+		if (stageScript != null)
+			stageScript.stop();
+		
 		super.destroy();
 	}
 
