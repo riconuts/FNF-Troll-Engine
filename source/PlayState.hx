@@ -1820,7 +1820,7 @@ class PlayState extends MusicBeatState
 		{
 			var goobaeg:Array<Note> = [];
 			for(column in field.noteQueue){
-				if(column.length>2){
+				if(column.length>=2){
 					for(nIdx in 1...column.length){
 						var last = column[nIdx-1];
 						var current = column[nIdx];
@@ -2456,7 +2456,7 @@ class PlayState extends MusicBeatState
 								&& char.animation.curAnim.name.startsWith('sing')
 								&& !char.animation.curAnim.name.endsWith('miss')
 								&& (char.idleWhenHold || !pressedGameplayKeys.contains(true)))
-							char.dance();
+							char .dance();
 							
 					}
 				}
@@ -3611,7 +3611,7 @@ class PlayState extends MusicBeatState
 		}
 		
 
-		callOnHScripts("noteMiss", [daNote]);
+		callOnHScripts("noteMiss", [daNote, field]);
 		#if LUA_ALLOWED
 		callOnLuas('noteMiss', [notes.members.indexOf(daNote), daNote.noteData, daNote.noteType, daNote.isSustainNote, daNote.ID]);
 		#end	
@@ -3633,7 +3633,7 @@ class PlayState extends MusicBeatState
 			}
 			else
 			#end
-				callScript(script, "noteMiss", [daNote]);
+				callScript(script, "noteMiss", [daNote, field]);
 		}
 
 	
