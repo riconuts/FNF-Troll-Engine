@@ -44,9 +44,13 @@ class NoteSettingsSubState extends BaseOptionsMenu
 			['Column','Quants']
 		); //Default value
 		addOption(option);
-		var option:Option = new Option('Smooth Holds',
+/* 		var option:Option = new Option('Smooth Holds',
 			"If checked, holds will be ALOT smoother, being able to bend to fit modcharts, etc. Turn off if you have a potato PC.", 'coolHolds', 'bool', true);
-		addOption(option);
+		addOption(option); */
+		// smooth holds are optimized enough, probably
+		// + too much work to keep support for both janky and smooth holds
+		// people with PCs who cant handle smooth holds will have to take the L
+
 		var option:Option = new Option(
 			'Optimized Holds', 
 			"If checked, smooth holds will have fewer calls to the modchart system for position info.\nBest to leave this on, unless you have a high-end PC and require the highest accuracy rendering for, some reason.", 

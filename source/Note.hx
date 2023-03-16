@@ -101,6 +101,7 @@ class Note extends NoteObject
 	public var colorSwap:ColorSwap;
 	public var inEditor:Bool = false;
 	public var gfNote:Bool = false;
+	public var characters:Array<Character> = [];
 	public var baseScaleX:Float = 1;
 	public var baseScaleY:Float = 1;
 

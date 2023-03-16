@@ -130,6 +130,28 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		insert(0, note);
 	}
 
+	public function getAllNotes(?dir:Int){
+		var arr:Array<Note> = [];
+		if(dir==null){
+			for(queue in noteQueue){
+				for(note in queue)
+					arr.push(note);
+				
+			}
+		}else{
+			for (note in noteQueue[dir])
+				arr.push(note);
+		}
+		for(note in spawnedNotes)
+			arr.push(note);
+		return arr;
+	}
+	
+	public function hasNote(note:Note){
+
+		return spawnedNotes.contains(note) || noteQueue[note.noteData]!=null && noteQueue[note.noteData].contains(note);
+	}
+
 	public function input(data:Int){
 		var noteList = getTapNotes(data);
 		noteList.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
@@ -388,7 +410,7 @@ class Perspective
 class NoteField extends FlxObject
 {
 	var holdSubdivisions:Int = ClientPrefs.holdSubdivs + 1;
-	var bendHolds = ClientPrefs.coolHolds;
+	var smoothHolds = true; //ClientPrefs.coolHolds;
 	var optimizeHolds = ClientPrefs.optimizeHolds;
 
 	public function new(field:PlayField, modManager:ModManager){
@@ -459,7 +481,7 @@ class NoteField extends FlxObject
 				var visPos = modManager.getVisPos(Conductor.songPosition, daNote.strumTime , speed);
 				if (visPos > drawDist)continue;
 				if (daNote.isSustainNote){
-					if (!bendHolds){
+					if (!smoothHolds){
 						var pos = modManager.getPos(visPos, daNote.strumTime - Conductor.songPosition, curDecBeat, daNote.noteData,
 							modNumber, daNote, ['perspectiveDONTUSE'],
 							daNote.vec3Cache);
@@ -486,7 +508,7 @@ class NoteField extends FlxObject
 
 			return FlxSort.byValues(FlxSort.ASCENDING, notePos.get(Obj1).z + Obj1.zIndex, notePos.get(Obj2).z + Obj2.zIndex);
 		});
-		if (!bendHolds){
+		if (!smoothHolds){
 			holds.sort(function(Obj1:Note, Obj2:Note)
 			{
 				if (!notePos.exists(Obj1))
@@ -508,7 +530,7 @@ class NoteField extends FlxObject
 		}
 
 		for (note in holds){
-			if (bendHolds)
+			if (smoothHolds)
 				drawHold(note);
 			else
 				drawNormalHold(note, notePos.get(note));
@@ -577,19 +599,9 @@ class NoteField extends FlxObject
 		var verts = [];
 		var uv = [];
 		
-		if (hold.shader == null)
-		{
-			hold.shader = new FlxShader();
-		}
 
-		if (hold.shader != null)
-		{
-			hold.shader.bitmap.input = hold.graphic.bitmap;
-			hold.shader.bitmap.filter = hold.antialiasing ? LINEAR : NEAREST;
-			hold.shader.alpha.value = [
-				hold.alpha * modManager.getAlpha(curDecBeat, 1, hold, modNumber, hold.noteData)
-			];
-		}
+		var alpha = hold.alpha * modManager.getAlpha(curDecBeat, 1, hold, modNumber, hold.noteData);
+		if(alpha==0)return;
 
 		var lastMe = null;
 
@@ -662,15 +674,19 @@ class NoteField extends FlxObject
 			var vertices = new Vector<Float>(verts.length, false, cast verts);
 			var uvData = new Vector<Float>(uv.length, false, uv);
 
-	 		var indices = new Vector<Int>();
-			for (i in 0...vertices.length)
-				indices.push(i); 
+			var shader = hold.shader != null ? hold.shader : hold.graphic.shader;
 
-			for (camera in cameras){
-				camera.canvas.graphics.beginShaderFill(hold.shader);
+			shader.bitmap.input = hold.graphic.bitmap;
+			shader.bitmap.filter = hold.antialiasing ? LINEAR : NEAREST;
+
+			for (camera in cameras)
+			{
+				shader.alpha.value = [alpha * camera.alpha];
+				camera.canvas.graphics.beginShaderFill(shader);
 				camera.canvas.graphics.drawTriangles(vertices, null, uvData);
 				camera.canvas.graphics.endFill();
 			}
+			shader.alpha.value = [alpha];
 		}
 	}
 
@@ -834,21 +850,20 @@ class NoteField extends FlxObject
 		//	sprite.graphic.shader = new FlxShader();
 		//}
 
-		if (sprite.graphic.shader != null)
-		{
-			@:privateAccess
-			sprite.graphic.shader.bitmap.input = sprite.graphic.bitmap;
-			sprite.graphic.shader.bitmap.filter = sprite.antialiasing ? LINEAR : NEAREST;
-			sprite.graphic.shader.alpha.value = [alpha];
-		}
+		var shader = sprite.shader!=null?sprite.shader:sprite.graphic.shader;
+
+		shader.bitmap.input = sprite.graphic.bitmap;
+		shader.bitmap.filter = sprite.antialiasing ? LINEAR : NEAREST;
+		
 
 		for (camera in cameras)
 		{
-			camera.canvas.graphics.beginShaderFill(sprite.graphic.shader);
+			shader.alpha.value = [alpha * camera.alpha];
+			camera.canvas.graphics.beginShaderFill(shader);
 			camera.canvas.graphics.drawTriangles(vertices, null, uvtDat);
 			camera.canvas.graphics.endFill();
-
 		}
+		shader.alpha.value = [alpha];
 	}
 
 	function drawNote(sprite:NoteObject, pos:Vector3, ?cameras:Array<FlxCamera>)
@@ -929,23 +944,19 @@ class NoteField extends FlxObject
 			rightUV, bottomUV,
 		]);
 
-		if (sprite.shader == null){
-			sprite.shader = new FlxShader();
-		}
+		var shader = sprite.shader != null ? sprite.shader : sprite.graphic.shader;
 
-		if (sprite.shader != null)
-		{
-			sprite.shader.bitmap.input = sprite.graphic.bitmap;
-			sprite.shader.bitmap.filter = sprite.antialiasing ? LINEAR : NEAREST;
-			sprite.shader.alpha.value = [alpha];
-		}
+		shader.bitmap.input = sprite.graphic.bitmap;
+		shader.bitmap.filter = sprite.antialiasing ? LINEAR : NEAREST;
 
 		for (camera in cameras)
 		{
-			camera.canvas.graphics.beginShaderFill(sprite.shader);
+			shader.alpha.value = [alpha * camera.alpha];
+			camera.canvas.graphics.beginShaderFill(shader);
 			camera.canvas.graphics.drawTriangles(vertices, null, uvtDat);
 			camera.canvas.graphics.endFill();
 		}
+		shader.alpha.value = [alpha];
 		
 	}
 
@@ -1032,21 +1043,19 @@ class NoteField extends FlxObject
 		]);
 
 		
-		if(sprite.shader==null)
-			sprite.shader = new FlxShader();
-		
-		if(sprite.shader!=null){
-			sprite.shader.bitmap.input = sprite.graphic.bitmap;
-			sprite.shader.bitmap.filter = sprite.antialiasing ? LINEAR : NEAREST;
-			sprite.shader.alpha.value = [alpha];
-		}
+		var shader = sprite.shader != null ? sprite.shader : sprite.graphic.shader;
+
+		shader.bitmap.input = sprite.graphic.bitmap;
+		shader.bitmap.filter = sprite.antialiasing ? LINEAR : NEAREST;
 
 		for (camera in cameras)
 		{
-			camera.canvas.graphics.beginShaderFill(sprite.shader);
+			shader.alpha.value = [alpha * camera.alpha];
+			camera.canvas.graphics.beginShaderFill(shader);
 			camera.canvas.graphics.drawTriangles(vertices, null, uvtDat);
 			camera.canvas.graphics.endFill();
 		}
+		shader.alpha.value = [alpha];
 	}
 
 }

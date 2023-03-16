@@ -3572,10 +3572,10 @@ class PlayState extends MusicBeatState
 		totalPlayed++;
 		RecalculateRating();
 
-		var chars:Array<Character> = [];
+		var chars:Array<Character> = daNote.characters;
 		if (daNote.gfNote)
-			chars = [gf];
-		else
+			chars.push(gf);
+		else if (chars.length == 0)
 			chars = field.characters;
 
 		for(char in chars){
@@ -3688,14 +3688,39 @@ class PlayState extends MusicBeatState
 		if (Paths.formatToSongPath(SONG.song) != 'tutorial')
 			camZooming = true;
 
-		var chars:Array<Character> = [];
-		if(note.gfNote)
-			chars = [gf];
-		else
+				// Script shit
+
+		var isSus:Bool = note.isSustainNote; //GET OUT OF MY HEAD, GET OUT OF MY HEAD, GET OUT OF MY HEAD
+		var leData:Int = Math.round(Math.abs(note.noteData));
+		var leType:String = note.noteType;
+		
+		if (note.noteScript != null)
+		{
+			var script:FunkinScript = note.noteScript;
+			#if LUA_ALLOWED
+			if (script.scriptType == 'lua')
+				if (callScript(script, 'preOpponentNoteHit', [notes.members.indexOf(note), leData, leType, isSus, note.ID]) == Globals.Function_Stop)
+					return;
+				else
+			#end
+			if (callScript(script, "preOpponentNoteHit", [note, field]) == Globals.Function_Stop)
+				return;
+		}
+		if (callOnHScripts("preOpponentNoteHit", [note, field]) == Globals.Function_Stop)
+			return;
+		#if LUA_ALLOWED
+		if (callOnLuas('preOpponentNoteHit', [notes.members.indexOf(note), leData, leType, isSus, note.ID]) == Globals.Function_Stop)
+			return;
+		#end
+
+		var chars:Array<Character> = note.characters;
+		if (note.gfNote)
+			chars.push(gf);
+		else if (chars.length == 0)
 			chars = field.characters;
 
 		for(char in chars){
-			char.callOnScripts("playNote", [note]);
+			char.callOnScripts("playNote", [note, field]);
 
 			if(note.noteType == 'Hey!' && char.animOffsets.exists('hey')) {
 				char.playAnim('hey', true);
@@ -3731,7 +3756,7 @@ class PlayState extends MusicBeatState
 
 		note.hitByOpponent = true;
 
-		callOnHScripts("opponentNoteHit", [note]);
+		callOnHScripts("opponentNoteHit", [note, field]);
 		#if LUA_ALLOWED
 		callOnLuas('opponentNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote, note.ID]);
 		#end
@@ -3753,17 +3778,13 @@ class PlayState extends MusicBeatState
 			}
 			else
 			#end
-				callScript(script, "opponentNoteHit", [note]); 
+				callScript(script, "opponentNoteHit", [note, field]); 
 		}
 		if (!note.isSustainNote)
 		{
 			if (opponentHPDrain > 0 && health > opponentHPDrain)
 				health -= opponentHPDrain;
 
-			/*if(modchartObjects.exists('note${note.ID}'))modchartObjects.remove('note${note.ID}');
-			note.kill();
-			notes.remove(note, true);
-			note.destroy();*/
 			field.removeNote(note);
 		}
 	}
@@ -3791,7 +3812,32 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		//
+		// Script shit
+
+		var isSus:Bool = note.isSustainNote; //GET OUT OF MY HEAD, GET OUT OF MY HEAD, GET OUT OF MY HEAD
+		var leData:Int = Math.round(Math.abs(note.noteData));
+		var leType:String = note.noteType;
+		
+		if (note.noteScript != null)
+		{
+			var script:FunkinScript = note.noteScript;
+			#if LUA_ALLOWED
+			if (script.scriptType == 'lua')
+				if (callScript(script, 'preGoodNoteHit', [notes.members.indexOf(note), leData, leType, isSus, note.ID]) == Globals.Function_Stop)
+					return;
+				else
+			#end
+			if (callScript(script, "preGoodNoteHit", [note, field]) == Globals.Function_Stop)
+				return;
+		}
+		if (callOnHScripts("preGoodNoteHit", [note, field]) == Globals.Function_Stop)
+			return;
+		#if LUA_ALLOWED
+		if (callOnLuas('preGoodNoteHit', [notes.members.indexOf(note), leData, leType, isSus, note.ID]) == Globals.Function_Stop)
+			return;
+		#end
+		
+
 		if(note.hitCausesMiss) {
 			noteMiss(note, field);
 
@@ -3803,7 +3849,13 @@ class PlayState extends MusicBeatState
 				switch (note.noteType)
 				{
 					case 'Hurt Note': // Hurt note
-						for(char in field.characters){
+						var chars:Array<Character> = note.characters;
+						if (note.gfNote)
+							chars.push(gf);
+						else if (chars.length == 0)
+							chars = field.characters;
+
+						for(char in chars){
 							if (char.animation.getByName('hurt') != null){
 								char.playAnim('hurt', true);
 								char.specialAnim = true;
@@ -3835,10 +3887,10 @@ class PlayState extends MusicBeatState
 		// Sing animations
 
 
-		var chars:Array<Character> = [];
-		if(note.gfNote)
-			chars = [gf];
-		else
+		var chars:Array<Character> = note.characters;
+		if (note.gfNote)
+			chars.push(gf);
+		else if(chars.length==0)
 			chars = field.characters;
 
 
@@ -3878,7 +3930,7 @@ class PlayState extends MusicBeatState
 		vocals.volume = 1;
 
 		// Script shit
-		callOnHScripts("goodNoteHit", [note]);
+		callOnHScripts("goodNoteHit", [note, field]);
 		#if LUA_ALLOWED
 		var isSus:Bool = note.isSustainNote; //GET OUT OF MY HEAD, GET OUT OF MY HEAD, GET OUT OF MY HEAD
 		var leData:Int = Math.round(Math.abs(note.noteData));
@@ -3906,7 +3958,7 @@ class PlayState extends MusicBeatState
 
 		for (playfield in playfields)
 		{
-			if (playfield.spawnedNotes.contains(note))
+			if (playfield.hasNote(note))
 				return playfield;
 		}
 		
