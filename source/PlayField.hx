@@ -624,11 +624,13 @@ class NoteField extends FlxObject
 			var scale:Float = 1;
 			var fuck = modManager.getVisPosD(strumDiff, songSpeed);
 
-			scale = 1 - (fuck + clipStrum) / clipStrum;
-			if(scale<0)scale=0;
-			if(scale>1)scale=1;
-			strumSub *= scale;
-			strumOff *= scale;
+			if((hold.wasGoodHit || hold.parent.wasGoodHit) && !hold.tooLate){
+				scale = 1 - (fuck + clipStrum) / clipStrum;
+				if(scale<0)scale=0;
+				if(scale>1)scale=1;
+				strumSub *= scale;
+				strumOff *= scale;
+			}
 			
 
 			var topWidth = FlxMath.lerp(tWid, bWid, prog);

@@ -2446,9 +2446,6 @@ class PlayState extends MusicBeatState
 		{
 			if (!inCutscene){
 				keyShit();
-
-				//if (boyfriend.animation.curAnim != null && boyfriend.holdTimer > Conductor.stepCrochet * (0.0011 / FlxG.sound.music.pitch) * boyfriend.singDuration && boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.animation.curAnim.name.endsWith('miss') && (boyfriend.idleWhenHold || !pressedGameplayKeys.contains(true)))
-				//	boyfriend.dance();
 			}
 
 			for(field in playfields){
@@ -2464,28 +2461,6 @@ class PlayState extends MusicBeatState
 					}
 				}
 			}
-
-			// var fakeCrochet:Float = (60 / SONG.bpm) * 1000;
-/* 			notes.sort(sortByOrderNote);
-			notes.forEachAlive(function(daNote:Note)
-			{
-				if (!daNote.mustPress && daNote.wasGoodHit && !daNote.hitByOpponent && !daNote.ignoreNote)
-				{
-					opponentNoteHit(daNote);
-				}
-
-				if (!daNote.blockHit && daNote.mustPress && cpuControlled && daNote.canBeHit)
-				{
-					if (daNote.isSustainNote){
-						if (daNote.canBeHit)
-							goodNoteHit(daNote);
-					}
-					else if (daNote.strumTime <= Conductor.songPosition || daNote.isSustainNote)
-					{
-						goodNoteHit(daNote);
-					}
-				}
-			}); */
 		}
 		checkEventNote();
 
