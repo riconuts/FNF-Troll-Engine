@@ -599,7 +599,18 @@ class NoteField extends FlxObject
 		var verts = [];
 		var uv = [];
 		
-
+		var render = false;
+		for (camera in cameras)
+		{
+			if (camera.alpha > 0 && camera.visible)
+			{
+				render = true;
+				break;
+			}
+		}
+		if (!render)
+			return;
+		
 		var alpha = hold.alpha * modManager.getAlpha(curDecBeat, 1, hold, modNumber, hold.noteData);
 		if(alpha==0)return;
 
@@ -638,16 +649,13 @@ class NoteField extends FlxObject
 
 			var top = lastMe == null ? getPoints(hold, topWidth, strumDiff + strumOff) : lastMe;
 			var bot = getPoints(hold, botWidth, strumDiff + strumOff + strumSub);
-			for(vert in bot){
+			for(vert in bot)
 				vert.x += (hold.origin.x + hold.offsetX - hold.offset.x);
-				//vert.y += Note.swagWidth / 2;
-			}
+			
 			
 			if (lastMe==null){
-				for (vert in top){
+				for (vert in top)
 					vert.x += (hold.origin.x + hold.offsetX - hold.offset.x);
-					//vert.y += Note.swagWidth / 2;
-				}
 				
 			}
 			lastMe = bot;
@@ -683,6 +691,8 @@ class NoteField extends FlxObject
 
 			for (camera in cameras)
 			{
+				if (camera.alpha == 0)
+					continue;
 				shader.alpha.value = [alpha * camera.alpha];
 				camera.canvas.graphics.beginShaderFill(shader);
 				camera.canvas.graphics.drawTriangles(vertices, null, uvData);
@@ -726,17 +736,6 @@ class NoteField extends FlxObject
 		];
 	}
 
-	function drawSpritePos(sprite:FlxSprite, pos:Vector3, ?cameras:Array<FlxCamera>, ?width:Float, ?height:Float)
-	{
-		//if(pos.z<0)pos.z = 1;
-		//var m = 1 / pos.z;
-		//var newPos = Perspective.getVector(pos.z, pos);
-		if(!sprite.visible)return;
-
-		//width *= m;
-		//height *= m;
-		drawSpriteDirectly(sprite, pos.x, pos.y, cameras, width, height);
-	}
 
 	// thanks schmoovin'
 	function rotateV3(vec:Vector3, xA:Float, yA:Float, zA:Float):Vector3
@@ -767,10 +766,21 @@ class NoteField extends FlxObject
 		if (cameras == null)
 			cameras = this.cameras;
 
+		var render = false;
+		for (camera in cameras)
+		{
+			if (camera.alpha > 0 && camera.visible){
+				render = true;
+				break;
+			}
+		}
+		if(!render)return;
+
 		var width = sprite.frameWidth * sprite.scale.x;
 		var height = sprite.frameHeight * sprite.scale.y;
 		var alpha = sprite.alpha * modManager.getAlpha(curDecBeat, 1, sprite, modNumber, sprite.noteData);
 
+		if(alpha==0)return;
 		@:privateAccess
 		{
 			if (sprite.checkFlipX())
@@ -860,6 +870,8 @@ class NoteField extends FlxObject
 
 		for (camera in cameras)
 		{
+			if (camera.alpha == 0)
+				continue;
 			shader.alpha.value = [alpha * camera.alpha];
 			camera.canvas.graphics.beginShaderFill(shader);
 			camera.canvas.graphics.drawTriangles(vertices, null, uvtDat);
@@ -877,6 +889,18 @@ class NoteField extends FlxObject
 		if (cameras == null)
 			cameras = this.cameras;
 
+		var render = false;
+		for (camera in cameras)
+		{
+			if (camera.alpha > 0 && camera.visible)
+			{
+				render = true;
+				break;
+			}
+		}
+		if (!render)
+			return;
+
 		var width = sprite.frameWidth * sprite.scale.x;
 		var height = sprite.frameHeight * sprite.scale.y;
 		var alpha = sprite.alpha * modManager.getAlpha(curDecBeat, 1, sprite, modNumber, sprite.noteData);
@@ -888,13 +912,8 @@ class NoteField extends FlxObject
 			new Vector3(width / 2, height / 2, 0) // bottom right
 		];
 
-		//pos.x += sprite.origin.x;
-		//pos.y += sprite.origin.y;
-
 		for (idx => vert in quad)
 		{
-			//vert.x -= sprite.origin.x;
-			//vert.y -= sprite.origin.y;
 			var vert = rotateV3(vert, 0, 0, FlxAngle.TO_RAD * sprite.angle);
 			vert = modManager.modifyVertex(curDecBeat, vert, idx, sprite, pos, modNumber, sprite.noteData);
 			vert.x += sprite.origin.x;
@@ -911,8 +930,6 @@ class NoteField extends FlxObject
 		pos.x -= sprite.offset.x;
 		pos.y -= sprite.offset.y;
 
-		//pos.x += sprite.origin.x;
-		//pos.y += sprite.origin.y;
 
 
 		var frameRect = sprite.frame.frame;
@@ -953,6 +970,7 @@ class NoteField extends FlxObject
 
 		for (camera in cameras)
 		{
+			if(camera.alpha == 0)continue;
 			shader.alpha.value = [alpha * camera.alpha];
 			camera.canvas.graphics.beginShaderFill(shader);
 			camera.canvas.graphics.drawTriangles(vertices, null, uvtDat);
@@ -960,104 +978,6 @@ class NoteField extends FlxObject
 		}
 		shader.alpha.value = [alpha];
 		
-	}
-
-	function drawSpriteDirectly(sprite:FlxSprite, ?x:Float, ?y:Float, ?alpha:Float, ?cameras:Array<FlxCamera>, ?width:Float, ?height:Float)
-	{
-		if (!sprite.visible)
-			return;
-
-		if(x == null)
-			x = sprite.x;
-
-		if(y == null)
-			y = sprite.y;
-		
-		if (cameras == null)
-			cameras = this.cameras;
-
-		if (width == null)
-			width = sprite.frameWidth * sprite.scale.x;
-
-		if (height == null)
-			height = sprite.frameHeight * sprite.scale.y;
-
-		if(alpha == null)
-			alpha = sprite.alpha;
-
-		@:privateAccess{
-		if(sprite.checkFlipX())width = -width;
-		if(sprite.checkFlipY())height = -height;
-		}
-
-		var quad = [
-			[-width / 2, -height / 2], // top left
-			[width / 2, -height / 2], // top right
-			[-width / 2, height / 2], // bottom left
-			[width / 2, height / 2] // bottom right
-		];
-
-
-		for (idx => side in quad)
-		{
-			var vert = rotateV3(new Vector3(side[0], side[1], 0), 0, 0, FlxAngle.TO_RAD * sprite.angle);
-			side[0] = vert.x;
-			side[1] = vert.y;
-		}
-
-
-		var frameRect = sprite.frame.frame;
-		var sourceBitmap = sprite.graphic.bitmap;
-
-		var leftUV = frameRect.left / sourceBitmap.width;
-		var rightUV = frameRect.right / sourceBitmap.width;
-		var topUV = frameRect.top / sourceBitmap.height;
-		var bottomUV = frameRect.bottom / sourceBitmap.height;
-
-		x -= sprite.offset.x;
-		y -= sprite.offset.y;
-
-		x += sprite.origin.x;
-		y += sprite.origin.y;
-
-		// order should be LT, RT, RB, LT, LB, RB
-		// R is right L is left T is top B is bottom
-		// order matters! so LT is left, top because they're represented as x, y
-		var vertices = new Vector<Float>(12, false, [
-			x + quad[0][0], y + quad[0][1],
-			x + quad[1][0], y + quad[1][1],
-			x + quad[3][0], y + quad[3][1],
-
-			x + quad[0][0], y + quad[0][1],
-			x + quad[2][0], y + quad[2][1],
-			x + quad[3][0], y + quad[3][1]
-		]);
-
-
-		var uvtDat = new Vector<Float>(12, false, [
-			 leftUV,    topUV,
-			rightUV,    topUV,
-			rightUV, bottomUV,
-
-			 leftUV,    topUV,
-			 leftUV, bottomUV,
-			rightUV, bottomUV,
-		]);
-
-		
-		var shader = sprite.shader != null ? sprite.shader : sprite.graphic.shader;
-
-		shader.bitmap.input = sprite.graphic.bitmap;
-		shader.bitmap.filter = sprite.antialiasing ? LINEAR : NEAREST;
-
-		for (camera in cameras)
-		{
-			shader.alpha.value = [alpha * camera.alpha];
-			camera.canvas.graphics.beginShaderFill(shader);
-			camera.canvas.graphics.drawTriangles(vertices, null, uvtDat);
-			camera.canvas.graphics.endFill();
-		}
-		shader.alpha.value = [alpha];
 	}
 
 }
