@@ -48,6 +48,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	public var autoPlayed:Bool = false;
 	public var noteHitCallback:NoteCallback;
 	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
+	public var strumAttachments:FlxTypedGroup<NoteObject>;
 
 	public var noteMissed:Event<NoteCallback> = new Event<NoteCallback>();
 	public var noteRemoved:Event<NoteCallback> = new Event<NoteCallback>();
@@ -58,6 +59,11 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		this.modManager = modMgr;
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 		add(grpNoteSplashes);
+
+		strumAttachments = new FlxTypedGroup<NoteObject>();
+		strumAttachments.visible = false;
+		add(strumAttachments);
+
 		var splash:NoteSplash = new NoteSplash(100, 100, 0);
 		splash.handleRendering = false;
 		grpNoteSplashes.add(splash);
@@ -525,11 +531,15 @@ class NoteField extends FlxObject
 		// TODO: somehow determine the render order based on z axis for cool holds
 		for (obj in field.strumNotes)
 		{
+			if (!obj.alive || !obj.visible)
+				continue;
 			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, ['perspectiveDONTUSE'], obj.vec3Cache);
 			drawNote(obj, pos);
 		}
 
 		for (note in holds){
+			if (!note.alive || !note.visible)
+				continue;
 			if (smoothHolds)
 				drawHold(note);
 			else
@@ -537,18 +547,30 @@ class NoteField extends FlxObject
 		}
 		
 		for (note in taps){
+			if (!note.alive || !note.visible)
+				continue;
 			drawNote(note, notePos.get(note));
 		}
 
 		for (obj in field.grpNoteSplashes.members)
 		{
+			if (!obj.alive || !obj.visible)
+				continue;
 			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, ['perspectiveDONTUSE'], obj.vec3Cache);
 			pos.x -= Note.swagWidth * 0.95;
 			pos.y -= Note.swagWidth;
 			drawNote(obj, pos);
 		}
 		
-		
+		for (obj in field.strumAttachments.members)
+		{
+			if(obj==null)continue;
+			if (!obj.alive || !obj.visible)
+				continue;
+			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, ['perspectiveDONTUSE']);
+			drawNote(obj, pos);
+		}
+
         super.draw();
     }
 

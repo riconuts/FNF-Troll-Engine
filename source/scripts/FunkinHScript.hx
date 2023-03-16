@@ -93,6 +93,7 @@ class FunkinHScript extends FunkinScript
 		set("FlxG", flixel.FlxG);
 		set("state", flixel.FlxG.state);
 		set("FlxSprite", flixel.FlxSprite);
+		set("NoteObject", NoteObject);
 		set("FlxCamera", flixel.FlxCamera);
 		set("PlayField", PlayField);
 		set("NoteField", PlayField.NoteField);
