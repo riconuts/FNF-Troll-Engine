@@ -780,7 +780,7 @@ class PlayState extends MusicBeatState
 				gf.cameraPosition[1] += stageData.camera_girlfriend[1];
 			}
 
-			startCharacterPos(gf);
+			startCharacter(gf);
 			gf.scrollFactor.set(0.95, 0.95);
 			gfMap.set(gf.curCharacter, gf);
 			gfGroup.add(gf);
@@ -792,8 +792,8 @@ class PlayState extends MusicBeatState
 			dad.cameraPosition[0] += stageData.camera_opponent[0];
 			dad.cameraPosition[1] += stageData.camera_opponent[1];
 		}
-		startCharacterPos(dad, true);
-
+		startCharacter(dad, true);
+		
 		dadMap.set(dad.curCharacter, dad);
 		dadGroup.add(dad);
 
@@ -802,7 +802,7 @@ class PlayState extends MusicBeatState
 			boyfriend.cameraPosition[0] += stageData.camera_boyfriend[0];
 			boyfriend.cameraPosition[1] += stageData.camera_boyfriend[1];
 		}
-		startCharacterPos(boyfriend);
+		startCharacter(boyfriend);
 
 		boyfriendMap.set(boyfriend.curCharacter, boyfriend);
 		boyfriendGroup.add(boyfriend);
@@ -1036,8 +1036,7 @@ class PlayState extends MusicBeatState
 					boyfriendMap.set(newCharacter, newBoyfriend);
 					boyfriendGroup.add(newBoyfriend);
 
-					startCharacterPos(newBoyfriend);
-					startCharacterScript(newBoyfriend);
+					startCharacter(newBoyfriend);
 				}
 
 			case 1:
@@ -1049,9 +1048,8 @@ class PlayState extends MusicBeatState
 					dadField.characters.push(newDad);
 					dadMap.set(newCharacter, newDad);
 					dadGroup.add(newDad);
-					startCharacterPos(newDad, true);
+					startCharacter(newDad, true);
 					newDad.alpha = 0.00001;
-					startCharacterScript(newDad);
 				}
 
 			case 2:
@@ -1065,11 +1063,15 @@ class PlayState extends MusicBeatState
 
 					gfMap.set(newCharacter, newGf);
 					gfGroup.add(newGf);
-					startCharacterPos(newGf);
+					startCharacter(newGf);
 
-					startCharacterScript(newGf);
 				}
 		}
+	}
+
+	function startCharacter(char:Character, gf:Bool=false){
+		startCharacterPos(char, gf);
+		startCharacterScript(char);
 	}
 
 	function startCharacterScript(char:Character)
