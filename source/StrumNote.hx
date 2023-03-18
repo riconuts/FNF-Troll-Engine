@@ -1,9 +1,11 @@
 package;
 
+#if !macro
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.math.FlxPoint;
+#end
 import math.Vector3;
 
 using StringTools;

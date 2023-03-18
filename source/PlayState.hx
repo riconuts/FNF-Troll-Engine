@@ -3542,10 +3542,14 @@ class PlayState extends MusicBeatState
 
 		if(!daNote.noMissAnimation){
 			var chars:Array<Character> = daNote.characters;
-			if (daNote.gfNote)
+
+			if (daNote.gfNote && gf != null)
 				chars.push(gf);
 			else if (chars.length == 0)
 				chars = field.characters;
+
+			if (combo > 10 && !chars.contains(gf) && gf.animOffsets.exists('sad'))
+				gf.playAnim('sad');
 
 			for(char in chars){
 				if(char != null)
@@ -3622,7 +3626,6 @@ class PlayState extends MusicBeatState
 	{
 		if(ClientPrefs.ghostTapping) return; //fuck it
 
-
 		health -= 0.05 * healthLoss;
 		if(instakillOnMiss)
 		{
@@ -3630,10 +3633,9 @@ class PlayState extends MusicBeatState
 			doDeathCheck(true);
 		}
 
-		if (combo > 5 && gf != null && gf.animOffsets.exists('sad'))
-		{
+		if (combo > 10 && gf != null && gf.animOffsets.exists('sad'))
 			gf.playAnim('sad');
-		}
+		
 		combo = 0;
 		while (lastCombos.length > 0)
 			lastCombos.shift().kill();

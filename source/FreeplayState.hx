@@ -30,12 +30,17 @@ class FreeplayState extends MusicBeatState
 	private var categories:Map<String, FreeplayCategory> = [];
 	private var categoryIDs:Array<String> = []; // "The order of both values and keys in any type of map is undefined"
 
-	static var lastY:Float = 360;
-	var camFollow = new FlxPoint(640, lastY);
-	var camFollowPos = new FlxObject(640, lastY);
+	static var lastCamY:Float = 360;
+	var camFollow = new FlxPoint(640, lastCamY);
+	var camFollowPos = new FlxObject(640, lastCamY);
 
 	var selectedSong:Null<SongMetadata> = null;
 	var buttons:Array<FreeplaySongButton> = [];
+
+	//// Keyboard shit
+	var curCat:Int = 0;
+	var curX:Int = 0;
+	var curY:Int = 0;
 
 	//
 	var hintText:FlxText;
@@ -334,7 +339,7 @@ class FreeplayState extends MusicBeatState
 	}
 
 	override function destroy(){
-		lastY = camFollowPos.y;
+		lastCamY = camFollowPos.y;
 		super.destroy();
 	}
 
@@ -395,9 +400,12 @@ class FreeplaySongButton extends TGTSquareButton{
 }
 
 class FreeplayCategory extends flixel.group.FlxSpriteGroup{
-	var titleText:FlxText;
-	var posArray = [51, 305, 542, 788, 1034]; // fuck it
+	static var posArray = [51, 305, 542, 788, 1034]; // Fuck it
+	
 	public var buttonArray:Array<FreeplaySongButton> = [];
+	public var positionArray:Array<Array<FreeplaySongButton>> = [];
+
+	var titleText:FlxText;
 
 	public function new(?X = 0, ?Y = 0, ?TitleText:FlxText)
 	{
@@ -426,7 +434,11 @@ class FreeplayCategory extends flixel.group.FlxSpriteGroup{
 		{
 			num++;
 			var x = num % posArray.length;
-			var y = Math.floor(num / 5);
+			var y = Math.floor(num / posArray.length);
+
+			if (positionArray[x] == null)
+				positionArray[x] = [];
+			positionArray[x][y] = item;
 
 			item.setPosition(posArray[x], 50 + titleText.y + titleText.height + y * 308);
 		}

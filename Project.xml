@@ -76,6 +76,8 @@
 	<!--<haxelib name="polymod"/> -->
 	<haxelib name="hscript" />
 	<define name="hscriptPos" />
+	<haxeflag name="-dce no" />
+	
 	<haxelib name="hxCodec" if="VIDEOS_ALLOWED"/>
 
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>

@@ -152,7 +152,8 @@ class TitleState extends MusicBeatState
 	{
 		if (!loaded) load();
 
-		bg.buildStage();
+		if (bg != null)
+			bg.buildStage();
 
 		FlxTransitionableState.defaultTransIn = FadeTransitionSubstate;
 		FlxTransitionableState.defaultTransOut = FadeTransitionSubstate;
@@ -252,7 +253,7 @@ class TitleState extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
-		if (bg.stageScript != null)
+		if (bg != null && bg.stageScript != null)
 			bg.stageScript.call('update', [elapsed]);
 
 		if (FlxG.sound.music != null)
@@ -328,7 +329,7 @@ class TitleState extends MusicBeatState
 			if(controls.UI_RIGHT) swagShader.hue += elapsed * 0.1;
 		}
 
-		if (bg.stageScript != null)
+		if (bg != null && bg.stageScript != null)
 			bg.stageScript.call('onUpdate', [elapsed]);
 
 		super.update(elapsed);

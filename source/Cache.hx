@@ -185,14 +185,13 @@ class Cache
 				}
 			});
 
-			var threadArray:Array<Thread> = [for (i in 0...threadLimit){
-				trace('creating thread $i');
-				
+			var threadArray:Array<Thread> = [for (i in 0...threadLimit){				
 				var thread = makeThread();
 				thread.sendMessage(shitToLoad.pop());
 				thread;
 			}];
 
+			trace("loading begin");
 			while (true)
 			{
 				var msg:LoadingThreadMessage = Thread.readMessage(true);

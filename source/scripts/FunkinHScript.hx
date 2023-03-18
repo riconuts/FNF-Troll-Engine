@@ -1,12 +1,16 @@
 package scripts;
 
+#if !macro
 import flixel.util.FlxColor;
 import flixel.FlxG;
 import flixel.system.FlxSound;
 import flixel.tweens.*;
-import hscript.*;
+
 import lime.utils.Assets;
 import lime.app.Application;
+#end
+
+import hscript.*;
 import scripts.Globals.*;
 
 class FunkinHScript extends FunkinScript
@@ -243,6 +247,8 @@ class FunkinHScript extends FunkinScript
 		set("CoolUtil", CoolUtil);
 		set("Character", Character);
 		set("Boyfriend", Boyfriend);
+
+		set("HScriptModifier", modchart.HScriptModifier);
 		set("SubModifier", modchart.SubModifier);
 		set("NoteModifier", modchart.NoteModifier);
 		set("EventTimeline", modchart.EventTimeline);
@@ -326,42 +332,39 @@ class FunkinHScript extends FunkinScript
 	public function executeFunc(func:String, ?parameters:Array<Dynamic>, ?theObject:Any, ?extraVars:Map<String,Dynamic>):Dynamic
 	{
 		if (extraVars == null)
-			extraVars=[];
-		if (exists(func))
-		{
-			var daFunc = get(func);
-			if (Reflect.isFunction(daFunc))
-			{
-				var returnVal:Any = null;
-				var defaultShit:Map<String,Dynamic>=[];
-				if (theObject!=null)
-					extraVars.set("this", theObject);
+			extraVars = [];
+	
+		var daFunc = get(func);
+		if (!Reflect.isFunction(daFunc))
+			return null;
 
-				for (key in extraVars.keys()){
-					defaultShit.set(key, get(key));
-					set(key, extraVars.get(key));
-				}
-				try
-				{
-					returnVal = Reflect.callMethod(theObject, daFunc, parameters);
-				}
-				catch (e:haxe.Exception)
-				{
-					#if sys
-					Sys.println(e.message);
-					#end
-				}
-				for (key in defaultShit.keys())
-				{
-					set(key, defaultShit.get(key));
-				}
-				return returnVal;
-			}
+		var returnVal:Any = null;
+		var defaultShit:Map<String,Dynamic> = [];
+		if (theObject!=null)
+			extraVars.set("this", theObject);
+
+		for (key in extraVars.keys()){
+			defaultShit.set(key, get(key));
+			set(key, extraVars.get(key));
 		}
-		return null;
+
+		try{
+			returnVal = Reflect.callMethod(theObject, daFunc, parameters);
+		}
+		catch (e:haxe.Exception){
+			#if sys
+			Sys.println('${scriptName}:${interpreter.posInfos().lineNumber}: ${e.message}');
+			#end
+		}
+
+		for (key in defaultShit.keys())
+			set(key, defaultShit.get(key));
+		
+		return returnVal;
 	}
 }
 
+#if !macro
 class HScriptSubstate extends MusicBeatSubstate
 {
 	public var script:FunkinHScript;
@@ -430,3 +433,4 @@ class HScriptSubstate extends MusicBeatSubstate
 		return super.destroy();
 	}
 }
+#end
