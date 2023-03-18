@@ -80,7 +80,7 @@ class VisualsUISubState extends BaseOptionsMenu
 		option.minValue = 0.0;
 		option.maxValue = 1;
 		option.changeValue = 0.05;
-		option.decimals = 1;
+		option.decimals = 2;
 		addOption(option);
 
 		var option:Option = new Option('Alt Judgements', "Here, I fixed your judgements.\n(Changes how they appear/disappear)", 'simpleJudge', 'bool', false);

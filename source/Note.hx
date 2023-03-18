@@ -195,9 +195,8 @@ class Note extends NoteObject
 			colorSwap.hue = ClientPrefs.quantHSV[idx][0] / 360;
 			colorSwap.saturation = ClientPrefs.quantHSV[idx][1] / 100;
 			colorSwap.brightness = ClientPrefs.quantHSV[idx][2] / 100;
+
 			
-			if (noteSplashTexture == 'noteSplashes' || noteSplashTexture == null || noteSplashTexture.length <= 0 )
-				noteSplashTexture = 'QUANTnoteSplashes'; // give it da quant notesplashes!!
 		}else{
 			colorSwap.hue = ClientPrefs.arrowHSV[noteData % 4][0] / 360;
 			colorSwap.saturation = ClientPrefs.arrowHSV[noteData % 4][1] / 100;
@@ -242,9 +241,19 @@ class Note extends NoteObject
 			}
 			noteType = value;
 		}
-		noteSplashHue = colorSwap.hue;
-		noteSplashSat = colorSwap.saturation;
-		noteSplashBrt = colorSwap.brightness;
+		if(isQuant){
+			if (noteSplashTexture == 'noteSplashes' || noteSplashTexture == null || noteSplashTexture.length <= 0)
+				noteSplashTexture = 'QUANTnoteSplashes'; // give it da quant notesplashes!!
+			else if (Paths.exists(Paths.getPath("images/QUANT" + noteSplashTexture + ".png",
+				IMAGE)) #if MODS_ALLOWED || Paths.exists(Paths.modsImages("QUANT" + noteSplashTexture)) #end)
+				noteSplashTexture = 'QUANT${noteSplashTexture}';
+		}
+
+		if (isQuant && noteSplashTexture.startsWith("QUANT") || !isQuant){
+			noteSplashHue = colorSwap.hue;
+			noteSplashSat = colorSwap.saturation;
+			noteSplashBrt = colorSwap.brightness;
+		}
 		return value;
 	}
 
