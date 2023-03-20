@@ -38,12 +38,12 @@ class ConfusionModifier extends NoteModifier {
         if((obj is Note)){
             var note:Note = cast obj;
 			if (!note.isSustainNote){
-				angle = (getValue(player) + getSubmodValue('confusion${note.noteData}', player) + getSubmodValue('note${note.noteData}Angle', player));
+				angle = (getValue(player) + getSubmodValue('noteAngle', player) + getSubmodValue('confusion${note.noteData}', player) + getSubmodValue('note${note.noteData}Angle', player));
             }
             
         }else if((obj is StrumNote)){
             var receptor:StrumNote = cast obj;
-			angle = (getValue(player) + getSubmodValue('confusion${receptor.noteData}', player)
+			angle = (getValue(player) + getSubmodValue('receptorAngle', player) + getSubmodValue('confusion${receptor.noteData}', player)
 				+ getSubmodValue('receptor${receptor.noteData}Angle', player));
         }
 		//vert = vert.subtract(pos);
