@@ -30,10 +30,7 @@ class Note extends NoteObject
 	public var bAngle:Float = 0;
 	
 	public var noteScript:FunkinScript;
-	public var fieldIndex:Int = -1; // Used to denote which PlayField to be placed into
-	// Leave -1 if it should be automatically determined based on mustPress and placed into either bf or dad's based on that.
-	// Note that holds automatically have this set to their parent's fieldIndex
-	public var field:PlayField; // same as fieldIndex but lets you set the field directly incase you wanna do that i guess
+
 
 	public static var quants:Array<Int> = [
 		4, // quarter note
@@ -59,20 +56,15 @@ class Note extends NoteObject
 		return quants[quants.length-1]; // invalid
 	}
 	public var noteDiff:Float = 1000;
-	public var quant:Int = 4;
-	public var zIndex:Float = 0;
-	public var desiredZIndex:Float = 0;
-	public var z:Float = 0;
-	public var garbage:Bool = false; // if this is true, the note will be removed in the next update cycle
-	public var alphaMod:Float = 1;
-	public var alphaMod2:Float = 1; // TODO: unhardcode this shit lmao
 
+	// quant shit
+	public var quant:Int = 4;
 	public var extraData:Map<String, Dynamic> = [];
-	public var hitbox:Float = Conductor.safeZoneOffset;
 	public var isQuant:Bool = false; // mainly for color swapping, so it changes color depending on which set (quants or regular notes)
 	public var canQuant:Bool = true;
+	
+	// basic stuff
 	public var strumTime:Float = 0;
-
 	public var mustPress:Bool = false;
 	public var canBeHit:Bool = false;
 	public var tooLate:Bool = false;
@@ -82,52 +74,84 @@ class Note extends NoteObject
 	public var noteWasHit:Bool = false;
 	public var prevNote:Note;
 	public var nextNote:Note;
-
 	public var spawned:Bool = false;
+	
+	// note type/customizable shit
+	
+	public var noteType(default, set):String = null;  // the note type
 
-	public var tail:Array<Note> = []; // for sustains
+	public var hitbox:Float = Conductor.safeZoneOffset; // how far you can hit the note in ms
+	public var blockHit:Bool = false; // whether you can hit this note or not
+	public var earlyHitMult:Float = 1; // multiplier to hitbox to hit this note early
+	public var lateHitMult:Float = 1; // multiplier to hitbox to hit this note late
+	//public var lowPriority:Bool = false; // shadowmario's shitty workaround for really bad mine placement, yet still no *real* hitbox customization lol!
+	public var noteSplashDisabled:Bool = false; // disables the notesplash when you hit this note
+	public var noteSplashTexture:String = null; // spritesheet for the notesplash
+	public var noteSplashHue:Float = 0; // hueshift for the notesplash, can be changed in note-type but otherwise its whatever the user sets in options
+	public var noteSplashSat:Float = 0; // ditto, but for saturation
+	public var noteSplashBrt:Float = 0; // ditto, but for brightness
+	public var ratingDisabled:Bool = false; // disables judging this note
+	public var missHealth:Float = 0.04; // health when you miss this note
+	public var texture(default, set):String = null; // texture for the note
+	public var noAnimation:Bool = false; // disables the animation for hitting this note
+	public var noMissAnimation:Bool = false; // disables the animation for missing this note
+	public var hitCausesMiss:Bool = false; // hitting this not causes a miss
+	public var hitsoundDisabled:Bool = false; // hitting this not does not cause a hitsound when user turns on hitsounds
+	public var gfNote:Bool = false; // gf sings this note (pushes gf into characters array when the note is hit)
+	public var characters:Array<Character> = []; // which characters sing this note, leave blank for the playfield's characters
+	public var fieldIndex:Int = -1; // Used to denote which PlayField to be placed into
+	// Leave -1 if it should be automatically determined based on mustPress and placed into either bf or dad's based on that.
+	// Note that holds automatically have this set to their parent's fieldIndex
+	public var field:PlayField; // same as fieldIndex but lets you set the field directly incase you wanna do that i  guess
+
+	// kadeium
+	// TODO: Maayybbe rewrite this to be multipliers to judgement health n shit
+	public var ratingHealth:Map<String, Float> = ["sick" => 0.04, "good" => 0, "bad" => -0.03, "shit" => -0.06];
+
+	// hold/roll shit
+	public var sustainMult:Float = 1;
+	public var tail:Array<Note> = []; 
+	public var unhitTail:Array<Note> = [];
 	public var parent:Note;
-	public var blockHit:Bool = false; // only works for player
-
 	public var sustainLength:Float = 0;
 	public var isSustainNote:Bool = false;
-	public var noteType(default, set):String = null;
+	public var holdingTime:Float = 0;
+	public var tripTimer:Float = 0;
+	public var isRoll:Bool = false;
 
+	// event shit (prob can be removed??????)
 	public var eventName:String = '';
 	public var eventLength:Int = 0;
 	public var eventVal1:String = '';
 	public var eventVal2:String = '';
 
+	// etc
+
 	public var colorSwap:ColorSwap;
 	public var inEditor:Bool = false;
-	public var gfNote:Bool = false;
-	public var characters:Array<Character> = [];
+	public var desiredZIndex:Float = 0;
+	
+	// do not tuch
 	public var baseScaleX:Float = 1;
 	public var baseScaleY:Float = 1;
-
-	public var animSuffix:String = '';
-	public var earlyHitMult:Float = 0.5;
-	public var lateHitMult:Float = 1;
-	public var lowPriority:Bool = false;
-	
+	public var zIndex:Float = 0;
+	public var z:Float = 0;
 	public static var swagWidth:Float = 160 * 0.7;
+	
 	
 	private var colArray:Array<String> = ['purple', 'blue', 'green', 'red'];
 
-	// Lua shit
-	public var noteSplashDisabled:Bool = false;
-	public var noteSplashTexture:String = null;
-	public var noteSplashHue:Float = 0;
-	public var noteSplashSat:Float = 0;
-	public var noteSplashBrt:Float = 0;
 
 	// mod manager
+	public var garbage:Bool = false; // if this is true, the note will be removed in the next update cycle
+	public var alphaMod:Float = 1;
+	public var alphaMod2:Float = 1; // TODO: unhardcode this shit lmao
 	public var typeOffsetX:Float = 0; // used to offset notes, mainly for note types. use in place of offset.x and offset.y when offsetting notetypes
 	public var typeOffsetY:Float = 0;
-
+	public var multSpeed(default, set):Float = 1;
+	// useless shit mostly
 	public var offsetAngle:Float = 0;
 	public var multAlpha:Float = 1;
-	public var multSpeed(default, set):Float = 1;
 
 	public var copyX:Bool = true;
 	public var copyY:Bool = true;
@@ -136,31 +160,26 @@ class Note extends NoteObject
 
 	public var rating:String = 'unknown';
 	public var ratingMod:Float = 0; //9 = unknown, 0.25 = shit, 0.5 = bad, 0.75 = good, 1 = sick
-	public var ratingDisabled:Bool = false;
 
-	// kadeium
-	public var ratingHealth:Map<String, Float> = [ 
-		"sick" => 0.04,
-		"good" => 0,
-		"bad" => -0.03,
-		"shit" => -0.06
-	];
-	public var missHealth:Float = 0.04;
-
-	public var texture(default, set):String = null;
-
-	public var noAnimation:Bool = false;
-	public var noMissAnimation:Bool = false;
-	public var hitCausesMiss:Bool = false;
 	public var distance:Float = 2000; //plan on doing scroll directions soon -bb
 
-	public var hitsoundDisabled:Bool = false;
 
 	public static var defaultNotes = [
 		'No Animation',
 		'GF Sing',
 		''
 	];
+
+	@:isVar
+	public var isSustainEnd(get, null):Bool = false;
+
+	public function get_isSustainEnd():Bool
+	{
+		if (isSustainNote && animation != null && animation.curAnim != null && animation.curAnim.name != null && animation.curAnim.name.endsWith("end"))
+			return true;
+
+		return false;
+	}
 
 	private function set_multSpeed(value:Float):Float {
 		resizeByRatio(value / multSpeed);
@@ -304,6 +323,7 @@ class Note extends NoteObject
 
 		if (isSustainNote && prevNote != null)
 		{
+			sustainMult = 0.5; // early hit mult but just so people can set their own and not have sustains fuck them
 			alpha = 0.6;
 			multAlpha = 0.6;
 			hitsoundDisabled = true;
@@ -332,8 +352,6 @@ class Note extends NoteObject
 				prevNote.defScale.copyFrom(prevNote.scale);
 				// prevNote.setGraphicSize();
 			}
-		} else if(!isSustainNote) {
-			earlyHitMult = 1;
 		}
 		defScale.copyFrom(scale);
 		x += offsetX;
@@ -471,15 +489,20 @@ class Note extends NoteObject
 		
 		colorSwap.daAlpha = alphaMod * alphaMod2;
 		
-		var actualHitbox:Float = hitbox * earlyHitMult;
+		var actualHitbox:Float = hitbox;
 		var diff = (strumTime - Conductor.songPosition);
+		if(diff < 0)
+			actualHitbox *= earlyHitMult * sustainMult;
+		else
+			actualHitbox *= lateHitMult;
+
 		noteDiff = diff;
 		var absDiff = Math.abs(diff);
 		canBeHit = absDiff <= actualHitbox;
 		if (hitByOpponent)
 			wasGoodHit = true;
 
-		if (strumTime < Conductor.songPosition - Conductor.safeZoneOffset && !wasGoodHit)
+		if (strumTime < Conductor.songPosition - hitbox && !wasGoodHit)
 			tooLate = true;
 
 /* 		if (mustPress)

@@ -45,7 +45,17 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	public var modManager:ModManager;
 	public var isPlayer:Bool = false;
 	public var inControl:Bool = true;
-	public var autoPlayed:Bool = false;
+	public var autoPlayed(default, set):Bool = false;
+	function set_autoPlayed(aP:Bool){
+		for (idx in 0...keysPressed.length)
+			keysPressed[idx] = false;
+		
+		for(obj in strumNotes){
+			obj.playAnim("static");
+			obj.resetAnim = 0;
+		}
+		return autoPlayed = aP;
+	}
 	public var noteHitCallback:NoteCallback;
 	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
 	public var strumAttachments:FlxTypedGroup<NoteObject>;
@@ -53,6 +63,8 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	public var noteMissed:Event<NoteCallback> = new Event<NoteCallback>();
 	public var noteRemoved:Event<NoteCallback> = new Event<NoteCallback>();
 	public var noteSpawned:Event<NoteCallback> = new Event<NoteCallback>();
+
+	public var keysPressed:Array<Bool> = [false,false,false,false];
 
     public function new(modMgr:ModManager){
         super();
