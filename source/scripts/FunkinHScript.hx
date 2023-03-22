@@ -296,8 +296,7 @@ class FunkinHScript extends FunkinScript
 			call('onCreate');
 			trace('Loaded script: $scriptName');
 		}catch(e:haxe.Exception){
-			trace('$scriptName: ${e.details()}');
-			FlxG.log.error("Error running hscript: " + e.message);
+			Sys.println('${e.details()}');
 		}
 	}
 
