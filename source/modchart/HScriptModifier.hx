@@ -25,11 +25,11 @@ class HScriptModifier extends Modifier
 		script.set("setSubmodValue", setSubmodValue);
 		script.set("setSubmodPercent", setSubmodPercent);
 
-                script.executeFunc("onCreate");
+        script.executeFunc("onCreate");
 
 		super(modMgr, parent);
 
-                script.executeFunc("onCreatePost");
+        script.executeFunc("onCreatePost");
 	}
 
 	public static function fromName(modMgr:ModManager, ?parent:Modifier, scriptName:String):Null<HScriptModifier>

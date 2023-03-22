@@ -843,6 +843,9 @@ class PlayState extends MusicBeatState
 		dadField.characters = [dad];
 		dadField.noteHitCallback = playOpponent ? goodNoteHit : opponentNoteHit;
 
+		dad.idleWhenHold = !dadField.isPlayer;
+		boyfriend.idleWhenHold = !playerField.isPlayer;
+
 		playfields.add(dadField);
 		playfields.add(playerField);
 
@@ -1751,6 +1754,7 @@ class PlayState extends MusicBeatState
 						modchartObjects.set('note${sustainNote.ID}', sustainNote);
 						sustainNote.scrollFactor.set();
 						swagNote.tail.push(sustainNote);
+						swagNote.unhitTail.push(sustainNote);
 						sustainNote.parent = swagNote;
 						//allNotes.push(sustainNote);
 						sustainNote.fieldIndex = swagNote.fieldIndex;
@@ -3408,7 +3412,7 @@ class PlayState extends MusicBeatState
 		{
 			// rewritten inputs???
 
-			for (field in playfields.members)
+/* 			for (field in playfields.members)
 			{
 				if(!field.autoPlayed && field.inControl && field.isPlayer){
 					for(daNote in field.spawnedNotes){
@@ -3424,7 +3428,7 @@ class PlayState extends MusicBeatState
 
 					}
 				}
-			}
+			} */
 
 			if (parsedHoldArray.contains(true) && !endingSong) {
 				#if ACHIEVEMENTS_ALLOWED
@@ -3507,6 +3511,7 @@ class PlayState extends MusicBeatState
 				return;
 		}
 
+		trace(daNote.isSustainNote);
 		health -= daNote.missHealth * healthLoss;
 
 		if(instakillOnMiss)
@@ -3589,7 +3594,7 @@ class PlayState extends MusicBeatState
 		}
 
 
-		//// KE SUSTAIN NOTES
+/* 		//// KE SUSTAIN NOTES
 		var num = 0;
 		for (child in (daNote.isSustainNote ? daNote.parent.tail : daNote.tail)){
 			child.tooLate = true;
@@ -3598,11 +3603,11 @@ class PlayState extends MusicBeatState
 			num++;
 		}
 
+		health -= 0.2;
 		if (num > 0){
-			health -= 0.2;
 			totalPlayed += num;
 			songScore -= num * 10;
-		}
+		} */
 
 	}
 
@@ -3750,13 +3755,20 @@ class PlayState extends MusicBeatState
 			#end
 				callScript(script, "opponentNoteHit", [note, field]);
 		}
-		if (!note.isSustainNote)
+
+					
+
+		if (!note.isSustainNote && note.sustainLength == 0)
 		{
 			if (opponentHPDrain > 0 && health > opponentHPDrain)
 				health -= opponentHPDrain;
 
 			field.removeNote(note);
 		}
+		else if (note.isSustainNote)
+			if (note.parent.unhitTail.contains(note))
+				note.parent.unhitTail.remove(note);
+		
 	}
 
 	function goodNoteHit(note:Note, field:PlayField):Void
@@ -3777,7 +3789,7 @@ class PlayState extends MusicBeatState
 				StrumPlayAnim(field, Std.int(Math.abs(note.noteData)) % 4, time, note);
 			}else{
 				var spr = field.strumNotes[note.noteData];
-				if(spr != null)
+				if(spr != null && field.keysPressed[note.noteData])
 					spr.playAnim('confirm', true, note);
 			}
 		}
@@ -3836,9 +3848,13 @@ class PlayState extends MusicBeatState
 			}
 
 			note.wasGoodHit = true;
-			if (!note.isSustainNote)
-			{
+			if (!note.isSustainNote && note.tail.length==0)
 				field.removeNote(note);
+			else if(note.isSustainNote){
+				if (note.parent != null)
+					if (note.parent.unhitTail.contains(note))
+						note.parent.unhitTail.remove(note);
+				
 			}
 			return;
 		}
@@ -3919,8 +3935,13 @@ class PlayState extends MusicBeatState
 			#end
 				callScript(script, "goodNoteHit", [note, field]);
 		}
-		if (!note.isSustainNote){
+		if (!note.isSustainNote && note.tail.length == 0)
 			field.removeNote(note);
+		else if (note.isSustainNote)
+		{
+			if (note.parent != null)
+				if (note.parent.unhitTail.contains(note))
+					note.parent.unhitTail.remove(note);
 		}
 	}
 

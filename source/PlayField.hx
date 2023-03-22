@@ -133,6 +133,13 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		spawnedNotes.remove(daNote);
 		if (noteQueue[daNote.noteData] != null)
 			noteQueue[daNote.noteData].remove(daNote);
+
+		if (daNote.parent != null && daNote.parent.tail.contains(daNote))
+			daNote.parent.tail.remove(daNote);
+
+		if (daNote.parent != null && daNote.parent.unhitTail.contains(daNote))
+			daNote.parent.unhitTail.remove(daNote);
+
 		noteQueue[daNote.noteData].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
 		remove(daNote);
 		daNote.destroy();
@@ -265,6 +272,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 		//spawnedNotes.sort(sortByOrderNote);
 
+		var garbage:Array<Note> = [];
 		for (daNote in spawnedNotes)
 		{
 			if(!daNote.alive){
@@ -273,24 +281,90 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 			}
 			modManager.updateObject(curDecBeat, daNote, modNumber);
 
+			// check for hold inputs
+			if(!daNote.isSustainNote){
+				if(daNote.holdingTime < daNote.sustainLength && inControl && !daNote.blockHit){
+					if(!daNote.tooLate && daNote.wasGoodHit){
+						var isHeld = autoPlayed || keysPressed[daNote.noteData];
+						//if(daNote.isRoll)isHeld = false; // roll logic is done on press
+						// TODO: write that logic tho
+						var receptor = strumNotes[daNote.noteData];
+						
+						// should i do this??? idfk lol
+						if(isHeld && receptor.animation.curAnim.name!="confirm")
+							receptor.playAnim("confirm", true);
+
+						daNote.holdingTime = Conductor.songPosition - daNote.strumTime;
+						var regrabTime = daNote.isRoll?0.5:0.35;
+						if(isHeld)
+							daNote.tripTimer = 1;
+						else
+							daNote.tripTimer -= elapsed / regrabTime; // TODO: regrab time multiplier in options
+
+						if(daNote.tripTimer <= 0){
+							daNote.tripTimer = 0;
+							daNote.tooLate=true;
+							daNote.wasGoodHit=false;
+							for(tail in daNote.tail){
+								if(!tail.wasGoodHit){
+									daNote.causedMiss = true;
+									if (!daNote.ignoreNote)
+										noteMissed.dispatch(daNote, this);
+									continue;
+									
+								}
+							}
+						}else{
+							for (tail in daNote.unhitTail)
+							{
+								if ((tail.strumTime - 25) <= Conductor.songPosition && !tail.wasGoodHit && !tail.tooLate){
+									noteHitCallback(tail, this);
+								}
+							}
+
+							if (daNote.holdingTime >= daNote.sustainLength)
+							{
+								trace("finished hold / roll successfully");
+								daNote.holdingTime = daNote.sustainLength;
+								
+								if (!isHeld)
+									receptor.playAnim("static", true);
+							}
+
+						}
+					}
+				}
+			}
 			// check for note deletion
 			if (daNote.garbage)
 			{
-				removeNote(daNote);
+				//removeNote(daNote);
+				garbage.push(daNote);
 				continue;
 			}
 			else
 			{
-				if (Conductor.songPosition > 350 + daNote.strumTime && daNote.active)
+
+				if (daNote.tooLate && daNote.active && !daNote.causedMiss && !daNote.isSustainNote)
 				{
+					daNote.causedMiss = true;
 					if (!daNote.ignoreNote && (daNote.tooLate || !daNote.wasGoodHit))
 						noteMissed.dispatch(daNote, this);
+				} 
 
-
-					removeNote(daNote);
-					continue;
+				if((
+					(daNote.holdingTime>=daNote.sustainLength || daNote.unhitTail.length==0 ) && daNote.sustainLength>0 ||
+					daNote.isSustainNote && daNote.strumTime - Conductor.songPosition < -350 ||
+					!daNote.isSustainNote && (daNote.sustainLength==0 || daNote.tooLate) && daNote.strumTime - Conductor.songPosition < -(200 + daNote.hitbox)) && (daNote.tooLate || daNote.wasGoodHit))
+				{
+					garbage.push(daNote);
 				}
+				
 			}
+		}
+
+		for(note in garbage){
+			removeNote(note);
 		}
 
 		if (inControl && autoPlayed)
@@ -501,16 +575,22 @@ class NoteField extends FlxObject
 				var speed = songSpeed * daNote.multSpeed * modManager.getValue("xmod", modNumber);
 				var visPos = modManager.getVisPos(Conductor.songPosition, daNote.strumTime , speed);
 				if (visPos > drawDist)continue;
+				var diff = daNote.strumTime - Conductor.songPosition;
+				if(daNote.wasGoodHit && daNote.tail.length > 0 && daNote.unhitTail.length > 0){
+					diff = 0;
+					visPos = 0;
+					continue; // stops it from drawing lol
+				}
 				if (daNote.isSustainNote){
 					if (!smoothHolds){
-						var pos = modManager.getPos(visPos, daNote.strumTime - Conductor.songPosition, curDecBeat, daNote.noteData,
+						var pos = modManager.getPos(visPos, diff, curDecBeat, daNote.noteData,
 							modNumber, daNote, ['perspectiveDONTUSE'],
 							daNote.vec3Cache);
 						notePos.set(daNote, pos);
 					}
 					holds.push(daNote);
 				}else{
-					var pos = modManager.getPos(visPos, daNote.strumTime - Conductor.songPosition, curDecBeat, daNote.noteData, modNumber,
+					var pos = modManager.getPos(visPos, diff, curDecBeat, daNote.noteData, modNumber,
 						daNote, ['perspectiveDONTUSE'], daNote.vec3Cache); // perspectiveDONTUSE is excluded because its code is done in the modifyVert function
 							// but the pos is still used by cool holds (For now? I'd like to make them use modified verts too lol)
 					notePos.set(daNote, pos);
@@ -544,15 +624,9 @@ class NoteField extends FlxObject
 
 
 		// TODO: somehow determine the render order based on z axis for cool holds
-		for (obj in field.strumNotes)
-		{
-			if (!obj.alive || !obj.visible)
-				continue;
-			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, ['perspectiveDONTUSE'], obj.vec3Cache);
-			drawNote(obj, pos);
-		}
 
-		for (note in holds){
+		for (note in holds)
+		{
 			if (!note.alive || !note.visible)
 				continue;
 			if (smoothHolds)
@@ -561,6 +635,14 @@ class NoteField extends FlxObject
 				drawNormalHold(note, notePos.get(note));
 		}
 		
+
+		for (obj in field.strumNotes)
+		{
+			if (!obj.alive || !obj.visible)
+				continue;
+			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, ['perspectiveDONTUSE'], obj.vec3Cache);
+			drawNote(obj, pos);
+		}
 		for (note in taps){
 			if (!note.alive || !note.visible)
 				continue;
@@ -572,8 +654,6 @@ class NoteField extends FlxObject
 			if (!obj.alive || !obj.visible)
 				continue;
 			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, ['perspectiveDONTUSE'], obj.vec3Cache);
-			//pos.x += (Note.swagWidth / 2) - obj.width/2;
-			//pos.y += (Note.swagWidth / 2) - obj.height/2;
 			drawNote(obj, pos);
 		}
 		
@@ -660,17 +740,17 @@ class NoteField extends FlxObject
 			else
 				return tWid;
 		})();
-		var strumDiff = Conductor.songPosition - hold.strumTime;
-		var crotchet = Conductor.getCrotchetAtTime(hold.strumTime) / 4;
+		var crotchet = Conductor.getCrotchetAtTime(0) / 4;
+		var strumDiff = (Conductor.songPosition - hold.strumTime) - crotchet;
 		var clipStrum = modManager.getVisPosD(crotchet, songSpeed);
 
 		for(sub in 0...holdSubdivisions){
 			var prog = sub / (holdSubdivisions+1);
 			var nextProg = (sub + 1) / (holdSubdivisions + 1);
 			var strumSub = crotchet / holdSubdivisions;
-			var strumOff = strumSub * sub;
+			var strumOff = (strumSub * sub);
 			var scale:Float = 1;
-			var fuck = modManager.getVisPosD(strumDiff, songSpeed);
+			var fuck = modManager.getVisPosD(strumDiff + (crotchet/2), songSpeed);
 
 			if((hold.wasGoodHit || hold.parent.wasGoodHit) && !hold.tooLate){
 				scale = 1 - (fuck + clipStrum) / clipStrum;

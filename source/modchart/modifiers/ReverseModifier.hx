@@ -110,12 +110,12 @@ class ReverseModifier extends NoteModifier {
 		var mult = CoolUtil.scale(perc, 0, 1, 1, -1);
 		shift = CoolUtil.scale(getSubmodValue("centered", player), 0, 1, shift, (FlxG.height/2) - 56);
 
-		if((obj is Note)){
+/* 		if((obj is Note)){
 			var obj:Note = cast obj;
 			if(obj.isSustainNote){
 				shift += lerp(Note.swagWidth, 0, perc > 1 ? 1 : (perc < 0 ? 0 : perc));
 			}
-		}
+		} */
 
 		
 		pos.y = shift + (visualDiff * mult);

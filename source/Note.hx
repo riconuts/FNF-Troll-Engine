@@ -79,7 +79,7 @@ class Note extends NoteObject
 	// note type/customizable shit
 	
 	public var noteType(default, set):String = null;  // the note type
-
+	public var causedMiss:Bool = false;
 	public var hitbox:Float = Conductor.safeZoneOffset; // how far you can hit the note in ms
 	public var blockHit:Bool = false; // whether you can hit this note or not
 	public var earlyHitMult:Float = 1; // multiplier to hitbox to hit this note early
@@ -491,7 +491,7 @@ class Note extends NoteObject
 		
 		var actualHitbox:Float = hitbox;
 		var diff = (strumTime - Conductor.songPosition);
-		if(diff < 0)
+		if(diff > 0)
 			actualHitbox *= earlyHitMult * sustainMult;
 		else
 			actualHitbox *= lateHitMult;
@@ -502,7 +502,7 @@ class Note extends NoteObject
 		if (hitByOpponent)
 			wasGoodHit = true;
 
-		if (strumTime < Conductor.songPosition - hitbox && !wasGoodHit)
+		if (diff < -hitbox && !wasGoodHit)
 			tooLate = true;
 
 /* 		if (mustPress)
