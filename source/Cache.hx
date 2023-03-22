@@ -195,6 +195,7 @@ class Cache
 			while (true)
 			{
 				var msg:LoadingThreadMessage = Thread.readMessage(true);
+				trace(msg);
 
 				if (shitToLoad.length > 0) // send more shit
 				{
@@ -207,16 +208,19 @@ class Cache
 				}
 				else // the end
 				{ 
-					for (key => value in msg.loadedGraphics){
-						Paths.localTrackedAssets.push(key);
-						Paths.currentTrackedAssets.set(key, value);
-						//trace('loaded:$key',value);
-					}
-					for (key => value in msg.loadedSounds){
-						Paths.localTrackedAssets.push(key);
-						Paths.currentTrackedSounds.set(key, value);
-						//trace('loaded:$key',value);
-					}
+					if (msg.loadedGraphics != null)
+						for (key => value in msg.loadedGraphics){
+							Paths.localTrackedAssets.push(key);
+							Paths.currentTrackedAssets.set(key, value);
+							//trace('loaded:$key',value);
+						}
+					
+					if (msg.loadedSounds != null)
+						for (key => value in msg.loadedSounds){
+							Paths.localTrackedAssets.push(key);
+							Paths.currentTrackedSounds.set(key, value);
+							//trace('loaded:$key',value);
+						}
 					
 					threadArray.remove(msg.thread);
 					//trace('thread terminated, ${threadArray.length} left.');

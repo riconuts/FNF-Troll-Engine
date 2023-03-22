@@ -11,7 +11,9 @@ import flixel.addons.display.shapes.FlxShapeBox;
 import flash.ui.Mouse;
 import flash.ui.MouseCursor;
 import flixel.FlxG;
-import openfl.utils.AssetType;
+#if desktop
+import Discord;
+#end
 
 using StringTools;
 
@@ -264,6 +266,7 @@ class JukeboxState extends MusicBeatState {
         if(daIdx==null)daIdx=playIdx;
 		playIdx = daIdx;
 		var song = songData[daIdx].songDirectory;
+
 		if (song == 'menuTheme')
 			MusicBeatState.playMenuMusic(true);
 		else
@@ -318,12 +321,17 @@ class JukeboxState extends MusicBeatState {
 				FlxG.sound.playMusic(Paths.music(song));
             }
 		}
+
+        #if desktop
+        DiscordClient.changePresence('Listening to: ${songData[idx].songName}', null);
+        #end
     }
 
     function changeSong(newIdx:Int){
-        if(newIdx > songData.length-1)newIdx = 0;
-        if(newIdx < 0)newIdx=songData.length-1;
+        if(newIdx > songData.length-1) newIdx = 0;
+        if(newIdx < 0) newIdx=songData.length-1;
         idx = newIdx;
+
         loadCoverImage(songData[idx]);
 		songName.text = songData[idx].songName;
     }

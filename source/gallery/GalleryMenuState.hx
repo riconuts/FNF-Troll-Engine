@@ -18,6 +18,11 @@ class GalleryMenuState extends MusicBeatState
     override function create(){
         super.create();
 
+		#if desktop
+		// Updating Discord Rich Presence
+		Discord.DiscordClient.changePresence("In the Menus", null);
+		#end
+
 		#if !FLX_NO_MOUSE
         FlxG.mouse.visible = true;
         #end

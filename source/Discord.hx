@@ -71,14 +71,14 @@ class DiscordClient
 
 	public static function changePresence(details:String, state:Null<String>, largeImageKey:String = "app-logo", ?hasStartTimestamp:Bool, ?endTimestamp:Float)
 	{
-		// secret rpc xd
+		#if SECRET_DISCORD_RPC
 		DiscordRpc.presence({
 			details: "thats how you do it",
 			largeImageKey: 'gorgeous',
 			largeImageText: 'gorgeous'
 		});
 
-		/*
+		#else
 		////
 		var startTimestamp:Float = hasStartTimestamp ? Date.now().getTime() : 0;
 
@@ -89,7 +89,7 @@ class DiscordClient
 			details: details,
 			state: state,
 
-			largeImageKey: largeImageKey,
+			largeImageKey: "app-logo",// largeImageKey,
 			// largeImageText: "Engine Version: " + MainMenuState.psychEngineVersion,
 
 			// Obtained times are in milliseconds so they are divided so Discord can use it
@@ -97,7 +97,7 @@ class DiscordClient
 			endTimestamp : Std.int(endTimestamp / 1000)
 		});
 
-		*/
+		#end
 
 		//trace('Discord RPC Updated. Arguments: $details, $state, $smallImageKey, $hasStartTimestamp, $endTimestamp');
 	}
