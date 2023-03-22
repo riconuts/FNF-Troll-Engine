@@ -3511,8 +3511,17 @@ class PlayState extends MusicBeatState
 				return;
 		}
 
-		trace(daNote.isSustainNote);
+		if(!daNote.isSustainNote && daNote.unhitTail.length > 0){
+			for(tail in daNote.unhitTail){
+				tail.tooLate = true;
+				tail.blockHit = true;
+				tail.ignoreNote = true;
+				health -= daNote.missHealth * healthLoss;
+			}
+		}
+		
 		health -= daNote.missHealth * healthLoss;
+		
 
 		if(instakillOnMiss)
 		{
