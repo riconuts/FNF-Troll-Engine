@@ -182,20 +182,21 @@ class Note extends NoteObject
 	}
 
 	private function set_multSpeed(value:Float):Float {
-		resizeByRatio(value / multSpeed);
+/* 		resizeByRatio(value / multSpeed);
 		multSpeed = value;
 		// trace('fuck cock');
+		return value; */
 		return value;
 	}
 
 	public function resizeByRatio(ratio:Float) //haha funny twitter shit
 	{
-		if(isSustainNote && !animation.curAnim.name.endsWith('end'))
+/* 		if(isSustainNote && !animation.curAnim.name.endsWith('end'))
 		{
 			scale.y *= ratio;
 			baseScaleY = scale.y;
 			updateHitbox();
-		}
+		} */
 	}
 
 	private function set_texture(value:String):String {
@@ -323,7 +324,7 @@ class Note extends NoteObject
 
 		if (isSustainNote && prevNote != null)
 		{
-			sustainMult = 0.5; // early hit mult but just so people can set their own and not have sustains fuck them
+			sustainMult = 0.5; // early hit mult but just so note-types can set their own and not have sustains fuck them
 			alpha = 0.6;
 			multAlpha = 0.6;
 			hitsoundDisabled = true;
@@ -342,11 +343,8 @@ class Note extends NoteObject
 			{
 				prevNote.animation.play(colArray[prevNote.noteData % 4] + 'hold');
 
-				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.05;
-				if(PlayState.instance != null)
-				{
-					prevNote.scale.y *= PlayState.instance.songSpeed;
-				}
+				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * PlayState.instance.songSpeed;
+
 				
 				prevNote.updateHitbox();
 				prevNote.defScale.copyFrom(prevNote.scale);
@@ -504,29 +502,6 @@ class Note extends NoteObject
 
 		if (diff < -hitbox && !wasGoodHit)
 			tooLate = true;
-
-/* 		if (mustPress)
-		{
-			// ok river
-			if (strumTime > Conductor.songPosition - (Conductor.safeZoneOffset * lateHitMult)
-				&& strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * earlyHitMult))
-				canBeHit = true;
-			else
-				canBeHit = false;
-
-			if (strumTime < Conductor.songPosition - Conductor.safeZoneOffset && !wasGoodHit)
-				tooLate = true;
-		}
-		else
-		{
-			canBeHit = false;
-
-			if (strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * earlyHitMult))
-			{
-				if ((isSustainNote && prevNote.wasGoodHit) || strumTime <= Conductor.songPosition)
-					wasGoodHit = true;
-			}
-		} */
 
 		if (tooLate && !inEditor)
 		{

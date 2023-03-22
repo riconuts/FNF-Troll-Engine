@@ -63,46 +63,7 @@ class ReverseModifier extends NoteModifier {
 
 	override function ignoreUpdateNote()
 		return false;
-    
-/* 	override function updateNote(beat:Float, daNote:Note, pos:Vector3, player:Int)
-	{
-		if (daNote.isSustainNote)
-		{
-			var y = pos.y + daNote.offsetY;
-            var revPerc = getReverseValue(daNote.noteData, player);
-			var strumLine = modMgr.receptors[player][daNote.noteData];
-			var shitGotHit = (strumLine.sustainReduce
-				&& daNote.isSustainNote
-				&& (daNote.mustPress || !daNote.ignoreNote)
-				&& (!daNote.mustPress || (daNote.wasGoodHit || (daNote.prevNote.wasGoodHit && !daNote.canBeHit))));
-			if (shitGotHit)
-			{
-				var center:Float = strumLine.y + Note.swagWidth* 0.5;
-				if (revPerc >= 0.5)
-				{
-					if (y - daNote.offset.y * daNote.scale.y + daNote.height >= center)
-					{
-						var swagRect = new FlxRect(0, 0, daNote.frameWidth, daNote.frameHeight);
-						swagRect.height = (center - y) / daNote.scale.y;
-						swagRect.y = daNote.frameHeight - swagRect.height;
 
-						daNote.clipRect = swagRect;
-					}
-				}
-				else
-				{
-					if (y + daNote.offset.y * daNote.scale.y <= center)
-					{
-						var swagRect = new FlxRect(0, 0, daNote.frameWidth, daNote.frameHeight);
-						swagRect.y = (center - y) / daNote.scale.y;
-						swagRect.height -= swagRect.y;
-
-						daNote.clipRect = swagRect;
-					}
-				}
-			}
-		}
-    } */
 	override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
 	{
         var perc = getReverseValue(data, player);
@@ -110,36 +71,9 @@ class ReverseModifier extends NoteModifier {
 		var mult = CoolUtil.scale(perc, 0, 1, 1, -1);
 		shift = CoolUtil.scale(getSubmodValue("centered", player), 0, 1, shift, (FlxG.height/2) - 56);
 
-/* 		if((obj is Note)){
-			var obj:Note = cast obj;
-			if(obj.isSustainNote){
-				shift += lerp(Note.swagWidth, 0, perc > 1 ? 1 : (perc < 0 ? 0 : perc));
-			}
-		} */
-
 		
 		pos.y = shift + (visualDiff * mult);
 
-		// TODO: rewrite this, I don't like this and I feel it could be solved better by changing the note's origin instead -neb
-/*         if((obj is Note)){
-            var note:Note = cast obj;
-            if (note.isSustainNote && perc > 0)
-            {
-                var daY = pos.y;
-				var fakeCrochet:Float = (60 / PlayState.SONG.bpm) * 1000;
-                var songSpeed:Float = PlayState.instance.songSpeed * note.multSpeed;
-                if (note.animation.curAnim.name.endsWith('end'))
-                {
-					daY += 10.5 * (fakeCrochet * 0.0025) * 1.5 * songSpeed + (46 * (songSpeed - 1));
-					daY -= 46 * (1 - (fakeCrochet / 600)) * songSpeed;
-					daY -= 19;
-                }
-				daY += (Note.swagWidth* 0.5) - (60.5 * (songSpeed - 1));
-				daY += 27.5 * ((PlayState.SONG.bpm * 0.01) - 1) * (songSpeed - 1);
-
-				pos.y = lerp(pos.y, daY, perc);
-             }
-        }*/
 
 		return pos;
 	}

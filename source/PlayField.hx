@@ -623,17 +623,7 @@ class NoteField extends FlxObject
 		}
 
 
-		// TODO: somehow determine the render order based on z axis for cool holds
-
-		for (note in holds)
-		{
-			if (!note.alive || !note.visible)
-				continue;
-			if (smoothHolds)
-				drawHold(note);
-			else
-				drawNormalHold(note, notePos.get(note));
-		}
+		// TODO: somehow determine the render order based on z axis for everything
 		
 
 		for (obj in field.strumNotes)
@@ -643,6 +633,15 @@ class NoteField extends FlxObject
 			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, ['perspectiveDONTUSE'], obj.vec3Cache);
 			drawNote(obj, pos);
 		}
+
+		for (note in holds)
+		{
+			if (!note.alive || !note.visible)
+				continue;
+			if (smoothHolds)
+				drawHold(note);
+		}
+
 		for (note in taps){
 			if (!note.alive || !note.visible)
 				continue;
@@ -691,9 +690,6 @@ class NoteField extends FlxObject
 			return [p1.add(quad[0]), p1.add(quad[1]), p1];
 		}
 
-
-		
-
 		var p2 = modManager.getPos(modManager.getVisPosD(diff + 1, speed), diff + 1, curDecBeat, hold.noteData, modNumber, hold, []);
 		p2.z = 0;
 		var unit = p2.subtract(p1);
@@ -740,9 +736,14 @@ class NoteField extends FlxObject
 			else
 				return tWid;
 		})();
+
+		var speed = songSpeed * hold.multSpeed * modManager.getValue("xmod", modNumber);
 		var crotchet = Conductor.getCrotchetAtTime(0) / 4;
-		var strumDiff = (Conductor.songPosition - hold.strumTime) - crotchet;
-		var clipStrum = modManager.getVisPosD(crotchet, songSpeed);
+		var basePos = modManager.getPos(modManager.getVisPosD(0, speed), 0, curDecBeat, hold.noteData, modNumber, hold, ['perspectiveDONTUSE']);
+		// i have no other idea on how to fix the clipping being retarded
+		// i'd like a better solution but this is best i've got atm
+		var clipOffset = CoolUtil.scale(basePos.y, 50, FlxG.height - 150, crotchet, -crotchet);
+		var strumDiff = (Conductor.songPosition - hold.strumTime) - clipOffset;
 
 		for(sub in 0...holdSubdivisions){
 			var prog = sub / (holdSubdivisions+1);
@@ -750,17 +751,16 @@ class NoteField extends FlxObject
 			var strumSub = crotchet / holdSubdivisions;
 			var strumOff = (strumSub * sub);
 			var scale:Float = 1;
-			var fuck = modManager.getVisPosD(strumDiff + (crotchet/2), songSpeed);
+			var fuck = strumDiff + (clipOffset/2);
 
 			if((hold.wasGoodHit || hold.parent.wasGoodHit) && !hold.tooLate){
-				scale = 1 - (fuck + clipStrum) / clipStrum;
+				scale = 1 - ((fuck + crotchet) / crotchet);
 				if(scale<0)scale=0;
 				if(scale>1)scale=1;
 				strumSub *= scale;
 				strumOff *= scale;
 			}
 			
-
 			var topWidth = FlxMath.lerp(tWid, bWid, prog);
 			var botWidth = FlxMath.lerp(tWid, bWid, nextProg);
 
@@ -871,130 +871,6 @@ class NoteField extends FlxObject
 		rotateY.putWeak();
 
 		return offY;
-	}
-
-	// no bending n shit
-	// used for ABSOLUTE SPUDS
-	function drawNormalHold(sprite:Note, pos:Vector3)
-	{
-		if (!sprite.visible || !sprite.alive)
-			return;
-
-		if (cameras == null)
-			cameras = this.cameras;
-
-		var render = false;
-		for (camera in cameras)
-		{
-			if (camera.alpha > 0 && camera.visible){
-				render = true;
-				break;
-			}
-		}
-		if(!render)return;
-
-		var width = sprite.frameWidth * sprite.scale.x;
-		var height = sprite.frameHeight * sprite.scale.y;
-		var alpha = sprite.alpha * modManager.getAlpha(curDecBeat, 1, sprite, modNumber, sprite.noteData);
-
-		if(alpha==0)return;
-		@:privateAccess
-		{
-			if (sprite.checkFlipX())
-				width = -width;
-			if (sprite.checkFlipY())
-				height = -height;
-		}
-
-		var quad = [
-			new Vector3(-width / 2, -height / 2, 0), // top left
-			new Vector3(width / 2, -height / 2, 0), // top right
-			new Vector3(-width / 2, height / 2, 0), // bottom left
-			new Vector3(width / 2, height / 2, 0) // bottom right
-		];
-
-		// pos.x += sprite.origin.x;
-		// pos.y += sprite.origin.y;
-
-		var futureSongPos = Conductor.songPosition + 75;
-		var diff = sprite.strumTime - futureSongPos;
-
-		var speed = songSpeed * sprite.multSpeed * modManager.getValue("xmod", modNumber);
-		var vDiff = modManager.getVisPos(futureSongPos, sprite.strumTime, speed);
-		
-		var nextPos = modManager.getPos(vDiff, diff, Conductor.getStep(futureSongPos) * 0.25, sprite.noteData, modNumber, sprite,
-			['perspectiveDONTUSE']);
-		nextPos.x += sprite.offsetX;
-		nextPos.y += sprite.offsetY;
-		var diffX = (nextPos.x - pos.x);
-		var diffY = (nextPos.y - pos.y);
-		var rad = Math.atan2(diffY, diffX);
-		var deg = rad * (180 / Math.PI);
-
-		var angle:Float = 0;
-		if (deg != 0)
-			angle = (deg + 90);	
-		for (idx => vert in quad)
-		{
-			var vert = rotateV3(vert, 0, 0, FlxAngle.TO_RAD * (sprite.angle + angle));
-			vert = modManager.modifyVertex(curDecBeat, vert, idx, sprite, pos, modNumber, sprite.noteData);
-			vert.x += sprite.origin.x - sprite.offset.x + sprite.offsetX;
-			vert.y += sprite.origin.y - sprite.offset.y + (sprite.frameHeight * sprite.scale.y) + sprite.offsetY;
-			quad[idx] = vert;
-		}
-
-		var frameRect = sprite.frame.frame;
-		var sourceBitmap = sprite.graphic.bitmap;
-
-		var leftUV = frameRect.left / sourceBitmap.width;
-		var rightUV = frameRect.right / sourceBitmap.width;
-		var topUV = frameRect.top / sourceBitmap.height;
-		var bottomUV = frameRect.bottom / sourceBitmap.height;
-
-		// order should be LT, RT, RB, LT, LB, RB
-		// R is right L is left T is top B is bottom
-		// order matters! so LT is left, top because they're represented as x, y
-		var vertices = new Vector<Float>(12, false, [
-			pos.x + quad[0].x, pos.y + quad[0].y,
-			pos.x + quad[1].x, pos.y + quad[1].y,
-			pos.x + quad[3].x, pos.y + quad[3].y,
-
-			pos.x + quad[0].x, pos.y + quad[0].y,
-			pos.x + quad[2].x, pos.y + quad[2].y,
-			pos.x + quad[3].x, pos.y + quad[3].y
-		]);
-
-		var uvtDat = new Vector<Float>(12, false, [
-			 leftUV,    topUV,
-			rightUV,    topUV,
-			rightUV, bottomUV,
-
-			 leftUV,    topUV,
-			 leftUV, bottomUV,
-			rightUV, bottomUV,
-		]);
-
-		//if (sprite.graphic.shader == null)
-		//{
-		//	sprite.graphic.shader = new FlxShader();
-		//}
-
-		var shader = sprite.shader!=null?sprite.shader:sprite.graphic.shader;
-
-		shader.bitmap.input = sprite.graphic.bitmap;
-		shader.bitmap.filter = sprite.antialiasing ? LINEAR : NEAREST;
-		
-
-		for (camera in cameras)
-		{
-			if (camera.alpha == 0)
-				continue;
-			shader.alpha.value = [alpha * camera.alpha];
-			camera.canvas.graphics.beginShaderFill(shader);
-			camera.canvas.graphics.drawTriangles(vertices, null, uvtDat);
-			camera.canvas.graphics.endFill();
-		}
-		shader.alpha.value = [alpha];
 	}
 
 	function drawNote(sprite:NoteObject, pos:Vector3, ?cameras:Array<FlxCamera>)

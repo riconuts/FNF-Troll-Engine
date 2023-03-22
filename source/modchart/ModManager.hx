@@ -26,7 +26,7 @@ class ModManager {
 			ConfusionModifier, 
 			OpponentModifier, 
 			TransformModifier, 
-			InfinitePathModifier, 
+			// InfinitePathModifier,  // broken
 			AccelModifier, 
 			XModifier,
 			PerspectiveModifier
@@ -285,14 +285,14 @@ class ModManager {
 		pos.x = getBaseX(data, player);
 		pos.y = 50 + diff;
 		pos.z = 0;
-		for (name in getActiveMods(player)){
+ 		for (name in getActiveMods(player)){
 			if (exclusions.contains(name))continue; // because some modifiers may want the path without reverse, for example. (which is actually more common than you'd think!)
 			var mod:Modifier = notemodRegister.get(name);
 			if (mod==null)continue;
 			if (!obj.alive)continue;
 			if (mod.ignorePos())continue;
 			pos = mod.getPos(diff, tDiff, beat, pos, data, player, obj);
-        }
+        } 
 
 		return pos;
     }

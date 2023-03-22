@@ -1,4 +1,5 @@
 package modchart.modifiers;
+import flixel.math.FlxAngle;
 import flixel.FlxSprite;
 import ui.*;
 import modchart.*;
@@ -61,7 +62,7 @@ class LocalRotateModifier extends NoteModifier { // this'll be rotateX in ModMan
         var diff = pos.subtract(origin);
         var scale = FlxG.height;
         diff.z *= scale;
-        var out = rotateV3(diff, getValue(player), getSubmodValue('${prefix}rotateY',player), getSubmodValue('${prefix}rotateZ',player));
+        var out = rotateV3(diff, getValue(player)* FlxAngle.TO_RAD, getSubmodValue('${prefix}rotateY',player)* FlxAngle.TO_RAD, getSubmodValue('${prefix}rotateZ',player)* FlxAngle.TO_RAD);
         out.z /= scale;
         return origin.add(out);
     }
