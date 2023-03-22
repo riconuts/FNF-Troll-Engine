@@ -3241,15 +3241,7 @@ class PlayState extends MusicBeatState
 
 			for(field in playfields.members){
 				if(!field.autoPlayed && field.isPlayer && field.inControl){
-
-					/*if (generatedMusic && !endingSong){
-					}
-					var spr:StrumNote = field.strumNotes[data];
-					if(spr != null && spr.animation.curAnim.name != 'confirm')
-					{
-						spr.playAnim('pressed');
-						spr.resetAnim = 0;
-					}*/
+					field.keysPressed[data] = true;
 					if(generatedMusic && !endingSong){
 						var note:Note = field.input(data);
 						if(note==null){
@@ -3346,17 +3338,6 @@ class PlayState extends MusicBeatState
 		}
 		//trace('pressed: ' + controlArray);
 	}*/
-
-	function sortHitNotes(a:Note, b:Note):Int
-	{
-		if (a.lowPriority && !b.lowPriority)
-			return 1;
-		else if (!a.lowPriority && b.lowPriority)
-			return -1;
-
-		return FlxSort.byValues(FlxSort.ASCENDING, a.strumTime, b.strumTime);
-	}
-
 	private function onKeyRelease(event:KeyboardEvent):Void
 	{
 		var eventKey:FlxKey = event.keyCode;
@@ -3367,6 +3348,7 @@ class PlayState extends MusicBeatState
 			for(field in playfields.members){
 				if (field.inControl && !field.autoPlayed && field.isPlayer)
 				{
+					field.keysPressed[key] = false;
 					var spr:StrumNote = field.strumNotes[key];
 					if (spr != null)
 					{
