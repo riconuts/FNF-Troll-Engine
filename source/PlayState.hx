@@ -1306,6 +1306,7 @@ class PlayState extends MusicBeatState
 				countdownSpr = new FlxSprite(0, 0, Paths.image(sprImage));
 				countdownSpr.scrollFactor.set();
 				countdownSpr.updateHitbox();
+				countdownSpr.cameras = [camHUD];
 
 				countdownSpr.screenCenter();
 				countdownSpr.antialiasing = ClientPrefs.globalAntialiasing;
