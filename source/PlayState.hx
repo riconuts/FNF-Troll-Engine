@@ -1,5 +1,6 @@
 package;
 
+import sys.FileSystem;
 import sys.io.File;
 import flixel.group.FlxGroup;
 #if ACHIEVEMENTS_ALLOWED
@@ -526,7 +527,10 @@ class PlayState extends MusicBeatState
 
 		if(SONG!=null){
 			var jason = Paths.songJson(Paths.formatToSongPath(SONG.song) + '/metadata');
-			if (jason!=null)
+			if (!FileSystem.exists(jason))
+				jason = Paths.modsSongJson(Paths.formatToSongPath(SONG.song) + '/metadata');
+
+			if (FileSystem.exists(jason))
 				metadata = cast Json.parse(File.getContent(jason));
 			else
 				trace("No metadata for " + SONG.song + ". Maybe add some?");

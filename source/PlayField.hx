@@ -134,6 +134,11 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		if (noteQueue[daNote.noteData] != null)
 			noteQueue[daNote.noteData].remove(daNote);
 
+		if(daNote.tail.length > 0)
+			for(tail in daNote.tail)
+				removeNote(tail);
+		
+
 		if (daNote.parent != null && daNote.parent.tail.contains(daNote))
 			daNote.parent.tail.remove(daNote);
 
