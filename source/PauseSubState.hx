@@ -79,20 +79,34 @@ class PauseSubState extends MusicBeatSubstate
 
 		////
 		var songInfo:Array<String> = [];
+		var metadata = PlayState.instance.metadata;
 
-		if (PlayState.SONG.song != null)
-			songInfo.push(PlayState.SONG.song);
+		if (PlayState.SONG != null && PlayState.SONG.song != null){
+			var songCredit = PlayState.SONG.song;
+			if (metadata!=null)
+				songCredit += " - " + metadata.artist;
+			songInfo.push(songCredit);
+		}
 
-		/*
-			songInfo.push(PlayState.TheSongDifficultyIDK);
-		*/
+		if (metadata != null){
+			var shartCredit = "Charted by " + metadata.charter;
+			if(metadata.modcharter!=null)
+				shartCredit += "\nModcharted by " + metadata.modcharter;
+			
+		}
 
-		if (PlayState.SONG.info != null)
+		if (PlayState.SONG != null && PlayState.SONG.info != null)
 			for (extraInfo in PlayState.SONG.info)
 				songInfo.push(extraInfo);
-
-		if (ClientPrefs.getGameplaySetting("practice", false))
-			songInfo.push("Blueballed: " + PlayState.deathCounter);
+		
+		if (metadata != null && metadata.extraInfo!=null){
+			for(extraInfo in metadata.extraInfo)
+				songInfo.push(extraInfo);
+		}
+		
+		
+		// removed the practice clause cus its just nice to have the counter lol
+		songInfo.push("Failed: " + PlayState.deathCounter); // i'd say blueballed but not every character blueballs + you straight up die in die batsards
 
 		////
 		var allTexts:Array<FlxText> = [];

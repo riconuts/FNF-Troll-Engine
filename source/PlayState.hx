@@ -1,5 +1,6 @@
 package;
 
+import sys.io.File;
 import flixel.group.FlxGroup;
 #if ACHIEVEMENTS_ALLOWED
 import Achievements;
@@ -57,13 +58,18 @@ import Discord.DiscordClient;
 import vlc.MP4Handler;
 #end
 
-typedef LineData = {
-	var character:String;
-	var anim:String;
-};
+typedef SongCreditdata = // beacuse SongMetadata is stolen
+{
+	artist:String,
+	charter:String,
+	?modcharter:Array<String>,
+	?extraInfo:Array<String>,
+}
 
 class PlayState extends MusicBeatState
 {
+	public var metadata:SongCreditdata; // metadata for the songs (artist, etc)
+
 	// andromeda modcharts :D
 	public var modManager:ModManager;
 
@@ -517,6 +523,15 @@ class PlayState extends MusicBeatState
 		////
 		if (SONG == null)
 			SONG = Song.loadFromJson('tutorial', 'tutorial');
+
+		if(SONG!=null){
+			var jason = Paths.songJson(Paths.formatToSongPath(SONG.song) + '/metadata');
+			if (jason!=null)
+				metadata = cast Json.parse(File.getContent(jason));
+			else
+				trace("No metadata for " + SONG.song + ". Maybe add some?");
+			
+		}
 
 		Conductor.mapBPMChanges(SONG);
 		Conductor.changeBPM(SONG.bpm);
