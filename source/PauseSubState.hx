@@ -24,7 +24,6 @@ class PauseSubState extends MusicBeatSubstate
 	var curSelected:Int = 0;
 
 	var pauseMusic:FlxSound;
-	var practiceText:FlxText;
 	var skipTimeText:FlxText;
 	var skipTimeTracker:Alphabet;
 	var curTime:Float = Math.max(0, Conductor.songPosition);
@@ -37,20 +36,23 @@ class PauseSubState extends MusicBeatSubstate
 		super();
 		var cam:FlxCamera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
 
-		if(PlayState.chartingMode #if debug || true #end)
+		if(#if debug true || #end PlayState.chartingMode)
 		{
 			var shit:Int = 2;
+
 			if (PlayState.chartingMode){
 				menuItemsOG.insert(shit, 'Leave Charting Mode');
 				shit++;
 			}
 
 			var num:Int = 0;
+
 			//if(!PlayState.instance.startingSong)
 			//{
 				num = 1;
 				menuItemsOG.insert(shit, 'Skip Time');
 			//}
+
 			menuItemsOG.insert(shit + num, 'End Song');
 			// menuItemsOG.insert(shit + num, 'Toggle Practice Mode');
 			menuItemsOG.insert(shit + num, 'Toggle Botplay');
@@ -75,46 +77,66 @@ class PauseSubState extends MusicBeatSubstate
 		bg.scrollFactor.set();
 		add(bg);
 
-		var levelInfo:FlxText = new FlxText(20, 15, 0, "", 32);
-		levelInfo.text += PlayState.SONG.song;
-		levelInfo.scrollFactor.set();
-		levelInfo.setFormat(Paths.font("calibri.ttf"), 32);
-		levelInfo.updateHitbox();
-		add(levelInfo);
+		////
+		var songInfo:Array<String> = [];
 
-		var blueballedTxt:FlxText = new FlxText(20, 15 + 48, 0, "", 32);
-		blueballedTxt.text = "Blueballed: " + PlayState.deathCounter;
-		blueballedTxt.scrollFactor.set();
-		blueballedTxt.setFormat(Paths.font('vcr.ttf'), 32);
-		blueballedTxt.updateHitbox();
-		add(blueballedTxt);
+		if (PlayState.SONG.song != null)
+			songInfo.push(PlayState.SONG.song);
 
-		practiceText = new FlxText(20, 15 + 101, 0, "PRACTICE MODE", 32);
-		practiceText.scrollFactor.set();
-		practiceText.setFormat(Paths.font('vcr.ttf'), 32);
-		practiceText.x = cam.width - (practiceText.width + 20);
-		practiceText.updateHitbox();
-		practiceText.visible = PlayState.instance.practiceMode;
-		add(practiceText);
+		/*
+			songInfo.push(PlayState.TheSongDifficultyIDK);
+		*/
 
-		var chartingText:FlxText = new FlxText(20, 15 + 101, 0, "CHARTING MODE", 32);
-		chartingText.scrollFactor.set();
-		chartingText.setFormat(Paths.font('vcr.ttf'), 32);
-		chartingText.x = cam.width - (chartingText.width + 20);
-		chartingText.y = cam.height - (chartingText.height + 20);
-		chartingText.updateHitbox();
-		chartingText.visible = PlayState.chartingMode;
-		add(chartingText);
+		if (PlayState.SONG.info != null)
+			for (extraInfo in PlayState.SONG.info)
+				songInfo.push(extraInfo);
 
-		blueballedTxt.alpha = 0;
-		levelInfo.alpha = 0;
+		if (ClientPrefs.getGameplaySetting("practice", false))
+			songInfo.push("Blueballed: " + PlayState.deathCounter);
 
-		levelInfo.x = cam.width - (levelInfo.width + 20);
-		blueballedTxt.x = cam.width - (blueballedTxt.width + 20);
+		////
+		var allTexts:Array<FlxText> = [];
+		var prevText:FlxText = null;
+
+		for (daText in songInfo){
+			prevText = new FlxText(20, prevText == null ? 15 : (prevText.y + prevText.height + 2), 0, daText, 32);
+			prevText.setFormat(Paths.font('vcr.ttf'), 32);
+			prevText.scrollFactor.set();
+			prevText.updateHitbox();
+			prevText.alpha = 0;	
+
+			prevText.x = cam.width - (prevText.width + 20);
+
+			allTexts.push(prevText);
+			add(prevText);
+		}
+
+		if (PlayState.chartingMode){
+			var chartingText:FlxText = new FlxText(cam.width, 0, 0, "CHARTING MODE", 32);
+			chartingText.setFormat(Paths.font('vcr.ttf'), 32);
+			chartingText.scrollFactor.set();
+			chartingText.updateHitbox();
+
+			chartingText.setPosition(
+				cam.width - (chartingText.width + 20),
+				cam.height - (chartingText.height + 20)
+			);
+
+			add(chartingText);
+
+			chartingText.alpha = 0;
+			FlxTween.tween(chartingText, {alpha: 1}, 0.4, {ease: FlxEase.quartInOut});
+		}
 
 		FlxTween.tween(bg, {alpha: 0.6}, 0.4, {ease: FlxEase.quartInOut});
-		FlxTween.tween(levelInfo, {alpha: 1, y: 20}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.3});
-		FlxTween.tween(blueballedTxt, {alpha: 1, y: blueballedTxt.y + 5}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.7});
+
+		for (id in 0...allTexts.length)
+		{
+			var daText = allTexts[id];
+
+			daText.y -= 5;
+			FlxTween.tween(daText, {alpha: 1, y: daText.y + 5}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.3 * (id+1)});
+		}
 
 		grpMenuShit = new FlxTypedGroup<Alphabet>();
 		add(grpMenuShit);
@@ -184,11 +206,7 @@ class PauseSubState extends MusicBeatSubstate
 					close();
 				case "Restart Song":
 
-					if (FlxG.keys.pressed.SHIFT){
-						PlayState.instance.paused = true; // For lua
-						FlxG.sound.music.volume = 0;
-						PlayState.instance.vocals.volume = 0;
-						
+					if (FlxG.keys.pressed.SHIFT){					
 						PlayState.SONG = Song.loadFromJson(PlayState.SONG.song, PlayState.SONG.song);
 
 						Paths.clearStoredMemory();

@@ -33,22 +33,26 @@ typedef SwagSong =
 	@:optional var splashSkin:String;
 
 	@:optional var extraTracks:Array<String>;
+	@:optional var info:Array<String>;
 }
 
 class Song
 {
 	public var song:String;
+	public var bpm:Float;
+	public var speed:Float = 1;
 	public var notes:Array<SwagSection>;
 	public var events:Array<Dynamic>;
-	public var bpm:Float;
+	
 	public var needsVoices:Bool = true;
 	public var arrowSkin:Null<String> = null;
 	public var splashSkin:Null<String> = null;
-	public var speed:Float = 1;
-	public var stage:String;
+
 	public var player1:String = 'bf';
 	public var player2:String = 'dad';
 	public var gfVersion:String = 'gf';
+	public var stage:String;
+
 	public var extraTracks:Array<String> = [];
 
 	private static function onLoadJson(songJson:Dynamic) // Convert old charts to newest format
