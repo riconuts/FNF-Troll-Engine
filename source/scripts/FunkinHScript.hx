@@ -323,36 +323,39 @@ class FunkinHScript extends FunkinScript
 	override public function call(func:String, ?parameters:Array<Dynamic>, ?extraVars:Map<String,Dynamic>):Dynamic
 	{
 		var returnValue:Dynamic = executeFunc(func, parameters, this, extraVars);
-		if (returnValue == null)
-			return Function_Continue;
+		if (returnValue == null) return Function_Continue;
+
 		return returnValue;
 	}
 
-	public function executeFunc(func:String, ?parameters:Array<Dynamic>, ?theObject:Any, ?extraVars:Map<String,Dynamic>):Dynamic
+	/**
+	* Calls a function within the script
+	**/
+	public function executeFunc(func:String, ?parameters:Array<Dynamic>, ?theObject:Any, ?extraVars:Map<String, Dynamic>):Dynamic
 	{
-		if (extraVars == null)
-			extraVars = [];
-	
 		var daFunc = get(func);
 		if (!Reflect.isFunction(daFunc))
 			return null;
 
-		var returnVal:Any = null;
-		var defaultShit:Map<String,Dynamic> = [];
-		if (theObject!=null)
+		if (extraVars == null) 
+			extraVars = [];
+		
+		if (theObject != null)
 			extraVars.set("this", theObject);
 
+		var defaultShit:Map<String, Dynamic> = [];
 		for (key in extraVars.keys()){
-			defaultShit.set(key, get(key));
+			defaultShit.set(key, get(key)); // Store original values of variables that are being overwritten
+
 			set(key, extraVars.get(key));
 		}
 
+		var returnVal:Any = null;
 		try{
 			returnVal = Reflect.callMethod(theObject, daFunc, parameters);
-		}
-		catch (e:haxe.Exception){
+		}catch (e:haxe.Exception){
 			#if sys
-			Sys.println('${scriptName}:${interpreter.posInfos().lineNumber}: ${e.message}');
+			Sys.println(e.message);
 			#end
 		}
 

@@ -1865,12 +1865,9 @@ class FunkinLua extends FunkinScript
 			luaTrace(toPrint.join(", "), true, false);
 		}));
 		Lua_helper.add_callback(lua, "close", function(printMessage:Bool) {
-			if(!gonnaClose) {
-				if(printMessage) {
-					luaTrace('Stopping lua script: ' + scriptName);
-				}
-				PlayState.instance.closeLuas.push(this);
-			}
+			if(!gonnaClose && printMessage)
+				luaTrace('Stopping lua script: ' + scriptName);
+			
 			gonnaClose = true;
 		});
 

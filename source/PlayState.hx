@@ -501,7 +501,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		camHUD.bgColor = FlxColor.fromRGBFloat(0, 0, 0, 1 - ClientPrefs.stageOpacity);
+		camHUD.bgColor.alpha = 0; 
 		camOverlay.bgColor.alpha = 0;
 		camOther.bgColor.alpha = 0;
 
@@ -986,6 +986,20 @@ class PlayState extends MusicBeatState
 
 		Conductor.safeZoneOffset = ClientPrefs.safeFrames / 60 * 1000;
 
+		////
+		var stageOpacity = new FlxSprite();
+
+		stageOpacity.makeGraphic(1,1,0xFFFFFFFF);
+		stageOpacity.color = 0xFF000000;
+		stageOpacity.alpha = 1 - ClientPrefs.stageOpacity;
+
+		stageOpacity.screenCenter();
+		stageOpacity.scale.set(FlxG.width * 100, FlxG.height * 100);
+		stageOpacity.scrollFactor.set();
+
+		add(stageOpacity);
+
+		////
 		callOnScripts('onCreatePost');
 		super.create();
 
@@ -1102,7 +1116,7 @@ class PlayState extends MusicBeatState
 
 		if (char.characterScript != null){
 			#if LUA_ALLOWED
-			if (char.characterScript.scriptType == "lua")
+			if (char.characterScript is FunkinLua)
 				luaArray.push(cast char.characterScript);
 			else
 			#end
@@ -2909,14 +2923,19 @@ class PlayState extends MusicBeatState
 		var finishCallback:Void->Void = endSong; //In case you want to change it in a specific song.
 
 		updateTime = false;
-		FlxG.sound.music.volume = 0;
+
+		// FlxG.sound.music.volume = 0;
+		FlxG.sound.music.pause();
+
 		vocals.volume = 0;
 		vocals.pause();
+
 		for (track in tracks){
 			track.volume = 0;
 			track.pause();
 		}
 
+		////
 		if(ClientPrefs.noteOffset <= 0 || ignoreNoteOffset) {
 			finishCallback();
 		} else {
@@ -3557,7 +3576,8 @@ class PlayState extends MusicBeatState
 		totalPlayed++;
 		RecalculateRating();
 
-		if(!daNote.noMissAnimation){
+		if(!daNote.noMissAnimation)
+		{
 			var chars:Array<Character> = daNote.characters;
 
 			if (daNote.gfNote && gf != null)
@@ -3566,7 +3586,10 @@ class PlayState extends MusicBeatState
 				chars = field.characters;
 
 			if (combo > 10 && !chars.contains(gf) && gf.animOffsets.exists('sad'))
+			{
 				gf.playAnim('sad');
+				gf.specialAnim = true;
+			}		
 
 			for(char in chars){
 				if(char != null)
@@ -3650,8 +3673,10 @@ class PlayState extends MusicBeatState
 			doDeathCheck(true);
 		}
 
-		if (combo > 10 && gf != null && gf.animOffsets.exists('sad'))
+		if (combo > 10 && gf != null && gf.animOffsets.exists('sad')){
 			gf.playAnim('sad');
+			gf.specialAnim = true;
+		}
 		
 		combo = 0;
 		while (lastCombos.length > 0)
@@ -3668,15 +3693,19 @@ class PlayState extends MusicBeatState
 
 		FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
 
-		for(field in playfields.members){
-			if(field.isPlayer){
-				for(char in field.characters){
-					if(char.hasMissAnimations) {
-						if(char.animTimer <= 0 && !char.voicelining)
-							char.playAnim(singAnimations[Std.int(Math.abs(direction))] + 'miss', true);
-					}
-				}
+		for (field in playfields.members)
+		{
+			if (!field.isPlayer)
+				continue;
 
+			for(char in field.characters)
+			{
+				if(char.animTimer <= 0 && !char.voicelining)
+				{
+					char.playAnim(singAnimations[Std.int(Math.abs(direction))] + 'miss', true);
+					if(!char.hasMissAnimations)
+						char.color = 0xFFC6A6FF;	
+				}
 			}
 		}
 
@@ -3730,13 +3759,11 @@ class PlayState extends MusicBeatState
 				char.specialAnim = true;
 				char.heyTimer = 0.6;
 			} else if(!note.noAnimation) {
-				var altAnim:String = "";
+				var animToPlay:String = singAnimations[Std.int(Math.abs(note.noteData))];
 
 				var curSection = SONG.notes[curSection];
-				if (curSection != null && curSection.altAnim || note.noteType == 'Alt Animation')
-					altAnim = '-alt';
-
-				var animToPlay:String = singAnimations[Std.int(Math.abs(note.noteData))] + altAnim;
+				if ((curSection != null && curSection.altAnim) || note.noteType == 'Alt Animation')
+					animToPlay += '-alt';
 
 				if (char != null && char.animTimer <= 0 && !char.voicelining){
 					char.playAnim(animToPlay, true);
@@ -3913,13 +3940,17 @@ class PlayState extends MusicBeatState
 
 
 		if(!note.noAnimation) {
-			var daAlt = note.noteType == 'Alt Animation' ? '-alt' : '';
 			var animToPlay:String = singAnimations[Std.int(Math.abs(note.noteData))];
+
+			var curSection = SONG.notes[curSection];
+			if ((curSection != null && curSection.altAnim) || note.noteType == 'Alt Animation')
+				animToPlay += '-alt';
+			
 			for(char in chars){
 				if (char != null && char.animTimer <= 0 && !char.voicelining){
-					char.playAnim(animToPlay + daAlt, true);
+					char.playAnim(animToPlay, true);
 					char.holdTimer = 0;
-					char.callOnScripts("playNoteAnim", [animToPlay + daAlt, note]);
+					char.callOnScripts("playNoteAnim", [animToPlay, note]);
 				}
 			}
 
@@ -4137,13 +4168,15 @@ class PlayState extends MusicBeatState
 				setOnScripts('crochet', Conductor.crochet);
 				setOnScripts('stepCrochet', Conductor.stepCrochet);
 			}
-			setOnScripts('mustHitSection', curSection.mustHitSection);
-			setOnScripts('altAnim', curSection.altAnim);
-			setOnScripts('gfSection', curSection.gfSection);
-			// else
-			// Conductor.changeBPM(SONG.bpm);
-			setOnScripts("sectionNumber", Math.floor(curStep / 16));
+			
 			setOnHScripts("curSection", curSection);
+
+			setOnScripts('mustHitSection', curSection.mustHitSection == true);
+			setOnScripts('altAnim', curSection.altAnim == true);
+			setOnScripts('gfSection', curSection.gfSection  == true);
+
+			setOnScripts('sectionNumber', Math.floor(curStep / 16));
+
 			if (lastSection != Math.floor(curStep / 16))
 			{
 				lastSection = Math.floor(curStep / 16);
@@ -4192,38 +4225,45 @@ class PlayState extends MusicBeatState
 		return returnVal;
 	}
 
-	public function setOnScripts(variable:String, arg:Dynamic, ?scriptArray:Array<Dynamic>)
+	public function setOnScripts(variable:String, value:Dynamic, ?scriptArray:Array<Dynamic>)
 	{
 		if (scriptArray == null)
 			scriptArray = funkyScripts;
 
-		for (script in scriptArray)
-			script.set(variable, arg);
+		for (script in scriptArray){
+			script.set(variable, value);
+			// trace('set $variable, $value, on ${script.scriptName}');
+		}	
 	}
 
-	public function callScript(script:Dynamic, event:String, args:Array<Dynamic>): Dynamic{
+	public function callScript(script:Dynamic, event:String, args:Array<Dynamic>):Dynamic
+	{
 		if((script is FunkinScript)){
 			return callOnScripts(event, args, true, [], [script], false);
-		}else if((script is Array)){
+		}
+		else if((script is Array)){
 			return callOnScripts(event, args, true, [], script, false);
-		}else if((script is String)){
+		}
+		else if((script is String)){
 			var scripts:Array<FunkinScript> = [];
+
 			for(scr in funkyScripts){
 				if(scr.scriptName == script)
 					scripts.push(scr);
 			}
+
 			return callOnScripts(event, args, true, [], scripts, false);
 		}
+
 		return Globals.Function_Continue;
 	}
 
 	#if hscript
-	public function callOnHScripts(event:String, args:Array<Dynamic>, ignoreStops = false, ?exclusions:Array<String>){
+	public function callOnHScripts(event:String, args:Array<Dynamic>, ignoreStops = false, ?exclusions:Array<String>)
 		return callOnScripts(event, args, ignoreStops, exclusions, hscriptArray);
-	}
-	public function setOnHScripts(variable:String, arg:Dynamic){
+	
+	public function setOnHScripts(variable:String, arg:Dynamic)
 		return setOnScripts(variable, arg, hscriptArray);
-	}
 
 	public function setDefaultHScripts(variable:String, arg:Dynamic){
 		FunkinHScript.defaultVars.set(variable, arg);
@@ -4232,14 +4272,11 @@ class PlayState extends MusicBeatState
 	#end
 
 	#if LUA_ALLOWED
-	public var closeLuas:Array<FunkinLua> = [];
-
-	public function callOnLuas(event:String, args:Array<Dynamic>, ignoreStops = false, ?exclusions:Array<String>){
+	public function callOnLuas(event:String, args:Array<Dynamic>, ignoreStops = false, ?exclusions:Array<String>)
 		return callOnScripts(event, args, ignoreStops, exclusions, luaArray);
-	}
-	public function setOnLuas(variable:String, arg:Dynamic){
+	
+	public function setOnLuas(variable:String, arg:Dynamic)
 		setOnScripts(variable, arg, luaArray);
-	}
 	#end
 
 	function StrumPlayAnim(field:PlayField, id:Int, time:Float, ?note:Note) {

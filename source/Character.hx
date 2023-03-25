@@ -273,34 +273,44 @@ class Character extends FlxSprite
 		}
 		originalFlipX = flipX;
 
-		if(animOffsets.exists('singLEFTmiss') && animOffsets.exists('singDOWNmiss') && animOffsets.exists('singUPmiss') && animOffsets.exists('singRIGHTmiss')) hasMissAnimations = true;
-		var anims = ['singLEFT','singRIGHT', 'singUP', 'singDOWN'];
-		var sufs = ["miss", "-alt"];
-		for(anim in anims){
-			for (s in sufs){
-				var shid = anim + s;
-				if (!animOffsets.exists(shid) && animOffsets.exists(anim)){
+		if(animOffsets.exists('singLEFTmiss') && animOffsets.exists('singDOWNmiss') && animOffsets.exists('singUPmiss') && animOffsets.exists('singRIGHTmiss')) 
+			hasMissAnimations = true;
+
+		if (!debugMode){
+			var anims = ['singLEFT','singRIGHT', 'singUP', 'singDOWN'];
+			var sufs = ["miss", "-alt"];
+
+			for (anim in anims)
+			{
+				for (s in sufs){
+					var shid = anim + s;
+					if (!animOffsets.exists(shid) && animOffsets.exists(anim)){
+						var daAnim:FlxAnimation = animation.getByName(anim);
+						if (daAnim == null) continue;
+						animation.add(shid, daAnim.frames, daAnim.frameRate, daAnim.looped, daAnim.flipX, daAnim.flipY);
+
+						camOffsets[shid] = camOffsets[anim];
+						animOffsets[shid] = animOffsets[anim];
+					}
+				}
+			}
+
+			for (anim in anims)
+			{
+				anim += "-alt";
+				var shid = anim + "miss";
+				if (!animOffsets.exists(shid) && animOffsets.exists(anim))
+				{
+					var daAnim:FlxAnimation = animation.getByName(anim);
+					if (daAnim == null) continue;
+					animation.add(shid, daAnim.frames, daAnim.frameRate, daAnim.looped, daAnim.flipX, daAnim.flipY);
+
 					camOffsets[shid] = camOffsets[anim];
 					animOffsets[shid] = animOffsets[anim];
-					var daAnim:FlxAnimation = animation.getByName(anim);
-					animation.add(shid, daAnim.frames, daAnim.frameRate, daAnim.looped, daAnim.flipX, daAnim.flipY);
 				}
 			}
 		}
 
-		for (anim in anims)
-		{
-			anim += "-alt";
-			var shid = anim + "miss";
-			if (!animOffsets.exists(shid) && animOffsets.exists(anim))
-			{
-				camOffsets[shid] = camOffsets[anim];
-				animOffsets[shid] = animOffsets[anim];
-				var daAnim:FlxAnimation = animation.getByName(anim);
-				animation.add(shid, daAnim.frames, daAnim.frameRate, daAnim.looped, daAnim.flipX, daAnim.flipY);
-			}
-
-		}
 		recalculateDanceIdle();
 		dance();
 
@@ -441,7 +451,7 @@ class Character extends FlxSprite
 
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
 	{
-		if(!AnimName.endsWith("miss"))color = FlxColor.WHITE;
+		if(!AnimName.endsWith("miss")) color = FlxColor.WHITE;
 		if(callOnScripts("onAnimPlay", [AnimName, Force, Reversed, Frame]) == Globals.Function_Stop)
 			return;
 
@@ -545,7 +555,7 @@ class Character extends FlxSprite
 
 			var file = '$filePath.hscript';
 			if (Paths.exists(file)){
-				characterScript = FunkinHScript.fromFile(file, basePath, ["character" => this]);
+				characterScript = FunkinHScript.fromFile(file, file, ["character" => this]);
 				break;
 			}
 			#if LUA_ALLOWED
@@ -566,27 +576,31 @@ class Character extends FlxSprite
 	{
 		var returnVal:Dynamic = Globals.Function_Continue;
 
-		if (characterScript != null){
-			var ret:Dynamic = characterScript.call(event, args != null ? args : []);
-			if (ret == Globals.Function_Halt){
-				ret = returnVal;
-				if (!ignoreStops)
-					return returnVal;
-			};
-			if (ret != Globals.Function_Continue && ret != null)
-				returnVal = ret;
+		if (characterScript == null)
+			return returnVal;
 
-			if (returnVal == null)
-				returnVal = Globals.Function_Continue;
-		}
+		var ret:Dynamic = characterScript.call(event, args, extraVars);
+
+		if (ret == Globals.Function_Halt){
+			ret = returnVal;
+			if (!ignoreStops)
+				return returnVal;
+		};
+
+		if (ret != Globals.Function_Continue && ret != null)
+			returnVal = ret;
+
+		if (returnVal == null)
+			returnVal = Globals.Function_Continue;
+
 
 		return returnVal;
 	}
 
-	public function setOnScripts(variable:String, arg:Dynamic)
+	public function setOnScripts(variable:String, value:Dynamic)
 	{
 		if (characterScript != null)
-			characterScript.set(variable, arg);
+			characterScript.set(variable, value);
 	}
 
 	//

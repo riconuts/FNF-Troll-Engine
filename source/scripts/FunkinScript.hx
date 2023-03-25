@@ -51,6 +51,7 @@ class FunkinScript {
 	**/
 	function setDefaultVars(){
 		var currentState = flixel.FlxG.state;
+
 		if ((currentState is PlayState))
 		{
 			set("inPlaystate", true);
@@ -72,9 +73,15 @@ class FunkinScript {
 			set('startedCountdown', false);
 		}else
 			set("inPlaystate", false);
-		
-		
+
+		set("scriptName", scriptName);
+
+		set('Function_Halt', Globals.Function_Halt);
+		set('Function_Stop', Globals.Function_Stop);
+		set('Function_Continue', Globals.Function_Continue);
+
 		set('inGameOver', false);
+		
 		set('downscroll', ClientPrefs.downScroll);
 		set('middlescroll', ClientPrefs.middleScroll);
 		set('framerate', ClientPrefs.framerate);
@@ -88,18 +95,16 @@ class FunkinScript {
 		set('healthBarAlpha', ClientPrefs.healthBarAlpha);
 		set('noResetButton', ClientPrefs.noReset);
 		set('lowQuality', ClientPrefs.lowQuality);
-		set("scriptName", scriptName);
 
 		set('curBpm', Conductor.bpm);
 		set('crochet', Conductor.crochet);
 		set('stepCrochet', Conductor.stepCrochet);
-		set('Function_Halt', Globals.Function_Halt);
-		set('Function_Stop', Globals.Function_Stop);
-		set('Function_Continue', Globals.Function_Continue);
+
 		set('curBeat', 0);
 		set('curStep', 0);
 		set('curDecBeat', 0);
 		set('curDecStep', 0);
+
 		set('version', MainMenuState.psychEngineVersion.trim());
 	}
 }
