@@ -1,4 +1,5 @@
 package;
+import openfl.display.Shader;
 import flixel.util.FlxColor;
 import openfl.geom.Vector3D;
 import flixel.math.FlxPoint;
@@ -32,6 +33,14 @@ PlayField is seperated into 2 classes:
     - This is typically per-player, and can control multiple characters, can be locked up, etc.
     - You can also swap which PlayField a player is actually controlling n all that
 */
+
+typedef RenderObject = {
+	shader:Shader,
+	alpha:Float,
+	uvData:Vector<Float>,
+	vertices:Vector<Float>,
+	zIndex:Float,
+}
 
 typedef NoteCallback = (Note, PlayField) -> Void;
 class PlayField extends FlxTypedGroup<FlxBasic>
@@ -134,8 +143,8 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		if (noteQueue[daNote.noteData] != null)
 			noteQueue[daNote.noteData].remove(daNote);
 
-		if(daNote.tail.length > 0)
-			for(tail in daNote.tail)
+		if (daNote.unhitTail.length > 0)
+			for(tail in daNote.unhitTail)
 				removeNote(tail);
 		
 
@@ -604,7 +613,7 @@ class NoteField extends FlxObject
 			}
 
 		}
-
+/* 
 		taps.sort(function(Obj1:Note, Obj2:Note){
 			if(!notePos.exists(Obj1))
 				return 1;
@@ -613,44 +622,39 @@ class NoteField extends FlxObject
 				return -1;
 
 			return FlxSort.byValues(FlxSort.ASCENDING, notePos.get(Obj1).z + Obj1.zIndex, notePos.get(Obj2).z + Obj2.zIndex);
-		});
-		if (!smoothHolds){
-			holds.sort(function(Obj1:Note, Obj2:Note)
-			{
-				if (!notePos.exists(Obj1))
-					return 1;
-
-				if (!notePos.exists(Obj2))
-					return -1;
-
-				return FlxSort.byValues(FlxSort.ASCENDING, notePos.get(Obj1).z + Obj1.zIndex, notePos.get(Obj2).z + Obj2.zIndex);
-			});
-		}
-
-
-		// TODO: somehow determine the render order based on z axis for everything
+		}); */
 		
+		var drawing:Array<RenderObject> = []; // stuff to render
+
+		for (note in holds)
+		{
+			if (!note.alive || !note.visible)
+				continue;
+			var object = drawHold(note);
+			if (object == null)
+				continue;
+			object.zIndex -= 0.1;
+			drawing.push(object);
+		}
 
 		for (obj in field.strumNotes)
 		{
 			if (!obj.alive || !obj.visible)
 				continue;
 			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, ['perspectiveDONTUSE'], obj.vec3Cache);
-			drawNote(obj, pos);
-		}
-
-		for (note in holds)
-		{
-			if (!note.alive || !note.visible)
-				continue;
-			if (smoothHolds)
-				drawHold(note);
+			var object = drawNote(obj, pos);
+			if(object==null)continue;
+			object.zIndex += (obj.animation!=null && obj.animation.curAnim != null && obj.animation.curAnim.name == 'confirm')?1:0;
+			drawing.push(object);
 		}
 
 		for (note in taps){
 			if (!note.alive || !note.visible)
 				continue;
-			drawNote(note, notePos.get(note));
+			var object = drawNote(note, notePos.get(note));
+			if(object==null)continue;
+			object.zIndex = notePos.get(note).z + note.zIndex;
+			drawing.push(object);
 		}
 
 		for (obj in field.grpNoteSplashes.members)
@@ -658,7 +662,11 @@ class NoteField extends FlxObject
 			if (!obj.alive || !obj.visible)
 				continue;
 			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, ['perspectiveDONTUSE'], obj.vec3Cache);
-			drawNote(obj, pos);
+			var object = drawNote(obj, pos);
+			if (object == null)
+				continue;
+			object.zIndex += 2;
+			drawing.push(object);
 		}
 		
 		for (obj in field.strumAttachments.members)
@@ -667,7 +675,39 @@ class NoteField extends FlxObject
 			if (!obj.alive || !obj.visible)
 				continue;
 			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, ['perspectiveDONTUSE']);
-			drawNote(obj, pos);
+			var object = drawNote(obj, pos);
+			if(object==null)continue;
+			object.zIndex += 2;
+			drawing.push(object);
+		}
+
+		drawing.sort(function(Obj1:RenderObject, Obj2:RenderObject)
+		{
+			return FlxSort.byValues(FlxSort.ASCENDING, Obj1.zIndex, Obj2.zIndex);
+		});
+
+		if(drawing.length>0){
+			for (camera in cameras)
+			{
+				if (camera.alpha == 0 || !camera.visible)
+					continue;
+
+
+				for (object in drawing)
+				{
+					if(object==null)continue;
+					var shader:Dynamic = object.shader;
+					var alpha = object.alpha;
+					var vertices = object.vertices;
+					var uvData = object.uvData;
+					shader.alpha.value = [alpha * camera.alpha];
+
+					// maybe some optimization so that it'll only do a beginShaderFill/endFill if the previous drawn shader != this shader
+					camera.canvas.graphics.beginShaderFill(shader);
+					camera.canvas.graphics.drawTriangles(vertices, null, uvData);
+					camera.canvas.graphics.endFill();
+				}
+			}
 		}
 
         super.draw();
@@ -709,9 +749,10 @@ class NoteField extends FlxObject
 		return [p1.add(off1), p1.add(off2), p1];
 	}
 	
-	function drawHold(hold:Note, ?cameras:Array<FlxCamera>){
-		if(hold.animation.curAnim==null)return;
-		if(hold.scale==null)return; 
+	function drawHold(hold:Note, ?cameras:Array<FlxCamera>):Null<RenderObject>
+	{
+		if(hold.animation.curAnim==null)return null;
+		if(hold.scale==null)return null; 
 		if(cameras==null)cameras = this.cameras;
 		
 		var verts = [];
@@ -727,10 +768,10 @@ class NoteField extends FlxObject
 			}
 		}
 		if (!render)
-			return;
+			return null;
 		
 		var alpha = hold.alpha * modManager.getAlpha(curDecBeat, 1, hold, modNumber, hold.noteData);
-		if(alpha==0)return;
+		if(alpha==0)return null;
 
 		var lastMe = null;
 
@@ -750,6 +791,7 @@ class NoteField extends FlxObject
 		var clipOffset = CoolUtil.scale(basePos.y, 50, FlxG.height - 150, crotchet, -crotchet);
 		var strumDiff = (Conductor.songPosition - hold.strumTime) - clipOffset;
 
+		var zIndex:Float = basePos.z;
 		for(sub in 0...holdSubdivisions){
 			var prog = sub / (holdSubdivisions+1);
 			var nextProg = (sub + 1) / (holdSubdivisions + 1);
@@ -802,26 +844,34 @@ class NoteField extends FlxObject
 			]);
 			uv = uv.concat(getUV(hold, false, sub));
 		}
-		if (verts.length>0){
-			var vertices = new Vector<Float>(verts.length, false, cast verts);
-			var uvData = new Vector<Float>(uv.length, false, uv);
 
-			var shader = hold.shader != null ? hold.shader : hold.graphic.shader;
+		var vertices = new Vector<Float>(verts.length, false, cast verts);
+		var uvData = new Vector<Float>(uv.length, false, uv);
 
-			shader.bitmap.input = hold.graphic.bitmap;
-			shader.bitmap.filter = hold.antialiasing ? LINEAR : NEAREST;
+		var shader = hold.shader != null ? hold.shader : hold.graphic.shader;
 
-			for (camera in cameras)
-			{
-				if (camera.alpha == 0)
-					continue;
-				shader.alpha.value = [alpha * camera.alpha];
-				camera.canvas.graphics.beginShaderFill(shader);
-				camera.canvas.graphics.drawTriangles(vertices, null, uvData);
-				camera.canvas.graphics.endFill();
-			}
-			shader.alpha.value = [alpha];
+		shader.bitmap.input = hold.graphic.bitmap;
+		shader.bitmap.filter = hold.antialiasing ? LINEAR : NEAREST;
+
+/* 			for (camera in cameras)
+		{
+			if (camera.alpha == 0)
+				continue;
+			shader.alpha.value = [alpha * camera.alpha];
+			camera.canvas.graphics.beginShaderFill(shader);
+			camera.canvas.graphics.drawTriangles(vertices, null, uvData);
+			camera.canvas.graphics.endFill();
+		} */
+		
+		//shader.alpha.value = [alpha];
+		return {
+			shader: shader,
+			alpha: alpha, 
+			uvData: uvData,
+			vertices: vertices,
+			zIndex: zIndex
 		}
+		
 	}
 
 	private function getUV(sprite:FlxSprite, flipY:Bool, sub:Int)
@@ -878,10 +928,10 @@ class NoteField extends FlxObject
 		return offY;
 	}
 
-	function drawNote(sprite:NoteObject, pos:Vector3, ?cameras:Array<FlxCamera>)
+	function drawNote(sprite:NoteObject, pos:Vector3, ?cameras:Array<FlxCamera>):Null<RenderObject>
 	{
 		if (!sprite.visible || !sprite.alive)
-			return;
+			return null;
 		
 
 		if (cameras == null)
@@ -897,12 +947,12 @@ class NoteField extends FlxObject
 			}
 		}
 		if (!render)
-			return;
+			return null;
 
 		var width = sprite.frameWidth * sprite.scale.x;
 		var height = sprite.frameHeight * sprite.scale.y;
 		var alpha = sprite.alpha * modManager.getAlpha(curDecBeat, 1, sprite, modNumber, sprite.noteData);
-		if(alpha==0)return;
+		if(alpha==0)return null;
 		var quad = [
 			new Vector3(-width / 2, -height / 2, 0), // top left
 			new Vector3(width / 2, -height / 2, 0), // top right
@@ -951,7 +1001,7 @@ class NoteField extends FlxObject
 			pos.x + quad[3].x, pos.y + quad[3].y
 		]);
 
-		var uvtDat = new Vector<Float>(12, false, [
+		var uvData = new Vector<Float>(12, false, [
 			 leftUV,    topUV,
 			rightUV,    topUV,
 			rightUV, bottomUV,
@@ -966,7 +1016,7 @@ class NoteField extends FlxObject
 		shader.bitmap.input = sprite.graphic.bitmap;
 		shader.bitmap.filter = sprite.antialiasing ? LINEAR : NEAREST;
 
-		for (camera in cameras)
+/* 		for (camera in cameras)
 		{
 			if(camera.alpha == 0)continue;
 			shader.alpha.value = [alpha * camera.alpha];
@@ -974,7 +1024,15 @@ class NoteField extends FlxObject
 			camera.canvas.graphics.drawTriangles(vertices, null, uvtDat);
 			camera.canvas.graphics.endFill();
 		}
-		shader.alpha.value = [alpha];
+		shader.alpha.value = [alpha]; */
+
+		return {
+			shader: shader,
+			alpha: alpha,
+			uvData: uvData,
+			vertices: vertices,
+			zIndex: pos.z
+		}
 		
 	}
 

@@ -62,7 +62,7 @@ class PerspectiveModifier extends NoteModifier {
 
     var aspect = 1;
     
-		var shit = pos.z / 1280;
+		var shit = pos.z / 720;
     if(shit>0)shit=0;
 
     var ta = FastTan(fov/2);
@@ -91,7 +91,7 @@ class PerspectiveModifier extends NoteModifier {
 		var origin = new Vector3(FlxG.width / 2, FlxG.height / 2); // vertex origin
 		var fieldPos = new Vector3(-getSubmodPercent("fieldX", player) / 100,
 			-getSubmodPercent("fieldY", player) / 100,
-			1280
+			720
 			+ getSubmodPercent("fieldZ", player)); // playfield pos
 			
 		
@@ -106,7 +106,7 @@ class PerspectiveModifier extends NoteModifier {
 	override function modifyVert(beat:Float, vert:Vector3, idx:Int, sprite:FlxSprite, pos:Vector3, player:Int, data:Int):Vector3
 	{
 		var origin = new Vector3(FlxG.width/2, FlxG.height/2); // vertex origin
-		var fieldPos = new Vector3(-getSubmodPercent("fieldX", player) / 100, -getSubmodPercent("fieldY", player) / 100, 1280 + getSubmodPercent("fieldZ", player)); // playfield pos
+		var fieldPos = new Vector3(-getSubmodPercent("fieldX", player) / 100, -getSubmodPercent("fieldY", player) / 100, 720 + getSubmodPercent("fieldZ", player)); // playfield pos
 		var originMod = vert.add(pos).subtract(origin); // moves the vertex to the appropriate position on screen based on origin
 		var rotated = rotateV3(originMod, getSubmodValue("fieldPitch", player) * FlxAngle.TO_RAD, getSubmodValue("fieldYaw", player) * FlxAngle.TO_RAD, getSubmodValue("fieldRoll", player) * FlxAngle.TO_RAD); // rotate the vertex properly
 		var projected = getVector(rotated.subtract(fieldPos)); // perpsective projection

@@ -462,7 +462,7 @@ class Note extends NoteObject
 	{
 		super.update(elapsed);
 
-		if (isSustainNote)
+/* 		if (isSustainNote)
 		{
 			if (prevNote != null && prevNote.isSustainNote)
 				zIndex = z + prevNote.zIndex;
@@ -476,7 +476,7 @@ class Note extends NoteObject
 		
 
 		zIndex += desiredZIndex;
-		zIndex -= (mustPress == true ? 0 : 1);
+		zIndex -= (mustPress == true ? 0 : 1); */
 
 		if(!inEditor){
 			if (noteScript != null && noteScript.scriptType == 'hscript'){
