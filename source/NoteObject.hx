@@ -12,11 +12,6 @@ class NoteObject extends FlxSprite {
 	{
 		if (handleRendering)
 			return super.draw();
-		else
-		{
-			if (dirty)
-				calcFrame(useFramePixels);
-		}
 	}
 
 	public function new(?x:Float, ?y:Float){

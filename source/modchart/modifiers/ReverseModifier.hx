@@ -73,7 +73,13 @@ class ReverseModifier extends NoteModifier {
 
 		
 		pos.y = shift + (visualDiff * mult);
-
+/*         if((obj is Note)){
+            var o:Note = cast obj;
+            if(!o.isSustainNote)
+                pos.z += Note.swagWidth/2;
+        }else
+            pos.z += Note.swagWidth / 2;
+ */
 
 		return pos;
 	}
