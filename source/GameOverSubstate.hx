@@ -22,13 +22,13 @@ class GameOverSubstate extends MusicBeatSubstate
 	public var camFollowPos:FlxObject;
 	public var updateCamera:Bool = false;
 
-	public static var characterName:String = 'bf-dead';
+	public static var characterName:String = null;
 	public static var deathSoundName:String = 'fnf_loss_sfx';
 	public static var loopSoundName:String = 'gameOver';
 	public static var endSoundName:String = 'gameOverEnd';
 
 	public static function resetVariables() {
-		characterName = 'bf-dead';
+		characterName = null;
 		deathSoundName = 'fnf_loss_sfx';
 		loopSoundName = 'gameOver';
 		endSoundName = 'gameOverEnd';
@@ -50,9 +50,14 @@ class GameOverSubstate extends MusicBeatSubstate
 
 		Conductor.songPosition = 0;
 
-		var deathName = PlayState.instance.boyfriend.deathName + "-dead";
+		var deathName:String = characterName;
+
+		if (deathName == null)
+			deathName = PlayState.instance.boyfriend.deathName + "-dead";
+
 		var charInfo = Character.getCharacterFile(deathName);
 		if (charInfo == null){
+			trace('"$deathName" does not exist, using default.');
 			deathName = Character.DEFAULT_CHARACTER + "-dead";
 			charInfo = Character.getCharacterFile(deathName);
 		}

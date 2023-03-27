@@ -8,32 +8,52 @@ import flixel.math.*;
 import flixel.text.FlxText;
 import sowy.*;
 
-typedef ComicData = {
+typedef ChapterData = {
+	var pages:Array<PageData>;
+
+	var ?directory:String;
+
+	var ?prevChapter:ChapterData;
+	var ?nextChapter:ChapterData;
+}
+typedef PageData = {
+	var chapter:ChapterData;
 	var name:String;
 
-	var directory:Null<String>;
-	var formattedName:String;
-	var imageAmount:Int;
+	var ?prevPage:PageData;
+	var ?nextPage:PageData;
 };
 
 class ComicsMenuState extends MusicBeatState
 {
-	public var data:Array<Array<ComicData>> = [];
-	private var curChapter:Int = 0;
-	private var curSelected:Int = 0;
+	public var data:Array<ChapterData> = [];
 
 	private var textOptionArray = [];
 
 	override public function create()
 	{
 		//// GET THE CUTSCENES
+		var lastChapter:ChapterData = null;
+		var lastPage:PageData = null;
+		
 		#if MODS_ALLOWED
 		for (modDir in Paths.getModDirectories())
 		{
 			var rawList = Paths.getContent(Paths.mods(modDir + "/data/freeplaySonglist.txt"));
 			if (rawList == null) continue;
 
-			data.push([for (line in CoolUtil.listFromString(rawList)){
+			var pages:Array<PageData> = [];
+
+			var daChapter = {pages: pages, directory: modDir, prevChapter: lastChapter};
+			data.push(daChapter);
+
+			if (lastChapter != null)
+				lastChapter.nextChapter = daChapter;
+			
+			lastChapter = daChapter;
+
+			////
+			for (line in CoolUtil.listFromString(rawList)){
 				var shid = line.split(":");
 				
 				// TODO
@@ -44,24 +64,44 @@ class ComicsMenuState extends MusicBeatState
 				var name = shid[0];
 				var formattedName = Paths.formatToSongPath(name);
 
-				var daComicPath = Paths.mods('$modDir/images/cutscenes/$formattedName');
+				var daComicPath = Paths.mods('$modDir/images/cutscenes');
 				var num = 0;
-				while (true)
-					if (!Paths.exists('$daComicPath-${++num}.png'))
-						continue;
-				
-				{name: name, directory: modDir, formattedName: formattedName, imageAmount: num};
-			}]);
 
+				while (true){
+					var name = '$formattedName-${num+1}';
+					if (Paths.exists('$daComicPath/${name}.png')){
+						var newPage = {name: name, chapter: daChapter, prevPage: lastPage};
+
+						if (lastPage != null)
+							lastPage.nextPage = newPage;
+						lastPage = newPage;
+
+						pages.push(newPage);
+						num++;
+					}else
+						break;
+				}
+			}
 		}
 		#end
 
+		/*
+		for (sowy in data){
+			for (page in sowy.pages){
+				trace(sowy.directory, page.name);
+			}
+		}
+		*/
 
+		super.create();
+
+		MusicBeatState.switchState(new ComicReader(data[0].pages[0]));
 	}
 
 	override public function update(e)
 	{
 		if (controls.BACK) MusicBeatState.switchState(new GalleryMenuState());
+		super.update(e);
 	}
 }
 
@@ -79,14 +119,15 @@ class ComicReader extends MusicBeatState
 	var zoom:Float = 1;
 
 	var curPanel:FlxSprite;
-	static var panelPaths:Array<String>;
+	static var pageData:PageData;
 	static var panelNumber:Int = 0;
 
-	public function new(?PanelPaths:Array<String>)
+	public function new(?Page:PageData)
 	{
 		super();
-		if (PanelPaths != null)
-			panelPaths = PanelPaths;
+
+		if (Page != null)
+			pageData = Page;
 	}
 
 	override function add(Object:FlxBasic)
@@ -99,6 +140,10 @@ class ComicReader extends MusicBeatState
 
 	override function create()
 	{
+		#if !FLX_NO_MOUSE
+		FlxG.mouse.visible = true;
+		#end
+
 		//
 		camComic.bgColor = 0x00000000;
 
@@ -118,32 +163,45 @@ class ComicReader extends MusicBeatState
 		add(bg);
 
 		//
-		loadPanel("Taste For Blood");
+		//trace('loaded page: ${pageData.name}\n${pageData.prevPage == null ? 'no': 'has'} prev page\n${pageData.nextPage == null ? 'no': 'has'} next page');
+
+		Paths.currentModDirectory = pageData.chapter.directory;
+		loadPanel(pageData.name);
 
 		//
-		var tail = curPanel.y + curPanel.height + 24;
+		var tail = curPanel.y + curPanel.height + 24;	
 
-		var sep = new FlxText(-9, tail, 18, " - ", 36, true);
-		sep.setFormat("calibri", 18, 0xFFFFFFFF, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE, 0xFFFFFFFF);
-		sep.scrollFactor.set(1, 1);
-		add(sep);
-
-		var prevPage = new SowyTextButton(-60, tail, 50, "← Page", 18);
-		prevPage.label.setFormat("calibri", 18, 0xFFFECB00, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, 0xFFFECB00);
-		prevPage.scrollFactor.set(1, 1);
-		add(prevPage);
-
-		var nextPage = new SowyTextButton(10, tail, 50, "Page →", 18);
-		nextPage.label.setFormat("calibri", 18, 0xFFFECB00, FlxTextAlign.LEFT, FlxTextBorderStyle.NONE, 0xFFFECB00);
-		nextPage.scrollFactor.set(1, 1);
-		add(nextPage);
-
-		var listPage = new SowyTextButton(-40, tail + 24, 80, "Page List", 18);
-		listPage.label.setFormat("calibri", 18, 0xFFFECB00, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE, 0xFFFECB00);
+		var listPage = new SowyTextButton(curPanel.getMidpoint().x, tail, 0, "Page List", 18);
+		listPage.label.font = Paths.font("calibri.ttf");
+		listPage.x -= listPage.frameWidth * 0.5;
 		listPage.scrollFactor.set(1, 1);
 		add(listPage);
 
-		trace(sep.frameWidth, nextPage.frameWidth);
+		if (pageData.prevPage != null){
+			var prevPage = new SowyTextButton(0, tail, 0, "← Page", 18, function(){
+				pageData = pageData.prevPage;
+				MusicBeatState.resetState();
+			});
+			prevPage.label.font = Paths.font("calibri.ttf");
+
+			prevPage.x = curPanel.x;
+
+			prevPage.scrollFactor.set(1, 1);
+			add(prevPage);
+		}
+
+		if (pageData.nextPage != null){
+			var nextPage = new SowyTextButton(0,tail, 0, "Page →", 18, function(){
+				pageData = pageData.nextPage;
+				MusicBeatState.resetState();
+			});
+			nextPage.label.font = Paths.font("calibri.ttf");
+
+			nextPage.x = curPanel.x + curPanel.width - nextPage.width;
+
+			nextPage.scrollFactor.set(1, 1);
+			add(nextPage);
+		}
 
 		super.create();
 	}
@@ -190,7 +248,7 @@ class ComicReader extends MusicBeatState
 		var justPressed = FlxG.keys.justPressed;
 		var pressed = FlxG.keys.pressed;
 
-		if (controls.BACK) MusicBeatState.switchState(new ComicsMenuState());
+		if (controls.BACK) MusicBeatState.switchState(new GalleryMenuState());
 
 		//
 		var speed = pressed.SHIFT ? baseSpeed * 2 : baseSpeed;

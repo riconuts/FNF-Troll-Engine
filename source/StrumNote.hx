@@ -62,7 +62,7 @@ class StrumNote extends NoteObject
 		shader = colorSwap.shader;
 		super(x, y);
 		noteData = leData;
-		trace(noteData);
+		// trace(noteData);
 
 		var skin:String = 'NOTE_assets';
 		if(PlayState.SONG.arrowSkin != null && PlayState.SONG.arrowSkin.length > 1) skin = PlayState.SONG.arrowSkin;

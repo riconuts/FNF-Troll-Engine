@@ -3116,8 +3116,8 @@ class PlayState extends MusicBeatState
 		if(field==null){
 			if(note!=null)
 				field = getFieldFromNote(note);
-
 		}
+
 		var noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset);
 		//trace(noteDiff);
 
@@ -3507,18 +3507,11 @@ class PlayState extends MusicBeatState
 		//Dupe note remove
 		//field.spawnedNotes.forEachAlive(function(note:Note) {
 		for(note in field.spawnedNotes){
-			if(!note.alive)continue;
+			if(!note.alive) continue;
 			if (daNote != note && field.isPlayer && daNote.noteData == note.noteData && daNote.isSustainNote == note.isSustainNote && Math.abs(daNote.strumTime - note.strumTime) < 1) {
 				field.removeNote(note);
 			}
 		}
-
-		if (ClientPrefs.ghostTapping && !daNote.isSustainNote) // i missed this sound
-			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
-
-		combo = 0;
-		while (lastCombos.length > 0)
-			lastCombos.shift().kill();
 
 		if(callOnHScripts("preNoteMiss", [daNote, field]) == Globals.Function_Stop)
 			return;
@@ -3526,7 +3519,7 @@ class PlayState extends MusicBeatState
 		if(callOnLuas('preNoteMiss', [notes.members.indexOf(daNote), daNote.noteData, daNote.noteType, daNote.isSustainNote, daNote.ID]) == Globals.Function_Stop)
 			return;
 		#end
-		////
+		
 		if (daNote.noteScript!=null)
 		{
 			var script:Dynamic = daNote.noteScript;
@@ -3549,6 +3542,7 @@ class PlayState extends MusicBeatState
 				return;
 		}
 
+		////
 		if(!daNote.isSustainNote && daNote.unhitTail.length > 0){
 			for(tail in daNote.unhitTail){
 				tail.tooLate = true;
@@ -3557,24 +3551,6 @@ class PlayState extends MusicBeatState
 				health -= daNote.missHealth * healthLoss;
 			}
 		}
-		
-		health -= daNote.missHealth * healthLoss;
-		
-
-		if(instakillOnMiss)
-		{
-			vocals.volume = 0;
-			doDeathCheck(true);
-		}
-
-		//For testing purposes
-		//trace(daNote.missHealth);
-		songMisses++;
-		vocals.volume = 0;
-		if(!practiceMode) songScore -= 10;
-
-		totalPlayed++;
-		RecalculateRating();
 
 		if(!daNote.noMissAnimation)
 		{
@@ -3585,46 +3561,54 @@ class PlayState extends MusicBeatState
 			else if (chars.length == 0)
 				chars = field.characters;
 
-			if (combo > 10 && !chars.contains(gf) && gf.animOffsets.exists('sad'))
+			if (combo > 10 && chars.contains(gf) == false && gf.animOffsets.exists('sad'))
 			{
 				gf.playAnim('sad');
 				gf.specialAnim = true;
-			}		
+			}
 
 			for(char in chars){
-				if(char != null)
+				if(char != null && char.animTimer <= 0 && !char.voicelining)
 				{
-					if(char.hasMissAnimations){
-						if(char.animTimer <= 0 && !char.voicelining){
-							var daAlt = '';
-							if(daNote.noteType == 'Alt Animation') daAlt = '-alt';
+					var daAlt = (daNote.noteType == 'Alt Animation') ? '-alt' : '';
+					var animToPlay:String = singAnimations[Std.int(Math.abs(daNote.noteData))] + daAlt + 'miss';
 
-							var animToPlay:String = singAnimations[Std.int(Math.abs(daNote.noteData))] + daAlt + 'miss';
-							char.playAnim(animToPlay, true);
-						}
-					}else{
-						if (char.animTimer <= 0 && !char.voicelining)
-						{
-							var daAlt = '';
-							if (daNote.noteType == 'Alt Animation')
-								daAlt = '-alt';
+					char.playAnim(animToPlay, true);
 
-							var animToPlay:String = singAnimations[Std.int(Math.abs(daNote.noteData))] + daAlt + 'miss';
-							char.playAnim(animToPlay, true);
-							char.color = 0xFFC6A6FF;
-						}
-					}
-				}
+					if (!char.hasMissAnimations)
+						char.color = 0xFFC6A6FF;
+				}	
 			}
 		}
 
+		combo = 0;
+		while (lastCombos.length > 0)
+			lastCombos.shift().kill();
+		
+		health -= daNote.missHealth * healthLoss;	
 
+		songMisses++;
+		vocals.volume = 0;
+
+		if(!practiceMode) 
+			songScore -= 10;
+
+		totalPlayed++;
+		RecalculateRating();
+
+		if (ClientPrefs.ghostTapping && !daNote.isSustainNote) // i missed this sound
+			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
+
+		if(instakillOnMiss)
+			doDeathCheck(true);
+
+		////
 		callOnHScripts("noteMiss", [daNote, field]);
 		#if LUA_ALLOWED
 		callOnLuas('noteMiss', [notes.members.indexOf(daNote), daNote.noteData, daNote.noteType, daNote.isSustainNote, daNote.ID]);
 		#end
 		////
-		if (daNote.noteScript!=null)
+		if (daNote.noteScript != null)
 		{
 			var script:Dynamic = daNote.noteScript;
 
@@ -3643,23 +3627,6 @@ class PlayState extends MusicBeatState
 			#end
 				callScript(script, "noteMiss", [daNote, field]);
 		}
-
-
-/* 		//// KE SUSTAIN NOTES
-		var num = 0;
-		for (child in (daNote.isSustainNote ? daNote.parent.tail : daNote.tail)){
-			child.tooLate = true;
-			child.ignoreNote = true;
-			child.blockHit = true;
-			num++;
-		}
-
-		health -= 0.2;
-		if (num > 0){
-			totalPlayed += num;
-			songScore -= num * 10;
-		} */
-
 	}
 
 	function noteMissPress(direction:Int = 1):Void //You pressed a key when there was no notes to press for this key
@@ -3710,7 +3677,6 @@ class PlayState extends MusicBeatState
 		}
 
 		vocals.volume = 0;
-
 
 		callOnScripts('noteMissPress', [direction]);
 	}
@@ -4136,9 +4102,12 @@ class PlayState extends MusicBeatState
 		{
 			gf.dance();
 		}
-		for(field in playfields){
-			for(char in field.characters){
-				if(char!=gf){
+		for(field in playfields)
+		{
+			for(char in field.characters)
+			{
+				if(char!=gf)
+				{
 					if (curBeat % char.danceEveryNumBeats == 0
 						&& char.animation.curAnim != null
 						&& !char.animation.curAnim.name.startsWith('sing')

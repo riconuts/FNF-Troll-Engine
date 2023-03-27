@@ -144,7 +144,6 @@ class Cache
 
 			//
 			var shitToLoad = [for (k => v in uniqueMap){/*trace(k);*/ v;}];
-			trace('loading ${shitToLoad.length} items.');
 			
 			// TODO: figure out why this sometimes crashes
 
@@ -185,17 +184,18 @@ class Cache
 				}
 			});
 
+			trace('Loading ${shitToLoad.length} items with ${threadLimit} threads.');
+			
 			var threadArray:Array<Thread> = [for (i in 0...threadLimit){				
 				var thread = makeThread();
 				thread.sendMessage(shitToLoad.pop());
 				thread;
 			}];
-
-			trace("loading begin");
+			
 			while (true)
 			{
 				var msg:LoadingThreadMessage = Thread.readMessage(true);
-				trace(msg);
+				// trace(msg);
 
 				if (shitToLoad.length > 0) // send more shit
 				{

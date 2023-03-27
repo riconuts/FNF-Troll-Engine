@@ -17,8 +17,15 @@ class StartupState extends FlxState
 	public static var volumeDownKeys:Array<FlxKey> = [FlxKey.NUMPADMINUS, FlxKey.MINUS];
 	public static var volumeUpKeys:Array<FlxKey> = [FlxKey.NUMPADPLUS, FlxKey.PLUS];
 
-	function load():Void
+	static var loaded = false;
+
+	public static function load():Void
 	{
+		if (loaded)
+			return;
+
+		loaded = true;
+
 		#if html5
 		Paths.initPaths();
 		#end

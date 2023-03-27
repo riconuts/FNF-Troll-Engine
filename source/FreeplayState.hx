@@ -10,8 +10,6 @@ import flixel.system.FlxSound;
 import flixel.text.FlxText;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
-import lime.utils.Assets;
-import openfl.utils.Assets as OpenFlAssets;
 import sowy.TGTSquareButton;
 
 using StringTools;
@@ -100,7 +98,8 @@ class FreeplayState extends MusicBeatState
 						eX: FlxG.camera.scroll.x - 3, eY: FlxG.camera.scroll.y - 3,
 						eW: FlxG.width + 6, eH: FlxG.height + 6
 					};
-					
+
+					persistentUpdate = false;
 					playSong(songButton.metadata);
 				};
 			}			
@@ -226,9 +225,7 @@ class FreeplayState extends MusicBeatState
 		#end
 	}
 
-	public function playSong(metadata:SongMetadata){
-		persistentUpdate = false;
-
+	static public function playSong(metadata:SongMetadata){
 		Paths.currentModDirectory = metadata.folder;
 
 		var songLowercase:String = Paths.formatToSongPath(metadata.songName);
@@ -243,7 +240,8 @@ class FreeplayState extends MusicBeatState
 		}else
 			LoadingState.loadAndSwitchState(new PlayState());
 
-		FlxG.sound.music.volume = 0;
+		if (FlxG.sound.music != null)
+			FlxG.sound.music.volume = 0;
 	} 
 
 	override function closeSubState() 
@@ -319,10 +317,14 @@ class FreeplayState extends MusicBeatState
 		if (mouseWheel != 0)
 			yScroll -= mouseWheel * 160 * speed;
 
-		if (controls.UI_UP)
+
+
+		if (controls.UI_UP){
 			camFollow.y -= 20;
-		if (controls.UI_DOWN)
+		}
+		if (controls.UI_DOWN){
 			camFollow.y += 20;
+		}
 
 		camFollow.y = Math.max(minY, Math.min(camFollow.y + yScroll, maxY));
 
@@ -345,10 +347,6 @@ class FreeplayState extends MusicBeatState
 
 	public inline static function songImage(SongName:String)
 		return Paths.image("songs/" + Paths.formatToSongPath(SongName));
-}
-
-typedef PsychEngineWeekFile = {
-	var songs:Array<Array<Dynamic>>;
 }
 
 class SongMetadata
