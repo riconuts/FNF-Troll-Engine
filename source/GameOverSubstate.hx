@@ -90,6 +90,8 @@ class GameOverSubstate extends MusicBeatSubstate
 	}
 
 	var isFollowingAlready:Bool = false;
+	var isEnding:Bool = false;
+
 	override function update(elapsed:Float)
 	{
 		PlayState.instance.callOnScripts('onUpdate', [elapsed]);
@@ -100,9 +102,18 @@ class GameOverSubstate extends MusicBeatSubstate
 			camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
 		}
 
-		if (controls.ACCEPT)
+		if (controls.ACCEPT && !isEnding)
 		{
-			endBullshit();
+			isEnding = true;
+			boyfriend.playAnim('deathConfirm', true);
+			FlxG.sound.music.stop();
+			FlxG.sound.play(Paths.music(endSoundName));
+			new FlxTimer().start(0.7, function(tmr:FlxTimer)
+			{
+				FlxG.camera.fade(FlxColor.BLACK, 2, false, MusicBeatState.resetState);
+			});
+
+			PlayState.instance.callOnScripts('onGameOverConfirm', [true]);
 		}
 
 		if (controls.BACK)
@@ -145,24 +156,5 @@ class GameOverSubstate extends MusicBeatSubstate
 	override function beatHit()
 	{
 		super.beatHit();
-	}
-
-	var isEnding:Bool = false;
-
-	function endBullshit():Void
-	{
-		if (!isEnding)
-		{
-			isEnding = true;
-			boyfriend.playAnim('deathConfirm', true);
-			FlxG.sound.music.stop();
-			FlxG.sound.play(Paths.music(endSoundName));
-			new FlxTimer().start(0.7, function(tmr:FlxTimer)
-			{
-				FlxG.camera.fade(FlxColor.BLACK, 2, false, MusicBeatState.resetState);
-			});
-
-			PlayState.instance.callOnScripts('onGameOverConfirm', [true]);
-		}
 	}
 }

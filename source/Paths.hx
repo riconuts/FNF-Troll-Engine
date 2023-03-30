@@ -128,51 +128,11 @@ class Paths
 	}
 
 	static public var currentModDirectory:String = '';
-	static public var currentLevel:String;
-
-	static public function setCurrentLevel(name:String)
-	{
-		currentLevel = name.toLowerCase();
-	}
 
 	public static function getPath(file:String, ?type:AssetType, ?library:Null<String> = null)
 	{
-		/* Fuck them libraries 
-
-		if (library != null)
-			return getLibraryPath(file, library);
-		
-		if (currentLevel != null)
-		{
-			var levelPath:String = '';
-			if (currentLevel != 'shared')
-			{
-				levelPath = getLibraryPathForce(file, currentLevel);
-				if (OpenFlAssets.exists(levelPath, type))
-					return levelPath;
-			}
-
-			levelPath = getLibraryPathForce(file, "shared");
-			if (OpenFlAssets.exists(levelPath, type))
-				return levelPath;
-		}
-		*/
-
 		return getPreloadPath(file);
 	}
-
-	/*
-	static public function getLibraryPath(file:String, library = "preload")
-	{
-		return if (library == "preload" || library == "default") getPreloadPath(file); else getLibraryPathForce(file, library);
-	}
-
-	inline static function getLibraryPathForce(file:String, library:String)
-	{
-		var returnPath = '$library:assets/$library/$file';
-		return returnPath;
-	}
-	*/
 
 	inline public static function getPreloadPath(file:String = '')
 	{
@@ -266,7 +226,9 @@ class Paths
 		for (i in pathMap.get(dir))
 			Func(i);
 	}
+
 	#else
+
 	inline static public function iterateDirectory(Directory:String, Func){
 		if (!FileSystem.exists(Directory) || !FileSystem.isDirectory(Directory))
 			return;
@@ -280,11 +242,11 @@ class Paths
 	{
 		#if MODS_ALLOWED
 		var file:String = modsVideo(key);
+
 		if (FileSystem.exists(file))
-		{
 			return file;
-		}
 		#end
+
 		return 'assets/videos/$key.$VIDEO_EXT';
 	}
 
@@ -320,22 +282,6 @@ class Paths
 		return track(song, "Inst");
 	}
 
-	/*
-	inline static public function voicesAlt(song:String):Any
-	{
-		var songKey:String = '${formatToSongPath(song)}/VoicesAlt';
-		var voices = returnSound('songs', songKey);
-		return voices;
-	}
-
-	inline static public function instAlt(song:String):Any
-	{
-		var songKey:String = '${formatToSongPath(song)}/InstAlt';
-		var inst = returnSound('songs', songKey);
-		return inst;
-	}
-	*/
-
 	inline static public function image(key:String, ?library:String):FlxGraphic
 	{
 		// streamlined the assets process more
@@ -353,22 +299,8 @@ class Paths
 
 		if (FileSystem.exists(getPreloadPath(key)))
 			return File.getContent(getPreloadPath(key));
-
-		/*if (currentLevel != null)
-		{
-			var levelPath:String = '';
-			if (currentLevel != 'shared')
-			{
-				levelPath = getLibraryPathForce(key, currentLevel);
-				if (FileSystem.exists(levelPath))
-					return File.getContent(levelPath);
-			}
-
-			levelPath = getLibraryPathForce(key, 'shared');
-			if (FileSystem.exists(levelPath))
-				return File.getContent(levelPath);
-		}*/
 		#end
+
 		return Assets.getText(getPath(key, TEXT));
 	}
 
@@ -461,7 +393,7 @@ class Paths
 			return currentTrackedAssets.get(path);
 		}
 
-		trace('oh no, "$key" returned null nooooo.');
+		trace('oh no, image "$key" returned null nooooo.');
 		return null;
 	}
 
@@ -513,8 +445,7 @@ class Paths
 	static public function getText(key:String, ?ignoreMods:Bool = false):Null<String>
 	{
 		#if MODS_ALLOWED
-		if (ignoreMods != true){	
-			// dangerous shit right here
+		if (ignoreMods != true){
 			var modPath:String = Paths.modFolders(key);
 			if (FileSystem.exists(modPath))
 				return File.getContent(modPath);
