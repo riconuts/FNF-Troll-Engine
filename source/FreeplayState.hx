@@ -46,6 +46,7 @@ class FreeplayState extends MusicBeatState
 	function setCategory(id, name){
 		var catTitle = new FlxText(0, 50, FlxG.width, name, 32, true);
 		catTitle.setFormat(Paths.font("calibrib.ttf"), 32, 0xFFF4CC34, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE);
+		catTitle.underline = true;
 		catTitle.scrollFactor.set(1, 1);
 		
 		var category = new FreeplayCategory(catTitle);

@@ -294,7 +294,7 @@ class FunkinHScript extends FunkinScript
 		try{
 			interpreter.execute(parsed);
 			call('onCreate');
-			trace('Loaded script: $scriptName');
+			Sys.println('Loaded haxe script: $scriptName');
 		}catch(e:haxe.Exception){
 			Sys.println('${e.details()}');
 		}
@@ -322,7 +322,7 @@ class FunkinHScript extends FunkinScript
 
 	override public function call(func:String, ?parameters:Array<Dynamic>, ?extraVars:Map<String,Dynamic>):Dynamic
 	{
-		var returnValue:Dynamic = executeFunc(func, parameters, this, extraVars);
+		var returnValue:Dynamic = executeFunc(func, parameters, null, extraVars);
 		if (returnValue == null) return Function_Continue;
 
 		return returnValue;

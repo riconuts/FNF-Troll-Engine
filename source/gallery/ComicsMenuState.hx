@@ -1,5 +1,6 @@
 package gallery;
 
+import openfl.text.TextFormat;
 import flixel.group.FlxSpriteGroup;
 import flixel.group.FlxGroup;
 import haxe.io.Path;
@@ -113,8 +114,7 @@ class ComicReader extends MusicBeatState
 	var camComic = new FlxCamera();
 
 	var camFollow = new FlxPoint(); // goal position
-	var camFollowPos = new FlxPoint(); // real position
-	var camPosition = new FlxObject(); // displayed position
+	var camFollowPos = new FlxObject(); // displayed position
 
 	var zoom:Float = 1;
 
@@ -152,7 +152,7 @@ class ComicReader extends MusicBeatState
 		FlxG.cameras.add(camComic, true);
 
 		camComic.antialiasing = ClientPrefs.globalAntialiasing;
-		camComic.follow(camPosition, LOCKON, 1);
+		camComic.follow(camFollowPos, LOCKON, 1);
 
 		//
 		var bg = new FlxSprite().loadGraphic(Paths.image("menuBGDesat"));
@@ -173,6 +173,7 @@ class ComicReader extends MusicBeatState
 
 		var listPage = new SowyTextButton(curPanel.getMidpoint().x, tail, 0, "Page List", 18);
 		listPage.label.font = Paths.font("calibri.ttf");
+		listPage.label.underline = true;
 		listPage.x -= listPage.frameWidth * 0.5;
 		listPage.scrollFactor.set(1, 1);
 		add(listPage);
@@ -183,6 +184,7 @@ class ComicReader extends MusicBeatState
 				MusicBeatState.resetState();
 			});
 			prevPage.label.font = Paths.font("calibri.ttf");
+			prevPage.label.underline = true;
 
 			prevPage.x = curPanel.x;
 
@@ -191,11 +193,12 @@ class ComicReader extends MusicBeatState
 		}
 
 		if (pageData.nextPage != null){
-			var nextPage = new SowyTextButton(0,tail, 0, "Page →", 18, function(){
+			var nextPage = new SowyTextButton(0, tail, 0, "Page →", 18, function(){
 				pageData = pageData.nextPage;
 				MusicBeatState.resetState();
 			});
 			nextPage.label.font = Paths.font("calibri.ttf");
+			nextPage.label.underline = true;
 
 			nextPage.x = curPanel.x + curPanel.width - nextPage.width;
 
@@ -241,7 +244,7 @@ class ComicReader extends MusicBeatState
 		camFollow.set(mid.x, curPanel.height > FlxG.height ? 0 : mid.y);
 	}
 
-	var baseSpeed = 6;
+	var baseSpeed = 12;
 
 	override function update(elapsed:Float)
 	{
@@ -271,14 +274,14 @@ class ComicReader extends MusicBeatState
 		else
 			yScroll -= mouseWheel * speed * 8;
 
-		if (pressed.UP)
+		if (pressed.UP || pressed.W)
 			camFollow.y -= speed;
-		if (pressed.DOWN)
+		if (pressed.DOWN || pressed.S)
 			camFollow.y += speed;
 
-		if (pressed.LEFT)
+		if (pressed.LEFT || pressed.A)
 			camFollow.x = Math.max(minX, camFollow.x - speed);
-		if (pressed.RIGHT)
+		if (pressed.RIGHT || pressed.D)
 			camFollow.x = Math.min(maxX, camFollow.x + speed);
 		
 		camFollow.y = Math.max(minY, Math.min(camFollow.y + yScroll, maxY));
@@ -287,8 +290,7 @@ class ComicReader extends MusicBeatState
 
 		// update camera
 		var lerpVal = Math.min(1, elapsed * 6);
-		camFollowPos.set(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
-		camPosition.setPosition(Std.int(camFollowPos.x), Std.int(camFollowPos.y)); // pixel perfect!!!
+		camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
 		camComic.zoom = FlxMath.lerp(camComic.zoom, zoom, lerpVal);
 
 		super.update(elapsed);

@@ -555,7 +555,7 @@ class Character extends FlxSprite
 
 			var file = '$filePath.hscript';
 			if (Paths.exists(file)){
-				characterScript = FunkinHScript.fromFile(file, file, ["character" => this]);
+				characterScript = FunkinHScript.fromFile(file, file, ["this" => this]);
 				break;
 			}
 			#if LUA_ALLOWED
@@ -579,7 +579,14 @@ class Character extends FlxSprite
 		if (characterScript == null)
 			return returnVal;
 
-		var ret:Dynamic = characterScript.call(event, args, extraVars);
+		var ret:Dynamic;
+
+		if (characterScript is FunkinHScript){
+			var characterScript:FunkinHScript = cast characterScript;
+			ret = characterScript.executeFunc(event, args, this, extraVars); 
+		}else{
+			ret = characterScript.call(event, args, extraVars);
+		}
 
 		if (ret == Globals.Function_Halt){
 			ret = returnVal;
