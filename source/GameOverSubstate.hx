@@ -110,7 +110,9 @@ class GameOverSubstate extends MusicBeatSubstate
 			FlxG.sound.play(Paths.music(endSoundName));
 			new FlxTimer().start(0.7, function(tmr:FlxTimer)
 			{
-				FlxG.camera.fade(FlxColor.BLACK, 2, false, MusicBeatState.resetState);
+				FlxG.camera.fade(FlxColor.BLACK, 2, false, ()->{
+					return MusicBeatState.resetState();
+				});
 			});
 
 			PlayState.instance.callOnScripts('onGameOverConfirm', [true]);
