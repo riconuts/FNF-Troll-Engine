@@ -56,28 +56,28 @@ class PerspectiveModifier extends NoteModifier {
 		return offY;
 	}
 
-  public function getVector(pos:Vector3):Vector3{
-    var oX = pos.x;
-    var oY = pos.y;
+	public function getVector(pos:Vector3):Vector3{
+		var oX = pos.x;
+		var oY = pos.y;
 
-    var aspect = 1;
-    
-		var shit = pos.z / 720;
-    if(shit>0)shit=0;
+		var aspect = 1;
 
-    var ta = FastTan(fov/2);
-    var x = oX * aspect/ta;
-    var y = oY/ta;
-    var a = (near+far)/(near-far);
-    var b = 2*near*far/(near-far);
-    var z = (a*shit+b);
-    var returnedVector = new Vector3(x/z,y/z,z);
+		var shit = pos.z / 1280;
+		if(shit>0)shit=0;
 
-    return returnedVector;
-  }
+		var ta = FastTan(fov/2);
+		var x = oX * aspect/ta;
+		var y = oY/ta;
+		var a = (near+far)/(near-far);
+		var b = 2*near*far/(near-far);
+		var z = (a*shit+b);
+		var returnedVector = new Vector3(x/z,y/z,z);
 
-  override function isRenderMod()
-    return true;
+		return returnedVector;
+	}
+
+	override function isRenderMod()
+		return true;
 
 	override function getSubmods()
 	{
@@ -88,10 +88,10 @@ class PerspectiveModifier extends NoteModifier {
 
 	override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
 	{
-		var origin = new Vector3(FlxG.width / 2, FlxG.height / 2); // vertex origin
+ 		var origin = new Vector3(FlxG.width / 2, FlxG.height / 2); // vertex origin
 		var fieldPos = new Vector3(-getSubmodPercent("fieldX", player) / 100,
 			-getSubmodPercent("fieldY", player) / 100,
-			720
+			1280
 			+ getSubmodPercent("fieldZ", player)); // playfield pos
 			
 		
@@ -100,13 +100,13 @@ class PerspectiveModifier extends NoteModifier {
 		var rotated = rotateV3(originMod, getSubmodValue("fieldPitch", player) * FlxAngle.TO_RAD, getSubmodValue("fieldYaw", player) * FlxAngle.TO_RAD,
 			getSubmodValue("fieldRoll", player) * FlxAngle.TO_RAD); // rotate the vertex properly
 		var projected = getVector(rotated.subtract(fieldPos)); // perpsective projection
-		return projected.add(origin); // puts the vertex back to default pos
+		return projected.add(origin); // puts the vertex back to default pos 
 	}
 
 	override function modifyVert(beat:Float, vert:Vector3, idx:Int, sprite:FlxSprite, pos:Vector3, player:Int, data:Int):Vector3
 	{
 		var origin = new Vector3(FlxG.width/2, FlxG.height/2); // vertex origin
-		var fieldPos = new Vector3(-getSubmodPercent("fieldX", player) / 100, -getSubmodPercent("fieldY", player) / 100, 720 + getSubmodPercent("fieldZ", player)); // playfield pos
+		var fieldPos = new Vector3(-getSubmodPercent("fieldX", player) / 100, -getSubmodPercent("fieldY", player) / 100, 1280 + getSubmodPercent("fieldZ", player)); // playfield pos
 		var originMod = vert.add(pos).subtract(origin); // moves the vertex to the appropriate position on screen based on origin
 		var rotated = rotateV3(originMod, getSubmodValue("fieldPitch", player) * FlxAngle.TO_RAD, getSubmodValue("fieldYaw", player) * FlxAngle.TO_RAD, getSubmodValue("fieldRoll", player) * FlxAngle.TO_RAD); // rotate the vertex properly
 		var projected = getVector(rotated.subtract(fieldPos)); // perpsective projection
