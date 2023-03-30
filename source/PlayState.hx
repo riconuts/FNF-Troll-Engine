@@ -223,6 +223,8 @@ class PlayState extends MusicBeatState
 	}
 	public var disableModcharts:Bool = false;
 	public var practiceMode:Bool = false;
+	public var perfectMode:Bool = false;
+	public var instaRespawn:Bool = false;
 
 	public var botplaySine:Float = 0;
 	public var botplayTxt:FlxText;
@@ -470,9 +472,15 @@ class PlayState extends MusicBeatState
 		playOpponent = ClientPrefs.getGameplaySetting('opponentPlay', false);
 		instakillOnMiss = ClientPrefs.getGameplaySetting('instakill', false);
 		practiceMode = ClientPrefs.getGameplaySetting('practice', false);
+		perfectMode = ClientPrefs.getGameplaySetting('perfect', false);
+		instaRespawn = ClientPrefs.getGameplaySetting('instaRespawn', false);
 		cpuControlled = ClientPrefs.getGameplaySetting('botplay', false);
 		disableModcharts = ClientPrefs.getGameplaySetting('disableModcharts', false);
 
+		if(perfectMode){
+			practiceMode = false;
+			instakillOnMiss = true;
+		}
 		healthDrain = switch(ClientPrefs.getGameplaySetting('healthDrain', "Disabled")){
 			default: 0;
 			case "Basic": 0.00055;
@@ -2536,12 +2544,17 @@ class PlayState extends MusicBeatState
 				persistentUpdate = false;
 				persistentDraw = false;
 
-				openSubState(new GameOverSubstate(
-					boyfriend.getScreenPosition().x - boyfriend.positionArray[0],
-					boyfriend.getScreenPosition().y - boyfriend.positionArray[1],
-					camFollowPos.x,
-					camFollowPos.y
-				));
+				if(instaRespawn){
+					MusicBeatState.resetState(true);
+					return true;
+				}else{
+					openSubState(new GameOverSubstate(
+						boyfriend.getScreenPosition().x - boyfriend.positionArray[0],
+						boyfriend.getScreenPosition().y - boyfriend.positionArray[1],
+						camFollowPos.x,
+						camFollowPos.y
+					));
+				}
 
 				#if desktop
 				// Game Over doesn't get his own variable because it's only used here
@@ -3009,7 +3022,8 @@ class PlayState extends MusicBeatState
 			{
 				var percent:Float = ratingPercent;
 				if(Math.isNaN(percent)) percent = 0;
-				Highscore.saveScore(SONG.song, songScore, percent);
+				if(!playOpponent && !disableModcharts)
+					Highscore.saveScore(SONG.song, songScore, percent);
 			}
 			#end
 
@@ -4243,8 +4257,16 @@ class PlayState extends MusicBeatState
 	}
 
 	public var ratingName:String = '?';
-	public var ratingPercent:Float;
+	public var ratingPercent(default,set):Float;
 	public var ratingFC:String;
+
+	function set_ratingPercent(val:Float){
+		if(perfectMode && val<1){
+			health = -100;
+			doDeathCheck(true);
+		}
+		return ratingPercent = val;
+	}
 	public function RecalculateRating() {
 		setOnScripts('score', songScore);
 		setOnScripts('misses', songMisses);

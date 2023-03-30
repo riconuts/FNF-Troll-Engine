@@ -103,16 +103,23 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		var option:GameplayOption = new GameplayOption('Practice Mode', 'practice', 'bool', false);
 		optionsArray.push(option);
 
+		var option:GameplayOption = new GameplayOption('Perfect Mode', 'perfect', 'bool', false);
+		optionsArray.push(option);
+
+		var option:GameplayOption = new GameplayOption('Instant Respawn', 'instaRespawn', 'bool', false);
+		optionsArray.push(option);
+
 		var option:GameplayOption = new GameplayOption('Botplay', 'botplay', 'bool', false);
+		optionsArray.push(option);
+
+		var option:GameplayOption = new GameplayOption('Opponent Mode', 'opponentPlay', 'bool', false);
 		optionsArray.push(option);
 
 		//// Niixx
 		var option:GameplayOption = new GameplayOption('bitch baby pussy mode', 'disableModcharts', 'bool', false);
 		optionsArray.push(option);
 
-		//// Niixx
-		var option:GameplayOption = new GameplayOption('Opponent Mode', 'opponentPlay', 'bool', false);
-		optionsArray.push(option);
+
 	}
 
 	public function getOptionByName(name:String)

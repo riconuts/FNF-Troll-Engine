@@ -163,6 +163,8 @@ class StrumNote extends NoteObject
 
 	public function playAnim(anim:String, ?force:Bool = false, ?note:Note) {
 		animation.play(anim, force);
+		centerOrigin();
+		centerOffsets();
 		updateZIndex();
 		if(animation.curAnim == null || animation.curAnim.name == 'static') {
 			colorSwap.hue = 0;

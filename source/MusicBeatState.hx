@@ -1,5 +1,6 @@
 package;
 
+import flixel.addons.transition.FlxTransitionableState;
 import flixel.system.FlxSound;
 import flixel.addons.ui.FlxUIState;
 
@@ -120,7 +121,11 @@ class MusicBeatState extends FlxUIState
 		FlxG.switchState(nextState); // just because im too lazy to goto every instance of switchState and change it to a FlxG call
 	}
 
-	public static function resetState() {
+	public static function resetState(?skipTrans:Bool = false) {
+		if(skipTrans){
+			FlxTransitionableState.skipNextTransIn = true;
+			FlxTransitionableState.skipNextTransOut = true;
+		}
 		FlxG.resetState();
 	}
 
