@@ -3561,7 +3561,7 @@ class PlayState extends MusicBeatState
 			else if (chars.length == 0)
 				chars = field.characters;
 
-			if (combo > 10 && chars.contains(gf) == false && gf.animOffsets.exists('sad'))
+			if (combo > 10 && gf!=null && chars.contains(gf) == false && gf.animOffsets.exists('sad'))
 			{
 				gf.playAnim('sad');
 				gf.specialAnim = true;
