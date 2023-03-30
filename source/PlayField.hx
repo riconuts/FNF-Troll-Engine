@@ -243,7 +243,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.zIndex, Obj2.zIndex);
 	}
 
-	public function spawnSplash(data:Int, ?splashSkin:String, ?note:Note){
+	public function spawnSplash(data:Int, splashSkin:String, ?note:Note){
 		var skin:String = splashSkin;
 		var hue:Float = ClientPrefs.arrowHSV[data % 4][0] / 360;
 		var sat:Float = ClientPrefs.arrowHSV[data % 4][1] / 100;
