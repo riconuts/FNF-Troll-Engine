@@ -18,6 +18,8 @@ class GameOverSubstate extends MusicBeatSubstate
 	public var boyfriend:Boyfriend;
 	public var deathSound:FlxSound;
 
+	public var defaultCamZoom:Float = 1;
+
 	public var camFollow:FlxPoint;
 	public var camFollowPos:FlxObject;
 	public var updateCamera:Bool = false;
@@ -87,6 +89,11 @@ class GameOverSubstate extends MusicBeatSubstate
 		camFollowPos = new FlxObject(0, 0, 1, 1);
 		camFollowPos.setPosition(FlxG.camera.scroll.x + (FlxG.camera.width* 0.5), FlxG.camera.scroll.y + (FlxG.camera.height* 0.5));
 		add(camFollowPos);
+
+		if (PlayState.instance != null && PlayState.instance.stage != null)
+			defaultCamZoom = PlayState.instance.stage.stageData.defaultZoom;
+		else
+			defaultCamZoom = FlxG.camera.zoom;
 	}
 
 	var isFollowingAlready:Bool = false;
@@ -95,12 +102,12 @@ class GameOverSubstate extends MusicBeatSubstate
 	override function update(elapsed:Float)
 	{
 		PlayState.instance.callOnScripts('onUpdate', [elapsed]);
-		super.update(elapsed);
 
 		if(updateCamera) {
 			var lerpVal:Float = CoolUtil.boundTo(elapsed * 0.6, 0, 1);
 			camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
-		}
+			FlxG.camera.zoom = FlxMath.lerp(FlxG.camera.zoom, defaultCamZoom, CoolUtil.boundTo(elapsed * 2.2, 0, 1));
+		}	
 
 		if (controls.ACCEPT && !isEnding)
 		{
@@ -152,6 +159,7 @@ class GameOverSubstate extends MusicBeatSubstate
 		if (FlxG.sound.music.playing)
 			Conductor.songPosition = FlxG.sound.music.time;
 		
+		super.update(elapsed);
 		PlayState.instance.callOnScripts('onUpdatePost', [elapsed]);
 	}
 
