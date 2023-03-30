@@ -172,7 +172,7 @@ class ComicReader extends MusicBeatState
 		var tail = curPanel.y + curPanel.height + 24;	
 
 		var listPage = new SowyTextButton(curPanel.getMidpoint().x, tail, 0, "Page List", 18);
-		listPage.label.font = Paths.font("calibri.ttf");
+		listPage.label.font = Paths.font("consola.ttf");
 		listPage.label.underline = true;
 		listPage.x -= listPage.frameWidth * 0.5;
 		listPage.scrollFactor.set(1, 1);
@@ -183,10 +183,10 @@ class ComicReader extends MusicBeatState
 				pageData = pageData.prevPage;
 				MusicBeatState.resetState();
 			});
-			prevPage.label.font = Paths.font("calibri.ttf");
+			prevPage.label.font = Paths.font("consola.ttf");
 			prevPage.label.underline = true;
 
-			prevPage.x = curPanel.x;
+			prevPage.x = curPanel.x + 18;
 
 			prevPage.scrollFactor.set(1, 1);
 			add(prevPage);
@@ -197,10 +197,10 @@ class ComicReader extends MusicBeatState
 				pageData = pageData.nextPage;
 				MusicBeatState.resetState();
 			});
-			nextPage.label.font = Paths.font("calibri.ttf");
+			nextPage.label.font = Paths.font("consola.ttf");
 			nextPage.label.underline = true;
 
-			nextPage.x = curPanel.x + curPanel.width - nextPage.width;
+			nextPage.x = curPanel.x + curPanel.width - nextPage.width - 18;
 
 			nextPage.scrollFactor.set(1, 1);
 			add(nextPage);
@@ -244,7 +244,7 @@ class ComicReader extends MusicBeatState
 		camFollow.set(mid.x, curPanel.height > FlxG.height ? 0 : mid.y);
 	}
 
-	var baseSpeed = 12;
+	var baseSpeed = 8;
 
 	override function update(elapsed:Float)
 	{
@@ -292,6 +292,9 @@ class ComicReader extends MusicBeatState
 		var lerpVal = Math.min(1, elapsed * 6);
 		camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
 		camComic.zoom = FlxMath.lerp(camComic.zoom, zoom, lerpVal);
+		
+		//	Causes some rendering glitches with the fade transition?
+		//	camComic.pixelPerfectRender = subState == null && camComic.zoom == 1;
 
 		super.update(elapsed);
 	}
