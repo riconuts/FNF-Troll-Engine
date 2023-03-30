@@ -243,6 +243,27 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.zIndex, Obj2.zIndex);
 	}
 
+	public function spawnSplash(data:Int, ?splashSkin:String, ?note:Note){
+		var skin:String = splashSkin;
+		var hue:Float = ClientPrefs.arrowHSV[data % 4][0] / 360;
+		var sat:Float = ClientPrefs.arrowHSV[data % 4][1] / 100;
+		var brt:Float = ClientPrefs.arrowHSV[data % 4][2] / 100;
+
+		if (note != null)
+		{
+			skin = note.noteSplashTexture;
+			hue = note.noteSplashHue;
+			sat = note.noteSplashSat;
+			brt = note.noteSplashBrt;
+		}
+
+		var splash:NoteSplash = grpNoteSplashes.recycle(NoteSplash);
+		splash.setupNoteSplash(0, 0, data, skin, hue, sat, brt);
+		splash.handleRendering = false;
+		grpNoteSplashes.add(splash);
+		return splash;
+	}
+
 	override public function update(elapsed:Float){
 		noteField.modNumber = modNumber;
 		noteField.cameras = cameras;
@@ -568,17 +589,7 @@ class NoteField extends FlxObject
 		}
 		
 		var drawing:Array<RenderObject> = []; // stuff to render
-
-		for (note in holds)
-		{
-			if (!note.alive || !note.visible)
-				continue;
-			var object = drawHold(note);
-			if (object == null)
-				continue;
-			//object.zIndex -= 0.1;
-			drawing.push(object);
-		}
+		var lookupMap:Map<Any, RenderObject> = [];
 
 		for (obj in field.strumNotes)
 		{
@@ -587,8 +598,8 @@ class NoteField extends FlxObject
 			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, ['perspectiveDONTUSE'], obj.vec3Cache);
 			var object = drawNote(obj, pos);
 			if(object==null)continue;
-			object.zIndex -= 1;
-			//object.zIndex += (obj.animation!=null && obj.animation.curAnim != null && obj.animation.curAnim.name == 'confirm')?1:0;
+			object.zIndex += (obj.animation!=null && obj.animation.curAnim != null && obj.animation.curAnim.name == 'confirm')?1:0;
+			lookupMap.set(obj, object);
 			drawing.push(object);
 		}
 
@@ -598,6 +609,19 @@ class NoteField extends FlxObject
 			var object = drawNote(note, notePos.get(note));
 			if(object==null)continue;
 			object.zIndex = notePos.get(note).z + note.zIndex;
+			lookupMap.set(note, object);
+			drawing.push(object);
+		}
+
+		for (note in holds)
+		{
+			if (!note.alive || !note.visible)
+				continue;
+			var object = drawHold(note);
+			if (object == null)
+				continue;
+			object.zIndex -= 1;
+			lookupMap.set(note, object);
 			drawing.push(object);
 		}
 
@@ -610,6 +634,7 @@ class NoteField extends FlxObject
 			if (object == null)
 				continue;
 			object.zIndex += 2;
+			lookupMap.set(obj, object);
 			drawing.push(object);
 		}
 		
@@ -623,6 +648,7 @@ class NoteField extends FlxObject
 			if (object == null)
 				continue;
 			object.zIndex += 2;
+			lookupMap.set(obj, object);
 			drawing.push(object);
 		}
 
@@ -632,7 +658,7 @@ class NoteField extends FlxObject
 		});
 
 		super.draw();
-		
+
 		if(drawing.length>0){
 			for (object in drawing)
 			{
