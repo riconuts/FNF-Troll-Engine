@@ -330,20 +330,20 @@ class Note extends NoteObject
 			hitsoundDisabled = true;
 			//if(ClientPrefs.downScroll) flipY = true;
 
-			offsetX += width* 0.5;
+			//offsetX += width* 0.5;
 			copyAngle = false;
 
 			animation.play(colArray[noteData % 4] + 'holdend');
 
 			updateHitbox();
 
-			offsetX -= width* 0.5;
+			//offsetX -= width* 0.5;
 
 			if (prevNote.isSustainNote)
 			{
 				prevNote.animation.play(colArray[prevNote.noteData % 4] + 'hold');
 
-				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * PlayState.instance.songSpeed;
+				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * PlayState.instance.songSpeed * 100;
 
 				
 				prevNote.updateHitbox();
@@ -352,7 +352,7 @@ class Note extends NoteObject
 			}
 		}
 		defScale.copyFrom(scale);
-		x += offsetX;
+		//x += offsetX;
 	}
 
 	public static var quantShitCache = new Map<String, String>();

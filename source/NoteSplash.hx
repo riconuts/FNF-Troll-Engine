@@ -45,10 +45,10 @@ class NoteSplash extends NoteObject
 		colorSwap.hue = hueColor;
 		colorSwap.saturation = satColor;
 		colorSwap.brightness = brtColor;
-		offset.set(10 * scale.x, 10 * scale.y);
+/* 		offset.set(10 * scale.x, 10 * scale.y);
 
 		offset.x -= (Note.swagWidth / 2) - width/2;
-		offset.y -= (Note.swagWidth / 2) - height/2;
+		offset.y -= (Note.swagWidth / 2) - height/2; */
 
 		var animNum:Int = FlxG.random.int(1, 2);
 		animation.play('note' + note + '-' + animNum, true);

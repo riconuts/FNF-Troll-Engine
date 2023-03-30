@@ -18,31 +18,27 @@ class ReverseModifier extends NoteModifier {
 	override function getOrder()return REVERSE;
     override function getName()return 'reverse';
 
-    public function getReverseValue(dir:Int, player:Int, ?scrolling=false){
-        var suffix = '';
-        if(scrolling==true)suffix='Scroll';
+    public function getReverseValue(dir:Int, player:Int){
         //var receptors = modMgr.receptors[player]; // TODO: rewrite for playfield system
 		// but for now we can just comment it out and set kNum to 4 since rn the key count never goes > 4
         var kNum = 4;
         var val:Float = 0;
         if(dir>=kNum/2)
-            val += getSubmodValue("split" + suffix,player);
+            val += getSubmodValue("split" ,player);
 
         if((dir%2)==1)
-            val += getSubmodValue("alternate" + suffix,player);
+            val += getSubmodValue("alternate" ,player);
 
         var first = kNum/4;
         var last = kNum-1-first;
 
         if(dir>=first && dir<=last)
-            val += getSubmodValue("cross" + suffix,player);
+            val += getSubmodValue("cross" ,player);
         
 
-        if(suffix=='')
-            val += getValue(player) + getSubmodValue("reverse" + Std.string(dir),player);
-        else
-            val += getSubmodValue("reverse" + suffix,player);
-        
+
+        val += getValue(player) + getSubmodValue("reverse" + Std.string(dir),player);
+
 
         if(getSubmodValue("unboundedReverse",player)==0){
             val %=2;
@@ -55,9 +51,6 @@ class ReverseModifier extends NoteModifier {
         return val;
     }
 
-    public function getScrollReversePerc(dir:Int, player:Int)
-        return getReverseValue(dir,player) * 100;
-
 	override function shouldExecute(player:Int,val:Float)
         return true;
 
@@ -68,24 +61,29 @@ class ReverseModifier extends NoteModifier {
 	{
         var perc = getReverseValue(data, player);
 		var shift = CoolUtil.scale(perc, 0, 1, 50, FlxG.height - 150);
-		var mult = CoolUtil.scale(perc, 0, 1, 1, -1);
 		shift = CoolUtil.scale(getSubmodValue("centered", player), 0, 1, shift, (FlxG.height/2) - 56);
+		var upscrollY =  (Note.swagWidth / 2) + shift + visualDiff;
+		var downscrollY = (Note.swagWidth / 2) + shift - visualDiff;
+		pos.y = FlxMath.lerp(upscrollY, downscrollY, perc);
 
-		
-		pos.y = shift + (visualDiff * mult);
-/*         if((obj is Note)){
-            var o:Note = cast obj;
-            if(!o.isSustainNote)
-                pos.z += Note.swagWidth/2;
-        }else
-            pos.z += Note.swagWidth / 2;
- */
+		if ((obj is NoteObject))
+		{
+			var nO:NoteObject = cast obj;
+			pos.y += nO.offsetY;
+		}
+
+		if ((obj is Note))
+		{
+			var n:Note = cast obj;
+			pos.y += n.typeOffsetY;
+		}
+        
 
 		return pos;
 	}
 
     override function getSubmods(){
-        var subMods:Array<String> = ["cross", "split", "alternate", "reverseScroll", "crossScroll", "splitScroll", "alternateScroll", "centered", "unboundedReverse"];
+        var subMods:Array<String> = ["cross", "split", "alternate", "centered", "unboundedReverse"];
 
 		for (i in 0...4)
 		{

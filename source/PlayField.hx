@@ -309,7 +309,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 							receptor.playAnim("confirm", true);
 
 						daNote.holdingTime = Conductor.songPosition - daNote.strumTime;
-						var regrabTime = daNote.isRoll?0.5:0.35;
+						var regrabTime = daNote.isRoll?0.5:0.1;
 						if(isHeld)
 							daNote.tripTimer = 1;
 						else
@@ -474,48 +474,6 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	}
 }
 
-class Perspective
-{
-	static var fov = Math.PI / 2;
-	static var near = 0;
-	static var far = 2;
-
-	static function FastTan(rad:Float) // thanks schmoovin
-	{
-		return FlxMath.fastSin(rad) / FlxMath.fastCos(rad);
-	}
-
-	public static function getVector(curZ:Float, pos:Vector3):Vector3
-	{
-		var halfOffset = new Vector3(FlxG.width / 2, FlxG.height / 2);
-		pos = pos.subtract(halfOffset);
-		var oX = pos.x;
-		var oY = pos.y;
-
-		// should I be using a matrix?
-		// .. nah im sure itll be fine just doing this manually
-		// instead of doing a proper perspective projection matrix
-
-		// var aspect = FlxG.width/FlxG.height;
-		var aspect = 1;
-
-		var shit = curZ - 1;
-		if (shit > 0)
-			shit = 0; // thanks schmovin!!
-
-		var ta = FastTan(fov / 2);
-		var x = oX  / ta;
-		var y = oY / ta;
-		var a = (near + far) / (near - far);
-		var b = 2 * near * far / (near - far);
-		var z = (a * shit + b);
-		// trace(shit, curZ, z, x/z, y/z);
-		var returnedVector = new Vector3(x / z, y / z, z).add(halfOffset);
-
-		return returnedVector;
-	}
-
-}
 class NoteField extends FlxObject
 {
 	var holdSubdivisions:Int = ClientPrefs.holdSubdivs + 1;
@@ -587,42 +545,27 @@ class NoteField extends FlxObject
 			if (songSpeed != 0)
 			{
 				var speed = songSpeed * daNote.multSpeed * modManager.getValue("xmod", modNumber);
-				var visPos = modManager.getVisPos(Conductor.songPosition, daNote.strumTime , speed);
+				var diff = Conductor.songPosition - daNote.strumTime ;
+				var visPos = modManager.getVisPosD(diff, speed);
 				if (visPos > drawDist)continue;
-				var diff = daNote.strumTime - Conductor.songPosition;
 				if(daNote.wasGoodHit && daNote.tail.length > 0 && daNote.unhitTail.length > 0){
 					diff = 0;
 					visPos = 0;
 					continue; // stops it from drawing lol
 				}
-				if (daNote.isSustainNote){
-					if (!smoothHolds){
-						var pos = modManager.getPos(visPos, diff, curDecBeat, daNote.noteData,
-							modNumber, daNote, ['perspectiveDONTUSE'],
-							daNote.vec3Cache);
-						notePos.set(daNote, pos);
-					}
-					holds.push(daNote);
-				}else{
+				if (!daNote.isSustainNote){
 					var pos = modManager.getPos(visPos, diff, curDecBeat, daNote.noteData, modNumber,
 						daNote, ['perspectiveDONTUSE'], daNote.vec3Cache); // perspectiveDONTUSE is excluded because its code is done in the modifyVert function
-							// but the pos is still used by cool holds (For now? I'd like to make them use modified verts too lol)
 					notePos.set(daNote, pos);
 					taps.push(daNote);
+				}else{
+					var pos = modManager.getPos(visPos, diff, curDecBeat, daNote.noteData, modNumber, daNote, ['perspectiveDONTUSE'], daNote.vec3Cache);
+					notePos.set(daNote, pos);
+					holds.push(daNote);
 				}
 			}
 
 		}
-/* 
-		taps.sort(function(Obj1:Note, Obj2:Note){
-			if(!notePos.exists(Obj1))
-				return 1;
-			
-			if (!notePos.exists(Obj2))
-				return -1;
-
-			return FlxSort.byValues(FlxSort.ASCENDING, notePos.get(Obj1).z + Obj1.zIndex, notePos.get(Obj2).z + Obj2.zIndex);
-		}); */
 		
 		var drawing:Array<RenderObject> = []; // stuff to render
 
@@ -633,7 +576,7 @@ class NoteField extends FlxObject
 			var object = drawHold(note);
 			if (object == null)
 				continue;
-			object.zIndex -= 0.1;
+			//object.zIndex -= 0.1;
 			drawing.push(object);
 		}
 
@@ -644,7 +587,8 @@ class NoteField extends FlxObject
 			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, ['perspectiveDONTUSE'], obj.vec3Cache);
 			var object = drawNote(obj, pos);
 			if(object==null)continue;
-			object.zIndex += (obj.animation!=null && obj.animation.curAnim != null && obj.animation.curAnim.name == 'confirm')?1:0;
+			object.zIndex -= 1;
+			//object.zIndex += (obj.animation!=null && obj.animation.curAnim != null && obj.animation.curAnim.name == 'confirm')?1:0;
 			drawing.push(object);
 		}
 
@@ -661,7 +605,7 @@ class NoteField extends FlxObject
 		{
 			if (!obj.alive || !obj.visible)
 				continue;
-			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, ['perspectiveDONTUSE'], obj.vec3Cache);
+			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, ['perspectiveDONTUSE']);
 			var object = drawNote(obj, pos);
 			if (object == null)
 				continue;
@@ -676,7 +620,8 @@ class NoteField extends FlxObject
 				continue;
 			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, ['perspectiveDONTUSE']);
 			var object = drawNote(obj, pos);
-			if(object==null)continue;
+			if (object == null)
+				continue;
 			object.zIndex += 2;
 			drawing.push(object);
 		}
@@ -686,22 +631,23 @@ class NoteField extends FlxObject
 			return FlxSort.byValues(FlxSort.ASCENDING, Obj1.zIndex, Obj2.zIndex);
 		});
 
+		super.draw();
+		
 		if(drawing.length>0){
-			for (camera in cameras)
+			for (object in drawing)
 			{
-				if (camera.alpha == 0 || !camera.visible)
+				if (object == null)
 					continue;
-
-
-				for (object in drawing)
+				var shader:Dynamic = object.shader;
+				var alpha = object.alpha;
+				var vertices = object.vertices;
+				var uvData = object.uvData;
+				shader.alpha.value = [alpha];
+				for (camera in cameras)
 				{
-					if(object==null)continue;
-					var shader:Dynamic = object.shader;
-					var alpha = object.alpha;
-					var vertices = object.vertices;
-					var uvData = object.uvData;
+					if (camera.alpha == 0 || !camera.visible)
+						continue;
 					shader.alpha.value = [alpha * camera.alpha];
-
 					// maybe some optimization so that it'll only do a beginShaderFill/endFill if the previous drawn shader != this shader
 					camera.canvas.graphics.beginShaderFill(shader);
 					camera.canvas.graphics.drawTriangles(vertices, null, uvData);
@@ -710,7 +656,7 @@ class NoteField extends FlxObject
 			}
 		}
 
-        super.draw();
+        
     }
 
 	function getPoints(hold:Note, ?wid:Float, ?diff:Float){ // stolen from schmovin'
@@ -749,12 +695,12 @@ class NoteField extends FlxObject
 		return [p1.add(off1), p1.add(off2), p1];
 	}
 	
-	function drawHold(hold:Note, ?cameras:Array<FlxCamera>):Null<RenderObject>
+	var crotchet = Conductor.getCrotchetAtTime(0) / 4;
+	function drawHold(hold:Note):Null<RenderObject>
 	{
 		if(hold.animation.curAnim==null)return null;
 		if(hold.scale==null)return null; 
-		if(cameras==null)cameras = this.cameras;
-		
+
 		var verts = [];
 		var uv = [];
 		
@@ -784,12 +730,10 @@ class NoteField extends FlxObject
 		})();
 
 		var speed = songSpeed * hold.multSpeed * modManager.getValue("xmod", modNumber);
-		var crotchet = Conductor.getCrotchetAtTime(0) / 4;
+		
 		var basePos = modManager.getPos(modManager.getVisPosD(0, speed), 0, curDecBeat, hold.noteData, modNumber, hold, ['perspectiveDONTUSE']);
-		// i have no other idea on how to fix the clipping being retarded
-		// i'd like a better solution but this is best i've got atm
-		var clipOffset = CoolUtil.scale(basePos.y, 50, FlxG.height - 150, crotchet, -crotchet);
-		var strumDiff = (Conductor.songPosition - hold.strumTime) - clipOffset;
+		
+		var strumDiff = (Conductor.songPosition - hold.strumTime);
 
 		var zIndex:Float = basePos.z;
 		for(sub in 0...holdSubdivisions){
@@ -798,7 +742,7 @@ class NoteField extends FlxObject
 			var strumSub = crotchet / holdSubdivisions;
 			var strumOff = (strumSub * sub);
 			var scale:Float = 1;
-			var fuck = strumDiff + (clipOffset/2);
+			var fuck = strumDiff;
 
 			if((hold.wasGoodHit || hold.parent.wasGoodHit) && !hold.tooLate){
 				scale = 1 - ((fuck + crotchet) / crotchet);
@@ -813,15 +757,7 @@ class NoteField extends FlxObject
 
 			var top = lastMe == null ? getPoints(hold, topWidth, strumDiff + strumOff) : lastMe;
 			var bot = getPoints(hold, botWidth, strumDiff + strumOff + strumSub);
-			for(vert in bot)
-				vert.x += (hold.origin.x + hold.offsetX - hold.offset.x);
-			
-			
-			if (lastMe==null){
-				for (vert in top)
-					vert.x += (hold.origin.x + hold.offsetX - hold.offset.x);
-				
-			}
+
 			lastMe = bot;
 
 			var quad:Array<Vector3> = [
@@ -830,8 +766,6 @@ class NoteField extends FlxObject
 				bot[0],
 				bot[1]
 			];
-
-
 
 			verts = verts.concat([
 				quad[0].x, quad[0].y,
@@ -848,22 +782,13 @@ class NoteField extends FlxObject
 		var vertices = new Vector<Float>(verts.length, false, cast verts);
 		var uvData = new Vector<Float>(uv.length, false, uv);
 
-		var shader = hold.shader != null ? hold.shader : hold.graphic.shader;
-
+		var shader = hold.shader != null ? hold.shader : new FlxShader();
+		if (shader != hold.shader)
+			hold.shader = shader;
+		
 		shader.bitmap.input = hold.graphic.bitmap;
 		shader.bitmap.filter = hold.antialiasing ? LINEAR : NEAREST;
 
-/* 			for (camera in cameras)
-		{
-			if (camera.alpha == 0)
-				continue;
-			shader.alpha.value = [alpha * camera.alpha];
-			camera.canvas.graphics.beginShaderFill(shader);
-			camera.canvas.graphics.drawTriangles(vertices, null, uvData);
-			camera.canvas.graphics.endFill();
-		} */
-		
-		//shader.alpha.value = [alpha];
 		return {
 			shader: shader,
 			alpha: alpha, 
@@ -928,14 +853,11 @@ class NoteField extends FlxObject
 		return offY;
 	}
 
-	function drawNote(sprite:NoteObject, pos:Vector3, ?cameras:Array<FlxCamera>):Null<RenderObject>
+	function drawNote(sprite:NoteObject, pos:Vector3):Null<RenderObject>
 	{
 		if (!sprite.visible || !sprite.alive)
 			return null;
-		
-
-		if (cameras == null)
-			cameras = this.cameras;
+	
 
 		var render = false;
 		for (camera in cameras)
@@ -963,23 +885,20 @@ class NoteField extends FlxObject
 		for (idx => vert in quad)
 		{
 			var vert = rotateV3(vert, 0, 0, FlxAngle.TO_RAD * sprite.angle);
-			vert = modManager.modifyVertex(curDecBeat, vert, idx, sprite, pos, modNumber, sprite.noteData);
-			vert.x += sprite.origin.x;
-			vert.y += sprite.origin.y;
+			vert.x += sprite.offsetX;
+			vert.y += sprite.offsetY;
 
+			if ((sprite is Note))
+			{
+				var n:Note = cast sprite;
+				vert.x += n.typeOffsetX;
+				vert.y += n.typeOffsetY;
+			}
+			vert = modManager.modifyVertex(curDecBeat, vert, idx, sprite, pos, modNumber, sprite.noteData);
 			quad[idx] = vert;
 
 		}
 		
-
-		pos.x += sprite.offsetX;
-		pos.y += sprite.offsetY;
-
-		pos.x -= sprite.offset.x;
-		pos.y -= sprite.offset.y;
-
-
-
 		var frameRect = sprite.frame.frame;
 		var sourceBitmap = sprite.graphic.bitmap;
 
@@ -1011,21 +930,12 @@ class NoteField extends FlxObject
 			rightUV, bottomUV,
 		]);
 
-		var shader = sprite.shader != null ? sprite.shader : sprite.graphic.shader;
+		var shader = sprite.shader != null ? sprite.shader : new FlxShader();
+		if(shader!=sprite.shader)sprite.shader = shader;
 
 		shader.bitmap.input = sprite.graphic.bitmap;
 		shader.bitmap.filter = sprite.antialiasing ? LINEAR : NEAREST;
-
-/* 		for (camera in cameras)
-		{
-			if(camera.alpha == 0)continue;
-			shader.alpha.value = [alpha * camera.alpha];
-			camera.canvas.graphics.beginShaderFill(shader);
-			camera.canvas.graphics.drawTriangles(vertices, null, uvtDat);
-			camera.canvas.graphics.endFill();
-		}
-		shader.alpha.value = [alpha]; */
-
+		
 		return {
 			shader: shader,
 			alpha: alpha,
