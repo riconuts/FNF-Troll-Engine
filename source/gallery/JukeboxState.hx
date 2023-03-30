@@ -195,6 +195,17 @@ class JukeboxState extends MusicBeatState {
 
 		FlxG.autoPause = false;
         FlxG.mouse.visible = true;
+
+        updateDiscord();
+    }
+
+    inline function updateDiscord(){
+        #if desktop
+        if (FlxG.sound.music.playing)
+            DiscordClient.changePresence('Listening to: ${songData[idx].songName}', null);
+        else
+            DiscordClient.changePresence('In the Menus', null);
+        #end
     }
 
     override function update(elapsed:Float){
@@ -232,11 +243,15 @@ class JukeboxState extends MusicBeatState {
                         FlxG.sound.music.pause();
 						if (MusicBeatState.menuVox != null)
 							MusicBeatState.menuVox.pause();
+
+                        updateDiscord();
                     }
                     else{
                         FlxG.sound.music.resume();
 						if (MusicBeatState.menuVox != null)
 							MusicBeatState.menuVox.resume();
+
+                        updateDiscord();
                     }
                 }
             }else{
@@ -322,9 +337,7 @@ class JukeboxState extends MusicBeatState {
             }
 		}
 
-        #if desktop
-        DiscordClient.changePresence('Listening to: ${songData[idx].songName}', null);
-        #end
+        updateDiscord();
     }
 
     function changeSong(newIdx:Int){
