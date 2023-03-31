@@ -495,19 +495,6 @@ class PlayState extends MusicBeatState
 		camOverlay = new FlxCamera();
 		camOther = new FlxCamera();
 
-		if (ClientPrefs.midScroll) // fucking modchart system i just wanted to be funny
-		{
-			// I HATE THIS :sob:
-			// IS THIS LIKE CENTERING IT TO THE CENTER OF THE SCREEN VERTICALLY?????
-			if (ClientPrefs.downScroll){
-				camHUD.y += 6;
-				camHUD.y -= (camHUD.height - 112) * 0.5;
-				camHUD.height += Math.ceil(-camHUD.y);
-			}else{
-				camHUD.y -= 50;
-				camHUD.y += (camHUD.height - 112) * 0.5;
-			}
-		}
 
 		camHUD.bgColor.alpha = 0; 
 		camOverlay.bgColor.alpha = 0;
@@ -3051,10 +3038,11 @@ class PlayState extends MusicBeatState
 
 					cancelMusicFadeTween();
 
-					if(!ClientPrefs.getGameplaySetting('practice', false) && !ClientPrefs.getGameplaySetting('botplay', false)) {
-						if (SONG.validScore && ChapterData.curChapter != null){
-							Highscore.saveWeekScore(ChapterData.curChapter.directory, campaignScore);
-
+					if (ChapterData.curChapter != null && !playOpponent ){
+						if(!ClientPrefs.getGameplaySetting('practice', false) && !ClientPrefs.getGameplaySetting('botplay', false)) {
+							if (SONG.validScore && !disableModcharts)
+								Highscore.saveWeekScore(ChapterData.curChapter.directory, campaignScore);
+							
 							StoryMenuState.weekCompleted.set(ChapterData.curChapter.directory, true);
 							FlxG.save.data.weekCompleted = StoryMenuState.weekCompleted;
 
