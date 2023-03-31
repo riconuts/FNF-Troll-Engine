@@ -1,5 +1,8 @@
 package scripts;
 
+import sys.io.File;
+import sys.FileSystem;
+import flixel.addons.display.FlxRuntimeShader;
 #if !macro
 import flixel.util.FlxColor;
 import flixel.FlxG;
@@ -97,10 +100,22 @@ class FunkinHScript extends FunkinScript
 		set("FlxG", flixel.FlxG);
 		set("state", flixel.FlxG.state);
 		set("FlxSprite", flixel.FlxSprite);
-		set("NoteObject", NoteObject);
 		set("FlxCamera", flixel.FlxCamera);
-		set("PlayField", PlayField);
-		set("NoteField", PlayField.NoteField);
+
+		set("newShader", function(fragFile:String = null, vertFile:String = null){ // returns a FlxRuntimeShader but with file names lol
+			var frag = fragFile==null?null:Paths.modsShaderFragment(fragFile);
+			var vert = vertFile==null?null:Paths.modsShaderVertex(vertFile);
+			if(FileSystem.exists(frag))
+				frag = File.getContent(frag);
+			else
+				frag = null;
+
+			if (FileSystem.exists(vert))
+				vert = File.getContent(vert);
+			else
+				vert = null;
+			return new FlxRuntimeShader(frag, vert);
+		});
 
 		set("FlxMath", flixel.math.FlxMath);
 		set("FlxSound", FlxSound);
@@ -120,6 +135,7 @@ class FunkinHScript extends FunkinScript
 			fromString: FlxColor.fromString,
 			fromRGB: FlxColor.fromRGB
 		});
+		set("FlxRuntimeShader", FlxRuntimeShader);
 		set("FlxTween", FlxTween);
 		set("FlxEase", FlxEase);
 		set("FlxSave", flixel.util.FlxSave); // should probably give it 1 save instead of giving it FlxSave
@@ -193,11 +209,6 @@ class FunkinHScript extends FunkinScript
 
 		});
 
-		set("importScript", function(){
-			// unimplemented lol
-			throw new haxe.exceptions.NotImplementedException();
-		});
-
 		for(variable => arg in defaultVars){
 			set(variable, arg);
 		}
@@ -214,25 +225,17 @@ class FunkinHScript extends FunkinScript
 			var spr = new FlxSprite(x, y);
 			spr.antialiasing = ClientPrefs.globalAntialiasing;
 
-			if(image != null && image.length > 0){
-				/*
-				switch(spriteType)
-				{
-					case "texture" | "textureatlas" | "tex":
-						spr.frames = AtlasFrameMaker.construct(image);
-					case "texture_noaa" | "textureatlas_noaa" | "tex_noaa":
-						spr.frames = AtlasFrameMaker.construct(image, null, true);
-					case "packer" | "packeratlas" | "pac":
-						spr.frames = Paths.getPackerAtlas(image);
-					default:*/
-						spr.frames = Paths.getSparrowAtlas(image);
-				//}
-			}
+			if(image != null && image.length > 0)
+				spr.frames = Paths.getSparrowAtlas(image);
+			
 
 			return spr;
 		});
 
 		// FNF-specific things
+		set("NoteObject", NoteObject);
+		set("PlayField", PlayField);
+		set("NoteField", PlayField.NoteField);
 		set("Paths", Paths);
 		set("AttachedSprite", AttachedSprite);
 		set("AttachedText", AttachedText);

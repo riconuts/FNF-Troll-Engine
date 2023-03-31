@@ -239,6 +239,7 @@ class PlayState extends MusicBeatState
 	public var timeBar:FlxBar;
 
 	public var camGame:FlxCamera;
+	public var camStageUnderlay:FlxCamera; // retarded
 	public var camHUD:FlxCamera;
 	public var camOverlay:FlxCamera; // shit that should go above all else and not get affected by camHUD changes, but still below camOther (pause menu, etc)
 	public var camOther:FlxCamera;
@@ -335,6 +336,7 @@ class PlayState extends MusicBeatState
 
 		var color = FlxColor.fromString(stageData.bg_color);
 		camGame.bgColor = color != null ? color : FlxColor.BLACK;
+		
 
 		BF_X = stageData.boyfriend[0];
 		BF_Y = stageData.boyfriend[1];
@@ -494,13 +496,15 @@ class PlayState extends MusicBeatState
 		camHUD = new FlxCamera();
 		camOverlay = new FlxCamera();
 		camOther = new FlxCamera();
+		camStageUnderlay = new FlxCamera();
 
-
+		camStageUnderlay.bgColor.alpha = 0; 
 		camHUD.bgColor.alpha = 0; 
 		camOverlay.bgColor.alpha = 0;
 		camOther.bgColor.alpha = 0;
 
 		FlxG.cameras.reset(camGame);
+		FlxG.cameras.add(camStageUnderlay, false);
 		FlxG.cameras.add(camHUD, false);
 		FlxG.cameras.add(camOverlay, false);
 		FlxG.cameras.add(camOther, false);
@@ -723,11 +727,6 @@ class PlayState extends MusicBeatState
 		#end
 
 		// After all characters being loaded, it makes then invisible 0.01s later so that the player won't freeze when you change characters
-
-		cameraPoints = [sectionCamera];
-
-		// moveCamera(gf != null ? gf : dad);
-		moveCameraSection(SONG.notes[0]);
 
 		//// LOAD SCRIPTS
 
@@ -987,7 +986,7 @@ class PlayState extends MusicBeatState
 		stageOpacity.makeGraphic(1,1,0xFFFFFFFF);
 		stageOpacity.color = 0xFF000000;
 		stageOpacity.alpha = 1 - ClientPrefs.stageOpacity;
-
+		stageOpacity.cameras=[camStageUnderlay]; // just to force it above camGame but below camHUD
 		stageOpacity.screenCenter();
 		stageOpacity.scale.set(FlxG.width * 100, FlxG.height * 100);
 		stageOpacity.scrollFactor.set();
