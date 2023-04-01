@@ -331,7 +331,8 @@ class Shader
 			message += (type == gl.VERTEX_SHADER) ? " compiling vertex shader" : " compiling fragment shader";
 			message += "\n" + shaderInfoLog;
 			message += "\n" + source;
-			if (compileStatus == 0) throw message;
+			if (compileStatus == 0)
+				trace(message);
 			else if (shaderInfoLog != null) Log.debug(message);
 		}
 
@@ -365,7 +366,8 @@ class Shader
 		{
 			var message = "Unable to initialize the shader program";
 			message += "\n" + gl.getProgramInfoLog(program);
-			throw message;
+            trace(message);
+			//throw message;
 		}
 
 		return program;
