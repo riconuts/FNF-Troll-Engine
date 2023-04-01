@@ -98,6 +98,7 @@ class Main extends Sprite
 				break;
 			}else if (arg.contains("debug")){
 				PlayState.chartingMode = true;
+				initialState = SongSelectState;
 			}
 		}
 		#end

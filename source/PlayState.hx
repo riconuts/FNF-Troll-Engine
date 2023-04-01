@@ -179,8 +179,7 @@ class PlayState extends MusicBeatState
 
 		displayedHealth = health;
 
-		if(instakillOnMiss)
-			doDeathCheck(value < health);
+		doDeathCheck(value < health);
 
 		return health;
 	}
@@ -1280,6 +1279,7 @@ class PlayState extends MusicBeatState
 			if (introPath != null)
 				shitToLoad.push({path: introPath});
 		}
+
 		Cache.loadWithList(shitToLoad);
 
 		// Do the countdown.
@@ -2924,7 +2924,7 @@ class PlayState extends MusicBeatState
 
 		updateTime = false;
 
-		// FlxG.sound.music.volume = 0;
+		FlxG.sound.music.volume = 0;
 		FlxG.sound.music.pause();
 
 		vocals.volume = 0;
@@ -3050,8 +3050,8 @@ class PlayState extends MusicBeatState
 						}
 					}
 
-					MusicBeatState.playMenuMusic(1, true);
 					MusicBeatState.switchState(new StoryMenuState());
+					MusicBeatState.playMenuMusic(1, true);
 				}
 				else
 				{
@@ -3079,9 +3079,9 @@ class PlayState extends MusicBeatState
 
 				if(FlxTransitionableState.skipNextTransIn)
 					CustomFadeTransition.nextCamera = null;
-
-				MusicBeatState.playMenuMusic(1, true);
+				
 				MusicBeatState.switchState(new FreeplayState());
+				MusicBeatState.playMenuMusic(1, true);
 			}
 		}
 	}
@@ -3550,15 +3550,9 @@ class PlayState extends MusicBeatState
 				tail.tooLate = true;
 				tail.blockHit = true;
 				tail.ignoreNote = true;
-				//health -= daNote.missHealth * healthLoss;
+				health -= daNote.missHealth * healthLoss;
 			}
-			health -= (daNote.missHealth * healthLoss) * ((daNote.holdingTime  - daNote.sustainLength) / 1000);
-			// the miss damage is multiplied by how many seconds are left on the hold
-			// so if you miss a hold with 3 seconds left on it, you'll take 3x the damage
-			// but if you miss one with half a second on it, you'll only take half the damage
-		}else
-			health -= daNote.missHealth * healthLoss;	
-		
+		}
 
 		if(!daNote.noMissAnimation)
 		{
@@ -3593,7 +3587,7 @@ class PlayState extends MusicBeatState
 		while (lastCombos.length > 0)
 			lastCombos.shift().kill();
 		
-		
+		health -= daNote.missHealth * healthLoss;	
 
 		songMisses++;
 		vocals.volume = 0;
@@ -4255,11 +4249,9 @@ class PlayState extends MusicBeatState
 	public var ratingFC:String;
 
 	function set_ratingPercent(val:Float){
-		if(perfectMode){
-			if (val < 1){
-				health = -100;
-				doDeathCheck(true);
-			}
+		if(perfectMode && val<1){
+			health = -100;
+			doDeathCheck(true);
 		}
 		return ratingPercent = val;
 	}
@@ -4368,7 +4360,8 @@ class PlayState extends MusicBeatState
 
 				// 0 chance for Gitaroo Man easter egg
 
-				if(FlxG.sound.music != null) {
+				if(FlxG.sound.music != null) 
+				{
 					FlxG.sound.music.pause();
 					vocals.pause();
 					for (track in tracks)

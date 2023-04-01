@@ -158,13 +158,13 @@ class MusicBeatState extends FlxUIState
 	}
 
 	// tgt
-	public static var menuMusic:flash.media.Sound;
+	public static var menuMusic:openfl.media.Sound;
 	public static var menuVox:FlxSound; // jukebox
 
 	public static var menuLoopFunc = function(){
 		trace("menu song ended, looping");
 
-		FlxG.sound.playMusic(Paths.music('freakyMenu'), FlxG.sound.music.volume, true);
+		FlxG.sound.playMusic(menuMusic != null ? menuMusic : Paths.music('freakyMenu'), FlxG.sound.music.volume, true);
 
 		Conductor.changeBPM(180);
 	}; 
@@ -181,8 +181,7 @@ class MusicBeatState extends FlxUIState
 			}
 			gallery.JukeboxState.playIdx = 0;
 
-			// menuMusic = FlxG.sound.cache("assets/music/freakyMenu.ogg"); // please work
-			Paths.music('freakyMenu');
+			menuMusic = Paths.music('freakyMenu');
 
 			FlxG.sound.playMusic(Paths.music('freakyIntro'), volume, false);
 			FlxG.sound.music.onComplete = menuLoopFunc;

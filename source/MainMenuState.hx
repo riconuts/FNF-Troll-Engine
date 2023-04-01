@@ -69,9 +69,11 @@ class MainMenuState extends MusicBeatState
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
 		#end
+
 		#if !FLX_NO_MOUSE
 		FlxG.mouse.visible = true;
 		#end
+
 		debugKeys = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
 
 		FlxG.camera.bgColor = FlxColor.BLACK;
@@ -171,6 +173,8 @@ class MainMenuState extends MusicBeatState
 		add(versionShit);
 
 		changeItem();
+
+		MusicBeatState.playMenuMusic();
 
 		super.create();
 	}

@@ -3,15 +3,15 @@ package scripts;
 import sys.io.File;
 import sys.FileSystem;
 import flixel.addons.display.FlxRuntimeShader;
-#if !macro
+
 import flixel.util.FlxColor;
 import flixel.FlxG;
 import flixel.system.FlxSound;
 import flixel.tweens.*;
+import flixel.math.FlxMath;
 
 import lime.utils.Assets;
 import lime.app.Application;
-#end
 
 import hscript.*;
 import scripts.Globals.*;
@@ -130,8 +130,19 @@ class FunkinHScript extends FunkinScript
 		set("FlxMath", flixel.math.FlxMath);
 		set("FlxSound", FlxSound);
 		set("FlxTimer", flixel.util.FlxTimer);
-		set("FlxColor", { // same case as maps?
+		set("FlxColor", {
+			// These aren't part of FlxColor but i thought they could be useful
 			toRGBArray: function(color:FlxColor){return [color.red, color.green, color.blue];},
+			lerp: function(from:FlxColor, to:FlxColor, ratio:Float){
+				return FlxColor.fromRGBFloat(
+					FlxMath.lerp(from.redFloat, to.redFloat, ratio),
+					FlxMath.lerp(from.greenFloat, to.greenFloat, ratio),
+					FlxMath.lerp(from.blueFloat, to.blueFloat, ratio),
+					FlxMath.lerp(from.alphaFloat, to.alphaFloat, ratio)
+				);
+			},
+						
+			////
 			setHue: function(color:FlxColor, hue){
 				color.hue = hue;
 				return color;
@@ -175,8 +186,10 @@ class FunkinHScript extends FunkinScript
 			// i would LIKE to do like.. flixel.util.* but idk if I can get everything in a namespace
 			var classSplit:Array<String> = className.split(".");
 			var daClassName = classSplit[classSplit.length-1]; // last one
+
 			if (daClassName == '*'){
 				var daClass = Type.resolveClass(className);
+
 				while(classSplit.length > 0 && daClass==null){
 					daClassName = classSplit.pop();
 					daClass = Type.resolveClass(classSplit.join("."));
