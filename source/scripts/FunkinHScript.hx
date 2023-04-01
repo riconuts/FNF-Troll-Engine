@@ -103,18 +103,28 @@ class FunkinHScript extends FunkinScript
 		set("FlxCamera", flixel.FlxCamera);
 
 		set("newShader", function(fragFile:String = null, vertFile:String = null){ // returns a FlxRuntimeShader but with file names lol
-			var frag = fragFile==null?null:Paths.modsShaderFragment(fragFile);
-			var vert = vertFile==null?null:Paths.modsShaderVertex(vertFile);
-			if(FileSystem.exists(frag))
-				frag = File.getContent(frag);
-			else
-				frag = null;
+			var runtime:FlxRuntimeShader = new FlxRuntimeShader();
 
-			if (FileSystem.exists(vert))
-				vert = File.getContent(vert);
-			else
-				vert = null;
-			return new FlxRuntimeShader(frag, vert);
+			try{
+				var frag = fragFile==null?null:Paths.modsShaderFragment(fragFile);
+				var vert = vertFile==null?null:Paths.modsShaderVertex(vertFile);
+				if(FileSystem.exists(frag))
+					frag = File.getContent(frag);
+				else
+					frag = null;
+
+				if (FileSystem.exists(vert))
+					vert = File.getContent(vert);
+				else
+					vert = null;
+				
+				var shader = new FlxRuntimeShader(frag, vert);
+				runtime = shader;
+			}catch(e:Dynamic){
+				trace("Shader compilation error:" + e.message);
+			}
+
+			return runtime;
 		});
 
 		set("FlxMath", flixel.math.FlxMath);
