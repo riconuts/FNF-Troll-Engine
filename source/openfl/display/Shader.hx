@@ -332,7 +332,7 @@ class Shader
 			message += "\n" + shaderInfoLog;
 			message += "\n" + source;
 			if (compileStatus == 0)
-				trace(message);
+				throw message;
 			else if (shaderInfoLog != null) Log.debug(message);
 		}
 
@@ -342,33 +342,36 @@ class Shader
 	@:noCompletion private function __createGLProgram(vertexSource:String, fragmentSource:String):GLProgram
 	{
 		var gl = __context.gl;
+        var program = gl.createProgram();
+        try {
+            var vertexShader = __createGLShader(vertexSource, gl.VERTEX_SHADER);
+            var fragmentShader = __createGLShader(fragmentSource, gl.FRAGMENT_SHADER);
 
-		var vertexShader = __createGLShader(vertexSource, gl.VERTEX_SHADER);
-		var fragmentShader = __createGLShader(fragmentSource, gl.FRAGMENT_SHADER);
 
-		var program = gl.createProgram();
+            // Fix support for drivers that don't draw if attribute 0 is disabled
+            for (param in __paramFloat)
+            {
+                if (param.name.indexOf("Position") > -1 && StringTools.startsWith(param.name, "openfl_"))
+                {
+                    gl.bindAttribLocation(program, 0, param.name);
+                    break;
+                }
+            }
 
-		// Fix support for drivers that don't draw if attribute 0 is disabled
-		for (param in __paramFloat)
-		{
-			if (param.name.indexOf("Position") > -1 && StringTools.startsWith(param.name, "openfl_"))
-			{
-				gl.bindAttribLocation(program, 0, param.name);
-				break;
-			}
-		}
+            gl.attachShader(program, vertexShader);
+            gl.attachShader(program, fragmentShader);
+            gl.linkProgram(program);
 
-		gl.attachShader(program, vertexShader);
-		gl.attachShader(program, fragmentShader);
-		gl.linkProgram(program);
-
-		if (gl.getProgramParameter(program, gl.LINK_STATUS) == 0)
-		{
-			var message = "Unable to initialize the shader program";
-			message += "\n" + gl.getProgramInfoLog(program);
-            trace(message);
-			//throw message;
-		}
+            if (gl.getProgramParameter(program, gl.LINK_STATUS) == 0)
+            {
+                var message = "Unable to initialize the shader program";
+                message += "\n" + gl.getProgramInfoLog(program);
+                throw message;
+                //throw message;
+            }
+        }catch(e:Dynamic){
+            trace(e.message);
+        }
 
 		return program;
 	}
