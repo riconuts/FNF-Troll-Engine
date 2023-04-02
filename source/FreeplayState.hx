@@ -293,7 +293,7 @@ class FreeplayState extends MusicBeatState
 	var maxY:Float = 0;
 	override function update(elapsed:Float)
 	{
-		hintText.x -= 64*elapsed;
+		hintText.x -= 64 * elapsed;
 		if (hintText.x < (FlxG.camera.scroll.x - hintText.width))
 			hintText.x = FlxG.camera.scroll.x + FlxG.width;
 
@@ -318,13 +318,12 @@ class FreeplayState extends MusicBeatState
 		if (mouseWheel != 0)
 			yScroll -= mouseWheel * 160 * speed;
 
-
-
+		var yuh = elapsed / (1/60);
 		if (controls.UI_UP){
-			camFollow.y -= 20;
+			camFollow.y -= 25*yuh;
 		}
 		if (controls.UI_DOWN){
-			camFollow.y += 20;
+			camFollow.y += 25*yuh;
 		}
 
 		camFollow.y = Math.max(minY, Math.min(camFollow.y + yScroll, maxY));

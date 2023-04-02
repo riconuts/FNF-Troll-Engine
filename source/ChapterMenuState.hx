@@ -19,15 +19,10 @@ class ChapterMenuState extends MusicBeatState{
 	var songText:FlxText;
 	var scoreText:FlxText;
 
-	// recycle bin
-	var songTxtArray:Array<FlxText> = [];
-	var scoreTxtArray:Array<FlxText> = [];
-
 	var totalSongTxt:FlxText;
 	var totalScoreTxt:FlxText;
 
 	// values used for positioning and shith
-	var sowyStr:String = "sowy";
 	var halfScreen:Float = 1280* 0.5;
 	var startY:Float = 0;
 
@@ -52,12 +47,10 @@ class ChapterMenuState extends MusicBeatState{
 		FlxG.mouse.visible = true;
 		#end
 
-		if (cameFromStoryMenu){
+		if (cameFromStoryMenu)
 			FlxTransitionableState.skipNextTransIn = true;
-		}else{
-			if (FlxTransitionableState.skipNextTransIn)
-				CustomFadeTransition.nextCamera = null;
-		}
+		else if (FlxTransitionableState.skipNextTransIn)
+			CustomFadeTransition.nextCamera = null;
 
 		super.create();
 
@@ -72,11 +65,12 @@ class ChapterMenuState extends MusicBeatState{
 		coverArt.updateHitbox();
 		add(coverArt);
 
-		chapterText = new FlxText(0, 0, 1, sowyStr, 32);
+		chapterText = new FlxText(coverArt.x, coverArt.y + coverArt.height + 4, coverArt.width, chapData.name, 32);
 		chapterText.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE, FlxColor.WHITE);
 		add(chapterText);
 
-		cornerLeftText = new SowyTextButton(15, 720, 0, "← BACK", 32, close);
+		//
+		cornerLeftText = new SowyTextButton(15, 720, 0, "← BACK", 32, goBack);
 		cornerLeftText.label.setFormat(Paths.font("calibri.ttf"), 32, 0xFFF4CC34, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE);
 		add(cornerLeftText);
 
@@ -88,7 +82,7 @@ class ChapterMenuState extends MusicBeatState{
 		cornerLeftText.y = cornerRightText.y -= cornerRightText.height + 15;
 
 		//// SONGS - HI-SCORE
-		halfScreen = 1280* 0.5;
+		halfScreen = FlxG.width * 0.5;
 		startY = coverArt.y + 48;
 
 		songText = new FlxText(halfScreen, startY, 0, "SONGS", 32);
@@ -100,56 +94,36 @@ class ChapterMenuState extends MusicBeatState{
 		scoreText.x -= scoreText.width + 15;
 		add(scoreText);
 
-		// TOTAL - TOTAL SCORE
-		totalSongTxt = new FlxText(halfScreen, 0, 0, "CHAPTER", 32);
-		totalSongTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
+		// SONG NAME - SONG SCORE
+		var songAmount:Int = chapData.songs.length;
 
-		totalScoreTxt = new FlxText(1205, 0, 0, Std.string(Highscore.getWeekScore(ChapterData.curChapter.directory)), 32);
-		totalScoreTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
-		totalScoreTxt.x -= totalScoreTxt.width + 15;
-
-		add(totalSongTxt);
-		add(totalScoreTxt);
-
-		/////////
-
-		//// Update menu
-		chapterText.setPosition(coverArt.x, coverArt.y + coverArt.height + 4);
-		chapterText.fieldWidth = coverArt.width;
-		chapterText.text = chapData.name;
-
-		// Make a text boxes for every song.
-		var songAmount:Int = 0;
-
-		for (songName in chapData.songs)
+		for (idx in 0...songAmount)
 		{
-			var yPos = startY + (songAmount + 2) * 48;
+			var yPos = startY + (idx + 2) * 48;
+			var songName = chapData.songs[idx];
 
 			var newSongTxt = new FlxText(halfScreen, yPos, 0, songName, 32);
 			newSongTxt.setFormat(Paths.font("calibri.ttf"), 32, 0xFFF4CC34, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE);
+			add(newSongTxt);
 
 			var newScoreTxt = new FlxText(1205, yPos, 0, '' + Highscore.getScore(songName), 32);
 			newScoreTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
 			newScoreTxt.x -= newScoreTxt.width + 15;
-
-			add(newSongTxt);
 			add(newScoreTxt);
-
-			songAmount++;
-		}
-		// Hide the rest of the previously created texts
-		for (i in songAmount...songTxtArray.length)
-		{
-			var songTxt = songTxtArray[songAmount];
-			var scoreTxt = scoreTxtArray[songAmount];
-			songTxt.visible = scoreTxt.visible = false;
 		}
 
-		// Accomodate the total week score text
-		totalSongTxt.y = totalScoreTxt.y = startY + (songAmount + 2) * 48;
+		// CHAPTER - TOTAL CHAPTER SCORE
+		totalSongTxt = new FlxText(halfScreen, startY + (songAmount + 2) * 48, 0, "CHAPTER", 32);
+		totalSongTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
+		add(totalSongTxt);
+
+		totalScoreTxt = new FlxText(1205, totalSongTxt.y, 0, Std.string(Highscore.getWeekScore(ChapterData.curChapter.directory)), 32);
+		totalScoreTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
+		totalScoreTxt.x -= totalScoreTxt.width + 15;
+		add(totalScoreTxt);
 	}
 
-	function close()
+	function goBack()
 	{
 		FlxTransitionableState.skipNextTransOut = true;
 
@@ -161,7 +135,7 @@ class ChapterMenuState extends MusicBeatState{
 	override function update(elapsed:Float)
 	{
 		if (controls.BACK)
-			close();
+			goBack();
 		else if (controls.ACCEPT)
 			playWeek();
 		else if (flixel.FlxG.keys.justPressed.CONTROL)
@@ -170,9 +144,12 @@ class ChapterMenuState extends MusicBeatState{
 		super.update(elapsed);
 	}
 
-	public function playWeek(){
-		if (chapData == null)
+	public function playWeek()
+	{
+		if (chapData == null){
+			trace("No chapter data!");
 			return;
+		}
 
 		Paths.currentModDirectory = chapData.directory;
 		ChapterData.curChapter = chapData;
@@ -184,8 +161,6 @@ class ChapterMenuState extends MusicBeatState{
 		PlayState.SONG = Song.loadFromJson(PlayState.storyPlaylist[0].toLowerCase(), PlayState.storyPlaylist[0].toLowerCase());
 		PlayState.campaignScore = 0;
 		PlayState.campaignMisses = 0;
-
-		flixel.FlxG.state.destroySubStates = true;
 
 		LoadingState.loadAndSwitchState(new PlayState(), true);
 		//FreeplayState.destroyFreeplayVocals();

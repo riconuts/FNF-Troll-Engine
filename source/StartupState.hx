@@ -104,7 +104,7 @@ class StartupState extends FlxState
 				step = 1;
 			case 1:
 				load();
-				//TitleState.load();
+				TitleState.load();
 				
 				var waitTime = 1.5 - Sys.cpuTime();
 				if (waitTime > 0) Sys.sleep(waitTime);

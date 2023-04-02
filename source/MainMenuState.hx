@@ -149,10 +149,10 @@ class MainMenuState extends MusicBeatState {
         else
             selected += val;
 
-        if(selected >= menuItems.members.length)
+        if(selected >= optionShit.length)
             selected = 0; 
         else if(selected < 0)
-            selected = menuItems.members.length-1;
+            selected = optionShit.length-1;
     }
     
 	function sortByOrder(wat:Int, Obj1:ZSprite, Obj2:ZSprite):Int
