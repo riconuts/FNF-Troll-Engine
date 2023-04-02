@@ -90,7 +90,7 @@ class DiscordClient
 			state: state,
 
 			largeImageKey: "app-logo",// largeImageKey,
-			// largeImageText: "Engine Version: " + MainMenuState.psychEngineVersion,
+			// largeImageText: "Engine Version: " + MainMenuState.engineVersion,
 
 			// Obtained times are in milliseconds so they are divided so Discord can use it
 			startTimestamp : Std.int(startTimestamp / 1000),

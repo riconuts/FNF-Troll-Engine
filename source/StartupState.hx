@@ -93,7 +93,7 @@ class StartupState extends FlxState
 	{
 		// this is kinda stupid but i couldn't find any other way to display the warning while the title screen loaded 
 		// could be worse lol
-		switch (step){
+ 		switch (step){
 			case 0:
 				warning = new FlxSprite().loadGraphic(Paths.image("warning"));
 				warning.scale.set(0.65, 0.65);
@@ -104,7 +104,7 @@ class StartupState extends FlxState
 				step = 1;
 			case 1:
 				load();
-				TitleState.load();
+				//TitleState.load();
 				
 				var waitTime = 1.5 - Sys.cpuTime();
 				if (waitTime > 0) Sys.sleep(waitTime);

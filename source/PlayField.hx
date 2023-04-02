@@ -860,25 +860,6 @@ class NoteField extends FlxObject
 	}
 
 
-	// thanks schmoovin'
-	function rotateV3(vec:Vector3, xA:Float, yA:Float, zA:Float):Vector3
-	{
-		var rotateZ = CoolUtil.rotate(vec.x, vec.y, zA);
-		var offZ = new Vector3(rotateZ.x, rotateZ.y, vec.z);
-
-		var rotateX = CoolUtil.rotate(offZ.z, offZ.y, xA);
-		var offX = new Vector3(offZ.x, rotateX.y, rotateX.x);
-
-		var rotateY = CoolUtil.rotate(offX.x, offX.z, yA);
-		var offY = new Vector3(rotateY.x, offX.y, rotateY.y);
-
-		rotateZ.putWeak();
-		rotateX.putWeak();
-		rotateY.putWeak();
-
-		return offY;
-	}
-
 	function drawNote(sprite:NoteObject, pos:Vector3):Null<RenderObject>
 	{
 		if (!sprite.visible || !sprite.alive)
@@ -910,7 +891,7 @@ class NoteField extends FlxObject
 
 		for (idx => vert in quad)
 		{
-			var vert = rotateV3(vert, 0, 0, FlxAngle.TO_RAD * sprite.angle);
+			var vert = VectorHelpers.rotateV3(vert, 0, 0, FlxAngle.TO_RAD * sprite.angle);
 			vert.x += sprite.offsetX;
 			vert.y += sprite.offsetY;
 

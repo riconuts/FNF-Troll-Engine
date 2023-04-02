@@ -105,7 +105,7 @@ class FunkinScript {
 		set('curDecBeat', 0);
 		set('curDecStep', 0);
 
-		set('version', MainMenuState.psychEngineVersion.trim());
+		set('version', MainMenuState.engineVersion.trim());
 	}
 }
 

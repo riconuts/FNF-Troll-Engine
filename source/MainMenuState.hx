@@ -1,270 +1,122 @@
 package;
 
-import sowy.Sowy;
-import flixel.group.FlxSpriteGroup;
-#if ACHIEVEMENTS_ALLOWED
-import Achievements;
-#end
 import editors.MasterEditorMenu;
-import flixel.FlxCamera;
-import flixel.FlxG;
-import flixel.FlxObject;
-import flixel.FlxSprite;
-import flixel.addons.transition.FlxTransitionableState;
-import flixel.addons.ui.FlxUIButton;
-import flixel.addons.ui.FlxUITypedButton;
-import flixel.effects.FlxFlicker;
-import flixel.graphics.frames.FlxAtlasFrames;
-import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.input.keyboard.FlxKey;
-import flixel.math.FlxMath;
-import flixel.text.FlxText;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
-import flixel.ui.FlxButton.FlxTypedButton;
-import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
-import lime.app.Application;
-import options.OptionsState;
-import sowy.SowyBaseButton;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import flixel.effects.FlxFlicker;
+import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;
+import flixel.util.FlxSort;
+import flixel.math.FlxMath;
+import flixel.math.FlxAngle;
+import flixel.group.FlxGroup.FlxTypedGroup;
 
-using StringTools;
-#if desktop
-import Discord.DiscordClient;
-#end
-
-class MainMenuState extends MusicBeatState
+class ZSprite extends FlxSprite
 {
-	public static var psychEngineVersion:String = '0.5.2n'; //This is also used for Discord RPC
-	public static var curSelected:Int = 0;
+    public var order:Float = 0;
+}
 
-	var menuItems:FlxTypedGroup<MainMenuButton>;
+class MainMenuState extends MusicBeatState {
+	var menuItems:FlxTypedGroup<ZSprite>;
+    var buttons:Array<ZSprite> = [];
+	var artBoxes:Array<ZSprite> = [];
+	var selectedSomethin:Bool = false;
 
-	var creditButton:SowyBaseButton;
-	var jukeboxButton:SowyBaseButton;
-	
-	/*
-	private var camGame:FlxCamera;
-	private var camAchievement:FlxCamera;
-	*/
-	
 	var optionShit:Array<String> = [
 		'story_mode',
-		'freeplay',
-		#if ACHIEVEMENTS_ALLOWED 'awards', #end
+ 		'freeplay',
 		'promo',
-		'options'
+		'options' 
 	];
 
-	var magenta:FlxSprite;
-	var camFollow:FlxObject;
-	var camFollowPos:FlxObject;
-	var debugKeys:Array<FlxKey>;
+	public static var engineVersion:String = '0.1'; // This is also used for Discord RPC
+	public static var selected:Int = 0;
 
-	override function create()
-	{
-		Paths.loadTheFirstEnabledMod();
+	inline function toRad(input:Float)
+		return FlxAngle.TO_RAD * input;
 
-		#if desktop
-		// Updating Discord Rich Presence
-		DiscordClient.changePresence("In the Menus", null);
-		#end
-
-		#if !FLX_NO_MOUSE
-		FlxG.mouse.visible = true;
-		#end
-
+    override function create()
+    {
+		persistentUpdate = true;
+		persistentDraw = true;
+		super.create();
 		debugKeys = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
 
+		Paths.loadTheFirstEnabledMod();
+        FlxG.mouse.visible = true;
 		FlxG.camera.bgColor = FlxColor.BLACK;
 
-		transIn = FlxTransitionableState.defaultTransIn;
-		transOut = FlxTransitionableState.defaultTransOut;
-
-		persistentUpdate = persistentDraw = true;
-
-		var yScroll:Float = Math.max(0.25 - (0.05 * (optionShit.length - 4)), 0.1);
-		
-		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('newmenuu/mainmenu/menuBG'));
+		var bg:ZSprite = cast new ZSprite().loadGraphic(Paths.image('newmenuu/mainmenu/menuBG'));
 		bg.scrollFactor.set();
 		bg.updateHitbox();
 		bg.screenCenter();
 		bg.antialiasing = ClientPrefs.globalAntialiasing;
 		add(bg);
 
-		camFollow = new FlxObject(0, 0, 1, 1);
-		camFollowPos = new FlxObject(0, 0, 1, 1);
-		add(camFollow);
-		add(camFollowPos);
+		MusicBeatState.playMenuMusic();
 
-		menuItems = new FlxTypedGroup<MainMenuButton>();
+		menuItems = new FlxTypedGroup<ZSprite>();
+        
+        for(option in optionShit){
+			var art = new ZSprite();
+			art.loadGraphic(Paths.image("newmenuu/mainmenu/cover_" + option));
+			art.scrollFactor.set();
+			art.antialiasing = false;
+			art.ID = artBoxes.length;
+
+			var butt = new ZSprite();
+			butt.loadGraphic(Paths.image("newmenuu/mainmenu/menu_" + option));
+			butt.scrollFactor.set();
+			butt.antialiasing = false;
+			butt.ID = art.ID;
+
+			artBoxes.push(art);
+			buttons.push(butt);
+
+			menuItems.add(butt);
+            menuItems.add(art);
+        }
 		add(menuItems);
-
-		var scale:Float = 1;
-		/*if(optionShit.length > 6) {
-			scale = 6 / optionShit.length;
-		}*/
-
-		for (i in 0...optionShit.length)
-		{
-			var offset:Float = 108 - (Math.max(optionShit.length, 4) - 4) * 80;
-			var menuItem:MainMenuButton = new MainMenuButton(51, (i * 140) + offset);
-			
-			menuItem.loadGraphic(Paths.image('newmenuu/mainmenu/menu_' + optionShit[i]));
-			menuItem.antialiasing = ClientPrefs.globalAntialiasing;
-
-			menuItem.scale.x = scale;
-			menuItem.scale.y = scale;
-			
-			menuItem.ID = i;
-
-			menuItem.onOver.callback = function(){
-				if (selectedSomethin) return;
-				//FlxG.sound.play(Paths.sound('scrollMenu'));
-				//menuItem.targetX = menuItem.x;
-				updateImage(menuItem.ID);
-			};
-			menuItem.onOut.callback = function(){
-				if (selectedSomethin) return;
-				menuItem.targetX = 51;
-			};
-			menuItem.onUp.callback = function(){
-				if (selectedSomethin) return;
-				curSelected = menuItem.ID;
-				onSelected();
-			};
-			
-			menuItems.add(menuItem);
-
-			var scr:Float = (optionShit.length - 4) * 0.135;
-			if(optionShit.length < 6) scr = 0;
-
-			menuItem.scrollFactor.set(0, scr);
-			menuItem.updateHitbox();
-		}
-		
-		creditButton = new SowyBaseButton(802, 586, function(){
-			selectedSomethin = true;
-			MusicBeatState.switchState(new CreditsState());
-		});
-		creditButton.loadGraphic(Paths.image('newmenuu/mainmenu/credits'));
-		add(creditButton);
-		
-		jukeboxButton = new SowyBaseButton(988, 586);
-		jukeboxButton.loadGraphic(Paths.image('newmenuu/mainmenu/comics'));
-		jukeboxButton.onUp.callback = function(){
-			selectedSomethin = true;
-			MusicBeatState.switchState(new gallery.GalleryMenuState());
-		}
-		add(jukeboxButton);
-
-		FlxG.camera.follow(camFollowPos, null, 1);
-
-		#if !final
-		var versionShit = new FlxText(12, FlxG.height - 44, 0, "Build Date: " + Sowy.getBuildDate(), 16);
-		versionShit.setFormat(Paths.font("calibri.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		versionShit.scrollFactor.set();
-		add(versionShit);
-		#end
-		
-		var versionShit = new FlxText(12, FlxG.height - 24, 0, "Tails Gets Trolled v" + Application.current.meta.get('version'), 16);
-		versionShit.setFormat(Paths.font("calibri.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		versionShit.scrollFactor.set();
-		add(versionShit);
 
 		changeItem();
 
-		MusicBeatState.playMenuMusic();
+		moveBoxes(1);
+    }
 
-		super.create();
-	}
-
-	var selectedSomethin:Bool = false;
-
-	override function update(elapsed:Float)
+	function onSelected()
 	{
-		if (FlxG.sound.music != null && FlxG.sound.music.volume < 0.8)
+		if (selectedSomethin)return;
+		if (optionShit[selected] == 'promo')
 		{
-			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
-		}
-
-		if (FlxG.keys.justPressed.CONTROL)
-			Paths.clearUnusedMemory();
-
-		var lerpVal:Float = CoolUtil.boundTo(elapsed * 7.5, 0, 1);
-		camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
-
-		if (!selectedSomethin)
-		{
-			#if !FLX_NO_MOUSE
-			if (FlxG.mouse.wheel != 0)
-			{
-				changeItem(FlxG.mouse.wheel);
-			}
-			#end
-
-			if (controls.UI_UP_P)
-			{
-				changeItem(-1);
-			}
-
-			if (controls.UI_DOWN_P)
-			{			
-				changeItem(1);
-			}
-
-			if (controls.BACK)
-			{
-				selectedSomethin = true;
-				FlxG.sound.play(Paths.sound('cancelMenu'));
-				MusicBeatState.switchState(new TitleState());
-			}
-
-			if (controls.ACCEPT)
-			{
-				onSelected();
-			}
-			#if desktop
-			else if (FlxG.keys.anyJustPressed(debugKeys))
-			{
-				selectedSomethin = true;
-				MusicBeatState.switchState(new MasterEditorMenu());
-			}
-			#end
-		}
-
-		super.update(elapsed);
-	}
-
-	function onSelected(){
-		if (optionShit[curSelected] == 'promo'){
 			CoolUtil.browserLoad('http://www.tailsgetstrolled.org/');
 			return;
 		}
-	
+        trace(selected);
+
 		selectedSomethin = true;
 
 		FlxG.sound.play(Paths.sound('confirmMenu'));
-		updateImage(null);
 
 		FlxG.mouse.visible = false;
 
-		for (spr in [creditButton, jukeboxButton])
+/* 		for (spr in [creditButton, jukeboxButton])
 			FlxTween.tween(spr, {alpha: 0}, 0.4, {
 				ease: FlxEase.quadOut,
-				onComplete: function(twn:FlxTween){
+				onComplete: function(twn:FlxTween)
+				{
 					spr.kill();
 				}
 			});
-
-		
+ */
 		menuItems.forEach(function(spr)
 		{
-			if (curSelected != spr.ID)
+			if (selected != spr.ID)
 			{
 				FlxTween.tween(spr, {alpha: 0}, 0.4, {
 					ease: FlxEase.quadOut,
-					onComplete: function(twn:FlxTween){
+					onComplete: function(twn:FlxTween)
+					{
 						spr.kill();
 					}
 				});
@@ -273,7 +125,7 @@ class MainMenuState extends MusicBeatState
 			{
 				FlxFlicker.flicker(spr, 1, 0.06, false, false, function(flick:FlxFlicker)
 				{
-					switch (optionShit[curSelected])
+					switch (optionShit[selected])
 					{
 						case 'story_mode':
 							MusicBeatState.switchState(new StoryMenuState());
@@ -287,148 +139,143 @@ class MainMenuState extends MusicBeatState
 		});
 	}
 
-	var imageMap:Map<String, FlxSprite> = new Map<String, FlxSprite>();
-	var curImage:FlxSprite;
-	var lastName:String;
-	var appaerTween:FlxTween;
+    function changeItem(?val:Int=0, absolute:Bool=false){
+		var difference = absolute?Math.abs(selected - val):val;
+        if(difference != 0)
+			FlxG.sound.play(Paths.sound('scrollMenu'));
 
-	var kirbCollision:FlxTypedGroup<SowyBaseButton>;
+        if(absolute)
+            selected = val;
+        else
+            selected += val;
 
-	function updateImage(sowyId:Int = null){
-		var name:String = sowyId != null ? "cover_" + optionShit[sowyId] : null;
+        if(selected >= menuItems.members.length)
+            selected = 0; 
+        else if(selected < 0)
+            selected = menuItems.members.length-1;
+    }
+    
+	function sortByOrder(wat:Int, Obj1:ZSprite, Obj2:ZSprite):Int
+		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.order, Obj2.order);
+	
+	var originX = FlxG.width / 2;
+	var originY = FlxG.height / 2 + 310;
 
-		if (name == lastName)
-			return;
-		else
-			lastName = name;
+    var heldDir:Array<Float> = [0, 0];
+    var holding:Array<Float> = [0, 0];
+    
+	function moveBoxes(lerpSpeed:Float = 0.2){
+		var lerpVal = lerpSpeed * (FlxG.elapsed / (1 / 60));
+		if (lerpSpeed>=1)lerpVal=1;
 
-		if (appaerTween != null)
-			appaerTween.cancel();
+		var rads = toRad(360 / artBoxes.length);
+		for (obj in artBoxes)
+		{
+			var idx = obj.ID;
+			var but = buttons[idx];
 
-		var prevImage = curImage;
-		if (name != null){
-			var sowyImage = imageMap.get(name);
+			obj.order = -obj.y;
 
-			if (sowyImage == null){
-				var newImage = new FlxSprite(FlxG.width - 560);
-				newImage.loadGraphic(Paths.image("newmenuu/mainmenu/" + name));
-				newImage.antialiasing = ClientPrefs.globalAntialiasing;
+			var input = (idx - selected) * rads;
+			var desiredX = FlxMath.fastSin(input) * 450;
+			var desiredY = -(FlxMath.fastCos(input) * 275);
 
-				newImage.scrollFactor.set();
-				newImage.updateHitbox();
-				newImage.screenCenter(Y);
+			var shit = FlxMath.fastSin(input);
 
-				imageMap.set(name, newImage);
+			var scaleX = FlxMath.lerp(obj.scale.x, 1 - (.3 * Math.abs(shit)), lerpVal);
+			var scaleY = FlxMath.lerp(obj.scale.y, 1 - (.3 * Math.abs(shit)), lerpVal);
 
-				sowyImage = newImage;
+			obj.scale.set(scaleX, scaleY);
+			obj.updateHitbox();
+			obj.x = FlxMath.lerp(obj.x, originX - obj.width / 2 + desiredX, lerpVal);
+			obj.y = FlxMath.lerp(obj.y, originY - obj.height / 2 + desiredY, lerpVal);
+
+			if (but != null)
+			{
+				but.order = obj.order + 1;
+				but.alpha = obj.alpha;
+				but.visible = obj.visible;
+
+
+				var scaleX = FlxMath.lerp(but.scale.x, 1 - (.3 * Math.abs(shit)), lerpVal);
+				var scaleY = FlxMath.lerp(but.scale.y, 1 - (.3 * Math.abs(shit)), lerpVal);
+
+				but.scale.set(scaleX, scaleY);
+				but.updateHitbox();
+				but.x = (obj.x - (but.width - obj.width) / 2);
+				but.y = (obj.y + (415 * scaleX));
 			}
-
-			for (otherImage in imageMap.iterator())
-				remove(otherImage);
-
-			add(prevImage);
-			add(sowyImage);
-
-			if (name == "cover_freeplay"){
-				if (kirbCollision == null){
-					kirbCollision = new FlxTypedGroup();
-
-					var totalSqueaks = 0;
-					var squeak = function(){
-						totalSqueaks++;
-
-						if (totalSqueaks > 4){
-							FlxG.sound.play(Paths.sound("pop"));
-							sowyImage.loadGraphic(Paths.image("newmenuu/mainmenu/cover_freeplay_alt"));
-							
-							for (collision in kirbCollision.members)
-								collision.destroy();
-							kirbCollision.clear();
-
-							return;
-						}
-
-						FlxG.sound.play(Paths.soundRandom("squeak", 1, 3), 1, false, true, function(){
-							totalSqueaks--;
-						});
-					}
-
-					kirbCollision.add(new SowyBaseButton(sowyImage.x + 26, sowyImage.y + 4, squeak)).makeGraphic(106, 54, 0x00000000); // head
-					kirbCollision.add(new SowyBaseButton(sowyImage.x + 13, sowyImage.y + 57, squeak)).makeGraphic(42, 61, 0x00000000); // mike
-					kirbCollision.add(new SowyBaseButton(sowyImage.x + 55, sowyImage.y + 57, squeak)).makeGraphic(89, 98, 0x00000000); // body
-				}
-
-				add(kirbCollision);
-			}else if (kirbCollision != null)
-				remove(kirbCollision);
-
-			curImage = sowyImage;
-			
-			sowyImage.alpha = 0;
-			appaerTween = FlxTween.tween(sowyImage, {alpha: 1}, 0.1, {ease: FlxEase.quadIn,});
 		}
-		else if (curImage != null)
-			for (daImage in imageMap.iterator())
-				if (daImage == curImage)
-					FlxTween.tween(daImage, {alpha: 0}, selectedSomethin ? 0.4 : 0.1, {ease: FlxEase.quadOut});
-				else
-					daImage.alpha = 0;
+
 	}
+	var debugKeys:Array<FlxKey>;
+    override function update(elapsed:Float){
+        super.update(elapsed);
+		if (FlxG.sound.music != null && FlxG.sound.music.volume < 0.8)
+		{
+			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
+		}
 
-	override function destroy()
-	{
-		for (image in imageMap)
-			image.destroy();
 
-		return super.destroy();
-	}
 
-	function changeItem(huh:Int = 0)
-	{
-		curSelected += huh;
+		if (FlxG.keys.justPressed.CONTROL)
+			Paths.clearUnusedMemory();
 
-		if (curSelected >= menuItems.length)
-			curSelected = 0;
-		if (curSelected < 0)
-			curSelected = menuItems.length - 1;
+		if (!selectedSomethin){
+			if (controls.ACCEPT)
+				onSelected();
+			#if desktop
+			else if (FlxG.keys.anyJustPressed(debugKeys))
+			{
+				selectedSomethin = true;
+				MusicBeatState.switchState(new MasterEditorMenu());
+			}
+			#end
+			#if !FLX_NO_MOUSE
+			if (FlxG.mouse.wheel != 0)
+			{
+				changeItem(FlxG.mouse.wheel);
+			}
+			#end
 
-		if (huh != 0) FlxG.sound.play(Paths.sound('scrollMenu'));
+            if (controls.UI_LEFT_P || controls.UI_LEFT && heldDir[0] > .3 && holding[0] >= 0.05)
+            {
+                holding[0] = 0;
+                changeItem(-1);
+            }
 
-		menuItems.forEach(function(spr){
-			spr.targetX = spr.ID == curSelected ? 151 : 51;
-		});
+            if (controls.UI_RIGHT_P || controls.UI_RIGHT && heldDir[1] >= .3 && holding[1] >= 0.05)
+            {
+                holding[1] = 0;
+                changeItem(1);
+            }
 
-		updateImage(curSelected);
-	}
+            if (controls.UI_LEFT)
+            {
+                heldDir[0] += elapsed;
+                holding[0] += elapsed;
+            }
+            else
+            {
+                heldDir[0] = 0;
+                holding[0] = 0;
+            }
 
-	#if ACHIEVEMENTS_ALLOWED
-	// Unlocks "Freaky on a Friday Night" achievement
-	function giveAchievement() {
-		add(new AchievementObject('friday_night_play', camAchievement));
-		FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
-		trace('Giving achievement "friday_night_play"');
-	}
-	#end
-}
+            if (controls.UI_RIGHT)
+            {
+                heldDir[1] += elapsed;
+                holding[1] += elapsed;
+            }
+            else
+            {
+                heldDir[1] = 0;
+                holding[1] = 0;
+            }
+        }
 
-class MainMenuButton extends SowyBaseButton
-{
-	// what??? 
+		moveBoxes();
 
-	public var targetX:Float = 0;
-	public var targetY:Float = 0;
+		menuItems.sort(sortByOrder);
 
-	public function new(x:Float = 0, y:Float = 0)
-	{
-		targetX = x;
-		targetY = y;
-		super(x, y);
-	}
-
-	override function update(elapsed:Float)
-	{
-		x = Std.int(FlxMath.lerp(x, targetX, CoolUtil.boundTo(elapsed * 10.2, 0, 1)));
-		y = Std.int(FlxMath.lerp(y, targetY, CoolUtil.boundTo(elapsed * 10.2, 0, 1)));
-		super.update(elapsed);
-	}
+    }
 }

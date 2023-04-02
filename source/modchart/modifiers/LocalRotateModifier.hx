@@ -26,25 +26,6 @@ class LocalRotateModifier extends NoteModifier { // this'll be rotateX in ModMan
 
     }
 
-    // thanks schmoovin'
-    function rotateV3(vec:Vector3,xA:Float,yA:Float,zA:Float):Vector3{
-        var rotateZ = CoolUtil.rotate(vec.x, vec.y, zA);
-        var offZ = new Vector3(rotateZ.x, rotateZ.y, vec.z);
-
-        var rotateX = CoolUtil.rotate(offZ.z, offZ.y, xA);
-        var offX = new Vector3(offZ.x, rotateX.y, rotateX.x);
-
-        var rotateY = CoolUtil.rotate(offX.x, offX.z, yA);
-        var offY = new Vector3(rotateY.x, offX.y, rotateY.y);
-
-		rotateZ.putWeak();
-        rotateX.putWeak();
-        rotateY.putWeak();
-
-        return offY;
-
-    }
-
 	override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite){
 		var x:Float = (FlxG.width* 0.5) - Note.swagWidth - 54 + Note.swagWidth * 1.5;
         switch (player)
@@ -62,7 +43,7 @@ class LocalRotateModifier extends NoteModifier { // this'll be rotateX in ModMan
         var diff = pos.subtract(origin);
         var scale = FlxG.height;
         diff.z *= scale;
-        var out = rotateV3(diff, getValue(player)* FlxAngle.TO_RAD, getSubmodValue('${prefix}rotateY',player)* FlxAngle.TO_RAD, getSubmodValue('${prefix}rotateZ',player)* FlxAngle.TO_RAD);
+		var out = VectorHelpers.rotateV3(diff, getValue(player)* FlxAngle.TO_RAD, getSubmodValue('${prefix}rotateY',player)* FlxAngle.TO_RAD, getSubmodValue('${prefix}rotateZ',player)* FlxAngle.TO_RAD);
         out.z /= scale;
         return origin.add(out);
     }

@@ -2532,6 +2532,7 @@ class PlayState extends MusicBeatState
 				persistentDraw = false;
 
 				if(instaRespawn){
+					isDead = true;
 					MusicBeatState.resetState(true);
 					return true;
 				}else{
