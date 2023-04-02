@@ -13,10 +13,10 @@ function onTrigger(value1, value2)
 {
 	if (value1 == "true")
 	{
-		var camDad = game.getCharacterCamera(game.dad);
-		var camBf = game.getCharacterCamera(game.boyfriend);
+		var camDad = PlayState.getCharacterCamera(game.dad);
+		var camBf = PlayState.getCharacterCamera(game.boyfriend);
 		
-		instance.triggerEventNote(
+		game.triggerEventNote(
 			"Camera Follow Pos", 
 			Std.string((camDad[0] + camBf[0]) * 0.5), 
 			Std.string((camDad[1] + camBf[1]) * 0.5)
@@ -24,6 +24,6 @@ function onTrigger(value1, value2)
 	}
 	else
 	{
-		instance.triggerEventNote("Camera Follow Pos", "", "");
+		game.triggerEventNote("Camera Follow Pos", "", "");
 	}
 }
