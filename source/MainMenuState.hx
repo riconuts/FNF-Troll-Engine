@@ -1,16 +1,18 @@
 package;
 
+import openfl.events.MouseEvent;
 import editors.MasterEditorMenu;
 import flixel.input.keyboard.FlxKey;
 import flixel.util.FlxColor;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 import flixel.effects.FlxFlicker;
-import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;
 import flixel.util.FlxSort;
 import flixel.math.FlxMath;
 import flixel.math.FlxAngle;
 import flixel.group.FlxGroup.FlxTypedGroup;
+import flash.ui.Mouse;
+import flash.ui.MouseCursor;
 
 class ZSprite extends FlxSprite
 {
@@ -62,13 +64,13 @@ class MainMenuState extends MusicBeatState {
 			var art = new ZSprite();
 			art.loadGraphic(Paths.image("newmenuu/mainmenu/cover_" + option));
 			art.scrollFactor.set();
-			art.antialiasing = false;
+			art.antialiasing = ClientPrefs.globalAntialiasing;
 			art.ID = artBoxes.length;
 
 			var butt = new ZSprite();
 			butt.loadGraphic(Paths.image("newmenuu/mainmenu/menu_" + option));
 			butt.scrollFactor.set();
-			butt.antialiasing = false;
+			butt.antialiasing = ClientPrefs.globalAntialiasing;
 			butt.ID = art.ID;
 
 			artBoxes.push(art);
@@ -82,17 +84,48 @@ class MainMenuState extends MusicBeatState {
 		changeItem();
 
 		moveBoxes(1);
+
+		FlxG.stage.addEventListener(MouseEvent.MOUSE_UP, mouseClickEvent);
+		FlxG.stage.addEventListener(MouseEvent.MOUSE_MOVE, updateMouseIcon);
     }
+
+	function mouseClickEvent(?e)
+	{
+		for (spr in menuItems){
+			if (spr.ID == selected && FlxG.mouse.overlaps(spr))
+			{
+				onSelected();
+				break;
+			}
+		}
+	}
+	function updateMouseIcon(?e)
+	{
+		for (spr in menuItems){
+			if (spr.ID == selected && FlxG.mouse.overlaps(spr))
+			{
+				Mouse.cursor = MouseCursor.BUTTON;
+				return;
+			}
+		}
+
+		Mouse.cursor = MouseCursor.AUTO;
+	}
+
+	override function destroy() {
+		FlxG.stage.removeEventListener(MouseEvent.MOUSE_UP, mouseClickEvent);
+		FlxG.stage.removeEventListener(MouseEvent.MOUSE_MOVE, updateMouseIcon);
+		super.destroy();
+	}
 
 	function onSelected()
 	{
 		if (selectedSomethin)return;
-		if (optionShit[selected] == 'promo')
-		{
+		
+		if (optionShit[selected] == 'promo'){
 			CoolUtil.browserLoad('http://www.tailsgetstrolled.org/');
 			return;
 		}
-        trace(selected);
 
 		selectedSomethin = true;
 
@@ -153,13 +186,15 @@ class MainMenuState extends MusicBeatState {
             selected = 0; 
         else if(selected < 0)
             selected = optionShit.length-1;
+
+		updateMouseIcon();
     }
     
 	function sortByOrder(wat:Int, Obj1:ZSprite, Obj2:ZSprite):Int
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.order, Obj2.order);
 	
 	var originX = FlxG.width / 2;
-	var originY = FlxG.height / 2 + 310;
+	var originY = FlxG.height / 2 + 300;
 
     var heldDir:Array<Float> = [0, 0];
     var holding:Array<Float> = [0, 0];
@@ -178,7 +213,7 @@ class MainMenuState extends MusicBeatState {
 
 			var input = (idx - selected) * rads;
 			var desiredX = FlxMath.fastSin(input) * 450;
-			var desiredY = -(FlxMath.fastCos(input) * 275);
+			var desiredY = -(FlxMath.fastCos(input) * 350);
 
 			var shit = FlxMath.fastSin(input);
 
