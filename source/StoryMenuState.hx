@@ -69,7 +69,7 @@ class StoryMenuState extends MusicBeatState
 				eY: STS.info.sY,
 				eW: STS.info.sW,
 				eH: STS.info.sH,
-				dur: 0.6
+				dur: 0.45
 			}
 			this.transIn = STS;
 		}
@@ -134,7 +134,7 @@ class StoryMenuState extends MusicBeatState
 							eY: cam.scroll.y + 10,
 							eW: 1260,
 							eH: 700,
-							dur: 0.6
+							dur: 0.45
 					}
 					this.transOut = SquareTransitionSubstate;
 
@@ -169,15 +169,11 @@ class StoryMenuState extends MusicBeatState
 
 	public function goBack()
 	{
-		if (!doingTransition)
-		{
-			FlxG.sound.play(Paths.sound('cancelMenu'));
-			
-			if (!doingTransition){
-				//subMenu.destroy();
-				MusicBeatState.switchState(new MainMenuState());
-			}
-		}
+		if (doingTransition)
+			return;
+		
+		FlxG.sound.play(Paths.sound('cancelMenu'));
+		MusicBeatState.switchState(new MainMenuState());
 	} 
 
 	override function update(elapsed:Float)

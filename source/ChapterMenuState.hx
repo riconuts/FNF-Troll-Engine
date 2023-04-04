@@ -1,5 +1,8 @@
 package;
 
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+import flixel.tweens.misc.ColorTween;
 import flixel.FlxSprite;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
@@ -53,10 +56,6 @@ class ChapterMenuState extends MusicBeatState{
 			CustomFadeTransition.nextCamera = null;
 
 		super.create();
-
-		var funkyRectangle = new flixel.addons.display.shapes.FlxShapeBox(10, 10, 1260, 700, {thickness: 3, color: 0xFFF4CC34}, FlxColor.BLACK);
-		funkyRectangle.cameras = cameras;
-		add(funkyRectangle);
 
 		// Create sprites
 		var artGraph = Paths.image('chaptercovers/' + Paths.formatToSongPath(chapData.name));
@@ -121,6 +120,15 @@ class ChapterMenuState extends MusicBeatState{
 		totalScoreTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
 		totalScoreTxt.x -= totalScoreTxt.width + 15;
 		add(totalScoreTxt);
+
+		////
+		var funkyRectangle = new flixel.addons.display.shapes.FlxShapeBox(10, 10, 1260, 700, {thickness: 3, color: 0xFFF4CC34}, FlxColor.BLACK);
+		funkyRectangle.cameras = cameras;
+		add(funkyRectangle);
+
+		FlxTween.num(1, 0, 0.12, {ease: FlxEase.quadOut}, function(yo){
+			funkyRectangle.fillColor = FlxColor.fromRGBFloat(0,0,0,yo);
+		});
 	}
 
 	function goBack()

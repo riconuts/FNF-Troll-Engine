@@ -197,8 +197,6 @@ class Stage extends FlxTypedGroup<FlxBasic>
 			}
 		}
 
-		trace(stages);
-
 		return stages;
 	}
 

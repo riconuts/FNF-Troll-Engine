@@ -86,7 +86,9 @@ class FreeplayState extends MusicBeatState
 			if (songButton.isLocked)
 				songButton.onUp.callback = songButton.shake;
 			else{
-				songButton.onOver.callback = function(){selectedSong = songButton.metadata;};
+				songButton.onOver.callback = function(){
+					selectedSong = songButton.metadata;
+				};
 				songButton.onOut.callback = resSelSongFunc;
 			
 				songButton.onUp.callback = function(){
@@ -101,7 +103,13 @@ class FreeplayState extends MusicBeatState
 					};
 
 					persistentUpdate = false;
-					playSong(songButton.metadata);
+
+					if (FlxG.keys.pressed.ALT){
+						var alters = SongChartSelec.getAlters(songButton.metadata);
+						if (alters.length > 0)
+							switchTo(new SongChartSelec(songButton.metadata, alters));
+					}else
+						playSong(songButton.metadata);
 				};
 			}			
 		}
@@ -226,13 +234,16 @@ class FreeplayState extends MusicBeatState
 		#end
 	}
 
-	static public function playSong(metadata:SongMetadata){
+	static public function playSong(metadata:SongMetadata, ?difficulty:String){
 		Paths.currentModDirectory = metadata.folder;
 
 		var songLowercase:String = Paths.formatToSongPath(metadata.songName);
 		trace('${Paths.currentModDirectory}, $songLowercase');
 
-		PlayState.SONG = Song.loadFromJson(songLowercase, songLowercase);
+		PlayState.SONG = Song.loadFromJson(
+			'$songLowercase${difficulty == null ? "" : '-$difficulty'}', 
+			songLowercase
+		);
 		PlayState.isStoryMode = false;
 
 		if (FlxG.keys.pressed.SHIFT){
@@ -441,4 +452,93 @@ class FreeplayCategory extends flixel.group.FlxSpriteGroup{
 			item.setPosition(posArray[x], 50 + titleText.y + titleText.height + y * 308);
 		}
 	}
+}
+
+/// ouhghhh just a little experiment
+class SongChartSelec extends MusicBeatState
+{
+	var songMeta:SongMetadata;
+	var alters:Array<String>;
+
+	var texts:Array<FlxText> = [];
+
+	var curSel = 0;
+
+	function changeSel(diff:Int = 0)
+	{
+		texts[curSel].color = 0xFFFFFFFF;
+
+		curSel += diff;
+		
+		if (curSel < 0)
+			curSel += alters.length;
+		else if (curSel >= alters.length)
+			curSel -= alters.length;
+
+		texts[curSel].color = 0xFFFFFF00;
+	}
+
+	override function create()
+	{
+		for (id in 0...alters.length){
+			var alt = alters[id];
+			var text = new FlxText(20, 20 + id * 20 , FlxG.width - 20, alt, 16);
+
+			texts[id] = text;
+
+			add(text);
+		}
+
+		changeSel();
+	}
+
+	override public function update(e){
+		if (controls.UI_DOWN_P)
+			changeSel(1);
+		if (controls.UI_UP_P)
+			changeSel(-1);
+
+		if (controls.BACK)
+			MusicBeatState.switchState(new FreeplayState());
+
+		if (controls.ACCEPT){
+			var daDiff = alters[curSel];
+			FreeplayState.playSong(songMeta, daDiff == "normal" ? "" : daDiff);
+		}
+
+		super.update(e);
+	} 
+
+	public function new(WHO:SongMetadata, alters) 
+	{
+		super();
+		
+		songMeta = WHO;
+		this.alters = alters;
+	}
+
+	public static function getAlters(metadata:SongMetadata)
+	{
+		Paths.currentModDirectory = metadata.folder;
+
+		var songName = Paths.formatToSongPath(metadata.songName);
+		var folder = Paths.mods('${Paths.currentModDirectory}/songs/$songName/');
+
+		var alts = [];
+
+		Paths.iterateDirectory(folder, function(fileName){
+			if (fileName == '$songName.json'){
+				alts.insert(1, "normal");
+				return;		
+			}
+			
+			if (!fileName.startsWith('$songName-') || !fileName.endsWith('.json'))
+				return;
+
+			var prefixLength = songName.length + 1;
+			alts.push(fileName.substr(prefixLength, fileName.length - prefixLength - 5));
+		});
+
+		return alts;
+	} 
 }

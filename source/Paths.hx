@@ -229,12 +229,15 @@ class Paths
 
 	#else
 
-	inline static public function iterateDirectory(Directory:String, Func){
+	inline static public function iterateDirectory(Directory:String, Func):Bool
+	{
 		if (!FileSystem.exists(Directory) || !FileSystem.isDirectory(Directory))
-			return;
+			return false;
 		
 		for (i in FileSystem.readDirectory(Directory))
 			Func(i);
+
+		return true;
 	}
 	#end
 
