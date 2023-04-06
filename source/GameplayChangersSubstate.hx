@@ -37,26 +37,28 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 	private var checkboxGroup:FlxTypedGroup<CheckboxThingie>;
 	private var grpTexts:FlxTypedGroup<AttachedText>;
 
+	var goption:GameplayOption;
+	var soption:GameplayOption;
 	function getOptions()
 	{
-		var goption:GameplayOption = new GameplayOption('Scroll Type', 'scrolltype', 'string', 'multiplicative', ["multiplicative", "constant"]);
+		goption = new GameplayOption('Scroll Type', 'scrolltype', 'string', 'multiplicative', ["multiplicative", "constant"]);
 		optionsArray.push(goption);
 
-		var option:GameplayOption = new GameplayOption('Scroll Speed', 'scrollspeed', 'float', 1);
-		option.scrollSpeed = 1.5;
-		option.minValue = 0.5;
-		option.changeValue = 0.1;
+		soption = new GameplayOption('Scroll Speed', 'scrollspeed', 'float', 1);
+		soption.scrollSpeed = 1.5;
+		soption.minValue = 0.5;
+		soption.changeValue = 0.1;
 		if (goption.getValue() != "constant")
 		{
-			option.displayFormat = '%vX';
-			option.maxValue = 3;
+			soption.displayFormat = '%vX';
+			soption.maxValue = 3;
 		}
 		else
 		{
-			option.displayFormat = "%v";
-			option.maxValue = 6;
+			soption.displayFormat = "%v";
+			soption.maxValue = 6;
 		}
-		optionsArray.push(option);
+		optionsArray.push(soption);
 
 		/*
 		var option:GameplayOption = new GameplayOption('Playback Rate', 'songspeed', 'float', 1);
@@ -195,6 +197,16 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 	var holdValue:Float = 0;
 	override function update(elapsed:Float)
 	{
+		if (goption.getValue() != "constant")
+		{
+			soption.displayFormat = '%vX';
+			soption.maxValue = 3;
+		}
+		else
+		{
+			soption.displayFormat = "%v";
+			soption.maxValue = 6;
+		}
 		if (controls.UI_UP_P)
 		{
 			changeSelection(-1);
