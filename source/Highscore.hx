@@ -18,25 +18,36 @@ class Highscore
 
 	static var loadedID:String = '';
 	static var save:FlxSave = new FlxSave();
+	static var defaultID:String = 'f-45-90-135-166'; // psych preset aka the default preset from old tgt
+	// this is used to make sure if you're on psych preset, you get to keep your old high scores
 
 	public static function getID(){
 		var idArray:Array<String> = [];
 		idArray.push(ClientPrefs.useEpics ? 't' : 'f');
-		var windows = ['sick', 'good', 'bad', 'max'];
+		var windows = ['sick', 'good', 'bad', 'hit'];
 		if(ClientPrefs.useEpics)windows.insert(0, 'epic');
 		for(window in windows){
 			var realWindow = Reflect.field(ClientPrefs, window + "Window");
 			idArray.push(Std.string(realWindow));
 		}
 
-		return idArray.join("-");
+		var id = idArray.join("-");
+		
+		
+		return "scores" +  id;
 	}
 
 	static function updateSave(){
 		var id = getID();
 		if(loadedID != id){
 			loadedID = id;
-			save.bind("scores" + id);
+			save.bind(id);
+
+			if (id == defaultID)
+			{
+				if (save.isEmpty())
+					save.mergeDataFrom("flixel", null, false, false);
+			}
 		}
 	}
 
