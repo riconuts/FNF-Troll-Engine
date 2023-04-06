@@ -905,7 +905,7 @@ class OptionsState extends MusicBeatState {
 			onNumberChanged(name, oldVal, snappedVal);
 
 		if (Reflect.hasField(ClientPrefs, name))
-			Reflect.setField(ClientPrefs, name, snappedVal);
+			Reflect.setField(ClientPrefs, name, snappedVal * (data.data.get("type") != 'percent'?1:0.01));
     }
 
 	function changeNumberW(widget:Widget, val:Float, abs:Bool = false)
