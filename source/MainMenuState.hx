@@ -1,5 +1,6 @@
 package;
 
+import flixel.ui.FlxButton.FlxTypedButton;
 import openfl.events.MouseEvent;
 import editors.MasterEditorMenu;
 import flixel.input.keyboard.FlxKey;
@@ -20,20 +21,28 @@ class ZSprite extends FlxSprite
 }
 
 class MainMenuState extends MusicBeatState {
-	var menuItems:FlxTypedGroup<ZSprite>;
-    var buttons:Array<ZSprite> = [];
-	var artBoxes:Array<ZSprite> = [];
-	var selectedSomethin:Bool = false;
+	public static var engineVersion:String = '0.1'; // This is also used for Discord RPC
 
-	var optionShit:Array<String> = [
+	final optionShit:Array<String> = [
 		'story_mode',
  		'freeplay',
 		'promo',
 		'options' 
 	];
 
-	public static var engineVersion:String = '0.1'; // This is also used for Discord RPC
-	public static var selected:Int = 0;
+	final sideShit:Array<String> = [
+		'credits',
+ 		'gallery'
+	];
+
+	var menuItems:FlxTypedGroup<ZSprite>;
+    var buttons:Array<ZSprite> = [];
+	var artBoxes:Array<ZSprite> = [];
+
+	var sideItems:FlxTypedGroup<FlxSprite>;
+
+	public static var curSelected:Int = 0;
+	var selectedSomethin:Bool = false;
 
 	inline function toRad(input:Float)
 		return FlxAngle.TO_RAD * input;
@@ -42,7 +51,9 @@ class MainMenuState extends MusicBeatState {
     {
 		persistentUpdate = true;
 		persistentDraw = true;
+
 		super.create();
+		
 		debugKeys = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
 
 		Paths.loadTheFirstEnabledMod();
@@ -56,21 +67,17 @@ class MainMenuState extends MusicBeatState {
 		bg.antialiasing = ClientPrefs.globalAntialiasing;
 		add(bg);
 
-		MusicBeatState.playMenuMusic();
-
 		menuItems = new FlxTypedGroup<ZSprite>();
-        
-        for(option in optionShit){
+        for(option in optionShit)
+		{
 			var art = new ZSprite();
 			art.loadGraphic(Paths.image("newmenuu/mainmenu/cover_" + option));
 			art.scrollFactor.set();
-			art.antialiasing = ClientPrefs.globalAntialiasing;
 			art.ID = artBoxes.length;
 
 			var butt = new ZSprite();
 			butt.loadGraphic(Paths.image("newmenuu/mainmenu/menu_" + option));
 			butt.scrollFactor.set();
-			butt.antialiasing = ClientPrefs.globalAntialiasing;
 			butt.ID = art.ID;
 
 			artBoxes.push(art);
@@ -81,28 +88,93 @@ class MainMenuState extends MusicBeatState {
         }
 		add(menuItems);
 
-		changeItem();
+		////
+		var buttonBg = new FlxSprite(FlxG.width, 0, Paths.image('newmenuu/mainmenu/extra_pad'));
+		buttonBg.x -= buttonBg.width;
+		add(buttonBg);
 
+		sideItems = new FlxTypedGroup<FlxSprite>();
+		for (idx in 0...sideShit.length)
+		{
+			var button = new FlxSprite(
+				buttonBg.x + 125 - 93, 
+				10 + (10 + idx * (83 + 16)), 
+				Paths.image('newmenuu/mainmenu/button_${sideShit[idx]}')
+			);
+
+			button.ID = idx;
+			sideItems.add(button);
+		}
+		add(sideItems);
+
+		////
+		changeItem(curSelected, true);
 		moveBoxes(1);
 
 		FlxG.stage.addEventListener(MouseEvent.MOUSE_UP, mouseClickEvent);
 		FlxG.stage.addEventListener(MouseEvent.MOUSE_MOVE, updateMouseIcon);
-    }
+    
+		MusicBeatState.playMenuMusic();
+	}
+
+	function fuckOff(?who:FlxSprite) 
+	{
+		selectedSomethin = true;
+
+		FlxG.sound.play(Paths.sound('confirmMenu'));
+
+		menuItems.forEach(function(spr){
+			FlxTween.tween(spr, {alpha: 0}, 0.4, {
+				ease: FlxEase.quadOut,
+				onComplete: function(_){spr.kill();}
+			});
+		});
+
+		for (spr in sideItems){
+			if (spr == who){
+				FlxFlicker.flicker(spr, 1, 0.06, false, false, function(_){
+					switch(sideShit[who.ID]){
+						case "credits":
+							MusicBeatState.switchState(new CreditsState());
+						case "gallery":
+							MusicBeatState.switchState(new gallery.GalleryMenuState());
+					}
+				});
+			}else{
+				FlxTween.tween(spr, {alpha: 0}, 0.4, {
+					ease: FlxEase.quadOut,
+					onComplete: function(_){spr.kill();}
+				});
+			}
+		}
+	}
 
 	function mouseClickEvent(?e)
 	{
+		if (selectedSomethin)
+			return;
+
+		for (spr in sideItems){
+			if (FlxG.mouse.overlaps(spr))
+				return fuckOff(spr);
+		}
+
 		for (spr in menuItems){
-			if (spr.ID == selected && FlxG.mouse.overlaps(spr))
-			{
-				onSelected();
-				break;
-			}
+			if (spr.ID == curSelected && FlxG.mouse.overlaps(spr))
+				return onSelected();
 		}
 	}
 	function updateMouseIcon(?e)
 	{
+		for (spr in sideItems){
+			if (FlxG.mouse.overlaps(spr)){
+				Mouse.cursor = MouseCursor.BUTTON;
+				return;
+			}
+		}
+
 		for (spr in menuItems){
-			if (spr.ID == selected && FlxG.mouse.overlaps(spr))
+			if (spr.ID == curSelected && FlxG.mouse.overlaps(spr))
 			{
 				Mouse.cursor = MouseCursor.BUTTON;
 				return;
@@ -115,14 +187,16 @@ class MainMenuState extends MusicBeatState {
 	override function destroy() {
 		FlxG.stage.removeEventListener(MouseEvent.MOUSE_UP, mouseClickEvent);
 		FlxG.stage.removeEventListener(MouseEvent.MOUSE_MOVE, updateMouseIcon);
+
 		super.destroy();
 	}
 
 	function onSelected()
 	{
-		if (selectedSomethin)return;
+		if (selectedSomethin)
+			return;
 		
-		if (optionShit[selected] == 'promo'){
+		if (optionShit[curSelected] == 'promo'){
 			CoolUtil.browserLoad('http://www.tailsgetstrolled.org/');
 			return;
 		}
@@ -133,7 +207,9 @@ class MainMenuState extends MusicBeatState {
 
 		FlxG.mouse.visible = false;
 
-/* 		for (spr in [creditButton, jukeboxButton])
+		FlxTween.tween(FlxG.camera, {zoom: 1.14}, 0.85, {ease: FlxEase.quartOut});
+
+		for (spr in sideItems){
 			FlxTween.tween(spr, {alpha: 0}, 0.4, {
 				ease: FlxEase.quadOut,
 				onComplete: function(twn:FlxTween)
@@ -141,10 +217,11 @@ class MainMenuState extends MusicBeatState {
 					spr.kill();
 				}
 			});
- */
+		}
+		
 		menuItems.forEach(function(spr)
 		{
-			if (selected != spr.ID)
+			if (curSelected != spr.ID)
 			{
 				FlxTween.tween(spr, {alpha: 0}, 0.4, {
 					ease: FlxEase.quadOut,
@@ -158,7 +235,7 @@ class MainMenuState extends MusicBeatState {
 			{
 				FlxFlicker.flicker(spr, 1, 0.06, false, false, function(flick:FlxFlicker)
 				{
-					switch (optionShit[selected])
+					switch (optionShit[curSelected])
 					{
 						case 'story_mode':
 							MusicBeatState.switchState(new StoryMenuState());
@@ -173,19 +250,19 @@ class MainMenuState extends MusicBeatState {
 	}
 
     function changeItem(?val:Int=0, absolute:Bool=false){
-		var difference = absolute?Math.abs(selected - val):val;
+		var difference = absolute?Math.abs(curSelected - val):val;
         if(difference != 0)
 			FlxG.sound.play(Paths.sound('scrollMenu'));
 
         if(absolute)
-            selected = val;
+            curSelected = val;
         else
-            selected += val;
+            curSelected += val;
 
-        if(selected >= optionShit.length)
-            selected = 0; 
-        else if(selected < 0)
-            selected = optionShit.length-1;
+        if(curSelected >= optionShit.length)
+            curSelected = 0; 
+        else if(curSelected < 0)
+            curSelected = optionShit.length-1;
 
 		updateMouseIcon();
     }
@@ -211,7 +288,7 @@ class MainMenuState extends MusicBeatState {
 
 			obj.order = -obj.y;
 
-			var input = (idx - selected) * rads;
+			var input = (idx - curSelected) * rads;
 			var desiredX = FlxMath.fastSin(input) * 450;
 			var desiredY = -(FlxMath.fastCos(input) * 350);
 
@@ -230,8 +307,7 @@ class MainMenuState extends MusicBeatState {
 				but.order = obj.order + 1;
 				but.alpha = obj.alpha;
 				but.visible = obj.visible;
-
-
+				
 				var scaleX = FlxMath.lerp(but.scale.x, 1 - (.3 * Math.abs(shit)), lerpVal);
 				var scaleY = FlxMath.lerp(but.scale.y, 1 - (.3 * Math.abs(shit)), lerpVal);
 
@@ -245,16 +321,8 @@ class MainMenuState extends MusicBeatState {
 	}
 	var debugKeys:Array<FlxKey>;
     override function update(elapsed:Float){
-        super.update(elapsed);
 		if (FlxG.sound.music != null && FlxG.sound.music.volume < 0.8)
-		{
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
-		}
-
-
-
-		if (FlxG.keys.justPressed.CONTROL)
-			Paths.clearUnusedMemory();
 
 		if (!selectedSomethin){
 			if (controls.ACCEPT)
@@ -265,7 +333,10 @@ class MainMenuState extends MusicBeatState {
 				selectedSomethin = true;
 				MusicBeatState.switchState(new MasterEditorMenu());
 			}
+			else if (FlxG.keys.justPressed.CONTROL)
+				Paths.clearUnusedMemory();
 			#end
+
 			#if !FLX_NO_MOUSE
 			if (FlxG.mouse.wheel != 0)
 			{
@@ -312,5 +383,6 @@ class MainMenuState extends MusicBeatState {
 
 		menuItems.sort(sortByOrder);
 
+		super.update(elapsed);
     }
 }
