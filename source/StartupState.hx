@@ -55,7 +55,7 @@ class StartupState extends FlxState
 		Paths.music('freakyMenu');
 		#end
 
-		ClientPrefs.loadPrefs();
+		ClientPrefs.load();
 
 		if (Main.fpsVar != null)
 			Main.fpsVar.visible = ClientPrefs.showFPS;
@@ -95,15 +95,17 @@ class StartupState extends FlxState
 		// could be worse lol
  		switch (step){
 			case 0:
-				warning = new FlxSprite().loadGraphic(Paths.image("warning"));
+ 				warning = new FlxSprite().loadGraphic(Paths.image("warning"));
 				warning.scale.set(0.65, 0.65);
 				warning.updateHitbox();
 				warning.screenCenter();
-				add(warning);
+				add(warning); 
 
+/* 				load();
+				MusicBeatState.switchState(new newoptions.OptionsState()); */
 				step = 1;
 			case 1:
-				load();
+ 				load();
 				TitleState.load();
 				
 				var waitTime = 1.5 - Sys.cpuTime();
@@ -111,10 +113,10 @@ class StartupState extends FlxState
 				
 				step = 2;
 			case 2:
-				FlxTween.tween(warning, {alpha: 0}, 1, {ease: FlxEase.expoIn, onComplete: function(twn){
+ 				FlxTween.tween(warning, {alpha: 0}, 1, {ease: FlxEase.expoIn, onComplete: function(twn){
 					MusicBeatState.switchState(new TitleState());
 				}});
-				step = 3;
+				step = 3; 
 
 		}
 

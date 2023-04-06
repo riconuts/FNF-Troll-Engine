@@ -30,7 +30,7 @@ class FPS extends TextField
 	/**
 		The current frame rate, expressed using frames-per-second
 	**/
-	public var currentFPS(default, null):Int;
+	public var currentFPS(default, null):Float;
 
 	@:noCompletion private var cacheCount:Int;
 	@:noCompletion private var currentTime:Float;
@@ -77,8 +77,9 @@ class FPS extends TextField
 		}
 
 		var currentCount = times.length;
-		currentFPS = Math.round((currentCount + cacheCount)* 0.5);
-		if (currentFPS > ClientPrefs.framerate) currentFPS = ClientPrefs.framerate;
+		currentFPS = Math.ffloor((currentCount + cacheCount)* 0.5);
+		if (currentFPS > ClientPrefs.framerate)
+			currentFPS = ClientPrefs.framerate;
 
 		if (currentCount != cacheCount /*&& visible*/)
 		{

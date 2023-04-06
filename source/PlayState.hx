@@ -166,7 +166,7 @@ class PlayState extends MusicBeatState
 	public var iconOffset:Int = 26;
 	public var displayedHealth(default, set):Float = 1;
 	function set_displayedHealth(value:Float){
-		if (!ClientPrefs.hideHud){
+		if (healthBar.alpha > 0){
 			healthBar.value = value;
 		}
 		displayedHealth = value;
@@ -586,8 +586,8 @@ class PlayState extends MusicBeatState
 
 		if (PauseSubState.songName != null)
 			shitToLoad.push({path: PauseSubState.songName, type: 'MUSIC'});
-		else if (ClientPrefs.pauseMusic != 'None')
-			shitToLoad.push({path: Paths.formatToSongPath(ClientPrefs.pauseMusic), type: 'MUSIC'});
+/* 		else if (ClientPrefs.pauseMusic != 'None')
+			shitToLoad.push({path: Paths.formatToSongPath(ClientPrefs.pauseMusic), type: 'MUSIC'}); */
 
 		if (ClientPrefs.timeBarType != 'Disabled')
 			shitToLoad.push({path: "timeBar"});
@@ -887,7 +887,8 @@ class PlayState extends MusicBeatState
 		scoreTxt.setFormat(Paths.font("calibri.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		scoreTxt.scrollFactor.set();
 		scoreTxt.borderSize = 1.25;
-		scoreTxt.visible = !ClientPrefs.hideHud;
+		scoreTxt.alpha = ClientPrefs.hudOpacity;
+		scoreTxt.visible = scoreTxt.alpha > 0;
 		add(scoreTxt);
 
 		//
@@ -978,14 +979,14 @@ class PlayState extends MusicBeatState
 			FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		}
 
-		Conductor.safeZoneOffset = ClientPrefs.safeFrames / 60 * 1000;
+		Conductor.safeZoneOffset = ClientPrefs.hitWindow;
 
 		////
 		var stageOpacity = new FlxSprite();
 
 		stageOpacity.makeGraphic(1,1,0xFFFFFFFF);
 		stageOpacity.color = 0xFF000000;
-		stageOpacity.alpha = 1 - ClientPrefs.stageOpacity;
+		stageOpacity.alpha = ClientPrefs.stageOpacity;
 		stageOpacity.cameras=[camStageUnderlay]; // just to force it above camGame but below camHUD
 		stageOpacity.screenCenter();
 		stageOpacity.scale.set(FlxG.width * 100, FlxG.height * 100);
@@ -1803,29 +1804,13 @@ class PlayState extends MusicBeatState
 						if (sustainNote.mustPress)
 						{
 							sustainNote.x += FlxG.width * 0.5; // general offset
-						}
-						else if(ClientPrefs.middleScroll)
-						{
-							sustainNote.x += 310;
-							if(daNoteData > 1) //Up and Right
-							{
-								sustainNote.x += FlxG.width * 0.5 + 25;
-							}
-						}
+						} 
 					}
 				}
 
 				if (swagNote.mustPress)
 				{
 					swagNote.x += FlxG.width * 0.5; // general offset
-				}
-				else if(ClientPrefs.middleScroll)
-				{
-					swagNote.x += 310;
-					if(daNoteData > 1) //Up and Right
-					{
-						swagNote.x += FlxG.width * 0.5 + 25;
-					}
 				}
 
 			}
@@ -2705,14 +2690,14 @@ class PlayState extends MusicBeatState
 				if(Math.isNaN(value) || value < 1) value = 1;
 				gfSpeed = value;
 			case 'Add Camera Zoom':
-				if(ClientPrefs.camZooms && FlxG.camera.zoom < 1.35) {
+				if(ClientPrefs.camZoomP > 0 && FlxG.camera.zoom < 1.35) {
 					var camZoom:Float = Std.parseFloat(value1);
 					var hudZoom:Float = Std.parseFloat(value2);
 					if(Math.isNaN(camZoom)) camZoom = 0.015;
 					if(Math.isNaN(hudZoom)) hudZoom = 0.03;
 
-					FlxG.camera.zoom += camZoom;
-					camHUD.zoom += hudZoom;
+					FlxG.camera.zoom += camZoom * ClientPrefs.camZoomP;
+					camHUD.zoom += hudZoom * ClientPrefs.camZoomP;
 				}
 			case 'Play Animation':
 				//trace('Anim to play: ' + value1);
@@ -4078,10 +4063,10 @@ class PlayState extends MusicBeatState
 			//notes.sort(FlxSort.byY, ClientPrefs.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
 		}
 
-		if (camZooming && ClientPrefs.camZooms && FlxG.camera.zoom < 1.35 && zoomEveryBeat > 0 && curBeat % zoomEveryBeat == 0)
+		if (camZooming && ClientPrefs.camZoomP>0 && FlxG.camera.zoom < 1.35 && zoomEveryBeat > 0 && curBeat % zoomEveryBeat == 0)
 		{
-			FlxG.camera.zoom += 0.015 * camZoomingMult;
-			camHUD.zoom += 0.03 * camZoomingMult;
+			FlxG.camera.zoom += 0.015 * camZoomingMult * ClientPrefs.camZoomP;
+			camHUD.zoom += 0.03 * camZoomingMult * ClientPrefs.camZoomP;
 		}
 
 		healthBar.iconScale = 1.2;
@@ -4471,8 +4456,8 @@ class FNFHealthBar extends FlxBar{
 
 		//
 		scrollFactor.set();
-		visible = !ClientPrefs.hideHud;
-		alpha = ClientPrefs.healthBarAlpha;
+		alpha = ClientPrefs.hpOpacity;
+		visible = alpha > 0;
 	}
 
 	public var iconScale(default, set) = 1.0;

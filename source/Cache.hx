@@ -130,7 +130,7 @@ class Cache
 		#end
 
 		#if MULTICORE_LOADING
-		var threadLimit:Int = FlxMath.minInt(shitToLoad.length, ClientPrefs.loadingThreads);
+		var threadLimit:Int = FlxMath.minInt(shitToLoad.length, Std.int(ClientPrefs.loadingThreads));
 		
 		if (threadLimit > 0){
 			// clear duplicates

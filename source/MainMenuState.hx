@@ -165,7 +165,7 @@ class MainMenuState extends MusicBeatState {
 						case 'freeplay':
 							MusicBeatState.switchState(new FreeplayState());
 						case 'options':
-							LoadingState.loadAndSwitchState(new options.OptionsState());
+							LoadingState.loadAndSwitchState(new newoptions.OptionsState());
 					}
 				});
 			}

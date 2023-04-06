@@ -25,7 +25,7 @@ import flixel.ui.FlxButton.FlxTypedButton;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import lime.app.Application;
-import options.OptionsState;
+import newoptions.OptionsState;
 import sowy.SowyBaseButton;
 
 using StringTools;
@@ -280,7 +280,7 @@ class OldMainMenuState extends MusicBeatState
 						case 'freeplay':
 							MusicBeatState.switchState(new FreeplayState());
 						case 'options':
-							LoadingState.loadAndSwitchState(new options.OptionsState());
+							LoadingState.loadAndSwitchState(new newoptions.OptionsState());
 					}
 				});
 			}

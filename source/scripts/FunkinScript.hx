@@ -83,16 +83,16 @@ class FunkinScript {
 		set('inGameOver', false);
 		
 		set('downscroll', ClientPrefs.downScroll);
-		set('middlescroll', ClientPrefs.middleScroll);
+		set('middlescroll', ClientPrefs.midScroll);
 		set('framerate', ClientPrefs.framerate);
 		set('ghostTapping', ClientPrefs.ghostTapping);
-		set('hideHud', ClientPrefs.hideHud);
+		set('hideHud', ClientPrefs.hudOpacity > 0);
 		set('timeBarType', ClientPrefs.timeBarType);
 		set('scoreZoom', ClientPrefs.scoreZoom);
-		set('cameraZoomOnBeat', ClientPrefs.camZooms);
+		set('cameraZoomOnBeat', ClientPrefs.camZoomP > 0);
 		set('flashingLights', ClientPrefs.flashing);
 		set('noteOffset', ClientPrefs.noteOffset);
-		set('healthBarAlpha', ClientPrefs.healthBarAlpha);
+		set('healthBarAlpha', ClientPrefs.hpOpacity);
 		set('noResetButton', ClientPrefs.noReset);
 		set('lowQuality', ClientPrefs.lowQuality);
 
