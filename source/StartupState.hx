@@ -55,6 +55,7 @@ class StartupState extends FlxState
 		Paths.music('freakyMenu');
 		#end
 
+		ClientPrefs.initialize();
 		ClientPrefs.load();
 
 		if (Main.fpsVar != null)

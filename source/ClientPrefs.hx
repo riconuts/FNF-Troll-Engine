@@ -464,7 +464,13 @@ class ClientPrefs
 		// trace(defaultKeys);
 	}
 
+	static var optionSave:FlxSave = new FlxSave();
+
 	static var manualLoads = ["gameplaySettings", "quantHSV", "arrowHSV", "comboOffset"];
+
+	public static function initialize()
+		optionSave.bind("options_v2");
+	
 
 	public static function save(?definitions:Map<String, OptionData>)
 	{
@@ -472,25 +478,25 @@ class ClientPrefs
 		{
 			for (key => val in definitions){
 				if (val.type == Number && val.data.exists("type") && val.data.get("type") == 'percent')
-					Reflect.setField(FlxG.save.data, key, val.value / 100);
+					Reflect.setField(optionSave.data, key, val.value / 100);
 				else
-					Reflect.setField(FlxG.save.data, key, val.value);
+					Reflect.setField(optionSave.data, key, val.value);
 				
 			}
 		}
 		else
 			for (name in options)
-				Reflect.setField(FlxG.save.data, name, Reflect.field(ClientPrefs, name));
+				Reflect.setField(optionSave.data, name, Reflect.field(ClientPrefs, name));
 
 		
 		// some dumb hardcoded saves
 		for (name in manualLoads)
-			Reflect.setField(FlxG.save.data, name, Reflect.field(ClientPrefs, name));
-/* 		FlxG.save.data.gameplaySettings = gameplaySettings;
-		FlxG.save.data.quantHSV = quantHSV;
-		FlxG.save.data.arrowHSV = arrowHSV;
-		FlxG.save.data.comboOffset = comboOffset; */
-		FlxG.save.flush();
+			Reflect.setField(optionSave.data, name, Reflect.field(ClientPrefs, name));
+/* 		optionSave.data.gameplaySettings = gameplaySettings;
+		optionSave.data.quantHSV = quantHSV;
+		optionSave.data.arrowHSV = arrowHSV;
+		optionSave.data.comboOffset = comboOffset; */
+		optionSave.flush();
 		var save:FlxSave = new FlxSave();
 		save.bind('controls_v2', 'ninjamuffin99'); // Placing this in a separate save so that it can be manually deleted without removing your Score and stuff
 		save.data.customControls = keyBinds;
@@ -500,15 +506,15 @@ class ClientPrefs
 	public static function load()
 	{
 		for (name in options){
-			if (Reflect.field(FlxG.save.data, name)!=null)
-				Reflect.setField(ClientPrefs, name, Reflect.field(FlxG.save.data, name));
+			if (Reflect.field(optionSave.data, name)!=null)
+				Reflect.setField(ClientPrefs, name, Reflect.field(optionSave.data, name));
 			else
 				Reflect.setField(ClientPrefs, name, ClientPrefs.defaultOptionDefinitions.get(name).value);
 		}
 
-		if (FlxG.save.data.gameplaySettings != null)
+		if (optionSave.data.gameplaySettings != null)
 		{
-			var savedMap:Map<String, Dynamic> = FlxG.save.data.gameplaySettings;
+			var savedMap:Map<String, Dynamic> = optionSave.data.gameplaySettings;
 			for (name => value in savedMap)
 			{
 				gameplaySettings.set(name, value);
@@ -517,14 +523,11 @@ class ClientPrefs
 
 		// some dumb hardcoded saves
 		for (name in manualLoads)
-			if (Reflect.field(FlxG.save.data, name) != null)
-				Reflect.setField(ClientPrefs, name, Reflect.field(FlxG.save.data, name));
+			if (Reflect.field(optionSave.data, name) != null)
+				Reflect.setField(ClientPrefs, name, Reflect.field(optionSave.data, name));
 
-/* 		gameplaySettings = FlxG.save.data.gameplaySettings;
-		quantHSV = FlxG.save.data.quantHSV;
-		arrowHSV = FlxG.save.data.arrowHSV;
-		comboOffset = FlxG.save.data.comboOffset; */
-
+		if (Main.fpsVar != null)
+			Main.fpsVar.visible = ClientPrefs.showFPS;
 
 		var save:FlxSave = new FlxSave();
 		save.bind('controls_v2', 'ninjamuffin99');

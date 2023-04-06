@@ -1,5 +1,6 @@
 package newoptions;
 
+import flixel.addons.transition.FlxTransitionableState;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 import flixel.group.FlxGroup.FlxTypedGroup;
@@ -319,19 +320,38 @@ class OptionsState extends MusicBeatState {
 
     var openedDropdown:Widget;
 
+	@:noCompletion
+	var _point:FlxPoint = FlxPoint.get();
+
+    function overlaps(object:FlxObject, ?camera:FlxCamera){
+		if (camera == null)
+			camera = optionCamera;
+
+		_point = FlxG.mouse.getPositionInCameraView(camera, _point);
+		if (camera.containsPoint(_point)){
+			_point = FlxG.mouse.getWorldPosition(camera, _point);
+			if (object.overlapsPoint(_point, true, camera))
+                return true;
+        }
+        
+        return false;
+    }
     override function create()
     {
 		//ClientPrefs.load();
         persistentDraw = true;
         persistentUpdate = true;
-		super.create();
+
 
 		mainCamera = new FlxCamera();
 		optionCamera = new FlxCamera();
 		optionCamera.bgColor.alpha = 0;
+        var transCamera = new FlxCamera();
+		transCamera.bgColor.alpha = 0; // JUST for the transition
 
         FlxG.cameras.reset(mainCamera);
         FlxG.cameras.add(optionCamera, false);
+		FlxG.cameras.add(transCamera, false);
      
         FlxG.mouse.visible = true;
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('newmenuu/optionsbg'));
@@ -437,6 +457,10 @@ class OptionsState extends MusicBeatState {
 		add(currentGroup);
         
 		checkWindows();
+		FlxTransitionableState.skipNextTransIn = false;
+		FlxTransitionableState.skipNextTransOut = false;
+
+		super.create();
        
     }
     
@@ -707,7 +731,7 @@ class OptionsState extends MusicBeatState {
 					checkbox.toggled = widget.optionData.value;
 
 				if (FlxG.mouse.justPressed){
-					if (FlxG.mouse.overlaps(optBox, optionCamera)){
+					if (overlaps(optBox)){
 /*                         checkbox.toggled = !checkbox.toggled;
                         widget.optionData.value = (checkbox.toggled);
 						onToggleChanged(widget.optionData.data.get("optionName"), checkbox.toggled); */
@@ -739,7 +763,7 @@ class OptionsState extends MusicBeatState {
 				if (FlxG.mouse.justPressed)
 				{
                     var interacted:Bool = false;
-					if (FlxG.mouse.overlaps(optBox, optionCamera)){
+					if (overlaps(optBox)){
 						if (openedDropdown==widget)
 						    openedDropdown = null;
                         else
@@ -751,7 +775,7 @@ class OptionsState extends MusicBeatState {
                         for (obj => opt in optionMap)
                         {
                             if(obj.isOnScreen(daCamera)){
-                                if (FlxG.mouse.overlaps(obj, daCamera) || FlxG.mouse.overlaps(boxes[obj.ID], daCamera))
+                                if (overlaps(obj, daCamera) || overlaps(boxes[obj.ID], daCamera))
                                 {
                                     //widget.optionData.value = (opt);
                                     interacted = true;
@@ -764,7 +788,7 @@ class OptionsState extends MusicBeatState {
                         }
 
                         if(!interacted){
-                            if (FlxG.mouse.overlaps(dropBox, daCamera))
+                            if (overlaps(dropBox, daCamera))
                                 interacted = true;
                             
                         }
@@ -776,7 +800,7 @@ class OptionsState extends MusicBeatState {
 
 				}
 
-				if (openedDropdown == widget && FlxG.mouse.overlaps(dropBox, daCamera)){
+				if (openedDropdown == widget && overlaps(dropBox, daCamera)){
                     var wheel = FlxG.mouse.wheel;
                     camFollow.y -= wheel * 35;
                     camFollowPos.y -= wheel * 35;
@@ -819,7 +843,7 @@ class OptionsState extends MusicBeatState {
 				var max:Float = widget.optionData.data.get("max");
                 var oldVal = widget.optionData.value;
 				var newVal = oldVal;
-				if (FlxG.mouse.justPressed && FlxG.mouse.overlaps(box, optionCamera) || FlxG.mouse.pressed && scrubbingBar == bar){
+				if (FlxG.mouse.justPressed && overlaps(box) || FlxG.mouse.pressed && scrubbingBar == bar){
 					scrubbingBar = bar;
                     var localX = FlxG.mouse.x - (box.x + optionCamera.x);
                     var value = FlxMath.lerp(min, max, localX / bar.frameWidth);
@@ -854,7 +878,7 @@ class OptionsState extends MusicBeatState {
 				bar.x = box.x + 4;
 				bar.y = box.y + 4;
 			case Button:
-				if (FlxG.mouse.justPressed && FlxG.mouse.overlaps(optBox, optionCamera))
+				if (FlxG.mouse.justPressed && overlaps(optBox))
 					onButtonPressed(widget.optionData.data.get("optionName"));
                 
 		}

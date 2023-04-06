@@ -3584,8 +3584,8 @@ class PlayState extends MusicBeatState
 		totalPlayed++;
 		RecalculateRating();
 
-		if (ClientPrefs.ghostTapping && !daNote.isSustainNote) // i missed this sound
-			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
+		if (!daNote.isSustainNote) // i missed this sound
+			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(ClientPrefs.missVolume * 0.9, ClientPrefs.missVolume * 1));
 
 		if(instakillOnMiss)
 			doDeathCheck(true);
@@ -3646,7 +3646,7 @@ class PlayState extends MusicBeatState
 		//totalPlayed++;
 		//RecalculateRating();
 
-		FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
+		FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(ClientPrefs.missVolume * 0.9, ClientPrefs.missVolume * 1));
 
 		for (field in playfields.members)
 		{
