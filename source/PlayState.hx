@@ -187,7 +187,7 @@ class PlayState extends MusicBeatState
 	public var combo:Int = 0;
 
 	public var ratingsData:Array<Rating> = [];
-	// public var epics:Int = 0;
+	public var epics:Int = 0;
 	public var sicks:Int = 0;
 	public var goods:Int = 0;
 	public var bads:Int = 0;
@@ -432,22 +432,29 @@ class PlayState extends MusicBeatState
 		for (i in 0...keysArray.length)
 			keysPressed.push(false);
 
-		//// Ratings
+		//// Judgements
 
-		/* sorry hooda
-		var rating:Rating = new Rating('epic');
-		rating.ratingMod = 1;
-		rating.score = 500;
-		rating.noteSplash = true;
-		ratingsData.push(rating);
-		*/
+		// un-sorry hooda :trollface:
+
+		// TODO: make highscore save differently depending on useEpics & judgement windows 
+		// (probably just turn the windows into a string and then use that when loading/saving high scores)
+
+		if(ClientPrefs.useEpics){
+			var rating:Rating = new Rating('epic');
+			rating.ratingMod = 1;
+			rating.score = 500;
+			rating.noteSplash = true;
+			ratingsData.push(rating);
+		}
+		
 
 		var rating:Rating = new Rating('sick');
-		/*
-		rating.ratingMod = 0.9825;
-		rating.score = 350;
-		rating.noteSplash = true;
-		*/
+		if(ClientPrefs.useEpics){
+			rating.ratingMod = 0.9;
+			// maybe make epics have the 350 score etc and make sicks, when epics are on, score less
+			// so that max scores stay the same
+
+		}
 		ratingsData.push(rating);
 
 		var rating:Rating = new Rating('good');
@@ -4277,7 +4284,7 @@ class PlayState extends MusicBeatState
 
 			// Rating FC
 			ratingFC = "";
-			//if (epics > 0) ratingFC = "EFC";
+			if (epics > 0) ratingFC = "EFC";
 			if (sicks > 0) ratingFC = "SFC";
 			if (goods > 0) ratingFC = "GFC";
 			if (bads > 0 || shits > 0) ratingFC = "FC";

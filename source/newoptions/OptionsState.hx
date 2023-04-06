@@ -226,6 +226,7 @@ class OptionsState extends MusicBeatState {
                     "timeOpacity",
                     "simpleJudge",
                     "scoreZoom",
+					"stageOpacity",
                     "customizeHUD"
                 ]
             ],
@@ -236,9 +237,9 @@ class OptionsState extends MusicBeatState {
                     "downScroll",
 					"midScroll",
                     "noteSplashes",
-                    "noteSkin",
 					"holdSubdivs",
 					"optimizeHolds",
+                    "noteSkin",
                     "customizeColours"
                 ]
             ]
@@ -254,7 +255,8 @@ class OptionsState extends MusicBeatState {
             [
                 "Display",
                 [
-		            "framerate"
+		            "framerate",
+                    
                 ]
             ],
             [

@@ -1,7 +1,7 @@
 package;
 
 import flixel.FlxG;
-
+import flixel.util.FlxSave;
 using StringTools;
 
 class Highscore
@@ -16,9 +16,33 @@ class Highscore
 	public static var songRating:Map<String, Float> = new Map<String, Float>();
 	#end
 
+	static var loadedID:String = '';
+	static var save:FlxSave = new FlxSave();
+
+	public static function getID(){
+		var idArray:Array<String> = [];
+		idArray.push(ClientPrefs.useEpics ? 't' : 'f');
+		var windows = ['sick', 'good', 'bad', 'max'];
+		if(ClientPrefs.useEpics)windows.insert(0, 'epic');
+		for(window in windows){
+			var realWindow = Reflect.field(ClientPrefs, window + "Window");
+			idArray.push(Std.string(realWindow));
+		}
+
+		return idArray.join("-");
+	}
+
+	static function updateSave(){
+		var id = getID();
+		if(loadedID != id){
+			loadedID = id;
+			save.bind("scores" + id);
+		}
+	}
 
 	public static function resetSong(song:String):Void
 	{
+		updateSave();
 		var daSong:String = formatSong(song);
 		setScore(daSong, 0);
 		setRating(daSong, 0);
@@ -26,6 +50,7 @@ class Highscore
 
 	public static function resetWeek(week:String):Void
 	{
+		updateSave();
 		var daWeek:String = formatSong(week);
 		setWeekScore(daWeek, 0);
 	}
@@ -48,6 +73,7 @@ class Highscore
 
 	public static function saveScore(song:String, score:Int = 0, ?rating:Float = -1):Void
 	{
+		updateSave();
 		var daSong:String = formatSong(song);
 
 		if (songScores.exists(daSong)) {
@@ -64,6 +90,7 @@ class Highscore
 
 	public static function saveWeekScore(week:String, score:Int = 0):Void
 	{
+		updateSave();
 		var daWeek:String = formatSong(week);
 
 		if (weekScores.exists(daWeek))
@@ -80,31 +107,35 @@ class Highscore
 	 */
 	static function setScore(song:String, score:Int):Void
 	{
+		updateSave();
 		// Reminder that I don't need to format this song, it should come formatted!
 		songScores.set(song, score);
-		FlxG.save.data.songScores = songScores;
-		FlxG.save.flush();
+		save.data.songScores = songScores;
+		save.flush();
 	}
 	static function setWeekScore(week:String, score:Int):Void
 	{
+		updateSave();
 		// Reminder that I don't need to format this song, it should come formatted!
 		weekScores.set(week, score);
-		FlxG.save.data.weekScores = weekScores;
-		FlxG.save.flush();
+		save.data.weekScores = weekScores;
+		save.flush();
 	}
 
 	static function setRating(song:String, rating:Float):Void
 	{
+		updateSave();
 		// Reminder that I don't need to format this song, it should come formatted!
 		songRating.set(song, rating);
-		FlxG.save.data.songRating = songRating;
-		FlxG.save.flush();
+		save.data.songRating = songRating;
+		save.flush();
 	}
 
 	static var formatSong = Paths.formatToSongPath;
 
 	public static function getScore(song:String):Int
 	{
+		updateSave();
 		var daSong:String = formatSong(song);
 		if (!songScores.exists(daSong))
 			setScore(daSong, 0);
@@ -114,6 +145,7 @@ class Highscore
 
 	public static function getRating(song:String):Float
 	{
+		updateSave();
 		var daSong:String = formatSong(song);
 		if (!songRating.exists(daSong))
 			setRating(daSong, 0);
@@ -123,6 +155,7 @@ class Highscore
 
 	public static function getWeekScore(week:String):Int
 	{
+		updateSave();
 		var daWeek:String = formatSong(week);
 		if (!weekScores.exists(daWeek))
 			setWeekScore(daWeek, 0);
@@ -132,17 +165,18 @@ class Highscore
 
 	public static function load():Void
 	{
-		if (FlxG.save.data.weekScores != null)
+		updateSave();
+		if (save.data.weekScores != null)
 		{
-			weekScores = FlxG.save.data.weekScores;
+			weekScores = save.data.weekScores;
 		}
-		if (FlxG.save.data.songScores != null)
+		if (save.data.songScores != null)
 		{
-			songScores = FlxG.save.data.songScores;
+			songScores = save.data.songScores;
 		}
-		if (FlxG.save.data.songRating != null)
+		if (save.data.songRating != null)
 		{
-			songRating = FlxG.save.data.songRating;
+			songRating = save.data.songRating;
 		}
 	}
 }
