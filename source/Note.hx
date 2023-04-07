@@ -106,7 +106,7 @@ class Note extends NoteObject
 
 	// kadeium
 	// TODO: Maayybbe rewrite this to be multipliers to judgement health n shit
-	public var ratingHealth:Map<String, Float> = ["sick" => 0.04, "good" => 0, "bad" => -0.03, "shit" => -0.06];
+	public var ratingHealth:Map<String, Float> = ["epic" => 0.04, "sick" => 0.04, "good" => 0, "bad" => -0.03, "shit" => -0.06];
 
 	// hold/roll shit
 	public var sustainMult:Float = 1;

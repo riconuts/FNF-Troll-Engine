@@ -351,7 +351,7 @@ class Character extends FlxSprite
 				}
 			} else if(specialAnim && animation.curAnim.finished)
 			{
-				trace("special done");
+				// trace("special done");
 				specialAnim = false;
 				dance();
 			}

@@ -330,10 +330,10 @@ class FreeplayState extends MusicBeatState
 			yScroll -= mouseWheel * 160 * speed;
 
 		var yuh = elapsed / (1/60);
-		if (controls.UI_UP){
+		if (controls.UI_UP || FlxG.keys.pressed.PAGEUP){
 			camFollow.y -= 25*yuh;
 		}
-		if (controls.UI_DOWN){
+		if (controls.UI_DOWN || FlxG.keys.pressed.PAGEDOWN){
 			camFollow.y += 25*yuh;
 		}
 
