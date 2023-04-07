@@ -41,12 +41,16 @@ class Highscore
 		var id = getID();
 		if(loadedID != id){
 			loadedID = id;
+			if(save.isBound)save.flush(); // makes sure it all saved
+
 			save.bind(id);
 
 			if (id == defaultID)
 			{
-				if (save.isEmpty())
+				if (save.isEmpty()){
 					save.mergeDataFrom("flixel", null, false, false);
+					save.flush();
+				}
 			}
 		}
 	}
