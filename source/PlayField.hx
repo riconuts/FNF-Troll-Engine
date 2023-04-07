@@ -340,14 +340,10 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 							daNote.tripTimer = 0;
 							daNote.tooLate=true;
 							daNote.wasGoodHit=false;
-							for(tail in daNote.tail){
-								if(!tail.wasGoodHit){
-									daNote.causedMiss = true;
-									if (!daNote.ignoreNote)
-										noteMissed.dispatch(daNote, this);
-									continue;
-									
-								}
+							for(tail in daNote.unhitTail){
+								tail.tooLate = true;
+								tail.blockHit = true;
+								tail.ignoreNote = true;
 							}
 						}else{
 							for (tail in daNote.unhitTail)
