@@ -17,27 +17,28 @@ using StringTools;
 import Discord.DiscordClient;
 #end
 
+typedef ChapterButton = {
+	var button:ChapterOption;
+	var border:FlxShapeBox;
+	var text:FlxText;
+}
+
 class StoryMenuState extends MusicBeatState
 {
 	public static var weekCompleted:Map<String, Bool> = new Map<String, Bool>();
-	public static var instance:StoryMenuState;
 
-	//public var camFollowPos:FlxObject;
-
-	final chapterSelectPositions:Array<Array<Int>> = [ // Screen positions for the chapter options
+	// Screen positions for the chapter options
+	final chapterSelectPositions:Array<Array<Int>> = [
 		[51, 109], [305, 109], [542, 109], [788, 109], [1034, 109],
 		[51, 417], [305, 417], [542, 417], [788, 417], [1034, 417]
 	];
-
-	var mainMenu = new FlxTypedGroup<FlxBasic>(); // group for the main menu where you select achapter!
-	
-	var funkyRectangle = new FlxShapeBox(0, 0, 206, 206, {thickness: 3, color: FlxColor.fromRGB(255, 242, 0)}, FlxColor.BLACK); // cool rectanlge used for transitions
-	var lastButton:ChapterOption; // used the square transition
-	var doingTransition = false; // to prevent unintended behaviour
-
-	var cornerLeftText:SowyTextButton;
+	var chapterButtons:Array<ChapterButton> = [];
 
 	public var cameFromChapterMenu = false;
+	var doingTransition = false;
+
+	static var curSelected:Int = 0;
+	var selectionArrow:FlxSprite;
 
 	override function create()
 	{
@@ -45,6 +46,7 @@ class StoryMenuState extends MusicBeatState
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
 		#end
+
 		#if !FLX_NO_MOUSE
 		FlxG.mouse.visible = true;
 		#end
@@ -138,36 +140,56 @@ class StoryMenuState extends MusicBeatState
 					}
 					this.transOut = SquareTransitionSubstate;
 
-					lastButton = newButton;
 					var nState = new ChapterMenuState(newButton.data);
 					nState.cameFromStoryMenu = true;
 					MusicBeatState.switchState(nState);
 				}
 			}
 
-			mainMenu.add(textTitle);
-			mainMenu.add(newButton);
-			mainMenu.add(yellowBorder);			
+			chapterButtons.push({
+				button: newButton,
+				text: textTitle,
+				border: yellowBorder
+			});
+
+			add(textTitle);
+			add(newButton);
+			add(yellowBorder);			
 		}
+
+		selectionArrow = new FlxSprite(0,0, Paths.image("selectionArrow"));
+		selectionArrow.color = 0xFFF4CC34;
+		add(selectionArrow);
+
+		changeSelection(curSelected, true);
 		
-		cornerLeftText = new SowyTextButton(15, 720, 0, "← BACK", 32, goBack);
+		var cornerLeftText = new SowyTextButton(15, 720, 0, "← BACK", 32, goBack);
 		cornerLeftText.label.setFormat(Paths.font("calibri.ttf"), 32, 0xFFF4CC34, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE);
 		cornerLeftText.y -= cornerLeftText.height + 15;
-		mainMenu.add(cornerLeftText);
-		
-		add(mainMenu);
-		funkyRectangle.visible = false;
-		add(funkyRectangle);
-		
-		instance = this;
+		add(cornerLeftText);
 	}
 
-	override function closeSubState()
+	function changeSelection(val:Int = 0, ?absolute:Bool = false)
 	{
-		super.closeSubState();
+		var prev = curSelected;
+		curSelected = absolute == true ? val : curSelected + val;
+
+		if (curSelected < 0 || curSelected >= chapterButtons.length)
+			curSelected = prev;
+
+		/*
+		if (curSelected < 0)
+			curSelected += chapterButtons.length;
+		else if (curSelected >= chapterButtons.length)
+			curSelected -= chapterButtons.length;
+		*/
+
+		var curButton = chapterButtons[curSelected];
+		selectionArrow.y = curButton.border.y + curButton.border.height + 10;
+		selectionArrow.x = curButton.border.x + (curButton.border.width - selectionArrow.width) * 0.5; 
 	}
 
-	public function goBack()
+	function goBack()
 	{
 		if (doingTransition)
 			return;
@@ -180,6 +202,20 @@ class StoryMenuState extends MusicBeatState
 	{
 		if (controls.BACK)
 			goBack();
+
+		if (controls.UI_LEFT_P)
+			changeSelection(-1);
+		if (controls.UI_RIGHT_P)
+			changeSelection(1);
+		if (controls.UI_DOWN_P)
+			changeSelection(5);
+		if (controls.UI_UP_P)
+			changeSelection(-5);
+		
+		if (controls.ACCEPT){
+			var curButton = chapterButtons[curSelected].button;
+			curButton.onUp.callback();
+		}
 
 		super.update(elapsed);
 	}

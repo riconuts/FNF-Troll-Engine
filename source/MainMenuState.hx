@@ -1,5 +1,6 @@
 package;
 
+import flixel.input.FlxPointer;
 import flixel.util.FlxTimer;
 import flixel.addons.display.FlxBackdrop;
 import flixel.ui.FlxButton.FlxTypedButton;
@@ -180,6 +181,28 @@ class MainMenuState extends MusicBeatState {
 		}
 	}
 
+	var came = false;
+	var squeaks = 0;
+	private function kirbfSqueak(spr:FlxSprite){
+		if (came) return false;
+
+		squeaks++;
+
+		if (squeaks > 4){
+			FlxG.sound.play(Paths.sound("pop"));
+			spr.loadGraphic(Paths.image("newmenuu/mainmenu/cover_freeplay_alt"));
+			
+			came = true;
+		}
+		else{
+			FlxG.sound.play(Paths.soundRandom("squeak", 1, 3), 1, false, true, function(){
+				squeaks--;
+			});
+		}
+
+		return true;
+	}
+
 	function mouseClickEvent(?e)
 	{
 		if (selectedSomethin)
@@ -191,8 +214,24 @@ class MainMenuState extends MusicBeatState {
 		}
 
 		for (spr in menuItems){
-			if (spr.ID == curSelected && FlxG.mouse.overlaps(spr))
+			if (spr.ID == curSelected && FlxG.mouse.overlaps(spr)){
+	
+				//// Kirb BF
+				if (spr.ID == optionShit.indexOf("freeplay")){
+					var clickPos = FlxG.mouse.getPositionInCameraView();
+
+					if (clickPos.x >= spr.x + 26 && 
+						clickPos.x <= spr.x + 132 &&
+						clickPos.y >= spr.y + 4 &&  
+						clickPos.y <= spr.y + 58 &&
+						kirbfSqueak(spr)
+					)
+						return;
+				}
+
+				////
 				return onSelected();
+			}	
 		}
 	}
 	function updateMouseIcon(?e)
