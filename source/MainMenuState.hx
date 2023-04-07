@@ -223,10 +223,11 @@ class MainMenuState extends MusicBeatState {
 					if (clickPos.x >= spr.x + 26 && 
 						clickPos.x <= spr.x + 132 &&
 						clickPos.y >= spr.y + 4 &&  
-						clickPos.y <= spr.y + 58 &&
-						kirbfSqueak(spr)
-					)
+						clickPos.y <= spr.y + 58
+					){
+						kirbfSqueak(spr);
 						return;
+					}
 				}
 
 				////
