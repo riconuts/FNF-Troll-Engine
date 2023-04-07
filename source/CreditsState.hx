@@ -13,11 +13,9 @@ import Discord.DiscordClient;
 
 using StringTools;
 
-// 2nuts freeplaystate lol
-
 class CreditsState extends MusicBeatState
 {	
-	var bg:FlxSprite = new FlxSprite();
+	var bg:FlxSprite;
 
     var hintBg:FlxSprite;
 	var hintText:FlxText;
@@ -56,6 +54,11 @@ class CreditsState extends MusicBeatState
 		return curSelected;
 	}
 
+	override function switchTo(nextState){
+		persistentUpdate = false;
+		return super.switchTo(nextState);
+	}
+
 	override function create()
 	{
 		#if desktop
@@ -63,7 +66,7 @@ class CreditsState extends MusicBeatState
 		DiscordClient.changePresence("In the Menus", null);
 		#end
 
-		persistentUpdate = false;
+		persistentUpdate = true;
 		
 		Paths.clearStoredMemory();
 		
@@ -76,7 +79,7 @@ class CreditsState extends MusicBeatState
 		camFollowPos.setPosition(camFollow.x, camFollow.y);
 
 		////
-		bg.loadGraphic(Paths.image("newmenuu/creditsbg"));
+		bg = new FlxSprite().loadGraphic(Paths.image("newmenuu/creditsbg"));
 		
 		if (FlxG.height < FlxG.width)
 			bg.setGraphicSize(0, FlxG.height);
@@ -84,7 +87,15 @@ class CreditsState extends MusicBeatState
 			bg.setGraphicSize(FlxG.width, 0);
 
 		bg.screenCenter().scrollFactor.set();
-		add(bg);	
+		add(bg);
+
+		var backdrops = new flixel.addons.display.FlxBackdrop(Paths.image('grid'));
+		backdrops.velocity.set(30, -30);
+		backdrops.scrollFactor.set();
+		backdrops.blend = MULTIPLY;
+		backdrops.alpha = 0.25;
+		backdrops.x -= 10;
+		add(backdrops);
 
         ////
         function loadLine(line:String, ?folder:String)
@@ -175,6 +186,7 @@ class CreditsState extends MusicBeatState
 		{
 			var title:Alphabet = titleArray[id];
             var data = dataArray[id];
+			var icon = iconArray[id];
 
             if (data == null){ // for the category titles, whatevrr !!!
                 
@@ -182,7 +194,8 @@ class CreditsState extends MusicBeatState
 				title.alpha = 1;
                 title.targetX = 90;
                 title.color = 0xFFFFFFFF;
-                title.blend = flash.display.BlendMode.NORMAL;
+
+				icon.color = 0xFFFFFFFF;
 
                 var descText = data[2];
                 if (descText == null){
@@ -213,15 +226,16 @@ class CreditsState extends MusicBeatState
 				camFollow.y = title.y + title.height * 0.5 + 20;
 			}else{
 				var difference = Math.abs(curSelected - id);
+				
 				title.targetX = 90 + difference * -20;
-				title.alpha = 1 - difference * 0.15;
-                var c = difference * 0.15 + 0.05;
-                title.color = FlxColor.fromRGBFloat(c,c,c);
-                title.blend = flash.display.BlendMode.MULTIPLY;
+				title.alpha = (1 - difference * 0.15);
+				title.color = 0xFF000000;
+				
+				var br = 1-(difference * 0.15 + 0.05);
+				icon.color = FlxColor.fromRGBFloat(br,br,br);
 			}
 
-			var icon = iconArray[id];
-			if (icon != null) 
+			if (icon != null)
 				icon.alpha = title.alpha;
 		}
 	}

@@ -59,7 +59,7 @@ class ClientPrefs
 				display: "Directional Camera",
 				desc: "When toggled, the camera will move with the focused character's animations",
 				type: Toggle,
-				value: true,
+				value: false,
 				data: []
 			},
 			"judgePreset" => {
@@ -528,6 +528,8 @@ class ClientPrefs
 
 		if (Main.fpsVar != null)
 			Main.fpsVar.visible = ClientPrefs.showFPS;
+
+		FlxSprite.defaultAntialiasing = ClientPrefs.globalAntialiasing;
 
 		var save:FlxSave = new FlxSave();
 		save.bind('controls_v2', 'ninjamuffin99');

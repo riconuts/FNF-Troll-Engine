@@ -1,5 +1,7 @@
 package;
 
+import flixel.util.FlxTimer;
+import flixel.addons.display.FlxBackdrop;
 import flixel.ui.FlxButton.FlxTypedButton;
 import openfl.events.MouseEvent;
 import editors.MasterEditorMenu;
@@ -35,6 +37,8 @@ class MainMenuState extends MusicBeatState {
  		'gallery'
 	];
 
+	var magenta:FlxBackdrop;
+	var backdrop:FlxBackdrop;
 	var menuItems:FlxTypedGroup<ZSprite>;
     var buttons:Array<ZSprite> = [];
 	var artBoxes:Array<ZSprite> = [];
@@ -46,6 +50,11 @@ class MainMenuState extends MusicBeatState {
 
 	inline function toRad(input:Float)
 		return FlxAngle.TO_RAD * input;
+
+	override function switchTo(nextState){
+		persistentUpdate = false;
+		return super.switchTo(nextState);
+	}
 
     override function create()
     {
@@ -60,6 +69,7 @@ class MainMenuState extends MusicBeatState {
         FlxG.mouse.visible = true;
 		FlxG.camera.bgColor = FlxColor.BLACK;
 
+		////
 		var bg:ZSprite = cast new ZSprite().loadGraphic(Paths.image('newmenuu/mainmenu/menuBG'));
 		bg.scrollFactor.set();
 		bg.updateHitbox();
@@ -67,6 +77,25 @@ class MainMenuState extends MusicBeatState {
 		bg.antialiasing = ClientPrefs.globalAntialiasing;
 		add(bg);
 
+		/*
+		var grad = flixel.util.FlxGradient.createGradientFlxSprite(FlxG.width, FlxG.height, [0xFF9BDCED, 0xFF6A94E5]);
+		add(grad);
+		*/
+
+		backdrop = new FlxBackdrop(Paths.image("grid"));
+		backdrop.velocity.set(30, 30);
+		backdrop.color = 0xFF467aeb;
+		backdrop.alpha = 0.175;
+		add(backdrop);
+
+		magenta = new FlxBackdrop(Paths.image("grid"));
+		magenta.velocity.set(30, 30);
+		magenta.color = 0xFFFF0078;
+		magenta.alpha = 0.6;
+		magenta.visible = false;
+		add(magenta);
+
+		////
 		menuItems = new FlxTypedGroup<ZSprite>();
         for(option in optionShit)
 		{
@@ -122,6 +151,8 @@ class MainMenuState extends MusicBeatState {
 		selectedSomethin = true;
 
 		FlxG.sound.play(Paths.sound('confirmMenu'));
+
+		bgFlicker();
 
 		menuItems.forEach(function(spr){
 			FlxTween.tween(spr, {alpha: 0}, 0.4, {
@@ -191,6 +222,26 @@ class MainMenuState extends MusicBeatState {
 		super.destroy();
 	}
 
+	var magTwn:FlxTween = null;
+	function magentaFlicker(?tmr){
+		if (magTwn != null) magTwn.cancel();
+		
+		magenta.alpha = 0.5;
+		magTwn = FlxTween.tween(magenta, {alpha: 0}, 0.15, {ease: FlxEase.circIn});
+	}
+	
+	function bgFlicker() {
+		magenta.visible = true;
+		
+		if (ClientPrefs.flashing){
+			magentaFlicker();
+			new FlxTimer().start(0.3, magentaFlicker, Std.int(1/0.3));
+		}else{
+			magenta.alpha = 0;
+			FlxTween.tween(magenta, {alpha: 0.6}, 1.1, {ease: FlxEase.quintOut});
+		}
+	}
+
 	function onSelected()
 	{
 		if (selectedSomethin)
@@ -208,6 +259,8 @@ class MainMenuState extends MusicBeatState {
 		FlxG.mouse.visible = false;
 
 		FlxTween.tween(FlxG.camera, {zoom: 1.14}, 0.85, {ease: FlxEase.quartOut});
+
+		bgFlicker();
 
 		for (spr in sideItems){
 			FlxTween.tween(spr, {alpha: 0}, 0.4, {
@@ -325,7 +378,10 @@ class MainMenuState extends MusicBeatState {
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
 
 		if (!selectedSomethin){
-			if (controls.ACCEPT)
+			if (controls.BACK){
+				selectedSomethin = true;
+				MusicBeatState.switchState(new TitleState());
+			}else if (controls.ACCEPT)
 				onSelected();
 			#if desktop
 			else if (FlxG.keys.anyJustPressed(debugKeys))

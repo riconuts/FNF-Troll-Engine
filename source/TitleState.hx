@@ -385,11 +385,12 @@ class TitleState extends MusicBeatState
 						MusicBeatState.menuVox.destroy();
 						MusicBeatState.menuVox = null;
 					}
-
+					
+					
 					MusicBeatState.playMenuMusic(0, true);
-
-					FlxG.sound.music.fadeIn(4, 0, 0.7);
+					//FlxG.sound.music.fadeIn(4, 0, 0.7);
 				case 2:
+					MusicBeatState.playMenuMusic(1, true);
 					createCoolText(['THE FNF TGT TEAM']);
 				case 4:
 					addMoreText('presents');

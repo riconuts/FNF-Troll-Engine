@@ -344,23 +344,32 @@ class OptionsState extends MusicBeatState {
         persistentDraw = true;
         persistentUpdate = true;
 
-
 		mainCamera = new FlxCamera();
 		optionCamera = new FlxCamera();
 		optionCamera.bgColor.alpha = 0;
-        var transCamera = new FlxCamera();
-		transCamera.bgColor.alpha = 0; // JUST for the transition
 
         FlxG.cameras.reset(mainCamera);
         FlxG.cameras.add(optionCamera, false);
+        FlxG.cameras.setDefaultDrawTarget(mainCamera, true);
+
+        // JUST for the transition
+        var transCamera = new FlxCamera();
+		transCamera.bgColor.alpha = 0;
 		FlxG.cameras.add(transCamera, false);
-     
+        CustomFadeTransition.nextCamera = transCamera;
+        
+        this.transIn = null;
+        this.transOut = null;
+
+        FlxTransitionableState.skipNextTransIn = false;
+        FlxTransitionableState.skipNextTransOut = false;
+        
         FlxG.mouse.visible = true;
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('newmenuu/optionsbg'));
 		bg.screenCenter(XY);
         add(bg);
 
-        var optionMenu = new FlxSprite(84, 80).makeGraphic(920, 648, FlxColor.GRAY);
+        var optionMenu = new FlxSprite(84, 80).makeGraphic(920, 648, FlxColor.fromRGB(82, 82, 82));
 		optionMenu.alpha = 0.75;
 		add(optionMenu);
 
@@ -378,10 +387,12 @@ class OptionsState extends MusicBeatState {
         var lastX:Float = optionMenu.x;
 		for (idx in 0...optionOrder.length){
             var name = optionOrder[idx];
+            
             var button = new FlxSprite(lastX, optionMenu.y - 3).makeGraphic(1, 44, FlxColor.WHITE);
 			button.ID = idx;
             button.color = idx == 0 ? FlxColor.fromRGB(128, 128, 128) : FlxColor.fromRGB(82, 82, 82);
             button.alpha = 0.75;
+
             var text = new FlxText(button.x, button.y, 0, name.toUpperCase(), 16);
 			text.setFormat(Paths.font("calibrib.ttf"), 32, 0xFFFFFFFF, FlxTextAlign.CENTER);
 			var width = text.fieldWidth < 86 ? 86 : text.fieldWidth;
@@ -459,8 +470,6 @@ class OptionsState extends MusicBeatState {
 		add(currentGroup);
         
 		checkWindows();
-		FlxTransitionableState.skipNextTransIn = false;
-		FlxTransitionableState.skipNextTransOut = false;
 
 		super.create();
        
@@ -471,9 +480,7 @@ class OptionsState extends MusicBeatState {
         var widget:Widget = {
             type: data.type,
 			optionData: data,
-            data: [
-			    "objects" => new FlxTypedGroup<FlxObject>()
-            ]
+            data: ["objects" => new FlxTypedGroup<FlxObject>()]
         }
 
 		var objects:FlxTypedGroup<FlxObject> = widget.data.get("objects");
@@ -486,7 +493,7 @@ class OptionsState extends MusicBeatState {
                 checkbox.updateHitbox();
 				var text = new FlxText(0, 0, 0, "off", 16);
 				text.setFormat(Paths.font("calibri.ttf"), 24, 0xFFFFFFFF, FlxTextAlign.LEFT);
-                trace(data.value);
+                // trace(data.value);
 				checkbox.toggled = data.value != null ? cast data.value : false;
 
                 if(Reflect.hasField(ClientPrefs, name))
