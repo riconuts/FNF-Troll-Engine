@@ -4,13 +4,11 @@ Echolocated::Echolocated::Director, observes from the distance in case we fuck u
 Hyper::Hyper::Co-Director and main artist. Drew Hammerhead Gf, cutscenes, drew Hammerhead Gf and credit icons. Did I mention Hammerhe-::https://twitter.com/HyperingOut::0xFF9752CC
 Niixx::Niixx::Co-Director, stolen from a niche TGT mod you haven't heard of. Voiced multiple trolls including the Fist in Poo Clan.::https://www.youtube.com/@NiixxVGM::0xFF37CF62
 Hooda The Antagonist::Hooda::THE antagonist herself, helped mixed and improve Lonely Looser, AHTK and all the other songs you already know. Wants No Villains in this world.::https://www.youtube.com/@HoodatheAntagonist::0xFFFFA0E2
-4mbr0s3::4mbr0s3::fuckin uhhh coder neb fix this later::
 Riconuts::Riconuts::Beloved femboy programmer. Anything new *masculine*::https://twitter.com/riconut::0xFF5B46E6
 Nebula The Zorua::Nebula_The_Zorua::Bribed to redo the TFB modchart through TGT-funded gay furry porn. Now helps code in general like the jukebox.::https://twitter.com/nebula_zorua::0xFFBA2DC4
 YoshiMaximus::YoshiMaximus::Made Mario and Luigi icons as well as the Hammerhead bg, I LOVE HAMMERHEAD. Big help for coding.::https://twitter.com/YoshiMaximus::0xFF37CF62
 Max XD::Max_XD::Animated Dark Sonic, originally animated Hammerhead Mario and GF. Composed the instrumental for AHTK before it got a touch up.::https://twitter.com/AssholeNormal::0xFFAFE054
 STA::STA::He hasn't done anything for this update, but is currently lying dormant in the time chambers cooking up new songs as we speak.::https://www.youtube.com/STA_lmao
-Minsan::minsan::The hero we needed when we thought there was none. Composed Scars'N'Stars for the No Villains B-Sides competition.::https://twitter.com/le_starmin
 Mmushrooms::Mmushrooms::Musician, originally made Awesome Plan before it got scrapped. Very sad.::https://twitter.com/mushroomwith2ms::0xFFFFE2E2
 OneGorgon::OneGorgon::Musician, made Lonely Looser and the original vocals for AHTK. @The Mike Gorgon progress?::https://twitter.com/OneGorgon::0xFFFFC371
 Bendyman::Bendyman::Made art for side story thumbnails, also Shadow's icon. Crazy...::https://twitter.com/BendymanReal
@@ -36,7 +34,9 @@ NOODLEGUM::noodlegum::The iconic Sonic va in the flesh. Don't ask them to say no
 RaiGuyyy::RaiGuy::Also stolen from another TGT mod (rest in piece Trlled...), voiced Girlfriend and Boyfriend. True gender goals.::https://twitter.com/RaiGuyyy::0xFFFFC371
 Pasteluluu::Luluu::She didn't actually do anything for the mod she just drew troll gf a lot and it was really hot like wow.........::https://twitter.com/pasteluluu::0xFFCCC24E
 Dawn::Dawn::Trans woman or some shit idk. She helps playtests, very nice.::https://www.youtube.com/channel/UCEvk60uiib_r8cMbiXrUnDQ::0xFFFF9DFA
-
+Contributors
+4mbr0s3::4mbr0s3::Inspiration for the modchart system's implementation, and created the hold note rendering system and some of the fake 3D rendering.::https://www.youtube.com/@4mbr0s3-2
+Minsan::minsan::The hero we needed when we thought there was none. Composed Scars'N'Stars for the No Villains B-Sides competition.::https://twitter.com/le_starmin
 Former Team Members
 Bepixel::Bepixel::Fun fact, animated the original troll Gf on the speaker for the original reboot. Also the fucker who delayed Impostor V4.::https://twitter.com/BepixelOfficial::0xFF37CF62
 Staticlysm::Staticlysm::Made Shadow and background assets for Die Batsards in V3.::https://twitter.com/staticlysm::0xFFAAAAAA
