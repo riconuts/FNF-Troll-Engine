@@ -387,15 +387,15 @@ class MainMenuState extends MusicBeatState {
 			var desiredX = FlxMath.fastSin(input) * 450;
 			var desiredY = -(FlxMath.fastCos(input) * 350);
 
-			var shit = FlxMath.fastSin(input);
+			var shit = 1 - (.3 * Math.abs(FlxMath.fastSin(input)));
 
-			var scaleX = FlxMath.lerp(obj.scale.x, 1 - (.3 * Math.abs(shit)), lerpVal);
-			var scaleY = FlxMath.lerp(obj.scale.y, 1 - (.3 * Math.abs(shit)), lerpVal);
+			var scaleX = FlxMath.lerp(obj.scale.x, shit, lerpVal);
+			var scaleY = FlxMath.lerp(obj.scale.y, shit, lerpVal);
 
 			obj.scale.set(scaleX, scaleY);
 			obj.updateHitbox();
-			obj.x = FlxMath.lerp(obj.x, originX - obj.width / 2 + desiredX, lerpVal);
-			obj.y = FlxMath.lerp(obj.y, originY - obj.height / 2 + desiredY, lerpVal);
+			obj.x = FlxMath.lerp(obj.x, originX - obj.width * 0.5 + desiredX, lerpVal);
+			obj.y = FlxMath.lerp(obj.y, originY - obj.height * 0.5 + desiredY, lerpVal);
 
 			if (but != null)
 			{
@@ -403,12 +403,12 @@ class MainMenuState extends MusicBeatState {
 				but.alpha = obj.alpha;
 				but.visible = obj.visible;
 				
-				var scaleX = FlxMath.lerp(but.scale.x, 1 - (.3 * Math.abs(shit)), lerpVal);
-				var scaleY = FlxMath.lerp(but.scale.y, 1 - (.3 * Math.abs(shit)), lerpVal);
+				var scaleX = FlxMath.lerp(but.scale.x, shit, lerpVal);
+				var scaleY = FlxMath.lerp(but.scale.y, shit, lerpVal);
 
 				but.scale.set(scaleX, scaleY);
 				but.updateHitbox();
-				but.x = (obj.x - (but.width - obj.width) / 2);
+				but.x = (obj.x - (but.width - obj.width) * 0.5);
 				but.y = (obj.y + (415 * scaleX));
 			}
 		}

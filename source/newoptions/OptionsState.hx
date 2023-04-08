@@ -367,11 +367,17 @@ class OptionsState extends MusicBeatState {
         FadeTransitionSubstate.nextCamera = transCamera;
         
         FlxG.mouse.visible = true;
+
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('newmenuu/optionsbg'));
 		bg.screenCenter(XY);
         add(bg);
 
-        var optionMenu = new FlxSprite(84, 80).makeGraphic(920, 648, FlxColor.fromRGB(82, 82, 82));
+        var backdrop = new flixel.addons.display.FlxBackdrop(Paths.image("grid"));
+		backdrop.velocity.set(30, 30);
+		backdrop.alpha = 0.175;
+		add(backdrop);
+
+        var optionMenu = new FlxSprite(84, 80, CoolUtil.makeOutlinedGraphic(920, 648, FlxColor.fromRGB(82, 82, 82), 2, FlxColor.fromRGB(70, 70, 70)));
 		optionMenu.alpha = 0.75;
 		add(optionMenu);
 

@@ -278,8 +278,7 @@ class ComicReader extends MusicBeatState
 		if (controls.BACK) MusicBeatState.switchState(new GalleryMenuState());
 
 		//
-		var yuh = elapsed / (1/60);
-		var speed = yuh * (pressed.SHIFT ? baseSpeed * 2 : baseSpeed);
+		var speed:Float = (pressed.SHIFT ? baseSpeed * 2 : baseSpeed);
 
 		var mouseWheel = FlxG.mouse.wheel;
 		var yScroll:Float = 0;
@@ -298,6 +297,8 @@ class ComicReader extends MusicBeatState
 			zoom += mouseWheel * 0.1;
 		else
 			yScroll -= mouseWheel * speed * 8;
+
+		speed *= elapsed / (1/60);
 
 		if (pressed.UP || pressed.W || pressed.PAGEUP)
 			camFollow.y -= speed;

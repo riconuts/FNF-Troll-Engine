@@ -1,14 +1,13 @@
 package;
 
+import openfl.geom.Rectangle;
+import flixel.graphics.FlxGraphic;
+import flixel.util.FlxColor;
 import flixel.FlxG;
 import flixel.math.FlxPoint;
-import flixel.system.FlxSound;
-import lime.utils.AssetLibrary;
-import lime.utils.AssetManifest;
-import lime.utils.Assets as LimeAssets;
-import openfl.utils.Assets;
 
 using StringTools;
+
 #if sys
 import sys.FileSystem;
 import sys.io.File;
@@ -19,6 +18,22 @@ import openfl.utils.Assets;
 
 class CoolUtil
 {
+	public static function makeOutlinedGraphic(Width:Int, Height:Int, Color:FlxColor, LineThickness:Int, OutlineColor:FlxColor)
+	{
+		var rectangle = FlxGraphic.fromRectangle(Width, Height, OutlineColor, true);
+		rectangle.bitmap.fillRect(
+			new Rectangle(
+				LineThickness, 
+				LineThickness, 
+				Width-LineThickness*2, 
+				Height-LineThickness*2
+			),
+			Color
+		);
+
+		return rectangle;
+	};
+
 	inline public static function scale(x:Float, l1:Float, h1:Float, l2:Float, h2:Float):Float
 		return ((x - l1) * (h2 - l2) / (h1 - l1) + l2);
 
