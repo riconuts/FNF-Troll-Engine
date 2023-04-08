@@ -28,8 +28,15 @@ class EaseEvent extends ModEvent {
 
 	override function run(curStep:Float)
 	{
+		if (mod == null && !finished){
+			trace("no mod!");
+			finished = true;
+		}
 		if (curStep <= endStep)
 		{
+
+			
+
 			if (this.startVal == null)
 				this.startVal = mod.getValue(player);
 			
