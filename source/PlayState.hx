@@ -2203,6 +2203,7 @@ class PlayState extends MusicBeatState
 	public var canReset:Bool = true;
 	var startedCountdown:Bool = false;
 	var canPause:Bool = true;
+	var resyncTimer:Float = 0;
 
 	override public function update(elapsed:Float)
 	{
@@ -2311,7 +2312,60 @@ class PlayState extends MusicBeatState
 		}
 
 		////
+		if (startedCountdown)
+		{
+			var addition:Float = elapsed * 1000;
+			if(FlxG.sound.music.playing){
+				if(FlxG.sound.music.time == Conductor.lastSongPos)
+					resyncTimer += addition;
+				else
+					resyncTimer = 0;
+				
+				Conductor.songPosition = FlxG.sound.music.time + resyncTimer;
+				Conductor.lastSongPos = FlxG.sound.music.time;
+				if (Math.abs(vocals.time - FlxG.sound.music.time) > 25)
+					vocals.time = FlxG.sound.music.time;
+				
+			}else
+				Conductor.songPosition += addition;
+		}
+
 		if (startingSong)
+		{
+			if (startedCountdown && Conductor.songPosition >= 0)
+				startSong();
+			else if(!startedCountdown)
+				Conductor.songPosition = -Conductor.crochet * 5;
+		}
+		else
+		{
+			if (!paused)
+			{
+				songTime += FlxG.game.ticks - previousFrameTime;
+				previousFrameTime = FlxG.game.ticks;
+
+
+				if(updateTime) {
+					var curTime:Float = Conductor.songPosition - ClientPrefs.noteOffset;
+					if(curTime < 0) curTime = 0;
+					songPercent = (curTime / songLength);
+
+					var songCalc:Float = (songLength - curTime);
+					if(ClientPrefs.timeBarType == 'Time Elapsed') songCalc = curTime;
+
+					var secondsTotal:Int = Math.floor(songCalc / 1000);
+					if(secondsTotal < 0) secondsTotal = 0;
+
+					if(ClientPrefs.timeBarType != 'Song Name')
+						timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
+
+				}
+			}
+
+			// Conductor.lastSongPos = inst.time;
+		}
+
+/* 		if (startingSong)
 		{
 			if (startedCountdown)
 			{
@@ -2357,7 +2411,7 @@ class PlayState extends MusicBeatState
 
 			// Conductor.lastSongPos = FlxG.sound.music.time;
 		}
-
+ */
 		if (camZooming)
 		{
 			var lerpVal = CoolUtil.boundTo(1 - (elapsed * 3.125 * camZoomingDecay), 0, 1);
@@ -4033,11 +4087,11 @@ class PlayState extends MusicBeatState
 	{
 		super.stepHit();
 
-		if (Math.abs(FlxG.sound.music.time - (Conductor.songPosition - Conductor.offset)) > 20
+/* 		if (Math.abs(FlxG.sound.music.time - (Conductor.songPosition - Conductor.offset)) > 20
 			|| (SONG.needsVoices && Math.abs(vocals.time - (Conductor.songPosition - Conductor.offset)) > 20))
 		{
 			resyncVocals();
-		}
+		} */
 
 		if(curStep == lastStepHit) {
 			return;
