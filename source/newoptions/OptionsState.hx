@@ -338,6 +338,14 @@ class OptionsState extends MusicBeatState {
         
         return false;
     }
+
+    var transCamera:FlxCamera; // JUST for the transition
+
+    override public function switchTo(to){
+        FadeTransitionSubstate.nextCamera = transCamera;
+        return super.switchTo(to);
+    }
+
     override function create()
     {
 		//ClientPrefs.load();
@@ -352,17 +360,11 @@ class OptionsState extends MusicBeatState {
         FlxG.cameras.add(optionCamera, false);
         FlxG.cameras.setDefaultDrawTarget(mainCamera, true);
 
-        // JUST for the transition
-        var transCamera = new FlxCamera();
+        transCamera = new FlxCamera();
 		transCamera.bgColor.alpha = 0;
 		FlxG.cameras.add(transCamera, false);
-        CustomFadeTransition.nextCamera = transCamera;
-        
-        this.transIn = null;
-        this.transOut = null;
 
-        FlxTransitionableState.skipNextTransIn = false;
-        FlxTransitionableState.skipNextTransOut = false;
+        FadeTransitionSubstate.nextCamera = transCamera;
         
         FlxG.mouse.visible = true;
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('newmenuu/optionsbg'));
@@ -382,7 +384,6 @@ class OptionsState extends MusicBeatState {
 		optionCamera.targetOffset.y = optionCamera.height / 2;
 
 		optionCamera.follow(camFollowPos);
-
 
         var lastX:Float = optionMenu.x;
 		for (idx in 0...optionOrder.length){

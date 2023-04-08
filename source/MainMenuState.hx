@@ -62,6 +62,8 @@ class MainMenuState extends MusicBeatState {
 		persistentUpdate = true;
 		persistentDraw = true;
 
+		FadeTransitionSubstate.nextCamera = FlxG.camera; // AAAA
+
 		super.create();
 		
 		debugKeys = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));

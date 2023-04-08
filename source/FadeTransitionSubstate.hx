@@ -60,12 +60,13 @@ class FadeTransitionSubstate extends TransitionSubstate
 
 
 	override public function start(status: TransitionStatus){
-		var cam = nextCamera!=null?nextCamera:(defaultCamera!=null?defaultCamera:FlxG.cameras.list[FlxG.cameras.list.length - 1]);
+		var cam = nextCamera!=null ? nextCamera : (defaultCamera!=null ? defaultCamera : FlxG.cameras.list[FlxG.cameras.list.length-1]);
 		cameras = [cam];
 
 		nextCamera = null;
-		//trace('transitioning $status');
-		curStatus=status;
+		// trace('transitioning $status');
+
+		curStatus = status;
 		var yStart:Float = 0;
 		var yEnd:Float = 0;
 		var duration:Float = .48;

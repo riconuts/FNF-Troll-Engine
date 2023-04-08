@@ -56,7 +56,7 @@ class NoteOffsetState extends MusicBeatState
 		FlxG.cameras.add(camOther);
 
 		FlxCamera.defaultCameras = [camGame];
-		CustomFadeTransition.nextCamera = camOther;
+		FadeTransitionSubstate.nextCamera = camOther;
 
 		persistentUpdate = true;
 		FlxG.sound.pause();
