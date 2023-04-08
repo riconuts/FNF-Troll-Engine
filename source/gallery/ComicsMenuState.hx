@@ -169,7 +169,16 @@ class ComicReader extends MusicBeatState
 		loadPanel(pageData.name);
 
 		//
+		var head = curPanel.y - 24 - 18;
 		var tail = curPanel.y + curPanel.height + 24;	
+
+		var listPage = new SowyTextButton(curPanel.getMidpoint().x, head, 0, "Page List", 18);
+		listPage.label.font = Paths.font("consola.ttf");
+		listPage.label.underline = true;
+		listPage.x -= listPage.frameWidth * 0.5;
+		listPage.y -= 18;
+		listPage.scrollFactor.set(1, 1);
+		add(listPage);
 
 		var listPage = new SowyTextButton(curPanel.getMidpoint().x, tail, 0, "Page List", 18);
 		listPage.label.font = Paths.font("consola.ttf");
@@ -179,31 +188,46 @@ class ComicReader extends MusicBeatState
 		add(listPage);
 
 		if (pageData.prevPage != null){
-			var prevPage = new SowyTextButton(0, tail, 0, "← Page", 18, function(){
+			function goPrevPage(){
 				pageData = pageData.prevPage;
 				MusicBeatState.resetState();
-			});
+			}
+
+			var prevPage = new SowyTextButton(curPanel.x + 18, head, 0, "← Page", 18, goPrevPage);
 			prevPage.label.font = Paths.font("consola.ttf");
 			prevPage.label.underline = true;
+			prevPage.scrollFactor.set(1, 1);
+			prevPage.y -= 18;
+			add(prevPage);
 
-			prevPage.x = curPanel.x + 18;
-
+			var prevPage = new SowyTextButton(prevPage.x, tail, 0, "← Page", 18, goPrevPage);
+			prevPage.label.font = Paths.font("consola.ttf");
+			prevPage.label.underline = true;
 			prevPage.scrollFactor.set(1, 1);
 			add(prevPage);
 		}
 
 		if (pageData.nextPage != null){
-			var nextPage = new SowyTextButton(0, tail, 0, "Page →", 18, function(){
+			function goNextPage(){
 				pageData = pageData.nextPage;
 				MusicBeatState.resetState();
-			});
+			}
+
+			var nextPage = new SowyTextButton(0, head, 0, "Page →", 18, goNextPage);
 			nextPage.label.font = Paths.font("consola.ttf");
 			nextPage.label.underline = true;
-
+			nextPage.scrollFactor.set(1, 1);
 			nextPage.x = curPanel.x + curPanel.width - nextPage.width - 18;
+			nextPage.y -= 18;
+			add(nextPage);
 
+			nextPage = new SowyTextButton(nextPage.x, tail, 0, "Page →", 18, goNextPage);
+			nextPage.label.font = Paths.font("consola.ttf");
+			nextPage.label.underline = true;
 			nextPage.scrollFactor.set(1, 1);
 			add(nextPage);
+
+
 		}
 
 		super.create();
@@ -254,7 +278,8 @@ class ComicReader extends MusicBeatState
 		if (controls.BACK) MusicBeatState.switchState(new GalleryMenuState());
 
 		//
-		var speed = pressed.SHIFT ? baseSpeed * 2 : baseSpeed;
+		var yuh = elapsed / (1/60);
+		var speed = yuh * (pressed.SHIFT ? baseSpeed * 2 : baseSpeed);
 
 		var mouseWheel = FlxG.mouse.wheel;
 		var yScroll:Float = 0;
@@ -274,9 +299,9 @@ class ComicReader extends MusicBeatState
 		else
 			yScroll -= mouseWheel * speed * 8;
 
-		if (pressed.UP || pressed.W)
+		if (pressed.UP || pressed.W || pressed.PAGEUP)
 			camFollow.y -= speed;
-		if (pressed.DOWN || pressed.S)
+		if (pressed.DOWN || pressed.S || pressed.PAGEDOWN)
 			camFollow.y += speed;
 
 		if (pressed.LEFT || pressed.A)
