@@ -202,7 +202,7 @@ class JukeboxState extends MusicBeatState {
     inline function updateDiscord(){
         #if desktop
         if (FlxG.sound.music.playing)
-            DiscordClient.changePresence('Listening to: ${songData[idx].songName}', null);
+            DiscordClient.changePresence('Listening to: ${songData[playIdx].songName}', null);
         else
             DiscordClient.changePresence('In the Menus', null);
         #end

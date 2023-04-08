@@ -183,7 +183,7 @@ class StoryMenuState extends MusicBeatState
 		else if (curSelected >= chapterButtons.length)
 			curSelected -= chapterButtons.length;
 		*/
-		
+
 		var curButton = chapterButtons[curSelected];
 		selectionArrow.y = curButton.border.y + curButton.border.height + 10;
 		selectionArrow.x = curButton.border.x + (curButton.border.width - selectionArrow.width) * 0.5; 
@@ -193,6 +193,8 @@ class StoryMenuState extends MusicBeatState
 	{
 		if (doingTransition)
 			return;
+
+		curSelected = 0;
 		
 		FlxG.sound.play(Paths.sound('cancelMenu'));
 		MusicBeatState.switchState(new MainMenuState());
