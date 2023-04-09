@@ -1735,6 +1735,10 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
+		if(eventNotes.length > 1)
+			eventNotes.sort(sortByTime);
+		
+
 
 		for(subEvent in getEvents()){
 			try{
@@ -1745,9 +1749,7 @@ class PlayState extends MusicBeatState
 				trace(e);
 			}
 		}
-		if(eventNotes.length > 1) { //No need to sort if there's a single one or none at all
-			eventNotes.sort(sortByTime);
-		}
+
 
 		speedChanges.sort(svSort);
 
@@ -1893,10 +1895,6 @@ class PlayState extends MusicBeatState
 				field.removeNote(note);
 
 		}
-
-		if(eventNotes.length > 1) //No need to sort if there's a single one or none at all
-			eventNotes.sort(sortByTime);
-
 		checkEventNote();
 		generatedMusic = true;
 	}
