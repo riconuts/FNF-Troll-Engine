@@ -12,6 +12,39 @@ class ColorSwap
 	public var daAlpha(default, set):Float = 1;
 	public var flash(default, set):Float = 0;
 
+	public var flashR(default, set):Float = 1;
+	public var flashG(default, set):Float = 1;
+	public var flashB(default, set):Float = 1;
+	public var flashA(default, set):Float = 1;
+
+	private function set_flashR(value:Float)
+	{
+		flashR = value;
+		shader.flashColor.value[0] = flashR;
+		return flashR;
+	}
+
+	private function set_flashG(value:Float)
+	{
+		flashG = value;
+		shader.flashColor.value[1] = flashG;
+		return flashG;
+	}
+
+	private function set_flashB(value:Float)
+	{
+		flashB = value;
+		shader.flashColor.value[2] = flashB;
+		return flashB;
+	}
+
+	private function set_flashA(value:Float)
+	{
+		flashA = value;
+		shader.flashColor.value[3] = flashA;
+		return flashA;
+	}
+
 	private function set_daAlpha(value:Float)
 	{
 		daAlpha = value;
@@ -50,6 +83,7 @@ class ColorSwap
 	public function new()
 	{
 		shader.uTime.value = [0, 0, 0];
+		shader.flashColor.value = [1, 1, 1, 1];
 		shader.daAlpha.value = [1];
 		shader.flash.value = [0];
 		shader.awesomeOutline.value = [false];
@@ -64,6 +98,7 @@ class ColorSwapShader extends FlxShader
 		uniform vec3 uTime;
 		uniform float daAlpha;
 		uniform float flash;
+		uniform vec4 flashColor;
 		uniform bool awesomeOutline;
 
 		const float offset = 1.0 / 128.0;
@@ -133,7 +168,7 @@ class ColorSwapShader extends FlxShader
 				}
 			}
 			if(flash != 0.0){
-				color = mix(color,vec4(1.0,1.0,1.0,1.0),flash) * color.a;
+				color = mix(color,flashColor,flash) * color.a;
 			}
 			color *= daAlpha;
 			gl_FragColor = color;

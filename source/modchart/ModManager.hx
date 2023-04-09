@@ -39,7 +39,7 @@ class ModManager {
 		quickRegister(new LocalRotateModifier(this, 'local'));
 		quickRegister(new SubModifier("noteSpawnTime", this));
 		quickRegister(new SubModifier("drawDistance", this));
-
+		quickRegister(new SubModifier("cover", this));
 		for (i in 0...4)
 			quickRegister(new SubModifier("noteSpawnTime" + i, this));
 
@@ -62,6 +62,11 @@ class ModManager {
 		setValue("xmod", 1, mN);
 		for (i in 0...4)
 			setValue('xmod$i', 1, mN);
+
+		setValue("flashR", 1, mN);
+		setValue("flashG", 1, mN);
+		setValue("flashB", 1, mN);
+		setValue("flashA", 1, mN);
 	}
 
 

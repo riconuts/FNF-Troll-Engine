@@ -185,10 +185,17 @@ class PlayState extends MusicBeatState
 
 	public var grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 
+	public var stageOpacity:FlxSprite;
+	
 	////
 	public var ratingTxtGroup = new FlxTypedGroup<RatingSprite>();
 	public var comboNumGroup = new FlxTypedGroup<RatingSprite>();
 	public var timingTxt:FlxText; // TODO: replace this with the combo numbers
+	
+	// We could also make it calibri or another custom font?
+	// Since as you said, combo numbers could be hard to read
+	// (We could also add a dropdown for it? idk lol)
+	// -neb
 
 	private var curSong:String = "";
 
@@ -944,12 +951,13 @@ class PlayState extends MusicBeatState
 			comboNumGroup.add(RatingSprite.newNumber()).kill();
 		
 		timingTxt = new FlxText();
+		timingTxt.setFormat(Paths.font("calibri.ttf"), 28, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		timingTxt.cameras = [camHUD];
 		timingTxt.scrollFactor.set();
 		timingTxt.borderColor = FlxColor.BLACK;
 		timingTxt.borderStyle = OUTLINE;
 		timingTxt.borderSize = 1;
-		timingTxt.size = 20;
+		timingTxt.size = 28;
 		timingTxt.alpha = 0;
 
 		add(ratingTxtGroup);
@@ -1037,7 +1045,7 @@ class PlayState extends MusicBeatState
 		Conductor.safeZoneOffset = ClientPrefs.hitWindow;
 
 		////
-		var stageOpacity = new FlxSprite();
+		stageOpacity = new FlxSprite();
 
 		stageOpacity.makeGraphic(1,1,0xFFFFFFFF);
 		stageOpacity.color = 0xFF000000;
@@ -2388,6 +2396,7 @@ class PlayState extends MusicBeatState
 		} */
 		
 
+		stageOpacity.alpha = FlxMath.lerp(ClientPrefs.stageOpacity, 1, (modManager.getValue("cover", 0)));
 		super.update(elapsed);
 
 		////
@@ -3326,6 +3335,8 @@ class PlayState extends MusicBeatState
 		////
 		var rating:RatingSprite;
 
+		var time = (Conductor.stepCrochet * 0.001);
+
 		if (ClientPrefs.simpleJudge){
 			rating = lastJudge;
 			rating.revive();
@@ -3343,8 +3354,8 @@ class PlayState extends MusicBeatState
 					if (!rating.alive)
 						return;
 
-					rating.tween = FlxTween.tween(rating.scale, {x: 0, y: 0}, 0.2, {
-						startDelay: 0.6,
+					rating.tween = FlxTween.tween(rating.scale, {x: 0, y: 0}, time, {
+						startDelay: time * 16,
 						ease: FlxEase.quadIn,
 						onComplete: function(tween:FlxTween){rating.kill();}
 					});
@@ -3379,19 +3390,44 @@ class PlayState extends MusicBeatState
 		msTotal += hitTime;
 		msNumber++;
 
-		timingTxt.text = '${FlxMath.roundDecimal(hitTime, 2)}ms';
-		timingTxt.color = switch(daRating.image){
-			case "epic" | "sick":
-				FlxColor.CYAN;
-			case "good":
-				FlxColor.GREEN;
-			case "bad" | "shit":
-				FlxColor.RED;
-			default:
-				FlxColor.WHITE;
-		};
-		timingTxt.screenCenter();
-		timingTxt.alpha = 1;
+		if(ClientPrefs.showMS && (field==null || !field.autoPlayed)){
+			timingTxt.text = '${FlxMath.roundDecimal(hitTime, 2)}ms';
+			FlxTween.cancelTweensOf(timingTxt);
+			FlxTween.cancelTweensOf(timingTxt.scale);
+			timingTxt.screenCenter();
+			timingTxt.y -= 10;
+			timingTxt.scale.set(1, 1);
+			timingTxt.visible=true;
+			FlxTween.tween(timingTxt, {
+				y: timingTxt.y + 10
+			}, 0.1,
+			{
+				onComplete:function(t:FlxTween){
+					FlxTween.tween(timingTxt.scale, {x: 0, y: 0}, time, {
+						ease: FlxEase.quadIn,
+						onComplete: function(twn:FlxTween)
+						{
+							timingTxt.visible = false;
+						},
+
+						startDelay: time * 16
+					});
+				}
+			});
+			timingTxt.color = switch(daRating.image){
+				case "epic":
+					0xFFba82e8;
+				case "sick":
+					0xFF87EDF5;
+				case "good":
+					0xFF86F36B;
+				case "bad" | "shit":
+					0xFFFF0000;
+				default:
+					FlxColor.WHITE;
+			};
+			timingTxt.alpha = 1;
+		}
 
 		////
 		if (ClientPrefs.simpleJudge){
@@ -3412,6 +3448,16 @@ class PlayState extends MusicBeatState
 			numScore.revive();
 			numScore.loadGraphic(Paths.image('num' + i));
 
+			numScore.color = switch(ratingFC){
+				case 'EFC':
+					0xFFba82e8;
+				case 'SFC':
+					0xFF87EDF5;
+				case 'GFC':
+					0xFF86F36B;
+				default:
+					FlxColor.WHITE;
+			};
 			numScore.screenCenter();
 			numScore.x += ClientPrefs.comboOffset[2] + 43 * daLoop;
 			numScore.y -= ClientPrefs.comboOffset[3];

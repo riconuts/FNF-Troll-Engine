@@ -739,7 +739,7 @@ class NoteField extends FlxObject
 		if (!render)
 			return null;
 		
-		var alpha = hold.alpha * modManager.getAlpha(curDecBeat, 1, hold, modNumber, hold.noteData);
+		var alpha = modManager.getAlpha(curDecBeat, hold.alpha, hold, modNumber, hold.noteData);
 		if(alpha==0)return null;
 
 		var lastMe = null;
@@ -791,6 +791,7 @@ class NoteField extends FlxObject
 				bot[1]
 			];
 
+			
 			verts = verts.concat([
 				quad[0].x, quad[0].y,
 				quad[1].x, quad[1].y,
@@ -878,7 +879,7 @@ class NoteField extends FlxObject
 
 		var width = sprite.frameWidth * sprite.scale.x;
 		var height = sprite.frameHeight * sprite.scale.y;
-		var alpha = sprite.alpha * modManager.getAlpha(curDecBeat, 1, sprite, modNumber, sprite.noteData);
+		var alpha = modManager.getAlpha(curDecBeat, sprite.alpha, sprite, modNumber, sprite.noteData);
 		if(alpha==0)return null;
 		var quad = [
 			new Vector3(-width / 2, -height / 2, 0), // top left

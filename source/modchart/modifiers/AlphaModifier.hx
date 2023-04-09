@@ -90,9 +90,13 @@ class AlphaModifier extends NoteModifier {
     if((obj is Note)){
       var note:Note = cast obj;
 			var speed = PlayState.instance.songSpeed * note.multSpeed * modMgr.getValue("xmod", player);
-      var yPos:Float = 50 + ((Conductor.visualPosition - note.visualTime) * speed);
-
+      var yPos:Float = 50 - ((Conductor.visualPosition - note.visualTime) * speed);
       note.colorSwap.flash = 0;
+      note.colorSwap.flashR = getSubmodValue("flashR", player);
+			note.colorSwap.flashG = getSubmodValue("flashG", player);
+			note.colorSwap.flashB = getSubmodValue("flashB", player);
+			note.colorSwap.flashA = getSubmodValue("flashA", player);
+
 			var alphaMod = 
       (1 - getSubmodValue("alpha",player)) 
       * (1 - getSubmodValue('alpha${note.noteData}',player)) 
@@ -100,7 +104,7 @@ class AlphaModifier extends NoteModifier {
       * (1 - getSubmodValue('noteAlpha${note.noteData}', player));
       var vis = getVisibility(yPos, player, note);
 
-      if (getSubmodValue("dontUseStealthGlow", player) == 0)
+			if (getSubmodValue("hideStealthGlow", player) == 0)
       {
 				alpha *= getRealAlpha(vis);
 				note.colorSwap.flash = getGlow(vis);
@@ -124,7 +128,7 @@ class AlphaModifier extends NoteModifier {
 	}
 
   override function getSubmods(){
-    var subMods:Array<String> = ["noteAlpha", "alpha", "hidden","hiddenOffset","sudden","suddenOffset","blink","randomVanish","dark","useStealthGlow","stealthPastReceptors"];
+    var subMods:Array<String> = ["flashR", "flashG", "flashB", "flashA", "noteAlpha", "alpha", "hidden","hiddenOffset","sudden","suddenOffset","blink","randomVanish","dark","hideStealthGlow","stealthPastReceptors"];
     for(i in 0...4){
 			subMods.push('noteAlpha$i');
 			subMods.push('alpha$i');

@@ -65,7 +65,6 @@ class ScaleModifier extends NoteModifier {
 			if (note.isSustainNote)
 				scale.y = 1;
 		}
-		//note.scale.copyFrom(scale);
 		vert.x *= scale.x;
 		vert.y *= scale.y;
 		scale.putWeak();

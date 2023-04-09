@@ -226,13 +226,15 @@ class OptionsState extends MusicBeatState {
             [
                 "HUD",
                 [
-		            "timeBarType",
+                    "timeBarType",
 		            "hudOpacity",
                     "hpOpacity",
                     "timeOpacity",
                     "simpleJudge",
                     "scoreZoom",
 					"stageOpacity",
+					"showMS",
+                    // "hitbar", // (I wanna add this but its not done yet lol)
                     "customizeHUD"
                 ]
             ],

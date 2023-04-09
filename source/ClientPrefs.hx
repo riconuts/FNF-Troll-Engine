@@ -288,6 +288,15 @@ class ClientPrefs
 				value: "Column",
 				data: ["options" => ["Column", "Quants"]]
 			},
+			"showMS" => {
+				display: "Show Timing",
+				desc: "When toggled, when you hit a note the milliseconds at which you hit it will be visible.",
+				type: Toggle,
+				value: false,
+				data: []
+			},
+
+			// judgment-related (gameplay)
 			"epicWindow" => {
 				display: "Epic Window",
 				desc: "The hit window to hit an Epic.",

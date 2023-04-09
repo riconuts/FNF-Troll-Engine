@@ -57,6 +57,10 @@ class PerspectiveModifier extends NoteModifier {
 
 	override function modifyVert(beat:Float, vert:Vector3, idx:Int, sprite:FlxSprite, pos:Vector3, player:Int, data:Int):Vector3
 	{
+		if((sprite is Note)){
+			var shit:Note = cast sprite;
+			if(shit.isSustainNote)return vert;
+		}
 		var origin = new Vector3(FlxG.width/2, FlxG.height/2); // vertex origin
 		var fieldPos = new Vector3(-getSubmodPercent("fieldX", player) / 100, -getSubmodPercent("fieldY", player) / 100, 1280 + getSubmodPercent("fieldZ", player) / 100); // playfield pos
 		var originMod = vert.add(pos).subtract(origin); // moves the vertex to the appropriate position on screen based on origin
