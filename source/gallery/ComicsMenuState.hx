@@ -18,6 +18,9 @@ typedef ChapterData = {
 	var ?nextChapter:ChapterData;
 }
 typedef PageData = {
+	/**
+		ChapterData to which this page belongs to. 
+	**/
 	var chapter:ChapterData;
 	var name:String;
 
@@ -27,16 +30,19 @@ typedef PageData = {
 
 class ComicsMenuState extends MusicBeatState
 {
-	public var data:Array<ChapterData> = [];
+	static var data:Null<Array<ChapterData>> = null;
+	static var curChapter:Int = 0;
 
-	private var textOptionArray = [];
+	var options = [];
+	var curSelected:Int = 0;
 
-	override public function create()
-	{
-		//// GET THE CUTSCENES
+	static function loadData()
+	{	
 		var lastChapter:ChapterData = null;
 		var lastPage:PageData = null;
-		
+
+		data = [];
+
 		#if MODS_ALLOWED
 		for (modDir in Paths.getModDirectories())
 		{
@@ -85,23 +91,72 @@ class ComicsMenuState extends MusicBeatState
 			}
 		}
 		#end
+	}
 
-		/*
-		for (sowy in data){
-			for (page in sowy.pages){
-				trace(sowy.directory, page.name);
-			}
+	inline static function cleanupData()
+	{
+		data = null;
+	}
+
+	override public function create()
+	{
+		#if !FLX_NO_MOUSE
+		FlxG.mouse.visible = true;
+		#end
+
+		//// GET THE CUTSCENES
+		if (data == null)
+			loadData();
+
+		var curData:ChapterData = data[curChapter];
+		var curPages:Array<PageData> = curData.pages;
+
+		var chapterNameTxt = new FlxText(0, 5, 0, "CHAPTER NAME GOES HERE", 18);
+		chapterNameTxt.font = Paths.font("consola.ttf");
+		chapterNameTxt.screenCenter(X);
+		add(chapterNameTxt);
+
+		var coverArt = new FlxSprite(0, chapterNameTxt.y + chapterNameTxt.height+ 24, ChapterMenuState.getChapterCover(curData.directory));
+		coverArt.screenCenter(X);
+		add(coverArt);
+
+		var tail = coverArt.y + coverArt.height + 20;
+
+		for (idx in 0...curPages.length){
+			var page:PageData = curData.pages[idx];
+			
+			////
+			var pageTxt = new sowy.TGTTextButton(
+				0, 
+				tail + 20*idx, 
+				0, 
+				page.name, 
+				18, 
+				function()
+				{
+					MusicBeatState.switchState(new ComicReader(page));
+				}
+			);
+			pageTxt.scrollFactor.set(1, 1);
+			pageTxt.label.font = Paths.font("consola.ttf");
+			pageTxt.label.underline = true;
+			pageTxt.screenCenter(X);
+			add(pageTxt);
+
+			options.push(pageTxt);
 		}
-		*/
 
 		super.create();
+	}
 
-		MusicBeatState.switchState(new ComicReader(data[0].pages[0]));
+	function goBack(){
+		cleanupData();
+		MusicBeatState.switchState(new GalleryMenuState());
 	}
 
 	override public function update(e)
 	{
-		if (controls.BACK) MusicBeatState.switchState(new GalleryMenuState());
+		if (controls.BACK) goBack();
 		super.update(e);
 	}
 }
@@ -128,14 +183,6 @@ class ComicReader extends MusicBeatState
 
 		if (Page != null)
 			pageData = Page;
-	}
-
-	override function add(Object:FlxBasic)
-	{
-		if (Std.isOfType(Object, FlxSprite))
-			cast(Object, FlxSprite).antialiasing = ClientPrefs.globalAntialiasing;
-
-		return super.add(Object);
 	}
 
 	override function create()
@@ -172,7 +219,7 @@ class ComicReader extends MusicBeatState
 		var head = curPanel.y - 24 - 18;
 		var tail = curPanel.y + curPanel.height + 24;	
 
-		var listPage = new SowyTextButton(curPanel.getMidpoint().x, head, 0, "Page List", 18);
+		var listPage = new TGTTextButton(curPanel.getMidpoint().x, head, 0, "Page List", 18);
 		listPage.label.font = Paths.font("consola.ttf");
 		listPage.label.underline = true;
 		listPage.x -= listPage.frameWidth * 0.5;
@@ -180,7 +227,7 @@ class ComicReader extends MusicBeatState
 		listPage.scrollFactor.set(1, 1);
 		add(listPage);
 
-		var listPage = new SowyTextButton(curPanel.getMidpoint().x, tail, 0, "Page List", 18);
+		var listPage = new TGTTextButton(curPanel.getMidpoint().x, tail, 0, "Page List", 18);
 		listPage.label.font = Paths.font("consola.ttf");
 		listPage.label.underline = true;
 		listPage.x -= listPage.frameWidth * 0.5;
@@ -193,14 +240,14 @@ class ComicReader extends MusicBeatState
 				MusicBeatState.resetState();
 			}
 
-			var prevPage = new SowyTextButton(curPanel.x + 18, head, 0, "← Page", 18, goPrevPage);
+			var prevPage = new TGTTextButton(curPanel.x + 18, head, 0, "← Page", 18, goPrevPage);
 			prevPage.label.font = Paths.font("consola.ttf");
 			prevPage.label.underline = true;
 			prevPage.scrollFactor.set(1, 1);
 			prevPage.y -= 18;
 			add(prevPage);
 
-			var prevPage = new SowyTextButton(prevPage.x, tail, 0, "← Page", 18, goPrevPage);
+			var prevPage = new TGTTextButton(prevPage.x, tail, 0, "← Page", 18, goPrevPage);
 			prevPage.label.font = Paths.font("consola.ttf");
 			prevPage.label.underline = true;
 			prevPage.scrollFactor.set(1, 1);
@@ -213,7 +260,7 @@ class ComicReader extends MusicBeatState
 				MusicBeatState.resetState();
 			}
 
-			var nextPage = new SowyTextButton(0, head, 0, "Page →", 18, goNextPage);
+			var nextPage = new TGTTextButton(0, head, 0, "Page →", 18, goNextPage);
 			nextPage.label.font = Paths.font("consola.ttf");
 			nextPage.label.underline = true;
 			nextPage.scrollFactor.set(1, 1);
@@ -221,7 +268,7 @@ class ComicReader extends MusicBeatState
 			nextPage.y -= 18;
 			add(nextPage);
 
-			nextPage = new SowyTextButton(nextPage.x, tail, 0, "Page →", 18, goNextPage);
+			nextPage = new TGTTextButton(nextPage.x, tail, 0, "Page →", 18, goNextPage);
 			nextPage.label.font = Paths.font("consola.ttf");
 			nextPage.label.underline = true;
 			nextPage.scrollFactor.set(1, 1);
@@ -275,7 +322,7 @@ class ComicReader extends MusicBeatState
 		var justPressed = FlxG.keys.justPressed;
 		var pressed = FlxG.keys.pressed;
 
-		if (controls.BACK) MusicBeatState.switchState(new GalleryMenuState());
+		if (controls.BACK) MusicBeatState.switchState(new ComicsMenuState());
 
 		//
 		var speed:Float = (pressed.SHIFT ? baseSpeed * 2 : baseSpeed);

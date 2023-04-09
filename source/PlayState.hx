@@ -185,9 +185,10 @@ class PlayState extends MusicBeatState
 
 	public var grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 
-	// does this even make a difference
+	////
 	public var ratingTxtGroup = new FlxTypedGroup<RatingSprite>();
 	public var comboNumGroup = new FlxTypedGroup<RatingSprite>();
+	public var timingTxt:FlxText; // TODO: replace this with the combo numbers
 
 	private var curSong:String = "";
 
@@ -941,10 +942,19 @@ class PlayState extends MusicBeatState
 		ratingTxtGroup.add(lastJudge).kill();
 		for (i in 0...3)
 			comboNumGroup.add(RatingSprite.newNumber()).kill();
-
+		
+		timingTxt = new FlxText();
+		timingTxt.cameras = [camHUD];
+		timingTxt.scrollFactor.set();
+		timingTxt.borderColor = FlxColor.BLACK;
+		timingTxt.borderStyle = OUTLINE;
+		timingTxt.borderSize = 1;
+		timingTxt.size = 20;
+		timingTxt.alpha = 0;
 
 		add(ratingTxtGroup);
 		add(comboNumGroup);
+		add(timingTxt);
 
 		// init shit
 		health = 1;
@@ -3263,6 +3273,9 @@ class PlayState extends MusicBeatState
 	var lastJudge:RatingSprite;
 	var lastCombos:Array<RatingSprite> = [];
 
+	var msNumber = 0;
+	var msTotal = 0.0;
+
 	private function popUpScore(note:Note = null, field:PlayField=null):Void
 	{
 		if(field==null){
@@ -3270,7 +3283,8 @@ class PlayState extends MusicBeatState
 				field = getFieldFromNote(note);
 		}
 
-		var noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset);
+		var hitTime = note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset;
+		var noteDiff:Float = Math.abs(hitTime);
 		//trace(noteDiff);
 
 		vocals.volume = 1;
@@ -3361,6 +3375,24 @@ class PlayState extends MusicBeatState
 
 		ratingTxtGroup.remove(rating, true);
 		ratingTxtGroup.add(rating);
+
+		////
+		msTotal += hitTime;
+		msNumber++;
+
+		timingTxt.text = '${FlxMath.roundDecimal(hitTime, 2)}ms';
+		timingTxt.color = switch(daRating.image){
+			case "epic" | "sick":
+				FlxColor.CYAN;
+			case "good":
+				FlxColor.GREEN;
+			case "bad" | "shit":
+				FlxColor.RED;
+			default:
+				FlxColor.WHITE;
+		};
+		timingTxt.screenCenter();
+		timingTxt.alpha = 1;
 
 		////
 		if (ClientPrefs.simpleJudge){
@@ -4151,6 +4183,8 @@ class PlayState extends MusicBeatState
 
 	private var preventLuaRemove:Bool = false;
 	override function destroy() {
+		trace(msTotal / msNumber);
+
 		preventLuaRemove = true;
 
 		for(script in funkyScripts){
