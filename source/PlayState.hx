@@ -954,10 +954,7 @@ class PlayState extends MusicBeatState
 		timingTxt.setFormat(Paths.font("calibri.ttf"), 28, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		timingTxt.cameras = [camHUD];
 		timingTxt.scrollFactor.set();
-		timingTxt.borderColor = FlxColor.BLACK;
-		timingTxt.borderStyle = OUTLINE;
 		timingTxt.borderSize = 1;
-		timingTxt.size = 28;
 		timingTxt.alpha = 0;
 
 		add(ratingTxtGroup);
@@ -3390,31 +3387,34 @@ class PlayState extends MusicBeatState
 		msTotal += hitTime;
 		msNumber++;
 
-		if(ClientPrefs.showMS && (field==null || !field.autoPlayed)){
+		if(ClientPrefs.showMS && (field==null || !field.autoPlayed))
+		{
 			FlxTween.cancelTweensOf(timingTxt);
 			FlxTween.cancelTweensOf(timingTxt.scale);
 			
 			timingTxt.text = '${FlxMath.roundDecimal(hitTime, 2)}ms';
 			timingTxt.screenCenter();
+			timingTxt.x += ClientPrefs.comboOffset[4];
+			timingTxt.y -= ClientPrefs.comboOffset[5];
+
+			timingTxt.visible = true;
 			timingTxt.y -= 10;
 			timingTxt.scale.set(1, 1);
-			timingTxt.visible=true;
-			FlxTween.tween(timingTxt, {
-				y: timingTxt.y + 10
-			}, 0.1,
-			{
-				onComplete:function(t:FlxTween){
+			
+			FlxTween.tween(timingTxt, 
+				{y: timingTxt.y + 10}, 
+				0.1,
+				{onComplete: function(t:FlxTween){
 					FlxTween.tween(timingTxt.scale, {x: 0, y: 0}, time, {
 						ease: FlxEase.quadIn,
-						onComplete: function(twn:FlxTween)
-						{
+						onComplete: function(twn:FlxTween){
 							timingTxt.visible = false;
 						},
 
 						startDelay: time * 16
 					});
-				}
-			});
+				}}
+			);
 			timingTxt.color = switch(daRating.image){
 				case "epic":
 					0xFFba82e8;
@@ -3443,22 +3443,24 @@ class PlayState extends MusicBeatState
 			separatedScore.unshift("0");
 
 		var daLoop:Int = 0;
+		var comboColor = !ClientPrefs.coloredCombos ? 0xFFFFFFFF : switch(ratingFC){ // so the color doesn't get calculated for every number ig
+			case 'EFC':
+				0xFFba82e8;
+			case 'SFC':
+				0xFF87EDF5;
+			case 'GFC':
+				0xFF86F36B;
+			default:
+				FlxColor.WHITE;
+		};
+
 		for (i in separatedScore)
 		{
 			var numScore:RatingSprite = comboNumGroup.recycle(RatingSprite, RatingSprite.newNumber);
 			numScore.revive();
 			numScore.loadGraphic(Paths.image('num' + i));
 
-			numScore.color = !ClientPrefs.coloredCombos ? 0xFFFFFFFF : switch(ratingFC){
-				case 'EFC':
-					0xFFba82e8;
-				case 'SFC':
-					0xFF87EDF5;
-				case 'GFC':
-					0xFF86F36B;
-				default:
-					FlxColor.WHITE;
-			};
+			numScore.color = comboColor;
 			numScore.screenCenter();
 			numScore.x += ClientPrefs.comboOffset[2] + 43 * daLoop;
 			numScore.y -= ClientPrefs.comboOffset[3];
@@ -4228,7 +4230,9 @@ class PlayState extends MusicBeatState
 	}
 
 	private var preventLuaRemove:Bool = false;
-	override function destroy() {
+	override function destroy() 
+	{
+		// Could probably do a results screen like the one on kade engine but for freeplay only. I think that could be cool.
 		trace(msTotal / msNumber);
 
 		preventLuaRemove = true;

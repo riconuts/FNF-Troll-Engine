@@ -448,7 +448,16 @@ class ClientPrefs
 
 	//
 	public static var arrowHSV:Array<Array<Int>> = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
-	public static var comboOffset:Array<Int> = [-60, 60, -260, -80];
+	/**
+		[0] and [1] for ratings.
+		[2] and [3] for combo numbers.
+		[4] and [5] for miliseconds.
+	**/
+	public static var comboOffset:Array<Int> = [
+		-60, 60, 
+		-260, -80,
+		 0, 0
+	];
 
 	// Every key has two binds, add your key bind down here and then add your control on options/ControlsSubState.hx and Controls.hx
 	public static var keyBinds:Map<String, Array<FlxKey>> = [

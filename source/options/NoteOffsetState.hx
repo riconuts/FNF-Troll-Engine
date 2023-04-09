@@ -26,7 +26,7 @@ class NoteOffsetState extends MusicBeatState
 	public var camGame:FlxCamera;
 	public var camOther:FlxCamera;
 
-	var coolText:FlxText;
+	var timingTxt:FlxText;
 	var rating:FlxSprite;
 	var comboNums:FlxSpriteGroup;
 	var dumbTexts:FlxTypedGroup<FlxText>;
@@ -44,31 +44,50 @@ class NoteOffsetState extends MusicBeatState
 
 	override public function create()
 	{
-		// Cameras
+		//// Cameras
 		camGame = new FlxCamera();
+		var camStageUnderlay = new FlxCamera();
 		camHUD = new FlxCamera();
 		camOther = new FlxCamera();
+		
 		camHUD.bgColor.alpha = 0;
 		camOther.bgColor.alpha = 0;
+		camStageUnderlay.bgColor.alpha = 0;
 
 		FlxG.cameras.reset(camGame);
-		FlxG.cameras.add(camHUD);
-		FlxG.cameras.add(camOther);
+		FlxG.cameras.add(camStageUnderlay, false);
+		FlxG.cameras.add(camHUD, false);
+		FlxG.cameras.add(camOther, false);
 
-		FlxCamera.defaultCameras = [camGame];
 		FadeTransitionSubstate.nextCamera = camOther;
 
 		persistentUpdate = true;
 		FlxG.sound.pause();
 
-		// Stage
-		stage = new Stage();
+		//// Stage
+		stage = new Stage("stage1");
 		stage.buildStage();
 		add(stage);
 
 		var stageData = stage.stageData;
+		var bgColor = FlxColor.fromString(stageData.bg_color);
+		camGame.bgColor = bgColor == null ? 0xFF000000 : bgColor;
 
-		// Characters
+		////
+		var stageOpacity = new FlxSprite();
+
+		stageOpacity.makeGraphic(1,1,0xFFFFFFFF);
+		stageOpacity.color = 0xFF000000;
+		stageOpacity.alpha = ClientPrefs.stageOpacity;
+		stageOpacity.cameras=[camStageUnderlay]; // just to force it above camGame but below camHUD
+		stageOpacity.screenCenter();
+		stageOpacity.scale.set(FlxG.width * 100, FlxG.height * 100);
+		stageOpacity.alpha = ClientPrefs.stageOpacity;
+		stageOpacity.scrollFactor.set();
+
+		add(stageOpacity);
+
+		//// Characters
 		gf = new Character(stageData.girlfriend[0], stageData.girlfriend[1], 'gf');
 		gf.x += gf.positionArray[0];
 		gf.y += gf.positionArray[1];
@@ -90,34 +109,31 @@ class NoteOffsetState extends MusicBeatState
 		add(stage.foreground);
 
 		// Combo stuff
-		rating = new FlxSprite().loadGraphic(Paths.image('sick'));
+		rating = new FlxSprite().loadGraphic(Paths.image(ClientPrefs.useEpics ? 'epic' : 'sick'));
 		rating.cameras = [camHUD];
 		rating.setGraphicSize(Std.int(rating.width * 0.7));
 		rating.updateHitbox();
-		rating.antialiasing = ClientPrefs.globalAntialiasing;
-		
 		add(rating);
 
 		comboNums = new FlxSpriteGroup();
 		comboNums.cameras = [camHUD];
+		for (i in 0...3){
+			var numScore = new FlxSprite(43 * i).loadGraphic(Paths.image('num' + FlxG.random.int(0, 9)));
+			numScore.cameras = [camHUD];
+			numScore.scale.set(0.5, 0.5);
+			numScore.updateHitbox();
+			comboNums.add(numScore);
+		}
 		add(comboNums);
 
-		var seperatedScore:Array<Int> = [];
-		for (i in 0...3)
-			seperatedScore.push(FlxG.random.int(0, 9));
+		timingTxt = new FlxText(0,0,0,"0ms");
+		timingTxt.setFormat(Paths.font("calibri.ttf"), 28, ClientPrefs.useEpics ? 0xFFba82e8 : 0xFF87EDF5, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		timingTxt.cameras = [camHUD];
+		timingTxt.scrollFactor.set();
+		timingTxt.borderSize = 1;
+		add(timingTxt);
 
-		var daLoop:Int = 0;
-		for (i in seperatedScore)
-		{
-			var numScore:FlxSprite = new FlxSprite(43 * daLoop).loadGraphic(Paths.image('num' + i));
-			numScore.cameras = [camHUD];
-			numScore.setGraphicSize(Std.int(numScore.width * 0.5));
-			numScore.updateHitbox();
-			numScore.antialiasing = ClientPrefs.globalAntialiasing;
-			comboNums.add(numScore);
-			daLoop++;
-		}
-
+		////
 		dumbTexts = new FlxTypedGroup<FlxText>();
 		dumbTexts.cameras = [camHUD];
 		add(dumbTexts);
@@ -127,6 +143,7 @@ class NoteOffsetState extends MusicBeatState
 
 		// Note delay stuff
 		beatText = new Alphabet(0, 0, 'Beat Hit!', true, false, 0.05, 0.6);
+		beatText.cameras = [camHUD];
 		beatText.scrollFactor.set();
 		beatText.x += 260;
 		beatText.alpha = 0;
@@ -207,7 +224,12 @@ class NoteOffsetState extends MusicBeatState
 				FlxG.keys.justPressed.A,
 				FlxG.keys.justPressed.D,
 				FlxG.keys.justPressed.W,
-				FlxG.keys.justPressed.S
+				FlxG.keys.justPressed.S,
+
+				FlxG.keys.justPressed.J,
+				FlxG.keys.justPressed.L,
+				FlxG.keys.justPressed.I,
+				FlxG.keys.justPressed.K
 			];
 
 			if(controlArray.contains(true)){
@@ -223,6 +245,8 @@ class NoteOffsetState extends MusicBeatState
 								ClientPrefs.comboOffset[1] += addNum;
 							case 3:
 								ClientPrefs.comboOffset[1] -= addNum;
+							
+							////
 							case 4:
 								ClientPrefs.comboOffset[2] -= addNum;
 							case 5:
@@ -231,6 +255,16 @@ class NoteOffsetState extends MusicBeatState
 								ClientPrefs.comboOffset[3] += addNum;
 							case 7:
 								ClientPrefs.comboOffset[3] -= addNum;
+
+							////
+							case 8:
+								ClientPrefs.comboOffset[4] -= addNum;
+							case 9:
+								ClientPrefs.comboOffset[4] += addNum;
+							case 10:
+								ClientPrefs.comboOffset[5] += addNum;
+							case 11:
+								ClientPrefs.comboOffset[5] -= addNum;							
 						}
 					}
 				}
@@ -238,6 +272,7 @@ class NoteOffsetState extends MusicBeatState
 			}
 
 			// probably there's a better way to do this but, oh well.
+			// TODO: fix this shittt
 			if (FlxG.mouse.justPressed)
 			{
 				holdingObjectType = null;
@@ -278,7 +313,7 @@ class NoteOffsetState extends MusicBeatState
 
 			if(controls.RESET)
 			{
-				ClientPrefs.comboOffset = [-60, 60, -260, -80];
+				ClientPrefs.comboOffset = [-60, 60, -260, -80, 0, 0];
 				repositionCombo();
 			}
 		}
@@ -393,29 +428,34 @@ class NoteOffsetState extends MusicBeatState
 		var daLoop = 0;
 		for (numScore in comboNums.members){
 			numScore.screenCenter();
-			numScore.x += ClientPrefs.comboOffset[2] + 43 * daLoop;
+			numScore.x += ClientPrefs.comboOffset[2] + 43 * daLoop++;
 			numScore.y -= ClientPrefs.comboOffset[3];
-			daLoop++;
 		}
+
+		timingTxt.screenCenter();
+		timingTxt.x += ClientPrefs.comboOffset[4];
+		timingTxt.y -= ClientPrefs.comboOffset[5];
 
 		reloadTexts();
 	}
 
 	function createTexts()
 	{
-		for (i in 0...4)
+		for (i in 0...6)
 		{
-			var text:FlxText = new FlxText(10, 48 + (i * 30), 0, '', 24);
-			text.setFormat(Paths.font("calibri.ttf"), 24, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			var text:FlxText = new FlxText(
+				10, 
+				48 + (i * 30) + 24 * Math.floor(i / 2), 
+				0, 
+				'', 
+				24
+			);
 			text.scrollFactor.set();
-			text.borderSize = 2;
-			dumbTexts.add(text);
+			text.setFormat(Paths.font("calibri.ttf"), 24, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, 0xFF000000);
+			text.borderSize = 1.5;
 			text.cameras = [camHUD];
 
-			if(i > 1)
-			{
-				text.y += 24;
-			}
+			dumbTexts.add(text);
 		}
 	}
 
@@ -423,12 +463,14 @@ class NoteOffsetState extends MusicBeatState
 	{
 		for (i in 0...dumbTexts.length)
 		{
-			switch(i)
-			{
-				case 0: dumbTexts.members[i].text = 'Rating Offset:';
-				case 1: dumbTexts.members[i].text = '[' + ClientPrefs.comboOffset[0] + ', ' + ClientPrefs.comboOffset[1] + ']';
-				case 2: dumbTexts.members[i].text = 'Numbers Offset:';
-				case 3: dumbTexts.members[i].text = '[' + ClientPrefs.comboOffset[2] + ', ' + ClientPrefs.comboOffset[3] + ']';
+			dumbTexts.members[i].text = switch(i){
+				case 0: 'Rating Offset:';
+				case 1: '[${ClientPrefs.comboOffset[0]}, ${ClientPrefs.comboOffset[1]}]';
+				case 2: 'Numbers Offset:';
+				case 3: '[${ClientPrefs.comboOffset[2]}, ${ClientPrefs.comboOffset[3]}]';
+				case 4: 'Miliseconds Offset:';
+				case 5: '[${ClientPrefs.comboOffset[4]}, ${ClientPrefs.comboOffset[5]}]';
+				default: '';
 			}
 		}
 	}
@@ -444,6 +486,7 @@ class NoteOffsetState extends MusicBeatState
 		rating.visible = onComboMenu;
 		comboNums.visible = onComboMenu;
 		dumbTexts.visible = onComboMenu;
+		timingTxt.visible = onComboMenu;
 		
 		timeBarBG.visible = !onComboMenu;
 		timeBar.visible = !onComboMenu;
