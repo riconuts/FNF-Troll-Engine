@@ -3400,14 +3400,14 @@ class PlayState extends MusicBeatState
 			timingTxt.y -= ClientPrefs.comboOffset[5];
 
 			timingTxt.color = switch(daRating.image){
-				case "epic":
-					0xFFba82e8;
-				case "sick":
-					0xFF87EDF5;
-				case "good":
-					0xFF86F36B;
+				case 'epic':
+					0xFFE367E5;
+				case 'sick':
+					0xFF00A2E8;
+				case 'good':
+					0xFFB5E61D;
 				case "bad" | "shit":
-					0xFFFF0000;
+					0xFFED1C24;
 				default:
 					FlxColor.WHITE;
 			};
@@ -3453,11 +3453,11 @@ class PlayState extends MusicBeatState
 		var daLoop:Int = 0;
 		var comboColor = !ClientPrefs.coloredCombos ? 0xFFFFFFFF : switch(ratingFC){ // so the color doesn't get calculated for every number ig
 			case 'EFC':
-				0xFFba82e8;
+				0xFFE367E5;
 			case 'SFC':
-				0xFF87EDF5;
+				0xFF00A2E8;
 			case 'GFC':
-				0xFF86F36B;
+				0xFFB5E61D;
 			default:
 				FlxColor.WHITE;
 		};
