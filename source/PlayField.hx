@@ -294,7 +294,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 			{
 				var dataSpawnTime = modManager.get("noteSpawnTime" + data); 
 				var noteSpawnTime = (dataSpawnTime != null && dataSpawnTime.getValue(modNumber)>0)?dataSpawnTime:modManager.get("noteSpawnTime");
-				var time:Float = noteSpawnTime == null ? 2000 : noteSpawnTime.getValue(modNumber); // no longer averages the spawn times
+				var time:Float = noteSpawnTime == null ? 3000 : noteSpawnTime.getValue(modNumber); // no longer averages the spawn times
 				while (column.length > 0 && column[0].strumTime - Conductor.songPosition < time)
 					spawnNote(column[0]);
 			}
@@ -563,7 +563,7 @@ class NoteField extends FlxObject
 			{
 				var speed = songSpeed * daNote.multSpeed * modManager.getValue("xmod", modNumber);
 				var diff = Conductor.songPosition - daNote.strumTime ;
-				var visPos = modManager.getVisPosD(diff, speed);
+				var visPos = -((Conductor.visualPosition - daNote.visualTime) * speed);
 				if (visPos > drawDist)continue;
 				if(daNote.wasGoodHit && daNote.tail.length > 0 && daNote.unhitTail.length > 0){
 					diff = 0;
@@ -681,11 +681,12 @@ class NoteField extends FlxObject
         
     }
 
-	function getPoints(hold:Note, ?wid:Float, ?diff:Float){ // stolen from schmovin'
-		var speed = songSpeed * hold.multSpeed * modManager.getValue("xmod", modNumber);
+	function getPoints(hold:Note, ?wid:Float, vDiff:Float, diff:Float){ // stolen from schmovin'
 		if (wid == null)
 			wid = hold.frameWidth * hold.scale.x;
-		var p1 = modManager.getPos(modManager.getVisPosD(diff, speed), diff, curDecBeat, hold.noteData, modNumber, hold, []);
+		var speed = songSpeed * hold.multSpeed * modManager.getValue("xmod", modNumber);
+
+		var p1 = modManager.getPos(-(vDiff) * speed, diff, curDecBeat, hold.noteData, modNumber, hold, []);
 		var z:Float = p1.z;
 		p1.z = 0;
 		var quad = [
@@ -703,7 +704,7 @@ class NoteField extends FlxObject
 			return [p1.add(quad[0]), p1.add(quad[1]), p1];
 		}
 
-		var p2 = modManager.getPos(modManager.getVisPosD(diff + 1, speed), diff + 1, curDecBeat, hold.noteData, modNumber, hold, []);
+		var p2 = modManager.getPos(-(vDiff + 1) * speed, diff + 1, curDecBeat, hold.noteData, modNumber, hold, []);
 		p2.z = 0;
 		var unit = p2.subtract(p1);
 		unit.normalize();
@@ -753,10 +754,10 @@ class NoteField extends FlxObject
 
 		var speed = songSpeed * hold.multSpeed * modManager.getValue("xmod", modNumber);
 		
-		var basePos = modManager.getPos(modManager.getVisPosD(0, speed), 0, curDecBeat, hold.noteData, modNumber, hold, ['perspectiveDONTUSE']);
+		var basePos = modManager.getPos(0, 0, curDecBeat, hold.noteData, modNumber, hold, ['perspectiveDONTUSE']);
 		
 		var strumDiff = (Conductor.songPosition - hold.strumTime);
-
+		var visualDiff = (Conductor.visualPosition - hold.visualTime); 
 		var zIndex:Float = basePos.z;
 		for(sub in 0...holdSubdivisions){
 			var prog = sub / (holdSubdivisions+1);
@@ -777,8 +778,9 @@ class NoteField extends FlxObject
 			var topWidth = FlxMath.lerp(tWid, bWid, prog);
 			var botWidth = FlxMath.lerp(tWid, bWid, nextProg);
 
-			var top = lastMe == null ? getPoints(hold, topWidth, strumDiff + strumOff) : lastMe;
-			var bot = getPoints(hold, botWidth, strumDiff + strumOff + strumSub);
+			
+			var top = lastMe == null ? getPoints(hold, topWidth, (visualDiff + (strumOff * 0.45)), strumDiff + strumOff) : lastMe;
+			var bot = getPoints(hold, botWidth, (visualDiff + ((strumOff + strumSub) * 0.45)), strumDiff + strumOff + strumSub);
 
 			lastMe = bot;
 

@@ -67,8 +67,36 @@ typedef SongCreditdata = // beacuse SongMetadata is stolen
 	?extraInfo:Array<String>,
 }
 
+/*
+okay SO im gonna explain how these work
+
+All speed changes are stored in an array, .sort()'d by the time
+if changes[0].songTime is above conductor.songposition then 
+	- it'll remove the first element of changes
+	- it'll store the position, songTime and speed of the change somewhere
+	- and then it'll songVisualPos = event.position + getVisPos(conductor.songPosition - event.songTime, songSpeed * event.speed)
+
+all notes will also store their visualPos in a variable when creation and then when moving notes it's just
+	note.y = note.visualPos - event.position
+:3
+
+EDIT: not EXACTLY how it works but its a good enough summary
+*/
+
+typedef SpeedEvent =
+{
+	position:Float, // the y position when the change happens (modManager.getVisPos(songTime))
+	songTime:Float, // the song position (conductor.songTime) when the changer happens
+	speed:Float // speed mult after the change
+}
+
+
 class PlayState extends MusicBeatState
 {
+	var speedChanges:Array<SpeedEvent> = [];
+
+	var subtitles:Null<SubtitleDisplay>;
+
 	public var metadata:SongCreditdata; // metadata for the songs (artist, etc)
 
 	// andromeda modcharts :D
@@ -239,6 +267,7 @@ class PlayState extends MusicBeatState
 	public var timeBar:FlxBar;
 
 	public var camGame:FlxCamera;
+	public var camSubs:FlxCamera; // JUST for subtitles
 	public var camStageUnderlay:FlxCamera; // retarded
 	public var camHUD:FlxCamera;
 	public var camOverlay:FlxCamera; // shit that should go above all else and not get affected by camHUD changes, but still below camOther (pause menu, etc)
@@ -428,6 +457,12 @@ class PlayState extends MusicBeatState
 			'NOTE_RIGHT'
 		];
 
+		speedChanges.push({
+			position: 0,
+			songTime: 0,
+			speed: 1
+		});
+
 		// For the "Just the Two of Us" achievement
 		for (i in 0...keysArray.length)
 			keysPressed.push(false);
@@ -503,8 +538,10 @@ class PlayState extends MusicBeatState
 		camHUD = new FlxCamera();
 		camOverlay = new FlxCamera();
 		camOther = new FlxCamera();
+		camSubs = new FlxCamera();
 		camStageUnderlay = new FlxCamera();
 
+		camSubs.bgColor.alpha = 0;
 		camStageUnderlay.bgColor.alpha = 0; 
 		camHUD.bgColor.alpha = 0; 
 		camOverlay.bgColor.alpha = 0;
@@ -514,6 +551,7 @@ class PlayState extends MusicBeatState
 		FlxG.cameras.add(camStageUnderlay, false);
 		FlxG.cameras.add(camHUD, false);
 		FlxG.cameras.add(camOverlay, false);
+		FlxG.cameras.add(camSubs, false);
 		FlxG.cameras.add(camOther, false);
 
 		FlxG.cameras.setDefaultDrawTarget(camGame, true);
@@ -1011,6 +1049,13 @@ class PlayState extends MusicBeatState
 		finishedCreating = true;
 
 		Paths.clearUnusedMemory();
+
+		subtitles = SubtitleDisplay.fromSong(SONG.song);
+		if(subtitles!=null){
+			add(subtitles);
+			subtitles.y = 550;
+			subtitles.cameras = [camSubs];
+		}
 
 		noteTypeMap.clear();
 		noteTypeMap = null;
@@ -1704,6 +1749,8 @@ class PlayState extends MusicBeatState
 			eventNotes.sort(sortByTime);
 		}
 
+		speedChanges.sort(svSort);
+
 		for (section in noteData)
 		{
 			for (songNotes in section.sectionNotes)
@@ -1866,8 +1913,47 @@ class PlayState extends MusicBeatState
 		return preload;
 	}
 
+	public function getNoteInitialTime(time:Float)
+	{
+		var event:SpeedEvent = {
+			position: 0,
+			songTime: 0,
+			speed: 1
+		};
+		for (shit in speedChanges)
+		{
+			if (shit.songTime <= time)
+				event = shit;
+		}
+
+		return event.position + (modManager.getBaseVisPosD(time - event.songTime, 1) * event.speed);
+	}
+
+
+	public function getVisualPosition()
+		return getNoteInitialTime(Conductor.songPosition);
+	
+
 	function eventPushed(event:EventNote) {
 		switch(event.event){
+			case 'Mult SV' | 'Constant SV':
+				var speed:Float = 1;
+				if(event.event == 'Constant SV'){
+					var b = Std.parseFloat(event.value1);
+					if(Math.isNaN(b))speed = songSpeed;
+					speed = songSpeed / b;
+				}else{
+					speed = Std.parseFloat(event.value1);
+					if(Math.isNaN(speed))speed = 1;
+				}
+
+				speedChanges.sort(svSort);
+				speedChanges.push({
+					position: getNoteInitialTime(event.strumTime),
+					songTime: event.strumTime,
+					speed: speed
+				});
+				
 			case 'Change Character':
 				var charType:Int = 0;
 				switch(event.value1.toLowerCase()) {
@@ -1966,6 +2052,12 @@ class PlayState extends MusicBeatState
 	function sortByTime(Obj1:EventNote, Obj2:EventNote):Int
 	{
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.strumTime, Obj2.strumTime);
+	}
+
+	
+	function svSort(Obj1:SpeedEvent, Obj2:SpeedEvent):Int
+	{
+		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.songTime, Obj2.songTime);
 	}
 
 	public var skipArrowStartTween:Bool = false; //for lua
@@ -2275,6 +2367,20 @@ class PlayState extends MusicBeatState
 			botplayTxt.alpha = 1 - Math.sin((Math.PI * botplaySine) / 180);
 		}
 
+	/* 	for (shit in speedChanges)
+		{
+			if (shit.songTime <= Conductor.songPosition)
+				event = shit;
+			else
+				break;
+		} */
+/* 		if(speedChanges.length > 1){
+			if(speedChanges[1].songTime < Conductor.songPosition)
+				while (speedChanges.length > 1 && speedChanges[1].songTime < Conductor.songPosition)
+					speedChanges.shift();
+		} */
+		
+
 		super.update(elapsed);
 
 		////
@@ -2433,6 +2539,8 @@ class PlayState extends MusicBeatState
 		FlxG.watch.addQuick("beatShit", curBeat);
 		FlxG.watch.addQuick("stepShit", curStep);
 
+		Conductor.visualPosition = getVisualPosition();
+		FlxG.watch.addQuick("visualPos", Conductor.visualPosition);
 		modManager.updateTimeline(curDecStep);
 		modManager.update(elapsed);
 

@@ -260,13 +260,9 @@ class ModManager {
 		}
     }
 
-	public inline function getVisPos(songPos:Float=0, strumTime:Float=0, songSpeed:Float=1){
-		return -(0.45 * (songPos - strumTime) * songSpeed);
-	}
-	
-	public inline function getVisPosD(diff:Float, songSpeed:Float = 1)
+	public inline function getBaseVisPosD(diff:Float, songSpeed:Float = 1)
 	{
-		return -(0.45 * (diff) * songSpeed);
+		return (0.45 * (diff) * songSpeed);
 	}
 
 	public function getPos(diff:Float, tDiff:Float, beat:Float, data:Int, player:Int, obj:FlxSprite, ?exclusions:Array<String>, ?pos:Vector3):Vector3
@@ -285,7 +281,6 @@ class ModManager {
 		pos.x = (Note.swagWidth / 2) + getBaseX(data, player);
 		pos.y = (Note.swagWidth / 2) + 50 + diff;
 		pos.z = 0;
-		
 
 
  		for (name in getActiveMods(player)){

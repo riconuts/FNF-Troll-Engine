@@ -65,6 +65,7 @@ class Note extends NoteObject
 	
 	// basic stuff
 	public var strumTime:Float = 0;
+	public var visualTime:Float = 0;
 	public var mustPress:Bool = false;
 	public var canBeHit:Bool = false;
 	public var tooLate:Bool = false;
@@ -296,6 +297,8 @@ class Note extends NoteObject
 		}
 		this.inEditor = inEditor;
 
+		if(!inEditor)
+			visualTime = PlayState.instance.getNoteInitialTime(strumTime);
 		x += PlayState.STRUM_X + 50;
 		// MAKE SURE ITS DEFINITELY OFF SCREEN?
 		y -= 2000;
