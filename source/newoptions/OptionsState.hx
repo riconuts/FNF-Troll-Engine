@@ -63,7 +63,6 @@ class OptionsState extends MusicBeatState {
 			}
 			if (isPreset)
 			{
-				//actualOptions.get("judgePreset").value = ( name);
                 changeDropdown("judgePreset", name);
 				didChange = true;
 				break;
@@ -81,13 +80,20 @@ class OptionsState extends MusicBeatState {
             case 'judgePreset':
                 if(judgeWindows.exists(newVal)){
                     var windows = judgeWindows.get(newVal);
-					actualOptions.get("useEpics").value = (windows[0] != -1);
+/* 					actualOptions.get("useEpics").value = (windows[0] != -1);
 					actualOptions.get("hitWindow").value = (windows[4]);
                     actualOptions.get("badWindow").value = (windows[3]);
                     actualOptions.get("goodWindow").value = (windows[2]);
                     actualOptions.get("sickWindow").value = (windows[1]);
                     if(windows[0] !=-1)
-						actualOptions.get("epicWindow").value = (windows[0]);
+						actualOptions.get("epicWindow").value = (windows[0]); */
+                    changeToggle("useEpics", windows[0]!=-1);
+					changeNumber("hitWindow", windows[4], true);
+					changeNumber("badWindow", windows[3], true);
+					changeNumber("goodWindow", windows[2], true);
+					changeNumber("sickWindow", windows[1], true);
+                    if(windows[0]!=-1)
+					    changeNumber("epicWindow", windows[0], true);
 
 					windowsChanged();
                 }
@@ -921,7 +927,7 @@ class OptionsState extends MusicBeatState {
 			onNumberChanged(name, oldVal, snappedVal);
 
 		if (Reflect.hasField(ClientPrefs, name))
-			Reflect.setField(ClientPrefs, name, snappedVal * (data.data.get("type") != 'percent'?1:0.01));
+			Reflect.setField(ClientPrefs, name, snappedVal / (data.data.get("type") == 'percent'?100:1));
     }
 
 	function changeNumberW(widget:Widget, val:Float, abs:Bool = false)
@@ -1010,12 +1016,8 @@ class OptionsState extends MusicBeatState {
 
     
     function getHeight():Float
-    {
-/* 		if (currentGroup != null && currentGroup.length > 0)
-            return findMaxYHelper() - findMinYHelper(); */
-        
         return heights[selected];
-    }
+    
 
 	override function update(elapsed:Float)
 	{
@@ -1064,7 +1066,8 @@ class OptionsState extends MusicBeatState {
 
         super.update(elapsed);
 		if (controls.BACK){
-			ClientPrefs.save(actualOptions);
+            ClientPrefs.save(actualOptions);
+			Highscore.updateSave();
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			MusicBeatState.switchState(new MainMenuState());
         }

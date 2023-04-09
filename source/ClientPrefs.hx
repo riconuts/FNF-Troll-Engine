@@ -481,7 +481,8 @@ class ClientPrefs
 					Reflect.setField(optionSave.data, key, val.value / 100);
 				else
 					Reflect.setField(optionSave.data, key, val.value);
-				
+
+				trace(key, val.value);
 			}
 		}
 		else
@@ -492,10 +493,7 @@ class ClientPrefs
 		// some dumb hardcoded saves
 		for (name in manualLoads)
 			Reflect.setField(optionSave.data, name, Reflect.field(ClientPrefs, name));
-/* 		optionSave.data.gameplaySettings = gameplaySettings;
-		optionSave.data.quantHSV = quantHSV;
-		optionSave.data.arrowHSV = arrowHSV;
-		optionSave.data.comboOffset = comboOffset; */
+
 		optionSave.flush();
 		var save:FlxSave = new FlxSave();
 		save.bind('controls_v2', 'ninjamuffin99'); // Placing this in a separate save so that it can be manually deleted without removing your Score and stuff

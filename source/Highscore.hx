@@ -32,18 +32,22 @@ class Highscore
 		}
 
 		var id = idArray.join("-");
-		
-		
+
 		return "scores" +  id;
 	}
 
-	static function updateSave(){
+	public static function updateSave(){
 		var id = getID();
 		if(loadedID != id){
 			loadedID = id;
-			if(save.isBound)save.flush(); // makes sure it all saved
+			if(save.isBound){
+				save.flush();
+				save.close();
+				save = new FlxSave();
+			} // makes sure it all saved
 
 			save.bind(id);
+			save.flush();
 
 			if (id == defaultID)
 			{
@@ -52,6 +56,8 @@ class Highscore
 					save.flush();
 				}
 			}
+			loadData();
+			
 		}
 	}
 
@@ -178,9 +184,10 @@ class Highscore
 		return weekScores.get(daWeek);
 	}
 
-	public static function load():Void
-	{
-		updateSave();
+	static function loadData(){
+		weekScores=[];
+		songScores=[];
+		songRating=[];
 		if (save.data.weekScores != null)
 		{
 			weekScores = save.data.weekScores;
@@ -193,5 +200,11 @@ class Highscore
 		{
 			songRating = save.data.songRating;
 		}
+	}
+	public static function load():Void
+	{
+		updateSave();
+		loadData();
+
 	}
 }
