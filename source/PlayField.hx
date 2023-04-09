@@ -757,7 +757,7 @@ class NoteField extends FlxObject
 		var basePos = modManager.getPos(0, 0, curDecBeat, hold.noteData, modNumber, hold, ['perspectiveDONTUSE']);
 		
 		var strumDiff = (Conductor.songPosition - hold.strumTime);
-		var visualDiff = (Conductor.visualPosition - hold.visualTime); 
+		var visualDiff = (Conductor.visualPosition - hold.visualTime); // TODO: get the start and end visualDiff and interpolate so that changing speeds mid-hold will look better
 		var zIndex:Float = basePos.z;
 		for(sub in 0...holdSubdivisions){
 			var prog = sub / (holdSubdivisions+1);
