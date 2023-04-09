@@ -88,12 +88,12 @@ class OptionsState extends MusicBeatState {
                     if(windows[0] !=-1)
 						actualOptions.get("epicWindow").value = (windows[0]); */
                     changeToggle("useEpics", windows[0]!=-1);
-					changeNumber("hitWindow", windows[4], true);
-					changeNumber("badWindow", windows[3], true);
-					changeNumber("goodWindow", windows[2], true);
+					if (windows[0] != -1)
+						changeNumber("epicWindow", windows[0], true);
 					changeNumber("sickWindow", windows[1], true);
-                    if(windows[0]!=-1)
-					    changeNumber("epicWindow", windows[0], true);
+					changeNumber("goodWindow", windows[2], true);
+					changeNumber("badWindow", windows[3], true);
+					changeNumber("hitWindow", windows[4], true);
 
 					windowsChanged();
                 }
