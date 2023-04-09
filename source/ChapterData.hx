@@ -11,16 +11,39 @@ import openfl.utils.Assets;
 #end
 
 typedef ChapterMetadata = {
+	/**
+		Name of the chapter. 
+	**/
 	var name:String;
+	
+	/**
+		Any chapter that isn't 'main' shouldn't be displayed in the story menus. 
+	**/
 	var category:String;
-	var unlockCondition:Dynamic;
+	
+	/**
+		This isn't implemented, and at this point I don't think it's going to. LOL.
+		Could've been a Bool or a String, in case of being a string it would've been checked from a Map from your save file
+		as FlxG.save.data.unlocks.get(unlockCondition kinda like psych's StoryMenuState.weeksCompleted???
+		
+		idk i fucking forgot how it was going to be done this so pointless and stupid, theres no point????????
+	**/
+	var unlockCondition:Any;
+	
+	/**
+		Song names of this chapter.
+	**/
 	var songs:Array<String>;
+	
+	/**
+		Name of the content folder containing this chapter
+	**/
     var directory:String;
 }
 
 class ChapterData
 {
-	public static var chaptersMap:Map<String, ChapterMetadata> = new Map();
+	// public static var chaptersMap:Map<String, ChapterMetadata> = new Map();
 	public static var chaptersList:Array<ChapterMetadata> = [];
 	public static var curChapter:Null<ChapterMetadata> = null;
 

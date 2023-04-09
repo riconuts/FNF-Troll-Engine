@@ -6,7 +6,7 @@ import flixel.FlxSprite;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.addons.transition.FlxTransitionableState;
-import sowy.SowyTextButton;
+import sowy.TGTTextButton;
 import ChapterData;
 
 using StringTools;
@@ -15,8 +15,8 @@ class ChapterMenuState extends MusicBeatState{
 	var coverArt:FlxSprite;
 	var chapterText:FlxText;
 
-	var cornerLeftText:SowyTextButton;
-	var cornerRightText:SowyTextButton;
+	var cornerLeftText:TGTTextButton;
+	var cornerRightText:TGTTextButton;
 
 	var songText:FlxText;
 	var scoreText:FlxText;
@@ -43,6 +43,12 @@ class ChapterMenuState extends MusicBeatState{
 		ChapterData.curChapter = chapData;
 	}
 
+	public static function getChapterCover(name:String){
+		var artGraph = Paths.image('chaptercovers/' + Paths.formatToSongPath(name));
+
+		return artGraph != null ? artGraph : Paths.image('newmenuu/mainmenu/cover_story_mode');
+	}
+
 	override function create()
 	{
 		#if !FLX_NO_MOUSE
@@ -57,9 +63,8 @@ class ChapterMenuState extends MusicBeatState{
 		super.create();
 
 		// Create sprites
-		var artGraph = Paths.image('chaptercovers/' + Paths.formatToSongPath(chapData.name));
-		coverArt = new FlxSprite(75, 130);
-		coverArt.loadGraphic(artGraph != null ? artGraph : Paths.image('newmenuu/mainmenu/cover_story_mode'));
+		
+		coverArt = new FlxSprite(75, 130, getChapterCover(chapData.name));
 		coverArt.updateHitbox();
 		add(coverArt);
 
@@ -68,11 +73,11 @@ class ChapterMenuState extends MusicBeatState{
 		add(chapterText);
 
 		//
-		cornerLeftText = new SowyTextButton(15, 720, 0, "← BACK", 32, goBack);
+		cornerLeftText = new TGTTextButton(15, 720, 0, "← BACK", 32, goBack);
 		cornerLeftText.label.setFormat(Paths.font("calibri.ttf"), 32, 0xFFF4CC34, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE);
 		add(cornerLeftText);
 
-		cornerRightText = new SowyTextButton(1280, 720, 0, "PLAY →", 32, playWeek);
+		cornerRightText = new TGTTextButton(1280, 720, 0, "PLAY →", 32, playWeek);
 		cornerRightText.label.setFormat(Paths.font("calibri.ttf"), 32, 0xFFF4CC34, FlxTextAlign.LEFT, FlxTextBorderStyle.NONE);
 		add(cornerRightText);
 

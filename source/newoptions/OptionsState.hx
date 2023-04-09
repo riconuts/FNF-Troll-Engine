@@ -1044,9 +1044,16 @@ class OptionsState extends MusicBeatState {
             updateWidget(object, widget, elapsed);
 
 		if (openedDropdown==null){
-            var wheel = FlxG.mouse.wheel;
-            camFollow.y -= wheel * 45;
-            camFollowPos.y -= wheel * 45;
+            var movement:Float = -FlxG.mouse.wheel * 45;
+            var es:Float = elapsed / (1/60);
+
+            if (FlxG.keys.pressed.PAGEUP)
+                movement -= 25*es;
+            if (FlxG.keys.pressed.PAGEDOWN)
+                movement += 25*es;
+
+            camFollow.y += movement;
+            camFollowPos.y += movement;
         }
 		if (camFollow.y < 0)
 			camFollow.y = 0;

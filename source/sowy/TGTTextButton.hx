@@ -4,7 +4,7 @@ import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 
-class SowyTextButton extends SowyBaseButton
+class TGTTextButton extends SowyBaseButton
 {
 	public var labelColors:Array<FlxColor> = [0xFFF4CC34, 0xFF00AAFF, 0xFFF4CC34];
 

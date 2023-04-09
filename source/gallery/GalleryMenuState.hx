@@ -12,7 +12,7 @@ import flixel.ui.FlxButton;
 class GalleryMenuState extends MusicBeatState
 {
 	var optionShit:Array<String> = ["comics", "jukebox", "titles"];
-	var options = new FlxTypedGroup<SowyTextButton>();
+	var options = new FlxTypedGroup<TGTTextButton>();
 
 	var curSelected(default, set):Int;
 	function set_curSelected(sowy){
@@ -56,7 +56,7 @@ class GalleryMenuState extends MusicBeatState
 		add(new FlxText(10, 24, FlxG.width - 10, "This is still unfinished ok???", 12));
 
 		for (id in 0...optionShit.length){
-			var option = new SowyTextButton(64, 300 + 48*id, 0, optionShit[id], 32, onSelected);
+			var option = new TGTTextButton(64, 300 + 48*id, 0, optionShit[id], 32, onSelected);
 			option.label.font = Paths.font("calibri.ttf");
 
 			option.onOver.callback = function(){curSelected = id;};
@@ -69,7 +69,7 @@ class GalleryMenuState extends MusicBeatState
 
 		curSelected = 0;
 
-		var cornerLeftText = new SowyTextButton(15, 720, 0, "← BACK", 32, goBack);
+		var cornerLeftText = new TGTTextButton(15, 720, 0, "← BACK", 32, goBack);
 		cornerLeftText.label.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
 		cornerLeftText.y -= cornerLeftText.height + 15;
 		add(cornerLeftText);
