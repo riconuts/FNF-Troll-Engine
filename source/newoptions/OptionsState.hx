@@ -233,6 +233,7 @@ class OptionsState extends MusicBeatState {
                     "simpleJudge",
                     "scoreZoom",
 					"stageOpacity",
+                    "coloredCombos",
 					"showMS",
                     // "hitbar", // (I wanna add this but its not done yet lol)
                     "customizeHUD"
@@ -1074,11 +1075,16 @@ class OptionsState extends MusicBeatState {
 		cameraPositions[selected].copyFrom(camFollow);
 
         super.update(elapsed);
+
 		if (controls.BACK){
+            persistentUpdate = false; // you can only go back once
+
             ClientPrefs.save(actualOptions);
 			Highscore.updateSave();
-			FlxG.sound.play(Paths.sound('cancelMenu'));
-			MusicBeatState.switchState(new MainMenuState());
+			
+            FlxG.sound.play(Paths.sound('cancelMenu'));
+			
+            MusicBeatState.switchState(new MainMenuState());
         }
 
 

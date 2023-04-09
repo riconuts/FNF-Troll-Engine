@@ -3391,9 +3391,10 @@ class PlayState extends MusicBeatState
 		msNumber++;
 
 		if(ClientPrefs.showMS && (field==null || !field.autoPlayed)){
-			timingTxt.text = '${FlxMath.roundDecimal(hitTime, 2)}ms';
 			FlxTween.cancelTweensOf(timingTxt);
 			FlxTween.cancelTweensOf(timingTxt.scale);
+			
+			timingTxt.text = '${FlxMath.roundDecimal(hitTime, 2)}ms';
 			timingTxt.screenCenter();
 			timingTxt.y -= 10;
 			timingTxt.scale.set(1, 1);
@@ -3448,7 +3449,7 @@ class PlayState extends MusicBeatState
 			numScore.revive();
 			numScore.loadGraphic(Paths.image('num' + i));
 
-			numScore.color = switch(ratingFC){
+			numScore.color = !ClientPrefs.coloredCombos ? 0xFFFFFFFF : switch(ratingFC){
 				case 'EFC':
 					0xFFba82e8;
 				case 'SFC':

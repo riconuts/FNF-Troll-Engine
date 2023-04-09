@@ -288,6 +288,13 @@ class ClientPrefs
 				value: "Column",
 				data: ["options" => ["Column", "Quants"]]
 			},
+			"coloredCombos" => {
+				display: "Colored Combos.",
+				desc: "When toggled, combo numbers are colored based on your combo rating.", // Sorry I'm bad at descriptions. 
+				type: Toggle,
+				value: false,
+				data: []
+			},
 			"showMS" => {
 				display: "Show Timing",
 				desc: "When toggled, when you hit a note the milliseconds at which you hit it will be visible.",
