@@ -117,11 +117,13 @@ class NoteOffsetState extends MusicBeatState
 
 		comboNums = new FlxSpriteGroup();
 		comboNums.cameras = [camHUD];
+		var comboColor = ClientPrefs.coloredCombos ? 0xFFba82e8 : 0xFFFFFFFF;
 		for (i in 0...3){
 			var numScore = new FlxSprite(43 * i).loadGraphic(Paths.image('num' + FlxG.random.int(0, 9)));
 			numScore.cameras = [camHUD];
 			numScore.scale.set(0.5, 0.5);
 			numScore.updateHitbox();
+			numScore.color = comboColor;
 			comboNums.add(numScore);
 		}
 		add(comboNums);
@@ -130,7 +132,7 @@ class NoteOffsetState extends MusicBeatState
 		timingTxt.setFormat(Paths.font("calibri.ttf"), 28, ClientPrefs.useEpics ? 0xFFba82e8 : 0xFF87EDF5, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		timingTxt.cameras = [camHUD];
 		timingTxt.scrollFactor.set();
-		timingTxt.borderSize = 1;
+		timingTxt.borderSize = 1.25;
 		add(timingTxt);
 
 		////

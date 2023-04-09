@@ -190,7 +190,7 @@ class PlayState extends MusicBeatState
 	////
 	public var ratingTxtGroup = new FlxTypedGroup<RatingSprite>();
 	public var comboNumGroup = new FlxTypedGroup<RatingSprite>();
-	public var timingTxt:FlxText; // TODO: replace this with the combo numbers
+	public var timingTxt:FlxText; // TODO: replace this with the combo numbers maybe
 	
 	// We could also make it calibri or another custom font?
 	// Since as you said, combo numbers could be hard to read
@@ -954,7 +954,9 @@ class PlayState extends MusicBeatState
 		timingTxt.setFormat(Paths.font("calibri.ttf"), 28, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		timingTxt.cameras = [camHUD];
 		timingTxt.scrollFactor.set();
-		timingTxt.borderSize = 1;
+		timingTxt.borderSize = 1.25;
+		
+		timingTxt.visible = false;
 		timingTxt.alpha = 0;
 
 		add(ratingTxtGroup);
@@ -3397,24 +3399,6 @@ class PlayState extends MusicBeatState
 			timingTxt.x += ClientPrefs.comboOffset[4];
 			timingTxt.y -= ClientPrefs.comboOffset[5];
 
-			timingTxt.visible = true;
-			timingTxt.y -= 10;
-			timingTxt.scale.set(1, 1);
-			
-			FlxTween.tween(timingTxt, 
-				{y: timingTxt.y + 10}, 
-				0.1,
-				{onComplete: function(t:FlxTween){
-					FlxTween.tween(timingTxt.scale, {x: 0, y: 0}, time, {
-						ease: FlxEase.quadIn,
-						onComplete: function(twn:FlxTween){
-							timingTxt.visible = false;
-						},
-
-						startDelay: time * 16
-					});
-				}}
-			);
 			timingTxt.color = switch(daRating.image){
 				case "epic":
 					0xFFba82e8;
@@ -3427,7 +3411,31 @@ class PlayState extends MusicBeatState
 				default:
 					FlxColor.WHITE;
 			};
+
+			timingTxt.visible = true;
 			timingTxt.alpha = 1;
+			timingTxt.y -= 8;
+			timingTxt.scale.set(1, 1);
+			
+			FlxTween.tween(timingTxt, 
+				{y: timingTxt.y + 8}, 
+				0.1,
+				{onComplete: function(_){
+					if (ClientPrefs.simpleJudge){
+						FlxTween.tween(timingTxt.scale, {x: 0, y: 0}, time, {
+							ease: FlxEase.quadIn,
+							onComplete: function(_){timingTxt.visible = false;},
+							startDelay: time * 16
+						});
+					}else{
+						FlxTween.tween(timingTxt, {alpha: 0}, time, {
+							// ease: FlxEase.circOut,
+							onComplete: function(_){timingTxt.visible = false;},
+							startDelay: time * 16
+						});
+					}
+				}}
+			);
 		}
 
 		////

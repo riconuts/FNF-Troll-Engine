@@ -230,9 +230,9 @@ class OptionsState extends MusicBeatState {
 		            "hudOpacity",
                     "hpOpacity",
                     "timeOpacity",
-                    "simpleJudge",
+                    "stageOpacity",
                     "scoreZoom",
-					"stageOpacity",
+					"simpleJudge",
                     "coloredCombos",
 					"showMS",
                     // "hitbar", // (I wanna add this but its not done yet lol)
