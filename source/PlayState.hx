@@ -1922,7 +1922,7 @@ class PlayState extends MusicBeatState
 		};
 		for (shit in speedChanges)
 		{
-			if (shit.songTime <= time)
+			if (shit.songTime <= time && shit.songTime >= shit.songTime)
 				event = shit;
 		}
 
