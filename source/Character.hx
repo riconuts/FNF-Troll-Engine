@@ -123,15 +123,19 @@ class Character extends FlxSprite
 
 	override function destroy()
 	{
-		if (characterScript != null)
+		if (characterScript != null){
+			characterScript.call("onDestroy");
 			characterScript.stop();
+		}
 
 		return super.destroy();
 	}
 
-	public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false)
+	public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false, ?debugMode = false)
 	{
 		super(x, y);
+
+		this.debugMode = debugMode == true;
 
 		xFacing = isPlayer ? -1 : 1;
 		idleWhenHold = !isPlayer;
@@ -145,7 +149,7 @@ class Character extends FlxSprite
 		curCharacter = character;
 		this.isPlayer = isPlayer;
 		antialiasing = ClientPrefs.globalAntialiasing;
-		var library:String = null;
+		
 		switch (curCharacter)
 		{
 			//case 'your character name in case you want to hardcode them instead':
@@ -276,7 +280,7 @@ class Character extends FlxSprite
 		if(animOffsets.exists('singLEFTmiss') && animOffsets.exists('singDOWNmiss') && animOffsets.exists('singUPmiss') && animOffsets.exists('singRIGHTmiss')) 
 			hasMissAnimations = true;
 
-		if (!debugMode){
+		if (!this.debugMode){
 			var anims = ['singLEFT','singRIGHT', 'singUP', 'singDOWN'];
 			var sufs = ["miss", "-alt"];
 
@@ -610,7 +614,9 @@ class Character extends FlxSprite
 			characterScript.set(variable, value);
 	}
 
-	//
+	/**
+		Returns an array with all the characters contained in the characters folder(s)
+	**/
 	public static function getCharacterList():Array<String>
 	{
 		#if MODS_ALLOWED

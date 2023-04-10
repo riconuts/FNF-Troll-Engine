@@ -294,7 +294,7 @@ class CharacterEditorState extends MusicBeatState
 		tab_group.add(animationInputText);
 		UI_box.addGroup(tab_group);
 	}*/
-
+	
 	var TemplateCharacter:String = '{
 			"animations": [
 				{
@@ -385,6 +385,8 @@ class CharacterEditorState extends MusicBeatState
 		{
 			char.isPlayer = !char.isPlayer;
 			char.flipX = !char.flipX;
+			char.xFacing = char.isPlayer ? -1 : 1;
+
 			updatePointerPos();
 			reloadBGs();
 			ghostChar.flipX = char.flipX;
@@ -931,15 +933,12 @@ class CharacterEditorState extends MusicBeatState
 			--i;
 		}
 		charLayer.clear();
-		ghostChar = new Character(0, 0, daAnim, !isDad);
-		ghostChar.debugMode = true;
+		ghostChar = new Character(0, 0, daAnim, !isDad, true);
 		ghostChar.alpha = 0.6;
 
-		char = new Character(0, 0, daAnim, !isDad);
-		if(char.animationsArray[0] != null) {
+		char = new Character(0, 0, daAnim, !isDad, true);
+		if(char.animationsArray[0] != null)
 			char.playAnim(char.animationsArray[0].anim, true);
-		}
-		char.debugMode = true;
 
 		charLayer.add(ghostChar);
 		charLayer.add(char);
@@ -1130,17 +1129,11 @@ class CharacterEditorState extends MusicBeatState
 			}
 
 			if (FlxG.keys.justPressed.R) {
-				if (char.isPlayer) {
-					camFollow.x = char.getMidpoint().x - 100;
-					camFollow.y = char.getMidpoint().y - 100;
-					camFollow.x -= char.cameraPosition[0];
-					camFollow.y += char.cameraPosition[1];
-				}else{
-					camFollow.x = char.getMidpoint().x - 100;
-					camFollow.y = char.getMidpoint().y - 100;
-					camFollow.x -= char.cameraPosition[0];
-					camFollow.y += char.cameraPosition[1];
-				}
+				var camPos = PlayState.getCharacterCamera(char);
+
+				camFollow.x = camPos[0];
+				camFollow.y = camPos[1];
+				
 				FlxG.camera.zoom = 1;
 			}
 
