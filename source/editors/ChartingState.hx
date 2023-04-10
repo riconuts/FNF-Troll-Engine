@@ -1627,6 +1627,8 @@ class ChartingState extends MusicBeatState
 			if (FlxG.keys.justPressed.ENTER)
 			{
 				autosaveSong();
+				if (_song.events != null && _song.events.length > 1)
+					_song.events.sort(sortByTime);
 				PlayState.SONG = _song;
 				PlayState.chartingMode = true;
 

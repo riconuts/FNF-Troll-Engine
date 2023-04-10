@@ -235,7 +235,7 @@ class OptionsState extends MusicBeatState {
 					"simpleJudge",
                     "coloredCombos",
 					"showMS",
-                    // "hitbar", // (I wanna add this but its not done yet lol)
+                    "hitbar", // (I wanna add this but its not done yet lol)
                     "customizeHUD"
                 ]
             ],

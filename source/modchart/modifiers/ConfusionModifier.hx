@@ -36,11 +36,10 @@ class ConfusionModifier extends NoteModifier {
 		vert = VectorHelpers.rotateV3(vert, 0, 0, FlxAngle.TO_RAD * angle);
         return vert; */
 
-		var MBS:MusicBeatState = cast FlxG.state;
-		var totalBeat:Float = MBS.curDecBeat;
+		
 
-		var angleX:Float = getConfusion("X", totalBeat, data, player);
-		var angleY:Float = getConfusion("Y", totalBeat, data, player);
+		var angleX:Float = getConfusion("X", beat, data, player);
+		var angleY:Float = getConfusion("Y", beat, data, player);
         var angleZ = getConfusion(beat, data, player);
         if((obj is Note)){
 			var note:Note = cast obj;
@@ -55,7 +54,9 @@ class ConfusionModifier extends NoteModifier {
 			if(note.isSustainNote)
 				angleZ = 0;	
 			else{
-				angleZ += (beat * getSubmodValue("dizzy", player) % 360) * (180 / Math.PI);
+				var noteBeat = Conductor.getBeat(note.strumTime) - beat;
+				
+				angleZ += (noteBeat * getSubmodValue("dizzy", player) % 360) * (180 / Math.PI);
 				angleZ += getSubmodValue("noteAngle", player) + getSubmodValue("note" + data + "Angle", player);
 
 			}

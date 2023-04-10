@@ -290,7 +290,7 @@ class ClientPrefs
 			},
 			"coloredCombos" => {
 				display: "Colored Combos.",
-				desc: "When toggled, combo numbers are colored based on your combo rating.", // Sorry I'm bad at descriptions. 
+				desc: "When toggled, combo numbers are colored based on the FC.", // Sorry I'm bad at descriptions. < its fine lol
 				type: Toggle,
 				value: false,
 				data: []
@@ -298,6 +298,13 @@ class ClientPrefs
 			"showMS" => {
 				display: "Show Timing",
 				desc: "When toggled, when you hit a note the milliseconds at which you hit it will be visible.",
+				type: Toggle,
+				value: false,
+				data: []
+			},
+			"hitbar" => {
+				display: "Show Hitbar",
+				desc: "When toggled, a bar will be shown that marks judgement timings", // TODO rewrite this desc
 				type: Toggle,
 				value: false,
 				data: []

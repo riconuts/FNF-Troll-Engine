@@ -537,6 +537,8 @@ class NoteField extends FlxObject
 	var curDecStep:Float = 0;
 	var curDecBeat:Float = 0;
 
+	public var strumPositions:Array<Vector3> = [];
+
     override function draw(){
 		if(!visible)return; // dont draw if visible = false
 		if((FlxG.state is MusicBeatState)){
@@ -592,9 +594,11 @@ class NoteField extends FlxObject
 			if (!obj.alive || !obj.visible)
 				continue;
 			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, ['perspectiveDONTUSE'], obj.vec3Cache);
+			strumPositions[obj.noteData] = pos;
 			var object = drawNote(obj, pos);
 			if(object==null)continue;
 			object.zIndex += (obj.animation!=null && obj.animation.curAnim != null && obj.animation.curAnim.name == 'confirm')?1:0;
+
 			lookupMap.set(obj, object);
 			drawing.push(object);
 		}

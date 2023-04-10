@@ -188,6 +188,11 @@ class PlayState extends MusicBeatState
 	public var stageOpacity:FlxSprite;
 	
 	////
+	var hitbarPxPerMs = 400 * (1 / ClientPrefs.hitWindow);
+	var hitbarHeight = 20;
+
+	public var timingBarGroup = new FlxSpriteGroup();
+	public var hitbar:FlxSprite;
 	public var ratingTxtGroup = new FlxTypedGroup<RatingSprite>();
 	public var comboNumGroup = new FlxTypedGroup<RatingSprite>();
 	public var timingTxt:FlxText; // TODO: replace this with the combo numbers maybe
@@ -962,6 +967,41 @@ class PlayState extends MusicBeatState
 		add(ratingTxtGroup);
 		add(comboNumGroup);
 		add(timingTxt);
+		
+		if(ClientPrefs.hitbar){
+
+			hitbar = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * ClientPrefs.hitWindow), hitbarHeight, FlxColor.BLACK);
+			hitbar.alpha = 0.5;
+			timingBarGroup.add(hitbar);
+
+			var epicWindow = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * ClientPrefs.epicWindow), hitbarHeight, 0xFFE367E5);
+			epicWindow.alpha = 0.6;
+			var sickWindow = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * ClientPrefs.sickWindow), hitbarHeight, 0xFF00A2E8);
+			sickWindow.alpha = 0.6;
+			var goodWindow = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * ClientPrefs.goodWindow), hitbarHeight, 0xFFB5E61D);
+			goodWindow.alpha = 0.6;
+			var badWindow = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * ClientPrefs.badWindow), hitbarHeight, FlxColor.BLACK);
+			badWindow.alpha = 0.6;
+
+			timingBarGroup.add(badWindow);
+			timingBarGroup.add(goodWindow);
+			timingBarGroup.add(sickWindow);
+			timingBarGroup.add(epicWindow);
+
+			timingBarGroup.screenCenter(XY);
+			if(ClientPrefs.downScroll)
+				timingBarGroup.y -= 250;
+			else
+				timingBarGroup.y += 250;
+
+			epicWindow.x = hitbar.x + ((hitbar.width - epicWindow.width))/2;
+			sickWindow.x = hitbar.x + ((hitbar.width - sickWindow.width))/2;
+			goodWindow.x = hitbar.x + ((hitbar.width - goodWindow.width))/2;
+			badWindow.x = hitbar.x + ((hitbar.width - badWindow.width))/2;
+
+			add(timingBarGroup);
+		}
+		
 
 		// init shit
 		health = 1;
@@ -1007,6 +1047,7 @@ class PlayState extends MusicBeatState
 
 
 		var cH = [camHUD];
+		timingBarGroup.cameras = cH;
 		playerField.cameras = cH;
 		dadField.cameras = cH;
 		playfields.cameras = cH;
@@ -3283,6 +3324,7 @@ class PlayState extends MusicBeatState
 	var msNumber = 0;
 	var msTotal = 0.0;
 
+	var hitmarks:Array<FlxSprite> = [];
 	private function popUpScore(note:Note = null, field:PlayField=null):Void
 	{
 		if(field==null){
@@ -3292,6 +3334,22 @@ class PlayState extends MusicBeatState
 
 		var hitTime = note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset;
 		var noteDiff:Float = Math.abs(hitTime);
+
+		var hitMark = new FlxSprite((timingBarGroup.width / 2), 0).makeGraphic(5, hitbarHeight, FlxColor.WHITE);
+		timingBarGroup.add(hitMark);
+		hitMark.x += ((hitbarPxPerMs/2) * -hitTime);
+		hitmarks.push(hitMark);
+		while(hitmarks.length > 15){
+			var recent = hitmarks.shift();
+			recent.kill();
+		}
+
+		for(idx in 0...hitmarks.length){
+			var m:FlxSprite = hitmarks[idx];
+			if(m!=hitMark)
+				m.color = FlxColor.RED;
+			m.alpha = (idx / (hitmarks.length-1));
+		}
 		//trace(noteDiff);
 
 		vocals.volume = 1;
@@ -3354,7 +3412,7 @@ class PlayState extends MusicBeatState
 						return;
 
 					rating.tween = FlxTween.tween(rating.scale, {x: 0, y: 0}, time, {
-						startDelay: time * 16,
+						startDelay: time * 8,
 						ease: FlxEase.quadIn,
 						onComplete: function(tween:FlxTween){rating.kill();}
 					});
@@ -3425,13 +3483,13 @@ class PlayState extends MusicBeatState
 						FlxTween.tween(timingTxt.scale, {x: 0, y: 0}, time, {
 							ease: FlxEase.quadIn,
 							onComplete: function(_){timingTxt.visible = false;},
-							startDelay: time * 16
+							startDelay: time * 8
 						});
 					}else{
 						FlxTween.tween(timingTxt, {alpha: 0}, time, {
 							// ease: FlxEase.circOut,
 							onComplete: function(_){timingTxt.visible = false;},
-							startDelay: time * 16
+							startDelay: time * 8
 						});
 					}
 				}}
@@ -3451,6 +3509,8 @@ class PlayState extends MusicBeatState
 			separatedScore.unshift("0");
 
 		var daLoop:Int = 0;
+
+		// did you goto MS Paint and get colours from there lol
 		var comboColor = !ClientPrefs.coloredCombos ? 0xFFFFFFFF : switch(ratingFC){ // so the color doesn't get calculated for every number ig
 			case 'EFC':
 				0xFFE367E5;
@@ -3472,7 +3532,7 @@ class PlayState extends MusicBeatState
 			numScore.screenCenter();
 			numScore.x += ClientPrefs.comboOffset[2] + 43 * daLoop;
 			numScore.y -= ClientPrefs.comboOffset[3];
-
+			numScore.ID = daLoop;
 			if (numScore.tween != null){
 				numScore.tween.cancel();
 				numScore.tween.destroy();
