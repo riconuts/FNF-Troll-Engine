@@ -3078,6 +3078,10 @@ class PlayState extends MusicBeatState
 			sectionCamera.set(cam[0], cam[1]);
 		}
 	}
+
+	/**
+		Returns an array with the characters camera focus positions.
+	**/
 	static public function getCharacterCamera(char:Character) {
 		return [
 			char.x + char.width * 0.5 + (char.cameraPosition[0] + 150) * char.xFacing,
