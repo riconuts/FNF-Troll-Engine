@@ -314,7 +314,7 @@ class PlayState extends MusicBeatState
 	public var timeTxt:FlxText;
 
 	var scoreTxtTween:FlxTween;
-
+	var hitbarTween:FlxTween;
 	public var songName:String = "";
 
 	public var songScore:Int = 0;
@@ -992,7 +992,7 @@ class PlayState extends MusicBeatState
 			if(ClientPrefs.downScroll)
 				timingBarGroup.y -= 250;
 			else
-				timingBarGroup.y += 250;
+				timingBarGroup.y += 315;
 
 			epicWindow.x = hitbar.x + ((hitbar.width - epicWindow.width))/2;
 			sickWindow.x = hitbar.x + ((hitbar.width - sickWindow.width))/2;
@@ -3382,6 +3382,15 @@ class PlayState extends MusicBeatState
 			if(ClientPrefs.scoreZoom)
 			{
 				if(scoreTxtTween != null) scoreTxtTween.cancel();
+				if(hitbarTween != null) hitbarTween.cancel();
+
+				timingBarGroup.scale.x = 1.075;
+				timingBarGroup.scale.y = 1.075;
+				hitbarTween = FlxTween.tween(timingBarGroup.scale, {x: 1, y: 1}, 0.2, {
+					onComplete: function(twn:FlxTween) {
+						hitbarTween = null;
+					}
+				});
 
 				scoreTxt.scale.x = 1.075;
 				scoreTxt.scale.y = 1.075;
@@ -4305,6 +4314,10 @@ class PlayState extends MusicBeatState
 	override function destroy() 
 	{
 		// Could probably do a results screen like the one on kade engine but for freeplay only. I think that could be cool.
+		// ^ I was JUST thinking this. We can show the average NPS, accuracy, grade, judge counters, etc
+		// I think just in general adding more stats could be neat & since we have the new options menu we can just put it in UI in a seperate category
+		// so you can set exactly which stats show up in the scoretxt, etc
+		
 		trace(msTotal / msNumber);
 
 		preventLuaRemove = true;
