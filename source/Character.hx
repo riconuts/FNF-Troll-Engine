@@ -123,8 +123,10 @@ class Character extends FlxSprite
 
 	override function destroy()
 	{
-		if (characterScript != null)
+		if (characterScript != null){
+			characterScript.call("onDestroy");
 			characterScript.stop();
+		}
 
 		return super.destroy();
 	}
