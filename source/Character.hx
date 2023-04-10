@@ -612,7 +612,9 @@ class Character extends FlxSprite
 			characterScript.set(variable, value);
 	}
 
-	//
+	/**
+		Returns an array with all the characters contained in the characters folder(s)
+	**/
 	public static function getCharacterList():Array<String>
 	{
 		#if MODS_ALLOWED

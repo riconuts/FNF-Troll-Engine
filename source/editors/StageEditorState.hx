@@ -109,6 +109,35 @@ class StageEditorState extends MusicBeatState{
 	var xPosTxt:FlxText;
 	var yPosTxt:FlxText;
 
+	function updateBF(name){
+		if (boyfriend != null){
+			boyfriendGroup.remove(boyfriend, true);
+			boyfriend.destroy();
+		}
+		boyfriend = new Boyfriend(0, 0, name);
+		startCharacterPos(boyfriend);
+		boyfriendGroup.add(boyfriend);
+	}
+	function updateDad(name){
+		if (dad != null){
+			dadGroup.remove(dad, true);
+			dad.destroy();
+		}
+		dad = new Character(0, 0, name);
+		startCharacterPos(dad);
+		dadGroup.add(dad);
+	}
+	function updateGF(name){
+		if (gf != null){
+			gfGroup.remove(gf, true);
+			gf.destroy();
+		}
+		gf = new Character(0, 0, name);
+		gf.scrollFactor.set(0.95, 0.95);
+		startCharacterPos(gf);
+		gfGroup.add(gf);
+	}
+
 	override function create()
 	{
 		#if desktop
@@ -130,66 +159,36 @@ class StageEditorState extends MusicBeatState{
 
 		var tab_group = new FlxUI(null, UI_characterbox);
 		tab_group.name = "Character Preview";
-		dadDropDown = new FlxUIDropDownMenuCustom(15, 110, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(character:String)
+
+		var weirdArray = FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true);
+		dadDropDown = new FlxUIDropDownMenuCustom(15, 110, weirdArray, function(character:String)
 		{
 			var daAnim = characterList[Std.parseInt(character)];
+			updateDad(daAnim);
 			
 			reloadCharacterArray();
-			dadDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(characterList, true));
-
-			if (dad != null){
-				dadGroup.remove(dad, true);
-				dad.destroy();
-			}
-			dad = new Character(0, 0, daAnim);
-			startCharacterPos(dad);
-			dadGroup.add(dad);
-			
 			dadDropDown.selectedLabel = daAnim;
 		});
-		gfDropDown = new FlxUIDropDownMenuCustom(15, 70, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(character:String)
+		gfDropDown = new FlxUIDropDownMenuCustom(15, 70, weirdArray, function(character:String)
 		{
 			var daAnim = characterList[Std.parseInt(character)];
+			updateGF(daAnim);
 
 			reloadCharacterArray();
-			gfDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(characterList, true));
-
-			if (gf != null){
-				gfGroup.remove(gf, true);
-				gf.destroy();
-			}
-			gf = new Character(0, 0, daAnim);
-			gf.scrollFactor.set(0.95, 0.95);
-			startCharacterPos(gf);
-			gfGroup.add(gf);
-			
 			gfDropDown.selectedLabel = daAnim;
 		});
-		bfDropDown = new FlxUIDropDownMenuCustom(15, 30, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(character:String)
+		bfDropDown = new FlxUIDropDownMenuCustom(15, 30, weirdArray, function(character:String)
 		{
 			var daAnim = characterList[Std.parseInt(character)];
+			updateBF(daAnim);
 
 			reloadCharacterArray();
-			bfDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(characterList, true));
-			
-			if (boyfriend != null){
-				boyfriendGroup.remove(boyfriend, true);
-				boyfriend.destroy();
-			}
-			boyfriend = new Boyfriend(0, 0, daAnim);
-			startCharacterPos(boyfriend);
-			boyfriendGroup.add(boyfriend);
-
 			bfDropDown.selectedLabel = daAnim;
 		});
 
 		tab_group.add(new FlxText(bfDropDown.x, bfDropDown.y - 15, 200, "Boyfriend:"));
 		tab_group.add(new FlxText(dadDropDown.x, dadDropDown.y - 15, 200, "Opponent:"));
 		tab_group.add(new FlxText(gfDropDown.x, gfDropDown.y - 15, 200, "Girlfriend:"));
-
-		dadDropDown.callback("bf");
-		gfDropDown.callback("gf");
-		bfDropDown.callback("bf");
 
 		tab_group.add(gfDropDown);
 		tab_group.add(dadDropDown);
@@ -208,45 +207,9 @@ class StageEditorState extends MusicBeatState{
 
 		var tab_group = new FlxUI(null, UI_characterbox);
 
-		#if MODS_ALLOWED
-		var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Paths.currentModDirectory + '/stages/'), Paths.getPreloadPath('stages/')];
-		#else
-		var directories:Array<String> = [Paths.getPreloadPath('stages/')];
-		#end
-
-		var tempMap:Map<String, Bool> = new Map<String, Bool>();
-		var stageFile:Array<String> = CoolUtil.coolTextFile(Paths.txt('stageList'));
-		var stages:Array<String> = [];
-		for (i in 0...stageFile.length) { //Prevent duplicates
-			var stageToCheck:String = stageFile[i];
-			if(!tempMap.exists(stageToCheck)) {
-				stages.push(stageToCheck);
-			}
-			tempMap.set(stageToCheck, true);
-		}
-		#if MODS_ALLOWED
-		for (i in 0...directories.length) {
-			var directory:String = directories[i];
-			if(FileSystem.exists(directory)) {
-				for (file in FileSystem.readDirectory(directory)) {
-					var path = haxe.io.Path.join([directory, file]);
-					if (!FileSystem.isDirectory(path) && file.endsWith('.json')) {
-						var stageToCheck:String = file.substr(0, file.length - 5);
-						if(!tempMap.exists(stageToCheck)) {
-							tempMap.set(stageToCheck, true);
-							stages.push(stageToCheck);
-						}
-					}
-				}
-			}
-		}
-		#end
-		if(stages.length < 1) stages.push('stage');
-
+		var stages = Stage.getAllStages();
 		var stageDropDown = new FlxUIDropDownMenuCustom(15, 30, FlxUIDropDownMenuCustom.makeStrIdLabelArray(stages, true), function(character:String){
 			curStage = stages[Std.parseInt(character)];
-			if (stage != null)
-				stage.destroy();
 			makeStage();
 		});
 		tab_group.name = "Stage Data";
@@ -302,6 +265,7 @@ class StageEditorState extends MusicBeatState{
 
 		FlxG.cameras.setDefaultDrawTarget(camGame, true);
 
+		reloadCharacterArray();
 		makeStage();
 
 		focusedChar = "boyfriend";
@@ -368,8 +332,16 @@ class StageEditorState extends MusicBeatState{
 
 	function makeStage()
 	{
+		if (stage != null){
+			remove(stage);
+			stage.destroy();
+		}
+
 		stage = new Stage(curStage).buildStage();
 		stageData = stage.stageData;
+
+		var color = FlxColor.fromString(stageData.bg_color);
+		camGame.bgColor = color != null ? color : FlxColor.BLACK;
 
 		////
 		defaultCamZoom = 1 * stageData.defaultZoom;
@@ -407,25 +379,9 @@ class StageEditorState extends MusicBeatState{
 		gfGroup.y = GF_Y;
 
 		////
-		dadDropDown.callback(dadDropDown.selectedLabel);
-		gfDropDown.callback(gfDropDown.selectedLabel);
-		bfDropDown.callback(bfDropDown.selectedLabel);
-		/*
-		if (!stageData.hide_girlfriend){
-			gf = new Character(0, 0, "gf");
-			startCharacterPos(gf);
-			gf.scrollFactor.set(0.95, 0.95);
-			gfGroup.add(gf);
-		}
-
-		dad = new Character(0, 0, "bf");
-		startCharacterPos(dad, true);
-		dadGroup.add(dad);
-
-		boyfriend = new Boyfriend(0, 0, "bf");
-		startCharacterPos(boyfriend);
-		boyfriendGroup.add(boyfriend);
-		*/
+		updateBF(dadDropDown.selectedLabel);
+		updateGF(gfDropDown.selectedLabel);
+		updateDad(bfDropDown.selectedLabel);
 
 		////
 		camGame.zoom = defaultCamZoom;
@@ -448,7 +404,7 @@ class StageEditorState extends MusicBeatState{
 				gf.visible = false;
 		}
 
-		trace(stageData);
+		// trace(stageData);
 
 		if (stage != null){
 			remove(stage);
@@ -479,38 +435,12 @@ class StageEditorState extends MusicBeatState{
 
 	function reloadCharacterArray()
 	{
-		var charsLoaded:Map<String, Bool> = new Map();
+		characterList = Character.getCharacterList();
 
-		#if MODS_ALLOWED
-		characterList = [];
-		var directories:Array<String> = [
-			Paths.mods('characters/'),
-			Paths.mods(Paths.currentModDirectory + '/characters/'),
-			Paths.getPreloadPath('characters/')
-		];
-		for (i in 0...directories.length)
-		{
-			var directory:String = directories[i];
-			if (FileSystem.exists(directory))
-			{
-				for (file in FileSystem.readDirectory(directory))
-				{
-					var path = haxe.io.Path.join([directory, file]);
-					if (!sys.FileSystem.isDirectory(path) && file.endsWith('.json'))
-					{
-						var charToCheck:String = file.substr(0, file.length - 5);
-						if (!charsLoaded.exists(charToCheck))
-						{
-							characterList.push(charToCheck);
-							charsLoaded.set(charToCheck, true);
-						}
-					}
-				}
-			}
-		}
-		#else
-		characterList = CoolUtil.coolTextFile(Paths.txt('characterList'));
-		#end
+		var weirdArray = FlxUIDropDownMenuCustom.makeStrIdLabelArray(characterList, true);
+		dadDropDown.setData(weirdArray);
+		gfDropDown.setData(weirdArray);
+		bfDropDown.setData(weirdArray);
 	}
 
 	var _file:FileReference;

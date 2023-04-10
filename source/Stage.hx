@@ -142,7 +142,9 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		super.destroy();
 	}
 
-	//// Stages of the currently loaded mod.
+	/**
+		Return an array with the names in the stageList file(s).
+	**/ 
 	public static function getStageList(modsOnly = false):Array<String>{
 		var rawList:Null<String> = modsOnly ? null : Paths.getText('data/stageList.txt', true);
 
@@ -171,7 +173,9 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		return stages;
 	}
 
-
+	/**
+		Returns an array with every stage in the stages folder(s).
+	**/
 	public static function getAllStages(modsOnly = false):Array<String>{
 		var stages:Array<String> = [];
 
