@@ -333,16 +333,25 @@ class FunkinHScript extends FunkinScript
 
 	override public function get(varName:String): Dynamic
 	{
+		if (interpreter == null)
+			return null;
+
 		return interpreter.variables.get(varName);
 	}
 
 	override public function set(varName:String, value:Dynamic):Void
 	{
+		if (interpreter == null)
+			return;
+
 		interpreter.variables.set(varName, value);
 	}
 
 	public function exists(varName:String)
 	{
+		if (interpreter == null)
+			return false;
+		
 		return interpreter.variables.exists(varName);
 	}
 
