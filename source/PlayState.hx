@@ -188,11 +188,8 @@ class PlayState extends MusicBeatState
 	public var stageOpacity:FlxSprite;
 	
 	////
-	var hitbarPxPerMs = 400 * (1 / ClientPrefs.hitWindow);
-	var hitbarHeight = 20;
 
-	public var timingBarGroup = new FlxSpriteGroup();
-	public var hitbar:FlxSprite;
+	public var hitbar:Hitbar;
 	public var ratingTxtGroup = new FlxTypedGroup<RatingSprite>();
 	public var comboNumGroup = new FlxTypedGroup<RatingSprite>();
 	public var timingTxt:FlxText; // TODO: replace this with the combo numbers maybe
@@ -941,6 +938,23 @@ class PlayState extends MusicBeatState
 		add(iconP1);
 		add(iconP2);
 
+				
+		if(ClientPrefs.hitbar){
+
+			hitbar = new Hitbar();
+			hitbar.screenCenter(XY);
+			if(ClientPrefs.downScroll){
+				hitbar.y -= 220;
+				hitbar.averageIndicator.flipY = false;
+				hitbar.averageIndicator.y = hitbar.y - (hitbar.averageIndicator.width + 5);
+			}else
+				hitbar.y += 340;
+
+			add(hitbar);
+		}
+		
+
+
 		scoreTxt = new FlxText(0, healthBarBG.y + 48, FlxG.width, "", 20);
 		scoreTxt.setFormat(Paths.font("calibri.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		scoreTxt.scrollFactor.set();
@@ -967,41 +981,6 @@ class PlayState extends MusicBeatState
 		add(ratingTxtGroup);
 		add(comboNumGroup);
 		add(timingTxt);
-		
-		if(ClientPrefs.hitbar){
-
-			hitbar = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * ClientPrefs.hitWindow), hitbarHeight, FlxColor.BLACK);
-			hitbar.alpha = 0.5;
-			timingBarGroup.add(hitbar);
-
-			var epicWindow = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * ClientPrefs.epicWindow), hitbarHeight, 0xFFE367E5);
-			epicWindow.alpha = 0.6;
-			var sickWindow = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * ClientPrefs.sickWindow), hitbarHeight, 0xFF00A2E8);
-			sickWindow.alpha = 0.6;
-			var goodWindow = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * ClientPrefs.goodWindow), hitbarHeight, 0xFFB5E61D);
-			goodWindow.alpha = 0.6;
-			var badWindow = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * ClientPrefs.badWindow), hitbarHeight, FlxColor.BLACK);
-			badWindow.alpha = 0.6;
-
-			timingBarGroup.add(badWindow);
-			timingBarGroup.add(goodWindow);
-			timingBarGroup.add(sickWindow);
-			timingBarGroup.add(epicWindow);
-
-			timingBarGroup.screenCenter(XY);
-			if(ClientPrefs.downScroll)
-				timingBarGroup.y -= 250;
-			else
-				timingBarGroup.y += 315;
-
-			epicWindow.x = hitbar.x + ((hitbar.width - epicWindow.width))/2;
-			sickWindow.x = hitbar.x + ((hitbar.width - sickWindow.width))/2;
-			goodWindow.x = hitbar.x + ((hitbar.width - goodWindow.width))/2;
-			badWindow.x = hitbar.x + ((hitbar.width - badWindow.width))/2;
-
-			add(timingBarGroup);
-		}
-		
 
 		// init shit
 		health = 1;
@@ -1047,7 +1026,7 @@ class PlayState extends MusicBeatState
 
 
 		var cH = [camHUD];
-		timingBarGroup.cameras = cH;
+		hitbar.cameras = cH;
 		playerField.cameras = cH;
 		dadField.cameras = cH;
 		playfields.cameras = cH;
@@ -3328,7 +3307,6 @@ class PlayState extends MusicBeatState
 	var msNumber = 0;
 	var msTotal = 0.0;
 
-	var hitmarks:Array<FlxSprite> = [];
 	private function popUpScore(note:Note = null, field:PlayField=null):Void
 	{
 		if(field==null){
@@ -3339,27 +3317,15 @@ class PlayState extends MusicBeatState
 		var hitTime = note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset;
 		var noteDiff:Float = Math.abs(hitTime);
 
-		var hitMark = new FlxSprite((timingBarGroup.width / 2), 0).makeGraphic(5, hitbarHeight, FlxColor.WHITE);
-		timingBarGroup.add(hitMark);
-		hitMark.x += ((hitbarPxPerMs/2) * -hitTime);
-		hitmarks.push(hitMark);
-		while(hitmarks.length > 15){
-			var recent = hitmarks.shift();
-			recent.kill();
-		}
-
-		for(idx in 0...hitmarks.length){
-			var m:FlxSprite = hitmarks[idx];
-			if(m!=hitMark)
-				m.color = FlxColor.RED;
-			m.alpha = (idx / (hitmarks.length-1));
-		}
+ 		if(ClientPrefs.hitbar)
+			hitbar.addHit(hitTime);
+		
 		//trace(noteDiff);
 
 		vocals.volume = 1;
 
 		//tryna do MS based judgment due to popular demand
-		var daRating:Rating = Conductor.judgeNote(note, noteDiff);
+		var daRating:Rating = Conductor.judgeNote(noteDiff);
 
 		totalNotesHit += daRating.ratingMod;
 		note.ratingMod = daRating.ratingMod;
@@ -3384,13 +3350,13 @@ class PlayState extends MusicBeatState
 				if(scoreTxtTween != null) scoreTxtTween.cancel();
 				if(hitbarTween != null) hitbarTween.cancel();
 
-				timingBarGroup.scale.x = 1.075;
-				timingBarGroup.scale.y = 1.075;
-				hitbarTween = FlxTween.tween(timingBarGroup.scale, {x: 1, y: 1}, 0.2, {
+				hitbar.scale.x = 1.075;
+				hitbar.scale.y = 1.075;
+				hitbarTween = FlxTween.tween(hitbar.scale, {x: 1, y: 1}, 0.2, {
 					onComplete: function(twn:FlxTween) {
 						hitbarTween = null;
 					}
-				});
+				}); 
 
 				scoreTxt.scale.x = 1.075;
 				scoreTxt.scale.y = 1.075;
@@ -4317,7 +4283,7 @@ class PlayState extends MusicBeatState
 		// ^ I was JUST thinking this. We can show the average NPS, accuracy, grade, judge counters, etc
 		// I think just in general adding more stats could be neat & since we have the new options menu we can just put it in UI in a seperate category
 		// so you can set exactly which stats show up in the scoretxt, etc
-		
+
 		trace(msTotal / msNumber);
 
 		preventLuaRemove = true;
@@ -4390,6 +4356,7 @@ class PlayState extends MusicBeatState
 			//trace('BEAT HIT: ' + curBeat + ', LAST HIT: ' + lastBeatHit);
 			return;
 		}
+		hitbar.beatHit();
 
 		if (generatedMusic)
 		{

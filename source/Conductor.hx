@@ -38,7 +38,7 @@ class Conductor
 	{
 	}
 
-	public static function judgeNote(note:Note, diff:Float=0):Rating // die
+	public static function judgeNote(diff:Float=0):Rating // die
 	{
 		var data:Array<Rating> = PlayState.instance.ratingsData; //shortening cuz fuck u
 		for(i in 0...data.length-1) //skips last window (Shit)
