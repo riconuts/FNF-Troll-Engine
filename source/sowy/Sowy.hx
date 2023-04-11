@@ -21,4 +21,9 @@ class Sowy
 
         return macro $v{daString};
     }
+
+    public static macro function getDefines() 
+    {
+        return macro $v{haxe.macro.Context.getDefines()};    
+    }
 }
