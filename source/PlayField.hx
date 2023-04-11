@@ -578,8 +578,6 @@ class NoteField extends FlxObject
 					notePos.set(daNote, pos);
 					taps.push(daNote);
 				}else{
-					var pos = modManager.getPos(visPos, diff, curDecBeat, daNote.noteData, modNumber, daNote, ['perspectiveDONTUSE'], daNote.vec3Cache);
-					notePos.set(daNote, pos);
 					holds.push(daNote);
 				}
 			}
@@ -755,19 +753,20 @@ class NoteField extends FlxObject
 			else
 				return tWid;
 		})();
-
-		var speed = songSpeed * hold.multSpeed * modManager.getValue("xmod", modNumber);
 		
 		var basePos = modManager.getPos(0, 0, curDecBeat, hold.noteData, modNumber, hold, ['perspectiveDONTUSE']);
 		
 		var strumDiff = (Conductor.songPosition - hold.strumTime);
 		var visualDiff = (Conductor.visualPosition - hold.visualTime); // TODO: get the start and end visualDiff and interpolate so that changing speeds mid-hold will look better
 		var zIndex:Float = basePos.z;
+		var sv = PlayState.instance.getSV(hold.strumTime).speed;
 		for(sub in 0...holdSubdivisions){
 			var prog = sub / (holdSubdivisions+1);
 			var nextProg = (sub + 1) / (holdSubdivisions + 1);
 			var strumSub = crotchet / holdSubdivisions;
 			var strumOff = (strumSub * sub);
+			strumOff *= sv;
+			strumSub *= sv;
 			var scale:Float = 1;
 			var fuck = strumDiff;
 

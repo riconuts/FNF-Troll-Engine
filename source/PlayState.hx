@@ -93,6 +93,7 @@ typedef SpeedEvent =
 
 class PlayState extends MusicBeatState
 {
+	public var currentSV:SpeedEvent = {position: 0, songTime:0, speed: 1};
 	var speedChanges:Array<SpeedEvent> = [];
 
 	var subtitles:Null<SubtitleDisplay>;
@@ -1949,6 +1950,14 @@ class PlayState extends MusicBeatState
 
 	public function getNoteInitialTime(time:Float)
 	{
+		var event:SpeedEvent = getSV(time);
+		return getTimeFromSV(time, event);
+	}
+
+	public inline function getTimeFromSV(time:Float, event:SpeedEvent)
+		return event.position + (modManager.getBaseVisPosD(time - event.songTime, 1) * event.speed);
+
+	public function getSV(time:Float){
 		var event:SpeedEvent = {
 			position: 0,
 			songTime: 0,
@@ -1960,12 +1969,12 @@ class PlayState extends MusicBeatState
 				event = shit;
 		}
 
-		return event.position + (modManager.getBaseVisPosD(time - event.songTime, 1) * event.speed);
+		return event;
 	}
 
 
-	public function getVisualPosition()
-		return getNoteInitialTime(Conductor.songPosition);
+	public inline function getVisualPosition()
+		return getTimeFromSV(Conductor.songPosition, currentSV);
 	
 
 	function eventPushed(event:EventNote) {
@@ -2574,6 +2583,7 @@ class PlayState extends MusicBeatState
 		FlxG.watch.addQuick("beatShit", curBeat);
 		FlxG.watch.addQuick("stepShit", curStep);
 
+		currentSV = getSV(Conductor.songPosition);
 		Conductor.visualPosition = getVisualPosition();
 		FlxG.watch.addQuick("visualPos", Conductor.visualPosition);
 		modManager.updateTimeline(curDecStep);

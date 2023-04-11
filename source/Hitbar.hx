@@ -28,7 +28,7 @@ class Hitbar extends FlxSpriteGroup {
     var maxMarks:Int = 15;
     var markMS:Array<Float> = [];
 	var markGroup:FlxTypedSpriteGroup<Hitmark> = new FlxTypedSpriteGroup<Hitmark>();
-	var hitbarPxPerMs = 400 * (1 / ClientPrefs.hitWindow);
+	var hitbarPxPerMs = 540 * (1 / ClientPrefs.hitWindow);
 	var hitbarHeight = 20;
 
     var metronomeScale:Float = 1;
@@ -78,10 +78,10 @@ class Hitbar extends FlxSpriteGroup {
 		averageIndicator.y += hitbarHeight + 5;
 
 		add(markGroup);
-		metronome = new FlxSprite((mainBar.width / 2), 0).makeGraphic(5, 1, 0xC4FFFFFF);
+		metronome = new FlxSprite((mainBar.width / 2), 0).makeGraphic(10, 1, 0xC4FFFFFF);
 		metronome.alpha = 0.85;
-		metronome.scale.y = hitbarHeight / 2;
-		metronomeScale = hitbarHeight / 2;
+		metronome.scale.y = hitbarHeight / 4;
+		metronomeScale = hitbarHeight / 4;
 		add(metronome);
 		metronome.x -= metronome.width / 2;
 		metronome.x += ((hitbarPxPerMs / 2) * 0);
@@ -96,7 +96,7 @@ class Hitbar extends FlxSpriteGroup {
     override function update(elapsed:Float){
 		var lerpVal = 0.2 * (elapsed / (1 / 60));
 		averageIndicator.x = FlxMath.lerp(averageIndicator.x, (mainBar.x + (mainBar.width / 2)) + ((hitbarPxPerMs / 2) * -currentAverage) - averageIndicator.width / 2, lerpVal);
-		metronomeScale = FlxMath.lerp(metronomeScale, hitbarHeight / 2, lerpVal);
+		metronomeScale = FlxMath.lerp(metronomeScale, hitbarHeight / 4, lerpVal);
 		metronome.scale.y = scale.y * metronomeScale;
 
 		markGroup.forEachDead(function(obj:Hitmark){
@@ -111,7 +111,7 @@ class Hitbar extends FlxSpriteGroup {
 			markMS.shift();
 
 		var hitMark:Hitmark = new Hitmark((mainBar.width / 2), 0);
-		hitMark.makeGraphic(5, hitbarHeight, FlxColor.WHITE);
+		hitMark.makeGraphic(6, hitbarHeight, FlxColor.WHITE);
 		hitMark.x -= hitMark.width / 2;
 		hitMark.x += ((hitbarPxPerMs / 2) * -time);
 		markGroup.add(hitMark);
