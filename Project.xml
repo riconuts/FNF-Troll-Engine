@@ -43,16 +43,19 @@
 
 	<classpath name="source" />
 	
-	<!-- no more preload folder -->
+	<!-- No more preload folder, or libraries. -->
 	<assets path="assets"/> 
 
 	<!-- PSYCH ENGINE CUSTOMIZATION -->
 	<define name="MODS_ALLOWED" if="desktop" />
 	<!-- <define name="ACHIEVEMENTS_ALLOWED" /> -->
 	<!-- <define name="VIDEOS_ALLOWED"/> -->
-	<define name="LUA_ALLOWED" if="desktop" />
+	
+	<define name="PE_MOD_COMPATIBILITY" if="desktop"/>
+	<define name="LUA_ALLOWED" if="PE_MOD_COMPATIBILITY"/>
+
 	<define name="CRASH_HANDLER" if="desktop" />
-	<define name="PE_MOD_COMPATIBILITY"/>
+	
 	<define name="MULTICORE_LOADING" if="desktop" />
 	<define name="loadBenchmark" if="MULTICORE_LOADING"/>
 	<!-- <define name="traceLoading"/> if="MULTICORE_LOADING"-->
@@ -68,6 +71,7 @@
 	<!-- _______________________________ Libraries ______________________________ -->
 
 	<haxelib name="flixel" />
+	<assets path="flixel" embed="true"/>
 	<haxedev set='webgl' />
 
 	<haxelib name="flixel-addons" />
@@ -76,7 +80,7 @@
 	<!--<haxelib name="polymod"/> -->
 	<haxelib name="hscript" />
 	<define name="hscriptPos" />
-	<haxeflag name="-dce no" />
+	<haxeflag name="-dce no" if="hscript"/> <!-- Disable dead code elimination so you can import unused classes on hscript -->
 	
 	<haxelib name="hxCodec" if="VIDEOS_ALLOWED"/>
 
@@ -113,9 +117,9 @@
 	<!--<haxedef name="FLX_NO_NATIVE_CURSOR" />-->
 
 	<!--Optimise inputs, be careful you will get null errors if you don't use conditionals in your game-->
-	<!-- <haxedef name="FLX_NO_KEYBOARD" if="mobile" /> -->
 	<haxedef name="FLX_NO_MOUSE" if="mobile" />
 	<haxedef name="FLX_NO_TOUCH" if="desktop" />
+	<!-- <haxedef name="FLX_NO_KEYBOARD" if="mobile" /> -->
 	<!--<haxedef name="FLX_NO_GAMEPAD" />-->
 
 	<!--Disable the Flixel core sound tray-->

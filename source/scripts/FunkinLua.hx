@@ -2471,8 +2471,8 @@ class FunkinLua extends FunkinScript
 	override public function call(func:String, ?args:Array<Dynamic>, ?extraVars:Map<String,Dynamic>): Dynamic{
 		#if LUA_ALLOWED
 		try {
-			if(args==null)args=[];
-			if(lua==null)return Function_Continue;
+			if(args==null) args=[];
+			if(lua==null) return Function_Continue;
 
 			Lua.getglobal(lua, func);
 			#if (linc_luajit >= "0.0.6")
@@ -2480,15 +2480,19 @@ class FunkinLua extends FunkinScript
 			#else
 			if(Lua.isfunction(lua, -1)==1){
 			#end
-				for(arg in args) Convert.toLua(lua, arg);
-				var result: Dynamic = Lua.pcall(lua, args.length, 1, 0);
+				for(arg in args) 
+					Convert.toLua(lua, arg);
+				
+				var result:Dynamic = Lua.pcall(lua, args.length, 1, 0);
+
 				if(result!=0){
 					var err = getErrorMessage();
-					if(errorHandler!=null){
+					
+					if(errorHandler != null)
 						errorHandler(err);
-					}else{
-						trace("ERROR: " + err);
-					}
+					else
+						trace('$scriptName: ERROR: $err on function $func(${args.join(', ')})');
+					
 					//LuaL.error(state,err);
 				}else{
 					if(result != null){
