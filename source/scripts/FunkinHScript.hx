@@ -1,7 +1,5 @@
 package scripts;
 
-import sys.io.File;
-import sys.FileSystem;
 import flixel.addons.display.FlxRuntimeShader;
 
 import flixel.util.FlxColor;
@@ -103,28 +101,18 @@ class FunkinHScript extends FunkinScript
 		set("FlxCamera", flixel.FlxCamera);
 
 		set("newShader", function(fragFile:String = null, vertFile:String = null){ // returns a FlxRuntimeShader but with file names lol
-			var runtime:FlxRuntimeShader = new FlxRuntimeShader();
+			var runtime:FlxRuntimeShader = null;
 
-			try{
-				var frag = fragFile==null?null:Paths.modsShaderFragment(fragFile);
-				var vert = vertFile==null?null:Paths.modsShaderVertex(vertFile);
-				if(FileSystem.exists(frag))
-					frag = File.getContent(frag);
-				else
-					frag = null;
-
-				if (FileSystem.exists(vert))
-					vert = File.getContent(vert);
-				else
-					vert = null;
-				
-				var shader = new FlxRuntimeShader(frag, vert);
-				runtime = shader;
+			try{				
+				runtime = new FlxRuntimeShader(
+					fragFile==null ? null : Paths.getContent(Paths.modsShaderFragment(fragFile)), 
+					vertFile==null ? null : Paths.getContent(Paths.modsShaderVertex(vertFile))
+				);
 			}catch(e:Dynamic){
 				trace("Shader compilation error:" + e.message);
 			}
 
-			return runtime;
+			return runtime==null ? new FlxRuntimeShader() : runtime;
 		});
 
 		set("FlxMath", flixel.math.FlxMath);
@@ -320,9 +308,9 @@ class FunkinHScript extends FunkinScript
 		try{
 			interpreter.execute(parsed);
 			call('onCreate');
-			Sys.println('Loaded haxe script: $scriptName');
+			trace('Loaded hscript: $scriptName');
 		}catch(e:haxe.Exception){
-			Sys.println('${e.details()}');
+			haxe.Log.trace(e.message, interpreter.posInfos());
 		}
 	}
 
@@ -372,6 +360,9 @@ class FunkinHScript extends FunkinScript
 		if (!Reflect.isFunction(daFunc))
 			return null;
 
+		if (parameters == null)
+			parameters = [];
+
 		if (extraVars == null) 
 			extraVars = [];
 		
@@ -389,9 +380,7 @@ class FunkinHScript extends FunkinScript
 		try{
 			returnVal = Reflect.callMethod(theObject, daFunc, parameters);
 		}catch (e:haxe.Exception){
-			#if sys
-			Sys.println(e.message);
-			#end
+			haxe.Log.trace(e.message, interpreter.posInfos());
 		}
 
 		for (key in defaultShit.keys())
