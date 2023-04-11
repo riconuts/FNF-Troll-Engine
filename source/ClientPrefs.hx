@@ -289,7 +289,7 @@ class ClientPrefs
 				data: ["options" => ["Column", "Quants"]]
 			},
 			"coloredCombos" => {
-				display: "Colored Combos.",
+				display: "Colored Combos",
 				desc: "When toggled, combo numbers are colored based on the FC.", // Sorry I'm bad at descriptions. < its fine lol
 				type: Toggle,
 				value: false,
