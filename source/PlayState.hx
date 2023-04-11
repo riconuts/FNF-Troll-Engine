@@ -1027,7 +1027,8 @@ class PlayState extends MusicBeatState
 
 
 		var cH = [camHUD];
-		hitbar.cameras = cH;
+		if (hitbar != null)
+			hitbar.cameras = cH;
 		playerField.cameras = cH;
 		dadField.cameras = cH;
 		playfields.cameras = cH;
@@ -3360,13 +3361,15 @@ class PlayState extends MusicBeatState
 				if(scoreTxtTween != null) scoreTxtTween.cancel();
 				if(hitbarTween != null) hitbarTween.cancel();
 
-				hitbar.scale.x = 1.075;
-				hitbar.scale.y = 1.075;
-				hitbarTween = FlxTween.tween(hitbar.scale, {x: 1, y: 1}, 0.2, {
-					onComplete: function(twn:FlxTween) {
-						hitbarTween = null;
-					}
-				}); 
+				if (hitbar != null){
+					hitbar.scale.x = 1.075;
+					hitbar.scale.y = 1.075;
+					hitbarTween = FlxTween.tween(hitbar.scale, {x: 1, y: 1}, 0.2, {
+						onComplete: function(twn:FlxTween) {
+							hitbarTween = null;
+						}
+					});
+				}
 
 				scoreTxt.scale.x = 1.075;
 				scoreTxt.scale.y = 1.075;
@@ -4366,7 +4369,8 @@ class PlayState extends MusicBeatState
 			//trace('BEAT HIT: ' + curBeat + ', LAST HIT: ' + lastBeatHit);
 			return;
 		}
-		hitbar.beatHit();
+		if (hitbar != null)
+			hitbar.beatHit();
 
 		if (generatedMusic)
 		{
