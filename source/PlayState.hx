@@ -496,7 +496,7 @@ class PlayState extends MusicBeatState
 
 		var rating:Rating = new Rating('sick');
 		if(ClientPrefs.useEpics){
-			rating.ratingMod = 0.9;
+			rating.ratingMod = 0.975;
 			// maybe make epics have the 350 score etc and make sicks, when epics are on, score less
 			// so that max scores stay the same
 
