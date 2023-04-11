@@ -158,7 +158,7 @@ class ClientPrefs
 				data: ["options" => ["Time Left", "Time Elapsed", "Song Name", "Disabled"]]
 			},
 			"hudOpacity" => {
-				display: "Opacity",
+				display: "HUD Opacity",
 				desc: "How visible the HUD should be. 100% is fully visible and 0% is invisible.",
 				type: Number,
 				value: 1,
