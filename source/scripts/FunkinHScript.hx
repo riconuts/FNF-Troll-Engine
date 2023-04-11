@@ -87,10 +87,6 @@ class FunkinHScript extends FunkinScript
 		set("newMap", function(){
 			return new Map<Dynamic, Dynamic>();
 		});
-		// this is stupid, there has to be a better way
-		set("newTypedGroup", function(maxSize:Int = 0){
-			return new flixel.group.FlxGroup.FlxTypedGroup<FlxBasic>(maxSize);
-		});
 
 		set("Assets", Assets);
 		set("OpenFlAssets", openfl.utils.Assets);
