@@ -74,11 +74,12 @@ class BaseHUD extends FlxSpriteGroup {
 
     function get_healthBarBG()return healthBar.healthBarBG;
 
-    public function new(iP1:String, iP2:String) {
+	public function new(iP1:String, iP2:String, songName:String) {
         super();
+		this.songName = songName;
 		if (!ClientPrefs.useEpics)
 			displayedJudges.remove("epic");
-		
+
 		healthBar = new FNFHealthBar(iP1, iP2);
 		iconP1 = healthBar.iconP1;
 		iconP2 = healthBar.iconP2;

@@ -29,9 +29,10 @@ class AdvancedHUD extends BaseHUD
 
 	var songHighscore:Int = 0;
 	public var hudPosition(default, null):String = ClientPrefs.hudPosition;
-	override public function new(iP1:String, iP2:String)
+	override public function new(iP1:String, iP2:String, songName:String)
 	{
-		super(iP1, iP2);
+		super(iP1, iP2, songName);
+		
 		songHighscore = Highscore.getScore(songName);
 
 		scoreTxt = new FlxText(0, 0, 170, "", 20);

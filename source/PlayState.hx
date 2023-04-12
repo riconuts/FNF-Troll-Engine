@@ -916,9 +916,9 @@ class PlayState extends MusicBeatState
 
 		////
 		if(ClientPrefs.etternaHUD == 'Advanced')
-			hud = new hud.AdvancedHUD(boyfriend.healthIcon, dad.healthIcon);
+			hud = new hud.AdvancedHUD(boyfriend.healthIcon, dad.healthIcon, songName);
 		else
-			hud = new PsychHUD(boyfriend.healthIcon, dad.healthIcon);
+			hud = new PsychHUD(boyfriend.healthIcon, dad.healthIcon, songName);
 		healthBar = hud.healthBar;
 		hud.songName = SONG.song;
 		hud.alpha = ClientPrefs.hudOpacity;
@@ -4484,7 +4484,7 @@ class PlayState extends MusicBeatState
 		hud.score = songScore;
 		
 		hud.recalculateRating();
-		
+
 		setOnScripts('rating', ratingPercent);
 		setOnScripts('ratingName', ratingName);
 		setOnScripts('ratingFC', ratingFC);

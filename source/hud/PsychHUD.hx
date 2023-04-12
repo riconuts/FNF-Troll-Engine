@@ -25,8 +25,9 @@ class PsychHUD extends BaseHUD {
 	var scoreTxtTween:FlxTween;
 
 	var songHighscore:Int = 0;
-    override public function new(iP1:String, iP2:String){
-        super(iP1, iP2);
+	override public function new(iP1:String, iP2:String, songName:String)
+	{
+		super(iP1, iP2, songName);
 		songHighscore = Highscore.getScore(songName);
 
 		scoreTxt = new FlxText(0, healthBarBG.y + 48, FlxG.width, "", 20);
