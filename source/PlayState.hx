@@ -1,5 +1,7 @@
 package;
 
+import hud.PsychHUD;
+import hud.BaseHUD;
 import sys.FileSystem;
 import sys.io.File;
 import flixel.group.FlxGroup;
@@ -90,12 +92,56 @@ typedef SpeedEvent =
 	speed:Float // speed mult after the change
 }
 
+// Etterna
+class Wife3
+{
+	public static var wifeZeroPoint:Float = 65;
 
+	public static var missWeight:Float = -5.5;
+	public static var mineWeight:Float = -7;
+	public static var holdDropWeight:Float = -4.5;
+	public static var a1 = 0.254829592;
+	public static var a2 = -0.284496736;
+	public static var a3 = 1.421413741;
+	public static var a4 = -1.453152027;
+	public static var a5 = 1.061405429;
+	public static var p = 0.3275911;
+
+	public static function werwerwerwerf(x:Float):Float
+	{
+		var sign = 1;
+		if (x < 0)sign = -1;
+		x = Math.abs(x);
+		var t = 1 / (1+p*x);
+		var y = 1 - (((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t*Math.exp(-x*x);
+		return sign*y;
+	}
+
+	public static function getAcc(noteDiff:Float):Float{ // https://github.com/etternagame/etterna/blob/0a7bd768cffd6f39a3d84d76964097e43011ce33/src/RageUtil/Utils/RageUtil.h
+		var jPow:Float = 0.75;
+		var maxPoints:Float = 2.0;
+		var ridic:Float = 5;
+		var shit_weight:Float = 200; // should I use this?? idfk man
+		var absDiff = Math.abs(noteDiff);
+		var zero:Float = wifeZeroPoint;
+		var dev:Float = 22.7;
+
+		if(absDiff<=ridic){
+			return maxPoints;
+		} else if(absDiff<=zero){
+			return maxPoints*werwerwerwerf((zero-absDiff)/dev);
+		}else if(absDiff<=shit_weight){
+			return (absDiff-zero)*missWeight/(shit_weight-zero);
+		}
+		return missWeight;
+	}
+
+
+}
 class PlayState extends MusicBeatState
 {
 	public var currentSV:SpeedEvent = {position: 0, songTime:0, speed: 1};
 	var speedChanges:Array<SpeedEvent> = [];
-
 	var subtitles:Null<SubtitleDisplay>;
 
 	public var metadata:SongCreditdata; // metadata for the songs (artist, etc)
@@ -110,7 +156,10 @@ class PlayState extends MusicBeatState
 	public static var STRUM_X_MIDDLESCROLL = -278;
 	public static var arrowSkin:String = '';
 	public static var splashSkin:String = '';
-	public static var ratingStuff:Array<Array<Dynamic>> = [
+
+	public var ratingStuff:Array<Array<Dynamic>> = Highscore.grades.get(ClientPrefs.gradeSet);
+	
+/* 	public static var ratingStuff:Array<Array<Dynamic>> = [
 		['You Suck!', 0.2], //From 0% to 19%
 		['Shit', 0.4], //From 20% to 39%
 		['Bad', 0.5], //From 40% to 49%
@@ -121,7 +170,7 @@ class PlayState extends MusicBeatState
 		['Great', 0.9], //From 80% to 89%
 		['Sick!', 1], //From 90% to 99%
 		['Perfect!!', 1] //The value on this one isn't used actually, since Perfect is always "1"
-	];
+	]; */
 	public var modchartTweens:Map<String, FlxTween> = new Map<String, FlxTween>();
 	public var modchartSprites:Map<String, ModchartSprite> = new Map<String, ModchartSprite>();
 	public var modchartTimers:Map<String, FlxTimer> = new Map<String, FlxTimer>();
@@ -183,6 +232,7 @@ class PlayState extends MusicBeatState
 	public var dadField:PlayField;
 
 	public var playfields = new FlxTypedGroup<PlayField>();
+	public var hud:BaseHUD;
 
 	public var grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 
@@ -190,7 +240,7 @@ class PlayState extends MusicBeatState
 	
 	////
 
-	public var hitbar:Hitbar;
+	
 	public var ratingTxtGroup = new FlxTypedGroup<RatingSprite>();
 	public var comboNumGroup = new FlxTypedGroup<RatingSprite>();
 	public var timingTxt:FlxText; // TODO: replace this with the combo numbers maybe
@@ -265,17 +315,8 @@ class PlayState extends MusicBeatState
 	public var perfectMode:Bool = false;
 	public var instaRespawn:Bool = false;
 
-	public var botplaySine:Float = 0;
-	public var botplayTxt:FlxText;
-
-	public var iconP1:HealthIcon;
-	public var iconP2:HealthIcon;
-
 	public var healthBar:FNFHealthBar;
 	var songPercent:Float = 0;
-
-	private var timeBarBG:AttachedSprite;
-	public var timeBar:FlxBar;
 
 	public var camGame:FlxCamera;
 	public var camSubs:FlxCamera; // JUST for subtitles
@@ -307,12 +348,6 @@ class PlayState extends MusicBeatState
 
 	public var stage:Stage;
 	var stageData:StageFile;
-
-	public var scoreTxt:FlxText;
-	public var timeTxt:FlxText;
-
-	var scoreTxtTween:FlxTween;
-	var hitbarTween:FlxTween;
 	public var songName:String = "";
 
 	public var songScore:Int = 0;
@@ -719,55 +754,6 @@ class PlayState extends MusicBeatState
 
 		updateTime = (ClientPrefs.timeBarType != 'Disabled');
 
-		timeTxt = new FlxText(STRUM_X + (FlxG.width * 0.5) - 248, (ClientPrefs.downScroll ? FlxG.height - 44 : 19) , 400, "", 32);
-		timeTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		timeTxt.scrollFactor.set();
-		timeTxt.alpha = 0;
-		timeTxt.borderSize = 2;
-		timeTxt.visible = updateTime;
-
-		if (ClientPrefs.timeBarType == 'Song Name')
-		{
-			timeTxt.text = SONG.song;
-			timeTxt.size = 24;
-			timeTxt.y += 3;
-		}
-
-		timeBarBG = new AttachedSprite('timeBar');
-		timeBarBG.x = timeTxt.x;
-		timeBarBG.y = timeTxt.y + (timeTxt.height * 0.25);
-		timeBarBG.scrollFactor.set();
-		timeBarBG.alpha = 0;
-		timeBarBG.visible = updateTime;
-		timeBarBG.color = FlxColor.BLACK;
-		timeBarBG.xAdd = -5;
-		timeBarBG.yAdd = -5;
-		add(timeBarBG);
-
-		timeBar = new FlxBar(timeBarBG.x + 5, timeBarBG.y + 5, LEFT_TO_RIGHT, Std.int(timeBarBG.width - 10), Std.int(timeBarBG.height - 10), this,
-			'songPercent', 0, 1);
-		timeBar.scrollFactor.set();
-		timeBar.createFilledBar(0xFF000000, 0xFFFFFFFF);
-		timeBar.numDivisions = 800; //How much lag this causes?? Should i tone it down to idk, 400 or 200?
-		timeBar.alpha = 0;
-		timeBar.visible = updateTime;
-
-		add(timeBar);
-		add(timeTxt);
-		timeBarBG.sprTracker = timeBar;
-
-		//
-		botplayTxt = new FlxText(400, timeBarBG.y + (ClientPrefs.downScroll ? -78 : 55), FlxG.width - 800, "[BUTTPLUG]", 32);
-		botplayTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		botplayTxt.scrollFactor.set();
-		botplayTxt.borderSize = 1.25;
-		botplayTxt.visible = cpuControlled;
-		add(botplayTxt);
-
-		//
-		add(strumLineNotes);
-		add(playfields);
-		add(grpNoteSplashes);
 
 		var splash:NoteSplash = new NoteSplash(100, 100, 0);
 		splash.alpha = 0.0;
@@ -929,40 +915,20 @@ class PlayState extends MusicBeatState
 		moveCameraSection(SONG.notes[0]);
 
 		////
-		healthBar = new FNFHealthBar(boyfriend.healthIcon, dad.healthIcon);
-		var healthBarBG = healthBar.healthBarBG;
-		iconP1 = healthBar.iconP1;
-		iconP2 = healthBar.iconP2;
-
-		add(healthBarBG);
-		add(healthBar);
-		add(iconP1);
-		add(iconP2);
-
-				
-		if(ClientPrefs.hitbar){
-
-			hitbar = new Hitbar();
-			hitbar.screenCenter(XY);
-			if(ClientPrefs.downScroll){
-				hitbar.y -= 220;
-				hitbar.averageIndicator.flipY = false;
-				hitbar.averageIndicator.y = hitbar.y - (hitbar.averageIndicator.width + 5);
-			}else
-				hitbar.y += 340;
-
-			add(hitbar);
-		}
+		if(ClientPrefs.etternaHUD == 'Advanced')
+			hud = new hud.AdvancedHUD(boyfriend.healthIcon, dad.healthIcon);
+		else
+			hud = new PsychHUD(boyfriend.healthIcon, dad.healthIcon);
+		healthBar = hud.healthBar;
+		hud.songName = SONG.song;
+		hud.alpha = ClientPrefs.hudOpacity;
 		
+		add(hud);
 
+		add(strumLineNotes);
+		add(playfields);
+		add(grpNoteSplashes);
 
-		scoreTxt = new FlxText(0, healthBarBG.y + 48, FlxG.width, "", 20);
-		scoreTxt.setFormat(Paths.font("calibri.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		scoreTxt.scrollFactor.set();
-		scoreTxt.borderSize = 1.25;
-		scoreTxt.alpha = ClientPrefs.hudOpacity;
-		scoreTxt.visible = scoreTxt.alpha > 0;
-		add(scoreTxt);
 
 		//
 		lastJudge = RatingSprite.newRating();
@@ -1027,23 +993,23 @@ class PlayState extends MusicBeatState
 
 
 		var cH = [camHUD];
-		if (hitbar != null)
-			hitbar.cameras = cH;
+/* 		if (hitbar != null)
+			hitbar.cameras = cH; */
+		hud.cameras = cH;
 		playerField.cameras = cH;
 		dadField.cameras = cH;
 		playfields.cameras = cH;
 		strumLineNotes.cameras = cH;
 		grpNoteSplashes.cameras = cH;
 		notes.cameras = cH;
-		healthBarBG.cameras = cH;
+/* 		healthBarBG.cameras = cH;
 		healthBar.cameras = cH;
 		iconP1.cameras = cH;
-		iconP2.cameras = cH;
-		scoreTxt.cameras = cH;
-		botplayTxt.cameras = cH;
+		iconP2.cameras = cH; */
+/* 		botplayTxt.cameras = cH;
 		timeBar.cameras = cH;
 		timeBarBG.cameras = cH;
-		timeTxt.cameras = cH;
+		timeTxt.cameras = cH; */
 
 		// EVENT AND NOTE SCRIPTS WILL GET LOADED HERE
 		generateSong(SONG.song);
@@ -1544,8 +1510,8 @@ class PlayState extends MusicBeatState
 
 		// Song duration in a float, useful for the time left feature
 		songLength = FlxG.sound.music.length;
-		FlxTween.tween(timeBar, {alpha: ClientPrefs.timeOpacity}, 0.5, {ease: FlxEase.circOut});
-		FlxTween.tween(timeTxt, {alpha: ClientPrefs.timeOpacity}, 0.5, {ease: FlxEase.circOut});
+		hud.songLength = songLength;
+		hud.songStarted();
 
 		#if desktop
 		// Updating Discord Rich Presence (with Time Left)
@@ -2343,8 +2309,7 @@ class PlayState extends MusicBeatState
 
 	override public function update(elapsed:Float)
 	{
-		if (FlxG.keys.justPressed.NINE)
-			iconP1.swapOldIcon();
+
 
 		for(field in playfields)
 			field.noteField.songSpeed = songSpeed;
@@ -2401,15 +2366,7 @@ class PlayState extends MusicBeatState
 
 		callOnHScripts('update', [elapsed]);
 
-		//// certified cr classic
-		scoreTxt.text = (songHighscore != 0 && songScore > songHighscore ? 'Hi-score: ' : 'Score: ')
-			+ '$songScore | Misses: $songMisses | Rating: '
-			+ (ratingName != '?' ? Highscore.floorDecimal(ratingPercent * 100, 2) + '% - $ratingFC' : ratingName);
 
-		if(botplayTxt.visible) {
-			botplaySine += 180 * elapsed;
-			botplayTxt.alpha = 1 - Math.sin((Math.PI * botplaySine) / 180);
-		}
 
 	/* 	for (shit in speedChanges)
 		{
@@ -2481,6 +2438,8 @@ class PlayState extends MusicBeatState
 				Conductor.songPosition += addition;
 		}
 
+		hud.updateTime = updateTime;
+
 		if (startingSong)
 		{
 			if (startedCountdown && Conductor.songPosition >= 0)
@@ -2488,81 +2447,7 @@ class PlayState extends MusicBeatState
 			else if(!startedCountdown)
 				Conductor.songPosition = -Conductor.crochet * 5;
 		}
-		else
-		{
-			if (!paused)
-			{
-				songTime += FlxG.game.ticks - previousFrameTime;
-				previousFrameTime = FlxG.game.ticks;
 
-
-				if(updateTime) {
-					var curTime:Float = Conductor.songPosition - ClientPrefs.noteOffset;
-					if(curTime < 0) curTime = 0;
-					songPercent = (curTime / songLength);
-
-					var songCalc:Float = (songLength - curTime);
-					if(ClientPrefs.timeBarType == 'Time Elapsed') songCalc = curTime;
-
-					var secondsTotal:Int = Math.floor(songCalc / 1000);
-					if(secondsTotal < 0) secondsTotal = 0;
-
-					if(ClientPrefs.timeBarType != 'Song Name')
-						timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
-
-				}
-			}
-
-			// Conductor.lastSongPos = inst.time;
-		}
-
-/* 		if (startingSong)
-		{
-			if (startedCountdown)
-			{
-				Conductor.songPosition += FlxG.elapsed * 1000;
-				if (Conductor.songPosition >= 0)
-					startSong();
-			}
-		}
-		else
-		{
-			Conductor.songPosition += FlxG.elapsed * 1000;
-
-			if (!paused)
-			{
-				songTime += FlxG.game.ticks - previousFrameTime;
-				previousFrameTime = FlxG.game.ticks;
-
-				// Interpolation type beat
-				if (Conductor.lastSongPos != Conductor.songPosition)
-				{
-					songTime = (songTime + Conductor.songPosition) * 0.5;
-					Conductor.lastSongPos = Conductor.songPosition;
-					// Conductor.songPosition += FlxG.elapsed * 1000;
-					// trace('MISSED FRAME');
-				}
-
-				if(updateTime) {
-					var curTime:Float = Conductor.songPosition - ClientPrefs.noteOffset;
-					if(curTime < 0) curTime = 0;
-
-					songPercent = (curTime / songLength);
-
-					if (chartingMode)
-						timeTxt.text = '${FlxMath.roundDecimal(curTime * 0.001, 2)} / ${FlxMath.roundDecimal(songLength * 0.001, 2)}';
-					else if(ClientPrefs.timeBarType != 'Song Name'){
-						var secondsTotal:Int = Math.floor((ClientPrefs.timeBarType == 'Time Elapsed' ? curTime : songLength - curTime) * 0.001);
-						if(secondsTotal < 0) secondsTotal = 0;
-
-						timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
-					}
-				}
-			}
-
-			// Conductor.lastSongPos = FlxG.sound.music.time;
-		}
- */
 		if (camZooming)
 		{
 			var lerpVal = CoolUtil.boundTo(1 - (elapsed * 3.125 * camZoomingDecay), 0, 1);
@@ -2791,7 +2676,7 @@ class PlayState extends MusicBeatState
 					boyfriend = boyfriendMap.get(name);
 					boyfriend.alpha = lastAlpha;
 					if(shiftFocus)focusedChar=boyfriend;
-					iconP1.changeIcon(boyfriend.healthIcon);
+					hud.iconP1.changeIcon(boyfriend.healthIcon);
 				}
 				setOnScripts('boyfriendName', boyfriend.curCharacter);
 
@@ -2816,7 +2701,7 @@ class PlayState extends MusicBeatState
 					}
 					if(shiftFocus)focusedChar=dad;
 					dad.alpha = lastAlpha;
-					iconP2.changeIcon(dad.healthIcon);
+					hud.iconP2.changeIcon(dad.healthIcon);
 				}
 				setOnScripts('dadName', dad.curCharacter);
 
@@ -3151,6 +3036,7 @@ class PlayState extends MusicBeatState
 	public var transitioning = false;
 	public function endSong():Void
 	{
+		
 		//Should kill you if you tried to cheat
 		if(!startingSong) {
 			/*for (daNote in allNotes) {
@@ -3172,9 +3058,7 @@ class PlayState extends MusicBeatState
 				return;
 		}
 
-		timeBarBG.visible = false;
-		timeBar.visible = false;
-		timeTxt.visible = false;
+		hud.songEnding();
 		canPause = false;
 		endingSong = true;
 		camZooming = false;
@@ -3211,7 +3095,7 @@ class PlayState extends MusicBeatState
 			{
 				var percent:Float = ratingPercent;
 				if(Math.isNaN(percent)) percent = 0;
-				if(!playOpponent && !disableModcharts)
+				if(!playOpponent && !disableModcharts && ratingFC!='Fail')
 					Highscore.saveScore(SONG.song, songScore, percent);
 			}
 			#end
@@ -3226,7 +3110,10 @@ class PlayState extends MusicBeatState
 
 			if (isStoryMode)
 			{
-				campaignScore += songScore;
+				// TODO: add a modcharted variable which songs w/ modcharts should set to true, then make it so if modcharts are disabled the score wont get added
+				// same check should be in the saveScore check above too
+				if (ratingFC != 'Fail')
+					campaignScore += songScore;
 				campaignMisses += songMisses;
 
 				storyPlaylist.remove(storyPlaylist[0]);
@@ -3242,8 +3129,7 @@ class PlayState extends MusicBeatState
 
 					if (ChapterData.curChapter != null && !playOpponent ){
 						if(!ClientPrefs.getGameplaySetting('practice', false) && !ClientPrefs.getGameplaySetting('botplay', false)) {
-							if (SONG.validScore && !disableModcharts)
-								Highscore.saveWeekScore(ChapterData.curChapter.directory, campaignScore);
+							Highscore.saveWeekScore(ChapterData.curChapter.directory, campaignScore);
 							
 							StoryMenuState.weekCompleted.set(ChapterData.curChapter.directory, true);
 							FlxG.save.data.weekCompleted = StoryMenuState.weekCompleted;
@@ -3309,7 +3195,7 @@ class PlayState extends MusicBeatState
 		eventNotes = [];
 	}
 
-	public var totalPlayed:Int = 0;
+	public var totalPlayed:Float = 0;
 	public var totalNotesHit:Float = 0.0;
 
 	var lastJudge:RatingSprite;
@@ -3317,6 +3203,71 @@ class PlayState extends MusicBeatState
 
 	var msNumber = 0;
 	var msTotal = 0.0;
+
+	private function showJudgment(image:String){
+		var rating:RatingSprite;
+
+		var time = (Conductor.stepCrochet * 0.001);
+
+		if (ClientPrefs.simpleJudge)
+		{
+			rating = lastJudge;
+			rating.revive();
+
+			if (rating.tween != null)
+			{
+				rating.tween.cancel();
+				rating.tween.destroy();
+			}
+
+			rating.scale.set(0.7 * 1.1, 0.7 * 1.1);
+
+			rating.tween = FlxTween.tween(rating.scale, {x: 0.7, y: 0.7}, 0.1, {
+				ease: FlxEase.quadOut,
+				onComplete: function(tween:FlxTween)
+				{
+					if (!rating.alive)
+						return;
+
+					rating.tween = FlxTween.tween(rating.scale, {x: 0, y: 0}, time, {
+						startDelay: time * 8,
+						ease: FlxEase.quadIn,
+						onComplete: function(tween:FlxTween)
+						{
+							rating.kill();
+						}
+					});
+				}
+			});
+		}
+		else
+		{
+			rating = ratingTxtGroup.recycle(RatingSprite, RatingSprite.newRating);
+
+			rating.acceleration.y = 550;
+			rating.velocity.set(-FlxG.random.int(0, 10), -FlxG.random.int(140, 175));
+
+			rating.alpha = 1;
+
+			rating.tween = FlxTween.tween(rating, {alpha: 0}, 0.2, {
+				startDelay: Conductor.crochet * 0.001,
+				onComplete: function(wtf)
+				{
+					rating.kill();
+				}
+			});
+		}
+
+		rating.loadGraphic(Paths.image(image));
+		rating.updateHitbox();
+
+		rating.screenCenter();
+		rating.x += ClientPrefs.comboOffset[0];
+		rating.y -= ClientPrefs.comboOffset[1];
+
+		ratingTxtGroup.remove(rating, true);
+		ratingTxtGroup.add(rating);
+	}
 
 	private function popUpScore(note:Note = null, field:PlayField=null):Void
 	{
@@ -3328,113 +3279,46 @@ class PlayState extends MusicBeatState
 		var hitTime = note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset;
 		var noteDiff:Float = Math.abs(hitTime);
 
- 		if(ClientPrefs.hitbar)
+/*  		if(ClientPrefs.hitbar)
 			hitbar.addHit(hitTime);
-		
-		//trace(noteDiff);
-
+ */
 		vocals.volume = 1;
 
 		//tryna do MS based judgment due to popular demand
 		var daRating:Rating = Conductor.judgeNote(noteDiff);
 
-		totalNotesHit += daRating.ratingMod;
-		note.ratingMod = daRating.ratingMod;
+		hud.noteJudged(daRating, note, field);
+
+		var ratingMod = daRating.ratingMod;
+		if (ClientPrefs.wife3)
+			ratingMod = Wife3.getAcc(hitTime);
+		
+		note.ratingMod = ratingMod;
+		
 		if(!note.ratingDisabled) daRating.increase();
 		note.rating = daRating.name;
+
+		if(!hud.judgements.exists(daRating.name))
+			hud.judgements.set(daRating.name, 0);
+		hud.judgements.set(daRating.name, hud.judgements.get(daRating.name) + 1);
 
 		if(daRating.noteSplash && !note.noteSplashDisabled)
 			spawnNoteSplashOnNote(note, field);
 
-		if(!practiceMode && !field.autoPlayed) {
+		if(!practiceMode && !field.autoPlayed)
 			songScore += daRating.score;
 
-			if(!note.ratingDisabled)
-			{
-				songHits++;
-				totalPlayed++;
-				RecalculateRating();
-			}
-
-			if(ClientPrefs.scoreZoom)
-			{
-				if(scoreTxtTween != null) scoreTxtTween.cancel();
-				if(hitbarTween != null) hitbarTween.cancel();
-
-				if (hitbar != null){
-					hitbar.scale.x = 1.075;
-					hitbar.scale.y = 1.075;
-					hitbarTween = FlxTween.tween(hitbar.scale, {x: 1, y: 1}, 0.2, {
-						onComplete: function(twn:FlxTween) {
-							hitbarTween = null;
-						}
-					});
-				}
-
-				scoreTxt.scale.x = 1.075;
-				scoreTxt.scale.y = 1.075;
-				scoreTxtTween = FlxTween.tween(scoreTxt.scale, {x: 1, y: 1}, 0.2, {
-					onComplete: function(twn:FlxTween) {
-						scoreTxtTween = null;
-					}
-				});
-			}
+		if(!note.ratingDisabled)
+		{
+			totalNotesHit += ratingMod;
+			songHits++;
+			totalPlayed += ClientPrefs.wife3 ? 2 : 1;
+			RecalculateRating();
 		}
-
-		////
-		var rating:RatingSprite;
-
+		
 		var time = (Conductor.stepCrochet * 0.001);
 
-		if (ClientPrefs.simpleJudge){
-			rating = lastJudge;
-			rating.revive();
-
-			if (rating.tween != null){
-				rating.tween.cancel();
-				rating.tween.destroy();
-			}
-
-			rating.scale.set(0.7*1.1,0.7*1.1);
-
-			rating.tween = FlxTween.tween(rating.scale, {x: 0.7, y: 0.7}, 0.1, {
-				ease: FlxEase.quadOut,
-				onComplete: function(tween:FlxTween){
-					if (!rating.alive)
-						return;
-
-					rating.tween = FlxTween.tween(rating.scale, {x: 0, y: 0}, time, {
-						startDelay: time * 8,
-						ease: FlxEase.quadIn,
-						onComplete: function(tween:FlxTween){rating.kill();}
-					});
-				}
-			});
-
-		}else{
-			rating = ratingTxtGroup.recycle(RatingSprite, RatingSprite.newRating);
-
-			rating.acceleration.y = 550;
-			rating.velocity.set(-FlxG.random.int(0, 10), -FlxG.random.int(140, 175));
-
-			rating.alpha = 1;
-
-			rating.tween = FlxTween.tween(rating, {alpha: 0}, 0.2, {
-				startDelay: Conductor.crochet * 0.001,
-				onComplete: function(wtf){rating.kill();}
-			});
-		}
-
-		rating.loadGraphic(Paths.image(daRating.image));
-		rating.updateHitbox();
-
-		rating.screenCenter();
-		rating.x += ClientPrefs.comboOffset[0];
-		rating.y -= ClientPrefs.comboOffset[1];
-
-		ratingTxtGroup.remove(rating, true);
-		ratingTxtGroup.add(rating);
-
+		showJudgment(daRating.image);
 		////
 		msTotal += hitTime;
 		msNumber++;
@@ -3449,18 +3333,7 @@ class PlayState extends MusicBeatState
 			timingTxt.x += ClientPrefs.comboOffset[4];
 			timingTxt.y -= ClientPrefs.comboOffset[5];
 
-			timingTxt.color = switch(daRating.image){
-				case 'epic':
-					0xFFE367E5;
-				case 'sick':
-					0xFF00A2E8;
-				case 'good':
-					0xFFB5E61D;
-				case "bad" | "shit":
-					0xFFED1C24;
-				default:
-					FlxColor.WHITE;
-			};
+			timingTxt.color = hud.judgeColours.get(daRating.name);
 
 			timingTxt.visible = true;
 			timingTxt.alpha = 1;
@@ -3504,12 +3377,12 @@ class PlayState extends MusicBeatState
 
 		// did you goto MS Paint and get colours from there lol
 		var comboColor = !ClientPrefs.coloredCombos ? 0xFFFFFFFF : switch(ratingFC){ // so the color doesn't get calculated for every number ig
-			case 'EFC':
-				0xFFE367E5;
-			case 'SFC':
-				0xFF00A2E8;
-			case 'GFC':
-				0xFFB5E61D;
+			case 'KFC':
+				hud.judgeColours.get("epic");
+			case 'AFC':
+				hud.judgeColours.get("sick");
+			case 'CFC':
+				hud.judgeColours.get("good");
 			default:
 				FlxColor.WHITE;
 		};
@@ -3795,7 +3668,7 @@ class PlayState extends MusicBeatState
 		return ret;
 	}
 
-	function noteMiss(daNote:Note, field:PlayField):Void { //You didn't hit the key and let it go offscreen, also used by Hurt Notes
+	function noteMiss(daNote:Note, field:PlayField, ?mine:Bool=false):Void { //You didn't hit the key and let it go offscreen, also used by Hurt Notes
 		//Dupe note remove
 		//field.spawnedNotes.forEachAlive(function(note:Note) {
 		for(note in field.spawnedNotes){
@@ -3885,10 +3758,22 @@ class PlayState extends MusicBeatState
 		if(!practiceMode) 
 			songScore -= 10;
 
-		totalPlayed++;
-		RecalculateRating();
+		if(!daNote.isSustainNote ){
+			if (daNote.sustainLength > 0 && ClientPrefs.wife3)
+			{
+				totalPlayed += 2;
+				totalNotesHit += Wife3.holdDropWeight;
+			}else{
+				totalPlayed += ClientPrefs.wife3?2:1;
+				if(ClientPrefs.wife3)
+					totalNotesHit += mine?Wife3.mineWeight:Wife3.missWeight;
+			}
+			
+			if(!mine)showJudgment("miss");
+			RecalculateRating();
+		}
 
-		if (!daNote.isSustainNote) // i missed this sound
+		if (!daNote.isSustainNote && ClientPrefs.missVolume > 0) // i missed this sound
 			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(ClientPrefs.missVolume * 0.9, ClientPrefs.missVolume * 1));
 
 		if(instakillOnMiss)
@@ -4134,7 +4019,7 @@ class PlayState extends MusicBeatState
 
 
 		if(note.hitCausesMiss) {
-			noteMiss(note, field);
+			noteMiss(note, field, true);
 
 			if(!note.noteSplashDisabled && !note.isSustainNote)
 				spawnNoteSplashOnNote(note, field);
@@ -4340,17 +4225,10 @@ class PlayState extends MusicBeatState
 	override function stepHit()
 	{
 		super.stepHit();
-
-/* 		if (Math.abs(FlxG.sound.music.time - (Conductor.songPosition - Conductor.offset)) > 20
-			|| (SONG.needsVoices && Math.abs(vocals.time - (Conductor.songPosition - Conductor.offset)) > 20))
-		{
-			resyncVocals();
-		} */
-
-		if(curStep == lastStepHit) {
+		if(curStep == lastStepHit) 
 			return;
-		}
-
+		
+		hud.stepHit(curStep);
 		lastStepHit = curStep;
 		setOnScripts('curStep', curStep);
 		callOnScripts('onStepHit');
@@ -4365,17 +4243,11 @@ class PlayState extends MusicBeatState
 	{
 		super.beatHit();
 
-		if(lastBeatHit >= curBeat) {
-			//trace('BEAT HIT: ' + curBeat + ', LAST HIT: ' + lastBeatHit);
+		if(lastBeatHit >= curBeat) 
 			return;
-		}
-		if (hitbar != null)
-			hitbar.beatHit();
-
-		if (generatedMusic)
-		{
-			//notes.sort(FlxSort.byY, ClientPrefs.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
-		}
+	
+		
+		hud.beatHit(curBeat);
 
 		if (camZooming && ClientPrefs.camZoomP>0 && FlxG.camera.zoom < 1.35 && zoomEveryBeat > 0 && curBeat % zoomEveryBeat == 0)
 		{
@@ -4383,12 +4255,9 @@ class PlayState extends MusicBeatState
 			camHUD.zoom += 0.03 * camZoomingMult * ClientPrefs.camZoomP;
 		}
 
-		healthBar.iconScale = 1.2;
-
 		if (gf != null && curBeat % Math.round(gfSpeed * gf.danceEveryNumBeats) == 0 && gf.animation.curAnim != null && !gf.animation.curAnim.name.startsWith("sing") && !gf.stunned)
-		{
 			gf.dance();
-		}
+		
 		for(field in playfields)
 		{
 			for(char in field.characters)
@@ -4561,6 +4430,7 @@ class PlayState extends MusicBeatState
 		setOnScripts('hits', songHits);
 
 		var ret:Dynamic = callOnScripts('onRecalculateRating');
+		
 		if(ret != Globals.Function_Stop)
 		{
 			if(totalPlayed < 1) //Prevent divide by 0
@@ -4568,19 +4438,21 @@ class PlayState extends MusicBeatState
 			else
 			{
 				// Rating Percent
-				ratingPercent = Math.min(1, Math.max(0, totalNotesHit / totalPlayed));
+				if(ClientPrefs.wife3)
+					ratingPercent = totalNotesHit / totalPlayed;
+				else
+					ratingPercent = Math.min(1, Math.max(0, totalNotesHit / totalPlayed));
 				//trace((totalNotesHit / totalPlayed) + ', Total: ' + totalPlayed + ', notes hit: ' + totalNotesHit);
 
 				// Rating Name
 				if(ratingPercent >= 1)
-				{
-					ratingName = ratingStuff[ratingStuff.length-1][0]; //Uses last string
-				}
+					ratingName = ratingStuff[0][0]; //Uses first string
 				else
 				{
-					for (i in 0...ratingStuff.length-1)
+					ratingName = ratingStuff[ratingStuff.length-1][0];
+					for (i in 0...ratingStuff.length)
 					{
-						if(ratingPercent < ratingStuff[i][1])
+						if(ratingPercent >= ratingStuff[i][1])
 						{
 							ratingName = ratingStuff[i][0];
 							break;
@@ -4590,14 +4462,29 @@ class PlayState extends MusicBeatState
 			}
 
 			// Rating FC
-			ratingFC = "";
-			if (epics > 0) ratingFC = "EFC";
-			if (sicks > 0) ratingFC = "SFC";
-			if (goods > 0) ratingFC = "GFC";
+			ratingFC = "Clear";
+			if(songMisses <= 0){
+			if (epics > 0) ratingFC = "KFC";
+			if (sicks > 0) ratingFC = "AFC";
+			if (goods > 0) ratingFC = "CFC";
 			if (bads > 0 || shits > 0) ratingFC = "FC";
-			if (songMisses > 0 && songMisses < 10) ratingFC = "SDCB";
-			else if (songMisses >= 10) ratingFC = "Clear";
+			}else{
+				if (songMisses < 10) ratingFC = "SDCB";
+				else if (songMisses >= 10 && ratingPercent <= 0)ratingFC = "Fail";
+			}
 		}
+		// maybe move all of this to a stats class that I can easily give to objects?
+		hud.ratingFC = ratingFC;
+		hud.grade = ratingName;
+		hud.ratingPercent = ratingPercent;
+		hud.misses = songMisses;
+		hud.judgements.set("miss", songMisses);
+		hud.totalNotesHit = totalNotesHit;
+		hud.totalPlayed = totalPlayed;
+		hud.score = songScore;
+		
+		hud.recalculateRating();
+		
 		setOnScripts('rating', ratingPercent);
 		setOnScripts('ratingName', ratingName);
 		setOnScripts('ratingFC', ratingFC);

@@ -95,7 +95,8 @@ class FunkinHScript extends FunkinScript
 		set("state", flixel.FlxG.state);
 		set("FlxSprite", flixel.FlxSprite);
 		set("FlxCamera", flixel.FlxCamera);
-
+		set("Wife3", PlayState.Wife3);
+		
 		set("newShader", function(fragFile:String = null, vertFile:String = null){ // returns a FlxRuntimeShader but with file names lol
 			var runtime:FlxRuntimeShader = null;
 

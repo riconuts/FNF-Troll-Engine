@@ -110,8 +110,8 @@ class ClientPrefs
 				]
 			},
 			"useEpics" => {
-				display: "Use Epics",
-				desc: "When toggled, epics will be used as the highest judgement.",
+				display: "Use Killers",
+				desc: "When toggled, killers will be used as the highest judgement.",
 				type: Toggle,
 				value: false,
 				data: []
@@ -274,6 +274,13 @@ class ClientPrefs
 				value: false,
 				data: []
 			},
+			"wife3" => {
+				display: "Wife3 Accuracy",
+				desc: "When toggled, accuracy will be MS-based instead of judgement-based.",
+				type: Toggle,
+				value: false,
+				data: []
+			},
 			"noteSplashes" => {
 				display: "Note Splashes",
 				desc: "When toggled, hitting top judgements will cause a particles to spawn.",
@@ -303,38 +310,86 @@ class ClientPrefs
 				data: []
 			},
 			"hitbar" => {
-				display: "Show Hitbar",
-				desc: "When toggled, a bar will be shown that marks judgement timings", // TODO rewrite this desc
+				display: "Show Error Bar",
+				desc: "When toggled, a bar will be shown that marks when you hit notes.", // TODO rewrite this desc
 				type: Toggle,
 				value: false,
 				data: []
 			},
+			"npsDisplay" => {
+				display: "NPS Display",
+				desc: "When toggled, the amount of notes you hit per second is displayed in the stats bar.",
+				type: Toggle,
+				value: false,
+				data: []
+			},
+			"gradeSet" => {
+				display: "Grade Set",
+				desc: "What set of grades to use to rank performance. Does not affect scores",
+				type: Dropdown,
+				value: "Psych",
+				data: [
+					"options" => (function()
+					{
+						var arr:Array<String> = [];
+						for (key in Highscore.grades.keys())
+							arr.push(key);
+						arr.reverse(); // for some reason keys() returns the map.. backwards
+						return arr;
+					})()
+				]
+			},
+			"etternaHUD" => {
+				display: "HUD Style",
+				desc: "Changes how the HUD looks.",
+				type: Dropdown,
+				value: "Default",
+				data: [
+					"options" => ["Default", "Advanced"]
+				]
+			},
 
+			"judgeCounter" => {
+				display: "Judgment Counter",
+				desc: "How to display the judgment counter",
+				type: Dropdown,
+				value: "Off",
+				data: [
+					"options" => ["Off", "Shortened", "Full"]
+				]
+			},
+			"hudPosition" => {
+				display: "HUD Position",
+				desc: "Where to position HUD elements",
+				type: Dropdown,
+				value: "Left",
+				data: ["options" => ["Left", "Right"]]
+			},
 			// judgment-related (gameplay)
 			"epicWindow" => {
-				display: "Epic Window",
-				desc: "The hit window to hit an Epic.",
+				display: "Killer Window",
+				desc: "The hit window to hit a Killer.",
 				type: Number,
 				value: 22,
 				data: ["suffix" => "ms", "min" => 0, "max" => 200, "step" => 0.1]
 			},
 			"sickWindow" => {
-				display: "Sick Window",
-				desc: "The hit window to hit a Sick.",
+				display: "Awesome Window",
+				desc: "The hit window to hit an Awesome.",
 				type: Number,
 				value: 45,
 				data: ["suffix" => "ms", "min" => 0, "max" => 200, "step" => 0.1]
 			},
 			"goodWindow" => {
-				display: "Good Window",
-				desc: "The hit window to hit a Good.",
+				display: "Cool Window",
+				desc: "The hit window to hit a Cool.",
 				type: Number,
 				value: 90,
 				data: ["suffix" => "ms", "min" => 0, "max" => 200, "step" => 0.1]
 			},
 			"badWindow" => {
-				display: "Bad Window",
-				desc: "The hit window to hit a Bad.",
+				display: "Gay Window",
+				desc: "The hit window to hit a Gay.",
 				type: Number,
 				value: 135,
 				data: ["suffix" => "ms", "min" => 0, "max" => 200, "step" => 0.1]

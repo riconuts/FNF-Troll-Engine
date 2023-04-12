@@ -1,11 +1,76 @@
 package;
-
+#if !macro
 import flixel.FlxG;
 import flixel.util.FlxSave;
+#end
 using StringTools;
 
 class Highscore
 {
+	public static var grades:Map<String, Array<Array<Dynamic>>> = [
+		"Psych" => [
+			["Perfect!!", 1],
+			["Sick!", 0.9],
+			["Great", 0.8],
+			["Good", 0.7],
+			["Nice", 0.69],
+			["Okay", 0.6],
+			["Meh", 0.5],
+			["Bad", 0.4],
+			["Bruh", 0.3],
+			["You Suck!", 0.01],
+			["Git Gud!!", -1],
+			["YOU ARE FUCKING ATROCIOUS", -200], // if you somehow get BELOW -100, this is your prize! (Only applicable to Wife3)
+		],
+		"Etterna" => [
+			["AAAAA", 0.999935],
+			["AAAA:", 0.99980],
+			["AAAA.", 0.99970],
+			["AAAA", 0.99955],
+			["AAA:", 0.999],
+			["AAA.", 0.998],
+			["AAA", 0.997],
+			["AA:",0.99],
+			["AA.", 0.9650],
+			["AA", 0.93],
+			["A:", 0.9],
+			["A.", 0.85],
+			["A", 0.8],
+			["B", 0.7],
+			["C", 0.6],
+			["D", 0.01],
+			["F", -1],
+			["ULTRA F", -200], // if you somehow get BELOW -100, this is your prize! (Only applicable to Wife3)
+		],
+		"ITG-Like" => [
+			// we cant do stars, so SS and everything beyond is a star lol (SS is 1 star, SS+ is 2, SS++ is 3 and Ss+++ is 4)
+			// or we do asterisks? (*, **, *** and ****)
+			// or we modify the font to allow for stars like i did in andromeda
+			
+			['SS+++', 1],
+			["SS++", 0.99],
+			["SS+", 0.98],
+			["SS", 0.96],
+			["S+", 0.94],
+			["S", 0.92],
+			["S-", 0.89],
+			["A+", 0.86],
+			["A", 0.83],
+			["A-", 0.8],
+			["B+", 0.76],
+			["B", 0.72],
+			["B-", 0.68],
+			["C+", 0.64],
+			["C", 0.6],
+			["C-", 0.5],
+			["D+", 0.5],
+			["D", 0.45],
+			["D-", 0.01],
+			["F", -1],
+			["ULTRA F", -200], // if you somehow get BELOW -100, this is your prize! (Only applicable to Wife3)
+			
+		]
+	];
 	#if (haxe >= "4.0.0")
 	public static var weekScores:Map<String, Int> = new Map();
 	public static var songScores:Map<String, Int> = new Map();
@@ -16,6 +81,7 @@ class Highscore
 	public static var songRating:Map<String, Float> = new Map<String, Float>();
 	#end
 
+	#if !macro
 	static var loadedID:String = '';
 	static var save:FlxSave = new FlxSave();
 	static var defaultID:String = 'f-45-90-135-166'; // psych preset aka the default preset from old tgt
@@ -24,12 +90,15 @@ class Highscore
 	public static function getID(){
 		var idArray:Array<String> = [];
 		idArray.push(ClientPrefs.useEpics ? 't' : 'f');
+		if (ClientPrefs.wife3)
+			idArray.push("w3");
 		var windows = ['sick', 'good', 'bad', 'hit'];
 		if(ClientPrefs.useEpics)windows.insert(0, 'epic');
 		for(window in windows){
 			var realWindow = Reflect.field(ClientPrefs, window + "Window");
 			idArray.push(Std.string(realWindow));
 		}
+
 
 		var id = idArray.join("-");
 
@@ -205,6 +274,6 @@ class Highscore
 	{
 		updateSave();
 		loadData();
-
 	}
+	#end
 }

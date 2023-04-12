@@ -1,4 +1,4 @@
-package;
+package hud;
 
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxMath;
@@ -10,14 +10,18 @@ class Hitmark extends FlxSprite
     var decayTime:Float = 0;
     override function update(elapsed:Float){
         decayTime += elapsed;
-        if(decayTime >= 5){
-			var decayScale = 1 - ((decayTime - 5) / 2); // 2 seconds to decay
-            // based on how Schmovin' does its decay lol
+		var s = Conductor.crochet * 0.001;
+		if (decayTime >= 1){
+			var decayScale = 1 - ((decayTime-1) / (s * 4)); // 4 beats to decay
 			scale.y = decayScale;
+			alpha = decayScale;
+			color.greenFloat = FlxMath.lerp(1, 0, 1 - decayScale);
+			color.blueFloat = FlxMath.lerp(1, 0, 1 - decayScale);
 
 			if (decayScale <= 0)
-                kill();
-        }
+				kill();
+		}
+        
         super.update(elapsed);
     }
 }
@@ -25,7 +29,7 @@ class Hitbar extends FlxSpriteGroup {
     public var mainBar:FlxSprite;
     public var averageIndicator:FlxSprite;
 
-    var maxMarks:Int = 15;
+	var maxMarks:Int = 15;
     var markMS:Array<Float> = [];
 	var markGroup:FlxTypedSpriteGroup<Hitmark> = new FlxTypedSpriteGroup<Hitmark>();
 	var hitbarPxPerMs = 540 * (1 / ClientPrefs.hitWindow);
@@ -78,7 +82,8 @@ class Hitbar extends FlxSpriteGroup {
 		averageIndicator.y += hitbarHeight + 5;
 
 		add(markGroup);
-		metronome = new FlxSprite((mainBar.width / 2), 0).makeGraphic(10, 1, 0xC4FFFFFF);
+		metronome = new FlxSprite((mainBar.width / 2), 0).makeGraphic(10, 1, 0xFFFFFFFF);
+		metronome.color = 0x3C00A3;
 		metronome.alpha = 0.85;
 		metronome.scale.y = hitbarHeight / 4;
 		metronomeScale = hitbarHeight / 4;
@@ -115,20 +120,5 @@ class Hitbar extends FlxSpriteGroup {
 		hitMark.x -= hitMark.width / 2;
 		hitMark.x += ((hitbarPxPerMs / 2) * -time);
 		markGroup.add(hitMark);
-		while (markGroup.length > maxMarks)
-		{
-			var recent = markGroup.members[0];
-			markGroup.remove(recent, true);
-			recent.kill();
-		}
-
-		for (idx in 0...markGroup.length)
-		{
-			var m:FlxSprite = markGroup.members[idx];
-			if (m != hitMark)
-				m.color = FlxColor.RED;
-
-			m.alpha = 1 - ((markGroup.length - idx) / maxMarks);
-		}
     }
 }

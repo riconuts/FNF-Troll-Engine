@@ -106,6 +106,9 @@ class OptionsState extends MusicBeatState {
         switch(option){
             case 'useEpics':
                 checkWindows();
+            case 'showFPS':
+				if (Main.fpsVar != null)
+					Main.fpsVar.visible = val;
             default:
                 // nothing
         }
@@ -212,7 +215,9 @@ class OptionsState extends MusicBeatState {
             [
                 "Advanced",
                 [
+                    "wife3",
 			        "judgePreset",
+                    // TODO: stepmania scale
                     "useEpics",
                     "epicWindow",
                     "sickWindow",
@@ -232,11 +237,14 @@ class OptionsState extends MusicBeatState {
                     "timeOpacity",
                     "stageOpacity",
                     "scoreZoom",
-					"simpleJudge",
-                    "coloredCombos",
-					"showMS",
-                    "hitbar", // (I wanna add this but its not done yet lol)
-                    "customizeHUD"
+					"showMS", 
+					"npsDisplay",
+					"hitbar", 
+					"judgeCounter",
+					"coloredCombos", 
+                    "simpleJudge",
+                    'hudPosition',
+					"customizeHUD", 
                 ]
             ],
             [
@@ -250,6 +258,13 @@ class OptionsState extends MusicBeatState {
 					"optimizeHolds",
                     "noteSkin",
                     "customizeColours"
+                ]
+            ],
+            [
+                "Advanced",
+                [
+                    "etternaHUD",
+                    "gradeSet"
                 ]
             ]
         ],
