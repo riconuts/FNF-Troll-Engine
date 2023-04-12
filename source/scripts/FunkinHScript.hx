@@ -4,7 +4,6 @@ import flixel.addons.display.FlxRuntimeShader;
 
 import flixel.util.FlxColor;
 import flixel.FlxG;
-import flixel.system.FlxSound;
 import flixel.tweens.*;
 import flixel.math.FlxMath;
 
@@ -25,6 +24,7 @@ class FunkinHScript extends FunkinScript
 		parser.allowMetadata = true;
 		parser.allowJSON = true;
 		parser.allowTypes = true;
+		parser.preprocesorValues = sowy.Sowy.getDefines();
 	}
 
 	public static function fromString(script:String, ?name:String = "Script", ?additionalVars:Map<String, Any>)
@@ -88,6 +88,7 @@ class FunkinHScript extends FunkinScript
 			return new Map<Dynamic, Dynamic>();
 		});
 
+		// These are kinda the same
 		set("Assets", Assets);
 		set("OpenFlAssets", openfl.utils.Assets);
 
@@ -113,7 +114,7 @@ class FunkinHScript extends FunkinScript
 		});
 
 		set("FlxMath", flixel.math.FlxMath);
-		set("FlxSound", FlxSound);
+		set("FlxSound", flixel.system.FlxSound);
 		set("FlxTimer", flixel.util.FlxTimer);
 		set("FlxColor", {
 			// These aren't part of FlxColor but i thought they could be useful

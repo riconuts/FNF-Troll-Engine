@@ -1,28 +1,16 @@
 package;
 
-import openfl.geom.Rectangle;
-import flixel.graphics.FlxGraphic;
-import flixel.util.FlxColor;
-import flixel.FlxG;
 import flixel.math.FlxPoint;
 
 using StringTools;
 
-#if sys
-import sys.FileSystem;
-import sys.io.File;
-#else
-import openfl.utils.Assets;
-#end
-
-
 class CoolUtil
 {
-	public static function makeOutlinedGraphic(Width:Int, Height:Int, Color:FlxColor, LineThickness:Int, OutlineColor:FlxColor)
+	public static function makeOutlinedGraphic(Width:Int, Height:Int, Color:Int, LineThickness:Int, OutlineColor:Int)
 	{
-		var rectangle = FlxGraphic.fromRectangle(Width, Height, OutlineColor, true);
+		var rectangle = flixel.graphics.FlxGraphic.fromRectangle(Width, Height, OutlineColor, true);
 		rectangle.bitmap.fillRect(
-			new Rectangle(
+			new openfl.geom.Rectangle(
 				LineThickness, 
 				LineThickness, 
 				Width-LineThickness*2, 
@@ -77,13 +65,11 @@ class CoolUtil
 
 	public static function coolTextFile(path:String):Array<String>
 	{
-		var daList:Array<String> = [];
-		#if sys
-		if(FileSystem.exists(path)) daList = File.getContent(path).trim().split('\n');
-		#else
-		if(Assets.exists(path)) daList = Assets.getText(path).trim().split('\n');
-		#end
+		var rawList = Paths.getContent(path);
+		if (rawList == null)
+			return [];
 
+		var daList:Array<String> = rawList.trim().split('\n');
 		for (i in 0...daList.length)
 			daList[i] = daList[i].trim();
 
@@ -95,9 +81,7 @@ class CoolUtil
 		daList = string.trim().split('\n');
 
 		for (i in 0...daList.length)
-		{
 			daList[i] = daList[i].trim();
-		}
 
 		return daList;
 	}
@@ -127,14 +111,10 @@ class CoolUtil
 		return maxKey;
 	}
 
-	public static function numberArray(max:Int, ?min = 0):Array<Int>
+	inline static function numberArray(max:Int, ?min = 0):Array<Int>
 	{
-		var dumbArray:Array<Int> = [];
-		for (i in min...max)
-		{
-			dumbArray.push(i);
-		}
-		return dumbArray;
+		// max+1 because in haxe for loops stop before reaching the max number
+		return [for (n in min...max+1){n;}];
 	}
 
 	//uhhhh does this even work at all? i'm starting to doubt
@@ -150,7 +130,7 @@ class CoolUtil
 		#if linux
 		Sys.command('/usr/bin/xdg-open', [site]);
 		#else
-		FlxG.openURL(site);
+		flixel.FlxG.openURL(site);
 		#end
 	}
 }
