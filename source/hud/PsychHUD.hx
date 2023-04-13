@@ -190,8 +190,9 @@ class PsychHUD extends BaseHUD {
 				FlxTween.cancelTweensOf(judgeTxt.scale);
 				judgeTxt.scale.set(1.075, 1.075);
 				FlxTween.tween(judgeTxt.scale, {x: 1, y: 1}, 0.2);
+				
+				judgeTxt.text = Std.string(val);
 			}
-			judgeTxt.text = Std.string(val);
 		}
 		return misses;
 	}
