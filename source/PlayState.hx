@@ -1417,7 +1417,10 @@ class PlayState extends MusicBeatState
 				}
 			}); */
 
-			callOnScripts('onCountdownTick', [swagCounter, tmr]);
+			callOnHScripts('onCountdownTick', [swagCounter, tmr]);
+			#if LUA_ALLOWED
+			callOnLuas('onCountdownTick', [swagCounter]);
+			#end
 
 			swagCounter += 1;
 		}, 5);
