@@ -16,15 +16,25 @@ import scripts.Globals.*;
 class FunkinHScript extends FunkinScript
 {
 	static var parser:Parser = new Parser();
-	public static var defaultVars:Map<String,Dynamic> = new Map<String, Dynamic>();
-
+	public static var defaultVars:Map<String, Dynamic> = new Map<String, Dynamic>();
 
 	public static function init() // BRITISH
 	{
 		parser.allowMetadata = true;
 		parser.allowJSON = true;
 		parser.allowTypes = true;
+
 		parser.preprocesorValues = sowy.Sowy.getDefines();
+	}
+
+	public static function parseString(script:String, ?name:String = "Script")
+	{
+		return parser.parseString(script, name);
+	}
+
+	public static function parseFile(file:String, ?name:String)
+	{
+		return parseString(Paths.getContent(file), name != null ? name : file);
 	}
 
 	public static function fromString(script:String, ?name:String = "Script", ?additionalVars:Map<String, Any>)
@@ -47,10 +57,6 @@ class FunkinHScript extends FunkinScript
 		}
 		return new FunkinHScript(expr, name, additionalVars);
 	}
-	public static function parseString(script:String, ?name:String = "Script")
-	{
-		return parser.parseString(script, name);
-	}
 
 	public static function fromFile(file:String, ?name:String, ?additionalVars:Map<String, Any>)
 	{
@@ -58,17 +64,14 @@ class FunkinHScript extends FunkinScript
 			name = file;
 		return fromString(Paths.getContent(file), name, additionalVars);
 	}
-	public static function parseFile(file:String, ?name:String)
-	{
-		return parseString(Paths.getContent(file), name != null ? name : file);
-	}
 
 	var interpreter:Interp = new Interp();
 
-	override public function scriptTrace(text:String) {
-		var posInfo = interpreter.posInfos();
-		haxe.Log.trace(text, posInfo);
+	override public function scriptTrace(text:String) 
+	{
+		haxe.Log.trace(text, interpreter.posInfos());
 	}
+	
 	public function new(parsed:Expr, ?name:String = "Script", ?additionalVars:Map<String, Any>)
 	{
 		scriptType = 'hscript';
@@ -84,9 +87,7 @@ class FunkinHScript extends FunkinScript
 		set("StringTools", StringTools);
 		set("scriptTrace", scriptTrace);
 
-		set("newMap", function(){
-			return new Map<Dynamic, Dynamic>();
-		});
+		set("newMap", () -> {return new Map<Dynamic, Dynamic>();});
 
 		// These are kinda the same
 		set("Assets", Assets);
