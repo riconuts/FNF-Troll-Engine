@@ -17,6 +17,7 @@ class BaseHUD extends FlxSpriteGroup {
 		"bad" => "Gays",
 		"shit" => "Retards",
 		"miss" => "Fails",
+		"cb" => "Combo Breaks"
 	];
 
 	static var shortenedDisplays:Map<String, String> = [
@@ -26,6 +27,7 @@ class BaseHUD extends FlxSpriteGroup {
 		"bad" => "GY",
 		"shit" => "RT",
 		"miss" => "L",
+		"cb" => "CB"
 	];
 
 	public var displayNames:Map<String, String> = ClientPrefs.judgeCounter == 'Shortened' ? shortenedDisplays : fullDisplays;
@@ -36,7 +38,8 @@ class BaseHUD extends FlxSpriteGroup {
 		"good" => 0xFFB5E61D,
 		"bad" => 0xFFED1C24,
 		"shit" => 0xFF880015,
-		"miss" => 0xFF47000B
+		"miss" => 0xFF47000B,
+		"cb" => 0xFF47000B
 	];
 
 	public var displayedJudges:Array<String> = ["epic", "sick", "good", "bad", "shit", "miss"];
@@ -46,13 +49,14 @@ class BaseHUD extends FlxSpriteGroup {
 	public var songLength(default, set):Float = 0;
     public var songName(default, set):String = '';
     public var score(default, set):Float = 0;
-    public var misses(default, set):Float = 0;
+    public var misses(default, set):Int = 0;
     public var grade(default, set):String = '';
     public var ratingFC(default, set):String = 'Clear';
     public var totalNotesHit(default, set):Float = 0;
     public var totalPlayed(default, set):Float = 0;
     public var ratingPercent(default, set):Float = 0;
 	public var songPercent(default, set):Float = 0;
+	public var comboBreaks(default, set):Int = 0;
 	public var updateTime:Bool = (ClientPrefs.timeBarType != 'Disabled');
     public var judgements:Map<String, Float> = [
         "epic" => 0,
@@ -119,11 +123,12 @@ class BaseHUD extends FlxSpriteGroup {
 	function set_time(value:Float)return time = value;
 	function set_songName(value:String)return songName = value;
 	function set_score(value:Float)return score = value;
-	function set_misses(value:Float)return misses = value;
+	function set_misses(value:Int)return misses = value;
 	function set_grade(value:String)return grade = value;
 	function set_ratingFC(value:String)return ratingFC = value;
 	function set_totalNotesHit(value:Float)return totalNotesHit = value;
 	function set_totalPlayed(value:Float)return totalPlayed = value;
 	function set_ratingPercent(value:Float)return ratingPercent = value;
 	function set_songPercent(value:Float)return songPercent = value;
+	function set_comboBreaks(value:Int)return comboBreaks = value;
 }

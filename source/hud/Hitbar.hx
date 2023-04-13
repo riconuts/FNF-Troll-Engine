@@ -1,5 +1,6 @@
 package hud;
 
+import PlayState.Wife3;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxMath;
 import flixel.util.FlxColor;
@@ -9,31 +10,27 @@ class Hitmark extends FlxSprite
 {
     var decayTime:Float = 0;
     override function update(elapsed:Float){
-        decayTime += elapsed;
-		var s = Conductor.crochet * 0.001;
-		if (decayTime >= 1){
-			var decayScale = 1 - ((decayTime-1) / (s * 4)); // 4 beats to decay
-			scale.y = decayScale;
-			alpha = decayScale;
-			color.greenFloat = FlxMath.lerp(1, 0, 1 - decayScale);
-			color.blueFloat = FlxMath.lerp(1, 0, 1 - decayScale);
-
-			if (decayScale <= 0)
-				kill();
-		}
-        
         super.update(elapsed);
+		decayTime += elapsed;
+		var s = Conductor.crochet * 0.001;
+
+		var decayScale = 1 - (decayTime / (s * 8)); // 8 beats to decay
+		scale.y = decayScale;
+		alpha = decayScale;
+		if (decayScale <= 0)
+			kill();
     }
 }
 class Hitbar extends FlxSpriteGroup {
     public var mainBar:FlxSprite;
     public var averageIndicator:FlxSprite;
 
-	var maxMarks:Int = 15;
+	var maxMarks:Int = 30;
     var markMS:Array<Float> = [];
 	var markGroup:FlxTypedSpriteGroup<Hitmark> = new FlxTypedSpriteGroup<Hitmark>();
-	var hitbarPxPerMs = 540 * (1 / ClientPrefs.hitWindow);
-	var hitbarHeight = 20;
+	var hitbarPxPerMs = 540 * (1 / 180);
+	var hitbarHeight = 10;
+	var hitmarkHeight = 20;
 
     var metronomeScale:Float = 1;
     var metronome:FlxSprite;
@@ -56,13 +53,13 @@ class Hitbar extends FlxSpriteGroup {
 		mainBar.alpha = 0.5;
 		add(mainBar);
 
-		var epicWindow = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * ClientPrefs.epicWindow), hitbarHeight, 0xFFE367E5);
+		var epicWindow = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * (ClientPrefs.epicWindow * Wife3.timeScale)), hitbarHeight, 0xFFE367E5);
 		epicWindow.alpha = 0.6;
-		var sickWindow = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * ClientPrefs.sickWindow), hitbarHeight, 0xFF00A2E8);
+		var sickWindow = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * (ClientPrefs.sickWindow * Wife3.timeScale)), hitbarHeight, 0xFF00A2E8);
 		sickWindow.alpha = 0.6;
-		var goodWindow = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * ClientPrefs.goodWindow), hitbarHeight, 0xFFB5E61D);
+		var goodWindow = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * (ClientPrefs.goodWindow * Wife3.timeScale)), hitbarHeight, 0xFFB5E61D);
 		goodWindow.alpha = 0.6;
-		var badWindow = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * ClientPrefs.badWindow), hitbarHeight, FlxColor.BLACK);
+		var badWindow = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * (ClientPrefs.badWindow * Wife3.timeScale)), hitbarHeight, FlxColor.BLACK);
 		badWindow.alpha = 0.6;
 
 		add(badWindow);
@@ -78,6 +75,8 @@ class Hitbar extends FlxSpriteGroup {
 
 		averageIndicator = new FlxSprite().loadGraphic(Paths.image("hitbarAverage"));
 		add(averageIndicator);
+		averageIndicator.scale.set(0.5, 0.5);
+		averageIndicator.updateHitbox();
 		averageIndicator.flipY = true;
 		averageIndicator.y += hitbarHeight + 5;
 
@@ -102,23 +101,28 @@ class Hitbar extends FlxSpriteGroup {
 		var lerpVal = 0.2 * (elapsed / (1 / 60));
 		averageIndicator.x = FlxMath.lerp(averageIndicator.x, (mainBar.x + (mainBar.width / 2)) + ((hitbarPxPerMs / 2) * -currentAverage) - averageIndicator.width / 2, lerpVal);
 		metronomeScale = FlxMath.lerp(metronomeScale, hitbarHeight / 4, lerpVal);
-		metronome.scale.y = scale.y * metronomeScale;
 
 		markGroup.forEachDead(function(obj:Hitmark){
 			markGroup.remove(obj, true);
         });
         super.update(elapsed);
+		metronome.scale.y = scale.y * metronomeScale;
+		averageIndicator.scale.set(scale.x * 0.5, scale.y * 0.5);
     }
 
     public function addHit(time:Float){
+		trace("registered hit at " + time);
         markMS.push(time);
 		while (markMS.length > maxMarks)
 			markMS.shift();
 
+		for (m in markGroup.members)m.color = FlxColor.WHITE;
 		var hitMark:Hitmark = new Hitmark((mainBar.width / 2), 0);
-		hitMark.makeGraphic(6, hitbarHeight, FlxColor.WHITE);
-		hitMark.x -= hitMark.width / 2;
-		hitMark.x += ((hitbarPxPerMs / 2) * -time);
+		hitMark.makeGraphic(6, hitmarkHeight, FlxColor.WHITE);
+		hitMark.color = FlxColor.RED;
 		markGroup.add(hitMark);
+		hitMark.x = mainBar.x + ((mainBar.width - hitMark.width)/2);
+		hitMark.x += ((hitbarPxPerMs / 2) * -time);
+		hitMark.y = mainBar.y + ((mainBar.height - hitMark.height)/2);
     }
 }

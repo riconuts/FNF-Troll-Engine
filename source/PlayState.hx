@@ -95,8 +95,6 @@ typedef SpeedEvent =
 // Etterna
 class Wife3
 {
-	public static var wifeZeroPoint:Float = 65;
-
 	public static var missWeight:Float = -5.5;
 	public static var mineWeight:Float = -7;
 	public static var holdDropWeight:Float = -4.5;
@@ -117,14 +115,17 @@ class Wife3
 		return sign*y;
 	}
 
-	public static function getAcc(noteDiff:Float):Float{ // https://github.com/etternagame/etterna/blob/0a7bd768cffd6f39a3d84d76964097e43011ce33/src/RageUtil/Utils/RageUtil.h
+	public static var timeScale:Float = 1;
+	public static function getAcc(noteDiff:Float, ?ts:Float):Float{ // https://github.com/etternagame/etterna/blob/0a7bd768cffd6f39a3d84d76964097e43011ce33/src/RageUtil/Utils/RageUtil.h
+		if(ts==null)ts=timeScale;
+		if(ts>1)ts=1;
 		var jPow:Float = 0.75;
 		var maxPoints:Float = 2.0;
-		var ridic:Float = 5;
-		var shit_weight:Float = 200; // should I use this?? idfk man
+		var ridic:Float = 5 * ts;
+		var shit_weight:Float = 200;
 		var absDiff = Math.abs(noteDiff);
-		var zero:Float = wifeZeroPoint;
-		var dev:Float = 22.7;
+		var zero:Float = 65 * Math.pow(ts, jPow);
+		var dev:Float = 22.7 * Math.pow(ts, jPow);
 
 		if(absDiff<=ridic){
 			return maxPoints;
@@ -143,7 +144,7 @@ class PlayState extends MusicBeatState
 	public var currentSV:SpeedEvent = {position: 0, songTime:0, speed: 1};
 	var speedChanges:Array<SpeedEvent> = [];
 	var subtitles:Null<SubtitleDisplay>;
-
+	
 	public var metadata:SongCreditdata; // metadata for the songs (artist, etc)
 
 	// andromeda modcharts :D
@@ -276,6 +277,7 @@ class PlayState extends MusicBeatState
 	public var combo:Int = 0;
 
 	public var ratingsData:Array<Rating> = [];
+	public var comboBreaks:Int = 0; 
 	public var epics:Int = 0;
 	public var sicks:Int = 0;
 	public var goods:Int = 0;
@@ -459,6 +461,8 @@ class PlayState extends MusicBeatState
 	var finishedCreating =false;
 	override public function create()
 	{
+		Conductor.safeZoneOffset = ClientPrefs.hitWindow;
+		Wife3.timeScale = Conductor.judgeScales.get(ClientPrefs.judgeDiff);
 		Paths.clearStoredMemory();
 		// Reset to default
 		Note.quantShitCache.clear();
@@ -542,11 +546,13 @@ class PlayState extends MusicBeatState
 		rating.ratingMod = 0.7;
 		rating.score = 200;
 		rating.noteSplash = false;
+		rating.health = 0;
 		ratingsData.push(rating);
 
 		var rating:Rating = new Rating('bad');
 		rating.ratingMod = 0.4;
 		rating.score = 100;
+		rating.health = -0.06;
 		rating.noteSplash = false;
 		ratingsData.push(rating);
 
@@ -554,6 +560,7 @@ class PlayState extends MusicBeatState
 		rating.ratingMod = 0;
 		rating.score = 50;
 		rating.noteSplash = false;
+		rating.health = -0.15;
 		ratingsData.push(rating);
 
 		// Gameplay settings
@@ -1028,8 +1035,6 @@ class PlayState extends MusicBeatState
 			FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 			FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		}
-
-		Conductor.safeZoneOffset = ClientPrefs.hitWindow;
 
 		////
 		stageOpacity = new FlxSprite();
@@ -1889,8 +1894,16 @@ class PlayState extends MusicBeatState
 						var last = column[nIdx-1];
 						var current = column[nIdx];
 						if(last==null || current==null)continue;
-						if (Math.abs(last.strumTime - current.strumTime) <= Conductor.stepCrochet / (192 / 16))
-							field.removeNote(last);
+						if(last.isSustainNote || current.isSustainNote)continue; // holds only get fukt if their parents get fukt
+						if(!last.alive || !current.alive)continue; // just incase
+						if (Math.abs(last.strumTime - current.strumTime) <= Conductor.stepCrochet / (192 / 16)){
+							if(last.sustainLength < current.sustainLength) // keep the longer hold
+								field.removeNote(last);
+							else{
+								current.kill();
+								goobaeg.push(current); // mark to delete after, cant delete here because otherwise it'd fuck w/ stuff	
+							}
+						}
 
 					}
 				}
@@ -3269,19 +3282,15 @@ class PlayState extends MusicBeatState
 		ratingTxtGroup.add(rating);
 	}
 
-	private function popUpScore(note:Note = null, field:PlayField=null):Void
+	private function popUpScore(note:Note, field:PlayField=null):Void
 	{
-		if(field==null){
-			if(note!=null)
-				field = getFieldFromNote(note);
-		}
+		if(field==null)
+			field = getFieldFromNote(note);
+		
 
 		var hitTime = note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset;
 		var noteDiff:Float = Math.abs(hitTime);
 
-/*  		if(ClientPrefs.hitbar)
-			hitbar.addHit(hitTime);
- */
 		vocals.volume = 1;
 
 		//tryna do MS based judgment due to popular demand
@@ -3305,6 +3314,14 @@ class PlayState extends MusicBeatState
 		if(daRating.noteSplash && !note.noteSplashDisabled)
 			spawnNoteSplashOnNote(note, field);
 
+		var hitHealth = note.ratingHealth.get(note.rating);
+		if((daRating.health<0 && ClientPrefs.wife3) || note.breaksCombo)
+			breakCombo();
+		else
+			combo++;
+
+		health += (hitHealth == null ? daRating.health : hitHealth) * healthGain;
+		
 		if(!practiceMode && !field.autoPlayed)
 			songScore += daRating.score;
 
@@ -3366,6 +3383,7 @@ class PlayState extends MusicBeatState
 			for (prevCombo in lastCombos){
 				prevCombo.kill();
 			}
+			if(combo==0)return;
 		}else if (combo < 10 && combo != 0)
 			return;
 
@@ -3385,7 +3403,7 @@ class PlayState extends MusicBeatState
 				hud.judgeColours.get("good");
 			default:
 				FlxColor.WHITE;
-		};
+		}; // this could prob be set in recalculateRating tbh lol
 
 		for (i in separatedScore)
 		{
@@ -3668,14 +3686,22 @@ class PlayState extends MusicBeatState
 		return ret;
 	}
 
+	function breakCombo(){
+		comboBreaks++;
+		combo = 0;
+		while (lastCombos.length > 0)
+			lastCombos.shift().kill();
+		RecalculateRating();
+	}
+
 	function noteMiss(daNote:Note, field:PlayField, ?mine:Bool=false):Void { //You didn't hit the key and let it go offscreen, also used by Hurt Notes
 		//Dupe note remove
 		//field.spawnedNotes.forEachAlive(function(note:Note) {
 		for(note in field.spawnedNotes){
-			if(!note.alive) continue;
-			if (daNote != note && field.isPlayer && daNote.noteData == note.noteData && daNote.isSustainNote == note.isSustainNote && Math.abs(daNote.strumTime - note.strumTime) < 1) {
+			if(!note.alive || daNote.tail.contains(note) || note.isSustainNote) continue;
+			if (daNote != note && field.isPlayer && daNote.noteData == note.noteData && Math.abs(daNote.strumTime - note.strumTime) < 1) 
 				field.removeNote(note);
-			}
+			
 		}
 
 		if(callOnHScripts("preNoteMiss", [daNote, field]) == Globals.Function_Stop)
@@ -3746,13 +3772,12 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		combo = 0;
-		while (lastCombos.length > 0)
-			lastCombos.shift().kill();
+
+		breakCombo();
 		
 		health -= daNote.missHealth * healthLoss;	
 
-		songMisses++;
+		if (!mine)songMisses++;
 		vocals.volume = 0;
 
 		if(!practiceMode) 
@@ -3822,9 +3847,10 @@ class PlayState extends MusicBeatState
 			gf.specialAnim = true;
 		}
 		
-		combo = 0;
+/* 		combo = 0;
 		while (lastCombos.length > 0)
-			lastCombos.shift().kill();
+			lastCombos.shift().kill(); */
+		breakCombo();
 
 		if(!practiceMode) songScore -= 10;
 		if(!endingSong) {
@@ -3971,7 +3997,7 @@ class PlayState extends MusicBeatState
 
 	function goodNoteHit(note:Note, field:PlayField):Void
 	{
-		if (note.wasGoodHit || (field.autoPlayed && (note.ignoreNote || note.hitCausesMiss)))
+		if (note.wasGoodHit || (field.autoPlayed && (note.ignoreNote || note.breaksCombo)))
 			return;
 
 		if (ClientPrefs.hitsoundVolume > 0 && !note.hitsoundDisabled)
@@ -4018,6 +4044,7 @@ class PlayState extends MusicBeatState
 		#end
 
 
+		// tbh I hate hitCuasesMiss lol its retarded
 		if(note.hitCausesMiss) {
 			noteMiss(note, field, true);
 
@@ -4059,14 +4086,8 @@ class PlayState extends MusicBeatState
 
 		// TODO: rewrite judgement code since i hate it -neb
 		if (!note.isSustainNote)
-		{
-			combo ++;
-			// if(combo < 9999) combo = 9999;
 			popUpScore(note, field);
-		}
-
-		var hitHealth = note.ratingHealth.get(note.rating);
-		health += hitHealth == null ? 0 : hitHealth * healthGain;
+		
 
 		// Sing animations
 
@@ -4427,6 +4448,7 @@ class PlayState extends MusicBeatState
 	public function RecalculateRating() {
 		setOnScripts('score', songScore);
 		setOnScripts('misses', songMisses);
+		setOnScripts('comboBreaks', comboBreaks);
 		setOnScripts('hits', songHits);
 
 		var ret:Dynamic = callOnScripts('onRecalculateRating');
@@ -4463,14 +4485,14 @@ class PlayState extends MusicBeatState
 
 			// Rating FC
 			ratingFC = "Clear";
-			if(songMisses <= 0){
+			if(comboBreaks <= 0){
 			if (epics > 0) ratingFC = "KFC";
 			if (sicks > 0) ratingFC = "AFC";
 			if (goods > 0) ratingFC = "CFC";
 			if (bads > 0 || shits > 0) ratingFC = "FC";
 			}else{
-				if (songMisses < 10) ratingFC = "SDCB";
-				else if (songMisses >= 10 && ratingPercent <= 0)ratingFC = "Fail";
+				if (comboBreaks < 10) ratingFC = "SDCB";
+				else if (comboBreaks >= 10 && ratingPercent <= 0)ratingFC = "Fail";
 			}
 		}
 		// maybe move all of this to a stats class that I can easily give to objects?
@@ -4478,7 +4500,9 @@ class PlayState extends MusicBeatState
 		hud.grade = ratingName;
 		hud.ratingPercent = ratingPercent;
 		hud.misses = songMisses;
+		hud.comboBreaks = comboBreaks;
 		hud.judgements.set("miss", songMisses);
+		hud.judgements.set("cb", comboBreaks);
 		hud.totalNotesHit = totalNotesHit;
 		hud.totalPlayed = totalPlayed;
 		hud.score = songScore;

@@ -84,7 +84,7 @@ class Highscore
 	#if !macro
 	static var loadedID:String = '';
 	static var save:FlxSave = new FlxSave();
-	static var defaultID:String = 'f-45-90-135-166'; // psych preset aka the default preset from old tgt
+	static var defaultID:String = 'f-J4-45-90-135-166'; // psych preset aka the default preset from old tgt
 	// this is used to make sure if you're on psych preset, you get to keep your old high scores
 
 	public static function getID(){
@@ -94,6 +94,8 @@ class Highscore
 			idArray.push("w3");
 		var windows = ['sick', 'good', 'bad', 'hit'];
 		if(ClientPrefs.useEpics)windows.insert(0, 'epic');
+		idArray.push(ClientPrefs.judgeDiff);
+		
 		for(window in windows){
 			var realWindow = Reflect.field(ClientPrefs, window + "Window");
 			idArray.push(Std.string(realWindow));

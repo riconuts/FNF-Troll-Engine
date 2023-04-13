@@ -14,6 +14,7 @@ import ClientPrefs.OptionType;
 typedef Widget = {
     type:OptionType,
 	optionData: OptionData,
+    locked:Bool,
     data:Map<String, Dynamic>, 
 }
 
@@ -37,12 +38,10 @@ class OptionsState extends MusicBeatState {
     function checkWindows()
     {
 		var didChange:Bool = false;
+		actualOptions.get("epicWindow").data.set("locked", !getToggle("useEpics"));
+        
 		for (name => windows in judgeWindows)
 		{
-            // TODO: hardcode some bullshit for Stepmania
-            
-			// maybe add a ?value to OptionType lol
-			// or replace defaultValue with it
 			var compareWindow = [
 				getToggle("useEpics") ? getNumber("epicWindow") : -1,
 				getNumber("sickWindow"),
@@ -80,13 +79,6 @@ class OptionsState extends MusicBeatState {
             case 'judgePreset':
                 if(judgeWindows.exists(newVal)){
                     var windows = judgeWindows.get(newVal);
-/* 					actualOptions.get("useEpics").value = (windows[0] != -1);
-					actualOptions.get("hitWindow").value = (windows[4]);
-                    actualOptions.get("badWindow").value = (windows[3]);
-                    actualOptions.get("goodWindow").value = (windows[2]);
-                    actualOptions.get("sickWindow").value = (windows[1]);
-                    if(windows[0] !=-1)
-						actualOptions.get("epicWindow").value = (windows[0]); */
                     changeToggle("useEpics", windows[0]!=-1);
 					if (windows[0] != -1)
 						changeNumber("epicWindow", windows[0], true);
@@ -168,14 +160,6 @@ class OptionsState extends MusicBeatState {
             135,
             166
         ],
-        "Stepmania" => [
-            // TODO: do some dumb hardcoding for the stepmania scales
-            22.5,
-            45,
-            90,
-            135,
-            180
-        ],
         "ITG" => [
             21,
             43,
@@ -216,18 +200,31 @@ class OptionsState extends MusicBeatState {
                 "Advanced",
                 [
                     "wife3",
-			        "judgePreset",
-                    // TODO: stepmania scale
                     "useEpics",
+			        "judgePreset",
                     "epicWindow",
                     "sickWindow",
                     "goodWindow",
                     "badWindow",
 			        "hitWindow",
+                    "judgeDiff", // for hooda lol
                 ]
             ]
         ],
         "UI" => [
+			[
+				"Notes",
+				[
+					"noteOpacity",
+					"downScroll",
+					"midScroll",
+					"noteSplashes",
+					"holdSubdivs",
+					"optimizeHolds",
+					"noteSkin",
+					"customizeColours"
+				]
+			],
             [
                 "HUD",
                 [
@@ -245,19 +242,6 @@ class OptionsState extends MusicBeatState {
                     "simpleJudge",
                     'hudPosition',
 					"customizeHUD", 
-                ]
-            ],
-            [
-                "Notes",
-                [
-			        "noteOpacity",
-                    "downScroll",
-					"midScroll",
-                    "noteSplashes",
-					"holdSubdivs",
-					"optimizeHolds",
-                    "noteSkin",
-                    "customizeColours"
                 ]
             ],
             [
@@ -467,12 +451,16 @@ class OptionsState extends MusicBeatState {
                     var drop:FlxUI9SliceSprite = new FlxUI9SliceSprite(text.x - 12, text.y, Paths.image("optionsMenu/backdrop"), new Rectangle(0, 0, optionMenu.width - text.x - 8, height),
                         [22, 22, 89, 89]);
 					drop.cameras = [optionCamera];
-
+					var lock:FlxUI9SliceSprite = new FlxUI9SliceSprite(text.x - 12, text.y, Paths.image("optionsMenu/backdrop"),
+						new Rectangle(0, 0, optionMenu.width - text.x - 8, height), [22, 22, 89, 89]);
+                    lock.alpha = 0.75;
+					lock.cameras = [optionCamera];
                     text.y += (height - text.height) / 2;
                     
                     var widget = createWidget(opt, drop, text, data);
 					group.add(drop);
 					widget.data.set("optionBox", drop);
+					widget.data.set("lockOverlay", lock);
                     if(widget.data.exists("objects")){
 						var objects:FlxTypedGroup<FlxObject> = widget.data.get("objects");
 						for (obj in objects.members){
@@ -485,6 +473,7 @@ class OptionsState extends MusicBeatState {
                     
                     widgets.set(text, widget);
 					group.add(text);
+					group.add(lock);
                     daY += height + 3;
                 }
             }
@@ -511,6 +500,7 @@ class OptionsState extends MusicBeatState {
         var widget:Widget = {
             type: data.type,
 			optionData: data,
+            locked: false,
             data: ["objects" => new FlxTypedGroup<FlxObject>()]
         }
 
@@ -590,7 +580,7 @@ class OptionsState extends MusicBeatState {
                 }
 
 				var height = daY;
-                if(height > 35 * 6)height = 35 * 6;
+                if(height > 35 * 12)height = 35 * 12;
                 height += 8;
 				daCamera.height = Std.int(height);
 				daCamera.width = Std.int(daW);
@@ -669,19 +659,20 @@ class OptionsState extends MusicBeatState {
 				rightAdjust.track = box;
 				rightAdjust.trackOffset.x = box.width + 5;
 
-				leftAdjust.onPressed = function()
-					changeNumber(name, -data.data.get("step"));
+				leftAdjust.onPressed = function(){
+                    if (!widget.locked)
+                        changeNumber(name, -data.data.get("step"));
+                }
                 
 
-				rightAdjust.onPressed = function()
-					changeNumber(name, data.data.get("step"));
-				
+				rightAdjust.onPressed = function(){
+					if (!widget.locked)
+					    changeNumber(name, data.data.get("step"));
+                }
                 objects.add(leftAdjust);
                 objects.add(rightAdjust);
 
 				var val = data.value ? cast data.value : (data.data.get("max") + data.data.get("min")) / 2;
-				// TODO: maybe use a macro n shit to speed this up instead of reflection
-                // or maybe when loading settings, it stuffs it into a Map n shit?? idk lol
 
                 if(Reflect.hasField(ClientPrefs, name)) {
                     val = Reflect.field(ClientPrefs, name);
@@ -761,6 +752,9 @@ class OptionsState extends MusicBeatState {
 
 	function updateWidget(object:FlxObject, widget:Widget, elapsed:Float){
 		var optBox = widget.data.get("optionBox");
+		var locked:Bool = widget.optionData.data.exists("locked") ?widget.optionData.data.get("locked"):false;
+		widget.data.get("lockOverlay").visible = locked;
+        widget.locked = locked;
 		switch (widget.type)
 		{
 			case Toggle:
@@ -770,17 +764,14 @@ class OptionsState extends MusicBeatState {
 				if (checkbox.toggled != widget.optionData.value)
 					checkbox.toggled = widget.optionData.value;
 
-				if (FlxG.mouse.justPressed){
-					if (overlaps(optBox)){
-/*                         checkbox.toggled = !checkbox.toggled;
-                        widget.optionData.value = (checkbox.toggled);
-						onToggleChanged(widget.optionData.data.get("optionName"), checkbox.toggled); */
-						checkbox.toggled = !checkbox.toggled;
-						changeToggleW(widget, checkbox.toggled);
+				if (!widget.locked){
+				    if (FlxG.mouse.justPressed){
+                        if (overlaps(optBox)){
+                            checkbox.toggled = !checkbox.toggled;
+                            changeToggleW(widget, checkbox.toggled);
+                        }
                     }
                 }
-
-
 
 				text.text = checkbox.toggled?"on":"off";
                 text.x = object.x + 450;
@@ -800,45 +791,50 @@ class OptionsState extends MusicBeatState {
 				var optionMap:Map<FlxText, String> = widget.data.get("optionMap");
 				var boxes:Array<FlxUI9SliceSprite> = widget.data.get("boxes");
                 
-				if (FlxG.mouse.justPressed)
-				{
-                    var interacted:Bool = false;
-					if (overlaps(optBox)){
-						if (openedDropdown==widget)
-						    openedDropdown = null;
-                        else
-							openedDropdown = widget;
-						interacted = true;
-                    }
+                if(!widget.locked){
+                    if (FlxG.mouse.justPressed)
+                    {
+                        var interacted:Bool = false;
+                        if (overlaps(optBox)){
+                            if (openedDropdown==widget)
+                                openedDropdown = null;
+                            else
+                                openedDropdown = widget;
+                            interacted = true;
+                        }
 
-					if (openedDropdown==widget){
-                        for (obj => opt in optionMap)
-                        {
-                            if(obj.isOnScreen(daCamera)){
-                                if (overlaps(obj, daCamera) || overlaps(boxes[obj.ID], daCamera))
-                                {
-                                    //widget.optionData.value = (opt);
-                                    interacted = true;
-                                    openedDropdown = null;
-									changeDropdownW(widget, opt);
-									//onDropdownChanged(widget.optionData.data.get("optionName"), widget.optionData.value, opt);
-                                    break;
+                        if (openedDropdown==widget){
+                            for (obj => opt in optionMap)
+                            {
+                                if(obj.isOnScreen(daCamera)){
+                                    if (overlaps(obj, daCamera) || overlaps(boxes[obj.ID], daCamera))
+                                    {
+                                        //widget.optionData.value = (opt);
+                                        interacted = true;
+                                        openedDropdown = null;
+                                        changeDropdownW(widget, opt);
+                                        //onDropdownChanged(widget.optionData.data.get("optionName"), widget.optionData.value, opt);
+                                        break;
+                                    }
                                 }
                             }
-                        }
 
-                        if(!interacted){
-                            if (overlaps(dropBox, daCamera))
-                                interacted = true;
-                            
-                        }
+                            if(!interacted){
+                                if (overlaps(dropBox, daCamera))
+                                    interacted = true;
+                                
+                            }
 
-						if (!interacted)
-							openedDropdown = null;
+                            if (!interacted)
+                                openedDropdown = null;
+
+                        }
 
                     }
-
-				}
+                }else
+                    if(openedDropdown == widget)
+                        openedDropdown = null;
+                
 
 				if (openedDropdown == widget && overlaps(dropBox, daCamera)){
                     var wheel = FlxG.mouse.wheel;
@@ -857,7 +853,11 @@ class OptionsState extends MusicBeatState {
 					camFollowPos.y = 0;
 				if (camFollowPos.y > height)
 					camFollowPos.y = height; 
-				label.text = widget.optionData.value;
+
+				switch (widget.optionData.data.get("optionName")){
+                    default:
+                        label.text = widget.optionData.value;
+                }
 
 				var active = openedDropdown == widget;
                 daCamera.alpha = FlxMath.lerp(daCamera.alpha, active?1:0, lerpVal);
@@ -875,6 +875,7 @@ class OptionsState extends MusicBeatState {
 				if (daCamera.y + daCamera.height > FlxG.height)
 					daCamera.y = FlxG.height - daCamera.height; // kick it up so nothing ends up off screen
                 
+       
 			case Number:
 				var box:FlxSprite = widget.data.get("box");
 				var bar:FlxSprite = widget.data.get("bar");
@@ -883,11 +884,14 @@ class OptionsState extends MusicBeatState {
 				var max:Float = widget.optionData.data.get("max");
                 var oldVal = widget.optionData.value;
 				var newVal = oldVal;
-				if (FlxG.mouse.justPressed && overlaps(box) || FlxG.mouse.pressed && scrubbingBar == bar){
-					scrubbingBar = bar;
-                    var localX = FlxG.mouse.x - (box.x + optionCamera.x);
-                    var value = FlxMath.lerp(min, max, localX / bar.frameWidth);
-					newVal = value;
+				if (!widget.locked)
+				{
+                    if (FlxG.mouse.justPressed && overlaps(box) || FlxG.mouse.pressed && scrubbingBar == bar){
+                        scrubbingBar = bar;
+                        var localX = FlxG.mouse.x - (box.x + optionCamera.x);
+                        var value = FlxMath.lerp(min, max, localX / bar.frameWidth);
+                        newVal = value;
+                    }
                 }
 				if (newVal < min)
 					newVal = min;
@@ -918,8 +922,10 @@ class OptionsState extends MusicBeatState {
 				bar.x = box.x + 4;
 				bar.y = box.y + 4;
 			case Button:
-				if (FlxG.mouse.justPressed && overlaps(optBox))
-					onButtonPressed(widget.optionData.data.get("optionName"));
+				if (!widget.locked){
+				    if (FlxG.mouse.justPressed && overlaps(optBox))
+                        onButtonPressed(widget.optionData.data.get("optionName"));
+                }
                 
 		}
 

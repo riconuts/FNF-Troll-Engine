@@ -25,13 +25,12 @@ class AdvancedHUD extends BaseHUD
 
 	private var timeBarBG:AttachedSprite;
 
-	var hitbarTween:FlxTween;
-
 	var songHighscore:Int = 0;
 	public var hudPosition(default, null):String = ClientPrefs.hudPosition;
 	override public function new(iP1:String, iP2:String, songName:String)
 	{
 		super(iP1, iP2, songName);
+		displayedJudges.push("cb");
 		
 		songHighscore = Highscore.getScore(songName);
 
@@ -294,7 +293,7 @@ class AdvancedHUD extends BaseHUD
 			timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
 	}
 
-	override function set_misses(val:Float){
+	override function set_misses(val:Int){
 		if(misses!=val){
 			misses = val;
 			var judgeName = judgeNames.get('miss');
@@ -316,6 +315,29 @@ class AdvancedHUD extends BaseHUD
 		return misses;
 	}
 
+	override function set_comboBreaks(val:Int)
+	{
+		if (comboBreaks != val)
+		{
+			comboBreaks = val;
+			var judgeName = judgeNames.get('cb');
+			var judgeTxt = judgeTexts.get('cb');
+			if (judgeName != null)
+			{
+				FlxTween.cancelTweensOf(judgeName.scale);
+				judgeName.scale.set(1.075, 1.075);
+				FlxTween.tween(judgeName.scale, {x: 1, y: 1}, 0.2);
+			}
+			if (judgeTxt != null)
+			{
+				FlxTween.cancelTweensOf(judgeTxt.scale);
+				judgeTxt.scale.set(1.075, 1.075);
+				FlxTween.tween(judgeTxt.scale, {x: 1, y: 1}, 0.2);
+			}
+			judgeTxt.text = Std.string(val);
+		}
+		return comboBreaks;
+	}
 
 	override function set_ratingPercent(val:Float)
 	{
@@ -353,20 +375,6 @@ class AdvancedHUD extends BaseHUD
 				FlxTween.cancelTweensOf(judgeTxt.scale);
 				judgeTxt.scale.set(1.075, 1.075);
 				FlxTween.tween(judgeTxt.scale, {x: 1, y: 1}, 0.2);
-			}
-			if (hitbarTween != null)
-				hitbarTween.cancel();
-
-			if (hitbar != null)
-			{
-				hitbar.scale.x = 1.075;
-				hitbar.scale.y = 1.075;
-				hitbarTween = FlxTween.tween(hitbar.scale, {x: 1, y: 1}, 0.2, {
-					onComplete: function(twn:FlxTween)
-					{
-						hitbarTween = null;
-					}
-				});
 			}
 
 		}

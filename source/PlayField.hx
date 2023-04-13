@@ -17,6 +17,8 @@ import flixel.util.FlxSort;
 import flixel.tweens.FlxTween;
 import lime.app.Event;
 import flixel.math.FlxAngle;
+import PlayState.Wife3;
+
 using StringTools;
 // attempt 2 of playfield system lol!
 /*
@@ -144,15 +146,15 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 			noteQueue[daNote.noteData].remove(daNote);
 
 		if (daNote.unhitTail.length > 0)
-			for(tail in daNote.unhitTail)
-				removeNote(tail);
+			while (daNote.unhitTail.length > 0)
+				removeNote(daNote.unhitTail.shift());
 		
 
 		if (daNote.parent != null && daNote.parent.tail.contains(daNote))
 			daNote.parent.tail.remove(daNote);
 
-		if (daNote.parent != null && daNote.parent.unhitTail.contains(daNote))
-			daNote.parent.unhitTail.remove(daNote);
+ 		if (daNote.parent != null && daNote.parent.unhitTail.contains(daNote))
+			daNote.parent.unhitTail.remove(daNote); 
 
 		noteQueue[daNote.noteData].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
 		remove(daNote);
@@ -330,7 +332,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 							receptor.playAnim("confirm", true);
 
 						daNote.holdingTime = Conductor.songPosition - daNote.strumTime;
-						var regrabTime = daNote.isRoll?0.5:0.1;
+						var regrabTime = (daNote.isRoll?0.5:0.25) * Wife3.timeScale;
 						if(isHeld)
 							daNote.tripTimer = 1;
 						else
@@ -409,7 +411,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 					}
 					else
 					{
-						if (daNote.strumTime <= Conductor.songPosition)
+						if ((daNote.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset) <= (5 * Wife3.timeScale))
 							noteHitCallback(daNote, this);
 					}
 					
@@ -564,7 +566,7 @@ class NoteField extends FlxObject
 			if (songSpeed != 0)
 			{
 				var speed = songSpeed * daNote.multSpeed * modManager.getValue("xmod", modNumber);
-				var diff = Conductor.songPosition - daNote.strumTime ;
+				var diff = Conductor.songPosition - daNote.strumTime;
 				var visPos = -((Conductor.visualPosition - daNote.visualTime) * speed);
 				if (visPos > drawDist)continue;
 				if(daNote.wasGoodHit && daNote.tail.length > 0 && daNote.unhitTail.length > 0){

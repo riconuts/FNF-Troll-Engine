@@ -1,5 +1,6 @@
 package;
 
+import PlayState.Wife3;
 import haxe.io.Path;
 import editors.ChartingState;
 import flixel.math.FlxPoint;
@@ -81,7 +82,7 @@ class Note extends NoteObject
 	
 	public var noteType(default, set):String = null;  // the note type
 	public var causedMiss:Bool = false;
-	public var hitbox:Float = Conductor.safeZoneOffset; // how far you can hit the note in ms
+	public var hitbox:Float = Conductor.safeZoneOffset * Wife3.timeScale; // how far you can hit the note in ms
 	public var blockHit:Bool = false; // whether you can hit this note or not
 	public var earlyHitMult:Float = 1; // multiplier to hitbox to hit this note early
 	public var lateHitMult:Float = 1; // multiplier to hitbox to hit this note late
@@ -96,8 +97,9 @@ class Note extends NoteObject
 	public var texture(default, set):String = null; // texture for the note
 	public var noAnimation:Bool = false; // disables the animation for hitting this note
 	public var noMissAnimation:Bool = false; // disables the animation for missing this note
-	public var hitCausesMiss:Bool = false; // hitting this not causes a miss
-	public var hitsoundDisabled:Bool = false; // hitting this not does not cause a hitsound when user turns on hitsounds
+	public var hitCausesMiss:Bool = false; // hitting this causes a miss
+	public var breaksCombo:Bool = false; // hitting this will cause a combo break
+	public var hitsoundDisabled:Bool = false; // hitting this does not cause a hitsound when user turns on hitsounds
 	public var gfNote:Bool = false; // gf sings this note (pushes gf into characters array when the note is hit)
 	public var characters:Array<Character> = []; // which characters sing this note, leave blank for the playfield's characters
 	public var fieldIndex:Int = -1; // Used to denote which PlayField to be placed into
@@ -105,9 +107,8 @@ class Note extends NoteObject
 	// Note that holds automatically have this set to their parent's fieldIndex
 	public var field:PlayField; // same as fieldIndex but lets you set the field directly incase you wanna do that i  guess
 
-	// kadeium
-	// TODO: Maayybbe rewrite this to be multipliers to judgement health n shit
-	public var ratingHealth:Map<String, Float> = ["epic" => 0.04, "sick" => 0.04, "good" => 0, "bad" => -0.03, "shit" => -0.06];
+	// custom health values
+	public var ratingHealth:Map<String, Float> = [];
 
 	// hold/roll shit
 	public var sustainMult:Float = 1;

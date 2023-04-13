@@ -1,5 +1,6 @@
 package;
 
+import PlayState.Wife3;
 import Song.SwagSong;
 
 /**
@@ -17,6 +18,19 @@ typedef BPMChangeEvent =
 
 class Conductor
 {
+	public static var judgeScales:Map<String, Float> = [
+		// since APPARENTLY Map<Float, String> is bad
+		"J1" => 1.50,
+		"J2" => 1.33,
+		"J3" => 1.16,
+		"J4" => 1.0,
+		"J5" => 0.84,
+		"J6" => 0.66,
+		"J7" => 0.5,
+		"J8" => 0.33,
+		"JUSTICE" => 0.2
+	];
+
 	public static var ROWS_PER_BEAT:Int = 48;
 	// its 48 in ITG but idk because FNF doesnt work w/ note rows
 	public static var ROWS_PER_MEASURE:Int = ROWS_PER_BEAT*4;
@@ -184,9 +198,10 @@ class Rating
 	public var name:String = '';
 	public var image:String = '';
 	public var counter:String = '';
-	public var hitWindow:Null<Int> = 0; //ms
+	public var hitWindow:Null<Float> = 0; //ms
 	public var ratingMod:Float = 1;
 	public var score:Int = 350;
+	public var health:Float = 0.04;
 	public var noteSplash:Bool = true;
 
 	public function new(name:String)
@@ -194,7 +209,7 @@ class Rating
 		this.name = name;
 		this.image = name;
 		this.counter = name + 's';
-		this.hitWindow = Reflect.field(ClientPrefs, name + 'Window');
+		this.hitWindow = Reflect.field(ClientPrefs, name + 'Window') * Wife3.timeScale;
 		
 		if(hitWindow == null)
 		{

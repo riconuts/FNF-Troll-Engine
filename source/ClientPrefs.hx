@@ -67,7 +67,16 @@ class ClientPrefs
 				desc: "Presets for the judgement windows",
 				type: Dropdown,
 				value: "Standard",
-				data: ["options" => ["Standard", "Psych", "Vanilla", "Stepmania", "ITG", "Custom"]]
+				data: ["options" => ["Psych", "Vanilla", "Standard", "ITG", "Custom"]]
+			},
+			"judgeDiff" => {
+				display: "Judge Difficulty",
+				desc: "Stepmania difficulties for judgments. For best results, use the Standard judgment preset.",
+				type: Dropdown,
+				value: "J4",
+				data: [
+					"options" => ["J1","J2","J3","J4","J5","J6","J7","J8","JUSTICE"]
+				]
 			},
 			"noteOffset" => {
 				display: "Offset",
@@ -275,8 +284,8 @@ class ClientPrefs
 				data: []
 			},
 			"wife3" => {
-				display: "Wife3 Accuracy",
-				desc: "When toggled, accuracy will be MS-based instead of judgement-based.",
+				display: "Wife3",
+				desc: "When toggled, accuracy will be millisecond-based, using Etterna's Wife3 system, instead of judgement-based.",
 				type: Toggle,
 				value: false,
 				data: []

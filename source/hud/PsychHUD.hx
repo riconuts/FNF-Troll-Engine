@@ -172,7 +172,7 @@ class PsychHUD extends BaseHUD {
             timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
     }
 
-	override function set_misses(val:Float)
+	override function set_misses(val:Int)
 	{
 		if (misses != val)
 		{
@@ -196,6 +196,30 @@ class PsychHUD extends BaseHUD {
 		return misses;
 	}
 
+	override function set_comboBreaks(val:Int)
+	{
+		if (comboBreaks != val)
+		{
+			comboBreaks = val;
+			var judgeName = judgeNames.get('cb');
+			var judgeTxt = judgeTexts.get('cb');
+			if (judgeName != null)
+			{
+				FlxTween.cancelTweensOf(judgeName.scale);
+				judgeName.scale.set(1.075, 1.075);
+				FlxTween.tween(judgeName.scale, {x: 1, y: 1}, 0.2);
+			}
+			if (judgeTxt != null)
+			{
+				FlxTween.cancelTweensOf(judgeTxt.scale);
+				judgeTxt.scale.set(1.075, 1.075);
+				FlxTween.tween(judgeTxt.scale, {x: 1, y: 1}, 0.2);
+			}
+			judgeTxt.text = Std.string(val);
+		}
+		return comboBreaks;
+	}
+
 	override function noteJudged(judge:Rating, ?note:Note, ?field:PlayField)
 	{
 		var hitTime = note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset;
@@ -206,9 +230,6 @@ class PsychHUD extends BaseHUD {
 		{
 			if (scoreTxtTween != null)
 				scoreTxtTween.cancel();
-
-			if (hitbarTween != null)
-				hitbarTween.cancel();
 
 			var judgeName = judgeNames.get(judge.name);
 			var judgeTxt = judgeTexts.get(judge.name);
@@ -224,18 +245,6 @@ class PsychHUD extends BaseHUD {
 				judgeTxt.scale.set(1.075, 1.075);
 				FlxTween.tween(judgeTxt.scale, {x: 1, y: 1}, 0.2);
 			}
-
-            if (hitbar != null)
-            {
-                hitbar.scale.x = 1.075;
-                hitbar.scale.y = 1.075;
-                hitbarTween = FlxTween.tween(hitbar.scale, {x: 1, y: 1}, 0.2, {
-                    onComplete: function(twn:FlxTween)
-                    {
-                        hitbarTween = null;
-                    }
-                });
-            }
 
 			scoreTxt.scale.x = 1.075;
 			scoreTxt.scale.y = 1.075;
