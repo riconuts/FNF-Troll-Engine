@@ -142,7 +142,7 @@ class PsychHUD extends BaseHUD {
 			+ '$score | Misses: $misses | Rating: '
 			+ (grade != '?' ? Highscore.floorDecimal(ratingPercent * 100, 2) + '% / ${grade} [$ratingFC]' : grade);
 		if (ClientPrefs.npsDisplay)
-			scoreTxt.text += 'NPS: ${nps} / ${npsPeak}';
+			scoreTxt.text += ' | NPS: ${nps} / ${npsPeak}';
 
 		for (k in judgements.keys())
 		{
