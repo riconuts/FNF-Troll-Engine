@@ -57,6 +57,8 @@ class BaseHUD extends FlxSpriteGroup {
     public var ratingPercent(default, set):Float = 0;
 	public var songPercent(default, set):Float = 0;
 	public var comboBreaks(default, set):Int = 0;
+	public var nps(default, set):Int = 0;
+	public var npsPeak(default, set):Int = 0;
 	public var updateTime:Bool = (ClientPrefs.timeBarType != 'Disabled');
     public var judgements:Map<String, Float> = [
         "epic" => 0,
@@ -131,4 +133,6 @@ class BaseHUD extends FlxSpriteGroup {
 	function set_ratingPercent(value:Float)return ratingPercent = value;
 	function set_songPercent(value:Float)return songPercent = value;
 	function set_comboBreaks(value:Int)return comboBreaks = value;
+	function set_nps(value:Int)return nps = value;
+	function set_npsPeak(value:Int)return npsPeak = value;
 }

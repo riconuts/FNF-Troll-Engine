@@ -141,6 +141,8 @@ class Wife3
 }
 class PlayState extends MusicBeatState
 {
+	public var noteHits:Array<Float> = [];
+	public var nps:Int = 0;
 	public var currentSV:SpeedEvent = {position: 0, songTime:0, speed: 1};
 	var speedChanges:Array<SpeedEvent> = [];
 	var subtitles:Null<SubtitleDisplay>;
@@ -2322,6 +2324,7 @@ class PlayState extends MusicBeatState
 	var startedCountdown:Bool = false;
 	var canPause:Bool = true;
 	var resyncTimer:Float = 0;
+	var prevNoteCount:Int = 0;
 
 	override public function update(elapsed:Float)
 	{
@@ -2401,7 +2404,18 @@ class PlayState extends MusicBeatState
 		stageOpacity.alpha = FlxMath.lerp(ClientPrefs.stageOpacity, 1, (modManager.getValue("cover", 0)));
 		super.update(elapsed);
 
-		////
+		if(ClientPrefs.npsDisplay){
+			if(noteHits.length > 0){
+				while (noteHits.length > 0 && (noteHits[0] + 2000) < Conductor.songPosition)
+					noteHits.shift();
+			}
+
+			nps = Math.floor(noteHits.length / 2);
+			FlxG.watch.addQuick("notes per second", nps);
+			hud.nps = nps;
+			if(hud.npsPeak < nps)
+				hud.npsPeak = nps;
+		}
 		if (!endingSong){
 			//// time travel
 			if (!startingSong && chartingMode){
@@ -4002,6 +4016,9 @@ class PlayState extends MusicBeatState
 	{
 		if (note.wasGoodHit || (field.autoPlayed && (note.ignoreNote || note.breaksCombo)))
 			return;
+
+		if(!note.isSustainNote)
+			noteHits.push(Conductor.songPosition);
 
 		if (ClientPrefs.hitsoundVolume > 0 && !note.hitsoundDisabled)
 			FlxG.sound.play(Paths.sound('hitsound'), ClientPrefs.hitsoundVolume);

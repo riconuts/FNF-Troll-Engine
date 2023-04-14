@@ -141,6 +141,8 @@ class PsychHUD extends BaseHUD {
 		scoreTxt.text = (songHighscore != 0 && score > songHighscore ? 'Hi-score: ' : 'Score: ')
 			+ '$score | Misses: $misses | Rating: '
 			+ (grade != '?' ? Highscore.floorDecimal(ratingPercent * 100, 2) + '% / ${grade} [$ratingFC]' : grade);
+		if (ClientPrefs.npsDisplay)
+			scoreTxt.text += 'NPS: ${nps} / ${npsPeak}';
 
 		for (k in judgements.keys())
 		{
