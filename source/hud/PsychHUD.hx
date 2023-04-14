@@ -139,7 +139,7 @@ class PsychHUD extends BaseHUD {
     }
     override function update(elapsed:Float){
 		scoreTxt.text = (songHighscore != 0 && score > songHighscore ? 'Hi-score: ' : 'Score: ')
-			+ '$score | Misses: $misses | Rating: '
+			+ '$score | Combo Breaks: $comboBreaks | Rating: '
 			+ (grade != '?' ? Highscore.floorDecimal(ratingPercent * 100, 2) + '% / ${grade} [$ratingFC]' : grade);
 		if (ClientPrefs.npsDisplay)
 			scoreTxt.text += ' | NPS: ${nps} / ${npsPeak}';
@@ -197,30 +197,6 @@ class PsychHUD extends BaseHUD {
 			}
 		}
 		return misses;
-	}
-
-	override function set_comboBreaks(val:Int)
-	{
-		if (comboBreaks != val)
-		{
-			comboBreaks = val;
-			var judgeName = judgeNames.get('cb');
-			var judgeTxt = judgeTexts.get('cb');
-			if (judgeName != null)
-			{
-				FlxTween.cancelTweensOf(judgeName.scale);
-				judgeName.scale.set(1.075, 1.075);
-				FlxTween.tween(judgeName.scale, {x: 1, y: 1}, 0.2);
-			}
-			if (judgeTxt != null)
-			{
-				FlxTween.cancelTweensOf(judgeTxt.scale);
-				judgeTxt.scale.set(1.075, 1.075);
-				FlxTween.tween(judgeTxt.scale, {x: 1, y: 1}, 0.2);
-				judgeTxt.text = Std.string(val);
-			}
-		}
-		return comboBreaks;
 	}
 
 	override function noteJudged(judge:Rating, ?note:Note, ?field:PlayField)

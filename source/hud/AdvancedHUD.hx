@@ -76,7 +76,7 @@ class AdvancedHUD extends BaseHUD
 			// maybe this'd benefit from a JudgeCounter object idk
 			for (judgment in displayedJudges){
 				var text = new FlxText(0, 0, tWidth, displayNames.get(judgment), 20);
-				text.setFormat(Paths.font("calibrib.ttf"), 28, judgeColours.get(judgment), LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				text.setFormat(Paths.font("calibrib.ttf"), 28, judgeColours.get(judgment), LEFT, FlxTextBorderStyle.OUTLINE, (judgment == 'cb' || judgment == 'miss')?FlxColor.WHITE:FlxColor.BLACK);
 				text.screenCenter(Y);
 				text.y -= 35 - (25 * idx);
 				text.x += 20 - 15;
@@ -97,7 +97,7 @@ class AdvancedHUD extends BaseHUD
 			}
 		}else{
 			var text = new FlxText(0, 0, tWidth, "Misses", 20);
-			text.setFormat(Paths.font("calibrib.ttf"), 28, 0xBDBDBD, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			text.setFormat(Paths.font("calibrib.ttf"), 28, 0xBDBDBD, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.WHITE);
 			text.screenCenter(Y);
 			text.y -= 35;
 			text.x += 20 - 15;
@@ -314,19 +314,25 @@ class AdvancedHUD extends BaseHUD
 			misses = val;
 			var judgeName = judgeNames.get('miss');
 			var judgeTxt = judgeTexts.get('miss');
-			if (judgeName != null)
+			if (ClientPrefs.scoreZoom)
 			{
-				FlxTween.cancelTweensOf(judgeName.scale);
-				judgeName.scale.set(1.075, 1.075);
-				FlxTween.tween(judgeName.scale, {x: 1, y: 1}, 0.2);
+				if (judgeName != null)
+				{
+
+					FlxTween.cancelTweensOf(judgeName.scale);
+					judgeName.scale.set(1.075, 1.075);
+					FlxTween.tween(judgeName.scale, {x: 1, y: 1}, 0.2);
+				}
 			}
 			if (judgeTxt != null)
 			{
-				FlxTween.cancelTweensOf(judgeTxt.scale);
-				judgeTxt.scale.set(1.075, 1.075);
-				FlxTween.tween(judgeTxt.scale, {x: 1, y: 1}, 0.2);
+				if (ClientPrefs.scoreZoom){
+					FlxTween.cancelTweensOf(judgeTxt.scale);
+					judgeTxt.scale.set(1.075, 1.075);
+					FlxTween.tween(judgeTxt.scale, {x: 1, y: 1}, 0.2);
+				}
+				judgeTxt.text = Std.string(val);
 			}
-			judgeTxt.text = Std.string(val);
 		}
 		return misses;
 	}
@@ -338,19 +344,25 @@ class AdvancedHUD extends BaseHUD
 			comboBreaks = val;
 			var judgeName = judgeNames.get('cb');
 			var judgeTxt = judgeTexts.get('cb');
-			if (judgeName != null)
+			if (ClientPrefs.scoreZoom)
 			{
-				FlxTween.cancelTweensOf(judgeName.scale);
-				judgeName.scale.set(1.075, 1.075);
-				FlxTween.tween(judgeName.scale, {x: 1, y: 1}, 0.2);
+				if (judgeName != null)
+				{
+					FlxTween.cancelTweensOf(judgeName.scale);
+					judgeName.scale.set(1.075, 1.075);
+					FlxTween.tween(judgeName.scale, {x: 1, y: 1}, 0.2);
+				}
 			}
 			if (judgeTxt != null)
 			{
-				FlxTween.cancelTweensOf(judgeTxt.scale);
-				judgeTxt.scale.set(1.075, 1.075);
-				FlxTween.tween(judgeTxt.scale, {x: 1, y: 1}, 0.2);
+				if (ClientPrefs.scoreZoom)
+				{
+					FlxTween.cancelTweensOf(judgeTxt.scale);
+					judgeTxt.scale.set(1.075, 1.075);
+					FlxTween.tween(judgeTxt.scale, {x: 1, y: 1}, 0.2);
+				}
+				judgeTxt.text = Std.string(val);
 			}
-			judgeTxt.text = Std.string(val);
 		}
 		return comboBreaks;
 	}
@@ -359,9 +371,12 @@ class AdvancedHUD extends BaseHUD
 	{
 		if (ratingPercent!=val){
 			ratingPercent = val;
-			FlxTween.cancelTweensOf(ratingTxt.scale);
-			ratingTxt.scale.set(1.075, 1.075);
-			FlxTween.tween(ratingTxt.scale, {x: 1, y: 1}, 0.2);
+			if (ClientPrefs.scoreZoom)
+			{
+				FlxTween.cancelTweensOf(ratingTxt.scale);
+				ratingTxt.scale.set(1.075, 1.075);
+				FlxTween.tween(ratingTxt.scale, {x: 1, y: 1}, 0.2);
+			}
 		}
 		return ratingPercent;
 	}
