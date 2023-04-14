@@ -41,7 +41,7 @@ class PsychHUD extends BaseHUD {
 		{
 			for (judgment in displayedJudges)
 			{
-				var text = new FlxText(0, 0, 170, displayNames.get(judgment), 20);
+				var text = new FlxText(0, 0, 200, displayNames.get(judgment), 20);
 				text.setFormat(Paths.font("calibrib.ttf"), 28, judgeColours.get(judgment), LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 				text.screenCenter(Y);
 				text.y -= 35 - (25 * idx);
@@ -49,7 +49,7 @@ class PsychHUD extends BaseHUD {
 				text.scrollFactor.set();
 				text.borderSize = 1;
 				add(text);
-				var numb = new FlxText(0, 0, 170, "0", 20);
+				var numb = new FlxText(0, 0, 200, "0", 20);
 				numb.setFormat(Paths.font("calibri.ttf"), 28, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 				numb.screenCenter(Y);
 				numb.y -= 35 - (25 * idx);

@@ -3445,8 +3445,8 @@ class PlayState extends MusicBeatState
 				numScore.scale.x = 0.5 * 1.25;
 				numScore.scale.y = 0.5 * 0.75;
 
-				numScore.alpha = 0.6;
-				numScore.tween = FlxTween.tween(numScore, {"scale.x": 0.5, "scale.y": 0.5, alpha: 1}, 0.2, {
+				/* numScore.alpha = 0.6; */
+				numScore.tween = FlxTween.tween(numScore, {"scale.x": 0.5, "scale.y": 0.5/* , alpha: 1 */}, 0.2, {
 					ease: FlxEase.circOut
 				});
 
@@ -4511,8 +4511,8 @@ class PlayState extends MusicBeatState
 			if (goods > 0) ratingFC = "CFC";
 			if (bads > 0 || shits > 0) ratingFC = "FC";
 			}else{
-				if (comboBreaks < 10) ratingFC = "SDCB";
-				else if (comboBreaks >= 10 && ratingPercent <= 0)ratingFC = "Fail";
+				if (comboBreaks < 10 && songScore >= 0) ratingFC = "SDCB";
+				else if (songScore < 0 || comboBreaks >= 10 && ratingPercent <= 0)ratingFC = "Fail";
 			}
 		}
 		// maybe move all of this to a stats class that I can easily give to objects?

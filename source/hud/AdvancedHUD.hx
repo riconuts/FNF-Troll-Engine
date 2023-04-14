@@ -76,7 +76,7 @@ class AdvancedHUD extends BaseHUD
 			// maybe this'd benefit from a JudgeCounter object idk
 			for (judgment in displayedJudges){
 				var text = new FlxText(0, 0, tWidth, displayNames.get(judgment), 20);
-				text.setFormat(Paths.font("calibrib.ttf"), 28, judgeColours.get(judgment), LEFT, FlxTextBorderStyle.OUTLINE, (judgment == 'cb' || judgment == 'miss')?FlxColor.WHITE:FlxColor.BLACK);
+				text.setFormat(Paths.font("calibrib.ttf"), 28, judgeColours.get(judgment), LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 				text.screenCenter(Y);
 				text.y -= 35 - (25 * idx);
 				text.x += 20 - 15;
