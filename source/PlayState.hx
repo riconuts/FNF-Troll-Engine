@@ -3792,8 +3792,10 @@ class PlayState extends MusicBeatState
 				field.removeNote(note);
 			
 		}
-
-		daNote.hitResult.judgment = MISS;
+		if (daNote.sustainLength > 0 && ClientPrefs.wife3)
+			daNote.hitResult.judgment = DROPPED_HOLD;
+		else
+			daNote.hitResult.judgment = MISS;
 
 		if(callOnHScripts("preNoteMiss", [daNote, field]) == Globals.Function_Stop)
 			return;
@@ -3867,7 +3869,6 @@ class PlayState extends MusicBeatState
 /* 		breakCombo();
 		
 		health -= daNote.missHealth * healthLoss;	 */
-
 		
 		if (!mine){
 			songMisses++;

@@ -107,10 +107,10 @@ class FunkinHScript extends FunkinScript
 			TIER4: Judgment.TIER4,
 			TIER5: Judgment.TIER5,
 			MISS: Judgment.MISS,
-			DAMAGELESS_MISS = Judgment.DAMAGELESS_MISS,
+			DAMAGELESS_MISS: Judgment.DAMAGELESS_MISS,
 			HIT_MINE: Judgment.HIT_MINE,
-			MISS_MINE = Judgment.MISS_MINE,
-			CUSTOM_MINE = Judgment.CUSTOM_MINE,
+			MISS_MINE: Judgment.MISS_MINE,
+			CUSTOM_MINE: Judgment.CUSTOM_MINE
 		});
 		
 		set("newShader", function(fragFile:String = null, vertFile:String = null){ // returns a FlxRuntimeShader but with file names lol

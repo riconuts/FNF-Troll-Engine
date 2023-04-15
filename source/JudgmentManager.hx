@@ -46,6 +46,7 @@ typedef JudgmentData = {
 	var TIER4 = 'tier4'; // sick / awesome
 	var TIER5 = 'tier5'; // epic / killer
 	var MISS = 'miss'; // miss / fail
+	var DROPPED_HOLD = 'holdDrop';
     var DAMAGELESS_MISS = 'customMiss'; // miss / fail but this doesnt cause damage
 	var HIT_MINE = 'mine'; // mine
     var MISS_MINE = 'missMine'; // hitCausesMiss mine. a mine but with health being derived from the note's .missHealth
@@ -116,6 +117,17 @@ class JudgmentManager {
 			comboBehaviour: BREAK,
 			noteSplash: false,
         },
+		DROPPED_HOLD => {
+			internalName: "miss",
+			displayName: "Fail",
+			window: -1,
+			score: -350,
+			accuracy: -100,
+			wifePoints: Wife3.holdDropWeight,
+			health: -2.5,
+			comboBehaviour: BREAK,
+			noteSplash: false,
+		},
 		DAMAGELESS_MISS => {
 			internalName: "miss",
 			displayName: "Fail",
@@ -227,7 +239,7 @@ class JudgmentManager {
         this.useEpics = useEpics;
         if(!useEpics){
 			hittableJudgments.remove(TIER5);
-            judgmentData.get(TIER4).set("accuracy", 100);
+            judgmentData.get(TIER4).accuracy =100;
         }
 
     }
