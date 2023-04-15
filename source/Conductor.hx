@@ -1,5 +1,6 @@
 package;
 
+import JudgmentManager.Judgment;
 import PlayState.Wife3;
 import Song.SwagSong;
 
@@ -52,9 +53,9 @@ class Conductor
 	{
 	}
 
-	public static function judgeNote(diff:Float=0):Rating // die
+	public static function judgeNote(diff:Float=0):Judgment // die
 	{
-		var data:Array<Rating> = PlayState.instance.ratingsData; //shortening cuz fuck u
+/* 		var data:Array<Rating> = PlayState.instance.ratingsData; //shortening cuz fuck u
 		for(i in 0...data.length-1) //skips last window (Shit)
 		{
 			if (diff <= data[i].hitWindow)
@@ -62,7 +63,14 @@ class Conductor
 				return data[i];
 			}
 		}
-		return data[data.length - 1];
+		return data[data.length - 1]; */
+		var jm = PlayState.instance.judgeManager;
+		for (judge in jm.hittableJudgments)
+		{
+			if (diff <= jm.getWindow(judge))
+				return judge;
+		}
+		return UNJUDGED;
 	}
 
 	inline public static function beatToNoteRow(beat:Float):Int{
@@ -190,35 +198,5 @@ class Conductor
 
 		crochet = calculateCrochet(bpm);
 		stepCrochet = crochet / 4;
-	}
-}
-
-class Rating
-{
-	public var name:String = '';
-	public var image:String = '';
-	public var counter:String = '';
-	public var hitWindow:Null<Float> = 0; //ms
-	public var ratingMod:Float = 1;
-	public var score:Int = 350;
-	public var health:Float = 0.04;
-	public var noteSplash:Bool = true;
-
-	public function new(name:String)
-	{
-		this.name = name;
-		this.image = name;
-		this.counter = name + 's';
-		this.hitWindow = Reflect.field(ClientPrefs, name + 'Window') * Wife3.timeScale;
-		
-		if(hitWindow == null)
-		{
-			hitWindow = 0;
-		}
-	}
-
-	public function increase(blah:Int = 1)
-	{
-		Reflect.setField(PlayState.instance, counter, Reflect.field(PlayState.instance, counter) + blah);
 	}
 }

@@ -1,5 +1,6 @@
 package;
 
+import JudgmentManager.Judgment;
 import PlayState.Wife3;
 import haxe.io.Path;
 import editors.ChartingState;
@@ -17,10 +18,18 @@ typedef EventNote = {
 	value2:String
 }
 
+typedef HitResult = {
+	judgment: Judgment,
+	hitDiff: Float
+}
+
 class Note extends NoteObject
 {
 	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
-	
+	public var hitResult:HitResult = {
+		judgment: UNJUDGED,
+		hitDiff: 0
+	}
 
 	override function destroy()
 	{
@@ -68,7 +77,8 @@ class Note extends NoteObject
 	public var strumTime:Float = 0;
 	public var visualTime:Float = 0;
 	public var mustPress:Bool = false;
-	public var canBeHit:Bool = false;
+	@:isVar
+	public var canBeHit(get, null):Bool = false;
 	public var tooLate:Bool = false;
 	public var wasGoodHit:Bool = false;
 	public var ignoreNote:Bool = false;
@@ -77,23 +87,27 @@ class Note extends NoteObject
 	public var prevNote:Note;
 	public var nextNote:Note;
 	public var spawned:Bool = false;
+	function get_canBeHit()return PlayState.instance.judgeManager.judgeNote(this)!=UNJUDGED;
+	
 	
 	// note type/customizable shit
 	
 	public var noteType(default, set):String = null;  // the note type
 	public var causedMiss:Bool = false;
-	public var hitbox:Float = Conductor.safeZoneOffset * Wife3.timeScale; // how far you can hit the note in ms
-	public var blockHit:Bool = false; // whether you can hit this note or not
+/* 	public var hitbox:Float = Conductor.safeZoneOffset * Wife3.timeScale; // how far you can hit the note in ms
 	public var earlyHitMult:Float = 1; // multiplier to hitbox to hit this note early
-	public var lateHitMult:Float = 1; // multiplier to hitbox to hit this note late
+	public var lateHitMult:Float = 1; // multiplier to hitbox to hit this note late */
+	// ^^ this is now determined by the judgements
+
+	public var blockHit:Bool = false; // whether you can hit this note or not
 	//public var lowPriority:Bool = false; // shadowmario's shitty workaround for really bad mine placement, yet still no *real* hitbox customization lol!
 	public var noteSplashDisabled:Bool = false; // disables the notesplash when you hit this note
 	public var noteSplashTexture:String = null; // spritesheet for the notesplash
 	public var noteSplashHue:Float = 0; // hueshift for the notesplash, can be changed in note-type but otherwise its whatever the user sets in options
 	public var noteSplashSat:Float = 0; // ditto, but for saturation
 	public var noteSplashBrt:Float = 0; // ditto, but for brightness
-	public var ratingDisabled:Bool = false; // disables judging this note
-	public var missHealth:Float = 0.04; // health when you miss this note
+	//public var ratingDisabled:Bool = false; // disables judging this note
+	public var missHealth:Float = 0; // health when you miss this note
 	public var texture(default, set):String = null; // texture for the note
 	public var noAnimation:Bool = false; // disables the animation for hitting this note
 	public var noMissAnimation:Bool = false; // disables the animation for missing this note
@@ -491,20 +505,10 @@ class Note extends NoteObject
 		
 		colorSwap.daAlpha = alphaMod * alphaMod2;
 		
-		var actualHitbox:Float = hitbox;
-		var diff = (strumTime - Conductor.songPosition);
-		if(diff > 0)
-			actualHitbox *= earlyHitMult * sustainMult;
-		else
-			actualHitbox *= lateHitMult;
-
-		noteDiff = diff;
-		var absDiff = Math.abs(diff);
-		canBeHit = absDiff <= actualHitbox;
 		if (hitByOpponent)
 			wasGoodHit = true;
-
-		if (diff < -hitbox && !wasGoodHit)
+		var diff = (strumTime - Conductor.songPosition);
+		if (diff < -Conductor.safeZoneOffset && !wasGoodHit)
 			tooLate = true;
 
 		if (tooLate && !inEditor)

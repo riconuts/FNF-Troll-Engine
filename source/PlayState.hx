@@ -1,5 +1,7 @@
 package;
 
+import JudgmentManager.JudgmentData;
+import JudgmentManager.Judgment;
 import hud.PsychHUD;
 import hud.BaseHUD;
 import sys.FileSystem;
@@ -9,7 +11,7 @@ import flixel.group.FlxGroup;
 import Achievements;
 #end
 import Cache;
-import Conductor.Rating;
+
 import Note.EventNote;
 import Section.SwagSection;
 import Shaders;
@@ -144,6 +146,8 @@ class PlayState extends MusicBeatState
 	public var noteHits:Array<Float> = [];
 	public var nps:Int = 0;
 	public var currentSV:SpeedEvent = {position: 0, songTime:0, speed: 1};
+	public var judgeManager:JudgmentManager;
+
 	var speedChanges:Array<SpeedEvent> = [];
 	var subtitles:Null<SubtitleDisplay>;
 	
@@ -278,13 +282,14 @@ class PlayState extends MusicBeatState
 
 	public var combo:Int = 0;
 
-	public var ratingsData:Array<Rating> = [];
 	public var comboBreaks:Int = 0; 
-	public var epics:Int = 0;
-	public var sicks:Int = 0;
-	public var goods:Int = 0;
-	public var bads:Int = 0;
-	public var shits:Int = 0;
+	public var judges:Map<String, Int> = [
+		"epic" => 0,
+		"sick" => 0,
+		"good" => 0,
+		"bad" => 0,
+		"shit" => 0
+	];
 
 	private var generatedMusic:Bool = false;
 	public var endingSong:Bool = false;
@@ -463,8 +468,11 @@ class PlayState extends MusicBeatState
 	var finishedCreating =false;
 	override public function create()
 	{
+		judgeManager = new JudgmentManager();
 		Conductor.safeZoneOffset = ClientPrefs.hitWindow;
 		Wife3.timeScale = Conductor.judgeScales.get(ClientPrefs.judgeDiff);
+		judgeManager.judgeTimescale = Wife3.timeScale;
+
 		Paths.clearStoredMemory();
 		// Reset to default
 		Note.quantShitCache.clear();
@@ -526,7 +534,7 @@ class PlayState extends MusicBeatState
 		// TODO: make highscore save differently depending on useEpics & judgement windows 
 		// (probably just turn the windows into a string and then use that when loading/saving high scores)
 
-		if(ClientPrefs.useEpics){
+/* 		if(ClientPrefs.useEpics){
 			var rating:Rating = new Rating('epic');
 			rating.ratingMod = 1;
 			rating.score = 500;
@@ -564,7 +572,7 @@ class PlayState extends MusicBeatState
 		rating.noteSplash = false;
 		rating.health = -0.15;
 		ratingsData.push(rating);
-
+ */
 		// Gameplay settings
 		healthGain = ClientPrefs.getGameplaySetting('healthgain', 1);
 		healthLoss = ClientPrefs.getGameplaySetting('healthloss', 1);
@@ -2253,6 +2261,8 @@ class PlayState extends MusicBeatState
 
 	// good to call this whenever you make a playfield
 	public function initPlayfield(field:PlayField){
+		field.judgeManager = judgeManager;
+
 		field.noteRemoved.add((note:Note, field:PlayField) -> {
 			if(modchartObjects.exists('note${note.ID}'))modchartObjects.remove('note${note.ID}');
 			allNotes.remove(note);
@@ -3299,13 +3309,228 @@ class PlayState extends MusicBeatState
 		ratingTxtGroup.add(rating);
 	}
 
-	private function popUpScore(note:Note, field:PlayField=null):Void
+	private function showCombo(?combo:Int){
+		if(combo==null)combo=this.combo;
+		if (ClientPrefs.simpleJudge)
+		{
+			for (prevCombo in lastCombos)
+			{
+				prevCombo.kill();
+			}
+			if (combo == 0)
+				return;
+		}
+		else if (combo < 10 && combo != 0)
+			return;
+
+		var separatedScore:Array<String> = Std.string(combo).split("");
+		while (separatedScore.length < 3)
+			separatedScore.unshift("0");
+
+		var daLoop:Int = 0;
+
+		// did you goto MS Paint and get colours from there lol
+		var comboColor = !ClientPrefs.coloredCombos ? 0xFFFFFFFF : switch (ratingFC)
+		{ // so the color doesn't get calculated for every number ig
+			case 'KFC':
+				hud.judgeColours.get("epic");
+			case 'AFC':
+				hud.judgeColours.get("sick");
+			case 'CFC':
+				hud.judgeColours.get("good");
+			default:
+				FlxColor.WHITE;
+		}; // this could prob be set in recalculateRating tbh lol
+
+		for (i in separatedScore)
+		{
+			var numScore:RatingSprite = comboNumGroup.recycle(RatingSprite, RatingSprite.newNumber);
+			numScore.revive();
+			numScore.loadGraphic(Paths.image('num' + i));
+
+			numScore.color = comboColor;
+			numScore.screenCenter();
+			numScore.x += ClientPrefs.comboOffset[2] + 43 * daLoop;
+			numScore.y -= ClientPrefs.comboOffset[3];
+			numScore.ID = daLoop;
+			if (numScore.tween != null)
+			{
+				numScore.tween.cancel();
+				numScore.tween.destroy();
+			}
+
+			comboNumGroup.remove(numScore, true);
+			comboNumGroup.add(numScore);
+
+			if (ClientPrefs.simpleJudge)
+			{
+				numScore.scale.x = 0.5 * 1.25;
+				numScore.scale.y = 0.5 * 0.75;
+
+				/* numScore.alpha = 0.6; */
+				numScore.tween = FlxTween.tween(numScore, {"scale.x": 0.5, "scale.y": 0.5 /* , alpha: 1 */}, 0.2, {
+					ease: FlxEase.circOut
+				});
+
+				lastCombos.push(numScore);
+			}
+			else
+			{
+				numScore.acceleration.y = FlxG.random.int(200, 300);
+				numScore.velocity.set(FlxG.random.float(-5, 5), -FlxG.random.int(140, 160));
+
+				numScore.alpha = 1;
+				numScore.tween = FlxTween.tween(numScore, {alpha: 0}, 0.2, {
+					onComplete: function(wtf)
+					{
+						numScore.kill();
+					},
+					startDelay: Conductor.crochet * 0.002
+				});
+			}
+
+			daLoop++;
+		}
+	}
+
+	private function applyJudgmentData(judgeData:JudgmentData, diff:Float, ?show:Bool = true){
+		if(judgeData==null){
+			trace("you didnt give a valid JudgmentData to applyJudgmentData!");
+			return;
+		}
+		songScore += judgeData.score;
+		health += (judgeData.health * 0.02) * (judgeData.health < 0 ? healthLoss : healthGain);
+		songHits++;
+
+
+		if(ClientPrefs.wife3){
+			if (judgeData.wifePoints == null)
+				totalNotesHit += Wife3.getAcc(diff);
+			else
+				totalNotesHit += judgeData.wifePoints;
+			totalPlayed += 2;
+		}else{
+			totalNotesHit += judgeData.accuracy * 0.01;
+			totalPlayed++;
+		}
+
+		if (!hud.judgements.exists(judgeData.internalName))
+			hud.judgements.set(judgeData.internalName, 0);
+		
+		hud.judgements.set(judgeData.internalName, hud.judgements.get(judgeData.internalName) + 1);
+
+		switch(judgeData.comboBehaviour){
+			default:
+				combo++;
+			case BREAK:
+				breakCombo();
+			case IGNORE:
+		}
+
+		if (!judges.exists(judgeData.internalName))
+			judges.set(judgeData.internalName, 0);
+
+		judges.set(judgeData.internalName, judges.get(judgeData.internalName) + 1);
+		
+		RecalculateRating();
+
+		if(show){
+			if(judgeData.hideJudge!=true)
+				showJudgment(judgeData.internalName);
+			if(judgeData.comboBehaviour != IGNORE)
+				showCombo();
+		}
+	}
+
+	private function applyNoteJudgment(note:Note):Null<JudgmentData>
+	{
+		if(note.hitResult.judgment == UNJUDGED)return null;
+		var judgeData:JudgmentData = judgeManager.judgmentData.get(note.hitResult.judgment);
+		if(judgeData==null)return null;
+
+		if (callOnHScripts("preApplyJudgment", [note, judgeData]) == Globals.Function_Stop)
+			return null;
+
+		var mutatedJudgeData:Dynamic = callOnHScripts("mutateJudgeData", [note, judgeData]);
+		if(mutatedJudgeData != null && mutatedJudgeData != Globals.Function_Continue)
+			judgeData = cast mutatedJudgeData; // so you can return your own custom judgements or w/e
+
+		applyJudgmentData(judgeData, note.hitResult.hitDiff, true);
+
+		callOnHScripts("postApplyJudgment", [note, judgeData]);
+		
+		return judgeData;
+	}
+
+	private function applyJudgment(judge:Judgment, ?diff:Float = 0, ?show:Bool = true)applyJudgmentData(judgeManager.judgmentData.get(judge), diff);
+	
+
+	private function judge(note:Note, field:PlayField=null){
+		if (field == null)
+			field = getFieldFromNote(note);
+
+		var hitTime = note.hitResult.hitDiff + ClientPrefs.ratingOffset;
+		var judgeData:JudgmentData = applyNoteJudgment(note);
+		if(judgeData==null)return;
+
+		note.ratingMod = judgeData.accuracy * 0.01;
+		note.rating = judgeData.internalName;
+		if (judgeData.noteSplash && !note.noteSplashDisabled)
+			spawnNoteSplashOnNote(note, field);
+
+		var time = (Conductor.stepCrochet * 0.001);
+		
+		msTotal += hitTime;
+		msNumber++;
+
+		if(ClientPrefs.showMS && (field==null || !field.autoPlayed))
+		{
+			FlxTween.cancelTweensOf(timingTxt);
+			FlxTween.cancelTweensOf(timingTxt.scale);
+			
+			timingTxt.text = '${FlxMath.roundDecimal(hitTime, 2)}ms';
+			timingTxt.screenCenter();
+			timingTxt.x += ClientPrefs.comboOffset[4];
+			timingTxt.y -= ClientPrefs.comboOffset[5];
+
+			timingTxt.color = hud.judgeColours.get(judgeData.internalName);
+
+			timingTxt.visible = true;
+			timingTxt.alpha = 1;
+			timingTxt.y -= 8;
+			timingTxt.scale.set(1, 1);
+			
+			FlxTween.tween(timingTxt, 
+				{y: timingTxt.y + 8}, 
+				0.1,
+				{onComplete: function(_){
+					if (ClientPrefs.simpleJudge){
+						FlxTween.tween(timingTxt.scale, {x: 0, y: 0}, time, {
+							ease: FlxEase.quadIn,
+							onComplete: function(_){timingTxt.visible = false;},
+							startDelay: time * 8
+						});
+					}else{
+						FlxTween.tween(timingTxt, {alpha: 0}, time, {
+							// ease: FlxEase.circOut,
+							onComplete: function(_){timingTxt.visible = false;},
+							startDelay: time * 8
+						});
+					}
+				}}
+			);
+		}
+
+		hud.noteJudged(judgeData, note, field);
+	}
+	// time to rewrite this!
+/* 	private function popUpScore(note:Note, field:PlayField=null):Void
 	{
 		if(field==null)
 			field = getFieldFromNote(note);
 		
 
-		var hitTime = note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset;
+		var hitTime = note.hitResult.hitDiff + ClientPrefs.ratingOffset;
 		var noteDiff:Float = Math.abs(hitTime);
 
 		vocals.volume = 1;
@@ -3396,75 +3621,8 @@ class PlayState extends MusicBeatState
 		}
 
 		////
-		if (ClientPrefs.simpleJudge){
-			for (prevCombo in lastCombos){
-				prevCombo.kill();
-			}
-			if(combo==0)return;
-		}else if (combo < 10 && combo != 0)
-			return;
-
-		var separatedScore:Array<String> = Std.string(combo).split("");
-		while (separatedScore.length < 3)
-			separatedScore.unshift("0");
-
-		var daLoop:Int = 0;
-
-		// did you goto MS Paint and get colours from there lol
-		var comboColor = !ClientPrefs.coloredCombos ? 0xFFFFFFFF : switch(ratingFC){ // so the color doesn't get calculated for every number ig
-			case 'KFC':
-				hud.judgeColours.get("epic");
-			case 'AFC':
-				hud.judgeColours.get("sick");
-			case 'CFC':
-				hud.judgeColours.get("good");
-			default:
-				FlxColor.WHITE;
-		}; // this could prob be set in recalculateRating tbh lol
-
-		for (i in separatedScore)
-		{
-			var numScore:RatingSprite = comboNumGroup.recycle(RatingSprite, RatingSprite.newNumber);
-			numScore.revive();
-			numScore.loadGraphic(Paths.image('num' + i));
-
-			numScore.color = comboColor;
-			numScore.screenCenter();
-			numScore.x += ClientPrefs.comboOffset[2] + 43 * daLoop;
-			numScore.y -= ClientPrefs.comboOffset[3];
-			numScore.ID = daLoop;
-			if (numScore.tween != null){
-				numScore.tween.cancel();
-				numScore.tween.destroy();
-			}
-
-			comboNumGroup.remove(numScore, true);
-			comboNumGroup.add(numScore);
-
-			if(ClientPrefs.simpleJudge){
-				numScore.scale.x = 0.5 * 1.25;
-				numScore.scale.y = 0.5 * 0.75;
-
-				/* numScore.alpha = 0.6; */
-				numScore.tween = FlxTween.tween(numScore, {"scale.x": 0.5, "scale.y": 0.5/* , alpha: 1 */}, 0.2, {
-					ease: FlxEase.circOut
-				});
-
-				lastCombos.push(numScore);
-			}else{
-				numScore.acceleration.y = FlxG.random.int(200, 300);
-				numScore.velocity.set(FlxG.random.float(-5, 5), -FlxG.random.int(140, 160));
-
-				numScore.alpha = 1;
-				numScore.tween = FlxTween.tween(numScore, {alpha: 0}, 0.2, {
-					onComplete: function(wtf){numScore.kill();},
-					startDelay: Conductor.crochet * 0.002
-				});
-			}
-
-			daLoop++;
-		}
-	}
+		showCombo();
+	} */
 
 	public var strumsBlocked:Array<Bool> = [];
 	var pressed:Array<FlxKey> = [];
@@ -3509,84 +3667,17 @@ class PlayState extends MusicBeatState
 			}
 		}
 	}
-	// TODO: rewrite this all it sucks dick
-	/*private function onKeyPress(event:KeyboardEvent):Void
-	{
-		var eventKey:FlxKey = event.keyCode;
-		var key:Int = getKeyFromEvent(eventKey);
-		//trace('Pressed: ' + eventKey);
-
-		if (!cpuControlled && startedCountdown && !paused && key > -1 && (FlxG.keys.checkStatus(eventKey, JUST_PRESSED) || ClientPrefs.controllerMode))
-		{
-			if(!boyfriend.stunned && generatedMusic && !endingSong)
-			{
-				//more accurate hit time for the ratings?
-				var lastTime:Float = Conductor.songPosition;
-				Conductor.songPosition = FlxG.sound.music.time;
-
-				var canMiss:Bool = !ClientPrefs.ghostTapping;
-
-				// heavily based on my own code LOL if it aint broke dont fix it
-				var pressNotes:Array<Note> = [];
-				//var notesDatas:Array<Int> = [];
-				var notesStopped:Bool = false;
-
-				var pressNotes:Array<Note> = [];
-
-				var ghostTapped:Bool = true;
-				for (field in playfields.members)
-				{
-					if (field.isPlayer && field.inControl && !field.autoPlayed)
-					{
-						var sortedNotesList:Array<Note> = field.getTapNotes(key);
-						sortedNotesList.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
-
-						if (sortedNotesList.length > 0)
-						{
-							pressNotes.push(sortedNotesList[0]);
-							field.noteHitCallback(sortedNotesList[0], field);
-						}
-					}
-				}
-
-				if (pressNotes.length == 0)
-				{
-					callOnScripts('onGhostTap', [key]);
-					if (canMiss)
-					{
-						noteMissPress(key);
-						callOnScripts('noteMissPress', [key]);
-					}
-				}
-
-				// I dunno what you need this for but here you go
-				//									- Shubs
-
-				// Shubs, this is for the "Just the Two of Us" achievement lol
-				//									- Shadow Mario
-				keysPressed[key] = true;
-
-				//more accurate hit time for the ratings? part 2 (Now that the calculations are done, go back to the time it was before for not causing a note stutter)
-				Conductor.songPosition = lastTime;
-			}
-
-			var spr:StrumNote = playerStrums.members[key];
-			if(strumsBlocked[key] != true && spr != null && spr.animation.curAnim.name != 'confirm')
-			{
-				spr.playAnim('pressed');
-				spr.resetAnim = 0;
-			}
-			callOnScripts('onKeyPress', [key]);
-		}
-		//trace('pressed: ' + controlArray);
-	}*/
 	private function onKeyRelease(event:KeyboardEvent):Void
 	{
 		var eventKey:FlxKey = event.keyCode;
 		var key:Int = getKeyFromEvent(eventKey);
 		if(pressed.contains(eventKey))pressed.remove(eventKey);
-		if(startedCountdown && !paused && key > -1)
+		if(startedCountdown && key > -1)
 		{
+			// doesnt matter if THIS is done while paused
+			// only worry would be if we implemented Lifts
+			// but afaik we arent doing that
+			// (though could be interesting to add)
 			for(field in playfields.members){
 				if (field.inControl && !field.autoPlayed && field.isPlayer)
 				{
@@ -3648,25 +3739,6 @@ class PlayState extends MusicBeatState
 		// FlxG.watch.addQuick('asdfa', upP);
 		if (startedCountdown && !boyfriend.stunned && generatedMusic)
 		{
-			// rewritten inputs???
-
-/* 			for (field in playfields.members)
-			{
-				if(!field.autoPlayed && field.inControl && field.isPlayer){
-					for(daNote in field.spawnedNotes){
-						if (strumsBlocked[daNote.noteData] != true
-							&& daNote.isSustainNote
-							&& parsedHoldArray[daNote.noteData]
-							&& daNote.canBeHit
-							&& !daNote.tooLate
-							&& !daNote.wasGoodHit
-							&& !daNote.blockHit
-						)
-							field.noteHitCallback(daNote, field);
-
-					}
-				}
-			} */
 
 			if (parsedHoldArray.contains(true) && !endingSong) {
 				#if ACHIEVEMENTS_ALLOWED
@@ -3721,6 +3793,8 @@ class PlayState extends MusicBeatState
 			
 		}
 
+		daNote.hitResult.judgment = MISS;
+
 		if(callOnHScripts("preNoteMiss", [daNote, field]) == Globals.Function_Stop)
 			return;
 		#if LUA_ALLOWED
@@ -3756,7 +3830,7 @@ class PlayState extends MusicBeatState
 				tail.tooLate = true;
 				tail.blockHit = true;
 				tail.ignoreNote = true;
-				health -= daNote.missHealth * healthLoss;
+				//health -= daNote.missHealth * healthLoss; // this is kinda dumb tbh no other VSRG does this just FNF
 			}
 		}
 
@@ -3790,17 +3864,25 @@ class PlayState extends MusicBeatState
 		}
 
 
-		breakCombo();
+/* 		breakCombo();
 		
-		health -= daNote.missHealth * healthLoss;	
+		health -= daNote.missHealth * healthLoss;	 */
 
-		if (!mine)songMisses++;
+		
+		if (!mine){
+			songMisses++;
+			applyJudgment(daNote.hitResult.judgment);
+		}else{
+			applyJudgment(MISS_MINE);
+			health -= daNote.missHealth * healthLoss;
+		}
+		
 		vocals.volume = 0;
 
-		if(!practiceMode) 
-			songScore -= 10;
+/* 		if(!practiceMode) 
+			songScore -= 10; */
 
-		if(!daNote.isSustainNote ){
+/* 		if(!daNote.isSustainNote ){
 			if (daNote.sustainLength > 0 && ClientPrefs.wife3)
 			{
 				totalPlayed += 2;
@@ -3813,7 +3895,7 @@ class PlayState extends MusicBeatState
 			
 			if(!mine)showJudgment("miss");
 			RecalculateRating();
-		}
+		} */
 
 		if (!daNote.isSustainNote && ClientPrefs.missVolume > 0) // i missed this sound
 			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(ClientPrefs.missVolume * 0.9, ClientPrefs.missVolume * 1));
@@ -4065,11 +4147,9 @@ class PlayState extends MusicBeatState
 
 
 		// tbh I hate hitCuasesMiss lol its retarded
-		if(note.hitCausesMiss) {
+		// added a shitty judge to deal w/ it tho!!
+ 		if(note.hitResult.judgment == MISS_MINE) {
 			noteMiss(note, field, true);
-
-			if(!note.noteSplashDisabled && !note.isSustainNote)
-				spawnNoteSplashOnNote(note, field);
 
 			if (!note.noMissAnimation)
 			{
@@ -4102,11 +4182,11 @@ class PlayState extends MusicBeatState
 				
 			}
 			return;
-		}
+		} 
 
 		// TODO: rewrite judgement code since i hate it -neb
 		if (!note.isSustainNote)
-			popUpScore(note, field);
+			judge(note, field);
 		
 
 		// Sing animations
@@ -4506,10 +4586,10 @@ class PlayState extends MusicBeatState
 			// Rating FC
 			ratingFC = "Clear";
 			if(comboBreaks <= 0){
-			if (epics > 0) ratingFC = "KFC";
-			if (sicks > 0) ratingFC = "AFC";
-			if (goods > 0) ratingFC = "CFC";
-			if (bads > 0 || shits > 0) ratingFC = "FC";
+			if (judges.get("epic") > 0) ratingFC = "KFC";
+			if (judges.get("sick") > 0) ratingFC = "AFC";
+			if (judges.get("good") > 0) ratingFC = "CFC";
+			if (judges.get("bad") > 0 || judges.get("shit") > 0) ratingFC = "FC";
 			}else{
 				if (comboBreaks < 10 && songScore >= 0) ratingFC = "SDCB";
 				else if (songScore < 0 || comboBreaks >= 10 && ratingPercent <= 0)ratingFC = "Fail";

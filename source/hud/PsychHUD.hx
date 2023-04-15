@@ -1,10 +1,11 @@
 package hud;
 
+import JudgmentManager.JudgmentData;
 import flixel.tweens.FlxEase;
 import flixel.util.FlxStringUtil;
 import flixel.ui.FlxBar;
 import flixel.util.FlxColor;
-import Conductor.Rating;
+
 import flixel.tweens.FlxTween;
 import flixel.text.FlxText;
 
@@ -199,7 +200,7 @@ class PsychHUD extends BaseHUD {
 		return misses;
 	}
 
-	override function noteJudged(judge:Rating, ?note:Note, ?field:PlayField)
+	override function noteJudged(judge:JudgmentData, ?note:Note, ?field:PlayField)
 	{
 		var hitTime = note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset;
 
@@ -210,8 +211,8 @@ class PsychHUD extends BaseHUD {
 			if (scoreTxtTween != null)
 				scoreTxtTween.cancel();
 
-			var judgeName = judgeNames.get(judge.name);
-			var judgeTxt = judgeTexts.get(judge.name);
+			var judgeName = judgeNames.get(judge.internalName);
+			var judgeTxt = judgeTexts.get(judge.internalName);
 			if (judgeName != null)
 			{
 				FlxTween.cancelTweensOf(judgeName.scale);

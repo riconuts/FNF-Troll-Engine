@@ -1,5 +1,6 @@
 package scripts;
 
+import JudgmentManager.Judgment;
 import flixel.addons.display.FlxRuntimeShader;
 
 import flixel.util.FlxColor;
@@ -98,6 +99,19 @@ class FunkinHScript extends FunkinScript
 		set("FlxSprite", flixel.FlxSprite);
 		set("FlxCamera", flixel.FlxCamera);
 		set("Wife3", PlayState.Wife3);
+		set("Judgment", {
+			UNJUDGED: Judgment.UNJUDGED,
+			TIER1: Judgment.TIER1,
+			TIER2: Judgment.TIER2,
+			TIER3: Judgment.TIER3,
+			TIER4: Judgment.TIER4,
+			TIER5: Judgment.TIER5,
+			MISS: Judgment.MISS,
+			DAMAGELESS_MISS = Judgment.DAMAGELESS_MISS,
+			HIT_MINE: Judgment.HIT_MINE,
+			MISS_MINE = Judgment.MISS_MINE,
+			CUSTOM_MINE = Judgment.CUSTOM_MINE,
+		});
 		
 		set("newShader", function(fragFile:String = null, vertFile:String = null){ // returns a FlxRuntimeShader but with file names lol
 			var runtime:FlxRuntimeShader = null;
@@ -119,6 +133,8 @@ class FunkinHScript extends FunkinScript
 		set("FlxTimer", flixel.util.FlxTimer);
 		set("FlxColor", {
 			// These aren't part of FlxColor but i thought they could be useful
+			// honestly we should replace source/flixel/FlxColor.hx or w/e with one with these funcs
+
 			toRGBArray: function(color:FlxColor){return [color.red, color.green, color.blue];},
 			lerp: function(from:FlxColor, to:FlxColor, ratio:Float){
 				return FlxColor.fromRGBFloat(
