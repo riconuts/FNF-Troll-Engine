@@ -116,12 +116,10 @@ class PsychHUD extends BaseHUD {
 			hitbar.screenCenter(XY);
 			if (ClientPrefs.downScroll)
 			{
-				hitbar.y -= 220;
-				hitbar.averageIndicator.flipY = false;
-				hitbar.averageIndicator.y = hitbar.y - (hitbar.averageIndicator.width + 5);
+				hitbar.y -= 230;
 			}
 			else
-				hitbar.y += 340;
+				hitbar.y += 330;
 
 			add(hitbar);
 		}

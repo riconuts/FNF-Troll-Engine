@@ -3398,7 +3398,7 @@ class PlayState extends MusicBeatState
 			trace("you didnt give a valid JudgmentData to applyJudgmentData!");
 			return;
 		}
-		songScore += judgeData.score;
+		if (!cpuControlled)songScore += judgeData.score;
 		health += (judgeData.health * 0.02) * (judgeData.health < 0 ? healthLoss : healthGain);
 		songHits++;
 
