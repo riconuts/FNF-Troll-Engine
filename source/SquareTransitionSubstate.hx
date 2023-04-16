@@ -13,17 +13,17 @@ import flixel.addons.display.shapes.FlxShapeBox;
 import flixel.util.FlxTimer;
 
 typedef SquareTransitionInfo = {
-	var sX:Null<Float>;
-	var sY:Null<Float>;
-	var sW:Null<Float>;
-	var sH:Null<Float>;
+	var ?sX:Float;
+	var ?sY:Float;
+	var ?sW:Float;
+	var ?sH:Float;
 	
-	var eX:Null<Float>;
-	var eY:Null<Float>;
-	var eW:Null<Float>;
-	var eH:Null<Float>;
+	var ?eX:Float;
+	var ?eY:Float;
+	var ?eW:Float;
+	var ?eH:Float;
 
-	var dur:Null<Float>;
+	var ?dur:Float;
 }
 
 class SquareTransitionSubstate extends TransitionSubstate

@@ -10,10 +10,33 @@ class TGTSquareButton extends SowyBaseButton
 		super(X, Y);
 	}
 
+	/* ahhhhhh so gay
+	var scaleTwn:Null<FlxTween>;
+	function cancelTwn() {
+		if (scaleTwn != null){
+			scaleTwn.cancel();
+			scaleTwn.destroy();
+		}
+	}
 	override function onover()
 	{
+		cancelTwn();
+		scaleTwn = FlxTween.tween(this.scale, {x: 1.05, y: 1.05}, 0.1);
+
 		super.onover();
 	}
+	override function onout()
+	{
+		cancelTwn();
+		scaleTwn = FlxTween.tween(this.scale, {x: 1, y: 1}, 0.1);
+
+		super.onout();
+	}
+	override function destroy(){
+		cancelTwn();
+		super.destroy();
+	}
+	*/
 
 	// fucking lmao
 	var shk = 0;

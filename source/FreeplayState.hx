@@ -94,7 +94,7 @@ class FreeplayState extends MusicBeatState
 				songButton.onUp.callback = function(){
 					this.transOut = SquareTransitionSubstate;
 					SquareTransitionSubstate.nextCamera = FlxG.camera;
-					SquareTransitionSubstate.info = cast {
+					SquareTransitionSubstate.info = {
 						sX: songButton.x - 3, sY: songButton.y - 3,
 						sW: 200, sH: 200,
 

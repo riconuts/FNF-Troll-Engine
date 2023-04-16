@@ -127,7 +127,7 @@ class StoryMenuState extends MusicBeatState
 					
 					var cam = FlxG.camera;
 					SquareTransitionSubstate.nextCamera = cam;
-					SquareTransitionSubstate.info = cast {
+					SquareTransitionSubstate.info = {
 							sX: newButton.x - 3,
 							sY: newButton.y - 3,
 							sW: 200,
