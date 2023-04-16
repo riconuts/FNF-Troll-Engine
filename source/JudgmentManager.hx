@@ -189,7 +189,7 @@ class JudgmentManager {
      */
     inline public function getWindow(judgment:Judgment){
 		var d:JudgmentData = judgmentData.get(judgment);
-        return d.window * (d.badJudgment?1:judgeTimescale);
+		return d.window * ((d.badJudgment && judgeTimescale<1)?1:judgeTimescale);
     }
     
 	/**
