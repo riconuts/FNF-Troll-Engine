@@ -84,7 +84,6 @@ all notes will also store their visualPos in a variable when creation and then w
 
 EDIT: not EXACTLY how it works but its a good enough summary
 */
-
 typedef SpeedEvent =
 {
 	position:Float, // the y position when the change happens (modManager.getVisPos(songTime))

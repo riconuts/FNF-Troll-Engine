@@ -102,8 +102,7 @@ class StartupState extends FlxState
 				warning.screenCenter();
 				add(warning); 
 
-/* 				load();
-				MusicBeatState.switchState(new newoptions.OptionsState()); */
+				//MusicBeatState.switchState(new editors.StageBuilderState());
 				step = 1;
 			case 1:
  				load();

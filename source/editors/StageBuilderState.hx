@@ -1,5 +1,9 @@
 package editors;
 
+import flixel.input.keyboard.FlxKey;
+import openfl.events.KeyboardEvent;
+import openfl.events.FocusEvent;
+import flixel.addons.ui.FlxInputText;
 import flixel.math.FlxMath;
 import openfl.events.MouseEvent;
 import flixel.text.FlxText;
@@ -8,7 +12,10 @@ import flixel.FlxCamera;
 import flixel.graphics.FlxGraphic;
 import openfl.geom.Rectangle;
 
+using StringTools;
+
 // this is pure spaghetti
+// also i should probably make this its own thing rather than embedding it into tgt lol
 
 typedef ObjectProperties = {
     var ?x:Float;
@@ -23,7 +30,6 @@ typedef ObjectProperties = {
 
 typedef ObjectData = {
     //// Real shit
-    var ?imagePath:String;
     var ?onForeground:Bool;
     var ?properties:ObjectProperties;
     var ?name:String;
@@ -33,14 +39,32 @@ typedef ObjectData = {
     var ?hideInEditor:Bool;
 }
 
+class FocusHelper // lol
+{
+    static var onUnfocus:Void->Void;
+
+    public static function unFocusCurrent()
+    {
+        if (onUnfocus != null) onUnfocus();
+        onUnfocus = null;
+    }
+
+    public static function setFocus(?onFocusLost)
+    {
+        unFocusCurrent();
+
+        onUnfocus = onFocusLost;
+    }
+}
+
 class Layer extends flixel.group.FlxSpriteGroup
 {
     var parent:LayerWindow;
-    public var object:Null<ObjectData> = null;
+    public var data:Null<ObjectData> = null;
     public var isSelected:Bool = false;
 
     public var bg:FlxSprite;
-    public var label:FlxText;
+    public var label:FlxInputText;
     // public var visSpr:FlxSprite;
 
     public static var bgTexture:Null<FlxGraphic> = null;
@@ -55,10 +79,10 @@ class Layer extends flixel.group.FlxSpriteGroup
         Layer.bgTexture = bgTexture;
     }
 
-    public function new(parent, object, camera)
+    public function new(parent, data, camera)
     {
         this.parent = parent;
-        this.object = object;
+        this.data = data;
         
         super();
 
@@ -67,7 +91,17 @@ class Layer extends flixel.group.FlxSpriteGroup
         bg.alpha = 0;
         add(bg);
 
-        label = new FlxText(8, (44 - 12) * 0.5, 240 - 8, "sowy", 12);
+        label = new FlxInputText(8, (44 - 12) * 0.5, 240 - 8*2, "sowy", 12);
+        label.callback = function(text, action)
+        {
+            if (action == "enter"){
+                label.hasFocus = false; 
+                data.name = text;
+                data.editorSprite.updateImage();
+            }
+        }
+        label.focusGained = FocusHelper.unFocusCurrent;
+        label.focusLost = ()->{label.text = data.name;};
         add(label);
 
         this.camera = camera;
@@ -75,53 +109,55 @@ class Layer extends flixel.group.FlxSpriteGroup
         updateObj();
 
         FlxG.stage.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-        FlxG.stage.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
     }
 
     override public function destroy(){
         FlxG.stage.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-        FlxG.stage.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 
         super.destroy();
     }
 
     public function updateObj() 
     {
-        var daName = object.name;
-        if (daName == null) daName = object.imagePath;
-        if (daName == null) daName = "unknown";
+        if (data.name == null)
+            data.name = "unknown";
 
-        label.text = daName;    
+        label.text = data.name;    
     }
 
     public function updateAlpha() 
     {
         if (isSelected)
             bg.alpha = 1;    
-        else if (FlxG.mouse.overlaps(this, this.camera))
+        else if (isMouseOverlaped())
             bg.alpha = 0.4;
         else
             bg.alpha = 0;
     }
 
-    function onMouseMove(?e) 
+    function onMouseMove(e) 
     {   
         updateAlpha();
     }
 
-    function onMouseUp(?e) 
+    public function isMouseOverlaped()
     {
-        if (FlxG.mouse.overlaps(this, this.camera)){
-            parent.selectLayer(this);   
-            updateAlpha();
-        }
+        return FlxG.mouse.overlaps(this, this.camera);
     }
+}
+
+class DragableWindow extends FlxTypedGroup<FlxBasic>
+{
+    var topBar:FlxSprite;
+    var layerCamera:FlxCamera;
 }
 
 class LayerWindow extends FlxTypedGroup<FlxBasic>
 {
-    var x:Int;
-    var y:Int;
+    public var x:Int=0;
+    public var y:Int=0;
+    public var width:Int=0;
+    public var height:Int=0;
 
     var parent:StageBuilderState;
 
@@ -133,13 +169,14 @@ class LayerWindow extends FlxTypedGroup<FlxBasic>
         curSelected = laeyr;
 
         if (parent != null)
-            parent.curSelected = laeyr.object;
+            parent.curSelected = laeyr != null ? laeyr.data : null;
         
         return laeyr;
     }
 
     var topBar:FlxSprite;
     var layerCamera:FlxCamera;
+    var layerHitbox:FlxObject;
     var bottomBar:FlxSprite;
 
     var managmentButtons:Array<FlxSprite> = [];
@@ -155,6 +192,11 @@ class LayerWindow extends FlxTypedGroup<FlxBasic>
         layerCamera.setSize(240, 266);
         layerCamera.bgColor = 0xFF404040;
         FlxG.cameras.add(layerCamera, false);
+
+        layerHitbox = new FlxObject(0, 0, layerCamera.width, layerCamera.height);
+        layerHitbox.scrollFactor.set();
+        layerHitbox.camera = layerCamera;
+        add(layerHitbox);
 
         topBar = new FlxSprite().makeGraphic(240, 24, 0xFF1A1A1A);
         topBar.scrollFactor.set();
@@ -177,7 +219,6 @@ class LayerWindow extends FlxTypedGroup<FlxBasic>
             else
                 button.animation.add("button", [i > 3 ? i-1 : i], 0, true);
             
-            
             button.animation.play("button", true);
             button.camera = camera;
 
@@ -188,11 +229,13 @@ class LayerWindow extends FlxTypedGroup<FlxBasic>
         ////
         Layer.makeBgTexture();
 
-        updatePos();
+        updatePos(FlxG.width-240, 0);
 
         FlxG.stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-        FlxG.stage.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+        //FlxG.stage.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
         FlxG.stage.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+
+        FlxG.stage.addEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
     }
 
     override public function destroy(){
@@ -200,94 +243,54 @@ class LayerWindow extends FlxTypedGroup<FlxBasic>
         Layer.bgTexture = null;
 
         FlxG.stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-        FlxG.stage.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+        //FlxG.stage.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
         FlxG.stage.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+
+        FlxG.stage.removeEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
 
         super.destroy();
     }
 
-    var holdInfo:Null<{mx:Int, my:Int, sx:Int, sy:Int}> = null;
+    inline static function mouseOverlaps(what)
+    {
+        return FlxG.mouse.overlaps(what, what.camera);
+    }
 
-    function onMouseDown(?e) {
-        if (FlxG.mouse.overlaps(topBar, this.camera)){
-            holdInfo = {mx: FlxG.mouse.screenX, my: FlxG.mouse.screenY, sx: Std.int(this.x), sy: Std.int(this.y)};
-            return;
-        }
-
-        holdInfo = null;
-
-        for (idx in 0...managmentButtons.length){
-            var button = managmentButtons[idx];
-            
-            if (!FlxG.mouse.overlaps(button, button.camera))
-                continue;
-            
-            switch (idx){
-                case 0:  // add new obj
-                    var pos = (curSelected == null) ? -1 : parent.objectArray.indexOf(curSelected.object);
-                    var newObj:ObjectData = {};
-
-                    if (pos == -1)
-                        parent.objectArray.push(newObj);
-                    else
-                        parent.objectArray.insert(pos, newObj);
-                    
-                    parent.updateObjects();
-
-                    selectLayer(layers.get(newObj));
-
-                case 1: // remove selected obj
-                    if (curSelected != null){
-                        var pos = parent.objectArray.indexOf(curSelected.object);
-
-                        parent.objectArray.remove(curSelected.object);
-
-                        if (parent.objectArray.length != 0){
-                            pos = FlxMath.minInt(pos+1, parent.objectArray.length-1);
-                            selectLayer(layers.get(parent.objectArray[pos]));
-                        }
-
-                        parent.updateObjects();
-                    }else 
-                        trace("noooooi");
-                case 3: // move up  
-                    if (curSelected != null){       
-                        var pos = parent.objectArray.indexOf(curSelected.object);
-
-                        if (pos == 0) pos = parent.objectArray.length;
-
-                        parent.objectArray.remove(curSelected.object);
-                        parent.objectArray.insert(pos-1, curSelected.object);
-                        parent.updateObjects();
-                    }
-                case 2: // move down
-                    if (curSelected != null){       
-                        var pos = parent.objectArray.indexOf(curSelected.object);
-
-                        if (pos == parent.objectArray.length-1) pos = -1;
-
-                        parent.objectArray.remove(curSelected.object);
-                        parent.objectArray.insert(pos+1, curSelected.object);
-                        parent.updateObjects();
-                    }
-                case 4: // clone
-
-                case 5: // modify
-
-                default: trace(idx);
-            }
-            break;
+    function onMouseWheel(e:MouseEvent){
+        if (mouseOverlaps(layerHitbox)){
+            layerCamera.scroll.y += -FlxG.mouse.wheel * 15;
+            e.stopImmediatePropagation();
         }
     }
 
+    var holdInfo:Null<{x:Int, y:Int}> = null;
+
+    function onMouseDown(e:MouseEvent) {
+        /* 
+        if (FlxG.mouse.overlaps(topBar, this.camera))
+            holdInfo = {x: FlxG.mouse.screenX, y: FlxG.mouse.screenY};
+        else
+            holdInfo = null;
+        */
+
+        if (mouseOverlaps(topBar) || mouseOverlaps(layerHitbox) || mouseOverlaps(bottomBar)){
+            e.stopImmediatePropagation();
+        }
+    }
+
+    /*
     function onMouseMove(?e){
         if (holdInfo != null){
-            var xDiff = FlxG.mouse.screenX - holdInfo.mx;
-            var yDiff = FlxG.mouse.screenY - holdInfo.my;
+            var xDiff = FlxG.mouse.screenX - holdInfo.x;
+            var yDiff = FlxG.mouse.screenY - holdInfo.y;
 
-            updatePos(holdInfo.sx + xDiff, holdInfo.sy + yDiff);
+            holdInfo.x = FlxG.mouse.screenX;
+            holdInfo.y = FlxG.mouse.screenY;
+
+            updatePos(x + xDiff, y + yDiff);
         }
     }
+    */
 
     function updatePos(x=0,y=0){
         this.x = x;
@@ -301,9 +304,113 @@ class LayerWindow extends FlxTypedGroup<FlxBasic>
             managmentButtons[idx].setPosition(x+4 + (16+8)*idx, bottomBar.y+4);
         }
     }
+
+    function addNewObj()
+    {
+        var pos = (curSelected == null) ? -1 : parent.objectArray.indexOf(curSelected.data);
+        var newObj:ObjectData = {};
+
+        if (pos == -1)
+            parent.objectArray.push(newObj);
+        else
+            parent.objectArray.insert(pos, newObj);
         
-    function onMouseUp(?e){
+        parent.updateObjects();
+
+        selectLayer(layers.get(newObj));
+    }
+
+    function destroySelectedObj(){
+        if (curSelected == null)
+            return;
+
+        var pos = parent.objectArray.indexOf(curSelected.data);
+        parent.objectArray.remove(curSelected.data);
+
+        if (parent.objectArray.length != 0){
+            pos = FlxMath.minInt(pos, parent.objectArray.length-1);
+            selectLayer(layers.get(parent.objectArray[pos]));
+        }
+
+        parent.updateObjects();
+    }
+
+    function moveSelectedObj(sowy:Int) {
+        if (curSelected == null)
+            return;
+
+        var pos = parent.objectArray.indexOf(curSelected.data)+sowy;
+
+        if (pos < 0)
+            pos = parent.objectArray.length+sowy;
+        else if (pos >= parent.objectArray.length)
+            pos = sowy-1;
+        
+        parent.objectArray.remove(curSelected.data);
+        parent.objectArray.insert(pos, curSelected.data);
+        parent.updateObjects();
+    }
+        
+    function onMouseUp(e:MouseEvent){
         holdInfo = null;
+
+        if (FlxG.mouse.overlaps(topBar, topBar.camera)){
+            e.stopImmediatePropagation();
+            return;
+        }
+
+        // Check if you at least clicked on the layer window
+        if (FlxG.mouse.overlaps(layerHitbox, layerHitbox.camera)){
+            // Check if you clicked on a layer
+            for (obj => layer in layers)
+            {
+                var label = layer.label;
+                var labelOverlaped = FlxG.mouse.overlaps(label, label.camera);
+    
+                label.hasFocus = labelOverlaped;
+    
+                if (labelOverlaped || layer.isMouseOverlaped())
+                {
+                    selectLayer(layer);   
+                    layer.updateAlpha();
+        
+                    FocusHelper.unFocusCurrent();
+        
+                    e.stopImmediatePropagation();
+                    return;
+                }
+            }
+
+            //// You didn't click on any layer.
+            selectLayer(null);
+
+            e.stopImmediatePropagation();
+            return;
+        }
+
+        if (FlxG.mouse.overlaps(bottomBar, bottomBar.camera)){
+            for (idx in 0...managmentButtons.length){
+                var button = managmentButtons[idx];
+                
+                if (!FlxG.mouse.overlaps(button, button.camera))
+                    continue;
+                
+                switch (idx){
+                    case 0: addNewObj();
+                    case 1: destroySelectedObj();
+                    case 2: moveSelectedObj(1); // move UP
+                    case 3: moveSelectedObj(-1); // move DOWN
+                    case 4: // cloneSelectedObj();
+                    case 5: // modifySelectedObj();
+                    default: trace(idx);
+                }
+
+                break;
+            }
+
+            e.stopImmediatePropagation();
+            return;
+        }
     }
 
     public function selectLayer(?layer:Layer){
@@ -324,7 +431,7 @@ class LayerWindow extends FlxTypedGroup<FlxBasic>
     {
         var lastObj = null;
         if (curSelected != null)
-            lastObj = curSelected.object;
+            lastObj = curSelected.data;
 
         selectLayer(null);
 
@@ -333,6 +440,8 @@ class LayerWindow extends FlxTypedGroup<FlxBasic>
             remove(layer, true);
             layer.destroy();
         }
+
+        layers.clear();
         
         for (idx in 0...parent.objectArray.length)
         {
@@ -349,6 +458,14 @@ class LayerWindow extends FlxTypedGroup<FlxBasic>
                 selectLayer(layer);
         }
 
+        var minY = 0.0;
+        var maxY = 0.0;
+        for (obj => layer in layers){
+            minY = Math.min(minY, layer.y);
+            maxY = Math.max(maxY, layer.y + layer.height);
+        }
+        layerCamera.setScrollBounds(null, null, minY, Math.max(maxY, layerCamera.height));
+
         while (unusedLayers.length > 0)
             unusedLayers.pop().destroy();
     }
@@ -358,23 +475,25 @@ class StageSprite extends FlxSprite
 {
     public var data:ObjectData;
 
-    public function updateData(?data:ObjectData)
+    public function updateImage(?newName:String)
     {
-        if (data != null)
-            this.data = data;
+        var possibleGraphic = Paths.image(newName == null ? data.name : newName);
+        loadGraphic(possibleGraphic == null ? "flixel/images/logo/default.png" : possibleGraphic);
+    }
 
-        if (data == null){
-            trace("WARNING: No data");
-            return;
-        }
+    public function updateData(?newData:ObjectData)
+    {
+        if (newData != null)
+            data = newData;
+
+        if (data == null)
+            trace("Attempt to update an object with no data");
+
+        if (data.properties == null)
+            data.properties = {};
        
         ////
-        loadGraphic(Paths.image(data.imagePath));
-
-        if (data.properties == null){
-            trace("no properties?");
-            data.properties = {};
-        }
+        updateImage();
 
         setPosition(
             data.properties.x != null ? data.properties.x : 0,
@@ -406,12 +525,51 @@ class StageBuilderState extends MusicBeatState
     public var objectArray:Array<ObjectData> = [];
     var layerWindow:LayerWindow;
 
+    /*
+    function moveSelectedObject(?x:Float, ?y:Float) {
+        if (curSelected == null || curSelected.editorSprite == null){
+            return;
+        }
+
+        final spr = curSelected.editorSprite;
+        
+    }
+
+    function moveObjectTool(e:Float){
+        final pressed = FlxG.keys.pressed;
+        
+        if (pressed.ANY)
+        {
+            final spr = curSelected.editorSprite;
+
+            var spd = e/(1/60) * (pressed.SHIFT ? 15 : 5);
+
+            if (pressed.UP)
+                spr.y -= spd;
+            if (pressed.DOWN)
+                spr.y += spd;
+
+            if (pressed.LEFT)
+                spr.x -= spd;
+            if (pressed.RIGHT)
+                spr.x += spd;
+
+            curSelected.properties.x = spr.x;
+            curSelected.properties.y = spr.y;
+        }
+    } 
+    */
+
     override public function create()
     {
         FlxG.mouse.visible = true;
         
         FlxG.cameras.reset(camGame);
         FlxG.cameras.add(camHUD, false);
+
+        // i think scrollfactor gets affected by the canera size ;_;  
+        camGame.width = (FlxG.width - 480);
+        camGame.x = 240;
 
         camGame.bgColor = 0xFF00FF00;
         camHUD.bgColor.alpha = 0;
@@ -424,8 +582,8 @@ class StageBuilderState extends MusicBeatState
         stage.camera = camGame;
         foreground.camera = camGame;
 
-        objectArray.push({name: "tails", imagePath: "tails", properties: {x: 10, y: 10, scrollX: 0, scrollY: 0, scaleX: 1.1, scaleY: 1.1}});
-        objectArray.push({name: "trollface", imagePath: "trollface"});
+        objectArray.push({name: "tails", properties: {x: 10, y: 10, scrollX: 0, scrollY: 0, scaleX: 1.1, scaleY: 1.1}});
+        objectArray.push({name: "trollface"});
         objectArray.push({});
 
         layerWindow = new LayerWindow(this, camHUD);
@@ -434,14 +592,94 @@ class StageBuilderState extends MusicBeatState
         updateObjects();
 
         super.create();
+
+        persistentUpdate = false;
+
+        //toolFunction = moveObjectTool;
+
+        FlxG.stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown, false, -1);
+        FlxG.stage.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove, false, -1);
+        FlxG.stage.addEventListener(MouseEvent.MOUSE_UP, onMouseUp, false, -1);
+        FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown, false, -1);
+    }
+    override public function destroy(){
+        FlxG.stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown, false);
+        FlxG.stage.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove, false);
+        FlxG.stage.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp, false);
+        FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown, false);   
+
+        super.destroy();
     }
 
+    function exportStageScript(){
+        var script = "function onLoad(){";
+
+        for (obj in objectArray)
+        {
+            if (obj.name == null){
+                trace("ERROR ON OBJ " + obj);
+                continue;
+            }
+            var varName:String = obj.name.replace('/', '_').replace("\\", '_').replace(" ", '_');
+
+            // Positions being null shouldn't be an issue
+            script += '\n   var ${varName} = new FlxSprite(${obj.properties.x}, ${obj.properties.y}, Paths.image("${obj.name}"));';
+            
+            // no scaling or scroll factor YET.
+            script += '\n   ${obj.onForeground ? "foreground.add" : "add"}(${varName});';
+        }
+
+        script += "\n}";
+
+        Sys.println("STAGE SCRIPT START:");
+        Sys.println(script);
+        Sys.println("STAGE SCRIPT END.");
+    }
+
+    function onKeyDown(e:KeyboardEvent){
+        if (e.ctrlKey && e.keyCode == FlxKey.E)
+            exportStageScript();
+    }
+
+    var holdInfo:Null<{x:Int, y:Int}> = null;
+    function onMouseDown(e) {
+        holdInfo = {x: FlxG.mouse.screenX, y: FlxG.mouse.screenY};
+        //trace("hold");
+    }
+    function onMouseMove(e) {
+        if (holdInfo == null)
+            return;
+
+        var xDiff = FlxG.mouse.screenX - holdInfo.x;
+        var yDiff = FlxG.mouse.screenY - holdInfo.y;
+
+        holdInfo.x = FlxG.mouse.screenX;
+        holdInfo.y = FlxG.mouse.screenY;
+
+        if (curSelected == null || curSelected.editorSprite == null)
+        {
+            camGame.scroll.x += xDiff;
+            camGame.scroll.y += yDiff;
+        }
+        else
+        {
+            final spr = curSelected.editorSprite;
+
+            spr.x += xDiff;
+            spr.y += yDiff;
+
+            curSelected.properties.x = spr.x;
+            curSelected.properties.y = spr.y;
+        }
+    }
+    function onMouseUp(e) {
+        holdInfo = null;
+    }
+
+    // 
     public function updateObjects()
     {
-        // trace("doing object update");
-
         var unusedSprites:Array<StageSprite> = [];
-        var usedSprites:Map<ObjectData, StageSprite> = []; // i forgot what i wanteed to do twith this
 
         function checkUnused(group:FlxTypedGroup<StageSprite>){
             for (spr in group.members){
@@ -453,8 +691,6 @@ class StageBuilderState extends MusicBeatState
                 if (spr.data == null || objectArray.indexOf(spr.data) == -1){
                     spr.data = null;
                     unusedSprites.push(spr);
-                }else{
-                    usedSprites.set(spr.data, spr);
                 }
             }
         }

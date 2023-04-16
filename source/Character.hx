@@ -52,9 +52,11 @@ typedef AnimArray = {
 
 class Character extends FlxSprite
 {
-	public var idleWhenHold:Bool = true; // Whether the character should idle when the player is holding a gameplay key
+	/**Whether the character should idle when the player is holding a gameplay key**/
+	public var idleWhenHold:Bool = true;
 
-	public static var DEFAULT_CHARACTER:String = 'bf'; // In case a character is missing, it will use BF on its place
+	/**In case a character is missing, it will use BF on its place**/
+	public static var DEFAULT_CHARACTER:String = 'bf'; 
 
 	public var controlled:Bool = false;
 	public var xFacing:Float = 1;
@@ -62,8 +64,9 @@ class Character extends FlxSprite
 	public var deathName = DEFAULT_CHARACTER;
 	public var characterScript:FunkinScript;
 
-	public var voicelining:Bool = false; // for fleetway, mainly
-	// but whenever you need to play an anim that has to be manually interrupted, here you go
+	/**for fleetway, mainly.
+		but whenever you need to play an anim that has to be manually interrupted, here you go**/
+	public var voicelining:Bool = false; 
 
 	public var idleAnims:Array<String> = ['idle'];
 	public var animOffsets:Map<String, Array<Dynamic>>;
@@ -82,9 +85,13 @@ class Character extends FlxSprite
 	public var specialAnim:Bool = false;
 	public var animationNotes:Array<Dynamic> = [];
 	public var stunned:Bool = false;
-	public var singDuration:Float = 4; //Multiplier of how long a character holds the sing pose
+	
+	/**Multiplier of how long a character holds the sing pose**/
+	public var singDuration:Float = 4;
 	public var idleSuffix:String = '';
-	public var danceIdle:Bool = false; //Character use "danceLeft" and "danceRight" instead of "idle"
+	
+	/**Character uses "danceLeft" and "danceRight" instead of "idle"**/
+	public var danceIdle:Bool = false;
 	public var skipDance:Bool = false;
 
 	public var healthIcon:String = 'face';
