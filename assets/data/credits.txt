@@ -2,7 +2,7 @@ TGT Mod Team
 George Washingtoad::EllisStohard::Director (we hate you), also wrote all the credit descriptions hi me::https://twitter.com/Washingtoaad
 Echolocated::Echolocated::Director, observes from the distance in case we fuck up. Made On Your Trail and improved Lonely Looser.::https://twitter.com/sinewaev::0xFFBA5CF4
 Hyper::Hyper::Co-Director and main artist. Drew Hammerhead Gf, cutscenes, drew Hammerhead Gf and credit icons. Did I mention Hammerhe-::https://twitter.com/HyperingOut::0xFF9752CC
-Niixx::Niixx::Co-Director, stolen from a niche TGT mod you haven't heard of. Voiced multiple trolls including the Fist in Poo Clan.::https://www.youtube.com/@NiixxVGM::0xFF37CF62
+Niixx::Niixx::Co-Director, stolen from a niche TGT mod you haven't heard of. Animated the cutscenes for the story mode and voiced all the trolls.::https://www.youtube.com/@NiixxVGM::0xFF37CF62
 Hooda The Antagonist::Hooda::THE antagonist herself, helped mixed and improve Lonely Looser, AHTK and all the other songs you already know. Wants No Villains in this world.::https://www.youtube.com/@HoodatheAntagonist::0xFFFFA0E2
 Riconuts::Riconuts::Beloved femboy programmer. Anything new *masculine*::https://twitter.com/riconut::0xFF5B46E6
 Nebula The Zorua::Nebula_The_Zorua::Bribed to redo the TFB modchart through TGT-funded gay furry porn. Now helps code in general like the jukebox.::https://twitter.com/nebula_zorua::0xFFBA2DC4
@@ -12,7 +12,7 @@ STA::STA::He hasn't done anything for this update, but is currently lying dorman
 Mmushrooms::Mmushrooms::Musician, originally made Awesome Plan before it got scrapped. Very sad.::https://twitter.com/mushroomwith2ms::0xFFFFE2E2
 OneGorgon::OneGorgon::Musician, made Lonely Looser and the original vocals for AHTK. @The Mike Gorgon progress?::https://twitter.com/OneGorgon::0xFFFFC371
 Bendyman::Bendyman::Made art for side story thumbnails, also Shadow's icon. Crazy...::https://twitter.com/BendymanReal
-Blitz::Blitz::The official voice actor of Mario (not really, he voiced Kei-So). Helped shade Bowser to fit chapter 2, also the first troll Gf hater.::https://twitter.com/Garfsonic::0xFF6191D5
+Blitz::Blitz::Made the art for the credits menu and helped shade Bowser to fit chapter 2. The first troll Gf hater.::https://twitter.com/Garfsonic::0xFF6191D5
 CoffeeWoffee::CoffeeWoffee::Animated Bowser and Fist in Poo Clan. Did that one Paralysis high effort mod you saw at least once on YouTube.::https://twitter.com/CoffeeCupIsBack::0xFFFF9DFA
 DickwadMcBlatherskites::DickwadMcBlatherskites::Created art for defender stuff until we realised the defenders arc would be too much to put in. Whoops!::https://twitter.com/blatherskites05::0xFFFFE255
 Kirb::Kirb::Did art for side story menu, also a dick on Twitter sometimes.::https://twitter.com/GamingKirb::0xFFCCC24E
@@ -23,7 +23,7 @@ SonicBlastForTheGameGear::blast::Main artist for Chapter 1 and artist for Hammer
 KawaiiMochiORA::SpookyMochiORA::2nd biggest Echolocated fan. Animated the voice lines for OYT. Stimmed in DMs after finding out they got to work on a song made by Echo.::https://twitter.com/kawaiimochiora::0xFFFFA0E2
 The Awesome::The_Awesome::The Awesome, animated and made art for chapter 2, is also retarded.::https://www.tailsgetstrolled.org/ch2/pg8.html::0xFFC7434C
 TheHolyRevenant::TheHolyRevenant::Voices the big boss Bowser himself, also made unused Troll King sprites wowie!::https://twitter.com/THolyRev::0xFF7A3299
-EstherMCH::EstherMCH::Charter (didn't finish all of the No Grinches chart cause they're a dick) and former Chromatic Maker, now obsolete with Hooda on the team yay!::https://twitter.com/Esther_system::0xFFA897E2
+EstherMCH::EstherMCH::First she was a charter, then Hooda came along so they made the side story art for Presentless Fox instead.::https://twitter.com/Esther_system::0xFFA897E2
 Kardia::Kardia::Charted No Grinches and helped chart On Your Trail. He is gradually improving his craft. Good for him!::https://twitter.com/Kardia2111::0xFFBBC6D9
 Todd::Todd::Helped Hooda fix Kardia's charts 'cause friendship is magic! Everybody say "thank you Todd" in our Twitter replies.::https://twitter.com/toxicbox01::0xFFFB4646
 Wilde::Wilde::Professional charter, brought on to voice act for Alex inste-wait, he actually charts now? Fuck.::https://twitter.com/0WildeRaze::0xFFAAAAAA
@@ -32,19 +32,20 @@ mc83ch5::mc83ch5::That talentless FUCK that voices tails. Is actually a really n
 Neo-Star::star::The hero that lent his voice for Knuckles in cutscenes when we didn't prepare ourselves.::
 NOODLEGUM::noodlegum::The iconic Sonic va in the flesh. Don't ask them to say no villains they will genuinely slaughter you::
 RaiGuyyy::RaiGuy::Also stolen from another TGT mod (rest in piece Trlled...), voiced Girlfriend and Boyfriend. True gender goals.::https://twitter.com/RaiGuyyy::0xFFFFC371
+RedTV53::RedTV53::The Hamhead guy himself. Voices Mario and Luigi like the king he is.::https://twitter.com/RedTV53::0xFFFB4646
 Pasteluluu::Luluu::She didn't actually do anything for the mod she just drew troll gf a lot and it was really hot like wow.........::https://twitter.com/pasteluluu::0xFFCCC24E
 Dawn::Dawn::Trans woman or some shit idk. She helps playtests, very nice.::https://www.youtube.com/channel/UCEvk60uiib_r8cMbiXrUnDQ::0xFFFF9DFA
 Contributors
 4mbr0s3::4mbr0s3::Inspiration for the modchart system's implementation, and created the hold note rendering system and some of the fake 3D rendering.::https://www.youtube.com/@4mbr0s3-2
 Minsan::minsan::The hero we needed when we thought there was none. Composed Scars'N'Stars for the No Villains B-Sides competition.::https://twitter.com/le_starmin
 Former Team Members
-Bepixel::Bepixel::Fun fact, animated the original troll Gf on the speaker for the original reboot. Also the fucker who delayed Impostor V4.::https://twitter.com/BepixelOfficial::0xFF37CF62
-Staticlysm::Staticlysm::Made Shadow and background assets for Die Batsards in V3.::https://twitter.com/staticlysm::0xFFAAAAAA
+Bepixel::Bepixel::Fun fact, animated the original troll Gf on the speaker for the original reboot before Lat swooped in (again).::https://twitter.com/BepixelOfficial::0xFF37CF62
+Salt::salt::Made Shadow and background assets for Die Batsards in V3.::https://twitter.com/saltexe::0xFFAAAAAA
 Wieder::Wieder::Made all the art assets for High Shovel except the animation. That was Echo's job, good job Echo!::::0xFFAAAAAA
 Polli::Polli::The legend behind chapter 3 troll Bf holy moly!::https://twitter.com/potopollo_po::0xFFAAAAAA
 Xooplord::Xooplord::Made the original High Shovel cutscene for V3.::::0xFFAAAAAA
 Flopdoodle::Flopdoodle::Made a funny gif animation to promote the original V3 release. How nice.::::0xFFAAAAAA
-LongestSoloEver::LongestSoloEver::He probably did Taste For Blood, I don't remember tbh............::https://twitter.com/longestsoloever::0xFFC7434C
+LongestSoloEver::LongestSoloEver::He might have made Taste For Blood, I don't remember tbh....,::https://twitter.com/longestsoloever::0xFFC7434C
 DPZ::DPZ::Made Silver's Mission (we will include silvers mission in the future we promise).::https://twitter.com/dpzmusic::0xFFAAAAAA
 Philliplol::Philliplol::Made High Shover *cough* sorry High Shovel. The weed got to me.::https://twitter.com/Philiplolz::0xFFAAAAAA
 Cmyth::Cmyth::Originally made Paralysis, no we will not include Paralysis lol.::https://www.youtube.com/@Cmyth::0xFFAAAAAA
