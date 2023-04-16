@@ -2490,8 +2490,9 @@ class FunkinLua extends FunkinScript
 					
 					if(errorHandler != null)
 						errorHandler(err);
-					else
-						trace('$scriptName: ERROR: $err on function $func(${args.join(', ')})');
+					#if sys else
+						Sys.println(err);
+					#end
 					
 					//LuaL.error(state,err);
 				}else{
@@ -2505,14 +2506,14 @@ class FunkinLua extends FunkinScript
 				}
 			}else{
 				Lua.pop(lua, 1);
-			return Function_Continue;
+				return Function_Continue;
 			}
 		}catch(e:Dynamic){
 			trace(e);
 		}
 		#end
-		return Function_Continue;
 
+		return Function_Continue;
 	}
 
 	public static function getPropertyLoopThingWhatever(killMe:Array<String>, ?checkForTextsToo:Bool = true, ?getProperty:Bool=true):Dynamic
@@ -2539,11 +2540,12 @@ class FunkinLua extends FunkinScript
 
 	#if LUA_ALLOWED
 	function resultIsAllowed(leLua:State, leResult:Null<Int>) { //Makes it ignore warnings
-		switch(Lua.type(leLua, leResult)) {
-			case Lua.LUA_TNIL | Lua.LUA_TBOOLEAN | Lua.LUA_TNUMBER | Lua.LUA_TSTRING | Lua.LUA_TTABLE:
-				return true;
+		return switch(Lua.type(leLua, leResult)) {
+			case Lua.LUA_TNIL | Lua.LUA_TBOOLEAN | Lua.LUA_TNUMBER | Lua.LUA_TSTRING | Lua.LUA_TTABLE :
+				true;
+			default:
+				false;
 		}
-		return false;
 	}
 	#end
 
