@@ -51,6 +51,7 @@ class BaseHUD extends FlxSpriteGroup {
     public var songName(default, set):String = '';
     public var score(default, set):Float = 0;
     public var misses(default, set):Int = 0;
+	public var combo(default, set):Int = 0;
     public var grade(default, set):String = '';
     public var ratingFC(default, set):String = 'Clear';
     public var totalNotesHit(default, set):Float = 0;
@@ -136,4 +137,5 @@ class BaseHUD extends FlxSpriteGroup {
 	function set_comboBreaks(value:Int)return comboBreaks = value;
 	function set_nps(value:Int)return nps = value;
 	function set_npsPeak(value:Int)return npsPeak = value;
+	function set_combo(value:Int)return combo = value;
 }

@@ -448,7 +448,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		var collected:Array<Note> = [];
 		for (note in spawnedNotes)
 		{
-			if (note.strumTime>end)break;
+			//if (note.strumTime>end)break;
 			if (note.alive && note.noteData == dir && !note.wasGoodHit && !note.tooLate)
 			{
 				if (filter == null || filter(note))

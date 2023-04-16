@@ -19,6 +19,7 @@ class AdvancedHUD extends BaseHUD
 	public var ratingTxt:FlxText;
 	public var fcTxt:FlxText;
 	public var npsTxt:FlxText;
+	public var pcTxt:FlxText;
 	public var hitbar:Hitbar;
 	public var timeBar:FlxBar;
 	public var timeTxt:FlxText;
@@ -27,6 +28,7 @@ class AdvancedHUD extends BaseHUD
 
 	private var timeBarBG:AttachedSprite;
 
+	var peakCombo:Int = 0;
 	var songHighscore:Int = 0;
 	public var hudPosition(default, null):String = ClientPrefs.hudPosition;
 	override public function new(iP1:String, iP2:String, songName:String)
@@ -125,8 +127,20 @@ class AdvancedHUD extends BaseHUD
 		npsTxt.x += 20 - 15;
 		npsTxt.scrollFactor.set();
 		npsTxt.borderSize = 1;
-		if (ClientPrefs.npsDisplay)
+		if (ClientPrefs.npsDisplay){
 			add(npsTxt);
+			idx++;
+		}
+		pcTxt = new FlxText(0, 0, tWidth, "Peak Combo: 0", 20);
+		pcTxt.setFormat(Paths.font("calibri.ttf"), 26, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		pcTxt.screenCenter(Y);
+		pcTxt.y -= 5 - (25 * idx);
+		pcTxt.x += 20 - 15;
+		pcTxt.scrollFactor.set();
+		pcTxt.borderSize = 1;
+		add(pcTxt);
+		idx++;
+		
 
 
 		if (hudPosition == 'Right'){
@@ -282,6 +296,9 @@ class AdvancedHUD extends BaseHUD
 
 		if (ClientPrefs.npsDisplay)
 			npsTxt.text = 'NPS: ${nps} (Peak: ${npsPeak})';
+
+		if(peakCombo < combo)peakCombo = combo;
+		pcTxt.text = "Peak Combo: " + Std.string(peakCombo);
 		
 		for(k in judgements.keys()){
 			if (judgeTexts.exists(k))
