@@ -4588,7 +4588,7 @@ class PlayState extends MusicBeatState
 			if(comboBreaks <= 0){
 			if (judges.get("epic") > 0) ratingFC = "KFC";
 			if (judges.get("sick") > 0) ratingFC = "AFC";
-			if (judges.get("good") > 0) ratingFC = "CFC";
+			if (judges.get("good") > 0) ratingFC = ClientPrefs.wife3 ? "FC" : "CFC";
 			if (judges.get("bad") > 0 || judges.get("shit") > 0) ratingFC = "FC";
 			}else{
 				if (comboBreaks < 10 && songScore >= 0) ratingFC = "SDCB";
@@ -4600,6 +4600,7 @@ class PlayState extends MusicBeatState
 		hud.grade = ratingName;
 		hud.ratingPercent = ratingPercent;
 		hud.misses = songMisses;
+		hud.combo = combo;
 		hud.comboBreaks = comboBreaks;
 		hud.judgements.set("miss", songMisses);
 		hud.judgements.set("cb", comboBreaks);
