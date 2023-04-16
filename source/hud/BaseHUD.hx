@@ -40,7 +40,7 @@ class BaseHUD extends FlxSpriteGroup {
 		"bad" => 0xFFC3C3C3,
 		"shit" => 0xFF7F7F7F,
 		"miss" => 0xFF7F2626,
-		"cb" => 0xFF7F2626
+		"cb" => 0xFF7F265A
 	];
 
 	public var displayedJudges:Array<String> = ["epic", "sick", "good", "bad", "shit", "miss"];
