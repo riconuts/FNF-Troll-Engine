@@ -1,9 +1,10 @@
 package hud;
 
+import JudgmentManager.JudgmentData;
 import flixel.util.FlxColor;
 import PlayState.FNFHealthBar;
 import haxe.exceptions.NotImplementedException;
-import Conductor.Rating;
+
 import flixel.group.FlxSpriteGroup;
 
 // bunch of basic stuff to be extended by other HUDs
@@ -116,7 +117,7 @@ class BaseHUD extends FlxSpriteGroup {
 		healthBar.iconScale = 1.2;
     }
     public function stepHit(step:Int){}
-    public function noteJudged(judge:Rating, ?note:Note, ?field:PlayField){}
+	public function noteJudged(judge:JudgmentData, ?note:Note, ?field:PlayField){}
     public function songStarted(){}
     public function songEnding(){}
 	public function recalculateRating(){}

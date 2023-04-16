@@ -35,6 +35,8 @@ class Hitbar extends FlxSpriteGroup {
     var metronomeScale:Float = 1;
     var metronome:FlxSprite;
 
+	public var judgeManager:JudgmentManager;
+
     @:isVar
     public var currentAverage(get, null):Float = 0;
     function get_currentAverage():Float{
@@ -46,20 +48,21 @@ class Hitbar extends FlxSpriteGroup {
         return avg;
     }
 
-    public function new(?x:Float, ?y:Float){
+	public function new(?x:Float, ?y:Float){
         super(x, y);
 
+		judgeManager = PlayState.instance.judgeManager;
 		mainBar = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * ClientPrefs.hitWindow), hitbarHeight, FlxColor.BLACK);
 		mainBar.alpha = 0.5;
 		add(mainBar);
 
-		var epicWindow = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * (ClientPrefs.epicWindow * Wife3.timeScale)), hitbarHeight, 0xFFE367E5);
+		var epicWindow = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * judgeManager.getWindow(TIER5)), hitbarHeight, 0xFFE367E5);
 		epicWindow.alpha = 0.6;
-		var sickWindow = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * (ClientPrefs.sickWindow * Wife3.timeScale)), hitbarHeight, 0xFF00A2E8);
+		var sickWindow = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * judgeManager.getWindow(TIER4)), hitbarHeight, 0xFF00A2E8);
 		sickWindow.alpha = 0.6;
-		var goodWindow = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * (ClientPrefs.goodWindow * Wife3.timeScale)), hitbarHeight, 0xFFB5E61D);
+		var goodWindow = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * judgeManager.getWindow(TIER3)), hitbarHeight, 0xFFB5E61D);
 		goodWindow.alpha = 0.6;
-		var badWindow = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * (ClientPrefs.badWindow * Wife3.timeScale)), hitbarHeight, FlxColor.BLACK);
+		var badWindow = new FlxSprite().makeGraphic(Std.int(hitbarPxPerMs * judgeManager.getWindow(TIER2)), hitbarHeight, FlxColor.BLACK);
 		badWindow.alpha = 0.6;
 
 		add(badWindow);

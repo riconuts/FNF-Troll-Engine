@@ -1,4 +1,5 @@
 package;
+import JudgmentManager.Judgment;
 import openfl.display.Shader;
 import flixel.util.FlxColor;
 import openfl.geom.Vector3D;
@@ -47,6 +48,9 @@ typedef RenderObject = {
 typedef NoteCallback = (Note, PlayField) -> Void;
 class PlayField extends FlxTypedGroup<FlxBasic>
 {
+	public var judgeManager(get, default):JudgmentManager;
+	function get_judgeManager()
+		return judgeManager == null ? PlayState.instance.judgeManager : judgeManager;
 	public var spawnedNotes:Array<Note> = []; // spawned notes
 	public var noteQueue:Array<Array<Note>> = [[], [], [], []]; // unspawned notes
 	public var strumNotes:Array<StrumNote> = []; // receptors
@@ -191,19 +195,23 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return arr;
 	}
 	
-	public function hasNote(note:Note){
-
+	public function hasNote(note:Note)
 		return spawnedNotes.contains(note) || noteQueue[note.noteData]!=null && noteQueue[note.noteData].contains(note);
-	}
+	
 
 	public function input(data:Int){
-		var noteList = getTapNotes(data);
+		var noteList = getNotesWithEnd(data, Conductor.songPosition + ClientPrefs.hitWindow, (note:Note) -> !note.isSustainNote); //getTapNotes(data);
 		noteList.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
 		if (noteList.length > 0)
 		{
-			var note = noteList[0];
-			noteHitCallback(note, this);
-			return note;
+			var note:Note = noteList[0];
+			var judge:Judgment = judgeManager.judgeNote(note);
+			if (judge != UNJUDGED){
+				note.hitResult.judgment = judge;
+				note.hitResult.hitDiff = note.strumTime - Conductor.songPosition;
+				noteHitCallback(note, this);
+				return note;
+			}
 		}
 		return null;
 	}
@@ -211,11 +219,8 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	public function generateStrums(){
 		for(i in 0...4){
 			var babyArrow:StrumNote = new StrumNote(0, 0, i);
-		//	babyArrow.scale.scale(scale);
-		//	babyArrow.updateHitbox();
 			babyArrow.downScroll = ClientPrefs.downScroll;
 			babyArrow.alpha = 0;
-			//add(babyArrow);
 			insert(0, babyArrow);
 			babyArrow.handleRendering = false; // NoteField handles rendering
 			strumNotes.push(babyArrow);
@@ -332,7 +337,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 							receptor.playAnim("confirm", true);
 
 						daNote.holdingTime = Conductor.songPosition - daNote.strumTime;
-						var regrabTime = (daNote.isRoll?0.5:0.25) * Wife3.timeScale;
+						var regrabTime = (daNote.isRoll?0.5:0.25) * judgeManager.judgeTimescale;
 						if(isHeld)
 							daNote.tripTimer = 1;
 						else
@@ -388,7 +393,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 				if((
 					(daNote.holdingTime>=daNote.sustainLength || daNote.unhitTail.length==0 ) && daNote.sustainLength>0 ||
 					daNote.isSustainNote && daNote.strumTime - Conductor.songPosition < -350 ||
-					!daNote.isSustainNote && (daNote.sustainLength==0 || daNote.tooLate) && daNote.strumTime - Conductor.songPosition < -(200 + daNote.hitbox)) && (daNote.tooLate || daNote.wasGoodHit))
+					!daNote.isSustainNote && (daNote.sustainLength==0 || daNote.tooLate) && daNote.strumTime - Conductor.songPosition < -(200 + judgeManager.getWindow(TIER1))) && (daNote.tooLate || daNote.wasGoodHit))
 				{
 					garbage.push(daNote);
 				}
@@ -404,15 +409,19 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		{
 			for(i in 0...4){
 				for (daNote in getNotes(i, (note:Note) -> !note.ignoreNote && !note.hitCausesMiss)){
-					if (daNote.isSustainNote)
+/* 					if (daNote.isSustainNote)
 					{
 						if (daNote.canBeHit)
 							noteHitCallback(daNote, this);
 					}
-					else
-					{
-						if ((daNote.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset) <= (5 * Wife3.timeScale))
+					else */
+					if (!daNote.isSustainNote){
+						var hitDiff = daNote.strumTime - Conductor.songPosition;
+						if ((hitDiff + ClientPrefs.ratingOffset) <= (5 * Wife3.timeScale)){
+							daNote.hitResult.judgment = judgeManager.useEpics ? TIER5 : TIER4;
+							daNote.hitResult.hitDiff = (hitDiff < -5) ? -5 : hitDiff; 
 							noteHitCallback(daNote, this);
+						}
 					}
 					
 				}
@@ -425,7 +434,22 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		var collected:Array<Note> = [];
 		for (note in spawnedNotes)
 		{
-			if (note.alive && note.noteData == dir && !note.wasGoodHit && !note.tooLate && note.canBeHit)
+			if (note.alive && note.noteData == dir && !note.wasGoodHit && !note.tooLate)
+			{
+				if (filter == null || filter(note))
+					collected.push(note);
+			}
+		}
+		return collected;
+	}
+
+	public function getNotesWithEnd(dir:Int, end:Float, ?filter:Note->Bool):Array<Note>
+	{
+		var collected:Array<Note> = [];
+		for (note in spawnedNotes)
+		{
+			if (note.strumTime>end)break;
+			if (note.alive && note.noteData == dir && !note.wasGoodHit && !note.tooLate)
 			{
 				if (filter == null || filter(note))
 					collected.push(note);
@@ -439,12 +463,6 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.strumTime, Obj2.strumTime);
 	}
 
-	public function getTapNotes(dir:Int):Array<Note>
-		return getNotes(dir, (note:Note) -> !note.isSustainNote);
-
-	public function getHoldNotes(dir:Int):Array<Note>
-		return getNotes(dir, (note:Note) -> note.isSustainNote);
-	
 	public function forEachQueuedNote(callback:Note->Void)
 	{
 		for(column in noteQueue){
