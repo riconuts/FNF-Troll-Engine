@@ -3335,7 +3335,7 @@ class PlayState extends MusicBeatState
 				hud.judgeColours.get("epic");
 			case 'AFC':
 				hud.judgeColours.get("sick");
-			case 'CFC':
+			case 'CFC'| "SDC":
 				hud.judgeColours.get("good");
 			default:
 				FlxColor.WHITE;
@@ -4588,7 +4588,8 @@ class PlayState extends MusicBeatState
 			if(comboBreaks <= 0){
 			if (judges.get("epic") > 0) ratingFC = "KFC";
 			if (judges.get("sick") > 0) ratingFC = "AFC";
-			if (judges.get("good") > 0) ratingFC = ClientPrefs.wife3 ? "FC" : "CFC";
+			if (judges.get("good") > 0 && judges.get("good") < 10) ratingFC = "SDC";
+			else if (judges.get("good") >= 10) ratingFC = "CFC";
 			if (judges.get("bad") > 0 || judges.get("shit") > 0) ratingFC = "FC";
 			}else{
 				if (comboBreaks < 10 && songScore >= 0) ratingFC = "SDCB";

@@ -278,13 +278,13 @@ class AdvancedHUD extends BaseHUD
 		scoreTxt.color = (songHighscore != 0 && score > songHighscore) ? 0xFFD800 : 0xFFFFFF;
 
 		ratingTxt.text = (grade != "?"?(Highscore.floorDecimal(ratingPercent * 100, 2) + "%"):"0%");
-		fcTxt.text = ratingFC;
+		fcTxt.text = (ratingFC=='CFC' && ClientPrefs.wife3)?"FC":ratingFC;
 		fcTxt.color = switch (ratingFC){
 			case 'KFC':
 				judgeColours.get("epic");
 			case 'AFC':	
 				judgeColours.get("sick");
-			case 'CFC':
+			case 'CFC' | 'SDC':
 				judgeColours.get("good");
 			case 'FC':
 				0xFFFFFFFF;
@@ -293,6 +293,7 @@ class AdvancedHUD extends BaseHUD
 			default:
 				0xFFA3A3A3;
 		}
+		
 
 		if (ClientPrefs.npsDisplay)
 			npsTxt.text = 'NPS: ${nps} (Peak: ${npsPeak})';
