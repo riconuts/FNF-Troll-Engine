@@ -139,7 +139,8 @@ class PsychHUD extends BaseHUD {
     override function update(elapsed:Float){
 		scoreTxt.text = (songHighscore != 0 && score > songHighscore ? 'Hi-score: ' : 'Score: ')
 			+ '$score | Combo Breaks: $comboBreaks | Rating: '
-			+ (grade != '?' ? Highscore.floorDecimal(ratingPercent * 100, 2) + '% / ${grade} [$ratingFC]' : grade);
+			+ (grade != '?' ? Highscore.floorDecimal(ratingPercent * 100, 2)
+				+ '% / ${grade} [${(ratingFC == 'CFC' && ClientPrefs.wife3) ? "FC" : ratingFC}]' : grade);
 		if (ClientPrefs.npsDisplay)
 			scoreTxt.text += ' | NPS: ${nps} / ${npsPeak}';
 
