@@ -1,5 +1,6 @@
 package gallery;
 
+import flixel.addons.display.FlxBackdrop;
 import flixel.util.FlxTimer;
 import flixel.system.FlxSound;
 import sys.FileSystem;
@@ -67,37 +68,12 @@ class JukeboxState extends MusicBeatState {
         persistentUpdate = true;
         persistentDraw = true;
 
-        // space background
-        // im pretty sure that flixel already has some pre written class specifically for this situation but i dont not care.
-        var bgTiles:Array<FlxSprite> = [];
-
-        var bg = new FlxSprite();
+        var bg = new FlxBackdrop();
         bg.frames = Paths.getSparrowAtlas("jukebox/space");
         bg.animation.addByPrefix("space", "space", 50, true);
         bg.animation.play("space");
-        bg.updateHitbox();
-
-        var fitsInX = Math.ceil(FlxG.width / bg.width);
-        var fitsInY = Math.ceil(FlxG.height / bg.height);
-
-        var xOffset = (bg.width * fitsInX - FlxG.width) * 0.5;
-        var yOffset = (bg.height * fitsInY - FlxG.height) * 0.5; 
-
-        for (iy in 0...fitsInY){
-            for (ix in 0...fitsInX){
-                var newTile = bg.clone();
-                newTile.x = bg.width * ix - xOffset;
-                newTile.y = bg.height * iy - yOffset;
-                add(newTile);
-
-                bgTiles.push(newTile);
-            }
-        }
-
-        for (tile in bgTiles)
-            tile.animation.play("space");
-
-        bg.destroy();
+        bg.screenCenter();
+        add(bg);
 
         if (FlxG.width > FlxG.height)
             add(new FlxSprite().makeGraphic(FlxG.height, FlxG.height, 0xFF000000).screenCenter(X));
@@ -208,6 +184,11 @@ class JukeboxState extends MusicBeatState {
         #end
     }
 
+    function goBack() {
+        FlxG.sound.play(Paths.sound('cancelMenu'));
+		MusicBeatState.switchState(new GalleryMenuState());
+    }
+
     override function update(elapsed:Float){
         super.update(elapsed);
 
@@ -225,10 +206,8 @@ class JukeboxState extends MusicBeatState {
             mute.animation.play(muteVocals ? "unmute" : "mute", true);
         }
 
-		if (controls.BACK){
-			FlxG.autoPause = true;
-			MusicBeatState.switchState(new GalleryMenuState());
-        }
+		if (controls.BACK)
+            goBack();
 
 		if (forward)
             changeSong(idx+1);

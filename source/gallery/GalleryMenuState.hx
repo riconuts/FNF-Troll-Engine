@@ -39,6 +39,7 @@ class GalleryMenuState extends MusicBeatState
 	var selectedSomethin:Bool = false;
 
 	function goBack(){
+		FlxG.sound.play(Paths.sound('cancelMenu'));
 		MusicBeatState.switchState(new MainMenuState());
     }
 

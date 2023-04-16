@@ -201,7 +201,8 @@ class TestState extends MusicBeatState{
 				logoBl.scrollFactor.set();
 				logoBl.screenCenter(XY);
 				group.add(logoBl);
-			}
+			}else
+				logoBl.time = 0;
 
 			// Stage Update 
 			var newStageName = stageNames[Std.int(bgStepper.value)];
