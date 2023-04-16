@@ -3,6 +3,8 @@ package;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.system.FlxSound;
 import flixel.addons.ui.FlxUIState;
+import flash.ui.Mouse;
+import flash.ui.MouseCursor;
 
 class MusicBeatState extends FlxUIState
 {
@@ -117,6 +119,7 @@ class MusicBeatState extends FlxUIState
 	public static function switchState(nextState:FlxState)
 	{
 		FlxG.mouse.visible = false;
+		Mouse.cursor = MouseCursor.AUTO;
 		FlxG.autoPause = false;
 		FlxG.switchState(nextState); // just because im too lazy to goto every instance of switchState and change it to a FlxG call
 	}

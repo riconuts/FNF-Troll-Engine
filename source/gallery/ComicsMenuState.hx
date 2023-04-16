@@ -151,6 +151,7 @@ class ComicsMenuState extends MusicBeatState
 
 	function goBack(){
 		cleanupData();
+		FlxG.sound.play(Paths.sound('cancelMenu'));
 		MusicBeatState.switchState(new GalleryMenuState());
 	}
 

@@ -184,6 +184,11 @@ class JukeboxState extends MusicBeatState {
         #end
     }
 
+    function goBack() {
+        FlxG.sound.play(Paths.sound('cancelMenu'));
+		MusicBeatState.switchState(new GalleryMenuState());
+    }
+
     override function update(elapsed:Float){
         super.update(elapsed);
 
@@ -201,10 +206,8 @@ class JukeboxState extends MusicBeatState {
             mute.animation.play(muteVocals ? "unmute" : "mute", true);
         }
 
-		if (controls.BACK){
-			FlxG.autoPause = true;
-			MusicBeatState.switchState(new GalleryMenuState());
-        }
+		if (controls.BACK)
+            goBack();
 
 		if (forward)
             changeSong(idx+1);
