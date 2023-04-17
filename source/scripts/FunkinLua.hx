@@ -1430,7 +1430,50 @@ class FunkinLua extends FunkinScript
 				}
 			}
 		});
+		Lua_helper.add_callback(lua, "playAnim", function(obj:String, name:String, forced:Bool = false, ?reverse:Bool = false, ?startFrame:Int = 0)
+		{
+			if(PlayState.instance.getLuaObject(obj, false) != null) {
+				var luaObj:FlxSprite = PlayState.instance.getLuaObject(obj,false);
+				if(luaObj.animation.getByName(name) != null)
+				{
+					luaObj.animation.play(name, forced, reverse, startFrame);
+					if(Std.isOfType(luaObj, ModchartSprite))
+					{
+						//convert luaObj to ModchartSprite
+						var obj:Dynamic = luaObj;
+						var luaObj:ModchartSprite = obj;
+
+						/*
+						var daOffset = luaObj.animOffsets.get(name);
+						if (luaObj.animOffsets.exists(name))
+						{
+							luaObj.offset.set(daOffset[0], daOffset[1]);
+						}*/
+					}
+				}
+				return true;
+			}
+
+			var spr:FlxSprite = Reflect.getProperty(getInstance(), obj);
+			if(spr != null) {
+				if(spr.animation.getByName(name) != null)
+				{
+					if(Std.isOfType(spr, Character))
+					{
+						//convert spr to Character
+						var obj:Dynamic = spr;
+						var spr:Character = obj;
+						spr.playAnim(name, forced, reverse, startFrame);
+					}
+					else
+						spr.animation.play(name, forced, reverse, startFrame);
+				}
+				return true;
+			}
+			return false;
+		});
 		Lua_helper.add_callback(lua, "objectPlayAnimation", function(obj:String, name:String, forced:Bool = false, ?startFrame:Int = 0) {
+			luaTrace("objectPlayAnimation is deprecated! Use playAnim instead", false, true);
 			if(PlayState.instance.getLuaObject(obj,false)!=null) {
 				PlayState.instance.getLuaObject(obj,false).animation.play(name, forced, startFrame);
 				return;

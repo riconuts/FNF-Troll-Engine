@@ -2863,15 +2863,16 @@ class PlayState extends MusicBeatState
 				var val1:Float = Std.parseFloat(value1);
 				var val2:Float = Std.parseFloat(value2);
 
-				if(Math.isNaN(val1)) val1 = 0;
-				if(Math.isNaN(val2)) val2 = 0;
+				var isNan1 = Math.isNaN(val1);
+				var isNan2 = Math.isNaN(val2);
 
-				if(!Math.isNaN(Std.parseFloat(value1)) || !Math.isNaN(Std.parseFloat(value2))) {
-					customCamera.x = val1;
-					customCamera.y = val2;
-					addCameraPoint(customCamera);
-				}else
+				if (isNan1 && isNan2) 
 					cameraPoints.remove(customCamera);
+				else{
+					if (!isNan1) customCamera.x = val1;
+					if (!isNan2) customCamera.y = val2;
+					addCameraPoint(customCamera);
+				}
 
 			case 'Alt Idle Animation':
 				var char:Character = dad;
