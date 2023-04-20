@@ -89,10 +89,11 @@ class PauseSubState extends MusicBeatSubstate
 		}
 
 		if (metadata != null){
-			var shartCredit = "Charted by " + metadata.charter;
-			if(metadata.modcharter!=null)
-				shartCredit += "\nModcharted by " + metadata.modcharter;
-			songInfo.push(shartCredit);
+			if(metadata.charter != null)
+				songInfo.push("Charted by " + metadata.charter);
+
+			if(metadata.modcharter != null)
+				songInfo.push("Modcharted by " + metadata.modcharter);
 		}
 
 		if (PlayState.SONG != null && PlayState.SONG.info != null)
@@ -103,7 +104,6 @@ class PauseSubState extends MusicBeatSubstate
 			for(extraInfo in metadata.extraInfo)
 				songInfo.push(extraInfo);
 		}
-		
 		
 		// removed the practice clause cus its just nice to have the counter lol
 		songInfo.push("Failed: " + PlayState.deathCounter); // i'd say blueballed but not every character blueballs + you straight up die in die batsards
