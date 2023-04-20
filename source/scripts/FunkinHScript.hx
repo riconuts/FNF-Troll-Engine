@@ -8,7 +8,7 @@ import flixel.FlxG;
 import flixel.tweens.*;
 import flixel.math.FlxMath;
 
-import lime.utils.Assets;
+import openfl.utils.Assets;
 import lime.app.Application;
 
 import hscript.*;
@@ -90,44 +90,11 @@ class FunkinHScript extends FunkinScript
 
 		set("newMap", () -> {return new Map<Dynamic, Dynamic>();});
 
-		// These are kinda the same
 		set("Assets", Assets);
-		set("OpenFlAssets", openfl.utils.Assets);
 
 		set("FlxG", flixel.FlxG);
-		set("state", flixel.FlxG.state);
 		set("FlxSprite", flixel.FlxSprite);
 		set("FlxCamera", flixel.FlxCamera);
-		set("Wife3", PlayState.Wife3);
-		set("Judgment", {
-			UNJUDGED: Judgment.UNJUDGED,
-			TIER1: Judgment.TIER1,
-			TIER2: Judgment.TIER2,
-			TIER3: Judgment.TIER3,
-			TIER4: Judgment.TIER4,
-			TIER5: Judgment.TIER5,
-			MISS: Judgment.MISS,
-			DAMAGELESS_MISS: Judgment.DAMAGELESS_MISS,
-			HIT_MINE: Judgment.HIT_MINE,
-			MISS_MINE: Judgment.MISS_MINE,
-			CUSTOM_MINE: Judgment.CUSTOM_MINE
-		});
-		
-		set("newShader", function(fragFile:String = null, vertFile:String = null){ // returns a FlxRuntimeShader but with file names lol
-			var runtime:FlxRuntimeShader = null;
-
-			try{				
-				runtime = new FlxRuntimeShader(
-					fragFile==null ? null : Paths.getContent(Paths.modsShaderFragment(fragFile)), 
-					vertFile==null ? null : Paths.getContent(Paths.modsShaderVertex(vertFile))
-				);
-			}catch(e:Dynamic){
-				trace("Shader compilation error:" + e.message);
-			}
-
-			return runtime==null ? new FlxRuntimeShader() : runtime;
-		});
-
 		set("FlxMath", flixel.math.FlxMath);
 		set("FlxSound", flixel.system.FlxSound);
 		set("FlxTimer", flixel.util.FlxTimer);
@@ -159,29 +126,29 @@ class FunkinHScript extends FunkinScript
 			fromString: FlxColor.fromString,
 			fromRGB: FlxColor.fromRGB
 		});
-		set("FlxRuntimeShader", FlxRuntimeShader);
 		set("FlxTween", FlxTween);
 		set("FlxEase", FlxEase);
 		set("FlxSave", flixel.util.FlxSave); // should probably give it 1 save instead of giving it FlxSave
 		set("FlxBar", flixel.ui.FlxBar);
 
+		set("FlxRuntimeShader", FlxRuntimeShader);
+		set("newShader", function(fragFile:String = null, vertFile:String = null){ // returns a FlxRuntimeShader but with file names lol
+			var runtime:FlxRuntimeShader = null;
+
+			try{				
+				runtime = new FlxRuntimeShader(
+					fragFile==null ? null : Paths.getContent(Paths.modsShaderFragment(fragFile)), 
+					vertFile==null ? null : Paths.getContent(Paths.modsShaderVertex(vertFile))
+				);
+			}catch(e:Dynamic){
+				trace("Shader compilation error:" + e.message);
+			}
+
+			return runtime==null ? new FlxRuntimeShader() : runtime;
+		});
+
 		set("getClass", Type.resolveClass);
 		set("getEnum", Type.resolveEnum);
-		@:privateAccess
-		{
-			if(FlxG.state == PlayState.instance){
-				var state:PlayState = PlayState.instance;
-				set("initPlayfield", state.initPlayfield);
-				set("newPlayField", function(){
-					var field = new PlayField(state.modManager);
-					field.modNumber = state.playfields.members.length;
-					field.cameras = state.playfields.cameras;
-					state.initPlayfield(field);
-					state.playfields.add(field);
-					return field;
-				});
-			}
-		}
 		set("importClass", function(className:String)
 		{
 			// importClass("flixel.util.FlxSort") should give you FlxSort.byValues, etc
@@ -211,6 +178,7 @@ class FunkinHScript extends FunkinScript
 				set(daClassName, daClass);
 			}
 		});
+		// psyche
 		set("addHaxeLibrary", function(libName:String, ?libPackage:String = ''){
 			try{
 				var str:String = '';
@@ -239,24 +207,52 @@ class FunkinHScript extends FunkinScript
 			set(variable, arg);
 		}
 
-		// Util
+		/*
 		set("makeSprite", function(?x:Float, ?y:Float, ?image:String)
 		{
-			var spr = new FlxSprite(x, y);
-			spr.antialiasing = ClientPrefs.globalAntialiasing;
-
-			return image == null ? spr : spr.loadGraphic(Paths.image(image));
+			return new FlxSprite(x, y, image==null ? null : Paths.image(image));
 		});
 		set("makeAnimatedSprite", function(?x:Float, ?y:Float, ?image:String, ?spriteType:String){
 			var spr = new FlxSprite(x, y);
-			spr.antialiasing = ClientPrefs.globalAntialiasing;
 
 			if(image != null && image.length > 0)
 				spr.frames = Paths.getSparrowAtlas(image);
-			
 
 			return spr;
 		});
+		*/
+
+		@:privateAccess
+		{
+			var state:Any = flixel.FlxG.state;
+			set("state", flixel.FlxG.state);
+
+			if(state is PlayState && state == PlayState.instance)
+			{
+				var state:PlayState = PlayState.instance;
+
+				set("game", state);
+				set("global", state.variables);
+				set("getInstance", getInstance);
+
+				set("initPlayfield", state.initPlayfield);
+				set("newPlayField", function(){
+					var field = new PlayField(state.modManager);
+					field.modNumber = state.playfields.members.length;
+					field.cameras = state.playfields.cameras;
+					state.initPlayfield(field);
+					state.playfields.add(field);
+					return field;
+				});
+
+			}else{
+				set("game", null);
+				set("global", null);
+				set("getInstance", function(){
+					return flixel.FlxG.state;
+				});
+			}
+		}
 
 		// FNF-specific things
 		set("NoteObject", NoteObject);
@@ -276,6 +272,21 @@ class FunkinHScript extends FunkinScript
 		set("CoolUtil", CoolUtil);
 		set("Character", Character);
 		set("Boyfriend", Boyfriend);
+
+		set("Wife3", PlayState.Wife3);
+		set("Judgment", {
+			UNJUDGED: Judgment.UNJUDGED,
+			TIER1: Judgment.TIER1,
+			TIER2: Judgment.TIER2,
+			TIER3: Judgment.TIER3,
+			TIER4: Judgment.TIER4,
+			TIER5: Judgment.TIER5,
+			MISS: Judgment.MISS,
+			DAMAGELESS_MISS: Judgment.DAMAGELESS_MISS,
+			HIT_MINE: Judgment.HIT_MINE,
+			MISS_MINE: Judgment.MISS_MINE,
+			CUSTOM_MINE: Judgment.CUSTOM_MINE
+		});
 
 		set("HScriptModifier", modchart.HScriptModifier);
 		set("SubModifier", modchart.SubModifier);
@@ -299,21 +310,6 @@ class FunkinHScript extends FunkinScript
 		set("HScriptSubstate", HScriptSubstate);
 		set("GameOverSubstate", GameOverSubstate);
 		set("HealthIcon", HealthIcon);
-		var currentState = flixel.FlxG.state;
-
-		if ((currentState is PlayState)){
-			var state:PlayState = cast currentState;
-
-			set("game", currentState);
-			set("global", state.variables);
-			set("getInstance", function(){
-				return getInstance();
-			});
-		}else{
-			set("getInstance", function(){
-				return flixel.FlxG.state;
-			});
-		}
 
 		if (additionalVars != null){
 			for (key in additionalVars.keys())
@@ -334,7 +330,7 @@ class FunkinHScript extends FunkinScript
 		interpreter = null;
 	}
 
-	override public function get(varName:String): Dynamic
+	override public function get(varName:String):Dynamic
 	{
 		if (interpreter == null)
 			return null;
@@ -361,9 +357,8 @@ class FunkinHScript extends FunkinScript
 	override public function call(func:String, ?parameters:Array<Dynamic>, ?extraVars:Map<String,Dynamic>):Dynamic
 	{
 		var returnValue:Dynamic = executeFunc(func, parameters, null, extraVars);
-		if (returnValue == null) return Function_Continue;
 
-		return returnValue;
+		return returnValue==null ? Function_Continue : returnValue;
 	}
 
 	/**
@@ -405,7 +400,6 @@ class FunkinHScript extends FunkinScript
 	}
 }
 
-#if !macro
 class HScriptSubstate extends MusicBeatSubstate
 {
 	public var script:FunkinHScript;
@@ -474,4 +468,3 @@ class HScriptSubstate extends MusicBeatSubstate
 		return super.destroy();
 	}
 }
-#end

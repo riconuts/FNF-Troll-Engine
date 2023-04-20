@@ -826,7 +826,7 @@ class PlayState extends MusicBeatState
 		stage.buildStage();
 		if (stage.stageScript != null){
 			#if LUA_ALLOWED
-			if (stage.stageScript.scriptType == "lua")
+			if (stage.stageScript is FunkinLua)
 				luaArray.push(cast stage.stageScript);
 			else
 			#end
@@ -837,6 +837,7 @@ class PlayState extends MusicBeatState
 
 		callOnScripts("preCharacters");
 		//// Characters
+
 		var gfVersion:String = SONG.gfVersion;
 		if(gfVersion == null || gfVersion.length < 1){
 			/* gfVersion = 'gf';
@@ -920,7 +921,6 @@ class PlayState extends MusicBeatState
 		playfields.add(dadField);
 		playfields.add(playerField);
 
-
 		for(field in playfields)
 			initPlayfield(field);
 		callOnScripts("postPlayfieldCreation");
@@ -939,12 +939,16 @@ class PlayState extends MusicBeatState
 		hud.songName = SONG.song;
 		hud.alpha = ClientPrefs.hudOpacity;
 		
+		/* This appears above the strumlines despite being added before them?
+		var sowy = new FlxSprite().makeGraphic(300, 300);
+		sowy.cameras = [camHUD];
+		add(sowy);
+		*/
 		add(hud);
 
 		add(strumLineNotes);
 		add(playfields);
 		add(grpNoteSplashes);
-
 
 		//
 		lastJudge = RatingSprite.newRating();

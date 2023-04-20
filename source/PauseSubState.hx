@@ -113,7 +113,7 @@ class PauseSubState extends MusicBeatSubstate
 		var prevText:FlxText = null;
 
 		for (daText in songInfo){
-			prevText = new FlxText(20, prevText == null ? 15 : (prevText.y + prevText.height + 2), 0, daText, 32);
+			prevText = new FlxText(20, prevText == null ? 15 : (prevText.y + 36), 0, daText, 32);
 			prevText.setFormat(Paths.font('vcr.ttf'), 32, 0xFFFFFFFF, RIGHT);
 			prevText.scrollFactor.set();
 			prevText.updateHitbox();

@@ -509,7 +509,7 @@ class SongChartSelec extends MusicBeatState
 
 		if (controls.ACCEPT){
 			var daDiff = alters[curSel];
-			FreeplayState.playSong(songMeta, daDiff == "normal" ? "" : daDiff);
+			FreeplayState.playSong(songMeta, daDiff == "normal" ? null : daDiff);
 		}
 
 		super.update(e);

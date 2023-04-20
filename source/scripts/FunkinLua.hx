@@ -1497,39 +1497,35 @@ class FunkinLua extends FunkinScript
 			}
 		});
 		Lua_helper.add_callback(lua, "addLuaSprite", function(tag:String, front:Bool = false) {
-			if(PlayState.instance.modchartSprites.exists(tag)) {
-				var shit:ModchartSprite = PlayState.instance.modchartSprites.get(tag);
-				if(!shit.wasAdded){
-					var stage = PlayState.instance.stage;
-					if(front)
-					{
-						(stage != null ? stage.foreground : getInstance()).add(shit);
-					}
-					else
-					{
-						if(PlayState.instance.isDead)
-						{
-							GameOverSubstate.instance.insert(GameOverSubstate.instance.members.indexOf(GameOverSubstate.instance.boyfriend), shit);
-						}
-						else
-						{	
-							if (stage != null){
-								stage.add(shit);
-							}else{
-								var position:Int = PlayState.instance.members.indexOf(PlayState.instance.gfGroup);
-								if(PlayState.instance.members.indexOf(PlayState.instance.boyfriendGroup) < position) {
-									position = PlayState.instance.members.indexOf(PlayState.instance.boyfriendGroup);
-								} else if(PlayState.instance.members.indexOf(PlayState.instance.dadGroup) < position) {
-									position = PlayState.instance.members.indexOf(PlayState.instance.dadGroup);
-								}
+			if (PlayState.instance == null || !PlayState.instance.modchartSprites.exists(tag))
+				return;
 
-								PlayState.instance.insert(position, shit);
-							}
-						}
-					}
-					shit.wasAdded = true;
-				}
+			var spr:ModchartSprite = PlayState.instance.modchartSprites.get(tag);
+			if(spr.wasAdded)
+				return;
+
+			var instance:FlxState = getInstance();
+
+			if (front){
+				instance.add(spr);			
+			}else if (instance is GameOverSubstate){
+				var instance:GameOverSubstate = cast instance; // fucking haxe
+				instance.insert(instance.members.indexOf(instance.boyfriend), spr);
+			}else if (instance is PlayState){
+				var instance:PlayState = cast instance; // fucking haxe
+				
+				var position:Int = instance.members.indexOf(instance.gfGroup);
+				position = FlxMath.minInt(position, instance.members.indexOf(instance.boyfriendGroup));
+				position = FlxMath.minInt(position, instance.members.indexOf(instance.dadGroup));
+
+				trace('bof: $position, $tag');
+
+				instance.insert(position, spr);
+			}else{
+				instance.add(spr);
 			}
+			
+			spr.wasAdded = true;	
 		});
 		Lua_helper.add_callback(lua, "setGraphicSize", function(obj:String, x:Int, y:Int = 0, updateHitbox:Bool = true) {
 			if(PlayState.instance.getLuaObject(obj)!=null) {
@@ -2533,9 +2529,8 @@ class FunkinLua extends FunkinScript
 					
 					if(errorHandler != null)
 						errorHandler(err);
-					#if sys else
-						Sys.println(err);
-					#end
+					else
+						haxe.Log.trace(err, {fileName: scriptName, lineNumber: -1, methodName: func, customParams: args, className: ""});		
 					
 					//LuaL.error(state,err);
 				}else{
