@@ -140,7 +140,7 @@ class JukeboxState extends MusicBeatState {
 		mute = new FlxSprite(0 , 560).loadGraphic(Paths.image("jukebox/controls"), true, 60, 60);
 		mute.animation.add("mute", [3], 0, true);
 		mute.animation.add("unmute", [4], 0, true);
-		mute.animation.play("mute", true);
+		mute.animation.play(muteVocals ? "unmute" : "mute", true);
         
         play.screenCenter(X);
         forw.screenCenter(X);
