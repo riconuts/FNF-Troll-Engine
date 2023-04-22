@@ -1430,7 +1430,50 @@ class FunkinLua extends FunkinScript
 				}
 			}
 		});
+		Lua_helper.add_callback(lua, "playAnim", function(obj:String, name:String, forced:Bool = false, ?reverse:Bool = false, ?startFrame:Int = 0)
+		{
+			if(PlayState.instance.getLuaObject(obj, false) != null) {
+				var luaObj:FlxSprite = PlayState.instance.getLuaObject(obj,false);
+				if(luaObj.animation.getByName(name) != null)
+				{
+					luaObj.animation.play(name, forced, reverse, startFrame);
+					if(Std.isOfType(luaObj, ModchartSprite))
+					{
+						//convert luaObj to ModchartSprite
+						var obj:Dynamic = luaObj;
+						var luaObj:ModchartSprite = obj;
+
+						/*
+						var daOffset = luaObj.animOffsets.get(name);
+						if (luaObj.animOffsets.exists(name))
+						{
+							luaObj.offset.set(daOffset[0], daOffset[1]);
+						}*/
+					}
+				}
+				return true;
+			}
+
+			var spr:FlxSprite = Reflect.getProperty(getInstance(), obj);
+			if(spr != null) {
+				if(spr.animation.getByName(name) != null)
+				{
+					if(Std.isOfType(spr, Character))
+					{
+						//convert spr to Character
+						var obj:Dynamic = spr;
+						var spr:Character = obj;
+						spr.playAnim(name, forced, reverse, startFrame);
+					}
+					else
+						spr.animation.play(name, forced, reverse, startFrame);
+				}
+				return true;
+			}
+			return false;
+		});
 		Lua_helper.add_callback(lua, "objectPlayAnimation", function(obj:String, name:String, forced:Bool = false, ?startFrame:Int = 0) {
+			luaTrace("objectPlayAnimation is deprecated! Use playAnim instead", false, true);
 			if(PlayState.instance.getLuaObject(obj,false)!=null) {
 				PlayState.instance.getLuaObject(obj,false).animation.play(name, forced, startFrame);
 				return;
@@ -1454,39 +1497,33 @@ class FunkinLua extends FunkinScript
 			}
 		});
 		Lua_helper.add_callback(lua, "addLuaSprite", function(tag:String, front:Bool = false) {
-			if(PlayState.instance.modchartSprites.exists(tag)) {
-				var shit:ModchartSprite = PlayState.instance.modchartSprites.get(tag);
-				if(!shit.wasAdded){
-					var stage = PlayState.instance.stage;
-					if(front)
-					{
-						(stage != null ? stage.foreground : getInstance()).add(shit);
-					}
-					else
-					{
-						if(PlayState.instance.isDead)
-						{
-							GameOverSubstate.instance.insert(GameOverSubstate.instance.members.indexOf(GameOverSubstate.instance.boyfriend), shit);
-						}
-						else
-						{	
-							if (stage != null){
-								stage.add(shit);
-							}else{
-								var position:Int = PlayState.instance.members.indexOf(PlayState.instance.gfGroup);
-								if(PlayState.instance.members.indexOf(PlayState.instance.boyfriendGroup) < position) {
-									position = PlayState.instance.members.indexOf(PlayState.instance.boyfriendGroup);
-								} else if(PlayState.instance.members.indexOf(PlayState.instance.dadGroup) < position) {
-									position = PlayState.instance.members.indexOf(PlayState.instance.dadGroup);
-								}
+			if (PlayState.instance == null || !PlayState.instance.modchartSprites.exists(tag))
+				return;
 
-								PlayState.instance.insert(position, shit);
-							}
-						}
-					}
-					shit.wasAdded = true;
-				}
+			var spr:ModchartSprite = PlayState.instance.modchartSprites.get(tag);
+			if(spr.wasAdded)
+				return;
+
+			var instance:FlxState = getInstance();
+
+			if (front){
+				instance.add(spr);			
+			}else if (instance is GameOverSubstate){
+				var instance:GameOverSubstate = cast instance; // fucking haxe
+				instance.insert(instance.members.indexOf(instance.boyfriend), spr);
+			}else if (instance is PlayState){
+				var instance:PlayState = cast instance; // fucking haxe
+				
+				var position:Int = instance.members.indexOf(instance.gfGroup);
+				position = FlxMath.minInt(position, instance.members.indexOf(instance.boyfriendGroup));
+				position = FlxMath.minInt(position, instance.members.indexOf(instance.dadGroup));
+
+				instance.insert(position, spr);
+			}else{
+				instance.add(spr);
 			}
+			
+			spr.wasAdded = true;	
 		});
 		Lua_helper.add_callback(lua, "setGraphicSize", function(obj:String, x:Int, y:Int = 0, updateHitbox:Bool = true) {
 			if(PlayState.instance.getLuaObject(obj)!=null) {
@@ -2491,7 +2528,7 @@ class FunkinLua extends FunkinScript
 					if(errorHandler != null)
 						errorHandler(err);
 					else
-						trace('$scriptName: ERROR: $err on function $func(${args.join(', ')})');
+						haxe.Log.trace(err, {fileName: scriptName, lineNumber: -1, methodName: func, customParams: args, className: ""});		
 					
 					//LuaL.error(state,err);
 				}else{
@@ -2505,14 +2542,14 @@ class FunkinLua extends FunkinScript
 				}
 			}else{
 				Lua.pop(lua, 1);
-			return Function_Continue;
+				return Function_Continue;
 			}
 		}catch(e:Dynamic){
 			trace(e);
 		}
 		#end
-		return Function_Continue;
 
+		return Function_Continue;
 	}
 
 	public static function getPropertyLoopThingWhatever(killMe:Array<String>, ?checkForTextsToo:Bool = true, ?getProperty:Bool=true):Dynamic
@@ -2539,11 +2576,12 @@ class FunkinLua extends FunkinScript
 
 	#if LUA_ALLOWED
 	function resultIsAllowed(leLua:State, leResult:Null<Int>) { //Makes it ignore warnings
-		switch(Lua.type(leLua, leResult)) {
-			case Lua.LUA_TNIL | Lua.LUA_TBOOLEAN | Lua.LUA_TNUMBER | Lua.LUA_TSTRING | Lua.LUA_TTABLE:
-				return true;
+		return switch(Lua.type(leLua, leResult)) {
+			case Lua.LUA_TNIL | Lua.LUA_TBOOLEAN | Lua.LUA_TNUMBER | Lua.LUA_TSTRING | Lua.LUA_TTABLE :
+				true;
+			default:
+				false;
 		}
-		return false;
 	}
 	#end
 

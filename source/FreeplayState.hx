@@ -179,14 +179,20 @@ class FreeplayState extends MusicBeatState
 					if (icon != null){
 						songButton.loadGraphic(icon);
 
-						if (songButton.width > songButton.height)
+						/*
+						if (songButton.width < songButton.height)
 							songButton.setGraphicSize(194, 0);
 						else
 							songButton.setGraphicSize(0, 194);
+						*/
+
+						songButton.scale.set(1,1);
+						songButton.clipRect = new FlxRect(0, 0, songButton.frameHeight, songButton.frameHeight);
+						songButton.updateHitbox();
 
 						songButton.offset.set(
-							-(194 - songButton.width) * 0.5,
-							-(194 - songButton.height) * 0.5
+							-(194 - songButton.frameHeight) * 0.5,
+							-(194 - songButton.frameHeight) * 0.5
 						);
 					}
 				}
@@ -503,7 +509,7 @@ class SongChartSelec extends MusicBeatState
 
 		if (controls.ACCEPT){
 			var daDiff = alters[curSel];
-			FreeplayState.playSong(songMeta, daDiff == "normal" ? "" : daDiff);
+			FreeplayState.playSong(songMeta, daDiff == "normal" ? null : daDiff);
 		}
 
 		super.update(e);

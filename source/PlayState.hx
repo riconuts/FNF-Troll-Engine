@@ -826,7 +826,7 @@ class PlayState extends MusicBeatState
 		stage.buildStage();
 		if (stage.stageScript != null){
 			#if LUA_ALLOWED
-			if (stage.stageScript.scriptType == "lua")
+			if (stage.stageScript is FunkinLua)
 				luaArray.push(cast stage.stageScript);
 			else
 			#end
@@ -837,6 +837,7 @@ class PlayState extends MusicBeatState
 
 		callOnScripts("preCharacters");
 		//// Characters
+
 		var gfVersion:String = SONG.gfVersion;
 		if(gfVersion == null || gfVersion.length < 1){
 			/* gfVersion = 'gf';
@@ -920,7 +921,6 @@ class PlayState extends MusicBeatState
 		playfields.add(dadField);
 		playfields.add(playerField);
 
-
 		for(field in playfields)
 			initPlayfield(field);
 		callOnScripts("postPlayfieldCreation");
@@ -939,12 +939,16 @@ class PlayState extends MusicBeatState
 		hud.songName = SONG.song;
 		hud.alpha = ClientPrefs.hudOpacity;
 		
+		/* This appears above the strumlines despite being added before them?
+		var sowy = new FlxSprite().makeGraphic(300, 300);
+		sowy.cameras = [camHUD];
+		add(sowy);
+		*/
 		add(hud);
 
 		add(strumLineNotes);
 		add(playfields);
 		add(grpNoteSplashes);
-
 
 		//
 		lastJudge = RatingSprite.newRating();
@@ -2863,15 +2867,16 @@ class PlayState extends MusicBeatState
 				var val1:Float = Std.parseFloat(value1);
 				var val2:Float = Std.parseFloat(value2);
 
-				if(Math.isNaN(val1)) val1 = 0;
-				if(Math.isNaN(val2)) val2 = 0;
+				var isNan1 = Math.isNaN(val1);
+				var isNan2 = Math.isNaN(val2);
 
-				if(!Math.isNaN(Std.parseFloat(value1)) || !Math.isNaN(Std.parseFloat(value2))) {
-					customCamera.x = val1;
-					customCamera.y = val2;
-					addCameraPoint(customCamera);
-				}else
+				if (isNan1 && isNan2) 
 					cameraPoints.remove(customCamera);
+				else{
+					if (!isNan1) customCamera.x = val1;
+					if (!isNan2) customCamera.y = val2;
+					addCameraPoint(customCamera);
+				}
 
 			case 'Alt Idle Animation':
 				var char:Character = dad;
@@ -4403,38 +4408,35 @@ class PlayState extends MusicBeatState
 	}
 
 	override function sectionHit(){
-		var curSection = SONG.notes[curSection];
-		if (curSection != null)
+		var sectionNumber = curSection;
+		var curSection = SONG.notes[sectionNumber];
+
+		if (curSection == null)
+			return;
+
+		if (curSection.changeBPM)
 		{
-			if (curSection.changeBPM)
-			{
-				Conductor.changeBPM(curSection.bpm);
-				// FlxG.log.add('CHANGED BPM!');
-				setOnScripts('curBpm', Conductor.bpm);
-				setOnScripts('crochet', Conductor.crochet);
-				setOnScripts('stepCrochet', Conductor.stepCrochet);
-			}
+			Conductor.changeBPM(curSection.bpm);
 			
-			setOnHScripts("curSection", curSection);
-
-			setOnScripts('mustHitSection', curSection.mustHitSection == true);
-			setOnScripts('altAnim', curSection.altAnim == true);
-			setOnScripts('gfSection', curSection.gfSection  == true);
-
-			setOnScripts('sectionNumber', Math.floor(curStep / 16));
-
-			if (lastSection != Math.floor(curStep / 16))
-			{
-				lastSection = Math.floor(curStep / 16);
-				callOnHScripts("sectionChanged", [curSection]);
-				#if LUA_ALLOWED
-				callOnLuas("sectionChanged", [Math.floor(curStep / 16)]);
-				#end
-			}
+			setOnScripts('curBpm', Conductor.bpm);
+			setOnScripts('crochet', Conductor.crochet);
+			setOnScripts('stepCrochet', Conductor.stepCrochet);
 		}
-		// FlxG.log.add('change bpm' + SONG.notes[Std.int(curStep / 16)].changeBPM);
+		
+		setOnHScripts("curSection", curSection);
+		setOnScripts('sectionNumber', sectionNumber);
 
-		if (generatedMusic && curSection != null && !endingSong)
+		setOnScripts('mustHitSection', curSection.mustHitSection == true);
+		setOnScripts('altAnim', curSection.altAnim == true);
+		setOnScripts('gfSection', curSection.gfSection  == true);
+
+		if (lastSection != sectionNumber)
+		{
+			lastSection = sectionNumber;
+			callOnHScripts("onSectionHit");
+		}
+
+		if (generatedMusic && !endingSong)
 		{
 			moveCameraSection(curSection);
 		}
@@ -4505,7 +4507,7 @@ class PlayState extends MusicBeatState
 	}
 
 	#if hscript
-	public function callOnHScripts(event:String, args:Array<Dynamic>, ignoreStops = false, ?exclusions:Array<String>)
+	public function callOnHScripts(event:String, ?args:Array<Dynamic>, ignoreStops = false, ?exclusions:Array<String>)
 		return callOnScripts(event, args, ignoreStops, exclusions, hscriptArray);
 	
 	public function setOnHScripts(variable:String, arg:Dynamic)
@@ -4518,7 +4520,7 @@ class PlayState extends MusicBeatState
 	#end
 
 	#if LUA_ALLOWED
-	public function callOnLuas(event:String, args:Array<Dynamic>, ignoreStops = false, ?exclusions:Array<String>)
+	public function callOnLuas(event:String, ?args:Array<Dynamic>, ignoreStops = false, ?exclusions:Array<String>)
 		return callOnScripts(event, args, ignoreStops, exclusions, luaArray);
 	
 	public function setOnLuas(variable:String, arg:Dynamic)

@@ -81,29 +81,34 @@ class PauseSubState extends MusicBeatSubstate
 		var songInfo:Array<String> = [];
 		var metadata = PlayState.instance.metadata;
 
+		function pushInfo(str:String) {
+			for (string in str.split('\n'))
+				songInfo.push(string);
+		}
+
 		if (PlayState.SONG != null && PlayState.SONG.song != null){
 			var songCredit = PlayState.SONG.song;
-			if (metadata!=null)
+			if (metadata != null)
 				songCredit += " - " + metadata.artist;
-			songInfo.push(songCredit);
+			pushInfo(songCredit);
 		}
 
 		if (metadata != null){
-			var shartCredit = "Charted by " + metadata.charter;
-			if(metadata.modcharter!=null)
-				shartCredit += "\nModcharted by " + metadata.modcharter;
-			songInfo.push(shartCredit);
+			if(metadata.charter != null)
+				pushInfo("Charted by " + metadata.charter);
+
+			if(metadata.modcharter != null)
+				pushInfo("Modcharted by " + metadata.modcharter);
 		}
 
 		if (PlayState.SONG != null && PlayState.SONG.info != null)
 			for (extraInfo in PlayState.SONG.info)
-				songInfo.push(extraInfo);
+				pushInfo(extraInfo);
 		
 		if (metadata != null && metadata.extraInfo!=null){
 			for(extraInfo in metadata.extraInfo)
-				songInfo.push(extraInfo);
+				pushInfo(extraInfo);
 		}
-		
 		
 		// removed the practice clause cus its just nice to have the counter lol
 		songInfo.push("Failed: " + PlayState.deathCounter); // i'd say blueballed but not every character blueballs + you straight up die in die batsards
@@ -113,7 +118,7 @@ class PauseSubState extends MusicBeatSubstate
 		var prevText:FlxText = null;
 
 		for (daText in songInfo){
-			prevText = new FlxText(20, prevText == null ? 15 : (prevText.y + prevText.height + 2), 0, daText, 32);
+			prevText = new FlxText(20, prevText == null ? 15 : (prevText.y + 36), 0, daText, 32);
 			prevText.setFormat(Paths.font('vcr.ttf'), 32, 0xFFFFFFFF, RIGHT);
 			prevText.scrollFactor.set();
 			prevText.updateHitbox();

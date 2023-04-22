@@ -48,6 +48,24 @@ typedef RenderObject = {
 typedef NoteCallback = (Note, PlayField) -> Void;
 class PlayField extends FlxTypedGroup<FlxBasic>
 {
+	override function set_camera(to){
+		for (strumLine in strumNotes)
+			strumLine.camera = to;
+		
+		noteField.camera = to;
+
+		return super.set_camera(to);
+	}
+
+	override function set_cameras(to){
+		for (strumLine in strumNotes)
+			strumLine.cameras = to;
+		
+		noteField.cameras = to;
+
+		return super.set_cameras(to);
+	}
+
 	public var judgeManager(get, default):JudgmentManager;
 	function get_judgeManager()
 		return judgeManager == null ? PlayState.instance.judgeManager : judgeManager;
@@ -223,6 +241,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 			babyArrow.alpha = 0;
 			insert(0, babyArrow);
 			babyArrow.handleRendering = false; // NoteField handles rendering
+			babyArrow.cameras = cameras;
 			strumNotes.push(babyArrow);
 			babyArrow.postAddedToGroup();
 		}
