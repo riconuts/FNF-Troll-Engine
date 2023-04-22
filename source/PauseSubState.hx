@@ -81,28 +81,33 @@ class PauseSubState extends MusicBeatSubstate
 		var songInfo:Array<String> = [];
 		var metadata = PlayState.instance.metadata;
 
+		function pushInfo(str:String) {
+			for (string in str.split('\n'))
+				songInfo.push(string);
+		}
+
 		if (PlayState.SONG != null && PlayState.SONG.song != null){
 			var songCredit = PlayState.SONG.song;
-			if (metadata!=null)
+			if (metadata != null)
 				songCredit += " - " + metadata.artist;
-			songInfo.push(songCredit);
+			pushInfo(songCredit);
 		}
 
 		if (metadata != null){
 			if(metadata.charter != null)
-				songInfo.push("Charted by " + metadata.charter);
+				pushInfo("Charted by " + metadata.charter);
 
 			if(metadata.modcharter != null)
-				songInfo.push("Modcharted by " + metadata.modcharter);
+				pushInfo("Modcharted by " + metadata.modcharter);
 		}
 
 		if (PlayState.SONG != null && PlayState.SONG.info != null)
 			for (extraInfo in PlayState.SONG.info)
-				songInfo.push(extraInfo);
+				pushInfo(extraInfo);
 		
 		if (metadata != null && metadata.extraInfo!=null){
 			for(extraInfo in metadata.extraInfo)
-				songInfo.push(extraInfo);
+				pushInfo(extraInfo);
 		}
 		
 		// removed the practice clause cus its just nice to have the counter lol

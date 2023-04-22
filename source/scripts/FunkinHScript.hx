@@ -1,5 +1,6 @@
 package scripts;
 
+import flixel.math.FlxPoint;
 import JudgmentManager.Judgment;
 import flixel.addons.display.FlxRuntimeShader;
 
@@ -98,6 +99,12 @@ class FunkinHScript extends FunkinScript
 		set("FlxMath", flixel.math.FlxMath);
 		set("FlxSound", flixel.system.FlxSound);
 		set("FlxTimer", flixel.util.FlxTimer);
+		set("FlxTween", FlxTween);
+		set("FlxEase", FlxEase);
+		set("FlxSave", flixel.util.FlxSave); // should probably give it 1 save instead of giving it FlxSave
+		set("FlxBar", flixel.ui.FlxBar);
+
+		// FlxColor is an abstract so you can't pass it to hscript
 		set("FlxColor", {
 			// These aren't part of FlxColor but i thought they could be useful
 			// honestly we should replace source/flixel/FlxColor.hx or w/e with one with these funcs
@@ -126,10 +133,11 @@ class FunkinHScript extends FunkinScript
 			fromString: FlxColor.fromString,
 			fromRGB: FlxColor.fromRGB
 		});
-		set("FlxTween", FlxTween);
-		set("FlxEase", FlxEase);
-		set("FlxSave", flixel.util.FlxSave); // should probably give it 1 save instead of giving it FlxSave
-		set("FlxBar", flixel.ui.FlxBar);
+		// Same for FlxPoint
+		set("FlxPoint", {
+			get: FlxPoint.get, 
+			weak: FlxPoint.weak
+		});
 
 		set("FlxRuntimeShader", FlxRuntimeShader);
 		set("newShader", function(fragFile:String = null, vertFile:String = null){ // returns a FlxRuntimeShader but with file names lol
@@ -149,7 +157,7 @@ class FunkinHScript extends FunkinScript
 
 		set("getClass", Type.resolveClass);
 		set("getEnum", Type.resolveEnum);
-		set("importClass", function(className:String)
+		set("importClass", function(className:String, ?printImports:Bool)
 		{
 			// importClass("flixel.util.FlxSort") should give you FlxSort.byValues, etc
 			// whereas importClass("scripts.Globals.*") should give you Function_Stop, Function_Continue, etc
@@ -163,11 +171,13 @@ class FunkinHScript extends FunkinScript
 				while(classSplit.length > 0 && daClass==null){
 					daClassName = classSplit.pop();
 					daClass = Type.resolveClass(classSplit.join("."));
-					if(daClass!=null)break;
+					if(daClass!=null) break;
 				}
 				if(daClass!=null){
 					for(field in Reflect.fields(daClass)){
 						set(field, Reflect.field(daClass, field));
+						
+						if (printImports == true) trace('Imported: $field, $daClass');
 					}
 				}else{
 					FlxG.log.error('Could not import class ${daClass}');
@@ -176,19 +186,8 @@ class FunkinHScript extends FunkinScript
 			}else{
 				var daClass = Type.resolveClass(className);
 				set(daClassName, daClass);
-			}
-		});
-		// psyche
-		set("addHaxeLibrary", function(libName:String, ?libPackage:String = ''){
-			try{
-				var str:String = '';
-				if (libPackage.length > 0)
-					str = libPackage + '.';
 
-				set(libName, Type.resolveClass(str + libName));
-			}
-			catch (e:Dynamic){
-
+				if (printImports == true) trace('Imported: $daClassName, $daClass');
 			}
 		});
 
