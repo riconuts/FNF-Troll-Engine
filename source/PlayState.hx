@@ -4423,6 +4423,7 @@ class PlayState extends MusicBeatState
 			setOnScripts('stepCrochet', Conductor.stepCrochet);
 		}
 		
+		setOnLuas("curSection", sectionNumber);
 		setOnHScripts("curSection", curSection);
 		setOnScripts('sectionNumber', sectionNumber);
 
@@ -4753,9 +4754,12 @@ class FNFHealthBar extends FlxBar{
 	{
 		//
 		healthBarBG = new FlxSprite(0, FlxG.height * (ClientPrefs.downScroll ? 0.11 : 0.89));
-		healthBarBG.loadGraphic(Paths.image('healthBar'));
+		//healthBarBG.loadGraphic(Paths.image('healthBar'));
+		healthBarBG.makeGraphic(600, 18);
+		healthBarBG.color = 0xFF000000;
 		healthBarBG.screenCenter(X);
 		healthBarBG.scrollFactor.set();
+		healthBarBG.antialiasing = false;
 
 		//
 		iconP1 = new HealthIcon(bfHealthIcon, true);
@@ -4784,6 +4788,7 @@ class FNFHealthBar extends FlxBar{
 		);
 
 		//
+		antialiasing = false;
 		scrollFactor.set();
 		alpha = ClientPrefs.hpOpacity;
 		visible = alpha > 0;
