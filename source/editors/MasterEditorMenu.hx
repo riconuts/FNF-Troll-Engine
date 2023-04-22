@@ -28,6 +28,7 @@ class MasterEditorMenu extends MusicBeatState
 		'Character Editor',
 		'Chart Editor',
 		'Stage Editor',
+		'Stage Builder',
 		'Test Stage'
 	];
 	private var grpTexts:FlxTypedGroup<Alphabet>;
@@ -123,6 +124,8 @@ class MasterEditorMenu extends MusicBeatState
 					MusicBeatState.switchState(new StageEditorState());
 				case 'Chart Editor':
 					LoadingState.loadAndSwitchState(new ChartingState(), false);
+				case 'Stage Builder':
+					MusicBeatState.switchState(new StageBuilderState());
 				case "Test Stage":
 					MusicBeatState.switchState(new TestState());
 			}

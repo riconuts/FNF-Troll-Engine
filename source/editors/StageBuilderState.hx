@@ -308,6 +308,19 @@ class LayerWindow extends FlxTypedGroup<FlxBasic>
         selectLayer(layers.get(newObj));
     }
 
+    function cloneSelectedObj() {
+        if (curSelected == null)
+            return;
+
+        var pos = parent.objectArray.indexOf(curSelected.data);
+        var newObj:ObjectData = {name: curSelected.data.name};
+
+        parent.objectArray.insert(pos, newObj);
+        parent.updateObjects();
+
+        selectLayer(layers.get(newObj));     
+    }
+
     function destroySelectedObj(){
         if (curSelected == null)
             return;
@@ -391,7 +404,7 @@ class LayerWindow extends FlxTypedGroup<FlxBasic>
                     case 1: destroySelectedObj();
                     case 2: moveSelectedObj(1); // move UP
                     case 3: moveSelectedObj(-1); // move DOWN
-                    case 4: // cloneSelectedObj();
+                    case 4: cloneSelectedObj();
                     case 5: // modifySelectedObj();
                     default: trace(idx);
                 }
@@ -846,9 +859,9 @@ class StageBuilderState extends MusicBeatState
             var varName:String = "spr" + ++sprNum; //obj.name.replace('/', '_').replace("\\", '_').replace(" ", '_');
 
             script += '\n   var $varName = new FlxSprite(${obj.properties.x}, ${obj.properties.y}, Paths.image("${obj.name}"));';
-            script += '\n   $varName.scrollFactor.set(${obj.properties.scrollX}, ${obj.properties.scrollY})';
-            script += '\n   $varName.scale.set(${obj.properties.scaleX}, ${obj.properties.scaleY})';
-            script += '\n   $varName.updateHitbox()';
+            script += '\n   $varName.scrollFactor.set(${obj.properties.scrollX}, ${obj.properties.scrollY});';
+            script += '\n   $varName.scale.set(${obj.properties.scaleX}, ${obj.properties.scaleY});';
+            script += '\n   $varName.updateHitbox();';
             script += '\n   ${obj.onForeground ? "foreground.add" : "add"}(${varName});';
         }
 
@@ -957,8 +970,14 @@ class StageBuilderState extends MusicBeatState
                 realZoom+=0.05;
                 camGame.zoom = realZoom * zoomMult;
             }
+            if (justPressed.R){
+                realZoom = 1;
+                camGame.zoom = realZoom * zoomMult;
+            }
         }
         
+        if (controls.BACK)
+            MusicBeatState.switchState(new MasterEditorMenu());
 
         super.update(e);
     }

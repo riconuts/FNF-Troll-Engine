@@ -205,22 +205,7 @@ class FunkinHScript extends FunkinScript
 		for(variable => arg in defaultVars){
 			set(variable, arg);
 		}
-
-		/*
-		set("makeSprite", function(?x:Float, ?y:Float, ?image:String)
-		{
-			return new FlxSprite(x, y, image==null ? null : Paths.image(image));
-		});
-		set("makeAnimatedSprite", function(?x:Float, ?y:Float, ?image:String, ?spriteType:String){
-			var spr = new FlxSprite(x, y);
-
-			if(image != null && image.length > 0)
-				spr.frames = Paths.getSparrowAtlas(image);
-
-			return spr;
-		});
-		*/
-
+		
 		@:privateAccess
 		{
 			var state:Any = flixel.FlxG.state;
