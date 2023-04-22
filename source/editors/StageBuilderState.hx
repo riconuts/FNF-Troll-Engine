@@ -976,7 +976,7 @@ class StageBuilderState extends MusicBeatState
             }
         }
         
-        if (controls.BACK)
+        if (FlxG.keys.justPressed.ESCAPE)
             MusicBeatState.switchState(new MasterEditorMenu());
 
         super.update(e);

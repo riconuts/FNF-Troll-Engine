@@ -4433,7 +4433,7 @@ class PlayState extends MusicBeatState
 		if (lastSection != sectionNumber)
 		{
 			lastSection = sectionNumber;
-			callOnHScripts("onSectionHit");
+			callOnScripts("onSectionHit");
 		}
 
 		if (generatedMusic && !endingSong)
