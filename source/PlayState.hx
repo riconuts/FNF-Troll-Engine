@@ -1362,15 +1362,18 @@ class PlayState extends MusicBeatState
 		var swagCounter:Int = 0;
 		startTimer = new FlxTimer().start(Conductor.crochet * 0.001, function(tmr:FlxTimer)
 		{
-			if (gf != null && tmr.loopsLeft % Math.round(gfSpeed * gf.danceEveryNumBeats) == 0 && gf.animation.curAnim != null && !gf.animation.curAnim.name.startsWith("sing") && !gf.stunned)
+			
+			if (gf != null)
 			{
-				gf.dance();
+				var gfDanceEveryNumBeats = Math.round(gfSpeed * gf.danceEveryNumBeats);
+				if ((gfDanceEveryNumBeats != 0 && tmr.loopsLeft % gfDanceEveryNumBeats == 0) && gf.animation.curAnim != null && !gf.animation.curAnim.name.startsWith("sing") && !gf.stunned)
+					gf.dance();
 			}
 
 			for(field in playfields){
 				for(char in field.characters){
 					if(char!=gf){
-						if (tmr.loopsLeft % char.danceEveryNumBeats == 0
+						if ((char.danceEveryNumBeats != 0 && tmr.loopsLeft % char.danceEveryNumBeats == 0)
 							&& char.animation.curAnim != null
 							&& !char.animation.curAnim.name.startsWith('sing')
 							&& !char.stunned)
@@ -4381,8 +4384,12 @@ class PlayState extends MusicBeatState
 			camHUD.zoom += 0.03 * camZoomingMult * ClientPrefs.camZoomP;
 		}
 
-		if (gf != null && curBeat % Math.round(gfSpeed * gf.danceEveryNumBeats) == 0 && gf.animation.curAnim != null && !gf.animation.curAnim.name.startsWith("sing") && !gf.stunned)
-			gf.dance();
+		if (gf != null)
+		{
+			var gfDanceEveryNumBeats = Math.round(gfSpeed * gf.danceEveryNumBeats);
+			if ((gfDanceEveryNumBeats != 0 && curBeat % gfDanceEveryNumBeats == 0) && gf.animation.curAnim != null && !gf.animation.curAnim.name.startsWith("sing") && !gf.stunned)
+				gf.dance();
+		}
 		
 		for(field in playfields)
 		{
@@ -4390,7 +4397,7 @@ class PlayState extends MusicBeatState
 			{
 				if(char!=gf)
 				{
-					if (curBeat % char.danceEveryNumBeats == 0
+					if ((char.danceEveryNumBeats != 0 && curBeat % char.danceEveryNumBeats == 0)
 						&& char.animation.curAnim != null
 						&& !char.animation.curAnim.name.startsWith('sing')
 						&& !char.stunned)
