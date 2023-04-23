@@ -226,7 +226,7 @@ class FreeplayState extends MusicBeatState
 		hintBg.alpha = 0.6;
 		add(hintBg);
 
-		hintText = new FlxText(FlxG.width, FlxG.height - 20, 0, "Press CTRL to open set Gameplay Modifiers | Press R to reset a song score.", 18);
+		hintText = new FlxText(FlxG.width, FlxG.height - 20, 0, "Press CTRL to open the Gameplay Modifiers menu | Press R to reset a song's score.", 18);
 		hintText.font = Paths.font("calibri.ttf");
 		hintText.antialiasing = false;
 		hintText.scrollFactor.set();
