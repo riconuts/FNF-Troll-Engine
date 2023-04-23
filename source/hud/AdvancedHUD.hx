@@ -44,7 +44,7 @@ class AdvancedHUD extends BaseHUD
 		scoreTxt.y -= 120;
 		scoreTxt.x += 20 - 15;
 		scoreTxt.scrollFactor.set();
-		scoreTxt.borderSize = 1;
+		scoreTxt.borderSize = 1.25;
 		add(scoreTxt);
 
 		ratingTxt = new FlxText(0, 0, tWidth, "100%", 20);
@@ -53,7 +53,7 @@ class AdvancedHUD extends BaseHUD
 		ratingTxt.y -= 90;
 		ratingTxt.x += 20 - 15;
 		ratingTxt.scrollFactor.set();
-		ratingTxt.borderSize = 1;
+		ratingTxt.borderSize = 1.25;
 		add(ratingTxt);
 
 		fcTxt = new FlxText(0, 0, tWidth, "Clear", 20);
@@ -62,7 +62,7 @@ class AdvancedHUD extends BaseHUD
 		fcTxt.y -= 60;
 		fcTxt.x += 20 - 15;
 		fcTxt.scrollFactor.set();
-		fcTxt.borderSize = 1;
+		fcTxt.borderSize = 1.25;
 		add(fcTxt);
 
 		gradeTxt = new FlxText(0, 0, 0, "C", 20);
@@ -71,7 +71,7 @@ class AdvancedHUD extends BaseHUD
 		gradeTxt.color = 0xFFD800;
 		gradeTxt.y = FlxG.height - gradeTxt.height;
 		gradeTxt.scrollFactor.set();
-		gradeTxt.borderSize = 1;
+		gradeTxt.borderSize = 1.25;
 		add(gradeTxt);
 
 		var idx:Int = 0;
@@ -79,41 +79,43 @@ class AdvancedHUD extends BaseHUD
 			// maybe this'd benefit from a JudgeCounter object idk
 			for (judgment in displayedJudges){
 				var text = new FlxText(0, 0, tWidth, displayNames.get(judgment), 20);
-				text.setFormat(Paths.font("calibrib.ttf"), 28, judgeColours.get(judgment), LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				text.setFormat(Paths.font("calibrib.ttf"), 24, judgeColours.get(judgment), LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 				text.screenCenter(Y);
 				text.y -= 35 - (25 * idx);
 				text.x += 20 - 15;
 				text.scrollFactor.set();
-				text.borderSize = 1;
+				text.borderSize = 1.25;
 				add(text);
+
 				var numb = new FlxText(0, 0, tWidth, "0", 20);
-				numb.setFormat(Paths.font("calibri.ttf"), 28, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				numb.setFormat(Paths.font("calibri.ttf"), 24, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 				numb.screenCenter(Y);
 				numb.y -= 35 - (25 * idx);
 				numb.x += 25 - 15;
 				numb.scrollFactor.set();
-				numb.borderSize = 1;
+				numb.borderSize = 1.25;
 				add(numb);
+
 				judgeTexts.set(judgment, numb);
 				judgeNames.set(judgment, text);
 				idx++;
 			}
 		}else{
 			var text = new FlxText(0, 0, tWidth, "Misses", 20);
-			text.setFormat(Paths.font("calibrib.ttf"), 28, 0xBDBDBD, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.WHITE);
+			text.setFormat(Paths.font("calibrib.ttf"), 24, 0xBDBDBD, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.WHITE);
 			text.screenCenter(Y);
 			text.y -= 35;
 			text.x += 20 - 15;
 			text.scrollFactor.set();
-			text.borderSize = 1;
+			text.borderSize = 1.25;
 			add(text);
 			var numb = new FlxText(0, 0, tWidth, "0", 20);
-			numb.setFormat(Paths.font("calibri.ttf"), 28, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			numb.setFormat(Paths.font("calibri.ttf"), 24, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 			numb.screenCenter(Y);
 			numb.y -= 35;
 			numb.x += 25 - 15;
 			numb.scrollFactor.set();
-			numb.borderSize = 1;
+			numb.borderSize = 1.25;
 			add(numb);
 			judgeTexts.set('miss', numb);
 			judgeNames.set('miss', text);
@@ -126,7 +128,7 @@ class AdvancedHUD extends BaseHUD
 		npsTxt.y -= 5 - (25 * idx);
 		npsTxt.x += 20 - 15;
 		npsTxt.scrollFactor.set();
-		npsTxt.borderSize = 1;
+		npsTxt.borderSize = 1.25;
 		if (ClientPrefs.npsDisplay){
 			add(npsTxt);
 			idx++;
@@ -137,7 +139,7 @@ class AdvancedHUD extends BaseHUD
 		pcTxt.y -= 5 - (25 * idx);
 		pcTxt.x += 20 - 15;
 		pcTxt.scrollFactor.set();
-		pcTxt.borderSize = 1;
+		pcTxt.borderSize = 1.25;
 		add(pcTxt);
 		idx++;
 		

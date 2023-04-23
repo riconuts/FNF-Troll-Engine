@@ -107,8 +107,24 @@ class CreditsState extends MusicBeatState
 
 		//// Get credits list
 		var rawCredits:String;
+		var creditsPath:String;
 
-		var creditsPath:String = Paths.txt('credits');
+		function getLocalCredits(){
+			#if MODS_ALLOWED
+			Paths.currentModDirectory = '';
+	
+			var modCredits = Paths.modsTxt('credits');
+			if (Paths.exists(modCredits)){
+				trace('using credits from mod folder');
+				creditsPath = modCredits;
+			}else
+			#end{
+				trace('using credits from assets folder');
+				creditsPath = Paths.txt('credits');
+			}
+
+			rawCredits = Paths.getContent(creditsPath);
+		}
 
 		// Just in case we forget someone!!!
 		#if final
@@ -130,22 +146,12 @@ class CreditsState extends MusicBeatState
 		}
 		http.onError = function(error){
 			trace('error: $error');
-
-			#if MODS_ALLOWED
-			Paths.currentModDirectory = '';
-	
-			var modCredits = Paths.modsTxt('credits');
-			if (Paths.exists(modCredits)){
-				trace('using credits from mod folder');
-				creditsPath = modCredits;
-			}else
-			#end
-				trace('using credits from assets folder');
-
-			rawCredits = Paths.getContent(creditsPath);
+			getLocalCredits();
 		}
 
 		http.request();
+		#else
+		getLocalCredits();
 		#end
 
 		for (i in CoolUtil.listFromString(rawCredits))

@@ -43,21 +43,23 @@ class PsychHUD extends BaseHUD {
 			for (judgment in displayedJudges)
 			{
 				var text = new FlxText(0, 0, 200, displayNames.get(judgment), 20);
-				text.setFormat(Paths.font("calibrib.ttf"), 28, judgeColours.get(judgment), LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				text.setFormat(Paths.font("calibrib.ttf"), 24, judgeColours.get(judgment), LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 				text.screenCenter(Y);
 				text.y -= 35 - (25 * idx);
 				text.x += 20 - 15;
 				text.scrollFactor.set();
-				text.borderSize = 1;
+				text.borderSize = 1.25;
 				add(text);
+
 				var numb = new FlxText(0, 0, 200, "0", 20);
-				numb.setFormat(Paths.font("calibri.ttf"), 28, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				numb.setFormat(Paths.font("calibri.ttf"), 24, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 				numb.screenCenter(Y);
 				numb.y -= 35 - (25 * idx);
 				numb.x += 25 - 15;
 				numb.scrollFactor.set();
-				numb.borderSize = 1;
+				numb.borderSize = 1.25;
 				add(numb);
+
 				judgeTexts.set(judgment, numb);
 				judgeNames.set(judgment, text);
 				idx++;
