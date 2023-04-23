@@ -80,7 +80,7 @@ class JukeboxState extends MusicBeatState {
 		{
 			var splitted = i.split(":");
 			//added.push(splitted[1]);
-			addSong(splitted[0], splitted[1], '', splitted[2]);
+			addSong(splitted[0], splitted[1], modDir, splitted[2]);
 		}
 
 		for (i in CoolUtil.coolTextFile(Paths.txt('freeplaySonglist')))
@@ -88,7 +88,7 @@ class JukeboxState extends MusicBeatState {
 			var song:String = i.split(":")[0];
 			var songLowercase:String = Paths.formatToSongPath(song);
 			//if (!added.contains(songLowercase))
-			addSong(song, songLowercase, '');
+			addSong(song, songLowercase, modDir);
 		}
 	}
 
