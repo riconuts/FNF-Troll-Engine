@@ -69,11 +69,7 @@ class CoolUtil
 		if (rawList == null)
 			return [];
 
-		var daList:Array<String> = rawList.trim().split('\n');
-		for (i in 0...daList.length)
-			daList[i] = daList[i].trim();
-
-		return daList;
+		return listFromString(rawList);
 	}
 	public static function listFromString(string:String):Array<String>
 	{

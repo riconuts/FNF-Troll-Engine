@@ -1,5 +1,9 @@
 package;
 
+#if sys
+import sys.io.File;
+import sys.FileSystem;
+#end
 import flixel.*;
 import flixel.math.*;
 import flixel.system.FlxSound;
@@ -101,16 +105,51 @@ class CreditsState extends MusicBeatState
         function loadLine(line:String, ?folder:String)
 			addSong(line.split("::"), folder);
 
-		//// Load the shit!!!
-		for (i in CoolUtil.coolTextFile(Paths.txt('credits')))
-			loadLine(i);
+		//// Get credits list
+		var rawCredits:String;
 
-		#if MODS_ALLOWED
-        Paths.currentModDirectory = '';
+		var creditsPath:String = Paths.txt('credits');
 
-        for (i in CoolUtil.coolTextFile(Paths.modsTxt('credits')))
-            loadLine(i);
+		// Just in case we forget someone!!!
+		#if final
+		trace('checking for updated credits');
+		var http = new haxe.Http("https://raw.githubusercontent.com/riconuts/troll-engine/main/assets/data/credits.txt");
+		http.onData = function(data:String){
+			rawCredits = data;
+
+			#if sys
+			try{
+				trace('updating credits...');
+				File.saveContent(creditsPath, data);
+			}catch(e){
+				trace("couldn't update credits: " + e);
+			}
+			#end
+
+			trace('using credits from github');
+		}
+		http.onError = function(error){
+			trace('error: $error');
+
+			#if MODS_ALLOWED
+			Paths.currentModDirectory = '';
+	
+			var modCredits = Paths.modsTxt('credits');
+			if (Paths.exists(modCredits)){
+				trace('using credits from mod folder');
+				creditsPath = modCredits;
+			}else
+			#end
+				trace('using credits from assets folder');
+
+			rawCredits = Paths.getContent(creditsPath);
+		}
+
+		http.request();
 		#end
+
+		for (i in CoolUtil.listFromString(rawCredits))
+			loadLine(i);
 
 		////
 		hintBg = new FlxSprite(0, FlxG.height - 130).makeGraphic(1, 1);
