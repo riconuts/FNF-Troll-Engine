@@ -71,19 +71,19 @@ class JukeboxState extends MusicBeatState {
 	function addSonglists(?modDir:String)
 	{
 		var modDir:String = modDir==null?'':modDir;
-
+		var getTxt:Dynamic = modDir==''?Paths.txt:Paths.modsTxt;
 		Paths.currentModDirectory = modDir;
 
 		//var added:Array<String> = [];
 
-		for (i in CoolUtil.coolTextFile(Paths.modsTxt('jukeboxSonglist')))
+		for (i in CoolUtil.coolTextFile(getTxt('jukeboxSonglist')))
 		{
 			var splitted = i.split(":");
 			//added.push(splitted[1]);
 			addSong(splitted[0], splitted[1], modDir, splitted[2]);
 		}
 
-		for (i in CoolUtil.coolTextFile(Paths.txt('freeplaySonglist')))
+		for (i in CoolUtil.coolTextFile(getTxt('freeplaySonglist')))
 		{
 			var song:String = i.split(":")[0];
 			var songLowercase:String = Paths.formatToSongPath(song);
