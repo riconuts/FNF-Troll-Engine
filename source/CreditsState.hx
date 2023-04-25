@@ -1,9 +1,5 @@
 package;
 
-#if sys
-import sys.io.File;
-import sys.FileSystem;
-#end
 import flixel.*;
 import flixel.math.*;
 import flixel.system.FlxSound;
@@ -13,6 +9,10 @@ import flixel.util.FlxColor;
 
 #if desktop
 import Discord.DiscordClient;
+#end
+#if sys
+import sys.io.File;
+import sys.FileSystem;
 #end
 
 using StringTools;

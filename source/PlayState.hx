@@ -4451,7 +4451,7 @@ class PlayState extends MusicBeatState
 	}
 
 	public function callOnScripts(event:String, ?args:Array<Dynamic>, ignoreStops:Bool = false, ?exclusions:Array<String>, ?scriptArray:Array<Dynamic>,
-			?ignoreSpecialShit:Bool = true)
+			?ignoreSpecialShit:Bool = false)
 	{
 		var args:Array<Dynamic> = args != null ? args : [];
 

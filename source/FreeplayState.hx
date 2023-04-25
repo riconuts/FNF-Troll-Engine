@@ -140,60 +140,60 @@ class FreeplayState extends MusicBeatState
 				var songButton = addSong(song[0], null, song[1], false);
 
 				if (songButton != null) setupButtonCallbacks(songButton);
-			}
+			}	
 
 			#if (sys && PE_MOD_COMPATIBILITY)
 			//// psych engine
 			var weeksFolderPath = Paths.mods('$mod/weeks/');
 			
-			if (!FileSystem.exists(weeksFolderPath) || !FileSystem.isDirectory(weeksFolderPath))
-				continue;
-			
-			var addedCat = false;
-			for (weekFileName in FileSystem.readDirectory(weeksFolderPath))
-			{
-				if (!weekFileName.endsWith(".json")) continue;
+			if (FileSystem.exists(weeksFolderPath) && FileSystem.isDirectory(weeksFolderPath))
+			{	
+				var addedCat = false;
+				for (weekFileName in FileSystem.readDirectory(weeksFolderPath))
+				{
+					if (!weekFileName.endsWith(".json")) continue;
 
-				var rawFile = Paths.getContent(weeksFolderPath + weekFileName);
-				if (rawFile == null) continue;
+					var rawFile = Paths.getContent(weeksFolderPath + weekFileName);
+					if (rawFile == null) continue;
 
-				var theJson = haxe.Json.parse(rawFile);
-				if (!Reflect.hasField(theJson, "songs")){trace("Songs unavailable"); continue;}
+					var theJson = haxe.Json.parse(rawFile);
+					if (!Reflect.hasField(theJson, "songs")){trace("Songs unavailable"); continue;}
 
-				var songs:Array<Array<Dynamic>> = theJson.songs;
-				if (songs.length < 1){trace("No songs"); continue;}
+					var songs:Array<Array<Dynamic>> = theJson.songs;
+					if (songs.length < 1){trace("No songs"); continue;}
 
-				if (!addedCat){ 
-					addedCat = true;
-					setCategory(mod, mod);
-				}
+					if (!addedCat){ 
+						addedCat = true;
+						setCategory(mod, mod);
+					}
 
-				for (song in songs){
-					var songButton = addSong(song[0], null, mod, false);
-					setupButtonCallbacks(songButton);
+					for (song in songs){
+						var songButton = addSong(song[0], null, mod, false);
+						setupButtonCallbacks(songButton);
 
-					var icon = Paths.image('icons/${song[1]}');
-					if (icon == null)
-						icon = Paths.image('icons/icon-${song[1]}');
+						var icon = Paths.image('icons/${song[1]}');
+						if (icon == null)
+							icon = Paths.image('icons/icon-${song[1]}');
 
-					if (icon != null){
-						songButton.loadGraphic(icon);
+						if (icon != null){
+							songButton.loadGraphic(icon);
 
-						/*
-						if (songButton.width < songButton.height)
-							songButton.setGraphicSize(194, 0);
-						else
-							songButton.setGraphicSize(0, 194);
-						*/
+							/*
+							if (songButton.width < songButton.height)
+								songButton.setGraphicSize(194, 0);
+							else
+								songButton.setGraphicSize(0, 194);
+							*/
 
-						songButton.scale.set(1,1);
-						songButton.clipRect = new FlxRect(0, 0, songButton.frameHeight, songButton.frameHeight);
-						songButton.updateHitbox();
+							songButton.scale.set(1,1);
+							songButton.clipRect = new FlxRect(0, 0, songButton.frameHeight, songButton.frameHeight);
+							songButton.updateHitbox();
 
-						songButton.offset.set(
-							-(194 - songButton.frameHeight) * 0.5,
-							-(194 - songButton.frameHeight) * 0.5
-						);
+							songButton.offset.set(
+								-(194 - songButton.frameHeight) * 0.5,
+								-(194 - songButton.frameHeight) * 0.5
+							);
+						}
 					}
 				}
 			}
@@ -223,6 +223,7 @@ class FreeplayState extends MusicBeatState
 		hintBg.scale.set(FlxG.width, 24);
 		hintBg.updateHitbox();
 		hintBg.scrollFactor.set();
+		hintBg.antialiasing = false;
 		hintBg.alpha = 0.6;
 		add(hintBg);
 
@@ -278,8 +279,11 @@ class FreeplayState extends MusicBeatState
 
 		// trace('"$folder" / "$songName" / "$categoryName"');
 
-		if (category == null)	
-			return null;
+		if (category == null){
+			setCategory(categoryName, categoryName);
+			category = categories.get(categoryName);
+			//return null;
+		}
 
 		var button:FreeplaySongButton = new FreeplaySongButton(
 			new SongMetadata(songName, folder),

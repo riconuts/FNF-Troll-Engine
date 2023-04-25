@@ -1430,6 +1430,7 @@ class FunkinLua extends FunkinScript
 				}
 			}
 		});
+		
 		Lua_helper.add_callback(lua, "playAnim", function(obj:String, name:String, forced:Bool = false, ?reverse:Bool = false, ?startFrame:Int = 0)
 		{
 			if(PlayState.instance.getLuaObject(obj, false) != null) {
@@ -1443,12 +1444,11 @@ class FunkinLua extends FunkinScript
 						var obj:Dynamic = luaObj;
 						var luaObj:ModchartSprite = obj;
 
-						/*
 						var daOffset = luaObj.animOffsets.get(name);
 						if (luaObj.animOffsets.exists(name))
 						{
 							luaObj.offset.set(daOffset[0], daOffset[1]);
-						}*/
+						}
 					}
 				}
 				return true;
@@ -1472,6 +1472,20 @@ class FunkinLua extends FunkinScript
 			}
 			return false;
 		});
+		Lua_helper.add_callback(lua, "addOffset", function(obj:String, anim:String, x:Float, y:Float) {
+			if(PlayState.instance.modchartSprites.exists(obj)) {
+				PlayState.instance.modchartSprites.get(obj).animOffsets.set(anim, [x, y]);
+				return true;
+			}
+
+			var char:Character = Reflect.getProperty(getInstance(), obj);
+			if(char != null) {
+				char.addOffset(anim, x, y);
+				return true;
+			}
+			return false;
+		});
+
 		Lua_helper.add_callback(lua, "objectPlayAnimation", function(obj:String, name:String, forced:Bool = false, ?startFrame:Int = 0) {
 			luaTrace("objectPlayAnimation is deprecated! Use playAnim instead", false, true);
 			if(PlayState.instance.getLuaObject(obj,false)!=null) {
@@ -2528,7 +2542,8 @@ class FunkinLua extends FunkinScript
 					if(errorHandler != null)
 						errorHandler(err);
 					else
-						haxe.Log.trace(err, {fileName: scriptName, lineNumber: -1, methodName: func, customParams: args, className: ""});		
+						Sys.println('$scriptName: Error on function $func(${args.join(', ')})');
+						//haxe.Log.trace(err, {fileName: scriptName, lineNumber: -1, methodName: func, customParams: args, className: ""});		
 					
 					//LuaL.error(state,err);
 				}else{
@@ -2659,6 +2674,7 @@ class ModchartSprite extends FlxSprite
 {
 	public var wasAdded:Bool = false;
 	//public var isInFront:Bool = false;
+	public var animOffsets:Map<String, Array<Float>> = new Map<String, Array<Float>>();
 
 	public function new(?x:Float = 0, ?y:Float = 0)
 	{

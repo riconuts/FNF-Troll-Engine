@@ -112,6 +112,9 @@ class OptionsState extends MusicBeatState {
 				LoadingState.loadAndSwitchState(new options.NoteOffsetState());
             case 'customizeColours':
                 // some sorta substate to customize note colours lol
+                openSubState(ClientPrefs.noteSkin == "Quants" ? new options.QuantNotesSubState() : new options.NotesSubState());
+            case 'customizeKeybinds':
+                openSubState(new options.ControlsSubState());
             default:
                 // nothing
         }
@@ -287,7 +290,7 @@ class OptionsState extends MusicBeatState {
             [
                 "Keyboard",
                 [
-
+                    "customizeKeybinds",
                 ]
             ],
             [
@@ -358,7 +361,7 @@ class OptionsState extends MusicBeatState {
     {
 		//ClientPrefs.load();
         persistentDraw = true;
-        persistentUpdate = true;
+        //persistentUpdate = true;
 
 		mainCamera = new FlxCamera();
 		optionCamera = new FlxCamera();
@@ -1098,7 +1101,7 @@ class OptionsState extends MusicBeatState {
         super.update(elapsed);
 
 		if (controls.BACK){
-            persistentUpdate = false; // you can only go back once
+            //persistentUpdate = false;
 
             ClientPrefs.save(actualOptions);
 			Highscore.updateSave();
