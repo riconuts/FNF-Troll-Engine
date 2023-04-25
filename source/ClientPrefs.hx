@@ -277,7 +277,7 @@ class ClientPrefs
 				data: []
 			},
 			"midScroll" => {
-				display: "MiddleScroll",
+				display: "Middlescroll",
 				desc: "When toggled, notes will be centered.",
 				type: Toggle,
 				value: false,
@@ -469,6 +469,13 @@ class ClientPrefs
 					"max" => Std.parseFloat(Sys.getEnv("NUMBER_OF_PROCESSORS")),
 					"step" => 1
 				]
+			},
+
+			"customizeKeybinds" => {
+				display: "Customize Key Bindings",
+				desc: "blahblah.",
+				type: Button,
+				data: []
 			}
 		];
 	}
@@ -504,13 +511,13 @@ class ClientPrefs
 	}
 
 	public static var quantHSV:Array<Array<Int>> = [
-		[0, -20, 0], // 4th
-		[-130, -20, 0], // 8th
+		[0, 0, 0], // 4th
+		[-100, 0, 0], // 8th
 		[-80, -20, 0], // 12th
-		[128, -30, 0], // 16th
+		[120, 0, 0], // 16th
 		[-120, -70, -35], // 20th
 		[-80, -20, 0], // 24th
-		[50, -20, 0], // 32nd
+		[50, -10, 0], // 32nd
 		[-80, -20, 0], // 48th
 		[160, -15, 0], // 64th
 		[-120, -70, -35], // 96th

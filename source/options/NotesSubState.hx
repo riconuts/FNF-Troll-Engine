@@ -45,6 +45,9 @@ class NotesSubState extends MusicBeatSubstate
 	public function new() {
 		super();
 
+		FlxG.state.persistentUpdate = false;
+		FlxG.cameras.add(cast add(new FlxCamera()), true);
+
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('newmenuu/optionsbg'));
 		//bg.color = 0xFFea71fd;
 		bg.screenCenter();
