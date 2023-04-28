@@ -2603,9 +2603,8 @@ class FunkinLua extends FunkinScript
 	override public function get(variable:String):Dynamic {
 		#if LUA_ALLOWED
 		if (lua == null)
-		{
 			return null; // because void doesnt fit under dynamic
-		}
+		
 		var result:Dynamic = null;
 		Lua.getglobal(lua, variable);
 		result = Convert.fromLua(lua, -1);
@@ -2616,11 +2615,11 @@ class FunkinLua extends FunkinScript
 		#end
 	}
 
-	override public function set(variable:String, data:Dynamic): Void {
+	override public function set(variable:String, data:Dynamic):Void
+	{
 		#if LUA_ALLOWED
-		if(lua == null) {
+		if(lua == null)
 			return;
-		}
 
 		Convert.toLua(lua, data);
 		Lua.setglobal(lua, variable);

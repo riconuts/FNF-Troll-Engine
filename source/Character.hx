@@ -180,9 +180,9 @@ class Character extends FlxSprite
 				var modTxtToFind:String = Paths.modsTxt(json.image);
 				var txtToFind:String = Paths.getPath('images/' + json.image + '.txt', TEXT);
 
-				if (FileSystem.exists(modTxtToFind) || FileSystem.exists(txtToFind) || Assets.exists(txtToFind))
+				if (Paths.exists(modTxtToFind) || Paths.exists(txtToFind))
 				#else
-				if (Assets.exists(Paths.getPath('images/' + json.image + '.txt', TEXT)))
+				if (Paths.exists(Paths.getPath('images/' + json.image + '.txt', TEXT)))
 				#end
 				{
 					spriteType = "packer";
@@ -192,12 +192,9 @@ class Character extends FlxSprite
 				var modAnimToFind:String = Paths.modFolders('images/' + json.image + '/Animation.json');
 				var animToFind:String = Paths.getPath('images/' + json.image + '/Animation.json', TEXT);
 
-				//var modTextureToFind:String = Paths.modFolders("images/"+json.image);
-				//var textureToFind:String = Paths.getPath('images/' + json.image, new AssetType();
-
-				if (FileSystem.exists(modAnimToFind) || FileSystem.exists(animToFind) || Assets.exists(animToFind))
+				if (Paths.exists(modAnimToFind) || Paths.exists(animToFind))
 				#else
-				if (Assets.exists(Paths.getPath('images/' + json.image + '/Animation.json', TEXT)))
+				if (Paths.exists(Paths.getPath('images/' + json.image + '/Animation.json', TEXT)))
 				#end
 				{
 					spriteType = "texture";
@@ -216,12 +213,13 @@ class Character extends FlxSprite
 				}
 				imageFile = json.image;
 
-				if(json.scale != 1)
-				{
-					jsonScale = json.scale;
-					setGraphicSize(Std.int(width * jsonScale));
-					updateHitbox();
-				}
+				jsonScale = json.scale;
+				if(jsonScale != 1)
+					setGraphicSize(Math.ceil(width * jsonScale));
+				else
+					scale.set(1, 1);
+				
+				updateHitbox();
 
 				positionArray = json.position;
 				cameraPosition = json.camera_position;
@@ -615,7 +613,7 @@ class Character extends FlxSprite
 		return returnVal;
 	}
 
-	public function setOnScripts(variable:String, value:Dynamic)
+	public function setOnScript(variable:String, value:Dynamic)
 	{
 		if (characterScript != null)
 			characterScript.set(variable, value);
