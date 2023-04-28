@@ -1,5 +1,8 @@
 package;
 
+import flixel.util.FlxSpriteUtil.LineStyle;
+import openfl.display.BitmapData;
+import FreeplayState.FreeplayCategory;
 import JudgmentManager.JudgmentData;
 import JudgmentManager.Judgment;
 import hud.PsychHUD;
@@ -702,10 +705,10 @@ class PlayState extends MusicBeatState
 		////
 		if (ClientPrefs.noteSkin == 'Quants'){
 			shitToLoad.push({path: 'QUANT$arrowSkin'});
-			shitToLoad.push({path: 'QUANT$arrowSkin'});
+			shitToLoad.push({path: 'QUANT$splashSkin'});
 		}else{
 			shitToLoad.push({path: arrowSkin});
-			shitToLoad.push({path: arrowSkin});
+			shitToLoad.push({path: splashSkin});
 		}
 
 		////
@@ -1512,11 +1515,19 @@ class PlayState extends MusicBeatState
 		previousFrameTime = FlxG.game.ticks;
 		//lastReportedPlayheadPosition = 0;
 
+		var speedMult = 1;
+
+		FlxG.timeScale = speedMult;
+
 		FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song), 1, false);
+		FlxG.sound.music.pitch = speedMult;
 		FlxG.sound.music.onComplete = function(){finishSong(false);};
 		vocals.play();
-		for (track in tracks)
+		vocals.pitch = speedMult;
+		for (track in tracks){
 			track.play();
+			track.pitch = speedMult;
+		}
 
 		if(startOnTime > 0)
 		{
@@ -2434,7 +2445,7 @@ class PlayState extends MusicBeatState
 		}
 		if (!endingSong){
 			//// time travel
-			if (!startingSong && chartingMode){
+			if (!startingSong #if !debug && chartingMode #end){
 				if (FlxG.keys.justPressed.ONE) {
 					KillNotes();
 					FlxG.sound.music.onComplete();
@@ -3174,7 +3185,7 @@ class PlayState extends MusicBeatState
 
 					cancelMusicFadeTween();
 
-					if (ChapterData.curChapter != null && !playOpponent ){
+					if (ChapterData.curChapter != null && !playOpponent){
 						if(!ClientPrefs.getGameplaySetting('practice', false) && !ClientPrefs.getGameplaySetting('botplay', false)) {
 							Highscore.saveWeekScore(ChapterData.curChapter.directory, campaignScore);
 							
@@ -3217,6 +3228,8 @@ class PlayState extends MusicBeatState
 				
 				MusicBeatState.switchState(new FreeplayState());
 				MusicBeatState.playMenuMusic(1, true);
+
+				//openSubState(new ResultsSubstate(this));
 			}
 		}
 	}
@@ -3226,7 +3239,6 @@ class PlayState extends MusicBeatState
 			var daNote:Note = allNotes[0];
 			daNote.active = false;
 			daNote.visible = false;
-
 
 			daNote.kill();
 			notes.remove(daNote, true);
@@ -3469,8 +3481,10 @@ class PlayState extends MusicBeatState
 		return judgeData;
 	}
 
-	private function applyJudgment(judge:Judgment, ?diff:Float = 0, ?show:Bool = true)applyJudgmentData(judgeManager.judgmentData.get(judge), diff);
-	
+	private function applyJudgment(judge:Judgment, ?diff:Float = 0, ?show:Bool = true)
+		applyJudgmentData(judgeManager.judgmentData.get(judge), diff);
+
+	var msJudges = [];
 
 	private function judge(note:Note, field:PlayField=null){
 		if (field == null)
@@ -3484,11 +3498,8 @@ class PlayState extends MusicBeatState
 		note.rating = judgeData.internalName;
 		if (judgeData.noteSplash && !note.noteSplashDisabled)
 			spawnNoteSplashOnNote(note, field);
-
-		var time = (Conductor.stepCrochet * 0.001);
 		
-		msTotal += hitTime;
-		msNumber++;
+		msJudges.push({hitTime: hitTime, strumTime: note.strumTime});
 
 		if(ClientPrefs.showMS && (field==null || !field.autoPlayed))
 		{
@@ -3507,6 +3518,7 @@ class PlayState extends MusicBeatState
 			timingTxt.y -= 8;
 			timingTxt.scale.set(1, 1);
 			
+			var time = (Conductor.stepCrochet * 0.001);
 			FlxTween.tween(timingTxt, 
 				{y: timingTxt.y + 8}, 
 				0.1,
@@ -3960,11 +3972,9 @@ class PlayState extends MusicBeatState
 		breakCombo();
 
 		if(!practiceMode) songScore -= 10;
-		if(!endingSong) {
-			songMisses++;
-		}
+		if(!endingSong) songMisses++;
+		
 		// i dont think this should reduce acc lol
-
 		//totalPlayed++;
 		//RecalculateRating();
 
@@ -4311,7 +4321,12 @@ class PlayState extends MusicBeatState
 		// I think just in general adding more stats could be neat & since we have the new options menu we can just put it in UI in a seperate category
 		// so you can set exactly which stats show up in the scoretxt, etc
 
-		trace(msTotal / msNumber);
+		/*
+		trace(msJudges.length / {
+			var total = 0.0;
+			for (n in msJudges) total+=n;
+			total;
+		});*/
 
 		preventLuaRemove = true;
 

@@ -199,18 +199,25 @@ class ChartingState extends MusicBeatState
 		{
 			_song = {
 				song: 'Test',
-				notes: [],
-				events: [],
 				bpm: 150.0,
-				needsVoices: true,
-				arrowSkin: '',
-				splashSkin: '',
+				speed: 1,
+
+				stage: 'stage',
+
 				player1: 'bf',
 				player2: 'dad',
 				gfVersion: 'gf',
-				speed: 1,
-				stage: 'stage',
-				validScore: false
+
+				arrowSkin: '',
+				splashSkin: '',
+
+				needsVoices: true,
+				extraTracks: [],
+
+				validScore: false,
+
+				notes: [],
+				events: [],
 			};
 			addSection();
 			PlayState.SONG = _song;

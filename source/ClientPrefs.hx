@@ -466,7 +466,7 @@ class ClientPrefs
 				value: 1,
 				data: [
 					"min" => 1, 
-					"max" => Std.parseFloat(Sys.getEnv("NUMBER_OF_PROCESSORS")),
+					"max" => 1, //Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS")),
 					"step" => 1
 				]
 			},
