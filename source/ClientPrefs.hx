@@ -459,18 +459,13 @@ class ClientPrefs
 				value: false,
 				data: []
 			},
-			"loadingThreads" => {
-				display: "Loading Threads",
-				desc: "Amount of CPU threads allowed to be used to load assets.",
-				type: Number,
-				value: 1,
-				data: [
-					"min" => 1, 
-					"max" => 1, //Std.parseInt(Sys.getEnv("NUMBER_OF_PROCESSORS")),
-					"step" => 1
-				]
+			"multicoreLoading" => {
+				display: "Multicore Loading",
+				desc: "When toggled, multiple threads will be used for asset loading.\nWARNING: May cause crashes on certain devices",
+				type: Toggle,
+				value: false,
+				data: []
 			},
-
 			"customizeKeybinds" => {
 				display: "Customize Key Bindings",
 				desc: "blahblah.",

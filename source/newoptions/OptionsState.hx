@@ -222,8 +222,10 @@ class OptionsState extends MusicBeatState {
 					"downScroll",
 					"midScroll",
 					"noteSplashes",
+                    /* I feel like these should be in Video only
+                    "optimizeHolds",
 					"holdSubdivs",
-					"optimizeHolds",
+					*/
 					"noteSkin",
 					"customizeColours"
 				]
@@ -275,8 +277,10 @@ class OptionsState extends MusicBeatState {
                 [
                     "lowQuality",
                     "globalAntialiasing",
-                    "holdSubdivs",
-                    "optimizeHolds"
+                    "multicoreLoading",
+                    
+                    "optimizeHolds",
+                    "holdSubdivs"
                 ]
             ]
         ],

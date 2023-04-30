@@ -120,9 +120,28 @@ class Cache
 				Paths.returnGraphic(toLoad.path, toLoad.library);
 		}
 		
-		// trace("loaded " + toLoad.path);
+		#if traceLoading
+		trace("loaded " + toLoad.path);
+		#end
 	}
 
+	public static var numberOfProcessors(get, null):Int = -1;
+	static function get_numberOfProcessors():Int
+	{
+		if (numberOfProcessors > 0)
+			return numberOfProcessors;
+
+		#if windows
+		var result = Sys.getEnv("NUMBER_OF_PROCESSORS");
+		numberOfProcessors = result==null ? 1 : Std.parseInt(result);
+		#else
+		// idk
+		numberOfProcessors = 1;
+		#end
+
+		return numberOfProcessors;
+	}
+	
 	static public function loadWithList(shitToLoad:Array<AssetPreload>, ?multicoreOnly = false)
 	{
 		#if loadBenchmark
@@ -130,9 +149,9 @@ class Cache
 		#end
 
 		#if MULTICORE_LOADING
-		var threadLimit:Int = FlxMath.minInt(shitToLoad.length, Std.int(ClientPrefs.loadingThreads));
+		var threadLimit:Int = FlxMath.minInt(shitToLoad.length, numberOfProcessors);
 		
-		if (threadLimit > 0){
+		if (threadLimit > 1){
 			// clear duplicates
 			var uniqueMap:Map<String, AssetPreload> = [];
 			
@@ -184,7 +203,7 @@ class Cache
 				}
 			});
 
-			trace('Loading ${shitToLoad.length} items with ${threadLimit} threads.');
+			trace('Loading ${shitToLoad.length} items with $threadLimit threads.');
 			
 			var threadArray:Array<Thread> = [for (i in 0...threadLimit){				
 				var thread = makeThread();
@@ -212,14 +231,20 @@ class Cache
 						for (key => value in msg.loadedGraphics){
 							Paths.localTrackedAssets.push(key);
 							Paths.currentTrackedAssets.set(key, value);
-							//trace('loaded:$key',value);
+
+							#if traceLoading
+							trace('loaded:$key',value);
+							#end
 						}
 					
 					if (msg.loadedSounds != null)
 						for (key => value in msg.loadedSounds){
 							Paths.localTrackedAssets.push(key);
 							Paths.currentTrackedSounds.set(key, value);
-							//trace('loaded:$key',value);
+
+							#if traceLoading
+							trace('loaded:$key',value);
+							#end
 						}
 					
 					threadArray.remove(msg.thread);
@@ -231,8 +256,11 @@ class Cache
 		}
 		else
 		#end
-		//if (!multicoreOnly)
-		//	for (shit in shitToLoad) load(shit);
+		if (!multicoreOnly){
+			trace('Loading ${shitToLoad.length} items.');
+			for (shit in shitToLoad) 
+				load(shit);
+		}
 
 		#if loadBenchmark
 		trace('finished loading in ${Sys.time() - startTime} seconds.');
