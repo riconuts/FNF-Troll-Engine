@@ -26,7 +26,7 @@ class FunkinHScript extends FunkinScript
 		parser.allowJSON = true;
 		parser.allowTypes = true;
 
-		parser.preprocesorValues = sowy.Sowy.getDefines();
+		// parser.preprocesorValues = sowy.Sowy.getDefines();
 	}
 
 	public static function parseString(script:String, ?name:String = "Script")
@@ -286,7 +286,7 @@ class FunkinHScript extends FunkinScript
 
 		set("StageData", Stage.StageData);
 		#if VIDEOS_ALLOWED
-		set("MP4Handler", vlc.MP4Handler);
+		set("MP4Handler", hxcodec.VideoHandler);
 		#end
 		set("PlayState", PlayState);
 		set("FunkinLua", FunkinLua);

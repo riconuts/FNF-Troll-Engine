@@ -63,7 +63,7 @@ using StringTools;
 import Discord.DiscordClient;
 #end
 #if VIDEOS_ALLOWED
-import vlc.MP4Handler;
+import hxcodec.VideoHandler;
 #end
 
 typedef SongCreditdata = // beacuse SongMetadata is stolen
@@ -624,7 +624,9 @@ class PlayState extends MusicBeatState
 
 		camFollow = prevCamFollow != null ? prevCamFollow : new FlxPoint();
 		camFollowPos = prevCamFollowPos != null ? prevCamFollowPos : new FlxObject(0, 0, 1, 1);
-		add(camFollowPos);
+
+		prevCamFollow = null;
+		prevCamFollowPos = null;
 
 		FlxG.camera.follow(camFollowPos, LOCKON, 1);
 		FlxG.camera.zoom = defaultCamZoom;
@@ -1229,7 +1231,7 @@ class PlayState extends MusicBeatState
 			return;
 		}
 
-		var video:MP4Handler = new MP4Handler();
+		var video:VideoHandler = new VideoHandler();
 		video.playVideo(filepath);
 		video.finishCallback = function()
 		{
@@ -3148,15 +3150,16 @@ class PlayState extends MusicBeatState
 		#end
 
 		if(ret != Globals.Function_Stop && !transitioning) {
-			#if !switch
-			if (SONG.validScore)
-			{
+			// Save song score and rating.
+			if (SONG.validScore){
 				var percent:Float = ratingPercent;
+
 				if(Math.isNaN(percent)) percent = 0;
+
 				if(!playOpponent && !disableModcharts && ratingFC!='Fail')
 					Highscore.saveScore(SONG.song, songScore, percent);
 			}
-			#end
+
 
 			transitioning = true;
 
@@ -3180,11 +3183,7 @@ class PlayState extends MusicBeatState
 				{
 					//// WEEK END
 
-					if(FlxTransitionableState.skipNextTransIn)
-						CustomFadeTransition.nextCamera = null;
-
-					cancelMusicFadeTween();
-
+					// Save week score
 					if (ChapterData.curChapter != null && !playOpponent){
 						if(!ClientPrefs.getGameplaySetting('practice', false) && !ClientPrefs.getGameplaySetting('botplay', false)) {
 							Highscore.saveWeekScore(ChapterData.curChapter.directory, campaignScore);
@@ -3196,6 +3195,11 @@ class PlayState extends MusicBeatState
 						}
 					}
 
+					if(FlxTransitionableState.skipNextTransIn)
+						CustomFadeTransition.nextCamera = null;
+
+					cancelMusicFadeTween();
+
 					MusicBeatState.switchState(new StoryMenuState());
 					MusicBeatState.playMenuMusic(1, true);
 				}
@@ -3204,15 +3208,16 @@ class PlayState extends MusicBeatState
 					var nextSong = PlayState.storyPlaylist[0];
 					trace('LOADING NEXT SONG: $nextSong');
 
-					FlxTransitionableState.skipNextTransIn = true;
-					FlxTransitionableState.skipNextTransOut = true;
-
 					prevCamFollow = camFollow;
 					prevCamFollowPos = camFollowPos;
 
-					FlxG.sound.music.stop();
+					/*
+					FlxTransitionableState.skipNextTransIn = true;
+					FlxTransitionableState.skipNextTransOut = true;
+					*/
 
 					cancelMusicFadeTween();
+					FlxG.sound.music.stop();
 
 					PlayState.SONG = Song.loadFromJson(nextSong, nextSong);
 					LoadingState.loadAndSwitchState(new PlayState());
@@ -3228,8 +3233,6 @@ class PlayState extends MusicBeatState
 				
 				MusicBeatState.switchState(new FreeplayState());
 				MusicBeatState.playMenuMusic(1, true);
-
-				//openSubState(new ResultsSubstate(this));
 			}
 		}
 	}
@@ -4006,8 +4009,7 @@ class PlayState extends MusicBeatState
 		if (Paths.formatToSongPath(SONG.song) != 'tutorial')
 			camZooming = true;
 
-				// Script shit
-
+		// Script shit
 		var isSus:Bool = note.isSustainNote; //GET OUT OF MY HEAD, GET OUT OF MY HEAD, GET OUT OF MY HEAD
 		var leData:Int = Math.round(Math.abs(note.noteData));
 		var leType:String = note.noteType;

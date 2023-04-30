@@ -49,7 +49,7 @@
 	<!-- PSYCH ENGINE CUSTOMIZATION -->
 	<define name="MODS_ALLOWED" if="desktop" />
 	<!-- <define name="ACHIEVEMENTS_ALLOWED" /> -->
-	<!-- <define name="VIDEOS_ALLOWED"/> -->
+	<define name="VIDEOS_ALLOWED"/>
 	
 	<define name="PE_MOD_COMPATIBILITY" if="desktop"/>
 	<define name="LUA_ALLOWED" if="PE_MOD_COMPATIBILITY"/>
@@ -71,6 +71,7 @@
 
 	<!--<haxelib name="polymod"/> -->
 	<haxelib name="hscript" />
+	<!-- <haxelib name="hscript-ex"/> -->
 	<define name="hscriptPos" />
 	<haxeflag name="-dce no" if="hscript"/> <!-- Disable dead code elimination so you can import unused classes on hscript -->
 	
