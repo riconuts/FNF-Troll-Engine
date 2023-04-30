@@ -28,7 +28,7 @@ import Controls;
 using StringTools;
 
 class ControlsSubState extends MusicBeatSubstate {
-	private static var curSelected:Int = -1;
+	var curSelected:Int = -1;
 	private static var curAlt:Bool = false;
 
 	private static var defaultKey:String = 'Reset to Default Keys';

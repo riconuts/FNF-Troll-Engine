@@ -12,7 +12,7 @@ using StringTools;
 
 class QuantNotesSubState extends MusicBeatSubstate
 {
-	private static var curSelected:Int = 0;
+	var curSelected:Int = 0;
 	private static var typeSelected:Int = 0;
 	private var grpNumbers:FlxTypedGroup<Alphabet>;
 	private var grpNotes:FlxTypedGroup<FlxSprite>;
