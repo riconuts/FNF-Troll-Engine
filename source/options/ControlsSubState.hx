@@ -29,9 +29,9 @@ using StringTools;
 
 class ControlsSubState extends MusicBeatSubstate {
 	var curSelected:Int = -1;
-	private static var curAlt:Bool = false;
+	var curAlt:Bool = false;
 
-	private static var defaultKey:String = 'Reset to Default Keys';
+	private inline static final defaultKey:String = 'Reset to Default Keys';
 	private var bindLength:Int = 0;
 
 	var optionShit:Array<Dynamic> = [
