@@ -613,7 +613,7 @@ class Character extends FlxSprite
 		return returnVal;
 	}
 
-	public function setOnScript(variable:String, value:Dynamic)
+	public function setOnScripts(variable:String, value:Dynamic)
 	{
 		if (characterScript != null)
 			characterScript.set(variable, value);
