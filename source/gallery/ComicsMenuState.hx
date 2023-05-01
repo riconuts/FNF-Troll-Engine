@@ -7,6 +7,7 @@ import haxe.io.Path;
 import flixel.*;
 import flixel.math.*;
 import flixel.text.FlxText;
+import flixel.util.FlxColor;
 import sowy.*;
 
 typedef ChapterData = {
@@ -147,6 +148,11 @@ class ComicsMenuState extends MusicBeatState
 		}
 
 		super.create();
+
+		var cornerLeftText = new sowy.TGTTextButton(15, 720, 0, "← BACK", 32, goBack);
+		cornerLeftText.label.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
+		cornerLeftText.y -= cornerLeftText.height + 15;
+		add(cornerLeftText);
 	}
 
 	function goBack(){

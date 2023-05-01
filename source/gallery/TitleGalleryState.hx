@@ -4,6 +4,8 @@ import openfl.events.MouseEvent;
 import flixel.addons.display.FlxBackdrop;
 import gallery.*;
 import TitleState.RandomTitleLogo;
+import flixel.text.FlxText;
+import flixel.util.FlxColor;
 
 class TitleGalleryState extends MusicBeatState
 {
@@ -57,6 +59,11 @@ class TitleGalleryState extends MusicBeatState
         changeSelected(curSelected, true);
 
         super.create();
+
+		var cornerLeftText = new sowy.TGTTextButton(15, 720, 0, "← BACK", 32, goBack);
+		cornerLeftText.label.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
+		cornerLeftText.y -= cornerLeftText.height + 15;
+		add(cornerLeftText);
 
         FlxG.stage.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
     }

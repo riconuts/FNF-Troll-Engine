@@ -1,5 +1,6 @@
 package gallery;
 
+import flixel.util.FlxGradient;
 import flixel.effects.FlxFlicker;
 import sowy.*;
 import flixel.text.FlxText;
@@ -7,31 +8,28 @@ import flixel.util.FlxColor;
 import flixel.tweens.*;
 import gallery.*;
 import flixel.group.FlxGroup;
-import flixel.ui.FlxButton;
+import flixel.addons.display.FlxBackdrop;
 
 class GalleryMenuState extends MusicBeatState
 {
 	var optionShit:Array<String> = ["comics", "jukebox", "titles"];
-	var options = new FlxTypedGroup<TGTTextButton>();
+	var options = new FlxTypedGroup<OldMainMenuState.MainMenuButton>();
 
-	var curSelected(default, set):Int;
-	function set_curSelected(sowy){
-        if (sowy < 0 || sowy >= optionShit.length)
-            sowy = sowy % optionShit.length;
-        if (sowy < 0)
-            sowy = optionShit.length + sowy;
+	static var curSelected:Int = 0;
 
+	function changeSelected(num:Int, ?absolute:Bool){
+		curSelected = absolute==true ? num : curSelected+num;
 
-		for (option in options.members)
-		{
-			if (option.ID == curSelected)
-				option.status = FlxButton.NORMAL;
-			else if (option.ID == sowy)
-				option.status = FlxButton.HIGHLIGHT;
-		}
-
-		curSelected = sowy;
+        if (curSelected < 0 || curSelected >= optionShit.length)
+            curSelected = curSelected % optionShit.length;
+        if (curSelected < 0)
+            curSelected = optionShit.length + curSelected;
+		
 		updateImage(curSelected);
+
+		for (button in options){
+			button.targetX = button.ID == curSelected ? 125 : 50;
+		}
 
 		return curSelected;
 	}
@@ -39,9 +37,17 @@ class GalleryMenuState extends MusicBeatState
 	var selectedSomethin:Bool = false;
 
 	function goBack(){
+		if (selectedSomethin) return;
+
 		FlxG.sound.play(Paths.sound('cancelMenu'));
 		MusicBeatState.switchState(new MainMenuState());
+		curSelected = 0;
     }
+
+	var magenta:FlxBackdrop;
+	var backdrop:FlxBackdrop;
+
+	var cornerLeftText:TGTTextButton;
 
     override function create()
 	{
@@ -54,48 +60,95 @@ class GalleryMenuState extends MusicBeatState
         FlxG.mouse.visible = true;
         #end
 
-		add(new FlxText(10, 24, FlxG.width - 10, "This is still unfinished ok???", 12));
+		persistentUpdate = true;
+
+		/*
+		add(new FlxSprite(0,0,Paths.image("gallerymenu/bg")));
+
+		backdrop = new FlxBackdrop(Paths.image("grid"));
+		backdrop.velocity.set(30, 30);
+		backdrop.color = 0xFF467aeb;
+		backdrop.alpha = 0.175;
+		add(backdrop);
+
+		magenta = new FlxBackdrop(Paths.image("grid"));
+		magenta.velocity.set(30, 30);
+		magenta.color = 0xFFFF0078;
+		magenta.alpha = 0.6;
+		magenta.visible = false;
+		add(magenta);
+		*/
+		var bg = new FlxBackdrop();
+		bg.frames = Paths.getSparrowAtlas("jukebox/space");
+		bg.animation.addByPrefix("space", "space", 50, true);
+		bg.animation.play("space");
+		bg.screenCenter();
+		add(bg);
+
+		add(FlxGradient.createGradientFlxSprite(FlxG.width, FlxG.height, [0xAA000000, 0x55000000, 0xAA000000]));
 
 		for (id in 0...optionShit.length){
-			var option = new TGTTextButton(64, 300 + 48*id, 0, optionShit[id], 32, onSelected);
-			option.label.font = Paths.font("calibri.ttf");
-
-			option.onOver.callback = function(){curSelected = id;};
+			var option = new OldMainMenuState.MainMenuButton(50, 210+120*id);
 			
+			option.onOver.callback = ()->{
+				if (selectedSomethin) return;
+				updateImage(id);
+			};
+			option.onOut.callback = ()->{
+				if (selectedSomethin) return;
+				option.targetX = 51;
+			};
+
+			option.onUp.callback = onSelected.bind(id);
 			option.ID = id;
+
+			option.loadGraphic(Paths.image('gallerymenu/button_${optionShit[id]}'));
+			
 			options.add(option);
 		}
 
 		add(options);
 
-		curSelected = 0;
+		changeSelected(curSelected, true);
 
-		var cornerLeftText = new TGTTextButton(15, 720, 0, "← BACK", 32, goBack);
-		cornerLeftText.label.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
+		cornerLeftText = new TGTTextButton(15, 720, 0, "← BACK", 32, goBack);
+		cornerLeftText.label.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		cornerLeftText.y -= cornerLeftText.height + 15;
 		add(cornerLeftText);
 
 		super.create();
     }
 
-	function onSelected()
+	function onSelected(?id:Int)
 	{
+		if (selectedSomethin) return;
+
 		selectedSomethin = true;
+
+		#if !FLX_NO_MOUSE
+        FlxG.mouse.visible = false;
+        #end
 
 		FlxG.sound.play(Paths.sound('confirmMenu'));
 		updateImage(null);
 
-		FlxG.mouse.visible = false;
+		if (id==null)
+			id = curSelected;
+
+		FlxTween.tween(cornerLeftText, {alpha: 0}, 0.4, {
+			ease: FlxEase.quadOut,
+			onComplete: (wtf)->{cornerLeftText.kill();}
+		});
 
 		options.forEach(function(spr){
-			if (curSelected != spr.ID){
+			if (id != spr.ID){
 				FlxTween.tween(spr, {alpha: 0}, 0.4, {
 					ease: FlxEase.quadOut,
 					onComplete: function(wtf){spr.kill();}
 				});
 			}else{
 				FlxFlicker.flicker(spr, 1, 0.06, false, false, function(fuu){
-					switch(curSelected){
+					switch(id){
 						case 0:
 							MusicBeatState.switchState(new ComicsMenuState());
 						case 1:
@@ -164,13 +217,12 @@ class GalleryMenuState extends MusicBeatState
 	var secsHolding = 0.0;
     override function update(elapsed:Float)
 	{
-		/*
 		if (controls.UI_DOWN_P){
-			curSelected++;
+			changeSelected(1);
 			secsHolding = 0;
 		}
 		if (controls.UI_UP_P){
-			curSelected--;
+			changeSelected(-1);
 			secsHolding = 0;
 		}
 
@@ -180,9 +232,8 @@ class GalleryMenuState extends MusicBeatState
 			var checkNewHold:Int = Math.floor((secsHolding - 0.5) * 10);
 
 			if(secsHolding > 0.35 && checkNewHold - checkLastHold > 0)
-				curSelected += (checkNewHold - checkLastHold) * (controls.UI_UP ? -1 : 1);
+				changeSelected((checkNewHold - checkLastHold) * (controls.UI_UP ? -1 : 1));
 		}
-		*/
 
 		if (controls.ACCEPT)
 			onSelected();
