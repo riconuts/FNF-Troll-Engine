@@ -415,58 +415,6 @@ class PlayState extends MusicBeatState
 	private var keysArray:Array<Dynamic>;
 	private var controlArray:Array<String>;
 
-	function setStageData(stageData:StageFile)
-	{
-		defaultCamZoom = stageData.defaultZoom;
-		FlxG.camera.zoom = defaultCamZoom;
-
-		var color = FlxColor.fromString(stageData.bg_color);
-		camGame.bgColor = color != null ? color : FlxColor.BLACK;
-		
-
-		BF_X = stageData.boyfriend[0];
-		BF_Y = stageData.boyfriend[1];
-		GF_X = stageData.girlfriend[0];
-		GF_Y = stageData.girlfriend[1];
-		DAD_X = stageData.opponent[0];
-		DAD_Y = stageData.opponent[1];
-
-		if(stageData.camera_speed != null)
-			cameraSpeed = stageData.camera_speed;
-
-		boyfriendCameraOffset = stageData.camera_boyfriend;
-		if(boyfriendCameraOffset == null) //Fucks sake should have done it since the start :rolling_eyes:
-			boyfriendCameraOffset = [0, 0];
-
-		opponentCameraOffset = stageData.camera_opponent;
-		if(opponentCameraOffset == null)
-			opponentCameraOffset = [0, 0];
-
-		girlfriendCameraOffset = stageData.camera_girlfriend;
-		if(girlfriendCameraOffset == null)
-			girlfriendCameraOffset = [0, 0];
-
-		if(boyfriendGroup==null)
-			boyfriendGroup = new FlxSpriteGroup(BF_X, BF_Y);
-		else{
-			boyfriendGroup.x = BF_X;
-			boyfriendGroup.y = BF_Y;
-		}
-		if(dadGroup==null)
-			dadGroup = new FlxSpriteGroup(DAD_X, DAD_Y);
-		else{
-			dadGroup.x = DAD_X;
-			dadGroup.y = DAD_Y;
-		}
-
-		if(gfGroup==null)
-			gfGroup = new FlxSpriteGroup(GF_X, GF_Y);
-		else{
-			gfGroup.x = GF_X;
-			gfGroup.y = GF_Y;
-		}
-	}
-
 	var finishedCreating =false;
 	override public function create()
 	{
@@ -476,7 +424,8 @@ class PlayState extends MusicBeatState
 		judgeManager.judgeTimescale = Wife3.timeScale;
 
 		Paths.clearStoredMemory();
-		// Reset to default
+
+		//// Reset to default
 		Note.quantShitCache.clear();
 		FunkinHScript.defaultVars.clear();
 
@@ -636,13 +585,14 @@ class PlayState extends MusicBeatState
 		if (SONG == null)
 			SONG = Song.loadFromJson('tutorial', 'tutorial');
 
-		if(SONG!=null){
+		if (SONG != null){
 			var jason = Paths.songJson(Paths.formatToSongPath(SONG.song) + '/metadata');
-			if (!FileSystem.exists(jason))
+
+			if (!Paths.exists(jason))
 				jason = Paths.modsSongJson(Paths.formatToSongPath(SONG.song) + '/metadata');
 
-			if (FileSystem.exists(jason))
-				metadata = cast Json.parse(File.getContent(jason));
+			if (Paths.exists(jason))
+				metadata = cast Json.parse(Paths.getContent(jason));
 			else
 				trace("No metadata for " + SONG.song + ". Maybe add some?");
 			
@@ -675,7 +625,8 @@ class PlayState extends MusicBeatState
 		stageData = stage.stageData;
 		setStageData(stageData);
 
-		//// Asset loading start
+		//// Asset precaching start
+		//// this could be moved to the loadingstate probably
 		var shitToLoad:Array<AssetPreload> = [
 			{path: "sick"},
 			{path: "good"},
@@ -691,15 +642,19 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.hitsoundVolume > 0)
 			shitToLoad.push({path: 'hitsound', type: 'SOUND'});
 
-		// PRECACHING MISS SOUNDS BECAUSE I THINK THEY CAN LAG PEOPLE AND FUCK THEM UP IDK HOW HAXE WORKS
-		shitToLoad.push({path: 'missnote1', type: 'SOUND'});
-		shitToLoad.push({path: 'missnote2', type: 'SOUND'});
-		shitToLoad.push({path: 'missnote3', type: 'SOUND'});
+		if (ClientPrefs.missVolume != 0){
+			shitToLoad.push({path: 'missnote1', type: 'SOUND'});
+			shitToLoad.push({path: 'missnote2', type: 'SOUND'});
+			shitToLoad.push({path: 'missnote3', type: 'SOUND'});
+		}
 
+		/* 
 		if (PauseSubState.songName != null)
 			shitToLoad.push({path: PauseSubState.songName, type: 'MUSIC'});
-/* 		else if (ClientPrefs.pauseMusic != 'None')
-			shitToLoad.push({path: Paths.formatToSongPath(ClientPrefs.pauseMusic), type: 'MUSIC'}); */
+		else if (ClientPrefs.pauseMusic != 'None')
+			shitToLoad.push({path: Paths.formatToSongPath(ClientPrefs.pauseMusic), type: 'MUSIC'}); 
+		*/
+		shitToLoad.push({path: "breakfast", type: 'MUSIC'}); 
 
 		if (ClientPrefs.timeBarType != 'Disabled')
 			shitToLoad.push({path: "timeBar"});
@@ -760,16 +715,15 @@ class PlayState extends MusicBeatState
 			});
 
 		// extra tracks (ex: die batsards bullet track)
-		for (track in SONG.extraTracks)
+		for (track in SONG.extraTracks){
 			shitToLoad.push({
 				path: '$songName/$track',
 				type: 'SONG'
 			});
+		}
 
-		// moved all of this to its own preload class
 		Cache.loadWithList(shitToLoad);
-
-		//// Asset loading end
+		//// Asset precaching end
 
 		Conductor.songPosition = -5000;
 
@@ -1092,6 +1046,58 @@ class PlayState extends MusicBeatState
 
 		CustomFadeTransition.nextCamera = camOther;
 	}
+
+	function setStageData(stageData:StageFile)
+	{
+		defaultCamZoom = stageData.defaultZoom;
+		FlxG.camera.zoom = defaultCamZoom;
+
+		var color = FlxColor.fromString(stageData.bg_color);
+		camGame.bgColor = color != null ? color : FlxColor.BLACK;
+		
+
+		BF_X = stageData.boyfriend[0];
+		BF_Y = stageData.boyfriend[1];
+		GF_X = stageData.girlfriend[0];
+		GF_Y = stageData.girlfriend[1];
+		DAD_X = stageData.opponent[0];
+		DAD_Y = stageData.opponent[1];
+
+		if(stageData.camera_speed != null)
+			cameraSpeed = stageData.camera_speed;
+
+		boyfriendCameraOffset = stageData.camera_boyfriend;
+		if(boyfriendCameraOffset == null) //Fucks sake should have done it since the start :rolling_eyes:
+			boyfriendCameraOffset = [0, 0];
+
+		opponentCameraOffset = stageData.camera_opponent;
+		if(opponentCameraOffset == null)
+			opponentCameraOffset = [0, 0];
+
+		girlfriendCameraOffset = stageData.camera_girlfriend;
+		if(girlfriendCameraOffset == null)
+			girlfriendCameraOffset = [0, 0];
+
+		if(boyfriendGroup==null)
+			boyfriendGroup = new FlxSpriteGroup(BF_X, BF_Y);
+		else{
+			boyfriendGroup.x = BF_X;
+			boyfriendGroup.y = BF_Y;
+		}
+		if(dadGroup==null)
+			dadGroup = new FlxSpriteGroup(DAD_X, DAD_Y);
+		else{
+			dadGroup.x = DAD_X;
+			dadGroup.y = DAD_Y;
+		}
+
+		if(gfGroup==null)
+			gfGroup = new FlxSpriteGroup(GF_X, GF_Y);
+		else{
+			gfGroup.x = GF_X;
+			gfGroup.y = GF_Y;
+		}
+	}	
 
 	function set_songSpeed(value:Float):Float
 	{
@@ -3981,7 +3987,7 @@ class PlayState extends MusicBeatState
 		//totalPlayed++;
 		//RecalculateRating();
 
-		FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(ClientPrefs.missVolume * 0.9, ClientPrefs.missVolume * 1));
+		FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), ClientPrefs.missVolume*FlxG.random.float(0.9, 1));
 
 		for (field in playfields.members)
 		{
@@ -4468,7 +4474,7 @@ class PlayState extends MusicBeatState
 	}
 
 	public function callOnScripts(event:String, ?args:Array<Dynamic>, ignoreStops:Bool = false, ?exclusions:Array<String>, ?scriptArray:Array<Dynamic>,
-			?ignoreSpecialShit:Bool = false)
+			?ignoreSpecialShit:Bool = true)
 	{
 		var args:Array<Dynamic> = args != null ? args : [];
 
