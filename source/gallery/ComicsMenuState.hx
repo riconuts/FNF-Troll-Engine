@@ -99,11 +99,26 @@ class ComicsMenuState extends MusicBeatState
 		data = null;
 	}
 
+	var doingTransition:Bool = false;
 	override public function create()
 	{
 		#if !FLX_NO_MOUSE
 		FlxG.mouse.visible = true;
 		#end
+
+		persistentUpdate = true;
+
+		var bg = new flixel.addons.display.FlxBackdrop();
+		bg.frames = Paths.getSparrowAtlas("jukebox/space");
+		bg.animation.addByPrefix("space", "space", 50, true);
+		bg.animation.play("space");
+		bg.screenCenter();
+		add(bg);
+		
+		if (FlxG.width > FlxG.height)
+			add(new FlxSprite().makeGraphic(FlxG.height, FlxG.height, 0xFF000000).screenCenter(X));
+		else
+			add(new FlxSprite().makeGraphic(FlxG.width, FlxG.width, 0xFF000000).screenCenter(Y));
 
 		//// GET THE CUTSCENES
 		if (data == null)
@@ -129,12 +144,14 @@ class ComicsMenuState extends MusicBeatState
 			////
 			var pageTxt = new sowy.TGTTextButton(
 				0, 
-				tail + 20*idx, 
+				tail + 24*idx, 
 				0, 
 				page.name, 
 				18, 
 				function()
 				{
+					if (doingTransition) return;
+					doingTransition = true;
 					MusicBeatState.switchState(new ComicReader(page));
 				}
 			);
@@ -156,6 +173,9 @@ class ComicsMenuState extends MusicBeatState
 	}
 
 	function goBack(){
+		if (doingTransition) return;
+		doingTransition = true;
+
 		cleanupData();
 		FlxG.sound.play(Paths.sound('cancelMenu'));
 		MusicBeatState.switchState(new GalleryMenuState());

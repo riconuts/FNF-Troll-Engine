@@ -118,7 +118,7 @@ class JukeboxState extends MusicBeatState {
 		image.antialiasing = false;
 		outline = new FlxShapeBox(0, 33, 420, 420, {
 			thickness: 8,
-			color: 0xFFFFFF00
+			color: 0xFFF4CC34
 		}, 0x000000);
 		outline.screenCenter(X);
 
@@ -138,22 +138,27 @@ class JukeboxState extends MusicBeatState {
 		Paths.currentModDirectory = '';
 
 		// TODO: order the songs so its story > side stories > remixes
+		// naah don't do that
 
 		back = new FlxSprite(0, 560).loadGraphic(Paths.image("jukebox/controls"), true, 60, 60);
+		back.color = 0xFFF4CC34;
 		back.animation.add("back", [0], 0, true);
 		back.animation.play("back", true);
 
 		play = new FlxSprite(0 , 560).loadGraphic(Paths.image("jukebox/controls"), true, 60, 60);
+		play.color = 0xFFF4CC34;
 		play.animation.add("play", [1], 0, true);
 		play.animation.add("pause", [2], 0, true);
 		play.animation.play("play", true);
 
 		forw = new FlxSprite(0, 560).loadGraphic(Paths.image("jukebox/controls"), true, 60, 60);
+		forw.color = 0xFFF4CC34;
 		forw.animation.add("fw", [0], 0, true);
 		forw.animation.play("fw", true);
 		forw.flipX = true;
 
 		mute = new FlxSprite(0 , 560).loadGraphic(Paths.image("jukebox/controls"), true, 60, 60);
+		mute.color = 0xFFF4CC34;
 		mute.animation.add("mute", [3], 0, true);
 		mute.animation.add("unmute", [4], 0, true);
 		mute.animation.play(muteVocals ? "unmute" : "mute", true);
@@ -167,7 +172,7 @@ class JukeboxState extends MusicBeatState {
 		mute.x = forw.x + 120;
 
 		songName = new FlxText(0, 520, FlxG.width, "", 32, true);
-		songName.setFormat(Paths.font("calibrib.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
+		songName.setFormat(Paths.font("calibrib.ttf"), 32, 0xFFF4CC34, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE, 0xFFF4CC34);
 		songName.scrollFactor.set(1, 1);
 
 		songName.screenCenter(X);
@@ -186,7 +191,7 @@ class JukeboxState extends MusicBeatState {
 		super.create();
 
 		var cornerLeftText = new sowy.TGTTextButton(15, 720, 0, "← BACK", 32, goBack);
-		cornerLeftText.label.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
+		cornerLeftText.label.setFormat(Paths.font("calibri.ttf"), 32, 0xFFF4CC34, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, 0xFFF4CC34);
 		cornerLeftText.y -= cornerLeftText.height + 15;
 		add(cornerLeftText);
 
