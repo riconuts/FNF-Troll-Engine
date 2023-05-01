@@ -18,6 +18,10 @@ class GalleryMenuState extends MusicBeatState
 	static var curSelected:Int = 0;
 
 	function changeSelected(num:Int, ?absolute:Bool){
+		var difference = absolute ? Math.abs(curSelected - num) : num;
+        if(difference != 0)
+			FlxG.sound.play(Paths.sound('scrollMenu'));
+
 		curSelected = absolute==true ? num : curSelected+num;
 
         if (curSelected < 0 || curSelected >= optionShit.length)
@@ -234,6 +238,11 @@ class GalleryMenuState extends MusicBeatState
 			if(secsHolding > 0.35 && checkNewHold - checkLastHold > 0)
 				changeSelected((checkNewHold - checkLastHold) * (controls.UI_UP ? -1 : 1));
 		}
+
+		#if !FLX_NO_MOUSE
+		if (FlxG.mouse.wheel != 0)
+			changeSelected(-FlxG.mouse.wheel);
+		#end
 
 		if (controls.ACCEPT)
 			onSelected();
