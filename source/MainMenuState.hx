@@ -1,5 +1,6 @@
 package;
 
+import flixel.text.FlxText;
 import flixel.input.FlxPointer;
 import flixel.util.FlxTimer;
 import flixel.addons.display.FlxBackdrop;
@@ -63,6 +64,11 @@ class MainMenuState extends MusicBeatState {
 		persistentDraw = true;
 
 		FadeTransitionSubstate.nextCamera = FlxG.camera; // AAAA
+
+		#if desktop
+		// Updating Discord Rich Presence
+		Discord.DiscordClient.changePresence("In the Menus", null);
+		#end
 
 		super.create();
 		

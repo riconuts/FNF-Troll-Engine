@@ -13,6 +13,17 @@ import llua.State;
 class DiscordClient
 {
 	public static var isInitialized:Bool = false;
+
+	public static function initialize()
+	{
+		var DiscordDaemon = sys.thread.Thread.create(() ->
+		{
+			new DiscordClient();
+		});
+		trace("Discord Client initialized");
+		isInitialized = true;
+	}
+
 	public function new()
 	{
 		trace("Discord Client starting...");
@@ -34,19 +45,9 @@ class DiscordClient
 		DiscordRpc.shutdown();
 	}
 	
-	public static function shutdown()
-	{
-		DiscordRpc.shutdown();
-	}
-	
 	static function onReady()
 	{
-		DiscordRpc.presence({
-			details: "In the Menus",
-			state: null,
-			largeImageKey: 'app-logo',
-			largeImageText: "Troll Engine"
-		});
+		changePresence("In the Menus", null);
 	}
 
 	static function onError(_code:Int, _message:String)
@@ -59,19 +60,9 @@ class DiscordClient
 		trace('Disconnected! $_code : $_message');
 	}
 
-	public static function initialize()
-	{
-		var DiscordDaemon = sys.thread.Thread.create(() ->
-		{
-			new DiscordClient();
-		});
-		trace("Discord Client initialized");
-		isInitialized = true;
-	}
-
 	public static function changePresence(details:String, state:Null<String>, largeImageKey:String = "app-logo", ?hasStartTimestamp:Bool, ?endTimestamp:Float)
 	{
-		#if SECRET_DISCORD_RPC
+		#if !final
 		DiscordRpc.presence({
 			details: "thats how you do it",
 			largeImageKey: 'gorgeous',
@@ -90,6 +81,7 @@ class DiscordClient
 			state: state,
 
 			largeImageKey: "app-logo",// largeImageKey,
+			largeImageText: "Tails Gets Trolled v" + Application.current.meta.get('version'), //"Troll Engine"
 			// largeImageText: "Engine Version: " + MainMenuState.engineVersion,
 
 			// Obtained times are in milliseconds so they are divided so Discord can use it
@@ -111,4 +103,9 @@ class DiscordClient
 			});
 	}
 	#end
+
+	public static function shutdown()
+	{
+		DiscordRpc.shutdown();
+	}
 }

@@ -2794,7 +2794,7 @@ class PlayState extends MusicBeatState
 		reloadHealthBarColors();
 	}
 
-	public function triggerEventNote(eventName:String, value1:String, value2:String) {
+	public function triggerEventNote(eventName:String = "", value1:String = "", value2:String = "") {
 		trace('Event: ' + eventName + ', Value 1: ' + value1 + ', Value 2: ' + value2 + ', at Time: ' + Conductor.songPosition);
 
 		switch(eventName) {
