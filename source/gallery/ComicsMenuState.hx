@@ -50,7 +50,7 @@ class Tails extends FlxSprite{
 		else
 			this.isAlt = FlxG.random.bool();
 	
-		super(x, y, Paths.image(isAlt ? "tailsalt" : "tails"));
+		super(x, y, Paths.image(this.isAlt ? "tailsalt" : "tails"));
 	}
 
 	var isOverlapping = false;

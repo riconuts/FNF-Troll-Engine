@@ -18,9 +18,9 @@ import Discord.DiscordClient;
 #end
 #if MODS_ALLOWED
 import sys.FileSystem;
-import sys.io.File;
 #end
 
+//// a lot of the category code isn't needed so rewritting it would be good i think.
 class FreeplayState extends MusicBeatState
 {
 	var songs:Array<SongMetadata> = [];
