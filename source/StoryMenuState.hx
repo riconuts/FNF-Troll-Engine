@@ -163,9 +163,7 @@ class StoryMenuState extends MusicBeatState
 
 		changeSelection(curSelected, true);
 		
-		var cornerLeftText = new TGTTextButton(15, 720, 0, "← BACK", 32, goBack);
-		cornerLeftText.label.setFormat(Paths.font("calibri.ttf"), 32, 0xFFF4CC34, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE);
-		cornerLeftText.y -= cornerLeftText.height + 15;
+		var cornerLeftText = sowy.TGTMenuShit.newBackTextButton(goBack);
 		add(cornerLeftText);
 	}
 

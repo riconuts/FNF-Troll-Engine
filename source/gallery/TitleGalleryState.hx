@@ -60,9 +60,7 @@ class TitleGalleryState extends MusicBeatState
 
         super.create();
 
-		var cornerLeftText = new sowy.TGTTextButton(15, 720, 0, "← BACK", 32, goBack);
-		cornerLeftText.label.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
-		cornerLeftText.y -= cornerLeftText.height + 15;
+		var cornerLeftText = sowy.TGTMenuShit.newBackTextButton(goBack);
 		add(cornerLeftText);
 
         FlxG.stage.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);

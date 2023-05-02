@@ -115,9 +115,7 @@ class GalleryMenuState extends MusicBeatState
 
 		changeSelected(curSelected, true);
 
-		cornerLeftText = new TGTTextButton(15, 720, 0, "← BACK", 32, goBack);
-		cornerLeftText.label.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		cornerLeftText.y -= cornerLeftText.height + 15;
+		cornerLeftText = TGTMenuShit.newBackTextButton(goBack);
 		add(cornerLeftText);
 
 		super.create();

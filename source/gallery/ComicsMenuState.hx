@@ -121,11 +121,11 @@ class ComicsMenuState extends MusicBeatState
 
 				while (true){
 					var visualName = '$name ${num+1}';
-					var name = '$formattedName-${num+1}';
+					var pathName = '$formattedName-${num+1}';
 
-					if (Paths.exists('$daComicPath/${name}.png')){
+					if (Paths.exists('$daComicPath/${pathName}.png')){
 						
-						var newPage = {visualName: visualName, name: name, chapter: daChapter, prevPage: lastPage};
+						var newPage = {visualName: visualName, name: pathName, chapter: daChapter, prevPage: lastPage};
 
 						if (lastPage != null)
 							lastPage.nextPage = newPage;
@@ -135,6 +135,10 @@ class ComicsMenuState extends MusicBeatState
 						num++;
 					}else
 						break;
+				}
+
+				if (num == 1 && lastPage != null){
+					lastPage.visualName = name;
 				}
 			}
 
@@ -197,10 +201,7 @@ class ComicsMenuState extends MusicBeatState
 		else
 			add(new FlxSprite().makeGraphic(FlxG.width, FlxG.width, 0xFF000000).screenCenter(Y));
 
-		var cornerLeftText = new sowy.TGTTextButton(15, 720, 0, "← BACK", 32, goBack);
-		cornerLeftText.label.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
-		cornerLeftText.label.underline = true;
-		cornerLeftText.y -= cornerLeftText.height + 15;
+		var cornerLeftText = TGTMenuShit.newBackTextButton(goBack);
 		add(cornerLeftText);
 
 		//// GET THE CUTSCENES
