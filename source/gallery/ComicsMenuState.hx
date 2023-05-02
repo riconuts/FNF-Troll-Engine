@@ -1,5 +1,7 @@
 package gallery;
 
+import openfl.ui.Mouse;
+import openfl.ui.MouseCursor;
 import openfl.text.TextFormat;
 import flixel.group.FlxSpriteGroup;
 import flixel.group.FlxGroup;
@@ -11,6 +13,7 @@ import flixel.util.FlxColor;
 import sowy.*;
 
 typedef ChapterData = {
+	var ?name:String;
 	var pages:Array<PageData>;
 
 	var ?directory:String;
@@ -23,11 +26,49 @@ typedef PageData = {
 		ChapterData to which this page belongs to. 
 	**/
 	var chapter:ChapterData;
+	
+	/**
+		Displayed name of this page.
+	**/
+	var visualName:String;
+
+	/**
+		Name of the image file that belongs to this page
+	**/
 	var name:String;
 
 	var ?prevPage:PageData;
 	var ?nextPage:PageData;
 };
+
+class Tails extends FlxSprite{
+	var isAlt:Bool = false;
+
+	public function new(?x, ?y, ?isAlt:Bool){
+		if (isAlt != null)
+			this.isAlt = isAlt;
+		else
+			this.isAlt = FlxG.random.bool();
+	
+		super(x, y, Paths.image(isAlt ? "tailsalt" : "tails"));
+	}
+
+	var isOverlapping = false;
+
+	override public function update(e) {
+		if (FlxG.mouse.overlaps(this) != isOverlapping)
+		{
+			isOverlapping = !isOverlapping;
+
+			if (isAlt)
+				loadGraphic(Paths.image(isOverlapping ? "tails" : "tailsalt"));
+			else
+				loadGraphic(Paths.image(isOverlapping ? "tailsalt" : "tails"));
+		}
+		
+		super.update(e);
+	}
+}
 
 class ComicsMenuState extends MusicBeatState
 {
@@ -45,22 +86,25 @@ class ComicsMenuState extends MusicBeatState
 		data = [];
 
 		#if MODS_ALLOWED
-		for (modDir in Paths.getModDirectories())
+		// lol im running out of names
+		for (mod in std.ChapterData.reloadChapterFiles())
 		{
+			var modDir = mod.directory;
 			var rawList = Paths.getContent(Paths.mods(modDir + "/data/freeplaySonglist.txt"));
 			if (rawList == null) continue;
 
-			var pages:Array<PageData> = [];
-
-			var daChapter = {pages: pages, directory: modDir, prevChapter: lastChapter};
-			data.push(daChapter);
-
-			if (lastChapter != null)
-				lastChapter.nextChapter = daChapter;
-			
-			lastChapter = daChapter;
+			var daChapter = {
+				directory: modDir,
+				
+				name: mod.name,
+				pages: null, 
+				 
+				prevChapter: lastChapter
+			};
 
 			////
+
+			var pages:Array<PageData> = [];
 			for (line in CoolUtil.listFromString(rawList)){
 				var shid = line.split(":");
 				
@@ -76,9 +120,12 @@ class ComicsMenuState extends MusicBeatState
 				var num = 0;
 
 				while (true){
+					var visualName = '$name ${num+1}';
 					var name = '$formattedName-${num+1}';
+
 					if (Paths.exists('$daComicPath/${name}.png')){
-						var newPage = {name: name, chapter: daChapter, prevPage: lastPage};
+						
+						var newPage = {visualName: visualName, name: name, chapter: daChapter, prevPage: lastPage};
 
 						if (lastPage != null)
 							lastPage.nextPage = newPage;
@@ -90,6 +137,17 @@ class ComicsMenuState extends MusicBeatState
 						break;
 				}
 			}
+
+			if (pages.length <= 0) 
+				continue; // Don't add this mod as a chapter if it doesn't have any pages
+
+			if (lastChapter != null){
+				lastChapter.nextChapter = daChapter;
+			}
+			lastChapter = daChapter;
+
+			daChapter.pages = pages;
+			data.push(daChapter);
 		}
 		#end
 	}
@@ -99,14 +157,33 @@ class ComicsMenuState extends MusicBeatState
 		data = null;
 	}
 
+	static inline function boundInt(Value:Int, ?Min:Int, ?Max:Int):Int
+	{
+		var lowerBound:Int = (Min != null && Value < Min) ? Min : Value;
+		return (Max != null && lowerBound > Max) ? Max : lowerBound;
+	}
+
+	static function switchToChapterNum(chapterNum:Int){
+		curChapter = chapterNum;
+		MusicBeatState.switchState(new ComicsMenuState());
+
+		FlxG.mouse.visible = true;
+		Mouse.cursor = __WAIT_ARROW;
+	}
+	static function switchToChapterData(chapterData:ChapterData){
+		switchToChapterNum(data.indexOf(chapterData));
+	}
+
 	var doingTransition:Bool = false;
 	override public function create()
 	{
 		#if !FLX_NO_MOUSE
 		FlxG.mouse.visible = true;
+		Mouse.cursor = ARROW;
 		#end
 
 		persistentUpdate = true;
+		super.create();
 
 		var bg = new flixel.addons.display.FlxBackdrop();
 		bg.frames = Paths.getSparrowAtlas("jukebox/space");
@@ -120,23 +197,70 @@ class ComicsMenuState extends MusicBeatState
 		else
 			add(new FlxSprite().makeGraphic(FlxG.width, FlxG.width, 0xFF000000).screenCenter(Y));
 
+		var cornerLeftText = new sowy.TGTTextButton(15, 720, 0, "← BACK", 32, goBack);
+		cornerLeftText.label.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
+		cornerLeftText.label.underline = true;
+		cornerLeftText.y -= cornerLeftText.height + 15;
+		add(cornerLeftText);
+
 		//// GET THE CUTSCENES
 		if (data == null)
 			loadData();
 
+		if (data.length <= 0){
+			trace("Chapter data not found!");
+			add(new Tails().screenCenter());
+			return;
+		}
+
+		curChapter = boundInt(curChapter, 0, data.length-1);
+
 		var curData:ChapterData = data[curChapter];
+		if (curData == null){
+			trace("Error: Chapter data is null!?");
+			add(new Tails().screenCenter());
+			return;
+		}
+
 		var curPages:Array<PageData> = curData.pages;
 
-		var chapterNameTxt = new FlxText(0, 5, 0, "CHAPTER NAME GOES HERE", 18);
+		var chapterNameTxt = new FlxText(0, 8, 0, '${curData.name}', 18);
 		chapterNameTxt.font = Paths.font("consola.ttf");
 		chapterNameTxt.screenCenter(X);
 		add(chapterNameTxt);
 
-		var coverArt = new FlxSprite(0, chapterNameTxt.y + chapterNameTxt.height+ 24, ChapterMenuState.getChapterCover(curData.directory));
+		Paths.currentModDirectory = curData.directory;
+		var coverArt = new FlxSprite(0, chapterNameTxt.y + chapterNameTxt.height + 18, ChapterMenuState.getChapterCover(curData.name));
 		coverArt.screenCenter(X);
 		add(coverArt);
 
-		var tail = coverArt.y + coverArt.height + 20;
+		var tail = coverArt.y + coverArt.height + 12;
+
+		if (curData.prevChapter != null){
+			var prevChapterTxt = new TGTTextButton(coverArt.x, tail, 0, "← Chapter", 18, ()->{
+				if (doingTransition) return;
+				doingTransition = true;
+
+				switchToChapterData(curData.prevChapter);
+			});
+			prevChapterTxt.label.font = Paths.font("consola.ttf");
+			prevChapterTxt.label.underline = true;
+			add(prevChapterTxt);
+		}
+		if (curData.nextChapter != null){
+			var nextChapterTxt = new TGTTextButton(coverArt.x + coverArt.width, tail, 0, "Chapter →", 18, ()->{
+				if (doingTransition) return;
+				doingTransition = true;
+
+				switchToChapterData(curData.nextChapter);
+			});
+			nextChapterTxt.x -= nextChapterTxt.width;
+			nextChapterTxt.label.font = Paths.font("consola.ttf");
+			nextChapterTxt.label.underline = true;
+			add(nextChapterTxt);
+		}
+
+		tail += 48;
 
 		for (idx in 0...curPages.length){
 			var page:PageData = curData.pages[idx];
@@ -144,37 +268,39 @@ class ComicsMenuState extends MusicBeatState
 			////
 			var pageTxt = new sowy.TGTTextButton(
 				0, 
-				tail + 24*idx, 
+				tail + 20*idx, 
 				0, 
-				page.name, 
+				page.visualName, 
 				18, 
 				function()
 				{
 					if (doingTransition) return;
 					doingTransition = true;
+					
 					MusicBeatState.switchState(new ComicReader(page));
+
+					FlxG.mouse.visible = true;
+					Mouse.cursor = __WAIT_ARROW;
 				}
 			);
 			pageTxt.scrollFactor.set(1, 1);
 			pageTxt.label.font = Paths.font("consola.ttf");
 			pageTxt.label.underline = true;
+			pageTxt.label.updateHitbox();
+			pageTxt.width = pageTxt.label.width;
 			pageTxt.screenCenter(X);
+			pageTxt.height = 18; // for the hitbox so you don't click on two texts at the same time
 			add(pageTxt);
 
 			options.push(pageTxt);
 		}
-
-		super.create();
-
-		var cornerLeftText = new sowy.TGTTextButton(15, 720, 0, "← BACK", 32, goBack);
-		cornerLeftText.label.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.YELLOW, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.YELLOW);
-		cornerLeftText.y -= cornerLeftText.height + 15;
-		add(cornerLeftText);
 	}
 
 	function goBack(){
 		if (doingTransition) return;
 		doingTransition = true;
+
+		curSelected = 0;
 
 		cleanupData();
 		FlxG.sound.play(Paths.sound('cancelMenu'));
@@ -184,6 +310,9 @@ class ComicsMenuState extends MusicBeatState
 	override public function update(e)
 	{
 		if (controls.BACK) goBack();
+
+		// TODO: uhhh scrolling code in case you can't fit all chapter pages into the screen (This probably won't happen though)
+
 		super.update(e);
 	}
 }
@@ -216,6 +345,7 @@ class ComicReader extends MusicBeatState
 	{
 		#if !FLX_NO_MOUSE
 		FlxG.mouse.visible = true;
+		Mouse.cursor = ARROW;
 		#end
 
 		//
@@ -246,7 +376,7 @@ class ComicReader extends MusicBeatState
 		var head = curPanel.y - 24 - 18;
 		var tail = curPanel.y + curPanel.height + 24;	
 
-		var listPage = new TGTTextButton(curPanel.getMidpoint().x, head, 0, "Page List", 18);
+		var listPage = new TGTTextButton(curPanel.getMidpoint().x, head, 0, "Page List", 18, goToPageList);
 		listPage.label.font = Paths.font("consola.ttf");
 		listPage.label.underline = true;
 		listPage.x -= listPage.frameWidth * 0.5;
@@ -254,7 +384,7 @@ class ComicReader extends MusicBeatState
 		listPage.scrollFactor.set(1, 1);
 		add(listPage);
 
-		var listPage = new TGTTextButton(curPanel.getMidpoint().x, tail, 0, "Page List", 18);
+		var listPage = new TGTTextButton(curPanel.getMidpoint().x, tail, 0, "Page List", 18, goToPageList);
 		listPage.label.font = Paths.font("consola.ttf");
 		listPage.label.underline = true;
 		listPage.x -= listPage.frameWidth * 0.5;
@@ -265,6 +395,8 @@ class ComicReader extends MusicBeatState
 			function goPrevPage(){
 				pageData = pageData.prevPage;
 				MusicBeatState.resetState();
+				FlxG.mouse.visible = true;
+				Mouse.cursor = __WAIT_ARROW;
 			}
 
 			var prevPage = new TGTTextButton(curPanel.x + 18, head, 0, "← Page", 18, goPrevPage);
@@ -285,6 +417,8 @@ class ComicReader extends MusicBeatState
 			function goNextPage(){
 				pageData = pageData.nextPage;
 				MusicBeatState.resetState();
+				FlxG.mouse.visible = true;
+				Mouse.cursor = __WAIT_ARROW;
 			}
 
 			var nextPage = new TGTTextButton(0, head, 0, "Page →", 18, goNextPage);
@@ -342,6 +476,15 @@ class ComicReader extends MusicBeatState
 		camFollow.set(mid.x, curPanel.height > FlxG.height ? 0 : mid.y);
 	}
 
+	function goToPageList(){
+		@:privateAccess(ComicsMenuState)
+		ComicsMenuState.switchToChapterData(pageData.chapter);
+		/*
+		FlxG.mouse.visible = true;
+		Mouse.cursor = __WAIT_ARROW;
+		*/
+	}
+
 	var baseSpeed = 8;
 
 	override function update(elapsed:Float)
@@ -349,7 +492,7 @@ class ComicReader extends MusicBeatState
 		var justPressed = FlxG.keys.justPressed;
 		var pressed = FlxG.keys.pressed;
 
-		if (controls.BACK) MusicBeatState.switchState(new ComicsMenuState());
+		if (controls.BACK) goToPageList();
 
 		//
 		var speed:Float = (pressed.SHIFT ? baseSpeed * 2 : baseSpeed);

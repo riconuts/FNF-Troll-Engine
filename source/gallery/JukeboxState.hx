@@ -9,8 +9,8 @@ import flixel.text.FlxText;
 import flixel.text.FlxText.FlxTextBorderStyle;
 import flixel.util.FlxColor;
 import flixel.addons.display.shapes.FlxShapeBox;
-import flash.ui.Mouse;
-import flash.ui.MouseCursor;
+import openfl.ui.Mouse;
+import openfl.ui.MouseCursor;
 import flixel.FlxG;
 #if desktop
 import Discord;
@@ -218,10 +218,10 @@ class JukeboxState extends MusicBeatState {
 	override function update(elapsed:Float){
 		super.update(elapsed);
 
-		if(FlxG.mouse.overlaps(forw) || FlxG.mouse.overlaps(back) || FlxG.mouse.overlaps(play))
-			Mouse.cursor = MouseCursor.BUTTON;
+		if(FlxG.mouse.overlaps(forw) || FlxG.mouse.overlaps(back) || FlxG.mouse.overlaps(play) || FlxG.mouse.overlaps(mute))
+			Mouse.cursor = BUTTON;
 		else
-			Mouse.cursor = MouseCursor.AUTO;
+			Mouse.cursor = ARROW;
 
 		var forward = FlxG.mouse.overlaps(forw) && FlxG.mouse.justPressed || FlxG.keys.justPressed.RIGHT;
 		var bakward = FlxG.mouse.overlaps(back) && FlxG.mouse.justPressed || FlxG.keys.justPressed.LEFT;
@@ -294,6 +294,7 @@ class JukeboxState extends MusicBeatState {
 
 		trace(daData);
 
+		Mouse.cursor = __WAIT_ARROW;
 		if (song == 'menuTheme')
 			MusicBeatState.playMenuMusic(true);
 		else
@@ -345,6 +346,7 @@ class JukeboxState extends MusicBeatState {
 				FlxG.sound.playMusic(Paths.music(song));
 			}
 		}
+		Mouse.cursor = ARROW;
 
 		updateDiscord();
 	}
