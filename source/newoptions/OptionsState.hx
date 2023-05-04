@@ -1,5 +1,6 @@
 package newoptions;
 
+import flixel.util.FlxTimer;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
@@ -101,6 +102,8 @@ class OptionsState extends MusicBeatState {
             case 'showFPS':
 				if (Main.fpsVar != null)
 					Main.fpsVar.visible = val;
+            case 'globalAntialising':
+                FlxSprite.defaultAntialiasing = ClientPrefs.globalAntialiasing;
             default:
                 // nothing
         }
@@ -135,7 +138,6 @@ class OptionsState extends MusicBeatState {
 				}
             case 'epicWindow' | 'sickWindow' | 'goodWindow' | 'badWindow' | 'hitWindow':
                 checkWindows();
-
             default:
                 // nothing
         }
@@ -383,15 +385,33 @@ class OptionsState extends MusicBeatState {
         
         FlxG.mouse.visible = true;
 
+        ////
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('newmenuu/optionsbg'));
 		bg.screenCenter(XY);
         add(bg);
 
         var backdrop = new flixel.addons.display.FlxBackdrop(Paths.image("grid"));
-		backdrop.velocity.set(30, 30);
+        backdrop.velocity.set(30, 30);
+        function updateBackdropPos(){
+            var time = Sys.time();
+		    backdrop.setPosition(time * 30, time * 30);
+        }
+        updateBackdropPos();
+		
 		backdrop.alpha = 0.15;
 		add(backdrop);
 
+        // im lazy so this is my temporary workaround to having persistantUpdate until you replace the psych menus :P
+        new FlxTimer().start(
+            1 / ClientPrefs.framerate, 
+            (tmr)->{
+                updateBackdropPos();
+                if (tmr.elapsedTime > 0.6) tmr.cancel();
+            }, 
+            0
+        );
+
+        ////
         var optionMenu = new FlxSprite(84, 80, CoolUtil.makeOutlinedGraphic(920, 648, FlxColor.fromRGB(82, 82, 82), 2, FlxColor.fromRGB(70, 70, 70)));
 		optionMenu.alpha = 0.8;
 		add(optionMenu);

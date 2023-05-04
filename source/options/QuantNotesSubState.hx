@@ -67,6 +67,13 @@ class QuantNotesSubState extends MusicBeatSubstate
 		bg.antialiasing = ClientPrefs.globalAntialiasing;
 		add(bg);
 
+		var backdrop = new flixel.addons.display.FlxBackdrop(Paths.image("grid"));
+		var time = Sys.time();
+		backdrop.setPosition(time * 30, time * 30);
+		backdrop.velocity.set(30, 30);
+		backdrop.alpha = 0.15;
+		add(backdrop);
+
 		blackBG = new FlxSprite(posX - 25).makeGraphic(870, 200, FlxColor.BLACK);
 		blackBG.alpha = 0.4;
 		add(blackBG);
