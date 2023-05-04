@@ -1,9 +1,9 @@
 package gallery;
 
+import sowy.TGTMenuShit;
 import flixel.addons.display.FlxBackdrop;
 import flixel.util.FlxTimer;
 import flixel.system.FlxSound;
-import sys.FileSystem;
 import flixel.tweens.FlxTween;
 import flixel.text.FlxText;
 import flixel.text.FlxText.FlxTextBorderStyle;
@@ -14,6 +14,9 @@ import openfl.ui.MouseCursor;
 import flixel.FlxG;
 #if desktop
 import Discord;
+#end
+#if sys
+import sys.FileSystem;
 #end
 
 using StringTools;
@@ -28,16 +31,18 @@ typedef JukeboxSongData = {
 class JukeboxState extends MusicBeatState {
 	var songData:Array<JukeboxSongData> = [];
 
+	////
 	var outline:FlxShapeBox;
 	var image:FlxSprite;
 	var defImage:FlxSprite;
 
 	var songName:FlxText;
+	var songProgress:FlxSprite;
 
+	// butts
 	var back:FlxSprite;
 	var play:FlxSprite;
 	var forw:FlxSprite;
-
 	var mute:FlxSprite;
 	
 	inline function addSong(songName:String, songDir:String, ?chapter:String, ?coverArt:String)
@@ -50,7 +55,6 @@ class JukeboxState extends MusicBeatState {
 	// TODO: add bpm
 	static var idx:Int = 0;
 	public static var playIdx:Int = 0;
-
 	static var muteVocals(default, set) = false;
 	static function set_muteVocals(mute:Bool){
 		muteVocals = mute;
@@ -118,7 +122,7 @@ class JukeboxState extends MusicBeatState {
 		image.antialiasing = false;
 		outline = new FlxShapeBox(0, 33, 420, 420, {
 			thickness: 8,
-			color: 0xFFF4CC34
+			color: TGTMenuShit.YELLOW
 		}, 0x000000);
 		outline.screenCenter(X);
 
@@ -141,24 +145,24 @@ class JukeboxState extends MusicBeatState {
 		// naah don't do that
 
 		back = new FlxSprite(0, 560).loadGraphic(Paths.image("jukebox/controls"), true, 60, 60);
-		back.color = 0xFFF4CC34;
+		back.color = TGTMenuShit.YELLOW;
 		back.animation.add("back", [0], 0, true);
 		back.animation.play("back", true);
 
 		play = new FlxSprite(0 , 560).loadGraphic(Paths.image("jukebox/controls"), true, 60, 60);
-		play.color = 0xFFF4CC34;
+		play.color = TGTMenuShit.YELLOW;
 		play.animation.add("play", [1], 0, true);
 		play.animation.add("pause", [2], 0, true);
 		play.animation.play("play", true);
 
 		forw = new FlxSprite(0, 560).loadGraphic(Paths.image("jukebox/controls"), true, 60, 60);
-		forw.color = 0xFFF4CC34;
+		forw.color = TGTMenuShit.YELLOW;
 		forw.animation.add("fw", [0], 0, true);
 		forw.animation.play("fw", true);
 		forw.flipX = true;
 
 		mute = new FlxSprite(0 , 560).loadGraphic(Paths.image("jukebox/controls"), true, 60, 60);
-		mute.color = 0xFFF4CC34;
+		mute.color = TGTMenuShit.YELLOW;
 		mute.animation.add("mute", [3], 0, true);
 		mute.animation.add("unmute", [4], 0, true);
 		mute.animation.play(muteVocals ? "unmute" : "mute", true);
@@ -172,10 +176,17 @@ class JukeboxState extends MusicBeatState {
 		mute.x = forw.x + 120;
 
 		songName = new FlxText(0, 520, FlxG.width, "", 32, true);
-		songName.setFormat(Paths.font("calibrib.ttf"), 32, 0xFFF4CC34, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE, 0xFFF4CC34);
+		songName.setFormat(Paths.font("calibrib.ttf"), 32, TGTMenuShit.YELLOW, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE, TGTMenuShit.YELLOW);
 		songName.scrollFactor.set(1, 1);
-
 		songName.screenCenter(X);
+
+		/*
+		songProgress = new FlxSprite(0, 650).makeGraphic(720, 8);
+		songProgress.color = TGTMenuShit.YELLOW;
+		songProgress.screenCenter(X);
+		songProgress.visible = false;
+		add(songProgress);
+		*/
 		
 		add(outline);
 		add(defImage);
@@ -208,7 +219,10 @@ class JukeboxState extends MusicBeatState {
 		#end
 	}
 
+	var doingTrans = false;
 	function goBack() {
+		if (doingTrans) return;
+		doingTrans = true;
 		FlxG.sound.play(Paths.sound('cancelMenu'));
 		MusicBeatState.switchState(new GalleryMenuState());
 	}
@@ -278,9 +292,45 @@ class JukeboxState extends MusicBeatState {
 		}
 				
 		play.animation.play(idx==playIdx?(FlxG.sound.music.playing?"pause":"play"):"play");
+
+		/*
+		if (playIdx != 0 && FlxG.sound.music != null){
+			songProgress.visible = true;
+			songProgress.scale.x = FlxG.sound.music.time / FlxG.sound.music.length;
+			songProgress.updateHitbox();
+		}else
+			songProgress.visible = false;
+		*/
+	}
+
+	//// sorry but ram usage rises pretty quickly ;_;
+	var trackedSounds:Array<String> = [];
+	function clearSounds(){
+		for (key in trackedSounds)
+			openfl.Assets.cache.clear(key);
+
+		trackedSounds = [];
+	}
+	function getSound(path):Null<openfl.media.Sound>
+	{
+		#if (html5 || flash)
+		if (Assets.exists(gottenPath, SOUND)){
+			trackedSounds.push(path);
+			return Assets.getSound(gottenPath, false);
+		}
+		#else
+		if (FileSystem.exists(path)){
+			trackedSounds.push(path);
+			return openfl.media.Sound.fromFile(path);
+		}
+		#end
+		
+		return null;
 	}
 
 	function playDaSong(?daIdx:Int){
+		Mouse.cursor = __WAIT_ARROW;
+
 		if(daIdx==null)daIdx=playIdx;
 		playIdx = daIdx;
 
@@ -292,57 +342,58 @@ class JukeboxState extends MusicBeatState {
 
 		trace(daData);
 
-		Mouse.cursor = __WAIT_ARROW;
+		if (FlxG.sound.music != null)
+			FlxG.sound.music.stop();
+		if (MusicBeatState.menuVox != null)
+			MusicBeatState.menuVox.stop();
+
+		clearSounds();
+
 		if (song == 'menuTheme')
 			MusicBeatState.playMenuMusic(true);
 		else
 		{
-			if (FileSystem.exists(Paths.returnSoundPath("songs", '${Paths.formatToSongPath(song)}/Inst'))){
-				var vox:Null<Any> = null;
-				var inst = Paths.inst(song);
+			var inst = getSound(Paths.returnSoundPath("songs", '${Paths.formatToSongPath(song)}/Inst'));
 
-				if (FileSystem.exists(Paths.returnSoundPath("songs", '${Paths.formatToSongPath(song)}/Voices')))
-				{
+			if (inst == null){
+				inst = getSound(Paths.returnSoundPath("music", song));
+			}else{
+				var vox = getSound(Paths.returnSoundPath("songs", '${Paths.formatToSongPath(song)}/Voices'));
+	
+				if (vox != null){
 					if (MusicBeatState.menuVox==null){
 						MusicBeatState.menuVox = new FlxSound();
 						MusicBeatState.menuVox.persist = true;
 						MusicBeatState.menuVox.looped = true;
 						MusicBeatState.menuVox.group = FlxG.sound.music.group;
-
+	
 						MusicBeatState.menuVox.volume = muteVocals ? 0 : 1;
-
+	
 						FlxG.sound.list.add(MusicBeatState.menuVox);
 					}
-
-					vox = Paths.voices(song);
-				}
-
-				if (vox!=null){
+	
 					MusicBeatState.menuVox.loadEmbedded(vox, true).volume = muteVocals ? 0 : 1;
-				}
-				
-				
-				FlxG.sound.playMusic(inst);
-				if(MusicBeatState.menuVox!=null)
-					MusicBeatState.menuVox.play();
-
-				new FlxTimer().start(0, function(tmr:FlxTimer){ // keep it in sync i hope
-					// honestly if i can learn how audio shit works I could try stitching the 2 audio files together to keep it synced n shit? idk if I could make it sound good tho
-					var time = FlxG.sound.music.time;
-					FlxG.sound.music.time = time;
-					MusicBeatState.menuVox.time = time;
-				});
-				
-			}else{
-				if (MusicBeatState.menuVox != null)
-				{
+	
+				}else if (MusicBeatState.menuVox != null){
 					MusicBeatState.menuVox.stop();
 					MusicBeatState.menuVox.destroy();
 					MusicBeatState.menuVox = null;
 				}
-
-				FlxG.sound.playMusic(Paths.music(song));
 			}
+			
+			FlxG.sound.playMusic(inst);
+			if(MusicBeatState.menuVox!=null)
+				MusicBeatState.menuVox.play();
+
+			new FlxTimer().start(0, function(tmr:FlxTimer){ // keep it in sync i hope
+				// honestly if i can learn how audio shit works I could try stitching the 2 audio files together to keep it synced n shit? idk if I could make it sound good tho
+				var time = FlxG.sound.music.time;
+				FlxG.sound.music.time = time;
+				if(MusicBeatState.menuVox!=null)
+					MusicBeatState.menuVox.time = time;
+			});
+				
+			
 		}
 		Mouse.cursor = ARROW;
 

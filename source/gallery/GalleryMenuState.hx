@@ -42,6 +42,7 @@ class GalleryMenuState extends MusicBeatState
 
 	function goBack(){
 		if (selectedSomethin) return;
+		selectedSomethin = true;
 
 		FlxG.sound.play(Paths.sound('cancelMenu'));
 		MusicBeatState.switchState(new MainMenuState());

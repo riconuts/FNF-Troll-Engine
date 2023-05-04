@@ -153,6 +153,8 @@ class MainMenuState extends MusicBeatState {
 		FlxG.stage.addEventListener(MouseEvent.MOUSE_MOVE, updateMouseIcon);
     
 		MusicBeatState.playMenuMusic();
+
+		Paths.clearUnusedMemory();
 	}
 
 	function fuckOff(?who:FlxSprite) 
@@ -436,9 +438,7 @@ class MainMenuState extends MusicBeatState {
 			{
 				selectedSomethin = true;
 				MusicBeatState.switchState(new MasterEditorMenu());
-			}
-			else if (FlxG.keys.justPressed.CONTROL)
-				Paths.clearUnusedMemory();
+			}				
 			#end
 
 			#if !FLX_NO_MOUSE

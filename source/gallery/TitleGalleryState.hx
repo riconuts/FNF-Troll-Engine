@@ -115,7 +115,10 @@ class TitleGalleryState extends MusicBeatState
         super.beatHit();
     }
 
-    function goBack(){
+	var doingTrans = false;
+	function goBack() {
+		if (doingTrans) return;
+		doingTrans = true;
         FlxG.sound.play(Paths.sound('cancelMenu'));
         MusicBeatState.switchState(new GalleryMenuState());
     }
