@@ -161,7 +161,22 @@ class ChapterMenuState extends MusicBeatState{
 		PlayState.campaignScore = 0;
 		PlayState.campaignMisses = 0;
 
-		LoadingState.loadAndSwitchState(new PlayState(), true);
+		var nextSong = PlayState.storyPlaylist[0];
+		function playNextSong(){
+			PlayState.SONG = Song.loadFromJson(nextSong, nextSong);
+			LoadingState.loadAndSwitchState(new PlayState(), true);
+		}
+
+		#if VIDEOS_ALLOWED
+		var videoPath:String = Paths.video('${Paths.formatToSongPath(nextSong)}');
+		if (Paths.exists(videoPath))
+			LoadingState.loadAndSwitchState(new VideoPlayerState(videoPath, playNextSong), true);
+		else
+			playNextSong();
+		#else
+		playNextSong();
+		#end
+
 		//FreeplayState.destroyFreeplayVocals();
 	}
 }

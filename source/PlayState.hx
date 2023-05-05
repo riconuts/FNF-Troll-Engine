@@ -3206,8 +3206,20 @@ class PlayState extends MusicBeatState
 
 					cancelMusicFadeTween();
 
-					MusicBeatState.switchState(new StoryMenuState());
-					MusicBeatState.playMenuMusic(1, true);
+					function gotoMenus(){
+						MusicBeatState.switchState(new StoryMenuState());
+						MusicBeatState.playMenuMusic(1, true);
+					}
+
+					#if VIDEOS_ALLOWED
+					var videoPath:String = Paths.video('${Paths.formatToSongPath(SONG.song)}-end');
+					if (Paths.exists(videoPath))
+						MusicBeatState.switchState(new VideoPlayerState(videoPath, gotoMenus));
+					else
+						gotoMenus();
+					#else
+					gotoMenus();
+					#end
 				}
 				else
 				{
@@ -3225,8 +3237,20 @@ class PlayState extends MusicBeatState
 					cancelMusicFadeTween();
 					FlxG.sound.music.stop();
 
-					PlayState.SONG = Song.loadFromJson(nextSong, nextSong);
-					LoadingState.loadAndSwitchState(new PlayState());
+					function playNextSong(){
+						PlayState.SONG = Song.loadFromJson(nextSong, nextSong);
+						LoadingState.loadAndSwitchState(new PlayState());
+					}
+
+					#if VIDEOS_ALLOWED
+					var videoPath:String = Paths.video('${Paths.formatToSongPath(nextSong)}');
+					if (Paths.exists(videoPath))
+						MusicBeatState.switchState(new VideoPlayerState(videoPath, playNextSong));
+					else
+						playNextSong();
+					#else
+					playNextSong();
+					#end
 				}
 			}
 			else

@@ -1,5 +1,6 @@
 package gallery;
 
+import lime.app.Application;
 import sowy.TGTMenuShit;
 import flixel.addons.display.FlxBackdrop;
 import flixel.util.FlxTimer;
@@ -96,12 +97,13 @@ class JukeboxState extends MusicBeatState {
 		}
 	}
 
+	var bg:FlxSprite;
 	override function create()
 	{
 		persistentUpdate = true;
 		persistentDraw = true;
 
-		var bg = new FlxBackdrop();
+		bg = new FlxBackdrop();
 		bg.frames = Paths.getSparrowAtlas("jukebox/space");
 		bg.animation.addByPrefix("space", "space", 50, true);
 		bg.animation.play("space");
@@ -207,7 +209,33 @@ class JukeboxState extends MusicBeatState {
 		FlxG.autoPause = false;
 		FlxG.mouse.visible = true;
 
+		Application.current.window.onFocusIn.add(onFocusIn);
+		Application.current.window.onFocusOut.add(onFocusOut);
+
 		updateDiscord();
+	}
+
+	function onFocusOut(){
+		FlxG.drawFramerate = 1;
+		FlxG.updateFramerate = 1;
+		bg.animation.pause();
+	}
+	function onFocusIn(){
+		var frameRate = Math.ceil(ClientPrefs.framerate);
+		if (frameRate > FlxG.drawFramerate){
+			FlxG.updateFramerate = frameRate;
+			FlxG.drawFramerate = frameRate;
+		}else{
+			FlxG.drawFramerate = frameRate;
+			FlxG.updateFramerate = frameRate;
+		}
+		bg.animation.resume();
+	}
+
+	override public function destroy(){
+		Application.current.window.onFocusIn.remove(onFocusIn);
+		Application.current.window.onFocusOut.remove(onFocusOut);
+		super.destroy();
 	}
 
 	inline function updateDiscord(){

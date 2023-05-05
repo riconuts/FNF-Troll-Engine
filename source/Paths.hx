@@ -245,10 +245,21 @@ class Paths
 	{
 		#if MODS_ALLOWED
 		var file:String = modsVideo(key);
-
 		if (FileSystem.exists(file))
 			return file;
+
+		/*
+		var file:String = modsVideo(key, "webm");
+		if (FileSystem.exists(file))
+			return file;
+		*/
 		#end
+
+		/*
+		var file = 'assets/videos/$key.webm';
+		if (exists(file))
+			return file;
+		*/
 
 		return 'assets/videos/$key.$VIDEO_EXT';
 	}
@@ -471,8 +482,8 @@ class Paths
 	inline static public function modsSongJson(key:String)
 		return modFolders('songs/' + key + '.json');
 
-	inline static public function modsVideo(key:String)
-		return modFolders('videos/' + key + '.' + VIDEO_EXT);
+	inline static public function modsVideo(key:String, extension:String = VIDEO_EXT)
+		return modFolders('videos/' + key + '.' + extension);
 
 	inline static public function modsSounds(path:String, key:String)
 		return modFolders(path + '/' + key + '.' + SOUND_EXT);
