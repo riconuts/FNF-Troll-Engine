@@ -324,6 +324,7 @@ class ComicReader extends MusicBeatState
 {
 	var camBackground = new FlxCamera();
 	var camComic = new FlxCamera();
+	var camHUD = new FlxCamera();
 
 	var camFollow = new FlxPoint(); // goal position
 	var camFollowPos = new FlxObject(); // displayed position
@@ -351,10 +352,12 @@ class ComicReader extends MusicBeatState
 
 		//
 		camComic.bgColor = 0x00000000;
+		camHUD.bgColor = 0x00000000;
 
 		FlxG.cameras.reset();
 		FlxG.cameras.add(camBackground, false);
 		FlxG.cameras.add(camComic, true);
+		FlxG.cameras.add(camHUD, false);
 
 		camComic.antialiasing = ClientPrefs.globalAntialiasing;
 		camComic.follow(camFollowPos, LOCKON, 1);
@@ -439,8 +442,35 @@ class ComicReader extends MusicBeatState
 
 		}
 
+		/*
+		var hintBg = new FlxSprite(0, FlxG.height-20).makeGraphic(1,1,0xFF000000);
+		hintBg.scale.set(FlxG.width, 24);
+		hintBg.updateHitbox();
+		hintBg.scrollFactor.set();
+		hintBg.antialiasing = false;
+		hintBg.alpha = 0.6;
+		hintBg.camera = camHUD;
+		add(hintBg);
+
+		hintText = new FlxText(10, FlxG.height - 20, 0, "", 18);
+		hintText.font = Paths.font("calibri.ttf");
+		hintText.antialiasing = false;
+		hintText.scrollFactor.set();
+		hintText.camera = camHUD;
+		add(hintText);
+		*/
+
+		/*
+		var fat = hintText.width + 10;
+		var road = FlxG.width + fat;
+		getHintX = ()->{return (64 * Sys.time()) % road - fat;}
+		hintText.x = getHintX(); //-fat;
+		*/
+
 		super.create();
 	}
+	//var getHintX:Void->Float;
+	var hintText:FlxText;
 
 	// Camera limits
 	var minX:Float = 0;
@@ -450,6 +480,8 @@ class ComicReader extends MusicBeatState
 
 	function loadPanel(path:String)
 	{
+
+		FlxG.random.shuffle([null]);
 		if (curPanel != null)
 			remove(curPanel).destroy();
 
@@ -490,55 +522,60 @@ class ComicReader extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
+		//hintText.x = getHintX();
+
 		var justPressed = FlxG.keys.justPressed;
 		var pressed = FlxG.keys.pressed;
 
-		if (controls.BACK) goToPageList();
+		if (justPressed.BACKSPACE) 
+			goToPageList();
 
-		//
-		var speed:Float = (pressed.SHIFT ? baseSpeed * 2 : baseSpeed);
-
-		var mouseWheel = FlxG.mouse.wheel;
-		var yScroll:Float = 0;
-
-		if (justPressed.R){
+		if (justPressed.R){ // Reset camera view
 			zoom = 1;
 			camFollow.x = curPanel.getMidpoint().x;
 		}
 
-		if (justPressed.C)
+		if (justPressed.Q)
 			zoom -= .1;
-		if (justPressed.V)
+		if (justPressed.E)
 			zoom += .1;
 
-		if (pressed.CONTROL)
-			zoom += mouseWheel * 0.1;
-		else
-			yScroll -= mouseWheel * speed * 8;
+		var speed:Float = (pressed.SHIFT ? baseSpeed * 2 : baseSpeed);
+		var yScroll:Float = 0;
+		var mouseWheel = FlxG.mouse.wheel;
+
+		if (mouseWheel != 0){
+			if (pressed.CONTROL)
+				zoom += mouseWheel * 0.1;
+			else 
+				yScroll -= mouseWheel * speed * 8;
+		}
 
 		speed *= elapsed / (1/60);
 
 		if (pressed.UP || pressed.W || pressed.PAGEUP)
-			camFollow.y -= speed;
+			yScroll -= speed;
 		if (pressed.DOWN || pressed.S || pressed.PAGEDOWN)
-			camFollow.y += speed;
+			yScroll += speed;
 
 		if (pressed.LEFT || pressed.A)
-			camFollow.x = Math.max(minX, camFollow.x - speed);
+			camFollow.x -= speed;
 		if (pressed.RIGHT || pressed.D)
-			camFollow.x = Math.min(maxX, camFollow.x + speed);
+			camFollow.x += speed;
 		
-		camFollow.y = Math.max(minY, Math.min(camFollow.y + yScroll, maxY));
-
-		zoom = Math.max(0.25, Math.min(zoom, 5));
-
+		zoom = FlxMath.bound(zoom, 0.25, 5);
+		camFollow.set(
+			FlxMath.bound(camFollow.x, minX, maxX),
+			FlxMath.bound(camFollow.y + yScroll, minY, maxY) 
+		);
+		
 		// update camera
 		var lerpVal = Math.min(1, elapsed * 6);
-		camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
 		camComic.zoom = FlxMath.lerp(camComic.zoom, zoom, lerpVal);
-		
-		//	Causes some rendering glitches with the fade transition?
-		//	camComic.pixelPerfectRender = subState == null && camComic.zoom == 1;
+		camFollowPos.setPosition(
+			FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), 
+			FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal)
+		);
 
 		super.update(elapsed);
 	}

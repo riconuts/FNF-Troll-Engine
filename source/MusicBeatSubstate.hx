@@ -8,11 +8,6 @@ import flixel.FlxSprite;
 
 class MusicBeatSubstate extends FlxSubState
 {
-	public function new()
-	{
-		super();
-	}
-
 	private var lastBeat:Float = 0;
 	private var lastStep:Float = 0;
 

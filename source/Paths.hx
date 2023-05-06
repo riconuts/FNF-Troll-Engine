@@ -1,23 +1,15 @@
 package;
 
-import flixel.system.FlxAssets;
-import animateatlas.AtlasFrameMaker;
-import flash.media.Sound;
+import openfl.media.Sound;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxAtlasFrames;
-import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
-import flixel.math.FlxPoint;
-import flixel.math.FlxRect;
-import haxe.Json;
-import haxe.xml.Access;
-import lime.utils.Assets;
 import openfl.display.BitmapData;
 import openfl.geom.Rectangle;
 import openfl.system.System;
 import openfl.utils.AssetType;
-import openfl.utils.Assets as OpenFlAssets;
+import openfl.utils.Assets as Assets;
 import haxe.CallStack;
 
 using StringTools;
@@ -395,7 +387,7 @@ class Paths
 		#end
 
 		var path = getPath('images/$key.png', IMAGE, library);
-		if (OpenFlAssets.exists(path, IMAGE))
+		if (Assets.exists(path, IMAGE))
 		{
 			if (!currentTrackedAssets.exists(path))
 			{
@@ -407,7 +399,7 @@ class Paths
 			return currentTrackedAssets.get(path);
 		}
 
-		trace('oh no, image "$key" returned null nooooo.');
+		trace('image "$key" returned null.');
 		return null;
 	}
 
@@ -448,7 +440,7 @@ class Paths
 			#else
 				currentTrackedSounds.set(
 					gottenPath, 
-					OpenFlAssets.getSound((path == 'songs' ? folder = 'songs:' : '') + getPath('$path/$key.$SOUND_EXT', SOUND, library))
+					Assets.getSound((path == 'songs' ? folder = 'songs:' : '') + getPath('$path/$key.$SOUND_EXT', SOUND, library))
 				);
 			#end
 		localTrackedAssets.push(gottenPath);

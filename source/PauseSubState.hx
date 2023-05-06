@@ -34,6 +34,7 @@ class PauseSubState extends MusicBeatSubstate
 	public function new(x:Float, y:Float)
 	{
 		super();
+		
 		var cam:FlxCamera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
 
 		if(#if debug true || #end PlayState.chartingMode)
