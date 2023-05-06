@@ -64,7 +64,7 @@ class GameOverSubstate extends MusicBeatSubstate
 			charInfo = Character.getCharacterFile(deathName);
 		}
 		
-		Cache.loadWithList(cast [
+		Cache.loadWithList([
 			{path: charInfo.image, type: 'IMAGE'},
 			{path: deathSoundName, type: 'SOUND'},
 			{path: loopSoundName, type: 'MUSIC'},
@@ -159,8 +159,8 @@ class GameOverSubstate extends MusicBeatSubstate
 		if (FlxG.sound.music.playing)
 			Conductor.songPosition = FlxG.sound.music.time;
 		
-		super.update(elapsed);
 		PlayState.instance.callOnScripts('onUpdatePost', [elapsed]);
+		super.update(elapsed);
 	}
 
 	override function beatHit()
