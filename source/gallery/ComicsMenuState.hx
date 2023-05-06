@@ -480,8 +480,6 @@ class ComicReader extends MusicBeatState
 
 	function loadPanel(path:String)
 	{
-
-		FlxG.random.shuffle([null]);
 		if (curPanel != null)
 			remove(curPanel).destroy();
 
