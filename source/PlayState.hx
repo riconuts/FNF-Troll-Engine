@@ -2476,7 +2476,7 @@ class PlayState extends MusicBeatState
 			}
 
 			// RESET = Quick Game Over Screen
-			if (!ClientPrefs.noReset && controls.RESET && canReset && !inCutscene && startedCountdown)
+			if (controls.RESET && canReset && !inCutscene && startedCountdown)
 				health = 0;
 			//	Death checks are now done after when your health is modified, rather than every frame
 

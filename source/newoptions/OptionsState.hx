@@ -114,10 +114,9 @@ class OptionsState extends MusicBeatState {
 			case 'customizeHUD':
 				LoadingState.loadAndSwitchState(new options.NoteOffsetState());
             case 'customizeColours':
-                // some sorta substate to customize note colours lol
                 openSubState(ClientPrefs.noteSkin == "Quants" ? new options.QuantNotesSubState() : new options.NotesSubState());
             case 'customizeKeybinds':
-                openSubState(new options.ControlsSubState());
+                openSubState(new NewBindsSubstate());
             default:
                 // nothing
         }
@@ -288,12 +287,6 @@ class OptionsState extends MusicBeatState {
         ],
         "Controls" => [
             [
-                "General",
-                [
-                    "noReset",
-                ]
-            ],
-            [
                 "Keyboard",
                 [
                     "customizeKeybinds",
@@ -402,6 +395,8 @@ class OptionsState extends MusicBeatState {
 		add(backdrop);
 
         // im lazy so this is my temporary workaround to having persistantUpdate until you replace the psych menus :P
+        // honestly for note colours idk what imma do lmao if you wanna design smth ill program it unless you wanna do that
+        // because idk what we should do there
         new FlxTimer().start(
             1 / ClientPrefs.framerate, 
             (tmr)->{

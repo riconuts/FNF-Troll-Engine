@@ -72,20 +72,28 @@ class InputFormatter {
 				return ",";
 			case PERIOD:
 				return ".";
-			//case SLASH:
-			//	return "/";
+			case SLASH:
+				return "/";
 			case GRAVEACCENT:
 				return "`";
 			case LBRACKET:
 				return "[";
-			//case BACKSLASH:
-			//	return "\\";
+			case BACKSLASH:
+				return "\\";
 			case RBRACKET:
 				return "]";
 			case QUOTE:
 				return "'";
 			case PRINTSCREEN:
 				return "PrtScrn";
+			case LEFT:
+				return "Left Arrow";
+			case RIGHT:
+				return 'Right Arrow';
+			case UP:
+				return 'Up Arrow';
+			case DOWN:
+				return 'Down Arrow';
 			case NONE:
 				return '---';
 			default:

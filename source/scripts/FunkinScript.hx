@@ -93,7 +93,6 @@ class FunkinScript {
 		set('flashingLights', ClientPrefs.flashing);
 		set('noteOffset', ClientPrefs.noteOffset);
 		set('healthBarAlpha', ClientPrefs.hpOpacity);
-		set('noResetButton', ClientPrefs.noReset);
 		set('lowQuality', ClientPrefs.lowQuality);
 
 		set('curBpm', Conductor.bpm);

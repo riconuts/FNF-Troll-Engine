@@ -41,13 +41,6 @@ class ClientPrefs
 				value: true,
 				data: []
 			},
-			"noReset" => {
-				display: "Disable Reset Button",
-				desc: "When toggled, you won't be able to press your bound Reset button.",
-				type: Toggle,
-				value: true,
-				data: []
-			},
 			"ghostTapping" => {
 				display: "Ghost Tapping",
 				desc: "When toggled, you won't get penalised for inputs which don't hit notes.",
@@ -532,9 +525,10 @@ class ClientPrefs
 		 0, 0
 	];
 
-	// Every key has two binds, add your key bind down here and then add your control on options/ControlsSubState.hx and Controls.hx
+	// I'd like to rewrite the whole Controls.hx thing tbh
+	// I think its shitty and can stand a rewrite but w/e
+	// later
 	public static var keyBinds:Map<String, Array<FlxKey>> = [
-		// Key Bind, Name for ControlsSubState
 		'note_left' => [A, LEFT],
 		'note_down' => [S, DOWN],
 		'note_up' => [W, UP],
@@ -545,7 +539,7 @@ class ClientPrefs
 		'ui_up' => [W, UP],
 		'ui_right' => [D, RIGHT],
 		'accept' => [SPACE, ENTER],
-		'back' => [BACKSPACE, ESCAPE],
+		'back' => [ESCAPE, NONE],
 		'pause' => [ENTER, ESCAPE],
 		'reset' => [R, NONE],
 		'volume_mute' => [ZERO, NONE],
@@ -593,10 +587,30 @@ class ClientPrefs
 			Reflect.setField(optionSave.data, name, Reflect.field(ClientPrefs, name));
 
 		optionSave.flush();
+
+		saveBinds();
+	}
+
+	public static function saveBinds(){
 		var save:FlxSave = new FlxSave();
 		save.bind('controls_v2', 'ninjamuffin99'); // Placing this in a separate save so that it can be manually deleted without removing your Score and stuff
 		save.data.customControls = keyBinds;
-		save.flush();
+		save.close();
+	}
+
+	public static function loadBinds()
+	{
+		var save:FlxSave = new FlxSave();
+		save.bind('controls_v2', 'ninjamuffin99');
+		if (save != null && save.data.customControls != null)
+		{
+			var loadedControls:Map<String, Array<FlxKey>> = save.data.customControls;
+			for (control => keys in loadedControls)
+				keyBinds.set(control, keys);
+
+			reloadControls();
+		}
+		save.destroy();
 	}
 
 	public static function load()
@@ -618,6 +632,8 @@ class ClientPrefs
 		}
 
 		// some dumb hardcoded saves
+		loadBinds();
+
 		for (name in manualLoads)
 			if (Reflect.field(optionSave.data, name) != null)
 				Reflect.setField(ClientPrefs, name, Reflect.field(optionSave.data, name));
@@ -627,16 +643,6 @@ class ClientPrefs
 
 		FlxSprite.defaultAntialiasing = ClientPrefs.globalAntialiasing;
 
-		var save:FlxSave = new FlxSave();
-		save.bind('controls_v2', 'ninjamuffin99');
-		if (save != null && save.data.customControls != null)
-		{
-			var loadedControls:Map<String, Array<FlxKey>> = save.data.customControls;
-			for (control => keys in loadedControls)
-				keyBinds.set(control, keys);
-
-			reloadControls();
-		}
 		if (framerate > FlxG.drawFramerate)
 		{
 			FlxG.updateFramerate = Math.floor(framerate);
