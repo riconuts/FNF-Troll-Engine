@@ -59,7 +59,7 @@ class Paths
 				@:privateAccess
 				if (obj != null)
 				{
-					openfl.Assets.cache.removeBitmapData(key);
+					Assets.cache.removeBitmapData(key);
 					FlxG.bitmap._cache.remove(key);
 					obj.destroy();
 					currentTrackedAssets.remove(key);
@@ -79,7 +79,7 @@ class Paths
 		@:privateAccess
 		if (obj != null)
 		{
-			openfl.Assets.cache.removeBitmapData(key);
+			Assets.cache.removeBitmapData(key);
 			FlxG.bitmap._cache.remove(key);
 			obj.destroy();
 			currentTrackedAssets.remove(key);
@@ -98,7 +98,7 @@ class Paths
 			var obj = FlxG.bitmap._cache.get(key);
 			if (obj != null && !currentTrackedAssets.exists(key))
 			{
-				openfl.Assets.cache.removeBitmapData(key);
+				Assets.cache.removeBitmapData(key);
 				FlxG.bitmap._cache.remove(key);
 				obj.destroy();
 			}
@@ -116,7 +116,7 @@ class Paths
 		}
 		// flags everything to be cleared out next unused memory clear
 		localTrackedAssets = [];
-		openfl.Assets.cache.clear("songs");
+		Assets.cache.clear("songs");
 	}
 
 	static public var currentModDirectory:String = '';
@@ -376,8 +376,7 @@ class Paths
 		if (FileSystem.exists(modKey))
 		{
 			if (!currentTrackedAssets.exists(modKey)){
-				var newBitmap:BitmapData = BitmapData.fromFile(modKey);
-				var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(newBitmap, false, modKey);
+				var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(modKey), false, modKey);
 				newGraphic.persist = true;
 				currentTrackedAssets.set(modKey, newGraphic);
 			}
