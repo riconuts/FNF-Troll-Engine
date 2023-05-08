@@ -363,6 +363,8 @@ class Character extends FlxSprite
 				// trace("special done");
 				specialAnim = false;
 				dance();
+
+				callOnScripts("onSpecialAnimFinished", [animation.curAnim.name]);
 			}
 
 			switch(curCharacter)
