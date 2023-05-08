@@ -1992,7 +1992,7 @@ class PlayState extends MusicBeatState
 
 
 	public inline function getVisualPosition()
-		return getTimeFromSV(Conductor.songPosition - ClientPrefs.noteOffset, currentSV);
+		return getTimeFromSV(Conductor.songPosition, currentSV);
 	
 
 	function eventPushed(event:EventNote) {

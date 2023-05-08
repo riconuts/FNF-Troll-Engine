@@ -312,13 +312,12 @@ class Note extends NoteObject
 		}
 		this.inEditor = inEditor;
 
-		if(!inEditor)
-			visualTime = PlayState.instance.getNoteInitialTime(strumTime);
 		x += PlayState.STRUM_X + 50;
 		// MAKE SURE ITS DEFINITELY OFF SCREEN?
 		y -= 2000;
 		this.strumTime = strumTime;
 		if(!inEditor) this.strumTime += ClientPrefs.noteOffset;
+		if(!inEditor)visualTime = PlayState.instance.getNoteInitialTime(this.strumTime);
 
 		this.noteData = noteData;
 
