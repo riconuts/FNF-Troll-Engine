@@ -161,7 +161,7 @@ class MusicBeatState extends FlxUIState
 	}
 
 	// tgt
-	public static var menuMusic:openfl.media.Sound;
+	public static var menuMusic:openfl.media.Sound; // main menu loop
 	public static var menuVox:FlxSound; // jukebox
 
 	public static var menuLoopFunc = function(){

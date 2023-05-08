@@ -55,6 +55,63 @@ class FreeplayState extends MusicBeatState
 		categoryIDs.push(id);
 	}
 
+	function resSelSongFunc(){
+		selectedSong = null;
+	};
+
+	function setupButtonCallbacks(songButton:FreeplaySongButton)
+	{
+		if (songButton.isLocked)
+			songButton.onUp.callback = songButton.shake;
+		else{
+			songButton.onOver.callback = ()->{
+				selectedSong = songButton.metadata;
+			};
+			songButton.onOut.callback = resSelSongFunc;
+		
+			songButton.onUp.callback = function(){
+				this.transOut = SquareTransitionSubstate;
+				SquareTransitionSubstate.nextCamera = FlxG.camera;
+				SquareTransitionSubstate.info = {
+					sX: songButton.x - 3, sY: songButton.y - 3,
+					sW: 200, sH: 200,
+
+					eX: FlxG.camera.scroll.x - 3, eY: FlxG.camera.scroll.y - 3,
+					eW: FlxG.width + 6, eH: FlxG.height + 6
+				};
+
+				persistentUpdate = false;
+
+				if (FlxG.keys.pressed.ALT){
+					var alters = SongChartSelec.getAlters(songButton.metadata);
+					if (alters.length > 0)
+						switchTo(new SongChartSelec(songButton.metadata, alters));
+				}else
+					playSong(songButton.metadata);
+			};
+		}			
+	}
+
+	function newSongButton(songName:String, ?categoryId:String):Null<FreeplaySongButton>
+	{
+		var songButton = addSong(songName, Paths.currentModDirectory, categoryId, false);
+		if (songButton != null) setupButtonCallbacks(songButton);
+
+		return songButton;
+	}
+
+	function loadFreeplayList(path:String)
+	{
+		for (i in CoolUtil.coolTextFile(path))
+		{
+			if (i == null || i.length < 1)
+				continue;
+			
+			var song:Array<String> = i.split(":");
+			newSongButton(song[0], song[1]);
+		}
+	}
+
 	override function create()
 	{
 		#if desktop
@@ -76,71 +133,15 @@ class FreeplayState extends MusicBeatState
 		setCategory("side", "SIDE STORIES");
 		setCategory("remix", "REMIXES / COVERS");
 
-		////
-		var resSelSongFunc = function(){
-			selectedSong = null;
-		};
-
-		function setupButtonCallbacks(songButton:FreeplaySongButton)
-		{
-			if (songButton.isLocked)
-				songButton.onUp.callback = songButton.shake;
-			else{
-				songButton.onOver.callback = function(){
-					selectedSong = songButton.metadata;
-				};
-				songButton.onOut.callback = resSelSongFunc;
-			
-				songButton.onUp.callback = function(){
-					this.transOut = SquareTransitionSubstate;
-					SquareTransitionSubstate.nextCamera = FlxG.camera;
-					SquareTransitionSubstate.info = {
-						sX: songButton.x - 3, sY: songButton.y - 3,
-						sW: 200, sH: 200,
-
-						eX: FlxG.camera.scroll.x - 3, eY: FlxG.camera.scroll.y - 3,
-						eW: FlxG.width + 6, eH: FlxG.height + 6
-					};
-
-					persistentUpdate = false;
-
-					if (FlxG.keys.pressed.ALT){
-						var alters = SongChartSelec.getAlters(songButton.metadata);
-						if (alters.length > 0)
-							switchTo(new SongChartSelec(songButton.metadata, alters));
-					}else
-						playSong(songButton.metadata);
-				};
-			}			
-		}
-
-		// Load the songs!!!
-		for (i in CoolUtil.coolTextFile(Paths.txt('freeplaySonglist')))
-		{
-			if (i == null || i.length < 1)
-				continue;
-			
-			var song:Array<String> = i.split(":");
-			var songButton = addSong(song[0], "", song[1], false);
-
-			if (songButton != null) setupButtonCallbacks(songButton);
-		}
+		//// Load the songs!!!
+		loadFreeplayList(Paths.txt('freeplaySonglist'));
+		loadFreeplayList(Paths.mods('global/data/freeplaySonglist.txt'));
 
 		#if MODS_ALLOWED
 		for (mod in Paths.getModDirectories())
 		{
 			Paths.currentModDirectory = mod;
-
-			for (i in CoolUtil.coolTextFile(Paths.modsTxt('freeplaySonglist')))
-			{
-				if (i == null || i.length < 1)
-					continue;
-
-				var song:Array<String> = i.split(":");
-				var songButton = addSong(song[0], null, song[1], false);
-
-				if (songButton != null) setupButtonCallbacks(songButton);
-			}	
+			loadFreeplayList(Paths.mods('$mod/data/freeplaySonglist.txt'));
 
 			#if (sys && PE_MOD_COMPATIBILITY)
 			//// psych engine
@@ -179,13 +180,12 @@ class FreeplayState extends MusicBeatState
 							songButton.loadGraphic(icon);
 
 							/*
-							if (songButton.width < songButton.height)
+							if (songButton.width > 194)
 								songButton.setGraphicSize(194, 0);
-							else
+							if (songButton.height > 194)
 								songButton.setGraphicSize(0, 194);
 							*/
-
-							songButton.scale.set(1,1);
+							
 							songButton.clipRect = new FlxRect(0, 0, songButton.frameHeight, songButton.frameHeight);
 							songButton.updateHitbox();
 
@@ -527,7 +527,7 @@ class SongChartSelec extends MusicBeatState
 		this.alters = alters;
 	}
 
-	public static function getAlters(metadata:SongMetadata)
+	public static function getAlters(metadata:SongMetadata) // dumb name
 	{
 		Paths.currentModDirectory = metadata.folder;
 

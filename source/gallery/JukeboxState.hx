@@ -217,7 +217,7 @@ class JukeboxState extends MusicBeatState {
 
 	function onFocusOut(){
 		FlxG.drawFramerate = 1;
-		FlxG.updateFramerate = 1;
+		FlxG.updateFramerate = 30;
 		bg.animation.pause();
 	}
 	function onFocusIn(){
@@ -377,10 +377,11 @@ class JukeboxState extends MusicBeatState {
 
 		clearSounds();
 
-		if (song == 'menuTheme')
+		if (song == 'menuTheme'){
+			MusicBeatState.menuMusic = null; // clear loop cache jus in case
+
 			MusicBeatState.playMenuMusic(true);
-		else
-		{
+		}else{
 			var inst = getSound(Paths.returnSoundPath("songs", '${Paths.formatToSongPath(song)}/Inst'));
 
 			if (inst == null){
