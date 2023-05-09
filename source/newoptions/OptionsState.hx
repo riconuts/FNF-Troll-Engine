@@ -229,6 +229,7 @@ class OptionsState extends MusicBeatState {
                     "optimizeHolds",
 					"holdSubdivs",
 					*/
+					"drawDistanceModifier",
 					"noteSkin",
 					"customizeColours"
 				]
@@ -284,7 +285,8 @@ class OptionsState extends MusicBeatState {
                     "multicoreLoading",
                     
                     "optimizeHolds",
-                    "holdSubdivs"
+                    "holdSubdivs",
+					"drawDistanceModifier" // apparently i forgot to add this in the new options thing lmao
                 ]
             ]
         ],
