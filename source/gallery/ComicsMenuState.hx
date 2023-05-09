@@ -1,5 +1,7 @@
 package gallery;
 
+import openfl.filters.ShaderFilter;
+import flixel.addons.transition.FlxTransitionableState;
 import openfl.ui.Mouse;
 import openfl.ui.MouseCursor;
 import openfl.text.TextFormat;
@@ -72,6 +74,8 @@ class Tails extends FlxSprite{
 
 class ComicsMenuState extends MusicBeatState
 {
+	public static var seenBefore:Array<String> = [];
+	
 	static var data:Null<Array<ChapterData>> = null;
 	static var curChapter:Int = 0;
 
@@ -169,6 +173,8 @@ class ComicsMenuState extends MusicBeatState
 
 	static function switchToChapterNum(chapterNum:Int){
 		curChapter = chapterNum;
+		FlxTransitionableState.skipNextTransIn = true;
+		FlxTransitionableState.skipNextTransOut = true;
 		MusicBeatState.switchState(new ComicsMenuState());
 
 		FlxG.mouse.visible = true;
@@ -277,6 +283,12 @@ class ComicsMenuState extends MusicBeatState
 				{
 					if (doingTransition) return;
 					doingTransition = true;
+
+					// TODO: make a shader that'll load it from top to bottom
+					FlxTransitionableState.skipNextTransIn = true;
+					FlxTransitionableState.skipNextTransOut = true;
+					
+					ComicReader.zoom = 1;
 					
 					MusicBeatState.switchState(new ComicReader(page));
 
@@ -305,6 +317,7 @@ class ComicsMenuState extends MusicBeatState
 
 		cleanupData();
 		FlxG.sound.play(Paths.sound('cancelMenu'));
+		Mouse.cursor = ARROW;
 		MusicBeatState.switchState(new GalleryMenuState());
 	}
 
@@ -329,7 +342,7 @@ class ComicReader extends MusicBeatState
 	var camFollow = new FlxPoint(); // goal position
 	var camFollowPos = new FlxObject(); // displayed position
 
-	var zoom:Float = 1;
+	public static var zoom:Float = 1;
 
 	var curPanel:FlxSprite;
 	static var pageData:PageData;
@@ -397,10 +410,15 @@ class ComicReader extends MusicBeatState
 
 		if (pageData.prevPage != null){
 			function goPrevPage(){
-				pageData = pageData.prevPage;
-				MusicBeatState.resetState();
-				FlxG.mouse.visible = true;
-				Mouse.cursor = __WAIT_ARROW;
+				if (loadingShader.loaded >= 1)
+				{
+					pageData = pageData.prevPage;
+					FlxTransitionableState.skipNextTransIn = true;
+					FlxTransitionableState.skipNextTransOut = true;
+					MusicBeatState.resetState();
+					FlxG.mouse.visible = true;
+					Mouse.cursor = __WAIT_ARROW;
+				}
 			}
 
 			var prevPage = new TGTTextButton(curPanel.x + 18, head, 0, "← Page", 18, goPrevPage);
@@ -419,10 +437,14 @@ class ComicReader extends MusicBeatState
 
 		if (pageData.nextPage != null){
 			function goNextPage(){
-				pageData = pageData.nextPage;
-				MusicBeatState.resetState();
-				FlxG.mouse.visible = true;
-				Mouse.cursor = __WAIT_ARROW;
+				if (loadingShader.loaded >= 1){
+					pageData = pageData.nextPage;
+					FlxTransitionableState.skipNextTransIn = true;
+					FlxTransitionableState.skipNextTransOut = true;
+					MusicBeatState.resetState();
+					FlxG.mouse.visible = true;
+					Mouse.cursor = __WAIT_ARROW;
+				}
 			}
 
 			var nextPage = new TGTTextButton(0, head, 0, "Page →", 18, goNextPage);
@@ -438,34 +460,7 @@ class ComicReader extends MusicBeatState
 			nextPage.label.underline = true;
 			nextPage.scrollFactor.set(1, 1);
 			add(nextPage);
-
-
 		}
-
-		/*
-		var hintBg = new FlxSprite(0, FlxG.height-20).makeGraphic(1,1,0xFF000000);
-		hintBg.scale.set(FlxG.width, 24);
-		hintBg.updateHitbox();
-		hintBg.scrollFactor.set();
-		hintBg.antialiasing = false;
-		hintBg.alpha = 0.6;
-		hintBg.camera = camHUD;
-		add(hintBg);
-
-		hintText = new FlxText(10, FlxG.height - 20, 0, "", 18);
-		hintText.font = Paths.font("calibri.ttf");
-		hintText.antialiasing = false;
-		hintText.scrollFactor.set();
-		hintText.camera = camHUD;
-		add(hintText);
-		*/
-
-		/*
-		var fat = hintText.width + 10;
-		var road = FlxG.width + fat;
-		getHintX = ()->{return (64 * Sys.time()) % road - fat;}
-		hintText.x = getHintX(); //-fat;
-		*/
 
 		super.create();
 	}
@@ -478,6 +473,12 @@ class ComicReader extends MusicBeatState
 	var minY:Float = 0;
 	var maxY:Float = 0;
 
+	var loadTimer:Float = 0;
+	var loadSteps:Int = FlxG.random.int(3, 10);
+	var timeBetweenSteps:Float = FlxG.random.float(0.1, 0.3);
+	var loadingShader:LoadShader = new LoadShader();
+	var YOURINTERNETSUCKS:Bool = false;
+
 	function loadPanel(path:String)
 	{
 		if (curPanel != null)
@@ -485,6 +486,7 @@ class ComicReader extends MusicBeatState
 
 		curPanel = new FlxSprite().loadGraphic(Paths.image('cutscenes/$path'));
 		curPanel.cameras = [camComic];
+		curPanel.shader = loadingShader;
 
 		var scrWidth = FlxG.width;
 		var scrHeight = FlxG.height;
@@ -494,6 +496,18 @@ class ComicReader extends MusicBeatState
 		
 		curPanel.scale.set(fuu, fuu);
 		curPanel.updateHitbox();
+		var bytes:Float = (curPanel.frameWidth * curPanel.frameHeight * 4) * 0.000001; // gets approx. how much space in memory the image uses, and bases load times on that
+		loadSteps = FlxG.random.int(Math.ceil(bytes / 6), Math.ceil(bytes / 2));
+		YOURINTERNETSUCKS = FlxG.random.bool(1);
+		if (ComicsMenuState.seenBefore.contains(path)){
+			YOURINTERNETSUCKS = false;
+			loadSteps = Math.floor(loadSteps / 3);
+			timeBetweenSteps /= 1.25;
+		}
+		if (YOURINTERNETSUCKS){
+			loadSteps *= 3;
+			timeBetweenSteps *= 1.5;
+		}
 
 		curPanel.x -= curPanel.width* 0.5;
 		add(curPanel);
@@ -505,22 +519,43 @@ class ComicReader extends MusicBeatState
 		
 		var mid = curPanel.getMidpoint();
 		camFollow.set(mid.x, curPanel.height > FlxG.height ? 0 : mid.y);
+
+		camComic.zoom = zoom;
 	}
 
 	function goToPageList(){
 		@:privateAccess(ComicsMenuState)
 		ComicsMenuState.switchToChapterData(pageData.chapter);
-		/*
-		FlxG.mouse.visible = true;
-		Mouse.cursor = __WAIT_ARROW;
-		*/
 	}
 
 	var baseSpeed = 8;
-
 	override function update(elapsed:Float)
 	{
-		//hintText.x = getHintX();
+		if (loadingShader.loaded < 1){
+			Mouse.cursor = __WAIT_ARROW;
+			loadTimer += elapsed;
+			while (loadTimer >= timeBetweenSteps){
+				loadTimer -= timeBetweenSteps;
+				loadingShader.loaded += 1 / loadSteps;
+				timeBetweenSteps = FlxG.random.float(0.1, 0.3);
+				if (YOURINTERNETSUCKS)
+					timeBetweenSteps *= 1.5;
+
+				if (loadingShader.loaded >= 1){
+					loadingShader.loaded = 1;
+					loadTimer = 0;
+					Mouse.cursor = ARROW;
+					if (!ComicsMenuState.seenBefore.contains(pageData.name))
+						ComicsMenuState.seenBefore.push(pageData.name);
+
+					if (ComicsMenuState.seenBefore.length > 10){
+						while (ComicsMenuState.seenBefore.length > 10)
+							ComicsMenuState.seenBefore.shift();
+					}
+				}
+			}
+		}
+
 
 		var justPressed = FlxG.keys.justPressed;
 		var pressed = FlxG.keys.pressed;
@@ -542,14 +577,30 @@ class ComicReader extends MusicBeatState
 		var yScroll:Float = 0;
 		var mouseWheel = FlxG.mouse.wheel;
 
-		if (mouseWheel != 0){
+		
+		speed *= elapsed / (1 / 60);
+		
+		if (mouseWheel != 0)
+		{
 			if (pressed.CONTROL)
 				zoom += mouseWheel * 0.1;
-			else 
-				yScroll -= mouseWheel * speed * 8;
+			else
+				yScroll -= mouseWheel * (speed / zoom) * 8;
 		}
-
-		speed *= elapsed / (1/60);
+		zoom = FlxMath.bound(zoom, 0.25, 5);
+			
+		if(FlxG.mouse.pressed){
+			var deltaX = FlxG.mouse.deltaX / zoom;
+			var deltaY = FlxG.mouse.deltaY / zoom;
+			camFollow.x -= deltaX;
+			yScroll -= deltaY;
+			camFollowPos.x -= deltaX;
+			camFollowPos.y -= deltaY;
+			camFollowPos.setPosition(
+				FlxMath.bound(camFollowPos.x, minX, maxX),
+				FlxMath.bound(camFollowPos.y, minY, maxY) 
+			);
+		}
 
 		if (pressed.UP || pressed.W || pressed.PAGEUP)
 			yScroll -= speed;
@@ -561,7 +612,7 @@ class ComicReader extends MusicBeatState
 		if (pressed.RIGHT || pressed.D)
 			camFollow.x += speed;
 		
-		zoom = FlxMath.bound(zoom, 0.25, 5);
+		
 		camFollow.set(
 			FlxMath.bound(camFollow.x, minX, maxX),
 			FlxMath.bound(camFollow.y + yScroll, minY, maxY) 

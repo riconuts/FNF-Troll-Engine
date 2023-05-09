@@ -53,7 +53,6 @@ class Paths
 		for (key in currentTrackedAssets.keys())
 		{
 			// if it is not currently contained within the used local assets
-			trace(key);
 			if (!localTrackedAssets.contains(key) && !dumpExclusions.contains(key))
 			{
 				// get rid of it

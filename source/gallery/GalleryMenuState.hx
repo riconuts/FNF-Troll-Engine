@@ -153,6 +153,7 @@ class GalleryMenuState extends MusicBeatState
 				FlxFlicker.flicker(spr, 1, 0.06, false, false, function(fuu){
 					switch(id){
 						case 0:
+							ComicsMenuState.seenBefore = [];
 							MusicBeatState.switchState(new ComicsMenuState());
 						case 1:
 							MusicBeatState.switchState(new JukeboxState());
