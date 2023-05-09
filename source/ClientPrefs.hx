@@ -64,14 +64,14 @@ class ClientPrefs
 			},
 			"judgePreset" => {
 				display: "Judgement Preset",
-				desc: "Preset for the judgement windows",
+				desc: "Preset for the judgement windows.",
 				type: Dropdown,
 				value: "Standard",
 				data: ["options" => ["Psych", "Vanilla", "Standard", "ITG", "Custom"]]
 			},
 			"judgeDiff" => {
 				display: "Judge Difficulty",
-				desc: "Stepmania difficulties for judgments. For best results, use the Standard judgment preset.",
+				desc: "Stepmania difficulties for judgements. For best results, use the Standard judgement preset.",
 				type: Dropdown,
 				value: "J4",
 				data: [
@@ -94,7 +94,7 @@ class ClientPrefs
 			},
 			"hitsoundVolume" => {
 				display: "Hitsound Volume",
-				desc: "The volume of hitsounds. 0% to disable",
+				desc: "The volume of hitsounds.",
 				type: Number,
 				value: 0,
 				data: [
@@ -107,7 +107,7 @@ class ClientPrefs
 			},
 			"missVolume" => {
 				display: "Miss Volume",
-				desc: "The volume of miss sounds. 0% to disable",
+				desc: "The volume of miss sounds.",
 				type: Number,
 				value: 50,
 				data: [
@@ -227,14 +227,14 @@ class ClientPrefs
 			},
 			"scoreZoom" => {
 				display: "Zoom On Hit",
-				desc: "When toggled, the score text zooms when you hit a note",
+				desc: "When toggled, the HUD zooms when you hit a note.",
 				type: Toggle,
 				value: true,
 				data: []
 			},
 			"customizeHUD" => {
 				display: "Customize HUD Placements",
-				desc: "Lets you customize where judgements and combo are displayed",
+				desc: "Lets you customize where judgements and combo are displayed.",
 				type: Button,
 				data: []
 			},
@@ -253,7 +253,7 @@ class ClientPrefs
 			},
 			"holdSubdivs" => {
 				display: "Hold Subdivisions",
-				desc: "How many times each hold note should be subdivided. More numbers means more lag, but smoother holds",
+				desc: "How many times each hold note should be subdivided. Higher numbers means more lag, but smoother holds.",
 				type: Number,
 				value: 2,
 				data: [
@@ -264,14 +264,14 @@ class ClientPrefs
 			},
 			"optimizeHolds" => {
 				display: "Optimize Holds",
-				desc: "When toggled, hold notes will be less accurate, but use less extra calls and thus less lag.",
+				desc: "When toggled, hold notes will be less accurate, but they'll use less calls and thus less lag.",
 				type: Toggle,
 				value: true,
 				data: []
 			},
 			"downScroll" => {
 				display: "Downscroll",
-				desc: "When toggled, notes will go from top to bottom instead of bottom to top.",
+				desc: "When toggled, notes will move from top to bottom instead of bottom to top.",
 				type: Toggle,
 				value: false,
 				data: []
@@ -292,7 +292,7 @@ class ClientPrefs
 			},
 			"noteSplashes" => {
 				display: "Note Splashes",
-				desc: "When toggled, hitting top judgements will cause a particles to spawn.",
+				desc: "When toggled, hitting top judgements will cause particles to spawn.",
 				type: Toggle,
 				value: true,
 				data: []
@@ -313,28 +313,28 @@ class ClientPrefs
 			},
 			"showMS" => {
 				display: "Show Timing",
-				desc: "When toggled, when you hit a note the milliseconds at which you hit it will be visible.",
+				desc: "When toggled, upon hitting a note it will show the millisecond timing.",
 				type: Toggle,
 				value: false,
 				data: []
 			},
 			"hitbar" => {
 				display: "Show Error Bar",
-				desc: "When toggled, a bar will be shown that marks when you hit notes.", // TODO rewrite this desc
+				desc: "When toggled, a bar will be shown that marks note hit timings.", // TODO rewrite this desc
 				type: Toggle,
 				value: false,
 				data: []
 			},
 			"npsDisplay" => {
 				display: "NPS Display",
-				desc: "When toggled, the amount of notes you hit per second is displayed in the stats bar.",
+				desc: "When toggled, the amount of notes you hit per second is displayed in the HUD.",
 				type: Toggle,
 				value: false,
 				data: []
 			},
 			"gradeSet" => {
 				display: "Grade Set",
-				desc: "What set of grades to use to rank performance. Does not affect scores",
+				desc: "What set of grades to use to rank performance ingame. Does not affect scores",
 				type: Dropdown,
 				value: "Psych",
 				data: [
@@ -359,8 +359,8 @@ class ClientPrefs
 			},
 
 			"judgeCounter" => {
-				display: "Judgment Counter",
-				desc: "How to display the judgment counter",
+				display: "Judgement Counter",
+				desc: "How to display the judgement counters.",
 				type: Dropdown,
 				value: "Off",
 				data: [
@@ -369,36 +369,36 @@ class ClientPrefs
 			},
 			"hudPosition" => {
 				display: "HUD Position",
-				desc: "Where to position HUD elements",
+				desc: "Where to position HUD elements.",
 				type: Dropdown,
 				value: "Left",
 				data: ["options" => ["Left", "Right"]]
 			},
-			// judgment-related (gameplay)
+			// judgement-related (gameplay)
 			"epicWindow" => {
 				display: "Killer Window",
-				desc: "The hit window to hit a Killer.",
+				desc: "The hit window to hit a Killer judgement.",
 				type: Number,
 				value: 22,
 				data: ["suffix" => "ms", "min" => 0, "max" => 200, "step" => 0.1]
 			},
 			"sickWindow" => {
 				display: "Awesome Window",
-				desc: "The hit window to hit an Awesome.",
+				desc: "The hit window to hit an Awesome judgement.",
 				type: Number,
 				value: 45,
 				data: ["suffix" => "ms", "min" => 0, "max" => 200, "step" => 0.1]
 			},
 			"goodWindow" => {
 				display: "Cool Window",
-				desc: "The hit window to hit a Cool.",
+				desc: "The hit window to hit a Cool judgement.",
 				type: Number,
 				value: 90,
 				data: ["suffix" => "ms", "min" => 0, "max" => 200, "step" => 0.1]
 			},
 			"badWindow" => {
 				display: "Gay Window",
-				desc: "The hit window to hit a Gay.",
+				desc: "The hit window to hit a Gay judgement.",
 				type: Number,
 				value: 135,
 				data: ["suffix" => "ms", "min" => 0, "max" => 200, "step" => 0.1]
@@ -412,21 +412,21 @@ class ClientPrefs
 			},
 			"drawDistanceModifier" => {
 				display: "Draw Distance Multiplier",
-				desc: "Changes how close/far a note must be to start drawing.",
+				desc: "Changes how close or far a note must be before it starts being drawn.",
 				type: Number,
 				value: 1,
 				data: ["suffix" => "x", "min" => 0.5, "max" => 2, "step" => 0.1]
 			},
 			"customizeColours" => {
 				display: "Customize Colors",
-				desc: "Lets you change the colours of your notes",
+				desc: "Lets you change the colours of your notes.",
 				type: Button,
 				data: []
 			},
 			// video
 			"shaders" => {
 				display: "Shaders",
-				desc: "Changes which shaders can load",
+				desc: "Changes which shaders can load.",
 				type: Dropdown,
 				value: "All",
 				data: ["options" => ["All", "Minimal", "None"]]
@@ -461,7 +461,7 @@ class ClientPrefs
 			},
 			"multicoreLoading" => {
 				display: "Multicore Loading",
-				desc: "When toggled, multiple threads will be used for asset loading.\nWARNING: May cause crashes on certain devices",
+				desc: "When toggled, multiple threads will be used for asset loading when possible.\nMay cause crashes, but speeds up load times.",
 				type: Toggle,
 				value: false,
 				data: []
