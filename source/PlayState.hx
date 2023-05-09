@@ -4769,6 +4769,7 @@ class FNFHealthBar extends FlxBar{
 	public var iconOffset:Int = 26;
 
 	// public var value:Float = 1;
+	public var isOpponentMode:Bool = false; // going insane
 
 	override function set_flipX(value:Bool){
 		iconP1.flipX = value;
@@ -4822,6 +4823,8 @@ class FNFHealthBar extends FlxBar{
 		rightIcon = iconP1;
 
 		//
+		isOpponentMode = PlayState.instance.playOpponent;
+
 		super(
 			healthBarBG.x + 5, healthBarBG.y + 5,
 			RIGHT_TO_LEFT,
@@ -4829,6 +4832,7 @@ class FNFHealthBar extends FlxBar{
 			null, null,
 			0, 2
 		);
+		
 		value = 1;
 
 		//
@@ -4866,6 +4870,8 @@ class FNFHealthBar extends FlxBar{
 	}
 
 	override function set_value(val:Float){
+		var val = isOpponentMode ? max-val : val;
+
 		iconP1.animation.curAnim.curFrame = val < 0.4 ? 1 : 0; // 20% ?
 		iconP2.animation.curAnim.curFrame = val > 1.6 ? 1 : 0; // 80% ?
 

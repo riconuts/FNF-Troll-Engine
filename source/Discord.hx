@@ -81,7 +81,7 @@ class DiscordClient
 			state: state,
 
 			largeImageKey: "app-logo",// largeImageKey,
-			largeImageText: "Tails Gets Trolled v" + Application.current.meta.get('version'), //"Troll Engine"
+			largeImageText: "Tails Gets Trolled v" + lime.app.Application.current.meta.get('version'), //"Troll Engine"
 			// largeImageText: "Engine Version: " + MainMenuState.engineVersion,
 
 			// Obtained times are in milliseconds so they are divided so Discord can use it
