@@ -77,6 +77,8 @@ class TitleGalleryState extends MusicBeatState
             changeSelected(-1);
         if (FlxG.mouse.overlaps(right))
             changeSelected(1);
+        if (FlxG.mouse.overlaps(title))
+            title.time = 0;
     }
 
     function changeSelected(value:Int = 0, ?absolute:Bool)
@@ -107,6 +109,7 @@ class TitleGalleryState extends MusicBeatState
         add(title);
     }
 
+    // this shit don't work bruh
     override function beatHit()
     {
         if (title != null)

@@ -30,32 +30,46 @@ typedef JukeboxSongData = {
 }
 
 class JukeboxState extends MusicBeatState {
-	var songData:Array<JukeboxSongData> = [];
-
 	////
 	var outline:FlxShapeBox;
 	var image:FlxSprite;
 	var defImage:FlxSprite;
 
 	var songName:FlxText;
+	var songProgressBG:FlxSprite;
 	var songProgress:FlxSprite;
 
 	// butts
+	var loopButton:FlxSprite;
 	var back:FlxSprite;
 	var play:FlxSprite;
 	var forw:FlxSprite;
 	var mute:FlxSprite;
 	
-	inline function addSong(songName:String, songDir:String, ?chapter:String, ?coverArt:String)
-		songData.push({
-			songName: songName,
-			songDirectory: songDir,
-			chapterDir: chapter==null ? "" : chapter,
-			coverArt: coverArt==null ? 'songs/$songDir' : coverArt
-		});
-	// TODO: add bpm
-	static var idx:Int = 0;
+	////
+	var songData:Array<JukeboxSongData> = [];
+
+	var idx:Int = 0;
 	public static var playIdx:Int = 0;
+
+	function updateSongCompleteCallback(){
+
+	}
+
+	var loopSong(default, set):Bool = true;
+	function set_loopSong(loop:Bool){
+		FlxG.sound.music.onComplete = loop ? (playIdx == 0 ? MusicBeatState.menuLoopFunc : null) : ()->{ // god fucking damnit i hate the menu theme
+			var nextSong = playIdx+1;
+			
+			changeSong(nextSong);
+			playDaSong(idx);
+		};
+
+		FlxG.sound.music.looped = loop;
+
+		return loopSong = loop;
+	}
+
 	static var muteVocals(default, set) = false;
 	static function set_muteVocals(mute:Bool){
 		muteVocals = mute;
@@ -72,6 +86,15 @@ class JukeboxState extends MusicBeatState {
 		
 		return mute;
 	}
+
+	inline function addSong(songName:String, songDir:String, ?chapter:String, ?coverArt:String)
+		songData.push({
+			songName: songName,
+			songDirectory: songDir,
+			chapterDir: chapter==null ? "" : chapter,
+			coverArt: coverArt==null ? 'songs/$songDir' : coverArt
+		});
+	// TODO: add bpm
 
 	function addSonglists(?modDir:String)
 	{
@@ -146,6 +169,14 @@ class JukeboxState extends MusicBeatState {
 		// TODO: order the songs so its story > side stories > remixes
 		// naah don't do that
 
+		////
+		loopButton = new FlxSprite(0, 560).loadGraphic(Paths.image("jukebox/controls"), true, 60, 60);
+		loopButton.color = TGTMenuShit.YELLOW;
+		loopButton.animation.add("playloop", [5], 0, true);
+		loopButton.animation.add("playlist", [6], 0, true);
+		//loopButton.animation.add("playrandom", [7], 0, true);
+		loopButton.animation.play(loopSong ? "playloop" : "playlist", true);
+
 		back = new FlxSprite(0, 560).loadGraphic(Paths.image("jukebox/controls"), true, 60, 60);
 		back.color = TGTMenuShit.YELLOW;
 		back.animation.add("back", [0], 0, true);
@@ -169,12 +200,13 @@ class JukeboxState extends MusicBeatState {
 		mute.animation.add("unmute", [4], 0, true);
 		mute.animation.play(muteVocals ? "unmute" : "mute", true);
 		
-		play.screenCenter(X);
 		forw.screenCenter(X);
+		play.screenCenter(X);
 		back.screenCenter(X);
 		back.x -= 60;
 		forw.x += 60;
 
+		loopButton.x = back.x - 120;
 		mute.x = forw.x + 120;
 
 		songName = new FlxText(0, 520, FlxG.width, "", 32, true);
@@ -182,13 +214,17 @@ class JukeboxState extends MusicBeatState {
 		songName.scrollFactor.set(1, 1);
 		songName.screenCenter(X);
 
-		/*
-		songProgress = new FlxSprite(0, 650).makeGraphic(720, 8);
+		songProgressBG = new FlxSprite(0, 694).makeGraphic(600, 8);
+		songProgressBG.color = 0xFF0B081B; // 0xFF070512
+		songProgressBG.screenCenter(X);
+		songProgressBG.scrollFactor.set();
+		add(songProgressBG);
+
+		songProgress = new FlxSprite(songProgressBG.x, songProgressBG.y).makeGraphic(600, 8);
 		songProgress.color = TGTMenuShit.YELLOW;
-		songProgress.screenCenter(X);
 		songProgress.visible = false;
+		songProgress.scrollFactor.set();
 		add(songProgress);
-		*/
 		
 		add(outline);
 		add(defImage);
@@ -199,12 +235,14 @@ class JukeboxState extends MusicBeatState {
 		add(back);
 		add(play);
 		add(mute);
+		add(loopButton);
 
-		changeSong(idx);
+		add(sowy.TGTMenuShit.newBackTextButton(goBack));
+
+		//
+		set_loopSong(true);
+		changeSong(playIdx);
 		super.create();
-
-		var cornerLeftText = sowy.TGTMenuShit.newBackTextButton(goBack);
-		add(cornerLeftText);
 
 		FlxG.autoPause = false;
 		FlxG.mouse.visible = true;
@@ -255,48 +293,77 @@ class JukeboxState extends MusicBeatState {
 	function goBack() {
 		if (doingTrans) return;
 		doingTrans = true;
+
 		FlxG.sound.play(Paths.sound('cancelMenu'));
+		
+		set_loopSong(true);
+		
 		MusicBeatState.switchState(new GalleryMenuState());
 	}
 
 	override function update(elapsed:Float){
-		super.update(elapsed);
+		if (controls.BACK)
+			goBack();
 
-		if(FlxG.mouse.overlaps(forw) || FlxG.mouse.overlaps(back) || FlxG.mouse.overlaps(play) || FlxG.mouse.overlaps(mute))
-			Mouse.cursor = BUTTON;
-		else
-			Mouse.cursor = ARROW;
+		// im bored
+		var mouseOverlaps = null;
+		var buttons = [back, play, forw, mute, loopButton];
+		if (songProgressBG.visible) buttons.push(songProgressBG);
 
-		var forward = FlxG.mouse.overlaps(forw) && FlxG.mouse.justPressed || FlxG.keys.justPressed.RIGHT;
-		var bakward = FlxG.mouse.overlaps(back) && FlxG.mouse.justPressed || FlxG.keys.justPressed.LEFT;
-		var resSong = FlxG.mouse.overlaps(play) && FlxG.mouse.justPressed || FlxG.keys.justPressed.SPACE;
+		for (butt in buttons){
+			if (FlxG.mouse.overlaps(butt)){ 
+				mouseOverlaps = butt;
+				break;
+			}
+		}
 
-		if (FlxG.mouse.overlaps(mute) && FlxG.mouse.justPressed || FlxG.keys.justPressed.M){
+		Mouse.cursor = mouseOverlaps!=null ? BUTTON : ARROW;
+
+		var justClicked = FlxG.mouse.justReleased;
+		var music = FlxG.sound.music;
+		
+		if (justClicked && mouseOverlaps == (songProgressBG))
+		{
+			music.pause();
+			music.time = music.length * ((FlxG.mouse.screenX-songProgressBG.x)/(songProgressBG.width));
+			
+			if (MusicBeatState.menuVox != null){
+				MusicBeatState.menuVox.pause();
+				MusicBeatState.menuVox.time = music.time;
+				MusicBeatState.menuVox.play();
+			}
+			
+			music.play();
+		}
+
+		if (justClicked && mouseOverlaps == (loopButton) || FlxG.keys.justPressed.L){
+			loopSong = !loopSong;
+			loopButton.animation.play(loopSong ? "playloop" : "playlist", true);
+		}
+
+		if (justClicked && mouseOverlaps == (mute) || FlxG.keys.justPressed.M){
 			muteVocals = !muteVocals;
 			mute.animation.play(muteVocals ? "unmute" : "mute", true);
 		}
 
-		if (controls.BACK)
-			goBack();
-
-		if (forward)
+		if (justClicked && mouseOverlaps == (forw) || FlxG.keys.justPressed.RIGHT)
 			changeSong(idx+1);
 
-		if (bakward)
+		if (justClicked && mouseOverlaps == (back) || FlxG.keys.justPressed.LEFT)
 			changeSong(idx-1);
 
-		if (resSong){
+		if (justClicked && mouseOverlaps == (play) || FlxG.keys.justPressed.SPACE){
 			if(idx==playIdx){
-				if (FlxG.sound.music.fadeTween == null || FlxG.sound.music.fadeTween.finished){
-					if (FlxG.sound.music.playing){
-						FlxG.sound.music.pause();
+				if (music.fadeTween == null || music.fadeTween.finished){
+					if (music.playing){
+						music.pause();
 						if (MusicBeatState.menuVox != null)
 							MusicBeatState.menuVox.pause();
 
 						updateDiscord();
 					}
 					else{
-						FlxG.sound.music.resume();
+						music.resume();
 						if (MusicBeatState.menuVox != null)
 							MusicBeatState.menuVox.resume();
 
@@ -325,14 +392,14 @@ class JukeboxState extends MusicBeatState {
 				
 		play.animation.play(idx==playIdx?(FlxG.sound.music.playing?"pause":"play"):"play");
 
-		/*
-		if (playIdx != 0 && FlxG.sound.music != null){
-			songProgress.visible = true;
-			songProgress.scale.x = FlxG.sound.music.time / FlxG.sound.music.length;
+		if (playIdx != 0 && (music.playing && (music.fadeTween == null || !music.fadeTween.active))){
+			songProgressBG.visible = songProgress.visible = true;
+			songProgress.scale.x = music.time / music.length;
 			songProgress.updateHitbox();
 		}else
-			songProgress.visible = false;
-		*/
+			songProgressBG.visible = songProgress.visible = false;
+
+		super.update(elapsed);
 	}
 
 	//// sorry but ram usage rises pretty quickly ;_;
@@ -383,35 +450,34 @@ class JukeboxState extends MusicBeatState {
 
 		if (song == 'menuTheme'){
 			MusicBeatState.menuMusic = null; // clear loop cache jus in case
-
 			MusicBeatState.playMenuMusic(true);
 		}else{
 			var inst = getSound(Paths.returnSoundPath("songs", '${Paths.formatToSongPath(song)}/Inst'));
+			var vox = null;
 
-			if (inst == null){
+			if (inst == null) // music folder song
 				inst = getSound(Paths.returnSoundPath("music", song));
-			}else{
-				var vox = getSound(Paths.returnSoundPath("songs", '${Paths.formatToSongPath(song)}/Voices'));
-	
-				if (vox != null){
-					if (MusicBeatState.menuVox==null){
-						MusicBeatState.menuVox = new FlxSound();
-						MusicBeatState.menuVox.persist = true;
-						MusicBeatState.menuVox.looped = true;
-						MusicBeatState.menuVox.group = FlxG.sound.music.group;
-	
-						MusicBeatState.menuVox.volume = muteVocals ? 0 : 1;
-	
-						FlxG.sound.list.add(MusicBeatState.menuVox);
-					}
-	
-					MusicBeatState.menuVox.loadEmbedded(vox, true).volume = muteVocals ? 0 : 1;
-	
-				}else if (MusicBeatState.menuVox != null){
-					MusicBeatState.menuVox.stop();
-					MusicBeatState.menuVox.destroy();
-					MusicBeatState.menuVox = null;
+			else // fnf song
+				vox = getSound(Paths.returnSoundPath("songs", '${Paths.formatToSongPath(song)}/Voices'));
+
+			if (vox != null){
+				if (MusicBeatState.menuVox==null){
+					MusicBeatState.menuVox = new FlxSound();
+					MusicBeatState.menuVox.persist = true;
+					MusicBeatState.menuVox.looped = true;
+					MusicBeatState.menuVox.group = FlxG.sound.music.group;
+
+					MusicBeatState.menuVox.volume = muteVocals ? 0 : 1;
+
+					FlxG.sound.list.add(MusicBeatState.menuVox);
 				}
+
+				MusicBeatState.menuVox.loadEmbedded(vox, true).volume = muteVocals ? 0 : 1;
+
+			}else if (MusicBeatState.menuVox != null){
+				MusicBeatState.menuVox.stop();
+				MusicBeatState.menuVox.destroy();
+				MusicBeatState.menuVox = null;
 			}
 			
 			FlxG.sound.playMusic(inst);
@@ -424,9 +490,9 @@ class JukeboxState extends MusicBeatState {
 				FlxG.sound.music.time = time;
 				if(MusicBeatState.menuVox!=null)
 					MusicBeatState.menuVox.time = time;
+
+				set_loopSong(loopSong);
 			});
-				
-			
 		}
 		Mouse.cursor = ARROW;
 
