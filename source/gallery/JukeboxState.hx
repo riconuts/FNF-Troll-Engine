@@ -209,12 +209,15 @@ class JukeboxState extends MusicBeatState {
 		FlxG.autoPause = false;
 		FlxG.mouse.visible = true;
 
+		/*
 		Application.current.window.onFocusIn.add(onFocusIn);
 		Application.current.window.onFocusOut.add(onFocusOut);
+		*/
 
 		updateDiscord();
 	}
 
+	/*
 	function onFocusOut(){
 		FlxG.drawFramerate = 1;
 		FlxG.updateFramerate = 30;
@@ -237,6 +240,7 @@ class JukeboxState extends MusicBeatState {
 		Application.current.window.onFocusOut.remove(onFocusOut);
 		super.destroy();
 	}
+	*/
 
 	inline function updateDiscord(){
 		#if desktop
