@@ -238,7 +238,11 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 			if (controls.BACK)
 			{
 				close();
+				FlxG.cameras.remove(cam);
+				FlxG.cameras.remove(scrollableCam);
+				FlxG.cameras.remove(overCam);
 				FlxG.sound.play(Paths.sound('cancelMenu'));
+				return;
 			}
             if(FlxG.mouse.justPressed){
                 for (index in 0...bindButtons.length){
@@ -306,10 +310,12 @@ class NewBindsSubstate extends MusicBeatSubstate  {
             if (camFollowPos.y > height)
                 camFollowPos.y = height; 
 
-			overCam.alpha = FlxMath.lerp(overCam.alpha, 0, lerpVal);
+			if (overCam!=null)
+				overCam.alpha = FlxMath.lerp(overCam.alpha, 0, lerpVal);
         }else{
 			var lerpVal = 0.2 * (elapsed / (1 / 60));
-            overCam.alpha = FlxMath.lerp(overCam.alpha, 1, lerpVal);
+			if (overCam != null)
+				overCam.alpha = FlxMath.lerp(overCam.alpha, 1, lerpVal);
 			var keyPressed:FlxKey = FlxG.keys.firstJustPressed();
 			if (keyPressed == BACKSPACE)
 			{

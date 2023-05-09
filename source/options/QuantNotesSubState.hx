@@ -55,13 +55,15 @@ class QuantNotesSubState extends MusicBeatSubstate
 		"192nd"
 	];
 
+	var daCam:FlxCamera;
 	public function new() {
 		super();
 
-		FlxG.state.persistentUpdate = false;
-		FlxG.cameras.add(cast add(new FlxCamera()), true);
+		daCam = new FlxCamera();
+		daCam.bgColor.alpha = 0;
+		FlxG.cameras.add(daCam, false);
 
-		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('newmenuu/optionsbg'));
+/* 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('newmenuu/optionsbg'));
 		//bg.color = 0xFFea71fd;
 		bg.screenCenter();
 		bg.antialiasing = ClientPrefs.globalAntialiasing;
@@ -72,6 +74,13 @@ class QuantNotesSubState extends MusicBeatSubstate
 		backdrop.setPosition(time * 30, time * 30);
 		backdrop.velocity.set(30, 30);
 		backdrop.alpha = 0.15;
+		add(backdrop); */
+
+		var backdrop = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
+		backdrop.setGraphicSize(FlxG.width, FlxG.height);
+		backdrop.updateHitbox();
+		backdrop.screenCenter(XY);
+		backdrop.alpha = 0.5;
 		add(backdrop);
 
 		blackBG = new FlxSprite(posX - 25).makeGraphic(870, 200, FlxColor.BLACK);
@@ -90,6 +99,9 @@ class QuantNotesSubState extends MusicBeatSubstate
 			for (j in 0...3) {
 				var optionText:Alphabet = new Alphabet(0, yPos + 60, Std.string(ClientPrefs.quantHSV[i][j]), true);
 				optionText.x = posX + (225 * j) + 250;
+				optionText.offset.x = (40 * (optionText.lettersArray.length - 1)) * 0.5;
+				if (Math.round(ClientPrefs.quantHSV[i][j]) < 0)
+					optionText.offset.x += 10;
 				grpNumbers.add(optionText);
 			}
 
@@ -114,11 +126,12 @@ class QuantNotesSubState extends MusicBeatSubstate
 			shaderArray.push(newShader);
 		}
 
-		hsbText = new Alphabet(0, 0, "Hue	Saturation  Luminosity", false, false, 0, 0.65);
+		hsbText = new Alphabet(0, 0, "Hue     Saturation  Brightness", false, false, 0, 0.65);
 		hsbText.x = posX + 240;
 		add(hsbText);
 
 		changeSelection();
+		cameras = [daCam];
 	}
 
 	var changingNote:Bool = false;
@@ -203,6 +216,7 @@ class QuantNotesSubState extends MusicBeatSubstate
 
 		if (controls.BACK || (changingNote && controls.ACCEPT)) {
 			if(!changingNote) {
+				FlxG.cameras.remove(daCam);
 				close();
 			} else {
 				changeSelection();
@@ -305,6 +319,9 @@ class QuantNotesSubState extends MusicBeatSubstate
 		var item = grpNumbers.members[(selected * 3) + type];
 		item.changeText(Std.string(ClientPrefs.quantHSV[selected][type]));
 		item.offset.x = (40 * (item.lettersArray.length - 1))* 0.5;
+		var roundedValue:Int = Math.round(ClientPrefs.quantHSV[selected][type]);
+		if (roundedValue < 0)
+			item.offset.x += 10;
 	}
 
 	function updateValue(change:Float = 0) {

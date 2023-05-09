@@ -360,7 +360,7 @@ class OptionsState extends MusicBeatState {
     {
 		//ClientPrefs.load();
         persistentDraw = true;
-        //persistentUpdate = true;
+        persistentUpdate = true;
 
 		mainCamera = new FlxCamera();
 		optionCamera = new FlxCamera();
@@ -385,11 +385,11 @@ class OptionsState extends MusicBeatState {
 
         var backdrop = new flixel.addons.display.FlxBackdrop(Paths.image("grid"));
         backdrop.velocity.set(30, 30);
-        function updateBackdropPos(){
+/*         function updateBackdropPos(){
             var time = Sys.time();
 		    backdrop.setPosition(time * 30, time * 30);
         }
-        updateBackdropPos();
+        updateBackdropPos(); */
 		
 		backdrop.alpha = 0.15;
 		add(backdrop);
@@ -397,14 +397,14 @@ class OptionsState extends MusicBeatState {
         // im lazy so this is my temporary workaround to having persistantUpdate until you replace the psych menus :P
         // honestly for note colours idk what imma do lmao if you wanna design smth ill program it unless you wanna do that
         // because idk what we should do there
-        new FlxTimer().start(
+/*         new FlxTimer().start(
             1 / ClientPrefs.framerate, 
             (tmr)->{
                 updateBackdropPos();
                 if (tmr.elapsedTime > 0.6) tmr.cancel();
             }, 
             0
-        );
+        ); */
 
         ////
         var optionMenu = new FlxSprite(84, 80, CoolUtil.makeOutlinedGraphic(920, 648, FlxColor.fromRGB(82, 82, 82), 2, FlxColor.fromRGB(70, 70, 70)));
@@ -1067,67 +1067,75 @@ class OptionsState extends MusicBeatState {
 
 	override function update(elapsed:Float)
 	{
-        if(controls.UI_LEFT_P)
-			changeCategory(-1);
-        else if(controls.UI_RIGHT_P)
-			changeCategory(1);
+        if(subState == null){
+            if(controls.UI_LEFT_P)
+                changeCategory(-1);
+            else if(controls.UI_RIGHT_P)
+                changeCategory(1);
 
-		if (FlxG.mouse.released)
-            scrubbingBar = null;
-		else if (FlxG.mouse.justPressed)
-		{
-			for (idx in 0...optionOrder.length)
-			{
-				if (FlxG.mouse.overlaps(buttons[idx]))
-				{
-					changeCategory(idx, true);
-					break;
-				}
-			}
-		}
+            if (FlxG.mouse.released)
+                scrubbingBar = null;
+            else if (FlxG.mouse.justPressed)
+            {
+                for (idx in 0...optionOrder.length)
+                {
+                    if (FlxG.mouse.overlaps(buttons[idx]))
+                    {
+                        changeCategory(idx, true);
+                        break;
+                    }
+                }
+            }
+            
+            
+            for(object => widget in currentWidgets)
+                updateWidget(object, widget, elapsed);
         
-        for(object => widget in currentWidgets)
-            updateWidget(object, widget, elapsed);
 
-		if (openedDropdown==null){
-            var movement:Float = -FlxG.mouse.wheel * 45;
-            var es:Float = elapsed / (1/60);
+            if (openedDropdown==null){
+                var movement:Float = -FlxG.mouse.wheel * 45;
+                var es:Float = elapsed / (1/60);
 
-            if (FlxG.keys.pressed.PAGEUP)
-                movement -= 25*es;
-            if (FlxG.keys.pressed.PAGEDOWN)
-                movement += 25*es;
+                if (FlxG.keys.pressed.PAGEUP)
+                    movement -= 25*es;
+                if (FlxG.keys.pressed.PAGEDOWN)
+                    movement += 25*es;
 
-            camFollow.y += movement;
-            camFollowPos.y += movement;
+                camFollow.y += movement;
+                camFollowPos.y += movement;
+            }
+        
+            if (camFollow.y < 0)
+                camFollow.y = 0;
+            if (camFollow.y > getHeight())
+                camFollow.y = getHeight(); 
+
+            var lerpVal = 0.2 * (elapsed / (1/60));
+            camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x , camFollow.x, lerpVal),
+                FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
+            if (camFollowPos.y < 0)
+                camFollowPos.y = 0;
+            
+            if (camFollowPos.y > getHeight())
+                camFollowPos.y = getHeight(); 
+
+            cameraPositions[selected].copyFrom(camFollow);
         }
-		if (camFollow.y < 0)
-			camFollow.y = 0;
-		if (camFollow.y > getHeight())
-			camFollow.y = getHeight(); 
-
-		var lerpVal = 0.2 * (elapsed / (1/60));
-		camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x , camFollow.x, lerpVal),
-			FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
-		if (camFollowPos.y < 0)
-			camFollowPos.y = 0;
-        
-		if (camFollowPos.y > getHeight())
-			camFollowPos.y = getHeight(); 
-
-		cameraPositions[selected].copyFrom(camFollow);
 
         super.update(elapsed);
 
-		if (controls.BACK){
-            //persistentUpdate = false;
+		if (subState == null)
+		{
+            if (controls.BACK){
+                //persistentUpdate = false;
 
-            ClientPrefs.save(actualOptions);
-			Highscore.updateSave();
-			
-            FlxG.sound.play(Paths.sound('cancelMenu'));
-			
-            MusicBeatState.switchState(new MainMenuState());
+                ClientPrefs.save(actualOptions);
+                Highscore.updateSave();
+                
+                FlxG.sound.play(Paths.sound('cancelMenu'));
+                
+                MusicBeatState.switchState(new MainMenuState());
+            }
         }
 
 
