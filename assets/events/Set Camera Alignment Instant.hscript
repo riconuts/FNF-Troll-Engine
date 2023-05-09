@@ -23,22 +23,21 @@ function onTrigger(value1, value2)
 		var bfX = camBf[0];
 		var bfY = camBf[1];
 		
-		var minX = 0.0;
-		var minY = 0.0;
-		var maxX = 0.0;
-		var maxY = 0.0;
+		var minX;
+		var minY;
+		var maxX;
+		var maxY;
 		
 		if (dadX < bfX){
 			minX = dadX;
 			maxX = bfX;
-		}else{
-			maxX = dadX;
-			minX = bfX;
-		}
-		if (dadY < bfY){
+			
 			minY = dadY;
 			maxY = bfY;
 		}else{
+			maxX = dadX;
+			minX = bfX;
+			
 			maxY = dadY;
 			minY = bfY;
 		}
