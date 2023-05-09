@@ -689,6 +689,10 @@ class NoteField extends FlxObject
 			drawing.push(object);
 		}
 
+		if((FlxG.state is PlayState))
+			PlayState.instance.callOnHScripts("playfieldDraw", [this], ["drawing" => drawing, "lookupMap" => lookupMap]); // lets you do custom rendering in scripts, if needed
+		// one example would be reimplementing Die Batsards' original bullet mechanic
+
 		drawing.sort(function(Obj1:RenderObject, Obj2:RenderObject)
 		{
 			return FlxSort.byValues(FlxSort.ASCENDING, Obj1.zIndex, Obj2.zIndex);

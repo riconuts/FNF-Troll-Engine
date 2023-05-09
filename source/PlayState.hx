@@ -245,7 +245,7 @@ class PlayState extends MusicBeatState
 
 	public var grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 
-	public var stageOpacity:FlxSprite;
+	public var stageOpacity:FlxSprite = new FlxSprite();
 	
 	////
 
@@ -1009,7 +1009,6 @@ class PlayState extends MusicBeatState
 		}
 
 		////
-		stageOpacity = new FlxSprite();
 
 		stageOpacity.makeGraphic(1,1,0xFFFFFFFF);
 		stageOpacity.color = 0xFF000000;
@@ -2436,7 +2435,8 @@ class PlayState extends MusicBeatState
 		} */
 		
 
-		stageOpacity.alpha = FlxMath.lerp(ClientPrefs.stageOpacity, 1, (modManager.getValue("cover", 0)));
+		if(modManager!=null)
+			stageOpacity.alpha = FlxMath.lerp(ClientPrefs.stageOpacity, 1, (modManager.getValue("cover", 0)));
 		super.update(elapsed);
 
 		if(ClientPrefs.npsDisplay){
@@ -4498,7 +4498,7 @@ class PlayState extends MusicBeatState
 	}
 
 	public function callOnScripts(event:String, ?args:Array<Dynamic>, ignoreStops:Bool = false, ?exclusions:Array<String>, ?scriptArray:Array<Dynamic>,
-			?ignoreSpecialShit:Bool = true)
+			?vars:Map<String, Dynamic>, ?ignoreSpecialShit:Bool = true)
 	{
 		var args:Array<Dynamic> = args != null ? args : [];
 
@@ -4514,7 +4514,7 @@ class PlayState extends MusicBeatState
 			{
 				continue;
 			}
-			var ret:Dynamic = script.call(event, args);
+			var ret:Dynamic = script.call(event, args, vars);
 			if (ret == Globals.Function_Halt)
 			{
 				ret = returnVal;
@@ -4562,8 +4562,8 @@ class PlayState extends MusicBeatState
 	}
 
 	#if hscript
-	public function callOnHScripts(event:String, ?args:Array<Dynamic>, ignoreStops = false, ?exclusions:Array<String>)
-		return callOnScripts(event, args, ignoreStops, exclusions, hscriptArray);
+	public function callOnHScripts(event:String, ?args:Array<Dynamic>, ?vars:Map<String, Dynamic>, ignoreStops = false, ?exclusions:Array<String>)
+		return callOnScripts(event, args, ignoreStops, exclusions, hscriptArray, vars);
 	
 	public function setOnHScripts(variable:String, arg:Dynamic)
 		return setOnScripts(variable, arg, hscriptArray);
