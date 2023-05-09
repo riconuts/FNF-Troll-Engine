@@ -42,7 +42,8 @@ class Paths
 		'assets/music/breakfast.$SOUND_EXT',
 		'content/global/music/freakyIntro.$SOUND_EXT',
 		'content/global/music/freakyMenu.$SOUND_EXT',
-		'content/global/music/breakfast.$SOUND_EXT'
+		'content/global/music/breakfast.$SOUND_EXT',
+		"assets/images/Garlic-Bread-PNG-Images.png"
 	];
 
 	/// haya I love you for the base cache dump I took to the max
@@ -52,6 +53,7 @@ class Paths
 		for (key in currentTrackedAssets.keys())
 		{
 			// if it is not currently contained within the used local assets
+			trace(key);
 			if (!localTrackedAssets.contains(key) && !dumpExclusions.contains(key))
 			{
 				// get rid of it

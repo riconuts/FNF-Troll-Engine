@@ -1,5 +1,7 @@
 package newoptions;
 
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.math.FlxMath;
@@ -266,11 +268,12 @@ class OptionsState extends MusicBeatState {
                     "showFPS"
                 ]
             ],
+            
             [
                 "Display",
                 [
 		            "framerate",
-                    
+                    "bread"
                 ]
             ],
             [
@@ -324,6 +327,7 @@ class OptionsState extends MusicBeatState {
 
     var mainCamera:FlxCamera;
     var optionCamera:FlxCamera;
+    var overlayCamera:FlxCamera;
     var cameraPositions:Array<FlxPoint> = [];
     var heights:Array<Float> = [];
 
@@ -356,6 +360,7 @@ class OptionsState extends MusicBeatState {
         return super.switchTo(to);
     }
 
+	var optionDesc:FlxText;
     override function create()
     {
 		//ClientPrefs.load();
@@ -365,9 +370,12 @@ class OptionsState extends MusicBeatState {
 		mainCamera = new FlxCamera();
 		optionCamera = new FlxCamera();
 		optionCamera.bgColor.alpha = 0;
+		overlayCamera = new FlxCamera();
+		overlayCamera.bgColor.alpha = 0;
 
         FlxG.cameras.reset(mainCamera);
         FlxG.cameras.add(optionCamera, false);
+		FlxG.cameras.add(overlayCamera, false);
         FlxG.cameras.setDefaultDrawTarget(mainCamera, true);
 
         transCamera = new FlxCamera();
@@ -385,26 +393,8 @@ class OptionsState extends MusicBeatState {
 
         var backdrop = new flixel.addons.display.FlxBackdrop(Paths.image("grid"));
         backdrop.velocity.set(30, 30);
-/*         function updateBackdropPos(){
-            var time = Sys.time();
-		    backdrop.setPosition(time * 30, time * 30);
-        }
-        updateBackdropPos(); */
-		
 		backdrop.alpha = 0.15;
 		add(backdrop);
-
-        // im lazy so this is my temporary workaround to having persistantUpdate until you replace the psych menus :P
-        // honestly for note colours idk what imma do lmao if you wanna design smth ill program it unless you wanna do that
-        // because idk what we should do there
-/*         new FlxTimer().start(
-            1 / ClientPrefs.framerate, 
-            (tmr)->{
-                updateBackdropPos();
-                if (tmr.elapsedTime > 0.6) tmr.cancel();
-            }, 
-            0
-        ); */
 
         ////
         var optionMenu = new FlxSprite(84, 80, CoolUtil.makeOutlinedGraphic(920, 648, FlxColor.fromRGB(82, 82, 82), 2, FlxColor.fromRGB(70, 70, 70)));
@@ -510,7 +500,15 @@ class OptionsState extends MusicBeatState {
 			allWidgets.set(name, widgets);
         } 
 		add(currentGroup);
-        
+
+		optionDesc = new FlxText(5, FlxG.height - 48, 0, "", 20);
+		optionDesc.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		optionDesc.textField.background = true;
+		optionDesc.textField.backgroundColor = FlxColor.BLACK;
+		optionDesc.screenCenter(XY);
+		optionDesc.cameras = [overlayCamera];
+		add(optionDesc);
+
 		checkWindows();
 
 		super.create();
@@ -1064,6 +1062,7 @@ class OptionsState extends MusicBeatState {
     function getHeight():Float
         return heights[selected];
     
+	var curHovering:Widget;
 
 	override function update(elapsed:Float)
 	{
@@ -1088,8 +1087,23 @@ class OptionsState extends MusicBeatState {
             }
             
             
-            for(object => widget in currentWidgets)
+            var pHov= curHovering;
+            for(object => widget in currentWidgets){
+				if (overlaps(widget.data.get("optionBox")))
+					curHovering = widget;
+                
                 updateWidget(object, widget, elapsed);
+            }
+
+			if (curHovering != pHov && curHovering!=null){
+                optionDesc.text = curHovering.optionData.desc;
+                optionDesc.screenCenter(XY);
+                optionDesc.y = FlxG.height - 56;
+                optionDesc.alpha = 0;
+                FlxTween.cancelTweensOf(optionDesc);
+                FlxTween.tween(optionDesc, {y: FlxG.height - 48, alpha: 1}, 0.35, {ease: FlxEase.quadOut});
+                
+            }
         
 
             if (openedDropdown==null){

@@ -55,9 +55,16 @@ class ClientPrefs
 				value: false,
 				data: []
 			},
+			"bread" => {
+				display: "Garlic Bread",
+				desc: "Garlic Bread. You're welcome, Wolfy.",
+				type: Toggle,
+				value: false,
+				data: []
+			},
 			"judgePreset" => {
 				display: "Judgement Preset",
-				desc: "Presets for the judgement windows",
+				desc: "Preset for the judgement windows",
 				type: Dropdown,
 				value: "Standard",
 				data: ["options" => ["Psych", "Vanilla", "Standard", "ITG", "Custom"]]
@@ -461,7 +468,7 @@ class ClientPrefs
 			},
 			"customizeKeybinds" => {
 				display: "Customize Key Bindings",
-				desc: "blahblah.",
+				desc: "Lets you change your controls. Pretty straight forward, huh?",
 				type: Button,
 				data: []
 			}
