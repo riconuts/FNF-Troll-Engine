@@ -2540,6 +2540,8 @@ class PlayState extends MusicBeatState
 		currentSV = getSV(Conductor.songPosition);
 		Conductor.visualPosition = getVisualPosition();
 		FlxG.watch.addQuick("visualPos", Conductor.visualPosition);
+
+		super.update(elapsed);
 		modManager.updateTimeline(curDecStep);
 		modManager.update(elapsed);
 
@@ -2636,8 +2638,6 @@ class PlayState extends MusicBeatState
 		setOnScripts('cameraX', camFollowPos.x);
 		setOnScripts('cameraY', camFollowPos.y);
 		callOnScripts('onUpdatePost', [elapsed]);
-
-		super.update(elapsed);
 	}
 
 	function openChartEditor()
@@ -4402,7 +4402,7 @@ class PlayState extends MusicBeatState
 	}
 	#end
 
-	var lastStepHit:Int = -1;
+	var lastStepHit:Int = -9999;
 	override function stepHit()
 	{
 		super.stepHit();

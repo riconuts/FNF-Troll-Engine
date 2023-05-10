@@ -277,7 +277,7 @@ class AdvancedHUD extends BaseHUD
 		if (hudPosition == 'Right')gradeTxt.x = FlxG.width - gradeTxt.width - 20;
 
 		scoreTxt.text = displayedScore;
-		scoreTxt.color = (songHighscore != 0 && score > songHighscore) ? 0xFFD800 : 0xFFFFFF;
+		scoreTxt.color = !PlayState.instance.saveScore?0x818181 : ((songHighscore != 0 && score > songHighscore) ? 0xFFD800 : 0xFFFFFF);
 
 		ratingTxt.text = (grade != "?"?(Highscore.floorDecimal(ratingPercent * 100, 2) + "%"):"0%");
 		fcTxt.text = (ratingFC=='CFC' && ClientPrefs.wife3)?"FC":ratingFC;
