@@ -575,7 +575,7 @@ class ComicReader extends MusicBeatState
 
 		var speed:Float = (pressed.SHIFT ? baseSpeed * 2 : baseSpeed);
 		var yScroll:Float = 0;
-		var mouseWheel = FlxG.mouse.wheel * 3;
+		var mouseWheel = FlxG.mouse.wheel;
 
 		
 		speed *= elapsed / (1 / 60);
@@ -585,7 +585,7 @@ class ComicReader extends MusicBeatState
 			if (pressed.CONTROL)
 				zoom += mouseWheel * 0.1;
 			else
-				yScroll -= mouseWheel * (speed / zoom) * 8;
+				yScroll -= mouseWheel * (speed / zoom) * 24;
 		}
 		zoom = FlxMath.bound(zoom, 0.25, 5);
 			
