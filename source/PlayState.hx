@@ -321,6 +321,8 @@ class PlayState extends MusicBeatState
 
 		return value;
 	}
+	public var saveScore:Bool = true; // whether to save the score. modcharted songs should set this to false if disableModcharts is true
+	
 	public var disableModcharts:Bool = false;
 	public var practiceMode:Bool = false;
 	public var perfectMode:Bool = false;
@@ -3165,7 +3167,7 @@ class PlayState extends MusicBeatState
 
 				if(Math.isNaN(percent)) percent = 0;
 
-				if(!playOpponent && !disableModcharts && ratingFC!='Fail')
+				if (!playOpponent && saveScore && ratingFC!='Fail')
 					Highscore.saveScore(SONG.song, songScore, percent);
 			}
 
