@@ -199,7 +199,7 @@ class GameOverSubstate extends MusicBeatSubstate
 			MusicBeatState.playMenuMusic(true);
 		}
 
-		if (boyfriend != null && boyfriend.animation.curAnim.name == 'firstDeath')
+		if (!isEnding && boyfriend != null && boyfriend.animation.curAnim.name == 'firstDeath')
 		{
 			if(boyfriend.animation.curAnim.curFrame >= 12 && !isFollowingAlready)
 			{
