@@ -39,9 +39,12 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 		// and make it so pressing it in playstate will open a debug menu w/ a bunch of stuff
 		// chart editor/character editor, botplay, skip to time, etc. move it from pause menu during charting mode lol
 		['Chart Editor', 'debug_1'],
-		['Character Editor', 'debug_2']
+		['Character Editor', 'debug_2'],
+		['Toggle Botplay', 'botplay']
 	];
 
+
+	public var changedBind:(String, Int, FlxKey) -> Void;
 
     // anything beyond this point prob shouldnt be touched too much
     var cam:FlxCamera = new FlxCamera();
@@ -269,6 +272,8 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 						for (key => val in ClientPrefs.defaultKeys.copy()){
 							ClientPrefs.keyBinds.set(key, []);
                             for(i => v in val){
+								if (changedBind!=null)
+									changedBind(key, i, v);
                                 ClientPrefs.keyBinds.get(key)[i] = v;
                             }
                         }
@@ -276,7 +281,6 @@ class NewBindsSubstate extends MusicBeatSubstate  {
                         for(index => fuck in bindButtons){
                             for(id => butt in fuck){
 								var internal = internals[index];
-								trace(InputFormatter.getKeyName(ClientPrefs.keyBinds.get(internal)[id]));
 								butt.bind = ClientPrefs.keyBinds.get(internal)[id];
                             }
                         }
@@ -340,6 +344,8 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 				if (binds[bindID] == keyPressed)
 					keyPressed = NONE;
                 else if(binds[opp] == keyPressed){
+					if (changedBind != null)
+						changedBind(internal, opp, NONE);
                     binds[opp] = NONE;
 					bindButtons[bindIndex][opp].bind = NONE;
                 }
@@ -354,6 +360,8 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 						    keyPressed = defaults[bindID]; 
                     }
                 }
+				if (changedBind != null)
+					changedBind(internal, bindID, keyPressed);
 				binds[bindID] = keyPressed;
 
                 bindButtons[bindIndex][bindID].bind = keyPressed;

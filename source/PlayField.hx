@@ -724,13 +724,15 @@ class NoteField extends FlxObject
 				shader.alpha.value = [alpha];
 				for (camera in cameras)
 				{
-					if (camera.alpha == 0 || !camera.visible)
-						continue;
-					shader.alpha.value = [alpha * camera.alpha];
-					// maybe some optimization so that it'll only do a beginShaderFill/endFill if the previous drawn shader != this shader
-					camera.canvas.graphics.beginShaderFill(shader);
-					camera.canvas.graphics.drawTriangles(vertices, null, uvData);
-					camera.canvas.graphics.endFill();
+					if (camera!=null && camera.canvas!=null && camera.canvas.graphics != null){
+						if (camera.alpha == 0 || !camera.visible)
+							continue;
+						shader.alpha.value = [alpha * camera.alpha];
+						// maybe some optimization so that it'll only do a beginShaderFill/endFill if the previous drawn shader != this shader
+						camera.canvas.graphics.beginShaderFill(shader);
+						camera.canvas.graphics.drawTriangles(vertices, null, uvData);
+						camera.canvas.graphics.endFill();
+					}
 				}
 			}
 		}

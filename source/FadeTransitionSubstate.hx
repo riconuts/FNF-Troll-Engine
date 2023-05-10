@@ -73,7 +73,7 @@ class FadeTransitionSubstate extends TransitionSubstate
 		var angle:Int = 90;
 		var zoom:Float = FlxMath.bound(cam.zoom,0.001);
 		var width:Int = Math.ceil(cam.width/zoom);
-		var height:Int = Math.ceil(cam.height/zoom);
+		var height:Int = Math.ceil(cam.height/ zoom);
 
 		yStart = -height;
 		yEnd = height;

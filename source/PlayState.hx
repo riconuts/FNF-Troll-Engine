@@ -411,6 +411,7 @@ class PlayState extends MusicBeatState
 
 	// Debug buttons
 	private var debugKeysChart:Array<FlxKey>;
+	private var debugKeysBotplay:Array<FlxKey>;
 	private var debugKeysCharacter:Array<FlxKey>;
 
 	// Less laggy controls
@@ -455,6 +456,7 @@ class PlayState extends MusicBeatState
 
 		debugKeysChart = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
 		debugKeysCharacter = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_2'));
+		debugKeysBotplay = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('botplay'));
 
 		keysArray = [
 			ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_left')),
@@ -535,12 +537,14 @@ class PlayState extends MusicBeatState
 		perfectMode = ClientPrefs.getGameplaySetting('perfect', false);
 		instaRespawn = ClientPrefs.getGameplaySetting('instaRespawn', false);
 		cpuControlled = ClientPrefs.getGameplaySetting('botplay', false);
-		disableModcharts = ClientPrefs.getGameplaySetting('disableModcharts', false);
+		disableModcharts = !ClientPrefs.modcharts; //ClientPrefs.getGameplaySetting('disableModcharts', false);
 
+		
 		if(perfectMode){
 			practiceMode = false;
 			instakillOnMiss = true;
 		}
+		saveScore = !cpuControlled;
 		healthDrain = switch(ClientPrefs.getGameplaySetting('healthDrain', "Disabled")){
 			default: 0;
 			case "Basic": 0.00055;
@@ -2494,6 +2498,11 @@ class PlayState extends MusicBeatState
 				paused = true;
 				cancelMusicFadeTween();
 				MusicBeatState.switchState(new CharacterEditorState(SONG.player2));
+			}
+
+			if (FlxG.keys.anyJustPressed(debugKeysBotplay)){
+				cpuControlled = !cpuControlled;
+				if(cpuControlled)saveScore=false;
 			}
 
 			// RESET = Quick Game Over Screen

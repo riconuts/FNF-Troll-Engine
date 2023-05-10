@@ -466,6 +466,13 @@ class ClientPrefs
 				value: false,
 				data: []
 			},
+			"modcharts" => {
+				display: "Modcharts",
+				desc: "When toggled, modcharts will be used on some songs.\nWARNING: Disabling modcharts on modcharted songs will disable scoring!",
+				type: Toggle,
+				value: true,
+				data: []
+			},
 			"customizeKeybinds" => {
 				display: "Customize Key Bindings",
 				desc: "Lets you change your controls. Pretty straight forward, huh?",
@@ -496,8 +503,7 @@ class ClientPrefs
 		'perfect' => false,
 		'instaRespawn' => false,
 		'botplay' => false,
-		'opponentplay' => false,
-		'disableModcharts' => false
+		'opponentplay' => false
 	];
 
 	inline public static function getGameplaySetting(name:String, defaultValue:Dynamic):Dynamic
@@ -553,7 +559,8 @@ class ClientPrefs
 		'volume_up' => [NUMPADPLUS, PLUS],
 		'volume_down' => [NUMPADMINUS, MINUS],
 		'debug_1' => [SEVEN, NONE],
-		'debug_2' => [EIGHT, NONE]
+		'debug_2' => [EIGHT, NONE],
+		'botplay' => [F6, NONE]
 	];
 	public static var defaultKeys:Map<String, Array<FlxKey>> = null;
 
@@ -581,7 +588,6 @@ class ClientPrefs
 				else
 					Reflect.setField(optionSave.data, key, val.value);
 
-				trace(key, val.value);
 			}
 		}
 		else

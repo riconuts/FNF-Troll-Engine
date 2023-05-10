@@ -1,5 +1,6 @@
 package;
 
+import newoptions.OptionsSubstate;
 import Controls.Control;
 import flixel.FlxCamera;
 import flixel.FlxG;
@@ -20,7 +21,7 @@ class PauseSubState extends MusicBeatSubstate
 	var grpMenuShit:FlxTypedGroup<Alphabet>;
 
 	var menuItems:Array<String> = [];
-	var menuItemsOG:Array<String> = ['Resume', 'Restart Song', 'Exit to menu'];
+	var menuItemsOG:Array<String> = ['Resume', 'Restart Song', 'Options', 'Exit to menu'];
 	var curSelected:Int = 0;
 
 	var pauseMusic:FlxSound;
@@ -222,6 +223,52 @@ class PauseSubState extends MusicBeatSubstate
 		{
 			switch (daSelected)
 			{
+				case 'Options':
+					var daSubstate = new OptionsSubstate();
+/* 					var noResume:Array<String> = [
+						"modcharts",
+						"noteOffset",
+						"ratingOffset",
+						"wife3",
+						"useEpics", 
+						"judgePreset", 
+						"epicWindow", 
+						"sickWindow", 
+						"goodWindow", 
+						"badWindow",
+						"hitWindow", 
+						"judgeDiff",
+						"noteSkin",
+					]; */
+					daSubstate.goBack = (function(changedOptions:Array<String>)
+					{
+/* 						var canResume:Bool = true;
+						for(opt in changedOptions){
+							if (noResume.contains(opt)){
+								canResume = false;
+								break;
+							}
+						}*/
+
+						closeSubState();
+/* 						if (!canResume)
+						{ */
+							if (changedOptions.length > 0)
+							{
+								menuItems.remove("Resume");
+								menuItems.remove("Skip Time");
+								regenMenu();
+	 						}
+						//}
+						for(camera in daSubstate.camerasToRemove)
+							FlxG.cameras.remove(camera);
+
+						var cam:FlxCamera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
+
+						cameras = [cam];
+
+					}); 
+					openSubState(daSubstate);
 				case "Resume":
 					close();
 				case "Restart Song":
