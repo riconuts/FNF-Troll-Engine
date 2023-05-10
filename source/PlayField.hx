@@ -70,6 +70,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	function get_judgeManager()
 		return judgeManager == null ? PlayState.instance.judgeManager : judgeManager;
 	public var spawnedNotes:Array<Note> = []; // spawned notes
+	public var spawnedByData:Array<Array<Note>> = [[], [], [], []]; // spawned notes by data. Used for input
 	public var noteQueue:Array<Array<Note>> = [[], [], [], []]; // unspawned notes
 	public var strumNotes:Array<StrumNote> = []; // receptors
 	public var characters:Array<Character> = []; // characters that sing when field is hit
@@ -164,6 +165,9 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 		daNote.kill();
 		spawnedNotes.remove(daNote);
+		if (spawnedByData[daNote.noteData] != null)
+			spawnedByData[daNote.noteData].remove(daNote);
+
 		if (noteQueue[daNote.noteData] != null)
 			noteQueue[daNote.noteData].remove(daNote);
 
@@ -186,6 +190,15 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	public function spawnNote(note:Note){
 		if (noteQueue[note.noteData]!=null)
 			noteQueue[note.noteData].remove(note);
+		if (spawnedByData[note.noteData]==null){
+			if(note.noteData >= spawnedByData.length){
+				for(i in spawnedByData.length-1...note.noteData)
+					spawnedByData.push([]);
+			}
+		}
+
+		spawnedByData[note.noteData].push(note);
+
 		noteQueue[note.noteData].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
 
 		noteSpawned.dispatch(note, this);
@@ -444,8 +457,11 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 	public function getNotes(dir:Int, ?filter:Note->Bool):Array<Note>
 	{
+		if (spawnedByData[dir]==null)
+			return [];
+
 		var collected:Array<Note> = [];
-		for (note in spawnedNotes)
+		for (note in spawnedByData[dir])
 		{
 			if (note.alive && note.noteData == dir && !note.wasGoodHit && !note.tooLate)
 			{
@@ -458,10 +474,12 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 	public function getNotesWithEnd(dir:Int, end:Float, ?filter:Note->Bool):Array<Note>
 	{
+		if (spawnedByData[dir] == null)
+			return [];
 		var collected:Array<Note> = [];
-		for (note in spawnedNotes)
+		for (note in spawnedByData[dir])
 		{
-			//if (note.strumTime>end)break;
+			if (note.strumTime>end)break;
 			if (note.alive && note.noteData == dir && !note.wasGoodHit && !note.tooLate)
 			{
 				if (filter == null || filter(note))
