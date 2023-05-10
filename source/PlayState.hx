@@ -847,6 +847,7 @@ class PlayState extends MusicBeatState
 
 		// in case you want to layer shit in a specific way (like in infimario for example)
 		// RICO CAN WE STOP USING SLURS IN THE CODE
+		// we???
 		if (Globals.Function_Stop != callOnHScripts("onAddSpriteGroups", []))
 		{
 			add(stage);
@@ -2437,7 +2438,24 @@ class PlayState extends MusicBeatState
 
 		if(modManager!=null)
 			stageOpacity.alpha = FlxMath.lerp(ClientPrefs.stageOpacity, 1, (modManager.getValue("cover", 0)));
-		super.update(elapsed);
+
+		if (camZooming)
+		{
+			var lerpVal = CoolUtil.boundTo(1 - (elapsed * 3.125 * camZoomingDecay), 0, 1);
+
+			camGame.zoom = FlxMath.lerp(
+				1 * defaultCamZoom,
+				camGame.zoom,
+				lerpVal
+			);
+			camHUD.zoom = FlxMath.lerp(
+				1,
+				camHUD.zoom,
+				lerpVal
+			);
+
+			camOverlay.zoom = camHUD.zoom;
+		}
 
 		if(ClientPrefs.npsDisplay){
 			if(noteHits.length > 0){
@@ -2511,24 +2529,6 @@ class PlayState extends MusicBeatState
 				startSong();
 			else if(!startedCountdown)
 				Conductor.songPosition = -Conductor.crochet * 5;
-		}
-
-		if (camZooming)
-		{
-			var lerpVal = CoolUtil.boundTo(1 - (elapsed * 3.125 * camZoomingDecay), 0, 1);
-
-			camGame.zoom = FlxMath.lerp(
-				1 * defaultCamZoom,
-				camGame.zoom,
-				lerpVal
-			);
-			camHUD.zoom = FlxMath.lerp(
-				1,
-				camHUD.zoom,
-				lerpVal
-			);
-
-			camOverlay.zoom = camHUD.zoom;
 		}
 
 		FlxG.watch.addQuick("beatShit", curBeat);
@@ -2633,6 +2633,8 @@ class PlayState extends MusicBeatState
 		setOnScripts('cameraX', camFollowPos.x);
 		setOnScripts('cameraY', camFollowPos.y);
 		callOnScripts('onUpdatePost', [elapsed]);
+
+		super.update(elapsed);
 	}
 
 	function openChartEditor()
