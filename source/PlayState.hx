@@ -848,6 +848,7 @@ class PlayState extends MusicBeatState
 		// in case you want to layer shit in a specific way (like in infimario for example)
 		// RICO CAN WE STOP USING SLURS IN THE CODE
 		// we???
+		// fine, can YOU stop using slurs in the code >:(
 		if (Globals.Function_Stop != callOnHScripts("onAddSpriteGroups", []))
 		{
 			add(stage);
