@@ -220,9 +220,9 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	public function input(data:Int){
 		var noteList = getNotesWithEnd(data, Conductor.songPosition + ClientPrefs.hitWindow, (note:Note) -> !note.isSustainNote); //getTapNotes(data);
 		noteList.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
-		if (noteList.length > 0)
+		while (noteList.length > 0)
 		{
-			var note:Note = noteList[0];
+			var note:Note = noteList.shift();
 			var judge:Judgment = judgeManager.judgeNote(note);
 			if (judge != UNJUDGED){
 				note.hitResult.judgment = judge;
@@ -428,12 +428,6 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		{
 			for(i in 0...4){
 				for (daNote in getNotes(i, (note:Note) -> !note.ignoreNote && !note.hitCausesMiss)){
-/* 					if (daNote.isSustainNote)
-					{
-						if (daNote.canBeHit)
-							noteHitCallback(daNote, this);
-					}
-					else */
 					if (!daNote.isSustainNote){
 						var hitDiff = daNote.strumTime - Conductor.songPosition;
 						if ((hitDiff + ClientPrefs.ratingOffset) <= (5 * Wife3.timeScale)){
