@@ -2697,11 +2697,13 @@ class PlayState extends MusicBeatState
 					MusicBeatState.resetState(true);
 					return true;
 				}else{
+					var char = playOpponent ? dad : boyfriend;
 					openSubState(new GameOverSubstate(
-						boyfriend.getScreenPosition().x - boyfriend.positionArray[0],
-						boyfriend.getScreenPosition().y - boyfriend.positionArray[1],
+						char.getScreenPosition().x - char.positionArray[0],
+						char.getScreenPosition().y - char.positionArray[1],
 						camFollowPos.x,
-						camFollowPos.y
+						camFollowPos.y,
+						char.isPlayer
 					));
 				}
 

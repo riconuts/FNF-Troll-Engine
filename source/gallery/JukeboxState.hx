@@ -510,6 +510,7 @@ class JukeboxState extends MusicBeatState {
 
 	function loadCoverImage(data:JukeboxSongData){
 		var coverArtPath = data.coverArt;
+
 		if(coverArtPath.trim()==''){
 			var songPath = 'songs/${data.songDirectory}';
 			if (!Paths.fileExists('images/$songPath.png', IMAGE))
@@ -517,13 +518,18 @@ class JukeboxState extends MusicBeatState {
 			else
 				coverArtPath = songPath;
 		}
+
 		if(data.chapterDir != null) Paths.currentModDirectory = data.chapterDir;
-		
-		image.loadGraphic(Paths.image(coverArtPath));
+
+		var graphic = Paths.image(coverArtPath);
+		if (graphic == null) graphic = Paths.image('jukebox/noCoverImage');
+
+		image.loadGraphic(graphic);
 		image.setGraphicSize(388, 388);
 		image.updateHitbox();
 		image.x = outline.x + 16;
 		image.y = outline.y + 16;
+		
 		Paths.currentModDirectory = '';
 	}
 }

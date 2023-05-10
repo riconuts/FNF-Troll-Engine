@@ -76,7 +76,7 @@ class GameOverSubstate extends MusicBeatSubstate
 		add(genericBitch);
 	}
 
-	public function new(x:Float, y:Float, camX:Float, camY:Float)
+	public function new(x:Float, y:Float, camX:Float, camY:Float, ?isPlayer:Bool)
 	{
 		super();
 
@@ -115,7 +115,7 @@ class GameOverSubstate extends MusicBeatSubstate
 			{path: endSoundName, type: 'MUSIC'}
 		]);
 		
-		boyfriend = new Boyfriend(x, y, deathName);
+		boyfriend = new Boyfriend(x, y, deathName, isPlayer);
 		boyfriend.x += boyfriend.positionArray[0];
 		boyfriend.y += boyfriend.positionArray[1];
 		add(boyfriend);
