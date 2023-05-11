@@ -102,7 +102,9 @@ class Note extends NoteObject
 	public var usesDefaultColours:Bool = true; // whether this note uses the default note colours (lets you change colours in options menu)
 
 	public var blockHit:Bool = false; // whether you can hit this note or not
-	//public var lowPriority:Bool = false; // shadowmario's shitty workaround for really bad mine placement, yet still no *real* hitbox customization lol!
+	#if PE_MOD_COMPATIBILITY
+	public var lowPriority:Bool = false; // shadowmario's shitty workaround for really bad mine placement, yet still no *real* hitbox customization lol!
+	#end
 	public var noteSplashDisabled:Bool = false; // disables the notesplash when you hit this note
 	public var noteSplashTexture:String = null; // spritesheet for the notesplash
 	public var noteSplashHue:Float = 0; // hueshift for the notesplash, can be changed in note-type but otherwise its whatever the user sets in options
@@ -225,8 +227,8 @@ class Note extends NoteObject
 		return value;
 	}
 
-	public function updateColours(){		
-		if(!usesDefaultColours)return;
+	public function updateColours(ignore:Bool=false){		
+		if(!ignore && !usesDefaultColours)return;
 		if(isQuant){
 			var idx = quants.indexOf(quant);
 			colorSwap.hue = ClientPrefs.quantHSV[idx][0] / 360;
@@ -243,6 +245,11 @@ class Note extends NoteObject
 		noteSplashTexture = PlayState.SONG.splashSkin;
 
 		updateColours();
+
+		// just to make sure they arent 0, 0, 0
+		colorSwap.hue += 0.0127;
+		colorSwap.saturation += 0.0127;
+		colorSwap.brightness += 0.0127;
 		var hue = colorSwap.hue;
 		var sat = colorSwap.saturation;
 		var brt = colorSwap.brightness;
@@ -290,6 +297,16 @@ class Note extends NoteObject
 			if(colorSwap.hue != hue || colorSwap.saturation != sat || colorSwap.brightness != brt)
 				usesDefaultColours = false;// just incase
 		}
+
+		if(colorSwap.hue==hue)
+			colorSwap.hue -= 0.0127;
+
+		if(colorSwap.saturation==sat)
+			colorSwap.saturation -= 0.0127;
+
+		if(colorSwap.brightness==brt)
+				colorSwap.brightness -= 0.0127;
+		
 		
 		if(isQuant){
 			if (noteSplashTexture == 'noteSplashes' || noteSplashTexture == null || noteSplashTexture.length <= 0)
@@ -436,7 +453,8 @@ class Note extends NoteObject
 
 				blahblah = texture;
 				isQuant = true;
-			}
+			}else
+				canQuant = false;
 		}
 		
 		frames = Paths.getSparrowAtlas(blahblah);

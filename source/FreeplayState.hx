@@ -171,7 +171,7 @@ class FreeplayState extends MusicBeatState
 					for (song in songs){
 						var songButton = addSong(song[0], null, mod, false);
 						setupButtonCallbacks(songButton);
-
+/* 
 						var icon = Paths.image('icons/${song[1]}');
 						if (icon == null)
 							icon = Paths.image('icons/icon-${song[1]}');
@@ -195,8 +195,13 @@ class FreeplayState extends MusicBeatState
 								-(194 - songButton.frameHeight) * 0.5,
 								-(194 - songButton.frameHeight) * 0.5
 							);
-						}else if(icon == null)
-							songButton.loadGraphic(Paths.image('songs/placeholder'));
+						}else if(icon == null) */
+
+						// TODO ^ make this work
+						// honestly probably just make a graphic and then stamp the icon onto it w/ healthicon n shit
+						
+
+						songButton.loadGraphic(Paths.image('songs/placeholder'));
 						
 					}
 				}

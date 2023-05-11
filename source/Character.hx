@@ -248,9 +248,8 @@ class Character extends FlxSprite
 						var animIndices:Array<Int> = anim.indices;
 						var camOffset:Null<Array<Float>> = anim.cameraOffset;
 
-						if (!ClientPrefs.directionalCam)
-							camOffset = [0, 0];
-						else if(camOffset==null){
+
+						if(camOffset==null){
 							switch(animAnim){
 								case 'singLEFT' | 'singLEFTmiss' | 'singLEFT-alt':
 									camOffset = [-30, 0];

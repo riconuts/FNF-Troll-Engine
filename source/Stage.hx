@@ -1,5 +1,12 @@
 package;
 
+#if LUA_ALLOWED
+import llua.Convert;
+import llua.Lua;
+import llua.LuaL;
+import llua.State;
+#end
+
 import Song;
 import flixel.FlxBasic;
 import flixel.FlxCamera;
@@ -121,8 +128,31 @@ class Stage extends FlxTypedGroup<FlxBasic>
 					break;
 				#if LUA_ALLOWED
 				} else if (ext == 'lua'){
-					stageScript = new FunkinLua(file);
+					stageScript = new FunkinLua(file, true);
+					#if PE_MOD_COMPATIBILITY
+					var lua:FunkinLua = cast stageScript;
+					Lua_helper.add_callback(lua.lua, "addLuaSprite", function(tag:String, front:Bool = false) {
+						// TODO: put modchartSprites n shit outside of PlayState
+						// maybe put it into FunkinLua so that stages made for psych mods will work on the title screen, etc
+
+						if (PlayState.instance == null || !PlayState.instance.modchartSprites.exists(tag))
+							return;
+
+						var spr:FunkinLua.ModchartSprite = PlayState.instance.modchartSprites.get(tag);
+						if(spr.wasAdded)
+							return;
+
+						if (front)
+							foreground.add(spr);			
+						else
+							add(spr);
+						
+						
+						spr.wasAdded = true;	
+					});
+					#end
 					stageScript.call("onCreate", []);
+					stageScript.call("onLoad", []);
 
 					break;
 				#end

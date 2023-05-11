@@ -115,10 +115,10 @@ class ModManager {
         return register.get(modName);
 
 	inline public function getPercent(modName:String, player:Int)
-		return register.get(modName).getPercent(player);
+		return !register.exists(modName)?0:register.get(modName).getPercent(player);
 
 	inline public function getValue(modName:String, player:Int)
-		return register.get(modName).getValue(player);
+		return !register.exists(modName)?0:register.get(modName).getValue(player);
 
     inline public function setPercent(modName:String, val:Float, player:Int=-1)
 		setValue(modName, val/100, player);

@@ -500,7 +500,6 @@ class Paths
 		if (Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
 		{
 			var fileToCheck = mods(Paths.currentModDirectory + '/' + key);
-
 			if (FileSystem.exists(fileToCheck))
 				return fileToCheck;
 		}

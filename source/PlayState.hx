@@ -343,6 +343,7 @@ class PlayState extends MusicBeatState
 	public var camSubs:FlxCamera; // JUST for subtitles
 	public var camStageUnderlay:FlxCamera; // retarded
 	public var camHUD:FlxCamera;
+	public var camNotes:FlxCamera; // just to ensure the notes go over HUD elements
 	public var camOverlay:FlxCamera; // shit that should go above all else and not get affected by camHUD changes, but still below camOther (pause menu, etc)
 	public var camOther:FlxCamera;
 
@@ -564,12 +565,14 @@ class PlayState extends MusicBeatState
 		//// Camera shit
 		camGame = new FlxCamera();
 		camHUD = new FlxCamera();
+		camNotes = new FlxCamera();
 		camOverlay = new FlxCamera();
 		camOther = new FlxCamera();
 		camSubs = new FlxCamera();
 		camStageUnderlay = new FlxCamera();
 
 		camSubs.bgColor.alpha = 0;
+		camNotes.bgColor.alpha = 0;
 		camStageUnderlay.bgColor.alpha = 0; 
 		camHUD.bgColor.alpha = 0; 
 		camOverlay.bgColor.alpha = 0;
@@ -578,6 +581,7 @@ class PlayState extends MusicBeatState
 		FlxG.cameras.reset(camGame);
 		FlxG.cameras.add(camStageUnderlay, false);
 		FlxG.cameras.add(camHUD, false);
+		FlxG.cameras.add(camNotes, false);
 		FlxG.cameras.add(camOverlay, false);
 		FlxG.cameras.add(camSubs, false);
 		FlxG.cameras.add(camOther, false);
@@ -994,12 +998,12 @@ class PlayState extends MusicBeatState
 /* 		if (hitbar != null)
 			hitbar.cameras = cH; */
 		hud.cameras = cH;
-		playerField.cameras = cH;
-		dadField.cameras = cH;
-		playfields.cameras = cH;
-		strumLineNotes.cameras = cH;
-		grpNoteSplashes.cameras = cH;
-		notes.cameras = cH;
+		playerField.cameras = [camNotes];
+		dadField.cameras = [camNotes];
+		playfields.cameras = [camNotes];
+		strumLineNotes.cameras = [camNotes];
+		grpNoteSplashes.cameras = [camNotes];
+		notes.cameras = [camNotes];
 /* 		healthBarBG.cameras = cH;
 		healthBar.cameras = cH;
 		iconP1.cameras = cH;
@@ -1040,7 +1044,7 @@ class PlayState extends MusicBeatState
 		add(stageOpacity);
 
 		////
-		callOnScripts('onCreatePost');
+		callOnAllScripts('onCreatePost');
 		super.create();
 
 		RecalculateRating();
@@ -1085,16 +1089,22 @@ class PlayState extends MusicBeatState
 			cameraSpeed = stageData.camera_speed;
 
 		boyfriendCameraOffset = stageData.camera_boyfriend;
-		if(boyfriendCameraOffset == null) //Fucks sake should have done it since the start :rolling_eyes:
+		if(boyfriendCameraOffset == null){ //Fucks sake should have done it since the start :rolling_eyes:
 			boyfriendCameraOffset = [0, 0];
+			stageData.camera_boyfriend = [0, 0];
+		}
 
 		opponentCameraOffset = stageData.camera_opponent;
-		if(opponentCameraOffset == null)
+		if(opponentCameraOffset == null){
 			opponentCameraOffset = [0, 0];
+			stageData.camera_opponent = [0, 0];
+		}
 
 		girlfriendCameraOffset = stageData.camera_girlfriend;
-		if(girlfriendCameraOffset == null)
+		if(girlfriendCameraOffset == null){
 			girlfriendCameraOffset = [0, 0];
+			stageData.camera_girlfriend = [0, 0];
+		}
 
 		if(boyfriendGroup==null)
 			boyfriendGroup = new FlxSpriteGroup(BF_X, BF_Y);
@@ -1317,8 +1327,13 @@ class PlayState extends MusicBeatState
 
 		inCutscene = false;
 
-		if(callOnScripts('onStartCountdown') == Globals.Function_Stop)
+		var startCntdown = callOnScripts('onStartCountdown');
+		if(startCntdown == Globals.Function_Stop){
+			trace("stop");
+			trace(startCntdown);
+			trace(Globals.Function_Stop);
 			return;
+		}
 
 		if (skipCountdown || startOnTime > 0)
 			skipArrowStartTween = true;
@@ -1592,7 +1607,7 @@ class PlayState extends MusicBeatState
 				if (eventScripts.exists(event.event))
 				{
 					var eventScript:FunkinScript = eventScripts.get(event.event);
-					var returnVal:Any = true;
+					var returnVal:Dynamic = true;
 
 					#if LUA_ALLOWED
 					if (eventScript.scriptType == 'lua')
@@ -1600,7 +1615,7 @@ class PlayState extends MusicBeatState
 					else #end
 						returnVal = callScript(eventScript, "shouldPush", [event]);
 
-					//trace(returnVal, returnVal != false, fuck);
+					if(returnVal == Globals.Function_Continue)return true;
 					return returnVal != false;
 				}
 		}
@@ -1729,7 +1744,7 @@ class PlayState extends MusicBeatState
 					#if LUA_ALLOWED
 					if (ext == 'lua')
 					{
-						var script = new FunkinLua(file, notetype);
+						var script = new FunkinLua(file, notetype, #if(PE_MOD_COMPATIBILITY) true #else false #end);
 						luaArray.push(script);
 						funkyScripts.push(script);
 						notetypeScripts.set(notetype, script);
@@ -1937,10 +1952,14 @@ class PlayState extends MusicBeatState
 			}
 			daBeats += 1;
 		}
+
 		// playerCounter += 1;
 
 		allNotes.sort(sortByShit);
 
+		for(fuck in allNotes)
+			unspawnNotes.push(fuck);
+		
 		for (field in playfields.members)
 		{
 			var goobaeg:Array<Note> = [];
@@ -1968,6 +1987,15 @@ class PlayState extends MusicBeatState
 				field.removeNote(note);
 
 		}
+
+		#if(LUA_ALLOWED && PE_MOD_COMPATIBILITY)
+		for(key => script in notetypeScripts){
+			if(script.scriptType == 'lua'){
+				script.call("onCreate");
+				trace(script.scriptName);
+			}
+		}
+		#end
 		checkEventNote();
 		generatedMusic = true;
 	}
@@ -2094,6 +2122,8 @@ class PlayState extends MusicBeatState
 	public function optionsChanged(options:Array<String>){
 		hud.changedOptions(options);
 		if (options.length > 0){
+			for(note in allNotes)
+				note.updateColours();
 			updateTime = (ClientPrefs.timeBarType != 'Disabled');
 			
 			var reBind:Bool = false;
@@ -2145,15 +2175,13 @@ class PlayState extends MusicBeatState
 	}
 
 	override function draw(){
-		if (modManager != null)
-			stageOpacity.alpha = FlxMath.lerp(ClientPrefs.stageOpacity, 1, (modManager.getValue("cover", 0)));
-		else
-			stageOpacity.alpha = ClientPrefs.stageOpacity;
+		stageOpacity.alpha = ClientPrefs.stageOpacity;
 		super.draw();
 	}
 
 	function eventNoteEarlyTrigger(event:EventNote):Float {
-		var returnedValue:Float = callOnScripts('eventEarlyTrigger', [event.event, event.value1, event.value2]);
+		var returnedValue:Float = 0;
+		var currentRV:Float = callOnAllScripts('eventEarlyTrigger', [event.event, event.value1, event.value2]);
 
 		if (eventScripts.exists(event.event)){
 			var eventScript:Dynamic = eventScripts.get(event.event);
@@ -2164,6 +2192,8 @@ class PlayState extends MusicBeatState
 			#end
 				returnedValue = callScript(eventScript, "getOffset", [event]);
 		}
+		if(currentRV!=0 && returnedValue==0)returnedValue = currentRV;
+
 		if(returnedValue != 0)
 			return returnedValue;
 
@@ -2373,6 +2403,7 @@ class PlayState extends MusicBeatState
 		field.noteRemoved.add((note:Note, field:PlayField) -> {
 			if(modchartObjects.exists('note${note.ID}'))modchartObjects.remove('note${note.ID}');
 			allNotes.remove(note);
+			unspawnNotes.remove(note);
 		});
 		field.noteMissed.add((daNote:Note, field:PlayField) -> {
 			if (field.isPlayer && !field.autoPlayed && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit))
@@ -2453,6 +2484,17 @@ class PlayState extends MusicBeatState
 
 		setOnScripts('curDecStep', curDecStep);
 		setOnScripts('curDecBeat', curDecBeat);
+		#if(LUA_ALLOWED && PE_MOD_COMPATIBILITY)
+		for (key => script in notetypeScripts){
+			if(script.scriptType=='lua')script.call("onUpdate", [elapsed]); // for backwards compat w/ psych lua
+		}
+		#end
+
+		#if(LUA_ALLOWED && PE_MOD_COMPATIBILITY)
+		for (key => script in eventScripts){
+			if(script.scriptType=='lua')script.call("onUpdate", [elapsed]); // for backwards compat w/ psych lua
+		}
+		#end
 
 		callOnScripts('onUpdate', [elapsed]);
 
@@ -2494,11 +2536,13 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		for (key in notetypeScripts.keys())
-			notetypeScripts.get(key).call("update", [elapsed]);
+		for (key => script in notetypeScripts){
+			script.call("update", [elapsed]);
+		}
 
-		for (key in eventScripts.keys())
+		for (key => script in eventScripts){
 			eventScripts.get(key).call("update", [elapsed]);
+		}
 
 		callOnHScripts('update', [elapsed]);
 
@@ -2533,8 +2577,16 @@ class PlayState extends MusicBeatState
 				lerpVal
 			);
 
-			camOverlay.zoom = camHUD.zoom;
 		}
+		camOverlay.zoom = camHUD.zoom;
+		camNotes.zoom = camHUD.zoom;
+
+		camNotes.setPosition(camHUD.x, camHUD.y);
+		if(camNotes.height != camHUD.height)
+			camNotes.height = camHUD.height;
+
+		if(camNotes.width != camHUD.width)
+			camNotes.width = camHUD.width;
 
 		if(noteHits.length > 0){
 			while (noteHits.length > 0 && (noteHits[0] + 2000) < Conductor.songPosition)
@@ -2717,6 +2769,16 @@ class PlayState extends MusicBeatState
 		setOnScripts('cameraX', camFollowPos.x);
 		setOnScripts('cameraY', camFollowPos.y);
 		callOnScripts('onUpdatePost', [elapsed]);
+		#if(LUA_ALLOWED && PE_MOD_COMPATIBILITY)
+		for (key => script in notetypeScripts){
+			if(script.scriptType=='lua')script.call("onUpdatePost", [elapsed]); // for backwards compat w/ psych lua
+		}
+		#end
+		#if(LUA_ALLOWED && PE_MOD_COMPATIBILITY)
+		for (key => script in eventScripts){
+			if(script.scriptType=='lua')script.call("onUpdatePost", [elapsed]); // for backwards compat w/ psych lua
+		}
+		#end
 	}
 
 	function openChartEditor()
@@ -3120,8 +3182,15 @@ class PlayState extends MusicBeatState
 				}
 		}
 		callOnScripts('onEvent', [eventName, value1, value2]);
-		if(eventScripts.exists(eventName))
-			callScript(eventScripts.get(eventName), "onTrigger", [value1, value2]);
+		if(eventScripts.exists(eventName)){
+			var script = eventScripts.get(eventName);
+			#if LUA_ALLOWED
+			if(script.scriptType == 'lua')
+				callScript(script, "onEvent", [eventName, value1, value2]);
+			else
+			#end
+				callScript(script, "onTrigger", [value1, value2]);
+		}
 	}
 
 	//// Kinda rewrote the camera shit so that its 'easier' to mod
@@ -3364,6 +3433,7 @@ class PlayState extends MusicBeatState
 			// daNote.destroy();
 		}
 		allNotes = [];
+		unspawnNotes = [];
 		for(field in playfields){
 			field.clearDeadNotes();
 			field.spawnedNotes = [];
@@ -4588,8 +4658,12 @@ class PlayState extends MusicBeatState
 		}
 	}
 
+	inline public function callOnAllScripts(event:String, ?args:Array<Dynamic>, ignoreStops:Bool = false, ?exclusions:Array<String>, ?scriptArray:Array<Dynamic>,
+			?vars:Map<String, Dynamic>):Dynamic
+			return callOnScripts(event,args,ignoreStops,exclusions,scriptArray,vars,false);
+
 	public function callOnScripts(event:String, ?args:Array<Dynamic>, ignoreStops:Bool = false, ?exclusions:Array<String>, ?scriptArray:Array<Dynamic>,
-			?vars:Map<String, Dynamic>, ?ignoreSpecialShit:Bool = true)
+			?vars:Map<String, Dynamic>, ?ignoreSpecialShit:Bool = true):Dynamic
 	{
 		var args:Array<Dynamic> = args != null ? args : [];
 
@@ -4612,9 +4686,12 @@ class PlayState extends MusicBeatState
 				if (!ignoreStops)
 					return returnVal;
 			};
-			if (ret != Globals.Function_Continue && ret!=null)
+			if (ret != Globals.Function_Continue && ret!=null){
+				trace(event, ret, script.scriptName);
 				returnVal = ret;
+			}
 		}
+		
 		if(returnVal==null)returnVal = Globals.Function_Continue;
 		return returnVal;
 	}
@@ -4653,7 +4730,7 @@ class PlayState extends MusicBeatState
 	}
 
 	#if hscript
-	public function callOnHScripts(event:String, ?args:Array<Dynamic>, ?vars:Map<String, Dynamic>, ignoreStops = false, ?exclusions:Array<String>)
+	public function callOnHScripts(event:String, ?args:Array<Dynamic>, ?vars:Map<String, Dynamic>, ignoreStops = false, ?exclusions:Array<String>):Dynamic
 		return callOnScripts(event, args, ignoreStops, exclusions, hscriptArray, vars);
 	
 	public function setOnHScripts(variable:String, arg:Dynamic)
@@ -4666,7 +4743,7 @@ class PlayState extends MusicBeatState
 	#end
 
 	#if LUA_ALLOWED
-	public function callOnLuas(event:String, ?args:Array<Dynamic>, ignoreStops = false, ?exclusions:Array<String>)
+	public function callOnLuas(event:String, ?args:Array<Dynamic>, ignoreStops = false, ?exclusions:Array<String>):Dynamic
 		return callOnScripts(event, args, ignoreStops, exclusions, luaArray);
 	
 	public function setOnLuas(variable:String, arg:Dynamic)
