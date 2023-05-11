@@ -450,13 +450,14 @@ class Note extends NoteObject
 				|| Paths.exists(Paths.modsImages("QUANT" + blahblah))
 				#end) {
 
+					trace("QUANT"+blahblah);
 				var texture = "QUANT" + blahblah;
 				quantShitCache.set(blahblah, texture);
 
 				blahblah = texture;
 				isQuant = true;
-			}else
-				canQuant = false;
+
+			}
 		}
 		
 		frames = Paths.getSparrowAtlas(blahblah);

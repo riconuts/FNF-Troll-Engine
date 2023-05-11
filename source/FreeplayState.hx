@@ -168,13 +168,39 @@ class FreeplayState extends MusicBeatState
 						setCategory(mod, mod);
 					}
 
-					var daDiffs:Array<String> = theJson.difficulties.split(",");
-					var topDiff:Null<String> = daDiffs.length==0?null:daDiffs[0];
-					if(daDiffs.length>1)topDiff = daDiffs[daDiffs.length-1].trim(); // play the top difficulty
-						
+					
 					for (song in songs){
-						var songButton = addSong(song[0], null, mod, false);
+						var disp:String = cast song[0];
+						disp = disp.replace("-", " ");
+						var capitlizationizering = disp.split(" ");
+						var displayName:String = '';
+						for (word in capitlizationizering){
+							displayName += ' ${word.substr(0,1).toUpperCase()}${word.substring(1)}';
+						}
+						var songButton = addSong(song[0], null, mod, false, displayName);
 						setupButtonCallbacks(songButton);
+						var daDiffs:Array<String> = theJson.difficulties.split(",");
+						if (daDiffs.length == 0 || daDiffs[0].trim() == '')
+							daDiffs = ["Easy", "Normal", "Hard"];
+						var topDiff:Null<String> = null;
+						var diffIdx = 1;
+						while (daDiffs.length>0)
+						{
+							var diff = daDiffs.pop().trim();
+							var input = diff == 'Normal'?'':'-$diff';
+							var json = '${song[0]}${input}';
+							var rawPath = Paths.formatToSongPath(song[0]) + '/' + Paths.formatToSongPath(json);
+
+							var path = Paths.modsSongJson(rawPath);
+							if (!Paths.exists(path))
+								path = Paths.modsJson(rawPath);
+
+							if(Paths.exists(path)){
+								topDiff = diff;
+								diffIdx = daDiffs.length;
+								break;
+							}
+						}
 						songButton.onUp.callback = function(){
 							this.transOut = SquareTransitionSubstate;
 							SquareTransitionSubstate.nextCamera = FlxG.camera;
@@ -188,7 +214,7 @@ class FreeplayState extends MusicBeatState
 
 							persistentUpdate = false;
 
-							playSong(songButton.metadata, topDiff, daDiffs.length-1);
+							playSong(songButton.metadata, topDiff, diffIdx);
 						};
 
 						var icum = new HealthIcon(song[1]);
@@ -286,7 +312,7 @@ class FreeplayState extends MusicBeatState
 		super.closeSubState();
 	}
 
-	public function addSong(songName:String, ?folder:String, ?categoryName:String, ?isLocked = false):Null<FreeplaySongButton>
+	public function addSong(songName:String, ?folder:String, ?categoryName:String, ?isLocked = false, ?displayName:String):Null<FreeplaySongButton>
 	{
 		var folder = folder != null ? folder : Paths.currentModDirectory;
 		var category = categories.get(categoryName);
@@ -308,7 +334,7 @@ class FreeplayState extends MusicBeatState
 		////
 		button.yellowBorder = new FlxShapeBox(button.x - 3, button.y - 3, 200, 200, {thickness: 6, color: 0xFFF4CC34}, FlxColor.TRANSPARENT);
 
-		button.nameText = new FlxText(button.x, button.y - 32, button.width, songName, 24);
+		button.nameText = new FlxText(button.x, button.y - 32, button.width, displayName == null ? songName : displayName, 24);
 		button.nameText.setFormat(Paths.font("calibri.ttf"), 18, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE);
 
 		button.scoreText = new FlxText(button.x, button.y + button.height + 12, button.width, "", 24);

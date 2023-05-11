@@ -888,13 +888,10 @@ class FunkinLua extends FunkinScript
 
 		//Tween shit, but for strums
 		Lua_helper.add_callback(lua, "noteTweenX", function(tag:String, note:Int, value:Dynamic, duration:Float, ease:String) {
-			trace("broken");
 		});
 		Lua_helper.add_callback(lua, "noteTweenY", function(tag:String, note:Int, value:Dynamic, duration:Float, ease:String) {
-			trace("broken");
 		});
 		Lua_helper.add_callback(lua, "noteTweenDirection", function(tag:String, note:Int, value:Dynamic, duration:Float, ease:String) {
-			trace("broken");
 		});
 		Lua_helper.add_callback(lua, "mouseClicked", function(button:String) {
 			var boobs = FlxG.mouse.justPressed;
@@ -2441,6 +2438,8 @@ class FunkinLua extends FunkinScript
 		#end
 	}
 
+	var duplicateErrors:Array<String> = [];
+
 	override public function call(func:String, ?args:Array<Dynamic>, ?extraVars:Map<String,Dynamic>): Dynamic{
 		#if LUA_ALLOWED
 		try {
@@ -2463,8 +2462,15 @@ class FunkinLua extends FunkinScript
 					
 					if(errorHandler != null)
 						errorHandler(err);
-					else
-						Sys.println('$scriptName: Error on function $func(${args.join(', ')})\n$err');
+					else{
+						if (!duplicateErrors.contains(err)){
+							// just so your output isnt SPAMMED
+							Sys.println('$scriptName: Error on function $func(${args.join(', ')})\n$err');
+							duplicateErrors.push(err);
+							while(duplicateErrors.length > 20)
+								duplicateErrors.shift();
+						}
+					}
 	
 					return Function_Continue;
 				}else{

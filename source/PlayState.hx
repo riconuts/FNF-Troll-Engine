@@ -952,17 +952,23 @@ class PlayState extends MusicBeatState
 
 		// SONG SPECIFIC SCRIPTS
 		var foldersToCheck:Array<String> = [
-			Paths.getPreloadPath('songs/' + songName + '/'),
+			Paths.getPreloadPath('songs/' + songName + '/')
+			#if PE_MOD_COMPATIBILITY ,
 			Paths.getPreloadPath('data/' + songName + '/')
+			#end
 		];
 		var filesPushed:Array<String> = [];
 
 		#if MODS_ALLOWED
 		foldersToCheck.insert(0, Paths.mods('songs/' + songName + '/'));
+		#if PE_MOD_COMPATIBILITY
 		foldersToCheck.insert(1, Paths.mods('data/' + songName + '/'));
+		#end
 		if(Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0){
 			foldersToCheck.insert(0, Paths.mods(Paths.currentModDirectory + '/songs/' + songName + '/'));
+			#if PE_MOD_COMPATIBILITY
 			foldersToCheck.insert(1, Paths.mods(Paths.currentModDirectory + '/data/' + songName + '/'));
+			#end
 		}
 		#end
 
@@ -1631,7 +1637,7 @@ class PlayState extends MusicBeatState
 		var songData = SONG;
 		var events:Array<EventNote> = [];
 
-		if (#if MODS_ALLOWED Paths.exists(Paths.modsSongJson(songName + '/events')) || #end Paths.exists(Paths.songJson(songName + '/events')))
+		if (#if MODS_ALLOWED Paths.exists(Paths.modsSongJson(songName + '/events')) || #if PE_MOD_COMPATIBILITY Paths.exists(Paths.modsJson(songName + '/events')) || #end #end Paths.exists(Paths.songJson(songName + '/events')))
 		{
 			var eventsData:Array<Dynamic> = Song.loadFromJson('events', songName).events;
 			for (event in eventsData) //Event Notes
