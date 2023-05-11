@@ -227,7 +227,7 @@ class MainMenuState extends MusicBeatState {
 			if (spr.ID == curSelected && FlxG.mouse.overlaps(spr)){
 	
 				//// Kirb BF
-				if (spr.ID == optionShit.indexOf("freeplay") && spr is ZSprite)
+				if (spr.ID == optionShit.indexOf("freeplay") && artBoxes.contains(spr))
 				{
 					var clickPos = FlxG.mouse.getPositionInCameraView();
 
