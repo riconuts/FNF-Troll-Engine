@@ -151,7 +151,7 @@ class Cache
 		#if MULTICORE_LOADING
 		var threadLimit:Int = FlxMath.minInt(shitToLoad.length, numberOfProcessors);
 		
-		if (threadLimit > 1){
+		if (ClientPrefs.multicoreLoading && threadLimit > 1){
 			// clear duplicates
 			var uniqueMap:Map<String, AssetPreload> = [];
 			
