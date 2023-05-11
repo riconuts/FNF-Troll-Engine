@@ -136,9 +136,10 @@ class CreditsState extends MusicBeatState
 			#if sys
 			try{
 				trace('updating credits...');
-				if (FileSystem.exists("assets/data/credits.txt"))
+				if (FileSystem.exists("assets/data/credits.txt")){
+					trace("updated credits!!!");
 					File.saveContent("assets/data/credits.txt", data);
-				else
+				}else
 					trace("no credits file to write to!");
 			}catch(e){
 				trace("couldn't update credits: " + e);
