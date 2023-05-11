@@ -80,7 +80,7 @@ class DiscordClient
 			details: details,
 			state: state,
 
-			largeImageKey: "app-logo",// largeImageKey,
+			largeImageKey: largeImageKey,
 			largeImageText: "Tails Gets Trolled v" + lime.app.Application.current.meta.get('version'), //"Troll Engine"
 			// largeImageText: "Engine Version: " + MainMenuState.engineVersion,
 

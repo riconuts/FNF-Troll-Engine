@@ -1,5 +1,5 @@
 TGT Mod Team
-George Washingtoad::EllisStohard::The big Director (we hate you). Did the art for the first cutscene and also wrote all the credit descriptions hi me::https://twitter.com/Washingtoaad
+George Washingtoad::EllisStohard::The big Director (we hate you). Did the art for the first cutscene, made the title cards and also wrote all the credit descriptions hi me::https://twitter.com/Washingtoaad
 Echolocated::Echolocated::Director. Made On Your Trail, Hammerhead, No Grinches, Presentless Fox, chapter 2 game over+breakfast and helped with Lonely Looser. Also kisses me on the lips when I do a good job at directing.::https://twitter.com/sinewaev::0xFFBA5CF4
 Hyper::Hyper::Co-Director and main artist. Made standing troll Gf, cutscenes, drew Hammerhead Gf and all the credit icons. Did I mention Hammerhe-::https://twitter.com/HyperingOut::0xFF9752CC
 Niixx::Niixx::Co-Director, stolen from a niche TGT mod you haven't heard of. Made Die Carolers, animated the cutscenes for the story mode and voiced all the trolls.::https://www.youtube.com/@NiixxVGM::0xFF37CF62
@@ -11,7 +11,7 @@ RedTV53::RedTV53::The Hamhead guy himself. Voices Mario and Luigi like the king 
 STA::STA::He hasn't done anything for this update, but is currently lying dormant in the time chambers cooking up new songs as we speak.::https://www.youtube.com/STA_lmao
 Mmushrooms::Mmushrooms::Musician, originally made Awesome Plan before it got scrapped. Very sad.::https://twitter.com/mushroomwith2ms::0xFFFFE2E2
 OneGorgon::OneGorgon::Musician, made Lonely Looser and the original vocals for AHTK. @The Mike Gorgon progress?::https://twitter.com/OneGorgon::0xFFFFC371
-Bendyman::Bendyman::Made art for side story thumbnails, also Shadow's icon. Crazy...::https://twitter.com/BendymanReal
+Bendyman::Bendyman::Made art for side story thumbnails, cutscenes as well as Shadow's icon. Crazy...::https://twitter.com/BendymanReal
 Blitz::Blitz::Made the art for the credits menu and helped shade Bowser to fit chapter 2. The first troll Gf hater, for that they weren't allowed to voice Kei-So.::https://twitter.com/Garfsonic::0xFF6191D5
 CoffeeWoffee::CoffeeWoffee::Animated Bowser and Fist in Poo Clan. Did that one Paralysis high effort mod you saw at least once on YouTube.::https://twitter.com/CoffeeCupIsBack::0xFFFF9DFA
 DickwadMcBlatherskites::DickwadMcBlatherskites::Created art for defender stuff until we realised the defenders arc would be too much to put in. Whoops!::https://twitter.com/blatherskites05::0xFFFFE255
@@ -23,11 +23,11 @@ SonicBlastForTheGameGear::blast::Main artist for Chapter 1 and artist for Hammer
 KawaiiMochiORA::SpookyMochiORA::2nd biggest Echolocated fan. Animated the voice lines for OYT. Stimmed in DMs after finding out they got to work on a song made by Echo.::https://twitter.com/kawaiimochiora::0xFFFFA0E2
 The Awesome::The_Awesome::The Awesome, animated Hammerhead GF and made art for chapter 2, is also retarded.::https://www.tailsgetstrolled.org/ch2/pg8.html::0xFFC7434C
 TheHolyRevenant::TheHolyRevenant::Voices the big boss Bowser himself and animated the game over for AHTK. He also might have made an unused Troll King sprite that isn't in the files...::https://twitter.com/THolyRev::0xFF7A3299
-EstherMCH::EstherMCH::First she was a charter, then Hooda came along so they made the side story art for Presentless Fox instead, also made the miss sound effects.::https://twitter.com/Esther_system::0xFFA897E2
-Kardia::Kardia::Charted No Grinches and helped chart On Your Trail. He is gradually improving his craft. Good for him!::https://twitter.com/Kardia2111::0xFFBBC6D9
-Todd::Todd::Part of the charter alliance along with Kardia and Wilde. This was until the Hooda nation attacked... Charted Die Carolers.::https://twitter.com/toxicbox01::0xFFFB4646
+EstherMCH::EstherMCH::First she was a charter, then Hooda came along so they made the side story art for Presentless Fox instead, also missed notes irl to make the miss sound effect.::https://twitter.com/Esther_system::0xFFA897E2
+Kardia::Kardia::Charted No Grinches, On Your Trail, No Grinches and Presentless Fox. He has came a long way since polished...::https://twitter.com/Kardia2111::0xFFBBC6D9
+Todd::Todd::Part of the charter alliance along with Kardia and Wilde. This was until the Hooda nation attacked... Charted Die Carolers, AHTK and helped with Lonely Looser.::https://twitter.com/toxicbox01::0xFFFB4646
 Wilde::Wilde::Professional charter, brought on to voice act for Alex inste-wait, he actually charts now? Fuck.::https://twitter.com/0WildeRaze::0xFFAAAAAA
-Aikori::Aikori::Godsend that keeps everything organised, also ate a bagle once and is LITERALLY Kirbf irl.::https://twitter.com/Aikori_091::0xFF1F3576
+Aikori::Aikori::Godsend that keeps everything organised, mainly voice lines. He also ate a bagle once and is LITERALLY Kirbf irl.::https://twitter.com/Aikori_091::0xFF1F3576
 mc83ch5::mc83ch5::That talentless FUCK that voices tails. Is actually a really nice person I didn't actually mean it...::https://twitter.com/mc83ch5
 Neo-Star::star::The hero that lent his voice for Knuckles in cutscenes when we didn't prepare ourselves.::
 NOODLEGUM::noodlegum::The iconic Sonic va in the flesh. Don't ask them to say no villains they will genuinely slaughter you::
@@ -39,7 +39,7 @@ Contributors
 Minsan::minsan::The hero we needed when we thought there was none. Composed Scars'N'Stars for the No Villains B-Sides competition.::https://twitter.com/le_starmin
 Former Team Members
 Bepixel::Bepixel::Fun fact, animated the original troll Gf on the speaker for the original reboot before Lat swooped in (again).::https://twitter.com/BepixelOfficial::0xFF37CF62
-LongestSoloEver::LongestSoloEver::The iconic musician that made the iconic V3 song Taste For Blood.::https://twitter.com/longestsoloever::0xFFC7434C
+LongestSoloEver::LongestSoloEver::The iconic musician that made the iconic V3 song Taste For Blood as well as the menu theme and chapter 1 breakfast and game over.::https://twitter.com/longestsoloever::0xFFC7434C
 Max XD::Max_XD::Animated Dark Sonic, originally animated Hammerhead Mario and GF. Composed the instrumental for AHTK.::https://twitter.com/AssholeNormal::0xFFAFE054
 DPZ::DPZ::Made Silver's Mission (we will include silvers mission in the future we promise).::https://twitter.com/dpzmusic::0xFFAAAAAA
 Philliplol::Philliplol::Made High Shover *cough* sorry High Shovel. The weed got to me.::https://twitter.com/Philiplolz::0xFFAAAAAA

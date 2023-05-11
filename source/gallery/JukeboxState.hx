@@ -99,7 +99,8 @@ class JukeboxState extends MusicBeatState {
 	function addSonglists(?modDir:String)
 	{
 		var modDir:String = modDir==null?'':modDir;
-		var getTxt:Dynamic = modDir==''?Paths.txt:Paths.modsTxt;
+
+		var getTxt:Dynamic = modDir== '' ? Paths.txt : (file:String)->{return Paths.mods('$modDir/data/$file.txt');};
 		Paths.currentModDirectory = modDir;
 
 		//var added:Array<String> = [];
@@ -156,8 +157,9 @@ class JukeboxState extends MusicBeatState {
 
 		//// Add songs
 		addSong("Main Menu (TGT Mix)", "menuTheme", null, ''); // menuTheme songDir is hard-coded to goto the playMenuMusic func
-		addSong("Game Over (TGT Mix)", 'gameOver', null, '');
-		addSong("Breakfast (TGT Mix)", 'breakfast', null, '');
+		// should i move these to the jukeboxSonglist
+		addSong("Game Over (Chapter 1)", 'gameOver', null, '');
+		addSong("Breakfast (Chapter 1)", 'breakfast', null, '');
 		addSonglists();
 
 		#if MODS_ALLOWED
@@ -529,7 +531,7 @@ class JukeboxState extends MusicBeatState {
 		image.updateHitbox();
 		image.x = outline.x + 16;
 		image.y = outline.y + 16;
-		
+
 		Paths.currentModDirectory = '';
 	}
 }

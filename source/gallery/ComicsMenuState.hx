@@ -393,6 +393,12 @@ class ComicReader extends MusicBeatState
 		var head = curPanel.y - 24 - 18;
 		var tail = curPanel.y + curPanel.height + 24;	
 
+		var pageNameTitle = new FlxText(curPanel.x, head -42*2, curPanel.width, pageData.visualName, 18);
+		pageNameTitle.font = Paths.font("consola.ttf");
+		pageNameTitle.alignment = CENTER;
+		pageNameTitle.scrollFactor.set(1, 1);
+		add(pageNameTitle);
+
 		var listPage = new TGTTextButton(curPanel.getMidpoint().x, head, 0, "Page List", 18, goToPageList);
 		listPage.label.font = Paths.font("consola.ttf");
 		listPage.label.underline = true;
