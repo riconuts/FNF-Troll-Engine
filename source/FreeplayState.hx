@@ -188,44 +188,23 @@ class FreeplayState extends MusicBeatState
 
 							persistentUpdate = false;
 
-			/* 				if (FlxG.keys.pressed.ALT){
-								var alters = SongChartSelec.getAlters(songButton.metadata);
-								if (alters.length > 0)
-									switchTo(new SongChartSelec(songButton.metadata, alters));
-							}else */
 							playSong(songButton.metadata, topDiff, daDiffs.length-1);
 						};
-/* 
-						var icon = Paths.image('icons/${song[1]}');
-						if (icon == null)
-							icon = Paths.image('icons/icon-${song[1]}');
+
+						var icum = new HealthIcon(song[1]);
+						icum.scale.set(0.5, 0.5);
+						icum.updateHitbox();
 
 
-						
-						if (icon != null){
-							songButton.loadGraphic(icon);
-
-							
-							if (songButton.width > 194)
-								songButton.setGraphicSize(194, 0);
-							if (songButton.height > 194)
-								songButton.setGraphicSize(0, 194);
-							
-							
-							songButton.clipRect = new FlxRect(0, 0, songButton.frameHeight, songButton.frameHeight);
-							songButton.updateHitbox();
-
-							songButton.offset.set(
-								-(194 - songButton.frameHeight) * 0.5,
-								-(194 - songButton.frameHeight) * 0.5
-							);
-						}else if(icon == null) */
-
-						// TODO ^ make this work
-						// honestly probably just make a graphic and then stamp the icon onto it w/ healthicon n shit
-						
-
-						songButton.loadGraphic(Paths.image('songs/placeholder'));
+						var colours:FlxSprite = new FlxSprite(songButton.x, songButton.y).loadGraphic(Paths.image('songs/psychModIcon'), false, 0, 0, true);
+						colours.color = FlxColor.fromRGB(song[2][0],song[2][1],song[2][2]); //FlxColor.fromInt(CoolUtil.dominantColor(icum));
+						songButton.makeGraphic(colours.frameWidth, colours.frameHeight, FlxColor.WHITE, true);
+        				songButton.stamp(colours, 0, 0);
+						songButton.stamp(
+							icum, 
+							-Std.int((icum.frameWidth - icum.width)/2) + Std.int((songButton.width / 2) - (icum.width / 2)),
+							-Std.int((icum.frameHeight - icum.height)/2) + Std.int((songButton.height / 2) - (icum.height / 2))
+						);
 						
 					}
 				}
@@ -278,13 +257,14 @@ class FreeplayState extends MusicBeatState
 		Paths.currentModDirectory = metadata.folder;
 
 		var songLowercase:String = Paths.formatToSongPath(metadata.songName);
-		trace('${Paths.currentModDirectory}, $songLowercase');
+		trace('${Paths.currentModDirectory}, $songLowercase, $difficulty');
 
 		PlayState.SONG = Song.loadFromJson(
 			'$songLowercase${difficulty == null ? "" : '-$difficulty'}', 
 			songLowercase
 		);
 		PlayState.difficulty = difficultyIdx;
+		PlayState.difficultyName = difficulty;
 		PlayState.isStoryMode = false;
 
 		if (FlxG.keys.pressed.SHIFT){

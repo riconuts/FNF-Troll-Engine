@@ -630,6 +630,7 @@ class FunkinLua extends FunkinScript
 			PlayState.SONG = Song.loadFromJson(poop, name);
 			PlayState.instance.persistentUpdate = false;
 			PlayState.difficulty = difficultyNum;
+			PlayState.difficultyName = '';
 			LoadingState.loadAndSwitchState(new PlayState());
 
 			FlxG.sound.music.pause();

@@ -67,8 +67,10 @@ class HealthIcon extends FlxSprite
 		if(this.char != char) {
 			var file:Dynamic = Paths.image('icons/$char');
 
-			if(file == null)
+			if(file == null){
+				trace(char);
 				file = Paths.image('icons/icon-$char'); // psych compat
+			}
 
 			if(file == null) 
 				file = Paths.image('icons/face'); // Prevents crash from missing icon

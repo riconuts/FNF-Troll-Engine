@@ -146,6 +146,7 @@ class Wife3
 class PlayState extends MusicBeatState
 {
 	public static var difficulty:Int = 1; // for psych mod shit
+	public static var difficultyName:String = ''; // for psych mod shit
 	public var noteHits:Array<Float> = [];
 	public var nps:Int = 0;
 	public var currentSV:SpeedEvent = {position: 0, songTime:0, speed: 1};
@@ -344,7 +345,6 @@ class PlayState extends MusicBeatState
 	public var camSubs:FlxCamera; // JUST for subtitles
 	public var camStageUnderlay:FlxCamera; // retarded
 	public var camHUD:FlxCamera;
-	public var camNotes:FlxCamera; // just to ensure the notes go over HUD elements
 	public var camOverlay:FlxCamera; // shit that should go above all else and not get affected by camHUD changes, but still below camOther (pause menu, etc)
 	public var camOther:FlxCamera;
 
@@ -566,14 +566,12 @@ class PlayState extends MusicBeatState
 		//// Camera shit
 		camGame = new FlxCamera();
 		camHUD = new FlxCamera();
-		camNotes = new FlxCamera();
 		camOverlay = new FlxCamera();
 		camOther = new FlxCamera();
 		camSubs = new FlxCamera();
 		camStageUnderlay = new FlxCamera();
 
 		camSubs.bgColor.alpha = 0;
-		camNotes.bgColor.alpha = 0;
 		camStageUnderlay.bgColor.alpha = 0; 
 		camHUD.bgColor.alpha = 0; 
 		camOverlay.bgColor.alpha = 0;
@@ -582,7 +580,6 @@ class PlayState extends MusicBeatState
 		FlxG.cameras.reset(camGame);
 		FlxG.cameras.add(camStageUnderlay, false);
 		FlxG.cameras.add(camHUD, false);
-		FlxG.cameras.add(camNotes, false);
 		FlxG.cameras.add(camOverlay, false);
 		FlxG.cameras.add(camSubs, false);
 		FlxG.cameras.add(camOther, false);
@@ -960,13 +957,19 @@ class PlayState extends MusicBeatState
 
 
 		// SONG SPECIFIC SCRIPTS
-		var foldersToCheck:Array<String> = [Paths.getPreloadPath('songs/' + songName + '/')];
+		var foldersToCheck:Array<String> = [
+			Paths.getPreloadPath('songs/' + songName + '/'),
+			Paths.getPreloadPath('data/' + songName + '/')
+		];
 		var filesPushed:Array<String> = [];
 
 		#if MODS_ALLOWED
 		foldersToCheck.insert(0, Paths.mods('songs/' + songName + '/'));
-		if(Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
+		foldersToCheck.insert(1, Paths.mods('data/' + songName + '/'));
+		if(Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0){
 			foldersToCheck.insert(0, Paths.mods(Paths.currentModDirectory + '/songs/' + songName + '/'));
+			foldersToCheck.insert(1, Paths.mods(Paths.currentModDirectory + '/data/' + songName + '/'));
+		}
 		#end
 
 		for (folder in foldersToCheck)
@@ -999,12 +1002,12 @@ class PlayState extends MusicBeatState
 /* 		if (hitbar != null)
 			hitbar.cameras = cH; */
 		hud.cameras = cH;
-		playerField.cameras = [camNotes];
-		dadField.cameras = [camNotes];
-		playfields.cameras = [camNotes];
-		strumLineNotes.cameras = [camNotes];
-		grpNoteSplashes.cameras = [camNotes];
-		notes.cameras = [camNotes];
+		playerField.cameras = cH;
+		dadField.cameras = cH;
+		playfields.cameras = cH;
+		strumLineNotes.cameras = cH;
+		grpNoteSplashes.cameras = cH;
+		notes.cameras = cH;
 /* 		healthBarBG.cameras = cH;
 		healthBar.cameras = cH;
 		iconP1.cameras = cH;
@@ -1729,42 +1732,50 @@ class PlayState extends MusicBeatState
 		for (notetype in noteTypeMap.keys())
 		{
 			var doPush:Bool = false;
-			var baseScriptFile:String = 'notetypes/' + notetype;
-			var exts = ["hscript" #if LUA_ALLOWED , "lua" #end];
-			for (ext in exts)
-			{
-				if (doPush)
-					break;
-				var baseFile = '$baseScriptFile.$ext';
-				var files = [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)];
-				for (file in files)
+			#if PE_MOD_COMPATIBILITY
+			var fuck = ["notetypes","custom_notetypes"];
+			for(file in fuck){
+				var baseScriptFile:String = '$file/$notetype';
+			#else
+				var baseScriptFile:String = 'notetypes/$notetype';
+			#end
+				var exts = ["hscript" #if LUA_ALLOWED , "lua" #end];
+				for (ext in exts)
 				{
-					if (!Paths.exists(file))
-						continue;
-
-					#if LUA_ALLOWED
-					if (ext == 'lua')
-					{
-						var script = new FunkinLua(file, notetype, #if(PE_MOD_COMPATIBILITY) true #else false #end);
-						luaArray.push(script);
-						funkyScripts.push(script);
-						notetypeScripts.set(notetype, script);
-						doPush = true;
-					}
-					else #end if (ext == 'hscript')
-					{
-						var script = FunkinHScript.fromFile(file, notetype);
-						hscriptArray.push(script);
-						funkyScripts.push(script);
-						notetypeScripts.set(notetype, script);
-						doPush = true;
-					}
 					if (doPush)
 						break;
-				}
-			}
-		}
+					var baseFile = '$baseScriptFile.$ext';
+					var files = [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)];
+					for (file in files)
+					{
+						if (!Paths.exists(file))
+							continue;
 
+						#if LUA_ALLOWED
+						if (ext == 'lua')
+						{
+							var script = new FunkinLua(file, notetype, #if(PE_MOD_COMPATIBILITY) true #else false #end);
+							luaArray.push(script);
+							funkyScripts.push(script);
+							notetypeScripts.set(notetype, script);
+							doPush = true;
+						}
+						else #end if (ext == 'hscript')
+						{
+							var script = FunkinHScript.fromFile(file, notetype);
+							hscriptArray.push(script);
+							funkyScripts.push(script);
+							notetypeScripts.set(notetype, script);
+							doPush = true;
+						}
+						if (doPush)
+							break;
+					}
+				}
+			#if PE_MOD_COMPATIBILITY
+			}
+			#end
+		}
 		// loads events
 		for(event in getEvents()){
 			if (!eventPushedMap.exists(event.event))
@@ -1777,45 +1788,55 @@ class PlayState extends MusicBeatState
 		for (event in eventPushedMap.keys())
 		{
 			var doPush:Bool = false;
-			var baseScriptFile:String = 'events/' + event;
-			var exts = ["hscript" #if LUA_ALLOWED , "lua" #end];
-			for (ext in exts)
-			{
-				if (doPush)
-					break;
-				var baseFile = '$baseScriptFile.$ext';
-				var files = [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)];
-				for (file in files)
+			
+			#if PE_MOD_COMPATIBILITY
+			var fuck = ["events","custom_events"];
+			for(file in fuck){
+				var baseScriptFile:String = '$file/$event';
+			#else
+				var baseScriptFile:String = 'events/$event';
+			#end
+				var exts = ["hscript" #if LUA_ALLOWED , "lua" #end];
+				for (ext in exts)
 				{
-					if (!Paths.exists(file))
-						continue;
-
-					#if LUA_ALLOWED
-					if (ext == 'lua')
-					{
-						var script = new FunkinLua(file, event);
-						luaArray.push(script);
-						funkyScripts.push(script);
-						eventScripts.set(event, script);
-						script.call("onLoad");
-						doPush = true;
-					}
-					else #end if (ext == 'hscript')
-					{
-						var script = FunkinHScript.fromFile(file, event);
-						hscriptArray.push(script);
-						funkyScripts.push(script);
-						eventScripts.set(event, script);
-
-						script.call("onLoad");
-
-						doPush = true;
-					}
-
 					if (doPush)
 						break;
+					var baseFile = '$baseScriptFile.$ext';
+					var files = [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)];
+					for (file in files)
+					{
+						if (!Paths.exists(file))
+							continue;
+
+						#if LUA_ALLOWED
+						if (ext == 'lua')
+						{
+							var script = new FunkinLua(file, event);
+							luaArray.push(script);
+							funkyScripts.push(script);
+							eventScripts.set(event, script);
+							script.call("onLoad");
+							doPush = true;
+						}
+						else #end if (ext == 'hscript')
+						{
+							var script = FunkinHScript.fromFile(file, event);
+							hscriptArray.push(script);
+							funkyScripts.push(script);
+							eventScripts.set(event, script);
+
+							script.call("onLoad");
+
+							doPush = true;
+						}
+
+						if (doPush)
+							break;
+					}
 				}
+			#if PE_MOD_COMPATIBILITY
 			}
+			#end
 		}
 
 		for(subEvent in getEvents()){
@@ -2582,14 +2603,7 @@ class PlayState extends MusicBeatState
 
 		}
 		camOverlay.zoom = camHUD.zoom;
-		camNotes.zoom = camHUD.zoom;
-
-		camNotes.setPosition(camHUD.x, camHUD.y);
-		if(camNotes.height != camHUD.height)
-			camNotes.height = camHUD.height;
-
-		if(camNotes.width != camHUD.width)
-			camNotes.width = camHUD.width;
+		camOverlay.angle = camHUD.angle;
 
 		if(noteHits.length > 0){
 			while (noteHits.length > 0 && (noteHits[0] + 2000) < Conductor.songPosition)

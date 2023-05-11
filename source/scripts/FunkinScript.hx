@@ -81,6 +81,9 @@ class FunkinScript {
 		set('Function_Continue', Globals.Function_Continue);
 
 		set("difficulty", PlayState.difficulty);
+		set("difficultyName", PlayState.difficultyName);
+
+		trace(PlayState.difficulty);
 
 		set('inGameOver', false);
 		

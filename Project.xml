@@ -52,7 +52,7 @@
 	<define name="VIDEOS_ALLOWED"/>
 	
 	<define name="PE_MOD_COMPATIBILITY" if="desktop"/>
-	<define name="LUA_ALLOWED" if="PE_MOD_COMPATIBILITY"/>
+	<define name="LUA_ALLOWED" />
 
 	<define name="CRASH_HANDLER" if="desktop" />
 	

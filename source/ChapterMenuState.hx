@@ -159,6 +159,7 @@ class ChapterMenuState extends MusicBeatState{
 
 		PlayState.SONG = Song.loadFromJson(PlayState.storyPlaylist[0].toLowerCase(), PlayState.storyPlaylist[0].toLowerCase());
 		PlayState.difficulty = 1;
+		PlayState.difficultyName = '';
 		PlayState.campaignScore = 0;
 		PlayState.campaignMisses = 0;
 
