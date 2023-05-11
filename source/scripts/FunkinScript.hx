@@ -80,6 +80,8 @@ class FunkinScript {
 		set('Function_Stop', Globals.Function_Stop);
 		set('Function_Continue', Globals.Function_Continue);
 
+		set("difficulty", PlayState.difficulty);
+
 		set('inGameOver', false);
 		
 		set('downscroll', ClientPrefs.downScroll);

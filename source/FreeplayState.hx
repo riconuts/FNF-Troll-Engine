@@ -82,12 +82,12 @@ class FreeplayState extends MusicBeatState
 
 				persistentUpdate = false;
 
-				if (FlxG.keys.pressed.ALT){
+/* 				if (FlxG.keys.pressed.ALT){
 					var alters = SongChartSelec.getAlters(songButton.metadata);
 					if (alters.length > 0)
 						switchTo(new SongChartSelec(songButton.metadata, alters));
-				}else
-					playSong(songButton.metadata);
+				}else */
+				playSong(songButton.metadata);
 			};
 		}			
 	}
@@ -168,9 +168,33 @@ class FreeplayState extends MusicBeatState
 						setCategory(mod, mod);
 					}
 
+					var daDiffs = theJson.difficulties.split(",");
+					var topDiff = daDiffs.length==0?null:daDiffs[0];
+					if(daDiffs.length>1)topDiff = daDiffs[daDiffs.length-1].trim(); // play the top difficulty
+						
 					for (song in songs){
 						var songButton = addSong(song[0], null, mod, false);
 						setupButtonCallbacks(songButton);
+						songButton.onUp.callback = function(){
+							this.transOut = SquareTransitionSubstate;
+							SquareTransitionSubstate.nextCamera = FlxG.camera;
+							SquareTransitionSubstate.info = {
+								sX: songButton.x - 3, sY: songButton.y - 3,
+								sW: 200, sH: 200,
+
+								eX: FlxG.camera.scroll.x - 3, eY: FlxG.camera.scroll.y - 3,
+								eW: FlxG.width + 6, eH: FlxG.height + 6
+							};
+
+							persistentUpdate = false;
+
+			/* 				if (FlxG.keys.pressed.ALT){
+								var alters = SongChartSelec.getAlters(songButton.metadata);
+								if (alters.length > 0)
+									switchTo(new SongChartSelec(songButton.metadata, alters));
+							}else */
+							playSong(songButton.metadata, topDiff, daDiffs.length-1);
+						};
 /* 
 						var icon = Paths.image('icons/${song[1]}');
 						if (icon == null)
@@ -250,7 +274,7 @@ class FreeplayState extends MusicBeatState
 		#end
 	}
 
-	static public function playSong(metadata:SongMetadata, ?difficulty:String){
+	static public function playSong(metadata:SongMetadata, ?difficulty:String, ?difficultyIdx:Int=1){
 		Paths.currentModDirectory = metadata.folder;
 
 		var songLowercase:String = Paths.formatToSongPath(metadata.songName);
@@ -260,6 +284,7 @@ class FreeplayState extends MusicBeatState
 			'$songLowercase${difficulty == null ? "" : '-$difficulty'}', 
 			songLowercase
 		);
+		PlayState.difficulty = difficultyIdx;
 		PlayState.isStoryMode = false;
 
 		if (FlxG.keys.pressed.SHIFT){

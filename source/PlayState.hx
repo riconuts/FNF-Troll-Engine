@@ -145,6 +145,7 @@ class Wife3
 }
 class PlayState extends MusicBeatState
 {
+	public static var difficulty:Int = 1; // for psych mod shit
 	public var noteHits:Array<Float> = [];
 	public var nps:Int = 0;
 	public var currentSV:SpeedEvent = {position: 0, songTime:0, speed: 1};
@@ -2404,6 +2405,7 @@ class PlayState extends MusicBeatState
 			if(modchartObjects.exists('note${note.ID}'))modchartObjects.remove('note${note.ID}');
 			allNotes.remove(note);
 			unspawnNotes.remove(note);
+			notes.remove(note);
 		});
 		field.noteMissed.add((daNote:Note, field:PlayField) -> {
 			if (field.isPlayer && !field.autoPlayed && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit))
@@ -2421,6 +2423,7 @@ class PlayState extends MusicBeatState
 			]);
 			#end
 
+			notes.add(dunceNote);
 			var index:Int = unspawnNotes.indexOf(dunceNote);
 			unspawnNotes.splice(index, 1);
 
