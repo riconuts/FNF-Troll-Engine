@@ -544,9 +544,9 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 class NoteField extends FlxObject
 {
-	var holdSubdivisions:Int = Std.int(ClientPrefs.holdSubdivs) + 1;
 	var smoothHolds = true; //ClientPrefs.coolHolds;
-	var optimizeHolds = ClientPrefs.optimizeHolds;
+	public var holdSubdivisions:Int = Std.int(ClientPrefs.holdSubdivs) + 1;
+	public var optimizeHolds = ClientPrefs.optimizeHolds;
 
 	public function new(field:PlayField, modManager:ModManager){
         super(0, 0);

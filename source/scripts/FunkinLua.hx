@@ -1499,6 +1499,20 @@ class FunkinLua extends FunkinScript
 			}
 		});
 
+		Lua_helper.add_callback(lua, "objectPlayAnim",  function(obj:String, name:String, forced:Bool = false, ?startFrame:Int = 0) { // some psych mods use this but i cant find it any official psych code
+			// weird
+			luaTrace("objectPlayAnim is deprecated! Use playAnim instead", false, true);
+			if(PlayState.instance.getLuaObject(obj,false)!=null) {
+				PlayState.instance.getLuaObject(obj,false).animation.play(name, forced, startFrame);
+				return;
+			}
+
+			var spr:FlxSprite = Reflect.getProperty(getInstance(), obj);
+			if(spr != null) {
+				spr.animation.play(name, forced);
+			}
+		});
+
 		Lua_helper.add_callback(lua, "setScrollFactor", function(obj:String, scrollX:Float, scrollY:Float) {
 			if(PlayState.instance.getLuaObject(obj,false)!=null) {
 				PlayState.instance.getLuaObject(obj,false).scrollFactor.set(scrollX, scrollY);
@@ -2542,7 +2556,7 @@ class FunkinLua extends FunkinScript
 					if(errorHandler != null)
 						errorHandler(err);
 					else
-						Sys.println('$scriptName: Error on function $func(${args.join(', ')})');
+						Sys.println('$scriptName: Error on function $func(${args.join(', ')})\n$err');
 						//haxe.Log.trace(err, {fileName: scriptName, lineNumber: -1, methodName: func, customParams: args, className: ""});		
 					
 					//LuaL.error(state,err);

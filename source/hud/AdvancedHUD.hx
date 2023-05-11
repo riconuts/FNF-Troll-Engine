@@ -31,6 +31,8 @@ class AdvancedHUD extends BaseHUD
 	var peakCombo:Int = 0;
 	var songHighscore:Int = 0;
 	public var hudPosition(default, null):String = ClientPrefs.hudPosition;
+
+	var npsIdx:Int = 0;
 	override public function new(iP1:String, iP2:String, songName:String)
 	{
 		super(iP1, iP2, songName);
@@ -122,6 +124,7 @@ class AdvancedHUD extends BaseHUD
 			idx++;
 		}
 
+		npsIdx = idx;
 		npsTxt = new FlxText(0, 0, tWidth, "NPS: 0 (Peak: 0)", 20);
 		npsTxt.setFormat(Paths.font("calibri.ttf"), 26, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		npsTxt.screenCenter(Y);
@@ -129,20 +132,17 @@ class AdvancedHUD extends BaseHUD
 		npsTxt.x += 20 - 15;
 		npsTxt.scrollFactor.set();
 		npsTxt.borderSize = 1.25;
-		if (ClientPrefs.npsDisplay){
-			add(npsTxt);
-			idx++;
-		}
+		npsTxt.visible = ClientPrefs.npsDisplay;
+		add(npsTxt);
+		
 		pcTxt = new FlxText(0, 0, tWidth, "Peak Combo: 0", 20);
 		pcTxt.setFormat(Paths.font("calibri.ttf"), 26, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		pcTxt.screenCenter(Y);
-		pcTxt.y -= 5 - (25 * idx);
+		pcTxt.y -= 5 - (25 * (ClientPrefs.npsDisplay ? (idx + 1) : idx));
 		pcTxt.x += 20 - 15;
 		pcTxt.scrollFactor.set();
 		pcTxt.borderSize = 1.25;
 		add(pcTxt);
-		idx++;
-		
 
 
 		if (hudPosition == 'Right'){
@@ -157,7 +157,7 @@ class AdvancedHUD extends BaseHUD
 		timeTxt.alpha = 0;
 		timeTxt.borderSize = 2;
 		timeTxt.visible = updateTime;
-
+		
 		if (ClientPrefs.timeBarType == 'Song Name')
 		{
 			timeTxt.text = songName;
@@ -196,9 +196,12 @@ class AdvancedHUD extends BaseHUD
 		botplayTxt.visible = false;
 		add(botplayTxt);
 
+		hitbar = new Hitbar();
+		hitbar.alpha = alpha;
+		hitbar.visible = ClientPrefs.hitbar;
+		add(hitbar);
 		if (ClientPrefs.hitbar)
 		{
-			hitbar = new Hitbar();
 			hitbar.screenCenter(XY);
 			if (ClientPrefs.downScroll)
 			{
@@ -208,15 +211,21 @@ class AdvancedHUD extends BaseHUD
 			}
 			else
 				hitbar.y += 340;
-
-			add(hitbar);
 		}
 	}
 
+	var tweenProg:Float = 0;
+
 	override public function songStarted()
 	{
-		FlxTween.tween(timeBar, {alpha: ClientPrefs.timeOpacity * alpha}, 0.5, {ease: FlxEase.circOut});
-		FlxTween.tween(timeTxt, {alpha: ClientPrefs.timeOpacity * alpha}, 0.5, {ease: FlxEase.circOut});
+		FlxTween.num(0, 1, 0.5, {ease: FlxEase.circOut, onComplete:function(tw:FlxTween){
+			tweenProg = 1;
+		}}, function(prog:Float)
+		{
+			tweenProg = prog;
+			timeBar.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
+			timeTxt.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
+		});
 	}
 
 	override public function songEnding()
@@ -264,6 +273,47 @@ class AdvancedHUD extends BaseHUD
 		gradeTxt.color = gradeColor;
 
 	}
+
+	override function changedOptions(changed:Array<String>){
+		super.changedOptions(changed);
+		timeTxt.y = (ClientPrefs.downScroll ? FlxG.height - 44 : 19);
+		timeBarBG.y = timeTxt.y + (timeTxt.height * 0.25);
+		timeBar.y = timeBarBG.y + 5;
+		botplayTxt.y = timeBarBG.y + (ClientPrefs.downScroll ? -78 : 55);
+		timeBar.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
+		timeTxt.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
+		hitbar.visible = ClientPrefs.hitbar;
+		npsTxt.visible = ClientPrefs.npsDisplay;
+
+		timeTxt.visible = updateTime;
+		timeBarBG.visible = updateTime;
+		timeBar.visible = updateTime;
+
+		if (ClientPrefs.timeBarType == 'Song Name')
+		{
+			timeTxt.text = songName;
+			timeTxt.size = 24;
+			timeTxt.y += 3;
+		}
+		else
+			timeTxt.size = 32;
+		pcTxt.screenCenter(Y);
+		pcTxt.y -= 5 - (25 * (ClientPrefs.npsDisplay ? npsIdx + 1 : npsIdx));
+		if (ClientPrefs.hitbar)
+		{
+			hitbar.screenCenter(XY);
+			if (ClientPrefs.downScroll)
+			{
+				hitbar.y -= 220;
+				hitbar.averageIndicator.flipY = false;
+				hitbar.averageIndicator.y = hitbar.y - (hitbar.averageIndicator.width + 5);
+			}
+			else
+				hitbar.y += 340;
+
+		}
+	}
+
 	override function update(elapsed:Float)
 	{
 /* 		scoreTxt.text = (songHighscore != 0 && score > songHighscore ? 'Hi-score: ' : 'Score: ')
@@ -271,8 +321,13 @@ class AdvancedHUD extends BaseHUD
 			+ (grade != '?' ? Highscore.floorDecimal(ratingPercent * 100, 2) + '% / ${grade} [$ratingFC]' : grade); */
 
 		var displayedScore = Std.string(score);
-		if (displayedScore.length > 7)
-			displayedScore = '999999999';
+		if (displayedScore.length > 7){
+			if(score < 0)
+				displayedScore = '-999999';
+			else
+				displayedScore = '9999999';
+		}
+
 		gradeTxt.text = grade;
 		if (hudPosition == 'Right')gradeTxt.x = FlxG.width - gradeTxt.width - 20;
 
@@ -296,7 +351,6 @@ class AdvancedHUD extends BaseHUD
 				0xFFA3A3A3;
 		}
 		
-
 		if (ClientPrefs.npsDisplay)
 			npsTxt.text = 'NPS: ${nps} (Peak: ${npsPeak})';
 

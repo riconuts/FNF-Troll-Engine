@@ -99,6 +99,8 @@ class Note extends NoteObject
 	public var lateHitMult:Float = 1; // multiplier to hitbox to hit this note late */
 	// ^^ this is now determined by the judgements
 
+	public var usesDefaultColours:Bool = true; // whether this note uses the default note colours (lets you change colours in options menu)
+
 	public var blockHit:Bool = false; // whether you can hit this note or not
 	//public var lowPriority:Bool = false; // shadowmario's shitty workaround for really bad mine placement, yet still no *real* hitbox customization lol!
 	public var noteSplashDisabled:Bool = false; // disables the notesplash when you hit this note
@@ -223,30 +225,37 @@ class Note extends NoteObject
 		return value;
 	}
 
-	private function set_noteType(value:String):String {
-		noteSplashTexture = PlayState.SONG.splashSkin;
-
+	public function updateColours(){		
+		if(!usesDefaultColours)return;
 		if(isQuant){
 			var idx = quants.indexOf(quant);
 			colorSwap.hue = ClientPrefs.quantHSV[idx][0] / 360;
 			colorSwap.saturation = ClientPrefs.quantHSV[idx][1] / 100;
 			colorSwap.brightness = ClientPrefs.quantHSV[idx][2] / 100;
-
-			
 		}else{
 			colorSwap.hue = ClientPrefs.arrowHSV[noteData % 4][0] / 360;
 			colorSwap.saturation = ClientPrefs.arrowHSV[noteData % 4][1] / 100;
 			colorSwap.brightness = ClientPrefs.arrowHSV[noteData % 4][2] / 100;
 		}
+	}
 
-		noteScript = null;
+	private function set_noteType(value:String):String {
+		noteSplashTexture = PlayState.SONG.splashSkin;
 
+		updateColours();
+		var hue = colorSwap.hue;
+		var sat = colorSwap.saturation;
+		var brt = colorSwap.brightness;
+
+		
 		if(noteData > -1 && noteType != value) {
+			noteScript = null;
 			switch(value) {
 				case 'Hurt Note':
 					ignoreNote = mustPress;
 					reloadNote('HURT');
 					noteSplashTexture = 'HURTnoteSplashes';
+					usesDefaultColours = false;
 					colorSwap.hue = 0;
 					colorSwap.saturation = 0;
 					colorSwap.brightness = 0;
@@ -277,6 +286,11 @@ class Note extends NoteObject
 			}
 			noteType = value;
 		}
+		if(usesDefaultColours){
+			if(colorSwap.hue != hue || colorSwap.saturation != sat || colorSwap.brightness != brt)
+				usesDefaultColours = false;// just incase
+		}
+		
 		if(isQuant){
 			if (noteSplashTexture == 'noteSplashes' || noteSplashTexture == null || noteSplashTexture.length <= 0)
 				noteSplashTexture = 'QUANTnoteSplashes'; // give it da quant notesplashes!!

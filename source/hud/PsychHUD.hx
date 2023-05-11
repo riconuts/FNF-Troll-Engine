@@ -66,6 +66,12 @@ class PsychHUD extends BaseHUD {
 			}
 		}
 
+		if (ClientPrefs.hudPosition == 'Right')
+		{
+			for (obj in members)
+				obj.x = FlxG.width - obj.width - obj.x;
+		}
+
 
 		timeTxt = new FlxText(PlayState.STRUM_X + (FlxG.width * 0.5) - 248, (ClientPrefs.downScroll ? FlxG.height - 44 : 19), 400, "", 32);
 		timeTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -112,27 +118,78 @@ class PsychHUD extends BaseHUD {
 		botplayTxt.visible = false;
 		add(botplayTxt);
         
+		hitbar = new Hitbar();
+		hitbar.alpha = alpha;
+		hitbar.visible = ClientPrefs.hitbar;
+		add(hitbar);
 		if (ClientPrefs.hitbar)
 		{
-			hitbar = new Hitbar();
 			hitbar.screenCenter(XY);
 			if (ClientPrefs.downScroll)
-			{
 				hitbar.y -= 230;
-			}
 			else
 				hitbar.y += 330;
-
-			add(hitbar);
 		}
+
 		add(scoreTxt);
     }
 
-    override public function songStarted(){
-		FlxTween.tween(timeBar, {alpha: ClientPrefs.timeOpacity * alpha}, 0.5, {ease: FlxEase.circOut});
-		FlxTween.tween(timeTxt, {alpha: ClientPrefs.timeOpacity * alpha}, 0.5, {ease: FlxEase.circOut});
-    }
+	var tweenProg:Float = 0;
 
+	override public function songStarted()
+	{
+		FlxTween.num(0, 1, 0.5, {
+			ease: FlxEase.circOut,
+			onComplete: function(tw:FlxTween)
+			{
+				tweenProg = 1;
+			}
+		}, function(prog:Float)
+		{
+			tweenProg = prog;
+			timeBar.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
+			timeTxt.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
+		});
+	}
+
+	override function changedOptions(changed:Array<String>)
+	{
+		super.changedOptions(changed);
+		timeTxt.y = (ClientPrefs.downScroll ? FlxG.height - 44 : 19);
+		timeBarBG.y = timeTxt.y + (timeTxt.height * 0.25);
+		timeBar.y = timeBarBG.y + 5;
+		botplayTxt.y = timeBarBG.y + (ClientPrefs.downScroll ? -78 : 55);
+		timeBar.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
+		timeTxt.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
+		hitbar.visible = ClientPrefs.hitbar;
+
+		timeTxt.visible = updateTime;
+		timeBarBG.visible = updateTime;
+		timeBar.visible = updateTime;
+
+		if (ClientPrefs.timeBarType == 'Song Name')
+		{
+			timeTxt.text = songName;
+			timeTxt.size = 24;
+			timeTxt.y += 3;
+		}
+		else
+			timeTxt.size = 32;
+		
+
+		if (ClientPrefs.hitbar)
+		{
+			hitbar.screenCenter(XY);
+			if (ClientPrefs.downScroll)
+			{
+				hitbar.y -= 220;
+				hitbar.averageIndicator.flipY = false;
+				hitbar.averageIndicator.y = hitbar.y - (hitbar.averageIndicator.width + 5);
+			}
+			else
+				hitbar.y += 340;
+		}
+	}
     override public function songEnding(){
 		timeBarBG.visible = false;
 		timeBar.visible = false;

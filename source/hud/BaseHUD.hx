@@ -117,6 +117,13 @@ class BaseHUD extends FlxSpriteGroup {
     public function beatHit(beat:Int){
 		healthBar.iconScale = 1.2;
     }
+
+	public function changedOptions(changed:Array<String>){
+		healthBar.healthBarBG.y = FlxG.height * (ClientPrefs.downScroll ? 0.11 : 0.89);
+		healthBar.y = healthBarBG.y + 5;
+		healthBar.iconP1.y = healthBar.y - 75;
+		healthBar.iconP2.y = healthBar.y - 75;
+	}
     public function stepHit(step:Int){}
 	public function noteJudged(judge:JudgmentData, ?note:Note, ?field:PlayField){}
     public function songStarted(){}

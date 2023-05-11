@@ -9,6 +9,7 @@ import flixel.group.FlxSpriteGroup;
 class Hitmark extends FlxSprite
 {
     var decayTime:Float = 0;
+	public var baseAlpha:Float = 1;
     override function update(elapsed:Float){
         super.update(elapsed);
 		decayTime += elapsed;
@@ -16,7 +17,7 @@ class Hitmark extends FlxSprite
 
 		var decayScale = 1 - (decayTime / (s * 8)); // 8 beats to decay
 		scale.y = decayScale;
-		alpha = decayScale;
+		alpha = baseAlpha * decayScale;
 		if (decayScale <= 0)
 			kill();
     }
@@ -105,6 +106,11 @@ class Hitbar extends FlxSpriteGroup {
 		averageIndicator.x = FlxMath.lerp(averageIndicator.x, (mainBar.x + (mainBar.width / 2)) + ((hitbarPxPerMs / 2) * -currentAverage) - averageIndicator.width / 2, lerpVal);
 		metronomeScale = FlxMath.lerp(metronomeScale, hitbarHeight / 4, lerpVal);
 
+		markGroup.forEachAlive(function(obj:Hitmark){
+			obj.baseAlpha = alpha;
+			obj.visible = visible;
+		});
+
 		markGroup.forEachDead(function(obj:Hitmark){
 			markGroup.remove(obj, true);
         });
@@ -114,7 +120,6 @@ class Hitbar extends FlxSpriteGroup {
     }
 
     public function addHit(time:Float){
-		trace("registered hit at " + time);
         markMS.push(time);
 		while (markMS.length > maxMarks)
 			markMS.shift();
@@ -122,8 +127,10 @@ class Hitbar extends FlxSpriteGroup {
 		for (m in markGroup.members)m.color = FlxColor.WHITE;
 		var hitMark:Hitmark = new Hitmark((mainBar.width / 2), 0);
 		hitMark.makeGraphic(6, hitmarkHeight, FlxColor.WHITE);
+		hitMark.baseAlpha = alpha;
 		hitMark.color = FlxColor.RED;
 		markGroup.add(hitMark);
+		hitMark.visible = visible;
 		hitMark.x = mainBar.x + ((mainBar.width - hitMark.width)/2);
 		hitMark.x += ((hitbarPxPerMs / 2) * -time);
 		hitMark.y = mainBar.y + ((mainBar.height - hitMark.height)/2);

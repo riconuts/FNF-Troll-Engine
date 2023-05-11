@@ -36,6 +36,7 @@ class PauseSubState extends MusicBeatSubstate
 	{
 		super();
 		
+		persistentUpdate = true;
 		var cam:FlxCamera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
 
 		if(#if debug true || #end PlayState.chartingMode)
@@ -150,7 +151,7 @@ class PauseSubState extends MusicBeatSubstate
 		}
 
 		FlxTween.tween(bg, {alpha: 0.6}, 0.4, {ease: FlxEase.quartInOut});
-
+		//FlxTween.tween(pauseMusic, {volume: 0.5}, 5, {ease: FlxEase.linear});
 		for (id in 0...allTexts.length)
 		{
 			var daText = allTexts[id];
@@ -164,166 +165,160 @@ class PauseSubState extends MusicBeatSubstate
 
 		regenMenu();
 		cameras = [cam];
+
+		PlayState.instance.callOnScripts('paused');
 	}
 
 	var holdTime:Float = 0;
 	override function update(elapsed:Float)
 	{
 		if (pauseMusic.volume < 0.5)
-			pauseMusic.volume += 0.01 * elapsed;
+			pauseMusic.volume += 0.01 * elapsed; 
 
 		super.update(elapsed);
 		updateSkipTextStuff();
 
-		var upP = controls.UI_UP_P;
-		var downP = controls.UI_DOWN_P;
-		var accepted = controls.ACCEPT;
+		if(subState == null){
+			var upP = controls.UI_UP_P;
+			var downP = controls.UI_DOWN_P;
+			var accepted = controls.ACCEPT;
 
-		if (upP)
-		{
-			changeSelection(-1);
-		}
-		if (downP)
-		{
-			changeSelection(1);
-		}
+			if (upP)
+			{
+				changeSelection(-1);
+			}
+			if (downP)
+			{
+				changeSelection(1);
+			}
 
-		var daSelected:String = menuItems[curSelected];
-		switch (daSelected)
-		{
-			case 'Skip Time':
-				if (controls.UI_LEFT_P)
-				{
-					FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
-					curTime -= 1000;
-					holdTime = 0;
-				}
-				if (controls.UI_RIGHT_P)
-				{
-					FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
-					curTime += 1000;
-					holdTime = 0;
-				}
-
-				if(controls.UI_LEFT || controls.UI_RIGHT)
-				{
-					holdTime += elapsed;
-					if(holdTime > 0.5)
-					{
-						curTime += 45000 * elapsed * (controls.UI_LEFT ? -1 : 1);
-					}
-
-					if(curTime >= FlxG.sound.music.length) curTime -= FlxG.sound.music.length;
-					else if(curTime < 0) curTime += FlxG.sound.music.length;
-					updateSkipTimeText();
-				}
-		}
-
-		if (accepted)
-		{
+			var daSelected:String = menuItems[curSelected];
 			switch (daSelected)
 			{
-				case 'Options':
-					var daSubstate = new OptionsSubstate();
-/* 					var noResume:Array<String> = [
-						"modcharts",
-						"noteOffset",
-						"ratingOffset",
-						"wife3",
-						"useEpics", 
-						"judgePreset", 
-						"epicWindow", 
-						"sickWindow", 
-						"goodWindow", 
-						"badWindow",
-						"hitWindow", 
-						"judgeDiff",
-						"noteSkin",
-					]; */
-					daSubstate.goBack = (function(changedOptions:Array<String>)
-					{
-/* 						var canResume:Bool = true;
-						for(opt in changedOptions){
-							if (noResume.contains(opt)){
-								canResume = false;
-								break;
-							}
-						}*/
-
-						closeSubState();
-/* 						if (!canResume)
-						{ */
-							if (changedOptions.length > 0)
-							{
-								menuItems.remove("Resume");
-								menuItems.remove("Skip Time");
-								regenMenu();
-	 						}
-						//}
-						for(camera in daSubstate.camerasToRemove)
-							FlxG.cameras.remove(camera);
-
-						var cam:FlxCamera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
-
-						cameras = [cam];
-
-					}); 
-					openSubState(daSubstate);
-				case "Resume":
-					close();
-				case "Restart Song":
-
-					if (FlxG.keys.pressed.SHIFT){					
-						PlayState.SONG = Song.loadFromJson(PlayState.SONG.song, PlayState.SONG.song);
-
-						Paths.clearStoredMemory();
-						Paths.clearUnusedMemory();
-
-						MusicBeatState.resetState();
-					}else
-						restartSong();
-				case "Leave Charting Mode":
-
-					restartSong();
-					PlayState.chartingMode = false;
 				case 'Skip Time':
-					if(curTime < Conductor.songPosition)
+					if (controls.UI_LEFT_P)
 					{
-						PlayState.startOnTime = curTime;
-						restartSong(true);
+						FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+						curTime -= 1000;
+						holdTime = 0;
 					}
-					else
+					if (controls.UI_RIGHT_P)
 					{
-						if (curTime != Conductor.songPosition)
+						FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+						curTime += 1000;
+						holdTime = 0;
+					}
+
+					if(controls.UI_LEFT || controls.UI_RIGHT)
+					{
+						holdTime += elapsed;
+						if(holdTime > 0.5)
 						{
-							PlayState.instance.clearNotesBefore(curTime);
-							PlayState.instance.setSongTime(curTime);
+							curTime += 45000 * elapsed * (controls.UI_LEFT ? -1 : 1);
 						}
+
+						if(curTime >= FlxG.sound.music.length) curTime -= FlxG.sound.music.length;
+						else if(curTime < 0) curTime += FlxG.sound.music.length;
+						updateSkipTimeText();
+					}
+			}
+
+			if (accepted)
+			{
+				switch (daSelected)
+				{
+					case 'Options':
+						var daSubstate = new OptionsSubstate();
+
+						daSubstate.goBack = (function(changedOptions:Array<String>)
+						{
+	 						var canResume:Bool = true;
+
+							for(opt in changedOptions){
+								if (OptionsSubstate.requiresRestart.contains(opt)){
+									canResume = false;
+									break;
+								}
+							}
+
+							
+							PlayState.instance.optionsChanged(changedOptions);
+
+							closeSubState();
+	 						if (!canResume)
+							{ 
+								if (changedOptions.length > 0)
+								{
+									menuItems.remove("Resume");
+									menuItems.remove("Skip Time");
+									regenMenu();
+								}
+							}
+							for(camera in daSubstate.camerasToRemove)
+								FlxG.cameras.remove(camera);
+
+							var cam:FlxCamera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
+
+							cameras = [cam];
+
+						}); 
+						openSubState(daSubstate);
+					case "Resume":
 						close();
-					}
-				case "End Song":
+					case "Restart Song":
 
-					close();
-					PlayState.instance.finishSong(true);
-				case 'Toggle Botplay':
-					PlayState.instance.cpuControlled = !PlayState.instance.cpuControlled;
-/* 					PlayState.instance.botplayTxt.visible = PlayState.instance.cpuControlled;
-					PlayState.instance.botplayTxt.alpha = 1;
-					PlayState.instance.botplaySine = 0; */
-				case "Exit to menu":
+						if (FlxG.keys.pressed.SHIFT){					
+							PlayState.SONG = Song.loadFromJson(PlayState.SONG.song, PlayState.SONG.song);
 
-					PlayState.deathCounter = 0;
-					PlayState.seenCutscene = false;
-					if(PlayState.isStoryMode) {
-						MusicBeatState.switchState(new StoryMenuState());
-					} else {
-						MusicBeatState.switchState(new FreeplayState());
-					}
-					PlayState.cancelMusicFadeTween();
+							Paths.clearStoredMemory();
+							Paths.clearUnusedMemory();
 
-					MusicBeatState.playMenuMusic(true);
-					
-					PlayState.chartingMode = false;
+							MusicBeatState.resetState();
+						}else
+							restartSong();
+					case "Leave Charting Mode":
+
+						restartSong();
+						PlayState.chartingMode = false;
+					case 'Skip Time':
+						if(curTime < Conductor.songPosition)
+						{
+							PlayState.startOnTime = curTime;
+							restartSong(true);
+						}
+						else
+						{
+							if (curTime != Conductor.songPosition)
+							{
+								PlayState.instance.clearNotesBefore(curTime);
+								PlayState.instance.setSongTime(curTime);
+							}
+							close();
+						}
+					case "End Song":
+
+						close();
+						PlayState.instance.finishSong(true);
+					case 'Toggle Botplay':
+						PlayState.instance.cpuControlled = !PlayState.instance.cpuControlled;
+	/* 					PlayState.instance.botplayTxt.visible = PlayState.instance.cpuControlled;
+						PlayState.instance.botplayTxt.alpha = 1;
+						PlayState.instance.botplaySine = 0; */
+					case "Exit to menu":
+
+						PlayState.deathCounter = 0;
+						PlayState.seenCutscene = false;
+						if(PlayState.isStoryMode) {
+							MusicBeatState.switchState(new StoryMenuState());
+						} else {
+							MusicBeatState.switchState(new FreeplayState());
+						}
+						PlayState.cancelMusicFadeTween();
+
+						MusicBeatState.playMenuMusic(true);
+						
+						PlayState.chartingMode = false;
+				}
 			}
 		}
 	}

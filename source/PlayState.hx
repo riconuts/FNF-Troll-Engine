@@ -180,6 +180,8 @@ class PlayState extends MusicBeatState
 		['Sick!', 1], //From 90% to 99%
 		['Perfect!!', 1] //The value on this one isn't used actually, since Perfect is always "1"
 	]; */
+	
+	public var scoreTxt:FlxText = new FlxText(); // just so psych mods n shit dont error
 	public var modchartTweens:Map<String, FlxTween> = new Map<String, FlxTween>();
 	public var modchartSprites:Map<String, ModchartSprite> = new Map<String, ModchartSprite>();
 	public var modchartTimers:Map<String, FlxTimer> = new Map<String, FlxTimer>();
@@ -329,6 +331,12 @@ class PlayState extends MusicBeatState
 	public var instaRespawn:Bool = false;
 
 	public var healthBar:FNFHealthBar;
+	public var healthBarBG:FlxSprite;
+
+	public var iconP1:HealthIcon;
+	public var iconP2:HealthIcon;
+
+
 	var songPercent:Float = 0;
 
 	public var camGame:FlxCamera;
@@ -749,6 +757,64 @@ class PlayState extends MusicBeatState
 		add(luaDebugGroup);
 		#end
 
+		//// Characters
+
+		var gfVersion:String = SONG.gfVersion;
+		if(gfVersion == null || gfVersion.length < 1){
+			/* gfVersion = 'gf';
+			SONG.gfVersion = gfVersion; //Fix for the Chart Editor */
+		}
+		else if (stageData.hide_girlfriend != true)
+		{
+			gf = new Character(0, 0, gfVersion);
+
+			if (stageData.camera_girlfriend != null){
+				gf.cameraPosition[0] += stageData.camera_girlfriend[0];
+				gf.cameraPosition[1] += stageData.camera_girlfriend[1];
+			}
+
+			startCharacter(gf);
+			gf.scrollFactor.set(0.95, 0.95);
+			gfMap.set(gf.curCharacter, gf);
+			gfGroup.add(gf);
+		}
+
+		dad = new Character(0, 0, SONG.player2);
+
+		if (stageData.camera_opponent != null){
+			dad.cameraPosition[0] += stageData.camera_opponent[0];
+			dad.cameraPosition[1] += stageData.camera_opponent[1];
+		}
+		startCharacter(dad, true);
+		
+		dadMap.set(dad.curCharacter, dad);
+		dadGroup.add(dad);
+
+		boyfriend = new Character(0, 0, SONG.player1, true);
+		if (stageData.camera_boyfriend != null){
+			boyfriend.cameraPosition[0] += stageData.camera_boyfriend[0];
+			boyfriend.cameraPosition[1] += stageData.camera_boyfriend[1];
+		}
+		startCharacter(boyfriend);
+
+		boyfriendMap.set(boyfriend.curCharacter, boyfriend);
+		boyfriendGroup.add(boyfriend);
+
+		if(dad.curCharacter.startsWith('gf')) {
+			dad.setPosition(GF_X, GF_Y);
+			if(gf != null)
+				gf.visible = false;
+		}
+		
+		if(ClientPrefs.etternaHUD == 'Advanced')
+			hud = new hud.AdvancedHUD(boyfriend.healthIcon, dad.healthIcon, songName);
+		else
+			hud = new PsychHUD(boyfriend.healthIcon, dad.healthIcon, songName);
+		healthBar = hud.healthBar;
+		healthBarBG = healthBar.healthBarBG;
+		iconP1 = healthBar.iconP1;
+		iconP2 = healthBar.iconP2;
+
 		// After all characters being loaded, it makes then invisible 0.01s later so that the player won't freeze when you change characters
 
 		//// LOAD SCRIPTS
@@ -800,57 +866,6 @@ class PlayState extends MusicBeatState
 			funkyScripts.push(stage.stageScript);
 		}
 
-		callOnScripts("preCharacters");
-		//// Characters
-
-		var gfVersion:String = SONG.gfVersion;
-		if(gfVersion == null || gfVersion.length < 1){
-			/* gfVersion = 'gf';
-			SONG.gfVersion = gfVersion; //Fix for the Chart Editor */
-		}
-		else if (stageData.hide_girlfriend != true)
-		{
-			gf = new Character(0, 0, gfVersion);
-
-			if (stageData.camera_girlfriend != null){
-				gf.cameraPosition[0] += stageData.camera_girlfriend[0];
-				gf.cameraPosition[1] += stageData.camera_girlfriend[1];
-			}
-
-			startCharacter(gf);
-			gf.scrollFactor.set(0.95, 0.95);
-			gfMap.set(gf.curCharacter, gf);
-			gfGroup.add(gf);
-		}
-
-		dad = new Character(0, 0, SONG.player2);
-
-		if (stageData.camera_opponent != null){
-			dad.cameraPosition[0] += stageData.camera_opponent[0];
-			dad.cameraPosition[1] += stageData.camera_opponent[1];
-		}
-		startCharacter(dad, true);
-		
-		dadMap.set(dad.curCharacter, dad);
-		dadGroup.add(dad);
-
-		boyfriend = new Character(0, 0, SONG.player1, true);
-		if (stageData.camera_boyfriend != null){
-			boyfriend.cameraPosition[0] += stageData.camera_boyfriend[0];
-			boyfriend.cameraPosition[1] += stageData.camera_boyfriend[1];
-		}
-		startCharacter(boyfriend);
-
-		boyfriendMap.set(boyfriend.curCharacter, boyfriend);
-		boyfriendGroup.add(boyfriend);
-
-		if(dad.curCharacter.startsWith('gf')) {
-			dad.setPosition(GF_X, GF_Y);
-			if(gf != null)
-				gf.visible = false;
-		}
-		callOnScripts("postCharacters");
-
 		// in case you want to layer shit in a specific way (like in infimario for example)
 		// RICO CAN WE STOP USING SLURS IN THE CODE
 		// we???
@@ -898,11 +913,7 @@ class PlayState extends MusicBeatState
 		moveCameraSection(SONG.notes[0]);
 
 		////
-		if(ClientPrefs.etternaHUD == 'Advanced')
-			hud = new hud.AdvancedHUD(boyfriend.healthIcon, dad.healthIcon, songName);
-		else
-			hud = new PsychHUD(boyfriend.healthIcon, dad.healthIcon, songName);
-		healthBar = hud.healthBar;
+		
 		hud.songName = SONG.song;
 		hud.alpha = ClientPrefs.hudOpacity;
 		
@@ -2080,6 +2091,67 @@ class PlayState extends MusicBeatState
 		}
 	}
 
+	public function optionsChanged(options:Array<String>){
+		hud.changedOptions(options);
+		if (options.length > 0){
+			updateTime = (ClientPrefs.timeBarType != 'Disabled');
+			
+			var reBind:Bool = false;
+			PlayState.instance.callOnScripts('optionsChanged', [options]);
+			for(opt in options){
+				if(opt.startsWith("bind")){
+					reBind = true;
+				}
+			}
+
+			for(field in playfields){
+				field.noteField.optimizeHolds = ClientPrefs.optimizeHolds;
+				field.noteField.drawDistMod = ClientPrefs.drawDistanceModifier;
+				field.noteField.holdSubdivisions = Std.int(ClientPrefs.holdSubdivs) + 1;
+			}
+			
+
+			if(reBind){
+				debugKeysChart = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
+				debugKeysCharacter = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_2'));
+				debugKeysBotplay = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('botplay'));
+
+				keysArray = [
+					ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_left')),
+					ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_down')),
+					ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_up')),
+					ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_right'))
+				];
+
+				// unpress everything
+				for (field in playfields.members)
+				{
+					if (field.inControl && !field.autoPlayed && field.isPlayer)
+					{
+						for (idx in 0...field.keysPressed.length)
+							field.keysPressed[idx] = false;
+
+						for (obj in field.strumNotes)
+						{
+							obj.playAnim("static");
+							obj.resetAnim = 0;
+						}
+					}
+				}
+			}
+		}
+		
+
+	}
+
+	override function draw(){
+		if (modManager != null)
+			stageOpacity.alpha = FlxMath.lerp(ClientPrefs.stageOpacity, 1, (modManager.getValue("cover", 0)));
+		else
+			stageOpacity.alpha = ClientPrefs.stageOpacity;
+		super.draw();
+	}
+
 	function eventNoteEarlyTrigger(event:EventNote):Float {
 		var returnedValue:Float = callOnScripts('eventEarlyTrigger', [event.event, event.value1, event.value2]);
 
@@ -2246,6 +2318,9 @@ class PlayState extends MusicBeatState
 			paused = false;
 			callOnScripts('onResume');
 
+			hud.alpha = ClientPrefs.hudOpacity;
+
+
 			#if desktop
 			if (startTimer != null && startTimer.finished)
 			{
@@ -2370,7 +2445,7 @@ class PlayState extends MusicBeatState
 
 	override public function update(elapsed:Float)
 	{
-
+		hud.updateTime = updateTime;
 
 		for(field in playfields)
 			field.noteField.songSpeed = songSpeed;
@@ -2443,9 +2518,6 @@ class PlayState extends MusicBeatState
 		} */
 		
 
-		if(modManager!=null)
-			stageOpacity.alpha = FlxMath.lerp(ClientPrefs.stageOpacity, 1, (modManager.getValue("cover", 0)));
-
 		if (camZooming)
 		{
 			var lerpVal = CoolUtil.boundTo(1 - (elapsed * 3.125 * camZoomingDecay), 0, 1);
@@ -2464,18 +2536,17 @@ class PlayState extends MusicBeatState
 			camOverlay.zoom = camHUD.zoom;
 		}
 
-		if(ClientPrefs.npsDisplay){
-			if(noteHits.length > 0){
-				while (noteHits.length > 0 && (noteHits[0] + 2000) < Conductor.songPosition)
-					noteHits.shift();
-			}
-
-			nps = Math.floor(noteHits.length / 2);
-			FlxG.watch.addQuick("notes per second", nps);
-			hud.nps = nps;
-			if(hud.npsPeak < nps)
-				hud.npsPeak = nps;
+		if(noteHits.length > 0){
+			while (noteHits.length > 0 && (noteHits[0] + 2000) < Conductor.songPosition)
+				noteHits.shift();
 		}
+
+		nps = Math.floor(noteHits.length / 2);
+		FlxG.watch.addQuick("notes per second", nps);
+		hud.nps = nps;
+		if(hud.npsPeak < nps)
+			hud.npsPeak = nps;
+		
 		if (!endingSong){
 			//// time travel
 			if (!startingSong #if !debug && chartingMode #end){
@@ -3319,6 +3390,7 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.simpleJudge)
 		{
 			rating = lastJudge;
+			rating.moves = false;
 			rating.revive();
 
 			if (rating.tween != null)
@@ -3350,9 +3422,9 @@ class PlayState extends MusicBeatState
 		else
 		{
 			rating = ratingTxtGroup.recycle(RatingSprite, RatingSprite.newRating);
-
+			rating.moves = true;
 			rating.acceleration.y = 550;
-			rating.velocity.set(-FlxG.random.int(0, 10), -FlxG.random.int(140, 175));
+			rating.velocity.set(FlxG.random.int(-10, 10), -FlxG.random.int(140, 175));
 
 			rating.alpha = 1;
 
@@ -3420,6 +3492,7 @@ class PlayState extends MusicBeatState
 			numScore.x += ClientPrefs.comboOffset[2] + 43 * daLoop;
 			numScore.y -= ClientPrefs.comboOffset[3];
 			numScore.ID = daLoop;
+			numScore.moves = !ClientPrefs.simpleJudge;
 			if (numScore.tween != null)
 			{
 				numScore.tween.cancel();
@@ -3443,8 +3516,9 @@ class PlayState extends MusicBeatState
 			}
 			else
 			{
+				
 				numScore.acceleration.y = FlxG.random.int(200, 300);
-				numScore.velocity.set(FlxG.random.float(-5, 5), -FlxG.random.int(140, 160));
+				numScore.velocity.set(FlxG.random.float(-10, 10), -FlxG.random.int(140, 160));
 
 				numScore.alpha = 1;
 				numScore.tween = FlxTween.tween(numScore, {alpha: 0}, 0.2, {
@@ -4905,6 +4979,8 @@ class FNFHealthBar extends FlxBar{
 			super.update(elapsed);
 			return;
 		}
+
+		alpha = ClientPrefs.hpOpacity;
 
 		healthBarBG.setPosition(x - 5, y - 5);
 

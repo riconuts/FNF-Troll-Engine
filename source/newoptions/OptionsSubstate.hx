@@ -25,6 +25,32 @@ typedef Widget =
 
 class OptionsSubstate extends MusicBeatSubstate
 {
+	public static var recommendsRestart:Array<String> = [
+		"etternaHUD",
+		"judgeCounter",
+		"hudPosition",
+		"gradeSet",
+		"shaders",
+		"lowQuality",
+		"globalAntialiasing",
+	];
+
+	public static var requiresRestart:Array<String> = [
+		"modcharts", 
+		"noteOffset", 
+		"ratingOffset", 
+		"wife3", 
+		"useEpics", 
+		"judgePreset", 
+		"epicWindow", 
+		"sickWindow", 
+		"goodWindow", 
+		"badWindow", 
+		"hitWindow",
+		"judgeDiff", 
+		"noteSkin",
+	];
+	
 	var changed:Array<String> = [];
 	var originalValues:Map<String, Dynamic> = [];
 
@@ -138,16 +164,26 @@ class OptionsSubstate extends MusicBeatSubstate
 				if((FlxG.state is OptionsState))
 					LoadingState.loadAndSwitchState(new options.NoteOffsetState());
 			case 'customizeColours':
-				changed.push("noteColours");
+				// TODO: check the note colours once you exit to see if any changed
 				openSubState(ClientPrefs.noteSkin == "Quants" ? new options.QuantNotesSubState() : new options.NotesSubState());
 			case 'customizeKeybinds':
 				var substate = new NewBindsSubstate();
-				var currentBinds = ClientPrefs.keyBinds.copy();
+				var currentBinds:Map<String, Array<FlxKey>> = [];
+
+				for (key => val in ClientPrefs.keyBinds.copy()) // copy the keys to the array
+				{
+					currentBinds.set(key, []);
+					for (i => v in val)
+						currentBinds.get(key)[i] = v;
+				}
+
 				substate.changedBind = function(action:String, index:Int, newBind:FlxKey){
 					var daId = '${action}${index}-bind';
+					trace(daId, currentBinds.get(action)[index], newBind, currentBinds.get(action)[index] == newBind);
 					if (currentBinds.get(action)[index] == newBind)
 						changed.remove(daId);
 					else
+					if (!changed.contains(daId))
 						changed.push(daId);
 				}
 				openSubState(substate);
@@ -985,10 +1021,9 @@ class OptionsSubstate extends MusicBeatSubstate
 		if (Reflect.hasField(ClientPrefs, name)){
 			var val = snappedVal / (data.data.get("type") == 'percent' ? 100 : 1);
 			Reflect.setField(ClientPrefs, name, val);
-
-			if(Std.string(originalValues.get(name)) != Std.string(val))
-				changed.push(name);
-			else if(changed.contains(name))
+			if(Std.string(originalValues.get(name)) != Std.string(val)){
+				if (!changed.contains(name))changed.push(name);
+			}else
 				changed.remove(name);
 		}
 	}
@@ -1012,9 +1047,9 @@ class OptionsSubstate extends MusicBeatSubstate
 
 		if (Reflect.hasField(ClientPrefs, name))
 			Reflect.setField(ClientPrefs, name, val);
-		if (originalValues.get(name) != val)
-			changed.push(name);
-		else if (changed.contains(name))
+		if (originalValues.get(name) != val){
+			if (!changed.contains(name))changed.push(name);
+		}else
 			changed.remove(name);
 		// checkbox.toggled = Reflect.field(ClientPrefs, name);
 	}
@@ -1043,7 +1078,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			Reflect.setField(ClientPrefs, name, val);
 
 		if (originalValues.get(name) != val)
-			changed.push(name);
+			if (!changed.contains(name))changed.push(name);
 		else if (changed.contains(name))
 			changed.remove(name);
 	}
@@ -1127,14 +1162,21 @@ class OptionsSubstate extends MusicBeatSubstate
 			{
 				var hovering = curHovering.optionData;
 				optionDesc.text = hovering.desc;
-				if(hovering.data.get("optionName") == 'customizeHUD' )
-					optionDesc.text += "\n(NOTE: This does not work because you're ingame!)";
+				if (!optState){
+					var oN = hovering.data.get("optionName");
+					if(oN == 'customizeHUD' )
+						optionDesc.text += "\n(NOTE: This does not work because you're ingame!)";
+					else if (requiresRestart.contains(oN))
+						optionDesc.text += "\nWARNING: You will need to restart the song if you change this!";
+					else if (recommendsRestart.contains(oN))
+						optionDesc.text += "\nNOTE: This won't have any effect unless you restart the song!";
+				}
 
 				optionDesc.screenCenter(XY);
-				optionDesc.y = FlxG.height - 56;
+				optionDesc.y = FlxG.height - 76;
 				optionDesc.alpha = 0;
 				FlxTween.cancelTweensOf(optionDesc);
-				FlxTween.tween(optionDesc, {y: FlxG.height - 48, alpha: 1}, 0.35, {ease: FlxEase.quadOut});
+				FlxTween.tween(optionDesc, {y: FlxG.height - 64, alpha: 1}, 0.35, {ease: FlxEase.quadOut});
 			}
 
 			if (openedDropdown == null)

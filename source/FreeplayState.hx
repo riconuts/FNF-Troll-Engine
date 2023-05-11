@@ -176,15 +176,17 @@ class FreeplayState extends MusicBeatState
 						if (icon == null)
 							icon = Paths.image('icons/icon-${song[1]}');
 
+
+						
 						if (icon != null){
 							songButton.loadGraphic(icon);
 
-							/*
+							
 							if (songButton.width > 194)
 								songButton.setGraphicSize(194, 0);
 							if (songButton.height > 194)
 								songButton.setGraphicSize(0, 194);
-							*/
+							
 							
 							songButton.clipRect = new FlxRect(0, 0, songButton.frameHeight, songButton.frameHeight);
 							songButton.updateHitbox();
@@ -193,7 +195,9 @@ class FreeplayState extends MusicBeatState
 								-(194 - songButton.frameHeight) * 0.5,
 								-(194 - songButton.frameHeight) * 0.5
 							);
-						}
+						}else if(icon == null)
+							songButton.loadGraphic(Paths.image('songs/placeholder'));
+						
 					}
 				}
 			}
@@ -366,8 +370,13 @@ class FreeplayState extends MusicBeatState
 		super.destroy();
 	}
 
-	public inline static function songImage(SongName:String)
-		return Paths.image("songs/" + Paths.formatToSongPath(SongName));
+	public inline static function songImage(SongName:String){
+		var img = Paths.image("songs/" + Paths.formatToSongPath(SongName));
+		if(img==null)
+			img = Paths.image("songs/placeholder");
+
+		return img;
+	}
 }
 
 class SongMetadata

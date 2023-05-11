@@ -45,7 +45,9 @@ class HealthIcon extends FlxSprite
 	public function swapOldIcon() 
 	{
 		var oldIcon = Paths.image('icons/$char-old');
-		
+		if(oldIcon == null)
+			oldIcon = Paths.image('icons/char-$char-old'); // psych compat
+
 		if (!isOldIcon && oldIcon != null){
 			changeIconGraphic(oldIcon);
 			
@@ -63,7 +65,10 @@ class HealthIcon extends FlxSprite
 	private var iconOffsets:Array<Float> = [0, 0];
 	public function changeIcon(char:String) {
 		if(this.char != char) {
-			var file:Dynamic = Paths.image('icons/' + char);
+			var file:Dynamic = Paths.image('icons/$char');
+
+			if(file == null)
+				file = Paths.image('icons/icon-$char'); // psych compat
 
 			if(file == null) 
 				file = Paths.image('icons/face'); // Prevents crash from missing icon
