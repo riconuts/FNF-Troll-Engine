@@ -34,6 +34,12 @@ class GameOverSubstate extends MusicBeatSubstate
 	public static var genericSound:String;
 	public static var genericMusic:String;
 
+	// for bowser or tankman or whatever
+	public static var voicelineNumber:Null<Int> = null; // set this value to play an specific voiceline (otherwise it will be randomly chosen using the voicelineAmount value)
+	public static var voicelineAmount:Int = 0; // how many voicelines exist.
+	public static var voicelineName:Null<String> = null; // if set to null then it will just use the character name
+	// nvm maybe ill use this next time
+
 	public static function resetVariables() {
 		characterName = null;
 		deathSoundName = 'fnf_loss_sfx';
@@ -44,6 +50,10 @@ class GameOverSubstate extends MusicBeatSubstate
 		genericName = 'characters/gameover/generic${FlxG.random.int(1,5)}'; 
 		genericSound = "gameoverGeneric";
 		genericMusic = "";
+
+		voicelineNumber = null;
+		voicelineAmount = 0;
+		voicelineName = null;
 	}
 
 	override function create()

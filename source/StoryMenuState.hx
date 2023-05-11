@@ -1,5 +1,6 @@
 package;
 
+import flixel.system.FlxSound;
 import ChapterData;
 import flixel.addons.display.shapes.FlxShapeBox;
 import flixel.group.FlxGroup;
@@ -28,6 +29,7 @@ class StoryMenuState extends MusicBeatState
 	public static var weekCompleted:Map<String, Bool> = new Map<String, Bool>();
 
 	// Screen positions for the chapter options
+	/// grrr make this shit dynamic
 	final chapterSelectPositions:Array<Array<Int>> = [
 		[51, 109], [305, 109], [542, 109], [788, 109], [1034, 109],
 		[51, 417], [305, 417], [542, 417], [788, 417], [1034, 417]
@@ -230,5 +232,44 @@ class ChapterOption extends TGTSquareButton{
 	override function onover(){
 		//if (!StoryMenuState.weekIsLocked(daWeek))
 			super.onover();
+	}
+
+	var fuckYouSound:FlxSound;
+	var violations:Int = 0;
+	var elapsedSecond:Float = 0;
+
+	override function update(e){
+		elapsedSecond += e;
+		if (elapsedSecond > 0.6 && violations > 0){
+			violations--;
+			elapsedSecond -= 0.6;
+		}
+
+		super.update(e);
+	}
+	override function shake(){
+		if (twen != null){ // if shaking
+			violations++;
+			if (violations >= 10){
+				if (fuckYouSound != null){
+					#if sys
+					Sys.exit(0);
+					return;
+					#end
+				}
+
+				FlxG.camera.shake(0.005,0.25,null,true,X);
+
+				fuckYouSound = FlxG.sound.play(Paths.sound("notyet"));
+				fuckYouSound.onComplete = ()->{
+					fuckYouSound = null;
+				};
+				violations = 0;
+
+
+			}
+		}
+		
+		super.shake();
 	}
 }
