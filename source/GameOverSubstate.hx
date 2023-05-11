@@ -31,6 +31,7 @@ class GameOverSubstate extends MusicBeatSubstate
 	public static var endSoundName:String = 'gameOverEnd';
 	
 	public static var genericName:String;
+	public static var genericSound:String;
 	public static var genericMusic:String;
 
 	public static function resetVariables() {
@@ -41,7 +42,8 @@ class GameOverSubstate extends MusicBeatSubstate
 
 		// maybe ill do something better for v5 idk i just wanna get over this
 		genericName = 'characters/gameover/generic${FlxG.random.int(1,5)}'; 
-		genericMusic = "gameoverGeneric";
+		genericSound = "gameoverGeneric";
+		genericMusic = "";
 	}
 
 	override function create()
@@ -54,9 +56,9 @@ class GameOverSubstate extends MusicBeatSubstate
 
 			var frameRate = 1/24;
 			FlxTween.tween(genericBitch, {"scale.x": 1.22, "scale.y": 1.22, alpha: 1}, 1, {ease: FlxEase.circIn}).then(
-				FlxTween.tween(genericBitch, {"scale.x": 1.196, "scale.y": 1.196}, frameRate, {onComplete: (_)->{ if (!isEnding) FlxG.sound.playMusic(Paths.music(genericMusic), 1, false); }})).then(
+				FlxTween.tween(genericBitch, {"scale.x": 1.196, "scale.y": 1.196}, frameRate, {onComplete: (_)->{ if (!isEnding) FlxG.sound.play(Paths.sound(genericSound), 1, false);}})).then(
 					FlxTween.tween(genericBitch, {"scale.x": 1.1, "scale.y": 1.1}, frameRate*35)).then(
-						FlxTween.tween(genericBitch, {"scale.x": 1, "scale.y": 1}, frameRate*60)).then(
+						FlxTween.tween(genericBitch, {"scale.x": 1, "scale.y": 1}, frameRate*60, {onStart: (fuck)->{ if (!isEnding) FlxG.sound.playMusic(Paths.music(genericMusic), 0.6, true); FlxG.sound.music.fadeIn(0.4, 0.6, 1);}})).then(
 							FlxTween.tween(genericBitch, {"scale.x": 1.01, "scale.y": 1.01}, frameRate * 14, {type: PINGPONG}));
 		}
 
@@ -99,6 +101,13 @@ class GameOverSubstate extends MusicBeatSubstate
 
 			deathName = "generic-gameover";
 			charInfo = null;
+
+			Cache.loadWithList([
+				{path: genericName, type: 'IMAGE'},
+				{path: genericSound, type: 'SOUND'},
+				{path: genericMusic, type: 'MUSIC'},
+				//{path: endSoundName, type: 'MUSIC'}
+			]);
 
 			return doGenericGameOver(); 
 			
