@@ -136,7 +136,7 @@ class CreditsState extends MusicBeatState
 			#if sys
 			try{
 				trace('updating credits...');
-				File.saveContent(creditsPath, data);
+				//File.saveContent(creditsPath, data);
 			}catch(e){
 				trace("couldn't update credits: " + e);
 			}
