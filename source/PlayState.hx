@@ -2121,9 +2121,9 @@ class PlayState extends MusicBeatState
 
 	public function optionsChanged(options:Array<String>){
 		hud.changedOptions(options);
+		for(note in allNotes)
+			note.updateColours();
 		if (options.length > 0){
-			for(note in allNotes)
-				note.updateColours();
 			updateTime = (ClientPrefs.timeBarType != 'Disabled');
 			
 			var reBind:Bool = false;

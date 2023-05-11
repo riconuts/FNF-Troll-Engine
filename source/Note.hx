@@ -294,8 +294,10 @@ class Note extends NoteObject
 			noteType = value;
 		}
 		if(usesDefaultColours){
-			if(colorSwap.hue != hue || colorSwap.saturation != sat || colorSwap.brightness != brt)
+			if(colorSwap.hue != hue || colorSwap.saturation != sat || colorSwap.brightness != brt){
 				usesDefaultColours = false;// just incase
+				trace("fuk u");
+			}
 		}
 
 		if(colorSwap.hue==hue)
@@ -305,7 +307,7 @@ class Note extends NoteObject
 			colorSwap.saturation -= 0.0127;
 
 		if(colorSwap.brightness==brt)
-				colorSwap.brightness -= 0.0127;
+			colorSwap.brightness -= 0.0127;
 		
 		
 		if(isQuant){
