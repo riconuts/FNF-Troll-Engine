@@ -926,10 +926,6 @@ class PlayState extends MusicBeatState
 		*/
 		add(hud);
 
-		add(strumLineNotes);
-		add(playfields);
-		add(grpNoteSplashes);
-
 		//
 		lastJudge = RatingSprite.newRating();
 		ratingTxtGroup.add(lastJudge).kill();
@@ -945,9 +941,7 @@ class PlayState extends MusicBeatState
 		timingTxt.visible = false;
 		timingTxt.alpha = 0;
 
-		add(ratingTxtGroup);
-		add(comboNumGroup);
-		add(timingTxt);
+
 
 		// init shit
 		health = 1;
@@ -1049,6 +1043,13 @@ class PlayState extends MusicBeatState
 
 		////
 		callOnAllScripts('onCreatePost');
+		add(strumLineNotes);
+		add(playfields);
+		add(grpNoteSplashes);
+		add(ratingTxtGroup);
+		add(comboNumGroup);
+		add(timingTxt);
+
 		super.create();
 
 		RecalculateRating();

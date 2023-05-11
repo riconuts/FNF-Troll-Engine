@@ -1713,7 +1713,6 @@ class FunkinLua extends FunkinScript
 		});
 		
 		Lua_helper.add_callback(lua, "startDialogue", function(dialogueFile:String, music:String = null) {
-			trace("Dialogue isnt in TGT");
 			if(PlayState.instance.endingSong) {
 				PlayState.instance.endSong();
 			} else {
