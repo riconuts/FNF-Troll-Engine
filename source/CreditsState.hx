@@ -220,6 +220,8 @@ class CreditsState extends MusicBeatState
         add(songTitle);
 	}
 
+	var moveTween:FlxTween;
+	
 	function updateSelection(playSound:Bool = true)
 	{
 		if (playSound)
@@ -261,7 +263,9 @@ class CreditsState extends MusicBeatState
                     var sty = hintText.y + 15;
                     var ety = hintText.y;
                     var sba = hintBg.alpha;
-                    FlxTween.num(0, 1, 0.25, {ease: FlxEase.sineOut}, function(v){
+					if (moveTween != null)
+						moveTween.cancel();
+                    moveTween = FlxTween.num(0, 1, 0.25, {ease: FlxEase.sineOut}, function(v){
                         hintBg.y = FlxMath.lerp(sby, eby, v);
                         hintText.y = FlxMath.lerp(sty, ety, v);
                         hintBg.alpha = FlxMath.lerp(sba, 0.6, v);

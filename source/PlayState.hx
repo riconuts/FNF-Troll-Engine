@@ -2500,10 +2500,9 @@ class PlayState extends MusicBeatState
 				MusicBeatState.switchState(new CharacterEditorState(SONG.player2));
 			}
 
-			if (FlxG.keys.anyJustPressed(debugKeysBotplay)){
+			if (FlxG.keys.anyJustPressed(debugKeysBotplay))
 				cpuControlled = !cpuControlled;
-				if(cpuControlled)saveScore=false;
-			}
+			
 
 			// RESET = Quick Game Over Screen
 			if (controls.RESET && canReset && !inCutscene && startedCountdown)
@@ -4162,6 +4161,7 @@ class PlayState extends MusicBeatState
 
 	function goodNoteHit(note:Note, field:PlayField):Void
 	{
+		
 		if (note.wasGoodHit || (field.autoPlayed && (note.ignoreNote || note.breaksCombo)))
 			return;
 
@@ -4211,6 +4211,7 @@ class PlayState extends MusicBeatState
 			return;
 		#end
 
+		if (cpuControlled)saveScore = false; // if botplay hits a note, then you lose scoring
 
 		// tbh I hate hitCuasesMiss lol its retarded
 		// added a shitty judge to deal w/ it tho!!
