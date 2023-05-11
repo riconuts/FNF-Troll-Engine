@@ -168,8 +168,8 @@ class FreeplayState extends MusicBeatState
 						setCategory(mod, mod);
 					}
 
-					var daDiffs = theJson.difficulties.split(",");
-					var topDiff = daDiffs.length==0?null:daDiffs[0];
+					var daDiffs:Array<String> = theJson.difficulties.split(",");
+					var topDiff:Null<String> = daDiffs.length==0?null:daDiffs[0];
 					if(daDiffs.length>1)topDiff = daDiffs[daDiffs.length-1].trim(); // play the top difficulty
 						
 					for (song in songs){
