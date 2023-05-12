@@ -41,8 +41,8 @@ PlayField is seperated into 2 classes:
 	If you use this code, please credit me (Nebula) and 4mbr0s3 2
 	Or ATLEAST credit 4mbr0s3 2 since he did the cool stuff of this system (hold note manipulation)
 
-	If you want to use this in other mods, you need to include the modchart sytem, this class, and do some changes to PlayState to make sure it works w/ PlayFields
-	(Or just use this engine teehee)
+	Note that if you want to use this in other mods, you'll have to do some pretty drastic changes to a bunch of classes (PlayState, Note, Conductor, etc)
+	If you can make it work in other engines then epic but its best to just use this engine tbh
  */
  
 typedef RenderObject = {
