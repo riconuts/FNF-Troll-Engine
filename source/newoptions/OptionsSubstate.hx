@@ -539,6 +539,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		optionDesc.textField.backgroundColor = FlxColor.BLACK;
 		optionDesc.screenCenter(XY);
 		optionDesc.cameras = [overlayCamera];
+		optionDesc.alpha = 0;
 		add(optionDesc);
 
 		checkWindows();
