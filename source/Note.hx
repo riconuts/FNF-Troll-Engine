@@ -309,9 +309,7 @@ class Note extends NoteObject
 
 		if(colorSwap.brightness==brt)
 			colorSwap.brightness -= 0.0127;
-		
-		if(noteType.trim()!='')trace(isQuant, texture);
-		updateColours(); // just to DOUBLY MAKE SURE (should prevent non-quants from being quanted because you had quants on but the note type didnt have canQuants = false)
+
 
 		if(isQuant){
 			if (noteSplashTexture == 'noteSplashes' || noteSplashTexture == null || noteSplashTexture.length <= 0)
