@@ -4711,7 +4711,6 @@ class PlayState extends MusicBeatState
 					return returnVal;
 			};
 			if (ret != Globals.Function_Continue && ret!=null){
-				trace(event, ret, script.scriptName);
 				returnVal = ret;
 			}
 		}

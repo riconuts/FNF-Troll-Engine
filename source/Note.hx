@@ -229,6 +229,7 @@ class Note extends NoteObject
 
 	public function updateColours(ignore:Bool=false){		
 		if(!ignore && !usesDefaultColours)return;
+		if (colorSwap==null)return;
 		if(isQuant){
 			var idx = quants.indexOf(quant);
 			colorSwap.hue = ClientPrefs.quantHSV[idx][0] / 360;
@@ -309,7 +310,9 @@ class Note extends NoteObject
 		if(colorSwap.brightness==brt)
 			colorSwap.brightness -= 0.0127;
 		
-		
+		if(noteType.trim()!='')trace(isQuant, texture);
+		updateColours(); // just to DOUBLY MAKE SURE (should prevent non-quants from being quanted because you had quants on but the note type didnt have canQuants = false)
+
 		if(isQuant){
 			if (noteSplashTexture == 'noteSplashes' || noteSplashTexture == null || noteSplashTexture.length <= 0)
 				noteSplashTexture = 'QUANTnoteSplashes'; // give it da quant notesplashes!!
@@ -433,7 +436,7 @@ class Note extends NoteObject
 		var arraySkin:Array<String> = skin.split('/');
 		arraySkin[arraySkin.length-1] = prefix + arraySkin[arraySkin.length-1] + suffix; // add prefix and suffix to the texture file
 		var blahblah:String = arraySkin.join('/');
-
+		var wasQuant = isQuant;
 		isQuant = false;
 		
 
@@ -456,9 +459,11 @@ class Note extends NoteObject
 
 				blahblah = texture;
 				isQuant = true;
-
 			}
 		}
+
+		if (wasQuant != isQuant)
+			updateColours();
 		
 		frames = Paths.getSparrowAtlas(blahblah);
 		loadNoteAnims();
