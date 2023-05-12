@@ -135,39 +135,61 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		return null;
 	}
 
-	public function new()
+	override public function create()
 	{
-		super();
+		super.create();
+
+		var cam:FlxCamera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
+		this.camera = cam;
 		
 		var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+		bg.screenCenter();
 		bg.scrollFactor.set();
-		bg.alpha = 0.3;
+		bg.camera = cam;
 		add(bg);
-		FlxTween.tween(bg, {alpha: 0.7}, 0.6);
+
+		if (this._parentState is PauseSubState)
+			bg.alpha = 0.6;
+		else{
+			bg.alpha = 0.3;
+			FlxTween.tween(bg, {alpha: 0.7}, 0.6);			
+		}
 
 		// avoids lagspikes while scrolling through menus!
 		grpOptions = new FlxTypedGroup<Alphabet>();
+		grpOptions.camera = cam;
 		add(grpOptions);
 
 		grpTexts = new FlxTypedGroup<AttachedText>();
+		grpTexts.camera = cam;
 		add(grpTexts);
 
 		checkboxGroup = new FlxTypedGroup<CheckboxThingie>();
+		checkboxGroup.camera = cam;
 		add(checkboxGroup);
 		
 		getOptions();
+
+		var yAdd = FlxG.camera.scroll.y;
+		
+		/*@:privateAccess
+		if (this._parentState is PauseSubState)
+			yAdd += cast(this._parentState, PauseSubState).curSelected * 70;
+		*/
 
 		for (i in 0...optionsArray.length)
 		{
 			var optionText:Alphabet = new Alphabet(0, 70 * i, optionsArray[i].name, true, false, 0.05, 0.8);
 			optionText.isMenuItem = true;
-			optionText.x += 300;
-			/*optionText.forceX = 300;
-			optionText.yMult = 90;*/
-			optionText.yAdd += FlxG.camera.scroll.y;
 
 			optionText.xAdd = 120;
+			optionText.x += 200;
+			optionText.targetX = 225;
+
+			optionText.yAdd += yAdd;
 			optionText.targetY = i;
+
+			optionText.camera = cam;
 			grpOptions.add(optionText);
 
 			if(optionsArray[i].type == 'bool') {
@@ -175,6 +197,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 				checkbox.sprTracker = optionText;
 				checkbox.offsetY = -60;
 				checkbox.ID = i;
+				checkboxGroup.camera = cam;
 				checkboxGroup.add(checkbox);
 				optionText.xAdd += 80;
 			} else {
@@ -182,6 +205,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 				valueText.sprTracker = optionText;
 				valueText.copyAlpha = true;
 				valueText.ID = i;
+				valueText.camera = cam;
 				grpTexts.add(valueText);
 				optionsArray[i].setChild(valueText);
 			}

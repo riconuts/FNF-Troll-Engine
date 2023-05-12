@@ -1,14 +1,12 @@
 package;
 
+import options.GameplaySettingsSubState;
 import newoptions.OptionsSubstate;
-import Controls.Control;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
-import flixel.FlxSubState;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.input.keyboard.FlxKey;
 import flixel.system.FlxSound;
 import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
@@ -37,7 +35,13 @@ class PauseSubState extends MusicBeatSubstate
 		super();
 		
 		persistentUpdate = true;
+
 		var cam:FlxCamera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
+		this.camera = cam;
+
+		if (!PlayState.isStoryMode){
+			menuItemsOG.insert(3, "Change Modifiers");
+		}
 
 		if(#if debug true || #end PlayState.chartingMode)
 		{
@@ -64,11 +68,11 @@ class PauseSubState extends MusicBeatSubstate
 
 
 		pauseMusic = new FlxSound();
-		if(songName != null) {
+		if(songName != null) 
 			pauseMusic.loadEmbedded(Paths.music(songName), true, true);
-		} else if (songName != 'None') {
+		else if (songName != 'None')
 			pauseMusic.loadEmbedded(Paths.music(Paths.formatToSongPath('Breakfast')), true, true);
-		}
+		
 		pauseMusic.volume = 0;
 		pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length* 0.5)));
 
@@ -184,41 +188,42 @@ class PauseSubState extends MusicBeatSubstate
 			var accepted = controls.ACCEPT;
 
 			if (upP)
-			{
 				changeSelection(-1);
-			}
+
 			if (downP)
-			{
 				changeSelection(1);
-			}
 
 			var daSelected:String = menuItems[curSelected];
 			switch (daSelected)
 			{
 				case 'Skip Time':
+					var speed = FlxG.keys.pressed.SHIFT ? 10 : 1;
+
 					if (controls.UI_LEFT_P)
 					{
 						FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
-						curTime -= 1000;
+						curTime -= 1000 * speed;
 						holdTime = 0;
 					}
 					if (controls.UI_RIGHT_P)
 					{
 						FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
-						curTime += 1000;
+						curTime += 1000 * speed;
 						holdTime = 0;
 					}
 
 					if(controls.UI_LEFT || controls.UI_RIGHT)
 					{
 						holdTime += elapsed;
-						if(holdTime > 0.5)
-						{
-							curTime += 45000 * elapsed * (controls.UI_LEFT ? -1 : 1);
-						}
 
-						if(curTime >= FlxG.sound.music.length) curTime -= FlxG.sound.music.length;
-						else if(curTime < 0) curTime += FlxG.sound.music.length;
+						if(holdTime > 0.5)
+							curTime += 45000 * elapsed * (controls.UI_LEFT ? -1 : 1) * speed;
+
+						if (curTime >= FlxG.sound.music.length) 
+							curTime -= FlxG.sound.music.length;
+						else if (curTime < 0)
+							curTime += FlxG.sound.music.length;
+
 						updateSkipTimeText();
 					}
 			}
@@ -227,8 +232,13 @@ class PauseSubState extends MusicBeatSubstate
 			{
 				switch (daSelected)
 				{
+					case 'Change Modifiers':
+						this.persistentDraw = false;						
+						this.openSubState(new GameplayChangersSubstate());						
+
 					case 'Options':
 						var daSubstate = new OptionsSubstate();
+						this.persistentDraw = true;
 
 						daSubstate.goBack = (function(changedOptions:Array<String>)
 						{
@@ -240,7 +250,6 @@ class PauseSubState extends MusicBeatSubstate
 									break;
 								}
 							}
-
 							
 							PlayState.instance.optionsChanged(changedOptions);
 
