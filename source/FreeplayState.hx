@@ -183,16 +183,18 @@ class FreeplayState extends MusicBeatState
 						var daDiffs:Array<String> = theJson.difficulties.split(",");
 						if (daDiffs.length == 0 || daDiffs[0].trim() == '')
 							daDiffs = ["Easy", "Normal", "Hard"];
+
 						var topDiff:Null<String> = null;
 						var diffIdx = 1;
 						while (daDiffs.length>0)
 						{
 							var diff = daDiffs.pop().trim();
-							var input = diff == 'Normal'?'':'-$diff';
+							var input = diff.toLowerCase() == 'normal'?'':'-$diff';
 							var json = '${song[0]}${input}';
 							var rawPath = Paths.formatToSongPath(song[0]) + '/' + Paths.formatToSongPath(json);
 
 							var path = Paths.modsSongJson(rawPath);
+
 							if (!Paths.exists(path))
 								path = Paths.modsJson(rawPath);
 
@@ -202,6 +204,9 @@ class FreeplayState extends MusicBeatState
 								break;
 							}
 						}
+						if (topDiff.trim() == 'normal')
+							topDiff=null;
+
 						songButton.onUp.callback = function(){
 							this.transOut = SquareTransitionSubstate;
 							SquareTransitionSubstate.nextCamera = FlxG.camera;
@@ -282,6 +287,11 @@ class FreeplayState extends MusicBeatState
 
 	static public function playSong(metadata:SongMetadata, ?difficulty:String, ?difficultyIdx:Int=1){
 		Paths.currentModDirectory = metadata.folder;
+
+
+		trace(difficulty);
+		if (difficulty != null && (difficulty.trim()=='' || difficulty.toLowerCase().trim() == 'normal'))
+			difficulty = null;
 
 		var songLowercase:String = Paths.formatToSongPath(metadata.songName);
 		trace('${Paths.currentModDirectory}, $songLowercase, $difficulty');
