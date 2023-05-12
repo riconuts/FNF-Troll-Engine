@@ -62,7 +62,6 @@ class FunkinLua extends FunkinScript
 		//trace('Lua version: ' + Lua.version());
 		//trace("LuaJIT version: " + Lua.versionJIT());
 
-		LuaL.dostring(lua, CLENSE);
 		try{
 			var result:Dynamic = LuaL.dofile(lua, script);
 			var resultStr:String = Lua.tostring(lua, result);
@@ -99,9 +98,6 @@ class FunkinLua extends FunkinScript
 
 		// Song/Week shit
 		setDefaultVars();
-
-		// Block require and os, Should probably have a proper function but this should be good enough for now until someone smarter comes along and recreates a safe version of the OS library
-		set('require', false);
 
 		// Camera poo
 		set('cameraX', 0);
@@ -2585,15 +2581,6 @@ class FunkinLua extends FunkinScript
 		#end
 	}
 
-	static inline var CLENSE:String = "
-	os.execute = nil;
-	os.exit = nil;
-	package.loaded.os.execute = nil;
-	package.loaded.os.exit = nil;
-	process = nil;
-	package.loaded.process = nil;
-
-	"; // Fuck this, I can't figure out linc_lua, so I'mma set everything in Lua itself - Super
 }
 
 class ModchartSprite extends FlxSprite
