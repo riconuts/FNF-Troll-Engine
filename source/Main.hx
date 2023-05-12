@@ -75,19 +75,21 @@ class Main extends Sprite
 
 	private function setupGame():Void
 	{
+		//// Readjust the game size for smaller screens
 		var screenWidth = Capabilities.screenResolutionX;
 		var screenHeight = Capabilities.screenResolutionY;
 
-		// only readjust for smaller screens
 		if (zoom == -1 && !(screenWidth > gameWidth || screenHeight > gameWidth))
 		{
 			var ratioX:Float = screenWidth / gameWidth;
 			var ratioY:Float = screenHeight / gameHeight;
+			
 			zoom = Math.min(ratioX, ratioY);
 			gameWidth = Math.ceil(screenWidth / zoom);
 			gameHeight = Math.ceil(screenHeight / zoom);
 		}
 	
+		////
 		ClientPrefs.loadDefaultKeys();
 
 		var troll = false;

@@ -617,7 +617,7 @@ class NoteField extends FlxObject
 		var taps:Array<Note> = [];
 		var holds:Array<Note> = [];
 		var drawMod = modManager.get("drawDistance");
-		var drawDist = drawMod==null?720:drawMod.getValue(modNumber); 
+		var drawDist = drawMod==null ? FlxG.height : drawMod.getValue(modNumber); 
 		drawDist *= drawDistMod;
 		for (daNote in field.spawnedNotes){
 			if(!daNote.alive)continue;

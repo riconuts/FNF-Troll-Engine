@@ -420,7 +420,7 @@ class OptionsSubstate extends MusicBeatSubstate
 
 
 		////
-		var optionMenu = new FlxSprite(84, 80, CoolUtil.makeOutlinedGraphic(920, 648, FlxColor.fromRGB(82, 82, 82), 2, FlxColor.fromRGB(70, 70, 70)));
+		var optionMenu = new FlxSprite(84, 80, CoolUtil.makeOutlinedGraphic(920, FlxG.height-80, FlxColor.fromRGB(82, 82, 82), 2, FlxColor.fromRGB(70, 70, 70)));
 		optionMenu.alpha = 0.8;
 		add(optionMenu);
 
