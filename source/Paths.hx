@@ -536,21 +536,23 @@ class Paths
 	
 	public static function loadTheFirstEnabledMod()
 	{
-		#if MODS_ALLOWED
+		Paths.currentModDirectory = '';
+/* 		#if MODS_ALLOWED
 		final first = getModDirectories()[0];
 		Paths.currentModDirectory = first != null ? first : '';
 		#else
 		Paths.currentModDirectory = '';
-		#end
+		#end */
 	}
 	public static function loadRandomMod()
 	{
-		#if MODS_ALLOWED
+		Paths.currentModDirectory = '';
+/* 		#if MODS_ALLOWED
 		final modList:Array<String> = getModDirectories();
 		final rand = modList[FlxG.random.int(0, modList.length - 1)];
 		Paths.currentModDirectory = rand != null ? rand : '';
 		#else
 		Paths.currentModDirectory = '';
-		#end
+		#end */
 	}
 }
