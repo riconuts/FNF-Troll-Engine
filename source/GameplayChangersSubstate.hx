@@ -170,12 +170,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		
 		getOptions();
 
-		var yAdd = FlxG.camera.scroll.y;
-		
-		/*@:privateAccess
-		if (this._parentState is PauseSubState)
-			yAdd += cast(this._parentState, PauseSubState).curSelected * 70;
-		*/
+		var yAdd:Float = (this._parentState is PauseSubState) ? 0 : FlxG.camera.scroll.y;
 
 		for (i in 0...optionsArray.length)
 		{
