@@ -2708,77 +2708,11 @@ class PlayState extends MusicBeatState
 		Conductor.visualPosition = getVisualPosition();
 		FlxG.watch.addQuick("visualPos", Conductor.visualPosition);
 
+		checkEventNote();
+		
 		super.update(elapsed);
 		modManager.updateTimeline(curDecStep);
 		modManager.update(elapsed);
-
-		// TODO: rewrite this a little bit cus of multSpeed and noteSpawnTime being able to be per-player and per-note n all that
-		// just so that if the top note spawns later, it wont fuck up other notes which should spawn sooner.
-
-/* 		if (unspawnNotes[0] != null)
-		{
-			var noteSpawnTime = modManager.get("noteSpawnTime"); // ermmmm, what the flip.
-			var time:Float = noteSpawnTime == null ? spawnTime : (noteSpawnTime.getValue(0) + noteSpawnTime.getValue(1)) / 2; // averages the spawn times
-			// TODO: make this per-player instead of averaging it
-			if (songSpeed < 1 && songSpeed != 0)
-				time /= songSpeed;
-			if (unspawnNotes[0].multSpeed < 1)
-				time /= unspawnNotes[0].multSpeed;
-
-			while (unspawnNotes.length > 0 && unspawnNotes[0].strumTime - Conductor.songPosition < time)
-			{
-				var dunceNote:Note = unspawnNotes[0];
-				notes.insert(0, dunceNote);
-				dunceNote.spawned = true;
-
-				callOnHScripts('onSpawnNote', [dunceNote]);
-				#if LUA_ALLOWED
-				callOnLuas('onSpawnNote', [notes.members.indexOf(dunceNote), dunceNote.noteData, dunceNote.noteType, dunceNote.isSustainNote]);
-				#end
-
-				var index:Int = unspawnNotes.indexOf(dunceNote);
-				unspawnNotes.splice(index, 1);
-
-				callOnHScripts('onSpawnNotePost', [dunceNote]);
-				if (dunceNote.noteScript != null)
-				{
-					var script:FunkinScript = dunceNote.noteScript;
-
-					#if LUA_ALLOWED
-					if (script.scriptType == 'lua'){
-						callScript(script, 'postSpawnNote', [
-							notes.members.indexOf(dunceNote),
-							Math.abs(dunceNote.noteData),
-							dunceNote.noteType,
-							dunceNote.isSustainNote,
-							dunceNote.ID
-						]);
-					}else
-					#end
-						callScript(script, "postSpawnNote", [dunceNote]);
-				}
-			}
-		} */
-
-/* 		opponentStrums.forEachAlive(function(strum:StrumNote)
-		{
-			var pos = modManager.getPos(0, 0, 0, curDecBeat, strum.noteData, 1, strum, [], strum.vec3Cache);
-			modManager.updateObject(curDecBeat, strum, pos, 1);
-			strum.x = pos.x;
-			strum.y = pos.y;
-			strum.z = pos.z;
-		});
-
-		playerStrums.forEachAlive(function(strum:StrumNote)
-		{
-			var pos = modManager.getPos(0, 0, 0, curDecBeat, strum.noteData, 0, strum, [], strum.vec3Cache);
-			modManager.updateObject(curDecBeat, strum, pos, 0);
-			strum.x = pos.x;
-			strum.y = pos.y;
-			strum.z = pos.z;
-		});
- */
-		strumLineNotes.sort(sortByOrderStrumNote);
 
 		if (generatedMusic)
 		{
@@ -2800,7 +2734,7 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
-		checkEventNote();
+		
 
 		setOnScripts('cameraX', camFollowPos.x);
 		setOnScripts('cameraY', camFollowPos.y);
