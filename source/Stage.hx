@@ -1,5 +1,7 @@
 package;
 
+import scripts.FunkinLua.ModchartSprite;
+import scripts.FunkinLua.ModchartText;
 #if LUA_ALLOWED
 import llua.Convert;
 import llua.Lua;
@@ -131,7 +133,8 @@ class Stage extends FlxTypedGroup<FlxBasic>
 					stageScript = new FunkinLua(file, true);
 					#if PE_MOD_COMPATIBILITY
 					var lua:FunkinLua = cast stageScript;
-					Lua_helper.add_callback(lua.lua, "addLuaSprite", function(tag:String, front:Bool = false) {
+					var state = lua.lua;
+					Lua_helper.add_callback(state, "addLuaSprite", function(tag:String, front:Bool = false) {
 						// TODO: put modchartSprites n shit outside of PlayState
 						// maybe put it into FunkinLua so that stages made for psych mods will work on the title screen, etc
 
@@ -149,6 +152,73 @@ class Stage extends FlxTypedGroup<FlxBasic>
 						
 						
 						spr.wasAdded = true;	
+					});
+
+					Lua_helper.add_callback(state, "removeLuaSprite", function(tag:String, destroy:Bool = true)
+					{
+						if (!PlayState.instance.modchartSprites.exists(tag))
+						{
+							return;
+						}
+
+						var pee:ModchartSprite = PlayState.instance.modchartSprites.get(tag);
+						if (destroy)
+						{
+							pee.kill();
+						}
+
+						if (pee.wasAdded)
+						{
+							remove(pee, true);
+							foreground.remove(pee, true);
+							pee.wasAdded = false;
+						}
+
+						if (destroy)
+						{
+							pee.destroy();
+							PlayState.instance.modchartSprites.remove(tag);
+						}
+					});
+
+					Lua_helper.add_callback(state, "addLuaText", function(tag:String)
+					{
+						if (PlayState.instance.modchartTexts.exists(tag))
+						{
+							var shit:ModchartText = PlayState.instance.modchartTexts.get(tag);
+							if (!shit.wasAdded)
+							{
+								foreground.add(shit);
+								shit.wasAdded = true;
+								// trace('added a thing: ' + tag);
+							}
+						}
+					});
+
+					Lua_helper.add_callback(state, "removeLuaText", function(tag:String, destroy:Bool = true)
+					{
+						if (!PlayState.instance.modchartTexts.exists(tag))
+						{
+							return;
+						}
+
+						var pee:ModchartText = PlayState.instance.modchartTexts.get(tag);
+						if (destroy)
+						{
+							pee.kill();
+						}
+
+						if (pee.wasAdded)
+						{
+							foreground.remove(pee, true);
+							pee.wasAdded = false;
+						}
+
+						if (destroy)
+						{
+							pee.destroy();
+							PlayState.instance.modchartTexts.remove(tag);
+						}
 					});
 					#end
 					stageScript.call("onCreate", []);
