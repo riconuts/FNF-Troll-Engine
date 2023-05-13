@@ -82,17 +82,19 @@ class Main extends Sprite
 	private function setupGame():Void
 	{
 		//// Readjust the game size for smaller screens
-		var screenWidth = Capabilities.screenResolutionX;
-		var screenHeight = Capabilities.screenResolutionY;
-
-		if (zoom == -1 && !(screenWidth > gameWidth || screenHeight > gameWidth))
+		if (zoom == -1)
 		{
-			var ratioX:Float = screenWidth / gameWidth;
-			var ratioY:Float = screenHeight / gameHeight;
-			
-			zoom = Math.min(ratioX, ratioY);
-			gameWidth = Math.ceil(screenWidth / zoom);
-			gameHeight = Math.ceil(screenHeight / zoom);
+			var screenWidth = Capabilities.screenResolutionX;
+			var screenHeight = Capabilities.screenResolutionY;
+
+			if (!(screenWidth > gameWidth || screenHeight > gameWidth)){
+				var ratioX:Float = screenWidth / gameWidth;
+				var ratioY:Float = screenHeight / gameHeight;
+				
+				zoom = Math.min(ratioX, ratioY);
+				gameWidth = Math.ceil(screenWidth / zoom);
+				gameHeight = Math.ceil(screenHeight / zoom);
+			}
 		}
 	
 		////
@@ -102,19 +104,20 @@ class Main extends Sprite
 			trace(release.tag_name);
 		
 		var troll = false;
-		
 		#if sys
 		for (arg in Sys.args()){
-			if (arg.contains("troll")){
-				troll = true;
-				break;
-			}else if (arg.contains("debug")){
-				PlayState.chartingMode = true;
-				initialState = SongSelectState;
+			switch(arg){
+				case "troll":
+					troll = true;
+					break;
+				
+				case "debug":
+					PlayState.chartingMode = true;
+					initialState = SongSelectState;
+				
+				case "showdebugtraces":
+					Main.showDebugTraces = true;
 			}
-
-			if (arg == 'showdebugtraces')
-				Main.showDebugTraces = true;
 		}
 		#end
 
@@ -146,14 +149,9 @@ class Main extends Sprite
 		}
 		#end
 
-/* 		bread = new FlxSprite().loadGraphic(Paths.image("Garlic-Bread-PNG-Images"));
-		bread.screenCenter(XY);
-		add(bread); */
-
 		bread = new Bread();
 		bread.visible = false;
 		addChild(bread);
-
 		
 		#if CRASH_HANDLER
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
