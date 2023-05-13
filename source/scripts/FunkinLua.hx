@@ -45,6 +45,7 @@ import Discord;
 
 class FunkinLua extends FunkinScript
 {
+	var haxeScript:FunkinHScript;
 	public var errorHandler:String->Void;
 	#if LUA_ALLOWED
 	public var lua:State = null;
@@ -82,7 +83,10 @@ class FunkinLua extends FunkinScript
 		}
 		scriptType = 'lua';
 		scriptName = name;
-		trace('lua file loaded succesfully:' + script);
+
+		haxeScript = FunkinHScript.fromString("", scriptName, null, false);
+
+		trace('lua file loaded:' + script);
 
 		#if (haxe >= "4.0.0")
 		accessedProps = new Map();
@@ -522,9 +526,24 @@ class FunkinLua extends FunkinScript
 			return false;
 		});
 
+		Lua_helper.add_callback(lua, "runHaxeCode", function(script:String)
+		{
+			var ar:Lua_Debug = {}
+			Lua.getstack(lua, 1, ar);
+			Lua.getinfo(lua, "l", ar);
+			
+			FunkinHScript.parser.line = ar.currentline; // so any errors, traces, etc, start from the runHaxeCode line in the lua file
+			// just to make outputs from the script a biiittt easier to tell where they came from
+			var retVal = haxeScript.executeCode(script);
+			if (retVal != null && !isOfTypes(retVal, [Bool, Int, Float, String, Array]))
+				retVal = null;
+
+			return retVal;
+		});
+
 
 		Lua_helper.add_callback(lua, "addLuaScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false) { //would be dope asf.
-			var cervix = luaFile + ".lua";
+			var cervix = luaFile + ".lua";	
 			if(luaFile.endsWith(".lua"))cervix=luaFile;
 			var doPush = false;
 			#if MODS_ALLOWED
@@ -2579,6 +2598,16 @@ class FunkinLua extends FunkinScript
 		Lua.close(lua);
 		lua = null;
 		#end
+	}
+
+	public static function isOfTypes(value:Any, types:Array<Dynamic>)
+	{
+		for (type in types)
+		{
+			if (Std.isOfType(value, type))
+				return true;
+		}
+		return false;
 	}
 
 }

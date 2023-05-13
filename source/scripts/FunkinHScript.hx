@@ -17,7 +17,7 @@ import scripts.Globals.*;
 
 class FunkinHScript extends FunkinScript
 {
-	static var parser:Parser = new Parser();
+	public static var parser:Parser = new Parser();
 	public static var defaultVars:Map<String, Dynamic> = new Map<String, Dynamic>();
 
 	public static function init() // BRITISH
@@ -38,8 +38,13 @@ class FunkinHScript extends FunkinScript
 	{
 		return parseString(Paths.getContent(file), name != null ? name : file);
 	}
+	
+	public static function blankScript(){
+		parser.line = 1;
+		return new FunkinHScript(parser.parseString(""), false);
+	}
 
-	public static function fromString(script:String, ?name:String = "Script", ?additionalVars:Map<String, Any>)
+	public static function fromString(script:String, ?name:String = "Script", ?additionalVars:Map<String, Any>, ?doExecute:Bool=true)
 	{
 		parser.line = 1;
 		var expr:Expr;
@@ -57,14 +62,14 @@ class FunkinHScript extends FunkinScript
 
 			expr = parser.parseString("", name);
 		}
-		return new FunkinHScript(expr, name, additionalVars);
+		return new FunkinHScript(expr, name, additionalVars, doExecute);
 	}
 
-	public static function fromFile(file:String, ?name:String, ?additionalVars:Map<String, Any>)
+	public static function fromFile(file:String, ?name:String, ?additionalVars:Map<String, Any>, ?doExecute:Bool = true)
 	{
 		if (name == null)
 			name = file;
-		return fromString(Paths.getContent(file), name, additionalVars);
+		return fromString(Paths.getContent(file), name, additionalVars, doExecute);
 	}
 
 	var interpreter:Interp = new Interp();
@@ -74,7 +79,7 @@ class FunkinHScript extends FunkinScript
 		haxe.Log.trace(text, interpreter.posInfos());
 	}
 	
-	public function new(parsed:Expr, ?name:String = "Script", ?additionalVars:Map<String, Any>)
+	public function new(parsed:Expr, ?name:String = "Script", ?additionalVars:Map<String, Any>, ?doExecute:Bool=true)
 	{
 		scriptType = 'hscript';
 		scriptName = name;
@@ -299,14 +304,31 @@ class FunkinHScript extends FunkinScript
 			for (key in additionalVars.keys())
 				set(key, additionalVars.get(key));
 		}
+		
+		if(doExecute){
+			try
+			{
+				interpreter.execute(parsed);
+				call('onCreate');
+				trace('Loaded hscript: $scriptName');
+			}
+			catch (e:haxe.Exception)
+			{
+				haxe.Log.trace(e.message, interpreter.posInfos());
+			}
+		}
+	}
 
-		try{
-			interpreter.execute(parsed);
-			call('onCreate');
-			trace('Loaded hscript: $scriptName');
-		}catch(e:haxe.Exception){
+	public function executeCode(script:String):Dynamic {
+		try
+		{
+			return interpreter.execute(parser.parseString(script, scriptName));
+		}
+		catch (e:haxe.Exception)
+		{
 			haxe.Log.trace(e.message, interpreter.posInfos());
 		}
+		return null;
 	}
 
 	override public function stop(){
