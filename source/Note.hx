@@ -297,7 +297,6 @@ class Note extends NoteObject
 		if(usesDefaultColours){
 			if(colorSwap.hue != hue || colorSwap.saturation != sat || colorSwap.brightness != brt){
 				usesDefaultColours = false;// just incase
-				trace("fuk u");
 			}
 		}
 
@@ -451,7 +450,6 @@ class Note extends NoteObject
 				|| Paths.exists(Paths.modsImages("QUANT" + blahblah))
 				#end) {
 
-					trace("QUANT"+blahblah);
 				var texture = "QUANT" + blahblah;
 				quantShitCache.set(blahblah, texture);
 

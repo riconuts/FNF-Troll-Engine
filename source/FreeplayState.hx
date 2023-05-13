@@ -289,12 +289,11 @@ class FreeplayState extends MusicBeatState
 		Paths.currentModDirectory = metadata.folder;
 
 
-		trace(difficulty);
 		if (difficulty != null && (difficulty.trim()=='' || difficulty.toLowerCase().trim() == 'normal'))
 			difficulty = null;
 
 		var songLowercase:String = Paths.formatToSongPath(metadata.songName);
-		trace('${Paths.currentModDirectory}, $songLowercase, $difficulty');
+		if (Main.showDebugTraces)trace('${Paths.currentModDirectory}, $songLowercase, $difficulty');
 
 		PlayState.SONG = Song.loadFromJson(
 			'$songLowercase${difficulty == null ? "" : '-$difficulty'}', 

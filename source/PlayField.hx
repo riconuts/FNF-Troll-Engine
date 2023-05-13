@@ -402,7 +402,6 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 							if (daNote.holdingTime >= daNote.sustainLength)
 							{
-								trace("finished hold / roll successfully");
 								daNote.holdingTime = daNote.sustainLength;
 								
 								if (!isHeld)

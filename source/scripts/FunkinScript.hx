@@ -70,9 +70,13 @@ class FunkinScript {
 			set('botPlay', PlayState.instance.cpuControlled);
 			set('disableModcharts', PlayState.instance.disableModcharts);
 			set('practice', PlayState.instance.practiceMode);
+			set('opponentPlay', PlayState.instance.playOpponent);
 			set('startedCountdown', false);
-		}else
+			set("showDebugTraces", PlayState.instance.showDebugTraces);
+		}else{
 			set("inPlaystate", false);
+			set("showDebugTraces", Main.showDebugTraces);
+		}
 
 		set("scriptName", scriptName);
 
@@ -82,8 +86,6 @@ class FunkinScript {
 
 		set("difficulty", PlayState.difficulty);
 		set("difficultyName", PlayState.difficultyName);
-
-		trace(PlayState.difficulty);
 
 		set('inGameOver', false);
 		
@@ -99,6 +101,8 @@ class FunkinScript {
 		set('noteOffset', ClientPrefs.noteOffset);
 		set('healthBarAlpha', ClientPrefs.hpOpacity);
 		set('lowQuality', ClientPrefs.lowQuality);
+		set("trollEngine", true); // so if any psych mods wanna add troll engine specific stuff well there they go
+		
 
 		set('curBpm', Conductor.bpm);
 		set('crochet', Conductor.crochet);
@@ -109,7 +113,8 @@ class FunkinScript {
 		set('curDecBeat', 0);
 		set('curDecStep', 0);
 
-		set('version', MainMenuState.engineVersion.trim());
+		set('version', "0.5.2h"); // version of psych troll engine is based on
+		set('teVersion', MainMenuState.engineVersion.trim());
 	}
 }
 

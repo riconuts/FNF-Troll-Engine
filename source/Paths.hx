@@ -398,8 +398,7 @@ class Paths
 			localTrackedAssets.push(path);
 			return currentTrackedAssets.get(path);
 		}
-
-		trace('image "$key" returned null.');
+		if(Main.showDebugTraces)trace('image "$key" returned null.');
 		return null;
 	}
 

@@ -124,7 +124,9 @@ class FunkinLua extends FunkinScript
 		set('altAnim', false);
 		set('gfSection', false);
 
-		for (i in 0...4) {
+		for (i in 0...5) {
+			// annoying since some scripts use defaultPlayerStrumX/Y 4
+			// (LOOKING AT YOU CHARA.)
 			set('defaultPlayerStrumX' + i, 0);
 			set('defaultPlayerStrumY' + i, 0);
 			set('defaultOpponentStrumX' + i, 0);
@@ -1052,12 +1054,28 @@ class FunkinLua extends FunkinScript
 			return key;
 		});
 		Lua_helper.add_callback(lua, "addCharacterToList", function(name:String, type:String) {
-			var charType:Int = 0;
-			switch(type.toLowerCase()) {
-				case 'dad': charType = 1;
-				case 'gf' | 'girlfriend': charType = 2;
+			try
+			{
+				var charType:Int = 0;
+				switch (type.toLowerCase())
+				{
+					case 'gf' | 'girlfriend' | '1':
+						charType = 2;
+					case 'dad' | 'opponent' | '0':
+						charType = 1;
+					default:
+						charType = Std.parseInt(type);
+						if (Math.isNaN(charType))
+							charType = 0;
+				}
+				
+				trace(charType, type, PlayState.instance);
+
+				PlayState.instance.addCharacterToList(name, charType);
+			}catch(e:Dynamic){
+				trace(e);
 			}
-			PlayState.instance.addCharacterToList(name, charType);
+
 		});
 		Lua_helper.add_callback(lua, "precacheImage", function(name:String) {
 			Paths.returnGraphic(name);

@@ -131,7 +131,6 @@ class Stage extends FlxTypedGroup<FlxBasic>
 				#if LUA_ALLOWED
 				} else if (ext == 'lua'){
 					stageScript = new FunkinLua(file, true);
-					#if PE_MOD_COMPATIBILITY
 					var lua:FunkinLua = cast stageScript;
 					var state = lua.lua;
 					Lua_helper.add_callback(state, "addLuaSprite", function(tag:String, front:Bool = false) {
@@ -220,7 +219,6 @@ class Stage extends FlxTypedGroup<FlxBasic>
 							PlayState.instance.modchartTexts.remove(tag);
 						}
 					});
-					#end
 					stageScript.call("onCreate", []);
 					stageScript.call("onLoad", []);
 

@@ -107,7 +107,7 @@ class GameOverSubstate extends MusicBeatSubstate
 
 		var charInfo = deathName == null ? null : Character.getCharacterFile(deathName);
 		if (charInfo == null){
-			trace('"$deathName" does not exist, using default.');
+			if (PlayState.instance.showDebugTraces)trace('"$deathName" does not exist, using default.');
 
 			deathName = "generic-gameover";
 			charInfo = null;

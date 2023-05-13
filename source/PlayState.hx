@@ -145,6 +145,12 @@ class Wife3
 }
 class PlayState extends MusicBeatState
 {
+	public var showRating:Bool = true;
+	public var showCombo:Bool = false;
+	public var showComboNum:Bool = true;
+
+	public var showDebugTraces:Bool = #if debug true #else Main.showDebugTraces #end;
+
 	public static var difficulty:Int = 1; // for psych mod shit
 	public static var difficultyName:String = ''; // for psych mod shit
 	public var noteHits:Array<Float> = [];
@@ -609,8 +615,10 @@ class PlayState extends MusicBeatState
 
 			if (Paths.exists(jason))
 				metadata = cast Json.parse(Paths.getContent(jason));
-			else
-				trace("No metadata for " + SONG.song + ". Maybe add some?");
+			else{
+				if(showDebugTraces)
+					trace("No metadata for " + SONG.song + ". Maybe add some?");
+			}
 			
 		}
 
@@ -887,7 +895,9 @@ class PlayState extends MusicBeatState
 		callOnScripts("prePlayfieldCreation");
 		playerField = new PlayField(modManager);
 		playerField.modNumber = 0;
-		playerField.characters = [boyfriend];
+		playerField.characters = [];
+		for(n => ch in boyfriendMap)playerField.characters.push(ch);
+		
 		playerField.isPlayer = !playOpponent;
 		playerField.autoPlayed = !playerField.isPlayer || cpuControlled;
 		playerField.noteHitCallback = playOpponent ? opponentNoteHit : goodNoteHit;
@@ -896,7 +906,8 @@ class PlayState extends MusicBeatState
 		dadField.isPlayer = playOpponent;
 		dadField.autoPlayed = !dadField.isPlayer || cpuControlled;
 		dadField.modNumber = 1;
-		dadField.characters = [dad];
+		dadField.characters = [];
+		for(n => ch in dadMap)dadField.characters.push(ch);
 		dadField.noteHitCallback = playOpponent ? goodNoteHit : opponentNoteHit;
 
 		dad.idleWhenHold = !dadField.isPlayer;
@@ -1187,7 +1198,8 @@ class PlayState extends MusicBeatState
 					newBoyfriend.cameraPosition[1] += stageData.camera_boyfriend[1];
 
 					newBoyfriend.alpha = 0.00001;
-					playerField.characters.push(newBoyfriend);
+					if(playerField!=null)
+						playerField.characters.push(newBoyfriend);
 
 					boyfriendMap.set(newCharacter, newBoyfriend);
 					boyfriendGroup.add(newBoyfriend);
@@ -1200,8 +1212,8 @@ class PlayState extends MusicBeatState
 					var newDad:Character = new Character(0, 0, newCharacter);
 					newDad.cameraPosition[0] += stageData.camera_opponent[0];
 					newDad.cameraPosition[1] += stageData.camera_opponent[1];
-
-					dadField.characters.push(newDad);
+					if(dadField!=null)
+						dadField.characters.push(newDad);
 					dadMap.set(newCharacter, newDad);
 					dadGroup.add(newDad);
 					startCharacter(newDad, true);
@@ -1340,15 +1352,16 @@ class PlayState extends MusicBeatState
 
 		var startCntdown = callOnScripts('onStartCountdown');
 		if(startCntdown == Globals.Function_Stop){
-			trace("stop");
-			trace(startCntdown);
-			trace(Globals.Function_Stop);
 			return;
 		}
 
 		if (skipCountdown || startOnTime > 0)
 			skipArrowStartTween = true;
 
+		for(i in 0...4){
+			playerStrums.add(new StrumNote(0, 0, 0));
+			opponentStrums.add(new StrumNote(0, 0, 0));
+		}
 		/* 		
 		generateStaticArrows(0);
 		generateStaticArrows(1);
@@ -2019,10 +2032,9 @@ class PlayState extends MusicBeatState
 
 		#if(LUA_ALLOWED && PE_MOD_COMPATIBILITY)
 		for(key => script in notetypeScripts){
-			if(script.scriptType == 'lua'){
+			if(script.scriptType == 'lua')
 				script.call("onCreate");
-				trace(script.scriptName);
-			}
+			
 		}
 		#end
 		checkEventNote();
@@ -2967,7 +2979,8 @@ class PlayState extends MusicBeatState
 	}
 
 	public function triggerEventNote(eventName:String = "", value1:String = "", value2:String = "") {
-		//trace('Event: ' + eventName + ', Value 1: ' + value1 + ', Value 2: ' + value2 + ', at Time: ' + Conductor.songPosition);
+		if(showDebugTraces)
+			trace('Event: ' + eventName + ', Value 1: ' + value1 + ', Value 2: ' + value2 + ', at Time: ' + Conductor.songPosition);
 
 		switch(eventName) {
 			case 'Change Focus':
@@ -3476,9 +3489,8 @@ class PlayState extends MusicBeatState
 	var msNumber = 0;
 	var msTotal = 0.0;
 
-	private function showJudgment(image:String){
+	private function displayJudgment(image:String){
 		var rating:RatingSprite;
-
 		var time = (Conductor.stepCrochet * 0.001);
 
 		if (ClientPrefs.simpleJudge)
@@ -3531,6 +3543,7 @@ class PlayState extends MusicBeatState
 			});
 		}
 
+		rating.visible = showRating;
 		rating.loadGraphic(Paths.image(image));
 		rating.updateHitbox();
 
@@ -3542,7 +3555,7 @@ class PlayState extends MusicBeatState
 		ratingTxtGroup.add(rating);
 	}
 
-	private function showCombo(?combo:Int){
+	private function displayCombo(?combo:Int){
 		if(combo==null)combo=this.combo;
 		if (ClientPrefs.simpleJudge)
 		{
@@ -3582,6 +3595,7 @@ class PlayState extends MusicBeatState
 			numScore.loadGraphic(Paths.image('num' + i));
 
 			numScore.color = comboColor;
+			numScore.visible = showComboNum;
 			numScore.screenCenter();
 			numScore.x += ClientPrefs.comboOffset[2] + 43 * daLoop;
 			numScore.y -= ClientPrefs.comboOffset[3];
@@ -3671,9 +3685,9 @@ class PlayState extends MusicBeatState
 
 		if(show){
 			if(judgeData.hideJudge!=true)
-				showJudgment(judgeData.internalName);
+				displayJudgment(judgeData.internalName);
 			if(judgeData.comboBehaviour != IGNORE)
-				showCombo();
+				displayCombo();
 		}
 	}
 
@@ -3812,7 +3826,7 @@ class PlayState extends MusicBeatState
 		
 		var time = (Conductor.stepCrochet * 0.001);
 
-		showJudgment(daRating.image);
+		displayJudgment(daRating.image);
 		////
 		msTotal += hitTime;
 		msNumber++;
@@ -3856,7 +3870,7 @@ class PlayState extends MusicBeatState
 		}
 
 		////
-		showCombo();
+		displayCombo();
 	} */
 
 	public var strumsBlocked:Array<Bool> = [];
@@ -4129,7 +4143,7 @@ class PlayState extends MusicBeatState
 					totalNotesHit += mine?Wife3.mineWeight:Wife3.missWeight;
 			}
 			
-			if(!mine)showJudgment("miss");
+			if(!mine)displayJudgment("miss");
 			RecalculateRating();
 		} */
 

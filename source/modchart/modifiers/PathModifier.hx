@@ -72,8 +72,10 @@ class PathModifier extends NoteModifier {
       dir++;
     }
 
-    for(dir in 0...totalDists.length){
-      trace(dir, totalDists[dir]);
+		if (Main.showDebugTraces){
+      for(dir in 0...totalDists.length){
+        trace(dir, totalDists[dir]);
+      }
     }
   }
 
