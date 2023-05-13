@@ -2848,6 +2848,7 @@ class PlayState extends MusicBeatState
 		switch(charType) {
 			case 0:
 				if(boyfriend.curCharacter != name) {
+					trace("turned bf into " + name);
 					var shiftFocus:Bool = focusedChar==boyfriend;
 					var oldChar = boyfriend;
 					if(!boyfriendMap.exists(name)) {
@@ -2865,6 +2866,7 @@ class PlayState extends MusicBeatState
 
 			case 1:
 				if(dad.curCharacter != name) {
+					trace("turned dad into " + name);
 					var shiftFocus:Bool = focusedChar==dad;
 					var oldChar = dad;
 					if(!dadMap.exists(name)) {
@@ -2893,6 +2895,7 @@ class PlayState extends MusicBeatState
 				{
 					if(gf.curCharacter != name)
 					{
+						trace("turned gf into " + name);
 						var shiftFocus:Bool = focusedChar==gf;
 						var oldChar = gf;
 						if(!gfMap.exists(name))
@@ -3090,6 +3093,8 @@ class PlayState extends MusicBeatState
 						frame = curChar.animation.curAnim.curFrame;
 					}
 				}
+
+				trace(value2, charType);
 
 				changeCharacter(value2, charType);
 				if(anim!=''){

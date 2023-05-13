@@ -1,5 +1,6 @@
 package;
 
+import sowy.Sowy;
 import openfl.system.Capabilities;
 import flixel.FlxG;
 import flixel.FlxGame;
@@ -21,6 +22,10 @@ import Discord.DiscordClient;
 
 class Main extends Sprite
 {
+	public static var UserAgent:String = 'TrollEngine/${MainMenuState.engineVersion}'; // used for http requests. if you end up forking the engine and making your own then make sure to change this!!
+	public static var githubRepo = Sowy.getRepoInfo();
+	public var github:Github = new Github(githubRepo.user, githubRepo.repo);
+
 	public static var showDebugTraces:Bool = #if(SHOW_DEBUG_TRACES || debug) true #else false #end;
 	var gameWidth:Int = 1280; // Width of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var gameHeight:Int = 720; // Height of the game in pixels (might be less / more in actual pixels depending on your zoom).
@@ -93,6 +98,9 @@ class Main extends Sprite
 		////
 		ClientPrefs.loadDefaultKeys();
 
+		for (release in github.getReleases())
+			trace(release.tag_name);
+		
 		var troll = false;
 		
 		#if sys

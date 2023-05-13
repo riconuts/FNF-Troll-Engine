@@ -229,7 +229,10 @@ class JudgmentManager {
                 }
 
         }
+        // did you know if you always return UNJUDGED a note won't be hittable?
+        // i thought that was interesting
         return UNJUDGED;
+        // (aka fake notes when)
     }
 
     public var useEpics:Bool = true;

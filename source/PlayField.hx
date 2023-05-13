@@ -74,7 +74,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return super.set_cameras(to);
 	}
 
-	public var judgeManager(get, default):JudgmentManager;
+	public var judgeManager(get, default):JudgmentManager; // for deriving judgements for input reasons
 	function get_judgeManager()
 		return judgeManager == null ? PlayState.instance.judgeManager : judgeManager;
 	public var spawnedNotes:Array<Note> = []; // spawned notes
@@ -83,11 +83,11 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	public var strumNotes:Array<StrumNote> = []; // receptors
 	public var characters:Array<Character> = []; // characters that sing when field is hit
 	public var noteField:NoteField; // renderer
-	public var modNumber:Int = 0;
-	public var modManager:ModManager;
-	public var isPlayer:Bool = false;
-	public var inControl:Bool = true;
-	public var autoPlayed(default, set):Bool = false;
+	public var modNumber:Int = 0; // used for the mod manager. can be set to a different number to give it a different set of modifiers. can be set to 0 to sync the modifiers w/ bf's, and 1 to sync w/ the opponent's
+	public var modManager:ModManager; // the mod manager. will be set automatically by playstate so dw bout this
+	public var isPlayer:Bool = false; // if this playfield takes input from the player
+	public var inControl:Bool = true; // if this playfield will take input at all
+	public var autoPlayed(default, set):Bool = false; // if this playfield should be played automatically (botplay, opponent, etc)
 	function set_autoPlayed(aP:Bool){
 		for (idx in 0...keysPressed.length)
 			keysPressed[idx] = false;
@@ -98,18 +98,18 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		}
 		return autoPlayed = aP;
 	}
-	public var noteHitCallback:NoteCallback;
-	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
-	public var strumAttachments:FlxTypedGroup<NoteObject>;
+	public var noteHitCallback:NoteCallback; // function that gets called when the note is hit. goodNoteHit and opponentNoteHit in playstate for eg
+	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>; // notesplashes
+	public var strumAttachments:FlxTypedGroup<NoteObject>; // things that get "attached" to the receptors. custom splashes, etc.
 
-	public var noteMissed:Event<NoteCallback> = new Event<NoteCallback>();
-	public var noteRemoved:Event<NoteCallback> = new Event<NoteCallback>();
-	public var noteSpawned:Event<NoteCallback> = new Event<NoteCallback>();
+	public var noteMissed:Event<NoteCallback> = new Event<NoteCallback>(); // event that gets called every time you miss a note. multiple functions can be bound here
+	public var noteRemoved:Event<NoteCallback> = new Event<NoteCallback>(); // event that gets called every time a note is removed. multiple functions can be bound here
+	public var noteSpawned:Event<NoteCallback> = new Event<NoteCallback>(); // event that gets called every time a note is spawned. multiple functions can be bound here
 
-	public var keysPressed:Array<Bool> = [false,false,false,false];
+	public var keysPressed:Array<Bool> = [false,false,false,false]; // what keys are pressed rn
 
-    public function new(modMgr:ModManager){
-        super();
+	public function new(modMgr:ModManager){
+		super();
 		this.modManager = modMgr;
 
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
@@ -146,8 +146,9 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		@:privateAccess
 		retard.draw();
 		add(retard);
-     }
+	}
 
+	// queues a note to be spawned
 	public function queue(note:Note){
 		if(noteQueue[note.noteData]==null)
 			noteQueue[note.noteData] = [];
@@ -156,6 +157,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		noteQueue[note.noteData].push(note);
 	}
 
+	// unqueues a note
 	public function unqueue(note:Note)
 	{
 		if (noteQueue[note.noteData] == null)
@@ -164,7 +166,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		noteQueue[note.noteData].remove(note);
 	}
 
-
+	// destroys a note
 	public function removeNote(daNote:Note){
 		daNote.active = false;
 		daNote.visible = false;
@@ -195,6 +197,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		daNote.destroy();
 	}
 
+	// spawns a note
 	public function spawnNote(note:Note){
 		if (noteQueue[note.noteData]!=null)
 			noteQueue[note.noteData].remove(note);
@@ -217,6 +220,8 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		insert(0, note);
 	}
 
+	// gets all notes in the playfield, spawned or otherwise.
+
 	public function getAllNotes(?dir:Int){
 		var arr:Array<Note> = [];
 		if(dir==null){
@@ -234,10 +239,11 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return arr;
 	}
 	
+	// returns true if the playfield has the note, false otherwise.
 	public function hasNote(note:Note)
 		return spawnedNotes.contains(note) || noteQueue[note.noteData]!=null && noteQueue[note.noteData].contains(note);
 	
-
+	// sends an input to the playfield
 	public function input(data:Int){
 		var noteList = getNotesWithEnd(data, Conductor.songPosition + ClientPrefs.hitWindow, (note:Note) -> !note.isSustainNote); //getTapNotes(data);
 		noteList.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
@@ -254,9 +260,10 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		}
 		return null;
 	}
-    
+
+	// generates the receptors
 	public function generateStrums(){
-		for(i in 0...4){
+		for(i in 0...4){ // TODO: multikey??? idk lol
 			var babyArrow:StrumNote = new StrumNote(0, 0, i);
 			babyArrow.downScroll = ClientPrefs.downScroll;
 			babyArrow.alpha = 0;
@@ -268,6 +275,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		}
 	}
 
+	// does the introduction thing for the receptors. story mode usually sets skip to true. OYT uses this when mario comes in
 	public function fadeIn(skip:Bool = false)
 	{
 		for (data in 0...strumNotes.length)
@@ -285,10 +293,13 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		}
 	}
 
+	// just sorts by z indexes, not used anymore tho
 	function sortByOrderNote(Obj1:Note, Obj2:Note):Int
 	{
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.zIndex, Obj2.zIndex);
 	}
+
+	// spawns a notesplash w/ specified skin. optional note to derive the skin and colours from.
 
 	public function spawnSplash(data:Int, splashSkin:String, ?note:Note){
 		var skin:String = splashSkin;
@@ -311,6 +322,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return splash;
 	}
 
+	// spawns notes, deals w/ hold inputs, etc.
 	override public function update(elapsed:Float){
 		noteField.modNumber = modNumber;
 		noteField.cameras = cameras;
@@ -381,7 +393,8 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 						if(isHeld)
 							daNote.tripTimer = 1;
 						else
-							daNote.tripTimer -= elapsed / regrabTime; // TODO: regrab time multiplier in options
+							daNote.tripTimer -= elapsed / regrabTime; // NOTDO: regrab time multiplier in options
+						// RE: nvm its done by the judge diff instead
 
 						if(daNote.tripTimer <= 0){
 							daNote.tripTimer = 0;
@@ -415,7 +428,6 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 			// check for note deletion
 			if (daNote.garbage)
 			{
-				//removeNote(daNote);
 				garbage.push(daNote);
 				continue;
 			}
@@ -462,6 +474,8 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		}
 	}
 
+	// gets all living notes w/ optional filter
+
 	public function getNotes(dir:Int, ?filter:Note->Bool):Array<Note>
 	{
 		if (spawnedByData[dir]==null)
@@ -479,6 +493,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return collected;
 	}
 
+	// gets all living notes before a certain time w/ optional filter
 	public function getNotesWithEnd(dir:Int, end:Float, ?filter:Note->Bool):Array<Note>
 	{
 		if (spawnedByData[dir] == null)
@@ -501,6 +516,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.strumTime, Obj2.strumTime);
 	}
 
+	// go through every queued note and call a func on it
 	public function forEachQueuedNote(callback:Note->Void)
 	{
 		for(column in noteQueue){
@@ -517,6 +533,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		}
 	}
 
+	// as is in the name, removes all dead notes
 	public function clearDeadNotes(){
 		var dead:Array<Note> = [];
 		for(note in spawnedNotes){
@@ -597,8 +614,12 @@ class NoteField extends FlxObject
 	var curDecStep:Float = 0;
 	var curDecBeat:Float = 0;
 
+	/*
+	* The position of every receptor for a given frame.
+	*/
 	public var strumPositions:Array<Vector3> = [];
 
+	// does all the drawing logic, best not to touch unless you know what youre doing
     override function draw(){
 		if(!visible)return; // dont draw if visible = false
 		if((FlxG.state is MusicBeatState)){
@@ -647,6 +668,7 @@ class NoteField extends FlxObject
 		var drawing:Array<RenderObject> = []; // stuff to render
 		var lookupMap:Map<Any, RenderObject> = [];
 
+		// draw the receptors
 		for (obj in field.strumNotes)
 		{
 			if (!obj.alive || !obj.visible)
@@ -661,6 +683,7 @@ class NoteField extends FlxObject
 			drawing.push(object);
 		}
 
+		// draw tap notes
 		for (note in taps){
 			if (!note.alive || !note.visible)
 				continue;
@@ -671,6 +694,7 @@ class NoteField extends FlxObject
 			drawing.push(object);
 		}
 
+		// draw hold notes (credit to 4mbr0s3 2)
 		for (note in holds)
 		{
 			if (!note.alive || !note.visible)
@@ -683,6 +707,7 @@ class NoteField extends FlxObject
 			drawing.push(object);
 		}
 
+		// draw notesplashes
 		for (obj in field.grpNoteSplashes.members)
 		{
 			if (!obj.alive || !obj.visible)
@@ -696,6 +721,7 @@ class NoteField extends FlxObject
 			drawing.push(object);
 		}
 		
+		// draw strumattachments
 		for (obj in field.strumAttachments.members)
 		{
 			if(obj==null)continue;
@@ -713,6 +739,7 @@ class NoteField extends FlxObject
 		if((FlxG.state is PlayState))
 			PlayState.instance.callOnHScripts("playfieldDraw", [this], ["drawing" => drawing, "lookupMap" => lookupMap]); // lets you do custom rendering in scripts, if needed
 		// one example would be reimplementing Die Batsards' original bullet mechanic
+		// if you need an example on how this all works just look at the tap note drawing portion
 
 		drawing.sort(function(Obj1:RenderObject, Obj2:RenderObject)
 		{
@@ -721,6 +748,7 @@ class NoteField extends FlxObject
 
 		super.draw();
 
+		// actually draws everything
 		if(drawing.length>0){
 			for (object in drawing)
 			{
