@@ -1,3 +1,3 @@
-Tails Gets Trolled: Polished
+# Friday Night Funkin': Troll Engine
 
-This is the engine used for the Friday Night Funkin': Tails Gets Trolled Polished mod, it is basically just Psych Engine with some features from Andromeda Engine.
+Troll Engine is the fork of [Psych Engine](https://github.com/ShadowMario/FNF-PsychEngine) that's used on the [Tails Gets Trolled mod](https://gamebanana.com/mods/320596).
