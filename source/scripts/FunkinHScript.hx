@@ -327,6 +327,7 @@ class FunkinHScript extends FunkinScript
 		catch (e:haxe.Exception)
 		{
 			haxe.Log.trace(e.message, interpreter.posInfos());
+			stop();
 		}
 		return null;
 	}

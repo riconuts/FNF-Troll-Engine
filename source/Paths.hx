@@ -370,6 +370,15 @@ class Paths
 	// completely rewritten asset loading? fuck!
 	public static var currentTrackedAssets:Map<String, FlxGraphic> = [];
 
+	public static function getGraphic(path:String):FlxGraphic
+	{
+		#if html5
+		return FlxG.bitmap.add(path, false, path);
+		#elseif sys
+		return FlxGraphic.fromBitmapData(BitmapData.fromFile(path), false, path);
+		#end
+	}
+
 	public static function returnGraphic(key:String, ?library:String)
 	{
 		#if MODS_ALLOWED
@@ -377,7 +386,7 @@ class Paths
 		if (FileSystem.exists(modKey))
 		{
 			if (!currentTrackedAssets.exists(modKey)){
-				var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(modKey), false, modKey);
+				var newGraphic:FlxGraphic = getGraphic(modKey);
 				newGraphic.persist = true;
 				currentTrackedAssets.set(modKey, newGraphic);
 			}
@@ -391,7 +400,7 @@ class Paths
 		{
 			if (!currentTrackedAssets.exists(path))
 			{
-				var newGraphic:FlxGraphic = FlxG.bitmap.add(path, false, path);
+				var newGraphic:FlxGraphic = getGraphic(path);
 				newGraphic.persist = true;
 				currentTrackedAssets.set(path, newGraphic);
 			}

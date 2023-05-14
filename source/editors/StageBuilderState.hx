@@ -1,5 +1,9 @@
 package editors;
 
+import openfl.net.FileReference;
+import openfl.events.Event;
+import openfl.events.IOErrorEvent;
+
 import flixel.util.FlxColor;
 import flixel.group.FlxSpriteGroup;
 import flixel.addons.ui.FlxUINumericStepper;
@@ -835,7 +839,7 @@ class StageBuilderState extends MusicBeatState
         FlxG.stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown, false, -1);
         FlxG.stage.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove, false, -1);
         FlxG.stage.addEventListener(MouseEvent.MOUSE_UP, onMouseUp, false, -1);
-        FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown, false, -1);
+        FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown, false, 100000);
     }
     override public function destroy(){
         FlxG.stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown, false);
@@ -846,7 +850,17 @@ class StageBuilderState extends MusicBeatState
         super.destroy();
     }
 
-    function exportStageScript(){
+    function onKeyDown(e:KeyboardEvent){
+        if (e.ctrlKey && e.keyCode == FlxKey.S){
+            e.altKey ? exportLuaStage() : exportHScriptStage();
+
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            e.preventDefault();
+        }
+    }
+
+    function exportHScriptStage(){
         var script = "function onLoad(){";
 
         var sprNum = 0;
@@ -867,19 +881,65 @@ class StageBuilderState extends MusicBeatState
 
         script += "\n}";
 
+        ////
         Sys.println("STAGE SCRIPT START:");
         Sys.println(script);
         Sys.println("STAGE SCRIPT END.");
 
-        // save prompt
-
+        saveFile(script, "stage.hscript");     
     }
 
-    function onKeyDown(e:KeyboardEvent){
-        if (e.ctrlKey && e.keyCode == FlxKey.E)
-            exportStageScript();
+    function exportLuaStage(){
+        var script = "function onCreate()";
+
+        var sprNum = 0;
+        for (obj in objectArray)
+        {
+            makeObjSafe(obj);
+
+            ////
+            if (sprNum > 0) script += '\n';
+            var varName:String = "spr" + ++sprNum; //obj.name.replace('/', '_').replace("\\", '_').replace(" ", '_');
+
+            var properties = obj.properties;
+
+            script += '\n   makeLuaSprite("$varName", "${obj.name}", ${properties.x}, ${properties.y});';
+            script += '\n   setScrollFactor("$varName", ${properties.scrollX}, ${properties.scrollY});';
+            script += '\n   scaleObject("$varName", ${properties.scaleX}, ${properties.scaleY}, true);';
+            script += '\n   addLuaSprite("$varName", ${obj.onForeground});';
+        }
+
+        script += "\nend";
+
+        ////
+        Sys.println("STAGE SCRIPT START:");
+        Sys.println(script);
+        Sys.println("STAGE SCRIPT END.");
+
+        saveFile(script, "stage.lua");       
     }
 
+    static var _file:FileReference;
+    static function saveFile(?data:String, ?name:String){
+        if (data == null)
+            data = "";
+        if (name == null)
+            name = "unknown";
+
+        _file = new FileReference();
+        _file.addEventListener(Event.COMPLETE, onSaveEnd);
+        _file.addEventListener(Event.CANCEL, onSaveEnd);
+        _file.addEventListener(IOErrorEvent.IO_ERROR, onSaveEnd);
+        _file.save(data, name);
+    }
+    static function onSaveEnd(?e){
+        _file.removeEventListener(Event.COMPLETE, onSaveEnd);
+		_file.removeEventListener(Event.CANCEL, onSaveEnd);
+		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveEnd);
+		_file = null;
+    }
+
+    /////
     var holdInfo:Null<{x:Int, y:Int}> = null;
     function onMouseDown(e) {
         holdInfo = {x: FlxG.mouse.screenX, y: FlxG.mouse.screenY};
