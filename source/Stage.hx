@@ -223,8 +223,8 @@ class Stage extends FlxTypedGroup<FlxBasic>
 					stageScript.call("onLoad", []);
 
 					break;
-				#end
-				}				
+				}	
+				#end			
 			}
 		#if LUA_ALLOWED
 		}

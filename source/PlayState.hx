@@ -220,6 +220,8 @@ class PlayState extends MusicBeatState
 	public var songSpeedType:String = "multiplicative";
 	public var noteKillOffset:Float = 350;
 
+	public var playbackRate(default, default):Float = 1;
+
 	public static var curStage:String = '';
 	public static var SONG:SwagSong = null;
 	public static var isStoryMode:Bool = false;
@@ -545,6 +547,7 @@ class PlayState extends MusicBeatState
 		ratingsData.push(rating);
  */
 		// Gameplay settings
+		playbackRate = ClientPrefs.getGameplaySetting('songspeed', 1);
 		healthGain = ClientPrefs.getGameplaySetting('healthgain', 1);
 		healthLoss = ClientPrefs.getGameplaySetting('healthloss', 1);
 		playOpponent = ClientPrefs.getGameplaySetting('opponentPlay', false);
@@ -1580,18 +1583,19 @@ class PlayState extends MusicBeatState
 		previousFrameTime = FlxG.game.ticks;
 		//lastReportedPlayheadPosition = 0;
 
-		var speedMult = 1;
-
-		FlxG.timeScale = speedMult;
+		FlxG.timeScale = playbackRate;
 
 		FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song), 1, false);
-		FlxG.sound.music.pitch = speedMult;
-		FlxG.sound.music.onComplete = function(){finishSong(false);};
+		FlxG.sound.music.pitch = playbackRate;
+		FlxG.sound.music.onComplete = function(){
+			trace("song ended!?");
+			finishSong(false);
+		};
 		vocals.play();
-		vocals.pitch = speedMult;
+		vocals.pitch = playbackRate;
 		for (track in tracks){
 			track.play();
-			track.pitch = speedMult;
+			track.pitch = playbackRate;
 		}
 
 		if(startOnTime > 0)
@@ -4615,7 +4619,9 @@ class PlayState extends MusicBeatState
 			setOnScripts('stepCrochet', Conductor.stepCrochet);
 		}
 		
+		#if LUA_ALLOWED
 		setOnLuas("curSection", sectionNumber);
+		#end
 		setOnHScripts("curSection", curSection);
 		setOnScripts('sectionNumber', sectionNumber);
 
