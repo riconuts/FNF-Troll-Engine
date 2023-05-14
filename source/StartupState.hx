@@ -1,6 +1,5 @@
-import haxe.io.Path;
+import openfl.events.KeyboardEvent;
 import sys.FileSystem;
-import OldMainMenuState.MainMenuButton;
 import Github.Release;
 import flixel.FlxG;
 import flixel.tweens.FlxEase;
@@ -118,6 +117,25 @@ class StartupState extends FlxState
 		persistentUpdate = true;
 
 		FlxG.fixedTimestep = false;
+
+		#if (windows || linux) // I have no idea if this also applies to other targets
+		FlxG.stage.addEventListener(
+			KeyboardEvent.KEY_DOWN, 
+			(e)->{
+				// Prevent flixel from listening to key inputs when switching fullscreen mode
+				if (e.keyCode == FlxKey.ENTER && e.altKey)
+					e.stopImmediatePropagation();
+
+				// Also add F11 to switch fullscreen mode :D
+				if (e.keyCode == FlxKey.F11){
+					FlxG.fullscreen = !FlxG.fullscreen;
+					e.stopImmediatePropagation();
+				}
+			}, 
+			false, 
+			100
+		);
+		#end
 	}
 
 	private var warning:FlxSprite;
