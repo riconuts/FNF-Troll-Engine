@@ -233,6 +233,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			[
 				"Gameplay", 
 				[
+					"downScroll",
 					"ghostTapping", 
 					"directionalCam", 
 					"noteOffset", 
@@ -308,6 +309,13 @@ class OptionsSubstate extends MusicBeatSubstate
 			]
 		],
 		"Controls" => [["Keyboard", ["customizeKeybinds",]], ["Controller", ["controllerMode",]]],
+		#if DO_AUTO_UPDATE
+		"Updating" => [
+			[
+				"Updating", ["downloadBetas", "checkForUpdates"]
+			]
+		]
+		#end
 		/* "Accessibility" => [
 				[
 					"Gameplay", 

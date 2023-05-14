@@ -25,8 +25,8 @@ class ZSprite extends FlxSprite
 }
 
 class MainMenuState extends MusicBeatState {
-	public static var engineVersion:String = '0.1'; // This is also used for Discord RPC
-
+	public static var engineVersion:String = '0.1.1'; // This is also used for Discord RPC
+	public static var beta:Bool = true;
 	final optionShit:Array<String> = [
 		'story_mode',
  		'freeplay',

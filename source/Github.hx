@@ -29,7 +29,7 @@ typedef Asset = {
 	var id:Int;
 	var node_id:String;
     var name:String;
-    var label:String;
+    @:optional var label:String;
     var uploader:User;
 	var content_type:String;
 	var state:String;
@@ -68,6 +68,7 @@ typedef Release = {
 	var prerelease:Bool;
 	var created_at:String;
 	var published_at:String;
+	var assets:Array<Asset>;
 	var tarball_url:String;
 	var zipball_url:String;
 	var body:String;
@@ -81,16 +82,18 @@ typedef Release = {
 }
 
 class Github {
+	static var redirects:Array<Int> = [
+		301, 302, 308
+	];
     static var baseURL:String = 'https://api.github.com/repos';
     static var defaultUser = Main.githubRepo.user;
     static var defaultRepo = Main.githubRepo.repo;
-    var requestURL:String = '';
+    public var requestURL:String = '';
     public function new(?user:String, ?repo:String){ 
         if(user == null)user = defaultUser;
 		if (repo == null)repo = defaultRepo;
 		requestURL = '$baseURL/$user/$repo';
-     } // TODO: maybe make it so you can specify token n shit
-    // rn doesnt matter tho cus this'll only be used for gathering releases for troll engine
+     }
     
     /*
 	 * Gets all releases within the repo
@@ -133,6 +136,14 @@ class Github {
         return returnedReleases;
     }
 
+	/*
+	 * Sends a GET request to a specified API endpoint.
+	 *
+	 * @param   endpoint				The API endpoint to send a request to.
+	 * @param	headers					A list of headers to be sent with the request.
+	 * @param	params					A list of parameters to be sent with the request.
+	 * @param	retType					What you want from the request, raw bytes or a string.
+	 */
     public function get(endpoint:String, ?headers:Map<String, Dynamic>, ?params:Map<String, Dynamic>, ?retType:HttpReturnType){
 		if (retType == null)
 			retType = DATA;
@@ -180,11 +191,13 @@ class Github {
 		var tryRequest:Bool = true;
 		daRequest.onStatus = function(code:Dynamic)
 		{
-			if (code == 301 && daRequest.responseHeaders.exists("Location")){
+			if (redirects.contains(code) && daRequest.responseHeaders.exists("Location")){
 				daRequest.url = daRequest.responseHeaders.get("Location");
 				trace("redirecT?? gonna try requesting " + daRequest.url);
 				tryRequest = true;
-			}
+			}else if(redirects.contains(code))
+				trace("redirect with no location wtf??");
+			
 		}
 
 		while (tryRequest){
@@ -194,6 +207,16 @@ class Github {
 		return returned;
     }
 
+	/*
+	 * Sends a POST request to a specified API endpoint.
+	 *
+	 * @param   endpoint				The API endpoint to send a request to.
+	 * @param	post					The data to post to the endpoint
+	 * @param	postType				How the data should be sent, as a string or as raw bytes.
+	 * @param	headers					A list of headers to be sent with the request.
+	 * @param	params					A list of parameters to be sent with the request.
+	 * @param	retType					What you want from the request, raw bytes or a string.
+	 */
 	public function post(endpoint:String, post:Dynamic, ?postType:HttpReturnType, ?headers:Map<String, Dynamic>, ?params:Map<String, Dynamic>, ?retType:HttpReturnType)
 	{
 		if (postType == null)
@@ -247,7 +270,25 @@ class Github {
             throw e;
         }
 
-        daRequest.request(true);
+		var tryRequest:Bool = true;
+		daRequest.onStatus = function(code:Dynamic)
+		{
+			if (redirects.contains(code) && daRequest.responseHeaders.exists("Location"))
+			{
+				daRequest.url = daRequest.responseHeaders.get("Location");
+				trace("redirecT?? gonna try requesting " + daRequest.url);
+				tryRequest = true;
+			}
+			else if (redirects.contains(code))
+				trace("redirect but the code doesnt have a location, weird!!");
+			
+		}
+
+		while (tryRequest)
+		{
+			tryRequest = false;
+			daRequest.request(true);
+		}
 
 		return returned;
 	}

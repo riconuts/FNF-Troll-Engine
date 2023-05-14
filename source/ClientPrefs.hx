@@ -478,7 +478,22 @@ class ClientPrefs
 				desc: "Lets you change your controls. Pretty straight forward, huh?",
 				type: Button,
 				data: []
+			},
+			"downloadBetas" => {
+				display: "Download Betas",
+				desc: "Lets the engine's auto-updater prompt you to update to beta versions of the engine when available.",
+				type: Toggle,
+				value: false,
+				data: []
+			},
+			"checkForUpdates" => {
+				display: "Check for Updates",
+				desc: "Lets the engine's auto-updater check for engine updates and prompt you to update when available.",
+				type: Toggle,
+				value: true,
+				data: []
 			}
+			
 		];
 	}
 
@@ -666,6 +681,8 @@ class ClientPrefs
 			FlxG.drawFramerate = Math.floor(framerate);
 			FlxG.updateFramerate = Math.floor(framerate);
 		}
+
+		Main.downloadBetas = Main.downloadBetas || ClientPrefs.downloadBetas;
 
 	}
 

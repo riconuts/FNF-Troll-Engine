@@ -43,8 +43,6 @@ class OptionsState extends MusicBeatState {
 		if (!transitoned){
 			transitoned = true;
 			transCamera = daSubstate.transCamera;
-/* 			bg.cameras = [FlxG.cameras.list[0]];
-			backdrop.cameras = [FlxG.cameras.list[0]]; */
 		    doDaInTrans();
         }
     }

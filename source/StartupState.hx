@@ -1,3 +1,7 @@
+import haxe.io.Path;
+import sys.FileSystem;
+import OldMainMenuState.MainMenuButton;
+import Github.Release;
 import flixel.FlxG;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
@@ -9,6 +13,8 @@ import Discord.DiscordClient;
 import lime.app.Application;
 #end
 
+using StringTools;
+
 // Loads the title screen, alongside some other stuff.
 
 class StartupState extends FlxState
@@ -18,12 +24,22 @@ class StartupState extends FlxState
 	public static var volumeUpKeys:Array<FlxKey> = [FlxKey.NUMPADPLUS, FlxKey.PLUS];
 
 	static var loaded = false;
+	static var recentRelease:Release;
 
+	static function clearTemps(dir:String){
+		trace("clearing temps from " + dir);
+		for(file in FileSystem.readDirectory(dir)){
+			var file = './$dir/$file';
+			if(FileSystem.isDirectory(file))
+				clearTemps(file);
+			else if (file.endsWith(".tempcopy"))
+				FileSystem.deleteFile(file);
+		}
+	}
 	public static function load():Void
 	{
 		if (loaded)
 			return;
-
 		loaded = true;
 
 		#if html5
@@ -64,6 +80,26 @@ class StartupState extends FlxState
 		if (FlxG.save.data.weekCompleted != null)
 			StoryMenuState.weekCompleted = FlxG.save.data.weekCompleted;
 
+		#if DO_AUTO_UPDATE
+		if (ClientPrefs.checkForUpdates){
+			var github:Github = new Github();
+			recentRelease = github.getReleases((release:Release) -> {
+				return (Main.downloadBetas || !release.prerelease);
+			})[0];
+
+			if (FlxG.save.data.ignoredUpdates==null){
+				FlxG.save.data.ignoredUpdates=[];
+				FlxG.save.flush();
+			}
+			if (recentRelease != null && FlxG.save.data.ignoredUpdates.contains(recentRelease.prerelease?"b":"" + recentRelease.tag_name))
+			{
+				recentRelease = null;
+			}
+		}
+		#end
+
+		clearTemps("./");
+		
 		#if desktop
 		if (!DiscordClient.isInitialized){
 			DiscordClient.initialize();
@@ -77,9 +113,6 @@ class StartupState extends FlxState
 
 	public function new(){
 		super();
-		
-		FlxTransitionableState.skipNextTransIn = true;
-		FlxTransitionableState.skipNextTransOut = true;
 
 		persistentDraw = true;
 		persistentUpdate = true;
@@ -114,7 +147,17 @@ class StartupState extends FlxState
 				step = 2;
 			case 2:
  				FlxTween.tween(warning, {alpha: 0}, 1, {ease: FlxEase.expoIn, onComplete: function(twn){
-					MusicBeatState.switchState(new TitleState());
+					#if DO_AUTO_UPDATE
+						if (recentRelease != null
+							&& MainMenuState.engineVersion < recentRelease.tag_name) // if current version is < the recent release
+						MusicBeatState.switchState(new UpdaterState(recentRelease)) // UPDATE!!
+					else
+					#end
+					{
+						FlxTransitionableState.skipNextTransIn = true;
+						FlxTransitionableState.skipNextTransOut = true;
+						MusicBeatState.switchState(new TitleState());
+					}	
 				}});
 				step = 3; 
 
