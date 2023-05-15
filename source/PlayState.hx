@@ -232,6 +232,7 @@ class PlayState extends MusicBeatState
 
 	public var tracks:Array<FlxSound> = [];
 	public var vocals:FlxSound;
+	public var inst:FlxSound;
 
 	public var dad:Character = null;
 	public var gf:Character = null;
@@ -1553,13 +1554,13 @@ class PlayState extends MusicBeatState
 	{
 		if(time < 0) time = 0;
 
-		FlxG.sound.music.pause();
+		inst.pause();
 		vocals.pause();
 		for (track in tracks)
 			track.pause();
 
-		FlxG.sound.music.time = time;
-		FlxG.sound.music.play();
+		inst.time = time;
+		inst.play();
 
 		vocals.time = time;
 		vocals.play();
@@ -1585,19 +1586,20 @@ class PlayState extends MusicBeatState
 
 		FlxG.timeScale = playbackRate;
 
-		FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song), 1, false);
-		FlxG.sound.music.pitch = playbackRate;
-		FlxG.sound.music.onComplete = function(){
+		inst.pitch = playbackRate;
+		inst.onComplete = function(){
 			trace("song ended!?");
 			finishSong(false);
 		};
-		vocals.play();
+		
 		vocals.pitch = playbackRate;
 		for (track in tracks){
 			track.play();
 			track.pitch = playbackRate;
 		}
 
+		vocals.play();
+		inst.play();
 		if(startOnTime > 0)
 		{
 			setSongTime(startOnTime - 500);
@@ -1606,16 +1608,18 @@ class PlayState extends MusicBeatState
 
 		if(paused) {
 			//trace('Oopsie doopsie! Paused sound');
-			FlxG.sound.music.pause();
+			inst.pause();
 			vocals.pause();
 			for (track in tracks)
 				track.play();
 		}
 
 		// Song duration in a float, useful for the time left feature
-		songLength = FlxG.sound.music.length;
+		songLength = inst.length;
 		hud.songLength = songLength;
 		hud.songStarted();
+
+		resyncVocals();
 
 		#if desktop
 		// Updating Discord Rich Presence (with Time Left)
@@ -1712,12 +1716,14 @@ class PlayState extends MusicBeatState
 
 		curSong = songData.song;
 
-		FlxG.sound.list.add(new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.song)));
+		//FlxG.sound.list.add(new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.song)));
+		inst = new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.song));
 
 		if (SONG.needsVoices)
 			vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.song));
 		else
 			vocals = new FlxSound();
+		FlxG.sound.list.add(inst);
 		FlxG.sound.list.add(vocals);
 
 		if (SONG.extraTracks != null){
@@ -2331,9 +2337,9 @@ class PlayState extends MusicBeatState
 	{
 		if (paused)
 		{
-			if (FlxG.sound.music != null)
+			if (inst != null)
 			{
-				FlxG.sound.music.pause();
+				inst.pause();
 				vocals.pause();
 				for (track in tracks)
 					track.pause();
@@ -2369,7 +2375,7 @@ class PlayState extends MusicBeatState
 	{
 		if (paused)
 		{
-			if (FlxG.sound.music != null && !startingSong)
+			if (inst != null && !startingSong)
 				resyncVocals();
 
 			if (startTimer != null && !startTimer.finished)
@@ -2501,12 +2507,14 @@ class PlayState extends MusicBeatState
 		if(finishTimer != null || transitioning)
 			return;
 
+		if(showDebugTraces)
+			trace("resync vocals!!");
 		vocals.pause();
 		for (track in tracks)
 			track.pause();
 
-		FlxG.sound.music.play();
-		Conductor.songPosition = FlxG.sound.music.time;
+		inst.play();
+		Conductor.songPosition = inst.time;
 
 		vocals.time = Conductor.songPosition;
 		vocals.play();
@@ -2547,7 +2555,7 @@ class PlayState extends MusicBeatState
 
 		callOnScripts('onUpdate', [elapsed]);
 
-		if (FlxG.sound.music.playing && !inCutscene && health > healthDrain)
+		if (inst.playing && !inCutscene && health > healthDrain)
 		{
 			health -= healthDrain * (elapsed / (1/60));
 		}
@@ -2646,7 +2654,7 @@ class PlayState extends MusicBeatState
 			if (!startingSong #if !debug && chartingMode #end){
 				if (FlxG.keys.justPressed.ONE) {
 					KillNotes();
-					FlxG.sound.music.onComplete();
+					inst.onComplete();
 				}else if(FlxG.keys.justPressed.TWO) { //Go 10 seconds into the future :O
 					setSongTime(Conductor.songPosition + 10000);
 					clearNotesBefore(Conductor.songPosition);
@@ -2682,16 +2690,17 @@ class PlayState extends MusicBeatState
 		if (startedCountdown)
 		{
 			var addition:Float = elapsed * 1000;
-			if(FlxG.sound.music.playing){
-				if(FlxG.sound.music.time == Conductor.lastSongPos)
+			if(inst.playing){
+				if(inst.time == Conductor.lastSongPos)
 					resyncTimer += addition;
 				else
 					resyncTimer = 0;
 				
-				Conductor.songPosition = FlxG.sound.music.time + resyncTimer;
-				Conductor.lastSongPos = FlxG.sound.music.time;
-				if (Math.abs(vocals.time - FlxG.sound.music.time) > 25)
-					vocals.time = FlxG.sound.music.time;
+				Conductor.songPosition = inst.time + resyncTimer;
+				Conductor.lastSongPos = inst.time;
+				if (Math.abs(vocals.time - inst.time) > 25){
+					resyncVocals();
+				}
 				
 			}else
 				Conductor.songPosition += addition;
@@ -2730,7 +2739,7 @@ class PlayState extends MusicBeatState
 				if(field.isPlayer){
 					for(char in field.characters){
 						if (char.animation.curAnim != null
-							&& char.holdTimer > Conductor.stepCrochet * (0.0011 / FlxG.sound.music.pitch) * char.singDuration
+							&& char.holdTimer > Conductor.stepCrochet * (0.0011 / inst.pitch) * char.singDuration
 								&& char.animation.curAnim.name.startsWith('sing')
 								&& !char.animation.curAnim.name.endsWith('miss')
 								&& (char.idleWhenHold || !pressedGameplayKeys.contains(true)))
@@ -2788,7 +2797,7 @@ class PlayState extends MusicBeatState
 				paused = true;
 
 				vocals.stop();
-				FlxG.sound.music.stop();
+				inst.stop();
 				for (track in tracks)
 					track.stop();
 
@@ -3214,8 +3223,8 @@ class PlayState extends MusicBeatState
 
 		updateTime = false;
 
-		FlxG.sound.music.volume = 0;
-		FlxG.sound.music.pause();
+		inst.volume = 0;
+		inst.pause();
 
 		vocals.volume = 0;
 		vocals.pause();
@@ -3372,7 +3381,7 @@ class PlayState extends MusicBeatState
 					*/
 
 					cancelMusicFadeTween();
-					FlxG.sound.music.stop();
+					inst.stop();
 
 					function playNextSong(){
 						PlayState.SONG = Song.loadFromJson(nextSong, nextSong);
@@ -4525,11 +4534,11 @@ class PlayState extends MusicBeatState
 		super.destroy();
 	}
 
-	public static function cancelMusicFadeTween() {
-		if(FlxG.sound.music.fadeTween != null) {
-			FlxG.sound.music.fadeTween.cancel();
+	public function cancelMusicFadeTween() {
+/* 		if(inst.fadeTween != null) {
+			inst.fadeTween.cancel();
 		}
-		FlxG.sound.music.fadeTween = null;
+		inst.fadeTween = null; */
 	}
 
 	#if LUA_ALLOWED
@@ -4881,9 +4890,9 @@ class PlayState extends MusicBeatState
 
 				// 0 chance for Gitaroo Man easter egg
 
-				if(FlxG.sound.music != null) 
+				if(inst != null) 
 				{
-					FlxG.sound.music.pause();
+					inst.pause();
 					vocals.pause();
 					for (track in tracks)
 						track.pause();

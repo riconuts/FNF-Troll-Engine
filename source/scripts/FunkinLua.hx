@@ -1113,7 +1113,7 @@ class FunkinLua extends FunkinScript
 				FlxTransitionableState.skipNextTransOut = true;
 			}
 
-			PlayState.cancelMusicFadeTween();
+			PlayState.instance.cancelMusicFadeTween();
 			CustomFadeTransition.nextCamera = PlayState.instance.camOther;
 			if(FlxTransitionableState.skipNextTransIn)
 				CustomFadeTransition.nextCamera = null;

@@ -322,7 +322,7 @@ class PauseSubState extends MusicBeatSubstate
 						} else {
 							MusicBeatState.switchState(new FreeplayState());
 						}
-						PlayState.cancelMusicFadeTween();
+						PlayState.instance.cancelMusicFadeTween();
 
 						MusicBeatState.playMenuMusic(true);
 						
