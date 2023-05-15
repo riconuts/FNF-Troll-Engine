@@ -180,7 +180,8 @@ class FreeplayState extends MusicBeatState
 						}
 						var songButton = addSong(song[0], null, mod, false, displayName);
 						setupButtonCallbacks(songButton);
-						var daDiffs:Array<String> = theJson.difficulties.split(",");
+
+						var daDiffs:Array<String> = theJson.difficulties == null ? [] : theJson.difficulties.split(",");					
 						if (daDiffs.length == 0 || daDiffs[0].trim() == '')
 							daDiffs = ["Easy", "Normal", "Hard"];
 
