@@ -151,6 +151,8 @@ class OptionsSubstate extends MusicBeatSubstate
 					Main.fpsVar.visible = val;
 			case 'globalAntialising':
 				FlxSprite.defaultAntialiasing = ClientPrefs.globalAntialiasing;
+			case 'downloadBetas':
+				Main.downloadBetas = MainMenuState.beta || ClientPrefs.downloadBetas;
 			default:
 				// nothing
 		}

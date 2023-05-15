@@ -481,7 +481,7 @@ class ClientPrefs
 			},
 			"downloadBetas" => {
 				display: "Download Betas",
-				desc: "Lets the engine's auto-updater prompt you to update to beta versions of the engine when available.",
+				desc: "Lets the engine's auto-updater prompt you to update to beta versions of the engine when available.\nNOTE: While on a beta build, this will always be on, regardless of this option.",
 				type: Toggle,
 				value: false,
 				data: []
@@ -682,7 +682,7 @@ class ClientPrefs
 			FlxG.updateFramerate = Math.floor(framerate);
 		}
 
-		Main.downloadBetas = Main.downloadBetas || ClientPrefs.downloadBetas;
+		Main.downloadBetas = MainMenuState.beta || ClientPrefs.downloadBetas;
 
 	}
 

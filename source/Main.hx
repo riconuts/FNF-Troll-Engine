@@ -24,7 +24,7 @@ class Main extends Sprite
 {
 	public static var UserAgent:String = 'TrollEngine/${MainMenuState.engineVersion}'; // used for http requests. if you end up forking the engine and making your own then make sure to change this!!
 	public static var githubRepo = Sowy.getRepoInfo();
-	public static var downloadBetas:Bool = MainMenuState.beta; // TODO: make this an option
+	public static var downloadBetas:Bool = MainMenuState.beta;
 	public static var showDebugTraces:Bool = #if(SHOW_DEBUG_TRACES || debug) true #else false #end;
 	var gameWidth:Int = 1280; // Width of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var gameHeight:Int = 720; // Height of the game in pixels (might be less / more in actual pixels depending on your zoom).
