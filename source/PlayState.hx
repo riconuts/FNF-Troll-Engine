@@ -1576,7 +1576,7 @@ class PlayState extends MusicBeatState
 	var previousFrameTime:Int = 0;
 	//var lastReportedPlayheadPosition:Int = 0;
 	var songTime:Float = 0;
-
+	var vocalsEnded:Bool = false;
 	function startSong():Void
 	{
 		startingSong = false;
@@ -1590,6 +1590,11 @@ class PlayState extends MusicBeatState
 		inst.onComplete = function(){
 			trace("song ended!?");
 			finishSong(false);
+		};
+
+		vocals.onComplete = function(){
+			vocalsEnded = true;
+			vocals.volume = 0; // just so theres no like vocal restart stuff at the end of the song lol
 		};
 		
 		vocals.pitch = playbackRate;
@@ -2516,7 +2521,7 @@ class PlayState extends MusicBeatState
 		inst.play();
 		Conductor.songPosition = inst.time;
 
-		vocals.time = Conductor.songPosition;
+		vocals.time = vocalsEnded ? vocals.length : Conductor.songPosition;
 		vocals.play();
 		for (track in tracks){
 			track.time = Conductor.songPosition;
@@ -2698,7 +2703,7 @@ class PlayState extends MusicBeatState
 				
 				Conductor.songPosition = inst.time + resyncTimer;
 				Conductor.lastSongPos = inst.time;
-				if (Math.abs(vocals.time - inst.time) > 25){
+				if (Math.abs(vocals.time - inst.time) > 25 && !vocalsEnded){
 					resyncVocals();
 				}
 				
@@ -4243,7 +4248,7 @@ class PlayState extends MusicBeatState
 		}
 
 		if (SONG.needsVoices)
-			vocals.volume = 1;
+			vocals.volume = vocalsEnded?0:1;
 
 		if (note.visible){
 			var time:Float = 0.15;
@@ -4438,7 +4443,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 		note.wasGoodHit = true;
-		vocals.volume = 1;
+		vocals.volume = vocalsEnded?0:1;
 
 		// Script shit
 		callOnHScripts("goodNoteHit", [note, field]);
