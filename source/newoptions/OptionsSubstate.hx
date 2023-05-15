@@ -322,7 +322,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			[
 				"Updating", ["downloadBetas", "checkForUpdates"]
 			]
-		]
+		],
 		#end
 		/* "Accessibility" => [
 				[
@@ -336,7 +336,12 @@ class OptionsSubstate extends MusicBeatSubstate
 			] */
 	];
 
-	static var optionOrder:Array<String> = ["Game", "UI", "Video", "Controls", /* "Accessibility" */];
+	static var optionOrder:Array<String> = [
+		"Game",
+		"UI",
+		"Video",
+		"Controls",
+		#if DO_AUTO_UPDATE "Updating", #end /* "Accessibility" */];
 
 	var selected:Int = 0;
 

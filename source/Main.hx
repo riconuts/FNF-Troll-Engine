@@ -24,7 +24,7 @@ import Discord.DiscordClient;
 class Main extends Sprite
 {
 	public static var UserAgent:String = 'TrollEngine/${MainMenuState.engineVersion}'; // used for http requests. if you end up forking the engine and making your own then make sure to change this!!
-	public static var githubRepo = Sowy.getRepoInfo();
+	public static var githubRepo = Github.getCompiledRepoInfo();
 	public static var downloadBetas:Bool = MainMenuState.beta;
 	public static var outOfDate:Bool = false;
 	public static var recentRelease:Release;
@@ -51,7 +51,8 @@ class Main extends Sprite
 				var split = tagName.split("-");
 				var betaVersion = split.length == 1 ? "1" : split.pop();
 				var versionName = split.pop();
-				outOfDate = (versionName >= MainMenuState.engineVersion && betaVersion > MainMenuState.betaVersion)
+				outOfDate = (versionName > MainMenuState.engineVersion && betaVersion > MainMenuState.betaVersion)
+					|| (MainMenuState.beta && versionName == MainMenuState.engineVersion && betaVersion > MainMenuState.betaVersion)
 					|| (versionName > MainMenuState.engineVersion);
 			}
 			else

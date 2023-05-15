@@ -81,18 +81,69 @@ typedef Release = {
 	var BYTES = 1;
 }
 
+typedef RepoInfo =
+{
+	var user:String;
+	var repo:String;
+}
+
 class Github {
+	// based on https://code.haxe.org/category/macros/add-git-commit-hash-in-build.html
+	// pretty much gets the github repo lol
+	public static macro function getCompiledRepoInfo()
+	{
+		var repoInfo:RepoInfo = {
+			user: "riconuts", // default user
+			repo: "troll-engine" // default repo
+		}
+		#if !display
+		var process = new sys.io.Process('git', ['config', '--get', 'remote.origin.url']);
+		if (process.exitCode() != 0)
+		{
+			var message = process.stderr.readAll().toString();
+			var pos = haxe.macro.Context.currentPos();
+			haxe.macro.Context.warning("Cannot execute 'git config --get remote.origin.url' " + message, pos);
+			return macro $v{repoInfo};
+		}
+
+		// read the output of the process
+		var originUrl:String = process.stdout.readLine();
+		var sshRegex = ~/git@github.com:(.+)\/(.+).git/i;
+		var urlRegex = ~/https:\/\/github.com\/(.+)\/(.+).git/i;
+
+		var regex:EReg = null;
+
+		if (sshRegex.match(originUrl))
+			regex = sshRegex
+		else if (urlRegex.match(originUrl))
+			regex = urlRegex;
+
+		if (regex != null)
+		{
+			repoInfo.user = regex.matched(1);
+			repoInfo.repo = regex.matched(2);
+		}
+
+		// Generates a string expression
+		return macro $v{repoInfo};
+		#else
+		// `#if display` is used for code completion. In this case returning an
+		// empty string is good enough; We don't want to call git on every hint.
+		return macro $v{repoInfo};
+		#end
+	}
+
+	#if !macro
 	static var redirects:Array<Int> = [
 		301, 302, 308
 	];
     static var baseURL:String = 'https://api.github.com/repos';
-	static var defaultUser = "nebulazorua";//Main.githubRepo.user;
-	static var defaultRepo = "update-test-thing";//Main.githubRepo.repo;
+	static var defaultRepo:RepoInfo = Main.githubRepo;
     public var requestURL:String = '';
-    public function new(?user:String, ?repo:String){ 
-        if(user == null)user = defaultUser;
-		if (repo == null)repo = defaultRepo;
-		requestURL = '$baseURL/$user/$repo';
+    public function new(?repoInfo:RepoInfo){ 
+		if (repoInfo == null)
+			repoInfo = defaultRepo;
+		requestURL = '$baseURL/${repoInfo.user}/${repoInfo.repo}';
      }
     
     /*
@@ -294,5 +345,5 @@ class Github {
 		return returned;
 	}
 
-
+	#end
 }

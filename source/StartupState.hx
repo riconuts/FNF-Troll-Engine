@@ -78,6 +78,8 @@ class StartupState extends FlxState
 
 		if (FlxG.save.data.weekCompleted != null)
 			StoryMenuState.weekCompleted = FlxG.save.data.weekCompleted;
+
+		getRecentGithubRelease();
 		clearTemps("./");
 		
 		#if desktop
@@ -93,14 +95,13 @@ class StartupState extends FlxState
 
 
 	#if DO_AUTO_UPDATE
+	// gets the most recent release and returns it
+	// if you dont have download betas on, then it'll exclude prereleases
 	public static function getRecentGithubRelease(){
 		if (ClientPrefs.checkForUpdates)
 		{
 			var github:Github = new Github(); // leaving the user and repo blank means it'll derive it from the repo the mod is compiled from
-
 			// if it cant find the repo you compiled in, it'll just default to troll engine's repo
-			// gets the most recent release and returns it
-			// if you dont have download betas on, then it'll exclude prereleases
 			recentRelease = github.getReleases((release:Release) ->
 			{
 				return (Main.downloadBetas || !release.prerelease);
@@ -113,10 +114,19 @@ class StartupState extends FlxState
 			if (recentRelease != null && FlxG.save.data.ignoredUpdates.contains(recentRelease.tag_name))
 				recentRelease = null;
 			Main.recentRelease = recentRelease;
+			
 		}else{
 			Main.recentRelease = null;
 			Main.outOfDate = false;
 		}
+		return Main.recentRelease;
+	}
+	#else
+	public static function getRecentGithubRelease()
+	{
+		Main.recentRelease = null;
+		Main.outOfDate = false;
+		return null;
 	}
 	#end
 
