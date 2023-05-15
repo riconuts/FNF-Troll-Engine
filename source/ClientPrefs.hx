@@ -71,7 +71,7 @@ class ClientPrefs
 			},
 			"judgeDiff" => {
 				display: "Judge Difficulty",
-				desc: "Stepmania difficulties for judgements. For best results, use the Standard judgement preset.",
+				desc: "Stepmania difficulties for judgements. Lower numbers means looser hit windows, while higher numbers means tighter hit windows.\n For best results, use the Standard judgement preset.",
 				type: Dropdown,
 				value: "J4",
 				data: [

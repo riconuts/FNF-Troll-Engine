@@ -51,8 +51,7 @@ class FunkinScript {
 	**/
 	function setDefaultVars(){
 		var currentState = flixel.FlxG.state;
-
-		if ((currentState is PlayState))
+		if ((currentState == PlayState.instance))
 		{
 			set("inPlaystate", true);
 			
@@ -114,7 +113,7 @@ class FunkinScript {
 		set('curDecStep', 0);
 
 		set('version', "0.5.2h"); // version of psych troll engine is based on
-		set('teVersion', MainMenuState.engineVersion.trim());
+		set('teVersion', MainMenuState.displayedVersion.trim());
 	}
 }
 

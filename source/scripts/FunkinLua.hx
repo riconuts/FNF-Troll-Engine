@@ -63,30 +63,10 @@ class FunkinLua extends FunkinScript
 		//trace('Lua version: ' + Lua.version());
 		//trace("LuaJIT version: " + Lua.versionJIT());
 
-		try{
-			var result:Dynamic = LuaL.dofile(lua, script);
-			var resultStr:String = Lua.tostring(lua, result);
-			if(resultStr != null && result != 0) {
-				trace('Error on lua script! ' + resultStr);
-				#if windows
-				FlxG.fullscreen = false;
-				lime.app.Application.current.window.alert(resultStr, 'Error on lua script!');
-				#else
-				luaTrace('Error loading lua script: "$script"\n' + resultStr,true,false);
-				#end
-				lua = null;
-				return;
-			}
-		}catch(e:Dynamic){
-			trace(e);
-			return;
-		}
 		scriptType = 'lua';
 		scriptName = name;
 
-		haxeScript = FunkinHScript.fromString("", scriptName, null, false);
-
-		trace('lua file loaded:' + script);
+		haxeScript = FunkinHScript.fromString("", 'runHaxeCode: ${scriptName}', null, false);
 
 		#if (haxe >= "4.0.0")
 		accessedProps = new Map();
@@ -159,6 +139,8 @@ class FunkinLua extends FunkinScript
 		#else
 		set('buildTarget', 'unknown');
 		#end
+
+	
 
 		// mod manager
 		Lua_helper.add_callback(lua, "setPercent", function(modName:String, val:Float, player:Int = -1)
@@ -530,12 +512,9 @@ class FunkinLua extends FunkinScript
 
 		Lua_helper.add_callback(lua, "runHaxeCode", function(script:String)
 		{
-			var ar:Lua_Debug = {}
-			Lua.getstack(lua, 1, ar);
-			Lua.getinfo(lua, "l", ar);
-			
-			FunkinHScript.parser.line = ar.currentline; // so any errors, traces, etc, start from the runHaxeCode line in the lua file
-			// just to make outputs from the script a biiittt easier to tell where they came from
+			// getinfo randomly broke here idk why
+			// so just trace from line 1
+			FunkinHScript.parser.line = 1;
 			var retVal = haxeScript.executeCode(script);
 			if (retVal != null && !isOfTypes(retVal, [Bool, Int, Float, String, Array]))
 				retVal = null;
@@ -2175,6 +2154,32 @@ class FunkinLua extends FunkinScript
 		Lua_helper.add_callback(lua, "stringEndsWith", function(str:String, end:String) {
 			return str.endsWith(end);
 		});
+
+
+		*try
+		{
+			var result:Dynamic = LuaL.dofile(lua, script);
+			var resultStr:String = Lua.tostring(lua, result);
+			if (resultStr != null && result != 0)
+			{
+				trace('Error on lua script! ' + resultStr);
+				#if windows
+				FlxG.fullscreen = false;
+				lime.app.Application.current.window.alert(resultStr, 'Error on lua script!');
+				#else
+				luaTrace('Error loading lua script: "$script"\n' + resultStr, true, false);
+				#end
+				lua = null;
+				return;
+			}
+		}
+		catch (e:Dynamic)
+		{
+			trace(e);
+			return;
+		}
+
+		trace('lua file loaded:' + script);
 
 		if(!ignoreCreateCall)call('onCreate', []);
 		#end
