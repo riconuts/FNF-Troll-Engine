@@ -2156,7 +2156,7 @@ class FunkinLua extends FunkinScript
 		});
 
 
-		*try
+		try
 		{
 			var result:Dynamic = LuaL.dofile(lua, script);
 			var resultStr:String = Lua.tostring(lua, result);
