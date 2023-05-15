@@ -4376,7 +4376,6 @@ class PlayState extends MusicBeatState
 			return;
 		} 
 
-		// TODO: rewrite judgement code since i hate it -neb
 		if (!note.isSustainNote)
 			judge(note, field);
 		
