@@ -4068,7 +4068,7 @@ class PlayState extends MusicBeatState
 					char.playAnim(animToPlay, true);
 
 					if (!char.hasMissAnimations)
-						char.color = 0xFFC6A6FF;
+						char.colorOverlay = 0xFFC6A6FF;
 				}	
 			}
 		}

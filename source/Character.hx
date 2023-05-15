@@ -1,5 +1,6 @@
 package;
 
+import flash.geom.ColorTransform;
 import flixel.util.FlxColor;
 import flixel.animation.FlxAnimation;
 import Section.SwagSection;
@@ -16,7 +17,7 @@ import haxe.format.JsonParser;
 import openfl.utils.AssetType;
 import openfl.utils.Assets;
 import scripts.*;
-
+using flixel.util.FlxColorTransformUtil;
 using StringTools;
 #if MODS_ALLOWED
 import sys.FileSystem;
@@ -459,9 +460,33 @@ class Character extends FlxSprite
 		}
 	}
 
+	public var colorOverlay(default, set):FlxColor = FlxColor.WHITE;
+
+	function set_colorOverlay(val:FlxColor){
+		if (colorOverlay!=val){
+			colorOverlay = val;
+			updateColorTransform();
+		}
+		return colorOverlay;
+	}
+	override function updateColorTransform():Void
+	{
+		if (colorTransform == null)
+			colorTransform = new ColorTransform();
+
+		useColorTransform = alpha != 1 || (color * colorOverlay) != 0xffffff;
+		if (useColorTransform)
+			colorTransform.setMultipliers(color.redFloat * colorOverlay.redFloat, color.greenFloat * colorOverlay.greenFloat, color.blueFloat * colorOverlay.blueFloat, alpha);
+		else
+			colorTransform.setMultipliers(1, 1, 1, 1);
+
+		dirty = true;
+	}
+
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
 	{
-		if(!AnimName.endsWith("miss")) color = FlxColor.WHITE;
+		if (!AnimName.endsWith("miss"))
+			colorOverlay = FlxColor.WHITE;
 		if(callOnScripts("onAnimPlay", [AnimName, Force, Reversed, Frame]) == Globals.Function_Stop)
 			return;
 
