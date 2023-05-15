@@ -4941,7 +4941,7 @@ class FNFHealthBar extends FlxBar{
 		iconP2.flipX = value;
 
 		// aughhh
-		if (flipX){
+		if (value){
 			leftIcon = iconP1;
 			rightIcon = iconP2;
 		}else{
