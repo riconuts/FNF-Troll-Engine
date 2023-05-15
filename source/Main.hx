@@ -1,5 +1,6 @@
 package;
 
+import Github.Release;
 import sowy.Sowy;
 import openfl.system.Capabilities;
 import flixel.FlxG;
@@ -25,6 +26,9 @@ class Main extends Sprite
 	public static var UserAgent:String = 'TrollEngine/${MainMenuState.engineVersion}'; // used for http requests. if you end up forking the engine and making your own then make sure to change this!!
 	public static var githubRepo = Sowy.getRepoInfo();
 	public static var downloadBetas:Bool = MainMenuState.beta;
+	public static var outOfDate:Bool = false;
+	public static var recentRelease:Release;
+	
 	public static var showDebugTraces:Bool = #if(SHOW_DEBUG_TRACES || debug) true #else false #end;
 	var gameWidth:Int = 1280; // Width of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var gameHeight:Int = 720; // Height of the game in pixels (might be less / more in actual pixels depending on your zoom).
@@ -38,6 +42,29 @@ class Main extends Sprite
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
+	public static function checkOutOfDate(){
+		if (recentRelease != null)
+		{
+			if (recentRelease.prerelease)
+			{
+				var tagName = recentRelease.tag_name;
+				var split = tagName.split("-");
+				var betaVersion = split.length == 1 ? "1" : split.pop();
+				var versionName = split.pop();
+				outOfDate = (versionName >= MainMenuState.engineVersion && betaVersion > MainMenuState.betaVersion)
+					|| (versionName > MainMenuState.engineVersion);
+			}
+			else
+			{
+				var versionName = recentRelease.tag_name;
+				// if you're in beta and version is the same as the engine version, but just not beta
+				// then you should absolutely be prompted to update
+				outOfDate = MainMenuState.beta && MainMenuState.engineVersion <= versionName || MainMenuState.engineVersion < versionName;
+			}
+		}
+		Main.outOfDate = outOfDate;
+		return outOfDate;
+	}
 	public static function main():Void
 	{
 		Lib.current.addChild(new Main());

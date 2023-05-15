@@ -27,7 +27,6 @@ class StartupState extends FlxState
 	static var recentRelease:Release;
 
 	static function clearTemps(dir:String){
-		trace("clearing temps from " + dir);
 		for(file in FileSystem.readDirectory(dir)){
 			var file = './$dir/$file';
 			if(FileSystem.isDirectory(file))
@@ -79,28 +78,6 @@ class StartupState extends FlxState
 
 		if (FlxG.save.data.weekCompleted != null)
 			StoryMenuState.weekCompleted = FlxG.save.data.weekCompleted;
-
-		#if DO_AUTO_UPDATE
-		if (ClientPrefs.checkForUpdates){
-			var github:Github = new Github(); // leaving the user and repo blank means it'll derive it from the repo the mod is compiled from
-			// if it cant find the repo you compiled in, it'll just default to troll engine's repo
-
-			// gets the most recent release and returns it
-			// if you dont have download betas on, then it'll exclude prereleases
-			recentRelease = github.getReleases((release:Release) -> {
-				return (Main.downloadBetas || !release.prerelease);
-			})[0];
-
-			if (FlxG.save.data.ignoredUpdates==null){
-				FlxG.save.data.ignoredUpdates=[];
-				FlxG.save.flush();
-			}
-			if (recentRelease != null && FlxG.save.data.ignoredUpdates.contains(recentRelease.prerelease?"b":"" + recentRelease.tag_name))
-				recentRelease = null;
-			
-		}
-		#end
-
 		clearTemps("./");
 		
 		#if desktop
@@ -113,6 +90,36 @@ class StartupState extends FlxState
 		}
 		#end
 	}
+
+
+	#if DO_AUTO_UPDATE
+	public static function getRecentGithubRelease(){
+		if (ClientPrefs.checkForUpdates)
+		{
+			var github:Github = new Github(); // leaving the user and repo blank means it'll derive it from the repo the mod is compiled from
+
+			// if it cant find the repo you compiled in, it'll just default to troll engine's repo
+			// gets the most recent release and returns it
+			// if you dont have download betas on, then it'll exclude prereleases
+			recentRelease = github.getReleases((release:Release) ->
+			{
+				return (Main.downloadBetas || !release.prerelease);
+			})[0];
+			if (FlxG.save.data.ignoredUpdates == null)
+			{
+				FlxG.save.data.ignoredUpdates = [];
+				FlxG.save.flush();
+			}
+			if (recentRelease != null && FlxG.save.data.ignoredUpdates.contains(recentRelease.tag_name))
+				recentRelease = null;
+			Main.recentRelease = recentRelease;
+		}else{
+			Main.recentRelease = null;
+			Main.outOfDate = false;
+		}
+	}
+	#end
+
 
 	public function new(){
 		super();
@@ -169,26 +176,11 @@ class StartupState extends FlxState
 				step = 2;
 			case 2:
  				FlxTween.tween(warning, {alpha: 0}, 1, {ease: FlxEase.expoIn, onComplete: function(twn){
-					var outOfDate:Bool = false;
 					#if DO_AUTO_UPDATE
 					// this seems to work?
-					{
-						if (recentRelease.prerelease){
-							var tagName = recentRelease.tag_name;
-							var split = tagName.split("b");
-							var betaVersion = split.length == 1 ? "1" : split.pop();
-							var versionName = split.pop();
-							outOfDate = (versionName >= MainMenuState.engineVersion && betaVersion > MainMenuState.betaVersion) || (versionName > MainMenuState.engineVersion);
-						}else{
-							var versionName = recentRelease.tag_name;
-							// if you're in beta and version is the same as the engine version, but just not beta
-							// then you should absolutely be prompted to update
-							outOfDate = MainMenuState.beta && MainMenuState.engineVersion <= versionName || MainMenuState.engineVersion < versionName;
-						}
-					}
-					if (recentRelease != null && outOfDate){
+					if (Main.checkOutOfDate())
 						MusicBeatState.switchState(new UpdaterState(recentRelease)); // UPDATE!!
-					}else
+					else
 					#end
 					{
 						FlxTransitionableState.skipNextTransIn = true;

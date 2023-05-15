@@ -18,20 +18,20 @@ import flixel.math.FlxAngle;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flash.ui.Mouse;
 import flash.ui.MouseCursor;
-
+using StringTools;
 class ZSprite extends FlxSprite
 {
     public var order:Float = 0;
 }
 
 class MainMenuState extends MusicBeatState {
-	public static var engineVersion:String = '0.2'; // Used for autoupdating n stuff
-	public static var betaVersion(get, default):String = '1'; // beta version (for example, 0.2b3 would be engineVersion 0.2 betaVersion 3)
-	public static var beta:Bool = true;
+	public static var engineVersion:String = '0.2.0'; // Used for autoupdating n stuff
+	public static var betaVersion(get, default):String = 'beta.1'; // beta version, make blank if not on a beta version, otherwise do it based on semantic versioning (alpha.1, beta.1, rc.1, etc)
+	public static var beta:Bool = betaVersion.trim() != '';
 	@:isVar
 	public static var displayedVersion(get, null):String = '';
 	static function get_displayedVersion(){
-		return 'v${engineVersion}${(beta?("b" + betaVersion):"")}';
+		return 'v${engineVersion}${(beta?("-" + betaVersion):"")}';
 	}
 	static function get_betaVersion()
 	{
@@ -157,7 +157,13 @@ class MainMenuState extends MusicBeatState {
 		add(sideItems);
 
 		engineWatermark = new FlxText(0, 0, 0, 'Troll Engine $displayedVersion');
+		engineWatermark.setFormat(Paths.font("calibrib.ttf"), 16, Main.outOfDate?FlxColor.RED:FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
+		engineWatermark.x = FlxG.width - engineWatermark.width;
+		engineWatermark.y = FlxG.height - engineWatermark.height;
 		add(engineWatermark);
+		if (Main.outOfDate)
+			engineWatermark.text += " [UPDATE AVAILABLE]";
+		
 
 		////
 		changeItem(curSelected, true);
@@ -237,6 +243,15 @@ class MainMenuState extends MusicBeatState {
 				return fuckOff(spr);
 		}
 
+		if (Main.outOfDate && FlxG.mouse.overlaps(engineWatermark)){
+			#if DO_AUTO_UPDATE
+			if(Main.recentRelease != null)
+				MusicBeatState.switchState(new UpdaterState(Main.recentRelease));
+			else#end{
+				CoolUtil.browserLoad('https://github.com/riconuts/troll-engine/releases');
+				return;
+			}
+		}
 		for (spr in menuItems){
 			if (spr.ID == curSelected && FlxG.mouse.overlaps(spr)){
 	
@@ -262,6 +277,13 @@ class MainMenuState extends MusicBeatState {
 	}
 	function updateMouseIcon(?e)
 	{
+		if (FlxG.mouse.overlaps(engineWatermark) && Main.outOfDate)
+		{
+			trace(Main.outOfDate);
+			Mouse.cursor = MouseCursor.BUTTON;
+			return;
+		}
+
 		for (spr in sideItems){
 			if (FlxG.mouse.overlaps(spr)){
 				Mouse.cursor = MouseCursor.BUTTON;

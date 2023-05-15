@@ -86,8 +86,8 @@ class Github {
 		301, 302, 308
 	];
     static var baseURL:String = 'https://api.github.com/repos';
-    static var defaultUser = Main.githubRepo.user;
-    static var defaultRepo = Main.githubRepo.repo;
+	static var defaultUser = "nebulazorua";//Main.githubRepo.user;
+	static var defaultRepo = "update-test-thing";//Main.githubRepo.repo;
     public var requestURL:String = '';
     public function new(?user:String, ?repo:String){ 
         if(user == null)user = defaultUser;
@@ -113,6 +113,7 @@ class Github {
 			if (parsedReleaseJSON==null){
 				return [];
 			}
+			trace(parsedReleaseJSON.length);
             for(release in parsedReleaseJSON){
                 // because +1 and -1 dont exist
                 var reactions:Reactions = {
@@ -129,7 +130,7 @@ class Github {
                 }
                 release.reactions = reactions; 
                 var realRelease:Release = cast release;
-				returnedReleases.push(realRelease);
+				if (filter == null || filter(realRelease))returnedReleases.push(realRelease);
             }
 
         }

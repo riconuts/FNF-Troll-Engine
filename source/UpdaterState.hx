@@ -297,11 +297,12 @@ class UpdaterState extends MusicBeatState {
         if(FlxG.keys.justPressed.N){
 			MusicBeatState.switchState(new TitleState());
         }else if(FlxG.keys.justPressed.I){
+			Main.outOfDate = false;
 			MusicBeatState.switchState(new TitleState());
 			if (FlxG.save.data.ignoredUpdates == null)
 				FlxG.save.data.ignoredUpdates = [];
 			
-			FlxG.save.data.ignoredUpdates.push(release.prerelease ? "b" : "" + release.tag_name);
+			FlxG.save.data.ignoredUpdates.push(release.tag_name);
             FlxG.save.flush();
         }else if(FlxG.keys.justPressed.Y){
             startDownload();
