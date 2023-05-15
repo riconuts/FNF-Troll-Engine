@@ -2117,6 +2117,8 @@ class PlayState extends MusicBeatState
 						charType = Std.parseInt(event.value1);
 						if(Math.isNaN(charType)) charType = 0;
 				}
+				
+				trace(event.value2, charType);
 
 				addCharacterToList(event.value2, charType);
 			default:
@@ -3068,7 +3070,7 @@ class PlayState extends MusicBeatState
 
 			case 'Change Character':
 				var charType:Int = 0;
-				switch(value1) {
+				switch(value1.toLowerCase().trim()) {
 					case 'gf' | 'girlfriend':
 						charType = 2;
 					case 'dad' | 'opponent':
