@@ -140,7 +140,28 @@ class FunkinLua extends FunkinScript
 		set('buildTarget', 'unknown');
 		#end
 
-	
+		try
+		{
+			var result:Dynamic = LuaL.dofile(lua, script);
+			var resultStr:String = Lua.tostring(lua, result);
+			if (resultStr != null && result != 0)
+			{
+				trace('Error on lua script! ' + resultStr);
+				#if windows
+				FlxG.fullscreen = false;
+				lime.app.Application.current.window.alert(resultStr, 'Error on lua script!');
+				#else
+				luaTrace('Error loading lua script: "$script"\n' + resultStr, true, false);
+				#end
+				lua = null;
+				return;
+			}
+		}
+		catch (e:Dynamic)
+		{
+			trace(e);
+			return;
+		}
 
 		// mod manager
 		Lua_helper.add_callback(lua, "setPercent", function(modName:String, val:Float, player:Int = -1)
@@ -2155,29 +2176,6 @@ class FunkinLua extends FunkinScript
 			return str.endsWith(end);
 		});
 
-
-		try
-		{
-			var result:Dynamic = LuaL.dofile(lua, script);
-			var resultStr:String = Lua.tostring(lua, result);
-			if (resultStr != null && result != 0)
-			{
-				trace('Error on lua script! ' + resultStr);
-				#if windows
-				FlxG.fullscreen = false;
-				lime.app.Application.current.window.alert(resultStr, 'Error on lua script!');
-				#else
-				luaTrace('Error loading lua script: "$script"\n' + resultStr, true, false);
-				#end
-				lua = null;
-				return;
-			}
-		}
-		catch (e:Dynamic)
-		{
-			trace(e);
-			return;
-		}
 
 		trace('lua file loaded:' + script);
 
