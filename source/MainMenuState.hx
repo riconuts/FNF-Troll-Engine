@@ -25,8 +25,18 @@ class ZSprite extends FlxSprite
 }
 
 class MainMenuState extends MusicBeatState {
-	public static var engineVersion:String = '0.1.1'; // This is also used for Discord RPC
+	public static var engineVersion:String = '0.2'; // Used for autoupdating n stuff
+	public static var betaVersion(get, default):String = '1'; // beta version (for example, 0.2b3 would be engineVersion 0.2 betaVersion 3)
 	public static var beta:Bool = true;
+	@:isVar
+	public static var displayedVersion(get, null):String = '';
+	static function get_displayedVersion(){
+		return 'v${engineVersion}${(beta?("b" + betaVersion):"")}';
+	}
+	static function get_betaVersion()
+	{
+		return beta ? betaVersion : "0";
+	}
 	final optionShit:Array<String> = [
 		'story_mode',
  		'freeplay',
@@ -39,6 +49,7 @@ class MainMenuState extends MusicBeatState {
  		'gallery'
 	];
 
+	var engineWatermark:FlxText;
 	var magenta:FlxBackdrop;
 	var backdrop:FlxBackdrop;
 	var menuItems:FlxTypedGroup<ZSprite>;
@@ -144,6 +155,9 @@ class MainMenuState extends MusicBeatState {
 			sideItems.add(button);
 		}
 		add(sideItems);
+
+		engineWatermark = new FlxText(0, 0, 0, 'Troll Engine $displayedVersion');
+		add(engineWatermark);
 
 		////
 		changeItem(curSelected, true);

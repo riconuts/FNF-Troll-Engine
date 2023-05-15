@@ -1,3 +1,4 @@
+import OldMainMenuState.MainMenuButton;
 import openfl.events.KeyboardEvent;
 import sys.FileSystem;
 import Github.Release;
@@ -81,7 +82,11 @@ class StartupState extends FlxState
 
 		#if DO_AUTO_UPDATE
 		if (ClientPrefs.checkForUpdates){
-			var github:Github = new Github();
+			var github:Github = new Github(); // leaving the user and repo blank means it'll derive it from the repo the mod is compiled from
+			// if it cant find the repo you compiled in, it'll just default to troll engine's repo
+
+			// gets the most recent release and returns it
+			// if you dont have download betas on, then it'll exclude prereleases
 			recentRelease = github.getReleases((release:Release) -> {
 				return (Main.downloadBetas || !release.prerelease);
 			})[0];
@@ -91,9 +96,8 @@ class StartupState extends FlxState
 				FlxG.save.flush();
 			}
 			if (recentRelease != null && FlxG.save.data.ignoredUpdates.contains(recentRelease.prerelease?"b":"" + recentRelease.tag_name))
-			{
 				recentRelease = null;
-			}
+			
 		}
 		#end
 
@@ -165,11 +169,26 @@ class StartupState extends FlxState
 				step = 2;
 			case 2:
  				FlxTween.tween(warning, {alpha: 0}, 1, {ease: FlxEase.expoIn, onComplete: function(twn){
+					var outOfDate:Bool = false;
 					#if DO_AUTO_UPDATE
-						if (recentRelease != null
-							&& MainMenuState.engineVersion < recentRelease.tag_name) // if current version is < the recent release
-						MusicBeatState.switchState(new UpdaterState(recentRelease)) // UPDATE!!
-					else
+					// this seems to work?
+					{
+						if (recentRelease.prerelease){
+							var tagName = recentRelease.tag_name;
+							var split = tagName.split("b");
+							var betaVersion = split.length == 1 ? "1" : split.pop();
+							var versionName = split.pop();
+							outOfDate = (versionName >= MainMenuState.engineVersion && betaVersion > MainMenuState.betaVersion) || (versionName > MainMenuState.engineVersion);
+						}else{
+							var versionName = recentRelease.tag_name;
+							// if you're in beta and version is the same as the engine version, but just not beta
+							// then you should absolutely be prompted to update
+							outOfDate = MainMenuState.beta && MainMenuState.engineVersion <= versionName || MainMenuState.engineVersion < versionName;
+						}
+					}
+					if (recentRelease != null && outOfDate){
+						MusicBeatState.switchState(new UpdaterState(recentRelease)); // UPDATE!!
+					}else
 					#end
 					{
 						FlxTransitionableState.skipNextTransIn = true;
