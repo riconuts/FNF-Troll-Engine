@@ -1,5 +1,6 @@
 package scripts;
 
+import editors.ChartingState;
 import flixel.math.FlxPoint;
 import JudgmentManager.Judgment;
 import flixel.addons.display.FlxRuntimeShader;
@@ -79,6 +80,8 @@ class FunkinHScript extends FunkinScript
 		haxe.Log.trace(text, interpreter.posInfos());
 	}
 	
+
+	var dummyManager:JudgmentManager = new JudgmentManager();
 	public function new(parsed:Expr, ?name:String = "Script", ?additionalVars:Map<String, Any>, ?doExecute:Bool=true)
 	{
 		scriptType = 'hscript';
@@ -216,7 +219,7 @@ class FunkinHScript extends FunkinScript
 			var state:Any = flixel.FlxG.state;
 			set("state", flixel.FlxG.state);
 
-			if(state is PlayState && state == PlayState.instance)
+			if((state is PlayState) && state == PlayState.instance)
 			{
 				var state:PlayState = PlayState.instance;
 
@@ -234,6 +237,15 @@ class FunkinHScript extends FunkinScript
 					return field;
 				});
 
+			}
+			else if ((state is ChartingState) && state == ChartingState.instance){
+				var state:ChartingState = ChartingState.instance;
+				set("game", state);
+				set("global", state.variables);
+				set("getInstance", function()
+				{
+					return flixel.FlxG.state;
+				});
 			}else{
 				set("game", null);
 				set("global", null);
@@ -263,7 +275,7 @@ class FunkinHScript extends FunkinScript
 		set("Boyfriend", Boyfriend);
 
 		set("Wife3", PlayState.Wife3);
-		set("Judgment", {
+		set("Judgement", {
 			UNJUDGED: Judgment.UNJUDGED,
 			TIER1: Judgment.TIER1,
 			TIER2: Judgment.TIER2,
@@ -277,11 +289,16 @@ class FunkinHScript extends FunkinScript
 			CUSTOM_MINE: Judgment.CUSTOM_MINE
 		});
 
+		if(FlxG.state == PlayState.instance)
+			set("judgeManager", PlayState.instance.judgeManager);
+		else
+			set("judgeManager", dummyManager);
 		set("HScriptModifier", modchart.HScriptModifier);
 		set("SubModifier", modchart.SubModifier);
 		set("NoteModifier", modchart.NoteModifier);
 		set("EventTimeline", modchart.EventTimeline);
 		set("ModManager", modchart.ModManager);
+		set("JudgmentManager", JudgmentManager);
 		set("Modifier", modchart.Modifier);
 		set("StepCallbackEvent", modchart.events.StepCallbackEvent);
 		set("CallbackEvent", modchart.events.CallbackEvent);

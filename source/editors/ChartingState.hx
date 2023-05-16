@@ -1,5 +1,7 @@
 package editors;
 
+import scripts.FunkinHScript;
+import scripts.FunkinScript;
 #if desktop
 import Discord.DiscordClient;
 #end
@@ -48,6 +50,10 @@ using StringTools;
 
 class ChartingState extends MusicBeatState
 {
+	public static var instance:ChartingState;
+	public var variables:Map<String, Dynamic> = new Map();
+	
+	public var notetypeScripts:Map<String, FunkinScript> = [];
 	public static var noteTypeList:Array<String> = //Used for backwards compatibility with 0.1 - 0.3.2 charts, though, you should add your hardcoded custom note types here too.
 	[
 		'',
@@ -199,6 +205,7 @@ class ChartingState extends MusicBeatState
 	public var mouseQuant:Bool = false;
 	override function create()
 	{
+		instance = this;
 		if (PlayState.SONG != null)
 			_song = PlayState.SONG;
 		else
@@ -2560,6 +2567,44 @@ class ChartingState extends MusicBeatState
 		}
 	}
 
+	function initNoteType(notetype:String){
+		if(notetype == '')return;
+		if(notetypeScripts.exists(notetype))return;
+		var did:Bool = false;
+		#if PE_MOD_COMPATIBILITY
+		var fuck = ["notetypes", "custom_notetypes"];
+		for (file in fuck)
+		{
+			var baseScriptFile:String = '$file/$notetype';
+		#else
+		var baseScriptFile:String = 'notetypes/$notetype';
+		#end
+			var exts = ["hscript"]; // TODO: maybe FunkinScript.extensions, FunkinScript.hscriptExtensions and FunkinScript.luaExtensions??
+			for (ext in exts)
+			{
+				if (did)
+					break;
+				var baseFile = '$baseScriptFile.$ext';
+				var files = [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)];
+				for (file in files)
+				{
+					if (!Paths.exists(file))
+						continue;
+					if (ext == 'hscript')
+					{
+						var script = FunkinHScript.fromFile(file, notetype);
+						notetypeScripts.set(notetype, script);
+						did = true;
+					}
+					if (did)
+						break;
+				}
+			}
+		#if PE_MOD_COMPATIBILITY
+		}
+		#end
+	}
+
 	function setupNoteData(i:Array<Dynamic>, isNextSection:Bool):Note
 	{
 		var daNoteInfo = i[1];
@@ -2577,6 +2622,7 @@ class ChartingState extends MusicBeatState
 				i.remove(i[3]);
 			}
 			note.sustainLength = daSus;
+			initNoteType(i[3]);
 			note.noteType = i[3];
 		} else { //Event note
 			note.loadGraphic(Paths.image('eventArrow'));

@@ -153,7 +153,7 @@ class JudgmentManager {
 			hideJudge: true
         },
 	    MISS_MINE => { // for legacy reasons
-			internalName: "missMine",
+			internalName: "miss",
 			displayName: "Mine",
 			window: 75,
 			score: -200,

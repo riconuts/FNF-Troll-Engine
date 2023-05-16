@@ -23,6 +23,12 @@ typedef HitResult = {
 	hitDiff: Float
 }
 
+@:enum abstract SplashBehaviour(Int) from Int to Int
+{
+	var DEFAULT = 0; // only splashes on judgements that have splashes
+	var DISABLED = -1; // never splashes
+	var FORCED = 1; // always splashes
+}
 class Note extends NoteObject
 {
 	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
@@ -103,15 +109,24 @@ class Note extends NoteObject
 
 	public var blockHit:Bool = false; // whether you can hit this note or not
 	#if PE_MOD_COMPATIBILITY
-	public var lowPriority:Bool = false; // shadowmario's shitty workaround for really bad mine placement, yet still no *real* hitbox customization lol!
+	public var lowPriority:Bool = false; // Unused. shadowmario's shitty workaround for really bad mine placement, yet still no *real* hitbox customization lol!
 	#end
-	public var noteSplashDisabled:Bool = false; // disables the notesplash when you hit this note
+	@:isVar
+	public var noteSplashDisabled(get, set):Bool = false; // disables the notesplash when you hit this note
+	function get_noteSplashDisabled()
+		return noteSplashBehaviour==DISABLED;
+	function set_noteSplashDisabled(val:Bool){
+		noteSplashBehaviour = val?DISABLED:DEFAULT;
+		return val;
+	}
+
+	public var noteSplashBehaviour:SplashBehaviour = DEFAULT;
 	public var noteSplashTexture:String = null; // spritesheet for the notesplash
 	public var noteSplashHue:Float = 0; // hueshift for the notesplash, can be changed in note-type but otherwise its whatever the user sets in options
 	public var noteSplashSat:Float = 0; // ditto, but for saturation
 	public var noteSplashBrt:Float = 0; // ditto, but for brightness
 	//public var ratingDisabled:Bool = false; // disables judging this note
-	public var missHealth:Float = 0; // health when you miss this note
+	public var missHealth:Float = 0; // damage when hitCausesMiss = true and you hit this note	
 	public var texture(default, set):String = null; // texture for the note
 	public var noAnimation:Bool = false; // disables the animation for hitting this note
 	public var noMissAnimation:Bool = false; // disables the animation for missing this note
@@ -240,6 +255,12 @@ class Note extends NoteObject
 			colorSwap.saturation = ClientPrefs.arrowHSV[noteData % 4][1] / 100;
 			colorSwap.brightness = ClientPrefs.arrowHSV[noteData % 4][2] / 100;
 		}
+
+		if (noteScript != null && noteScript.scriptType == 'hscript')
+		{
+			var noteScript:FunkinHScript = cast noteScript;
+			noteScript.executeFunc("onUpdateColours", [this], this);
+		}
 	}
 
 	private function set_noteType(value:String):String {
@@ -282,8 +303,8 @@ class Note extends NoteObject
 				default:
 					if (!inEditor && PlayState.instance != null)
 						noteScript = PlayState.instance.notetypeScripts.get(value);
-					/*else
-						noteScript = ChartingState.instance.notetypeScripts.get(value);*/
+					else if(inEditor && ChartingState.instance!=null)
+						noteScript = ChartingState.instance.notetypeScripts.get(value);
 					
 					if (noteScript != null && noteScript.scriptType == 'hscript')
 					{
@@ -309,6 +330,11 @@ class Note extends NoteObject
 		if(colorSwap.brightness==brt)
 			colorSwap.brightness -= 0.0127;
 
+		if (noteScript != null && noteScript.scriptType == 'hscript')
+		{
+			var noteScript:FunkinHScript = cast noteScript;
+			noteScript.executeFunc("postSetupNote", [this], this);
+		}
 
 		if(isQuant){
 			if (noteSplashTexture == 'noteSplashes' || noteSplashTexture == null || noteSplashTexture.length <= 0)

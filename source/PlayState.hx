@@ -3685,7 +3685,7 @@ class PlayState extends MusicBeatState
 
 		note.ratingMod = judgeData.accuracy * 0.01;
 		note.rating = judgeData.internalName;
-		if (judgeData.noteSplash && !note.noteSplashDisabled)
+		if (note.noteSplashBehaviour == FORCED || judgeData.noteSplash && !note.noteSplashDisabled)
 			spawnNoteSplashOnNote(note, field);
 		
 		msJudges.push({hitTime: hitTime, strumTime: note.strumTime});
