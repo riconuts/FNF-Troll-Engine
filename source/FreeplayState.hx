@@ -238,7 +238,8 @@ class FreeplayState extends MusicBeatState
 							-Std.int((icum.frameWidth - icum.width)/2) + Std.int((songButton.width / 2) - (icum.width / 2)),
 							-Std.int((icum.frameHeight - icum.height)/2) + Std.int((songButton.height / 2) - (icum.height / 2))
 						);
-						
+						songButton.setGraphicSize(194, 194);
+						songButton.updateHitbox();
 					}
 				}
 			}
