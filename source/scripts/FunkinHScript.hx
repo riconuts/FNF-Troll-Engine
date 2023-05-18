@@ -1,5 +1,7 @@
 package scripts;
 
+import flixel.text.FlxText;
+import flixel.text.FlxText.FlxTextBorderStyle;
 import editors.ChartingState;
 import flixel.math.FlxPoint;
 import JudgmentManager.Judgment;
@@ -210,6 +212,14 @@ class FunkinHScript extends FunkinScript
 
 		});
 
+		set("FlxText", FlxText); // idk how this wasnt added sooner tbh
+		set("FlxTextBorderStyle", {
+			NONE: FlxTextBorderStyle.NONE,
+			SHADOW: FlxTextBorderStyle.SHADOW,
+			OUTLINE: FlxTextBorderStyle.OUTLINE,
+			OUTLINE_FAST: FlxTextBorderStyle.OUTLINE_FAST
+		});
+		
 		for(variable => arg in defaultVars){
 			set(variable, arg);
 		}

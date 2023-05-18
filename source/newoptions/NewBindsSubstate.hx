@@ -329,14 +329,6 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 			}else if (keyPressed != NONE)
             {
 				FlxG.sound.play(Paths.sound('confirmMenu'));
-				// TODO: make it so binds cant conflict
-				// though idk how to since menu and gameplay binds are seperate..
-				// (maybe it'd be more preferable to remove menu binds, OR actually add bind categories and just not allow conflict within them)
-				/*				 for(action => binds in ClientPrefs.keyBinds){
-
-				}*/
-
-                
                 var opp = bindID == 0 ? 1 : 0 ;
                 var internal = internals[bindIndex];
 				trace("bound " + internal + " (" + bindID + ") to " + InputFormatter.getKeyName(keyPressed));

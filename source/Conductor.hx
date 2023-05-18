@@ -56,15 +56,6 @@ class Conductor
 
 	public static function judgeNote(diff:Float=0):Judgment // die
 	{
-/* 		var data:Array<Rating> = PlayState.instance.ratingsData; //shortening cuz fuck u
-		for(i in 0...data.length-1) //skips last window (Shit)
-		{
-			if (diff <= data[i].hitWindow)
-			{
-				return data[i];
-			}
-		}
-		return data[data.length - 1]; */
 		var jm = PlayState.instance.judgeManager;
 		for (judge in jm.hittableJudgments)
 		{
