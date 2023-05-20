@@ -548,7 +548,7 @@ class PlayState extends MusicBeatState
 		ratingsData.push(rating);
  */
 		// Gameplay settings
-		playbackRate = ClientPrefs.getGameplaySetting('songspeed', 1);
+		playbackRate = 1;//ClientPrefs.getGameplaySetting('songspeed', 1);
 		healthGain = ClientPrefs.getGameplaySetting('healthgain', 1);
 		healthLoss = ClientPrefs.getGameplaySetting('healthloss', 1);
 		playOpponent = ClientPrefs.getGameplaySetting('opponentPlay', false);
@@ -1434,7 +1434,6 @@ class PlayState extends MusicBeatState
 		var swagCounter:Int = 0;
 		startTimer = new FlxTimer().start(Conductor.crochet * 0.001, function(tmr:FlxTimer)
 		{
-			
 			if (gf != null)
 			{
 				var gfDanceEveryNumBeats = Math.round(gfSpeed * gf.danceEveryNumBeats);
@@ -1899,7 +1898,7 @@ class PlayState extends MusicBeatState
 
 				var gottaHitNote:Bool = section.mustHitSection;
 
-				if (songNotes[1] > 3)
+				if (songNotes[1]%8 > 3)
 				{
 					gottaHitNote = !section.mustHitSection;
 				}
