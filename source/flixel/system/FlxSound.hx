@@ -1,5 +1,10 @@
 package flixel.system;
 
+import lime.system.CFFIPointer;
+import lime.media.openal.ALEffect;
+import lime.media.openal.ALAuxiliaryEffectSlot;
+import lime.media.openal.ALFilter;
+import lime.media.openal.AL;
 import flash.events.Event;
 import flash.events.IEventDispatcher;
 import flash.media.Sound;
@@ -26,6 +31,30 @@ import openfl.utils.AssetType;
  */
 class FlxSound extends FlxBasic
 {
+		var effectAux:ALAuxiliaryEffectSlot = AL.createAux(); // TODO: add removeAux
+	/**
+	 * Filter which gets applied to the sound
+	 */
+	public var filter(default, set):ALFilter;
+
+	function set_filter(v:ALFilter)
+	{
+		filter = v;
+		updateTransform();
+		return filter;
+	}
+
+	/**
+	 * Effect which gets applied to the sound
+	 */
+	public var effect(default, set):ALEffect;
+
+	function set_effect(v:ALEffect)
+	{
+		effect = v;
+		updateTransform();
+		return effect;
+	}
 	/**
 	 * The x position of this sound in world coordinates.
 	 * Only really matters if you are doing proximity/panning stuff.
@@ -599,9 +628,29 @@ class FlxSound extends FlxBasic
 				#if cpp
 				@:privateAccess
 				this._channel.__source.__backend.setPitch(_pitch);
-				// trace('changing $name pitch new $_pitch');
 				#end
 			}
+
+			#if cpp
+			@:privateAccess
+			{
+				if (_channel.__source != null){
+					var handle = this._channel.__source.__backend.handle;
+					if(filter!=null)
+						AL.sourcei(handle, AL.DIRECT_FILTER, filter);
+					else
+						AL.removeDirectFilter(handle);
+
+					if(effect!=null){
+						var cffi:CFFIPointer = cast filter;
+						AL.auxi(effectAux, AL.EFFECTSLOT_EFFECT, effect);
+						AL.source3i(handle, AL.AUXILIARY_SEND_FILTER, effectAux, 0, filter == null ? AL.FILTER_NULL : Std.int(cffi.get()));
+					}else
+						AL.source3i(handle, AL.AUXILIARY_SEND_FILTER, AL.FILTER_NULL, 0, AL.FILTER_NULL);
+				}
+				
+			}
+			#end
 		}
 	}
 
