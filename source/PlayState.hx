@@ -548,7 +548,7 @@ class PlayState extends MusicBeatState
 		ratingsData.push(rating);
  */
 		// Gameplay settings
-		playbackRate = ClientPrefs.getGameplaySetting('songspeed', 1);
+		playbackRate = 1;//ClientPrefs.getGameplaySetting('songspeed', 1);
 		healthGain = ClientPrefs.getGameplaySetting('healthgain', 1);
 		healthLoss = ClientPrefs.getGameplaySetting('healthloss', 1);
 		playOpponent = ClientPrefs.getGameplaySetting('opponentPlay', false);
@@ -1434,7 +1434,6 @@ class PlayState extends MusicBeatState
 		var swagCounter:Int = 0;
 		startTimer = new FlxTimer().start(Conductor.crochet * 0.001, function(tmr:FlxTimer)
 		{
-			
 			if (gf != null)
 			{
 				var gfDanceEveryNumBeats = Math.round(gfSpeed * gf.danceEveryNumBeats);
@@ -1899,7 +1898,7 @@ class PlayState extends MusicBeatState
 
 				var gottaHitNote:Bool = section.mustHitSection;
 
-				if (songNotes[1] > 3)
+				if (songNotes[1]%8 > 3)
 				{
 					gottaHitNote = !section.mustHitSection;
 				}
@@ -1917,6 +1916,7 @@ class PlayState extends MusicBeatState
 				// or maybe make a "Transform Notes" event which'll make notes which don't change texture change into the specified one
 
 				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
+				swagNote.realNoteData = songNotes[1];
 				swagNote.mustPress = gottaHitNote;
 				swagNote.sustainLength = songNotes[2];
 
@@ -1949,6 +1949,7 @@ class PlayState extends MusicBeatState
 				}
 
 				#if LUA_ALLOWED
+				// in hscripts setupNote gets called on Note.set_noteType
 				if(swagNote.noteScript != null && swagNote.noteScript.scriptType == 'lua'){
 					callScript(swagNote.noteScript, 'setupNote', [
 						allNotes.indexOf(swagNote),
@@ -4570,6 +4571,7 @@ class PlayState extends MusicBeatState
 	var lastBeatHit:Int = -1;
 
 	public var zoomEveryBeat:Int = 4;
+	public var beatToZoom:Int = 0;
 
 	var lastSection:Int = -1;
 	override function beatHit()
@@ -4582,7 +4584,7 @@ class PlayState extends MusicBeatState
 		
 		hud.beatHit(curBeat);
 
-		if (camZooming && ClientPrefs.camZoomP>0 && FlxG.camera.zoom < 1.35 && zoomEveryBeat > 0 && curBeat % zoomEveryBeat == 0)
+		if (camZooming && ClientPrefs.camZoomP>0 && FlxG.camera.zoom < 1.35 && zoomEveryBeat > 0 && curBeat % zoomEveryBeat == beatToZoom)
 		{
 			FlxG.camera.zoom += 0.015 * camZoomingMult * ClientPrefs.camZoomP;
 			camHUD.zoom += 0.03 * camZoomingMult * ClientPrefs.camZoomP;

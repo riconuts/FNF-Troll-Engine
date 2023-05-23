@@ -2,7 +2,7 @@ package;
 
 typedef SwagSection =
 {
-	var sectionNotes:Array<Dynamic>;
+	var sectionNotes:Array<Array<Dynamic>>;
 	//var lengthInSteps:Int;
 	var typeOfSection:Int;
 	var mustHitSection:Bool;

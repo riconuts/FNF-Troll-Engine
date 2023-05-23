@@ -491,6 +491,7 @@ class ComicReader extends MusicBeatState
 			remove(curPanel).destroy();
 
 		curPanel = new FlxSprite().loadGraphic(Paths.image('cutscenes/$path'));
+		curPanel.pixelPerfectRender = true;
 		curPanel.cameras = [camComic];
 		curPanel.shader = loadingShader;
 
