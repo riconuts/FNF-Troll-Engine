@@ -1,5 +1,8 @@
 package;
 
+import lime.media.openal.ALFilter;
+import lime.media.openal.ALEffect;
+import lime.media.openal.AL;
 import flixel.util.FlxSpriteUtil.LineStyle;
 import openfl.display.BitmapData;
 import FreeplayState.FreeplayCategory;
@@ -145,6 +148,8 @@ class Wife3
 }
 class PlayState extends MusicBeatState
 {
+	var sndFilter:ALFilter = AL.createFilter();
+    var sndEffect:ALEffect = AL.createEffect();
 	public var showRating:Bool = true;
 	public var showCombo:Bool = false;
 	public var showComboNum:Bool = true;
@@ -220,7 +225,7 @@ class PlayState extends MusicBeatState
 	public var songSpeedType:String = "multiplicative";
 	public var noteKillOffset:Float = 350;
 
-	public var playbackRate(default, default):Float = 1;
+	public var playbackRate:Float = 1;
 
 	public static var curStage:String = '';
 	public static var SONG:SwagSong = null;
@@ -548,7 +553,7 @@ class PlayState extends MusicBeatState
 		ratingsData.push(rating);
  */
 		// Gameplay settings
-		playbackRate = 1;//ClientPrefs.getGameplaySetting('songspeed', 1);
+		playbackRate = ClientPrefs.getGameplaySetting('songspeed', 1);
 		healthGain = ClientPrefs.getGameplaySetting('healthgain', 1);
 		healthLoss = ClientPrefs.getGameplaySetting('healthloss', 1);
 		playOpponent = ClientPrefs.getGameplaySetting('opponentPlay', false);
@@ -559,6 +564,8 @@ class PlayState extends MusicBeatState
 		cpuControlled = ClientPrefs.getGameplaySetting('botplay', false);
 		disableModcharts = !ClientPrefs.modcharts; //ClientPrefs.getGameplaySetting('disableModcharts', false);
 
+		playbackRate *= (ClientPrefs.ruin ? 0.8 : 1);
+		FlxG.timeScale = playbackRate;
 		
 		if(perfectMode){
 			practiceMode = false;
@@ -1482,17 +1489,27 @@ class PlayState extends MusicBeatState
 				});
 			}
 
+			var sound = '';
 			switch (swagCounter){
 				case 0:
-					FlxG.sound.play(Paths.sound('intro3' + introSoundsSuffix), 0.6);
+					sound = 'intro3' + introSoundsSuffix;
 				case 1:
-					FlxG.sound.play(Paths.sound('intro2' + introSoundsSuffix), 0.6);
+					sound = 'intro2' + introSoundsSuffix;
 				case 2:
-					FlxG.sound.play(Paths.sound('intro1' + introSoundsSuffix), 0.6);
+					sound = 'intro1' + introSoundsSuffix;
 				case 3:
-					FlxG.sound.play(Paths.sound('introGo' + introSoundsSuffix), 0.6);
+					sound = 'introGo' + introSoundsSuffix;
 			}
-
+			if(sound != ''){
+				var snd = FlxG.sound.play(Paths.sound(sound), 0.6);
+				snd.endTime = snd.length;
+				snd.effect = ClientPrefs.ruin?sndEffect:null;
+				snd.onComplete = function(){
+					trace("stopped");
+					snd.volume = 0;
+				}
+				snd.pitch = playbackRate;
+			}
 /* 			notes.forEachAlive(function(note:Note) {
 				if(ClientPrefs.opponentStrums || note.mustPress)
 				{
@@ -1582,8 +1599,6 @@ class PlayState extends MusicBeatState
 
 		previousFrameTime = FlxG.game.ticks;
 		//lastReportedPlayheadPosition = 0;
-
-		FlxG.timeScale = playbackRate;
 
 		
 		inst.onComplete = function(){
@@ -1735,9 +1750,27 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		for (track in tracks)
-			track.pitch = playbackRate;
+		AL.filteri(sndFilter, AL.FILTER_TYPE, AL.FILTER_NULL);
+ 		if(ClientPrefs.ruin){
+			AL.effecti(sndEffect, AL.EFFECT_TYPE, AL.EFFECT_REVERB);
+			AL.effectf(sndEffect, AL.REVERB_DECAY_TIME, 5);
+			AL.effectf(sndEffect, AL.REVERB_GAIN, 0.75);
+			AL.effectf(sndEffect, AL.REVERB_DIFFUSION, 0.5);
+		}else{ 
+			AL.effecti(sndEffect, AL.EFFECT_TYPE, AL.EFFECT_NULL);
+		}
 
+		for (track in tracks){
+			track.effect = ClientPrefs.ruin?sndEffect:null;
+			track.filter = null;
+			track.pitch = playbackRate;
+		}
+
+		inst.filter = null;
+		vocals.filter = null;
+		inst.effect = ClientPrefs.ruin?sndEffect:null;
+		vocals.effect = ClientPrefs.ruin?sndEffect:null;
+		
 		inst.pitch = playbackRate;
 		vocals.pitch = playbackRate;
 
@@ -3610,7 +3643,7 @@ class PlayState extends MusicBeatState
 			trace("you didnt give a valid JudgmentData to applyJudgmentData!");
 			return;
 		}
-		if (!cpuControlled)songScore += judgeData.score;
+		if (!cpuControlled)songScore += Math.floor(judgeData.score * playbackRate);
 		health += (judgeData.health * 0.02) * (judgeData.health < 0 ? healthLoss : healthGain);
 		songHits++;
 

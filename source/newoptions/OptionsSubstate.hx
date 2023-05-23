@@ -32,6 +32,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		"gradeSet",
 		"shaders",
 		"lowQuality",
+		"ruin",
 		"globalAntialiasing",
 	];
 
@@ -251,6 +252,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			[
 				"Audio", 
 				[
+					"ruin",
 					"hitsoundVolume", 
 					"missVolume"
 				]

@@ -31,7 +31,7 @@ import openfl.utils.AssetType;
  */
 class FlxSound extends FlxBasic
 {
-		var effectAux:ALAuxiliaryEffectSlot = AL.createAux(); // TODO: add removeAux
+	var effectAux:ALAuxiliaryEffectSlot = AL.createAux(); // TODO: add removeAux
 	/**
 	 * Filter which gets applied to the sound
 	 */
@@ -55,6 +55,8 @@ class FlxSound extends FlxBasic
 		updateTransform();
 		return effect;
 	}
+
+	public static var defaultPitch:Float = 1;
 	/**
 	 * The x position of this sound in world coordinates.
 	 * Only really matters if you are doing proximity/panning stuff.
@@ -208,7 +210,7 @@ class FlxSound extends FlxBasic
 	/**
 	 * Internal tracker for pitch.
 	 */
-	var _pitch:Float = 1.0;
+	var _pitch:Float = defaultPitch;
 
 	/**
 	 * Internal tracker for total volume adjustment.
@@ -257,7 +259,7 @@ class FlxSound extends FlxBasic
 		_time = 0;
 		_paused = false;
 		_volume = 1.0;
-		_pitch = 1.0;
+		_pitch = defaultPitch;
 		_volumeAdjust = 1.0;
 		looped = false;
 		loopTime = 0.0;

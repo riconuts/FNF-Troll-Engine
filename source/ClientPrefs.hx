@@ -473,12 +473,21 @@ class ClientPrefs
 				value: true,
 				data: []
 			},
+			"ruin" => {
+				display: "Ruin The Mod",
+				desc: "Makes the mod really good! improves the mod alot!! the name is a joke guys it makes the mod REALLY REALLY good its not blammed lights i swear",
+				type: Toggle,
+				value: true,
+				data: []
+			},
 			"customizeKeybinds" => {
 				display: "Customize Key Bindings",
 				desc: "Lets you change your controls. Pretty straight forward, huh?",
 				type: Button,
 				data: []
 			},
+			
+			// updating
 			"downloadBetas" => {
 				display: "Download Betas",
 				desc: "Lets the engine's auto-updater prompt you to update to beta versions of the engine when available.\nNOTE: While on a beta build, this will always be on, regardless of this option.",
