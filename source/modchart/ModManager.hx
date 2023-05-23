@@ -111,6 +111,17 @@ class ModManager {
         // TODO: sort by mod.getOrder()
     }
 
+	public function addHScriptModifier(modName:String, ?defaultVal:Float):Null<HScriptModifier>
+	{	
+		var modifier = HScriptModifier.fromName(this, null, modName);
+		if (modifier == null) return null;
+	
+		quickRegister(modifier);
+		setValue(modifier.getName(), defaultVal==null ? 0 : defaultVal);
+		
+		return modifier;
+	}
+
     inline public function get(modName:String)
         return register.get(modName);
 

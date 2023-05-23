@@ -10,7 +10,7 @@ class HScriptModifier extends Modifier
 {
 	public var script:FunkinHScript;
 
-	function new(modMgr:ModManager, ?parent:Modifier, script:FunkinHScript) 
+	public function new(modMgr:ModManager, ?parent:Modifier, script:FunkinHScript) 
 	{
 		this.script = script;
 		script.set("this", this);
@@ -25,11 +25,37 @@ class HScriptModifier extends Modifier
 		script.set("setSubmodValue", setSubmodValue);
 		script.set("setSubmodPercent", setSubmodPercent);
 
+		/*
+		for (fieldName in Type.getInstanceFields(HScriptModifier))
+			script.set(fieldName, Reflect.getProperty(this, fieldName));
+		*/
+
         script.executeFunc("onCreate");
 
 		super(modMgr, parent);
 
         script.executeFunc("onCreatePost");
+	}
+
+	static final _scriptEnums:Map<String, Dynamic> = [
+		"NOTE_MOD" => NOTE_MOD,
+		"MISC_MOD" => MISC_MOD,
+
+		"FIRST" => FIRST,
+		"PRE_REVERSE" => PRE_REVERSE,
+		"REVERSE" => REVERSE,
+		"POST_REVERSE" => POST_REVERSE,
+		"DEFAULT" => DEFAULT,
+		"LAST" => LAST
+	];
+
+	public static function fromString(modMgr:ModManager, ?parent:Modifier, scriptSource:String):HScriptModifier
+	{
+		return new HScriptModifier(
+			modMgr, 
+			parent, 
+			FunkinHScript.fromString(scriptSource, "HScriptModifier", _scriptEnums)
+		);
 	}
 
 	public static function fromName(modMgr:ModManager, ?parent:Modifier, scriptName:String):Null<HScriptModifier>
@@ -39,27 +65,18 @@ class HScriptModifier extends Modifier
 		{
 			if (!Paths.exists(file)) continue;
 
-			var script = FunkinHScript.fromFile(file, [
-				"NOTE_MOD" => NOTE_MOD,
-				"MISC_MOD" => MISC_MOD,
-
-				"FIRST" => FIRST,
-				"PRE_REVERSE" => PRE_REVERSE,
-				"REVERSE" => REVERSE,
-				"POST_REVERSE" => POST_REVERSE,
-				"DEFAULT" => DEFAULT,
-				"LAST" => LAST
-			]);
-			var modifier = new HScriptModifier(modMgr, parent, script);
-			return modifier;
+			return new HScriptModifier(
+				modMgr, 
+				parent, 
+				FunkinHScript.fromFile(file, _scriptEnums)
+			);
 		}
 
 		trace('Modifier script: $scriptName not found!');
-
 		return null;
 	}
 
-	//// Fuck this shit. This is where a macro could have helped me, if Haxe and Flixel weren't so fucking retarded.
+	//// this is where a macro could have helped me, if i weren't so retarded.
 	// lol i'll probably rewrite this to use a macro dont worry bb
 
 	override public function getModType()
@@ -88,6 +105,7 @@ class HScriptModifier extends Modifier
 
 	// shouldnt be overriding getValue/getPercent/etc
 	// they're used purely to get the value of a modifier and should not be overwritten
+	// you sure
 
 	/* 	override public function getValue(player:Int):Float
 		return script.exists("getValue") ? script.executeFunc("getValue", [player]) : super.getValue(player);
