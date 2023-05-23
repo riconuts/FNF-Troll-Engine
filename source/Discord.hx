@@ -60,6 +60,35 @@ class DiscordClient
 		trace('Disconnected! $_code : $_message');
 	}
 
+	////
+	static var allowedImageKeys:Array<String> = [
+		"app-logo",
+		"gorgeous",
+		"trollface",
+
+		"talentless-fox",
+		"no-villains",
+		"die-batsards",
+		"taste-for-blood",
+		
+		"high-shovel",
+		"on-your-trail",
+		"proving-nothing",
+
+		"no-heroes",
+		"scars-n-stars",
+		
+		"lonely-looser",
+		"hammerhead",
+		"all-hail-the-king",
+
+		"presentless-fox",
+		"no-grinches",
+		"die-carolers",
+	];
+	inline static function getImageKey(key):String
+		return allowedImageKeys.contains(key) ? key : "app-logo";
+	
 	public static function changePresence(details:String, state:Null<String>, largeImageKey:String = "app-logo", ?hasStartTimestamp:Bool, ?endTimestamp:Float)
 	{
 		#if !final
@@ -80,7 +109,7 @@ class DiscordClient
 			details: details,
 			state: state,
 
-			largeImageKey: largeImageKey,
+			largeImageKey: getImageKey(largeImageKey),
 			largeImageText: "Tails Gets Trolled v" + lime.app.Application.current.meta.get('version'), //"Troll Engine"
 			// largeImageText: "Engine Version: " + MainMenuState.engineVersion,
 

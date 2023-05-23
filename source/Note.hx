@@ -171,6 +171,7 @@ class Note extends NoteObject
 	public var baseScaleY:Float = 1;
 	public var zIndex:Float = 0;
 	public var z:Float = 0;
+	public var realNoteData:Int;
 	public static var swagWidth:Float = 160 * 0.7;
 	
 	
