@@ -1585,7 +1585,7 @@ class PlayState extends MusicBeatState
 
 		FlxG.timeScale = playbackRate;
 
-		inst.pitch = playbackRate;
+		
 		inst.onComplete = function(){
 			trace("song ended!?");
 			finishSong(false);
@@ -1595,12 +1595,9 @@ class PlayState extends MusicBeatState
 			vocalsEnded = true;
 			vocals.volume = 0; // just so theres no like vocal restart stuff at the end of the song lol
 		};
-		
-		vocals.pitch = playbackRate;
-		for (track in tracks){
+		for (track in tracks)
 			track.play();
-			track.pitch = playbackRate;
-		}
+		
 
 		vocals.play();
 		inst.play();
@@ -1737,6 +1734,12 @@ class PlayState extends MusicBeatState
 				FlxG.sound.list.add(newTrack);
 			}
 		}
+
+		for (track in tracks)
+			track.pitch = playbackRate;
+
+		inst.pitch = playbackRate;
+		vocals.pitch = playbackRate;
 
 		add(notes);
 
@@ -4918,6 +4921,7 @@ class PlayState extends MusicBeatState
 	override public function switchTo(nextState: Dynamic){
 		callOnHScripts("switchingState", [nextState]);
 		callOnLuas("switchingState");
+		FlxG.timeScale = 1;
 		pressedGameplayKeys = [];
 		FunkinHScript.defaultVars.clear();
 		return super.switchTo(nextState);
