@@ -4916,6 +4916,8 @@ class PlayState extends MusicBeatState
 	}
 
 	override public function switchTo(nextState: Dynamic){
+		callOnHScripts("switchingState", [nextState]);
+		callOnLuas("switchingState");
 		pressedGameplayKeys = [];
 		FunkinHScript.defaultVars.clear();
 		return super.switchTo(nextState);
