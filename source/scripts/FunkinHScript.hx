@@ -211,7 +211,6 @@ class FunkinHScript extends FunkinScript
 				set(splitted.pop(), daEnum);
 
 		});
-
 		set("FlxText", FlxText); // idk how this wasnt added sooner tbh
 		set("FlxTextBorderStyle", {
 			NONE: FlxTextBorderStyle.NONE,

@@ -465,7 +465,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 						if (isPlayer && (hitDiff + ClientPrefs.ratingOffset) <= (5 * (Wife3.timeScale > 1?1:Wife3.timeScale)) || hitDiff <= 0){
 							daNote.hitResult.judgment = judgeManager.useEpics ? TIER5 : TIER4;
 							daNote.hitResult.hitDiff = (hitDiff < -5) ? -5 : hitDiff; 
-							noteHitCallback(daNote, this);
+							if (noteHitCallback!=null)noteHitCallback(daNote, this);
 						}
 					}
 					
