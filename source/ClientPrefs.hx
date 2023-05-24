@@ -477,7 +477,7 @@ class ClientPrefs
 				display: "Ruin The Mod",
 				desc: "Makes the mod really good! improves the mod alot!! the name is a joke guys it makes the mod REALLY REALLY good its not blammed lights i swear",
 				type: Toggle,
-				value: true,
+				value: false,
 				data: []
 			},
 			"customizeKeybinds" => {
