@@ -1756,9 +1756,9 @@ class PlayState extends MusicBeatState
 			AL.effectf(sndEffect, AL.REVERB_DECAY_TIME, 5);
 			AL.effectf(sndEffect, AL.REVERB_GAIN, 0.75);
 			AL.effectf(sndEffect, AL.REVERB_DIFFUSION, 0.5);
-		}else{ 
+		}else
 			AL.effecti(sndEffect, AL.EFFECT_TYPE, AL.EFFECT_NULL);
-		}
+		
 
 		for (track in tracks){
 			track.effect = ClientPrefs.ruin?sndEffect:null;
