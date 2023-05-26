@@ -1505,10 +1505,8 @@ class PlayState extends MusicBeatState
 				snd.endTime = snd.length;
 				snd.effect = ClientPrefs.ruin?sndEffect:null;
 				snd.onComplete = function(){
-					trace("stopped");
 					snd.volume = 0;
 				}
-				snd.pitch = playbackRate;
 			}
 /* 			notes.forEachAlive(function(note:Note) {
 				if(ClientPrefs.opponentStrums || note.mustPress)

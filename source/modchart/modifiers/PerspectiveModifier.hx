@@ -62,7 +62,7 @@ class PerspectiveModifier extends NoteModifier {
 			if(shit.isSustainNote)return vert;
 		}
 		var origin = new Vector3(FlxG.width/2, FlxG.height/2); // vertex origin
-		var fieldPos = new Vector3(-getSubmodPercent("fieldX", player) / 100, -getSubmodPercent("fieldY", player) / 100, 1280 + getSubmodPercent("fieldZ", player) / 100); // playfield pos
+		var fieldPos = new Vector3(-getSubmodValue("fieldX", player), -getSubmodValue("fieldY", player), 1280 + getSubmodValue("fieldZ", player)); // playfield pos
 		var originMod = vert.add(pos).subtract(origin); // moves the vertex to the appropriate position on screen based on origin
 		var rotated = VectorHelpers.rotateV3(originMod, getSubmodValue("fieldPitch", player) * FlxAngle.TO_RAD, getSubmodValue("fieldYaw", player) * FlxAngle.TO_RAD, getSubmodValue("fieldRoll", player) * FlxAngle.TO_RAD); // rotate the vertex properly
 		var projected = VectorHelpers.getVector(rotated.subtract(fieldPos)); // perpsective projection
