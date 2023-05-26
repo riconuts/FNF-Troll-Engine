@@ -41,10 +41,10 @@ class PerspectiveModifier extends NoteModifier {
 	override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
 	{
  		var origin = new Vector3(FlxG.width / 2, FlxG.height / 2); // vertex origin
-		var fieldPos = new Vector3(-getSubmodPercent("fieldX", player) / 100,
-			-getSubmodPercent("fieldY", player) / 100,
+		var fieldPos = new Vector3(-getSubmodValue("fieldX", player),
+			-getSubmodValue("fieldY", player),
 			1280
-			+ getSubmodPercent("fieldZ", player) / 100); // playfield pos
+			+ getSubmodValue("fieldZ", player)); // playfield pos
 			
 		
 		
