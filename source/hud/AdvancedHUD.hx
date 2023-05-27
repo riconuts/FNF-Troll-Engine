@@ -369,19 +369,22 @@ class AdvancedHUD extends BaseHUD
 		if (botplayTxt.visible)
 		{
 			botplaySine += 180 * elapsed;
-			botplayTxt.alpha = 1 - Math.sin((Math.PI * botplaySine) / 180);
+			botplayTxt.alpha = 1 - flixel.math.FlxMath.fastSin((Math.PI * botplaySine) / 180);
 		}
 
-		var songCalc:Float = (songLength - time);
-		if (ClientPrefs.timeBarType == 'Time Elapsed')
+		var songCalc:Null<Float> = null;
+
+		if (ClientPrefs.timeBarType == 'Time Left')
+			songCalc = (songLength - time);
+		else if (ClientPrefs.timeBarType == 'Time Elapsed')
 			songCalc = time;
+		
+		if (songCalc != null){
+			var secondsTotal:Int = Math.floor(songCalc / 1000);
+			if (secondsTotal < 0) secondsTotal = 0;
 
-		var secondsTotal:Int = Math.floor(songCalc / 1000);
-		if (secondsTotal < 0)
-			secondsTotal = 0;
-
-		if (ClientPrefs.timeBarType != 'Song Name')
 			timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
+		}
 	}
 
 	override function set_misses(val:Int){

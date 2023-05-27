@@ -34,7 +34,7 @@ class PauseSubState extends MusicBeatSubstate
 	{
 		super();
 		
-		persistentUpdate = true;
+		persistentUpdate = false;
 
 		var cam:FlxCamera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
 		this.camera = cam;
@@ -179,7 +179,6 @@ class PauseSubState extends MusicBeatSubstate
 		if (pauseMusic.volume < 0.5)
 			pauseMusic.volume += 0.01 * elapsed; 
 
-		super.update(elapsed);
 		updateSkipTextStuff();
 
 		if(subState == null){
@@ -330,6 +329,8 @@ class PauseSubState extends MusicBeatSubstate
 				}
 			}
 		}
+
+		super.update(elapsed);
 	}
 
 	public static function restartSong(noTrans:Bool = false)

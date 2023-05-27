@@ -117,7 +117,7 @@ class PsychHUD extends BaseHUD {
 		botplayTxt.borderSize = 1.25;
 		botplayTxt.visible = false;
 		add(botplayTxt);
-        
+		
 		hitbar = new Hitbar();
 		hitbar.alpha = alpha;
 		hitbar.visible = ClientPrefs.hitbar;
@@ -132,7 +132,7 @@ class PsychHUD extends BaseHUD {
 		}
 
 		add(scoreTxt);
-    }
+	}
 
 	var tweenProg:Float = 0;
 
@@ -155,6 +155,7 @@ class PsychHUD extends BaseHUD {
 	override function changedOptions(changed:Array<String>)
 	{
 		super.changedOptions(changed);
+
 		timeTxt.y = (ClientPrefs.downScroll ? FlxG.height - 44 : 19);
 		timeBarBG.y = timeTxt.y + (timeTxt.height * 0.25);
 		timeBar.y = timeBarBG.y + 5;
@@ -190,12 +191,12 @@ class PsychHUD extends BaseHUD {
 				hitbar.y += 340;
 		}
 	}
-    override public function songEnding(){
+	override public function songEnding(){
 		timeBarBG.visible = false;
 		timeBar.visible = false;
 		timeTxt.visible = false;
-    }
-    override function update(elapsed:Float){
+	}
+	override function update(elapsed:Float){
 		scoreTxt.text = (songHighscore != 0 && score > songHighscore ? 'Hi-score: ' : 'Score: ')
 			+ '$score | Combo Breaks: $comboBreaks | Rating: '
 			+ (grade != '?' ? Highscore.floorDecimal(ratingPercent * 100, 2)
@@ -209,7 +210,7 @@ class PsychHUD extends BaseHUD {
 				judgeTexts.get(k).text = Std.string(judgements.get(k));
 		}
 		
-        super.update(elapsed);
+		super.update(elapsed);
 
 		if (FlxG.state == PlayState.instance)
 			botplayTxt.visible = PlayState.instance.cpuControlled;
@@ -217,21 +218,23 @@ class PsychHUD extends BaseHUD {
 		if (botplayTxt.visible)
 		{
 			botplaySine += 180 * elapsed;
-			botplayTxt.alpha = 1 - Math.sin((Math.PI * botplaySine) / 180);
+			botplayTxt.alpha = 1 - flixel.math.FlxMath.fastSin((Math.PI * botplaySine) / 180);
 		}
 
+		var songCalc:Null<Float> = null;
 
-        var songCalc:Float = (songLength - time);
-        if (ClientPrefs.timeBarType == 'Time Elapsed')
-            songCalc = time;
+		if (ClientPrefs.timeBarType == 'Time Left')
+			songCalc = (songLength - time);
+		else if (ClientPrefs.timeBarType == 'Time Elapsed')
+			songCalc = time;
+		
+		if (songCalc != null){
+			var secondsTotal:Int = Math.floor(songCalc / 1000);
+			if (secondsTotal < 0) secondsTotal = 0;
 
-        var secondsTotal:Int = Math.floor(songCalc / 1000);
-        if (secondsTotal < 0)
-            secondsTotal = 0;
-
-        if (ClientPrefs.timeBarType != 'Song Name')
-            timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
-    }
+			timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
+		}
+	}
 
 	override function set_misses(val:Int)
 	{
@@ -295,10 +298,10 @@ class PsychHUD extends BaseHUD {
 		}
 	}
 
-    override public function beatHit(beat:Int){
+	override public function beatHit(beat:Int){
 		if (hitbar != null)
 			hitbar.beatHit();
 
-        super.beatHit(beat);
-    }
+		super.beatHit(beat);
+	}
 }

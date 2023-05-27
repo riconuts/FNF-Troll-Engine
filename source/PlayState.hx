@@ -4142,7 +4142,7 @@ class PlayState extends MusicBeatState
 		} */
 
 		if (!daNote.isSustainNote && ClientPrefs.missVolume > 0) // i missed this sound
-			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(ClientPrefs.missVolume * 0.9, ClientPrefs.missVolume * 1));
+			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), ClientPrefs.missVolume * FlxG.random.float(0.9, 1));
 
 		if(instakillOnMiss)
 			doDeathCheck(true);
