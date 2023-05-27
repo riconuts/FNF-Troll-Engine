@@ -117,9 +117,11 @@ class NoteOffsetState extends MusicBeatState
 
 		comboNums = new FlxSpriteGroup();
 		comboNums.cameras = [camHUD];
-		var comboColor = ClientPrefs.coloredCombos ? 0xFFba82e8 : 0xFFFFFFFF;
+
+		var ratingColor = ClientPrefs.useEpics ? 0xFFba82e8 : 0xFF87EDF5;
+		var comboColor = ClientPrefs.coloredCombos ? ratingColor : 0xFFFFFFFF;
 		for (i in 0...3){
-			var numScore = new FlxSprite(43 * i).loadGraphic(Paths.image('num' + FlxG.random.int(0, 9)));
+			var numScore = new FlxSprite().loadGraphic(Paths.image('num' + FlxG.random.int(0, 9)));
 			numScore.cameras = [camHUD];
 			numScore.scale.set(0.5, 0.5);
 			numScore.updateHitbox();
@@ -129,7 +131,7 @@ class NoteOffsetState extends MusicBeatState
 		add(comboNums);
 
 		timingTxt = new FlxText(0,0,0,"0ms");
-		timingTxt.setFormat(Paths.font("calibri.ttf"), 28, ClientPrefs.useEpics ? 0xFFba82e8 : 0xFF87EDF5, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		timingTxt.setFormat(Paths.font("calibri.ttf"), 28, ratingColor, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		timingTxt.cameras = [camHUD];
 		timingTxt.scrollFactor.set();
 		timingTxt.borderSize = 1.25;
@@ -428,9 +430,10 @@ class NoteOffsetState extends MusicBeatState
 		rating.y -= ClientPrefs.comboOffset[1];
 
 		var daLoop = 0;
+		var numStartX:Float = (FlxG.width - 3 * 41) * 0.5 + ClientPrefs.comboOffset[2];
 		for (numScore in comboNums.members){
-			numScore.screenCenter();
-			numScore.x += ClientPrefs.comboOffset[2] + 43 * daLoop++;
+			numScore.x = numStartX + 43 * daLoop++;
+			numScore.screenCenter(Y);
 			numScore.y -= ClientPrefs.comboOffset[3];
 		}
 

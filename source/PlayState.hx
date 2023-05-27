@@ -3582,21 +3582,30 @@ class PlayState extends MusicBeatState
 				FlxColor.WHITE;
 		}; // this could prob be set in recalculateRating tbh lol
 
+		var numStartX:Float = (FlxG.width - separatedScore.length * 41) * 0.5 + ClientPrefs.comboOffset[2];
 		for (i in separatedScore)
 		{
 			var numScore:RatingSprite = comboNumGroup.recycle(RatingSprite, RatingSprite.newNumber);
-			numScore.revive();
 			numScore.loadGraphic(Paths.image('num' + i));
+
+			if (ClientPrefs.simpleJudge){
+				numScore.scale.x = 0.5 * 1.25;
+				numScore.updateHitbox();
+				numScore.scale.y = 0.5 * 0.75;
+			}else{
+				numScore.updateHitbox();
+			}
+			
+			numScore.x = numStartX + 41.5 * daLoop;
+			numScore.screenCenter(Y);
+			numScore.y -= ClientPrefs.comboOffset[3];
 
 			numScore.color = comboColor;
 			numScore.visible = showComboNum;
-			numScore.screenCenter();
-			numScore.x += ClientPrefs.comboOffset[2] + 43 * daLoop;
-			numScore.y -= ClientPrefs.comboOffset[3];
+
 			numScore.ID = daLoop;
 			numScore.moves = !ClientPrefs.simpleJudge;
-			if (numScore.tween != null)
-			{
+			if (numScore.tween != null){
 				numScore.tween.cancel();
 				numScore.tween.destroy();
 			}
@@ -3606,9 +3615,6 @@ class PlayState extends MusicBeatState
 
 			if (ClientPrefs.simpleJudge)
 			{
-				numScore.scale.x = 0.5 * 1.25;
-				numScore.scale.y = 0.5 * 0.75;
-
 				/* numScore.alpha = 0.6; */
 				numScore.tween = FlxTween.tween(numScore, {"scale.x": 0.5, "scale.y": 0.5 /* , alpha: 1 */}, 0.2, {
 					ease: FlxEase.circOut
