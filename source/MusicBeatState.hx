@@ -1,5 +1,6 @@
 package;
 
+import haxe.io.Path;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.system.FlxSound;
 import flixel.addons.ui.FlxUIState;
@@ -184,10 +185,41 @@ class MusicBeatState extends FlxUIState
 			}
 			gallery.JukeboxState.playIdx = 0;
 
-			menuMusic = Paths.music('freakyMenu');
+			#if MODS_ALLOWED
+			// i NEED to rewrite the paths shit for real 
+			function returnSound(path:String, key:String, ?library:String){
+				var filePath = Path.join([path, key]);
 
+				if (!Paths.currentTrackedSounds.exists(filePath))
+					Paths.currentTrackedSounds.set(filePath, openfl.media.Sound.fromFile(filePath));
+				
+				Paths.localTrackedAssets.push(key);
+
+				return Paths.currentTrackedSounds.get(filePath);
+			}
+
+			for (folder in [Paths.mods(Paths.currentModDirectory), Paths.mods("global"), "assets"]){
+				var daPath = Path.join([folder, "music"]);
+				
+				var menuFilePath = daPath+"/freakyMenu.ogg";
+				if (Paths.exists(menuFilePath)){
+					if (Paths.exists(daPath+"/freakyIntro.ogg")){
+						menuMusic = returnSound(daPath, "freakyMenu.ogg");
+
+						FlxG.sound.playMusic(returnSound(daPath, "freakyIntro.ogg"), volume, false);
+						FlxG.sound.music.onComplete = menuLoopFunc;
+					}else{
+						FlxG.sound.playMusic(returnSound(daPath, "freakyMenu.ogg"), volume, true);
+					}	
+
+					break;
+				}
+			}
+			#else
+			menuMusic = Paths.music('freakyMenu');
 			FlxG.sound.playMusic(Paths.music('freakyIntro'), volume, false);
 			FlxG.sound.music.onComplete = menuLoopFunc;
+			#end
 
 			Conductor.changeBPM(180);
 			Conductor.songPosition = 0;
