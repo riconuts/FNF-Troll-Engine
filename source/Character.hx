@@ -472,10 +472,17 @@ class Character extends FlxSprite
 
 	public function getCamera()
 	{
-		return [
+		var cam:Array<Float> = [
 			x + width * 0.5 + (cameraPosition[0] + 150) * xFacing,
 			y + height * 0.5 + cameraPosition[1] - 100
 		];
+
+		var scriptCam:Null<Array<Float>> = null;
+		
+		if (characterScript!=null && characterScript is FunkinHScript)
+			scriptCam = characterScript.call("getCamera", [cam]);
+
+		return scriptCam!=null ? scriptCam : cam;
 	}
 
 	override function updateColorTransform():Void
