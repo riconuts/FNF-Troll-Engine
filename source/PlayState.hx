@@ -3608,16 +3608,11 @@ class PlayState extends MusicBeatState
 
 			if (ClientPrefs.simpleJudge)
 			{
-				/* numScore.alpha = 0.6; */
-				numScore.tween = FlxTween.tween(numScore, {"scale.x": 0.5, "scale.y": 0.5 /* , alpha: 1 */}, 0.2, {
-					ease: FlxEase.circOut
-				});
-
+				numScore.tween = FlxTween.tween(numScore.scale, {x: 0.5, y: 0.5}, 0.2, {ease: FlxEase.circOut});
 				lastCombos.push(numScore);
 			}
 			else
 			{
-				
 				numScore.acceleration.y = FlxG.random.int(200, 300);
 				numScore.velocity.set(FlxG.random.float(-10, 10), -FlxG.random.int(140, 160));
 
