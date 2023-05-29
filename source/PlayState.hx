@@ -828,9 +828,9 @@ class PlayState extends MusicBeatState
 		}
 		
 		if(ClientPrefs.etternaHUD == 'Advanced')
-			hud = new hud.AdvancedHUD(boyfriend.healthIcon, dad.healthIcon, songName);
+			hud = new hud.AdvancedHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song);
 		else
-			hud = new PsychHUD(boyfriend.healthIcon, dad.healthIcon, songName);
+			hud = new PsychHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song);
 		healthBar = hud.healthBar;
 		healthBarBG = healthBar.healthBarBG;
 		iconP1 = healthBar.iconP1;
