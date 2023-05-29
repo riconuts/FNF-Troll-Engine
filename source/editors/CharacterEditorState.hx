@@ -963,7 +963,7 @@ class CharacterEditorState extends MusicBeatState
 	}
 
 	function updatePointerPos() {
-		var cam = PlayState.getCharacterCamera(char);
+		var cam = char.getCamera();
 		var x:Float = cam[0];
 		var y:Float = cam[1];
 
@@ -1129,7 +1129,7 @@ class CharacterEditorState extends MusicBeatState
 			}
 
 			if (FlxG.keys.justPressed.R) {
-				var camPos = PlayState.getCharacterCamera(char);
+				var camPos = char.getCamera();
 
 				camFollow.x = camPos[0];
 				camFollow.y = camPos[1];

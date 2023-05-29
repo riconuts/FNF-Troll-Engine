@@ -13,8 +13,8 @@ function onTrigger(value1, value2)
 {
 	if (value1 == "true")
 	{
-		var camDad = PlayState.getCharacterCamera(game.dad);
-		var camBf = PlayState.getCharacterCamera(game.boyfriend);
+		var camDad = game.dad.getCamera();
+		var camBf = game.boyfriend.getCamera();
 		
 		game.triggerEventNote(
 			"Camera Follow Pos", 

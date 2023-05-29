@@ -3242,19 +3242,9 @@ class PlayState extends MusicBeatState
 	{
 		focusedChar = char;
 		if (char != null){
-			var cam = getCharacterCamera(char);
+			var cam = char.getCamera();
 			sectionCamera.set(cam[0], cam[1]);
 		}
-	}
-
-	/**
-		Returns an array with the characters camera focus positions.
-	**/
-	static public function getCharacterCamera(char:Character) {
-		return [
-			char.x + char.width * 0.5 + (char.cameraPosition[0] + 150) * char.xFacing,
-			char.y + char.height * 0.5 + char.cameraPosition[1] - 100
-		];
 	}
 
 	public function finishSong(?ignoreNoteOffset:Bool = false):Void

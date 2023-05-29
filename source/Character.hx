@@ -469,6 +469,15 @@ class Character extends FlxSprite
 		}
 		return colorOverlay;
 	}
+
+	public function getCamera()
+	{
+		return [
+			x + width * 0.5 + (cameraPosition[0] + 150) * xFacing,
+			y + height * 0.5 + cameraPosition[1] - 100
+		];
+	}
+
 	override function updateColorTransform():Void
 	{
 		if (colorTransform == null)
