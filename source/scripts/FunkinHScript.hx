@@ -149,6 +149,9 @@ class FunkinHScript extends FunkinScript
 			weak: FlxPoint.weak
 		});
 
+		set("Main", Main);
+		set("Lib", openfl.Lib);
+
 		set("FlxRuntimeShader", FlxRuntimeShader);
 		set("newShader", function(fragFile:String = null, vertFile:String = null){ // returns a FlxRuntimeShader but with file names lol
 			var runtime:FlxRuntimeShader = null;

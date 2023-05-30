@@ -66,6 +66,7 @@ class Main extends Sprite
 		Main.outOfDate = outOfDate;
 		return outOfDate;
 	}
+	
 	public static function main():Void
 	{
 		Lib.current.addChild(new Main());
