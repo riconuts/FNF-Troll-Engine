@@ -618,26 +618,25 @@ class PlayState extends MusicBeatState
 		if (SONG == null)
 			SONG = Song.loadFromJson('tutorial', 'tutorial');
 
-		if (SONG != null){
-			var jason = Paths.songJson(Paths.formatToSongPath(SONG.song) + '/metadata');
-
-			if (!Paths.exists(jason))
-				jason = Paths.modsSongJson(Paths.formatToSongPath(SONG.song) + '/metadata');
-
-			if (Paths.exists(jason))
-				metadata = cast Json.parse(Paths.getContent(jason));
-			else{
-				if(showDebugTraces)
-					trace("No metadata for " + SONG.song + ". Maybe add some?");
-			}
-			
-		}
-
 		Conductor.mapBPMChanges(SONG);
 		Conductor.changeBPM(SONG.bpm);
 
 		songName = Paths.formatToSongPath(SONG.song);
 		songHighscore = Highscore.getScore(SONG.song);
+
+		if (SONG != null){
+			var jason = Paths.songJson(songName + '/metadata');
+
+			if (!Paths.exists(jason))
+				jason = Paths.modsSongJson(songName + '/metadata');
+
+			if (Paths.exists(jason))
+				metadata = cast Json.parse(Paths.getContent(jason));
+			else{
+				if(showDebugTraces)
+					trace("No metadata for " + songName + ". Maybe add some?");
+			}
+		}
 
 		////
 		arrowSkin = SONG.arrowSkin;
@@ -955,7 +954,7 @@ class PlayState extends MusicBeatState
 			comboNumGroup.add(RatingSprite.newNumber()).kill();
 		
 		timingTxt = new FlxText();
-		timingTxt.setFormat(Paths.font("calibri.ttf"), 28, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		timingTxt.setFormat(Paths.font("vcr.ttf"), 28, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		timingTxt.cameras = [camHUD];
 		timingTxt.scrollFactor.set();
 		timingTxt.borderSize = 1.25;
