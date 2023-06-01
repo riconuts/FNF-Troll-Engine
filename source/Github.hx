@@ -237,7 +237,7 @@ class Github {
 
 		daRequest.onError = function(e:Dynamic)
 		{
-			throw e;
+			trace(e);
 		}
 		
 		var tryRequest:Bool = true;
@@ -319,7 +319,7 @@ class Github {
 
 
         daRequest.onError = function(e:Dynamic){
-            throw e;
+            trace(e);
         }
 
 		var tryRequest:Bool = true;
