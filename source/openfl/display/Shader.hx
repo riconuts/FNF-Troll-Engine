@@ -366,11 +366,12 @@ class Shader
             {
                 var message = "Unable to initialize the shader program";
                 message += "\n" + gl.getProgramInfoLog(program);
+				trace(message);
                 throw message;
                 //throw message;
             }
         }catch(e:Dynamic){
-            trace(e.message);
+            trace(e);
         }
 
 		return program;

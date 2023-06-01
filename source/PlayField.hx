@@ -1,4 +1,5 @@
 package;
+import flixel.graphics.FlxGraphic;
 import JudgmentManager.Judgment;
 import openfl.display.Shader;
 import flixel.util.FlxColor;
@@ -46,6 +47,7 @@ PlayField is seperated into 2 classes:
  */
  
 typedef RenderObject = {
+	graphic:FlxGraphic,
 	shader:Shader,
 	alpha:Float,
 	uvData:Vector<Float>,
@@ -755,20 +757,22 @@ class NoteField extends FlxObject
 				if (object == null)
 					continue;
 				var shader:Dynamic = object.shader;
+				var graphic:FlxGraphic = object.graphic;
 				var alpha = object.alpha;
 				var vertices = object.vertices;
 				var uvData = object.uvData;
 				shader.alpha.value = [alpha];
+				var indices = new Vector<Int>(vertices.length, false, cast [for (i in 0...vertices.length)i]);
+
+
 				for (camera in cameras)
 				{
 					if (camera!=null && camera.canvas!=null && camera.canvas.graphics != null){
 						if (camera.alpha == 0 || !camera.visible)
 							continue;
 						shader.alpha.value = [alpha * camera.alpha];
-						// maybe some optimization so that it'll only do a beginShaderFill/endFill if the previous drawn shader != this shader
-						camera.canvas.graphics.beginShaderFill(shader);
-						camera.canvas.graphics.drawTriangles(vertices, null, uvData);
-						camera.canvas.graphics.endFill();
+						var drawItem = camera.startTrianglesBatch(graphic, shader.bitmap.filter==4, false, null, false, shader);
+						drawItem.addTriangles(vertices, indices, uvData);
 					}
 				}
 			}
@@ -912,6 +916,7 @@ class NoteField extends FlxObject
 		shader.bitmap.filter = hold.antialiasing ? LINEAR : NEAREST;
 
 		return {
+			graphic: hold.graphic,
 			shader: shader,
 			alpha: alpha, 
 			uvData: uvData,
@@ -1040,6 +1045,7 @@ class NoteField extends FlxObject
 		shader.bitmap.filter = sprite.antialiasing ? LINEAR : NEAREST;
 		
 		return {
+			graphic: sprite.graphic,
 			shader: shader,
 			alpha: alpha,
 			uvData: uvData,
