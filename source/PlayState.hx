@@ -4325,7 +4325,8 @@ class PlayState extends MusicBeatState
 			if (opponentHPDrain > 0 && health > opponentHPDrain)
 				health -= opponentHPDrain;
 
-			field.removeNote(note);
+			if(note.sustainLength == 0)
+				field.removeNote(note);
 		}
 		else if (note.isSustainNote)
 			if (note.parent.unhitTail.contains(note))
