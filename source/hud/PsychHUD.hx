@@ -19,7 +19,6 @@ class PsychHUD extends BaseHUD {
 	public var timeBar:FlxBar;
 	public var timeTxt:FlxText;
 	public var botplaySine:Float = 0;
-	public var botplayTxt:FlxText;
 
 	private var timeBarBG:AttachedSprite;
 
@@ -112,12 +111,6 @@ class PsychHUD extends BaseHUD {
 		timeBarBG.sprTracker = timeBar;
 
 		//
-		botplayTxt = new FlxText(400, timeBarBG.y + (ClientPrefs.downScroll ? -78 : 55), FlxG.width - 800, "[BUTTPLUG]", 32);
-		botplayTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		botplayTxt.scrollFactor.set();
-		botplayTxt.borderSize = 1.25;
-		botplayTxt.visible = false;
-		add(botplayTxt);
 		
 		hitbar = new Hitbar();
 		hitbar.alpha = alpha;
@@ -160,7 +153,6 @@ class PsychHUD extends BaseHUD {
 		timeTxt.y = (ClientPrefs.downScroll ? FlxG.height - 44 : 19);
 		timeBarBG.y = timeTxt.y + (timeTxt.height * 0.25);
 		timeBar.y = timeBarBG.y + 5;
-		botplayTxt.y = timeBarBG.y + (ClientPrefs.downScroll ? -78 : 55);
 		timeBar.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
 		timeTxt.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
 		hitbar.visible = ClientPrefs.hitbar;
@@ -212,15 +204,6 @@ class PsychHUD extends BaseHUD {
 		}
 		
 		super.update(elapsed);
-
-		if (FlxG.state == PlayState.instance)
-			botplayTxt.visible = PlayState.instance.cpuControlled;
-
-		if (botplayTxt.visible)
-		{
-			botplaySine += 180 * elapsed;
-			botplayTxt.alpha = 1 - flixel.math.FlxMath.fastSin((Math.PI * botplaySine) / 180);
-		}
 
 		var songCalc:Null<Float> = null;
 

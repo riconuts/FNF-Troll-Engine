@@ -179,6 +179,26 @@ class ClientPrefs
 					"type" => "percent" // saved value is value / 100
 				]
 			},
+			"judgeOpacity" => {
+				display: "Judgement Opacity",
+				desc: "How visible the judgement, combo and timing displays should be. 100% is fully visible and 0% is invisible.",
+				type: Number,
+				value: 1,
+				data: [
+					"suffix" => "%",
+					"min" => 0,
+					"max" => 100,
+					"step" => 1,
+					"type" => "percent"
+				]
+			},
+			"judgeBehind" => {
+				display: "Judgements Behind Notes",
+				desc: "Places judgements behind the notes instead of infront.",
+				type: Toggle,
+				value: false,
+				data: []
+			},
 			"hpOpacity" => {
 				display: "Health Bar Opacity",
 				desc: "How visible the health bar should be. 100% is fully visible and 0% is invisible.",

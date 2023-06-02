@@ -149,6 +149,9 @@ class Wife3
 }
 class PlayState extends MusicBeatState
 {
+	public var botplaySine:Float = 0;
+	public var botplayTxt:FlxText;
+
 	var notefields:NotefieldManager = new NotefieldManager();
 	var sndFilter:ALFilter = AL.createFilter();
     var sndEffect:ALEffect = AL.createEffect();
@@ -790,6 +793,13 @@ class PlayState extends MusicBeatState
 		iconP1 = healthBar.iconP1;
 		iconP2 = healthBar.iconP2;
 
+		botplayTxt = new FlxText(400, (ClientPrefs.downScroll ? FlxG.height - 44 : 19) + 15 + (ClientPrefs.downScroll ? -78 : 55), FlxG.width - 800, "[BUTTPLUG]", 32);
+		botplayTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		botplayTxt.scrollFactor.set();
+		botplayTxt.borderSize = 1.25;
+		botplayTxt.visible = false;
+		
+
 		// After all characters being loaded, it makes then invisible 0.01s later so that the player won't freeze when you change characters
 
 		//// LOAD SCRIPTS
@@ -984,11 +994,12 @@ class PlayState extends MusicBeatState
 		strumLineNotes.cameras = cH;
 		grpNoteSplashes.cameras = cH;
 		notes.cameras = cH;
+		botplayTxt.cameras = cH;
 /* 		healthBarBG.cameras = cH;
 		healthBar.cameras = cH;
 		iconP1.cameras = cH;
 		iconP2.cameras = cH; */
-/* 		botplayTxt.cameras = cH;
+/* 	
 		timeBar.cameras = cH;
 		timeBarBG.cameras = cH;
 		timeTxt.cameras = cH; */
@@ -1025,13 +1036,22 @@ class PlayState extends MusicBeatState
 
 		////
 		callOnAllScripts('onCreatePost');
+		if(ClientPrefs.judgeBehind){
+			add(ratingTxtGroup);
+			add(comboNumGroup);
+			add(timingTxt);
+		}
 		add(strumLineNotes);
 		add(playfields);
 		add(notefields);
+		if (!ClientPrefs.judgeBehind)
+		{
+			add(ratingTxtGroup);
+			add(comboNumGroup);
+			add(timingTxt);
+		}
+		add(botplayTxt);
 		add(grpNoteSplashes);
-		add(ratingTxtGroup);
-		add(comboNumGroup);
-		add(timingTxt);
 
 		super.create();
 
@@ -2182,6 +2202,21 @@ class PlayState extends MusicBeatState
 				}
 			}
 
+			remove(ratingTxtGroup);
+			remove(comboNumGroup);
+			remove(timingTxt);
+			if(ClientPrefs.judgeBehind){
+				insert(members.indexOf(strumLineNotes) - 1, timingTxt);
+				insert(members.indexOf(timingTxt) - 1, comboNumGroup);
+				insert(members.indexOf(comboNumGroup) - 1, ratingTxtGroup);
+			}else{
+				insert(members.indexOf(notefields) + 1, timingTxt);
+				insert(members.indexOf(timingTxt) + 1, comboNumGroup);
+				insert(members.indexOf(comboNumGroup) + 1, ratingTxtGroup);
+			}
+
+			botplayTxt.y = (ClientPrefs.downScroll ? FlxG.height - 44 : 19) + 15 + (ClientPrefs.downScroll ? -78 : 55);
+			
 			for(field in playfields){
 				field.noteField.optimizeHolds = ClientPrefs.optimizeHolds;
 				field.noteField.drawDistMod = ClientPrefs.drawDistanceModifier;
@@ -2722,6 +2757,14 @@ class PlayState extends MusicBeatState
 
 		checkEventNote();
 		
+		botplayTxt.visible = PlayState.instance.cpuControlled;
+
+		if (botplayTxt.visible)
+		{
+			botplaySine += 180 * elapsed;
+			botplayTxt.alpha = 1 - flixel.math.FlxMath.fastSin((Math.PI * botplaySine) / 180);
+		}
+
 		super.update(elapsed);
 		modManager.updateTimeline(curDecStep);
 		modManager.update(elapsed);
@@ -3488,6 +3531,8 @@ class PlayState extends MusicBeatState
 			});
 		}
 
+		rating.alpha = ClientPrefs.judgeOpacity;
+
 		rating.visible = showRating;
 		rating.loadGraphic(Paths.image(image));
 		rating.updateHitbox();
@@ -3564,6 +3609,7 @@ class PlayState extends MusicBeatState
 			comboNumGroup.remove(numScore, true);
 			comboNumGroup.add(numScore);
 
+			numScore.alpha = ClientPrefs.judgeOpacity;
 			if (ClientPrefs.simpleJudge)
 			{
 				numScore.tween = FlxTween.tween(numScore.scale, {x: 0.5, y: 0.5}, 0.2, {ease: FlxEase.circOut});
@@ -3574,7 +3620,6 @@ class PlayState extends MusicBeatState
 				numScore.acceleration.y = FlxG.random.int(200, 300);
 				numScore.velocity.set(FlxG.random.float(-10, 10), -FlxG.random.int(140, 160));
 
-				numScore.alpha = 1;
 				numScore.tween = FlxTween.tween(numScore, {alpha: 0}, 0.2, {
 					onComplete: function(wtf)
 					{
@@ -3682,6 +3727,7 @@ class PlayState extends MusicBeatState
 			FlxTween.cancelTweensOf(timingTxt);
 			FlxTween.cancelTweensOf(timingTxt.scale);
 			
+			timingTxt.alpha = ClientPrefs.judgeOpacity;
 			timingTxt.text = '${FlxMath.roundDecimal(hitTime, 2)}ms';
 			timingTxt.screenCenter();
 			timingTxt.x += ClientPrefs.comboOffset[4];
@@ -4274,12 +4320,13 @@ class PlayState extends MusicBeatState
 
 					
 
-		if (!note.isSustainNote && note.sustainLength == 0)
+		if (!note.isSustainNote)
 		{
 			if (opponentHPDrain > 0 && health > opponentHPDrain)
 				health -= opponentHPDrain;
 
-			field.removeNote(note);
+			if(note.sustainLength == 0)
+				field.removeNote(note);
 		}
 		else if (note.isSustainNote)
 			if (note.parent.unhitTail.contains(note))
