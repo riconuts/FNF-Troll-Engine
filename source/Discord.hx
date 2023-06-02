@@ -91,14 +91,14 @@ class DiscordClient
 	
 	public static function changePresence(details:String, state:Null<String>, largeImageKey:String = "app-logo", ?hasStartTimestamp:Bool, ?endTimestamp:Float)
 	{
-		#if !final
+		/*
 		DiscordRpc.presence({
 			details: "thats how you do it",
 			largeImageKey: 'gorgeous',
 			largeImageText: 'gorgeous'
 		});
+		*/
 
-		#else
 		////
 		var startTimestamp:Float = hasStartTimestamp ? Date.now().getTime() : 0;
 
@@ -117,9 +117,7 @@ class DiscordClient
 			startTimestamp : Std.int(startTimestamp / 1000),
 			endTimestamp : Std.int(endTimestamp / 1000)
 		});
-
-		#end
-
+		
 		//trace('Discord RPC Updated. Arguments: $details, $state, $smallImageKey, $hasStartTimestamp, $endTimestamp');
 	}
 
