@@ -193,7 +193,7 @@ class UpdaterState extends MusicBeatState {
                 FileSystem.rename(progPath, nu);
 				File.copy('${finishedFolder}\\${exe}', progPath);
 				prog.done = true; 
-				Sys.command('start /B "$progPath"');
+				Sys.command('start /B "$progPath\\$exe"');
                 System.exit(0);
 			});
         });
