@@ -3727,7 +3727,6 @@ class PlayState extends MusicBeatState
 			FlxTween.cancelTweensOf(timingTxt);
 			FlxTween.cancelTweensOf(timingTxt.scale);
 			
-			timingTxt.alpha = ClientPrefs.judgeOpacity;
 			timingTxt.text = '${FlxMath.roundDecimal(hitTime, 2)}ms';
 			timingTxt.screenCenter();
 			timingTxt.x += ClientPrefs.comboOffset[4];
@@ -3736,7 +3735,7 @@ class PlayState extends MusicBeatState
 			timingTxt.color = hud.judgeColours.get(judgeData.internalName);
 
 			timingTxt.visible = true;
-			timingTxt.alpha = 1;
+			timingTxt.alpha = ClientPrefs.judgeOpacity;
 			timingTxt.y -= 8;
 			timingTxt.scale.set(1, 1);
 			
