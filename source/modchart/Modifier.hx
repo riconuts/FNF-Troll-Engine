@@ -2,6 +2,7 @@
 
 package modchart;
 
+import flixel.math.FlxPoint;
 import flixel.FlxSprite;
 import math.Vector3;
 // Based on Schmovin' and Andromeda's modifier systems
@@ -125,6 +126,7 @@ class Modifier {
 	public function getPos(diff:Float, tDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite):Vector3{return pos;}
 	public function modifyVert(beat:Float, vert:Vector3, idx:Int, obj:FlxSprite, pos:Vector3, player:Int, data:Int):Vector3{return vert;}
 	public function getAlpha(beat:Float, alpha:Float, obj:FlxSprite, player:Int, data:Int):Float{return alpha;}
+	public function getScale(beat:Float, scale:FlxPoint, obj:FlxSprite, player:Int, data:Int):FlxPoint{return scale;}
     public function update(elapsed:Float){}
 	public function isRenderMod():Bool{return false;}
 }

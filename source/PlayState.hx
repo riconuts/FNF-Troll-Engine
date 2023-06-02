@@ -18,6 +18,7 @@ import Achievements;
 #end
 import Cache;
 
+import playfields.*;
 import Note.EventNote;
 import Section.SwagSection;
 import Shaders;
@@ -148,6 +149,7 @@ class Wife3
 }
 class PlayState extends MusicBeatState
 {
+	var notefields:NotefieldManager = new NotefieldManager();
 	var sndFilter:ALFilter = AL.createFilter();
     var sndEffect:ALEffect = AL.createEffect();
 	public var showRating:Bool = true;
@@ -1025,6 +1027,7 @@ class PlayState extends MusicBeatState
 		callOnAllScripts('onCreatePost');
 		add(strumLineNotes);
 		add(playfields);
+		add(notefields);
 		add(grpNoteSplashes);
 		add(ratingTxtGroup);
 		add(comboNumGroup);
@@ -2443,6 +2446,8 @@ class PlayState extends MusicBeatState
 
 	// good to call this whenever you make a playfield
 	public function initPlayfield(field:PlayField){
+		notefields.add(field.noteField);
+
 		field.judgeManager = judgeManager;
 
 		field.noteRemoved.add((note:Note, field:PlayField) -> {

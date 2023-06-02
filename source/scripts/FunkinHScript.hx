@@ -1,11 +1,15 @@
 package scripts;
 
+import proxies.ProxyField;
+import proxies.ProxySprite;
+import proxies.ProxySprite;
 import flixel.text.FlxText;
 import flixel.text.FlxText.FlxTextBorderStyle;
 import editors.ChartingState;
 import flixel.math.FlxPoint;
 import JudgmentManager.Judgment;
 import flixel.addons.display.FlxRuntimeShader;
+import playfields.*;
 
 import flixel.util.FlxColor;
 import flixel.FlxG;
@@ -270,7 +274,9 @@ class FunkinHScript extends FunkinScript
 		// FNF-specific things
 		set("NoteObject", NoteObject);
 		set("PlayField", PlayField);
-		set("NoteField", PlayField.NoteField);
+		set("NoteField", NoteField);
+		set("ProxyField", ProxyField);
+		set("ProxySprite", ProxySprite);
 		set("Paths", Paths);
 		set("AttachedSprite", AttachedSprite);
 		set("AttachedText", AttachedText);

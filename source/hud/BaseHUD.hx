@@ -4,6 +4,7 @@ import JudgmentManager.JudgmentData;
 import flixel.util.FlxColor;
 import PlayState.FNFHealthBar;
 import haxe.exceptions.NotImplementedException;
+import playfields.*;
 
 import flixel.group.FlxSpriteGroup;
 

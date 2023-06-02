@@ -1,6 +1,7 @@
 // @author Nebula_Zorua
 
 package modchart;
+import flixel.math.FlxPoint;
 import flixel.tweens.FlxEase;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.FlxSprite;
@@ -352,6 +353,29 @@ class ModManager {
 				alpha = mod.getAlpha(beat, alpha, obj, player, data);
 		}
 		return alpha;
+	}
+
+	public function getScale(beat:Float, scale:FlxPoint, obj:FlxSprite, player:Int, data:Int, ?exclusions:Array<String>):FlxPoint
+	{
+		if (exclusions == null)
+			exclusions = [];
+
+		if (!obj.active)
+			return scale;
+
+		for (name in getActiveMods(player))
+		{
+			if (exclusions.contains(name))
+				continue;
+			var mod:Modifier = notemodRegister.get(name);
+			if (mod == null)
+				continue;
+			if (!obj.active)
+				return scale;
+			if (mod.isRenderMod())
+				scale = mod.getScale(beat, scale, obj, player, data);
+		}
+		return scale;
 	}
 
 	public function queueEaseP(step:Float, endStep:Float, modName:String, percent:Float, style:String = 'linear', player:Int = -1, ?startVal:Float)

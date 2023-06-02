@@ -11,7 +11,7 @@ class ScaleModifier extends NoteModifier {
 	{
 		return a + (b - a) * c;
 	}
-	function getScale(sprite:Dynamic, scale:FlxPoint, data:Int, player:Int)
+	function daScale(sprite:Dynamic, scale:FlxPoint, data:Int, player:Int)
 	{
 		var y = scale.y;
 		scale.x *= 1 - getValue(player);
@@ -54,44 +54,19 @@ class ScaleModifier extends NoteModifier {
 
 	// TODO: seperate into modifyNoteVert and modifyReceptorVert?
 
-	override function modifyVert(beat:Float, vert:Vector3, idx:Int, sprite:FlxSprite, pos:Vector3, player:Int, data:Int):Vector3
+	override function getScale(beat:Float, scale:FlxPoint, sprite:FlxSprite, player:Int, data:Int):FlxPoint
 	{
-		if(!(sprite is NoteObject))return vert;
+		if(!(sprite is NoteObject))return scale;
 
 		var obj:NoteObject = cast sprite;
-		var scale = getScale(obj, FlxPoint.weak(1, 1), obj.noteData, player);
+		var scale = daScale(obj, scale, obj.noteData, player);
 		if ((sprite is Note)){
 			var note:Note = cast sprite;
 			if (note.isSustainNote)
 				scale.y = 1;
 		}
-		vert.x *= scale.x;
-		vert.y *= scale.y;
-		scale.putWeak();
-		return vert;
+		return scale;
 	}
-
-/* 	override function ignoreUpdateReceptor()
-		return false;
-
-	override function ignoreUpdateNote()
-		return false;
-
-	override function updateNote(beat:Float, note:Note, player:Int)
-	{
-		var scale = getScale(note, FlxPoint.weak(note.defScale.x, note.defScale.y), note.noteData, player);
-		if(note.isSustainNote)scale.y = note.defScale.y;
-		
-		note.scale.copyFrom(scale);
-		scale.putWeak();
-	}
-
-	override function updateReceptor(beat:Float, receptor:StrumNote, player:Int)
-	{
-		var scale = getScale(receptor, FlxPoint.weak(receptor.defScale.x, receptor.defScale.y), receptor.noteData, player);
-		receptor.scale.copyFrom(scale);
-		scale.putWeak();
-	} */
 
 	override function getSubmods()
 	{
