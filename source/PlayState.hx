@@ -5051,9 +5051,17 @@ class FNFHealthBar extends FlxBar{
 		//
 		antialiasing = false;
 		scrollFactor.set();
-		alpha = ClientPrefs.hpOpacity;
 		visible = alpha > 0;
 	}
+
+	function get_alpha()
+		return alpha * ClientPrefs.hpOpacity;
+
+	public var real_alpha(get, set):Float;
+	function get_real_alpha()
+		@:bypassAccessor return alpha;
+	function set_real_alpha(val:Float)
+		return alpha = val;
 
 	public var iconScale(default, set) = 1.0;
 	function set_iconScale(value:Float){
@@ -5091,8 +5099,6 @@ class FNFHealthBar extends FlxBar{
 			super.update(elapsed);
 			return;
 		}
-
-		alpha = ClientPrefs.hpOpacity;
 
 		healthBarBG.setPosition(x - 5, y - 5);
 
