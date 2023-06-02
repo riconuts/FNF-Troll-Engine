@@ -793,7 +793,7 @@ class PlayState extends MusicBeatState
 		iconP1 = healthBar.iconP1;
 		iconP2 = healthBar.iconP2;
 
-		botplayTxt = new FlxText(400, (ClientPrefs.downScroll ? FlxG.height - 44 : 19) + 50 + (ClientPrefs.downScroll ? -78 : 55), FlxG.width - 800, "[BUTTPLUG]", 32);
+		botplayTxt = new FlxText(400, (ClientPrefs.downScroll ? FlxG.height - 44 : 19) + 15 + (ClientPrefs.downScroll ? -78 : 55), FlxG.width - 800, "[BUTTPLUG]", 32);
 		botplayTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		botplayTxt.scrollFactor.set();
 		botplayTxt.borderSize = 1.25;
@@ -2215,7 +2215,7 @@ class PlayState extends MusicBeatState
 				insert(members.indexOf(comboNumGroup) + 1, ratingTxtGroup);
 			}
 
-			botplayTxt.y = (ClientPrefs.downScroll ? FlxG.height - 44 : 19) + 50 + (ClientPrefs.downScroll ? -78 : 55);
+			botplayTxt.y = (ClientPrefs.downScroll ? FlxG.height - 44 : 19) + 15 + (ClientPrefs.downScroll ? -78 : 55);
 			
 			for(field in playfields){
 				field.noteField.optimizeHolds = ClientPrefs.optimizeHolds;
@@ -4320,7 +4320,7 @@ class PlayState extends MusicBeatState
 
 					
 
-		if (!note.isSustainNote && note.sustainLength == 0)
+		if (!note.isSustainNote)
 		{
 			if (opponentHPDrain > 0 && health > opponentHPDrain)
 				health -= opponentHPDrain;
