@@ -296,9 +296,22 @@ class OptionsSubstate extends MusicBeatSubstate
 			[
 				"HUD",
 				[
-					"timeBarType", "hudOpacity", "hpOpacity", "timeOpacity", "stageOpacity", "scoreZoom", "npsDisplay", "showMS", "coloredCombos",
+					"timeBarType", 
+					"hudOpacity", 
+					"hpOpacity", 
+					"timeOpacity", 
+					"judgeOpacity",
+					"stageOpacity", 
+					"scoreZoom", 
+					"judgeBehind",
+					"npsDisplay", 
+					"showMS", 
+					"coloredCombos",
 					"simpleJudge",
-					"hitbar", "judgeCounter", 'hudPosition', "customizeHUD",
+					"hitbar", 
+					"judgeCounter", 
+					'hudPosition', 
+					"customizeHUD",
 				]
 			],
 			["Advanced", ["etternaHUD", "gradeSet"]]
@@ -840,6 +853,11 @@ class OptionsSubstate extends MusicBeatSubstate
 	{
 		var optBox = widget.data.get("optionBox");
 		var locked:Bool = widget.optionData.data.exists("locked") ? widget.optionData.data.get("locked") : false;
+		if (!optState)
+		{
+			if (widget.data.get("optionName") == 'customizeHUD')
+				locked = true;
+		}
 		widget.data.get("lockOverlay").visible = locked;
 		widget.locked = locked;
 		switch (widget.type)
