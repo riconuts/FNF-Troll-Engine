@@ -149,9 +149,19 @@ class Main extends Sprite
 		if (troll){
 			initialState = SinnerState;
 			skipSplash = true;
+		}else{
+			@:privateAccess
+			FlxG.initSave();
+
+			if (FlxG.save.data != null && FlxG.save.data.fullscreen != null)
+				startFullscreen = FlxG.save.data.fullscreen;
 		}
 		
 		addChild(new FlxGame(gameWidth, gameHeight, initialState, #if(flixel < "5.0.0") zoom, #end framerate, framerate, skipSplash, startFullscreen));
+		
+		// 
+		@:privateAccess
+		FlxG.sound.loadSavedPrefs();
 
 		FlxG.sound.muteKeys = StartupState.muteKeys;
 		FlxG.sound.volumeDownKeys = StartupState.volumeDownKeys;
@@ -161,20 +171,20 @@ class Main extends Sprite
 		FlxG.mouse.useSystemCursor = true;
 		FlxG.mouse.visible = false;
 		
-		#if !mobile
 		if (!troll){
+			#if !mobile
 			fpsVar = new FPS(10, 3, 0xFFFFFF);
 			fpsVar.visible = false;
 			addChild(fpsVar);
 			
 			Lib.current.stage.align = "tl";
 			Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
-		}
-		#end
+			#end
 
-		bread = new Bread();
-		bread.visible = false;
-		addChild(bread);
+			bread = new Bread();
+			bread.visible = false;
+			addChild(bread);
+		}
 		
 		#if CRASH_HANDLER
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
