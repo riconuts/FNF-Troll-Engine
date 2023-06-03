@@ -260,6 +260,7 @@ class NoteField extends FieldBase
 						if (camera.alpha == 0 || !camera.visible)
 							continue;
 						var drawItem = camera.startTrianglesBatch(graphic, shader.bitmap.filter == 4, false, null, false, shader);
+						transfarm.alphaMultiplier = alpha * camera.alpha;
 						drawItem.addTriangles(vertices, indices, uvData, null, null, null, transfarm);
 					}
 				}
