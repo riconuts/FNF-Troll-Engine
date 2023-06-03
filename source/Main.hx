@@ -149,8 +149,6 @@ class Main extends Sprite
 		if (troll){
 			initialState = SinnerState;
 			skipSplash = true;
-		}else if (FlxG.save.bind('funkin', 'ninjamuffin99') && FlxG.save.data.fullscreen != null){
-			startFullscreen = FlxG.save.data.fullscreen;
 		}
 		
 		addChild(new FlxGame(gameWidth, gameHeight, initialState, #if(flixel < "5.0.0") zoom, #end framerate, framerate, skipSplash, startFullscreen));
