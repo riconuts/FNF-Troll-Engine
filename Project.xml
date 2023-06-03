@@ -60,7 +60,7 @@
 	<!--Remove if you dont want Psych Engine mod compatibility-->
 	<define name="PE_MOD_COMPATIBILITY" if="LUA_ALLOWED" />
 	<!--Remove if you dont want the engine to autoupdate-->
-	<define name="DO_AUTO_UPDATE" unless="debug"/>
+	<define name="DO_AUTO_UPDATE" if="desktop" unless="debug"/>
 
 	<define name="CRASH_HANDLER" if="desktop" />
 	

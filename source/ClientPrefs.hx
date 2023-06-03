@@ -650,7 +650,7 @@ class ClientPrefs
 
 	public static function saveBinds(){
 		var save:FlxSave = new FlxSave();
-		save.bind('controls_v2', 'ninjamuffin99'); // Placing this in a separate save so that it can be manually deleted without removing your Score and stuff
+		save.bind('controls_v2'); // Placing this in a separate save so that it can be manually deleted without removing your Score and stuff
 		save.data.customControls = keyBinds;
 		save.close();
 	}
@@ -658,7 +658,7 @@ class ClientPrefs
 	public static function loadBinds()
 	{
 		var save:FlxSave = new FlxSave();
-		save.bind('controls_v2', 'ninjamuffin99');
+		save.bind('controls_v2');
 		if (save != null && save.data.customControls != null)
 		{
 			var loadedControls:Map<String, Array<FlxKey>> = save.data.customControls;

@@ -27,6 +27,7 @@ class StartupState extends FlxState
 	static var recentRelease:Release;
 
 	static function clearTemps(dir:String){
+		#if desktop
 		for(file in FileSystem.readDirectory(dir)){
 			var file = './$dir/$file';
 			if(FileSystem.isDirectory(file))
@@ -34,12 +35,16 @@ class StartupState extends FlxState
 			else if (file.endsWith(".tempcopy"))
 				FileSystem.deleteFile(file);
 		}
+		#end
 	}
 	public static function load():Void
 	{
 		if (loaded)
 			return;
 		loaded = true;
+
+		getRecentGithubRelease();
+		clearTemps("./");
 
 		#if html5
 		Paths.initPaths();
@@ -78,9 +83,6 @@ class StartupState extends FlxState
 
 		if (FlxG.save.data.weekCompleted != null)
 			StoryMenuState.weekCompleted = FlxG.save.data.weekCompleted;
-
-		getRecentGithubRelease();
-		clearTemps("./");
 		
 		#if desktop
 		if (!DiscordClient.isInitialized){
