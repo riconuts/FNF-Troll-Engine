@@ -2514,12 +2514,15 @@ class ChartingState extends MusicBeatState
 			if(i[1] > 3) note.mustPress = !note.mustPress;
 		}
 
+		inline function sowyNumber(n:Float):Float // haha decimals
+			return Std.parseFloat(Std.string(n));
+
 		// CURRENT EVENTS
-		var startThing:Float = sectionStartTime();
-		var endThing:Float = sectionStartTime(1);
+		var startThing:Float = sowyNumber(sectionStartTime());
+		var endThing:Float = sowyNumber(sectionStartTime(1));
 		for (i in _song.events)
 		{
-			if(endThing > i[0] && i[0] >= startThing)
+			if(i[0] >= startThing && i[0] < endThing)
 			{
 				var note:Note = setupNoteData(i, false);
 				curRenderedNotes.add(note);
@@ -2534,7 +2537,8 @@ class ChartingState extends MusicBeatState
 				if(note.eventLength > 1) daText.yAdd += 8;
 				curRenderedNoteType.add(daText);
 				daText.sprTracker = note;
-				//trace('test: ' + i[0], 'startThing: ' + startThing, 'endThing: ' + endThing);
+
+				////trace('test: ${i[0]}, startThing: $startThing, endThing: $endThing');
 			}
 		}
 
@@ -2554,11 +2558,11 @@ class ChartingState extends MusicBeatState
 		}
 
 		// NEXT EVENTS
-		var startThing:Float = sectionStartTime(1);
-		var endThing:Float = sectionStartTime(2);
+		var startThing:Float = endThing;
+		var endThing:Float = sowyNumber(sectionStartTime(2));
 		for (i in _song.events)
 		{
-			if(endThing > i[0] && i[0] >= startThing)
+			if(i[0] >= startThing && i[0] < endThing)
 			{
 				var note:Note = setupNoteData(i, true);
 				note.alpha = 0.6;
