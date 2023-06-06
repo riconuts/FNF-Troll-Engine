@@ -320,7 +320,6 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	override public function update(elapsed:Float){
 		noteField.modNumber = modNumber;
 		noteField.cameras = cameras;
-		noteField.active = true;
 
 		for(char in characters)
 			char.controlled = isPlayer;

@@ -12,9 +12,8 @@ class ConfusionModifier extends NoteModifier {
 
     function getConfusion(?suffix:String = '', beat:Float, column:Int, player:Int){
 		var main = (suffix == '' ? getValue(player) : getSubmodValue('confusion$suffix', player)) + getSubmodValue('confusion${suffix}${column}', player);
-        var mainAngle:Float = ((beat * main) % 360) * -180 / Math.PI;
+		var mainAngle:Float = -((beat * main) % 360);
 		var constAngle:Float = getSubmodValue('confusion${suffix}Offset', player) + getSubmodValue('confusion${suffix}Offset${column}', player);
-
 		return mainAngle + constAngle;
     }
 
@@ -25,7 +24,7 @@ class ConfusionModifier extends NoteModifier {
         var angleZ = getConfusion(beat, data, player);
         if((obj is Note)){
 			var note:Note = cast obj;
-			var speed = PlayState.instance.songSpeed * note.multSpeed * modMgr.getValue("xmod", player);
+			var speed = PlayState.instance.songSpeed * note.multSpeed;
 			var yPos:Float = ((Conductor.visualPosition - note.visualTime)) * speed;
 
 			angleX += getSubmodValue("roll", player) * yPos / 2;

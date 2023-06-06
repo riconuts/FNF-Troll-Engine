@@ -29,8 +29,9 @@ class ModManager {
 			TransformModifier, 
 			XModeModifier,
 			// InfinitePathModifier,  // broken
+			TornadoModifier,
 			AccelModifier, 
-			XModifier,
+			XModifier,	
 			PerspectiveModifier
 		];
 		for (mod in quickRegs)

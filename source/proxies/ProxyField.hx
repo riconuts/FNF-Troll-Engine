@@ -65,7 +65,7 @@ class ProxyField extends FieldBase {
 						if (camera.alpha == 0 || !camera.visible)
 							continue;
 						var drawItem = camera.startTrianglesBatch(graphic, shader.bitmap.filter == 4, false, null, false, shader);
-						transfarm.alphaMultiplier = alpha * camera.alpha;
+						transfarm.alphaMultiplier = alpha * camera.alpha * this.alpha;
 						drawItem.addTriangles(vertices, indices, uvData, null, FlxPoint.weak(x, y), null, transfarm);
 					}
 				}
