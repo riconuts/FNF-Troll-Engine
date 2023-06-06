@@ -170,6 +170,17 @@ class FlxCamera extends FlxBasic
 	public var scroll:FlxPoint = FlxPoint.get();
 
 	/**
+	 * `scroll`, but without the offset
+	 */
+	var _scrollInternal:FlxPoint = FlxPoint.get();
+	/**
+	 * Stores an offset to the `scroll` value
+	 * Can be used to offset camera's scroll without affecting the target follow
+	 */
+	
+	public var scrollOffset:FlxPoint = FlxPoint.get();
+
+	/**
 	 * The actual `BitmapData` of the camera display itself.
 	 * Used in blit render mode, where you can manipulate its pixels for achieving some visual effects.
 	 */
@@ -1162,8 +1173,11 @@ class FlxCamera extends FlxBasic
 		var maxY:Null<Float> = maxScrollY == null ? null : maxScrollY + (zoom - 1) * height / (2 * zoom);
 
 		// Make sure we didn't go outside the camera's bounds
-		scroll.x = FlxMath.bound(scroll.x, minX, (maxX != null) ? maxX - width : null);
-		scroll.y = FlxMath.bound(scroll.y, minY, (maxY != null) ? maxY - height : null);
+		_scrollInternal.x = FlxMath.bound(_scrollInternal.x, minX, (maxX != null) ? maxX - width : null);
+		_scrollInternal.y = FlxMath.bound(_scrollInternal.y, minY, (maxY != null) ? maxY - height : null);
+
+		scroll.copyFrom(_scrollInternal);
+		scroll.addPoint(scrollOffset);
 	}
 
 	/**
@@ -1188,20 +1202,20 @@ class FlxCamera extends FlxBasic
 
 			if (style == SCREEN_BY_SCREEN)
 			{
-				if (targetX >= (scroll.x + width))
+				if (targetX >= (_scrollInternal.x + width))
 				{
 					_scrollTarget.x += width;
 				}
-				else if (targetX < scroll.x)
+				else if (targetX < _scrollInternal.x)
 				{
 					_scrollTarget.x -= width;
 				}
 
-				if (targetY >= (scroll.y + height))
+				if (targetY >= (_scrollInternal.y + height))
 				{
 					_scrollTarget.y += height;
 				}
-				else if (targetY < scroll.y)
+				else if (targetY < _scrollInternal.y)
 				{
 					_scrollTarget.y -= height;
 				}
@@ -1246,12 +1260,12 @@ class FlxCamera extends FlxBasic
 
 			if (followLerp >= 60 / FlxG.updateFramerate)
 			{
-				scroll.copyFrom(_scrollTarget); // no easing
+				_scrollInternal.copyFrom(_scrollTarget); // no easing
 			}
 			else
 			{
-				scroll.x += (_scrollTarget.x - scroll.x) * followLerp * FlxG.updateFramerate / 60;
-				scroll.y += (_scrollTarget.y - scroll.y) * followLerp * FlxG.updateFramerate / 60;
+				_scrollInternal.x += (_scrollTarget.x - _scrollInternal.x) * followLerp * FlxG.updateFramerate / 60;
+				_scrollInternal.y += (_scrollTarget.y - _scrollInternal.y) * followLerp * FlxG.updateFramerate / 60;
 			}
 		}
 	}
@@ -1479,7 +1493,7 @@ class FlxCamera extends FlxBasic
 	public function snapToTarget():Void
 	{
 		updateFollow();
-		scroll.copyFrom(_scrollTarget);
+		_scrollInternal.copyFrom(_scrollTarget);
 	}
 
 	/**
@@ -1489,7 +1503,7 @@ class FlxCamera extends FlxBasic
 	 */
 	public inline function focusOn(point:FlxPoint):Void
 	{
-		scroll.set(point.x - width * 0.5, point.y - height * 0.5);
+		_scrollInternal.set(point.x - width * 0.5, point.y - height * 0.5);
 		point.putWeak();
 	}
 

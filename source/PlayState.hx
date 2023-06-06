@@ -4212,7 +4212,7 @@ class PlayState extends MusicBeatState
 				{
 					char.playAnim(singAnimations[Std.int(Math.abs(direction))] + 'miss', true);
 					if(!char.hasMissAnimations)
-						char.color = 0xFFC6A6FF;	
+						char.colorOverlay = 0xFFC6A6FF;	
 				}
 			}
 		}
@@ -4387,7 +4387,7 @@ class PlayState extends MusicBeatState
 
 		if (cpuControlled)saveScore = false; // if botplay hits a note, then you lose scoring
 
-		// tbh I hate hitCuasesMiss lol its retarded
+		// tbh I hate hitCausesMiss lol its retarded
 		// added a shitty judge to deal w/ it tho!!
  		if(note.hitResult.judgment == MISS_MINE) {
 			noteMiss(note, field, true);

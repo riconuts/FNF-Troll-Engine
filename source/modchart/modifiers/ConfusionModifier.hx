@@ -20,24 +20,6 @@ class ConfusionModifier extends NoteModifier {
 
 	override function modifyVert(beat:Float, vert:Vector3, idx:Int, obj:FlxSprite, pos:Vector3, player:Int, data:Int):Vector3
 	{
-/*         var angle:Float = 0;
-        if((obj is Note)){
-            var note:Note = cast obj;
-			if (!note.isSustainNote){
-				angle = (getValue(player) + getSubmodValue('noteAngle', player) + getSubmodValue('confusion${note.noteData}', player) + getSubmodValue('note${note.noteData}Angle', player));
-            }
-            
-        }else if((obj is StrumNote)){
-            var receptor:StrumNote = cast obj;
-			angle = (getValue(player) + getSubmodValue('receptorAngle', player) + getSubmodValue('confusion${receptor.noteData}', player)
-				+ getSubmodValue('receptor${receptor.noteData}Angle', player));
-        }
-		//vert = vert.subtract(pos);
-		vert = VectorHelpers.rotateV3(vert, 0, 0, FlxAngle.TO_RAD * angle);
-        return vert; */
-
-		
-
 		var angleX:Float = getConfusion("X", beat, data, player);
 		var angleY:Float = getConfusion("Y", beat, data, player);
         var angleZ = getConfusion(beat, data, player);
@@ -54,7 +36,7 @@ class ConfusionModifier extends NoteModifier {
 			if(note.isSustainNote)
 				angleZ = 0;	
 			else{
-				var noteBeat = Conductor.getBeat(note.strumTime) - beat;
+				var noteBeat = note.beat - beat;
 				
 				angleZ += (noteBeat * getSubmodValue("dizzy", player) % 360) * (180 / Math.PI);
 				angleZ += getSubmodValue("noteAngle", player) + getSubmodValue("note" + data + "Angle", player);

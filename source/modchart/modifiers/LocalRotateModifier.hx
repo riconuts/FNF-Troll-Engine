@@ -38,7 +38,7 @@ class LocalRotateModifier extends NoteModifier { // this'll be rotateX in ModMan
 		
 		x -= 56;
 
-		var origin:Vector3 = new Vector3(x, FlxG.height* 0.5 - Note.swagWidth* 0.5);
+		var origin:Vector3 = new Vector3(x, FlxG.height* 0.5);
 
         var diff = pos.subtract(origin);
         var scale = FlxG.height;

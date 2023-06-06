@@ -27,6 +27,7 @@ class ModManager {
 			ConfusionModifier, 
 			OpponentModifier, 
 			TransformModifier, 
+			XModeModifier,
 			// InfinitePathModifier,  // broken
 			AccelModifier, 
 			XModifier,
@@ -36,7 +37,7 @@ class ModManager {
 			quickRegister(Type.createInstance(mod, [this]));
 
 		quickRegister(new RotateModifier(this));
-		quickRegister(new RotateModifier(this, 'center', new Vector3((FlxG.width* 0.5) - (Note.swagWidth/2), (FlxG.height* 0.5) - Note.swagWidth/2)));
+		quickRegister(new RotateModifier(this, 'center', new Vector3(FlxG.width* 0.5, FlxG.height* 0.5)));
 		quickRegister(new LocalRotateModifier(this, 'local'));
 		quickRegister(new SubModifier("noteSpawnTime", this));
 		quickRegister(new SubModifier("drawDistance", this));
@@ -402,7 +403,7 @@ class ModManager {
 			}
 			
 
-			timeline.addEvent(new EaseEvent(step, endStep, modName, target, easeFunc, player, this));
+			timeline.addEvent(new ModEaseEvent(step, endStep, modName, target, easeFunc, player, this));
 
 		}
 	}
@@ -427,5 +428,7 @@ class ModManager {
 	public function queueFuncOnce(step:Float, callback:(CallbackEvent, Float) -> Void)
 		timeline.addEvent(new CallbackEvent(step, callback, this));
 	
+	public function queueEaseFunc(step:Float, endStep:Float, func:EaseFunction, callback:(EaseEvent, Float, Float) -> Void)
+		timeline.addEvent(new EaseEvent(step, endStep, func, callback, this));
 
 }

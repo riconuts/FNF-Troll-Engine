@@ -91,6 +91,8 @@ class AlphaModifier extends NoteModifier {
       var note:Note = cast obj;
 			var speed = PlayState.instance.songSpeed * note.multSpeed * modMgr.getValue("xmod", player);
       var yPos:Float = 50 - ((Conductor.visualPosition - note.visualTime) * speed);
+
+      // TODO: rewrite this to be done in the NoteField instead
       note.colorSwap.flash = 0;
       note.colorSwap.flashR = getSubmodValue("flashR", player);
 			note.colorSwap.flashG = getSubmodValue("flashG", player);

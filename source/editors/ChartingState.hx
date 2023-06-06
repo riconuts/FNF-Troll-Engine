@@ -1977,7 +1977,7 @@ class ChartingState extends MusicBeatState
 		bpmTxt.text =
 		"Time: " + Std.string(FlxMath.roundDecimal(Conductor.songPosition / 1000, 2)) + " / " + Std.string(FlxMath.roundDecimal(FlxG.sound.music.length / 1000, 2)) +
 		"\n\nSection: " + curSec +
-		"\nBeat: " + Std.string(curDecBeat).substring(0,4) +
+		"\nBeat: " + Highscore.floorDecimal(curDecBeat, 2) +
 		"\nStep: " + curStep;
 
 		var playedSound:Array<Bool> = [false, false, false, false]; //Prevents ouchy GF sex sounds

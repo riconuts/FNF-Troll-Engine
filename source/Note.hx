@@ -81,6 +81,7 @@ class Note extends NoteObject
 	public var canQuant:Bool = true;
 	
 	// basic stuff
+	public var beat:Float = 0;
 	public var strumTime:Float = 0;
 	public var visualTime:Float = 0;
 	public var mustPress:Bool = false;
@@ -365,12 +366,13 @@ class Note extends NoteObject
 		isSustainNote = sustainNote;
 
 		if (canQuant && ClientPrefs.noteSkin == 'Quants'){
-			var beat = Conductor.getBeatInMeasure(strumTime);
 			if(prevNote != null && isSustainNote)
 				quant = prevNote.quant;
 			else
-				quant = getQuant(beat);
+				quant = getQuant(Conductor.getBeatInMeasure(strumTime));
 		}
+		beat = Conductor.getBeat(strumTime);
+
 		this.inEditor = inEditor;
 
 		x += PlayState.STRUM_X + 50;
