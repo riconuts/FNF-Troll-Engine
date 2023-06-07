@@ -379,8 +379,11 @@ class ModManager {
 	public function queueEase(step:Float, endStep:Float, modName:String, target:Float, style:String = 'linear', player:Int = -1, ?startVal:Float)
 	{
 		if(player==-1){
-			queueEase(step, endStep, modName, target, style, 0);
-			queueEase(step, endStep, modName, target, style, 1);
+			for (pN in 0...activeMods.length)
+				queueEase(step, endStep, modName, target, style, pN);
+
+/* 			queueEase(step, endStep, modName, target, style, 0);
+			queueEase(step, endStep, modName, target, style, 1); */
 		}else{
 			var easeFunc = FlxEase.linear;
 
@@ -401,8 +404,8 @@ class ModManager {
 	{
 		if (player == -1)
 		{
-			queueSet(step, modName, target, 0);
-			queueSet(step, modName, target, 1);
+			for (pN in 0...activeMods.length)
+				queueSet(step, modName, target, pN);
 		}
 		else
 			timeline.addEvent(new SetEvent(step, modName, target, player, this));
