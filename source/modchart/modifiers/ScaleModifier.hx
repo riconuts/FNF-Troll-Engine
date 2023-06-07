@@ -1,5 +1,6 @@
 package modchart.modifiers;
 
+import modchart.Modifier.RenderInfo;
 import flixel.math.FlxPoint;
 import modchart.Modifier.ModifierOrder;
 import math.Vector3;
@@ -52,20 +53,21 @@ class ScaleModifier extends NoteModifier {
 	override function isRenderMod()
 		return true;
 
-	// TODO: seperate into modifyNoteVert and modifyReceptorVert?
-
-	override function getScale(beat:Float, scale:FlxPoint, sprite:FlxSprite, player:Int, data:Int):FlxPoint
+	override function getExtraInfo(diff:Float, tDiff:Float, beat:Float, info:RenderInfo, sprite:FlxSprite, player:Int, data:Int):RenderInfo
 	{
-		if(!(sprite is NoteObject))return scale;
+		if (!(sprite is NoteObject))
+			return info;
 
 		var obj:NoteObject = cast sprite;
-		var scale = daScale(obj, scale, obj.noteData, player);
-		if ((sprite is Note)){
+		var scale = daScale(obj, info.scale, obj.noteData, player);
+		if ((sprite is Note))
+		{
 			var note:Note = cast sprite;
 			if (note.isSustainNote)
 				scale.y = 1;
 		}
-		return scale;
+		info.scale = scale;
+		return info;
 	}
 
 	override function getSubmods()

@@ -1,6 +1,7 @@
 // @author Nebula_Zorua
 
 package modchart;
+import modchart.Modifier.RenderInfo;
 import flixel.math.FlxPoint;
 import flixel.tweens.FlxEase;
 import flixel.group.FlxGroup.FlxTypedGroup;
@@ -42,7 +43,10 @@ class ModManager {
 		quickRegister(new LocalRotateModifier(this, 'local'));
 		quickRegister(new SubModifier("noteSpawnTime", this));
 		quickRegister(new SubModifier("drawDistance", this));
-		quickRegister(new SubModifier("cover", this));
+		quickRegister(new SubModifier("flashR", this));
+		quickRegister(new SubModifier("flashG", this));
+		quickRegister(new SubModifier("flashB", this));
+
 		for (i in 0...4)
 			quickRegister(new SubModifier("noteSpawnTime" + i, this));
 
@@ -69,7 +73,6 @@ class ModManager {
 		setValue("flashR", 1, mN);
 		setValue("flashG", 1, mN);
 		setValue("flashB", 1, mN);
-		setValue("flashA", 1, mN);
 	}
 
 
@@ -333,14 +336,21 @@ class ModManager {
 		return vert;
 	}
 
-	// if i need more data for rendering shit or smth then maybe like getRenderData() w/ a typedef
-	public function getAlpha(beat:Float, alpha:Float, obj:FlxSprite, player:Int, data:Int, ?exclusions:Array<String>):Float
+	public function getExtraInfo(diff:Float, tDiff:Float, beat:Float, ?info:RenderInfo, obj:FlxSprite, player:Int, data:Int, ?exclusions:Array<String>):RenderInfo
 	{
 		if (exclusions == null)
 			exclusions = [];
 
+		if (info == null){
+			info = {
+				alpha: 1,
+				glow: 0,
+				scale: FlxPoint.weak(0.7, 0.7)
+			};
+		}
+
 		if (!obj.active)
-			return alpha;
+			return info;
 
 		for (name in getActiveMods(player))
 		{
@@ -350,34 +360,12 @@ class ModManager {
 			if (mod == null)
 				continue;
 			if (!obj.active)
-				return alpha;
+				return info;
 			if (mod.isRenderMod())
-				alpha = mod.getAlpha(beat, alpha, obj, player, data);
+				info = mod.getExtraInfo(diff, tDiff, beat, info, obj, player, data);
 		}
-		return alpha;
-	}
 
-	public function getScale(beat:Float, scale:FlxPoint, obj:FlxSprite, player:Int, data:Int, ?exclusions:Array<String>):FlxPoint
-	{
-		if (exclusions == null)
-			exclusions = [];
-
-		if (!obj.active)
-			return scale;
-
-		for (name in getActiveMods(player))
-		{
-			if (exclusions.contains(name))
-				continue;
-			var mod:Modifier = notemodRegister.get(name);
-			if (mod == null)
-				continue;
-			if (!obj.active)
-				return scale;
-			if (mod.isRenderMod())
-				scale = mod.getScale(beat, scale, obj, player, data);
-		}
-		return scale;
+		return info;
 	}
 
 	public function queueEaseP(step:Float, endStep:Float, modName:String, percent:Float, style:String = 'linear', player:Int = -1, ?startVal:Float)

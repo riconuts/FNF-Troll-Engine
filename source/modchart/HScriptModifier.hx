@@ -140,10 +140,10 @@ class HScriptModifier extends Modifier
 
 	override public function modifyVert(beat:Float, vert:Vector3, idx:Int, obj:FlxSprite, pos:Vector3, player:Int, data:Int):Vector3 
 		return script.exists("modifyVert") ? script.executeFunc("modifyVert", [beat, vert, idx, obj, pos, player, data]) : super.modifyVert(beat, vert, idx, obj, pos, player, data);
-
+/* 
 	override public function getAlpha(beat:Float, alpha:Float, obj:FlxSprite, player:Int, data:Int):Float 
 		return script.exists("getAlpha") ? script.executeFunc("getAlpha", [beat, alpha, obj, player, data]) : super.getAlpha(beat, alpha, obj, player, data);
-
+ */
 	override public function update(elapsed:Float) 
 		return script.exists("update") ? script.executeFunc("update", [elapsed]) : super.update(elapsed);
 

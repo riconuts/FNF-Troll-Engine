@@ -1,5 +1,6 @@
 package playfields;
 
+import modchart.Modifier.RenderInfo;
 import flixel.math.FlxPoint;
 import openfl.geom.ColorTransform;
 import flixel.graphics.FlxGraphic;
@@ -18,7 +19,8 @@ typedef RenderObject =
 {
 	graphic:FlxGraphic,
 	shader:Shader,
-	alpha:Float,
+	alphas:Array<Float>,
+	glows:Array<Float>,
 	uvData:Vector<Float>,
 	vertices:Vector<Float>,
 	zIndex:Float,
@@ -227,7 +229,7 @@ class NoteField extends FieldBase
 
     }
 
-	var transfarm:ColorTransform = new ColorTransform();
+	
 	override function draw()
 	{
 		if (!active || !exists || !visible)
@@ -238,6 +240,10 @@ class NoteField extends FieldBase
 			PlayState.instance.callOnHScripts("playfieldDraw", [this],
 				["drawQueue" => drawQueue]); // lets you do custom rendering in scripts, if needed
 
+		var glowR = modManager.getValue("flashR", modNumber);
+		var glowG = modManager.getValue("flashG", modNumber);
+		var glowB = modManager.getValue("flashB", modNumber);
+		
 		// actually draws everything
 		if (drawQueue.length > 0)
 		{
@@ -247,21 +253,41 @@ class NoteField extends FieldBase
 					continue;
 				var shader:Dynamic = object.shader;
 				var graphic:FlxGraphic = object.graphic;
-				var alpha = object.alpha;
+				var alphas = object.alphas;
+				var glows = object.glows;
 				var vertices = object.vertices;
 				var uvData = object.uvData;
 				var indices = new Vector<Int>(vertices.length, false, cast [for (i in 0...vertices.length) i]);
+				var transforms:Array<ColorTransform> = [];
+				for (n in 0... Std.int(vertices.length / 3)){
+					var glow = glows[n];
+					var transfarm:ColorTransform = new ColorTransform();
+					transfarm.redMultiplier = 1 - glow;
+					transfarm.greenMultiplier = 1 - glow;
+					transfarm.blueMultiplier = 1 - glow;
+					transfarm.redOffset = glowR * glow * 255;
+					transfarm.greenOffset = glowG * glow * 255; 
+					transfarm.blueOffset = glowB * glow * 255;
 
-				transfarm.alphaMultiplier = alpha;
+					transfarm.alphaMultiplier = alphas[n] * this.alpha;
+					transforms.push(transfarm);
+				}
+
+
 				for (camera in cameras)
 				{
 					if (camera != null && camera.canvas != null && camera.canvas.graphics != null)
 					{
 						if (camera.alpha == 0 || !camera.visible)
 							continue;
-						var drawItem = camera.startTrianglesBatch(graphic, shader.bitmap.filter == 4, false, null, false, shader);
-						transfarm.alphaMultiplier = alpha * camera.alpha * this.alpha;
-						drawItem.addTriangles(vertices, indices, uvData, null, null, null, transfarm);
+						for(shit in transforms)
+							shit.alphaMultiplier *= camera.alpha;
+						
+						var drawItem = camera.startTrianglesBatch(graphic, shader.bitmap.filter == 4, true, null, true, shader);
+
+						drawItem.addTrianglesColorArray(vertices, indices, uvData, null, FlxPoint.weak(x, y), null, transforms);
+						for (n in 0...transforms.length)
+							transforms[n].alphaMultiplier = alphas[n];
 					}
 				}
 			}
@@ -306,7 +332,7 @@ class NoteField extends FieldBase
 
 	var crotchet = Conductor.getCrotchetAtTime(0) / 4;
 
-	function drawHold(hold:Note):Null<RenderObject>
+	function drawHold(hold:Note, ?prevAlpha:Float, ?prevGlow:Float):Null<RenderObject>
 	{
 		if (hold.animation.curAnim == null)
 			return null;
@@ -315,6 +341,8 @@ class NoteField extends FieldBase
 
 		var verts = [];
 		var uv = [];
+		var alphas:Array<Float> = [];
+		var glows:Array<Float> = [];
 
 		var render = false;
 		for (camera in cameras)
@@ -327,12 +355,6 @@ class NoteField extends FieldBase
 		}
 		if (!render)
 			return null;
-		var scalePoint = FlxPoint.weak(1, 1);
-		var scale:FlxPoint = modManager.getScale(curDecBeat, scalePoint, hold, modNumber, hold.noteData);
-		var alpha = modManager.getAlpha(curDecBeat, hold.alpha, hold, modNumber, hold.noteData);
-		if (alpha == 0)
-			return null;
-
 		var lastMe = null;
 
 		var tWid = hold.frameWidth * hold.scale.x;
@@ -344,15 +366,14 @@ class NoteField extends FieldBase
 				return tWid;
 		})();
 
-		tWid *= scale.x;
-		bWid *= scale.x;
-
 		var basePos = modManager.getPos(0, 0, curDecBeat, hold.noteData, modNumber, hold, ['perspectiveDONTUSE']);
 
 		var strumDiff = (Conductor.songPosition - hold.strumTime);
 		var visualDiff = (Conductor.visualPosition - hold.visualTime); // TODO: get the start and end visualDiff and interpolate so that changing speeds mid-hold will look better
 		var zIndex:Float = basePos.z;
 		var sv = PlayState.instance.getSV(hold.strumTime).speed;
+		var scalePoint = FlxPoint.weak(1, 1);
+
 		for (sub in 0...holdSubdivisions)
 		{
 			var prog = sub / (holdSubdivisions + 1);
@@ -375,8 +396,24 @@ class NoteField extends FieldBase
 				strumOff *= scale;
 			}
 
-			var topWidth = FlxMath.lerp(tWid, bWid, prog);
-			var botWidth = FlxMath.lerp(tWid, bWid, nextProg);
+			var topWidth = FlxMath.lerp(tWid, bWid, prog) * scalePoint.x;
+			var botWidth = FlxMath.lerp(tWid, bWid, nextProg) * scalePoint.x;
+
+			scalePoint.set(1, 1);
+
+			var speed = songSpeed * hold.multSpeed * modManager.getValue("xmod", modNumber);
+
+			var info:RenderInfo = modManager.getExtraInfo((visualDiff + ((strumOff + strumSub) * 0.45)) * -speed,  strumDiff + strumOff + strumSub, curDecBeat, {
+				alpha: hold.alpha,
+				glow: 0,
+				scale: scalePoint
+			}, hold, modNumber, hold.noteData);
+
+			for (_ in 0...4)
+			{
+				alphas.push(info.alpha);
+				glows.push(info.glow);
+			}
 
 			var top = lastMe == null ? getPoints(hold, topWidth, (visualDiff + (strumOff * 0.45)), strumDiff + strumOff) : lastMe;
 			var bot = getPoints(hold, botWidth, (visualDiff + ((strumOff + strumSub) * 0.45)), strumDiff + strumOff + strumSub);
@@ -410,7 +447,8 @@ class NoteField extends FieldBase
 		return {
 			graphic: hold.graphic,
 			shader: shader,
-			alpha: alpha,
+			alphas: alphas,
+			glows: glows,
 			uvData: uvData,
 			vertices: vertices,
 			zIndex: zIndex
@@ -471,10 +509,24 @@ class NoteField extends FieldBase
 		var width = sprite.frameWidth * sprite.scale.x;
 		var height = sprite.frameHeight * sprite.scale.y;
 		var scalePoint = FlxPoint.weak(1, 1);
-		var scale = modManager.getScale(curDecBeat, scalePoint, sprite, modNumber, sprite.noteData);
-		var alpha = modManager.getAlpha(curDecBeat, sprite.alpha, sprite, modNumber, sprite.noteData);
-		if (alpha == 0)
-			return null;
+		var diff:Float =0;
+		var visPos:Float = 0;
+		if((sprite is Note)){
+			var daNote:Note = cast sprite;
+			var speed = songSpeed * daNote.multSpeed * modManager.getValue("xmod", modNumber);
+			diff = Conductor.songPosition - daNote.strumTime;
+			visPos = -((Conductor.visualPosition - daNote.visualTime) * speed);
+		}
+
+		var info:RenderInfo = modManager.getExtraInfo(visPos, diff, curDecBeat, {
+			alpha: sprite.alpha,
+			glow: 0,
+			scale: scalePoint
+		}, sprite, modNumber, sprite.noteData);
+
+		var alpha = info.alpha;
+		var glow = info.glow;
+
 		var quad = [
 			new Vector3(-width / 2, -height / 2, 0), // top left
 			new Vector3(width / 2, -height / 2, 0), // top right
@@ -544,7 +596,8 @@ class NoteField extends FieldBase
 		return {
 			graphic: sprite.graphic,
 			shader: shader,
-			alpha: alpha,
+			alphas: [for (i in 0...Std.int(vertices.length / 3))alpha],
+			glows: [for (i in 0...Std.int(vertices.length / 3)) glow],
 			uvData: uvData,
 			vertices: vertices,
 			zIndex: pos.z

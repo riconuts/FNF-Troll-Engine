@@ -20,7 +20,12 @@ abstract ModifierOrder(Int) to Int{
     var POST_REVERSE = -1;
     var DEFAULT = 0;
 	var LAST = 1000;
-	
+}
+
+typedef RenderInfo = {
+	var alpha:Float;
+	var glow:Float;
+	var scale:FlxPoint;
 }
 
 class Modifier {
@@ -125,8 +130,9 @@ class Modifier {
 	public function updateNote(beat:Float, note:Note, player:Int){}
 	public function getPos(diff:Float, tDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite):Vector3{return pos;}
 	public function modifyVert(beat:Float, vert:Vector3, idx:Int, obj:FlxSprite, pos:Vector3, player:Int, data:Int):Vector3{return vert;}
-	public function getAlpha(beat:Float, alpha:Float, obj:FlxSprite, player:Int, data:Int):Float{return alpha;}
-	public function getScale(beat:Float, scale:FlxPoint, obj:FlxSprite, player:Int, data:Int):FlxPoint{return scale;}
+/* 	public function getAlpha(beat:Float, alpha:Float, obj:FlxSprite, player:Int, data:Int):Float{return alpha;}
+	public function getScale(beat:Float, scale:FlxPoint, obj:FlxSprite, player:Int, data:Int):FlxPoint{return scale;} */
+	public function getExtraInfo(diff:Float, tDiff:Float, beat:Float, info:RenderInfo, obj:FlxSprite, player:Int, data:Int):RenderInfo{return info;}
     public function update(elapsed:Float){}
 	public function isRenderMod():Bool{return false;}
 }

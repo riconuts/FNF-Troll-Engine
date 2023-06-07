@@ -41,6 +41,10 @@ class ProxyField extends FieldBase {
 		if ((FlxG.state is PlayState))
 			PlayState.instance.callOnHScripts("playfieldDraw", [this], ["drawQueue" => drawQueue]); // lets you do custom rendering in scripts, if needed
 
+		var glowR = proxiedField.modManager.getValue("flashR", proxiedField.modNumber);
+		var glowG = proxiedField.modManager.getValue("flashG", proxiedField.modNumber);
+		var glowB = proxiedField.modManager.getValue("flashB", proxiedField.modNumber);
+
 		// actually draws everything
 		if (drawQueue.length > 0)
 		{
@@ -50,23 +54,40 @@ class ProxyField extends FieldBase {
 					continue;
 				var shader:Dynamic = object.shader;
 				var graphic:FlxGraphic = object.graphic;
-				var alpha = object.alpha;
-				var daVertices = object.vertices;
-                var vertices = daVertices.copy();
+				var alphas = object.alphas;
+				var glows = object.glows;
+				var vertices = object.vertices;
 				var uvData = object.uvData;
-				shader.alpha.value = [alpha];
 				var indices = new Vector<Int>(vertices.length, false, cast [for (i in 0...vertices.length) i]);
-                
-                transfarm.alphaMultiplier = alpha;
+				var transforms:Array<ColorTransform> = [];
+				for (n in 0...Std.int(vertices.length / 3))
+				{
+					var glow = glows[n];
+					var transfarm:ColorTransform = new ColorTransform();
+					transfarm.redMultiplier = 1 - glow;
+					transfarm.greenMultiplier = 1 - glow;
+					transfarm.blueMultiplier = 1 - glow;
+					transfarm.redOffset = glowR * glow * 255;
+					transfarm.greenOffset = glowG * glow * 255;
+					transfarm.blueOffset = glowB * glow * 255;
+					transfarm.alphaMultiplier = alphas[n] * this.alpha;
+					transforms.push(transfarm);
+				}
+
 				for (camera in cameras)
 				{
 					if (camera != null && camera.canvas != null && camera.canvas.graphics != null)
 					{
 						if (camera.alpha == 0 || !camera.visible)
 							continue;
-						var drawItem = camera.startTrianglesBatch(graphic, shader.bitmap.filter == 4, false, null, false, shader);
-						transfarm.alphaMultiplier = alpha * camera.alpha * this.alpha;
-						drawItem.addTriangles(vertices, indices, uvData, null, FlxPoint.weak(x, y), null, transfarm);
+						for (shit in transforms)
+							shit.alphaMultiplier *= camera.alpha;
+
+						var drawItem = camera.startTrianglesBatch(graphic, shader.bitmap.filter == 4, true, null, true, shader);
+	
+						drawItem.addTrianglesColorArray(vertices, indices, uvData, null, FlxPoint.weak(x, y), null, transforms);
+						for (n in 0...transforms.length)
+							transforms[n].alphaMultiplier = alphas[n];
 					}
 				}
 			}
