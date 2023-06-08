@@ -255,7 +255,7 @@ class PlayState extends MusicBeatState
 	public var allNotes:Array<Note> = []; // all notes
 
 	public var eventNotes:Array<EventNote> = [];
-
+	//
 	public var strumLineNotes = new FlxTypedGroup<StrumNote>();
 	public var opponentStrums = new FlxTypedGroup<StrumNote>();
 	public var playerStrums = new FlxTypedGroup<StrumNote>();
