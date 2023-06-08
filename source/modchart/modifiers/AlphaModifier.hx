@@ -109,8 +109,15 @@ class AlphaModifier extends NoteModifier {
     }else if((obj is StrumNote)){
       var receptor:StrumNote = cast obj;
       alpha *= (1 - getSubmodValue("alpha", player)) * (1 - getSubmodValue('alpha${receptor.noteData}', player));
-      if (getSubmodValue("dark", player) != 0 || getSubmodValue('dark${receptor.noteData}', player) != 0)
-        alpha *= (1 - getSubmodValue("dark", player)) * (1 - getSubmodValue('dark${receptor.noteData}', player));
+      if (getSubmodValue("dark", player) != 0 || getSubmodValue('dark${receptor.noteData}', player) != 0){
+        var vis = (1 - getSubmodValue("dark", player)) * (1 - getSubmodValue('dark${receptor.noteData}', player));
+				if (getSubmodValue("hideDarkGlow", player) == 0)
+				{
+          alpha *= getRealAlpha(vis);
+          info.glow = getGlow(vis);
+        }else
+          alpha *= vis;
+      }
     }
 
     alpha *= ClientPrefs.noteOpacity;
@@ -120,7 +127,7 @@ class AlphaModifier extends NoteModifier {
   }
 
   override function getSubmods(){
-    var subMods:Array<String> = ["noteAlpha", "alpha", "hidden","hiddenOffset","sudden","suddenOffset","blink","randomVanish","dark","hideStealthGlow","stealthPastReceptors"];
+    var subMods:Array<String> = ["noteAlpha", "alpha", "hidden","hiddenOffset","sudden","suddenOffset","blink","randomVanish","dark","hideDarkGlow", "hideStealthGlow","stealthPastReceptors"];
     for(i in 0...4){
 			subMods.push('noteAlpha$i');
 			subMods.push('alpha$i');
