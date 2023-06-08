@@ -17,9 +17,8 @@ class ModManager {
 	public function registerDefaultModifiers()
 	{
 		var quickRegs:Array<Any> = [
-			FlipModifier,
 			ReverseModifier,
-			InvertModifier,
+			SwapModifier,
 			DrunkModifier,
 			BeatModifier,
 			AlphaModifier,
@@ -28,9 +27,8 @@ class ModManager {
 			ConfusionModifier, 
 			OpponentModifier, 
 			TransformModifier, 
-			XModeModifier,
 			// InfinitePathModifier,  // broken
-			TornadoModifier,
+			PathModifier,
 			AccelModifier, 
 			XModifier,	
 			PerspectiveModifier
@@ -220,10 +218,18 @@ class ModManager {
 
 	public function update(elapsed:Float)
 	{
-		for (mod in modArray)
-		{
-			if (mod.active && mod.doesUpdate())
-			    mod.update(elapsed);
+		if (FlxG.state == PlayState.instance){
+			for (mod in modArray)
+			{
+				if (mod.doesUpdate())
+					mod.update(elapsed, PlayState.instance.curDecBeat);
+			}
+		}else{
+			for (mod in modArray)
+			{
+				if (mod.doesUpdate())
+					mod.update(elapsed, 0);
+			}
 		}
 	}
 

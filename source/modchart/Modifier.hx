@@ -33,8 +33,6 @@ class Modifier {
 	public var percents:Array<Float> = [0, 0];
 	public var submods:Map<String, Modifier> = [];
 	public var parent:Modifier; // for submods
-    public var active:Bool = false; // used for performance reasons
-    // modifiers are only called if active is true
 
     public function getModType()
 		return MISC_MOD; // if this is NOTE_MOD then this will be called on notes & receptors
@@ -49,7 +47,7 @@ class Modifier {
 		return true;
 
     public function doesUpdate()
-        return getModType()==MISC_MOD; // override in your modifier if you want it to have update(elapsed) called
+        return getModType()==MISC_MOD; // override in your modifier if you want it to have update(elapsed, beat) called
     
 	public function shouldExecute(player:Int, value:Float):Bool
 	{
@@ -133,6 +131,6 @@ class Modifier {
 /* 	public function getAlpha(beat:Float, alpha:Float, obj:FlxSprite, player:Int, data:Int):Float{return alpha;}
 	public function getScale(beat:Float, scale:FlxPoint, obj:FlxSprite, player:Int, data:Int):FlxPoint{return scale;} */
 	public function getExtraInfo(diff:Float, tDiff:Float, beat:Float, info:RenderInfo, obj:FlxSprite, player:Int, data:Int):RenderInfo{return info;}
-    public function update(elapsed:Float){}
+    public function update(elapsed:Float, beat:Float){}
 	public function isRenderMod():Bool{return false;}
 }

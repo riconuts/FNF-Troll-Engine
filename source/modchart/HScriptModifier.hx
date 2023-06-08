@@ -144,8 +144,14 @@ class HScriptModifier extends Modifier
 	override public function getAlpha(beat:Float, alpha:Float, obj:FlxSprite, player:Int, data:Int):Float 
 		return script.exists("getAlpha") ? script.executeFunc("getAlpha", [beat, alpha, obj, player, data]) : super.getAlpha(beat, alpha, obj, player, data);
  */
-	override public function update(elapsed:Float) 
-		return script.exists("update") ? script.executeFunc("update", [elapsed]) : super.update(elapsed);
+	override public function getExtraInfo(diff:Float, tDiff:Float, beat:Float, info:RenderInfo, obj:FlxSprite, player:Int, data:Int):RenderInfo
+	{
+		return script.exists("getExtraInfo") ? script.executeFunc("getExtraInfo",
+			[diff, tDiff, beat, info, obj, player, data]) : super.getExtraInfo(diff, tDiff, beat, info, obj, player, data);
+	}
+
+	override public function update(elapsed:Float, beat:Float) 
+		return script.exists("update") ? script.executeFunc("update", [elapsed, beat]) : super.update(elapsed, beat);
 
 	override public function isRenderMod():Bool 
 		return script.exists("isRenderMod") ? script.executeFunc("isRenderMod") : super.isRenderMod();

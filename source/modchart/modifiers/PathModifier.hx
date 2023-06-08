@@ -1,117 +1,119 @@
 package modchart.modifiers;
-import flixel.FlxSprite;
-import ui.*;
-import modchart.*;
-import flixel.math.FlxPoint;
+
 import flixel.math.FlxMath;
-import flixel.FlxG;
+import flixel.FlxSprite;
 import math.Vector3;
-import math.*;
 
-typedef PathInfo = {
-  var position:Vector3;
-  var dist:Float;
-  var start:Float;
-  var end:Float;
-}
+class PathModifier extends NoteModifier
+{
+	override function getName()
+		return 'tornado';
 
-class PathModifier extends NoteModifier {
-  var moveSpeed:Float;
-  var pathData:Array<Array<PathInfo>>=[];
-  var totalDists:Array<Float> = [];
-  override function getName()return 'basePath';
-  public function getMoveSpeed(){
-    return 5000;
-  }
+	inline function square(angle:Float)
+	{
+		var fAngle = angle % (Math.PI * 2);
 
-	public function getPath():Array<Array<Vector3>>{
-    return [];
-  }
+		return fAngle >= Math.PI ? -1.0 : 1.0;
+	}
 
-  public function new(modMgr:ModManager, ?parent:Modifier){
-    super(modMgr, parent);
-		moveSpeed = getMoveSpeed();
-		var path:Array<Array<Vector3>> = getPath();
-    var dir:Int = 0;
-    // ridiculous that haxe doesnt have a numeric for loop
+	inline function triangle(angle:Float)
+	{
+		var fAngle:Float = angle % (Math.PI * 2.0);
+		if (fAngle < 0.0)
+		{
+			fAngle += Math.PI * 2.0;
+		}
+		var result:Float = fAngle * (1 / Math.PI);
+		if (result < .5)
+		{
+			return result * 2.0;
+		}
+		else if (result < 1.5)
+		{
+			return 1.0 - ((result - .5) * 2.0);
+		}
+		else
+		{
+			return -4.0 + (result * 2.0);
+		}
+	}
 
-    // neb from the future here
-    //.. it fucking does
-    // I forgot about (for start...end)
-    // You just can't set the interval.
-    // how did i forget it fucking has a numeric for loop im gonna kms.
+	override function getPos(diff:Float, tDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
+	{
+        if(getSubmodValue("zigzag", player) != 0){
+			var offset = getSubmodValue("zigzagOffset", player);
+			var period = getSubmodValue("zigzagPeriod", player);
+			var perc = getSubmodValue("zigzag", player);
 
-    // TODO: rewrite this.
+			var result:Float = triangle((Math.PI * (1 / (period + 1)) * ((diff + (100 * (offset))) / Note.swagWidth)));
 
-    while(dir<path.length){
-      var idx = 0;
-      totalDists[dir]=0;
-      pathData[dir]=[];
-      while(idx<path[dir].length){
-        var pos = path[dir][idx];
+			pos.x += (perc * Note.swagWidth / 2) * result;
+        }
+        
+        if(getSubmodValue("sawtooth", player) != 0){
+			var percent = getSubmodValue('sawtooth', player);
+			var period = (getSubmodValue("sawtoothPeriod", player)) + 1;
+			pos.x += (percent * Note.swagWidth) * ((0.5 / period * diff) / Note.swagWidth - Math.floor((0.5 / period * diff) / Note.swagWidth));
+        }
 
-        if(idx!=0){
-          var last = pathData[dir][idx-1];
-          totalDists[dir] += Math.abs(Vector3.distance(last.position, pos)); // idk if haxeflixel will for some reason ever return negative distance
-          var totalDist = totalDists[dir];
-          // roblox doesnt so im just making sure
-          last.end = totalDist;
-          last.dist = last.start - totalDist; // used for interpolation
+		if (getSubmodValue("square", player) != 0)
+		{
+			var offset = getSubmodValue("squareOffset", player);
+			var period = getSubmodValue("squarePeriod", player);
+			var cum:Float = (Math.PI * (diff + (1 * (offset))) / (Note.swagWidth + (period * Note.swagWidth)));
+			var fResult = square(cum);
+
+			pos.x += getSubmodValue('square', player) * Note.swagWidth * 0.5 * fResult;
+		}
+
+        if(getSubmodValue("bounce", player)!=0){
+			var offset = getSubmodValue("bounceOffset", player) * 100;
+			var period = getSubmodValue("bouncePeriod", player) * 60;
+			var bounce:Float = Math.abs(FlxMath.fastSin(((diff + (1 * (offset))) / (60 + period))));
+
+			pos.x += getSubmodValue('bounce', player) * Note.swagWidth * 0.5 * bounce;
         }
 
 
-
-        pathData[dir].push({
-          position: pos.add(new Vector3(-Note.swagWidth/2,-Note.swagWidth/2)),
-          start: totalDists[dir],
-          end: 0,
-          dist: 0
-        });
-        idx++;
-      }
-      dir++;
-    }
-
-		if (Main.showDebugTraces){
-      for(dir in 0...totalDists.length){
-        trace(dir, totalDists[dir]);
-      }
-    }
-  }
-
-
-	override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite){
-    if(getValue(player)==0)return pos;
-    //var vDiff = Math.abs(timeDiff);
-    var vDiff = timeDiff;
-    // tried to use visualDiff but didnt work :(
-    // will get it working later
-
-    var progress  = (vDiff / -moveSpeed) * totalDists[data];
-    var outPos = pos.clone();
-    var daPath = pathData[data];
-    if(progress<=0)return pos.lerp(daPath[0].position,getValue(player));
-
-    var idx:Int = 0;
-    // STILL ridiculous
-    // no its not im just dumb
-
-    while(idx<daPath.length){
-      var cData = daPath[idx];
-      var nData = daPath[idx+1];
-      if(nData!=null && cData!=null){
-        if(progress>cData.start && progress<cData.end){
-          var alpha = (cData.start - progress)/cData.dist;
-          var interpPos:Vector3 = cData.position.lerp(nData.position,alpha);
-          outPos = pos.lerp(interpPos,getValue(player));
+        if(getSubmodValue("xmode", player) != 0){
+			var mod = (player + 1) * 2 - 3;
+			pos.x += getSubmodValue('xmode', player) * (diff * mod);
         }
-      }
-      idx++;
-    }
-    return outPos;
-  }
 
-  override function getSubmods(){
-    return [];
-  }
+		if (getValue(player) != 0)
+		{
+			// from schmovin!!
+			var playerColumn = data % 4;
+			var columnPhaseShift = playerColumn * Math.PI / 3;
+			var phaseShift = diff / 135;
+			var returnReceptorToZeroOffsetX = (-Math.cos(-columnPhaseShift) + 1) / 2 * Note.swagWidth * 3;
+			var offsetX = (-Math.cos(phaseShift - columnPhaseShift) + 1) / 2 * Note.swagWidth * 3 - returnReceptorToZeroOffsetX;
+			pos.x += offsetX * getValue(player);
+		}
+		return pos;
+	}
+
+	override function getSubmods()
+	{
+		return [
+            'xmode',
+
+            'zigzag',
+            'zigzagPeriod',
+            'zigzagOffset',
+
+            'sawtooth',
+            'sawtoothPeriod',
+
+            'square',
+            'squareOffset',
+            'squarePeriod',
+
+            'bounce',
+            'bounceOffset',
+            'bouncePeriod',
+
+            // TODO: maybe some sorta scrollDirectionX/Y/Z which'll make it so the note moves towards the receptor in that direction
+        ];
+	}
 }
