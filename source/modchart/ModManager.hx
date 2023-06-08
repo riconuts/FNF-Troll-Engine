@@ -50,8 +50,8 @@ class ModManager {
 		for (i in 0...4)
 			quickRegister(new SubModifier("noteSpawnTime" + i, this));
 
-		for(i in 0...activeMods.length)
-			setDefaultValues(i);
+		for (pN => mods in activeMods)
+			setDefaultValues(pN);
 		
 
 	}
@@ -152,7 +152,7 @@ class ModManager {
 	public function setValue(modName:String, val:Float, player:Int=-1){
 		if (player == -1)
 		{
-			for (pN in 0...activeMods.length)
+			for (pN => mods in activeMods)
 				setValue(modName, val, pN);
 		}
 		else
@@ -379,11 +379,8 @@ class ModManager {
 	public function queueEase(step:Float, endStep:Float, modName:String, target:Float, style:String = 'linear', player:Int = -1, ?startVal:Float)
 	{
 		if(player==-1){
-			for (pN in 0...activeMods.length)
+			for (pN => mods in activeMods)
 				queueEase(step, endStep, modName, target, style, pN);
-
-/* 			queueEase(step, endStep, modName, target, style, 0);
-			queueEase(step, endStep, modName, target, style, 1); */
 		}else{
 			var easeFunc = FlxEase.linear;
 
@@ -404,7 +401,7 @@ class ModManager {
 	{
 		if (player == -1)
 		{
-			for (pN in 0...activeMods.length)
+			for (pN => mods in activeMods)
 				queueSet(step, modName, target, pN);
 		}
 		else

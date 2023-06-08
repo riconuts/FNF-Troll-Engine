@@ -52,8 +52,11 @@ class NoteField extends FieldBase
 	 * The ID used to determine how you apply modifiers to the notes
 	 * For example, you can have multiple notefields sharing 1 set of mods by giving them all the same modNumber
 	 */
-	public var modNumber:Int = 0;
-
+	public var modNumber(default, set):Int = 0;
+	function set_modNumber(d:Int){
+		modManager.getActiveMods(d); // generate an activemods thing if needed
+		return modNumber = d;
+	}
 	/*
 	 * The PlayField used to determine the notes to render
 	 * Required!
