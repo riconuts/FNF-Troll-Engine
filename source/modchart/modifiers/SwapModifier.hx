@@ -12,7 +12,7 @@ class SwapModifier extends NoteModifier
 	{
         if(getSubmodValue('invert', player) != 0){
 			var distance = Note.swagWidth * ((data % 2 == 0) ? 1 : -1);
-			pos.x += distance * getValue(player);
+			pos.x += distance * getSubmodValue('invert', player);
         }
         
 		if (getValue(player) != 0){
