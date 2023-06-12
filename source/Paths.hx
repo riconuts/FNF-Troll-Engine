@@ -120,7 +120,9 @@ class Paths
 		Assets.cache.clear("songs");
 	}
 
+	static public var currentModAddons:Array<String> = [];
 	static public var currentModDirectory:String = '';
+	static public var currentModLibraries:Array<String> = [];
 
 	public static function getPath(file:String, ?type:AssetType, ?library:Null<String> = null)
 	{

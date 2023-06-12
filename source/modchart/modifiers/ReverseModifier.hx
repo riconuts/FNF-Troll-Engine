@@ -1,14 +1,14 @@
 package modchart.modifiers;
-import flixel.math.FlxRect;
+
 import modchart.Modifier.ModifierOrder;
+import modchart.*;
+import math.*;
+
 import flixel.FlxSprite;
 import flixel.FlxG;
-import ui.*;
-import modchart.*;
-import flixel.math.FlxPoint;
 import flixel.math.FlxMath;
+
 using StringTools;
-import math.*;
 
 class ReverseModifier extends NoteModifier {
 	inline function lerp(a:Float, b:Float, c:Float)
@@ -34,8 +34,6 @@ class ReverseModifier extends NoteModifier {
 
         if(dir>=first && dir<=last)
             val += getSubmodValue("cross" ,player);
-        
-
 
         val += getValue(player) + getSubmodValue("reverse" + Std.string(dir),player);
 
