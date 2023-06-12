@@ -102,11 +102,6 @@ class Note extends NoteObject
 	
 	public var noteType(default, set):String = null;  // the note type
 	public var causedMiss:Bool = false;
-/* 	public var hitbox:Float = Conductor.safeZoneOffset * Wife3.timeScale; // how far you can hit the note in ms
-	public var earlyHitMult:Float = 1; // multiplier to hitbox to hit this note early
-	public var lateHitMult:Float = 1; // multiplier to hitbox to hit this note late */
-	// ^^ this is now determined by the judgements
-
 	public var usesDefaultColours:Bool = true; // whether this note uses the default note colours (lets you change colours in options menu)
 
 	public var blockHit:Bool = false; // whether you can hit this note or not
