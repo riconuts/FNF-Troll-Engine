@@ -596,7 +596,7 @@ class ClientPrefs
 		'ui_up' => [W, UP],
 		'ui_right' => [D, RIGHT],
 		'accept' => [SPACE, ENTER],
-		'back' => [ESCAPE, NONE],
+		'back' => [ESCAPE, BACKSPACE],
 		'pause' => [ENTER, ESCAPE],
 		'reset' => [R, NONE],
 		'volume_mute' => [ZERO, NONE],
