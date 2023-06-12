@@ -257,7 +257,7 @@ class NewBindsSubstate extends MusicBeatSubstate  {
                             bindIndex = index;
 
 							unbindText.visible = forcedBind.contains(internal);
-							popupText.text = 'Press any key to bind, or press [BACKSPACE] to cancel.';
+							popupText.text = 'Press any key to bind, or press [ESCAPE] to cancel.';
 							if (ClientPrefs.keyBinds.get(internal)[id]!=NONE)
                                 popupText.text += '\nPress [${InputFormatter.getKeyName(ClientPrefs.keyBinds.get(internal)[id])}] to unbind.';
 
@@ -321,7 +321,7 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 			if (overCam != null)
 				overCam.alpha = FlxMath.lerp(overCam.alpha, 1, lerpVal);
 			var keyPressed:FlxKey = FlxG.keys.firstJustPressed();
-			if (keyPressed == BACKSPACE)
+			if (keyPressed == ESCAPE)
 			{
 				bindID = 0;
 				bindIndex = -1;
