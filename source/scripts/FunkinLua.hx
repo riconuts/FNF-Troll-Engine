@@ -59,12 +59,12 @@ class FunkinLua extends FunkinScript
 		lua = LuaL.newstate();
 		LuaL.openlibs(lua);
 		Lua.init_callbacks(lua);
-		if(name==null) name=script;
+		
 		//trace('Lua version: ' + Lua.version());
 		//trace("LuaJIT version: " + Lua.versionJIT());
-
+		
 		scriptType = 'lua';
-		scriptName = name;
+		scriptName = name!=null ? name : script;
 
 		haxeScript = FunkinHScript.fromString("", 'runHaxeCode: ${scriptName}', null, false);
 
@@ -2040,7 +2040,7 @@ class FunkinLua extends FunkinScript
 			return str.endsWith(end);
 		});
 		
-		trace('lua file loaded:' + script);
+		trace('lua file loaded: $script');
 
 		if(!ignoreCreateCall) call('onCreate', []);
 		#end
@@ -2488,7 +2488,11 @@ class FunkinLua extends FunkinScript
 					else{
 						if (!duplicateErrors.contains(err)){
 							// just so your output isnt SPAMMED
-							Sys.println('$scriptName: Error on function $func(${args.join(', ')})\n$err');
+
+							var args = [for (arg in args){
+								(arg is String ? '"$arg"' : Std.string(arg));
+							}];
+							Sys.println('$scriptName: Error on function $func(${args.join(', ')}): $err');
 							duplicateErrors.push(err);
 							while(duplicateErrors.length > 20)
 								duplicateErrors.shift();
