@@ -295,12 +295,10 @@ class PlayState extends MusicBeatState
 		return value;
 	}
 	public var health(default, set):Float = 1;
+	public var maxHealth:Float = 2;
 	function set_health(value:Float){
-		health = value > 2 ? 2 : value;
-
+		health = value > maxHealth ? maxHealth : value;
 		displayedHealth = health;
-
-		doDeathCheck(value < health);
 
 		return health;
 	}
@@ -1063,11 +1061,12 @@ class PlayState extends MusicBeatState
 		Paths.clearUnusedMemory();
 
 		subtitles = SubtitleDisplay.fromSong(SONG.song);
-		if(subtitles!=null){
+		if (subtitles != null){
 			add(subtitles);
 			subtitles.y = 550;
 			subtitles.cameras = [camSubs];
-		}
+		}else if(showDebugTraces)
+			trace(SONG.song + " doesnt have subtitles!");
 
 		noteTypeMap.clear();
 		noteTypeMap = null;
@@ -2712,7 +2711,8 @@ class PlayState extends MusicBeatState
 			// RESET = Quick Game Over Screen
 			if (controls.RESET && canReset && !inCutscene && startedCountdown)
 				health = 0;
-			//	Death checks are now done after when your health is modified, rather than every frame
+			
+			doDeathCheck();
 
 			if (controls.PAUSE)
 				pause();
