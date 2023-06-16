@@ -902,12 +902,6 @@ class PlayState extends MusicBeatState
 		
 		hud.songName = SONG.song;
 		hud.alpha = ClientPrefs.hudOpacity;
-		
-		/* This appears above the strumlines despite being added before them?
-		var sowy = new FlxSprite().makeGraphic(300, 300);
-		sowy.cameras = [camHUD];
-		add(sowy);
-		*/
 		add(hud);
 
 		//
@@ -2535,7 +2529,7 @@ class PlayState extends MusicBeatState
 
 	function resyncVocals():Void
 	{
-		if(finishTimer != null || transitioning)
+		if(finishTimer != null || transitioning || !SONG.needsVoices)
 			return;
 
 		if(showDebugTraces)
@@ -3694,6 +3688,8 @@ class PlayState extends MusicBeatState
 		var mutatedJudgeData:Dynamic = callOnHScripts("mutateJudgeData", [note, judgeData]);
 		if(mutatedJudgeData != null && mutatedJudgeData != Globals.Function_Continue)
 			judgeData = cast mutatedJudgeData; // so you can return your own custom judgements or w/e
+		// Note: Be careful while changing values from the judgeData, cause it will also change the judgeData of every other note with the same judgement.
+		// You should use Reflect.copy() on your script.
 
 		applyJudgmentData(judgeData, note.hitResult.hitDiff, true);
 

@@ -1,12 +1,8 @@
 package;
 
 import JudgmentManager.Judgment;
-import PlayState.Wife3;
-import haxe.io.Path;
 import editors.ChartingState;
-import flixel.math.FlxPoint;
 import math.Vector3;
-import openfl.utils.Assets;
 import scripts.*;
 import playfields.*;
 
