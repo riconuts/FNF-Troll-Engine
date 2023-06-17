@@ -79,13 +79,14 @@ class GameOverSubstate extends MusicBeatSubstate
 	function doGenericGameOver()
 	{
 		Conductor.changeBPM(100);
-		FlxG.camera.bgColor = FlxColor.BLACK;
-		FlxG.camera.scroll.set();
-		FlxG.camera.target = null;
 
 		genericBitch = new FlxSprite().loadGraphic(Paths.image(genericName));
+		genericBitch.scrollFactor.set();
 		genericBitch.screenCenter();
 		add(genericBitch);
+
+		FlxG.camera.bgColor = FlxColor.BLACK;
+		FlxG.camera.follow(genericBitch, LOCKON);
 	}
 
 	public function new(x:Float, y:Float, camX:Float, camY:Float, ?isPlayer:Bool)
@@ -158,6 +159,8 @@ class GameOverSubstate extends MusicBeatSubstate
 		camFollowPos.setPosition(FlxG.camera.scroll.x + (FlxG.camera.width* 0.5), FlxG.camera.scroll.y + (FlxG.camera.height* 0.5));
 		add(camFollowPos);
 
+		FlxG.camera.follow(camFollowPos, LOCKON, 1);
+
 		if (PlayState.instance != null && PlayState.instance.stage != null)
 			defaultCamZoom = PlayState.instance.stage.stageData.defaultZoom;
 		else
@@ -227,7 +230,6 @@ class GameOverSubstate extends MusicBeatSubstate
 		{
 			if(boyfriend.animation.curAnim.curFrame >= 12 && !isFollowingAlready)
 			{
-				FlxG.camera.follow(camFollowPos, LOCKON, 1);
 				updateCamera = true;
 				isFollowingAlready = true;
 			}
