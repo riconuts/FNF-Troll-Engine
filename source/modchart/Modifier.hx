@@ -106,6 +106,20 @@ class Modifier {
 
 	public function setSubmodValue(modName:String, endValue:Float, player:Int)
 		return submods.get(modName).setValue(endValue, player);
+
+	public inline function getOtherPercent(modName:String, player:Int)
+		return modMgr.getPercent(modName, player);
+	
+
+	public inline function getOtherValue(modName:String, player:Int)
+		return modMgr.getValue(modName, player);
+	
+
+	public inline function setOtherPercent(modName:String, endPercent:Float, player:Int)
+		return modMgr.setPercent(modName, endPercent, player);
+
+	public inline function setOtherValue(modName:String, endValue:Float, player:Int)
+		return modMgr.setValue(modName, endValue, player);
     
 	public function new(modMgr:ModManager, ?parent:Modifier)
 	{

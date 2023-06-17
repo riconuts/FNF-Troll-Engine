@@ -120,7 +120,7 @@ class NoteField extends FieldBase
 
 			if (songSpeed != 0)
 			{
-				var speed = songSpeed * daNote.multSpeed * modManager.getValue("xmod", modNumber);
+				var speed = songSpeed * daNote.multSpeed * modManager.getValue("xmod", modNumber) * modManager.getValue('xmod${daNote.noteData}', modNumber);
 				var diff = Conductor.songPosition - daNote.strumTime;
 				var visPos = -((Conductor.visualPosition - daNote.visualTime) * speed);
 				if (visPos > drawDist)
@@ -232,6 +232,7 @@ class NoteField extends FieldBase
 
     }
 
+	var point:FlxPoint = FlxPoint.get(0, 0);
 	
 	override function draw()
 	{
@@ -272,7 +273,7 @@ class NoteField extends FieldBase
 					transfarm.greenOffset = glowG * glow * 255; 
 					transfarm.blueOffset = glowB * glow * 255;
 
-					transfarm.alphaMultiplier = alphas[n] * this.alpha;
+					transfarm.alphaMultiplier = alphas[n] * this.alpha * ClientPrefs.noteOpacity;
 					transforms.push(transfarm);
 				}
 
@@ -286,9 +287,13 @@ class NoteField extends FieldBase
 						for(shit in transforms)
 							shit.alphaMultiplier *= camera.alpha;
 						
+						getScreenPosition(point, camera);
 						var drawItem = camera.startTrianglesBatch(graphic, shader.bitmap.filter == 4, true, null, true, shader);
 
-						drawItem.addTrianglesColorArray(vertices, indices, uvData, null, FlxPoint.weak(x, y), null, transforms);
+						@:privateAccess
+						{
+							drawItem.addTrianglesColorArray(vertices, indices, uvData, null, point, camera._bounds, transforms);
+						}
 						for (n in 0...transforms.length)
 							transforms[n].alphaMultiplier = alphas[n];
 					}
@@ -297,11 +302,10 @@ class NoteField extends FieldBase
 		}
 	}
 
-	function getPoints(hold:Note, ?wid:Float, vDiff:Float, diff:Float)
+	function getPoints(hold:Note, ?wid:Float, speed:Float, vDiff:Float, diff:Float)
 	{ // stolen from schmovin'
 		if (wid == null)
 			wid = hold.frameWidth * hold.scale.x;
-		var speed = songSpeed * hold.multSpeed * modManager.getValue("xmod", modNumber);
 
 		var p1 = modManager.getPos(-(vDiff) * speed, diff, curDecBeat, hold.noteData, modNumber, hold, []);
 		var z:Float = p1.z;
@@ -404,7 +408,7 @@ class NoteField extends FieldBase
 
 			scalePoint.set(1, 1);
 
-			var speed = songSpeed * hold.multSpeed * modManager.getValue("xmod", modNumber);
+			var speed = songSpeed * hold.multSpeed * modManager.getValue("xmod", modNumber) * modManager.getValue('xmod${hold.noteData}', modNumber);
 
 			var info:RenderInfo = modManager.getExtraInfo((visualDiff + ((strumOff + strumSub) * 0.45)) * -speed,  strumDiff + strumOff + strumSub, curDecBeat, {
 				alpha: hold.alpha,
@@ -418,8 +422,8 @@ class NoteField extends FieldBase
 				glows.push(info.glow);
 			}
 
-			var top = lastMe == null ? getPoints(hold, topWidth, (visualDiff + (strumOff * 0.45)), strumDiff + strumOff) : lastMe;
-			var bot = getPoints(hold, botWidth, (visualDiff + ((strumOff + strumSub) * 0.45)), strumDiff + strumOff + strumSub);
+			var top = lastMe == null ? getPoints(hold, topWidth, speed, (visualDiff + (strumOff * 0.45)), strumDiff + strumOff) : lastMe;
+			var bot = getPoints(hold, botWidth, speed, (visualDiff + ((strumOff + strumSub) * 0.45)), strumDiff + strumOff + strumSub);
 
 			lastMe = bot;
 
@@ -516,7 +520,7 @@ class NoteField extends FieldBase
 		var visPos:Float = 0;
 		if((sprite is Note)){
 			var daNote:Note = cast sprite;
-			var speed = songSpeed * daNote.multSpeed * modManager.getValue("xmod", modNumber);
+			var speed = songSpeed * daNote.multSpeed * modManager.getValue("xmod", modNumber) * modManager.getValue('xmod${daNote.noteData}', modNumber);
 			diff = Conductor.songPosition - daNote.strumTime;
 			visPos = -((Conductor.visualPosition - daNote.visualTime) * speed);
 		}

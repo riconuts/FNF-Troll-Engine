@@ -211,21 +211,12 @@ class Note extends NoteObject
 	}
 
 	private function set_multSpeed(value:Float):Float {
-/* 		resizeByRatio(value / multSpeed);
-		multSpeed = value;
-		// trace('fuck cock');
-		return value; */
-		return value;
+		return multSpeed = value;
 	}
 
 	public function resizeByRatio(ratio:Float) //haha funny twitter shit
 	{
-/* 		if(isSustainNote && !animation.curAnim.name.endsWith('end'))
-		{
-			scale.y *= ratio;
-			baseScaleY = scale.y;
-			updateHitbox();
-		} */
+		
 	}
 
 	private function set_texture(value:String):String {

@@ -165,50 +165,36 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 			this.vertices[currentVertexPosition++] = tempX;
 			this.vertices[currentVertexPosition++] = tempY;
 
-			if (i == 0)
-			{
-				bounds.set(tempX, tempY, 0, 0);
-			}
-			else
-			{
-				inflateBounds(bounds, tempX, tempY);
-			}
-
 			i += 2;
 		}
 
-		if (!cameraBounds.overlaps(bounds))
+
+		var uvtDataLength:Int = uvtData.length;
+		for (i in 0...uvtDataLength)
 		{
-			this.vertices.splice(this.vertices.length - verticesLength, verticesLength);
+			this.uvtData[prevUVTDataLength + i] = uvtData[i];
 		}
-		else
+
+		var indicesLength:Int = indices.length;
+		for (i in 0...indicesLength)
 		{
-			var uvtDataLength:Int = uvtData.length;
-			for (i in 0...uvtDataLength)
-			{
-				this.uvtData[prevUVTDataLength + i] = uvtData[i];
-			}
-
-			var indicesLength:Int = indices.length;
-			for (i in 0...indicesLength)
-			{
-				this.indices[prevIndicesLength + i] = indices[i] + prevNumberOfVertices;
-			}
-			#if openfl_legacy
-			if (colored)
-			{
-				for (i in 0...numberOfVertices)
-				{
-					this.colors[prevColorsLength + i] = colors[i];
-				}
-
-				colorsPosition += numberOfVertices;
-			}
-            #end
-
-			verticesPosition += verticesLength;
-			indicesPosition += indicesLength;
+			this.indices[prevIndicesLength + i] = indices[i] + prevNumberOfVertices;
 		}
+		#if openfl_legacy
+		if (colored)
+		{
+			for (i in 0...numberOfVertices)
+			{
+				this.colors[prevColorsLength + i] = colors[i];
+			}
+
+			colorsPosition += numberOfVertices;
+		}
+		#end
+
+		verticesPosition += verticesLength;
+		indicesPosition += indicesLength;
+		
 
 		position.putWeak();
 		cameraBounds.putWeak();

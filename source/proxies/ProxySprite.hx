@@ -39,7 +39,7 @@ class ProxySprite extends FlxSprite {
 				_matrix.rotateWithTrig(_cosAngle, _sinAngle);
 		}
 
-		getScreenPosition(_point, camera).subtractPoint(offset);
+		getScreenPosition(_point, camera).subtractPoint(offset).subtractPoint(proxiedSprite.offset);
 		_point.add(origin.x, origin.y);
 		_point.add(proxiedSprite.origin.x, proxiedSprite.origin.y);
 		_matrix.translate(_point.x, _point.y);

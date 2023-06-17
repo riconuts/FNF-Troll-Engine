@@ -977,8 +977,6 @@ class PlayState extends MusicBeatState
 
 
 		var cH = [camHUD];
-/* 		if (hitbar != null)
-			hitbar.cameras = cH; */
 		hud.cameras = cH;
 		playerField.cameras = cH;
 		dadField.cameras = cH;
@@ -987,14 +985,6 @@ class PlayState extends MusicBeatState
 		grpNoteSplashes.cameras = cH;
 		notes.cameras = cH;
 		botplayTxt.cameras = cH;
-/* 		healthBarBG.cameras = cH;
-		healthBar.cameras = cH;
-		iconP1.cameras = cH;
-		iconP2.cameras = cH; */
-/* 	
-		timeBar.cameras = cH;
-		timeBarBG.cameras = cH;
-		timeTxt.cameras = cH; */
 
 		// EVENT AND NOTE SCRIPTS WILL GET LOADED HERE
 		generateSong(SONG.song);
@@ -3627,12 +3617,12 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	private function applyJudgmentData(judgeData:JudgmentData, diff:Float, ?show:Bool = true){
+	private function applyJudgmentData(judgeData:JudgmentData, diff:Float, ?bot:Bool = false, ?show:Bool = true){
 		if(judgeData==null){
 			trace("you didnt give a valid JudgmentData to applyJudgmentData!");
 			return;
 		}
-		if (!cpuControlled)songScore += Math.floor(judgeData.score * playbackRate);
+		if (!bot)songScore += Math.floor(judgeData.score * playbackRate);
 		health += (judgeData.health * 0.02) * (judgeData.health < 0 ? healthLoss : healthGain);
 		songHits++;
 
@@ -3676,7 +3666,7 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	private function applyNoteJudgment(note:Note):Null<JudgmentData>
+	private function applyNoteJudgment(note:Note, bot:Bool = false):Null<JudgmentData>
 	{
 		if(note.hitResult.judgment == UNJUDGED)return null;
 		var judgeData:JudgmentData = judgeManager.judgmentData.get(note.hitResult.judgment);
@@ -3691,7 +3681,7 @@ class PlayState extends MusicBeatState
 		// Note: Be careful while changing values from the judgeData, cause it will also change the judgeData of every other note with the same judgement.
 		// You should use Reflect.copy() on your script.
 
-		applyJudgmentData(judgeData, note.hitResult.hitDiff, true);
+		applyJudgmentData(judgeData, note.hitResult.hitDiff, bot, true);
 
 		callOnHScripts("postApplyJudgment", [note, judgeData]);
 		
@@ -3708,7 +3698,7 @@ class PlayState extends MusicBeatState
 			field = getFieldFromNote(note);
 
 		var hitTime = note.hitResult.hitDiff + ClientPrefs.ratingOffset;
-		var judgeData:JudgmentData = applyNoteJudgment(note);
+		var judgeData:JudgmentData = applyNoteJudgment(note, field.autoPlayed);
 		if(judgeData==null)return;
 
 		note.ratingMod = judgeData.accuracy * 0.01;
@@ -3759,106 +3749,6 @@ class PlayState extends MusicBeatState
 
 		hud.noteJudged(judgeData, note, field);
 	}
-	// time to rewrite this!
-/* 	private function popUpScore(note:Note, field:PlayField=null):Void
-	{
-		if(field==null)
-			field = getFieldFromNote(note);
-		
-
-		var hitTime = note.hitResult.hitDiff + ClientPrefs.ratingOffset;
-		var noteDiff:Float = Math.abs(hitTime);
-
-		vocals.volume = 1;
-
-		//tryna do MS based judgment due to popular demand
-		var daRating:Rating = Conductor.judgeNote(noteDiff);
-
-		hud.noteJudged(daRating, note, field);
-
-		var ratingMod = daRating.ratingMod;
-		if (ClientPrefs.wife3)
-			ratingMod = Wife3.getAcc(hitTime);
-		
-		note.ratingMod = ratingMod;
-		
-		if(!note.ratingDisabled) daRating.increase();
-		note.rating = daRating.name;
-
-		if(!hud.judgements.exists(daRating.name))
-			hud.judgements.set(daRating.name, 0);
-		hud.judgements.set(daRating.name, hud.judgements.get(daRating.name) + 1);
-
-		if(daRating.noteSplash && !note.noteSplashDisabled)
-			spawnNoteSplashOnNote(note, field);
-
-		var hitHealth = note.ratingHealth.get(note.rating);
-		if((daRating.health<0 && ClientPrefs.wife3) || note.breaksCombo)
-			breakCombo();
-		else
-			combo++;
-
-		health += (hitHealth == null ? daRating.health : hitHealth) * healthGain;
-		
-		if(!practiceMode && !field.autoPlayed)
-			songScore += daRating.score;
-
-		if(!note.ratingDisabled)
-		{
-			totalNotesHit += ratingMod;
-			songHits++;
-			totalPlayed += ClientPrefs.wife3 ? 2 : 1;
-			RecalculateRating();
-		}
-		
-		var time = (Conductor.stepCrochet * 0.001);
-
-		displayJudgment(daRating.image);
-		////
-		msTotal += hitTime;
-		msNumber++;
-
-		if(ClientPrefs.showMS && (field==null || !field.autoPlayed))
-		{
-			FlxTween.cancelTweensOf(timingTxt);
-			FlxTween.cancelTweensOf(timingTxt.scale);
-			
-			timingTxt.text = '${FlxMath.roundDecimal(hitTime, 2)}ms';
-			timingTxt.screenCenter();
-			timingTxt.x += ClientPrefs.comboOffset[4];
-			timingTxt.y -= ClientPrefs.comboOffset[5];
-
-			timingTxt.color = hud.judgeColours.get(daRating.name);
-
-			timingTxt.visible = true;
-			timingTxt.alpha = 1;
-			timingTxt.y -= 8;
-			timingTxt.scale.set(1, 1);
-			
-			FlxTween.tween(timingTxt, 
-				{y: timingTxt.y + 8}, 
-				0.1,
-				{onComplete: function(_){
-					if (ClientPrefs.simpleJudge){
-						FlxTween.tween(timingTxt.scale, {x: 0, y: 0}, time, {
-							ease: FlxEase.quadIn,
-							onComplete: function(_){timingTxt.visible = false;},
-							startDelay: time * 8
-						});
-					}else{
-						FlxTween.tween(timingTxt, {alpha: 0}, time, {
-							// ease: FlxEase.circOut,
-							onComplete: function(_){timingTxt.visible = false;},
-							startDelay: time * 8
-						});
-					}
-				}}
-			);
-		}
-
-		////
-		displayCombo();
-	} */
 
 	public var strumsBlocked:Array<Bool> = [];
 	var pressed:Array<FlxKey> = [];
