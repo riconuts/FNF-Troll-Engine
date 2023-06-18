@@ -24,7 +24,8 @@ class ConfusionModifier extends NoteModifier {
         var angleZ = getConfusion(beat, data, player);
         if((obj is Note)){
 			var note:Note = cast obj;
-			var speed = PlayState.instance.songSpeed * note.multSpeed;
+			var speed = PlayState.instance.songSpeed * note.multSpeed * getOtherValue("xmod",
+				player) * getOtherValue('xmod${data}', player);
 			var yPos:Float = ((Conductor.visualPosition - note.visualTime)) * speed;
 
 			angleX += getSubmodValue("roll", player) * yPos / 2;

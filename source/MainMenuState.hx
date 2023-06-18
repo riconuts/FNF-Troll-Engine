@@ -169,8 +169,11 @@ class MainMenuState extends MusicBeatState {
 		changeItem(curSelected, true);
 		moveBoxes(1);
 
-		FlxG.stage.addEventListener(MouseEvent.MOUSE_UP, mouseClickEvent);
-		FlxG.stage.addEventListener(MouseEvent.MOUSE_MOVE, updateMouseIcon);
+		#if mobile
+		FlxG.stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+		#end
+		FlxG.stage.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+		FlxG.stage.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
     
 		MusicBeatState.playMenuMusic();
 
@@ -233,49 +236,19 @@ class MainMenuState extends MusicBeatState {
 		return true;
 	}
 
-	function mouseClickEvent(?e)
+	#if mobile
+	var mouseHolding:Bool = false;
+	var mouseHoldStartX:Float;
+	var mouseSwipe:Float = 0;
+
+	function onMouseDown(e)
 	{
-		if (selectedSomethin)
-			return;
-
-		for (spr in sideItems){
-			if (FlxG.mouse.overlaps(spr))
-				return fuckOff(spr);
-		}
-
-		if (Main.outOfDate && FlxG.mouse.overlaps(engineWatermark)){
-			#if DO_AUTO_UPDATE
-			if(Main.recentRelease != null)
-				MusicBeatState.switchState(new UpdaterState(Main.recentRelease));
-			else#end{
-				CoolUtil.browserLoad('https://github.com/riconuts/troll-engine/releases');
-				return;
-			}
-		}
-		for (spr in menuItems){
-			if (spr.ID == curSelected && FlxG.mouse.overlaps(spr)){
-	
-				//// Kirb BF
-				if (spr.ID == optionShit.indexOf("freeplay") && artBoxes.contains(spr))
-				{
-					var clickPos = FlxG.mouse.getPositionInCameraView();
-
-					if (clickPos.x >= spr.x + 26 && 
-						clickPos.x <= spr.x + 132 &&
-						clickPos.y >= spr.y + 4 &&  
-						clickPos.y <= spr.y + 58
-					){
-						kirbfSqueak(spr);
-						return;
-					}
-				}
-
-				////
-				return onSelected();
-			}	
-		}
+		mouseHolding = true;
+		mouseHoldStartX = FlxG.mouse.x;
 	}
-	function updateMouseIcon(?e)
+
+	#else
+	function updateMouseIcon()
 	{
 		if (FlxG.mouse.overlaps(engineWatermark) && Main.outOfDate)
 		{
@@ -301,10 +274,83 @@ class MainMenuState extends MusicBeatState {
 
 		Mouse.cursor = MouseCursor.AUTO;
 	}
+	#end
+
+	function onMouseMove(e)
+	{
+		#if mobile
+		if (mouseHolding && !selectedSomethin)
+			mouseSwipe = (mouseHoldStartX - FlxG.mouse.x) / FlxG.width;
+		else
+			mouseSwipe = 0;
+		
+		#else
+
+		updateMouseIcon();
+		#end
+	}
+
+	function onMouseUp(e)
+	{
+		if (selectedSomethin)
+			return;
+		
+		#if mobile
+		mouseHolding = false;
+
+		if (mouseSwipe < -0.65)
+			return changeItem(-1);
+		else if (mouseSwipe > 0.65)
+			return changeItem(1);
+
+		mouseSwipe = 0;
+		#end
+
+		for (spr in sideItems){
+			if (FlxG.mouse.overlaps(spr))
+				return fuckOff(spr);
+		}
+
+		if (Main.outOfDate && FlxG.mouse.overlaps(engineWatermark)){
+			#if DO_AUTO_UPDATE
+			if(Main.recentRelease != null)
+				MusicBeatState.switchState(new UpdaterState(Main.recentRelease));
+			else#end{
+				CoolUtil.browserLoad('https://github.com/riconuts/troll-engine/releases');
+				return;
+			}
+		}
+
+		for (spr in menuItems){
+			if (spr.ID == curSelected && FlxG.mouse.overlaps(spr)){
+	
+				//// Kirb BF
+				if (spr.ID == optionShit.indexOf("freeplay") && artBoxes.contains(spr))
+				{
+					var clickPos = FlxG.mouse.getPositionInCameraView();
+
+					if (clickPos.x >= spr.x + 26 && 
+						clickPos.x <= spr.x + 132 &&
+						clickPos.y >= spr.y + 4 &&  
+						clickPos.y <= spr.y + 58
+					){
+						kirbfSqueak(spr);
+						return;
+					}
+				}
+
+				////
+				return onSelected();
+			}	
+		}
+	}
 
 	override function destroy() {
-		FlxG.stage.removeEventListener(MouseEvent.MOUSE_UP, mouseClickEvent);
-		FlxG.stage.removeEventListener(MouseEvent.MOUSE_MOVE, updateMouseIcon);
+		#if mobile
+		FlxG.stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+		#end
+		FlxG.stage.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+		FlxG.stage.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 
 		super.destroy();
 	}
@@ -380,7 +426,7 @@ class MainMenuState extends MusicBeatState {
 						case 'story_mode':
 							MusicBeatState.switchState(new StoryMenuState());
 						case 'freeplay':
-							MusicBeatState.switchState(new FreeplayState());
+							MusicBeatState.switchState(/*FlxG.keys.pressed.SHIFT ? new SongSelectState() :*/ new FreeplayState());
 						case 'options':
 							LoadingState.loadAndSwitchState(new newoptions.OptionsState());
 					}
@@ -404,7 +450,9 @@ class MainMenuState extends MusicBeatState {
         else if(curSelected < 0)
             curSelected = optionShit.length-1;
 
+		#if !mobile
 		updateMouseIcon();
+		#end
     }
     
 	function sortByOrder(wat:Int, Obj1:ZSprite, Obj2:ZSprite):Int
@@ -428,7 +476,7 @@ class MainMenuState extends MusicBeatState {
 
 			obj.order = -obj.y;
 
-			var input = (idx - curSelected) * rads;
+			var input = (idx - curSelected #if mobile - mouseSwipe #end) * rads;
 			var desiredX = FlxMath.fastSin(input) * 450;
 			var desiredY = -(FlxMath.fastCos(input) * 350);
 

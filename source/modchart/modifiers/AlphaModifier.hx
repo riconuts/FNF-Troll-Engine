@@ -120,7 +120,6 @@ class AlphaModifier extends NoteModifier {
       }
     }
 
-    alpha *= ClientPrefs.noteOpacity;
     info.alpha = alpha;
 
     return info;

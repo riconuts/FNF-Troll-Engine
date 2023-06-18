@@ -7,12 +7,7 @@ class XModifier extends NoteModifier {
 		return 'xmod';
 
 	override function shouldExecute(player:Int, val:Float)
-		return true;
-    
-	override function updateNote(beat:Float, daNote:Note, player:Int)
-	{
-        daNote.multSpeed = getValue(player) * getSubmodValue('xmod' + daNote.noteData, player);
-    }
+		return false;
 
 	override function getSubmods()
 	{

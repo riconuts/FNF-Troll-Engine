@@ -64,22 +64,20 @@
 
 	<define name="CRASH_HANDLER" if="desktop" />
 	
-	<define name="MULTICORE_LOADING" if="desktop" />
+	<define name="MULTICORE_LOADING" if="windows" />
 	<define name="loadBenchmark" if="MULTICORE_LOADING"/>
 	<!-- <define name="traceLoading"/> if="MULTICORE_LOADING"/> -->
 
 	<!-- _______________________________ Libraries ______________________________ -->
 
 	<haxelib name="flixel" />
-	<assets path="flixel" embed="true"/> <!-- to override flixel assets -->
-
 	<haxelib name="flixel-addons" />
 	<haxelib name="flixel-ui" />
 
-	<!--<haxelib name="polymod"/> -->
+	<assets path="flixel" embed="true"/> <!-- To override some Flixel assets -->
+
 	<haxelib name="hscript" />
-	<!-- <haxelib name="hscript-ex"/> -->
-	<define name="hscriptPos" />
+	<define name="hscriptPos" if="hscript"/>
 	<haxeflag name="-dce no" if="hscript"/> <!-- Disable dead code elimination so you can import unused classes on hscript -->
 	
 	<haxelib name="hxCodec" if="VIDEOS_ALLOWED"/>
@@ -87,17 +85,10 @@
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
 
 	<haxelib name="discord_rpc" if="desktop"/>
+
 	<haxelib name="faxe" if='switch'/>
 
-	<!-- es -->
 	<haxelib name="hxcpp-debug-server" if="debug"/>
-
-	<!--Used for Izzy Engine's crash handler-->
-	<haxedef name="HXCPP_STACK_TRACE" if="CRASH_HANDLER"/>
-	<haxedef name="HXCPP_CHECK_POINTER" if="CRASH_HANDLER" />
-	<haxedef name="HXCPP_STACK_LINE" if="CRASH_HANDLER" />
-
-	<!-- <haxedef name="no_traces" if="final"/> -->
 
 	<!-- <haxelib name="markdown" /> -->
 	<!-- <haxelib name="HtmlParser" /> -->
@@ -106,6 +97,13 @@
 	<!--<haxelib name="nape-haxe4" />-->
 
 	<!-- ______________________________ Haxedefines _____________________________ -->
+
+	<!--Used for Izzy Engine's crash handler-->
+	<haxedef name="HXCPP_STACK_TRACE" if="CRASH_HANDLER"/>
+	<haxedef name="HXCPP_CHECK_POINTER" if="CRASH_HANDLER" />
+	<haxedef name="HXCPP_STACK_LINE" if="CRASH_HANDLER" />
+
+	<!-- <haxedef name="no_traces" if="final"/> -->
 
 	<!--Enable the Flixel core recording system-->
 	<!--<haxedef name="FLX_RECORD" />-->

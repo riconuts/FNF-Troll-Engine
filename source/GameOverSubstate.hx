@@ -79,13 +79,14 @@ class GameOverSubstate extends MusicBeatSubstate
 	function doGenericGameOver()
 	{
 		Conductor.changeBPM(100);
-		FlxG.camera.bgColor = FlxColor.BLACK;
-		FlxG.camera.scroll.set();
-		FlxG.camera.target = null;
 
 		genericBitch = new FlxSprite().loadGraphic(Paths.image(genericName));
+		genericBitch.scrollFactor.set();
 		genericBitch.screenCenter();
 		add(genericBitch);
+
+		FlxG.camera.bgColor = FlxColor.BLACK;
+		FlxG.camera.follow(genericBitch, LOCKON);
 	}
 
 	public function new(x:Float, y:Float, camX:Float, camY:Float, ?isPlayer:Bool)
@@ -95,6 +96,11 @@ class GameOverSubstate extends MusicBeatSubstate
 		var game = PlayState.instance;
 
 		game.setOnScripts('inGameOver', true);
+
+		game.inst.volume = 0;
+		game.inst.stop();
+		game.vocals.volume = 0;
+		game.vocals.stop();
 
 		Conductor.songPosition = 0;
 
@@ -107,7 +113,7 @@ class GameOverSubstate extends MusicBeatSubstate
 
 		var charInfo = deathName == null ? null : Character.getCharacterFile(deathName);
 		if (charInfo == null){
-			if (PlayState.instance.showDebugTraces)trace('"$deathName" does not exist, using default.');
+			if (PlayState.instance.showDebugTraces) trace('"$deathName" does not exist, using default.');
 
 			deathName = "generic-gameover";
 			charInfo = null;
@@ -152,6 +158,8 @@ class GameOverSubstate extends MusicBeatSubstate
 		camFollowPos = new FlxObject(0, 0, 1, 1);
 		camFollowPos.setPosition(FlxG.camera.scroll.x + (FlxG.camera.width* 0.5), FlxG.camera.scroll.y + (FlxG.camera.height* 0.5));
 		add(camFollowPos);
+
+		FlxG.camera.follow(camFollowPos, LOCKON, 1);
 
 		if (PlayState.instance != null && PlayState.instance.stage != null)
 			defaultCamZoom = PlayState.instance.stage.stageData.defaultZoom;
@@ -222,7 +230,6 @@ class GameOverSubstate extends MusicBeatSubstate
 		{
 			if(boyfriend.animation.curAnim.curFrame >= 12 && !isFollowingAlready)
 			{
-				FlxG.camera.follow(camFollowPos, LOCKON, 1);
 				updateCamera = true;
 				isFollowingAlready = true;
 			}

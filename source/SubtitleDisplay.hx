@@ -30,21 +30,24 @@ typedef SubData = {
 }
 
 class SubtitleDisplay extends FlxTypedGroup<FlxText> {
-    public inline static function fromFile(path:String){
-		return new SubtitleDisplay(Json.parse(File.getContent(path)));
-    }
     
-
-	public inline static function fromSong(song:String){
-		//var jason = Paths.songJson(Paths.formatToSongPath(song) + '/subtitles');
-		var jason = Paths.songJson(Paths.formatToSongPath(song) + '/subtitles');
-		if (!FileSystem.exists(jason))
-			jason = Paths.modsSongJson(Paths.formatToSongPath(song) + '/subtitles');
-        if(!FileSystem.exists(jason)){
-            trace(song + " doesnt have subtitles!");
+    public inline static function fromFile(path:String):Null<SubtitleDisplay>
+    {
+        try{
+		    return FileSystem.exists(path) ? new SubtitleDisplay(Json.parse(File.getContent(path))) : null;
+        }catch(e){
             return null;
         }
-		return new SubtitleDisplay(Json.parse(File.getContent(jason)));
+    }
+    
+	public inline static function fromSong(song:String):Null<SubtitleDisplay>
+    {
+        var jason = Paths.songJson(Paths.formatToSongPath(song) + '/subtitles');
+		
+        if (!FileSystem.exists(jason))
+			jason = Paths.modsSongJson(Paths.formatToSongPath(song) + '/subtitles');
+
+        return fromFile(jason);
     }
 	
     public var y:Float = 0;

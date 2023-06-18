@@ -72,6 +72,13 @@ class FunkinScript {
 			set('opponentPlay', PlayState.instance.playOpponent);
 			set('startedCountdown', false);
 			set("showDebugTraces", PlayState.instance.showDebugTraces);
+
+			set('mustHitSection', false);
+			set('altAnim', false);
+			set('gfSection', false);
+
+			set("curSection", null);
+			set("sectionNumber", 0);
 		}else{
 			set("inPlaystate", false);
 			set("showDebugTraces", Main.showDebugTraces);
@@ -101,8 +108,8 @@ class FunkinScript {
 		set('healthBarAlpha', ClientPrefs.hpOpacity);
 		set('lowQuality', ClientPrefs.lowQuality);
 		set("trollEngine", true); // so if any psych mods wanna add troll engine specific stuff well there they go
-		
 
+		
 		set('curBpm', Conductor.bpm);
 		set('crochet', Conductor.crochet);
 		set('stepCrochet', Conductor.stepCrochet);

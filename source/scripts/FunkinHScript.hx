@@ -1,8 +1,5 @@
 package scripts;
 
-import proxies.ProxyField;
-import proxies.ProxySprite;
-import proxies.ProxySprite;
 import flixel.text.FlxText;
 import flixel.text.FlxText.FlxTextBorderStyle;
 import editors.ChartingState;
@@ -16,7 +13,6 @@ import flixel.FlxG;
 import flixel.tweens.*;
 import flixel.math.FlxMath;
 
-import openfl.utils.Assets;
 import lime.app.Application;
 
 import hscript.*;
@@ -103,9 +99,15 @@ class FunkinHScript extends FunkinScript
 		set("StringTools", StringTools);
 		set("scriptTrace", scriptTrace);
 
+		set("StringMap", haxe.ds.StringMap);
+		set("ObjectMap", haxe.ds.ObjectMap);
+		set("IntMap", haxe.ds.IntMap);
+		set("EnumValueMap", haxe.ds.EnumValueMap);
 		set("newMap", () -> {return new Map<Dynamic, Dynamic>();});
 
-		set("Assets", Assets);
+		set("Lib", openfl.Lib);
+		set("Assets", openfl.utils.Assets);
+		set("Main", Main);
 
 		set("FlxG", flixel.FlxG);
 		set("FlxSprite", flixel.FlxSprite);
@@ -123,8 +125,8 @@ class FunkinHScript extends FunkinScript
 			// These aren't part of FlxColor but i thought they could be useful
 			// honestly we should replace source/flixel/FlxColor.hx or w/e with one with these funcs
 
-			toRGBArray: function(color:FlxColor){return [color.red, color.green, color.blue];},
-			lerp: function(from:FlxColor, to:FlxColor, ratio:Float){
+			toRGBArray: (color:FlxColor)->{return [color.red, color.green, color.blue];},
+			lerp: (from:FlxColor, to:FlxColor, ratio:Float)->{
 				return FlxColor.fromRGBFloat(
 					FlxMath.lerp(from.redFloat, to.redFloat, ratio),
 					FlxMath.lerp(from.greenFloat, to.greenFloat, ratio),
@@ -134,8 +136,16 @@ class FunkinHScript extends FunkinScript
 			},
 						
 			////
-			setHue: function(color:FlxColor, hue){
+			set_hue: (color:FlxColor, hue:Float)->{
 				color.hue = hue;
+				return color;
+			},
+			set_saturation: (color:FlxColor, saturation:Float)->{
+				color.saturation = saturation;
+				return color;
+			},
+			set_brightness: (color:FlxColor, brightness:Float)->{
+				color.brightness = brightness;
 				return color;
 			},
 
@@ -145,16 +155,30 @@ class FunkinHScript extends FunkinScript
 			fromInt: FlxColor.fromInt,
 			fromRGBFloat: FlxColor.fromRGBFloat,
 			fromString: FlxColor.fromString,
-			fromRGB: FlxColor.fromRGB
+			fromRGB: FlxColor.fromRGB,
+
+			TRANSPARENT: 0x00000000,
+			WHITE: 0xFFFFFFFF,
+			GRAY: 0xFF808080,
+			BLACK: 0xFF000000,
+		
+			GREEN: 0xFF008000,
+			LIME: 0xFF00FF00,
+			YELLOW: 0xFFFFFF00,
+			ORANGE: 0xFFFFA500,
+			RED: 0xFFFF0000,
+			PURPLE: 0xFF800080,
+			BLUE: 0xFF0000FF,
+			BROWN: 0xFF8B4513,
+			PINK: 0xFFFFC0CB,
+			MAGENTA: 0xFFFF00FF,
+			CYAN: 0xFF00FFFF,
 		});
 		// Same for FlxPoint
 		set("FlxPoint", {
 			get: FlxPoint.get, 
 			weak: FlxPoint.weak
 		});
-
-		set("Main", Main);
-		set("Lib", openfl.Lib);
 
 		set("FlxRuntimeShader", FlxRuntimeShader);
 		set("newShader", function(fragFile:String = null, vertFile:String = null){ // returns a FlxRuntimeShader but with file names lol
@@ -258,16 +282,11 @@ class FunkinHScript extends FunkinScript
 				var state:ChartingState = ChartingState.instance;
 				set("game", state);
 				set("global", state.variables);
-				set("getInstance", function()
-				{
-					return flixel.FlxG.state;
-				});
+				set("getInstance", flixel.FlxG.get_state);
 			}else{
 				set("game", null);
 				set("global", null);
-				set("getInstance", function(){
-					return flixel.FlxG.state;
-				});
+				set("getInstance", flixel.FlxG.get_state);
 			}
 		}
 
@@ -275,8 +294,8 @@ class FunkinHScript extends FunkinScript
 		set("NoteObject", NoteObject);
 		set("PlayField", PlayField);
 		set("NoteField", NoteField);
-		set("ProxyField", ProxyField);
-		set("ProxySprite", ProxySprite);
+		set("ProxyField", proxies.ProxyField);
+		set("ProxySprite", proxies.ProxySprite);
 		set("Paths", Paths);
 		set("AttachedSprite", AttachedSprite);
 		set("AttachedText", AttachedText);

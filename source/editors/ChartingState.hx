@@ -2519,7 +2519,7 @@ class ChartingState extends MusicBeatState
 
 		// CURRENT EVENTS
 		var startThing:Float = sowyNumber(sectionStartTime());
-		var endThing:Float = sowyNumber(sectionStartTime(1));
+		var endThing:Float = sectionStartTime(1);
 		for (i in _song.events)
 		{
 			if(i[0] >= startThing && i[0] < endThing)
@@ -2559,7 +2559,7 @@ class ChartingState extends MusicBeatState
 
 		// NEXT EVENTS
 		var startThing:Float = endThing;
-		var endThing:Float = sowyNumber(sectionStartTime(2));
+		var endThing:Float = sectionStartTime(2);
 		for (i in _song.events)
 		{
 			if(i[0] >= startThing && i[0] < endThing)

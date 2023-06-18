@@ -13,9 +13,12 @@ class HScriptModifier extends Modifier
 	public function new(modMgr:ModManager, ?parent:Modifier, script:FunkinHScript) 
 	{
 		this.script = script;
+		this.modMgr = modMgr;
+		this.parent = parent;
+
 		script.set("this", this);
-		script.set("modMgr", modMgr);
-		script.set("parent", parent);
+		script.set("modMgr", this.modMgr);
+		script.set("parent", this.parent);
 		script.set("getValue", getValue);
 		script.set("getPercent", getPercent);
 		script.set("getSubmodValue", getSubmodValue);
@@ -32,7 +35,7 @@ class HScriptModifier extends Modifier
 
         script.executeFunc("onCreate");
 
-		super(modMgr, parent);
+		super(this.modMgr, this.parent);
 
         script.executeFunc("onCreatePost");
 	}
@@ -76,7 +79,7 @@ class HScriptModifier extends Modifier
 		return null;
 	}
 
-	//// this is where a macro could have helped me, if i weren't so retarded.
+	//// this is where a macro could have helped me, if i weren't so stupid.
 	// lol i'll probably rewrite this to use a macro dont worry bb
 
 	override public function getModType()

@@ -23,7 +23,7 @@ class PauseSubState extends MusicBeatSubstate
 	var curSelected:Int = 0;
 
 	var pauseMusic:FlxSound;
-	var skipTimeText:FlxText;
+	var skipTimeText:Null<FlxText> = null;
 	var skipTimeTracker:Alphabet;
 	var curTime:Float = Math.max(0, Conductor.songPosition);
 	//var botplayText:FlxText;
@@ -393,6 +393,8 @@ class PauseSubState extends MusicBeatSubstate
 	}
 
 	function regenMenu():Void {
+		skipTimeText = null;
+
 		for (i in 0...grpMenuShit.members.length) {
 			var obj = grpMenuShit.members[0];
 			obj.kill();

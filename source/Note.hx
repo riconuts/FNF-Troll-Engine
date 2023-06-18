@@ -1,12 +1,8 @@
 package;
 
 import JudgmentManager.Judgment;
-import PlayState.Wife3;
-import haxe.io.Path;
 import editors.ChartingState;
-import flixel.math.FlxPoint;
 import math.Vector3;
-import openfl.utils.Assets;
 import scripts.*;
 import playfields.*;
 
@@ -102,11 +98,6 @@ class Note extends NoteObject
 	
 	public var noteType(default, set):String = null;  // the note type
 	public var causedMiss:Bool = false;
-/* 	public var hitbox:Float = Conductor.safeZoneOffset * Wife3.timeScale; // how far you can hit the note in ms
-	public var earlyHitMult:Float = 1; // multiplier to hitbox to hit this note early
-	public var lateHitMult:Float = 1; // multiplier to hitbox to hit this note late */
-	// ^^ this is now determined by the judgements
-
 	public var usesDefaultColours:Bool = true; // whether this note uses the default note colours (lets you change colours in options menu)
 
 	public var blockHit:Bool = false; // whether you can hit this note or not
@@ -220,21 +211,12 @@ class Note extends NoteObject
 	}
 
 	private function set_multSpeed(value:Float):Float {
-/* 		resizeByRatio(value / multSpeed);
-		multSpeed = value;
-		// trace('fuck cock');
-		return value; */
-		return value;
+		return multSpeed = value;
 	}
 
 	public function resizeByRatio(ratio:Float) //haha funny twitter shit
 	{
-/* 		if(isSustainNote && !animation.curAnim.name.endsWith('end'))
-		{
-			scale.y *= ratio;
-			baseScaleY = scale.y;
-			updateHitbox();
-		} */
+		
 	}
 
 	private function set_texture(value:String):String {

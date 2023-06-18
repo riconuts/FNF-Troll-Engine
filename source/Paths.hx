@@ -120,7 +120,9 @@ class Paths
 		Assets.cache.clear("songs");
 	}
 
+	static public var currentModAddons:Array<String> = [];
 	static public var currentModDirectory:String = '';
+	static public var currentModLibraries:Array<String> = [];
 
 	public static function getPath(file:String, ?type:AssetType, ?library:Null<String> = null)
 	{
@@ -545,22 +547,10 @@ class Paths
 	public static function loadTheFirstEnabledMod()
 	{
 		Paths.currentModDirectory = '';
-/* 		#if MODS_ALLOWED
-		final first = getModDirectories()[0];
-		Paths.currentModDirectory = first != null ? first : '';
-		#else
-		Paths.currentModDirectory = '';
-		#end */
 	}
+	
 	public static function loadRandomMod()
 	{
 		Paths.currentModDirectory = '';
-/* 		#if MODS_ALLOWED
-		final modList:Array<String> = getModDirectories();
-		final rand = modList[FlxG.random.int(0, modList.length - 1)];
-		Paths.currentModDirectory = rand != null ? rand : '';
-		#else
-		Paths.currentModDirectory = '';
-		#end */
 	}
 }

@@ -23,14 +23,20 @@ import flixel.math.FlxAngle;
 import PlayState.Wife3;
 
 using StringTools;
-// attempt 2 of playfield system lol!
+
 /*
-PlayField is seperated into 2 classes:
+The system is seperated into 3 classes:
 
 - NoteField
     - This is the rendering component.
     - This can be created seperately from a PlayField to duplicate the notes multiple times, for example.
     - Needs to be linked to a PlayField though, so it can keep track of what notes exist, when notes get hit (to update receptors), etc.
+
+- ProxyField
+	- Clones a NoteField
+	- This cannot have its own modifiers, etc applied. All this does is render whatever's in the NoteField
+	- If you need to duplicate one PlayField a bunch, you should be using ProxyFields as they are far more optimized it only calls the mod manager for the initial notefield, and not any ProxyFields
+	- One use case is if you wanna include an infinite NoteField effect (i.e the end of The Government Knows by FMS_Cat, or get f**ked from UKSRT8)
 
 - PlayField
     - This is the gameplay component.
@@ -132,6 +138,8 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		retard.playAnim("static");
 		retard.alpha = 1;
 		retard.visible = true;
+		retard.color = FlxColor.BLACK; // just to make it a bit harder to see
+		retard.alpha = 0.9; // just to make it a bit harder to see
 		retard.scale.set(0.002, 0.002);
 		retard.handleRendering = true;
 		retard.updateHitbox();
@@ -239,8 +247,12 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	
 	// sends an input to the playfield
 	public function input(data:Int){
-		var noteList = getNotesWithEnd(data, Conductor.songPosition + ClientPrefs.hitWindow, (note:Note) -> !note.isSustainNote); //getTapNotes(data);
+		var noteList = getNotesWithEnd(data, Conductor.songPosition + ClientPrefs.hitWindow, (note:Note) -> !note.isSustainNote);
+		#if PE_MOD_COMPATIBILITY
+		noteList.sort((a, b) -> Std.int((a.strumTime + (a.lowPriority ? 10000 : 0)) - (b.strumTime + (b.lowPriority ? 10000 : 0)))); // so lowPriority actually works (even though i hate it lol!)
+		#else
 		noteList.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
+		#end
 		while (noteList.length > 0)
 		{
 			var note:Note = noteList.shift();

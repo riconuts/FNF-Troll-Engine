@@ -39,6 +39,7 @@ typedef CharacterFile = {
 	var healthbar_colors:Array<Int>;
 
 	@:optional var death_name:String;
+	@:optional var script_name:String;
 }
 
 typedef AnimArray = {
@@ -62,7 +63,8 @@ class Character extends FlxSprite
 	public var controlled:Bool = false;
 	public var xFacing:Float = 1;
 
-	public var deathName = DEFAULT_CHARACTER;
+	public var deathName:String = DEFAULT_CHARACTER;
+	public var scriptName:String = DEFAULT_CHARACTER;
 	public var characterScript:FunkinScript;
 
 	/**for fleetway, mainly.
@@ -172,6 +174,7 @@ class Character extends FlxSprite
 
 				// new death
 				deathName = json.death_name != null ? json.death_name : curCharacter;
+				scriptName = json.script_name != null ? json.script_name : curCharacter;
 
 				var spriteType = "sparrow";
 				//sparrow
@@ -600,7 +603,7 @@ class Character extends FlxSprite
 	////
 	public function startScripts()
 	{
-		var basePath = 'characters/$curCharacter';
+		var basePath = 'characters/$scriptName';
 
 		for (filePath in [#if MODS_ALLOWED Paths.mods('${Paths.currentModDirectory}/$basePath'), Paths.mods('global/$basePath'), #end Paths.getPreloadPath(basePath)]){
 
