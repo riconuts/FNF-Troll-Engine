@@ -188,7 +188,7 @@ class FreeplayState extends MusicBeatState
 		for (mod in Paths.getModDirectories())
 		{
 			Paths.currentModDirectory = mod;
-			var path = Paths.modFolders("metadata.json");
+			var path = Paths.mods(mod + "/metadata.json");
 			var rawJson:Null<String> = Paths.getContent(path);
 
 			var songsAdded:Array<String> = [];
@@ -333,7 +333,7 @@ class FreeplayState extends MusicBeatState
 
 
 			if (defaultCategory.length > 0){
-				var dir = Paths.modFolders("songs");
+				var dir = Paths.mods(mod + "/songs");
 				Paths.iterateDirectory(dir, function(file:String){
 					if (FileSystem.isDirectory(haxe.io.Path.join([dir, file])) && !songsAdded.contains(file.toLowerCase().replace(" ", "-"))){
 						file = file.trim().replace("-", " ");

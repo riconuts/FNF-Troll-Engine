@@ -61,7 +61,7 @@ class ChapterData
 		#if MODS_ALLOWED
 		for (mod in Paths.getModDirectories()){
 			Paths.currentModDirectory = mod;
-			var path = Paths.modFolders("metadata.json");
+			var path = Paths.modFolders("metadata.json", true);
 			var rawJson:Null<String> = Paths.getContent(path);
 
 			if (rawJson != null && rawJson.length > 0)

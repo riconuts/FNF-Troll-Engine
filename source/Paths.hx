@@ -52,7 +52,7 @@ typedef ContentMetadata = {
 		This mod will always run, regardless of whether it's currently being played or not.
 		(Custom HUDs, etc, will find this useful, as you can have stuff run across every song without adding to the global folder)
 	**/
-	@:optional var global:Bool;
+	@:optional var runsGlobally:Bool;
 }
 
 class Paths
@@ -574,22 +574,23 @@ class Paths
 		globalContent = [];
 		for (mod in Paths.getModDirectories())
 		{
-			Paths.currentModDirectory = mod;
-			var path = Paths.modFolders("metadata.json");
+			var path = Paths.mods('$mod/metadata.json');
 			var rawJson:Null<String> = Paths.getContent(path);
 
 			if (rawJson != null && rawJson.length > 0)
 			{
 				var json:Dynamic = Json.parse(rawJson);
-				if (Reflect.getProperty(json, "global"))
+				var fuck:Bool = Reflect.field(json, "runsGlobally");
+				if (fuck){
 					globalContent.push(mod);
+				}
 			}
 		}
 
 		return globalContent;
 	}
 	
-	static public function modFolders(key:String)
+	static public function modFolders(key:String, ignoreGlobal:Bool = false)
 	{
 		// TODO: check skins
 		if (Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
@@ -599,10 +600,13 @@ class Paths
 				return fileToCheck;
 		}
 
-		for(mod in getGlobalContent()){
-			var fileToCheck = mods(mod + '/' + key);
-			if (FileSystem.exists(fileToCheck))
-				return fileToCheck;
+		if (!ignoreGlobal){
+			for(mod in getGlobalContent()){
+				var fileToCheck = mods(mod + '/' + key);
+				trace(mod);
+				if (FileSystem.exists(fileToCheck))
+					return fileToCheck;
+			}
 		}
 
 		var fileToCheck = mods('global/' + key);

@@ -50,6 +50,6 @@
 			"id": "basefnf"
 		}
 	],
-	"global": true,
+	"runsGlobally": true,
 	"defaultCategory": "basefnf"
 }
