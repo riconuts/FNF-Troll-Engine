@@ -282,16 +282,11 @@ class FunkinHScript extends FunkinScript
 				var state:ChartingState = ChartingState.instance;
 				set("game", state);
 				set("global", state.variables);
-				set("getInstance", function()
-				{
-					return flixel.FlxG.state;
-				});
+				set("getInstance", flixel.FlxG.get_state);
 			}else{
 				set("game", null);
 				set("global", null);
-				set("getInstance", function(){
-					return flixel.FlxG.state;
-				});
+				set("getInstance", flixel.FlxG.get_state);
 			}
 		}
 
