@@ -610,6 +610,7 @@ class Character extends FlxSprite
 			var file = '$filePath.hscript';
 			if (Paths.exists(file)){
 				characterScript = FunkinHScript.fromFile(file, file, ["this" => this]);
+				callOnScripts("onLoad", [this], true);
 				break;
 			}
 			#if LUA_ALLOWED
@@ -620,8 +621,6 @@ class Character extends FlxSprite
 			}
 			#end
 		}
-
-		callOnScripts("onLoad", [this], true);
 
 		return this;
 	}

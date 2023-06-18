@@ -54,7 +54,7 @@ class FunkinLua extends FunkinScript
 	public final addCallback:(String, Dynamic)->Bool;
 	public final removeCallback:String->Bool;
 
-	public function new(script:String, ?name:String, ?ignoreCreateCall:Bool=false) {	
+	public function new(script:String, ?name:String, ?ignoreCreateCall:Bool=false) {
 		#if LUA_ALLOWED
 		lua = LuaL.newstate();
 		LuaL.openlibs(lua);
@@ -66,7 +66,7 @@ class FunkinLua extends FunkinScript
 		scriptType = 'lua';
 		scriptName = name!=null ? name : script;
 
-		haxeScript = FunkinHScript.fromString("", 'runHaxeCode: ${scriptName}', null, false);
+		haxeScript = FunkinHScript.fromString('', 'runHaxeCode: $scriptName', ["luaScript" => this], false);
 
 		#if (haxe >= "4.0.0")
 		accessedProps = new Map();
@@ -498,15 +498,14 @@ class FunkinLua extends FunkinScript
 			Lua.pushnil(lua);
 		});
 
-		addCallback("runHaxeCode", function(script:String)
-		{
+		addCallback("runHaxeCode", function(code:String){
 			// getinfo randomly broke here idk why
 			// so just trace from line 1
 			FunkinHScript.parser.line = 1;
-			var retVal = haxeScript.executeCode(script);
+			var retVal = haxeScript.executeCode(code);
 			if (retVal != null && !isOfTypes(retVal, [Bool, Int, Float, String, Array]))
 				retVal = null;
-
+	
 			return retVal;
 		});
 
@@ -784,8 +783,7 @@ class FunkinLua extends FunkinScript
 		addCallback("doTweenColor", function(tag:String, vars:String, targetColor:String, duration:Float, ease:String) {
 			var penisExam:Dynamic = tweenShit(tag, vars);
 			if(penisExam != null) {
-				var color:Int = Std.parseInt(targetColor);
-				if(!targetColor.startsWith('0x')) color = Std.parseInt('0xff' + targetColor);
+				var color:Int = FlxColor.fromString(targetColor);
 
 				var curColor:FlxColor = penisExam.color;
 				curColor.alphaFloat = penisExam.alpha;
@@ -1778,21 +1776,16 @@ class FunkinLua extends FunkinScript
 			var obj:FlxText = getTextObject(tag);
 			if(obj != null)
 			{
-				var colorNum:Int = Std.parseInt(color);
-				if(!color.startsWith('0x')) colorNum = Std.parseInt('0xff' + color);
-
 				obj.borderSize = size;
-				obj.borderColor = colorNum;
+				obj.borderColor = FlxColor.fromString(color);
 			}
 		});
 		addCallback("setTextColor", function(tag:String, color:String) {
 			var obj:FlxText = getTextObject(tag);
+
 			if(obj != null)
 			{
-				var colorNum:Int = Std.parseInt(color);
-				if(!color.startsWith('0x')) colorNum = Std.parseInt('0xff' + color);
-
-				obj.color = colorNum;
+				obj.color = FlxColor.fromString(color);
 			}
 		});
 		addCallback("setTextFont", function(tag:String, newFont:String) {
