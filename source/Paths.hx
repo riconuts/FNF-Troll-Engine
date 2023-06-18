@@ -566,12 +566,12 @@ class Paths
 		return foldersToCheck;
 	}
 
-	static public function getGlobalContent(){
+	inline static public function getGlobalContent(){
 		return globalContent;
 	}
 
-	inline static public function pushGlobalContent(){
-		var list:Array<String> = [];
+	static public function pushGlobalContent(){
+		globalContent = [];
 		for (mod in Paths.getModDirectories())
 		{
 			Paths.currentModDirectory = mod;
@@ -582,11 +582,11 @@ class Paths
 			{
 				var json:ContentMetadata = Json.parse(rawJson);
 				if (json.global)
-					list.push(mod);
+					globalContent.push(mod);
 			}
 		}
 
-		return list;
+		return globalContent;
 	}
 	
 	static public function modFolders(key:String)
