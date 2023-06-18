@@ -580,8 +580,8 @@ class Paths
 
 			if (rawJson != null && rawJson.length > 0)
 			{
-				var json:ContentMetadata = Json.parse(rawJson);
-				if (json.global)
+				var json:Dynamic = Json.parse(rawJson);
+				if (Reflect.getProperty(json, "global"))
 					globalContent.push(mod);
 			}
 		}
