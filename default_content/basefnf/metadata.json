@@ -1,0 +1,55 @@
+{
+	"chapters": [
+		{
+			"name": "Week 1",
+			"category": "main",
+			"freeplayCategory": "basefnf",
+			"unlockCondition": true,
+			"songs": []
+		},
+		{
+			"name": "Week 2",
+			"category": "main",
+			"freeplayCategory": "basefnf",
+			"unlockCondition": true,
+			"songs": []
+		},
+		{
+			"name": "Week 3",
+			"category": "main",
+			"freeplayCategory": "basefnf",
+			"unlockCondition": true,
+			"songs": []
+		},
+		{
+			"name": "Week 4",
+			"category": "main",
+			"freeplayCategory": "basefnf",
+			"unlockCondition": true,
+			"songs": []
+		},
+		{
+			"name": "Week 5",
+			"category": "main",
+			"freeplayCategory": "basefnf",
+			"unlockCondition": true,
+			"songs": []
+		},
+		{
+			"name": "Week 6",
+			"category": "main",
+			"freeplayCategory": "basefnf",
+			"unlockCondition": true,
+			"songs": []
+		}
+	],
+	"freeplaySongs": [],
+	"freeplayCategories": [
+		{
+			"name": "Friday Night Funkin'",
+			"id": "basefnf"
+		}
+	],
+	"global": true,
+	"defaultCategory": "basefnf"
+}

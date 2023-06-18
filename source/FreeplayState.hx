@@ -1,5 +1,7 @@
 package;
 
+import Paths.ContentMetadata;
+import haxe.Json;
 import editors.ChartingState;
 import flixel.*;
 import flixel.addons.display.shapes.FlxShapeBox;
@@ -19,6 +21,40 @@ import Discord.DiscordClient;
 #if MODS_ALLOWED
 import sys.FileSystem;
 #end
+
+typedef FreeplaySongMetadata = {
+	/**
+		Name of the song to be played
+	**/
+	var name:String;
+
+	/**
+		Category ID for the song to be placed into (main, side, remix)
+	**/
+	var category:String;
+
+	/**
+		Displayed name of the song.
+		Does not have to be the same as name.
+	**/
+	@:optional var displayName:String;
+}
+
+typedef FreeplayCategoryMetadata = {
+	/**
+		Displayed Name of the category
+		This is used to show the category in the freeplay list
+	**/
+	var name:String;
+
+	/**
+		ID of the category
+		This gets used when adding songs to the category
+		(Defaults are main, side and remix)
+	**/
+	var id:String;
+
+}
 
 //// a lot of the category code isn't needed so rewritting it would be good i think.
 class FreeplayState extends MusicBeatState
@@ -93,24 +129,34 @@ class FreeplayState extends MusicBeatState
 		}			
 	}
 
-	function newSongButton(songName:String, ?categoryId:String):Null<FreeplaySongButton>
+	function newSongButton(songName:String, ?categoryId:String, ?displayName:String):Null<FreeplaySongButton>
 	{
-		var songButton = addSong(songName, Paths.currentModDirectory, categoryId, false);
+		var songButton = addSong(songName, Paths.currentModDirectory, categoryId, false, displayName);
 		if (songButton != null) setupButtonCallbacks(songButton);
 
 		return songButton;
 	}
 
-	function loadFreeplayList(path:String)
+	function loadFreeplayList(songs:Array<FreeplaySongMetadata>, defaultCategory:String = 'uncategorized')
 	{
+		for (song in songs)
+			newSongButton(song.name, song.category == null ? defaultCategory : song.category, song.displayName);	
+		return [for(song in songs)song.name];
+	}
+
+	function loadTxtFreeplayList(path:String)
+	{
+		var added:Array<String> = [];
 		for (i in CoolUtil.coolTextFile(path))
 		{
 			if (i == null || i.length < 1)
 				continue;
 			
 			var song:Array<String> = i.split(":");
+			added.push(song[0]);
 			newSongButton(song[0], song[1]);
 		}
+		return added;
 	}
 
 	override function create()
@@ -135,14 +181,53 @@ class FreeplayState extends MusicBeatState
 		setCategory("remix", "REMIXES / COVERS");
 
 		//// Load the songs!!!
-		loadFreeplayList(Paths.txt('freeplaySonglist'));
-		loadFreeplayList(Paths.mods('global/data/freeplaySonglist.txt'));
+		loadTxtFreeplayList(Paths.txt('freeplaySonglist'));
+		loadTxtFreeplayList(Paths.mods('global/data/freeplaySonglist.txt'));
 
 		#if MODS_ALLOWED
 		for (mod in Paths.getModDirectories())
 		{
 			Paths.currentModDirectory = mod;
-			loadFreeplayList(Paths.mods('$mod/data/freeplaySonglist.txt'));
+			var path = Paths.modFolders("metadata.json");
+			var rawJson:Null<String> = Paths.getContent(path);
+
+			var songsAdded:Array<String> = [];
+
+			var defaultCategory:String = '';
+			if (rawJson != null && rawJson.length > 0)
+			{
+				var daJson:Dynamic = Json.parse(rawJson);
+				if (Reflect.field(daJson, "freeplayCategories") != null || Reflect.field(daJson, "freeplaySongs") != null)
+				{
+					var json:ContentMetadata = cast daJson;
+					defaultCategory = json.defaultCategory == null ? "" : json.defaultCategory.trim();
+					if (json.freeplayCategories != null && json.freeplayCategories.length > 0){
+						for (cat in json.freeplayCategories)
+							setCategory(cat.id, cat.name);
+					}
+					if (json.freeplaySongs != null && json.freeplaySongs.length > 0)
+					{
+						for (song in loadFreeplayList(json.freeplaySongs, defaultCategory))
+							songsAdded.push(song.toLowerCase().replace(" ","-"));
+					}
+					if (json.chapters != null && json.chapters.length > 0)
+					{
+						for (chapter in json.chapters){
+							var category = chapter.freeplayCategory==null ? chapter.category : chapter.freeplayCategory;
+							for (song in chapter.songs){
+								if (!songsAdded.contains(song.toLowerCase().replace(" ", "-"))){
+									newSongButton(song, category);
+									songsAdded.push(song.toLowerCase().replace(" ", "-"));
+								}
+							}
+						}
+
+					}
+				}
+			}
+
+			for (song in  loadTxtFreeplayList(Paths.mods('$mod/data/freeplaySonglist.txt')))
+				songsAdded.push(song.toLowerCase().replace(" ", "-"));
 
 			#if (sys && PE_MOD_COMPATIBILITY)
 			//// psych engine
@@ -172,12 +257,13 @@ class FreeplayState extends MusicBeatState
 					
 					for (song in songs){
 						var disp:String = cast song[0];
-						disp = disp.replace("-", " ");
+						disp = disp.trim().replace("-", " ");
 						var capitlizationizering = disp.split(" ");
 						var displayName:String = '';
 						for (word in capitlizationizering){
 							displayName += ' ${word.substr(0,1).toUpperCase()}${word.substring(1)}';
 						}
+						songsAdded.push(disp.toLowerCase());
 						var songButton = addSong(song[0], null, mod, false, displayName);
 						setupButtonCallbacks(songButton);
 
@@ -244,6 +330,24 @@ class FreeplayState extends MusicBeatState
 				}
 			}
 			#end
+
+
+			if (defaultCategory.length > 0){
+				var dir = Paths.modFolders("songs");
+				Paths.iterateDirectory(dir, function(file:String){
+					if (FileSystem.isDirectory(haxe.io.Path.join([dir, file])) && !songsAdded.contains(file.toLowerCase().replace(" ", "-"))){
+						file = file.trim().replace("-", " ");
+						var capitlizationizering = file.split(" ");
+						var displayName:String = '';
+						for (word in capitlizationizering)
+							displayName += ' ${word.substr(0, 1).toUpperCase()}${word.substring(1)}';
+						
+						newSongButton(file, defaultCategory, displayName);
+					}
+					
+
+				});
+			}
 		}
 		Paths.currentModDirectory = '';
 		#end
@@ -336,6 +440,11 @@ class FreeplayState extends MusicBeatState
 			category = categories.get(categoryName);
 			//return null;
 		}
+		else if (category.songsInCategory.contains(songName))
+			return null;
+
+		
+		
 
 		var button:FreeplaySongButton = new FreeplaySongButton(
 			new SongMetadata(songName, folder),
@@ -478,6 +587,7 @@ class FreeplaySongButton extends TGTSquareButton{
 class FreeplayCategory extends flixel.group.FlxSpriteGroup{
 	static var posArray = [51, 305, 542, 788, 1034]; // Fuck it
 	
+	public var songsInCategory:Array<String> = [];
 	public var buttonArray:Array<FreeplaySongButton> = [];
 	public var positionArray:Array<Array<FreeplaySongButton>> = [];
 
@@ -496,6 +606,7 @@ class FreeplayCategory extends flixel.group.FlxSpriteGroup{
 	public function addItem(item:FreeplaySongButton){
 		if (item != null){
 			buttonArray.push(item);
+			songsInCategory.push(item.metadata.songName);
 			orderShit();
 		}	
 

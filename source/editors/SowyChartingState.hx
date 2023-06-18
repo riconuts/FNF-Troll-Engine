@@ -245,13 +245,7 @@ class SowyChartingState extends MusicBeatState
 
 		// Get notetypes from the notetypes folder
 		#if (sys && (hscript || LUA_ALLOWED))
-		var directories:Array<String> = [
-			#if MODS_ALLOWED
-			Paths.mods(Paths.currentModDirectory + '/notetypes/'),
-			Paths.mods('global/notetypes/'),
-			#end
-			Paths.getPreloadPath('notetypes/')
-		];
+		var directories:Array<String> = Paths.getFolders('notetypes');
 		var allowedFormats = [
 			#if hscript 'hscript', #end 
 			#if LUA_ALLOWED 'lua' #end 

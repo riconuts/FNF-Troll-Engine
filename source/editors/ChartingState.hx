@@ -893,16 +893,7 @@ class ChartingState extends MusicBeatState
 		}
 
 		#if (sys && (hscript || LUA_ALLOWED))
-		var charsLoaded:Map<String, Bool> = new Map();
-		var notesList = [];
-		var directories:Array<String> = [
-			#if MODS_ALLOWED
-			Paths.mods(Paths.currentModDirectory + '/notetypes/'),
-			Paths.mods('global/notetypes/'),
-			Paths.mods('notetypes/'),
-			#end
-			Paths.getPreloadPath('notetypes/')
-		];
+		var directories:Array<String> = Paths.getFolders('notetypes');
 		var allowedFormats = [
 			#if hscript
 			'.hscript',
@@ -981,14 +972,7 @@ class ChartingState extends MusicBeatState
 		
 		#if (sys && (hscript || LUA_ALLOWED))
 		var eventsLoaded:Map<String, Bool> = new Map();
-		var directories:Array<String> = [
-			#if MODS_ALLOWED
-			Paths.mods(Paths.currentModDirectory + '/events/'),
-			Paths.mods('global/events/'),
-			Paths.mods('events/'),
-			#end
-			Paths.getPreloadPath('events/')
-		];
+		var directories:Array<String> = Paths.getFolders('events');
 		for (directory in directories)
 		{
 			if (!FileSystem.exists(directory))

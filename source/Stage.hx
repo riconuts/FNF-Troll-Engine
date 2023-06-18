@@ -1,5 +1,6 @@
 package;
 
+import Paths.ContentMetadata;
 import scripts.FunkinLua.ModchartSprite;
 import scripts.FunkinLua.ModchartText;
 #if LUA_ALLOWED
@@ -257,6 +258,25 @@ class Stage extends FlxTypedGroup<FlxBasic>
 			else
 				rawList = modsList;
 		}
+		var path = Paths.modFolders("metadata.json");
+		var rawJson:Null<String> = Paths.getContent(path);
+
+		if (rawJson != null && rawJson.length > 0)
+		{
+			var daJson:Dynamic = Json.parse(rawJson);
+			if (Reflect.field(daJson, "titleStages") != null)
+			{
+				var data:ContentMetadata = cast daJson;
+				for (stage in data.titleStages)
+				{
+					if (rawList != null)
+						rawList += "\n" + stage;
+					else
+						rawList = stage;
+				}
+			}
+		}
+
 		#end
 		
 		if (rawList == null)
@@ -280,13 +300,14 @@ class Stage extends FlxTypedGroup<FlxBasic>
 	public static function getAllStages(modsOnly = false):Array<String>{
 		var stages:Array<String> = [];
 
-		var folderPath = Paths.mods('${Paths.currentModDirectory}/stages/');
-		if (FileSystem.exists(folderPath) && FileSystem.isDirectory(folderPath)){
+		for (folderPath in Paths.getFolders("stages", true)){
+			if (FileSystem.exists(folderPath) && FileSystem.isDirectory(folderPath)){
 
-			for (fileName in FileSystem.readDirectory(folderPath)){
-				if (!fileName.endsWith(".json")) continue;
+				for (fileName in FileSystem.readDirectory(folderPath)){
+					if (!fileName.endsWith(".json")) continue;
 
-				stages.push(fileName.substr(0, fileName.length - 5));
+					stages.push(fileName.substr(0, fileName.length - 5));
+				}
 			}
 		}
 

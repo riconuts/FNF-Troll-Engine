@@ -672,12 +672,7 @@ class Character extends FlxSprite
 		#if MODS_ALLOWED
 		var charsLoaded:Map<String, Bool> = new Map();
 		var characterList = [];
-		var directories:Array<String> = [
-			Paths.mods(Paths.currentModDirectory + '/characters/'),
-			Paths.mods('global/characters/'),
-			Paths.mods('characters/'),
-			Paths.getPreloadPath('characters/')
-		];
+		var directories:Array<String> = Paths.getFolders('characters');
 		for (i in 0...directories.length) {
 			var directory:String = directories[i];
 			if(FileSystem.exists(directory)) {

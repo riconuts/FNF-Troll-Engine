@@ -1,5 +1,6 @@
 package;
 
+import hud.AdvancedHUD;
 import lime.media.openal.ALFilter;
 import lime.media.openal.ALEffect;
 import lime.media.openal.AL;
@@ -782,10 +783,14 @@ class PlayState extends MusicBeatState
 				gf.visible = false;
 		}
 		
-		if(ClientPrefs.etternaHUD == 'Advanced')
-			hud = new hud.AdvancedHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song);
-		else
-			hud = new PsychHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song);
+		
+		switch(ClientPrefs.etternaHUD){
+			case 'Advanced':
+				hud = new AdvancedHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song);
+			default:
+				hud = new PsychHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song);
+		}
+		
 		healthBar = hud.healthBar;
 		healthBarBG = healthBar.healthBarBG;
 		iconP1 = healthBar.iconP1;
@@ -804,14 +809,8 @@ class PlayState extends MusicBeatState
 
 		// "GLOBAL" SCRIPTS
 		var filesPushed:Array<String> = [];
-		var foldersToCheck:Array<String> = [Paths.getPreloadPath('scripts/')];
 
-		#if MODS_ALLOWED
-		foldersToCheck.insert(0, Paths.mods('scripts/'));
-		foldersToCheck.insert(0, Paths.mods('global/scripts/'));
-		if(Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
-			foldersToCheck.insert(0, Paths.mods(Paths.currentModDirectory + '/scripts/'));
-		#end
+		var foldersToCheck:Array<String> = Paths.getFolders('scripts');
 
 		for (folder in foldersToCheck)
 		{
@@ -929,26 +928,13 @@ class PlayState extends MusicBeatState
 
 
 		// SONG SPECIFIC SCRIPTS
-		var foldersToCheck:Array<String> = [
-			Paths.getPreloadPath('songs/' + songName + '/')
-			#if PE_MOD_COMPATIBILITY ,
-			Paths.getPreloadPath('data/' + songName + '/')
-			#end
-		];
+		var foldersToCheck:Array<String> = Paths.getFolders('songs/$songName');
+		#if PE_MOD_COMPATIBILITY
+		for (dir in Paths.getFolders('data/$songName'))foldersToCheck.push(dir);
+		
+		#end
 		var filesPushed:Array<String> = [];
 
-		#if MODS_ALLOWED
-		foldersToCheck.insert(0, Paths.mods('songs/' + songName + '/'));
-		#if PE_MOD_COMPATIBILITY
-		foldersToCheck.insert(1, Paths.mods('data/' + songName + '/'));
-		#end
-		if(Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0){
-			foldersToCheck.insert(0, Paths.mods(Paths.currentModDirectory + '/songs/' + songName + '/'));
-			#if PE_MOD_COMPATIBILITY
-			foldersToCheck.insert(1, Paths.mods(Paths.currentModDirectory + '/data/' + songName + '/'));
-			#end
-		}
-		#end
 
 		for (folder in foldersToCheck)
 		{
@@ -1902,11 +1888,7 @@ class PlayState extends MusicBeatState
 					oldNote = null;
 
 				var type:Dynamic = songNotes[3];
-				//if(!Std.isOfType(type, String)) type = editors.ChartingState.noteTypeList[type];
-
-				// TODO: maybe make a checkNoteType n shit but idfk im lazy
-				// or maybe make a "Transform Notes" event which'll make notes which don't change texture change into the specified one
-
+				
 				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
 				swagNote.realNoteData = songNotes[1];
 				swagNote.mustPress = gottaHitNote;
@@ -2010,33 +1992,10 @@ class PlayState extends MusicBeatState
 		for(fuck in allNotes)
 			unspawnNotes.push(fuck);
 		
+		
 		for (field in playfields.members)
-		{
-			var goobaeg:Array<Note> = [];
-			for(column in field.noteQueue){
-				if(column.length>=2){
-					for(nIdx in 1...column.length){
-						var last = column[nIdx-1];
-						var current = column[nIdx];
-						if(last==null || current==null)continue;
-						if(last.isSustainNote || current.isSustainNote)continue; // holds only get fukt if their parents get fukt
-						if(!last.alive || !current.alive)continue; // just incase
-						if (Math.abs(last.strumTime - current.strumTime) <= Conductor.stepCrochet / (192 / 16)){
-							if(last.sustainLength < current.sustainLength) // keep the longer hold
-								field.removeNote(last);
-							else{
-								current.kill();
-								goobaeg.push(current); // mark to delete after, cant delete here because otherwise it'd fuck w/ stuff	
-							}
-						}
+			field.clearStackedNotes();
 
-					}
-				}
-			}
-			for(note in goobaeg)
-				field.removeNote(note);
-
-		}
 
 		#if(LUA_ALLOWED && PE_MOD_COMPATIBILITY)
 		for(key => script in notetypeScripts){
@@ -3552,11 +3511,11 @@ class PlayState extends MusicBeatState
 		// did you goto MS Paint and get colours from there lol
 		var comboColor = !ClientPrefs.coloredCombos ? 0xFFFFFFFF : switch (ratingFC)
 		{ // so the color doesn't get calculated for every number ig
-			case 'KFC':
+			case 'EFC':
 				hud.judgeColours.get("epic");
-			case 'AFC':
+			case 'SFC':
 				hud.judgeColours.get("sick");
-			case 'CFC'| "SDC":
+			case 'GFC'| "SDG":
 				hud.judgeColours.get("good");
 			default:
 				FlxColor.WHITE;
@@ -4729,16 +4688,20 @@ class PlayState extends MusicBeatState
 			// Rating FC
 			ratingFC = "Clear";
 			if(comboBreaks <= 0){
-			if (judges.get("epic") > 0) ratingFC = "KFC";
-			if (judges.get("sick") > 0) ratingFC = "AFC";
-			if (judges.get("good") > 0 && judges.get("good") < 10) ratingFC = "SDC";
-			else if (judges.get("good") >= 10) ratingFC = "CFC";
+			if (judges.get("epic") > 0) ratingFC = "EFC";
+			if (judges.get("sick") > 0) ratingFC = "SFC";
+			if (judges.get("good") > 0 && judges.get("good") < 10) ratingFC = "SDG";
+			else if (judges.get("good") >= 10) ratingFC = "GFC";
 			if (judges.get("bad") > 0 || judges.get("shit") > 0) ratingFC = "FC";
 			}else{
 				if (comboBreaks < 10 && songScore >= 0) ratingFC = "SDCB";
 				else if (songScore < 0 || comboBreaks >= 10 && ratingPercent <= 0)ratingFC = "Fail";
 			}
 		}
+
+		callOnScripts('postRecalculateRating'); // incase you wanna add custom rating stuff
+
+
 		// maybe move all of this to a stats class that I can easily give to objects?
 		hud.ratingFC = ratingFC;
 		hud.grade = ratingName;

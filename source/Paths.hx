@@ -1,5 +1,9 @@
 package;
 
+import FreeplayState.FreeplayCategoryMetadata;
+import FreeplayState.FreeplaySongMetadata;
+import haxe.Json;
+import ChapterData.ChapterMetadata;
 import openfl.media.Sound;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -18,8 +22,43 @@ import sys.FileSystem;
 import sys.io.File;
 #end
 
+
+typedef ContentMetadata = {
+	/**
+		Chapters to be added to the story mode
+	**/
+	var chapters:Array<ChapterMetadata>;
+	/**
+		Stages that can appear in the title menu
+	**/
+	var titleStages:Array<String>;
+
+	/**
+		Songs to be placed into the freeplay menu
+	**/
+	var freeplaySongs:Array<FreeplaySongMetadata>;
+
+	/**
+		Categories to be placed into the freeplay menu
+	**/
+	var freeplayCategories:Array<FreeplayCategoryMetadata>;
+	
+	/**
+	If this is specified, then songs don't have to be added to freeplaySongs to have them appear
+	As anything in the songs folder will appear in this category instead
+	**/
+	@:optional var defaultCategory:String;
+	/**
+		This mod will always run, regardless of whether it's currently being played or not.
+		(Custom HUDs, etc, will find this useful, as you can have stuff run across every song without adding to the global folder)
+	**/
+	@:optional var global:Bool;
+}
+
 class Paths
 {
+	public static var globalContent:Array<String> = [];
+
 	inline public static var SOUND_EXT = "ogg";
 	inline public static var VIDEO_EXT = "mp4";
 
@@ -507,12 +546,61 @@ class Paths
 	
 	inline static public function modsShaderVertex(key:String, ?library:String)
 		return modFolders('shaders/'+key+'.vert');
+
+	inline static public function getFolders(dir:String, ?modsOnly:Bool = false){
+		var foldersToCheck:Array<String> = [
+			#if MODS_ALLOWED
+			Paths.mods(Paths.currentModDirectory + '/$dir/'),
+			Paths.mods('global/$dir/'),
+			Paths.mods('$dir/'),
+			#end
+		];
+
+		if(!modsOnly)
+			foldersToCheck.push(Paths.getPreloadPath('$dir/'));
+
+		#if MODS_ALLOWED
+		for(mod in getGlobalContent())foldersToCheck.push(Paths.mods('$mod/$dir/'));
+		#end
+
+		return foldersToCheck;
+	}
+
+	static public function getGlobalContent(){
+		return globalContent;
+	}
+
+	inline static public function pushGlobalContent(){
+		var list:Array<String> = [];
+		for (mod in Paths.getModDirectories())
+		{
+			Paths.currentModDirectory = mod;
+			var path = Paths.modFolders("metadata.json");
+			var rawJson:Null<String> = Paths.getContent(path);
+
+			if (rawJson != null && rawJson.length > 0)
+			{
+				var json:ContentMetadata = Json.parse(rawJson);
+				if (json.global)
+					list.push(mod);
+			}
+		}
+
+		return list;
+	}
 	
 	static public function modFolders(key:String)
 	{
+		// TODO: check skins
 		if (Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
 		{
 			var fileToCheck = mods(Paths.currentModDirectory + '/' + key);
+			if (FileSystem.exists(fileToCheck))
+				return fileToCheck;
+		}
+
+		for(mod in getGlobalContent()){
+			var fileToCheck = mods(mod + '/' + key);
 			if (FileSystem.exists(fileToCheck))
 				return fileToCheck;
 		}
@@ -524,7 +612,10 @@ class Paths
 		return mods(key);
 	}
 
-	static public function getModDirectories():Array<String>
+	// I might end up making this just return an array of loaded mods and require you to press a refresh button to reload content lol
+	// mainly for optimization reasons, so its not going through the entire content folder every single time
+
+	static public function getModDirectories():Array<String> 
 	{
 		var list:Array<String> = [];
 		if (FileSystem.exists(modFolderPath))

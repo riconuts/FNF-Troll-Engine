@@ -1,5 +1,6 @@
 package hud;
 
+import PlayState.FNFHealthBar;
 import JudgmentManager.JudgmentData;
 import flixel.math.FlxMath;
 import flixel.tweens.FlxEase;
@@ -35,6 +36,12 @@ class AdvancedHUD extends BaseHUD
 	override public function new(iP1:String, iP2:String, songName:String)
 	{
 		super(iP1, iP2, songName);
+
+		add(healthBarBG);
+		add(healthBar);
+		add(iconP1);
+		add(iconP2);
+		
 		displayedJudges.push("cb");
 		
 		songHighscore = Highscore.getScore(songName);
@@ -268,7 +275,11 @@ class AdvancedHUD extends BaseHUD
 	}
 
 	override function changedOptions(changed:Array<String>){
-		super.changedOptions(changed);
+		healthBar.healthBarBG.y = FlxG.height * (ClientPrefs.downScroll ? 0.11 : 0.89);
+		healthBar.y = healthBarBG.y + 5;
+		healthBar.iconP1.y = healthBar.y - 75;
+		healthBar.iconP2.y = healthBar.y - 75;
+
 		timeTxt.y = (ClientPrefs.downScroll ? FlxG.height - 44 : 19);
 		timeBarBG.y = timeTxt.y + (timeTxt.height * 0.25);
 		timeBar.y = timeBarBG.y + 5;
@@ -327,13 +338,13 @@ class AdvancedHUD extends BaseHUD
 		scoreTxt.color = !PlayState.instance.saveScore?0x818181 : ((songHighscore != 0 && score > songHighscore) ? 0xFFD800 : 0xFFFFFF);
 
 		ratingTxt.text = (grade != "?"?(Highscore.floorDecimal(ratingPercent * 100, 2) + "%"):"0%");
-		fcTxt.text = (ratingFC=='CFC' && ClientPrefs.wife3)?"FC":ratingFC;
+		fcTxt.text = (ratingFC=='GFC' && ClientPrefs.wife3)?"FC":ratingFC;
 		fcTxt.color = switch (ratingFC){
-			case 'KFC':
+			case 'EFC':
 				judgeColours.get("epic");
-			case 'AFC':	
+			case 'SFC':	
 				judgeColours.get("sick");
-			case 'CFC' | 'SDC':
+			case 'GFC' | 'SDG':
 				judgeColours.get("good");
 			case 'FC':
 				0xFFFFFFFF;

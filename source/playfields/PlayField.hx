@@ -538,6 +538,40 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		}
 	}
 
+	// kills all notes which are stacked
+	public function clearStackedNotes(){
+		var goobaeg:Array<Note> = [];
+		for (column in noteQueue)
+		{
+			if (column.length >= 2)
+			{
+				for (nIdx in 1...column.length)
+				{
+					var last = column[nIdx - 1];
+					var current = column[nIdx];
+					if (last == null || current == null)
+						continue;
+					if (last.isSustainNote || current.isSustainNote)
+						continue; // holds only get fukt if their parents get fukt
+					if (!last.alive || !current.alive)
+						continue; // just incase
+					if (Math.abs(last.strumTime - current.strumTime) <= Conductor.stepCrochet / (192 / 16))
+					{
+						if (last.sustainLength < current.sustainLength) // keep the longer hold
+							removeNote(last);
+						else
+						{
+							current.kill();
+							goobaeg.push(current); // mark to delete after, cant delete here because otherwise it'd fuck w/ stuff
+						}
+					}
+				}
+			}
+		}
+		for (note in goobaeg)
+			removeNote(note);
+	}
+
 	// as is in the name, removes all dead notes
 	public function clearDeadNotes(){
 		var dead:Array<Note> = [];

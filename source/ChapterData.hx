@@ -1,5 +1,6 @@
 package;
 
+import Paths.ContentMetadata;
 import haxe.Json;
 import haxe.format.JsonParser;
 
@@ -9,6 +10,7 @@ import sys.io.File;
 #else
 import openfl.utils.Assets;
 #end
+
 
 typedef ChapterMetadata = {
 	/**
@@ -20,6 +22,11 @@ typedef ChapterMetadata = {
 		Any chapter that isn't 'main' shouldn't be displayed in the story menus. 
 	**/
 	var category:String;
+
+	/**
+		Incase you want a main chapter to appear in a seperate freeplay category
+	**/
+	@:optional var freeplayCategory:String;
 	
 	/**
 		This isn't implemented, and at this point I don't think it's going to. LOL.
@@ -38,7 +45,7 @@ typedef ChapterMetadata = {
 	/**
 		Name of the content folder containing this chapter
 	**/
-    var directory:String;
+    @:optional var directory:String;
 }
 
 class ChapterData
@@ -59,9 +66,20 @@ class ChapterData
 
 			if (rawJson != null && rawJson.length > 0)
             {
-				var json:ChapterMetadata = Json.parse(rawJson);
-				json.directory = mod;
-				list.push(json);
+				var daJson:Dynamic = Json.parse(rawJson);
+				if (Reflect.field(daJson, "chapters") != null){
+					var data:ContentMetadata = cast daJson;
+					for(chapter in data.chapters){
+						chapter.directory = mod;
+						list.push(chapter);
+					}
+				}else{
+					// backwards compatibility
+					var chapter:ChapterMetadata = cast daJson;
+					chapter.directory = mod;
+					list.push(chapter);
+					
+				}
 			}
 		}
 		Paths.currentModDirectory = '';
