@@ -600,18 +600,20 @@ class Paths
 				return fileToCheck;
 		}
 
-		if (!ignoreGlobal){
-			for(mod in getGlobalContent()){
-				var fileToCheck = mods(mod + '/' + key);
-				trace(mod);
-				if (FileSystem.exists(fileToCheck))
-					return fileToCheck;
-			}
-		}
-
 		var fileToCheck = mods('global/' + key);
 		if (FileSystem.exists(fileToCheck))
 			return fileToCheck;
+
+		if (!ignoreGlobal)
+		{
+			for (mod in getGlobalContent())
+			{
+				var fileToCheck = mods(mod + '/' + key);
+				if (FileSystem.exists(fileToCheck)){
+					return fileToCheck;
+				}
+			}
+		}
 
 		return mods(key);
 	}
