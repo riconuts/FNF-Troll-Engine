@@ -1619,7 +1619,23 @@ class PlayState extends MusicBeatState
 
 		if (#if MODS_ALLOWED Paths.exists(Paths.modsSongJson(songName + '/events')) || #if PE_MOD_COMPATIBILITY Paths.exists(Paths.modsJson(songName + '/events')) || #end #end Paths.exists(Paths.songJson(songName + '/events')))
 		{
-			var eventsData:Array<Dynamic> = Song.loadFromJson('events', songName).events;
+			var rawEventsData:Array<Array<Dynamic>> = Song.loadFromJson('events', songName).events;
+			rawEventsData.sort((a, b) -> return Std.int(a[0] - b[0]));
+			var eventsData:Array<Array<Dynamic>> = [];
+			for(event in rawEventsData){
+				var last = eventsData[eventsData.length-1];
+				if(last==null){
+					eventsData.push(event);
+				}else{
+					if(Math.abs(last[0] - event[0]) <= Conductor.stepCrochet / (192 / 16)){
+						var fuck:Array<Array<Dynamic>> = event[1];
+						for (shit in fuck)eventsData[eventsData.length - 1][1].push(shit);
+					}else{
+						eventsData.push(event);
+					}
+				}
+			}
+
 			for (event in eventsData) //Event Notes
 			{
 				for (i in 0...event[1].length)
@@ -1636,6 +1652,25 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
+
+		var rawEventsData:Array<Array<Dynamic>> = songData.events;
+		rawEventsData.sort((a, b) -> return Std.int(a[0] - b[0]));
+		var eventsData:Array<Array<Dynamic>>  = [];
+		for(event in rawEventsData){
+			var last = eventsData[eventsData.length-1];
+			if(last==null){
+				eventsData.push(event);
+			}else{
+				if(Math.abs(last[0] - event[0]) <= Conductor.stepCrochet / (192 / 16)){
+					var fuck:Array<Array<Dynamic>> = event[1];
+					for (shit in fuck)eventsData[eventsData.length-1][1].push(shit);
+				}else{
+					eventsData.push(event);
+				}
+			}
+		}
+
+		songData.events = eventsData;		
 
 		for (event in songData.events) //Event Notes
 		{
