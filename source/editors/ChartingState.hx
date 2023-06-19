@@ -2551,7 +2551,7 @@ class ChartingState extends MusicBeatState
 		for (i in _song.events)
 		{
 			var t = fuckFloatingPoints(i[0]);
-			if(t >= startThing && t <= endThing)
+			if(t >= startThing && t < endThing)
 			{
 				var note:Note = setupNoteData(i, false);
 				curRenderedNotes.add(note);
@@ -2588,10 +2588,11 @@ class ChartingState extends MusicBeatState
 
 		// NEXT EVENTS
 		var startThing:Float = endThing;
-		var endThing:Float = sectionStartTime(2);
+		var endThing:Float = fuckFloatingPoints(sectionStartTime(2));
 		for (i in _song.events)
 		{
-			if(i[0] >= startThing && i[0] < endThing)
+			var t:Float = fuckFloatingPoints(i[0]);
+			if(t >= startThing && t < endThing)
 			{
 				var note:Note = setupNoteData(i, true);
 				note.alpha = 0.6;
