@@ -248,7 +248,7 @@ class ChartingState extends MusicBeatState
 				notes: [],
 				events: [],
 			};
-			addSection();
+			pushSection();
 			PlayState.SONG = _song;
 		}
 
@@ -304,7 +304,7 @@ class ChartingState extends MusicBeatState
 
 		tempBpm = _song.bpm;
 
-		addSection();
+		pushSection();
 
 		// sections = _song.notes;
 
@@ -756,9 +756,9 @@ class ChartingState extends MusicBeatState
 		clearSectionButton.color = FlxColor.RED;
 		clearSectionButton.label.color = FlxColor.WHITE;
 		
-		check_notesSec = new FlxUICheckBox(10, clearSectionButton.y + 25, null, null, "Notes", 100);
+		check_notesSec = new FlxUICheckBox(10, clearSectionButton.y + 25, null, null, "Notes", 35);
 		check_notesSec.checked = true;
-		check_eventsSec = new FlxUICheckBox(check_notesSec.x + 100, check_notesSec.y, null, null, "Events", 100);
+		check_eventsSec = new FlxUICheckBox(check_notesSec.x + 105, check_notesSec.y, null, null, "Events", 50);
 		check_eventsSec.checked = true;
 
 		var swapSection:FlxButton = new FlxButton(10, check_notesSec.y + 40, "Swap section", function()
@@ -780,30 +780,34 @@ class ChartingState extends MusicBeatState
 
 			var daSec = FlxMath.maxInt(curSec, value);
 
-			for (note in _song.notes[daSec - value].sectionNotes)
-			{
-				var strum = note[0] + Conductor.stepCrochet * (getSectionBeats(daSec) * 4 * value);
+			if(check_notesSec.checked){
+				for (note in _song.notes[daSec - value].sectionNotes)
+				{
+					var strum = note[0] + Conductor.stepCrochet * (getSectionBeats(daSec) * 4 * value);
 
 
-				var copiedNote:Array<Dynamic> = [strum, note[1], note[2], note[3]];
-				_song.notes[daSec].sectionNotes.push(copiedNote);
+					var copiedNote:Array<Dynamic> = [strum, note[1], note[2], note[3]];
+					_song.notes[daSec].sectionNotes.push(copiedNote);
+				}
 			}
 
 			var startThing:Float = sectionStartTime(-value);
 			var endThing:Float = sectionStartTime(-value + 1);
-			for (event in _song.events)
-			{
-				var strumTime:Float = event[0];
-				if(endThing > event[0] && event[0] >= startThing)
+			if(check_eventsSec.checked){
+				for (event in _song.events)
 				{
-					strumTime += Conductor.stepCrochet * (getSectionBeats(daSec) * 4 * value);
-					var copiedEventArray:Array<Dynamic> = [];
-					for (i in 0...event[1].length)
+					var strumTime:Float = event[0];
+					if(endThing > event[0] && event[0] >= startThing)
 					{
-						var eventToPush:Array<Dynamic> = event[1][i];
-						copiedEventArray.push([eventToPush[0], eventToPush[1], eventToPush[2]]);
+						strumTime += Conductor.stepCrochet * (getSectionBeats(daSec) * 4 * value);
+						var copiedEventArray:Array<Dynamic> = [];
+						for (i in 0...event[1].length)
+						{
+							var eventToPush:Array<Dynamic> = event[1][i];
+							copiedEventArray.push([eventToPush[0], eventToPush[1], eventToPush[2]]);
+						}
+						_song.events.push([strumTime, copiedEventArray]);
 					}
-					_song.events.push([strumTime, copiedEventArray]);
 				}
 			}
 			updateGrid();
@@ -1469,6 +1473,24 @@ class ChartingState extends MusicBeatState
 
 	var updatedSection:Bool = false;
 
+	function setSectionStartTime(sec:Int = 0):Float
+	{
+		var daBPM:Float = _song.bpm;
+		var daPos:Float = 0;
+
+		for (i in 0...sec)
+		{
+			if(_song.notes[i] == null)
+				continue;
+			
+			if (_song.notes[i].changeBPM)
+				daBPM = _song.notes[i].bpm;
+			
+			daPos += getSectionBeats(i) * (1000 * 60 / daBPM);		
+		}
+		return daPos;
+	}
+
 	function sectionStartTime(add:Int = 0):Float
 	{
 		var daBPM:Float = _song.bpm;
@@ -1518,7 +1540,7 @@ class ChartingState extends MusicBeatState
 		{
 			if (Math.ceil(strumLine.y) >= gridBG.height){
 				if (_song.notes[curSec + 1] == null)
-					addSection();
+					pushSection();
 
 				changeSection(curSec + 1, false);
 			} else if(strumLine.y < -10)
@@ -1910,31 +1932,18 @@ class ChartingState extends MusicBeatState
 					if (curSelectedNote != null){
 						dastrum = curSelectedNote[0];
 					}
-
-					var secStart:Float = sectionStartTime();
-					var datime = (feces - secStart) - (dastrum - secStart); //idk math find out why it doesn't work on any other section other than 0
-					if (curSelectedNote != null)
-					{
-						var controlArray:Array<Bool> = [FlxG.keys.pressed.ONE, FlxG.keys.pressed.TWO, FlxG.keys.pressed.THREE, FlxG.keys.pressed.FOUR,
-													   FlxG.keys.pressed.FIVE, FlxG.keys.pressed.SIX, FlxG.keys.pressed.SEVEN, FlxG.keys.pressed.EIGHT];
-
-						if(controlArray.contains(true))
-						{
-
-							for (i in 0...controlArray.length)
-							{
-								if(controlArray[i])
-									if(curSelectedNote[1] == i) curSelectedNote[2] += datime - curSelectedNote[2] - Conductor.stepCrochet;
-							}
-							updateGrid();
-							updateNoteUI();
-						}
-					}
 				}
 			}
 			var shiftThing:Int = 1;
 			if (FlxG.keys.pressed.SHIFT)
 				shiftThing = 4;
+
+			for(i in curSec ... curSec + shiftThing + 1){
+				if(_song.notes[i] == null){
+					if(setSectionStartTime(i) < FlxG.sound.music.length)
+						insertSection(i);
+				}
+			}
 
 			if (FlxG.keys.justPressed.D)
 				changeSection(curSec + shiftThing);
@@ -2722,7 +2731,7 @@ class ChartingState extends MusicBeatState
 
 	}
 
-	private function addSection(sectionBeats:Float = 4):Void
+	private function pushSection(sectionBeats:Float = 4):Void
 	{
 		var sec:SwagSection = {
 			sectionBeats: sectionBeats,
@@ -2736,6 +2745,22 @@ class ChartingState extends MusicBeatState
 		};
 
 		_song.notes.push(sec);
+	}
+	
+	private function insertSection(idx:Int, sectionBeats:Float = 4):Void
+	{
+		var sec:SwagSection = {
+			sectionBeats: sectionBeats,
+			bpm: _song.bpm,
+			changeBPM: false,
+			mustHitSection: true,
+			gfSection: false,
+			sectionNotes: [],
+			typeOfSection: 0,
+			altAnim: false
+		};
+
+		_song.notes.insert(idx, sec);
 	}
 
 	function selectNote(note:Note):Void
