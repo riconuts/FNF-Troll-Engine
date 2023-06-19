@@ -192,6 +192,7 @@ class ChartingState extends MusicBeatState
 		"8th",
 		"12th",
 		"16th",
+		"20th",
 		"24th",
 		"32nd",
 		"48th",
@@ -1753,20 +1754,13 @@ class ChartingState extends MusicBeatState
 				if (!mouseQuant)
 					FlxG.sound.music.time -= (FlxG.mouse.wheel * Conductor.stepCrochet);
 				else
-					{
-						var time:Float = FlxG.sound.music.time;
-						var beat:Float = curDecBeat;
-						var snap:Float = quantization / 4;
-						var increase:Float = 1 / snap;
-						if (FlxG.mouse.wheel > 0)
-						{
-							var fuck:Float = CoolUtil.quantize(beat, snap) - increase;
-							FlxG.sound.music.time = Conductor.beatToSeconds(fuck);
-						}else{
-							var fuck:Float = CoolUtil.quantize(beat, snap) + increase;
-							FlxG.sound.music.time = Conductor.beatToSeconds(fuck);
-						}
-					}
+				{
+					var fuck = Conductor.stepCrochet / (quantization / 16);
+					if (FlxG.mouse.wheel > 0)
+						FlxG.sound.music.time = CoolUtil.snap(FlxG.sound.music.time - fuck, fuck);
+					else
+						FlxG.sound.music.time = CoolUtil.snap(FlxG.sound.music.time + fuck, fuck);
+				}
 				if(vocals != null) {
 					vocals.pause();
 					vocals.time = FlxG.sound.music.time;
@@ -1805,18 +1799,11 @@ class ChartingState extends MusicBeatState
 				{
 					FlxG.sound.music.pause();
 					updateCurStep();
-					var time:Float = FlxG.sound.music.time;
-					var beat:Float = curDecBeat;
-					var snap:Float = quantization / 4;
-					var increase:Float = 1 / snap;
-					if (FlxG.keys.pressed.UP)
-					{
-						var fuck:Float = CoolUtil.quantize(beat, snap) - increase; //(Math.floor((beat+snap) / snap) * snap);
-						FlxG.sound.music.time = Conductor.beatToSeconds(fuck);
-					}else{
-						var fuck:Float = CoolUtil.quantize(beat, snap) + increase; //(Math.floor((beat+snap) / snap) * snap);
-						FlxG.sound.music.time = Conductor.beatToSeconds(fuck);
-					}
+					var fuck = Conductor.stepCrochet / (quantization / 16);
+					if (FlxG.mouse.wheel > 0)
+						FlxG.sound.music.time = CoolUtil.snap(FlxG.sound.music.time - fuck, fuck);
+					else
+						FlxG.sound.music.time = CoolUtil.snap(FlxG.sound.music.time + fuck, fuck);
 				}
 			}
 
