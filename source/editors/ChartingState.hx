@@ -1882,7 +1882,7 @@ class ChartingState extends MusicBeatState
 					//FlxG.sound.music.time = (Math.round(curStep/quants[curQuant])*quants[curQuant]) * Conductor.stepCrochet;
 
 						//(Math.floor((curStep+quants[curQuant]*1.5/(quants[curQuant]/2))/quants[curQuant])*quants[curQuant]) * Conductor.stepCrochet;//snap into quantization
-					var time:Float = FlxG.sound.music.time;
+/* 					var time:Float = FlxG.sound.music.time;
 					var beat:Float = curDecBeat;
 					var snap:Float = quantization / 4;
 					var increase:Float = 1 / snap;
@@ -1893,7 +1893,12 @@ class ChartingState extends MusicBeatState
 					}else{
 						var fuck:Float = CoolUtil.quantize(beat, snap) + increase; //(Math.floor((beat+snap) / snap) * snap);
 						feces = Conductor.beatToSeconds(fuck);
-					}
+					} */
+					var snap:Float = Conductor.stepCrochet / (quantization / 16);
+					if (FlxG.keys.pressed.UP)
+						feces = CoolUtil.snap(FlxG.sound.music.time, snap) - snap;
+					else
+						feces = CoolUtil.snap(FlxG.sound.music.time, snap) + snap;
 					FlxTween.tween(FlxG.sound.music, {time:feces}, 0.1, {ease:FlxEase.circOut});
 					if(vocals != null) {
 						vocals.pause();
