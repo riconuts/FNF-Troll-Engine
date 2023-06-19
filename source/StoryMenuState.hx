@@ -85,6 +85,10 @@ class StoryMenuState extends MusicBeatState
 		for (chapData in ChapterData.reloadChapterFiles())
 		{
 			// For Now
+
+			var pos = chapterSelectPositions[chapN];
+			if (pos == null)
+				continue; // NO ERRORS
 			var isLocked = chapData.unlockCondition != true;
 
 			// this is to hide the christmas stuff from story mode, since im not sure if we're gonna make extra stuff for the story mode
@@ -102,7 +106,6 @@ class StoryMenuState extends MusicBeatState
 			var previewImage = Paths.image("chapters/" + Paths.formatToSongPath(chapData.name) + (isLocked ? "-lock" : ""));
 			previewImage = previewImage != null ? previewImage : Paths.image("chapters/unknown");
 			
-			var pos = chapterSelectPositions[chapN];
 			var xPos = pos[0];
 			var yPos = pos[1];
 

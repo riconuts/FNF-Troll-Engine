@@ -67,7 +67,6 @@ typedef StageFile =
 class Stage extends FlxTypedGroup<FlxBasic>
 {
 	public var stageScript:FunkinScript;
-	
 	public var curStage = "stage1";
 	public var stageData:StageFile = {
 		directory: "",
@@ -248,16 +247,13 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		Return an array with the names in the stageList file(s).
 	**/ 
 	public static function getStageList(modsOnly = false):Array<String>{
-		var rawList:Null<String> = modsOnly ? null : Paths.getText('data/stageList.txt', true);
-
+	
+		var daList:Array<String> = [];
 		#if MODS_ALLOWED
 		var modsList = Paths.getText('data/stageList.txt', false);
-		if (modsList != null){
-			if (rawList != null)
-				rawList += "\n" + modsList;
-			else
-				rawList = modsList;
-		}
+		if (modsList != null)
+			for (shit in modsList.split("\n"))daList.push(shit);
+		
 		var path = Paths.modFolders("metadata.json");
 		var rawJson:Null<String> = Paths.getContent(path);
 
@@ -269,29 +265,13 @@ class Stage extends FlxTypedGroup<FlxBasic>
 				var data:ContentMetadata = cast daJson;
 				for (stage in data.titleStages)
 				{
-					if (rawList != null)
-						rawList += "\n" + stage;
-					else
-						rawList = stage;
+					daList.push(stage);
 				}
 			}
 		}
 
 		#end
-		
-		if (rawList == null)
-			return [];
-
-		var stages:Array<String> = [];
-
-		for (i in rawList.trim().split('\n'))
-		{
-			var modStage = i.trim();
-			if (!stages.contains(modStage))
-				stages.push(modStage);
-		}
-
-		return stages;
+		return daList;
 	}
 
 	/**
@@ -306,7 +286,8 @@ class Stage extends FlxTypedGroup<FlxBasic>
 				for (fileName in FileSystem.readDirectory(folderPath)){
 					if (!fileName.endsWith(".json")) continue;
 
-					stages.push(fileName.substr(0, fileName.length - 5));
+					var name = fileName.substr(0, fileName.length - 5);
+					if(!stages.contains(name))stages.push(name);
 				}
 			}
 		}
@@ -317,8 +298,9 @@ class Stage extends FlxTypedGroup<FlxBasic>
 
 				for (fileName in FileSystem.readDirectory(folderPath)){
 					if (!fileName.endsWith(".json")) continue;
-
-					stages.push(fileName.substr(0, fileName.length - 5));
+					
+					var name = fileName.substr(0, fileName.length - 5);
+					if (!stages.contains(name))stages.push(name);
 				}
 			}
 		}

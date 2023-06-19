@@ -737,11 +737,8 @@ class PlayState extends MusicBeatState
 		//// Characters
 
 		var gfVersion:String = SONG.gfVersion;
-		if(gfVersion == null || gfVersion.length < 1){
-			/* gfVersion = 'gf';
-			SONG.gfVersion = gfVersion; //Fix for the Chart Editor */
-		}
-		else if (stageData.hide_girlfriend != true)
+
+		if (stageData.hide_girlfriend != true)
 		{
 			gf = new Character(0, 0, gfVersion);
 

@@ -328,14 +328,6 @@ class Character extends FlxSprite
 
 		if (isPlayer)
 			flipX = !flipX;
-
-		switch(curCharacter)
-		{
-			case 'pico-speaker':
-				skipDance = true;
-				loadMappedAnims();
-				playAnim("shoot1");
-		}
 	}
 
 	override function update(elapsed:Float)
@@ -368,21 +360,6 @@ class Character extends FlxSprite
 				dance();
 
 				callOnScripts("onSpecialAnimFinished", [animation.curAnim.name]);
-			}
-
-			switch(curCharacter)
-			{
-				case 'pico-speaker':
-					if(animationNotes.length > 0 && Conductor.songPosition > animationNotes[0][0])
-					{
-						var noteData:Int = 1;
-						if(animationNotes[0][1] > 2) noteData = 3;
-
-						noteData += FlxG.random.int(0, 1);
-						playAnim('shoot' + noteData, true);
-						animationNotes.shift();
-					}
-					if(animation.curAnim.finished) playAnim(animation.curAnim.name, false, false, animation.curAnim.frames.length - 3);
 			}
 
 			if (!controlled)
@@ -550,23 +527,6 @@ class Character extends FlxSprite
 		callOnScripts("onAnimPlayed", [AnimName, Force, Reversed, Frame]);
 	}
 
-	function loadMappedAnims():Void
-	{
-		var noteData:Array<SwagSection> = Song.loadFromJson('picospeaker', Paths.formatToSongPath(PlayState.SONG.song)).notes;
-		for (section in noteData) {
-			for (songNotes in section.sectionNotes) {
-				animationNotes.push(songNotes);
-			}
-		}
-		//TankmenBG.animationNotes = animationNotes;
-		animationNotes.sort(sortAnims);
-	}
-
-	function sortAnims(Obj1:Array<Dynamic>, Obj2:Array<Dynamic>):Int
-	{
-		return FlxSort.byValues(FlxSort.ASCENDING, Obj1[0], Obj2[0]);
-	}
-
 	public var danceEveryNumBeats:Int = 2;
 	private var settingCharacterUp:Bool = true;
 	public function recalculateDanceIdle() {
@@ -610,6 +570,7 @@ class Character extends FlxSprite
 			var file = '$filePath.hscript';
 			if (Paths.exists(file)){
 				characterScript = FunkinHScript.fromFile(file, file, ["this" => this]);
+				callOnScripts("onLoad", [this], true);
 				break;
 			}
 			#if LUA_ALLOWED
@@ -621,7 +582,7 @@ class Character extends FlxSprite
 			#end
 		}
 
-		callOnScripts("onLoad", [this], true);
+		
 
 		return this;
 	}
