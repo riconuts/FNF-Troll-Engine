@@ -31,17 +31,17 @@ typedef ContentMetadata = {
 	/**
 		Stages that can appear in the title menu
 	**/
-	var titleStages:Array<String>;
+	@:optional var titleStages:Array<String>;
 
 	/**
 		Songs to be placed into the freeplay menu
 	**/
-	var freeplaySongs:Array<FreeplaySongMetadata>;
+	@:optional var freeplaySongs:Array<FreeplaySongMetadata>;
 
 	/**
 		Categories to be placed into the freeplay menu
 	**/
-	var freeplayCategories:Array<FreeplayCategoryMetadata>;
+	@:optional var freeplayCategories:Array<FreeplayCategoryMetadata>;
 	
 	/**
 	If this is specified, then songs don't have to be added to freeplaySongs to have them appear

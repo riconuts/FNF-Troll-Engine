@@ -75,7 +75,7 @@ typedef SongCreditdata = // beacuse SongMetadata is stolen
 {
 	artist:String,
 	charter:String,
-	?modcharter:Array<String>,
+	?modcharter:String,
 	?extraInfo:Array<String>,
 }
 
@@ -150,6 +150,7 @@ class Wife3
 }
 class PlayState extends MusicBeatState
 {
+	var midScroll = false;
 	public var botplaySine:Float = 0;
 	public var botplayTxt:FlxText;
 
@@ -300,6 +301,7 @@ class PlayState extends MusicBeatState
 	}
 
 	public var combo:Int = 0;
+	public var cbCombo:Int = 0;
 
 	public var comboBreaks:Int = 0; 
 	public var judges:Map<String, Int> = [
@@ -515,7 +517,7 @@ class PlayState extends MusicBeatState
 		instaRespawn = ClientPrefs.getGameplaySetting('instaRespawn', false);
 		cpuControlled = ClientPrefs.getGameplaySetting('botplay', false);
 		disableModcharts = !ClientPrefs.modcharts; //ClientPrefs.getGameplaySetting('disableModcharts', false);
-
+		midScroll = ClientPrefs.midScroll;
 		playbackRate *= (ClientPrefs.ruin ? 0.8 : 1);
 		FlxG.timeScale = playbackRate;
 		
@@ -577,16 +579,20 @@ class PlayState extends MusicBeatState
 		songHighscore = Highscore.getScore(SONG.song);
 
 		if (SONG != null){
-			var jason = Paths.songJson(songName + '/metadata');
-
-			if (!Paths.exists(jason))
-				jason = Paths.modsSongJson(songName + '/metadata');
-
-			if (Paths.exists(jason))
-				metadata = cast Json.parse(Paths.getContent(jason));
+			if(SONG.metadata != null)
+				metadata = SONG.metadata;
 			else{
-				if(showDebugTraces)
-					trace("No metadata for " + songName + ". Maybe add some?");
+				var jason = Paths.songJson(songName + '/metadata');
+
+				if (!Paths.exists(jason))
+					jason = Paths.modsSongJson(songName + '/metadata');
+
+				if (Paths.exists(jason))
+					metadata = cast Json.parse(Paths.getContent(jason));
+				else{
+					if(showDebugTraces)
+						trace("No metadata for " + songName + ". Maybe add some?");
+				}
 			}
 		}
 
@@ -1339,7 +1345,7 @@ class PlayState extends MusicBeatState
 		modManager.registerDefaultModifiers();
 		callOnScripts('postModifierRegister');
 
-		if(ClientPrefs.midScroll){
+		if(midScroll){
 			modManager.setValue("opponentSwap", 0.5);
 			for(field in notefields.members){
 				if(field.field==null)continue;
@@ -2172,6 +2178,9 @@ class PlayState extends MusicBeatState
 		if (options.length > 0){
 			updateTime = (ClientPrefs.timeBarType != 'Disabled');
 			
+			if(options.contains("gradeSet"))
+				ratingStuff = Highscore.grades.get(ClientPrefs.gradeSet);
+			
 			var reBind:Bool = false;
 			PlayState.instance.callOnScripts('optionsChanged', [options]);
 			for(opt in options){
@@ -2744,7 +2753,7 @@ class PlayState extends MusicBeatState
 			botplayTxt.alpha = 1 - flixel.math.FlxMath.fastSin((Math.PI * botplaySine) / 180);
 		}
 
-		if(ClientPrefs.midScroll){
+		if(midScroll){
 			for(field in notefields.members){
 				if(field.field==null)continue;
 				if(field.field.isPlayer){
@@ -3539,6 +3548,7 @@ class PlayState extends MusicBeatState
 		ratingTxtGroup.remove(rating, true);
 		ratingTxtGroup.add(rating);
 	}
+	var comboColor = 0xFFFFFFFF;
 
 	private function displayCombo(?combo:Int){
 		if(combo==null)combo=this.combo;
@@ -3551,33 +3561,24 @@ class PlayState extends MusicBeatState
 			if (combo == 0)
 				return;
 		}
-		else if (combo < 10 && combo != 0)
+		else if (combo > 0 && combo < 10 && combo != 0)
 			return;
 
-		var separatedScore:Array<String> = Std.string(combo).split("");
+		var separatedScore:Array<String> = Std.string(Math.abs(combo)).split("");
 		while (separatedScore.length < 3)
 			separatedScore.unshift("0");
+		if(combo < 0)
+			separatedScore.unshift("-");
 
 		var daLoop:Int = 0;
 
-		// did you goto MS Paint and get colours from there lol
-		var comboColor = !ClientPrefs.coloredCombos ? 0xFFFFFFFF : switch (ratingFC)
-		{ // so the color doesn't get calculated for every number ig
-			case 'EFC':
-				hud.judgeColours.get("epic");
-			case 'SFC':
-				hud.judgeColours.get("sick");
-			case 'GFC'| "SDG":
-				hud.judgeColours.get("good");
-			default:
-				FlxColor.WHITE;
-		}; // this could prob be set in recalculateRating tbh lol
+		var col = combo < 0 ? hud.judgeColours.get("miss") : comboColor;
 
 		var numStartX:Float = (FlxG.width - separatedScore.length * 41) * 0.5 + ClientPrefs.comboOffset[2];
 		for (i in separatedScore)
 		{
 			var numScore:RatingSprite = comboNumGroup.recycle(RatingSprite, RatingSprite.newNumber);
-			numScore.loadGraphic(Paths.image('num' + i));
+			numScore.loadGraphic(Paths.image('num' + (i == "-" ? "neg" : i)));
 
 			if (ClientPrefs.simpleJudge){
 				numScore.scale.x = 0.5 * 1.25;
@@ -3591,7 +3592,7 @@ class PlayState extends MusicBeatState
 			numScore.screenCenter(Y);
 			numScore.y -= ClientPrefs.comboOffset[3];
 
-			numScore.color = comboColor;
+			numScore.color = col;
 			numScore.visible = showComboNum;
 
 			numScore.ID = daLoop;
@@ -3656,6 +3657,7 @@ class PlayState extends MusicBeatState
 
 		switch(judgeData.comboBehaviour){
 			default:
+				cbCombo = 0;
 				combo++;
 			case BREAK:
 				breakCombo();
@@ -3673,7 +3675,7 @@ class PlayState extends MusicBeatState
 			if(judgeData.hideJudge!=true)
 				displayJudgment(judgeData.internalName);
 			if(judgeData.comboBehaviour != IGNORE)
-				displayCombo();
+				displayCombo(judgeData.comboBehaviour == BREAK ? (cbCombo > 1 ? -cbCombo : 0) : combo);
 		}
 	}
 
@@ -3914,6 +3916,7 @@ class PlayState extends MusicBeatState
 
 	function breakCombo(){
 		comboBreaks++;
+		cbCombo++;
 		combo = 0;
 		while (lastCombos.length > 0)
 			lastCombos.shift().kill();
@@ -4699,6 +4702,54 @@ class PlayState extends MusicBeatState
 		}
 		return ratingPercent = val;
 	}
+
+	public function getClearType(){
+		var clear = 'Clear';
+
+		if (comboBreaks <= 0)
+		{
+			var goods = judges.get("good");
+			var sicks = judges.get("sick");
+			var epics = judges.get("epic");
+			if (goods > 0){
+				if(goods < 10 && goods > 0)
+					clear = 'SDG';
+				else
+					clear = 'GFC';
+			}
+			else if (sicks > 0)
+			{
+				if (sicks < 10 && sicks > 0)
+					clear = 'SDS';
+				else
+					clear = 'SFC';
+			}
+			else if (epics > 0)
+				clear = "EFC";
+			if (ClientPrefs.gradeSet == 'Etterna')
+			{
+				if(sicks == 1)
+					clear = 'WF';
+				else if (goods == 1)
+					clear = 'BF';
+				
+			}
+			
+		}
+		else
+		{
+			if (comboBreaks < 10 && songScore >= 0)
+				clear = "SDCB";
+			else if (songScore < 0 || comboBreaks >= 10 && ratingPercent <= 0)
+				clear = "Fail";
+			else if (ClientPrefs.gradeSet == 'Etterna' && comboBreaks == 1)
+				clear = 'MF';
+		}
+		if(totalPlayed == 0)
+			clear = 'No Play';
+		return clear;
+	}
+
 	public function RecalculateRating() {
 		setOnScripts('score', songScore);
 		setOnScripts('misses', songMisses);
@@ -4738,20 +4789,19 @@ class PlayState extends MusicBeatState
 			}
 
 			// Rating FC
-			ratingFC = "Clear";
-			if(comboBreaks <= 0){
-			if (judges.get("epic") > 0) ratingFC = "EFC";
-			if (judges.get("sick") > 0) ratingFC = "SFC";
-			if (judges.get("good") > 0 && judges.get("good") < 10) ratingFC = "SDG";
-			else if (judges.get("good") >= 10) ratingFC = "GFC";
-			if (judges.get("bad") > 0 || judges.get("shit") > 0) ratingFC = "FC";
-			}else{
-				if (comboBreaks < 10 && songScore >= 0) ratingFC = "SDCB";
-				else if (songScore < 0 || comboBreaks >= 10 && ratingPercent <= 0)ratingFC = "Fail";
+			ratingFC = getClearType();
+
+			if (ClientPrefs.coloredCombos){
+				if (judges.get("bad") > 0 || judges.get("shit") > 0 || comboBreaks > 0)
+					comboColor = 0xFFFFFFFF;
+				else if (judges.get("good") > 0)
+					comboColor = hud.judgeColours.get("good");
+				else if (judges.get("sick") > 0)
+					comboColor = hud.judgeColours.get("sick");
+				else if (judges.get("epic") > 0)
+					comboColor = hud.judgeColours.get("epic");
 			}
 		}
-
-		callOnScripts('postRecalculateRating'); // incase you wanna add custom rating stuff
 
 
 		// maybe move all of this to a stats class that I can easily give to objects?
@@ -4769,6 +4819,7 @@ class PlayState extends MusicBeatState
 		
 		hud.recalculateRating();
 
+		callOnScripts('postRecalculateRating'); // incase you wanna add custom rating stuff
 		setOnScripts('rating', ratingPercent);
 		setOnScripts('ratingName', ratingName);
 		setOnScripts('ratingFC', ratingFC);

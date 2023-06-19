@@ -339,20 +339,34 @@ class AdvancedHUD extends BaseHUD
 
 		ratingTxt.text = (grade != "?"?(Highscore.floorDecimal(ratingPercent * 100, 2) + "%"):"0%");
 		fcTxt.text = (ratingFC=='GFC' && ClientPrefs.wife3)?"FC":ratingFC;
-		fcTxt.color = switch (ratingFC){
-			case 'EFC':
-				judgeColours.get("epic");
-			case 'SFC':	
-				judgeColours.get("sick");
-			case 'GFC' | 'SDG':
-				judgeColours.get("good");
-			case 'FC':
-				0xFFFFFFFF;
-			case 'Fail':
-				judgeColours.get("miss");
-			default:
-				0xFFA3A3A3;
-		}
+		fcTxt.color = (function(){
+			var color:FlxColor = 0xFFA3A3A3;
+			if(comboBreaks == 0){
+				if (judgements.get("bad") > 0 || judgements.get("shit") > 0)
+					color = 0xFFFFFFFF;
+				else if (judgements.get("good") > 0)
+				{
+					color = judgeColours.get("good");
+					if (judgements.get("good")==1)
+						color.saturation *= 0.75;
+					
+				}
+				else if (judgements.get("sick") > 0)
+				{
+					color = judgeColours.get("sick");
+					if (judgements.get("sick") == 1)
+						color.saturation *= 0.75;
+				}
+				else if(judgements.get("epic") > 0){
+					color = judgeColours.get("epic");
+				}
+			}
+
+			if (ratingFC=='Fail')
+				color = judgeColours.get("miss");
+			
+			return color;
+		})();
 		
 		if (ClientPrefs.npsDisplay)
 			npsTxt.text = 'NPS: ${nps} (Peak: ${npsPeak})';

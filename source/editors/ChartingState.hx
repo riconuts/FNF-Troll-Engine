@@ -251,6 +251,13 @@ class ChartingState extends MusicBeatState
 			pushSection();
 			PlayState.SONG = _song;
 		}
+		
+		if(_song.metadata==null){
+			_song.metadata = {
+				artist: "Unspecified",
+				charter: "Unspecified"
+			}
+		}
 
 		// Paths.clearMemory();
 
@@ -514,7 +521,25 @@ class ChartingState extends MusicBeatState
 
 		var saveEvents:FlxButton = new FlxButton(110, reloadSongJson.y, 'Save Events', saveEvents);
 
-		var clear_events:FlxButton = new FlxButton(loadAutosaveBtn.x, 310, 'Clear events', function()
+		var saveMetadata:FlxButton = new FlxButton(110, saveEvents.y + 30, 'Save Metadata', function(){
+
+		});
+
+		var loadMetadata:FlxButton = new FlxButton(110, saveMetadata.y + 30, 'Load Metadata', function(){
+			var songName:String = Paths.formatToSongPath(_song.song);
+			var jason = Paths.songJson(songName + '/metadata');
+
+			if (!Paths.exists(jason))
+				jason = Paths.modsSongJson(songName + '/metadata');
+
+			if (Paths.exists(jason)){
+				var metadata:PlayState.SongCreditdata = cast Json.parse(Paths.getContent(jason));
+				_song.metadata = metadata;
+			}
+			
+		});
+
+		var clear_events:FlxButton = new FlxButton(loadAutosaveBtn.x, 210, 'Clear events', function()
 			{
 				openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, clearEvents, null,ignoreWarnings));
 			});
@@ -611,6 +636,8 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(clear_notes);
 		tab_group_song.add(saveButton);
 		tab_group_song.add(saveEvents);
+		tab_group_song.add(saveMetadata);
+		tab_group_song.add(loadMetadata);
 		tab_group_song.add(reloadSong);
 		tab_group_song.add(reloadSongJson);
 		tab_group_song.add(loadAutosaveBtn);
@@ -621,7 +648,6 @@ class ChartingState extends MusicBeatState
 		//tab_group_song.add(noteSkinInputText);
 		//tab_group_song.add(noteSplashesInputText);
 		tab_group_song.add(new FlxText(stepperBPM.x, stepperBPM.y - 15, 0, 'Song BPM:'));
-		tab_group_song.add(new FlxText(stepperBPM.x + 100, stepperBPM.y - 15, 0, 'Song Offset:'));
 		tab_group_song.add(new FlxText(stepperSpeed.x, stepperSpeed.y - 15, 0, 'Song Speed:'));
 		
 		tab_group_song.add(new FlxText(player2DropDown.x, player2DropDown.y - 15, 0, 'Opponent:'));
@@ -3061,6 +3087,25 @@ class ChartingState extends MusicBeatState
 			_file.addEventListener(Event.CANCEL, onSaveCancel);
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 			_file.save(data.trim(), Paths.formatToSongPath(_song.song) + ".json");
+		}
+	}
+
+	private function saveMetadata(){
+		if(_song.metadata==null){
+			_song.metadata = {
+				artist: "Unspecified",
+				charter: "Unspecified"
+			}
+		}
+		var data:String = Json.stringify(_song.metadata, "\t");
+
+		if ((data != null) && (data.length > 0))
+		{
+			_file = new FileReference();
+			_file.addEventListener(Event.COMPLETE, onSaveComplete);
+			_file.addEventListener(Event.CANCEL, onSaveCancel);
+			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+			_file.save(data.trim(), "events.json");
 		}
 	}
 
