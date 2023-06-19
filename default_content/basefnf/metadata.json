@@ -5,42 +5,53 @@
 			"category": "main",
 			"freeplayCategory": "basefnf",
 			"unlockCondition": true,
-			"songs": []
+			"songs": ["Bopeebo","Fresh","Dad Battle"]
 		},
 		{
 			"name": "Week 2",
 			"category": "main",
 			"freeplayCategory": "basefnf",
 			"unlockCondition": true,
-			"songs": []
+			"songs": ["Spookeez", "South", "Monster"]
 		},
 		{
 			"name": "Week 3",
 			"category": "main",
 			"freeplayCategory": "basefnf",
 			"unlockCondition": true,
-			"songs": []
+			"songs": ["Pico", "Philly Nice", "Blammed"]
 		},
 		{
 			"name": "Week 4",
 			"category": "main",
 			"freeplayCategory": "basefnf",
 			"unlockCondition": true,
-			"songs": []
+			"songs": ["Satin Panties", "High", "MILF"]
 		},
 		{
 			"name": "Week 5",
 			"category": "main",
 			"freeplayCategory": "basefnf",
 			"unlockCondition": true,
-			"songs": []
+			"songs": ["Cocoa", "Eggnog", "Winter Horrorland"]
 		},
 		{
 			"name": "Week 6",
 			"category": "main",
 			"freeplayCategory": "basefnf",
 			"unlockCondition": true,
-			"songs": []
+			"songs": ["Senpai", "Roses", "Thorns"]
+		},
+		{
+			"name": "Week 7",
+			"category": "main",
+			"freeplayCategory": "basefnf",
+			"unlockCondition": true,
+			"songs": [
+				"Ugh",
+				"Guns",
+				"Stress"
+			]
 		}
 	],
 	"freeplaySongs": [],

@@ -85,7 +85,7 @@ class StoryMenuState extends MusicBeatState
 		for (chapData in ChapterData.reloadChapterFiles())
 		{
 			// For Now
-
+			chapN++;
 			var pos = chapterSelectPositions[chapN];
 			if (pos == null)
 				continue; // NO ERRORS
@@ -101,7 +101,7 @@ class StoryMenuState extends MusicBeatState
 			*/
 
 			Paths.currentModDirectory = chapData.directory;
-			chapN++;
+			
 
 			var previewImage = Paths.image("chapters/" + Paths.formatToSongPath(chapData.name) + (isLocked ? "-lock" : ""));
 			previewImage = previewImage != null ? previewImage : Paths.image("chapters/unknown");
