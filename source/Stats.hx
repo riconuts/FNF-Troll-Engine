@@ -21,6 +21,7 @@ class Stats {
     public var grade:String = '';
     public var combo:Int = 0;
 	public var ratingPercent:Float = 0;
+    public var noteHits:Array<Float> = 0;
 
     @:isVar
     public var comboBreaks(get, set):Int = 0;
@@ -49,7 +50,7 @@ class Stats {
     }
 
     public function getClearType(){
-        
+
     }
 
     public function updateVariables()

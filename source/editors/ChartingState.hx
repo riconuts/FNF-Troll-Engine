@@ -672,7 +672,7 @@ class ChartingState extends MusicBeatState
 			var endThing:Float = sectionStartTime(1);
 			for (event in _song.events)
 			{
-				var strumTime:Float = event[0];
+				var strumTime:Float = fuckFloatingPoints(event[0]);
 				if(endThing > event[0] && event[0] >= startThing)
 				{
 					var copiedEventArray:Array<Dynamic> = [];
@@ -796,7 +796,8 @@ class ChartingState extends MusicBeatState
 			if(check_eventsSec.checked){
 				for (event in _song.events)
 				{
-					var strumTime:Float = event[0];
+					var strumTime:Float = fuckFloatingPoints(event[0]);
+					
 					if(endThing > event[0] && event[0] >= startThing)
 					{
 						strumTime += Conductor.stepCrochet * (getSectionBeats(daSec) * 4 * value);
@@ -2505,6 +2506,11 @@ class ChartingState extends MusicBeatState
 		}
 	}
 
+	
+	inline function fuckFloatingPoints(n:Float):Float // haha decimals
+		return CoolUtil.snap(n, Conductor.stepCrochet / (192 / 16));
+
+
 	function updateGrid():Void
 	{
 		curRenderedNotes.clear();
@@ -2555,10 +2561,6 @@ class ChartingState extends MusicBeatState
 			note.mustPress = _song.notes[curSec].mustHitSection;
 			if(i[1] > 3) note.mustPress = !note.mustPress;
 		}
-
-		inline function fuckFloatingPoints(n:Float):Float // haha decimals
-			return CoolUtil.snap(n, Conductor.stepCrochet / (192 / 16));
-
 		// CURRENT EVENTS
 		var startThing:Float = fuckFloatingPoints(sectionStartTime());
 		var endThing:Float = fuckFloatingPoints(sectionStartTime(1));
