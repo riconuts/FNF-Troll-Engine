@@ -58,12 +58,6 @@ class NoteField extends FieldBase
 		return modNumber = d;
 	}
 	/*
-	 * The PlayField used to determine the notes to render
-	 * Required!
-	 */
-	public var field:PlayField;
-
-	/*
 	 * The ModManager to be used to get modifier positions, etc
 	 * Required!
 	 */
@@ -92,6 +86,7 @@ class NoteField extends FieldBase
     override function preDraw()
     {
 		drawQueue = [];
+		if(field==null)return;
         if(!active || !exists)return;
 		if ((FlxG.state is MusicBeatState))
 		{

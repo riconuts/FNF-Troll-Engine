@@ -1,22 +1,22 @@
 package playfields;
 
 class NotefieldManager extends FlxBasic {
-	var notefields:Array<FieldBase> = [];
+	public var members:Array<FieldBase> = [];
 
-    public function add(field:FieldBase)notefields.push(field);
-	public function remove(field:FieldBase)notefields.remove(field);
+    public function add(field:FieldBase)members.push(field);
+	public function remove(field:FieldBase)members.remove(field);
     
     override function draw(){
-        for(field in notefields)
+        for(field in members)
             field.preDraw();
 
-		for (field in notefields)
+		for (field in members)
 			field.draw();
     }
 
     override function update(elapsed:Float){
         super.update(elapsed);
-        for(field in notefields)
+        for(field in members)
             field.update(elapsed);
     }
 }

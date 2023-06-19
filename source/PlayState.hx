@@ -1339,6 +1339,15 @@ class PlayState extends MusicBeatState
 		modManager.registerDefaultModifiers();
 		callOnScripts('postModifierRegister');
 
+		if(ClientPrefs.midScroll){
+			modManager.setValue("opponentSwap", 0.5);
+			for(field in notefields.members){
+				if(field.field==null)continue;
+				field.alpha = field.field.isPlayer ? 0 : 1;
+			}
+			
+		}
+
 		startedCountdown = true;
 		Conductor.songPosition = 0;
 		Conductor.songPosition -= Conductor.crochet * 5;
@@ -2700,6 +2709,22 @@ class PlayState extends MusicBeatState
 			botplayTxt.alpha = 1 - flixel.math.FlxMath.fastSin((Math.PI * botplaySine) / 180);
 		}
 
+		if(ClientPrefs.midScroll){
+			for(field in notefields.members){
+				if(field.field==null)continue;
+				if(field.field.isPlayer){
+					if(field.alpha < 1){
+						field.alpha += 0.1 * elapsed;
+						if(field.alpha>1)field.alpha=1;
+					}
+				}else{
+					if(field.alpha > 0){
+						field.alpha -= 0.1 * elapsed;
+						if(field.alpha<0)field.alpha=0;
+					}
+				}
+			}
+		}
 		super.update(elapsed);
 		modManager.updateTimeline(curDecStep);
 		modManager.update(elapsed);

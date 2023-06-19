@@ -62,7 +62,7 @@ class ModManager {
 			setValue("noteSpawnTime" + i, 0, mN);
 		
 		setValue("noteSpawnTime", 1500, mN); // maybe a ClientPrefs.noteSpawnTime
-		setValue("drawDistance", FlxG.height, mN); // MAY NOT REPRESENT ACTUAL DRAWDISTANCE: drawDistance is modified by the notefields aswell
+		setValue("drawDistance", FlxG.height * 1.1, mN); // MAY NOT REPRESENT ACTUAL DRAWDISTANCE: drawDistance is modified by the notefields aswell
 		// so when you set drawDistance is might be lower or higher than expected because of the draw distance mult. setting
 		setValue("xmod", 1, mN);
 		for (i in 0...4)

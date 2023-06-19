@@ -22,6 +22,7 @@ import playfields.NoteField;
 class ProxyField extends FieldBase {
     var proxiedField:NoteField;
 	var transfarm:ColorTransform = new ColorTransform();
+
 	public function new(field:NoteField){
         super(0,0);
 		proxiedField = field;
@@ -31,6 +32,10 @@ class ProxyField extends FieldBase {
         // does nothing, since this uses info from its linked notefield
     }
 	
+	override function update(elapsed:Float){
+		field = proxiedField.field;
+		super.update(elapsed);
+	}
 	var point = FlxPoint.get(0, 0);
     override function draw(){
 		if (!active || !exists || !visible || !proxiedField.exists || !proxiedField.active)

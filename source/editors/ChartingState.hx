@@ -1191,7 +1191,7 @@ class ChartingState extends MusicBeatState
 		mouseScrollingQuant = new FlxUICheckBox(10, 200, null, null, "Mouse Scrolling Quantization", 100);
 		if (FlxG.save.data.mouseScrollingQuant == null) FlxG.save.data.mouseScrollingQuant = false;
 		mouseScrollingQuant.checked = FlxG.save.data.mouseScrollingQuant;
-
+		mouseQuant = FlxG.save.data.mouseScrollingQuant;
 		mouseScrollingQuant.callback = function()
 		{
 			FlxG.save.data.mouseScrollingQuant = mouseScrollingQuant.checked;
@@ -1755,11 +1755,11 @@ class ChartingState extends MusicBeatState
 					FlxG.sound.music.time -= (FlxG.mouse.wheel * Conductor.stepCrochet);
 				else
 				{
-					var fuck = Conductor.stepCrochet / (quantization / 16);
+					var snap = Conductor.stepCrochet / (quantization / 16);
 					if (FlxG.mouse.wheel > 0)
-						FlxG.sound.music.time = CoolUtil.snap(FlxG.sound.music.time - fuck, fuck);
+						FlxG.sound.music.time = CoolUtil.snap(FlxG.sound.music.time, snap) - snap;
 					else
-						FlxG.sound.music.time = CoolUtil.snap(FlxG.sound.music.time + fuck, fuck);
+						FlxG.sound.music.time = CoolUtil.snap(FlxG.sound.music.time, snap) + snap;
 				}
 				if(vocals != null) {
 					vocals.pause();
@@ -1798,12 +1798,11 @@ class ChartingState extends MusicBeatState
 				if (FlxG.keys.justPressed.UP || FlxG.keys.justPressed.DOWN  )
 				{
 					FlxG.sound.music.pause();
-					updateCurStep();
-					var fuck = Conductor.stepCrochet / (quantization / 16);
-					if (FlxG.mouse.wheel > 0)
-						FlxG.sound.music.time = CoolUtil.snap(FlxG.sound.music.time - fuck, fuck);
-					else
-						FlxG.sound.music.time = CoolUtil.snap(FlxG.sound.music.time + fuck, fuck);
+					var snap:Float = Conductor.stepCrochet / (quantization / 16);
+					if (FlxG.keys.justPressed.UP)
+						FlxG.sound.music.time = CoolUtil.snap(FlxG.sound.music.time, snap) - snap;
+					if (FlxG.keys.justPressed.DOWN)
+						FlxG.sound.music.time = CoolUtil.snap(FlxG.sound.music.time, snap) + snap;
 				}
 			}
 
@@ -2543,15 +2542,16 @@ class ChartingState extends MusicBeatState
 			if(i[1] > 3) note.mustPress = !note.mustPress;
 		}
 
-		inline function sowyNumber(n:Float):Float // haha decimals
-			return Std.parseFloat(Std.string(n));
+		inline function fuckFloatingPoints(n:Float):Float // haha decimals
+			return CoolUtil.snap(n, Conductor.stepCrochet / (192 / 16));
 
 		// CURRENT EVENTS
-		var startThing:Float = sowyNumber(sectionStartTime());
-		var endThing:Float = sectionStartTime(1);
+		var startThing:Float = fuckFloatingPoints(sectionStartTime());
+		var endThing:Float = fuckFloatingPoints(sectionStartTime(1));
 		for (i in _song.events)
 		{
-			if(i[0] >= startThing && i[0] < endThing)
+			var t = fuckFloatingPoints(i[0]);
+			if(t >= startThing && t <= endThing)
 			{
 				var note:Note = setupNoteData(i, false);
 				curRenderedNotes.add(note);
