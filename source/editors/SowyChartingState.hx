@@ -98,7 +98,7 @@ class ChartNote extends FlxSprite
 		this.notetypeText = null;
 
 		if (ClientPrefs.noteSkin == "Quants"){
-			var beat = Conductor.getBeatInMeasure(strumTime);
+			var beat = Conductor.getBeatSinceChange(strumTime);
 			var quant = getQuant(beat);
 			var idx = quants.indexOf(quant);
 

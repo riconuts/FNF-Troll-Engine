@@ -142,6 +142,9 @@ class ChartingState extends MusicBeatState
 	**/
 	var curSelectedNote:Array<Dynamic> = null;
 
+	var heldNotesClick:Array<Array<Dynamic>> = []; // HELD NOTE FROM CLICKING
+	var heldNotesVortex:Array<Array<Dynamic>> = []; // HELD NOTES FROM VORTEX
+
 	var tempBpm:Float = 0;
 
 	var extraTracks:Array<FlxSound> = [];
@@ -184,6 +187,18 @@ class ChartingState extends MusicBeatState
 
 	var quantTxt:FlxText;
 
+	public var quantNames:Array<String> = [
+		"4th",
+		"8th",
+		"12th",
+		"16th",
+		"24th",
+		"32nd",
+		"48th",
+		"64th",
+		"96th",
+		"192nd"
+	];
 	public var quantizations:Array<Int> = [
 		4,
 		8,
@@ -398,7 +413,7 @@ class ChartingState extends MusicBeatState
 		zoomTxt.scrollFactor.set();
 		add(zoomTxt);
 
-		quantTxt = new FlxText(10, 200, 0, "Beat Snap: " + quantization + "th" , 16);
+		quantTxt = new FlxText(10, 200, 0, "Beat Snap: " + quantNames[curQuant] , 16);
 		quantTxt.setFormat(null, 18, 0xFFFFFFFF, LEFT, FlxTextBorderStyle.OUTLINE, 0xFF000000);
 		quantTxt.borderSize = 2;
 		quantTxt.scrollFactor.set();
@@ -1567,6 +1582,16 @@ class ChartingState extends MusicBeatState
 					addNote();
 				}
 			}
+		}else if(FlxG.mouse.pressed){
+			for(note in heldNotesClick){
+				if (note != null)
+				{
+					var len = CoolUtil.snap((getStrumTime(dummyArrow.y * (getSectionBeats() / 4), false) + sectionStartTime()) - note[0], Conductor.stepCrochet);
+					setNoteSustain(len, note);
+				}
+			}
+		}else if(heldNotesClick.length>0){
+			heldNotesClick = [];
 		}
 
 		var blockInput:Bool = false;
@@ -1726,7 +1751,7 @@ class ChartingState extends MusicBeatState
 			{
 				FlxG.sound.music.pause();
 				if (!mouseQuant)
-					FlxG.sound.music.time -= (FlxG.mouse.wheel * Conductor.stepCrochet*0.8);
+					FlxG.sound.music.time -= (FlxG.mouse.wheel * Conductor.stepCrochet);
 				else
 					{
 						var time:Float = FlxG.sound.music.time;
@@ -1813,7 +1838,7 @@ class ChartingState extends MusicBeatState
 
 					quantization = quantizations[curQuant];
 
-					quantTxt.text = "Beat Snap: " + quantization + "th";
+					quantTxt.text = "Beat Snap: " + quantNames[curQuant];
 				}
 
 				if(FlxG.keys.justPressed.LEFT){
@@ -1823,13 +1848,34 @@ class ChartingState extends MusicBeatState
 
 					quantization = quantizations[curQuant];
 
-					quantTxt.text = "Beat Snap: " + quantization + "th";
+					quantTxt.text = "Beat Snap: " + quantNames[curQuant];
 				}
 				quant.animation.play('q', true, false, curQuant);
 			}
 			if(vortex && !blockInput){
 				var controlArray:Array<Bool> = [FlxG.keys.justPressed.ONE, FlxG.keys.justPressed.TWO, FlxG.keys.justPressed.THREE, FlxG.keys.justPressed.FOUR,
 											   FlxG.keys.justPressed.FIVE, FlxG.keys.justPressed.SIX, FlxG.keys.justPressed.SEVEN, FlxG.keys.justPressed.EIGHT];
+				var holdArray:Array<Bool> = [
+					FlxG.keys.pressed.ONE, FlxG.keys.pressed.TWO, FlxG.keys.pressed.THREE, FlxG.keys.pressed.FOUR,
+					FlxG.keys.pressed.FIVE, FlxG.keys.pressed.SIX, FlxG.keys.pressed.SEVEN, FlxG.keys.pressed.EIGHT
+				];
+
+				if(holdArray.contains(true) && heldNotesVortex.length > 0){
+					for(i in 0...holdArray.length){
+						if (holdArray[i]){
+							var note = heldNotesVortex[i];
+							if(note != null){
+								var len = CoolUtil.snap(Conductor.songPosition - note[0], Conductor.stepCrochet);
+								setNoteSustain(len, note);
+							}
+						}else if(heldNotesVortex[i]!=null)
+							heldNotesVortex[i] = null;
+						
+					}
+				}else
+					heldNotesVortex = [];
+					
+				
 
 				if(controlArray.contains(true))
 				{
@@ -2288,19 +2334,31 @@ class ChartingState extends MusicBeatState
 		#end
 	}
 
-	function changeNoteSustain(value:Float):Void
+	function setNoteSustain(value:Float, ?note:Array<Dynamic>):Void
 	{
-		if (curSelectedNote != null)
+		if (note == null)
+			note = curSelectedNote;
+
+		if (note != null)
 		{
-			if (curSelectedNote[2] != null)
+			if (note[2] != null)
 			{
-				curSelectedNote[2] += value;
-				curSelectedNote[2] = Math.max(curSelectedNote[2], 0);
+				if(note[2] == value)
+					return;
+				note[2] = value;
+				note[2] = Math.max(note[2], 0);
 			}
 		}
 
 		updateNoteUI();
 		updateGrid();
+	}
+
+	function changeNoteSustain(value:Float, ?note:Array<Dynamic>):Void
+	{
+		if (note == null)
+			note = curSelectedNote;
+		setNoteSustain(note[2] + value, note);
 	}
 
 	function recalculateSteps(add:Float = 0):Int
@@ -2776,7 +2834,7 @@ class ChartingState extends MusicBeatState
 		}
 
 		if (!delnote){
-			addNote(cs, d, style);
+			addNote(cs, d, style, false);
 		}
 	}
 	function clearSong():Void
@@ -2789,7 +2847,7 @@ class ChartingState extends MusicBeatState
 		updateGrid();
 	}
 
-	private function addNote(strum:Null<Float> = null, data:Null<Int> = null, type:Null<Int> = null):Void
+	private function addNote(strum:Null<Float> = null, data:Null<Int> = null, type:Null<Int> = null, click:Bool=true):Void
 	{
 		//curUndoIndex++;
 		//var newsong = _song.notes;
@@ -2808,6 +2866,10 @@ class ChartingState extends MusicBeatState
 		{
 			_song.notes[curSec].sectionNotes.push([noteStrum, noteData, noteSus, noteTypeIntMap.get(daType)]);
 			curSelectedNote = _song.notes[curSec].sectionNotes[_song.notes[curSec].sectionNotes.length - 1];
+			if(click)
+				heldNotesClick[noteData] = _song.notes[curSec].sectionNotes[_song.notes[curSec].sectionNotes.length - 1];
+			else
+				heldNotesVortex[noteData] = _song.notes[curSec].sectionNotes[_song.notes[curSec].sectionNotes.length - 1];
 		}
 		else
 		{
@@ -2819,10 +2881,13 @@ class ChartingState extends MusicBeatState
 			curEventSelected = 0;
 			changeEventSelected();
 		}
-
-		if (FlxG.keys.pressed.CONTROL && noteData > -1)
-		{
-			_song.notes[curSec].sectionNotes.push([noteStrum, (noteData + 4) % 8, noteSus, noteTypeIntMap.get(daType)]);
+		if(click){
+			if (FlxG.keys.pressed.CONTROL && noteData > -1)
+			{
+				var note:Array<Dynamic> = [noteStrum, (noteData + 4) % 8, noteSus, noteTypeIntMap.get(daType)];
+				_song.notes[curSec].sectionNotes.push(note);
+				heldNotesClick[ (noteData + 4) % 8] = note;
+			}
 		}
 
 		//trace(noteData + ', ' + noteStrum + ', ' + curSec);
@@ -2911,6 +2976,7 @@ class ChartingState extends MusicBeatState
 		_file.addEventListener(Event.CANCEL, onSaveCancel);
 		_file.browse([new openfl.net.FileFilter("JSON file", "*.json", "JSON")]);
 	}
+	
 	function onJsonSelected(e){
 		trace(_file.data.toString());
 

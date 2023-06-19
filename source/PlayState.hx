@@ -276,13 +276,8 @@ class PlayState extends MusicBeatState
 	
 	public var ratingTxtGroup = new FlxTypedGroup<RatingSprite>();
 	public var comboNumGroup = new FlxTypedGroup<RatingSprite>();
-	public var timingTxt:FlxText; // TODO: replace this with the combo numbers maybe
+	public var timingTxt:FlxText;
 	
-	// We could also make it calibri or another custom font?
-	// Since as you said, combo numbers could be hard to read
-	// (We could also add a dropdown for it? idk lol)
-	// -neb
-
 	private var curSong:String = "";
 
 	public var iconOffset:Int = 26;
