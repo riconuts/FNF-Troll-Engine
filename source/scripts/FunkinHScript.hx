@@ -51,8 +51,8 @@ class FunkinHScript extends FunkinScript
 	{
 		parser.line = 1;
 		var expr:Expr;
-		try
-		{
+
+		try{
 			expr = parser.parseString(script, name);
 		}
 		catch (e:haxe.Exception)
@@ -65,6 +65,7 @@ class FunkinHScript extends FunkinScript
 
 			expr = parser.parseString("", name);
 		}
+
 		return new FunkinHScript(expr, name, additionalVars, doExecute);
 	}
 
@@ -243,6 +244,15 @@ class FunkinHScript extends FunkinScript
 
 		});
 		set("FlxText", FlxText); // idk how this wasnt added sooner tbh
+		set("FlxTextAlign", {
+			"CENTER": FlxTextAlign.CENTER,
+			"LEFT": FlxTextAlign.LEFT,
+			"RIGHT": FlxTextAlign.RIGHT,
+			"JUSTIFY": FlxTextAlign.JUSTIFY,
+
+			"fromOpenFL": FlxTextAlign.fromOpenFL,
+			"toOpenFL": FlxTextAlign.toOpenFL
+		});
 		set("FlxTextBorderStyle", {
 			NONE: FlxTextBorderStyle.NONE,
 			SHADOW: FlxTextBorderStyle.SHADOW,
@@ -407,7 +417,7 @@ class FunkinHScript extends FunkinScript
 		interpreter.variables.set(varName, value);
 	}
 
-	public function exists(varName:String)
+	public function exists(varName:String):Bool
 	{
 		if (interpreter == null)
 			return false;

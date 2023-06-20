@@ -1,5 +1,7 @@
 package;
 
+import sys.io.File;
+import sys.FileSystem;
 import flixel.text.FlxText;
 import FreeplayState.SongMetadata;
 
@@ -40,8 +42,10 @@ class SongSelectState extends MusicBeatState{
 
 		#if MODS_ALLOWED
 		for (modDir in Paths.getModDirectories()){
-			Paths.iterateDirectory(Paths.mods('$modDir/songs/'), function(path:String){
-				songMeta.push(new SongMetadata(path, modDir));
+			var folder = Paths.mods('$modDir/songs/');
+			Paths.iterateDirectory(folder, function(path:String){
+				if (FileSystem.isDirectory(folder+path))
+					songMeta.push(new SongMetadata(path, modDir));
 			});
 		}
 		#end
