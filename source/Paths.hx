@@ -399,13 +399,39 @@ class Paths
 		#end
 	}
 
-	inline static public function formatToSongPath(path:String)
-	{
+	private static final hideChars = ['.','!','?','%','"',",","'"];
+	private static final invalidChars = [' ','#','>','<',':',';','\\','~','&'];
+
+	inline static public function formatToSongPath(path:String) {
+    	var finalPath = "";
+
+		for (idx in 0...path.length)
+		{
+			var char = path.charAt(idx);   
+
+			if (hideChars.contains(char))
+				continue;
+			else if (invalidChars.contains(char))
+				finalPath += "-";
+			else 
+				finalPath += char;
+		}
+
+		/* finalPath = [
+			for (s in finalPath.split("-")) {
+				(s == "") ?continue:s;
+			}
+		].join("-"); */		
+
+		return finalPath.toLowerCase();
+
+		/*
 		var invalidChars = ~/[~&\\;:<>#]/;
 		var hideChars = ~/[.,'"%?!]/;
 
 		var path = invalidChars.split(path.replace(' ', '-')).join("-");
 		return hideChars.split(path).join("").toLowerCase();
+		*/
 	}
 
 	// completely rewritten asset loading? fuck!
