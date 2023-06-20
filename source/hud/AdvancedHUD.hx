@@ -272,6 +272,36 @@ class AdvancedHUD extends BaseHUD
 
 		gradeTxt.color = gradeColor;
 
+		fcTxt.color = (function()
+		{
+			var color:FlxColor = 0xFFA3A3A3;
+			if (comboBreaks == 0)
+			{
+				if (judgements.get("bad") > 0 || judgements.get("shit") > 0)
+					color = 0xFFFFFFFF;
+				else if (judgements.get("good") > 0)
+				{
+					color = judgeColours.get("good");
+					if (judgements.get("good") == 1)
+						color.saturation *= 0.75;
+				}
+				else if (judgements.get("sick") > 0)
+				{
+					color = judgeColours.get("sick");
+					if (judgements.get("sick") == 1)
+						color.saturation *= 0.75;
+				}
+				else if (judgements.get("epic") > 0)
+				{
+					color = judgeColours.get("epic");
+				}
+			}
+
+			if (ratingFC == 'Fail')
+				color = judgeColours.get("miss");
+
+			return color;
+		})();
 	}
 
 	override function changedOptions(changed:Array<String>){
@@ -339,34 +369,6 @@ class AdvancedHUD extends BaseHUD
 
 		ratingTxt.text = (grade != "?"?(Highscore.floorDecimal(ratingPercent * 100, 2) + "%"):"0%");
 		fcTxt.text = (ratingFC=='GFC' && ClientPrefs.wife3)?"FC":ratingFC;
-		fcTxt.color = (function(){
-			var color:FlxColor = 0xFFA3A3A3;
-			if(comboBreaks == 0){
-				if (judgements.get("bad") > 0 || judgements.get("shit") > 0)
-					color = 0xFFFFFFFF;
-				else if (judgements.get("good") > 0)
-				{
-					color = judgeColours.get("good");
-					if (judgements.get("good")==1)
-						color.saturation *= 0.75;
-					
-				}
-				else if (judgements.get("sick") > 0)
-				{
-					color = judgeColours.get("sick");
-					if (judgements.get("sick") == 1)
-						color.saturation *= 0.75;
-				}
-				else if(judgements.get("epic") > 0){
-					color = judgeColours.get("epic");
-				}
-			}
-
-			if (ratingFC=='Fail')
-				color = judgeColours.get("miss");
-			
-			return color;
-		})();
 		
 		if (ClientPrefs.npsDisplay)
 			npsTxt.text = 'NPS: ${nps} (Peak: ${npsPeak})';
