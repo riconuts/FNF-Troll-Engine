@@ -4711,27 +4711,33 @@ class PlayState extends MusicBeatState
 			var goods = judges.get("good");
 			var sicks = judges.get("sick");
 			var epics = judges.get("epic");
+
+			if (totalPlayed == 0){
+				clear = 'No Play'; // Havent played anything yet
+				return clear;
+			}
+			
 			if (goods > 0){
 				if(goods < 10 && goods > 0)
-					clear = 'SDG';
+					clear = 'SDG'; // Single Digit Goods
 				else
-					clear = 'GFC';
+					clear = 'GFC'; // Good Full Combo
 			}
 			else if (sicks > 0)
 			{
 				if (sicks < 10 && sicks > 0)
-					clear = 'SDS';
+					clear = 'SDS'; // Single Digit Sicks
 				else
-					clear = 'SFC';
+					clear = 'SFC'; // Sick Full Combo
 			}
 			else if (epics > 0)
 				clear = "EFC";
 			if (ClientPrefs.gradeSet == 'Etterna')
 			{
 				if(sicks == 1)
-					clear = 'WF';
+					clear = 'WF'; // White Flag (EFC missed by 1 sick)
 				else if (goods == 1)
-					clear = 'BF';
+					clear = 'BF'; // Black Flag (SFC missed by 1 good)
 				
 			}
 			
@@ -4739,14 +4745,13 @@ class PlayState extends MusicBeatState
 		else
 		{
 			if (comboBreaks < 10 && songScore >= 0)
-				clear = "SDCB";
+				clear = "SDCB"; // Single Digit Combo Break
 			else if (songScore < 0 || comboBreaks >= 10 && ratingPercent <= 0)
-				clear = "Fail";
+				clear = "Fail"; // Fail
 			else if (ClientPrefs.gradeSet == 'Etterna' && comboBreaks == 1)
-				clear = 'MF';
+				clear = 'MF'; // Miss Flag (Any FC missed by 1 CB)
 		}
-		if(totalPlayed == 0)
-			clear = 'No Play';
+
 		return clear;
 	}
 
