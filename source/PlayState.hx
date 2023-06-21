@@ -4500,27 +4500,28 @@ class PlayState extends MusicBeatState
 		callOnScripts('onStepHit');
 	}
 
-	var lastBeatHit:Int = -1;
+	public function cameraBump()
+	{
+		if(FlxG.camera.zoom < (defaultCamZoom * 1.35))
+			FlxG.camera.zoom += 0.015 * camZoomingMult * ClientPrefs.camZoomP;
+		camHUD.zoom += 0.03 * camZoomingMult * ClientPrefs.camZoomP;
+	}
 
 	public var zoomEveryBeat:Int = 4;
 	public var beatToZoom:Int = 0;
-
-	var lastSection:Int = -1;
+		
+	var lastBeatHit:Int = -1;
 	override function beatHit()
 	{
 		super.beatHit();
-
 		if(lastBeatHit >= curBeat) 
 			return;
-	
 		
 		hud.beatHit(curBeat);
 
 		if (camZooming && ClientPrefs.camZoomP>0 && zoomEveryBeat > 0 && curBeat % zoomEveryBeat == beatToZoom)
 		{
-			if(FlxG.camera.zoom < (defaultCamZoom * 1.35))
-				FlxG.camera.zoom += 0.015 * camZoomingMult * ClientPrefs.camZoomP;
-			camHUD.zoom += 0.03 * camZoomingMult * ClientPrefs.camZoomP;
+			cameraBump();
 		}
 
 		if (gf != null)
@@ -4553,6 +4554,7 @@ class PlayState extends MusicBeatState
 		callOnScripts('onBeatHit');
 	}
 
+	var lastSection:Int = -1;
 	override function sectionHit(){
 		var sectionNumber = curSection;
 		var curSection = SONG.notes[sectionNumber];
