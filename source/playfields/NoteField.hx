@@ -1,5 +1,6 @@
 package playfields;
 
+import flixel.math.FlxMatrix;
 import modchart.Modifier.RenderInfo;
 import flixel.math.FlxPoint;
 import openfl.geom.ColorTransform;
@@ -28,6 +29,8 @@ typedef RenderObject =
 
 class NoteField extends FieldBase
 {
+	var zoom:Float = 0.5;
+
 	var smoothHolds = true; // ClientPrefs.coolHolds;
 
 	public var holdSubdivisions:Int = Std.int(ClientPrefs.holdSubdivs) + 1;
@@ -229,6 +232,7 @@ class NoteField extends FieldBase
 
 	var point:FlxPoint = FlxPoint.get(0, 0);
 	
+	var matrix:FlxMatrix = new FlxMatrix();
 	override function draw()
 	{
 		if (!active || !exists || !visible)
@@ -254,7 +258,7 @@ class NoteField extends FieldBase
 				var graphic:FlxGraphic = object.graphic;
 				var alphas = object.alphas;
 				var glows = object.glows;
-				var vertices = object.vertices;
+				var vertices = object.vertices.copy();
 				var uvData = object.uvData;
 				var indices = new Vector<Int>(vertices.length, false, cast [for (i in 0...vertices.length) i]);
 				var transforms:Array<ColorTransform> = [];
@@ -271,6 +275,40 @@ class NoteField extends FieldBase
 					transfarm.alphaMultiplier = alphas[n] * this.alpha * ClientPrefs.noteOpacity;
 					transforms.push(transfarm);
 				}
+
+ 				var i:Int = 0;
+				var currentVertexPosition:Int = 0;
+
+
+				var centerX = FlxG.width * 0.5;
+				var centerY = FlxG.height * 0.5;
+				var absoluteZoom = Math.abs(zoom);
+				var marginLeft = 0.5 * FlxG.width * (absoluteZoom - 1) / absoluteZoom;
+				var marginTop = 0.5 * FlxG.height * (absoluteZoom - 1) / absoluteZoom;
+				while (i < vertices.length)
+				{
+					matrix.identity();
+					if(zoom < 0){
+						matrix.translate(-centerX, -centerY);
+						matrix.rotateBy180();
+						matrix.translate(centerX, centerY);
+					}
+					var xIdx = currentVertexPosition++;
+					var yIdx = currentVertexPosition++;
+					point.set(vertices[xIdx], vertices[yIdx]);
+					point.transform(matrix);
+
+					point.x -= marginLeft;
+					point.y -= marginTop;
+					point.x *= absoluteZoom;
+					point.y *= absoluteZoom;
+
+					vertices[xIdx] = point.x;
+					vertices[yIdx] = point.y;
+
+					i += 2;
+				}
+
 
 
 				for (camera in cameras)
@@ -552,6 +590,9 @@ class NoteField extends FieldBase
 			vert = modManager.modifyVertex(curDecBeat, vert, idx, sprite, pos, modNumber, sprite.noteData);
 			vert.x *= scalePoint.x;
 			vert.y *= scalePoint.y;
+
+/* 			vert.x *= zoom;
+			vert.y *= zoom; */
 			quad[idx] = vert;
 		}
 

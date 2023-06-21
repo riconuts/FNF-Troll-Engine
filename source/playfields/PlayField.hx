@@ -466,10 +466,10 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 			for(i in 0...4){
 				for (daNote in getNotes(i, (note:Note) -> !note.ignoreNote && !note.hitCausesMiss)){
 					if (!daNote.isSustainNote){
-						var hitDiff = daNote.strumTime - Conductor.songPosition;
-						if (isPlayer && (hitDiff + ClientPrefs.ratingOffset) <= (5 * (Wife3.timeScale > 1?1:Wife3.timeScale)) || hitDiff <= 0){
+						var hitDiff = Conductor.songPosition - daNote.strumTime;
+						if (isPlayer && (hitDiff + ClientPrefs.ratingOffset) >= (-5 * (Wife3.timeScale > 1?1:Wife3.timeScale)) || hitDiff >= 0){
 							daNote.hitResult.judgment = judgeManager.useEpics ? TIER5 : TIER4;
-							daNote.hitResult.hitDiff = (hitDiff < -5) ? -5 : hitDiff; 
+							daNote.hitResult.hitDiff = (hitDiff > -5) ? -5 : hitDiff; 
 							if (noteHitCallback!=null)noteHitCallback(daNote, this);
 						}
 					}
