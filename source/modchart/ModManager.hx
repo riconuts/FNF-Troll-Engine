@@ -260,24 +260,18 @@ class ModManager {
 			if (!obj.active)
 				continue;
             if((obj is Note)){
-				var o:Note = cast obj;
-				if (mod.ignoreUpdateNote())
-					continue;
-				mod.updateNote(beat, o, player);
+				if (mod.ignoreUpdateNote()) continue;
+				mod.updateNote(beat, cast obj, player);
 			}
             else if((obj is StrumNote)){
-				var o:StrumNote = cast obj;
-				if (mod.ignoreUpdateReceptor())continue;
-				mod.updateReceptor(beat, o, player);
+				if (mod.ignoreUpdateReceptor()) continue;
+				mod.updateReceptor(beat, cast obj, player);
 			}
         }
-		if((obj is Note))obj.updateHitbox();
 		
-		if (!(obj is Note)){
-			obj.centerOrigin();
-			obj.centerOffsets();
-		}
-		if((obj is Note)){
+		if ((obj is Note)){
+			obj.updateHitbox();
+
 			var cum:Note = cast obj;
 			if(!cum.isSustainNote){
 				obj.centerOrigin();
@@ -285,6 +279,9 @@ class ModManager {
 			}
 			cum.offset.x += cum.typeOffsetX;
 			cum.offset.y += cum.typeOffsetY;
+		}else{
+			obj.centerOrigin();
+			obj.centerOffsets();
 		}
     }
 
@@ -333,11 +330,10 @@ class ModManager {
 		for (name in getActiveMods(player)){
 			if(exclusions.contains(name))continue;
 			var mod:Modifier = notemodRegister.get(name);
-			if(mod==null)continue;
-			if (!obj.active)return vert;
+			if(mod==null) continue;
+			if (!obj.active) return vert;
 			if (mod.isRenderMod())
 				vert = mod.modifyVert(beat, vert, idx, obj, pos, player, data);
-			
 		}
 		return vert;
 	}
