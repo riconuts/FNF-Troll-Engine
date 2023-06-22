@@ -177,6 +177,7 @@ class Note extends NoteObject
 	public var alphaMod2:Float = 1; // TODO: unhardcode this shit lmao
 	public var typeOffsetX:Float = 0; // used to offset notes, mainly for note types. use in place of offset.x and offset.y when offsetting notetypes
 	public var typeOffsetY:Float = 0;
+	public var typeOffsetAngle:Float = 0;
 	public var multSpeed(default, set):Float = 1;
 	// useless shit mostly
 	public var offsetAngle:Float = 0;
