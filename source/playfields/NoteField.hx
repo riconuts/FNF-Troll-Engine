@@ -595,6 +595,10 @@ class NoteField extends FieldBase
 
 /* 			vert.x *= zoom;
 			vert.y *= zoom; */
+			if (sprite.flipX)
+				vert.x *= -1;
+			if (sprite.flipY)
+				vert.y *= -1;
 			quad[idx] = vert;
 		}
 
