@@ -5,6 +5,7 @@ import modchart.*;
 import flixel.math.FlxPoint;
 import flixel.math.FlxMath;
 import math.*;
+import playfields.NoteField;
 
 class BeatModifier extends NoteModifier {
     override function getName()return 'beat';
@@ -60,7 +61,7 @@ class BeatModifier extends NoteModifier {
 
     }
 
-    override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite){
+     override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField){
 		if (beatFactors[player] == null){
 			updateBeat(0, beat, player, getSubmodValue('beatOffset', player), getSubmodValue('beatMult', player));
 			updateBeat(1, beat, player, getSubmodValue('beatYOffset', player), getSubmodValue('beatYMult', player));

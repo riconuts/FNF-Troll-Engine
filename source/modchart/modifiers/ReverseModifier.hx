@@ -7,6 +7,7 @@ import math.*;
 import flixel.FlxSprite;
 import flixel.FlxG;
 import flixel.math.FlxMath;
+import playfields.NoteField;
 
 using StringTools;
 
@@ -55,13 +56,14 @@ class ReverseModifier extends NoteModifier {
 	override function ignoreUpdateNote()
 		return false;
 
-	override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
+	 override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
 	{
         var perc = getReverseValue(data, player);
 		var shift = CoolUtil.scale(perc, 0, 1, 50, FlxG.height - 150);
 		var centerPercent = getSubmodValue("centered", player);
 
-		shift = CoolUtil.scale(centerPercent, 0, 1, shift, (FlxG.height/2) - 56);
+		var zoom = field.zoom;
+		shift = CoolUtil.scale(centerPercent, 0, 1, shift, ((FlxG.height/2) - 56));
 		var upscrollY =  (Note.swagWidth / 2) + shift + visualDiff;
 		var downscrollY = (Note.swagWidth / 2) + shift - visualDiff;
 		pos.y = FlxMath.lerp(upscrollY, downscrollY, perc);

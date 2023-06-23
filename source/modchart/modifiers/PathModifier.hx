@@ -1,8 +1,10 @@
 package modchart.modifiers;
 
+import playfields.NoteField;
 import flixel.math.FlxMath;
 import flixel.FlxSprite;
 import math.Vector3;
+import playfields.NoteField;
 
 class PathModifier extends NoteModifier
 {
@@ -38,7 +40,7 @@ class PathModifier extends NoteModifier
 		}
 	}
 
-	override function getPos(diff:Float, tDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
+	override function getPos(diff:Float, tDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
 	{
         if(getSubmodValue("zigzag", player) != 0){
 			var offset = getSubmodValue("zigzagOffset", player);

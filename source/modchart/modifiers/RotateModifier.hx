@@ -8,6 +8,7 @@ import flixel.math.FlxMath;
 import flixel.FlxG;
 import math.Vector3;
 import math.*;
+import playfields.NoteField;
 
 class RotateModifier extends NoteModifier { // this'll be rotateX in ModManager
 	override function getName()
@@ -29,7 +30,7 @@ class RotateModifier extends NoteModifier { // this'll be rotateX in ModManager
     }
 
 
-	override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite){
+	 override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField){
         var origin:Vector3 = new Vector3(modMgr.getBaseX(data, player), FlxG.height* 0.5);
         if(daOrigin!=null)origin=daOrigin;
 

@@ -2,6 +2,7 @@
 
 package modchart;
 
+import playfields.NoteField;
 import flixel.math.FlxPoint;
 import flixel.FlxSprite;
 import math.Vector3;
@@ -9,7 +10,7 @@ import math.Vector3;
 
 enum ModifierType {
     NOTE_MOD; // used when the mod moves notes
-    MISC_MOD; // used for anything else
+    MISC_MOD; // used for most things else
 }
 
 @:enum
@@ -34,6 +35,9 @@ class Modifier {
 	public var submods:Map<String, Modifier> = [];
 	public var parent:Modifier; // for submods
 
+	public function affectsField()
+		return false;
+	
     public function getModType()
 		return MISC_MOD; // if this is NOTE_MOD then this will be called on notes & receptors
 	
@@ -76,13 +80,13 @@ class Modifier {
 		else
 			percents[player] = value;
 	}
+
 	public function setPercent(percent:Float, player:Int = -1)
 		setValue(percent * 0.01, player);
 	
 
 	public function getSubmods():Array<String>
 		return [];
-	
 
 	public function getSubmodPercent(modName:String, player:Int)
 	{
@@ -110,11 +114,9 @@ class Modifier {
 	public inline function getOtherPercent(modName:String, player:Int)
 		return modMgr.getPercent(modName, player);
 	
-
 	public inline function getOtherValue(modName:String, player:Int)
 		return modMgr.getValue(modName, player);
 	
-
 	public inline function setOtherPercent(modName:String, endPercent:Float, player:Int)
 		return modMgr.setPercent(modName, endPercent, player);
 
@@ -127,24 +129,26 @@ class Modifier {
 		this.parent = parent;
 		for (submod in getSubmods())
 			submods.set(submod, new SubModifier(submod, modMgr, this));
-		
 	}
 
+	// Available whenever shouldUpdate() == true
+	public function update(elapsed:Float, beat:Float){}
+
+	// used when affectsField() == true and getModType() == MISC_MOD
+	public function getFieldZoom(zoom:Float, beat:Float, songPos:Float, player:Int, field:NoteField){return zoom;}
+
+	// Note-based overrides (only use if getModType() == NOTE_MOD)
 	// time is the note/receptor strumtime
 	// diff is the 'visual difference' aka the strumTime - currentTime w/ math for scrollspeed, etc
-    // beat is the curBeat, but with decimals
-    // pos is the current position of the note/receptor
-    // player is 0 for bf, 1 for dad
-    // data is the column/direction/notedata
-    // note/receptor is self-explanatory
-
+	// beat is the curBeat, but with decimals
+	// pos is the current position of the note/receptor
+	// player is 0 for bf, 1 for dad
+	// data is the column/direction/notedata
+	// note/receptor is self-explanatory
     public function updateReceptor(beat:Float, receptor:StrumNote, player:Int){}
 	public function updateNote(beat:Float, note:Note, player:Int){}
-	public function getPos(diff:Float, tDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite):Vector3{return pos;}
+	public function getPos(diff:Float, tDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField):Vector3{return pos;}
 	public function modifyVert(beat:Float, vert:Vector3, idx:Int, obj:FlxSprite, pos:Vector3, player:Int, data:Int):Vector3{return vert;}
-/* 	public function getAlpha(beat:Float, alpha:Float, obj:FlxSprite, player:Int, data:Int):Float{return alpha;}
-	public function getScale(beat:Float, scale:FlxPoint, obj:FlxSprite, player:Int, data:Int):FlxPoint{return scale;} */
 	public function getExtraInfo(diff:Float, tDiff:Float, beat:Float, info:RenderInfo, obj:FlxSprite, player:Int, data:Int):RenderInfo{return info;}
-    public function update(elapsed:Float, beat:Float){}
-	public function isRenderMod():Bool{return false;}
+	public function isRenderMod():Bool{return false;} // Override and return true if your modifier uses modifyVert or getExtraInfo
 }

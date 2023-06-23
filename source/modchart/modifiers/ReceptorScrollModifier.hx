@@ -6,6 +6,7 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxMath;
 import flixel.FlxG;
 import math.*;
+import playfields.NoteField;
 
 
 // TODO: rewrite this
@@ -18,7 +19,7 @@ class ReceptorScrollModifier extends NoteModifier {
 	override function getName()
 		return 'receptorScroll';
 
-  override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
+   override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
   {
     var diff = timeDiff;
     var sPos = Conductor.songPosition;

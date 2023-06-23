@@ -11,6 +11,7 @@ import math.Vector3;
 import modchart.Modifier.ModifierType;
 import modchart.modifiers.*;
 import modchart.events.*;
+import playfields.NoteField;
 
 // Weird amalgamation of Schmovin' modifier system, Andromeda modifier system and my own new shit -neb
 class ModManager {
@@ -29,9 +30,9 @@ class ModManager {
 			TransformModifier, 
 			// InfinitePathModifier,  // broken
 			PathModifier,
-			AccelModifier, 
-			XModifier,	
-			PerspectiveModifier
+			AccelModifier,
+			PerspectiveModifier,
+			ZoomModifier
 		];
 		for (mod in quickRegs)
 			quickRegister(Type.createInstance(mod, [this]));
@@ -44,9 +45,11 @@ class ModManager {
 		quickRegister(new SubModifier("flashR", this));
 		quickRegister(new SubModifier("flashG", this));
 		quickRegister(new SubModifier("flashB", this));
-
-		for (i in 0...4)
+		quickRegister(new SubModifier("xmod", this));
+		for (i in 0...4){
+			quickRegister(new SubModifier("xmod" + i, this));
 			quickRegister(new SubModifier("noteSpawnTime" + i, this));
+		}
 
 		for (pN => mods in activeMods)
 			setDefaultValues(pN);
@@ -293,7 +296,7 @@ class ModManager {
 		return (0.45 * (diff) * songSpeed);
 	}
 
-	public function getPos(diff:Float, tDiff:Float, beat:Float, data:Int, player:Int, obj:FlxSprite, ?exclusions:Array<String>, ?pos:Vector3):Vector3
+	public function getPos(diff:Float, tDiff:Float, beat:Float, data:Int, player:Int, obj:FlxSprite, field:NoteField, ?exclusions:Array<String>, ?pos:Vector3):Vector3
 	{
 		if(exclusions==null)exclusions=[]; // since [] cant be a default value for.. some reason?? "its not constant!!" kys haxe
 		if (pos == null)
@@ -317,11 +320,27 @@ class ModManager {
 			if (mod==null)continue;
 			if (!obj.alive)continue;
 			if (mod.ignorePos())continue;
-			pos = mod.getPos(diff, tDiff, beat, pos, data, player, obj);
+			pos = mod.getPos(diff, tDiff, beat, pos, data, player, obj, field);
         } 
 
 		return pos;
     }
+
+	public function getFieldZoom(zoom:Float, beat:Float, songPos:Float, player:Int, field:NoteField, ?exclusions:Array<String>):Float
+	{
+		if (exclusions == null)
+			exclusions = [];
+
+		for (name in getActiveMods(player))
+		{
+			if (exclusions.contains(name))continue;
+			var mod:Modifier = miscmodRegister.get(name);
+			if (mod == null)continue;
+			if (mod.affectsField())zoom = mod.getFieldZoom(zoom, beat, songPos, player, field);
+		}
+
+		return zoom;
+	}
 
 	public function modifyVertex(beat:Float, vert:Vector3, idx:Int, obj:FlxSprite, pos:Vector3, player:Int, data:Int, ?exclusions:Array<String>):Vector3
 	{
