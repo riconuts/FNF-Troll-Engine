@@ -1,2 +1,0 @@
-Forces a lightning strike on 'spooky' background
-Value 1: Play Sound (true or false, defaults to false)
