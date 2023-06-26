@@ -908,7 +908,7 @@ class PlayState extends MusicBeatState
 			comboNumGroup.add(RatingSprite.newNumber()).kill();
 		
 		timingTxt = new FlxText();
-		timingTxt.setFormat(Paths.font("vcr.ttf"), 28, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		timingTxt.setFormat(Paths.font("calibri.ttf"), 28, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		timingTxt.cameras = [camHUD];
 		timingTxt.scrollFactor.set();
 		timingTxt.borderSize = 1.25;
@@ -4721,19 +4721,19 @@ class PlayState extends MusicBeatState
 
 			if (goods > 0){
 				if(goods < 10 && goods > 0)
-					clear = 'SDG'; // Single Digit Goods
+					clear = 'SDC'; // Single Digit Goods
 				else
-					clear = 'GFC'; // Good Full Combo
+					clear = 'CFC'; // Good Full Combo
 			}
 			else if (sicks > 0)
 			{
 				if (sicks < 10 && sicks > 0)
-					clear = 'SDS'; // Single Digit Sicks
+					clear = 'SDA'; // Single Digit Sicks
 				else
-					clear = 'SFC'; // Sick Full Combo
+					clear = 'AFC'; // Sick Full Combo
 			}
 			else if (epics > 0)
-				clear = "EFC";
+				clear = "KFC";
 			if (ClientPrefs.gradeSet == 'Etterna')
 			{
 				if(sicks == 1)

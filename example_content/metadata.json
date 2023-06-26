@@ -1,6 +1,20 @@
 {
-	"name": "Example",
-	"category": "main",
-	"unlockCondition": true,
-	"songs": []
+	"chapters": [
+		{
+			"name": "Example",
+			"category": "main",
+			"unlockCondition": true,
+			"songs": ["Test"]
+		}
+	],
+	"freeplaySongs": [
+		{
+			"name": "Test",
+			"category": "main"
+		}
+	],
+	"titleStages": [
+		"example_stage"
+	]
+
 }

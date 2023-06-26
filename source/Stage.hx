@@ -246,7 +246,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 	/**
 		Return an array with the names in the stageList file(s).
 	**/ 
-	public static function getStageList(modsOnly = false):Array<String>{
+	public static function getTitleStages(modsOnly = false):Array<String>{
 	
 		var daList:Array<String> = [];
 		#if MODS_ALLOWED

@@ -196,6 +196,8 @@ class FreeplayState extends MusicBeatState
 			var defaultCategory:String = '';
 			if (rawJson != null && rawJson.length > 0)
 			{
+
+				// TODO: make it add the chapter songs automatically, too
 				var daJson:Dynamic = Json.parse(rawJson);
 				if (Reflect.field(daJson, "freeplayCategories") != null || Reflect.field(daJson, "freeplaySongs") != null)
 				{

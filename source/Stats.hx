@@ -143,19 +143,19 @@ class Stats {
 			if (goods > 0)
 			{
 				if (goods < 10 && goods > 0)
-					clear = 'SDG'; // Single Digit Goods
+					clear = 'SDC'; // Single Digit Goods
 				else
-					clear = 'GFC'; // Good Full Combo
+					clear = 'CFC'; // Good Full Combo
 			}
 			else if (sicks > 0)
 			{
 				if (sicks < 10 && sicks > 0)
-					clear = 'SDS'; // Single Digit Sicks
+					clear = 'SDA'; // Single Digit Sicks
 				else
-					clear = 'SFC'; // Sick Full Combo
+					clear = 'AFC'; // Sick Full Combo
 			}
 			else if (epics > 0)
-				clear = "EFC";
+				clear = "KFC";
 			if (useFlags)
 			{
 				if (sicks == 1)
@@ -176,6 +176,7 @@ class Stats {
 
 		return clear;
 	}
+
 
 
     public function updateVariables()

@@ -13,31 +13,31 @@ import flixel.group.FlxSpriteGroup;
 class BaseHUD extends FlxSpriteGroup {
 	// just some ref vars
 	static var fullDisplays:Map<String, String> = [
-		"epic" => "Epics",
-		"sick" => "Sicks",
-		"good" => "Goods",
-		"bad" => "Bads",
-		"shit" => "Shits",
-		"miss" => "Misses",
+		"epic" => "Killers",
+		"sick" => "Awesomes",
+		"good" => "Cools",
+		"bad" => "Gays",
+		"shit" => "Retards",
+		"miss" => "Fails",
 		"cb" => "Combo Breaks"
 	];
 
 	static var shortenedDisplays:Map<String, String> = [
-		"epic" => "EP",
-		"sick" => "SK",
-		"good" => "GD",
-		"bad" => "BD",
-		"shit" => "ST",
-		"miss" => "MS",
+		"epic" => "KL",
+		"sick" => "AW",
+		"good" => "CL",
+		"bad" => "GY",
+		"shit" => "RT",
+		"miss" => "L",
 		"cb" => "CB"
 	];
-
+	
 	public var displayNames:Map<String, String> = ClientPrefs.judgeCounter == 'Shortened' ? shortenedDisplays : fullDisplays;
 
 	public var judgeColours:Map<String, FlxColor> = [
-		"epic" => 0xFFB611E9,
-		"sick" => 0xE70A7AFA,
-		"good" => 0xFF4AB91D,
+		"epic" => 0xFFE367E5,
+		"sick" => 0xFF00A2E8,
+		"good" => 0xFFB5E61D,
 		"bad" => 0xFFC3C3C3,
 		"shit" => 0xFF7F7F7F,
 		"miss" => 0xFF7F2626,

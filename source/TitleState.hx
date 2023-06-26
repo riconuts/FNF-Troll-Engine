@@ -65,13 +65,13 @@ class TitleState extends MusicBeatState
 		var stages:Array<Array<String>> = []; // [stage name, mod directory]
 		
 		Paths.currentModDirectory = "";
-		for (stage in Stage.getStageList())
+		for (stage in Stage.getTitleStages())
 			stages.push([stage, ""]);
 
 		#if MODS_ALLOWED
 		for (mod in Paths.getModDirectories()){
 			Paths.currentModDirectory = mod;
-			for (stage in Stage.getStageList(true))
+			for (stage in Stage.getTitleStages(true))
 				stages.push([stage, mod]);
 		}
 		#end
