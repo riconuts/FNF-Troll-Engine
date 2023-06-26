@@ -2,6 +2,7 @@
 
 package modchart;
 
+import playfields.NoteField;
 import scripts.FunkinHScript;
 import modchart.Modifier;
 import math.Vector3;
@@ -138,8 +139,8 @@ class HScriptModifier extends Modifier
 	override public function updateNote(beat:Float, note:Note, player:Int)
 		return script.exists("updateNote") ? script.executeFunc("updateNote", [beat, note, player]) : super.updateNote(beat, note, player);
 
-	override public function getPos(diff:Float, tDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite):Vector3 
-		return script.exists("getPos") ? script.executeFunc("getPos", [diff, tDiff, beat, pos, data, player, obj]) : super.getPos(diff, tDiff, beat, pos, data, player, obj);
+	override public function getPos(diff:Float, tDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField):Vector3 
+		return script.exists("getPos") ? script.executeFunc("getPos", [diff, tDiff, beat, pos, data, player, obj, field]) : super.getPos(diff, tDiff, beat, pos, data, player, obj, field);
 
 	override public function modifyVert(beat:Float, vert:Vector3, idx:Int, obj:FlxSprite, pos:Vector3, player:Int, data:Int):Vector3 
 		return script.exists("modifyVert") ? script.executeFunc("modifyVert", [beat, vert, idx, obj, pos, player, data]) : super.modifyVert(beat, vert, idx, obj, pos, player, data);

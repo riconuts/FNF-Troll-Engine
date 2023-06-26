@@ -6,6 +6,7 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxMath;
 import flixel.FlxG;
 import math.*;
+import playfields.NoteField;
 
 class DrunkModifier extends NoteModifier {
     override function getName()return 'drunk';
@@ -48,7 +49,7 @@ class DrunkModifier extends NoteModifier {
     }
 
 
-	override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
+	 override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
 	{
         var time = (Conductor.songPosition/1000);
 		pos.x += 

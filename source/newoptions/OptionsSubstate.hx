@@ -29,11 +29,11 @@ class OptionsSubstate extends MusicBeatSubstate
 		"etternaHUD",
 		"judgeCounter",
 		"hudPosition",
-		"gradeSet",
 		"shaders",
 		"lowQuality",
 		"ruin",
 		"globalAntialiasing",
+		"midScroll"
 	];
 
 	public static var requiresRestart:Array<String> = [

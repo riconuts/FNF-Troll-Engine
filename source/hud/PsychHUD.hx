@@ -1,5 +1,6 @@
 package hud;
 
+import PlayState.FNFHealthBar;
 import JudgmentManager.JudgmentData;
 import flixel.tweens.FlxEase;
 import flixel.util.FlxStringUtil;
@@ -18,7 +19,6 @@ class PsychHUD extends BaseHUD {
 	public var hitbar:Hitbar;
 	public var timeBar:FlxBar;
 	public var timeTxt:FlxText;
-	public var botplaySine:Float = 0;
 
 	private var timeBarBG:AttachedSprite;
 
@@ -29,6 +29,12 @@ class PsychHUD extends BaseHUD {
 	override public function new(iP1:String, iP2:String, songName:String)
 	{
 		super(iP1, iP2, songName);
+
+		add(healthBarBG);
+		add(healthBar);
+		add(iconP1);
+		add(iconP2);
+		
 		songHighscore = Highscore.getScore(songName);
 
 		scoreTxt = new FlxText(0, healthBarBG.y + 48, FlxG.width, "", 20);

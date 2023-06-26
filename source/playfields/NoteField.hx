@@ -1,5 +1,6 @@
 package playfields;
 
+import flixel.math.FlxMatrix;
 import modchart.Modifier.RenderInfo;
 import flixel.math.FlxPoint;
 import openfl.geom.ColorTransform;
@@ -40,7 +41,7 @@ class NoteField extends FieldBase
 		this.modManager = modManager;
 	}
 
-	/*
+	/**
 	 * The Draw Distance Modifier
 	 * Multiplied by the draw distance to determine at what time a note will start being drawn
 	 * Set to ClientPrefs.drawDistanceModifier by default, which is an option to let you change the draw distance.
@@ -48,7 +49,7 @@ class NoteField extends FieldBase
 	 */
 	public var drawDistMod:Float = ClientPrefs.drawDistanceModifier;
 
-	/*
+	/**
 	 * The ID used to determine how you apply modifiers to the notes
 	 * For example, you can have multiple notefields sharing 1 set of mods by giving them all the same modNumber
 	 */
@@ -57,19 +58,13 @@ class NoteField extends FieldBase
 		modManager.getActiveMods(d); // generate an activemods thing if needed
 		return modNumber = d;
 	}
-	/*
-	 * The PlayField used to determine the notes to render
-	 * Required!
-	 */
-	public var field:PlayField;
-
-	/*
+	/**
 	 * The ModManager to be used to get modifier positions, etc
 	 * Required!
 	 */
 	public var modManager:ModManager;
 
-	/*
+	/**
 	 * The song's scroll speed. Can be messed with to give different fields different speeds, etc.
 	 */
 	public var songSpeed:Float = 1.6;
@@ -77,21 +72,32 @@ class NoteField extends FieldBase
 	var curDecStep:Float = 0;
 	var curDecBeat:Float = 0;
 
-	/*
+	/**
 	 * The position of every receptor for a given frame.
 	 */
 	public var strumPositions:Array<Vector3> = [];
     
-    /*
+	/**
 	 * Used by preDraw to store RenderObjects to be drawn
     */
 	@:allow(proxies.ProxyField)
-    var drawQueue:Array<RenderObject> = [];
+    private var drawQueue:Array<RenderObject> = [];
+	/**
+	 * How zoomed this NoteField is without taking modifiers into account. 2 is 2x zoomed, 0.5 is half zoomed.
+	 * If you want to modify a NoteField's zoom in code, you should use this!
+	 */
+	public var baseZoom:Float = 1;
+    /**
+     * How zoomed this NoteField is, taking modifiers into account. 2 is 2x zoomed, 0.5 is half zoomed.
+	 * NOTE: This should not be set directly, as this is set by modifiers!
+     */
+	public var zoom:Float = 1;
 
 	// does all the drawing logic, best not to touch unless you know what youre doing
     override function preDraw()
     {
 		drawQueue = [];
+		if(field==null)return;
         if(!active || !exists)return;
 		if ((FlxG.state is MusicBeatState))
 		{
@@ -107,6 +113,7 @@ class NoteField extends FieldBase
 		}
 		curDecBeat = curDecStep / 4;
 
+		zoom = modManager.getFieldZoom(baseZoom, curDecBeat, (Conductor.songPosition - ClientPrefs.noteOffset), modNumber, this);
 		var notePos:Map<Note, Vector3> = [];
 		var taps:Array<Note> = [];
 		var holds:Array<Note> = [];
@@ -133,7 +140,7 @@ class NoteField extends FieldBase
 				}
 				if (!daNote.isSustainNote)
 				{
-					var pos = modManager.getPos(visPos, diff, curDecBeat, daNote.noteData, modNumber, daNote, ['perspectiveDONTUSE'],
+					var pos = modManager.getPos(visPos, diff, curDecBeat, daNote.noteData, modNumber, daNote, this, ['perspectiveDONTUSE'],
 						daNote.vec3Cache); // perspectiveDONTUSE is excluded because its code is done in the modifyVert function
 					notePos.set(daNote, pos);
 					taps.push(daNote);
@@ -152,7 +159,7 @@ class NoteField extends FieldBase
 		{
 			if (!obj.alive || !obj.visible)
 				continue;
-			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, ['perspectiveDONTUSE'], obj.vec3Cache);
+			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, this, ['perspectiveDONTUSE'], obj.vec3Cache);
 			strumPositions[obj.noteData] = pos;
 			var object = drawNote(obj, pos);
 			if (object == null)
@@ -194,7 +201,7 @@ class NoteField extends FieldBase
 		{
 			if (!obj.alive || !obj.visible)
 				continue;
-			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, ['perspectiveDONTUSE']);
+			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, this, ['perspectiveDONTUSE']);
 			var object = drawNote(obj, pos);
 			if (object == null)
 				continue;
@@ -210,7 +217,7 @@ class NoteField extends FieldBase
 				continue;
 			if (!obj.alive || !obj.visible)
 				continue;
-			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, ['perspectiveDONTUSE']);
+			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, this, ['perspectiveDONTUSE']);
 			var object = drawNote(obj, pos);
 			if (object == null)
 				continue;
@@ -220,7 +227,7 @@ class NoteField extends FieldBase
 		}
 
 		if ((FlxG.state is PlayState))
-			PlayState.instance.callOnHScripts("playfieldPreDraw", [this],
+			PlayState.instance.callOnHScripts("notefieldPreDraw", [this],
 				["drawQueue" => drawQueue, "lookupMap" => lookupMap]); // lets you do custom rendering in scripts, if needed
 		// one example would be reimplementing Die Batsards' original bullet mechanic
 		// if you need an example on how this all works just look at the tap note drawing portion
@@ -230,10 +237,39 @@ class NoteField extends FieldBase
 			return FlxSort.byValues(FlxSort.ASCENDING, Obj1.zIndex, Obj2.zIndex);
 		});
 
+		if(zoom != 1){
+			for(object in drawQueue){
+				var vertices = object.vertices;
+				var i:Int = 0;
+				var currentVertexPosition:Int = 0;
+
+				var centerX = FlxG.width * 0.5;
+				var centerY = FlxG.height * 0.5;
+				while (i < vertices.length)
+				{
+					matrix.identity();
+					matrix.translate(-centerX, -centerY);
+					matrix.scale(zoom, zoom);
+					matrix.translate(centerX, centerY);
+					var xIdx = currentVertexPosition++;
+					var yIdx = currentVertexPosition++;
+					point.set(vertices[xIdx], vertices[yIdx]);
+					point.transform(matrix);
+
+					vertices[xIdx] = point.x;
+					vertices[yIdx] = point.y;
+
+					i += 2;
+				}
+				object.vertices = vertices; // i dont think this is needed but its like, JUUUSST incase
+			}
+		}
+
     }
 
 	var point:FlxPoint = FlxPoint.get(0, 0);
 	
+	var matrix:FlxMatrix = new FlxMatrix();
 	override function draw()
 	{
 		if (!active || !exists || !visible)
@@ -241,7 +277,7 @@ class NoteField extends FieldBase
 		super.draw();
 
 		if ((FlxG.state is PlayState))
-			PlayState.instance.callOnHScripts("playfieldDraw", [this],
+			PlayState.instance.callOnHScripts("notefieldDraw", [this],
 				["drawQueue" => drawQueue]); // lets you do custom rendering in scripts, if needed
 
 		var glowR = modManager.getValue("flashR", modNumber);
@@ -277,7 +313,6 @@ class NoteField extends FieldBase
 					transforms.push(transfarm);
 				}
 
-
 				for (camera in cameras)
 				{
 					if (camera != null && camera.canvas != null && camera.canvas.graphics != null)
@@ -307,7 +342,7 @@ class NoteField extends FieldBase
 		if (wid == null)
 			wid = hold.frameWidth * hold.scale.x;
 
-		var p1 = modManager.getPos(-(vDiff) * speed, diff, curDecBeat, hold.noteData, modNumber, hold, []);
+		var p1 = modManager.getPos(-(vDiff) * speed, diff, curDecBeat, hold.noteData, modNumber, hold, this, []);
 		var z:Float = p1.z;
 		p1.z = 0;
 		var quad = [new Vector3((-wid / 2)), new Vector3((wid / 2))];
@@ -323,7 +358,7 @@ class NoteField extends FieldBase
 			return [p1.add(quad[0]), p1.add(quad[1]), p1];
 		}
 
-		var p2 = modManager.getPos(-(vDiff + 1) * speed, diff + 1, curDecBeat, hold.noteData, modNumber, hold, []);
+		var p2 = modManager.getPos(-(vDiff + 1) * speed, diff + 1, curDecBeat, hold.noteData, modNumber, hold, this, []);
 		p2.z = 0;
 		var unit = p2.subtract(p1);
 		unit.normalize();
@@ -373,7 +408,7 @@ class NoteField extends FieldBase
 				return tWid;
 		})();
 
-		var basePos = modManager.getPos(0, 0, curDecBeat, hold.noteData, modNumber, hold, ['perspectiveDONTUSE']);
+		var basePos = modManager.getPos(0, 0, curDecBeat, hold.noteData, modNumber, hold, this, ['perspectiveDONTUSE']);
 
 		var strumDiff = (Conductor.songPosition - hold.strumTime);
 		var visualDiff = (Conductor.visualPosition - hold.visualTime); // TODO: get the start and end visualDiff and interpolate so that changing speeds mid-hold will look better
@@ -557,6 +592,13 @@ class NoteField extends FieldBase
 			vert = modManager.modifyVertex(curDecBeat, vert, idx, sprite, pos, modNumber, sprite.noteData);
 			vert.x *= scalePoint.x;
 			vert.y *= scalePoint.y;
+
+/* 			vert.x *= zoom;
+			vert.y *= zoom; */
+			if (sprite.flipX)
+				vert.x *= -1;
+			if (sprite.flipY)
+				vert.y *= -1;
 			quad[idx] = vert;
 		}
 

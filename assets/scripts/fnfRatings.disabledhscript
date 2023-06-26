@@ -1,0 +1,104 @@
+// this was mega annoying lole
+
+var StringMap = getClass("haxe.ds.StringMap");
+
+// these are never used but whatevr
+var nameMap = new StringMap();
+nameMap.set("Killer", "Epic");
+nameMap.set("Awesome", "Sick");
+nameMap.set("Cool", "Good");
+nameMap.set("Gay", "Bad");
+nameMap.set("Retard", "Shit");
+nameMap.set("Fail", "Miss");
+
+for (judge in game.judgeManager.judgmentData){
+	if (nameMap.exists(judge.displayName))
+		judge.displayName = nameMap.get(judge.displayName);
+}
+
+//
+var BaseHUD = getClass("hud.BaseHUD");
+var ogShortenedDisplays = BaseHUD.shortenedDisplays;
+var ogFullDisplays = BaseHUD.fullDisplays;
+
+var fullDisplays = new StringMap();
+fullDisplays.set("epic", "Epics");
+fullDisplays.set("sick", "Sicks");
+fullDisplays.set("good", "Goods");
+fullDisplays.set("bad", "Bads");
+fullDisplays.set("shit", "Shits");
+fullDisplays.set("miss", "Misses");
+fullDisplays.set("cb", "Combo Breaks");
+
+var shortenedDisplays = new StringMap();
+shortenedDisplays.set("epic", "EP");
+shortenedDisplays.set("sick", "SK");
+shortenedDisplays.set("good", "GD");
+shortenedDisplays.set("bad", "BD");
+shortenedDisplays.set("shit", "ST");
+shortenedDisplays.set("miss", "M");
+shortenedDisplays.set("cb", "CB");
+
+BaseHUD.fullDisplays = fullDisplays;
+BaseHUD.shortenedDisplays = shortenedDisplays;
+
+// regen hud
+game.hud.destroy();
+game.hud = null;
+var DaHUD = (ClientPrefs.etternaHUD == 'Advanced') ? getClass("hud.AdvancedHUD") : getClass("hud.PsychHUD");
+var hud = new DaHUD(game.boyfriend.healthIcon, game.dad.healthIcon, game.songName);
+
+// judgeColours isnt static
+// the combo numbers and timing text also use these colors
+
+/* idfk */
+hud.judgeColours.set("epic", 0xFFBA78FF);
+hud.judgeColours.set("sick", 0xFF97FFFF);
+hud.judgeColours.set("good", 0xFF97FF9F);
+/*
+hud.judgeColours.set("bad", 0xFF);
+hud.judgeColours.set("shit", 0xFF);
+hud.judgeColours.set("miss", 0xFF);
+hud.judgeColours.set("cb", 0xFF);
+*/
+
+var theFont = Paths.font("vcr.ttf");
+function setFont(txt){
+	txt.font = theFont;
+	txt.size*= 0.85;
+}
+
+for (judgment in hud.displayedJudges){
+	var nameTxt = hud.judgeNames.get(judgment);
+	setFont(nameTxt);
+	nameTxt.color = 0xFFFFFFFF;//hud.judgeColours.get(judgment);
+	
+	setFont(hud.judgeTexts.get(judgment));
+}
+if (ClientPrefs.etternaHUD == "Advanced"){
+	function setFont(txt){
+		txt.font = theFont;
+		txt.size*= 0.75;
+	}
+
+	setFont(hud.pcTxt);
+	setFont(hud.npsTxt);
+	setFont(hud.gradeTxt);
+	setFont(hud.fcTxt);
+	setFont(hud.ratingTxt);
+	setFont(hud.scoreTxt);
+}else{
+	hud.scoreTxt.font = theFont;
+}
+hud.timeTxt.font = theFont;
+
+
+game.hud = hud;
+game.healthBar = hud.healthBar;
+game.healthBarBG = hud.healthBar.healthBarBG;
+game.iconP1 = hud.healthBar.iconP1;
+game.iconP2 = hud.healthBar.iconP2;
+
+// restore static shits
+BaseHUD.fullDisplays = ogFullDisplays;
+BaseHUD.shortenedDisplays = ogShortenedDisplays;

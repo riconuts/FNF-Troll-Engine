@@ -4,9 +4,10 @@ import modchart.Modifier.RenderInfo;
 import flixel.math.FlxPoint;
 import modchart.Modifier.ModifierOrder;
 import math.Vector3;
+import playfields.NoteField;
 
 class ScaleModifier extends NoteModifier {
-	override function getName()return 'mini';
+	override function getName()return 'tiny';
 	override function getOrder()return PRE_REVERSE;
 	inline function lerp(a:Float, b:Float, c:Float)
 	{
@@ -17,11 +18,11 @@ class ScaleModifier extends NoteModifier {
 		var y = scale.y;
 		scale.x *= 1 - getValue(player);
 		scale.y *= 1 - getValue(player);
-		var miniX = getSubmodValue("miniX", player) + getSubmodValue('mini${data}X', player);
-		var miniY = getSubmodValue("miniY", player) + getSubmodValue('mini${data}Y', player);
+		var tinyX = getSubmodValue("tinyX", player) + getSubmodValue('tiny${data}X', player);
+		var tinyY = getSubmodValue("tinyY", player) + getSubmodValue('tiny${data}Y', player);
 
-		scale.x *= 1 - miniX;
-		scale.y *= 1 - miniY;
+		scale.x *= 1 - tinyX;
+		scale.y *= 1 - tinyY;
 		var angle = 0;
 
 		var stretch = getSubmodValue("stretch", player) + getSubmodValue('stretch${data}', player);
@@ -72,12 +73,12 @@ class ScaleModifier extends NoteModifier {
 
 	override function getSubmods()
 	{
-		var subMods:Array<String> = ["squish", "stretch", "miniX", "miniY"];
+		var subMods:Array<String> = ["squish", "stretch", "tinyX", "tinyY"];
 
 		for (i in 0...4)
 		{
-			subMods.push('mini${i}X');
-			subMods.push('mini${i}Y');
+			subMods.push('tiny${i}X');
+			subMods.push('tiny${i}Y');
 			subMods.push('squish${i}');
 			subMods.push('stretch${i}');
 		}

@@ -6,6 +6,7 @@ import flixel.math.FlxMath;
 import flixel.FlxG;
 import math.Vector3;
 import math.*;
+import playfields.NoteField;
 
 class AccelModifier extends NoteModifier { // this'll be boost in ModManager
   inline function lerp(a:Float,b:Float,c:Float){
@@ -15,7 +16,7 @@ class AccelModifier extends NoteModifier { // this'll be boost in ModManager
 	override function getName()
 		return 'boost';
 
-  override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite){
+   override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField){
     var wave = getSubmodValue("wave",player);
     var brake = getSubmodValue("brake",player);
     var boost = getValue(player);

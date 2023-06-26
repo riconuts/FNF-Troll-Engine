@@ -61,7 +61,7 @@ class JudgmentManager {
     public var judgmentData:Map<Judgment, JudgmentData> = [
         TIER5 => {
             internalName: "epic",
-            displayName: "Killer",
+            displayName: "Epic",
 			window: ClientPrefs.epicWindow,
             score: 500,
             accuracy: 100,
@@ -70,7 +70,7 @@ class JudgmentManager {
         },
         TIER4 => {
             internalName: "sick",
-            displayName: "Awesome",
+            displayName: "Sick",
 			window: ClientPrefs.sickWindow,
             score: 350,
             accuracy: 98,
@@ -79,7 +79,7 @@ class JudgmentManager {
         },
         TIER3 => {
             internalName: "good",
-            displayName: "Cool",
+            displayName: "Good",
 			window: ClientPrefs.goodWindow,
             score: 100,
             accuracy: 80,
@@ -88,7 +88,7 @@ class JudgmentManager {
         },
         TIER2 => {
             internalName: "bad",
-            displayName: "Gay",
+            displayName: "Bad",
 			window: ClientPrefs.badWindow,
             score: 0,
             accuracy: 50,
@@ -98,7 +98,7 @@ class JudgmentManager {
         },
         TIER1 => {
             internalName: "shit",
-            displayName: "Retard",
+            displayName: "Shit",
 			window: ClientPrefs.hitWindow,
             score: -150,
             accuracy: -20,
@@ -108,7 +108,7 @@ class JudgmentManager {
         },
         MISS => {
             internalName: "miss",
-            displayName: "Fail",
+			displayName: "Miss",
             window: -1,
             score: -350,
             accuracy: -100,
@@ -119,7 +119,7 @@ class JudgmentManager {
         },
 		DROPPED_HOLD => {
 			internalName: "miss",
-			displayName: "Fail",
+			displayName: "Miss",
 			window: -1,
 			score: -350,
 			accuracy: -100,
@@ -130,7 +130,7 @@ class JudgmentManager {
 		},
 		DAMAGELESS_MISS => {
 			internalName: "miss",
-			displayName: "Fail",
+			displayName: "Miss",
 			window: -1,
 			score: -350,
 			wifePoints: Wife3.missWeight,

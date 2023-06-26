@@ -84,7 +84,8 @@ class MainMenuState extends MusicBeatState {
 		super.create();
 		
 		debugKeys = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
-
+		
+		Paths.pushGlobalContent();
 		Paths.loadTheFirstEnabledMod();
         FlxG.mouse.visible = true;
 		FlxG.camera.bgColor = FlxColor.BLACK;

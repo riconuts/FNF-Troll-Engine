@@ -78,7 +78,7 @@ class Conductor
 		return time-lastChange.songTime;
 	}
 
-	public static function getBeatInMeasure(time:Float):Float{
+	public static function getBeatSinceChange(time:Float):Float{
 		var lastBPMChange = getBPMFromSeconds(time);
 		return (time-lastBPMChange.songTime) / (lastBPMChange.stepCrochet*4);
 	}

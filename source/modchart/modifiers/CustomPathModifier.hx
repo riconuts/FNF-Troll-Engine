@@ -7,6 +7,7 @@ import flixel.math.FlxMath;
 import flixel.FlxG;
 import math.Vector3;
 import math.*;
+import playfields.NoteField;
 
 typedef PathInfo = {
   var position:Vector3;
@@ -80,7 +81,7 @@ class CustomPathModifier extends NoteModifier {
   }
 
 
-	override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite){
+	 override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField){
     if(getValue(player)==0)return pos;
     //var vDiff = Math.abs(timeDiff);
     var vDiff = timeDiff;

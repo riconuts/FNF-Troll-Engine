@@ -466,10 +466,10 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 			for(i in 0...4){
 				for (daNote in getNotes(i, (note:Note) -> !note.ignoreNote && !note.hitCausesMiss)){
 					if (!daNote.isSustainNote){
-						var hitDiff = daNote.strumTime - Conductor.songPosition;
-						if (isPlayer && (hitDiff + ClientPrefs.ratingOffset) <= (5 * (Wife3.timeScale > 1?1:Wife3.timeScale)) || hitDiff <= 0){
+						var hitDiff = Conductor.songPosition - daNote.strumTime;
+						if (isPlayer && (hitDiff + ClientPrefs.ratingOffset) >= (-5 * (Wife3.timeScale > 1?1:Wife3.timeScale)) || hitDiff >= 0){
 							daNote.hitResult.judgment = judgeManager.useEpics ? TIER5 : TIER4;
-							daNote.hitResult.hitDiff = (hitDiff < -5) ? -5 : hitDiff; 
+							daNote.hitResult.hitDiff = (hitDiff > -5) ? -5 : hitDiff; 
 							if (noteHitCallback!=null)noteHitCallback(daNote, this);
 						}
 					}
@@ -536,6 +536,40 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 					callback(note);
 			}
 		}
+	}
+
+	// kills all notes which are stacked
+	public function clearStackedNotes(){
+		var goobaeg:Array<Note> = [];
+		for (column in noteQueue)
+		{
+			if (column.length >= 2)
+			{
+				for (nIdx in 1...column.length)
+				{
+					var last = column[nIdx - 1];
+					var current = column[nIdx];
+					if (last == null || current == null)
+						continue;
+					if (last.isSustainNote || current.isSustainNote)
+						continue; // holds only get fukt if their parents get fukt
+					if (!last.alive || !current.alive)
+						continue; // just incase
+					if (Math.abs(last.strumTime - current.strumTime) <= Conductor.stepCrochet / (192 / 16))
+					{
+						if (last.sustainLength < current.sustainLength) // keep the longer hold
+							removeNote(last);
+						else
+						{
+							current.kill();
+							goobaeg.push(current); // mark to delete after, cant delete here because otherwise it'd fuck w/ stuff
+						}
+					}
+				}
+			}
+		}
+		for (note in goobaeg)
+			removeNote(note);
 	}
 
 	// as is in the name, removes all dead notes

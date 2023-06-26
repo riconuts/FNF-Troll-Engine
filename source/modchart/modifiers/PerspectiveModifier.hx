@@ -9,6 +9,8 @@ import flixel.math.FlxMath;
 import flixel.FlxG;
 using StringTools;
 import math.*;
+import playfields.NoteField;
+
 // NOTE: THIS SHOULDNT HAVE ITS PERCENTAGE MODIFIED
 // THIS IS JUST HERE TO ALLOW OTHER MODIFIERS TO HAVE PERSPECTIVE
 
@@ -38,7 +40,7 @@ class PerspectiveModifier extends NoteModifier {
 		return subMods;
 	}
 
-	override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
+	 override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
 	{
  		var origin = new Vector3(FlxG.width / 2, FlxG.height / 2); // vertex origin
 		var fieldPos = new Vector3(-getSubmodValue("fieldX", player),

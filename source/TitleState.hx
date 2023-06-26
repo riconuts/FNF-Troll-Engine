@@ -485,14 +485,7 @@ class RandomTitleLogo extends FlxSprite
 	public static function getTitlesList():Array<String>
 	{
 		var titleNames:Array<String> = [];
-		var foldersToCheck:Array<String> = [Paths.getPreloadPath('images/titles/')];
-
-		#if MODS_ALLOWED
-		foldersToCheck.insert(0, Paths.mods('images/titles/'));
-		foldersToCheck.insert(0, Paths.mods('global/images/titles/'));
-		if (Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
-			foldersToCheck.insert(0, Paths.mods(Paths.currentModDirectory + '/images/titles/'));
-		#end
+		var foldersToCheck:Array<String> = Paths.getFolders('images/titles');
 		
 		for (folder in foldersToCheck){
 			Paths.iterateDirectory(folder, function(path:String){

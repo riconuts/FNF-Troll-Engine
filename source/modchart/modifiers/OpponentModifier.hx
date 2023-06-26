@@ -3,12 +3,13 @@ package modchart.modifiers;
 import flixel.FlxSprite;
 import modchart.*;
 import math.*;
+import playfields.NoteField;
 
 class OpponentModifier extends NoteModifier {
 	override function getName()
 		return 'opponentSwap';
 
-    override function getPos(diff:Float, tDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite)
+	override function getPos(diff:Float, tDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
     {
         var nPlayer = Std.int(CoolUtil.scale(player, 0, 1, 1, 0));
 

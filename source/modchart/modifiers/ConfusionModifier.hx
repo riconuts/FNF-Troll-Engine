@@ -29,8 +29,6 @@ class ConfusionModifier extends NoteModifier {
 				player) * getOtherValue('xmod${data}', player);
 			var yPos:Float = ((Conductor.visualPosition - note.visualTime)) * speed;
 
-			angleX += note.typeOffsetAngle;
-
 			angleX += getSubmodValue("roll", player) * yPos / 2;
 			angleY += getSubmodValue("twirl", player) * yPos / 2;
 			angleX += getSubmodValue("noteAngleX", player) + getSubmodValue("note" + data + "AngleX", player);
@@ -45,6 +43,8 @@ class ConfusionModifier extends NoteModifier {
 				angleZ += getSubmodValue("noteAngle", player) + getSubmodValue("note" + data + "Angle", player);
 
 			}
+
+			angleZ += note.typeOffsetAngle;
         }else if((obj is StrumNote)){
 			angleX += getSubmodValue("receptorAngleX", player) + getSubmodValue("receptor" + data + "AngleX", player);
 			angleY += getSubmodValue("receptorAngleY", player) + getSubmodValue("receptor" + data + "AngleY", player);

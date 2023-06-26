@@ -1,5 +1,6 @@
 package;
 
+import hud.AdvancedHUD;
 import lime.media.openal.ALFilter;
 import lime.media.openal.ALEffect;
 import lime.media.openal.AL;
@@ -74,7 +75,7 @@ typedef SongCreditdata = // beacuse SongMetadata is stolen
 {
 	artist:String,
 	charter:String,
-	?modcharter:Array<String>,
+	?modcharter:String,
 	?extraInfo:Array<String>,
 }
 
@@ -149,6 +150,7 @@ class Wife3
 }
 class PlayState extends MusicBeatState
 {
+	var midScroll = false;
 	public var botplaySine:Float = 0;
 	public var botplayTxt:FlxText;
 
@@ -275,13 +277,8 @@ class PlayState extends MusicBeatState
 	
 	public var ratingTxtGroup = new FlxTypedGroup<RatingSprite>();
 	public var comboNumGroup = new FlxTypedGroup<RatingSprite>();
-	public var timingTxt:FlxText; // TODO: replace this with the combo numbers maybe
+	public var timingTxt:FlxText;
 	
-	// We could also make it calibri or another custom font?
-	// Since as you said, combo numbers could be hard to read
-	// (We could also add a dropdown for it? idk lol)
-	// -neb
-
 	private var curSong:String = "";
 
 	public var iconOffset:Int = 26;
@@ -304,6 +301,7 @@ class PlayState extends MusicBeatState
 	}
 
 	public var combo:Int = 0;
+	public var cbCombo:Int = 0;
 
 	public var comboBreaks:Int = 0; 
 	public var judges:Map<String, Int> = [
@@ -519,7 +517,7 @@ class PlayState extends MusicBeatState
 		instaRespawn = ClientPrefs.getGameplaySetting('instaRespawn', false);
 		cpuControlled = ClientPrefs.getGameplaySetting('botplay', false);
 		disableModcharts = !ClientPrefs.modcharts; //ClientPrefs.getGameplaySetting('disableModcharts', false);
-
+		midScroll = ClientPrefs.midScroll;
 		playbackRate *= (ClientPrefs.ruin ? 0.8 : 1);
 		FlxG.timeScale = playbackRate;
 		
@@ -581,16 +579,20 @@ class PlayState extends MusicBeatState
 		songHighscore = Highscore.getScore(SONG.song);
 
 		if (SONG != null){
-			var jason = Paths.songJson(songName + '/metadata');
-
-			if (!Paths.exists(jason))
-				jason = Paths.modsSongJson(songName + '/metadata');
-
-			if (Paths.exists(jason))
-				metadata = cast Json.parse(Paths.getContent(jason));
+			if(SONG.metadata != null)
+				metadata = SONG.metadata;
 			else{
-				if(showDebugTraces)
-					trace("No metadata for " + songName + ". Maybe add some?");
+				var jason = Paths.songJson(songName + '/metadata');
+
+				if (!Paths.exists(jason))
+					jason = Paths.modsSongJson(songName + '/metadata');
+
+				if (Paths.exists(jason))
+					metadata = cast Json.parse(Paths.getContent(jason));
+				else{
+					if(showDebugTraces)
+						trace("No metadata for " + songName + ". Maybe add some?");
+				}
 			}
 		}
 
@@ -736,11 +738,8 @@ class PlayState extends MusicBeatState
 		//// Characters
 
 		var gfVersion:String = SONG.gfVersion;
-		if(gfVersion == null || gfVersion.length < 1){
-			/* gfVersion = 'gf';
-			SONG.gfVersion = gfVersion; //Fix for the Chart Editor */
-		}
-		else if (stageData.hide_girlfriend != true)
+
+		if (stageData.hide_girlfriend != true)
 		{
 			gf = new Character(0, 0, gfVersion);
 
@@ -782,10 +781,14 @@ class PlayState extends MusicBeatState
 				gf.visible = false;
 		}
 		
-		if(ClientPrefs.etternaHUD == 'Advanced')
-			hud = new hud.AdvancedHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song);
-		else
-			hud = new PsychHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song);
+		
+		switch(ClientPrefs.etternaHUD){
+			case 'Advanced':
+				hud = new AdvancedHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song);
+			default:
+				hud = new PsychHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song);
+		}
+		
 		healthBar = hud.healthBar;
 		healthBarBG = healthBar.healthBarBG;
 		iconP1 = healthBar.iconP1;
@@ -804,14 +807,8 @@ class PlayState extends MusicBeatState
 
 		// "GLOBAL" SCRIPTS
 		var filesPushed:Array<String> = [];
-		var foldersToCheck:Array<String> = [Paths.getPreloadPath('scripts/')];
 
-		#if MODS_ALLOWED
-		foldersToCheck.insert(0, Paths.mods('scripts/'));
-		foldersToCheck.insert(0, Paths.mods('global/scripts/'));
-		if(Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
-			foldersToCheck.insert(0, Paths.mods(Paths.currentModDirectory + '/scripts/'));
-		#end
+		var foldersToCheck:Array<String> = Paths.getFolders('scripts');
 
 		for (folder in foldersToCheck)
 		{
@@ -929,26 +926,13 @@ class PlayState extends MusicBeatState
 
 
 		// SONG SPECIFIC SCRIPTS
-		var foldersToCheck:Array<String> = [
-			Paths.getPreloadPath('songs/' + songName + '/')
-			#if PE_MOD_COMPATIBILITY ,
-			Paths.getPreloadPath('data/' + songName + '/')
-			#end
-		];
+		var foldersToCheck:Array<String> = Paths.getFolders('songs/$songName');
+		#if PE_MOD_COMPATIBILITY
+		for (dir in Paths.getFolders('data/$songName'))foldersToCheck.push(dir);
+		
+		#end
 		var filesPushed:Array<String> = [];
 
-		#if MODS_ALLOWED
-		foldersToCheck.insert(0, Paths.mods('songs/' + songName + '/'));
-		#if PE_MOD_COMPATIBILITY
-		foldersToCheck.insert(1, Paths.mods('data/' + songName + '/'));
-		#end
-		if(Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0){
-			foldersToCheck.insert(0, Paths.mods(Paths.currentModDirectory + '/songs/' + songName + '/'));
-			#if PE_MOD_COMPATIBILITY
-			foldersToCheck.insert(1, Paths.mods(Paths.currentModDirectory + '/data/' + songName + '/'));
-			#end
-		}
-		#end
 
 		for (folder in foldersToCheck)
 		{
@@ -1361,6 +1345,15 @@ class PlayState extends MusicBeatState
 		modManager.registerDefaultModifiers();
 		callOnScripts('postModifierRegister');
 
+		if(midScroll){
+			modManager.setValue("opponentSwap", 0.5);
+			for(field in notefields.members){
+				if(field.field==null)continue;
+				field.alpha = field.field.isPlayer ? 0 : 1;
+			}
+			
+		}
+
 		startedCountdown = true;
 		Conductor.songPosition = 0;
 		Conductor.songPosition -= Conductor.crochet * 5;
@@ -1632,7 +1625,23 @@ class PlayState extends MusicBeatState
 
 		if (#if MODS_ALLOWED Paths.exists(Paths.modsSongJson(songName + '/events')) || #if PE_MOD_COMPATIBILITY Paths.exists(Paths.modsJson(songName + '/events')) || #end #end Paths.exists(Paths.songJson(songName + '/events')))
 		{
-			var eventsData:Array<Dynamic> = Song.loadFromJson('events', songName).events;
+			var rawEventsData:Array<Array<Dynamic>> = Song.loadFromJson('events', songName).events;
+			rawEventsData.sort((a, b) -> return Std.int(a[0] - b[0]));
+			var eventsData:Array<Array<Dynamic>> = [];
+			for(event in rawEventsData){
+				var last = eventsData[eventsData.length-1];
+				if(last==null){
+					eventsData.push(event);
+				}else{
+					if(Math.abs(last[0] - event[0]) <= Conductor.stepCrochet / (192 / 16)){
+						var fuck:Array<Array<Dynamic>> = event[1];
+						for (shit in fuck)eventsData[eventsData.length - 1][1].push(shit);
+					}else{
+						eventsData.push(event);
+					}
+				}
+			}
+
 			for (event in eventsData) //Event Notes
 			{
 				for (i in 0...event[1].length)
@@ -1649,6 +1658,25 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
+
+		var rawEventsData:Array<Array<Dynamic>> = songData.events;
+		rawEventsData.sort((a, b) -> return Std.int(a[0] - b[0]));
+		var eventsData:Array<Array<Dynamic>>  = [];
+		for(event in rawEventsData){
+			var last = eventsData[eventsData.length-1];
+			if(last==null){
+				eventsData.push(event);
+			}else{
+				if(Math.abs(last[0] - event[0]) <= Conductor.stepCrochet / (192 / 16)){
+					var fuck:Array<Array<Dynamic>> = event[1];
+					for (shit in fuck)eventsData[eventsData.length-1][1].push(shit);
+				}else{
+					eventsData.push(event);
+				}
+			}
+		}
+
+		songData.events = eventsData;		
 
 		for (event in songData.events) //Event Notes
 		{
@@ -1902,11 +1930,7 @@ class PlayState extends MusicBeatState
 					oldNote = null;
 
 				var type:Dynamic = songNotes[3];
-				//if(!Std.isOfType(type, String)) type = editors.ChartingState.noteTypeList[type];
-
-				// TODO: maybe make a checkNoteType n shit but idfk im lazy
-				// or maybe make a "Transform Notes" event which'll make notes which don't change texture change into the specified one
-
+				
 				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
 				swagNote.realNoteData = songNotes[1];
 				swagNote.mustPress = gottaHitNote;
@@ -2010,33 +2034,10 @@ class PlayState extends MusicBeatState
 		for(fuck in allNotes)
 			unspawnNotes.push(fuck);
 		
+		
 		for (field in playfields.members)
-		{
-			var goobaeg:Array<Note> = [];
-			for(column in field.noteQueue){
-				if(column.length>=2){
-					for(nIdx in 1...column.length){
-						var last = column[nIdx-1];
-						var current = column[nIdx];
-						if(last==null || current==null)continue;
-						if(last.isSustainNote || current.isSustainNote)continue; // holds only get fukt if their parents get fukt
-						if(!last.alive || !current.alive)continue; // just incase
-						if (Math.abs(last.strumTime - current.strumTime) <= Conductor.stepCrochet / (192 / 16)){
-							if(last.sustainLength < current.sustainLength) // keep the longer hold
-								field.removeNote(last);
-							else{
-								current.kill();
-								goobaeg.push(current); // mark to delete after, cant delete here because otherwise it'd fuck w/ stuff	
-							}
-						}
+			field.clearStackedNotes();
 
-					}
-				}
-			}
-			for(note in goobaeg)
-				field.removeNote(note);
-
-		}
 
 		#if(LUA_ALLOWED && PE_MOD_COMPATIBILITY)
 		for(key => script in notetypeScripts){
@@ -2176,6 +2177,9 @@ class PlayState extends MusicBeatState
 			note.updateColours();
 		if (options.length > 0){
 			updateTime = (ClientPrefs.timeBarType != 'Disabled');
+			
+			if(options.contains("gradeSet"))
+				ratingStuff = Highscore.grades.get(ClientPrefs.gradeSet);
 			
 			var reBind:Bool = false;
 			PlayState.instance.callOnScripts('optionsChanged', [options]);
@@ -2749,6 +2753,22 @@ class PlayState extends MusicBeatState
 			botplayTxt.alpha = 1 - flixel.math.FlxMath.fastSin((Math.PI * botplaySine) / 180);
 		}
 
+		if(midScroll){
+			for(field in notefields.members){
+				if(field.field==null)continue;
+				if(field.field.isPlayer){
+					if(field.alpha < 1){
+						field.alpha += 0.1 * elapsed;
+						if(field.alpha>1)field.alpha=1;
+					}
+				}else{
+					if(field.alpha > 0){
+						field.alpha -= 0.1 * elapsed;
+						if(field.alpha<0)field.alpha=0;
+					}
+				}
+			}
+		}
 		super.update(elapsed);
 		modManager.updateTimeline(curDecStep);
 		modManager.update(elapsed);
@@ -3528,6 +3548,7 @@ class PlayState extends MusicBeatState
 		ratingTxtGroup.remove(rating, true);
 		ratingTxtGroup.add(rating);
 	}
+	var comboColor = 0xFFFFFFFF;
 
 	private function displayCombo(?combo:Int){
 		if(combo==null)combo=this.combo;
@@ -3540,33 +3561,24 @@ class PlayState extends MusicBeatState
 			if (combo == 0)
 				return;
 		}
-		else if (combo < 10 && combo != 0)
+		else if (combo > 0 && combo < 10 && combo != 0)
 			return;
 
-		var separatedScore:Array<String> = Std.string(combo).split("");
+		var separatedScore:Array<String> = Std.string(Math.abs(combo)).split("");
 		while (separatedScore.length < 3)
 			separatedScore.unshift("0");
+		if(combo < 0)
+			separatedScore.unshift("-");
 
 		var daLoop:Int = 0;
 
-		// did you goto MS Paint and get colours from there lol
-		var comboColor = !ClientPrefs.coloredCombos ? 0xFFFFFFFF : switch (ratingFC)
-		{ // so the color doesn't get calculated for every number ig
-			case 'KFC':
-				hud.judgeColours.get("epic");
-			case 'AFC':
-				hud.judgeColours.get("sick");
-			case 'CFC'| "SDC":
-				hud.judgeColours.get("good");
-			default:
-				FlxColor.WHITE;
-		}; // this could prob be set in recalculateRating tbh lol
+		var col = combo < 0 ? hud.judgeColours.get("miss") : comboColor;
 
 		var numStartX:Float = (FlxG.width - separatedScore.length * 41) * 0.5 + ClientPrefs.comboOffset[2];
 		for (i in separatedScore)
 		{
 			var numScore:RatingSprite = comboNumGroup.recycle(RatingSprite, RatingSprite.newNumber);
-			numScore.loadGraphic(Paths.image('num' + i));
+			numScore.loadGraphic(Paths.image('num' + (i == "-" ? "neg" : i)));
 
 			if (ClientPrefs.simpleJudge){
 				numScore.scale.x = 0.5 * 1.25;
@@ -3580,7 +3592,7 @@ class PlayState extends MusicBeatState
 			numScore.screenCenter(Y);
 			numScore.y -= ClientPrefs.comboOffset[3];
 
-			numScore.color = comboColor;
+			numScore.color = col;
 			numScore.visible = showComboNum;
 
 			numScore.ID = daLoop;
@@ -3645,6 +3657,7 @@ class PlayState extends MusicBeatState
 
 		switch(judgeData.comboBehaviour){
 			default:
+				cbCombo = 0;
 				combo++;
 			case BREAK:
 				breakCombo();
@@ -3662,7 +3675,7 @@ class PlayState extends MusicBeatState
 			if(judgeData.hideJudge!=true)
 				displayJudgment(judgeData.internalName);
 			if(judgeData.comboBehaviour != IGNORE)
-				displayCombo();
+				displayCombo(judgeData.comboBehaviour == BREAK ? (cbCombo > 1 ? -cbCombo : 0) : combo);
 		}
 	}
 
@@ -3903,6 +3916,7 @@ class PlayState extends MusicBeatState
 
 	function breakCombo(){
 		comboBreaks++;
+		cbCombo++;
 		combo = 0;
 		while (lastCombos.length > 0)
 			lastCombos.shift().kill();
@@ -4690,6 +4704,59 @@ class PlayState extends MusicBeatState
 		}
 		return ratingPercent = val;
 	}
+
+	public function getClearType(){
+		var clear = 'Clear';
+
+		if (comboBreaks <= 0)
+		{
+			var goods = judges.get("good");
+			var sicks = judges.get("sick");
+			var epics = judges.get("epic");
+
+			if (totalPlayed == 0){
+				clear = 'No Play'; // Havent played anything yet
+				return clear;
+			}
+
+			if (goods > 0){
+				if(goods < 10 && goods > 0)
+					clear = 'SDG'; // Single Digit Goods
+				else
+					clear = 'GFC'; // Good Full Combo
+			}
+			else if (sicks > 0)
+			{
+				if (sicks < 10 && sicks > 0)
+					clear = 'SDS'; // Single Digit Sicks
+				else
+					clear = 'SFC'; // Sick Full Combo
+			}
+			else if (epics > 0)
+				clear = "EFC";
+			if (ClientPrefs.gradeSet == 'Etterna')
+			{
+				if(sicks == 1)
+					clear = 'WF'; // White Flag (EFC missed by 1 sick)
+				else if (goods == 1)
+					clear = 'BF'; // Black Flag (SFC missed by 1 good)
+				
+			}
+			
+		}
+		else
+		{
+			if (ClientPrefs.gradeSet == 'Etterna' && comboBreaks == 1)
+				clear = 'MF'; // Miss Flag (Any FC missed by 1 CB)
+			else if (comboBreaks < 10 && songScore >= 0)
+				clear = "SDCB"; // Single Digit Combo Break
+			else if (songScore < 0 || comboBreaks >= 10 && ratingPercent <= 0)
+				clear = "Fail"; // Fail
+		}
+
+		return clear;
+	}
+
 	public function RecalculateRating() {
 		setOnScripts('score', songScore);
 		setOnScripts('misses', songMisses);
@@ -4729,18 +4796,21 @@ class PlayState extends MusicBeatState
 			}
 
 			// Rating FC
-			ratingFC = "Clear";
-			if(comboBreaks <= 0){
-			if (judges.get("epic") > 0) ratingFC = "KFC";
-			if (judges.get("sick") > 0) ratingFC = "AFC";
-			if (judges.get("good") > 0 && judges.get("good") < 10) ratingFC = "SDC";
-			else if (judges.get("good") >= 10) ratingFC = "CFC";
-			if (judges.get("bad") > 0 || judges.get("shit") > 0) ratingFC = "FC";
-			}else{
-				if (comboBreaks < 10 && songScore >= 0) ratingFC = "SDCB";
-				else if (songScore < 0 || comboBreaks >= 10 && ratingPercent <= 0)ratingFC = "Fail";
+			ratingFC = getClearType();
+
+			if (ClientPrefs.coloredCombos){
+				if (judges.get("bad") > 0 || judges.get("shit") > 0 || comboBreaks > 0)
+					comboColor = 0xFFFFFFFF;
+				else if (judges.get("good") > 0)
+					comboColor = hud.judgeColours.get("good");
+				else if (judges.get("sick") > 0)
+					comboColor = hud.judgeColours.get("sick");
+				else if (judges.get("epic") > 0)
+					comboColor = hud.judgeColours.get("epic");
 			}
 		}
+
+
 		// maybe move all of this to a stats class that I can easily give to objects?
 		hud.ratingFC = ratingFC;
 		hud.grade = ratingName;
@@ -4756,6 +4826,7 @@ class PlayState extends MusicBeatState
 		
 		hud.recalculateRating();
 
+		callOnScripts('postRecalculateRating'); // incase you wanna add custom rating stuff
 		setOnScripts('rating', ratingPercent);
 		setOnScripts('ratingName', ratingName);
 		setOnScripts('ratingFC', ratingFC);

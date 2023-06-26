@@ -54,6 +54,7 @@ class StartupState extends FlxState
 		#end
 		
 		#if MODS_ALLOWED
+		Paths.pushGlobalContent();
 		Paths.getModDirectories();
 		Paths.loadRandomMod();
 		#end

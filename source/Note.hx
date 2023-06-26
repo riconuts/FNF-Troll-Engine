@@ -352,7 +352,7 @@ class Note extends NoteObject
 			if(prevNote != null && isSustainNote)
 				quant = prevNote.quant;
 			else
-				quant = getQuant(Conductor.getBeatInMeasure(strumTime));
+				quant = getQuant(Conductor.getBeatSinceChange(strumTime));
 		}
 		beat = Conductor.getBeat(strumTime);
 
