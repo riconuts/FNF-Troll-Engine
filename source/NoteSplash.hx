@@ -36,6 +36,7 @@ class NoteSplash extends NoteObject
 		}
 		setPosition(x, y);
 		alpha = 0.6;
+		scale.set(0.8, 0.8);
 		updateHitbox();
 
 		noteData = note;
