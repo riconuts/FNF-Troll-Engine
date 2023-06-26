@@ -1019,6 +1019,19 @@ class PlayState extends MusicBeatState
 		add(botplayTxt);
 		add(grpNoteSplashes);
 
+		if(SONG.notes[0].mustHitSection){
+			var cam = boyfriend.getCamera();
+			camFollow.set(cam[0], cam[1]);
+		}else if(SONG.notes[0].gfSection && gf != null){
+			var cam = gf.getCamera();
+			camFollow.set(cam[0], cam[1]);
+		}else{
+			var cam = dad.getCamera();
+			camFollow.set(cam[0], cam[1]);
+		}
+		sectionCamera.copyFrom(camFollow);
+		camFollowPos.setPosition(camFollow.x, camFollow.y);
+
 		super.create();
 
 		RecalculateRating();
