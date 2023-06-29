@@ -1,4 +1,6 @@
 package;
+
+import lime.app.Event;
 /* hud.ratingFC = ratingFC;
 hud.grade = ratingName;
 hud.ratingPercent = ratingPercent;
@@ -14,16 +16,30 @@ hud.score = songScore; */
 
 // Might use this some day idk lol
 class Stats {
-	public var changedCallback:(String, Dynamic)->Void;
+	public var changedEvent:Event<(String, Dynamic) -> Void> = new Event<(String, Dynamic)->Void>();
+	function changedCallback(n:String, v:Dynamic)
+		changedEvent.dispatch(n, v);
+	
 	public var gradeSet:Array<Array<Dynamic>> = [];
 
     public var score(default, set):Int = 0;
+	public var nps(default, set):Int = 0;
+	public var npsPeak(default, set):Int = 0;
     public var totalPlayed(default, set):Float = 0;
 	public var totalNotesHit(default, set):Float = 0;
     public var clearType(default, set):String = '';
     public var grade(default, set):String = '';
-    public var judgements:Map<String, Int> = [];
+    public var judgements:Map<String, Int> = [
+		"epic" => 0,
+		"sick" => 0,
+		"good" => 0,
+		"bad" => 0,
+		"shit" => 0,
+		"miss" => 0,
+		"cb" => 0
+	];
     public var combo(default, set):Int = 0;
+	public var cbCombo(default, set):Int = 0;
 	public var ratingPercent(default, set):Float = 0;
     function set_score(val:Int){
         if(score != val){
@@ -32,6 +48,23 @@ class Stats {
         }
         return val;
     }
+	function set_nps(val:Int){
+		if (nps != val)
+		{
+			changedCallback("nps", val);
+			return nps = val;
+		}
+		return val;
+	}
+	function set_npsPeak(val:Int)
+	{
+		if (npsPeak != val)
+		{
+			changedCallback("npsPeak", val);
+			return npsPeak = val;
+		}
+		return val;
+	}
 	function set_totalPlayed(val:Float)
 	{
 		if (totalPlayed != val){
@@ -70,6 +103,15 @@ class Stats {
             changedCallback("combo", val);
             return combo = val;
         }
+		return val;
+	}
+	function set_cbCombo(val:Int)
+	{
+		if (cbCombo != val)
+		{
+			changedCallback("cbCombo", val);
+			return cbCombo = val;
+		}
 		return val;
 	}
 	function set_ratingPercent(val:Float)
@@ -158,10 +200,10 @@ class Stats {
 				clear = "KFC";
 			if (useFlags)
 			{
-				if (sicks == 1)
-					clear = 'WF'; // White Flag (EFC missed by 1 sick)
-				else if (goods == 1)
+				if (goods == 1)
 					clear = 'BF'; // Black Flag (SFC missed by 1 good)
+				else if (sicks == 1)
+					clear = 'WF'; // White Flag (EFC missed by 1 sick)
 			}
 		}
 		else
@@ -181,7 +223,9 @@ class Stats {
 
     public function updateVariables()
     {
+		ratingPercent = totalNotesHit / totalPlayed;
         grade = getGrade();
 		clearType = getClearType();
+		trace(score, grade, clearType);
     }
 }

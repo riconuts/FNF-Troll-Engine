@@ -11,6 +11,7 @@ import flixel.group.FlxSpriteGroup;
 // bunch of basic stuff to be extended by other HUDs
 
 class BaseHUD extends FlxSpriteGroup {
+	var stats:Stats;
 	// just some ref vars
 	static var fullDisplays:Map<String, String> = [
 		"epic" => "Killers",
@@ -50,29 +51,33 @@ class BaseHUD extends FlxSpriteGroup {
 	public var time(default, set):Float = 0;
 	public var songLength(default, set):Float = 0;
 	public var songName(default, set):String = '';
-	public var score(default, set):Float = 0;
-	public var misses(default, set):Int = 0;
-	public var combo(default, set):Int = 0;
-	public var grade(default, set):String = '';
-	public var ratingFC(default, set):String = 'Clear';
-	public var totalNotesHit(default, set):Float = 0;
-	public var totalPlayed(default, set):Float = 0;
-	public var ratingPercent(default, set):Float = 0;
+	public var score(get, null):Float = 0;
+	function get_score()return stats.score;
+	public var comboBreaks(get, null):Float = 0;
+	function get_comboBreaks()return stats.comboBreaks;
+	public var misses(get, null):Int = 0;
+	function get_misses()return stats.misses;
+	public var combo(get, null):Int = 0;
+	function get_combo()return stats.combo;
+	public var grade(get, null):String = '';
+	function get_grade()return stats.grade;
+	public var ratingFC(get, null):String = 'Clear';
+	function get_ratingFC()return stats.clearType;
+	public var totalNotesHit(get, null):Float = 0;
+	function get_totalNotesHit()return stats.totalNotesHit;
+	public var totalPlayed(get, null):Float = 0;
+	function get_totalPlayed()return stats.totalPlayed;
+	public var ratingPercent(get, null):Float = 0;
+	function get_ratingPercent()return stats.ratingPercent;
+	public var nps(get, null):Int = 0;
+	function get_nps()return stats.nps;
+	public var npsPeak(get, null):Int = 0;
+	function get_npsPeak()return stats.npsPeak;
 	public var songPercent(default, set):Float = 0;
-	public var comboBreaks(default, set):Int = 0;
-	public var nps(default, set):Int = 0;
-	public var npsPeak(default, set):Int = 0;
 	public var updateTime:Bool = (ClientPrefs.timeBarType != 'Disabled');
-	public var judgements:Map<String, Float> = [
-		"epic" => 0,
-		"sick" => 0,
-		"good" => 0,
-		"bad" => 0,
-		"shit" => 0,
-		"miss" => 0
-
-		// maybe add hold judgements? (OK and NG)
-	];
+	@:isVar
+	public var judgements(get, null):Map<String, Int>;
+	function get_judgements()return stats.judgements;
 
 	// just some extra variables lol
 	public var healthBar:FNFHealthBar;
@@ -83,8 +88,10 @@ class BaseHUD extends FlxSpriteGroup {
 
 	function get_healthBarBG()return healthBar.healthBarBG;
 
-	public function new(iP1:String, iP2:String, songName:String) {
+	public function new(iP1:String, iP2:String, songName:String, stats:Stats)
+	{
 		super();
+		this.stats = stats;
 		this.songName = songName;
 		if (!ClientPrefs.useEpics)
 			displayedJudges.remove("epic");
@@ -129,16 +136,6 @@ class BaseHUD extends FlxSpriteGroup {
 	function set_songLength(value:Float)return songLength = value;
 	function set_time(value:Float)return time = value;
 	function set_songName(value:String)return songName = value;
-	function set_score(value:Float)return score = value;
-	function set_misses(value:Int)return misses = value;
-	function set_grade(value:String)return grade = value;
-	function set_ratingFC(value:String)return ratingFC = value;
-	function set_totalNotesHit(value:Float)return totalNotesHit = value;
-	function set_totalPlayed(value:Float)return totalPlayed = value;
-	function set_ratingPercent(value:Float)return ratingPercent = value;
 	function set_songPercent(value:Float)return songPercent = value;
-	function set_comboBreaks(value:Int)return comboBreaks = value;
-	function set_nps(value:Int)return nps = value;
-	function set_npsPeak(value:Int)return npsPeak = value;
 	function set_combo(value:Int)return combo = value;
 }

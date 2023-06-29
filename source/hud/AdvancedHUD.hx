@@ -25,7 +25,6 @@ class AdvancedHUD extends BaseHUD
 	public var hitbar:Hitbar;
 	public var timeBar:FlxBar;
 	public var timeTxt:FlxText;
-
 	private var timeBarBG:AttachedSprite;
 
 	var peakCombo:Int = 0;
@@ -33,9 +32,12 @@ class AdvancedHUD extends BaseHUD
 	public var hudPosition(default, null):String = ClientPrefs.hudPosition;
 
 	var npsIdx:Int = 0;
-	override public function new(iP1:String, iP2:String, songName:String)
+	override public function new(iP1:String, iP2:String, songName:String, stats:Stats)
 	{
-		super(iP1, iP2, songName);
+		super(iP1, iP2, songName, stats);
+
+		stats.changedEvent.add(statChanged);
+		
 
 		add(healthBarBG);
 		add(healthBar);
@@ -46,7 +48,7 @@ class AdvancedHUD extends BaseHUD
 		
 		songHighscore = Highscore.getScore(songName);
 		var tWidth = 200;
-		scoreTxt = new FlxText(0, 0, tWidth, "", 20);
+		scoreTxt = new FlxText(0, 0, tWidth, "0", 20);
 		scoreTxt.setFormat(Paths.font("calibri.ttf"), 40, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		scoreTxt.screenCenter(Y);
 		scoreTxt.y -= 120;
@@ -243,17 +245,6 @@ class AdvancedHUD extends BaseHUD
 			FlxMath.lerp(clr1.alphaFloat, clr2.alphaFloat, alpha)
 		);
 	}
-	
-	override function set_grade(v:String){
-		if(grade != v){
-			grade = v;
-			FlxTween.cancelTweensOf(gradeTxt.scale);
-			gradeTxt.scale.set(1.2, 1.2);
-			FlxTween.tween(gradeTxt.scale, {x: 1, y: 1}, 0.2, {ease: FlxEase.circOut});
-		}
-
-		return grade;
-	}
 
 	override function recalculateRating(){
 		var gradeColor = FlxColor.WHITE;
@@ -271,37 +262,6 @@ class AdvancedHUD extends BaseHUD
 		
 
 		gradeTxt.color = gradeColor;
-
-		fcTxt.color = (function()
-		{
-			var color:FlxColor = 0xFFA3A3A3;
-			if (comboBreaks == 0)
-			{
-				if (judgements.get("bad") > 0 || judgements.get("shit") > 0)
-					color = 0xFFFFFFFF;
-				else if (judgements.get("good") > 0)
-				{
-					color = judgeColours.get("good");
-					if (judgements.get("good") == 1)
-						color.saturation *= 0.75;
-				}
-				else if (judgements.get("sick") > 0)
-				{
-					color = judgeColours.get("sick");
-					if (judgements.get("sick") == 1)
-						color.saturation *= 0.75;
-				}
-				else if (judgements.get("epic") > 0)
-				{
-					color = judgeColours.get("epic");
-				}
-			}
-
-			if (ratingFC == 'Fail')
-				color = judgeColours.get("miss");
-
-			return color;
-		})();
 	}
 
 	override function changedOptions(changed:Array<String>){
@@ -349,24 +309,10 @@ class AdvancedHUD extends BaseHUD
 
 	override function update(elapsed:Float)
 	{
-/* 		scoreTxt.text = (songHighscore != 0 && score > songHighscore ? 'Hi-score: ' : 'Score: ')
-			+ '$score | Misses: $misses | Rating: '
-			+ (grade != '?' ? Highscore.floorDecimal(ratingPercent * 100, 2) + '% / ${grade} [$ratingFC]' : grade); */
-
-		var displayedScore = Std.string(score);
-		if (displayedScore.length > 7){
-			if(score < 0)
-				displayedScore = '-999999';
-			else
-				displayedScore = '9999999';
-		}
-
 		gradeTxt.text = grade;
 		if (hudPosition == 'Right')gradeTxt.x = FlxG.width - gradeTxt.width - 20;
 
-		scoreTxt.text = displayedScore;
-		scoreTxt.color = !PlayState.instance.saveScore?0x818181 : ((songHighscore != 0 && score > songHighscore) ? 0xFFD800 : 0xFFFFFF);
-
+		
 		ratingTxt.text = (grade != "?"?(Highscore.floorDecimal(ratingPercent * 100, 2) + "%"):"0%");
 		fcTxt.text = (ratingFC=='GFC' && ClientPrefs.wife3)?"FC":ratingFC;
 		
@@ -376,9 +322,9 @@ class AdvancedHUD extends BaseHUD
 		if(peakCombo < combo)peakCombo = combo;
 		pcTxt.text = "Peak Combo: " + Std.string(peakCombo);
 		
-		for(k in judgements.keys()){
+		for (k in stats.judgements.keys()){
 			if (judgeTexts.exists(k))
-				judgeTexts.get(k).text = Std.string(judgements.get(k));
+				judgeTexts.get(k).text = Std.string(stats.judgements.get(k));
 		}
 		super.update(elapsed);
 
@@ -398,76 +344,76 @@ class AdvancedHUD extends BaseHUD
 		}
 	}
 
-	override function set_misses(val:Int){
-		if(misses!=val){
-			misses = val;
-			var judgeName = judgeNames.get('miss');
-			var judgeTxt = judgeTexts.get('miss');
-			if (ClientPrefs.scoreZoom)
-			{
-				if (judgeName != null)
+	function statChanged(stat:String, val:Dynamic){
+		switch(stat){
+			case 'score':
+				var displayedScore = Std.string(val);
+				if (displayedScore.length > 7)
 				{
+					if (score < 0)
+						displayedScore = '-999999';
+					else
+						displayedScore = '9999999';
+				}
 
-					FlxTween.cancelTweensOf(judgeName.scale);
-					judgeName.scale.set(1.075, 1.075);
-					FlxTween.tween(judgeName.scale, {x: 1, y: 1}, 0.2);
-				}
-			}
-			if (judgeTxt != null)
-			{
-				if (ClientPrefs.scoreZoom){
-					FlxTween.cancelTweensOf(judgeTxt.scale);
-					judgeTxt.scale.set(1.075, 1.075);
-					FlxTween.tween(judgeTxt.scale, {x: 1, y: 1}, 0.2);
-				}
-				judgeTxt.text = Std.string(val);
-			}
-		}
-		return misses;
-	}
-
-	override function set_comboBreaks(val:Int)
-	{
-		if (comboBreaks != val)
-		{
-			comboBreaks = val;
-			var judgeName = judgeNames.get('cb');
-			var judgeTxt = judgeTexts.get('cb');
-			if (ClientPrefs.scoreZoom)
-			{
-				if (judgeName != null)
-				{
-					FlxTween.cancelTweensOf(judgeName.scale);
-					judgeName.scale.set(1.075, 1.075);
-					FlxTween.tween(judgeName.scale, {x: 1, y: 1}, 0.2);
-				}
-			}
-			if (judgeTxt != null)
-			{
+				scoreTxt.text = displayedScore;
+				scoreTxt.color = !PlayState.instance.saveScore ? 0x818181 : ((songHighscore != 0 && score > songHighscore) ? 0xFFD800 : 0xFFFFFF);
+			case 'grade':
+				FlxTween.cancelTweensOf(gradeTxt.scale);
+				gradeTxt.scale.set(1.2, 1.2);
+				FlxTween.tween(gradeTxt.scale, {x: 1, y: 1}, 0.2, {ease: FlxEase.circOut});
+			case 'misses':
+				var judgeName = judgeNames.get('miss');
+				var judgeTxt = judgeTexts.get('miss');
 				if (ClientPrefs.scoreZoom)
 				{
-					FlxTween.cancelTweensOf(judgeTxt.scale);
-					judgeTxt.scale.set(1.075, 1.075);
-					FlxTween.tween(judgeTxt.scale, {x: 1, y: 1}, 0.2);
+					if (judgeName != null)
+					{
+						FlxTween.cancelTweensOf(judgeName.scale);
+						judgeName.scale.set(1.075, 1.075);
+						FlxTween.tween(judgeName.scale, {x: 1, y: 1}, 0.2);
+					}
 				}
-				judgeTxt.text = Std.string(val);
-			}
+				if (judgeTxt != null)
+				{
+					if (ClientPrefs.scoreZoom)
+					{
+						FlxTween.cancelTweensOf(judgeTxt.scale);
+						judgeTxt.scale.set(1.075, 1.075);
+						FlxTween.tween(judgeTxt.scale, {x: 1, y: 1}, 0.2);
+					}
+					judgeTxt.text = Std.string(val);
+				}
+			case 'comboBreaks':
+				var judgeName = judgeNames.get('cb');
+				var judgeTxt = judgeTexts.get('cb');
+				if (ClientPrefs.scoreZoom)
+				{
+					if (judgeName != null)
+					{
+						FlxTween.cancelTweensOf(judgeName.scale);
+						judgeName.scale.set(1.075, 1.075);
+						FlxTween.tween(judgeName.scale, {x: 1, y: 1}, 0.2);
+					}
+				}
+				if (judgeTxt != null)
+				{
+					if (ClientPrefs.scoreZoom)
+					{
+						FlxTween.cancelTweensOf(judgeTxt.scale);
+						judgeTxt.scale.set(1.075, 1.075);
+						FlxTween.tween(judgeTxt.scale, {x: 1, y: 1}, 0.2);
+					}
+					judgeTxt.text = Std.string(val);
+				}
+			case 'ratingPercent':
+				if (ClientPrefs.scoreZoom)
+				{
+					FlxTween.cancelTweensOf(ratingTxt.scale);
+					ratingTxt.scale.set(1.075, 1.075);
+					FlxTween.tween(ratingTxt.scale, {x: 1, y: 1}, 0.2);
+				}
 		}
-		return comboBreaks;
-	}
-
-	override function set_ratingPercent(val:Float)
-	{
-		if (ratingPercent!=val){
-			ratingPercent = val;
-			if (ClientPrefs.scoreZoom)
-			{
-				FlxTween.cancelTweensOf(ratingTxt.scale);
-				ratingTxt.scale.set(1.075, 1.075);
-				FlxTween.tween(ratingTxt.scale, {x: 1, y: 1}, 0.2);
-			}
-		}
-		return ratingPercent;
 	}
 
 	
@@ -476,7 +422,7 @@ class AdvancedHUD extends BaseHUD
 		var hitTime = note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset;
 
 		if (ClientPrefs.hitbar)
-			hitbar.addHit(hitTime);
+			hitbar.addHit(-hitTime);
 		if (ClientPrefs.scoreZoom)
 		{
 			FlxTween.cancelTweensOf(scoreTxt.scale);
@@ -498,6 +444,36 @@ class AdvancedHUD extends BaseHUD
 			}
 
 		}
+		fcTxt.color = (function()
+		{
+			var color:FlxColor = 0xFFA3A3A3;
+			if (comboBreaks == 0)
+			{
+				if (stats.judgements.get("bad") > 0 || stats.judgements.get("shit") > 0)
+					color = 0xFFFFFFFF;
+				else if (stats.judgements.get("good") > 0)
+				{
+					color = judgeColours.get("good");
+					if (stats.judgements.get("good") == 1)
+						color.saturation *= 0.75;
+				}
+				else if (stats.judgements.get("sick") > 0)
+				{
+					color = judgeColours.get("sick");
+					if (stats.judgements.get("sick") == 1)
+						color.saturation *= 0.75;
+				}
+				else if (stats.judgements.get("epic") > 0)
+				{
+					color = judgeColours.get("epic");
+				}
+			}
+
+			if (ratingFC == 'Fail')
+				color = judgeColours.get("miss");
+
+			return color;
+		})();
 	}
 
 	override public function beatHit(beat:Int)

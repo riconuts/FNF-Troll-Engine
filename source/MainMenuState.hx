@@ -26,7 +26,7 @@ class ZSprite extends FlxSprite
 
 class MainMenuState extends MusicBeatState {
 	public static var engineVersion:String = '0.2.0'; // Used for autoupdating n stuff
-	public static var betaVersion(get, default):String = 'beta.5'; // beta version, make blank if not on a beta version, otherwise do it based on semantic versioning (alpha.1, beta.1, rc.1, etc)
+	public static var betaVersion(get, default):String = 'beta.6'; // beta version, make blank if not on a beta version, otherwise do it based on semantic versioning (alpha.1, beta.1, rc.1, etc)
 	public static var beta:Bool = betaVersion.trim() != '';
 	@:isVar
 	public static var displayedVersion(get, null):String = '';

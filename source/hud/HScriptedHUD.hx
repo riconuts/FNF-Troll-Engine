@@ -6,9 +6,9 @@ import scripts.FunkinHScript;
 
 class HScriptedHUD extends BaseHUD {
 	private var script:FunkinHScript;
-	override public function new(iP1:String, iP2:String, songName:String, script:FunkinHScript)
+	override public function new(iP1:String, iP2:String, songName:String, stats:Stats, script:FunkinHScript)
 	{
-		super(iP1, iP2, songName);
+		super(iP1, iP2, songName, stats);
 		this.script = script;
 		script.set("this", this);
 
@@ -122,12 +122,12 @@ class HScriptedHUD extends BaseHUD {
 
 	// easier constructors
 
-	public static function fromString(iP1:String, iP2:String, songName:String, scriptSource:String):HScriptedHUD
+	public static function fromString(iP1:String, iP2:String, songName:String, stats:Stats, scriptSource:String):HScriptedHUD
 	{
-		return new HScriptedHUD(iP1, iP2, songName, FunkinHScript.fromString(scriptSource, "HScriptedHUD"));
+		return new HScriptedHUD(iP1, iP2, songName, stats, FunkinHScript.fromString(scriptSource, "HScriptedHUD"));
 	}
 
-	public static function fromFile(iP1:String, iP2:String, songName:String, fileName:String):Null<HScriptedHUD>
+	public static function fromFile(iP1:String, iP2:String, songName:String, stats:Stats, fileName:String):Null<HScriptedHUD>
 	{
 		var fileName:String = '$fileName.hscript';
 		for (file in [#if MODS_ALLOWED Paths.modFolders(fileName), #end Paths.getPreloadPath(fileName)])
@@ -135,14 +135,14 @@ class HScriptedHUD extends BaseHUD {
 			if (!Paths.exists(file))
 				continue;
 
-			return new HScriptedHUD(iP1, iP2, songName, FunkinHScript.fromFile(file));
+			return new HScriptedHUD(iP1, iP2, songName, stats, FunkinHScript.fromFile(file));
 		}
 
 		trace('HUD script: $fileName not found!');
 		return null;
 	}
 
-	public static function fromName(iP1:String, iP2:String, songName:String, scriptName:String):Null<HScriptedHUD>
+	public static function fromName(iP1:String, iP2:String, songName:String, stats:Stats, scriptName:String):Null<HScriptedHUD>
 	{
 		var fileName:String = 'scripts/$scriptName.hscript';
 		for (file in [#if MODS_ALLOWED Paths.modFolders(fileName), #end Paths.getPreloadPath(fileName)])
@@ -154,6 +154,7 @@ class HScriptedHUD extends BaseHUD {
 				iP1, 
 				iP2, 
 				songName, 
+				stats,
 				FunkinHScript.fromFile(file)
 			);
 		}
