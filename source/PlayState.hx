@@ -2563,7 +2563,7 @@ class PlayState extends MusicBeatState
 
 	function resyncVocals():Void
 	{
-		if(finishTimer != null || transitioning || !SONG.needsVoices)
+		if(finishTimer != null || transitioning || isDead || !SONG.needsVoices)
 			return;
 
 		if(showDebugTraces)
@@ -2899,6 +2899,10 @@ class PlayState extends MusicBeatState
 					return true;
 				}else{
 					var char = playOpponent ? dad : boyfriend;
+					
+					inst.stop();
+					vocals.stop();
+					
 					openSubState(new GameOverSubstate(
 						char.getScreenPosition().x - char.positionArray[0],
 						char.getScreenPosition().y - char.positionArray[1],
