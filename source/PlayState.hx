@@ -644,14 +644,17 @@ class PlayState extends MusicBeatState
 
 		//// Asset precaching start
 		//// this could be moved to the loadingstate probably
-		var shitToLoad:Array<AssetPreload> = [
+		var shitToLoad:Array<AssetPreload> = [];
+		/*
 			{path: "sick"},
 			{path: "good"},
 			{path: "bad"},
 			{path: "shit"},
 			{path: "healthBar"}
 			//,{path: "combo"}
-		];
+		];*/
+		for (judgeData in judgeManager.judgmentData)
+			shitToLoad.push({path: judgeData.internalName});
 
 		for (number in 0...10)
 			shitToLoad.push({path: 'num$number'});
@@ -1343,8 +1346,7 @@ class PlayState extends MusicBeatState
 
 		inCutscene = false;
 
-		var startCntdown = callOnScripts('onStartCountdown');
-		if(startCntdown == Globals.Function_Stop){
+		if (callOnScripts('onStartCountdown') == Globals.Function_Stop){
 			return;
 		}
 
@@ -1459,6 +1461,8 @@ class PlayState extends MusicBeatState
 			if (sprImage != null){
 				if (countdownTwn != null)
 					countdownTwn.cancel();
+				if (countdownSpr != null)
+					remove(countdownSpr).destroy();
 
 				countdownSpr = new FlxSprite(0, 0, Paths.image(sprImage));
 				countdownSpr.scrollFactor.set();
@@ -1466,7 +1470,6 @@ class PlayState extends MusicBeatState
 				countdownSpr.cameras = [camHUD];
 
 				countdownSpr.screenCenter();
-				countdownSpr.antialiasing = ClientPrefs.globalAntialiasing;
 
 				insert(members.indexOf(notes), countdownSpr);
 
@@ -1476,30 +1479,27 @@ class PlayState extends MusicBeatState
 						countdownTwn.destroy();
 						countdownTwn = null;
 						remove(countdownSpr).destroy();
+						countdownSpr = null;
 					}
 				});
 			}
 
-			var sound = '';
-			switch (swagCounter){
-				case 0:
-					sound = 'intro3' + introSoundsSuffix;
-				case 1:
-					sound = 'intro2' + introSoundsSuffix;
-				case 2:
-					sound = 'intro1' + introSoundsSuffix;
-				case 3:
-					sound = 'introGo' + introSoundsSuffix;
-			}
-			if(sound != ''){
+			var sound = switch (swagCounter){
+				case 0: 'intro3' + introSoundsSuffix;
+				case 1: 'intro2' + introSoundsSuffix;
+				case 2: 'intro1' + introSoundsSuffix;
+				case 3: 'introGo' + introSoundsSuffix;
+				default: null;
+			};
+			if(sound != null){
 				var snd = FlxG.sound.play(Paths.sound(sound), 0.6);
 				snd.endTime = snd.length;
-				snd.effect = ClientPrefs.ruin?sndEffect:null;
-				snd.onComplete = function(){
-					snd.volume = 0;
-				}
+				snd.effect = ClientPrefs.ruin ? sndEffect : null;
+				snd.onComplete = ()->{ snd.volume = 0; }
 			}
-/* 			notes.forEachAlive(function(note:Note) {
+			
+			/*
+				notes.forEachAlive(function(note:Note) {
 				if(ClientPrefs.opponentStrums || note.mustPress)
 				{
 					note.copyAlpha = false;
@@ -1508,7 +1508,8 @@ class PlayState extends MusicBeatState
 						note.alpha *= 0.35;
 					}
 				}
-			}); */
+			}); 
+			*/
 
 			callOnHScripts('onCountdownTick', [swagCounter, tmr]);
 			#if LUA_ALLOWED
