@@ -56,7 +56,6 @@ typedef FreeplayCategoryMetadata = {
 
 }
 
-//// a lot of the category code isn't needed so rewritting it would be good i think.
 class FreeplayState extends MusicBeatState
 {
 	var songs:Array<SongMetadata> = [];
@@ -120,7 +119,7 @@ class FreeplayState extends MusicBeatState
 				persistentUpdate = false;
 
 /* 				if (FlxG.keys.pressed.ALT){
-					var alters = SongChartSelec.getAlters(songButton.metadata);
+					var alters = SongChartSelec.getCharts(songButton.metadata);
 					if (alters.length > 0)
 						switchTo(new SongChartSelec(songButton.metadata, alters));
 				}else */
@@ -488,10 +487,18 @@ class FreeplayState extends MusicBeatState
 		{
 			openSubState(new GameplayChangersSubstate());
 		}
-		if (FlxG.keys.pressed.R && selectedSong != null)
+		else if (selectedSong != null)
 		{
-			Paths.currentModDirectory = selectedSong.folder;
-			openSubState(new ResetScoreSubState(selectedSong.songName, false));
+			if (FlxG.keys.justPressed.R){
+				Paths.currentModDirectory = selectedSong.folder;
+				openSubState(new ResetScoreSubState(selectedSong.songName, false));
+			}else if (FlxG.keys.justPressed.TAB){
+				var song = selectedSong.songName;
+				var scr = Highscore.getScore(song);
+				var rat = Highscore.floorDecimal(Highscore.getRating(song) * 100, 2);
+
+				trace('SONG: $song	| RATING: $rat%	| HI-SCORE: $scr');
+			}
 		}
 
 		var speed = FlxG.keys.pressed.SHIFT ? 2 : 1;
@@ -634,7 +641,6 @@ class FreeplayCategory extends flixel.group.FlxSpriteGroup{
 	}
 }
 
-/// ouhghhh just a little experiment
 class SongChartSelec extends MusicBeatState
 {
 	var songMeta:SongMetadata;
@@ -697,7 +703,7 @@ class SongChartSelec extends MusicBeatState
 		this.alters = alters;
 	}
 
-	public static function getAlters(metadata:SongMetadata) // dumb name
+	public static function getCharts(metadata:SongMetadata) // dumb name
 	{
 		Paths.currentModDirectory = metadata.folder;
 

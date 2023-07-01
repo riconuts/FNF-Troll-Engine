@@ -264,10 +264,10 @@ class FunkinHScript extends FunkinScript
 			set(variable, arg);
 		}
 		
+		var state:Any = PlayState.instance != null ? PlayState.instance : flixel.FlxG.state;
 		@:privateAccess
 		{
-			var state:Any = flixel.FlxG.state;
-			set("state", flixel.FlxG.state);
+			set("state", state);
 
 			if((state is PlayState) && state == PlayState.instance)
 			{
@@ -336,7 +336,7 @@ class FunkinHScript extends FunkinScript
 			CUSTOM_MINE: Judgment.CUSTOM_MINE
 		});
 
-		if(FlxG.state == PlayState.instance)
+		if(state == PlayState.instance)
 			set("judgeManager", PlayState.instance.judgeManager);
 		else
 			set("judgeManager", dummyManager);

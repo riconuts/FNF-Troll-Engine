@@ -62,7 +62,7 @@ class FunkinScript {
 			set('weekRaw', PlayState.storyWeek);
 			set('seenCutscene', PlayState.seenCutscene);
 			// set('week', WeekData.weeksList[PlayState.storyWeek]);
-			set('songLength', flixel.FlxG.sound.music.length);
+			
 			set('healthGainMult', PlayState.instance.healthGain);
 			set('healthLossMult', PlayState.instance.healthLoss);
 			set('instakillOnMiss', PlayState.instance.instakillOnMiss);
@@ -70,7 +70,6 @@ class FunkinScript {
 			set('disableModcharts', PlayState.instance.disableModcharts);
 			set('practice', PlayState.instance.practiceMode);
 			set('opponentPlay', PlayState.instance.playOpponent);
-			set('startedCountdown', false);
 			set("showDebugTraces", PlayState.instance.showDebugTraces);
 
 			set('mustHitSection', false);
@@ -79,6 +78,9 @@ class FunkinScript {
 
 			set("curSection", null);
 			set("sectionNumber", 0);
+
+			set('songLength', null);
+			set('startedCountdown', false);
 		}else{
 			set("inPlaystate", false);
 			set("showDebugTraces", Main.showDebugTraces);

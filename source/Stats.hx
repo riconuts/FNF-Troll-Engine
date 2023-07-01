@@ -226,6 +226,6 @@ class Stats {
 		ratingPercent = totalNotesHit / totalPlayed;
         grade = getGrade();
 		clearType = getClearType();
-		trace(score, grade, clearType);
+		// trace(score, grade, clearType);
     }
 }
