@@ -326,22 +326,28 @@ class AdvancedHUD extends BaseHUD
 			if (judgeTexts.exists(k))
 				judgeTexts.get(k).text = Std.string(stats.judgements.get(k));
 		}
-		super.update(elapsed);
-
-
-		var songCalc:Null<Float> = null;
-
-		if (ClientPrefs.timeBarType == 'Time Left')
-			songCalc = (songLength - time);
-		else if (ClientPrefs.timeBarType == 'Time Elapsed')
-			songCalc = time;
 		
-		if (songCalc != null){
-			var secondsTotal:Int = Math.floor(songCalc / 1000);
+		var timeCalc:Null<Float> = null;
+
+		switch (ClientPrefs.timeBarType){
+			case "Percentage":
+				timeTxt.text = Math.floor(time / songLength * 100) + "%";
+			case "Time Left":
+				timeCalc = (songLength - time);
+			case "Time Elapsed":
+				timeCalc = time;
+		}
+
+		if (timeCalc != null){
+			timeCalc /= FlxG.timeScale;
+
+			var secondsTotal:Int = Math.floor(timeCalc / 1000);
 			if (secondsTotal < 0) secondsTotal = 0;
 
 			timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
 		}
+
+		super.update(elapsed);
 	}
 
 	function statChanged(stat:String, val:Dynamic){

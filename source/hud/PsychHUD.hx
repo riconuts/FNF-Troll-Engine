@@ -158,6 +158,8 @@ class PsychHUD extends BaseHUD {
 	{
 		super.changedOptions(changed);
 
+		scoreTxt.y = healthBarBG.y + 48;
+
 		timeTxt.y = (ClientPrefs.downScroll ? FlxG.height - 44 : 19);
 		timeBarBG.y = timeTxt.y + (timeTxt.height * 0.25);
 		timeBar.y = timeBarBG.y + 5;
@@ -211,21 +213,27 @@ class PsychHUD extends BaseHUD {
 				judgeTexts.get(k).text = Std.string(judgements.get(k));
 		}
 		
-		super.update(elapsed);
+		var timeCalc:Null<Float> = null;
 
-		var songCalc:Null<Float> = null;
+		switch (ClientPrefs.timeBarType){
+			case "Percentage":
+				timeTxt.text = Math.floor(time / songLength * 100) + "%";
+			case "Time Left":
+				timeCalc = (songLength - time);
+			case "Time Elapsed":
+				timeCalc = time;
+		}
 
-		if (ClientPrefs.timeBarType == 'Time Left')
-			songCalc = (songLength - time);
-		else if (ClientPrefs.timeBarType == 'Time Elapsed')
-			songCalc = time;
-		
-		if (songCalc != null){
-			var secondsTotal:Int = Math.floor(songCalc / 1000);
+		if (timeCalc != null){
+			timeCalc /= FlxG.timeScale;
+
+			var secondsTotal:Int = Math.floor(timeCalc / 1000);
 			if (secondsTotal < 0) secondsTotal = 0;
 
 			timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
 		}
+
+		super.update(elapsed);
 	}
 
 
