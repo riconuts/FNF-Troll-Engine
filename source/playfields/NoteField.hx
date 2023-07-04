@@ -438,18 +438,22 @@ class NoteField extends FieldBase
 				strumOff *= scale;
 			}
 
-			var topWidth = FlxMath.lerp(tWid, bWid, prog) * scalePoint.x;
-			var botWidth = FlxMath.lerp(tWid, bWid, nextProg) * scalePoint.x;
-
 			scalePoint.set(1, 1);
 
 			var speed = songSpeed * hold.multSpeed * modManager.getValue("xmod", modNumber) * modManager.getValue('xmod${hold.noteData}', modNumber);
 
-			var info:RenderInfo = modManager.getExtraInfo((visualDiff + ((strumOff + strumSub) * 0.45)) * -speed,  strumDiff + strumOff + strumSub, curDecBeat, {
+			var info:RenderInfo = modManager.getExtraInfo((visualDiff + ((strumOff + strumSub) * 0.45)) * -speed, strumDiff + strumOff + strumSub, curDecBeat,
+			{
 				alpha: hold.alpha,
 				glow: 0,
 				scale: scalePoint
 			}, hold, modNumber, hold.noteData);
+			
+			var topWidth = FlxMath.lerp(tWid, bWid, prog) * scalePoint.x;
+			var botWidth = FlxMath.lerp(tWid, bWid, nextProg) * scalePoint.x;
+
+			
+
 
 			for (_ in 0...4)
 			{

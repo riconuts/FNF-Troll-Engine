@@ -16,13 +16,12 @@ class ScaleModifier extends NoteModifier {
 	function daScale(sprite:Dynamic, scale:FlxPoint, data:Int, player:Int)
 	{
 		var y = scale.y;
-		scale.x *= 1 - getValue(player);
-		scale.y *= 1 - getValue(player);
-		var tinyX = getSubmodValue("tinyX", player) + getSubmodValue('tiny${data}X', player);
-		var tinyY = getSubmodValue("tinyY", player) + getSubmodValue('tiny${data}Y', player);
+		var tiny = getValue(player);
+		var tinyX = (getSubmodValue("tinyX", player) + getSubmodValue('tiny${data}X', player));
+		var tinyY = (getSubmodValue("tinyY", player) + getSubmodValue('tiny${data}Y', player));
 
-		scale.x *= 1 - tinyX;
-		scale.y *= 1 - tinyY;
+		scale.x *= Math.pow(0.5, tinyX) * Math.pow(0.5, tiny);
+		scale.y *= Math.pow(0.5, tinyY) * Math.pow(0.5, tiny);
 		var angle = 0;
 
 		var stretch = getSubmodValue("stretch", player) + getSubmodValue('stretch${data}', player);
@@ -49,7 +48,35 @@ class ScaleModifier extends NoteModifier {
 		return true;
 
 	override function ignorePos()
-		return true;
+		return false;
+
+	override function getPos(visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
+	{
+		var tiny = getValue(player);
+		var tinyX = (getSubmodValue("tinyX", player) + getSubmodValue('tiny${data}X', player));
+
+		var tinyPerc = Math.min(Math.pow(0.5, tinyX) * Math.pow(0.5, tiny), 1);
+		switch (player)
+		{
+			case 0:
+				pos.x -= FlxG.width * 0.5 - Note.swagWidth * 2 - 100;
+			case 1:
+				pos.x += FlxG.width * 0.5 - Note.swagWidth * 2 - 100;
+		}
+		pos.x -= FlxG.width / 2;
+		pos.x *= tinyPerc;
+		pos.x += FlxG.width / 2;
+		switch (player)
+		{
+			case 0:
+				pos.x += FlxG.width * 0.5 - Note.swagWidth * 2 - 100;
+			case 1:
+				pos.x -= FlxG.width * 0.5 - Note.swagWidth * 2 - 100;
+		} 
+
+		return pos;
+	}
+
 
 	override function isRenderMod()
 		return true;

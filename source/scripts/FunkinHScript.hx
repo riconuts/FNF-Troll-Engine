@@ -336,7 +336,7 @@ class FunkinHScript extends FunkinScript
 			CUSTOM_MINE: Judgment.CUSTOM_MINE
 		});
 
-		if(state == PlayState.instance)
+		if ((state is PlayState))
 			set("judgeManager", PlayState.instance.judgeManager);
 		else
 			set("judgeManager", dummyManager);
