@@ -1049,6 +1049,7 @@ class PlayState extends MusicBeatState
 		add(botplayTxt);
 		add(grpNoteSplashes);
 
+		/*
 		if(SONG.notes[0].mustHitSection){
 			var cam = boyfriend.getCamera();
 			camFollow.set(cam[0], cam[1]);
@@ -1061,6 +1062,7 @@ class PlayState extends MusicBeatState
 		}
 		sectionCamera.copyFrom(camFollow);
 		camFollowPos.setPosition(camFollow.x, camFollow.y);
+		*/
 
 		super.create();
 
@@ -1090,11 +1092,10 @@ class PlayState extends MusicBeatState
 	function setStageData(stageData:StageFile)
 	{
 		defaultCamZoom = stageData.defaultZoom;
-		FlxG.camera.zoom = defaultCamZoom;
+		camGame.zoom = defaultCamZoom;
 
 		var color = FlxColor.fromString(stageData.bg_color);
 		camGame.bgColor = color != null ? color : FlxColor.BLACK;
-		
 
 		BF_X = stageData.boyfriend[0];
 		BF_Y = stageData.boyfriend[1];
