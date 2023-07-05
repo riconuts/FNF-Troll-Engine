@@ -74,7 +74,7 @@ class BaseHUD extends FlxSpriteGroup {
 	public var npsPeak(get, null):Int = 0;
 	function get_npsPeak()return stats.npsPeak;
 	public var songPercent(default, set):Float = 0;
-	public var updateTime:Bool = (ClientPrefs.timeBarType != 'Disabled');
+	public var updateTime:Bool = (ClientPrefs.timeBarType != 'Disabled' && ClientPrefs.timeOpacity > 0);
 	@:isVar
 	public var judgements(get, null):Map<String, Int>;
 	function get_judgements()return stats.judgements;

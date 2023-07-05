@@ -270,28 +270,38 @@ class AdvancedHUD extends BaseHUD
 		healthBar.iconP1.y = healthBar.y - 75;
 		healthBar.iconP2.y = healthBar.y - 75;
 
-		timeTxt.y = (ClientPrefs.downScroll ? FlxG.height - 44 : 19);
-		timeBarBG.y = timeTxt.y + (timeTxt.height * 0.25);
-		timeBar.y = timeBarBG.y + 5;
-		timeBar.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
-		timeTxt.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
-		hitbar.visible = ClientPrefs.hitbar;
-		npsTxt.visible = ClientPrefs.npsDisplay;
+		updateTime = (ClientPrefs.timeBarType != 'Disabled' && ClientPrefs.timeOpacity > 0);
 
 		timeTxt.visible = updateTime;
 		timeBarBG.visible = updateTime;
 		timeBar.visible = updateTime;
 
-		if (ClientPrefs.timeBarType == 'Song Name')
-		{
-			timeTxt.text = songName;
-			timeTxt.size = 24;
-			timeTxt.y += 3;
+		if (updateTime){
+			timeTxt.y = (ClientPrefs.downScroll ? FlxG.height - 44 : 19);
+			timeBarBG.y = timeTxt.y + (timeTxt.height * 0.25);
+			timeBar.y = timeBarBG.y + 5;
+			timeBar.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
+			timeTxt.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
+
+			if (ClientPrefs.timeBarType == 'Song Name')
+			{
+				timeTxt.text = songName;
+				timeTxt.size = 24;
+				timeTxt.y += 3;
+			}
+			else{
+				timeTxt.text = "";
+				timeTxt.size = 32;
+			}
 		}
-		else
-			timeTxt.size = 32;
+
 		pcTxt.screenCenter(Y);
 		pcTxt.y -= 5 - (25 * (ClientPrefs.npsDisplay ? npsIdx + 1 : npsIdx));
+
+		npsTxt.visible = ClientPrefs.npsDisplay;
+
+		hitbar.visible = ClientPrefs.hitbar;
+
 		if (ClientPrefs.hitbar)
 		{
 			hitbar.screenCenter(XY);
@@ -327,24 +337,26 @@ class AdvancedHUD extends BaseHUD
 				judgeTexts.get(k).text = Std.string(stats.judgements.get(k));
 		}
 		
-		var timeCalc:Null<Float> = null;
+		if (updateTime){
+			var timeCalc:Null<Float> = null;
 
-		switch (ClientPrefs.timeBarType){
-			case "Percentage":
-				timeTxt.text = Math.floor(time / songLength * 100) + "%";
-			case "Time Left":
-				timeCalc = (songLength - time);
-			case "Time Elapsed":
-				timeCalc = time;
-		}
+			switch (ClientPrefs.timeBarType){
+				case "Percentage":
+					timeTxt.text = Math.floor(time / songLength * 100) + "%";
+				case "Time Left":
+					timeCalc = (songLength - time);
+				case "Time Elapsed":
+					timeCalc = time;
+			}
 
-		if (timeCalc != null){
-			timeCalc /= FlxG.timeScale;
+			if (timeCalc != null){
+				timeCalc /= FlxG.timeScale;
 
-			var secondsTotal:Int = Math.floor(timeCalc / 1000);
-			if (secondsTotal < 0) secondsTotal = 0;
+				var secondsTotal:Int = Math.floor(timeCalc / 1000);
+				if (secondsTotal < 0) secondsTotal = 0;
 
-			timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
+				timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
+			}
 		}
 
 		super.update(elapsed);

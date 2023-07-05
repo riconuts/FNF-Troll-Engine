@@ -45,39 +45,31 @@ class PsychHUD extends BaseHUD {
 		scoreTxt.borderSize = 1.25;
 		scoreTxt.visible = scoreTxt.alpha > 0;
 
-		var idx:Int = 0;
 		if (ClientPrefs.judgeCounter != 'Off')
 		{
-			for (judgment in displayedJudges)
+			var textWidth = ClientPrefs.judgeCounter == 'Shortened' ? 150 : 200;
+			var textPosX = ClientPrefs.hudPosition == 'Right' ? (FlxG.width - 5 - textWidth) : 5;
+			var textPosY = (FlxG.height - displayedJudges.length*25) * 0.5;
+
+			for (idx in 0...displayedJudges.length)
 			{
-				var text = new FlxText(0, 0, 200, displayNames.get(judgment), 20);
+				var judgment = displayedJudges[idx];
+
+				var text = new FlxText(textPosX, textPosY + idx*25, textWidth, displayNames.get(judgment), 20);
 				text.setFormat(Paths.font("calibrib.ttf"), 24, judgeColours.get(judgment), LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-				text.screenCenter(Y);
-				text.y -= 35 - (25 * idx);
-				text.x += 20 - 15;
 				text.scrollFactor.set();
 				text.borderSize = 1.25;
 				add(text);
 
-				var numb = new FlxText(0, 0, 200, "0", 20);
+				var numb = new FlxText(textPosX, text.y, textWidth, "0", 20);
 				numb.setFormat(Paths.font("calibri.ttf"), 24, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-				numb.screenCenter(Y);
-				numb.y -= 35 - (25 * idx);
-				numb.x += 25 - 15;
 				numb.scrollFactor.set();
 				numb.borderSize = 1.25;
 				add(numb);
 
 				judgeTexts.set(judgment, numb);
 				judgeNames.set(judgment, text);
-				idx++;
 			}
-		}
-
-		if (ClientPrefs.hudPosition == 'Right')
-		{
-			for (obj in members)
-				obj.x = FlxG.width - obj.width - obj.x;
 		}
 
 
@@ -160,26 +152,32 @@ class PsychHUD extends BaseHUD {
 
 		scoreTxt.y = healthBarBG.y + 48;
 
-		timeTxt.y = (ClientPrefs.downScroll ? FlxG.height - 44 : 19);
-		timeBarBG.y = timeTxt.y + (timeTxt.height * 0.25);
-		timeBar.y = timeBarBG.y + 5;
-		timeBar.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
-		timeTxt.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
-		hitbar.visible = ClientPrefs.hitbar;
+		updateTime = (ClientPrefs.timeBarType != 'Disabled' && ClientPrefs.timeOpacity > 0);
 
 		timeTxt.visible = updateTime;
 		timeBarBG.visible = updateTime;
 		timeBar.visible = updateTime;
 
-		if (ClientPrefs.timeBarType == 'Song Name')
-		{
-			timeTxt.text = songName;
-			timeTxt.size = 24;
-			timeTxt.y += 3;
+		if (updateTime){
+			timeTxt.y = (ClientPrefs.downScroll ? FlxG.height - 44 : 19);
+			timeBarBG.y = timeTxt.y + (timeTxt.height * 0.25);
+			timeBar.y = timeBarBG.y + 5;
+			timeBar.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
+			timeTxt.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
+
+			if (ClientPrefs.timeBarType == 'Song Name')
+			{
+				timeTxt.text = songName;
+				timeTxt.size = 24;
+				timeTxt.y += 3;
+			}
+			else{
+				timeTxt.text = "";
+				timeTxt.size = 32;
+			}
 		}
-		else
-			timeTxt.size = 32;
-		
+
+		hitbar.visible = ClientPrefs.hitbar;
 
 		if (ClientPrefs.hitbar)
 		{
@@ -213,24 +211,26 @@ class PsychHUD extends BaseHUD {
 				judgeTexts.get(k).text = Std.string(judgements.get(k));
 		}
 		
-		var timeCalc:Null<Float> = null;
+		if (updateTime){
+			var timeCalc:Null<Float> = null;
 
-		switch (ClientPrefs.timeBarType){
-			case "Percentage":
-				timeTxt.text = Math.floor(time / songLength * 100) + "%";
-			case "Time Left":
-				timeCalc = (songLength - time);
-			case "Time Elapsed":
-				timeCalc = time;
-		}
+			switch (ClientPrefs.timeBarType){
+				case "Percentage":
+					timeTxt.text = Math.floor(time / songLength * 100) + "%";
+				case "Time Left":
+					timeCalc = (songLength - time);
+				case "Time Elapsed":
+					timeCalc = time;
+			}
 
-		if (timeCalc != null){
-			timeCalc /= FlxG.timeScale;
+			if (timeCalc != null){
+				timeCalc /= FlxG.timeScale;
 
-			var secondsTotal:Int = Math.floor(timeCalc / 1000);
-			if (secondsTotal < 0) secondsTotal = 0;
+				var secondsTotal:Int = Math.floor(timeCalc / 1000);
+				if (secondsTotal < 0) secondsTotal = 0;
 
-			timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
+				timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
+			}
 		}
 
 		super.update(elapsed);
