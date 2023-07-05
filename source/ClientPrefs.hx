@@ -164,7 +164,7 @@ class ClientPrefs
 				desc: "How to display the time bar",
 				type: Dropdown,
 				value: "Time Left",
-				data: ["options" => ["Time Left", "Time Elapsed", "Song Name", "Disabled"]]
+				data: ["options" => ["Time Left", "Time Elapsed", "Percentage", "Song Name", "Disabled"]]
 			},
 			"hudOpacity" => {
 				display: "HUD Opacity",

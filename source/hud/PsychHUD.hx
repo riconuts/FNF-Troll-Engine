@@ -1,26 +1,19 @@
 package hud;
 
-import PlayState.FNFHealthBar;
 import JudgmentManager.JudgmentData;
-import flixel.tweens.FlxEase;
-import flixel.util.FlxStringUtil;
-import flixel.ui.FlxBar;
 import flixel.util.FlxColor;
 import playfields.*;
 
 import flixel.tweens.FlxTween;
 import flixel.text.FlxText;
 
-class PsychHUD extends BaseHUD {
+class PsychHUD extends BaseHUD 
+{
 	public var judgeTexts:Map<String, FlxText> = [];
 	public var judgeNames:Map<String, FlxText> = [];
 	
 	public var scoreTxt:FlxText;
 	public var hitbar:Hitbar;
-	public var timeBar:FlxBar;
-	public var timeTxt:FlxText;
-
-	private var timeBarBG:AttachedSprite;
 
 	var hitbarTween:FlxTween;
 	var scoreTxtTween:FlxTween;
@@ -72,46 +65,7 @@ class PsychHUD extends BaseHUD {
 			}
 		}
 
-
-		timeTxt = new FlxText(PlayState.STRUM_X + (FlxG.width * 0.5) - 248, (ClientPrefs.downScroll ? FlxG.height - 44 : 19), 400, "", 32);
-		timeTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		timeTxt.scrollFactor.set();
-		timeTxt.alpha = 0;
-		timeTxt.borderSize = 2;
-		timeTxt.visible = updateTime;
-
-		if (ClientPrefs.timeBarType == 'Song Name')
-		{
-			timeTxt.text = songName;
-			timeTxt.size = 24;
-			timeTxt.y += 3;
-		}
-
-		timeBarBG = new AttachedSprite('timeBar');
-		timeBarBG.x = timeTxt.x;
-		timeBarBG.y = timeTxt.y + (timeTxt.height * 0.25);
-		timeBarBG.scrollFactor.set();
-		timeBarBG.alpha = 0;
-		timeBarBG.visible = updateTime;
-		timeBarBG.color = FlxColor.BLACK;
-		timeBarBG.xAdd = -5;
-		timeBarBG.yAdd = -5;
-		add(timeBarBG);
-
-		timeBar = new FlxBar(timeBarBG.x + 5, timeBarBG.y + 5, LEFT_TO_RIGHT, Std.int(timeBarBG.width - 10), Std.int(timeBarBG.height - 10), this,
-			'songPercent', 0, 1);
-		timeBar.scrollFactor.set();
-		timeBar.createFilledBar(0xFF000000, 0xFFFFFFFF);
-		timeBar.numDivisions = 800; // How much lag this causes?? Should i tone it down to idk, 400 or 200?
-		timeBar.alpha = 0;
-		timeBar.visible = updateTime;
-
-		add(timeBar);
-		add(timeTxt);
-		timeBarBG.sprTracker = timeBar;
-
 		//
-		
 		hitbar = new Hitbar();
 		hitbar.alpha = alpha;
 		hitbar.visible = ClientPrefs.hitbar;
@@ -128,54 +82,11 @@ class PsychHUD extends BaseHUD {
 		add(scoreTxt);
 	}
 
-	var tweenProg:Float = 0;
-
-	override public function songStarted()
-	{
-		FlxTween.num(0, 1, 0.5, {
-			ease: FlxEase.circOut,
-			onComplete: function(tw:FlxTween)
-			{
-				tweenProg = 1;
-			}
-		}, function(prog:Float)
-		{
-			tweenProg = prog;
-			timeBar.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
-			timeTxt.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
-		});
-	}
-
 	override function changedOptions(changed:Array<String>)
 	{
 		super.changedOptions(changed);
 
 		scoreTxt.y = healthBarBG.y + 48;
-
-		updateTime = (ClientPrefs.timeBarType != 'Disabled' && ClientPrefs.timeOpacity > 0);
-
-		timeTxt.visible = updateTime;
-		timeBarBG.visible = updateTime;
-		timeBar.visible = updateTime;
-
-		if (updateTime){
-			timeTxt.y = (ClientPrefs.downScroll ? FlxG.height - 44 : 19);
-			timeBarBG.y = timeTxt.y + (timeTxt.height * 0.25);
-			timeBar.y = timeBarBG.y + 5;
-			timeBar.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
-			timeTxt.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
-
-			if (ClientPrefs.timeBarType == 'Song Name')
-			{
-				timeTxt.text = songName;
-				timeTxt.size = 24;
-				timeTxt.y += 3;
-			}
-			else{
-				timeTxt.text = "";
-				timeTxt.size = 32;
-			}
-		}
 
 		hitbar.visible = ClientPrefs.hitbar;
 
@@ -192,11 +103,7 @@ class PsychHUD extends BaseHUD {
 				hitbar.y += 340;
 		}
 	}
-	override public function songEnding(){
-		timeBarBG.visible = false;
-		timeBar.visible = false;
-		timeTxt.visible = false;
-	}
+
 	override function update(elapsed:Float){
 		scoreTxt.text = (songHighscore != 0 && score > songHighscore ? 'Hi-score: ' : 'Score: ')
 			+ '$score | Combo Breaks: $comboBreaks | Rating: '
@@ -209,28 +116,6 @@ class PsychHUD extends BaseHUD {
 		{
 			if (judgeTexts.exists(k))
 				judgeTexts.get(k).text = Std.string(judgements.get(k));
-		}
-		
-		if (updateTime){
-			var timeCalc:Null<Float> = null;
-
-			switch (ClientPrefs.timeBarType){
-				case "Percentage":
-					timeTxt.text = Math.floor(time / songLength * 100) + "%";
-				case "Time Left":
-					timeCalc = (songLength - time);
-				case "Time Elapsed":
-					timeCalc = time;
-			}
-
-			if (timeCalc != null){
-				timeCalc /= FlxG.timeScale;
-
-				var secondsTotal:Int = Math.floor(timeCalc / 1000);
-				if (secondsTotal < 0) secondsTotal = 0;
-
-				timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
-			}
 		}
 
 		super.update(elapsed);

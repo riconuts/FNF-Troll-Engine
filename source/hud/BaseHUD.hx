@@ -1,5 +1,9 @@
 package hud;
 
+import flixel.tweens.*;
+import flixel.util.FlxStringUtil;
+import flixel.ui.FlxBar;
+import flixel.text.FlxText;
 import JudgmentManager.JudgmentData;
 import flixel.util.FlxColor;
 import PlayState.FNFHealthBar;
@@ -74,7 +78,7 @@ class BaseHUD extends FlxSpriteGroup {
 	public var npsPeak(get, null):Int = 0;
 	function get_npsPeak()return stats.npsPeak;
 	public var songPercent(default, set):Float = 0;
-	public var updateTime:Bool = (ClientPrefs.timeBarType != 'Disabled' && ClientPrefs.timeOpacity > 0);
+	public var updateTime:Bool = false;
 	@:isVar
 	public var judgements(get, null):Map<String, Int>;
 	function get_judgements()return stats.judgements;
@@ -86,7 +90,11 @@ class BaseHUD extends FlxSpriteGroup {
 	public var iconP1:HealthIcon;
 	public var iconP2:HealthIcon;
 
-	function get_healthBarBG()return healthBar.healthBarBG;
+	function get_healthBarBG() return healthBar.healthBarBG;
+
+	public var timeBar:FlxBar;
+	public var timeTxt:FlxText;
+	private var timeBarBG:AttachedSprite;
 
 	public function new(iP1:String, iP2:String, songName:String, stats:Stats)
 	{
@@ -99,6 +107,60 @@ class BaseHUD extends FlxSpriteGroup {
 		healthBar = new FNFHealthBar(iP1, iP2);
 		iconP1 = healthBar.iconP1;
 		iconP2 = healthBar.iconP2;
+
+		// prob gonna do my own time bar too lol but for now idc
+		timeTxt = new FlxText(PlayState.STRUM_X + (FlxG.width * 0.5) - 248, (ClientPrefs.downScroll ? FlxG.height - 44 : 19), 400, "", 32);
+		timeTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		timeTxt.scrollFactor.set();
+		timeTxt.borderSize = 2;
+
+		timeBarBG = new AttachedSprite('timeBar');
+		timeBarBG.x = timeTxt.x;
+		timeBarBG.y = timeTxt.y + (timeTxt.height * 0.25);
+		timeBarBG.scrollFactor.set();
+		timeBarBG.color = FlxColor.BLACK;
+		timeBarBG.xAdd = -5;
+		timeBarBG.yAdd = -5;
+		add(timeBarBG);
+
+		timeBar = new FlxBar(timeBarBG.x + 5, timeBarBG.y + 5, LEFT_TO_RIGHT, Std.int(timeBarBG.width - 10), Std.int(timeBarBG.height - 10), this,
+			'songPercent', 0, 1);
+		timeBar.scrollFactor.set();
+		timeBar.createFilledBar(0xFF000000, 0xFFFFFFFF);
+		timeBar.numDivisions = 800; // How much lag this causes?? Should i tone it down to idk, 400 or 200?
+
+		add(timeBar);
+		add(timeTxt);
+		timeBarBG.sprTracker = timeBar;
+
+		updateTimeBarType();
+	}
+
+	function updateTimeBarType(){	
+		updateTime = (ClientPrefs.timeBarType != 'Disabled' && ClientPrefs.timeOpacity > 0);
+
+		timeTxt.exists = updateTime;
+		timeBarBG.exists = updateTime;
+		timeBar.exists = updateTime;
+
+		if (updateTime){
+			timeTxt.y = (ClientPrefs.downScroll ? FlxG.height - 44 : 19);
+			timeBarBG.y = timeTxt.y + (timeTxt.height * 0.25);
+			timeBar.y = timeBarBG.y + 5;
+			timeBar.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
+			timeTxt.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
+
+			if (ClientPrefs.timeBarType == 'Song Name')
+			{
+				timeTxt.text = songName;
+				timeTxt.size = 24;
+				timeTxt.y += 3;
+			}
+			else{
+				timeTxt.text = "";
+				timeTxt.size = 32;
+			}
+		}
 	}
 
 	override public function update(elapsed:Float){
@@ -110,11 +172,32 @@ class BaseHUD extends FlxSpriteGroup {
 			var curTime:Float = Conductor.songPosition - ClientPrefs.noteOffset;
 			if (curTime < 0)
 				curTime = 0;
+			
 			songPercent = (curTime / songLength);
 			time = curTime;
-		}
-		super.update(elapsed);
 
+			var timeCalc:Null<Float> = null;
+
+			switch (ClientPrefs.timeBarType){
+				case "Percentage":
+					timeTxt.text = Math.floor(songPercent * 100) + "%";
+				case "Time Left":
+					timeCalc = (songLength - time);
+				case "Time Elapsed":
+					timeCalc = time;
+			}
+
+			if (timeCalc != null){
+				timeCalc /= FlxG.timeScale;
+
+				var secondsTotal:Int = Math.floor(timeCalc / 1000);
+				if (secondsTotal < 0) secondsTotal = 0;
+
+				timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
+			}
+		}
+
+		super.update(elapsed);
 	}
 
 	public function beatHit(beat:Int){
@@ -126,11 +209,37 @@ class BaseHUD extends FlxSpriteGroup {
 		healthBar.y = healthBarBG.y + 5;
 		healthBar.iconP1.y = healthBar.y - 75;
 		healthBar.iconP2.y = healthBar.y - 75;
+
+		trace(updateTime, ClientPrefs.timeBarType, ClientPrefs.timeOpacity);
+
+		updateTimeBarType();
 	}
+
+	var tweenProg:Float = 0;
+	public function songStarted(){
+		FlxTween.num(0, 1, 0.5, {
+			ease: FlxEase.circOut,
+			onComplete: function(tw:FlxTween)
+			{
+				tweenProg = 1;
+			}
+		}, function(prog:Float)
+		{
+			tweenProg = prog;
+			timeBar.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
+			timeTxt.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
+		});	
+	}
+
+	public function songEnding()
+	{
+		timeBarBG.visible = false;
+		timeBar.visible = false;
+		timeTxt.visible = false;
+	}
+
 	public function stepHit(step:Int){}
 	public function noteJudged(judge:JudgmentData, ?note:Note, ?field:PlayField){}
-	public function songStarted(){}
-	public function songEnding(){}
 	public function recalculateRating(){}
 
 	function set_songLength(value:Float)return songLength = value;

@@ -158,14 +158,9 @@ class PlayState extends MusicBeatState
 	var notefields:NotefieldManager = new NotefieldManager();
 	var sndFilter:ALFilter = AL.createFilter();
     var sndEffect:ALEffect = AL.createEffect();
-	public var showRating:Bool = true;
-	public var showCombo:Bool = false;
-	public var showComboNum:Bool = true;
 
 	public var showDebugTraces:Bool = #if debug true #else Main.showDebugTraces #end;
 
-	public static var difficulty:Int = 1; // for psych mod shit
-	public static var difficultyName:String = ''; // for psych mod shit
 	public var noteHits:Array<Float> = [];
 	public var nps:Int = 0;
 	public var currentSV:SpeedEvent = {position: 0, songTime:0, speed: 1};
@@ -188,21 +183,10 @@ class PlayState extends MusicBeatState
 	public static var splashSkin:String = '';
 
 	public var ratingStuff:Array<Array<Dynamic>> = Highscore.grades.get(ClientPrefs.gradeSet);
-	
-/* 	public static var ratingStuff:Array<Array<Dynamic>> = [
-		['You Suck!', 0.2], //From 0% to 19%
-		['Shit', 0.4], //From 20% to 39%
-		['Bad', 0.5], //From 40% to 49%
-		['Bruh', 0.6], //From 50% to 59%
-		['Meh', 0.69], //From 60% to 68%
-		['Nice', 0.7], //69%
-		['Good', 0.8], //From 70% to 79%
-		['Great', 0.9], //From 80% to 89%
-		['Sick!', 1], //From 90% to 99%
-		['Perfect!!', 1] //The value on this one isn't used actually, since Perfect is always "1"
-	]; */
-	
+	public var hud:BaseHUD;
 	public var scoreTxt:FlxText = new FlxText(); // just so psych mods n shit dont error
+	public var timingTxt:FlxText;
+
 	public var modchartTweens:Map<String, FlxTween> = new Map<String, FlxTween>();
 	public var modchartSprites:Map<String, ModchartSprite> = new Map<String, ModchartSprite>();
 	public var modchartTimers:Map<String, FlxTimer> = new Map<String, FlxTimer>();
@@ -228,18 +212,13 @@ class PlayState extends MusicBeatState
 	public var dadGroup:FlxSpriteGroup;
 	public var gfGroup:FlxSpriteGroup;
 
-	public var songSpeedTween:FlxTween;
-	public var songSpeed(default, set):Float = 1;
-	public var songSpeedType:String = "multiplicative";
-	public var noteKillOffset:Float = 350;
-
-	public var playbackRate:Float = 1;
-
 	public static var curStage:String = '';
 	public static var SONG:SwagSong = null;
 	public static var isStoryMode:Bool = false;
 	public static var storyWeek:Int = 0;
 	public static var storyPlaylist:Array<String> = [];
+	public static var difficulty:Int = 1; // for psych mod shit
+	public static var difficultyName:String = ''; // for psych mod shit
 
 	public var spawnTime:Float = 2000;
 
@@ -267,18 +246,17 @@ class PlayState extends MusicBeatState
 	public var dadField:PlayField;
 
 	public var playfields = new FlxTypedGroup<PlayField>();
-	public var hud:BaseHUD;
-
 	public var grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 
 	public var stageOpacity:FlxSprite = new FlxSprite();
 	
 	////
-
+	public var showRating:Bool = true;
+	public var showCombo:Bool = false;
+	public var showComboNum:Bool = true;
 	
 	public var ratingTxtGroup = new FlxTypedGroup<RatingSprite>();
 	public var comboNumGroup = new FlxTypedGroup<RatingSprite>();
-	public var timingTxt:FlxText;
 	
 	private var curSong:String = "";
 
@@ -340,7 +318,7 @@ class PlayState extends MusicBeatState
 	private var generatedMusic:Bool = false;
 	public var endingSong:Bool = false;
 	public var startingSong:Bool = false;
-	private var updateTime:Bool = true;
+
 	public static var chartingMode:Bool = false;
 
 	//Gameplay settings
@@ -352,6 +330,14 @@ class PlayState extends MusicBeatState
 
 	public var instakillOnMiss:Bool = false;
 	public var cpuControlled(default, set) = false;
+
+	public var playbackRate:Float = 1;
+
+	public var songSpeedTween:FlxTween;
+	public var songSpeed(default, set):Float = 1;
+	public var songSpeedType:String = "multiplicative";
+	public var noteKillOffset:Float = 350;
+
 	function set_cpuControlled(value){
 		cpuControlled = value;
 
@@ -746,9 +732,6 @@ class PlayState extends MusicBeatState
 		//// Asset precaching end
 
 		Conductor.songPosition = -5000;
-
-		updateTime = (ClientPrefs.timeBarType != 'Disabled');
-
 
 		var splash:NoteSplash = new NoteSplash(100, 100, 0);
 		splash.alpha = 0.0;
@@ -2214,76 +2197,74 @@ class PlayState extends MusicBeatState
 	}
 
 	public function optionsChanged(options:Array<String>){
-		hud.changedOptions(options);
+		if (options.length < 1)
+			return;
+
 		for(note in allNotes)
 			note.updateColours();
-		if (options.length > 0){
-			updateTime = (ClientPrefs.timeBarType != 'Disabled');
 			
-			if(options.contains("gradeSet"))
-				ratingStuff = Highscore.grades.get(ClientPrefs.gradeSet);
-			
-			var reBind:Bool = false;
-			PlayState.instance.callOnScripts('optionsChanged', [options]);
-			for(opt in options){
-				if(opt.startsWith("bind")){
-					reBind = true;
-				}
+		hud.changedOptions(options);
+		
+		if(options.contains("gradeSet"))
+			ratingStuff = Highscore.grades.get(ClientPrefs.gradeSet);
+		
+		var reBind:Bool = false;
+		PlayState.instance.callOnScripts('optionsChanged', [options]);
+		for(opt in options){
+			if(opt.startsWith("bind")){
+				reBind = true;
 			}
+		}
 
-			remove(ratingTxtGroup);
-			remove(comboNumGroup);
-			remove(timingTxt);
-			if(ClientPrefs.judgeBehind){
-				insert(members.indexOf(strumLineNotes) - 1, timingTxt);
-				insert(members.indexOf(timingTxt) - 1, comboNumGroup);
-				insert(members.indexOf(comboNumGroup) - 1, ratingTxtGroup);
-			}else{
-				insert(members.indexOf(notefields) + 1, timingTxt);
-				insert(members.indexOf(timingTxt) + 1, comboNumGroup);
-				insert(members.indexOf(comboNumGroup) + 1, ratingTxtGroup);
-			}
+		remove(ratingTxtGroup);
+		remove(comboNumGroup);
+		remove(timingTxt);
+		if(ClientPrefs.judgeBehind){
+			insert(members.indexOf(strumLineNotes) - 1, timingTxt);
+			insert(members.indexOf(timingTxt) - 1, comboNumGroup);
+			insert(members.indexOf(comboNumGroup) - 1, ratingTxtGroup);
+		}else{
+			insert(members.indexOf(notefields) + 1, timingTxt);
+			insert(members.indexOf(timingTxt) + 1, comboNumGroup);
+			insert(members.indexOf(comboNumGroup) + 1, ratingTxtGroup);
+		}
 
-			botplayTxt.y = (ClientPrefs.downScroll ? FlxG.height - 44 : 19) + 15 + (ClientPrefs.downScroll ? -78 : 55);
-			
-			for(field in playfields){
-				field.noteField.optimizeHolds = ClientPrefs.optimizeHolds;
-				field.noteField.drawDistMod = ClientPrefs.drawDistanceModifier;
-				field.noteField.holdSubdivisions = Std.int(ClientPrefs.holdSubdivs) + 1;
-			}
-			
+		botplayTxt.y = (ClientPrefs.downScroll ? FlxG.height - 44 : 19) + 15 + (ClientPrefs.downScroll ? -78 : 55);
+		
+		for(field in playfields){
+			field.noteField.optimizeHolds = ClientPrefs.optimizeHolds;
+			field.noteField.drawDistMod = ClientPrefs.drawDistanceModifier;
+			field.noteField.holdSubdivisions = Std.int(ClientPrefs.holdSubdivs) + 1;
+		}
+		
+		if(reBind){
+			debugKeysChart = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
+			debugKeysCharacter = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_2'));
+			debugKeysBotplay = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('botplay'));
 
-			if(reBind){
-				debugKeysChart = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
-				debugKeysCharacter = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_2'));
-				debugKeysBotplay = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('botplay'));
+			keysArray = [
+				ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_left')),
+				ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_down')),
+				ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_up')),
+				ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_right'))
+			];
 
-				keysArray = [
-					ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_left')),
-					ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_down')),
-					ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_up')),
-					ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_right'))
-				];
-
-				// unpress everything
-				for (field in playfields.members)
+			// unpress everything
+			for (field in playfields.members)
+			{
+				if (field.inControl && !field.autoPlayed && field.isPlayer)
 				{
-					if (field.inControl && !field.autoPlayed && field.isPlayer)
-					{
-						for (idx in 0...field.keysPressed.length)
-							field.keysPressed[idx] = false;
+					for (idx in 0...field.keysPressed.length)
+						field.keysPressed[idx] = false;
 
-						for (obj in field.strumNotes)
-						{
-							obj.playAnim("static");
-							obj.resetAnim = 0;
-						}
+					for (obj in field.strumNotes)
+					{
+						obj.playAnim("static");
+						obj.resetAnim = 0;
 					}
 				}
 			}
 		}
-		
-
 	}
 
 	override function draw(){
@@ -2594,8 +2575,6 @@ class PlayState extends MusicBeatState
 
 	override public function update(elapsed:Float)
 	{
-		hud.updateTime = updateTime;
-
 		for(field in playfields)
 			field.noteField.songSpeed = songSpeed;
 
@@ -2767,8 +2746,6 @@ class PlayState extends MusicBeatState
 			}else
 				Conductor.songPosition += addition;
 		}
-
-		hud.updateTime = updateTime;
 
 		if (startingSong)
 		{
@@ -3305,7 +3282,7 @@ class PlayState extends MusicBeatState
 	{
 		var finishCallback:Void->Void = endSong; //In case you want to change it in a specific song.
 
-		updateTime = false;
+		hud.updateTime = false;
 
 		inst.volume = 0;
 		inst.pause();
@@ -3355,11 +3332,11 @@ class PlayState extends MusicBeatState
 		}
 
 		hud.songEnding();
+		hud.updateTime = false;
 		canPause = false;
 		endingSong = true;
 		camZooming = false;
 		inCutscene = false;
-		updateTime = false;
 
 		deathCounter = 0;
 		seenCutscene = false;
