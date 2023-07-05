@@ -16,7 +16,7 @@ class ScaleModifier extends NoteModifier {
 	function daScale(sprite:Dynamic, scale:FlxPoint, data:Int, player:Int)
 	{
 		var y = scale.y;
-		var tiny = getValue(player);
+		var tiny = getValue(player) + getSubmodValue('tiny${data}', player);
 		var tinyX = (getSubmodValue("tinyX", player) + getSubmodValue('tiny${data}X', player));
 		var tinyY = (getSubmodValue("tinyY", player) + getSubmodValue('tiny${data}Y', player));
 
@@ -52,10 +52,8 @@ class ScaleModifier extends NoteModifier {
 
 	override function getPos(visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
 	{
-		var tiny = getValue(player);
-		var tinyX = (getSubmodValue("tinyX", player) + getSubmodValue('tiny${data}X', player));
-
-		var tinyPerc = Math.min(Math.pow(0.5, tinyX) * Math.pow(0.5, tiny), 1);
+		var tiny = getValue(player) + getSubmodValue('tiny${data}', player);
+		var tinyPerc = Math.min(Math.pow(0.5, tiny), 1);
 		switch (player)
 		{
 			case 0:
@@ -104,6 +102,7 @@ class ScaleModifier extends NoteModifier {
 
 		for (i in 0...4)
 		{
+			subMods.push('tiny${i}');
 			subMods.push('tiny${i}X');
 			subMods.push('tiny${i}Y');
 			subMods.push('squish${i}');
