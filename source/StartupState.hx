@@ -164,6 +164,7 @@ class StartupState extends FlxState
 
 	private var warning:FlxSprite;
 	private var step = 0;
+	private var nextState = TitleState;
 
 	override function update(elapsed)
 	{
@@ -181,11 +182,14 @@ class StartupState extends FlxState
 				step = 1;
 			case 1:
  				load();
-				TitleState.load();
+				if (Type.getClassFields(nextState).contains("load"))
+					nextState.load();
 				
+				#if (sys && debug)
 				var waitTime = 1.5 - Sys.cpuTime();
 				if (waitTime > 0) Sys.sleep(waitTime);
-				
+				#end
+
 				step = 2;
 			case 2:
  				FlxTween.tween(warning, {alpha: 0}, 1, {ease: FlxEase.expoIn, onComplete: function(twn){

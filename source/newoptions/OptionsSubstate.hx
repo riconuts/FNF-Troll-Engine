@@ -569,6 +569,15 @@ class OptionsSubstate extends MusicBeatSubstate
 		}
 		add(currentGroup);
 
+		////
+		selectableWidgetObjects = [
+			for (object in currentGroup.members){
+				if (currentWidgets.exists(object))
+					object;
+			}
+		];
+		////
+
 		optionDesc = new FlxText(5, FlxG.height - 48, 0, "", 20);
 		optionDesc.setFormat(Paths.font("calibri.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		optionDesc.textField.background = true;
@@ -585,14 +594,13 @@ class OptionsSubstate extends MusicBeatSubstate
 
 	function createWidget(name:String, drop:FlxSprite, text:FlxText, data:OptionData):Widget
 	{
+		var objects:FlxTypedGroup<FlxObject> = new FlxTypedGroup<FlxObject>();
 		var widget:Widget = {
 			type: data.type,
 			optionData: data,
 			locked: false,
-			data: ["objects" => new FlxTypedGroup<FlxObject>()]
+			data: ["objects" => objects]
 		}
-
-		var objects:FlxTypedGroup<FlxObject> = widget.data.get("objects");
 
 		switch (widget.type)
 		{
@@ -845,6 +853,71 @@ class OptionsSubstate extends MusicBeatSubstate
 				currentGroup = group;
 			}
 		}
+
+		////
+		selectableWidgetObjects = [
+			for (object in currentGroup.members){
+				if (currentWidgets.exists(object))
+					object;
+			}
+		];
+
+		changeWidget(null, true);
+	}
+
+	var selectableWidgetObjects:Array<FlxObject> = [];
+	var curOption:Null<Int> = null;
+	var curWidget:Widget;
+
+	function changeWidget(val:Null<Int>, ?isAbs:Bool = false){
+		var nextOption:Null<Int> = null; 
+
+		if (val != null)
+		{
+			if (curOption == null) curOption = (val<0) ? 0 : -1;
+
+			nextOption = isAbs ? val : (curOption + val);
+
+			if (nextOption < 0) nextOption = selectableWidgetObjects.length + nextOption;
+			nextOption = (selectableWidgetObjects.length > 0) ? (nextOption % selectableWidgetObjects.length) : 0;
+		}
+
+		// highlight and get the option text
+		var nextObject:Null<FlxText> = null;
+		for (idx in 0...selectableWidgetObjects.length)
+		{
+			var object:FlxText = cast selectableWidgetObjects[idx];
+
+			if (idx == nextOption){
+				nextObject = object;
+				object.color = FlxColor.YELLOW;
+			}else
+				object.color = FlxColor.WHITE;
+		}
+
+		// move the camera to the option if it's off-screen
+		if (nextObject != null){
+			var widget:Widget = currentWidgets.get(nextObject);
+			var optBox:FlxObject = widget.data.get("optionBox");
+
+			if (widget != null){
+				var cam = optBox.camera;
+
+				if (optBox.y < cam.scroll.y)
+					camFollow.y = nextOption==0 ? 0 : optBox.y;
+				else{
+					var camTail = cam.scroll.y + cam.height;
+					if (camTail < optBox.y)
+						camFollow.y += (optBox.y - camTail) + optBox.height;
+				}
+			}
+
+			curWidget = widget;
+		}else{
+			curWidget = null;
+		}
+
+		curOption = nextOption;
 	}
 
 	var scrubbingBar:FlxSprite; // TODO: maybe make the bar a seperate class and then have this handled in that class
@@ -1172,10 +1245,48 @@ class OptionsSubstate extends MusicBeatSubstate
 	{
 		if (subState == null)
 		{
-			if (controls.UI_LEFT_P)
-				changeCategory(-1);
-			else if (controls.UI_RIGHT_P)
+			if (FlxG.keys.justPressed.TAB)
 				changeCategory(1);
+
+			if (FlxG.keys.justPressed.UP)
+				changeWidget(-1);
+			if (FlxG.keys.justPressed.DOWN)
+				changeWidget(1);
+			if (FlxG.keys.justPressed.ENTER)
+			{
+				if (curWidget != null){
+					switch (curWidget.type){
+						case Toggle:
+							var checkbox:Checkbox = curWidget.data.get("checkbox");
+							checkbox.toggled = !checkbox.toggled;
+							changeToggleW(curWidget, checkbox.toggled);
+						case Button:
+							if (!curWidget.locked)
+								onButtonPressed(curWidget.optionData.data.get("optionName"));
+						default: 
+							// nothing dumbass						
+					}
+				}
+			}
+			if (FlxG.keys.anyJustPressed([LEFT, RIGHT])){
+				if (curWidget != null){
+					var change = 0;
+					if (FlxG.keys.justPressed.LEFT) change--;
+					if (FlxG.keys.justPressed.RIGHT) change++;
+
+					var sowy = actualOptions.get(curWidget.optionData.data.get("optionName"));
+					switch (curWidget.type){
+						case Number:
+							changeNumberW(curWidget, change * sowy.data.get("step"));
+						case Dropdown:
+							var allOptions:Array<String> = sowy.data.get("options");
+							var idx = FlxMath.wrap(allOptions.indexOf(sowy.value) + change, 0, allOptions.length-1);
+
+							changeDropdownW(curWidget, allOptions[idx]);
+						default:
+					}
+				}
+			}
 
 			if (FlxG.mouse.released)
 				scrubbingBar = null;
