@@ -907,8 +907,10 @@ class OptionsSubstate extends MusicBeatSubstate
 					camFollow.y = nextOption==0 ? 0 : optBox.y;
 				else{
 					var camTail = cam.scroll.y + cam.height;
-					if (camTail < optBox.y)
-						camFollow.y += (optBox.y - camTail) + optBox.height;
+					var optTail = optBox.y + optBox.height;
+
+					if (camTail < optTail)
+						camFollow.y += (optTail - camTail);
 				}
 			}
 
