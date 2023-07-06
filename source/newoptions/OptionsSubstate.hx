@@ -1257,14 +1257,15 @@ class OptionsSubstate extends MusicBeatSubstate
 			if (FlxG.keys.justPressed.ENTER)
 			{
 				if (curWidget != null){
+					var optionName = curWidget.optionData.data.get("optionName");
 					switch (curWidget.type){
 						case Toggle:
 							var checkbox:Checkbox = curWidget.data.get("checkbox");
 							checkbox.toggled = !checkbox.toggled;
-							changeToggleW(curWidget, checkbox.toggled);
+							changeToggle(optionName, checkbox.toggled);
 						case Button:
 							if (!curWidget.locked)
-								onButtonPressed(curWidget.optionData.data.get("optionName"));
+								onButtonPressed(optionName);
 						default: 
 							// nothing dumbass						
 					}
@@ -1276,15 +1277,16 @@ class OptionsSubstate extends MusicBeatSubstate
 					if (FlxG.keys.justPressed.LEFT) change--;
 					if (FlxG.keys.justPressed.RIGHT) change++;
 
-					var sowy = actualOptions.get(curWidget.optionData.data.get("optionName"));
+					var optionName = curWidget.optionData.data.get("optionName");
+					var sowy = actualOptions.get(optionName);
 					switch (curWidget.type){
 						case Number:
-							changeNumberW(curWidget, change * sowy.data.get("step"));
+							changeNumber(optionName, change * sowy.data.get("step"));
 						case Dropdown:
 							var allOptions:Array<String> = sowy.data.get("options");
 							var idx = FlxMath.wrap(allOptions.indexOf(sowy.value) + change, 0, allOptions.length-1);
 
-							changeDropdownW(curWidget, allOptions[idx]);
+							changeDropdown(optionName, allOptions[idx]);
 						default:
 					}
 				}

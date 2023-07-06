@@ -142,24 +142,22 @@ class BaseHUD extends FlxSpriteGroup {
 		timeTxt.exists = updateTime;
 		timeBarBG.exists = updateTime;
 		timeBar.exists = updateTime;
+		
+		timeTxt.y = (ClientPrefs.downScroll ? FlxG.height - 44 : 19);
+		timeBarBG.y = timeTxt.y + (timeTxt.height * 0.25);
+		timeBar.y = timeBarBG.y + 5;
+		timeBar.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
+		timeTxt.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
 
-		if (updateTime){
-			timeTxt.y = (ClientPrefs.downScroll ? FlxG.height - 44 : 19);
-			timeBarBG.y = timeTxt.y + (timeTxt.height * 0.25);
-			timeBar.y = timeBarBG.y + 5;
-			timeBar.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
-			timeTxt.alpha = ClientPrefs.timeOpacity * alpha * tweenProg;
-
-			if (ClientPrefs.timeBarType == 'Song Name')
-			{
-				timeTxt.text = songName;
-				timeTxt.size = 24;
-				timeTxt.y += 3;
-			}
-			else{
-				timeTxt.text = "";
-				timeTxt.size = 32;
-			}
+		if (ClientPrefs.timeBarType == 'Song Name')
+		{
+			timeTxt.text = songName;
+			timeTxt.size = 24;
+			timeTxt.y += 3;
+		}
+		else{
+			timeTxt.text = "";
+			timeTxt.size = 32;
 		}
 	}
 
