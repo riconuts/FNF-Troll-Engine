@@ -40,8 +40,9 @@ class ComboOffsetSubstate extends MusicBeatSubstate{
                 default: 0xFFFFFFFF;
             }
         }
-        trace(ratingName, ratingColor.toHexString(false, false));
+        //trace(ratingName, ratingColor.toHexString(false, false));
             
+        
         rating = RatingSprite.newRating();
         rating.scrollFactor.set();
         rating.cameras = [camHUD];
@@ -52,7 +53,10 @@ class ComboOffsetSubstate extends MusicBeatSubstate{
 
         combo = new FlxTypedGroup<RatingSprite>();
         var comboColor = ClientPrefs.coloredCombos ? ratingColor : 0xFFFFFFFF;
-        for (number in Std.string(Std.random(1000)).split("")){
+        var splitCombo = Std.string(Std.random(1000)).split("");
+        while (splitCombo.length < 3) splitCombo.unshift("0");
+        
+        for (number in splitCombo){
             var num = RatingSprite.newNumber();
             num.loadGraphic(Paths.image('num$number'));
             num.scrollFactor.set();
