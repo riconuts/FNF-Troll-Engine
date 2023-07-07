@@ -239,18 +239,15 @@ class ModManager {
     public function updateTimeline(curStep:Float)
 		timeline.update(curStep);
 
+	public var playerAmount = 2;
+	public var receptorAmount = 4;
 	public function getBaseX(direction:Int, player:Int):Float
 	{
-		var x:Float = (FlxG.width* 0.5) - Note.swagWidth - 54 + Note.swagWidth * direction;
-		switch (player)
-		{
-			case 0:
-				x += FlxG.width* 0.5 - Note.swagWidth * 2 - 100;
-			case 1:
-				x -= FlxG.width* 0.5 - Note.swagWidth * 2 - 100;
-		}
+		var spaceWidth = FlxG.width / playerAmount;
+		var spaceX = spaceWidth * (playerAmount-1-player);
 
-		x -= 56;
+		var baseX:Float = spaceX + (spaceWidth - Note.swagWidth * receptorAmount) * 0.5;
+		var x:Float = baseX + Note.swagWidth * direction;
 
 		return x;
 	}
