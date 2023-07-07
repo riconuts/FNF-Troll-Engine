@@ -172,6 +172,8 @@ class OptionsSubstate extends MusicBeatSubstate
 			case 'customizeHUD':
 				if((FlxG.state is OptionsState))
 					LoadingState.loadAndSwitchState(new options.NoteOffsetState());
+				else if (FlxG.state is PlayState)
+					openSubState(new newoptions.ComboOffsetSubstate());
 			case 'customizeColours':
 				// TODO: check the note colours once you exit to see if any changed
 				openSubState(ClientPrefs.noteSkin == "Quants" ? new options.QuantNotesSubState() : new options.NotesSubState());
@@ -928,11 +930,15 @@ class OptionsSubstate extends MusicBeatSubstate
 	{
 		var optBox = widget.data.get("optionBox");
 		var locked:Bool = widget.optionData.data.exists("locked") ? widget.optionData.data.get("locked") : false;
+		
+		/*
 		if (!optState)
 		{
 			if (widget.data.get("optionName") == 'customizeHUD')
 				locked = true;
 		}
+		*/
+
 		widget.data.get("lockOverlay").visible = locked;
 		widget.locked = locked;
 		switch (widget.type)
@@ -1321,9 +1327,10 @@ class OptionsSubstate extends MusicBeatSubstate
 				optionDesc.text = hovering.desc;
 				if (!optState){
 					var oN = hovering.data.get("optionName");
+					/*
 					if(oN == 'customizeHUD' )
 						optionDesc.text += "\n(NOTE: This does not work because you're ingame!)";
-					else if (requiresRestart.contains(oN))
+					else */if (requiresRestart.contains(oN))
 						optionDesc.text += "\nWARNING: You will need to restart the song if you change this!";
 					else if (recommendsRestart.contains(oN))
 						optionDesc.text += "\nNOTE: This won't have any effect unless you restart the song!";
