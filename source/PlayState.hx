@@ -1015,6 +1015,7 @@ class PlayState extends MusicBeatState
 
 		////
 		callOnAllScripts('onCreatePost');
+
 		if(ClientPrefs.judgeBehind){
 			add(ratingTxtGroup);
 			add(comboNumGroup);
@@ -1046,6 +1047,20 @@ class PlayState extends MusicBeatState
 		sectionCamera.copyFrom(camFollow);
 		camFollowPos.setPosition(camFollow.x, camFollow.y);
 		*/
+
+		// Load all of the countdown intro assets!!!!!
+		var shitToLoad:Array<AssetPreload> = [
+			{path: 'intro3', type: "SOUND"},
+			{path: 'intro2', type: "SOUND"},
+			{path: 'intro1', type: "SOUND"},
+			{path: 'introGo', type: "SOUND"}
+		];
+		for (introPath in introAlts){
+			if (introPath != null)
+				shitToLoad.push({path: introPath});
+		}
+
+		Cache.loadWithList(shitToLoad);
 
 		super.create();
 
@@ -1399,20 +1414,6 @@ class PlayState extends MusicBeatState
 			setSongTime(0);
 			return;
 		}
-
-		// Load all of the countdown intro assets!!!!!
-		var shitToLoad:Array<AssetPreload> = [
-			{path: 'intro3', type: "SOUND"},
-			{path: 'intro2', type: "SOUND"},
-			{path: 'intro1', type: "SOUND"},
-			{path: 'introGo', type: "SOUND"}
-		];
-		for (introPath in introAlts){
-			if (introPath != null)
-				shitToLoad.push({path: introPath});
-		}
-
-		Cache.loadWithList(shitToLoad);
 
 		// Do the countdown.
 		var swagCounter:Int = 0;
