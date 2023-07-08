@@ -73,8 +73,8 @@ import hxcodec.VideoHandler;
 
 typedef SongCreditdata = // beacuse SongMetadata is stolen
 {
-	artist:String,
-	charter:String,
+	?artist:String,
+	?charter:String,
 	?modcharter:String,
 	?extraInfo:Array<String>,
 }
@@ -151,7 +151,6 @@ class Wife3
 class PlayState extends MusicBeatState
 {
 	public var stats:Stats = new Stats();
-	var midScroll = false;
 	public var botplaySine:Float = 0;
 	public var botplayTxt:FlxText;
 
@@ -247,8 +246,6 @@ class PlayState extends MusicBeatState
 
 	public var playfields = new FlxTypedGroup<PlayField>();
 	public var grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
-
-	public var stageOpacity:FlxSprite = new FlxSprite();
 	
 	////
 	public var showRating:Bool = true;
@@ -260,12 +257,9 @@ class PlayState extends MusicBeatState
 	
 	private var curSong:String = "";
 
-	public var iconOffset:Int = 26;
 	public var displayedHealth(default, set):Float = 1;
 	function set_displayedHealth(value:Float){
-		if (healthBar.alpha > 0){
-			healthBar.value = value;
-		}
+		healthBar.value = value;
 		displayedHealth = value;
 
 		return value;
@@ -322,6 +316,8 @@ class PlayState extends MusicBeatState
 	public static var chartingMode:Bool = false;
 
 	//Gameplay settings
+	var midScroll = false;
+
 	public var healthGain:Float = 1;
 	public var healthLoss:Float = 1;
 	public var playOpponent:Bool = false;
@@ -554,7 +550,7 @@ class PlayState extends MusicBeatState
 		camStageUnderlay = new FlxCamera();
 
 		camSubs.bgColor.alpha = 0;
-		camStageUnderlay.bgColor.alpha = 0; 
+		camStageUnderlay.bgColor = FlxColor.BLACK; 
 		camHUD.bgColor.alpha = 0; 
 		camOverlay.bgColor.alpha = 0;
 		camOther.bgColor.alpha = 0;
@@ -1000,18 +996,6 @@ class PlayState extends MusicBeatState
 			FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 			FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		}
-
-		////
-
-		stageOpacity.makeGraphic(1,1,0xFFFFFFFF);
-		stageOpacity.color = 0xFF000000;
-		stageOpacity.alpha = ClientPrefs.stageOpacity;
-		stageOpacity.cameras=[camStageUnderlay]; // just to force it above camGame but below camHUD
-		stageOpacity.screenCenter();
-		stageOpacity.scale.set(FlxG.width * 100, FlxG.height * 100);
-		stageOpacity.scrollFactor.set();
-
-		add(stageOpacity);
 
 		////
 		callOnAllScripts('onCreatePost');
@@ -2269,7 +2253,7 @@ class PlayState extends MusicBeatState
 	}
 
 	override function draw(){
-		stageOpacity.alpha = ClientPrefs.stageOpacity;
+		camStageUnderlay.bgColor.alphaFloat = ClientPrefs.stageOpacity;
 		super.draw();
 	}
 

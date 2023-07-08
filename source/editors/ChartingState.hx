@@ -251,13 +251,14 @@ class ChartingState extends MusicBeatState
 			pushSection();
 			PlayState.SONG = _song;
 		}
-		
+		/*
 		if(_song.metadata==null){
 			_song.metadata = {
 				artist: "Unspecified",
 				charter: "Unspecified"
 			}
 		}
+		*/
 
 		// Paths.clearMemory();
 
@@ -3091,13 +3092,14 @@ class ChartingState extends MusicBeatState
 	}
 
 	private function saveMetadata(){
-		if(_song.metadata==null){
-			_song.metadata = {
+		var metadata = _song.metadata;
+		if(metadata==null){
+			metadata = {
 				artist: "Unspecified",
 				charter: "Unspecified"
 			}
 		}
-		var data:String = Json.stringify(_song.metadata, "\t");
+		var data:String = Json.stringify(metadata, "\t");
 
 		if ((data != null) && (data.length > 0))
 		{
@@ -3105,7 +3107,7 @@ class ChartingState extends MusicBeatState
 			_file.addEventListener(Event.COMPLETE, onSaveComplete);
 			_file.addEventListener(Event.CANCEL, onSaveCancel);
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-			_file.save(data.trim(), "events.json");
+			_file.save(data.trim(), "metadata.json");
 		}
 	}
 

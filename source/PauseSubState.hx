@@ -95,16 +95,18 @@ class PauseSubState extends MusicBeatSubstate
 
 		if (PlayState.SONG != null && PlayState.SONG.song != null){
 			var songCredit = PlayState.SONG.song;
-			if (metadata != null)
+
+			if (metadata != null && metadata.artist != null && metadata.artist.length > 0)
 				songCredit += " - " + metadata.artist;
+			
 			pushInfo(songCredit);
 		}
 
 		if (metadata != null){
-			if(metadata.charter != null)
+			if(metadata.charter != null && metadata.charter.length > 0)
 				pushInfo("Charted by " + metadata.charter);
 
-			if(metadata.modcharter != null)
+			if(metadata.modcharter != null && metadata.modcharter.length > 0)
 				pushInfo("Modcharted by " + metadata.modcharter);
 		}
 
