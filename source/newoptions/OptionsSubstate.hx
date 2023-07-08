@@ -1358,12 +1358,19 @@ class OptionsSubstate extends MusicBeatSubstate
 					else if (recommendsRestart.contains(oN))
 						optionDesc.text += "\nNOTE: This won't have any effect unless you restart the song!";
 				}
-
-				optionDesc.screenCenter(XY);
-				optionDesc.y = FlxG.height - 76;
+				
+				var maxWidth = FlxG.width - 30;
+				if (optionDesc.width > maxWidth)
+					optionDesc.fieldWidth = maxWidth;
+				else
+					optionDesc.fieldWidth = 0;
+				
+				var goalY = FlxG.height - optionDesc.height - 44;
+				optionDesc.screenCenter(X);
+				optionDesc.y = goalY - 12;
 				optionDesc.alpha = 0;
 				FlxTween.cancelTweensOf(optionDesc);
-				FlxTween.tween(optionDesc, {y: FlxG.height - 64, alpha: 1}, 0.35, {ease: FlxEase.quadOut});
+				FlxTween.tween(optionDesc, {y: goalY, alpha: 1}, 0.35, {ease: FlxEase.quadOut});
 			}
 
 			if (openedDropdown == null)
