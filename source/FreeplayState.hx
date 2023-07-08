@@ -64,8 +64,8 @@ class FreeplayState extends MusicBeatState
 	private var categoryIDs:Array<String> = []; // "The order of both values and keys in any type of map is undefined"
 
 	static var lastCamY:Float = 360;
-	var camFollow = new FlxPoint(640, lastCamY);
-	var camFollowPos = new FlxObject(640, lastCamY);
+	var camFollow = new FlxPoint(FlxG.width * 0.5, lastCamY);
+	var camFollowPos = new FlxObject(FlxG.width * 0.5, lastCamY);
 
 	var selectedSong:Null<SongMetadata> = null;
 	var buttons:Array<FreeplaySongButton> = [];
@@ -79,7 +79,7 @@ class FreeplayState extends MusicBeatState
 	var hintText:FlxText;
 
 	function setCategory(id, name){
-		var catTitle = new FlxText(0, 50, FlxG.width, name, 32, true);
+		var catTitle = new FlxText(0, 50, 0, name, 32, true);
 		catTitle.setFormat(Paths.font("calibrib.ttf"), 32, 0xFFF4CC34, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE);
 		catTitle.underline = true;
 		catTitle.scrollFactor.set();
@@ -173,6 +173,20 @@ class FreeplayState extends MusicBeatState
 
 		FlxG.camera.follow(camFollowPos);
 		FlxG.camera.bgColor = FlxColor.BLACK;
+
+		////
+		var buttonSize = 194;
+		var spacing = 50;
+		var bSpace = buttonSize + spacing;
+
+		var buttons = Math.floor(FlxG.width / bSpace);
+		var baseX = (FlxG.width - (bSpace * buttons - spacing)) * 0.5;
+
+		FreeplayCategory.posArray = [
+			for (i in 0...buttons){
+				baseX + bSpace * i;
+			}
+		];
 
 		////
 		setCategory("main", "MAIN STORY");
@@ -594,7 +608,7 @@ class FreeplaySongButton extends TGTSquareButton{
 }
 
 class FreeplayCategory extends flixel.group.FlxSpriteGroup{
-	static var posArray = [51, 305, 542, 788, 1034]; // Fuck it
+	public static var posArray:Array<Float> = [51, 305, 542, 788, 1034]; // Fuck it
 	
 	public var songsInCategory:Array<String> = [];
 	public var buttonArray:Array<FreeplaySongButton> = [];

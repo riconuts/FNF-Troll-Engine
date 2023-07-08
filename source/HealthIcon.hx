@@ -1,5 +1,6 @@
 package;
 
+import flixel.graphics.FlxGraphic;
 import flixel.FlxSprite;
 
 using StringTools;
@@ -16,7 +17,6 @@ class HealthIcon extends FlxSprite
 		super();
 
 		this.isPlayer = isPlayer;
-		antialiasing = ClientPrefs.globalAntialiasing;
 
 		changeIcon(char);
 
@@ -25,15 +25,15 @@ class HealthIcon extends FlxSprite
 
 	override function update(elapsed:Float)
 	{
-		super.update(elapsed);
-
 		if (sprTracker != null)
 			setPosition(sprTracker.x + sprTracker.width + 10, sprTracker.y - 30);
+	
+		super.update(elapsed);
 	}
 
-	function changeIconGraphic(gr){
-		loadGraphic(gr); //Load stupidly first for getting the file size
-		loadGraphic(gr, true, Math.floor(width * 0.5), Math.floor(height)); //Then load it fr
+	function changeIconGraphic(graphic:FlxGraphic)
+	{
+		loadGraphic(graphic, true, Math.floor(graphic.width * 0.5), Math.floor(graphic.height));
 		iconOffsets[0] = (width - 150) * 0.5;
 		iconOffsets[1] = (width - 150) * 0.5;
 		updateHitbox();
@@ -44,41 +44,37 @@ class HealthIcon extends FlxSprite
 
 	public function swapOldIcon() 
 	{
-		var oldIcon = Paths.image('icons/$char-old');
-		if(oldIcon == null)
-			oldIcon = Paths.image('icons/char-$char-old'); // psych compat
-
-		if (!isOldIcon && oldIcon != null){
-			changeIconGraphic(oldIcon);
+		if (!isOldIcon){
+			var oldIcon = Paths.image('icons/$char-old');
 			
-			isOldIcon = true;
-		}else if (isOldIcon){
-			// shitty workaround
-			var ugh = char;
-			char = "";
-			changeIcon(ugh);
+			if(oldIcon == null)
+				oldIcon = Paths.image('icons/char-$char-old'); // psych compat
 
-			isOldIcon = false;
+			if (oldIcon != null){
+				changeIconGraphic(oldIcon);
+				isOldIcon = true;
+				return;
+			}
 		}
+
+		changeIcon(char);
+		isOldIcon = false;
 	}
 
 	private var iconOffsets:Array<Float> = [0, 0];
 	public function changeIcon(char:String) {
-		if(this.char != char) {
-			var file:Dynamic = Paths.image('icons/$char');
+		var file:Null<FlxGraphic> = Paths.image('icons/$char');
 
-			if(file == null)
-				file = Paths.image('icons/icon-$char'); // psych compat
-			
+		if(file == null)
+			file = Paths.image('icons/icon-$char'); // psych compat
+		
+		if(file == null) 
+			file = Paths.image('icons/face'); // Prevents crash from missing icon
 
-			if(file == null) 
-				file = Paths.image('icons/face'); // Prevents crash from missing icon
+		changeIconGraphic(file);
+		this.char = char;
 
-			changeIconGraphic(file);
-			this.char = char;
-
-			// antialiasing = ClientPrefs.globalAntialiasing && !char.endsWith("-pixel");
-		}
+		antialiasing = char.endsWith("-pixel") ? false : ClientPrefs.globalAntialiasing;
 	}
 
 	override function updateHitbox()
