@@ -100,6 +100,7 @@ class TitleState extends MusicBeatState
 		titleText.animation.play('idle');
 
 		titleText.updateHitbox();
+		titleText.screenCenter(X);
 
 		//
 		blackScreen = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
@@ -205,14 +206,6 @@ class TitleState extends MusicBeatState
 			initialized = true;
 			MusicBeatState.playMenuMusic(0, true);
 		}
-	}
-
-	override function add(Object:FlxBasic)
-	{
-		if (Std.isOfType(Object, FlxSprite))
-			cast(Object, FlxSprite).antialiasing = ClientPrefs.globalAntialiasing;
-
-		return super.add(Object);
 	}
 
 	static function getIntroTextShit():Array<Array<String>>
