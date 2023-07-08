@@ -868,11 +868,13 @@ class OptionsSubstate extends MusicBeatSubstate
 		changeWidget(null, true);
 	}
 
+	//// For keyboard
 	var selectableWidgetObjects:Array<FlxObject> = [];
 	var curOption:Null<Int> = null;
 	var curWidget:Widget;
 
-	function changeWidget(val:Null<Int>, ?isAbs:Bool = false){
+	function changeWidget(val:Null<Int>, ?isAbs:Bool = false)
+	{
 		var nextOption:Null<Int> = null; 
 
 		if (val != null)
@@ -898,12 +900,12 @@ class OptionsSubstate extends MusicBeatSubstate
 				object.color = FlxColor.WHITE;
 		}
 
-		// move the camera to the option if it's off-screen
 		if (nextObject != null){
 			var widget:Widget = currentWidgets.get(nextObject);
-			var optBox:FlxObject = widget.data.get("optionBox");
 
+			// move the camera to the option if it's off-screen
 			if (widget != null){
+				var optBox:FlxObject = widget.data.get("optionBox");
 				var cam = optBox.camera;
 
 				if (optBox.y < cam.scroll.y)
@@ -917,6 +919,9 @@ class OptionsSubstate extends MusicBeatSubstate
 				}
 			}
 
+			if (curWidget != null)
+				onWidgetUnselected(curWidget);
+
 			curWidget = widget;
 		}else{
 			curWidget = null;
@@ -924,7 +929,18 @@ class OptionsSubstate extends MusicBeatSubstate
 
 		curOption = nextOption;
 	}
+	
+	function onWidgetUnselected(widget:Widget)
+	{
+		switch(widget.type){
+			case Number:
+				widget.data.get("leftAdjust").release();
+				widget.data.get("rightAdjust").release();
+			default:
+		}
+	}
 
+	////
 	var scrubbingBar:FlxSprite; // TODO: maybe make the bar a seperate class and then have this handled in that class
 
 	function updateWidget(object:FlxObject, widget:Widget, elapsed:Float)
@@ -1267,41 +1283,41 @@ class OptionsSubstate extends MusicBeatSubstate
 				FlxG.sound.play(Paths.sound("scrollMenu"));
 				changeWidget(1);
 			}
-			if (FlxG.keys.justPressed.ENTER)
-			{
-				if (curWidget != null){
-					var optionName = curWidget.optionData.data.get("optionName");
-					switch (curWidget.type){
-						case Toggle:
+
+			if (curWidget != null){
+				switch (curWidget.type){
+					case Toggle:
+						if (FlxG.keys.justPressed.ENTER){
 							var checkbox:Checkbox = curWidget.data.get("checkbox");
 							checkbox.toggled = !checkbox.toggled;
-							changeToggle(optionName, checkbox.toggled);
-						case Button:
-							if (!curWidget.locked)
-								onButtonPressed(optionName);
-						default: 
-							// nothing dumbass						
-					}
-				}
-			}
-			if (FlxG.keys.anyJustPressed([LEFT, RIGHT])){
-				if (curWidget != null){
-					var change = 0;
-					if (FlxG.keys.justPressed.LEFT) change--;
-					if (FlxG.keys.justPressed.RIGHT) change++;
+							changeToggle(curWidget.optionData.data.get("optionName"), checkbox.toggled);
+						}
+					case Button:
+						if (FlxG.keys.justPressed.ENTER && !curWidget.locked){
+							onButtonPressed(curWidget.optionData.data.get("optionName"));
+						}
 
-					var optionName = curWidget.optionData.data.get("optionName");
-					var sowy = actualOptions.get(optionName);
-					switch (curWidget.type){
-						case Number:
-							changeNumber(optionName, change * sowy.data.get("step"));
-						case Dropdown:
+					case Number:
+						// ;_;
+						if (FlxG.keys.justPressed.LEFT)		curWidget.data.get("leftAdjust").press();
+						else if (!FlxG.keys.pressed.LEFT)	curWidget.data.get("leftAdjust").release();
+
+						if (FlxG.keys.justPressed.RIGHT)	curWidget.data.get("rightAdjust").press();
+						else if (!FlxG.keys.pressed.RIGHT)	curWidget.data.get("rightAdjust").release();
+
+					case Dropdown:
+						var change = 0;
+						if (FlxG.keys.justPressed.LEFT) change--;
+						if (FlxG.keys.justPressed.RIGHT) change++;
+
+						if (change != 0){
+							var optionName = curWidget.optionData.data.get("optionName");
+							var sowy = actualOptions.get(optionName);
 							var allOptions:Array<String> = sowy.data.get("options");
 							var idx = FlxMath.wrap(allOptions.indexOf(sowy.value) + change, 0, allOptions.length-1);
 
 							changeDropdown(optionName, allOptions[idx]);
-						default:
-					}
+						}
 				}
 			}
 
@@ -1418,6 +1434,17 @@ class WidgetButton extends WidgetSprite
 	var pressedTime:Float = 0;
 	var repeatingTime:Float = 0;
 
+	public function press(){
+		isPressed = true;
+		if (onPressed != null)
+			onPressed();
+	}
+	public function release(){
+		isPressed = false;
+		if (onReleased != null)				
+			onReleased();
+	}
+
 	override function update(elapsed:Float)
 	{
 		if (!isPressed)
@@ -1430,9 +1457,7 @@ class WidgetButton extends WidgetSprite
 				{
 					if (FlxG.mouse.overlaps(this, camera))
 					{
-						isPressed = true;
-						if (onPressed != null)
-							onPressed();
+						press();
 						break;
 					}
 				}
@@ -1452,11 +1477,9 @@ class WidgetButton extends WidgetSprite
 						onPressed();
 				}
 			}
-			if (FlxG.mouse.released)
+			if (FlxG.mouse.justReleased)
 			{
-				isPressed = false;
-				if (onReleased != null)
-					onReleased();
+				release();
 			}
 			else
 			{
