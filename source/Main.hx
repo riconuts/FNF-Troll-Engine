@@ -31,7 +31,7 @@ class Main extends Sprite
 	public static var recentRelease:Release;
 	
 	public static var showDebugTraces:Bool = #if(SHOW_DEBUG_TRACES || debug) true #else false #end;
-	var gameWidth:Int = 1080; // Width of the game in pixels (might be less / more in actual pixels depending on your zoom).
+	var gameWidth:Int = 1280; // Width of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var gameHeight:Int = 720; // Height of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var initialState:Class<FlxState> = StartupState; // The FlxState the game starts with.
 	var zoom:Float = -1; // If -1, zoom is automatically calculated to fit the window dimensions.
