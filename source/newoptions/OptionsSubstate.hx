@@ -459,6 +459,7 @@ class OptionsSubstate extends MusicBeatSubstate
 
 		////
 		var optionMenu = new FlxSprite(84, 80, CoolUtil.makeOutlinedGraphic(920, FlxG.height-80, FlxColor.fromRGB(82, 82, 82), 2, FlxColor.fromRGB(70, 70, 70)));
+		optionMenu.screenCenter(X);
 		optionMenu.alpha = 0.8;
 		add(optionMenu);
 
@@ -1253,13 +1254,19 @@ class OptionsSubstate extends MusicBeatSubstate
 	{
 		if (subState == null)
 		{
-			if (FlxG.keys.justPressed.TAB)
+			if (FlxG.keys.justPressed.TAB){
+				FlxG.sound.play(Paths.sound("scrollMenu"));
 				changeCategory(1);
+			}
 
-			if (FlxG.keys.justPressed.UP)
+			if (FlxG.keys.justPressed.UP){
+				FlxG.sound.play(Paths.sound("scrollMenu"));
 				changeWidget(-1);
-			if (FlxG.keys.justPressed.DOWN)
+			}
+			if (FlxG.keys.justPressed.DOWN){
+				FlxG.sound.play(Paths.sound("scrollMenu"));
 				changeWidget(1);
+			}
 			if (FlxG.keys.justPressed.ENTER)
 			{
 				if (curWidget != null){
