@@ -18,7 +18,7 @@ import lime.app.Application;
 import openfl.events.UncaughtErrorEvent;
 import sys.io.File;
 #end
-#if desktop
+#if discord_rpc
 import Discord.DiscordClient;
 #end
 

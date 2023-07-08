@@ -20,9 +20,8 @@ import openfl.display.Bitmap;
 import openfl.display.BitmapData;
 
 using StringTools;
-#if desktop
+#if discord_rpc
 import Discord.DiscordClient;
-import sys.thread.Thread;
 #end
 #if sys
 import sys.FileSystem;

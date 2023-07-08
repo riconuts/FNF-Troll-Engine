@@ -13,7 +13,7 @@ import flixel.addons.display.shapes.FlxShapeBox;
 import openfl.ui.Mouse;
 import openfl.ui.MouseCursor;
 import flixel.FlxG;
-#if desktop
+#if discord_rpc
 import Discord;
 #end
 #if sys
@@ -283,7 +283,7 @@ class JukeboxState extends MusicBeatState {
 	*/
 
 	inline function updateDiscord(){
-		#if desktop
+		#if discord_rpc
 		if (FlxG.sound.music.playing)
 			DiscordClient.changePresence('Listening to: ${songData[playIdx].songName}', null);
 		else

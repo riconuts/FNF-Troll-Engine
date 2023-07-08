@@ -64,7 +64,7 @@ import scripts.*;
 import scripts.FunkinLua;
 
 using StringTools;
-#if desktop
+#if discord_rpc
 import Discord.DiscordClient;
 #end
 #if VIDEOS_ALLOWED
@@ -420,7 +420,7 @@ class PlayState extends MusicBeatState
 	public var opponentCameraOffset:Array<Float> = null;
 	public var girlfriendCameraOffset:Array<Float> = null;
 
-	#if desktop
+	#if discord_rpc
 	// Discord RPC variables
 	var detailsText:String = "";
 	var detailsPausedText:String = "";
@@ -986,7 +986,7 @@ class PlayState extends MusicBeatState
 		// EVENT AND NOTE SCRIPTS WILL GET LOADED HERE
 		generateSong(SONG.song);
 
-		#if desktop
+		#if discord_rpc
 		// Discord RPC texts
 		detailsText = isStoryMode ? "Story Mode" : "Freeplay";
 		detailsPausedText = "Paused - " + detailsText;
@@ -1612,7 +1612,7 @@ class PlayState extends MusicBeatState
 
 		resyncVocals();
 
-		#if desktop
+		#if discord_rpc
 		// Updating Discord Rich Presence (with Time Left)
 		DiscordClient.changePresence(detailsText, SONG.song, Paths.formatToSongPath(SONG.song), true, songLength);
 		#end
@@ -2445,7 +2445,7 @@ class PlayState extends MusicBeatState
 			hud.alpha = ClientPrefs.hudOpacity;
 
 
-			#if desktop
+			#if discord_rpc
 			if (startTimer != null && startTimer.finished)
 			{
 				DiscordClient.changePresence(detailsText, SONG.song, Paths.formatToSongPath(SONG.song), true, songLength - Conductor.songPosition - ClientPrefs.noteOffset);
@@ -2462,7 +2462,7 @@ class PlayState extends MusicBeatState
 
 	override public function onFocus():Void
 	{
-		#if desktop
+		#if discord_rpc
 		if (health > 0 && !paused)
 		{
 			if (Conductor.songPosition > 0.0)
@@ -2481,7 +2481,7 @@ class PlayState extends MusicBeatState
 
 	override public function onFocusLost():Void
 	{
-		#if desktop
+		#if discord_rpc
 		if (health > 0)
 			DiscordClient.changePresence(detailsPausedText, SONG.song, Paths.formatToSongPath(SONG.song));
 		#end
@@ -2837,7 +2837,7 @@ class PlayState extends MusicBeatState
 		cancelMusicFadeTween();
 		MusicBeatState.switchState(new ChartingState());
 
-		#if desktop
+		#if discord_rpc
 		DiscordClient.changePresence("Chart Editor", null, null, true);
 		#end
 	}
@@ -2892,7 +2892,7 @@ class PlayState extends MusicBeatState
 					));
 				}
 
-				#if desktop
+				#if discord_rpc
 				// Game Over doesn't get his own variable because it's only used here
 				DiscordClient.changePresence("Game Over - " + detailsText, SONG.song, Paths.formatToSongPath(SONG.song));
 				#end
@@ -4912,7 +4912,7 @@ class PlayState extends MusicBeatState
 				if (OpenPauseMenu)
 					openSubState(new PauseSubState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
 
-				#if desktop
+				#if discord_rpc
 				DiscordClient.changePresence(detailsPausedText, SONG.song, Paths.formatToSongPath(SONG.song));
 				#end
 			}

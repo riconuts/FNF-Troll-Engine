@@ -8,7 +8,7 @@ import flixel.tweens.FlxTween;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.input.keyboard.FlxKey;
 
-#if desktop
+#if discord_rpc
 import Discord.DiscordClient;
 import lime.app.Application;
 #end
@@ -85,7 +85,7 @@ class StartupState extends FlxState
 		if (FlxG.save.data.weekCompleted != null)
 			StoryMenuState.weekCompleted = FlxG.save.data.weekCompleted;
 		
-		#if desktop
+		#if discord_rpc
 		if (!DiscordClient.isInitialized){
 			DiscordClient.initialize();
 			Application.current.onExit.add(function(exitCode)

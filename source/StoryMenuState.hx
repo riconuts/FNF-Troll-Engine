@@ -14,7 +14,7 @@ import flixel.util.FlxTimer;
 import sowy.*;
 
 using StringTools;
-#if desktop
+#if discord_rpc
 import Discord.DiscordClient;
 #end
 
@@ -44,7 +44,7 @@ class StoryMenuState extends MusicBeatState
 
 	override function create()
 	{
-		#if desktop
+		#if discord_rpc
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
 		#end

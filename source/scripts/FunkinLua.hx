@@ -33,7 +33,7 @@ import sys.io.File;
 import openfl.Assets;
 #end
 
-#if desktop
+#if discord_rpc
 import Discord;
 #end
 
@@ -1737,7 +1737,7 @@ class FunkinLua extends FunkinScript
 		});
 
 		addCallback("changePresence", function(details:String, state:Null<String>, ?smallImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float) {
-			#if desktop
+			#if discord_rpc
 			DiscordClient.changePresence(details, state, smallImageKey, hasStartTimestamp, endTimestamp);
 			#end
 		});

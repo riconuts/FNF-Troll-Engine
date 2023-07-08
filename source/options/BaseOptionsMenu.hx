@@ -1,6 +1,6 @@
 package options;
 
-#if desktop
+#if discord_rpc
 import Discord.DiscordClient;
 #end
 import Controls;
@@ -52,7 +52,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		if(rpcTitle == null) rpcTitle = 'Options Menu';
 
 		/*
-		#if desktop
+		#if discord_rpc
 		DiscordClient.changePresence(rpcTitle, null);
 		#end
 		*/
