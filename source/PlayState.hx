@@ -145,13 +145,10 @@ class Wife3
 		}
 		return missWeight;
 	}
-
-
 }
 class PlayState extends MusicBeatState
 {
 	public var stats:Stats = new Stats();
-	public var botplaySine:Float = 0;
 	public var botplayTxt:FlxText;
 
 	var notefields:NotefieldManager = new NotefieldManager();
@@ -803,11 +800,11 @@ class PlayState extends MusicBeatState
 		iconP1 = healthBar.iconP1;
 		iconP2 = healthBar.iconP2;
 
-		botplayTxt = new FlxText(400, (ClientPrefs.downScroll ? FlxG.height - 44 : 19) + 15 + (ClientPrefs.downScroll ? -78 : 55), FlxG.width - 800, "[BUTTPLUG]", 32);
+		botplayTxt = new BotplayText(0, (ClientPrefs.downScroll ? FlxG.height - 44 : 19) + 15 + (ClientPrefs.downScroll ? -78 : 55), FlxG.width, "[BUTTPLUG]", 32);
 		botplayTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		botplayTxt.scrollFactor.set();
 		botplayTxt.borderSize = 1.25;
-		botplayTxt.visible = false;
+		botplayTxt.exists = false;
 		
 
 		// After all characters being loaded, it makes then invisible 0.01s later so that the player won't freeze when you change characters
@@ -2531,7 +2528,7 @@ class PlayState extends MusicBeatState
 
 	function resyncVocals():Void
 	{
-		if(finishTimer != null || transitioning || isDead || !SONG.needsVoices)
+		if(finishTimer != null || transitioning || isDead)
 			return;
 
 		if(showDebugTraces)
@@ -2749,13 +2746,7 @@ class PlayState extends MusicBeatState
 
 		checkEventNote();
 		
-		botplayTxt.visible = PlayState.instance.cpuControlled;
-
-		if (botplayTxt.visible)
-		{
-			botplaySine += 180 * elapsed;
-			botplayTxt.alpha = 1 - flixel.math.FlxMath.fastSin((Math.PI * botplaySine) / 180);
-		}
+		botplayTxt.exists = PlayState.instance.cpuControlled;
 
 		if(midScroll){
 			for(field in notefields.members){
@@ -5112,5 +5103,17 @@ class RatingSprite extends FlxSprite
 		numScore.scale.set(0.5, 0.5);
 
 		return numScore;
+	}
+}
+
+class BotplayText extends FlxText
+{
+	public var sine:Float = 0;
+
+	override public function update(elapsed:Float){
+		sine += 180 * elapsed;
+		alpha = 1 - flixel.math.FlxMath.fastSin((Math.PI * sine) / 180);
+		
+		super.update(elapsed);
 	}
 }
