@@ -357,9 +357,6 @@ class PlayState extends MusicBeatState
 	public var iconP1:HealthIcon;
 	public var iconP2:HealthIcon;
 
-
-	var songPercent:Float = 0;
-
 	public var camGame:FlxCamera;
 	public var camSubs:FlxCamera; // JUST for subtitles
 	public var camStageUnderlay:FlxCamera; // retarded
@@ -390,13 +387,15 @@ class PlayState extends MusicBeatState
 
 	public var stage:Stage;
 	var stageData:StageFile;
-	public var songName:String = "";
 	
-
 	public var songHits:Int = 0;
 	public var songMisses:Int = 0;
 
+	public var songName:String = "";
 	public var songHighscore:Int = 0;
+	public var songLength:Float = 0;
+
+	var songPercent:Float = 0;
 
 	public static var campaignScore:Int = 0;
 	public static var campaignMisses:Int = 0;
@@ -407,7 +406,6 @@ class PlayState extends MusicBeatState
 
 	public var inCutscene:Bool = false;
 	public var skipCountdown:Bool = false;
-	var songLength:Float = 0;
 
 	public var boyfriendCameraOffset:Array<Float> = null;
 	public var opponentCameraOffset:Array<Float> = null;
@@ -448,6 +446,7 @@ class PlayState extends MusicBeatState
 	private var controlArray:Array<String>;
 
 	var finishedCreating =false;
+	var shitToLoad:Array<AssetPreload> = [];
 	override public function create()
 	{
 		judgeManager = new JudgmentManager();
@@ -578,6 +577,7 @@ class PlayState extends MusicBeatState
 
 		Conductor.mapBPMChanges(SONG);
 		Conductor.changeBPM(SONG.bpm);
+		Conductor.songPosition = -5000;
 
 		songName = Paths.formatToSongPath(SONG.song);
 		songHighscore = Highscore.getScore(SONG.song);
@@ -621,17 +621,27 @@ class PlayState extends MusicBeatState
 		stageData = stage.stageData;
 		setStageData(stageData);
 
+		var filesPushed:Array<String> = [];
+
+		for (folder in Paths.getFolders('scripts'))
+		{
+			Paths.iterateDirectory(folder, function(file:String)
+			{
+				if(filesPushed.contains(file))
+					return;
+
+				if(file.endsWith('.hscript')) {
+					var script = FunkinHScript.fromFile(folder + file);
+					hscriptArray.push(script);
+					funkyScripts.push(script);
+					filesPushed.push(file);
+				}
+			});
+		}
+
 		//// Asset precaching start
 		//// this could be moved to the loadingstate probably
-		var shitToLoad:Array<AssetPreload> = [];
-		/*
-			{path: "sick"},
-			{path: "good"},
-			{path: "bad"},
-			{path: "shit"},
-			{path: "healthBar"}
-			//,{path: "combo"}
-		];*/
+		
 		for (judgeData in judgeManager.judgmentData)
 			shitToLoad.push({path: judgeData.internalName});
 
@@ -724,20 +734,12 @@ class PlayState extends MusicBeatState
 		Cache.loadWithList(shitToLoad);
 		//// Asset precaching end
 
-		Conductor.songPosition = -5000;
-
 		var splash:NoteSplash = new NoteSplash(100, 100, 0);
 		splash.alpha = 0.0;
 		grpNoteSplashes.add(splash);
 
 		modManager = new ModManager(this);
 		setDefaultHScripts("modManager", modManager);
-
-		#if LUA_ALLOWED
-		luaDebugGroup = new FlxTypedGroup<DebugLuaText>();
-		luaDebugGroup.cameras = [camOther];
-		add(luaDebugGroup);
-		#end
 
 		//// Characters
 
@@ -806,38 +808,27 @@ class PlayState extends MusicBeatState
 		botplayTxt.borderSize = 1.25;
 		botplayTxt.exists = false;
 		
+		#if LUA_ALLOWED
+		// "GLOBAL" LUA SCRIPTS
 
-		// After all characters being loaded, it makes then invisible 0.01s later so that the player won't freeze when you change characters
-
-		//// LOAD SCRIPTS
-
-		// "GLOBAL" SCRIPTS
 		var filesPushed:Array<String> = [];
 
-		var foldersToCheck:Array<String> = Paths.getFolders('scripts');
-
-		for (folder in foldersToCheck)
+		for (folder in Paths.getFolders('scripts'))
 		{
 			Paths.iterateDirectory(folder, function(file:String)
 			{
 				if(filesPushed.contains(file))
 					return;
 
-				#if LUA_ALLOWED
 				if(file.endsWith('.lua')) {
 					var script = new FunkinLua(folder + file);
 					luaArray.push(script);
 					funkyScripts.push(script);
 					filesPushed.push(file);
-				}
-				else #end if(file.endsWith('.hscript')) {
-					var script = FunkinHScript.fromFile(folder + file);
-					hscriptArray.push(script);
-					funkyScripts.push(script);
-					filesPushed.push(file);
-				}
+				}			
 			});
 		}
+		#end
 
 		// STAGE SCRIPTS
 		stage.buildStage();
@@ -965,7 +956,6 @@ class PlayState extends MusicBeatState
 			});
 		}
 
-
 		var cH = [camHUD];
 		hud.cameras = cH;
 		playerField.cameras = cH;
@@ -1013,6 +1003,12 @@ class PlayState extends MusicBeatState
 		}
 		add(botplayTxt);
 		add(grpNoteSplashes);
+
+		#if LUA_ALLOWED
+		luaDebugGroup = new FlxTypedGroup<DebugLuaText>();
+		luaDebugGroup.cameras = [camOther];
+		add(luaDebugGroup);
+		#end
 
 		/*
 		if(SONG.notes[0].mustHitSection){
