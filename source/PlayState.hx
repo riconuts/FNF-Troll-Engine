@@ -358,11 +358,10 @@ class PlayState extends MusicBeatState
 	public var iconP2:HealthIcon;
 
 	public var camGame:FlxCamera;
-	public var camSubs:FlxCamera; // JUST for subtitles
 	public var camStageUnderlay:FlxCamera; // retarded
 	public var camHUD:FlxCamera;
-	public var camOverlay:FlxCamera; // shit that should go above all else and not get affected by camHUD changes, but still below camOther (pause menu, etc)
 	public var camOther:FlxCamera;
+	public var camOverlay:FlxCamera; // shit that should go above all else and not get affected by camHUD changes, but still below camOther (pause menu, etc)
 
 	public var camFollow:FlxPoint;
 	public var camFollowPos:FlxObject;
@@ -542,10 +541,8 @@ class PlayState extends MusicBeatState
 		camHUD = new FlxCamera();
 		camOverlay = new FlxCamera();
 		camOther = new FlxCamera();
-		camSubs = new FlxCamera();
 		camStageUnderlay = new FlxCamera();
 
-		camSubs.bgColor.alpha = 0;
 		camStageUnderlay.bgColor = FlxColor.BLACK; 
 		camHUD.bgColor.alpha = 0; 
 		camOverlay.bgColor.alpha = 0;
@@ -555,7 +552,6 @@ class PlayState extends MusicBeatState
 		FlxG.cameras.add(camStageUnderlay, false);
 		FlxG.cameras.add(camHUD, false);
 		FlxG.cameras.add(camOverlay, false);
-		FlxG.cameras.add(camSubs, false);
 		FlxG.cameras.add(camOther, false);
 
 		FlxG.cameras.setDefaultDrawTarget(camGame, true);
@@ -984,6 +980,14 @@ class PlayState extends MusicBeatState
 			FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		}
 
+		subtitles = SubtitleDisplay.fromSong(SONG.song);
+		if (subtitles != null){
+			add(subtitles);
+			subtitles.y = 550;
+			subtitles.cameras = [camOther];
+		}else if(showDebugTraces)
+			trace(SONG.song + " doesnt have subtitles!");
+
 		////
 		callOnAllScripts('onCreatePost');
 
@@ -1047,14 +1051,6 @@ class PlayState extends MusicBeatState
 		finishedCreating = true;
 
 		Paths.clearUnusedMemory();
-
-		subtitles = SubtitleDisplay.fromSong(SONG.song);
-		if (subtitles != null){
-			add(subtitles);
-			subtitles.y = 550;
-			subtitles.cameras = [camSubs];
-		}else if(showDebugTraces)
-			trace(SONG.song + " doesnt have subtitles!");
 
 		noteTypeMap.clear();
 		noteTypeMap = null;
