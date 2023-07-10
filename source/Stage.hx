@@ -66,7 +66,6 @@ typedef StageFile =
 
 class Stage extends FlxTypedGroup<FlxBasic>
 {
-	public var stageScript:FunkinScript;
 	public var curStage = "stage1";
 	public var stageData:StageFile = {
 		directory: "",
@@ -80,11 +79,12 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		camera_girlfriend: [0, 0],
 		camera_speed: 1
 	};
-
-	public var spriteMap = new Map<String, FlxBasic>();
 	public var foreground = new FlxTypedGroup<FlxBasic>();
 
-	public function new(?StageName = "stage")
+	public var stageScript:FunkinHScript;
+	public var spriteMap = new Map<String, FlxBasic>();
+
+	public function new(?StageName = "stage", ?StartScript:Bool = true)
 	{
 		super();
 
@@ -94,142 +94,58 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		var newStageData = StageData.getStageFile(curStage);
 		if (newStageData != null)
 			stageData = newStageData;
+
+		if (StartScript)
+			startScript(false);
+	}
+
+	var stageBuilt:Bool = false;
+	public function startScript(?BuildStage = false)
+	{
+		if (stageScript != null)
+		{
+			trace("Stage script already started!");
+			return;
+		}
+
+		var baseFile:String = 'stages/$curStage.hscript';
+	
+		for (file in [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)])
+		{
+			if (!Paths.exists(file))
+				continue;
+		
+			stageScript = FunkinHScript.fromFile(file);
+
+			// define variables lolol
+			stageScript.set("add", add);
+			stageScript.set("stage", this);
+			stageScript.set("this", this);
+			stageScript.set("foreground", foreground);
+			
+			if (BuildStage){
+				stageScript.call("onLoad", [this, foreground]);
+				stageBuilt = true;
+			}
+
+			break;
+		}
 	}
 
 	public function buildStage()
 	{
-		var doPush:Bool = false;
-		var baseScriptFile:String = 'stages/' + curStage;
-
-		#if LUA_ALLOWED
-		for (ext in ["hscript" , "lua"])
-		{
-			if (doPush)
-				break;
-			var baseFile = '$baseScriptFile.$ext';
-		#else
-			var baseFile = '$baseScriptFile.hscript';
-		#end
-			for (file in [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)])
-			{
-				if (!Paths.exists(file))
-					continue;
-				
-				#if LUA_ALLOWED
-				if (ext == 'hscript'){
-				#end
-					stageScript = FunkinHScript.fromFile(file);
-
-					// define variables lolol
-					stageScript.set("add", add);
-					stageScript.set("stage", this);
-					stageScript.set("this", this);
-					stageScript.set("foreground", foreground);
-					
-					stageScript.call("onLoad", [this, foreground]);
-					break;
-				#if LUA_ALLOWED
-				} else if (ext == 'lua'){
-					stageScript = new FunkinLua(file, true);
-					var lua:FunkinLua = cast stageScript;
-					var state = lua.lua;
-					Lua_helper.add_callback(state, "addLuaSprite", function(tag:String, front:Bool = false) {
-						// TODO: put modchartSprites n shit outside of PlayState
-						// maybe put it into FunkinLua so that stages made for psych mods will work on the title screen, etc
-
-						if (PlayState.instance == null || !PlayState.instance.modchartSprites.exists(tag))
-							return;
-
-						var spr:FunkinLua.ModchartSprite = PlayState.instance.modchartSprites.get(tag);
-						if(spr.wasAdded)
-							return;
-
-						if (front)
-							foreground.add(spr);			
-						else
-							add(spr);
-						
-						
-						spr.wasAdded = true;	
-					});
-
-					Lua_helper.add_callback(state, "removeLuaSprite", function(tag:String, destroy:Bool = true)
-					{
-						if (!PlayState.instance.modchartSprites.exists(tag))
-						{
-							return;
-						}
-
-						var pee:ModchartSprite = PlayState.instance.modchartSprites.get(tag);
-						if (destroy)
-						{
-							pee.kill();
-						}
-
-						if (pee.wasAdded)
-						{
-							remove(pee, true);
-							foreground.remove(pee, true);
-							pee.wasAdded = false;
-						}
-
-						if (destroy)
-						{
-							pee.destroy();
-							PlayState.instance.modchartSprites.remove(tag);
-						}
-					});
-
-					Lua_helper.add_callback(state, "addLuaText", function(tag:String)
-					{
-						if (PlayState.instance.modchartTexts.exists(tag))
-						{
-							var shit:ModchartText = PlayState.instance.modchartTexts.get(tag);
-							if (!shit.wasAdded)
-							{
-								foreground.add(shit);
-								shit.wasAdded = true;
-								// trace('added a thing: ' + tag);
-							}
-						}
-					});
-
-					Lua_helper.add_callback(state, "removeLuaText", function(tag:String, destroy:Bool = true)
-					{
-						if (!PlayState.instance.modchartTexts.exists(tag))
-						{
-							return;
-						}
-
-						var pee:ModchartText = PlayState.instance.modchartTexts.get(tag);
-						if (destroy)
-						{
-							pee.kill();
-						}
-
-						if (pee.wasAdded)
-						{
-							foreground.remove(pee, true);
-							pee.wasAdded = false;
-						}
-
-						if (destroy)
-						{
-							pee.destroy();
-							PlayState.instance.modchartTexts.remove(tag);
-						}
-					});
+		if (!stageBuilt){
+			
+			if (stageScript != null){
+				if (stageScript is FunkinLua)
 					stageScript.call("onCreate", []);
-					stageScript.call("onLoad", []);
-
-					break;
-				}	
-				#end			
+				else
+					stageScript.call("onLoad", [this, foreground]);
 			}
-		#if LUA_ALLOWED
+
+			stageBuilt = true;
 		}
-		#end
-		
+
 		return this;
 	}
 

@@ -1371,7 +1371,10 @@ class FunkinLua extends FunkinScript
 				position = FlxMath.minInt(position, instance.members.indexOf(instance.boyfriendGroup));
 				position = FlxMath.minInt(position, instance.members.indexOf(instance.dadGroup));
 
-				instance.insert(position, spr);
+				if (position == -1)
+					instance.add(spr);
+				else
+					instance.insert(position, spr);
 			}else{
 				instance.add(spr);
 			}

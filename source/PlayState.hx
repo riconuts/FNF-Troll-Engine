@@ -360,8 +360,8 @@ class PlayState extends MusicBeatState
 	public var camGame:FlxCamera;
 	public var camStageUnderlay:FlxCamera; // retarded
 	public var camHUD:FlxCamera;
-	public var camOther:FlxCamera;
 	public var camOverlay:FlxCamera; // shit that should go above all else and not get affected by camHUD changes, but still below camOther (pause menu, etc)
+	public var camOther:FlxCamera;
 
 	public var camFollow:FlxPoint;
 	public var camFollowPos:FlxObject;
@@ -578,6 +578,9 @@ class PlayState extends MusicBeatState
 		songName = Paths.formatToSongPath(SONG.song);
 		songHighscore = Highscore.getScore(SONG.song);
 
+		modManager = new ModManager(this);
+		setDefaultHScripts("modManager", modManager);
+
 		if (SONG != null){
 			if(SONG.metadata != null)
 				metadata = SONG.metadata;
@@ -610,15 +613,12 @@ class PlayState extends MusicBeatState
 
 		//// STAGE SHIT
 		if (SONG.stage == null || SONG.stage.length < 1)
-			SONG.stage = 'stage';
-		curStage = SONG.stage;
+			curStage = 'stage';
+		else
+			curStage = SONG.stage;
 
-		stage = new Stage(curStage);
-		stageData = stage.stageData;
-		setStageData(stageData);
-
+		//// GLOBAL SCRIPTS
 		var filesPushed:Array<String> = [];
-
 		for (folder in Paths.getFolders('scripts'))
 		{
 			Paths.iterateDirectory(folder, function(file:String)
@@ -635,9 +635,19 @@ class PlayState extends MusicBeatState
 			});
 		}
 
-		//// Asset precaching start
-		//// this could be moved to the loadingstate probably
-		
+		//// STAGE SCRIPTS
+		stage = new Stage(curStage, true);
+		stageData = stage.stageData;
+		setStageData(stageData);
+
+		//callOnHScripts("onStageCreated");
+
+		if (stage.stageScript != null){
+			hscriptArray.push(cast stage.stageScript);
+			funkyScripts.push(stage.stageScript);
+		}
+
+		//// Asset precaching start		
 		for (judgeData in judgeManager.judgmentData)
 			shitToLoad.push({path: judgeData.internalName});
 
@@ -658,8 +668,8 @@ class PlayState extends MusicBeatState
 			shitToLoad.push({path: PauseSubState.songName, type: 'MUSIC'});
 		else if (ClientPrefs.pauseMusic != 'None')
 			shitToLoad.push({path: Paths.formatToSongPath(ClientPrefs.pauseMusic), type: 'MUSIC'}); 
-		*/
 		shitToLoad.push({path: "breakfast", type: 'MUSIC'}); 
+		*/
 
 		if (ClientPrefs.timeBarType != 'Disabled')
 			shitToLoad.push({path: "timeBar"});
@@ -728,14 +738,13 @@ class PlayState extends MusicBeatState
 		}
 
 		Cache.loadWithList(shitToLoad);
+		shitToLoad = [];
+
 		//// Asset precaching end
 
 		var splash:NoteSplash = new NoteSplash(100, 100, 0);
 		splash.alpha = 0.0;
 		grpNoteSplashes.add(splash);
-
-		modManager = new ModManager(this);
-		setDefaultHScripts("modManager", modManager);
 
 		//// Characters
 
@@ -783,12 +792,11 @@ class PlayState extends MusicBeatState
 				gf.visible = false;
 		}
 		
-		
-		switch(ClientPrefs.etternaHUD){
-			case 'Advanced':
-				hud = new AdvancedHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song, stats);
-			default:
-				hud = new PsychHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song, stats);
+		if (hud == null){
+			switch(ClientPrefs.etternaHUD){
+				case 'Advanced': hud = new AdvancedHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song, stats);
+				default: hud = new PsychHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song, stats);
+			}
 		}
 		
 		// TODO: remove all dependencies on healthbar in here
@@ -803,47 +811,15 @@ class PlayState extends MusicBeatState
 		botplayTxt.scrollFactor.set();
 		botplayTxt.borderSize = 1.25;
 		botplayTxt.exists = false;
-		
-		#if LUA_ALLOWED
-		// "GLOBAL" LUA SCRIPTS
 
-		var filesPushed:Array<String> = [];
-
-		for (folder in Paths.getFolders('scripts'))
-		{
-			Paths.iterateDirectory(folder, function(file:String)
-			{
-				if(filesPushed.contains(file))
-					return;
-
-				if(file.endsWith('.lua')) {
-					var script = new FunkinLua(folder + file);
-					luaArray.push(script);
-					funkyScripts.push(script);
-					filesPushed.push(file);
-				}			
-			});
-		}
-		#end
-
-		// STAGE SCRIPTS
+		////
 		stage.buildStage();
-		if (stage.stageScript != null){
-			#if LUA_ALLOWED
-			if (stage.stageScript is FunkinLua)
-				luaArray.push(cast stage.stageScript);
-			else
-			#end
-			hscriptArray.push(cast stage.stageScript);
 
-			funkyScripts.push(stage.stageScript);
-		}
-
-		// in case you want to layer shit in a specific way (like in infimario for example)
+		// in case you want to layer characters or objects in a specific way (like in infimario for example)
 		// RICO CAN WE STOP USING SLURS IN THE CODE
 		// we???
 		// fine, can YOU stop using slurs in the code >:(
-		if (Globals.Function_Stop != callOnHScripts("onAddSpriteGroups", []))
+		if (Globals.Function_Stop != callOnHScripts("onAddSpriteGroups"))
 		{
 			add(stage);
 
@@ -854,7 +830,7 @@ class PlayState extends MusicBeatState
 			add(stage.foreground);
 		}
 
-		// Generate playfields so you can actually, well, play the game
+		//// Generate playfields so you can actually, well, play the game
 		callOnScripts("prePlayfieldCreation");
 		playerField = new PlayField(modManager);
 		playerField.modNumber = 0;
@@ -909,14 +885,45 @@ class PlayState extends MusicBeatState
 		timingTxt.visible = false;
 		timingTxt.alpha = 0;
 
-
-
 		// init shit
 		health = 1;
 		reloadHealthBarColors();
 
 		startingSong = true;
 
+		#if LUA_ALLOWED
+		//// "GLOBAL" LUA SCRIPTS
+		var filesPushed:Array<String> = [];
+		for (folder in Paths.getFolders('scripts'))
+		{
+			Paths.iterateDirectory(folder, function(file:String)
+			{
+				if(filesPushed.contains(file))
+					return;
+
+				if(file.endsWith('.lua')) {
+					var script = new FunkinLua(folder + file);
+					luaArray.push(script);
+					funkyScripts.push(script);
+					filesPushed.push(file);
+				}			
+			});
+		}
+
+		//// STAGE LUA SCRIPTS
+		var baseFile:String = 'stages/$curStage.lua';
+		for (file in [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)])
+		{
+			if (!Paths.exists(file))
+				continue;
+
+			var script = new FunkinLua(file);
+			luaArray.push(script);
+			funkyScripts.push(script);
+
+			break;
+		}
+		#end
 
 		// SONG SPECIFIC SCRIPTS
 		var foldersToCheck:Array<String> = Paths.getFolders('songs/$songName');
@@ -1042,6 +1049,7 @@ class PlayState extends MusicBeatState
 		}
 
 		Cache.loadWithList(shitToLoad);
+		shitToLoad = [];
 
 		super.create();
 
