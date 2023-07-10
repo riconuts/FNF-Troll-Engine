@@ -2190,13 +2190,18 @@ class PlayState extends MusicBeatState
 		if(options.contains("gradeSet"))
 			ratingStuff = Highscore.grades.get(ClientPrefs.gradeSet);
 		
+		callOnScripts('optionsChanged', [options]);
+		
 		var reBind:Bool = false;
-		PlayState.instance.callOnScripts('optionsChanged', [options]);
 		for(opt in options){
 			if(opt.startsWith("bind")){
 				reBind = true;
+				break;
 			}
 		}
+
+		if (!ClientPrefs.coloredCombos)
+			comboColor = 0xFFFFFFFF;
 
 		remove(ratingTxtGroup);
 		remove(comboNumGroup);
