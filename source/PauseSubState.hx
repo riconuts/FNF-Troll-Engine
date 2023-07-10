@@ -30,9 +30,14 @@ class PauseSubState extends MusicBeatSubstate
 
 	public static var songName:String = '';
 
-	public function new(x:Float, y:Float)
+	public function new (x:Float, y:Float)
 	{
 		super();
+	}
+
+	override public function create()
+	{
+		super.create();
 		
 		persistentUpdate = false;
 
