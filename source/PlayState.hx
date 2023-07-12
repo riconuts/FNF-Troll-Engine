@@ -3355,7 +3355,7 @@ class PlayState extends MusicBeatState
 				// TODO: Save more stats?
 
 				if (!playOpponent && saveScore && ratingFC!='Fail')
-					Highscore.saveScore(SONG.song, stats.score, percent);
+					Highscore.saveScore(SONG.song, stats.score, percent, stats.totalNotesHit);
 			}
 
 

@@ -597,7 +597,7 @@ class FreeplaySongButton extends TGTSquareButton{
 	{
 		var ratingPercent = Highscore.getRating(metadata.songName);
 		scoreText.text = Highscore.floorDecimal(ratingPercent * 100, 2) + '%';
-		scoreText.color = ratingPercent == 1 ? 0xFFF4CC34 : 0xFFFFFFFF;
+		scoreText.color = ratingPercent == 1 ? 0xFFF4CC34 : Highscore.hasValidScore(metadata.songName) ? 0xFFFFFFFF : 0xFF8B8B8B;
 	}
 
 	override function onover()

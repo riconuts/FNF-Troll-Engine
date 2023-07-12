@@ -5,6 +5,9 @@ import flixel.util.FlxSave;
 #end
 using StringTools;
 
+// honestly i'd like to rewrite this
+// somehow hash the charts into a string and save it by that, Etterna style
+// though idk if that's a good idea (it'd kill all current scores + any chart changes will reset them too, though if you put the old chart back in you'll get the score back, so)
 class Highscore
 {
 	public static var grades:Map<String, Array<Array<Dynamic>>> = [
@@ -74,9 +77,11 @@ class Highscore
 	#if (haxe >= "4.0.0")
 	public static var weekScores:Map<String, Int> = new Map();
 	public static var songScores:Map<String, Int> = new Map();
+	public static var songWifeScores:Map<String, Float> = new Map();
 	public static var songRating:Map<String, Float> = new Map();
 	#else
 	public static var weekScores:Map<String, Int> = new Map();
+	public static var songWifeScores:Map<String, Float> = new Map<String, Float>();
 	public static var songScores:Map<String, Int> = new Map<String, Int>();
 	public static var songRating:Map<String, Float> = new Map<String, Float>();
 	#end
@@ -87,15 +92,24 @@ class Highscore
 	static var defaultID:String = 'f-45-90-135-166'; // psych preset aka the default preset from old tgt
 	// this is used to make sure if you're on psych preset, you get to keep your old high scores
 
+	static var isWife3:Bool = false;
+	static var hasEpic:Bool = false;
+	static var judgeDiff:String = 'J4';
+
 	public static function getID(){
 		var idArray:Array<String> = [];
-		idArray.push(ClientPrefs.useEpics ? 't' : 'f');
-		if (ClientPrefs.wife3)
+
+		isWife3 = ClientPrefs.wife3;
+		hasEpic = ClientPrefs.useEpics;
+		judgeDiff = ClientPrefs.judgeDiff;
+
+		idArray.push(hasEpic ? 't' : 'f');
+		if (isWife3)
 			idArray.push("w3");
 		var windows = ['sick', 'good', 'bad', 'hit'];
-		if(ClientPrefs.useEpics)windows.insert(0, 'epic');
-		if (ClientPrefs.judgeDiff!='J4')
-			idArray.push(ClientPrefs.judgeDiff);
+		if (hasEpic)windows.insert(0, 'epic');
+		if (judgeDiff !='J4')
+			idArray.push(judgeDiff);
 		
 		for(window in windows){
 			var realWindow = Reflect.field(ClientPrefs, window + "Window");
@@ -164,21 +178,20 @@ class Highscore
 		return newValue / tempMult;
 	}
 
-	public static function saveScore(song:String, score:Int = 0, ?rating:Float = -1):Void
+	public static function saveScore(song:String, score:Int = 0, ?rating:Float = -1, ?notesHit:Float = 0):Void
 	{
 		updateSave();
 		var daSong:String = formatSong(song);
 
-		if (songScores.exists(daSong)) {
-			if (songScores.get(daSong) < score) {
-				setScore(daSong, score);
-				if(rating >= 0) setRating(daSong, rating);
-			}
-		}
-		else {
+		if (!songWifeScores.exists(daSong) || songWifeScores.get(daSong) < notesHit)
+			setNotesHit(daSong, notesHit);
+		
+		if (!songRating.exists(daSong) || songRating.get(daSong) < rating)
+			setRating(daSong, rating);
+		
+		if (!songScores.exists(daSong) || songScores.get(daSong) < score) 
 			setScore(daSong, score);
-			if(rating >= 0) setRating(daSong, rating);
-		}
+		
 	}
 
 	public static function saveWeekScore(week:String, score:Int = 0):Void
@@ -198,6 +211,15 @@ class Highscore
 	/**
 	 * YOU SHOULD FORMAT SONG WITH formatSong() BEFORE TOSSING IN SONG VARIABLE
 	 */
+	static function setNotesHit(song:String, score:Float):Void
+	{
+		updateSave();
+		// Reminder that I don't need to format this song, it should come formatted!
+		songWifeScores.set(song, score);
+		save.data.songWifeScores = songWifeScores;
+		save.flush();
+	}
+
 	static function setScore(song:String, score:Int):Void
 	{
 		updateSave();
@@ -225,6 +247,29 @@ class Highscore
 	}
 
 	static var formatSong = Paths.formatToSongPath;
+
+	public static function hasValidScore(song:String):Bool
+	{
+/* 		if (isWife3){
+			if (!songWifeScores.exists(formatSong(song)) && getRating(song) != 0) // if it has no wifescore but has an accuracy tied to it then this should be overwritten
+				// (this is to ensure when on Wife3, it'll only save your best accuracy, sadly means old W3 accuracies get wiped though)
+				return false;
+			
+		} */
+
+		// ^^ incase just checking rating > prevRating doesnt work and stil fucks up Wife3 scores
+
+		return true;
+	}
+	public static function getNotesHit(song:String):Float
+	{
+		updateSave();
+		var daSong:String = formatSong(song);
+		if (!songWifeScores.exists(daSong))
+			return 0;
+
+		return songWifeScores.get(daSong);
+	}
 
 	public static function getScore(song:String):Int
 	{

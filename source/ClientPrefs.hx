@@ -310,6 +310,13 @@ class ClientPrefs
 				value: false,
 				data: []
 			},
+			"showWifeScore" => {
+				display: "Accuracy Score Display",
+				desc: "When toggled, the score will be displayed as the total notes hit instead of the standard judgment-based scoring.\nOnly really useful on Wife3.",
+				type: Toggle,
+				value: false,
+				data: []
+			},
 			"noteSplashes" => {
 				display: "Note Splashes",
 				desc: "When toggled, hitting top judgements will cause particles to spawn.",

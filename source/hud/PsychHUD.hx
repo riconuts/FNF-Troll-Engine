@@ -19,6 +19,7 @@ class PsychHUD extends BaseHUD
 	var scoreTxtTween:FlxTween;
 
 	var songHighscore:Int = 0;
+	var songWifeHighscore:Float = 0;
 	override public function new(iP1:String, iP2:String, songName:String, stats:Stats)
 	{
 		super(iP1, iP2, songName, stats);
@@ -31,6 +32,7 @@ class PsychHUD extends BaseHUD
 		add(iconP2);
 		
 		songHighscore = Highscore.getScore(songName);
+		songWifeHighscore = Highscore.getNotesHit(songName);
 
 		scoreTxt = new FlxText(0, healthBarBG.y + 48, FlxG.width, "", 20);
 		scoreTxt.setFormat(Paths.font("calibri.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -105,8 +107,17 @@ class PsychHUD extends BaseHUD
 	}
 
 	override function update(elapsed:Float){
-		scoreTxt.text = (songHighscore != 0 && score > songHighscore ? 'Hi-score: ' : 'Score: ')
-			+ '$score | Combo Breaks: $comboBreaks | Rating: '
+		var shownScore:String = Std.string(score);
+		var isHighscore:Bool = false;
+		if (ClientPrefs.showWifeScore){
+			shownScore = Std.string(Math.floor(stats.totalNotesHit * 100));
+			isHighscore = songWifeHighscore != 0 && stats.totalNotesHit > songWifeHighscore;
+		}else
+			isHighscore = songHighscore != 0 && score > songHighscore;
+		
+
+		scoreTxt.text = (isHighscore ? 'Hi-score: ' : 'Score: ')
+			+ '$shownScore | Combo Breaks: $comboBreaks | Rating: '
 			+ (grade != '?' ? Highscore.floorDecimal(ratingPercent * 100, 2)
 				+ '% / ${grade} [${(ratingFC == 'CFC' && ClientPrefs.wife3) ? "FC" : ratingFC}]' : grade);
 		if (ClientPrefs.npsDisplay)
