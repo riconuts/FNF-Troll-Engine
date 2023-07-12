@@ -1,5 +1,6 @@
 package;
 
+import sys.FileSystem;
 import JudgmentManager.Judgment;
 import editors.ChartingState;
 import math.Vector3;
@@ -421,11 +422,18 @@ class Note extends NoteObject
 	public static var quantShitCache = new Map<String, String>();
 	var lastNoteScaleToo:Float = 1;
 	public var originalHeightForCalcs:Float = 6;
-	public function reloadNote(?prefix:String = '', ?texture:String = '', ?suffix:String = '') {
+
+	public var texPrefix:String = '';
+	public var tex:String = '';
+	public var texSuffix:String = '';
+	public function reloadNote(?prefix:String = '', ?texture:String = '', ?suffix:String = '', ?dir:String = '', hInd:Int = 0, vInd:Int = 0) {
 		if(prefix == null) prefix = '';
 		if(texture == null) texture = '';
 		if(suffix == null) suffix = '';
 
+		texPrefix = prefix;
+		tex = texture;
+		texSuffix = suffix;
 		if (noteScript != null && noteScript.scriptType == 'hscript')
 		{
 			var noteScript:FunkinHScript = cast noteScript;
@@ -444,39 +452,63 @@ class Note extends NoteObject
 		}
 
 		var arraySkin:Array<String> = skin.split('/');
-		arraySkin[arraySkin.length-1] = prefix + arraySkin[arraySkin.length-1] + suffix; // add prefix and suffix to the texture file
+		arraySkin[arraySkin.length - 1] = prefix + arraySkin[arraySkin.length-1] + suffix; // add prefix and suffix to the texture file
 		var blahblah:String = arraySkin.join('/');
 		var wasQuant = isQuant;
 		isQuant = false;
 		
 
-		if (canQuant && ClientPrefs.noteSkin == 'Quants')
+		var daDirs = [
+			''
+		];
+		if(dir.trim() != '')
+			daDirs.unshift(dir + '/');	
+		
+
+		for (dir in daDirs)
 		{
-			var texture = quantShitCache.get(blahblah); // did i do this right, is this the right thing to do
+			if (canQuant && ClientPrefs.noteSkin == 'Quants')
+			{
+				var texture = quantShitCache.get(dir + blahblah); // did i do this right, is this the right thing to do
 
-			if (texture != null){
-				blahblah = texture;
-				isQuant = true;
+				if (texture != null){
+					blahblah = texture;
+					isQuant = true;
 
-			}else if (Paths.exists(Paths.getPath("images/QUANT" + blahblah + ".png", IMAGE))
-				#if MODS_ALLOWED
-				|| Paths.exists(Paths.modsImages("QUANT" + blahblah))
-				#end) {
+				}else if (Paths.exists(Paths.getPath("images/" + dir + "QUANT" + blahblah + ".png", IMAGE))
+					#if MODS_ALLOWED
+					|| Paths.exists(Paths.modsImages(dir + "QUANT" + blahblah))
+					#end) {
 
-				var texture = "QUANT" + blahblah;
-				quantShitCache.set(blahblah, texture);
+					var texture = "QUANT" + blahblah;
+					quantShitCache.set(dir + blahblah, texture);
 
-				blahblah = texture;
-				isQuant = true;
+					blahblah = texture;
+					isQuant = true;
+				}
+			}
+
+			if (wasQuant != isQuant)
+				updateColours();
+
+			if (Paths.exists(Paths.getPath("images/" + dir + blahblah + ".png",
+				IMAGE)) #if MODS_ALLOWED || Paths.exists(Paths.modsImages(dir + blahblah)) #end)
+			{
+				if (vInd > 0 && hInd > 0){
+					loadGraphic(Paths.image(dir + blahblah));
+					width = width / hInd;
+					height = height / vInd;
+					loadGraphic(Paths.image(dir + blahblah), true, Math.floor(width), Math.floor(height));
+					loadIndNoteAnims();
+					break;
+				}else{	
+					frames = Paths.getSparrowAtlas(dir + blahblah);
+					loadNoteAnims();
+					antialiasing = ClientPrefs.globalAntialiasing;
+					break;
+				}
 			}
 		}
-
-		if (wasQuant != isQuant)
-			updateColours();
-		
-		frames = Paths.getSparrowAtlas(blahblah);
-		loadNoteAnims();
-		antialiasing = ClientPrefs.globalAntialiasing;
 		
 		if(isSustainNote) {
 			scale.y = lastScaleY;
@@ -498,6 +530,33 @@ class Note extends NoteObject
 			noteScript.executeFunc("postReloadNote", [this, prefix, texture, suffix], this);
 		}
 	}
+
+	public function loadIndNoteAnims()
+	{
+		if (noteScript != null && noteScript.scriptType == 'hscript')
+		{
+			var noteScript:FunkinHScript = cast noteScript;
+			if (noteScript.exists("loadIndNoteAnims") && Reflect.isFunction(noteScript.get("loadIndNoteAnims")))
+			{
+				noteScript.executeFunc("loadIndNoteAnims", [this], this, ["super" => _loadIndNoteAnims]);
+				return;
+			}
+		}
+		_loadIndNoteAnims();
+	}
+
+	function _loadIndNoteAnims()
+	{
+		if (isSustainNote)
+		{
+			animation.add(colArray[noteData] + 'holdend', [noteData + 4]);
+			animation.add(colArray[noteData] + 'hold', [noteData]);
+		}
+		else
+			animation.add(colArray[noteData] + 'Scroll', [noteData + 4]);
+		
+	}
+
 
 	public function loadNoteAnims() {
 		if (noteScript != null && noteScript.scriptType == 'hscript'){
@@ -527,22 +586,6 @@ class Note extends NoteObject
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
-
-/* 		if (isSustainNote)
-		{
-			if (prevNote != null && prevNote.isSustainNote)
-				zIndex = z + prevNote.zIndex;
-			
-			else if (prevNote != null && !prevNote.isSustainNote)
-				zIndex = z + prevNote.zIndex - 1;
-			
-		}
-		else
-			zIndex = z;
-		
-
-		zIndex += desiredZIndex;
-		zIndex -= (mustPress == true ? 0 : 1); */
 
 		if(!inEditor){
 			if (noteScript != null && noteScript.scriptType == 'hscript'){
