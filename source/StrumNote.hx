@@ -10,6 +10,10 @@ import math.Vector3;
 
 using StringTools;
 
+// honestly we should make it so you can attach a hscript to receptors and type-less notes
+// maybe notetypes/default.hx and notetypes/receptor.hx
+// idk lol i'll explore it more once i get around to making skins/assetpacks (resource packs but troll engine)
+
 class StrumNote extends NoteObject
 {
 
@@ -98,6 +102,7 @@ class StrumNote extends NoteObject
 		antialiasing = ClientPrefs.globalAntialiasing;
 		setGraphicSize(Std.int(width * 0.7));
 
+		// TODO: proper multi-key support
 		switch (Math.abs(noteData) % 4)
 		{
 			case 0:

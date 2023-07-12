@@ -239,9 +239,8 @@ class ModManager {
     public function updateTimeline(curStep:Float)
 		timeline.update(curStep);
 
- 	public var playerAmount = 2;
-	public var receptorAmount = 4;
-	public function getBaseX(direction:Int, player:Float):Float
+ 	public var playerAmount:Int = 2;
+	public function getBaseX(direction:Int, player:Float, receptorAmount:Int = 4):Float
 	{
 		if (player > (playerAmount-1) || player < 0)
 			player = 0.5; // replicating old behaviour for upcoming modcharts
@@ -322,7 +321,7 @@ class ModManager {
 
 		if (!obj.alive)return pos;
 
-		pos.x = (Note.swagWidth / 2) + getBaseX(data, player);
+		pos.x = (Note.swagWidth / 2) + getBaseX(data, player, field.field.keyCount);
 		pos.y = (Note.swagWidth / 2) + 50 + diff;
 		pos.z = 0;
 

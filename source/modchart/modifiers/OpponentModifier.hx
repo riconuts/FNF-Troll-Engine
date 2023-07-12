@@ -13,8 +13,8 @@ class OpponentModifier extends NoteModifier {
     {
         var nPlayer = Std.int(CoolUtil.scale(player, 0, 1, 1, 0));
 
-		var oppX = modMgr.getBaseX(data, nPlayer);
-		var plrX = modMgr.getBaseX(data, player);
+		var oppX = modMgr.getBaseX(data, nPlayer, field.field.keyCount);
+		var plrX = modMgr.getBaseX(data, player, field.field.keyCount);
         var distX = oppX-plrX;
 
 		pos.x += distX * getValue(player);

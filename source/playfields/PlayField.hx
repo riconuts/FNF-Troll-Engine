@@ -87,7 +87,39 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	public var modManager:ModManager; // the mod manager. will be set automatically by playstate so dw bout this
 	public var isPlayer:Bool = false; // if this playfield takes input from the player
 	public var inControl:Bool = true; // if this playfield will take input at all
+	public var keyCount(default, set):Int = 4; // How many lanes are in this field
 	public var autoPlayed(default, set):Bool = false; // if this playfield should be played automatically (botplay, opponent, etc)
+
+	function set_keyCount(cnt:Int){
+		if (cnt < 0)
+			cnt=0;
+		if (spawnedByData.length < cnt){
+			for (_ in (spawnedByData.length)...cnt)
+				spawnedByData.push([]);
+		}else if(spawnedByData.length > cnt){
+			for (_ in cnt...spawnedByData.length)
+				spawnedByData.pop();
+		}
+
+		if (noteQueue.length < cnt)
+		{
+			for (_ in (noteQueue.length)...cnt)
+				noteQueue.push([]);
+		}
+		else if (noteQueue.length > cnt)
+		{
+			for (_ in cnt...noteQueue.length)
+				noteQueue.pop();
+		}
+		if (keysPressed.length < cnt)
+		{
+			for (_ in (keysPressed.length)...cnt)
+				keysPressed.push(false);
+		}
+
+		return keyCount = cnt;
+	}
+
 	function set_autoPlayed(aP:Bool){
 		for (idx in 0...keysPressed.length)
 			keysPressed[idx] = false;
@@ -194,26 +226,24 @@ class PlayField extends FlxTypedGroup<FlxBasic>
  		if (daNote.parent != null && daNote.parent.unhitTail.contains(daNote))
 			daNote.parent.unhitTail.remove(daNote); 
 
-		noteQueue[daNote.noteData].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
+		if (noteQueue[daNote.noteData] != null)
+			noteQueue[daNote.noteData].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
 		remove(daNote);
 		daNote.destroy();
 	}
 
 	// spawns a note
 	public function spawnNote(note:Note){
-		if (noteQueue[note.noteData]!=null)
+		if (noteQueue[note.noteData]!=null){
 			noteQueue[note.noteData].remove(note);
-		if (spawnedByData[note.noteData]==null){
-			if(note.noteData >= spawnedByData.length){
-				for(i in spawnedByData.length-1...note.noteData)
-					spawnedByData.push([]);
-			}
+			noteQueue[note.noteData].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
 		}
 
-		spawnedByData[note.noteData].push(note);
-
-		noteQueue[note.noteData].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
-
+		if (spawnedByData[note.noteData]!=null)
+			spawnedByData[note.noteData].push(note);
+		else
+			return;
+		
 		noteSpawned.dispatch(note, this);
 		spawnedNotes.push(note);
 		note.handleRendering = false;
@@ -247,6 +277,8 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	
 	// sends an input to the playfield
 	public function input(data:Int){
+		if(data > keyCount || data < 0)return null;
+		
 		var noteList = getNotesWithEnd(data, Conductor.songPosition + ClientPrefs.hitWindow, (note:Note) -> !note.isSustainNote);
 		#if PE_MOD_COMPATIBILITY
 		noteList.sort((a, b) -> Std.int((a.strumTime + (a.lowPriority ? 10000 : 0)) - (b.strumTime + (b.lowPriority ? 10000 : 0)))); // so lowPriority actually works (even though i hate it lol!)
@@ -269,7 +301,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 	// generates the receptors
 	public function generateStrums(){
-		for(i in 0...4){ // TODO: multikey??? idk lol
+		for(i in 0...keyCount){
 			var babyArrow:StrumNote = new StrumNote(0, 0, i);
 			babyArrow.downScroll = ClientPrefs.downScroll;
 			babyArrow.alpha = 0;
@@ -382,6 +414,10 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 			// check for hold inputs
 			if(!daNote.isSustainNote){
+				if(daNote.noteData > keyCount-1){
+					garbage.push(daNote);
+					continue;
+				}
 				if(daNote.holdingTime < daNote.sustainLength && inControl && !daNote.blockHit){
 					if(!daNote.tooLate && daNote.wasGoodHit){
 						var isHeld = autoPlayed || keysPressed[daNote.noteData];
@@ -463,7 +499,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 		if (inControl && autoPlayed)
 		{
-			for(i in 0...4){
+			for(i in 0...keyCount){
 				for (daNote in getNotes(i, (note:Note) -> !note.ignoreNote && !note.hitCausesMiss)){
 					if (!daNote.isSustainNote){
 						var hitDiff = Conductor.songPosition - daNote.strumTime;
