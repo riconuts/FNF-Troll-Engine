@@ -251,8 +251,6 @@ class PlayState extends MusicBeatState
 	
 	public var ratingTxtGroup = new FlxTypedGroup<RatingSprite>();
 	public var comboNumGroup = new FlxTypedGroup<RatingSprite>();
-	
-	private var curSong:String = "";
 
 	public var displayedHealth(default, set):Float = 1;
 	function set_displayedHealth(value:Float){
@@ -1295,10 +1293,9 @@ class PlayState extends MusicBeatState
 
 	/*
 	function songIntroCutscene(){
-		var daSong:String = Paths.formatToSongPath(curSong);
 		if (isStoryMode && !seenCutscene)
 		{
-			switch (daSong)
+			switch (songName)
 			{
 				default:
 					startCountdown();
@@ -1725,8 +1722,6 @@ class PlayState extends MusicBeatState
 
 		var songData = SONG;
 		Conductor.changeBPM(songData.bpm);
-
-		curSong = songData.song;
 
 		//FlxG.sound.list.add(new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.song)));
 		inst = new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.song));
