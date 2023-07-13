@@ -623,15 +623,13 @@ class PlayState extends MusicBeatState
 		{
 			Paths.iterateDirectory(folder, function(file:String)
 			{
-				if(filesPushed.contains(file))
+				if(filesPushed.contains(file) || !file.endsWith('.hscript'))
 					return;
 
-				if(file.endsWith('.hscript')) {
-					var script = FunkinHScript.fromFile(folder + file);
-					hscriptArray.push(script);
-					funkyScripts.push(script);
-					filesPushed.push(file);
-				}
+				var script = FunkinHScript.fromFile(folder + file);
+				hscriptArray.push(script);
+				funkyScripts.push(script);
+				filesPushed.push(file);
 			});
 		}
 
@@ -645,6 +643,28 @@ class PlayState extends MusicBeatState
 		if (stage.stageScript != null){
 			hscriptArray.push(cast stage.stageScript);
 			funkyScripts.push(stage.stageScript);
+		}
+
+		// SONG SPECIFIC SCRIPTS
+		var foldersToCheck:Array<String> = Paths.getFolders('songs/$songName');
+		#if PE_MOD_COMPATIBILITY
+		for (dir in Paths.getFolders('data/$songName'))
+			foldersToCheck.push(dir);
+		#end
+
+		var filesPushed:Array<String> = [];
+		for (folder in foldersToCheck)
+		{
+			Paths.iterateDirectory(folder, function(file:String)
+			{
+				if(filesPushed.contains(file) || !file.endsWith('.hscript'))
+					return;
+
+				var script = FunkinHScript.fromFile(folder + file);
+				hscriptArray.push(script);
+				funkyScripts.push(script);
+				filesPushed.push(file);
+			});
 		}
 
 		//// Asset precaching start		
@@ -923,41 +943,28 @@ class PlayState extends MusicBeatState
 
 			break;
 		}
-		#end
 
-		// SONG SPECIFIC SCRIPTS
+		// SONG SPECIFIC LUA SCRIPTS
 		var foldersToCheck:Array<String> = Paths.getFolders('songs/$songName');
 		#if PE_MOD_COMPATIBILITY
-		for (dir in Paths.getFolders('data/$songName'))foldersToCheck.push(dir);
-		
+		for (dir in Paths.getFolders('data/$songName'))
+			foldersToCheck.push(dir);
 		#end
+
 		var filesPushed:Array<String> = [];
-
-
-		for (folder in foldersToCheck)
-		{
+		for (folder in foldersToCheck){
 			Paths.iterateDirectory(folder, function(file:String)
 			{
-				if(filesPushed.contains(file))
+				if(filesPushed.contains(file) || !file.endsWith('.lua'))
 					return;
 
-				#if LUA_ALLOWED
-				if(file.endsWith('.lua'))
-				{
-					var script = new FunkinLua(folder + file);
-					luaArray.push(script);
-					funkyScripts.push(script);
-					filesPushed.push(file);
-				}
-				else #end if(file.endsWith('.hscript'))
-				{
-					var script = FunkinHScript.fromFile(folder + file);
-					hscriptArray.push(script);
-					funkyScripts.push(script);
-					filesPushed.push(file);
-				}
+				var script = new FunkinLua(folder + file);
+				luaArray.push(script);
+				funkyScripts.push(script);
+				filesPushed.push(file);			
 			});
 		}
+		#end
 
 		var cH = [camHUD];
 		hud.cameras = cH;
@@ -1037,12 +1044,10 @@ class PlayState extends MusicBeatState
 		*/
 
 		// Load all of the countdown intro assets!!!!!
-		var shitToLoad:Array<AssetPreload> = [
-			{path: 'intro3', type: "SOUND"},
-			{path: 'intro2', type: "SOUND"},
-			{path: 'intro1', type: "SOUND"},
-			{path: 'introGo', type: "SOUND"}
-		];
+		shitToLoad.push({path: 'intro3', type: "SOUND"});
+		shitToLoad.push({path: 'intro2', type: "SOUND"});
+		shitToLoad.push({path: 'intro1', type: "SOUND"});
+		shitToLoad.push({path: 'introGo', type: "SOUND"});
 		for (introPath in introAlts){
 			if (introPath != null)
 				shitToLoad.push({path: introPath});
