@@ -149,40 +149,33 @@ class Wife3
 
 class PlayState extends MusicBeatState
 {
-	public var stats:Stats = new Stats();
-	public var botplayTxt:FlxText;
-
-	var notefields:NotefieldManager = new NotefieldManager();
 	var sndFilter:ALFilter = AL.createFilter();
     var sndEffect:ALEffect = AL.createEffect();
 
 	public var showDebugTraces:Bool = #if debug true #else Main.showDebugTraces #end;
 
-	public var noteHits:Array<Float> = [];
-	public var nps:Int = 0;
+	var speedChanges:Array<SpeedEvent> = [];
 	public var currentSV:SpeedEvent = {position: 0, songTime:0, speed: 1};
 	public var judgeManager:JudgmentManager;
 
-	var speedChanges:Array<SpeedEvent> = [];
-	var subtitles:Null<SubtitleDisplay>;
-	
-	public var metadata:SongCreditdata; // metadata for the songs (artist, etc)
-
-	// andromeda modcharts :D
-	public var modManager:ModManager;
-
-	public var whosTurn:String = '';
-	public var focusedChar:Character;
+	var notefields:NotefieldManager = new NotefieldManager();
+	public var modManager:ModManager; // andromeda modcharts :D
 
 	/*
 	public static var STRUM_X = 42;
 	public static var STRUM_X_MIDDLESCROLL = -278;
+
+	public var spawnTime:Float = 2000;
 	*/
 
+	public var stats:Stats = new Stats();
+	public var noteHits:Array<Float> = [];
+	public var nps:Int = 0;
 	public var ratingStuff:Array<Array<Dynamic>> = Highscore.grades.get(ClientPrefs.gradeSet);
 	public var hud:BaseHUD;
 	public var scoreTxt:FlxText = new FlxText(); // just so psych mods n shit dont error
-	public var timingTxt:FlxText;
+	public var botplayTxt:FlxText;
+	var subtitles:Null<SubtitleDisplay>;
 
 	public var modchartTweens:Map<String, FlxTween> = new Map<String, FlxTween>();
 	public var modchartSprites:Map<String, ModchartSprite> = new Map<String, ModchartSprite>();
@@ -219,7 +212,7 @@ class PlayState extends MusicBeatState
 	public static var arrowSkin:String = '';
 	public static var splashSkin:String = '';
 
-	public var spawnTime:Float = 2000;
+	public var metadata:SongCreditdata; // metadata for the songs (artist, etc)
 
 	public var tracks:Array<FlxSound> = [];
 	public var vocals:FlxSound;
@@ -229,6 +222,7 @@ class PlayState extends MusicBeatState
 	public var gf:Character = null;
 	public var boyfriend:Character = null;
 
+	public var focusedChar:Character;
 	public var gfSpeed:Int = 1;
 
 	public var notes = new FlxTypedGroup<Note>();
@@ -254,6 +248,7 @@ class PlayState extends MusicBeatState
 	
 	public var ratingTxtGroup = new FlxTypedGroup<RatingSprite>();
 	public var comboNumGroup = new FlxTypedGroup<RatingSprite>();
+	public var timingTxt:FlxText;
 
 	public var displayedHealth(default, set):Float = 1;
 	function set_displayedHealth(value:Float){
@@ -287,7 +282,6 @@ class PlayState extends MusicBeatState
 	public var ratingPercent(get, set):Float;
 	@:isVar
 	public var ratingFC(get, set):String;
-
 	
 	public inline function get_songScore()return stats.score;
 	public inline function get_totalPlayed()return stats.totalPlayed;
@@ -445,8 +439,10 @@ class PlayState extends MusicBeatState
 	private var keysArray:Array<Dynamic>;
 	private var controlArray:Array<String>;
 
-	var finishedCreating =false;
+	// Loading
 	var shitToLoad:Array<AssetPreload> = [];
+	var finishedCreating = false;
+	
 	override public function create()
 	{
 		judgeManager = new JudgmentManager();
@@ -1726,13 +1722,12 @@ class PlayState extends MusicBeatState
 		var songData = SONG;
 		Conductor.changeBPM(songData.bpm);
 
-		//FlxG.sound.list.add(new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.song)));
 		inst = new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.song));
+		vocals = new FlxSound();
 
 		if (SONG.needsVoices)
-			vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.song));
-		else
-			vocals = new FlxSound();
+			vocals.loadEmbedded(Paths.voices(PlayState.SONG.song));
+
 		FlxG.sound.list.add(inst);
 		FlxG.sound.list.add(vocals);
 
@@ -4703,58 +4698,6 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	public function getClearType(){
-		var clear = 'Clear';
-
-		if (stats.comboBreaks <= 0)
-		{
-			var goods = stats.judgements.get("good");
-			var sicks = stats.judgements.get("sick");
-			var epics = stats.judgements.get("epic");
-
-			if (totalPlayed == 0){
-				clear = 'No Play'; // Havent played anything yet
-				return clear;
-			}
-
-			if (goods > 0){
-				if(goods < 10 && goods > 0)
-					clear = 'SDC'; // Single Digit Goods
-				else
-					clear = 'CFC'; // Good Full Combo
-			}
-			else if (sicks > 0)
-			{
-				if (sicks < 10 && sicks > 0)
-					clear = 'SDA'; // Single Digit Sicks
-				else
-					clear = 'AFC'; // Sick Full Combo
-			}
-			else if (epics > 0)
-				clear = "KFC";
-			if (ClientPrefs.gradeSet == 'Etterna')
-			{
-				if(sicks == 1)
-					clear = 'WF'; // White Flag (EFC missed by 1 sick)
-				else if (goods == 1)
-					clear = 'BF'; // Black Flag (SFC missed by 1 good)
-				
-			}
-			
-		}
-		else
-		{
-			if (ClientPrefs.gradeSet == 'Etterna' && stats.comboBreaks == 1)
-				clear = 'MF'; // Miss Flag (Any FC missed by 1 CB)
-			else if (stats.comboBreaks < 10 && stats.score >= 0)
-				clear = "SDCB"; // Single Digit Combo Break
-			else if (stats.score < 0 || stats.comboBreaks >= 10 && stats.ratingPercent <= 0)
-				clear = "Fail"; // Fail
-		}
-
-		return clear;
-	}
-
 	public function RecalculateRating() {
 		setOnScripts('score', stats.score);
 		setOnScripts('misses', songMisses);
@@ -4896,6 +4839,7 @@ class PlayState extends MusicBeatState
 	override public function switchTo(nextState: Dynamic){
 		callOnHScripts("switchingState", [nextState]);
 		callOnLuas("switchingState");
+
 		FlxG.timeScale = 1;
 		pressedGameplayKeys = [];
 		FunkinHScript.defaultVars.clear();

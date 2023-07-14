@@ -35,8 +35,18 @@ class PauseSubState extends MusicBeatSubstate
 		super();
 	}
 
+	var prevTimeScale:Float;
+	override public function close(){
+		FlxG.timeScale = prevTimeScale;
+		
+		super.close();
+	}
+
 	override public function create()
 	{
+		prevTimeScale = FlxG.timeScale;
+		FlxG.timeScale = 1;
+
 		super.create();
 		
 		persistentUpdate = false;
