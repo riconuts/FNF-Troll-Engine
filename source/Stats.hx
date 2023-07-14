@@ -144,26 +144,24 @@ class Stats {
 
     public function getGrade()
     {
-        var grade = '?';
 		if (totalPlayed < 1)
-            return grade;
+            return '?';
         
 		if (ratingPercent >= 1)
-			grade = gradeSet[0][0]; // Uses first string
+			return gradeSet[0][0]; // Uses first string
 		else
 		{
 			grade = gradeSet[gradeSet.length - 1][0];
 			for (i in 0...gradeSet.length)
 			{
 				if (ratingPercent >= gradeSet[i][1])
-				{
-					grade = gradeSet[i][0];
-                    break;
-				}
+					return gradeSet[i][0];
+				
 			}
 		}
+		
+		return '?';
 
-        return grade;
     }
 
 	public function getClearType()
