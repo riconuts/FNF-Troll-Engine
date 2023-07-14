@@ -263,7 +263,6 @@ class Note extends NoteObject
 		var sat = colorSwap.saturation;
 		var brt = colorSwap.brightness;
 
-		
 		if(noteData > -1 && noteType != value) {
 			noteScript = null;
 			switch(value) {
@@ -293,13 +292,13 @@ class Note extends NoteObject
 					else if(inEditor && ChartingState.instance!=null)
 						noteScript = ChartingState.instance.notetypeScripts.get(value);
 					
-					if (noteScript != null && noteScript.scriptType == 'hscript')
+					if (noteScript != null && noteScript is FunkinHScript)
 					{
 						var noteScript:FunkinHScript = cast noteScript;
-						noteScript.executeFunc("setupNote", [this], this);
+						noteScript.executeFunc("setupNote", [this], this, ["this" => this]);
 					}
-						
 			}
+
 			noteType = value;
 		}
 		if(usesDefaultColours){
@@ -317,10 +316,10 @@ class Note extends NoteObject
 		if(colorSwap.brightness==brt)
 			colorSwap.brightness -= 0.0127;
 
-		if (noteScript != null && noteScript.scriptType == 'hscript')
+		if (noteScript != null && noteScript is FunkinHScript)
 		{
 			var noteScript:FunkinHScript = cast noteScript;
-			noteScript.executeFunc("postSetupNote", [this], this);
+			noteScript.executeFunc("postSetupNote", [this], this, ["this" => this]);
 		}
 
 		if(isQuant){
@@ -342,12 +341,12 @@ class Note extends NoteObject
 	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false, ?inEditor:Bool = false)
 	{
 		super();
-
-		if (prevNote == null)
-			prevNote = this;
 		
-		this.prevNote = prevNote;
-		isSustainNote = sustainNote;
+		this.strumTime = strumTime;
+		this.noteData = noteData;
+		this.prevNote = (prevNote==null) ? this : prevNote;
+		this.isSustainNote = sustainNote;
+		this.inEditor = inEditor;
 
 		if (canQuant && ClientPrefs.noteSkin == 'Quants'){
 			if(prevNote != null && isSustainNote)
@@ -357,16 +356,13 @@ class Note extends NoteObject
 		}
 		beat = Conductor.getBeat(strumTime);
 
-		this.inEditor = inEditor;
-
-		x += PlayState.STRUM_X + 50;
-		// MAKE SURE ITS DEFINITELY OFF SCREEN?
-		y -= 2000;
-		this.strumTime = strumTime;
-		if(!inEditor) this.strumTime += ClientPrefs.noteOffset;
-		if(!inEditor)visualTime = PlayState.instance.getNoteInitialTime(this.strumTime);
-
-		this.noteData = noteData;
+		//x += PlayState.STRUM_X + 50;
+		y -= 2000; // MAKE SURE ITS DEFINITELY OFF SCREEN?
+		
+		if(!inEditor){ 
+			this.strumTime += ClientPrefs.noteOffset;
+			visualTime = PlayState.instance.getNoteInitialTime(this.strumTime);
+		}
 
 		if(noteData > -1) {
 			texture = '';
@@ -381,9 +377,7 @@ class Note extends NoteObject
 			}
 		}
 
-		// trace(prevNote);
-
-		if(prevNote!=null)
+		if(prevNote != null)
 			prevNote.nextNote = this;
 
 		if (isSustainNote && prevNote != null)
@@ -392,10 +386,10 @@ class Note extends NoteObject
 			alpha = 0.6;
 			multAlpha = 0.6;
 			hitsoundDisabled = true;
+			copyAngle = false;
 			//if(ClientPrefs.downScroll) flipY = true;
 
 			//offsetX += width* 0.5;
-			copyAngle = false;
 
 			animation.play(colArray[noteData % 4] + 'holdend');
 
@@ -408,13 +402,12 @@ class Note extends NoteObject
 				prevNote.animation.play(colArray[prevNote.noteData % 4] + 'hold');
 
 				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * PlayState.instance.songSpeed * 100;
-
-				
 				prevNote.updateHitbox();
 				prevNote.defScale.copyFrom(prevNote.scale);
 				// prevNote.setGraphicSize();
 			}
 		}
+
 		defScale.copyFrom(scale);
 		//x += offsetX;
 	}
@@ -588,7 +581,7 @@ class Note extends NoteObject
 		super.update(elapsed);
 
 		if(!inEditor){
-			if (noteScript != null && noteScript.scriptType == 'hscript'){
+			if (noteScript != null && noteScript is FunkinHScript){
 				var noteScript:FunkinHScript = cast noteScript;
 				noteScript.executeFunc("noteUpdate", [elapsed], this);
 			}
@@ -598,6 +591,7 @@ class Note extends NoteObject
 		
 		if (hitByOpponent)
 			wasGoodHit = true;
+
 		var diff = (strumTime - Conductor.songPosition);
 		if (diff < -Conductor.safeZoneOffset && !wasGoodHit)
 			tooLate = true;

@@ -146,6 +146,7 @@ class Wife3
 		return missWeight;
 	}
 }
+
 class PlayState extends MusicBeatState
 {
 	public var stats:Stats = new Stats();
@@ -173,10 +174,10 @@ class PlayState extends MusicBeatState
 	public var whosTurn:String = '';
 	public var focusedChar:Character;
 
+	/*
 	public static var STRUM_X = 42;
 	public static var STRUM_X_MIDDLESCROLL = -278;
-	public static var arrowSkin:String = '';
-	public static var splashSkin:String = '';
+	*/
 
 	public var ratingStuff:Array<Array<Dynamic>> = Highscore.grades.get(ClientPrefs.gradeSet);
 	public var hud:BaseHUD;
@@ -215,6 +216,8 @@ class PlayState extends MusicBeatState
 	public static var storyPlaylist:Array<String> = [];
 	public static var difficulty:Int = 1; // for psych mod shit
 	public static var difficultyName:String = ''; // for psych mod shit
+	public static var arrowSkin:String = '';
+	public static var splashSkin:String = '';
 
 	public var spawnTime:Float = 2000;
 
@@ -251,8 +254,6 @@ class PlayState extends MusicBeatState
 	
 	public var ratingTxtGroup = new FlxTypedGroup<RatingSprite>();
 	public var comboNumGroup = new FlxTypedGroup<RatingSprite>();
-	
-	private var curSong:String = "";
 
 	public var displayedHealth(default, set):Float = 1;
 	function set_displayedHealth(value:Float){
@@ -375,8 +376,8 @@ class PlayState extends MusicBeatState
 	public var cameraSpeed:Float = 1;
 	public var defaultCamZoom:Float = 1;
 
-	public var sectionCamera = new FlxPoint(); // default camera
-	public var customCamera = new FlxPoint(); // custom camera
+	public var sectionCamera = new FlxPoint(); // Default camera focus point
+	public var customCamera = new FlxPoint(); // Used for the 'Camera Follow Pos' event
 	public var cameraPoints:Array<FlxPoint>;
 
 	public function addCameraPoint(point:FlxPoint){
@@ -623,15 +624,13 @@ class PlayState extends MusicBeatState
 		{
 			Paths.iterateDirectory(folder, function(file:String)
 			{
-				if(filesPushed.contains(file))
+				if(filesPushed.contains(file) || !file.endsWith('.hscript'))
 					return;
 
-				if(file.endsWith('.hscript')) {
-					var script = FunkinHScript.fromFile(folder + file);
-					hscriptArray.push(script);
-					funkyScripts.push(script);
-					filesPushed.push(file);
-				}
+				var script = FunkinHScript.fromFile(folder + file);
+				hscriptArray.push(script);
+				funkyScripts.push(script);
+				filesPushed.push(file);
 			});
 		}
 
@@ -645,6 +644,28 @@ class PlayState extends MusicBeatState
 		if (stage.stageScript != null){
 			hscriptArray.push(cast stage.stageScript);
 			funkyScripts.push(stage.stageScript);
+		}
+
+		// SONG SPECIFIC SCRIPTS
+		var foldersToCheck:Array<String> = Paths.getFolders('songs/$songName');
+		#if PE_MOD_COMPATIBILITY
+		for (dir in Paths.getFolders('data/$songName'))
+			foldersToCheck.push(dir);
+		#end
+
+		var filesPushed:Array<String> = [];
+		for (folder in foldersToCheck)
+		{
+			Paths.iterateDirectory(folder, function(file:String)
+			{
+				if(filesPushed.contains(file) || !file.endsWith('.hscript'))
+					return;
+
+				var script = FunkinHScript.fromFile(folder + file);
+				hscriptArray.push(script);
+				funkyScripts.push(script);
+				filesPushed.push(file);
+			});
 		}
 
 		//// Asset precaching start		
@@ -923,41 +944,28 @@ class PlayState extends MusicBeatState
 
 			break;
 		}
-		#end
 
-		// SONG SPECIFIC SCRIPTS
+		// SONG SPECIFIC LUA SCRIPTS
 		var foldersToCheck:Array<String> = Paths.getFolders('songs/$songName');
 		#if PE_MOD_COMPATIBILITY
-		for (dir in Paths.getFolders('data/$songName'))foldersToCheck.push(dir);
-		
+		for (dir in Paths.getFolders('data/$songName'))
+			foldersToCheck.push(dir);
 		#end
+
 		var filesPushed:Array<String> = [];
-
-
-		for (folder in foldersToCheck)
-		{
+		for (folder in foldersToCheck){
 			Paths.iterateDirectory(folder, function(file:String)
 			{
-				if(filesPushed.contains(file))
+				if(filesPushed.contains(file) || !file.endsWith('.lua'))
 					return;
 
-				#if LUA_ALLOWED
-				if(file.endsWith('.lua'))
-				{
-					var script = new FunkinLua(folder + file);
-					luaArray.push(script);
-					funkyScripts.push(script);
-					filesPushed.push(file);
-				}
-				else #end if(file.endsWith('.hscript'))
-				{
-					var script = FunkinHScript.fromFile(folder + file);
-					hscriptArray.push(script);
-					funkyScripts.push(script);
-					filesPushed.push(file);
-				}
+				var script = new FunkinLua(folder + file);
+				luaArray.push(script);
+				funkyScripts.push(script);
+				filesPushed.push(file);			
 			});
 		}
+		#end
 
 		var cH = [camHUD];
 		hud.cameras = cH;
@@ -1037,12 +1045,10 @@ class PlayState extends MusicBeatState
 		*/
 
 		// Load all of the countdown intro assets!!!!!
-		var shitToLoad:Array<AssetPreload> = [
-			{path: 'intro3', type: "SOUND"},
-			{path: 'intro2', type: "SOUND"},
-			{path: 'intro1', type: "SOUND"},
-			{path: 'introGo', type: "SOUND"}
-		];
+		shitToLoad.push({path: 'intro3', type: "SOUND"});
+		shitToLoad.push({path: 'intro2', type: "SOUND"});
+		shitToLoad.push({path: 'intro1', type: "SOUND"});
+		shitToLoad.push({path: 'introGo', type: "SOUND"});
 		for (introPath in introAlts){
 			if (introPath != null)
 				shitToLoad.push({path: introPath});
@@ -1290,10 +1296,9 @@ class PlayState extends MusicBeatState
 
 	/*
 	function songIntroCutscene(){
-		var daSong:String = Paths.formatToSongPath(curSong);
 		if (isStoryMode && !seenCutscene)
 		{
-			switch (daSong)
+			switch (songName)
 			{
 				default:
 					startCountdown();
@@ -1614,7 +1619,7 @@ class PlayState extends MusicBeatState
 					var returnVal:Dynamic = true;
 
 					#if LUA_ALLOWED
-					if (eventScript.scriptType == 'lua')
+					if (eventScript is FunkinLua)
 						returnVal = callScript(eventScript, "shouldPush", [event.value1, event.value2]);
 					else #end
 						returnVal = callScript(eventScript, "shouldPush", [event]);
@@ -1720,8 +1725,6 @@ class PlayState extends MusicBeatState
 
 		var songData = SONG;
 		Conductor.changeBPM(songData.bpm);
-
-		curSong = songData.song;
 
 		//FlxG.sound.list.add(new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.song)));
 		inst = new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.song));
@@ -1973,7 +1976,7 @@ class PlayState extends MusicBeatState
 
 				#if LUA_ALLOWED
 				// in hscripts setupNote gets called on Note.set_noteType
-				if(swagNote.noteScript != null && swagNote.noteScript.scriptType == 'lua'){
+				if(swagNote.noteScript != null && swagNote.noteScript is FunkinLua){
 					callScript(swagNote.noteScript, 'setupNote', [
 						allNotes.indexOf(swagNote),
 						Math.abs(swagNote.noteData),
@@ -2007,7 +2010,7 @@ class PlayState extends MusicBeatState
 						playfield.queue(sustainNote);
 						allNotes.push(sustainNote);
 						#if LUA_ALLOWED
-						if (sustainNote.noteScript != null && sustainNote.noteScript.scriptType == 'lua'){
+						if (sustainNote.noteScript != null && sustainNote.noteScript is FunkinLua){
 							callScript(sustainNote.noteScript, 'setupNote', [
 								allNotes.indexOf(sustainNote),
 								Math.abs(sustainNote.noteData),
@@ -2048,7 +2051,7 @@ class PlayState extends MusicBeatState
 
 		#if(LUA_ALLOWED && PE_MOD_COMPATIBILITY)
 		for(key => script in notetypeScripts){
-			if(script.scriptType == 'lua')
+			if(script is FunkinLua)
 				script.call("onCreate");
 			
 		}
@@ -2139,7 +2142,7 @@ class PlayState extends MusicBeatState
 					var eventScript:FunkinScript = eventScripts.get(event.event);
 
 					#if LUA_ALLOWED
-					if (eventScript.scriptType == 'lua')
+					if (eventScript is FunkinLua)
 						callScript(eventScript, "onPush",[event.value1, event.value2]);
 					else
 					#end
@@ -2166,10 +2169,10 @@ class PlayState extends MusicBeatState
 				// should PROBABLY turn this into a function, callEventScript(eventNote, "func") or something, idk
 				if (eventScripts.exists(event.event))
 				{
-					var eventScript:Dynamic = eventScripts.get(event.event);
+					var eventScript:FunkinScript = eventScripts.get(event.event);
 
 					#if LUA_ALLOWED
-					if (eventScript.scriptType == 'lua')
+					if (eventScript is FunkinLua)
 						callScript(eventScript, "onLoad", [event.value1, event.value2]);
 					else
 					#end
@@ -2264,9 +2267,9 @@ class PlayState extends MusicBeatState
 		var currentRV:Float = callOnAllScripts('eventEarlyTrigger', [event.event, event.value1, event.value2]);
 
 		if (eventScripts.exists(event.event)){
-			var eventScript:Dynamic = eventScripts.get(event.event);
+			var eventScript:FunkinScript = eventScripts.get(event.event);
 			#if LUA_ALLOWED
-			if(eventScript.scriptType == 'lua')
+			if(eventScript is FunkinLua)
 				returnedValue = callScript(eventScript, "getOffset", [event.value1, event.value2]);
 			else
 			#end
@@ -2512,10 +2515,8 @@ class PlayState extends MusicBeatState
 			if (dunceNote.noteScript != null)
 			{
 				var script:FunkinScript = dunceNote.noteScript;
-
 				#if LUA_ALLOWED
-				if (script.scriptType == 'lua')
-				{
+				if (script is FunkinLua) {
 					callScript(script, 'postSpawnNote', [
 						notes.members.indexOf(dunceNote),
 						Math.abs(dunceNote.noteData),
@@ -2569,15 +2570,11 @@ class PlayState extends MusicBeatState
 		setOnScripts('curDecStep', curDecStep);
 		setOnScripts('curDecBeat', curDecBeat);
 		#if(LUA_ALLOWED && PE_MOD_COMPATIBILITY)
-		for (key => script in notetypeScripts){
-			if(script.scriptType=='lua')script.call("onUpdate", [elapsed]); // for backwards compat w/ psych lua
-		}
-		#end
+		for (key => script in notetypeScripts)
+			if(script is FunkinLua) script.call("onUpdate", [elapsed]); // for backwards compat w/ psych lua
 
-		#if(LUA_ALLOWED && PE_MOD_COMPATIBILITY)
-		for (key => script in eventScripts){
-			if(script.scriptType=='lua')script.call("onUpdate", [elapsed]); // for backwards compat w/ psych lua
-		}
+		for (key => script in eventScripts)
+			if(script is FunkinLua) script.call("onUpdate", [elapsed]); // for backwards compat w/ psych lua
 		#end
 
 		callOnScripts('onUpdate', [elapsed]);
@@ -2799,14 +2796,11 @@ class PlayState extends MusicBeatState
 		setOnScripts('cameraY', camFollowPos.y);
 		callOnScripts('onUpdatePost', [elapsed]);
 		#if(LUA_ALLOWED && PE_MOD_COMPATIBILITY)
-		for (key => script in notetypeScripts){
-			if(script.scriptType=='lua')script.call("onUpdatePost", [elapsed]); // for backwards compat w/ psych lua
-		}
-		#end
-		#if(LUA_ALLOWED && PE_MOD_COMPATIBILITY)
-		for (key => script in eventScripts){
-			if(script.scriptType=='lua')script.call("onUpdatePost", [elapsed]); // for backwards compat w/ psych lua
-		}
+		for (key => script in notetypeScripts)
+			if(script is FunkinLua) script.call("onUpdatePost", [elapsed]); // for backwards compat w/ psych lua
+
+		for (key => script in eventScripts)
+			if(script is FunkinLua) script.call("onUpdatePost", [elapsed]); // for backwards compat w/ psych lua
 		#end
 	}
 
@@ -3225,7 +3219,7 @@ class PlayState extends MusicBeatState
 		if(eventScripts.exists(eventName)){
 			var script = eventScripts.get(eventName);
 			#if LUA_ALLOWED
-			if(script.scriptType == 'lua')
+			if(script is FunkinLua)
 				callScript(script, "onEvent", [eventName, value1, value2]);
 			else
 			#end
@@ -3959,10 +3953,10 @@ class PlayState extends MusicBeatState
 		
 		if (daNote.noteScript!=null)
 		{
-			var script:Dynamic = daNote.noteScript;
+			var script:FunkinScript = daNote.noteScript;
 
 			#if LUA_ALLOWED
-			if (script.scriptType == 'lua')
+			if (script is FunkinLua)
 			{
 				if(callScript(script, 'preNoteMiss', [
 					notes.members.indexOf(daNote),
@@ -4065,10 +4059,10 @@ class PlayState extends MusicBeatState
 		////
 		if (daNote.noteScript != null)
 		{
-			var script:Dynamic = daNote.noteScript;
+			var script:FunkinScript = daNote.noteScript;
 
 			#if LUA_ALLOWED
-			if (script.scriptType == 'lua')
+			if (script is FunkinLua)
 			{
 				callScript(script, 'noteMiss', [
 					notes.members.indexOf(daNote),
@@ -4149,7 +4143,7 @@ class PlayState extends MusicBeatState
 		{
 			var script:FunkinScript = note.noteScript;
 			#if LUA_ALLOWED
-			if (script.scriptType == 'lua')
+			if (script is FunkinLua)
 				if (callScript(script, 'preOpponentNoteHit', [notes.members.indexOf(note), leData, leType, isSus, note.ID]) == Globals.Function_Stop)
 					return;
 				else
@@ -4212,10 +4206,10 @@ class PlayState extends MusicBeatState
 
 		if (note.noteScript != null)
 		{
-			var script:Dynamic = note.noteScript;
+			var script:FunkinScript = note.noteScript;
 
 			#if LUA_ALLOWED
-			if (script.scriptType == 'lua'){
+			if (script is FunkinLua){
 				callScript(script, 'opponentNoteHit',
 				[
 					notes.members.indexOf(note),
@@ -4283,7 +4277,7 @@ class PlayState extends MusicBeatState
 		{
 			var script:FunkinScript = note.noteScript;
 			#if LUA_ALLOWED
-			if (script.scriptType == 'lua')
+			if (script is FunkinLua)
 				if (callScript(script, 'preGoodNoteHit', [notes.members.indexOf(note), leData, leType, isSus, note.ID]) == Globals.Function_Stop)
 					return;
 				else
@@ -4404,7 +4398,7 @@ class PlayState extends MusicBeatState
 		{
 			var script:FunkinScript = note.noteScript;
 			#if LUA_ALLOWED
-			if (script.scriptType == 'lua')
+			if (script is FunkinLua)
 				callScript(script, 'goodNoteHit',
 					[notes.members.indexOf(note), leData, leType, isSus, note.ID]);
 			else

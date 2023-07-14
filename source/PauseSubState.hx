@@ -28,7 +28,7 @@ class PauseSubState extends MusicBeatSubstate
 	var curTime:Float = Math.max(0, Conductor.songPosition);
 	//var botplayText:FlxText;
 
-	public static var songName:String = '';
+	public static var songName:Null<String> = null;
 
 	public function new (x:Float, y:Float)
 	{

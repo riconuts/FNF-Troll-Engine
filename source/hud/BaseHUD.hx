@@ -109,7 +109,7 @@ class BaseHUD extends FlxSpriteGroup {
 		iconP2 = healthBar.iconP2;
 
 		// prob gonna do my own time bar too lol but for now idc
-		timeTxt = new FlxText(PlayState.STRUM_X + (FlxG.width * 0.5) - 248, (ClientPrefs.downScroll ? FlxG.height - 44 : 19), 400, "", 32);
+		timeTxt = new FlxText((FlxG.width - 400) * 0.5, (ClientPrefs.downScroll ? FlxG.height - 44 : 19), 400, "", 32);
 		timeTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		timeTxt.scrollFactor.set();
 		timeTxt.borderSize = 2;

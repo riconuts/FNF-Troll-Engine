@@ -19,14 +19,15 @@ class AttachedSprite extends FlxSprite
 	public function new(?file:String = null, ?anim:String = null, ?library:String = null, ?loop:Bool = false)
 	{
 		super();
-		if(anim != null) {
-			frames = Paths.getSparrowAtlas(file, library);
-			animation.addByPrefix('idle', anim, 24, loop);
-			animation.play('idle');
-		} else if(file != null) {
-			loadGraphic(Paths.image(file));
+
+		if(file != null) {
+			if(anim != null) {
+				frames = Paths.getSparrowAtlas(file, library);
+				animation.addByPrefix('idle', anim, 24, loop);
+				animation.play('idle');
+			}else 
+				loadGraphic(Paths.image(file));
 		}
-		antialiasing = ClientPrefs.globalAntialiasing;
 		scrollFactor.set();
 	}
 
