@@ -142,7 +142,7 @@ class Stats {
 		updateVariables();
     }
 
-    public function getGrade()
+    public function getGrade():String
     {
 		if (totalPlayed < 1)
             return '?';
@@ -151,20 +151,17 @@ class Stats {
 			return gradeSet[0][0]; // Uses first string
 		else
 		{
-			grade = gradeSet[gradeSet.length - 1][0];
 			for (i in 0...gradeSet.length)
 			{
 				if (ratingPercent >= gradeSet[i][1])
-					return gradeSet[i][0];
-				
+					return gradeSet[i][0];	
 			}
 		}
 		
 		return '?';
-
     }
 
-	public function getClearType()
+	public function getClearType():String
 	{
 		var clear = 'Clear';
 
@@ -196,6 +193,7 @@ class Stats {
 			}
 			else if (epics > 0)
 				clear = "KFC";
+			
 			if (useFlags)
 			{
 				if (goods == 1)
@@ -216,7 +214,6 @@ class Stats {
 
 		return clear;
 	}
-
 
 
     public function updateVariables()
