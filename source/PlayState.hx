@@ -2179,8 +2179,12 @@ class PlayState extends MusicBeatState
 	}
 
 	public function optionsChanged(options:Array<String>){
-		if (options.length < 1)
+		if (options.length < 1){
+			trace("didn't change " + options);
 			return;
+		}
+
+		trace("changed " + options);
 
 		for(note in allNotes)
 			note.updateColours();

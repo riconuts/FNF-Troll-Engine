@@ -133,8 +133,9 @@ class Stats {
 	function get_misses()return judgements.get("miss");
 	function set_misses(val:Int){judgements.set("miss", val);return val;}
 
-	public function new(?gradeSet:Array<Array<Dynamic>>){
-		if (gradeSet==null)
+	public function new(?gradeSet:Array<Array<Dynamic>>)
+	{
+		if (gradeSet == null)
 			gradeSet = Highscore.grades.get(ClientPrefs.gradeSet);
 
         this.gradeSet = gradeSet;
@@ -151,10 +152,10 @@ class Stats {
 			return gradeSet[0][0]; // Uses first string
 		else
 		{
-			for (i in 0...gradeSet.length)
+			for (grade in gradeSet)
 			{
-				if (ratingPercent >= gradeSet[i][1])
-					return gradeSet[i][0];	
+				if (ratingPercent >= grade[1])
+					return grade[0];	
 			}
 		}
 		
