@@ -369,7 +369,7 @@ class Character extends FlxSprite
 					holdTimer += elapsed;
 				}
 
-				if (holdTimer >= Conductor.stepCrochet * (0.0011 / FlxG.sound.music.pitch) * singDuration
+				if (holdTimer >= Conductor.stepCrochet * 0.0011 * singDuration
 					&& (idleWhenHold || !PlayState.pressedGameplayKeys.contains(true)))
 				{
 					dance();
