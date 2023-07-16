@@ -45,14 +45,15 @@ class FunkinLua extends FunkinScript
 	public var errorHandler:String->Void;
 	#if LUA_ALLOWED
 	public var lua:State = null;
+
+	public final addCallback:(String, Dynamic)->Bool;
+	public final removeCallback:String->Bool;	
 	#end
+
 	public var camTarget:FlxCamera;
 	var gonnaClose:Bool = false;
 
 	public var accessedProps:Map<String, Dynamic> = null;
-
-	public final addCallback:(String, Dynamic)->Bool;
-	public final removeCallback:String->Bool;
 
 	public function new(script:String, ?name:String, ?ignoreCreateCall:Bool=false) {
 		#if LUA_ALLOWED
