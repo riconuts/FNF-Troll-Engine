@@ -1729,6 +1729,8 @@ class PlayState extends MusicBeatState
 
 		if (SONG.needsVoices)
 			vocals.loadEmbedded(Paths.voices(PlayState.SONG.song));
+		else
+			vocals.exists = true; // so it doesn't get recycled and fuck up EVERYTHING
 
 		FlxG.sound.list.add(inst);
 		FlxG.sound.list.add(vocals);
