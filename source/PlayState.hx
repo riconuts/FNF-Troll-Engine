@@ -1239,9 +1239,9 @@ class PlayState extends MusicBeatState
 	}
 
 	public function getLuaObject(tag:String, text:Bool=true):FlxSprite {
-		if(modchartObjects.exists(tag))return modchartObjects.get(tag);
-		if(modchartSprites.exists(tag))return modchartSprites.get(tag);
-		if(text && modchartTexts.exists(tag))return modchartTexts.get(tag);
+		if(modchartObjects.exists(tag)) return modchartObjects.get(tag);
+		if(modchartSprites.exists(tag)) return modchartSprites.get(tag);
+		if(text && modchartTexts.exists(tag)) return modchartTexts.get(tag);
 		return null;
 	}
 
@@ -1730,7 +1730,9 @@ class PlayState extends MusicBeatState
 		if (SONG.needsVoices)
 			vocals.loadEmbedded(Paths.voices(PlayState.SONG.song));
 		else
-			vocals.exists = true; // so it doesn't get recycled and fuck up EVERYTHING
+			vocalsEnded = true;
+		
+		vocals.exists = true; // so it doesn't get recycled and fuck up EVERYTHING
 
 		FlxG.sound.list.add(inst);
 		FlxG.sound.list.add(vocals);
@@ -1769,13 +1771,8 @@ class PlayState extends MusicBeatState
 
 		add(notes);
 
-		var noteData:Array<SwagSection>;
-
 		// NEW SHIT
-		noteData = songData.notes;
-
-		var playerCounter:Int = 0;
-		var daBeats:Int = 0; // Not exactly representative of 'daBeats' lol, just how much it has looped
+		var noteData:Array<SwagSection> = songData.notes;
 
 		// loads note types
 		for (section in noteData)
@@ -2033,10 +2030,7 @@ class PlayState extends MusicBeatState
 				}
 
 			}
-			daBeats += 1;
 		}
-
-		// playerCounter += 1;
 
 		allNotes.sort(sortByShit);
 
