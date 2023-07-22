@@ -99,7 +99,7 @@ class StrumNote extends NoteObject
 		animation.addByPrefix('purple', 'arrowLEFT');
 		animation.addByPrefix('red', 'arrowRIGHT');
 
-		antialiasing = ClientPrefs.globalAntialiasing;
+		//antialiasing = ClientPrefs.globalAntialiasing;
 		setGraphicSize(Std.int(width * 0.7));
 
 		// TODO: proper multi-key support
