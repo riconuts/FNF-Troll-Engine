@@ -53,7 +53,7 @@ class NotesSubState extends MusicBeatSubstate
 /* 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('newmenuu/optionsbg'));
 		//bg.color = 0xFFea71fd;
 		bg.screenCenter();
-		bg.antialiasing = ClientPrefs.globalAntialiasing;
+		//bg.antialiasing = ClientPrefs.globalAntialiasing;
 		add(bg);
 
 		var backdrop = new flixel.addons.display.FlxBackdrop(Paths.image("grid"));
@@ -96,7 +96,7 @@ class NotesSubState extends MusicBeatSubstate
 			var animations:Array<String> = ['purple0', 'blue0', 'green0', 'red0'];
 			note.animation.addByPrefix('idle', animations[i]);
 			note.animation.play('idle');
-			note.antialiasing = ClientPrefs.globalAntialiasing;
+			//note.antialiasing = ClientPrefs.globalAntialiasing;
 			grpNotes.add(note);
 
 			var newShader:ColorSwap = new ColorSwap();

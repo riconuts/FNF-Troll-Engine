@@ -188,7 +188,7 @@ class GalleryMenuState extends MusicBeatState
 			if (sowyImage == null){
 				var newImage = new FlxSprite(FlxG.width - 560);
 				newImage.loadGraphic(Paths.image("gallerymenu/cover_" + name));
-				newImage.antialiasing = ClientPrefs.globalAntialiasing;
+				//newImage.antialiasing = ClientPrefs.globalAntialiasing;
 
 				newImage.scrollFactor.set();
 				newImage.updateHitbox();

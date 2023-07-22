@@ -89,7 +89,7 @@ class OldMainMenuState extends MusicBeatState
 		bg.scrollFactor.set();
 		bg.updateHitbox();
 		bg.screenCenter();
-		bg.antialiasing = ClientPrefs.globalAntialiasing;
+		//bg.antialiasing = ClientPrefs.globalAntialiasing;
 		add(bg);
 
 		camFollow = new FlxObject(0, 0, 1, 1);
@@ -111,7 +111,7 @@ class OldMainMenuState extends MusicBeatState
 			var menuItem:MainMenuButton = new MainMenuButton(51, (i * 140) + offset);
 			
 			menuItem.loadGraphic(Paths.image('newmenuu/mainmenu/menu_' + optionShit[i]));
-			menuItem.antialiasing = ClientPrefs.globalAntialiasing;
+			//menuItem.antialiasing = ClientPrefs.globalAntialiasing;
 
 			menuItem.scale.x = scale;
 			menuItem.scale.y = scale;
@@ -312,7 +312,7 @@ class OldMainMenuState extends MusicBeatState
 			if (sowyImage == null){
 				var newImage = new FlxSprite(FlxG.width - 560);
 				newImage.loadGraphic(Paths.image("newmenuu/mainmenu/" + name));
-				newImage.antialiasing = ClientPrefs.globalAntialiasing;
+				//newImage.antialiasing = ClientPrefs.globalAntialiasing;
 
 				newImage.scrollFactor.set();
 				newImage.updateHitbox();

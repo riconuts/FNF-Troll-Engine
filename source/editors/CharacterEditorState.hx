@@ -545,10 +545,7 @@ class CharacterEditorState extends MusicBeatState
 		noAntialiasingCheckBox = new FlxUICheckBox(flipXCheckBox.x, flipXCheckBox.y + 40, null, null, "No Antialiasing", 80);
 		noAntialiasingCheckBox.checked = char.noAntialiasing;
 		noAntialiasingCheckBox.callback = function() {
-			char.antialiasing = false;
-			if(!noAntialiasingCheckBox.checked && ClientPrefs.globalAntialiasing) {
-				char.antialiasing = true;
-			}
+			char.antialiasing = (!noAntialiasingCheckBox.checked && ClientPrefs.globalAntialiasing);
 			char.noAntialiasing = noAntialiasingCheckBox.checked;
 		};
 

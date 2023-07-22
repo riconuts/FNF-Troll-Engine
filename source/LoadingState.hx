@@ -28,7 +28,7 @@ class LoadingState extends MusicBeatState
 		add(bg);
 		
 		funkay = new FlxSprite(0, 0).loadGraphic(Paths.getPath('images/funkay.png', IMAGE));
-		funkay.antialiasing = ClientPrefs.globalAntialiasing;
+		//funkay.antialiasing = ClientPrefs.globalAntialiasing;
 		funkay.setGraphicSize(0, FlxG.height);
 		funkay.updateHitbox();
 		funkay.scrollFactor.set();
@@ -36,7 +36,7 @@ class LoadingState extends MusicBeatState
 		add(funkay);
 
 		loadBar = new FlxSprite(0, FlxG.height - 20).makeGraphic(FlxG.width, 10, 0xffff16d2);
-		loadBar.antialiasing = ClientPrefs.globalAntialiasing;
+		//loadBar.antialiasing = ClientPrefs.globalAntialiasing;
 		loadBar.screenCenter(X);
 		add(loadBar);
 	}
