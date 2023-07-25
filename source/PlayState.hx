@@ -3245,6 +3245,23 @@ class PlayState extends MusicBeatState
 		}
 	}
 
+	public static function gotoMenus()
+	{
+		FlxTransitionableState.skipNextTransIn = false;
+		CustomFadeTransition.nextCamera = null;
+
+		MusicBeatState.switchState(isStoryMode ? new StoryMenuState() : new FreeplayState());
+		
+		deathCounter = 0;
+		seenCutscene = false;
+		chartingMode = false;
+
+		if (instance != null)
+			instance.cancelMusicFadeTween(); // Doesn't do anything now
+
+		MusicBeatState.playMenuMusic(1, true);
+	}
+
 
 	public var transitioning = false;
 	public function endSong():Void
@@ -3355,13 +3372,6 @@ class PlayState extends MusicBeatState
 					if(FlxTransitionableState.skipNextTransIn)
 						CustomFadeTransition.nextCamera = null;
 
-					cancelMusicFadeTween();
-
-					function gotoMenus(){
-						MusicBeatState.switchState(new StoryMenuState());
-						MusicBeatState.playMenuMusic(1, true);
-					}
-
 					#if VIDEOS_ALLOWED
 					var videoPath:String = Paths.video('${Paths.formatToSongPath(SONG.song)}-end');
 					if (Paths.exists(videoPath))
@@ -3407,13 +3417,7 @@ class PlayState extends MusicBeatState
 			else
 			{
 				trace('WENT BACK TO FREEPLAY??');
-				cancelMusicFadeTween();
-
-				if(FlxTransitionableState.skipNextTransIn)
-					CustomFadeTransition.nextCamera = null;
-				
-				MusicBeatState.switchState(new FreeplayState());
-				MusicBeatState.playMenuMusic(1, true);
+				gotoMenus();
 			}
 		}
 	}

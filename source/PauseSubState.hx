@@ -329,19 +329,7 @@ class PauseSubState extends MusicBeatSubstate
 						PlayState.instance.botplayTxt.alpha = 1;
 						PlayState.instance.botplaySine = 0; */
 					case "Exit to menu":
-						PlayState.deathCounter = 0;
-						PlayState.seenCutscene = false;
-						
-						if(PlayState.isStoryMode)
-							MusicBeatState.switchState(new StoryMenuState());
-						else
-							MusicBeatState.switchState(new FreeplayState());
-						
-						PlayState.instance.cancelMusicFadeTween();
-
-						MusicBeatState.playMenuMusic(true);
-						
-						PlayState.chartingMode = false;
+						PlayState.gotoMenus();
 
 				}
 			}
