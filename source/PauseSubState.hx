@@ -290,21 +290,20 @@ class PauseSubState extends MusicBeatSubstate
 						openSubState(daSubstate);
 					case "Resume":
 						close();
+
 					case "Restart Song":
-
-						if (FlxG.keys.pressed.SHIFT){					
-							PlayState.SONG = Song.loadFromJson(PlayState.SONG.song, PlayState.SONG.song);
-
+						if (FlxG.keys.pressed.SHIFT){
 							Paths.clearStoredMemory();
 							Paths.clearUnusedMemory();
+						}
+						restartSong();
 
-							MusicBeatState.resetState();
-						}else
-							restartSong();
 					case "Leave Charting Mode":
+						PlayState.SONG = Song.loadFromJson(PlayState.SONG.song, PlayState.SONG.song);
+						PlayState.chartingMode = false;
 
 						restartSong();
-						PlayState.chartingMode = false;
+
 					case 'Skip Time':
 						if(curTime < Conductor.songPosition)
 						{
@@ -321,28 +320,29 @@ class PauseSubState extends MusicBeatSubstate
 							close();
 						}
 					case "End Song":
-
 						close();
 						PlayState.instance.finishSong(true);
+
 					case 'Toggle Botplay':
 						PlayState.instance.cpuControlled = !PlayState.instance.cpuControlled;
 	/* 					PlayState.instance.botplayTxt.visible = PlayState.instance.cpuControlled;
 						PlayState.instance.botplayTxt.alpha = 1;
 						PlayState.instance.botplaySine = 0; */
 					case "Exit to menu":
-
 						PlayState.deathCounter = 0;
 						PlayState.seenCutscene = false;
-						if(PlayState.isStoryMode) {
+						
+						if(PlayState.isStoryMode)
 							MusicBeatState.switchState(new StoryMenuState());
-						} else {
+						else
 							MusicBeatState.switchState(new FreeplayState());
-						}
+						
 						PlayState.instance.cancelMusicFadeTween();
 
 						MusicBeatState.playMenuMusic(true);
 						
 						PlayState.chartingMode = false;
+
 				}
 			}
 		}

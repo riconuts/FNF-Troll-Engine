@@ -1815,7 +1815,10 @@ class PlayState extends MusicBeatState
 							var script = new FunkinLua(file, notetype, #if PE_COMPATIBILITY true #else false #end);
 							luaArray.push(script);
 							funkyScripts.push(script);
+							#if PE_COMPATIBILITY
+							// PE_COMPATIBILITY to call onCreate at the end of this function
 							notetypeScripts.set(notetype, script);
+							#end
 							doPush = true;
 						}
 						else #end if (ext == 'hscript')
@@ -1864,7 +1867,7 @@ class PlayState extends MusicBeatState
 							var script = new FunkinLua(file, event);
 							luaArray.push(script);
 							funkyScripts.push(script);
-							eventScripts.set(event, script);
+							// psych lua scripts work the exact same no matter what type of script they are 
 							doPush = true;
 						}
 						else #end if (ext == 'hscript')
@@ -2033,11 +2036,12 @@ class PlayState extends MusicBeatState
 			field.clearStackedNotes();
 
 
-		#if(LUA_ALLOWED && PE_MOD_COMPATIBILITY)
+		#if (LUA_ALLOWED && PE_MOD_COMPATIBILITY)
 		for(key => script in notetypeScripts){
-			if(script is FunkinLua)
+			if(script is FunkinLua){
 				script.call("onCreate");
-			
+				notetypeScripts.remove(key);
+			}
 		}
 		#end
 		checkEventNote();
@@ -2124,12 +2128,7 @@ class PlayState extends MusicBeatState
 				{
 					var eventScript:FunkinScript = eventScripts.get(event.event);
 
-					#if LUA_ALLOWED
-					if (eventScript is FunkinLua)
-						callScript(eventScript, "onPush",[event.value1, event.value2]);
-					else
-					#end
-						callScript(eventScript, "onPush", [event]);
+					callScript(eventScript, "onPush", [event]);
 				}
 
 		}
@@ -2154,12 +2153,7 @@ class PlayState extends MusicBeatState
 				{
 					var eventScript:FunkinScript = eventScripts.get(event.event);
 
-					#if LUA_ALLOWED
-					if (eventScript is FunkinLua)
-						callScript(eventScript, "onLoad", [event.value1, event.value2]);
-					else
-					#end
-						callScript(eventScript, "onLoad", [event]);
+					callScript(eventScript, "onLoad", [event]);
 				}
 		}
 	}
@@ -2255,12 +2249,8 @@ class PlayState extends MusicBeatState
 
 		if (eventScripts.exists(event.event)){
 			var eventScript:FunkinScript = eventScripts.get(event.event);
-			#if LUA_ALLOWED
-			if(eventScript is FunkinLua)
-				returnedValue = callScript(eventScript, "getOffset", [event.value1, event.value2]);
-			else
-			#end
-				returnedValue = callScript(eventScript, "getOffset", [event]);
+
+			returnedValue = callScript(eventScript, "getOffset", [event]);
 		}
 		if(currentRV!=0 && returnedValue==0)returnedValue = currentRV;
 
@@ -2556,15 +2546,15 @@ class PlayState extends MusicBeatState
 
 		setOnScripts('curDecStep', curDecStep);
 		setOnScripts('curDecBeat', curDecBeat);
-		#if(LUA_ALLOWED && PE_MOD_COMPATIBILITY)
+		/*
 		for (key => script in notetypeScripts)
-			if(script is FunkinLua) script.call("onUpdate", [elapsed]); // for backwards compat w/ psych lua
+			script.call("onUpdate", [elapsed]); 
 
 		for (key => script in eventScripts)
-			if(script is FunkinLua) script.call("onUpdate", [elapsed]); // for backwards compat w/ psych lua
-		#end
-
+			script.call("onUpdate", [elapsed]);
+		*/
 		callOnScripts('onUpdate', [elapsed]);
+		//callOnScripts('onUpdate', [elapsed], null, null, null, null, false);
 
 		if (inst.playing && !inCutscene && health > healthDrain)
 		{
@@ -2604,13 +2594,12 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		for (key => script in notetypeScripts){
-			script.call("update", [elapsed]);
-		}
 
-		for (key => script in eventScripts){
+		for (key => script in notetypeScripts)
+			script.call("update", [elapsed]);
+
+		for (key => script in eventScripts)
 			eventScripts.get(key).call("update", [elapsed]);
-		}
 
 		callOnHScripts('update', [elapsed]);
 
@@ -2782,13 +2771,6 @@ class PlayState extends MusicBeatState
 		setOnScripts('cameraX', camFollowPos.x);
 		setOnScripts('cameraY', camFollowPos.y);
 		callOnScripts('onUpdatePost', [elapsed]);
-		#if(LUA_ALLOWED && PE_MOD_COMPATIBILITY)
-		for (key => script in notetypeScripts)
-			if(script is FunkinLua) script.call("onUpdatePost", [elapsed]); // for backwards compat w/ psych lua
-
-		for (key => script in eventScripts)
-			if(script is FunkinLua) script.call("onUpdatePost", [elapsed]); // for backwards compat w/ psych lua
-		#end
 	}
 
 	function openChartEditor()
@@ -3205,12 +3187,8 @@ class PlayState extends MusicBeatState
 		callOnScripts('onEvent', [eventName, value1, value2]);
 		if(eventScripts.exists(eventName)){
 			var script = eventScripts.get(eventName);
-			#if LUA_ALLOWED
-			if(script is FunkinLua)
-				callScript(script, "onEvent", [eventName, value1, value2]);
-			else
-			#end
-				callScript(script, "onTrigger", [value1, value2]);
+
+			callScript(script, "onTrigger", [value1, value2]);
 		}
 	}
 

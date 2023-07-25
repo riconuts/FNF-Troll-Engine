@@ -5,12 +5,19 @@ import flixel.text.FlxText;
 import PlayState.RatingSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
 
-class ComboOffsetSubstate extends MusicBeatSubstate{
-    
+class ComboOffsetSubstate extends MusicBeatSubstate
+{
+    //// Preview    
     var rating:RatingSprite;
     var combo:FlxTypedGroup<RatingSprite>;
-    var timingTxt:FlxText;
+    var timing:FlxText;
 
+    //// Offset Texts
+    var txt_rating:FlxText;
+    var txt_combo:FlxText;
+    var txt_timing:FlxText;
+
+    ////
     var camHUD:FlxCamera;
 
     override public function create(){
@@ -40,7 +47,6 @@ class ComboOffsetSubstate extends MusicBeatSubstate{
                 default: 0xFFFFFFFF;
             }
         }
-        //trace(ratingName, ratingColor.toHexString(false, false));
             
         
         rating = RatingSprite.newRating();
@@ -68,14 +74,39 @@ class ComboOffsetSubstate extends MusicBeatSubstate{
         add(combo);
 
 
-        timingTxt = new FlxText(0, 0, 0, "0 ms");
-		timingTxt.setFormat(Paths.font("calibri.ttf"), 28, 0xFFFFFFFF, CENTER, FlxTextBorderStyle.OUTLINE, 0xFF000000);
-        timingTxt.color = ratingColor;
-        timingTxt.scrollFactor.set();
-		timingTxt.borderSize = 1.25;
-        timingTxt.cameras = [camHUD];
-        timingTxt.updateHitbox();
-        add(timingTxt);
+        timing = new FlxText(0, 0, 0, "0 ms");
+		timing.setFormat(Paths.font("calibri.ttf"), 28, 0xFFFFFFFF, CENTER, FlxTextBorderStyle.OUTLINE, 0xFF000000);
+        timing.color = ratingColor;
+        timing.scrollFactor.set();
+		timing.borderSize = 1.25;
+        timing.cameras = [camHUD];
+        timing.updateHitbox();
+        add(timing);
+
+
+        function makeText(i){
+            var text:FlxText = new FlxText(
+				10, 
+				48 + (i * 30) + 24 * Math.floor(i / 2), 
+				0, 
+				'', 
+				24
+			);
+			text.scrollFactor.set();
+			text.setFormat(Paths.font("calibri.ttf"), 24, 0xFFFFFFFF, LEFT, FlxTextBorderStyle.OUTLINE, 0xFF000000);
+			text.borderSize = 1.5;
+			text.cameras = [camHUD];
+            add(text);
+
+            return text;
+        }
+
+        makeText(0).text = "Rating Offset:";
+        txt_rating = makeText(1);
+        makeText(2).text = "Combo Offset:";
+        txt_combo = makeText(3);
+        makeText(4).text = "Timing Offset:";
+        txt_timing = makeText(5);
 
 
         updateRatingPos();
@@ -89,7 +120,9 @@ class ComboOffsetSubstate extends MusicBeatSubstate{
     function updateRatingPos(){
 		rating.screenCenter();
 		rating.x += ClientPrefs.comboOffset[0];
-		rating.y -= ClientPrefs.comboOffset[1];        
+		rating.y -= ClientPrefs.comboOffset[1];
+        
+        txt_rating.text = '[${ClientPrefs.comboOffset[0]}, ${ClientPrefs.comboOffset[1]}]';
     }
 
     function updateComboPos(){
@@ -101,12 +134,16 @@ class ComboOffsetSubstate extends MusicBeatSubstate{
 			num.screenCenter(Y);
 			num.y -= ClientPrefs.comboOffset[3];
         }
+
+        txt_combo.text = '[${ClientPrefs.comboOffset[2]}, ${ClientPrefs.comboOffset[3]}]';
     }
 
     function updateTimingPos() {
-        timingTxt.screenCenter();
-		timingTxt.x += ClientPrefs.comboOffset[4];
-		timingTxt.y -= ClientPrefs.comboOffset[5];
+        timing.screenCenter();
+		timing.x += ClientPrefs.comboOffset[4];
+		timing.y -= ClientPrefs.comboOffset[5];
+
+        txt_timing.text = '[${ClientPrefs.comboOffset[4]}, ${ClientPrefs.comboOffset[5]}]';
     }
 
     ////
@@ -117,7 +154,7 @@ class ComboOffsetSubstate extends MusicBeatSubstate{
     override public function update(elapsed)
     {
         if (FlxG.mouse.justPressed){
-            var toCheck = [timingTxt, combo, rating];
+            var toCheck = [timing, combo, rating];
             
             mouseGrabbed=null;
             for (idx in 0...toCheck.length){
@@ -131,13 +168,13 @@ class ComboOffsetSubstate extends MusicBeatSubstate{
         if (FlxG.mouse.justReleased)
             mouseGrabbed = null;
 
-        var deltaX = FlxG.mouse.deltaScreenX;
-        var deltaY = FlxG.mouse.deltaScreenY;
+        var deltaX = FlxG.mouse.deltaX;
+        var deltaY = FlxG.mouse.deltaY;
         if (deltaX != 0 || deltaY != 0){
             switch(mouseGrabbed){
                 case 0:
                     ClientPrefs.comboOffset[0] += deltaX;
-                    ClientPrefs.comboOffset[1] -= deltaY; // Why the fuck is this inverted ughhhhhh!!!!!!!!!!!!!!!!!!!!!!
+                    ClientPrefs.comboOffset[1] -= deltaY; // Why the fuck is this inverted!!!!!!!!!!!!!!!!!!!!!!
                     updateRatingPos();
                 case 1:
                     ClientPrefs.comboOffset[2] += deltaX;

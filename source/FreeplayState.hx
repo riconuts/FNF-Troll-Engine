@@ -118,12 +118,12 @@ class FreeplayState extends MusicBeatState
 
 				persistentUpdate = false;
 
-/* 				if (FlxG.keys.pressed.ALT){
-					var alters = SongChartSelec.getCharts(songButton.metadata);
-					if (alters.length > 0)
-						switchTo(new SongChartSelec(songButton.metadata, alters));
-				}else */
-				playSong(songButton.metadata);
+ 				if (FlxG.keys.pressed.ALT){
+					var altDiffs = SongChartSelec.getCharts(songButton.metadata);
+					if (altDiffs.length > 0)
+						switchTo(new SongChartSelec(songButton.metadata, altDiffs));
+				}else
+					playSong(songButton.metadata);
 			};
 		}			
 	}
@@ -291,7 +291,11 @@ class FreeplayState extends MusicBeatState
 						while (daDiffs.length>0)
 						{
 							var diff = daDiffs.pop().trim();
-							var input = diff.toLowerCase() == 'normal'?'':'-$diff';
+							#if PE_MOD_COMPATIBILITY
+							var input = diff == 'Normal' ? '' : '-$diff';
+							#else
+							var input = diff.toLowerCase() == 'normal' ? '' : '-$diff';
+							#end
 							var json = '${song[0]}${input}';
 							var rawPath = Paths.formatToSongPath(song[0]) + '/' + Paths.formatToSongPath(json);
 
@@ -658,7 +662,7 @@ class FreeplayCategory extends flixel.group.FlxSpriteGroup{
 class SongChartSelec extends MusicBeatState
 {
 	var songMeta:SongMetadata;
-	var alters:Array<String>;
+	var alts:Array<String>;
 
 	var texts:Array<FlxText> = [];
 
@@ -671,17 +675,17 @@ class SongChartSelec extends MusicBeatState
 		curSel += diff;
 		
 		if (curSel < 0)
-			curSel += alters.length;
-		else if (curSel >= alters.length)
-			curSel -= alters.length;
+			curSel += alts.length;
+		else if (curSel >= alts.length)
+			curSel -= alts.length;
 
 		texts[curSel].color = 0xFFFFFF00;
 	}
 
 	override function create()
 	{
-		for (id in 0...alters.length){
-			var alt = alters[id];
+		for (id in 0...alts.length){
+			var alt = alts[id];
 			var text = new FlxText(20, 20 + id * 20 , FlxG.width - 20, alt, 16);
 
 			texts[id] = text;
@@ -702,19 +706,19 @@ class SongChartSelec extends MusicBeatState
 			MusicBeatState.switchState(new FreeplayState());
 
 		if (controls.ACCEPT){
-			var daDiff = alters[curSel];
+			var daDiff = alts[curSel];
 			FreeplayState.playSong(songMeta, daDiff == "normal" ? null : daDiff);
 		}
 
 		super.update(e);
 	} 
 
-	public function new(WHO:SongMetadata, alters) 
+	public function new(WHO:SongMetadata, alts) 
 	{
 		super();
 		
 		songMeta = WHO;
-		this.alters = alters;
+		this.alts = alts;
 	}
 
 	public static function getCharts(metadata:SongMetadata) // dumb name

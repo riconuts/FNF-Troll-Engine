@@ -431,7 +431,6 @@ class TitleState extends MusicBeatState
 	}
 }
 
-// ...kinda unnecessary to make a whole class
 class RandomTitleLogo extends FlxSprite
 {
 	public var titleName:String;
