@@ -1590,7 +1590,7 @@ class PlayState extends MusicBeatState
 				if (eventScripts.exists(event.event))
 				{
 					var eventScript:FunkinScript = eventScripts.get(event.event);
-					var returnVal:Dynamic = callScript(eventScript, "shouldPush", /*eventScript is FunkinLua ? [event.event, event.value1, event.value2] : */ [event]);
+					var returnVal:Dynamic = callScript(eventScript, "shouldPush", [event]);
 
 					if (returnVal == Globals.Function_Stop) returnVal = false;
 
@@ -1930,26 +1930,6 @@ class PlayState extends MusicBeatState
 					continue;
 				}
 
-				/*
-				#if LUA_ALLOWED
-				// in hscripts setupNote gets called on Note.set_noteType
-				if(swagNote.noteScript != null && swagNote.noteScript is FunkinLua){
-					callScript(swagNote.noteScript, 'setupNote', [
-						allNotes.indexOf(swagNote),
-						Math.abs(swagNote.noteData),
-						swagNote.noteType,
-						swagNote.isSustainNote,
-						swagNote.ID
-					]);
-				}
-				#end
-				*/
-
-				/*
-				if (swagNote.mustPress)
-					swagNote.x += FlxG.width * 0.5; // general offset
-				*/
-
 				oldNote = swagNote;
 
 				var susLength:Float = swagNote.sustainLength / Conductor.stepCrochet;
@@ -1975,25 +1955,6 @@ class PlayState extends MusicBeatState
 					sustainNote.fieldIndex = swagNote.fieldIndex;
 					playfield.queue(sustainNote);
 					allNotes.push(sustainNote);
-
-					/*
-					#if LUA_ALLOWED
-					if (sustainNote.noteScript != null && sustainNote.noteScript is FunkinLua){
-						callScript(sustainNote.noteScript, 'setupNote', [
-							allNotes.indexOf(sustainNote),
-							Math.abs(sustainNote.noteData),
-							sustainNote.noteType,
-							sustainNote.isSustainNote,
-							sustainNote.ID
-						]);
-					}
-					#end
-					*/
-
-					/*
-					if (sustainNote.mustPress)
-						sustainNote.x += FlxG.width * 0.5; // general offset
-					*/
 
 					oldNote = sustainNote;
 				}
@@ -2465,20 +2426,6 @@ class PlayState extends MusicBeatState
 			{
 				var script:FunkinScript = dunceNote.noteScript;
 
-				/*
-				#if LUA_ALLOWED
-				if (script is FunkinLua) {
-					callScript(script, 'postSpawnNote', [
-						notes.members.indexOf(dunceNote),
-						Math.abs(dunceNote.noteData),
-						dunceNote.noteType,
-						dunceNote.isSustainNote,
-						dunceNote.ID
-					]);
-				}
-				else
-				#end
-				*/
 				callScript(script, "postSpawnNote", [dunceNote]);
 			}
 		});
@@ -3895,22 +3842,6 @@ class PlayState extends MusicBeatState
 		{
 			var script:FunkinScript = daNote.noteScript;
 
-			/*
-			#if LUA_ALLOWED
-			if (script is FunkinLua)
-			{
-				if(callScript(script, 'preNoteMiss', [
-					notes.members.indexOf(daNote),
-					Math.abs(daNote.noteData),
-					daNote.noteType,
-					daNote.isSustainNote,
-					daNote.ID
-				]) == Globals.Function_Stop)
-				return;
-			}
-			else
-			#end
-			*/
 			if(callScript(script, "preNoteMiss", [daNote, field]) == Globals.Function_Stop)
 				return;
 		}
@@ -4003,22 +3934,7 @@ class PlayState extends MusicBeatState
 		{
 			var script:FunkinScript = daNote.noteScript;
 
-			/*
-			#if LUA_ALLOWED
-			if (script is FunkinLua)
-			{
-				callScript(script, 'noteMiss', [
-					notes.members.indexOf(daNote),
-					Math.abs(daNote.noteData),
-					daNote.noteType,
-					daNote.isSustainNote,
-					daNote.ID
-				]);
-			}
-			else
-			#end
-			*/
-				callScript(script, "noteMiss", [daNote, field]);
+			callScript(script, "noteMiss", [daNote, field]);
 		}
 	}
 
@@ -4086,14 +4002,7 @@ class PlayState extends MusicBeatState
 		if (note.noteScript != null)
 		{
 			var script:FunkinScript = note.noteScript;
-			/*
-			#if LUA_ALLOWED
-			if (script is FunkinLua)
-				if (callScript(script, 'preOpponentNoteHit', [notes.members.indexOf(note), leData, leType, isSus, note.ID]) == Globals.Function_Stop)
-					return;
-				else
-			#end
-			*/
+			
 			if (callScript(script, "preOpponentNoteHit", [note, field]) == Globals.Function_Stop)
 				return;
 		}
@@ -4154,22 +4063,7 @@ class PlayState extends MusicBeatState
 		{
 			var script:FunkinScript = note.noteScript;
 
-			/*
-			#if LUA_ALLOWED
-			if (script is FunkinLua){
-				callScript(script, 'opponentNoteHit',
-				[
-					notes.members.indexOf(note),
-					Math.abs(note.noteData),
-					note.noteType,
-					note.isSustainNote,
-					note.ID
-				]);
-			}
-			else
-			#end
-			*/
-				callScript(script, "opponentNoteHit", [note, field]);
+			callScript(script, "opponentNoteHit", [note, field]);
 		}
 
 					
@@ -4225,14 +4119,6 @@ class PlayState extends MusicBeatState
 		{
 			var script:FunkinScript = note.noteScript;
 
-			/*
-			#if LUA_ALLOWED
-			if (script is FunkinLua)
-				if (callScript(script, 'preGoodNoteHit', [notes.members.indexOf(note), leData, leType, isSus, note.ID]) == Globals.Function_Stop)
-					return;
-				else
-			#end
-			*/
 			if (callScript(script, "preGoodNoteHit", [note, field]) == Globals.Function_Stop)
 				return;
 		}
@@ -4348,15 +4234,8 @@ class PlayState extends MusicBeatState
 		if (note.noteScript != null)
 		{
 			var script:FunkinScript = note.noteScript;
-			/*
-			#if LUA_ALLOWED
-			if (script is FunkinLua)
-				callScript(script, 'goodNoteHit',
-					[notes.members.indexOf(note), leData, leType, isSus, note.ID]);
-			else
-			#end
-			*/
-				callScript(script, "goodNoteHit", [note, field]);
+
+			callScript(script, "goodNoteHit", [note, field]);
 		}
 		if (!note.isSustainNote && note.tail.length == 0)
 			field.removeNote(note);
