@@ -1629,82 +1629,82 @@ class PlayState extends MusicBeatState
 		return true;
 	}
 
-	function getEvents(){
+	function eventSort(a:Array<Dynamic>, b:Array<Dynamic>)
+		return Std.int(a[0] - b[0]);
+
+	function getEvents()
+	{
 		var songData = SONG;
 		var events:Array<EventNote> = [];
 
-		if (#if MODS_ALLOWED Paths.exists(Paths.modsSongJson(songName + '/events')) || #if PE_MOD_COMPATIBILITY Paths.exists(Paths.modsJson(songName + '/events')) || #end #end Paths.exists(Paths.songJson(songName + '/events')))
+		var eventsJSON = Song.loadFromJson('events', songName);
+		if (eventsJSON != null)
 		{
-			var rawEventsData:Array<Array<Dynamic>> = Song.loadFromJson('events', songName).events;
-			rawEventsData.sort((a, b) -> return Std.int(a[0] - b[0]));
+			var rawEventsData:Array<Array<Dynamic>> = eventsJSON.events;
+			rawEventsData.sort(eventSort);
+
 			var eventsData:Array<Array<Dynamic>> = [];
-			for(event in rawEventsData){
+			for (event in rawEventsData){
 				var last = eventsData[eventsData.length-1];
-				if(last==null){
+				
+				if (last != null && Math.abs(last[0] - event[0]) <= Conductor.stepCrochet / (192 / 16)){
+					var fuck:Array<Array<Dynamic>> = event[1];
+					for (shit in fuck) eventsData[eventsData.length - 1][1].push(shit);
+				}else
 					eventsData.push(event);
-				}else{
-					if(Math.abs(last[0] - event[0]) <= Conductor.stepCrochet / (192 / 16)){
-						var fuck:Array<Array<Dynamic>> = event[1];
-						for (shit in fuck)eventsData[eventsData.length - 1][1].push(shit);
-					}else{
-						eventsData.push(event);
-					}
-				}
 			}
 
 			for (event in eventsData) //Event Notes
 			{
-				for (i in 0...event[1].length)
+				var eventTime:Float = event[0] + ClientPrefs.noteOffset;
+				var subEvents:Array<Dynamic> = event[1];
+	
+				for (eventData in subEvents)
 				{
-					var newEventNote:Array<Dynamic> = [event[0], event[1][i][0], event[1][i][1], event[1][i][2]];
-					var subEvent:EventNote = {
-						strumTime: newEventNote[0] + ClientPrefs.noteOffset,
-						event: newEventNote[1],
-						value1: newEventNote[2],
-						value2: newEventNote[3]
+					var eventNote:EventNote = {
+						strumTime: eventTime,
+						event: eventData[0],
+						value1: eventData[1],
+						value2: eventData[2]
 					};
-					if(!shouldPush(subEvent))continue;
-					events.push(subEvent);
+					if (shouldPush(eventNote)) events.push(eventNote);
 				}
 			}
 		}
 
+		////
 		var rawEventsData:Array<Array<Dynamic>> = songData.events;
-		rawEventsData.sort((a, b) -> return Std.int(a[0] - b[0]));
+		rawEventsData.sort(eventSort);
 		var eventsData:Array<Array<Dynamic>>  = [];
-		for(event in rawEventsData){
+
+		for (event in rawEventsData){
 			var last = eventsData[eventsData.length-1];
-			if(last==null){
+
+			if (last != null && Math.abs(last[0] - event[0]) <= Conductor.stepCrochet / (192 / 16)){
+				var fuck:Array<Array<Dynamic>> = event[1];
+				for (shit in fuck) eventsData[eventsData.length - 1][1].push(shit);
+			}else
 				eventsData.push(event);
-			}else{
-				if(Math.abs(last[0] - event[0]) <= Conductor.stepCrochet / (192 / 16)){
-					var fuck:Array<Array<Dynamic>> = event[1];
-					for (shit in fuck)eventsData[eventsData.length-1][1].push(shit);
-				}else{
-					eventsData.push(event);
-				}
-			}
 		}
 
 		songData.events = eventsData;		
 
 		for (event in songData.events) //Event Notes
 		{
-			for (i in 0...event[1].length)
+			var eventTime:Float = event[0] + ClientPrefs.noteOffset;
+			var subEvents:Array<Dynamic> = event[1];
+
+			for (eventData in subEvents)
 			{
-				var newEventNote:Array<Dynamic> = [event[0], event[1][i][0], event[1][i][1], event[1][i][2]];
-				var subEvent:EventNote = {
-					strumTime: newEventNote[0] + ClientPrefs.noteOffset,
-					event: newEventNote[1],
-					value1: newEventNote[2],
-					value2: newEventNote[3]
+				var eventNote:EventNote = {
+					strumTime: eventTime,
+					event: eventData[0],
+					value1: eventData[1],
+					value2: eventData[2]
 				};
-				if (!shouldPush(subEvent))
-					continue;
-				events.push(subEvent);
+				if (shouldPush(eventNote)) events.push(eventNote);
 			}
 		}
-
 
 		return events;
 	}
@@ -1732,7 +1732,7 @@ class PlayState extends MusicBeatState
 		else
 			vocalsEnded = true;
 		
-		vocals.exists = true; // so it doesn't get recycled and fuck up EVERYTHING
+		vocals.exists = true; // so it doesn't get recycled
 
 		FlxG.sound.list.add(inst);
 		FlxG.sound.list.add(vocals);
@@ -1812,11 +1812,11 @@ class PlayState extends MusicBeatState
 						#if LUA_ALLOWED
 						if (ext == 'lua')
 						{
-							var script = new FunkinLua(file, notetype, #if PE_COMPATIBILITY true #else false #end);
+							var script = new FunkinLua(file, notetype, #if PE_MOD_COMPATIBILITY true #else false #end);
 							luaArray.push(script);
 							funkyScripts.push(script);
-							#if PE_COMPATIBILITY
-							// PE_COMPATIBILITY to call onCreate at the end of this function
+							#if PE_MOD_COMPATIBILITY
+							// PE_MOD_COMPATIBILITY to call onCreate at the end of this function
 							notetypeScripts.set(notetype, script);
 							#end
 							doPush = true;
