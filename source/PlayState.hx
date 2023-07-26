@@ -1,83 +1,58 @@
 package;
 
-import hud.AdvancedHUD;
-import lime.media.openal.ALFilter;
-import lime.media.openal.ALEffect;
-import lime.media.openal.AL;
-import flixel.util.FlxSpriteUtil.LineStyle;
-import openfl.display.BitmapData;
-import FreeplayState.FreeplayCategory;
-import JudgmentManager.JudgmentData;
-import JudgmentManager.Judgment;
-import hud.PsychHUD;
-import hud.BaseHUD;
-import sys.FileSystem;
-import sys.io.File;
-import flixel.group.FlxGroup;
-#if ACHIEVEMENTS_ALLOWED
-import Achievements;
-#end
 import Cache;
-
-import playfields.*;
-import Note.EventNote;
+import Song;
 import Section.SwagSection;
-import Shaders;
-import Song.SwagSong;
+import Note.EventNote;
 import Stage;
-import WiggleEffect.WiggleEffectType;
-import animateatlas.AtlasFrameMaker;
+import Shaders;
+import JudgmentManager;
+import hud.*;
+import playfields.*;
+import modchart.*;
+import scripts.*;
+import scripts.FunkinLua;
 import editors.*;
+
 import flixel.*;
-import flixel.addons.display.*;
-import flixel.addons.effects.*;
-import flixel.addons.effects.chainable.*;
+import flixel.util.*;
+import flixel.math.*;
+import flixel.tweens.*;
 import flixel.addons.transition.FlxTransitionableState;
-import flixel.effects.particles.*;
-import flixel.graphics.FlxGraphic;
-import flixel.graphics.atlas.FlxAtlas;
-import flixel.graphics.frames.FlxAtlasFrames;
-import flixel.group.FlxGroup.FlxTypedGroup;
+import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;
 import flixel.input.keyboard.FlxKey;
-import flixel.math.*;
-import flixel.system.FlxAssets.FlxShader;
 import flixel.system.FlxSound;
-import flixel.system.scaleModes.*;
 import flixel.text.FlxText;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
 import flixel.ui.FlxBar;
-import flixel.util.*;
+
 import haxe.Json;
-import lime.utils.Assets;
-import modchart.*;
-import openfl.Lib;
-import openfl.display.BlendMode;
-import openfl.display.StageQuality;
+
+import lime.media.openal.AL;
+import lime.media.openal.ALFilter;
+import lime.media.openal.ALEffect;
+
 import openfl.events.KeyboardEvent;
 import openfl.filters.BitmapFilter;
 import openfl.filters.ShaderFilter;
-import openfl.system.Capabilities;
-import openfl.utils.Assets as OpenFlAssets;
-import scripts.*;
-import scripts.FunkinLua;
 
-using StringTools;
+#if sys
+import sys.FileSystem;
+import sys.io.File;
+#end
+
 #if discord_rpc
 import Discord.DiscordClient;
 #end
-#if VIDEOS_ALLOWED
-import hxcodec.VideoHandler;
+
+#if VIDEOS_ALLOWED 
+#if (hxCodec >= "3.0.0") import hxcodec.flixel.FlxVideo as VideoHandler;
+#elseif (hxCodec >= "2.6.1") import hxcodec.VideoHandler as VideoHandler;
+#elseif (hxCodec == "2.6.0") import VideoHandler;
+#else import vlc.MP4Handler as VideoHandler; #end
 #end
 
-typedef SongCreditdata = // beacuse SongMetadata is stolen
-{
-	?artist:String,
-	?charter:String,
-	?modcharter:String,
-	?extraInfo:Array<String>,
-}
+using StringTools;
 
 /*
 okay SO im gonna explain how these work
@@ -172,8 +147,9 @@ class PlayState extends MusicBeatState
 	public var noteHits:Array<Float> = [];
 	public var nps:Int = 0;
 	public var ratingStuff:Array<Array<Dynamic>> = Highscore.grades.get(ClientPrefs.gradeSet);
+	
 	public var hud:BaseHUD;
-	public var scoreTxt:FlxText = new FlxText(); // just so psych mods n shit dont error
+	// public var scoreTxt:FlxText = new FlxText(); // just so psych mods n shit dont error
 	public var botplayTxt:FlxText;
 	var subtitles:Null<SubtitleDisplay>;
 
@@ -1836,8 +1812,9 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		// loads events
-		for(event in getEvents()){
+		//// load events
+		var daEvents = getEvents();
+		for (event in daEvents){
 			if (!eventPushedMap.exists(event.event))
 			{
 				eventPushedMap.set(event.event, true);
@@ -1888,14 +1865,10 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		for(subEvent in getEvents()){
-			try{
-				subEvent.strumTime -= eventNoteEarlyTrigger(subEvent);
-				eventNotes.push(subEvent);
-				eventPushed(subEvent);
-			}catch(e:Dynamic){
-				trace(e);
-			}
+		for (subEvent in daEvents){
+			subEvent.strumTime -= eventNoteEarlyTrigger(subEvent);
+			eventNotes.push(subEvent);
+			eventPushed(subEvent);
 		}
 
 		if (eventNotes.length > 1)
@@ -3390,11 +3363,6 @@ class PlayState extends MusicBeatState
 					prevCamFollow = camFollow;
 					prevCamFollowPos = camFollowPos;
 
-					/*
-					FlxTransitionableState.skipNextTransIn = true;
-					FlxTransitionableState.skipNextTransOut = true;
-					*/
-
 					cancelMusicFadeTween();
 					inst.stop();
 
@@ -3407,11 +3375,12 @@ class PlayState extends MusicBeatState
 					var videoPath:String = Paths.video('${Paths.formatToSongPath(nextSong)}');
 					if (Paths.exists(videoPath))
 						MusicBeatState.switchState(new VideoPlayerState(videoPath, playNextSong));
-					else
+					else #end
+					{
+						FlxTransitionableState.skipNextTransIn = true;
+						FlxTransitionableState.skipNextTransOut = true;
 						playNextSong();
-					#else
-					playNextSong();
-					#end
+					}
 				}
 			}
 			else

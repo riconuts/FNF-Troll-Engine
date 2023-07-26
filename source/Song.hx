@@ -4,7 +4,6 @@ import Section.SwagSection;
 import haxe.Json;
 import haxe.format.JsonParser;
 import lime.utils.Assets;
-import PlayState.SongCreditdata;
 
 using StringTools;
 #if sys
@@ -36,6 +35,14 @@ typedef SwagSong =
 	@:optional var extraTracks:Array<String>;
 	@:optional var info:Array<String>;
 	@:optional var metadata:SongCreditdata;
+}
+
+typedef SongCreditdata = // beacuse SongMetadata is stolen
+{
+	?artist:String,
+	?charter:String,
+	?modcharter:String,
+	?extraInfo:Array<String>,
 }
 
 class Song

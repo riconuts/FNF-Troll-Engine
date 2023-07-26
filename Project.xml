@@ -46,14 +46,12 @@
 	<set name="BUILD_DIR" value="export/32bit" if="32bits" />
 
 	<classpath path="source" />
-
-	<!-- No more preload folder, or libraries. -->
+	
 	<assets path="assets" />
 	<assets path='default_content' rename='content' embed='false' />
 
 	<!-- PSYCH ENGINE CUSTOMIZATION -->
 	<define name="MODS_ALLOWED" if="desktop" />
-	<!-- <define name="ACHIEVEMENTS_ALLOWED" /> -->
 	<define name="VIDEOS_ALLOWED" />
 
 	<!--Remove if you dont want Lua to be usable. Note that if you remove this, you should remove PE_MOD_COMPATIBILITY too-->
@@ -72,8 +70,8 @@
 	<!-- _______________________________ Libraries ______________________________ -->
 
 	<haxelib name="flixel" />
-	<haxelib name="flixel-addons" />
-	<haxelib name="flixel-ui" />
+	<haxelib name="flixel-ui"/>
+	<haxelib name="flixel-addons"/>
 
 	<assets path="flixel" embed="true"/> <!-- To override some Flixel assets -->
 
