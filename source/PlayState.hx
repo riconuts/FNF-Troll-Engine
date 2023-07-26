@@ -400,8 +400,8 @@ class PlayState extends MusicBeatState
 	public var luaArray:Array<FunkinLua> = [];
 	#end
 
-	public var notetypeScripts:Map<String, FunkinScript> = []; // custom notetypes for scriptVer '1'
-	public var eventScripts:Map<String, FunkinScript> = []; // custom events for scriptVer '1'
+	public var notetypeScripts:Map<String, FunkinHScript> = []; // custom notetypes for scriptVer '1'
+	public var eventScripts:Map<String, FunkinHScript> = []; // custom events for scriptVer '1'
 
 	private var luaDebugGroup:FlxTypedGroup<DebugLuaText>;
 	public var introSoundsSuffix:String = '';
@@ -1590,16 +1590,11 @@ class PlayState extends MusicBeatState
 				if (eventScripts.exists(event.event))
 				{
 					var eventScript:FunkinScript = eventScripts.get(event.event);
-					var returnVal:Dynamic = true;
+					var returnVal:Dynamic = callScript(eventScript, "shouldPush", /*eventScript is FunkinLua ? [event.event, event.value1, event.value2] : */ [event]);
 
-					#if LUA_ALLOWED
-					if (eventScript is FunkinLua)
-						returnVal = callScript(eventScript, "shouldPush", [event.value1, event.value2]);
-					else #end
-						returnVal = callScript(eventScript, "shouldPush", [event]);
+					if (returnVal == Globals.Function_Stop) returnVal = false;
 
-					if(returnVal == Globals.Function_Continue)return true;
-					return returnVal != false;
+					return !(returnVal == false);
 				}
 		}
 		return true;
@@ -1768,6 +1763,9 @@ class PlayState extends MusicBeatState
 			}
 		}
 
+		#if (LUA_ALLOWED && PE_MOD_COMPATIBILITY)
+		var luaNotetypeScripts = [];
+		#end
 		for (notetype in noteTypeMap.keys())
 		{
 			var doPush:Bool = false;
@@ -1793,11 +1791,11 @@ class PlayState extends MusicBeatState
 							funkyScripts.push(script);
 							#if PE_MOD_COMPATIBILITY
 							// PE_MOD_COMPATIBILITY to call onCreate at the end of this function
-							notetypeScripts.set(notetype, script);
+							luaNotetypeScripts.push(script);
 							#end
 							doPush = true;
 						}
-						else #end if (ext == 'hscript')
+						else if (ext == 'hscript') #end
 						{
 							var script = FunkinHScript.fromFile(file, notetype);
 							hscriptArray.push(script);
@@ -1805,6 +1803,7 @@ class PlayState extends MusicBeatState
 							notetypeScripts.set(notetype, script);
 							doPush = true;
 						}
+						
 						if (doPush)
 							break;
 					}
@@ -1909,10 +1908,7 @@ class PlayState extends MusicBeatState
 				swagNote.gfNote = (section.gfSection && (songNotes[1]<4));
 				swagNote.noteType = type;
 				swagNote.scrollFactor.set();
-
-				var susLength:Float = swagNote.sustainLength;
-
-				susLength = susLength / Conductor.stepCrochet;
+				
 				swagNote.ID = allNotes.length;
 				modchartObjects.set('note${swagNote.ID}', swagNote);
 
@@ -1934,6 +1930,7 @@ class PlayState extends MusicBeatState
 					continue;
 				}
 
+				/*
 				#if LUA_ALLOWED
 				// in hscripts setupNote gets called on Note.set_noteType
 				if(swagNote.noteScript != null && swagNote.noteScript is FunkinLua){
@@ -1946,16 +1943,16 @@ class PlayState extends MusicBeatState
 					]);
 				}
 				#end
+				*/
 
 				/*
 				if (swagNote.mustPress)
-				{
 					swagNote.x += FlxG.width * 0.5; // general offset
-				}
 				*/
 
 				oldNote = swagNote;
 
+				var susLength:Float = swagNote.sustainLength / Conductor.stepCrochet;
 				var floorSus:Int = Math.round(susLength);
 				for (susNote in 0...floorSus)
 				{
@@ -1963,18 +1960,23 @@ class PlayState extends MusicBeatState
 					sustainNote.mustPress = gottaHitNote;
 					sustainNote.gfNote = swagNote.gfNote;
 					sustainNote.noteType = type;
-					if(sustainNote==null || !sustainNote.alive)
+
+					if (sustainNote==null || !sustainNote.alive)
 						break;
+
+					sustainNote.scrollFactor.set();
+
 					sustainNote.ID = allNotes.length;
 					modchartObjects.set('note${sustainNote.ID}', sustainNote);
-					sustainNote.scrollFactor.set();
+					
 					swagNote.tail.push(sustainNote);
 					swagNote.unhitTail.push(sustainNote);
 					sustainNote.parent = swagNote;
-					//allNotes.push(sustainNote);
 					sustainNote.fieldIndex = swagNote.fieldIndex;
 					playfield.queue(sustainNote);
 					allNotes.push(sustainNote);
+
+					/*
 					#if LUA_ALLOWED
 					if (sustainNote.noteScript != null && sustainNote.noteScript is FunkinLua){
 						callScript(sustainNote.noteScript, 'setupNote', [
@@ -1986,12 +1988,11 @@ class PlayState extends MusicBeatState
 						]);
 					}
 					#end
+					*/
 
 					/*
 					if (sustainNote.mustPress)
-					{
 						sustainNote.x += FlxG.width * 0.5; // general offset
-					} 
 					*/
 
 					oldNote = sustainNote;
@@ -2010,12 +2011,9 @@ class PlayState extends MusicBeatState
 
 
 		#if (LUA_ALLOWED && PE_MOD_COMPATIBILITY)
-		for(key => script in notetypeScripts){
-			if(script is FunkinLua){
-				script.call("onCreate");
-				notetypeScripts.remove(key);
-			}
-		}
+		for (script in luaNotetypeScripts)
+			script.call("onCreate");
+		luaNotetypeScripts = null;
 		#end
 		checkEventNote();
 		generatedMusic = true;
@@ -2453,7 +2451,8 @@ class PlayState extends MusicBeatState
 				allNotes.indexOf(dunceNote),
 				dunceNote.noteData,
 				dunceNote.noteType,
-				dunceNote.isSustainNote
+				dunceNote.isSustainNote,
+				dunceNote.strumTime
 			]);
 			#end
 
@@ -2465,6 +2464,8 @@ class PlayState extends MusicBeatState
 			if (dunceNote.noteScript != null)
 			{
 				var script:FunkinScript = dunceNote.noteScript;
+
+				/*
 				#if LUA_ALLOWED
 				if (script is FunkinLua) {
 					callScript(script, 'postSpawnNote', [
@@ -2477,6 +2478,7 @@ class PlayState extends MusicBeatState
 				}
 				else
 				#end
+				*/
 				callScript(script, "postSpawnNote", [dunceNote]);
 			}
 		});
@@ -3893,6 +3895,7 @@ class PlayState extends MusicBeatState
 		{
 			var script:FunkinScript = daNote.noteScript;
 
+			/*
 			#if LUA_ALLOWED
 			if (script is FunkinLua)
 			{
@@ -3907,6 +3910,7 @@ class PlayState extends MusicBeatState
 			}
 			else
 			#end
+			*/
 			if(callScript(script, "preNoteMiss", [daNote, field]) == Globals.Function_Stop)
 				return;
 		}
@@ -3999,6 +4003,7 @@ class PlayState extends MusicBeatState
 		{
 			var script:FunkinScript = daNote.noteScript;
 
+			/*
 			#if LUA_ALLOWED
 			if (script is FunkinLua)
 			{
@@ -4012,6 +4017,7 @@ class PlayState extends MusicBeatState
 			}
 			else
 			#end
+			*/
 				callScript(script, "noteMiss", [daNote, field]);
 		}
 	}
@@ -4080,12 +4086,14 @@ class PlayState extends MusicBeatState
 		if (note.noteScript != null)
 		{
 			var script:FunkinScript = note.noteScript;
+			/*
 			#if LUA_ALLOWED
 			if (script is FunkinLua)
 				if (callScript(script, 'preOpponentNoteHit', [notes.members.indexOf(note), leData, leType, isSus, note.ID]) == Globals.Function_Stop)
 					return;
 				else
 			#end
+			*/
 			if (callScript(script, "preOpponentNoteHit", [note, field]) == Globals.Function_Stop)
 				return;
 		}
@@ -4146,6 +4154,7 @@ class PlayState extends MusicBeatState
 		{
 			var script:FunkinScript = note.noteScript;
 
+			/*
 			#if LUA_ALLOWED
 			if (script is FunkinLua){
 				callScript(script, 'opponentNoteHit',
@@ -4159,6 +4168,7 @@ class PlayState extends MusicBeatState
 			}
 			else
 			#end
+			*/
 				callScript(script, "opponentNoteHit", [note, field]);
 		}
 
@@ -4214,12 +4224,15 @@ class PlayState extends MusicBeatState
 		if (note.noteScript != null)
 		{
 			var script:FunkinScript = note.noteScript;
+
+			/*
 			#if LUA_ALLOWED
 			if (script is FunkinLua)
 				if (callScript(script, 'preGoodNoteHit', [notes.members.indexOf(note), leData, leType, isSus, note.ID]) == Globals.Function_Stop)
 					return;
 				else
 			#end
+			*/
 			if (callScript(script, "preGoodNoteHit", [note, field]) == Globals.Function_Stop)
 				return;
 		}
@@ -4335,12 +4348,14 @@ class PlayState extends MusicBeatState
 		if (note.noteScript != null)
 		{
 			var script:FunkinScript = note.noteScript;
+			/*
 			#if LUA_ALLOWED
 			if (script is FunkinLua)
 				callScript(script, 'goodNoteHit',
 					[notes.members.indexOf(note), leData, leType, isSus, note.ID]);
 			else
 			#end
+			*/
 				callScript(script, "goodNoteHit", [note, field]);
 		}
 		if (!note.isSustainNote && note.tail.length == 0)
