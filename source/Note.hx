@@ -75,7 +75,6 @@ class Note extends NoteObject
 	public var quant:Int = 4;
 	public var extraData:Map<String, Dynamic> = [];
 	public var isQuant:Bool = false; // mainly for color swapping, so it changes color depending on which set (quants or regular notes)
-	public var canQuant:Bool = true;
 	
 	// basic stuff
 	public var beat:Float = 0;
@@ -92,18 +91,23 @@ class Note extends NoteObject
 	public var prevNote:Note;
 	public var nextNote:Note;
 	public var spawned:Bool = false;
+	public var causedMiss:Bool = false;
 	function get_canBeHit()return PlayState.instance.judgeManager.judgeNote(this)!=UNJUDGED;
 	
 	
 	// note type/customizable shit
 	
+	public var canQuant:Bool = true; // whether a quant texture should be searched for or not
 	public var noteType(default, set):String = null;  // the note type
-	public var causedMiss:Bool = false;
 	public var usesDefaultColours:Bool = true; // whether this note uses the default note colours (lets you change colours in options menu)
+	// This automatically gets set if a notetype changes the ColorSwap values
+
+	public var requiresTap:Bool = true; // If you need to tap the note to hit it, or just have the direction be held when it can be judged to hit.
+										// An example is Stepmania mines
 
 	public var blockHit:Bool = false; // whether you can hit this note or not
 	#if PE_MOD_COMPATIBILITY
-	public var lowPriority:Bool = false; // Unused. shadowmario's shitty workaround for really bad mine placement, yet still no *real* hitbox customization lol!
+	public var lowPriority:Bool = false; // Shadowmario's shitty workaround for really bad mine placement, yet still no *real* hitbox customization lol! Only used when PE Mod Compat is enabled in project.xml
 	#end
 	@:isVar
 	public var noteSplashDisabled(get, set):Bool = false; // disables the notesplash when you hit this note

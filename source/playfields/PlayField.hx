@@ -288,12 +288,14 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		while (noteList.length > 0)
 		{
 			var note:Note = noteList.shift();
-			var judge:Judgment = judgeManager.judgeNote(note);
-			if (judge != UNJUDGED){
-				note.hitResult.judgment = judge;
-				note.hitResult.hitDiff = note.strumTime - Conductor.songPosition;
-				noteHitCallback(note, this);
-				return note;
+			if(note.requiresTap){
+				var judge:Judgment = judgeManager.judgeNote(note);
+				if (judge != UNJUDGED){
+					note.hitResult.judgment = judge;
+					note.hitResult.hitDiff = note.strumTime - Conductor.songPosition;
+					noteHitCallback(note, this);
+					return note;
+				}
 			}
 		}
 		return null;
@@ -509,11 +511,35 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 							if (noteHitCallback!=null)noteHitCallback(daNote, this);
 						}
 					}
-					
+				}
+			}
+		}else{
+			for(data in 0...keyCount){
+				if (keysPressed[data]){
+					var noteList = getNotesWithEnd(data, Conductor.songPosition + ClientPrefs.hitWindow, (note:Note) -> !note.isSustainNote);
+					#if PE_MOD_COMPATIBILITY
+					noteList.sort((a, b) -> Std.int((a.strumTime + (a.lowPriority ? 10000 : 0)) - (b.strumTime + (b.lowPriority ? 10000 : 0)))); // so lowPriority actually works (even though i hate it lol!)
+					#else
+					noteList.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
+					#end
+					while (noteList.length > 0)
+					{
+						var note:Note = noteList.shift();
+						if(!note.requiresTap){
+							var judge:Judgment = judgeManager.judgeNote(note);
+							if (judge != UNJUDGED)
+							{
+								note.hitResult.judgment = judge;
+								note.hitResult.hitDiff = note.strumTime - Conductor.songPosition;
+								noteHitCallback(note, this);
+							}
+						}
+					}
 				}
 			}
 		}
 	}
+	
 
 	// gets all living notes w/ optional filter
 
