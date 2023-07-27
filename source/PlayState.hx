@@ -4598,52 +4598,6 @@ class PlayState extends MusicBeatState
 		setOnScripts('ratingFC', ratingFC);
 	}
 
-	// Shader stuff from andromeda or V3 idrk
-	private var camShaders = [];
-	private var hudShaders = [];
-
-	public function addCameraEffect(effect:ShaderEffect)
-	{
-		camShaders.push(effect);
-
-		var newCamEffects:Array<BitmapFilter> = [];
-		for (i in camShaders)
-			newCamEffects.push(new ShaderFilter(i.shader));
-
-		camGame.setFilters(newCamEffects);
-	}
-	public function removeCameraEffect(effect:ShaderEffect)
-	{
-		camShaders.remove(effect);
-
-		var newCamEffects:Array<BitmapFilter> = [];
-		for (i in camShaders)
-			newCamEffects.push(new ShaderFilter(i.shader));
-
-		camGame.setFilters(newCamEffects);
-	}
-
-	public function addHUDEffect(effect:ShaderEffect)
-	{
-		hudShaders.push(effect);
-
-		var newCamEffects:Array<BitmapFilter> = [];
-		for (i in hudShaders)
-			newCamEffects.push(new ShaderFilter(i.shader));
-
-		camHUD.setFilters(newCamEffects);
-	}
-	public function removeHUDEffect(effect:ShaderEffect)
-	{
-		hudShaders.remove(effect);
-
-		var newCamEffects:Array<BitmapFilter> = [];
-		for (i in hudShaders)
-			newCamEffects.push(new ShaderFilter(i.shader));
-
-		camHUD.setFilters(newCamEffects);
-	}
-
 	////
 	public function pause(?OpenPauseMenu = true){
 		if (startedCountdown && canPause && health > 0 && !paused)
