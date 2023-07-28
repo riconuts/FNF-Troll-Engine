@@ -1,0 +1,2 @@
+Value 1: Beats to bump on (Defaults to 4)
+Value 2: Intensity multiplier (Defaults to 1)
