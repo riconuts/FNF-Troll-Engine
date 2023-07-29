@@ -20,3 +20,6 @@ export/*
 !.vscode/extensions.json
 *.swf
 .vscode/tasks.json
+
+# why does hmm install it here what the fuuck why not install it into my main haxelib
+.haxelib
