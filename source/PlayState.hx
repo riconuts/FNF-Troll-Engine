@@ -847,8 +847,8 @@ class PlayState extends MusicBeatState
 		playfields.add(dadField);
 		playfields.add(playerField);
 
-		for(field in playfields)
-			if(field.judgeManager == null)initPlayfield(field);
+		initPlayfield(dadField);
+		initPlayfield(playerField);
 		
 		callOnScripts("postPlayfieldCreation");
 
