@@ -68,12 +68,20 @@ class ModManager {
 		setValue("drawDistance", FlxG.height * 1.1, mN); // MAY NOT REPRESENT ACTUAL DRAWDISTANCE: drawDistance is modified by the notefields aswell
 		// so when you set drawDistance is might be lower or higher than expected because of the draw distance mult. setting
 		setValue("xmod", 1, mN);
-		for (i in 0...4)
+		setValue("scale", 1, mN);
+		setValue("scaleX", 1, mN);
+		setValue("scaleY", 1, mN);
+		for (i in 0...4){
 			setValue('xmod$i', 1, mN);
+			setValue('scale${i}', 1, mN);
+			setValue('scale${i}X', 1, mN);
+			setValue('scale${i}Y', 1, mN);
+		}
 
 		setValue("flashR", 1, mN);
 		setValue("flashG", 1, mN);
 		setValue("flashB", 1, mN);
+		
 	}
 
 

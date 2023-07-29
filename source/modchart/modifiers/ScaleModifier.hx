@@ -22,6 +22,16 @@ class ScaleModifier extends NoteModifier {
 
 		scale.x *= Math.pow(0.5, tinyX) * Math.pow(0.5, tiny);
 		scale.y *= Math.pow(0.5, tinyY) * Math.pow(0.5, tiny);
+
+		scale.x *= getSubmodValue("scale", player) 
+			* getSubmodValue('scale${data}', player) 
+			* getSubmodValue('scaleX', player)
+			* getSubmodValue('scale${data}X', player);
+
+		scale.y *= getSubmodValue("scale", player) 
+			* getSubmodValue('scale${data}', player) 
+			* getSubmodValue('scaleY', player)
+			* getSubmodValue('scale${data}Y', player);
 		var angle = 0;
 
 		var stretch = getSubmodValue("stretch", player) + getSubmodValue('stretch${data}', player);
@@ -50,7 +60,9 @@ class ScaleModifier extends NoteModifier {
 	override function ignorePos()
 		return false;
 
-	override function getPos(visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
+	// TODO: fix this
+
+/* 	override function getPos(visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
 	{
 		var tiny = getValue(player) + getSubmodValue('tiny${data}', player);
 		var tinyPerc = Math.min(Math.pow(0.5, tiny), 1);
@@ -73,7 +85,7 @@ class ScaleModifier extends NoteModifier {
 		} 
 
 		return pos;
-	}
+	} */
 
 
 	override function isRenderMod()
@@ -98,13 +110,16 @@ class ScaleModifier extends NoteModifier {
 
 	override function getSubmods()
 	{
-		var subMods:Array<String> = ["squish", "stretch", "tinyX", "tinyY"];
+		var subMods:Array<String> = ["squish", "stretch", "scale", "scaleX", "scaleY", "tinyX", "tinyY"];
 
 		for (i in 0...4)
 		{
 			subMods.push('tiny${i}');
 			subMods.push('tiny${i}X');
 			subMods.push('tiny${i}Y');
+			subMods.push('scale${i}');
+			subMods.push('scale${i}X');
+			subMods.push('scale${i}Y');
 			subMods.push('squish${i}');
 			subMods.push('stretch${i}');
 		}
