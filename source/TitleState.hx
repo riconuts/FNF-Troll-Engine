@@ -1,23 +1,12 @@
 package;
 
 import flixel.addons.transition.FlxTransitionableState;
-import flixel.addons.transition.TransitionData;
-import flixel.graphics.frames.FlxAtlasFrames;
-import flixel.graphics.frames.FlxFrame;
 import flixel.group.FlxGroup;
 import flixel.input.gamepad.FlxGamepad;
 import flixel.math.*;
-import flixel.system.FlxSound;
-import flixel.system.ui.FlxSoundTray;
-import flixel.text.FlxText;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
+import flixel.tweens.*;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
-import haxe.Json;
-import openfl.Assets;
-import openfl.display.Bitmap;
-import openfl.display.BitmapData;
 
 using StringTools;
 #if discord_rpc

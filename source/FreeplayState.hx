@@ -5,12 +5,8 @@ import haxe.Json;
 import editors.ChartingState;
 import flixel.*;
 import flixel.addons.display.shapes.FlxShapeBox;
-import flixel.addons.transition.FlxTransitionableState;
-import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.*;
-import flixel.system.FlxSound;
 import flixel.text.FlxText;
-import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import sowy.TGTSquareButton;
 

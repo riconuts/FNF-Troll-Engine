@@ -481,38 +481,42 @@ class FlxSprite extends FlxObject
 	 * HaxeFlixel copies the previous reference onto the `pixels` field instead
 	 * of creating another copy of the image data, to save memory.
 	 *
-	 * @param   Graphic    The image you want to use.
-	 * @param   Animated   Whether the `Graphic` parameter is a single sprite or a row / grid of sprites.
-	 * @param   Width      Specify the width of your sprite
-	 *                     (helps figure out what to do with non-square sprites or sprite sheets).
-	 * @param   Height     Specify the height of your sprite
-	 *                     (helps figure out what to do with non-square sprites or sprite sheets).
-	 * @param   Unique     Whether the graphic should be a unique instance in the graphics cache.
-	 *                     Set this to `true` if you want to modify the `pixels` field without changing
-	 *                     the `pixels` of other sprites with the same `BitmapData`.
-	 * @param   Key        Set this parameter if you're loading `BitmapData`.
+	 * @param   graphic      The image you want to use.
+	 * @param   animated     Whether the `Graphic` parameter is a single sprite or a row / grid of sprites.
+	 * @param   FrameWidth   Specify the width of your sprite
+	 *                       (helps figure out what to do with non-square sprites or sprite sheets).
+	 * @param   FrameHeight  Specify the height of your sprite
+	 *                       (helps figure out what to do with non-square sprites or sprite sheets).
+	 * @param   unique       Whether the graphic should be a unique instance in the graphics cache.
+	 *                       Set this to `true` if you want to modify the `pixels` field without changing
+	 *                       the `pixels` of other sprites with the same `BitmapData`.
+	 * @param   key          Set this parameter if you're loading `BitmapData`.
 	 * @return  This `FlxSprite` instance (nice for chaining stuff together, if you're into that).
 	 */
-	public function loadGraphic(Graphic:FlxGraphicAsset, Animated:Bool = false, Width:Int = 0, Height:Int = 0, Unique:Bool = false, ?Key:String):FlxSprite
+	public function loadGraphic(Graphic:FlxGraphicAsset, Animated = false, FrameWidth = 0, FrameHeight = 0, Unique = false, ?Key:String):FlxSprite
 	{
 		var graph:FlxGraphic = FlxG.bitmap.add(Graphic, Unique, Key);
 		if (graph == null)
 			return this;
 
-		if (Width == 0)
+		if (FrameWidth == 0)
 		{
-			Width = Animated ? graph.height : graph.width;
-			Width = (Width > graph.width) ? graph.width : Width;
+			FrameWidth = Animated ? graph.height : graph.width;
+			FrameWidth = (FrameWidth > graph.width) ? graph.width : FrameWidth;
 		}
+		else if (FrameWidth > graph.width)
+			FlxG.log.warn('FrameWidth:$FrameWidth is larger than the graphic\'s width:${graph.width}');
 
-		if (Height == 0)
+		if (FrameHeight == 0)
 		{
-			Height = Animated ? Width : graph.height;
-			Height = (Height > graph.height) ? graph.height : Height;
+			FrameHeight = Animated ? FrameWidth : graph.height;
+			FrameHeight = (FrameHeight > graph.height) ? graph.height : FrameHeight;
 		}
+		else if (FrameHeight > graph.height)
+			FlxG.log.warn('FrameHeight:$FrameHeight is larger than the graphic\'s height:${graph.height}');
 
 		if (Animated)
-			frames = FlxTileFrames.fromGraphic(graph, FlxPoint.get(Width, Height));
+			frames = FlxTileFrames.fromGraphic(graph, FlxPoint.get(FrameWidth, FrameHeight));
 		else
 			frames = graph.imageFrame;
 

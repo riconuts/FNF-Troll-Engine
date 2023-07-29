@@ -1,16 +1,18 @@
-package flixel.system;
+package flixel.sound;
 
 import lime.system.CFFIPointer;
 import lime.media.openal.ALEffect;
 import lime.media.openal.ALAuxiliaryEffectSlot;
 import lime.media.openal.ALFilter;
 import lime.media.openal.AL;
+
 import flash.events.Event;
 import flash.events.IEventDispatcher;
 import flash.media.Sound;
 import flash.media.SoundChannel;
 import flash.media.SoundTransform;
 import flash.net.URLRequest;
+
 import flixel.FlxBasic;
 import flixel.FlxG;
 import flixel.math.FlxMath;
@@ -18,6 +20,8 @@ import flixel.math.FlxPoint;
 import flixel.system.FlxAssets.FlxSoundAsset;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxStringUtil;
+import flixel.sound.FlxSoundGroup;
+
 import openfl.Assets;
 #if flash11
 import flash.utils.ByteArray;
@@ -95,7 +99,7 @@ class FlxSound extends FlxBasic
 	public var amplitudeLeft(default, null):Float;
 
 	/**
-	 * Just the amplitude of the left stereo channel
+	 * Just the amplitude of the right stereo channel
 	 */
 	public var amplitudeRight(default, null):Float;
 
@@ -616,7 +620,7 @@ class FlxSound extends FlxBasic
 	/**
 	 * Call after adjusting the volume to update the sound channel's settings.
 	 */
-	@:allow(flixel.system.FlxSoundGroup)
+	@:allow(flixel.sound.FlxSoundGroup)
 	function updateTransform():Void
 	{
 		if (_transform != null)

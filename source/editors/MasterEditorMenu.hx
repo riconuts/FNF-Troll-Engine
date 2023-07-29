@@ -6,19 +6,11 @@ import Discord.DiscordClient;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
-import flixel.addons.display.FlxGridOverlay;
-import flixel.addons.transition.FlxTransitionableState;
 import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.math.FlxMath;
-import flixel.system.FlxSound;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 
 using StringTools;
-#if MODS_ALLOWED
-import sys.FileSystem;
-#end
-
 
 class MasterEditorMenu extends MusicBeatState
 {

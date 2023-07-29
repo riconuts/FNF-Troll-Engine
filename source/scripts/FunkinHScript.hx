@@ -102,11 +102,11 @@ class FunkinHScript extends FunkinScript
 		set("Assets", openfl.utils.Assets);
 		set("Main", Main);
 
-		set("FlxG", flixel.FlxG);
-		set("FlxSprite", flixel.FlxSprite);
-		set("FlxCamera", flixel.FlxCamera);
+		set("FlxG", FlxG);
+		set("FlxSprite", FlxSprite);
+		set("FlxCamera", FlxCamera);
+		set("FlxSound", FlxSound);
 		set("FlxMath", flixel.math.FlxMath);
-		set("FlxSound", flixel.system.FlxSound);
 		set("FlxTimer", flixel.util.FlxTimer);
 		set("FlxTween", flixel.tweens.FlxTween);
 		set("FlxEase", flixel.tweens.FlxEase);

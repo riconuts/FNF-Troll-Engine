@@ -6,21 +6,6 @@ Troll Engine is the fork of [Psych Engine](https://github.com/ShadowMario/FNF-Ps
 ## Installation:
 You must have [the most up-to-date version of Haxe](https://haxe.org/download/).
 
-You'll also need to install a couple things that involve Gits. To do this, you need to do a few things first.
-1. Download [git-scm](https://git-scm.com/downloads). Works for Windows, Mac, and Linux, just select your build.
-2. Follow instructions to install the application properly.
+open up a Command Prompt/PowerShell or Terminal, type `haxelib install hmm`
 
-You'll also need to install each one of these Haxe libraries.
-
-```
-haxelib install flixel 5.2.2
-haxelib install flixel-addons
-haxelib install flixel-ui
-
-haxelib install hscript
-haxelib install hxCodec
-haxelib git discord_rpc https://github.com/Aidan63/linc_discord-rpc
-haxelib git linc_luajit https://github.com/nebulazorua/linc_luajit
-```
-
-(You can just paste them onto Command Prompt/PowerShell to install them)
+after it finishes, simply type `haxelib run hmm install` in order to install all the needed libraries for *Psych Engine!*

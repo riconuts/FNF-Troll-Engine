@@ -2,7 +2,6 @@ package;
 
 import flixel.*;
 import flixel.math.*;
-import flixel.system.FlxSound;
 import flixel.text.FlxText;
 import flixel.tweens.*;
 import flixel.util.FlxColor;

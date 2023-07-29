@@ -2,8 +2,8 @@ package;
 
 import haxe.io.Path;
 import flixel.addons.transition.FlxTransitionableState;
-import flixel.system.FlxSound;
 import flixel.addons.ui.FlxUIState;
+import openfl.media.Sound;
 import flash.ui.Mouse;
 import flash.ui.MouseCursor;
 
@@ -162,7 +162,7 @@ class MusicBeatState extends FlxUIState
 	}
 
 	// tgt
-	public static var menuMusic:openfl.media.Sound; // main menu loop
+	public static var menuMusic:Sound; // main menu loop
 	public static var menuVox:FlxSound; // jukebox
 
 	public static var menuLoopFunc = function(){

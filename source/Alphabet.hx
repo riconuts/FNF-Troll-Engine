@@ -3,10 +3,9 @@ package;
 import flash.media.Sound;
 import flixel.FlxG;
 import flixel.FlxSprite;
-import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.group.FlxSpriteGroup;
 import flixel.math.FlxMath;
-import flixel.system.FlxSound;
+
 import flixel.util.FlxTimer;
 
 using StringTools;
@@ -197,12 +196,7 @@ class Alphabet extends FlxSpriteGroup
 		splitWords = _finalText.split("");
 	}
 
-	var loopNum:Int = 0;
-	var xPos:Float = 0;
-	public var curRow:Int = 0;
-	var dialogueSound:FlxSound = null;
 	private static var soundDialog:Sound = null;
-	var consecutiveSpaces:Int = 0;
 	public static function setDialogueSound(name:String = '')
 	{
 		if (name == null || name.trim() == '') name = 'dialogue';
@@ -211,6 +205,11 @@ class Alphabet extends FlxSpriteGroup
 	}
 
 	var typeTimer:FlxTimer = null;
+	var loopNum:Int = 0;
+	var xPos:Float = 0;
+	public var curRow:Int = 0;
+	var consecutiveSpaces:Int = 0;
+	var dialogueSound:FlxSound = null;
 	public function startTypedText(speed:Float):Void
 	{
 		_finalText = text;
