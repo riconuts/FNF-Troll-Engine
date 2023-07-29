@@ -1345,14 +1345,14 @@ class PlayState extends MusicBeatState
 		modManager.registerDefaultModifiers();
 		callOnScripts('postModifierRegister');
 
-		if(midScroll){
+/* 		if(midScroll){
 			modManager.setValue("opponentSwap", 0.5);
 			for(field in notefields.members){
 				if(field.field==null)continue;
 				field.alpha = field.field.isPlayer ? 0 : 1;
 			}
 			
-		}
+		} */
 
 		startedCountdown = true;
 		Conductor.songPosition = 0;
@@ -2122,7 +2122,7 @@ class PlayState extends MusicBeatState
 		remove(comboNumGroup);
 		remove(timingTxt);
 		if(ClientPrefs.judgeBehind){
-			insert(members.indexOf(strumLineNotes) - 1, timingTxt);
+			insert(members.indexOf(notefields) - 1, timingTxt);
 			insert(members.indexOf(timingTxt) - 1, comboNumGroup);
 			insert(members.indexOf(comboNumGroup) - 1, ratingTxtGroup);
 		}else{
@@ -2647,7 +2647,7 @@ class PlayState extends MusicBeatState
 		
 		botplayTxt.exists = PlayState.instance.cpuControlled;
 
-		if(midScroll){
+/* 		if(midScroll){
 			for(field in notefields.members){
 				if(field.field==null)continue;
 				if(field.field.isPlayer){
@@ -2662,7 +2662,7 @@ class PlayState extends MusicBeatState
 					}
 				}
 			}
-		}
+		} */
 		super.update(elapsed);
 		modManager.updateTimeline(curDecStep);
 		modManager.update(elapsed);

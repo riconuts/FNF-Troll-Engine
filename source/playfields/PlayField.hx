@@ -187,7 +187,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		if(noteQueue[note.noteData]==null)
 			noteQueue[note.noteData] = [];
 		noteQueue[note.noteData].push(note);
-		
+
 		noteQueue[note.noteData].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
 		
 	}
@@ -197,8 +197,8 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	{
 		if (noteQueue[note.noteData] == null)
 			noteQueue[note.noteData] = [];
-		noteQueue[note.noteData].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
 		noteQueue[note.noteData].remove(note);
+		noteQueue[note.noteData].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
 	}
 
 	// destroys a note
@@ -235,6 +235,9 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 	// spawns a note
 	public function spawnNote(note:Note){
+		if(note.spawned)
+			return;
+		
 		if (noteQueue[note.noteData]!=null){
 			noteQueue[note.noteData].remove(note);
 			noteQueue[note.noteData].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
