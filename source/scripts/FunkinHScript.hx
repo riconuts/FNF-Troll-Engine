@@ -357,7 +357,11 @@ class FunkinHScript extends FunkinScript
 		set("EaseEvent", modchart.events.EaseEvent);
 		set("SetEvent", modchart.events.SetEvent);
 
-		set("MP4Handler", #if VIDEOS_ALLOWED hxcodec.VideoHandler #else null #end);
+		#if !VIDEOS_ALLOWED set("MP4Handler", null);
+		#elseif (hxCodec >= "3.0.0") set("MP4Handler", hxcodec.flixel.FlxVideo);
+		#elseif (hxCodec >= "2.6.1") set("MP4Handler", hxcodec.VideoHandler);
+		#elseif (hxCodec == "2.6.0") set("MP4Handler", VideoHandler);
+		#elseif (hxCodec) set("MP4Handler", vlc.MP4Handler); #end
 		
 		set("FunkinLua", FunkinLua);
 		set("FunkinHScript", FunkinHScript);

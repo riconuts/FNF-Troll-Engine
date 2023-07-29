@@ -1,47 +1,59 @@
 package;
 
-#if VIDEOS_ALLOWED
-import hxcodec.VideoHandler;
-#end
+#if !VIDEOS_ALLOWED
+#elseif (hxCodec >= "3.0.0") import hxcodec.flixel.FlxVideo as VideoHandler;
+#elseif (hxCodec >= "2.6.1") import hxcodec.VideoHandler as VideoHandler;
+#elseif (hxCodec == "2.6.0") import VideoHandler;
+#elseif (hxCodec) import vlc.MP4Handler as VideoHandler; #end
 
-// is this stupid or
 class VideoPlayerState extends MusicBeatState
 {  
-    final videoPath:String;
-    final isSkippable:Bool;
-    final onComplete:Void -> Void;
+	final videoPath:String;
+	final isSkippable:Bool;
+	final onComplete:Void -> Void;
 
-    public function new(videoPath:String, onComplete:Void -> Void, isSkippable:Bool = true)
-    {
-        super();
+	public function new(videoPath:String, onComplete:Void -> Void, isSkippable:Bool = true)
+	{
+		super();
 
-        this.videoPath = videoPath;
-        this.isSkippable = isSkippable==true;
-        this.onComplete = onComplete;
-    }
+		this.videoPath = videoPath;
+		this.isSkippable = isSkippable==true;
+		this.onComplete = onComplete;
+	}
 
-    var video:VideoHandler;
-    override public function create(){
-        FlxG.camera.bgColor = 0xFF000000;
+	#if VIDEOS_ALLOWED
+	var video:VideoHandler;
+	#end
+	override public function create(){
+		FlxG.camera.bgColor = 0xFF000000;
 
-        super.create();
+		super.create();
 
-        #if !VIDEOS_ALLOWED
-        onComplete();
-        #else
-        video = new VideoHandler();
-        video.finishCallback = onComplete;
-		video.playVideo(videoPath);
-        #end
-    }
+		#if !VIDEOS_ALLOWED
+		onComplete();
+		trace("Video playback is unavailable");
 
-    override public function update(e) {
-        if (isSkippable && controls.ACCEPT){
-            video.stop();
-            video.dispose();
-            onComplete();
-        }
+		#else
+		if (!Paths.exists(videoPath)){
+			onComplete();
+			trace('$videoPath does not exist');
+		}else{
+			video = new VideoHandler();
+			video.finishCallback = onComplete;
+			video.playVideo(videoPath);
+		}
+		#end
+	}
 
-        super.update(e);
-    }
+	#if VIDEOS_ALLOWED
+	override public function update(e) {
+		if (isSkippable && controls.ACCEPT){
+			video.stop();
+			video.dispose();
+			onComplete();
+		}
+
+		super.update(e);
+	}
+	#end
 }

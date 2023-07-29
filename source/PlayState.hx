@@ -1245,12 +1245,17 @@ class PlayState extends MusicBeatState
 		}
 
 		var video:VideoHandler = new VideoHandler();
-		video.playVideo(filepath);
-		video.finishCallback = function()
-		{
+		#if (hxCodec >= "3.0.0")
+		video.play(filepath);
+		video.onEndReached.add(()->{
+			video.dispose();
 			startAndEnd();
-			return;
-		}
+		}, true);
+		#else
+		video.playVideo(filepath);
+		video.finishCallback = startAndEnd;
+		#end
+		
 		#else
 		FlxG.log.warn('Video not supported!');
 		startAndEnd();
