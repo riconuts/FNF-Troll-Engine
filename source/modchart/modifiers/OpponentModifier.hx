@@ -9,16 +9,15 @@ class OpponentModifier extends NoteModifier {
 	override function getName()
 		return 'opponentSwap';
 
+	inline function sign(x:Int)
+		return x == 0 ? 0 : (x <= -1 ? -1 : 1);
+
 	override function getPos(diff:Float, tDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
     {
-        var nPlayer = Std.int(CoolUtil.scale(player, 0, 1, 1, 0));
+		var distX = 640 / (modMgr.playerAmount / 2); // theres probably a way to optimize this (divison is expensive!) but i think this is a good way of doing this rn
 
-		var oppX = modMgr.getBaseX(data, nPlayer, field.field.keyCount);
-		var plrX = modMgr.getBaseX(data, player, field.field.keyCount);
-        var distX = oppX-plrX;
-
-		pos.x += distX * getValue(player);
-
+		pos.x += distX * sign(((player + 1) * 2 - 3)) * getValue(player);
+		// any pN > 0 should go right whereas any pN < 0 should go left 
         return pos;
     }
 }

@@ -242,7 +242,7 @@ class JudgmentManager {
         this.useEpics = useEpics;
         if(!useEpics){
 			hittableJudgments.remove(TIER5);
-            judgmentData.get(TIER4).accuracy =100;
+            judgmentData.get(TIER4).accuracy = 100;
         }
 
     }

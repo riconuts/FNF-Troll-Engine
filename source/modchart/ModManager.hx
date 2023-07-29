@@ -240,9 +240,11 @@ class ModManager {
 		timeline.update(curStep);
 
  	public var playerAmount:Int = 2;
+	public var playerOOBIsCentered:Bool = true; // Player Out of Bounds is centered
+
 	public function getBaseX(direction:Int, player:Float, receptorAmount:Int = 4):Float
 	{
-		if (player > (playerAmount-1) || player < 0)
+		if (playerOOBIsCentered && (player > (playerAmount-1) || player < 0))
 			player = 0.5; // replicating old behaviour for upcoming modcharts
 		
 		
