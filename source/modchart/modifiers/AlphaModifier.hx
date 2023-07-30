@@ -118,6 +118,9 @@ class AlphaModifier extends NoteModifier {
         }else
           alpha *= vis;
       }
+    }else if((obj is NoteObject)){
+        var nobj:NoteObject = cast obj;
+		alpha *= (1 - getSubmodValue("alpha", player)) * (1 - getSubmodValue('alpha${nobj.noteData}', player));
     }
 
     info.alpha = alpha;

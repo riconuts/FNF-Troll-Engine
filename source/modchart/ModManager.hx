@@ -42,6 +42,7 @@ class ModManager {
 		quickRegister(new LocalRotateModifier(this, 'local'));
 		quickRegister(new SubModifier("noteSpawnTime", this));
 		quickRegister(new SubModifier("drawDistance", this));
+		quickRegister(new SubModifier("disableDrawDistMult", this));
 		quickRegister(new SubModifier("flashR", this));
 		quickRegister(new SubModifier("flashG", this));
 		quickRegister(new SubModifier("flashB", this));

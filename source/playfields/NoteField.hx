@@ -118,8 +118,9 @@ class NoteField extends FieldBase
 		var taps:Array<Note> = [];
 		var holds:Array<Note> = [];
 		var drawMod = modManager.get("drawDistance");
+		var multAllowed = modManager.get("disableDrawDistMult");
 		var drawDist = drawMod == null ? FlxG.height : drawMod.getValue(modNumber);
-		drawDist *= drawDistMod;
+		if (multAllowed == null || multAllowed.getValue(modNumber) == 0)drawDist *= drawDistMod;
 		for (daNote in field.spawnedNotes)
 		{
 			if (!daNote.alive)
