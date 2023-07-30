@@ -46,8 +46,10 @@ class ModManager {
 		quickRegister(new SubModifier("flashG", this));
 		quickRegister(new SubModifier("flashB", this));
 		quickRegister(new SubModifier("xmod", this));
+		quickRegister(new SubModifier("cmod", this));
 		for (i in 0...4){
 			quickRegister(new SubModifier("xmod" + i, this));
+			quickRegister(new SubModifier("cmod" + i, this));
 			quickRegister(new SubModifier("noteSpawnTime" + i, this));
 		}
 
@@ -68,10 +70,12 @@ class ModManager {
 		setValue("drawDistance", FlxG.height * 1.1, mN); // MAY NOT REPRESENT ACTUAL DRAWDISTANCE: drawDistance is modified by the notefields aswell
 		// so when you set drawDistance is might be lower or higher than expected because of the draw distance mult. setting
 		setValue("xmod", 1, mN);
+		setValue("cmod", -1, mN);
 		setValue("scale", 1, mN);
 		setValue("scaleX", 1, mN);
 		setValue("scaleY", 1, mN);
 		for (i in 0...4){
+			setValue('cmod$i', -1, mN);
 			setValue('xmod$i', 1, mN);
 			setValue('scale${i}', 1, mN);
 			setValue('scale${i}X', 1, mN);
@@ -148,7 +152,34 @@ class ModManager {
 
     inline public function setPercent(modName:String, val:Float, player:Int=-1)
 		setValue(modName, val/100, player);
-    
+
+	public function getCMod(data:Int, player:Int, ?defaultSpeed:Float){
+
+		var daSpeed = getValue('cmod${data}', player);
+		if (daSpeed < 0){
+			daSpeed = getValue('cmod', player);
+
+			if (daSpeed < 0){
+				if (defaultSpeed == null)
+					return PlayState.instance.songSpeed;
+				else
+					return defaultSpeed;
+			}
+		}
+
+		return daSpeed;
+	}
+
+	public function getXMod(data:Int, player:Int)
+		return getValue("xmod", player) * getValue('xmod${data}', player);
+	
+
+	inline public function getSpeed(dir:Int, player:Int, ?songSpeed:Float)
+		return getCMod(dir, player, songSpeed) * getXMod(dir, player);
+	
+	inline public function getNoteSpeed(note:Note, pN:Int, ?songSpeed:Float)
+		return getCMod(note.noteData, pN, songSpeed) * note.multSpeed * getXMod(note.noteData, pN);
+	
 
 	public function getActiveMods(pN:Int){
 		if(activeMods[pN]==null){

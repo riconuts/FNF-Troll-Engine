@@ -127,7 +127,7 @@ class NoteField extends FieldBase
 
 			if (songSpeed != 0)
 			{
-				var speed = songSpeed * daNote.multSpeed * modManager.getValue("xmod", modNumber) * modManager.getValue('xmod${daNote.noteData}', modNumber);
+				var speed = modManager.getNoteSpeed(daNote, modNumber, songSpeed);
 				var diff = Conductor.songPosition - daNote.strumTime;
 				var visPos = -((Conductor.visualPosition - daNote.visualTime) * speed);
 				if (visPos > drawDist)
@@ -440,7 +440,7 @@ class NoteField extends FieldBase
 
 			scalePoint.set(1, 1);
 
-			var speed = songSpeed * hold.multSpeed * modManager.getValue("xmod", modNumber) * modManager.getValue('xmod${hold.noteData}', modNumber);
+			var speed = modManager.getNoteSpeed(hold, modNumber, songSpeed);
 
 			var info:RenderInfo = modManager.getExtraInfo((visualDiff + ((strumOff + strumSub) * 0.45)) * -speed, strumDiff + strumOff + strumSub, curDecBeat,
 			{
@@ -559,7 +559,7 @@ class NoteField extends FieldBase
 		var visPos:Float = 0;
 		if((sprite is Note)){
 			var daNote:Note = cast sprite;
-			var speed = songSpeed * daNote.multSpeed * modManager.getValue("xmod", modNumber) * modManager.getValue('xmod${daNote.noteData}', modNumber);
+			var speed = modManager.getNoteSpeed(daNote, modNumber, songSpeed);
 			diff = Conductor.songPosition - daNote.strumTime;
 			visPos = -((Conductor.visualPosition - daNote.visualTime) * speed);
 		}
