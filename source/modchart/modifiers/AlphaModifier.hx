@@ -64,10 +64,9 @@ class AlphaModifier extends NoteModifier {
       alpha += CoolUtil.scale(f,0,1,-1,0);
     }
 
-    if(getSubmodValue("randomVanish",player)!=0){
-      var realFadeDist:Float = 240;
-      // TODO: make this randomize the notes
-      alpha += CoolUtil.scale(Math.abs(distFromCenter),realFadeDist,2*realFadeDist,-1,0)*getSubmodValue("randomVanish",player);
+    if(getSubmodValue("vanish",player)!=0){
+      var realFadeDist:Float = 360;
+      alpha += CoolUtil.scale(Math.abs(distFromCenter),realFadeDist,2*realFadeDist,-1,0)*getSubmodValue("vanish",player);
     }
 
     return CoolUtil.clamp(alpha+1,0,1);
@@ -129,7 +128,7 @@ class AlphaModifier extends NoteModifier {
   }
 
   override function getSubmods(){
-    var subMods:Array<String> = ["noteAlpha", "alpha", "hidden","hiddenOffset","sudden","suddenOffset","blink","randomVanish","dark","hideDarkGlow", "hideStealthGlow","stealthPastReceptors"];
+    var subMods:Array<String> = ["noteAlpha", "alpha", "hidden","hiddenOffset","sudden","suddenOffset","blink","vanish","dark","hideDarkGlow", "hideStealthGlow","stealthPastReceptors"];
     for(i in 0...4){
 			subMods.push('noteAlpha$i');
 			subMods.push('alpha$i');
