@@ -21,7 +21,7 @@ class AccelModifier extends NoteModifier
 
 	override function getPos(visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
 	{
-		if (getOtherValue("movePastReceptors", player) == 0 && visualDiff<0)
+		if (getOtherValue("movePastReceptors", player) == 0 && visualDiff<=0)
             return pos;
         
 		var wave = getSubmodValue("wave", player);
@@ -47,7 +47,8 @@ class AccelModifier extends NoteModifier
 			yAdjust += CoolUtil.clamp(boost * (off - visualDiff), -600, 600);
 		}
 
-		yAdjust += wave * 20 * FlxMath.fastSin(visualDiff / 57);
+		if (getSubmodValue("wavePeriod", player) != -1 /**< no division by 0**/ && wave != 0) 
+		    yAdjust += wave * ((40 * getSubmodValue("waveMagnitude", player)) + 40) * FlxMath.fastSin(visualDiff / ((114 * getSubmodValue("wavePeriod", player)) + 114));
 
 		pos.y += yAdjust * mult;
 		return pos;
@@ -55,7 +56,7 @@ class AccelModifier extends NoteModifier
 
 	override function getSubmods()
 	{
-		var subMods:Array<String> = ["brake", "wave"];
+		var subMods:Array<String> = ["brake", "wave", "wavePeriod", "waveMagnitude"];
 		return subMods;
 	}
 }
