@@ -352,9 +352,6 @@ class ModManager {
 		pos.y = (Note.swagWidth / 2) + 50 + diff;
 		pos.z = 0;
 
-		if (diff < 0 && getValue("movePastReceptors", player) == 0)
-			return pos;
-
  		for (name in getActiveMods(player)){
 			if (exclusions.contains(name))continue; // because some modifiers may want the path without reverse, for example. (which is actually more common than you'd think!)
 			var mod:Modifier = notemodRegister.get(name);
