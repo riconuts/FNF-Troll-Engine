@@ -1370,6 +1370,8 @@ class PlayState extends MusicBeatState
 		setOnScripts('startedCountdown', true);
 		callOnScripts('onCountdownStarted');
 
+		callOnScripts("generateModchart"); // this is where scripts should generate modcharts from here on out lol
+
 		if(startOnTime < 0)
 			startOnTime = 0;
 
@@ -2016,7 +2018,7 @@ class PlayState extends MusicBeatState
 	public inline function getTimeFromSV(time:Float, event:SpeedEvent){
 
 		// TODO: make easing SVs work somehow
-		
+
 		//if(time >= event.songTime || event.songTime == event.startTime) // practically the same start and end time
 			return event.position + (modManager.getBaseVisPosD(time - event.songTime, 1) * event.speed);
 /* 		else{
