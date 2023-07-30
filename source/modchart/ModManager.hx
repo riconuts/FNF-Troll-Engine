@@ -47,6 +47,7 @@ class ModManager {
 		quickRegister(new SubModifier("flashB", this));
 		quickRegister(new SubModifier("xmod", this));
 		quickRegister(new SubModifier("cmod", this));
+		quickRegister(new SubModifier("movePastReceptors", this));
 		for (i in 0...4){
 			quickRegister(new SubModifier("xmod" + i, this));
 			quickRegister(new SubModifier("cmod" + i, this));
@@ -81,7 +82,7 @@ class ModManager {
 			setValue('scale${i}X', 1, mN);
 			setValue('scale${i}Y', 1, mN);
 		}
-
+		setValue("movePastReceptors", 0); // effects shouldnt go on
 		setValue("flashR", 1, mN);
 		setValue("flashG", 1, mN);
 		setValue("flashB", 1, mN);
@@ -295,21 +296,6 @@ class ModManager {
 
 		return x;
 	}
-/* 	public function getBaseX(direction:Int, player:Int):Float
-	{
-		var x:Float = (FlxG.width * 0.5) - Note.swagWidth - 54 + Note.swagWidth * direction;
-		switch (player)
-		{
-			case 0:
-				x += FlxG.width * 0.5 - Note.swagWidth * 2 - 100;
-			case 1:
-				x -= FlxG.width * 0.5 - Note.swagWidth * 2 - 100;
-		}
-
-		x -= 56;
-
-		return x;
-	} */
 
 	public function updateObject(beat:Float, obj:FlxSprite, player:Int){
 		for (name in getActiveMods(player))
@@ -366,6 +352,8 @@ class ModManager {
 		pos.y = (Note.swagWidth / 2) + 50 + diff;
 		pos.z = 0;
 
+		if (diff < 0 && getValue("movePastReceptors", player) == 0)
+			return pos;
 
  		for (name in getActiveMods(player)){
 			if (exclusions.contains(name))continue; // because some modifiers may want the path without reverse, for example. (which is actually more common than you'd think!)
@@ -374,10 +362,14 @@ class ModManager {
 			if (!obj.alive)continue;
 			if (mod.ignorePos())continue;
 			pos = mod.getPos(diff, tDiff, beat, pos, data, player, obj, field);
-        } 
+        }
+
 
 		return pos;
     }
+
+	inline function lerp(a,b,c)
+		return a + (b - a) * c;
 
 	public function getFieldZoom(zoom:Float, beat:Float, songPos:Float, player:Int, field:NoteField, ?exclusions:Array<String>):Float
 	{

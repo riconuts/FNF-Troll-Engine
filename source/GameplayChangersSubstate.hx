@@ -45,7 +45,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		optionsArray.push(goption);
 
 		soption = new GameplayOption('Scroll Speed', 'scrollspeed', 'float', 1);
-		soption.scrollSpeed = 1.5;
+		soption.scrollSpeed = 0.1;
 		soption.minValue = 0.5;
 		soption.changeValue = 0.05;
 		soption.decimals = 2;
@@ -216,6 +216,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 	var nextAccept:Int = 5;
 	var holdTime:Float = 0;
 	var holdValue:Float = 0;
+	var holdingTimer:Float = 0;
 	override function update(elapsed:Float)
 	{
 		if (goption.getValue() != "constant")
@@ -264,6 +265,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 				if(controls.UI_LEFT || controls.UI_RIGHT) {
 					var pressed = (controls.UI_LEFT_P || controls.UI_RIGHT_P);
 					if(holdTime > 0.5 || pressed) {
+						holdingTimer += elapsed;
 						if(pressed) {
 							var add:Dynamic = null;
 							if(curOption.type != 'string') {
@@ -327,20 +329,23 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 							curOption.change();
 							FlxG.sound.play(Paths.sound('scrollMenu'));
 						} else if(curOption.type != 'string') {
-							holdValue += curOption.scrollSpeed * elapsed * (controls.UI_LEFT ? -1 : 1);
-							if(holdValue < curOption.minValue) holdValue = curOption.minValue;
-							else if (holdValue > curOption.maxValue) holdValue = curOption.maxValue;
+							while(holdingTimer >= 0.05){
+								holdingTimer -= 0.05;
+								holdValue += curOption.scrollSpeed * (controls.UI_LEFT ? -1 : 1);
+								if(holdValue < curOption.minValue) holdValue = curOption.minValue;
+								else if (holdValue > curOption.maxValue) holdValue = curOption.maxValue;
 
-							switch(curOption.type)
-							{
-								case 'int':
-									curOption.setValue(Math.round(holdValue));
-								
-								case 'float' | 'percent':
-									curOption.setValue(FlxMath.roundDecimal(holdValue, curOption.decimals));
+								switch(curOption.type)
+								{
+									case 'int':
+										curOption.setValue(Math.round(holdValue));
+									
+									case 'float' | 'percent':
+										curOption.setValue(FlxMath.roundDecimal(holdValue, curOption.decimals));
+								}
+								updateTextFrom(curOption);
+								curOption.change();
 							}
-							updateTextFrom(curOption);
-							curOption.change();
 						}
 					}
 
@@ -404,6 +409,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 			FlxG.sound.play(Paths.sound('scrollMenu'));
 		}
 		holdTime = 0;
+		holdingTimer = 0;
 	}
 	
 	function changeSelection(change:Int = 0)

@@ -20,7 +20,7 @@ class AccelModifier extends NoteModifier { // this'll be boost in ModManager
     var wave = getSubmodValue("wave",player);
     var brake = getSubmodValue("brake",player);
     var boost = getValue(player);
-    var effectHeight = 500;
+    var effectHeight = 720;
 
     var yAdjust:Float = 0;
 		var reverse:Dynamic = modMgr.register.get("reverse");
@@ -30,16 +30,15 @@ class AccelModifier extends NoteModifier { // this'll be boost in ModManager
     if(brake!=0){
       var scale = CoolUtil.scale(visualDiff, 0, effectHeight, 0, 1);
       var off = visualDiff * scale;
-      yAdjust += CoolUtil.clamp(brake * (off - visualDiff),-400,400);
+      yAdjust += CoolUtil.clamp(brake * (off - visualDiff),-600,600);
     }
 
     if(boost!=0){
-      //((fYOffset+fEffectHeight/1.2f)/fEffectHeight);
       var off = visualDiff * 1.5 / ((visualDiff + effectHeight/1.2)/effectHeight);
-      yAdjust += CoolUtil.clamp(boost * (off - visualDiff),-400,400);
+      yAdjust += CoolUtil.clamp(boost * (off - visualDiff),-600,600);
     }
 
-    yAdjust += wave * 20 * FlxMath.fastSin(visualDiff/38);
+    yAdjust += wave * 20 * FlxMath.fastSin(visualDiff/57);
 
     pos.y += yAdjust * mult;
     return pos;
