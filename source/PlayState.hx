@@ -2608,6 +2608,37 @@ class PlayState extends MusicBeatState
 		stats.nps = nps;
 		if(stats.npsPeak < nps)
 			stats.npsPeak = nps;
+
+		if (startedCountdown)
+		{
+			var addition:Float = elapsed * 1000;
+			if(inst.playing){
+				if(inst.time == Conductor.lastSongPos)
+					resyncTimer += addition;
+				else
+					resyncTimer = 0;
+				
+				Conductor.songPosition = inst.time + resyncTimer;
+				Conductor.lastSongPos = inst.time;
+				if (Math.abs(vocals.time - inst.time) > 25 && !vocalsEnded){
+					resyncVocals();
+				}
+				
+			}else
+				Conductor.songPosition += addition;
+		}
+
+		if (startingSong)
+		{
+			if (startedCountdown){
+				if (Conductor.songPosition >= 0)
+					startSong();
+			}else
+				Conductor.songPosition = -Conductor.crochet * 5;
+		}
+
+		FlxG.watch.addQuick("beatShit", curBeat);
+		FlxG.watch.addQuick("stepShit", curStep);		
 		
 		if (!endingSong){
 			//// time travel
@@ -2648,36 +2679,6 @@ class PlayState extends MusicBeatState
 		}
 
 		////
-		if (startedCountdown)
-		{
-			var addition:Float = elapsed * 1000;
-			if(inst.playing){
-				if(inst.time == Conductor.lastSongPos)
-					resyncTimer += addition;
-				else
-					resyncTimer = 0;
-				
-				Conductor.songPosition = inst.time + resyncTimer;
-				Conductor.lastSongPos = inst.time;
-				if (Math.abs(vocals.time - inst.time) > 25 && !vocalsEnded){
-					resyncVocals();
-				}
-				
-			}else
-				Conductor.songPosition += addition;
-		}
-
-		if (startingSong)
-		{
-			if (startedCountdown && Conductor.songPosition >= 0)
-				startSong();
-			else if(!startedCountdown)
-				Conductor.songPosition = -Conductor.crochet * 5;
-		}
-
-		FlxG.watch.addQuick("beatShit", curBeat);
-		FlxG.watch.addQuick("stepShit", curStep);
-
 		currentSV = getSV(Conductor.songPosition);
 		Conductor.visualPosition = getVisualPosition();
 		FlxG.watch.addQuick("visualPos", Conductor.visualPosition);
@@ -4641,9 +4642,9 @@ class PlayState extends MusicBeatState
 		if (startedCountdown && canPause && health > 0 && !paused)
 		{
 			if(callOnScripts('onPause') != Globals.Function_Stop) {
+				paused = true;
 				persistentUpdate = false;
 				persistentDraw = true;
-				paused = true;
 
 				// 0 chance for Gitaroo Man easter egg
 
