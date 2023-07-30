@@ -172,7 +172,7 @@ class StartupState extends FlxState
 		// could be worse lol
  		switch (step){
 			case 0:
- 				warning = new FlxSprite().loadGraphic(Paths.image("warning"));
+ 				warning = new FlxSprite(0, 0, Paths.image("warning"));
 				warning.scale.set(0.65, 0.65);
 				warning.updateHitbox();
 				warning.screenCenter();

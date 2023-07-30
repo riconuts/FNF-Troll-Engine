@@ -46,10 +46,22 @@ class FPS extends TextField
 		currentFPS = 0;
 		selectable = false;
 		mouseEnabled = false;
-		defaultTextFormat = new TextFormat("_sans", 12, color);
+
 		autoSize = LEFT;
 		multiline = true;
 		text = "FPS: ";
+
+		var textFormat = new TextFormat(null, 12, color);
+		var fontPath = Paths.font("calibri.ttf");
+		if (Assets.exists(fontPath, openfl.utils.AssetType.FONT)){
+			embedFonts = true;
+			textFormat.size = 14;
+			textFormat.font = Assets.getFont(fontPath).fontName;
+		}else{
+			embedFonts = false;
+			textFormat.font = "_sans";
+		}
+		defaultTextFormat = textFormat;
 
 		cacheCount = 0;
 		currentTime = 0;
