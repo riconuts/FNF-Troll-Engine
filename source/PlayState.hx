@@ -5,7 +5,6 @@ import Song;
 import Section.SwagSection;
 import Note.EventNote;
 import Stage;
-import Shaders;
 import JudgmentManager;
 import hud.*;
 import playfields.*;
@@ -2469,8 +2468,7 @@ class PlayState extends MusicBeatState
 	{
 		for(field in playfields)
 			field.noteField.songSpeed = songSpeed;
-
-
+		
 		setOnScripts('curDecStep', curDecStep);
 		setOnScripts('curDecBeat', curDecBeat);
 		/*
