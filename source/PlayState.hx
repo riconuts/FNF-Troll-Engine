@@ -1,5 +1,6 @@
 package;
 
+import flixel.tweens.FlxEase.EaseFunction;
 import Cache;
 import Song;
 import Section.SwagSection;
@@ -69,8 +70,10 @@ EDIT: not EXACTLY how it works but its a good enough summary
 */
 typedef SpeedEvent =
 {
-	position:Float, // the y position when the change happens (modManager.getVisPos(songTime))
-	songTime:Float, // the song position (conductor.songTime) when the changer happens
+	position:Float, // the y position where the change happens (modManager.getVisPos(songTime))
+	startTime:Float, // the song position (conductor.songTime) where the change starts
+	songTime:Float, // the song position (conductor.songTime) when the change ends
+	?startSpeed:Float, // the starting speed
 	speed:Float // speed mult after the change
 }
 
@@ -128,7 +131,7 @@ class PlayState extends MusicBeatState
 	public var showDebugTraces:Bool = #if debug true #else Main.showDebugTraces #end;
 
 	var speedChanges:Array<SpeedEvent> = [];
-	public var currentSV:SpeedEvent = {position: 0, songTime:0, speed: 1};
+	public var currentSV:SpeedEvent = {position: 0, startTime: 0, songTime:0, speed: 1, startSpeed: 1};
 	public var judgeManager:JudgmentManager;
 
 	var notefields:NotefieldManager = new NotefieldManager();
@@ -472,8 +475,10 @@ class PlayState extends MusicBeatState
 
 		speedChanges.push({
 			position: 0,
-			songTime: 0,
-			speed: 1
+			songTime: 1000,
+			startTime: 0,
+			startSpeed: 0.75,
+			speed: 1,
 		});
 
 		// For the "Just the Two of Us" achievement
@@ -2002,19 +2007,46 @@ class PlayState extends MusicBeatState
 		return getTimeFromSV(time, event);
 	}
 
-	public inline function getTimeFromSV(time:Float, event:SpeedEvent)
-		return event.position + (modManager.getBaseVisPosD(time - event.songTime, 1) * event.speed);
+	function ease(e:EaseFunction, t:Float, b:Float, c:Float, d:Float)
+	{ // elapsed, begin, change (ending-beginning), duration
+		var time = t / d;
+		return c * e(time) + b;
+	}
+
+	public inline function getTimeFromSV(time:Float, event:SpeedEvent){
+
+		// TODO: make easing SVs work somehow
+		
+		//if(time >= event.songTime || event.songTime == event.startTime) // practically the same start and end time
+			return event.position + (modManager.getBaseVisPosD(time - event.songTime, 1) * event.speed);
+/* 		else{
+			// ease(easeFunc, passed, startVal, change, length)
+			// var passed = curStep - executionStep;
+			// var change = endVal - startVal;
+			if(event.startSpeed==null)event.startSpeed = currentSV.speed;
+
+			var speed = ease(FlxEase.linear, time - event.songTime, event.startSpeed, event.speed - event.startSpeed, event.songTime - event.startTime);
+			trace(speed);
+			return event.position + (modManager.getBaseVisPosD(time - event.startTime, 1) * speed);
+		} */
+	}
 
 	public function getSV(time:Float){
 		var event:SpeedEvent = {
 			position: 0,
 			songTime: 0,
+			startTime: 0,
+			startSpeed: 1,
 			speed: 1
 		};
 		for (shit in speedChanges)
 		{
-			if (shit.songTime <= time && shit.songTime >= shit.songTime)
+			if (shit.startTime <= time && shit.startTime >= event.startTime){
+				if(shit.startSpeed == null)
+					shit.startSpeed = event.speed;
 				event = shit;
+				
+			}
 		}
 
 		return event;
@@ -2041,6 +2073,7 @@ class PlayState extends MusicBeatState
 				speedChanges.push({
 					position: getNoteInitialTime(event.strumTime),
 					songTime: event.strumTime,
+					startTime: event.strumTime,
 					speed: speed
 				});
 				
@@ -2223,7 +2256,7 @@ class PlayState extends MusicBeatState
 	
 	function svSort(Obj1:SpeedEvent, Obj2:SpeedEvent):Int
 	{
-		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.songTime, Obj2.songTime);
+		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.startTime, Obj2.startTime);
 	}
 
 	public var skipArrowStartTween:Bool = false; //for lua
