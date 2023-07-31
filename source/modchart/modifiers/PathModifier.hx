@@ -62,7 +62,7 @@ class PathModifier extends NoteModifier
 		{
 			var offset = getSubmodValue("squareOffset", player);
 			var period = getSubmodValue("squarePeriod", player);
-			var cum:Float = (Math.PI * (diff + (1 * (offset))) / (Note.swagWidth + (period * Note.swagWidth)));
+			var cum:Float = (Math.PI * (diff + offset) / (Note.swagWidth + (period * Note.swagWidth)));
 			var fResult = square(cum);
 
 			pos.x += getSubmodValue('square', player) * Note.swagWidth * 0.5 * fResult;
@@ -70,8 +70,8 @@ class PathModifier extends NoteModifier
 
         if(getSubmodValue("bounce", player)!=0){
 			var offset = getSubmodValue("bounceOffset", player) * 100;
-			var period = getSubmodValue("bouncePeriod", player) * 60;
-			var bounce:Float = Math.abs(FlxMath.fastSin(((diff + (1 * (offset))) / (60 + period))));
+			var period = getSubmodValue("bouncePeriod", player) * 90;
+			var bounce:Float = Math.abs(FlxMath.fastSin(((diff + (1 * (offset))) / (90 + 90 * period))));
 
 			pos.x += getSubmodValue('bounce', player) * Note.swagWidth * 0.5 * bounce;
         }

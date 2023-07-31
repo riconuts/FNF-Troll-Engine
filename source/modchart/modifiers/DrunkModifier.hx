@@ -41,7 +41,7 @@ class DrunkModifier extends NoteModifier {
         var perc = getSubmodValue('bumpy${axis}', player);
 		var period = getSubmodValue('bumpy${axis}Period', player);
 		var offset = getSubmodValue('bumpy${axis}Offset', player);
-		if (perc!=0){
+		if (perc != 0 && period != -1){
             var angle = (visualDiff + (100.0 * offset)) / ((period * 16.0) + 16.0);
 		    return (perc * 40 * FlxMath.fastSin(angle));
         }
@@ -73,10 +73,11 @@ class DrunkModifier extends NoteModifier {
             "bumpy",
             "bumpyOffset",
             "bumpyPeriod",
-
+			// TODO: make alias mods, so tipZ/tipZSpeed/tipZOffset can be aliases for tipsyZ
+            // (alias mods would affect the actual mods when set/get)
 			"tipZ",
 			"tipZSpeed",
-			"tipZOffset",
+			"tipZOffset", 
 
 			"drunkZ",
 			"drunkZSpeed",
@@ -108,8 +109,6 @@ class DrunkModifier extends NoteModifier {
 			"drunkSpeed",
 			"drunkOffset",
 			"drunkPeriod"
-
-
         ];
     }
 
