@@ -247,8 +247,7 @@ class Character extends FlxSprite
 						var animLoop:Bool = !!anim.loop; //Bruh
 						var animIndices:Array<Int> = anim.indices;
 						var camOffset:Null<Array<Float>> = anim.cameraOffset;
-
-
+						
 						if(camOffset==null){
 							switch(animAnim){
 								case 'singLEFT' | 'singLEFTmiss' | 'singLEFT-alt':
