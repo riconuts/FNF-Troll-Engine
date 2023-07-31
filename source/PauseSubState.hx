@@ -81,10 +81,26 @@ class PauseSubState extends MusicBeatSubstate
 
 
 		pauseMusic = new FlxSound();
-		if(songName != null) 
+
+		var songName = songName;
+		if (songName == null) songName = 'Breakfast';
+		
+		if(songName != 'None'){
+			songName = Paths.formatToSongPath(songName);
 			pauseMusic.loadEmbedded(Paths.music(songName), true, true);
-		else if (songName != 'None')
-			pauseMusic.loadEmbedded(Paths.music(Paths.formatToSongPath('Breakfast')), true, true);
+			
+			var path = new haxe.io.Path(Paths.returnSoundPath("music", songName));
+			path.file += "-loopTime";
+			path.ext = "txt";
+			var pathStr = path.toString();
+			if (Paths.exists(pathStr)){
+				var loopTime:Float = Std.parseFloat(Paths.getContent(pathStr));
+				if (!Math.isNaN(loopTime)){
+					pauseMusic.loopTime = loopTime;
+					trace(loopTime);
+				}
+			}
+		}
 		
 		pauseMusic.volume = 0;
 		pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length* 0.5)));
