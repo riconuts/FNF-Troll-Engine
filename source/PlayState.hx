@@ -475,9 +475,9 @@ class PlayState extends MusicBeatState
 
 		speedChanges.push({
 			position: 0,
-			songTime: 1000,
+			songTime: 0,
 			startTime: 0,
-			startSpeed: 0.75,
+			startSpeed: 1,
 			speed: 1,
 		});
 
