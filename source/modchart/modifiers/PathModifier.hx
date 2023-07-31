@@ -69,9 +69,11 @@ class PathModifier extends NoteModifier
 		}
 
         if(getSubmodValue("bounce", player)!=0){
-			var offset = getSubmodValue("bounceOffset", player) * 100;
-			var period = getSubmodValue("bouncePeriod", player) * 90;
-			var bounce:Float = Math.abs(FlxMath.fastSin(((diff + (1 * (offset))) / (90 + 90 * period))));
+			var offset = getSubmodValue("bounceOffset", player);
+			var period = getSubmodValue("bouncePeriod", player);
+			var bounce:Float = Math.abs(FlxMath.fastSin(((diff + offset) / (90
+				+ (period * 90)))));
+            //Math.abs(FlxMath.fastSin(((diff + (1 * (offset))) / (90 + 90 * period))));
 
 			pos.x += getSubmodValue('bounce', player) * Note.swagWidth * 0.5 * bounce;
         }
