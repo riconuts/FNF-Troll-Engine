@@ -1,6 +1,7 @@
 // @author Nebula_Zorua
 
 package modchart;
+import flixel.tweens.FlxEase.EaseFunction;
 import modchart.Modifier.RenderInfo;
 import flixel.math.FlxPoint;
 import flixel.tweens.FlxEase;
@@ -443,6 +444,49 @@ class ModManager {
 	
 	
 
+    // could probably use a macro
+	static var EaseMap:Map<String, EaseFunction> = [
+        "backIn" => FlxEase.backIn,
+        "backInOut" => FlxEase.backInOut,
+        "backOut" => FlxEase.backOut,
+		"bounceIn" => FlxEase.bounceIn,
+        "bounceInOut" => FlxEase.bounceInOut,
+		"bounceOut" => FlxEase.bounceOut,
+        "circIn" => FlxEase.circIn,
+        "circInOut" => FlxEase.circInOut,
+        "circOut" => FlxEase.circOut,
+        "cubeIn" => FlxEase.cubeIn,
+        "cubeInOut" => FlxEase.cubeInOut,
+        "cubeOut" => FlxEase.cubeOut,
+        "elasticIn" => FlxEase.elasticIn,
+        "elasticInOut" => FlxEase.elasticInOut,
+        "elasticOut" => FlxEase.elasticOut,
+        "expoIn" => FlxEase.expoIn,
+        "expoInOut" => FlxEase.expoInOut,
+        "expoOut" => FlxEase.expoOut,
+        "quadIn" => FlxEase.quadIn,
+        "quadInOut" => FlxEase.quadInOut,
+        "quadOut" => FlxEase.quadOut,
+        "quartIn" => FlxEase.quartIn,
+        "quartInOut" => FlxEase.quartInOut,
+        "quartOut" => FlxEase.quartOut,
+        "quintIn" => FlxEase.quintIn,
+        "quintInOut" => FlxEase.quintInOut,
+        "quintOut" => FlxEase.quintOut,
+        "sineIn" => FlxEase.sineIn,
+        "sineInOut" => FlxEase.sineInOut,
+        "sineOut" => FlxEase.sineOut,
+        "smoothStepIn" => FlxEase.smoothStepIn,
+        "smoothStepInOut" => FlxEase.smoothStepInOut,
+        "smoothStepOut" => FlxEase.smoothStepOut,
+        "smootherStepIn" => FlxEase.smootherStepIn,
+        "smootherStepInOut" => FlxEase.smootherStepInOut,
+        "smootherStepOut" => FlxEase.smootherStepOut,
+
+        "linear" => FlxEase.linear,
+        "instant" => ((t:Float) -> return 1),
+    ];
+
 	public function queueEase(step:Float, endStep:Float, modName:String, target:Float, style:Dynamic = 'linear', player:Int = -1, ?startVal:Float)
 	{
 		if(player==-1){
@@ -452,14 +496,13 @@ class ModManager {
 			var easeFunc:EaseFunction = FlxEase.linear;
 
             if((style is String)){
-                // most common use of 'style'
+                // most common use of the style var is to just use an existing FlxEase
                 try
                 {
-                    var newEase = Reflect.getProperty(FlxEase, style);
-                    if (newEase != null)
-                        easeFunc = newEase;
+					if (EaseMap.exists(style))
+						easeFunc = EaseMap.get(style);
                 }
-            }else if((style is EaseFunction)){
+            }else if(Reflect.isFunction(style)){ // i cant use easefunction for some reason so yeah just please provide an easefunction and nothing else :pray:
                 // probably gonna be useful SOMEWHERE
                 // maybe custom eases?
                 easeFunc = style;
