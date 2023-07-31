@@ -435,7 +435,7 @@ class ModManager {
 		return info;
 	}
 
-	public function queueEaseP(step:Float, endStep:Float, modName:String, percent:Float, style:String = 'linear', player:Int = -1, ?startVal:Float)
+	public function queueEaseP(step:Float, endStep:Float, modName:String, percent:Float, style:Dynamic = 'linear', player:Int = -1, ?startVal:Float)
 		queueEase(step, endStep, modName, percent * 0.01, style, player, startVal * 0.01);
 	
 	public function queueSetP(step:Float, modName:String, percent:Float, player:Int = -1)
@@ -443,20 +443,27 @@ class ModManager {
 	
 	
 
-	public function queueEase(step:Float, endStep:Float, modName:String, target:Float, style:String = 'linear', player:Int = -1, ?startVal:Float)
+	public function queueEase(step:Float, endStep:Float, modName:String, target:Float, style:Dynamic = 'linear', player:Int = -1, ?startVal:Float)
 	{
 		if(player==-1){
 			for (pN => mods in activeMods)
 				queueEase(step, endStep, modName, target, style, pN);
 		}else{
-			var easeFunc = FlxEase.linear;
+			var easeFunc:EaseFunction = FlxEase.linear;
 
-			try
-			{
-				var newEase = Reflect.getProperty(FlxEase, style);
-				if (newEase != null)
-					easeFunc = newEase;
-			}
+            if((style is String)){
+                // most common use of 'style'
+                try
+                {
+                    var newEase = Reflect.getProperty(FlxEase, style);
+                    if (newEase != null)
+                        easeFunc = newEase;
+                }
+            }else if((style is EaseFunction)){
+                // probably gonna be useful SOMEWHERE
+                // maybe custom eases?
+                easeFunc = style;
+            }
 			
 
 			timeline.addEvent(new ModEaseEvent(step, endStep, modName, target, easeFunc, player, this));
