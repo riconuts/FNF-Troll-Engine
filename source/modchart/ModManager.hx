@@ -24,7 +24,6 @@ class ModManager {
 			DrunkModifier,
 			BeatModifier,
 			AlphaModifier,
-			ReceptorScrollModifier, 
 			ScaleModifier, 
 			ConfusionModifier, 
 			OpponentModifier, 
