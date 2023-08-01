@@ -1440,32 +1440,17 @@ class PlayState extends MusicBeatState
 				});
 			}
 
-			var sound = switch (swagCounter){
+			var soundName = switch (swagCounter){
 				case 0: 'intro3' + introSoundsSuffix;
 				case 1: 'intro2' + introSoundsSuffix;
 				case 2: 'intro1' + introSoundsSuffix;
 				case 3: 'introGo' + introSoundsSuffix;
 				default: null;
 			};
-			if(sound != null){
-				var snd = FlxG.sound.play(Paths.sound(sound), 0.6);
-				snd.endTime = snd.length;
+			if (soundName != null){
+				var snd = FlxG.sound.play(Paths.sound(soundName), 0.6);
 				snd.effect = ClientPrefs.ruin ? sndEffect : null;
-				snd.onComplete = ()->{ snd.volume = 0; }
 			}
-			
-			/*
-				notes.forEachAlive(function(note:Note) {
-				if(ClientPrefs.opponentStrums || note.mustPress)
-				{
-					note.copyAlpha = false;
-					note.alpha = note.multAlpha;
-					if(ClientPrefs.middleScroll && !note.mustPress) {
-						note.alpha *= 0.35;
-					}
-				}
-			}); 
-			*/
 
 			callOnHScripts('onCountdownTick', [swagCounter, tmr]);
 			#if LUA_ALLOWED

@@ -1,8 +1,6 @@
 package;
 
-import openfl.display.Bitmap;
-
-class Bread extends Bitmap {
+class Bread extends openfl.display.Bitmap {
 	public function new() {
 		super(Paths.image("Garlic-Bread-PNG-Images").bitmap);
 

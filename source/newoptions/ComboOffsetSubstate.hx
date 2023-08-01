@@ -66,7 +66,7 @@ class ComboOffsetSubstate extends MusicBeatSubstate
             var num = RatingSprite.newNumber();
             num.loadGraphic(Paths.image('num$number'));
             num.scrollFactor.set();
-            num.color = ratingColor;
+            num.color = comboColor;
             num.cameras = [camHUD];
             num.updateHitbox();
             combo.add(num);
