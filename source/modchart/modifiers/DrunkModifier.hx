@@ -26,10 +26,9 @@ class DrunkModifier extends NoteModifier {
 
 	inline function applyTipsy(axis:String, player:Int, time:Float, visualDiff:Float, data:Float)
 	{
-        var tipsy = axis == 'Z' ? 'tip' : 'tipsy';
-        var perc = getSubmodValue('${tipsy}${axis}', player);
-		var speed = getSubmodValue('${tipsy}${axis}Speed', player);
-		var offset = getSubmodValue('${tipsy}${axis}Offset', player);
+        var perc = getSubmodValue('tipsy${axis}', player);
+		var speed = getSubmodValue('tipsy${axis}Speed', player);
+		var offset = getSubmodValue('tipsy${axis}Offset', player);
 
 		if (perc != 0)
 		    return perc * (FlxMath.fastCos((time * ((speed * 1.2) + 1.2) + data * ((offset * 1.8) + 1.8))) * Note.swagWidth * .4);
@@ -67,17 +66,24 @@ class DrunkModifier extends NoteModifier {
         return pos;
     }
 
+    override function getAliases(){
+        return [
+            "tipZ" => "tipsyZ",
+            "tipZSpeed" => "tipsyZSpeed",
+            "tipZOffset" => "tipsyZOffset"
+        ];
+    }
+
     override function getSubmods(){
         return [
             // Z
             "bumpy",
             "bumpyOffset",
             "bumpyPeriod",
-			// TODO: make alias mods, so tipZ/tipZSpeed/tipZOffset can be aliases for tipsyZ
-            // (alias mods would affect the actual mods when set/get)
-			"tipZ",
-			"tipZSpeed",
-			"tipZOffset", 
+
+			"tipsyZ",
+			"tipsyZSpeed",
+			"tipsyZOffset", 
 
 			"drunkZ",
 			"drunkZSpeed",

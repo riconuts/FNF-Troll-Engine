@@ -1,6 +1,6 @@
 package modchart;
 
-class SubModifier extends Modifier {
+class SubModifier extends Modifier { // also called an aux mod
     var name:String = 'unspecified';
 
     override function getName() return name;

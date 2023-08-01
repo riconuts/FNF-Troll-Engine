@@ -33,6 +33,15 @@ class TransformModifier extends NoteModifier { // this'll be transformX in ModMa
         return pos;
     }
 
+    override function getAliases(){
+        return [
+            // Outfox/ITG modifiers
+            "moveX" => "transformX", 
+            "moveY" => "transformY",
+            "moveZ" => "transformZ",
+        ];
+    }
+
     override function getSubmods(){
 		var subMods:Array<String> = ["transformY", "transformZ", "transformX-a", "transformY-a", "transformZ-a"];
 
