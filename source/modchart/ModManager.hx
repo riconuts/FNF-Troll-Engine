@@ -117,6 +117,7 @@ class ModManager {
     public var register:Map<String, Modifier> = [];
     public var modArray:Array<Modifier> = [];
     public var activeMods:Array<Array<String>> = [[], []]; // by player    
+    public var tempActiveMods:Array<Array<String>> = [[], []];
 	public var lastActiveMods:Array<Array<String>> = [[], []]; // by player
     public var aliases:Map<String, String> = [];
     var nodeSeen:Int = 0;
@@ -234,7 +235,14 @@ class ModManager {
 			setDefaultValues(pN);
 		}
 
-		return activeMods[pN];
+		if (tempActiveMods[pN] == null)
+			tempActiveMods[pN] = [];
+
+
+        if(tempActiveMods[pN].length > 0){
+			return activeMods[pN].concat(tempActiveMods[pN]);
+        }else
+			return activeMods[pN];
 	}
 	public function setValue(modName:String, val:Float, player:Int=-1){
 		if (player == -1)
@@ -307,6 +315,7 @@ class ModManager {
 
 	public function update(elapsed:Float)
 	{
+		tempActiveMods = [];
 		if (FlxG.state == PlayState.instance){
 			for (mod in modArray)
 			{
@@ -327,6 +336,7 @@ class ModManager {
             // alternatively i add a seperate array for activeNodes so nodes can get a final call in b4 being disabled + still have up-to-date active mod data
             // honestly probably the best idea i'll do that tmrw
 			nodeSeen++;
+            var aMods = getActiveMods(pN);
             var values:Map<String, Float> = []; // to prevent calling getValue over and over
             for(mod in mods){
                 if(nodes.exists(mod)){
@@ -347,14 +357,27 @@ class ModManager {
                                 if((returnValue is Array)){
                                     var values:Array<Float> = cast returnValue;
                                     for (idx in 0...values.length){ // goes over all the values
+										// better have only floats in here if you dont then THATS NOT MY FAULT IF IT CRASHES!!
                                         var value:Float = values[idx];
 										var output:String = node.out_mods[idx];
-										if (node.in_mods.contains(output)) // if the output is also an input then set it directly, otherwise add it
-											get(output)._percents[pN] = value;
+										var oM = get(output);
+                                        if (node.in_mods.contains(output)) // if the output is also an input then set it directly, otherwise add it
+											oM._percents[pN] = value;
                                         else
-                                            get(output)._percents[pN] += value;
+											oM._percents[pN] += value;
 
-                                        // better have only floats in here if you dont then THATS NOT MY FAULT IF IT CRASHES!!
+										if (oM._percents[pN] != 0 && !aMods.contains(output)){
+											if (tempActiveMods[pN] == null)
+												tempActiveMods[pN] = [];
+
+											if (!tempActiveMods[pN].contains(output))
+											    tempActiveMods[pN].push(output);
+                                        }
+                                        // honestly i should make it so anything that is outputted gets added to tempactivemods BEFORE doing any node stuff
+                                        // and then remove them if they didnt change after doing nodes
+                                        // so then nodes that get outputted by another node are set active
+                                        
+                                        
                                     }
                                 }
                             }
