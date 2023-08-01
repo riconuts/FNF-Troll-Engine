@@ -312,7 +312,7 @@ class ClientPrefs
 			},
 			"showWifeScore" => {
 				display: "Accuracy Score Display",
-				desc: "When toggled, the score will be displayed as the total notes hit instead of the standard judgment-based scoring.\nOnly really useful on Wife3.",
+				desc: "When toggled, the score will be displayed as the internal accuracy score, instead of the normal judgement-based scoring.\nOnly really useful on Wife3.",
 				type: Toggle,
 				value: false,
 				data: []
