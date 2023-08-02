@@ -123,6 +123,7 @@ class ModManager {
     var nodeSeen:Int = 0;
 
     public var nodes:Map<String, Array<Node>> = []; // maps nodes by their inputs
+    public var nodeArray:Array<Node> = [];
 
     inline public function quickRegister(mod:Modifier)
         registerMod(mod.getName(), mod);
@@ -137,6 +138,7 @@ class ModManager {
             
             nodes.get(inp).push(node);
         }
+		nodeArray.push(node);
     }
 
 	public function quickNode(inputs:Array<String>, nodeFunc:(Array<Dynamic>, Int) -> Dynamic, ?outputs:Array<String>){
@@ -315,7 +317,7 @@ class ModManager {
 
 	public function update(elapsed:Float)
 	{
-		tempActiveMods = [];
+		tempActiveMods = [[], []];
 		if (FlxG.state == PlayState.instance){
 			for (mod in modArray)
 			{
@@ -332,59 +334,88 @@ class ModManager {
 			}
 		}
         
-		for (pN => mods in lastActiveMods){ // dont use activeMods just incase the value has just rolled over to 0 so the node will have to be disabled
-            // alternatively i add a seperate array for activeNodes so nodes can get a final call in b4 being disabled + still have up-to-date active mod data
-            // honestly probably the best idea i'll do that tmrw
-			nodeSeen++;
-            var aMods = getActiveMods(pN);
-            var values:Map<String, Float> = []; // to prevent calling getValue over and over
-            for(mod in mods){
-                if(nodes.exists(mod)){
-                    for(node in nodes.get(mod)){
-						if (node.lastSeen != nodeSeen){
-							node.lastSeen = nodeSeen; // to prevent the node from being called over and over in the same frame by having multiple inputs
+		for (node in nodeArray){
+			if (node.out_mods.length > 0)
+			{
+                for(out in node.out_mods){
+                    for(pN in 0...activeMods.length){
+						if (tempActiveMods[pN] == null)
+							tempActiveMods[pN] = [];
 
-                            // collect up all the input values from the in_mods array
-                            var inputValues:Array<Float> = []; 
-                            for(in_mod in node.in_mods){
-                                if(!values.exists(in_mod))
-									values.set(in_mod, getValue(in_mod, pN));
+                        if (!tempActiveMods[pN].contains(out))
+                            tempActiveMods[pN].push(out);
+						if (!lastActiveMods[pN].contains(out))
+							lastActiveMods[pN].push(out);
+                    }
+                }
+            }
+        }
 
-								inputValues.push(values.get(in_mod));
-                            }
-                            var returnValue:Dynamic = node.nodeFunc(inputValues, pN);
-                            if(node.out_mods.length > 0){ // if this has outputs then output them
-                                if((returnValue is Array)){
-                                    var values:Array<Float> = cast returnValue;
-                                    for (idx in 0...values.length){ // goes over all the values
-										// better have only floats in here if you dont then THATS NOT MY FAULT IF IT CRASHES!!
-                                        var value:Float = values[idx];
-										var output:String = node.out_mods[idx];
-										var oM = get(output);
-                                        if (node.in_mods.contains(output)) // if the output is also an input then set it directly, otherwise add it
-											oM._percents[pN] = value;
-                                        else
-											oM._percents[pN] += value;
+        // honestly i can probably optimize this some day but for now its fine
 
-										if (oM._percents[pN] != 0 && !aMods.contains(output)){
-											if (tempActiveMods[pN] == null)
-												tempActiveMods[pN] = [];
+        if(nodeArray.length > 0){
+            for (pN => mods in lastActiveMods){ // dont use activeMods just incase the value has just rolled over to 0 so the node will have to be disabled
+                // alternatively i add a seperate array for activeNodes so nodes can get a final call in b4 being disabled + still have up-to-date active mod data
+                // honestly probably the best idea i'll do that tmrw
+				
+                var touched:Array<String> = [];
+                nodeSeen++;
+                var aMods = getActiveMods(pN);
+                var values:Map<String, Float> = []; // to prevent calling getValue over and over
+                
+                for(mod in mods){
+                    if(nodes.exists(mod)){
+                        for(node in nodes.get(mod)){
+                            if (node.lastSeen != nodeSeen){
+                                node.lastSeen = nodeSeen; // to prevent the node from being called over and over in the same frame by having multiple inputs
 
-											if (!tempActiveMods[pN].contains(output))
-											    tempActiveMods[pN].push(output);
+                                // collect up all the input values from the in_mods array
+                                var inputValues:Array<Float> = []; 
+                                for(in_mod in node.in_mods){
+                                    if(!values.exists(in_mod))
+                                        values.set(in_mod, getValue(in_mod, pN));
+
+                                    inputValues.push(values.get(in_mod));
+                                }
+                                var returnValue:Dynamic = node.nodeFunc(inputValues, pN);
+                                if(node.out_mods.length > 0){ // if this has outputs then output them
+                                    if((returnValue is Array)){
+                                        var values:Array<Float> = cast returnValue;
+                                        for (idx in 0...values.length){ // goes over all the values
+                                            // better have only floats in here if you dont then THATS NOT MY FAULT IF IT CRASHES!!
+                                            var value:Float = values[idx];
+                                            var output:String = node.out_mods[idx];
+                                            var oM = get(output);
+											var perc:Null<Float> = cast oM._percents[pN];
+											if (node.in_mods.contains(output) || perc == null) // if the output is also an input then set it directly, otherwise add it
+                                                oM._percents[pN] = value;
+                                            else
+                                                oM._percents[pN] += value;
+
+											if (oM.shouldExecute(pN, oM._percents[pN]) && !touched.contains(output))
+                                                touched.push(output);
+
+                                            // honestly i should make it so anything that is outputted gets added to tempactivemods BEFORE doing any node stuff
+                                            // and then remove them if they didnt change after doing nodes
+                                            // so then nodes that get outputted by another node are set active
+                                            
+                                            
                                         }
-                                        // honestly i should make it so anything that is outputted gets added to tempactivemods BEFORE doing any node stuff
-                                        // and then remove them if they didnt change after doing nodes
-                                        // so then nodes that get outputted by another node are set active
-                                        
-                                        
                                     }
                                 }
                             }
+                            
                         }
-                        
                     }
                 }
+
+                var toRemove:Array<String> = [];
+                for(shit in tempActiveMods[pN]){
+                    if (!touched.contains(shit))
+                        toRemove.push(shit);
+                }
+                for(shit in toRemove)
+                    tempActiveMods[pN].remove(shit);
             }
         }
 	}
