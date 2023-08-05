@@ -317,24 +317,24 @@ class ModManager {
 
 	public function update(elapsed:Float)
 	{
-		tempActiveMods = [[], []];
+		//tempActiveMods = [[], []];
 		if (FlxG.state == PlayState.instance){
 			for (mod in modArray)
 			{
-                mod._internalUpdate();
+                //mod._internalUpdate();
 				if (mod.doesUpdate())
 					mod.update(elapsed, PlayState.instance.curDecBeat);
 			}
 		}else{
 			for (mod in modArray)
 			{
-                mod._internalUpdate();
+                //mod._internalUpdate();
 				if (mod.doesUpdate())
 					mod.update(elapsed, 0);
 			}
 		}
         
-		for (node in nodeArray){
+		/*for (node in nodeArray){
 			if (node.out_mods.length > 0)
 			{
                 for(out in node.out_mods){
@@ -353,7 +353,7 @@ class ModManager {
 
         // honestly i can probably optimize this some day but for now its fine
 
-/*         if(nodeArray.length > 0){
+        if(nodeArray.length > 0){
             for (pN => mods in lastActiveMods){ // dont use activeMods just incase the value has just rolled over to 0 so the node will have to be disabled
                 // alternatively i add a seperate array for activeNodes so nodes can get a final call in b4 being disabled + still have up-to-date active mod data
                 // honestly probably the best idea i'll do that tmrw

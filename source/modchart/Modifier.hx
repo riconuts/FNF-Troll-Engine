@@ -70,7 +70,7 @@ class Modifier {
 	}
 
 	public function getValue(player:Int):Float
-		return _percents[player];
+		return percents[player];
 
 	public function getPercent(player:Int):Float
 		return getValue(player) * 100;
