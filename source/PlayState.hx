@@ -446,8 +446,10 @@ class PlayState extends MusicBeatState
 		// for lua
 		instance = this;
 
-		if (FlxG.sound.music != null)
+		if (FlxG.sound.music != null){
 			FlxG.sound.music.stop();
+			FlxG.sound.music.destroy();
+		}
 
 		if (MusicBeatState.menuVox != null){
 			MusicBeatState.menuVox.stop();
@@ -1544,13 +1546,11 @@ class PlayState extends MusicBeatState
 		for (track in tracks)
 			track.play();
 		
-
 		vocals.play();
 		inst.play();
+
 		if(startOnTime > 0)
-		{
 			setSongTime(startOnTime - 500);
-		}
 		startOnTime = 0;
 
 		if(paused) {
@@ -2492,10 +2492,10 @@ class PlayState extends MusicBeatState
 		setOnScripts('curDecStep', curDecStep);
 		setOnScripts('curDecBeat', curDecBeat);
 		/*
-		for (key => script in notetypeScripts)
+		for (script in notetypeScripts)
 			script.call("onUpdate", [elapsed]); 
 
-		for (key => script in eventScripts)
+		for (script in eventScripts)
 			script.call("onUpdate", [elapsed]);
 		*/
 		callOnScripts('onUpdate', [elapsed]);
@@ -2540,11 +2540,11 @@ class PlayState extends MusicBeatState
 		}
 
 
-		for (key => script in notetypeScripts)
+		for (script in notetypeScripts)
 			script.call("update", [elapsed]);
 
-		for (key => script in eventScripts)
-			eventScripts.get(key).call("update", [elapsed]);
+		for (script in eventScripts)
+			script.call("update", [elapsed]);
 
 		callOnHScripts('update', [elapsed]);
 
@@ -2762,10 +2762,10 @@ class PlayState extends MusicBeatState
 				persistentUpdate = false;
 				persistentDraw = false;
 
+				isDead = true;
+
 				if(instaRespawn){
-					isDead = true;
 					MusicBeatState.resetState(true);
-					return true;
 				}else{
 					var char = playOpponent ? dad : boyfriend;
 					
@@ -2779,13 +2779,13 @@ class PlayState extends MusicBeatState
 						camFollowPos.y,
 						char.isPlayer
 					));
+
+					#if discord_rpc
+					// Game Over doesn't get his own variable because it's only used here
+					DiscordClient.changePresence("Game Over - " + detailsText, SONG.song, Paths.formatToSongPath(SONG.song));
+					#end
 				}
 
-				#if discord_rpc
-				// Game Over doesn't get his own variable because it's only used here
-				DiscordClient.changePresence("Game Over - " + detailsText, SONG.song, Paths.formatToSongPath(SONG.song));
-				#end
-				isDead = true;
 				return true;
 			}
 		}
@@ -3161,8 +3161,7 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	static public function getCharacterCamera(char:Character)return char.getCamera();
-	
+	static public function getCharacterCamera(char:Character) return char.getCamera();
 
 	public function finishSong(?ignoreNoteOffset:Bool = false):Void
 	{
@@ -3212,14 +3211,8 @@ class PlayState extends MusicBeatState
 	public var transitioning = false;
 	public function endSong():Void
 	{
-		
 		//Should kill you if you tried to cheat
 		if(!startingSong) {
-			/*for (daNote in allNotes) {
-				if(daNote.strumTime < songLength - Conductor.safeZoneOffset) {
-					health -= 0.05 * healthLoss;
-				}
-			}*/
 			for(field in playfields.members){
 				if(field.isPlayer){
 					for(daNote in field.spawnedNotes){
@@ -4046,11 +4039,14 @@ class PlayState extends MusicBeatState
 		for(char in chars){
 			char.callOnScripts("playNote", [note, field]);
 
-			if(note.noteType == 'Hey!' && char.animOffsets.exists('hey')) {
+			if(note.noteType == 'Hey!' && char.animOffsets.exists('hey')) 
+			{
 				char.playAnim('hey', true);
 				char.specialAnim = true;
 				char.heyTimer = 0.6;
-			} else if(!note.noAnimation) {
+			} 
+			else if(!note.noAnimation) 
+			{
 				var animToPlay:String = singAnimations[Std.int(Math.abs(note.noteData))];
 
 				var curSection = SONG.notes[curSection];
@@ -4107,8 +4103,7 @@ class PlayState extends MusicBeatState
 	}
 
 	function goodNoteHit(note:Note, field:PlayField):Void
-	{
-		
+	{	
 		if (note.wasGoodHit || (field.autoPlayed && (note.ignoreNote || note.breaksCombo)))
 			return;
 
@@ -4153,7 +4148,7 @@ class PlayState extends MusicBeatState
 			return;
 		#end
 
-		if (cpuControlled)saveScore = false; // if botplay hits a note, then you lose scoring
+		if (cpuControlled) saveScore = false; // if botplay hits a note, then you lose scoring
 
 		// tbh I hate hitCausesMiss lol its retarded
 		// added a shitty judge to deal w/ it tho!!
@@ -4256,11 +4251,8 @@ class PlayState extends MusicBeatState
 		#end
 
 		if (note.noteScript != null)
-		{
-			var script:FunkinScript = note.noteScript;
-
-			callScript(script, "goodNoteHit", [note, field]);
-		}
+			callScript(note.noteScript, "goodNoteHit", [note, field]);
+		
 		if (!note.isSustainNote && note.tail.length == 0)
 			field.removeNote(note);
 		else if (note.isSustainNote)

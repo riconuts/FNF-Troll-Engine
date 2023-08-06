@@ -97,7 +97,7 @@ class PauseSubState extends MusicBeatSubstate
 				var loopTime:Float = Std.parseFloat(Paths.getContent(pathStr));
 				if (!Math.isNaN(loopTime)){
 					pauseMusic.loopTime = loopTime;
-					trace(loopTime);
+					//trace(loopTime);
 				}
 			}
 		}
