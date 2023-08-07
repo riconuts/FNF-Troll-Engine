@@ -2082,9 +2082,7 @@ class PlayState extends MusicBeatState
 			default:
 				if (eventScripts.exists(event.event))
 				{
-					var eventScript:FunkinScript = eventScripts.get(event.event);
-
-					callScript(eventScript, "onPush", [event]);
+					callScript(eventScripts.get(event.event), "onPush", [event]);
 				}
 
 		}

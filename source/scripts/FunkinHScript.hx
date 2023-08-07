@@ -191,7 +191,7 @@ class FunkinHScript extends FunkinScript
 
 		set("getClass", Type.resolveClass);
 		set("getEnum", Type.resolveEnum);
-		set("importClass", function(className:String, ?printImports:Bool)
+		set("importClass", function(className:String, ?traceImports:Bool)
 		{
 			// importClass("flixel.util.FlxSort") should give you FlxSort.byValues, etc
 			// whereas importClass("scripts.Globals.*") should give you Function_Stop, Function_Continue, etc
@@ -211,17 +211,16 @@ class FunkinHScript extends FunkinScript
 					for(field in Reflect.fields(daClass)){
 						set(field, Reflect.field(daClass, field));
 						
-						if (printImports == true) trace('Imported: $field, $daClass');
+						if (traceImports == true) trace('Imported: $field, $daClass');
 					}
 				}else{
-					FlxG.log.error('Could not import class ${daClass}');
-					scriptTrace('Could not import class ${daClass}');
+					FlxG.log.error('Could not import class $className');
+					if (traceImports == true) trace('Could not import class $className');
 				}
 			}else{
 				var daClass = Type.resolveClass(className);
 				set(daClassName, daClass);
-
-				if (printImports == true) trace('Imported: $daClassName, $daClass');
+				if (traceImports == true) trace('Imported: $daClassName, $daClass');
 			}
 		});
 

@@ -5,7 +5,6 @@ import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
-import flixel.FlxState;
 import flixel.addons.ui.*;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.group.FlxSpriteGroup;
@@ -333,6 +332,11 @@ class StageEditorState extends MusicBeatState{
 	function makeStage()
 	{
 		if (stage != null){
+			if (stage.foreground != null){
+				remove(stage.foreground);
+				stage.foreground.destroy();
+			}
+
 			remove(stage);
 			stage.destroy();
 		}
@@ -377,11 +381,10 @@ class StageEditorState extends MusicBeatState{
 
 		gfGroup.x = GF_X;
 		gfGroup.y = GF_Y;
-
 		////
-		updateBF(dadDropDown.selectedLabel);
+		updateBF(bfDropDown.selectedLabel);
 		updateGF(gfDropDown.selectedLabel);
-		updateDad(bfDropDown.selectedLabel);
+		updateDad(dadDropDown.selectedLabel);
 
 		////
 		camGame.zoom = defaultCamZoom;
@@ -406,14 +409,9 @@ class StageEditorState extends MusicBeatState{
 
 		// trace(stageData);
 
-		if (stage != null){
-			remove(stage);
-			remove(stage.foreground);
-		}
 		remove(gfGroup);
 		remove(dadGroup);
 		remove(boyfriendGroup);
-		
 
 		add(stage);
 		add(gfGroup);
