@@ -522,7 +522,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			var daY:Float = 0;
 			var group = new FlxTypedGroup<FlxObject>();
 			var widgets:Map<FlxObject, Widget> = [];
-			cameraPositions.push(FlxPoint.weak());
+			cameraPositions.push(FlxPoint.get());
 			for (data in options.get(name))
 			{
 				var label = data[0];
@@ -1446,7 +1446,7 @@ class OptionsSubstate extends MusicBeatSubstate
 	override function destroy()
 	{
 		for (val in cameraPositions)
-			val.putWeak();
+			val.put();
 
 		super.destroy();
 	}
