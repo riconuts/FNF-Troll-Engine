@@ -32,8 +32,9 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 		['Back', 'back'],
 		['Misc.'],
 		['Mute', 'volume_mute'],
-		['Vol Up', 'volume_up'],
-		['Vol Down', 'volume_down'],
+		['Volume Up', 'volume_up'],
+		['Volume Down', 'volume_down'],
+		//['Fullscreen', 'fullscreen'],
 		['Debug'],
 		// honestly might just replace this with one debug thing
 		// and make it so pressing it in playstate will open a debug menu w/ a bunch of stuff

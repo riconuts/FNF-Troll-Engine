@@ -1289,6 +1289,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		if (subState == null)
 		{
 			var pHov = curHovering;
+			var doUpdate = false;
 
 			if (FlxG.keys.justPressed.TAB){
 				FlxG.sound.play(Paths.sound("scrollMenu"));
@@ -1313,20 +1314,34 @@ class OptionsSubstate extends MusicBeatSubstate
 							var checkbox:Checkbox = curWidget.data.get("checkbox");
 							checkbox.toggled = !checkbox.toggled;
 							changeToggle(curWidget.optionData.data.get("optionName"), checkbox.toggled);
+
+							doUpdate = true;
 						}
 					case Button:
 						if (FlxG.keys.justPressed.ENTER && !curWidget.locked){
 							onButtonPressed(curWidget.optionData.data.get("optionName"));
+							doUpdate = true;
 						}
 
 					case Number:
 						// ;_;
-						if (FlxG.keys.justPressed.LEFT)		curWidget.data.get("leftAdjust").press();
-						else if (!FlxG.keys.pressed.LEFT)	curWidget.data.get("leftAdjust").release();
+						if (FlxG.keys.justPressed.LEFT)	{
+							curWidget.data.get("leftAdjust").press();
+							doUpdate = true;
+						}
+						else if (!FlxG.keys.pressed.LEFT) {
+							curWidget.data.get("leftAdjust").release();
+							doUpdate = true;
+						}		
 
-						if (FlxG.keys.justPressed.RIGHT)	curWidget.data.get("rightAdjust").press();
-						else if (!FlxG.keys.pressed.RIGHT)	curWidget.data.get("rightAdjust").release();
-
+						if (FlxG.keys.justPressed.RIGHT) {
+							curWidget.data.get("rightAdjust").press();
+							doUpdate = true;
+						}
+						else if (!FlxG.keys.pressed.RIGHT) {
+							curWidget.data.get("rightAdjust").release();
+							doUpdate = true;
+						}				
 					case Dropdown:
 						var change = 0;
 						if (FlxG.keys.justPressed.LEFT) change--;
@@ -1339,6 +1354,8 @@ class OptionsSubstate extends MusicBeatSubstate
 							var idx = FlxMath.wrap(allOptions.indexOf(sowy.value) + change, 0, allOptions.length-1);
 
 							changeDropdown(optionName, allOptions[idx]);
+
+							doUpdate = true;
 						}
 				}
 			}
@@ -1359,7 +1376,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			}
 
 			var movedMouse = FlxG.mouse.justMoved || FlxG.mouse.wheel != 0 || FlxG.mouse.justPressed;
-			if (pHov == null || movedMouse){
+			if (pHov == null || doUpdate || movedMouse){
 				for (object => widget in currentWidgets)
 				{
 					if (movedMouse && overlaps(widget.data.get("optionBox")))
