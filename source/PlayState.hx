@@ -2567,7 +2567,7 @@ class PlayState extends MusicBeatState
 			var lerpVal = CoolUtil.boundTo(1 - (elapsed * 3.125 * camZoomingDecay), 0, 1);
 
 			camGame.zoom = FlxMath.lerp(
-				1 * defaultCamZoom,
+				defaultCamZoom,
 				camGame.zoom,
 				lerpVal
 			);
