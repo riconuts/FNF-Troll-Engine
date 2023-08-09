@@ -12,8 +12,7 @@ import openfl.geom.Rectangle;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.addons.ui.FlxUI9SliceSprite;
-import ClientPrefs.OptionData;
-import ClientPrefs.OptionType;
+import ClientPrefs;
 
 typedef Widget =
 {
@@ -469,15 +468,21 @@ class OptionsSubstate extends MusicBeatSubstate
 
 
 		////
-		var optionMenu = new FlxSprite(84, 80, CoolUtil.makeOutlinedGraphic(FlxMath.minInt(920, FlxG.width), FlxG.height-80, FlxColor.fromRGB(82, 82, 82), 2, FlxColor.fromRGB(70, 70, 70)));
+		var optionMenu = new FlxSprite(84, 80, CoolUtil.makeOutlinedGraphic(
+			FlxMath.minInt(920, FlxG.width), 
+			FlxG.height-140, 
+			FlxColor.fromRGB(82, 82, 82), 
+			2, 
+			FlxColor.fromRGB(70, 70, 70)
+		));
 		if (optionMenu.width == FlxG.width) optionMenu.x = 0;
 		optionMenu.alpha = 0.8;
 		add(optionMenu);
 
 		optionCamera.width = Std.int(optionMenu.width);
-		optionCamera.height = Std.int(optionMenu.height);
+		optionCamera.height = Std.int(optionMenu.height - 4);
 		optionCamera.x = optionMenu.x;
-		optionCamera.y = optionMenu.y;
+		optionCamera.y = optionMenu.y + 2;
 
 		optionCamera.targetOffset.x = optionCamera.width / 2;
 		optionCamera.targetOffset.y = optionCamera.height / 2;
@@ -934,8 +939,10 @@ class OptionsSubstate extends MusicBeatSubstate
 				onWidgetUnselected(curWidget);
 
 			curWidget = widget;
+			curHovering = widget;
 		}else{
 			curWidget = null;
+			curHovering = null;
 		}
 
 		curOption = nextOption;
@@ -1281,18 +1288,26 @@ class OptionsSubstate extends MusicBeatSubstate
 	{
 		if (subState == null)
 		{
+			var changedSelection = false;
+
 			if (FlxG.keys.justPressed.TAB){
 				FlxG.sound.play(Paths.sound("scrollMenu"));
 				changeCategory(1);
+
+				changedSelection = true;
 			}
 
 			if (FlxG.keys.justPressed.UP){
 				FlxG.sound.play(Paths.sound("scrollMenu"));
 				changeWidget(-1);
+
+				changedSelection = true;
 			}
 			if (FlxG.keys.justPressed.DOWN){
 				FlxG.sound.play(Paths.sound("scrollMenu"));
 				changeWidget(1);
+
+				changedSelection = true;
 			}
 
 			if (curWidget != null){
@@ -1341,21 +1356,23 @@ class OptionsSubstate extends MusicBeatSubstate
 					if (FlxG.mouse.overlaps(buttons[idx], mainCamera))
 					{
 						changeCategory(idx, true);
+						changedSelection = true;
 						break;
 					}
 				}
 			}
 
-			var pHov = curHovering;
-			for (object => widget in currentWidgets)
-			{
-				if (overlaps(widget.data.get("optionBox")))
-					curHovering = widget;
+			if (changedSelection || FlxG.mouse.justMoved || FlxG.mouse.wheel != 0 || FlxG.mouse.justPressed){
+				for (object => widget in currentWidgets)
+				{
+					if (overlaps(widget.data.get("optionBox")))
+						curHovering = widget;
 
-				updateWidget(object, widget, elapsed);
+					updateWidget(object, widget, elapsed);
+				}
 			}
 
-			if (curHovering != pHov && curHovering != null)
+			if (changedSelection && curHovering != null)
 			{
 				var hovering = curHovering.optionData;
 				optionDesc.text = hovering.desc;
@@ -1376,7 +1393,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				else
 					optionDesc.fieldWidth = 0;
 				
-				var goalY = FlxG.height - optionDesc.height - 44;
+				var goalY = ((optionCamera.y + optionCamera.height) + (FlxG.height - optionDesc.height)) / 2;
 				optionDesc.screenCenter(X);
 				optionDesc.y = goalY - 12;
 				optionDesc.alpha = 0;
@@ -1423,7 +1440,6 @@ class OptionsSubstate extends MusicBeatSubstate
                 save();
 				FlxG.sound.play(Paths.sound('cancelMenu'));
             
-
                 if(goBack!=null)
 					goBack(changed);
 			}
