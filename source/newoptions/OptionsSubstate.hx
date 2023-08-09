@@ -1288,26 +1288,22 @@ class OptionsSubstate extends MusicBeatSubstate
 	{
 		if (subState == null)
 		{
-			var changedSelection = false;
+			var pHov = curHovering;
 
 			if (FlxG.keys.justPressed.TAB){
 				FlxG.sound.play(Paths.sound("scrollMenu"));
 				changeCategory(1);
 
-				changedSelection = true;
+				pHov = null;
 			}
 
 			if (FlxG.keys.justPressed.UP){
 				FlxG.sound.play(Paths.sound("scrollMenu"));
 				changeWidget(-1);
-
-				changedSelection = true;
 			}
 			if (FlxG.keys.justPressed.DOWN){
 				FlxG.sound.play(Paths.sound("scrollMenu"));
 				changeWidget(1);
-
-				changedSelection = true;
 			}
 
 			if (curWidget != null){
@@ -1356,23 +1352,24 @@ class OptionsSubstate extends MusicBeatSubstate
 					if (FlxG.mouse.overlaps(buttons[idx], mainCamera))
 					{
 						changeCategory(idx, true);
-						changedSelection = true;
+						pHov = null;
 						break;
 					}
 				}
 			}
 
-			if (changedSelection || FlxG.mouse.justMoved || FlxG.mouse.wheel != 0 || FlxG.mouse.justPressed){
+			var movedMouse = FlxG.mouse.justMoved || FlxG.mouse.wheel != 0 || FlxG.mouse.justPressed;
+			if (pHov == null || movedMouse){
 				for (object => widget in currentWidgets)
 				{
-					if (overlaps(widget.data.get("optionBox")))
+					if (movedMouse && overlaps(widget.data.get("optionBox")))
 						curHovering = widget;
 
 					updateWidget(object, widget, elapsed);
 				}
 			}
 
-			if (changedSelection && curHovering != null)
+			if (curHovering != null && pHov != curHovering)
 			{
 				var hovering = curHovering.optionData;
 				optionDesc.text = hovering.desc;
