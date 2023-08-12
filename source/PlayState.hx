@@ -2164,16 +2164,13 @@ class PlayState extends MusicBeatState
 			comboColor = 0xFFFFFFFF;
 
 		remove(ratingGroup);
-		remove(ratingGroup);
 		remove(timingTxt);
 		if(ClientPrefs.judgeBehind){
-			insert(members.indexOf(notefields) - 1, timingTxt);
-			insert(members.indexOf(timingTxt) - 1, ratingGroup);
-			insert(members.indexOf(ratingGroup) - 1, ratingGroup);
+			insert(members.indexOf(strumLineNotes) - 1, ratingGroup);
+			insert(members.indexOf(strumLineNotes) - 1, timingTxt);
 		}else{
 			insert(members.indexOf(notefields) + 1, timingTxt);
-			insert(members.indexOf(timingTxt) + 1, ratingGroup);
-			insert(members.indexOf(ratingGroup) + 1, ratingGroup);
+			insert(members.indexOf(notefields) + 1, ratingGroup);
 		}
 
 		botplayTxt.y = (ClientPrefs.downScroll ? FlxG.height - 44 : 19) + 15 + (ClientPrefs.downScroll ? -78 : 55);
