@@ -1,6 +1,5 @@
 package;
 
-import flixel.tweens.FlxEase.EaseFunction;
 import Cache;
 import Song;
 import Section.SwagSection;
@@ -17,7 +16,8 @@ import editors.*;
 import flixel.*;
 import flixel.util.*;
 import flixel.math.*;
-import flixel.tweens.*;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;
@@ -533,7 +533,6 @@ class PlayState extends MusicBeatState
 		FlxG.cameras.add(camOther, false);
 
 		FlxG.cameras.setDefaultDrawTarget(camGame, true);
-		CustomFadeTransition.nextCamera = camOther;
 
 		camFollow = prevCamFollow != null ? prevCamFollow : new FlxPoint();
 		camFollowPos = prevCamFollowPos != null ? prevCamFollowPos : new FlxObject(0, 0, 1, 1);
@@ -1809,17 +1808,13 @@ class PlayState extends MusicBeatState
 
 		//// load events
 		var daEvents = getEvents();
-		for (event in daEvents){
-			if (!eventPushedMap.exists(event.event))
-			{
-				eventPushedMap.set(event.event, true);
-				firstEventPush(event);
-			}
-		}
+		for (event in daEvents)
+			eventPushedMap.set(event.event, true);
 
 		for (event in eventPushedMap.keys())
 		{
 			var doPush:Bool = false;
+
 			for(file in ["events", #if PE_MOD_COMPATIBILITY "custom_events" #end]){
 				var baseScriptFile:String = '$file/$event';
 				for (ext in ["hscript", #if LUA_ALLOWED "lua" #end])
@@ -1858,6 +1853,8 @@ class PlayState extends MusicBeatState
 					}
 				}
 			}
+
+			firstEventPush(event);
 		}
 
 		for (subEvent in daEvents){
@@ -2039,21 +2036,43 @@ class PlayState extends MusicBeatState
 		return event;
 	}
 
-
 	public inline function getVisualPosition()
 		return getTimeFromSV(Conductor.songPosition, currentSV);
-	
 
-	function eventPushed(event:EventNote) {
+
+	function eventNoteEarlyTrigger(event:EventNote):Float {
+		var returnedValue:Float = 0;
+		var currentRV:Float = callOnAllScripts('eventEarlyTrigger', [event.event, event.value1, event.value2]);
+
+		if (eventScripts.exists(event.event)){
+			var eventScript:FunkinScript = eventScripts.get(event.event);
+
+			returnedValue = callScript(eventScript, "getOffset", [event]);
+		}
+		if(currentRV!=0 && returnedValue==0)returnedValue = currentRV;
+
+		if(returnedValue != 0)
+			return returnedValue;
+
+		switch(event.event) {
+			case 'Kill Henchmen': //Better timing so that the kill sound matches the beat intended
+				return 280; //Plays 280ms before the actual position
+		}
+		return 0;
+	}
+	
+	// called for every event note
+	function eventPushed(event:EventNote) 
+	{
 		switch(event.event){
 			case 'Mult SV' | 'Constant SV':
 				var speed:Float = 1;
 				if(event.event == 'Constant SV'){
 					var b = Std.parseFloat(event.value1);
-					speed = Math.isNaN(b) ? songSpeed : songSpeed / b;
+					speed = Math.isNaN(b) ? songSpeed : (songSpeed / b);
 				}else{
 					speed = Std.parseFloat(event.value1);
-					if(Math.isNaN(speed))speed = 1;
+					if (Math.isNaN(speed)) speed = 1;
 				}
 
 				speedChanges.sort(svSort);
@@ -2081,34 +2100,33 @@ class PlayState extends MusicBeatState
 				addCharacterToList(event.value2, charType);
 			default:
 				if (eventScripts.exists(event.event))
-				{
 					callScript(eventScripts.get(event.event), "onPush", [event]);
-				}
-
 		}
+
+		callOnHScripts("eventPushed", [event]);
+	}
+
+	// called only once for each different event
+	function firstEventPush(eventName:String){
+		
+		/* onLoad is called on script creation soo...
+		switch (eventName)
+		{
+			default:
+				// should PROBABLY turn this into a function, callEventScript(eventNote, "func") or something, idk
+				if (eventScripts.exists(eventName))
+					eventScripts.get(eventName).call("onLoad");
+		}
+		*/
+
+		callOnHScripts("firstEventPush", [eventName]);
 	}
 
 	function firstNotePush(type:String){
 		switch(type){
 			default:
 				if (notetypeScripts.exists(type))
-				{
 					callScript(notetypeScripts.get(type), "onLoad", []);
-				}
-		}
-	}
-
-	function firstEventPush(event:EventNote){
-		switch (event.event)
-		{
-			default:
-				// should PROBABLY turn this into a function, callEventScript(eventNote, "func") or something, idk
-				if (eventScripts.exists(event.event))
-				{
-					var eventScript:FunkinScript = eventScripts.get(event.event);
-
-					callScript(eventScript, "onLoad", [event]);
-				}
 		}
 	}
 
@@ -2195,27 +2213,6 @@ class PlayState extends MusicBeatState
 	override function draw(){
 		camStageUnderlay.bgColor.alphaFloat = ClientPrefs.stageOpacity;
 		super.draw();
-	}
-
-	function eventNoteEarlyTrigger(event:EventNote):Float {
-		var returnedValue:Float = 0;
-		var currentRV:Float = callOnAllScripts('eventEarlyTrigger', [event.event, event.value1, event.value2]);
-
-		if (eventScripts.exists(event.event)){
-			var eventScript:FunkinScript = eventScripts.get(event.event);
-
-			returnedValue = callScript(eventScript, "getOffset", [event]);
-		}
-		if(currentRV!=0 && returnedValue==0)returnedValue = currentRV;
-
-		if(returnedValue != 0)
-			return returnedValue;
-
-		switch(event.event) {
-			case 'Kill Henchmen': //Better timing so that the kill sound matches the beat intended
-				return 280; //Plays 280ms before the actual position
-		}
-		return 0;
 	}
 
 	function sortByShit(Obj1:Note, Obj2:Note):Int
