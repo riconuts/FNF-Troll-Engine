@@ -223,8 +223,7 @@ class PlayState extends MusicBeatState
 	public var showCombo:Bool = false;
 	public var showComboNum:Bool = true;
 	
-	public var ratingTxtGroup = new FlxTypedGroup<RatingSprite>();
-	public var comboNumGroup = new FlxTypedGroup<RatingSprite>();
+	public var ratingGroup = new FlxTypedGroup<RatingSprite>();
 	public var timingTxt:FlxText;
 
 	public var displayedHealth(default, set):Float = 1;
@@ -869,10 +868,11 @@ class PlayState extends MusicBeatState
 		add(hud);
 
 		//
-		lastJudge = RatingSprite.newRating();
-		ratingTxtGroup.add(lastJudge).kill();
+		lastJudge = new RatingSprite();
+		lastJudge.scale.set(0.7, 0.7);
+		ratingGroup.add(lastJudge).kill();
 		for (i in 0...3)
-			comboNumGroup.add(RatingSprite.newNumber()).kill();
+			ratingGroup.add(new RatingSprite()).kill();
 		
 		timingTxt = new FlxText();
 		timingTxt.setFormat(Paths.font("calibri.ttf"), 28, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -984,8 +984,7 @@ class PlayState extends MusicBeatState
 		callOnAllScripts('onCreatePost');
 
 		if(ClientPrefs.judgeBehind){
-			add(ratingTxtGroup);
-			add(comboNumGroup);
+			add(ratingGroup);
 			add(timingTxt);
 		}
 		add(strumLineNotes);
@@ -993,8 +992,7 @@ class PlayState extends MusicBeatState
 		add(notefields);
 		if (!ClientPrefs.judgeBehind)
 		{
-			add(ratingTxtGroup);
-			add(comboNumGroup);
+			add(ratingGroup);
 			add(timingTxt);
 		}
 		add(botplayTxt);
@@ -2108,7 +2106,7 @@ class PlayState extends MusicBeatState
 
 	// called only once for each different event
 	function firstEventPush(eventName:String){
-		
+
 		/* onLoad is called on script creation soo...
 		switch (eventName)
 		{
@@ -2145,6 +2143,12 @@ class PlayState extends MusicBeatState
 		
 		if(options.contains("gradeSet"))
 			ratingStuff = Highscore.grades.get(ClientPrefs.gradeSet);
+
+		if (!ClientPrefs.simpleJudge)
+		{
+			for (prevCombo in lastCombos)
+				prevCombo.kill();
+		}
 		
 		callOnScripts('optionsChanged', [options]);
 		
@@ -2159,17 +2163,17 @@ class PlayState extends MusicBeatState
 		if (!ClientPrefs.coloredCombos)
 			comboColor = 0xFFFFFFFF;
 
-		remove(ratingTxtGroup);
-		remove(comboNumGroup);
+		remove(ratingGroup);
+		remove(ratingGroup);
 		remove(timingTxt);
 		if(ClientPrefs.judgeBehind){
 			insert(members.indexOf(notefields) - 1, timingTxt);
-			insert(members.indexOf(timingTxt) - 1, comboNumGroup);
-			insert(members.indexOf(comboNumGroup) - 1, ratingTxtGroup);
+			insert(members.indexOf(timingTxt) - 1, ratingGroup);
+			insert(members.indexOf(ratingGroup) - 1, ratingGroup);
 		}else{
 			insert(members.indexOf(notefields) + 1, timingTxt);
-			insert(members.indexOf(timingTxt) + 1, comboNumGroup);
-			insert(members.indexOf(comboNumGroup) + 1, ratingTxtGroup);
+			insert(members.indexOf(timingTxt) + 1, ratingGroup);
+			insert(members.indexOf(ratingGroup) + 1, ratingGroup);
 		}
 
 		botplayTxt.y = (ClientPrefs.downScroll ? FlxG.height - 44 : 19) + 15 + (ClientPrefs.downScroll ? -78 : 55);
@@ -3417,7 +3421,9 @@ class PlayState extends MusicBeatState
 		}
 		else
 		{
-			rating = ratingTxtGroup.recycle(RatingSprite, RatingSprite.newRating);
+			rating = ratingGroup.recycle(RatingSprite);
+			rating.scale.set(0.7, 0.7);
+
 			rating.moves = true;
 			rating.acceleration.y = 550;
 			rating.velocity.set(FlxG.random.int(-10, 10), -FlxG.random.int(140, 175));
@@ -3443,8 +3449,8 @@ class PlayState extends MusicBeatState
 		rating.x += ClientPrefs.comboOffset[0];
 		rating.y -= ClientPrefs.comboOffset[1];
 
-		ratingTxtGroup.remove(rating, true);
-		ratingTxtGroup.add(rating);
+		ratingGroup.remove(rating, true);
+		ratingGroup.add(rating);
 	}
 	var comboColor = 0xFFFFFFFF;
 
@@ -3475,8 +3481,9 @@ class PlayState extends MusicBeatState
 		var numStartX:Float = (FlxG.width - separatedScore.length * 41) * 0.5 + ClientPrefs.comboOffset[2];
 		for (i in separatedScore)
 		{
-			var numScore:RatingSprite = comboNumGroup.recycle(RatingSprite, RatingSprite.newNumber);
+			var numScore:RatingSprite = ratingGroup.recycle(RatingSprite);
 			numScore.loadGraphic(Paths.image('num' + (i == "-" ? "neg" : i)));
+			numScore.scale.set(0.5, 0.5);
 
 			if (ClientPrefs.simpleJudge){
 				numScore.scale.x = 0.5 * 1.25;
@@ -3500,8 +3507,8 @@ class PlayState extends MusicBeatState
 				numScore.tween.destroy();
 			}
 
-			comboNumGroup.remove(numScore, true);
-			comboNumGroup.add(numScore);
+			ratingGroup.remove(numScore, true);
+			ratingGroup.add(numScore);
 
 			numScore.alpha = ClientPrefs.judgeOpacity;
 			if (ClientPrefs.simpleJudge)
@@ -4146,7 +4153,8 @@ class PlayState extends MusicBeatState
 		if (cpuControlled) saveScore = false; // if botplay hits a note, then you lose scoring
 
 		// tbh I hate hitCausesMiss lol its retarded
-		// added a shitty judge to deal w/ it tho!!
+		// added a shitty judge to deal w/ it tho!! 
+		// This doesn't play the miss animation tho!!
  		if(note.hitResult.judgment == MISS_MINE) {
 			noteMiss(note, field, true);
 
@@ -4833,23 +4841,6 @@ class RatingSprite extends FlxSprite
 			tween.destroy();
 		}
 		return super.kill();
-	}
-
-	public static function newRating()
-	{
-		var rating = new RatingSprite();
-		// rating.acceleration.y = 550;
-		rating.scale.set(0.7, 0.7);
-
-		return rating;
-	}
-
-	public static function newNumber()
-	{
-		var numScore = new RatingSprite();
-		numScore.scale.set(0.5, 0.5);
-
-		return numScore;
 	}
 }
 

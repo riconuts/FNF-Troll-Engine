@@ -49,7 +49,8 @@ class ComboOffsetSubstate extends MusicBeatSubstate
         }
             
         
-        rating = RatingSprite.newRating();
+        rating = new RatingSprite();
+        rating.scale.set(0.7, 0.7);
         rating.scrollFactor.set();
         rating.cameras = [camHUD];
         rating.loadGraphic(Paths.image(ratingName));
@@ -63,8 +64,9 @@ class ComboOffsetSubstate extends MusicBeatSubstate
         while (splitCombo.length < 3) splitCombo.unshift("0");
         
         for (number in splitCombo){
-            var num = RatingSprite.newNumber();
+            var num = new RatingSprite();
             num.loadGraphic(Paths.image('num$number'));
+            num.scale.set(0.5, 0.5);
             num.scrollFactor.set();
             num.color = comboColor;
             num.cameras = [camHUD];
