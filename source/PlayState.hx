@@ -1952,7 +1952,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		allNotes.sort(sortByShit);
+		allNotes.sort(sortByTime);
 
 		for(fuck in allNotes)
 			unspawnNotes.push(fuck);
@@ -2216,27 +2216,16 @@ class PlayState extends MusicBeatState
 		super.draw();
 	}
 
-	function sortByShit(Obj1:Note, Obj2:Note):Int
-	{
-		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.strumTime, Obj2.strumTime);
-	}
-
-	function sortByOrderNote(wat:Int, Obj1:Note, Obj2:Note):Int
+	function sortByZIndex(Obj1:{zIndex:Float}, Obj2:{zIndex:Float}):Int
 	{
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.zIndex, Obj2.zIndex);
 	}
 
-	function sortByOrderStrumNote(wat:Int, Obj1:StrumNote, Obj2:StrumNote):Int
-	{
-		return FlxSort.byValues(FlxSort.DESCENDING, Obj1.zIndex, Obj2.zIndex);
-	}
-
-	function sortByTime(Obj1:EventNote, Obj2:EventNote):Int
+	function sortByTime(Obj1:{strumTime:Float}, Obj2:{strumTime:Float}):Int
 	{
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.strumTime, Obj2.strumTime);
 	}
 
-	
 	function svSort(Obj1:SpeedEvent, Obj2:SpeedEvent):Int
 	{
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.startTime, Obj2.startTime);
