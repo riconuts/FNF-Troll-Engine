@@ -550,13 +550,19 @@ class Character extends FlxSprite
 	}
 
 	////
+
+    public var defaultVars:Map<String, Dynamic> = [];
+    public function setDefaultVar(i:String, v:Dynamic)
+		defaultVars.set(i, v);
+    
+
 	public function startScripts()
 	{
+		setDefaultVar("this", this);
 		for (filePath in Paths.getFolders("characters")){
-
 			var file = filePath + '$scriptName.hscript';
 			if (Paths.exists(file)){
-				characterScript = FunkinHScript.fromFile(file, file, ["this" => this]);
+				characterScript = FunkinHScript.fromFile(file, file, defaultVars);
 				callOnScripts("onLoad", [this], true);
 				break;
 			}

@@ -755,6 +755,7 @@ class PlayState extends MusicBeatState
 				gf.cameraPosition[1] += stageData.camera_girlfriend[1];
 			}
 
+            gf.setDefaultVar("used", true);
 			startCharacter(gf);
 			gf.scrollFactor.set(0.95, 0.95);
 			gfMap.set(gf.curCharacter, gf);
@@ -767,6 +768,7 @@ class PlayState extends MusicBeatState
 			dad.cameraPosition[0] += stageData.camera_opponent[0];
 			dad.cameraPosition[1] += stageData.camera_opponent[1];
 		}
+        dad.setDefaultVar("used", true);
 		startCharacter(dad, true);
 		
 		dadMap.set(dad.curCharacter, dad);
@@ -777,6 +779,7 @@ class PlayState extends MusicBeatState
 			boyfriend.cameraPosition[0] += stageData.camera_boyfriend[0];
 			boyfriend.cameraPosition[1] += stageData.camera_boyfriend[1];
 		}
+		boyfriend.setDefaultVar("used", true);
 		startCharacter(boyfriend);
 
 		boyfriendMap.set(boyfriend.curCharacter, boyfriend);
@@ -1031,7 +1034,6 @@ class PlayState extends MusicBeatState
 
 		Cache.loadWithList(shitToLoad);
 		shitToLoad = [];
-
 		gf.callOnScripts("onAdded", [gf]); // if you can come up w/ a better name for this callback then change it lol
 		// (this also gets called for the characters changed in changeCharacter
         boyfriend.callOnScripts("onAdded", [boyfriend]);
@@ -1169,6 +1171,8 @@ class PlayState extends MusicBeatState
 					boyfriendGroup.add(newBoyfriend);
 
 					startCharacter(newBoyfriend);
+
+                    newBoyfriend.setOnScripts("used", false); // used to determine when a character is actually being used
 				}
 
 			case 1:
@@ -1182,6 +1186,8 @@ class PlayState extends MusicBeatState
 					dadGroup.add(newDad);
 					startCharacter(newDad, true);
 					newDad.alpha = 0.00001;
+
+					newDad.setOnScripts("used", false); // used to determine when a character is actually being used
 				}
 
 			case 2:
@@ -1196,6 +1202,8 @@ class PlayState extends MusicBeatState
 					gfMap.set(newCharacter, newGf);
 					gfGroup.add(newGf);
 					startCharacter(newGf);
+
+					newGf.setOnScripts("used", false); // used to determine when a character is actually being used
 
 				}
 		}
@@ -2823,6 +2831,8 @@ class PlayState extends MusicBeatState
 					boyfriend.alpha = lastAlpha;
 					if(shiftFocus)focusedChar=boyfriend;
 					hud.iconP1.changeIcon(boyfriend.healthIcon);
+                    oldChar.setOnScripts("used", false);
+					boyfriend.setOnScripts("used", true);
                     oldChar.callOnScripts("changedOut", [oldChar, boyfriend]); // oldChar, newChar
                     boyfriend.callOnScripts("onAdded", [boyfriend]); // if you can come up w/ a better name for this callback then change it lol
                     // (this also gets called for the characters set by the chart's player1/player2)
@@ -2853,6 +2863,8 @@ class PlayState extends MusicBeatState
 					if(shiftFocus)focusedChar=dad;
 					dad.alpha = lastAlpha;
 					hud.iconP2.changeIcon(dad.healthIcon);
+					oldChar.setOnScripts("used", false);
+					dad.setOnScripts("used", true);
 					oldChar.callOnScripts("changedOut", [oldChar, dad]); // oldChar, newChar
 					dad.callOnScripts("onAdded", [dad]); // if you can come up w/ a better name for this callback then change it lol
 					// (this also gets called for the characters set by the chart's player1/player2)
@@ -2877,8 +2889,10 @@ class PlayState extends MusicBeatState
 						gf = gfMap.get(name);
 						gf.alpha = lastAlpha;
 						if(shiftFocus)focusedChar=gf;
+					    oldChar.setOnScripts("used", false);
+					    gf.setOnScripts("used", true);
 						oldChar.callOnScripts("changedOut", [oldChar, gf]); // oldChar, newChar
-						gf.callOnScripts("onAdded", [gf]); // if you can come up w/ a better name for this callback then change it lol
+                        gf.callOnScripts("onAdded", [gf]); // if you can come up w/ a better name for this callback then change it lol
 						// (this also gets called for the characters set by the chart's player1/player2)
 					}
 					setOnScripts('gfName', gf.curCharacter);
