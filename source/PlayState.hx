@@ -1034,10 +1034,10 @@ class PlayState extends MusicBeatState
 
 		Cache.loadWithList(shitToLoad);
 		shitToLoad = [];
-        if(gf!=null)gf.callOnScripts("onAdded", [gf]); // if you can come up w/ a better name for this callback then change it lol
+        if(gf!=null)gf.callOnScripts("onAdded", [gf, null]); // if you can come up w/ a better name for this callback then change it lol
 		// (this also gets called for the characters changed in changeCharacter)
-        boyfriend.callOnScripts("onAdded", [boyfriend]);
-        dad.callOnScripts("onAdded", [dad]); 
+        boyfriend.callOnScripts("onAdded", [boyfriend, null]);
+        dad.callOnScripts("onAdded", [dad, null]); 
 
 		super.create();
 
@@ -2834,7 +2834,7 @@ class PlayState extends MusicBeatState
                     oldChar.setOnScripts("used", false);
 					boyfriend.setOnScripts("used", true);
                     oldChar.callOnScripts("changedOut", [oldChar, boyfriend]); // oldChar, newChar
-                    boyfriend.callOnScripts("onAdded", [boyfriend]); // if you can come up w/ a better name for this callback then change it lol
+                    boyfriend.callOnScripts("onAdded", [boyfriend, oldChar]); // if you can come up w/ a better name for this callback then change it lol
                     // (this also gets called for the characters set by the chart's player1/player2)
 
 				}
@@ -2866,7 +2866,7 @@ class PlayState extends MusicBeatState
 					oldChar.setOnScripts("used", false);
 					dad.setOnScripts("used", true);
 					oldChar.callOnScripts("changedOut", [oldChar, dad]); // oldChar, newChar
-					dad.callOnScripts("onAdded", [dad]); // if you can come up w/ a better name for this callback then change it lol
+					dad.callOnScripts("onAdded", [dad, oldChar]); // if you can come up w/ a better name for this callback then change it lol
 					// (this also gets called for the characters set by the chart's player1/player2)
 				}
 				setOnScripts('dadName', dad.curCharacter);
@@ -2892,7 +2892,7 @@ class PlayState extends MusicBeatState
 					    oldChar.setOnScripts("used", false);
 					    gf.setOnScripts("used", true);
 						oldChar.callOnScripts("changedOut", [oldChar, gf]); // oldChar, newChar
-                        gf.callOnScripts("onAdded", [gf]); // if you can come up w/ a better name for this callback then change it lol
+                        gf.callOnScripts("onAdded", [gf, oldChar]); // if you can come up w/ a better name for this callback then change it lol
 						// (this also gets called for the characters set by the chart's player1/player2)
 					}
 					setOnScripts('gfName', gf.curCharacter);
@@ -3149,7 +3149,7 @@ class PlayState extends MusicBeatState
 
 				}
 		}
-		callOnScripts('onEvent', [eventName, value1, value2]);
+		callOnScripts('onEvent', [eventName, value1, value2, time]);
 		if(eventScripts.exists(eventName)){
 			var script = eventScripts.get(eventName);
 
