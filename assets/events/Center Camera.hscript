@@ -9,7 +9,7 @@ function getOffset(eventNote):Float{
 function onPush(eventNote){}
 function onLoad(){}
 
-function onTrigger(value1, value2)
+function onTrigger(value1, value2, time)
 {
 	if (value1 == "true")
 	{

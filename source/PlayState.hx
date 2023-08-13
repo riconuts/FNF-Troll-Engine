@@ -2803,7 +2803,7 @@ class PlayState extends MusicBeatState
 			var value2:Null<String> = daEvent.value2;
 			if(value2 == null) value2 = '';
 
-			triggerEventNote(daEvent.event, value1, value2);
+			triggerEventNote(daEvent.event, value1, value2, daEvent.strumTime);
 			eventNotes.shift();
 		}
 	}
@@ -2901,9 +2901,12 @@ class PlayState extends MusicBeatState
 		reloadHealthBarColors();
 	}
 
-	public function triggerEventNote(eventName:String = "", value1:String = "", value2:String = "") {
+	public function triggerEventNote(eventName:String = "", value1:String = "", value2:String = "", ?time:Float) {
+        if(time==null)
+            time = Conductor.songPosition;
+
 		if(showDebugTraces)
-			trace('Event: ' + eventName + ', Value 1: ' + value1 + ', Value 2: ' + value2 + ', at Time: ' + Conductor.songPosition);
+			trace('Event: ' + eventName + ', Value 1: ' + value1 + ', Value 2: ' + value2 + ', at Time: ' + time);
 
 		switch(eventName) {
 			case 'Change Focus':
@@ -3150,7 +3153,7 @@ class PlayState extends MusicBeatState
 		if(eventScripts.exists(eventName)){
 			var script = eventScripts.get(eventName);
 
-			callScript(script, "onTrigger", [value1, value2]);
+			callScript(script, "onTrigger", [value1, value2, time]);
 		}
 	}
 

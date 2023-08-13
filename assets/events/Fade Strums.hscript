@@ -11,7 +11,7 @@ function getOffset(eventNote): Float{
   // likewise, -250 will go from 1000 to 1250
 }
 
-function onTrigger(value1:Dynamic, value2:Dynamic){
+function onTrigger(value1:Dynamic, value2:Dynamic, time:Float){
 	for (boi in game.playerStrums)
 		FlxTween.tween(boi, {alpha: 0}, Std.parseFloat(value2), {ease: FlxEase.expoIn});
 		

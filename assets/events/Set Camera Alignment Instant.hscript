@@ -6,7 +6,7 @@ function getOffset(eventNote):Float{
 	return 0;
 }
 
-function onTrigger(value1, value2)
+function onTrigger(value1, value2, time)
 {
 	if(game.stageData.camera_speed != null)
 		game.cameraSpeed = game.stageData.camera_speed;

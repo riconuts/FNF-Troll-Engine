@@ -1,4 +1,4 @@
-function onTrigger(value1, value2)
+function onTrigger(value1, value2, time)
 {
     var beat = Std.parseInt(value1);
     if(beat == null || Math.isNaN(beat))beat = 4;

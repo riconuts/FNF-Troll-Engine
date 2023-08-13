@@ -56,6 +56,6 @@ function getOffset(eventNote):Float
 	return (dur < 0) ? (dur * 1000) : 0; 
 }
 
-function onTrigger(value1:Dynamic, value2:Dynamic){
+function onTrigger(value1:Dynamic, value2:Dynamic, time:Float){
 	doZoomTween(Std.parseFloat(value1), Std.parseFloat(value2));
 }
