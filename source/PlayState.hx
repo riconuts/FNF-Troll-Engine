@@ -1032,6 +1032,11 @@ class PlayState extends MusicBeatState
 		Cache.loadWithList(shitToLoad);
 		shitToLoad = [];
 
+		gf.callOnScripts("onAdded", [gf]); // if you can come up w/ a better name for this callback then change it lol
+		// (this also gets called for the characters changed in changeCharacter
+        boyfriend.callOnScripts("onAdded", [boyfriend]);
+        dad.callOnScripts("onAdded", [dad]); 
+
 		super.create();
 
 		RecalculateRating();
@@ -2818,6 +2823,10 @@ class PlayState extends MusicBeatState
 					boyfriend.alpha = lastAlpha;
 					if(shiftFocus)focusedChar=boyfriend;
 					hud.iconP1.changeIcon(boyfriend.healthIcon);
+                    oldChar.callOnScripts("changedOut", [oldChar, boyfriend]); // oldChar, newChar
+                    boyfriend.callOnScripts("onAdded", [boyfriend]); // if you can come up w/ a better name for this callback then change it lol
+                    // (this also gets called for the characters set by the chart's player1/player2)
+
 				}
 				setOnScripts('boyfriendName', boyfriend.curCharacter);
 
@@ -2844,6 +2853,9 @@ class PlayState extends MusicBeatState
 					if(shiftFocus)focusedChar=dad;
 					dad.alpha = lastAlpha;
 					hud.iconP2.changeIcon(dad.healthIcon);
+					oldChar.callOnScripts("changedOut", [oldChar, dad]); // oldChar, newChar
+					dad.callOnScripts("onAdded", [dad]); // if you can come up w/ a better name for this callback then change it lol
+					// (this also gets called for the characters set by the chart's player1/player2)
 				}
 				setOnScripts('dadName', dad.curCharacter);
 
@@ -2865,6 +2877,9 @@ class PlayState extends MusicBeatState
 						gf = gfMap.get(name);
 						gf.alpha = lastAlpha;
 						if(shiftFocus)focusedChar=gf;
+						oldChar.callOnScripts("changedOut", [oldChar, gf]); // oldChar, newChar
+						gf.callOnScripts("onAdded", [gf]); // if you can come up w/ a better name for this callback then change it lol
+						// (this also gets called for the characters set by the chart's player1/player2)
 					}
 					setOnScripts('gfName', gf.curCharacter);
 				}
@@ -3055,6 +3070,8 @@ class PlayState extends MusicBeatState
 				trace(value2, charType);
 
 				changeCharacter(value2, charType);
+
+                
 				if(anim!=''){
 					var char:Character = boyfriend;
 					switch(charType){
