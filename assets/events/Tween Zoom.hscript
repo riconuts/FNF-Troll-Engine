@@ -85,7 +85,7 @@ function onTrigger(value1:Dynamic, value2:Dynamic, time:Float){
 
         var passed = Conductor.songPosition - time;
         var startVal = instance.defaultCamZoom;
-        var change = args[0] - startVal;
+        var change = zoom - startVal;
         instance.defaultCamZoom = ease(easeFunc, passed, instance.defaultCamZoom, change, endTime - Conductor.songPosition);
         lastTween = FlxTween.num(instance.defaultCamZoom, zoom, length, {
             ease: easeFunc,
