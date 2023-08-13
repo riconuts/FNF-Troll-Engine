@@ -120,6 +120,7 @@ class FreeplayState extends MusicBeatState
 				if (FlxG.keys.pressed.ALT && charts.length > 0){
 					switchTo(new SongChartSelec(songButton.metadata, charts)); // we should make this better and add a proper chart selector
                     // maybe I'll concept up that if you dont wanna do that
+					// Go ahead, I didn't want to make one cause it wouldn't get used since the TGT doesn't have alt difficulties :p
 				}else{
 					var daDiff:String = "";
 

@@ -206,25 +206,30 @@ class OptionsSubstate extends MusicBeatSubstate
 		}
 	}
 
+	private var previewSound:Null<FlxSound> = null;
+	function playPreviewSound(name:String, volume:Float = 1){
+		if (previewSound != null) previewSound.stop().destroy();
+		previewSound = FlxG.sound.play(Paths.sound(name), volume, false, null, true, ()->{previewSound = null;});
+	}
+
 	function onNumberChanged(option:String, oldVal:Float, newVal:Float)
 	{
 		switch (option)
 		{
 			case 'framerate':
-				if (newVal > FlxG.drawFramerate)
-				{
+				if (newVal > FlxG.drawFramerate){
 					FlxG.updateFramerate = Math.floor(newVal);
 					FlxG.drawFramerate = Math.floor(newVal);
-				}
-				else
-				{
+				}else{
 					FlxG.drawFramerate = Math.floor(newVal);
 					FlxG.updateFramerate = Math.floor(newVal);
 				}
 			case 'epicWindow' | 'sickWindow' | 'goodWindow' | 'badWindow' | 'hitWindow':
 				checkWindows();
-			default:
-				// nothing
+			case 'hitsoundVolume':
+				playPreviewSound("hitsound", newVal / 100);
+			case 'missVolume':
+				playPreviewSound('missnote${FlxG.random.int(1, 3)}', newVal / 100);
 		}
 	}
 
@@ -516,34 +521,36 @@ class OptionsSubstate extends MusicBeatSubstate
 			buttons.push(button);
 		}
 
-		// for (data in options.get("Game")){
-		for (name in optionOrder)
+		for (tabName in optionOrder)
 		{
 			var daY:Float = 0;
 			var group = new FlxTypedGroup<FlxObject>();
 			var widgets:Map<FlxObject, Widget> = [];
 			cameraPositions.push(FlxPoint.get());
-			for (data in options.get(name))
+
+			for (data in options.get(tabName))
 			{
 				var label = data[0];
-				var daOpts:Array<String> = data[1];
 				var text = new FlxText(8, daY, 0, label, 16);
 				text.setFormat(Paths.font("calibrib.ttf"), 32, 0xFFFFFFFF, FlxTextAlign.LEFT);
 				text.cameras = [optionCamera];
 				group.add(text);
 				daY += text.height;
+
+				var daOpts:Array<String> = data[1];
 				for (opt in daOpts)
 				{
 					if (!actualOptions.exists(opt))
 						continue;
+
 					var data = actualOptions.get(opt);
 					data.data.set("optionName", opt);
 					var text = new FlxText(16, daY, 0, data.display, 16);
 					text.cameras = [optionCamera];
 					text.setFormat(Paths.font("calibri.ttf"), 28, 0xFFFFFFFF, FlxTextAlign.LEFT);
 					var height = text.height + 12;
-					if (height < 45)
-						height = 45;
+					if (height < 45) height = 45;
+					
 					var drop:FlxUI9SliceSprite = new FlxUI9SliceSprite(text.x - 12, text.y, Paths.image("optionsMenu/backdrop"),
 						new Rectangle(0, 0, optionMenu.width - text.x - 8, height), [22, 22, 89, 89]);
 					drop.cameras = [optionCamera];
@@ -583,8 +590,8 @@ class OptionsSubstate extends MusicBeatSubstate
 			daY += 4;
 			var height = daY > optionCamera.height ? daY - optionCamera.height : 0;
 			heights.push(height);
-			groups.set(name, group);
-			allWidgets.set(name, widgets);
+			groups.set(tabName, group);
+			allWidgets.set(tabName, widgets);
 		}
 		add(currentGroup);
 
@@ -1313,7 +1320,7 @@ class OptionsSubstate extends MusicBeatSubstate
 						if (FlxG.keys.justPressed.ENTER){
 							var checkbox:Checkbox = curWidget.data.get("checkbox");
 							checkbox.toggled = !checkbox.toggled;
-							changeToggle(curWidget.optionData.data.get("optionName"), checkbox.toggled);
+							changeToggleW(curWidget, checkbox.toggled);
 
 							doUpdate = true;
 						}
@@ -1325,23 +1332,34 @@ class OptionsSubstate extends MusicBeatSubstate
 
 					case Number:
 						// ;_;
-						if (FlxG.keys.justPressed.LEFT)	{
-							curWidget.data.get("leftAdjust").press();
-							doUpdate = true;
-						}
-						else if (!FlxG.keys.pressed.LEFT) {
-							curWidget.data.get("leftAdjust").release();
-							doUpdate = true;
-						}		
+						var locked:Bool = curWidget.optionData.data.exists("locked") ? curWidget.optionData.data.get("locked") : false;
+						if (!locked){
+							var data = curWidget.data;
 
-						if (FlxG.keys.justPressed.RIGHT) {
-							curWidget.data.get("rightAdjust").press();
+							if (FlxG.keys.justPressed.LEFT)	{
+								if (FlxG.keys.pressed.SHIFT)	changeNumberW(curWidget, data.get("min"), true);
+								else							data.get("leftAdjust").press();
+							}
+							else if (FlxG.keys.justReleased.LEFT) {
+								data.get("leftAdjust").release();
+							}		
+
+							if (FlxG.keys.justPressed.RIGHT) {
+								if (FlxG.keys.pressed.SHIFT)	changeNumberW(curWidget, data.get("max"), true);
+								else							data.get("rightAdjust").press();
+							}
+							else if (FlxG.keys.justReleased.RIGHT) {
+								data.get("rightAdjust").release();
+							}
+
+							@:privateAccess
+							if (FlxG.keys.justPressed.R){
+								var name = curWidget.optionData.data.get("optionName");
+								changeNumber(name, ClientPrefs.defaultOptionDefinitions.get(name).value, true);
+							}
+
 							doUpdate = true;
 						}
-						else if (!FlxG.keys.pressed.RIGHT) {
-							curWidget.data.get("rightAdjust").release();
-							doUpdate = true;
-						}				
 					case Dropdown:
 						var change = 0;
 						if (FlxG.keys.justPressed.LEFT) change--;

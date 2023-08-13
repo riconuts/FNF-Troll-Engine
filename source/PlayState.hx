@@ -3088,11 +3088,10 @@ class PlayState extends MusicBeatState
 
 			case 'Set Property':
 				var value2:Dynamic = value2;
+
 				switch (value2){
-					case "true":
-						value2 = true;
-					case "false":
-						value2 = false;
+					case "true": value2 = true;
+					case "false": value2 = false;
 				}
 
 				var killMe:Array<String> = value1.split('.');
