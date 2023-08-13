@@ -71,7 +71,7 @@ function onTrigger(value1:Dynamic, value2:Dynamic, time:Float){
     zoom = Math.isNaN(zoom) ? defaultZoom : zoom;
 	duration = Math.isNaN(duration) ? 1 : Math.abs(duration);
 
-    var endTime = time + duration;
+    var endTime = time + (duration * 1000);
     if(lastTween!=null){
         lastTween.cancel();
         lastTween = null;
