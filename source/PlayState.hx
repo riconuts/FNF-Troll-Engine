@@ -2247,51 +2247,7 @@ class PlayState extends MusicBeatState
 	public var skipArrowStartTween:Bool = false; //for lua
 	private function generateStaticArrows(player:Int):Void
 	{
-/* 		var targetAlpha:Float = 1;
-		if (player < 1){
-			if(!ClientPrefs.opponentStrums) targetAlpha = 0;
-			else if(ClientPrefs.middleScroll) targetAlpha = 0.35;
-		}
 
-		for (i in 0...4){
-			var babyArrow:StrumNote = new StrumNote(
-				ClientPrefs.middleScroll ? STRUM_X_MIDDLESCROLL : STRUM_X,
-				ClientPrefs.downScroll ? FlxG.height - 162 : 50,
-				i
-			);
-
-			babyArrow.downScroll = ClientPrefs.downScroll;
-
-			if (!isStoryMode && !skipArrowStartTween)
-			{
-				//babyArrow.y -= 10;
-				babyArrow.alpha = 0;
-				FlxTween.tween(babyArrow, {alpha: targetAlpha}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * i)});
-			}
-			else
-			{
-				babyArrow.alpha = targetAlpha;
-			}
-
-			if (player == 1)
-			{
-				playerStrums.add(babyArrow);
-			}
-			else
-			{
-				if(ClientPrefs.middleScroll)
-				{
-					babyArrow.x += 310;
-					if(i > 1) { //Up and Right
-						babyArrow.x += FlxG.width * 0.5 + 25;
-					}
-				}
-				opponentStrums.add(babyArrow);
-			}
-
-			strumLineNotes.add(babyArrow);
-			babyArrow.postAddedToGroup();
-		} */
 	}
 
 	override function openSubState(SubState:FlxSubState)
@@ -2700,7 +2656,7 @@ class PlayState extends MusicBeatState
 				if(field.isPlayer){
 					for(char in field.characters){
 						if (char.animation.curAnim != null
-							&& char.holdTimer > Conductor.stepCrochet * (0.0011 / inst.pitch) * char.singDuration
+							&& char.holdTimer > Conductor.stepCrochet * 0.0011 * char.singDuration
 								&& char.animation.curAnim.name.startsWith('sing')
 								&& !char.animation.curAnim.name.endsWith('miss')
 								&& (char.idleWhenHold || !pressedGameplayKeys.contains(true)))
