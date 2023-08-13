@@ -9,8 +9,6 @@ function doZoomTween(zoom:Float, duration:Float)
 	zoom = Math.isNaN(zoom) ? defaultZoom : zoom;
 	duration = Math.isNaN(duration) ? 1 : Math.abs(duration);
 	
-	instance.camZooming = true;
-	
 	if (lastTween != null)
 	{
 		lastTween.cancel();
@@ -28,10 +26,12 @@ function doZoomTween(zoom:Float, duration:Float)
 			{
 				ease: FlxEase.quadInOut, 
 				onUpdate: function(twn){
+                    instance.camGame.zoom = twn.value;
 					instance.defaultCamZoom = twn.value;
 				},
 				onComplete: function(wtf){
-					instance.defaultCamZoom = zoom;
+					instance.camGame.zoom = zoom;
+                    instance.defaultCamZoom = zoom;
 					if (lastTween == wtf) lastTween = null;
 				}
 			}
