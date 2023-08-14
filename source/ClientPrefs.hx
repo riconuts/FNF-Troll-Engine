@@ -109,7 +109,7 @@ class ClientPrefs
 				display: "Miss Volume",
 				desc: "The volume of miss sounds.",
 				type: Number,
-				value: 50,
+				value: 1,
 				data: [
 					"suffix" => "%",
 					"min" => 0,
