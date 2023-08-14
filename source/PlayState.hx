@@ -3414,6 +3414,7 @@ class PlayState extends MusicBeatState
 			});
 		}
 
+		rating.color = 0xFFFFFFFF;
 		rating.alpha = ClientPrefs.judgeOpacity;
 
 		rating.visible = showRating;
@@ -3430,13 +3431,12 @@ class PlayState extends MusicBeatState
 	var comboColor = 0xFFFFFFFF;
 
 	private function displayCombo(?combo:Int){
-		if(combo==null)combo=stats.combo;
+		if (combo==null) combo = stats.combo;
 		if (ClientPrefs.simpleJudge)
 		{
 			for (prevCombo in lastCombos)
-			{
 				prevCombo.kill();
-			}
+			
 			if (combo == 0)
 				return;
 		}

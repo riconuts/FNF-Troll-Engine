@@ -1314,8 +1314,8 @@ class OptionsSubstate extends MusicBeatSubstate
 				changeWidget(1);
 			}
 
-			if (curWidget != null){
-				var optionName = curWidget.optionData.data.get("optionName");
+			if (curWidget != null && !curWidget.locked){
+				var optionName:String = curWidget.optionData.data.get("optionName");
 
 				switch (curWidget.type){
 					case Toggle:
@@ -1327,53 +1327,51 @@ class OptionsSubstate extends MusicBeatSubstate
 							doUpdate = true;
 						}
 
-						@:privateAccess
 						if (FlxG.keys.justPressed.R){
+							@:privateAccess
 							changeToggle(optionName, ClientPrefs.defaultOptionDefinitions.get(optionName).value);
 							doUpdate = true;
 						}
 						
 					case Button:
-						if (FlxG.keys.justPressed.ENTER && !curWidget.locked){
+						if (FlxG.keys.justPressed.ENTER){
 							onButtonPressed(optionName);
 							doUpdate = true;
 						}
 
 					case Number:
-						// ;_;
-						var locked:Bool = curWidget.optionData.data.exists("locked") ? curWidget.optionData.data.get("locked") : false;
-						if (!locked){
-							var data = curWidget.data;
+						// ;_;	
+						var data = curWidget.data;
 
-							if (FlxG.keys.justPressed.LEFT)	{
-								if (FlxG.keys.pressed.SHIFT)	changeNumber(optionName, data.get("min"), true);
-								else							data.get("leftAdjust").press();
-							}
-							else if (FlxG.keys.justReleased.LEFT) {
-								data.get("leftAdjust").release();
-							}		
-
-							if (FlxG.keys.justPressed.RIGHT) {
-								if (FlxG.keys.pressed.SHIFT)	changeNumber(optionName, data.get("max"), true);
-								else							data.get("rightAdjust").press();
-							}
-							else if (FlxG.keys.justReleased.RIGHT) {
-								data.get("rightAdjust").release();
-							}
-
-							@:privateAccess
-							if (FlxG.keys.justPressed.R){
-								var defaultDefinition = ClientPrefs.defaultOptionDefinitions.get(optionName);
-								var defaultValue = defaultDefinition.value;
-
-								if (defaultDefinition.data.get("type") == "percent")
-									defaultValue *= 100;
-
-								changeNumber(optionName, defaultValue, true);
-							}
-
-							doUpdate = true;
+						if (FlxG.keys.justPressed.LEFT)	{
+							if (FlxG.keys.pressed.SHIFT)	changeNumber(optionName, data.get("min"), true);
+							else							data.get("leftAdjust").press();
 						}
+						else if (FlxG.keys.justReleased.LEFT) {
+							data.get("leftAdjust").release();
+						}		
+
+						if (FlxG.keys.justPressed.RIGHT) {
+							if (FlxG.keys.pressed.SHIFT)	changeNumber(optionName, data.get("max"), true);
+							else							data.get("rightAdjust").press();
+						}
+						else if (FlxG.keys.justReleased.RIGHT) {
+							data.get("rightAdjust").release();
+						}
+
+						if (FlxG.keys.justPressed.R){
+							@:privateAccess
+							var defaultDefinition = ClientPrefs.defaultOptionDefinitions.get(optionName);
+							var defaultValue = defaultDefinition.value;
+
+							if (defaultDefinition.data.get("type") == "percent")
+								defaultValue *= 100;
+
+							changeNumber(optionName, defaultValue, true);
+						}
+
+						doUpdate = true; // fuck it
+						
 					case Dropdown:
 						var change = 0;
 						if (FlxG.keys.justPressed.LEFT) change--;
@@ -1389,8 +1387,8 @@ class OptionsSubstate extends MusicBeatSubstate
 							doUpdate = true;
 						}
 
-						@:privateAccess
 						if (FlxG.keys.justPressed.R){
+							@:privateAccess
 							changeDropdown(optionName, ClientPrefs.defaultOptionDefinitions.get(optionName).value);
 							doUpdate = true;
 						}
