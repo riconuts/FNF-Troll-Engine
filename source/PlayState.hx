@@ -3286,7 +3286,7 @@ class PlayState extends MusicBeatState
 						CustomFadeTransition.nextCamera = null;
 
 					#if VIDEOS_ALLOWED
-					var videoPath:String = Paths.video('${Paths.formatToSongPath(SONG.song)}-end');
+					var videoPath:String = Paths.video(Paths.formatToSongPath(SONG.song) + '-end');
 					if (Paths.exists(videoPath))
 						MusicBeatState.switchState(new VideoPlayerState(videoPath, gotoMenus));
 					else
@@ -3312,7 +3312,7 @@ class PlayState extends MusicBeatState
 					}
 
 					#if VIDEOS_ALLOWED
-					var videoPath:String = Paths.video('${Paths.formatToSongPath(nextSong)}');
+					var videoPath:String = Paths.video(Paths.formatToSongPath(nextSong));
 					if (Paths.exists(videoPath))
 						MusicBeatState.switchState(new VideoPlayerState(videoPath, playNextSong));
 					else #end
@@ -3447,7 +3447,7 @@ class PlayState extends MusicBeatState
 		while (separatedScore.length < 3)
 			separatedScore.unshift("0");
 		if(combo < 0)
-			separatedScore.unshift("-");
+			separatedScore.unshift("neg");
 
 		var daLoop:Int = 0;
 
@@ -3457,7 +3457,7 @@ class PlayState extends MusicBeatState
 		for (i in separatedScore)
 		{
 			var numScore:RatingSprite = ratingGroup.recycle(RatingSprite);
-			numScore.loadGraphic(Paths.image('num' + (i == "-" ? "neg" : i)));
+			numScore.loadGraphic(Paths.image('num' + i));
 			numScore.scale.set(0.5, 0.5);
 
 			if (ClientPrefs.simpleJudge){
@@ -4327,7 +4327,7 @@ class PlayState extends MusicBeatState
 	override function stepHit()
 	{
 		super.stepHit();
-		if(curStep == lastStepHit) 
+		if (curStep < lastStepHit) 
 			return;
 		
 		hud.stepHit(curStep);
@@ -4350,7 +4350,7 @@ class PlayState extends MusicBeatState
 	override function beatHit()
 	{
 		super.beatHit();
-		if(lastBeatHit >= curBeat) 
+		if (curBeat < lastBeatHit) 
 			return;
 		
 		hud.beatHit(curBeat);
@@ -4386,7 +4386,7 @@ class PlayState extends MusicBeatState
 
 		lastBeatHit = curBeat;
 
-		setOnScripts('curBeat', curBeat); //DAWGG?????
+		setOnScripts('curBeat', curBeat);
 		callOnScripts('onBeatHit');
 	}
 
