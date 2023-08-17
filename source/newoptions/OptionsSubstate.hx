@@ -1411,7 +1411,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			}
 
 			var movedMouse = FlxG.mouse.justMoved || FlxG.mouse.wheel != 0 || FlxG.mouse.justPressed;
-			if (pHov == null || doUpdate || movedMouse){
+			if (pHov == null || movedMouse){
 				for (object => widget in currentWidgets)
 				{
 					if (movedMouse && overlaps(widget.data.get("optionBox")))
