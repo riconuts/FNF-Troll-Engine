@@ -160,6 +160,9 @@ class Main extends Sprite
 		
 		addChild(new FlxGame(gameWidth, gameHeight, initialState, #if(flixel < "5.0.0") zoom, #end framerate, framerate, skipSplash, startFullscreen));
 		
+		FlxG.mouse.useSystemCursor = true;
+		FlxG.mouse.visible = false;
+
 		if (!troll){
 			#if !mobile
 			fpsVar = new FPS(10, 3, 0xFFFFFF);

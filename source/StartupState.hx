@@ -23,28 +23,19 @@ class StartupState extends FlxState
 	public static var volumeDownKeys:Array<FlxKey> = [FlxKey.NUMPADMINUS, FlxKey.MINUS];
 	public static var volumeUpKeys:Array<FlxKey> = [FlxKey.NUMPADPLUS, FlxKey.PLUS];
 
+	private final nextState = TitleState;
 	static var loaded = false;
-	static var recentRelease:Release;
 
-	static function clearTemps(dir:String){
-		#if desktop
-		for(file in FileSystem.readDirectory(dir)){
-			var file = './$dir/$file';
-			if(FileSystem.isDirectory(file))
-				clearTemps(file);
-			else if (file.endsWith(".tempcopy"))
-				FileSystem.deleteFile(file);
-		}
-		#end
-	}
 	public static function load():Void
 	{
 		if (loaded)
 			return;
 		loaded = true;
 
+		#if DO_AUTO_UPDATE
 		getRecentGithubRelease();
 		clearTemps("./");
+		#end
 
 		@:privateAccess
 		FlxG.sound.loadSavedPrefs(); // why is flixel not doing this !!!
@@ -53,10 +44,7 @@ class StartupState extends FlxState
 		FlxG.sound.volumeDownKeys = StartupState.volumeDownKeys;
 		FlxG.sound.volumeUpKeys = StartupState.volumeUpKeys;
 		FlxG.keys.preventDefaultKeys = [TAB];
-
-		FlxG.mouse.useSystemCursor = true;
-		FlxG.mouse.visible = false;
-
+		
 		FlxG.fixedTimestep = false;
 
 		#if (windows || linux) // No idea if this also applies to other targets
@@ -131,10 +119,11 @@ class StartupState extends FlxState
 		Paths.music('freakyMenu');
 	}
 
-
 	#if DO_AUTO_UPDATE
 	// gets the most recent release and returns it
 	// if you dont have download betas on, then it'll exclude prereleases
+	static var recentRelease:Release;
+
 	public static function getRecentGithubRelease(){
 		if (ClientPrefs.checkForUpdates)
 		{
@@ -159,6 +148,19 @@ class StartupState extends FlxState
 		}
 		return Main.recentRelease;
 	}
+
+	private static function clearTemps(dir:String)
+	{
+		#if desktop
+		for(file in FileSystem.readDirectory(dir)){
+			var file = './$dir/$file';
+			if(FileSystem.isDirectory(file))
+				clearTemps(file);
+			else if (file.endsWith(".tempcopy"))
+				FileSystem.deleteFile(file);
+		}
+		#end
+	}
 	#else
 	public static function getRecentGithubRelease()
 	{
@@ -179,51 +181,53 @@ class StartupState extends FlxState
 
 	private var warning:FlxSprite;
 	private var step = 0;
-	private var nextState = TitleState;
 
 	override function update(elapsed)
 	{
 		// this is kinda stupid but i couldn't find any other way to display the warning while the title screen loaded 
 		// could be worse lol
- 		switch (step){
+		switch (step){
 			case 0:
- 				warning = new FlxSprite(0, 0, Paths.image("warning"));
+				warning = new FlxSprite(0, 0, Paths.image("warning"));
 				warning.scale.set(0.65, 0.65);
 				warning.updateHitbox();
 				warning.screenCenter();
-				add(warning); 
+				add(warning);
 
-				//MusicBeatState.switchState(new editors.StageBuilderState());
 				step = 1;
 			case 1:
- 				load();
+				load();
 				if (Type.getClassFields(nextState).contains("load"))
 					nextState.load();
-				
-				#if (sys && debug)
-				var waitTime = 1.5 - Sys.cpuTime();
-				if (waitTime > 0) Sys.sleep(waitTime);
-				#end
-
 				step = 2;
 			case 2:
-				step = 3;
-
- 				FlxTween.tween(warning, {alpha: 0}, 1, {ease: FlxEase.expoIn, onComplete: function(twn){
-					step = 4;
-				}});
-			case 4:				
-				#if DO_AUTO_UPDATE
-				// this seems to work?
-				if (Main.checkOutOfDate())
-					MusicBeatState.switchState(new UpdaterState(recentRelease)); // UPDATE!!
-				else
+				#if debug
+				var waitTime:Float = 0;
+				#elseif sys
+				var waitTime:Float = Math.max(0, 1.5 - Sys.cpuTime());
+				#else
+				var waitTime:Float = 0;
 				#end
-				{
-					FlxTransitionableState.skipNextTransIn = true;
-					FlxTransitionableState.skipNextTransOut = true;
-					MusicBeatState.switchState(new TitleState());
-				}
+
+				FlxTween.tween(warning, {alpha: 0}, 1, {
+					ease: FlxEase.expoIn,
+					startDelay: waitTime, 
+					onComplete: (twn)->{
+						#if DO_AUTO_UPDATE
+						// this seems to work?
+						if (Main.checkOutOfDate())
+							MusicBeatState.switchState(new UpdaterState(recentRelease)); // UPDATE!!
+						else
+						#end
+						{
+							FlxTransitionableState.skipNextTransIn = true;
+							FlxTransitionableState.skipNextTransOut = true;
+							MusicBeatState.switchState(new TitleState());
+						}
+					}
+				});
+
+				step = 3;
 		}
 
 		super.update(elapsed);
