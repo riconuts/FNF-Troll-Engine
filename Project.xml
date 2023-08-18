@@ -100,10 +100,12 @@
 
 	<!-- ______________________________ Haxedefines _____________________________ -->
 
-	<!--Used for Izzy Engine's crash handler-->
-	<haxedef name="HXCPP_STACK_TRACE" if="CRASH_HANDLER"/>
-	<haxedef name="HXCPP_CHECK_POINTER" if="CRASH_HANDLER" />
-	<haxedef name="HXCPP_STACK_LINE" if="CRASH_HANDLER" />
+	<section if="CRASH_HANDLER">
+		<haxedef name="HXCPP_STACK_TRACE" />
+		<haxedef name="HXCPP_CHECK_POINTER" />
+		<haxedef name="HXCPP_STACK_LINE" />
+		<haxedef name="openfl-enable-handle-error" />
+	</section>
 
 	<!-- <haxedef name="no_traces" if="final"/> -->
 

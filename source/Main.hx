@@ -160,18 +160,6 @@ class Main extends Sprite
 		
 		addChild(new FlxGame(gameWidth, gameHeight, initialState, #if(flixel < "5.0.0") zoom, #end framerate, framerate, skipSplash, startFullscreen));
 		
-		// 
-		@:privateAccess
-		FlxG.sound.loadSavedPrefs();
-
-		FlxG.sound.muteKeys = StartupState.muteKeys;
-		FlxG.sound.volumeDownKeys = StartupState.volumeDownKeys;
-		FlxG.sound.volumeUpKeys = StartupState.volumeUpKeys;
-		FlxG.keys.preventDefaultKeys = [TAB];
-
-		FlxG.mouse.useSystemCursor = true;
-		FlxG.mouse.visible = false;
-		
 		if (!troll){
 			#if !mobile
 			fpsVar = new FPS(10, 3, 0xFFFFFF);
@@ -188,13 +176,24 @@ class Main extends Sprite
 		}
 		
 		#if CRASH_HANDLER
-		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
+		// Original code was made by sqirra-rng, big props to them!!!
+		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(
+			UncaughtErrorEvent.UNCAUGHT_ERROR, 
+			(event:UncaughtErrorEvent)->{
+				onCrash(event.error);
+			}
+		);
+
+		#if cpp
+		// Thank You EliteMasterEric, Very Cool!
+		untyped __global__.__hxcpp_set_critical_error_handler(onCrash);
+		#end
 		#end
 	}
 
-	// Original code was made by sqirra-rng, big props to them!!!
+	
 	#if CRASH_HANDLER
-	function onCrash(e:UncaughtErrorEvent):Void
+	function onCrash(errorName:String):Void
 	{
 		Sys.println("Call stack starts below");
 
@@ -212,7 +211,7 @@ class Main extends Sprite
 			}
 		}
 
-		errMsg += "\nUncaught Error: " + e.error;
+		errMsg += '\n$errorName';
 
 		Sys.println(" \n" + errMsg);
 		File.saveContent("crash.txt", errMsg);

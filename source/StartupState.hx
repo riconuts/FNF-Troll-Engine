@@ -46,6 +46,17 @@ class StartupState extends FlxState
 		getRecentGithubRelease();
 		clearTemps("./");
 
+		@:privateAccess
+		FlxG.sound.loadSavedPrefs(); // why is flixel not doing this !!!
+
+		FlxG.sound.muteKeys = StartupState.muteKeys;
+		FlxG.sound.volumeDownKeys = StartupState.volumeDownKeys;
+		FlxG.sound.volumeUpKeys = StartupState.volumeUpKeys;
+		FlxG.keys.preventDefaultKeys = [TAB];
+
+		FlxG.mouse.useSystemCursor = true;
+		FlxG.mouse.visible = false;
+
 		FlxG.fixedTimestep = false;
 
 		#if (windows || linux) // No idea if this also applies to other targets
@@ -196,21 +207,23 @@ class StartupState extends FlxState
 
 				step = 2;
 			case 2:
- 				FlxTween.tween(warning, {alpha: 0}, 1, {ease: FlxEase.expoIn, onComplete: function(twn){
-					#if DO_AUTO_UPDATE
-					// this seems to work?
-					if (Main.checkOutOfDate())
-						MusicBeatState.switchState(new UpdaterState(recentRelease)); // UPDATE!!
-					else
-					#end
-					{
-						FlxTransitionableState.skipNextTransIn = true;
-						FlxTransitionableState.skipNextTransOut = true;
-						MusicBeatState.switchState(new TitleState());
-					}	
-				}});
-				step = 3; 
+				step = 3;
 
+ 				FlxTween.tween(warning, {alpha: 0}, 1, {ease: FlxEase.expoIn, onComplete: function(twn){
+					step = 4;
+				}});
+			case 4:				
+				#if DO_AUTO_UPDATE
+				// this seems to work?
+				if (Main.checkOutOfDate())
+					MusicBeatState.switchState(new UpdaterState(recentRelease)); // UPDATE!!
+				else
+				#end
+				{
+					FlxTransitionableState.skipNextTransIn = true;
+					FlxTransitionableState.skipNextTransOut = true;
+					MusicBeatState.switchState(new TitleState());
+				}
 		}
 
 		super.update(elapsed);
