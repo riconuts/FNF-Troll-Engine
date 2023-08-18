@@ -891,80 +891,6 @@ class OptionsSubstate extends MusicBeatSubstate
 		changeWidget(null, true);
 	}
 
-	//// For keyboard
-	var selectableWidgetObjects:Array<FlxObject> = [];
-	var curOption:Null<Int> = null;
-	var curWidget:Widget;
-
-	function changeWidget(val:Null<Int>, ?isAbs:Bool = false)
-	{
-		var nextOption:Null<Int> = null; 
-
-		if (val != null)
-		{
-			if (curOption == null) curOption = (val<0) ? 0 : -1;
-
-			nextOption = isAbs ? val : (curOption + val);
-
-			if (nextOption < 0) nextOption = selectableWidgetObjects.length + nextOption;
-			nextOption = (selectableWidgetObjects.length > 0) ? (nextOption % selectableWidgetObjects.length) : 0;
-		}
-
-		// highlight and get the option text
-		var nextObject:Null<FlxText> = null;
-		for (idx in 0...selectableWidgetObjects.length)
-		{
-			var object:FlxText = cast selectableWidgetObjects[idx];
-
-			if (idx == nextOption){
-				nextObject = object;
-				object.color = FlxColor.YELLOW;
-			}else
-				object.color = FlxColor.WHITE;
-		}
-
-		if (nextObject != null){
-			var widget:Widget = currentWidgets.get(nextObject);
-
-			// move the camera to the option if it's off-screen
-			if (widget != null){
-				var optBox:FlxObject = widget.data.get("optionBox");
-				var cam = optBox.camera;
-
-				if (optBox.y < cam.scroll.y)
-					camFollow.y = nextOption==0 ? 0 : optBox.y;
-				else{
-					var camTail = cam.scroll.y + cam.height;
-					var optTail = optBox.y + optBox.height;
-
-					if (camTail < optTail)
-						camFollow.y += (optTail - camTail);
-				}
-			}
-
-			if (curWidget != null)
-				onWidgetUnselected(curWidget);
-
-			curWidget = widget;
-			curHovering = widget;
-		}else{
-			curWidget = null;
-			curHovering = null;
-		}
-
-		curOption = nextOption;
-	}
-	
-	function onWidgetUnselected(widget:Widget)
-	{
-		switch(widget.type){
-			case Number:
-				widget.data.get("leftAdjust").release();
-				widget.data.get("rightAdjust").release();
-			default:
-		}
-	}
-
 	////
 	var scrubbingBar:FlxSprite; // TODO: maybe make the bar a seperate class and then have this handled in that class
 
@@ -1289,13 +1215,84 @@ class OptionsSubstate extends MusicBeatSubstate
 	function getHeight():Float
 		return heights[selected];
 
-	var curHovering:Widget;
+	//// For keyboard
+	var selectableWidgetObjects:Array<FlxObject> = [];
+	var curOption:Null<Int> = null;
+
+	function changeWidget(val:Null<Int>, ?isAbs:Bool = false)
+	{
+		var nextOption:Null<Int> = null; 
+
+		if (val != null)
+		{
+			if (curOption == null) curOption = (val<0) ? 0 : -1;
+
+			nextOption = isAbs ? val : (curOption + val);
+
+			if (nextOption < 0) nextOption = selectableWidgetObjects.length + nextOption;
+			nextOption = (selectableWidgetObjects.length > 0) ? (nextOption % selectableWidgetObjects.length) : 0;
+		}
+
+		// highlight and get the option text
+		var nextObject:Null<FlxText> = null;
+		for (idx in 0...selectableWidgetObjects.length)
+		{
+			var object:FlxText = cast selectableWidgetObjects[idx];
+
+			if (idx == nextOption){
+				nextObject = object;
+				object.color = FlxColor.YELLOW;
+			}else
+				object.color = FlxColor.WHITE;
+		}
+
+		if (nextObject != null){
+			var widget:Widget = currentWidgets.get(nextObject);
+
+			// move the camera to the option if it's off-screen
+			if (widget != null){
+				var optBox:FlxObject = widget.data.get("optionBox");
+				var cam = optBox.camera;
+
+				if (optBox.y < cam.scroll.y)
+					camFollow.y = nextOption==0 ? 0 : optBox.y;
+				else{
+					var camTail = cam.scroll.y + cam.height;
+					var optTail = optBox.y + optBox.height;
+
+					if (camTail < optTail)
+						camFollow.y += (optTail - camTail);
+				}
+			}
+
+			if (curWidget != null)
+				onWidgetUnselected(curWidget);
+
+			curWidget = widget;
+		}else{
+			curWidget = null;
+		}
+
+		curOption = nextOption;
+	}
+	
+	function onWidgetUnselected(widget:Widget)
+	{
+		switch(widget.type){
+			case Number:
+				widget.data.get("leftAdjust").release();
+				widget.data.get("rightAdjust").release();
+			default:
+		}
+	}
+
+	var curWidget:Widget;
 
 	override function update(elapsed:Float)
 	{
 		if (subState == null)
 		{
-			var pHov = curHovering;
+			var pHov = curWidget;
 			var doUpdate = false;
 
 			if (FlxG.keys.justPressed.TAB){
@@ -1368,10 +1365,12 @@ class OptionsSubstate extends MusicBeatSubstate
 								defaultValue *= 100;
 
 							changeNumber(optionName, defaultValue, true);
+							doUpdate = true;
+						}
+						if (FlxG.keys.pressed.LEFT || FlxG.keys.pressed.RIGHT || FlxG.mouse.pressed){
+							doUpdate = true;
 						}
 
-						doUpdate = true; // fuck it
-						
 					case Dropdown:
 						var change = 0;
 						if (FlxG.keys.justPressed.LEFT) change--;
@@ -1410,20 +1409,25 @@ class OptionsSubstate extends MusicBeatSubstate
 				}
 			}
 
-			var movedMouse = FlxG.mouse.justMoved || FlxG.mouse.wheel != 0 || FlxG.mouse.justPressed;
-			if (pHov == null || doUpdate || movedMouse){
+			var movedMouse = FlxG.mouse.justMoved || FlxG.mouse.wheel != 0;
+			if (pHov == null || doUpdate || movedMouse || FlxG.mouse.justPressed)
+			{
 				for (object => widget in currentWidgets)
 				{
-					if (movedMouse && overlaps(widget.data.get("optionBox")))
-						curHovering = widget;
+					if (movedMouse && widget != pHov && overlaps(widget.data.get("optionBox")))
+					{
+						movedMouse = false;
+						changeWidget(null); // to reset keyboard selection
+						curWidget = widget;
+					}
 
 					updateWidget(object, widget, elapsed);
 				}
 			}
 
-			if (curHovering != null && pHov != curHovering)
+			if (curWidget != null && pHov != curWidget)
 			{
-				var hovering = curHovering.optionData;
+				var hovering = curWidget.optionData;
 				optionDesc.text = hovering.desc;
 				if (!optState){
 					var oN = hovering.data.get("optionName");
