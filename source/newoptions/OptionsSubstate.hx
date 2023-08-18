@@ -160,7 +160,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				Main.downloadBetas = MainMenuState.beta || ClientPrefs.downloadBetas;
 				if(!MainMenuState.beta || option == 'checkForUpdates'){
 					StartupState.getRecentGithubRelease();
-					Main.checkOutOfDate();
+					StartupState.checkOutOfDate();
 				}
 			#end
 			default:
