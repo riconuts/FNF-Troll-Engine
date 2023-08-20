@@ -3763,10 +3763,9 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		// FlxG.watch.addQuick('asdfa', upP);
+		/*
 		if (startedCountdown && !boyfriend.stunned && generatedMusic)
 		{
-
 			if (parsedHoldArray.contains(true) && !endingSong) {
 				#if ACHIEVEMENTS_ALLOWED
 				var achieve:String = checkForAchievement(['oversinging']);
@@ -3775,9 +3774,8 @@ class PlayState extends MusicBeatState
 				}
 				#end
 			}
-
-
 		}
+		*/
 
 		// TO DO: Find a better way to handle controller inputs, this should work for now
 		if (ClientPrefs.controllerMode || strumsBlocked.contains(true))
@@ -4087,7 +4085,7 @@ class PlayState extends MusicBeatState
 		if(!note.isSustainNote)
 			noteHits.push(Conductor.songPosition);
 
-		if (ClientPrefs.hitsoundVolume > 0 && !note.hitsoundDisabled)
+		if (!note.hitsoundDisabled && ClientPrefs.hitsoundVolume > 0)
 			FlxG.sound.play(Paths.sound('hitsound'), ClientPrefs.hitsoundVolume);
 
 		// Strum animations
@@ -4106,7 +4104,6 @@ class PlayState extends MusicBeatState
 		}
 
 		// Script shit
-
 		var isSus:Bool = note.isSustainNote; //GET OUT OF MY HEAD, GET OUT OF MY HEAD, GET OUT OF MY HEAD
 		var leData:Int = Math.round(Math.abs(note.noteData));
 		var leType:String = note.noteType;
@@ -4129,8 +4126,8 @@ class PlayState extends MusicBeatState
 
 		// tbh I hate hitCausesMiss lol its retarded
 		// added a shitty judge to deal w/ it tho!! 
-		// This doesn't play the miss animation tho!!
- 		if(note.hitResult.judgment == MISS_MINE) {
+ 		if (note.hitResult.judgment == MISS_MINE) 
+		{
 			noteMiss(note, field, true);
 
 			if (!note.noMissAnimation)
@@ -4161,18 +4158,15 @@ class PlayState extends MusicBeatState
 				if (note.parent != null)
 					if (note.parent.unhitTail.contains(note))
 						note.parent.unhitTail.remove(note);
-				
 			}
+
 			return;
 		} 
 
 		if (!note.isSustainNote)
 			judge(note, field);
-		
 
 		// Sing animations
-
-
 		var chars:Array<Character> = note.characters;
 		if (note.gfNote)
 			chars.push(gf);
@@ -4253,7 +4247,7 @@ class PlayState extends MusicBeatState
 	}
 
 	public function spawnNoteSplashOnNote(note:Note, ?field:PlayField) {
-		if(ClientPrefs.noteSplashes && note != null) {
+		if (ClientPrefs.noteSplashes && note != null) {
 			if(field==null)
 				field = getFieldFromNote(note);
 
@@ -4268,46 +4262,6 @@ class PlayState extends MusicBeatState
 		field.spawnSplash(data, splashSkin, note);
 	}
 
-	private var preventLuaRemove:Bool = false;
-	override function destroy() 
-	{
-		// Could probably do a results screen like the one on kade engine but for freeplay only. I think that could be cool.
-		// ^ I was JUST thinking this. We can show the average NPS, accuracy, grade, judge counters, etc
-		// I think just in general adding more stats could be neat & since we have the new options menu we can just put it in UI in a seperate category
-		// so you can set exactly which stats show up in the scoretxt, etc
-
-		/*
-		trace(msJudges.length / {
-			var total = 0.0;
-			for (n in msJudges) total+=n;
-			total;
-		});*/
-
-		stats.changedEvent.removeAll();
-		stats.changedEvent = null;
-
-		preventLuaRemove = true;
-
-		for(script in funkyScripts){
-			script.call("onDestroy");
-			script.stop();
-		}
-		hscriptArray = [];
-		funkyScripts = [];
-		#if LUA_ALLOWED
-		luaArray = [];
-		#end
-
-		notetypeScripts.clear();
-		eventScripts.clear();
-		if(!ClientPrefs.controllerMode)
-		{
-			FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
-			FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
-		}
-		super.destroy();
-	}
-
 	public function cancelMusicFadeTween() {
 /* 		if(inst.fadeTween != null) {
 			inst.fadeTween.cancel();
@@ -4316,6 +4270,8 @@ class PlayState extends MusicBeatState
 	}
 
 	#if LUA_ALLOWED
+	private var preventLuaRemove:Bool = false;
+
 	public function removeLua(lua:FunkinLua) {
 		if(luaArray != null && !preventLuaRemove) {
 			luaArray.remove(lua);
@@ -4535,58 +4491,14 @@ class PlayState extends MusicBeatState
 		setOnScripts('comboBreaks', stats.comboBreaks);
 		setOnScripts('hits', songHits);
 
-		var ret:Dynamic = callOnScripts('onRecalculateRating');
-		
-/* 		if(ret != Globals.Function_Stop)
-		{
-			if(totalPlayed < 1) //Prevent divide by 0
-				ratingName = '?';
-			else
-			{
-				// Rating Percent
-				if(ClientPrefs.wife3)
-					ratingPercent = totalNotesHit / totalPlayed;
-				else
-					ratingPercent = Math.min(1, Math.max(0, totalNotesHit / totalPlayed));
-				//trace((totalNotesHit / totalPlayed) + ', Total: ' + totalPlayed + ', notes hit: ' + totalNotesHit);
-
-				// Rating Name
-				if(ratingPercent >= 1)
-					ratingName = ratingStuff[0][0]; //Uses first string
-				else
-				{
-					ratingName = ratingStuff[ratingStuff.length-1][0];
-					for (i in 0...ratingStuff.length)
-					{
-						if(ratingPercent >= ratingStuff[i][1])
-						{
-							ratingName = ratingStuff[i][0];
-							break;
-						}
-					}
-				}
-			}
-
-			// Rating FC
-			ratingFC = getClearType();
-
-		} */
+		callOnScripts('onRecalculateRating');
 
 		stats.updateVariables();
-		
-		// maybe move all of this to a stats class that I can easily give to objects?
-/* 		hud.ratingFC = ratingFC;
-		hud.grade = ratingName;
-		hud.ratingPercent = ratingPercent;
-		hud.misses = songMisses;
-		hud.combo = combo;
-		hud.totalNotesHit = totalNotesHit;
-		hud.totalPlayed = totalPlayed;
-		hud.score = songScore; */
 		
 		hud.recalculateRating();
 
 		callOnScripts('postRecalculateRating'); // incase you wanna add custom rating stuff
+
 		setOnScripts('rating', ratingPercent);
 		setOnScripts('ratingName', ratingName);
 		setOnScripts('ratingFC', ratingFC);
@@ -4621,7 +4533,7 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	override public function switchTo(nextState: Dynamic){
+	override public function startOutro(nextState){
 		callOnHScripts("switchingState", [nextState]);
 		#if LUA_ALLOWED
 		callOnLuas("switchingState");
@@ -4630,9 +4542,48 @@ class PlayState extends MusicBeatState
 		FlxG.timeScale = 1;
 		pressedGameplayKeys = [];
 		FunkinHScript.defaultVars.clear();
-		return super.switchTo(nextState);
+
+		return super.startOutro(nextState);
 	}
 
+	override function destroy() 
+	{
+		// Could probably do a results screen like the one on kade engine but for freeplay only. I think that could be cool.
+		// ^ I was JUST thinking this. We can show the average NPS, accuracy, grade, judge counters, etc
+		// I think just in general adding more stats could be neat & since we have the new options menu we can just put it in UI in a seperate category
+		// so you can set exactly which stats show up in the scoretxt, etc
+
+		/*
+		trace(msJudges.length / {
+			var total = 0.0;
+			for (n in msJudges) total+=n;
+			total;
+		});*/
+
+		stats.changedEvent.removeAll();
+		stats.changedEvent = null;
+
+		preventLuaRemove = true;
+
+		for(script in funkyScripts){
+			script.call("onDestroy");
+			script.stop();
+		}
+		hscriptArray = [];
+		funkyScripts = [];
+		#if LUA_ALLOWED
+		luaArray = [];
+		#end
+
+		notetypeScripts.clear();
+		eventScripts.clear();
+		if(!ClientPrefs.controllerMode)
+		{
+			FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
+			FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
+		}
+		super.destroy();
+	}	
 }
 
 // mental gymnastics

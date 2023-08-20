@@ -24,7 +24,7 @@ typedef OptionData =
 }
 
 #if !macro
-@:build(newoptions.OptionMacro.build())
+@:build(options.OptionMacro.build())
 #end
 class ClientPrefs
 {

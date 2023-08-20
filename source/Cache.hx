@@ -1,14 +1,11 @@
 package;
 
-// thanks neb
+import openfl.Assets;
+import openfl.media.Sound;
+import openfl.display.BitmapData;
+import flixel.graphics.FlxGraphic;
 
 import flixel.math.FlxMath;
-
-import flixel.graphics.FlxGraphic;
-import flash.media.Sound;
-
-import openfl.Assets;
-import openfl.display.BitmapData;
 
 #if sys
 import sys.FileSystem;

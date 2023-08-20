@@ -1,7 +1,6 @@
-package newoptions;
+package options;
 
 import flixel.addons.transition.FlxTransitionableState;
-
 
 class OptionsState extends MusicBeatState {
 	var transCamera:FlxCamera; // JUST for the transition
@@ -11,6 +10,7 @@ class OptionsState extends MusicBeatState {
 		FadeTransitionSubstate.nextCamera = daSubstate.transCamera;
 		return super.switchTo(to);
 	}
+	
 	var daSubstate:OptionsSubstate;
     var transitoned:Bool = false;
     var bg:FlxSprite;

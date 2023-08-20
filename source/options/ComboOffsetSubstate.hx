@@ -1,8 +1,9 @@
-package newoptions;
+package options;
+
+import PlayState.RatingSprite;
 
 import flixel.util.FlxColor;
 import flixel.text.FlxText;
-import PlayState.RatingSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
 
 class ComboOffsetSubstate extends MusicBeatSubstate

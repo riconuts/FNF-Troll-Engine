@@ -1,4 +1,4 @@
-package newoptions;
+package options;
 
 import flixel.input.keyboard.FlxKey;
 import flixel.tweens.FlxEase;
@@ -176,7 +176,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				if((FlxG.state is OptionsState))
 					LoadingState.loadAndSwitchState(new options.NoteOffsetState());
 				else if (FlxG.state is PlayState)
-					openSubState(new newoptions.ComboOffsetSubstate());
+					openSubState(new options.ComboOffsetSubstate());
 			case 'customizeColours':
 				// TODO: check the note colours once you exit to see if any changed
 				openSubState(ClientPrefs.noteSkin == "Quants" ? new options.QuantNotesSubState() : new options.NotesSubState());

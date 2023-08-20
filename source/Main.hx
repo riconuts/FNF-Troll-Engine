@@ -161,7 +161,7 @@ class Main extends Sprite
 		);
 
 		#if cpp
-		// Thank You EliteMasterEric, Very Cool!
+		// Thank you EliteMasterEric, very cool!
 		untyped __global__.__hxcpp_set_critical_error_handler(onCrash);
 		#end
 		#end

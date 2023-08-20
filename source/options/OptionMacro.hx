@@ -1,4 +1,4 @@
-package newoptions;
+package options;
 
 #if macro
 import haxe.macro.Context;

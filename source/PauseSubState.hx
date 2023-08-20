@@ -1,6 +1,6 @@
 package;
 
-import newoptions.OptionsSubstate;
+import options.OptionsSubstate;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxCamera;

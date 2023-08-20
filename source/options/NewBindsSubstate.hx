@@ -1,6 +1,5 @@
-package newoptions;
+package options;
 
-import flixel.addons.plugin.taskManager.FlxTask;
 import flixel.input.keyboard.FlxKey;
 import flixel.math.FlxMath;
 import flixel.addons.ui.FlxUI9SliceSprite;
@@ -11,6 +10,7 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.math.FlxPoint;
 import openfl.geom.Rectangle;
+
 class NewBindsSubstate extends MusicBeatSubstate  {
 	// if an option is in this list, then atleast ONE key will have to be bound.
 	var forcedBind:Array<String> = ["ui_up", "ui_down", "ui_left", "ui_right", "accept", "back",];
