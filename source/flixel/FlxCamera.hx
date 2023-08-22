@@ -370,6 +370,11 @@ class FlxCamera extends FlxBasic
 	 */
 	public var angle(default, set):Float = 0;
 
+    /**
+     * The angle of the camera view (in degrees).
+	 */
+	public var scrollAngle(default, set):Float = 0;
+
 	/**
 	 * The color tint of the camera display.
 	 */
@@ -1350,11 +1355,20 @@ class FlxCamera extends FlxBasic
 	 */
 	function updateFlashSpritePosition():Void
 	{
-		if (flashSprite != null)
-		{
-			flashSprite.x = x * FlxG.scaleMode.scale.x + _flashOffset.x;
-			flashSprite.y = y * FlxG.scaleMode.scale.y + _flashOffset.y;
-		}
+		if (canvas != null){
+            if (flashSprite != null)
+            {
+                flashSprite.x = _flashOffset.x;
+                flashSprite.y = _flashOffset.y;
+            }
+            updateInternalSpritePositions();
+        }else{
+			if (flashSprite != null)
+			{
+				flashSprite.x = x * FlxG.scaleMode.scale.x + _flashOffset.x;
+				flashSprite.y = y * FlxG.scaleMode.scale.y + _flashOffset.y;
+			}
+        }
 	}
 
 	/**
@@ -1418,6 +1432,23 @@ class FlxCamera extends FlxBasic
 
 				canvas.scaleX = totalScaleX;
 				canvas.scaleY = totalScaleY;
+
+				_helperMatrix.identity();
+				_helperMatrix.translate(-width * 0.5, -height * 0.5);
+				_helperMatrix.scale(scaleX, scaleY);
+				_helperMatrix.rotateWithTrig(FlxMath.fastCos(scrollAngle * 0.0174533), FlxMath.fastSin(scrollAngle * 0.0174533));
+				_helperMatrix.translate(width * 0.5, height * 0.5);
+				_helperMatrix.translate(x, y);
+				_helperMatrix.scale(FlxG.scaleMode.scale.x, FlxG.scaleMode.scale.y);
+
+                @:privateAccess{
+                    canvas.__transform.a = _helperMatrix.a;
+                    canvas.__transform.b = _helperMatrix.b;
+                    canvas.__transform.c = _helperMatrix.c;
+                    canvas.__transform.d = _helperMatrix.d;
+                    canvas.__transform.tx = _helperMatrix.tx;
+                    canvas.__transform.ty = _helperMatrix.ty;
+                }
 
 				#if FLX_DEBUG
 				if (debugLayer != null)
@@ -1966,6 +1997,13 @@ class FlxCamera extends FlxBasic
 		angle = Angle;
 		flashSprite.rotation = Angle;
 		return Angle;
+	}
+
+	function set_scrollAngle(ScrollAngle:Float):Float
+	{
+		scrollAngle = ScrollAngle;
+		updateFlashSpritePosition();
+		return ScrollAngle;
 	}
 
 	function set_color(Color:FlxColor):FlxColor
