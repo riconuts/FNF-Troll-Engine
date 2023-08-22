@@ -15,15 +15,29 @@ class HScriptedHUD extends BaseHUD {
 		script.call("createHUD", [iP1, iP2, songName]);
 	}
 
-	override public function songStarted()
-	{
+	override function set_displayedHealth(nV:Float):Float 
+		return script.call("displayedHealth", [nV]);
+    
+
+
+    override function reloadHealthBarColors()
+		script.call("reloadHealthBarColors");
+
+	override function changedCharacter(id:Int, char:Character)
 		script.call("songStarted");
-	}
+	
+
+	function statChanged(stat:String, val:Dynamic)
+        script.call("statChanged", [stat, val]);
+    
+
+	override public function songStarted()
+		script.call("songStarted");
+	
 
 	override public function songEnding()
-	{
 		script.call("songEnding");
-	}
+	
 
 	override function changedOptions(changed:Array<String>)
 	{
@@ -65,49 +79,9 @@ class HScriptedHUD extends BaseHUD {
 		script.call("set_songName", [value]);
 		return songName = value;
 	}
-	override function set_score(value:Float){
-		script.call("set_score", [value]);
-		return score = value;
-	}
-	override function set_misses(value:Int){
-		script.call("set_misses", [value]);
-		return misses = value;
-	}
-	override function set_grade(value:String){
-		script.call("set_grade", [value]);
-		return grade = value;
-	}
-	override function set_ratingFC(value:String){
-		script.call("set_ratingFC", [value]);
-		return ratingFC = value;
-	}
-	override function set_totalNotesHit(value:Float){
-		script.call("set_totalNotesHit", [value]);
-		return totalNotesHit = value;
-	}
-	override function set_totalPlayed(value:Float){
-		script.call("set_totalPlayed", [value]);
-		return totalPlayed = value;
-	}
-	override function set_ratingPercent(value:Float){
-		script.call("set_ratingPercent", [value]);
-		return ratingPercent = value;
-	}
 	override function set_songPercent(value:Float){
 		script.call("set_songPercent", [value]);
 		return songPercent = value;
-	}
-	override function set_comboBreaks(value:Int){
-		script.call("set_comboBreaks", [value]);
-		return comboBreaks = value;
-	}
-	override function set_nps(value:Int){
-		script.call("set_nps", [value]);
-		return nps = value;
-	}
-	override function set_npsPeak(value:Int){
-		script.call("set_npsPeak", [value]);
-		return npsPeak = value;
 	}
 	override function set_combo(value:Int){
 		script.call("set_combo", [value]);

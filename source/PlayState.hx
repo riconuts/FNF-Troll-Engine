@@ -228,7 +228,8 @@ class PlayState extends MusicBeatState
 
 	public var displayedHealth(default, set):Float = 1;
 	function set_displayedHealth(value:Float){
-		healthBar.value = value;
+		//healthBar.value = value;
+		hud.displayedHealth = value;
 		displayedHealth = value;
 
 		return value;
@@ -238,6 +239,7 @@ class PlayState extends MusicBeatState
 	function set_health(value:Float){
 		health = value > maxHealth ? maxHealth : value;
 		displayedHealth = health;
+        hud.displayedHealth = health;
 
 		return health;
 	}
@@ -321,9 +323,6 @@ class PlayState extends MusicBeatState
 	public var practiceMode:Bool = false;
 	public var perfectMode:Bool = false;
 	public var instaRespawn:Bool = false;
-
-	public var healthBar:FNFHealthBar;
-	public var healthBarBG:FlxSprite;
 
 	public var iconP1:HealthIcon;
 	public var iconP2:HealthIcon;
@@ -797,13 +796,6 @@ class PlayState extends MusicBeatState
 				default: hud = new PsychHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song, stats);
 			}
 		}
-		
-		// TODO: remove all dependencies on healthbar in here
-		// aka make the HUD handle all of this (so that you can make custom HP bars, etc)
-		healthBar = hud.healthBar;
-		healthBarBG = healthBar.healthBarBG;
-		iconP1 = healthBar.iconP1;
-		iconP2 = healthBar.iconP2;
 
 		botplayTxt = new BotplayText(0, (ClientPrefs.downScroll ? FlxG.height - 44 : 19) + 15 + (ClientPrefs.downScroll ? -78 : 55), FlxG.width, "[BUTTPLUG]", 32);
 		botplayTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -1143,16 +1135,10 @@ class PlayState extends MusicBeatState
 	}
 
 	public function reloadHealthBarColors() {
-		if(callOnHScripts('reloadHealthBarColors', [healthBar]) == Globals.Function_Stop)
+		if(callOnHScripts('reloadHealthBarColors', [hud]) == Globals.Function_Stop)
 			return;
 
-		if (healthBar != null){
-			healthBar.createFilledBar(
-				FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]),
-				FlxColor.fromRGB(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2])
-			);
-			healthBar.updateBar();
-		}	
+        hud.reloadHealthBarColors();
 	}
 
 	public function addCharacterToList(newCharacter:String, type:Int) {
@@ -2786,7 +2772,9 @@ class PlayState extends MusicBeatState
 					boyfriend = boyfriendMap.get(name);
 					boyfriend.alpha = lastAlpha;
 					if(shiftFocus)focusedChar=boyfriend;
-					hud.iconP1.changeIcon(boyfriend.healthIcon);
+					//hud.iconP1.changeIcon(boyfriend.healthIcon);
+                    //hud.iconChange(1, boyfriend.healthIcon);
+                    hud.changedCharacter(1, boyfriend);
                     oldChar.setOnScripts("used", false);
 					boyfriend.setOnScripts("used", true);
                     oldChar.callOnScripts("changedOut", [oldChar, boyfriend]); // oldChar, newChar
@@ -2818,7 +2806,8 @@ class PlayState extends MusicBeatState
 					}
 					if(shiftFocus)focusedChar=dad;
 					dad.alpha = lastAlpha;
-					hud.iconP2.changeIcon(dad.healthIcon);
+					//hud.iconP2.changeIcon(dad.healthIcon);
+					hud.changedCharacter(2, boyfriend);
 					oldChar.setOnScripts("used", false);
 					dad.setOnScripts("used", true);
 					oldChar.callOnScripts("changedOut", [oldChar, dad]); // oldChar, newChar
@@ -2845,6 +2834,7 @@ class PlayState extends MusicBeatState
 						gf = gfMap.get(name);
 						gf.alpha = lastAlpha;
 						if(shiftFocus)focusedChar=gf;
+						hud.changedCharacter(3, boyfriend);
 					    oldChar.setOnScripts("used", false);
 					    gf.setOnScripts("used", true);
 						oldChar.callOnScripts("changedOut", [oldChar, gf]); // oldChar, newChar

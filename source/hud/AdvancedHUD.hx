@@ -7,7 +7,7 @@ import flixel.math.FlxMath;
 import flixel.tweens.*;
 import flixel.text.FlxText;
 
-class AdvancedHUD extends BaseHUD
+class AdvancedHUD extends CommonHUD
 {
 	public var judgeTexts:Map<String, FlxText> = [];
 	public var judgeNames:Map<String, FlxText> = [];

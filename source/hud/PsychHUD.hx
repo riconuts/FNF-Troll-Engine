@@ -7,7 +7,7 @@ import playfields.*;
 import flixel.tweens.FlxTween;
 import flixel.text.FlxText;
 
-class PsychHUD extends BaseHUD 
+class PsychHUD extends CommonHUD 
 {
 	public var judgeTexts:Map<String, FlxText> = [];
 	public var judgeNames:Map<String, FlxText> = [];
