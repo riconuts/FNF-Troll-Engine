@@ -2045,7 +2045,9 @@ class PlayState extends MusicBeatState
 			var eventScript:FunkinScript = eventScripts.get(event.event);
 
 			returnedValue = callScript(eventScript, "getOffset", [event]);
+            trace(eventScript, event.event);
 		}
+		trace(returnedValue, currentRV);
 		if(currentRV!=0 && returnedValue==0)returnedValue = currentRV;
 
 		if(returnedValue != 0)
@@ -4403,9 +4405,9 @@ class PlayState extends MusicBeatState
 				if (!ignoreStops)
 					return returnVal;
 			};
-			if (ret != Globals.Function_Continue && ret!=null){
+			if (ret != Globals.Function_Continue && ret!=null)
 				returnVal = ret;
-			}
+			
 		}
 		
 		if(returnVal==null)returnVal = Globals.Function_Continue;
@@ -4426,10 +4428,10 @@ class PlayState extends MusicBeatState
 	public function callScript(script:Dynamic, event:String, args:Array<Dynamic>):Dynamic
 	{
 		if((script is FunkinScript)){
-			return callOnScripts(event, args, true, [], [script], false);
+			return callOnScripts(event, args, true, [], [script], [], false);
 		}
 		else if((script is Array)){
-			return callOnScripts(event, args, true, [], script, false);
+			return callOnScripts(event, args, true, [], script, [], false);
 		}
 		else if((script is String)){
 			var scripts:Array<FunkinScript> = [];
@@ -4439,7 +4441,7 @@ class PlayState extends MusicBeatState
 					scripts.push(scr);
 			}
 
-			return callOnScripts(event, args, true, [], scripts, false);
+			return callOnScripts(event, args, true, [], scripts, [], false);
 		}
 
 		return Globals.Function_Continue;
