@@ -375,6 +375,12 @@ class FlxCamera extends FlxBasic
 	 */
 	public var scrollAngle(default, set):Float = 0;
 
+    /**
+     * Replicates old behaviour where camera.x moves flashSprite
+     * (Old behaviour)
+     */
+
+    public var positionMovesSprite:Bool = true;
 	/**
 	 * The color tint of the camera display.
 	 */
@@ -1358,8 +1364,13 @@ class FlxCamera extends FlxBasic
 		if (canvas != null){
             if (flashSprite != null)
             {
-                flashSprite.x = _flashOffset.x;
-                flashSprite.y = _flashOffset.y;
+				if (positionMovesSprite){
+					flashSprite.x = x * FlxG.scaleMode.scale.x + _flashOffset.x;
+					flashSprite.y = y * FlxG.scaleMode.scale.y + _flashOffset.y;
+                }else{
+                    flashSprite.x = _flashOffset.x;
+                    flashSprite.y = _flashOffset.y;
+                }
             }
             updateInternalSpritePositions();
         }else{
@@ -1438,7 +1449,7 @@ class FlxCamera extends FlxBasic
 				_helperMatrix.scale(scaleX, scaleY);
 				_helperMatrix.rotateWithTrig(FlxMath.fastCos(scrollAngle * 0.0174533), FlxMath.fastSin(scrollAngle * 0.0174533));
 				_helperMatrix.translate(width * 0.5, height * 0.5);
-				_helperMatrix.translate(x, y);
+				if (!positionMovesSprite)_helperMatrix.translate(x, y);
 				_helperMatrix.scale(FlxG.scaleMode.scale.x, FlxG.scaleMode.scale.y);
 
                 @:privateAccess{
