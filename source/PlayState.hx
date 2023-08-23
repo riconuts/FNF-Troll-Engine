@@ -227,8 +227,8 @@ class PlayState extends MusicBeatState
 	public var timingTxt:FlxText;
 
 	public var displayedHealth(default, set):Float = 1;
-	function set_displayedHealth(value:Float){
-		//healthBar.value = value;
+	function set_displayedHealth(value:Float)
+	{
 		hud.displayedHealth = value;
 		displayedHealth = value;
 
@@ -239,7 +239,6 @@ class PlayState extends MusicBeatState
 	function set_health(value:Float){
 		health = value > maxHealth ? maxHealth : value;
 		displayedHealth = health;
-        hud.displayedHealth = health;
 
 		return health;
 	}

@@ -21,9 +21,15 @@ class CommonHUD extends BaseHUD
 	public var healthBarBG(get, null):FlxSprite;
 	public var iconP1:HealthIcon;
 	public var iconP2:HealthIcon;
-
+	
 	function get_healthBarBG()
 		return healthBar.healthBarBG;
+
+	override function set_displayedHealth(value:Float){
+		healthBar.value = value;
+		displayedHealth = value;
+		return value;
+	}
 
 	public var timeBar:FlxBar;
 	public var timeTxt:FlxText;

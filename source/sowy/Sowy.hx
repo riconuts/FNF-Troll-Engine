@@ -5,8 +5,6 @@ using StringTools;
 
 class Sowy
 {
-    public inline static var YELLOW = 0xFFF4CC34;
-
     public static macro function getBuildDate()
     {
         var daDate = Date.now();

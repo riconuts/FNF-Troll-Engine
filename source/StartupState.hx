@@ -22,10 +22,11 @@ class StartupState extends FlxState
 	public static var muteKeys:Array<FlxKey> = [FlxKey.ZERO];
 	public static var volumeDownKeys:Array<FlxKey> = [FlxKey.NUMPADMINUS, FlxKey.MINUS];
 	public static var volumeUpKeys:Array<FlxKey> = [FlxKey.NUMPADPLUS, FlxKey.PLUS];
+	public static var fullscreenKeys:Array<FlxKey> = [FlxKey.F11];
 
 	private final nextState = TitleState;
-	static var loaded = false;
 
+	private static var loaded = false;
 	public static function load():Void
 	{
 		if (loaded)
@@ -57,7 +58,7 @@ class StartupState extends FlxState
 					e.stopImmediatePropagation();
 
 				// Also add F11 to switch fullscreen mode
-				if (e.keyCode == FlxKey.F11){
+				if (fullscreenKeys.contains(e.keyCode)){
 					FlxG.fullscreen = !FlxG.fullscreen;
 					e.stopImmediatePropagation();
 				}
