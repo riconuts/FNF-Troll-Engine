@@ -1,30 +1,36 @@
 package;
 
 import flixel.text.FlxText;
-import flixel.input.FlxPointer;
-import flixel.util.FlxTimer;
 import flixel.addons.display.FlxBackdrop;
-import flixel.ui.FlxButton.FlxTypedButton;
-import openfl.events.MouseEvent;
-import editors.MasterEditorMenu;
-import flixel.input.keyboard.FlxKey;
-import flixel.util.FlxColor;
+import flixel.effects.FlxFlicker;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
-import flixel.effects.FlxFlicker;
+import flixel.util.FlxColor;
 import flixel.util.FlxSort;
+import flixel.util.FlxTimer;
 import flixel.math.FlxMath;
 import flixel.math.FlxAngle;
 import flixel.group.FlxGroup.FlxTypedGroup;
-import flash.ui.Mouse;
-import flash.ui.MouseCursor;
+import editors.MasterEditorMenu;
+
+import flixel.input.keyboard.FlxKey;
+import openfl.events.MouseEvent;
+import openfl.ui.Mouse;
+import openfl.ui.MouseCursor;
+
+#if debug
+import sowy.Sowy;
+#end
+
 using StringTools;
+
 class ZSprite extends FlxSprite
 {
     public var order:Float = 0;
 }
 
-class MainMenuState extends MusicBeatState {
+class MainMenuState extends MusicBeatState 
+{
 	public static var engineVersion:String = '0.2.0'; // Used for autoupdating n stuff
 	public static var betaVersion(get, default):String = 'beta.6'; // beta version, make blank if not on a beta version, otherwise do it based on semantic versioning (alpha.1, beta.1, rc.1, etc)
 	public static var beta:Bool = betaVersion.trim() != '';
@@ -157,14 +163,18 @@ class MainMenuState extends MusicBeatState {
 		}
 		add(sideItems);
 
-		engineWatermark = new FlxText(0, 0, 0, 'Troll Engine $displayedVersion');
+		engineWatermark = new FlxText(0, 0, 0, 'Troll Engine');
 		engineWatermark.setFormat(Paths.font("calibrib.ttf"), 16, Main.outOfDate?FlxColor.RED:FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
-		engineWatermark.x = FlxG.width - engineWatermark.width;
-		engineWatermark.y = FlxG.height - engineWatermark.height;
 		add(engineWatermark);
+		#if debug
+		engineWatermark.text += ' [${Sowy.getBuildDate()}]';
+		#else
+		engineWatermark.text += ' $displayedVersion';
 		if (Main.outOfDate)
 			engineWatermark.text += " [UPDATE AVAILABLE]";
-		
+		#end
+		engineWatermark.x = FlxG.width - engineWatermark.width;
+		engineWatermark.y = FlxG.height - engineWatermark.height;
 
 		////
 		changeItem(curSelected, true);
