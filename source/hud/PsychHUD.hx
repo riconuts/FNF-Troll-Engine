@@ -106,32 +106,33 @@ class PsychHUD extends CommonHUD
 		}
 	}
 
-	override function update(elapsed:Float){
-		var shownScore:String = Std.string(score);
-		var isHighscore:Bool = false;
+	override function update(elapsed:Float)
+	{
+		var shownScore:String;
+		var isHighscore:Bool;
 		if (ClientPrefs.showWifeScore){
-			shownScore = Std.string(Math.floor(stats.totalNotesHit * 100));
-			isHighscore = songWifeHighscore != 0 && stats.totalNotesHit > songWifeHighscore;
-		}else
+			shownScore = Std.string(Math.floor(totalNotesHit * 100));
+			isHighscore = songWifeHighscore != 0 && totalNotesHit > songWifeHighscore;
+		}else{
+			shownScore = Std.string(score);
 			isHighscore = songHighscore != 0 && score > songHighscore;
-		
+		}		
 
-		scoreTxt.text = (isHighscore ? 'Hi-score: ' : 'Score: ')
-			+ '$shownScore | Combo Breaks: $comboBreaks | Rating: '
-			+ (grade != '?' ? Highscore.floorDecimal(ratingPercent * 100, 2)
-				+ '% / ${grade} [${(ratingFC == 'CFC' && ClientPrefs.wife3) ? "FC" : ratingFC}]' : grade);
+		scoreTxt.text = 
+			(isHighscore ? 'Hi-score: ' : 'Score: ') + shownScore +
+			' | Combo Breaks: ' + comboBreaks + 
+			' | Rating: ' + (grade == '?' ? grade : Highscore.floorDecimal(ratingPercent * 100, 2) + '% / $grade [${(ratingFC == 'CFC' && ClientPrefs.wife3) ? "FC" : ratingFC}]');
 		if (ClientPrefs.npsDisplay)
 			scoreTxt.text += ' | NPS: ${nps} / ${npsPeak}';
 
-		for (k in judgements.keys())
-		{
+		
+		for (k => v in judgements){
 			if (judgeTexts.exists(k))
-				judgeTexts.get(k).text = Std.string(judgements.get(k));
+				judgeTexts.get(k).text = Std.string(v);
 		}
 
 		super.update(elapsed);
 	}
-
 
 	override function noteJudged(judge:JudgmentData, ?note:Note, ?field:PlayField)
 	{

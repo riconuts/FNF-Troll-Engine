@@ -172,31 +172,25 @@ class AdvancedHUD extends CommonHUD
 		}
 	}
 
-	function colorLerp(clr1:FlxColor, clr2:FlxColor, alpha:Float){
-		return FlxColor.fromRGBFloat(
-			FlxMath.lerp(clr1.redFloat, clr2.redFloat, alpha),
-			FlxMath.lerp(clr1.greenFloat, clr2.greenFloat, alpha),
-			FlxMath.lerp(clr1.blueFloat, clr2.blueFloat, alpha),
-			FlxMath.lerp(clr1.alphaFloat, clr2.alphaFloat, alpha)
-		);
-	}
-
 	override function recalculateRating(){
-		var gradeColor = FlxColor.WHITE;
-		if(grade!='?'){
-			if (ratingPercent < 0)
-				gradeColor = judgeColours.get("miss");
-			else if (ratingPercent >= 0.9)
-				gradeColor = colorLerp(judgeColours.get("good"), 0xFFD800, (ratingPercent - 0.9) / 0.1);
-			
-			else if (ratingPercent >= 0.6)
-				gradeColor = colorLerp(FlxColor.WHITE, judgeColours.get("good"), (ratingPercent - 0.6) / 0.3);
-			else
-				gradeColor = colorLerp(judgeColours.get("miss"), FlxColor.WHITE, (ratingPercent) / 0.6);
-		}
-		
+		gradeTxt.color = (
+			if(grade == '?'){
+				FlxColor.WHITE;
 
-		gradeTxt.color = gradeColor;
+			}else if (ratingPercent < 0){
+				judgeColours.get("miss");
+
+			}else if (ratingPercent >= 0.9){
+				FlxColor.interpolate(judgeColours.get("good"), 0xFFD800, (ratingPercent - 0.9) / 0.1);
+			
+			}else if (ratingPercent >= 0.6){
+				FlxColor.interpolate(FlxColor.WHITE, judgeColours.get("good"), (ratingPercent - 0.6) / 0.3);
+
+			}else{
+				FlxColor.interpolate(judgeColours.get("miss"), FlxColor.WHITE, (ratingPercent) / 0.6);
+
+			}
+		);
 	}
 
 	override function changedOptions(changed:Array<String>){
@@ -209,8 +203,8 @@ class AdvancedHUD extends CommonHUD
 
 		hitbar.visible = ClientPrefs.hitbar;
 
-		statChanged("totalNotesHit", stats.totalNotesHit);
-		statChanged("score", stats.score);
+		statChanged("totalNotesHit", totalNotesHit);
+		statChanged("score", score);
 
 		// ^^ force the displays to update
 
@@ -232,21 +226,22 @@ class AdvancedHUD extends CommonHUD
 	override function update(elapsed:Float)
 	{
 		gradeTxt.text = grade;
-		if (hudPosition == 'Right')gradeTxt.x = FlxG.width - gradeTxt.width - 20;
+		if (hudPosition == 'Right') gradeTxt.x = FlxG.width - gradeTxt.width - 20;
 
 		
-		ratingTxt.text = (grade != "?"?(Highscore.floorDecimal(ratingPercent * 100, 2) + "%"):"0%");
-		fcTxt.text = (ratingFC=='CFC' && ClientPrefs.wife3)?"FC":ratingFC;
+		ratingTxt.text = (grade=="?") ? "0%" : (Highscore.floorDecimal(ratingPercent * 100, 2) + "%");
+		fcTxt.text = (ratingFC=='CFC' && ClientPrefs.wife3) ? "FC" : ratingFC;
 		
 		if (ClientPrefs.npsDisplay)
-			npsTxt.text = 'NPS: ${nps} (Peak: ${npsPeak})';
+			npsTxt.text = 'NPS: $nps (Peak: $npsPeak)';
 
-		if(peakCombo < combo)peakCombo = combo;
-		pcTxt.text = "Peak Combo: " + Std.string(peakCombo);
+		if(peakCombo < combo) peakCombo = combo;
+		pcTxt.text = 'Peak Combo: $peakCombo';
 		
-		for (k in stats.judgements.keys()){
+
+		for (k => v in judgements){
 			if (judgeTexts.exists(k))
-				judgeTexts.get(k).text = Std.string(stats.judgements.get(k));
+				judgeTexts.get(k).text = Std.string(v);
 		}
 
 		super.update(elapsed);
@@ -374,10 +369,14 @@ class AdvancedHUD extends CommonHUD
 			}
 
 		}
-		fcTxt.color = (function()
-		{
+		fcTxt.color = {
 			var color:FlxColor = 0xFFA3A3A3;
-			if (comboBreaks == 0)
+
+			if (ratingFC == 'Fail'){
+				color = judgeColours.get("miss");
+				
+			}
+			else if (comboBreaks == 0)
 			{
 				if (stats.judgements.get("bad") > 0 || stats.judgements.get("shit") > 0)
 					color = 0xFFFFFFFF;
@@ -397,13 +396,10 @@ class AdvancedHUD extends CommonHUD
 				{
 					color = judgeColours.get("epic");
 				}
-			}
+			}	
 
-			if (ratingFC == 'Fail')
-				color = judgeColours.get("miss");
-
-			return color;
-		})();
+			color;
+		};
 	}
 
 	override public function beatHit(beat:Int)
