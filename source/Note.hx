@@ -256,7 +256,7 @@ class Note extends NoteObject
 	}
 
 	private function set_noteType(value:String):String {
-		noteSplashTexture = PlayState.SONG.splashSkin;
+		noteSplashTexture = PlayState.splashSkin;
 
 		updateColours();
 

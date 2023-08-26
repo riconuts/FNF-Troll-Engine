@@ -17,7 +17,8 @@ class NoteSplash extends NoteObject
 		super(x, y);
 
 		var skin:String = 'noteSplashes';
-		if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
+		if (PlayState.splashSkin != null && PlayState.splashSkin.length > 0) 
+			skin = PlayState.splashSkin;
 
 		loadAnims(skin);
 		
@@ -40,9 +41,9 @@ class NoteSplash extends NoteObject
 		updateHitbox();
 
 		noteData = note;
-		if(texture == null) {
+		if (texture == null) {
 			texture = 'noteSplashes';
-			if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) texture = PlayState.SONG.splashSkin;
+			if (PlayState.splashSkin != null && PlayState.splashSkin.length > 0) texture = PlayState.splashSkin;
 		}
 
 		if(textureLoaded != texture) {
