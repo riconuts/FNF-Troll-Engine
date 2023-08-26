@@ -47,6 +47,7 @@ class PauseSubState extends MusicBeatSubstate
 
 		super.create();
 		
+		FlxG.mouse.visible = false;
 		persistentUpdate = false;
 
 		var cam:FlxCamera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
@@ -267,14 +268,14 @@ class PauseSubState extends MusicBeatSubstate
 						this.openSubState(new GameplayChangersSubstate());						
 
 					case 'Options':
-						var daSubstate = new OptionsSubstate();
 						this.persistentDraw = true;
+						var daSubstate = new OptionsSubstate();
 
 						daSubstate.goBack = (function(changedOptions:Array<String>)
 						{
 	 						var canResume:Bool = true;
 
-							for(opt in changedOptions){
+							for (opt in changedOptions){
 								if (OptionsSubstate.requiresRestart.contains(opt)){
 									canResume = false;
 									break;
@@ -282,6 +283,8 @@ class PauseSubState extends MusicBeatSubstate
 							}
 							
 							PlayState.instance.optionsChanged(changedOptions);
+
+							FlxG.mouse.visible = false;
 
 							closeSubState();
 	 						if (!canResume)
@@ -293,6 +296,7 @@ class PauseSubState extends MusicBeatSubstate
 									regenMenu();
 								}
 							}
+
 							for(camera in daSubstate.camerasToRemove)
 								FlxG.cameras.remove(camera);
 
