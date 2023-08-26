@@ -2326,7 +2326,7 @@ class PlayState extends MusicBeatState
 	override public function onFocus():Void
 	{
 		#if discord_rpc
-		if (health > 0 && !paused)
+		if (!isDead && !paused)
 		{
 			if (Conductor.songPosition > 0.0)
 			{
@@ -2345,7 +2345,7 @@ class PlayState extends MusicBeatState
 	override public function onFocusLost():Void
 	{
 		#if discord_rpc
-		if (health > 0)
+		if (!isDead)
 			DiscordClient.changePresence(detailsPausedText, SONG.song, Paths.formatToSongPath(SONG.song));
 		#end
 
@@ -2672,7 +2672,7 @@ class PlayState extends MusicBeatState
 		#end
 	}
 
-	public var isDead:Bool = false; //Don't mess with this on Lua!!!
+	public var isDead:Bool = false;
 	function doDeathCheck(?skipHealthCheck:Bool = false) {
 		if (
 			(
@@ -4497,7 +4497,7 @@ class PlayState extends MusicBeatState
 
 	////
 	public function pause(?OpenPauseMenu = true){
-		if (startedCountdown && canPause && health > 0 && !paused)
+		if (startedCountdown && canPause && !isDead && !paused)
 		{
 			if(callOnScripts('onPause') != Globals.Function_Stop) {
 				paused = true;
