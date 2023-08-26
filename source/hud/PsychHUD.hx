@@ -41,32 +41,8 @@ class PsychHUD extends CommonHUD
 		scoreTxt.visible = scoreTxt.alpha > 0;
 
 		if (ClientPrefs.judgeCounter != 'Off')
-		{
-			var textWidth = ClientPrefs.judgeCounter == 'Shortened' ? 150 : 200;
-			var textPosX = ClientPrefs.hudPosition == 'Right' ? (FlxG.width - 5 - textWidth) : 5;
-			var textPosY = (FlxG.height - displayedJudges.length*25) * 0.5;
-
-			for (idx in 0...displayedJudges.length)
-			{
-				var judgment = displayedJudges[idx];
-
-				var text = new FlxText(textPosX, textPosY + idx*25, textWidth, displayNames.get(judgment), 20);
-				text.setFormat(Paths.font("calibrib.ttf"), 24, judgeColours.get(judgment), LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-				text.scrollFactor.set();
-				text.borderSize = 1.25;
-				add(text);
-
-				var numb = new FlxText(textPosX, text.y, textWidth, "0", 20);
-				numb.setFormat(Paths.font("calibri.ttf"), 24, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-				numb.scrollFactor.set();
-				numb.borderSize = 1.25;
-				add(numb);
-
-				judgeTexts.set(judgment, numb);
-				judgeNames.set(judgment, text);
-			}
-		}
-
+			generateJudgementDisplays();
+		
 		//
 		hitbar = new Hitbar();
 		hitbar.alpha = alpha;
@@ -82,6 +58,48 @@ class PsychHUD extends CommonHUD
 		}
 
 		add(scoreTxt);
+	}
+
+	function clearJudgementDisplays()
+	{
+		for (text in judgeTexts){
+			remove(text);
+			text.destroy();
+		}
+		judgeTexts.clear();
+
+		for (text in judgeNames){
+			remove(text);
+			text.destroy();
+		}
+		judgeNames.clear();
+	}
+
+	function generateJudgementDisplays()
+	{
+		var textWidth = ClientPrefs.judgeCounter == 'Shortened' ? 150 : 200;
+		var textPosX = ClientPrefs.hudPosition == 'Right' ? (FlxG.width - 5 - textWidth) : 5;
+		var textPosY = (FlxG.height - displayedJudges.length*25) * 0.5;
+
+		for (idx in 0...displayedJudges.length)
+		{
+			var judgment = displayedJudges[idx];
+
+			var text = new FlxText(textPosX, textPosY + idx*25, textWidth, displayNames.get(judgment), 20);
+			text.setFormat(Paths.font("calibrib.ttf"), 24, judgeColours.get(judgment), LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			text.scrollFactor.set();
+			text.borderSize = 1.25;
+			add(text);
+
+			var numb = new FlxText(textPosX, text.y, textWidth, "0", 20);
+			numb.setFormat(Paths.font("calibri.ttf"), 24, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			numb.scrollFactor.set();
+			numb.borderSize = 1.25;
+			add(numb);
+
+			judgeTexts.set(judgment, numb);
+			judgeNames.set(judgment, text);
+		}
 	}
 
 	override function changedOptions(changed:Array<String>)
@@ -103,6 +121,22 @@ class PsychHUD extends CommonHUD
 			}
 			else
 				hitbar.y += 340;
+		}
+
+		var regenJudgeDisplays:Bool = false;
+		for (optionName in changed){
+			if (optionName == "judgeCounter" || optionName == "hudPosition"){
+				regenJudgeDisplays = true; 
+				break;
+			}
+		}
+
+		if (regenJudgeDisplays)
+		{
+			clearJudgementDisplays();
+
+			if (ClientPrefs.judgeCounter != 'Off')
+				generateJudgementDisplays();
 		}
 	}
 
@@ -140,6 +174,7 @@ class PsychHUD extends CommonHUD
 
 		if (ClientPrefs.hitbar)
 			hitbar.addHit(hitTime);
+		
 		if (ClientPrefs.scoreZoom)
 		{
 			if (scoreTxtTween != null)
