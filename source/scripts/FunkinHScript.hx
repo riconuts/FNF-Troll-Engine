@@ -237,8 +237,6 @@ class FunkinHScript extends FunkinScript
 					set("global", null);
 					set("getInstance", flixel.FlxG.get_state);
 				}
-
-				set("judgeManager", new JudgmentManager()); // dummy manager
 			}
 		}			
 
