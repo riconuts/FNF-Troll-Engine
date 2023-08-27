@@ -288,6 +288,8 @@ class FunkinHScript extends FunkinScript
 			CUSTOM_MINE: Judgment.CUSTOM_MINE
 		});
 
+		set("HScriptedHUD", hud.HScriptedHUD);
+
 		set("HScriptModifier", modchart.HScriptModifier);
 		set("SubModifier", modchart.SubModifier);
 		set("NoteModifier", modchart.NoteModifier);

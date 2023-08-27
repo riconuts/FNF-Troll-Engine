@@ -2044,9 +2044,9 @@ class PlayState extends MusicBeatState
 			var eventScript:FunkinScript = eventScripts.get(event.event);
 
 			returnedValue = callScript(eventScript, "getOffset", [event]);
-            trace(eventScript, event.event);
+            //trace(eventScript, event.event);
 		}
-		trace(returnedValue, currentRV);
+		//trace(returnedValue, currentRV);
 		if(currentRV!=0 && returnedValue==0)returnedValue = currentRV;
 
 		if(returnedValue != 0)
