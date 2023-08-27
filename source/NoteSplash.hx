@@ -49,25 +49,33 @@ class NoteSplash extends NoteObject
 			if (PlayState.splashSkin != null && PlayState.splashSkin.length > 0) texture = PlayState.splashSkin;
 		}
 
-		if(textureLoaded != texture) {
+		if (textureLoaded != texture) {
 			var ret = Globals.Function_Continue;
 
-			if(FlxG.state == PlayState.instance)
+			if (FlxG.state == PlayState.instance)
 				ret = PlayState.instance.callOnHScripts("loadSplashAnims", [texture], ["this" => this, "noteData" => noteData]);
 			
-			if (ret != Globals.Function_Stop) loadAnims(texture);
-			
+			if (ret != Globals.Function_Stop) 
+				loadAnims(texture);
 		}
 
 		colorSwap.hue = hueColor;
 		colorSwap.saturation = satColor;
 		colorSwap.brightness = brtColor;
 
-		PlayState.instance.callOnHScripts("postSetupNoteSplash", [x, y, note, texture, hueColor, satColor, brtColor], ["this" => this, "noteData" => noteData]);
+		var ret = Globals.Function_Continue;
+		if (FlxG.state == PlayState.instance)
+			ret = PlayState.instance.callOnHScripts("postSetupNoteSplash", [x, y, note, texture, hueColor, satColor, brtColor], ["this" => this, "noteData" => noteData]);
 
-		animation.play('note$note-${FlxG.random.int(1, animationAmount)}', true);
-		if (animation.curAnim != null) 
-			animation.curAnim.frameRate = 24 + FlxG.random.int(-2, 2);
+		if (ret != Globals.Function_Stop){
+			var playAnim = 'note$note';
+			if (animationAmount > 1)
+				playAnim += '-${FlxG.random.int(1, animationAmount)}';
+
+			animation.play(playAnim, true);
+			if (animation.curAnim != null) 
+				animation.curAnim.frameRate = 24 + FlxG.random.int(-2, 2);
+		}
 	}
 
 	function loadAnims(skin:String) {
