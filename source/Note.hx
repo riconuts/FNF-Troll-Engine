@@ -206,16 +206,14 @@ class Note extends NoteObject
 		''
 	];
 
+	public var isSustainEnd:Bool = false;
+	/*
 	@:isVar
 	public var isSustainEnd(get, null):Bool = false;
 
 	public function get_isSustainEnd():Bool
-	{
-		if (isSustainNote && animation != null && animation.curAnim != null && animation.curAnim.name != null && animation.curAnim.name.endsWith("end"))
-			return true;
-
-		return false;
-	}
+		return (isSustainNote && animation != null && animation.curAnim != null && animation.curAnim.name != null && animation.curAnim.name.endsWith("end"));
+	*/
 
 	private function set_multSpeed(value:Float):Float {
 		return multSpeed = value;

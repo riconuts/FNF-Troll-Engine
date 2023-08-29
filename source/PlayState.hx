@@ -154,31 +154,6 @@ class PlayState extends MusicBeatState
 	public var botplayTxt:FlxText;
 	var subtitles:Null<SubtitleDisplay>;
 
-	public var modchartTweens:Map<String, FlxTween> = new Map<String, FlxTween>();
-	public var modchartSprites:Map<String, ModchartSprite> = new Map<String, ModchartSprite>();
-	public var modchartTimers:Map<String, FlxTimer> = new Map<String, FlxTimer>();
-	public var modchartSounds:Map<String, FlxSound> = new Map<String, FlxSound>();
-	public var modchartTexts:Map<String, ModchartText> = new Map<String, ModchartText>();
-	public var modchartSaves:Map<String, FlxSave> = new Map<String, FlxSave>();
-	public var modchartObjects:Map<String, FlxSprite> = new Map<String, FlxSprite>();
-
-	public var boyfriendMap:Map<String, Character> = new Map();
-	public var extraMap:Map<String, Character> = new Map();
-	public var dadMap:Map<String, Character> = new Map();
-	public var gfMap:Map<String, Character> = new Map();
-	public var variables:Map<String, Dynamic> = new Map();
-
-	public var BF_X:Float = 770;
-	public var BF_Y:Float = 100;
-	public var DAD_X:Float = 100;
-	public var DAD_Y:Float = 100;
-	public var GF_X:Float = 400;
-	public var GF_Y:Float = 130;
-
-	public var boyfriendGroup:FlxSpriteGroup;
-	public var dadGroup:FlxSpriteGroup;
-	public var gfGroup:FlxSpriteGroup;
-
 	public static var curStage:String = '';
 	public static var SONG:SwagSong = null;
 	public static var isStoryMode:Bool = false;
@@ -191,6 +166,31 @@ class PlayState extends MusicBeatState
 
 	public var metadata:SongCreditdata; // metadata for the songs (artist, etc)
 
+	public var modchartTweens:Map<String, FlxTween> = new Map<String, FlxTween>();
+	public var modchartSprites:Map<String, ModchartSprite> = new Map<String, ModchartSprite>();
+	public var modchartTimers:Map<String, FlxTimer> = new Map<String, FlxTimer>();
+	public var modchartSounds:Map<String, FlxSound> = new Map<String, FlxSound>();
+	public var modchartTexts:Map<String, ModchartText> = new Map<String, ModchartText>();
+	public var modchartSaves:Map<String, FlxSave> = new Map<String, FlxSave>();
+	public var modchartObjects:Map<String, FlxSprite> = new Map<String, FlxSprite>();
+
+	public var boyfriendMap:Map<String, Character> = new Map();
+	public var extraMap:Map<String, Character> = new Map();
+	public var dadMap:Map<String, Character> = new Map();
+	public var gfMap:Map<String, Character> = new Map();
+	public var variables:Map<String, Dynamic> = new Map(); 
+
+	public var BF_X:Float = 770;
+	public var BF_Y:Float = 100;
+	public var DAD_X:Float = 100;
+	public var DAD_Y:Float = 100;
+	public var GF_X:Float = 400;
+	public var GF_Y:Float = 130;
+
+	public var boyfriendGroup:FlxSpriteGroup;
+	public var dadGroup:FlxSpriteGroup;
+	public var gfGroup:FlxSpriteGroup;
+
 	public var tracks:Array<FlxSound> = [];
 	public var vocals:FlxSound;
 	public var inst:FlxSound;
@@ -198,6 +198,10 @@ class PlayState extends MusicBeatState
 	public var dad:Character = null;
 	public var gf:Character = null;
 	public var boyfriend:Character = null;
+
+	public var boyfriendCameraOffset:Array<Float> = null;
+	public var opponentCameraOffset:Array<Float> = null;
+	public var girlfriendCameraOffset:Array<Float> = null;
 
 	public var focusedChar:Character;
 	public var gfSpeed:Int = 1;
@@ -374,10 +378,6 @@ class PlayState extends MusicBeatState
 
 	public var inCutscene:Bool = false;
 	public var skipCountdown:Bool = false;
-
-	public var boyfriendCameraOffset:Array<Float> = null;
-	public var opponentCameraOffset:Array<Float> = null;
-	public var girlfriendCameraOffset:Array<Float> = null;
 
 	#if discord_rpc
 	// Discord RPC variables
@@ -1947,6 +1947,8 @@ class PlayState extends MusicBeatState
 
 					oldNote = sustainNote;
 				}
+
+				oldNote.isSustainEnd = true;
 			}
 		}
 
@@ -4003,9 +4005,11 @@ class PlayState extends MusicBeatState
 			chars = field.characters;
 
 		for(char in chars){
-			char.callOnScripts("playNote", [note, field]);
-
-			if(note.noteType == 'Hey!' && char.animOffsets.exists('hey')) 
+			if (char.callOnScripts("playNote", [note, field]) == Globals.Function_Stop)
+			{
+				// nada
+			}	
+			else if(note.noteType == 'Hey!' && char.animOffsets.exists('hey')) 
 			{
 				char.playAnim('hey', true);
 				char.specialAnim = true;
@@ -4050,9 +4054,7 @@ class PlayState extends MusicBeatState
 			var script:FunkinScript = note.noteScript;
 
 			callScript(script, "opponentNoteHit", [note, field]);
-		}
-
-					
+		}					
 
 		if (!note.isSustainNote)
 		{
@@ -4163,44 +4165,41 @@ class PlayState extends MusicBeatState
 			chars.push(gf);
 		else if(chars.length==0)
 			chars = field.characters;
+		
+		for(char in chars){
+			if (char.callOnScripts("playNote", [note, field]) == Globals.Function_Stop)
+			{
+				// nada
+			}	
+			else if(note.noteType == 'Hey!') 
+			{
+				char.playAnim('hey', true);
+				char.specialAnim = true;
+				char.heyTimer = 0.6;
 
+				if (gf != null && gf.animOffsets.exists('cheer')) 
+				{
+					gf.playAnim('cheer', true);
+					gf.specialAnim = true;
+					gf.heyTimer = 0.6;
+				}
+			} 
+			else if(!note.noAnimation) 
+			{
+				var animToPlay:String = singAnimations[Std.int(Math.abs(note.noteData))];
 
-		for(char in chars)
-			char.callOnScripts("playNote", [note]);
+				var curSection = SONG.notes[curSection];
+				if ((curSection != null && curSection.altAnim) || note.noteType == 'Alt Animation')
+					animToPlay += '-alt';
 
-
-		if(!note.noAnimation) {
-			var animToPlay:String = singAnimations[Std.int(Math.abs(note.noteData))];
-
-			var curSection = SONG.notes[curSection];
-			if ((curSection != null && curSection.altAnim) || note.noteType == 'Alt Animation')
-				animToPlay += '-alt';
-			
-			for(char in chars){
 				if (char != null && char.animTimer <= 0 && !char.voicelining){
 					char.playAnim(animToPlay, true);
 					char.holdTimer = 0;
 					char.callOnScripts("playNoteAnim", [animToPlay, note]);
 				}
 			}
-
-			if(note.noteType == 'Hey!') {
-				for(char in chars){
-					if (char.animTimer <= 0 && !char.voicelining){
-						if(char.animOffsets.exists('hey')) {
-							char.playAnim('hey', true);
-							char.specialAnim = true;
-							char.heyTimer = 0.6;
-						}
-					}
-				}
-				if(gf != null && gf.animOffsets.exists('cheer')) {
-					gf.playAnim('cheer', true);
-					gf.specialAnim = true;
-					gf.heyTimer = 0.6;
-				}
-			}
 		}
+
 		note.wasGoodHit = true;
 		vocals.volume = vocalsEnded?0:1;
 
@@ -4524,7 +4523,8 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	override public function startOutro(nextState){
+	override public function startOutro(nextState)
+	{
 		callOnHScripts("switchingState", [nextState]);
 		#if LUA_ALLOWED
 		callOnLuas("switchingState");

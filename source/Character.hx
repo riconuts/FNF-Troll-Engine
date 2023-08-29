@@ -85,8 +85,8 @@ class Character extends FlxSprite
 	
 	/**Multiplier of how long a character holds the sing pose**/
 	public var singDuration:Float = 4;
+
 	public var idleSuffix:String = '';
-	
 	/**Character uses "danceLeft" and "danceRight" instead of "idle"**/
 	public var danceIdle:Bool = false;
 	public var skipDance:Bool = false;
