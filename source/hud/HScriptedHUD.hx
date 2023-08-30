@@ -1,5 +1,6 @@
 package hud;
 
+import flixel.util.FlxColor;
 import playfields.PlayField;
 import JudgmentManager.JudgmentData;
 import scripts.FunkinHScript;
@@ -20,8 +21,8 @@ class HScriptedHUD extends BaseHUD {
     
 
 
-    override function reloadHealthBarColors()
-		script.call("reloadHealthBarColors");
+	override function reloadHealthBarColors(dadColor:FlxColor, bfColor:FlxColor)
+		script.call("reloadHealthBarColors", [dadColor, bfColor]);
 
 	override function changedCharacter(id:Int, char:Character)
 		script.call("songStarted");
