@@ -86,7 +86,7 @@ class BaseHUD extends FlxSpriteGroup {
 	public var judgements(get, null):Map<String, Int>;
 	function get_judgements()return stats.judgements;
 
-    public function reloadHealthBarColors(){}
+	public function reloadHealthBarColors(dadColor:FlxColor, bfColor:FlxColor){}
 
 	public function new(iP1:String, iP2:String, songName:String, stats:Stats)
 	{

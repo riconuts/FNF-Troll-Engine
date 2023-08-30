@@ -1134,10 +1134,12 @@ class PlayState extends MusicBeatState
 	}
 
 	public function reloadHealthBarColors() {
-		if(callOnHScripts('reloadHealthBarColors', [hud]) == Globals.Function_Stop)
+        var dadColor:FlxColor = FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]);
+		var bfColor:FlxColor = FlxColor.fromRGB(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2]);
+		if(callOnHScripts('reloadHealthBarColors', [hud, dadColor, bfColor]) == Globals.Function_Stop)
 			return;
 
-        hud.reloadHealthBarColors();
+		hud.reloadHealthBarColors(dadColor, bfColor);
 	}
 
 	public function addCharacterToList(newCharacter:String, type:Int) {
