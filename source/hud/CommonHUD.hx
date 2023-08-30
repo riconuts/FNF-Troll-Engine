@@ -74,6 +74,17 @@ class CommonHUD extends BaseHUD
 		add(timeTxt);
 	}
 
+    override function reloadHealthBarColors()
+	{
+		if (healthBar != null)
+		{
+			healthBar.createFilledBar(FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]),
+				FlxColor.fromRGB(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2]));
+			healthBar.updateBar();
+		}
+	}
+
+
 	function updateTimeBarType()
 	{
 		// trace("time bar update", ClientPrefs.timeBarType); // the text size doesn't get updated sometimes idk why

@@ -1923,32 +1923,34 @@ class PlayState extends MusicBeatState
 
 				var susLength:Float = swagNote.sustainLength / Conductor.stepCrochet;
 				var floorSus:Int = Math.round(susLength);
-				for (susNote in 0...floorSus)
-				{
-					var sustainNote:Note = new Note(daStrumTime + Conductor.stepCrochet * (susNote + 1), daNoteData, oldNote, true);
-					sustainNote.mustPress = gottaHitNote;
-					sustainNote.gfNote = swagNote.gfNote;
-					sustainNote.noteType = type;
+                if(floorSus > 0){
+                    for (susNote in 0...floorSus)
+                    {
+                        var sustainNote:Note = new Note(daStrumTime + Conductor.stepCrochet * (susNote + 1), daNoteData, oldNote, true);
+                        sustainNote.mustPress = gottaHitNote;
+                        sustainNote.gfNote = swagNote.gfNote;
+                        sustainNote.noteType = type;
 
-					if (sustainNote==null || !sustainNote.alive)
-						break;
+                        if (sustainNote==null || !sustainNote.alive)
+                            break;
 
-					sustainNote.scrollFactor.set();
+                        sustainNote.scrollFactor.set();
 
-					sustainNote.ID = allNotes.length;
-					modchartObjects.set('note${sustainNote.ID}', sustainNote);
-					
-					swagNote.tail.push(sustainNote);
-					swagNote.unhitTail.push(sustainNote);
-					sustainNote.parent = swagNote;
-					sustainNote.fieldIndex = swagNote.fieldIndex;
-					playfield.queue(sustainNote);
-					allNotes.push(sustainNote);
+                        sustainNote.ID = allNotes.length;
+                        modchartObjects.set('note${sustainNote.ID}', sustainNote);
+                        
+                        swagNote.tail.push(sustainNote);
+                        swagNote.unhitTail.push(sustainNote);
+                        sustainNote.parent = swagNote;
+                        sustainNote.fieldIndex = swagNote.fieldIndex;
+                        playfield.queue(sustainNote);
+                        allNotes.push(sustainNote);
 
-					oldNote = sustainNote;
-				}
+                        oldNote = sustainNote;
+                    }
 
-				oldNote.isSustainEnd = true;
+                    oldNote.isSustainEnd = true;
+                }
 			}
 		}
 
