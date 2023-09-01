@@ -6,6 +6,7 @@ import editors.ChartingState;
 import math.Vector3;
 import scripts.*;
 import playfields.*;
+import shaders.ColorSwap;
 
 using StringTools;
 

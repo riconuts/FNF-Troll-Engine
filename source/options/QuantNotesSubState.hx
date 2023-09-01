@@ -7,6 +7,7 @@ import flixel.FlxSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxMath;
 import flixel.util.FlxColor;
+import shaders.ColorSwap;
 
 using StringTools;
 

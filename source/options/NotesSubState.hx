@@ -24,6 +24,7 @@ import flixel.util.FlxSave;
 import flixel.util.FlxTimer;
 import haxe.Json;
 import lime.utils.Assets;
+import shaders.ColorSwap;
 
 using StringTools;
 

@@ -482,7 +482,7 @@ class ComicReader extends MusicBeatState
 	var loadTimer:Float = 0;
 	var loadSteps:Int = FlxG.random.int(3, 10);
 	var timeBetweenSteps:Float = FlxG.random.float(0.1, 0.3);
-	var loadingShader:LoadShader = new LoadShader();
+	var loadingShader = new shaders.LoadShader();
 	var YOURINTERNETSUCKS:Bool = false;
 
 	function loadPanel(path:String)

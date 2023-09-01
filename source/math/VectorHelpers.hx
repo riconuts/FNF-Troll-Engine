@@ -1,4 +1,4 @@
-package;
+package math;
 
 import flixel.math.FlxMath;
 import math.Vector3;

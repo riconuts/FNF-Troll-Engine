@@ -1,10 +1,12 @@
 package modchart.modifiers;
+
 import ui.*;
 import modchart.*;
 import flixel.math.FlxPoint;
 import flixel.math.FlxMath;
 import math.*;
 import flixel.math.FlxAngle;
+
 class ConfusionModifier extends NoteModifier {
     override function getName()return 'confusion';
 	override function shouldExecute(player:Int, val:Float)return true;

@@ -5,6 +5,7 @@ import math.Vector3;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
+import shaders.ColorSwap;
 
 class NoteSplash extends NoteObject
 {

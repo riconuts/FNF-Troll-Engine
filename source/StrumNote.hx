@@ -5,10 +5,11 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.math.FlxPoint;
-#end
 import math.Vector3;
+import shaders.ColorSwap;
 
 using StringTools;
+#end
 
 // honestly we should make it so you can attach a hscript to receptors and type-less notes
 // maybe notetypes/default.hx and notetypes/receptor.hx

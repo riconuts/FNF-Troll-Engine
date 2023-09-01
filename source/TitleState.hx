@@ -7,6 +7,7 @@ import flixel.math.*;
 import flixel.tweens.*;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
+import shaders.ColorSwap;
 
 using StringTools;
 #if discord_rpc

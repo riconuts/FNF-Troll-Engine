@@ -4,102 +4,59 @@ import flixel.input.keyboard.FlxKey;
 using StringTools;
 
 class InputFormatter {
-	public static function getKeyName(key:FlxKey):String {
-		switch (key) {
-			case BACKSPACE:
-				return "BckSpc";
-			case CONTROL:
-				return "Ctrl";
-			case ALT:
-				return "Alt";
-			case CAPSLOCK:
-				return "Caps";
-			case PAGEUP:
-				return "PgUp";
-			case PAGEDOWN:
-				return "PgDown";
-			case ZERO:
-				return "0";
-			case ONE:
-				return "1";
-			case TWO:
-				return "2";
-			case THREE:
-				return "3";
-			case FOUR:
-				return "4";
-			case FIVE:
-				return "5";
-			case SIX:
-				return "6";
-			case SEVEN:
-				return "7";
-			case EIGHT:
-				return "8";
-			case NINE:
-				return "9";
-			case NUMPADZERO:
-				return "#0";
-			case NUMPADONE:
-				return "#1";
-			case NUMPADTWO:
-				return "#2";
-			case NUMPADTHREE:
-				return "#3";
-			case NUMPADFOUR:
-				return "#4";
-			case NUMPADFIVE:
-				return "#5";
-			case NUMPADSIX:
-				return "#6";
-			case NUMPADSEVEN:
-				return "#7";
-			case NUMPADEIGHT:
-				return "#8";
-			case NUMPADNINE:
-				return "#9";
-			case NUMPADMULTIPLY:
-				return "#*";
-			case NUMPADPLUS:
-				return "#+";
-			case NUMPADMINUS:
-				return "#-";
-			case NUMPADPERIOD:
-				return "#.";
-			case SEMICOLON:
-				return ";";
-			case COMMA:
-				return ",";
-			case PERIOD:
-				return ".";
-			case SLASH:
-				return "/";
-			case GRAVEACCENT:
-				return "`";
-			case LBRACKET:
-				return "[";
-			case BACKSLASH:
-				return "\\";
-			case RBRACKET:
-				return "]";
-			case QUOTE:
-				return "'";
-			case PRINTSCREEN:
-				return "PrtScrn";
-			case LEFT:
-				return "Left Arrow";
-			case RIGHT:
-				return 'Right Arrow';
-			case UP:
-				return 'Up Arrow';
-			case DOWN:
-				return 'Down Arrow';
-			case NONE:
-				return '---';
-			default:
-				var label:String = '' + key;
-				if(label.toLowerCase() == 'null') return '---';
-				return '' + label.charAt(0).toUpperCase() + label.substr(1).toLowerCase();
+	public static function getKeyName(key:FlxKey):String 
+	{
+		var key:Null<FlxKey> = key;
+		return switch (key) 
+		{
+			case BACKSPACE: "BckSpc";
+			case CONTROL: "Ctrl";
+			case ALT: "Alt";
+			case CAPSLOCK: "Caps";
+			case PAGEUP: "PgUp";
+			case PAGEDOWN: "PgDown";
+			case ZERO: "0";
+			case ONE: "1";
+			case TWO: "2";
+			case THREE: "3";
+			case FOUR: "4";
+			case FIVE: "5";
+			case SIX: "6";
+			case SEVEN: "7";
+			case EIGHT: "8";
+			case NINE: "9";
+			case NUMPADZERO: "#0";
+			case NUMPADONE: "#1";
+			case NUMPADTWO: "#2";
+			case NUMPADTHREE: "#3";
+			case NUMPADFOUR: "#4";
+			case NUMPADFIVE: "#5";
+			case NUMPADSIX: "#6";
+			case NUMPADSEVEN: "#7";
+			case NUMPADEIGHT: "#8";
+			case NUMPADNINE: "#9";
+			case NUMPADMULTIPLY: "#*";
+			case NUMPADPLUS: "#+";
+			case NUMPADMINUS: "#-";
+			case NUMPADPERIOD: "#.";
+			case SEMICOLON: ";";
+			case COMMA: ",";
+			case PERIOD: ".";
+			case SLASH: "/";
+			case GRAVEACCENT: "`";
+			case LBRACKET: "[";
+			case BACKSLASH: "\\";
+			case RBRACKET: "]";
+			case QUOTE: "'";
+			case PRINTSCREEN: "PrtScrn";
+			case LEFT: "Left Arrow";
+			case RIGHT: 'Right Arrow';
+			case UP: 'Up Arrow';
+			case DOWN: 'Down Arrow';
+			case NONE | null: '---';
+			default: 
+				var label:String = key.toString(); 
+				(label.charAt(0).toUpperCase() + label.substr(1).toLowerCase());
 		}
 	}
 }

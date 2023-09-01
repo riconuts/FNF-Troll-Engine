@@ -1,4 +1,5 @@
 package modchart.modifiers;
+
 import flixel.math.FlxAngle;
 import flixel.FlxSprite;
 import ui.*;

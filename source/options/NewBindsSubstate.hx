@@ -344,8 +344,8 @@ class NewBindsSubstate extends MusicBeatSubstate  {
                 }
 
                 if(forcedBind.contains(internal)){
-					var defaults = ClientPrefs.defaultKeys.get(internal);
                     if(keyPressed == NONE && binds[opp] == NONE){
+						var defaults = ClientPrefs.defaultKeys.get(internal);
                         // atleast ONE needs to be bound, so use a default
 						if (defaults[bindID] == NONE)
                             keyPressed = defaults[opp];

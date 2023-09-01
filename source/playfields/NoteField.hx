@@ -1,18 +1,18 @@
 package playfields;
 
-import flixel.math.FlxMatrix;
-import modchart.Modifier.RenderInfo;
-import flixel.math.FlxPoint;
-import openfl.geom.ColorTransform;
-import flixel.graphics.FlxGraphic;
-import openfl.display.Shader;
+import math.*;
 import flixel.math.FlxMath;
-import math.Vector3;
-import flixel.system.FlxAssets.FlxShader;
-import modchart.ModManager;
-import openfl.Vector;
-import flixel.util.FlxSort;
 import flixel.math.FlxAngle;
+import flixel.math.FlxPoint;
+import flixel.math.FlxMatrix;
+import flixel.util.FlxSort;
+import openfl.Vector;
+import openfl.geom.ColorTransform;
+import openfl.display.Shader;
+import flixel.graphics.FlxGraphic;
+import modchart.Modifier.RenderInfo;
+import modchart.ModManager;
+import flixel.system.FlxAssets.FlxShader;
 
 using StringTools;
 
