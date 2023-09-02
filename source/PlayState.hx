@@ -4649,7 +4649,7 @@ class FNFHealthBar extends FlxBar{
 		rightIcon = iconP1;
 
 		//
-		isOpponentMode = PlayState.instance.playOpponent;
+		isOpponentMode = PlayState.instance == null ? false : PlayState.instance.playOpponent;
 
 		super(
 			healthBarBG.x + 5, healthBarBG.y + 5,
