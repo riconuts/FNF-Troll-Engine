@@ -38,6 +38,14 @@ class PerspectiveModifier extends NoteModifier {
 	{
 		var subMods:Array<String> = ["fieldRoll", "fieldYaw", "fieldPitch", "fieldX", "fieldY", "fieldZ"];
 
+        for(col in 0...4){
+            subMods.push('${col}Roll');
+			subMods.push('${col}Yaw');
+			subMods.push('${col}Pitch');
+            // I dont see any real practical use for [col]X, Y, Z esp since transform[col]X/Y/Z exists
+            // however theres no good way to rotate the columns seperately atm
+        }
+
 		return subMods;
 	}
 
@@ -55,6 +63,8 @@ class PerspectiveModifier extends NoteModifier {
 		var rotated = VectorHelpers.rotateV3(originMod, getSubmodValue("fieldPitch", player) * FlxAngle.TO_RAD, getSubmodValue("fieldYaw", player) * FlxAngle.TO_RAD,
 			getSubmodValue("fieldRoll", player) * FlxAngle.TO_RAD); // rotate the vertex properly
 		var projected = VectorHelpers.getVector(rotated.subtract(fieldPos)); // perpsective projection
+
+        // TODO: column-based rotation
 		return projected.add(origin); // puts the vertex back to default pos 
 	}
 
