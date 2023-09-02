@@ -78,7 +78,6 @@ function onTrigger(value1:Dynamic, value2:Dynamic, time:Float){
     }
     if(Conductor.songPosition >= endTime){
         instance.defaultCamZoom = zoom;
-        instance.camGame.zoom = instance.defaultCamZoom;
     }else{
         var length = (endTime - Conductor.songPosition)/1000;
         var easeFunc = FlxEase.quadInOut;
