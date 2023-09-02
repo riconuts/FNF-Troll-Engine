@@ -352,7 +352,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		#if DO_AUTO_UPDATE
 		"Updating" => [
 			[
-				"Updating", ["downloadBetas", "checkForUpdates"]
+				"Updating", ["checkForUpdates", "downloadBetas"]
 			]
 		],
 		#end
