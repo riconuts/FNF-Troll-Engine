@@ -20,9 +20,19 @@ class PsychHUD extends CommonHUD
 
 	var songHighscore:Int = 0;
 	var songWifeHighscore:Float = 0;
+	var scoreString = Paths.getString("score");
+	var hiscoreString = Paths.getString("highscore");
+	var ratingString = Paths.getString("rating");
+	var cbString = Paths.getString("cbfullplural");
+	var npsString = Paths.getString("nps");
+
 	override public function new(iP1:String, iP2:String, songName:String, stats:Stats)
 	{
 		super(iP1, iP2, songName, stats);
+
+        // cached because dont wanna be doing that shit every update cycle lmao
+        // even though it probably doesnt matter since it caches it the first time
+        // i feel like this is probably faster than going through map.get each time
 
 		stats.changedEvent.add(statChanged);
 
@@ -153,11 +163,13 @@ class PsychHUD extends CommonHUD
 		}		
 
 		scoreTxt.text = 
-			(isHighscore ? 'Hi-score: ' : 'Score: ') + shownScore +
-			' | Combo Breaks: ' + comboBreaks + 
-			' | Rating: ' + (grade == '?' ? grade : Highscore.floorDecimal(ratingPercent * 100, 2) + '% / $grade [${(ratingFC == 'CFC' && ClientPrefs.wife3) ? "FC" : ratingFC}]');
+			(isHighscore ? '$hiscoreString: ' : '$scoreString: ') + shownScore +
+			' | $cbString: ' + comboBreaks + 
+			' | $ratingString: '
+			+ (grade == '?' ? grade : Highscore.floorDecimal(ratingPercent * 100, 2)
+				+ '% / $grade [${(ratingFC == stats.cfc && ClientPrefs.wife3) ? stats.fc : ratingFC}]');
 		if (ClientPrefs.npsDisplay)
-			scoreTxt.text += ' | NPS: ${nps} / ${npsPeak}';
+			scoreTxt.text += ' | $npsString: ${nps} / ${npsPeak}';
 
 		
 		for (k => v in judgements){

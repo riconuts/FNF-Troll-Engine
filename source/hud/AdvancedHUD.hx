@@ -25,6 +25,10 @@ class AdvancedHUD extends CommonHUD
 	var songHighRating:Float = 0;
 	public var hudPosition(default, null):String = ClientPrefs.hudPosition;
 
+	var npsString:String = Paths.getString("nps");
+	var peakString:String = Paths.getString("peak");
+	var pcString:String = Paths.getString("peakcombo");
+
 	var npsIdx:Int = 0;
 	override public function new(iP1:String, iP2:String, songName:String, stats:Stats)
 	{
@@ -107,7 +111,7 @@ class AdvancedHUD extends CommonHUD
 				idx++;
 			}
 		}else{
-			var text = new FlxText(0, 0, tWidth, "Misses", 20);
+			var text = new FlxText(0, 0, tWidth, Paths.getString("tier0plural"), 20);
 			text.setFormat(Paths.font("calibrib.ttf"), 24, 0xBDBDBD, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.WHITE);
 			text.screenCenter(Y);
 			text.y -= 35;
@@ -129,7 +133,7 @@ class AdvancedHUD extends CommonHUD
 		}
 
 		npsIdx = idx;
-		npsTxt = new FlxText(0, 0, tWidth, "NPS: 0 (Peak: 0)", 20);
+		npsTxt = new FlxText(0, 0, tWidth, '$npsString: 0 ($peakString: 0)', 20);
 		npsTxt.setFormat(Paths.font("calibri.ttf"), 26, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		npsTxt.screenCenter(Y);
 		npsTxt.y -= 5 - (25 * idx);
@@ -139,7 +143,7 @@ class AdvancedHUD extends CommonHUD
 		npsTxt.visible = ClientPrefs.npsDisplay;
 		add(npsTxt);
 		
-		pcTxt = new FlxText(0, 0, tWidth, "Peak Combo: 0", 20);
+		pcTxt = new FlxText(0, 0, tWidth, '$pcString: 0', 20);
 		pcTxt.setFormat(Paths.font("calibri.ttf"), 26, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		pcTxt.screenCenter(Y);
 		pcTxt.y -= 5 - (25 * (ClientPrefs.npsDisplay ? (idx + 1) : idx));
@@ -230,13 +234,13 @@ class AdvancedHUD extends CommonHUD
 
 		
 		ratingTxt.text = (grade=="?") ? "0%" : (Highscore.floorDecimal(ratingPercent * 100, 2) + "%");
-		fcTxt.text = (ratingFC=='CFC' && ClientPrefs.wife3) ? "FC" : ratingFC;
+		fcTxt.text = (ratingFC==stats.cfc && ClientPrefs.wife3) ? stats.fc : ratingFC;
 		
 		if (ClientPrefs.npsDisplay)
-			npsTxt.text = 'NPS: $nps (Peak: $npsPeak)';
+			npsTxt.text = '$npsString: $nps ($peakString: $npsPeak)';
 
 		if(peakCombo < combo) peakCombo = combo;
-		pcTxt.text = 'Peak Combo: $peakCombo';
+		pcTxt.text = '$pcString: $peakCombo';
 		
 
 		for (k => v in judgements){
@@ -372,9 +376,8 @@ class AdvancedHUD extends CommonHUD
 		fcTxt.color = {
 			var color:FlxColor = 0xFFA3A3A3;
 
-			if (ratingFC == 'Fail'){
+			if (ratingFC == stats.fail){
 				color = judgeColours.get("miss");
-				
 			}
 			else if (comboBreaks == 0)
 			{

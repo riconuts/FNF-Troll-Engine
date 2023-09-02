@@ -17,27 +17,34 @@ import flixel.group.FlxSpriteGroup;
 class BaseHUD extends FlxSpriteGroup {
 	var stats:Stats;
 	// just some ref vars
-	static var fullDisplays:Map<String, String> = [
-		"epic" => "Killers",
-		"sick" => "Awesomes",
-		"good" => "Cools",
-		"bad" => "Gays",
-		"shit" => "Retards",
-		"miss" => "Fails",
-		"cb" => "Combo Breaks"
+	var fullDisplays:Map<String, String> = [
+		"epic" => Paths.getString("tier5plural"),
+		"sick" => Paths.getString("tier4plural"),
+		"good" => Paths.getString("tier3plural"),
+		"bad" => Paths.getString("tier2plural"),
+		"shit" => Paths.getString("tier1plural"),
+		"miss" => Paths.getString("tier0plural"),
+		"cb" => Paths.getString("cbplural")
 	];
 
-	static var shortenedDisplays:Map<String, String> = [
-		"epic" => "KL",
-		"sick" => "AW",
-		"good" => "CL",
-		"bad" => "GY",
-		"shit" => "RT",
-		"miss" => "L",
-		"cb" => "CB"
+	var shortenedDisplays:Map<String, String> = [
+		"epic" => Paths.getString("tier5short"),
+		"sick" => Paths.getString("tier4short"),
+		"good" => Paths.getString("tier3short"),
+		"bad" => Paths.getString("tier2short"),
+		"shit" => Paths.getString("tier1short"),
+		"miss" => Paths.getString("tier0short"),
+		"cb" => Paths.getString("cbshort")
 	];
 	
-	public var displayNames:Map<String, String> = ClientPrefs.judgeCounter == 'Shortened' ? shortenedDisplays : fullDisplays;
+    @:isVar
+	public var displayNames(get, null):Map<String, String>;
+    function get_displayNames()
+		return ClientPrefs.judgeCounter == 'Shortened' ? shortenedDisplays : fullDisplays;
+
+
+    // TODO: add some easier way to customize these through scripts
+    // (maybe pulled from JudgementManager?)
 
 	public var judgeColours:Map<String, FlxColor> = [
 		"epic" => 0xFFE367E5,

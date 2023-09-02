@@ -110,6 +110,7 @@ class Paths
 		}
 		// run the garbage collector for good measure lmfao
 		System.gc();
+        
 	}
 
 	// fuckin around ._.
@@ -157,12 +158,15 @@ class Paths
 		// flags everything to be cleared out next unused memory clear
 		localTrackedAssets = [];
 		Assets.cache.clear("songs");
+		// remove the cached strings
+		currentStrings = [];
 	}
+
+    static public var currentStrings:Map<String,String> = [];
 
 	static public var currentModAddons:Array<String> = [];
 	static public var currentModDirectory:String = '';
 	static public var currentModLibraries:Array<String> = [];
-
 	public static function getPath(file:String, ?type:AssetType, ?library:Null<String> = null)
 	{
 		return getPreloadPath(file);
@@ -360,6 +364,43 @@ class Paths
 			return file;
 		#end
 		return 'assets/fonts/$key';
+	}
+
+
+    // TODO: maybe these should be cached when starting a song
+	public static function getString(key:String)
+	{
+		if (currentStrings.exists(key))
+			return currentStrings.get(key);
+        currentStrings.set(key, '');
+
+        var stringsText = '';
+        var hasFile:Bool = false;
+		for (filePath in Paths.getFolders("data"))
+		{
+			var file = filePath + "strings.txt";
+			if (FileSystem.exists(file))
+			{
+				stringsText = File.getContent(file);
+				hasFile = true;
+                break;
+			}
+        }
+
+        if(hasFile){
+            var daLines = stringsText.trim().split("\n");
+            for(shit in daLines){
+                var splitted = shit.split("=");
+                var thisKey = splitted.shift();
+                if (thisKey == key){
+                    currentStrings.set(key, splitted.join("=").trim());
+                    return currentStrings.get(key);
+                }
+            }
+        }
+
+        trace('$key has no attached value');
+        return key;
 	}
 
 	inline static public function fileExists(key:String, type:AssetType, ?ignoreMods:Bool = false, ?library:String)
