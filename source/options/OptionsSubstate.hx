@@ -1395,6 +1395,8 @@ class OptionsSubstate extends MusicBeatSubstate
 							changeDropdown(optionName, ClientPrefs.defaultOptionDefinitions.get(optionName).value);
 							doUpdate = true;
 						}
+
+						doUpdate=true; // necessary because it needs to fade in and out :T
 				}
 			}
 
