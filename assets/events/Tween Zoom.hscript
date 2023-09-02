@@ -91,11 +91,9 @@ function onTrigger(value1:Dynamic, value2:Dynamic, time:Float){
             onComplete: function(tw:FlxTween){
                 lastTween = null;
                 instance.defaultCamZoom = zoom;
-                instance.camGame.zoom = zoom;
             },
             onUpdate: function(tw:FlxTween){
                 instance.defaultCamZoom = tw.value;
-                instance.camGame.zoom = tw.value;
             }
         });
     }
