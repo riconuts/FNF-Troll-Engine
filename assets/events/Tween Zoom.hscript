@@ -26,11 +26,11 @@ function doZoomTween(zoom:Float, duration:Float)
 			{
 				ease: FlxEase.quadInOut, 
 				onUpdate: function(twn){
-                    instance.camGame.zoom = twn.value;
+                    //instance.camGame.zoom = twn.value;
 					instance.defaultCamZoom = twn.value;
 				},
 				onComplete: function(wtf){
-					instance.camGame.zoom = zoom;
+					//instance.camGame.zoom = zoom;
                     instance.defaultCamZoom = zoom;
 					if (lastTween == wtf) lastTween = null;
 				}
