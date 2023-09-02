@@ -149,6 +149,10 @@ class PlayState extends MusicBeatState
 	public var nps:Int = 0;
 	public var ratingStuff:Array<Array<Dynamic>> = Highscore.grades.get(ClientPrefs.gradeSet);
 	
+    public var healthBar:FNFHealthBar = new FNFHealthBar(); // backwards compat reasons, isnt ACTUALLY used
+    public var iconP1:HealthIcon = new HealthIcon(); // ditto
+    public var iconP2:HealthIcon = new HealthIcon(); // ditto
+    
 	public var hud:BaseHUD;
 	// public var scoreTxt:FlxText = new FlxText(); // just so psych mods n shit dont error
 	public var botplayTxt:FlxText;
@@ -326,9 +330,6 @@ class PlayState extends MusicBeatState
 	public var practiceMode:Bool = false;
 	public var perfectMode:Bool = false;
 	public var instaRespawn:Bool = false;
-
-	public var iconP1:HealthIcon;
-	public var iconP2:HealthIcon;
 
 	public var camGame:FlxCamera;
 	public var camStageUnderlay:FlxCamera; // retarded
