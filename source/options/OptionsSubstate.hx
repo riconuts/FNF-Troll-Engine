@@ -543,15 +543,15 @@ class OptionsSubstate extends MusicBeatSubstate
 					if (!actualOptions.exists(opt))
 						continue;
 
-					var data:OptionData = Reflect.copy(actualOptions.get(opt));
+					var data:OptionData = actualOptions.get(opt);
 
+					data.data.set("optionName", opt);
 					data.display = Paths.getString('opt_display_$opt');
 					data.desc = Paths.getString('opt_desc_$opt');
 
-					data.data.set("optionName", opt);
 					var text = new FlxText(16, daY, 0, data.display, 16);
-					text.cameras = [optionCamera];
 					text.setFormat(Paths.font("calibri.ttf"), 28, 0xFFFFFFFF, FlxTextAlign.LEFT);
+					text.cameras = [optionCamera];
 					var height = text.height + 12;
 					if (height < 45) height = 45;
 					
