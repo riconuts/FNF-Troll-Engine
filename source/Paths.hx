@@ -374,20 +374,14 @@ class Paths
 			return currentStrings.get(key);
         currentStrings.set(key, '');
 
-        var stringsText = '';
-        var hasFile:Bool = false;
+
 		for (filePath in Paths.getFolders("data"))
 		{
 			var file = filePath + "strings.txt";
-			if (FileSystem.exists(file))
-			{
-				stringsText = File.getContent(file);
-				hasFile = true;
-                break;
-			}
-        }
+			if (!FileSystem.exists(file))
+                continue;
+            var stringsText = File.getContent(file);
 
-        if(hasFile){
             var daLines = stringsText.trim().split("\n");
             for(shit in daLines){
                 var splitted = shit.split("=");
@@ -397,6 +391,7 @@ class Paths
                     return currentStrings.get(key);
                 }
             }
+            
         }
 
         trace('$key has no attached value');
