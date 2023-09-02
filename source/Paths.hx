@@ -380,6 +380,7 @@ class Paths
 			var file = filePath + "strings.txt";
 			if (!FileSystem.exists(file))
                 continue;
+            trace(filePath);
             var stringsText = File.getContent(file);
 
             var daLines = stringsText.trim().split("\n");
@@ -622,7 +623,7 @@ class Paths
 			foldersToCheck.push(Paths.getPreloadPath('$dir/'));
 
 		#if MODS_ALLOWED
-		for(mod in getGlobalContent())foldersToCheck.push(Paths.mods('$mod/$dir/'));
+		for(mod in getGlobalContent())foldersToCheck.insert(1, Paths.mods('$mod/$dir/'));
 		#end
 
 		return foldersToCheck;
