@@ -61,12 +61,15 @@
 	<define name="PE_MOD_COMPATIBILITY" if="LUA_ALLOWED" />
 	<!--Remove if you dont want the engine to autoupdate-->
 	<define name="DO_AUTO_UPDATE" if="desktop" unless="debug"/>
+	<undefine name="DO_AUTO_UPDATE" unless="final"/>
 
 	<define name="CRASH_HANDLER" if="desktop" />
 	
 	<define name="MULTICORE_LOADING" if="windows" />
-	<define name="loadBenchmark" if="MULTICORE_LOADING"/>
-	<!-- <define name="traceLoading"/> if="MULTICORE_LOADING"/> -->
+	<section if="MULTICORE_LOADING">
+		<!-- <define name="loadBenchmark" -->
+		<!-- <define name="traceLoading"/> -->
+	</section>
 
 	<!-- _______________________________ Libraries ______________________________ -->
 

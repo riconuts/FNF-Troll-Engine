@@ -95,7 +95,6 @@ class FunkinHScript extends FunkinScript
 		set("ObjectMap", haxe.ds.ObjectMap);
 		set("IntMap", haxe.ds.IntMap);
 		set("EnumValueMap", haxe.ds.EnumValueMap);
-		set("newMap", () -> {return new Map<Dynamic, Dynamic>();});
 
 		set("Lib", openfl.Lib);
 		set("Assets", openfl.utils.Assets);

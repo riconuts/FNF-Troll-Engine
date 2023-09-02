@@ -403,29 +403,29 @@ class ClientPrefs
 			},
 			// judgement-related (gameplay)
 			"epicWindow" => {
-				display: "Killer Window",
-				desc: "The hit window to hit a Killer judgement.",
+				display: "Epic Window",
+				desc: "The hit window to hit an Epic judgement.",
 				type: Number,
 				value: 22,
 				data: ["suffix" => "ms", "min" => 0, "max" => 200, "step" => 0.1]
 			},
 			"sickWindow" => {
-				display: "Awesome Window",
-				desc: "The hit window to hit an Awesome judgement.",
+				display: "Sick Window",
+				desc: "The hit window to hit a Sick judgement.",
 				type: Number,
 				value: 45,
 				data: ["suffix" => "ms", "min" => 0, "max" => 200, "step" => 0.1]
 			},
 			"goodWindow" => {
-				display: "Cool Window",
-				desc: "The hit window to hit a Cool judgement.",
+				display: "Good Window",
+				desc: "The hit window to hit a Good judgement.",
 				type: Number,
 				value: 90,
 				data: ["suffix" => "ms", "min" => 0, "max" => 200, "step" => 0.1]
 			},
 			"badWindow" => {
-				display: "Gay Window",
-				desc: "The hit window to hit a Gay judgement.",
+				display: "Bad Window",
+				desc: "The hit window to hit a Bad judgement.",
 				type: Number,
 				value: 135,
 				data: ["suffix" => "ms", "min" => 0, "max" => 200, "step" => 0.1]

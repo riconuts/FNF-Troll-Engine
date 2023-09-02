@@ -388,7 +388,7 @@ class Paths
                 var splitted = shit.split("=");
                 var thisKey = splitted.shift();
                 if (thisKey == key){
-                    currentStrings.set(key, splitted.join("=").trim());
+                    currentStrings.set(key, splitted.join("=").trim().replace('\\n', '\n'));
                     return currentStrings.get(key);
                 }
             }
