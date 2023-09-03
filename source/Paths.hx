@@ -380,7 +380,7 @@ class Paths
 			var file = filePath + "strings.txt";
 			if (!FileSystem.exists(file))
                 continue;
-            trace(filePath);
+            //trace(filePath);
             var stringsText = File.getContent(file);
 
             var daLines = stringsText.trim().split("\n");

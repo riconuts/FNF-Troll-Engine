@@ -253,6 +253,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				"Gameplay", 
 				[
 					"downScroll",
+					"midScroll",
 					"ghostTapping", 
 					"directionalCam", 
 					"noteOffset", 
@@ -497,14 +498,14 @@ class OptionsSubstate extends MusicBeatSubstate
 		var lastX:Float = optionMenu.x;
 		for (idx in 0...optionOrder.length)
 		{
-			var name = optionOrder[idx];
+			var tabName = optionOrder[idx];
 
 			var button = new FlxSprite(lastX, optionMenu.y - 3).makeGraphic(1, 44, FlxColor.WHITE);
 			button.ID = idx;
 			button.color = idx == 0 ? FlxColor.fromRGB(128, 128, 128) : FlxColor.fromRGB(82, 82, 82);
 			button.alpha = 0.75;
 
-			var text = new FlxText(button.x, button.y, 0, name.toUpperCase(), 16);
+			var text = new FlxText(button.x, button.y, 0, Paths.getString('opt_tabName_$tabName').toUpperCase(), 16);
 			text.setFormat(Paths.font("calibrib.ttf"), 32, 0xFFFFFFFF, FlxTextAlign.CENTER);
 			var width = text.fieldWidth < 86 ? 86 : text.fieldWidth;
 			button.setGraphicSize(Std.int(width + 8), Std.int(button.height));
@@ -519,10 +520,8 @@ class OptionsSubstate extends MusicBeatSubstate
 			add(button);
 			add(text);
 			buttons.push(button);
-		}
 
-		for (tabName in optionOrder)
-		{
+			////
 			var daY:Float = 0;
 			var group = new FlxTypedGroup<FlxObject>();
 			var widgets:Map<FlxObject, Widget> = [];
@@ -531,7 +530,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			for (data in options.get(tabName))
 			{
 				var label = data[0];
-				var text = new FlxText(8, daY, 0, label, 16);
+				var text = new FlxText(8, daY, 0, Paths.getString('opt_label_$label'), 16);
 				text.setFormat(Paths.font("calibrib.ttf"), 32, 0xFFFFFFFF, FlxTextAlign.LEFT);
 				text.cameras = [optionCamera];
 				group.add(text);
@@ -555,13 +554,14 @@ class OptionsSubstate extends MusicBeatSubstate
 					var height = text.height + 12;
 					if (height < 45) height = 45;
 					
-					var drop:FlxUI9SliceSprite = new FlxUI9SliceSprite(text.x - 12, text.y, Paths.image("optionsMenu/backdrop"),
-						new Rectangle(0, 0, optionMenu.width - text.x - 8, height), [22, 22, 89, 89]);
+					var rect = new Rectangle(text.x - 12, text.y, optionMenu.width - text.x - 8, height);
+					
+					var drop:FlxUI9SliceSprite = new FlxUI9SliceSprite(rect.x, rect.y, Paths.image("optionsMenu/backdrop"), rect, [22, 22, 89, 89]);
 					drop.cameras = [optionCamera];
-					var lock:FlxUI9SliceSprite = new FlxUI9SliceSprite(text.x - 12, text.y, Paths.image("optionsMenu/backdrop"),
-						new Rectangle(0, 0, optionMenu.width - text.x - 8, height), [22, 22, 89, 89]);
-					lock.alpha = 0.75;
+					
+					var lock:FlxUI9SliceSprite = new FlxUI9SliceSprite(rect.x, rect.y, Paths.image("optionsMenu/backdrop"), rect, [22, 22, 89, 89]);
 					lock.cameras = [optionCamera];
+					lock.alpha = 0.75;
 					text.y += (height - text.height) / 2;
 
 					var widget = createWidget(opt, drop, text, data);
