@@ -603,7 +603,7 @@ class ClientPrefs
 		'ui_up' => [W, UP],
 		'ui_right' => [D, RIGHT],
 		'accept' => [SPACE, ENTER],
-		'back' => [ESCAPE, BACKSPACE],
+		'back' => [ESCAPE, NONE],
 		'pause' => [ENTER, ESCAPE],
 		'reset' => [R, NONE],
 		'volume_mute' => [ZERO, NONE],
@@ -625,8 +625,10 @@ class ClientPrefs
 
 	static var manualLoads = ["gameplaySettings", "quantHSV", "arrowHSV", "comboOffset"];
 
-	public static function initialize()
+	public static function initialize(){
 		optionSave.bind("options_v2");
+		loadDefaultKeys();
+    }
 	
 
 	public static function save(?definitions:Map<String, OptionData>)

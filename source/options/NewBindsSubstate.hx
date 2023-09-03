@@ -10,38 +10,39 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.math.FlxPoint;
 import openfl.geom.Rectangle;
+using StringTools;
 
 class NewBindsSubstate extends MusicBeatSubstate  {
 	// if an option is in this list, then atleast ONE key will have to be bound.
 	var forcedBind:Array<String> = ["ui_up", "ui_down", "ui_left", "ui_right", "accept", "back",];
 
 	var binds:Array<Array<String>> = [
-		['Gameplay'],
-		['Left', 'note_left'],
-		['Down', 'note_down'],
-		['Up', 'note_up'],
-		['Right', 'note_right'],
-		['Pause', 'pause'],
-		['Reset', 'reset'],
-		['UI'],
-		['Up', 'ui_up'],
-		['Down', 'ui_down'],
-		['Left', 'ui_left'],
-		['Right', 'ui_right'],
-		['Accept', 'accept'],
-		['Back', 'back'],
-		['Misc.'],
-		['Mute', 'volume_mute'],
-		['Volume Up', 'volume_up'],
-		['Volume Down', 'volume_down'],
+		[Paths.getString('controls_gameplay')],
+		[Paths.getString('control_note_left'), 'note_left'],
+		[Paths.getString('control_note_down'), 'note_down'],
+		[Paths.getString('control_note_up'), 'note_up'],
+		[Paths.getString('control_note_right'), 'note_right'],
+		[Paths.getString('control_pause'), 'pause'],
+		[Paths.getString('control_reset'), 'reset'],
+		[Paths.getString('controls_ui')],
+		[Paths.getString('control_ui_up'), 'ui_up'],
+		[Paths.getString('control_ui_down'), 'ui_down'],
+		[Paths.getString('control_ui_left'), 'ui_left'],
+		[Paths.getString('control_ui_right'), 'ui_right'],
+		[Paths.getString('control_accept'), 'accept'],
+		[Paths.getString('control_back'), 'back'],
+		[Paths.getString('controls_misc')],
+		[Paths.getString('control_volume_mute'), 'volume_mute'],
+		[Paths.getString('control_volume_up'), 'volume_up'],
+		[Paths.getString('control_volume_down'), 'volume_down'],
 		//['Fullscreen', 'fullscreen'],
-		['Debug'],
+		[Paths.getString('controls_debug')],
 		// honestly might just replace this with one debug thing
 		// and make it so pressing it in playstate will open a debug menu w/ a bunch of stuff
 		// chart editor/character editor, botplay, skip to time, etc. move it from pause menu during charting mode lol
-		['Chart Editor', 'debug_1'],
-		['Character Editor', 'debug_2'],
-		['Toggle Botplay', 'botplay']
+		[Paths.getString('control_debug_1'), 'debug_1'],
+		[Paths.getString('control_debug_2'), 'debug_2'],
+		[Paths.getString('control_botplay'), 'botplay']
 	];
 
 
@@ -213,7 +214,7 @@ class NewBindsSubstate extends MusicBeatSubstate  {
         }
         
 
-		var text = new FlxText(16, daY, 0, "Reset to Defaults", 16);
+		var text = new FlxText(16, daY, 0, Paths.getString("control_default"), 16);
 		text.cameras = [scrollableCam];
 		text.setFormat(Paths.font("calibri.ttf"), 28, 0xFFFFFFFF, FlxTextAlign.LEFT);
 		text.updateHitbox();
@@ -258,11 +259,12 @@ class NewBindsSubstate extends MusicBeatSubstate  {
                             bindIndex = index;
 
 							unbindText.visible = forcedBind.contains(internal);
-							popupText.text = 'Press any key to bind, or press [BACKSPACE] to cancel.';
+							popupText.text = Paths.getString("control_rebind").replace("{cancelKey}", "[Backspace]"); //'Press any key to bind, or press [BACKSPACE] to cancel.';
 							if (ClientPrefs.keyBinds.get(internal)[id]!=NONE)
-                                popupText.text += '\nPress [${InputFormatter.getKeyName(ClientPrefs.keyBinds.get(internal)[id])}] to unbind.';
+								popupText.text += "\n" + Paths.getString("control_unbind").replace("{unbindKey}", '[${InputFormatter.getKeyName(ClientPrefs.keyBinds.get(internal)[id])}]');
+                            //'\nPress [${InputFormatter.getKeyName(ClientPrefs.keyBinds.get(internal)[id])}] to unbind.';
 
-							popupTitle.text = "CURRENTLY BINDING " + binds[butt.ID][0].toUpperCase();
+							popupTitle.text = Paths.getString("control_binding").replace("{controlNameUpper}", binds[butt.ID][0].toUpperCase()).replace("{controlName}", binds[butt.ID][0]); //"CURRENTLY BINDING " + binds[butt.ID][0].toUpperCase();
                         }
                     }
                 }
