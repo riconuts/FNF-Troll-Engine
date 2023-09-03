@@ -371,7 +371,7 @@ class Paths
 	public static function getString(key:String):String
 	{
 		if (currentStrings.exists(key))
-			return currentStrings.get(key)
+			return currentStrings.get(key);
 		
         // currentStrings.set(key, '');
 
