@@ -370,10 +370,9 @@ class Paths
     // TODO: maybe these should be cached when starting a song
 	public static function getString(key:String):String
 	{
-		if (currentStrings.exists(key)){
-			var x = currentStrings.get(key);
-			return x==null ? key : x;
-		}
+		if (currentStrings.exists(key))
+			return currentStrings.get(key)
+		
         // currentStrings.set(key, '');
 
 		for (filePath in Paths.getFolders("data"))
