@@ -368,22 +368,23 @@ class Paths
 
 
     // TODO: maybe these should be cached when starting a song
-	public static function getString(key:String)
+	public static function getString(key:String):String
 	{
-		if (currentStrings.exists(key))
-			return currentStrings.get(key);
-        currentStrings.set(key, '');
-
+		if (currentStrings.exists(key)){
+			var x = currentStrings.get(key);
+			return x==null ? key : x;
+		}
+        // currentStrings.set(key, '');
 
 		for (filePath in Paths.getFolders("data"))
 		{
 			var file = filePath + "strings.txt";
-			if (!FileSystem.exists(file))
-                continue;
-            //trace(filePath);
-            var stringsText = File.getContent(file);
+			if (!exists(file)) continue;
 
+            //trace(filePath);
+            var stringsText = getContent(file);
             var daLines = stringsText.trim().split("\n");
+
             for(shit in daLines){
                 var splitted = shit.split("=");
                 var thisKey = splitted.shift();
@@ -392,7 +393,6 @@ class Paths
                     return currentStrings.get(key);
                 }
             }
-            
         }
 
         trace('$key has no attached value');
