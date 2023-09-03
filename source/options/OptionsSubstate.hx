@@ -248,9 +248,9 @@ class OptionsSubstate extends MusicBeatSubstate
 
 	static var options:Map<String, Array<Dynamic>> = [
 		// maps are annoying and dont preserve order so i have to do this
-		"Game" => [
+		"game" => [
 			[
-				"Gameplay", 
+				"gameplay", 
 				[
 					"downScroll",
 					"midScroll",
@@ -261,7 +261,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				]
 			],
 			[
-				"Audio", 
+				"audio", 
 				[
 					"ruin",
 					"hitsoundVolume", 
@@ -269,7 +269,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				]
 			],
 			[
-				"Accessibility",
+				"accessibility",
 				[
 					"flashing",
 					"camShakeP",
@@ -278,7 +278,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				]
 			],
 			[
-				"Advanced",
+				"advanced",
 				[
 					"wife3",
 					"useEpics",
@@ -292,9 +292,9 @@ class OptionsSubstate extends MusicBeatSubstate
 				]
 			]
 		],
-		"UI" => [
+		"ui" => [
 			[
-				"Notes",
+				"notes",
 				[
 					"noteOpacity",
 					"downScroll",
@@ -305,7 +305,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				]
 			],
 			[
-				"HUD",
+				"hud",
 				[
 					"timeBarType", 
 					"hudOpacity", 
@@ -326,7 +326,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				]
 			],
 			[
-				"Advanced", 
+				"advanced", 
 				[
 					"etternaHUD", 
 					"gradeSet",
@@ -334,11 +334,11 @@ class OptionsSubstate extends MusicBeatSubstate
 				]
 			]
 		],
-		"Video" => [
-			["Video", ["shaders", "showFPS"]],
-			["Display", ["framerate", "bread"]],
+		"video" => [
+			["video", ["shaders", "showFPS"]],
+			["display", ["framerate", "bread"]],
 			[
-				"Performance",
+				"performance",
 				[
 					"lowQuality",
 					"globalAntialiasing",
@@ -349,17 +349,24 @@ class OptionsSubstate extends MusicBeatSubstate
 				]
 			]
 		],
-		"Controls" => [["Keyboard", ["customizeKeybinds",]], ["Controller", ["controllerMode",]]],
+		"controls" => [
+            [
+                "keyboard", ["customizeKeybinds",]
+            ], 
+            [
+                "controller", ["controllerMode",]
+            ]
+        ],
 		#if DO_AUTO_UPDATE
-		"Updating" => [
+		"updating" => [
 			[
-				"Updating", ["checkForUpdates", "downloadBetas"]
+				"updating", ["checkForUpdates", "downloadBetas"]
 			]
 		],
 		#end
-		/* "Accessibility" => [
+		/* "accessibility" => [
 				[
-					"Gameplay", 
+					"gameplay", 
 					[
 						"flashing",
 						"camShakeP",
@@ -370,11 +377,11 @@ class OptionsSubstate extends MusicBeatSubstate
 	];
 
 	static var optionOrder:Array<String> = [
-		"Game",
-		"UI",
-		"Video",
-		"Controls",
-		#if DO_AUTO_UPDATE "Updating", #end /* "Accessibility" */];
+		"game",
+		"ui",
+		"video",
+		"controls",
+		#if DO_AUTO_UPDATE "updating", #end /* "Accessibility" */];
 
 	var selected:Int = 0;
 
