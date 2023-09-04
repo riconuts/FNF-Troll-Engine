@@ -49,7 +49,7 @@ class SinnerState extends FlxState
 		// window shit
 		mainWindow = Application.current.window;
 		mainWindow.borderless = true;
-		mainWindow.parameters = {alwaysOnTop: true}; // shit doesnt work
+		mainWindow.parameters.alwaysOnTop = true; // shit doesnt work
 
 		//
 		desktopSize = mainWindow.display.bounds.size;
@@ -92,13 +92,6 @@ class SinnerState extends FlxState
 				else if (FlxG.keys.justPressed.ANY) code = 0;
 			case 10:
 				if (FlxG.keys.justPressed.ENTER){
-					#if final
-					/*
-					FlxG.save.bind('funkin', 'ninjamuffin99');
-					FlxG.save.data.tgtNotes = null;
-					FlxG.save.flush();
-					*/
-					#end
 					#if sys
 					Sys.exit(0);
 					#end
@@ -113,20 +106,20 @@ class SinnerState extends FlxState
 			if (newX < 0){ // left
 				xSpeed = -xSpeed;
 				newX = 0;
-				hueSpeed = 100;
+				hueSpeed = 50;
 			}else if (newX > maximumX){ // right
 				xSpeed = -xSpeed;
 				newX = maximumX;
-				hueSpeed = 100;
+				hueSpeed = 50;
 			}
 			if (newY < 0){ // up
 				ySpeed = -ySpeed;
 				newY = 0;
-				hueSpeed = 100;
+				hueSpeed = 50;
 			}else if (newY > maximumY){ // down
 				ySpeed = -ySpeed;
 				newY = maximumY;
-				hueSpeed = 100;
+				hueSpeed = 50;
 			}
 
 			x = newX;
@@ -135,7 +128,7 @@ class SinnerState extends FlxState
 			mainWindow.move(Std.int(x), Std.int(y));
 		}
 
-		hueSpeed = flixel.math.FlxMath.lerp(hueSpeed, 10, elapsed * 10);
+		hueSpeed = flixel.math.FlxMath.lerp(hueSpeed, 8, elapsed * 10);
 		hue = (hue + hueSpeed * elapsed * 10) % 360;
 		color.hue = hue;
 		trollface.color = color;
