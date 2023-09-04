@@ -62,19 +62,6 @@ class Paths
 	inline public static var SOUND_EXT = "ogg";
 	inline public static var VIDEO_EXT = "mp4";
 
-	#if MODS_ALLOWED
-	public static var ignoreModFolders:Array<String> = [
-		'characters', 'events', 'notetypes', 'data', 'songs', 'music', 'sounds', 'shaders', 'videos', 'images', 'stages', 'weeks', 'fonts',
-		'scripts', 'achievements', 'global'
-	];
-	#end
-
-	public static function excludeAsset(key:String)
-	{
-		if (!dumpExclusions.contains(key))
-			dumpExclusions.push(key);
-	}
-
 	public static var dumpExclusions:Array<String> = [
 		'assets/music/freakyIntro.$SOUND_EXT',
 		'assets/music/freakyMenu.$SOUND_EXT',
@@ -84,6 +71,12 @@ class Paths
 		'content/global/music/breakfast.$SOUND_EXT',
 		"assets/images/Garlic-Bread-PNG-Images.png"
 	];
+
+	public static function excludeAsset(key:String)
+	{
+		if (!dumpExclusions.contains(key))
+			dumpExclusions.push(key);
+	}
 
 	/// haya I love you for the base cache dump I took to the max
 	public static function clearUnusedMemory()
@@ -110,7 +103,7 @@ class Paths
 		}
 		// run the garbage collector for good measure lmfao
 		System.gc();
-        
+		
 	}
 
 	// fuckin around ._.
@@ -162,7 +155,7 @@ class Paths
 		currentStrings.clear();
 	}
 
-    static public var currentStrings:Map<String,String> = [];
+	static public var currentStrings:Map<String,String> = [];
 
 	static public var currentModAddons:Array<String> = [];
 	static public var currentModDirectory:String = '';
@@ -367,35 +360,35 @@ class Paths
 	}
 
 
-    // TODO: maybe these should be cached when starting a song
+	// TODO: maybe these should be cached when starting a song
 	public static function getString(key:String):String
 	{
 		if (currentStrings.exists(key))
 			return currentStrings.get(key);
 		
-        // currentStrings.set(key, '');
+		// currentStrings.set(key, '');
 
 		for (filePath in Paths.getFolders("data"))
 		{
 			var file = filePath + "strings.txt";
 			if (!exists(file)) continue;
 
-            //trace(filePath);
-            var stringsText = getContent(file);
-            var daLines = stringsText.trim().split("\n");
+			//trace(filePath);
+			var stringsText = getContent(file);
+			var daLines = stringsText.trim().split("\n");
 
-            for(shit in daLines){
-                var splitted = shit.split("=");
-                var thisKey = splitted.shift();
-                if (thisKey == key){
-                    currentStrings.set(key, splitted.join("=").trim().replace('\\n', '\n'));
-                    return currentStrings.get(key);
-                }
-            }
-        }
+			for(shit in daLines){
+				var splitted = shit.split("=");
+				var thisKey = splitted.shift();
+				if (thisKey == key){
+					currentStrings.set(key, splitted.join("=").trim().replace('\\n', '\n'));
+					return currentStrings.get(key);
+				}
+			}
+		}
 
-        trace('$key has no attached value');
-        return key;
+		trace('$key has no attached value');
+		return key;
 	}
 
 	inline static public function fileExists(key:String, type:AssetType, ?ignoreMods:Bool = false, ?library:String)
@@ -439,7 +432,7 @@ class Paths
 	private static final invalidChars = [' ','#','>','<',':',';','\\','~','&'];
 
 	inline static public function formatToSongPath(path:String) {
-    	var finalPath = "";
+		var finalPath = "";
 
 		for (idx in 0...path.length)
 		{
@@ -677,7 +670,7 @@ class Paths
 			for (folder in FileSystem.readDirectory(modFolderPath))
 			{
 				var path = haxe.io.Path.join([modFolderPath, folder]);
-				if (sys.FileSystem.isDirectory(path) && !ignoreModFolders.contains(folder) && !list.contains(folder))
+				if (sys.FileSystem.isDirectory(path) && !list.contains(folder))
 				{
 					list.push(folder);
 				}
