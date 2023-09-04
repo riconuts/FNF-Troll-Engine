@@ -159,7 +159,7 @@ class Paths
 		localTrackedAssets = [];
 		Assets.cache.clear("songs");
 		// remove the cached strings
-		currentStrings = [];
+		currentStrings.clear();
 	}
 
     static public var currentStrings:Map<String,String> = [];
