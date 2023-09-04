@@ -23,7 +23,7 @@ class PsychHUD extends CommonHUD
 	var scoreString = Paths.getString("score");
 	var hiscoreString = Paths.getString("highscore");
 	var ratingString = Paths.getString("rating");
-	var cbString = Paths.getString("cbfullplural");
+	var cbString = Paths.getString("cbplural");
 	var npsString = Paths.getString("nps");
 
 	override public function new(iP1:String, iP2:String, songName:String, stats:Stats)

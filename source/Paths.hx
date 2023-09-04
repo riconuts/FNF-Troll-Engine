@@ -453,21 +453,7 @@ class Paths
 				finalPath += char;
 		}
 
-		/* finalPath = [
-			for (s in finalPath.split("-")) {
-				(s == "") ?continue:s;
-			}
-		].join("-"); */		
-
 		return finalPath.toLowerCase();
-
-		/*
-		var invalidChars = ~/[~&\\;:<>#]/;
-		var hideChars = ~/[.,'"%?!]/;
-
-		var path = invalidChars.split(path.replace(' ', '-')).join("-");
-		return hideChars.split(path).join("").toLowerCase();
-		*/
 	}
 
 	// completely rewritten asset loading? fuck!

@@ -426,6 +426,7 @@ class PlayState extends MusicBeatState
 		judgeManager.judgeTimescale = Wife3.timeScale;
 
 		Paths.clearStoredMemory();
+		Paths.pushGlobalContent();
 
 		//// Reset to default
 		Note.quantShitCache.clear();
@@ -1477,23 +1478,22 @@ class PlayState extends MusicBeatState
 
 	public function clearNotesBefore(time:Float)
 	{
-
-		var i:Int = allNotes.length - 1;
-		while (i >= 0) {
-			var daNote:Note = allNotes[i];
-			if(daNote.strumTime - 350 < time)
+		var time = time + 350;
+		for (daNote in allNotes) 
+		{
+			if(daNote.strumTime < time)
 			{
+				camZooming = true;
+
 				daNote.ignoreNote = true;
 				if (modchartObjects.exists('note${daNote.ID}'))
 					modchartObjects.remove('note${daNote.ID}');
 				for (field in playfields)
 					field.removeNote(daNote);
-
-
-
-
 			}
-			--i;
+			else
+				break;
+			
 		}
 	}
 
@@ -2923,9 +2923,7 @@ class PlayState extends MusicBeatState
 					if(Math.isNaN(camZoom)) camZoom = 0.015;
 					if(Math.isNaN(hudZoom)) hudZoom = 0.03;
 
-					if(FlxG.camera.zoom < (defaultCamZoom * 1.35))
-						FlxG.camera.zoom += camZoom * ClientPrefs.camZoomP;
-					camHUD.zoom += hudZoom * ClientPrefs.camZoomP;
+					cameraBump(camZoom, hudZoom);
 				}
 			case 'Play Animation':
 				//trace('Anim to play: ' + value1);
@@ -3981,7 +3979,7 @@ class PlayState extends MusicBeatState
 
 	function opponentNoteHit(note:Note, field:PlayField):Void
 	{
-		if (Paths.formatToSongPath(SONG.song) != 'tutorial')
+		if (songName != 'tutorial')
 			camZooming = true;
 
 		// Script shit
@@ -4287,11 +4285,11 @@ class PlayState extends MusicBeatState
 		callOnScripts('onStepHit');
 	}
 
-	public function cameraBump()
+	public function cameraBump(camZoom:Float = 0.015, hudZoom:Float = 0.03)
 	{
 		if(FlxG.camera.zoom < (defaultCamZoom * 1.35))
-			FlxG.camera.zoom += 0.015 * camZoomingMult * ClientPrefs.camZoomP;
-		camHUD.zoom += 0.03 * camZoomingMult * ClientPrefs.camZoomP;
+			FlxG.camera.zoom += camZoom * camZoomingMult * ClientPrefs.camZoomP;
+		camHUD.zoom += hudZoom * camZoomingMult * ClientPrefs.camZoomP;
 	}
 
 	public var zoomEveryBeat:Int = 4;
