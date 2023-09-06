@@ -128,9 +128,9 @@ class UpdaterState extends MusicBeatState {
 						File.saveBytes(fullPath, data);
                     }
                 }
-            }else{
+            }else
                 prog.finishedFiles.push(file);
-            }
+            
         }
 
 		

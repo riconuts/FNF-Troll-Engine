@@ -529,7 +529,7 @@ class ModManager {
 		return zoom;
 	}
 
-	public function modifyVertex(beat:Float, vert:Vector3, idx:Int, obj:FlxSprite, pos:Vector3, player:Int, data:Int, ?exclusions:Array<String>):Vector3
+	public function modifyVertex(beat:Float, vert:Vector3, idx:Int, obj:FlxSprite, pos:Vector3, player:Int, data:Int, field:NoteField, ?exclusions:Array<String>):Vector3
 	{
 		if (exclusions == null)
 			exclusions = [];
@@ -542,7 +542,7 @@ class ModManager {
 			if(mod==null) continue;
 			if (!obj.active) return vert;
 			if (mod.isRenderMod())
-				vert = mod.modifyVert(beat, vert, idx, obj, pos, player, data);
+				vert = mod.modifyVert(beat, vert, idx, obj, pos, player, data, field);
 		}
 		return vert;
 	}

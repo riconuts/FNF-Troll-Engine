@@ -1,5 +1,6 @@
 package modchart.modifiers;
 
+import playfields.NoteField;
 import ui.*;
 import modchart.*;
 import flixel.math.FlxPoint;
@@ -12,18 +13,21 @@ class ConfusionModifier extends NoteModifier {
 	override function shouldExecute(player:Int, val:Float)return true;
 	override function isRenderMod()return true;
 
-    function getConfusion(?suffix:String = '', beat:Float, column:Int, player:Int){
-		var main = (suffix == '' ? getValue(player) : getSubmodValue('confusion$suffix', player)) + getSubmodValue('confusion${suffix}${column}', player);
-		var mainAngle:Float = -((beat * main) % 360);
+    function getConfusion(?suffix:String = '', beat:Float, column:Int, player:Int, onlyOffset:Bool=false){
+		var mainAngle:Float = 0;
+		if (!onlyOffset){
+            var main = (suffix == '' ? getValue(player) : getSubmodValue('confusion$suffix', player)) + getSubmodValue('confusion${suffix}${column}', player);
+		    mainAngle = -((beat * main) % 360);
+        }
 		var constAngle:Float = getSubmodValue('confusion${suffix}Offset', player) + getSubmodValue('confusion${suffix}Offset${column}', player);
 		return mainAngle + constAngle;
     }
 
-	override function modifyVert(beat:Float, vert:Vector3, idx:Int, obj:FlxSprite, pos:Vector3, player:Int, data:Int):Vector3
+	override function modifyVert(beat:Float, vert:Vector3, idx:Int, obj:FlxSprite, pos:Vector3, player:Int, data:Int, field:NoteField):Vector3
 	{
 		var angleX:Float = getConfusion("X", beat, data, player);
 		var angleY:Float = getConfusion("Y", beat, data, player);
-        var angleZ = getConfusion(beat, data, player);
+        var angleZ:Float = getConfusion(beat, data, player);
 
         if((obj is Note)){
 			var note:Note = cast obj;
@@ -35,9 +39,10 @@ class ConfusionModifier extends NoteModifier {
 			angleX += getSubmodValue("noteAngleX", player) + getSubmodValue("note" + data + "AngleX", player);
 			angleY += getSubmodValue("noteAngleY", player) + getSubmodValue("note" + data + "AngleY", player);
 
-			if(note.isSustainNote)
+			if(note.isSustainNote){
 				angleZ = 0;	
-			else{
+                trace(angleX, angleY, angleZ);
+            }else{
 				var noteBeat = note.beat - beat;
 				
 				angleZ += (noteBeat * getSubmodValue("dizzy", player) % 360) * (180 / Math.PI);

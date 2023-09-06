@@ -45,15 +45,26 @@ class LocalRotateModifier extends NoteModifier { // this'll be rotateX in ModMan
         var diff = pos.subtract(origin);
         var scale = FlxG.height;
         diff.z *= scale;
-		var out = VectorHelpers.rotateV3(diff, getValue(player)* FlxAngle.TO_RAD, getSubmodValue('${prefix}rotateY',player)* FlxAngle.TO_RAD, getSubmodValue('${prefix}rotateZ',player)* FlxAngle.TO_RAD);
+		var out = VectorHelpers.rotateV3(diff, (getValue(player) + getSubmodValue('${prefix}${data}rotateX', player)) * FlxAngle.TO_RAD,
+			(getSubmodValue('${prefix}rotateY', player) + getSubmodValue('${prefix}${data}rotateY', player)) * FlxAngle.TO_RAD,
+			(getSubmodValue('${prefix}rotateZ', player) + getSubmodValue('${prefix}${data}rotateZ', player)) * FlxAngle.TO_RAD);
         out.z /= scale;
         return origin.add(out);
     }
 
     override function getSubmods(){
-        return [
-            '${prefix}rotateY',
-            '${prefix}rotateZ'
-        ];
+		var shid:Array<String> = ['rotateX', 'rotateY', 'rotateZ'];
+
+		var submods:Array<String> = [
+			for (d in 0...4)
+			{
+				for (s in shid)
+					'$prefix$d$s';
+			}
+		];
+
+		submods.push('${prefix}rotateY');
+		submods.push('${prefix}rotateZ');
+		return submods;
     }
 }

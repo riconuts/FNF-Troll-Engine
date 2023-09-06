@@ -594,7 +594,7 @@ class NoteField extends FieldBase
 				vert.x += n.typeOffsetX;
 				vert.y += n.typeOffsetY;
 			}
-			vert = modManager.modifyVertex(curDecBeat, vert, idx, sprite, pos, modNumber, sprite.noteData);
+			vert = modManager.modifyVertex(curDecBeat, vert, idx, sprite, pos, modNumber, sprite.noteData, this);
 			vert.x *= scalePoint.x;
 			vert.y *= scalePoint.y;
 
