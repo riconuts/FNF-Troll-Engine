@@ -4557,8 +4557,9 @@ class PlayState extends MusicBeatState
 		stats.changedEvent.removeAll();
 		stats.changedEvent = null;
 
+        #if LUA_ALLOWED
 		preventLuaRemove = true;
-
+        #end
 		for(script in funkyScripts){
 			script.call("onDestroy");
 			script.stop();

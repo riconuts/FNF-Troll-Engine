@@ -13,7 +13,4 @@
 		"tryBody": "next",
 		"tryCatch": "next"
 	}
-	"indentation": {
-        "character": "	"
-    }
 }

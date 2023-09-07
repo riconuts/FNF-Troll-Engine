@@ -22,6 +22,7 @@ import sys.io.File;
 import Discord.DiscordClient;
 #end
 
+
 class Main extends Sprite
 {
 	public static var UserAgent:String = 'TrollEngine/${MainMenuState.engineVersion}'; // used for http requests. if you end up forking the engine and making your own then make sure to change this!!
@@ -39,7 +40,7 @@ class Main extends Sprite
 	var framerate:Int = 60; // How many frames per second the game should run at.
 	var skipSplash:Bool = true; // Whether to skip the flixel splash screen that appears in release mode.
 	var startFullscreen:Bool = false; // Whether to start the game in fullscreen on desktop targets
-
+    
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
 	public static var fpsVar:FPS;
@@ -150,7 +151,8 @@ class Main extends Sprite
 			bread.visible = false;
 			addChild(bread);
 		}
-		
+	
+
 		#if CRASH_HANDLER
 		// Original code was made by sqirra-rng, big props to them!!!
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(
@@ -160,12 +162,14 @@ class Main extends Sprite
 			}
 		);
 
+
 		#if cpp
 		// Thank you EliteMasterEric, very cool!
 		untyped __global__.__hxcpp_set_critical_error_handler(onCrash);
 		#end
 		#end
 	}
+
 
 	
 	#if CRASH_HANDLER
