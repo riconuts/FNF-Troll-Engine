@@ -97,7 +97,8 @@ class Stage extends FlxTypedGroup<FlxBasic>
 
 			// define variables lolol
 			stageScript.set("add", add);
-			stageScript.set("stage", this);
+			stageScript.set("remove", remove);
+			stageScript.set("insert", insert);
 			stageScript.set("this", this);
 			stageScript.set("foreground", foreground);
 			
