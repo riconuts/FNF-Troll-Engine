@@ -12,6 +12,9 @@ class HScriptedHUD extends BaseHUD {
 		super(iP1, iP2, songName, stats);
 		this.script = script;
 		script.set("this", this);
+		script.set("add", add);
+		script.set("remove", add);
+		script.set("insert", add);
 
 		stats.changedEvent.add(statChanged);
 
