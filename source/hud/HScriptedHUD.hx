@@ -25,7 +25,7 @@ class HScriptedHUD extends BaseHUD {
 		script.call("reloadHealthBarColors", [dadColor, bfColor]);
 
 	override function changedCharacter(id:Int, char:Character)
-		script.call("songStarted");
+		script.call("changedCharacter", [id, char]);
 	
 
 	function statChanged(stat:String, val:Dynamic)
