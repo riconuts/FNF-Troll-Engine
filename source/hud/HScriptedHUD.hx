@@ -13,6 +13,8 @@ class HScriptedHUD extends BaseHUD {
 		this.script = script;
 		script.set("this", this);
 
+		stats.changedEvent.add(statChanged);
+
 		script.call("createHUD", [iP1, iP2, songName]);
 	}
 
