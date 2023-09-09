@@ -4097,24 +4097,13 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		// Script shit
-		var isSus:Bool = note.isSustainNote; //GET OUT OF MY HEAD, GET OUT OF MY HEAD, GET OUT OF MY HEAD
-		var leData:Int = Math.round(Math.abs(note.noteData));
-		var leType:String = note.noteType;
-
 		if (note.noteScript != null)
 		{
-			var script:FunkinScript = note.noteScript;
-
-			if (callScript(script, "preGoodNoteHit", [note, field]) == Globals.Function_Stop)
+			if (callScript(note.noteScript, "preGoodNoteHit", [note, field]) == Globals.Function_Stop)
 				return;
 		}
 		if (callOnHScripts("preGoodNoteHit", [note, field]) == Globals.Function_Stop)
 			return;
-		#if LUA_ALLOWED
-		if (callOnLuas('preGoodNoteHit', [notes.members.indexOf(note), leData, leType, isSus, note.ID]) == Globals.Function_Stop)
-			return;
-		#end
 
 		if (cpuControlled) saveScore = false; // if botplay hits a note, then you lose scoring
 
@@ -4167,7 +4156,8 @@ class PlayState extends MusicBeatState
 		else if(chars.length==0)
 			chars = field.characters;
 		
-		for(char in chars){
+		for (char in chars)
+		{
 			if (char.callOnScripts("playNote", [note, field]) == Globals.Function_Stop)
 			{
 				// nada
