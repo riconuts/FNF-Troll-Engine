@@ -3683,7 +3683,6 @@ class PlayState extends MusicBeatState
 				if (!ClientPrefs.ghostTapping)
 				{
 					noteMissPress(data);
-					callOnScripts('noteMissPress', [data]);
 				}
 			}
 		}
@@ -3819,16 +3818,10 @@ class PlayState extends MusicBeatState
 
 		if(callOnHScripts("preNoteMiss", [daNote, field]) == Globals.Function_Stop)
 			return;
-		#if LUA_ALLOWED
-		if(callOnLuas('preNoteMiss', [notes.members.indexOf(daNote), daNote.noteData, daNote.noteType, daNote.isSustainNote, daNote.ID]) == Globals.Function_Stop)
-			return;
-		#end
 		
-		if (daNote.noteScript!=null)
+		if (daNote.noteScript != null)
 		{
-			var script:FunkinScript = daNote.noteScript;
-
-			if(callScript(script, "preNoteMiss", [daNote, field]) == Globals.Function_Stop)
+			if (callScript(daNote.noteScript, "preNoteMiss", [daNote, field]) == Globals.Function_Stop)
 				return;
 		}
 
@@ -3952,7 +3945,8 @@ class PlayState extends MusicBeatState
 		//totalPlayed++;
 		//RecalculateRating();
 
-		FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), ClientPrefs.missVolume*FlxG.random.float(0.9, 1));
+		if (ClientPrefs.missVolume > 0)
+			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), ClientPrefs.missVolume * FlxG.random.float(0.9, 1));
 
 		for (field in playfields.members)
 		{
