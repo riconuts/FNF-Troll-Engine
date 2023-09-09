@@ -93,7 +93,7 @@
 
 	<haxelib name="faxe" if='switch'/>
 
-	<haxelib name="hxcpp-debug-server" if="debug"/>
+	<haxelib name="hxcpp-debug-server" if="debug" unless="telemetry"/> 
 
 	<!-- <haxelib name="markdown" /> -->
 	<!-- <haxelib name="HtmlParser" /> -->
