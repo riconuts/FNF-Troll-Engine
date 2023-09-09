@@ -13,8 +13,8 @@ class HScriptedHUD extends BaseHUD {
 		this.script = script;
 		script.set("this", this);
 		script.set("add", add);
-		script.set("remove", add);
-		script.set("insert", add);
+		script.set("remove", remove);
+		script.set("insert", insert);
 
 		stats.changedEvent.add(statChanged);
 

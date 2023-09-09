@@ -96,6 +96,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 			stageScript = FunkinHScript.fromFile(file);
 
 			// define variables lolol
+			stageScript.set("stage", this); // for backwards compat lol
 			stageScript.set("add", add);
 			stageScript.set("remove", remove);
 			stageScript.set("insert", insert);
