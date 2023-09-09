@@ -1479,21 +1479,19 @@ class PlayState extends MusicBeatState
 	public function clearNotesBefore(time:Float)
 	{
 		var time = time + 350;
-		for (daNote in allNotes) 
-		{
+
+		var i:Int = allNotes.length - 1;
+		while (i >= 0) {
+			var daNote:Note = allNotes[i];
 			if(daNote.strumTime < time)
 			{
-				camZooming = true;
-
 				daNote.ignoreNote = true;
 				if (modchartObjects.exists('note${daNote.ID}'))
 					modchartObjects.remove('note${daNote.ID}');
 				for (field in playfields)
 					field.removeNote(daNote);
 			}
-			else
-				break;
-			
+			--i;
 		}
 	}
 
@@ -3222,7 +3220,7 @@ class PlayState extends MusicBeatState
 		}
 		#end
 
-		#if (LUA_ALLOWED || hscript)
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		var ret:Dynamic = callOnScripts('onEndSong');
 		#else
 		var ret:Dynamic = Globals.Function_Continue;
