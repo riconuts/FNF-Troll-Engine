@@ -12,6 +12,11 @@ class HScriptedHUD extends BaseHUD {
 		super(iP1, iP2, songName, stats);
 		this.script = script;
 		script.set("this", this);
+		script.set("add", add);
+		script.set("remove", add);
+		script.set("insert", add);
+
+		stats.changedEvent.add(statChanged);
 
 		script.call("createHUD", [iP1, iP2, songName]);
 	}
@@ -25,7 +30,7 @@ class HScriptedHUD extends BaseHUD {
 		script.call("reloadHealthBarColors", [dadColor, bfColor]);
 
 	override function changedCharacter(id:Int, char:Character)
-		script.call("songStarted");
+		script.call("changedCharacter", [id, char]);
 	
 
 	function statChanged(stat:String, val:Dynamic)
