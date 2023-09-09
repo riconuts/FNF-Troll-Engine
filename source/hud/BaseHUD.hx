@@ -98,6 +98,8 @@ class BaseHUD extends FlxSpriteGroup {
 	public function new(iP1:String, iP2:String, songName:String, stats:Stats)
 	{
 		super();
+		this.stats = stats;
+		this.songName = songName;
 	}
 
 	override public function update(elapsed:Float){
