@@ -250,6 +250,41 @@ class AdvancedHUD extends CommonHUD
 
 		super.update(elapsed);
 	}
+    
+    function refreshFCColour(){
+		fcTxt.color =
+			{
+				var color:FlxColor = 0xFFA3A3A3;
+
+				if (ratingFC == stats.fail)
+				{
+					color = judgeColours.get("miss");
+				}
+				else if (comboBreaks == 0)
+				{
+					if (stats.judgements.get("bad") > 0 || stats.judgements.get("shit") > 0)
+						color = 0xFFFFFFFF;
+					else if (stats.judgements.get("good") > 0)
+					{
+						color = judgeColours.get("good");
+						if (stats.judgements.get("good") == 1)
+							color.saturation *= 0.75;
+					}
+					else if (stats.judgements.get("sick") > 0)
+					{
+						color = judgeColours.get("sick");
+						if (stats.judgements.get("sick") == 1)
+							color.saturation *= 0.75;
+					}
+					else if (stats.judgements.get("epic") > 0)
+					{
+						color = judgeColours.get("epic");
+					}
+				}
+
+				color;
+			};
+    }
 
 	function statChanged(stat:String, val:Dynamic){
 		switch(stat){
@@ -312,6 +347,7 @@ class AdvancedHUD extends CommonHUD
 					}
 					judgeTxt.text = Std.string(val);
 				}
+				refreshFCColour();
 			case 'comboBreaks':
 				var judgeName = judgeNames.get('cb');
 				var judgeTxt = judgeTexts.get('cb');
@@ -334,6 +370,7 @@ class AdvancedHUD extends CommonHUD
 					}
 					judgeTxt.text = Std.string(val);
 				}
+				refreshFCColour();
 			case 'ratingPercent':
 				if (ClientPrefs.scoreZoom)
 				{
@@ -373,36 +410,8 @@ class AdvancedHUD extends CommonHUD
 			}
 
 		}
-		fcTxt.color = {
-			var color:FlxColor = 0xFFA3A3A3;
 
-			if (ratingFC == stats.fail){
-				color = judgeColours.get("miss");
-			}
-			else if (comboBreaks == 0)
-			{
-				if (stats.judgements.get("bad") > 0 || stats.judgements.get("shit") > 0)
-					color = 0xFFFFFFFF;
-				else if (stats.judgements.get("good") > 0)
-				{
-					color = judgeColours.get("good");
-					if (stats.judgements.get("good") == 1)
-						color.saturation *= 0.75;
-				}
-				else if (stats.judgements.get("sick") > 0)
-				{
-					color = judgeColours.get("sick");
-					if (stats.judgements.get("sick") == 1)
-						color.saturation *= 0.75;
-				}
-				else if (stats.judgements.get("epic") > 0)
-				{
-					color = judgeColours.get("epic");
-				}
-			}	
-
-			color;
-		};
+		refreshFCColour();
 	}
 
 	override public function beatHit(beat:Int)
