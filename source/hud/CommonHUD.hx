@@ -39,8 +39,7 @@ class CommonHUD extends BaseHUD
 	public function new(iP1:String, iP2:String, songName:String, stats:Stats)
 	{
 		super(iP1, iP2, songName, stats);
-		this.stats = stats;
-		this.songName = songName;
+
 		if (!ClientPrefs.useEpics)
 			displayedJudges.remove("epic");
 

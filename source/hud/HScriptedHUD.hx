@@ -9,7 +9,6 @@ class HScriptedHUD extends BaseHUD {
 	private var script:FunkinHScript;
 	override public function new(iP1:String, iP2:String, songName:String, stats:Stats, script:FunkinHScript)
 	{
-		super(iP1, iP2, songName, stats);
 		this.script = script;
 		script.set("this", this);
 		script.set("add", add);
@@ -18,6 +17,7 @@ class HScriptedHUD extends BaseHUD {
 
 		stats.changedEvent.add(statChanged);
 
+		super(iP1, iP2, songName, stats);
 		script.call("createHUD", [iP1, iP2, songName]);
 	}
 
