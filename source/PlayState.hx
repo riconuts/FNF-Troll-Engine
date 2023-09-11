@@ -2218,7 +2218,11 @@ class PlayState extends MusicBeatState
 
 	override function draw(){
 		camStageUnderlay.bgColor.alphaFloat = ClientPrefs.stageOpacity;
-		super.draw();
+        var ret:Dynamic = callOnScripts('stateDraw');
+		if(ret != Globals.Function_Stop) 
+		    super.draw();
+
+        callOnScripts('postStateDraw');
 	}
 
 	function sortByZIndex(Obj1:{zIndex:Float}, Obj2:{zIndex:Float}):Int
