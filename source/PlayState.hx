@@ -2602,14 +2602,12 @@ class PlayState extends MusicBeatState
 			if (FlxG.keys.anyJustPressed(debugKeysBotplay))
 				cpuControlled = !cpuControlled;
 			
-
 			// RESET = Quick Game Over Screen
-			if (controls.RESET && canReset && !inCutscene && startedCountdown)
-				health = 0;
-			
-			doDeathCheck();
-
-			if (controls.PAUSE)
+			if (controls.RESET && canReset && !inCutscene && startedCountdown){
+				doGameOver();
+			}else if (doDeathCheck()){
+				// die lol
+			}else if (controls.PAUSE)
 				pause();
 		}
 
@@ -2648,22 +2646,24 @@ class PlayState extends MusicBeatState
 				keyShit();
 			}
 
-			for(field in playfields){
-				if(field.isPlayer){
-					for(char in field.characters){
-						if (char.animation.curAnim != null
-							&& char.holdTimer > Conductor.stepCrochet * 0.0011 * char.singDuration
-								&& char.animation.curAnim.name.startsWith('sing')
-								&& !char.animation.curAnim.name.endsWith('miss')
-								&& (char.idleWhenHold || !pressedGameplayKeys.contains(true)))
-							char .dance();
-
-					}
+			for(field in playfields)
+			{
+				if (!field.isPlayer)
+					continue;
+					
+				for(char in field.characters)
+				{
+					if (char.animation.curAnim != null
+						&& char.holdTimer > Conductor.stepCrochet * 0.0011 * char.singDuration
+						&& char.animation.curAnim.name.startsWith('sing')
+						&& !char.animation.curAnim.name.endsWith('miss')
+						&& (char.idleWhenHold || !pressedGameplayKeys.contains(true))
+					)
+						char.dance();
 				}
 			}
 		}
 		
-
 		setOnScripts('cameraX', camFollowPos.x);
 		setOnScripts('cameraY', camFollowPos.y);
 		callOnScripts('onUpdatePost', [elapsed]);
@@ -2692,54 +2692,59 @@ class PlayState extends MusicBeatState
 			&& !isDead
 		)
 		{
-			var ret:Dynamic = callOnScripts('onGameOver');
-			if(ret != Globals.Function_Stop) {
-				boyfriend.stunned = true;
-				deathCounter++;
-
-				paused = true;
-
-				vocals.stop();
-				inst.stop();
-				for (track in tracks)
-					track.stop();
-
-				for (tween in modchartTweens)
-					tween.active = true;
-				for (timer in modchartTimers)
-					timer.active = true;
-
-				persistentUpdate = false;
-				persistentDraw = false;
-
-				isDead = true;
-
-				if(instaRespawn){
-					MusicBeatState.resetState(true);
-				}else{
-					var char = playOpponent ? dad : boyfriend;
-					
-					inst.stop();
-					vocals.stop();
-					
-					openSubState(new GameOverSubstate(
-						char.getScreenPosition().x - char.positionArray[0],
-						char.getScreenPosition().y - char.positionArray[1],
-						camFollowPos.x,
-						camFollowPos.y,
-						char.isPlayer
-					));
-
-					#if discord_rpc
-					// Game Over doesn't get his own variable because it's only used here
-					DiscordClient.changePresence("Game Over - " + detailsText, SONG.song, Paths.formatToSongPath(SONG.song));
-					#end
-				}
-
-				return true;
-			}
+			return doGameOver();
 		}
 		return false;
+	}
+
+	function doGameOver()
+	{
+		if (callOnScripts('onGameOver') != Globals.Function_Stop) 
+			return false;
+
+		boyfriend.stunned = true;
+		deathCounter++;
+
+		paused = true;
+
+		vocals.stop();
+		inst.stop();
+		for (track in tracks)
+			track.stop();
+
+		for (tween in modchartTweens)
+			tween.active = true;
+		for (timer in modchartTimers)
+			timer.active = true;
+
+		persistentUpdate = false;
+		persistentDraw = false;
+
+		isDead = true;
+
+		if(instaRespawn){
+			MusicBeatState.resetState(true);
+		}else{
+			var char = playOpponent ? dad : boyfriend;
+			
+			inst.stop();
+			vocals.stop();
+			
+			openSubState(new GameOverSubstate(
+				char.getScreenPosition().x - char.positionArray[0],
+				char.getScreenPosition().y - char.positionArray[1],
+				camFollowPos.x,
+				camFollowPos.y,
+				char.isPlayer
+			));
+
+			#if discord_rpc
+			// Game Over doesn't get his own variable because it's only used here
+			DiscordClient.changePresence("Game Over - " + detailsText, SONG.song, Paths.formatToSongPath(SONG.song));
+			#end
+		}
+
+		return true;
 	}
 
 	public function checkEventNote() {
@@ -3230,103 +3235,100 @@ class PlayState extends MusicBeatState
 		var ret:Dynamic = Globals.Function_Continue;
 		#end
 
-		if(ret != Globals.Function_Stop && !transitioning) {
-			// Save song score and rating.
-			if (SONG.validScore){
+		if (transitioning || ret == Globals.Function_Stop)
+			return;
 
-				var percent:Float = stats.ratingPercent;
-				
-				if(Math.isNaN(percent)) percent = 0;
-				
-				// TODO: different score saving for Wife3
-				// TODO: Save more stats?
+		transitioning = true;
 
-				if (!playOpponent && saveScore && ratingFC!='Fail')
-					Highscore.saveScore(SONG.song, stats.score, percent, stats.totalNotesHit);
-			}
+		// Save song score and rating.
+		if (SONG.validScore){
 
+			var percent:Float = stats.ratingPercent;
+			
+			if(Math.isNaN(percent)) percent = 0;
+			
+			// TODO: different score saving for Wife3
+			// TODO: Save more stats?
 
-			transitioning = true;
+			if (!playOpponent && saveScore && ratingFC!='Fail')
+				Highscore.saveScore(SONG.song, stats.score, percent, stats.totalNotesHit);
+		}
 
-			if (chartingMode)
+		if (chartingMode)
+		{
+			openChartEditor();
+		}
+		else if (isStoryMode)
+		{
+			// TODO: add a modcharted variable which songs w/ modcharts should set to true, then make it so if modcharts are disabled the score wont get added
+			// same check should be in the saveScore check above too
+			if (ratingFC != 'Fail')
+				campaignScore += stats.score;
+			campaignMisses += songMisses;
+
+			storyPlaylist.remove(storyPlaylist[0]);
+
+			if (storyPlaylist.length <= 0)
 			{
-				openChartEditor();
-				return;
-			}
+				//// WEEK END
 
-			if (isStoryMode)
-			{
-				// TODO: add a modcharted variable which songs w/ modcharts should set to true, then make it so if modcharts are disabled the score wont get added
-				// same check should be in the saveScore check above too
-				if (ratingFC != 'Fail')
-					campaignScore += stats.score;
-				campaignMisses += songMisses;
+				// Save week score
+				if (ChapterData.curChapter != null && !playOpponent){
+					if(!ClientPrefs.getGameplaySetting('practice', false) && !ClientPrefs.getGameplaySetting('botplay', false)) {
+						Highscore.saveWeekScore(ChapterData.curChapter.directory, campaignScore);
+						
+						StoryMenuState.weekCompleted.set(ChapterData.curChapter.directory, true);
+						FlxG.save.data.weekCompleted = StoryMenuState.weekCompleted;
 
-				storyPlaylist.remove(storyPlaylist[0]);
-
-				if (storyPlaylist.length <= 0)
-				{
-					//// WEEK END
-
-					// Save week score
-					if (ChapterData.curChapter != null && !playOpponent){
-						if(!ClientPrefs.getGameplaySetting('practice', false) && !ClientPrefs.getGameplaySetting('botplay', false)) {
-							Highscore.saveWeekScore(ChapterData.curChapter.directory, campaignScore);
-							
-							StoryMenuState.weekCompleted.set(ChapterData.curChapter.directory, true);
-							FlxG.save.data.weekCompleted = StoryMenuState.weekCompleted;
-
-							FlxG.save.flush();
-						}
+						FlxG.save.flush();
 					}
-
-					if(FlxTransitionableState.skipNextTransIn)
-						CustomFadeTransition.nextCamera = null;
-
-					#if VIDEOS_ALLOWED
-					var videoPath:String = Paths.video(Paths.formatToSongPath(SONG.song) + '-end');
-					if (Paths.exists(videoPath))
-						MusicBeatState.switchState(new VideoPlayerState(videoPath, gotoMenus));
-					else
-						gotoMenus();
-					#else
-					gotoMenus();
-					#end
 				}
+
+				if(FlxTransitionableState.skipNextTransIn)
+					CustomFadeTransition.nextCamera = null;
+
+				#if VIDEOS_ALLOWED
+				var videoPath:String = Paths.video(Paths.formatToSongPath(SONG.song) + '-end');
+				if (Paths.exists(videoPath))
+					MusicBeatState.switchState(new VideoPlayerState(videoPath, gotoMenus));
 				else
-				{
-					var nextSong = PlayState.storyPlaylist[0];
-					trace('LOADING NEXT SONG: $nextSong');
-
-					prevCamFollow = camFollow;
-					prevCamFollowPos = camFollowPos;
-
-					cancelMusicFadeTween();
-					inst.stop();
-
-					function playNextSong(){
-						PlayState.SONG = Song.loadFromJson(nextSong, nextSong);
-						LoadingState.loadAndSwitchState(new PlayState());
-					}
-
-					#if VIDEOS_ALLOWED
-					var videoPath:String = Paths.video(Paths.formatToSongPath(nextSong));
-					if (Paths.exists(videoPath))
-						MusicBeatState.switchState(new VideoPlayerState(videoPath, playNextSong));
-					else #end
-					{
-						FlxTransitionableState.skipNextTransIn = true;
-						FlxTransitionableState.skipNextTransOut = true;
-						playNextSong();
-					}
-				}
+				#end
+					gotoMenus();
 			}
 			else
 			{
-				trace('WENT BACK TO FREEPLAY??');
-				gotoMenus();
+				var nextSong = PlayState.storyPlaylist[0];
+				trace('LOADING NEXT SONG: $nextSong');
+
+				prevCamFollow = camFollow;
+				prevCamFollowPos = camFollowPos;
+
+				cancelMusicFadeTween();
+				inst.stop();
+
+				function playNextSong(){
+					PlayState.SONG = Song.loadFromJson(nextSong, nextSong);
+					LoadingState.loadAndSwitchState(new PlayState());
+				}
+
+				#if VIDEOS_ALLOWED
+				var videoPath:String = Paths.video(Paths.formatToSongPath(nextSong));
+				if (Paths.exists(videoPath))
+					MusicBeatState.switchState(new VideoPlayerState(videoPath, playNextSong));
+				else #end
+				{
+					FlxTransitionableState.skipNextTransIn = true;
+					FlxTransitionableState.skipNextTransOut = true;
+					playNextSong();
+				}
 			}
 		}
+		else
+		{
+			trace('WENT BACK TO FREEPLAY??');
+			gotoMenus();
+		}
+		
 	}
 
 	public function KillNotes() {
@@ -3682,7 +3684,7 @@ class PlayState extends MusicBeatState
 					}
 				}
 			}
-			if(hitNotes.length==0){
+			if (hitNotes.length==0){
 				callOnScripts('onGhostTap', [data]);
 				if (!ClientPrefs.ghostTapping)
 				{
