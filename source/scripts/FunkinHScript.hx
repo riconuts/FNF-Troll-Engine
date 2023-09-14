@@ -6,7 +6,6 @@ import flixel.math.FlxPoint;
 import JudgmentManager.Judgment;
 import flixel.addons.display.FlxRuntimeShader;
 import playfields.*;
-
 import flixel.util.FlxColor;
 import flixel.FlxG;
 import flixel.math.FlxMath;
@@ -314,10 +313,10 @@ class FunkinHScript extends FunkinScript
 		set("HScriptSubstate", HScriptSubstate);
         set("HScriptState", HScriptState);
 
-        variables.set("get_controls", function(){
-            return PlayerSettings.player1.controls
+        set("get_controls", function(){
+            return PlayerSettings.player1.controls;
         });
-        variables.set("controls", PlayerSettings.player1.controls);
+        set("controls", PlayerSettings.player1.controls);
 
 		if (additionalVars != null){
 			for (key in additionalVars.keys())
@@ -459,7 +458,7 @@ class HScriptState extends MusicBeatState
 
 
 			variables.set("get_controls", function(){
-                return PlayerSettings.player1.controls
+                return PlayerSettings.player1.controls;
             });
             variables.set("controls", PlayerSettings.player1.controls);
 
@@ -476,161 +475,195 @@ class HScriptState extends MusicBeatState
 
 		if (script == null){
 			trace('Script file "$ScriptName" not found!');
-			return close();
+            FlxG.switchState(new TitleState(false)); // incase a TitleState override is what broke this
+			return;
 		}
 
 		script.call("onLoad");
 	}
 
-    override function create(){
-        // i'd use the "on" prefix but I think this is more natural for stuff like states
 
-        if(script.call("create") == Globals.Function_Stop) // idk why you'd return stop on create on a hscriptstate but.. sure
+    override function create(){
+        // UPDATE: realised I should be using the "on" prefix just so if a script needs to call an internal function it doesnt cause issues
+        // (Also need to figure out how to give the super to the classes incase that's needed in the on[function] funcs though honestly thats what the post functions are for)
+        // I'd love to modify HScript to add override specifically for troll engine hscript
+        // THSCript...
+
+        if(script.call("onCreate", []) == Globals.Function_Stop) // idk why you'd return stop on create on a hscriptstate but.. sure
             return;
 
         super.create(); 
-        script.call("createPost");
+        script.call("onCreatePost");
     }
 
     override function update(e)
 	{
-		if (script.call("update", [e]) == Globals.Function_Stop)
+		if (script.call("onUpdate", [e]) == Globals.Function_Stop)
 			return;
 
 		super.update(e);
 
-		script.call("updatePost", [e]);
+		script.call("onUpdatePost", [e]);
 	}
 
-    override function closeSubstate()
+    override function closeSubState()
 	{
-		if (script.call("closeSubstate") == Globals.Function_Stop)
+		if (script.call("onCloseSubState") == Globals.Function_Stop)
 			return;
 
-		super.closeSubstate();
+		super.closeSubState();
 
-		script.call("closeSubstatePost");
+		script.call("onCloseSubStatePost");
 	}
 
     override function onFocus()
 	{
-		if (script.call("onFocus") == Globals.Function_Stop)
+		if (script.call("onOnFocus") == Globals.Function_Stop)
 			return;
 
 		super.onFocus();
 
-		script.call("onFocusPost");
+		script.call("onOnFocusPost");
 	}
     
     override function onFocusLost()
 	{
-		if (script.call("onFocusLost") == Globals.Function_Stop)
+		if (script.call("onOnFocusLost") == Globals.Function_Stop)
 			return;
 
 		super.onFocusLost();
 
-		script.call("onFocusLostPost");
+		script.call("onOnFocusLostPost");
 	}
 
     override function onResize(w:Int, h:Int)
 	{
-		if (script.call("onResize", [w, h]) == Globals.Function_Stop)
+		if (script.call("onOnResize", [w, h]) == Globals.Function_Stop)
 			return;
 
 		super.onResize(w, h);
 
-		script.call("onResizePost", [w, h]);
+		script.call("onOnResizePost", [w, h]);
 	}
 
-    override function openSubstate(subState:FlxSubstate)
+    override function openSubState(subState:FlxSubState)
 	{
-		if (script.call("openSubstate", [subState]) == Globals.Function_Stop)
+		if (script.call("onOpenSubState", [subState]) == Globals.Function_Stop)
 			return;
 
-		super.openSubstate(subState);
+		super.openSubState(subState);
 
-		script.call("openSubstatePost", [subState]);
+		script.call("onOpenSubStatePost", [subState]);
 	}
 
-    override function resetSubstate()
+    override function resetSubState()
 	{
-		if (script.call("resetSubstate") == Globals.Function_Stop)
+		if (script.call("onResetSubState") == Globals.Function_Stop)
 			return;
 
-		super.resetSubstate();
+		super.resetSubState();
 
-		script.call("resetSubstatePost");
+		script.call("onResetSubStatePost");
 	}
+
+    override function startOutro(onOutroFinished:()->Void){
+        final currentState = FlxG.state;
+
+		if (script.call("onStartOutro", [onOutroFinished]) == Globals.Function_Stop)
+			return;
+
+        if(FlxG.state == currentState) // if "onOutroFinished" wasnt called by the func above ^ then call onOutroFinished for it
+            onOutroFinished(); // same as super.startOutro(onOutroFinished)
+
+        script.call("onStartOutroPost", []);
+    }
 
     override function switchTo(s:FlxState)
 	{
-		if (script.call("switchTo", [s]) == Globals.Function_Stop)
-			return;
+        trace("switchTo is deprecated. Consider using startOutro");
+		if (script.call("onSwitchTo", [s]) == Globals.Function_Stop)
+			return false;
 
 		super.switchTo(s);
 
-		script.call("switchToPost", [s]);
+		script.call("onSwitchToPost", [s]);
+        return true;
 	}
 
     override function transitionIn()
 	{
-		if (script.call("transitionIn") == Globals.Function_Stop)
+		if (script.call("onTransitionIn") == Globals.Function_Stop)
 			return;
 
 		super.transitionIn();
 
-		script.call("transitionInPost");
+		script.call("onTransitionInPost");
 	}
 
     override function transitionOut(?onExit: ()->Void)
 	{
-		if (script.call("transitionOut", [onExit]) == Globals.Function_Stop)
+		if (script.call("onTransitionOut", [onExit]) == Globals.Function_Stop)
 			return;
 
 		super.transitionOut(onExit);
 
-		script.call("transitionOutPost", [onExit]);
+		script.call("onTransitionOutPost", [onExit]);
 	}
 
     override function draw()
 	{
-		if (script.call("draw", []) == Globals.Function_Stop)
+		if (script.call("onDraw", []) == Globals.Function_Stop)
 			return;
 
 		super.draw();
 
-		script.call("drawPost", []);
+		script.call("onDrawPost", []);
 	}
 
-    // idk sometimes you wanna override add/remove
-    override function add(member:FlxBasic)
+    override function destroy()
 	{
-		if (script.call("add", [member]) == Globals.Function_Stop)
+		if (script.call("onDestroy", []) == Globals.Function_Stop)
 			return;
+
+		super.destroy();
+
+		script.call("onDestroyPost", []);
+	}
+
+
+    // idk sometimes you wanna override add/remove
+	override function add(member:FlxBasic):FlxBasic
+	{
+		if (script.call("onAdd", [member], []) == Globals.Function_Stop)
+			return member;
 
 		super.add(member);
 
-		script.call("addPost", [member]);
+		script.call("onAddPost", [member]);
+		return member;
 	}
 
-    override function remove(member:FlxBasic)
+    override function remove(member:FlxBasic, splice:Bool = false):FlxBasic
 	{
-		if (script.call("remove", [member]) == Globals.Function_Stop)
-			return;
+		if (script.call("onRemove", [member, splice]) == Globals.Function_Stop)
+			return member;
 
-		super.remove(member);
+		super.remove(member, splice);
 
-		script.call("removePost", [member]);
+		script.call("onRemovePost", [member, splice]);
+		return member;
 	}
 
-    override function insert(position:Int, member:FlxBasic)
+	override function insert(position:Int, member:FlxBasic):FlxBasic
 	{
-		if (script.call("insert", [position, member]) == Globals.Function_Stop)
-			return;
+		if (script.call("onInsert", [position, member]) == Globals.Function_Stop)
+			return member;
 
 		super.insert(position, member);
 
-		script.call("insertPost", [position, member]);
+		script.call("onInsertPost", [position, member]);
+
+		return member;
 	}
 /*     override function ()
 	{
@@ -665,7 +698,7 @@ class HScriptSubstate extends MusicBeatSubstate
 			variables.set("add", add);
 			variables.set("remove", remove);
 			variables.set("get_controls", function(){
-                return PlayerSettings.player1.controls
+                return PlayerSettings.player1.controls;
             });
             variables.set("controls", PlayerSettings.player1.controls);
 			variables.set("close", close);

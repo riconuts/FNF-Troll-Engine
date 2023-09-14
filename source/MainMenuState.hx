@@ -70,9 +70,9 @@ class MainMenuState extends MusicBeatState
 	inline function toRad(input:Float)
 		return FlxAngle.TO_RAD * input;
 
-	override function switchTo(nextState){
+	override function startOutro(onOutroFinished:()->Void){
 		persistentUpdate = false;
-		return super.switchTo(nextState);
+		return onOutroFinished();
 	}
 
     override function create()

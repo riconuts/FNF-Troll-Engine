@@ -5,11 +5,11 @@ import flixel.addons.transition.FlxTransitionableState;
 class OptionsState extends MusicBeatState {
 	var transCamera:FlxCamera; // JUST for the transition
 
-	override public function switchTo(to)
-	{
+	override public function startOutro(onOutroComplete:() -> Void) {
 		FadeTransitionSubstate.nextCamera = daSubstate.transCamera;
-		return super.switchTo(to);
-	}
+		return onOutroComplete();
+    }
+	
 	
 	var daSubstate:OptionsSubstate;
     var transitoned:Bool = false;

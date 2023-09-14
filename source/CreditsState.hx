@@ -57,9 +57,9 @@ class CreditsState extends MusicBeatState
 		return curSelected;
 	}
 
-	override function switchTo(nextState){
+	override function startOutro(onOutroFinished:()->Void){
 		persistentUpdate = false;
-		return super.switchTo(nextState);
+		return onOutroFinished();
 	}
 
 	override function create()
