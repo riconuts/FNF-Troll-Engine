@@ -312,6 +312,12 @@ class FunkinHScript extends FunkinScript
 		set("FunkinLua", FunkinLua);
 		set("FunkinHScript", FunkinHScript);
 		set("HScriptSubstate", HScriptSubstate);
+        set("HScriptState", HScriptState);
+
+        variables.set("get_controls", function(){
+            return PlayerSettings.player1.controls
+        });
+        variables.set("controls", PlayerSettings.player1.controls);
 
 		if (additionalVars != null){
 			for (key in additionalVars.keys())
@@ -428,6 +434,217 @@ class FunkinHScript extends FunkinScript
 	}
 }
 
+// tbh i'd *LIKE* to use a macro for this but im lazy lol
+
+class HScriptState extends MusicBeatState
+{
+    public function new(ScriptName:String, ?additionalVars:Map<String, Any>)
+	{
+		super(false); // false because the whole point of this state is its scripted lol
+
+		var fileName = 'states/$ScriptName.hscript';
+
+		for (filePath in [#if MODS_ALLOWED Paths.modFolders(fileName), Paths.mods(fileName), #end Paths.getPreloadPath(fileName)])
+		{
+			if (!Paths.exists(filePath)) continue;
+
+			// some shortcuts
+			var variables = new Map<String, Dynamic>();
+			variables.set("this", this);
+			variables.set("add", add);
+			variables.set("remove", remove);
+            variables.set("insert", insert);
+            variables.set("members", members);
+            // TODO: use a macro to auto-generate code to variables.set all variables/methods of MusicBeatState
+
+
+			variables.set("get_controls", function(){
+                return PlayerSettings.player1.controls
+            });
+            variables.set("controls", PlayerSettings.player1.controls);
+
+			if (additionalVars != null){
+				for (key in additionalVars.keys())
+					variables.set(key, additionalVars.get(key));
+			}
+
+			script = FunkinHScript.fromFile(filePath, variables);
+			script.scriptName = ScriptName;
+
+			break;
+		}
+
+		if (script == null){
+			trace('Script file "$ScriptName" not found!');
+			return close();
+		}
+
+		script.call("onLoad");
+	}
+
+    override function create(){
+        // i'd use the "on" prefix but I think this is more natural for stuff like states
+
+        if(script.call("create") == Globals.Function_Stop) // idk why you'd return stop on create on a hscriptstate but.. sure
+            return;
+
+        super.create(); 
+        script.call("createPost");
+    }
+
+    override function update(e)
+	{
+		if (script.call("update", [e]) == Globals.Function_Stop)
+			return;
+
+		super.update(e);
+
+		script.call("updatePost", [e]);
+	}
+
+    override function closeSubstate()
+	{
+		if (script.call("closeSubstate") == Globals.Function_Stop)
+			return;
+
+		super.closeSubstate();
+
+		script.call("closeSubstatePost");
+	}
+
+    override function onFocus()
+	{
+		if (script.call("onFocus") == Globals.Function_Stop)
+			return;
+
+		super.onFocus();
+
+		script.call("onFocusPost");
+	}
+    
+    override function onFocusLost()
+	{
+		if (script.call("onFocusLost") == Globals.Function_Stop)
+			return;
+
+		super.onFocusLost();
+
+		script.call("onFocusLostPost");
+	}
+
+    override function onResize(w:Int, h:Int)
+	{
+		if (script.call("onResize", [w, h]) == Globals.Function_Stop)
+			return;
+
+		super.onResize(w, h);
+
+		script.call("onResizePost", [w, h]);
+	}
+
+    override function openSubstate(subState:FlxSubstate)
+	{
+		if (script.call("openSubstate", [subState]) == Globals.Function_Stop)
+			return;
+
+		super.openSubstate(subState);
+
+		script.call("openSubstatePost", [subState]);
+	}
+
+    override function resetSubstate()
+	{
+		if (script.call("resetSubstate") == Globals.Function_Stop)
+			return;
+
+		super.resetSubstate();
+
+		script.call("resetSubstatePost");
+	}
+
+    override function switchTo(s:FlxState)
+	{
+		if (script.call("switchTo", [s]) == Globals.Function_Stop)
+			return;
+
+		super.switchTo(s);
+
+		script.call("switchToPost", [s]);
+	}
+
+    override function transitionIn()
+	{
+		if (script.call("transitionIn") == Globals.Function_Stop)
+			return;
+
+		super.transitionIn();
+
+		script.call("transitionInPost");
+	}
+
+    override function transitionOut(?onExit: ()->Void)
+	{
+		if (script.call("transitionOut", [onExit]) == Globals.Function_Stop)
+			return;
+
+		super.transitionOut(onExit);
+
+		script.call("transitionOutPost", [onExit]);
+	}
+
+    override function draw()
+	{
+		if (script.call("draw", []) == Globals.Function_Stop)
+			return;
+
+		super.draw();
+
+		script.call("drawPost", []);
+	}
+
+    // idk sometimes you wanna override add/remove
+    override function add(member:FlxBasic)
+	{
+		if (script.call("add", [member]) == Globals.Function_Stop)
+			return;
+
+		super.add(member);
+
+		script.call("addPost", [member]);
+	}
+
+    override function remove(member:FlxBasic)
+	{
+		if (script.call("remove", [member]) == Globals.Function_Stop)
+			return;
+
+		super.remove(member);
+
+		script.call("removePost", [member]);
+	}
+
+    override function insert(position:Int, member:FlxBasic)
+	{
+		if (script.call("insert", [position, member]) == Globals.Function_Stop)
+			return;
+
+		super.insert(position, member);
+
+		script.call("insertPost", [position, member]);
+	}
+/*     override function ()
+	{
+		if (script.call("", []) == Globals.Function_Stop)
+			return;
+
+		super.();
+
+		script.call("Post", []);
+	} */
+
+
+}
+
 class HScriptSubstate extends MusicBeatSubstate
 {
 	public var script:FunkinHScript;
@@ -447,7 +664,10 @@ class HScriptSubstate extends MusicBeatSubstate
 			variables.set("this", this);
 			variables.set("add", add);
 			variables.set("remove", remove);
-			variables.set("get_controls", get_controls);
+			variables.set("get_controls", function(){
+                return PlayerSettings.player1.controls
+            });
+            variables.set("controls", PlayerSettings.player1.controls);
 			variables.set("close", close);
 
 			if (additionalVars != null){

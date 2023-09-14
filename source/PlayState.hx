@@ -823,7 +823,10 @@ class PlayState extends MusicBeatState
 		}
 
 		//// Generate playfields so you can actually, well, play the game
-		callOnScripts("prePlayfieldCreation");
+		callOnScripts("prePlayfieldCreation"); // backwards compat
+        // TODO: add deprecation messages to function callbacks somehow
+
+        callOnScripts("onPlayfieldCreation"); // you should use this
 		playerField = new PlayField(modManager);
 		playerField.modNumber = 0;
 		playerField.characters = [];
@@ -850,8 +853,9 @@ class PlayState extends MusicBeatState
 		initPlayfield(dadField);
 		initPlayfield(playerField);
 		
-		callOnScripts("postPlayfieldCreation");
+		callOnScripts("postPlayfieldCreation"); // backwards compat
 
+        callOnScripts("onPlayfieldCreationPost");
 
 		////
 		cameraPoints = [sectionCamera];
@@ -1341,20 +1345,25 @@ class PlayState extends MusicBeatState
 		modManager.receptors = [playerStrums.members, opponentStrums.members]; 
 		*/
 
-		callOnScripts('preReceptorGeneration');
+		callOnScripts('preReceptorGeneration'); // backwards compat, deprecated
+        callOnScripts('onReceptorGeneration');
 		//playerField.generateStrums();
 		//dadField.generateStrums();
 		for(field in playfields.members)
 			field.generateStrums();
 
-		callOnScripts('postReceptorGeneration');
+		callOnScripts('postReceptorGeneration'); // deprecated
+        callOnScripts('onReceptorGenerationPost');
+
 		for(field in playfields.members)
 			field.fadeIn(isStoryMode || skipArrowStartTween); // TODO: check if its the first song so it should fade the notes in on song 1 of story mode
 		modManager.receptors = [playerField.strumNotes, dadField.strumNotes];
 
-		callOnScripts('preModifierRegister');
+		callOnScripts('preModifierRegister'); // deprecated
+        callOnScripts('onModifierRegister');
 		modManager.registerDefaultModifiers();
-		callOnScripts('postModifierRegister');
+		callOnScripts('postModifierRegister'); // deprecated
+        callOnScripts('onModifierRegisterPost');
 
 /* 		if(midScroll){
 			modManager.setValue("opponentSwap", 0.5);
@@ -2218,11 +2227,11 @@ class PlayState extends MusicBeatState
 
 	override function draw(){
 		camStageUnderlay.bgColor.alphaFloat = ClientPrefs.stageOpacity;
-        var ret:Dynamic = callOnScripts('stateDraw');
+        var ret:Dynamic = callOnScripts('onStateDraw');
 		if(ret != Globals.Function_Stop) 
 		    super.draw();
 
-        callOnScripts('postStateDraw');
+        callOnScripts('onStateDrawPost');
 	}
 
 	function sortByZIndex(Obj1:{zIndex:Float}, Obj2:{zIndex:Float}):Int
@@ -3573,7 +3582,7 @@ class PlayState extends MusicBeatState
 		var judgeData:JudgmentData = judgeManager.judgmentData.get(note.hitResult.judgment);
 		if(judgeData==null)return null;
 
-		if (callOnHScripts("preApplyJudgment", [note, judgeData]) == Globals.Function_Stop)
+		if (callOnHScripts("onApplyJudgment", [note, judgeData]) == Globals.Function_Stop)
 			return null;
 
 		var mutatedJudgeData:Dynamic = callOnHScripts("mutateJudgeData", [note, judgeData]);
@@ -3584,7 +3593,7 @@ class PlayState extends MusicBeatState
 
 		applyJudgmentData(judgeData, note.hitResult.hitDiff, bot, true);
 
-		callOnHScripts("postApplyJudgment", [note, judgeData]);
+		callOnHScripts("onApplyJudgmentPost", [note, judgeData]);
 		
 		return judgeData;
 	}
@@ -4488,7 +4497,9 @@ class PlayState extends MusicBeatState
 		
 		hud.recalculateRating();
 
-		callOnScripts('postRecalculateRating'); // incase you wanna add custom rating stuff
+		callOnScripts('postRecalculateRating'); // deprecated
+        
+        callOnScripts('onRecalculateRatingPost');
 
 		setOnScripts('rating', ratingPercent);
 		setOnScripts('ratingName', ratingName);

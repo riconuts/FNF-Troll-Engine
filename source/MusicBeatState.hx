@@ -9,6 +9,8 @@ import openfl.ui.MouseCursor;
 
 class MusicBeatState extends FlxUIState
 {
+    public var script:FunkinHScript; // once i add state scripting this'll be used but rn its only used by FunkinHScript
+
 	private var curSection:Int = 0;
 	private var stepsToDo:Int = 0;
 
@@ -20,6 +22,13 @@ class MusicBeatState extends FlxUIState
 	private var controls(get, never):Controls;
 
 	public static var camBeat:FlxCamera;
+
+    public var hasScriptOverride:Bool = false;
+
+    public function new(canOverride:Bool = true){
+        super();
+        hasScriptOverride = canOverride; // for once I add state scripting
+    }
 
 	inline function get_controls():Controls
 		return PlayerSettings.player1.controls;
