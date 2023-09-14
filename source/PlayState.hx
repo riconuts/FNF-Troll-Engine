@@ -3663,14 +3663,23 @@ class PlayState extends MusicBeatState
 			pressed.push(eventKey);
 			var hitNotes:Array<Note> = [];
 			if(strumsBlocked[data]) return;
-
-			callOnScripts('onKeyPress', [data]);
-
+            
+			if (callOnScripts("onKeyPress", [data]) == Globals.Function_Stop)
+				return;
+        
 			for(field in playfields.members){
 				if(!field.autoPlayed && field.isPlayer && field.inControl){
 					field.keysPressed[data] = true;
 					if(generatedMusic && !endingSong){
-						var note:Note = field.input(data);
+                        var note:Note = null;
+                        var ret:Dynamic = callOnHScripts("onFieldInput", [field, data, hitNotes]);
+						if (ret == Globals.Function_Stop)
+							continue;
+                        else if((ret is Note))
+                            note = ret;
+                        else
+						    note = field.input(data);
+
 						if(note==null){
 							var spr:StrumNote = field.strumNotes[data];
 							if (spr != null && spr.animation.curAnim.name != 'confirm')
@@ -3680,6 +3689,7 @@ class PlayState extends MusicBeatState
 							}
 						}else
 							hitNotes.push(note);
+                        
 
 					}
 				}
