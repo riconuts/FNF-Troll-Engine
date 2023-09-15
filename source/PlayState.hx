@@ -3426,6 +3426,9 @@ class PlayState extends MusicBeatState
 				}
 			});
 		}
+        if (callOnScripts("onDisplayJudgment", [rating, image]) == Globals.Function_Stop)
+			return;
+
 
 		rating.color = 0xFFFFFFFF;
 		rating.alpha = ClientPrefs.judgeOpacity;
