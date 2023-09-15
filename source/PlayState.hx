@@ -418,6 +418,10 @@ class PlayState extends MusicBeatState
 	var shitToLoad:Array<AssetPreload> = [];
 	var finishedCreating = false;
 	
+    public function new(_:Bool = false){
+        super(false); // no scripting on playstate
+    }
+
 	override public function create()
 	{
 		judgeManager = new JudgmentManager();

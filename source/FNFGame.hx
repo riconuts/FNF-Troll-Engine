@@ -12,7 +12,7 @@ class FNFGame extends FlxGame {
                 var className = Type.getClassName(Type.getClass(_requestedState));
                 for (filePath in Paths.getFolders("states"))
                 {
-					var fileName = '$className.override.hscript';
+					var fileName = 'override/$className.hscript';
 					if (Paths.exists(filePath + fileName)){
                         _requestedState = new HScriptState(fileName);
                         return super.switchState();
