@@ -434,7 +434,7 @@ class ClientPrefs
 				display: "Max Hit Window",
 				desc: "The hit window to hit notes at all",
 				type: Number,
-				value: 166,
+				value: 180,
 				data: ["suffix" => "ms", "min" => 0, "max" => 200, "step" => 0.1]
 			},
 			"drawDistanceModifier" => {

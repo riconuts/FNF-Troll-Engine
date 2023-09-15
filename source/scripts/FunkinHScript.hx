@@ -1,5 +1,6 @@
 package scripts;
 
+import TitleState.RandomTitleLogo;
 import flixel.text.FlxText;
 import editors.ChartingState;
 import flixel.math.FlxPoint;
@@ -437,14 +438,13 @@ class FunkinHScript extends FunkinScript
 
 class HScriptState extends MusicBeatState
 {
-    public function new(ScriptName:String, ?additionalVars:Map<String, Any>)
+	public function new(fileName:String, ?additionalVars:Map<String, Any>)
 	{
 		super(false); // false because the whole point of this state is its scripted lol
 
-		var fileName = 'states/$ScriptName.hscript';
-
-		for (filePath in [#if MODS_ALLOWED Paths.modFolders(fileName), Paths.mods(fileName), #end Paths.getPreloadPath(fileName)])
+		for (filePath in Paths.getFolders("states"))
 		{
+			var name = filePath + fileName;
 			if (!Paths.exists(filePath)) continue;
 
 			// some shortcuts
@@ -467,15 +467,17 @@ class HScriptState extends MusicBeatState
 					variables.set(key, additionalVars.get(key));
 			}
 
-			script = FunkinHScript.fromFile(filePath, variables);
-			script.scriptName = ScriptName;
+			trace(name);
+
+			script = FunkinHScript.fromFile(name, variables);
+			script.scriptName = fileName;
 
 			break;
 		}
 
 		if (script == null){
-			trace('Script file "$ScriptName" not found!');
-            FlxG.switchState(new TitleState(false)); // incase a TitleState override is what broke this
+            script = FunkinHScript.blankScript();
+			trace('Script file "$fileName" not found!');
 			return;
 		}
 
@@ -489,6 +491,11 @@ class HScriptState extends MusicBeatState
         // I'd love to modify HScript to add override specifically for troll engine hscript
         // THSCript...
 
+        if(script==null){
+            FlxG.switchState(new MainMenuState(false));
+            return;
+        }
+        
         if(script.call("onCreate", []) == Globals.Function_Stop) // idk why you'd return stop on create on a hscriptstate but.. sure
             return;
 

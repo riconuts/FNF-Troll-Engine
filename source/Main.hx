@@ -132,7 +132,7 @@ class Main extends Sprite
 				startFullscreen = FlxG.save.data.fullscreen;
 		}
 		
-		addChild(new FlxGame(gameWidth, gameHeight, initialState, #if(flixel < "5.0.0") zoom, #end framerate, framerate, skipSplash, startFullscreen));
+		addChild(new FNFGame(gameWidth, gameHeight, initialState, #if(flixel < "5.0.0") zoom, #end framerate, framerate, skipSplash, startFullscreen));
 		
 		FlxG.mouse.useSystemCursor = true;
 		FlxG.mouse.visible = false;
@@ -169,7 +169,6 @@ class Main extends Sprite
 		#end
 		#end
 	}
-
 
 	
 	#if CRASH_HANDLER

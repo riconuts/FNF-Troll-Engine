@@ -361,6 +361,9 @@ class Paths
 
 
 	// TODO: maybe these should be cached when starting a song
+    // once we add a resource (mod/skin) menu we can do caching there for some things
+    // we can populate the entire string map when reloading mods and skins
+
 	public static function getString(key:String):String
 	{
 		if (currentStrings.exists(key))
