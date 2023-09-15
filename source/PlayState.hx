@@ -3831,15 +3831,19 @@ class PlayState extends MusicBeatState
 		RecalculateRating();
 	}
 
-	function noteMiss(daNote:Note, field:PlayField, ?mine:Bool=false):Void { //You didn't hit the key and let it go offscreen, also used by Hurt Notes
+	// You didn't hit the key and let it go offscreen, also used by Hurt Notes
+	function noteMiss(daNote:Note, field:PlayField, ?mine:Bool=false):Void 
+	{
 		//Dupe note remove
 		//field.spawnedNotes.forEachAlive(function(note:Note) {
 		for(note in field.spawnedNotes){
-			if(!note.alive || daNote.tail.contains(note) || note.isSustainNote) continue;
+			if(!note.alive || daNote.tail.contains(note) || note.isSustainNote) 
+				continue;
+
 			if (daNote != note && field.isPlayer && daNote.noteData == note.noteData && Math.abs(daNote.strumTime - note.strumTime) < 1) 
 				field.removeNote(note);
-			
 		}
+
 		if (daNote.sustainLength > 0 && ClientPrefs.wife3)
 			daNote.hitResult.judgment = DROPPED_HOLD;
 		else
@@ -3847,12 +3851,8 @@ class PlayState extends MusicBeatState
 
 		if(callOnHScripts("preNoteMiss", [daNote, field]) == Globals.Function_Stop)
 			return;
-		
-		if (daNote.noteScript != null)
-		{
-			if (callScript(daNote.noteScript, "preNoteMiss", [daNote, field]) == Globals.Function_Stop)
-				return;
-		}
+		if (daNote.noteScript != null && callScript(daNote.noteScript, "preNoteMiss", [daNote, field]) == Globals.Function_Stop)
+			return;
 
 		////
 		if(!daNote.isSustainNote && daNote.unhitTail.length > 0){
@@ -3864,7 +3864,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		if(!daNote.noMissAnimation)
+		if (ClientPrefs.ghostTapping && !daNote.noMissAnimation)
 		{
 			var chars:Array<Character> = daNote.characters;
 
@@ -3926,7 +3926,7 @@ class PlayState extends MusicBeatState
 			RecalculateRating();
 		} */
 
-		if (!daNote.isSustainNote && ClientPrefs.missVolume > 0) // i missed this sound
+		if (ClientPrefs.ghostTapping && !daNote.isSustainNote && ClientPrefs.missVolume > 0)
 			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), ClientPrefs.missVolume * FlxG.random.float(0.9, 1));
 
 		if(instakillOnMiss)
@@ -3937,13 +3937,8 @@ class PlayState extends MusicBeatState
 		#if LUA_ALLOWED
 		callOnLuas('noteMiss', [notes.members.indexOf(daNote), daNote.noteData, daNote.noteType, daNote.isSustainNote, daNote.ID]);
 		#end
-		////
 		if (daNote.noteScript != null)
-		{
-			var script:FunkinScript = daNote.noteScript;
-
 			callScript(script, "noteMiss", [daNote, field]);
-		}
 	}
 
 	function noteMissPress(direction:Int = 1):Void //You pressed a key when there was no notes to press for this key
@@ -4000,32 +3995,15 @@ class PlayState extends MusicBeatState
 
 	function opponentNoteHit(note:Note, field:PlayField):Void
 	{
-		if (songName != 'tutorial')
-			camZooming = true;
-
-		// Script shit
-		var isSus:Bool = note.isSustainNote; //GET OUT OF MY HEAD, GET OUT OF MY HEAD, GET OUT OF MY HEAD
-		var leData:Int = Math.round(Math.abs(note.noteData));
-		var leType:String = note.noteType;
-
-		if (note.noteScript != null)
-		{
-			var script:FunkinScript = note.noteScript;
-			
-			if (callScript(script, "preOpponentNoteHit", [note, field]) == Globals.Function_Stop)
-				return;
-		}
+		if (note.noteScript != null && callScript(script, "preOpponentNoteHit", [note, field]) == Globals.Function_Stop)
+			return;
 		if (callOnHScripts("preOpponentNoteHit", [note, field]) == Globals.Function_Stop)
 			return;
-		#if LUA_ALLOWED
-		if (callOnLuas('preOpponentNoteHit', [notes.members.indexOf(note), leData, leType, isSus, note.ID]) == Globals.Function_Stop)
-			return;
-		#end
 
 		var chars:Array<Character> = note.characters;
-		if (note.gfNote)
+		if (note.gfNote && gf != null)
 			chars.push(gf);
-		else if (chars.length == 0)
+		if (chars.length == 0)
 			chars = field.characters;
 
 		for(char in chars){
@@ -4047,7 +4025,7 @@ class PlayState extends MusicBeatState
 				if ((curSection != null && curSection.altAnim) || note.noteType == 'Alt Animation')
 					animToPlay += '-alt';
 
-				if (char != null && char.animTimer <= 0 && !char.voicelining){
+				if (char.animTimer <= 0 && !char.voicelining){
 					char.playAnim(animToPlay, true);
 					char.holdTimer = 0;
 					char.callOnScripts("playNoteAnim", [animToPlay, note]);
@@ -4058,6 +4036,7 @@ class PlayState extends MusicBeatState
 		if (SONG.needsVoices)
 			vocals.volume = vocalsEnded?0:1;
 
+		// Strum animations
 		if (note.visible){
 			var time:Float = 0.15;
 			if (note.isSustainNote && !note.animation.curAnim.name.endsWith('end'))
@@ -4068,17 +4047,14 @@ class PlayState extends MusicBeatState
 
 		note.hitByOpponent = true;
 
+		// Script shit
 		callOnHScripts("opponentNoteHit", [note, field]);
+		if (note.noteScript != null)
+			callScript(script, "opponentNoteHit", [note, field]);	
+		
 		#if LUA_ALLOWED
 		callOnLuas('opponentNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote, note.ID]);
 		#end
-
-		if (note.noteScript != null)
-		{
-			var script:FunkinScript = note.noteScript;
-
-			callScript(script, "opponentNoteHit", [note, field]);
-		}					
 
 		if (!note.isSustainNote)
 		{
@@ -4099,36 +4075,16 @@ class PlayState extends MusicBeatState
 		if (note.wasGoodHit || (field.autoPlayed && (note.ignoreNote || note.breaksCombo)))
 			return;
 
+		if (note.noteScript != null && callScript(note.noteScript, "preGoodNoteHit", [note, field]) == Globals.Function_Stop)
+			return;
+		if (callOnHScripts("preGoodNoteHit", [note, field]) == Globals.Function_Stop)
+			return;
+
 		if(!note.isSustainNote)
 			noteHits.push(Conductor.songPosition);
 
 		if (!note.hitsoundDisabled && ClientPrefs.hitsoundVolume > 0)
 			FlxG.sound.play(Paths.sound('hitsound'), ClientPrefs.hitsoundVolume);
-
-		// Strum animations
-		if (note.visible){
-			if(field.autoPlayed){
-				var time:Float = 0.15;
-				if(note.isSustainNote && !note.animation.curAnim.name.endsWith('end'))
-					time += 0.15;
-
-				StrumPlayAnim(field, Std.int(Math.abs(note.noteData)) % 4, time, note);
-			}else{
-				var spr = field.strumNotes[note.noteData];
-				if(spr != null && field.keysPressed[note.noteData])
-					spr.playAnim('confirm', true, note);
-			}
-		}
-
-		if (note.noteScript != null)
-		{
-			if (callScript(note.noteScript, "preGoodNoteHit", [note, field]) == Globals.Function_Stop)
-				return;
-		}
-		if (callOnHScripts("preGoodNoteHit", [note, field]) == Globals.Function_Stop)
-			return;
-
-		if (cpuControlled) saveScore = false; // if botplay hits a note, then you lose scoring
 
 		// tbh I hate hitCausesMiss lol its retarded
 		// added a shitty judge to deal w/ it tho!! 
@@ -4174,9 +4130,9 @@ class PlayState extends MusicBeatState
 
 		// Sing animations
 		var chars:Array<Character> = note.characters;
-		if (note.gfNote)
+		if (note.gfNote && gf != null)
 			chars.push(gf);
-		else if(chars.length==0)
+		if (chars.length == 0)
 			chars = field.characters;
 		
 		for (char in chars)
@@ -4206,7 +4162,7 @@ class PlayState extends MusicBeatState
 				if ((curSection != null && curSection.altAnim) || note.noteType == 'Alt Animation')
 					animToPlay += '-alt';
 
-				if (char != null && char.animTimer <= 0 && !char.voicelining){
+				if (char.animTimer <= 0 && !char.voicelining){
 					char.playAnim(animToPlay, true);
 					char.holdTimer = 0;
 					char.callOnScripts("playNoteAnim", [animToPlay, note]);
@@ -4215,19 +4171,32 @@ class PlayState extends MusicBeatState
 		}
 
 		note.wasGoodHit = true;
-		vocals.volume = vocalsEnded?0:1;
+		if (SONG.needsVoices) vocals.volume = vocalsEnded?0:1;
+		if (cpuControlled) saveScore = false; // if botplay hits a note, then you lose scoring
+
+		// Strum animations
+		if (note.visible){
+			if(field.autoPlayed){
+				var time:Float = 0.15;
+				if(note.isSustainNote && !note.animation.curAnim.name.endsWith('end'))
+					time += 0.15;
+
+				StrumPlayAnim(field, Std.int(Math.abs(note.noteData)) % 4, time, note);
+			}else{
+				var spr = field.strumNotes[note.noteData];
+				if(spr != null && field.keysPressed[note.noteData])
+					spr.playAnim('confirm', true, note);
+			}
+		}
 
 		// Script shit
 		callOnHScripts("goodNoteHit", [note, field]);
-		#if LUA_ALLOWED
-		var isSus:Bool = note.isSustainNote; //GET OUT OF MY HEAD, GET OUT OF MY HEAD, GET OUT OF MY HEAD
-		var leData:Int = Math.round(Math.abs(note.noteData));
-		var leType:String = note.noteType;
-		callOnLuas('goodNoteHit', [notes.members.indexOf(note), leData, leType, isSus, note.ID]);
-		#end
-
 		if (note.noteScript != null)
 			callScript(note.noteScript, "goodNoteHit", [note, field]);
+
+		#if LUA_ALLOWED
+		callOnLuas('goodNoteHit', [notes.members.indexOf(note), Math.round(Math.abs(note.noteData)), note.noteType, note.isSustainNote, note.ID]);
+		#end
 		
 		if (!note.isSustainNote && note.tail.length == 0)
 			field.removeNote(note);
