@@ -3998,6 +3998,7 @@ class PlayState extends MusicBeatState
 
 	function opponentNoteHit(note:Note, field:PlayField):Void
 	{
+		camZooming = true;
 		if (note.noteScript != null && callScript(script, "preOpponentNoteHit", [note, field]) == Globals.Function_Stop)
 			return;
 		if (callOnHScripts("preOpponentNoteHit", [note, field]) == Globals.Function_Stop)
