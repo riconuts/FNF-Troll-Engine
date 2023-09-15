@@ -154,7 +154,7 @@ class PlayState extends MusicBeatState
     public var iconP2:HealthIcon = new HealthIcon(); // ditto
     
 	public var hud:BaseHUD;
-	// public var scoreTxt:FlxText = new FlxText(); // just so psych mods n shit dont error
+	public var scoreTxt:FlxText = new FlxText(); // just so psych mods n shit dont error
 	public var botplayTxt:FlxText;
 	var subtitles:Null<SubtitleDisplay>;
 
