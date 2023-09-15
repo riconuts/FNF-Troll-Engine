@@ -348,18 +348,22 @@ class Highscore
         if(!isWife3){
             if(save.data.SCORE_VERSION < scoringVersion){
                 songOldScores[Std.string(save.data.SCORE_VERSION)] = songScores;
-                songScores = [];
+				songScores = [];
 				save.data.songScores = songScores;
                 save.data.songOldScores = songOldScores;
                 save.data.SCORE_VERSION = scoringVersion;
                 save.flush();
             }
-        }else{
+        }/* else{
+			songScores = [];
 			for (shid in songOldScores.keys())
 				for(song in songOldScores.get(shid).keys())
 					songScores.set(song, songOldScores.get(shid).get(song));
+
+			save.data.songScores = songScores;
+            save.flush();
                 
-        }
+        } */
 	}
 	public static function load():Void
 	{
