@@ -195,6 +195,7 @@ class AdvancedHUD extends CommonHUD
 
 			}
 		);
+		refreshFCColour();
 	}
 
 	override function changedOptions(changed:Array<String>){
@@ -347,7 +348,6 @@ class AdvancedHUD extends CommonHUD
 					}
 					judgeTxt.text = Std.string(val);
 				}
-				refreshFCColour();
 			case 'comboBreaks':
 				var judgeName = judgeNames.get('cb');
 				var judgeTxt = judgeTexts.get('cb');
@@ -370,7 +370,6 @@ class AdvancedHUD extends CommonHUD
 					}
 					judgeTxt.text = Std.string(val);
 				}
-				refreshFCColour();
 			case 'ratingPercent':
 				if (ClientPrefs.scoreZoom)
 				{
