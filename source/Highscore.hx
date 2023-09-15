@@ -345,6 +345,12 @@ class Highscore
 		{
 			songRating = save.data.songRating;
 		}
+
+		if (songScores==null){
+			songScores = [];
+            trace("wtf song scores null???");
+        }
+        
         if(!isWife3){
             if(save.data.SCORE_VERSION < scoringVersion){
                 songOldScores[Std.string(save.data.SCORE_VERSION)] = songScores;
