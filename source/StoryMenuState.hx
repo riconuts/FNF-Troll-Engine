@@ -185,8 +185,10 @@ class StoryMenuState extends MusicBeatState
 		*/
 
 		var curButton = chapterButtons[curSelected];
-		selectionArrow.y = curButton.border.y + curButton.border.height + 10;
-		selectionArrow.x = curButton.border.x + (curButton.border.width - selectionArrow.width) * 0.5; 
+		if (curButton != null){	
+			selectionArrow.y = curButton.border.y + curButton.border.height + 10;
+			selectionArrow.x = curButton.border.x + (curButton.border.width - selectionArrow.width) * 0.5; 
+		}
 	}
 
 	function goBack()

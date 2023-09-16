@@ -2,46 +2,44 @@ package options;
 
 import flixel.addons.transition.FlxTransitionableState;
 
-class OptionsState extends MusicBeatState {
-	var transCamera:FlxCamera; // JUST for the transition
-
-	override public function startOutro(onOutroComplete:() -> Void) {
-		FadeTransitionSubstate.nextCamera = daSubstate.transCamera;
-		return onOutroComplete();
-    }
-	
-	
-	var daSubstate:OptionsSubstate;
-    var transitoned:Bool = false;
+class OptionsState extends MusicBeatState 
+{
     var bg:FlxSprite;
 	var backdrop:flixel.addons.display.FlxBackdrop;
 
+	var daSubstate:OptionsSubstate;
+
+	var transCamera:FlxCamera; // JUST for the transition	
+    var transitioned:Bool = false;
+
     override function create(){
         daSubstate = new OptionsSubstate(true);
-		daSubstate.goBack = (function(changedOptions:Array<String>){
-            MusicBeatState.switchState(new MainMenuState());
-        }); 
- 		bg = new FlxSprite().loadGraphic(Paths.image('newmenuu/optionsbg'));
+		daSubstate.goBack = (changedOptions:Array<String>)->{
+			FadeTransitionSubstate.nextCamera = daSubstate.transCamera;
+			MusicBeatState.switchState(new MainMenuState());
+        };
+
+ 		bg = new FlxSprite(0, 0, Paths.image('newmenuu/optionsbg'));
 		bg.screenCenter(XY);
 		add(bg);
         
 		backdrop = new flixel.addons.display.FlxBackdrop(Paths.image("grid"));
 		backdrop.velocity.set(30, 30);
 		backdrop.alpha = 0.15;
-		add(backdrop); 
-		openSubState(daSubstate);
+		add(backdrop);
 
+		openSubState(daSubstate);
 
         persistentUpdate=true;
         persistentDraw=true;
-        super.create();
 
+        super.create();
     }
 
 	override public function resetSubState(){
 		super.resetSubState();
-		if (!transitoned){
-			transitoned = true;
+		if (!transitioned){
+			transitioned = true;
 			transCamera = daSubstate.transCamera;
 		    doDaInTrans();
         }
@@ -58,9 +56,8 @@ class OptionsState extends MusicBeatState {
 			{
 				FlxTransitionableState.skipNextTransIn = false;
 				if (finishTransIn != null)
-				{
 					finishTransIn();
-				}
+				
 				return;
 			}
 
