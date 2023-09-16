@@ -38,7 +38,7 @@ class FadeTransitionSubstate extends TransitionSubstate
 		var yStart = -height;
 		var yEnd = height;
 
-		trace('transitioning $status');
+		//trace('transitioning $status');
 		switch(status){
 			case IN:
 				updateFunc = function() gradientFill.y = gradient.y - gradient.height;
