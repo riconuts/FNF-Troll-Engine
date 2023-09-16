@@ -114,7 +114,7 @@ class Wife3
 
 		if(absDiff<=ridic){
 			return maxPoints;
-		} else if(absDiff<=zero){
+		}else if(absDiff<=zero){
 			return maxPoints*werwerwerwerf((zero-absDiff)/dev);
 		}else if(absDiff<=shit_weight){
 			return (absDiff-zero)*missWeight/(shit_weight-zero);
@@ -1534,7 +1534,6 @@ class PlayState extends MusicBeatState
 	}
 
 	var previousFrameTime:Int = 0;
-	//var lastReportedPlayheadPosition:Int = 0;
 	var songTime:Float = 0;
 	var vocalsEnded:Bool = false;
 	function startSong():Void
@@ -1542,7 +1541,6 @@ class PlayState extends MusicBeatState
 		startingSong = false;
 
 		previousFrameTime = FlxG.game.ticks;
-		//lastReportedPlayheadPosition = 0;
 
 		
 		inst.onComplete = function(){
@@ -1581,13 +1579,12 @@ class PlayState extends MusicBeatState
 
 		#if discord_rpc
 		// Updating Discord Rich Presence (with Time Left)
-		DiscordClient.changePresence(detailsText, SONG.song, Paths.formatToSongPath(SONG.song), true, songLength);
+		DiscordClient.changePresence(detailsText, SONG.song, songName, true, songLength);
 		#end
 		setOnScripts('songLength', songLength);
 		callOnScripts('onSongStart');
 	}
 
-	var debugNum:Int = 0;
 	private var noteTypeMap:Map<String, Bool> = new Map<String, Bool>();
 	private var eventPushedMap:Map<String, Bool> = new Map<String, Bool>();
 
@@ -2335,11 +2332,11 @@ class PlayState extends MusicBeatState
 			#if discord_rpc
 			if (startTimer != null && startTimer.finished)
 			{
-				DiscordClient.changePresence(detailsText, SONG.song, Paths.formatToSongPath(SONG.song), true, songLength - Conductor.songPosition - ClientPrefs.noteOffset);
+				DiscordClient.changePresence(detailsText, SONG.song, songName, true, songLength - Conductor.songPosition - ClientPrefs.noteOffset);
 			}
 			else
 			{
-				DiscordClient.changePresence(detailsText, SONG.song, Paths.formatToSongPath(SONG.song));
+				DiscordClient.changePresence(detailsText, SONG.song, songName);
 			}
 			#end
 		}
@@ -2354,11 +2351,11 @@ class PlayState extends MusicBeatState
 		{
 			if (Conductor.songPosition > 0.0)
 			{
-				DiscordClient.changePresence(detailsText, SONG.song, Paths.formatToSongPath(SONG.song), true, songLength - Conductor.songPosition - ClientPrefs.noteOffset);
+				DiscordClient.changePresence(detailsText, SONG.song, songName, true, songLength - Conductor.songPosition - ClientPrefs.noteOffset);
 			}
 			else
 			{
-				DiscordClient.changePresence(detailsText, SONG.song, Paths.formatToSongPath(SONG.song));
+				DiscordClient.changePresence(detailsText, SONG.song, songName);
 			}
 		}
 		#end
@@ -2370,7 +2367,7 @@ class PlayState extends MusicBeatState
 	{
 		#if discord_rpc
 		if (!isDead)
-			DiscordClient.changePresence(detailsPausedText, SONG.song, Paths.formatToSongPath(SONG.song));
+			DiscordClient.changePresence(detailsPausedText, SONG.song, songName);
 		#end
 
 		super.onFocusLost();
@@ -2755,7 +2752,7 @@ class PlayState extends MusicBeatState
 
 			#if discord_rpc
 			// Game Over doesn't get his own variable because it's only used here
-			DiscordClient.changePresence("Game Over - " + detailsText, SONG.song, Paths.formatToSongPath(SONG.song));
+			DiscordClient.changePresence("Game Over - " + detailsText, SONG.song, songName);
 			#end
 		}
 
@@ -3303,7 +3300,7 @@ class PlayState extends MusicBeatState
 					CustomFadeTransition.nextCamera = null;
 
 				#if VIDEOS_ALLOWED
-				var videoPath:String = Paths.video(Paths.formatToSongPath(SONG.song) + '-end');
+				var videoPath:String = Paths.video(songName + '-end');
 				if (Paths.exists(videoPath))
 					MusicBeatState.switchState(new VideoPlayerState(videoPath, gotoMenus));
 				else
@@ -3327,7 +3324,7 @@ class PlayState extends MusicBeatState
 				}
 
 				#if VIDEOS_ALLOWED
-				var videoPath:String = Paths.video(Paths.formatToSongPath(nextSong));
+				var videoPath:String = Paths.video(songName);
 				if (Paths.exists(videoPath))
 					MusicBeatState.switchState(new VideoPlayerState(videoPath, playNextSong));
 				else #end
@@ -4511,7 +4508,7 @@ class PlayState extends MusicBeatState
 					openSubState(new PauseSubState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
 
 				#if discord_rpc
-				DiscordClient.changePresence(detailsPausedText, SONG.song, Paths.formatToSongPath(SONG.song));
+				DiscordClient.changePresence(detailsPausedText, SONG.song, songName);
 				#end
 			}
 		}
