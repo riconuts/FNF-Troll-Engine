@@ -1503,6 +1503,8 @@ class PlayState extends MusicBeatState
 					modchartObjects.remove('note${daNote.ID}');
 				for (field in playfields)
 					field.removeNote(daNote);
+
+				camZooming = true;
 			}
 			--i;
 		}
@@ -3998,11 +4000,12 @@ class PlayState extends MusicBeatState
 
 	function opponentNoteHit(note:Note, field:PlayField):Void
 	{
-		camZooming = true;
 		if (note.noteScript != null && callScript(script, "preOpponentNoteHit", [note, field]) == Globals.Function_Stop)
 			return;
 		if (callOnHScripts("preOpponentNoteHit", [note, field]) == Globals.Function_Stop)
 			return;
+
+		camZooming = true;
 
 		var chars:Array<Character> = note.characters;
 		if (note.gfNote && gf != null)
@@ -4083,6 +4086,8 @@ class PlayState extends MusicBeatState
 			return;
 		if (callOnHScripts("preGoodNoteHit", [note, field]) == Globals.Function_Stop)
 			return;
+
+		camZooming = true;
 
 		if(!note.isSustainNote)
 			noteHits.push(Conductor.songPosition);
