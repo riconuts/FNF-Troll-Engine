@@ -489,10 +489,19 @@ class FreeplayState extends MusicBeatState
 		button.scoreText = new FlxText(button.x, button.y + button.height + 12, button.width, "", 24);
 		button.scoreText.setFormat(Paths.font("calibri.ttf"), 18, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.NONE);
 
+        button.medal = new FlxSprite(button.x, button.y);
+        button.medal.loadGraphic(Paths.image("medals/medal_fc"));
+        button.medal.updateHitbox();
+        button.medal.x -= button.medal.width/2;
+        button.medal.y -= button.medal.height/2;
+        button.medal.y += 15;
+        button.medal.x += 5;
+		button.medal.visible = false;
+
 		category.add(button.yellowBorder);
 		category.add(button.nameText);
 		category.add(button.scoreText);
-
+		category.add(button.medal);
 		button.updateHighscore();
 		buttons.push(button);
 
@@ -594,6 +603,7 @@ class FreeplaySongButton extends TGTSquareButton{
 	public var yellowBorder:FlxShapeBox;
 	public var nameText:FlxText;
 	public var scoreText:FlxText;
+    public var medal:FlxSprite;
 
 	public function new(Metadata, IsLocked)
 	{
@@ -609,10 +619,51 @@ class FreeplaySongButton extends TGTSquareButton{
 
 	public function updateHighscore()
 	{
+        var record = Highscore.getRecord(metadata.songName);
+
 		var ratingPercent = Highscore.getRating(metadata.songName);
 		scoreText.text = Highscore.floorDecimal(ratingPercent * 100, 2) + '%';
-		scoreText.color = ratingPercent == 1 ? 0xFFF4CC34 : Highscore.hasValidScore(metadata.songName) ? 0xFFFFFFFF : 0xFF8B8B8B;
-	}
+		scoreText.color = (Highscore.isWife3 ? ratingPercent >= 0.93 : ratingPercent == 1) ? 0xFFF4CC34 : Highscore.hasValidScore(metadata.songName) ? 0xFFFFFFFF : 0xFF8B8B8B;
+        
+        if(!Highscore.isWife3 && record.fcMedal != null && record.fcMedal != NONE){
+            medal.visible = true;
+            var medalArray:Array<String> = [
+                "medal_fc",
+                "medal_fc",
+                "medal_gfc",
+                "medal_sfc",
+                "medal_efc"
+            ];
+
+			medal.loadGraphic(Paths.image("medals/" + medalArray[record.fcMedal]));
+        }
+        else if(Highscore.isWife3 && ratingPercent >= 0.93){
+            medal.visible = true;
+            var medalShid:Array<Array<Dynamic>> = [
+                ["medal_aaaaa", 0.999935],
+                ["medal_aaaa", 0.999],
+                ["medal_aaa", 0.99],
+                ["medal_aa", 0.93]
+            ];
+            for (data in medalShid){
+                if (ratingPercent >= data[1]){
+                    medal.loadGraphic(Paths.image("medals/" + data[0]));
+                    break;
+                }
+            }
+        }else
+            medal.visible = false; 
+
+        if(medal.visible){
+            medal.x = x;
+            medal.y = y;
+            medal.updateHitbox();
+            medal.x -= medal.width / 2;
+            medal.y -= medal.height / 2;
+            medal.y += 15;
+            medal.x += 5;
+        }
+    }
 
 	override function onover()
 	{

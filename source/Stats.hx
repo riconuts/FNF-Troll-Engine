@@ -1,5 +1,6 @@
 package;
 
+import Highscore.ScoreRecord;
 import lime.app.Event;
 /* hud.ratingFC = ratingFC;
 hud.grade = ratingName;
@@ -29,6 +30,8 @@ class Stats {
 	public var totalNotesHit(default, set):Float = 0;
     public var clearType(default, set):String = '';
     public var grade(default, set):String = '';
+    public var noteDiffs:Array<Float> = [];
+
     public var judgements:Map<String, Int> = [
 		"epic" => 0,
 		"sick" => 0,
@@ -235,6 +238,18 @@ class Stats {
 		return clear;
 	}
 
+
+    public function getScoreRecord():ScoreRecord{
+		return {
+			score: score,
+			comboBreaks: judgements.get("cb"), // since we cant detect the combo breaks from here
+			accuracyScore: totalNotesHit,
+			maxAccuracyScore: totalPlayed,
+			judges: judgements,
+			noteDiffs: noteDiffs,
+			npsPeak: npsPeak
+		}
+    }
 
     public function updateVariables()
     {

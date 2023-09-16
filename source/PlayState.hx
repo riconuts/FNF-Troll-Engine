@@ -3263,8 +3263,10 @@ class PlayState extends MusicBeatState
 			// TODO: different score saving for Wife3
 			// TODO: Save more stats?
 
-			if (!playOpponent && saveScore && ratingFC!='Fail')
-				Highscore.saveScore(SONG.song, stats.score, percent, stats.totalNotesHit);
+			if (saveScore && ratingFC!='Fail'){
+				//Highscore.saveScore(SONG.song, stats.score, percent, stats.totalNotesHit);
+                Highscore.saveScoreRecord(SONG.song, stats.getScoreRecord());
+            }
 		}
 
 		if (chartingMode)
@@ -4084,8 +4086,10 @@ class PlayState extends MusicBeatState
 		if (callOnHScripts("preGoodNoteHit", [note, field]) == Globals.Function_Stop)
 			return;
 
-		if(!note.isSustainNote)
-			noteHits.push(Conductor.songPosition);
+		if(!note.isSustainNote){
+			noteHits.push(Conductor.songPosition); // used for NPS
+			stats.noteDiffs.push(note.hitResult.hitDiff + ClientPrefs.ratingOffset); // used for stat saving (i.e viewing song stats after you beaten it)
+        }
 
 		if (!note.hitsoundDisabled && ClientPrefs.hitsoundVolume > 0)
 			FlxG.sound.play(Paths.sound('hitsound'), ClientPrefs.hitsoundVolume);
