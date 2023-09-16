@@ -2834,7 +2834,7 @@ class PlayState extends MusicBeatState
 					if(shiftFocus)focusedChar=dad;
 					dad.alpha = lastAlpha;
 					//hud.iconP2.changeIcon(dad.healthIcon);
-					hud.changedCharacter(2, boyfriend);
+					hud.changedCharacter(2, dad);
 					oldChar.setOnScripts("used", false);
 					dad.setOnScripts("used", true);
 					oldChar.callOnScripts("changedOut", [oldChar, dad]); // oldChar, newChar
