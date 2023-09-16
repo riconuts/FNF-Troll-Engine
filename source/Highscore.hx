@@ -360,16 +360,19 @@ class Highscore
                 save.data.SCORE_VERSION = scoringVersion;
                 save.flush();
             }
-        }/* else{
+        }/*  else{
 			songScores = [];
 			for (shid in songOldScores.keys())
-				for(song in songOldScores.get(shid).keys())
+				for(song in songOldScores.get(shid).keys()){
 					songScores.set(song, songOldScores.get(shid).get(song));
+                }
 
+			songOldScores = [];
+			save.data.songOldScores = songOldScores;
 			save.data.songScores = songScores;
             save.flush();
                 
-        } */
+        }  */
 	}
 	public static function load():Void
 	{
