@@ -2861,7 +2861,7 @@ class PlayState extends MusicBeatState
 						gf = gfMap.get(name);
 						gf.alpha = lastAlpha;
 						if(shiftFocus)focusedChar=gf;
-						hud.changedCharacter(3, boyfriend);
+						hud.changedCharacter(3, gf);
 					    oldChar.setOnScripts("used", false);
 					    gf.setOnScripts("used", true);
 						oldChar.callOnScripts("changedOut", [oldChar, gf]); // oldChar, newChar
