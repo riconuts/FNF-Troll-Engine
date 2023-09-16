@@ -56,6 +56,8 @@ class GameOverSubstate extends MusicBeatSubstate
 
 	override function create()
 	{
+		FlxG.timeScale = 1;
+
 		instance = this;
 
 		if (genericBitch != null){
