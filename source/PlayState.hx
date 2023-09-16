@@ -2711,7 +2711,7 @@ class PlayState extends MusicBeatState
 
 	function doGameOver()
 	{
-		if (callOnScripts('onGameOver') != Globals.Function_Stop) 
+		if (callOnScripts('onGameOver') == Globals.Function_Stop) 
 			return false;
 
 		boyfriend.stunned = true;
