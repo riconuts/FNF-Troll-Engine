@@ -1860,9 +1860,6 @@ class ChartingState extends MusicBeatState
 				}
 			}
 
-			//ARROW VORTEX SHIT NO DEADASS
-
-
 
 			if (FlxG.keys.pressed.W || FlxG.keys.pressed.S)
 			{
@@ -1891,53 +1888,37 @@ class ChartingState extends MusicBeatState
 				}
 			}
 
-			if(!vortex){
-				if (FlxG.keys.justPressed.UP || FlxG.keys.justPressed.DOWN  )
-				{
-					FlxG.sound.music.pause();
-					var snap:Float = Conductor.stepCrochet / (quantization / 16);
-					if (FlxG.keys.justPressed.UP)
-						FlxG.sound.music.time = CoolUtil.snap(FlxG.sound.music.time, snap) - snap;
-					if (FlxG.keys.justPressed.DOWN)
-						FlxG.sound.music.time = CoolUtil.snap(FlxG.sound.music.time, snap) + snap;
-				}
-			}
-
-			var style = currentType;
-
-			if (FlxG.keys.pressed.SHIFT){
-				style = 3;
-			}
-
 			var conductorTime = Conductor.songPosition; //+ sectionStartTime();Conductor.songPosition / Conductor.stepCrochet;
 
 			//AWW YOU MADE IT SEXY <3333 THX SHADMAR
 
-			if(!blockInput){
-				if(FlxG.keys.justPressed.RIGHT){
-					curQuant++;
-					if(curQuant>quantizations.length-1)
-						curQuant = 0;
+			if(FlxG.keys.justPressed.RIGHT){
+				curQuant++;
+				if(curQuant>quantizations.length-1)
+					curQuant = 0;
 
-					quantization = quantizations[curQuant];
+				quantization = quantizations[curQuant];
 
-					quantTxt.text = "Beat Snap: " + quantNames[curQuant];
-				}
-
-				if(FlxG.keys.justPressed.LEFT){
-					curQuant--;
-					if(curQuant<0)
-						curQuant = quantizations.length-1;
-
-					quantization = quantizations[curQuant];
-
-					quantTxt.text = "Beat Snap: " + quantNames[curQuant];
-				}
-				quant.animation.play('q', true, false, curQuant);
+				quantTxt.text = "Beat Snap: " + quantNames[curQuant];
 			}
-			if(vortex && !blockInput){
-				var controlArray:Array<Bool> = [FlxG.keys.justPressed.ONE, FlxG.keys.justPressed.TWO, FlxG.keys.justPressed.THREE, FlxG.keys.justPressed.FOUR,
-											   FlxG.keys.justPressed.FIVE, FlxG.keys.justPressed.SIX, FlxG.keys.justPressed.SEVEN, FlxG.keys.justPressed.EIGHT];
+
+			if(FlxG.keys.justPressed.LEFT){
+				curQuant--;
+				if(curQuant<0)
+					curQuant = quantizations.length-1;
+
+				quantization = quantizations[curQuant];
+
+				quantTxt.text = "Beat Snap: " + quantNames[curQuant];
+			}
+			quant.animation.play('q', true, false, curQuant);
+			
+			//ARROW VORTEX SHIT NO DEADASS
+			if(vortex){
+				var controlArray:Array<Bool> = [
+					FlxG.keys.justPressed.ONE, FlxG.keys.justPressed.TWO, FlxG.keys.justPressed.THREE, FlxG.keys.justPressed.FOUR,
+					FlxG.keys.justPressed.FIVE, FlxG.keys.justPressed.SIX, FlxG.keys.justPressed.SEVEN, FlxG.keys.justPressed.EIGHT
+				];
 				var holdArray:Array<Bool> = [
 					FlxG.keys.pressed.ONE, FlxG.keys.pressed.TWO, FlxG.keys.pressed.THREE, FlxG.keys.pressed.FOUR,
 					FlxG.keys.pressed.FIVE, FlxG.keys.pressed.SIX, FlxG.keys.pressed.SEVEN, FlxG.keys.pressed.EIGHT
@@ -1965,21 +1946,27 @@ class ChartingState extends MusicBeatState
 					for (i in 0...controlArray.length)
 					{
 						if(controlArray[i])
-							doANoteThing(conductorTime, i, style);
+							doANoteThing(conductorTime, i, currentType);
 					}
 				}
 
-				var feces:Float;
-				if (FlxG.keys.justPressed.UP || FlxG.keys.justPressed.DOWN  )
+				
+				if (FlxG.keys.justPressed.UP || FlxG.keys.justPressed.DOWN)
 				{
 					FlxG.sound.music.pause();
-
+					if (vocals != null)
+						vocals.pause();
+					for (track in extraTracks)
+						track.pause();
 
 					updateCurStep();
+
+					var feces:Float;
+
 					//FlxG.sound.music.time = (Math.round(curStep/quants[curQuant])*quants[curQuant]) * Conductor.stepCrochet;
 
-						//(Math.floor((curStep+quants[curQuant]*1.5/(quants[curQuant]/2))/quants[curQuant])*quants[curQuant]) * Conductor.stepCrochet;//snap into quantization
-/* 					var time:Float = FlxG.sound.music.time;
+					//(Math.floor((curStep+quants[curQuant]*1.5/(quants[curQuant]/2))/quants[curQuant])*quants[curQuant]) * Conductor.stepCrochet;//snap into quantization
+					/*var time:Float = FlxG.sound.music.time;
 					var beat:Float = curDecBeat;
 					var snap:Float = quantization / 4;
 					var increase:Float = 1 / snap;
@@ -1991,28 +1978,35 @@ class ChartingState extends MusicBeatState
 						var fuck:Float = CoolUtil.quantize(beat, snap) + increase; //(Math.floor((beat+snap) / snap) * snap);
 						feces = Conductor.beatToSeconds(fuck);
 					} */
+
 					var snap:Float = Conductor.stepCrochet / (quantization / 16);
-					if (FlxG.keys.pressed.UP)
-						feces = CoolUtil.snap(FlxG.sound.music.time, snap) - snap;
-					else
-						feces = CoolUtil.snap(FlxG.sound.music.time, snap) + snap;
-					FlxTween.tween(FlxG.sound.music, {time:feces}, 0.1, {ease:FlxEase.circOut});
-					if(vocals != null) {
-						vocals.pause();
-						vocals.time = FlxG.sound.music.time;
-					}
-					for (track in extraTracks){
-						track.pause();
-						track.time = FlxG.sound.music.time;
-					}
+					feces = CoolUtil.snap(FlxG.sound.music.time, snap) + (FlxG.keys.justPressed.UP ? -snap : snap);
 
+					FlxTween.tween(FlxG.sound.music, {time: feces}, 0.1, {ease: FlxEase.circOut});
+
+					/*
 					var dastrum = 0;
-
 					if (curSelectedNote != null){
 						dastrum = curSelectedNote[0];
 					}
+					*/
+				}
+			}else{
+				if (FlxG.keys.justPressed.UP || FlxG.keys.justPressed.DOWN)
+				{
+					FlxG.sound.music.pause();
+					if (vocals != null)
+						vocals.pause();
+					for (track in extraTracks)
+						track.pause();
+
+					var snap:Float = Conductor.stepCrochet / (quantization / 16);
+					var feces:Float = CoolUtil.snap(FlxG.sound.music.time, snap) + (FlxG.keys.justPressed.UP ? -snap : snap);
+
+					FlxTween.tween(FlxG.sound.music, {time: feces}, 0.1, {ease: FlxEase.circOut});
 				}
 			}
+
 			var shiftThing:Int = 1;
 			if (FlxG.keys.pressed.SHIFT)
 				shiftThing = 4;
