@@ -318,6 +318,9 @@ class ChartingState extends MusicBeatState
 		Conductor.changeBPM(_song.bpm);
 		Conductor.mapBPMChanges(_song);
 
+		loadSong();
+		fixEvents();
+
 		bpmTxt = new FlxText(12, 50, 0, "", 20);
 		bpmTxt.setFormat(null, 18, 0xFFFFFFFF, LEFT, FlxTextBorderStyle.OUTLINE, 0xFF000000);
 		bpmTxt.borderSize = 2;
@@ -413,17 +416,13 @@ class ChartingState extends MusicBeatState
 		quantTxt.borderSize = 2;
 		quantTxt.scrollFactor.set();
 		add(quantTxt);
-		
-		loadSong();
-		fixEvents();
 
-		if(lastSong != currentSongName)
+		if (lastSong != currentSongName){
 			changeSection();
-		
-		lastSong = currentSongName;
+			lastSong = currentSongName;
+		}
 
 		reloadGridLayer();
-
 		updateHeads();
 
 		super.create();
