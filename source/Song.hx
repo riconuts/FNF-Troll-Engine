@@ -132,7 +132,7 @@ class Song
 		while (!rawJson.endsWith("}"))
 			rawJson = rawJson.substr(0, rawJson.length - 1);
 
-		var songJson:Dynamic = parseJSONshit(rawJson);
+		var songJson:SwagSong = parseJSONshit(rawJson);
 		if(jsonInput != 'events') Stage.StageData.loadDirectory(songJson);
 		onLoadJson(songJson);
 
