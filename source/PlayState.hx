@@ -651,17 +651,15 @@ class PlayState extends MusicBeatState
 		for (judgeData in judgeManager.judgmentData)
 			shitToLoad.push({path: judgeData.internalName});
 
-		for (number in 0...10)
-			shitToLoad.push({path: 'num$number'});
+		for (i in 0...10)
+			shitToLoad.push({path: 'num$i'});
 
-		if (ClientPrefs.hitsoundVolume > 0)
-			shitToLoad.push({path: 'hitsound', type: 'SOUND'});
+		for (i in 1...3) // TODO: Be able to add more than 3 miss sounds
+			shitToLoad.push({path: 'missnote$i', type: 'SOUND'});
 
-		if (ClientPrefs.missVolume != 0){
-			shitToLoad.push({path: 'missnote1', type: 'SOUND'});
-			shitToLoad.push({path: 'missnote2', type: 'SOUND'});
-			shitToLoad.push({path: 'missnote3', type: 'SOUND'});
-		}
+		shitToLoad.push({path: 'hitsound', type: 'SOUND'});
+		shitToLoad.push({path: "healthBar"});
+		shitToLoad.push({path: "timeBar"});
 
 		/* 
 		if (PauseSubState.songName != null)
@@ -670,9 +668,6 @@ class PlayState extends MusicBeatState
 			shitToLoad.push({path: Paths.formatToSongPath(ClientPrefs.pauseMusic), type: 'MUSIC'}); 
 		shitToLoad.push({path: "breakfast", type: 'MUSIC'}); 
 		*/
-
-		if (ClientPrefs.timeBarType != 'Disabled')
-			shitToLoad.push({path: "timeBar"});
 
 		////
 		if (ClientPrefs.noteSkin == 'Quants'){
