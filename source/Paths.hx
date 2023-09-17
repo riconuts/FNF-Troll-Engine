@@ -363,6 +363,27 @@ class Paths
 	// TODO: maybe these should be cached when starting a song
     // once we add a resource (mod/skin) menu we can do caching there for some things
     // we can populate the entire string map when reloading mods and skins
+	public static function getAllStrings()
+	{
+		currentStrings.clear();
+
+		for (filePath in Paths.getFolders("data"))
+		{
+			var file = filePath + "strings.txt";
+			if (!exists(file)) continue;
+
+			var stringsText = getContent(file);
+			var daLines = stringsText.trim().split("\n");
+
+			for(shit in daLines){
+				var splitted = shit.split("=");
+				var thisKey = splitted.shift();
+
+				if (!currentStrings.exists(thisKey))
+					currentStrings.set(thisKey, splitted.join("=").trim().replace('\\n', '\n'));
+			}
+		}
+	}
 
 	public static function getString(key:String):String
 	{

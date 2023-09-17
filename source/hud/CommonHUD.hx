@@ -21,6 +21,9 @@ class CommonHUD extends BaseHUD
 	public var healthBarBG(get, null):FlxSprite;
 	public var iconP1:HealthIcon;
 	public var iconP2:HealthIcon;
+
+	public var botplayTxt:FlxText;
+	public var botplaySine:Float = 0;
 	
 	function get_healthBarBG()
 		return healthBar.healthBarBG;
@@ -76,6 +79,13 @@ class CommonHUD extends BaseHUD
 		add(timeBarBG);
 		add(timeBar);
 		add(timeTxt);
+
+		botplayTxt = new FlxText(0, (ClientPrefs.downScroll ? (FlxG.height-107) : 89), FlxG.width, "[BUTTPLUG]", 32);
+		botplayTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		botplayTxt.scrollFactor.set();
+		botplayTxt.borderSize = 1.25;
+		botplayTxt.exists = false;
+		add(botplayTxt);
 	}
 
 	override function reloadHealthBarColors(dadColor:FlxColor, bfColor:FlxColor)
@@ -148,6 +158,13 @@ class CommonHUD extends BaseHUD
 		if (FlxG.keys.justPressed.NINE)
 			iconP1.swapOldIcon();
 
+		if (botplayTxt.exists = PlayState.instance.cpuControlled){
+			botplaySine += 180 * elapsed;
+			botplayTxt.alpha = 1 - flixel.math.FlxMath.fastSin((Math.PI * botplaySine) / 180);
+		}else{
+			botplaySine = 0;
+		}
+
 		if (updateTime)
 		{
 			var curTime:Float = Conductor.songPosition - ClientPrefs.noteOffset;
@@ -192,6 +209,8 @@ class CommonHUD extends BaseHUD
 		healthBar.y = healthBarBG.y + 5;
 		healthBar.iconP1.y = healthBar.y - 75;
 		healthBar.iconP2.y = healthBar.y - 75;
+
+		botplayTxt.y = (ClientPrefs.downScroll ? (FlxG.height-107) : 89);
 
 		updateTimeBarType();
 	}

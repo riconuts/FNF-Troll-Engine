@@ -155,7 +155,7 @@ class PlayState extends MusicBeatState
     
 	public var hud:BaseHUD;
 	public var scoreTxt:FlxText = new FlxText(); // just so psych mods n shit dont error
-	public var botplayTxt:FlxText;
+	public var botplayTxt:FlxText = new FlxText(); // ditto
 	var subtitles:Null<SubtitleDisplay>;
 
 	public static var curStage:String = '';
@@ -737,6 +737,7 @@ class PlayState extends MusicBeatState
 			});
 		}
 
+		// Paths.getAllStrings();
 		Cache.loadWithList(shitToLoad);
 		shitToLoad = [];
 
@@ -801,12 +802,8 @@ class PlayState extends MusicBeatState
 				default: hud = new PsychHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song, stats);
 			}
 		}
-
-		botplayTxt = new BotplayText(0, (ClientPrefs.downScroll ? FlxG.height - 44 : 19) + 15 + (ClientPrefs.downScroll ? -78 : 55), FlxG.width, "[BUTTPLUG]", 32);
-		botplayTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		botplayTxt.scrollFactor.set();
-		botplayTxt.borderSize = 1.25;
-		botplayTxt.exists = false;
+		hud.alpha = ClientPrefs.hudOpacity;
+		add(hud);
 
 		////
 		stage.buildStage();
@@ -866,10 +863,6 @@ class PlayState extends MusicBeatState
 		moveCameraSection(SONG.notes[0]);
 
 		////
-		
-		hud.songName = SONG.song;
-		hud.alpha = ClientPrefs.hudOpacity;
-		add(hud);
 
 		//
 		lastJudge = new RatingSprite();
@@ -956,7 +949,6 @@ class PlayState extends MusicBeatState
 		strumLineNotes.cameras = cH;
 		grpNoteSplashes.cameras = cH;
 		notes.cameras = cH;
-		botplayTxt.cameras = cH;
 
 		// EVENT AND NOTE SCRIPTS WILL GET LOADED HERE
 		generateSong(SONG.song);
@@ -999,7 +991,6 @@ class PlayState extends MusicBeatState
 			add(ratingGroup);
 			add(timingTxt);
 		}
-		add(botplayTxt);
 		add(grpNoteSplashes);
 
 		#if LUA_ALLOWED
@@ -2189,8 +2180,6 @@ class PlayState extends MusicBeatState
 			insert(members.indexOf(notefields) + 1, timingTxt);
 			insert(members.indexOf(notefields) + 1, ratingGroup);
 		}
-
-		botplayTxt.y = (ClientPrefs.downScroll ? FlxG.height - 44 : 19) + 15 + (ClientPrefs.downScroll ? -78 : 55);
 		
 		for(field in playfields){
 			field.noteField.optimizeHolds = ClientPrefs.optimizeHolds;
@@ -2630,8 +2619,6 @@ class PlayState extends MusicBeatState
 
 		checkEventNote();
 		
-		botplayTxt.exists = PlayState.instance.cpuControlled;
-
 /* 		if(midScroll){
 			for(field in notefields.members){
 				if(field.field==null)continue;
@@ -4754,17 +4741,5 @@ class RatingSprite extends FlxSprite
 			tween.destroy();
 		}
 		return super.kill();
-	}
-}
-
-class BotplayText extends FlxText
-{
-	public var sine:Float = 0;
-
-	override public function update(elapsed:Float){
-		sine += 180 * elapsed;
-		alpha = 1 - flixel.math.FlxMath.fastSin((Math.PI * sine) / 180);
-		
-		super.update(elapsed);
 	}
 }
