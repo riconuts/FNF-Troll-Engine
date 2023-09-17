@@ -2177,7 +2177,6 @@ class ChartingState extends MusicBeatState
 	{
 		#if desktop
 		if(waveformPrinted) {
-			trace(waveformSprite);
 			waveformSprite.makeGraphic(Std.int(GRID_SIZE * 8), Std.int(gridBG.height), 0x00FFFFFF);
 			waveformSprite.pixels.fillRect(new Rectangle(0, 0, gridBG.width, gridBG.height), 0x00FFFFFF);
 		}
