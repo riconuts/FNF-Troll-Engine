@@ -327,9 +327,9 @@ class FunkinHScript extends FunkinScript
 		if(doExecute){
 			try
 			{
+				trace('Loading haxe script: $scriptName');
 				interpreter.execute(parsed);
 				call('onCreate');
-				trace('Loaded hscript: $scriptName');
 			}
 			catch (e:haxe.Exception)
 			{
