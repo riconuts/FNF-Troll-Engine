@@ -1387,14 +1387,16 @@ class ChartingState extends MusicBeatState
 		}
 		
 		vocals = new FlxSound();
-		var file:Dynamic = Paths.voices(currentSongName);
 
+		var file:Dynamic = Paths.voices(currentSongName);
 		if (Std.isOfType(file, Sound) || OpenFlAssets.exists(file)) {
 			soundTracksMap.set(
 				"Vocals", 
 				vocals.loadEmbedded(file)
 			);
 			FlxG.sound.list.add(vocals);
+		}else{
+			vocals = null;
 		}
 
 		FlxG.sound.playMusic(Paths.inst(currentSongName), 0.6/*, false*/);
@@ -1416,11 +1418,18 @@ class ChartingState extends MusicBeatState
 				vocals.pause();
 				vocals.time = 0;
 			}
+			for (track in extraTracks){
+				track.pause();
+				track.time = 0;
+			}
+			
 			changeSection();
 			curSec = 0;
 			updateGrid();
 			updateSectionUI();
+			
 			vocals.play();
+			for (track in extraTracks) track.play();
 		};
 
 		FlxG.sound.music.pause();
@@ -1799,15 +1808,22 @@ class ChartingState extends MusicBeatState
 				{
 					FlxG.sound.music.pause();
 					if(vocals != null) vocals.pause();
+					for (track in extraTracks) track.pause();
 				}
 				else
 				{
 					if(vocals != null) {
-						vocals.play();
 						vocals.pause();
 						vocals.time = FlxG.sound.music.time;
 						vocals.play();
 					}
+
+					for (track in extraTracks){
+						track.pause();
+						track.time = FlxG.sound.music.time;
+						track.play();
+					}
+
 					FlxG.sound.music.play();
 				}
 			}
@@ -1833,9 +1849,14 @@ class ChartingState extends MusicBeatState
 					else
 						FlxG.sound.music.time = CoolUtil.snap(FlxG.sound.music.time, snap) + snap;
 				}
+
 				if(vocals != null) {
 					vocals.pause();
 					vocals.time = FlxG.sound.music.time;
+				}
+				for (track in extraTracks){
+					track.pause();
+					track.time = FlxG.sound.music.time;
 				}
 			}
 
@@ -1863,6 +1884,10 @@ class ChartingState extends MusicBeatState
 				if(vocals != null) {
 					vocals.pause();
 					vocals.time = FlxG.sound.music.time;
+				}
+				for (track in extraTracks){
+					track.pause();
+					track.time = FlxG.sound.music.time;
 				}
 			}
 
@@ -1975,6 +2000,10 @@ class ChartingState extends MusicBeatState
 					if(vocals != null) {
 						vocals.pause();
 						vocals.time = FlxG.sound.music.time;
+					}
+					for (track in extraTracks){
+						track.pause();
+						track.time = FlxG.sound.music.time;
 					}
 
 					var dastrum = 0;
@@ -2436,6 +2465,10 @@ class ChartingState extends MusicBeatState
 			vocals.pause();
 			vocals.time = FlxG.sound.music.time;
 		}
+		for (track in extraTracks){
+			track.pause();
+			track.time = FlxG.sound.music.time;
+		}
 		updateCurStep();
 
 		updateGrid();
@@ -2457,7 +2490,6 @@ class ChartingState extends MusicBeatState
 					vocals.pause();
 					vocals.time = FlxG.sound.music.time;
 				}
-
 				for (track in extraTracks){
 					track.pause();
 					track.time = FlxG.sound.music.time;
