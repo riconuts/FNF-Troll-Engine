@@ -457,10 +457,6 @@ class ChartingState extends MusicBeatState
 		_song.events = eventsData;	
 	}
 
-	var check_vortex:FlxUICheckBox = null;
-	var check_warnings:FlxUICheckBox = null;
-	var playSoundBf:FlxUICheckBox = null;
-	var playSoundDad:FlxUICheckBox = null;
 	var UI_songTitle:FlxUIInputText;
 	//var noteSkinInputText:FlxUIInputText;
 	//var noteSplashesInputText:FlxUIInputText;
@@ -1210,11 +1206,18 @@ class ChartingState extends MusicBeatState
 	}
 
 	var metronome:FlxUICheckBox;
-	var mouseScrollingQuant:FlxUICheckBox;
 	var metronomeStepper:FlxUINumericStepper;
 	var metronomeOffsetStepper:FlxUINumericStepper;
 	var disableAutoScrolling:FlxUICheckBox;
-	
+	var mouseScrollingQuant:FlxUICheckBox;
+
+	var check_vortex:FlxUICheckBox = null;
+	var check_warnings:FlxUICheckBox = null;
+
+	var playSoundBf:FlxUICheckBox = null;
+	var playSoundDad:FlxUICheckBox = null;
+	var playSoundEvents:FlxUICheckBox = null;
+
 	var waveformTrackDropDown:FlxUIDropDownMenuCustom;
 	var waveformTrack:FlxSound;
 	var trackVolumeStepper:FlxUINumericStepper;
@@ -1230,7 +1233,7 @@ class ChartingState extends MusicBeatState
 			displayNameList.push(k);
 
 		////
-		var trackVolumeTxt:FlxText = null; // holy shit shut the fuck upppp i know what im doinggg
+		var trackVolumeTxt:FlxText = null; // holy shiiit shut the fuck uppp i know what im doinggg
 
 		waveformTrackDropDown = new FlxUIDropDownMenuCustom(10, 100, 
 			FlxUIDropDownMenuCustom.makeStrIdLabelArray(displayNameList, true), 
@@ -1294,17 +1297,27 @@ class ChartingState extends MusicBeatState
 		mouseScrollingQuant.checked = FlxG.save.data.mouseScrollingQuant;
 
 		////////
-		playSoundBf = new FlxUICheckBox(10, 310 + 30, null, null, 'Play Sound (Boyfriend notes)', 100,
+		var xPos = 10 + 120;
+
+		playSoundBf = new FlxUICheckBox(xPos, startY, null, null, 'Play Sound (Boyfriend notes)', 100,
 			()->{FlxG.save.data.chart_playSoundBf = playSoundBf.checked;}
 		);
 		if (FlxG.save.data.chart_playSoundBf == null) FlxG.save.data.chart_playSoundBf = false;
 		playSoundBf.checked = FlxG.save.data.chart_playSoundBf;
 
-		playSoundDad = new FlxUICheckBox(10 + 120, playSoundBf.y, null, null, 'Play Sound (Opponent notes)', 100,
+
+		playSoundDad = new FlxUICheckBox(xPos, startY + 40, null, null, 'Play Sound (Opponent notes)', 100,
 			()->{FlxG.save.data.chart_playSoundDad = playSoundDad.checked;}
 		);
 		if (FlxG.save.data.chart_playSoundDad == null) FlxG.save.data.chart_playSoundDad = false;
 		playSoundDad.checked = FlxG.save.data.chart_playSoundDad;
+
+		
+		playSoundEvents = new FlxUICheckBox(xPos, startY + 80, null, null, 'Play Sound (Event notes)', 100,
+			()->{FlxG.save.data.chart_playSoundEvents = playSoundEvents.checked;}
+		);
+		if (FlxG.save.data.chart_playSoundEvents == null) FlxG.save.data.chart_playSoundEvents = false;
+		playSoundEvents.checked = FlxG.save.data.chart_playSoundEvents;
 
 		////////
 		metronome = new FlxUICheckBox(10, 15, null, null, "Metronome Enabled", 100,
@@ -1338,6 +1351,7 @@ class ChartingState extends MusicBeatState
 
 		tab_group_chart.add(playSoundBf);
 		tab_group_chart.add(playSoundDad);
+		tab_group_chart.add(playSoundEvents);
 
 		tab_group_chart.add(trackVolumeTxt);
 		tab_group_chart.add(trackVolumeStepper);
@@ -1804,19 +1818,19 @@ class ChartingState extends MusicBeatState
 				}
 				else
 				{
+					FlxG.sound.music.play();
+
 					if(vocals != null) {
 						vocals.pause();
 						vocals.time = FlxG.sound.music.time;
-						vocals.play();
+						vocals.play(false, FlxG.sound.music.time);
 					}
 
 					for (track in extraTracks){
 						track.pause();
 						track.time = FlxG.sound.music.time;
-						track.play();
+						track.play(false, FlxG.sound.music.time);
 					}
-
-					FlxG.sound.music.play();
 				}
 			}
 
@@ -2021,10 +2035,12 @@ class ChartingState extends MusicBeatState
 		"\nBeat: " + Highscore.floorDecimal(curDecBeat, 2) +
 		"\nStep: " + curStep;
 
-		var playedSound:Array<Bool> = [false, false, false, false]; //Prevents ouchy GF sex sounds
+		var playedSound:Array<Bool> = []; //Prevents ouchy GF sex sounds
 		curRenderedNotes.forEachAlive(function(note:Note) {
 			note.alpha = 1;
-			if(curSelectedNote != null) {
+
+			if(curSelectedNote != null) 
+			{
 				var noteDataToCheck:Int = note.noteData;
 				if(noteDataToCheck > -1 && note.mustPress != _song.notes[curSec].mustHitSection) noteDataToCheck += 4;
 
@@ -2036,30 +2052,42 @@ class ChartingState extends MusicBeatState
 				}
 			}
 
-			if(note.strumTime <= Conductor.songPosition) {
+			if (note.strumTime <= Conductor.songPosition) 
+			{
 				note.alpha = 0.4;
-				if(note.strumTime > lastConductorPos && FlxG.sound.music.playing && note.noteData > -1 && !note.ignoreNote) {
-					var data:Int = note.noteData % 4;
-					var noteDataToCheck:Int = note.noteData;
-					if(noteDataToCheck > -1 && note.mustPress != _song.notes[curSec].mustHitSection) noteDataToCheck += 4;
-						strumLineNotes.members[noteDataToCheck].playAnim('confirm', true);
-						strumLineNotes.members[noteDataToCheck].resetAnim = (note.sustainLength / 1000) + 0.15;
-					if(!playedSound[data]) {
-						if (!note.hitsoundDisabled && (playSoundBf.checked && note.mustPress) || (playSoundDad.checked && !note.mustPress)){
-							var soundToPlay = 'hitsound';
-							if(_song.player1 == 'gf') { //Easter egg
-								soundToPlay = 'GF_' + Std.string(data + 1);
-							}
 
-							FlxG.sound.play(Paths.sound(soundToPlay)).pan = note.noteData < 4? -0.3 : 0.3; //would be coolio
-							playedSound[data] = true;
-						}
+				if (note.strumTime > lastConductorPos && FlxG.sound.music.playing) 
+				{
+					if (note.noteData > -1)
+					{
+						// This is a note.
 
-						data = note.noteData;
-						if(note.mustPress != _song.notes[curSec].mustHitSection)
+						if (!note.ignoreNote)
 						{
-							data += 4;
+							var data:Int = note.noteData % 4;
+							var noteDataToCheck:Int = note.noteData;
+							if (noteDataToCheck > -1 && note.mustPress != _song.notes[curSec].mustHitSection) 
+								noteDataToCheck += 4;
+
+							strumLineNotes.members[noteDataToCheck].playAnim('confirm', true);
+							strumLineNotes.members[noteDataToCheck].resetAnim = (note.sustainLength / 1000) + 0.15;
+						
+							if (!note.hitsoundDisabled && playedSound[data]!=true && (playSoundBf.checked && note.mustPress) || (playSoundDad.checked && !note.mustPress))
+							{
+								var soundToPlay = 'hitsound';
+								if(_song.player1 == 'gf') // Easter egg
+									soundToPlay = 'GF_' + Std.string(data + 1);
+	
+								FlxG.sound.play(Paths.sound(soundToPlay)).pan = (note.noteData < 4) ? -0.3 : 0.3; //would be coolio
+								playedSound[data] = true;
+							}
+							
 						}
+					}else{
+						// This is an event.
+
+						if (playSoundEvents.checked)
+							FlxG.sound.play(Paths.sound('hitsound'));
 					}
 				}
 			}
