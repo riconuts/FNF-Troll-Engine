@@ -2106,7 +2106,7 @@ class ChartingState extends MusicBeatState
 
 			if(note.strumTime <= Conductor.songPosition) {
 				note.alpha = 0.4;
-				if(note.strumTime > lastConductorPos && FlxG.sound.music.playing && note.noteData > -1) {
+				if(note.strumTime > lastConductorPos && FlxG.sound.music.playing && note.noteData > -1 && !note.ignoreNote) {
 					var data:Int = note.noteData % 4;
 					var noteDataToCheck:Int = note.noteData;
 					if(noteDataToCheck > -1 && note.mustPress != _song.notes[curSec].mustHitSection) noteDataToCheck += 4;
@@ -2711,7 +2711,7 @@ class ChartingState extends MusicBeatState
 						continue;
 					if (ext == 'hscript')
 					{
-						var script = FunkinHScript.fromFile(file, notetype);
+						var script = FunkinHScript.fromFile(file);
 						notetypeScripts.set(notetype, script);
 						did = true;
 					}
