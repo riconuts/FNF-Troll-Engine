@@ -1220,16 +1220,10 @@ class ChartingState extends MusicBeatState
 	var metronomeStepper:FlxUINumericStepper;
 	var metronomeOffsetStepper:FlxUINumericStepper;
 	var disableAutoScrolling:FlxUICheckBox;
-	#if desktop
+	
 	var waveformTrackDropDown:FlxUIDropDownMenuCustom;
 	var waveformTrack:FlxSound;
 	var trackVolumeStepper:FlxUINumericStepper;
-	#else
-	var check_mute_inst:FlxUICheckBox = null;
-
-	var instVolume:FlxUINumericStepper;
-	var voicesVolume:FlxUINumericStepper;
-	#end
 
 	function addChartingUI() {
 		var tab_group_chart = new FlxUI(null, UI_box);
@@ -1241,11 +1235,10 @@ class ChartingState extends MusicBeatState
 		for (k => v in soundTracksMap)
 			displayNameList.push(k);
 
-		var startY = 100;
-
+		////
 		var trackVolumeTxt:FlxText = null; // holy shit shut the fuck upppp i know what im doinggg
 
-		waveformTrackDropDown = new FlxUIDropDownMenuCustom(10, startY, 
+		waveformTrackDropDown = new FlxUIDropDownMenuCustom(10, 100, 
 			FlxUIDropDownMenuCustom.makeStrIdLabelArray(displayNameList, true), 
 			function(idx:String){
 				var trackName = displayNameList[Std.parseInt(idx)];
@@ -1495,23 +1488,12 @@ class ChartingState extends MusicBeatState
 				_song.notes[curSec].bpm = nums.value;
 				updateGrid();
 			}
-			#if desktop
 			else if (wname == 'track_volume'){
 				if (waveformTrack != null)
 					waveformTrack.volume = nums.value;
 				else
 					trace("No track selected.");
 			}
-			#else
-			else if (wname == 'inst_volume')
-			{
-				FlxG.sound.music.volume = nums.value;
-			}
-			else if (wname == 'voices_volume')
-			{
-				vocals.volume = nums.value;
-			}
-			#end
 		}
 		else if(id == FlxUIInputText.CHANGE_EVENT && (sender is FlxUIInputText)) {
 			/*if(sender == noteSplashesInputText) {
