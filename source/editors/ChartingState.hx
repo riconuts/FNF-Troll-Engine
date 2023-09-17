@@ -1,46 +1,48 @@
 package editors;
 
-import flixel.addons.transition.FlxTransitionSprite.GraphicTransTileDiamond;
 import scripts.FunkinHScript;
 import scripts.FunkinScript;
-#if discord_rpc
-import Discord.DiscordClient;
-#end
+
 import Conductor.BPMChangeEvent;
 import Section.SwagSection;
 import Song.SwagSong;
+
 import flixel.*;
+import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;
 import flixel.input.keyboard.FlxKey;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.addons.ui.*;
 import flixel.addons.transition.FlxTransitionableState;
-import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.group.FlxGroup;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 import flixel.text.FlxText;
+import flixel.util.FlxColor;
 import flixel.tweens.*;
 import flixel.ui.FlxButton;
 import flixel.ui.FlxSpriteButton;
-import flixel.util.FlxColor;
+
 import haxe.Json;
 import haxe.format.JsonParser;
-import lime.utils.Assets;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
-import openfl.media.Sound;
 import openfl.net.FileReference;
 import openfl.utils.ByteArray;
 import openfl.utils.Assets as OpenFlAssets;
+import openfl.media.Sound;
 import lime.media.AudioBuffer;
 import haxe.io.Bytes;
-import flash.geom.Rectangle;
+import openfl.geom.Rectangle;
 import flixel.util.FlxSort;
+
+#if discord_rpc
+import Discord.DiscordClient;
+#end
+
 #if sys
 import sys.io.File;
 import sys.FileSystem;
-import flash.media.Sound;
+import openfl.media.Sound;
 #end
 
 using StringTools;
@@ -1883,8 +1885,6 @@ class ChartingState extends MusicBeatState
 				}
 			}
 
-			var conductorTime = Conductor.songPosition; //+ sectionStartTime();Conductor.songPosition / Conductor.stepCrochet;
-
 			//AWW YOU MADE IT SEXY <3333 THX SHADMAR
 
 			if(FlxG.keys.justPressed.RIGHT){
@@ -1941,7 +1941,7 @@ class ChartingState extends MusicBeatState
 					for (i in 0...controlArray.length)
 					{
 						if(controlArray[i])
-							doANoteThing(conductorTime, i, currentType);
+							doANoteThing(Conductor.songPosition, i, currentType);
 					}
 				}
 			}	
@@ -1999,7 +1999,8 @@ class ChartingState extends MusicBeatState
 				}else 
 					changeSection(curSec - shiftThing);
 			}
-		} else if (FlxG.keys.justPressed.ENTER) {
+		} 
+		else if (FlxG.keys.justPressed.ENTER) {
 			for (i in 0...blockPressWhileTypingOn.length) {
 				if(blockPressWhileTypingOn[i].hasFocus) {
 					blockPressWhileTypingOn[i].hasFocus = false;
@@ -2072,11 +2073,11 @@ class ChartingState extends MusicBeatState
 							strumLineNotes.members[noteDataToCheck].playAnim('confirm', true);
 							strumLineNotes.members[noteDataToCheck].resetAnim = (note.sustainLength / 1000) + 0.15;
 						
-							if (!note.hitsoundDisabled && playedSound[data]!=true && (playSoundBf.checked && note.mustPress) || (playSoundDad.checked && !note.mustPress))
+							if (!note.hitsoundDisabled && playedSound[data]!=true && (note.mustPress ? playSoundBf.checked : playSoundDad.checked))
 							{
 								var soundToPlay = 'hitsound';
 								if(_song.player1 == 'gf') // Easter egg
-									soundToPlay = 'GF_' + Std.string(data + 1);
+									soundToPlay = 'GF_${data + 1}';
 	
 								FlxG.sound.play(Paths.sound(soundToPlay)).pan = (note.noteData < 4) ? -0.3 : 0.3; //would be coolio
 								playedSound[data] = true;
@@ -2123,16 +2124,19 @@ class ChartingState extends MusicBeatState
 		
 		////
 		var leBeats = getSectionBeats();
-		gridBG = FlxGridOverlay.create(GRID_SIZE, GRID_SIZE, GRID_SIZE * 9, Std.int(GRID_SIZE * leBeats * 4 * zoomList[curZoom]));
-
-		var leHeight:Int = Std.int(gridBG.height);
+		var leHeight:Int = Std.int(GRID_SIZE * leBeats * 4 * zoomList[curZoom]);
+		
 		var nextStartTime:Float = sectionStartTime(1); 
 		var nextBeats = getSectionBeats(curSec + 1);
 		if (nextBeats == null) nextBeats = 0;
+		
+		gridBG = FlxGridOverlay.create(GRID_SIZE, GRID_SIZE, GRID_SIZE * 9, leHeight);
 
 		if (nextStartTime <= FlxG.sound.music.length && nextBeats > 0)
 		{
-			nextGridBG = FlxGridOverlay.create(GRID_SIZE, GRID_SIZE, GRID_SIZE * 9, Std.int(GRID_SIZE * nextBeats * 4 * zoomList[curZoom]));
+			var nextHeight:Int = Std.int(GRID_SIZE * nextBeats * 4 * zoomList[curZoom]);
+
+			nextGridBG = FlxGridOverlay.create(GRID_SIZE, GRID_SIZE, GRID_SIZE * 9, nextHeight);
 			nextGridBG.y = gridBG.height;
 			gridLayer.add(nextGridBG);
 			
@@ -2140,7 +2144,7 @@ class ChartingState extends MusicBeatState
 			gridBlack.alpha = 0.4;
 			gridLayer.add(gridBlack);
 
-			leHeight = Std.int(gridBG.height + nextGridBG.height);
+			leHeight += nextHeight;
 		}
 		
 		gridLayer.add(gridBG);
@@ -2176,7 +2180,7 @@ class ChartingState extends MusicBeatState
 	function updateWaveform() 
 	{
 		#if desktop
-		if(waveformPrinted) {
+		if(waveformPrinted) { 
 			waveformSprite.makeGraphic(Std.int(GRID_SIZE * 8), Std.int(gridBG.height), 0x00FFFFFF);
 			waveformSprite.pixels.fillRect(new Rectangle(0, 0, gridBG.width, gridBG.height), 0x00FFFFFF);
 		}
