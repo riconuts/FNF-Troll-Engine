@@ -317,7 +317,10 @@ class PauseSubState extends MusicBeatSubstate
 						restartSong();
 
 					case "Leave Charting Mode":
-						PlayState.SONG = Song.loadFromJson(PlayState.SONG.song, PlayState.SONG.song);
+						var chartPostfix = PlayState.difficultyName;
+						if (chartPostfix != "") chartPostfix = '-$chartPostfix';
+
+						PlayState.SONG = Song.loadFromJson(PlayState.SONG.song + chartPostfix, PlayState.SONG.song);
 						PlayState.chartingMode = false;
 
 						restartSong();
