@@ -1152,7 +1152,21 @@ class ChartingState extends MusicBeatState
 
 		var moveLeftButton:FlxButton = new FlxButton(addButton.x + addButton.width + 20, addButton.y, '<', function()
 		{
-			changeEventSelected(-1);
+			if (curSelectedNote == null || curSelectedNote[2] != null) // Isn't event note
+				return;
+
+			if (FlxG.keys.pressed.SHIFT){
+				var noteEvents:Array<Array<Dynamic>> = curSelectedNote[1];
+				var selectedEvent:Array<Dynamic> = noteEvents[curEventSelected];
+				var switchPos:Int = (curEventSelected-1 < 0) ?  noteEvents.length-1 : curEventSelected-1;
+
+				curSelectedNote[1].remove(selectedEvent);
+				curSelectedNote[1].insert(switchPos, selectedEvent);
+
+				updateGrid();				
+			}
+			
+			changeEventSelected(-1);			
 		});
 		moveLeftButton.setGraphicSize(Std.int(addButton.width), Std.int(addButton.height));
 		moveLeftButton.updateHitbox();
@@ -1162,6 +1176,21 @@ class ChartingState extends MusicBeatState
 
 		var moveRightButton:FlxButton = new FlxButton(moveLeftButton.x + moveLeftButton.width + 10, moveLeftButton.y, '>', function()
 		{
+			if (curSelectedNote == null || curSelectedNote[2] != null) // Isn't event note
+				return;
+
+			if (FlxG.keys.pressed.SHIFT)
+			{
+				var noteEvents:Array<Array<Dynamic>> = curSelectedNote[1];
+				var selectedEvent:Array<Dynamic> = noteEvents[curEventSelected];
+				var switchPos:Int = (curEventSelected+1 == curSelectedNote[1].length) ? 0 : curEventSelected+1;
+
+				curSelectedNote[1].remove(selectedEvent);
+				curSelectedNote[1].insert(switchPos, selectedEvent);
+
+				updateGrid();
+			}
+			
 			changeEventSelected(1);
 		});
 		moveRightButton.setGraphicSize(Std.int(moveLeftButton.width), Std.int(moveLeftButton.height));
