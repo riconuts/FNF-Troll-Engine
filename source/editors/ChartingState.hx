@@ -1709,14 +1709,8 @@ class ChartingState extends MusicBeatState
 
 		_song.song = UI_songTitle.text;
 
-		strumLineUpdateY();
-		for (i in 0...8){
-			strumLineNotes.members[i].y = strumLine.y;
-		}
-
 		FlxG.mouse.visible = true; //cause reasons. trust me
 
-		camPos.y = strumLine.y;
 		if(!disableAutoScrolling.checked) 
 		{
 			if (Math.ceil(strumLine.y) >= gridBG.height){
