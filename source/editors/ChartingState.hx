@@ -175,6 +175,7 @@ class ChartingState extends MusicBeatState
 		16,
 		24
 	];
+	/**Selected zoom index**/
 	var curZoom:Int = 2;
 
 	private var blockPressWhileTypingOn:Array<FlxUIInputText> = [];
@@ -1678,6 +1679,11 @@ class ChartingState extends MusicBeatState
 
 	var lastConductorPos:Float;
 	var colorSine:Float = 0;
+	// sustain note dragging 
+	var startDummyY:Null<Int> = null;
+	var lastDummyY:Null<Int> = null;
+	var curDummyY:Null<Int> = null;
+
 	override function update(elapsed:Float)
 	{
 		curStep = recalculateSteps();
@@ -1716,6 +1722,7 @@ class ChartingState extends MusicBeatState
 		FlxG.watch.addQuick('daBeat', curBeat);
 		FlxG.watch.addQuick('daStep', curStep);
 
+		lastDummyY = curDummyY;
 
 		if (FlxG.mouse.x > gridBG.x
 			&& FlxG.mouse.x < gridBG.x + gridBG.width
@@ -1724,13 +1731,20 @@ class ChartingState extends MusicBeatState
 		{
 			dummyArrow.visible = true;
 			dummyArrow.x = Math.floor(FlxG.mouse.x / GRID_SIZE) * GRID_SIZE;
+
+			var gridmult = GRID_SIZE / (quantization / 16);
+			var gridY = Math.floor(FlxG.mouse.y / gridmult);
+
+			if (FlxG.mouse.pressed && startDummyY == null)
+				startDummyY = curDummyY;
+
 			if (FlxG.keys.pressed.SHIFT)
 				dummyArrow.y = FlxG.mouse.y;
 			else
-			{
-				var gridmult = GRID_SIZE / (quantization / 16);
-				dummyArrow.y = Math.floor(FlxG.mouse.y / gridmult) * gridmult;
-			}
+				dummyArrow.y = gridY * gridmult;
+
+			curDummyY = Math.floor(gridY / (quantization / 16));
+			
 		} else {
 			dummyArrow.visible = false;
 		}
@@ -1773,15 +1787,36 @@ class ChartingState extends MusicBeatState
 				}
 			}
 		}else if(FlxG.mouse.pressed){
-			for(note in heldNotesClick){
-				if (note != null)
-				{
+
+			if (lastDummyY != curDummyY && startDummyY != null && curDummyY != null){
+				for(note in heldNotesClick){
+					if (note == null) continue;
+				
+					/*
 					var len = CoolUtil.snap((getStrumTime(dummyArrow.y * (getSectionBeats() / 4), false) + sectionStartTime()) - note[0], Conductor.stepCrochet);
 					setNoteSustain(len, note);
+					*/
+
+					var zoomMult:Float = zoomList[curZoom];
+
+					var diff:Int = (curDummyY - startDummyY);
+					var len:Float = diff / zoomMult * Conductor.stepCrochet;
+
+					if (len < 0 && note[2] + len < 0){
+						note[0] = sectionStartTime() + Conductor.stepCrochet * (curDummyY / zoomMult);
+						setNoteSustain(-len, note);
+					}else{
+						note[0] = sectionStartTime() + Conductor.stepCrochet * (startDummyY / zoomMult);
+						setNoteSustain(len, note);
+					}
 				}
 			}
-		}else if(heldNotesClick.length>0){
-			heldNotesClick = [];
+
+		}else {
+			if (heldNotesClick.length > 0) heldNotesClick = [];
+			startDummyY = null;
+			lastDummyY = null;
+			curDummyY = null;
 		}
 
 		var blockInput:Bool = false;
