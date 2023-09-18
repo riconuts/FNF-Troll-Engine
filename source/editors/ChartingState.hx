@@ -283,9 +283,11 @@ class ChartingState extends MusicBeatState
 
 		vortex = FlxG.save.data.chart_vortex;
 		ignoreWarnings = FlxG.save.data.ignoreWarnings;
-		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuBGDesat'));
+
+		var bg:FlxSprite = new FlxSprite(0, 0, Paths.image('menuBGDesat'));
+		bg.color = FlxColor.fromHSB(Std.random(360), 0x16 /255, 0x24/255);
 		bg.scrollFactor.set();
-		bg.color = 0xFF222222;
+		bg.screenCenter();
 		add(bg);
 
 		gridLayer = new FlxTypedGroup<FlxSprite>();
@@ -294,7 +296,7 @@ class ChartingState extends MusicBeatState
 		waveformSprite = new FlxSprite(GRID_SIZE, 0).makeGraphic(FlxG.width, FlxG.height, 0x00FFFFFF);
 		add(waveformSprite);
 
-		var eventIcon:FlxSprite = new FlxSprite(-GRID_SIZE - 5, 15).loadGraphic(Paths.image('eventArrow'));
+		var eventIcon:FlxSprite = new FlxSprite(-GRID_SIZE - 5, 15, Paths.image('eventArrow'));
 		leftIcon = new HealthIcon('bf');
 		rightIcon = new HealthIcon('dad');
 		eventIcon.scrollFactor.set(1, 0);
@@ -2185,8 +2187,9 @@ class ChartingState extends MusicBeatState
 							if (noteDataToCheck > -1 && note.mustPress != _song.notes[curSec].mustHitSection) 
 								noteDataToCheck += 4;
 
-							strumLineNotes.members[noteDataToCheck].playAnim('confirm', true);
-							strumLineNotes.members[noteDataToCheck].resetAnim = (note.sustainLength / 1000) + 0.15;
+							var strum:StrumNote = strumLineNotes.members[noteDataToCheck];
+							strum.playAnim('confirm', true, note);
+							strum.resetAnim = (note.sustainLength / 1000) + 0.15;
 						
 							if (!note.hitsoundDisabled && playedSound[data]!=true && (note.mustPress ? playSoundBf.checked : playSoundDad.checked))
 							{
