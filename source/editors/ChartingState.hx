@@ -221,20 +221,8 @@ class ChartingState extends MusicBeatState
 	public static var vortex:Bool = false;
 	public var mouseQuant:Bool = false;
 
-	// switchTo shouldn't have been deprecated ffs
-	override function switchTo(cb)
-	{
-		FlxG.sound.pause();
-
-		persistentUpdate = false;
-
-		return super.switchTo(cb);
-	}
-
 	override function create()
 	{
-		persistentUpdate = true;
-
 		instance = this;
 		if (PlayState.SONG != null)
 			_song = PlayState.SONG;
@@ -1861,6 +1849,24 @@ class ChartingState extends MusicBeatState
 
 		if (!blockInput)
 		{
+			if (FlxG.keys.justPressed.ENTER)
+			{
+				autosaveSong();
+				if (_song.events != null && _song.events.length > 1)
+					_song.events.sort(sortByTime);
+				PlayState.SONG = _song;
+				PlayState.chartingMode = true;
+
+				if (FlxG.keys.pressed.SHIFT)
+					PlayState.startOnTime = Conductor.songPosition;
+
+				FlxG.sound.pause();
+
+				LoadingState.loadAndSwitchState(new PlayState());
+
+				return;
+			}
+
 			if (FlxG.keys.justPressed.M)
 			{
 				var mustHit = !_song.notes[curSec].mustHitSection;
@@ -1879,23 +1885,6 @@ class ChartingState extends MusicBeatState
 				updateGrid();
 				updateHeads();	
 			}	
-
-			if (FlxG.keys.justPressed.ENTER)
-			{
-				autosaveSong();
-				if (_song.events != null && _song.events.length > 1)
-					_song.events.sort(sortByTime);
-				PlayState.SONG = _song;
-				PlayState.chartingMode = true;
-
-				if (FlxG.keys.pressed.SHIFT)
-					PlayState.startOnTime = Conductor.songPosition;
-
-				var state = new PlayState();
-				LoadingState.loadAndSwitchState(state);
-
-				return;
-			}
 
 			if(curSelectedNote != null && curSelectedNote[1] > -1) {
 				if (FlxG.keys.justPressed.E)
