@@ -1837,12 +1837,7 @@ class ChartingState extends MusicBeatState
 			}
 
 			if (FlxG.keys.justPressed.R)
-			{
-				if (FlxG.keys.pressed.SHIFT)
-					resetSection(true);
-				else
-					resetSection();
-			}
+				resetSection(FlxG.keys.pressed.SHIFT);
 
 			if (FlxG.mouse.wheel != 0)
 			{
@@ -1866,12 +1861,10 @@ class ChartingState extends MusicBeatState
 				if (FlxG.keys.pressed.CONTROL) holdingShift = 0.25;
 				else if (FlxG.keys.pressed.SHIFT) holdingShift = 4;
 
-				var daTime:Float = 700 * FlxG.elapsed * holdingShift;
+				var daTime:Float = 720 * FlxG.elapsed * holdingShift;
 
 				if (FlxG.keys.pressed.W)
-				{
 					FlxG.sound.music.time -= daTime;
-				}
 				else
 					FlxG.sound.music.time += daTime;
 
@@ -1893,17 +1886,13 @@ class ChartingState extends MusicBeatState
 					curQuant = 0;
 
 				quantization = quantizations[curQuant];
-
 				quantTxt.text = "Beat Snap: " + quantNames[curQuant];
-			}
-
-			if(FlxG.keys.justPressed.LEFT){
+			}else if(FlxG.keys.justPressed.LEFT){
 				curQuant--;
 				if(curQuant<0)
 					curQuant = quantizations.length-1;
 
 				quantization = quantizations[curQuant];
-
 				quantTxt.text = "Beat Snap: " + quantNames[curQuant];
 			}
 			quant.animation.play('q', true, false, curQuant);
@@ -2010,8 +1999,6 @@ class ChartingState extends MusicBeatState
 
 		_song.bpm = tempBpm;
 
-		strumLineNotes.visible = quant.visible = vortex;
-
 		if(FlxG.sound.music.time < 0) {
 			FlxG.sound.music.pause();
 			FlxG.sound.music.time = 0;
@@ -2025,9 +2012,12 @@ class ChartingState extends MusicBeatState
 		Conductor.songPosition = FlxG.sound.music.time;
 		strumLineUpdateY();
 		camPos.y = strumLine.y;
-		for (i in 0...8){
-			strumLineNotes.members[i].y = strumLine.y;
-			strumLineNotes.members[i].alpha = FlxG.sound.music.playing ? 1 : 0.35;
+
+		if (strumLineNotes.visible = quant.visible = vortex){
+			for (i in 0...8){
+				strumLineNotes.members[i].y = strumLine.y;
+				strumLineNotes.members[i].alpha = FlxG.sound.music.playing ? 1 : 0.35;
+			}
 		}
 
 		bpmTxt.text =
@@ -2045,11 +2035,14 @@ class ChartingState extends MusicBeatState
 				var noteDataToCheck:Int = note.noteData;
 				if(noteDataToCheck > -1 && note.mustPress != _song.notes[curSec].mustHitSection) noteDataToCheck += 4;
 
-				if (curSelectedNote[0] == note.strumTime && ((curSelectedNote[2] == null && noteDataToCheck < 0) || (curSelectedNote[2] != null && curSelectedNote[1] == noteDataToCheck)))
+				if (curSelectedNote[0] == note.strumTime && (curSelectedNote[2]==null ? noteDataToCheck<0 : curSelectedNote[1]==noteDataToCheck))
 				{
 					colorSine += elapsed;
-					var colorVal:Float = 0.7 + Math.sin(Math.PI * colorSine) * 0.3;
-					note.color = FlxColor.fromRGBFloat(colorVal, colorVal, colorVal, 0.999); //Alpha can't be 100% or the color won't be updated for some reason, guess i will die
+
+					var colorVal:Float = 0.7 + 0.3 * FlxMath.fastSin(Math.PI * colorSine);
+					var colorVal:Int = Math.round(colorVal * 255);
+
+					note.color = FlxColor.fromRGB(colorVal, colorVal, colorVal, 255);
 				}
 			}
 
