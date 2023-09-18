@@ -1738,10 +1738,11 @@ class ChartingState extends MusicBeatState
 
 			dummyArrow.y = (FlxG.keys.pressed.SHIFT) ? FlxG.mouse.y : (gridY * gridmult);
 
-			movedDummyY = (curDummyY != (curDummyY = gridY/quantizationMult));
+			if (FlxG.mouse.pressed){
+				movedDummyY = (curDummyY != (curDummyY = gridY/quantizationMult));
 
-			if (FlxG.mouse.pressed && startDummyY == null)
-				startDummyY = curDummyY;
+				if (startDummyY == null) startDummyY = curDummyY;
+			}
 
 		} else {
 			dummyArrow.visible = false;
