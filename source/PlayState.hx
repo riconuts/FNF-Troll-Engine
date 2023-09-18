@@ -1776,7 +1776,7 @@ class PlayState extends MusicBeatState
 						#if LUA_ALLOWED
 						if (ext == 'lua')
 						{
-							var script = new FunkinLua(file, null, #if PE_MOD_COMPATIBILITY true #else false #end);
+							var script = new FunkinLua(file, notetype, #if PE_MOD_COMPATIBILITY true #else false #end);
 							luaArray.push(script);
 							funkyScripts.push(script);
 							#if PE_MOD_COMPATIBILITY
@@ -1787,7 +1787,7 @@ class PlayState extends MusicBeatState
 						}
 						else if (ext == 'hscript') #end
 						{
-							var script = FunkinHScript.fromFile(file);
+							var script = FunkinHScript.fromFile(file, notetype);
 							hscriptArray.push(script);
 							funkyScripts.push(script);
 							notetypeScripts.set(notetype, script);
@@ -1826,7 +1826,7 @@ class PlayState extends MusicBeatState
 						#if LUA_ALLOWED
 						if (ext == 'lua')
 						{
-							var script = new FunkinLua(file);
+							var script = new FunkinLua(file, event);
 							luaArray.push(script);
 							funkyScripts.push(script);
 							// psych lua scripts work the exact same no matter what type of script they are 
@@ -1834,7 +1834,7 @@ class PlayState extends MusicBeatState
 						}
 						else #end if (ext == 'hscript')
 						{
-							var script = FunkinHScript.fromFile(file);
+							var script = FunkinHScript.fromFile(file, event);
 							hscriptArray.push(script);
 							funkyScripts.push(script);
 							eventScripts.set(event, script);
