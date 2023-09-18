@@ -1618,7 +1618,10 @@ class ChartingState extends MusicBeatState
 			/*if(sender == noteSplashesInputText) {
 				_song.splashSkin = noteSplashesInputText.text;
 			}
-			else*/ if(curSelectedNote != null)
+			else*/ 
+			if (sender == UI_songTitle){
+				_song.song = UI_songTitle.text;
+			}else if(curSelectedNote != null)
 			{
 				if(sender == value1InputText) {
 					curSelectedNote[1][curEventSelected][1] = value1InputText.text;
@@ -1707,8 +1710,6 @@ class ChartingState extends MusicBeatState
 		}
 		Conductor.songPosition = FlxG.sound.music.time;
 
-		_song.song = UI_songTitle.text;
-
 		FlxG.mouse.visible = true; //cause reasons. trust me
 
 		if(!disableAutoScrolling.checked) 
@@ -1721,8 +1722,6 @@ class ChartingState extends MusicBeatState
 			} else if(strumLine.y < -10)
 				changeSection(curSec - 1, false);
 		}
-		FlxG.watch.addQuick('daBeat', curBeat);
-		FlxG.watch.addQuick('daStep', curStep);
 
 		var movedDummyY:Bool = false;
 
