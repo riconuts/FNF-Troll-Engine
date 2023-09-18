@@ -1286,7 +1286,72 @@ class ChartingState extends MusicBeatState
 		);
 		blockPressWhileScrolling.push(waveformTrackDropDown);
 
-		trackVolumeStepper = new FlxUINumericStepper(waveformTrackDropDown.x + waveformTrackDropDown.width + 25, waveformTrackDropDown.y, 0.1, 1, 0, 1, 1);
+		/* just edit your extra tracks into the JSON file!! 
+
+		var newTrackTextInput = new FlxUIInputText(waveformTrackDropDown.x, waveformTrackDropDown.y, Std.int(waveformTrackDropDown.header.width), "", waveformTrackDropDown.header.text.size, FlxColor.BLACK, FlxColor.WHITE);
+
+		var addTrackButton = new FlxButton(waveformTrackDropDown.x + waveformTrackDropDown.width, waveformTrackDropDown.y, "+", ()->{
+
+		});
+		addTrackButton.color = FlxColor.GREEN;
+		addTrackButton.setGraphicSize(20, 20);
+		addTrackButton.updateHitbox();
+		addTrackButton.label.size = 12;
+		//setAllLabelsOffset(addTrackButton, -30, 0);
+
+		var removeTrackButton = new FlxButton(addTrackButton.x + addTrackButton.width, "+", ()->{
+			if (waveformTrack == null || waveformTrack == FlxG.sound.music || waveformTrack == vocals) 
+				return;
+
+			//// Get track display name and index
+			var trackName:String = "";
+			var trackIndex:Int = -1;
+
+			for (name => track in soundTracksMap)
+			{
+				if (track != waveformTrack) continue;
+				
+				trackName = name;
+				trackIndex = displayNameList.indexOf(name, 3);
+
+				break;
+			}
+
+			trace("selected", trackName, trackIndex);
+
+			if (trackIndex < 0 || trackName == ""){
+				trace("wtf");
+				return;
+			}
+
+			//// Remove the track sound
+			extraTracks.remove(waveformTrack);
+			waveformTrack.stop();
+			waveformTrack.destroy();
+			waveformTrack = null;
+
+			//// Remove from dropdown
+			displayNameList.remove(trackName);
+
+			var opt = waveformTrackDropDown.getBtnByIndex(trackIndex);
+			trace("removed", trackIndex, opt.name);
+			waveformTrackDropDown.list.remove(opt);
+			//opt.destroy(); // causes crashes!!! since this is some flxui shit it probably gets added somewhere else too :|
+
+			// re index dropdown list options Dx
+			for (idx in 0...waveformTrackDropDown.list.length)
+				waveformTrackDropDown.list[idx].name = Std.string(idx);
+			
+			waveformTrackDropDown.selectedId = "0";
+		});
+		removeTrackButton.color = FlxColor.RED;
+		removeTrackButton.setGraphicSize(20, 20);
+		removeTrackButton.updateHitbox();
+		removeTrackButton.label.size = 12;
+		//setAllLabelsOffset(removeTrackButton, -30, 0);
+		*/
+
+		trackVolumeStepper = new FlxUINumericStepper(waveformTrackDropDown.x + waveformTrackDropDown.width + 64, waveformTrackDropDown.y, 0.1, 1, 0, 1, 1);
 		trackVolumeStepper.name = "track_volume";
 		blockPressWhileTypingOnStepper.push(trackVolumeStepper);
 
@@ -1328,7 +1393,7 @@ class ChartingState extends MusicBeatState
 		mouseScrollingQuant.checked = FlxG.save.data.mouseScrollingQuant;
 
 		////////
-		var xPos = 10 + 120;
+		var xPos = 10 + 150;
 
 		playSoundBf = new FlxUICheckBox(xPos, startY, null, null, 'Play Sound (Boyfriend notes)', 100,
 			()->{FlxG.save.data.chart_playSoundBf = playSoundBf.checked;}
@@ -1362,7 +1427,7 @@ class ChartingState extends MusicBeatState
 		blockPressWhileTypingOnStepper.push(metronomeStepper);
 		blockPressWhileTypingOnStepper.push(metronomeOffsetStepper);
 
-		disableAutoScrolling = new FlxUICheckBox(metronome.x + 120, metronome.y, null, null, "Disable Section Autoscroll", 120,
+		disableAutoScrolling = new FlxUICheckBox(metronome.x + 150, metronome.y, null, null, "Disable Section Autoscroll", 120,
 			()->{FlxG.save.data.chart_noAutoScroll = disableAutoScrolling.checked;}
 		);
 		if (FlxG.save.data.chart_noAutoScroll == null) FlxG.save.data.chart_noAutoScroll = false;
@@ -1388,6 +1453,10 @@ class ChartingState extends MusicBeatState
 		tab_group_chart.add(trackVolumeStepper);
 		tab_group_chart.add(new FlxText(waveformTrackDropDown.x, waveformTrackDropDown.y - 15, 0, "Track"));
 		tab_group_chart.add(waveformTrackDropDown);
+		/*
+		tab_group_chart.add(addTrackButton);
+		tab_group_chart.add(removeTrackButton);
+		*/
 
 		UI_box.addGroup(tab_group_chart);
 
