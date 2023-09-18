@@ -186,6 +186,7 @@ class ChartingState extends MusicBeatState
 	var gridLayer:FlxTypedGroup<FlxSprite>;
 
 	public static var quantization:Int = 16;
+	public var quantizationMult:Float = (quantization / 16);
 	public static var curQuant = 3;
 
 	var quantTxt:FlxText;
@@ -1677,6 +1678,14 @@ class ChartingState extends MusicBeatState
 		return daPos;
 	}
 
+	function updateQuantization(){
+		quantization = quantizations[curQuant];
+		quantizationMult = (quantization / 16);
+		
+		quantTxt.text = "Beat Snap: " + quantNames[curQuant];
+		quant.animation.play('q', true, false, curQuant);
+	}
+
 	var lastConductorPos:Float;
 	var colorSine:Float = 0;
 	// sustain note dragging 
@@ -1724,26 +1733,26 @@ class ChartingState extends MusicBeatState
 
 		lastDummyY = curDummyY;
 
-		if (FlxG.mouse.x > gridBG.x
-			&& FlxG.mouse.x < gridBG.x + gridBG.width
-			&& FlxG.mouse.y > gridBG.y
-			&& FlxG.mouse.y < gridBG.y + (GRID_SIZE * getSectionBeats() * 4) * zoomList[curZoom])
+		if (FlxG.mouse.x >= gridBG.x
+			&& FlxG.mouse.x <= gridBG.x + gridBG.width
+			&& FlxG.mouse.y >= gridBG.y
+			&& FlxG.mouse.y < gridBG.y + gridBG.height)
 		{
 			dummyArrow.visible = true;
 			dummyArrow.x = Math.floor(FlxG.mouse.x / GRID_SIZE) * GRID_SIZE;
 
-			var gridmult = GRID_SIZE / (quantization / 16);
+			var gridmult = GRID_SIZE / quantizationMult;
 			var gridY = Math.floor(FlxG.mouse.y / gridmult);
-
-			if (FlxG.mouse.pressed && startDummyY == null)
-				startDummyY = curDummyY;
 
 			if (FlxG.keys.pressed.SHIFT)
 				dummyArrow.y = FlxG.mouse.y;
 			else
 				dummyArrow.y = gridY * gridmult;
 
-			curDummyY = Math.floor(gridY / (quantization / 16));
+			curDummyY = Math.floor(gridY / quantizationMult);
+
+			if (FlxG.mouse.pressed && startDummyY == null)
+				startDummyY = curDummyY;
 			
 		} else {
 			dummyArrow.visible = false;
@@ -1981,7 +1990,7 @@ class ChartingState extends MusicBeatState
 				if (!mouseQuant)
 					FlxG.sound.music.time -= (FlxG.mouse.wheel * Conductor.stepCrochet);
 				else{
-					var snap = Conductor.stepCrochet / (quantization / 16);
+					var snap = Conductor.stepCrochet / quantizationMult;
 					FlxG.sound.music.time = CoolUtil.snap(FlxG.sound.music.time, snap) - (snap * FlxG.mouse.wheel);
 				}
 			}
@@ -2014,21 +2023,16 @@ class ChartingState extends MusicBeatState
 			//AWW YOU MADE IT SEXY <3333 THX SHADMAR
 
 			if(FlxG.keys.justPressed.RIGHT){
-				curQuant++;
-				if(curQuant>quantizations.length-1)
+				if (++curQuant > quantizations.length-1)
 					curQuant = 0;
 
-				quantization = quantizations[curQuant];
-				quantTxt.text = "Beat Snap: " + quantNames[curQuant];
+				updateQuantization();
 			}else if(FlxG.keys.justPressed.LEFT){
-				curQuant--;
-				if(curQuant<0)
+				if (--curQuant < 0)
 					curQuant = quantizations.length-1;
 
-				quantization = quantizations[curQuant];
-				quantTxt.text = "Beat Snap: " + quantNames[curQuant];
+				updateQuantization();
 			}
-			quant.animation.play('q', true, false, curQuant);
 			
 			//ARROW VORTEX SHIT NO DEADASS
 			if(vortex){
@@ -2074,7 +2078,7 @@ class ChartingState extends MusicBeatState
 				if (vocals != null) vocals.pause();
 				for (track in extraTracks) track.pause();
 
-				var snap:Float = Conductor.stepCrochet / (quantization / 16);
+				var snap:Float = Conductor.stepCrochet / quantizationMult;
 				var feces:Float = CoolUtil.snap(FlxG.sound.music.time, snap) + (FlxG.keys.justPressed.UP ? -snap : snap);
 
 				FlxTween.tween(FlxG.sound.music, {time: feces}, 0.1, {ease: FlxEase.circOut});
