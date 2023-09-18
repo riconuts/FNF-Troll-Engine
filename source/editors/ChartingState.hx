@@ -1702,7 +1702,7 @@ class ChartingState extends MusicBeatState
 		quant.animation.play('q', true, false, curQuant);
 	}
 
-	var lastConductorPos:Float;
+	var lastConductorPos:Float = -1;
 	var colorSine:Float = 0;
 	//// sustain note dragging 
 	var startDummyY:Null<Float> = null;
@@ -1721,7 +1721,6 @@ class ChartingState extends MusicBeatState
 			FlxG.sound.music.time = 0;
 			changeSection();
 		}
-		Conductor.songPosition = FlxG.sound.music.time;
 
 		FlxG.mouse.visible = true; //cause reasons. trust me
 
@@ -2129,18 +2128,10 @@ class ChartingState extends MusicBeatState
 		}
 
 		_song.bpm = tempBpm;
-
-		if(FlxG.sound.music.time < 0) {
-			FlxG.sound.music.pause();
-			FlxG.sound.music.time = 0;
-		}
-		else if(FlxG.sound.music.time > FlxG.sound.music.length) {
-			FlxG.sound.music.pause();
-			FlxG.sound.music.time = 0;
-			changeSection();
-		}
-
+		
+		lastConductorPos = Conductor.songPosition;
 		Conductor.songPosition = FlxG.sound.music.time;
+
 		strumLineUpdateY();
 		camPos.y = strumLine.y;
 
@@ -2159,9 +2150,7 @@ class ChartingState extends MusicBeatState
 
 		var playedSound:Array<Bool> = []; //Prevents ouchy GF sex sounds
 		curRenderedNotes.forEachAlive(function(note:Note) {
-			note.alpha = 1;
-
-			if(curSelectedNote != null) 
+			if (curSelectedNote != null) 
 			{
 				var noteDataToCheck:Int = note.noteData;
 				if(noteDataToCheck > -1 && note.mustPress != _song.notes[curSec].mustHitSection) noteDataToCheck += 4;
@@ -2176,12 +2165,10 @@ class ChartingState extends MusicBeatState
 					note.color = FlxColor.fromRGB(colorVal, colorVal, colorVal, 255);
 				}
 			}
-
+			
 			if (note.strumTime <= Conductor.songPosition) 
 			{
-				note.alpha = 0.4;
-
-				if (note.strumTime > lastConductorPos && FlxG.sound.music.playing) 
+				if (note.alpha != 0.4 && FlxG.sound.music.playing) 
 				{
 					if (note.noteData > -1)
 					{
@@ -2189,8 +2176,8 @@ class ChartingState extends MusicBeatState
 
 						if (!note.ignoreNote)
 						{
-							var data:Int = note.noteData % 4;
-							var noteDataToCheck:Int = note.noteData;
+							var data:Int = note.noteData;
+							var noteDataToCheck:Int = data;
 							if (noteDataToCheck > -1 && note.mustPress != _song.notes[curSec].mustHitSection) 
 								noteDataToCheck += 4;
 
@@ -2215,7 +2202,10 @@ class ChartingState extends MusicBeatState
 							FlxG.sound.play(Paths.sound('hitsound'));
 					}
 				}
-			}
+
+				note.alpha = 0.4;
+			}else
+				note.alpha = 1;
 		});
 
 		if(metronome.checked && lastConductorPos != Conductor.songPosition) {
@@ -2227,7 +2217,7 @@ class ChartingState extends MusicBeatState
 				//trace('Ticked');
 			}
 		}
-		lastConductorPos = Conductor.songPosition;
+
 		super.update(elapsed);
 	}
 
@@ -2243,8 +2233,7 @@ class ChartingState extends MusicBeatState
 	var lastSecBeatsNext:Float = 0;
 	function reloadGridLayer() 
 	{
-		for (spr in gridLayer) spr.destroy();
-		gridLayer.clear();
+		wipeGroup(gridLayer);
 		
 		////
 		var leBeats = getSectionBeats();
@@ -2664,14 +2653,19 @@ class ChartingState extends MusicBeatState
 	inline function fuckFloatingPoints(n:Float):Float // haha decimals
 		return CoolUtil.snap(n, Conductor.stepCrochet / (192 / 16));
 
+	inline function wipeGroup(group:FlxTypedGroup<Dynamic>)
+	{
+		for (obj in group) obj.destroy();
+		group.clear();	
+	}
 
 	function updateGrid():Void
 	{
-		curRenderedNotes.clear();
-		curRenderedSustains.clear();
-		curRenderedNoteType.clear();
-		nextRenderedNotes.clear();
-		nextRenderedSustains.clear();
+		wipeGroup(curRenderedNotes);
+		wipeGroup(curRenderedSustains);
+		wipeGroup(curRenderedNoteType);
+		wipeGroup(nextRenderedNotes);
+		wipeGroup(nextRenderedSustains);
 
 		if (_song.notes[curSec].changeBPM && _song.notes[curSec].bpm > 0)
 		{
