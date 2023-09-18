@@ -220,8 +220,21 @@ class ChartingState extends MusicBeatState
 
 	public static var vortex:Bool = false;
 	public var mouseQuant:Bool = false;
+
+	// switchTo shouldn't have been deprecated ffs
+	override function switchTo(cb)
+	{
+		FlxG.sound.pause();
+
+		persistentUpdate = false;
+
+		return super.switchTo(cb);
+	}
+
 	override function create()
 	{
+		persistentUpdate = true;
+
 		instance = this;
 		if (PlayState.SONG != null)
 			_song = PlayState.SONG;
@@ -1724,12 +1737,12 @@ class ChartingState extends MusicBeatState
 		}
 
 		var movedDummyY:Bool = false;
+		var onGrid:Bool =	FlxG.mouse.x >= gridBG.x
+						&&	FlxG.mouse.x <= gridBG.x + gridBG.width
+						&&	FlxG.mouse.y >= gridBG.y
+						&&	FlxG.mouse.y <	gridBG.y + gridBG.height;
 
-		if (FlxG.mouse.x >= gridBG.x
-			&& FlxG.mouse.x <= gridBG.x + gridBG.width
-			&& FlxG.mouse.y >= gridBG.y
-			&& FlxG.mouse.y < gridBG.y + gridBG.height)
-		{
+		if (onGrid){
 			dummyArrow.visible = true;
 			dummyArrow.x = Math.floor(FlxG.mouse.x / GRID_SIZE) * GRID_SIZE;
 
@@ -1744,7 +1757,7 @@ class ChartingState extends MusicBeatState
 				if (startDummyY == null) startDummyY = curDummyY;
 			}
 
-		} else {
+		}else{
 			dummyArrow.visible = false;
 
 			curDummyY = null;
@@ -1776,16 +1789,9 @@ class ChartingState extends MusicBeatState
 					}
 				});
 			}
-			else
-			{
-				if (FlxG.mouse.x > gridBG.x
-					&& FlxG.mouse.x < gridBG.x + gridBG.width
-					&& FlxG.mouse.y > gridBG.y
-					&& FlxG.mouse.y < gridBG.y + (GRID_SIZE * getSectionBeats() * 4) * zoomList[curZoom])
-				{
-					FlxG.log.add('added note');
-					addNote();
-				}
+			else if (onGrid){
+				FlxG.log.add('added note');
+				addNote();
 			}
 		}else if(FlxG.mouse.pressed){
 
@@ -1886,6 +1892,8 @@ class ChartingState extends MusicBeatState
 
 				var state = new PlayState();
 				LoadingState.loadAndSwitchState(state);
+
+				return;
 			}
 
 			if(curSelectedNote != null && curSelectedNote[1] > -1) {

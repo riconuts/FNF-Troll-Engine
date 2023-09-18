@@ -45,7 +45,7 @@ class FadeTransitionSubstate extends TransitionSubstate
 			case OUT:
 				angle = 270;
 				updateFunc = function() gradientFill.y = gradient.y + gradient.height;
-				duration = 0.8;
+				duration = 0.6;
 			default:
 				//trace("bruh");
 		}
