@@ -2149,8 +2149,10 @@ class ChartingState extends MusicBeatState
 		"\nStep: " + curStep;
 
 		var playedSound:Array<Bool> = []; //Prevents ouchy GF sex sounds
+		var updateSelectedNote = curSelectedNote != null;
+
 		curRenderedNotes.forEachAlive(function(note:Note) {
-			if (curSelectedNote != null) 
+			if (updateSelectedNote) 
 			{
 				var noteDataToCheck:Int = note.noteData;
 				if(noteDataToCheck > -1 && note.mustPress != _song.notes[curSec].mustHitSection) noteDataToCheck += 4;
@@ -2163,6 +2165,8 @@ class ChartingState extends MusicBeatState
 					var colorVal:Int = Math.round(colorVal * 255);
 
 					note.color = FlxColor.fromRGB(colorVal, colorVal, colorVal, 255);
+
+					updateSelectedNote = false;
 				}
 			}
 			
