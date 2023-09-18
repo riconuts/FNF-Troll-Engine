@@ -1688,10 +1688,9 @@ class ChartingState extends MusicBeatState
 
 	var lastConductorPos:Float;
 	var colorSine:Float = 0;
-	// sustain note dragging 
-	var startDummyY:Null<Int> = null;
-	var lastDummyY:Null<Int> = null;
-	var curDummyY:Null<Int> = null;
+	//// sustain note dragging 
+	var startDummyY:Null<Float> = null;
+	var curDummyY:Null<Float> = null;
 
 	override function update(elapsed:Float)
 	{
@@ -1731,7 +1730,7 @@ class ChartingState extends MusicBeatState
 		FlxG.watch.addQuick('daBeat', curBeat);
 		FlxG.watch.addQuick('daStep', curStep);
 
-		lastDummyY = curDummyY;
+		var movedDummyY:Bool = false;
 
 		if (FlxG.mouse.x >= gridBG.x
 			&& FlxG.mouse.x <= gridBG.x + gridBG.width
@@ -1744,18 +1743,17 @@ class ChartingState extends MusicBeatState
 			var gridmult = GRID_SIZE / quantizationMult;
 			var gridY = Math.floor(FlxG.mouse.y / gridmult);
 
-			if (FlxG.keys.pressed.SHIFT)
-				dummyArrow.y = FlxG.mouse.y;
-			else
-				dummyArrow.y = gridY * gridmult;
+			dummyArrow.y = (FlxG.keys.pressed.SHIFT) ? FlxG.mouse.y : (gridY * gridmult);
 
-			curDummyY = Math.floor(gridY / quantizationMult);
+			movedDummyY = (curDummyY != (curDummyY = gridY/quantizationMult));
 
 			if (FlxG.mouse.pressed && startDummyY == null)
 				startDummyY = curDummyY;
-			
+
 		} else {
 			dummyArrow.visible = false;
+
+			curDummyY = null;
 		}
 
 		if (FlxG.mouse.justPressed)
@@ -1797,34 +1795,28 @@ class ChartingState extends MusicBeatState
 			}
 		}else if(FlxG.mouse.pressed){
 
-			if (lastDummyY != curDummyY && startDummyY != null && curDummyY != null){
-				for(note in heldNotesClick){
+			if (movedDummyY)
+			{
+				for (note in heldNotesClick){
 					if (note == null) continue;
 				
-					/*
-					var len = CoolUtil.snap((getStrumTime(dummyArrow.y * (getSectionBeats() / 4), false) + sectionStartTime()) - note[0], Conductor.stepCrochet);
-					setNoteSustain(len, note);
-					*/
-
 					var zoomMult:Float = zoomList[curZoom];
+					var step:Float = Conductor.stepCrochet;
 
-					var diff:Int = (curDummyY - startDummyY);
-					var len:Float = diff / zoomMult * Conductor.stepCrochet;
+					var diff:Float = (curDummyY - startDummyY);
+					var notePos:Float = (diff < 0) ? curDummyY : startDummyY;
 
-					if (len < 0 && note[2] + len < 0){
-						note[0] = sectionStartTime() + Conductor.stepCrochet * (curDummyY / zoomMult);
-						setNoteSustain(-len, note);
-					}else{
-						note[0] = sectionStartTime() + Conductor.stepCrochet * (startDummyY / zoomMult);
-						setNoteSustain(len, note);
-					}
+					note[0] = sectionStartTime() + (notePos / zoomMult) * step;
+					note[2] = Math.abs((diff / zoomMult) * step);
+
+					updateNoteUI();
+					updateGrid();
 				}
 			}
 
 		}else {
 			if (heldNotesClick.length > 0) heldNotesClick = [];
 			startDummyY = null;
-			lastDummyY = null;
 			curDummyY = null;
 		}
 
@@ -3061,6 +3053,7 @@ class ChartingState extends MusicBeatState
 			curEventSelected = 0;
 			changeEventSelected();
 		}
+
 		if(click){
 			if (FlxG.keys.pressed.CONTROL && noteData > -1)
 			{
