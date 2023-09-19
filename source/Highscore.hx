@@ -305,7 +305,7 @@ class Highscore {
         
 		if (songSaveData.exists(ID + "songs")){
 			songSaveData.set(ID, songSaveData.get(ID + "songs"));
-			songSaveData.remove(ID);
+			songSaveData.remove(ID + "songs");
         }
 
 		if (!songSaveData.exists(ID)){
