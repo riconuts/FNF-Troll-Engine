@@ -23,6 +23,8 @@ typedef ScoreRecord = {
     var noteDiffs:Array<Float>; // hit diffs for every note
 	var npsPeak:Int; // peak notes-per-second
     @:optional var fcMedal:FCType;
+
+    @:optional var rating:Float; // backwards compat, never saved for new scores, only migrated.
 }
 
 // TODO: maybe a score history?
@@ -119,18 +121,20 @@ class Highscore {
 			windows.insert(0, 'epic');
 		if (judgeDiff != 'J4')
 			idArray.push(judgeDiff);
-
-        var gameplayModifierString:String = '';
-        if(ClientPrefs.getGameplaySetting('opponentPlay', false))
-            gameplayModifierString += 'o';
-
-        if(gameplayModifierString.trim().length > 0)idArray.push(gameplayModifierString);
         
 		for (window in windows)
 		{
 			var realWindow = Reflect.field(ClientPrefs, window + "Window");
 			idArray.push(Std.string(realWindow));
 		}
+
+		var gameplayModifierString:String = '';
+		if (ClientPrefs.getGameplaySetting('opponentPlay', false))
+			gameplayModifierString += 'o';
+
+		if (gameplayModifierString.trim().length > 0)
+			idArray.push(gameplayModifierString);
+
 		return idArray.join("-"); 
 	}
 
@@ -152,10 +156,8 @@ class Highscore {
 
 	static var formatSong = Paths.formatToSongPath;
 
-    public static function getRecord(song:String):ScoreRecord
-    {
-        var formattedSong:String = formatSong(song);
-		return currentSongData.exists(formattedSong) ? currentSongData.get(formattedSong) : {
+    public static function emptyRecord():ScoreRecord {
+        return {
             scoreSystemV: isWife3 ? wifeVersion : normVersion,
             score: 0,
             comboBreaks: 0,
@@ -174,9 +176,17 @@ class Highscore {
 			fcMedal: NONE
         };
     }
+    public static function getRecord(song:String):ScoreRecord
+    {
+        var formattedSong:String = formatSong(song);
+		return currentSongData.exists(formattedSong) ? currentSongData.get(formattedSong) : emptyRecord();
+    }
     public static function hasValidScore(song:String)return true;
     public static function getRating(song:String):Float{
 		var scoreRecord = getRecord(song);
+		if (scoreRecord.rating != null)
+			return scoreRecord.rating;
+
 		if (scoreRecord.accuracyScore == 0 || scoreRecord.maxAccuracyScore == 0)return 0;
 		return (scoreRecord.accuracyScore / scoreRecord.maxAccuracyScore);
     }
@@ -228,7 +238,7 @@ class Highscore {
 
 		if (currentRecord.accuracyScore < scoreRecord.accuracyScore || currentRecord.scoreSystemV < scoreRecord.scoreSystemV || isFCHigher){
             currentSongData.set(formatSong(song), scoreRecord);
-			save.data.saveData.set(currentLoadedID + "songs", currentSongData);
+			save.data.saveData.set(currentLoadedID, currentSongData);
             save.flush();
         }
     }
@@ -236,55 +246,217 @@ class Highscore {
 	public static function saveWeekScore(week:String, score:Int = 0){
 		if (currentWeekData.get(week) < score){
             currentWeekData.set(week, score);
-/* 			save.data.saveData.set(currentLoadedID + "weeks", currentWeekData);
-			save.flush(); */
+ 			save.data.weekSaveData.set(currentLoadedID, currentWeekData);
+			save.flush(); 
         }
     }
 	public static function resetWeek(week:String){}
 	public static function resetSong(week:String){}
 
-	public static function loadData()
+	public static function loadData(?ID:String, ?shouldMigrate:Bool=true)
 	{
-		isWife3 = ClientPrefs.wife3;
-		hasEpic = ClientPrefs.useEpics;
-		judgeDiff = ClientPrefs.judgeDiff;
-        var ID = getID();
-        if(currentLoadedID == ID)return;
+		if (ID==null){
+			isWife3 = ClientPrefs.wife3;
+			hasEpic = ClientPrefs.useEpics;
+			judgeDiff = ClientPrefs.judgeDiff;
+            ID = getID();
+			if (currentLoadedID == ID)
+				return;
+        }else{
+			if (currentLoadedID == ID)
+				return;
+            var idData = ID.split("-");
+            isWife3 = idData[1] == 'w3';
+            hasEpic = idData[0] == 't';
+			judgeDiff = isWife3 ? idData[2] : idData[1];
+			if (!Math.isNaN(Std.parseFloat(judgeDiff)))
+				judgeDiff = 'J4';
+        }
+        
 
         currentLoadedID = ID;
 		currentSongData = [];
-		var saveData:Map<String, Map<String, ScoreRecord>> = [];
+        currentWeekData = [];
+
+		var songSaveData:Map<String, Map<String, ScoreRecord>> = [];
+		var weekSaveData:Map<String, Map<String, Int>> = [];
 		var saveNeedsFlushing:Bool = false;
 
 		if (save.data.saveData == null)
 		{
-			save.data.saveData = saveData;
+			save.data.saveData = songSaveData;
 			saveNeedsFlushing = true;
 		}else
-			saveData = save.data.saveData;
+			songSaveData = save.data.saveData;
+
+        if(save.data.weekSaveData == null)
+        {
+			save.data.weekSaveData = weekSaveData;
+            saveNeedsFlushing = true;
+        }else
+            weekSaveData = save.data.weekSaveData;
         
-        if(!saveData.exists(ID + "songs")){
-            saveData.set(ID + "songs", []);
-			save.data.saveData = saveData;
+		if (songSaveData.exists(ID)){
+			songSaveData.set(ID, songSaveData.get(ID));
+			songSaveData.remove(ID);
+        }
+
+		if (!songSaveData.exists(ID)){
+			songSaveData.set(ID, []);
+			save.data.saveData = songSaveData;
 			saveNeedsFlushing = true;
         }else
-			currentSongData = saveData.get(ID + "songs");
+			currentSongData = songSaveData.get(ID);
 
-/* 		if (!saveData.exists(ID + "weeks"))
+		if (!weekSaveData.exists(ID))
 		{
-			saveData.set(ID + "weeks", []);
-			save.data.saveData = saveData;
+			weekSaveData.set(ID, []);
+			save.data.weekSaveData = weekSaveData;
 			saveNeedsFlushing = true;
 		}else
-			currentWeekData = saveData.get(ID + "weeks"); */
+			currentWeekData = weekSaveData.get(ID); 
 		
+
+		if (shouldMigrate)
+			migrateSave();
+        
 		if (saveNeedsFlushing)
             save.flush();
     }
     
-    public static function migrateSave(oldID:String)
+    public static function migrateSave(?id:String)
     {
+		if (id == null)
+            id = currentLoadedID;
+
+        var oldID = currentLoadedID;
+
+		loadData(id, false);
+
+        var migrationSave:FlxSave = new FlxSave();
         
+		migrationSave.bind('scores$id');
+        
+
+		if (!migrationSave.isEmpty()){
+			var backupSave = new FlxSave();
+			backupSave.bind('scores${id}_BAK');
+			backupSave.mergeData(migrationSave.data, true);
+			backupSave.close();
+        }
+
+		var scores:Map<String, Int> = migrationSave.isEmpty() ? null : migrationSave.data.songScores;
+		if (migrationSave.data.songOldScores != null){
+			var oldScores:Map<String, Int> = migrationSave.data.songOldScores;
+			for (song => score in oldScores){
+                scores.set(song, score);
+                oldScores.remove(song);
+            }
+			//migrationSave.data.songOldScores = null;
+        }
+		if (scores == null){  // doesnt matter since theres no scores here TO migrate
+            trace(id + " is an empty score save lol");
+ 			if (!migrationSave.isEmpty())
+                migrationSave.erase(); 
+
+            migrationSave.close();
+            return;
+        }
+		trace("migrating " + id);
+		var wifeScores:Map<String, Float> = [];
+		var songRatings:Map<String, Float> = [];
+		var weekScores:Map<String, Int> = [];
+
+		if (migrationSave.data.songWifeScore != null)
+			wifeScores = migrationSave.data.songWifeScore;
+		if (migrationSave.data.songRating != null)
+			songRatings = migrationSave.data.songRating;
+
+		if (migrationSave.data.weekScores != null)
+			weekScores = migrationSave.data.weekScores;
+
+/* 		var idData = id.split("-");
+        var wife3 = idData[1] == 'w3'; */
+
+		for (song => wScore in wifeScores)
+		{
+			if (!scores.exists(song))
+				scores.set(song, 0); // for some reason if it has a wife score but not a judge score then i guess just make it 0
+			// could PROBABLY do some math to approximate it but /shrug i dont care enough imma b real
+		}
+
+		for (song => rating in songRatings){
+            if(!scores.exists(song))
+                scores.set(song, 0); // same as above
+        }
+
+
+        var successfulMigrations:Int = 0;
+        var count:Int = 0;
+        for(song => score in scores){
+			count++;
+            try{
+				if (!currentSongData.exists(song)){
+                    var newRecord:ScoreRecord = emptyRecord();
+                    newRecord.score = score;
+                    if (songRatings.exists(song)){
+                        var rating = songRatings.get(song);
+						if (wifeScores.exists(song)){
+                            var notesHit = wifeScores.get(song);
+                            newRecord.accuracyScore = notesHit;
+                            newRecord.maxAccuracyScore = notesHit / rating;    
+                        }else
+                            newRecord.rating = rating;
+                        newRecord.scoreSystemV = 1.0;
+                        newRecord.fcMedal = rating == 1 ? TIER4 : NONE; // since we cant really detect it from here lol
+                    }
+                    
+                    wifeScores.remove(song);
+                    songRatings.remove(song);
+                    scores.remove(song);
+                    currentSongData.set(song, newRecord);
+                }
+                successfulMigrations++;
+                
+            }
+            catch(e:Dynamic){
+                trace("error migrating scores: " + e);
+            }
+        }
+
+		save.data.saveData.set(id, currentSongData);
+
+		if (migrationSave.data.songRatings != null)
+			migrationSave.data.songRatings = songRatings;
+
+		if (migrationSave.data.songWifeScores != null)
+			migrationSave.data.songWifeScores = wifeScores;
+
+		migrationSave.data.songScores = scores;
+        
+		trace('successfully migrated $successfulMigrations/$count saved scores');
+		if (weekScores!=null){
+			for (week => score in weekScores){
+				currentWeekData.set(week, score);
+				weekScores.remove(week);
+            }
+			migrationSave.data.weekScores = weekScores;
+            save.data.weekSaveData.set(id, currentWeekData);
+        }
+
+        save.flush();
+        
+		if (successfulMigrations == count){
+            trace("successfully migrated shit, erasing save");
+            migrationSave.erase(); // erase the old data since it has been migrated successfully
+			migrationSave.destroy();
+        }else{
+            trace("not everything successfully migrated so the save is being kept");
+			migrationSave.close();
+        }
+
+
+		loadData(oldID, false);
     }
 
 	public static function load():Void
