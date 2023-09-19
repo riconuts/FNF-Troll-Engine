@@ -1806,7 +1806,7 @@ class ChartingState extends MusicBeatState
 			}
 
 		}else {
-			if (heldNotesClick.length > 0) heldNotesClick = [];
+			if (!heldNotesClick.empty()) heldNotesClick = [];
 			startDummyY = null;
 			curDummyY = null;
 		}
@@ -2865,18 +2865,21 @@ class ChartingState extends MusicBeatState
 	}
 
 	var noteColors = [0xFFA349A4, 0xFFED1C24, 0xFFB5E61D, 0xFF00A2E8];
-	function setupSusNote(note:Note, beats:Float):FlxSprite {
-		var height:Int = Math.floor(FlxMath.remapToRange(note.sustainLength, 0, Conductor.stepCrochet * 16, 0, GRID_SIZE * 16 * zoomList[curZoom]) + (GRID_SIZE * zoomList[curZoom]) - GRID_SIZE* 0.5);
-		var minHeight:Int = Std.int((GRID_SIZE * zoomList[curZoom]* 0.5) + GRID_SIZE* 0.5);
-		if(height < minHeight) height = minHeight;
-		if(height < 1) height = 1; //Prevents error of invalid height
-
-		var spr:FlxSprite = new FlxSprite(note.x + (GRID_SIZE * 0.5) - 4,
-			note.y + GRID_SIZE * 0.5).makeGraphic(8, height, ClientPrefs.noteSkin == 'Quants'?0xFFED1C24:noteColors[note.noteData % noteColors.length]);
+	function setupSusNote(note:Note, beats:Float):FlxSprite 
+	{
+		var width = 8;
+		var height = (note.sustainLength / Conductor.stepCrochet + 0.5) * GRID_SIZE * zoomList[curZoom];
+		
+		var spr:FlxSprite = new FlxSprite(
+			note.x + (GRID_SIZE - width) * 0.5, 
+			note.y + GRID_SIZE * zoomList[curZoom] * 0.5
+		);
+		spr.makeGraphic(1, 1, (ClientPrefs.noteSkin == 'Quants') ? 0xFFED1C24 : noteColors[note.noteData % noteColors.length]);
+		spr.scale.set(width, height);
+		spr.updateHitbox();
 		spr.shader = note.shader;
 		
 		return spr;
-
 	}
 
 	private function pushSection(sectionBeats:Float = 4):Void
