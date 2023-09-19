@@ -46,6 +46,7 @@ import openfl.media.Sound;
 #end
 
 using StringTools;
+using Lambda;
 
 @:access(flixel.sound.FlxSound._sound)
 @:access(openfl.media.Sound.__buffer)
@@ -1735,13 +1736,14 @@ class ChartingState extends MusicBeatState
 			dummyArrow.visible = true;
 			dummyArrow.x = Math.floor(FlxG.mouse.x / GRID_SIZE) * GRID_SIZE;
 
-			var gridmult = GRID_SIZE / quantizationMult;
-			var gridY = Math.floor(FlxG.mouse.y / gridmult);
+			var gridMult = GRID_SIZE / quantizationMult;
+			var rawGridY = FlxG.mouse.y / gridMult;
+			var gridY = Math.floor(rawGridY);
 
-			dummyArrow.y = (FlxG.keys.pressed.SHIFT) ? FlxG.mouse.y : (gridY * gridmult);
+			dummyArrow.y = (FlxG.keys.pressed.SHIFT) ? FlxG.mouse.y : (gridY * gridMult);
 
 			if (FlxG.mouse.pressed){
-				movedDummyY = (curDummyY != (curDummyY = gridY/quantizationMult));
+				movedDummyY = (curDummyY != (curDummyY = (FlxG.keys.pressed.SHIFT) ? rawGridY : gridY/quantizationMult)); // wtf
 
 				if (startDummyY == null) startDummyY = curDummyY;
 			}
@@ -2029,11 +2031,12 @@ class ChartingState extends MusicBeatState
 					FlxG.keys.pressed.FIVE, FlxG.keys.pressed.SIX, FlxG.keys.pressed.SEVEN, FlxG.keys.pressed.EIGHT
 				];
 
-				if(holdArray.contains(true) && heldNotesVortex.length > 0){
+				if (heldNotesVortex.length > 0 && holdArray.contains(true))
+				{
 					for(i in 0...holdArray.length){
 						if (holdArray[i]){
 							var note = heldNotesVortex[i];
-							if(note != null){
+							if (note != null){
 								var len = CoolUtil.snap(Conductor.songPosition - note[0], Conductor.stepCrochet);
 								setNoteSustain(len, note);
 							}
@@ -2041,12 +2044,11 @@ class ChartingState extends MusicBeatState
 							heldNotesVortex[i] = null;
 						
 					}
-				}else
+				}else{
 					heldNotesVortex = [];
-					
-				
+				}
 
-				if(controlArray.contains(true))
+				if (controlArray.contains(true))
 				{
 					for (i in 0...controlArray.length)
 					{
