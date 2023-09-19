@@ -2868,14 +2868,15 @@ class ChartingState extends MusicBeatState
 	function setupSusNote(note:Note, beats:Float):FlxSprite 
 	{
 		var width = 8;
-		var height = (note.sustainLength / Conductor.stepCrochet + 0.5) * GRID_SIZE * zoomList[curZoom];
+		var height = (note.sustainLength / Conductor.stepCrochet) * GRID_SIZE * zoomList[curZoom];
+		var tailOffset = GRID_SIZE * 0.5;
 		
 		var spr:FlxSprite = new FlxSprite(
 			note.x + (GRID_SIZE - width) * 0.5, 
-			note.y + GRID_SIZE * zoomList[curZoom] * 0.5
+			note.y + tailOffset
 		);
-		spr.makeGraphic(1, 1, (ClientPrefs.noteSkin == 'Quants') ? 0xFFED1C24 : noteColors[note.noteData % noteColors.length]);
-		spr.scale.set(width, height);
+		spr.makeGraphic(1, 1, (ClientPrefs.noteSkin == 'Quants') ? 0xFFFF0000 : noteColors[note.noteData % noteColors.length]);
+		spr.scale.set(width, height - tailOffset);
 		spr.updateHitbox();
 		spr.shader = note.shader;
 		
