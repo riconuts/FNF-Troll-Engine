@@ -453,6 +453,9 @@ class FreeplayState extends MusicBeatState
 		for (button in buttons)
 			button.updateHighscore();
 
+        if((subState is GameplayChangersSubstate))
+			Highscore.loadData();
+        
 		super.closeSubState();
 	}
 
