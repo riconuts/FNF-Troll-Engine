@@ -220,7 +220,7 @@ class Highscore {
         });
     }
 
-	public static function saveScoreRecord(song:String, scoreRecord:ScoreRecord){
+	public static function saveScoreRecord(song:String, scoreRecord:ScoreRecord, ?force:Bool = false){
 		if (scoreRecord.fcMedal == null){
             if(scoreRecord.comboBreaks > 0)
                 scoreRecord.fcMedal = NONE; // no fc since you have a CB lol
@@ -243,22 +243,30 @@ class Highscore {
 		var savingFC:Int = (scoreRecord.fcMedal == null ? NONE : scoreRecord.fcMedal);
 		var isFCHigher = currentFC < savingFC;
 
-		if (!isValidScoreRecord(currentRecord) || currentRecord.accuracyScore < scoreRecord.accuracyScore || currentRecord.scoreSystemV < scoreRecord.scoreSystemV || isFCHigher){
+		if (force || !isValidScoreRecord(currentRecord) || currentRecord.accuracyScore < scoreRecord.accuracyScore || currentRecord.scoreSystemV < scoreRecord.scoreSystemV || isFCHigher){
             currentSongData.set(formatSong(song), scoreRecord);
 			save.data.saveData.set(currentLoadedID, currentSongData);
             save.flush();
         }
     }
 
-	public static function saveWeekScore(week:String, score:Int = 0){
-		if (currentWeekData.get(week) < score){
+	public static function saveWeekScore(week:String, score:Int = 0, ?force:Bool=false){
+		if (force || currentWeekData.get(week) < score){
             currentWeekData.set(week, score);
  			save.data.weekSaveData.set(currentLoadedID, currentWeekData);
 			save.flush(); 
         }
     }
-	public static function resetWeek(week:String){}
-	public static function resetSong(week:String){}
+	public static function resetWeek(week:String){
+		currentWeekData.set(week, 0);
+		save.data.weekSaveData.set(currentLoadedID, currentWeekData);
+		save.flush(); 
+    }
+	public static function resetSong(song:String){
+		currentSongData.remove(formatSong(song));
+		save.data.saveData.set(currentLoadedID, currentSongData);
+		save.flush();
+    }
 
 	public static function loadData(?ID:String, ?shouldMigrate:Bool=true)
 	{
