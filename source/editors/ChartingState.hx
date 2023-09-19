@@ -2681,14 +2681,13 @@ class ChartingState extends MusicBeatState
 		}
 
 		// CURRENT SECTION
-		var beats:Float = getSectionBeats();
 		for (i in _song.notes[curSec].sectionNotes)
 		{
 			var note:Note = setupNoteData(i, false);
 			curRenderedNotes.add(note);
 			if (note.sustainLength > 0)
 			{
-				curRenderedSustains.add(setupSusNote(note, beats));
+				curRenderedSustains.add(setupSusNote(note));
 			}
 
 			if(i[3] != null && note.noteType != null && note.noteType.length > 0) {
@@ -2734,7 +2733,6 @@ class ChartingState extends MusicBeatState
 		}
 
 		// NEXT SECTION
-		var beats:Float = getSectionBeats(1);
 		if(curSec < _song.notes.length-1) {
 			for (i in _song.notes[curSec+1].sectionNotes)
 			{
@@ -2743,7 +2741,7 @@ class ChartingState extends MusicBeatState
 				nextRenderedNotes.add(note);
 				if (note.sustainLength > 0)
 				{
-					nextRenderedSustains.add(setupSusNote(note, beats));
+					nextRenderedSustains.add(setupSusNote(note));
 				}
 			}
 		}
@@ -2864,19 +2862,22 @@ class ChartingState extends MusicBeatState
 		return retStr;
 	}
 
-	var noteColors = [0xFFA349A4, 0xFFED1C24, 0xFFB5E61D, 0xFF00A2E8];
-	function setupSusNote(note:Note, beats:Float):FlxSprite 
+	var noteColors:Array<FlxColor> = [0xFFA349A4, 0xFFED1C24, 0xFFB5E61D, 0xFF00A2E8];
+	var susWidth:Float = 8;
+
+	function setupSusNote(note:Note):Null<FlxSprite> 
 	{
-		var width = 8;
-		var height = (note.sustainLength / Conductor.stepCrochet) * GRID_SIZE * zoomList[curZoom];
-		var tailOffset = GRID_SIZE * 0.5;
+		var tailOffset:Float = GRID_SIZE * 0.5;
+		var height:Float = (note.sustainLength / Conductor.stepCrochet) * GRID_SIZE * zoomList[curZoom] - tailOffset;
+
+		if (height <= 0) return null;
 		
 		var spr:FlxSprite = new FlxSprite(
-			note.x + (GRID_SIZE - width) * 0.5, 
+			note.x + (GRID_SIZE - susWidth) * 0.5, 
 			note.y + tailOffset
 		);
 		spr.makeGraphic(1, 1, (ClientPrefs.noteSkin == 'Quants') ? 0xFFFF0000 : noteColors[note.noteData % noteColors.length]);
-		spr.scale.set(width, height - tailOffset);
+		spr.scale.set(susWidth, height);
 		spr.updateHitbox();
 		spr.shader = note.shader;
 		
