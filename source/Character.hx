@@ -105,20 +105,39 @@ class Character extends FlxSprite
 	/**How many steps a character should hold their sing animation for**/
 	public var singDuration:Float = 4;
 
+	/**String to be appended to idle animation names. For example, if this is -alt, then the animation used for idling will be idle-alt or danceLeft-alt/danceRight-alt**/
 	public var idleSuffix:String = '';
 	/**Character uses "danceLeft" and "danceRight" instead of "idle"**/
 	public var danceIdle:Bool = false;
-	public var skipDance:Bool = false;
 
+	/**.. Pppretty much voicelining again... WHY IS THIS A THING????????**/
+    @:deprecated("Use Character.voicelining for the love of god")
+	public var skipDance(default, set):Bool = false;
+    
+    @:noCompletion
+    static var _hasShownSkipDanceLog = false;
+    function set_skipDance(v:Bool){
+		if (!_hasShownSkipDanceLog){
+			_hasShownSkipDanceLog = true;
+			trace("Character.skipDance is deprecated: Use Character.voicelining instead of Character.skipDance for the love of god");
+        }
+		Reflect.setProperty(this, "skipDance", v); // to get around the deprecated warning
+		return v;
+    }
+
+	/**Name of the image to be used for the health icon**/
 	public var healthIcon:String = 'face';
-	public var animationsArray:Array<AnimArray> = [];
 
+	/**Offsets the character on the stage**/
 	public var positionArray:Array<Float> = [0, 0];
+	/**Offsets the camera when its focused on the character**/
 	public var cameraPosition:Array<Float> = [0, 0];
-
+    
+	/**Set to true if the character has miss animations. Optimization mainly**/
 	public var hasMissAnimations:Bool = false;
-
+    
 	//Used on Character Editor
+	public var animationsArray:Array<AnimArray> = [];
 	public var imageFile:String = '';
 	public var jsonScale:Float = 1;
 	public var noAntialiasing:Bool = false;
