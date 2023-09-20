@@ -125,13 +125,3 @@ class FunkinScript {
 		set('teVersion', MainMenuState.displayedVersion.trim());
 	}
 }
-
-interface IFunkinScript
-{
-	public var scriptName:String;
-	public var scriptType:String;
-	public function set(variable:String, data:Dynamic): Void;
-	public function get(key:String):Dynamic;
-	public function call(func:String, ?args:Array<Dynamic>):Dynamic;
-	public function stop():Void;
-}

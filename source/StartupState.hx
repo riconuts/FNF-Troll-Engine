@@ -24,7 +24,7 @@ class StartupState extends FlxState
 	public static var volumeUpKeys:Array<FlxKey> = [FlxKey.NUMPADPLUS, FlxKey.PLUS];
 	public static var fullscreenKeys:Array<FlxKey> = [FlxKey.F11];
 
-	private static final nextState:Class<FlxState> = TitleState;
+	private static final nextState:Class<FlxState> = StartupState;//TestingState;
 
     // vv wait this isnt a musicbeatstate LOL!
 /* 
