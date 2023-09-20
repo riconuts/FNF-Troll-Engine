@@ -54,36 +54,55 @@ class Character extends FlxSprite
 	/**In case a character is missing, it will use BF on its place**/
 	public static var DEFAULT_CHARACTER:String = 'bf'; 
 
+	/**Whether the player controls this character**/
 	public var controlled:Bool = false;
+
+	/**Whether the character is facing left or right. -1 means it's facing to the left, 1 means its facing to the right.**/
 	public var xFacing:Float = 1;
 
+	/**Name of the death character to be used. Can be used to share 1 game over character across multiple characters**/
 	public var deathName:String = DEFAULT_CHARACTER;
+
+	/**Name of the script to be ran. Can be used to share 1 script across multiple characters**/
 	public var scriptName:String = DEFAULT_CHARACTER;
+	/**Script file running for the character**/
 	public var characterScript:FunkinScript;
 
 	/**for fleetway, mainly.
 		but whenever you need to play an anim that has to be manually interrupted, here you go**/
 	public var voicelining:Bool = false; 
 
-	public var idleAnims:Array<String> = ['idle'];
-	public var animOffsets:Map<String, Array<Dynamic>>;
-	public var camOffsets:Map<String, Array<Float>> = [];
+	/**Unused. Might eventually be used to create an "idleSequence" which lets you create your own custom sequence of animations to be played during idling, instead of only idle or danceLeft and danceRight.**/
+	public var idleSequence:Array<String> = ['idle'];
+	/**How each animation offsets the character**/
+    public var animOffsets:Map<String, Array<Dynamic>>;
+	/**How each animation offsets the camera**/
+    public var camOffsets:Map<String, Array<Float>> = [];
+	/**Used by the character editor. Disables most functions of the character besides animations**/
 	public var debugMode:Bool = false;
-	public var camOffX:Float = 0;
+	/**Camera horizontal offset from the animation**/
+    public var camOffX:Float = 0;
+	/**Camera vertical offset from the animation**/
 	public var camOffY:Float = 0;
-
+	/**Whether this character is playable. Not really used much anymore**/
 	public var isPlayer:Bool = false;
+	/**Name of the character**/
 	public var curCharacter:String = DEFAULT_CHARACTER;
 
+	/**BLAMMED LIGHTS!! idk not used anymore**/
 	public var colorTween:FlxTween;
+	/**How long in seconds the current sing animation has been held for**/
 	public var holdTimer:Float = 0;
+	/**How long in seconds to hold the hey/cheer anim**/
 	public var heyTimer:Float = 0;
+	/**Automatically resets the character to idle once this hits 0 after being set to any value above 0**/
 	public var animTimer:Float = 0;
+	/**Disables dancing while the hey/cheer animations are playing**/
 	public var specialAnim:Bool = false;
-	public var animationNotes:Array<Dynamic> = [];
-	public var stunned:Bool = false;
+	/**Disables the ability for characters to manually reset to idle**/
+    public var stunned:Bool = false;
 	
-	/**Multiplier of how long a character holds the sing pose**/
+	/**How many steps a character should hold their sing animation for**/
 	public var singDuration:Float = 4;
 
 	public var idleSuffix:String = '';
