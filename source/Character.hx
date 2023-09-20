@@ -61,7 +61,8 @@ class Character extends FlxSprite
 	public var scriptName:String = DEFAULT_CHARACTER;
 	public var characterScript:FunkinScript;
 
-	/**whenever you need to play an anim that has to be manually interrupted, here you go**/
+	/**for fleetway, mainly.
+		but whenever you need to play an anim that has to be manually interrupted, here you go**/
 	public var voicelining:Bool = false; 
 
 	public var idleAnims:Array<String> = ['idle'];
