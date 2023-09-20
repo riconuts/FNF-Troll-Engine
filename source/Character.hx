@@ -69,7 +69,9 @@ class Character extends FlxSprite
 	public var characterScript:FunkinScript;
 
 	/**for fleetway, mainly.
-		but whenever you need to play an anim that has to be manually interrupted, here you go**/
+		but whenever you need to play an anim that has to be manually interrupted, here you go.
+        
+    Stops note anims and idle from playing. Make sure to set this to false once the animation is done.**/
 	public var voicelining:Bool = false; 
 
 	/**Unused. Might eventually be used to create an "idleSequence" which lets you create your own custom sequence of animations to be played during idling, instead of only idle or danceLeft and danceRight.**/
@@ -110,20 +112,9 @@ class Character extends FlxSprite
 	/**Character uses "danceLeft" and "danceRight" instead of "idle"**/
 	public var danceIdle:Bool = false;
 
-	/**.. Pppretty much voicelining again... WHY IS THIS A THING????????**/
-    @:deprecated("Use Character.voicelining for the love of god")
-	public var skipDance(default, set):Bool = false;
+	/**Stops the idle from playing**/
+	public var skipDance:Bool = false;
     
-    @:noCompletion
-    static var _hasShownSkipDanceLog = false;
-    function set_skipDance(v:Bool){
-		if (!_hasShownSkipDanceLog){
-			_hasShownSkipDanceLog = true;
-			trace("Character.skipDance is deprecated: Use Character.voicelining instead of Character.skipDance for the love of god");
-        }
-		Reflect.setProperty(this, "skipDance", v); // to get around the deprecated warning
-		return v;
-    }
 
 	/**Name of the image to be used for the health icon**/
 	public var healthIcon:String = 'face';
