@@ -493,8 +493,8 @@ class Macro {
                     // nothing
             }
         }
+		return fields;
         #end
 
-		return fields;
     }
 }
