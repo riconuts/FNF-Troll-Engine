@@ -37,7 +37,6 @@ class TestingState extends MusicBeatState {
 		text.screenCenter(X);
 		add(text);
 
-
         super.create();
     }
 

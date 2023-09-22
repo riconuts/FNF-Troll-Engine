@@ -13,8 +13,11 @@ using haxe.macro.Tools;
 // And then add "override" as a thing to HScript
 
 class Macro {
-    macro public static function addScriptingCallbacks(?toInject:Array<String>, ?folder:String = 'states'):Array<Field>{
-		#if !display
+    macro public static function addScriptingCallbacks(?toInject:Array<String>, ?folder:String = 'states'):Array<Field>
+    {
+        var fields:Array<Field> = Context.getBuildFields();
+
+		#if display
 		if (toInject==null)
 			toInject = [ // this is like.. the bare minimum lol
                 "create", 
@@ -26,23 +29,21 @@ class Macro {
                 "switchTo"
             ];
 
-        var fields:Array<Field> = Context.getBuildFields();
-        var cl = Context.getLocalClass().get();
-        var className = cl.name;
+        var cl:ClassType = Context.getLocalClass().get();
 		var classConstructor = cl.constructor == null ? null : cl.constructor.get();
-		var constructor:Field;
 
 		var clMeta = cl.meta == null ? [] : cl.meta.get();
-
 		if (clMeta != null && clMeta.length > 0)
 		{
 			for (entry in clMeta)
 			{
 				if (entry.name == ':noScripting')
 					return fields;
+
                 else if(entry.name == ':injectFunctions'){
                     if(entry.params.length > 0)
                         toInject = entry.params[0].getValue();
+
                 }else if (entry.name == ':injectMoreFunctions'){
                     if (entry.params.length > 0){
 						var p:Array<String> = entry.params[0].getValue();
@@ -54,6 +55,7 @@ class Macro {
 			}
 		}
 
+        var constructor:Field;
 		for (field in fields)
 		{
 			if (field.name == 'new')
@@ -448,13 +450,14 @@ class Macro {
                     }
 
                     // injects code *BEFORE* the existing class new() code
-
                     body.insert(0, macro
                         {
                             this._scriptSuperObject = $v{superObject}
                         }
                     );
+                    
 
+                    var className = cl.name;
                     // injects code AFTER the existing class new() code
                     body.push(macro
                         {
@@ -489,7 +492,6 @@ class Macro {
             }
         }
         #end
-		
 
 		return fields;
     }
