@@ -14,7 +14,7 @@ using haxe.macro.Tools;
 
 class Macro {
     macro public static function addScriptingCallbacks(?toInject:Array<String>, ?folder:String = 'states'):Array<Field>{
-		//#if !display
+		#if !display
 		if (toInject==null)
 			toInject = [ // this is like.. the bare minimum lol
                 "create", 
@@ -470,7 +470,6 @@ class Macro {
 							for (filePath in Paths.getFolders($v{folder}))
                             {
                                 var file = filePath + "extension/" + $v{className} + ".hscript";
-								trace(file);
                                 if (Paths.exists(file))
                                 {
                                     script = scripts.FunkinHScript.fromFile(file, $v{className}, defaultVars);
@@ -479,7 +478,7 @@ class Macro {
                                 }
                             }
 
-                            trace("wow");
+
                         }
                     );
                         
@@ -489,7 +488,7 @@ class Macro {
                     // nothing
             }
         }
-        //#end
+        #end
 		
 
 		return fields;
