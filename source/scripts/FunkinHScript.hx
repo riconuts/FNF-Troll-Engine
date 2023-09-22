@@ -436,6 +436,7 @@ class FunkinHScript extends FunkinScript
 
 // tbh i'd *LIKE* to use a macro for this but im lazy lol
 
+@:noScripting // honestly we could prob use the scripting thing to override shit instead
 class HScriptState extends MusicBeatState
 {
 	public function new(fileName:String, ?additionalVars:Map<String, Any>)
@@ -675,10 +676,9 @@ class HScriptState extends MusicBeatState
 
 }
 
+@:noScripting // honestly we could prob use the scripting thing to override shit instead
 class HScriptSubstate extends MusicBeatSubstate
 {
-	public var script:FunkinHScript;
-
 	public function new(ScriptName:String, ?additionalVars:Map<String, Any>)
 	{
 		super();

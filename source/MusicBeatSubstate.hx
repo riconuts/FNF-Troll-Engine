@@ -1,13 +1,24 @@
 package;
 
+import scripts.FunkinHScript;
 import Conductor.BPMChangeEvent;
 import flixel.FlxG;
 import flixel.FlxSubState;
 import flixel.FlxBasic;
 import flixel.FlxSprite;
 
+@:autoBuild(scripts.Macro.addScriptingCallbacks([
+	"create",
+	"update",
+	"destroy",
+	"close",
+	"stepHit",
+	"beatHit",
+], "substates"))
 class MusicBeatSubstate extends FlxSubState
 {
+	public var script:FunkinHScript = FunkinHScript.blankScript();
+
 	private var lastBeat:Float = 0;
 	private var lastStep:Float = 0;
 

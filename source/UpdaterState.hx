@@ -39,6 +39,7 @@ typedef DLProgress = {
     var done:Bool;
 }
 
+@:noScripting
 class UpdaterState extends MusicBeatState {
     var release:Release;
     var downloading:Bool = false;

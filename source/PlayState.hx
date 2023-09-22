@@ -123,8 +123,14 @@ class Wife3
 	}
 }
 
+@:noScripting
 class PlayState extends MusicBeatState
 {
+    public function new(_:Bool = false){
+        super(false); // no scripting on playstate
+    }
+
+
 	var sndFilter:ALFilter = AL.createFilter();
     var sndEffect:ALEffect = AL.createEffect();
 
@@ -418,10 +424,6 @@ class PlayState extends MusicBeatState
 	var shitToLoad:Array<AssetPreload> = [];
 	var finishedCreating = false;
 	
-    public function new(_:Bool = false){
-        super(false); // no scripting on playstate
-    }
-
 	override public function create()
 	{
 		Highscore.loadData();

@@ -7,10 +7,19 @@ import openfl.media.Sound;
 import openfl.ui.Mouse;
 import openfl.ui.MouseCursor;
 import scripts.FunkinHScript;
-
+@:autoBuild(scripts.Macro.addScriptingCallbacks([
+	"create",
+	"update",
+	"destroy",
+	"openSubState",
+	"closeSubState",
+	"stepHit",
+	"beatHit",
+	"sectionHit"
+]))
 class MusicBeatState extends FlxUIState
 {
-    public var script:FunkinHScript; // once i add state scripting this'll be used but rn its only used by FunkinHScript
+    public var script:FunkinHScript = FunkinHScript.blankScript();
 
 	private var curSection:Int = 0;
 	private var stepsToDo:Int = 0;
