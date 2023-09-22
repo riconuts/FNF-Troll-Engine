@@ -17,7 +17,9 @@ class Macro {
     {
         var fields:Array<Field> = Context.getBuildFields();
 
-		#if display
+        #if display
+        return fields
+		#else
 		if (toInject==null)
 			toInject = [ // this is like.. the bare minimum lol
                 "create", 
