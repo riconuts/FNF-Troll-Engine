@@ -1295,10 +1295,14 @@ class PlayState extends MusicBeatState
 	var finishTimer:FlxTimer = null;
 
 	// For being able to mess with the sprites on Lua
-	public var introAlts:Array<Null<String>> = [null, 'ready', 'set', 'go'];
+	public var introAlts:Array<Null<String>> = ["onyourmarks", 'ready', 'set', 'go'];
+	public var introSnds:Array<Null<String>> = ["intro3", 'intro2', 'intro1', 'introGo'];
 
-	public var countdownSpr:FlxSprite;
-	var countdownTwn:FlxTween;
+	public var countdownSpr:Null<FlxSprite>;
+	public var countdownSnd:Null<FlxSound>;
+	
+	private var countdownTwn:FlxTween;
+	
 	public static var startOnTime:Float = 0;
 
 	public function startCountdown():Void
@@ -1317,24 +1321,10 @@ class PlayState extends MusicBeatState
 		if (skipCountdown || startOnTime > 0)
 			skipArrowStartTween = true;
 
-		for(i in 0...4){
+		for (_ in 0...4){
 			playerStrums.add(new StrumNote(0, 0, 0));
 			opponentStrums.add(new StrumNote(0, 0, 0));
 		}
-		/* 		
-		generateStaticArrows(0);
-		generateStaticArrows(1);
-		for (i in 0...playerStrums.length) {
-			setOnScripts('defaultPlayerStrumX' + i, playerStrums.members[i].x);
-			setOnScripts('defaultPlayerStrumY' + i, playerStrums.members[i].y);
-		}
-		for (i in 0...opponentStrums.length) {
-			setOnScripts('defaultOpponentStrumX' + i, opponentStrums.members[i].x);
-			setOnScripts('defaultOpponentStrumY' + i, opponentStrums.members[i].y);
-		}
-
-		modManager.receptors = [playerStrums.members, opponentStrums.members]; 
-		*/
 
 		callOnScripts('preReceptorGeneration'); // backwards compat, deprecated
         callOnScripts('onReceptorGeneration');
@@ -1366,8 +1356,7 @@ class PlayState extends MusicBeatState
 		} */
 
 		startedCountdown = true;
-		Conductor.songPosition = 0;
-		Conductor.songPosition -= Conductor.crochet * 5;
+		Conductor.songPosition = -Conductor.crochet * 5;
 		setOnScripts('startedCountdown', true);
 		callOnScripts('onCountdownStarted');
 
@@ -1413,15 +1402,14 @@ class PlayState extends MusicBeatState
 				}
 			}
 
-
-			var sprImage:Null<String> = introAlts[swagCounter];
-			if (sprImage != null){
+			var sprImage:Null<flixel.graphics.FlxGraphic> = Paths.image(introAlts[swagCounter]); // hopefully never gives a nor lol
+			if (sprImage != null){			
 				if (countdownTwn != null)
 					countdownTwn.cancel();
 				if (countdownSpr != null)
 					remove(countdownSpr).destroy();
 
-				countdownSpr = new FlxSprite(0, 0, Paths.image(sprImage));
+				countdownSpr = new FlxSprite(0, 0, sprImage);
 				countdownSpr.scrollFactor.set();
 				countdownSpr.updateHitbox();
 				countdownSpr.cameras = [camHUD];
@@ -1441,16 +1429,15 @@ class PlayState extends MusicBeatState
 				});
 			}
 
-			var soundName = switch (swagCounter){
-				case 0: 'intro3' + introSoundsSuffix;
-				case 1: 'intro2' + introSoundsSuffix;
-				case 2: 'intro1' + introSoundsSuffix;
-				case 3: 'introGo' + introSoundsSuffix;
-				default: null;
-			};
+			var soundName:Null<String> = introSnds[swagCounter];
 			if (soundName != null){
-				var snd = FlxG.sound.play(Paths.sound(soundName), 0.6);
+				var snd:FlxSound; 
+				snd = FlxG.sound.play(Paths.sound(soundName + introSoundsSuffix), 0.6, false, null, true, ()->{
+					if (countdownSnd == snd) countdownSnd = null;
+				});
 				snd.effect = ClientPrefs.ruin ? sndEffect : null;
+				
+				countdownSnd = snd;
 			}
 
 			callOnHScripts('onCountdownTick', [swagCounter, tmr]);

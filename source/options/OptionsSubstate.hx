@@ -155,6 +155,8 @@ class OptionsSubstate extends MusicBeatSubstate
 					Main.bread.visible = val;
 			case 'globalAntialiasing':
 				FlxSprite.defaultAntialiasing = val;
+			case 'lowQuality':
+				FlxG.stage.quality = val ? openfl.display.StageQuality.LOW : openfl.display.StageQuality.HIGH; // fucking useless!?!?
 			#if DO_AUTO_UPDATE
 			case 'downloadBetas' | 'checkForUpdates':
 				Main.downloadBetas = MainMenuState.beta || ClientPrefs.downloadBetas;
