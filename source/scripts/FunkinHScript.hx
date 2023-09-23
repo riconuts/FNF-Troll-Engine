@@ -600,7 +600,11 @@ class HScriptState extends MusicBeatState
 
     override function switchTo(s:FlxState)
 	{
-        trace("switchTo is deprecated. Consider using startOutro");
+		if (!script.exists("onSwitchTo"))
+			return true;
+		else
+			trace("switchTo is deprecated. Consider using startOutro");		
+
 		if (script.call("onSwitchTo", [s]) == Globals.Function_Stop)
 			return false;
 
