@@ -514,6 +514,18 @@ class HScriptState extends MusicBeatState
 		script.call("onUpdatePost", [e]);
 	}
 
+	override function beatHit()
+	{
+		script.call("onBeatHit");
+		super.beatHit();
+	}
+	
+	override function stepHit()
+	{
+		script.call("onStepHit");
+		super.stepHit();
+	}
+
     override function closeSubState()
 	{
 		if (script.call("onCloseSubState") == Globals.Function_Stop)
