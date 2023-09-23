@@ -433,6 +433,11 @@ class Character extends FlxSprite
 
 	public var danced:Bool = false;
 
+    public function resetDance(){
+        // called when resetting back to idle from a pose
+        // useful for stuff like sing return animations
+		if(callOnScripts("onResetDance") != Globals.Function_Stop)dance();
+    }
 	/**
 	 * FOR GF DANCING SHIT
 	 */
@@ -440,6 +445,8 @@ class Character extends FlxSprite
 	{
 		if (!debugMode && !skipDance && !specialAnim && animTimer <= 0 && !voicelining)
 		{
+			if (callOnScripts("onDance") == Globals.Function_Stop)
+                return;
 			if(danceIdle)
 			{
 				danced = !danced;
@@ -449,11 +456,11 @@ class Character extends FlxSprite
 				else
 					playAnim('danceLeft' + idleSuffix);
 
-				callOnScripts("onDance");
+				callOnScripts("onDancePost");
 			}
 			else if(animation.getByName('idle' + idleSuffix) != null) {
 				playAnim('idle' + idleSuffix);
-				callOnScripts("onDance");
+				callOnScripts("onDancePost");
 			}
 		}
 	}

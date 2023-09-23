@@ -2641,7 +2641,7 @@ class PlayState extends MusicBeatState
 						&& !char.animation.curAnim.name.endsWith('miss')
 						&& (char.idleWhenHold || !pressedGameplayKeys.contains(true))
 					)
-						char.dance();
+                        char.resetDance();
 				}
 			}
 		}
