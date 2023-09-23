@@ -18,7 +18,7 @@ class Macro {
         var fields:Array<Field> = Context.getBuildFields();
 
         #if !display
-		if (Sys.args().indexOf("--no-output") != -1)return fields;
+		if (Sys.args().indexOf("--no-output") != -1)return fields; // code completion
 
 		if (toInject==null)
 			toInject = [ // this is like.. the bare minimum lol
