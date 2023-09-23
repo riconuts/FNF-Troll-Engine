@@ -604,7 +604,7 @@ class HScriptState extends MusicBeatState
     override function switchTo(s:FlxState)
 	{
         if(!script.exists("onSwitchTo"))
-            return true;
+            return super.switchTo(s);
     
 		if (!switchToDeprecation){
 			trace("switchTo is deprecated. Consider using startOutro");
