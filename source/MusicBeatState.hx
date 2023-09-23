@@ -35,12 +35,11 @@ class MusicBeatState extends FlxUIState
 
 	public static var camBeat:FlxCamera;
 
-    public var canBeScripted:Bool = false;
-
+    public var canBeScripted(get, default):Bool = false;
+    function get_canBeScripted()return canBeScripted;
     public function new(canBeScripted:Bool = true){
         super();
-        this.canBeScripted = canBeScripted; // for once I add state scripting
-        // NOTE: Once state scripting is added we should do a proper mod and skin selection menu like Psych's, but I think we can take some inspiration from how Minecraft does it w/ resource packs since that's a pretty good system of doing it, imo
+        this.canBeScripted = canBeScripted;
     }
 
 	inline function get_controls():Controls

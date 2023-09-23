@@ -19,7 +19,7 @@ class Macro {
 
         #if !display
 		if (Sys.args().indexOf("--no-output") != -1)return fields; // code completion
-
+ 
 		if (toInject==null)
 			toInject = [ // this is like.. the bare minimum lol
                 "create", 
@@ -30,17 +30,90 @@ class Macro {
 				"startOutro",
                 "switchTo"
             ];
+            
 
         var cl:ClassType = Context.getLocalClass().get();
 		var classConstructor = cl.constructor == null ? null : cl.constructor.get();
 		var className = cl.name;
 		var clMeta = cl.meta == null ? [] : cl.meta.get();
+
+		var superFields:Map<String, ClassField> = [];
+		var superFieldNames:Array<String> = [];
+
+		if (cl.superClass != null && cl.superClass.t != null)
+		{
+			var superduper = cl.superClass;
+			while (superduper != null && superduper.t != null)
+			{
+				var scl = superduper.t.get();
+				if (classConstructor == null && scl.constructor != null)
+					classConstructor = scl.constructor.get();
+
+				if (scl.fields != null)
+				{
+					for (field in scl.fields.get())
+					{
+						if (field.meta.has(":inject"))
+							toInject.push(field.name);
+
+						if (!superFieldNames.contains(field.name))
+						{
+							superFieldNames.push(field.name);
+							superFields.set(field.name, field);
+						}
+					}
+				}
+				superduper = scl.superClass;
+			}
+		} 
+
 		if (clMeta != null && clMeta.length > 0)
 		{
 			for (entry in clMeta)
 			{
-				if (entry.name == ':noScripting')
+				if (entry.name == ':noScripting'){
+					// only way i can think of to force-override canBeScripted to always be false
+                    // makes it so that you can't use state overrides to script the state, either.
+/* 					fields.push({
+						name: "canBeScripted",
+						access: [APublic],
+						kind: FProp("get", "default", macro:Bool),
+						pos: Context.currentPos()
+					}); */
+
+					var func:FieldType = FFun({
+						expr: (macro
+							{
+								trace("got canbescripted");
+								return false;
+							}),
+						ret: macro :Bool,
+						args: []
+					});
+
+					var access = [AInline];
+					if (superFieldNames.contains("get_canBeScripted"))
+						access.push(AOverride);
+
+                    for(field in fields){
+                        if(field.name == 'get_canBeScripted'){
+							field.kind = func;
+							if (superFieldNames.contains("get_canBeScripted"))
+								field.access.push(AOverride);
+                            return fields;
+                        }
+                    }
+
+
+
+					fields.push({
+						name: "get_canBeScripted",
+						access: access,
+						kind: func,
+						pos: Context.currentPos()
+					});
 					return fields;
+                }
                 
 
                 else if(entry.name == ':injectFunctions'){
@@ -77,32 +150,6 @@ class Macro {
 				}
 			}
 		}
-
-        var superFields:Map<String, ClassField> = [];
-        var superFieldNames:Array<String> = [];
-
-        if (cl.superClass != null && cl.superClass.t != null){
-            var superduper = cl.superClass;
-            while (superduper != null && superduper.t != null){
-                var scl = superduper.t.get();
-                if (classConstructor==null && scl.constructor != null)
-					classConstructor = scl.constructor.get();
-
-				if (scl.fields!=null){
-                    for(field in scl.fields.get()){
-						if (field.meta.has(":inject"))
-                            toInject.push(field.name);
-
-
-						if (!superFieldNames.contains(field.name) && toInject.contains(field.name)){
-							superFieldNames.push(field.name);
-							superFields.set(field.name, field);
-                        }
-                    }
-                }
-                superduper = scl.superClass;
-            }
-        } 
 
         var funcs:Map<String, Field> = [];
 

@@ -446,7 +446,7 @@ class HScriptState extends MusicBeatState
 		for (filePath in Paths.getFolders("states"))
 		{
 			var name = filePath + fileName;
-			if (!Paths.exists(filePath)) continue;
+			if (!Paths.exists(name)) continue;
 
 			// some shortcuts
 			var variables = new Map<String, Dynamic>();
@@ -497,11 +497,12 @@ class HScriptState extends MusicBeatState
             return;
         }
         
-        if(script.call("onCreate", []) == Globals.Function_Stop) // idk why you'd return stop on create on a hscriptstate but.. sure
+        // onCreate is used when the script is created so lol
+        if(script.call("onStateCreate", []) == Globals.Function_Stop) // idk why you'd return stop on create on a hscriptstate but.. sure
             return;
 
         super.create(); 
-        script.call("onCreatePost");
+        script.call("onStateCreatePost");
     }
 
     override function update(e)
@@ -598,9 +599,17 @@ class HScriptState extends MusicBeatState
         script.call("onStartOutroPost", []);
     }
 
+    static var switchToDeprecation = false;
+
     override function switchTo(s:FlxState)
 	{
-        trace("switchTo is deprecated. Consider using startOutro");
+        if(!script.exists("onSwitchTo"))
+            return true;
+    
+		if (!switchToDeprecation){
+			trace("switchTo is deprecated. Consider using startOutro");
+			switchToDeprecation = true;
+        }
 		if (script.call("onSwitchTo", [s]) == Globals.Function_Stop)
 			return false;
 
