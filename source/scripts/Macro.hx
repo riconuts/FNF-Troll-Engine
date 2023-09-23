@@ -17,9 +17,9 @@ class Macro {
     {
         var fields:Array<Field> = Context.getBuildFields();
 
-        #if display
-        return fields
-		#else
+        #if !display
+		if (Sys.args().indexOf("--no-output") != -1)return fields;
+
 		if (toInject==null)
 			toInject = [ // this is like.. the bare minimum lol
                 "create", 
@@ -33,7 +33,7 @@ class Macro {
 
         var cl:ClassType = Context.getLocalClass().get();
 		var classConstructor = cl.constructor == null ? null : cl.constructor.get();
-
+		var className = cl.name;
 		var clMeta = cl.meta == null ? [] : cl.meta.get();
 		if (clMeta != null && clMeta.length > 0)
 		{
@@ -41,6 +41,7 @@ class Macro {
 			{
 				if (entry.name == ':noScripting')
 					return fields;
+                
 
                 else if(entry.name == ':injectFunctions'){
                     if(entry.params.length > 0)
@@ -459,7 +460,7 @@ class Macro {
                     );
                     
 
-                    var className = cl.name;
+                    
                     // injects code AFTER the existing class new() code
                     body.push(macro
                         {
@@ -493,8 +494,9 @@ class Macro {
                     // nothing
             }
         }
-		return fields;
         #end
+
+		return fields;
 
     }
 }

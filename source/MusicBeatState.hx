@@ -7,6 +7,8 @@ import openfl.media.Sound;
 import openfl.ui.Mouse;
 import openfl.ui.MouseCursor;
 import scripts.FunkinHScript;
+
+
 @:autoBuild(scripts.Macro.addScriptingCallbacks([
 	"create",
 	"update",

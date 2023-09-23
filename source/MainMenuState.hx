@@ -487,6 +487,7 @@ class MainMenuState extends MusicBeatState
     var holding:Array<Float> = [0, 0];
     
 	function moveBoxes(lerpSpeed:Float = 0.2){
+        
 		var lerpVal = lerpSpeed * (FlxG.elapsed / (1 / 60));
 		if (lerpSpeed>=1)lerpVal=1;
 

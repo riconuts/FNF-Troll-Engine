@@ -6,7 +6,6 @@ import flixel.FlxG;
 import flixel.FlxSubState;
 import flixel.FlxBasic;
 import flixel.FlxSprite;
-
 @:autoBuild(scripts.Macro.addScriptingCallbacks([
 	"create",
 	"update",
