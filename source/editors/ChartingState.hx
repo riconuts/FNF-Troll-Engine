@@ -100,11 +100,6 @@ class ChartingState extends MusicBeatState
 
 	var UI_box:FlxUITabMenu;
 
-	public static var goToPlayState:Bool = false;
-	/**
-	 * Array of notes showing when each section STARTS in STEPS
-	 * Usually rounded up??
-	 */
 	public static var curSec:Int = 0;
 	public static var lastSection:Int = 0;
 	private static var lastSong:String = '';
@@ -218,6 +213,8 @@ class ChartingState extends MusicBeatState
 		96,
 		192
 	];
+
+	public var playbackSpeed:Float = 1.0;
 
 	public static var vortex:Bool = false;
 	public var mouseQuant:Bool = false;
@@ -1439,6 +1436,13 @@ class ChartingState extends MusicBeatState
 		if (FlxG.save.data.chart_noAutoScroll == null) FlxG.save.data.chart_noAutoScroll = false;
 		disableAutoScrolling.checked = FlxG.save.data.chart_noAutoScroll;
 
+		#if !html5
+		var sliderRate = new FlxUISlider(this, 'playbackSpeed', 68, 270, 0.5, 3, 150, null, 5, FlxColor.WHITE, FlxColor.BLACK);
+		sliderRate.value = playbackSpeed;
+		sliderRate.nameLabel.text = 'Playback Rate';
+		tab_group_chart.add(sliderRate);
+		#end
+
 		tab_group_chart.add(new FlxText(metronomeStepper.x, metronomeStepper.y - 15, 0, 'BPM:'));
 		tab_group_chart.add(new FlxText(metronomeOffsetStepper.x, metronomeOffsetStepper.y - 15, 0, 'Offset (ms):'));
 
@@ -1643,6 +1647,11 @@ class ChartingState extends MusicBeatState
 				}
 			}
 		}
+		else if (id == FlxUISlider.CHANGE_EVENT && (sender is FlxUISlider))
+		{
+			
+			
+		}
 
 		// FlxG.log.add(id + " WEED " + sender + " WEED " + data + " WEED " + params);
 	}
@@ -1712,6 +1721,10 @@ class ChartingState extends MusicBeatState
 			FlxG.sound.music.time = 0;
 			changeSection();
 		}
+
+		FlxG.sound.music.pitch = playbackSpeed;
+		vocals.pitch = playbackSpeed;
+		for (track in extraTracks) track.pitch = playbackSpeed;
 
 		FlxG.mouse.visible = true; //cause reasons. trust me
 
