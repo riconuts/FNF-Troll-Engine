@@ -559,7 +559,7 @@ class ClientPrefs
 
 	inline public static function getGameplaySetting(name:String, defaultValue:Dynamic):Dynamic
 	{
-		return (gameplaySettings.exists(name) ? gameplaySettings.get(name) : defaultValue);
+		return ((!PlayState.isStoryMode && gameplaySettings.exists(name)) ? gameplaySettings.get(name) : defaultValue);
 	}
 
 	public static var quantHSV:Array<Array<Int>> = [
