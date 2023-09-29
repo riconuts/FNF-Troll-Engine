@@ -222,7 +222,12 @@ class MusicBeatState extends FlxUIState
 				return Paths.currentTrackedSounds.get(filePath);
 			}
 
-			for (folder in [Paths.mods(Paths.currentModDirectory), Paths.mods("global"), "assets"]){
+            var fuck = [Paths.mods(Paths.currentModDirectory), Paths.mods("global"), "assets"];
+			#if MODS_ALLOWED
+			for (mod in Paths.getGlobalContent())
+				fuck.insert(0, Paths.mods(mod));
+			#end
+			for (folder in fuck){
 				var daPath = Path.join([folder, "music"]);
 				
 				var menuFilePath = daPath+"/freakyMenu.ogg";
