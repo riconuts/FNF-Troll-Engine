@@ -16,9 +16,6 @@ import sys.FileSystem;
 
 using StringTools;
 
-@:injectMoreFunctions([
-	"getLocalCredits"
-])
 class CreditsState extends MusicBeatState
 {	
     var useHttp:Bool = #if final true #else false #end;
