@@ -51,7 +51,8 @@ class FunkinScript {
 	**/
 	function setDefaultVars(){
 		var currentState = flixel.FlxG.state;
-		if ((currentState == PlayState.instance))
+
+		if (currentState is PlayState && currentState == PlayState.instance)
 		{
 			set("inPlaystate", true);
 			

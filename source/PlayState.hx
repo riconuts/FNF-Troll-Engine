@@ -127,7 +127,7 @@ class Wife3
 class PlayState extends MusicBeatState
 {
 	var sndFilter:ALFilter = AL.createFilter();
-    var sndEffect:ALEffect = AL.createEffect();
+	var sndEffect:ALEffect = AL.createEffect();
 
 	public var showDebugTraces:Bool = #if debug true #else Main.showDebugTraces #end;
 
@@ -150,14 +150,17 @@ class PlayState extends MusicBeatState
 	public var nps:Int = 0;
 	public var ratingStuff:Array<Array<Dynamic>> = Highscore.grades.get(ClientPrefs.gradeSet);
 	
-    public var healthBar:FNFHealthBar = new FNFHealthBar(); // backwards compat reasons, isnt ACTUALLY used
-    public var iconP1:HealthIcon = new HealthIcon(); // ditto
-    public var iconP2:HealthIcon = new HealthIcon(); // ditto
-    
 	public var hud:BaseHUD;
-	public var scoreTxt:FlxText = new FlxText(); // just so psych mods n shit dont error
-	public var botplayTxt:FlxText = new FlxText(); // ditto
 	var subtitles:Null<SubtitleDisplay>;
+
+	#if PE_MOD_COMPATIBILITY // for backwards compat reasons, these aren't ACTUALLY used
+	public var healthBar:FNFHealthBar = new FNFHealthBar(); 
+	public var iconP1:HealthIcon = new HealthIcon();
+	public var iconP2:HealthIcon = new HealthIcon();
+
+	public var scoreTxt:FlxText = new FlxText();
+	public var botplayTxt:FlxText = new FlxText();
+	#end
 
 	public static var curStage:String = '';
 	public static var SONG:SwagSong = null;
@@ -1319,45 +1322,23 @@ class PlayState extends MusicBeatState
 			skipArrowStartTween = true;
 
 		callOnScripts('preReceptorGeneration'); // backwards compat, deprecated
-        callOnScripts('onReceptorGeneration');
+		callOnScripts('onReceptorGeneration');
 
 		for(field in playfields.members)
 			field.generateStrums();
 
 		callOnScripts('postReceptorGeneration'); // deprecated
-        callOnScripts('onReceptorGenerationPost');
+		callOnScripts('onReceptorGenerationPost');
 
 		for(field in playfields.members)
 			field.fadeIn(isStoryMode || skipArrowStartTween); // TODO: check if its the first song so it should fade the notes in on song 1 of story mode
 		modManager.receptors = [playerField.strumNotes, dadField.strumNotes];
-		/*
-		if (!isStoryMode && !skipArrowStartTween) // TODO: check if its the first song so it should fade the notes in on song 1 of story mode
-		{
-			for (field in playfields.members){
-				for (strum in field.strumNotes)
-					strum.alpha = 1;
-			}
-
-			var startOffset = Conductor.getStep(500);
-
-			for (i in 0...4){
-				var startStep = (-5+i)*4 + startOffset;
-				var endStep = (-4+i)*4 + startOffset;
-				
-				modManager.setValue('transform${i}Y', -10);
-				modManager.queueEase(startStep, endStep, 'transform${i}Y', 0, FlxEase.circOut);
-			
-				modManager.setValue('alpha${i}', 1);
-				modManager.queueEase(startStep, endStep, 'alpha${i}', 0, FlxEase.circOut);
-			}
-		}
-		*/
 
 		callOnScripts('preModifierRegister'); // deprecated
-        callOnScripts('onModifierRegister');
+		callOnScripts('onModifierRegister');
 		modManager.registerDefaultModifiers();
 		callOnScripts('postModifierRegister'); // deprecated
-        callOnScripts('onModifierRegisterPost');
+		callOnScripts('onModifierRegisterPost');
 
 		/* 		
 		if(midScroll){

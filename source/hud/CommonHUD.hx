@@ -69,11 +69,13 @@ class CommonHUD extends BaseHUD
 		timeBar.numDivisions = 800; // How much lag this causes?? Should i tone it down to idk, 400 or 200?
 		timeBar.scrollFactor.set();
 
+		#if (PE_MOD_COMPATIBILITY && false)
         if(FlxG.state == PlayState.instance){
             PlayState.instance.healthBar = healthBar;
 			PlayState.instance.iconP1 = iconP1;
 			PlayState.instance.iconP2 = iconP2;
         }
+		#end
 		updateTimeBarType();
 
 		add(timeBarBG);

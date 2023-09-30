@@ -927,9 +927,9 @@ class FunkinLua extends FunkinScript
 				var charType:Int = 0;
 				switch (type.toLowerCase())
 				{
-					case 'gf' | 'girlfriend' | '1':
+					case 'gf' | 'girlfriend' | '2':
 						charType = 2;
-					case 'dad' | 'opponent' | '0':
+					case 'dad' | 'opponent' | '1':
 						charType = 1;
 					default:
 						charType = Std.parseInt(type);
@@ -959,8 +959,9 @@ class FunkinLua extends FunkinScript
 			//trace('Triggered event: ' + name + ', ' + value1 + ', ' + value2);
 		});
 
-		addCallback("startCountdown", function(variable:String) {
+		addCallback("startCountdown", function(){
 			PlayState.instance.startCountdown();
+			return true;
 		});
 		addCallback("endSong", function() {
 			PlayState.instance.KillNotes();
