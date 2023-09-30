@@ -1318,15 +1318,9 @@ class PlayState extends MusicBeatState
 		if (skipCountdown || startOnTime > 0)
 			skipArrowStartTween = true;
 
-		for (_ in 0...4){
-			playerStrums.add(new StrumNote(0, 0, 0));
-			opponentStrums.add(new StrumNote(0, 0, 0));
-		}
-
 		callOnScripts('preReceptorGeneration'); // backwards compat, deprecated
         callOnScripts('onReceptorGeneration');
-		//playerField.generateStrums();
-		//dadField.generateStrums();
+
 		for(field in playfields.members)
 			field.generateStrums();
 
@@ -1336,6 +1330,28 @@ class PlayState extends MusicBeatState
 		for(field in playfields.members)
 			field.fadeIn(isStoryMode || skipArrowStartTween); // TODO: check if its the first song so it should fade the notes in on song 1 of story mode
 		modManager.receptors = [playerField.strumNotes, dadField.strumNotes];
+		/*
+		if (!isStoryMode && !skipArrowStartTween) // TODO: check if its the first song so it should fade the notes in on song 1 of story mode
+		{
+			for (field in playfields.members){
+				for (strum in field.strumNotes)
+					strum.alpha = 1;
+			}
+
+			var startOffset = Conductor.getStep(500);
+
+			for (i in 0...4){
+				var startStep = (-5+i)*4 + startOffset;
+				var endStep = (-4+i)*4 + startOffset;
+				
+				modManager.setValue('transform${i}Y', -10);
+				modManager.queueEase(startStep, endStep, 'transform${i}Y', 0, FlxEase.circOut);
+			
+				modManager.setValue('alpha${i}', 1);
+				modManager.queueEase(startStep, endStep, 'alpha${i}', 0, FlxEase.circOut);
+			}
+		}
+		*/
 
 		callOnScripts('preModifierRegister'); // deprecated
         callOnScripts('onModifierRegister');
@@ -1343,14 +1359,16 @@ class PlayState extends MusicBeatState
 		callOnScripts('postModifierRegister'); // deprecated
         callOnScripts('onModifierRegisterPost');
 
-/* 		if(midScroll){
+		/* 		
+		if(midScroll){
 			modManager.setValue("opponentSwap", 0.5);
 			for(field in notefields.members){
 				if(field.field==null)continue;
 				field.alpha = field.field.isPlayer ? 0 : 1;
 			}
 			
-		} */
+		} 
+		*/
 
 		startedCountdown = true;
 		Conductor.songPosition = -Conductor.crochet * 5;
