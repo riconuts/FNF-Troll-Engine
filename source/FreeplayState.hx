@@ -122,16 +122,13 @@ class FreeplayState extends MusicBeatState
                     // maybe I'll concept up that if you dont wanna do that
 					// Go ahead, I didn't want to make one cause it wouldn't get used since the TGT doesn't have alt difficulties :p
 				}else{
-					var daDiff:String = "";
-
-					if (charts.contains("hard")) 
-						daDiff = "hard";
-					else if (charts.contains("normal"))
-						daDiff = "normal"
-					else if (charts.length > 0)
-						daDiff = charts[charts.length-1];
+					var diffIdx:Null<Int> = null;
 					
-					playSong(songButton.metadata, daDiff);
+					if ((diffIdx=charts.indexOf("hard")) != -1){}
+					else if ((diffIdx=charts.indexOf("normal")) != -1){}
+					else if (charts.length > 0) diffIdx = charts.length-1;
+					
+					playSong(songButton.metadata, charts[diffIdx], diffIdx);
 				}
 			};
 		}			
@@ -427,7 +424,7 @@ class FreeplayState extends MusicBeatState
 			difficulty = null;
 
 		var songLowercase:String = Paths.formatToSongPath(metadata.songName);
-		if (Main.showDebugTraces)trace('${Paths.currentModDirectory}, $songLowercase, $difficulty');
+		if (Main.showDebugTraces) trace('${Paths.currentModDirectory}, $songLowercase, $difficulty');
 
 		PlayState.SONG = Song.loadFromJson(
 			'$songLowercase${difficulty == null ? "" : '-$difficulty'}', 
@@ -748,9 +745,14 @@ class SongChartSelec extends MusicBeatState
 
 	override function create()
 	{
+		add(new FlxText(0, 5, FlxG.width, songMeta.songName).setFormat(null, 20, 0xFFFFFFFF, CENTER));
+
 		for (id in 0...alts.length){
 			var alt = alts[id];
-			var text = new FlxText(20, 20 + id * 20 , FlxG.width - 20, alt, 16);
+			var text = new FlxText(20, 20 + id * 20 , (FlxG.width-20) / 2, alt, 16);
+
+			// uhhh we don't save separate highscores for other chart difficulties oops
+			// var scoreTxt = new FlxText(text.x + text.width, text.y, text.fieldWidth, Highscore.getScore(songMeta.songName));
 
 			texts[id] = text;
 
@@ -771,7 +773,7 @@ class SongChartSelec extends MusicBeatState
 
 		if (controls.ACCEPT){
 			var daDiff = alts[curSel];
-			FreeplayState.playSong(songMeta, daDiff == "normal" ? null : daDiff);
+			FreeplayState.playSong(songMeta, (daDiff=="normal") ? null : daDiff, curSel);
 		}
 
 		super.update(e);
