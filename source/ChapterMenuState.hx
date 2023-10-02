@@ -137,8 +137,8 @@ class ChapterMenuState extends MusicBeatState{
 			goBack();
 		else if (controls.ACCEPT)
 			playWeek();
-		else if (flixel.FlxG.keys.justPressed.CONTROL)
-			openSubState(new GameplayChangersSubstate());
+		/*else if (flixel.FlxG.keys.justPressed.CONTROL)
+			openSubState(new GameplayChangersSubstate());*/
 
 		super.update(elapsed);
 	}

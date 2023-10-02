@@ -135,16 +135,6 @@ class PlayState extends MusicBeatState
 	public var currentSV:SpeedEvent = {position: 0, startTime: 0, songTime:0, speed: 1, startSpeed: 1};
 	public var judgeManager:JudgmentManager;
 
-	var notefields:NotefieldManager = new NotefieldManager();
-	public var modManager:ModManager; // andromeda modcharts :D
-
-	/*
-	public static var STRUM_X = 42;
-	public static var STRUM_X_MIDDLESCROLL = -278;
-
-	public var spawnTime:Float = 2000;
-	*/
-
 	public var stats:Stats = new Stats();
 	public var noteHits:Array<Float> = [];
 	public var nps:Int = 0;
@@ -160,6 +150,13 @@ class PlayState extends MusicBeatState
 
 	public var scoreTxt:FlxText = new FlxText();
 	public var botplayTxt:FlxText = new FlxText();
+
+	/*
+	public static var STRUM_X = 42;
+	public static var STRUM_X_MIDDLESCROLL = -278;
+
+	public var spawnTime:Float = 1500;
+	*/
 	#end
 
 	public static var curStage:String = '';
@@ -174,19 +171,23 @@ class PlayState extends MusicBeatState
 
 	public var metadata:SongCreditdata; // metadata for the songs (artist, etc)
 
-	public var modchartTweens:Map<String, FlxTween> = new Map<String, FlxTween>();
-	public var modchartSprites:Map<String, ModchartSprite> = new Map<String, ModchartSprite>();
-	public var modchartTimers:Map<String, FlxTimer> = new Map<String, FlxTimer>();
-	public var modchartSounds:Map<String, FlxSound> = new Map<String, FlxSound>();
-	public var modchartTexts:Map<String, ModchartText> = new Map<String, ModchartText>();
-	public var modchartSaves:Map<String, FlxSave> = new Map<String, FlxSave>();
-	public var modchartObjects:Map<String, FlxSprite> = new Map<String, FlxSprite>();
+	public var modchartTweens:Map<String, FlxTween> = new Map();
+	public var modchartSprites:Map<String, ModchartSprite> = new Map();
+	public var modchartTimers:Map<String, FlxTimer> = new Map();
+	public var modchartSounds:Map<String, FlxSound> = new Map();
+	public var modchartTexts:Map<String, ModchartText> = new Map();
+	public var modchartSaves:Map<String, FlxSave> = new Map();
+	public var modchartObjects:Map<String, FlxSprite> = new Map();
 
 	public var boyfriendMap:Map<String, Character> = new Map();
 	public var extraMap:Map<String, Character> = new Map();
 	public var dadMap:Map<String, Character> = new Map();
 	public var gfMap:Map<String, Character> = new Map();
 	public var variables:Map<String, Dynamic> = new Map(); 
+
+	public var tracks:Array<FlxSound> = [];
+	public var vocals:FlxSound;
+	public var inst:FlxSound;
 
 	public var BF_X:Float = 770;
 	public var BF_Y:Float = 100;
@@ -198,10 +199,6 @@ class PlayState extends MusicBeatState
 	public var boyfriendGroup:FlxSpriteGroup;
 	public var dadGroup:FlxSpriteGroup;
 	public var gfGroup:FlxSpriteGroup;
-
-	public var tracks:Array<FlxSound> = [];
-	public var vocals:FlxSound;
-	public var inst:FlxSound;
 
 	public var dad:Character = null;
 	public var gf:Character = null;
@@ -227,6 +224,8 @@ class PlayState extends MusicBeatState
 	public var playerField:PlayField;
 	public var dadField:PlayField;
 
+	public var modManager:ModManager;
+	public var notefields = new NotefieldManager();
 	public var playfields = new FlxTypedGroup<PlayField>();
 	public var grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 	
@@ -238,9 +237,9 @@ class PlayState extends MusicBeatState
 	public var ratingGroup = new FlxTypedGroup<RatingSprite>();
 	public var timingTxt:FlxText;
 
+	////
 	public var displayedHealth(default, set):Float = 1;
-	function set_displayedHealth(value:Float)
-	{
+	function set_displayedHealth(value:Float){
 		hud.displayedHealth = value;
 		displayedHealth = value;
 
@@ -249,28 +248,21 @@ class PlayState extends MusicBeatState
 	public var health(default, set):Float = 1;
 	public var maxHealth:Float = 2;
 	function set_health(value:Float){
-		health = value > maxHealth ? maxHealth : value;
+		health = FlxMath.bound(value, 0, maxHealth);
 		displayedHealth = health;
 
 		return health;
 	}
 
-	@:isVar
-	public var songScore(get, set):Int = 0;
-	@:isVar
-	public var totalPlayed(get, set):Float = 0;
-	@:isVar
-	public var totalNotesHit(get, set):Float = 0.0;
-	@:isVar
-	public var combo(get, set):Int = 0;
-	@:isVar
-	public var cbCombo(get, set):Int = 0;
-	@:isVar
-	public var ratingName(get, set):String = '?';
-	@:isVar
-	public var ratingPercent(get, set):Float;
-	@:isVar
-	public var ratingFC(get, set):String;
+	////
+	@:isVar public var songScore(get, set):Int = 0;
+	@:isVar public var totalPlayed(get, set):Float = 0;
+	@:isVar public var totalNotesHit(get, set):Float = 0.0;
+	@:isVar public var combo(get, set):Int = 0;
+	@:isVar public var cbCombo(get, set):Int = 0;
+	@:isVar public var ratingName(get, set):String = '?';
+	@:isVar public var ratingPercent(get, set):Float;
+	@:isVar public var ratingFC(get, set):String;
 	
 	public inline function get_songScore()return stats.score;
 	public inline function get_totalPlayed()return stats.totalPlayed;
@@ -540,9 +532,6 @@ class PlayState extends MusicBeatState
 
 		camFollow = prevCamFollow != null ? prevCamFollow : new FlxPoint();
 		camFollowPos = prevCamFollowPos != null ? prevCamFollowPos : new FlxObject(0, 0, 1, 1);
-
-		prevCamFollow = null;
-		prevCamFollowPos = null;
 
 		FlxG.camera.follow(camFollowPos, LOCKON, 1);
 		FlxG.camera.zoom = defaultCamZoom;
@@ -995,6 +984,10 @@ class PlayState extends MusicBeatState
 		add(luaDebugGroup);
 		#end
 
+		//// nulling them here so stage scripts can use them as a starting camera position
+		prevCamFollow = null;
+		prevCamFollowPos = null;
+
 		/*
 		if(SONG.notes[0].mustHitSection){
 			var cam = boyfriend.getCamera();
@@ -1010,19 +1003,20 @@ class PlayState extends MusicBeatState
 		camFollowPos.setPosition(camFollow.x, camFollow.y);
 		*/
 
-		// Load all of the countdown intro assets!!!!!
-		shitToLoad.push({path: 'intro3', type: "SOUND"});
-		shitToLoad.push({path: 'intro2', type: "SOUND"});
-		shitToLoad.push({path: 'intro1', type: "SOUND"});
-		shitToLoad.push({path: 'introGo', type: "SOUND"});
-		for (introPath in introAlts){
-			if (introPath != null)
-				shitToLoad.push({path: introPath});
+		// Load the countdown intro assets!!!!!
+		for (introSndPath in introSnds){
+			if (introSndPath != null)
+				shitToLoad.push({path: introSndPath, type: "SOUND"});
+		}
+		for (introImgPath in introAlts){
+			if (introImgPath != null)
+				shitToLoad.push({path: introImgPath});
 		}
 
 		Cache.loadWithList(shitToLoad);
 		shitToLoad = [];
-        if(gf!=null)gf.callOnScripts("onAdded", [gf, null]); // if you can come up w/ a better name for this callback then change it lol
+
+        if(gf!=null) gf.callOnScripts("onAdded", [gf, null]); // if you can come up w/ a better name for this callback then change it lol
 		// (this also gets called for the characters changed in changeCharacter)
         boyfriend.callOnScripts("onAdded", [boyfriend, null]);
         dad.callOnScripts("onAdded", [dad, null]); 
@@ -1034,14 +1028,14 @@ class PlayState extends MusicBeatState
 
 		finishedCreating = true;
 
-		Paths.clearUnusedMemory();
-
 		noteTypeMap.clear();
 		noteTypeMap = null;
 		eventPushedMap.clear();
 		eventPushedMap = null;
 
 		CustomFadeTransition.nextCamera = camOther;
+	
+		Paths.clearUnusedMemory();
 	}
 
 	function setStageData(stageData:StageFile)
@@ -1885,16 +1879,16 @@ class PlayState extends MusicBeatState
 				modchartObjects.set('note${swagNote.ID}', swagNote);
 
 
-				if(swagNote.fieldIndex==-1 && swagNote.field==null)
+				if (swagNote.fieldIndex==-1 && swagNote.field==null)
 					swagNote.field = swagNote.mustPress ? playerField : dadField;
 
-				if(swagNote.field!=null)
+				if (swagNote.field != null)
 					swagNote.fieldIndex = playfields.members.indexOf(swagNote.field);
 
 
 				var playfield:PlayField = playfields.members[swagNote.fieldIndex];
 
-				if (playfield!=null){
+				if (playfield != null){
 					playfield.queue(swagNote); // queues the note to be spawned
 					allNotes.push(swagNote); // just for the sake of convenience
 				}else{
@@ -3156,8 +3150,12 @@ class PlayState extends MusicBeatState
 		seenCutscene = false;
 		chartingMode = false;
 
-		if (instance != null)
-			instance.cancelMusicFadeTween(); // Doesn't do anything now
+		if (instance != null){
+			instance.cancelMusicFadeTween(); // Doesn't do anything now (?)
+			
+			instance.camFollow.put();
+			instance.camFollowPos.destroy();
+		}
 
 		MusicBeatState.playMenuMusic(1, true);
 	}
@@ -3246,7 +3244,7 @@ class PlayState extends MusicBeatState
 				campaignScore += stats.score;
 			campaignMisses += songMisses;
 
-			storyPlaylist.remove(storyPlaylist[0]);
+			storyPlaylist.shift();
 
 			if (storyPlaylist.length <= 0)
 			{
@@ -3264,7 +3262,7 @@ class PlayState extends MusicBeatState
 					}
 				}
 
-				if(FlxTransitionableState.skipNextTransIn)
+				if (FlxTransitionableState.skipNextTransIn)
 					CustomFadeTransition.nextCamera = null;
 
 				#if VIDEOS_ALLOWED
@@ -3292,7 +3290,7 @@ class PlayState extends MusicBeatState
 				}
 
 				#if VIDEOS_ALLOWED
-				var videoPath:String = Paths.video(songName);
+				var videoPath:String = Paths.video(nextSong);
 				if (Paths.exists(videoPath))
 					MusicBeatState.switchState(new VideoPlayerState(videoPath, playNextSong));
 				else #end
@@ -3309,6 +3307,7 @@ class PlayState extends MusicBeatState
 			gotoMenus();
 		}
 		
+		callOnScripts('onSongEnd');
 	}
 
 	public function KillNotes() {
@@ -4484,18 +4483,22 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	override public function startOutro(nextState)
+	override public function startOutro(onOutroComplete)
 	{
-		callOnHScripts("switchingState", [nextState]);
-		#if LUA_ALLOWED
-		callOnLuas("switchingState");
-		#end
+		callOnScripts("switchingState");
 
 		FlxG.timeScale = 1;
+		
 		pressedGameplayKeys = [];
+
+		if (!ClientPrefs.controllerMode){
+			FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
+			FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
+		}
+
 		FunkinHScript.defaultVars.clear();
 
-		return super.startOutro(nextState);
+		return super.startOutro(onOutroComplete);
 	}
 
 	override function destroy() 
@@ -4510,36 +4513,43 @@ class PlayState extends MusicBeatState
 			var total = 0.0;
 			for (n in msJudges) total+=n;
 			total;
-		});*/
+		});
+		*/
 
 		stats.changedEvent.removeAll();
 		stats.changedEvent = null;
+		stats = null;
 
         #if LUA_ALLOWED
 		preventLuaRemove = true;
         #end
-		for(script in funkyScripts){
+
+		while (funkyScripts.length > 0){
+			var script = funkyScripts.pop();
 			script.call("onDestroy");
 			script.stop();
 		}
-		hscriptArray = [];
-		funkyScripts = [];
+		funkyScripts = null;
+		
+		while (hscriptArray.length > 0)
+			hscriptArray.pop();
+		hscriptArray = null;
+
 		#if LUA_ALLOWED
-		luaArray = [];
+		while (luaArray.length > 0)
+			luaArray.pop();
+		luaArray = null;
 		#end
 
 		notetypeScripts.clear();
+		notetypeScripts = null;
 		eventScripts.clear();
-		if(!ClientPrefs.controllerMode)
-		{
-			FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
-			FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
-		}
+		eventScripts = null;
+
 		super.destroy();
 	}	
 }
 
-// mental gymnastics
 class FNFHealthBar extends FlxBar{
 	public var healthBarBG:FlxSprite;
 
