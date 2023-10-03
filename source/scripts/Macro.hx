@@ -17,7 +17,7 @@ class Macro {
     {
         var fields:Array<Field> = Context.getBuildFields();
 
-        #if !display
+        #if (!display && SCRIPTABLE_STATES)
 		if (Sys.args().indexOf("--no-output") != -1)return fields; // code completion
  
 		if (toInject==null)
