@@ -316,7 +316,6 @@ class OptionsSubstate extends MusicBeatSubstate
 					"judgeOpacity",
 					"stageOpacity", 
 					"scoreZoom", 
-					"judgeBehind",
 					"npsDisplay", 
 					"showMS", 
 					"coloredCombos",
@@ -1516,6 +1515,9 @@ class OptionsSubstate extends MusicBeatSubstate
 
 	override function destroy()
 	{
+		_point.put();
+		_mousePoint.put();
+
 		for (val in cameraPositions)
 			val.put();
 

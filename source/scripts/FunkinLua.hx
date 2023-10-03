@@ -2411,11 +2411,6 @@ class FunkinLua extends FunkinScript
 		#end
 	}
 
-	override public function scriptTrace(text:String)
-	{
-		luaTrace(text);
-	}
-
 	/*public function call(event:String, args:Array<Dynamic>):Dynamic {
 		#if LUA_ALLOWED
 		if(lua == null) {

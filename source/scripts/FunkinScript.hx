@@ -16,12 +16,6 @@ class FunkinScript {
 	}
 
 	/**
-		Called to output debug information
-	**/
-	public function scriptTrace(text:String){
-		trace(text); // wow for once its not NotImplementedException
-	}
-	/**
 		Called to set a variable defined in the script
 	**/
 	public function set(variable:String, data:Dynamic):Void

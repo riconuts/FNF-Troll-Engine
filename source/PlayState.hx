@@ -238,13 +238,6 @@ class PlayState extends MusicBeatState
 	public var timingTxt:FlxText;
 
 	////
-	public var displayedHealth(default, set):Float = 1;
-	function set_displayedHealth(value:Float){
-		hud.displayedHealth = value;
-		displayedHealth = value;
-
-		return value;
-	}
 	public var health(default, set):Float = 1;
 	public var maxHealth:Float = 2;
 	function set_health(value:Float){
@@ -252,6 +245,14 @@ class PlayState extends MusicBeatState
 		displayedHealth = health;
 
 		return health;
+	}
+
+	public var displayedHealth(default, set):Float = 1;
+	function set_displayedHealth(value:Float){
+		hud.displayedHealth = value;
+		displayedHealth = value;
+
+		return value;
 	}
 
 	////
@@ -417,18 +418,19 @@ class PlayState extends MusicBeatState
 	override public function create()
 	{
 		Highscore.loadData();
-		judgeManager = new JudgmentManager();
+		
 		Conductor.safeZoneOffset = ClientPrefs.hitWindow;
 		Wife3.timeScale = Conductor.judgeScales.get(ClientPrefs.judgeDiff);
+
+		judgeManager = new JudgmentManager();
 		judgeManager.judgeTimescale = Wife3.timeScale;
+
+		modManager = new ModManager(this);
 
 		Paths.clearStoredMemory();
 		Paths.pushGlobalContent();
 
 		//// Reset to default
-		Note.quantShitCache.clear();
-		FunkinHScript.defaultVars.clear();
-
 		PauseSubState.songName = null;
 		GameOverSubstate.resetVariables();
 
@@ -438,9 +440,6 @@ class PlayState extends MusicBeatState
 
 		persistentUpdate = true;
 		persistentDraw = true;
-
-		// for lua
-		instance = this;
 
 		if (FlxG.sound.music != null){
 			FlxG.sound.music.stop();
@@ -548,9 +547,6 @@ class PlayState extends MusicBeatState
 		songName = Paths.formatToSongPath(SONG.song);
 		songHighscore = Highscore.getScore(SONG.song);
 
-		modManager = new ModManager(this);
-		setDefaultHScripts("modManager", modManager);
-
 		if (SONG != null){
 			if(SONG.metadata != null)
 				metadata = SONG.metadata;
@@ -586,6 +582,13 @@ class PlayState extends MusicBeatState
 			curStage = 'stage';
 		else
 			curStage = SONG.stage;
+
+		////
+		instance = this;
+		setDefaultHScripts("modManager", modManager);
+		setDefaultHScripts("judgeManager", judgeManager);
+		setDefaultHScripts("initPlayfield", initPlayfield);
+		setDefaultHScripts("newPlayField", newPlayfield);
 
 		//// GLOBAL SCRIPTS
 		var filesPushed:Array<String> = [];
@@ -964,18 +967,11 @@ class PlayState extends MusicBeatState
 		////
 		callOnAllScripts('onCreatePost');
 
-		if(ClientPrefs.judgeBehind){
-			add(ratingGroup);
-			add(timingTxt);
-		}
+		add(ratingGroup);
+		add(timingTxt);
 		add(strumLineNotes);
 		add(playfields);
 		add(notefields);
-		if (!ClientPrefs.judgeBehind)
-		{
-			add(ratingGroup);
-			add(timingTxt);
-		}
 		add(grpNoteSplashes);
 
 		#if LUA_ALLOWED
@@ -1898,36 +1894,32 @@ class PlayState extends MusicBeatState
 
 				oldNote = swagNote;
 
-				var susLength:Float = swagNote.sustainLength / Conductor.stepCrochet;
-				var floorSus:Int = Math.round(susLength);
-                if(floorSus > 0){
-                    for (susNote in 0...floorSus)
-                    {
-                        var sustainNote:Note = new Note(daStrumTime + Conductor.stepCrochet * (susNote + 1), daNoteData, oldNote, true);
-                        sustainNote.mustPress = gottaHitNote;
-                        sustainNote.gfNote = swagNote.gfNote;
-                        sustainNote.noteType = type;
+				for (susNote in 0...Math.floor(swagNote.sustainLength / Conductor.stepCrochet))
+				{
+					var sustainNote:Note = new Note(daStrumTime + Conductor.stepCrochet * (susNote + 1), daNoteData, oldNote, true);
+					sustainNote.mustPress = gottaHitNote;
+					sustainNote.gfNote = swagNote.gfNote;
+					sustainNote.noteType = type;
 
-                        if (sustainNote==null || !sustainNote.alive)
-                            break;
+					if (sustainNote==null || !sustainNote.alive)
+						break;
 
-                        sustainNote.scrollFactor.set();
+					sustainNote.scrollFactor.set();
 
-                        sustainNote.ID = allNotes.length;
-                        modchartObjects.set('note${sustainNote.ID}', sustainNote);
-                        
-                        swagNote.tail.push(sustainNote);
-                        swagNote.unhitTail.push(sustainNote);
-                        sustainNote.parent = swagNote;
-                        sustainNote.fieldIndex = swagNote.fieldIndex;
-                        playfield.queue(sustainNote);
-                        allNotes.push(sustainNote);
+					sustainNote.ID = allNotes.length;
+					modchartObjects.set('note${sustainNote.ID}', sustainNote);
+					
+					swagNote.tail.push(sustainNote);
+					swagNote.unhitTail.push(sustainNote);
+					sustainNote.parent = swagNote;
+					sustainNote.fieldIndex = swagNote.fieldIndex;
+					playfield.queue(sustainNote);
+					allNotes.push(sustainNote);
 
-                        oldNote = sustainNote;
-                    }
+					oldNote = sustainNote;
+				}
 
-                    oldNote.isSustainEnd = true;
-                }
+				oldNote.isSustainEnd = true;
 			}
 		}
 
@@ -2143,16 +2135,6 @@ class PlayState extends MusicBeatState
 
 		if (!ClientPrefs.coloredCombos)
 			comboColor = 0xFFFFFFFF;
-
-		remove(ratingGroup);
-		remove(timingTxt);
-		if(ClientPrefs.judgeBehind){
-			insert(members.indexOf(strumLineNotes) - 1, ratingGroup);
-			insert(members.indexOf(strumLineNotes) - 1, timingTxt);
-		}else{
-			insert(members.indexOf(notefields) + 1, timingTxt);
-			insert(members.indexOf(notefields) + 1, ratingGroup);
-		}
 		
 		for(field in playfields){
 			field.noteField.optimizeHolds = ClientPrefs.optimizeHolds;
@@ -2335,6 +2317,15 @@ class PlayState extends MusicBeatState
 		super.onFocusLost();
 	}
 
+	public function newPlayfield()
+	{
+		var field = new PlayField(modManager);
+		field.modNumber = playfields.members.length;
+		field.cameras = playfields.cameras;
+		initPlayfield(field);
+		playfields.add(field);
+		return field;
+	}
 
 	// good to call this whenever you make a playfield
 	public function initPlayfield(field:PlayField){
@@ -4541,8 +4532,12 @@ class PlayState extends MusicBeatState
 		luaArray = null;
 		#end
 
+		Note.quantShitCache.clear();
+		FunkinHScript.defaultVars.clear();
+
 		notetypeScripts.clear();
 		notetypeScripts = null;
+		
 		eventScripts.clear();
 		eventScripts = null;
 

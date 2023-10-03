@@ -192,13 +192,6 @@ class ClientPrefs
 					"type" => "percent"
 				]
 			},
-			"judgeBehind" => {
-				display: "Judgements Behind Notes",
-				desc: "Places judgements behind the notes instead of infront.",
-				type: Toggle,
-				value: false,
-				data: []
-			},
 			"hpOpacity" => {
 				display: "Health Bar Opacity",
 				desc: "How visible the health bar should be. 100% is fully visible and 0% is invisible.",
