@@ -4331,14 +4331,13 @@ class PlayState extends MusicBeatState
 	public function callOnScripts(event:String, ?args:Array<Dynamic>, ignoreStops:Bool = false, ?exclusions:Array<String>, ?scriptArray:Array<Dynamic>,
 			?vars:Map<String, Dynamic>, ?ignoreSpecialShit:Bool = true):Dynamic
 	{
-		var args:Array<Dynamic> = args != null ? args : [];
-
-		if (scriptArray == null)
-			scriptArray = funkyScripts;
-		if(exclusions==null)exclusions = [];
+		if (args == null) args = [];
+		if (scriptArray == null) scriptArray = funkyScripts;
+		if (exclusions == null) exclusions = [];
+		
 		var returnVal:Dynamic = Globals.Function_Continue;
 		for (script in scriptArray)
-		{
+		{			
 			if (exclusions.contains(script.scriptName)
 				|| ignoreSpecialShit
 				&& (notetypeScripts.exists(script.scriptName) || eventScripts.exists(script.scriptName) ) )
@@ -4354,10 +4353,9 @@ class PlayState extends MusicBeatState
 			};
 			if (ret != Globals.Function_Continue && ret!=null)
 				returnVal = ret;
-			
 		}
 		
-		if(returnVal==null)returnVal = Globals.Function_Continue;
+		if (returnVal == null) returnVal = Globals.Function_Continue;
 		return returnVal;
 	}
 
@@ -4480,7 +4478,7 @@ class PlayState extends MusicBeatState
 
 		FlxG.timeScale = 1;
 		
-		pressedGameplayKeys = [];
+		pressedGameplayKeys = null;
 
 		if (!ClientPrefs.controllerMode){
 			FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
