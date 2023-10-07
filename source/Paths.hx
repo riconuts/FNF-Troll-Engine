@@ -496,7 +496,7 @@ class Paths
 				newGraphic.persist = true;
 				currentTrackedAssets.set(modKey, newGraphic);
 			}
-			localTrackedAssets.push(modKey);
+			if (!localTrackedAssets.contains(modKey))localTrackedAssets.push(modKey);
 			return currentTrackedAssets.get(modKey);
 		}
 		#end
@@ -510,7 +510,7 @@ class Paths
 				newGraphic.persist = true;
 				currentTrackedAssets.set(path, newGraphic);
 			}
-			localTrackedAssets.push(path);
+			if (!localTrackedAssets.contains(path))localTrackedAssets.push(path);
 			return currentTrackedAssets.get(path);
 		}
 		if(Main.showDebugTraces)trace('image "$key" returned null.');
@@ -540,7 +540,7 @@ class Paths
 			if (!currentTrackedSounds.exists(file))
 				currentTrackedSounds.set(file, Sound.fromFile(file));
 			
-			localTrackedAssets.push(key);
+			if (!localTrackedAssets.contains(key))localTrackedAssets.push(key);
 			return currentTrackedSounds.get(file);
 		}
 		#end
@@ -557,7 +557,8 @@ class Paths
 					Assets.getSound((path == 'songs' ? folder = 'songs:' : '') + getPath('$path/$key.$SOUND_EXT', SOUND, library))
 				);
 			#end
-		localTrackedAssets.push(gottenPath);
+		if (!localTrackedAssets.contains(gottenPath))
+			localTrackedAssets.push(gottenPath);
 		return currentTrackedSounds.get(gottenPath);
 	}
 
