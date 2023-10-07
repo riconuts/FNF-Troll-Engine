@@ -181,7 +181,8 @@ class FunkinHScript extends FunkinScript
 		set("PlayState", PlayState);
 		set("GameOverSubstate", GameOverSubstate);
 		set("Song", Song);
-
+        set("BGSprite", BGSprite);
+        
 		set("Note", Note);
 		set("NoteObject", NoteObject);
 		set("NoteSplash", NoteSplash);
@@ -205,7 +206,7 @@ class FunkinHScript extends FunkinScript
 
 		set("Wife3", PlayState.Wife3);
 		
-		/*
+		
 		set("JudgmentManager", JudgmentManager);
 
 		set("ModManager", modchart.ModManager);
@@ -224,7 +225,7 @@ class FunkinHScript extends FunkinScript
 		#elseif (hxCodec >= "2.6.1") set("MP4Handler", hxcodec.VideoHandler);
 		#elseif (hxCodec == "2.6.0") set("MP4Handler", VideoHandler);
 		#elseif (hxCodec) set("MP4Handler", vlc.MP4Handler); #end
-		*/
+		
 		
 		set("FunkinHScript", FunkinHScript);
 
