@@ -2362,11 +2362,7 @@ class PlayState extends MusicBeatState
 
 			callOnHScripts('onSpawnNotePost', [dunceNote]);
 			if (dunceNote.noteScript != null)
-			{
-				var script:FunkinScript = dunceNote.noteScript;
-
 				callScript(script, "postSpawnNote", [dunceNote]);
-			}
 		});
 	}
 
@@ -2463,8 +2459,6 @@ class PlayState extends MusicBeatState
 
 		callOnHScripts('update', [elapsed]);
 
-
-
 	/* 	for (shit in speedChanges)
 		{
 			if (shit.songTime <= Conductor.songPosition)
@@ -2552,23 +2546,23 @@ class PlayState extends MusicBeatState
 				}
 			}
 
+			if (FlxG.keys.anyJustPressed(debugKeysBotplay))
+				cpuControlled = !cpuControlled;
+
 			//// editors
 			if (FlxG.keys.anyJustPressed(debugKeysChart))
 				openChartEditor();
 
-			if (FlxG.keys.anyJustPressed(debugKeysCharacter))
+			else if (FlxG.keys.anyJustPressed(debugKeysCharacter))
 			{
 				persistentUpdate = false;
 				paused = true;
 				cancelMusicFadeTween();
 				MusicBeatState.switchState(new CharacterEditorState(SONG.player2));
 			}
-
-			if (FlxG.keys.anyJustPressed(debugKeysBotplay))
-				cpuControlled = !cpuControlled;
 			
 			// RESET = Quick Game Over Screen
-			if (controls.RESET && canReset && !inCutscene && startedCountdown){
+			else if (canReset && !inCutscene && startedCountdown && controls.RESET){
 				doGameOver();
 			}else if (doDeathCheck()){
 				// die lol
@@ -2583,7 +2577,8 @@ class PlayState extends MusicBeatState
 
 		checkEventNote();
 		
-/* 		if(midScroll){
+		/* 		
+		if(midScroll){
 			for(field in notefields.members){
 				if(field.field==null)continue;
 				if(field.field.isPlayer){
@@ -2598,7 +2593,9 @@ class PlayState extends MusicBeatState
 					}
 				}
 			}
-		} */
+		} 
+		*/
+
 		super.update(elapsed);
 		modManager.updateTimeline(curDecStep);
 		modManager.update(elapsed);
@@ -2647,12 +2644,8 @@ class PlayState extends MusicBeatState
 	public var isDead:Bool = false;
 	function doDeathCheck(?skipHealthCheck:Bool = false) {
 		if (
-			(
-				(skipHealthCheck && instakillOnMiss)
-				|| health <= 0
-			)
-			&& !practiceMode
-			&& !isDead
+			((skipHealthCheck && instakillOnMiss) || health <= 0)
+			&& !(practiceMode || isDead)
 		)
 		{
 			return doGameOver();
@@ -3140,6 +3133,9 @@ class PlayState extends MusicBeatState
 		deathCounter = 0;
 		seenCutscene = false;
 		chartingMode = false;
+
+		if (prevCamFollow != null) prevCamFollow.put();
+		if (prevCamFollowPos != null) prevCamFollowPos.destroy();
 
 		if (instance != null){
 			instance.cancelMusicFadeTween(); // Doesn't do anything now (?)
@@ -3629,10 +3625,13 @@ class PlayState extends MusicBeatState
 
 	private function onKeyPress(event:KeyboardEvent):Void
 	{
+		if (paused || !startedCountdown)
+			return;
+
 		var eventKey:FlxKey = event.keyCode;
 		var data:Int = getKeyFromEvent(eventKey);
 
-		if (startedCountdown && !paused && data > -1 && !pressed.contains(eventKey)){
+		if (data > -1 && !pressed.contains(eventKey)){
 			pressed.push(eventKey);
 			var hitNotes:Array<Note> = [];
 			if(strumsBlocked[data]) return;
@@ -3669,10 +3668,9 @@ class PlayState extends MusicBeatState
 			}
 			if (hitNotes.length==0){
 				callOnScripts('onGhostTap', [data]);
+				
 				if (!ClientPrefs.ghostTapping)
-				{
 					noteMissPress(data);
-				}
 			}
 		}
 	}
@@ -3903,27 +3901,22 @@ class PlayState extends MusicBeatState
 
 	function noteMissPress(direction:Int = 1):Void //You pressed a key when there was no notes to press for this key
 	{
-		if(ClientPrefs.ghostTapping) return; //fuck it
-
 		health -= 0.05 * healthLoss;
+		
+		vocals.volume = 0;
+
 		if(instakillOnMiss)
-		{
-			vocals.volume = 0;
 			doDeathCheck(true);
-		}
 
 		if (stats.combo > 10 && gf != null && gf.animOffsets.exists('sad')){
 			gf.playAnim('sad');
 			gf.specialAnim = true;
 		}
 		
-/* 		combo = 0;
-		while (lastCombos.length > 0)
-			lastCombos.shift().kill(); */
-		breakCombo();
-
 		if(!practiceMode) stats.score -= 10;
 		if(!endingSong) songMisses++;
+
+		breakCombo();
 		
 		// i dont think this should reduce acc lol
 		//totalPlayed++;
@@ -3947,8 +3940,6 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
-
-		vocals.volume = 0;
 
 		callOnScripts('noteMissPress', [direction]);
 	}
@@ -3995,19 +3986,17 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		if (SONG.needsVoices)
-			vocals.volume = vocalsEnded?0:1;
+		note.hitByOpponent = true;
+		if (!vocalsEnded) vocals.volume = 1;
 
 		// Strum animations
 		if (note.visible){
 			var time:Float = 0.15;
-			if (note.isSustainNote && !note.animation.curAnim.name.endsWith('end'))
-			time += 0.15;
+			if (note.isSustainNote && !note.isSustainEnd)
+				time += 0.15;
 
 			StrumPlayAnim(field, Std.int(Math.abs(note.noteData)) % 4, time, note);
 		}
-
-		note.hitByOpponent = true;
 
 		// Script shit
 		callOnHScripts("opponentNoteHit", [note, field]);
@@ -4137,20 +4126,20 @@ class PlayState extends MusicBeatState
 		}
 
 		note.wasGoodHit = true;
-		if (SONG.needsVoices) vocals.volume = vocalsEnded?0:1;
+		if (!vocalsEnded) vocals.volume = 1;
 		if (cpuControlled) saveScore = false; // if botplay hits a note, then you lose scoring
 
 		// Strum animations
 		if (note.visible){
 			if(field.autoPlayed){
 				var time:Float = 0.15;
-				if(note.isSustainNote && !note.animation.curAnim.name.endsWith('end'))
+				if (note.isSustainNote && !note.isSustainEnd)
 					time += 0.15;
 
 				StrumPlayAnim(field, Std.int(Math.abs(note.noteData)) % 4, time, note);
 			}else{
 				var spr = field.strumNotes[note.noteData];
-				if(spr != null && field.keysPressed[note.noteData])
+				if (spr != null && field.keysPressed[note.noteData])
 					spr.playAnim('confirm', true, note);
 			}
 		}
@@ -4416,7 +4405,7 @@ class PlayState extends MusicBeatState
 	function StrumPlayAnim(field:PlayField, id:Int, time:Float, ?note:Note) {
 		var spr:StrumNote = field.strumNotes[id];
 
-		if(spr != null) {
+		if (spr != null) {
 			spr.playAnim('confirm', true, note);
 			spr.resetAnim = time;
 		}
@@ -4505,10 +4494,6 @@ class PlayState extends MusicBeatState
 		});
 		*/
 
-		stats.changedEvent.removeAll();
-		stats.changedEvent = null;
-		stats = null;
-
         #if LUA_ALLOWED
 		preventLuaRemove = true;
         #end
@@ -4530,6 +4515,16 @@ class PlayState extends MusicBeatState
 		luaArray = null;
 		#end
 
+		sectionCamera.put();
+		customCamera.put();
+		
+		while (cameraPoints.length > 0)
+			cameraPoints.pop().put();
+
+		stats.changedEvent.removeAll();
+		stats.changedEvent = null;
+		stats = null;
+
 		Note.quantShitCache.clear();
 		FunkinHScript.defaultVars.clear();
 
@@ -4538,6 +4533,8 @@ class PlayState extends MusicBeatState
 		
 		eventScripts.clear();
 		eventScripts = null;
+
+		instance = null;
 
 		super.destroy();
 	}	

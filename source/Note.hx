@@ -139,9 +139,6 @@ class Note extends NoteObject
 	// Note that holds automatically have this set to their parent's fieldIndex
 	public var field:PlayField; // same as fieldIndex but lets you set the field directly incase you wanna do that i  guess
 
-	// custom health values
-	public var ratingHealth:Map<String, Float> = [];
-
 	// hold/roll shit
 	public var sustainMult:Float = 1;
 	public var tail:Array<Note> = []; 

@@ -67,7 +67,7 @@ class FunkinHScript extends FunkinScript
 	////
 
 	var interpreter:Interp = new Interp();
-	public function new(parsed:Expr, ?name:String = "Script", ?additionalVars:Map<String, Any>, ?doExecute:Bool=true)
+	public function new(parsed:Expr, ?name:String = "Script", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool=true)
 	{
 		scriptType = 'hscript';
 		scriptName = name;
@@ -239,17 +239,15 @@ class FunkinHScript extends FunkinScript
 				set(key, additionalVars.get(key));
 		}
 		
-		if(doExecute){
-			try
-			{
-				trace('Loading haxe script: $scriptName');
-				interpreter.execute(parsed);
-				call('onCreate');
-			}
-			catch (e:haxe.Exception)
-			{
-				haxe.Log.trace(e.message, interpreter.posInfos());
-			}
+		try
+		{
+			trace('Loading haxe script: $scriptName');
+			interpreter.execute(parsed);
+			if (doCreateCall) call('onCreate');
+		}
+		catch (e:haxe.Exception)
+		{
+			haxe.Log.trace(e.message, interpreter.posInfos());
 		}
 	}
 
@@ -370,8 +368,28 @@ class FunkinHScript extends FunkinScript
 		var returnVal:Any = null;
 		try{
 			returnVal = Reflect.callMethod(parentObject, daFunc, parameters);
-		}catch (e:haxe.Exception){
-			haxe.Log.trace(e.message, interpreter.posInfos());
+		}
+		catch (e:haxe.Exception)
+		{
+			/* 
+				When you call something outside the script and it throws an exception this traces the exception message but not the line where it came from
+				just the script line that called it in the first place, which is confusing.
+			*/
+			var errorOrigin:String = "";
+
+			for (stackItem in e.stack){
+				switch (stackItem){
+					default:
+					case FilePos(s, file, line, column):{
+						if (!StringTools.contains(StringTools.ltrim(file), "hscript/Interp.hx:")) // stupid.
+							errorOrigin = '$file:$line - ';
+						
+						break;
+					}
+				}
+			}
+
+			haxe.Log.trace(errorOrigin + e.message, interpreter.posInfos());
 		}
 
 		for (key in defaultShit.keys())

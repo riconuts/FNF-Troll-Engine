@@ -10,6 +10,7 @@ import math.Vector3;
 class HScriptModifier extends Modifier
 {
 	public var script:FunkinHScript;
+	public var name:String = "unknown";
 
 	public function new(modMgr:ModManager, ?parent:Modifier, script:FunkinHScript) 
 	{
@@ -58,22 +59,24 @@ class HScriptModifier extends Modifier
 		return new HScriptModifier(
 			modMgr, 
 			parent, 
-			FunkinHScript.fromString(scriptSource, "HScriptModifier", _scriptEnums)
+			FunkinHScript.fromString(scriptSource, "HScriptModifier", _scriptEnums, false)
 		);
 	}
 
 	public static function fromName(modMgr:ModManager, ?parent:Modifier, scriptName:String):Null<HScriptModifier>
-	{
+	{		
 		var fileName:String = 'modifiers/$scriptName.hscript';
-		for (file in [#if MODS_ALLOWED Paths.modFolders(fileName), #end Paths.getPreloadPath(fileName)])
+		for (filePath in [#if MODS_ALLOWED Paths.modFolders(fileName), #end Paths.getPreloadPath(fileName)])
 		{
-			if (!Paths.exists(file)) continue;
+			if (!Paths.exists(filePath)) continue;
 
-			return new HScriptModifier(
+			var mod = new HScriptModifier(
 				modMgr, 
 				parent, 
-				FunkinHScript.fromFile(file, _scriptEnums)
+				FunkinHScript.fromFile(filePath, filePath, _scriptEnums, false)
 			);
+			mod.name = scriptName;
+			return mod;
 		}
 
 		trace('Modifier script: $scriptName not found!');
@@ -105,7 +108,7 @@ class HScriptModifier extends Modifier
 		return script.exists("getOrder") ? script.executeFunc("getOrder") : super.getOrder();
 
 	override public function getName():String
-		return script.exists("getName") ? script.executeFunc("getName") : super.getName();
+		return script.exists("getName") ? script.executeFunc("getName") : name;
 
 	// shouldnt be overriding getValue/getPercent/etc
 	// they're used purely to get the value of a modifier and should not be overwritten
