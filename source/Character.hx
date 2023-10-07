@@ -436,7 +436,7 @@ class Character extends FlxSprite
     public function resetDance(){
         // called when resetting back to idle from a pose
         // useful for stuff like sing return animations
-		if(callOnScripts("onResetDance") != Globals.Function_Stop)dance();
+		if(callOnScripts("onResetDance") != Globals.Function_Stop) dance();
     }
 	/**
 	 * FOR GF DANCING SHIT

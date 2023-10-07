@@ -201,7 +201,7 @@ class Highscore {
     
 	public inline static function getNotesHit(song:String)return getRecord(song).accuracyScore;
 
-	public static function getWeekScore(week:String)return currentWeekData.get(week);
+	public static function getWeekScore(week:String):Int return currentWeekData.exists(week) ? currentWeekData.get(week) : 0;
 
     @:deprecated("You should use saveScoreRecord in place of saveScore!")
 	public static function saveScore(song:String, score:Int = 0, ?rating:Float = -1, ?notesHit:Float = 0):Void

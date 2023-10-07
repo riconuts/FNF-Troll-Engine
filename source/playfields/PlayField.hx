@@ -332,7 +332,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 				babyArrow.alpha = 0;
 				var daY = babyArrow.downScroll ? -10 : 10;
 				babyArrow.offsetY -= daY;
-				FlxTween.tween(babyArrow, {offsetY: babyArrow.offsetY + daY, alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * data)});
+				FlxTween.tween(babyArrow, {offsetY: babyArrow.offsetY + daY, alpha: 1}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (Conductor.crochet / 1000) * data});
 			}
 		}
 	}

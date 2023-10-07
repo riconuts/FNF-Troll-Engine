@@ -2890,7 +2890,7 @@ class ChartingState extends MusicBeatState
 			note.x + (GRID_SIZE - susWidth) * 0.5, 
 			note.y + tailOffset
 		);
-		spr.makeGraphic(1, 1, (ClientPrefs.noteSkin == 'Quants') ? 0xFFFF0000 : noteColors[note.noteData % noteColors.length]);
+		spr.makeGraphic(1, 1, note.isQuant ? 0xFFFF0000 : noteColors[note.noteData % noteColors.length]);
 		spr.scale.set(susWidth, height);
 		spr.updateHitbox();
 		spr.shader = note.shader;

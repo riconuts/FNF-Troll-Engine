@@ -31,7 +31,12 @@ typedef Node = {
 }
 
 class ModManager {
-	public function registerAux(name:String)return quickRegister(new SubModifier(name, this));
+	public function new(state:PlayState) {
+        this.state=state;
+    }
+
+	public function registerAux(name:String)
+		return quickRegister(new SubModifier(name, this));
     
 	public function registerDefaultModifiers()
 	{
@@ -57,6 +62,7 @@ class ModManager {
 		quickRegister(new RotateModifier(this));
 		quickRegister(new RotateModifier(this, 'center', new Vector3(FlxG.width* 0.5, FlxG.height* 0.5)));
 		quickRegister(new LocalRotateModifier(this, 'local'));
+
 		registerAux("noteSpawnTime");
 		registerAux("drawDistance");
 		registerAux("disableDrawDistMult");
@@ -72,10 +78,8 @@ class ModManager {
 			registerAux("noteSpawnTime" + i);
 		}
 
-		for (pN => mods in activeMods)
-			setDefaultValues(pN);
-		
-
+		for (playerNumber => mods in activeMods)
+			setDefaultValues(playerNumber);
 	}
 
 	function setDefaultValues(mN:Int=-1){
@@ -104,7 +108,6 @@ class ModManager {
 		setValue("flashR", 1, mN);
 		setValue("flashG", 1, mN);
 		setValue("flashB", 1, mN);
-		
 	}
 
 
@@ -128,7 +131,8 @@ class ModManager {
     inline public function quickRegister(mod:Modifier)
         registerMod(mod.getName(), mod);
 
-    public function registerAlias(alias:String, mod:String)aliases.set(alias, mod);
+    public function registerAlias(alias:String, mod:String)
+		aliases.set(alias, mod);
 
     public function registerNode(node:Node){
         var inputs = node.in_mods;
@@ -152,7 +156,8 @@ class ModManager {
 		});
     }
 
-    public function getActualModName(m:String)return aliases.exists(m)?aliases.get(m):m;
+    public function getActualModName(m:String)
+		return aliases.exists(m) ? aliases.get(m) : m;
 
     public function registerMod(modName:String, mod:Modifier, ?registerSubmods = true){
         register.set(modName, mod);
@@ -183,7 +188,7 @@ class ModManager {
         // TODO: sort by mod.getOrder()
     }
 
-	public function addHScriptModifier(modName:String, ?defaultVal:Float):Null<HScriptModifier>
+	public function addHScriptModifier(modName:String, ?defaultVal:Float = 0):Null<HScriptModifier>
 	{	
 		var modifier = HScriptModifier.fromName(this, null, modName);
 		if (modifier == null) return null;
@@ -194,7 +199,8 @@ class ModManager {
 		return modifier;
 	}
 
-    inline public function get(modName:String)return register.get(getActualModName(modName));
+    inline public function get(modName:String)
+		return register.get(getActualModName(modName));
     
 	inline public function getPercent(modName:String, player:Int)
 		return !register.exists(getActualModName(modName))?0:get(modName).getPercent(player);
@@ -309,10 +315,6 @@ class ModManager {
 
 			aMods.sort((a, b) -> Std.int(get(a).getOrder() - get(b).getOrder()));
 		}
-    }
-
-    public function new(state:PlayState) {
-        this.state=state;
     }
 
 	public function update(elapsed:Float)

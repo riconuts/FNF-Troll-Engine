@@ -16,12 +16,6 @@ class FunkinScript {
 	}
 
 	/**
-		Called to output debug information
-	**/
-	public function scriptTrace(text:String){
-		trace(text); // wow for once its not NotImplementedException
-	}
-	/**
 		Called to set a variable defined in the script
 	**/
 	public function set(variable:String, data:Dynamic):Void
@@ -51,7 +45,8 @@ class FunkinScript {
 	**/
 	function setDefaultVars(){
 		var currentState = flixel.FlxG.state;
-		if ((currentState == PlayState.instance))
+
+		if (currentState is PlayState && currentState == PlayState.instance)
 		{
 			set("inPlaystate", true);
 			

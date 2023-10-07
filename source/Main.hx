@@ -109,8 +109,10 @@ class Main extends Sprite
 					troll = true;
 					break;
 
+				#if !final
 				case "songselect":
-					initialState = SongSelectState;
+					StartupState.nextState = SongSelectState;
+				#end
 
 				case "debug":
 					PlayState.chartingMode = true;
