@@ -359,31 +359,28 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 
 			if(controls.RESET)
 			{
-				for (i in 0...optionsArray.length)
+				var leOption:GameplayOption = optionsArray[curSelected];
+				leOption.setValue(leOption.defaultValue);
+				
+				if (leOption.type != 'bool')
 				{
-					var leOption:GameplayOption = optionsArray[i];
-					leOption.setValue(leOption.defaultValue);
-					if(leOption.type != 'bool')
-					{
-						if(leOption.type == 'string')
-						{
-							leOption.curOption = leOption.options.indexOf(leOption.getValue());
-						}
-						updateTextFrom(leOption);
-					}
-
-					if(leOption.name == 'Scroll Speed')
-					{
-						leOption.displayFormat = "%vX";
-						leOption.maxValue = 3;
-						if(leOption.getValue() > 3)
-						{
-							leOption.setValue(3);
-						}
-						updateTextFrom(leOption);
-					}
-					leOption.change();
+					if (leOption.type == 'string')
+						leOption.curOption = leOption.options.indexOf(leOption.getValue());
+					
+					updateTextFrom(leOption);
 				}
+
+				if (leOption.name == 'Scroll Speed')
+				{
+					leOption.displayFormat = "%vX";
+					leOption.maxValue = 3;
+					if (leOption.getValue() > 3)
+						leOption.setValue(3);
+					
+					updateTextFrom(leOption);
+				}
+				leOption.change();
+				
 				FlxG.sound.play(Paths.sound('cancelMenu'));
 				reloadCheckboxes();
 			}

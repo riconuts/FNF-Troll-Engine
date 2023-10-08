@@ -36,7 +36,7 @@ class ReverseModifier extends NoteModifier {
         if(dir>=first && dir<=last)
             val += getSubmodValue("cross" ,player);
 
-        val += getValue(player) + getSubmodValue("reverse" + Std.string(dir),player);
+        val += getValue(player) + getSubmodValue("reverse" + Std.string(dir), player);
 
 
         if(getSubmodValue("unboundedReverse",player)==0){
