@@ -1,5 +1,6 @@
 package;
 
+import flixel.tweens.FlxEase;
 import flixel.math.FlxPoint;
 
 using StringTools;
@@ -38,8 +39,7 @@ class CoolUtil
 	public static function rotate(x:Float, y:Float, angle:Float, ?point:FlxPoint):FlxPoint
 	{
 		var p = point == null ? FlxPoint.weak() : point;
-		p.set((x * Math.cos(angle)) - (y * Math.sin(angle)), (x * Math.sin(angle)) + (y * Math.cos(angle)));
-		return p;
+		return p.set((x * Math.cos(angle)) - (y * Math.sin(angle)), (x * Math.sin(angle)) + (y * Math.cos(angle)));
 	}
 
 	inline public static function quantizeAlpha(f:Float, interval:Float){
@@ -105,6 +105,53 @@ class CoolUtil
 			}
 		}
 		return maxKey;
+	}
+
+	// could probably use a macro
+	public static function getEaseFromString(?name:String):EaseFunction
+	{
+		return switch(name)
+		{
+ 			case "backIn": FlxEase.backIn;
+ 			case "backInOut": FlxEase.backInOut;
+ 			case "backOut": FlxEase.backOut;
+ 			case "bounceIn": FlxEase.bounceIn;
+ 			case "bounceInOut": FlxEase.bounceInOut;
+ 			case "bounceOut": FlxEase.bounceOut;
+ 			case "circIn": FlxEase.circIn;
+ 			case "circInOut": FlxEase.circInOut;
+ 			case "circOut": FlxEase.circOut;
+ 			case "cubeIn": FlxEase.cubeIn;
+ 			case "cubeInOut": FlxEase.cubeInOut;
+ 			case "cubeOut": FlxEase.cubeOut;
+ 			case "elasticIn": FlxEase.elasticIn;
+ 			case "elasticInOut": FlxEase.elasticInOut;
+ 			case "elasticOut": FlxEase.elasticOut;
+ 			case "expoIn": FlxEase.expoIn;
+ 			case "expoInOut": FlxEase.expoInOut;
+ 			case "expoOut": FlxEase.expoOut;
+ 			case "quadIn": FlxEase.quadIn;
+ 			case "quadInOut": FlxEase.quadInOut;
+ 			case "quadOut": FlxEase.quadOut;
+ 			case "quartIn": FlxEase.quartIn;
+ 			case "quartInOut": FlxEase.quartInOut;
+ 			case "quartOut": FlxEase.quartOut;
+ 			case "quintIn": FlxEase.quintIn;
+ 			case "quintInOut": FlxEase.quintInOut;
+ 			case "quintOut": FlxEase.quintOut;
+ 			case "sineIn": FlxEase.sineIn;
+ 			case "sineInOut": FlxEase.sineInOut;
+ 			case "sineOut": FlxEase.sineOut;
+ 			case "smoothStepIn": FlxEase.smoothStepIn;
+ 			case "smoothStepInOut": FlxEase.smoothStepInOut;
+ 			case "smoothStepOut": FlxEase.smoothStepOut;
+ 			case "smootherStepIn": FlxEase.smootherStepIn;
+ 			case "smootherStepInOut": FlxEase.smootherStepInOut;
+ 			case "smootherStepOut": FlxEase.smootherStepOut;
+
+ 			case "instant": ((t:Float) -> return 1);
+			default: FlxEase.linear;
+		}
 	}
 
 	inline static function numberArray(max:Int, ?min = 0):Array<Int>

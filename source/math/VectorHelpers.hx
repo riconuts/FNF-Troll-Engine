@@ -16,19 +16,15 @@ class VectorHelpers {
 	public static function rotateV3(vec:Vector3, xA:Float, yA:Float, zA:Float):Vector3
 	{
 		var rotateZ = CoolUtil.rotate(vec.x, vec.y, zA);
-		var offZ = new Vector3(rotateZ.x, rotateZ.y, vec.z);
-
-		var rotateY = CoolUtil.rotate(offZ.x, offZ.z, yA);
-		var offY = new Vector3(rotateY.x, offZ.y, rotateY.y);
-
-		var rotateX = CoolUtil.rotate(offY.z, offY.y, xA);
-		var offX = new Vector3(offY.x, rotateX.y, rotateX.x);
+		var rotateY = CoolUtil.rotate(rotateZ.x, vec.z, yA);
+		var rotateX = CoolUtil.rotate(rotateY.y, rotateZ.y, xA);
+		var returnedVector = new Vector3(rotateY.x, rotateX.y, rotateX.x);
 
 		rotateZ.putWeak();
 		rotateX.putWeak();
 		rotateY.putWeak();
 
-		return offX;
+		return returnedVector;
 	}
 
 	public static function project(pos:Vector3):Vector3

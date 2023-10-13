@@ -431,9 +431,8 @@ class ModManager {
 
 	public function getBaseX(direction:Int, player:Float, receptorAmount:Int = 4):Float
 	{
-		if (playerOOBIsCentered && (player > (playerAmount-1) || player < 0))
+		if (playerOOBIsCentered && (player >= playerAmount || player < 0))
 			player = 0.5; // replicating old behaviour for upcoming modcharts
-		
 		
 		var spaceWidth = FlxG.width / playerAmount;
 		var spaceX = spaceWidth * (playerAmount-1-player);
@@ -447,21 +446,23 @@ class ModManager {
 	public function updateObject(beat:Float, obj:FlxSprite, player:Int){
 		for (name in getActiveMods(player))
 		{
-			var mod:Modifier = notemodRegister.get(name);
-			if (mod==null)continue;
 			if (!obj.active)
 				continue;
-            if((obj is Note)){
+
+			var mod:Modifier = notemodRegister.get(name);
+			if (mod==null) continue;
+			
+			if(obj is Note){
 				if (mod.ignoreUpdateNote()) continue;
 				mod.updateNote(beat, cast obj, player);
 			}
-            else if((obj is StrumNote)){
+			else if(obj is StrumNote){
 				if (mod.ignoreUpdateReceptor()) continue;
 				mod.updateReceptor(beat, cast obj, player);
 			}
-        }
+		}
 		
-		if ((obj is Note)){
+		if (obj is Note){
 			obj.updateHitbox();
 
 			var cum:Note = cast obj;
@@ -484,36 +485,35 @@ class ModManager {
 
 	public function getPos(diff:Float, tDiff:Float, beat:Float, data:Int, player:Int, obj:FlxSprite, field:NoteField, ?exclusions:Array<String>, ?pos:Vector3):Vector3
 	{
-		if(exclusions==null)exclusions=[]; // since [] cant be a default value for.. some reason?? "its not constant!!" kys haxe
+		if (!obj.alive) 
+			return pos;
+
+		if (exclusions == null) 
+			exclusions = []; // since [] cant be a default value for.. some reason?? "its not constant!!" kys haxe
+		
 		if (pos == null)
 			pos = new Vector3();
-		else{
-			pos.x = 0;
-			pos.y = 0;
-			pos.z = 0;
-		}
-
-		if (!obj.alive)return pos;
-
-		pos.x = (Note.swagWidth / 2) + getBaseX(data, player, field.field.keyCount);
-		pos.y = (Note.swagWidth / 2) + 50 + diff;
-		pos.z = 0;
+		
+		pos.setTo(
+			(Note.swagWidth / 2) + getBaseX(data, player, field.field.keyCount),
+			(Note.swagWidth / 2) + 50 + diff,
+			0
+		);
 
  		for (name in getActiveMods(player)){
-			if (exclusions.contains(name))continue; // because some modifiers may want the path without reverse, for example. (which is actually more common than you'd think!)
+			if (!obj.alive) 
+				continue;
+			
+			if (exclusions.contains(name)) 
+				continue; // because some modifiers may want the path without reverse, for example. (which is actually more common than you'd think!)
+			
 			var mod:Modifier = notemodRegister.get(name);
-			if (mod==null)continue;
-			if (!obj.alive)continue;
-			if (mod.ignorePos())continue;
-			pos = mod.getPos(diff, tDiff, beat, pos, data, player, obj, field);
+			if (mod != null && !mod.ignorePos())
+				pos = mod.getPos(diff, tDiff, beat, pos, data, player, obj, field);
         }
-
 
 		return pos;
     }
-
-	inline function lerp(a,b,c)
-		return a + (b - a) * c;
 
 	public function getFieldZoom(zoom:Float, beat:Float, songPos:Float, player:Int, field:NoteField, ?exclusions:Array<String>):Float
 	{
@@ -522,10 +522,12 @@ class ModManager {
 
 		for (name in getActiveMods(player))
 		{
-			if (exclusions.contains(name))continue;
+			if (exclusions.contains(name)) 
+				continue;
+
 			var mod:Modifier = miscmodRegister.get(name);
-			if (mod == null)continue;
-			if (mod.affectsField())zoom = mod.getFieldZoom(zoom, beat, songPos, player, field);
+			if (mod != null && mod.affectsField()) 
+				zoom = mod.getFieldZoom(zoom, beat, songPos, player, field);
 		}
 
 		return zoom;
@@ -533,17 +535,22 @@ class ModManager {
 
 	public function modifyVertex(beat:Float, vert:Vector3, idx:Int, obj:FlxSprite, pos:Vector3, player:Int, data:Int, field:NoteField, ?exclusions:Array<String>):Vector3
 	{
-		if (exclusions == null)
+		if (!obj.active) 
+			return vert;
+
+		if (exclusions == null) 
 			exclusions = [];
 
-		if(!obj.active)return vert;
+		for (name in getActiveMods(player))
+		{
+			if (!obj.active) 
+				return vert;
 
-		for (name in getActiveMods(player)){
-			if(exclusions.contains(name))continue;
+			if (exclusions.contains(name))
+				continue;
+
 			var mod:Modifier = notemodRegister.get(name);
-			if(mod==null) continue;
-			if (!obj.active) return vert;
-			if (mod.isRenderMod())
+			if (mod != null && mod.isRenderMod())
 				vert = mod.modifyVert(beat, vert, idx, obj, pos, player, data, field);
 		}
 		return vert;
@@ -551,6 +558,9 @@ class ModManager {
 
 	public function getExtraInfo(diff:Float, tDiff:Float, beat:Float, ?info:RenderInfo, obj:FlxSprite, player:Int, data:Int, ?exclusions:Array<String>):RenderInfo
 	{
+		if (!obj.active)
+			return info;
+
 		if (exclusions == null)
 			exclusions = [];
 
@@ -562,101 +572,49 @@ class ModManager {
 			};
 		}
 
-		if (!obj.active)
-			return info;
-
 		for (name in getActiveMods(player))
 		{
-			if (exclusions.contains(name))
-				continue;
-			var mod:Modifier = notemodRegister.get(name);
-			if (mod == null)
-				continue;
 			if (!obj.active)
 				return info;
-			if (mod.isRenderMod())
+
+			if (exclusions.contains(name))
+				continue;
+
+			var mod:Modifier = notemodRegister.get(name);
+			if (mod != null && mod.isRenderMod())
 				info = mod.getExtraInfo(diff, tDiff, beat, info, obj, player, data);
 		}
 
 		return info;
 	}
 
-	public function queueEaseP(step:Float, endStep:Float, modName:String, percent:Float, style:Dynamic = 'linear', player:Int = -1, ?startVal:Float)
-		queueEase(step, endStep, modName, percent * 0.01, style, player, startVal * 0.01);
-	
-	public function queueSetP(step:Float, modName:String, percent:Float, player:Int = -1)
-		queueSet(step, modName, percent * 0.01, player);
-	
-	
-
-    // could probably use a macro
-	static var EaseMap:Map<String, EaseFunction> = [
-        "backIn" => FlxEase.backIn,
-        "backInOut" => FlxEase.backInOut,
-        "backOut" => FlxEase.backOut,
-		"bounceIn" => FlxEase.bounceIn,
-        "bounceInOut" => FlxEase.bounceInOut,
-		"bounceOut" => FlxEase.bounceOut,
-        "circIn" => FlxEase.circIn,
-        "circInOut" => FlxEase.circInOut,
-        "circOut" => FlxEase.circOut,
-        "cubeIn" => FlxEase.cubeIn,
-        "cubeInOut" => FlxEase.cubeInOut,
-        "cubeOut" => FlxEase.cubeOut,
-        "elasticIn" => FlxEase.elasticIn,
-        "elasticInOut" => FlxEase.elasticInOut,
-        "elasticOut" => FlxEase.elasticOut,
-        "expoIn" => FlxEase.expoIn,
-        "expoInOut" => FlxEase.expoInOut,
-        "expoOut" => FlxEase.expoOut,
-        "quadIn" => FlxEase.quadIn,
-        "quadInOut" => FlxEase.quadInOut,
-        "quadOut" => FlxEase.quadOut,
-        "quartIn" => FlxEase.quartIn,
-        "quartInOut" => FlxEase.quartInOut,
-        "quartOut" => FlxEase.quartOut,
-        "quintIn" => FlxEase.quintIn,
-        "quintInOut" => FlxEase.quintInOut,
-        "quintOut" => FlxEase.quintOut,
-        "sineIn" => FlxEase.sineIn,
-        "sineInOut" => FlxEase.sineInOut,
-        "sineOut" => FlxEase.sineOut,
-        "smoothStepIn" => FlxEase.smoothStepIn,
-        "smoothStepInOut" => FlxEase.smoothStepInOut,
-        "smoothStepOut" => FlxEase.smoothStepOut,
-        "smootherStepIn" => FlxEase.smootherStepIn,
-        "smootherStepInOut" => FlxEase.smootherStepInOut,
-        "smootherStepOut" => FlxEase.smootherStepOut,
-
-        "linear" => FlxEase.linear,
-        "instant" => ((t:Float) -> return 1),
-    ];
-
 	public function queueEase(step:Float, endStep:Float, modName:String, target:Float, style:Dynamic = 'linear', player:Int = -1, ?startVal:Float)
 	{
-		if(player==-1){
+		if (player == -1){
 			for (pN => mods in activeMods)
-				queueEase(step, endStep, modName, target, style, pN);
-		}else{
-			var easeFunc:EaseFunction = FlxEase.linear;
-
-            if((style is String)){
-                // most common use of the style var is to just use an existing FlxEase
-                try
-                {
-					if (EaseMap.exists(style))
-						easeFunc = EaseMap.get(style);
-                }
-            }else if(Reflect.isFunction(style)){ // i cant use easefunction for some reason so yeah just please provide an easefunction and nothing else :pray:
-                // probably gonna be useful SOMEWHERE
-                // maybe custom eases?
-                easeFunc = style;
-            }
+				queueEase(step, endStep, modName, target, style, pN, startVal);
 			
-
-			timeline.addEvent(new ModEaseEvent(step, endStep, modName, target, easeFunc, player, this));
-
+			return;
 		}
+
+		/*
+		if (startVal != null)
+			queueSet(step, modName, startVal, pN);
+		*/
+
+		var easeFunc:EaseFunction = FlxEase.linear;
+
+		if (style is String){
+			// most common use of the style var is to just use an existing FlxEase
+			easeFunc = CoolUtil.getEaseFromString(style);
+
+		}else if (Reflect.isFunction(style)){ // i cant use easefunction for some reason so yeah just please provide an easefunction and nothing else :pray:
+			// probably gonna be useful SOMEWHERE
+			// maybe custom eases?
+			easeFunc = style;
+		}
+
+		timeline.addEvent(new ModEaseEvent(step, endStep, modName, target, easeFunc, player, this));
 	}
 
 	public function queueSet(step:Float, modName:String, target:Float, player:Int = -1)
@@ -671,10 +629,14 @@ class ModManager {
 		
 	}
 
+	public function queueEaseP(step:Float, endStep:Float, modName:String, percent:Float, style:Dynamic = 'linear', player:Int = -1, ?startVal:Float)
+		queueEase(step, endStep, modName, percent * 0.01, style, player, startVal * 0.01);
+	
+	public function queueSetP(step:Float, modName:String, percent:Float, player:Int = -1)
+		queueSet(step, modName, percent * 0.01, player);
+
 	public function queueFunc(step:Float, endStep:Float, callback:(CallbackEvent, Float) -> Void)
-	{
 		timeline.addEvent(new StepCallbackEvent(step, endStep, callback, this));
-	}
     
 	public function queueFuncOnce(step:Float, callback:(CallbackEvent, Float) -> Void)
 		timeline.addEvent(new CallbackEvent(step, callback, this));

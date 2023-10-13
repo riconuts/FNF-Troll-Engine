@@ -35,14 +35,15 @@ class HScriptModifier extends Modifier
 			script.set(fieldName, Reflect.getProperty(this, fieldName));
 		*/
 
-        script.executeFunc("onCreate");
+		script.executeFunc("onCreate");
 
 		super(this.modMgr, this.parent);
 
-        script.executeFunc("onCreatePost");
+		script.executeFunc("onCreatePost");
 	}
 
-	static final _scriptEnums:Map<String, Dynamic> = [
+	@:noCompletion
+	private static final _scriptEnums:Map<String, Dynamic> = [
 		"NOTE_MOD" => NOTE_MOD,
 		"MISC_MOD" => MISC_MOD,
 

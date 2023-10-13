@@ -1,8 +1,8 @@
 // @author Nebula_Zorua
 package modchart.events;
 
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase.EaseFunction;
+
 class EaseEvent extends BaseEvent
 {
 	public var easeFunc:EaseFunction;
@@ -22,27 +22,19 @@ class EaseEvent extends BaseEvent
 		length = endStep - step;
 	}
 
-
-	function ease(e:EaseFunction, t:Float, b:Float, c:Float, d:Float)
-	{ // elapsed, begin, change (ending-beginning), duration
-		var time = t / d;
-		return c * e(time) + b;
-	}
-
 	override function run(curStep:Float)
 	{
 		if (curStep <= endStep)
 		{
 			var passed = curStep - executionStep;
 			progress = passed / (endStep - executionStep);
-            
-			value = ease(easeFunc, passed, 0, 1, length);
+            	
+			value = easeFunc(passed / length);
 			callback(this, value, curStep);
 		}
-		else
+		else{
 			finished = true;
-
-		if (finished)
 			progress = 1;
+		}
 	}
 }
