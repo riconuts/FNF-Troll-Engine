@@ -345,6 +345,7 @@ class PlayState extends MusicBeatState
 
 	public var cameraSpeed:Float = 1;
 	public var defaultCamZoom:Float = 1;
+	public var defaultHudZoom:Float = 1;
 
 	public var sectionCamera = new FlxPoint(); // Default camera focus point
 	public var customCamera = new FlxPoint(); // Used for the 'Camera Follow Pos' event
@@ -2483,7 +2484,7 @@ class PlayState extends MusicBeatState
 				lerpVal
 			);
 			camHUD.zoom = FlxMath.lerp(
-				1,
+				defaultHudZoom,
 				camHUD.zoom,
 				lerpVal
 			);
