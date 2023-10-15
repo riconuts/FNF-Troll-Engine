@@ -30,11 +30,6 @@ class HScriptModifier extends Modifier
 		script.set("setSubmodValue", setSubmodValue);
 		script.set("setSubmodPercent", setSubmodPercent);
 
-		/*
-		for (fieldName in Type.getInstanceFields(HScriptModifier))
-			script.set(fieldName, Reflect.getProperty(this, fieldName));
-		*/
-
 		script.executeFunc("onCreate");
 
 		super(this.modMgr, this.parent);

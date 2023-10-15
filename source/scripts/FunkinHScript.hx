@@ -39,7 +39,7 @@ class FunkinHScript extends FunkinScript
 		return new FunkinHScript(parser.parseString(""), false);
 	}
 
-	public static function fromString(script:String, ?name:String = "Script", ?additionalVars:Map<String, Any>, ?doExecute:Bool=true)
+	public static function fromString(script:String, ?name:String = "Script", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool=true)
 	{
 		parser.line = 1;
 		var expr:Expr;
@@ -58,11 +58,11 @@ class FunkinHScript extends FunkinScript
 			expr = parser.parseString("", name);
 		}
 
-		return new FunkinHScript(expr, name, additionalVars, doExecute);
+		return new FunkinHScript(expr, name, additionalVars, doCreateCall);
 	}
 
-	public static function fromFile(file:String, ?name:String, ?additionalVars:Map<String, Any>, ?doExecute:Bool = true)
-		return fromString(Paths.getContent(file), (name==null ? file : name), additionalVars, doExecute);
+	public static function fromFile(file:String, ?name:String, ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true)
+		return fromString(Paths.getContent(file), (name==null ? file : name), additionalVars, doCreateCall);
 
 	////
 
@@ -103,7 +103,7 @@ class FunkinHScript extends FunkinScript
 		set("FlxTextBorderStyle", FlxTextBorderStyle);
 		
 		set("FlxRuntimeShader", flixel.addons.display.FlxRuntimeShader);
-		set("newShader", Paths.newShader);
+		set("newShader", Paths.getShader);
 
 		set("getClass", Type.resolveClass);
 		set("getEnum", Type.resolveEnum);

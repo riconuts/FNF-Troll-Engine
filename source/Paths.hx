@@ -453,7 +453,7 @@ class Paths
 	}
 
 	/** returns a FlxRuntimeShader but with file names lol **/ 
-	public static function newShader(fragFile:String = null, vertFile:String = null):FlxRuntimeShader
+	public static function getShader(fragFile:String = null, vertFile:String = null):FlxRuntimeShader
 	{
 		try{				
 			return new FlxRuntimeShader(
