@@ -268,7 +268,7 @@ class PauseSubState extends MusicBeatSubstate
 						this.openSubState(new GameplayChangersSubstate());						
 
 					case 'Options':
-						this.persistentDraw = true;
+						this.persistentDraw = false;
 						var daSubstate = new OptionsSubstate();
 
 						daSubstate.goBack = (function(changedOptions:Array<String>)

@@ -444,10 +444,11 @@ class ModManager {
 	}
 
 	public function updateObject(beat:Float, obj:FlxSprite, player:Int){
+		if (obj.active)
 		for (name in getActiveMods(player))
 		{
-			if (!obj.active)
-				continue;
+			/*if (!obj.active)
+				continue;*/
 
 			var mod:Modifier = notemodRegister.get(name);
 			if (mod==null) continue;
@@ -501,8 +502,8 @@ class ModManager {
 		);
 
  		for (name in getActiveMods(player)){
-			if (!obj.alive) 
-				continue;
+			/*if (!obj.alive) 
+				continue;*/
 			
 			if (exclusions.contains(name)) 
 				continue; // because some modifiers may want the path without reverse, for example. (which is actually more common than you'd think!)
@@ -543,8 +544,8 @@ class ModManager {
 
 		for (name in getActiveMods(player))
 		{
-			if (!obj.active) 
-				return vert;
+			/*if (!obj.active) 
+				return vert;*/
 
 			if (exclusions.contains(name))
 				continue;
@@ -574,8 +575,8 @@ class ModManager {
 
 		for (name in getActiveMods(player))
 		{
-			if (!obj.active)
-				return info;
+			/*if (!obj.active)
+				return info;*/
 
 			if (exclusions.contains(name))
 				continue;
@@ -588,42 +589,39 @@ class ModManager {
 		return info;
 	}
 
-	public function queueEase(step:Float, endStep:Float, modName:String, target:Float, style:Dynamic = 'linear', player:Int = -1, ?startVal:Float)
+	public function queueEase(step:Float, endStep:Float, modName:String, target:Float, style:Any, player:Int = -1, ?startVal:Float)
 	{
-		if (player == -1){
-			for (pN => mods in activeMods)
-				queueEase(step, endStep, modName, target, style, pN, startVal);
-			
-			return;
-		}
-
 		/*
 		if (startVal != null)
-			queueSet(step, modName, startVal, pN);
+			queueSet(step, modName, startVal, player);
 		*/
 
 		var easeFunc:EaseFunction = FlxEase.linear;
 
-		if (style is String){
+		if (style == null){
+		
+		}else if (style is String){
 			// most common use of the style var is to just use an existing FlxEase
 			easeFunc = CoolUtil.getEaseFromString(style);
 
-		}else if (Reflect.isFunction(style)){ // i cant use easefunction for some reason so yeah just please provide an easefunction and nothing else :pray:
+		}else if (Reflect.isFunction(style)){
 			// probably gonna be useful SOMEWHERE
 			// maybe custom eases?
 			easeFunc = style;
 		}
 
-		timeline.addEvent(new ModEaseEvent(step, endStep, modName, target, easeFunc, player, this));
+		if (player == -1)
+			for (pN => mods in activeMods)
+				timeline.addEvent(new ModEaseEvent(step, endStep, modName, target, easeFunc, pN, this));				
+		else
+			timeline.addEvent(new ModEaseEvent(step, endStep, modName, target, easeFunc, player, this));
 	}
 
 	public function queueSet(step:Float, modName:String, target:Float, player:Int = -1)
 	{
 		if (player == -1)
-		{
 			for (pN => mods in activeMods)
-				queueSet(step, modName, target, pN);
-		}
+				timeline.addEvent(new SetEvent(step, modName, target, pN, this));
 		else
 			timeline.addEvent(new SetEvent(step, modName, target, player, this));
 		

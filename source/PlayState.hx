@@ -1418,7 +1418,7 @@ class PlayState extends MusicBeatState
 
 			var soundName:Null<String> = introSnds[swagCounter];
 			if (soundName != null){
-				var snd:FlxSound; 
+				var snd:FlxSound = null; 
 				snd = FlxG.sound.play(Paths.sound(soundName + introSoundsSuffix), 0.6, false, null, true, ()->{
 					if (countdownSnd == snd) countdownSnd = null;
 				});
