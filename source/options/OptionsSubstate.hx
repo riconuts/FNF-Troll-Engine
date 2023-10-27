@@ -32,7 +32,6 @@ class OptionsSubstate extends MusicBeatSubstate
 		"shaders",
 		"lowQuality",
 		"ruin",
-		"globalAntialiasing",
 		#if !tgt "midScroll" #end
 	];
 
@@ -463,9 +462,10 @@ class OptionsSubstate extends MusicBeatSubstate
 			var backdrop = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
 			backdrop.setGraphicSize(FlxG.width, FlxG.height);
 			backdrop.updateHitbox();
-			backdrop.screenCenter(XY);
-			backdrop.alpha = 0.5;
+			backdrop.screenCenter();
+			backdrop.alpha = 0.6;
 			add(backdrop);
+
 			FlxG.cameras.add(mainCamera, false);
 			FlxG.cameras.add(optionCamera, false);
 			FlxG.cameras.add(overlayCamera, false);
