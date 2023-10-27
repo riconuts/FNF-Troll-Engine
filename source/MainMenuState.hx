@@ -50,10 +50,12 @@ class MainMenuState extends MusicBeatState
 	static function get_displayedVersion(){
 		return 'v${engineVersion}${(beta?("-" + betaVersion):"")}';
 	}
-	static function get_betaVersion()
-	{
+	static function get_betaVersion(){
 		return beta ? betaVersion : "0";
 	}
+
+	////
+
 	final optionShit:Array<String> = [
 		'story_mode',
  		'freeplay',

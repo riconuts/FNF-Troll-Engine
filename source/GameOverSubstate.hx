@@ -71,16 +71,34 @@ class GameOverSubstate extends MusicBeatSubstate
 						FlxTween.tween(genericBitch, {"scale.x": 1, "scale.y": 1}, frameRate*60, {onStart: (fuck)->{ if (!isEnding) FlxG.sound.playMusic(Paths.music(genericMusic), 0.6, true); FlxG.sound.music.fadeIn(0.4, 0.6, 1);}})).then(
 							FlxTween.tween(genericBitch, {"scale.x": 1.01, "scale.y": 1.01}, frameRate * 14, {type: PINGPONG}));
 		}
+		else{
+			deathSound = FlxG.sound.play(Paths.sound(deathSoundName));
+			boyfriend.playAnim('firstDeath');
+		}
 
+		PlayState.instance.setOnScripts('inGameOver', true);
 		PlayState.instance.callOnScripts('onGameOverStart', []);
+
 		super.create();
+	}
+
+	override function destroy(){
+		if (camFollow != null)
+			camFollow.put();
+		
+		super.destroy();
 	}
 
 	function doGenericGameOver()
 	{
-		Conductor.changeBPM(100);
+		Cache.loadWithList([
+			{path: genericName, type: 'IMAGE'},
+			{path: genericSound, type: 'SOUND'},
+			{path: genericMusic, type: 'MUSIC'},
+			// {path: endSoundName, type: 'MUSIC'}
+		]);
 
-		genericBitch = new FlxSprite().loadGraphic(Paths.image(genericName));
+		genericBitch = new FlxSprite(0, 0, Paths.image(genericName));
 		genericBitch.scrollFactor.set();
 		genericBitch.screenCenter();
 		add(genericBitch);
@@ -95,14 +113,8 @@ class GameOverSubstate extends MusicBeatSubstate
 
 		var game = PlayState.instance;
 
-		game.setOnScripts('inGameOver', true);
-
-		game.inst.volume = 0;
-		game.inst.stop();
-		game.vocals.volume = 0;
-		game.vocals.stop();
-
 		Conductor.songPosition = 0;
+		Conductor.changeBPM(100);
 
 		var deathName:String = characterName;
 
@@ -111,19 +123,10 @@ class GameOverSubstate extends MusicBeatSubstate
 			if (character != null) deathName = character.deathName + "-dead";
 		}
 
-		var charInfo = deathName == null ? null : Character.getCharacterFile(deathName);
+		var charInfo = (deathName==null) ? null : Character.getCharacterFile(deathName);
 		if (charInfo == null){
-			if (PlayState.instance.showDebugTraces) trace('"$deathName" does not exist, using default.');
-
-			deathName = "generic-gameover";
-			charInfo = null;
-
-			Cache.loadWithList([
-				{path: genericName, type: 'IMAGE'},
-				{path: genericSound, type: 'SOUND'},
-				{path: genericMusic, type: 'MUSIC'},
-				//{path: endSoundName, type: 'MUSIC'}
-			]);
+			if (game.showDebugTraces) 
+				trace('"$deathName" returned null, using default.');
 
 			return doGenericGameOver(); 
 			
@@ -144,25 +147,17 @@ class GameOverSubstate extends MusicBeatSubstate
 		boyfriend.x += boyfriend.positionArray[0];
 		boyfriend.y += boyfriend.positionArray[1];
 		add(boyfriend);
-		
-		camFollow = new FlxPoint(boyfriend.getGraphicMidpoint().x, boyfriend.getGraphicMidpoint().y);
-		
-		deathSound = FlxG.sound.play(Paths.sound(deathSoundName));
-		Conductor.changeBPM(100);
-		FlxG.camera.bgColor = FlxColor.BLACK;
-		FlxG.camera.scroll.set();
-		FlxG.camera.target = null;
 
-		boyfriend.playAnim('firstDeath');
+		camFollow = boyfriend.getGraphicMidpoint();
 
-		camFollowPos = new FlxObject(0, 0, 1, 1);
-		camFollowPos.setPosition(FlxG.camera.scroll.x + (FlxG.camera.width* 0.5), FlxG.camera.scroll.y + (FlxG.camera.height* 0.5));
+		camFollowPos = new FlxObject(FlxG.camera.width * 0.5, FlxG.camera.height * 0.5);
 		add(camFollowPos);
 
+		FlxG.camera.bgColor = FlxColor.BLACK;
 		FlxG.camera.follow(camFollowPos, LOCKON, 1);
 
-		if (PlayState.instance != null && PlayState.instance.stage != null)
-			defaultCamZoom = PlayState.instance.stage.stageData.defaultZoom;
+		if (game != null && game.stage != null)
+			defaultCamZoom = game.stage.stageData.defaultZoom;
 		else
 			defaultCamZoom = FlxG.camera.zoom;
 	}
