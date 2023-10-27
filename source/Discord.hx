@@ -85,6 +85,11 @@ class DiscordClient
 		"presentless-fox",
 		"no-grinches",
 		"die-carolers",
+
+		"tricks-for-treats",
+		"lonely-ghouler",
+		"hammerdread",
+		"fear-the-pumpkin-king"
 	];
 	inline static function getImageKey(key):String
 		return allowedImageKeys.contains(key) ? key : "app-logo";
