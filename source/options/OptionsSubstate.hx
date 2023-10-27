@@ -33,7 +33,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		"lowQuality",
 		"ruin",
 		"globalAntialiasing",
-		"midScroll"
+		#if !tgt "midScroll" #end
 	];
 
 	public static var requiresRestart:Array<String> = [

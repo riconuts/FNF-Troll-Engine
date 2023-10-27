@@ -1331,16 +1331,20 @@ class PlayState extends MusicBeatState
 		callOnScripts('postModifierRegister'); // deprecated
 		callOnScripts('onModifierRegisterPost');
 
-		/* 		
-		if(midScroll){
+		#if !tgt
+		if (midScroll)
+		{
+			var off = Math.min(FlxG.width, 1280) / 4;
+			modManager.setValue("transform0X", -off, 1);
+			modManager.setValue("transform1X", -off, 1);
+			modManager.setValue("transform2X", off, 1);
+			modManager.setValue("transform3X", off, 1);
+
+			modManager.setValue("alpha", 0.6, 1);
+
 			modManager.setValue("opponentSwap", 0.5);
-			for(field in notefields.members){
-				if(field.field==null)continue;
-				field.alpha = field.field.isPlayer ? 0 : 1;
-			}
-			
-		} 
-		*/
+		}
+		#end
 
 		startedCountdown = true;
 		Conductor.songPosition = -Conductor.crochet * 5;
