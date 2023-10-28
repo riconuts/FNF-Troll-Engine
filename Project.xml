@@ -3,7 +3,7 @@
 
 	<!-- _________________________ Application Settings _________________________ -->
 
-	<app title="Tails Gets Trolled" file="Trolled" packageName="com.sowy.trollengine" package="com.sowy.trollengine" main="Main" version="0.4.1" company="Sowy" />
+	<app title="Troll Engine" file="Troll Engine" packageName="com.sowy.trollengine" package="com.sowy.trollengine" main="Main" version="0.4.1" company="Sowy" />
 
 	<!--Switch Export with Unique ApplicationID and Icon-->
 	<set name="APP_ID" value="0x0100f6c013bbc000" />
@@ -76,12 +76,13 @@
 	<haxelib name="flixel-ui"/>
 	<haxelib name="flixel-addons"/>
 
-	<assets path="flixel" embed="true"/> <!-- To override some Flixel assets -->
-
 	<haxelib name="discord_rpc" if="desktop"/>
 
 	<haxelib name="hxCodec" if="VIDEOS_ALLOWED"/>
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
+	
+	<haxelib name="faxe" if='switch'/>
+	<haxelib name="hxcpp-debug-server" if="debug" unless="telemetry"/> 
 
 	<section if="HSCRIPT_ALLOWED">
 		<haxelib name="hscript"/>
@@ -93,17 +94,15 @@
 	</section>
 
     <section if="tgt"> <!--lime build windows -release -Dtgt-->
+		<app title="Tails Gets Trolled" file="Trolled"/>
+
         <undefine name="SCRIPTABLE_STATES"/>
-        <undefine name="PE_MOD_COMPATIBILITY" />
-        <!--maybe disable auto-updating idk-->
+        <undefine name="PE_MOD_COMPATIBILITY"/>
+		<undefine name="DO_AUTO_UPDATE"/>
+		<!-- <undefine name="LUA_ALLOWED"/> --> <!-- There's one lua script on TGT and I'm not rewritting it -->
+
+		<assets path="flixel" embed="true"/> <!-- To override some Flixel assets -->
     </section>
-
-	<haxelib name="faxe" if='switch'/>
-
-	<haxelib name="hxcpp-debug-server" if="debug" unless="telemetry"/> 
-
-	<!--In case you want to use nape with flixel-->
-	<!--<haxelib name="nape-haxe4" />-->
 
 	<!-- ______________________________ Haxedefines _____________________________ -->
 
