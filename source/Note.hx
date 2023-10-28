@@ -491,10 +491,10 @@ class Note extends NoteObject
 				IMAGE)) #if MODS_ALLOWED || Paths.exists(Paths.modsImages(dir + blahblah)) #end)
 			{
 				if (vInd > 0 && hInd > 0){
-					loadGraphic(Paths.image(dir + blahblah));
-					width = width / hInd;
-					height = height / vInd;
-					loadGraphic(Paths.image(dir + blahblah), true, Math.floor(width), Math.floor(height));
+					var graphic = Paths.image(dir + blahblah);
+					width = graphic.width / hInd;
+					height = graphic.height / vInd;
+					loadGraphic(graphic, true, Math.floor(width), Math.floor(height));
 					loadIndNoteAnims();
 					break;
 				}else{	

@@ -25,7 +25,7 @@ typedef Widget =
 class OptionsSubstate extends MusicBeatSubstate
 {
 	// TODO: put this all into the ClientPrefs option definitions instead
-	public static var recommendsRestart:Array<String> = [
+	private static final _recommendsRestart:Array<String> = [
 		"etternaHUD",
 		"judgeCounter",
 		"hudPosition",
@@ -35,7 +35,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		#if !tgt "midScroll" #end
 	];
 
-	public static var requiresRestart:Array<String> = [
+	private static final _requiresRestart:Array<String> = [
 		"modcharts", 
 		"noteOffset", 
 		"ratingOffset", 
@@ -50,7 +50,16 @@ class OptionsSubstate extends MusicBeatSubstate
 		"judgeDiff", 
 		"noteSkin",
 	];
-	
+
+	static public var requiresRestart = _requiresRestart;
+	static public var recommendsRestart = _recommendsRestart;
+
+	public static function resetRestartRecomendations()
+	{
+		requiresRestart = _requiresRestart.copy();
+		recommendsRestart = _recommendsRestart.copy();
+	}
+
 	var changed:Array<String> = [];
 	var originalValues:Map<String, Dynamic> = [];
 

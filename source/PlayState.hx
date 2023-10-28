@@ -428,6 +428,7 @@ class PlayState extends MusicBeatState
 
 		modManager = new ModManager(this);
 
+		options.OptionsSubstate.resetRestartRecomendations();
 		Paths.clearStoredMemory();
 		Paths.pushGlobalContent();
 
