@@ -5,4 +5,9 @@
   //(Supposedly) makes VSCode only search the current file for words to auto-complete.
   //Might not work... Who knows.
   "editor.wordBasedSuggestionsMode": "currentDocument"
+  
+  "[haxe]": {
+    "editor.formatOnSave": false,
+    "editor.formatOnPaste": true
+ }
 }

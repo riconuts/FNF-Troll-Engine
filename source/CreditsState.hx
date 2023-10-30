@@ -201,7 +201,11 @@ class CreditsState extends MusicBeatState
 
             dataArray[id] = data; 
 
-            var songIcon = new AttachedSprite("credits/" + data[1]);
+			var iconPath = "credits/" + data[1];
+			if (Paths.image(iconPath) == null)
+				iconPath = "icons/face";
+
+            var songIcon = new AttachedSprite(iconPath);
 
             songIcon.xAdd = songTitle.width + 15; 
             songIcon.yAdd = 15;
@@ -293,12 +297,18 @@ class CreditsState extends MusicBeatState
 	}
 	
 	var secsHolding:Float = 0;
+	var controlLock:Bool = false;
 	override function update(elapsed:Float)
 	{
 		if (FlxG.sound.music != null && FlxG.sound.music.volume < 0.7)
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
 
+		//// update camera
+		var lerpVal = Math.min(1, elapsed * (9.6 + Math.max(0, Math.abs(camFollowPos.y - camFollow.y) - 360) * 0.002));
+		camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
+
 		////
+		if (!controlLock){
 		var speed = FlxG.keys.pressed.SHIFT ? 2 : 1;
 
 		var mouseWheel = FlxG.mouse.wheel;
@@ -323,33 +333,30 @@ class CreditsState extends MusicBeatState
 				curSelected += (checkNewHold - checkLastHold) * (controls.UI_UP ? -speed : speed);
 		}
 
-		//// update camera
-		var lerpVal = Math.min(
-            1, 
-            elapsed * (9.6 + Math.max(0, Math.abs(camFollowPos.y - camFollow.y) - 360) * 0.002)
-        );
-        
-        camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
-
-        if (FlxG.keys.justPressed.NINE){
-            for (item in titleArray){
-                if (item != null && !item.isBold)
-                    item.x += 50;
-            }
-
-            for (icon in iconArray){
-                if (icon != null)
-                    icon.loadGraphic(Paths.image('credits/peak'));
-            }
-        }
-
 		if (controls.BACK){
+			controlLock = true;
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			MusicBeatState.switchState(new MainMenuState());
 		}
 
 		if (controls.ACCEPT){
             CoolUtil.browserLoad(dataArray[curSelected][3]);
+		}
+
+		if (FlxG.keys.justPressed.NINE)
+		{
+			for (item in titleArray)
+			{
+				if (item != null && !item.isBold)
+					item.x += 50;
+			}
+
+			for (icon in iconArray)
+			{
+				if (icon != null)
+					icon.loadGraphic(Paths.image('credits/peak'));
+			}
+		}
 		}
 		
 		super.update(elapsed);

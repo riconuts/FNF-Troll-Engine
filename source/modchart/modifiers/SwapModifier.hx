@@ -11,14 +11,16 @@ class SwapModifier extends NoteModifier
 
 	override function getPos(diff:Float, tDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
 	{
-        if(getSubmodValue('invert', player) != 0){
+		var invertVal = getSubmodValue('invert', player); 
+        if (invertVal != 0){
 			var distance = Note.swagWidth * ((data % 2 == 0) ? 1 : -1);
-			pos.x += distance * getSubmodValue('invert', player);
+			pos.x += distance * invertVal;
         }
         
-		if (getValue(player) != 0){
+		var flipVal = getValue(player);
+		if (flipVal != 0){
             var distance = Note.swagWidth * 2 * (1.5 - data);
-            pos.x += distance * getValue(player);
+            pos.x += distance * flipVal;
         }
 		return pos;
 	}

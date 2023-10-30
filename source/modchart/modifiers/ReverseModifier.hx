@@ -62,6 +62,11 @@ class ReverseModifier extends NoteModifier {
 		var shift = CoolUtil.scale(perc, 0, 1, 50, FlxG.height - 150);
 		var centerPercent = getSubmodValue("centered", player);
 
+		#if tgt
+		if (ClientPrefs.midScroll)
+			centerPercent = 1 - centerPercent;
+		#end
+
 		shift = CoolUtil.scale(centerPercent, 0, 1, shift, ((FlxG.height/2) - 56));
 		var upscrollY =  (Note.swagWidth / 2) + shift + visualDiff;
 		var downscrollY = (Note.swagWidth / 2) + shift - visualDiff;

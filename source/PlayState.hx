@@ -455,6 +455,7 @@ class PlayState extends MusicBeatState
 
 		modManager = new ModManager(this);
 
+		options.OptionsSubstate.resetRestartRecomendations();
 		Paths.clearStoredMemory();
 		Paths.pushGlobalContent();
 
@@ -1374,16 +1375,20 @@ class PlayState extends MusicBeatState
 		callOnScripts('postModifierRegister'); // deprecated
 		callOnScripts('onModifierRegisterPost');
 
-		/* 		
-		if(midScroll){
+		#if !tgt
+		if (midScroll)
+		{
+			var off = Math.min(FlxG.width, 1280) / 4;
+			modManager.setValue("transform0X", -off, 1);
+			modManager.setValue("transform1X", -off, 1);
+			modManager.setValue("transform2X", off, 1);
+			modManager.setValue("transform3X", off, 1);
+
+			modManager.setValue("alpha", 0.6, 1);
+
 			modManager.setValue("opponentSwap", 0.5);
-			for(field in notefields.members){
-				if(field.field==null)continue;
-				field.alpha = field.field.isPlayer ? 0 : 1;
-			}
-			
-		} 
-		*/
+		}
+		#end
 
 		startedCountdown = true;
 		Conductor.songPosition = -Conductor.crochet * 5;
@@ -2752,10 +2757,14 @@ class PlayState extends MusicBeatState
 
 		paused = true;
 
-		vocals.stop();
+		inst.volume = 0;
 		inst.stop();
-		for (track in tracks)
+		vocals.volume = 0;
+		vocals.stop();
+		for (track in tracks){
+			track.volume = 0;
 			track.stop();
+		}
 
 		for (tween in modchartTweens)
 			tween.active = true;
@@ -2768,12 +2777,10 @@ class PlayState extends MusicBeatState
 		isDead = true;
 
 		if(instaRespawn){
+			FlxG.camera.bgColor = 0xFF000000;
 			MusicBeatState.resetState(true);
 		}else{
 			var char = playOpponent ? dad : boyfriend;
-			
-			inst.stop();
-			vocals.stop();
 			
 			openSubState(new GameOverSubstate(
 				char.getScreenPosition().x - char.positionArray[0],

@@ -25,18 +25,17 @@ typedef Widget =
 class OptionsSubstate extends MusicBeatSubstate
 {
 	// TODO: put this all into the ClientPrefs option definitions instead
-	public static var recommendsRestart:Array<String> = [
+	private static final _recommendsRestart:Array<String> = [
 		"etternaHUD",
 		"judgeCounter",
 		"hudPosition",
 		"shaders",
 		"lowQuality",
 		"ruin",
-		"globalAntialiasing",
-		"midScroll"
+		#if !tgt "midScroll" #end
 	];
 
-	public static var requiresRestart:Array<String> = [
+	private static final _requiresRestart:Array<String> = [
 		"modcharts", 
 		"noteOffset", 
 		"ratingOffset", 
@@ -51,7 +50,16 @@ class OptionsSubstate extends MusicBeatSubstate
 		"judgeDiff", 
 		"noteSkin",
 	];
-	
+
+	static public var requiresRestart = _requiresRestart;
+	static public var recommendsRestart = _recommendsRestart;
+
+	public static function resetRestartRecomendations()
+	{
+		requiresRestart = _requiresRestart.copy();
+		recommendsRestart = _recommendsRestart.copy();
+	}
+
 	var changed:Array<String> = [];
 	var originalValues:Map<String, Dynamic> = [];
 
@@ -463,9 +471,10 @@ class OptionsSubstate extends MusicBeatSubstate
 			var backdrop = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
 			backdrop.setGraphicSize(FlxG.width, FlxG.height);
 			backdrop.updateHitbox();
-			backdrop.screenCenter(XY);
-			backdrop.alpha = 0.5;
+			backdrop.screenCenter();
+			backdrop.alpha = 0.6;
 			add(backdrop);
+
 			FlxG.cameras.add(mainCamera, false);
 			FlxG.cameras.add(optionCamera, false);
 			FlxG.cameras.add(overlayCamera, false);
