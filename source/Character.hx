@@ -203,7 +203,7 @@ class Character extends FlxSprite
 				//packer
 				//texture
 				#if MODS_ALLOWED
-				var modTxtToFind:String = Paths.modsTxt(json.image);
+				var modTxtToFind:String = Paths.modFolders('images/' + json.image + '.txt');
 				var txtToFind:String = Paths.getPath('images/' + json.image + '.txt', TEXT);
 
 				if (Paths.exists(modTxtToFind) || Paths.exists(txtToFind))
