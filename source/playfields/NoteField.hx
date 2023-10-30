@@ -373,10 +373,10 @@ class NoteField extends FieldBase
 		return [p1.add(off1), p1.add(off2), p1];
 	}
 
-	var crotchet = Conductor.getCrotchetAtTime(0) / 4;
-
+    
 	function drawHold(hold:Note, ?prevAlpha:Float, ?prevGlow:Float):Null<RenderObject>
-	{
+    {
+        var crotchet = Conductor.getCrotchetAtTime(0) / 4;
 		if (hold.animation.curAnim == null)
 			return null;
 		if (hold.scale == null)
@@ -594,7 +594,13 @@ class NoteField extends FieldBase
 				vert.x += n.typeOffsetX;
 				vert.y += n.typeOffsetY;
 			}
+            // TODO:  remove PerspectiveModifier and do perspective shit? or in a seperate NoteRenderer object maybe?
+            // probably in a seperate NoteRenderer since I also wanna make it so everything is sorted and obeys each triangle's z
+            // (right now even if the opponent notes have a higher Z value they're drawn below the player, no matter what. I wanna fix that lol)
+            // prob just use NotefieldManager instead of a new thing tho tbh
+
 			vert = modManager.modifyVertex(curDecBeat, vert, idx, sprite, pos, modNumber, sprite.noteData, this);
+
 			vert.x *= scalePoint.x;
 			vert.y *= scalePoint.y;
 

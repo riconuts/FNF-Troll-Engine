@@ -182,6 +182,7 @@ class FunkinHScript extends FunkinScript
 		set("GameOverSubstate", GameOverSubstate);
 		set("Song", Song);
         set("BGSprite", BGSprite);
+        set("RatingSprite", PlayState.RatingSprite);
         
 		set("Note", Note);
 		set("NoteObject", NoteObject);

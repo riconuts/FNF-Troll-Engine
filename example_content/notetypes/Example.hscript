@@ -9,7 +9,6 @@ function setupNote(note:Note){
 
 function onReloadNote(note:Note, prefix:String, texture:String, suffix:String){
     trace("Called at the beginning of the reloadNote function");
-    // can return Function_Stop to stop the note from having its texture changed
 }
 
 function postReloadNote(note:Note, prefix:String, texture:String, suffix:String){

@@ -90,6 +90,9 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	public var keyCount(default, set):Int = 4; // How many lanes are in this field
 	public var autoPlayed(default, set):Bool = false; // if this playfield should be played automatically (botplay, opponent, etc)
 
+    public var x:Float = 0;
+    public var y:Float = 0;
+    
 	function set_keyCount(cnt:Int){
 		if (cnt < 0)
 			cnt=0;
@@ -308,7 +311,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	// generates the receptors
 	public function generateStrums(){
 		for(i in 0...keyCount){
-			var babyArrow:StrumNote = new StrumNote(0, 0, i);
+			var babyArrow:StrumNote = new StrumNote(0, 0, i, (FlxG.state == PlayState.instance) ? PlayState.instance.hudSkin : 'default');
 			babyArrow.downScroll = ClientPrefs.downScroll;
 			babyArrow.alpha = 0;
 			insert(0, babyArrow);
@@ -345,11 +348,11 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 	// spawns a notesplash w/ specified skin. optional note to derive the skin and colours from.
 
-	public function spawnSplash(data:Int, splashSkin:String, ?note:Note){
+	public function spawnSplash(note:Note, splashSkin:String){
 		var skin:String = splashSkin;
-		var hue:Float = ClientPrefs.arrowHSV[data % 4][0] / 360;
-		var sat:Float = ClientPrefs.arrowHSV[data % 4][1] / 100;
-		var brt:Float = ClientPrefs.arrowHSV[data % 4][2] / 100;
+		var hue:Float = ClientPrefs.arrowHSV[note.noteData % 4][0] / 360;
+		var sat:Float = ClientPrefs.arrowHSV[note.noteData % 4][1] / 100;
+		var brt:Float = ClientPrefs.arrowHSV[note.noteData % 4][2] / 100;
 
 		if (note != null)
 		{
@@ -360,7 +363,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		}
 
 		var splash:NoteSplash = grpNoteSplashes.recycle(NoteSplash);
-		splash.setupNoteSplash(0, 0, data, skin, hue, sat, brt);
+		splash.setupNoteSplash(0, 0, note.noteData, skin, hue, sat, brt, note);
 		splash.handleRendering = false;
 		grpNoteSplashes.add(splash);
 		return splash;

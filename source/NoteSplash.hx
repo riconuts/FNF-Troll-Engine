@@ -27,16 +27,35 @@ class NoteSplash extends NoteObject
 		shader = colorSwap.shader;
 
 		setupNoteSplash(x, y, note);
+        visible = false;
 		//antialiasing = ClientPrefs.globalAntialiasing;
 	}
 
+	function callOnHScripts(event:String, ?args:Array<Dynamic>, ?vars:Map<String, Dynamic>, ignoreStops = false, ?exclusions:Array<String>):Dynamic{
+		if(FlxG.state == PlayState.instance)
+            return PlayState.instance.callOnScripts(event, args, ignoreStops, exclusions, PlayState.instance.hscriptArray, vars);
+        else
+            return Globals.Function_Continue;
+
+    }
+    
 	public var animationAmount:Int = 2;
-	public function setupNoteSplash(x:Float, y:Float, note:Int = 0, texture:String = null, hueColor:Float = 0, satColor:Float = 0, brtColor:Float = 0) 
+    public function setupNoteSplash(x:Float, y:Float, data:Int = 0, texture:String = null, hueColor:Float = 0, satColor:Float = 0, brtColor:Float = 0, ?note:Note) 
 	{
-		if (FlxG.state == PlayState.instance){
-			if (PlayState.instance.callOnHScripts("preSetupNoteSplash", [x, y, note, texture, hueColor, satColor, brtColor], ["this" => this, "noteData" => noteData]) == Globals.Function_Stop)
-				return;
-		}
+		visible = true;
+        var doR:Bool = false;
+		if (note != null && note.genScript != null){
+            var ret:Dynamic = note.genScript.call("preSetupNoteSplash", [x, y, data, texture, hueColor, satColor, brtColor, note], ["this" => this, "noteData" => noteData]);
+            if(ret == Globals.Function_Stop){
+				doR = true;
+            }
+        }
+        
+        if (callOnHScripts("preSetupNoteSplash", [x, y, data, texture, hueColor, satColor, brtColor, note], ["this" => this, "noteData" => noteData]) == Globals.Function_Stop)
+            return;
+
+		if (doR)return;
+		
 
 		setPosition(x, y);
 		animationAmount = 2;
@@ -44,18 +63,28 @@ class NoteSplash extends NoteObject
 		scale.set(0.8, 0.8);
 		updateHitbox();
 
-		noteData = note;
+		noteData = data;
 		if (texture == null) {
 			texture = 'noteSplashes';
 			if (PlayState.splashSkin != null && PlayState.splashSkin.length > 0) texture = PlayState.splashSkin;
 		}
 
+        if(note != null && note.genScript != null){
+			if (note.genScript.exists("texturePrefix"))
+				texture = note.genScript.get("texturePrefix") + texture;
+
+            if(note.genScript.exists("textureSuffix"))
+                texture += note.genScript.get("textureSuffix");
+        }
+
 		if (textureLoaded != texture) {
 			var ret = Globals.Function_Continue;
 
-			if (FlxG.state == PlayState.instance)
-				ret = PlayState.instance.callOnHScripts("loadSplashAnims", [texture], ["this" => this, "noteData" => noteData]);
-			
+            if (note != null && note.genScript != null)
+				ret = note.genScript.call("loadSplashAnims", [texture], ["this" => this, "noteData" => noteData]);
+
+			ret = callOnHScripts("loadSplashAnims", [texture], ["this" => this, "noteData" => noteData]);
+
 			if (ret != Globals.Function_Stop) 
 				loadAnims(texture);
 		}
@@ -65,11 +94,13 @@ class NoteSplash extends NoteObject
 		colorSwap.brightness = brtColor;
 
 		var ret = Globals.Function_Continue;
-		if (FlxG.state == PlayState.instance)
-			ret = PlayState.instance.callOnHScripts("postSetupNoteSplash", [x, y, note, texture, hueColor, satColor, brtColor], ["this" => this, "noteData" => noteData]);
+		if (note != null && note.genScript != null)
+			ret = note.genScript.call("postSetupNoteSplash", [x, y, data, texture, hueColor, satColor, brtColor, note], ["this" => this, "noteData" => noteData]);
+		
+		ret = callOnHScripts("postSetupNoteSplash", [x, y, data, texture, hueColor, satColor, brtColor, note], ["this" => this, "noteData" => noteData]);
 
 		if (ret != Globals.Function_Stop){
-			var playAnim = 'note$note';
+			var playAnim = 'note$data';
 			if (animationAmount > 1)
 				playAnim += '-${FlxG.random.int(1, animationAmount)}';
 
@@ -92,7 +123,7 @@ class NoteSplash extends NoteObject
 
 	override function update(elapsed:Float) 
 	{
-		if(animation.curAnim != null && animation.curAnim.finished) 
+		if(animation.curAnim == null || animation.curAnim.finished) 
 			kill();
 
 		super.update(elapsed);

@@ -28,6 +28,7 @@ typedef SwagSong =
 	@:optional var player3:String;
 	@:optional var gfVersion:String;
 	@:optional var stage:String;
+    @:optional var hudSkin:String;
 
 	@:optional var arrowSkin:String;
 	@:optional var splashSkin:String;
@@ -102,6 +103,9 @@ class Song
 				}
 			}
 		}
+
+        if(songJson.hudSkin==null)
+            songJson.hudSkin = 'default';
 	}
 
 	public function new(song, notes, bpm)

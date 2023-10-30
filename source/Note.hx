@@ -44,8 +44,8 @@ class Note extends NoteObject
 	public var mAngle:Float = 0;
 	public var bAngle:Float = 0;
 	
-	public var noteScript:FunkinScript;
-
+	public var noteScript:FunkinHScript;
+    public var genScript:FunkinHScript; // note generator script (used for shit like pixel notes or skin mods) ((script provided by the HUD skin))
 
 	public static var quants:Array<Int> = [
 		4, // quarter note
@@ -99,6 +99,7 @@ class Note extends NoteObject
 	// note type/customizable shit
 	
 	public var canQuant:Bool = true; // whether a quant texture should be searched for or not
+    public var noteMod(default, set):String = null; 
 	public var noteType(default, set):String = null;  // the note type
 	public var usesDefaultColours:Bool = true; // whether this note uses the default note colours (lets you change colours in options menu)
 	// This automatically gets set if a notetype changes the ColorSwap values
@@ -125,8 +126,9 @@ class Note extends NoteObject
 	public var noteSplashSat:Float = 0; // ditto, but for saturation
 	public var noteSplashBrt:Float = 0; // ditto, but for brightness
 	//public var ratingDisabled:Bool = false; // disables judging this note
-	public var missHealth:Float = 0; // damage when hitCausesMiss = true and you hit this note	
-	public var texture(default, set):String = null; // texture for the note
+	public var missHealth:Float = 0; // damage when hitCausesMiss = true and you hit this note
+    @:isVar	
+	public var texture(get, set):String; // texture for the note
 	public var noAnimation:Bool = false; // disables the animation for hitting this note
 	public var noMissAnimation:Bool = false; // disables the animation for missing this note
 	public var hitCausesMiss:Bool = false; // hitting this causes a miss
@@ -223,12 +225,13 @@ class Note extends NoteObject
 	}
 
 	private function set_texture(value:String):String {
-		if(texture != value) {
-			reloadNote('', value);
-		}
-		texture = value;
-		return value;
+        if(tex != value)reloadNote(texPrefix, value, texSuffix);
+        return tex;
 	}
+
+    function get_texture():String{
+        return tex;
+    }
 
 	public function updateColours(ignore:Bool=false){		
 		if(!ignore && !usesDefaultColours)return;
@@ -244,12 +247,97 @@ class Note extends NoteObject
 			colorSwap.brightness = ClientPrefs.arrowHSV[noteData % 4][2] / 100;
 		}
 
-		if (noteScript != null && noteScript.scriptType == 'hscript')
+		if (noteScript != null)
 		{
-			var noteScript:FunkinHScript = cast noteScript;
 			noteScript.executeFunc("onUpdateColours", [this], this);
 		}
+
+		if (genScript != null)
+		{
+			genScript.executeFunc("onUpdateColours", [this], this);
+		}
 	}
+
+    private function set_noteMod(value:String):String
+    {
+        if(value == null)
+            value = 'default';
+
+        updateColours();
+
+		colorSwap = new ColorSwap();
+		shader = colorSwap.shader;
+
+		// just to make sure they arent 0, 0, 0
+		colorSwap.hue += 0.0127;
+		colorSwap.saturation += 0.0127;
+		colorSwap.brightness += 0.0127;
+		var hue = colorSwap.hue;
+		var sat = colorSwap.saturation;
+		var brt = colorSwap.brightness;
+
+		if (usesDefaultColours)
+		{
+			if (colorSwap.hue != hue || colorSwap.saturation != sat || colorSwap.brightness != brt)
+			{
+				usesDefaultColours = false; // just incase
+			}
+		}
+
+		if (colorSwap.hue == hue)
+			colorSwap.hue -= 0.0127;
+
+		if (colorSwap.saturation == sat)
+			colorSwap.saturation -= 0.0127;
+
+		if (colorSwap.brightness == brt)
+			colorSwap.brightness -= 0.0127;
+
+		if (!inEditor && PlayState.instance != null){
+			var script = PlayState.instance.hudSkinScripts.get(value);
+            if(script == null){
+				var baseFile = 'hudskins/$value.hscript';
+				var files = [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)];
+				for (file in files)
+				{
+					if (!Paths.exists(file))
+						continue;
+                    script = FunkinHScript.fromFile(file, value);
+                    PlayState.instance.hscriptArray.push(script);
+                    PlayState.instance.funkyScripts.push(script);
+                    PlayState.instance.hudSkinScripts.set(value, script);
+                    
+                }
+
+            }
+			genScript = script;
+        }
+
+		if (genScript == null || !genScript.exists("setupNoteTexture")){
+			if (genScript != null)
+			{
+				if (genScript.exists("texturePrefix"))
+					texPrefix = genScript.get("texturePrefix");
+
+				if (genScript.exists("textureSuffix"))
+					texSuffix = genScript.get("textureSuffix");
+			}
+
+			texture = (genScript != null && genScript.exists("noteTexture")) ? genScript.get("noteTexture") : "";
+        }
+        else if(genScript.exists("setupNoteTexture"))
+            genScript.executeFunc("setupNoteTexture", [this]);
+        
+
+		if (!isSustainNote && noteData > -1 && noteData < 4)
+		{
+			var animToPlay:String = '';
+			animToPlay = colArray[noteData % 4];
+			animation.play(animToPlay + 'Scroll');
+        }
+
+        return noteMod = value;
+    }
 
 	private function set_noteType(value:String):String {
 		noteSplashTexture = PlayState.splashSkin;
@@ -264,6 +352,9 @@ class Note extends NoteObject
 		var sat = colorSwap.saturation;
 		var brt = colorSwap.brightness;
 
+
+        // TODO: add the ability to override these w/ scripts lol
+        
 		if(noteData > -1 && noteType != value) {
 			noteScript = null;
 			switch(value) {
@@ -290,13 +381,20 @@ class Note extends NoteObject
 				default:
 					if (!inEditor && PlayState.instance != null)
 						noteScript = PlayState.instance.notetypeScripts.get(value);
-					else if(inEditor && ChartingState.instance!=null)
-						noteScript = ChartingState.instance.notetypeScripts.get(value);
+					else if(inEditor && ChartingState.instance!=null){
+						var script:FunkinScript = ChartingState.instance.notetypeScripts.get(value);
+                        if(script.scriptType == 'hscript')
+						    noteScript = cast script;
+                    }
 					
-					if (noteScript != null && noteScript is FunkinHScript)
+					if (noteScript != null)
 					{
-						var noteScript:FunkinHScript = cast noteScript;
 						noteScript.executeFunc("setupNote", [this], this, ["this" => this]);
+					}
+
+					if (genScript != null)
+					{
+						genScript.executeFunc("setupNoteType", [this], this, ["this" => this]);
 					}
 			}
 
@@ -317,11 +415,15 @@ class Note extends NoteObject
 		if(colorSwap.brightness==brt)
 			colorSwap.brightness -= 0.0127;
 
-		if (noteScript != null && noteScript is FunkinHScript)
+		if (noteScript != null)
 		{
-			var noteScript:FunkinHScript = cast noteScript;
 			noteScript.executeFunc("postSetupNote", [this], this, ["this" => this]);
 		}
+
+		if (genScript != null)
+        {
+			genScript.executeFunc("postSetupNoteType", [this], this, ["this" => this]);
+        }
 
 		if(isQuant){
 			if (noteSplashTexture == 'noteSplashes' || noteSplashTexture == null || noteSplashTexture.length <= 0)
@@ -339,7 +441,7 @@ class Note extends NoteObject
 		return value;
 	}
 
-	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false, ?inEditor:Bool = false)
+	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false, ?inEditor:Bool = false, ?noteMod:String = 'default')
 	{
 		super();
 		
@@ -368,16 +470,7 @@ class Note extends NoteObject
 		}
 
 		if(noteData > -1) {
-			texture = '';
-			colorSwap = new ColorSwap();
-			shader = colorSwap.shader;
-
-			// x += swagWidth * (noteData);
-			if(!isSustainNote && noteData > -1 && noteData < 4) { //Doing this 'if' check to fix the warnings on Senpai songs
-				var animToPlay:String = '';
-				animToPlay = colArray[noteData % 4];
-				animation.play(animToPlay + 'Scroll');
-			}
+			this.noteMod = noteMod;
 		}
 
 		if(prevNote != null)
@@ -393,6 +486,10 @@ class Note extends NoteObject
 			//if(ClientPrefs.downScroll) flipY = true;
 
 			//offsetX += width* 0.5;
+
+
+			if (genScript != null && genScript.exists("setupHoldNoteTexture"))
+				genScript.executeFunc("setupHoldNoteTexture", [this]);
 
 			animation.play(colArray[noteData % 4] + 'holdend');
 
@@ -420,7 +517,7 @@ class Note extends NoteObject
 	public var originalHeightForCalcs:Float = 6;
 
 	public var texPrefix:String = '';
-	public var tex:String = '';
+	public var tex:String;
 	public var texSuffix:String = '';
 	public function reloadNote(?prefix:String = '', ?texture:String = '', ?suffix:String = '', ?dir:String = '', hInd:Int = 0, vInd:Int = 0) {
 		if(prefix == null) prefix = '';
@@ -430,10 +527,20 @@ class Note extends NoteObject
 		texPrefix = prefix;
 		tex = texture;
 		texSuffix = suffix;
-		if (noteScript != null && noteScript.scriptType == 'hscript')
+
+		if (genScript != null)
 		{
-			var noteScript:FunkinHScript = cast noteScript;
-			if (noteScript.executeFunc("onReloadNote", [this, prefix, texture, suffix], this) == Globals.Function_Stop)
+			genScript.executeFunc("onReloadNote", [this, prefix, texture, suffix], this);
+		}
+        
+		if (noteScript != null)
+		{
+			noteScript.executeFunc("onReloadNote", [this, prefix, texture, suffix], this);
+		}
+
+		if (genScript != null)
+		{
+			if (genScript.executeFunc("preReloadNote", [this, prefix, texture, suffix], this) == Globals.Function_Stop)
 				return;
 		}
 
@@ -467,21 +574,18 @@ class Note extends NoteObject
 			{
 				var texture = quantShitCache.get(dir + blahblah);
 
-				if (texture != null){
-					blahblah = texture;
-					isQuant = true;
-
-				}else if (Paths.exists(Paths.getPath("images/" + dir + "QUANT" + blahblah + ".png", IMAGE))
+				if (texture == null && (Paths.exists(Paths.getPath("images/" + dir + "QUANT" + blahblah + ".png", IMAGE))
 					#if MODS_ALLOWED
 					|| Paths.exists(Paths.modsImages(dir + "QUANT" + blahblah))
-					#end) {
+					#end)) {
 
-					var texture = "QUANT" + blahblah;
+					texture = "QUANT" + blahblah;
 					quantShitCache.set(dir + blahblah, texture);
-
-					blahblah = texture;
-					isQuant = true;
 				}
+				if (texture!=null){
+                    blahblah = texture;
+                    isQuant = true;
+                }
 			}
 
 			if (wasQuant != isQuant)
@@ -519,24 +623,41 @@ class Note extends NoteObject
 			updateHitbox();
 		}
 
-		if (noteScript != null && noteScript.scriptType == 'hscript')
+		if (genScript != null)
 		{
-			var noteScript:FunkinHScript = cast noteScript;
+			genScript.executeFunc("postReloadNote", [this, prefix, texture, suffix], this);
+		}
+
+		if (noteScript != null)
+		{
 			noteScript.executeFunc("postReloadNote", [this, prefix, texture, suffix], this);
 		}
+
+
 	}
 
 	public function loadIndNoteAnims()
 	{
-		if (noteScript != null && noteScript.scriptType == 'hscript')
+		var con = true;
+		if (noteScript != null)
 		{
-			var noteScript:FunkinHScript = cast noteScript;
 			if (noteScript.exists("loadIndNoteAnims") && Reflect.isFunction(noteScript.get("loadIndNoteAnims")))
 			{
 				noteScript.executeFunc("loadIndNoteAnims", [this], this, ["super" => _loadIndNoteAnims]);
-				return;
+				con = false;
 			}
 		}
+
+		if (genScript != null)
+		{
+			if (genScript.exists("loadIndNoteAnims") && Reflect.isFunction(genScript.get("loadIndNoteAnims")))
+			{
+				genScript.executeFunc("loadIndNoteAnims", [this], this, ["super" => _loadIndNoteAnims, "noteTypeLoaded" => con]);
+				con = false;
+			}
+		}
+		if (!con)
+			return;
 		_loadIndNoteAnims();
 	}
 
@@ -554,13 +675,24 @@ class Note extends NoteObject
 
 
 	public function loadNoteAnims() {
-		if (noteScript != null && noteScript.scriptType == 'hscript'){
-			var noteScript:FunkinHScript = cast noteScript;
+        var con = true;
+		if (noteScript != null){
 			if (noteScript.exists("loadNoteAnims") && Reflect.isFunction(noteScript.get("loadNoteAnims"))){
 				noteScript.executeFunc("loadNoteAnims", [this], this, ["super" => _loadNoteAnims]);
-				return;
+				con = false;
 			}
 		}
+
+		if (genScript != null)
+		{
+			if (genScript.exists("loadNoteAnims") && Reflect.isFunction(genScript.get("loadNoteAnims")))
+			{
+				genScript.executeFunc("loadNoteAnims", [this], this, ["super" => _loadNoteAnims, "noteTypeLoaded" => con]);
+				con = false;
+			}
+		}
+		if (!con)return;
+
 		_loadNoteAnims();
 	}
 
@@ -570,6 +702,7 @@ class Note extends NoteObject
 		if (isSustainNote)
 		{
 			animation.addByPrefix('purpleholdend', 'pruple end hold'); // ?????
+            // this is autistic wtf
 			animation.addByPrefix(colArray[noteData] + 'holdend', colArray[noteData] + ' hold end');
 			animation.addByPrefix(colArray[noteData] + 'hold', colArray[noteData] + ' hold piece');
 		}
@@ -583,10 +716,13 @@ class Note extends NoteObject
 		super.update(elapsed);
 
 		if(!inEditor){
-			if (noteScript != null && noteScript is FunkinHScript){
-				var noteScript:FunkinHScript = cast noteScript;
+			if (noteScript != null){
 				noteScript.executeFunc("noteUpdate", [elapsed], this);
 			}
+
+			if (genScript != null){
+				genScript.executeFunc("noteUpdate", [elapsed], this);
+            }
 		}
 		
 		colorSwap.daAlpha = alphaMod * alphaMod2;

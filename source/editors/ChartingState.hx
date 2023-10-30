@@ -66,6 +66,11 @@ class ChartingState extends MusicBeatState
 		'GF Sing',
 		'No Animation'
 	];
+
+    var hudList:Array<String> = [
+        'Default'
+    ];
+
 	private var noteTypeIntMap:Map<Int, String> = new Map<Int, String>();
 	private var noteTypeMap:Map<String, Null<Int>> = new Map<String, Null<Int>>();
 	public var ignoreWarnings = false;
@@ -565,6 +570,26 @@ class ChartingState extends MusicBeatState
 
 		////
 		var characters:Array<String> = Character.getCharacterList();
+        var skins:Array<String> = ['default'];
+        #if MODS_ALLOWED
+		var skinsLoaded:Map<String, Bool> = new Map();
+		var directories:Array<String> = Paths.getFolders('hudskins');
+		for (i in 0...directories.length) {
+			var directory:String = directories[i];
+			if(FileSystem.exists(directory)) {
+				for (file in FileSystem.readDirectory(directory)) {
+					var path = haxe.io.Path.join([directory, file]);
+					if (!FileSystem.isDirectory(path) && file.endsWith('.hscript')) {
+						var skinToCheck:String = file.substr(0, file.length - 8);
+						if(!skinsLoaded.exists(skinToCheck)) {
+							skins.push(skinToCheck);
+							skinsLoaded.set(skinToCheck, true);
+						}
+					}
+				}
+			}
+		}
+		#end
 
 		var player1DropDown = new FlxUIDropDownMenuCustom(10, stepperSpeed.y + 45, FlxUIDropDownMenuCustom.makeStrIdLabelArray(characters, true), function(character:String)
 		{
@@ -589,6 +614,13 @@ class ChartingState extends MusicBeatState
 		});
 		player2DropDown.selectedLabel = _song.player2;
 		blockPressWhileScrolling.push(player2DropDown);
+
+        var skinDropdown = new FlxUIDropDownMenuCustom(player1DropDown.x, player2DropDown.y + 40, FlxUIDropDownMenuCustom.makeStrIdLabelArray(skins, true), function(skin:String)
+		{
+			_song.hudSkin = skins[Std.parseInt(skin)];
+		});
+		skinDropdown.selectedLabel = _song.hudSkin;
+		blockPressWhileScrolling.push(skinDropdown);
 
 		////
 		var stages = Stage.getAllStages();
@@ -631,8 +663,10 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(clear_notes);
 		tab_group_song.add(saveButton);
 		tab_group_song.add(saveEvents);
-		tab_group_song.add(saveMetadata);
-		tab_group_song.add(loadMetadata);
+
+        // TODO: per-song metadata 
+/* 		tab_group_song.add(saveMetadata);
+		tab_group_song.add(loadMetadata); */
 		tab_group_song.add(reloadSong);
 		tab_group_song.add(reloadSongJson);
 		tab_group_song.add(loadAutosaveBtn);
@@ -644,7 +678,8 @@ class ChartingState extends MusicBeatState
 		//tab_group_song.add(noteSplashesInputText);
 		tab_group_song.add(new FlxText(stepperBPM.x, stepperBPM.y - 15, 0, 'Song BPM:'));
 		tab_group_song.add(new FlxText(stepperSpeed.x, stepperSpeed.y - 15, 0, 'Song Speed:'));
-		
+
+		tab_group_song.add(new FlxText(skinDropdown.x, skinDropdown.y - 15, 0, 'HUD Skin:'));
 		tab_group_song.add(new FlxText(player2DropDown.x, player2DropDown.y - 15, 0, 'Opponent:'));
 		tab_group_song.add(new FlxText(gfVersionDropDown.x, gfVersionDropDown.y - 15, 0, 'Girlfriend:'));
 		tab_group_song.add(new FlxText(player1DropDown.x, player1DropDown.y - 15, 0, 'Boyfriend:'));
@@ -657,6 +692,7 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(gfVersionDropDown);
 		tab_group_song.add(player1DropDown);
 		tab_group_song.add(stageDropDown);
+        tab_group_song.add(skinDropdown);
 
 		UI_box.addGroup(tab_group_song);
 

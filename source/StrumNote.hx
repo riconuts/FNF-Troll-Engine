@@ -1,5 +1,6 @@
 package;
 
+import scripts.FunkinHScript;
 #if !macro
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -60,24 +61,72 @@ class StrumNote extends NoteObject
 	{
 		zIndex = getZIndex();
 	}
+
+    public var noteMod(default, set):String;
+    public var genScript:FunkinHScript;
+
+    function set_noteMod(value:String){
+		if (PlayState.instance != null)
+		{
+            var script = PlayState.instance.hudSkinScripts.get(value);
+            if(script == null){
+				var baseFile = 'hudskins/$value.hscript';
+				var files = [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)];
+				for (file in files)
+				{
+					if (!Paths.exists(file))
+						continue;
+                    script = FunkinHScript.fromFile(file, value);
+                    PlayState.instance.hscriptArray.push(script);
+                    PlayState.instance.funkyScripts.push(script);
+                    PlayState.instance.hudSkinScripts.set(value, script);
+                }
+
+            }
+			genScript = script;
+		}
+		// trace(noteData);
+
+		if (genScript == null || !genScript.exists("setupReceptorTexture")){
+			var skin:String = 'NOTE_assets';
+			if (PlayState.SONG.arrowSkin != null && PlayState.SONG.arrowSkin.length > 1)
+				skin = PlayState.SONG.arrowSkin;
+
+			var newTex = (genScript != null && genScript.exists("texture")) ? genScript.get("texture") : skin;
+			if (genScript != null)
+			{
+				if (genScript.exists("texturePrefix"))
+					newTex = genScript.get("texturePrefix") + texture;
+
+				if (genScript.exists("textureSuffix"))
+					newTex += genScript.get("textureSuffix");
+			}
+
+			texture = newTex; // Load texture and anims
+            
+        }
+		else if (genScript.exists("setupReceptorTexture"))
+			genScript.executeFunc("setupReceptorTexture", [this]);
+
+        return noteMod = value;
+    }
 	
 
-	public function new(x:Float, y:Float, leData:Int) {
+	public function new(x:Float, y:Float, leData:Int, ?hudSkin:String = 'default') {
 		colorSwap = new ColorSwap();
 		shader = colorSwap.shader;
 		super(x, y);
 		noteData = leData;
-		// trace(noteData);
-
-		var skin:String = 'NOTE_assets';
-		if(PlayState.SONG.arrowSkin != null && PlayState.SONG.arrowSkin.length > 1) skin = PlayState.SONG.arrowSkin;
-		texture = skin; //Load texture and anims
+        
+        noteMod = hudSkin;
 
 		scrollFactor.set();
 	}
 
 	public function reloadNote()
 	{
+        // TODO: add indices support n shit
+
 		isQuant = false;
 		var lastAnim:String = null;
 		if(animation.curAnim != null) lastAnim = animation.curAnim.name;
@@ -133,13 +182,6 @@ class StrumNote extends NoteObject
 		}
 	}
 
-/* 	public function postAddedToGroup() {
-		playAnim('static');
-		x += Note.swagWidth * noteData;
-		x += 50;
-		x += ((FlxG.width* 0.5) * player);
-		ID = noteData;
-	} */
 	public function postAddedToGroup()
 	{
 		playAnim('static');
