@@ -73,6 +73,9 @@ class Note extends NoteObject
 	public var noteDiff:Float = 1000;
 
 	// quant shit
+    public var row(get, null):Int = 0;
+    function get_row()return Conductor.secsToRow(strumTime);
+    
 	public var quant:Int = 4;
 	public var extraData:Map<String, Dynamic> = [];
 	public var isQuant:Bool = false; // mainly for color swapping, so it changes color depending on which set (quants or regular notes)
