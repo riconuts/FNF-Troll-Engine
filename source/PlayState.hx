@@ -3976,10 +3976,6 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-
-/* 		breakCombo();
-		
-		health -= daNote.missHealth * healthLoss;	 */
 		
 		if (!mine){
 			songMisses++;
@@ -3990,24 +3986,6 @@ class PlayState extends MusicBeatState
 		}
 		
 		vocals.volume = 0;
-
-/* 		if(!practiceMode) 
-			songScore -= 10; */
-
-/* 		if(!daNote.isSustainNote ){
-			if (daNote.sustainLength > 0 && ClientPrefs.wife3)
-			{
-				totalPlayed += 2;
-				totalNotesHit += Wife3.holdDropWeight;
-			}else{
-				totalPlayed += ClientPrefs.wife3?2:1;
-				if(ClientPrefs.wife3)
-					totalNotesHit += mine?Wife3.mineWeight:Wife3.missWeight;
-			}
-			
-			if(!mine)displayJudgment("miss");
-			RecalculateRating();
-		} */
 
 		if (ClientPrefs.ghostTapping && !daNote.isSustainNote && ClientPrefs.missVolume > 0)
 			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), ClientPrefs.missVolume * FlxG.random.float(0.9, 1));

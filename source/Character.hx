@@ -350,6 +350,7 @@ class Character extends FlxSprite
 
 	override function update(elapsed:Float)
 	{
+        if(callOnScripts("onCharacterUpdate", [elapsed]) == Globals.Function_Stop)return;
 		if(!debugMode && animation.curAnim != null)
 		{
 			if(animTimer > 0){
@@ -413,6 +414,8 @@ class Character extends FlxSprite
 		}
 		super.update(elapsed);
 
+        
+
 		if(!debugMode){
 			if(animation.curAnim!=null){
 				var name = animation.curAnim.name;
@@ -429,6 +432,8 @@ class Character extends FlxSprite
 				}
 			}
 		}
+
+		callOnScripts("onCharacterUpdatePost", [elapsed]);
 	}
 
 	public var danced:Bool = false;
@@ -464,6 +469,13 @@ class Character extends FlxSprite
 			}
 		}
 	}
+
+    override function draw(){
+        if(callOnScripts("onDraw") == Globals.Function_Stop)
+            return;
+        super.draw();
+        callOnScripts("onDrawPost");
+    }
 
 	public var colorOverlay(default, set):FlxColor = FlxColor.WHITE;
 
