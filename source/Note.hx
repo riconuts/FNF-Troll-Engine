@@ -383,7 +383,7 @@ class Note extends NoteObject
 						noteScript = PlayState.instance.notetypeScripts.get(value);
 					else if(inEditor && ChartingState.instance!=null){
 						var script:FunkinScript = ChartingState.instance.notetypeScripts.get(value);
-                        if(script.scriptType == 'hscript')
+						if (script!=null && script.scriptType == 'hscript')
 						    noteScript = cast script;
                     }
 					

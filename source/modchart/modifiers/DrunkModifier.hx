@@ -63,6 +63,21 @@ class DrunkModifier extends NoteModifier {
             applyDrunk("Z", player, time, visualDiff, data)
             + applyTipsy("Z", player, time, visualDiff, data)
 			+ applyBumpy("", player, time, visualDiff, data);
+
+        // direction-specific
+		pos.x += 
+            applyDrunk('$data', player, time, visualDiff, data) 
+            + applyTipsy('X$data', player, time, visualDiff, data)
+			+ applyBumpy('X$data', player, time, visualDiff, data);
+		pos.y += 
+            applyDrunk('Y$data', player, time, visualDiff, data) 
+            + applyTipsy('$data', player, time, visualDiff, data)
+			+ applyBumpy('Y$data', player, time, visualDiff, data);
+		pos.z += 
+            applyDrunk('Z$data', player, time, visualDiff, data)
+            + applyTipsy('Z$data', player, time, visualDiff, data)
+			+ applyBumpy('$data', player, time, visualDiff, data);
+            
         return pos;
     }
 
@@ -75,47 +90,36 @@ class DrunkModifier extends NoteModifier {
     }
 
     override function getSubmods(){
-        return [
-            // Z
-            "bumpy",
-            "bumpyOffset",
-            "bumpyPeriod",
 
-			"tipsyZ",
-			"tipsyZSpeed",
-			"tipsyZOffset", 
-
-			"drunkZ",
-			"drunkZSpeed",
-			"drunkZOffset",
-			"drunkZPeriod",
-            // Y
-			"tipsy",
-			"tipsySpeed",
-			"tipsyOffset",
-
-			"bumpyY", 
-            "bumpyYOffset", 
-            "bumpyYPeriod",
-            
-			"drunkY",
-			"drunkYSpeed",
-			"drunkYOffset",
-			"drunkYPeriod",
-
-            // X
-			"tipsyX", 
-            "tipsyXSpeed",
-			"tipsyXOffset", 
-
-			"bumpyX",
-			"bumpyXOffset",
-			"bumpyXPeriod",
-
-			"drunkSpeed",
-			"drunkOffset",
-			"drunkPeriod"
+        var axes = ["X", "Y", "Z"];
+        var props = [
+		    ["Speed", "Offset", "Period"],
+		    ["Speed", "Offset"],
+		    ["Offset", "Period"]
         ];
+
+        var shids:Array<String> = ["drunk","tipsy","bumpy"];
+        var submods:Array<String> = [];
+
+        
+        for(i in 0...shids.length){
+            var mod = shids[i];
+            for(a in 0...axes.length){
+                var axe = axes[a];
+                if(a==i)axe='';
+                submods.push('$mod$axe');
+                var p = props[i];
+                for(prop in p)submods.push('$mod$axe$prop');
+                
+                for(d in 0...4){
+                    submods.push('$mod$axe$d');
+                    for(prop in p)submods.push('$mod$axe$d$prop');
+                }
+            }
+        }
+        
+        submods.remove("drunk");
+        return submods;
     }
 
 }
