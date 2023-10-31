@@ -13,6 +13,7 @@ import lime.app.Application;
 
 import hscript.*;
 import scripts.Globals.*;
+using StringTools;
 
 class FunkinHScript extends FunkinScript
 {
@@ -406,13 +407,18 @@ class FunkinHScript extends FunkinScript
 @:noScripting // honestly we could prob use the scripting thing to override shit instead
 class HScriptState extends MusicBeatState
 {
+    var file:String = '';
 	public function new(fileName:String, ?additionalVars:Map<String, Any>)
 	{
 		super(false); // false because the whole point of this state is its scripted lol
 
+        file = fileName;
 		for (filePath in Paths.getFolders("states"))
 		{
-			var name = filePath + fileName;
+            var name = filePath + fileName;
+			if (!name.endsWith(".hscript"))
+				name += ".hscript";
+            trace(filePath, name);
 			if (!Paths.exists(name)) continue;
 
 			// some shortcuts
@@ -474,6 +480,12 @@ class HScriptState extends MusicBeatState
 
     override function update(e)
 	{
+        if(FlxG.keys.justPressed.F7)
+            if(FlxG.keys.pressed.CONTROL)
+				FlxG.switchState(new FreeplayState());
+            else
+				FlxG.switchState(new HScriptState(file));
+
 		if (script.call("onUpdate", [e]) == Globals.Function_Stop)
 			return;
 
