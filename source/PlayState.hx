@@ -2017,7 +2017,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		allNotes.sort(sortByTime);
+		allNotes.sort(sortByNotes);
 
 		for(fuck in allNotes)
 			unspawnNotes.push(fuck);
@@ -2278,6 +2278,11 @@ class PlayState extends MusicBeatState
 	function sortByZIndex(Obj1:{zIndex:Float}, Obj2:{zIndex:Float}):Int
 	{
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.zIndex, Obj2.zIndex);
+	}
+
+    function sortByNotes(Obj1:Note, Obj2:Note):Int
+	{
+		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.strumTime, Obj2.strumTime);
 	}
 
 	function sortByTime(Obj1:{strumTime:Float}, Obj2:{strumTime:Float}):Int
