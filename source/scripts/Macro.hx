@@ -525,6 +525,7 @@ class Macro {
                                 var file = filePath + "extension/" + $v{className} + ".hscript";
                                 if (Paths.exists(file))
                                 {
+                                    // TODO: make this an array so you can have mutliple extensions lol
                                     script = scripts.FunkinHScript.fromFile(file, $v{className}, defaultVars);
                                     script.call("new", []);
                                     break;
