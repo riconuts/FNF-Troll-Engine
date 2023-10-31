@@ -37,6 +37,18 @@ class Conductor
 	// its 48 in ITG but idk because FNF doesnt work w/ note rows
 	public static var ROWS_PER_MEASURE:Int = ROWS_PER_BEAT*4;
 
+	public static var MAX_NOTE_ROW = 1 << 30; // from Stepmania
+
+	public inline static function beatToRow(beat:Float):Int
+		return Math.round(beat * ROWS_PER_BEAT);
+
+	public inline static function rowToBeat(row:Int):Float
+		return row / ROWS_PER_BEAT;
+
+	public inline static function secsToRow(sex:Float):Int
+		return Math.round(getBeat(sex) * ROWS_PER_BEAT);
+    
+
 	public static var bpm:Float = 100;
 	public static var crochet:Float = ((60 / bpm) * 1000); // beats in milliseconds
 	public static var stepCrochet:Float = crochet / 4; // steps in milliseconds

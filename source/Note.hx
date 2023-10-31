@@ -73,8 +73,7 @@ class Note extends NoteObject
 	public var noteDiff:Float = 1000;
 
 	// quant shit
-    public var row(get, null):Int = 0;
-    function get_row()return Conductor.secsToRow(strumTime);
+    public var row:Int = 0;
     
 	public var quant:Int = 4;
 	public var extraData:Map<String, Dynamic> = [];
@@ -82,7 +81,11 @@ class Note extends NoteObject
 	
 	// basic stuff
 	public var beat:Float = 0;
-	public var strumTime:Float = 0;
+	public var strumTime(default, set):Float = 0;
+    function set_strumTime(val:Float){
+        row = Conductor.secsToRow(val);
+        return strumTime=val;
+    }
 	public var visualTime:Float = 0;
 	public var mustPress:Bool = false;
 	@:isVar
