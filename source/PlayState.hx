@@ -3672,7 +3672,13 @@ class PlayState extends MusicBeatState
 		if (callOnHScripts("onApplyNoteJudgment", [note, judgeData, bot]) == Globals.Function_Stop)
 			return null;
 
-		var mutatedJudgeData:Dynamic = callOnHScripts("mutateJudgeData", [note, judgeData]);
+        if (note.noteScript != null){
+			var mutatedJudgeData:Dynamic = callScript(note.noteScript, "mutateJudgeData", [note, judgeData]);
+			if (mutatedJudgeData != null && mutatedJudgeData != Globals.Function_Continue)
+				judgeData = cast mutatedJudgeData;
+        }
+        var mutatedJudgeData:Dynamic = callOnHScripts("mutateJudgeData", [note, judgeData]);
+
 		if(mutatedJudgeData != null && mutatedJudgeData != Globals.Function_Continue)
 			judgeData = cast mutatedJudgeData; // so you can return your own custom judgements or w/e
 		// Note: Be careful while changing values from the judgeData, cause it will also change the judgeData of every other note with the same judgement.
