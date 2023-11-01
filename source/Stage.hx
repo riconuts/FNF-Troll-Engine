@@ -148,7 +148,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		#if MODS_ALLOWED
 		var modsList = Paths.getText('data/stageList.txt', false);
 		if (modsList != null)
-			for (shit in modsList.split("\n"))daList.push(shit);
+			for (shit in modsList.split("\n"))daList.push(shit.trim().replace("\n",""));
 		
 		var path = Paths.modFolders("metadata.json");
 		var rawJson:Null<String> = Paths.getContent(path);
@@ -161,7 +161,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 				var data:ContentMetadata = cast daJson;
 				for (stage in data.titleStages)
 				{
-					daList.push(stage);
+					daList.push(stage.trim().replace("\n",""));
 				}
 			}
 		}
