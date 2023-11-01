@@ -231,6 +231,10 @@ class MusicBeatState extends FlxUIState
 			#if MODS_ALLOWED
 			for (mod in Paths.getGlobalContent())
 				fuck.insert(0, Paths.mods(mod));
+			for (mod in Paths.preLoadContent)
+				fuck.push(Paths.mods(mod));
+			for (mod in Paths.postLoadContent)
+				fuck.insert(0, Paths.mods(mod));
 			#end
 			for (folder in fuck){
 				var daPath = Path.join([folder, "music"]);

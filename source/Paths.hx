@@ -58,6 +58,8 @@ typedef ContentMetadata = {
 class Paths
 {
 	public static var globalContent:Array<String> = [];
+	public static var preLoadContent:Array<String> = [];
+	public static var postLoadContent:Array<String> = [];
 
 	inline public static var SOUND_EXT = "ogg";
 	inline public static var VIDEO_EXT = "mp4";
@@ -641,7 +643,9 @@ class Paths
 			foldersToCheck.push(Paths.getPreloadPath('$dir/'));
 
 		#if MODS_ALLOWED
+		for(mod in preLoadContent)foldersToCheck.push(Paths.mods('$mod/$dir/'));
 		for(mod in getGlobalContent())foldersToCheck.insert(0, Paths.mods('$mod/$dir/'));
+        for(mod in postLoadContent)foldersToCheck.insert(0, Paths.mods('$mod/$dir/'));
 		#end
 
 		return foldersToCheck;
