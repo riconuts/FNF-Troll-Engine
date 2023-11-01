@@ -65,9 +65,19 @@ class NoteOffsetState extends MusicBeatState
 		FlxG.sound.pause();
 
 		//// Stage
-		stage = new Stage("stage1");
-		stage.buildStage();
-		add(stage);
+		var randomStage = TitleState.getRandomStage();
+		if (randomStage != null)
+		{
+			Paths.currentModDirectory = randomStage[1];
+			
+			stage = new Stage(randomStage[0]);
+			stage.buildStage();
+			add(stage);
+		
+		}else{
+			stage = new Stage();
+			add(stage);	
+		}
 
 		var stageData = stage.stageData;
 		var bgColor = FlxColor.fromString(stageData.bg_color);
@@ -98,12 +108,6 @@ class NoteOffsetState extends MusicBeatState
 		boyfriend.x += boyfriend.positionArray[0];
 		boyfriend.y += boyfriend.positionArray[1];
 		add(boyfriend);
-
-		// Focus camera on Boyfriend
-		FlxG.camera.scroll.set(
-			-FlxG.width * 0.5 + boyfriend.x + boyfriend.width * 0.5 + (boyfriend.cameraPosition[0] + 150) * boyfriend.xFacing,
-			-FlxG.height * 0.5 + boyfriend.y + boyfriend.height * 0.5 + boyfriend.cameraPosition[1] - 100
-		);
 
 		// Stage Foreground
 		add(stage.foreground);
@@ -201,6 +205,13 @@ class NoteOffsetState extends MusicBeatState
 
 		Conductor.changeBPM(128.0);
 		FlxG.sound.playMusic(Paths.music('offsetSong'), 1, true);
+
+		// Focus camera on Boyfriend
+		var bfCam = boyfriend.getCamera();
+		var camFollowPos = new FlxObject(bfCam[0], bfCam[1]);
+		add(camFollowPos);
+		
+		camGame.follow(camFollowPos);
 
 		super.create();
 	}

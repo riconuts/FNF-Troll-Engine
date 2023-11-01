@@ -46,26 +46,31 @@ class TitleState extends MusicBeatState
 	public var camFollow = new FlxPoint(640, 360);
 	public var camFollowPos = new FlxObject(640, 360, 1, 1);
 	
-	static public function load()
-	{
-		curWacky = FlxG.random.getObject(getIntroTextShit());
-		
+	static public function getRandomStage(){
 		// Set up a stage list
 		var stages:Array<Array<String>> = []; // [stage name, mod directory]
-		
+
 		Paths.currentModDirectory = "";
 		for (stage in Stage.getTitleStages())
 			stages.push([stage, ""]);
 
 		#if MODS_ALLOWED
-		for (mod in Paths.getModDirectories()){
+		for (mod in Paths.getModDirectories())
+		{
 			Paths.currentModDirectory = mod;
 			for (stage in Stage.getTitleStages(true))
 				stages.push([stage, mod]);
 		}
 		#end
 
-		var randomStage = FlxG.random.getObject(stages); // Get a random stage from the list
+		return FlxG.random.getObject(stages); // Get a random stage from the list
+	}
+
+	static public function load()
+	{
+		curWacky = FlxG.random.getObject(getIntroTextShit());
+		
+		var randomStage = getRandomStage();
 
 		if (randomStage != null){
 			Paths.currentModDirectory = randomStage[1];
