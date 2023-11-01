@@ -2270,7 +2270,11 @@ class PlayState extends MusicBeatState
 	}
 
 	override function draw(){
-		camStageUnderlay.bgColor.alphaFloat = ClientPrefs.stageOpacity;
+        if(!(subState is GameOverSubstate))
+		    camStageUnderlay.bgColor.alphaFloat = ClientPrefs.stageOpacity;
+        else
+            camStageUnderlay.bgColor.alphaFloat = 0;
+
         var ret:Dynamic = callOnScripts('onStateDraw');
 		if(ret != Globals.Function_Stop) 
 		    super.draw();
@@ -2306,6 +2310,7 @@ class PlayState extends MusicBeatState
 
 	override function openSubState(SubState:FlxSubState)
 	{
+        camStageUnderlay.bgColor.alphaFloat = 0;
 		if (paused)
 		{
 			if (inst != null)
