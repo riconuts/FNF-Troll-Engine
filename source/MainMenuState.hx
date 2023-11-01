@@ -180,7 +180,7 @@ class MainMenuState extends MusicBeatState
 		engineWatermark.setFormat(Paths.font("calibrib.ttf"), 16, Main.outOfDate?FlxColor.RED:FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
 		add(engineWatermark);
 		#if (tgt && final)
-		engineWatermark.text += "Tails Gets Trolled v" + lime.app.Application.current.meta.get('version');
+		engineWatermark.text += " | Tails Gets Trolled v" + lime.app.Application.current.meta.get('version');
 		#elseif debug
 		engineWatermark.text += ' [${Sowy.getBuildDate()}]';
 		#else
