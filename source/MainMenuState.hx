@@ -179,7 +179,9 @@ class MainMenuState extends MusicBeatState
 		engineWatermark = new FlxText(0, 0, 0, 'Troll Engine');
 		engineWatermark.setFormat(Paths.font("calibrib.ttf"), 16, Main.outOfDate?FlxColor.RED:FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
 		add(engineWatermark);
-		#if debug
+		#if (tgt && final)
+		engineWatermark.text += "Tails Gets Trolled v" + lime.app.Application.current.meta.get('version');
+		#elseif debug
 		engineWatermark.text += ' [${Sowy.getBuildDate()}]';
 		#else
 		engineWatermark.text += ' $displayedVersion';
