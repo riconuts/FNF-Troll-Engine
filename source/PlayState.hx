@@ -2461,7 +2461,7 @@ class PlayState extends MusicBeatState
 
 			callOnHScripts('onSpawnNotePost', [dunceNote]);
 			if (dunceNote.noteScript != null)
-				callScript(script, "postSpawnNote", [dunceNote]);
+				callScript(dunceNote.noteScript, "postSpawnNote", [dunceNote]);
 		});
 	}
 
@@ -3165,11 +3165,8 @@ class PlayState extends MusicBeatState
 				}
 		}
 		callOnScripts('onEvent', [eventName, value1, value2, time]);
-		if(eventScripts.exists(eventName)){
-			var script = eventScripts.get(eventName);
-
-			callScript(script, "onTrigger", [value1, value2, time]);
-		}
+		if(eventScripts.exists(eventName))
+			callScript(eventScripts.get(eventName), "onTrigger", [value1, value2, time]);
 	}
 
 	//// Kinda rewrote the camera shit so that its 'easier' to mod
@@ -4004,7 +4001,7 @@ class PlayState extends MusicBeatState
 		callOnLuas('noteMiss', [notes.members.indexOf(daNote), daNote.noteData, daNote.noteType, daNote.isSustainNote, daNote.ID]);
 		#end
 		if (daNote.noteScript != null)
-			callScript(script, "noteMiss", [daNote, field]);
+			callScript(daNote.noteScript, "noteMiss", [daNote, field]);
 	}
 
 	function noteMissPress(direction:Int = 1):Void //You pressed a key when there was no notes to press for this key
@@ -4054,7 +4051,7 @@ class PlayState extends MusicBeatState
 
 	function opponentNoteHit(note:Note, field:PlayField):Void
 	{
-		if (note.noteScript != null && callScript(script, "preOpponentNoteHit", [note, field]) == Globals.Function_Stop)
+		if (note.noteScript != null && callScript(note.noteScript, "preOpponentNoteHit", [note, field]) == Globals.Function_Stop)
 			return;
 		if (callOnHScripts("preOpponentNoteHit", [note, field]) == Globals.Function_Stop)
 			return;
@@ -4109,7 +4106,7 @@ class PlayState extends MusicBeatState
 		// Script shit
 		callOnHScripts("opponentNoteHit", [note, field]);
 		if (note.noteScript != null)
-			callScript(script, "opponentNoteHit", [note, field]);	
+			callScript(note.noteScript, "opponentNoteHit", [note, field]);	
 		
 		#if LUA_ALLOWED
 		callOnLuas('opponentNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote, note.ID]);
