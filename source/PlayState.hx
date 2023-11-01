@@ -446,6 +446,9 @@ class PlayState extends MusicBeatState
 	override public function create()
 	{
 		Highscore.loadData();
+
+        Paths.preLoadContent = [];
+		Paths.postLoadContent = [];
 		
 		Conductor.safeZoneOffset = ClientPrefs.hitWindow;
 		Wife3.timeScale = Conductor.judgeScales.get(ClientPrefs.judgeDiff);
