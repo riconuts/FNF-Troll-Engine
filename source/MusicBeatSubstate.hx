@@ -16,7 +16,7 @@ import flixel.FlxSprite;
 ], "substates"))
 class MusicBeatSubstate extends FlxSubState
 {
-	public var script:FunkinHScript = FunkinHScript.blankScript();
+	public var script:FunkinHScript;
 
 	private var lastBeat:Float = 0;
 	private var lastStep:Float = 0;
@@ -30,6 +30,14 @@ class MusicBeatSubstate extends FlxSubState
 
 	inline function get_controls():Controls
 		return PlayerSettings.player1.controls;
+    
+	override public function destroy()
+	{
+		if (script != null)
+			script.stop();
+		return super.destroy();
+	}
+
 
 	override function update(elapsed:Float)
 	{
