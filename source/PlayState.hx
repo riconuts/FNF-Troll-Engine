@@ -3354,7 +3354,7 @@ class PlayState extends MusicBeatState
 					CustomFadeTransition.nextCamera = null;
 
 				#if VIDEOS_ALLOWED
-				var videoPath:String = Paths.video(songName + '-end');
+				var videoPath:String = Paths.video(Paths.formatToSongPath(songName + '-end'));
 				if (Paths.exists(videoPath))
 					MusicBeatState.switchState(new VideoPlayerState(videoPath, gotoMenus));
 				else
@@ -3378,7 +3378,7 @@ class PlayState extends MusicBeatState
 				}
 
 				#if VIDEOS_ALLOWED
-				var videoPath:String = Paths.video(nextSong);
+				var videoPath:String = Paths.video(Paths.formatToSongPath(nextSong));
 				if (Paths.exists(videoPath))
 					MusicBeatState.switchState(new VideoPlayerState(videoPath, playNextSong));
 				else #end
