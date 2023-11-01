@@ -38,7 +38,7 @@ class ClientPrefs
 				display: "Controller Mode",
 				desc: "When toggled, lets you play the game with a controller instead.",
 				type: Toggle,
-				value: true,
+				value: false,
 				data: []
 			},
 			"ghostTapping" => {
@@ -596,7 +596,7 @@ class ClientPrefs
 		'ui_up' => [W, UP],
 		'ui_right' => [D, RIGHT],
 		'accept' => [SPACE, ENTER],
-		'back' => [ESCAPE, NONE],
+		'back' => [ESCAPE, BACKSPACE],
 		'pause' => [ENTER, ESCAPE],
 		'reset' => [R, NONE],
 		'volume_mute' => [ZERO, NONE],
