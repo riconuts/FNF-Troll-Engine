@@ -86,23 +86,20 @@ class NewBindsSubstate extends MusicBeatSubstate  {
     var popupTitle:FlxText;
     var popupText:FlxText;
     var unbindText:FlxText;
-    
-    public function new() {
-		super();
+
+	override public function create()
+	{
+		super.create();
         
         FlxG.cameras.add(cam, false);
 		FlxG.cameras.add(scrollableCam, false);
 		FlxG.cameras.add(overCam, false);
+		
 		scrollableCam.bgColor.alpha = 0;
         cam.bgColor.alpha = 0;
 		overCam.bgColor.alpha = 0;
-        var backdrop = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
-        backdrop.setGraphicSize(FlxG.width, FlxG.height);
-		backdrop.updateHitbox();
-		backdrop.screenCenter(XY);
-		backdrop.alpha = 0.5;
-		backdrop.cameras = [cam];
-        add(backdrop);
+
+		overCam.alpha = 0;
 
 		var overbackdrop = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
 		overbackdrop.setGraphicSize(FlxG.width, FlxG.height);
@@ -112,7 +109,9 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 		overbackdrop.cameras = [overCam];
 		add(overbackdrop);
 
-		var popupDrop:FlxUI9SliceSprite = new FlxUI9SliceSprite(0, 0, Paths.image("optionsMenu/backdrop"),
+		var backdropGraphic = Paths.image("optionsMenu/backdrop");
+
+		var popupDrop:FlxUI9SliceSprite = new FlxUI9SliceSprite(0, 0, backdropGraphic,
 			new Rectangle(0, 0, 880, 225), [22, 22, 89, 89]);
 		popupDrop.cameras = [overCam];
 		popupDrop.screenCenter(XY);
@@ -139,11 +138,6 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 		optionMenu.screenCenter(XY);
 		add(optionMenu);
 
-		scrollableCam.alpha = 0;
-		cam.alpha = 0;
-		overCam.alpha = 0;
-		FlxTween.tween(scrollableCam, {alpha: 1}, 0.5, {ease: FlxEase.quadOut});
-		FlxTween.tween(cam, {alpha: 1}, 0.5, {ease: FlxEase.quadOut});
 
 		scrollableCam.width = Std.int(optionMenu.width);
 		scrollableCam.height = Std.int(optionMenu.height);
@@ -175,12 +169,14 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 				var height = text.height + 12;
 				if (height < 45)
 					height = 45;
-				var drop:FlxUI9SliceSprite = new FlxUI9SliceSprite(text.x - 12, text.y, Paths.image("optionsMenu/backdrop"), new Rectangle(0, 0, optionMenu.width - text.x - 8, height), [22, 22, 89, 89]);
+				var drop:FlxUI9SliceSprite = new FlxUI9SliceSprite(text.x - 12, text.y, backdropGraphic, new Rectangle(0, 0, optionMenu.width - text.x - 8, height), [22, 22, 89, 89]);
 				drop.cameras = [scrollableCam];
 				text.y += (height - text.height) / 2;
 
-				var prButt:BindButton = new BindButton(drop.x + drop.width - 40, drop.y, new Rectangle(0, 0, 200, height - 10),
-					ClientPrefs.keyBinds.get(internal)[0]);
+
+				var rect = new Rectangle(0, 0, 200, height - 10);
+
+				var prButt:BindButton = new BindButton(drop.x + drop.width - 40, drop.y, rect, ClientPrefs.keyBinds.get(internal)[0]);
 				prButt.x -= prButt.width * 2;
 				prButt.y += 5;
 				prButt.ID = idx;
@@ -188,7 +184,7 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 				buttArray.push(prButt);
 
 
-				var secButt:BindButton = new BindButton(drop.x + drop.width - 20, drop.y, new Rectangle(0, 0, 200, height - 10), ClientPrefs.keyBinds.get(internal)[1]);
+				var secButt:BindButton = new BindButton(drop.x + drop.width - 20, drop.y, rect, ClientPrefs.keyBinds.get(internal)[1]);
 				secButt.x -= secButt.width;
 				secButt.y += 5;
 				secButt.ID = idx;
@@ -218,10 +214,11 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 		text.cameras = [scrollableCam];
 		text.setFormat(Paths.font("calibri.ttf"), 28, 0xFFFFFFFF, FlxTextAlign.LEFT);
 		text.updateHitbox();
+		
 		var height = text.height + 12;
-		if (height < 45)
-			height = 45;
-		resetBinds = new FlxUI9SliceSprite(text.x - 12, text.y, Paths.image("optionsMenu/backdrop"),
+		if (height < 45) height = 45;
+
+		resetBinds = new FlxUI9SliceSprite(text.x - 12, text.y, backdropGraphic,
 			new Rectangle(0, 0, optionMenu.width - text.x - 8, height), [22, 22, 89, 89]);
 		resetBinds.cameras = [scrollableCam];
 		text.y += (height - text.height) / 2;
@@ -238,7 +235,10 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 
     override function update(elapsed:Float){
         super.update(elapsed);
-        
+
+		var lerpVal = (elapsed / (1 / 60));
+		cam.bgColor = FlxColor.interpolate(cam.bgColor, 0x80000000, lerpVal * 0.1);
+
         if(bindIndex == -1){
 			if (controls.BACK)
 			{
@@ -308,8 +308,6 @@ class NewBindsSubstate extends MusicBeatSubstate  {
             if (camFollow.y > height)
                 camFollow.y = height; 
 
-
-            var lerpVal = 0.2 * (elapsed / (1 / 60));
             camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
             if (camFollowPos.y < 0)
                 camFollowPos.y = 0;
@@ -317,12 +315,10 @@ class NewBindsSubstate extends MusicBeatSubstate  {
             if (camFollowPos.y > height)
                 camFollowPos.y = height; 
 
-			if (overCam!=null)
-				overCam.alpha = FlxMath.lerp(overCam.alpha, 0, lerpVal);
+			overCam.alpha = FlxMath.lerp(overCam.alpha, 0, lerpVal * 0.2);
         }else{
-			var lerpVal = 0.2 * (elapsed / (1 / 60));
-			if (overCam != null)
-				overCam.alpha = FlxMath.lerp(overCam.alpha, 1, lerpVal);
+			overCam.alpha = FlxMath.lerp(overCam.alpha, 1, lerpVal * 0.2);
+
 			var keyPressed:FlxKey = FlxG.keys.firstJustPressed();
 			if (keyPressed == BACKSPACE)
 			{
