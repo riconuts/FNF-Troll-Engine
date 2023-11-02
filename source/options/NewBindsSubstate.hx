@@ -95,9 +95,9 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 		FlxG.cameras.add(scrollableCam, false);
 		FlxG.cameras.add(overCam, false);
 		
-		scrollableCam.bgColor.alpha = 0;
-        cam.bgColor.alpha = 0;
-		overCam.bgColor.alpha = 0;
+		scrollableCam.bgColor = 0x00000000;
+		cam.bgColor = 0x00000000;
+		overCam.bgColor = 0x00000000;
 
 		overCam.alpha = 0;
 
