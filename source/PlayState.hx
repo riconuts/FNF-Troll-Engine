@@ -2515,6 +2515,8 @@ class PlayState extends MusicBeatState
 			script.call("onUpdate", [elapsed]);
 		*/
 		callOnScripts('onUpdate', [elapsed]);
+        if (hudSkinScript != null)
+            hudSkinScript.call("onUpdate", [elapsed]);
 		//callOnScripts('onUpdate', [elapsed], null, null, null, null, false);
 
 		if (inst.playing && !inCutscene && health > healthDrain)
@@ -2732,6 +2734,8 @@ class PlayState extends MusicBeatState
 		setOnScripts('cameraX', camFollowPos.x);
 		setOnScripts('cameraY', camFollowPos.y);
 		callOnScripts('onUpdatePost', [elapsed]);
+        if (hudSkinScript != null)
+            hudSkinScript.call("onUpdatePost", [elapsed]);
 	}
 
 	function openChartEditor()
