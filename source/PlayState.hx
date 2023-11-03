@@ -3511,7 +3511,7 @@ class PlayState extends MusicBeatState
 
         if(hudSkinScript!=null)
             callScript(hudSkinScript, "onDisplayJudgmentPost", [rating, image]);
-        callOnScripts("onDisplayJudgmentPost", [image]);
+        callOnScripts("onDisplayJudgmentPost", [rating, image]);
 	}
 	var comboColor = 0xFFFFFFFF;
 
