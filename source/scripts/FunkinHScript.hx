@@ -175,6 +175,9 @@ class FunkinHScript extends FunkinScript
 			}
 		}
 
+		set("FlxParticle", flixel.effects.particles.FlxParticle); // for some reason these cant be imported so
+		set("FlxTypedEmitter", flixel.effects.particles.FlxEmitter.FlxTypedEmitter);
+
 		set("controls", PlayerSettings.player1.controls);
 
 		// FNF-specific things
