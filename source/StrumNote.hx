@@ -1,5 +1,6 @@
 package;
 
+import playfields.PlayField;
 import scripts.FunkinHScript;
 #if !macro
 import flixel.FlxG;
@@ -111,10 +112,12 @@ class StrumNote extends NoteObject
         return noteMod = value;
     }
 	
+    var field:PlayField;
 
-	public function new(x:Float, y:Float, leData:Int, ?hudSkin:String = 'default') {
+	public function new(x:Float, y:Float, leData:Int, ?field:PlayField, ?hudSkin:String = 'default') {
 		colorSwap = new ColorSwap();
 		shader = colorSwap.shader;
+        this.field = field;
 		super(x, y);
 		noteData = leData;
         

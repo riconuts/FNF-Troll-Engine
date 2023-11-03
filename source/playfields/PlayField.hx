@@ -312,7 +312,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	// generates the receptors
 	public function generateStrums(){
 		for(i in 0...keyCount){
-			var babyArrow:StrumNote = new StrumNote(0, 0, i, (FlxG.state == PlayState.instance) ? PlayState.instance.hudSkin : 'default');
+			var babyArrow:StrumNote = new StrumNote(0, 0, i, this, (FlxG.state == PlayState.instance) ? PlayState.instance.hudSkin : 'default');
 			babyArrow.downScroll = ClientPrefs.downScroll;
 			babyArrow.alpha = 0;
 			insert(0, babyArrow);

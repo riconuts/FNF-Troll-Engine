@@ -447,7 +447,7 @@ class Note extends NoteObject
 		return value;
 	}
 
-	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false, ?inEditor:Bool = false, ?noteMod:String = 'default')
+	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?gottaHitNote:Bool = false, ?sustainNote:Bool = false, ?inEditor:Bool = false, ?noteMod:String = 'default')
 	{
 		super();
 		
@@ -456,6 +456,7 @@ class Note extends NoteObject
 		this.prevNote = (prevNote==null) ? this : prevNote;
 		this.isSustainNote = sustainNote;
 		this.inEditor = inEditor;
+		this.mustPress = gottaHitNote;
 
 		if (canQuant && ClientPrefs.noteSkin == 'Quants'){
 			if(prevNote != null && isSustainNote)

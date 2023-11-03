@@ -147,15 +147,15 @@ class FunkinHScript extends FunkinScript
 		for(variable => arg in defaultVars)
 			set(variable, arg);
 		
-		var state:Any = flixel.FlxG.state;
+		var state:Any = FlxG.state;
 		@:privateAccess
 		{
 			set("state", state);
+			set("game", state);
 
 			if((state is PlayState) && state == PlayState.instance){
 				var state:PlayState = PlayState.instance;
 
-				set("game", state);
 				set("global", state.variables);
 				set("getInstance", getInstance);
 
@@ -163,15 +163,14 @@ class FunkinHScript extends FunkinScript
 			else if ((state is ChartingState) && state == ChartingState.instance){
 				var state:ChartingState = ChartingState.instance;
 
-				set("game", state);
+				
 				set("global", state.variables);
-				set("getInstance", flixel.FlxG.get_state);
+				set("getInstance", FlxG.get_state);
 
 			}
 			else{
-				set("game", null);
 				set("global", null);
-				set("getInstance", flixel.FlxG.get_state);
+				set("getInstance", FlxG.get_state);
 
 			}
 		}
