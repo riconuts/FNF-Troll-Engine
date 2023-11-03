@@ -222,23 +222,30 @@ class FunkinHScript extends FunkinScript
 		set("EaseEvent", modchart.events.EaseEvent);
 		set("SetEvent", modchart.events.SetEvent);
 
+        // TODO: create a compatibility wrapper for the various versions
+        // (so you can use any version of hxcodec and use the same versions)
 		#if !VIDEOS_ALLOWED 
+        set("hxcodec", "0");
 		set("MP4Handler", null);
 		set("MP4Sprite", null);
 		#elseif (hxCodec >= "3.0.0") 
+		set("hxcodec", "3.0.0");
 		set("MP4Handler", hxcodec.flixel.FlxVideo);
-		set("MP4Sprite", null); // idk how hxcodec 3.0.0 works :clueless:
+		set("MP4Sprite", hxcodec.flixel.FlxVideoSprite); // idk how hxcodec 3.0.0 works :clueless:
 		#elseif (hxCodec >= "2.6.1")
+		set("hxcodec", "2.6.1");
 		set("MP4Handler", hxcodec.VideoHandler);
 		set("MP4Sprite", hxcodec.VideoSprite);
 		#elseif (hxCodec == "2.6.0") 
+		set("hxcodec", "2.6.0");
         set("MP4Handler", VideoHandler);
 		set("MP4Sprite", VideoSprite);
 		#elseif (hxCodec)
+		set("hxcodec", "1.0.0");
 		set("MP4Handler", vlc.MP4Handler);
 		set("MP4Sprite", vlc.MP4Sprite);
         #end
-		
+        
 		
 		set("FunkinHScript", FunkinHScript);
 
