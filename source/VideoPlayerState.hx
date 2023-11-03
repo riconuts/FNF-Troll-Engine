@@ -38,9 +38,18 @@ class VideoPlayerState extends MusicBeatState
 			onComplete();
 			trace('$videoPath does not exist');
 		}else{
+            #if(hxCodec >= "3.0.0")
+			video = new VideoHandler();
+			video.onEndReached.add(function(){
+				onComplete();
+				video.dispose();
+            });
+			video.play(videoPath);
+            #else
 			video = new VideoHandler();
 			video.finishCallback = onComplete;
 			video.playVideo(videoPath);
+            #end
 		}
 		#end
 	}
