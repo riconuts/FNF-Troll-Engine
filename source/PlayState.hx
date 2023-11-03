@@ -818,15 +818,6 @@ class PlayState extends MusicBeatState
 			if(gf != null)
 				gf.visible = false;
 		}
-		
-		if (hud == null){
-			switch(ClientPrefs.etternaHUD){
-				case 'Advanced': hud = new AdvancedHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song, stats);
-				default: hud = new PsychHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song, stats);
-			}
-		}
-		hud.alpha = ClientPrefs.hudOpacity;
-		add(hud);
 
 		////
 		stage.buildStage();
@@ -845,6 +836,15 @@ class PlayState extends MusicBeatState
 
 			add(stage.foreground);
 		}
+
+        if (hud == null){
+			switch(ClientPrefs.etternaHUD){
+				case 'Advanced': hud = new AdvancedHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song, stats);
+				default: hud = new PsychHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song, stats);
+			}
+		}
+		hud.alpha = ClientPrefs.hudOpacity;
+		add(hud);
 
 		//// Generate playfields so you can actually, well, play the game
 		callOnScripts("prePlayfieldCreation"); // backwards compat

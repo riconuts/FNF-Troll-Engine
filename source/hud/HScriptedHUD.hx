@@ -18,7 +18,7 @@ class HScriptedHUD extends BaseHUD {
 		stats.changedEvent.add(statChanged);
 
 		super(iP1, iP2, songName, stats);
-		script.call("createHUD", [iP1, iP2, songName]);
+		script.call("createHUD", [iP1, iP2, songName, stats]);
 	}
 
 	override function set_displayedHealth(nV:Float):Float 
