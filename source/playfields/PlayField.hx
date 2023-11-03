@@ -74,6 +74,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return super.set_cameras(to);
 	}
 
+	public var spawnTime:Float = 1750; // spawn time for notes
 	public var judgeManager(get, default):JudgmentManager; // for deriving judgements for input reasons
 	function get_judgeManager()
 		return judgeManager == null ? PlayState.instance.judgeManager : judgeManager;
@@ -399,7 +400,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 			{
 				var dataSpawnTime = modManager.get("noteSpawnTime" + data); 
 				var noteSpawnTime = (dataSpawnTime != null && dataSpawnTime.getValue(modNumber)>0)?dataSpawnTime:modManager.get("noteSpawnTime");
-				var time:Float = noteSpawnTime == null ? 3000 : noteSpawnTime.getValue(modNumber); // no longer averages the spawn times
+				var time:Float = noteSpawnTime == null ? spawnTime : noteSpawnTime.getValue(modNumber); // no longer averages the spawn times
 				while (column.length > 0 && column[0].strumTime - Conductor.songPosition < time)
 					spawnNote(column[0]);
 			}
