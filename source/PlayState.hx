@@ -3777,6 +3777,8 @@ class PlayState extends MusicBeatState
 		if (data > -1 && !pressed.contains(eventKey)){
 			pressed.push(eventKey);
 			var hitNotes:Array<Note> = [];
+            var controlledFields:Array<PlayField> = [];
+
 			if(strumsBlocked[data]) return;
             
 			if (callOnScripts("onKeyPress", [data]) == Globals.Function_Stop)
@@ -3784,6 +3786,7 @@ class PlayState extends MusicBeatState
         
 			for(field in playfields.members){
 				if(!field.autoPlayed && field.isPlayer && field.inControl){
+                    controlledFields.push(field);
 					field.keysPressed[data] = true;
 					if(generatedMusic && !endingSong){
                         var note:Note = null;
@@ -3809,7 +3812,7 @@ class PlayState extends MusicBeatState
 					}
 				}
 			}
-			if (hitNotes.length==0){
+			if (hitNotes.length==0 && controlledFields.length > 0){
 				callOnScripts('onGhostTap', [data]);
 				
 				if (!ClientPrefs.ghostTapping)
