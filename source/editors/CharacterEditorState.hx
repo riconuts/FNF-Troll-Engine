@@ -641,21 +641,9 @@ class CharacterEditorState extends MusicBeatState
 		});
 
 		var addUpdateButton:FlxButton = new FlxButton(70, animationIndicesInputText.y + 30, "Add/Update", function() {
-			var indices:Array<Int> = [];
-			var indicesStr:Array<String> = animationIndicesInputText.text.trim().split(',');
-			if(indicesStr.length > 1) {
-				for (i in 0...indicesStr.length) {
-					var index:Int = Std.parseInt(indicesStr[i]);
-					if(indicesStr[i] != null && indicesStr[i] != '' && !Math.isNaN(index) && index > -1) {
-						indices.push(index);
-					}
-				}
-			}
-
-			var lastAnim:String = '';
-			if(char.animationsArray[curAnim] != null) {
-				lastAnim = char.animationsArray[curAnim].anim;
-			}
+			var indices:Array<Int> = Character.parseIndices(animationIndicesInputText.text.trim().split(','));
+			
+			var lastAnim:String = char.animationsArray[curAnim] != null ? char.animationsArray[curAnim].anim : '';
 
 			var lastOffsets:Array<Int> = [0, 0];
 			for (anim in char.animationsArray) {
@@ -995,7 +983,6 @@ class CharacterEditorState extends MusicBeatState
 
 		Paths.removeBitmap(char.frames.parent.key);
 		
-
 		if(Paths.fileExists('images/' + char.imageFile + '/Animation.json', TEXT)) {
 			char.frames = AtlasFrameMaker.construct(char.imageFile);
 		} else if(Paths.fileExists('images/' + char.imageFile + '.txt', TEXT)) {
@@ -1003,12 +990,6 @@ class CharacterEditorState extends MusicBeatState
 		} else {
 			char.frames = Paths.getSparrowAtlas(char.imageFile);
 		}
-
-
-
-
-
-
 
 		if(char.animationsArray != null && char.animationsArray.length > 0) {
 			for (anim in char.animationsArray) {

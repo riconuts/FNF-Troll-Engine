@@ -137,9 +137,24 @@ class Character extends FlxSprite
 
 	public static function getCharacterFile(character:String):Null<CharacterFile>
 	{
-		var rawJson:Null<String> = Paths.getText('characters/' + character + '.json');
+		var rawContent:Null<String> = Paths.getText('characters/' + character + '.json');		
+		if (rawContent == null){
+			trace('Could not find character "$character" JSON file');
+			return null;
+		} 
 
-		return rawJson != null ? cast Json.parse(rawJson) : null;
+		try{
+			var json:CharacterFile = cast Json.parse(rawContent);
+			
+			for (anim in json.animations)
+				anim.indices = parseIndices(anim.indices);
+
+			return json;
+		}catch(e){
+			trace('Error loading character "$character" JSON file');
+		}
+
+		return null;
 	}
 
 	public static function returnCharacterPreload(characterName:String):Array<Cache.AssetPreload>{
@@ -162,6 +177,37 @@ class Character extends FlxSprite
 		}
 
 		return super.destroy();
+	}
+
+	public static function parseIndices(indices:Array<Any>):Array<Int>
+	{
+		var parsed:Array<Int> = [];
+
+		for (val in indices)
+		{
+			if (val is Int)
+				parsed.push(val);
+			else if (val is String)
+			{
+				var val:String = cast val;
+				var expression:Array<String> = val.split("..."); // might add something for "*" so you can repeat a frame a certain amount of times
+				var startIndex:Null<Int> = Std.parseInt(expression[0]);
+				var endIndex:Null<Int> = Std.parseInt(expression[1]);
+
+				if (startIndex == null) // Can't do anything
+					continue;
+				else if (endIndex == null)
+				{
+					parsed.push(startIndex); // hmm
+					continue;
+				}
+
+				for (idxNumber in startIndex...(endIndex + 1))
+					parsed.push(idxNumber);
+			}
+		}
+
+		return parsed;
 	}
 
 	public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false, ?debugMode = false)
@@ -253,6 +299,7 @@ class Character extends FlxSprite
 				healthIcon = json.healthicon;
 				singDuration = json.sing_duration;
 				flipX = !!json.flip_x;
+
 				if(json.no_antialiasing) {
 					antialiasing = false;
 					noAntialiasing = true;
@@ -262,6 +309,7 @@ class Character extends FlxSprite
 					healthColorArray = json.healthbar_colors;
 
 				animationsArray = json.animations;
+				
 				if(animationsArray != null && animationsArray.length > 0) {
 					for (anim in animationsArray) {
 						var animAnim:String = '' + anim.anim;

@@ -154,7 +154,7 @@ class CoolUtil
 		}
 	}
 
-	inline static function numberArray(max:Int, ?min = 0):Array<Int>
+	inline public static function numberArray(max:Int, ?min = 0):Array<Int>
 	{
 		// max+1 because in haxe for loops stop before reaching the max number
 		return [for (n in min...max+1){n;}];
