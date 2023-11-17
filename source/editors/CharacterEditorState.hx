@@ -139,6 +139,13 @@ class CharacterEditorState extends MusicBeatState
 
 		loadChar(!daAnim.startsWith('bf'), false);
 
+		var camPos = char.getCamera();
+
+		camFollow.x = camPos[0];
+		camFollow.y = camPos[1];
+
+		FlxG.camera.zoom = 1;
+
 		var healthbarGraphic = Paths.image('healthBar');
 		if (healthbarGraphic == null)
 			healthbarGraphic = CoolUtil.makeOutlinedGraphic(600, 18, 0xFFFFFFFF, 5, 0xFF000000);
