@@ -139,13 +139,6 @@ class CharacterEditorState extends MusicBeatState
 
 		loadChar(!daAnim.startsWith('bf'), false);
 
-		var camPos = char.getCamera();
-
-		camFollow.x = camPos[0];
-		camFollow.y = camPos[1];
-
-		FlxG.camera.zoom = 1;
-
 		var healthbarGraphic = Paths.image('healthBar');
 		if (healthbarGraphic == null)
 			healthbarGraphic = CoolUtil.makeOutlinedGraphic(600, 18, 0xFFFFFFFF, 5, 0xFF000000);
@@ -183,6 +176,14 @@ class CharacterEditorState extends MusicBeatState
 		var mid = greenHill.getMidpoint();
 		camFollow.setPosition(mid.x, mid.y);
 		add(camFollow);
+
+        var camPos = char.getCamera();
+
+		camFollow.x = camPos[0];
+		camFollow.y = camPos[1];
+
+		FlxG.camera.zoom = 1;
+
 
 		var tipTextArray:Array<String> = "E/Q - Camera Zoom In/Out
 		\nR - Reset Camera Zoom
