@@ -242,6 +242,9 @@ class CharacterEditorState extends MusicBeatState
 		super.create();
 	}
 
+    override function onFocus(){
+		FlxG.mouse.visible = true;
+    }
 	var testMode:Bool = false;
 	var onPixelBG:Bool = false;
 	function reloadBGs() {
