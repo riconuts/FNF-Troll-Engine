@@ -374,9 +374,9 @@ class NoteField extends FieldBase
 	}
 
     
+    var crotchet = Conductor.getCrotchetAtTime(0) / 4;
 	function drawHold(hold:Note, ?prevAlpha:Float, ?prevGlow:Float):Null<RenderObject>
     {
-        var crotchet = Conductor.getCrotchetAtTime(0) / 4;
 		if (hold.animation.curAnim == null)
 			return null;
 		if (hold.scale == null)
