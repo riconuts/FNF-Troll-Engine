@@ -629,6 +629,36 @@ class PlayState extends MusicBeatState
 		var filesPushed:Array<String> = [];
 		for (folder in Paths.getFolders('scripts'))
 		{
+			////
+			var orderListPath = folder + 'orderList.txt';
+			if (FileSystem.exists(orderListPath)){
+				//trace('$orderListPath exists');
+
+				for (name in File.getContent(orderListPath).split('\n'))
+				{
+					var file = '$name.hscript';
+					var filePath = folder + file;
+
+					if (!FileSystem.exists(filePath) || filesPushed.contains(file)){
+						//trace('skipped: $file');
+						continue;
+					}
+
+					var script = FunkinHScript.fromFile(filePath);
+					hscriptArray.push(script);
+					funkyScripts.push(script);
+					filesPushed.push(file);
+				}
+
+				/*
+				Sys.println('');
+			}
+			else{
+				trace('$orderListPath does not exist!');
+				*/
+			}
+
+			////
 			Paths.iterateDirectory(folder, function(file:String)
 			{
 				if(filesPushed.contains(file) || !file.endsWith('.hscript'))
@@ -640,6 +670,7 @@ class PlayState extends MusicBeatState
 				filesPushed.push(file);
 			});
 		}
+		//trace("Loaded global scripts in order:" + filesPushed);
 
 		//// STAGE SCRIPTS
 		stage = new Stage(curStage, true);

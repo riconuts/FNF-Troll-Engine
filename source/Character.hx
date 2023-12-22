@@ -149,6 +149,18 @@ class Character extends FlxSprite
 			for (anim in json.animations)
 				anim.indices = parseIndices(anim.indices);
 
+			if (json.healthbar_colors is String){
+				var color:Null<FlxColor> = FlxColor.fromString(cast json.healthbar_colors);
+				json.healthbar_colors = (color==null) ? null : [color.red, color.green, color.blue];
+			}
+			else if (json.healthbar_colors is Int){
+				var color:FlxColor = FlxColor.fromInt(cast json.healthbar_colors);
+				json.healthbar_colors = [color.red, color.green, color.blue];
+			}
+
+			if (json.healthbar_colors == null)
+				json.healthbar_colors = [192, 192, 192];
+
 			return json;
 		}catch(e){
 			trace('Error loading character "$character" JSON file');
