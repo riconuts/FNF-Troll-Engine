@@ -104,9 +104,12 @@ class SubtitleDisplay extends FlxTypedGroup<FlxText> {
             if(!obj.alive)continue;
 			obj.updateHitbox();
 			obj.screenCenter(X);
+
+            /*
 			obj.x -= len / 2;
 			if (idx > 0)
 				obj.x = members[idx - 1].x + members[idx - 1].fieldWidth;
+            */
 		}
 
         var steps = subData.steps;
