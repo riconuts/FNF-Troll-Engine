@@ -50,13 +50,15 @@ class SubtitleDisplay extends FlxTypedGroup<FlxText> {
         return fromFile(jason);
     }
 	
+	public var defaultHighlightColour:FlxColor = 0xFFFFFFFF;
+	public var defaultFont:String = 'vcr';
+	public var defaultSize:Int = 24;
+
     public var y:Float = 0;
+
 	var subData:SubData;
     var seperated:Array<String> = [];
     var currentIdx:Int = 0;
-    var defaultHighlightColour:FlxColor = FlxColor.RED;
-    var defaultFont:String = 'vcr';
-    var defaultSize:Int = 28;
     var subs:Array<SubData> = [];
     public function new(subtitles:SubtitleFile) {
         super();

@@ -1025,7 +1025,7 @@ class PlayState extends MusicBeatState
 		subtitles = SubtitleDisplay.fromSong(SONG.song);
 		if (subtitles != null){
 			add(subtitles);
-			subtitles.y = 550;
+			subtitles.y = FlxG.height - 160;
 			subtitles.cameras = [camOther];
 		}else if(showDebugTraces)
 			trace(SONG.song + " doesnt have subtitles!");
