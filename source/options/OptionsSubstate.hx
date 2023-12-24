@@ -173,6 +173,10 @@ class OptionsSubstate extends MusicBeatSubstate
 					StartupState.checkOutOfDate();
 				}
 			#end
+			#if discord_rpc
+			case 'discordRPC':
+				val ? Discord.DiscordClient.start() : Discord.DiscordClient.shutdown();
+			#end
 			default:
 				// nothing
 		}
@@ -366,13 +370,16 @@ class OptionsSubstate extends MusicBeatSubstate
                 "controller", ["controllerMode",]
             ]
         ],
-		#if DO_AUTO_UPDATE
-		"updating" => [
-			[
-				"updating", ["checkForUpdates", "downloadBetas"]
-			]
+		
+		"misc" => [
+			#if discord_rpc
+			["discord", ["discordRPC"]],
+			#end
+			#if DO_AUTO_UPDATE
+			["updating", ["checkForUpdates", "downloadBetas"]]
+			#end
 		],
-		#end
+		
 		/* "accessibility" => [
 				[
 					"gameplay", 
@@ -390,7 +397,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		"ui",
 		"video",
 		"controls",
-		#if DO_AUTO_UPDATE "updating", #end /* "Accessibility" */];
+		#if (discord_rpc || DO_AUTO_UPDATE) "misc", #end /* "Accessibility" */];
 
 	var selected:Int = 0;
 

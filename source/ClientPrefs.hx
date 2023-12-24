@@ -4,6 +4,11 @@ package;
 import Controls.KeyboardScheme;
 import flixel.util.FlxSave;
 import flixel.input.keyboard.FlxKey;
+
+#if discord_rpc
+import Discord.DiscordClient;
+#end
+
 #end
 
 enum OptionType
@@ -506,6 +511,15 @@ class ClientPrefs
 				type: Button,
 				data: []
 			},
+
+			//
+			"discordRPC" => {
+				display: "Discord Rich Presence",
+				desc: "Toggles Discord Rich Presence.",
+				type: Toggle,
+				value: true,
+				data: []
+			},
 			
 			// updating
 			"downloadBetas" => {
@@ -704,6 +718,10 @@ class ClientPrefs
 			Main.bread.visible = ClientPrefs.bread;
 
 		FlxSprite.defaultAntialiasing = ClientPrefs.globalAntialiasing;
+
+		#if discord_rpc
+		discordRPC ? DiscordClient.start() : DiscordClient.shutdown();	
+		#end
 
 		if (framerate > FlxG.drawFramerate)
 		{

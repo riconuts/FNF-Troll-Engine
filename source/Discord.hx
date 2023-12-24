@@ -1,5 +1,7 @@
 package;
 
+import sys.thread.Mutex;
+import sys.thread.Thread;
 import Sys.sleep;
 import discord_rpc.DiscordRpc;
 
@@ -12,52 +14,86 @@ import llua.State;
 
 class DiscordClient
 {
-	public static var isInitialized:Bool = false;
+	private static final defaultID = "1009523643392475206";
+	
+	private static var discordDaemon:Thread;
+	private static var mutex:Mutex = new Mutex(); // whatever the fuck this is
 
-	public static function initialize()
+	private static var lastPresence:DiscordPresenceOptions;
+	public static var currentID:String = defaultID;
+
+	public static function start()
 	{
-		var DiscordDaemon = sys.thread.Thread.create(() ->
-		{
-			new DiscordClient();
-		});
-		trace("Discord Client initialized");
-		isInitialized = true;
-	}
-
-	public function new()
-	{
-		trace("Discord Client starting...");
-		DiscordRpc.start({
-			clientID: "1009523643392475206",
-			onReady: onReady,
-			onError: onError,
-			onDisconnected: onDisconnected
-		});
-		trace("Discord Client started.");
-
-		while (true)
-		{
-			DiscordRpc.process();
-			sleep(2);
-			//trace("Discord Client Update");
+		if (discordDaemon != null){
+			discordDaemon.sendMessage(currentID);
+			return;
 		}
 
+		trace("Discord Client initializing...");
+
+		discordDaemon = Thread.create(() ->{
+			var id:Null<String> = null;
+
+			while (true)
+			{
+				var msg:Dynamic = Thread.readMessage(id==null);  // wait for a wake up call 
+
+				if (msg == null){
+					// nothing you idot
+
+				}
+				else if (msg == false){
+					// DiscordClient.shutdown() was called
+					id = null;
+
+				}
+				else if (msg!=id || (msg==true && id!=null)){
+					id = msg;
+					trace('Discord Client starting with id [$id]');
+
+					mutex.acquire();
+
+					DiscordRpc.shutdown(); // Nothing should happen if it wasn't started before right???
+					DiscordRpc.start({
+						clientID: id,
+						onReady: onReady,
+						onError: onError,
+						onDisconnected: onDisconnected
+					});
+
+					mutex.release();
+
+					trace("Discord Client started.");
+				}
+
+				if (id!=null) DiscordRpc.process();
+
+				sleep(0.6);
+			}
+		});
+
+		discordDaemon.sendMessage(defaultID);
+		trace("Discord Client initialized.");
+	}
+
+	public static function changeID(id:String){
+		currentID = id;
+
+		if (ClientPrefs.discordRPC)
+			discordDaemon.sendMessage(id);
+	}
+
+	public static function shutdown()
+	{
+		if (discordDaemon == null) return;
+
+		trace("Discord Client shitting down...");
+
+		mutex.acquire();
 		DiscordRpc.shutdown();
-	}
-	
-	static function onReady()
-	{
-		changePresence("In the Menus", null);
-	}
+		mutex.release();
 
-	static function onError(_code:Int, _message:String)
-	{
-		trace('Error! $_code : $_message');
-	}
-
-	static function onDisconnected(_code:Int, _message:String)
-	{
-		trace('Disconnected! $_code : $_message');
+		discordDaemon.sendMessage(false);
 	}
 
 	////
@@ -94,7 +130,7 @@ class DiscordClient
 	];
 	inline static function getImageKey(key):String
 		return allowedImageKeys.contains(key) ? key : "app-logo";
-	
+
 	public static function changePresence(details:String, state:Null<String>, largeImageKey:String = "app-logo", ?hasStartTimestamp:Bool, ?endTimestamp:Float)
 	{
 		/*
@@ -111,20 +147,44 @@ class DiscordClient
 		if (endTimestamp > 0)
 			endTimestamp = startTimestamp + endTimestamp;
 
-		DiscordRpc.presence({
+		mutex.acquire();
+
+		lastPresence = {
 			details: details,
 			state: state,
 
 			largeImageKey: getImageKey(largeImageKey),
-			largeImageText: "Tails Gets Trolled v" + lime.app.Application.current.meta.get('version'), //"Troll Engine"
+			largeImageText: "Tails Gets Trolled v" + lime.app.Application.current.meta.get('version'), // "Troll Engine"
 			// largeImageText: "Engine Version: " + MainMenuState.engineVersion,
 
 			// Obtained times are in milliseconds so they are divided so Discord can use it
-			startTimestamp : Std.int(startTimestamp / 1000),
-			endTimestamp : Std.int(endTimestamp / 1000)
-		});
+			startTimestamp: Std.int(startTimestamp / 1000),
+			endTimestamp: Std.int(endTimestamp / 1000)
+		};
+
+		DiscordRpc.presence(lastPresence);
+
+		mutex.release();
 		
 		//trace('Discord RPC Updated. Arguments: $details, $state, $smallImageKey, $hasStartTimestamp, $endTimestamp');
+	}
+
+	static function onReady()
+	{
+		if (lastPresence != null)
+			DiscordRpc.presence(lastPresence);
+		else
+			changePresence("In the Menus", null);
+	}
+
+	static function onError(_code:Int, _message:String)
+	{
+		trace('Error! $_code : $_message');
+	}
+
+	static function onDisconnected(_code:Int, _message:String)
+	{
+		trace('Disconnected! $_code : $_message');
 	}
 
 	#if LUA_ALLOWED
@@ -136,9 +196,4 @@ class DiscordClient
 			});
 	}
 	#end
-
-	public static function shutdown()
-	{
-		DiscordRpc.shutdown();
-	}
 }

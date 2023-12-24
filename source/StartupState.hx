@@ -108,13 +108,9 @@ class StartupState extends FlxState
 			StoryMenuState.weekCompleted = FlxG.save.data.weekCompleted;
 		
 		#if discord_rpc
-		if (!DiscordClient.isInitialized){
-			DiscordClient.initialize();
-			Application.current.onExit.add(function(exitCode)
-			{
-				DiscordClient.shutdown();
-			});
-		}
+		Application.current.onExit.add((exitCode)->{
+			DiscordClient.shutdown();
+		});
 		#end
 
 		FlxTransitionableState.defaultTransIn = FadeTransitionSubstate;
