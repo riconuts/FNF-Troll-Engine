@@ -18,6 +18,7 @@ class PauseSubState extends MusicBeatSubstate
 
 	var menuItems:Array<String> = [];
 	var menuItemsOG:Array<String> = ['Resume', 'Restart Song', 'Options', 'Exit to menu'];
+	var menuItemFunctions:Map<String, haxe.Constraints.Function>;
 	var curSelected:Int = 0;
 
 	var pauseMusic:FlxSound;
@@ -31,6 +32,106 @@ class PauseSubState extends MusicBeatSubstate
 	public function new (x:Float, y:Float)
 	{
 		super();
+
+		menuItemFunctions = [
+			'Change Modifiers' => () ->
+			{
+				this.persistentDraw = false;
+				this.openSubState(new GameplayChangersSubstate());
+			},
+			'Options' => () ->
+			{
+				this.persistentDraw = false;
+				var daSubstate = new OptionsSubstate();
+				daSubstate.goBack = function(changedOptions:Array<String>)
+				{
+					var canResume:Bool = true;
+
+					for (opt in changedOptions)
+					{
+						if (OptionsSubstate.requiresRestart.contains(opt))
+						{
+							canResume = false;
+							break;
+						}
+					}
+
+					PlayState.instance.optionsChanged(changedOptions);
+
+					FlxG.mouse.visible = false;
+
+					closeSubState();
+					if (!canResume)
+					{
+						if (changedOptions.length > 0)
+						{
+							menuItems.remove("Resume");
+							menuItems.remove("Skip Time");
+							regenMenu();
+						}
+					}
+
+					for (camera in daSubstate.camerasToRemove)
+						FlxG.cameras.remove(camera);
+
+					var cam:FlxCamera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
+
+					cameras = [cam];
+				};
+				openSubState(daSubstate);
+			},
+			"Resume" => this.close,
+			"Restart Song" => () ->
+			{
+				if (FlxG.keys.pressed.SHIFT)
+				{
+					Paths.clearStoredMemory();
+					Paths.clearUnusedMemory();
+				}
+				restartSong();
+			},
+			"Leave Charting Mode" => () ->
+			{
+				var chartPostfix = PlayState.difficultyName;
+				if (chartPostfix != "")
+					chartPostfix = '-$chartPostfix';
+				PlayState.SONG = Song.loadFromJson(PlayState.SONG.song + chartPostfix, PlayState.SONG.song);
+				PlayState.chartingMode = false;
+				restartSong();
+			},
+			'Skip Time' => () ->
+			{
+				if (curTime < Conductor.songPosition)
+				{
+					PlayState.startOnTime = curTime;
+					restartSong(true);
+				}
+				else
+				{
+					if (curTime != Conductor.songPosition)
+					{
+						PlayState.instance.clearNotesBefore(curTime);
+						PlayState.instance.setSongTime(curTime);
+					}
+					close();
+				}
+			},
+			"End Song" => () ->
+			{
+				close();
+				PlayState.instance.finishSong(true);
+			},
+			'Toggle Botplay' => () ->
+			{
+				PlayState.instance.cpuControlled = !PlayState.instance.cpuControlled;
+				/* 	
+				PlayState.instance.botplayTxt.visible = PlayState.instance.cpuControlled;
+				PlayState.instance.botplayTxt.alpha = 1;
+				PlayState.instance.botplaySine = 0; 
+				*/
+			},
+			"Exit to menu" => PlayState.gotoMenus
+		];
 	}
 
 	var prevTimeScale:Float;
@@ -216,15 +317,16 @@ class PauseSubState extends MusicBeatSubstate
 		updateSkipTextStuff();
 
 		if(subState == null){
-			var upP = controls.UI_UP_P;
-			var downP = controls.UI_DOWN_P;
-			var accepted = controls.ACCEPT;
+			var scrollChange:Int = -FlxG.mouse.wheel;
 
-			if (upP)
-				changeSelection(-1);
+			if (controls.UI_UP_P)
+				scrollChange--;
 
-			if (downP)
-				changeSelection(1);
+			if (controls.UI_DOWN_P)
+				scrollChange++;
+
+			if (scrollChange != 0)
+				changeSelection(scrollChange);
 
 			var daSelected:String = menuItems[curSelected];
 			switch (daSelected)
@@ -261,100 +363,9 @@ class PauseSubState extends MusicBeatSubstate
 					}
 			}
 
-			if (accepted)
+			if (controls.ACCEPT && menuItemFunctions.exists(daSelected))
 			{
-				switch (daSelected)
-				{
-					case 'Change Modifiers':
-						this.persistentDraw = false;						
-						this.openSubState(new GameplayChangersSubstate());						
-
-					case 'Options':
-						this.persistentDraw = false;
-						var daSubstate = new OptionsSubstate();
-
-						daSubstate.goBack = (function(changedOptions:Array<String>)
-						{
-	 						var canResume:Bool = true;
-
-							for (opt in changedOptions){
-								if (OptionsSubstate.requiresRestart.contains(opt)){
-									canResume = false;
-									break;
-								}
-							}
-							
-							PlayState.instance.optionsChanged(changedOptions);
-
-							FlxG.mouse.visible = false;
-
-							closeSubState();
-	 						if (!canResume)
-							{ 
-								if (changedOptions.length > 0)
-								{
-									menuItems.remove("Resume");
-									menuItems.remove("Skip Time");
-									regenMenu();
-								}
-							}
-
-							for(camera in daSubstate.camerasToRemove)
-								FlxG.cameras.remove(camera);
-
-							var cam:FlxCamera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
-
-							cameras = [cam];
-
-						}); 
-						openSubState(daSubstate);
-					case "Resume":
-						close();
-
-					case "Restart Song":
-						if (FlxG.keys.pressed.SHIFT){
-							Paths.clearStoredMemory();
-							Paths.clearUnusedMemory();
-						}
-						restartSong();
-
-					case "Leave Charting Mode":
-						var chartPostfix = PlayState.difficultyName;
-						if (chartPostfix != "") chartPostfix = '-$chartPostfix';
-
-						PlayState.SONG = Song.loadFromJson(PlayState.SONG.song + chartPostfix, PlayState.SONG.song);
-						PlayState.chartingMode = false;
-
-						restartSong();
-
-					case 'Skip Time':
-						if(curTime < Conductor.songPosition)
-						{
-							PlayState.startOnTime = curTime;
-							restartSong(true);
-						}
-						else
-						{
-							if (curTime != Conductor.songPosition)
-							{
-								PlayState.instance.clearNotesBefore(curTime);
-								PlayState.instance.setSongTime(curTime);
-							}
-							close();
-						}
-					case "End Song":
-						close();
-						PlayState.instance.finishSong(true);
-
-					case 'Toggle Botplay':
-						PlayState.instance.cpuControlled = !PlayState.instance.cpuControlled;
-	/* 					PlayState.instance.botplayTxt.visible = PlayState.instance.cpuControlled;
-						PlayState.instance.botplayTxt.alpha = 1;
-						PlayState.instance.botplaySine = 0; */
-					case "Exit to menu":
-						PlayState.gotoMenus();
-
-				}
+				menuItemFunctions.get(daSelected)();
 			}
 		}
 
@@ -391,7 +402,8 @@ class PauseSubState extends MusicBeatSubstate
 	{
 		curSelected += change;
 
-		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+		if (change != 0)
+			FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
 
 		if (curSelected < 0)
 			curSelected = menuItems.length - 1;
@@ -451,6 +463,7 @@ class PauseSubState extends MusicBeatSubstate
 				updateSkipTimeText();
 			}
 		}
+
 		curSelected = 0;
 		changeSelection();
 	}

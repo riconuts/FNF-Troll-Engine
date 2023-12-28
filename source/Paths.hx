@@ -108,8 +108,8 @@ class Paths
 		
 	}
 
-	// fuckin around ._.
-	public static function removeBitmap(key)
+	// does this even work
+	public static function removeBitmap(key:String)
 	{
 		var obj = currentTrackedAssets.get(key);
 		@:privateAccess
