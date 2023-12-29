@@ -992,9 +992,9 @@ class CharacterEditorState extends MusicBeatState
 		
 		//var anims:Array<AnimArray> = char.animationsArray.copy();
 
-		Paths.removeBitmap(char.frames.parent.key);
+		Paths.removeBitmap(char.frames.parent.key); // is null SOMETIMES idk WHY
 		
-		if(Paths.fileExists('images/' + char.imageFile + '/Animation.json', TEXT)) {
+		if (Paths.fileExists('images/' + char.imageFile + '/Animation.json', TEXT)) {
 			char.frames = AtlasFrameMaker.construct(char.imageFile);
 		} else if(Paths.fileExists('images/' + char.imageFile + '.txt', TEXT)) {
 			char.frames = Paths.getPackerAtlas(char.imageFile);

@@ -108,7 +108,7 @@ class Paths
 		
 	}
 
-	// does this even work
+	/** removeBitmap(FlxSprite.graphic.key); **/
 	public static function removeBitmap(key:String)
 	{
 		var obj = currentTrackedAssets.get(key);
@@ -121,10 +121,13 @@ class Paths
 			FlxG.bitmap._cache.remove(key);
 			obj.destroy();
 			currentTrackedAssets.remove(key);
-		/*	trace('removed $key');
-		}else{
-			trace('did not remove $key');*/
+			
+			//trace('removed $key');
+			//return true;
 		}
+
+		//trace('did not remove $key');
+		//return false;
 	}
 
 	// define the locally tracked assets

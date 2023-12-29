@@ -154,8 +154,11 @@ class DiscordClient
 			state: state,
 
 			largeImageKey: getImageKey(largeImageKey),
-			largeImageText: "Tails Gets Trolled v" + lime.app.Application.current.meta.get('version'), // "Troll Engine"
-			// largeImageText: "Engine Version: " + MainMenuState.engineVersion,
+			#if tgt
+			largeImageText: "Tails Gets Trolled v" + lime.app.Application.current.meta.get('version'),
+			#else
+			largeImageText: "Troll Engine " + MainMenuState.displayedVersion,
+			#end
 
 			// Obtained times are in milliseconds so they are divided so Discord can use it
 			startTimestamp: Std.int(startTimestamp / 1000),
