@@ -1772,11 +1772,10 @@ class PlayState extends MusicBeatState
 			case "multiplicative":
 				songSpeed = SONG.speed * ClientPrefs.getGameplaySetting('scrollspeed', 1);
 			case "constant":
-				songSpeed = ClientPrefs.getGameplaySetting('scrollspeed', 1);
+				songSpeed = ClientPrefs.getGameplaySetting('scrollspeed', SONG.speed);
 		}
 
-		var songData = SONG;
-		Conductor.changeBPM(songData.bpm);
+		Conductor.changeBPM(PlayState.SONG.bpm);
 
 		inst = new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.song));
 		vocals = new FlxSound();
@@ -1808,17 +1807,17 @@ class PlayState extends MusicBeatState
 		}else
 			AL.effecti(sndEffect, AL.EFFECT_TYPE, AL.EFFECT_NULL);
 		
-
+		var trackEffect = ClientPrefs.ruin ? sndEffect : null;
 		for (track in tracks){
-			track.effect = ClientPrefs.ruin?sndEffect:null;
+			track.effect = trackEffect;
 			track.filter = null;
 			track.pitch = playbackRate;
 		}
 
 		inst.filter = null;
 		vocals.filter = null;
-		inst.effect = ClientPrefs.ruin?sndEffect:null;
-		vocals.effect = ClientPrefs.ruin?sndEffect:null;
+		inst.effect = trackEffect;
+		vocals.effect = trackEffect;
 		
 		inst.pitch = playbackRate;
 		vocals.pitch = playbackRate;
@@ -1826,7 +1825,7 @@ class PlayState extends MusicBeatState
 		add(notes);
 
 		// NEW SHIT
-		var noteData:Array<SwagSection> = songData.notes;
+		var noteData:Array<SwagSection> = PlayState.SONG.notes;
 
 		// loads note types
 		for (section in noteData)

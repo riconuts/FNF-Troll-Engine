@@ -435,7 +435,12 @@ class PauseSubState extends MusicBeatSubstate
 	}
 
 	function regenMenu():Void {
-		skipTimeText = null;
+		if (skipTimeText != null){
+			remove(skipTimeText);
+			
+			skipTimeText.destroy();
+			skipTimeText = null;
+		}
 
 		for (i in 0...grpMenuShit.members.length) {
 			var obj = grpMenuShit.members[0];

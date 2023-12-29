@@ -115,10 +115,15 @@ class Paths
 		@:privateAccess
 		if (obj != null)
 		{
+			localTrackedAssets.remove(key);
+
 			Assets.cache.removeBitmapData(key);
 			FlxG.bitmap._cache.remove(key);
 			obj.destroy();
 			currentTrackedAssets.remove(key);
+		/*	trace('removed $key');
+		}else{
+			trace('did not remove $key');*/
 		}
 	}
 
