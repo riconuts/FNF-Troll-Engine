@@ -718,6 +718,7 @@ class ClientPrefs
 			Main.bread.visible = ClientPrefs.bread;
 
 		FlxSprite.defaultAntialiasing = ClientPrefs.globalAntialiasing;
+		FlxG.stage.quality = ClientPrefs.globalAntialiasing ? openfl.display.StageQuality.BEST : openfl.display.StageQuality.LOW; // does nothing!!!!
 
 		#if discord_rpc
 		discordRPC ? DiscordClient.start() : DiscordClient.shutdown();	

@@ -49,7 +49,7 @@ class DiscordClient
 				}
 				else if (msg!=id || (msg==true && id!=null)){
 					id = msg;
-					trace('Discord Client starting with id [$id]');
+					trace('Discord Client starting with id: $id');
 
 					mutex.acquire();
 

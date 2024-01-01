@@ -51,8 +51,8 @@ class OptionsSubstate extends MusicBeatSubstate
 		"noteSkin",
 	];
 
-	static public var requiresRestart = _requiresRestart;
-	static public var recommendsRestart = _recommendsRestart;
+	static public var requiresRestart = _requiresRestart.copy();
+	static public var recommendsRestart = _recommendsRestart.copy();
 
 	public static function resetRestartRecomendations()
 	{
@@ -163,8 +163,8 @@ class OptionsSubstate extends MusicBeatSubstate
 					Main.bread.visible = val;
 			case 'globalAntialiasing':
 				FlxSprite.defaultAntialiasing = val;
-			case 'lowQuality':
-				FlxG.stage.quality = val ? openfl.display.StageQuality.LOW : openfl.display.StageQuality.HIGH; // fucking useless!?!?
+				FlxG.stage.quality = val ? openfl.display.StageQuality.BEST : openfl.display.StageQuality.LOW; // does nothing!!!!
+				
 			#if DO_AUTO_UPDATE
 			case 'downloadBetas' | 'checkForUpdates':
 				Main.downloadBetas = MainMenuState.beta || ClientPrefs.downloadBetas;

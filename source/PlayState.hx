@@ -2773,6 +2773,8 @@ class PlayState extends MusicBeatState
 		persistentUpdate = false;
 		paused = true;
 		cancelMusicFadeTween();
+
+		if (FlxG.keys.pressed.SHIFT) ChartingState.curSec = curSection;
 		MusicBeatState.switchState(new ChartingState());
 
 		#if discord_rpc
