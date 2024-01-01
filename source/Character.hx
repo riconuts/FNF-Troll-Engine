@@ -32,6 +32,7 @@ typedef CharacterFile = {
 	var no_antialiasing:Bool;
 	var healthbar_colors:Array<Int>;
 
+	@:optional var x_facing:Float;
 	@:optional var death_name:String;
 	@:optional var script_name:String;
 }
@@ -252,59 +253,53 @@ class Character extends FlxSprite
 					curCharacter = DEFAULT_CHARACTER;
 				}
 
-				// new death
+				////
+				if (json.x_facing != null)
+					xFacing *= json.x_facing;
+
+				//// new death
 				deathName = json.death_name != null ? json.death_name : curCharacter;
+				////
 				scriptName = json.script_name != null ? json.script_name : curCharacter;
 
+				////
+				imageFile = json.image;
 				var spriteType = "sparrow";
-				//sparrow
-				//packer
-				//texture
-				#if MODS_ALLOWED
-				var modTxtToFind:String = Paths.modFolders('images/' + json.image + '.txt');
-				var txtToFind:String = Paths.getPath('images/' + json.image + '.txt', TEXT);
 
-				if (Paths.exists(modTxtToFind) || Paths.exists(txtToFind))
-				#else
-				if (Paths.exists(Paths.getPath('images/' + json.image + '.txt', TEXT)))
-				#end
-				{
+				var path = 'images/$imageFile.txt';
+				if (#if MODS_ALLOWED 
+					Paths.exists(Paths.modFolders(path)) || #end 
+					Paths.exists(Paths.getPath(path, TEXT))
+				)
 					spriteType = "packer";
-				}
-
-				#if MODS_ALLOWED
-				var modAnimToFind:String = Paths.modFolders('images/' + json.image + '/Animation.json');
-				var animToFind:String = Paths.getPath('images/' + json.image + '/Animation.json', TEXT);
-
-				if (Paths.exists(modAnimToFind) || Paths.exists(animToFind))
-				#else
-				if (Paths.exists(Paths.getPath('images/' + json.image + '/Animation.json', TEXT)))
-				#end
-				{
+				
+				var path = 'images/$imageFile/Animation.json';
+				if (#if MODS_ALLOWED 
+					Paths.exists(Paths.modFolders(path)) || #end 
+					Paths.exists(Paths.getPath(path, TEXT))
+				)
 					spriteType = "texture";
-				}
-
+				
+				
 				switch (spriteType)
 				{
-					case "packer":
-						frames = Paths.getPackerAtlas(json.image);
+					case "texture": frames = AtlasFrameMaker.construct(imageFile);
 
-					case "sparrow":
-						frames = Paths.getSparrowAtlas(json.image);
+					case "packer":	frames = Paths.getPackerAtlas(imageFile);
 
-					case "texture":
-						frames = AtlasFrameMaker.construct(json.image);
+					case "sparrow":	frames = Paths.getSparrowAtlas(imageFile);
 				}
-				imageFile = json.image;
 
+				////
 				jsonScale = json.scale;
-				if(jsonScale != 1)
+				if (jsonScale != 1)
 					setGraphicSize(Math.ceil(width * jsonScale));
 				else
 					scale.set(1, 1);
 				
 				updateHitbox();
 
+				////
 				positionArray = json.position;
 				cameraPosition = json.camera_position;
 
@@ -312,12 +307,12 @@ class Character extends FlxSprite
 				singDuration = json.sing_duration;
 				flipX = !!json.flip_x;
 
-				if(json.no_antialiasing) {
+				if (json.no_antialiasing == true) {
 					antialiasing = false;
 					noAntialiasing = true;
 				}
 
-				if(json.healthbar_colors != null && json.healthbar_colors.length > 2)
+				if (json.healthbar_colors != null && json.healthbar_colors.length > 2)
 					healthColorArray = json.healthbar_colors;
 
 				animationsArray = json.animations;
@@ -331,30 +326,32 @@ class Character extends FlxSprite
 						var animIndices:Array<Int> = anim.indices;
 						var camOffset:Null<Array<Float>> = anim.cameraOffset;
 						
-						if(camOffset==null){
-							switch(animAnim){
-								case 'singLEFT' | 'singLEFTmiss' | 'singLEFT-alt':
-									camOffset = [-30, 0];
-								case 'singRIGHT' | 'singRIGHTmiss' | 'singRIGHT-alt':
-									camOffset = [30, 0];
-								case 'singUP' | 'singUPmiss' | 'singUP-alt':
-									camOffset = [0, -30];
-								case 'singDOWN' | 'singDOWNmiss' | 'singDOWN-alt':
-									camOffset = [0, 30];
-								default:
-									camOffset = [0, 0];
-							}
-						}
-						if(animIndices != null && animIndices.length > 0) {
-							animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop);
-						} else {
-							animation.addByPrefix(animAnim, animName, animFps, animLoop);
-						}
+						camOffsets[anim.anim] = (camOffset!=null) ? [camOffset[0], camOffset[1]] : {
+							if (!animAnim.startsWith('sing'))
+								[0.0,	0.0];  
+							else if (animAnim.startsWith('singLEFT'))
+								[-30.0,	0.0];
+							else if (animAnim.startsWith('singDOWN'))
+								[0.0,	30.0];
+							else if (animAnim.startsWith('singUP'))
+								[0.0,	-30.0];
+							else if (animAnim.startsWith('singRIGHT'))
+								[30.0,	0.0];
+							else
+								[0.0,	0.0];	
+						};
 
-						if(anim.offsets != null && anim.offsets.length > 1) {
+						////
+						if (animIndices != null && animIndices.length > 0)
+							animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop);
+						else
+							animation.addByPrefix(animAnim, animName, animFps, animLoop);
+
+						////
+						if (anim.offsets != null && anim.offsets.length > 1)
 							addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
-						}
-						camOffsets[anim.anim] = [camOffset[0], camOffset[1]];
+						/* else
+							addOffset(anim.anim, 0, 0); */
 					}
 				} else {
 					quickAnimAdd('idle', 'BF idle dance');
@@ -366,38 +363,13 @@ class Character extends FlxSprite
 		if(animOffsets.exists('singLEFTmiss') && animOffsets.exists('singDOWNmiss') && animOffsets.exists('singUPmiss') && animOffsets.exists('singRIGHTmiss')) 
 			hasMissAnimations = true;
 
+		//// placeholder animations
 		if (!this.debugMode){
-			var anims = ['singLEFT','singRIGHT', 'singUP', 'singDOWN'];
-			var sufs = ["miss", "-alt"];
-
-			for (anim in anims)
+			for (animName in ['singLEFT', 'singRIGHT', 'singUP', 'singDOWN'])
 			{
-				for (s in sufs){
-					var shid = anim + s;
-					if (!animOffsets.exists(shid) && animOffsets.exists(anim)){
-						var daAnim:FlxAnimation = animation.getByName(anim);
-						if (daAnim == null) continue;
-						animation.add(shid, daAnim.frames, daAnim.frameRate, daAnim.looped, daAnim.flipX, daAnim.flipY);
-
-						camOffsets[shid] = camOffsets[anim];
-						animOffsets[shid] = animOffsets[anim];
-					}
-				}
-			}
-
-			for (anim in anims)
-			{
-				anim += "-alt";
-				var shid = anim + "miss";
-				if (!animOffsets.exists(shid) && animOffsets.exists(anim))
-				{
-					var daAnim:FlxAnimation = animation.getByName(anim);
-					if (daAnim == null) continue;
-					animation.add(shid, daAnim.frames, daAnim.frameRate, daAnim.looped, daAnim.flipX, daAnim.flipY);
-
-					camOffsets[shid] = camOffsets[anim];
-					animOffsets[shid] = animOffsets[anim];
-				}
+				cloneAnimation(animName,		animName+'miss');
+				cloneAnimation(animName,		animName+'-alt');
+				cloneAnimation(animName+'-alt',	animName+'-altmiss');
 			}
 		}
 
@@ -578,49 +550,48 @@ class Character extends FlxSprite
 
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
 	{
+		if (callOnScripts("onAnimPlay", [AnimName, Force, Reversed, Frame]) == Globals.Function_Stop)
+			return;
+
 		if (!AnimName.endsWith("miss"))
 			colorOverlay = FlxColor.WHITE;
-		if(callOnScripts("onAnimPlay", [AnimName, Force, Reversed, Frame]) == Globals.Function_Stop)
-			return;
 
 		specialAnim = false;
 		animation.play(AnimName, Force, Reversed, Frame);
 
 		var daOffset = animOffsets.get(AnimName);
-		if (animOffsets.exists(AnimName))
+		if (daOffset != null)
 			offset.set(daOffset[0], daOffset[1]);
 		else
 			offset.set(0, 0);
 
+		////
 		camOffX = 0;
 		camOffY = 0;
 
-		if(camOffsets.exists(AnimName) && camOffsets.get(AnimName).length==2){
-			camOffX = camOffsets.get(AnimName)[0];
-			camOffY = camOffsets.get(AnimName)[1];
-		}
-		else if (camOffsets.exists(AnimName.replace("-loop", "")) && camOffsets.get(AnimName.replace("-loop", "")).length == 2)
-		{
-			camOffX = camOffsets.get(AnimName.replace("-loop", ""))[0];
-			camOffY = camOffsets.get(AnimName.replace("-loop", ""))[1];
+		var daOffset:Array<Float> = camOffsets.get(AnimName);
+		if (daOffset == null || daOffset.length < 2)
+			daOffset = camOffsets.get(AnimName.replace("-loop", ""));
+		
+		if (daOffset != null && daOffset.length >= 2){
+			camOffX = daOffset[0];
+			camOffY = daOffset[1];
 		}
 
+		////
 		if (curCharacter.startsWith('gf'))
 		{
 			if (AnimName == 'singLEFT')
-			{
 				danced = true;
-			}
+			
 			else if (AnimName == 'singRIGHT')
-			{
 				danced = false;
-			}
-
-			if (AnimName == 'singUP' || AnimName == 'singDOWN')
-			{
+			
+			else if (AnimName == 'singUP' || AnimName == 'singDOWN')
 				danced = !danced;
-			}
 		}
+
+		////
 		callOnScripts("onAnimPlayed", [AnimName, Force, Reversed, Frame]);
 	}
 
@@ -657,8 +628,20 @@ class Character extends FlxSprite
 		animation.addByPrefix(name, anim, 24, false);
 	}
 
-	////
+	function cloneAnimation(ogName:String, cloneName:String, ?force:Bool)
+	{
+		var daAnim:FlxAnimation = animation.getByName(ogName);
 
+		if (daAnim!=null && (force==true || !animation.exists(cloneName)))
+		{
+			animation.add(cloneName, daAnim.frames, daAnim.frameRate, daAnim.looped, daAnim.flipX, daAnim.flipY);
+
+			camOffsets[cloneName] = camOffsets[ogName];
+			animOffsets[cloneName] = animOffsets[ogName];
+		}
+	}
+
+	////
     public var defaultVars:Map<String, Dynamic> = [];
     public function setDefaultVar(i:String, v:Dynamic)
 		defaultVars.set(i, v);
