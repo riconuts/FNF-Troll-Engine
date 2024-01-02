@@ -284,8 +284,8 @@ class PlayState extends MusicBeatState
 	public inline function set_ratingFC(val:String)return stats.clearType = val;
 
 	private var generatedMusic:Bool = false;
-	public var endingSong:Bool = false;
 	public var startingSong:Bool = false;
+	public var endingSong:Bool = false;
 
 	public static var chartingMode:Bool = false;
 
@@ -577,7 +577,7 @@ class PlayState extends MusicBeatState
 
 		Conductor.mapBPMChanges(SONG);
 		Conductor.changeBPM(SONG.bpm);
-		Conductor.songPosition = -5000;
+		Conductor.songPosition = -Conductor.crochet * 5;
 
 		songName = Paths.formatToSongPath(SONG.song);
 		songHighscore = Highscore.getScore(SONG.song);
@@ -1423,9 +1423,8 @@ class PlayState extends MusicBeatState
 			modManager.setValue("opponentSwap", 0.5);
 		}
 		#end
-
+		
 		startedCountdown = true;
-		Conductor.songPosition = -Conductor.crochet * 5;
 		setOnScripts('startedCountdown', true);
 		callOnScripts('onCountdownStarted');
 		if (hudSkinScript != null)
@@ -1433,17 +1432,9 @@ class PlayState extends MusicBeatState
 
 		callOnScripts("generateModchart"); // this is where scripts should generate modcharts from here on out lol
 
-		if(startOnTime < 0)
-			startOnTime = 0;
-
-		if (startOnTime > 0) {
-			clearNotesBefore(startOnTime);
-			setSongTime(startOnTime - 350);
-			return;
-		}
-		else if (skipCountdown)
-		{
-			setSongTime(0);
+		if (startOnTime != 0 || skipCountdown) {
+			trace('starting on time: $startOnTime, skipping countdown: $skipCountdown');
+			startSong();
 			return;
 		}
 
@@ -1598,11 +1589,15 @@ class PlayState extends MusicBeatState
 		for (track in tracks)
 			track.pause();
 
+		////
 		inst.time = time;
+		inst.volume = 1;
 		inst.play();
 
 		vocals.time = time;
+		vocals.volume = 1;
 		vocals.play();
+
 		for (track in tracks){
 			track.time = time;
 			track.play();
@@ -1621,7 +1616,6 @@ class PlayState extends MusicBeatState
 
 		previousFrameTime = FlxG.game.ticks;
 
-		
 		inst.onComplete = function(){
 			trace("song ended!?");
 			finishSong(false);
@@ -1631,22 +1625,33 @@ class PlayState extends MusicBeatState
 			vocalsEnded = true;
 			vocals.volume = 0; // just so theres no like vocal restart stuff at the end of the song lol
 		};
+
+		var startOnTime = PlayState.startOnTime;
+
+		if (startOnTime != 0){
+			startOnTime = startOnTime > 500 ? startOnTime - 500 : 0;
+			PlayState.startOnTime = 0;
+			clearNotesBefore(startOnTime + 500);
+		}
+
+		Conductor.songPosition = startOnTime;
+
+		vocals.volume = 1;
+		vocals.play(false, startOnTime);
+
+		inst.volume = 1;
+		inst.play(false, startOnTime);
+
 		for (track in tracks)
-			track.play();
-		
-		vocals.play();
-		inst.play();
+			track.play(false, startOnTime);
 
-		if(startOnTime > 0)
-			setSongTime(startOnTime - 500);
-		startOnTime = 0;
 
-		if(paused) {
-			//trace('Oopsie doopsie! Paused sound');
+		if (paused) {
+			trace('Oopsie doopsie! Paused sound');
 			inst.pause();
 			vocals.pause();
 			for (track in tracks)
-				track.play();
+				track.pause();
 		}
 
 		// Song duration in a float, useful for the time left feature
@@ -1778,7 +1783,9 @@ class PlayState extends MusicBeatState
 		Conductor.changeBPM(PlayState.SONG.bpm);
 
 		inst = new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.song));
+		inst.volume = 0;
 		vocals = new FlxSound();
+		vocals.volume = 0;
 
 		if (SONG.needsVoices)
 			vocals.loadEmbedded(Paths.voices(PlayState.SONG.song));
