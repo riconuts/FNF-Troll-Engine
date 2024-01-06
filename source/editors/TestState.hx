@@ -1,4 +1,4 @@
-package;
+package editors;
 
 import flixel.util.FlxColor;
 import Alphabet;
