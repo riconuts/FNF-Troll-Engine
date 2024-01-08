@@ -187,19 +187,24 @@ class Highscore {
         
         return true;
     }
-	public inline static function hasValidScore(song:String)return isValidScoreRecord(getRecord(song));
+	public inline static function hasValidScore(song:String) return isValidScoreRecord(getRecord(song));
 
-    public static function getRating(song:String):Float{
-		var scoreRecord = getRecord(song);
+	public static function getRatingRecord(scoreRecord:ScoreRecord):Float{
 		if (scoreRecord.rating != null)
 			return scoreRecord.rating;
 
-		if (scoreRecord.accuracyScore == 0 || scoreRecord.maxAccuracyScore == 0)return 0;
+		if (scoreRecord.accuracyScore == 0 || scoreRecord.maxAccuracyScore == 0)
+			return 0;
+		
 		return (scoreRecord.accuracyScore / scoreRecord.maxAccuracyScore);
-    }
-    public inline static function getScore(song:String)return getRecord(song).score;
+	}
+
+    public inline static function getRating(song:String):Float
+		return getRatingRecord(getRecord(song));
     
-	public inline static function getNotesHit(song:String)return getRecord(song).accuracyScore;
+    public inline static function getScore(song:String) return getRecord(song).score;
+    
+	public inline static function getNotesHit(song:String) return getRecord(song).accuracyScore;
 
 	public static function getWeekScore(week:String):Int return currentWeekData.exists(week) ? currentWeekData.get(week) : 0;
 

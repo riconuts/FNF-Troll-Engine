@@ -622,9 +622,9 @@ class FreeplaySongButton extends TGTSquareButton{
 	{
         var record = Highscore.getRecord(metadata.songName);
 
-		var ratingPercent = Highscore.getRating(metadata.songName);
+		var ratingPercent = Highscore.getRatingRecord(record);
 		scoreText.text = Highscore.floorDecimal(ratingPercent * 100, 2) + '%';
-		scoreText.color = (Highscore.isWife3 ? ratingPercent >= 0.93 : ratingPercent == 1) ? 0xFFF4CC34 : Highscore.hasValidScore(metadata.songName) ? 0xFFFFFFFF : 0xFF8B8B8B;
+		scoreText.color = (Highscore.isWife3 ? ratingPercent >= 0.93 : ratingPercent == 1) ? 0xFFF4CC34 : Highscore.isValidScoreRecord(record) ? 0xFFFFFFFF : 0xFF8B8B8B;
         
         if(!Highscore.isWife3 && record.fcMedal != null && record.fcMedal != NONE){
             medal.visible = true;
