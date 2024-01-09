@@ -173,8 +173,13 @@ class LayerWindow extends FlxTypedGroup<FlxBasic>
     function set_curSelected(laeyr){
         curSelected = laeyr;
 
+        if (laeyr != null && laeyr.data != null)
+            trace("selected: "+laeyr.data.name);
+        else
+			trace("selected: "+laeyr);
+
         if (parent != null)
-            parent.curSelected = laeyr != null ? laeyr.data : null;
+			parent.curSelected = laeyr==null ? null : laeyr.data;
         
         return laeyr;
     }
@@ -681,8 +686,10 @@ class StageSprite extends FlxSprite
 
     public function updateImage(?newName:String)
     {
+        /*
         var possibleGraphic = Paths.image(newName == null ? data.name : newName);
         loadGraphic(possibleGraphic == null ? "flixel/images/logo/default.png" : possibleGraphic);
+        */
     }
 
     public function updateData(?newData:ObjectData)
@@ -791,8 +798,15 @@ class StageBuilderState extends MusicBeatState
     var realZoom:Float = 1;
     var zoomMult:Float;
 
+    var camFollowPos:FlxObject;
+
     override public function create()
     {
+		#if discord_rpc
+		// Updating Discord Rich Presence
+		Discord.DiscordClient.changePresence("Stage Builder", null);
+		#end
+
         FlxG.mouse.visible = true;
         
         FlxG.cameras.reset(camGame);
@@ -805,6 +819,9 @@ class StageBuilderState extends MusicBeatState
         camGame.x = (FlxG.width-camGame.width) * 0.5;
         camGame.y = (FlxG.height-camGame.height) * 0.5;
         camGame.zoom = realZoom * zoomMult;
+
+		camFollowPos = new FlxObject(0, 0, camGame.width, camGame.height);
+		camGame.follow(camFollowPos);
 
         camGame.bgColor = 0xFF00FF00;
         camHUD.bgColor.alpha = 0;
@@ -840,6 +857,22 @@ class StageBuilderState extends MusicBeatState
         FlxG.stage.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove, false, -1);
         FlxG.stage.addEventListener(MouseEvent.MOUSE_UP, onMouseUp, false, -1);
         FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown, false, 100000);
+
+        /* TODO: sparrow atlas, animations!!!!!!
+		var frames = Paths.getSparrowAtlas("an-stage/allnighter_bg");
+		@:privateAccess 
+        for (sowy in 0...13){
+			
+            layerWindow.addNewObj();
+			var spr = layerWindow.curSelected.data.editorSprite;
+            spr.frames = frames;
+			spr.animation.addByIndices("sowy", "anlayers", [sowy], "", 0, true);
+            spr.animation.play("sowy");
+
+            spr.data.name = ''+sowy;
+            spr.updateData();
+        }
+		*/
     }
     override public function destroy(){
         FlxG.stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown, false);
@@ -957,10 +990,8 @@ class StageBuilderState extends MusicBeatState
 
         if (curSelected == null || curSelected.editorSprite == null)
         {
-            /*
-            camGame.scroll.x += xDiff;
-            camGame.scroll.y += yDiff;
-            */
+            camFollowPos.x += xDiff;
+			camFollowPos.y += yDiff;
         }
         else
         {
@@ -1004,24 +1035,26 @@ class StageBuilderState extends MusicBeatState
             Mouse.cursor = ARROW;
         */
 
-        if (curSelected == null){
-            final pressed = FlxG.keys.pressed;
-            if (pressed.ANY){
-                final spr = camGame.scroll;
+		var pressed = FlxG.keys.pressed;
+		var justPressed = FlxG.keys.justPressed;
 
-                var spd = e/(1/60) * (pressed.SHIFT ? 15 : 5);
+        //// move camera
+		if (curSelected==null && pressed.ANY)
+        {
+            var spr = camFollowPos;
+            var spd = e/(1/60) * (pressed.SHIFT ? 15 : 5);
 
-                if (pressed.W)
-                    spr.y -= spd;
-                if (pressed.S)
-                    spr.y += spd;
-                if (pressed.A)
-                    spr.x -= spd;
-                if (pressed.D)
-                    spr.x += spd;
-            }
+            //// position
+            if (pressed.W)
+                spr.y -= spd;
+            if (pressed.S)
+                spr.y += spd;
+            if (pressed.A)
+                spr.x -= spd;
+            if (pressed.D)
+                spr.x += spd;		
 
-            var justPressed = FlxG.keys.justPressed;
+            //// zoom
             if (justPressed.Q){
                 realZoom-=0.05;
                 camGame.zoom = realZoom * zoomMult;
@@ -1036,7 +1069,7 @@ class StageBuilderState extends MusicBeatState
             }
         }
         
-        if (FlxG.keys.justPressed.ESCAPE)
+        if (justPressed.ESCAPE)
             MusicBeatState.switchState(new MasterEditorMenu());
 
         super.update(e);
