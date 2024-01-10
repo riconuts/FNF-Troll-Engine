@@ -172,18 +172,22 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		
 		getOptions();
 
+		/*
+		var xAdd:Float = (this._parentState is PauseSubState) ? 0 : FlxG.camera.scroll.x;
 		var yAdd:Float = (this._parentState is PauseSubState) ? 0 : FlxG.camera.scroll.y;
+		*/
 
 		for (i in 0...optionsArray.length)
 		{
 			var optionText:Alphabet = new Alphabet(0, 70 * i, optionsArray[i].name, true, false, 0.05, 0.8);
+			optionText.scrollFactor.set();
 			optionText.isMenuItem = true;
 
 			optionText.xAdd = 120;
 			optionText.x += 200;
 			optionText.targetX = 225;
 
-			optionText.yAdd += yAdd;
+			//optionText.yAdd += yAdd;
 			optionText.targetY = i;
 
 			optionText.camera = cam;
@@ -191,6 +195,8 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 
 			if(optionsArray[i].type == 'bool') {
 				var checkbox:CheckboxThingie = new CheckboxThingie(optionText.x - 105, optionText.y, optionsArray[i].getValue() == true);
+				checkbox.scrollFactor.set();
+
 				checkbox.sprTracker = optionText;
 				checkbox.offsetY = -60;
 				checkbox.ID = i;
@@ -199,6 +205,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 				optionText.xAdd += 80;
 			} else {
 				var valueText:AttachedText = new AttachedText('' + optionsArray[i].getValue(), optionText.width + 80, true, 0.8);
+				valueText.scrollFactor.set();
 				valueText.sprTracker = optionText;
 				valueText.copyAlpha = true;
 				valueText.ID = i;
