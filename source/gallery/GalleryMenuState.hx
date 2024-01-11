@@ -1,19 +1,18 @@
 package gallery;
 
+import sowy.*;
+import gallery.*;
+import flixel.math.FlxMath;
 import flixel.util.FlxGradient;
 import flixel.effects.FlxFlicker;
-import sowy.*;
-import flixel.text.FlxText;
-import flixel.util.FlxColor;
 import flixel.tweens.*;
-import gallery.*;
 import flixel.group.FlxGroup;
 import flixel.addons.display.FlxBackdrop;
 
 class GalleryMenuState extends MusicBeatState
 {
 	var optionShit:Array<String> = ["comics", "jukebox", "titles"];
-	var options = new FlxTypedGroup<OldMainMenuState.MainMenuButton>();
+	var options = new FlxTypedGroup<MenuButton>();
 
 	static var curSelected:Int = 0;
 
@@ -93,7 +92,7 @@ class GalleryMenuState extends MusicBeatState
 		add(FlxGradient.createGradientFlxSprite(FlxG.width, FlxG.height, [0xAA000000, 0x55000000, 0xAA000000]));
 
 		for (id in 0...optionShit.length){
-			var option = new OldMainMenuState.MainMenuButton(50, 210+120*id);
+			var option = new MenuButton(50, 210+120*id);
 			
 			option.onOver.callback = ()->{
 				if (selectedSomethin) return;
@@ -252,4 +251,24 @@ class GalleryMenuState extends MusicBeatState
         
         super.update(elapsed);
     }
+}
+
+class MenuButton extends SowyBaseButton
+{
+	public var targetX:Float = 0;
+	public var targetY:Float = 0;
+
+	public function new(x:Float = 0, y:Float = 0)
+	{
+		targetX = x;
+		targetY = y;
+		super(x, y);
+	}
+
+	override function update(elapsed:Float)
+	{
+		x = Std.int(FlxMath.lerp(x, targetX, CoolUtil.boundTo(elapsed * 10.2, 0, 1)));
+		y = Std.int(FlxMath.lerp(y, targetY, CoolUtil.boundTo(elapsed * 10.2, 0, 1)));
+		super.update(elapsed);
+	}
 }

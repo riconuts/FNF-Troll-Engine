@@ -15,11 +15,13 @@ class ResetScoreSubState extends MusicBeatSubstate
 	var noText:Alphabet;
 
 	var name:String;
+	var displayName:String;
 	var isChapter:Bool;
 	
-	public function new(name:String, ?isChapter:Bool)
+	public function new(name:String, ?isChapter:Bool, ?displayName:String)
 	{
 		this.name = name;
+		this.displayName = displayName==null ? name : displayName;
 		this.isChapter = isChapter == true;
 
 		super();
@@ -29,7 +31,7 @@ class ResetScoreSubState extends MusicBeatSubstate
 		bg.scrollFactor.set();
 		add(bg);
 
-		var tooLong:Float = (name.length > 18) ? 0.8 : 1; //Fucking Winter Horrorland
+		var tooLong:Float = (displayName.length > 18) ? 0.8 : 1; //Fucking Winter Horrorland
 
 		var text:Alphabet = new Alphabet(0, 180 + FlxG.camera.scroll.y, "Reset the score of", true);
 		text.scrollFactor.set();
@@ -38,7 +40,7 @@ class ResetScoreSubState extends MusicBeatSubstate
 		text.alpha = 0;
 		add(text);
 
-		var text:Alphabet = new Alphabet(0, text.y + 90, name + "?", true, false, 0.05, tooLong);
+		var text:Alphabet = new Alphabet(0, text.y + 90, displayName + "?", true, false, 0.05, tooLong);
 		text.scrollFactor.set();
 		text.screenCenter(X);
 		//if(!this.isChapter) text.x += 60 * tooLong;
