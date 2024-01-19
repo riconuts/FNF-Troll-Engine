@@ -6,9 +6,13 @@ function getOffset(eventNote):Float{
 	return 0;
 }
 
-function onTrigger(value1)
+function onTrigger(value1, value2)
 {
-	if (Std.string(value1) != "")
+	if(game.stageData.camera_speed != null)
+		game.cameraSpeed = game.stageData.camera_speed;
+
+	var sowy = Std.parseFloat(value1);
+	if (!Math.isNaN(sowy))
 	{	
 		var camDad = game.dad.getCamera();
 		var camBf = game.boyfriend.getCamera();
@@ -38,12 +42,15 @@ function onTrigger(value1)
 			minY = bfY;
 		}
 		
-		var sowy = Std.parseFloat(value1);
 		game.triggerEventNote(
 			"Camera Follow Pos",
 			Std.string(FlxMath.lerp(minX, maxX, sowy)), 
 			Std.string(FlxMath.lerp(minY, maxY, sowy))
 		);
+		
+		var cusSpeed = Std.parseFloat(value2);
+		if (!Math.isNaN(cusSpeed))
+			game.cameraSpeed *= cusSpeed;
 	}
 	else
 	{

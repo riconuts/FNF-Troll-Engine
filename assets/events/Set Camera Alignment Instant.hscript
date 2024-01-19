@@ -42,7 +42,6 @@ function onTrigger(value1, value2, time)
 			minY = bfY;
 		}
 		
-		
 		game.triggerEventNote(
 			"Camera Follow Pos",
 			Std.string(FlxMath.lerp(minX, maxX, sowy)), 

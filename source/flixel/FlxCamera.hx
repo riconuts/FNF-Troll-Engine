@@ -1169,7 +1169,7 @@ class FlxCamera extends FlxBasic
 		updateFlash(elapsed);
 		updateFade(elapsed);
 
-		flashSprite.filters = (ClientPrefs.shaders != 'Off' && filtersEnabled) ? filters : null;
+		flashSprite.filters = (filtersEnabled && ClientPrefs.shaders != 'Off') ? filters : null;
 
 		updateFlashSpritePosition();
 		updateShake(elapsed);

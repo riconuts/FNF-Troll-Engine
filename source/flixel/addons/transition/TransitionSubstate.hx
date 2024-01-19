@@ -7,18 +7,18 @@ import flixel.util.FlxColor;
 
 class TransitionSubstate extends FlxSubState
 {
-  public var finishCallback:Void->Void;
-  public function new(){
-	super(FlxColor.TRANSPARENT);
-  }
+	public var finishCallback:Void->Void;
+	public function new(){
+		super(FlxColor.TRANSPARENT);
+	}
 
-  public override function destroy():Void
-  {
-	super.destroy();
-	finishCallback = null;
-  }
+	public override function destroy():Void
+	{
+		super.destroy();
+		finishCallback = null;
+	}
 
-  public function start(status: TransitionStatus){
-	trace('transitioning $status');
-  }
+	public function start(status: TransitionStatus){
+		trace('transitioning $status');
+	}
 }
