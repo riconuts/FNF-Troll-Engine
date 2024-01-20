@@ -113,7 +113,7 @@ class NoteOffsetState extends MusicBeatState
 		add(stage.foreground);
 
 		// Combo stuff
-		rating = new FlxSprite().loadGraphic(Paths.image(ClientPrefs.useEpics ? 'epic' : 'sick'));
+		rating = new FlxSprite(0, 0, Paths.image(ClientPrefs.useEpics ? 'epic' : 'sick'));
 		rating.cameras = [camHUD];
 		rating.setGraphicSize(Std.int(rating.width * 0.7));
 		rating.updateHitbox();

@@ -59,6 +59,7 @@ typedef JudgmentData = {
  */
 class JudgmentManager {
     public var judgmentData:Map<Judgment, JudgmentData> = [
+		#if USE_EPIC_JUDGEMENT
         TIER5 => {
             internalName: "epic",
             displayName: "Killer",
@@ -68,6 +69,7 @@ class JudgmentManager {
             health: 1.15,
 			noteSplash: true,
         },
+		#end
         TIER4 => {
             internalName: "sick",
             displayName: "Awesome",
@@ -235,15 +237,19 @@ class JudgmentManager {
         // (aka fake notes when)
     }
 
-    public var useEpics:Bool = true;
-    public function new(?useEpics:Bool){
-        if(useEpics==null)useEpics = ClientPrefs.useEpics;
+    public var useEpics:Bool;
+    public function new(?useEpics:Bool)
+    {
+        #if USE_EPIC_JUDGEMENT
+		if (ClientPrefs.useEpics && useEpics==true){
+			this.useEpics = true;
+            return;
+		}
 
-        this.useEpics = useEpics;
-        if(!useEpics){
-			hittableJudgments.remove(TIER5);
-            judgmentData.get(TIER4).accuracy = 100;
-        }
+		hittableJudgments.remove(TIER5);
+		#end
 
+		judgmentData.get(TIER4).accuracy = 100;
+		this.useEpics = false;
     }
 }

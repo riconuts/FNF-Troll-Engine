@@ -73,9 +73,10 @@ class OptionsSubstate extends MusicBeatSubstate
 	function windowsChanged()
 	{
 		var windows = ["badWindow", "goodWindow", "sickWindow"];
-		if (getToggle("useEpics"))
+
+		#if USE_EPIC_JUDGEMENT if (getToggle("useEpics"))
 			windows.push("epicWindow");
-		else
+		else #end 
 			actualOptions.get("sickWindow").data.set("min", 0);
 
 		for (idx in 0...windows.length - 1)
@@ -91,12 +92,19 @@ class OptionsSubstate extends MusicBeatSubstate
 	function checkWindows()
 	{
 		var didChange:Bool = false;
+
+		#if USE_EPIC_JUDGEMENT
 		actualOptions.get("epicWindow").data.set("locked", !getToggle("useEpics"));
+		#end
 
 		for (name => windows in judgeWindows)
 		{
 			var compareWindow = [
+				#if USE_EPIC_JUDGEMENT
 				getToggle("useEpics") ? getNumber("epicWindow") : -1,
+				#else
+				-1,
+				#end
 				getNumber("sickWindow"),
 				getNumber("goodWindow"),
 				getNumber("badWindow"),
@@ -134,9 +142,13 @@ class OptionsSubstate extends MusicBeatSubstate
 				if (judgeWindows.exists(newVal))
 				{
 					var windows = judgeWindows.get(newVal);
+
+					#if USE_EPIC_JUDGEMENT
 					changeToggle("useEpics", windows[0] != -1);
 					if (windows[0] != -1)
 						changeNumber("epicWindow", windows[0], true);
+					#end
+
 					changeNumber("sickWindow", windows[1], true);
 					changeNumber("goodWindow", windows[2], true);
 					changeNumber("badWindow", windows[3], true);
@@ -295,9 +307,11 @@ class OptionsSubstate extends MusicBeatSubstate
 				"advanced",
 				[
 					"wife3",
-					"useEpics",
 					"judgePreset",
+					#if USE_EPIC_JUDGEMENT
+					"useEpics",
 					"epicWindow",
+					#end
 					"sickWindow",
 					"goodWindow",
 					"badWindow",

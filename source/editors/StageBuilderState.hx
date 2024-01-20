@@ -24,9 +24,6 @@ import openfl.geom.Rectangle;
 
 using StringTools;
 
-// this is pure spaghetti
-// also i should probably make this its own thing rather than embedding it into tgt lol
-
 typedef ObjectProperties = {
     var ?x:Float;
     var ?y:Float;
