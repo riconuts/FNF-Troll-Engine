@@ -182,7 +182,7 @@ class JudgmentManager {
         }
     ];
     public var judgeTimescale:Float = 1; // scales hit windows
-	public var hittableJudgments:Array<Judgment> = [TIER5, TIER4, TIER3, TIER2, TIER1]; // should be from highest to lowest
+	public var hittableJudgments:Array<Judgment> = [#if USE_EPIC_JUDGEMENT TIER5, #end TIER4, TIER3, TIER2, TIER1]; // should be from highest to lowest
     // these are judgments that you can *actually* hit and arent caused by special notes (i.e Mines)
 
     /**
