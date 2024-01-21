@@ -97,32 +97,33 @@ class OptionsSubstate extends MusicBeatSubstate
 		actualOptions.get("epicWindow").data.set("locked", !getToggle("useEpics"));
 		#end
 
+		var compareWindow = [
+			#if USE_EPIC_JUDGEMENT
+			getToggle("useEpics") ? getNumber("epicWindow") : -1,
+			#else
+			-1,
+			#end
+			getNumber("sickWindow"),
+			getNumber("goodWindow"),
+			getNumber("badWindow"),
+			getNumber("hitWindow")
+		];
+
 		for (name => windows in judgeWindows)
-		{
-			var compareWindow = [
-				#if USE_EPIC_JUDGEMENT
-				getToggle("useEpics") ? getNumber("epicWindow") : -1,
-				#else
-				-1,
-				#end
-				getNumber("sickWindow"),
-				getNumber("goodWindow"),
-				getNumber("badWindow"),
-				getNumber("hitWindow")
-			];
+		{	
 			var isPreset:Bool = true;
-			for (idx in 0...compareWindow.length)
-			{
+
+			for (idx in 0...compareWindow.length){
 				var preset = CoolUtil.snap(windows[idx], 0.1);
 				var custom = CoolUtil.snap(compareWindow[idx], 0.1);
-				if (preset != custom)
-				{
+				
+				if (preset != custom){
 					isPreset = false;
 					break;
 				}
 			}
-			if (isPreset)
-			{
+
+			if (isPreset){
 				changeDropdown("judgePreset", name);
 				didChange = true;
 				break;
@@ -259,17 +260,20 @@ class OptionsSubstate extends MusicBeatSubstate
 		}
 	}
 
+	static inline function epicWindowVal(val:Float){
+		return #if USE_EPIC_JUDGEMENT val #else -1 #end ;
+	}
 	static var judgeWindows:Map<String, Array<Float>> = [
-		"Standard" => [22.5, 45, 90, 135, 180],
+		"Standard" => [epicWindowVal(22.5), 45, 90, 135, 180],
 		"Vanilla" => [
-			-1, // epic (-1 to disable)
-			33, // sick
-			125, // good
-			150, // bad
-			166 // shit / max hit window
+			-1,		// epic (-1 to disable)
+			33,		// sick
+			125,	// good
+			150,	// bad
+			166		// shit / max hit window
 		],
 		"Psych" => [-1, 45, 90, 135, 166],
-		"ITG" => [21, 43, 102, 135, 180]
+		"ITG" => [epicWindowVal(21), 43, 102, 135, 180]
 	];
 
 	static var options:Map<String, Array<Dynamic>> = [
