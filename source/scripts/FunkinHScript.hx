@@ -256,7 +256,6 @@ class FunkinHScript extends FunkinScript
 			else if ((state is ChartingState) && state == ChartingState.instance){
 				var state:ChartingState = ChartingState.instance;
 
-				
 				set("global", state.variables);
 				set("getInstance", FlxG.get_state);
 

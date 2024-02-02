@@ -164,11 +164,18 @@ class ColorSwapShader extends FlxShader
 		{
 			vec4 color = texture2D(bitmap, openfl_TextureCoordv);
 
-			vec4 swagColor = vec4(rgb2hsv(vec3(color[0], color[1], color[2])), color[3]);
+			vec4 swagColor = vec4(
+				rgb2hsv(
+					vec3(color[0], color[1], color[2])
+				), 
+				color[3]
+			);
 
-			// [0] is the hue???
+			// hue
 			swagColor[0] = swagColor[0] + uTime[0];
-			swagColor[1] = swagColor[1] + uTime[1];
+			// sat
+			swagColor[1] = swagColor[1] * (1.0 + uTime[1]);
+			// val
 			swagColor[2] = swagColor[2] * (1.0 + uTime[2]);
 			
 			if(swagColor[1] < 0.0)
