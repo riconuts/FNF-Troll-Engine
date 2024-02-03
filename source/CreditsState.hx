@@ -83,7 +83,7 @@ class CreditsState extends MusicBeatState
 		camFollowPos.setPosition(camFollow.x, camFollow.y);
 
 		////
-		bg = new FlxSprite().loadGraphic(Paths.image("newmenuu/creditsbg"));
+		bg = new FlxSprite().loadGraphic(Paths.image("tgtmenus/creditsbg"));
 		
 		if (FlxG.height < FlxG.width)
 			bg.setGraphicSize(0, FlxG.height);

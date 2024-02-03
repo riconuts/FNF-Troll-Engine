@@ -110,7 +110,7 @@ class MainMenuState extends MusicBeatState
 		FlxG.camera.bgColor = FlxColor.BLACK;
 
 		////
-		var bg:ZSprite = cast new ZSprite().loadGraphic(Paths.image('newmenuu/mainmenu/menuBG'));
+		var bg:ZSprite = cast new ZSprite().loadGraphic(Paths.image('tgtmenus/mainmenu/menuBG'));
 		bg.scrollFactor.set();
 		bg.setGraphicSize(0, FlxG.height);
 		bg.updateHitbox();
@@ -140,12 +140,12 @@ class MainMenuState extends MusicBeatState
         for(option in optionShit)
 		{
 			var art = new ZSprite();
-			art.loadGraphic(Paths.image("newmenuu/mainmenu/cover_" + option));
+			art.loadGraphic(Paths.image("tgtmenus/mainmenu/cover_" + option));
 			art.scrollFactor.set();
 			art.ID = artBoxes.length;
 
 			var butt = new ZSprite();
-			butt.loadGraphic(Paths.image("newmenuu/mainmenu/menu_" + option));
+			butt.loadGraphic(Paths.image("tgtmenus/mainmenu/menu_" + option));
 			butt.scrollFactor.set();
 			butt.ID = art.ID;
 
@@ -158,7 +158,7 @@ class MainMenuState extends MusicBeatState
 		add(menuItems);
 
 		////
-		var buttonBg = new FlxSprite(FlxG.width, 0, Paths.image('newmenuu/mainmenu/extra_pad'));
+		var buttonBg = new FlxSprite(FlxG.width, 0, Paths.image('tgtmenus/mainmenu/extra_pad'));
 		buttonBg.x -= buttonBg.width;
 		add(buttonBg);
 
@@ -168,7 +168,7 @@ class MainMenuState extends MusicBeatState
 			var button = new FlxSprite(
 				buttonBg.x + 125 - 93, 
 				10 + (10 + idx * (83 + 16)), 
-				Paths.image('newmenuu/mainmenu/button_${sideShit[idx]}')
+				Paths.image('tgtmenus/mainmenu/button_${sideShit[idx]}')
 			);
 
 			button.ID = idx;
@@ -249,7 +249,7 @@ class MainMenuState extends MusicBeatState
 
 		if (squeaks > 4){
 			FlxG.sound.play(Paths.sound("pop"));
-			spr.loadGraphic(Paths.image("newmenuu/mainmenu/cover_freeplay_alt"));
+			spr.loadGraphic(Paths.image("tgtmenus/mainmenu/cover_freeplay_alt"));
 			
 			came = true;
 		}

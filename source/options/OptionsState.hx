@@ -19,7 +19,7 @@ class OptionsState extends MusicBeatState
 			MusicBeatState.switchState(new MainMenuState());
         };
 
- 		bg = new FlxSprite(0, 0, Paths.image('newmenuu/optionsbg'));
+ 		bg = new FlxSprite(0, 0, Paths.image('tgtmenus/optionsbg'));
 		bg.screenCenter(XY);
 		add(bg);
         

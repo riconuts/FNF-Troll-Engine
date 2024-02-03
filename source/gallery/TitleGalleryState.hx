@@ -37,7 +37,7 @@ class TitleGalleryState extends MusicBeatState
         else
             add(new FlxSprite().makeGraphic(FlxG.width, FlxG.width, 0xFF000000).screenCenter(Y));
 
-        left = new FlxSprite(10, 0, Paths.image("selectionArrow"));
+        left = new FlxSprite(10, 0, Paths.image("tgtmenus/selectionArrow"));
         left.color = 0xFFF4CC34;
         left.angle = -90;
         left.scale.set(2,2);
@@ -45,7 +45,7 @@ class TitleGalleryState extends MusicBeatState
         left.screenCenter(Y);
         add(left);
 
-        right = new FlxSprite(0, 0, Paths.image("selectionArrow"));
+        right = new FlxSprite(0, 0, Paths.image("tgtmenus/selectionArrow"));
         right.color = 0xFFF4CC34;
         right.angle = 90;
         right.scale.set(2,2);

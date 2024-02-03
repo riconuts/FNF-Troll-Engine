@@ -159,7 +159,7 @@ class StoryMenuState extends MusicBeatState
 			add(yellowBorder);			
 		}
 
-		selectionArrow = new FlxSprite(0,0, Paths.image("selectionArrow"));
+		selectionArrow = new FlxSprite(0,0, Paths.image("tgtmenus/selectionArrow"));
 		selectionArrow.color = 0xFFF4CC34;
 		add(selectionArrow);
 
