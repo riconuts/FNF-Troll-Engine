@@ -198,8 +198,8 @@ class ComboOffsetSubstate extends MusicBeatSubstate
         super.update(elapsed);
     } 
 
-    override public function close(){
-        FlxG.cameras.remove(camHUD, false);
-        super.close();
+	override public function destroy(){
+        super.destroy();
+		FlxG.cameras.remove(camHUD, true);
     }
 }

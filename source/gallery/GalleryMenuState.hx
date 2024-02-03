@@ -66,22 +66,6 @@ class GalleryMenuState extends MusicBeatState
 
 		persistentUpdate = true;
 
-		/*
-		add(new FlxSprite(0,0,Paths.image("tgtmenus/gallerymenu/bg")));
-
-		backdrop = new FlxBackdrop(Paths.image("grid"));
-		backdrop.velocity.set(30, 30);
-		backdrop.color = 0xFF467aeb;
-		backdrop.alpha = 0.175;
-		add(backdrop);
-
-		magenta = new FlxBackdrop(Paths.image("grid"));
-		magenta.velocity.set(30, 30);
-		magenta.color = 0xFFFF0078;
-		magenta.alpha = 0.6;
-		magenta.visible = false;
-		add(magenta);
-		*/
 		var bg = new FlxBackdrop();
 		bg.frames = Paths.getSparrowAtlas("jukebox/space");
 		bg.animation.addByPrefix("space", "space", 50, true);

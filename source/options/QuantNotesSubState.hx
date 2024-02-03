@@ -61,28 +61,8 @@ class QuantNotesSubState extends MusicBeatSubstate
 		super();
 
 		daCam = new FlxCamera();
-		daCam.bgColor.alpha = 0;
+		daCam.bgColor = FlxColor.fromRGBFloat(0, 0, 0, 0.6);
 		FlxG.cameras.add(daCam, false);
-
-/* 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('tgtmenus/optionsbg'));
-		//bg.color = 0xFFea71fd;
-		bg.screenCenter();
-		//bg.antialiasing = ClientPrefs.globalAntialiasing;
-		add(bg);
-
-		var backdrop = new flixel.addons.display.FlxBackdrop(Paths.image("grid"));
-		var time = Sys.time();
-		backdrop.setPosition(time * 30, time * 30);
-		backdrop.velocity.set(30, 30);
-		backdrop.alpha = 0.15;
-		add(backdrop); */
-
-		var backdrop = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
-		backdrop.setGraphicSize(FlxG.width, FlxG.height);
-		backdrop.updateHitbox();
-		backdrop.screenCenter(XY);
-		backdrop.alpha = 0.5;
-		add(backdrop);
 
 		blackBG = new FlxSprite(posX - 25).makeGraphic(870, 200, FlxColor.BLACK);
 		blackBG.alpha = 0.4;
@@ -217,7 +197,6 @@ class QuantNotesSubState extends MusicBeatSubstate
 
 		if (controls.BACK || (changingNote && controls.ACCEPT)) {
 			if(!changingNote) {
-				FlxG.cameras.remove(daCam);
 				close();
 			} else {
 				changeSelection();
@@ -253,6 +232,11 @@ class QuantNotesSubState extends MusicBeatSubstate
 		}
 
 		super.update(elapsed);
+	}
+
+	override function destroy(){
+		super.destroy();
+		FlxG.cameras.remove(daCam);
 	}
 
 	function changeSelection(change:Int = 0) {
