@@ -67,7 +67,7 @@ class GalleryMenuState extends MusicBeatState
 		persistentUpdate = true;
 
 		/*
-		add(new FlxSprite(0,0,Paths.image("gallerymenu/bg")));
+		add(new FlxSprite(0,0,Paths.image("tgtmenus/gallerymenu/bg")));
 
 		backdrop = new FlxBackdrop(Paths.image("grid"));
 		backdrop.velocity.set(30, 30);
@@ -106,7 +106,7 @@ class GalleryMenuState extends MusicBeatState
 			option.onUp.callback = onSelected.bind(id);
 			option.ID = id;
 
-			option.loadGraphic(Paths.image('gallerymenu/button_${optionShit[id]}'));
+			option.loadGraphic(Paths.image('tgtmenus/gallerymenu/button_${optionShit[id]}'));
 			
 			options.add(option);
 		}
@@ -185,8 +185,11 @@ class GalleryMenuState extends MusicBeatState
 			var sowyImage = imageMap.get(name);
 
 			if (sowyImage == null){
-				var newImage = new FlxSprite(FlxG.width - 560);
-				newImage.loadGraphic(Paths.image("gallerymenu/cover_" + name));
+				var newImage = new FlxSprite(
+					FlxG.width - 560, 
+					0, 
+					Paths.image("tgtmenus/gallerymenu/cover_" + name)
+				);
 				//newImage.antialiasing = ClientPrefs.globalAntialiasing;
 
 				newImage.scrollFactor.set();

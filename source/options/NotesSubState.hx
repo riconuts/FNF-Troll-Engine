@@ -51,7 +51,7 @@ class NotesSubState extends MusicBeatSubstate
 		daCam.bgColor.alpha = 0;
 		FlxG.cameras.add(daCam, false);
 
-/* 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('newmenuu/optionsbg'));
+/* 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('tgtmenus/optionsbg'));
 		//bg.color = 0xFFea71fd;
 		bg.screenCenter();
 		//bg.antialiasing = ClientPrefs.globalAntialiasing;

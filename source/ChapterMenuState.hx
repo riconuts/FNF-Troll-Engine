@@ -30,7 +30,7 @@ class ChapterMenuState extends MusicBeatState{
 	public static function getChapterCover(name:String){
 		var artGraph = Paths.image('chaptercovers/' + Paths.formatToSongPath(name));
 
-		return artGraph != null ? artGraph : Paths.image('newmenuu/mainmenu/cover_story_mode');
+		return artGraph != null ? artGraph : Paths.image('tgtmenus/mainmenu/cover_story_mode');
 	}
 
 	override function create()
