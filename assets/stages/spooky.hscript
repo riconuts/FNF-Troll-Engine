@@ -1,20 +1,19 @@
-function onLoad(stage, foreground)
+var halloweenBG;
+
+function onLoad()
 {
-	var hallowTex = Paths.getSparrowAtlas('halloween_bg');
-	if(!ClientPrefs.lowQuality) {
+	if (ClientPrefs.lowQuality){
+		halloweenBG = new FlxSprite(-200, -100, Paths.image('stages/spooky/halloween_bg_low'));
+
+	}else{
 		halloweenBG = new FlxSprite(-200, -100);
-		halloweenBG.frames = hallowTex;
+		halloweenBG.frames = Paths.getSparrowAtlas('stages/spooky/halloween_bg');
 		halloweenBG.animation.addByPrefix('idle', 'halloweem bg0');
 		halloweenBG.animation.addByPrefix('lightning', 'halloweem bg lightning strike', 24, false);
 		halloweenBG.animation.play('idle');
-		halloweenBG.antialiasing = true;
 	}
-	else 
-		halloweenBG = new BGSprite('halloween_bg_low', -200, -100);
-	
-	halloweenBG.scrollFactor.set(1, 1);
+ 
 	add(halloweenBG);
-
 }
 
 var lightningStrikeBeat = 0;
@@ -22,9 +21,11 @@ var lightningOffset = 0;
 
 function lightningStrikeShit(sound:Bool):Void
 {
-	if(sound)
-	FlxG.sound.play(Paths.soundRandom('thunder_', 1, 2));
-	if(!ClientPrefs.lowQuality) halloweenBG.animation.play('lightning');
+	if (sound)
+		FlxG.sound.play(Paths.soundRandom('thunder_', 1, 2));
+	
+	if (!ClientPrefs.lowQuality) 
+		halloweenBG.animation.play('lightning');
 
 	lightningStrikeBeat = curBeat;
 	lightningOffset = FlxG.random.int(8, 24);
@@ -38,7 +39,7 @@ function onEvent(name, val1, val2)
 	if (name == "Lightning")
 	{
 		var sound = false;
-		if(val1!=null && val1.toLowerCase()=='true')sound=true;
+		if (val1!=null && val1.toLowerCase()=='true') sound=true;
 		lightningStrikeShit(sound);
 	}
 }

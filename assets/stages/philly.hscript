@@ -2,29 +2,25 @@ var phillyCityLights = [];
 var phillyTrain:FlxSprite;
 var trainSound:FlxSound;
 
-function onLoad(stage, foreground)
+function onLoad()
 {
-	var add = function(o){
-		return stage.add(o);
-	}
-
-	var bg:FlxSprite = new FlxSprite(-100).loadGraphic(Paths.image('philly/sky'));
+	var bg:FlxSprite = new FlxSprite(-100, 0, Paths.image('stages/philly/sky'));
 	bg.scrollFactor.set(0.1, 0.1);
 	add(bg);
 
-	var city:FlxSprite = new FlxSprite(-10).loadGraphic(Paths.image('philly/city'));
+	var city:FlxSprite = new FlxSprite(-10, 0, Paths.image('stages/philly/city'));
 	city.scrollFactor.set(0.3, 0.3);
 	city.setGraphicSize(Std.int(city.width * 0.85));
 	city.updateHitbox();
 	add(city);
 
-	lightFadeShader = newShader("buildingShader");
+	lightFadeShader = Paths.getShader("buildingShader");
 	lightFadeShader.data.alphaShit.value = [0];
 
 	var phillyLightsColors = [0xFF31A2FD, 0xFF31FD8C, 0xFFFB33F5, 0xFFFD4531, 0xFFFBA633];
 	for (i in 0...5)
 	{
-		var light:FlxSprite = new FlxSprite(city.x).loadGraphic(Paths.image('philly/window'));
+		var light:FlxSprite = new FlxSprite(city.x, 0 ,Paths.image('stages/philly/window'));
 		light.color = phillyLightsColors[i];
 		light.scrollFactor.set(0.3, 0.3);
 		light.visible = false;
@@ -38,10 +34,10 @@ function onLoad(stage, foreground)
 
 	phillyCityLights[0].visible = true;
 
-	var streetBehind:FlxSprite = new FlxSprite(-40, 50).loadGraphic(Paths.image('philly/behindTrain'));
+	var streetBehind:FlxSprite = new FlxSprite(-40, 50, Paths.image('stages/philly/behindTrain'));
 	add(streetBehind);
 
-	phillyTrain = new FlxSprite(2000, 360).loadGraphic(Paths.image('philly/train'));
+	phillyTrain = new FlxSprite(2000, 360, Paths.image('stages/philly/train'));
 	add(phillyTrain);
 
 	trainSound = new FlxSound().loadEmbedded(Paths.sound('train_passes'));
@@ -49,7 +45,7 @@ function onLoad(stage, foreground)
 
 	// var cityLights:FlxSprite = new FlxSprite().loadGraphic(AssetPaths.win0.png);
 
-	var street:FlxSprite = new FlxSprite(-40, streetBehind.y).loadGraphic(Paths.image('philly/street'));
+	var street:FlxSprite = new FlxSprite(-40, streetBehind.y, Paths.image('stages/philly/street'));
 	add(street);
 	
 }
