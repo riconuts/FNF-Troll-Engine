@@ -46,8 +46,8 @@
 
 	<classpath path="source" />
 	
-	<assets path="assets" />
-	<assets path='default_content' rename='content' embed='false' />
+	<assets path="assets"	unless="tgt"/>
+	<assets path='default_content'	rename='content'	embed='false' />
 
 	<!-- PSYCH ENGINE CUSTOMIZATION -->
 	<define name="MODS_ALLOWED" if="desktop" />
@@ -93,6 +93,7 @@
 
     <section if="tgt"> <!--lime build windows -release -Dtgt-->
 		<app title="Tails Gets Trolled"/>
+		<assets path="assets-tgt" rename="assets"/>
 
 		<define name="USE_EPIC_JUDGEMENT"/>
 
