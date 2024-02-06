@@ -1,0 +1,43 @@
+if (!PlayState.isStoryMode){
+	script.stop();
+	return;
+}
+
+function onStartCountdown()
+{	
+	game.inCutscene = true;
+
+	var blackScreen:FlxSprite = new FlxSprite(0, 0).makeGraphic(1, 1, FlxColor.BLACK);
+	blackScreen.scale.set(FlxG.width * 2, FlxG.height * 2);
+	blackScreen.scrollFactor.set();
+	blackScreen.screenCenter();
+	game.add(blackScreen);
+	
+	game.camHUD.visible = false;
+
+	new FlxTimer().start(0.1, function(tmr:FlxTimer)
+	{
+		game.remove(blackScreen);
+		blackScreen.destroy();
+		
+		FlxG.sound.play(Paths.sound('Lights_Turn_On'));
+		game.camFollowPos.setPosition(450, -2050);
+		game.camGame.zoom = 1.5;
+
+		new FlxTimer().start(0.8, function(tmr:FlxTimer)
+		{
+			game.camHUD.visible = true;
+
+			FlxTween.tween(game.camGame, {zoom: game.defaultCamZoom}, 2.5, {
+				ease: FlxEase.quadInOut,
+				onComplete: function(twn:FlxTween)
+				{
+					script.stop();
+					game.startCountdown();
+				}
+			});
+		});
+	});
+					
+	return Function_Stop;
+}

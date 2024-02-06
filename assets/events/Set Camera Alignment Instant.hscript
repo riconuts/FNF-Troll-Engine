@@ -1,0 +1,58 @@
+function shouldPush(eventNote):Bool{
+	return true;
+}
+
+function getOffset(eventNote):Float{
+	return 0;
+}
+
+function onTrigger(value1, value2, time)
+{
+	if(game.stageData.camera_speed != null)
+		game.cameraSpeed = game.stageData.camera_speed;
+	
+	var sowy = Std.parseFloat(value1);
+	if (!Math.isNaN(sowy))
+	{
+		var camDad = game.dad.getCamera();
+		var camBf = game.boyfriend.getCamera();
+		
+		var dadX = camDad[0];
+		var dadY = camDad[1];
+		
+		var bfX = camBf[0];
+		var bfY = camBf[1];
+		
+		var minX;
+		var minY;
+		var maxX;
+		var maxY;
+		
+		if (dadX < bfX){
+			minX = dadX;
+			maxX = bfX;
+			
+			minY = dadY;
+			maxY = bfY;
+		}else{
+			maxX = dadX;
+			minX = bfX;
+			
+			maxY = dadY;
+			minY = bfY;
+		}
+		
+		game.triggerEventNote(
+			"Camera Follow Pos",
+			Std.string(FlxMath.lerp(minX, maxX, sowy)), 
+			Std.string(FlxMath.lerp(minY, maxY, sowy))
+		);
+		
+		var cusSpeed = Std.parseFloat(value2);
+		game.cameraSpeed *= (Math.isNaN(cusSpeed) ? 3 : cusSpeed);
+	}
+	else
+	{
+		game.triggerEventNote("Camera Follow Pos", "", "");
+	}
+}

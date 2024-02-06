@@ -1,0 +1,54 @@
+
+function onCreatePost(){
+    for(note in game.allNotes){
+        if(note.isSustainNote)
+            note.reloadNote(note.texPrefix, note.tex, note.texSuffix + 'ENDS', 'pixelUI', 4, 2);
+        else
+            note.reloadNote(note.texPrefix, note.tex, note.texSuffix, 'pixelUI', 4, 5);
+        
+        note.scale.set(6, 6);
+        note.noteType = note.noteType; // reset the splashes
+        note.antialiasing = false;
+    }
+}
+function postReceptorGeneration(){
+    for(field in game.playfields){
+        for(strum in field.strumNotes){
+            // TODO: quants
+            strum.isQuant = false;
+            strum.loadGraphic(Paths.image("pixelUI/NOTE_assets"));
+            strum.width /= 4;
+            strum.height /= 5;
+            strum.loadGraphic(Paths.image("pixelUI/NOTE_assets"), true, Math.floor(strum.width), Math.floor(strum.height));
+            strum.animation.add('static', [strum.noteData]);
+            strum.animation.add('pressed', [strum.noteData + 4, strum.noteData + 8], 12);
+            strum.animation.add('confirm', [strum.noteData + 12, strum.noteData + 16], 24);
+            strum.scale.set(6, 6);
+            strum.playAnim("static", true);
+        }
+    }
+}
+var bgGhouls;
+
+function onLoad(){
+	var posX = 400;
+	var posY = 200;
+	if(!ClientPrefs.lowQuality) {
+		var bg:BGSprite = new BGSprite('weeb/animatedEvilSchool', posX, posY, 0.8, 0.9, ['background 2'], true);
+		bg.scale.set(6, 6);
+		bg.antialiasing = false;
+		add(bg);
+
+		bgGhouls = new BGSprite('weeb/bgGhouls', -100, 190, 0.9, 0.9, ['BG freaks glitch instance'], false);
+		bgGhouls.setGraphicSize(Std.int(bgGhouls.width * daPixelZoom));
+		bgGhouls.updateHitbox();
+		bgGhouls.visible = false;
+		bgGhouls.antialiasing = false;
+		add(bgGhouls);
+	} else {
+		var bg:BGSprite = new BGSprite('weeb/animatedEvilSchool_low', posX, posY, 0.8, 0.9);
+		bg.scale.set(6, 6);
+		bg.antialiasing = false;
+		add(bg);
+	}
+}

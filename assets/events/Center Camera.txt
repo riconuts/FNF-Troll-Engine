@@ -1,0 +1,2 @@
+Calls the Camera Follow Pos event to the middle point between the player and the opponent.
+Value 1: "true" to lock the camera to the center, (anything else unlocks the camera)

@@ -1,0 +1,5 @@
+Value 1: Camera Position (0 to 1)
+Value 2: Camera Speed (Default is 3)
+
+instantly snaps the camera
+leave value 1 blank to unlock the camera after the event is used

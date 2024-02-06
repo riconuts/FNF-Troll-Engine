@@ -1,0 +1,95 @@
+
+function onCreatePost(){
+    for(note in game.allNotes){
+        if(note.isSustainNote)
+            note.reloadNote(note.texPrefix, note.tex, note.texSuffix + 'ENDS', 'pixelUI', 4, 2);
+        else
+            note.reloadNote(note.texPrefix, note.tex, note.texSuffix, 'pixelUI', 4, 5);
+        
+        note.scale.set(6, 6);
+        note.noteType = note.noteType; // reset the splashes
+        note.antialiasing = false;
+    }
+}
+
+function postReceptorGeneration(){
+    for(field in game.playfields){
+        for(strum in field.strumNotes){
+            // TODO: quants
+            strum.isQuant = false;
+            strum.loadGraphic(Paths.image("pixelUI/NOTE_assets"));
+            strum.width /= 4;
+            strum.height /= 5;
+            strum.loadGraphic(Paths.image("pixelUI/NOTE_assets"), true, Math.floor(strum.width), Math.floor(strum.height));
+            strum.animation.add('static', [strum.noteData]);
+            strum.animation.add('pressed', [strum.noteData + 4, strum.noteData + 8], 12);
+            strum.animation.add('confirm', [strum.noteData + 12, strum.noteData + 16], 24);
+            strum.scale.set(6, 6);
+            strum.playAnim("static", true);
+        }
+    }
+}
+
+var bgGirls;
+
+function onLoad(){
+	var bgSky:BGSprite = new BGSprite('weeb/weebSky', 0, 0, 0.1, 0.1);
+	add(bgSky);
+	bgSky.antialiasing = false;
+
+	var repositionShit = -200;
+
+	var bgSchool:BGSprite = new BGSprite('weeb/weebSchool', repositionShit, 0, 0.6, 0.90);
+	add(bgSchool);
+	bgSchool.antialiasing = false;
+
+	var bgStreet:BGSprite = new BGSprite('weeb/weebStreet', repositionShit, 0, 0.95, 0.95);
+	add(bgStreet);
+	bgStreet.antialiasing = false;
+
+	var widShit = Std.int(bgSky.width * 6);
+	if(!ClientPrefs.lowQuality) {
+		var fgTrees:BGSprite = new BGSprite('weeb/weebTreesBack', repositionShit + 170, 130, 0.9, 0.9);
+		fgTrees.setGraphicSize(Std.int(widShit * 0.8));
+		fgTrees.updateHitbox();
+		add(fgTrees);
+		fgTrees.antialiasing = false;
+	}
+
+	var bgTrees:FlxSprite = new FlxSprite(repositionShit - 380, -800);
+	bgTrees.frames = Paths.getPackerAtlas('weeb/weebTrees');
+	bgTrees.animation.add('treeLoop', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18], 12);
+	bgTrees.animation.play('treeLoop');
+	bgTrees.scrollFactor.set(0.85, 0.85);
+	add(bgTrees);
+	bgTrees.antialiasing = false;
+
+	if(!ClientPrefs.lowQuality) {
+		var treeLeaves:BGSprite = new BGSprite('weeb/petals', repositionShit, -40, 0.85, 0.85, ['PETALS ALL'], true);
+		treeLeaves.setGraphicSize(widShit);
+		treeLeaves.updateHitbox();
+		add(treeLeaves);
+		treeLeaves.antialiasing = false;
+	}
+
+	bgSky.setGraphicSize(widShit);
+	bgSchool.setGraphicSize(widShit);
+	bgStreet.setGraphicSize(widShit);
+	bgTrees.setGraphicSize(Std.int(widShit * 1.4));
+
+	bgSky.updateHitbox();
+	bgSchool.updateHitbox();
+	bgStreet.updateHitbox();
+	bgTrees.updateHitbox();
+
+	/*
+	if(!ClientPrefs.lowQuality) {
+		bgGirls = new BackgroundGirls(-100, 190);
+		bgGirls.scrollFactor.set(0.9, 0.9);
+
+		bgGirls.setGraphicSize(Std.int(bgGirls.width * daPixelZoom));
+		bgGirls.updateHitbox();
+		add(bgGirls);
+	}
+	*/
+}
