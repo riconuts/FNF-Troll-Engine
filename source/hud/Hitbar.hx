@@ -87,7 +87,8 @@ class Hitbar extends FlxSpriteGroup
 		// sick window
 		makeBar(hitbarPxPerMs * judgeManager.getWindow(TIER4), 0xFF00A2E8);
 		#if USE_EPIC_JUDGEMENT
-		makeBar(hitbarPxPerMs * judgeManager.getWindow(TIER5), 0xFFE367E5);
+		if (ClientPrefs.useEpics)
+			makeBar(hitbarPxPerMs * judgeManager.getWindow(TIER5), 0xFFE367E5);
 		#end
 
 		averageIndicator = new FlxSprite(mainBar.width / 2, hitbarHeight + 5, Paths.image("hitbarAverage"));
