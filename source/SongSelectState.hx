@@ -13,6 +13,9 @@ class SongSelectState extends MusicBeatState
 	var songText:Array<FlxText> = [];
 	var curSel(default, set):Int;
 	function set_curSel(sowy){
+		if (songMeta.length == 0)
+			return curSel = 0;
+
 		if (sowy < 0 || sowy >= songMeta.length)
 			sowy = sowy % songMeta.length;
 		if (sowy < 0)
@@ -41,6 +44,12 @@ class SongSelectState extends MusicBeatState
 
 		if (FlxG.sound.music == null)
 			MusicBeatState.playMenuMusic(1);
+
+		var folder = 'assets/songs/';
+		Paths.iterateDirectory(folder, function(path:String){
+			if (FileSystem.isDirectory(folder + path))
+				songMeta.push(new SongMetadata(path));
+		});
 
 		#if MODS_ALLOWED
 		for (modDir in Paths.getModDirectories()){

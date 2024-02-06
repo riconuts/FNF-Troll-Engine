@@ -475,13 +475,31 @@ class Paths
 		#end
 	}
 
+	static function getShaderFragment(name:String):Null<String>{
+		var path = Paths.modsShaderFragment(name);
+		if (Paths.exists(path)) return path;
+		var path = Paths.shaderFragment(name);
+		if (Paths.exists(path)) return path;
+		return null;
+	}
+	static function getShaderVertex(name:String):Null<String>{
+		var path = Paths.modsShaderVertex(name);
+		if (Paths.exists(path)) return path;
+		var path = Paths.shaderVertex(name);
+		if (Paths.exists(path)) return path;
+		return null;
+	}
+
 	/** returns a FlxRuntimeShader but with file names lol **/ 
 	public static function getShader(fragFile:String = null, vertFile:String = null, ?version:Int):FlxRuntimeShader
 	{
-		try{				
+		try{
+			var fragPath:Null<String> = fragFile==null ? null : getShaderFragment(fragFile);
+			var vertPath:Null<String> = fragFile==null ? null : getShaderVertex(vertFile);
+
 			return new FlxRuntimeShader(
-				fragFile==null ? null : Paths.getContent(Paths.modsShaderFragment(fragFile)), 
-				vertFile==null ? null : Paths.getContent(Paths.modsShaderVertex(vertFile)),
+				fragFile==null ? null : Paths.getContent(fragPath), 
+				vertFile==null ? null : Paths.getContent(vertPath),
                 version
 			);
 		}catch(e:Dynamic){
