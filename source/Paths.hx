@@ -439,13 +439,26 @@ class Paths
 	{
 		#if MODS_ALLOWED
 		var imageLoaded:FlxGraphic = returnGraphic(key);
+		var xmlLoaded:Any = null;
+
+		var xmlPath = modsXml(key);
+		if (FileSystem.exists(xmlPath))
+			xmlLoaded = File.getContent(xmlPath);
+		else{
+			xmlPath = file('images/$key.xml', library);
+			if (FileSystem.exists(xmlPath))
+				xmlLoaded = File.getContent(xmlPath);
+		}
 
 		return FlxAtlasFrames.fromSparrow(
-			(imageLoaded != null ? imageLoaded : image(key, library)),
-			(FileSystem.exists(modsXml(key)) ? File.getContent(modsXml(key)) : file('images/$key.xml', library))
+			imageLoaded != null ? imageLoaded : image(key, library),
+			xmlLoaded != null ? xmlLoaded : xmlPath
 		);
 		#else
-		return FlxAtlasFrames.fromSparrow(image(key, library), file('images/$key.xml', library));
+		return FlxAtlasFrames.fromSparrow(
+			image(key, library), 
+			file('images/$key.xml', library)
+		);
 		#end
 	}
 
@@ -528,10 +541,9 @@ class Paths
 		#end
 
 		var path = getPath('images/$key.png', IMAGE, library);
-		if (Assets.exists(path, IMAGE))
+		if (Paths.exists(path, IMAGE))
 		{
-			if (!currentTrackedAssets.exists(path))
-			{
+			if (!currentTrackedAssets.exists(path)){
 				var newGraphic:FlxGraphic = getGraphic(path);
 				newGraphic.persist = true;
 				currentTrackedAssets.set(path, newGraphic);
@@ -539,7 +551,8 @@ class Paths
 			if (!localTrackedAssets.contains(path))localTrackedAssets.push(path);
 			return currentTrackedAssets.get(path);
 		}
-		if(Main.showDebugTraces)trace('image "$key" returned null.');
+
+		if (Main.showDebugTraces) trace('image "$key" returned null.');
 		return null;
 	}
 
