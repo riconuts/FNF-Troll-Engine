@@ -32,7 +32,7 @@ function newTankmen(x:Float, y:Float, isGoingRight:Bool)
 {
 	var spr = new FlxSprite(x, y);
 
-	spr.frames = Paths.getSparrowAtlas('tankmanKilled1');
+	spr.frames = Paths.getSparrowAtlas('stages/tank/tankmanKilled1');
 	spr.animation.addByPrefix('run', 'tankman running', 24, true);
 	spr.animation.addByPrefix('shot', 'John Shot ' + FlxG.random.int(1, 2), 24, false);
 
