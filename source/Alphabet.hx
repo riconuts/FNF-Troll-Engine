@@ -467,6 +467,7 @@ class AlphaCharacter extends FlxSprite
 		y = (110 - height);
 		y += row * 60;
 
+		#if tgt
 		switch (letter)
 		{
 			case "g" | "j" | "p" | "q" | "y":
@@ -478,6 +479,7 @@ class AlphaCharacter extends FlxSprite
 			case "B" | "D" | "E" | "L":
 				y--;
 		}
+		#end
 	}
 
 	public function createNumber(letter:String):Void
@@ -487,7 +489,7 @@ class AlphaCharacter extends FlxSprite
 
 		updateHitbox();
 
-		y = (109 - height);
+		y = (110 - height);
 		y += row * 60;
 	}
 
