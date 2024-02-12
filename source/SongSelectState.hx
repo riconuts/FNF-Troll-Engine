@@ -3,12 +3,10 @@ package;
 import sys.io.File;
 import sys.FileSystem;
 import flixel.text.FlxText;
-import FreeplayState.SongMetadata;
+import Song;
 
-@:noScripting
 class SongSelectState extends MusicBeatState
-{
-	
+{	
 	var songMeta:Array<SongMetadata> = [];
 	var songText:Array<FlxText> = [];
 	var curSel(default, set):Int;
@@ -132,7 +130,7 @@ class SongSelectState extends MusicBeatState
 		}
 
 		if (controls.ACCEPT)
-			FreeplayState.playSong(songMeta[curSel]);
+			Song.playSong(songMeta[curSel]);
         else if (controls.BACK)
             MusicBeatState.switchState(new MainMenuState());
 

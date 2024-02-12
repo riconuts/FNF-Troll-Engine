@@ -127,9 +127,12 @@ class CreditsState extends MusicBeatState
 		}
 
 		// Just in case we forget someone!!!
-		if(useHttp){
+		
+		if (useHttp){
             trace('checking for updated credits');
-            var http = new haxe.Http("https://raw.githubusercontent.com/riconuts/troll-engine/main/assets/data/credits.txt");
+			
+			var githubRepo = Main.githubRepo;
+			var http = new haxe.Http('https://raw.githubusercontent.com/${githubRepo.user}/${githubRepo.repo}/main/assets/data/credits.txt');
             http.onData = function(data:String){
                 rawCredits = data;
 

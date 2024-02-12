@@ -1,5 +1,6 @@
-package gallery;
+package tgt.gallery;
 
+import tgt.*;
 import openfl.filters.ShaderFilter;
 import flixel.addons.transition.FlxTransitionableState;
 import openfl.ui.Mouse;
@@ -273,7 +274,7 @@ class ComicsMenuState extends MusicBeatState
 			var page:PageData = curData.pages[idx];
 			
 			////
-			var pageTxt = new sowy.TGTTextButton(
+			var pageTxt = new tgt.TGTTextButton(
 				0, 
 				tail + 20*idx, 
 				0, 

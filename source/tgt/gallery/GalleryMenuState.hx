@@ -1,7 +1,7 @@
-package gallery;
+package tgt.gallery;
 
 import sowy.*;
-import gallery.*;
+import tgt.gallery.*;
 import flixel.math.FlxMath;
 import flixel.util.FlxGradient;
 import flixel.effects.FlxFlicker;

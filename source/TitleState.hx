@@ -434,13 +434,9 @@ class RandomTitleLogo extends FlxSprite
 
 	public function new(?X:Float, ?Y:Float, ?Name:String)
 	{
-		super(X, Y);
-		
 		titleName = Name != null ? Name : FlxG.random.getObject(getTitlesList());
 
-		loadGraphic(Paths.image('titles/${titleName}'));
-		updateHitbox();
-
+		super(X, Y, Paths.image('titles/${titleName}'));
 		antialiasing = true;
 	}
 

@@ -1,4 +1,4 @@
-package;
+package tgt;
 
 import ChapterData;
 import flixel.addons.display.shapes.FlxShapeBox;
@@ -23,8 +23,6 @@ typedef ChapterButton = {
 
 class StoryMenuState extends MusicBeatState
 {
-	public static var weekCompleted:Map<String, Bool> = new Map<String, Bool>();
-
 	// Screen positions for the chapter options
 	/// grrr make this shit dynamic
 	final chapterSelectPositions:Array<Array<Int>> = [
@@ -165,7 +163,7 @@ class StoryMenuState extends MusicBeatState
 
 		changeSelection(curSelected, true);
 		
-		var cornerLeftText = sowy.TGTMenuShit.newBackTextButton(goBack);
+		var cornerLeftText = tgt.TGTMenuShit.newBackTextButton(goBack);
 		add(cornerLeftText);
 	}
 

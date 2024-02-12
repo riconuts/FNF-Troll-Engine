@@ -117,6 +117,6 @@ class FunkinScript {
 		set('curDecStep', 0);
 
 		set('version', "0.5.2h"); // version of psych troll engine is based on
-		set('teVersion', MainMenuState.displayedVersion.trim());
+		set('teVersion', Main.displayedVersion.trim());
 	}
 }

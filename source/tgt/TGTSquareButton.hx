@@ -1,5 +1,6 @@
-package sowy;
+package tgt;
 
+import sowy.*;
 import flixel.tweens.FlxTween.TweenOptions;
 import flixel.tweens.*;
 

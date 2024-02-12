@@ -1,12 +1,14 @@
 package;
 
+#if SCRIPTABLE_STATES
 import scripts.FunkinHScript;
 import scripts.FunkinHScript.HScriptState;
+#end
 
 class FNFGame extends FlxGame {
+	#if SCRIPTABLE_STATES
 	override function switchState():Void
 	{
-        #if SCRIPTABLE_STATES
 		if (_requestedState is MusicBeatState){
 			var state:MusicBeatState = cast _requestedState;
             if (state.canBeScripted){
@@ -22,9 +24,9 @@ class FNFGame extends FlxGame {
                     }
                 }
             }
-        }
-        #end
+        } 
 
         return super.switchState();
     }
+	#end
 }

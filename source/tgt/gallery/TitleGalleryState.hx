@@ -1,8 +1,8 @@
-package gallery;
+package tgt.gallery;
 
 import openfl.events.MouseEvent;
 import flixel.addons.display.FlxBackdrop;
-import gallery.*;
+import tgt.gallery.*;
 import TitleState.RandomTitleLogo;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
@@ -60,7 +60,7 @@ class TitleGalleryState extends MusicBeatState
 
         super.create();
 
-		var cornerLeftText = sowy.TGTMenuShit.newBackTextButton(goBack);
+		var cornerLeftText = tgt.TGTMenuShit.newBackTextButton(goBack);
 		add(cornerLeftText);
 
         FlxG.stage.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);

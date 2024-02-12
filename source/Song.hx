@@ -149,4 +149,47 @@ class Song
 		swagShit.validScore = true;
 		return swagShit;
 	}
+
+	static public function playSong(metadata:SongMetadata, ?difficulty:String, ?difficultyIdx:Int = 1)
+	{
+		Paths.currentModDirectory = metadata.folder;
+
+		if (difficulty != null && (difficulty.trim() == '' || difficulty.toLowerCase().trim() == 'normal'))
+			difficulty = null;
+
+		var songLowercase:String = Paths.formatToSongPath(metadata.songName);
+		if (Main.showDebugTraces)
+			trace('${Paths.currentModDirectory}, $songLowercase, $difficulty');
+
+		PlayState.SONG = Song.loadFromJson('$songLowercase${difficulty == null ? "" : '-$difficulty'}', songLowercase);
+		PlayState.difficulty = difficultyIdx;
+		PlayState.difficultyName = difficulty;
+		PlayState.isStoryMode = false;
+
+		if (FlxG.keys.pressed.SHIFT)
+		{
+			PlayState.chartingMode = true;
+			LoadingState.loadAndSwitchState(new editors.ChartingState());
+		}
+		else
+			LoadingState.loadAndSwitchState(new PlayState());
+
+		if (FlxG.sound.music != null)
+			FlxG.sound.music.volume = 0;
+	} 
+}
+
+class SongMetadata
+{
+	public var songName:String = "";
+	public var folder:String = "";
+	// public var charts:Array<String>;
+
+	public function new(song:String, ?folder:String)
+	{
+		this.songName = song;
+		this.folder = folder != null ? folder : Paths.currentModDirectory;
+
+		if(this.folder == null) this.folder = '';
+	}
 }

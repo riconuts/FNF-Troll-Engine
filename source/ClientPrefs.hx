@@ -744,7 +744,7 @@ class ClientPrefs
 			FlxG.updateFramerate = Math.floor(framerate);
 		}
 
-		Main.downloadBetas = MainMenuState.beta || ClientPrefs.downloadBetas;
+		Main.downloadBetas = Main.beta || ClientPrefs.downloadBetas;
 
 	}
 

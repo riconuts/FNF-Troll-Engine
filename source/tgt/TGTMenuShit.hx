@@ -1,4 +1,4 @@
-package sowy;
+package tgt;
 
 import flixel.text.FlxText;
 

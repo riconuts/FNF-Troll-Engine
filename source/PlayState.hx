@@ -3389,8 +3389,8 @@ class PlayState extends MusicBeatState
 					if(!ClientPrefs.getGameplaySetting('practice', false) && !ClientPrefs.getGameplaySetting('botplay', false)) {
 						Highscore.saveWeekScore(ChapterData.curChapter.directory, campaignScore);
 						
-						StoryMenuState.weekCompleted.set(ChapterData.curChapter.directory, true);
-						FlxG.save.data.weekCompleted = StoryMenuState.weekCompleted;
+						Highscore.weekCompleted.set(ChapterData.curChapter.directory, true);
+						FlxG.save.data.weekCompleted = Highscore.weekCompleted;
 
 						FlxG.save.flush();
 					}

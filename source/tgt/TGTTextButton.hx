@@ -1,5 +1,6 @@
-package sowy;
+package tgt;
 
+import sowy.*;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.util.FlxColor;

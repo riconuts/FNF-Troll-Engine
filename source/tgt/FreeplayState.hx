@@ -1,6 +1,7 @@
-package;
+package tgt;
 
-import Paths.ContentMetadata;
+import Song;
+import Paths;
 import haxe.Json;
 import editors.ChartingState;
 import flixel.*;
@@ -8,7 +9,7 @@ import flixel.addons.display.shapes.FlxShapeBox;
 import flixel.math.*;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
-import sowy.TGTSquareButton;
+import tgt.TGTSquareButton;
 
 using StringTools;
 #if discord_rpc
@@ -17,40 +18,6 @@ import Discord.DiscordClient;
 #if MODS_ALLOWED
 import sys.FileSystem;
 #end
-
-typedef FreeplaySongMetadata = {
-	/**
-		Name of the song to be played
-	**/
-	var name:String;
-
-	/**
-		Category ID for the song to be placed into (main, side, remix)
-	**/
-	var category:String;
-
-	/**
-		Displayed name of the song.
-		Does not have to be the same as name.
-	**/
-	@:optional var displayName:String;
-}
-
-typedef FreeplayCategoryMetadata = {
-	/**
-		Displayed Name of the category
-		This is used to show the category in the freeplay list
-	**/
-	var name:String;
-
-	/**
-		ID of the category
-		This gets used when adding songs to the category
-		(Defaults are main, side and remix)
-	**/
-	var id:String;
-
-}
 
 class FreeplayState extends MusicBeatState
 {
@@ -418,31 +385,7 @@ class FreeplayState extends MusicBeatState
 	}
 
 	static public function playSong(metadata:SongMetadata, ?difficulty:String, ?difficultyIdx:Int=1){
-		Paths.currentModDirectory = metadata.folder;
-
-
-		if (difficulty != null && (difficulty.trim()=='' || difficulty.toLowerCase().trim() == 'normal'))
-			difficulty = null;
-
-		var songLowercase:String = Paths.formatToSongPath(metadata.songName);
-		if (Main.showDebugTraces) trace('${Paths.currentModDirectory}, $songLowercase, $difficulty');
-
-		PlayState.SONG = Song.loadFromJson(
-			'$songLowercase${difficulty == null ? "" : '-$difficulty'}', 
-			songLowercase
-		);
-		PlayState.difficulty = difficultyIdx;
-		PlayState.difficultyName = difficulty;
-		PlayState.isStoryMode = false;
-
-		if (FlxG.keys.pressed.SHIFT){
-			PlayState.chartingMode = true;
-			LoadingState.loadAndSwitchState(new ChartingState());
-		}else
-			LoadingState.loadAndSwitchState(new PlayState());
-
-		if (FlxG.sound.music != null)
-			FlxG.sound.music.volume = 0;
+		return Song.playSong(metadata, difficulty, difficultyIdx);
 	} 
 
 	override function closeSubState() 
@@ -579,21 +522,6 @@ class FreeplayState extends MusicBeatState
 			img = Paths.image("songs/placeholder");
 
 		return img;
-	}
-}
-
-class SongMetadata
-{
-	public var songName:String = "";
-	public var folder:String = "";
-	// public var charts:Array<String>;
-
-	public function new(song:String, ?folder:String)
-	{
-		this.songName = song;
-		this.folder = folder != null ? folder : Paths.currentModDirectory;
-
-		if(this.folder == null) this.folder = '';
 	}
 }
 
@@ -788,7 +716,7 @@ class SongChartSelec extends MusicBeatState
 		this.alts = alts;
 	}
 
-	public static function getCharts(metadata:SongMetadata) // dumb name
+	public static function getCharts(metadata:SongMetadata)
 	{
 		Paths.currentModDirectory = metadata.folder;
 

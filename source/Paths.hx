@@ -1,59 +1,26 @@
 package;
 
-import FreeplayState.FreeplayCategoryMetadata;
-import FreeplayState.FreeplaySongMetadata;
-import haxe.Json;
-import ChapterData.ChapterMetadata;
-import openfl.media.Sound;
+#if tgt
+typedef FreeplayCategoryMetadata = FreeplayState.FreeplayCategoryMetadata;
+typedef FreeplaySongMetadata = FreeplayState.FreeplaySongMetadata;  
+#end
+
 import flixel.FlxG;
-import flixel.FlxSprite;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxAtlasFrames;
-import openfl.display.BitmapData;
 import flixel.addons.display.FlxRuntimeShader;
-import openfl.system.System;
-import openfl.utils.AssetType;
 import openfl.utils.Assets as Assets;
-import haxe.CallStack;
+import openfl.display.BitmapData;
+import openfl.utils.AssetType;
+import openfl.media.Sound;
+import haxe.Json;
+import ChapterData.ChapterMetadata;
 
 using StringTools;
 #if sys
 import sys.FileSystem;
 import sys.io.File;
 #end
-
-
-typedef ContentMetadata = {
-	/**
-		Chapters to be added to the story mode
-	**/
-	var chapters:Array<ChapterMetadata>;
-	/**
-		Stages that can appear in the title menu
-	**/
-	@:optional var titleStages:Array<String>;
-
-	/**
-		Songs to be placed into the freeplay menu
-	**/
-	@:optional var freeplaySongs:Array<FreeplaySongMetadata>;
-
-	/**
-		Categories to be placed into the freeplay menu
-	**/
-	@:optional var freeplayCategories:Array<FreeplayCategoryMetadata>;
-	
-	/**
-	If this is specified, then songs don't have to be added to freeplaySongs to have them appear
-	As anything in the songs folder will appear in this category instead
-	**/
-	@:optional var defaultCategory:String;
-	/**
-		This mod will always run, regardless of whether it's currently being played or not.
-		(Custom HUDs, etc, will find this useful, as you can have stuff run across every song without adding to the global folder)
-	**/
-	@:optional var runsGlobally:Bool;
-}
 
 class Paths
 {
@@ -104,8 +71,7 @@ class Paths
 			}
 		}
 		// run the garbage collector for good measure lmfao
-		System.gc();
-		
+		openfl.system.System.gc();
 	}
 
 	/** removeBitmap(FlxSprite.graphic.key); **/
@@ -775,4 +741,69 @@ class Paths
 	{
 		Paths.currentModDirectory = '';
 	}
+}
+
+typedef FreeplaySongMetadata = {
+	/**
+		Name of the song to be played
+	**/
+	var name:String;
+
+	/**
+		Category ID for the song to be placed into (main, side, remix)
+	**/
+	var category:String;
+
+	/**
+		Displayed name of the song.
+		Does not have to be the same as name.
+	**/
+	@:optional var displayName:String;
+}
+
+typedef FreeplayCategoryMetadata = {
+	/**
+		Displayed Name of the category
+		This is used to show the category in the freeplay list
+	**/
+	var name:String;
+
+	/**
+		ID of the category
+		This gets used when adding songs to the category
+		(Defaults are main, side and remix)
+	**/
+	var id:String;
+}
+
+typedef ContentMetadata = {
+	/**
+		Chapters to be added to the story mode
+	**/
+	var chapters:Array<ChapterMetadata>;
+	/**
+		Stages that can appear in the title menu
+	**/
+	@:optional var titleStages:Array<String>;
+
+	/**
+		Songs to be placed into the freeplay menu
+	**/
+	@:optional var freeplaySongs:Array<FreeplaySongMetadata>;
+
+	/**
+		Categories to be placed into the freeplay menu
+	**/
+	@:optional var freeplayCategories:Array<FreeplayCategoryMetadata>;
+	
+	/**
+	If this is specified, then songs don't have to be added to freeplaySongs to have them appear
+	As anything in the songs folder will appear in this category instead
+	**/
+	@:optional var defaultCategory:String;
+	/**
+		This mod will always run, regardless of whether it's currently being played or not.
+		(Custom HUDs, etc, will find this useful, as you can have stuff run across every song without adding to the global folder)
+	**/
+	@:optional var runsGlobally:Bool;
 }

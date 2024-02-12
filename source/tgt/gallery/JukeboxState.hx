@@ -1,7 +1,7 @@
-package gallery;
+package tgt.gallery;
 
 import lime.app.Application;
-import sowy.TGTMenuShit;
+import tgt.TGTMenuShit;
 import flixel.addons.display.FlxBackdrop;
 import flixel.util.FlxTimer;
 import flixel.tweens.FlxTween;
@@ -239,7 +239,7 @@ class JukeboxState extends MusicBeatState {
 		add(mute);
 		add(loopButton);
 
-		add(sowy.TGTMenuShit.newBackTextButton(goBack));
+		add(tgt.TGTMenuShit.newBackTextButton(goBack));
 
 		//
 		set_loopSong(true);

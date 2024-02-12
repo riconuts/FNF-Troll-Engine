@@ -1,4 +1,4 @@
-package;
+package tgt;
 
 import flixel.text.FlxText;
 import flixel.addons.display.FlxBackdrop;
@@ -42,20 +42,6 @@ class ZSprite extends FlxSprite
 ])
 class MainMenuState extends MusicBeatState 
 {
-	public static var engineVersion:String = '0.2.0'; // Used for autoupdating n stuff
-	public static var betaVersion(get, default):String = 'beta.6'; // beta version, make blank if not on a beta version, otherwise do it based on semantic versioning (alpha.1, beta.1, rc.1, etc)
-	public static var beta:Bool = betaVersion.trim() != '';
-	@:isVar
-	public static var displayedVersion(get, null):String = '';
-	static function get_displayedVersion(){
-		return 'v${engineVersion}${(beta?("-" + betaVersion):"")}';
-	}
-	static function get_betaVersion(){
-		return beta ? betaVersion : "0";
-	}
-
-	////
-
 	final optionShit:Array<String> = [
 		'story_mode',
  		'freeplay',
@@ -184,7 +170,7 @@ class MainMenuState extends MusicBeatState
 		#elseif debug
 		engineWatermark.text += ' [${Sowy.getBuildDate()}]';
 		#else
-		engineWatermark.text += ' $displayedVersion';
+		engineWatermark.text += ' ${Main.displayedVersion}';
 		if (Main.outOfDate)
 			engineWatermark.text += " [UPDATE AVAILABLE]";
 		#end
@@ -228,7 +214,7 @@ class MainMenuState extends MusicBeatState
 						case "credits":
 							MusicBeatState.switchState(new CreditsState());
 						case "gallery":
-							MusicBeatState.switchState(new gallery.GalleryMenuState());
+							MusicBeatState.switchState(new tgt.gallery.GalleryMenuState());
 					}
 				});
 			}else{

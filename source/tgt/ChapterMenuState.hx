@@ -1,4 +1,4 @@
-package;
+package tgt;
 
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
@@ -6,12 +6,13 @@ import flixel.FlxSprite;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.addons.transition.FlxTransitionableState;
-import sowy.TGTTextButton;
+import tgt.TGTTextButton;
 import ChapterData;
 
 using StringTools;
 
-class ChapterMenuState extends MusicBeatState{
+class ChapterMenuState extends MusicBeatState
+{
 	//
 	public var chapData:ChapterMetadata;
 
@@ -60,11 +61,11 @@ class ChapterMenuState extends MusicBeatState{
 		add(chapterText);
 
 		//
-		var cornerLeftText = sowy.TGTMenuShit.newBackTextButton(goBack);
+		var cornerLeftText = tgt.TGTMenuShit.newBackTextButton(goBack);
 		add(cornerLeftText);
 
 		var cornerRightText = new TGTTextButton(1280, 720, 0, "PLAY →", 32, playWeek);
-		cornerRightText.label.setFormat(Paths.font("calibri.ttf"), 32, sowy.TGTMenuShit.YELLOW, FlxTextAlign.LEFT, FlxTextBorderStyle.NONE);
+		cornerRightText.label.setFormat(Paths.font("calibri.ttf"), 32, tgt.TGTMenuShit.YELLOW, FlxTextAlign.LEFT, FlxTextBorderStyle.NONE);
 		cornerRightText.label.underline = true;
 		add(cornerRightText);
 
@@ -126,7 +127,7 @@ class ChapterMenuState extends MusicBeatState{
 	{
 		FlxTransitionableState.skipNextTransOut = true;
 
-		var state = new StoryMenuState();
+		var state = new tgt.StoryMenuState();
 		state.cameFromChapterMenu = true;
 		MusicBeatState.switchState(state);
 	}

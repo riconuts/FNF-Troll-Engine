@@ -32,6 +32,8 @@ typedef ScoreRecord = {
 // Judges will be used for FC medals
 
 class Highscore {
+	public static var weekCompleted:Map<String, Bool> = new Map<String, Bool>();
+
 	public static var grades:Map<String, Array<Array<Dynamic>>> = [
 		"Psych" => [
 			["Perfect!!", 1],

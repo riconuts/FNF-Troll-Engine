@@ -82,7 +82,7 @@ class CommonHUD extends BaseHUD
 		add(timeBar);
 		add(timeTxt);
 
-		botplayTxt = new FlxText(0, (ClientPrefs.downScroll ? (FlxG.height-107) : 89), FlxG.width, "[BUTTPLUG]", 32);
+		botplayTxt = new FlxText(0, (ClientPrefs.downScroll ? (FlxG.height - 107) : 89), FlxG.width, Paths.getString("botplayMark"), 32);
 		botplayTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		botplayTxt.scrollFactor.set();
 		botplayTxt.borderSize = 1.25;

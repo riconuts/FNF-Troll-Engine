@@ -25,14 +25,6 @@ import Discord.DiscordClient;
 
 class Main extends Sprite
 {
-	public static var UserAgent:String = 'TrollEngine/${MainMenuState.engineVersion}'; // used for http requests. if you end up forking the engine and making your own then make sure to change this!!
-	public static var githubRepo = Github.getCompiledRepoInfo();
-	public static var downloadBetas:Bool = MainMenuState.beta;
-	public static var outOfDate:Bool = false;
-	public static var recentRelease:Release;
-	
-	public static var showDebugTraces:Bool = #if(SHOW_DEBUG_TRACES || debug) true #else false #end;
-	
 	var gameWidth:Int = 1280; // Width of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var gameHeight:Int = 720; // Height of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var initialState:Class<FlxState> = StartupState; // The FlxState the game starts with.
@@ -40,9 +32,29 @@ class Main extends Sprite
 	var framerate:Int = 60; // How many frames per second the game should run at.
 	var skipSplash:Bool = true; // Whether to skip the flixel splash screen that appears in release mode.
 	var startFullscreen:Bool = false; // Whether to start the game in fullscreen on desktop targets
-    
+
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
+	public static var showDebugTraces:Bool = #if (SHOW_DEBUG_TRACES || debug) true #else false #end;
+
+	public static var engineVersion:String = '0.2.0'; // Used for autoupdating n stuff
+	public static var betaVersion(get, default):String = 'beta.6'; // beta version, make blank if not on a beta version, otherwise do it based on semantic versioning (alpha.1, beta.1, rc.1, etc)
+	public static var beta:Bool = betaVersion.trim() != '';
+
+	public static var UserAgent:String = 'TrollEngine/${Main.engineVersion}'; // used for http requests. if you end up forking the engine and making your own then make sure to change this!!
+	public static var githubRepo = Github.getCompiledRepoInfo();
+	public static var downloadBetas:Bool = beta;
+	public static var outOfDate:Bool = false;
+	public static var recentRelease:Release;
+	
+	@:isVar
+	public static var displayedVersion(get, null):String = '';
+	static function get_displayedVersion()
+		return 'v${engineVersion}${(beta?("-" + betaVersion):"")}';
+	static function get_betaVersion()
+		return beta ? betaVersion : "0";
+	    
+	////
 	public static var fpsVar:FPS;
 	public static var bread:Bread;
 	

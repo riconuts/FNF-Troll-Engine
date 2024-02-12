@@ -157,7 +157,7 @@ class DiscordClient
 			#if tgt
 			largeImageText: "Tails Gets Trolled v" + lime.app.Application.current.meta.get('version'),
 			#else
-			largeImageText: "Troll Engine " + MainMenuState.displayedVersion,
+			largeImageText: "Troll Engine " + Main.displayedVersion,
 			#end
 
 			// Obtained times are in milliseconds so they are divided so Discord can use it
