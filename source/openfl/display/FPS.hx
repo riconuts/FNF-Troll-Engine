@@ -52,12 +52,17 @@ class FPS extends TextField
 		text = "FPS: ";
 
 		var textFormat = new TextFormat(null, 12, color);
+		
+		#if tgt
 		var fontPath = Paths.font("calibri.ttf");
 		if (Assets.exists(fontPath, openfl.utils.AssetType.FONT)){
 			embedFonts = true;
 			textFormat.size = 14;
 			textFormat.font = Assets.getFont(fontPath).fontName;
-		}else{
+		}
+		else
+		#end
+		{
 			embedFonts = false;
 			textFormat.font = "_sans";
 		}
@@ -98,14 +103,17 @@ class FPS extends TextField
 			text = "FPS: " + currentFPS;
 			
 			var memoryMegas:Float = 0;
-			/*
+			
 			#if (openfl && !final)
 			memoryMegas = Math.abs(FlxMath.roundDecimal(System.totalMemory / 1000000, 1));
 			text += "\nMemory: " + memoryMegas + " MB";
 			#end
 
+			/*
+			#if debug
 			text += "\nState: " + Type.getClassName(Type.getClass(FlxG.state));
 			text += "\nSubstate: " + Type.getClassName(Type.getClass(FlxG.state.subState));
+			#end
 			*/
 
 			textColor = 0xFFFFFFFF;

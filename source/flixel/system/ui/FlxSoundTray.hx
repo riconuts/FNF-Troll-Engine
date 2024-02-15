@@ -1,4 +1,3 @@
-#if tgt
 package flixel.system.ui;
 
 #if FLX_SOUND_SYSTEM
@@ -82,7 +81,12 @@ class FlxSoundTray extends Sprite
 		text.gridFitType = GridFitType.PIXEL;
 		#else
 		#end
+		
+		#if tgt
 		var dtf:TextFormat = new TextFormat(Paths.font("calibrib.ttf"), 10, 0xffffff);
+		#else
+		var dtf:TextFormat = new TextFormat(FlxAssets.FONT_DEFAULT, 8, 0xffffff);
+		#end
 		dtf.align = TextFormatAlign.CENTER;
 		text.defaultTextFormat = dtf;
 		addChild(text);
@@ -184,5 +188,4 @@ class FlxSoundTray extends Sprite
 		x = (0.5 * (Lib.current.stage.stageWidth - _width * _defaultScale) - FlxG.game.x);
 	}
 }
-#end
 #end
