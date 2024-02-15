@@ -26,7 +26,7 @@ import Discord.DiscordClient;
 #end
 
 class StageEditorState extends MusicBeatState{
-	public static var curStage = "stage1";
+	public static var curStage = "stage";
 
 	public var camGame:FlxCamera = new FlxCamera();
 	public var camHUD:FlxCamera = new FlxCamera();
@@ -113,7 +113,7 @@ class StageEditorState extends MusicBeatState{
 			boyfriendGroup.remove(boyfriend, true);
 			boyfriend.destroy();
 		}
-		boyfriend = new Boyfriend(0, 0, name);
+		boyfriend = new Character(0, 0, name);
 		startCharacterPos(boyfriend);
 		boyfriendGroup.add(boyfriend);
 	}

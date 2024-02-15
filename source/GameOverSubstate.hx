@@ -13,7 +13,7 @@ class GameOverSubstate extends MusicBeatSubstate
 {
 	public static var instance:GameOverSubstate;
 
-	public var boyfriend:Boyfriend;
+	public var boyfriend:Character;
 	public var genericBitch:FlxSprite;
 	public var deathSound:FlxSound;
 
@@ -143,7 +143,7 @@ class GameOverSubstate extends MusicBeatSubstate
 			{path: endSoundName, type: 'MUSIC'}
 		]);
 		
-		boyfriend = new Boyfriend(x, y, deathName, isPlayer);
+		boyfriend = new Character(x, y, deathName, isPlayer);
 		boyfriend.x += boyfriend.positionArray[0];
 		boyfriend.y += boyfriend.positionArray[1];
 		add(boyfriend);
@@ -228,8 +228,8 @@ class GameOverSubstate extends MusicBeatSubstate
 
 			if (boyfriend.animation.curAnim.finished)
 			{
+				boyfriend.playAnim('deathLoop');
 				FlxG.sound.playMusic(Paths.music(loopSoundName), 1);
-				boyfriend.startedDeath = true;
 			}
 		}
 
@@ -243,5 +243,7 @@ class GameOverSubstate extends MusicBeatSubstate
 	override function beatHit()
 	{
 		super.beatHit();
+		
+		boyfriend.playAnim('deathLoop');
 	}
 }
