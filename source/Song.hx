@@ -185,11 +185,9 @@ class SongMetadata
 	public var folder:String = "";
 	// public var charts:Array<String>;
 
-	public function new(song:String, ?folder:String)
+	public function new(song:String, ?folder:String = '')
 	{
 		this.songName = song;
-		this.folder = folder != null ? folder : Paths.currentModDirectory;
-
-		if(this.folder == null) this.folder = '';
+		this.folder = folder != null ? folder : '';
 	}
 }

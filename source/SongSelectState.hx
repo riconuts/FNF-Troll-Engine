@@ -5,6 +5,8 @@ import sys.FileSystem;
 import flixel.text.FlxText;
 import Song;
 
+using StringTools;
+
 class SongSelectState extends MusicBeatState
 {	
 	var songMeta:Array<SongMetadata> = [];
@@ -129,11 +131,114 @@ class SongSelectState extends MusicBeatState
 				curSel += (checkNewHold - checkLastHold) * (controls.UI_UP ? -verticalLimit : verticalLimit);
 		}
 
-		if (controls.ACCEPT)
-			Song.playSong(songMeta[curSel]);
+		if (controls.ACCEPT){
+			var charts = SongChartSelec.getCharts(songMeta[curSel]);
+
+			trace(charts);
+			
+			if (charts.length > 1)
+				MusicBeatState.switchState(new SongChartSelec(songMeta[curSel], charts));
+			else
+				Song.playSong(songMeta[curSel], charts[0], 0);
+		}
         else if (controls.BACK)
             MusicBeatState.switchState(new MainMenuState());
 
 		super.update(e);
 	}
+}
+
+class SongChartSelec extends MusicBeatState
+{
+	var songMeta:SongMetadata;
+	var alts:Array<String>;
+
+	var texts:Array<FlxText> = [];
+
+	var curSel = 0;
+
+	function changeSel(diff:Int = 0)
+	{
+		texts[curSel].color = 0xFFFFFFFF;
+
+		curSel += diff;
+		
+		if (curSel < 0)
+			curSel += alts.length;
+		else if (curSel >= alts.length)
+			curSel -= alts.length;
+
+		texts[curSel].color = 0xFFFFFF00;
+	}
+
+	override function create()
+	{
+		add(new FlxText(0, 5, FlxG.width, songMeta.songName).setFormat(null, 20, 0xFFFFFFFF, CENTER));
+
+		for (id in 0...alts.length){
+			var alt = alts[id];
+			var text = new FlxText(20, 20 + id * 20 , (FlxG.width-20) / 2, alt, 16);
+
+			// uhhh we don't save separate highscores for other chart difficulties oops
+			// var scoreTxt = new FlxText(text.x + text.width, text.y, text.fieldWidth, Highscore.getScore(songMeta.songName));
+
+			texts[id] = text;
+
+			add(text);
+		}
+
+		changeSel();
+	}
+
+	override public function update(e){
+		if (controls.UI_DOWN_P)
+			changeSel(1);
+		if (controls.UI_UP_P)
+			changeSel(-1);
+
+		if (controls.BACK)
+			MusicBeatState.switchState(new FreeplayState());
+
+		if (controls.ACCEPT){
+			var daDiff = alts[curSel];
+			Song.playSong(songMeta, (daDiff=="normal") ? null : daDiff, curSel);
+		}
+
+		super.update(e);
+	} 
+
+	public function new(WHO:SongMetadata, alts) 
+	{
+		super();
+		
+		songMeta = WHO;
+		this.alts = alts;
+	}
+
+	public static function getCharts(metadata:SongMetadata)
+	{
+		Paths.currentModDirectory = metadata.folder;
+
+		var songName = Paths.formatToSongPath(metadata.songName);
+		var folder = (metadata.folder=="") ? Paths.getPath('songs/$songName/') : Paths.mods('${metadata.folder}/songs/$songName/');
+
+		trace(songName, folder);
+
+		var alts = [];
+
+		Paths.iterateDirectory(folder, function(fileName){
+			if (fileName == '$songName.json'){
+				alts.insert(1, "normal");
+				return;		
+			}
+			
+			if (!fileName.startsWith('$songName-') || !fileName.endsWith('.json'))
+				return;
+
+			var prefixLength = songName.length + 1;
+			alts.push(fileName.substr(prefixLength, fileName.length - prefixLength - 5));
+		});
+
+		return alts;
+	} 
 }

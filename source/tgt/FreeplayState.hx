@@ -5,11 +5,12 @@ import Paths;
 import haxe.Json;
 import editors.ChartingState;
 import flixel.*;
-import flixel.addons.display.shapes.FlxShapeBox;
 import flixel.math.*;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
+import flixel.addons.display.shapes.FlxShapeBox;
 import tgt.TGTSquareButton;
+import SongSelectState.SongChartSelec;
 
 using StringTools;
 #if discord_rpc
@@ -647,97 +648,4 @@ class FreeplayCategory extends flixel.group.FlxSpriteGroup{
 			item.setPosition(posArray[x], 50 + titleText.y + titleText.height + y * 308);
 		}
 	}
-}
-
-class SongChartSelec extends MusicBeatState
-{
-	var songMeta:SongMetadata;
-	var alts:Array<String>;
-
-	var texts:Array<FlxText> = [];
-
-	var curSel = 0;
-
-	function changeSel(diff:Int = 0)
-	{
-		texts[curSel].color = 0xFFFFFFFF;
-
-		curSel += diff;
-		
-		if (curSel < 0)
-			curSel += alts.length;
-		else if (curSel >= alts.length)
-			curSel -= alts.length;
-
-		texts[curSel].color = 0xFFFFFF00;
-	}
-
-	override function create()
-	{
-		add(new FlxText(0, 5, FlxG.width, songMeta.songName).setFormat(null, 20, 0xFFFFFFFF, CENTER));
-
-		for (id in 0...alts.length){
-			var alt = alts[id];
-			var text = new FlxText(20, 20 + id * 20 , (FlxG.width-20) / 2, alt, 16);
-
-			// uhhh we don't save separate highscores for other chart difficulties oops
-			// var scoreTxt = new FlxText(text.x + text.width, text.y, text.fieldWidth, Highscore.getScore(songMeta.songName));
-
-			texts[id] = text;
-
-			add(text);
-		}
-
-		changeSel();
-	}
-
-	override public function update(e){
-		if (controls.UI_DOWN_P)
-			changeSel(1);
-		if (controls.UI_UP_P)
-			changeSel(-1);
-
-		if (controls.BACK)
-			MusicBeatState.switchState(new FreeplayState());
-
-		if (controls.ACCEPT){
-			var daDiff = alts[curSel];
-			FreeplayState.playSong(songMeta, (daDiff=="normal") ? null : daDiff, curSel);
-		}
-
-		super.update(e);
-	} 
-
-	public function new(WHO:SongMetadata, alts) 
-	{
-		super();
-		
-		songMeta = WHO;
-		this.alts = alts;
-	}
-
-	public static function getCharts(metadata:SongMetadata)
-	{
-		Paths.currentModDirectory = metadata.folder;
-
-		var songName = Paths.formatToSongPath(metadata.songName);
-		var folder = Paths.mods('${Paths.currentModDirectory}/songs/$songName/');
-
-		var alts = [];
-
-		Paths.iterateDirectory(folder, function(fileName){
-			if (fileName == '$songName.json'){
-				alts.insert(1, "normal");
-				return;		
-			}
-			
-			if (!fileName.startsWith('$songName-') || !fileName.endsWith('.json'))
-				return;
-
-			var prefixLength = songName.length + 1;
-			alts.push(fileName.substr(prefixLength, fileName.length - prefixLength - 5));
-		});
-
-		return alts;
-	} 
 }
