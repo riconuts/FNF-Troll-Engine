@@ -1,3 +1,4 @@
+#if tgt
 package flixel.system.ui;
 
 #if FLX_SOUND_SYSTEM
@@ -183,4 +184,5 @@ class FlxSoundTray extends Sprite
 		x = (0.5 * (Lib.current.stage.stageWidth - _width * _defaultScale) - FlxG.game.x);
 	}
 }
+#end
 #end

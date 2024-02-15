@@ -801,6 +801,7 @@
 		],
 		"player2": "dad",
 		"player3": "gf",
+		"stage":"stage",
 		"song": "Bopeebo",
 		"needsVoices": true,
 		"validScore": true,
