@@ -235,6 +235,7 @@ class PlayState extends MusicBeatState
 	public var showComboNum:Bool = true;
 	
 	public var ratingGroup = new FlxTypedGroup<RatingSprite>();
+	public var ratingOrigin = [FlxG.width / 2, FlxG.height / 2];
 	public var timingTxt:FlxText;
 
 	////
@@ -513,6 +514,7 @@ class PlayState extends MusicBeatState
 		// For the "Just the Two of Us" achievement
 		for (i in 0...keysArray.length)
 			keysPressed.push(false);
+		
 		// Gameplay settings
 		playbackRate = ClientPrefs.getGameplaySetting('songspeed', 1);
 		healthGain = ClientPrefs.getGameplaySetting('healthgain', 1);
@@ -871,6 +873,7 @@ class PlayState extends MusicBeatState
         if (hud == null){
 			switch(ClientPrefs.etternaHUD){
 				case 'Advanced': hud = new AdvancedHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song, stats);
+				case 'Kade': hud = new KadeHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song, stats);
 				default: hud = new PsychHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song, stats);
 			}
 		}
@@ -919,15 +922,13 @@ class PlayState extends MusicBeatState
 		////
 
 		//
-		lastJudge = new RatingSprite();
-		lastJudge.scale.set(0.7, 0.7);
-		ratingGroup.add(lastJudge).kill();
-		for (i in 0...3)
-			ratingGroup.add(new RatingSprite()).kill();
-		
+		ratingGroup.cameras = [ClientPrefs.worldCombos&&!ClientPrefs.simpleJudge ? camGame : camHUD];
+		for (i in 0...4)
+			(lastJudge = ratingGroup.add(new RatingSprite())).kill();
+
 		timingTxt = new FlxText();
-		timingTxt.setFormat(Paths.font("calibri.ttf"), 28, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		timingTxt.cameras = [camHUD];
+		timingTxt.setFormat(Paths.font("vcr.ttf"), 28, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		timingTxt.cameras = ratingGroup.cameras;
 		timingTxt.scrollFactor.set();
 		timingTxt.borderSize = 1.25;
 		
@@ -1046,24 +1047,40 @@ class PlayState extends MusicBeatState
 		add(luaDebugGroup);
 		#end
 
+		////
+		#if !tgt
+		if (prevCamFollowPos != null){
+			// do nothing
+		}else if(SONG.notes[0].mustHitSection)
+		{
+			var cam = dad.getCamera();
+			camFollow.set(cam[0], cam[1]);
+
+			var cam = boyfriend.getCamera();
+			sectionCamera.set(cam[0], cam[1]); 
+		}
+		else if(SONG.notes[0].gfSection && gf != null)
+		{
+			var cam = boyfriend.getCamera();
+			sectionCamera.set(cam[0], cam[1]); 
+			
+			var cam = gf.getCamera();
+			sectionCamera.set(cam[0], cam[1]); 
+		}
+		else
+		{
+			var cam = boyfriend.getCamera();
+			camFollow.set(cam[0], cam[1]);
+
+			var cam = dad.getCamera();
+			sectionCamera.set(cam[0], cam[1]); 
+		}
+		camFollowPos.setPosition(camFollow.x, camFollow.y);
+		#end
+
 		//// nulling them here so stage scripts can use them as a starting camera position
 		prevCamFollow = null;
 		prevCamFollowPos = null;
-
-		/*
-		if(SONG.notes[0].mustHitSection){
-			var cam = boyfriend.getCamera();
-			camFollow.set(cam[0], cam[1]);
-		}else if(SONG.notes[0].gfSection && gf != null){
-			var cam = gf.getCamera();
-			camFollow.set(cam[0], cam[1]);
-		}else{
-			var cam = dad.getCamera();
-			camFollow.set(cam[0], cam[1]);
-		}
-		sectionCamera.copyFrom(camFollow);
-		camFollowPos.setPosition(camFollow.x, camFollow.y);
-		*/
 
 		// Load the countdown intro assets!!!!!
 
@@ -1982,10 +1999,11 @@ class PlayState extends MusicBeatState
 					oldNote = null;
 
 				var type:Dynamic = songNotes[3];
-				/*
-				if (Std.isOfType(songNotes[3], Int))
-					type = editors.ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts;
-				*/
+
+				if (type == true) // ??????????????????
+					type = 1;
+				if (Std.isOfType(type, Int)) // Backward compatibility + compatibility with Week 7 charts;
+					type = editors.ChartingState.noteTypeList[type]; 
 				
 				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, gottaHitNote, false, false, hudSkin);
 				swagNote.realNoteData = songNotes[1];
@@ -2235,7 +2253,6 @@ class PlayState extends MusicBeatState
 
 	public function optionsChanged(options:Array<String>){
 		if (options.length < 1){
-			trace("didn't change " + options);
 			return;
 		}
 
@@ -2249,11 +2266,15 @@ class PlayState extends MusicBeatState
 		if(options.contains("gradeSet"))
 			ratingStuff = Highscore.grades.get(ClientPrefs.gradeSet);
 
+		
 		if (!ClientPrefs.simpleJudge)
 		{
+			ratingGroup.cameras[0] = ClientPrefs.worldCombos ? camGame : camHUD;
 			for (prevCombo in lastCombos)
 				prevCombo.kill();
 		}
+		else
+			ratingGroup.cameras[0] = camHUD;
 		
 		callOnScripts('optionsChanged', [options]);
 		
@@ -3385,7 +3406,7 @@ class PlayState extends MusicBeatState
 				//// WEEK END
 
 				// Save week score
-				if (ChapterData.curChapter != null && !playOpponent){
+				if (saveScore && ChapterData.curChapter != null && !playOpponent){
 					if(!ClientPrefs.getGameplaySetting('practice', false) && !ClientPrefs.getGameplaySetting('botplay', false)) {
 						Highscore.saveWeekScore(ChapterData.curChapter.directory, campaignScore);
 						
@@ -3543,9 +3564,10 @@ class PlayState extends MusicBeatState
 		rating.loadGraphic(Paths.image(image));
 		rating.updateHitbox();
 
-		rating.screenCenter();
-		rating.x += ClientPrefs.comboOffset[0];
-		rating.y -= ClientPrefs.comboOffset[1];
+		rating.offset.set(rating.width/2, rating.height/2);
+
+		rating.x = ratingOrigin[0] + ClientPrefs.comboOffset[0];
+		rating.y = ratingOrigin[1] - ClientPrefs.comboOffset[1];
 
 		ratingGroup.remove(rating, true);
 		ratingGroup.add(rating);
@@ -3579,18 +3601,19 @@ class PlayState extends MusicBeatState
 		else if (combo > 0 && combo < 10 && combo != 0)
 			return;
 
+		var comboColor = comboColor;
 		var separatedScore:Array<String> = Std.string(Math.abs(combo)).split("");
+		
 		while (separatedScore.length < 3)
 			separatedScore.unshift("0");
-		if(combo < 0)
+		
+		if (combo < 0){
 			separatedScore.unshift("neg");
+			comboColor = hud.judgeColours.get("miss");
+		}
 
-		var daLoop:Int = 0;
-
-		var col = combo < 0 ? hud.judgeColours.get("miss") : comboColor;
-
-		var numStartX:Float = (FlxG.width - separatedScore.length * 41) * 0.5 + ClientPrefs.comboOffset[2];
-		for (i in separatedScore)
+		var numStartX:Float = ratingOrigin[0] + ClientPrefs.comboOffset[2] - separatedScore.length * 41 / 2;
+		for (daLoop => i in separatedScore)
 		{
 			var numScore:RatingSprite = ratingGroup.recycle(RatingSprite);
 			numScore.loadGraphic(Paths.image('num' + i));
@@ -3603,12 +3626,13 @@ class PlayState extends MusicBeatState
 			}else{
 				numScore.updateHitbox();
 			}
-			
-			numScore.x = numStartX + 41.5 * daLoop;
-			numScore.screenCenter(Y);
-			numScore.y -= ClientPrefs.comboOffset[3];
 
-			numScore.color = col;
+			numScore.offset.set(0, numScore.height / 2);
+
+			numScore.x = numStartX + 41.5 * daLoop;
+			numScore.y = ratingOrigin[1] - ClientPrefs.comboOffset[3];
+
+			numScore.color = comboColor;
 			numScore.visible = showComboNum;
 
 			numScore.ID = daLoop;
@@ -3640,8 +3664,6 @@ class PlayState extends MusicBeatState
 					startDelay: Conductor.crochet * 0.002
 				});
 			}
-
-			daLoop++;
 		}
 
         if(hudSkinScript!=null)callScript(hudSkinScript, "onDisplayComboPost", [combo]);
@@ -4659,6 +4681,8 @@ class PlayState extends MusicBeatState
 		});
 		*/
 
+		ClientPrefs.gameplaySettings.set('botplay', cpuControlled);
+
         #if LUA_ALLOWED
 		preventLuaRemove = true;
         #end
@@ -4875,11 +4899,9 @@ class RatingSprite extends FlxSprite
 		super();
 		moves = !ClientPrefs.simpleJudge;
 
-		//antialiasing = ClientPrefs.globalAntialiasing;
-		//cameras = [ClientPrefs.simpleJudge ? PlayState.instance.camHUD : PlayState.instance.camGame];
-		cameras = [PlayState.instance.camHUD];
-
-		scrollFactor.set();
+		cameras = PlayState.instance.ratingGroup.cameras;
+		
+		//scrollFactor.set();
 	}
 
 	override public function kill(){

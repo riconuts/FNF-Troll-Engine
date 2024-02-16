@@ -52,7 +52,7 @@ class CommonHUD extends BaseHUD
 
 		// prob gonna do my own time bar too lol but for now idc
 		timeTxt = new FlxText(FlxG.width * 0.5 - 200, 0, 400, "", 32);
-		timeTxt.setFormat(Paths.font("calibri.ttf"), 32, 0xFFFFFFFF, CENTER, FlxTextBorderStyle.OUTLINE, 0xFF000000);
+		timeTxt.setFormat(Paths.font("vcr.ttf"), 32, 0xFFFFFFFF, CENTER, FlxTextBorderStyle.OUTLINE, 0xFF000000);
 		timeTxt.scrollFactor.set();
 		timeTxt.borderSize = 2;
 
@@ -83,7 +83,7 @@ class CommonHUD extends BaseHUD
 		add(timeTxt);
 
 		botplayTxt = new FlxText(0, (ClientPrefs.downScroll ? (FlxG.height - 107) : 89), FlxG.width, Paths.getString("botplayMark"), 32);
-		botplayTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		botplayTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		botplayTxt.scrollFactor.set();
 		botplayTxt.borderSize = 1.25;
 		botplayTxt.exists = false;

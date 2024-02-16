@@ -150,13 +150,6 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		bg.camera = cam;
 		add(bg);
 
-		if (this._parentState is PauseSubState)
-			bg.alpha = 0.6;
-		else{
-			bg.alpha = 0.3;
-			FlxTween.tween(bg, {alpha: 0.7}, 0.6);			
-		}
-
 		// avoids lagspikes while scrolling through menus!
 		grpOptions = new FlxTypedGroup<Alphabet>();
 		grpOptions.camera = cam;
@@ -169,6 +162,30 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		checkboxGroup = new FlxTypedGroup<CheckboxThingie>();
 		checkboxGroup.camera = cam;
 		add(checkboxGroup);
+
+		if (this._parentState is PauseSubState){
+			bg.alpha = 0.6;
+
+			var optionDesc = new FlxText(5, FlxG.height - 48, 0, "NOTE: These won't have any effect until you reset the song!", 20);
+			optionDesc.setFormat(Paths.font("vcr.ttf"), #if tgt 20 #else 16 #end, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			optionDesc.textField.background = true;
+			optionDesc.textField.backgroundColor = FlxColor.BLACK;
+			optionDesc.screenCenter(X);
+			optionDesc.scrollFactor.set();
+			optionDesc.camera = cam;
+			optionDesc.alpha = 0;
+			add(optionDesc);
+
+			var goalY = optionDesc.y;
+			optionDesc.screenCenter(X);
+			optionDesc.y = goalY - 12;
+			optionDesc.alpha = 0;
+			FlxTween.tween(optionDesc, {y: goalY, alpha: 1}, 0.35, {ease: FlxEase.quadOut});
+		}else
+		{
+			bg.alpha = 0.3;
+			FlxTween.tween(bg, {alpha: 0.7}, 0.6);
+		}
 		
 		getOptions();
 
@@ -181,8 +198,9 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		{
 			var optionText:Alphabet = new Alphabet(0, 70 * i, optionsArray[i].name, true, false, 0.05, 0.8);
 			optionText.scrollFactor.set();
-			optionText.isMenuItem = true;
+			optionText.camera = cam;
 
+			optionText.isMenuItem = true;
 			optionText.xAdd = 120;
 			optionText.x += 200;
 			optionText.targetX = 225;
@@ -190,7 +208,8 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 			//optionText.yAdd += yAdd;
 			optionText.targetY = i;
 
-			optionText.camera = cam;
+			optionText.ID = i;
+			
 			grpOptions.add(optionText);
 
 			if(optionsArray[i].type == 'bool') {
@@ -424,24 +443,18 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		if (curSelected >= optionsArray.length)
 			curSelected = 0;
 
-		var bullShit:Int = 0;
-
-		for (item in grpOptions.members) {
+		////
+		for (bullShit => item in grpOptions.members) {
+			var difference = Math.abs(curSelected - item.ID);
+			item.alpha = (difference == 0) ? 1 : 0.6;
 			item.targetY = bullShit - curSelected;
-			bullShit++;
-
-			item.alpha = 0.6;
-			if (item.targetY == 0) {
-				item.alpha = 1;
-			}
 		}
 		for (text in grpTexts) {
-			text.alpha = 0.6;
-			if(text.ID == curSelected) {
-				text.alpha = 1;
-			}
+			var difference = Math.abs(curSelected - text.ID);
+			text.alpha = (difference == 0) ? 1 : 0.6;
 		}
-		curOption = optionsArray[curSelected]; //shorter lol
+
+		curOption = optionsArray[curSelected];
 		FlxG.sound.play(Paths.sound('scrollMenu'));
 	}
 

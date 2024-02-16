@@ -7,7 +7,7 @@ import flixel.util.FlxColor;
 import PlayState;
 
 /**
-	Taken from Kade Engine 1.6
+	Joke. Taken from Kade Engine 1.6
 **/
 class KadeHUD extends BaseHUD
 {
@@ -35,7 +35,14 @@ class KadeHUD extends BaseHUD
 	var cbString = Paths.getString("cbplural");
 	var npsString = Paths.getString("nps");
 
-	var engineString = "Troll Engine";
+	var engineString = 'Troll Engine ${Main.displayedVersion}';
+
+	override function set_displayedHealth(value:Float)
+	{
+		healthBar.value = value;
+		displayedHealth = value;
+		return value;
+	}
 
 	public function new(iP1:String, iP2:String, songName:String, stats:Stats)
 	{

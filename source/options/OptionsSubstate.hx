@@ -1,5 +1,6 @@
 package options;
 
+import flixel.graphics.FlxGraphic;
 import flixel.input.keyboard.FlxKey;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
@@ -349,6 +350,7 @@ class OptionsSubstate extends MusicBeatSubstate
 					"npsDisplay", 
 					"showMS", 
 					"coloredCombos",
+					'worldCombos',
 					"simpleJudge",
 					"hitbar", 
 					"judgeCounter", 
@@ -469,8 +471,11 @@ class OptionsSubstate extends MusicBeatSubstate
 		optState=state;
 		super();
 	}
+
+	var whitePixel = FlxGraphic.fromRectangle(1, 1, 0xFFFFFFFF, false, 'whitePixel');
 	override function create()
 	{
+		//var startTime = Sys.cpuTime();
 		// ClientPrefs.load();
 		persistentDraw = true;
 		persistentUpdate = true;
@@ -493,10 +498,10 @@ class OptionsSubstate extends MusicBeatSubstate
 
 		}else{
 			//mainCamera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
-			var backdrop = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
-			backdrop.setGraphicSize(FlxG.width, FlxG.height);
+			var backdrop = new FlxSprite(whitePixel);
+			backdrop.scale.set(FlxG.width, FlxG.height);
 			backdrop.updateHitbox();
-			backdrop.screenCenter();
+			backdrop.color = 0xFF000000;
 			backdrop.alpha = 0.6;
 			add(backdrop);
 
@@ -506,7 +511,6 @@ class OptionsSubstate extends MusicBeatSubstate
 			FlxG.cameras.add(transCamera, false);
 		}
 
-		
 		camerasToRemove.push(optionCamera);
 		camerasToRemove.push(overlayCamera);
 		camerasToRemove.push(transCamera);
@@ -542,19 +546,19 @@ class OptionsSubstate extends MusicBeatSubstate
 		{
 			var tabName = optionOrder[idx];
 
-			var button = new FlxSprite(lastX, optionMenu.y - 3).makeGraphic(1, 44, FlxColor.WHITE);
+			var button = new FlxSprite(lastX, optionMenu.y - 3, whitePixel);
 			button.ID = idx;
 			button.color = idx == 0 ? FlxColor.fromRGB(128, 128, 128) : FlxColor.fromRGB(82, 82, 82);
 			button.alpha = 0.75;
 
 			var text = new FlxText(button.x, button.y, 0, Paths.getString('opt_tabName_$tabName').toUpperCase(), 16);
 			text.setFormat(Paths.font("calibrib.ttf"), 32, 0xFFFFFFFF, FlxTextAlign.CENTER);
-			var width = text.fieldWidth < 86 ? 86 : text.fieldWidth;
-			button.setGraphicSize(Std.int(width + 8), Std.int(button.height));
+			
+			button.scale.set(Math.max(86, text.fieldWidth) + 8, 44);
 			button.updateHitbox();
 			button.y -= button.height;
-			text.y = button.y + ((button.height - text.height) / 2);
 
+			text.y = button.y + ((button.height - text.height) / 2);
 			text.fieldWidth = button.width;
 			text.updateHitbox();
 
@@ -651,7 +655,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		////
 
 		optionDesc = new FlxText(5, FlxG.height - 48, 0, "", 20);
-		optionDesc.setFormat(Paths.font("calibri.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		optionDesc.setFormat(Paths.font("vcr.ttf"), #if tgt 20 #else 16 #end, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		optionDesc.textField.background = true;
 		optionDesc.textField.backgroundColor = FlxColor.BLACK;
 		optionDesc.screenCenter(XY);
@@ -662,6 +666,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		checkWindows();
 
 		super.create();
+		//trace('OptionState creation took ${Sys.cpuTime() - startTime} seconds.');
 	}
 
 	function createWidget(name:String, drop:FlxSprite, text:FlxText, data:OptionData):Widget
@@ -763,9 +768,9 @@ class OptionsSubstate extends MusicBeatSubstate
 					daCamera.y = FlxG.height - daCamera.height; // kick it up so nothing ends up off screen
 				daCamera.alpha = 0;
 
-				var hitbox = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);
+				var hitbox = new FlxSprite(0, 0, whitePixel);
 				hitbox.alpha = 0.1;
-				hitbox.setGraphicSize(daCamera.width, daCamera.height);
+				hitbox.scale.set(daCamera.width, daCamera.height);
 				hitbox.updateHitbox();
 				hitbox.scrollFactor.set();
 				hitbox.cameras = [daCamera];

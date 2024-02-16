@@ -2,7 +2,8 @@ update = null;
 onBeatHit = null;
 onStepHit = null;
 
-function onCreatePost(){
+function onCreatePost()
+{
      /*
 	var count = 0;
 	var gf = 0;

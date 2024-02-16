@@ -333,12 +333,13 @@ class ClientPrefs
 				value: false,
 				data: []
 			},
-			"comboDisplay" => {
-				display: "Combo Display",
-				desc: "Changes where combo and judgement sprites get shown.",
-				type: Dropdown,
-				value: "World",
-				data: ["options" => ["World", "HUD"]]
+			"worldCombos" => {
+				display: "World Combos",
+				desc: "When toggled, combo sprites are placed on the stage instead of the HUD."
+				+ '\nDoesn'+"'"+'t work with "Alt Judgements" enabled.',
+				type: Toggle,
+				value: true,
+				data: []
 			},
 			"showMS" => {
 				display: "Show Timing",

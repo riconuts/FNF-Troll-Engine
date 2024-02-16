@@ -45,9 +45,14 @@ class PsychHUD extends CommonHUD
 		songWifeHighscore = Highscore.getNotesHit(songName);
 
 		scoreTxt = new FlxText(0, healthBarBG.y + 48, FlxG.width, "", 20);
+		#if tgt
 		scoreTxt.setFormat(Paths.font("calibri.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		scoreTxt.scrollFactor.set();
 		scoreTxt.borderSize = 1.25;
+		#else
+		scoreTxt.setFormat(Paths.font("vcr.ttf"), 18, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		scoreTxt.borderSize = 1.15;
+		#end
+		scoreTxt.scrollFactor.set();
 		scoreTxt.visible = scoreTxt.alpha > 0;
 
 		if (ClientPrefs.judgeCounter != 'Off')
@@ -87,24 +92,29 @@ class PsychHUD extends CommonHUD
 
 	function generateJudgementDisplays()
 	{
+		final textBorderSpacing = 6;
+		final textLineSpacing = #if tgt 25 #else 22 #end;
+		final textSize = #if tgt 24 #else 20 #end;
+		final textBorderSize = #if tgt 1.25 #else 1.15 #end;
+
 		var textWidth = ClientPrefs.judgeCounter == 'Shortened' ? 150 : 200;
-		var textPosX = ClientPrefs.hudPosition == 'Right' ? (FlxG.width - 5 - textWidth) : 5;
-		var textPosY = (FlxG.height - displayedJudges.length*25) * 0.5;
+		var textPosX = ClientPrefs.hudPosition == 'Right' ? (FlxG.width - textBorderSpacing - textWidth) : textBorderSpacing;
+		var textPosY = (FlxG.height - displayedJudges.length * textLineSpacing) * 0.5;
 
 		for (idx in 0...displayedJudges.length)
 		{
 			var judgment = displayedJudges[idx];
 
-			var text = new FlxText(textPosX, textPosY + idx*25, textWidth, displayNames.get(judgment), 20);
-			text.setFormat(Paths.font("calibrib.ttf"), 24, judgeColours.get(judgment), LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			var text = new FlxText(textPosX, textPosY + idx*textLineSpacing, textWidth, displayNames.get(judgment));
+			text.setFormat(Paths.font(#if tgt "calibrib.ttf" #else "vcr.ttf" #end), textSize, judgeColours.get(judgment), LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			text.borderSize = textBorderSize;
 			text.scrollFactor.set();
-			text.borderSize = 1.25;
 			add(text);
 
-			var numb = new FlxText(textPosX, text.y, textWidth, "0", 20);
-			numb.setFormat(Paths.font("calibri.ttf"), 24, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			var numb = new FlxText(textPosX, text.y, textWidth, "0");
+			numb.setFormat(Paths.font(#if tgt "calibri.ttf" #else "vcr.ttf" #end), textSize, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			numb.borderSize = textBorderSize;
 			numb.scrollFactor.set();
-			numb.borderSize = 1.25;
 			add(numb);
 
 			judgeTexts.set(judgment, numb);

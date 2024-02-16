@@ -1,5 +1,12 @@
 var halloweenBG;
 
+function onAddSpriteGroups(){
+	var KadeHUD = getClass("hud.KadeHUD");
+	trace(KadeHUD);
+	game.hud = new KadeHUD(game.boyfriend.healthIcon, game.dad.healthIcon, PlayState.SONG.song, game.stats);
+}
+
+
 function onLoad()
 {
 	if (ClientPrefs.lowQuality){
@@ -16,8 +23,8 @@ function onLoad()
 	add(halloweenBG);
 }
 
-var lightningStrikeBeat = 0;
-var lightningOffset = 0;
+lightningStrikeBeat = 0;
+lightningOffset = 0;
 
 function lightningStrikeShit(sound:Bool):Void
 {

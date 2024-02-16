@@ -567,22 +567,30 @@ class Paths
 			return currentTrackedSounds.get(file);
 		}
 		#end
-		// I hate this so god damn much
+
 		var gottenPath:String = getPath('$path/$key.$SOUND_EXT', SOUND, library);
+		#if html
 		gottenPath = gottenPath.substring(gottenPath.indexOf(':') + 1, gottenPath.length);
-		// trace(gottenPath);
-		if (!currentTrackedSounds.exists(gottenPath))
-			#if MODS_ALLOWED
-			currentTrackedSounds.set(gottenPath, Sound.fromFile('./' + gottenPath));
-			#else
-				currentTrackedSounds.set(
-					gottenPath, 
-					Assets.getSound((path == 'songs' ? folder = 'songs:' : '') + getPath('$path/$key.$SOUND_EXT', SOUND, library))
-				);
-			#end
+		#end
+
+		var toReturn = currentTrackedSounds.get(gottenPath);
+
+		if (toReturn == null)
+			currentTrackedSounds.set(
+				gottenPath, 
+				toReturn = (
+				#if !html
+				Sound.fromFile('./' + gottenPath)
+				#else
+				Assets.getSound((path == 'songs' ? folder = 'songs:' : '') + getPath('$path/$key.$SOUND_EXT', SOUND, library))
+				#end
+				)
+			);
+			
 		if (!localTrackedAssets.contains(gottenPath))
 			localTrackedAssets.push(gottenPath);
-		return currentTrackedSounds.get(gottenPath);
+
+		return toReturn;
 	}
 
 	// i just fucking realised there's already a function for this wtfff

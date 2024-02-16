@@ -1,28 +1,34 @@
+if (!game.isStoryMode)
+	return;
+
 var black:FlxSprite;
 var white:FlxSprite;
-function onCreatePost(){
-    game.skipCountdown = true;
+
+function onCreatePost()
+{
+	game.skipCountdown = true;
+	
     black = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
-    black.setGraphicSize(3240, 3240);
+    black.scale.set(3240, 3240);
     black.updateHitbox();
+    black.screenCenter();
     black.alpha = 1;
-    black.screenCenter("XY");
-    black.cameras = [game.camOther];
     game.add(black);
 
     white = new FlxSprite().makeGraphic(1, 1, FlxColor.WHITE);
-    white.setGraphicSize(3240, 3240);
+    white.scale.set(3240, 3240);
     white.updateHitbox();
+    white.screenCenter();
     white.alpha = 0;
     white.blend = 0;
-    white.screenCenter("XY");
-    white.cameras = [game.camOther];
+	game.add(white);
+	
+    black.cameras = white.cameras = [game.playOpponent ? game.camHUD : game.camOther];
 
-    if(game.stage.curStage == 'spooky'){
+	if (game.stage.curStage == 'spooky'){
         game.stage.stageScript.set('lightningOffset', 1000);
         game.stage.stageScript.set('lightningStrikeBeat', 1000);
     }
-    game.add(white);
 }
 
 var lightninged:Bool = false;

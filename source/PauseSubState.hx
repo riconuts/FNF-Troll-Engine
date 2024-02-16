@@ -181,34 +181,33 @@ class PauseSubState extends MusicBeatSubstate
 		}
 		menuItems = menuItemsOG;
 
-
+		////
 		pauseMusic = new FlxSound();
 
 		var songName = songName;
 		if (songName == null) songName = 'Breakfast';
-		
-		if(songName != 'None'){
+
+		if (songName != 'None'){
 			songName = Paths.formatToSongPath(songName);
 			pauseMusic.loadEmbedded(Paths.music(songName), true, true);
 			
-			var path = new haxe.io.Path(Paths.returnSoundPath("music", songName));
-			path.file += "-loopTime";
-			path.ext = "txt";
-			var pathStr = path.toString();
-			if (Paths.exists(pathStr)){
-				var loopTime:Float = Std.parseFloat(Paths.getContent(pathStr));
-				if (!Math.isNaN(loopTime)){
-					pauseMusic.loopTime = loopTime;
-					//trace(loopTime);
-				}
-			}
+			var loopTimePath = new haxe.io.Path(Paths.returnSoundPath("music", songName));
+			loopTimePath.file += "-loopTime";
+			loopTimePath.ext = "txt";
+
+			var loopTime:Float = Std.parseFloat(Paths.getContent(loopTimePath.toString()));
+			if (!Math.isNaN(loopTime))
+				pauseMusic.loopTime = loopTime;
+			
 		}
 		
 		pauseMusic.volume = 0;
 		pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length* 0.5)));
+		pauseMusic.fadeIn(50, 0, 0.5);
 
 		FlxG.sound.list.add(pauseMusic);
 
+		////
 		var bg = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
 		bg.setGraphicSize(FlxG.width, FlxG.height);
 		bg.updateHitbox();
@@ -290,7 +289,7 @@ class PauseSubState extends MusicBeatSubstate
 		}
 
 		FlxTween.tween(bg, {alpha: 0.6}, 0.4, {ease: FlxEase.quartInOut});
-		//FlxTween.tween(pauseMusic, {volume: 0.5}, 5, {ease: FlxEase.linear});
+
 		for (id in 0...allTexts.length)
 		{
 			var daText = allTexts[id];
@@ -311,9 +310,6 @@ class PauseSubState extends MusicBeatSubstate
 	var holdTime:Float = 0;
 	override function update(elapsed:Float)
 	{
-		if (pauseMusic.volume < 0.5)
-			pauseMusic.volume += 0.01 * elapsed; 
-
 		updateSkipTextStuff();
 
 		if(subState == null){
