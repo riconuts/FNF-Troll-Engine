@@ -14,7 +14,7 @@ import llua.State;
 
 class DiscordClient
 {
-	private static final defaultID = "1009523643392475206";
+	private static final defaultID = #if tgt "1009523643392475206" #else '814588678700924999' #end;
 	
 	private static var discordDaemon:Thread;
 	private static var mutex:Mutex = new Mutex(); // whatever the fuck this is
@@ -98,6 +98,9 @@ class DiscordClient
 
 	////
 	static var allowedImageKeys:Array<String> = [
+		#if !tgt
+		"icon",
+		#else
 		"app-logo",
 		"gorgeous",
 		"trollface",
@@ -127,9 +130,10 @@ class DiscordClient
 		"hammerdread",
 		"fear-the-pumpkin-king",
 		"you-cant-consent",
+		#end
 	];
 	inline static function getImageKey(key):String
-		return allowedImageKeys.contains(key) ? key : "app-logo";
+		return allowedImageKeys.contains(key) ? key : allowedImageKeys[0];
 
 	public static function changePresence(details:String, state:Null<String>, largeImageKey:String = "app-logo", ?hasStartTimestamp:Bool, ?endTimestamp:Float)
 	{

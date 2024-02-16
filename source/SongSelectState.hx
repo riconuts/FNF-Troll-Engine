@@ -1,5 +1,6 @@
 package;
 
+import Discord.DiscordClient;
 import sys.io.File;
 import sys.FileSystem;
 import flixel.text.FlxText;
@@ -42,6 +43,9 @@ class SongSelectState extends MusicBeatState
 	{
 		StartupState.load();
 
+		DiscordClient.changePresence("In the Menus", null);
+		FlxG.camera.bgColor = 0xFF000000;
+
 		if (FlxG.sound.music == null)
 			MusicBeatState.playMenuMusic(1);
 
@@ -61,7 +65,7 @@ class SongSelectState extends MusicBeatState
 		}
 		#end
 
-		var border = 5;
+		var border = 8;
 		var spacing = 2;
 		var textSize = 16;
 		var width = 16*textSize;
@@ -143,6 +147,8 @@ class SongSelectState extends MusicBeatState
 		}
         else if (controls.BACK)
             MusicBeatState.switchState(new MainMenuState());
+		else if (FlxG.keys.justPressed.SEVEN)
+			MusicBeatState.switchState(new editors.MasterEditorMenu());
 
 		super.update(e);
 	}
@@ -198,8 +204,7 @@ class SongChartSelec extends MusicBeatState
 
 		if (controls.BACK)
 			MusicBeatState.switchState(new FreeplayState());
-
-		if (controls.ACCEPT){
+		else if (controls.ACCEPT){
 			var daDiff = alts[curSel];
 			Song.playSong(songMeta, (daDiff=="normal") ? null : daDiff, curSel);
 		}
