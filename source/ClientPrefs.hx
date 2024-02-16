@@ -333,6 +333,13 @@ class ClientPrefs
 				value: false,
 				data: []
 			},
+			"comboDisplay" => {
+				display: "Combo Display",
+				desc: "Changes where combo and judgement sprites get shown.",
+				type: Dropdown,
+				value: "World",
+				data: ["options" => ["World", "HUD"]]
+			},
 			"showMS" => {
 				display: "Show Timing",
 				desc: "When toggled, upon hitting a note it will show the millisecond timing.",
@@ -476,7 +483,7 @@ class ClientPrefs
 				display: "Max Framerate",
 				desc: "The highest framerate the game can hit.",
 				type: Number,
-				value: 60,
+				value: #if macro 60 #else FlxG.stage==null ? 60 : FlxG.stage.application.window.displayMode.refreshRate #end,
 				data: ["suffix" => " FPS", "min" => 30, "max" => 240, "step" => 1,]
 			},
 			"lowQuality" => {
@@ -642,6 +649,8 @@ class ClientPrefs
 	static var manualLoads = ["gameplaySettings", "quantHSV", "arrowHSV", "comboOffset"];
 
 	public static function initialize(){
+		defaultOptionDefinitions.get("framerate").value = FlxG.stage.application.window.displayMode.refreshRate;
+
 		optionSave.bind("options_v2");
 		loadDefaultKeys();
     }
