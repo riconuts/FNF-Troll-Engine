@@ -69,7 +69,7 @@ class UpdaterState extends MusicBeatState {
 		var beta = release.prerelease ? " (PRE-RELEASE)" : "";
 		var currentBeta = Main.beta ? " (PRE-RELEASE)" : "";
 		updateText = new FlxText(0, 0, FlxG.width,
-			'You are on Troll Engine ${MainMenuState.displayedVersion}${currentBeta}, but the most recent is v${release.tag_name}${beta}!\n\nY = Update, N = Remind me later, I = Skip this update');
+			'You are on Troll Engine ${Main.displayedVersion}${currentBeta}, but the most recent is v${release.tag_name}${beta}!\n\nY = Update, N = Remind me later, I = Skip this update');
 		updateText.setFormat(Paths.font("calibrib.ttf"), 32, FlxColor.WHITE, CENTER);
 		updateText.updateHitbox();
 		updateText.screenCenter(Y);

@@ -241,7 +241,7 @@ class JudgmentManager {
     public function new(?useEpics:Bool)
     {
         #if USE_EPIC_JUDGEMENT
-		if (ClientPrefs.useEpics && useEpics==true){
+		if (ClientPrefs.useEpics || useEpics==true){
 			this.useEpics = true;
             return;
 		}
