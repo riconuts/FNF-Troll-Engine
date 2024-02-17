@@ -702,10 +702,9 @@ class OptionsSubstate extends MusicBeatSubstate
 
 				data.value = (checkbox.toggled);
 			case Dropdown:
-				var arrow:FlxSprite = new FlxSprite().loadGraphic(Paths.image("optionsMenu/arrow"));
+				var arrow:FlxSprite = new FlxSprite(Paths.image("optionsMenu/arrow"));
 				arrow.scale.set(0.7, 0.7);
 				arrow.updateHitbox();
-				arrow.antialiasing = false;
 
 				var daCamera = new FlxCamera();
 				daCamera.bgColor = FlxColor.GRAY;
