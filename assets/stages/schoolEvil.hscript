@@ -27,82 +27,22 @@ var lastCombos;
 var lastJudge;
 var lr = true;
 
-function onDisplayCombo(combo)
-{
-	if (combo > 0 && combo < 10 && combo != 0)
-		return Function_Stop;
+function anim(spr, startX, targetX, startY, targetY, prog){
+	if (prog < 0.5)
+		spr.alpha = FlxEase.backOut(prog*2);
+	else if (prog > 0.8)
+		spr.alpha = 1 - (prog - 0.8) / 0.2;
 
-	var splitCombo = Std.string(Math.abs(combo)).split();
-	while (splitCombo.length < 3)
-		splitCombo.unshift("0");
-	if (combo < 0)
-		combo.unshift("neg");		
-		
-	var bs = 0;
-	var totalWidth = 9 * 6 * splitCombo.length;
-	lr=!lr;
-	
-	/*
-	if (ClientPrefs.simpleJudge)
-		while (lastCombos.length > 0)
-			lastCombos.pop().kill();
-	*/
-	
-	for (char in splitCombo){	
-		var spr = ratingGroup.recycle(RatingSprite, null, false);
-		spr.loadGraphic(Paths.image("pixelUI/num"+char+"-pixel"));
-		spr.scale.set(6,6);
-		spr.updateHitbox();
-		spr.antialiasing = false;
-		
-		//spr.alpha = 1;
-		spr.velocity.set();
-		spr.acceleration.set();
-
-		spr.setPosition(game.ratingOrigin[0] + ClientPrefs.comboOffset[0], game.ratingOrigin[1] - ClientPrefs.comboOffset[1]);
-		spr.offset.set(game.totalWidth / 2 - 9*6*bs, spr.height/2);
-		
-		ratingGroup.remove(spr, true);
-		ratingGroup.add(spr);
-		
-		var startY = spr.offset.y - spr.height / 2;
-		var targetY = spr.offset.y + spr.height / 2;
-		var startX = spr.offset.x;
-		var targetX = spr.offset.x + 6*8*(lr ? 1 : -1);
-		spr.tween = FlxTween.num(0, 1, 1.2, {onComplete: spr.kill}, (prog)->{
-			if (prog < 0.5)
-				spr.alpha = FlxEase.backOut(prog*2);
-			else if (prog > 0.8)
-				spr.alpha = 1 - (prog - 0.8) / 0.2;
-
-			var num = FlxEase.backOut(prog > 0.5 ? 1 : prog*2);
-			spr.offset.y = FlxMath.lerp(startY, targetY, num); //roundTo( FlxMath.lerp(startY, targetY, num), 6);
-			spr.offset.x = roundTo( FlxMath.lerp(startX, targetX, FlxEase.circIn(prog)), 6 );
-
-		});
-		
-		lastCombos.push(spr);
-		
-		bs++;
-	}
-
-	return Function_Stop;
+	var num = FlxEase.backOut(prog > 0.5 ? 1 : prog*2);
+	spr.offset.set(
+		roundTo( FlxMath.lerp(startX, targetX, FlxEase.circIn(prog)), 6 ),
+		FlxMath.lerp(startY, targetY, num)
+	);
 }
 
-function onDisplayJudgment(name){
-	var spr; 
+function prepareSpr(name, ?spr){
+	var spr = spr!=null ? spr : ratingGroup.recycle(RatingSprite, null, false);
 	
-	/*
-	if (ClientPrefs.simpleJudge){
-		if (lastJudge.alive)
-			lastJudge.kill();
-		
-		spr = lastJudge;
-		spr.revive();
-	}else
-	*/
-		spr = ratingGroup.recycle(RatingSprite, null, false);
-
 	spr.loadGraphic(Paths.image("pixelUI/"+name+"-pixel"));
 	spr.scale.set(6,6);
 	spr.updateHitbox();
@@ -111,25 +51,83 @@ function onDisplayJudgment(name){
 	//spr.alpha = 1;
 	spr.velocity.set();
 	spr.acceleration.set();
-	
-	spr.setPosition(game.ratingOrigin[0] + ClientPrefs.comboOffset[0], game.ratingOrigin[1] - ClientPrefs.comboOffset[1]);
-	spr.offset.set(spr.width / 2, spr.height/2);
-	
-	var startY = spr.offset.y - spr.height / 2;
-	var targetY = spr.offset.y + spr.height / 2;
-	var startX = spr.offset.x;
-	var targetX = spr.offset.x + 6*8*(lr=!lr ? 1 : -1);
-	spr.tween = FlxTween.num(0, 1, 1.2, {onComplete: spr.kill}, (prog)->{
+	spr.scrollFactor.set(1, 1);
 
-		if (prog < 0.5)
-			spr.alpha = FlxEase.backOut(prog*2);
-		else if (prog > 0.8)
-			spr.alpha = 1 - (prog - 0.8) / 0.2;
+	return spr;
+}
+
+function onDisplayCombo(combo)
+{
+	if (combo > 0 && combo < 10 && combo != 0)
+		return Function_Stop;
+
+	var comboColor = game.comboColor;
+	var splitCombo = Std.string(Math.abs(combo)).split();
+	while (splitCombo.length < 3)
+		splitCombo.unshift("0");
+	if (combo < 0){
+		splitCombo.unshift("neg");		
+		comboColor = 0xFFF7C5DC;
+	}
+		
+	var bs = 0;
+	var totalWidth = 9 * 6 * splitCombo.length;
+	lr=!lr;
 	
-		var num = FlxEase.backOut(prog > 0.5 ? 1 : prog*2);
-		spr.offset.y = FlxMath.lerp(startY, targetY, num); //roundTo( FlxMath.lerp(startY, targetY, num), 6);
-		spr.offset.x = roundTo( FlxMath.lerp(startX, targetX, FlxEase.circIn(prog)), 6 );
-	});
+	var posX = roundTo(game.ratingOrigin[0] + ClientPrefs.comboOffset[2], 6);
+	var posY = roundTo(game.ratingOrigin[1] - ClientPrefs.comboOffset[3], 6);
+	
+	for (char in splitCombo){	
+		var spr = prepareSpr("num"+char);
+		spr.color = comboColor;
+
+		spr.setPosition(posX, posY);
+		spr.offset.set(
+			totalWidth / 2 - (9 * 6 * bs),
+			spr.height / 2
+		);
+		
+		var startX	=	spr.offset.x;
+		var targetX =	spr.offset.x + 6*9*(lr ? 1 : -1);
+		var startY	=	spr.offset.y - spr.height;
+		var targetY =	spr.offset.y;
+		spr.tween = FlxTween.num(
+			0, 1, 1.2, 
+			{onComplete: spr.kill}, 
+			(prog)->{anim(spr, startX, targetX, startY, targetY, prog);}
+		);
+		
+		ratingGroup.remove(spr, true);
+		ratingGroup.add(spr);
+		
+		bs++;
+	}
+
+	return Function_Stop;
+}
+
+function onDisplayJudgment(name){
+	var spr = prepareSpr(name);
+	spr.color = 0xFFFFFFFF;
+	
+	spr.setPosition(
+		roundTo(game.ratingOrigin[0] + ClientPrefs.comboOffset[0], 6), 
+		roundTo(game.ratingOrigin[1] - ClientPrefs.comboOffset[1], 6)
+	);
+	spr.offset.set(
+		spr.width / 2, 
+		spr.height / 2
+	);
+	
+	var startX	=	spr.offset.x;
+	var targetX =	spr.offset.x + 6*9*(lr=!lr ? 1 : -1);
+	var startY	=	spr.offset.y - spr.height;
+	var targetY =	spr.offset.y;
+	spr.tween = FlxTween.num(
+		0, 1, 1.2, 
+		{onComplete: spr.kill}, 
+		(prog)->{anim(spr, startX, targetX, startY, targetY, prog);}
+	);
 	
 	ratingGroup.remove(spr, true);
 	ratingGroup.add(spr);
@@ -188,7 +186,7 @@ function onLoad(){
 		add(bg);
 
 		bgGhouls = new BGSprite('stages/schoolEvil/bgGhouls', -100, 190, 0.9, 0.9, ['BG freaks glitch instance'], false);
-		bgGhouls.setGraphicSize(Std.int(bgGhouls.width * daPixelZoom));
+		bgGhouls.scale.set(6, 6);
 		bgGhouls.updateHitbox();
 		bgGhouls.visible = false;
 		bgGhouls.antialiasing = false;
