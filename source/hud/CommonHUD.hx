@@ -211,6 +211,7 @@ class CommonHUD extends BaseHUD
 		healthBar.y = healthBarBG.y + 5;
 		healthBar.iconP1.y = healthBar.y - 75;
 		healthBar.iconP2.y = healthBar.y - 75;
+		healthBar.real_alpha = healthBar.real_alpha;
 
 		botplayTxt.y = (ClientPrefs.downScroll ? (FlxG.height-107) : 89);
 

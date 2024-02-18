@@ -8,6 +8,9 @@ import Song;
 
 using StringTools;
 
+/**
+	Barebones menu that shows a list of available songs
+**/
 class SongSelectState extends MusicBeatState
 {	
 	var songMeta:Array<SongMetadata> = [];

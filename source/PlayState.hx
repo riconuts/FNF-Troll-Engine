@@ -4732,6 +4732,7 @@ class PlayState extends MusicBeatState
 	}	
 }
 
+// TODO: think abt this
 class FNFHealthBar extends FlxBar{
 	public var healthBarBG:FlxSprite;
 
@@ -4772,12 +4773,20 @@ class FNFHealthBar extends FlxBar{
 		return super.set_visible(value);
 	}
 
-	override function set_alpha(value:Float){
+	override function set_alpha(value:Float)
+	{
 		healthBarBG.alpha = value;
 		iconP1.alpha = value;
 		iconP2.alpha = value;
 
 		return super.set_alpha(value);
+	}
+
+	/** Use this to change the alpha of the bar **/
+	public var real_alpha(default, set):Float = 1.0; 
+	function set_real_alpha(value:Float){
+		set_alpha(value * ClientPrefs.hpOpacity);
+		return real_alpha = value; 
 	}
 
 	public function new(bfHealthIcon = "face", dadHealthIcon = "face")
@@ -4823,17 +4832,9 @@ class FNFHealthBar extends FlxBar{
 		//
 		antialiasing = false;
 		scrollFactor.set();
+		real_alpha = 1.0;
 		visible = alpha > 0;
 	}
-
-	function get_alpha()
-		return alpha * ClientPrefs.hpOpacity;
-
-	public var real_alpha(get, set):Float;
-	function get_real_alpha()
-		@:bypassAccessor return alpha;
-	function set_real_alpha(val:Float)
-		return alpha = val;
 
 	public var iconScale(default, set) = 1.0;
 	function set_iconScale(value:Float){
