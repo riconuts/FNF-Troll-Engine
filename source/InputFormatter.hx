@@ -9,7 +9,7 @@ class InputFormatter {
 		var key:Null<FlxKey> = key;
 		return switch (key) 
 		{
-			case BACKSPACE: "BckSpc";
+			case BACKSPACE: "Backspace";
 			case CONTROL: "Ctrl";
 			case ALT: "Alt";
 			case CAPSLOCK: "Caps";
