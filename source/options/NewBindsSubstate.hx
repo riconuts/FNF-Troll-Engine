@@ -12,6 +12,21 @@ import flixel.math.FlxPoint;
 import openfl.geom.Rectangle;
 using StringTools;
 
+private class KeyboardNavHelper{
+	public var bg:FlxSprite; // for camera
+	public var text:FlxText; // to highlight
+	public var onTextPress:Dynamic; // for reset to defaults text
+	public var bindButtons:Null<Array<BindButton>>;
+
+	public function new(text:FlxText, bg:FlxSprite, ?bindButtons:Array<BindButton>, ?onTextPress:Dynamic)
+	{
+		this.text = text;
+		this.bg = bg;
+		this.bindButtons = bindButtons;
+		this.onTextPress = onTextPress;
+	}
+}
+
 class NewBindsSubstate extends MusicBeatSubstate  {
 	// if an option is in this list, then atleast ONE key will have to be bound.
 	var forcedBind:Array<String> = ["ui_up", "ui_down", "ui_left", "ui_right", "accept", "back",];
@@ -61,6 +76,13 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 	var bindButtons:Array<Array<BindButton>> = []; // the actual bind buttons. used for input etc lol
 	var internals:Array<String> = [];
 	var resetBinds:FlxUI9SliceSprite;
+	var cancelKey:FlxKey;
+
+	//// Keyboard navigation
+	var keyboardNavigation:Array<KeyboardNavHelper> = [];
+	var selectionArrow:FlxSprite;
+	var keyboardY:Int = 0;
+	var keyboardX:Int = 0;
 
 	@:noCompletion
 	var _point:FlxPoint = FlxPoint.get();
@@ -156,7 +178,8 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 		for(data in binds){
 			var label = data[0];
 
-			if(data.length > 1){
+			if(data.length > 1)
+			{
 				// its a bind
 				var internal = data[1];
 				var buttArray:Array<BindButton> = [];
@@ -166,9 +189,8 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 				text.cameras = [scrollableCam];
 				text.setFormat(Paths.font("calibri.ttf"), 28, 0xFFFFFFFF, FlxTextAlign.LEFT);
 				text.updateHitbox();
-				var height = text.height + 12;
-				if (height < 45)
-					height = 45;
+
+				var height = Math.min(45, text.height + 12);
 				var drop:FlxUI9SliceSprite = new FlxUI9SliceSprite(text.x - 12, text.y, backdropGraphic, new Rectangle(0, 0, optionMenu.width - text.x - 8, height), [22, 22, 89, 89]);
 				drop.cameras = [scrollableCam];
 				text.y += (height - text.height) / 2;
@@ -183,7 +205,6 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 				prButt.cameras = [scrollableCam];
 				buttArray.push(prButt);
 
-
 				var secButt:BindButton = new BindButton(drop.x + drop.width - 20, drop.y, rect, ClientPrefs.keyBinds.get(internal)[1]);
 				secButt.x -= secButt.width;
 				secButt.y += 5;
@@ -197,7 +218,11 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 				group.add(secButt);
 				daY += height + 3;
 
+				keyboardNavigation.push(new KeyboardNavHelper(text, drop, buttArray));
+
+
 				bindButtons.push(buttArray);
+
 			}else{
 				// its just a label
 				var text = new FlxText(8, daY, 0, label, 16);
@@ -209,7 +234,7 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 			idx++;
 		}
 		
-
+		//////
 		var text = new FlxText(16, daY, 0, Paths.getString("control_default"), 16);
 		text.cameras = [scrollableCam];
 		text.setFormat(Paths.font("calibri.ttf"), 28, 0xFFFFFFFF, FlxTextAlign.LEFT);
@@ -230,72 +255,136 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 
 		group.add(resetBinds);
 		group.add(text);
+		keyboardNavigation.push(new KeyboardNavHelper(text, resetBinds, null, resetAllBinds));
+
 		add(group);
+
+		////
+		selectionArrow = new FlxSprite();
+		selectionArrow.visible = false;
+		selectionArrow.cameras = [scrollableCam];
+		add(selectionArrow);
+	}
+
+	override function destroy()
+	{
+		FlxG.cameras.remove(cam);
+		FlxG.cameras.remove(scrollableCam);
+		FlxG.cameras.remove(overCam);
+		FlxG.sound.play(Paths.sound('cancelMenu'));
+
+		return super.destroy();
 	}
 
 	override function update(elapsed:Float){
-		super.update(elapsed);
+		var es:Float = elapsed / (1 / 60);
+		cam.bgColor = FlxColor.interpolate(cam.bgColor, 0x80000000, es * 0.1);
 
-		var lerpVal = (elapsed / (1 / 60));
-		cam.bgColor = FlxColor.interpolate(cam.bgColor, 0x80000000, lerpVal * 0.1);
-
-		if(bindIndex == -1){
-			if (controls.BACK)
-			{
+		if (bindIndex == -1)
+		{
+			if (controls.BACK){
 				close();
-				FlxG.cameras.remove(cam);
-				FlxG.cameras.remove(scrollableCam);
-				FlxG.cameras.remove(overCam);
-				FlxG.sound.play(Paths.sound('cancelMenu'));
 				return;
 			}
-			if(FlxG.mouse.justPressed){
-				for (index in 0...bindButtons.length){
-					var fuck = bindButtons[index];
-					for(id => butt in fuck){
-						if(overlaps(butt, scrollableCam)){
-							var internal = internals[index];
-							bindID = id;
-							bindIndex = index;
 
-							unbindText.visible = forcedBind.contains(internal);
-							popupText.text = Paths.getString("control_rebind").replace("{cancelKey}", "[Backspace]"); //'Press any key to bind, or press [BACKSPACE] to cancel.';
-							if (ClientPrefs.keyBinds.get(internal)[id]!=NONE)
-								popupText.text += "\n" + Paths.getString("control_unbind").replace("{unbindKey}", '[${InputFormatter.getKeyName(ClientPrefs.keyBinds.get(internal)[id])}]');
-							//'\nPress [${InputFormatter.getKeyName(ClientPrefs.keyBinds.get(internal)[id])}] to unbind.';
+			////////
+			var wasKeyboarding = selectionArrow.visible;
+			var updateKeyboard = false;
+			var prevY = keyboardY; // to unhighlight text
 
-							popupTitle.text = Paths.getString("control_binding").replace("{controlNameUpper}", binds[butt.ID][0].toUpperCase()).replace("{controlName}", binds[butt.ID][0]); //"CURRENTLY BINDING " + binds[butt.ID][0].toUpperCase();
+			if (FlxG.keys.justPressed.UP){
+				if (wasKeyboarding) keyboardY--;
+				updateKeyboard = true;
+			}
+			if (FlxG.keys.justPressed.DOWN)
+			{
+				if (wasKeyboarding) keyboardY++;
+				updateKeyboard = true;
+			}
+			if (FlxG.keys.justPressed.LEFT)
+			{
+				if (wasKeyboarding) keyboardX--;
+				updateKeyboard = true;
+			}
+			if (FlxG.keys.justPressed.RIGHT)
+			{
+				if (wasKeyboarding) keyboardX++;
+				updateKeyboard = true;
+			}
+
+			if (updateKeyboard)
+			{
+				FlxG.mouse.visible = false;
+
+				var prevSel = keyboardNavigation[prevY];
+				if (prevSel != null && prevSel.text != null){
+					prevSel.text.color = 0xFFFFFFFF;
+				}
+
+				keyboardY = FlxMath.wrap(keyboardY, 0, keyboardNavigation.length-1);
+				var curSel = keyboardNavigation[keyboardY];
+
+				curSel.text.color = 0xFFFFFF00;
+
+				if (curSel.bindButtons != null){
+					keyboardX = FlxMath.wrap(keyboardX, 0, curSel.bindButtons.length-1);
+					
+					////
+					var curButt = curSel.bindButtons[keyboardX];
+
+					selectionArrow.visible = true;
+					selectionArrow.flipX = false; // face right idk
+					selectionArrow.setPosition(
+						curButt.x - selectionArrow.width - 2,
+						curButt.y + (curButt.height - selectionArrow.height) / 2
+					);
+				}else{
+					selectionArrow.visible = true;
+					selectionArrow.flipX = true; // face left idk
+					selectionArrow.setPosition(
+						curSel.text.x + curSel.text.width + 2,
+						curSel.text.y + (curSel.text.height - selectionArrow.height) / 2
+					);
+				}
+
+				camFollow.y = curSel.bg.y + curSel.bg.height / 2 - scrollableCam.height / 2;
+
+				trace(keyboardY, keyboardX);
+			}
+
+			var curSel = keyboardNavigation[keyboardY];
+			if (wasKeyboarding && FlxG.keys.justPressed.ENTER){
+				var bindButton = curSel.bindButtons != null ? curSel.bindButtons[keyboardX] : null;
+				
+				if (bindButton != null)
+					startRebind(keyboardY, keyboardX, bindButton);
+				else if (curSel.onTextPress != null)
+					curSel.onTextPress();
+			}
+
+			if (FlxG.mouse.deltaX + FlxG.mouse.deltaY != 0){
+				FlxG.mouse.visible = true;
+				curSel.text.color = 0xFFFFFFFF;
+				selectionArrow.visible = false;
+			}
+			
+			////////
+			if (FlxG.mouse.justPressed){
+				for (y => buttons in bindButtons){
+					for (x => butt in buttons){
+						if (overlaps(butt, scrollableCam)){
+							startRebind(y, x, butt);
 						}
 					}
 				}
 
-				if(bindIndex == -1){
-					if (overlaps(resetBinds, scrollableCam)){
-						// i hate haxeflixel lmao
-						for (key => val in ClientPrefs.defaultKeys.copy()){
-							ClientPrefs.keyBinds.set(key, []);
-							for(i => v in val){
-								if (changedBind!=null)
-									changedBind(key, i, v);
-								ClientPrefs.keyBinds.get(key)[i] = v;
-							}
-						}
-						
-						for(index => fuck in bindButtons){
-							for(id => butt in fuck){
-								var internal = internals[index];
-								butt.bind = ClientPrefs.keyBinds.get(internal)[id];
-							}
-						}
-						FlxG.sound.play(Paths.sound('confirmMenu'));
-						ClientPrefs.saveBinds();
-						ClientPrefs.reloadControls();
-					}
+				if (bindIndex == -1){
+					if (overlaps(resetBinds, scrollableCam))
+						resetAllBinds();
 				}
 			}
-			var movement:Float = -FlxG.mouse.wheel * 45;
-			var es:Float = elapsed / (1 / 60);
 
+			var movement:Float = -FlxG.mouse.wheel * 45;
 			if (FlxG.keys.pressed.PAGEUP)
 				movement -= 25 * es;
 			if (FlxG.keys.pressed.PAGEDOWN)
@@ -303,34 +392,30 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 
 			camFollow.y += movement;
 			camFollowPos.y += movement;
-			if (camFollow.y < 0)
-				camFollow.y = 0;
-			if (camFollow.y > height)
-				camFollow.y = height; 
 
-			camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
-			if (camFollowPos.y < 0)
-				camFollowPos.y = 0;
+			camFollow.y = FlxMath.bound(camFollow.y, 0, height);
 
-			if (camFollowPos.y > height)
-				camFollowPos.y = height; 
+			camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, es), FlxMath.lerp(camFollowPos.y, camFollow.y, 0.2 * es));
+			camFollowPos.y = FlxMath.bound(camFollowPos.y, 0, height);
 
-			overCam.alpha = FlxMath.lerp(overCam.alpha, 0, lerpVal * 0.2);
+			overCam.alpha = FlxMath.lerp(overCam.alpha, 0, es * 0.2);
 		}else{
-			overCam.alpha = FlxMath.lerp(overCam.alpha, 1, lerpVal * 0.2);
+			overCam.alpha = FlxMath.lerp(overCam.alpha, 1, es * 0.2);
 
 			var keyPressed:FlxKey = FlxG.keys.firstJustPressed();
-			if (keyPressed == BACKSPACE)
-			{
+			if (keyPressed == cancelKey){
+				FlxG.sound.play(Paths.sound('cancelMenu'));
 				bindID = 0;
 				bindIndex = -1;
-				FlxG.sound.play(Paths.sound('cancelMenu'));
-			}else if (keyPressed != NONE)
+			}
+			else if (keyPressed != NONE)
 			{
 				FlxG.sound.play(Paths.sound('confirmMenu'));
 				var opp = bindID == 0 ? 1 : 0 ;
 				var internal = internals[bindIndex];
-				trace("bound " + internal + " (" + bindID + ") to " + InputFormatter.getKeyName(keyPressed));
+
+				trace('bound $internal ($bindID) to ' + InputFormatter.getKeyName(keyPressed));
+				
 				var binds = ClientPrefs.keyBinds.get(internal);
 				if (binds[bindID] == keyPressed)
 					keyPressed = NONE;
@@ -365,6 +450,54 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 			}
 		}
 
+		super.update(elapsed);
+	}
+
+	function startRebind(index:Int, id:Int, butt:BindButton){
+		var internal = internals[index];
+		var actionToBindTo:String = binds[butt.ID][0];
+		var currentBinded:FlxKey = ClientPrefs.keyBinds.get(internal)[id];
+
+		bindID = id;
+		bindIndex = index;
+		cancelKey = (currentBinded == BACKSPACE) ? FlxKey.ESCAPE : FlxKey.BACKSPACE;
+		
+		// 
+		unbindText.visible = forcedBind.contains(internal);
+
+		// 'Press any key to bind, or press [BACKSPACE] to cancel.';
+		popupText.text = Paths.getString("control_rebind").replace("{cancelKey}", '[${InputFormatter.getKeyName(cancelKey)}]'); 
+		
+		// '\nPress [${InputFormatter.getKeyName(currentBinded)}] to unbind.';
+		if (currentBinded != NONE)
+			popupText.text += "\n" + Paths.getString("control_unbind").replace("{unbindKey}", '[${InputFormatter.getKeyName(currentBinded)}]');
+		
+		// "CURRENTLY BINDING " + actionToBindTo.toUpperCase();
+		popupTitle.text = Paths.getString("control_binding")
+			.replace("{controlNameUpper}", actionToBindTo.toUpperCase())
+			.replace("{controlName}", actionToBindTo); 
+	}
+
+	function resetAllBinds(){
+		// i hate haxeflixel lmao
+		for (key => val in ClientPrefs.defaultKeys.copy()){
+			ClientPrefs.keyBinds.set(key, []);
+			for(i => v in val){
+				if (changedBind!=null)
+					changedBind(key, i, v);
+				ClientPrefs.keyBinds.get(key)[i] = v;
+			}
+		}
+		
+		for(index => fuck in bindButtons){
+			var internal = internals[index];
+			for(id => butt in fuck){
+				butt.bind = ClientPrefs.keyBinds.get(internal)[id];
+			}
+		}
+		FlxG.sound.play(Paths.sound('confirmMenu'));
+		ClientPrefs.saveBinds();
+		ClientPrefs.reloadControls();
 	}
 }
 
