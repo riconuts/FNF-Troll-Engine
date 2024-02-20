@@ -78,7 +78,7 @@ class Character extends FlxSprite
 	/**Unused. Might eventually be used to create an "idleSequence" which lets you create your own custom sequence of animations to be played during idling, instead of only idle or danceLeft and danceRight.**/
 	public var idleSequence:Array<String> = ['idle'];
 	/**How each animation offsets the character**/
-    public var animOffsets:Map<String, Array<Dynamic>>;
+    public var animOffsets = new Map<String, Array<Dynamic>>();
 	/**How each animation offsets the camera**/
     public var camOffsets:Map<String, Array<Float>> = [];
 	/**Used by the character editor. Disables most functions of the character besides animations**/
@@ -227,20 +227,14 @@ class Character extends FlxSprite
 	{
 		super(x, y);
 
+		curCharacter = character;
+		this.isPlayer = isPlayer;
 		this.debugMode = debugMode == true;
 
 		xFacing = isPlayer ? -1 : 1;
 		idleWhenHold = !isPlayer;
 		controlled = isPlayer;
 
-		#if (haxe >= "4.0.0")
-		animOffsets = new Map();
-		#else
-		animOffsets = new Map<String, Array<Dynamic>>();
-		#end
-		curCharacter = character;
-		this.isPlayer = isPlayer;
-		
 		switch (curCharacter)
 		{
 			//case 'your character name in case you want to hardcode them instead':
@@ -267,36 +261,23 @@ class Character extends FlxSprite
 				var spriteType = "sparrow";
 
 				var path = 'images/$imageFile.txt';
-				if (#if MODS_ALLOWED 
-					Paths.exists(Paths.modFolders(path)) || #end 
-					Paths.exists(Paths.getPath(path, TEXT))
-				)
+				if (#if MODS_ALLOWED Paths.exists(Paths.modFolders(path)) || #end Paths.exists(Paths.getPath(path, TEXT)))
 					spriteType = "packer";
 				
 				var path = 'images/$imageFile/Animation.json';
-				if (#if MODS_ALLOWED 
-					Paths.exists(Paths.modFolders(path)) || #end 
-					Paths.exists(Paths.getPath(path, TEXT))
-				)
+				if (#if MODS_ALLOWED Paths.exists(Paths.modFolders(path)) || #end Paths.exists(Paths.getPath(path, TEXT)))
 					spriteType = "texture";
-				
 				
 				switch (spriteType)
 				{
 					case "texture": frames = AtlasFrameMaker.construct(imageFile);
-
 					case "packer":	frames = Paths.getPackerAtlas(imageFile);
-
 					case "sparrow":	frames = Paths.getSparrowAtlas(imageFile);
 				}
 
 				////
-				jsonScale = json.scale;
-				if (jsonScale != 1)
-					setGraphicSize(Math.ceil(width * jsonScale));
-				else
-					scale.set(1, 1);
-				
+				jsonScale = Math.isNaN(json.scale) ? 1 : json.scale;
+				scale.set(jsonScale, jsonScale);
 				updateHitbox();
 
 				////
@@ -326,20 +307,22 @@ class Character extends FlxSprite
 						var animIndices:Array<Int> = anim.indices;
 						var camOffset:Null<Array<Float>> = anim.cameraOffset;
 						
-						camOffsets[anim.anim] = (camOffset!=null) ? [camOffset[0], camOffset[1]] : {
-							if (!animAnim.startsWith('sing'))
-								[0.0,	0.0];  
-							else if (animAnim.startsWith('singLEFT'))
-								[-30.0,	0.0];
-							else if (animAnim.startsWith('singDOWN'))
-								[0.0,	30.0];
-							else if (animAnim.startsWith('singUP'))
-								[0.0,	-30.0];
-							else if (animAnim.startsWith('singRIGHT'))
-								[30.0,	0.0];
-							else
-								[0.0,	0.0];	
-						};
+						if (!debugMode){
+							camOffsets[anim.anim] = (camOffset != null) ? [camOffset[0], camOffset[1]] : {
+								if (!animAnim.startsWith('sing'))
+									[0.0,	0.0];  
+								else if (animAnim.startsWith('singLEFT'))
+									[-30.0,	0.0];
+								else if (animAnim.startsWith('singDOWN'))
+									[0.0,	30.0];
+								else if (animAnim.startsWith('singUP'))
+									[0.0,	-30.0];
+								else if (animAnim.startsWith('singRIGHT'))
+									[30.0,	0.0];
+								else
+									[0.0,	0.0];	
+							};
+						}
 
 						////
 						if (animIndices != null && animIndices.length > 0)
@@ -382,7 +365,9 @@ class Character extends FlxSprite
 
 	override function update(elapsed:Float)
 	{
-        if(callOnScripts("onCharacterUpdate", [elapsed]) == Globals.Function_Stop)return;
+        if (callOnScripts("onCharacterUpdate", [elapsed]) == Globals.Function_Stop)
+			return;
+		
 		if(!debugMode && animation.curAnim != null)
 		{
 			if(animTimer > 0){
@@ -444,9 +429,8 @@ class Character extends FlxSprite
 				playAnim(animation.curAnim.name + '-loop');
 			}
 		}
-		super.update(elapsed);
 
-        
+		super.update(elapsed);
 
 		if(!debugMode){
 			if(animation.curAnim!=null){
@@ -480,26 +464,21 @@ class Character extends FlxSprite
 	 */
 	public function dance()
 	{
-		if (!debugMode && !skipDance && !specialAnim && animTimer <= 0 && !voicelining)
-		{
-			if (callOnScripts("onDance") == Globals.Function_Stop)
-                return;
-			if(danceIdle)
-			{
-				danced = !danced;
+		if (debugMode || skipDance || specialAnim || animTimer > 0 || voicelining)
+			return;
+		
+		if (callOnScripts("onDance") == Globals.Function_Stop)
+			return;
 
-				if (danced)
-					playAnim('danceRight' + idleSuffix);
-				else
-					playAnim('danceLeft' + idleSuffix);
-
-				callOnScripts("onDancePost");
-			}
-			else if(animation.getByName('idle' + idleSuffix) != null) {
-				playAnim('idle' + idleSuffix);
-				callOnScripts("onDancePost");
-			}
+		if(danceIdle){
+			danced = !danced;
+			playAnim(danced ? 'danceRight' : 'danceLeft' + idleSuffix);
 		}
+		else if(animation.getByName('idle' + idleSuffix) != null) {
+			playAnim('idle' + idleSuffix);
+		}
+
+		callOnScripts("onDancePost");
 	}
 
     override function draw(){
@@ -563,11 +542,9 @@ class Character extends FlxSprite
 		if (daOffset != null)
 			offset.set(daOffset[0], daOffset[1]);
 		else
-			offset.set(0, 0);
+			offset.set();
 
 		////
-		camOffX = 0;
-		camOffY = 0;
 
 		var daOffset:Array<Float> = camOffsets.get(AnimName);
 		if (daOffset == null || daOffset.length < 2)
@@ -576,6 +553,9 @@ class Character extends FlxSprite
 		if (daOffset != null && daOffset.length >= 2){
 			camOffX = daOffset[0];
 			camOffY = daOffset[1];
+		}else{
+			camOffX = 0;
+			camOffY = 0;
 		}
 
 		////
@@ -608,7 +588,7 @@ class Character extends FlxSprite
 		else if(lastDanceIdle != danceIdle)
 		{
 			var calc:Float = danceEveryNumBeats;
-			if(danceIdle)
+			if(danceIdle) 
 				calc /= 2;
 			else
 				calc *= 2;
@@ -650,7 +630,9 @@ class Character extends FlxSprite
 	public function startScripts()
 	{
 		setDefaultVar("this", this);
-		for (filePath in Paths.getFolders("characters")){
+
+		for (filePath in Paths.getFolders("characters"))
+		{
 			var file = filePath + '$scriptName.hscript';
 			if (Paths.exists(file)){
 				characterScript = FunkinHScript.fromFile(file, file, defaultVars);
@@ -718,7 +700,7 @@ class Character extends FlxSprite
 		var directories:Array<String> = Paths.getFolders('characters');
 		for (i in 0...directories.length) {
 			var directory:String = directories[i];
-			if(FileSystem.exists(directory)) {
+			if (FileSystem.exists(directory)) {
 				for (file in FileSystem.readDirectory(directory)) {
 					var path = haxe.io.Path.join([directory, file]);
 					if (!FileSystem.isDirectory(path) && file.endsWith('.json')) {
