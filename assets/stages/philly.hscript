@@ -2,6 +2,17 @@ var phillyCityLights = [];
 var phillyTrain:FlxSprite;
 var trainSound:FlxSound;
 
+function cloneSpr(spr)
+{
+	var clone = spr.clone();
+	clone.setPosition(spr.x, spr.y);
+	clone.scale = spr.scale;
+	clone.origin = spr.origin;
+	clone.offset = spr.offset;
+	clone.scrollFactor = spr.scrollFactor;
+	return clone;
+}
+
 function onLoad()
 {
 	var bg:FlxSprite = new FlxSprite(-100, 0, Paths.image('stages/philly/sky'));
@@ -9,12 +20,22 @@ function onLoad()
 	bg.scrollFactor.set(0.1, 0.1);
 	add(bg);
 
-	var city:FlxSprite = new FlxSprite(-10, 0, Paths.image('stages/philly/city'));
+	////
+	var city:FlxSprite = new FlxSprite(-10 + 32 * 0.85, 0 + 52 * 0.85, Paths.image('stages/philly/city'));
 	city.scrollFactor.set(0.3, 0.3);
 	city.scale.set(0.85, 0.85);
 	city.updateHitbox();
 	add(city);
-
+	
+	var cityL = cloneSpr(city);
+	cityL.x -= city.width;
+	add(cityL);
+	
+	var cityR = cloneSpr(city);
+	cityR.x += city.width;
+	add(cityR);
+	
+	/////
 	lightFadeShader = Paths.getShader("buildingShader");
 	lightFadeShader.data.alphaShit.value = [0];
 
@@ -22,7 +43,7 @@ function onLoad()
 	var lightGraphic = Paths.image('stages/philly/window');
 	for (i in 0...5)
 	{
-		var light:FlxSprite = new FlxSprite(city.x, 0, lightGraphic);
+		var light:FlxSprite = new FlxSprite(-10, 0, lightGraphic);
 		light.color = phillyLightsColors[i];
 		light.scrollFactor.set(0.3, 0.3);
 		light.visible = false;
@@ -35,18 +56,29 @@ function onLoad()
 
 	phillyCityLights[0].visible = true;
 
+	////
 	var streetBehind:FlxSprite = new FlxSprite(-40, 50, Paths.image('stages/philly/behindTrain'));
 	streetBehind.offset.set(-218, -97);
 	add(streetBehind);
 
+	////
 	phillyTrain = new FlxSprite(2000, 360, Paths.image('stages/philly/train'));
 	add(phillyTrain);
 
 	trainSound = new FlxSound().loadEmbedded(Paths.sound('train_passes'));
 	FlxG.sound.list.add(trainSound);
 
+	/////
 	var street:FlxSprite = new FlxSprite(-40, streetBehind.y, Paths.image('stages/philly/street'));
 	add(street);
+	
+	var streetL = cloneSpr(street);
+	streetL.x -= street.width;
+	add(streetL);
+	
+	var streetR = cloneSpr(street);
+	streetR.x += street.width;
+	add(streetR);
 	
 }
 
