@@ -1,0 +1,67 @@
+// fuck you edu
+
+stageMap = new StringMap();
+
+function onLoad()
+{
+	stageMap.set(game.stage.curStage, game.stage);
+}
+
+function onTrigger(value1, value2)
+{
+	var stage = stageMap.get(value1);
+	if (stage==null) {
+		trace("Error: Could not get stage "+value1);
+		return;
+	}
+	
+	//////
+	var stageIdx = game.members.indexOf(game.stage);
+	var foregroundIdx = game.members.indexOf(game.stage.foreground);
+	
+	game.remove(game.stage);
+	game.remove(game.stage.foreground);
+	
+	if (value2 == "true")
+	{
+		game.stage.destroy();
+		game.stage.foreground.destroy();
+		stageMap.remove(game.stage.curStage);
+	}
+	//////
+	
+	var previousZoom = game.camGame.zoom;
+	game.setStageData(stage.stageData);
+	game.camZooming = true;
+	game.camGame.zoom = previousZoom;
+	
+	game.insert(stageIdx, stage);
+	game.insert(foregroundIdx, stage.foreground);
+	game.stage = stage;
+	game.foreground = stage.foreground;
+	
+	PlayState.curStage = stage.curStage;
+}
+
+function onPush(event)
+{
+	var stage = new Stage(event.value1);
+	stage.buildStage();
+	
+	if (stage.stageScript != null){
+		game.hscriptArray.push(stage.stageScript);
+		game.funkyScripts.push(stage.stageScript);
+	}
+	
+	stageMap.set(stage.curStage, stage);
+}
+
+function onDestroy()
+{
+	for (stage in stageMap){
+		stage.foreground.destroy();
+		stage.destroy();
+	}
+	
+	stageMap.clear();
+}

@@ -1,0 +1,7 @@
+Changes the current stage.
+
+NOTE: Most stages aren't built to be changed
+so unexpected behaviour may occur.
+
+Value 1: Stage Name
+Value 2: Destroy Previous Stage (Default: false)
