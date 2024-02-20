@@ -1,44 +1,44 @@
 {
 	"animations": [
 		{
-			"offsets": [
-				-30,
-				-12
-			],
 			"loop": false,
-			"anim": "deathConfirm",
-			"fps": 24,
-			"name": "RETRY CONFIRM",
-			"indices": []
-		},
-		{
 			"offsets": [
 				-30,
 				-12
 			],
-			"loop": true,
-			"anim": "deathLoop",
 			"fps": 24,
-			"name": "Retry Loop",
-			"indices": []
+			"anim": "deathConfirm",
+			"indices": [],
+			"name": "RETRY CONFIRM"
 		},
 		{
+			"loop": true,
+			"offsets": [
+				-30,
+				-12
+			],
+			"fps": 24,
+			"anim": "deathLoop",
+			"indices": [],
+			"name": "Retry Loop"
+		},
+		{
+			"loop": false,
 			"offsets": [
 				0,
 				0
 			],
-			"loop": false,
-			"anim": "firstDeath",
 			"fps": 24,
-			"name": "BF Dies pixel",
-			"indices": []
+			"anim": "firstDeath",
+			"indices": [],
+			"name": "BF Dies pixel"
 		}
 	],
 	"no_antialiasing": true,
 	"image": "characters/bfPixelsDEAD",
 	"position": [
-		-12,
-		376
+		-6,
+		374
 	],
 	"healthicon": "bf-pixel",
 	"flip_x": true,

@@ -1,12 +1,5 @@
 var halloweenBG;
 
-function onAddSpriteGroups(){
-	var KadeHUD = getClass("hud.KadeHUD");
-	trace(KadeHUD);
-	game.hud = new KadeHUD(game.boyfriend.healthIcon, game.dad.healthIcon, PlayState.SONG.song, game.stats);
-}
-
-
 function onLoad()
 {
 	if (ClientPrefs.lowQuality){

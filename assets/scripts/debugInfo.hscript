@@ -3,7 +3,7 @@ onBeatHit = null;
 onStepHit = null;
 
 function onCreatePost()
-{
+{	
      /*
 	var count = 0;
 	var gf = 0;
