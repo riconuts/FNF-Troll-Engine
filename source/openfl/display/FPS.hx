@@ -31,6 +31,7 @@ class FPS extends TextField
 		The current frame rate, expressed using frames-per-second
 	**/
 	public var currentFPS(default, null):Float;
+	public var currentState(default, null):String;
 
 	@:noCompletion private var cacheCount:Int;
 	@:noCompletion private var currentTime:Float;
@@ -79,6 +80,16 @@ class FPS extends TextField
 			__enterFrame(time - currentTime);
 		});
 		#end
+
+		/*
+		#if debug
+		@:privateAccess
+		FlxG.signals.preStateSwitch.add(()->{
+			var nextState = FlxG.game._requestedState;
+			currentState = Type.getClassName(Type.getClass(nextState));
+		});
+		#end
+		*/
 	}
 
 	// Event Handlers
@@ -98,27 +109,25 @@ class FPS extends TextField
 		if (currentFPS > ClientPrefs.framerate)
 			currentFPS = ClientPrefs.framerate;
 
-		if (currentCount != cacheCount /*&& visible*/)
+		if (currentCount != cacheCount)
 		{
 			text = "FPS: " + currentFPS;
 			
-			var memoryMegas:Float = 0;
-			
 			#if (openfl && !final)
-			memoryMegas = Math.abs(FlxMath.roundDecimal(System.totalMemory / 1000000, 1));
+			var memoryMegas:Float = Math.abs(FlxMath.roundDecimal(System.totalMemory / 1000000, 1));
 			text += "\nMemory: " + memoryMegas + " MB";
 			#end
 
 			/*
 			#if debug
-			text += "\nState: " + Type.getClassName(Type.getClass(FlxG.state));
-			text += "\nSubstate: " + Type.getClassName(Type.getClass(FlxG.state.subState));
+			text += '\nState: $currentState';
 			#end
 			*/
 
-			textColor = 0xFFFFFFFF;
-			if (currentFPS <= ClientPrefs.framerate * 0.5 || memoryMegas > 3000)
+			if (currentFPS <= ClientPrefs.framerate * 0.5)
 				textColor = 0xFFFF0000;
+			else
+				textColor = 0xFFFFFFFF;
 
 			#if (gl_stats && !disable_cffi && (!html5 || !canvas))
 			text += "\ntotalDC: " + Context3DStats.totalDrawCalls();
