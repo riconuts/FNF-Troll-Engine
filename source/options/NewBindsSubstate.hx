@@ -181,8 +181,8 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 			if(data.length > 1)
 			{
 				// its a bind
-				var internal = data[1];
 				var buttArray:Array<BindButton> = [];
+				var internal:String = data[1];
 				internals.push(data[1]);
 				
 				var text = new FlxText(16, daY, 0, label, 16);
@@ -260,7 +260,9 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 		add(group);
 
 		////
-		selectionArrow = new FlxSprite();
+		selectionArrow = new FlxSprite(Paths.image('optionsMenu/arrow'));
+		selectionArrow.setGraphicSize(16, 16);
+		selectionArrow.updateHitbox();
 		selectionArrow.visible = false;
 		selectionArrow.cameras = [scrollableCam];
 		add(selectionArrow);
@@ -314,6 +316,7 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 
 			if (updateKeyboard)
 			{
+				FlxG.sound.play(Paths.sound("scrollMenu"));
 				FlxG.mouse.visible = false;
 
 				var prevSel = keyboardNavigation[prevY];
@@ -323,8 +326,9 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 
 				keyboardY = FlxMath.wrap(keyboardY, 0, keyboardNavigation.length-1);
 				var curSel = keyboardNavigation[keyboardY];
-
 				curSel.text.color = 0xFFFFFF00;
+
+				selectionArrow.visible = true;
 
 				if (curSel.bindButtons != null){
 					keyboardX = FlxMath.wrap(keyboardX, 0, curSel.bindButtons.length-1);
@@ -332,15 +336,15 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 					////
 					var curButt = curSel.bindButtons[keyboardX];
 
-					selectionArrow.visible = true;
-					selectionArrow.flipX = false; // face right idk
+					selectionArrow.alpha = 1;
+					selectionArrow.angle = -90; // face right idk
 					selectionArrow.setPosition(
 						curButt.x - selectionArrow.width - 2,
 						curButt.y + (curButt.height - selectionArrow.height) / 2
 					);
 				}else{
-					selectionArrow.visible = true;
-					selectionArrow.flipX = true; // face left idk
+					selectionArrow.alpha = 0;
+					selectionArrow.angle = 90; // face left idk
 					selectionArrow.setPosition(
 						curSel.text.x + curSel.text.width + 2,
 						curSel.text.y + (curSel.text.height - selectionArrow.height) / 2
@@ -349,7 +353,19 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 
 				camFollow.y = curSel.bg.y + curSel.bg.height / 2 - scrollableCam.height / 2;
 
-				trace(keyboardY, keyboardX);
+				//trace(keyboardY, keyboardX);
+			}
+
+			if (FlxG.keys.justPressed.R){
+				var actionName:Null<String> = internals[keyboardY];
+				if (actionName != null){
+					var defaultBindKeys:Null<Array<FlxKey>> = ClientPrefs.defaultKeys.get(actionName);
+					if (defaultBindKeys != null){
+						var defaultKey:FlxKey = defaultBindKeys[keyboardX];
+						var binded = bind(keyboardY, keyboardX, defaultKey);
+						FlxG.sound.play(Paths.sound(binded[keyboardX] == defaultKey ? 'confirmMenu' : 'cancelMenu'));
+					}
+				}
 			}
 
 			var curSel = keyboardNavigation[keyboardY];
@@ -399,7 +415,9 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 			camFollowPos.y = FlxMath.bound(camFollowPos.y, 0, height);
 
 			overCam.alpha = FlxMath.lerp(overCam.alpha, 0, es * 0.2);
-		}else{
+		}
+		else
+		{
 			overCam.alpha = FlxMath.lerp(overCam.alpha, 1, es * 0.2);
 
 			var keyPressed:FlxKey = FlxG.keys.firstJustPressed();
@@ -411,37 +429,8 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 			else if (keyPressed != NONE)
 			{
 				FlxG.sound.play(Paths.sound('confirmMenu'));
-				var opp = bindID == 0 ? 1 : 0 ;
-				var internal = internals[bindIndex];
-
-				trace('bound $internal ($bindID) to ' + InputFormatter.getKeyName(keyPressed));
 				
-				var binds = ClientPrefs.keyBinds.get(internal);
-				if (binds[bindID] == keyPressed)
-					keyPressed = NONE;
-				else if(binds[opp] == keyPressed){
-					if (changedBind != null)
-						changedBind(internal, opp, NONE);
-					binds[opp] = NONE;
-					bindButtons[bindIndex][opp].bind = NONE;
-				}
-
-				if(forcedBind.contains(internal)){
-					if(keyPressed == NONE && binds[opp] == NONE){
-						var defaults = ClientPrefs.defaultKeys.get(internal);
-						// atleast ONE needs to be bound, so use a default
-						if (defaults[bindID] == NONE)
-							keyPressed = defaults[opp];
-						else
-							keyPressed = defaults[bindID]; 
-					}
-				}
-				if (changedBind != null)
-					changedBind(internal, bindID, keyPressed);
-				binds[bindID] = keyPressed;
-
-				bindButtons[bindIndex][bindID].bind = keyPressed;
-				ClientPrefs.keyBinds.set(internal, binds);
+				bind(bindIndex, bindID, keyPressed);
 				ClientPrefs.saveBinds();
 				ClientPrefs.reloadControls();
 
@@ -451,6 +440,44 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 		}
 
 		super.update(elapsed);
+	}
+
+	function bind(bindIndex:Int, bindID:Int, key:FlxKey){
+		var opp = bindID == 0 ? 1 : 0;
+		var internal = internals[bindIndex];
+
+		trace('bound $internal ($bindID) to ' + InputFormatter.getKeyName(key));
+
+		var binds = ClientPrefs.keyBinds.get(internal);
+		if (binds[bindID] == key)
+			key = NONE;
+		else if (binds[opp] == key)
+		{
+			if (changedBind != null)
+				changedBind(internal, opp, NONE);
+			binds[opp] = NONE;
+			bindButtons[bindIndex][opp].bind = NONE;
+		}
+
+		if (forcedBind.contains(internal))
+		{
+			if (key == NONE && binds[opp] == NONE)
+			{
+				var defaults = ClientPrefs.defaultKeys.get(internal);
+				// atleast ONE needs to be bound, so use a default
+				if (defaults[bindID] == NONE)
+					key = defaults[opp];
+				else
+					key = defaults[bindID];
+			}
+		}
+		if (changedBind != null)
+			changedBind(internal, bindID, key);
+		binds[bindID] = key;
+
+		bindButtons[bindIndex][bindID].bind = key;
+		ClientPrefs.keyBinds.set(internal, binds);
+		return binds;
 	}
 
 	function startRebind(index:Int, id:Int, butt:BindButton){

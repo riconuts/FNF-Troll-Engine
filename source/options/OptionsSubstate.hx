@@ -552,7 +552,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			button.alpha = 0.75;
 
 			var text = new FlxText(button.x, button.y, 0, Paths.getString('opt_tabName_$tabName').toUpperCase(), 16);
-			text.setFormat(Paths.font("calibrib.ttf"), 32, 0xFFFFFFFF, FlxTextAlign.CENTER);
+			text.setFormat(Paths.font(#if tgt "calibrib.ttf" #else "vcr.ttf" #end), 32, 0xFFFFFFFF, FlxTextAlign.CENTER);
 			
 			button.scale.set(Math.max(86, text.fieldWidth) + 8, 44);
 			button.updateHitbox();
@@ -577,7 +577,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			{
 				var label = data[0];
 				var text = new FlxText(8, daY, 0, Paths.getString('opt_label_$label'), 16);
-				text.setFormat(Paths.font("calibrib.ttf"), 32, 0xFFFFFFFF, FlxTextAlign.LEFT);
+				text.setFormat(Paths.font(#if tgt "calibrib.ttf" #else "vcr.ttf" #end), 32, 0xFFFFFFFF, FlxTextAlign.LEFT);
 				text.cameras = [optionCamera];
 				group.add(text);
 				daY += text.height;
@@ -597,9 +597,8 @@ class OptionsSubstate extends MusicBeatSubstate
 					var text = new FlxText(16, daY, 0, data.display, 16);
 					text.setFormat(Paths.font("calibri.ttf"), 28, 0xFFFFFFFF, FlxTextAlign.LEFT);
 					text.cameras = [optionCamera];
-					var height = text.height + 12;
-					if (height < 45) height = 45;
-					
+
+					var height = Math.max(45, text.height + 12);
 					var rect = new Rectangle(text.x - 12, text.y, optionMenu.width - text.x - 8, height);
 					
 					var drop:FlxUI9SliceSprite = new FlxUI9SliceSprite(rect.x, rect.y, Paths.image("optionsMenu/backdrop"), rect, [22, 22, 89, 89]);

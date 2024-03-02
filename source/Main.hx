@@ -38,7 +38,7 @@ class Main extends Sprite
 	public static var showDebugTraces:Bool = #if (SHOW_DEBUG_TRACES || debug) true #else false #end;
 
 	public static var engineVersion:String = '0.2.0'; // Used for autoupdating n stuff
-	public static var betaVersion(get, default):String = 'beta.6'; // beta version, make blank if not on a beta version, otherwise do it based on semantic versioning (alpha.1, beta.1, rc.1, etc)
+	public static var betaVersion(get, default):String = 'rc.1'; // beta version, make blank if not on a beta version, otherwise do it based on semantic versioning (alpha.1, beta.1, rc.1, etc)
 	public static var beta:Bool = betaVersion.trim() != '';
 
 	public static var UserAgent:String = 'TrollEngine/${Main.engineVersion}'; // used for http requests. if you end up forking the engine and making your own then make sure to change this!!
@@ -207,7 +207,7 @@ class Main extends Sprite
 		Sys.println(" \n" + errMsg);
 		File.saveContent("crash.txt", errMsg);
 		
-		Application.current.window.alert(errMsg, "Error!");
+		Application.current.window.alert(errMsg, errorName);
 
 		DiscordClient.shutdown();
 		Sys.exit(1);
