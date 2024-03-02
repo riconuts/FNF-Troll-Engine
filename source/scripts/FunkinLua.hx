@@ -102,6 +102,8 @@ class FunkinLua extends FunkinScript
 
 		set("curSection", 0);
 
+		set("playbackRate", 1.0); // so psych scripts give one error less 
+
 		for (i in 0...5) {
 			// annoying since some scripts use defaultPlayerStrumX/Y 4
 			// (LOOKING AT YOU CHARA.)

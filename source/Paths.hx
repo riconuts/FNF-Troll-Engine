@@ -1,10 +1,5 @@
 package;
 
-#if tgt
-typedef FreeplayCategoryMetadata = FreeplayState.FreeplayCategoryMetadata;
-typedef FreeplaySongMetadata = FreeplayState.FreeplaySongMetadata;  
-#end
-
 import flixel.FlxG;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxAtlasFrames;
@@ -21,6 +16,13 @@ using StringTools;
 import sys.FileSystem;
 import sys.io.File;
 #end
+
+/*
+#if tgt
+typedef FreeplayCategoryMetadata = FreeplayState.FreeplayCategoryMetadata;
+typedef FreeplaySongMetadata = FreeplayState.FreeplaySongMetadata;
+#end
+*/
 
 class Paths
 {

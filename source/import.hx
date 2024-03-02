@@ -5,7 +5,7 @@ import flixel.sound.FlxSound;
 #if tgt
 import tgt.MainMenuState;
 import tgt.FreeplayState;
-import tgt.StoryMenuSelect;
+import tgt.StoryMenuState;
 import tgt.*;
 #else
 import SongSelectState as MainMenuState;

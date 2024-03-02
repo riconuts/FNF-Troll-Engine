@@ -302,7 +302,7 @@ class PlayState extends MusicBeatState
 	public var instakillOnMiss:Bool = false;
 	public var cpuControlled(default, set) = false;
 
-	public var playbackRate:Float = 1;
+	public var playbackRate:Float = 1.0;
 
 	public var songSpeedTween:FlxTween;
 	public var songSpeed(default, set):Float = 1;
@@ -575,7 +575,10 @@ class PlayState extends MusicBeatState
 		if (SONG == null)
 			SONG = Song.loadFromJson('tutorial', 'tutorial');
 
-        hudSkin = SONG.hudSkin;
+		//if (SONG.hudSkin != null)
+        	hudSkin = SONG.hudSkin;
+		/*else
+			hudSkin = 'default';*/
 
 		Conductor.mapBPMChanges(SONG);
 		Conductor.changeBPM(SONG.bpm);

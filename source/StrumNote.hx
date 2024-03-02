@@ -88,10 +88,12 @@ class StrumNote extends NoteObject
 		}
 		// trace(noteData);
 
-		if (genScript == null || !genScript.exists("setupReceptorTexture")){
-			var skin:String = 'NOTE_assets';
-			if (PlayState.SONG.arrowSkin != null && PlayState.SONG.arrowSkin.length > 1)
-				skin = PlayState.SONG.arrowSkin;
+		if (genScript != null && genScript.exists("setupReceptorTexture"))
+			genScript.executeFunc("setupReceptorTexture", [this]);
+		else{
+			var skin:String = PlayState.arrowSkin;
+			if (skin == null || skin.length < 1)
+				skin = 'NOTE_assets';
 
 			var newTex = (genScript != null && genScript.exists("texture")) ? genScript.get("texture") : skin;
 			if (genScript != null)
@@ -106,8 +108,7 @@ class StrumNote extends NoteObject
 			texture = newTex; // Load texture and anims
             
         }
-		else if (genScript.exists("setupReceptorTexture"))
-			genScript.executeFunc("setupReceptorTexture", [this]);
+		
 
         return noteMod = value;
     }

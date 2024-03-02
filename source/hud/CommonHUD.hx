@@ -56,11 +56,11 @@ class CommonHUD extends BaseHUD
 		timeTxt.scrollFactor.set();
 		timeTxt.borderSize = 2;
 
-		var bgGraphic = Paths.image('timeBar');
-		if (bgGraphic == null)
-			bgGraphic = CoolUtil.makeOutlinedGraphic(400, 20, 0xFFFFFFFF, 5, 0xFF000000);
+		var timeBarGraphic = Paths.image('timeBar');
+		if (timeBarGraphic == null)
+			timeBarGraphic = CoolUtil.makeOutlinedGraphic(400, 20, 0xFFFFFFFF, 5, 0xFF000000);
 
-		timeBarBG = new FlxSprite(timeTxt.x, 0, bgGraphic);
+		timeBarBG = new FlxSprite((FlxG.width - timeBarGraphic.width) / 2, 0, timeBarGraphic);
 		timeBarBG.color = FlxColor.BLACK;
 		timeBarBG.scrollFactor.set();
 
