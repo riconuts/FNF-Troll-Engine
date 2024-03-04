@@ -493,7 +493,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			FlxG.cameras.add(optionCamera, false);
 			FlxG.cameras.add(overlayCamera, false);
 			FlxG.cameras.add(transCamera, false);
-			FlxG.cameras.setDefaultDrawTarget(mainCamera, true);
+			//FlxG.cameras.setDefaultDrawTarget(mainCamera, true);
 			camerasToRemove.push(mainCamera);
 
 		}else{
@@ -516,18 +516,17 @@ class OptionsSubstate extends MusicBeatSubstate
 		camerasToRemove.push(transCamera);
 
 		cameras = [mainCamera];
-		FlxG.mouse.visible = true;
 
 
 		////
-		var optionMenu = new FlxSprite(84, 80, CoolUtil.makeOutlinedGraphic(
+		var optionMenu = new FlxSprite(80, 80, CoolUtil.makeOutlinedGraphic(
 			FlxMath.minInt(920, FlxG.width), 
 			FlxG.height-140, 
 			FlxColor.fromRGB(82, 82, 82), 
 			2, 
 			FlxColor.fromRGB(70, 70, 70)
 		));
-		if (optionMenu.width == FlxG.width) optionMenu.x = 0;
+		if (FlxG.width - 160 < optionMenu.width + 160) optionMenu.x = Math.floor((FlxG.width - optionMenu.width)/2);
 		optionMenu.alpha = 0.8;
 		add(optionMenu);
 
@@ -573,6 +572,9 @@ class OptionsSubstate extends MusicBeatSubstate
 			var widgets:Map<FlxObject, Widget> = [];
 			cameraPositions.push(FlxPoint.get());
 
+			var backdropGraphic = Paths.image("optionsMenu/backdrop");
+			var backdropSlice = [22, 22, 89, 89];
+
 			for (data in options.get(tabName))
 			{
 				var label = data[0];
@@ -601,10 +603,10 @@ class OptionsSubstate extends MusicBeatSubstate
 					var height = Math.max(45, text.height + 12);
 					var rect = new Rectangle(text.x - 12, text.y, optionMenu.width - text.x - 8, height);
 					
-					var drop:FlxUI9SliceSprite = new FlxUI9SliceSprite(rect.x, rect.y, Paths.image("optionsMenu/backdrop"), rect, [22, 22, 89, 89]);
+					var drop:FlxUI9SliceSprite = new FlxUI9SliceSprite(rect.x, rect.y, backdropGraphic, rect, backdropSlice);
 					drop.cameras = [optionCamera];
 					
-					var lock:FlxUI9SliceSprite = new FlxUI9SliceSprite(rect.x, rect.y, Paths.image("optionsMenu/backdrop"), rect, [22, 22, 89, 89]);
+					var lock:FlxUI9SliceSprite = new FlxUI9SliceSprite(rect.x, rect.y, backdropGraphic, rect, backdropSlice);
 					lock.cameras = [optionCamera];
 					lock.alpha = 0.75;
 					text.y += (height - text.height) / 2;
@@ -657,10 +659,13 @@ class OptionsSubstate extends MusicBeatSubstate
 		optionDesc.setFormat(Paths.font("vcr.ttf"), #if tgt 20 #else 16 #end, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		optionDesc.textField.background = true;
 		optionDesc.textField.backgroundColor = FlxColor.BLACK;
-		optionDesc.screenCenter(XY);
+		optionDesc.screenCenter(X);
 		optionDesc.cameras = [overlayCamera];
 		optionDesc.alpha = 0;
 		add(optionDesc);
+
+		prevScreenX = FlxG.mouse.screenX;
+		prevScreenY = FlxG.mouse.screenY;
 
 		checkWindows();
 
@@ -894,6 +899,8 @@ class OptionsSubstate extends MusicBeatSubstate
 
 	function changeCategory(?val:Int = 0, absolute:Bool = false)
 	{
+		//selected = FlxMath.wrap(absolute ? val : selected+val, 0, buttons.length-1);
+		
 		if (absolute)
 			selected = val;
 		else
@@ -904,6 +911,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		else if (selected < 0)
 			selected = buttons.length - 1;
 
+		////
 		for (idx in 0...buttons.length)
 		{
 			var butt = buttons[idx];
@@ -1335,7 +1343,48 @@ class OptionsSubstate extends MusicBeatSubstate
 		}
 	}
 
+	function showOptionDesc(?text:String){
+		if (text == null || text == ''){
+			FlxTween.cancelTweensOf(optionDesc);
+			FlxTween.tween(optionDesc, {alpha: 0}, 0.16, {ease: FlxEase.quadOut});
+			return;
+		}
+		
+		////
+		optionDesc.text = text;
+
+		////
+		var maxWidth = FlxG.width - 30;
+		if (optionDesc.width > maxWidth)
+			optionDesc.fieldWidth = maxWidth;
+		else
+			optionDesc.fieldWidth = 0;
+		
+		//// Scale down the text if it doesn't fit below the options.
+		
+		optionDesc.drawFrame(true); // to get the realest frameHeight
+
+		var optionsTail = Std.int(optionCamera.y + optionCamera.height) + 2; // lowest part of options
+		var scaledHeight = FlxG.height - optionsTail; // screen space below options
+		scaledHeight = (optionDesc.frameHeight > scaledHeight) ? scaledHeight - 4 : optionDesc.frameHeight;
+		optionDesc.setGraphicSize(0, scaledHeight);
+		optionDesc.updateHitbox();
+		
+		////
+		var goalY = ((optionCamera.y + optionCamera.height) + (FlxG.height - optionDesc.height)) / 2;
+		optionDesc.screenCenter(X);
+		
+		optionDesc.y = goalY - 12;
+		optionDesc.alpha = 0;
+		FlxTween.cancelTweensOf(optionDesc);
+		FlxTween.tween(optionDesc, {y: goalY, alpha: 1}, 0.35, {ease: FlxEase.quadOut});
+	}
+
 	var curWidget:Widget;
+
+	//// workaround for when you switch from a state that set the camera to a different zoom value (like the tgt main menu)
+	var prevScreenX:Int;
+	var prevScreenY:Int;
 
 	override function update(elapsed:Float)
 	{
@@ -1347,7 +1396,8 @@ class OptionsSubstate extends MusicBeatSubstate
 			if (FlxG.keys.justPressed.TAB){
 				FlxG.sound.play(Paths.sound("scrollMenu"));
 				changeCategory(1);
-
+				
+				doUpdate = true;
 				pHov = null;
 			}
 
@@ -1441,7 +1491,7 @@ class OptionsSubstate extends MusicBeatSubstate
 							doUpdate = true;
 						}
 
-						doUpdate=true; // necessary because it needs to fade in and out :T
+						doUpdate=true; // wont fade in and out otherwise :T
 				}
 			}
 
@@ -1460,55 +1510,54 @@ class OptionsSubstate extends MusicBeatSubstate
 				}
 			}
 
-			var movedMouse = FlxG.mouse.justMoved || FlxG.mouse.wheel != 0;
+			var movedMouse = Math.abs(FlxG.mouse.wheel) + Math.abs(FlxG.mouse.screenX - prevScreenX) + Math.abs(FlxG.mouse.screenY - prevScreenY) != 0;
+			if (movedMouse) FlxG.mouse.visible = true;
+			prevScreenX = FlxG.mouse.screenX;
+			prevScreenY = FlxG.mouse.screenY;
+
 			if (pHov == null || doUpdate || movedMouse || FlxG.mouse.justPressed)
 			{
 				for (object => widget in currentWidgets)
 				{
 					if (movedMouse && widget != pHov && overlaps(widget.data.get("optionBox")))
 					{
-						movedMouse = false;
 						changeWidget(null); // to reset keyboard selection
 						curWidget = widget;
+						// trace(widget.optionData.display);
 					}
 
 					updateWidget(object, widget, elapsed);
 				}
 			}
 
-			if (curWidget != null && pHov != curWidget)
+			if (curWidget == null){
+				showOptionDesc(null);
+			}
+			else if (pHov != curWidget)
 			{
-				var hovering = curWidget.optionData;
-				optionDesc.text = hovering.desc;
+				var hovering:OptionData = curWidget.optionData;
+				var optDesc:String = hovering.desc;
+
 				if (!optState){
 					var oN = hovering.data.get("optionName");
-					/*
-					if(oN == 'customizeHUD' )
-						optionDesc.text += "\n(NOTE: This does not work because you're ingame!)";
+					
+					/*if(oN == 'customizeHUD' )
+						optDesc += "\n(NOTE: This does not work because you're ingame!)";
 					else */if (requiresRestart.contains(oN))
-						optionDesc.text += "\nWARNING: You will need to restart the song if you change this!";
+						optDesc += "\nWARNING: You will need to restart the song if you change this!";
 					else if (recommendsRestart.contains(oN))
-						optionDesc.text += "\nNOTE: This won't have any effect unless you restart the song!";
+						optDesc += "\nNOTE: This won't have any effect unless you restart the song!";
 				}
 				
-				var maxWidth = FlxG.width - 30;
-				if (optionDesc.width > maxWidth)
-					optionDesc.fieldWidth = maxWidth;
-				else
-					optionDesc.fieldWidth = 0;
-				
-				var goalY = ((optionCamera.y + optionCamera.height) + (FlxG.height - optionDesc.height)) / 2;
-				optionDesc.screenCenter(X);
-				optionDesc.y = goalY - 12;
-				optionDesc.alpha = 0;
-				FlxTween.cancelTweensOf(optionDesc);
-				FlxTween.tween(optionDesc, {y: goalY, alpha: 1}, 0.35, {ease: FlxEase.quadOut});
+				showOptionDesc(optDesc);
 			}
+
+			////
+			var es:Float = elapsed / (1 / 60);
 
 			if (openedDropdown == null)
 			{
 				var movement:Float = -FlxG.mouse.wheel * 45;
-				var es:Float = elapsed / (1 / 60);
 
 				if (FlxG.keys.pressed.PAGEUP)
 					movement -= 25 * es;
@@ -1524,11 +1573,14 @@ class OptionsSubstate extends MusicBeatSubstate
 			if (camFollow.y > getHeight())
 				camFollow.y = getHeight();
 
-			var lerpVal = 0.2 * (elapsed / (1 / 60));
-			camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
+			var lerpVal = 0.2 * es;
+			camFollowPos.setPosition(
+				FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), 
+				FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal)
+			);
+			
 			if (camFollowPos.y < 0)
 				camFollowPos.y = 0;
-
 			if (camFollowPos.y > getHeight())
 				camFollowPos.y = getHeight();
 

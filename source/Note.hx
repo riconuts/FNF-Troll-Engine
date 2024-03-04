@@ -677,7 +677,6 @@ class Note extends NoteObject
 		}
 		else
 			animation.add(colArray[noteData] + 'Scroll', [noteData + 4]);
-		
 	}
 
 
