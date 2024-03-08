@@ -683,10 +683,10 @@ class StageSprite extends FlxSprite
 
     public function updateImage(?newName:String)
     {
-        /*
+        
         var possibleGraphic = Paths.image(newName == null ? data.name : newName);
         loadGraphic(possibleGraphic == null ? "flixel/images/logo/default.png" : possibleGraphic);
-        */
+        
     }
 
     public function updateData(?newData:ObjectData)
