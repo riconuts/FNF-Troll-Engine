@@ -2586,8 +2586,6 @@ class PlayState extends MusicBeatState
 		}
 
 		if(!inCutscene) {
-			var lerpVal:Float = CoolUtil.boundTo(elapsed * 2.4 * cameraSpeed, 0, 1);
-
 			var xOff:Float = 0;
 			var yOff:Float = 0;
 
@@ -2600,9 +2598,10 @@ class PlayState extends MusicBeatState
 			if (currentCameraPoint != null)
 				camFollow.copyFrom(currentCameraPoint);
 
+			var lerpVal:Float = Math.exp(-elapsed * 2.4 * cameraSpeed);
 			camFollowPos.setPosition(
-				FlxMath.lerp(camFollowPos.x, camFollow.x + xOff, lerpVal),
-				FlxMath.lerp(camFollowPos.y, camFollow.y + yOff, lerpVal)
+				FlxMath.lerp(camFollow.x + xOff, camFollowPos.x, lerpVal),
+				FlxMath.lerp(camFollow.y + yOff, camFollowPos.y, lerpVal)
 			);
 
 			if (!startingSong
@@ -2643,7 +2642,7 @@ class PlayState extends MusicBeatState
 
 		if (camZooming)
 		{
-			var lerpVal = CoolUtil.boundTo(1 - (elapsed * 3.125 * camZoomingDecay), 0, 1);
+			var lerpVal = Math.exp(-elapsed * 3.125 * camZoomingDecay);
 
 			camGame.zoom = FlxMath.lerp(
 				defaultCamZoom,
@@ -4879,7 +4878,7 @@ class FNFHealthBar extends FlxBar{
 		healthBarBG.setPosition(x - 5, y - 5);
 
 		if (iconScale != 1){
-			iconScale = FlxMath.lerp(1, iconScale, CoolUtil.boundTo(1 - (elapsed * 9), 0, 1));
+			iconScale = FlxMath.lerp(1, iconScale, Math.exp(-elapsed * 9));
 
 			var scaleOff = 75 * iconScale;
 			leftIcon.x = healthBarPos - scaleOff - iconOffset * 2;

@@ -247,8 +247,11 @@ class TitleState extends MusicBeatState
 		if (FlxG.sound.music != null)
 			Conductor.songPosition = FlxG.sound.music.time;
 
-		var lerpVal:Float = CoolUtil.boundTo(elapsed * 2.4, 0, 1);
-		camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
+		var lerpVal:Float = Math.exp(-elapsed * 2.4);
+		camFollowPos.setPosition(
+			FlxMath.lerp(camFollow.x,  camFollowPos.x, lerpVal), 
+			FlxMath.lerp(camFollow.y,  camFollowPos.y, lerpVal)
+		);
 		
 		var pressedEnter:Bool = FlxG.keys.justPressed.ENTER || (controls != null && controls.ACCEPT) || FlxG.mouse.justPressed;
 
@@ -271,16 +274,14 @@ class TitleState extends MusicBeatState
 			#end
 		}
 
-		titleTimer += CoolUtil.boundTo(elapsed, 0, 1);
-		if (titleTimer > 2)
-			titleTimer -= 2;
+		titleTimer = (titleTimer + elapsed) % 2;
 
 		if (initialized && !transitioning && skippedIntro)
 		{
 			if(!pressedEnter){
 				var timer:Float = titleTimer;
 				if (timer >= 1)
-					timer = (-timer) + 2;
+					timer = 2 - timer;
 
 				timer = FlxEase.quadInOut(timer);
 				

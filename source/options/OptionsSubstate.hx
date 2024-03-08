@@ -1062,8 +1062,11 @@ class OptionsSubstate extends MusicBeatSubstate
 						camFollow.y = height;
 				}
 
-				var lerpVal = 0.2 * (elapsed / (1 / 60));
-				camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
+				var lerpVal = Math.exp(-elapsed * 12);
+				camFollowPos.setPosition(
+					FlxMath.lerp(camFollow.x, camFollowPos.x, lerpVal), 
+					FlxMath.lerp(camFollow.y, camFollowPos.y, lerpVal)
+				);
 				if (camFollowPos.y < 0)
 					camFollowPos.y = 0;
 				if (camFollowPos.y > height)
@@ -1311,6 +1314,9 @@ class OptionsSubstate extends MusicBeatSubstate
 				var optBox:FlxObject = widget.data.get("optionBox");
 				var cam = optBox.camera;
 
+				camFollow.y = optBox.y + (optBox.height - cam.height) / 2;
+
+				/*
 				if (optBox.y < cam.scroll.y)
 					camFollow.y = nextOption==0 ? 0 : optBox.y;
 				else{
@@ -1320,6 +1326,7 @@ class OptionsSubstate extends MusicBeatSubstate
 					if (camTail < optTail)
 						camFollow.y += (optTail - camTail);
 				}
+				*/
 			}
 
 			if (curWidget != null)
@@ -1553,36 +1560,29 @@ class OptionsSubstate extends MusicBeatSubstate
 			}
 
 			////
-			var es:Float = elapsed / (1 / 60);
-
 			if (openedDropdown == null)
 			{
 				var movement:Float = -FlxG.mouse.wheel * 45;
+				var keySpeed = elapsed * 1200;
 
 				if (FlxG.keys.pressed.PAGEUP)
-					movement -= 25 * es;
+					movement -= keySpeed;
 				if (FlxG.keys.pressed.PAGEDOWN)
-					movement += 25 * es;
+					movement += keySpeed;
 
 				camFollow.y += movement;
 				camFollowPos.y += movement;
 			}
 
-			if (camFollow.y < 0)
-				camFollow.y = 0;
-			if (camFollow.y > getHeight())
-				camFollow.y = getHeight();
+			var height = getHeight();
+			camFollow.y = FlxMath.bound(camFollow.y, 0, height);
 
-			var lerpVal = 0.2 * es;
+			var lerpVal = Math.exp(-elapsed * 12);
 			camFollowPos.setPosition(
-				FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), 
-				FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal)
+				FlxMath.lerp(camFollow.x, camFollowPos.x, lerpVal), 
+				FlxMath.lerp(camFollow.y, camFollowPos.y, lerpVal)
 			);
-			
-			if (camFollowPos.y < 0)
-				camFollowPos.y = 0;
-			if (camFollowPos.y > getHeight())
-				camFollowPos.y = getHeight();
+			camFollowPos.y = FlxMath.bound(camFollowPos.y, 0, height);
 
 			cameraPositions[selected].copyFrom(camFollow);
 		}

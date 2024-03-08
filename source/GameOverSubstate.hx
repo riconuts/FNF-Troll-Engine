@@ -170,9 +170,14 @@ class GameOverSubstate extends MusicBeatSubstate
 		PlayState.instance.callOnScripts('onUpdate', [elapsed]);
 
 		if(updateCamera && genericBitch == null) {
-			var lerpVal:Float = CoolUtil.boundTo(elapsed * 0.6, 0, 1);
-			camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
-			FlxG.camera.zoom = FlxMath.lerp(FlxG.camera.zoom, defaultCamZoom, CoolUtil.boundTo(elapsed * 2.2, 0, 1));
+			var lerpVal:Float = Math.exp(-elapsed * 0.6);
+			camFollowPos.setPosition(
+				FlxMath.lerp(camFollow.x, camFollowPos.x, lerpVal), 
+				FlxMath.lerp(camFollow.y,  camFollowPos.y, lerpVal)
+			);
+			
+			var lerpVal:Float = Math.exp(-elapsed * 2.2);
+			FlxG.camera.zoom = FlxMath.lerp(defaultCamZoom, FlxG.camera.zoom, lerpVal);
 		}	
 
 		if (controls.ACCEPT && !isEnding)
@@ -188,11 +193,12 @@ class GameOverSubstate extends MusicBeatSubstate
 			}
 			
 			FlxG.sound.music.stop();
-			FlxG.sound.play(Paths.music(endSoundName));
+			
+			var endSound = FlxG.sound.play(Paths.music(endSoundName));
+			var endTime = Math.max(endSound.length/1000, 2.7); // wait for both the sound and the fade out to end.
 
-			new FlxTimer().start(0.7, function(tmr:FlxTimer){
-				FlxG.camera.fade(FlxColor.BLACK, 2, false, MusicBeatState.resetState.bind(true));
-			});
+			new FlxTimer().start(0.7,		(tmr)->{	FlxG.camera.fade(FlxColor.BLACK, 2, false);	});
+			new FlxTimer().start(endTime,	(tmr)->{	MusicBeatState.resetState(true);			});
 
 			PlayState.instance.callOnScripts('onGameOverConfirm', [true]);
 		}

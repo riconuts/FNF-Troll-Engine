@@ -117,15 +117,15 @@ class Hitbar extends FlxSpriteGroup
 
 	override function update(elapsed:Float)
 	{
-		var lerpVal = 0.2 * (elapsed / (1 / 60));
+		var lerpVal = Math.exp(-elapsed * 12);
 		
 		averageIndicator.x = FlxMath.lerp(
-			averageIndicator.x,
 			(mainBar.x + mainBar.width/2) + (hitbarPxPerMs/2 * -currentAverage), 
+			averageIndicator.x,
 			lerpVal
 		);
 
-		metronomeScale = FlxMath.lerp(metronomeScale, hitbarHeight / 4, lerpVal);
+		metronomeScale = FlxMath.lerp(hitbarHeight / 4, metronomeScale, lerpVal);
 
 		markGroup.forEachAlive(function(obj:Hitmark){
 			obj.baseAlpha = alpha;

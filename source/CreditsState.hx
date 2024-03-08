@@ -307,8 +307,12 @@ class CreditsState extends MusicBeatState
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
 
 		//// update camera
-		var lerpVal = Math.min(1, elapsed * (9.6 + Math.max(0, Math.abs(camFollowPos.y - camFollow.y) - 360) * 0.002));
-		camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
+		var farAwaySpeedup = 0.002 * Math.max(0, Math.abs(camFollowPos.y - camFollow.y) - 360);
+		var lerpVal = Math.exp(-elapsed * (9.6 + farAwaySpeedup));
+		camFollowPos.setPosition(
+			FlxMath.lerp(camFollow.x, camFollowPos.x, lerpVal), 
+			FlxMath.lerp(camFollow.y, camFollowPos.y, lerpVal)
+		);
 
 		////
 		if (!controlLock){

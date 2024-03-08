@@ -279,8 +279,7 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 	}
 
 	override function update(elapsed:Float){
-		var es:Float = elapsed / (1 / 60);
-		cam.bgColor = FlxColor.interpolate(cam.bgColor, 0x80000000, es * 0.1);
+		cam.bgColor = FlxColor.interpolate(0x80000000, cam.bgColor, Math.exp(-elapsed * 6));
 
 		if (bindIndex == -1)
 		{
@@ -401,24 +400,29 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 			}
 
 			var movement:Float = -FlxG.mouse.wheel * 45;
+			var keySpeed = elapsed * 1200;
 			if (FlxG.keys.pressed.PAGEUP)
-				movement -= 25 * es;
+				movement -= keySpeed;
 			if (FlxG.keys.pressed.PAGEDOWN)
-				movement += 25 * es;
+				movement += keySpeed;
 
 			camFollow.y += movement;
 			camFollowPos.y += movement;
 
 			camFollow.y = FlxMath.bound(camFollow.y, 0, height);
 
-			camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, es), FlxMath.lerp(camFollowPos.y, camFollow.y, 0.2 * es));
+			var lerpVal = Math.exp(-elapsed * 12);
+			camFollowPos.setPosition(
+				FlxMath.lerp(camFollow.x, camFollowPos.x, lerpVal), 
+				FlxMath.lerp(camFollow.y, camFollowPos.y, lerpVal)
+			);
 			camFollowPos.y = FlxMath.bound(camFollowPos.y, 0, height);
 
-			overCam.alpha = FlxMath.lerp(overCam.alpha, 0, es * 0.2);
+			overCam.alpha = FlxMath.lerp(0, overCam.alpha, lerpVal);
 		}
 		else
 		{
-			overCam.alpha = FlxMath.lerp(overCam.alpha, 1, es * 0.2);
+			overCam.alpha = FlxMath.lerp(1, overCam.alpha, Math.exp(-elapsed * 12));
 
 			var keyPressed:FlxKey = FlxG.keys.firstJustPressed();
 			if (keyPressed == cancelKey){

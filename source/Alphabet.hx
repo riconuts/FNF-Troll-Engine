@@ -347,21 +347,21 @@ class Alphabet extends FlxSpriteGroup
 
 	override function update(elapsed:Float)
 	{
+		var lerpVal:Float = Math.exp(-elapsed * 9.6);
+
 		if (isMenuItem)
 		{
-			var lerpVal:Float = CoolUtil.boundTo(elapsed * 9.6, 0, 1);
-			
 			var scaledY = FlxMath.remapToRange(targetY, 0, 1, 0, 1.3);
-			y = FlxMath.lerp(y, (scaledY * yMult) + (FlxG.height * 0.48) + yAdd, lerpVal);
+			y = FlxMath.lerp((scaledY * yMult) + (FlxG.height * 0.48) + yAdd, y, lerpVal);
 			
-			if(forceX != Math.NEGATIVE_INFINITY) {
+			if(forceX != Math.NEGATIVE_INFINITY) 
 				x = forceX;
-			} else {
-				x = FlxMath.lerp(x, (targetY * 20) + 90 + xAdd, lerpVal);
-			}
+			else 
+				x = FlxMath.lerp((targetY * 20) + 90 + xAdd, x, lerpVal);
+			
 		}
 		if (sowyFreeplay)
-			x = FlxMath.lerp(x, targetX + xAdd, CoolUtil.boundTo(elapsed * 9.6, 0, 1));
+			x = FlxMath.lerp(targetX + xAdd, x, lerpVal);
 
 		super.update(elapsed);
 	}
