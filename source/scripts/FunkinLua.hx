@@ -40,7 +40,7 @@ using StringTools;
 
 class FunkinLua extends FunkinScript
 {
-	var haxeScript:FunkinHScript;
+	static var haxeScript:FunkinHScript;
 	public var errorHandler:String->Void;
 	#if LUA_ALLOWED
 	public var lua:State = null;
@@ -66,7 +66,8 @@ class FunkinLua extends FunkinScript
 		scriptType = 'lua';
 		scriptName = name!=null ? name : script;
 
-		haxeScript = FunkinHScript.fromString('', 'runHaxeCode: $scriptName', ["luaScript" => this], false);
+		if (haxeScript == null)
+			haxeScript = FunkinHScript.fromString('', 'runHaxeCode', null, false);
 
 		#if (haxe >= "4.0.0")
 		accessedProps = new Map();

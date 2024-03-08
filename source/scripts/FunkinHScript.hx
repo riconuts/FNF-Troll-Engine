@@ -26,6 +26,7 @@ class FunkinHScript extends FunkinScript
 		parser.allowJSON = true;
 		parser.allowTypes = true;
 
+		parser.preprocesorValues.set("TROLL_ENGINE", true);
 		// parser.preprocesorValues = sowy.Sowy.getDefines();
 	}
 
@@ -274,7 +275,7 @@ class FunkinHScript extends FunkinScript
 		
 		try
 		{
-			trace('Loading haxe script: $scriptName');
+			trace('Running haxe script: $scriptName');
 			interpreter.execute(parsed);
 			if (doCreateCall) call('onCreate');
 		}
