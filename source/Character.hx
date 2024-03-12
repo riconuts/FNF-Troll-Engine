@@ -66,8 +66,20 @@ class Character extends FlxSprite
 
 	/**Name of the script to be ran. Can be used to share 1 script across multiple characters**/
 	public var scriptName:String = DEFAULT_CHARACTER;
-	/**Script file running for the character**/
-	public var characterScript:FunkinScript;
+	/**LEGACY. DO NOT USE.**/
+	public var characterScript(get, set):FunkinScript;
+	inline function get_characterScript()
+		return characterScripts[0];
+	function set_characterScript(script:FunkinScript){ // you REALLY shouldnt be setting characterScript, you should be using the removeScript and addScript functions though;
+        characterScripts.shift(); // removes the first script
+        characterScripts.unshift(script); // and replaces it w/ the new one
+
+        return script;
+    }
+		
+    /**Scripts running on the character. You should not modify this directly! Use pushScript/removeScript!
+     * If you must modify it directly, atleast call character.startScript(script)/character.stopScript(script) after adding/removing it**/
+    public var characterScripts:Array<FunkinScript> = [];
 
 	/**for fleetway, mainly.
 		but whenever you need to play an anim that has to be manually interrupted, here you go.
@@ -184,10 +196,9 @@ class Character extends FlxSprite
 
 	override function destroy()
 	{
-		if (characterScript != null){
-			characterScript.call("onDestroy");
-			characterScript.stop();
-		}
+        for(script in characterScripts)
+            removeScript(script, true);
+        
 
 		return super.destroy();
 	}
@@ -222,6 +233,41 @@ class Character extends FlxSprite
 
 		return parsed;
 	}
+
+    public function pushScript(script:FunkinScript, alreadyStarted:Bool=false){
+        characterScripts.push(script);
+        if(!alreadyStarted)
+            startScript(script);
+    }
+
+	public function removeScript(script:FunkinScript, destroy:Bool = false, alreadyStopped:Bool = false)
+	{
+		characterScripts.remove(script);
+		if (!alreadyStopped)
+			stopScript(script, destroy);
+	}
+
+
+    public function startScript(script:FunkinScript){        
+		#if HSCRIPT_ALLOWED
+        if(script.scriptType == 'hscript'){
+		    callScript(script, "onLoad", [this]);
+        }
+        #end
+    }
+
+    public function stopScript(script:FunkinScript, destroy:Bool=false){
+        #if HSCRIPT_ALLOWED
+        if (script.scriptType == 'hscript'){
+            callScript(script, "onStop", [this]);
+            if(destroy){
+		        script.call("onDestroy");
+		        script.stop();
+            }
+        }
+        #end
+    }
+
 
 	public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false, ?debugMode = false)
 	{
@@ -507,8 +553,9 @@ class Character extends FlxSprite
 
 		var scriptCam:Null<Array<Float>> = null;
 		
-		if (characterScript!=null && characterScript is FunkinHScript)
-			scriptCam = characterScript.call("getCamera", [cam]);
+        var retValue = callOnScripts("getCamera", [cam]);
+        if((retValue is Array))scriptCam = retValue;
+        
 
 		return scriptCam!=null ? scriptCam : cam;
 	}
@@ -635,14 +682,15 @@ class Character extends FlxSprite
 		{
 			var file = filePath + '$scriptName.hscript';
 			if (Paths.exists(file)){
-				characterScript = FunkinHScript.fromFile(file, file, defaultVars);
-				callOnScripts("onLoad", [this], true);
+				var script = FunkinHScript.fromFile(file, file, defaultVars);
+				pushScript(script);
 				break;
 			}
 			#if LUA_ALLOWED
 			file = filePath + '$scriptName.lua';
 			if (Paths.exists(file)){
-				characterScript = new FunkinLua(file);
+				var script = new FunkinLua(file);
+				pushScript(script);
 				break;
 			}
 			#end
@@ -651,43 +699,80 @@ class Character extends FlxSprite
 		return this;
 	}
 
-	public function callOnScripts(event:String, ?args:Array<Dynamic>, ?ignoreStops:Bool = false, ?extraVars:Map<String,Dynamic>)
-	{
-		var returnVal:Dynamic = Globals.Function_Continue;
+    public function callOnScripts(event:String, ?args:Array<Dynamic>, ignoreStops:Bool = false, ?exclusions:Array<String>, ?scriptArray:Array<Dynamic>,
+        ?vars:Map<String, Dynamic>, ?ignoreSpecialShit:Bool = true):Dynamic
+    {
+    #if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+    if (args == null)
+        args = [];
+    if (scriptArray == null)
+        scriptArray = characterScripts;
+    if (exclusions == null)
+        exclusions = [];
 
-		if (characterScript == null)
-			return returnVal;
+    var returnVal:Dynamic = Globals.Function_Continue;
+    for (script in scriptArray)
+    {
+        if (exclusions.contains(script.scriptName))
+            continue;
+        
+        var ret:Dynamic = script.call(event, args, vars);
+        if (ret == Globals.Function_Halt)
+        {
+            ret = returnVal;
+            if (!ignoreStops)
+                return returnVal;
+        };
+        if (ret != Globals.Function_Continue && ret != null)
+            returnVal = ret;
+    }
 
-		var ret:Dynamic;
+    if (returnVal == null)
+        returnVal = Globals.Function_Continue;
+    return returnVal;
+    #else
+    return Globals.Function_Continue
+    #end
+    }
 
-		if (characterScript is FunkinHScript){
-			var characterScript:FunkinHScript = cast characterScript;
-			ret = characterScript.executeFunc(event, args, this, extraVars); 
-		}else{
-			ret = characterScript.call(event, args, extraVars);
-		}
+    public function setOnScripts(variable:String, value:Dynamic, ?scriptArray:Array<Dynamic>)
+    {
+    if (scriptArray == null)
+        scriptArray = characterScripts;
 
-		if (ret == Globals.Function_Halt){
-			ret = returnVal;
-			if (!ignoreStops)
-				return returnVal;
-		};
+    for (script in scriptArray)
+    {
+        script.set(variable, value);
+        // trace('set $variable, $value, on ${script.scriptName}');
+    }
+    }
 
-		if (ret != Globals.Function_Continue && ret != null)
-			returnVal = ret;
+    public function callScript(script:Dynamic, event:String, ?args:Array<Dynamic>):Dynamic
+    {
+    #if (LUA_ALLOWED || HSCRIPT_ALLOWED) // no point in calling this code if you.. for whatever reason, disabled scripting.
+    if ((script is FunkinScript))
+    {
+        return callOnScripts(event, args, true, [], [script], [], false);
+    }
+    else if ((script is Array))
+    {
+        return callOnScripts(event, args, true, [], script, [], false);
+    }
+    else if ((script is String))
+    {
+        var scripts:Array<FunkinScript> = [];
 
-		if (returnVal == null)
-			returnVal = Globals.Function_Continue;
+        for (scr in characterScripts)
+        {
+            if (scr.scriptName == script)
+                scripts.push(scr);
+        }
 
-
-		return returnVal;
-	}
-
-	public function setOnScripts(variable:String, value:Dynamic)
-	{
-		if (characterScript != null)
-			characterScript.set(variable, value);
-	}
+        return callOnScripts(event, args, true, [], scripts, [], false);
+    }
+    #end
+    return Globals.Function_Continue;
+    }
 
 	/**
 		Returns an array with all the characters contained in the characters folder(s)

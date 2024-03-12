@@ -423,8 +423,12 @@ class PlayState extends MusicBeatState
 				hudSkinScripts.set(value, script);
 			}
 		}
+        if(hudSkinScript!=null)
+            hudSkinScript.call("onSkinUnload");
+        
 		hudSkinScript = script;
 
+        if(script != null)script.call("onSkinLoad");
         return hudSkin = value;
     }
 
@@ -1036,7 +1040,7 @@ class PlayState extends MusicBeatState
 
 		////
 		callOnAllScripts('onCreatePost');
-
+        
 		add(ratingGroup);
 		add(timingTxt);
 		add(strumLineNotes);
@@ -1285,16 +1289,16 @@ class PlayState extends MusicBeatState
 	{
 		char.startScripts();
 
-		if (char.characterScript != null){
-			#if LUA_ALLOWED
-			if (char.characterScript is FunkinLua)
-				luaArray.push(cast char.characterScript);
-			else
-			#end
-			hscriptArray.push(cast char.characterScript);
+        for(script in char.characterScripts){
+            #if LUA_ALLOWED
+            if((script is FunkinLua))
+                luaArray.push(cast script);
+            else
+            #end
+            hscriptArray.push(cast script);
 
-			funkyScripts.push(char.characterScript);
-		}
+            funkyScripts.push(script);
+        }
 	}
 
 	public function getLuaObject(tag:String, text:Bool=true):FlxSprite {
@@ -3361,12 +3365,8 @@ class PlayState extends MusicBeatState
 			}
 		}
 		#end
-
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+		
 		var ret:Dynamic = callOnScripts('onEndSong');
-		#else
-		var ret:Dynamic = Globals.Function_Continue;
-		#end
 
 		if (transitioning || ret == Globals.Function_Stop)
 			return;
@@ -3501,7 +3501,8 @@ class PlayState extends MusicBeatState
         var r:Bool = false;
         if(hudSkinScript!=null && callScript(hudSkinScript, "onDisplayJudgment", [image]) == Globals.Function_Stop)
             r = true;
-
+        
+        trace(r);
         if(callOnScripts("onDisplayJudgment", [image]) == Globals.Function_Stop)
             return;
 
@@ -4503,6 +4504,7 @@ class PlayState extends MusicBeatState
 	public function callOnScripts(event:String, ?args:Array<Dynamic>, ignoreStops:Bool = false, ?exclusions:Array<String>, ?scriptArray:Array<Dynamic>,
 			?vars:Map<String, Dynamic>, ?ignoreSpecialShit:Bool = true):Dynamic
 	{
+        #if(LUA_ALLOWED || HSCRIPT_ALLOWED)
 		if (args == null) args = [];
 		if (scriptArray == null) scriptArray = funkyScripts;
 		if (exclusions == null) exclusions = [];
@@ -4529,6 +4531,9 @@ class PlayState extends MusicBeatState
 		
 		if (returnVal == null) returnVal = Globals.Function_Continue;
 		return returnVal;
+        #else
+        return Globals.Function_Continue
+        #end
 	}
 
 	public function setOnScripts(variable:String, value:Dynamic, ?scriptArray:Array<Dynamic>)
@@ -4539,11 +4544,12 @@ class PlayState extends MusicBeatState
 		for (script in scriptArray){
 			script.set(variable, value);
 			// trace('set $variable, $value, on ${script.scriptName}');
-		}	
+		}
 	}
 
 	public function callScript(script:Dynamic, event:String, ?args:Array<Dynamic>):Dynamic
 	{
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED) // no point in calling this code if you.. for whatever reason, disabled scripting.
 		if((script is FunkinScript)){
 			return callOnScripts(event, args, true, [], [script], [], false);
 		}
@@ -4560,7 +4566,7 @@ class PlayState extends MusicBeatState
 
 			return callOnScripts(event, args, true, [], scripts, [], false);
 		}
-
+        #end
 		return Globals.Function_Continue;
 	}
 

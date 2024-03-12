@@ -1,0 +1,314 @@
+introSnds = ["intro3-pixel","intro2-pixel","intro1-pixel","introGo-pixel"];
+introAlts = ["pixelUI/onyourmarks-pixel", 'pixelUI/ready-pixel', 'pixelUI/set-pixel', 'pixelUI/date-pixel'];
+
+var RatingSprite;
+var ratingGroup;
+function onCreatePost(){
+    ratingGroup = state.ratingGroup;
+    RatingSprite = Type.getClass(ratingGroup.members[0]); // ridiculous LOL
+}
+
+function makeCountdownSprite(sprImage, swagCounter, tmr){
+    var countdownSpr = new FlxSprite(0, 0, sprImage);
+    countdownSpr.scrollFactor.set();
+    countdownSpr.scale.set(6, 6);
+    countdownSpr.updateHitbox();
+    countdownSpr.cameras = [state.camHUD];
+    countdownSpr.screenCenter();
+    countdownSpr.antialiasing = false;
+    return countdownSpr;
+}
+
+var pixelJudges:Array<String> = ['miss', 'epic', 'sick','good','bad','shit'];
+
+function preSetupNoteSplash(){
+    this.kill();
+    return Function_Stop;
+}
+var lastCombos;
+var lastJudge;
+var lr = true;
+
+function roundTo(num, roundFactor){
+	return Math.round(num / 6) * 6;
+}
+
+function anim(spr, startX, targetX, startY, targetY, prog){
+	if (prog < 0.5)
+		spr.alpha = FlxEase.backOut(prog*2);
+	else if (prog > 0.8)
+		spr.alpha = 1 - (prog - 0.8) / 0.2;
+
+	var num = FlxEase.backOut(prog > 0.5 ? 1 : prog*2);
+	spr.offset.set(
+		roundTo( FlxMath.lerp(startX, targetX, FlxEase.circIn(prog)), 6 ),
+		FlxMath.lerp(startY, targetY, num)
+	);
+}
+
+function prepareSpr(name, ?spr){
+	var spr = spr!=null ? spr : ratingGroup.recycle(RatingSprite, null, false);
+	
+	spr.loadGraphic(Paths.image("pixelUI/"+name+"-pixel"));
+	spr.scale.set(6,6);
+	spr.updateHitbox();
+	spr.antialiasing = false;
+	
+	//spr.alpha = 1;
+	spr.velocity.set();
+	spr.acceleration.set();
+	spr.scrollFactor.set(1, 1);
+
+	return spr;
+}
+
+function onDisplayCombo(combo)
+{
+	if (combo > 0 && combo < 10 && combo != 0)
+		return Function_Stop;
+
+	var comboColor = game.comboColor;
+	var splitCombo = Std.string(Math.abs(combo)).split();
+	while (splitCombo.length < 3)
+		splitCombo.unshift("0");
+	if (combo < 0){
+		splitCombo.unshift("neg");		
+		comboColor = 0xFFF7C5DC;
+	}
+		
+	var bs = 0;
+	var totalWidth = 9 * 6 * splitCombo.length;
+	lr=!lr;
+	
+	var posX = roundTo(game.ratingOrigin[0] + ClientPrefs.comboOffset[2], 6);
+	var posY = roundTo(game.ratingOrigin[1] - ClientPrefs.comboOffset[3], 6);
+	
+	for (char in splitCombo){	
+		var spr = prepareSpr("num"+char);
+		spr.color = comboColor;
+
+		spr.setPosition(posX, posY);
+		spr.offset.set(
+			totalWidth / 2 - (9 * 6 * bs),
+			spr.height / 2
+		);
+		
+		var startX	=	spr.offset.x;
+		var targetX =	spr.offset.x + 6*9*(lr ? 1 : -1);
+		var startY	=	spr.offset.y - spr.height;
+		var targetY =	spr.offset.y;
+		spr.tween = FlxTween.num(
+			0, 1, 1.2, 
+			{onComplete: spr.kill}, 
+			(prog)->{anim(spr, startX, targetX, startY, targetY, prog);}
+		);
+		
+		ratingGroup.remove(spr, true);
+		ratingGroup.add(spr);
+		
+		bs++;
+	}
+
+	return Function_Stop;
+}
+
+/* function onDisplayCombo(combo:Int){
+    var hud = state.hud;
+
+    if (ClientPrefs.simpleJudge)
+    {
+        for (prevCombo in state.lastCombos)
+            prevCombo.kill();
+        
+        if (combo == 0)
+            return Function_Stop; 
+    }
+    else if (combo > 0 && combo < 10 && combo != 0)
+        return Function_Stop;
+
+    var separatedScore:Array<String> = Std.string(Math.abs(combo)).split("");
+    while (separatedScore.length < 3)
+        separatedScore.unshift("0");
+    if(combo < 0)
+        separatedScore.unshift("neg");
+
+    var daLoop:Int = 0;
+
+    var col = combo < 0 ? hud.judgeColours.get("miss") : state.comboColor;
+
+    var numStartX:Float = (FlxG.width - separatedScore.length * 41) * 0.5 + ClientPrefs.comboOffset[2];
+    for (i in separatedScore)
+    {
+        var numScore:RatingSprite = ratingGroup.recycle(RatingSprite);
+        numScore.loadGraphic(Paths.image('pixelUI/num' + i + "-pixel"));
+        numScore.antialiasing = false;
+        numScore.scale.set(5, 5);
+        numScore.updateHitbox();
+        
+        
+        numScore.screenCenter();
+        numScore.x = numStartX + 41.5 * daLoop;
+        numScore.y -= ClientPrefs.comboOffset[3];
+        if(ClientPrefs.simpleJudge)
+            numScore.y -= 20;
+
+        numScore.color = col;
+        numScore.visible = state.showComboNum;
+
+        numScore.ID = daLoop;
+        numScore.moves = !ClientPrefs.simpleJudge;
+        if (numScore.tween != null){
+            numScore.tween.cancel();
+            numScore.tween.destroy();
+        }
+
+        ratingGroup.remove(numScore, true);
+        ratingGroup.add(numScore);
+
+        numScore.alpha = ClientPrefs.judgeOpacity;
+        if (ClientPrefs.simpleJudge)
+        {
+            numScore.tween = FlxTween.tween(numScore, {y: numScore.y + 20}, 0.2, {ease: FlxEase.circOut});
+            state.lastCombos.push(numScore);
+        }
+        else
+        {
+            numScore.acceleration.y = FlxG.random.int(200, 300);
+            numScore.velocity.set(FlxG.random.float(-10, 10), -FlxG.random.int(140, 160));
+
+            numScore.tween = FlxTween.tween(numScore, {alpha: 0}, 0.2, {
+                onComplete: function(wtf)
+                {
+                    numScore.kill();
+                },
+                startDelay: Conductor.crochet * 0.002
+            });
+        }
+
+        daLoop++;
+    }
+    return Function_Stop;
+}
+ */
+ 
+ 
+function onDisplayJudgment(name){
+	var spr = prepareSpr(name);
+	spr.color = 0xFFFFFFFF;
+	
+	spr.setPosition(
+		roundTo(game.ratingOrigin[0] + ClientPrefs.comboOffset[0], 6), 
+		roundTo(game.ratingOrigin[1] - ClientPrefs.comboOffset[1], 6)
+	);
+	spr.offset.set(
+		spr.width / 2, 
+		spr.height / 2
+	);
+	
+	var startX	=	spr.offset.x;
+	var targetX =	spr.offset.x + 6*9*(lr=!lr ? 1 : -1);
+	var startY	=	spr.offset.y - spr.height;
+	var targetY =	spr.offset.y;
+	spr.tween = FlxTween.num(
+		0, 1, 1.2, 
+		{onComplete: spr.kill}, 
+		(prog)->{anim(spr, startX, targetX, startY, targetY, prog);}
+	);
+	
+	ratingGroup.remove(spr, true);
+	ratingGroup.add(spr);
+
+	return Function_Stop;
+}
+
+
+ /* 
+function onDisplayJudgmentPost(rating, image){
+    if(!pixelJudges.contains(image))return;
+    rating.loadGraphic(Paths.image("pixelUI/" + image + "-pixel"));
+    rating.antialiasing = false;
+    if(ClientPrefs.simpleJudge){
+        rating.x += 5;
+        rating.y -= 5;
+        var time = (Conductor.stepCrochet * 0.001);
+        rating.scale.set(5 * 1.1, 5 * 1.1);
+        rating.updateHitbox();
+
+        if (rating.tween != null)
+        {
+            rating.tween.cancel();
+            rating.tween.destroy();
+        }
+
+        rating.tween = FlxTween.tween(rating.scale, {x: 5, y: 5}, 0.1, {
+            ease: FlxEase.quadOut,
+            onComplete: function(tween:FlxTween)
+            {
+                if (!rating.alive)
+                    return;
+
+                rating.tween = FlxTween.tween(rating.scale, {x: 0, y: 0}, time, {
+                    startDelay: time * 8,
+                    ease: FlxEase.quadIn,
+                    onComplete: function(tween:FlxTween)
+                    {
+                        rating.kill();
+                    }
+                });
+            }
+        });
+    }else{
+        rating.scale.set(5, 5);
+        rating.updateHitbox();
+    }
+    
+} */
+
+function setupNoteTexture(note:Note){
+    if(note.isSustainNote)
+        note.reloadNote(note.texPrefix, 'NOTE_assets', note.texSuffix + 'ENDS', 'pixelUI', 4, 2);
+    else
+        note.reloadNote(note.texPrefix, 'NOTE_assets', note.texSuffix, 'pixelUI', 4, 5);
+
+    note.setGraphicSize(Std.int(note.width * 6));
+    note.antialiasing = false;
+}
+
+function setupReceptorTexture(strum:StrumNote){
+    strum.isQuant = false;
+    var lastAnim:String = null;
+    if(strum.animation.curAnim != null) lastAnim = strum.animation.curAnim.name;
+    var br:String = 'NOTE_assets';
+    if (PlayState.SONG.arrowSkin != null && PlayState.SONG.arrowSkin.length > 1)
+        br = PlayState.SONG.arrowSkin;
+
+    
+    if (ClientPrefs.noteSkin == 'Quants')
+    {
+        if (Paths.exists(Paths.getPath("images/pixelUI/QUANT" + br + ".png", "IMAGE")) || Paths.exists(Paths.modsImages("pixelUI/QUANT" + br))) {
+            br = "QUANT" + br;
+            strum.isQuant = true;
+        }
+    }
+    
+    // TODO: add an easy way to do indices for strums
+
+    strum.loadGraphic(Paths.image("pixelUI/" + br));
+    strum.width /= 4;
+    strum.height /= 5;
+    strum.loadGraphic(Paths.image("pixelUI/" + br), true, Math.floor(strum.width), Math.floor(strum.height));
+    strum.animation.add('static', [strum.noteData]);
+    strum.animation.add('pressed', [strum.noteData + 4, strum.noteData + 8], 12, false);
+    strum.animation.add('confirm', [strum.noteData + 12, strum.noteData + 16], 16, false);
+    strum.scale.set(6, 6);
+    strum.playAnim("static", true);
+    
+    strum.defScale.x = strum.scale.x;
+    strum.defScale.y = strum.scale.y;
+    strum.updateHitbox();
+    strum.antialiasing = false;
+    if(lastAnim != null)
+    {
+        strum.playAnim(lastAnim, true);
+    }
+}
