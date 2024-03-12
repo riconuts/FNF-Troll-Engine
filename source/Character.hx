@@ -71,9 +71,10 @@ class Character extends FlxSprite
 	inline function get_characterScript()
 		return characterScripts[0];
 	function set_characterScript(script:FunkinScript){ // you REALLY shouldnt be setting characterScript, you should be using the removeScript and addScript functions though;
-        characterScripts.shift(); // removes the first script
+        var oldScript = characterScripts.shift(); // removes the first script
+        removeScript(oldScript, true);
         characterScripts.unshift(script); // and replaces it w/ the new one
-
+		startScript(script);
         return script;
     }
 		
