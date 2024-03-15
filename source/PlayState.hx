@@ -3496,17 +3496,18 @@ class PlayState extends MusicBeatState
 
 	private function displayJudgment(image:String){
 		var rating:RatingSprite;
-		var time = (Conductor.stepCrochet * 0.001);
 
         var r:Bool = false;
         if(hudSkinScript!=null && callScript(hudSkinScript, "onDisplayJudgment", [image]) == Globals.Function_Stop)
             r = true;
         
-        trace(r);
+        //trace(r);
         if(callOnScripts("onDisplayJudgment", [image]) == Globals.Function_Stop)
             return;
 
         if(r)return;
+
+		var time = (Conductor.stepCrochet * 0.001);
 
 		if (ClientPrefs.simpleJudge)
 		{
