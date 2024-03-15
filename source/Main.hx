@@ -154,9 +154,6 @@ class Main extends Sprite
 			fpsVar = new FPS(10, 3, 0xFFFFFF);
 			fpsVar.visible = false;
 			addChild(fpsVar);
-			
-			Lib.current.stage.align = "tl";
-			Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
 			#end
 
 			bread = new Bread();

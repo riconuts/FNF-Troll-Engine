@@ -379,8 +379,8 @@ class FlxCamera extends FlxBasic
      * Replicates old behaviour where camera.x moves flashSprite
      * (Old behaviour)
      */
-
     public var positionMovesSprite:Bool = true;
+	
 	/**
 	 * The color tint of the camera display.
 	 */
