@@ -206,7 +206,9 @@ class Main extends Sprite
 		
 		Application.current.window.alert(errMsg, errorName);
 
+		#if discord_rpc
 		DiscordClient.shutdown();
+		#end
 		Sys.exit(1);
 	}
 	#end
