@@ -4834,11 +4834,11 @@ class FNFHealthBar extends FlxBar{
 		//
 		iconP2.setPosition(
 			healthBarPos - 75 - iconOffset * 2,
-			y - 75
+			y + (height - iconP2.height) / 2
 		);
 		iconP1.setPosition(
 			healthBarPos - iconOffset,
-			y - 75
+			y + (height - iconP1.height) / 2
 		);
 
 		//
