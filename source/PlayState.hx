@@ -2284,6 +2284,7 @@ class PlayState extends MusicBeatState
 			ratingGroup.cameras[0] = camHUD;
 		
 		callOnScripts('optionsChanged', [options]);
+		if (hudSkinScript != null) callScript(hudSkinScript, "optionsChanged", [options]);
 		
 		var reBind:Bool = false;
 		for(opt in options){
