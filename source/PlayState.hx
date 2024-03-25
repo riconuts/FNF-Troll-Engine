@@ -2284,6 +2284,7 @@ class PlayState extends MusicBeatState
 			ratingGroup.cameras[0] = camHUD;
 		
 		callOnScripts('optionsChanged', [options]);
+		if (hudSkinScript != null) callScript(hudSkinScript, "optionsChanged", [options]);
 		
 		var reBind:Bool = false;
 		for(opt in options){
@@ -2578,11 +2579,12 @@ class PlayState extends MusicBeatState
 
 		for (script in eventScripts)
 			script.call("onUpdate", [elapsed]);
+
+		callOnScripts('onUpdate', [elapsed], null, null, null, null, false);
 		*/
 		callOnScripts('onUpdate', [elapsed]);
         if (hudSkinScript != null)
             hudSkinScript.call("onUpdate", [elapsed]);
-		//callOnScripts('onUpdate', [elapsed], null, null, null, null, false);
 
 		if (inst.playing && !inCutscene && health > healthDrain)
 		{
@@ -2797,6 +2799,7 @@ class PlayState extends MusicBeatState
 		
 		setOnScripts('cameraX', camFollowPos.x);
 		setOnScripts('cameraY', camFollowPos.y);
+		
 		callOnScripts('onUpdatePost', [elapsed]);
         if (hudSkinScript != null)
             hudSkinScript.call("onUpdatePost", [elapsed]);
@@ -3496,17 +3499,18 @@ class PlayState extends MusicBeatState
 
 	private function displayJudgment(image:String){
 		var rating:RatingSprite;
-		var time = (Conductor.stepCrochet * 0.001);
 
         var r:Bool = false;
         if(hudSkinScript!=null && callScript(hudSkinScript, "onDisplayJudgment", [image]) == Globals.Function_Stop)
             r = true;
         
-        trace(r);
+        //trace(r);
         if(callOnScripts("onDisplayJudgment", [image]) == Globals.Function_Stop)
             return;
 
         if(r)return;
+
+		var time = (Conductor.stepCrochet * 0.001);
 
 		if (ClientPrefs.simpleJudge)
 		{
@@ -4830,11 +4834,11 @@ class FNFHealthBar extends FlxBar{
 		//
 		iconP2.setPosition(
 			healthBarPos - 75 - iconOffset * 2,
-			y - 75
+			y + (height - iconP2.height) / 2
 		);
 		iconP1.setPosition(
 			healthBarPos - iconOffset,
-			y - 75
+			y + (height - iconP1.height) / 2
 		);
 
 		//

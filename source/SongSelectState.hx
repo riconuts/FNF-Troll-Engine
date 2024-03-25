@@ -1,6 +1,8 @@
 package;
 
+#if discord_rpc
 import Discord.DiscordClient;
+#end
 import sys.io.File;
 import sys.FileSystem;
 import flixel.text.FlxText;
@@ -46,7 +48,9 @@ class SongSelectState extends MusicBeatState
 	{
 		StartupState.load();
 
+		#if discord_rpc
 		DiscordClient.changePresence("In the Menus", null);
+		#end
 		FlxG.camera.bgColor = 0xFF000000;
 
 		if (FlxG.sound.music == null)

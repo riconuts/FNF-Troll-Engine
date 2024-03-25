@@ -7,9 +7,10 @@ function onCreate()
 	GameOverSubstate.loopSoundName = 'gameOver-pixel';
 	GameOverSubstate.endSoundName = 'gameOverEnd-pixel';
 
-    if(game.hudSkin == 'default')
-        game.hudSkin = 'pixel';
-
+	if (game.hudSkin == 'default'){
+		game.hudSkin = 'pixel';
+		game.hudSkinScript.set("rosesHealthBar", false);
+	}
 }
 
 function roundTo(num, roundFactor){
@@ -21,7 +22,8 @@ var bgGhouls;
 function onLoad(){
 	var posX = 400;
 	var posY = 200;
-	if(!ClientPrefs.lowQuality) {
+	
+	if (!ClientPrefs.lowQuality) {
 		var bg:BGSprite = new BGSprite('stages/schoolEvil/animatedEvilSchool', posX, posY, 0.8, 0.9, ['background 2'], true);
 		bg.scale.set(6, 6);
 		bg.antialiasing = false;
@@ -33,6 +35,7 @@ function onLoad(){
 		bgGhouls.visible = false;
 		bgGhouls.antialiasing = false;
 		add(bgGhouls);
+		
 	} else {
 		var bg:BGSprite = new BGSprite('stages/schoolEvil/animatedEvilSchool_low', posX, posY, 0.8, 0.9);
 		bg.scale.set(6, 6);

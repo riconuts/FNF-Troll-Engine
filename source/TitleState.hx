@@ -116,18 +116,8 @@ class TitleState extends MusicBeatState
 
 	override public function destroy()
 	{
-		curWacky = [];
+		curWacky = null;
 		swagShader = null;
-
-		/*
-		blackScreen.destroy();
-		textGroup.destroy();
-		ngSpr.destroy();
-	
-		logoBl.destroy();
-		titleText.destroy();
-		bg.destroy();
-		*/
 
 		blackScreen = null;
 		textGroup = null;

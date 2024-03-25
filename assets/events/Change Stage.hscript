@@ -38,7 +38,6 @@ function onTrigger(value1, value2)
 	game.insert(stageIdx, stage);
 	game.insert(foregroundIdx, stage.foreground);
 	game.stage = stage;
-	game.foreground = stage.foreground;
 	
 	PlayState.curStage = stage.curStage;
 }

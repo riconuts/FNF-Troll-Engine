@@ -1,28 +1,30 @@
 package;
 
 import Github.Release;
-import sowy.Sowy;
-import openfl.system.Capabilities;
 import flixel.FlxG;
-import flixel.FlxGame;
 import flixel.FlxState;
 import openfl.Lib;
 import openfl.display.FPS;
 import openfl.display.Sprite;
 import openfl.display.StageScaleMode;
+import openfl.system.Capabilities;
 import openfl.events.Event;
 using StringTools;
+
 #if CRASH_HANDLER
 import haxe.CallStack;
 import lime.app.Application;
 import openfl.events.UncaughtErrorEvent;
 import sys.io.File;
 #end
+
 #if discord_rpc
 import Discord.DiscordClient;
 #end
 
-
+#if (windows && cpp)
+@:cppFileCode('#include <windows.h>')
+#end
 class Main extends Sprite
 {
 	var gameWidth:Int = 1280; // Width of the game in pixels (might be less / more in actual pixels depending on your zoom).
@@ -154,9 +156,6 @@ class Main extends Sprite
 			fpsVar = new FPS(10, 3, 0xFFFFFF);
 			fpsVar.visible = false;
 			addChild(fpsVar);
-			
-			Lib.current.stage.align = "tl";
-			Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
 			#end
 
 			bread = new Bread();
@@ -207,10 +206,22 @@ class Main extends Sprite
 		Sys.println(" \n" + errMsg);
 		File.saveContent("crash.txt", errMsg);
 		
+		#if (windows && cpp)
+		windows_showErrorMsgBox(errMsg, errorName);
+		#else
 		Application.current.window.alert(errMsg, errorName);
+		#end
 
+		#if discord_rpc
 		DiscordClient.shutdown();
+		#end
 		Sys.exit(1);
 	}
+
+	#if (windows && cpp)
+	@:functionCode('MessageBox(NULL, message, title, MB_ICONERROR | MB_OK);')
+	function windows_showErrorMsgBox(message:String, title:String){}
+	#end
+
 	#end
 }

@@ -209,8 +209,8 @@ class CommonHUD extends BaseHUD
 	{
 		healthBar.healthBarBG.y = FlxG.height * (ClientPrefs.downScroll ? 0.11 : 0.89);
 		healthBar.y = healthBarBG.y + 5;
-		healthBar.iconP1.y = healthBar.y - 75;
-		healthBar.iconP2.y = healthBar.y - 75;
+		healthBar.iconP1.y = healthBar.y + (healthBar.height - healthBar.iconP1.height) / 2;
+		healthBar.iconP2.y = healthBar.y + (healthBar.height - healthBar.iconP2.height) / 2;
 		healthBar.real_alpha = healthBar.real_alpha;
 
 		botplayTxt.y = (ClientPrefs.downScroll ? (FlxG.height-107) : 89);
