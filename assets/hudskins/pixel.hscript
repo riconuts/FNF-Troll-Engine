@@ -10,7 +10,6 @@ var lastCombos;
 var lastJudge;
 
 rosesHealthBar = true;
-updateTime = true;
 
 var hud;
 var hb;
@@ -19,6 +18,10 @@ var bg;
 var timerCirc;
 var timerNums = [];
 var timerSpecial;
+
+function roundTo(num, roundFactor){
+	return Math.round(num / roundFactor) * roundFactor;
+}
 
 function onCreatePost()
 {
@@ -50,6 +53,7 @@ function onCreatePost()
 	timerSpecial.scale.set(6, 6);
 	timerSpecial.antialiasing = false;
 	timerSpecial.exists = false;
+	timerSpecial.alpha = 0.0;
 	hud.insert(hud.members.indexOf(timerCirc) + 1, timerSpecial);
 	
 	adjustClock();
@@ -81,7 +85,7 @@ function onCountdownTick(tick)
 	else if (tick == 4)
 	{
 		updateTimerTxt();
-		
+
 		timerSpecial.alpha = 0.0;
 		FlxTween.tween(timerSpecial, {alpha: 1}, Conductor.crochet / 1000);
 		
@@ -91,33 +95,20 @@ function onCountdownTick(tick)
 		}
 	}
 }
+function onSongStart()
+{
+	timerCirc.alpha = 1.0;
+	timerSpecial.alpha = 1.0;
+}
 
 function optionsChanged(changed:Array)
 {
-	//trace("yooo", changed);
-	if (rosesHealthBar && changed.contains("downScroll"))
-	{
+	if (rosesHealthBar && changed.contains("downScroll")){
 		adjustHealthBar();
 		bg.setPosition(hb.x - 5, hb.y - 5); // game is probably paused so it wont update
 	}
 	
-	if (ClientPrefs.timeBarType == "Disabled")
-	{
-		timerCirc.visible = false;
-		setTimerTxt("");
-		updateTime = false;
-	}else{
-	}
-	
-	if (ClientPrefs.timeBarType == "Song Name"){
-		
-	}
-	
 	adjustClock();
-}
-
-function roundTo(num, roundFactor){
-	return Math.round(num / roundFactor) * roundFactor;
 }
 
 function adjustHealthBar()
@@ -137,14 +128,30 @@ function adjustHealthBar()
 	hud.iconP1.y = hb.y + (hb.height - hud.iconP1.height) / 2;
 	hud.iconP2.y = hb.y + (hb.height - hud.iconP2.height) / 2;
 }
+
 function adjustClock()
 {
+	timerCirc.visible = (ClientPrefs.timeBarType != "Disabled");
+	setTimerTxt("");
+	
 	timerCirc.y = Note.swagWidth / 2 + 45;
-	//timerCirc.flipY = ClientPrefs.downScroll;
 	if (ClientPrefs.downScroll) timerCirc.y = FlxG.height - timerCirc.y;
 	
-	for (spr in timerNums)
+	for (spr in timerNums){
 		spr.y = timerCirc.y	- timerCirc.height / 2 + 11*6;
+	}
+	
+	if (ClientPrefs.timeBarType == "Song Name"){
+		timerSpecial.loadGraphic(Paths.image("pixelUI/clock-texts/"+game.songName));
+		timerSpecial.updateHitbox();
+		timerSpecial.exists = true;
+		timerSpecial.setPosition(
+			(FlxG.width - timerSpecial.width) / 2,
+			timerCirc.y - timerSpecial.height / 2
+		);
+	}else{
+		timerSpecial.exists = false;
+	}
 		
 	hud.botplayTxt.y = timerCirc.y - hud.botplayTxt.height / 2;
 }
@@ -159,32 +166,33 @@ function formatTime(time:Float)
 	return displayMinutes + ":" + displaySeconds;
 }
 
+var curClockTxt = null;
 function updateTimerTxt()
 {
 	var curTime:Float = Conductor.songPosition - ClientPrefs.noteOffset;
 	if (curTime < 0) curTime = 0;
 	
 	timerSpecial.exists = false;
+	
+	var txt:String = "";
 	switch (ClientPrefs.timeBarType)
 	{
 		case "Percentage":
-			setTimerTxt(Math.floor((curTime / game.songLength) * 100) + "%");
+			txt = Math.floor((curTime / game.songLength) * 100) + "%";
 			
 		case "Time Left":
-			setTimerTxt(formatTime((game.songLength - curTime) / 1000 / FlxG.timeScale));
+			txt = (formatTime((game.songLength - curTime) / 1000 / FlxG.timeScale));
 			
 		case "Time Elapsed":
-			setTimerTxt(formatTime(curTime / 1000 / FlxG.timeScale));
+			txt = (formatTime(curTime / 1000 / FlxG.timeScale));		
 			
 		case "Song Name":
-			setTimerTxt("");
-			timerSpecial.loadGraphic(Paths.image("pixelUI/clock-texts/"+game.songName));
-			timerSpecial.updateHitbox();
-			timerSpecial.x = (FlxG.width - timerSpecial.width) / 2;
-			timerSpecial.y = timerCirc.y - timerSpecial.height / 2;
+			txt = "";
 			timerSpecial.exists = true;
-			
 	}
+	
+	if (curClockTxt != txt)
+		setTimerTxt(txt);
 }
 
 function onUpdate(elapsed){	
@@ -192,7 +200,11 @@ function onUpdate(elapsed){
 		game.cpuControlled ? setTimerTxt("") : updateTimerTxt();
 }
 
-function setTimerTxt(text:String){
+
+function setTimerTxt(text:String)
+{
+	curClockTxt = text;
+
 	var splitText = text.split("");
 	var totalWidth = 5*6*splitText.length - 6;
 	var offset = 0;
