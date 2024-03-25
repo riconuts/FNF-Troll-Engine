@@ -1,36 +1,226 @@
 introSnds = ["intro3-pixel","intro2-pixel","intro1-pixel","introGo-pixel"];
 introAlts = ["pixelUI/onyourmarks-pixel", 'pixelUI/ready-pixel', 'pixelUI/set-pixel', 'pixelUI/date-pixel'];
 
-var RatingSprite;
+var RatingSprite = getClass("RatingSprite"); // hmmmmm
 var ratingGroup;
-function onCreatePost(){
-    ratingGroup = state.ratingGroup;
-    RatingSprite = Type.getClass(ratingGroup.members[0]); // ridiculous LOL
-}
 
-function makeCountdownSprite(sprImage, swagCounter, tmr){
-    var countdownSpr = new FlxSprite(0, 0, sprImage);
-    countdownSpr.scrollFactor.set();
-    countdownSpr.scale.set(6, 6);
-    countdownSpr.updateHitbox();
-    countdownSpr.cameras = [state.camHUD];
-    countdownSpr.screenCenter();
-    countdownSpr.antialiasing = false;
-    return countdownSpr;
-}
+//var pixelJudges:Array<String> = ['miss', 'epic', 'sick','good','bad','shit'];
 
-var pixelJudges:Array<String> = ['miss', 'epic', 'sick','good','bad','shit'];
-
-function preSetupNoteSplash(){
-    this.kill();
-    return Function_Stop;
-}
 var lastCombos;
 var lastJudge;
-var lr = true;
+
+rosesHealthBar = true;
+updateTime = true;
+
+var hud;
+var hb;
+var bg;
+
+var timerCirc;
+var timerNums = [];
+var timerSpecial;
+
+function onCreatePost()
+{
+	ratingGroup = state.ratingGroup;
+	if (RatingSprite == null)
+		RatingSprite = Type.getClass(ratingGroup.members[0]); // ridiculous LOL
+	
+	hud = game.hud;
+	
+	hb = hud.healthBar;
+	bg = hud.healthBarBG;
+	
+	////
+	hud.timeTxt.visible = false;
+	hud.timeBar.visible = false;
+	hud.timeBarBG.visible = false;
+	hud.updateTime = false;
+	
+	var graphic = Paths.image("pixelUI/timer-circ");
+	timerCirc = new FlxSprite((FlxG.width - graphic.width * 6) / 2, 0, graphic);
+	timerCirc.antialiasing = false;
+	timerCirc.scale.set(6, 6);
+	timerCirc.updateHitbox();
+	timerCirc.offset.y += timerCirc.height / 2;
+	timerCirc.alpha = 0.0;
+	hud.insert(hud.members.indexOf(hud.timeBarBG), timerCirc);
+	
+	timerSpecial = new FlxSprite();
+	timerSpecial.scale.set(6, 6);
+	timerSpecial.antialiasing = false;
+	timerSpecial.exists = false;
+	hud.insert(hud.members.indexOf(timerCirc) + 1, timerSpecial);
+	
+	adjustClock();
+	////
+	
+	if (rosesHealthBar==true && hb != null && bg != null)
+	{
+		hud.remove(bg);
+		hud.insert(hud.members.indexOf(hb) + 1, bg);
+		
+		bg.color = 0xFFFFFFFF;
+		bg.loadGraphic(Paths.image("pixelUI/healthBar"));
+		bg.scale.set(6, 6);
+		bg.updateHitbox();
+		
+		adjustHealthBar();
+	
+	}else{
+		rosesHealthBar = false;
+	}
+}
+
+function onCountdownTick(tick)
+{
+	//trace("tick" + tick);
+	if (tick==3){
+		FlxTween.tween(timerCirc, {alpha: 1}, Conductor.crochet / 1000);
+	}
+	else if (tick == 4)
+	{
+		updateTimerTxt();
+		
+		timerSpecial.alpha = 0.0;
+		FlxTween.tween(timerSpecial, {alpha: 1}, Conductor.crochet / 1000);
+		
+		for (spr in timerNums){
+			spr.alpha = 0.0;
+			FlxTween.tween(spr, {alpha: 1}, Conductor.crochet / 1000);
+		}
+	}
+}
+
+function optionsChanged(changed:Array)
+{
+	//trace("yooo", changed);
+	if (rosesHealthBar && changed.contains("downScroll"))
+	{
+		adjustHealthBar();
+		bg.setPosition(hb.x - 5, hb.y - 5); // game is probably paused so it wont update
+	}
+	
+	if (ClientPrefs.timeBarType == "Disabled")
+	{
+		timerCirc.visible = false;
+		setTimerTxt("");
+		updateTime = false;
+	}else{
+	}
+	
+	if (ClientPrefs.timeBarType == "Song Name"){
+		
+	}
+	
+	adjustClock();
+}
 
 function roundTo(num, roundFactor){
-	return Math.round(num / 6) * 6;
+	return Math.round(num / roundFactor) * roundFactor;
+}
+
+function adjustHealthBar()
+{
+	bg.offset.set(
+		-0.5 * (bg.width - bg.frameWidth) - 5, 
+		-0.5 * (bg.height - bg.frameHeight) - 5
+	);
+	
+	var offY = bg.height / 2 - 5;
+	
+	bg.offset.y += offY;
+	bg.offset.x += (bg.width - hb.width) / 2;
+	
+	hb.y = (ClientPrefs.downScroll ? 0 : FlxG.height - bg.height) + offY;
+	
+	hud.iconP1.y = hb.y + (hb.height - hud.iconP1.height) / 2;
+	hud.iconP2.y = hb.y + (hb.height - hud.iconP2.height) / 2;
+}
+function adjustClock()
+{
+	timerCirc.y = Note.swagWidth / 2 + 45;
+	//timerCirc.flipY = ClientPrefs.downScroll;
+	if (ClientPrefs.downScroll) timerCirc.y = FlxG.height - timerCirc.y;
+	
+	for (spr in timerNums)
+		spr.y = timerCirc.y	- timerCirc.height / 2 + 11*6;
+		
+	hud.botplayTxt.y = timerCirc.y - hud.botplayTxt.height / 2;
+}
+
+function formatTime(time:Float)
+{
+	var displayMinutes = Std.string(Std.int(time / 60));
+	var displaySeconds = Std.string(Std.int(time % 60));
+	while (displaySeconds.length < 2)
+		displaySeconds = "0" + displaySeconds;
+	
+	return displayMinutes + ":" + displaySeconds;
+}
+
+function updateTimerTxt()
+{
+	var curTime:Float = Conductor.songPosition - ClientPrefs.noteOffset;
+	if (curTime < 0) curTime = 0;
+	
+	timerSpecial.exists = false;
+	switch (ClientPrefs.timeBarType)
+	{
+		case "Percentage":
+			setTimerTxt(Math.floor((curTime / game.songLength) * 100) + "%");
+			
+		case "Time Left":
+			setTimerTxt(formatTime((game.songLength - curTime) / 1000 / FlxG.timeScale));
+			
+		case "Time Elapsed":
+			setTimerTxt(formatTime(curTime / 1000 / FlxG.timeScale));
+			
+		case "Song Name":
+			setTimerTxt("");
+			timerSpecial.loadGraphic(Paths.image("pixelUI/clock-texts/"+game.songName));
+			timerSpecial.updateHitbox();
+			timerSpecial.x = (FlxG.width - timerSpecial.width) / 2;
+			timerSpecial.y = timerCirc.y - timerSpecial.height / 2;
+			timerSpecial.exists = true;
+			
+	}
+}
+
+function onUpdate(elapsed){	
+	if (!(game.startingSong || game.endingSong))
+		game.cpuControlled ? setTimerTxt("") : updateTimerTxt();
+}
+
+function setTimerTxt(text:String){
+	var splitText = text.split("");
+	var totalWidth = 5*6*splitText.length - 6;
+	var offset = 0;
+	
+	if (splitText.contains(":")){
+		totalWidth-=3*6;
+	}
+	
+	for (spr in timerNums){
+		spr.exists = false;
+	}
+	
+	for (i in 0...splitText.length){
+		var char = splitText[i];
+		
+		var spr = timerNums[i];
+		if (spr==null) spr = makeTimerSpr(char);
+		
+		spr.animation.play(char);
+		spr.exists = true;
+		
+		spr.x = timerCirc.x + timerCirc.width / 2 - totalWidth / 2 + i * 5*6 + offset;
+		
+		if (char==":"){
+			spr.x -= 6;
+			offset -= 3*6;
+		}
+	}
 }
 
 function anim(spr, startX, targetX, startY, targetY, prog){
@@ -46,7 +236,29 @@ function anim(spr, startX, targetX, startY, targetY, prog){
 	);
 }
 
-function prepareSpr(name, ?spr){
+var timerNumsGraphic = Paths.image("pixelUI/timer-nums");
+function makeTimerSpr(?name)
+{
+	var spr = new FlxSprite().loadGraphic(timerNumsGraphic, true, 5, 6);
+	spr.y = timerCirc.y	- timerCirc.height / 2 + 11*6;
+
+	for (i in 0...10)
+	spr.animation.add(""+i, [i], 0, false);
+	spr.animation.add("%", [10], 0, false);
+	spr.animation.add(":", [11], 0, false);
+	spr.animation.play((name != null) ? name : "0");
+	
+	spr.antialiasing = false;
+	spr.scale.set(6,6);
+	spr.updateHitbox();
+	
+	timerNums.push(spr);
+	hud.insert(hud.members.indexOf(timerCirc)+1, spr);
+	
+	return spr;
+}
+
+function prepareRatingSpr(name, ?spr){
 	var spr = spr!=null ? spr : ratingGroup.recycle(RatingSprite, null, false);
 	
 	spr.loadGraphic(Paths.image("pixelUI/"+name+"-pixel"));
@@ -78,13 +290,12 @@ function onDisplayCombo(combo)
 		
 	var bs = 0;
 	var totalWidth = 9 * 6 * splitCombo.length;
-	lr=!lr;
 	
 	var posX = roundTo(game.ratingOrigin[0] + ClientPrefs.comboOffset[2], 6);
 	var posY = roundTo(game.ratingOrigin[1] - ClientPrefs.comboOffset[3], 6);
 	
 	for (char in splitCombo){	
-		var spr = prepareSpr("num"+char);
+		var spr = prepareRatingSpr("num"+char);
 		spr.color = comboColor;
 
 		spr.setPosition(posX, posY);
@@ -94,7 +305,7 @@ function onDisplayCombo(combo)
 		);
 		
 		var startX	=	spr.offset.x;
-		var targetX =	spr.offset.x + 6*9*(lr ? 1 : -1);
+		var targetX =	spr.offset.x - 6*9;
 		var startY	=	spr.offset.y - spr.height;
 		var targetY =	spr.offset.y;
 		spr.tween = FlxTween.num(
@@ -113,87 +324,87 @@ function onDisplayCombo(combo)
 }
 
 /* function onDisplayCombo(combo:Int){
-    var hud = state.hud;
+	var hud = state.hud;
 
-    if (ClientPrefs.simpleJudge)
-    {
-        for (prevCombo in state.lastCombos)
-            prevCombo.kill();
-        
-        if (combo == 0)
-            return Function_Stop; 
-    }
-    else if (combo > 0 && combo < 10 && combo != 0)
-        return Function_Stop;
+	if (ClientPrefs.simpleJudge)
+	{
+		for (prevCombo in state.lastCombos)
+			prevCombo.kill();
+		
+		if (combo == 0)
+			return Function_Stop; 
+	}
+	else if (combo > 0 && combo < 10 && combo != 0)
+		return Function_Stop;
 
-    var separatedScore:Array<String> = Std.string(Math.abs(combo)).split("");
-    while (separatedScore.length < 3)
-        separatedScore.unshift("0");
-    if(combo < 0)
-        separatedScore.unshift("neg");
+	var separatedScore:Array<String> = Std.string(Math.abs(combo)).split("");
+	while (separatedScore.length < 3)
+		separatedScore.unshift("0");
+	if(combo < 0)
+		separatedScore.unshift("neg");
 
-    var daLoop:Int = 0;
+	var daLoop:Int = 0;
 
-    var col = combo < 0 ? hud.judgeColours.get("miss") : state.comboColor;
+	var col = combo < 0 ? hud.judgeColours.get("miss") : state.comboColor;
 
-    var numStartX:Float = (FlxG.width - separatedScore.length * 41) * 0.5 + ClientPrefs.comboOffset[2];
-    for (i in separatedScore)
-    {
-        var numScore:RatingSprite = ratingGroup.recycle(RatingSprite);
-        numScore.loadGraphic(Paths.image('pixelUI/num' + i + "-pixel"));
-        numScore.antialiasing = false;
-        numScore.scale.set(5, 5);
-        numScore.updateHitbox();
-        
-        
-        numScore.screenCenter();
-        numScore.x = numStartX + 41.5 * daLoop;
-        numScore.y -= ClientPrefs.comboOffset[3];
-        if(ClientPrefs.simpleJudge)
-            numScore.y -= 20;
+	var numStartX:Float = (FlxG.width - separatedScore.length * 41) * 0.5 + ClientPrefs.comboOffset[2];
+	for (i in separatedScore)
+	{
+		var numScore:RatingSprite = ratingGroup.recycle(RatingSprite);
+		numScore.loadGraphic(Paths.image('pixelUI/num' + i + "-pixel"));
+		numScore.antialiasing = false;
+		numScore.scale.set(5, 5);
+		numScore.updateHitbox();
+		
+		
+		numScore.screenCenter();
+		numScore.x = numStartX + 41.5 * daLoop;
+		numScore.y -= ClientPrefs.comboOffset[3];
+		if(ClientPrefs.simpleJudge)
+			numScore.y -= 20;
 
-        numScore.color = col;
-        numScore.visible = state.showComboNum;
+		numScore.color = col;
+		numScore.visible = state.showComboNum;
 
-        numScore.ID = daLoop;
-        numScore.moves = !ClientPrefs.simpleJudge;
-        if (numScore.tween != null){
-            numScore.tween.cancel();
-            numScore.tween.destroy();
-        }
+		numScore.ID = daLoop;
+		numScore.moves = !ClientPrefs.simpleJudge;
+		if (numScore.tween != null){
+			numScore.tween.cancel();
+			numScore.tween.destroy();
+		}
 
-        ratingGroup.remove(numScore, true);
-        ratingGroup.add(numScore);
+		ratingGroup.remove(numScore, true);
+		ratingGroup.add(numScore);
 
-        numScore.alpha = ClientPrefs.judgeOpacity;
-        if (ClientPrefs.simpleJudge)
-        {
-            numScore.tween = FlxTween.tween(numScore, {y: numScore.y + 20}, 0.2, {ease: FlxEase.circOut});
-            state.lastCombos.push(numScore);
-        }
-        else
-        {
-            numScore.acceleration.y = FlxG.random.int(200, 300);
-            numScore.velocity.set(FlxG.random.float(-10, 10), -FlxG.random.int(140, 160));
+		numScore.alpha = ClientPrefs.judgeOpacity;
+		if (ClientPrefs.simpleJudge)
+		{
+			numScore.tween = FlxTween.tween(numScore, {y: numScore.y + 20}, 0.2, {ease: FlxEase.circOut});
+			state.lastCombos.push(numScore);
+		}
+		else
+		{
+			numScore.acceleration.y = FlxG.random.int(200, 300);
+			numScore.velocity.set(FlxG.random.float(-10, 10), -FlxG.random.int(140, 160));
 
-            numScore.tween = FlxTween.tween(numScore, {alpha: 0}, 0.2, {
-                onComplete: function(wtf)
-                {
-                    numScore.kill();
-                },
-                startDelay: Conductor.crochet * 0.002
-            });
-        }
+			numScore.tween = FlxTween.tween(numScore, {alpha: 0}, 0.2, {
+				onComplete: function(wtf)
+				{
+					numScore.kill();
+				},
+				startDelay: Conductor.crochet * 0.002
+			});
+		}
 
-        daLoop++;
-    }
-    return Function_Stop;
+		daLoop++;
+	}
+	return Function_Stop;
 }
  */
  
  
 function onDisplayJudgment(name){
-	var spr = prepareSpr(name);
+	var spr = prepareRatingSpr(name);
 	spr.color = 0xFFFFFFFF;
 	
 	spr.setPosition(
@@ -206,7 +417,7 @@ function onDisplayJudgment(name){
 	);
 	
 	var startX	=	spr.offset.x;
-	var targetX =	spr.offset.x + 6*9*(lr=!lr ? 1 : -1);
+	var targetX =	spr.offset.x + 6*9;
 	var startY	=	spr.offset.y - spr.height;
 	var targetY =	spr.offset.y;
 	spr.tween = FlxTween.num(
@@ -224,91 +435,109 @@ function onDisplayJudgment(name){
 
  /* 
 function onDisplayJudgmentPost(rating, image){
-    if(!pixelJudges.contains(image))return;
-    rating.loadGraphic(Paths.image("pixelUI/" + image + "-pixel"));
-    rating.antialiasing = false;
-    if(ClientPrefs.simpleJudge){
-        rating.x += 5;
-        rating.y -= 5;
-        var time = (Conductor.stepCrochet * 0.001);
-        rating.scale.set(5 * 1.1, 5 * 1.1);
-        rating.updateHitbox();
+	if(!pixelJudges.contains(image))return;
+	rating.loadGraphic(Paths.image("pixelUI/" + image + "-pixel"));
+	rating.antialiasing = false;
+	if(ClientPrefs.simpleJudge){
+		rating.x += 5;
+		rating.y -= 5;
+		var time = (Conductor.stepCrochet * 0.001);
+		rating.scale.set(5 * 1.1, 5 * 1.1);
+		rating.updateHitbox();
 
-        if (rating.tween != null)
-        {
-            rating.tween.cancel();
-            rating.tween.destroy();
-        }
+		if (rating.tween != null)
+		{
+			rating.tween.cancel();
+			rating.tween.destroy();
+		}
 
-        rating.tween = FlxTween.tween(rating.scale, {x: 5, y: 5}, 0.1, {
-            ease: FlxEase.quadOut,
-            onComplete: function(tween:FlxTween)
-            {
-                if (!rating.alive)
-                    return;
+		rating.tween = FlxTween.tween(rating.scale, {x: 5, y: 5}, 0.1, {
+			ease: FlxEase.quadOut,
+			onComplete: function(tween:FlxTween)
+			{
+				if (!rating.alive)
+					return;
 
-                rating.tween = FlxTween.tween(rating.scale, {x: 0, y: 0}, time, {
-                    startDelay: time * 8,
-                    ease: FlxEase.quadIn,
-                    onComplete: function(tween:FlxTween)
-                    {
-                        rating.kill();
-                    }
-                });
-            }
-        });
-    }else{
-        rating.scale.set(5, 5);
-        rating.updateHitbox();
-    }
-    
+				rating.tween = FlxTween.tween(rating.scale, {x: 0, y: 0}, time, {
+					startDelay: time * 8,
+					ease: FlxEase.quadIn,
+					onComplete: function(tween:FlxTween)
+					{
+						rating.kill();
+					}
+				});
+			}
+		});
+	}else{
+		rating.scale.set(5, 5);
+		rating.updateHitbox();
+	}
+	
 } */
 
-function setupNoteTexture(note:Note){
-    if(note.isSustainNote)
-        note.reloadNote(note.texPrefix, 'NOTE_assets', note.texSuffix + 'ENDS', 'pixelUI', 4, 2);
-    else
-        note.reloadNote(note.texPrefix, 'NOTE_assets', note.texSuffix, 'pixelUI', 4, 5);
+function makeCountdownSprite(sprImage, swagCounter, tmr){
+	var countdownSpr = new FlxSprite(0, 0, sprImage);
+	countdownSpr.scrollFactor.set();
+	countdownSpr.scale.set(6, 6);
+	countdownSpr.updateHitbox();
+	countdownSpr.cameras = [state.camHUD];
+	countdownSpr.screenCenter();
+	countdownSpr.antialiasing = false;
+	return countdownSpr;
+}
 
-    note.setGraphicSize(Std.int(note.width * 6));
-    note.antialiasing = false;
+function setupNoteTexture(note:Note){
+	if(note.isSustainNote)
+		note.reloadNote(note.texPrefix, 'NOTE_assets', note.texSuffix + 'ENDS', 'pixelUI', 4, 2);
+	else
+		note.reloadNote(note.texPrefix, 'NOTE_assets', note.texSuffix, 'pixelUI', 4, 5);
+
+	note.scale.set(6, 6);
+	note.antialiasing = false;
 }
 
 function setupReceptorTexture(strum:StrumNote){
-    strum.isQuant = false;
-    var lastAnim:String = null;
-    if(strum.animation.curAnim != null) lastAnim = strum.animation.curAnim.name;
-    var br:String = 'NOTE_assets';
-    if (PlayState.SONG.arrowSkin != null && PlayState.SONG.arrowSkin.length > 1)
-        br = PlayState.SONG.arrowSkin;
+	strum.isQuant = false;
+	
+	var lastAnim:String = null;
+	if (strum.animation.curAnim != null) 
+		lastAnim = strum.animation.curAnim.name;
+	
+	var br:String = 'NOTE_assets';
+	if (PlayState.SONG.arrowSkin != null && PlayState.SONG.arrowSkin.length > 1)
+		br = PlayState.SONG.arrowSkin;
+	
+	if (ClientPrefs.noteSkin == 'Quants')
+	{
+		if (Paths.exists(Paths.getPath("images/pixelUI/QUANT" + br + ".png", "IMAGE")) || Paths.exists(Paths.modsImages("pixelUI/QUANT" + br))) {
+			br = "QUANT" + br;
+			strum.isQuant = true;
+		}
+	}
+	
+	// TODO: add an easy way to do indices for strums
 
-    
-    if (ClientPrefs.noteSkin == 'Quants')
-    {
-        if (Paths.exists(Paths.getPath("images/pixelUI/QUANT" + br + ".png", "IMAGE")) || Paths.exists(Paths.modsImages("pixelUI/QUANT" + br))) {
-            br = "QUANT" + br;
-            strum.isQuant = true;
-        }
-    }
-    
-    // TODO: add an easy way to do indices for strums
+	var graphic = Paths.image("pixelUI/" + br);
+	strum.loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
+	strum.animation.add('static', [strum.noteData]);
+	strum.animation.add('pressed', [strum.noteData + 4, strum.noteData + 8], 12, false);
+	strum.animation.add('confirm', [strum.noteData + 12, strum.noteData + 16], 16, false);
+	strum.playAnim("static", true);
+	strum.antialiasing = false;
 
-    strum.loadGraphic(Paths.image("pixelUI/" + br));
-    strum.width /= 4;
-    strum.height /= 5;
-    strum.loadGraphic(Paths.image("pixelUI/" + br), true, Math.floor(strum.width), Math.floor(strum.height));
-    strum.animation.add('static', [strum.noteData]);
-    strum.animation.add('pressed', [strum.noteData + 4, strum.noteData + 8], 12, false);
-    strum.animation.add('confirm', [strum.noteData + 12, strum.noteData + 16], 16, false);
-    strum.scale.set(6, 6);
-    strum.playAnim("static", true);
-    
-    strum.defScale.x = strum.scale.x;
-    strum.defScale.y = strum.scale.y;
-    strum.updateHitbox();
-    strum.antialiasing = false;
-    if(lastAnim != null)
-    {
-        strum.playAnim(lastAnim, true);
-    }
+	strum.scale.set(6, 6);    
+	strum.updateHitbox();
+
+	strum.defScale.x = strum.scale.x;
+	strum.defScale.y = strum.scale.y;
+	
+	if(lastAnim != null)
+	{
+		strum.playAnim(lastAnim, true);
+	}
+}
+
+function preSetupNoteSplash(){
+	this.kill();
+	return Function_Stop;
 }
