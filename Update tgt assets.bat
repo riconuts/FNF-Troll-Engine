@@ -11,5 +11,5 @@ if confirm == "Y" (
 exit
 ) else (
 rmdir /s assets
-xcopy /e %cd%\export\release\windows\bin\assets\ %cd%\assets\
+xcopy /e %cd%\export\release-tgt\windows\bin\assets\ %cd%\assets\
 )
