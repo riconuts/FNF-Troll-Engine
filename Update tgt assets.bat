@@ -10,6 +10,6 @@ if confirm == "y" set confirm="Y"
 if confirm == "Y" (
 exit
 ) else (
-rmdir /s assets
+rmdir /s assets-tgt
 xcopy /e %cd%\export\release-tgt\windows\bin\assets\ %cd%\assets-tgt\
 )
