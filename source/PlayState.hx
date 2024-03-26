@@ -4804,10 +4804,10 @@ class FNFHealthBar extends FlxBar{
 	public function new(bfHealthIcon = "face", dadHealthIcon = "face")
 	{
 		//
+		var graphic = Paths.image('healthBar');
+
 		healthBarBG = new FlxSprite(0, FlxG.height * (ClientPrefs.downScroll ? 0.11 : 0.89));
-		//healthBarBG.loadGraphic(Paths.image('healthBar'));
-		healthBarBG.makeGraphic(600, 18);
-		healthBarBG.color = 0xFF000000;
+		(graphic==null) ? healthBarBG.makeGraphic(600, 18, 0xFF000000) : healthBarBG.loadGraphic(graphic);	
 		healthBarBG.screenCenter(X);
 		healthBarBG.scrollFactor.set();
 		healthBarBG.antialiasing = false;
