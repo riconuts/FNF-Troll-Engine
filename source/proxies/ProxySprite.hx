@@ -1,5 +1,6 @@
 package proxies;
 
+import flixel.math.FlxRect;
 import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
 
 class ProxySprite extends FlxSprite {
@@ -8,7 +9,32 @@ class ProxySprite extends FlxSprite {
     public function new(x:Float, y:Float, sprite:FlxSprite){
         super(x, y);
         proxiedSprite = sprite;
-    }
+	}
+
+	override public function getScreenBounds(?newRect:FlxRect, ?camera:FlxCamera):FlxRect
+	{
+		if (newRect == null)
+			newRect = FlxRect.get();
+
+		if (camera == null)
+			camera = FlxG.camera;
+
+		var originX = proxiedSprite.origin.x + origin.x; 
+		var originY = proxiedSprite.origin.y + origin.y;
+		var scaleX = scale.x * proxiedSprite.scale.x;
+		var scaleY = scale.y * proxiedSprite.scale.y;
+
+		newRect.setPosition(x, y);
+		if (pixelPerfectPosition)
+			newRect.floor();
+		_scaledOrigin.set(originX * scaleX, originY * scaleY);
+		newRect.x += -Std.int(camera.scroll.x * scrollFactor.x) - offset.x + originX - _scaledOrigin.x;
+		newRect.y += -Std.int(camera.scroll.y * scrollFactor.y) - offset.y + originY - _scaledOrigin.y;
+		if (isPixelPerfectRender(camera))
+			newRect.floor();
+		newRect.setSize(proxiedSprite.frameWidth * Math.abs(scaleX), proxiedSprite.frameHeight * Math.abs(scaleY));
+		return newRect.getRotatedBounds(angle, _scaledOrigin, newRect);
+	}
 
 	@:noCompletion
 	override function drawSimple(camera:FlxCamera):Void
