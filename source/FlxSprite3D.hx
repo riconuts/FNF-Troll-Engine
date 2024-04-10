@@ -41,9 +41,8 @@ class FlxSprite3D extends FlxSprite {
 		var halfW = wid * 0.5;
 		var halfH = hei * 0.5;
 
-        
-        var camPos = new Vector3(0, 0, 1280);
-		var camOrigin = new Vector3(FlxG.width / 2, FlxG.height / 2); // vertex origin
+		var camPos = new Vector3();
+		var camOrigin = new Vector3(); // vertex origin
 
         // TODO: take origin into account properly without this bandaid fix vv
 
@@ -53,6 +52,9 @@ class FlxSprite3D extends FlxSprite {
 		{
 			if (!camera.visible || !camera.exists || camera.canvas == null || camera.canvas.graphics == null)
 				continue;
+			
+			camPos.setTo(camera.scroll.x, camera.scroll.y, Math.max(camera.width, camera.height));
+			camOrigin.setTo(camera.width / 2, camera.height / 2, 0);
 
 			var quad = [
 				new Vector3(-halfW, -halfH, 0),
@@ -125,7 +127,6 @@ class FlxSprite3D extends FlxSprite {
 			shader.bitmap.input = graphic.bitmap;
 			shader.bitmap.filter = antialiasing ? LINEAR : NEAREST;
 
-
 			var transforms:Array<ColorTransform> = [];
             var transfarm:ColorTransform = new ColorTransform();
 			transfarm.redMultiplier = colorTransform.redMultiplier;
@@ -142,7 +143,7 @@ class FlxSprite3D extends FlxSprite {
     
 
 			var indices = new Vector<Int>(vertices.length, false, cast [for (i in 0...vertices.length) i]);
-			var drawItem = camera.startTrianglesBatch(graphic, antialiasing, true, null, true, shader);
+			var drawItem = camera.startTrianglesBatch(graphic, antialiasing, true, blend, true, shader);
 
 			@:privateAccess
 			{
