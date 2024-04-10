@@ -65,7 +65,7 @@ class ReverseModifier extends NoteModifier
 
 	override function getPos(visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
 	{
-		var swagOffset = Note.swagWidth / 2 + 45;
+		var swagOffset = Note.swagWidth / 2 + modMgr.vPadding;
 		var reversePerc = getReverseValue(data, player);
 		var shift = lerp(swagOffset, FlxG.height - swagOffset, reversePerc);
 		

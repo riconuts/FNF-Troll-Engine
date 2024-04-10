@@ -428,6 +428,7 @@ class ModManager {
 
  	public var playerAmount:Int = 2;
 	public var playerOOBIsCentered:Bool = true; // Player Out of Bounds is centered
+	public var vPadding:Float = 45;
 
 	public function getBaseX(direction:Int, player:Float, receptorAmount:Int = 4):Float
 	{
