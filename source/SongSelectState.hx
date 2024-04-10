@@ -72,29 +72,38 @@ class SongSelectState extends MusicBeatState
 		}
 		#end
 
-		var border = 8;
-		var spacing = 2;
+		var hPadding = 14;
+		var vPadding = 24;
+		var spacing = 3;
 		var textSize = 16;
 		var width = 16*textSize;
 
 		var ySpace = (textSize+spacing);
 
-		verticalLimit = Math.floor((FlxG.height - border*2)/ySpace);
+		verticalLimit = Math.floor((FlxG.height - vPadding*2)/ySpace);
 
 		for (id in 0...songMeta.length)
 		{
 			var text = new FlxText(
-				border + (Math.floor(id/verticalLimit) * width), 
-				border + (ySpace*(id%verticalLimit)), 
+				hPadding + (Math.floor(id/verticalLimit) * width), 
+				vPadding + (ySpace*(id%verticalLimit)), 
 				width, 
 				songMeta[id].songName,
 				textSize
 			);
+			text.wordWrap = false;
+			text.antialiasing = false;
 			songText.push(text);
 			add(text);
 		}
 
 		curSel = 0;
+
+		var versionTxt = new FlxText(0, 0, 0, Main.displayedVersion, 12);
+		versionTxt.setPosition(FlxG.width - 2 - versionTxt.width, FlxG.height - 2 - versionTxt.height);
+		versionTxt.alpha = 0.6;
+		versionTxt.antialiasing = false;
+		add(versionTxt);
 
 		super.create();
 	}
@@ -106,40 +115,40 @@ class SongSelectState extends MusicBeatState
 	{
 		var speed = 1;
 
-		if (controls.UI_DOWN_P){
-			curSel += speed;
-			ySecsHolding = 0;
-		}
-		if (controls.UI_UP_P){
-			curSel -= speed;
-			ySecsHolding = 0;
-		}
-
 		if (controls.UI_UP || controls.UI_DOWN){
+			if (controls.UI_DOWN_P){
+				curSel += speed;
+				ySecsHolding = 0;
+			}
+			if (controls.UI_UP_P){
+				curSel -= speed;
+				ySecsHolding = 0;
+			}
+
 			var checkLastHold:Int = Math.floor((ySecsHolding - 0.5) * 10);
 			ySecsHolding += e;
 			var checkNewHold:Int = Math.floor((ySecsHolding - 0.5) * 10);
 
 			if(ySecsHolding > 0.35 && checkNewHold - checkLastHold > 0)
-				curSel += (checkNewHold - checkLastHold) * (controls.UI_UP ? -speed : speed);
-		}
-
-		if (controls.UI_RIGHT_P){
-			curSel += verticalLimit;
-			ySecsHolding = 0;
-		}
-		if (controls.UI_LEFT_P){
-			curSel -= verticalLimit;
-			ySecsHolding = 0;
+				curSel += (checkNewHold - checkLastHold) * (controls.UI_UP ? -1 : 1) * speed;
 		}
 
 		if (controls.UI_LEFT || controls.UI_RIGHT){
+			if (controls.UI_RIGHT_P){
+				curSel += verticalLimit;
+				ySecsHolding = 0;
+			}
+			if (controls.UI_LEFT_P){
+				curSel -= verticalLimit;
+				ySecsHolding = 0;
+			}
+
 			var checkLastHold:Int = Math.floor((ySecsHolding - 0.5) * 10);
 			ySecsHolding += e;
 			var checkNewHold:Int = Math.floor((ySecsHolding - 0.5) * 10);
 
 			if(ySecsHolding > 0.35 && checkNewHold - checkLastHold > 0)
-				curSel += (checkNewHold - checkLastHold) * (controls.UI_UP ? -verticalLimit : verticalLimit);
+				curSel += (checkNewHold - checkLastHold) * (controls.UI_LEFT_P ? -1 : 1) * verticalLimit;
 		}
 
 		if (controls.ACCEPT){
@@ -156,6 +165,8 @@ class SongSelectState extends MusicBeatState
             MusicBeatState.switchState(new MainMenuState());
 		else if (FlxG.keys.justPressed.SEVEN)
 			MusicBeatState.switchState(new editors.MasterEditorMenu());
+		else if (FlxG.keys.justPressed.SIX)
+			MusicBeatState.switchState(new options.OptionsState());
 
 		super.update(e);
 	}

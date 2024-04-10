@@ -732,8 +732,8 @@ class HScriptSubstate extends MusicBeatSubstate
 			variables.set("close", close);
 
 			if (additionalVars != null){
-				for (key in additionalVars.keys())
-					variables.set(key, additionalVars.get(key));
+				for (key => val in additionalVars)
+					variables.set(key, val);
 			}
 
 			script = FunkinHScript.fromFile(filePath, variables);

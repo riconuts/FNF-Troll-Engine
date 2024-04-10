@@ -22,7 +22,7 @@ import sys.io.File;
 import Discord.DiscordClient;
 #end
 
-#if (windows && cpp)
+#if (CRASH_HANDLER && windows && cpp)
 @:cppFileCode('#include <windows.h>')
 #end
 class Main extends Sprite
@@ -37,8 +37,6 @@ class Main extends Sprite
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
-	public static var showDebugTraces:Bool = #if (SHOW_DEBUG_TRACES || debug) true #else false #end;
-
 	public static var engineVersion:String = '0.2.0'; // Used for autoupdating n stuff
 	public static var betaVersion(get, default):String = 'rc.1'; // beta version, make blank if not on a beta version, otherwise do it based on semantic versioning (alpha.1, beta.1, rc.1, etc)
 	public static var beta:Bool = betaVersion.trim() != '';
@@ -48,13 +46,16 @@ class Main extends Sprite
 	public static var downloadBetas:Bool = beta;
 	public static var outOfDate:Bool = false;
 	public static var recentRelease:Release;
-	
+
+	public static var showDebugTraces:Bool = #if (SHOW_DEBUG_TRACES || debug) true #else false #end;
+
+	static function get_betaVersion()
+		return beta ? betaVersion : "0";
+
 	@:isVar
 	public static var displayedVersion(get, null):String = '';
 	static function get_displayedVersion()
-		return 'v${engineVersion}${(beta?("-" + betaVersion):"")}';
-	static function get_betaVersion()
-		return beta ? betaVersion : "0";
+		return 'v$engineVersion${beta ? '-$betaVersion' : ""}';
 	    
 	////
 	public static var fpsVar:FPS;
@@ -98,12 +99,12 @@ class Main extends Sprite
 
 	private function setupGame():Void
 	{
+		final screenWidth = Capabilities.screenResolutionX;
+		final screenHeight = Capabilities.screenResolutionY;
+
 		//// Readjust the game size for smaller screens
 		if (zoom == -1)
 		{
-			var screenWidth = Capabilities.screenResolutionX;
-			var screenHeight = Capabilities.screenResolutionY;
-
 			if (!(screenWidth > gameWidth || screenHeight > gameWidth)){
 				var ratioX:Float = screenWidth / gameWidth;
 				var ratioY:Float = screenHeight / gameHeight;
@@ -142,6 +143,23 @@ class Main extends Sprite
 			@:privateAccess
 			FlxG.initSave();
 
+			//// Readjust the window size for larger screens 
+			var scaleFactor:Int = Math.ceil((screenWidth > screenHeight) ? (screenHeight / gameHeight) : (screenWidth / gameWidth));
+			if (scaleFactor > 1) scaleFactor--;
+			
+			final windowWidth:Int = scaleFactor * gameWidth;
+			final windowHeight:Int = scaleFactor * gameHeight;
+
+			Application.current.window.resize(
+				windowWidth, 
+				windowHeight
+			);
+			Application.current.window.move(
+				Std.int((screenWidth - windowWidth) / 2),
+				Std.int((screenHeight - windowHeight) / 2)
+			);
+
+			////
 			if (FlxG.save.data != null && FlxG.save.data.fullscreen != null)
 				startFullscreen = FlxG.save.data.fullscreen;
 		}
