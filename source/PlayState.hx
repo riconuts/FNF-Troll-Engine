@@ -2334,10 +2334,10 @@ class PlayState extends MusicBeatState
 	}
 
 	override function draw(){
-        if(!(subState is GameOverSubstate))
-		    camStageUnderlay.bgColor.alphaFloat = ClientPrefs.stageOpacity;
-        else
-            camStageUnderlay.bgColor.alphaFloat = 0;
+		if((subState is GameOverSubstate))
+			camStageUnderlay.bgColor.alphaFloat = 0;
+		else
+			camStageUnderlay.bgColor.alphaFloat = ClientPrefs.stageOpacity;
 
         var ret:Dynamic = callOnScripts('onStateDraw');
 		if(ret != Globals.Function_Stop) 
@@ -2445,7 +2445,7 @@ class PlayState extends MusicBeatState
 
 
 			#if discord_rpc
-			if (startTimer != null && startTimer.finished)
+			if (Conductor.songPosition > 0.0)
 			{
 				DiscordClient.changePresence(detailsText, SONG.song, songName, true, songLength - Conductor.songPosition - ClientPrefs.noteOffset);
 			}
@@ -2775,9 +2775,7 @@ class PlayState extends MusicBeatState
 
 		if (generatedMusic)
 		{
-			if (!inCutscene){
-				keyShit();
-			}
+			keyShit();
 
 			for(field in playfields)
 			{
@@ -3728,7 +3726,6 @@ class PlayState extends MusicBeatState
 			else if (stats.judgements.get("epic") > 0)
 				comboColor = hud.judgeColours.get("epic");
 		}
-        
 
         if(hudSkinScript!=null)callScript(hudSkinScript, "onApplyJudgmentDataPost", [judgeData, diff, bot, show]);
         callOnScripts("onApplyJudgmentDataPost", [judgeData, diff, bot, show]);
@@ -3836,7 +3833,7 @@ class PlayState extends MusicBeatState
 
 	private function onKeyPress(event:KeyboardEvent):Void
 	{
-		if (paused || !startedCountdown)
+		if (paused || !startedCountdown || inCutscene)
 			return;
 
 		var eventKey:FlxKey = event.keyCode;
@@ -3939,6 +3936,9 @@ class PlayState extends MusicBeatState
 
 	private function keyShit():Void
 	{
+		if (inCutscene) return;
+
+
 		// HOLDING
 		var parsedHoldArray:Array<Bool> = parseKeys();
 		pressedGameplayKeys = parsedHoldArray;
