@@ -188,21 +188,21 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 	// queues a note to be spawned
 	public function queue(note:Note){
-		if(noteQueue[note.noteData]==null)
-			noteQueue[note.noteData] = [];
-		noteQueue[note.noteData].push(note);
+		if(noteQueue[note.column]==null)
+			noteQueue[note.column] = [];
+		noteQueue[note.column].push(note);
 
-		noteQueue[note.noteData].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
+		noteQueue[note.column].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
 		
 	}
 
 	// unqueues a note
 	public function unqueue(note:Note)
 	{
-		if (noteQueue[note.noteData] == null)
-			noteQueue[note.noteData] = [];
-		noteQueue[note.noteData].remove(note);
-		noteQueue[note.noteData].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
+		if (noteQueue[note.column] == null)
+			noteQueue[note.column] = [];
+		noteQueue[note.column].remove(note);
+		noteQueue[note.column].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
 	}
 
 	// destroys a note
@@ -214,11 +214,11 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 		daNote.kill();
 		spawnedNotes.remove(daNote);
-		if (spawnedByData[daNote.noteData] != null)
-			spawnedByData[daNote.noteData].remove(daNote);
+		if (spawnedByData[daNote.column] != null)
+			spawnedByData[daNote.column].remove(daNote);
 
-		if (noteQueue[daNote.noteData] != null)
-			noteQueue[daNote.noteData].remove(daNote);
+		if (noteQueue[daNote.column] != null)
+			noteQueue[daNote.column].remove(daNote);
 
 		if (daNote.unhitTail.length > 0)
 			while (daNote.unhitTail.length > 0)
@@ -231,8 +231,8 @@ class PlayField extends FlxTypedGroup<FlxBasic>
  		if (daNote.parent != null && daNote.parent.unhitTail.contains(daNote))
 			daNote.parent.unhitTail.remove(daNote); 
 
-		if (noteQueue[daNote.noteData] != null)
-			noteQueue[daNote.noteData].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
+		if (noteQueue[daNote.column] != null)
+			noteQueue[daNote.column].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
 		remove(daNote);
 		daNote.destroy();
 	}
@@ -242,13 +242,13 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		if(note.spawned)
 			return;
 		
-		if (noteQueue[note.noteData]!=null){
-			noteQueue[note.noteData].remove(note);
-			noteQueue[note.noteData].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
+		if (noteQueue[note.column]!=null){
+			noteQueue[note.column].remove(note);
+			noteQueue[note.column].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
 		}
 
-		if (spawnedByData[note.noteData]!=null)
-			spawnedByData[note.noteData].push(note);
+		if (spawnedByData[note.column]!=null)
+			spawnedByData[note.column].push(note);
 		else
 			return;
 		
@@ -281,7 +281,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	
 	// returns true if the playfield has the note, false otherwise.
 	public function hasNote(note:Note)
-		return spawnedNotes.contains(note) || noteQueue[note.noteData]!=null && noteQueue[note.noteData].contains(note);
+		return spawnedNotes.contains(note) || noteQueue[note.column]!=null && noteQueue[note.column].contains(note);
 	
 	// sends an input to the playfield
 	public function input(data:Int){
@@ -351,9 +351,9 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 	public function spawnSplash(note:Note, splashSkin:String){
 		var skin:String = splashSkin;
-		var hue:Float = ClientPrefs.arrowHSV[note.noteData % 4][0] / 360;
-		var sat:Float = ClientPrefs.arrowHSV[note.noteData % 4][1] / 100;
-		var brt:Float = ClientPrefs.arrowHSV[note.noteData % 4][2] / 100;
+		var hue:Float = ClientPrefs.arrowHSV[note.column % 4][0] / 360;
+		var sat:Float = ClientPrefs.arrowHSV[note.column % 4][1] / 100;
+		var brt:Float = ClientPrefs.arrowHSV[note.column % 4][2] / 100;
 
 		if (note != null)
 		{
@@ -364,7 +364,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		}
 
 		var splash:NoteSplash = grpNoteSplashes.recycle(NoteSplash);
-		splash.setupNoteSplash(0, 0, note.noteData, skin, hue, sat, brt, note);
+		splash.setupNoteSplash(0, 0, note.column, skin, hue, sat, brt, note);
 		splash.handleRendering = false;
 		grpNoteSplashes.add(splash);
 		return splash;
@@ -424,16 +424,16 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 			// check for hold inputs
 			if(!daNote.isSustainNote){
-				if(daNote.noteData > keyCount-1){
+				if(daNote.column > keyCount-1){
 					garbage.push(daNote);
 					continue;
 				}
 				if(daNote.holdingTime < daNote.sustainLength && inControl && !daNote.blockHit){
 					if(!daNote.tooLate && daNote.wasGoodHit){
-						var isHeld = autoPlayed || keysPressed[daNote.noteData];
+						var isHeld = autoPlayed || keysPressed[daNote.column];
 						//if(daNote.isRoll)isHeld = false; // roll logic is done on press
 						// TODO: write that logic tho
-						var receptor = strumNotes[daNote.noteData];							
+						var receptor = strumNotes[daNote.column];							
 
 						daNote.holdingTime = Conductor.songPosition - daNote.strumTime;
 						
@@ -561,7 +561,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		var collected:Array<Note> = [];
 		for (note in spawnedByData[dir])
 		{
-			if (note.alive && note.noteData == dir && !note.wasGoodHit && !note.tooLate)
+			if (note.alive && note.column == dir && !note.wasGoodHit && !note.tooLate)
 			{
 				if (filter == null || filter(note))
 					collected.push(note);
@@ -579,7 +579,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		for (note in spawnedByData[dir])
 		{
 			if (note.strumTime>end)break;
-			if (note.alive && note.noteData == dir && !note.wasGoodHit && !note.tooLate)
+			if (note.alive && note.column == dir && !note.wasGoodHit && !note.tooLate)
 			{
 				if (filter == null || filter(note))
 					collected.push(note);

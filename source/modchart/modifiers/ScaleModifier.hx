@@ -97,7 +97,7 @@ class ScaleModifier extends NoteModifier {
 			return info;
 
 		var obj:NoteObject = cast sprite;
-		var scale = daScale(obj, info.scale, obj.noteData, player);
+		var scale = daScale(obj, info.scale, obj.column, player);
 		if ((sprite is Note))
 		{
 			var note:Note = cast sprite;

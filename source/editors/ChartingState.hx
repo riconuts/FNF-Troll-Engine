@@ -2197,10 +2197,10 @@ class ChartingState extends MusicBeatState
 		curRenderedNotes.forEachAlive(function(note:Note) {
 			if (updateSelectedNote) 
 			{
-				var noteDataToCheck:Int = note.noteData;
-				if(noteDataToCheck > -1 && note.mustPress != _song.notes[curSec].mustHitSection) noteDataToCheck += 4;
+				var columnToCheck:Int = note.column;
+				if(columnToCheck > -1 && note.mustPress != _song.notes[curSec].mustHitSection) columnToCheck += 4;
 
-				if (curSelectedNote[0] == note.strumTime && (curSelectedNote[2]==null ? noteDataToCheck<0 : curSelectedNote[1]==noteDataToCheck))
+				if (curSelectedNote[0] == note.strumTime && (curSelectedNote[2]==null ? columnToCheck<0 : curSelectedNote[1]==columnToCheck))
 				{
 					colorSine += elapsed;
 
@@ -2217,18 +2217,18 @@ class ChartingState extends MusicBeatState
 			{
 				if (note.alpha != 0.4 && FlxG.sound.music.playing) 
 				{
-					if (note.noteData > -1)
+					if (note.column > -1)
 					{
 						// This is a note.
 
 						if (!note.ignoreNote)
 						{
-							var data:Int = note.noteData;
-							var noteDataToCheck:Int = data;
-							if (noteDataToCheck > -1 && note.mustPress != _song.notes[curSec].mustHitSection) 
-								noteDataToCheck += 4;
+							var data:Int = note.column;
+							var columnToCheck:Int = data;
+							if (columnToCheck > -1 && note.mustPress != _song.notes[curSec].mustHitSection) 
+								columnToCheck += 4;
 
-							var strum:StrumNote = strumLineNotes.members[noteDataToCheck];
+							var strum:StrumNote = strumLineNotes.members[columnToCheck];
 							strum.playAnim('confirm', true, note);
 							strum.resetAnim = (note.sustainLength / 1000) + 0.15;
 						
@@ -2238,7 +2238,7 @@ class ChartingState extends MusicBeatState
 								if(_song.player1 == 'gf') // Easter egg
 									soundToPlay = 'GF_${data + 1}';
 	
-								FlxG.sound.play(Paths.sound(soundToPlay)).pan = (note.noteData < 4) ? -0.3 : 0.3; //would be coolio
+								FlxG.sound.play(Paths.sound(soundToPlay)).pan = (note.column < 4) ? -0.3 : 0.3; //would be coolio
 								playedSound[data] = true;
 							}
 							
@@ -2851,11 +2851,11 @@ class ChartingState extends MusicBeatState
 
 	function setupNoteData(i:Array<Dynamic>, isNextSection:Bool):Note
 	{
-		var daNoteInfo = i[1];
+		var daColumn = i[1];
 		var daStrumTime = i[0];
 		var daSus:Dynamic = i[2];
 
-		var note:Note = new Note(daStrumTime, daNoteInfo % 4, null, false, false, true);
+		var note:Note = new Note(daStrumTime, daColumn % 4, null, false, false, true);
 		if(daSus != null) { //Common note
 			if(!Std.isOfType(i[3], String)) //Convert old note type to new note type format
 			{
@@ -2877,7 +2877,7 @@ class ChartingState extends MusicBeatState
 				note.eventVal1 = i[1][0][1];
 				note.eventVal2 = i[1][0][2];
 			}
-			note.noteData = -1;
+			note.column = -1;
 			daNoteInfo = -1;
 		}
 
@@ -2926,7 +2926,7 @@ class ChartingState extends MusicBeatState
 			note.x + (GRID_SIZE - susWidth) * 0.5, 
 			note.y + tailOffset
 		);
-		spr.makeGraphic(1, 1, note.isQuant ? 0xFFFF0000 : noteColors[note.noteData % noteColors.length]);
+		spr.makeGraphic(1, 1, note.isQuant ? 0xFFFF0000 : noteColors[note.column % noteColors.length]);
 		spr.scale.set(susWidth, height);
 		spr.updateHitbox();
 		spr.shader = note.shader;
@@ -2968,14 +2968,14 @@ class ChartingState extends MusicBeatState
 
 	function selectNote(note:Note):Void
 	{
-		var noteDataToCheck:Int = note.noteData;
+		var columnToCheck:Int = note.column;
 
-		if(noteDataToCheck > -1)
+		if(columnToCheck > -1)
 		{
-			if(note.mustPress != _song.notes[curSec].mustHitSection) noteDataToCheck += 4;
+			if(note.mustPress != _song.notes[curSec].mustHitSection) columnToCheck += 4;
 			for (i in _song.notes[curSec].sectionNotes)
 			{
-				if (i != curSelectedNote && i.length > 2 && i[0] == note.strumTime && i[1] == noteDataToCheck)
+				if (i != curSelectedNote && i.length > 2 && i[0] == note.strumTime && i[1] == columnToCheck)
 				{
 					curSelectedNote = i;
 					break;
@@ -3002,14 +3002,14 @@ class ChartingState extends MusicBeatState
 
 	function deleteNote(note:Note):Void
 	{
-		var noteDataToCheck:Int = note.noteData;
-		if(noteDataToCheck > -1 && note.mustPress != _song.notes[curSec].mustHitSection) noteDataToCheck += 4;
+		var columnToCheck:Int = note.column;
+		if(columnToCheck > -1 && note.mustPress != _song.notes[curSec].mustHitSection) columnToCheck += 4;
 
-		if(note.noteData > -1) //Normal Notes
+		if(note.column > -1) //Normal Notes
 		{
 			for (i in _song.notes[curSec].sectionNotes)
 			{
-				if (i[0] == note.strumTime && i[1] == noteDataToCheck)
+				if (i[0] == note.strumTime && i[1] == columnToCheck)
 				{
 					if(i == curSelectedNote) curSelectedNote = null;
 					//FlxG.log.add('FOUND EVIL NOTE');
@@ -3045,7 +3045,7 @@ class ChartingState extends MusicBeatState
 		{
 			curRenderedNotes.forEachAlive(function(note:Note)
 			{
-				if (note.overlapsPoint(new FlxPoint(strumLineNotes.members[d].x + 1,strumLine.y+1)) && note.noteData == d%4)
+				if (note.overlapsPoint(new FlxPoint(strumLineNotes.members[d].x + 1,strumLine.y+1)) && note.column == d%4)
 				{
 						//trace('tryin to delete note...');
 						if(!delnote) deleteNote(note);
@@ -3074,23 +3074,23 @@ class ChartingState extends MusicBeatState
 		//var newsong = _song.notes;
 		//	undos.push(newsong);
 		var noteStrum = getStrumTime(dummyArrow.y * (getSectionBeats() / 4), false) + sectionStartTime();
-		var noteData = Math.floor((FlxG.mouse.x - GRID_SIZE) / GRID_SIZE);
+		var column = Math.floor((FlxG.mouse.x - GRID_SIZE) / GRID_SIZE);
 		var noteSus = 0;
 		var daAlt = false;
 		var daType = currentType;
 
 		if (strum != null) noteStrum = strum;
-		if (data != null) noteData = data;
+		if (data != null) column = data;
 		if (type != null) daType = type;
 
-		if(noteData > -1)
+		if(column > -1)
 		{
-			_song.notes[curSec].sectionNotes.push([noteStrum, noteData, noteSus, noteTypeIntMap.get(daType)]);
+			_song.notes[curSec].sectionNotes.push([noteStrum, column, noteSus, noteTypeIntMap.get(daType)]);
 			curSelectedNote = _song.notes[curSec].sectionNotes[_song.notes[curSec].sectionNotes.length - 1];
 			if(click)
-				heldNotesClick[noteData] = _song.notes[curSec].sectionNotes[_song.notes[curSec].sectionNotes.length - 1];
+				heldNotesClick[column] = _song.notes[curSec].sectionNotes[_song.notes[curSec].sectionNotes.length - 1];
 			else
-				heldNotesVortex[noteData] = _song.notes[curSec].sectionNotes[_song.notes[curSec].sectionNotes.length - 1];
+				heldNotesVortex[column] = _song.notes[curSec].sectionNotes[_song.notes[curSec].sectionNotes.length - 1];
 		}
 		else
 		{

@@ -175,7 +175,16 @@ class Note extends NoteObject
 	public var baseScaleY:Float = 1;
 	public var zIndex:Float = 0;
 	public var z:Float = 0;
-	public var realNoteData:Int;
+    public var realColumn:Int;
+
+    @:isVar
+	public var realNoteData(get, set):Int; // backwards compat
+    inline function get_realNoteData()
+        return realColumn;
+    inline function set_realNoteData(v:Int)
+        return realColumn = v;
+
+    
 	public static var swagWidth:Float = 160 * 0.7;
 	
 	
@@ -248,9 +257,9 @@ class Note extends NoteObject
 			colorSwap.saturation = ClientPrefs.quantHSV[idx][1] / 100;
 			colorSwap.brightness = ClientPrefs.quantHSV[idx][2] / 100;
 		}else{
-			colorSwap.hue = ClientPrefs.arrowHSV[noteData % 4][0] / 360;
-			colorSwap.saturation = ClientPrefs.arrowHSV[noteData % 4][1] / 100;
-			colorSwap.brightness = ClientPrefs.arrowHSV[noteData % 4][2] / 100;
+			colorSwap.hue = ClientPrefs.arrowHSV[column % 4][0] / 360;
+			colorSwap.saturation = ClientPrefs.arrowHSV[column % 4][1] / 100;
+			colorSwap.brightness = ClientPrefs.arrowHSV[column % 4][2] / 100;
 		}
 
 		if (noteScript != null)
@@ -335,10 +344,10 @@ class Note extends NoteObject
             genScript.executeFunc("setupNoteTexture", [this]);
         
 
-		if (!isSustainNote && noteData > -1 && noteData < 4)
+		if (!isSustainNote && column > -1 && column < 4)
 		{
 			var animToPlay:String = '';
-			animToPlay = colArray[noteData % 4];
+			animToPlay = colArray[column % 4];
 			animation.play(animToPlay + 'Scroll');
         }
 
@@ -361,7 +370,7 @@ class Note extends NoteObject
 
         // TODO: add the ability to override these w/ scripts lol
         
-		if(noteData > -1 && noteType != value) {
+		if(column > -1 && noteType != value) {
 			noteScript = null;
 			switch(value) {
 				case 'Hurt Note':
@@ -447,12 +456,12 @@ class Note extends NoteObject
 		return value;
 	}
 
-	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?gottaHitNote:Bool = false, ?sustainNote:Bool = false, ?inEditor:Bool = false, ?noteMod:String = 'default')
+	public function new(strumTime:Float, column:Int, ?prevNote:Note, ?gottaHitNote:Bool = false, ?sustainNote:Bool = false, ?inEditor:Bool = false, ?noteMod:String = 'default')
 	{
 		super();
 		
 		this.strumTime = strumTime;
-		this.noteData = noteData;
+		this.column = column;
 		this.prevNote = (prevNote==null) ? this : prevNote;
 		this.isSustainNote = sustainNote;
 		this.inEditor = inEditor;
@@ -476,7 +485,7 @@ class Note extends NoteObject
 			visualTime = PlayState.instance.getNoteInitialTime(this.strumTime);
 		}
 
-		if(noteData > -1) {
+		if(column > -1) {
 			this.noteMod = noteMod;
 		}
 
@@ -498,7 +507,7 @@ class Note extends NoteObject
 			if (genScript != null && genScript.exists("setupHoldNoteTexture"))
 				genScript.executeFunc("setupHoldNoteTexture", [this]);
 
-			animation.play(colArray[noteData % 4] + 'holdend');
+			animation.play(colArray[column % 4] + 'holdend');
 
 			updateHitbox();
 
@@ -506,7 +515,7 @@ class Note extends NoteObject
 
 			if (prevNote.isSustainNote)
 			{
-				prevNote.animation.play(colArray[prevNote.noteData % 4] + 'hold');
+				prevNote.animation.play(colArray[prevNote.column % 4] + 'hold');
 
 				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * PlayState.instance.songSpeed * 100;
 				prevNote.updateHitbox();
@@ -672,11 +681,11 @@ class Note extends NoteObject
 	{
 		if (isSustainNote)
 		{
-			animation.add(colArray[noteData] + 'holdend', [noteData + 4]);
-			animation.add(colArray[noteData] + 'hold', [noteData]);
+			animation.add(colArray[column] + 'holdend', [column + 4]);
+			animation.add(colArray[column] + 'hold', [column]);
 		}
 		else
-			animation.add(colArray[noteData] + 'Scroll', [noteData + 4]);
+			animation.add(colArray[column] + 'Scroll', [column + 4]);
 	}
 
 
@@ -703,14 +712,14 @@ class Note extends NoteObject
 	}
 
 	function _loadNoteAnims() {
-		animation.addByPrefix(colArray[noteData] + 'Scroll', colArray[noteData] + '0');
+		animation.addByPrefix(colArray[column] + 'Scroll', colArray[column] + '0');
 
 		if (isSustainNote)
 		{
 			animation.addByPrefix('purpleholdend', 'pruple end hold'); // ?????
             // this is autistic wtf
-			animation.addByPrefix(colArray[noteData] + 'holdend', colArray[noteData] + ' hold end');
-			animation.addByPrefix(colArray[noteData] + 'hold', colArray[noteData] + ' hold piece');
+			animation.addByPrefix(colArray[column] + 'holdend', colArray[column] + ' hold end');
+			animation.addByPrefix(colArray[column] + 'hold', colArray[column] + ' hold piece');
 		}
 
 		setGraphicSize(Std.int(width * 0.7));

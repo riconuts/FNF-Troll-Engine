@@ -234,7 +234,7 @@ class ModManager {
 		return getCMod(dir, player, songSpeed) * getXMod(dir, player);
 	
 	inline public function getNoteSpeed(note:Note, pN:Int, ?songSpeed:Float)
-		return getCMod(note.noteData, pN, songSpeed) * note.multSpeed * getXMod(note.noteData, pN);
+		return getCMod(note.column, pN, songSpeed) * note.multSpeed * getXMod(note.column, pN);
 	
 
 	public function getActiveMods(pN:Int){
