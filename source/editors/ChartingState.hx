@@ -2878,14 +2878,14 @@ class ChartingState extends MusicBeatState
 				note.eventVal2 = i[1][0][2];
 			}
 			note.column = -1;
-			daNoteInfo = -1;
+			daColumn = -1;
 		}
 
 		note.setGraphicSize(GRID_SIZE, GRID_SIZE);
 		note.updateHitbox();
-		note.x = Math.floor(daNoteInfo * GRID_SIZE) + GRID_SIZE;
+		note.x = Math.floor(daColumn * GRID_SIZE) + GRID_SIZE;
 		if(isNextSection && _song.notes[curSec].mustHitSection != _song.notes[curSec+1].mustHitSection) {
-			if(daNoteInfo > 3) {
+			if(daColumn > 3) {
 				note.x -= GRID_SIZE * 4;
 			} else if(daSus != null) {
 				note.x += GRID_SIZE * 4;
@@ -3104,11 +3104,11 @@ class ChartingState extends MusicBeatState
 		}
 
 		if(click){
-			if (FlxG.keys.pressed.CONTROL && noteData > -1)
+			if (FlxG.keys.pressed.CONTROL && column > -1)
 			{
-				var note:Array<Dynamic> = [noteStrum, (noteData + 4) % 8, noteSus, noteTypeIntMap.get(daType)];
+				var note:Array<Dynamic> = [noteStrum, (column + 4) % 8, noteSus, noteTypeIntMap.get(daType)];
 				_song.notes[curSec].sectionNotes.push(note);
-				heldNotesClick[ (noteData + 4) % 8] = note;
+				heldNotesClick[ (column + 4) % 8] = note;
 			}
 		}
 
