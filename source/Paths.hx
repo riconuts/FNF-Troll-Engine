@@ -610,6 +610,17 @@ class Paths
 		return getContent(Paths.getPreloadPath(key));
 	}
 
+	static public function getJson(path:String):Null<Dynamic>
+	{
+		try{
+			return Json.parse(Paths.getContent(path));
+		}catch(e){
+			Sys.println('$path: $e');
+		}
+
+		return null;
+	}
+
 	public static var modsList:Array<String> = [];
 	#if MODS_ALLOWED
 	static final modFolderPath:String = "content/";

@@ -1,9 +1,7 @@
 package;
 
-import haxe.io.Path;
 import Paths.ContentMetadata;
-import haxe.Json;
-import haxe.format.JsonParser;
+import haxe.io.Path;
 
 // TODO: stop calling them chapters!!!
 typedef ChapterMetadata = WeekMetadata;
@@ -49,6 +47,9 @@ class WeekData
 	public static var chaptersList:Array<ChapterMetadata> = [];
 	public static var curChapter:Null<ChapterMetadata> = null;
 
+	public static var weekCompleted(get, null):Map<String, Bool>;
+	@:noCompletion static function get_weekCompleted() return Highscore.weekCompleted;
+
 	public static function reloadChapterFiles():Array<ChapterMetadata>
 	{
 		var list:Array<ChapterMetadata> = [];
@@ -63,12 +64,10 @@ class WeekData
 			Paths.currentModDirectory = mod;
 
 			var jsonPath:String = Paths.modFolders("metadata.json", false);
-			var rawJson:Null<String> = Paths.getContent(jsonPath);
+			var daJson:Null<Dynamic> = Paths.getJson(jsonPath);
 
-			if (rawJson != null && rawJson.length > 0)
+			if (daJson != null)
             {
-				var daJson:Dynamic = Json.parse(rawJson);
-
 				if (Reflect.field(daJson, "chapters") != null){
 					var data:ContentMetadata = cast daJson;
 					for (chapter in data.chapters)
@@ -86,7 +85,7 @@ class WeekData
 			var modWeeksPushed:Array<String> = [];
 
 			for (weekName in modWeekList){
-				var data = portPsychWeek(getJson('${modWeeksPath}/${weekName}.json'), weekName);
+				var data = portPsychWeek(Paths.getJson('${modWeeksPath}/${weekName}.json'), weekName);
 				if (data != null){
 					pushChapter(data, mod);
 					modWeeksPushed.push(weekName);
@@ -94,13 +93,13 @@ class WeekData
 			}
 
 			Paths.iterateDirectory(modWeeksPath, (fileName:String)->{
-				var path:Path = new Path('$modWeeksPath/$fileName');
+				var path = new Path('$modWeeksPath/$fileName');
 				var weekName:String = path.file;
 
 				if (path.ext != "json" || modWeeksPushed.contains(weekName))
 					return;
 
-				var data = portPsychWeek(getJson('$modWeeksPath/$fileName'), weekName);
+				var data = portPsychWeek(Paths.getJson('$modWeeksPath/$fileName'), weekName);
 				if (data != null){
 					pushChapter(data, mod);
 					modWeeksPushed.push(weekName); // but what if you write the same name on the list twice :o
@@ -142,20 +141,9 @@ class WeekData
 				songs.push(songData[0]);
 		}
 
-		vChapter.unlockCondition = json.startUnlocked != false; /* || (json.weekBefore!=null && Highscore.weekCompleted.get(json.weekBefore)); */
+		vChapter.unlockCondition = json.startUnlocked != false; /* || (json.weekBefore!=null && weekCompleted.get(json.weekBefore)); */
 
 		return vChapter;
 	}
-	#end	
-
-	static function getJson(path:String):Null<Dynamic>
-	{
-		try{
-			return Json.parse(Paths.getContent(path));
-		}catch(e){
-			trace(path, e);
-		}
-
-		return null;
-	}
+	#end
 }
