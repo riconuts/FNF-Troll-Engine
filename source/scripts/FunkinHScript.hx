@@ -247,21 +247,20 @@ class FunkinHScript extends FunkinScript
 			set("state", state);
 			set("game", state);
 
-			if((state is PlayState) && state == PlayState.instance){
-				var state:PlayState = PlayState.instance;
+			if (state != null){
+				if (state is PlayState && state == PlayState.instance){ // the null check wasn't enough it seems
+					var state:PlayState = PlayState.instance;
 
-				set("global", state.variables);
-				set("getInstance", getInstance);
+					set("global", state.variables);
+					set("getInstance", getInstance);
+				}
+				else if (state is ChartingState && state == ChartingState.instance){
+					var state:ChartingState = ChartingState.instance;
 
-			}
-			else if ((state is ChartingState) && state == ChartingState.instance){
-				var state:ChartingState = ChartingState.instance;
-
-				set("global", state.variables);
-				set("getInstance", FlxG.get_state);
-
-			}
-			else{
+					set("global", state.variables);
+					set("getInstance", FlxG.get_state);
+				}
+			}else{
 				set("global", null);
 				set("getInstance", FlxG.get_state);
 
@@ -269,8 +268,8 @@ class FunkinHScript extends FunkinScript
 		}
 
 		if (additionalVars != null){
-			for (key in additionalVars.keys())
-				set(key, additionalVars.get(key));
+			for (key => value in additionalVars)
+				set(key, value);
 		}
 		
 		try

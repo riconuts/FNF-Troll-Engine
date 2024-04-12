@@ -73,11 +73,10 @@ class CoolUtil
 	}
 	public static function listFromString(string:String):Array<String>
 	{
-		var daList:Array<String> = [];
-		daList = string.trim().split('\n');
-
-		for (i in 0...daList.length)
-			daList[i] = daList[i].trim();
+		var daList:Array<String> = [
+			for (i in string.trim().split('\n'))
+				i.trim()
+		];
 
 		return daList;
 	}

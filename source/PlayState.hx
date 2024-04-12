@@ -363,6 +363,7 @@ class PlayState extends MusicBeatState
 	public var songHits:Int = 0;
 	public var songMisses:Int = 0;
 
+	/** Formatted song name **/
 	public var songName:String = "";
 	public var songHighscore:Int = 0;
 	public var songLength:Float = 0;
@@ -576,8 +577,10 @@ class PlayState extends MusicBeatState
 
 		////
         
-		if (SONG == null)
+		if (SONG == null){
+			trace("null SONG");
 			SONG = Song.loadFromJson('tutorial', 'tutorial');
+		}
 
 		//if (SONG.hudSkin != null)
         	hudSkin = SONG.hudSkin;
@@ -591,21 +594,19 @@ class PlayState extends MusicBeatState
 		songName = Paths.formatToSongPath(SONG.song);
 		songHighscore = Highscore.getScore(SONG.song);
 
-		if (SONG != null){
-			if(SONG.metadata != null)
-				metadata = SONG.metadata;
+		if(SONG.metadata != null)
+			metadata = SONG.metadata;
+		else{
+			var jsonPath:String = Paths.modsSongJson('$songName/metadata');
+
+			if (!Paths.exists(jsonPath))
+				jsonPath = Paths.songJson('$songName/metadata');
+
+			if (Paths.exists(jsonPath))
+				metadata = cast Json.parse(Paths.getContent(jsonPath));
 			else{
-				var jason = Paths.songJson(songName + '/metadata');
-
-				if (!Paths.exists(jason))
-					jason = Paths.modsSongJson(songName + '/metadata');
-
-				if (Paths.exists(jason))
-					metadata = cast Json.parse(Paths.getContent(jason));
-				else{
-					if(showDebugTraces)
-						trace("No metadata for " + songName + ". Maybe add some?");
-				}
+				if(showDebugTraces)
+					trace('No metadata for $songName. Maybe add some?');
 			}
 		}
 

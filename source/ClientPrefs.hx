@@ -368,14 +368,11 @@ class ClientPrefs
 				type: Dropdown,
 				value: "Psych",
 				data: [
-					"options" => (function()
-					{
-						var arr:Array<String> = [];
-						for (key in Highscore.grades.keys())
-							arr.push(key);
+					"options" => {
+						var arr:Array<String> = [for (key in Highscore.grades.keys()) key];
 						arr.reverse(); // for some reason keys() returns the map.. backwards
-						return arr;
-					})()
+						arr;
+					}
 				]
 			},
 			"etternaHUD" => {
