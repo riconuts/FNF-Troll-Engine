@@ -1,18 +1,15 @@
 package;
 
+import haxe.io.Path;
 import Paths.ContentMetadata;
 import haxe.Json;
 import haxe.format.JsonParser;
 
-#if sys
-import sys.FileSystem;
-import sys.io.File;
-#else
-import openfl.utils.Assets;
-#end
+// TODO: stop calling them chapters!!!
+typedef ChapterMetadata = WeekMetadata;
+typedef ChapterData = WeekData;
 
-
-typedef ChapterMetadata = {
+typedef WeekMetadata = {
 	/**
 		Name of the chapter. 
 	**/
@@ -29,11 +26,9 @@ typedef ChapterMetadata = {
 	@:optional var freeplayCategory:String;
 	
 	/**
-		This isn't implemented, and at this point I don't think it's going to. LOL.
-		Could've been a Bool or a String, in case of being a string it would've been checked from a Map from your save file
-		as FlxG.save.data.unlocks.get(unlockCondition kinda like psych's StoryMenuState.weeksCompleted???
-		
-		idk i fucking forgot how it was going to be done this so pointless and stupid, theres no point????????
+		Not implemented!
+		In case of being a string it would've been checked from a Map from your save file
+		as FlxG.save.data.unlocks.get(unlockCondition) maybe
 	**/
 	var unlockCondition:Any;
 	
@@ -45,10 +40,10 @@ typedef ChapterMetadata = {
 	/**
 		Name of the content folder containing this chapter
 	**/
-    @:optional var directory:String;
+    var ?directory:String;
 }
 
-class ChapterData
+class WeekData
 {
 	// public static var chaptersMap:Map<String, ChapterMetadata> = new Map();
 	public static var chaptersList:Array<ChapterMetadata> = [];
@@ -59,28 +54,59 @@ class ChapterData
 		var list:Array<ChapterMetadata> = [];
 
 		#if MODS_ALLOWED
+		inline function pushChapter(chapter, mod){
+			chapter.directory = mod;
+			list.push(chapter);
+		}
+
 		for (mod in Paths.getModDirectories()){
 			Paths.currentModDirectory = mod;
-			var path = Paths.modFolders("metadata.json", true);
-			var rawJson:Null<String> = Paths.getContent(path);
+
+			var jsonPath:String = Paths.modFolders("metadata.json", false);
+			var rawJson:Null<String> = Paths.getContent(jsonPath);
 
 			if (rawJson != null && rawJson.length > 0)
             {
 				var daJson:Dynamic = Json.parse(rawJson);
+
 				if (Reflect.field(daJson, "chapters") != null){
 					var data:ContentMetadata = cast daJson;
-					for(chapter in data.chapters){
-						chapter.directory = mod;
-						list.push(chapter);
-					}
+					for (chapter in data.chapters)
+						pushChapter(chapter, mod);
 				}else{
 					// backwards compatibility
 					var chapter:ChapterMetadata = cast daJson;
-					chapter.directory = mod;
-					list.push(chapter);
-					
+					pushChapter(chapter, mod);
 				}
 			}
+
+			#if PE_MOD_COMPATIBILITY
+			var modWeeksPath:String = Paths.modFolders("weeks", false);
+			var modWeekList:Array<String> = CoolUtil.coolTextFile('$modWeeksPath/weekList.txt');
+			var modWeeksPushed:Array<String> = [];
+
+			for (weekName in modWeekList){
+				var data = portPsychWeek(getJson('${modWeeksPath}/${weekName}.json'), weekName);
+				if (data != null){
+					pushChapter(data, mod);
+					modWeeksPushed.push(weekName);
+				}
+			}
+
+			Paths.iterateDirectory(modWeeksPath, (fileName:String)->{
+				var path:Path = new Path('$modWeeksPath/$fileName');
+				var weekName:String = path.file;
+
+				if (path.ext != "json" || modWeeksPushed.contains(weekName))
+					return;
+
+				var data = portPsychWeek(getJson('$modWeeksPath/$fileName'), weekName);
+				if (data != null){
+					pushChapter(data, mod);
+					modWeeksPushed.push(weekName); // but what if you write the same name on the list twice :o
+				}
+			});
+			#end
 		}
 		Paths.currentModDirectory = '';
         #end
@@ -88,5 +114,48 @@ class ChapterData
 		chaptersList = list;
 
 		return list;
+	}
+
+	#if PE_MOD_COMPATIBILITY
+	static function portPsychWeek(json:Dynamic, name):Null<WeekMetadata>
+	{
+		if (json == null)
+			return null;
+
+		var vChapter:WeekMetadata = {
+			name: name,
+			songs: [],
+			category: 'psychengine', //'main',
+			// freeplayCategory: '$mod - $name',
+			unlockCondition: true,
+			//directory: mod
+		};
+
+		if (json.hideStoryMode == true)
+			vChapter.category = "hidden";
+
+		var psychSongs:Null<Array<Dynamic>> = json.songs;
+		if (psychSongs != null)
+		{
+			var songs:Array<String> = vChapter.songs;
+			for (songData in psychSongs)
+				songs.push(songData[0]);
+		}
+
+		vChapter.unlockCondition = json.startUnlocked != false; /* || (json.weekBefore!=null && Highscore.weekCompleted.get(json.weekBefore)); */
+
+		return vChapter;
+	}
+	#end	
+
+	static function getJson(path:String):Null<Dynamic>
+	{
+		try{
+			return Json.parse(Paths.getContent(path));
+		}catch(e){
+			trace(path, e);
+		}
+
+		return null;
 	}
 }

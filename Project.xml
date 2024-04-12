@@ -80,6 +80,8 @@
 	<section if="HSCRIPT_ALLOWED">
 		<haxelib name="hscript"/>
 		<define name="hscriptPos"/>
+
+		<define name="dce" value="no"/>
 		<haxeflag name="-dce no"/>
 		<haxeflag name="-dce" value="no"/>
 
@@ -102,7 +104,7 @@
 		<define name="VIDEOS_ALLOWED"/>
 
         <!-- <undefine name="SCRIPTABLE_STATES"/> --> <!--Needed for future thing-->
-        <undefine name="PE_MOD_COMPATIBILITY"/>
+        <!-- <undefine name="PE_MOD_COMPATIBILITY"/> -->
 		<undefine name="DO_AUTO_UPDATE"/>
         <!-- <undefine name="LUA_ALLOWED"/> --> <!-- There's one lua script on TGT and I'm not rewritting it -->
 
