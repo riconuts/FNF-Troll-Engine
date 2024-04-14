@@ -54,7 +54,7 @@ class SongSelectState extends MusicBeatState
 		FlxG.camera.bgColor = 0xFF000000;
 
 		if (FlxG.sound.music == null)
-			MusicBeatState.playMenuMusic(1);
+			MusicBeatState.playMenuMusic(ClientPrefs.songVolume);
 
 		var folder = 'assets/songs/';
 		Paths.iterateDirectory(folder, function(path:String){

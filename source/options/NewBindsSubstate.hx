@@ -273,7 +273,7 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 		FlxG.cameras.remove(cam);
 		FlxG.cameras.remove(scrollableCam);
 		FlxG.cameras.remove(overCam);
-		FlxG.sound.play(Paths.sound('cancelMenu'));
+		FlxG.sound.play(Paths.sound('cancelMenu'), ClientPrefs.sfxVolume);
 
 		return super.destroy();
 	}
@@ -315,7 +315,7 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 
 			if (updateKeyboard)
 			{
-				FlxG.sound.play(Paths.sound("scrollMenu"));
+				FlxG.sound.play(Paths.sound("scrollMenu"), ClientPrefs.sfxVolume);
 				FlxG.mouse.visible = false;
 
 				var prevSel = keyboardNavigation[prevY];
@@ -362,7 +362,7 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 					if (defaultBindKeys != null){
 						var defaultKey:FlxKey = defaultBindKeys[keyboardX];
 						var binded = bind(keyboardY, keyboardX, defaultKey);
-						FlxG.sound.play(Paths.sound(binded[keyboardX] == defaultKey ? 'confirmMenu' : 'cancelMenu'));
+						FlxG.sound.play(Paths.sound(binded[keyboardX] == defaultKey ? 'confirmMenu' : 'cancelMenu'), ClientPrefs.sfxVolume );
 					}
 				}
 			}
@@ -426,13 +426,13 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 
 			var keyPressed:FlxKey = FlxG.keys.firstJustPressed();
 			if (keyPressed == cancelKey){
-				FlxG.sound.play(Paths.sound('cancelMenu'));
+				FlxG.sound.play(Paths.sound('cancelMenu'), ClientPrefs.sfxVolume);
 				bindID = 0;
 				bindIndex = -1;
 			}
 			else if (keyPressed != NONE)
 			{
-				FlxG.sound.play(Paths.sound('confirmMenu'));
+				FlxG.sound.play(Paths.sound('confirmMenu'), ClientPrefs.sfxVolume);
 				
 				bind(bindIndex, bindID, keyPressed);
 				ClientPrefs.saveBinds();
@@ -526,7 +526,7 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 				butt.bind = ClientPrefs.keyBinds.get(internal)[id];
 			}
 		}
-		FlxG.sound.play(Paths.sound('confirmMenu'));
+		FlxG.sound.play(Paths.sound('confirmMenu'), ClientPrefs.sfxVolume);
 		ClientPrefs.saveBinds();
 		ClientPrefs.reloadControls();
 	}

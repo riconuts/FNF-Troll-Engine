@@ -267,7 +267,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		if (controls.BACK) {
 			close();
 			ClientPrefs.save();
-			FlxG.sound.play(Paths.sound('cancelMenu'));
+			FlxG.sound.play(Paths.sound('cancelMenu'), ClientPrefs.sfxVolume);
 		}
 
 		if(nextAccept <= 0)
@@ -407,7 +407,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 				}
 				leOption.change();
 				
-				FlxG.sound.play(Paths.sound('cancelMenu'));
+				FlxG.sound.play(Paths.sound('cancelMenu'), ClientPrefs.sfxVolume);
 				reloadCheckboxes();
 			}
 		}
@@ -429,7 +429,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 	function clearHold()
 	{
 		if(holdTime > 0.5) {
-			FlxG.sound.play(Paths.sound('scrollMenu'));
+			FlxG.sound.play(Paths.sound('scrollMenu'), ClientPrefs.sfxVolume);
 		}
 		holdTime = 0;
 		holdingTimer = 0;
@@ -455,7 +455,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		}
 
 		curOption = optionsArray[curSelected];
-		FlxG.sound.play(Paths.sound('scrollMenu'));
+		FlxG.sound.play(Paths.sound('scrollMenu'), ClientPrefs.sfxVolume);
 	}
 
 	function reloadCheckboxes() {

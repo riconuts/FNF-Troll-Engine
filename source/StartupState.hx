@@ -46,6 +46,13 @@ class StartupState extends FlxState
 		ClientPrefs.initialize();
 		ClientPrefs.load();
 
+		FlxG.sound.volumeHandler = function(vol:Float)
+            {
+            ClientPrefs.masterVolume = vol;
+			Main.volumeChangedEvent.dispatch(vol);
+		}
+		FlxG.sound.volume = ClientPrefs.masterVolume;
+
 		#if DO_AUTO_UPDATE
 		getRecentGithubRelease();
 		checkOutOfDate();

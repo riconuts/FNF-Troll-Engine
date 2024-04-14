@@ -127,6 +127,46 @@ class ClientPrefs
 					"type" => "percent" // saved value is value / 100
 				]
 			},
+			"songVolume" => {
+				display: "Music Volume",
+				desc: "The volume of music.",
+				type: Number,
+				value: 1,
+				data: [
+					"suffix" => "%",
+					"min" => 0,
+					"max" => 100,
+					"step" => 1,
+					"type" => "percent" // saved value is value / 100
+				]
+			},
+			"masterVolume" => {
+				display: "Master Volume",
+				desc: "The volume of the game.",
+				type: Number,
+				value: 1,
+				data: [
+					"suffix" => "%",
+					"min" => 0,
+					"max" => 100,
+					"step" => 1,
+					"type" => "percent" // saved value is value / 100
+				]
+			},
+			"sfxVolume" => {
+				display: "SFX Volume",
+				desc: "The volume of the sound effects.",
+				type: Number,
+				value: 1,
+				data: [
+					"suffix" => "%",
+					"min" => 0,
+					"max" => 100,
+					"step" => 1,
+					"type" => "percent" // saved value is value / 100
+				]
+			},
+
 			"flashing" => {
 				display: "Flashing Lights",
 				desc: "When toggled, flashing lights will be shown ingame.",

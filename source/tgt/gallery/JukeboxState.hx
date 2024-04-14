@@ -81,7 +81,7 @@ class JukeboxState extends MusicBeatState {
 			if (mute)
 				MusicBeatState.menuVox.fadeOut(0.25, 0);
 			else
-				MusicBeatState.menuVox.volume = 1;
+				MusicBeatState.menuVox.volume = ClientPrefs.songVolume;
 		}
 		
 		return mute;
@@ -296,7 +296,7 @@ class JukeboxState extends MusicBeatState {
 		if (doingTrans) return;
 		doingTrans = true;
 
-		FlxG.sound.play(Paths.sound('cancelMenu'));
+		FlxG.sound.play(Paths.sound('cancelMenu'), ClientPrefs.sfxVolume);
 		
 		set_loopSong(true);
 		
@@ -469,12 +469,12 @@ class JukeboxState extends MusicBeatState {
 					MusicBeatState.menuVox.looped = true;
 					MusicBeatState.menuVox.group = FlxG.sound.music.group;
 
-					MusicBeatState.menuVox.volume = muteVocals ? 0 : 1;
+					MusicBeatState.menuVox.volume = muteVocals ? 0 : ClientPrefs.songVolume;
 
 					FlxG.sound.list.add(MusicBeatState.menuVox);
 				}
 
-				MusicBeatState.menuVox.loadEmbedded(vox, true).volume = muteVocals ? 0 : 1;
+				MusicBeatState.menuVox.loadEmbedded(vox, true).volume = muteVocals ? 0 : ClientPrefs.songVolume;
 
 			}else if (MusicBeatState.menuVox != null){
 				MusicBeatState.menuVox.stop();
@@ -482,7 +482,7 @@ class JukeboxState extends MusicBeatState {
 				MusicBeatState.menuVox = null;
 			}
 			
-			FlxG.sound.playMusic(inst);
+			FlxG.sound.playMusic(inst, ClientPrefs.songVolume);
 			if(MusicBeatState.menuVox!=null)
 				MusicBeatState.menuVox.play();
 

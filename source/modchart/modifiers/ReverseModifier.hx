@@ -32,7 +32,7 @@ class ReverseModifier extends NoteModifier
         if((dir%2)==1)
             val += getSubmodValue("alternate" ,player);
 
-        var first = kNum/4;
+        var first = kNum * 0.25;
         var last = kNum-1-first;
 
         if(dir>=first && dir<=last)

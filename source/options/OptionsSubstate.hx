@@ -51,6 +51,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		"judgeDiff", 
 		"noteSkin",
 	];
+	var forceWidgetUpdate:Bool = false;
 
 	static public var requiresRestart = _requiresRestart.copy();
 	static public var recommendsRestart = _recommendsRestart.copy();
@@ -255,9 +256,21 @@ class OptionsSubstate extends MusicBeatSubstate
 			case 'epicWindow' | 'sickWindow' | 'goodWindow' | 'badWindow' | 'hitWindow':
 				checkWindows();
 			case 'hitsoundVolume':
-				playPreviewSound("hitsound", newVal / 100);
+				playPreviewSound("hitsound", newVal * 0.01);
+            case 'sfxVolume':
+				playPreviewSound("scrollMenu", newVal * 0.01);
+            case 'songVolume':
+				if (FlxG.sound.music!=null)FlxG.sound.music.volume = ClientPrefs.songVolume;
+            case 'masterVolume':
+                var vol = FlxG.sound.volume;
+                var newVol = newVal * 0.01;
+                if(vol != newVol)FlxG.sound.volume = newVol;
+
+                // TODO: only show sound tray if it would go up/down a step (so prob just check if newVol / 10 is a whole number or sum shit)
+				//FlxG.sound.showSoundTray(vol < newVol);
+
 			case 'missVolume':
-				playPreviewSound('missnote${FlxG.random.int(1, 3)}', newVal / 100);
+				playPreviewSound('missnote${FlxG.random.int(1, 3)}', newVal * 0.01);
 		}
 	}
 
@@ -295,6 +308,9 @@ class OptionsSubstate extends MusicBeatSubstate
 				"audio", 
 				[
 					"ruin",
+                    "masterVolume",
+                    "songVolume",
+				    'sfxVolume',
 					"hitsoundVolume", 
 					"missVolume"
 				]
@@ -392,6 +408,7 @@ class OptionsSubstate extends MusicBeatSubstate
         ],
 		
 		"misc" => [
+			//["audio", ["masterVolume", "songVolume", "hitsoundVolume", "missVolume"]],
 			#if discord_rpc
 			["discord", ["discordRPC"]],
 			#end
@@ -417,7 +434,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		"ui",
 		"video",
 		"controls",
-		#if (discord_rpc || DO_AUTO_UPDATE) "misc", #end /* "Accessibility" */];
+		#if (discord_rpc || DO_AUTO_UPDATE) "misc" #end, /* "Accessibility" */];
 
 	var selected:Int = 0;
 
@@ -473,10 +490,19 @@ class OptionsSubstate extends MusicBeatSubstate
 	}
 
 	var whitePixel = FlxGraphic.fromRectangle(1, 1, 0xFFFFFFFF, false, 'whitePixel');
+    function onVolumeChange(vol:Float){
+        vol *= 100;
+		if (Math.floor(getNumber("masterVolume")) != Math.floor(vol)){
+			forceWidgetUpdate = true;
+            changeNumber("masterVolume", vol, true);
+        }
+    }
+
 	override function create()
 	{
 		//var startTime = Sys.cpuTime();
 		// ClientPrefs.load();
+		Main.volumeChangedEvent.add(onVolumeChange);
 		persistentDraw = true;
 		persistentUpdate = true;
 
@@ -593,8 +619,8 @@ class OptionsSubstate extends MusicBeatSubstate
 					var data:OptionData = actualOptions.get(opt);
 
 					data.data.set("optionName", opt);
-					data.display = Paths.getString('opt_display_$opt');
-					data.desc = Paths.getString('opt_desc_$opt');
+					if (Paths.hasString('opt_display_$opt'))data.display = Paths.getString('opt_display_$opt');
+					if (Paths.hasString('opt_desc_$opt'))data.desc = Paths.getString('opt_desc_$opt');
 
 					var text = new FlxText(16, daY, 0, data.display, 16);
 					text.setFormat(Paths.font("calibri.ttf"), 28, 0xFFFFFFFF, FlxTextAlign.LEFT);
@@ -1401,7 +1427,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			var doUpdate = false;
 
 			if (FlxG.keys.justPressed.TAB){
-				FlxG.sound.play(Paths.sound("scrollMenu"));
+				FlxG.sound.play(Paths.sound("scrollMenu"), ClientPrefs.sfxVolume);
 				changeCategory(1);
 				
 				doUpdate = true;
@@ -1409,11 +1435,11 @@ class OptionsSubstate extends MusicBeatSubstate
 			}
 
 			if (FlxG.keys.justPressed.UP){
-				FlxG.sound.play(Paths.sound("scrollMenu"));
+				FlxG.sound.play(Paths.sound("scrollMenu"), ClientPrefs.sfxVolume);
 				changeWidget(-1);
 			}
 			if (FlxG.keys.justPressed.DOWN){
-				FlxG.sound.play(Paths.sound("scrollMenu"));
+				FlxG.sound.play(Paths.sound("scrollMenu"), ClientPrefs.sfxVolume);
 				changeWidget(1);
 			}
 
@@ -1522,7 +1548,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			prevScreenX = FlxG.mouse.screenX;
 			prevScreenY = FlxG.mouse.screenY;
 
-			if (pHov == null || doUpdate || movedMouse || FlxG.mouse.justPressed)
+			if (pHov == null || doUpdate || movedMouse || FlxG.mouse.justPressed || forceWidgetUpdate)
 			{
 				for (object => widget in currentWidgets)
 				{
@@ -1535,6 +1561,7 @@ class OptionsSubstate extends MusicBeatSubstate
 
 					updateWidget(object, widget, elapsed);
 				}
+				forceWidgetUpdate = false;
 			}
 
 			if (curWidget == null){
@@ -1594,7 +1621,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			if (controls.BACK)
 			{
                 save();
-				FlxG.sound.play(Paths.sound('cancelMenu'));
+				FlxG.sound.play(Paths.sound('cancelMenu'), ClientPrefs.sfxVolume);
             
                 if(goBack!=null)
 					goBack(changed);
@@ -1606,6 +1633,7 @@ class OptionsSubstate extends MusicBeatSubstate
 	{
 		_point.put();
 		_mousePoint.put();
+		Main.volumeChangedEvent.remove(onVolumeChange);
 
 		for (val in cameraPositions)
 			val.put();

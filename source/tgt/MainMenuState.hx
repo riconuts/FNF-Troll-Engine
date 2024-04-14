@@ -196,7 +196,7 @@ class MainMenuState extends MusicBeatState
 	{
 		selectedSomethin = true;
 
-		FlxG.sound.play(Paths.sound('confirmMenu'));
+		FlxG.sound.play(Paths.sound('confirmMenu'), ClientPrefs.sfxVolume);
 
 		bgFlicker();
 
@@ -399,7 +399,7 @@ class MainMenuState extends MusicBeatState
 
 		selectedSomethin = true;
 
-		FlxG.sound.play(Paths.sound('confirmMenu'));
+		FlxG.sound.play(Paths.sound('confirmMenu'), ClientPrefs.sfxVolume);
 
 		FlxG.mouse.visible = false;
 
@@ -450,7 +450,7 @@ class MainMenuState extends MusicBeatState
     function changeItem(?val:Int=0, absolute:Bool=false){
 		var difference = absolute?Math.abs(curSelected - val):val;
         if(difference != 0)
-			FlxG.sound.play(Paths.sound('scrollMenu'));
+			FlxG.sound.play(Paths.sound('scrollMenu'), ClientPrefs.sfxVolume);
 
         if(absolute)
             curSelected = val;
@@ -521,8 +521,12 @@ class MainMenuState extends MusicBeatState
 	}
 	var debugKeys:Array<FlxKey>;
     override function update(elapsed:Float){
-		if (FlxG.sound.music != null && FlxG.sound.music.volume < 0.8)
+		var targetVolume:Float = ClientPrefs.songVolume * 0.8;
+		if (FlxG.sound.music != null && FlxG.sound.music.volume < targetVolume)
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
+
+		if (FlxG.sound.music.volume > targetVolume)
+			FlxG.sound.music.volume = targetVolume;
 
 		if (!selectedSomethin){
 			if (controls.BACK){

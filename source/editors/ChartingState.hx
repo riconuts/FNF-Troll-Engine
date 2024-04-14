@@ -1553,7 +1553,7 @@ class ChartingState extends MusicBeatState
 			vocals = null;
 		}
 
-		FlxG.sound.playMusic(Paths.inst(currentSongName), 0.6/*, false*/);
+		FlxG.sound.playMusic(Paths.inst(currentSongName), 0.6 * ClientPrefs.songVolume/*, false*/);
 		soundTracksMap.set("Inst", FlxG.sound.music);
 
 		/*
@@ -2238,7 +2238,7 @@ class ChartingState extends MusicBeatState
 								if(_song.player1 == 'gf') // Easter egg
 									soundToPlay = 'GF_${data + 1}';
 	
-								FlxG.sound.play(Paths.sound(soundToPlay)).pan = (note.column < 4) ? -0.3 : 0.3; //would be coolio
+								FlxG.sound.play(Paths.sound(soundToPlay), ClientPrefs.sfxVolume).pan = (note.column < 4) ? -0.3 : 0.3; //would be coolio
 								playedSound[data] = true;
 							}
 							
@@ -2247,7 +2247,7 @@ class ChartingState extends MusicBeatState
 						// This is an event.
 
 						if (playSoundEvents.checked)
-							FlxG.sound.play(Paths.sound('hitsound'));
+							FlxG.sound.play(Paths.sound('hitsound'), ClientPrefs.sfxVolume);
 					}
 				}
 
@@ -2260,8 +2260,8 @@ class ChartingState extends MusicBeatState
 			var metroInterval:Float = 60 / metronomeStepper.value;
 			var metroStep:Int = Math.floor(((Conductor.songPosition + metronomeOffsetStepper.value) / metroInterval) / 1000);
 			var lastMetroStep:Int = Math.floor(((lastConductorPos + metronomeOffsetStepper.value) / metroInterval) / 1000);
-			if(metroStep != lastMetroStep) {
-				FlxG.sound.play(Paths.sound('Metronome_Tick'));
+			if(metroStep != lastMetroStep) { // this should be rewritten to be in sync w/ some shit like playScheduled but not really since we dont have that in flixel
+				FlxG.sound.play(Paths.sound('Metronome_Tick'), ClientPrefs.sfxVolume);
 				//trace('Ticked');
 			}
 		}

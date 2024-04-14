@@ -364,12 +364,13 @@ class Paths
 		}
 	}
 
+	public inline static function hasString(key:String)return getString(key) != key;
+
 	public static function getString(key:String):String
 	{
 		if (currentStrings.exists(key))
 			return currentStrings.get(key);
-		
-		// currentStrings.set(key, '');
+	
 
 		for (filePath in Paths.getFolders("data"))
 		{

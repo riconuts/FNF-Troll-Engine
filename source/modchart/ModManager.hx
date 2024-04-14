@@ -86,8 +86,9 @@ class ModManager {
 	}
 
 	function setDefaultValues(mN:Int=-1){
-		for(modName => mod in register)
+/* 		for(modName => mod in register){
 			setValue(modName, 0, mN);
+        } */
 		
 		for (i in 0...4)
 			setValue("noteSpawnTime" + i, 0, mN);
@@ -253,7 +254,7 @@ class ModManager {
 
 	public function getActiveMods(pN:Int){
 		if(activeMods[pN]==null){
-            //trace("generating active mods for " + pN);
+            trace("generating active mods for player " + pN);
 			activeMods[pN] = [];
 			touchedMods[pN] = [];
             setDefaultValues(pN);

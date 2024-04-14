@@ -203,7 +203,7 @@ class PauseSubState extends MusicBeatSubstate
 		
 		pauseMusic.volume = 0;
 		pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length* 0.5)));
-		pauseMusic.fadeIn(50, 0, 0.5);
+		pauseMusic.fadeIn(50, 0, 0.5 * ClientPrefs.songVolume);
 
 		FlxG.sound.list.add(pauseMusic);
 
@@ -332,13 +332,13 @@ class PauseSubState extends MusicBeatSubstate
 
 					if (controls.UI_LEFT_P)
 					{
-						FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+						FlxG.sound.play(Paths.sound('scrollMenu'), 0.4 * ClientPrefs.sfxVolume);
 						curTime -= 1000 * speed;
 						holdTime = 0;
 					}
 					if (controls.UI_RIGHT_P)
 					{
-						FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+						FlxG.sound.play(Paths.sound('scrollMenu'), 0.4 * ClientPrefs.sfxVolume);
 						curTime += 1000 * speed;
 						holdTime = 0;
 					}

@@ -317,7 +317,7 @@ class ComicsMenuState extends MusicBeatState
 		curSelected = 0;
 
 		cleanupData();
-		FlxG.sound.play(Paths.sound('cancelMenu'));
+		FlxG.sound.play(Paths.sound('cancelMenu'), ClientPrefs.sfxVolume);
 		Mouse.cursor = ARROW;
 		MusicBeatState.switchState(new GalleryMenuState());
 	}

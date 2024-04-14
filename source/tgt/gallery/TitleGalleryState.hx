@@ -122,7 +122,7 @@ class TitleGalleryState extends MusicBeatState
 	function goBack() {
 		if (doingTrans) return;
 		doingTrans = true;
-        FlxG.sound.play(Paths.sound('cancelMenu'));
+        FlxG.sound.play(Paths.sound('cancelMenu'), ClientPrefs.sfxVolume);
         MusicBeatState.switchState(new GalleryMenuState());
     }
 
