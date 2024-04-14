@@ -25,12 +25,7 @@ class StrumNote extends NoteObject
 	public var zIndex:Float = 0;
 	public var desiredZIndex:Float = 0;
 	public var z:Float = 0;
-	
-	override function destroy()
-	{
-		defScale.put();
-		super.destroy();
-	}	
+
 	public var isQuant:Bool = false;
 	private var colorSwap:ColorSwap;
 	public var resetAnim:Float = 0;
@@ -114,6 +109,11 @@ class StrumNote extends NoteObject
     }
 	
     var field:PlayField;
+
+	override function toString()
+	{
+		return '(column: $column | texture $texture | visible: $visible)';
+	}
 
 	public function new(x:Float, y:Float, leColumn:Int, ?field:PlayField, ?hudSkin:String = 'default') {
 		colorSwap = new ColorSwap();

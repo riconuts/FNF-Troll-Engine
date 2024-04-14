@@ -36,11 +36,6 @@ class Note extends NoteObject
 		hitDiff: 0
 	}
 
-	override function destroy()
-	{
-		defScale.put();
-		super.destroy();
-	}
 	public var mAngle:Float = 0;
 	public var bAngle:Float = 0;
 	
@@ -454,6 +449,11 @@ class Note extends NoteObject
 			noteSplashBrt = colorSwap.brightness;
 		}
 		return value;
+	}
+
+	override function toString()
+	{
+		return 'Note (column: $column | noteType: $noteType | strumTime: $strumTime | visible: $visible)';
 	}
 
 	public function new(strumTime:Float, column:Int, ?prevNote:Note, ?gottaHitNote:Bool = false, ?sustainNote:Bool = false, ?inEditor:Bool = false, ?noteMod:String = 'default')

@@ -14,6 +14,12 @@ class NoteObject extends FlxSprite {
 	public var offsetY:Float = 0;
 	public var defScale:FlxPoint = FlxPoint.get(); // for modcharts to keep the scaling
 	public var handleRendering:Bool = true;
+	
+	override function toString()
+	{
+		return 'NoteObject (column: $column | visible: $visible)';
+	}
+
 	override function draw()
 	{
 		if (handleRendering)
@@ -22,5 +28,11 @@ class NoteObject extends FlxSprite {
 
 	public function new(?x:Float, ?y:Float){
 		super(x, y);
+	}
+
+	override function destroy()
+	{
+		defScale.put();
+		super.destroy();
 	}
 }
