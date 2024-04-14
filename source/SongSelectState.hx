@@ -53,21 +53,24 @@ class SongSelectState extends MusicBeatState
 		#end
 		FlxG.camera.bgColor = 0xFF000000;
 
-		if (FlxG.sound.music == null)
+		if (FlxG.sound.music == null){
 			MusicBeatState.playMenuMusic(1);
+		}else{
+			FlxG.sound.music.fadeIn(1.0, FlxG.sound.music.volume);
+		}
 
 		var folder = 'assets/songs/';
-		Paths.iterateDirectory(folder, function(path:String){
-			if (FileSystem.isDirectory(folder + path))
-				songMeta.push(new SongMetadata(path));
+		Paths.iterateDirectory(folder, function(name:String){
+			if (FileSystem.isDirectory(folder + name))
+				songMeta.push(new SongMetadata(name));
 		});
 
 		#if MODS_ALLOWED
 		for (modDir in Paths.getModDirectories()){
 			var folder = Paths.mods('$modDir/songs/');
-			Paths.iterateDirectory(folder, function(path:String){
-				if (FileSystem.isDirectory(folder+path))
-					songMeta.push(new SongMetadata(path, modDir));
+			Paths.iterateDirectory(folder, function(name:String){
+				if (FileSystem.isDirectory(folder + name))
+					songMeta.push(new SongMetadata(name, modDir));
 			});
 		}
 		#end
@@ -158,8 +161,12 @@ class SongSelectState extends MusicBeatState
 			
 			if (charts.length > 1)
 				MusicBeatState.switchState(new SongChartSelec(songMeta[curSel], charts));
-			else
+			else if (charts.length > 0)
 				Song.playSong(songMeta[curSel], charts[0], 0);
+			else{
+				trace("no charts!");
+				songText[curSel].alpha = 0.6;
+			}
 		}
         else if (controls.BACK)
             MusicBeatState.switchState(new MainMenuState());

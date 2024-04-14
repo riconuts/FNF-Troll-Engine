@@ -102,7 +102,7 @@ class WeekData
 				var data = portPsychWeek(Paths.getJson('$modWeeksPath/$fileName'), weekName);
 				if (data != null){
 					pushChapter(data, mod);
-					modWeeksPushed.push(weekName); // but what if you write the same name on the list twice :o
+					modWeeksPushed.push(weekName); // what if same name was written more than once :o
 				}
 			});
 			#end

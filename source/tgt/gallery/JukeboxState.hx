@@ -45,6 +45,7 @@ class JukeboxState extends MusicBeatState {
 	var play:FlxSprite;
 	var forw:FlxSprite;
 	var mute:FlxSprite;
+	var buttons:Array<FlxSprite>;
 	
 	////
 	var songData:Array<JukeboxSongData> = [];
@@ -239,6 +240,8 @@ class JukeboxState extends MusicBeatState {
 		add(mute);
 		add(loopButton);
 
+		buttons = [back, play, forw, mute, loopButton, songProgressBG];
+
 		add(tgt.TGTMenuShit.newBackTextButton(goBack));
 
 		//
@@ -309,11 +312,9 @@ class JukeboxState extends MusicBeatState {
 
 		// im bored
 		var mouseOverlaps = null;
-		var buttons = [back, play, forw, mute, loopButton];
-		if (songProgressBG.visible) buttons.push(songProgressBG);
 
 		for (butt in buttons){
-			if (FlxG.mouse.overlaps(butt)){ 
+			if (butt.visible && FlxG.mouse.overlaps(butt)){ 
 				mouseOverlaps = butt;
 				break;
 			}
@@ -468,8 +469,7 @@ class JukeboxState extends MusicBeatState {
 					MusicBeatState.menuVox.persist = true;
 					MusicBeatState.menuVox.looped = true;
 					MusicBeatState.menuVox.group = FlxG.sound.music.group;
-
-					MusicBeatState.menuVox.volume = muteVocals ? 0 : 1;
+					MusicBeatState.menuVox.volume = 0;
 
 					FlxG.sound.list.add(MusicBeatState.menuVox);
 				}
@@ -515,10 +515,10 @@ class JukeboxState extends MusicBeatState {
 
 		if(coverArtPath.trim()==''){
 			var songPath = 'songs/${data.songDirectory}';
-			if (!Paths.fileExists('images/$songPath.png', IMAGE))
-				coverArtPath = 'jukebox/noCoverImage';
-			else
+			if (Paths.fileExists('images/$songPath.png', IMAGE))
 				coverArtPath = songPath;
+			else
+				coverArtPath = 'jukebox/noCoverImage';
 		}
 
 		if(data.chapterDir != null) Paths.currentModDirectory = data.chapterDir;
