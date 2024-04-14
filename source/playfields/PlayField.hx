@@ -401,7 +401,9 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 				var dataSpawnTime = modManager.get("noteSpawnTime" + data); 
 				var noteSpawnTime = (dataSpawnTime != null && dataSpawnTime.getValue(modNumber)>0)?dataSpawnTime:modManager.get("noteSpawnTime");
 				var time:Float = noteSpawnTime == null ? spawnTime : noteSpawnTime.getValue(modNumber); // no longer averages the spawn times
-				while (column.length > 0 && column[0].strumTime - Conductor.songPosition < time)
+				if (time <= 0)time = spawnTime;
+                
+                while (column.length > 0 && column[0].strumTime - Conductor.songPosition < time)
 					spawnNote(column[0]);
 			}
 		}

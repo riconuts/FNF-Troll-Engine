@@ -24,8 +24,6 @@ class ReverseModifier extends NoteModifier
 		return false;
 
     public function getReverseValue(dir:Int, player:Int){
-        //var receptors = modMgr.receptors[player]; // TODO: rewrite for playfield system
-		// but for now we can just comment it out and set kNum to 4 since rn the key count never goes > 4
         var kNum = 4;
         var val:Float = 0;
         if(dir>=kNum/2)
@@ -65,7 +63,7 @@ class ReverseModifier extends NoteModifier
 
 	override function getPos(visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
 	{
-		var swagOffset = Note.swagWidth / 2 + modMgr.vPadding;
+		var swagOffset = Note.swagWidth / 2 + modMgr.vPadding; // maybe vPadding can be a field variable?
 		var reversePerc = getReverseValue(data, player);
 		var shift = lerp(swagOffset, FlxG.height - swagOffset, reversePerc);
 		

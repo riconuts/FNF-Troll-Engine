@@ -24,7 +24,7 @@ import playfields.NoteField;
  * (for example you can have a screen bounce aux mod + node w/ that aux mod as an input, and then change transformX)
  */
 typedef Node = {
-	var lastSeen:Int; // to make sure it doesnt get hit multiple times per update
+	var lastIndex:Int; // to make sure it doesnt get hit multiple times per update
     var in_mods:Array<String>; /// the modifiers that get input into this node
     var out_mods:Array<String>; // the modifiers that get transformed by this node
 	var nodeFunc:(Array<Float>, Int)->Dynamic; // takes an array of the input mods' values, and returns an array of transformed modifier values, if out_mods.length > 0
@@ -78,8 +78,11 @@ class ModManager {
 			registerAux("noteSpawnTime" + i);
 		}
 
-		for (playerNumber => mods in activeMods)
+		for (playerNumber => mods in activeMods){
 			setDefaultValues(playerNumber);
+			updateActiveMods(playerNumber);
+        }
+
 	}
 
 	function setDefaultValues(mN:Int=-1){
@@ -89,9 +92,10 @@ class ModManager {
 		for (i in 0...4)
 			setValue("noteSpawnTime" + i, 0, mN);
 		
-		setValue("noteSpawnTime", 1500, mN); // maybe a ClientPrefs.noteSpawnTime
+		setValue("noteSpawnTime", 0, mN); // when this is <= 0, it defaults to field.spawnTime
 		setValue("drawDistance", FlxG.height * 1.1, mN); // MAY NOT REPRESENT ACTUAL DRAWDISTANCE: drawDistance is modified by the notefields aswell
-		// so when you set drawDistance is might be lower or higher than expected because of the draw distance mult. setting
+		// so whAT you set drawDistance to might be lower or higher than expected because of the draw distance mult. setting
+		// If you want to disable the usage of draw distance muitiplier, you can set 'disableDrawDistMult' to anything but 0
 		setValue("xmod", 1, mN);
 		setValue("cmod", -1, mN);
 		setValue("scale", 1, mN);
@@ -104,7 +108,7 @@ class ModManager {
 			setValue('scale${i}X', 1, mN);
 			setValue('scale${i}Y', 1, mN);
 		}
-		setValue("movePastReceptors", 0); // effects shouldnt go on
+		setValue("movePastReceptors", 0);
 		setValue("flashR", 1, mN);
 		setValue("flashG", 1, mN);
 		setValue("flashB", 1, mN);
@@ -112,21 +116,18 @@ class ModManager {
 
 
     private var state:PlayState;
-	public var receptors:Array<Array<StrumNote>> = []; // for modifiers to be able to access receptors directly if they need to
 	public var timeline:EventTimeline = new EventTimeline();
 
 	public var notemodRegister:Map<String, Modifier> = [];
 	public var miscmodRegister:Map<String, Modifier> = [];
     public var register:Map<String, Modifier> = [];
     public var modArray:Array<Modifier> = [];
-    public var activeMods:Array<Array<String>> = [[], []]; // by player    
-    public var tempActiveMods:Array<Array<String>> = [[], []];
-	public var lastActiveMods:Array<Array<String>> = [[], []]; // by player
+    public var activeMods:Array<Array<String>> = [[], []]; // mods that should be executing and will be called by functions like getPos
     public var aliases:Map<String, String> = [];
-    var nodeSeen:Int = 0;
 
     public var nodes:Map<String, Array<Node>> = []; // maps nodes by their inputs
     public var nodeArray:Array<Node> = [];
+	var nodeIndex:Int = 0;
 
     inline public function quickRegister(mod:Modifier)
         registerMod(mod.getName(), mod);
@@ -149,14 +150,14 @@ class ModManager {
 		if (outputs == null)
 			outputs=[];
 		registerNode({
-			lastSeen: -1,
+			lastIndex: -1,
 			in_mods: inputs,
 			out_mods: outputs,
 			nodeFunc: nodeFunc
 		});
     }
 
-    public function getActualModName(m:String)
+    function getActualModName(m:String)
 		return aliases.exists(m) ? aliases.get(m) : m;
 
     public function registerMod(modName:String, mod:Modifier, ?registerSubmods = true){
@@ -185,7 +186,7 @@ class ModManager {
 
 		setValue(modName, 0); // so if it should execute it gets added Automagically
 		modArray.sort((a, b) -> Std.int(a.getOrder() - b.getOrder()));
-        // TODO: sort by mod.getOrder()
+
     }
 
 	public function addHScriptModifier(modName:String, ?defaultVal:Float = 0):Null<HScriptModifier>
@@ -211,6 +212,15 @@ class ModManager {
     inline public function setPercent(modName:String, val:Float, player:Int=-1)
 		setValue(modName, val/100, player);
 
+	inline public function setCurrentPercent(modName:String, val:Float, player:Int = -1)
+		setCurrentValue(modName, val / 100, player);
+
+	inline public function getTargetPercent(modName:String, player:Int)
+		return !register.exists(getActualModName(modName)) ? 0 : get(modName).getTargetPercent(player);
+
+	inline public function getTargetValue(modName:String, player:Int)
+		return !register.exists(getActualModName(modName)) ? 0 : get(modName).getTargetValue(player);
+    
 	public function getCMod(data:Int, player:Int, ?defaultSpeed:Float){
 		var daSpeed = getValue('cmod${data}', player);
 		if (daSpeed < 0){
@@ -218,7 +228,7 @@ class ModManager {
 
 			if (daSpeed < 0){
 				if (defaultSpeed == null)
-					return PlayState.instance.songSpeed;
+					return state.songSpeed;
 				else
 					return defaultSpeed;
 			}
@@ -229,9 +239,6 @@ class ModManager {
 
 	public function getXMod(data:Int, player:Int)
 		return getValue("xmod", player) * getValue('xmod${data}', player);
-
-	inline public function getSpeed(dir:Int, player:Int, ?songSpeed:Float)
-		return getCMod(dir, player, songSpeed) * getXMod(dir, player);
 	
 	inline public function getNoteSpeed(note:Note, pN:Int, ?songSpeed:Float)
 		return getCMod(note.column, pN, songSpeed) * note.multSpeed * getXMod(note.column, pN);
@@ -239,192 +246,115 @@ class ModManager {
 
 	public function getActiveMods(pN:Int){
 		if(activeMods[pN]==null){
+            //trace("generating active mods for " + pN);
 			activeMods[pN] = [];
-			setDefaultValues(pN);
+            setDefaultValues(pN);
 		}
-/* 
-		if (tempActiveMods[pN] == null)
-			tempActiveMods[pN] = [];
-
-
-        if(tempActiveMods[pN].length > 0){
-			return activeMods[pN].concat(tempActiveMods[pN]);
-        }else */
-			return activeMods[pN];
+		return activeMods[pN];
 	}
-	public function setValue(modName:String, val:Float, player:Int=-1){
+
+	public function setCurrentValue(modName:String, val:Float, player:Int = -1)
+	{
 		if (player == -1)
 		{
 			for (pN => mods in activeMods)
-				setValue(modName, val, pN);
+				setCurrentValue(modName, val, pN);
 		}
 		else
 		{
 			var daMod = get(modName);
-			if(daMod==null)return;
-			var mod = daMod.parent==null?daMod:daMod.parent;
-			var name = mod.getName();
-            // optimization shit!! :)
-            // thanks 4mbr0s3 for giving an alternative way to do all of this cus andromeda has smth similar in Flexy but like
-            // this is a better way to do it
-            // (ofc its not EXACTLY what 4mbr0s3 did but.. y'know, it's close to it)
-
-			// so this actually has an issue
-			// this doesnt take into account any other submods
-			// so if you turn a submod off
-			// it turns the parent mod off, too, when it shouldnt
-			// so what I need to do is like, check other submods before removing the parent
-            
-			var aMods = getActiveMods(player);
-
-			get(modName).setValue(val, player);
-			
-			if (!aMods.contains(name) && mod.shouldExecute(player, val)){
-				if (daMod.getName() != name)
-					aMods.push(daMod.getName());
-				aMods.push(name);
-			}else if (!mod.shouldExecute(player, val)){
-
-				// there is prob a better way to do this
-				// i just dont know it
-				var modParent = daMod.parent;
-				if(modParent==null){
-					for (name => mod in daMod.submods)
-					{
-						modParent = daMod; // because if this gets called at all, there's atleast 1 submod!!
-						break;
-					}
-				}
-				if(daMod!=modParent)
-					aMods.remove(daMod.getName());
-				if (modParent!=null){
-					if (modParent.shouldExecute(player, modParent.getValue(player))){
-						aMods.sort((a, b) -> Std.int(get(a).getOrder() - get(b).getOrder()));
-						return;
-					}
-					for (subname => submod in modParent.submods){
-						if(submod.shouldExecute(player, submod.getValue(player))){
-							aMods.sort((a, b) -> Std.int(get(a).getOrder() - get(b).getOrder()));
-							return;
-						}
-					}
-					aMods.remove(modParent.getName());
-				}else
-					aMods.remove(daMod.getName());
-			}
-
-			aMods.sort((a, b) -> Std.int(get(a).getOrder() - get(b).getOrder()));
+			if (daMod == null)
+				return;
+			daMod.setCurrentValue(val, player);
 		}
+	}
+
+    public function setValue(modName:String, val:Float, player:Int=-1){
+		if (player == -1)
+		{
+			for (pN => mods in activeMods)
+				setValue(modName, val, pN);
+		}else{
+            var daMod = get(modName);
+			if (daMod == null)
+				return;
+            
+			daMod.setValue(val, player);
+        }
     }
 
-	public function update(elapsed:Float)
-	{
-		//tempActiveMods = [[], []];
-		if (FlxG.state == PlayState.instance){
-			for (mod in modArray)
-			{
-                //mod._internalUpdate();
-				if (mod.doesUpdate())
-					mod.update(elapsed, PlayState.instance.curDecBeat);
-			}
-		}else{
-			for (mod in modArray)
-			{
-                //mod._internalUpdate();
-				if (mod.doesUpdate())
-					mod.update(elapsed, 0);
-			}
-		}
-        
-		/*for (node in nodeArray){
-			if (node.out_mods.length > 0)
-			{
-                for(out in node.out_mods){
-                    for(pN in 0...activeMods.length){
-						if (tempActiveMods[pN] == null)
-							tempActiveMods[pN] = [];
+    public function updateActiveMods(player:Int){
+        if(player == -1){
+            for(pN => mods in activeMods)
+                updateActiveMods(pN);
 
-                        if (!tempActiveMods[pN].contains(out))
-                            tempActiveMods[pN].push(out);
-						if (!lastActiveMods[pN].contains(out))
-							lastActiveMods[pN].push(out);
+            return;
+        }
+
+		var active_mods = getActiveMods(player);
+        
+        // remove currently inactive mods from the active mods
+        var discarded_mods:Array<String> = [];
+		var activated_mods:Array<String> = [];
+        for(mod in modArray){
+            var mod_name = mod.getName();
+            if(active_mods.contains(mod_name)){
+                if(!mod.shouldExecute(player, mod.getValue(player))){
+                    var can_discard:Bool = true;
+                    // before discarding we should be checking for submods and if THEY can execute
+                    // if they can execute then we shouldnt be discarding this mod since the parent mod executes the logic for submods
+
+                    for(submod_name => submod in mod.submods){
+                        if (submod.shouldExecute(player, submod.getValue(player)))
+                            can_discard = false; // we CANNOT discard since a submod can execute still
                     }
+
+
+                    if(can_discard)
+                        discarded_mods.push(mod_name); // shit is inactive, remove it later (cant in this loop)
+                    
+                }
+            }else{
+
+                if(mod.shouldExecute(player, mod.getValue(player))){
+					if (mod.parent != null && !activated_mods.contains(mod.parent.getName()) && !active_mods.contains(mod.parent.getName()))
+						activated_mods.push(mod.parent.getName());
+					activated_mods.push(mod.getName());
                 }
             }
         }
 
-        // honestly i can probably optimize this some day but for now its fine
-
-        if(nodeArray.length > 0){
-            for (pN => mods in lastActiveMods){ // dont use activeMods just incase the value has just rolled over to 0 so the node will have to be disabled
-                // alternatively i add a seperate array for activeNodes so nodes can get a final call in b4 being disabled + still have up-to-date active mod data
-                // honestly probably the best idea i'll do that tmrw
-				
-                var touched:Array<String> = [];
-                nodeSeen++;
-                var values:Map<String, Float> = []; // to prevent calling getValue over and over
-                
-                for(mod in mods){
-                    if(nodes.exists(mod)){
-                        for(node in nodes.get(mod)){
-                            if (node.lastSeen != nodeSeen){
-                                node.lastSeen = nodeSeen; // to prevent the node from being called over and over in the same frame by having multiple inputs
-
-                                // collect up all the input values from the in_mods array
-                                var inputValues:Array<Float> = []; 
-                                for(in_mod in node.in_mods){
-                                    if(!values.exists(in_mod))
-                                        values.set(in_mod, getValue(in_mod, pN));
-
-                                    inputValues.push(values.get(in_mod));
-                                }
-                                var returnValue:Dynamic = node.nodeFunc(inputValues, pN);
-                                if(node.out_mods.length > 0){ // if this has outputs then output them
-                                    if((returnValue is Array)){
-                                        var values:Array<Float> = cast returnValue;
-                                        for (idx in 0...values.length){ // goes over all the values
-                                            // better have only floats in here if you dont then THATS NOT MY FAULT IF IT CRASHES!!
-                                            var value:Float = values[idx];
-                                            var output:String = node.out_mods[idx];
-                                            var oM = get(output);
-											var perc:Null<Float> = cast oM._percents[pN];
-											if (node.in_mods.contains(output) || perc == null) // if the output is also an input then set it directly, otherwise add it
-                                                oM._percents[pN] = value;
-                                            else
-                                                oM._percents[pN] += value;
-
-											if (oM.shouldExecute(pN, oM._percents[pN]) && !touched.contains(output))
-                                                touched.push(output);
-
-                                            // honestly i should make it so anything that is outputted gets added to tempactivemods BEFORE doing any node stuff
-                                            // and then remove them if they didnt change after doing nodes
-                                            // so then nodes that get outputted by another node are set active
-                                            
-                                            
-                                        }
-                                    }
-                                }
-                            }
-                            
-                        }
-                    }
-                }
-
-                var toRemove:Array<String> = [];
-                for(shit in tempActiveMods[pN]){
-                    if (!touched.contains(shit))
-                        toRemove.push(shit);
-                }
-                for(shit in toRemove)
-                    tempActiveMods[pN].remove(shit);
+		// remove all inactive mods (we do it after pushing new ones so that we dont end up checking mods we KNOW arent executing)
+		for (mod_name in discarded_mods){
+			//trace("discarded " + mod_name + " for " + player);
+			active_mods.remove(mod_name);
+        }
+		
+		for (mod in activated_mods){
+            if(!active_mods.contains(mod)){ // prob a redundant check but better safe than sorry
+			    active_mods.push(mod);
+				//trace("activated " + mod + " for " + player);
             }
-        } */
-	}
-
-    public function updateTimeline(curStep:Float){
-		lastActiveMods = activeMods.copy();
-		timeline.update(curStep);
+        }
+        
+		active_mods.sort((a, b) -> Std.int(get(a).getOrder() - get(b).getOrder()));
     }
+
+
+	public function update(elapsed:Float, beat:Float, step:Float)
+	{
+		//tempActiveMods = [[], []];
+		timeline.updateMods(step);
+        for (mod in modArray)
+        {
+            mod._internalUpdate();
+            if (mod.doesUpdate())
+				mod.update(elapsed, beat);
+        }
+		timeline.updateFuncs(step);
+		updateActiveMods(-1);
+
+	}
 
  	public var playerAmount:Int = 2;
 	public var playerOOBIsCentered:Bool = true; // Player Out of Bounds is centered
@@ -597,6 +527,8 @@ class ModManager {
 			queueSet(step, modName, startVal, player);
 		*/
 
+		//modName = getActualModName(modName);
+
 		var easeFunc:EaseFunction = FlxEase.linear;
 
 		if (style == null){
@@ -613,13 +545,14 @@ class ModManager {
 
 		if (player == -1)
 			for (pN => mods in activeMods)
-				timeline.addEvent(new ModEaseEvent(step, endStep, modName, target, easeFunc, pN, this));				
+				timeline.addEvent(new ModEaseEvent(step, endStep, modName, target, easeFunc, pN, this, startVal));				
 		else
-			timeline.addEvent(new ModEaseEvent(step, endStep, modName, target, easeFunc, player, this));
+			timeline.addEvent(new ModEaseEvent(step, endStep, modName, target, easeFunc, player, this, startVal));
 	}
 
 	public function queueSet(step:Float, modName:String, target:Float, player:Int = -1)
 	{
+		//modName = getActualModName(modName);
 		if (player == -1)
 			for (pN => mods in activeMods)
 				timeline.addEvent(new SetEvent(step, modName, target, pN, this));

@@ -1426,7 +1426,6 @@ class PlayState extends MusicBeatState
 
 		for(field in playfields.members)
 			field.fadeIn(isStoryMode || skipArrowStartTween); // TODO: check if its the first song so it should fade the notes in on song 1 of story mode
-		modManager.receptors = [playerField.strumNotes, dadField.strumNotes];
 
 		callOnScripts('preModifierRegister'); // deprecated
 		callOnScripts('onModifierRegister');
@@ -2771,8 +2770,7 @@ class PlayState extends MusicBeatState
 		*/
 
 		super.update(elapsed);
-		modManager.updateTimeline(curDecStep);
-		modManager.update(elapsed);
+		modManager.update(elapsed, curDecBeat, curDecStep);
 
 		if (generatedMusic)
 		{

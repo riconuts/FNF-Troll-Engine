@@ -32,7 +32,7 @@ typedef RenderInfo = {
 class Modifier {
 	public var modMgr:ModManager;
 	@:allow(modchart.ModManager)
-	var _percents:Array<Float> = [0, 0];
+	var target_percents:Array<Float> = [0, 0];
     public var percents:Array<Float> = [0, 0];
 
 	public var submods:Map<String, Modifier> = [];
@@ -72,17 +72,39 @@ class Modifier {
 	public function getValue(player:Int):Float
 		return percents[player];
 
-	public function getPercent(player:Int):Float
-		return getValue(player) * 100;
-
-	public function setValue(value:Float, player:Int = -1)
+	public function setCurrentValue(value:Float, player:Int = -1) // only set for like a frame
 	{
+		//modMgr.touchMod(getName(), player);
 		if (player == -1)
 			for (idx in 0...percents.length)
 				percents[idx] = value;
 		else
-			percents[player] = value;
+            percents[player] = value;
+        
 	}
+
+	public function getTargetValue(player:Int):Float // because most the time when you getValue you wanna get the CURRENT value, not the target
+		return target_percents[player];
+
+	public function getTargetPercent(player:Int):Float
+		return getTargetValue(player) * 100;
+
+	public function getPercent(player:Int):Float
+		return getValue(player) * 100;
+    
+	public function setValue(value:Float, player:Int = -1) // because most the time when you setValue you wanna set the TARGET value, not the current
+	{
+		setCurrentValue(value, player);
+		if (player == -1)
+			for (idx in 0...target_percents.length)
+				target_percents[idx] = value;
+		else
+            target_percents[player] = value;
+        
+	}
+
+	public function setCurrentPercent(percent:Float, player:Int = -1)
+		setCurrentValue(percent * 0.01, player);
 
 	public function setPercent(percent:Float, player:Int = -1)
 		setValue(percent * 0.01, player);
@@ -107,6 +129,41 @@ class Modifier {
 		else
 			return 0;
 	}
+
+	public function getTargetSubmodPercent(modName:String, player:Int)
+	{
+		if (submods.exists(modName))
+			return submods.get(modName).getTargetPercent(player);
+		else
+			return 0;
+	}
+
+	public function getTargetSubmodValue(modName:String, player:Int)
+	{
+		if (submods.exists(modName))
+			return submods.get(modName).getTargetValue(player);
+		else
+			return 0;
+	}
+
+	public function setCurrentSubmodPercent(modName:String, endPercent:Float, player:Int)
+		return submods.get(modName).setCurrentPercent(endPercent, player);
+
+	public function setCurrentSubmodValue(modName:String, endValue:Float, player:Int)
+		return submods.get(modName).setCurrentValue(endValue, player);
+
+	public inline function getTargetOtherPercent(modName:String, player:Int)
+		return modMgr.getTargetPercent(modName, player);
+
+	public inline function getTargetOtherValue(modName:String, player:Int)
+		return modMgr.getTargetValue(modName, player);
+
+	public inline function setCurrentOtherPercent(modName:String, endPercent:Float, player:Int)
+		return modMgr.setCurrentPercent(modName, endPercent, player);
+
+	public inline function setCurrentOtherValue(modName:String, endValue:Float, player:Int)
+		return modMgr.setCurrentValue(modName, endValue, player);
+    
 
 	public function setSubmodPercent(modName:String, endPercent:Float, player:Int)
 		return submods.get(modName).setPercent(endPercent, player);
@@ -136,9 +193,12 @@ class Modifier {
 
     @:allow(modchart.ModManager)
     private function _internalUpdate(){
-        for(pN in 0...percents.length)
-            _percents[pN] = percents[pN];
-        // ^^ this is done so nodes etc can affect these by changing _percents
+        for(pN in 0...target_percents.length){
+			percents[pN] = target_percents[pN];
+        }
+
+        //for(mod in submods)mod._internalUpdate();
+        
     }
 
 	// Available whenever shouldUpdate() == true

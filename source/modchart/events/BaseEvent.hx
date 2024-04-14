@@ -2,6 +2,7 @@ package modchart.events;
 
 class BaseEvent {
     public var manager:ModManager;
+    public var parent:EventTimeline;
     public var executionStep:Float = 0;
 	public var ignoreExecution:Bool = false;
     public var finished:Bool = false;
