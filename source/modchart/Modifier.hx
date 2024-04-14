@@ -74,12 +74,15 @@ class Modifier {
 
 	public function setCurrentValue(value:Float, player:Int = -1) // only set for like a frame
 	{
-		//modMgr.touchMod(getName(), player);
 		if (player == -1)
-			for (idx in 0...percents.length)
+			for (idx in 0...percents.length){
+				modMgr.touchMod(getName(), idx);
 				percents[idx] = value;
-		else
+            }
+		else{
+			modMgr.touchMod(getName(), player);
             percents[player] = value;
+        }
         
 	}
 

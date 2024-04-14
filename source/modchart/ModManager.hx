@@ -115,18 +115,25 @@ class ModManager {
 	}
 
 
-    private var state:PlayState;
+	private var state:PlayState;
+
 	public var timeline:EventTimeline = new EventTimeline();
 
-	public var notemodRegister:Map<String, Modifier> = [];
-	public var miscmodRegister:Map<String, Modifier> = [];
-    public var register:Map<String, Modifier> = [];
-    public var modArray:Array<Modifier> = [];
-    public var activeMods:Array<Array<String>> = [[], []]; // mods that should be executing and will be called by functions like getPos
-    public var aliases:Map<String, String> = [];
+	var notemodRegister:Map<String, Modifier> = [];
+	var miscmodRegister:Map<String, Modifier> = [];
 
-    public var nodes:Map<String, Array<Node>> = []; // maps nodes by their inputs
-    public var nodeArray:Array<Node> = [];
+	public var register:Map<String, Modifier> = [];
+
+	var activeMods:Array<Array<String>> = [[], []]; // mods that should be executing and will be called by functions like getPos
+	// ^^ maybe this can be seperated into a misc and note one, just so you arent checking misc mods for note shit & vice versa
+	// also so you arent calling shit like getPos on submods etc etc, might be better for optimization to do that
+	var modArray:Array<Modifier> = [];
+	var aliases:Map<String, String> = [];
+
+	var nodes:Map<String, Array<Node>> = []; // maps nodes by their inputs
+	var nodeArray:Array<Node> = [];
+
+	var touchedMods:Array<Array<String>> = [[], []];
 	var nodeIndex:Int = 0;
 
     inline public function quickRegister(mod:Modifier)
@@ -248,6 +255,7 @@ class ModManager {
 		if(activeMods[pN]==null){
             //trace("generating active mods for " + pN);
 			activeMods[pN] = [];
+			touchedMods[pN] = [];
             setDefaultValues(pN);
 		}
 		return activeMods[pN];
@@ -267,6 +275,17 @@ class ModManager {
 				return;
 			daMod.setCurrentValue(val, player);
 		}
+	}
+
+	public function touchMod(name:String, player:Int)
+	{
+        if(player < 0)return;
+
+		if (touchedMods[player] == null)
+			touchedMods[player] = [];
+
+		if (!touchedMods[player].contains(name))
+			touchedMods[player].push(name);
 	}
 
     public function setValue(modName:String, val:Float, player:Int=-1){
@@ -340,11 +359,109 @@ class ModManager {
 		active_mods.sort((a, b) -> Std.int(get(a).getOrder() - get(b).getOrder()));
     }
 
+	function runNodes()
+	{
+		if (nodeArray.length > 0)
+		{
+			for (player => mods in touchedMods)
+			{
+				nodeIndex++; // used to prevent calling the same node over and over when it has multiple inputs
+				// could do a ran_nodes array but honestly this is probably better for optimization since its not having to store the entire node, just an index
+
+				for (mod in mods)
+				{
+					if (nodes.exists(mod))
+					{
+						var garbage = [];
+						for (node in nodes.get(mod))
+						{
+							if (node.lastIndex != nodeIndex)
+							{
+								var input_values:Array<Float> = [];
+
+								for (input_mod in node.in_mods)
+									input_values.push(getValue(input_mod, player));
+
+								var output:Dynamic = node.nodeFunc(input_values, player);
+
+								
+								if (node.out_mods.length > 0)
+								{ // if theres multiple outputs
+									if (output is Array)
+									{
+										var output_values:Array<Float> = cast output;
+										if (output_values.length < node.out_mods.length)
+										{
+											for (i in node.out_mods.length...output_values.length)
+												output_values.push(0); // TODO: check the out_mod to see if i should add in 0 or mod.getValue(player) depending on if its in in_mods
+										}
+										for (idx in 0...node.out_mods.length)
+										{
+											var output_value:Float = output_values[idx];
+											var output_mod_name:String = node.out_mods[idx];
+											var output_mod:Modifier = get(output_mod_name);
+											if (output_mod == null){
+                                                trace(output_mod_name + " is not a valid output, look into fixing pl0x");
+                                                continue;
+                                            }
+											var current_value:Float = output_mod.getValue(player);
+											// if the output is also an input then set it directly, otherwise add it
+											if (node.in_mods.contains(output_mod_name))
+												output_mod.setCurrentValue(output_value, player);
+											else
+												output_mod.setCurrentValue(current_value + output_value, player);
+										}
+									}
+									else
+									{
+										trace("Broken Node!!! Expected an Array of outputs, but did not get that!!!!");
+										garbage.push(node); // broken node!!
+										continue;
+									}
+								}
+								else
+								{
+									if (output is Float)
+									{
+										var output_value:Float = output;
+										var output_mod_name:String = node.out_mods[0];
+										var output_mod:Modifier = get(output_mod_name);
+										var current_value:Float = output_mod.getValue(player);
+										// if the output is also an input then set it directly, otherwise add it
+										if (node.in_mods.contains(output_mod_name))
+											output_mod.setCurrentValue(output_value);
+										else
+											output_mod.setCurrentValue(current_value + output_value);
+									}
+									else
+									{
+										trace("Broken Node!!! Expected a Float output, but did not get that!!!!");
+										garbage.push(node); // broken node!!
+										continue;
+									}
+								}
+							}
+						}
+						for (node in garbage)
+							nodes.get(mod).remove(node);
+					}
+				}
+			}
+		}
+	}
 
 	public function update(elapsed:Float, beat:Float, step:Float)
 	{
 		//tempActiveMods = [[], []];
+		for (pN => mods in activeMods)
+		{
+			touchedMods[pN] = [];
+			for (mod in mods)
+				touchedMods[pN].push(mod);
+		}
+
 		timeline.updateMods(step);
+        
         for (mod in modArray)
         {
             mod._internalUpdate();
@@ -352,8 +469,9 @@ class ModManager {
 				mod.update(elapsed, beat);
         }
 		timeline.updateFuncs(step);
+        runNodes();
+        for(pN in 0...touchedMods.length)touchedMods[pN] = [];
 		updateActiveMods(-1);
-
 	}
 
  	public var playerAmount:Int = 2;
