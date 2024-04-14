@@ -235,7 +235,7 @@ class CreditsState extends MusicBeatState
 	function updateSelection(playSound:Bool = true)
 	{
 		if (playSound)
-			FlxG.sound.play(Paths.sound("scrollMenu"), 0.4);
+			FlxG.sound.play(Paths.sound("scrollMenu"), 0.4 * ClientPrefs.sfxVolume);
 
 		// selectedSong = titleArray[curSelected];
 
