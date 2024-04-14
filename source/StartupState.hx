@@ -17,7 +17,7 @@ using StringTools;
 
 // Loads the title screen, alongside some other stuff.
 
-class StartupState extends FlxState
+class StartupState extends FlxTransitionableState
 {
 	public static var muteKeys:Array<FlxKey> = [FlxKey.ZERO];
 	public static var volumeDownKeys:Array<FlxKey> = [FlxKey.NUMPADMINUS, FlxKey.MINUS];
@@ -105,9 +105,6 @@ class StartupState extends FlxState
 		#end
 		
 		Highscore.load();
-
-		if (FlxG.save.data.weekCompleted != null)
-			Highscore.weekCompleted = FlxG.save.data.weekCompleted;
 		
 		#if discord_rpc
 		Application.current.onExit.add((exitCode)->{
@@ -227,62 +224,74 @@ class StartupState extends FlxState
 		persistentUpdate = true;
 	}
 
+	override function create()
+	{
+		this.transIn = FadeTransitionSubstate;
+		//this.transOut = FadeTransitionSubstate;
+		FlxTransitionableState.skipNextTransOut = true;
+
+		warning = new FlxSprite(0, 0, Paths.image("warning"));
+		warning.scale.set(0.65, 0.65);
+		warning.updateHitbox();
+		warning.screenCenter();
+		add(warning);
+
+		super.create();
+	}
+
 	private var warning:FlxSprite;
-	private var step = 0;
+	private var step:Int = 10;
 
 	var fadeTwn:FlxTween = null;
 	override function update(elapsed)
 	{
-		// this is kinda stupid but i couldn't find any other way to display the warning while the title screen loaded 
-		// could be worse lol
 		switch (step){
-			case 0:
-				warning = new FlxSprite(0, 0, Paths.image("warning"));
-				warning.scale.set(0.65, 0.65);
-				warning.updateHitbox();
-				warning.screenCenter();
-				add(warning);
-
-				step = 1;
-			case 1:
-				var startTime = Sys.cpuTime();
+			case 10:
+				final startTime = Sys.cpuTime();
 
 				load();
-				if (Reflect.getProperty(nextState, "load") != null)
-					Reflect.callMethod(null, Reflect.getProperty(nextState, "load"), []);
+				final stateLoad:Dynamic = Reflect.getProperty(nextState, "load");
+				if (stateLoad != null)
+					Reflect.callMethod(null, stateLoad, []);
 
 				#if debug
-				var waitTime:Float = 0;
+				final waitTime:Float = 0.0;
 				#elseif sys
-				var waitTime:Float = (nextState == PlayState || nextState == editors.ChartingState) ? 0 : Math.max(0, 1.6 - (startTime - Sys.cpuTime()));
+				final waitTime:Float = (nextState == PlayState || nextState == editors.ChartingState) ? 0.0 : Math.max(0.0, 1.6 - (startTime - Sys.cpuTime()));
 				#else
-				var waitTime:Float = 0;
+				final waitTime:Float = 0.0;
 				#end
 
-				fadeTwn = FlxTween.tween(warning, {alpha: 0}, 1, {
+				step = 30;
+
+				fadeTwn = FlxTween.tween(warning, {alpha: 0}, 1.0, {
 					ease: FlxEase.expoIn,
 					startDelay: waitTime,
-					onComplete: (twn)->{
-						step = 5;
-					}
+					onStart: (twn)->{step = 40;},
+					onComplete: (twn)->{step = 50;}
 				});
-
-				step = 3;
-			case 3:
-				if ((FlxG.keys.justPressed.ANY || FlxG.mouse.justPressed) && fadeTwn.percent <= 0){
+				
+			case 30:
+				if (FlxG.keys.justPressed.ANY || FlxG.mouse.justPressed){
 					fadeTwn.startDelay = 0;
-					step = 4;
+					step = 40;
+				}
+			case 40:
+				if (FlxG.keys.justPressed.ANY || FlxG.mouse.justPressed){
+					fadeTwn.percent = (1.0 + fadeTwn.percent) * 0.5;
 				}
 
-			case 5:
+			case 50:
 				#if DO_AUTO_UPDATE
 				if (Main.outOfDate)
 					MusicBeatState.switchState(new UpdaterState(recentRelease)); // UPDATE!!
 				else
 				#end
 				{
+					/*
 					FlxTransitionableState.skipNextTransIn = true;
 					FlxTransitionableState.skipNextTransOut = true;
+					*/
 					MusicBeatState.switchState(Type.createInstance(nextState, []));
 				}
 		}

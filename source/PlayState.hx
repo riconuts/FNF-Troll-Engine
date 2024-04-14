@@ -3416,7 +3416,6 @@ class PlayState extends MusicBeatState
 						
 						Highscore.weekCompleted.set(ChapterData.curChapter.directory, true);
 						FlxG.save.data.weekCompleted = Highscore.weekCompleted;
-
 						FlxG.save.flush();
 					}
 				}

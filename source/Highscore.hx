@@ -32,6 +32,7 @@ typedef ScoreRecord = {
 // Judges will be used for FC medals
 
 class Highscore {
+	// maybe move this to WeekData oops
 	public static var weekCompleted:Map<String, Bool> = new Map<String, Bool>();
 
 	public static var grades:Map<String, Array<Array<Dynamic>>> = [
@@ -492,6 +493,9 @@ class Highscore {
 	{
 		save.bind("highscores2");
 		loadData();
+
+		if (FlxG.save.data.weekCompleted != null)
+			Highscore.weekCompleted = FlxG.save.data.weekCompleted;
 	}
     #end
 }
