@@ -235,7 +235,7 @@ class CreditsState extends MusicBeatState
 	function updateSelection(playSound:Bool = true)
 	{
 		if (playSound)
-			FlxG.sound.play(Paths.sound("scrollMenu"), 0.4 * ClientPrefs.sfxVolume);
+			FlxG.sound.play(Paths.sound("scrollMenu"), 0.4 );
 
 		// selectedSong = titleArray[curSelected];
 
@@ -303,7 +303,7 @@ class CreditsState extends MusicBeatState
 	var controlLock:Bool = false;
 	override function update(elapsed:Float)
 	{
-		var targetVolume:Float = ClientPrefs.songVolume * 0.7;
+		var targetVolume:Float =  0.7;
 		if (FlxG.sound.music != null && FlxG.sound.music.volume < targetVolume)
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
 
@@ -346,7 +346,7 @@ class CreditsState extends MusicBeatState
 
 		if (controls.BACK){
 			controlLock = true;
-			FlxG.sound.play(Paths.sound('cancelMenu'), ClientPrefs.sfxVolume);
+			FlxG.sound.play(Paths.sound('cancelMenu'));
 			MusicBeatState.switchState(new MainMenuState());
 		}
 

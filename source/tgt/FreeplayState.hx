@@ -461,7 +461,7 @@ class FreeplayState extends MusicBeatState
 		if (hintText.x < (FlxG.camera.scroll.x - hintText.width))
 			hintText.x = FlxG.camera.scroll.x + FlxG.width;
 
-		var targetVolume:Float = ClientPrefs.songVolume * 0.7;
+		var targetVolume:Float =  0.7;
 		if (FlxG.sound.music != null && FlxG.sound.music.volume < targetVolume)
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
 
@@ -509,7 +509,7 @@ class FreeplayState extends MusicBeatState
 		camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
 
 		if (controls.BACK){
-			FlxG.sound.play(Paths.sound('cancelMenu'), ClientPrefs.sfxVolume);
+			FlxG.sound.play(Paths.sound('cancelMenu'));
 			MusicBeatState.switchState(new MainMenuState());
 		}
 		

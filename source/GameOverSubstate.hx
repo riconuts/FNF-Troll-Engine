@@ -66,13 +66,13 @@ class GameOverSubstate extends MusicBeatSubstate
 
 			var frameRate = 1/24;
 			FlxTween.tween(genericBitch, {"scale.x": 1.22, "scale.y": 1.22, alpha: 1}, 1, {ease: FlxEase.circIn}).then(
-				FlxTween.tween(genericBitch, {"scale.x": 1.196, "scale.y": 1.196}, frameRate, {onComplete: (_)->{ if (!isEnding) FlxG.sound.play(Paths.sound(genericSound), ClientPrefs.sfxVolume, false);}})).then(
+				FlxTween.tween(genericBitch, {"scale.x": 1.196, "scale.y": 1.196}, frameRate, {onComplete: (_)->{ if (!isEnding) FlxG.sound.play(Paths.sound(genericSound), false);}})).then(
 					FlxTween.tween(genericBitch, {"scale.x": 1.1, "scale.y": 1.1}, frameRate*35)).then(
-						FlxTween.tween(genericBitch, {"scale.x": 1, "scale.y": 1}, frameRate*60, {onStart: (fuck)->{ if (!isEnding) FlxG.sound.playMusic(Paths.music(genericMusic), 0.6 * ClientPrefs.songVolume, true); FlxG.sound.music.fadeIn(0.4, 0.6, 1);}})).then(
+						FlxTween.tween(genericBitch, {"scale.x": 1, "scale.y": 1}, frameRate*60, {onStart: (fuck)->{ if (!isEnding) FlxG.sound.playMusic(Paths.music(genericMusic), 0.6 , true); FlxG.sound.music.fadeIn(0.4, 0.6, 1);}})).then(
 							FlxTween.tween(genericBitch, {"scale.x": 1.01, "scale.y": 1.01}, frameRate * 14, {type: PINGPONG}));
 		}
 		else{
-			deathSound = FlxG.sound.play(Paths.sound(deathSoundName), ClientPrefs.sfxVolume);
+			deathSound = FlxG.sound.play(Paths.sound(deathSoundName));
 			boyfriend.playAnim('firstDeath');
 		}
 
@@ -194,7 +194,7 @@ class GameOverSubstate extends MusicBeatSubstate
 			
 			FlxG.sound.music.stop();
 			
-			var endSound = FlxG.sound.play(Paths.music(endSoundName), ClientPrefs.sfxVolume);
+			var endSound = FlxG.sound.play(Paths.music(endSoundName));
 			var endTime = Math.max(endSound.length/1000, 2.7); // wait for both the sound and the fade out to end.
 
 			new FlxTimer().start(0.7,		(tmr)->{	FlxG.camera.fade(FlxColor.BLACK, 2, false);	});
@@ -235,7 +235,7 @@ class GameOverSubstate extends MusicBeatSubstate
 			if (boyfriend.animation.curAnim.finished)
 			{
 				boyfriend.playAnim('deathLoop');
-				FlxG.sound.playMusic(Paths.music(loopSoundName), ClientPrefs.songVolume);
+				FlxG.sound.playMusic(Paths.music(loopSoundName), 1);
 			}
 		}
 

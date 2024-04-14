@@ -239,6 +239,7 @@ class OptionsSubstate extends MusicBeatSubstate
 	function playPreviewSound(name:String, volume:Float = 1){
 		if (previewSound != null) previewSound.stop().destroy();
 		previewSound = FlxG.sound.play(Paths.sound(name), volume, false, null, true, ()->{previewSound = null;});
+		previewSound.context = MISC;
 	}
 
 	function onNumberChanged(option:String, oldVal:Float, newVal:Float)
@@ -259,8 +260,6 @@ class OptionsSubstate extends MusicBeatSubstate
 				playPreviewSound("hitsound", newVal * 0.01);
             case 'sfxVolume':
 				playPreviewSound("scrollMenu", newVal * 0.01);
-            case 'songVolume':
-				if (FlxG.sound.music!=null)FlxG.sound.music.volume = ClientPrefs.songVolume;
             case 'masterVolume':
                 var vol = FlxG.sound.volume;
                 var newVol = newVal * 0.01;
@@ -1427,7 +1426,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			var doUpdate = false;
 
 			if (FlxG.keys.justPressed.TAB){
-				FlxG.sound.play(Paths.sound("scrollMenu"), ClientPrefs.sfxVolume);
+				FlxG.sound.play(Paths.sound("scrollMenu"));
 				changeCategory(1);
 				
 				doUpdate = true;
@@ -1435,11 +1434,11 @@ class OptionsSubstate extends MusicBeatSubstate
 			}
 
 			if (FlxG.keys.justPressed.UP){
-				FlxG.sound.play(Paths.sound("scrollMenu"), ClientPrefs.sfxVolume);
+				FlxG.sound.play(Paths.sound("scrollMenu"));
 				changeWidget(-1);
 			}
 			if (FlxG.keys.justPressed.DOWN){
-				FlxG.sound.play(Paths.sound("scrollMenu"), ClientPrefs.sfxVolume);
+				FlxG.sound.play(Paths.sound("scrollMenu"));
 				changeWidget(1);
 			}
 
@@ -1621,7 +1620,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			if (controls.BACK)
 			{
                 save();
-				FlxG.sound.play(Paths.sound('cancelMenu'), ClientPrefs.sfxVolume);
+				FlxG.sound.play(Paths.sound('cancelMenu'));
             
                 if(goBack!=null)
 					goBack(changed);

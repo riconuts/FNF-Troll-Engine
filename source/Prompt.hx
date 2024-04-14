@@ -122,7 +122,7 @@ class Prompt extends MusicBeatSubstate
 				FlxG.sound.play(Paths.sound('confirmMenu'));
 				if(okc != null)okc();
 			}else{
-				FlxG.sound.play(Paths.sound('cancelMenu'), ClientPrefs.sfxVolume);
+				FlxG.sound.play(Paths.sound('cancelMenu'));
 				if(cancelc != null)cancelc();
 			}
 			close();

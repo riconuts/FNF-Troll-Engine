@@ -55,7 +55,7 @@ class StoryMenuState extends MusicBeatState
 		if (cameFromChapterMenu){
 			trace('uuoohhhhh im cummmminggg aaaaa');
 
-			FlxG.sound.play(Paths.sound('cancelMenu'), ClientPrefs.sfxVolume); // swoosh
+			FlxG.sound.play(Paths.sound('cancelMenu')); // swoosh
 
 			final STS = SquareTransitionSubstate;
 			STS.nextCamera = cam;
@@ -116,7 +116,7 @@ class StoryMenuState extends MusicBeatState
 				newButton.onUp.callback = function(){
 					if (doingTransition)
 						return;
-					FlxG.sound.play(Paths.sound('lockedMenu'), ClientPrefs.sfxVolume);
+					FlxG.sound.play(Paths.sound('lockedMenu'));
 					newButton.shake();
 				}
 			}else{
@@ -124,7 +124,7 @@ class StoryMenuState extends MusicBeatState
 				{
 					if (doingTransition)
 						return;
-					FlxG.sound.play(Paths.sound('cancelMenu'), ClientPrefs.sfxVolume); // swoosh
+					FlxG.sound.play(Paths.sound('cancelMenu')); // swoosh
 					
 					var cam = FlxG.camera;
 					SquareTransitionSubstate.nextCamera = cam;
@@ -197,7 +197,7 @@ class StoryMenuState extends MusicBeatState
 
 		curSelected = 0;
 		
-		FlxG.sound.play(Paths.sound('cancelMenu'), ClientPrefs.sfxVolume);
+		FlxG.sound.play(Paths.sound('cancelMenu'));
 		MusicBeatState.switchState(new MainMenuState());
 	} 
 

@@ -121,13 +121,13 @@ class QuantNotesSubState extends MusicBeatSubstate
 			if(holdTime < 0.5) {
 				if(controls.UI_LEFT_P) {
 					updateValue(-1);
-					FlxG.sound.play(Paths.sound('scrollMenu'), ClientPrefs.sfxVolume);
+					FlxG.sound.play(Paths.sound('scrollMenu'));
 				} else if(controls.UI_RIGHT_P) {
 					updateValue(1);
-					FlxG.sound.play(Paths.sound('scrollMenu'), ClientPrefs.sfxVolume);
+					FlxG.sound.play(Paths.sound('scrollMenu'));
 				} else if(controls.RESET) {
 					resetValue(curSelected, typeSelected);
-					FlxG.sound.play(Paths.sound('scrollMenu'), ClientPrefs.sfxVolume);
+					FlxG.sound.play(Paths.sound('scrollMenu'));
 				}
 				if(controls.UI_LEFT_R || controls.UI_RIGHT_R) {
 					holdTime = 0;
@@ -145,35 +145,35 @@ class QuantNotesSubState extends MusicBeatSubstate
 					updateValue(elapsed * add);
 				}
 				if(controls.UI_LEFT_R || controls.UI_RIGHT_R) {
-					FlxG.sound.play(Paths.sound('scrollMenu'), ClientPrefs.sfxVolume);
+					FlxG.sound.play(Paths.sound('scrollMenu'));
 					holdTime = 0;
 				}
 			}
 		} else {
 			if (controls.UI_UP_P) {
 				changeSelection(-1);
-				FlxG.sound.play(Paths.sound('scrollMenu'), ClientPrefs.sfxVolume);
+				FlxG.sound.play(Paths.sound('scrollMenu'));
 			}
 			if (controls.UI_DOWN_P) {
 				changeSelection(1);
-				FlxG.sound.play(Paths.sound('scrollMenu'), ClientPrefs.sfxVolume);
+				FlxG.sound.play(Paths.sound('scrollMenu'));
 			}
 			if (controls.UI_LEFT_P) {
 				changeType(-1);
-				FlxG.sound.play(Paths.sound('scrollMenu'), ClientPrefs.sfxVolume);
+				FlxG.sound.play(Paths.sound('scrollMenu'));
 			}
 			if (controls.UI_RIGHT_P) {
 				changeType(1);
-				FlxG.sound.play(Paths.sound('scrollMenu'), ClientPrefs.sfxVolume);
+				FlxG.sound.play(Paths.sound('scrollMenu'));
 			}
 			if(controls.RESET) {
 				for (i in 0...3) {
 					resetValue(curSelected, i);
 				}
-				FlxG.sound.play(Paths.sound('scrollMenu'), ClientPrefs.sfxVolume);
+				FlxG.sound.play(Paths.sound('scrollMenu'));
 			}
 			if (controls.ACCEPT && nextAccept <= 0) {
-				FlxG.sound.play(Paths.sound('scrollMenu'), ClientPrefs.sfxVolume);
+				FlxG.sound.play(Paths.sound('scrollMenu'));
 				changingNote = true;
 				holdTime = 0;
 				for (i in 0...grpNumbers.length) {
@@ -202,7 +202,7 @@ class QuantNotesSubState extends MusicBeatSubstate
 				changeSelection();
 			}
 			changingNote = false;
-			FlxG.sound.play(Paths.sound('cancelMenu'), ClientPrefs.sfxVolume);
+			FlxG.sound.play(Paths.sound('cancelMenu'));
 		}
 
 		if(nextAccept > 0) {
@@ -266,7 +266,7 @@ class QuantNotesSubState extends MusicBeatSubstate
 				item.scale.set(1, 1);
 			}
 		}
-		FlxG.sound.play(Paths.sound('scrollMenu'), ClientPrefs.sfxVolume);
+		FlxG.sound.play(Paths.sound('scrollMenu'));
 	}
 
 	function changeType(change:Int = 0) {

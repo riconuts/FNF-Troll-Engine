@@ -19,7 +19,7 @@ class GalleryMenuState extends MusicBeatState
 	function changeSelected(num:Int, ?absolute:Bool){
 		var difference = absolute ? Math.abs(curSelected - num) : num;
         if(difference != 0)
-			FlxG.sound.play(Paths.sound('scrollMenu'), ClientPrefs.sfxVolume);
+			FlxG.sound.play(Paths.sound('scrollMenu'));
 
 		curSelected = absolute==true ? num : curSelected+num;
 
@@ -43,7 +43,7 @@ class GalleryMenuState extends MusicBeatState
 		if (selectedSomethin) return;
 		selectedSomethin = true;
 
-		FlxG.sound.play(Paths.sound('cancelMenu'), ClientPrefs.sfxVolume);
+		FlxG.sound.play(Paths.sound('cancelMenu'));
 		MusicBeatState.switchState(new MainMenuState());
 		curSelected = 0;
     }
@@ -115,7 +115,7 @@ class GalleryMenuState extends MusicBeatState
         FlxG.mouse.visible = false;
         #end
 
-		FlxG.sound.play(Paths.sound('confirmMenu'), ClientPrefs.sfxVolume);
+		FlxG.sound.play(Paths.sound('confirmMenu'));
 		updateImage(null);
 
 		if (id==null)

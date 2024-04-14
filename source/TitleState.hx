@@ -287,7 +287,7 @@ class TitleState extends MusicBeatState
 					titleText.animation.play('press');
 
 				camHUD.flash(ClientPrefs.flashing ? FlxColor.WHITE : 0x4CFFFFFF, 1);
-				FlxG.sound.play(Paths.sound('confirmMenu'), 0.7 * ClientPrefs.sfxVolume);
+				FlxG.sound.play(Paths.sound('confirmMenu'), 0.7 );
 
 				transitioning = true;
 
@@ -370,7 +370,7 @@ class TitleState extends MusicBeatState
 					MusicBeatState.playMenuMusic(0, true);
 					//FlxG.sound.music.fadeIn(4, 0, 0.7);
 				case 2:
-					MusicBeatState.playMenuMusic(ClientPrefs.songVolume, true);
+					MusicBeatState.playMenuMusic(1, true);
 					createCoolText(['THE FNF TGT TEAM']);
 				case 4:
 					addMoreText('presents');

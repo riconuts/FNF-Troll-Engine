@@ -1634,7 +1634,7 @@ class FunkinLua extends FunkinScript
 		});
 
 		addCallback("playMusic", function(sound:String, volume:Float = 1, loop:Bool = false) {
-			FlxG.sound.playMusic(Paths.music(sound), volume * ClientPrefs.songVolume, loop);
+			FlxG.sound.playMusic(Paths.music(sound), volume , loop);
 		});
 		addCallback("playSound", function(sound:String, volume:Float = 1, ?tag:String = null) {
 			if(tag != null && tag.length > 0) {
@@ -1642,13 +1642,13 @@ class FunkinLua extends FunkinScript
 				if(PlayState.instance.modchartSounds.exists(tag)) {
 					PlayState.instance.modchartSounds.get(tag).stop();
 				}
-				PlayState.instance.modchartSounds.set(tag, FlxG.sound.play(Paths.sound(sound), volume * ClientPrefs.sfxVolume, false, function() {
+				PlayState.instance.modchartSounds.set(tag, FlxG.sound.play(Paths.sound(sound), volume , false, function() {
 					PlayState.instance.modchartSounds.remove(tag);
 					PlayState.instance.callOnLuas('onSoundFinished', [tag]);
 				}));
 				return;
 			}
-			FlxG.sound.play(Paths.sound(sound), volume * ClientPrefs.sfxVolume);
+			FlxG.sound.play(Paths.sound(sound), volume );
 		});
 		addCallback("stopSound", function(tag:String) {
 			if(tag != null && tag.length > 1 && PlayState.instance.modchartSounds.exists(tag)) {

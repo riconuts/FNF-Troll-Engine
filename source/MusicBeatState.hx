@@ -204,10 +204,7 @@ class MusicBeatState extends FlxUIState
 
 	// TODO: check the jukebox selection n shit and play THAT instead? idk lol
 
-	public static function playMenuMusic(?volume:Float, ?force:Bool = false){	
-		if (volume==null)
-			volume = ClientPrefs.songVolume;
-        	
+	public static function playMenuMusic(?volume:Float=1, ?force:Bool = false){	        	
 		if(FlxG.sound.music == null || !FlxG.sound.music.playing || force){
 			if (menuVox!=null){
 				trace("stopped menu vox");
@@ -263,6 +260,7 @@ class MusicBeatState extends FlxUIState
 			FlxG.sound.playMusic(Paths.music('freakyIntro'), volume, false);
 			FlxG.sound.music.onComplete = menuLoopFunc;
 			#end
+			
 
 			Conductor.changeBPM(180);
 			Conductor.songPosition = 0;

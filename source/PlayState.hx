@@ -1548,7 +1548,7 @@ class PlayState extends MusicBeatState
                 if(ret == Globals.Function_Continue){
                     // default behaviour
                     var snd:FlxSound = null; 
-					snd = FlxG.sound.play(Paths.sound(soundName + introSoundsSuffix), 0.6 * ClientPrefs.sfxVolume, false, null, true, ()->{
+					snd = FlxG.sound.play(Paths.sound(soundName + introSoundsSuffix), 0.6 , false, null, true, ()->{
                         if (countdownSnd == snd) countdownSnd = null;
                     });
                     snd.effect = ClientPrefs.ruin ? sndEffect : null;
@@ -1615,11 +1615,11 @@ class PlayState extends MusicBeatState
 
 		////
 		inst.time = time;
-		inst.volume = ClientPrefs.songVolume;
+		inst.volume = 1;
 		inst.play();
 
 		vocals.time = time;
-		vocals.volume = ClientPrefs.songVolume;
+		vocals.volume = 1;
 		vocals.play();
 
 		for (track in tracks){
@@ -1660,10 +1660,10 @@ class PlayState extends MusicBeatState
 
 		Conductor.songPosition = startOnTime;
 
-		vocals.volume = ClientPrefs.songVolume;
+		vocals.volume = 1;
 		vocals.play(false, startOnTime);
 
-		inst.volume = ClientPrefs.songVolume;
+		inst.volume = 1;
 		inst.play(false, startOnTime);
 
 		for (track in tracks)
@@ -1807,8 +1807,10 @@ class PlayState extends MusicBeatState
 		Conductor.changeBPM(PlayState.SONG.bpm);
 
 		inst = new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.song));
+        inst.context = MUSIC;
 		inst.volume = 0;
 		vocals = new FlxSound();
+        vocals.context = MUSIC;
 		vocals.volume = 0;
 
 		if (SONG.needsVoices)
@@ -2286,8 +2288,6 @@ class PlayState extends MusicBeatState
 		callOnScripts('optionsChanged', [options]);
 		if (hudSkinScript != null) callScript(hudSkinScript, "optionsChanged", [options]);
 		
-        inst.volume = ClientPrefs.songVolume;
-		if (!vocalsEnded) vocals.volume = ClientPrefs.songVolume;
 		var reBind:Bool = false;
 		for(opt in options){
 			if(opt.startsWith("bind")){
@@ -3320,7 +3320,7 @@ class PlayState extends MusicBeatState
 			instance.camFollowPos.destroy();
 		}
 
-		MusicBeatState.playMenuMusic(ClientPrefs.songVolume, true);
+		MusicBeatState.playMenuMusic(1, true);
 	}
 
 
@@ -4078,7 +4078,7 @@ class PlayState extends MusicBeatState
 		vocals.volume = 0;
 
 		if (ClientPrefs.ghostTapping && !daNote.isSustainNote && ClientPrefs.missVolume > 0)
-			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), ClientPrefs.missVolume * FlxG.random.float(0.9, 1) * ClientPrefs.sfxVolume);
+			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), ClientPrefs.missVolume * FlxG.random.float(0.9, 1) );
 
 		if(instakillOnMiss)
 			doDeathCheck(true);
@@ -4116,7 +4116,7 @@ class PlayState extends MusicBeatState
 		//RecalculateRating();
 
 		if (ClientPrefs.missVolume > 0)
-			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), ClientPrefs.missVolume * ClientPrefs.sfxVolume * FlxG.random.float(0.9, 1));
+			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), ClientPrefs.missVolume  * FlxG.random.float(0.9, 1));
 
 		for (field in playfields.members)
 		{
@@ -4180,7 +4180,7 @@ class PlayState extends MusicBeatState
 		}
 
 		note.hitByOpponent = true;
-		if (!vocalsEnded) vocals.volume = ClientPrefs.songVolume;
+		if (!vocalsEnded) vocals.volume = 1;
 
 		// Strum animations
 		if (note.visible){
@@ -4232,7 +4232,7 @@ class PlayState extends MusicBeatState
         }
 
 		if (!note.hitsoundDisabled && ClientPrefs.hitsoundVolume > 0)
-			FlxG.sound.play(Paths.sound('hitsound'), ClientPrefs.hitsoundVolume * ClientPrefs.sfxVolume);
+			FlxG.sound.play(Paths.sound('hitsound'), ClientPrefs.hitsoundVolume );
 
 		// tbh I hate hitCausesMiss lol its retarded
 		// added a shitty judge to deal w/ it tho!! 
@@ -4319,7 +4319,7 @@ class PlayState extends MusicBeatState
 		}
 
 		note.wasGoodHit = true;
-		if (!vocalsEnded) vocals.volume = ClientPrefs.songVolume;
+		if (!vocalsEnded) vocals.volume = 1;
 		if (cpuControlled) saveScore = false; // if botplay hits a note, then you lose scoring
 
 		// Strum animations
