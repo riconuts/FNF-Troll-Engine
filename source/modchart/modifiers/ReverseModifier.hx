@@ -26,7 +26,7 @@ class ReverseModifier extends NoteModifier
     public function getReverseValue(dir:Int, player:Int){
         var kNum = 4;
         var val:Float = 0;
-        if(dir>=kNum/2)
+        if(dir>=kNum * 0.5)
             val += getSubmodValue("split" ,player);
 
         if((dir%2)==1)
@@ -63,12 +63,12 @@ class ReverseModifier extends NoteModifier
 
 	override function getPos(visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
 	{
-		var swagOffset = Note.swagWidth / 2 + modMgr.vPadding; // maybe vPadding can be a field variable?
+		var swagOffset = Note.swagWidth * 0.5 + modMgr.vPadding; // maybe vPadding can be a field variable?
 		var reversePerc = getReverseValue(data, player);
 		var shift = lerp(swagOffset, FlxG.height - swagOffset, reversePerc);
 		
 		var centerPercent = getCenterValue(player);		
-		shift = lerp(shift, (FlxG.height / 2), centerPercent);
+		shift = lerp(shift, (FlxG.height * 0.5), centerPercent);
 		
 		pos.y = shift + lerp(visualDiff, -visualDiff, reversePerc);
 

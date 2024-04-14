@@ -73,9 +73,9 @@ class ScaleModifier extends NoteModifier {
 			case 1:
 				pos.x += FlxG.width * 0.5 - Note.swagWidth * 2 - 100;
 		}
-		pos.x -= FlxG.width / 2;
+		pos.x -= FlxG.width * 0.5;
 		pos.x *= tinyPerc;
-		pos.x += FlxG.width / 2;
+		pos.x += FlxG.width * 0.5;
 		switch (player)
 		{
 			case 0:

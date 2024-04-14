@@ -63,7 +63,7 @@ class CustomPathModifier extends NoteModifier {
 
 
         pathData[dir].push({
-          position: pos.add(new Vector3(-Note.swagWidth/2,-Note.swagWidth/2)),
+          position: pos.add(new Vector3(-Note.swagWidth * 0.5,-Note.swagWidth * 0.5)),
           start: totalDists[dir],
           end: 0,
           dist: 0

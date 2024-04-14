@@ -545,8 +545,8 @@ class ModManager {
 			pos = new Vector3();
 		
 		pos.setTo(
-			(Note.swagWidth / 2) + getBaseX(data, player, field.field.keyCount),
-			(Note.swagWidth / 2) + 50 + diff,
+			(Note.swagWidth * 0.5) + getBaseX(data, player, field.field.keyCount),
+			(Note.swagWidth * 0.5) + 50 + diff,
 			0
 		);
 

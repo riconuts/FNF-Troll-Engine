@@ -47,7 +47,7 @@ class PerspectiveModifier extends NoteModifier
 		return subMods;
 	}
 
-	var origin = new Vector3(FlxG.width / 2, FlxG.height / 2); // vertex origin
+	var origin = new Vector3(FlxG.width * 0.5, FlxG.height * 0.5); // vertex origin
 	var fieldPos = new Vector3();
 	override function getPos(visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
 	{

@@ -34,8 +34,8 @@ class ConfusionModifier extends NoteModifier {
 			var speed = modMgr.getNoteSpeed(note, player);
 			var yPos:Float = ((Conductor.visualPosition - note.visualTime)) * speed;
 
-			angleX += getSubmodValue("roll", player) * yPos / 2;
-			angleY += getSubmodValue("twirl", player) * yPos / 2;
+			angleX += getSubmodValue("roll", player) * yPos * 0.5;
+			angleY += getSubmodValue("twirl", player) * yPos * 0.5;
 			angleX += getSubmodValue("noteAngleX", player) + getSubmodValue("note" + data + "AngleX", player);
 			angleY += getSubmodValue("noteAngleY", player) + getSubmodValue("note" + data + "AngleY", player);
 
