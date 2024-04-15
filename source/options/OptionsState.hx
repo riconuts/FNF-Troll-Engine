@@ -66,7 +66,6 @@ class OptionsState extends MusicBeatState
 		bruh.stamp(bg, 0, 0);
 
 		bg.destroy();
-		adjustColor.shader.program.dispose();
 		remove(bg, true);
 
 		var grid = new openfl.display.BitmapData(2, 2);
