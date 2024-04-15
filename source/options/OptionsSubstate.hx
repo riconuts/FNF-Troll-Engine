@@ -306,12 +306,12 @@ class OptionsSubstate extends MusicBeatSubstate
 			[
 				"audio", 
 				[
-					"ruin",
                     "masterVolume",
                     "songVolume",
 				    'sfxVolume',
 					"hitsoundVolume", 
-					"missVolume"
+					"missVolume",
+					#if tgt "ruin", #end
 				]
 			],
 			[
@@ -565,24 +565,31 @@ class OptionsSubstate extends MusicBeatSubstate
 
 		optionCamera.follow(camFollowPos);
 
+		////
+		final backdropGraphic = Paths.image("optionsMenu/backdrop");
+		final backdropSlice = [22, 22, 89, 89];
+		final tabButtonHeight = 44;
+
 		var lastX:Float = optionMenu.x;
 		for (idx in 0...optionOrder.length)
 		{
 			var tabName = optionOrder[idx];
 
-			var button = new FlxSprite(lastX, optionMenu.y - 3, whitePixel);
-			button.ID = idx;
-			button.color = idx == 0 ? FlxColor.fromRGB(128, 128, 128) : FlxColor.fromRGB(82, 82, 82);
-			button.alpha = 0.75;
-
-			var text = new FlxText(button.x, button.y, 0, Paths.getString('opt_tabName_$tabName').toUpperCase(), 16);
+			var text = new FlxText(0, 0, 0, Paths.getString('opt_tabName_$tabName').toUpperCase(), 16);
 			text.setFormat(Paths.font(#if tgt "calibrib.ttf" #else "vcr.ttf" #end), 32, 0xFFFFFFFF, FlxTextAlign.CENTER);
-			
-			button.scale.set(Math.max(86, text.fieldWidth) + 8, 44);
-			button.updateHitbox();
-			button.y -= button.height;
 
-			text.y = button.y + ((button.height - text.height) / 2);
+			var button = new FlxSprite(lastX, optionMenu.y - 3 - tabButtonHeight, whitePixel);
+			button.ID = idx;
+			button.alpha = 0.75;
+			button.color = idx == 0 ? FlxColor.fromRGB(128, 128, 128) : FlxColor.fromRGB(82, 82, 82);
+			
+			button.scale.set(Math.max(86, text.fieldWidth) + 8, tabButtonHeight);
+			button.updateHitbox();
+
+			text.setPosition(
+				button.x,
+				button.y + ((button.height - text.height) / 2)
+			);
 			text.fieldWidth = button.width;
 			text.updateHitbox();
 
@@ -596,9 +603,6 @@ class OptionsSubstate extends MusicBeatSubstate
 			var group = new FlxTypedGroup<FlxObject>();
 			var widgets:Map<FlxObject, Widget> = [];
 			cameraPositions.push(FlxPoint.get());
-
-			var backdropGraphic = Paths.image("optionsMenu/backdrop");
-			var backdropSlice = [22, 22, 89, 89];
 
 			for (data in options.get(tabName))
 			{

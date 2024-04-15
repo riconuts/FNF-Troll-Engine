@@ -421,7 +421,7 @@ class ClientPrefs
 				type: Dropdown,
 				value: "Default",
 				data: [
-					"options" => ["Default", "Advanced"]
+					"options" => ["Default", "Advanced", "Kade"]
 				]
 			},
 
@@ -552,6 +552,7 @@ class ClientPrefs
 				value: true,
 				data: []
 			},
+			#if tgt
 			"ruin" => {
 				display: "Ruin The Mod",
 				desc: "Makes the mod really good! improves the mod alot!! the name is a joke guys it makes the mod REALLY REALLY good its not blammed lights i swear",
@@ -559,6 +560,7 @@ class ClientPrefs
 				value: false,
 				data: []
 			},
+			#end
 			"customizeKeybinds" => {
 				display: "Customize Key Bindings",
 				desc: "Lets you change your controls. Pretty straight forward, huh?",
