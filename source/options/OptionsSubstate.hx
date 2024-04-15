@@ -716,7 +716,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		{
 			case Toggle:
 				var checkbox = new Checkbox();
-				checkbox.scale.set(0.65, 0.65);
+				checkbox.setGraphicSize(36, 36);
 				checkbox.updateHitbox();
 				var text = new FlxText(0, 0, 0, "off", 16);
 				text.setFormat(Paths.font("calibri.ttf"), 24, 0xFFFFFFFF, FlxTextAlign.LEFT);
@@ -1749,11 +1749,11 @@ class Checkbox extends WidgetSprite
 	{
 		super(x, y);
 		frames = Paths.getSparrowAtlas("optionsMenu/checkbox");
-		animation.addByPrefix("toggled", "selected", 0, true);
-		animation.addByPrefix("idle", "deselected", 0, true);
+		animation.addByPrefix("toggled", "selected", 0, false);
+		animation.addByPrefix("idle", "deselected", 0, false);
 		animation.play("idle", true);
 
-		antialiasing = false;
+		// antialiasing = false;
 
 		toggled = defaultToggled;
 	}
