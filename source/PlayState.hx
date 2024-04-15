@@ -532,7 +532,9 @@ class PlayState extends MusicBeatState
 		cpuControlled = ClientPrefs.getGameplaySetting('botplay', false);
 		disableModcharts = !ClientPrefs.modcharts; //ClientPrefs.getGameplaySetting('disableModcharts', false);
 		midScroll = ClientPrefs.midScroll;
+        #if tgt
 		playbackRate *= (ClientPrefs.ruin ? 0.8 : 1);
+        #end
 		FlxG.timeScale = playbackRate;
 		
 		if(perfectMode){
@@ -1551,8 +1553,9 @@ class PlayState extends MusicBeatState
 					snd = FlxG.sound.play(Paths.sound(soundName + introSoundsSuffix), 0.6 , false, null, true, ()->{
                         if (countdownSnd == snd) countdownSnd = null;
                     });
+                    #if tgt
                     snd.effect = ClientPrefs.ruin ? sndEffect : null;
-                    
+                    #end
                     countdownSnd = snd;
                 }
 			}
@@ -1832,6 +1835,7 @@ class PlayState extends MusicBeatState
 		}
 
 		AL.filteri(sndFilter, AL.FILTER_TYPE, AL.FILTER_NULL);
+        #if tgt
  		if(ClientPrefs.ruin){
 			AL.effecti(sndEffect, AL.EFFECT_TYPE, AL.EFFECT_REVERB);
 			AL.effectf(sndEffect, AL.REVERB_DECAY_TIME, 5);
@@ -1846,12 +1850,13 @@ class PlayState extends MusicBeatState
 			track.filter = null;
 			track.pitch = playbackRate;
 		}
+        
 
 		inst.filter = null;
 		vocals.filter = null;
 		inst.effect = trackEffect;
 		vocals.effect = trackEffect;
-		
+		#end
 		inst.pitch = playbackRate;
 		vocals.pitch = playbackRate;
 

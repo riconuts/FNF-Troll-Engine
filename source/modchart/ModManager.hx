@@ -387,7 +387,7 @@ class ModManager {
 
 								
 								if (node.out_mods.length > 0)
-								{ // if theres multiple outputs
+								{ // if theres outputs
 									if (output is Array)
 									{
 										var output_values:Array<Float> = cast output;
@@ -416,27 +416,6 @@ class ModManager {
 									else
 									{
 										trace("Broken Node!!! Expected an Array of outputs, but did not get that!!!!");
-										garbage.push(node); // broken node!!
-										continue;
-									}
-								}
-								else
-								{
-									if (output is Float)
-									{
-										var output_value:Float = output;
-										var output_mod_name:String = node.out_mods[0];
-										var output_mod:Modifier = get(output_mod_name);
-										var current_value:Float = output_mod.getValue(player);
-										// if the output is also an input then set it directly, otherwise add it
-										if (node.in_mods.contains(output_mod_name))
-											output_mod.setCurrentValue(output_value);
-										else
-											output_mod.setCurrentValue(current_value + output_value);
-									}
-									else
-									{
-										trace("Broken Node!!! Expected a Float output, but did not get that!!!!");
 										garbage.push(node); // broken node!!
 										continue;
 									}
