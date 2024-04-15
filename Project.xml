@@ -81,9 +81,11 @@
 		<haxelib name="hscript"/>
 		<define name="hscriptPos"/>
 
+		<!-- 
 		<define name="dce" value="no"/>
 		<haxeflag name="-dce no"/>
 		<haxeflag name="-dce" value="no"/>
+		-->
 
 		<define name="SCRIPTABLE_STATES"/>
 	</section>

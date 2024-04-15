@@ -17,7 +17,7 @@ class NoteObject extends FlxSprite {
 	
 	override function toString()
 	{
-		return 'NoteObject (column: $column | visible: $visible)';
+		return '(column: $column | visible: $visible)';
 	}
 
 	override function draw()

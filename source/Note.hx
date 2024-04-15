@@ -453,7 +453,7 @@ class Note extends NoteObject
 
 	override function toString()
 	{
-		return 'Note (column: $column | noteType: $noteType | strumTime: $strumTime | visible: $visible)';
+		return '(column: $column | noteType: $noteType | strumTime: $strumTime | visible: $visible)';
 	}
 
 	public function new(strumTime:Float, column:Int, ?prevNote:Note, ?gottaHitNote:Bool = false, ?sustainNote:Bool = false, ?inEditor:Bool = false, ?noteMod:String = 'default')
