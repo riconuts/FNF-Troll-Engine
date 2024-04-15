@@ -316,15 +316,21 @@ function onDisplayCombo(combo)
 			spr.height / 2
 		);
 		
-		var startX	=	spr.offset.x;
-		var targetX =	spr.offset.x - 6*9;
-		var startY	=	spr.offset.y - spr.height;
-		var targetY =	spr.offset.y;
-		spr.tween = FlxTween.num(
-			0, 1, 1.2, 
-			{onComplete: spr.kill}, 
-			(prog)->{anim(spr, startX, targetX, startY, targetY, prog);}
-		);
+		if (ClientPrefs.simpleJudge){
+			
+		}else{
+			var startX	=	spr.offset.x;
+			var targetX =	spr.offset.x - 6*9;
+			var startY	=	spr.offset.y - spr.height;
+			var targetY =	spr.offset.y;
+			spr.tween = FlxTween.num(
+				0, 1, 1.2, 
+				{onComplete: spr.kill}, 
+				(prog)->{anim(spr, startX, targetX, startY, targetY, prog);}
+			);
+		}
+		
+		
 		
 		ratingGroup.remove(spr, true);
 		ratingGroup.add(spr);
@@ -423,20 +429,51 @@ function onDisplayJudgment(name){
 		roundTo(game.ratingOrigin[0] + ClientPrefs.comboOffset[0], 6), 
 		roundTo(game.ratingOrigin[1] - ClientPrefs.comboOffset[1], 6)
 	);
+	/*
+	spr.updateHitbox();
+	spr.offset.set(
+		spr.offset.x + spr.width / 2, 
+		spr.offset.y + spr.height / 2
+	);
+	*/
 	spr.offset.set(
 		spr.width / 2, 
 		spr.height / 2
 	);
 	
-	var startX	=	spr.offset.x;
-	var targetX =	spr.offset.x + 6*9;
-	var startY	=	spr.offset.y - spr.height;
-	var targetY =	spr.offset.y;
-	spr.tween = FlxTween.num(
-		0, 1, 1.2, 
-		{onComplete: spr.kill}, 
-		(prog)->{anim(spr, startX, targetX, startY, targetY, prog);}
-	);
+	if (ClientPrefs.simpleJudge){
+		var startScale = spr.scale.x;
+		var time = (Conductor.stepCrochet * 0.001);
+		
+		spr.tween = FlxTween.num(
+			1, 0, 0.1, 
+			{ease: FlxEase.quadOut},
+			(val)->{spr.scale.set(startScale + val, startScale + val);}
+			
+		).then(
+			FlxTween.num(
+				startScale, 0, time, 
+				{
+					startDelay: time * 8,
+					onStart: (twn)->{spr.tween = twn;},
+					ease: FlxEase.quadIn,
+					onComplete: spr.kill
+				},
+				(val)->{spr.scale.set(val, val);}
+			)
+		);
+		
+	}else{
+		var startX	=	spr.offset.x;
+		var targetX =	spr.offset.x + 6*9;
+		var startY	=	spr.offset.y - spr.height;
+		var targetY =	spr.offset.y;
+		spr.tween = FlxTween.num(
+			0, 1, 1.2, 
+			{onComplete: spr.kill}, 
+			(prog)->{anim(spr, startX, targetX, startY, targetY, prog);}
+		);
+	}
 	
 	ratingGroup.remove(spr, true);
 	ratingGroup.add(spr);
@@ -444,6 +481,7 @@ function onDisplayJudgment(name){
 	return Function_Stop;
 }
 
+//script.stop();
 
  /* 
 function onDisplayJudgmentPost(rating, image){
