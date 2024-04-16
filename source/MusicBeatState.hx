@@ -9,6 +9,7 @@ import openfl.ui.MouseCursor;
 import scripts.FunkinHScript;
 
 
+#if SCRIPTABLE_STATES
 @:autoBuild(scripts.Macro.addScriptingCallbacks([
 	"create",
 	"update",
@@ -19,6 +20,7 @@ import scripts.FunkinHScript;
 	"beatHit",
 	"sectionHit"
 ]))
+#end
 class MusicBeatState extends FlxUIState
 {
     public var script:FunkinHScript;

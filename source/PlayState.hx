@@ -541,7 +541,7 @@ class PlayState extends MusicBeatState
 			practiceMode = false;
 			instakillOnMiss = true;
 		}
-		saveScore = !cpuControlled;
+		saveScore = true; //!cpuControlled;
 		healthDrain = switch(ClientPrefs.getGameplaySetting('healthDrain', "Disabled")){
 			default: 0;
 			case "Basic": 0.00055;
