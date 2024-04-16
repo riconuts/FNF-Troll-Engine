@@ -202,14 +202,14 @@ class Stats {
 
 			if (goods > 0)
 			{
-				if (goods < 10 && goods > 0)
+				if (goods < 10)
 					clear = sdc; // Single Digit Goods
 				else
 					clear = cfc; // Good Full Combo
 			}
 			else if (sicks > 0)
 			{
-				if (sicks < 10 && sicks > 0)
+				if (sicks < 10)
 					clear = sda; // Single Digit Sicks
 				else
 					clear = afc; // Sick Full Combo
