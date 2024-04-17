@@ -171,6 +171,9 @@ class KadeHUD extends BaseHUD
 
 	override function update(elapsed:Float)
 	{
+		if (FlxG.keys.justPressed.NINE)
+			iconP1.swapOldIcon();
+
 		var shownScore:String;
 		var isHighscore:Bool;
 		if (ClientPrefs.showWifeScore){
