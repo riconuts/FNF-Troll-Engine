@@ -594,10 +594,7 @@ class NoteField extends FieldBase
 				vert.x += n.typeOffsetX;
 				vert.y += n.typeOffsetY;
 			}
-            // TODO:  remove PerspectiveModifier and do perspective shit? or in a seperate NoteRenderer object maybe?
-            // probably in a seperate NoteRenderer since I also wanna make it so everything is sorted and obeys each triangle's z
-            // (right now even if the opponent notes have a higher Z value they're drawn below the player, no matter what. I wanna fix that lol)
-            // prob just use NotefieldManager instead of a new thing tho tbh
+        
 
 			vert = modManager.modifyVertex(curDecBeat, vert, idx, sprite, pos, modNumber, sprite.column, this);
 

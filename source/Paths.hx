@@ -338,6 +338,19 @@ class Paths
 		return 'assets/fonts/$key';
 	}
 
+    public static var locale(default, set):String = 'en-us';
+    static function set_locale(l:String){
+        locale = l.toLowerCase();
+		getAllStrings();
+/*         
+        if(locale != l){
+			for (idx => string in currentStrings){
+                var newString = getString(idx, true);
+				currentStrings.set(idx, newString);
+            }
+        } */
+        return l;
+    }
 
 	// TODO: maybe these should be cached when starting a song
     // once we add a resource (mod/skin) menu we can do caching there for some things
@@ -348,8 +361,13 @@ class Paths
 
 		for (filePath in Paths.getFolders("data"))
 		{
-			var file = filePath + "strings.txt";
-			if (!exists(file)) continue;
+            var checkFiles = ["lang/" + locale + ".txt", "lang/en-us.txt", "strings.txt"];
+			var file = filePath + checkFiles.shift();
+			while (checkFiles.length > 0 && !exists(file))
+                file = filePath + checkFiles.shift();
+			
+			if (!exists(file))continue;
+
 
 			var stringsText = getContent(file);
 			var daLines = stringsText.trim().split("\n");
@@ -366,16 +384,18 @@ class Paths
 
 	public inline static function hasString(key:String)return getString(key) != key;
 
-	public static function getString(key:String):String
+	public static function getString(key:String, force:Bool = false):String
 	{
-		if (currentStrings.exists(key))
+		if (!force && currentStrings.exists(key))
 			return currentStrings.get(key);
 	
 
 		for (filePath in Paths.getFolders("data"))
 		{
-			var file = filePath + "strings.txt";
-			if (!exists(file)) continue;
+			var checkFiles = ["lang/" + locale + ".txt", "lang/en-us.txt", "strings.txt"];
+			var file = filePath + checkFiles.shift();
+			while (checkFiles.length > 0 && !exists(file))
+				file = filePath + checkFiles.shift();
 
 			//trace(filePath);
 			var stringsText = getContent(file);

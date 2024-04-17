@@ -123,6 +123,8 @@ class StartupState extends FlxTransitionableState
 		Paths.music('freakyIntro');
 		Paths.music('freakyMenu');
 
+		Paths.getAllStrings();
+        
 		/*
 		if (nextState == PlayState || nextState == editors.ChartingState){
 			Paths.currentModDirectory = "chapter1";

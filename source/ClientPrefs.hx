@@ -652,6 +652,8 @@ class ClientPrefs
 		 0, 0
 	];
 
+    public static var locale:String = 'en-us';
+
 	// I'd like to rewrite the whole Controls.hx thing tbh
 	// I think its shitty and can stand a rewrite but w/e
 	// later
