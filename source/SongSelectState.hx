@@ -154,6 +154,11 @@ class SongSelectState extends MusicBeatState
 				curSel += (checkNewHold - checkLastHold) * (controls.UI_LEFT_P ? -1 : 1) * verticalLimit;
 		}
 
+		if (FlxG.keys.pressed.CONTROL)
+		{
+			openSubState(new GameplayChangersSubstate());
+		}
+
 		if (controls.ACCEPT){
 			var charts = SongChartSelec.getCharts(songMeta[curSel]);
 
@@ -245,30 +250,37 @@ class SongChartSelec extends MusicBeatState
 		this.alts = alts;
 	}
 
-	public static function getCharts(metadata:SongMetadata)
+	public static function getCharts(metadata:SongMetadata):Array<String>
 	{
 		Paths.currentModDirectory = metadata.folder;
+		final songName = Paths.formatToSongPath(metadata.songName);
+		
+		trace(songName, metadata.folder);
 
-		var songName = Paths.formatToSongPath(metadata.songName);
-		var folder = (metadata.folder=="") ? Paths.getPath('songs/$songName/') : Paths.mods('${metadata.folder}/songs/$songName/');
-
-		trace(songName, folder);
-
-		var alts = [];
-
-		Paths.iterateDirectory(folder, function(fileName){
-			if (fileName == '$songName.json'){
-				alts.insert(1, "normal");
-				return;		
-			}
-			
-			if (!fileName.startsWith('$songName-') || !fileName.endsWith('.json'))
+		final charts = new haxe.ds.StringMap();
+		function processFileName(fileName:String)
+		{
+			if (!fileName.startsWith('$songName-') || !fileName.endsWith('.json')){
 				return;
+			}
+			else if (fileName == '$songName.json')
+			{
+				charts.set("normal", true);
+				return;
+			}
 
-			var prefixLength = songName.length + 1;
-			alts.push(fileName.substr(prefixLength, fileName.length - prefixLength - 5));
-		});
+			final extension_dot = songName.length + 1;
+			charts.set(fileName.substr(extension_dot, fileName.length - extension_dot - 5), true);
+		}
 
-		return alts;
+		#if PE_MOD_COMPATIBILITY
+		final folder = (metadata.folder == "") ? Paths.getPath('data/$songName/') : Paths.mods('${metadata.folder}/data/$songName/');
+		Paths.iterateDirectory(folder, processFileName);
+		#end
+
+		final folder = (metadata.folder == "") ? Paths.getPath('songs/$songName/') : Paths.mods('${metadata.folder}/songs/$songName/');
+		Paths.iterateDirectory(folder, processFileName);
+
+		return [for (name in charts.keys()) name];
 	} 
 }
