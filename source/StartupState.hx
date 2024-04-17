@@ -168,8 +168,13 @@ class StartupState extends FlxTransitionableState
 
 		if (ClientPrefs.checkForUpdates && recentRelease != null)
 		{
-			if (recentRelease.prerelease)
+            // hoping this works lol
+			var tagName:SemanticVersion = recentRelease.tag_name;
+			outOfDate = tagName > Main.semanticVersion;
+			trace(tagName, Main.semanticVersion);
+/* 			if (recentRelease.prerelease)
 			{
+                
 				var tagName = recentRelease.tag_name;
 				var split = tagName.split("-");
 				var betaVersion = split.length == 1 ? "1" : split.pop();
@@ -184,7 +189,7 @@ class StartupState extends FlxTransitionableState
 				// if you're in beta and version is the same as the engine version, but just not beta
 				// then you should absolutely be prompted to update
 				outOfDate = Main.beta && Main.engineVersion <= versionName || Main.engineVersion < versionName;
-			}
+			} */
 		}
 
 		Main.outOfDate = outOfDate;

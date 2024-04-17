@@ -1,5 +1,6 @@
 package;
 
+import Github.RepoInfo;
 import Github.Release;
 import flixel.FlxG;
 import flixel.FlxState;
@@ -43,7 +44,7 @@ class Main extends Sprite
 	public static var beta:Bool = betaVersion.trim() != '';
 
 	public static var UserAgent:String = 'TrollEngine/${Main.engineVersion}'; // used for http requests. if you end up forking the engine and making your own then make sure to change this!!
-	public static var githubRepo = Github.getCompiledRepoInfo();
+	public static var githubRepo:RepoInfo = Github.getCompiledRepoInfo();
 	public static var downloadBetas:Bool = beta;
 	public static var outOfDate:Bool = false;
 	public static var recentRelease:Release;
@@ -53,10 +54,15 @@ class Main extends Sprite
 	static function get_betaVersion()
 		return beta ? betaVersion : "0";
 
+    @:isVar
+    public static var semanticVersion(get, null):SemanticVersion = '';
+	static function get_semanticVersion()
+		return '$engineVersion${beta ? '-$betaVersion' : ""}';
+
 	@:isVar
 	public static var displayedVersion(get, null):String = '';
 	static function get_displayedVersion()
-		return 'v$engineVersion${beta ? '-$betaVersion' : ""}';
+		return 'v${semanticVersion}';
 	    
 	////
 	public static var fpsVar:FPS;

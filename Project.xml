@@ -61,7 +61,7 @@
     <!--Remove if you dont want Psych Engine mod compatibility -->
 	<define name="PE_MOD_COMPATIBILITY" if="LUA_ALLOWED" />
     <!--Remove if you dont want the engine to autoupdate -->
-	<define name="DO_AUTO_UPDATE" if="desktop" unless="debug || final"/>
+	<define name="DO_AUTO_UPDATE" if="desktop" unless="debug || tgt final"/>
 
     <!-- _______________________________ Libraries ______________________________ -->
 
@@ -87,7 +87,7 @@
 		<haxeflag name="-dce" value="no"/>
 		-->
 
-		<define name="SCRIPTABLE_STATES"/>
+		<!-- <define name="SCRIPTABLE_STATES"/> -->
 	</section>
 
 	<!-- __________________ lime build windows -release -Dtgt __________________ -->
@@ -106,8 +106,8 @@
 		<define name="VIDEOS_ALLOWED"/>
 
         <!-- <undefine name="SCRIPTABLE_STATES"/> --> <!--Needed for future thing-->
-        <!-- <undefine name="PE_MOD_COMPATIBILITY"/> -->
-		<undefine name="DO_AUTO_UPDATE"/>
+        <undefine name="PE_MOD_COMPATIBILITY" if="final"/>
+		<!-- <undefine name="DO_AUTO_UPDATE"/> -->
         <!-- <undefine name="LUA_ALLOWED"/> --> <!-- There's one lua script on TGT and I'm not rewritting it -->
 
 		<assets path="flixel" embed="true"/> <!-- To override some Flixel assets -->
