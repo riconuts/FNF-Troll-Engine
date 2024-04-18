@@ -50,7 +50,7 @@
 
     <!-- PSYCH ENGINE CUSTOMIZATION -->
 	<define name="USE_EPIC_JUDGEMENT" />
-	<define name="VIDEOS_ALLOWED" if="cpp"/>
+	<define name="VIDEOS_ALLOWED" if="cpp final"/>
 	<define name="HSCRIPT_ALLOWED" />
 	<define name="MODS_ALLOWED" if="desktop" />
 	<define name="CRASH_HANDLER" if="desktop" />
@@ -71,7 +71,7 @@
 
 	<haxelib name="discord_rpc" if="desktop cpp"/>
 
-	<haxelib name="hxCodec" if="VIDEOS_ALLOWED"/>
+	<haxelib name="hxCodec" if="VIDEOS_ALLOWED"/> 
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
 	
 	<haxelib name="faxe" if='switch'/>
