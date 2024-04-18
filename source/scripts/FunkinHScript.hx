@@ -26,8 +26,11 @@ class FunkinHScript extends FunkinScript
 		parser.allowJSON = true;
 		parser.allowTypes = true;
 
-		parser.preprocesorValues.set("TROLL_ENGINE", true);
-		// parser.preprocesorValues = sowy.Sowy.getDefines();
+		final definitions:Map<String, String> = sowy.Sowy.getDefines();
+		for (k => v in definitions)
+			parser.preprocesorValues.set(k, v);
+
+		parser.preprocesorValues.set("TROLL_ENGINE", Main.semanticVersion);
 	}
 
 	public static function parseString(script:String, ?name:String = "Script")
