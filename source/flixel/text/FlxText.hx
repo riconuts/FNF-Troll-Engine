@@ -889,7 +889,7 @@ class FlxText extends FlxSprite
 		}
 
 
-		graphic.undump();
+		if (graphic != null && graphic.isDumped)graphic.undump();
 
 		if (oldWidth != newWidth || oldHeight != newHeight)
 		{
@@ -941,7 +941,7 @@ class FlxText extends FlxSprite
 			drawTextFieldTo(graphic.bitmap);
 		}
 
-		graphic.dump();
+        if(graphic.canBeDumped)graphic.dump();
         
 		_regen = false;
 		resetFrame();
