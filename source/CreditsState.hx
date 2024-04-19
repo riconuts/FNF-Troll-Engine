@@ -18,7 +18,7 @@ using StringTools;
 
 class CreditsState extends MusicBeatState
 {	
-    var useHttp:Bool = #if final true #else false #end;
+    var useHttp:Bool = #if final true #else false #end; // shouldnt we check if tgt too
 	var bg:FlxSprite;
 
     var hintBg:FlxSprite;
