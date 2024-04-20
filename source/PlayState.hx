@@ -4551,7 +4551,7 @@ class PlayState extends MusicBeatState
 		if (returnVal == null) returnVal = Globals.Function_Continue;
 		return returnVal;
         #else
-        return Globals.Function_Continue
+        return Globals.Function_Continue;
         #end
 	}
 
