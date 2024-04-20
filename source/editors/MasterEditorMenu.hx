@@ -38,7 +38,7 @@ class MasterEditorMenu extends MusicBeatState
 		DiscordClient.changePresence("Editors Menu", null);
 		#end
 
-		var bg:FlxSprite = new FlxSprite(0, 0, Paths.image('menuBGDesat'));
+		var bg:FlxSprite = new FlxSprite(0, 0, Paths.image('menuDesat'));
 		bg.scrollFactor.set();
 		bg.color = 0xFF353535;
 		add(bg);

@@ -23,7 +23,7 @@ class OptionsState extends MusicBeatState
 		final bgGraphic = Paths.image('tgtmenus/optionsbg');
 		bg = new FlxSprite((FlxG.width - bgGraphic.width) * 0.5, (FlxG.height - bgGraphic.height) * 0.5, bgGraphic);
 		#else
-		final bgGraphic = Paths.image('menuBGDesat');
+		final bgGraphic = Paths.image('menuDesat');
 		bg = new FlxSprite((FlxG.width - bgGraphic.width) * 0.5, (FlxG.height - bgGraphic.height) * 0.5, bgGraphic);
 		bg.color = 0xFFea71fd;
 		#end
