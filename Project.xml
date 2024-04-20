@@ -50,7 +50,7 @@
 
     <!-- PSYCH ENGINE CUSTOMIZATION -->
 	<define name="USE_EPIC_JUDGEMENT" />
-	<define name="VIDEOS_ALLOWED" if="cpp final"/>
+	<define name="VIDEOS_ALLOWED" if="tgt cpp || cpp final"/>
 	<define name="HSCRIPT_ALLOWED" />
 	<define name="MODS_ALLOWED" if="desktop" />
 	<define name="CRASH_HANDLER" if="desktop" />
