@@ -1585,13 +1585,13 @@ class FlxSprite extends FlxObject
 	}
 
     @:noCompletion
-    function get_antialiasing():Bool
+    function get_antialiasing():Null<Bool>
     {
         return antialiasing == null ? defaultAntialiasing : antialiasing;
     }
 
 	@:noCompletion
-    function set_antialiasing(value:Bool):Bool
+	function set_antialiasing(value:Null<Bool>):Null<Bool>
     {
         return antialiasing = value;
     }

@@ -79,7 +79,7 @@ class HealthIcon extends FlxSprite
 		changeIconGraphic(file);
 		this.char = char;
 
-		antialiasing = char.endsWith("-pixel") ? false : true;
+		antialiasing = char.endsWith("-pixel") ? false : null;
 	}
 
 	override function updateHitbox()
