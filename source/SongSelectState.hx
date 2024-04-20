@@ -259,13 +259,12 @@ class SongChartSelec extends MusicBeatState
 
 		final charts = new haxe.ds.StringMap();
 		function processFileName(fileName:String)
-		{
-			if (!fileName.startsWith('$songName-') || !fileName.endsWith('.json')){
+		{			
+			if (fileName == '$songName.json'){
+				charts.set("normal", true);
 				return;
 			}
-			else if (fileName == '$songName.json')
-			{
-				charts.set("normal", true);
+			else if (!fileName.startsWith('$songName-') || !fileName.endsWith('.json')){
 				return;
 			}
 
