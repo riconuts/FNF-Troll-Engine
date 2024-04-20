@@ -377,7 +377,7 @@ class ComicReader extends MusicBeatState
 		camComic.follow(camFollowPos, LOCKON, 1);
 
 		//
-		var bg = new FlxSprite().loadGraphic(Paths.image("menuBGDesat"));
+		var bg = new FlxSprite().loadGraphic(Paths.image("menuDesat"));
 		bg.color = 0xFF001010;
 		bg.cameras = [camBackground];
 		bg.scrollFactor.set();
