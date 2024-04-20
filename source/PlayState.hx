@@ -48,7 +48,9 @@ import Discord.DiscordClient;
 #if (hxCodec >= "3.0.0") import hxcodec.flixel.FlxVideo as VideoHandler;
 #elseif (hxCodec >= "2.6.1") import hxcodec.VideoHandler as VideoHandler;
 #elseif (hxCodec == "2.6.0") import VideoHandler;
-#else import vlc.MP4Handler as VideoHandler; #end
+#elseif(hxCodec) import vlc.MP4Handler as VideoHandler; 
+#elseif (hxvlc) import hxvlc.flixel.FlxVideo as VideoHandler;
+#end
 #end
 
 using StringTools;
@@ -1337,7 +1339,17 @@ class PlayState extends MusicBeatState
 		}
 
 		var video:VideoHandler = new VideoHandler();
-		#if (hxCodec >= "3.0.0")
+        #if (hxvlc)
+        video.load(filepath);
+		video.onEndReached.add(() ->
+		{
+            video.dispose();
+			if (FlxG.game.contains(video))
+				FlxG.game.removeChild(video);
+            startAndEnd();
+		});
+        video.play();
+		#elseif (hxCodec >= "3.0.0")
 		video.play(filepath);
 		video.onEndReached.add(()->{
 			video.dispose();

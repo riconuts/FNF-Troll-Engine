@@ -122,6 +122,8 @@ class FunkinHScript extends FunkinScript
 		set("importEnum", importEnum);
 		
 		// Abstracts
+        // TODO: maybe add SemanticVersion tho tbh prob not needed
+
 		set("FlxColor", CustomFlxColor);
 		set("FlxPoint", {
 			get: FlxPoint.get, 
@@ -211,11 +213,21 @@ class FunkinHScript extends FunkinScript
 
 		// TODO: create a compatibility wrapper for the various versions
 		// (so you can use any version of hxcodec and use the same versions)
+
 		#if !VIDEOS_ALLOWED
 		set("hxcodec", "0");
 		set("MP4Handler", null);
 		set("MP4Sprite", null);
-		#elseif (hxCodec >= "3.0.0")
+        #else
+		#if (hxvlc)
+		set("hxcodec", "0");
+        set("hxvlc", "1.0.0");
+		set("MP4Handler", hxvlc.flixel.FlxVideo);
+		set("MP4Sprite", hxvlc.flixel.FlxVideoSprite);
+        #else
+        set("hxvlc", "0")
+        #end
+		#if (hxCodec >= "3.0.0")
 		set("hxcodec", "3.0.0");
 		set("MP4Handler", hxcodec.flixel.FlxVideo);
 		set("MP4Sprite", hxcodec.flixel.FlxVideoSprite); // idk how hxcodec 3.0.0 works :clueless:
@@ -232,7 +244,7 @@ class FunkinHScript extends FunkinScript
 		set("MP4Handler", vlc.MP4Handler);
 		set("MP4Sprite", vlc.MP4Sprite);
 		#end
-
+        #end
 		set("FunkinHScript", FunkinHScript);
 
 		set("HScriptedHUD", hud.HScriptedHUD);
@@ -318,6 +330,7 @@ class FunkinHScript extends FunkinScript
 	{
 		// same as importClass, but for enums
 		// and it cant have enum.*;
+        // EDIT this doesnt work
 		var splitted:Array<String> = enumName.split(".");
 		var daEnum = Type.resolveClass(enumName);
 		if (daEnum!=null)

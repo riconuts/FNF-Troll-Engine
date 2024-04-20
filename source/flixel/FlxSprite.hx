@@ -1591,7 +1591,7 @@ class FlxSprite extends FlxObject
     }
 
 	@:noCompletion
-    function set_antialiasing(value:Null<Bool>):Null<Bool>
+    function set_antialiasing(value:Bool):Bool
     {
         return antialiasing = value;
     }

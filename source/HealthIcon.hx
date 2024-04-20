@@ -63,10 +63,15 @@ class HealthIcon extends FlxSprite
 
 	private var iconOffsets:Array<Float> = [0, 0];
 	public function changeIcon(char:String) {
-		var file:Null<FlxGraphic> = Paths.image('icons/$char');
+/* 		var file:Null<FlxGraphic> = Paths.image('characters/icons/$char'); // i'd like to use this some day lol
+
+		if (file == null)
+			file = Paths.image('icons/$char'); // new psych compat */
+
+		var file:Null<FlxGraphic> = Paths.image('icons/$char'); 
 
 		if(file == null)
-			file = Paths.image('icons/icon-$char'); // psych compat
+			file = Paths.image('icons/icon-$char'); // old psych compat
 		
 		if(file == null) 
 			file = Paths.image('icons/face'); // Prevents crash from missing icon
@@ -74,7 +79,7 @@ class HealthIcon extends FlxSprite
 		changeIconGraphic(file);
 		this.char = char;
 
-		antialiasing = char.endsWith("-pixel") ? false : null;
+		antialiasing = char.endsWith("-pixel") ? false : true;
 	}
 
 	override function updateHitbox()

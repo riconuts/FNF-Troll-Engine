@@ -48,7 +48,8 @@
 	<assets path="assets"	unless="tgt"/>
 	<assets path='default_content'	rename='content'	embed='false' />
 
-    <!-- PSYCH ENGINE CUSTOMIZATION -->
+    <define name="tgt" if="display"/> <!--Comment if you dont want auto complete to assume youre compiling for TGT-->
+    <!-- TROLL ENGINE CUSTOMIZATION -->
 	<define name="USE_EPIC_JUDGEMENT" />
 	<define name="VIDEOS_ALLOWED" if="tgt cpp || cpp final"/>
 	<define name="HSCRIPT_ALLOWED" />
@@ -71,7 +72,7 @@
 
 	<haxelib name="discord_rpc" if="desktop cpp"/>
 
-	<haxelib name="hxCodec" if="VIDEOS_ALLOWED"/> 
+	<haxelib name="hxvlc" if="VIDEOS_ALLOWED"/> <!--You can replace with hxcodec if you're stubborn and dont wanna use newer and better libs-->
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
 	
 	<haxelib name="faxe" if='switch'/>
