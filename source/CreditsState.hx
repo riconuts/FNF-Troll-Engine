@@ -195,10 +195,6 @@ class CreditsState extends MusicBeatState
 
         updateSelection();
         curSelected = 0;
-
-		#if !FLX_NO_MOUSE
-		FlxG.mouse.visible = true;
-		#end
 	}
 
     var realIndex:Int = 0;

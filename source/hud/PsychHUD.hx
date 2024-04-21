@@ -170,7 +170,7 @@ class PsychHUD extends CommonHUD
 		}else{
 			shownScore = Std.string(score);
 			isHighscore = songHighscore != 0 && score > songHighscore;
-		}		
+		}
 
 		scoreTxt.text = 
 			(isHighscore ? '$hiscoreString: ' : '$scoreString: ') + shownScore +

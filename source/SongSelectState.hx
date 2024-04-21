@@ -11,7 +11,8 @@ import Song;
 using StringTools;
 
 /**
-	Barebones menu that shows a list of available songs
+	Barebones menu that shows a list of every available song and chart
+	Not meant to be a Freeplay menu!!! Just here as a placeholder and song select menu for quick testing
 **/
 class SongSelectState extends MusicBeatState
 {	
@@ -53,6 +54,17 @@ class SongSelectState extends MusicBeatState
 		#end
 		FlxG.camera.bgColor = 0xFF000000;
 
+		////
+		
+		/*
+		var bg = new FlxSprite(Paths.image("menuDesat"));
+		bg.blend = INVERT;
+		bg.setColorTransform(-1.75, -1.75, -1.75, 0.4, Std.int(255 + bg.color.red / 3), Std.int(255 + bg.color.green / 3), Std.int(255 + bg.color.blue / 3), 0);
+		bg.screenCenter();
+		add(bg);
+		*/
+
+		////
 		if (FlxG.sound.music == null){
 			MusicBeatState.playMenuMusic(1);
 		}else{
