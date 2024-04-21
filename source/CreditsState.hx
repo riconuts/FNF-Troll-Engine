@@ -141,8 +141,12 @@ class CreditsState extends MusicBeatState
             trace('checking for updated credits');
 			
 			var githubRepo = Main.githubRepo;
+			#if tgt
+			var http = new haxe.Http('https://raw.githubusercontent.com/${githubRepo.user}/${githubRepo.repo}/main/assets-tgt/data/credits.txt'); // hmmmmm
+            #else
 			var http = new haxe.Http('https://raw.githubusercontent.com/${githubRepo.user}/${githubRepo.repo}/main/assets/data/credits.txt');
-            http.onData = function(data:String){
+			#end
+			http.onData = function(data:String){
                 rawCredits = data;
 
                 #if sys
@@ -362,9 +366,12 @@ class CreditsState extends MusicBeatState
 		}
 
 		if (controls.ACCEPT){
-            CoolUtil.browserLoad(dataArray[curSelected][3]);
+			var link:Null<String> = dataArray[curSelected][3];
+			if (link != null && link.length > 0)
+            	CoolUtil.browserLoad(link);
 		}
 
+		#if tgt
 		if (FlxG.keys.justPressed.NINE)
 		{
 			for (item in titleArray)
@@ -379,6 +386,7 @@ class CreditsState extends MusicBeatState
 					icon.loadGraphic(Paths.image('credits/peak'));
 			}
 		}
+		#end
 		}
 		
 		super.update(elapsed);
