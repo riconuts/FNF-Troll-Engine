@@ -366,36 +366,42 @@ class TitleState extends MusicBeatState
 						MusicBeatState.menuVox = null;
 					}
 					
-					
 					MusicBeatState.playMenuMusic(0, true);
-					//FlxG.sound.music.fadeIn(4, 0, 0.7);
 				case 2:
 					MusicBeatState.playMenuMusic(1, true);
+					#if tgt
 					createCoolText(['THE FNF TGT TEAM']);
-				case 4:
-					addMoreText('presents');
-				case 5:
-					deleteCoolText();
-				case 6:
-					createCoolText(['In association', 'with'], -40);
+					#else
+					createCoolText(['THE FNF TGT TEAM']);
+					#end
+				case 4: addMoreText('presents');
+				case 5: deleteCoolText();
+
+				case 6: createCoolText(['Without any', 'association to'], -40);
 				case 8:
+					#if tgt
 					addMoreText('tailsgetstrolled dot org', -40);
+					#else
+					addMoreText('Newgrounds', -40);
+					#end
 					ngSpr.visible = true;
 				case 9:
 					deleteCoolText();
 					ngSpr.visible = false;
-				case 10:
-					createCoolText([curWacky[0]]);
-				case 12:
-					addMoreText(curWacky[1]);
-				case 13:
-					deleteCoolText();
-				case 14:
-					addMoreText('Tails');
-				case 15:
-					addMoreText('Gets');
-				case 16:
-					addMoreText('Trolled');
+				
+				case 10: createCoolText([curWacky[0]]);
+				case 12: addMoreText(curWacky[1]);
+				case 13: deleteCoolText();
+
+				#if tgt
+				case 14: addMoreText('Tails');
+				case 15: addMoreText('Gets');
+				case 16: addMoreText('Trolled');
+				#else
+				case 14: addMoreText('Friday');
+				case 15: addMoreText('Night');
+				case 16: addMoreText("Funkin");
+				#end
 				case 17:
 					skipIntro();
 			}
