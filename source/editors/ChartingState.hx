@@ -1513,17 +1513,7 @@ class ChartingState extends MusicBeatState
 
 	function loadSong():Void
 	{
-		if (FlxG.sound.music != null)
-		{
-			FlxG.sound.music.stop();
-			// vocals.stop();
-		}
-
-		if (MusicBeatState.menuVox != null){
-			MusicBeatState.menuVox.stop();
-			MusicBeatState.menuVox.destroy();
-			MusicBeatState.menuVox = null;
-		}
+		MusicBeatState.stopMenuMusic();
 
 		for (trackName in _song.extraTracks){
 			var file:Dynamic = Paths.track(currentSongName, trackName);
