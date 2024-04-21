@@ -501,7 +501,6 @@ class OptionsSubstate extends MusicBeatSubstate
 	{
 		//var startTime = Sys.cpuTime();
 		// ClientPrefs.load();
-		Main.volumeChangedEvent.add(onVolumeChange);
 		persistentDraw = true;
 		persistentUpdate = true;
 
@@ -587,7 +586,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			var button = new FlxSprite(lastX, optionMenu.y - 3 - tabButtonHeight, whitePixel);
 			button.ID = idx;
 			button.alpha = 0.75;
-			button.color = idx == 0 ? FlxColor.fromRGB(128, 128, 128) : FlxColor.fromRGB(82, 82, 82);
+			button.color = idx == 0 ? FlxColor.fromRGB(128, 128, 128) : FlxColor.fromRGB(70, 70, 70);
 			
 			button.scale.set(Math.max(86, text.fieldWidth) + 8, tabButtonHeight);
 			button.updateHitbox();
@@ -715,6 +714,9 @@ class OptionsSubstate extends MusicBeatSubstate
 
 		prevScreenX = FlxG.mouse.screenX;
 		prevScreenY = FlxG.mouse.screenY;
+
+		Main.volumeChangedEvent.add(onVolumeChange);
+		onVolumeChange(FlxG.sound.volume);
 
 		checkWindows();
 
@@ -969,7 +971,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		for (idx in 0...buttons.length)
 		{
 			var butt = buttons[idx];
-			butt.color = idx == selected ? FlxColor.fromRGB(128, 128, 128) : FlxColor.fromRGB(82, 82, 82);
+			butt.color = idx == selected ? FlxColor.fromRGB(128, 128, 128) : FlxColor.fromRGB(70, 70, 70);
 		}
 
 		camFollow.copyFrom(cameraPositions[selected]);
