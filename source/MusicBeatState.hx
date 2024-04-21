@@ -272,8 +272,12 @@ class MusicBeatState extends FlxUIState
 			FlxG.sound.music.onComplete = menuLoopFunc;
 			#end
 			
-
+			//// TODO: find a way to soft code this!!! (psych engine already has one so maybe we could just use that and add custom intro text to it :-)
+			#if tgt
 			Conductor.changeBPM(180);
+			#else
+			Conductor.changeBPM(102);
+			#end
 			Conductor.songPosition = 0;
 		}
 	}
