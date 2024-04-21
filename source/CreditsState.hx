@@ -18,7 +18,7 @@ using StringTools;
 
 class CreditsState extends MusicBeatState
 {	
-    var useHttp:Bool = #if final true #else false #end; // shouldnt we check if tgt too
+    var useHttp:Bool = #if final true #else false #end; // shouldnt we check if tgt too		// no, the base engine could use it
 	var bg:FlxSprite;
 
     var hintBg:FlxSprite;
@@ -83,16 +83,24 @@ class CreditsState extends MusicBeatState
 		camFollowPos.setPosition(camFollow.x, camFollow.y);
 
 		////
-		bg = new FlxSprite().loadGraphic(Paths.image("tgtmenus/creditsbg"));
-		
-		if (FlxG.height < FlxG.width)
-			bg.setGraphicSize(0, FlxG.height);
-		else
-			bg.setGraphicSize(FlxG.width, 0);
+		bg = new FlxSprite();
+		#if tgt
+		bg.loadGraphic(Paths.image("tgtmenus/creditsbg"));
+		#else
+		bg.loadGraphic(Paths.image("menuDesat"));
+		#end
 
 		bg.screenCenter().scrollFactor.set();
+
+		if (FlxG.height < FlxG.width){
+			bg.scale.x = bg.scale.y = (FlxG.height * 1.05) / bg.frameHeight;
+		}else{
+			bg.scale.x = bg.scale.y = (FlxG.width * 1.05) / bg.frameWidth;
+		}
+
 		add(bg);
 
+		#if tgt
 		var backdrops = new flixel.addons.display.FlxBackdrop(Paths.image('grid'));
 		backdrops.velocity.set(30, -30);
 		backdrops.scrollFactor.set();
@@ -100,6 +108,7 @@ class CreditsState extends MusicBeatState
 		backdrops.alpha = 0.25;
 		backdrops.x -= 10;
 		add(backdrops);
+		#end
 
         ////
         function loadLine(line:String, ?folder:String)
@@ -205,17 +214,16 @@ class CreditsState extends MusicBeatState
             dataArray[id] = data; 
 
 			var iconPath = "credits/" + data[1];
-			if (Paths.image(iconPath) == null)
-				iconPath = "icons/face";
+			if (Paths.image(iconPath) != null){
+				var songIcon = new AttachedSprite(iconPath);
 
-            var songIcon = new AttachedSprite(iconPath);
+				songIcon.xAdd = songTitle.width + 15; 
+				songIcon.yAdd = 15;
+				songIcon.sprTracker = songTitle;
 
-            songIcon.xAdd = songTitle.width + 15; 
-            songIcon.yAdd = 15;
-            songIcon.sprTracker = songTitle;
-
-            iconArray[id] = songIcon;
-            add(songIcon);
+				iconArray[id] = songIcon;
+				add(songIcon);
+			}
         }else if (data[0].trim().length == 0){
             return;
         }else{
@@ -242,8 +250,8 @@ class CreditsState extends MusicBeatState
 		for (id in 0...titleArray.length)
 		{
 			var title:Alphabet = titleArray[id];
-            var data = dataArray[id];
-			var icon = iconArray[id];
+            var data:Array<String> = dataArray[id];
+			var icon:AttachedSprite = iconArray[id];
 
             if (data == null){ // for the category titles, whatevrr !!!
                 
@@ -252,7 +260,8 @@ class CreditsState extends MusicBeatState
                 title.targetX = 90;
                 title.color = 0xFFFFFFFF;
 
-				icon.color = 0xFFFFFFFF;
+				if (icon != null)
+					icon.color = 0xFFFFFFFF;
 
                 var descText = data[2];
                 if (descText == null){
@@ -290,8 +299,10 @@ class CreditsState extends MusicBeatState
 				title.alpha = (1 - difference * 0.15);
 				title.color = 0xFF000000;
 				
-				var br = 1-(difference * 0.15 + 0.05);
-				icon.color = FlxColor.fromRGBFloat(br,br,br);
+				if (icon != null){
+					var br = 1-(difference * 0.15 + 0.05);
+					icon.color = FlxColor.fromRGBFloat(br,br,br);
+				}
 			}
 
 			if (icon != null)
