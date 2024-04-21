@@ -481,16 +481,7 @@ class PlayState extends MusicBeatState
 		persistentUpdate = true;
 		persistentDraw = true;
 
-		if (FlxG.sound.music != null){
-			FlxG.sound.music.stop();
-			FlxG.sound.music.destroy();
-		}
-
-		if (MusicBeatState.menuVox != null){
-			MusicBeatState.menuVox.stop();
-			MusicBeatState.menuVox.destroy();
-			MusicBeatState.menuVox = null;
-		}
+		MusicBeatState.stopMenuMusic();
 
 		debugKeysChart = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
 		debugKeysCharacter = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_2'));

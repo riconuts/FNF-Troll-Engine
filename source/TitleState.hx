@@ -358,31 +358,21 @@ class TitleState extends MusicBeatState
 			switch (sickBeats * 0.5)
 			{
 				case 1:
-					FlxG.sound.music.stop();
-					if (MusicBeatState.menuVox != null)
-					{
-						MusicBeatState.menuVox.stop();
-						MusicBeatState.menuVox.destroy();
-						MusicBeatState.menuVox = null;
-					}
-					
+					MusicBeatState.stopMenuMusic();
 					MusicBeatState.playMenuMusic(0, true);
 				case 2:
 					MusicBeatState.playMenuMusic(1, true);
-					#if tgt
-					createCoolText(['THE FNF TGT TEAM']);
-					#else
-					createCoolText(['THE FNF TGT TEAM']);
+					
+					#if	tgt	createCoolText(['THE FNF TGT TEAM']);
+					#else	createCoolText(['THE FNF TGT TEAM']);
 					#end
 				case 4: addMoreText('presents');
 				case 5: deleteCoolText();
 
 				case 6: createCoolText(['Without any', 'association to'], -40);
 				case 8:
-					#if tgt
-					addMoreText('tailsgetstrolled dot org', -40);
-					#else
-					addMoreText('Newgrounds', -40);
+					#if tgt	addMoreText('tailsgetstrolled dot org', -40);
+					#else	addMoreText('Newgrounds', -40);
 					#end
 					ngSpr.visible = true;
 				case 9:

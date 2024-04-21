@@ -204,16 +204,25 @@ class MusicBeatState extends FlxUIState
 		Conductor.changeBPM(180);
 	}; 
 
-	// TODO: check the jukebox selection n shit and play THAT instead? idk lol
+	public static function stopMenuMusic(){
+		if (FlxG.sound.music != null){
+			FlxG.sound.music.stop();
+			FlxG.sound.music.destroy();
+			FlxG.sound.music = null;
+		}
 
+		if (MusicBeatState.menuVox != null)
+		{
+			MusicBeatState.menuVox.stop();
+			MusicBeatState.menuVox.destroy();
+			MusicBeatState.menuVox = null;
+		}
+	}
+
+	// TODO: check the jukebox selection n shit and play THAT instead? idk lol
 	public static function playMenuMusic(?volume:Float=1, ?force:Bool = false){	        	
 		if(FlxG.sound.music == null || !FlxG.sound.music.playing || force){
-			if (menuVox!=null){
-				trace("stopped menu vox");
-				menuVox.stop();
-				menuVox.destroy();
-				menuVox = null;
-			}
+			MusicBeatState.stopMenuMusic();
 			#if tgt
 			tgt.gallery.JukeboxState.playIdx = 0;
 			#end
