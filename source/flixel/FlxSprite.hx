@@ -1588,17 +1588,18 @@ class FlxSprite extends FlxObject
 		return flipY = Value;
 	}
 
-    @:noCompletion
-    function get_antialiasing():Null<Bool>
-    {
-        return useDefaultAntialiasing ? defaultAntialiasing : antialiasing;
-    }
+	@:noCompletion
+    function get_antialiasing():Bool
+	{
+		return useDefaultAntialiasing ? defaultAntialiasing : antialiasing;
+	}
 
 	@:noCompletion
 	function set_antialiasing(value:Bool):Bool
-    {
-        return antialiasing = value;
-    }
+	{
+		useDefaultAntialiasing = false;
+		return antialiasing = value;
+	}
     /*
 	function set_antialiasing(value:Bool):Bool
 	{
