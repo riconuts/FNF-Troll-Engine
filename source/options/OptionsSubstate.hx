@@ -576,7 +576,13 @@ class OptionsSubstate extends MusicBeatSubstate
 			var tabName = optionOrder[idx];
 
 			var text = new FlxText(0, 0, 0, Paths.getString('opt_tabName_$tabName').toUpperCase(), 16);
-			text.setFormat(Paths.font(#if tgt "calibrib.ttf" #else "vcr.ttf" #end), 32, 0xFFFFFFFF, FlxTextAlign.CENTER);
+			#if tgt
+			text.setFormat(Paths.font("calibrib.ttf"), 32, 0xFFFFFFFF, CENTER);
+			#else
+			text.setFormat(Paths.font("vcr.ttf"), 32, 0xFFFFFFFF, CENTER);
+			text.pixelPerfectRender = true;
+			text.antialiasing = false;
+			#end
 
 			var button = new FlxSprite(lastX, optionMenu.y - 3 - tabButtonHeight, whitePixel);
 			button.ID = idx;
@@ -606,11 +612,19 @@ class OptionsSubstate extends MusicBeatSubstate
 
 			for (data in options.get(tabName))
 			{
-				var label = data[0];
+				var label:String = data[0];
+
 				var text = new FlxText(8, daY, 0, Paths.getString('opt_label_$label'), 16);
-				text.setFormat(Paths.font(#if tgt "calibrib.ttf" #else "vcr.ttf" #end), 32, 0xFFFFFFFF, FlxTextAlign.LEFT);
+				#if tgt
+				text.setFormat(Paths.font("calibrib.ttf"), 32, 0xFFFFFFFF, LEFT);
+				#else
+				text.setFormat(Paths.font("vcr.ttf"), 32, 0xFFFFFFFF, LEFT);
+				text.pixelPerfectRender = true;
+				text.antialiasing = false;
+				#end
 				text.cameras = [optionCamera];
 				group.add(text);
+
 				daY += text.height;
 
 				var daOpts:Array<String> = data[1];
@@ -631,17 +645,18 @@ class OptionsSubstate extends MusicBeatSubstate
 
 					var height = Math.max(45, text.height + 12);
 					var rect = new Rectangle(text.x - 12, text.y, optionMenu.width - text.x - 8, height);
+
+					text.y += (height - text.height) / 2;
 					
 					var drop:FlxUI9SliceSprite = new FlxUI9SliceSprite(rect.x, rect.y, backdropGraphic, rect, backdropSlice);
 					drop.cameras = [optionCamera];
+					group.add(drop);
 					
 					var lock:FlxUI9SliceSprite = new FlxUI9SliceSprite(rect.x, rect.y, backdropGraphic, rect, backdropSlice);
 					lock.cameras = [optionCamera];
 					lock.alpha = 0.75;
-					text.y += (height - text.height) / 2;
 
-					var widget = createWidget(opt, drop, text, data);
-					group.add(drop);
+					var widget:Widget = createWidget(opt, drop, text, data);
 					widget.data.set("optionBox", drop);
 					widget.data.set("lockOverlay", lock);
 					if (widget.data.exists("objects"))
@@ -684,11 +699,16 @@ class OptionsSubstate extends MusicBeatSubstate
 		];
 		////
 
-		optionDesc = new FlxText(5, FlxG.height - 48, 0, "", 20);
-		optionDesc.setFormat(Paths.font("vcr.ttf"), #if tgt 20 #else 16 #end, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		optionDesc = new FlxText(5, FlxG.height - 48, 0);
+		#if tgt
+		optionDesc.setFormat(Paths.font("calibri.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		#else
+		optionDesc.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		optionDesc.pixelPerfectRender = true;
+		optionDesc.antialiasing = false;
+		#end
 		optionDesc.textField.background = true;
 		optionDesc.textField.backgroundColor = FlxColor.BLACK;
-		optionDesc.screenCenter(X);
 		optionDesc.cameras = [overlayCamera];
 		optionDesc.alpha = 0;
 		add(optionDesc);
@@ -838,8 +858,13 @@ class OptionsSubstate extends MusicBeatSubstate
 				objects.add(arrow);
 				objects.add(label);
 			case Number:
-				var box:FlxSprite = new FlxSprite().makeGraphic(240, 24, FlxColor.BLACK);
-				var bar:FlxSprite = new FlxSprite().makeGraphic(240 - 8, 24 - 8, FlxColor.WHITE);
+				var box:FlxSprite = new FlxSprite(whitePixel);
+				box.color = FlxColor.BLACK;
+				box.scale.set(240, 24);
+				box.updateHitbox();
+
+				var bar:FlxSprite = new FlxSprite().makeGraphic(240-8, 24-8);
+				
 				objects.add(box);
 				objects.add(bar);
 
@@ -1382,7 +1407,7 @@ class OptionsSubstate extends MusicBeatSubstate
 	function showOptionDesc(?text:String){
 		if (text == null || text == ''){
 			FlxTween.cancelTweensOf(optionDesc);
-			FlxTween.tween(optionDesc, {alpha: 0}, 0.16, {ease: FlxEase.quadOut});
+			FlxTween.tween(optionDesc, {alpha: 0, y: optionDesc.y + 12}, 0.16, {ease: FlxEase.quadOut});
 			return;
 		}
 		
