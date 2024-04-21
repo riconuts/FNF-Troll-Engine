@@ -49,6 +49,9 @@ class KadeHUD extends BaseHUD
 	{
 		super(iP1, iP2, songName, stats);
 
+		songHighscore = Highscore.getScore(songName);
+		songWifeHighscore = Highscore.getNotesHit(songName);
+
 		//// Health bar
 		healthBar = new FNFHealthBar(iP1, iP2);
 		healthBarBG = healthBar.healthBarBG;
@@ -182,7 +185,7 @@ class KadeHUD extends BaseHUD
 		}else{
 			shownScore = Std.string(score);
 			isHighscore = songHighscore != 0 && score > songHighscore;
-		}		
+		}
 
 		scoreTxt.text = 
 			(isHighscore ? '$hiscoreString: ' : '$scoreString: ') + shownScore +
