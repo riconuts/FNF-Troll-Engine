@@ -776,9 +776,11 @@ class PlayState extends MusicBeatState
                     SONG.events.push([
 						songNotes[0],
                         [
-                            songNotes[2],
-                            songNotes[3],
-                            songNotes[4]
+                            [
+                                songNotes[2],
+                                songNotes[3],
+                                songNotes[4]
+                            ]
                         ]
 					]);
                     section.sectionNotes.splice(idx, 1);
