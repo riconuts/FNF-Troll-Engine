@@ -1,3 +1,5 @@
+var titleScreen = script.get("titleScreen") == true;
+
 var phillyCityLights = [];
 var phillyTrain:FlxSprite;
 var trainSound:FlxSound;

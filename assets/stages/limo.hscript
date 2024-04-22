@@ -1,10 +1,11 @@
+var titleScreen = script.get("titleScreen") == true;
+
 var bgDancers:Array<FlxSprite> = [];
-
 var dancerDanced:Bool = false;
-
 
 var limo:FlxSprite;
 var fastCar:FlxSprite;
+var carTmr:FlxTimer;
 
 function onAddSpriteGroups(){
 	game.add(this);
@@ -18,7 +19,8 @@ function onAddSpriteGroups(){
 	return Function_Stop;
 }
 
-function onLoad(){
+function onLoad()
+{
 	//if (game.gf.curCharacter == 'gf') game.changeCharacter("gf-car", 2);
 
 	var skyBG:FlxSprite = new FlxSprite(-120, -50, Paths.image('stages/limo/limoSunset'));
@@ -41,7 +43,6 @@ function onLoad(){
 		dancer.animation.addByIndices('danceRight', 'bg dancer sketch PINK', [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29], "", 24, false);
 		dancer.animation.play('danceLeft');
 		//dancer.animation.finish();
-		dancer.antialiasing = true;
 		dancer.scrollFactor.set(0.4, 0.4);
 		bgDancers.push(dancer);
 		add(dancer);
@@ -58,12 +59,21 @@ function onLoad(){
 	limo.frames = Paths.getSparrowAtlas('stages/limo/limoDrive');
 	limo.animation.addByPrefix('drive', "Limo stage", 24);
 	limo.animation.play('drive');
-	limo.antialiasing = true;
 
 	fastCar = new FlxSprite(-300, 160, Paths.image('stages/limo/fastCarLol'));
 	foreground.add(fastCar);
 	resetFastCar();
-    if(titleScreen){
+	
+	carTmr = new FlxTimer();
+	
+    if (titleScreen){
+		var stageData = this.stageData;
+		limo.x = stageData.camera_stage[0] + (FlxG.width / 2 / stageData.title_zoom);
+		
+		// maybe make this happen after the intro ended
+		FlxTween.tween(limo, {x: limo.x + (-limo.width + 100) / 1.125}, 4.2, {ease: FlxEase.backOut, songPos: Conductor.crochet, songBased: true});
+		
+		fastCarDrive();
         add(limo);
         add(foreground);
     }
@@ -73,8 +83,10 @@ var fastCarCanDrive = false;
 
 function resetFastCar():Void
 {
-	fastCar.x = -12600;
-	fastCar.y = FlxG.random.int(140, 250);
+	fastCar.setPosition(
+		-12600,
+		titleScreen ? 420 : FlxG.random.int(140, 250)
+	);
 	fastCar.velocity.x = 0;
 	fastCarCanDrive = true;
 }
@@ -85,12 +97,10 @@ function fastCarDrive()
         FlxG.sound.play(Paths.soundRandom('carPass', 0, 1), 0.35);
     else
         FlxG.sound.play(Paths.soundRandom('carPass', 0, 1), 0.7);
-    
-	
 
 	fastCar.velocity.x = (FlxG.random.int(170, 220) / FlxG.elapsed) * 3;
 	fastCarCanDrive = false;
-	new FlxTimer().start(2, function(tmr:FlxTimer)
+	carTmr.start(2, function(tmr:FlxTimer)
 	{
 		resetFastCar();
 	});
@@ -111,4 +121,3 @@ function onBeatHit(){
 		fastCarDrive();
 	
 }
-

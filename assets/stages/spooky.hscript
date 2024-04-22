@@ -1,5 +1,6 @@
-var halloweenBG;
+var titleScreen = script.get("titleScreen") == true;
 
+var halloweenBG;
 function onLoad()
 {
 	if (ClientPrefs.lowQuality){
