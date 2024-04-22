@@ -763,6 +763,7 @@ class PlayState extends MusicBeatState
 			characters.push(SONG.gfVersion);
 		}
 
+        #if PE_MOD_COMPATIBILITY
         for (section in PlayState.SONG.notes)
 		{
             var garbage:Array<Array<Dynamic>> = [];
@@ -785,6 +786,7 @@ class PlayState extends MusicBeatState
                 idx--;
             }
         }
+        #end
 
 		for (character in characters)
 		{
