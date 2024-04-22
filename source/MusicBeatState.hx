@@ -111,6 +111,16 @@ class MusicBeatState extends FlxUIState
 			sectionHit();
 		}
 	}
+    
+	override function startOutro(fuck:() -> Void)
+	{
+		return super.startOutro(() ->
+		{
+			scripts.Globals.variables.clear();
+			return fuck();
+		});
+	}
+
 
 	private function rollbackSection():Void
 	{

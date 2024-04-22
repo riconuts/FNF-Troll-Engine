@@ -54,7 +54,6 @@ using Lambda;
 class ChartingState extends MusicBeatState
 {
 	public static var instance:ChartingState;
-	public var variables:Map<String, Dynamic> = new Map();
 	
 	public var notetypeScripts:Map<String, FunkinScript> = [];
 	public static var noteTypeList:Array<String> = //Used for backwards compatibility with 0.1 - 0.3.2 charts, though, you should add your hardcoded custom note types here too.

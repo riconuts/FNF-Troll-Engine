@@ -185,7 +185,6 @@ class PlayState extends MusicBeatState
 	public var extraMap:Map<String, Character> = new Map();
 	public var dadMap:Map<String, Character> = new Map();
 	public var gfMap:Map<String, Character> = new Map();
-	public var variables:Map<String, Dynamic> = new Map(); 
 
 	public var tracks:Array<FlxSound> = [];
 	public var vocals:FlxSound;

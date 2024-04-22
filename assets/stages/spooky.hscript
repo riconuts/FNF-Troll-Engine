@@ -21,8 +21,12 @@ lightningOffset = 0;
 
 function lightningStrikeShit(sound:Bool):Void
 {
-	if (sound)
-		FlxG.sound.play(Paths.soundRandom('thunder_', 1, 2));
+	if (sound){
+        if(titleScreen)
+            FlxG.sound.play(Paths.soundRandom('thunder_', 1, 2), 0.5);
+        else
+		    FlxG.sound.play(Paths.soundRandom('thunder_', 1, 2));
+    }
 	
 	if (!ClientPrefs.lowQuality) 
 		halloweenBG.animation.play('lightning');

@@ -66,6 +66,9 @@ function onLoad()
 	add(phillyTrain);
 
 	trainSound = new FlxSound().loadEmbedded(Paths.sound('train_passes'));
+    if(titleScreen)
+        trainSound.volume = 0.5;
+    
 	FlxG.sound.list.add(trainSound);
 
 	/////

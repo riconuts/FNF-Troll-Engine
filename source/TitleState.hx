@@ -17,9 +17,22 @@ import Discord.DiscordClient;
 import sys.FileSystem;
 import sys.io.File;
 #end
+// used so stages wont break
+class FakeCharacter
+{
+	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void{}
+
+	public function new(){}
+}
 
 class TitleState extends MusicBeatState
 {
+	// for stage scripts
+	public var gf:FakeCharacter = new FakeCharacter();
+	public var dad:FakeCharacter = new FakeCharacter();
+	public var boyfriend:FakeCharacter = new FakeCharacter();
+	public var inCutscene:Bool = false;
+
 	public static var initialized:Bool = false;
 
 	static var curWacky:Array<String> = [];
@@ -46,7 +59,8 @@ class TitleState extends MusicBeatState
 	public var camFollow = new FlxPoint(640, 360);
 	public var camFollowPos = new FlxObject(640, 360, 1, 1);
 	
-	static public function getRandomStage(){
+	static public function getRandomStage()
+	{
 		// Set up a stage list
 		var stages:Array<Array<String>> = []; // [stage name, mod directory]
 
@@ -72,9 +86,11 @@ class TitleState extends MusicBeatState
 		
 		var randomStage = getRandomStage();
 
-		if (randomStage != null){
+		if (randomStage != null)
+		{
 			Paths.currentModDirectory = randomStage[1];
-			bg = new Stage(randomStage[0]);
+			bg = new Stage(randomStage[0], false);
+			bg.startScript(false, ["titleScreen" => true]);
 		}
 
 		// Random logoooo
@@ -101,6 +117,9 @@ class TitleState extends MusicBeatState
 		blackScreen = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
 		blackScreen.scale.set(FlxG.width, FlxG.height);
 		blackScreen.updateHitbox();
+
+		titleText.visible = false;
+		logoBl.visible = false;
 
 		textGroup = new FlxGroup();
 
@@ -133,9 +152,12 @@ class TitleState extends MusicBeatState
 
 		return super.destroy();
 	}
-
+	var darkness:FlxSprite;
 	override public function create():Void
 	{
+		if (initialized)
+			Paths.clearStoredMemory();
+
 		if (!loaded) load();
 
 		if (bg != null)
@@ -159,7 +181,8 @@ class TitleState extends MusicBeatState
 
 		if (bg != null){
 			camGame.zoom = bg.stageData.defaultZoom;
-
+			if (bg.stageData.title_zoom != null)
+				camGame.zoom = bg.stageData.title_zoom;
 			var color = FlxColor.fromString(bg.stageData.bg_color);
 			camGame.bgColor = color != null ? color : FlxColor.BLACK;
 
@@ -173,6 +196,16 @@ class TitleState extends MusicBeatState
 		}else{
 			camGame.bgColor = 0xFF000000;
 		}
+
+		var scale = 1920 / camGame.zoom;
+		darkness = new FlxSprite(0, 0).makeGraphic(1, 1, FlxColor.BLACK);
+		darkness.scale.set(scale, scale);
+		darkness.updateHitbox();
+		darkness.scrollFactor.set(0, 0);
+		darkness.screenCenter(XY);
+		darkness.alpha = 0.4;
+		darkness.cameras = [camGame];
+		add(darkness);
 
 		////
 		logoBl.cameras = [camHUD];
@@ -189,9 +222,10 @@ class TitleState extends MusicBeatState
 
 
 		////
-		if (initialized)
+		if (initialized){
+			Paths.clearUnusedMemory();
 			skipIntro();
-		else{
+        }else{
 			initialized = true;
 			MusicBeatState.playMenuMusic(0, true);
 		}
@@ -233,9 +267,11 @@ class TitleState extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
-		if (bg != null && bg.stageScript != null)
+		if (bg != null && bg.stageScript != null){
+			bg.stageScript.set("curDecBeat", curDecBeat);
+			bg.stageScript.set("curDecStep", curDecStep);
 			bg.stageScript.call('update', [elapsed]);
-
+        }
 		if (FlxG.sound.music != null)
 			Conductor.songPosition = FlxG.sound.music.time;
 
@@ -288,7 +324,8 @@ class TitleState extends MusicBeatState
 				if (titleText != null)
 					titleText.animation.play('press');
 
-				camHUD.flash(ClientPrefs.flashing ? FlxColor.WHITE : 0x4CFFFFFF, 1);
+                remove(darkness);
+				camHUD.flash(ClientPrefs.flashing ? FlxColor.WHITE : 0x4CFFFFFF, 1, null, true);
 				FlxG.sound.play(Paths.sound('confirmMenu'), 0.7 );
 
 				transitioning = true;
@@ -351,12 +388,18 @@ class TitleState extends MusicBeatState
 	override function beatHit()
 	{
 		super.beatHit();
-
+		if (skippedIntro)
+			if (bg != null && bg.stageScript != null)
+			{
+				bg.stageScript.set("curBeat", curBeat);
+				bg.stageScript.call('onBeatHit', []);
+			}
 		if (logoBl != null)
 			logoBl.time = 0;
 
 		if(!closedState) {
 			sickBeats++;
+            // this could prob be replaced with a json, yaml or even a whole "TitleSequence" script?? :shrug:
 			switch (sickBeats #if tgt * 0.5 #end)
 			{
 				case 1:
@@ -365,8 +408,17 @@ class TitleState extends MusicBeatState
 				case 2:
 					MusicBeatState.playMenuMusic(1, true);
 					
-					#if	tgt	createCoolText(['THE FNF TGT TEAM']);
-					#else	createCoolText(['THE FNF TGT TEAM']);
+					#if	tgt	
+					FlxTween.tween(blackScreen, {alpha: 0.8}, Conductor.crochet * 2 * 0.002, {
+						ease: FlxEase.quadInOut
+					});
+                    createCoolText(['THE FNF TGT TEAM']);
+					#else	
+					FlxTween.tween(blackScreen, {alpha: 0.8}, Conductor.crochet * 2 * 0.001, {
+						ease: FlxEase.quadInOut
+					});
+                    createCoolText(['THE TROLL ENGINE TEAM']);
+					//createCoolText(['RICONUTS', 'NEBULA_ZORUA', 'AND MORE']);
 					#end
 				case 4: addMoreText('presents');
 				case 5: deleteCoolText();
@@ -399,6 +451,29 @@ class TitleState extends MusicBeatState
 			}
 		}
 	}
+	var section:Int = -100;
+	override function stepHit()
+	{
+		super.stepHit();
+
+        if (bg != null && bg.stageScript != null)
+        {
+            if (skippedIntro){
+                bg.stageScript.set("curStep", curStep);
+                bg.stageScript.call('onStepHit', []);
+            }
+            var nuSection:Int = Math.floor(curBeat / 4);
+            if (section != nuSection)
+            {
+                section = nuSection;
+                if (skippedIntro){
+                    bg.stageScript.set("curSection", section);
+                    bg.stageScript.call('onSectionHit', []);
+                }
+            }
+        }
+	}
+
 
 	var skippedIntro:Bool = false;
 	var increaseVolume:Bool = false;
@@ -406,6 +481,8 @@ class TitleState extends MusicBeatState
 	{
 		if (!skippedIntro)
 		{
+            titleText.visible = true;
+			logoBl.visible = true;
 			remove(ngSpr);
 			remove(blackScreen);
 			remove(textGroup);

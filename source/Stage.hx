@@ -34,8 +34,10 @@ typedef StageFile =
 
 	@:optional var bg_color:Null<String>;
 
-	@:optional var camera_stage:Array<Float>; // for the title screen
-	@:optional var pixel_size:Null<Float>;
+    // title screen vars
+	@:optional var camera_stage:Array<Float>; 
+    @:optional var title_zoom:Float;
+
 	@:optional var preloadStrings:Array<String>;
 	#if sys
 	@:optional var preload:Array<Cache.AssetPreload>; // incase you would like to add more information, though you shouldnt really need to
@@ -62,23 +64,23 @@ class Stage extends FlxTypedGroup<FlxBasic>
 	public var stageScript:FunkinHScript;
 	public var spriteMap = new Map<String, FlxBasic>();
 
-	public function new(?StageName = "stage", ?StartScript:Bool = true)
+	public function new(?stageName = "stage", ?runScript:Bool = true)
 	{
 		super();
 
-		if (StageName != null)
-			curStage = StageName;
+		if (stageName != null)
+			curStage = stageName;
 		
 		var newStageData = StageData.getStageFile(curStage);
 		if (newStageData != null)
 			stageData = newStageData;
 
-		if (StartScript)
+		if (runScript)
 			startScript(false);
 	}
 
 	var stageBuilt:Bool = false;
-	public function startScript(?BuildStage = false)
+	public function startScript(?buildStage = false, ?additionalVars:Map<String, Any>)
 	{
 		if (stageScript != null)
 		{
@@ -93,7 +95,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 			if (!Paths.exists(file))
 				continue;
 		
-			stageScript = FunkinHScript.fromFile(file);
+			stageScript = FunkinHScript.fromFile(file, file, additionalVars);
 
 			// define variables lolol
 			stageScript.set("stage", this); // for backwards compat lol
@@ -103,7 +105,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 			stageScript.set("this", this);
 			stageScript.set("foreground", foreground);
 			
-			if (BuildStage){
+			if (buildStage){
 				stageScript.call("onLoad", [this, foreground]);
 				stageBuilt = true;
 			}
@@ -168,10 +170,25 @@ class Stage extends FlxTypedGroup<FlxBasic>
 	
 		var daList:Array<String> = [];
 		#if MODS_ALLOWED
-		var modsList = Paths.getText('data/stageList.txt', false);
-		if (modsList != null)
-			for (shit in modsList.split("\n"))daList.push(shit.trim().replace("\n",""));
-		
+		if (modsOnly){
+			var modPath:String = Paths.modFolders('data/stageList.txt');
+			if (FileSystem.exists(modPath))
+			{
+				var modsList = File.getContent(modPath);
+				if (modsList != null && modsList.trim().length > 0)
+                    for (shit in modsList.split("\n"))
+                        daList.push(shit.trim().replace("\n", ""));
+			}
+
+        }else{
+			var modsList = Paths.getText('data/stageList.txt', false);
+			if (modsList != null && modsList.trim().length > 0)
+				for (shit in modsList.split("\n"))
+					daList.push(shit.trim().replace("\n", ""));
+        }
+
+
+		 
 		var path = Paths.modFolders("metadata.json");
 		var rawJson:Null<String> = Paths.getContent(path);
 

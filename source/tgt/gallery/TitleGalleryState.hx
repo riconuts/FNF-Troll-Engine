@@ -3,13 +3,13 @@ package tgt.gallery;
 import openfl.events.MouseEvent;
 import flixel.addons.display.FlxBackdrop;
 import tgt.gallery.*;
-import TitleState.RandomTitleLogo;
+import TitleState.TitleLogo;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 
 class TitleGalleryState extends MusicBeatState
 {
-    var title:RandomTitleLogo;
+    var title:TitleLogo;
     var titulos:Array<String>;
 
     static var curSelected:Int = 0;
@@ -55,7 +55,7 @@ class TitleGalleryState extends MusicBeatState
         add(right);
 
         //
-        titulos = RandomTitleLogo.getTitlesList();
+        titulos = TitleLogo.getTitlesList();
         changeSelected(curSelected, true);
 
         super.create();
@@ -104,7 +104,7 @@ class TitleGalleryState extends MusicBeatState
             title = null;
         }
 
-        title = new RandomTitleLogo(0,0, titulos[curSelected]);
+        title = new TitleLogo(0,0, titulos[curSelected]);
         title.screenCenter();
         add(title);
     }
