@@ -188,6 +188,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 	// queues a note to be spawned
 	public function queue(note:Note){
+        trace(note.column);
 		if(noteQueue[note.column]==null)
 			noteQueue[note.column] = [];
 		noteQueue[note.column].push(note);

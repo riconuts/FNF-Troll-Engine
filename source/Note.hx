@@ -246,12 +246,16 @@ class Note extends NoteObject
 	public function updateColours(ignore:Bool=false){		
 		if(!ignore && !usesDefaultColours)return;
 		if (colorSwap==null)return;
+        if(column == -1)return; // FUCKING PSYCH EVENT NOTES!!!
 		if(isQuant){
 			var idx = quants.indexOf(quant);
 			colorSwap.hue = ClientPrefs.quantHSV[idx][0] / 360;
 			colorSwap.saturation = ClientPrefs.quantHSV[idx][1] / 100;
 			colorSwap.brightness = ClientPrefs.quantHSV[idx][2] / 100;
 		}else{
+            if(ClientPrefs.arrowHSV[column % 4]==null)
+                ClientPrefs.arrowHSV[column % 4] = [0,0,0]; // IDK WHERE IT WENT BUT JUST INCASE
+
 			colorSwap.hue = ClientPrefs.arrowHSV[column % 4][0] / 360;
 			colorSwap.saturation = ClientPrefs.arrowHSV[column % 4][1] / 100;
 			colorSwap.brightness = ClientPrefs.arrowHSV[column % 4][2] / 100;
@@ -459,8 +463,7 @@ class Note extends NoteObject
 	public function new(strumTime:Float, column:Int, ?prevNote:Note, ?gottaHitNote:Bool = false, ?sustainNote:Bool = false, ?inEditor:Bool = false, ?noteMod:String = 'default')
 	{
 		super();
-		
-		this.strumTime = strumTime;
+        this.strumTime = strumTime;
 		this.column = column;
 		this.prevNote = (prevNote==null) ? this : prevNote;
 		this.isSustainNote = sustainNote;
@@ -488,6 +491,9 @@ class Note extends NoteObject
 		if(column > -1) {
 			this.noteMod = noteMod;
 		}
+
+        if(colorSwap == null)
+            colorSwap = new ColorSwap();
 
 		if(prevNote != null)
 			prevNote.nextNote = this;

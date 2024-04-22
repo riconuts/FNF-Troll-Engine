@@ -763,6 +763,29 @@ class PlayState extends MusicBeatState
 			characters.push(SONG.gfVersion);
 		}
 
+        for (section in PlayState.SONG.notes)
+		{
+            var garbage:Array<Array<Dynamic>> = [];
+            
+            var idx = section.sectionNotes.length-1;
+			while(idx > 0)
+			{
+                var songNotes = section.sectionNotes[idx];
+                if(songNotes[1] <= -1){
+                    SONG.events.push([
+						songNotes[0],
+                        [
+                            songNotes[2],
+                            songNotes[3],
+                            songNotes[4]
+                        ]
+					]);
+                    section.sectionNotes.splice(idx, 1);
+                }
+                idx--;
+            }
+        }
+
 		for (character in characters)
 		{
 			for (data in Character.returnCharacterPreload(character))
@@ -2035,6 +2058,9 @@ class PlayState extends MusicBeatState
 			{
 				var daStrumTime:Float = songNotes[0];
 				var daColumn:Int = Std.int(songNotes[1] % 4);
+                if(songNotes[1] <= -1)
+                    continue; // RETARDED EVENT NOTES IN OLD PSYCH CHARTS
+                // TODO: AUTO CONVERT TO EVENTNOTES
 
 				var gottaHitNote:Bool = section.mustHitSection;
 
