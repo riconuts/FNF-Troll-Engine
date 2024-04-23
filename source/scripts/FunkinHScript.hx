@@ -296,7 +296,7 @@ class FunkinHScript extends FunkinScript
 		catch (e:haxe.Exception)
 		{
 			haxe.Log.trace(e.message, interpreter.posInfos());
-            stop();
+            //stop();
 		}
         return returnValue;
     }
@@ -347,8 +347,10 @@ class FunkinHScript extends FunkinScript
 			set(splitted.pop(), daEnum);
 	}
 
-	public inline function executeCode(script:String):Dynamic
+	public inline function executeCode(script:String):Dynamic{
+        parser.line = 1;
 		return run(parser.parseString(script, scriptName));
+    }
 	
 
 	override public function stop()
