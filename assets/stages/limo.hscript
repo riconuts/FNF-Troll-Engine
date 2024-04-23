@@ -1,5 +1,3 @@
-var titleScreen = script.get("titleScreen") == true;
-
 var bgDancers:Array<FlxSprite> = [];
 var dancerDanced:Bool = false;
 
@@ -66,7 +64,7 @@ function onLoad()
 	
 	carTmr = new FlxTimer();
 	
-    if (titleScreen){
+    if (inTitlescreen){
 		var stageData = this.stageData;
 		limo.x = stageData.camera_stage[0] + (FlxG.width / 2 / stageData.title_zoom);
 		

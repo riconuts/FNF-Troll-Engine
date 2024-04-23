@@ -255,24 +255,10 @@ class FunkinHScript extends FunkinScript
 		set("HScriptState", HScriptState);
 		set("HScriptSubstate", HScriptSubstate);
 
+		set("global", Globals.variables);
+
 		for (variable => arg in defaultVars)
 			set(variable, arg);
-
-		var state:Any = FlxG.state;
-		@:privateAccess
-		{
-			set("state", state);
-			set("game", state);
-
-			if (state != null)
-			{
-				if (state is PlayState && state == PlayState.instance) // the null check wasn't enough it seems
-					set("getInstance", getInstance);
-				else
-					set("getInstance", FlxG.get_state);
-			}
-			set("global", Globals.variables);
-		}
 
 		if (additionalVars != null)
 		{
@@ -300,6 +286,27 @@ class FunkinHScript extends FunkinScript
 		}
         return returnValue;
     }
+
+	/**
+		Helper function
+		Sets a bunch of basic variables for the script depending on the state
+	**/
+	override function setDefaultVars() {
+		super.setDefaultVars();
+
+		var currentState = flixel.FlxG.state;
+		
+		set("state", currentState);
+		set("game", currentState);
+		
+		// set("inTitlescreen", (currentState is TitleState)); // hmmm
+		if (currentState is PlayState){
+			set("getInstance", getInstance);
+		}else{
+			@:privateAccess
+			set("getInstance", FlxG.get_state);
+		}
+	}
 
 	function importClass(className:String)
 	{

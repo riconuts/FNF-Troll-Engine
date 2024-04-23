@@ -88,12 +88,10 @@ class Stage extends FlxTypedGroup<FlxBasic>
 			return;
 		}
 
-		if (additionalVars==null || additionalVars.get("titleScreen")==null){
-			if (additionalVars == null)
-				additionalVars = ["titleScreen" => false];
-            else
-                additionalVars.set("titleScreen", false);
-        }
+		if (additionalVars == null)
+			additionalVars = ["inTitlescreen" => false];
+		else if (!additionalVars.exists("inTitlescreen"))
+			additionalVars.set("inTitlescreen", false);        
 
 		var baseFile:String = 'stages/$curStage.hscript';
 	
