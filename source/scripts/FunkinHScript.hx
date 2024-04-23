@@ -388,8 +388,13 @@ class FunkinHScript extends FunkinScript
 
 	override public function call(func:String, ?parameters:Array<Dynamic>, ?extraVars:Map<String, Dynamic>):Dynamic
 	{
-		var returnValue:Dynamic = executeFunc(func, parameters, null, extraVars);
-
+        var returnValue:Dynamic = null;
+        
+        try{
+		    returnValue = executeFunc(func, parameters, null, extraVars); // I AM SICK OF THIS CASUING CRASHES
+        }catch(e:haxe.Exception){
+			trace('HScript error (${scriptName}): ${e.message}');
+        }
 		return returnValue == null ? Function_Continue : returnValue;
 	}
 
