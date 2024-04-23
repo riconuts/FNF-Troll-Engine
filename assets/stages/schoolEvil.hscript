@@ -1,6 +1,3 @@
-var noteGraphic = Paths.image(ClientPrefs.noteSkin=="Quants" ? "pixelUI/QUANTNOTE_assets" : "pixelUI/NOTE_assets");
-var usePixelNotes = noteGraphic!=null;
-
 function onCreate()
 {	
 	GameOverSubstate.deathSoundName = 'fnf_loss_sfx-pixel';
