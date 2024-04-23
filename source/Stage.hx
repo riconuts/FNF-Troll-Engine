@@ -88,6 +88,9 @@ class Stage extends FlxTypedGroup<FlxBasic>
 			return;
 		}
 
+		if (additionalVars.get("titleScreen")==null)
+            additionalVars.set("titleScreen", false);
+        
 		var baseFile:String = 'stages/$curStage.hscript';
 	
 		for (file in [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)])
