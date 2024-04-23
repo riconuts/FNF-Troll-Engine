@@ -239,7 +239,7 @@ class GameOverSubstate extends MusicBeatSubstate
 			}
 		}
 
-		if (FlxG.sound.music.playing)
+		if (FlxG.sound.music!=null && FlxG.sound.music.playing)
 			Conductor.songPosition = FlxG.sound.music.time;
 		
 		PlayState.instance.callOnScripts('onUpdatePost', [elapsed]);
