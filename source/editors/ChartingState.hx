@@ -1657,20 +1657,23 @@ class ChartingState extends MusicBeatState
 				_song.song = UI_songTitle.text;
 			}else if(curSelectedNote != null)
 			{
-				if(sender == value1InputText) {
-					curSelectedNote[1][curEventSelected][1] = value1InputText.text;
-					updateGrid();
-				}
-				else if(sender == value2InputText) {
-					curSelectedNote[1][curEventSelected][2] = value2InputText.text;
-					updateGrid();
-				}
-				else if(sender == strumTimeInputText) {
-					var value:Float = Std.parseFloat(strumTimeInputText.text);
-					if(Math.isNaN(value)) value = 0;
-					curSelectedNote[0] = value;
-					updateGrid();
-				}
+                if(curSelectedNote[1][curEventSelected] != null){
+				    if(sender == value1InputText) {
+                        curSelectedNote[1][curEventSelected][1] = value1InputText.text;
+                        updateGrid();
+                    }
+                    else if(sender == value2InputText) {
+                        curSelectedNote[1][curEventSelected][2] = value2InputText.text;
+                        updateGrid();
+                    }
+                }
+                if(sender == strumTimeInputText) {
+                    var value:Float = Std.parseFloat(strumTimeInputText.text);
+                    if(Math.isNaN(value)) value = 0;
+                    curSelectedNote[0] = value;
+                    updateGrid();
+                }
+                
 			}
 		}
 		else if (id == FlxUISlider.CHANGE_EVENT && (sender is FlxUISlider))
