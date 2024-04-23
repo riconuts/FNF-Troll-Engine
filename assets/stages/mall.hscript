@@ -5,18 +5,18 @@ var santa;
 function onLoad()
 {
 	var bg:BGSprite = new BGSprite('stages/mall/bgWalls', -1000, -500, 0.2, 0.2);
-	bg.setGraphicSize(Std.int(bg.width * 0.8));
+	bg.scale.set(0.8, 0.8);
 	bg.updateHitbox();
 	add(bg);
 
 	if(!ClientPrefs.lowQuality) {
 		upperBoppers = new BGSprite('stages/mall/upperBop', -240, -90, 0.33, 0.33, ['Upper Crowd Bob']);
-		upperBoppers.setGraphicSize(Std.int(upperBoppers.width * 0.85));
+		upperBoppers.scale.set(0.85, 0.85);
 		upperBoppers.updateHitbox();
 		add(upperBoppers);
 
 		var bgEscalator:BGSprite = new BGSprite('stages/mall/bgEscalator', -1100, -600, 0.3, 0.3);
-		bgEscalator.setGraphicSize(Std.int(bgEscalator.width * 0.9));
+		bgEscalator.scale.set(0.9, 0.9);
 		bgEscalator.updateHitbox();
 		add(bgEscalator);
 	}
@@ -26,7 +26,7 @@ function onLoad()
 
 	bottomBoppers = new BGSprite('stages/mall/bottomBop', -300, 140, 0.9, 0.9, ['Bottom Level Boppers Idle']);
 	bottomBoppers.animation.addByPrefix('hey', 'Bottom Level Boppers HEY', 24, false);
-	bottomBoppers.setGraphicSize(Std.int(bottomBoppers.width * 1));
+	bottomBoppers.scale.set(1.0, 1.0);
 	bottomBoppers.updateHitbox();
 	add(bottomBoppers);
 
