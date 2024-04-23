@@ -73,7 +73,7 @@ class FunkinHScript extends FunkinScript
 	////
 	var interpreter:Interp = new Interp();
 
-	public function new(parsed:Expr, ?name:String = "Script", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true)
+	public function new(?parsed:Expr, ?name:String = "Script", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true)
 	{
 		scriptType = 'hscript';
 		scriptName = name;
@@ -280,18 +280,26 @@ class FunkinHScript extends FunkinScript
 				set(key, value);
 		}
 
-		try
+		if (parsed != null)
+			run(parsed, doCreateCall);
+	}
+
+	public function run(parsed:Expr, doCreateCall:Bool=false){
+		var returnValue:Dynamic;
+        try
 		{
 			trace('Running haxe script: $scriptName');
-			interpreter.execute(parsed);
+			returnValue = interpreter.execute(parsed);
 			if (doCreateCall)
 				call('onCreate');
 		}
 		catch (e:haxe.Exception)
 		{
 			haxe.Log.trace(e.message, interpreter.posInfos());
+            stop();
 		}
-	}
+        return returnValue;
+    }
 
 	function importClass(className:String)
 	{
@@ -339,19 +347,9 @@ class FunkinHScript extends FunkinScript
 			set(splitted.pop(), daEnum);
 	}
 
-	public function executeCode(script:String):Dynamic
-	{
-		try
-		{
-			return interpreter.execute(parser.parseString(script, scriptName));
-		}
-		catch (e:haxe.Exception)
-		{
-			haxe.Log.trace(e.message, interpreter.posInfos());
-			stop();
-		}
-		return null;
-	}
+	public inline function executeCode(script:String):Dynamic
+		return run(parser.parseString(script, scriptName));
+	
 
 	override public function stop()
 	{
