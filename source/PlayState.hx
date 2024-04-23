@@ -3908,8 +3908,14 @@ class PlayState extends MusicBeatState
 		var eventKey:FlxKey = event.keyCode;
 		var data:Int = getKeyFromEvent(eventKey);
 
-		if (data > -1 && !pressed.contains(eventKey)){
-			pressed.push(eventKey);
+		if (pressed.contains(eventKey))
+            return;
+        pressed.push(eventKey);
+        
+        if (callOnScripts("onKeyDown", [event]) == Globals.Function_Stop)
+            return;
+
+		if (data > -1){
 			var hitNotes:Array<Note> = [];
             var controlledFields:Array<PlayField> = [];
 
@@ -3959,6 +3965,10 @@ class PlayState extends MusicBeatState
 		var eventKey:FlxKey = event.keyCode;
 		var key:Int = getKeyFromEvent(eventKey);
 		if(pressed.contains(eventKey))pressed.remove(eventKey);
+        
+        if (callOnScripts("onKeyUp", [event]) == Globals.Function_Stop)
+            return;
+
 		if(startedCountdown && key > -1)
 		{
 			// doesnt matter if THIS is done while paused

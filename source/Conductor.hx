@@ -135,7 +135,7 @@ class Conductor
 	public static function beatToSeconds(beat:Float): Float{
 		var step = beat * 4;
 		var lastChange = getBPMFromStep(step);
-		return lastChange.songTime + ((step - lastChange.stepTime) / (lastChange.bpm / 60)/4) * 1000; // TODO: make less shit and take BPM into account PROPERLY
+		return lastChange.songTime + ((step - lastChange.stepTime) / (lastChange.bpm / 60) * 0.25) * 1000; // TODO: make less shit and take BPM into account PROPERLY
 	}
 
 	public static function getStep(time:Float){
@@ -149,11 +149,11 @@ class Conductor
 	}
 
 	public static function getBeat(time:Float){
-		return getStep(time)/4;
+		return getStep(time) * 0.25;
 	}
 
 	public static function getBeatRounded(time:Float):Int{
-		return Math.floor(getStepRounded(time)/4);
+		return Math.floor(getStepRounded(time) * 0.25);
 	}
 
 	public static function mapBPMChanges(song:SwagSong)
