@@ -1,5 +1,6 @@
 package;
 
+import openfl.filters.BlurFilter;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.group.FlxGroup;
 import flixel.input.gamepad.FlxGamepad;
@@ -40,6 +41,7 @@ class TitleState extends MusicBeatState
 	static var blackScreen:FlxSprite;
 	static var textGroup:FlxGroup;
 	static var ngSpr:FlxSprite;
+	static var blurFilter:BlurFilter;
 
 	static var logoBl:TitleLogo;
 	static var titleText:FlxSprite;
@@ -118,6 +120,8 @@ class TitleState extends MusicBeatState
 		blackScreen.scale.set(FlxG.width, FlxG.height);
 		blackScreen.updateHitbox();
 
+		blurFilter = new BlurFilter(32, 32);
+
 		titleText.visible = false;
 		logoBl.visible = false;
 
@@ -140,6 +144,7 @@ class TitleState extends MusicBeatState
 		curWacky = null;
 		swagShader = null;
 
+		blurFilter = null;
 		blackScreen = null;
 		textGroup = null;
 		ngSpr = null;
@@ -178,7 +183,11 @@ class TitleState extends MusicBeatState
 
 		camHUD.bgColor = 0x00000000;
 		camGame.follow(camFollowPos);
+	
+		////
+		camGame.filters = [blurFilter];
 
+		////
 		if (bg != null){
 			camGame.zoom = bg.stageData.defaultZoom;
 			if (bg.stageData.title_zoom != null)
@@ -403,25 +412,27 @@ class TitleState extends MusicBeatState
 			switch (sickBeats #if tgt * 0.5 #end)
 			{
 				case 1:
-					MusicBeatState.stopMenuMusic();
+					// MusicBeatState.stopMenuMusic();
 					MusicBeatState.playMenuMusic(0, true);
+
+					FlxTween.tween(blackScreen, {alpha: 0.86}, Conductor.crochet * 0.005, {
+						ease: FlxEase.quadInOut,
+						songBased: true,
+					});
+
 				case 2:
 					MusicBeatState.playMenuMusic(1, true);
-					
-					#if	tgt	
-					FlxTween.tween(blackScreen, {alpha: 0.8}, Conductor.crochet * 2 * 0.002, {
-						ease: FlxEase.quadInOut
-					});
-                    createCoolText(['THE FNF TGT TEAM']);
-					#else	
-					FlxTween.tween(blackScreen, {alpha: 0.8}, Conductor.crochet * 2 * 0.001, {
-						ease: FlxEase.quadInOut
-					});
-                    createCoolText(['THE TROLL ENGINE TEAM']);
-					//createCoolText(['RICONUTS', 'NEBULA_ZORUA', 'AND MORE']);
+
+					#if tgt
+					createCoolText(['THE FNF TGT TEAM']);
+					#else
+					//createCoolText(['THE TROLL ENGINE TEAM']); // huge if true
+					createCoolText(['RICONUTS', 'NEBULA_ZORUA', 'AND MORE']);
 					#end
 				case 4: addMoreText('presents');
 				case 5: deleteCoolText();
+
+				////
 
 				case 6: createCoolText(['Without any', 'association to'], -40);
 				case 8:
@@ -432,10 +443,14 @@ class TitleState extends MusicBeatState
 				case 9:
 					deleteCoolText();
 					ngSpr.visible = false;
+
+				////
 				
 				case 10: createCoolText([curWacky[0]]);
 				case 12: addMoreText(curWacky[1]);
 				case 13: deleteCoolText();
+
+				////
 
 				#if tgt
 				case 14: addMoreText('Tails');
@@ -446,6 +461,9 @@ class TitleState extends MusicBeatState
 				case 15: addMoreText('Night');
 				case 16: addMoreText("Funkin");
 				#end
+
+				////
+
 				case 17:
 					skipIntro();
 			}
@@ -481,6 +499,8 @@ class TitleState extends MusicBeatState
 	{
 		if (!skippedIntro)
 		{
+			camGame.filters.remove(blurFilter);
+
             titleText.visible = true;
 			logoBl.visible = true;
 			remove(ngSpr);
