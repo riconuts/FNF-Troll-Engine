@@ -109,7 +109,7 @@ class MasterEditorMenu extends MusicBeatState
 		{
 			switch(options[curSelected]) {
 				case 'Character Editor':
-					LoadingState.loadAndSwitchState(new CharacterEditorState(Character.DEFAULT_CHARACTER, false));
+					MusicBeatState.switchState(FlxG.keys.pressed.SHIFT ? new SowyCharacterEditor() : new CharacterEditorState(Character.DEFAULT_CHARACTER, false));
 				/*case 'Week Editor':
 					MusicBeatState.switchState(new WeekEditorState());*/
 				case 'Stage Editor':
