@@ -1425,6 +1425,7 @@ class PlayState extends MusicBeatState
 	private var countdownTwn:FlxTween;
 	
 	public static var startOnTime:Float = 0;
+    public var startedOnTime:Float = 0;
 
 	public function startCountdown():Void
 	{
@@ -1719,6 +1720,7 @@ class PlayState extends MusicBeatState
 
 		if (startOnTime != 0){
 			startOnTime = startOnTime > 500 ? startOnTime - 500 : 0;
+            startedOnTime = startOnTime;
 			PlayState.startOnTime = 0;
 			clearNotesBefore(startOnTime + 500);
 		}
@@ -3911,7 +3913,7 @@ class PlayState extends MusicBeatState
 		if (pressed.contains(eventKey))
             return;
         pressed.push(eventKey);
-        
+
         if (callOnScripts("onKeyDown", [event]) == Globals.Function_Stop)
             return;
 
