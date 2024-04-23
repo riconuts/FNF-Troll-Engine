@@ -285,7 +285,7 @@ class FunkinHScript extends FunkinScript
 	}
 
 	public function run(parsed:Expr, doCreateCall:Bool=false){
-		var returnValue:Dynamic;
+		var returnValue:Dynamic = null;
         try
 		{
 			trace('Running haxe script: $scriptName');
