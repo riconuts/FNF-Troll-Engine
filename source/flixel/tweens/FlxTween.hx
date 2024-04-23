@@ -873,7 +873,7 @@ class FlxTween implements IFlxDestroyable
     {
 		if (songBased)
 		{
-			_secondsSinceStart = (Conductor.songPosition * 0.001) - (songPos * 0.001);
+			_secondsSinceStart = (Conductor.songPosition * 0.001) - (value * 0.001);
 			if (_secondsSinceStart < 0)
 				_secondsSinceStart = 0;
 
