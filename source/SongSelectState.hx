@@ -53,7 +53,6 @@ class SongSelectState extends MusicBeatState
 		DiscordClient.changePresence("In the Menus", null);
 		#end
 		FlxG.camera.bgColor = 0xFF000000;
-
 		////
 		
 		/*

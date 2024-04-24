@@ -2642,8 +2642,9 @@ class PlayState extends MusicBeatState
 
 	override public function update(elapsed:Float)
 	{
-		for(field in playfields)
-			field.noteField.songSpeed = songSpeed;
+		for(idx in 0...playfields.members.length)
+			playfields.members[idx].noteField.songSpeed = songSpeed;
+        
 		
 		setOnScripts('curDecStep', curDecStep);
 		setOnScripts('curDecBeat', curDecBeat);
@@ -4573,8 +4574,9 @@ class PlayState extends MusicBeatState
 		if (exclusions == null) exclusions = [];
 		
 		var returnVal:Dynamic = Globals.Function_Continue;
-		for (script in scriptArray)
-		{			
+		for (idx in 0...scriptArray.length)
+		{
+			var script = scriptArray[idx];
 			if (exclusions.contains(script.scriptName)
 				|| ignoreSpecialShit
 				&& (notetypeScripts.exists(script.scriptName) || eventScripts.exists(script.scriptName) || hudSkinScripts.exists(script.scriptName) ) )
@@ -4604,9 +4606,9 @@ class PlayState extends MusicBeatState
 		if (scriptArray == null)
 			scriptArray = funkyScripts;
 
-		for (script in scriptArray){
+		for (idx in 0...scriptArray.length){
+            var script = scriptArray[idx];
 			script.set(variable, value);
-			// trace('set $variable, $value, on ${script.scriptName}');
 		}
 	}
 
@@ -4622,7 +4624,9 @@ class PlayState extends MusicBeatState
 		else if((script is String)){
 			var scripts:Array<FunkinScript> = [];
 
-			for(scr in funkyScripts){
+			for (idx in 0...funkyScripts.length)
+			{
+                var scr = funkyScripts[idx];
 				if(scr.scriptName == script)
 					scripts.push(scr);
 			}
