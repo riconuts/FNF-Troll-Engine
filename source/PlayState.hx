@@ -4577,6 +4577,8 @@ class PlayState extends MusicBeatState
 		for (idx in 0...scriptArray.length)
 		{
 			var script = scriptArray[idx];
+            if(script==null)continue;
+            
 			if (exclusions.contains(script.scriptName)
 				|| ignoreSpecialShit
 				&& (notetypeScripts.exists(script.scriptName) || eventScripts.exists(script.scriptName) || hudSkinScripts.exists(script.scriptName) ) )
