@@ -3,6 +3,17 @@ import flixel.tweens.*;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.input.keyboard.FlxKey;
 
+#if sys
+import Sys.time as getTime;
+#else
+import haxe.Timer.stamp as getTime;
+#end
+
+#if MULTICORE_LOADING
+import sys.thread.Thread;
+import sys.thread.Mutex;
+#end
+
 #if DO_AUTO_UPDATE
 import Github.Release;
 import sys.FileSystem;
@@ -233,6 +244,7 @@ class StartupState extends FlxTransitionableState
 
 	override function create()
 	{
+		#if tgt
 		this.transIn = FadeTransitionSubstate;
 		//this.transOut = FadeTransitionSubstate;
 		FlxTransitionableState.skipNextTransOut = true;
@@ -242,31 +254,72 @@ class StartupState extends FlxTransitionableState
 		warning.updateHitbox();
 		warning.screenCenter();
 		add(warning);
+		
+		#else
+		this.transIn = null;
+		this.transOut = null;
+		// TODO: Default Flixel Startup Animation :]
+		#end
 
 		super.create();
 	}
 
+	#if tgt
 	private var warning:FlxSprite;
-	private var step:Int = 10;
+	#end
+
+	private var step:Int = 0;
+	private var loadingTime:Float = getTime();
+
+	#if MULTICORE_LOADING
+	private var loadingMutex:Null<Mutex> = null;
+	#end
+
+	inline private function doLoading()
+	{
+		load();
+		final stateLoad:Dynamic = Reflect.getProperty(nextState, "load");
+		if (stateLoad != null) Reflect.callMethod(null, stateLoad, []);
+
+		loadingTime = getTime() - loadingTime;
+	}
 
 	var fadeTwn:FlxTween = null;
-	override function update(elapsed)
+	override function update(elapsed:Float)
 	{
 		switch (step){
-			case 10:
-				final startTime = Sys.cpuTime();
+			case 0:
+				#if !MULTICORE_LOADING
+				loadingDuration = doLoading();
+				step = 10;
 
-				load();
-				final stateLoad:Dynamic = Reflect.getProperty(nextState, "load");
-				if (stateLoad != null)
-					Reflect.callMethod(null, stateLoad, []);
+				#else
+				if (loadingMutex == null){
+					loadingMutex = new Mutex();
+					Thread.create(() -> {
+						loadingMutex.acquire();
+						doLoading();
+						loadingMutex.release();
+					});
+				}
+				else if (loadingMutex.tryAcquire()){
+					loadingMutex = null;
+					step = 10;
+				}
+				//else warning.angle += elapsed * 25;
+				#end
+				
+			case 10:
+				trace('loading lasted $loadingTime');
+
+				#if !tgt
+				step = 50;
+				#else
 
 				#if debug
 				final waitTime:Float = 0.0;
-				#elseif sys
-				final waitTime:Float = (nextState == PlayState || nextState == editors.ChartingState) ? 0.0 : Math.max(0.0, 1.6 - (startTime - Sys.cpuTime()));
 				#else
-				final waitTime:Float = 0.0;
+				final waitTime:Float = (nextState == PlayState || nextState == editors.ChartingState) ? 0.0 : Math.max(0.0, 1.6 - loadingTime);
 				#end
 
 				step = 30;
@@ -287,6 +340,7 @@ class StartupState extends FlxTransitionableState
 				if (FlxG.keys.justPressed.ANY || FlxG.mouse.justPressed){
 					fadeTwn.percent = (1.0 + fadeTwn.percent) * 0.5;
 				}
+				#end
 
 			case 50:
 				#if DO_AUTO_UPDATE
