@@ -83,7 +83,7 @@ function resetFastCar():Void
 {
 	fastCar.setPosition(
 		-12600,
-		titleScreen ? 420 : FlxG.random.int(140, 250)
+		inTitlescreen ? 420 : FlxG.random.int(140, 250)
 	);
 	fastCar.velocity.x = 0;
 	fastCarCanDrive = true;
@@ -91,7 +91,7 @@ function resetFastCar():Void
 
 function fastCarDrive()
 {
-    if(titleScreen)
+    if(inTitlescreen)
         FlxG.sound.play(Paths.soundRandom('carPass', 0, 1), 0.35);
     else
         FlxG.sound.play(Paths.soundRandom('carPass', 0, 1), 0.7);
