@@ -236,7 +236,7 @@ class PlayState extends MusicBeatState
 	public var showComboNum:Bool = true;
 	
 	public var ratingGroup = new FlxTypedGroup<RatingSprite>();
-	public var ratingOrigin = [FlxG.width / 2, FlxG.height / 2];
+	public var ratingOrigin = [640, 360];
 	public var timingTxt:FlxText;
 
 	////
@@ -3643,8 +3643,13 @@ class PlayState extends MusicBeatState
 
 		rating.offset.set(rating.width/2, rating.height/2);
 
-		rating.x = ratingOrigin[0] + ClientPrefs.comboOffset[0];
-		rating.y = ratingOrigin[1] - ClientPrefs.comboOffset[1];
+		if (ClientPrefs.worldCombos && !ClientPrefs.simpleJudge){
+			rating.x = ratingOrigin[0] + ClientPrefs.comboOffset[0];
+			rating.y = ratingOrigin[1] - ClientPrefs.comboOffset[1];
+		}else{
+			rating.x = FlxG.width * 0.5 + ClientPrefs.comboOffset[0];
+			rating.y = FlxG.height * 0.5 - ClientPrefs.comboOffset[1];
+		}
 
 		ratingGroup.remove(rating, true);
 		ratingGroup.add(rating);
@@ -3689,7 +3694,17 @@ class PlayState extends MusicBeatState
 			comboColor = hud.judgeColours.get("miss");
 		}
 
-		var numStartX:Float = ratingOrigin[0] + ClientPrefs.comboOffset[2] - separatedScore.length * 41 / 2;
+		var worldOffsetX:Float;
+		var worldOffsetY:Float;
+		if (ClientPrefs.worldCombos && !ClientPrefs.simpleJudge){
+			worldOffsetX = ratingOrigin[0];
+			worldOffsetY = ratingOrigin[1];
+		}else{
+			worldOffsetX = FlxG.width * 0.5;
+			worldOffsetY = FlxG.height * 0.5;
+		}
+
+		var numStartX:Float = worldOffsetX + ClientPrefs.comboOffset[2] - separatedScore.length * 41 / 2;
 		for (daLoop => i in separatedScore)
 		{
 			var numScore:RatingSprite = ratingGroup.recycle(RatingSprite);
@@ -3707,7 +3722,7 @@ class PlayState extends MusicBeatState
 			numScore.offset.set(0, numScore.height / 2);
 
 			numScore.x = numStartX + 41.5 * daLoop;
-			numScore.y = ratingOrigin[1] - ClientPrefs.comboOffset[3];
+			numScore.y = worldOffsetY - ClientPrefs.comboOffset[3];
 
 			numScore.color = comboColor;
 			numScore.visible = showComboNum;
