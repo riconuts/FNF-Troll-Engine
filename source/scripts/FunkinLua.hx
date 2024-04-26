@@ -40,7 +40,7 @@ using StringTools;
 
 class FunkinLua extends FunkinScript
 {
-	static var haxeScript:FunkinHScript;
+	public static var haxeScript:FunkinHScript;
 	public var errorHandler:String->Void;
 	#if LUA_ALLOWED
 	public var lua:State = null;
@@ -65,9 +65,6 @@ class FunkinLua extends FunkinScript
 		
 		scriptType = 'lua';
 		scriptName = name!=null ? name : script;
-
-		if (haxeScript == null)
-			haxeScript = FunkinHScript.fromString('', 'runHaxeCode', null, false);
 
 		#if (haxe >= "4.0.0")
 		accessedProps = new Map();
@@ -502,6 +499,11 @@ class FunkinLua extends FunkinScript
 		});
 
 		addCallback("runHaxeCode", function(code:String){
+			if (haxeScript == null){
+				trace('null');
+				return;
+			}
+
 			// getinfo randomly broke here idk why
 			// so just trace from line 1
 			FunkinHScript.parser.line = 1;
