@@ -149,6 +149,8 @@ class MainMenuState extends MusicBeatState
 		if (curMusicVolume < 0.8){
 			FlxG.sound.music.fadeIn((0.8 - curMusicVolume) * 2.0, curMusicVolume, 0.8);
 		}
+
+		Paths.clearUnusedMemory();
 	}
 
 	#if ACHIEVEMENTS_ALLOWED

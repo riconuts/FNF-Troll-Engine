@@ -303,7 +303,10 @@ class StartupState extends FlxTransitionableState
 					});
 				}
 				else if (loadingMutex.tryAcquire()){
+					// is this necessary or at least favorable
+					loadingMutex.release();
 					loadingMutex = null;
+
 					step = 10;
 				}
 				//else warning.angle += elapsed * 25;
