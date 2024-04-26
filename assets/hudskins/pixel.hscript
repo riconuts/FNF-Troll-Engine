@@ -6,8 +6,8 @@ var ratingGroup;
 
 //var pixelJudges:Array<String> = ['miss', 'epic', 'sick','good','bad','shit'];
 
-var lastCombos;
-var lastJudge;
+var lastCombos = game.lastCombos;
+var lastJudge = null;
 
 rosesHealthBar = true;
 
@@ -19,9 +19,7 @@ var timerCirc;
 var timerNums = [];
 var timerSpecial;
 
-function roundTo(num, roundFactor){
-	return Math.round(num / roundFactor) * roundFactor;
-}
+var roundTo = CoolUtil.snap;
 
 function onCreatePost()
 {
@@ -76,41 +74,6 @@ function onCreatePost()
 	}
 }
 
-function onCountdownTick(tick)
-{
-	//trace("tick" + tick);
-	if (tick==3){
-		FlxTween.tween(timerCirc, {alpha: 1}, Conductor.crochet / 1000);
-	}
-	else if (tick == 4)
-	{
-		updateTimerTxt();
-
-		timerSpecial.alpha = 0.0;
-		FlxTween.tween(timerSpecial, {alpha: 1}, Conductor.crochet / 1000);
-		
-		for (spr in timerNums){
-			spr.alpha = 0.0;
-			FlxTween.tween(spr, {alpha: 1}, Conductor.crochet / 1000);
-		}
-	}
-}
-function onSongStart()
-{
-	timerCirc.alpha = 1.0;
-	timerSpecial.alpha = 1.0;
-}
-
-function optionsChanged(changed:Array)
-{
-	if (rosesHealthBar && changed.contains("downScroll")){
-		adjustHealthBar();
-		bg.setPosition(hb.x - 5, hb.y - 5); // game is probably paused so it wont update
-	}
-	
-	adjustClock();
-}
-
 function adjustHealthBar()
 {
 	bg.offset.set(
@@ -153,7 +116,43 @@ function adjustClock()
 		timerSpecial.exists = false;
 	}
 		
-	hud.botplayTxt.y = timerCirc.y - hud.botplayTxt.height / 2;
+	if (hud.botplayTxt != null)
+		hud.botplayTxt.y = timerCirc.y - hud.botplayTxt.height / 2;
+}
+
+function optionsChanged(changed:Array)
+{
+	if (rosesHealthBar && changed.contains("downScroll")){
+		adjustHealthBar();
+		bg.setPosition(hb.x - 5, hb.y - 5); // game is probably paused so it wont update
+	}
+	
+	adjustClock();
+}
+
+function onCountdownTick(tick)
+{
+	//trace("tick" + tick);
+	if (tick==3){
+		FlxTween.tween(timerCirc, {alpha: 1}, Conductor.crochet / 1000);
+	}
+	else if (tick == 4)
+	{
+		updateTimerTxt();
+
+		timerSpecial.alpha = 0.0;
+		FlxTween.tween(timerSpecial, {alpha: 1}, Conductor.crochet / 1000);
+		
+		for (spr in timerNums){
+			spr.alpha = 0.0;
+			FlxTween.tween(spr, {alpha: 1}, Conductor.crochet / 1000);
+		}
+	}
+}
+function onSongStart()
+{
+	timerCirc.alpha = 1.0;
+	timerSpecial.alpha = 1.0;
 }
 
 function formatTime(time:Float)
@@ -169,8 +168,7 @@ function formatTime(time:Float)
 var curClockTxt = null;
 function updateTimerTxt()
 {
-	var curTime:Float = Conductor.songPosition - ClientPrefs.noteOffset;
-	if (curTime < 0) curTime = 0;
+	var curTime:Float = Math.max(0, Conductor.songPosition - ClientPrefs.noteOffset);
 	
 	timerSpecial.exists = false;
 	
@@ -235,19 +233,6 @@ function setTimerTxt(text:String)
 	}
 }
 
-function anim(spr, startX, targetX, startY, targetY, prog){
-	if (prog < 0.5)
-		spr.alpha = FlxEase.backOut(prog*2);
-	else if (prog > 0.8)
-		spr.alpha = 1 - (prog - 0.8) / 0.2;
-
-	var num = FlxEase.backOut(prog > 0.5 ? 1 : prog*2);
-	spr.offset.set(
-		roundTo( FlxMath.lerp(startX, targetX, FlxEase.circIn(prog)), 6 ),
-		FlxMath.lerp(startY, targetY, num)
-	);
-}
-
 var timerNumsGraphic = Paths.image("pixelUI/timer-nums");
 function makeTimerSpr(?name)
 {
@@ -270,25 +255,39 @@ function makeTimerSpr(?name)
 	return spr;
 }
 
-function prepareRatingSpr(name, ?spr){
-	var spr = spr!=null ? spr : ratingGroup.recycle(RatingSprite, null, false);
+function prepareRatingSpr()
+{
+	var spr = new RatingSprite();
+	spr.moves = false;
+	return spr;
+}
+function getRatingSpr(name, ?spr){
+	var spr = spr!=null ? spr : ratingGroup.recycle(RatingSprite, prepareRatingSpr, false, true);
 	
-	spr.loadGraphic(Paths.image("pixelUI/"+name+"-pixel"));
-	spr.scale.set(6,6);
-	spr.updateHitbox();
 	spr.antialiasing = false;
-	
-	//spr.alpha = 1;
-	spr.velocity.set();
-	spr.acceleration.set();
-	spr.scrollFactor.set(1, 1);
+	spr.loadGraphic(Paths.image("pixelUI/"+name+"-pixel"));
+	spr.scale.set(6.0, 6.0);
+	spr.updateHitbox();
 
 	return spr;
 }
 
+function anim(spr, startX, targetX, startY, targetY, prog){
+	if (prog < 0.5)
+		spr.alpha = FlxEase.backOut(prog *2);
+	else if (prog > 0.8)
+		spr.alpha = 5 - 5 * prog;
+
+	var num = FlxEase.backOut(prog > 0.5 ? 1 : prog*2);
+	spr.offset.set(
+		roundTo( FlxMath.lerp(startX, targetX, FlxEase.circIn(prog)), 6 ),
+		FlxMath.lerp(startY, targetY, num)
+	);
+}
+
 function onDisplayCombo(combo)
 {
-	if (combo > 0 && combo < 10 && combo != 0)
+	if (combo == 0 || (!ClientPrefs.simpleJudge && combo > 0 && combo < 10))
 		return Function_Stop;
 
 	var comboColor = game.comboColor;
@@ -306,8 +305,13 @@ function onDisplayCombo(combo)
 	var posX = roundTo(game.ratingOrigin[0] + ClientPrefs.comboOffset[2], 6);
 	var posY = roundTo(game.ratingOrigin[1] - ClientPrefs.comboOffset[3], 6);
 	
+	if (ClientPrefs.simpleJudge){
+		while (lastCombos.length > 0)
+			lastCombos.pop().kill();
+	}
+	
 	for (char in splitCombo){	
-		var spr = prepareRatingSpr("num"+char);
+		var spr = getRatingSpr("num"+char);
 		spr.color = comboColor;
 
 		spr.setPosition(posX, posY);
@@ -330,8 +334,7 @@ function onDisplayCombo(combo)
 			);
 		}
 		
-		
-		
+		lastCombos.push(spr);
 		ratingGroup.remove(spr, true);
 		ratingGroup.add(spr);
 		
@@ -340,127 +343,49 @@ function onDisplayCombo(combo)
 
 	return Function_Stop;
 }
-
-/* function onDisplayCombo(combo:Int){
-	var hud = state.hud;
-
-	if (ClientPrefs.simpleJudge)
-	{
-		for (prevCombo in state.lastCombos)
-			prevCombo.kill();
-		
-		if (combo == 0)
-			return Function_Stop; 
+game.playbackRate = 1;
+game.skipCountdown = true;
+function onDisplayJudgment(name)
+{
+	if (ClientPrefs.simpleJudge && lastJudge != null){
+		lastJudge.kill();
 	}
-	else if (combo > 0 && combo < 10 && combo != 0)
-		return Function_Stop;
-
-	var separatedScore:Array<String> = Std.string(Math.abs(combo)).split("");
-	while (separatedScore.length < 3)
-		separatedScore.unshift("0");
-	if(combo < 0)
-		separatedScore.unshift("neg");
-
-	var daLoop:Int = 0;
-
-	var col = combo < 0 ? hud.judgeColours.get("miss") : state.comboColor;
-
-	var numStartX:Float = (FlxG.width - separatedScore.length * 41) * 0.5 + ClientPrefs.comboOffset[2];
-	for (i in separatedScore)
-	{
-		var numScore:RatingSprite = ratingGroup.recycle(RatingSprite);
-		numScore.loadGraphic(Paths.image('pixelUI/num' + i + "-pixel"));
-		numScore.antialiasing = false;
-		numScore.scale.set(5, 5);
-		numScore.updateHitbox();
-		
-		
-		numScore.screenCenter();
-		numScore.x = numStartX + 41.5 * daLoop;
-		numScore.y -= ClientPrefs.comboOffset[3];
-		if(ClientPrefs.simpleJudge)
-			numScore.y -= 20;
-
-		numScore.color = col;
-		numScore.visible = state.showComboNum;
-
-		numScore.ID = daLoop;
-		numScore.moves = !ClientPrefs.simpleJudge;
-		if (numScore.tween != null){
-			numScore.tween.cancel();
-			numScore.tween.destroy();
-		}
-
-		ratingGroup.remove(numScore, true);
-		ratingGroup.add(numScore);
-
-		numScore.alpha = ClientPrefs.judgeOpacity;
-		if (ClientPrefs.simpleJudge)
-		{
-			numScore.tween = FlxTween.tween(numScore, {y: numScore.y + 20}, 0.2, {ease: FlxEase.circOut});
-			state.lastCombos.push(numScore);
-		}
-		else
-		{
-			numScore.acceleration.y = FlxG.random.int(200, 300);
-			numScore.velocity.set(FlxG.random.float(-10, 10), -FlxG.random.int(140, 160));
-
-			numScore.tween = FlxTween.tween(numScore, {alpha: 0}, 0.2, {
-				onComplete: function(wtf)
-				{
-					numScore.kill();
-				},
-				startDelay: Conductor.crochet * 0.002
-			});
-		}
-
-		daLoop++;
-	}
-	return Function_Stop;
-}
- */
- 
- 
-function onDisplayJudgment(name){
-	var spr = prepareRatingSpr(name);
+	
+	var spr = getRatingSpr(name);
 	spr.color = 0xFFFFFFFF;
 	
 	spr.setPosition(
 		roundTo(game.ratingOrigin[0] + ClientPrefs.comboOffset[0], 6), 
 		roundTo(game.ratingOrigin[1] - ClientPrefs.comboOffset[1], 6)
 	);
-	/*
-	spr.updateHitbox();
-	spr.offset.set(
-		spr.offset.x + spr.width / 2, 
-		spr.offset.y + spr.height / 2
-	);
-	*/
 	spr.offset.set(
 		spr.width / 2, 
 		spr.height / 2
 	);
 	
+	//trace(spr, spr.alpha, spr.scale);
+	
 	if (ClientPrefs.simpleJudge){
 		var startScale = spr.scale.x;
 		var time = (Conductor.stepCrochet * 0.001);
 		
-		spr.tween = FlxTween.num(
-			1, 0, 0.1, 
-			{ease: FlxEase.quadOut},
-			(val)->{spr.scale.set(startScale + val, startScale + val);}
-			
-		).then(
-			FlxTween.num(
+		var playNextTwn = ()->{
+			spr.tween = FlxTween.num(
 				startScale, 0, time, 
 				{
 					startDelay: time * 8,
-					onStart: (twn)->{spr.tween = twn;},
 					ease: FlxEase.quadIn,
 					onComplete: spr.kill
 				},
 				(val)->{spr.scale.set(val, val);}
-			)
+			);
+		}
+		
+		spr.tween = FlxTween.num(
+			1.0, 0.0, 0.1, 
+			{ease: FlxEase.quadOut, onComplete: playNextTwn},
+			(val)->{spr.scale.set(startScale + val, startScale + val);}
+			
 		);
 		
 	}else{
@@ -468,62 +393,21 @@ function onDisplayJudgment(name){
 		var targetX =	spr.offset.x + 6*9;
 		var startY	=	spr.offset.y - spr.height;
 		var targetY =	spr.offset.y;
+		
+		anim(spr, startX, targetX, startY, targetY, 0.0);
 		spr.tween = FlxTween.num(
-			0, 1, 1.2, 
+			0.0, 1.0, 1.2, 
 			{onComplete: spr.kill}, 
 			(prog)->{anim(spr, startX, targetX, startY, targetY, prog);}
 		);
 	}
 	
+	lastJudge = spr;
 	ratingGroup.remove(spr, true);
 	ratingGroup.add(spr);
 
 	return Function_Stop;
 }
-
-//script.stop();
-
- /* 
-function onDisplayJudgmentPost(rating, image){
-	if(!pixelJudges.contains(image))return;
-	rating.loadGraphic(Paths.image("pixelUI/" + image + "-pixel"));
-	rating.antialiasing = false;
-	if(ClientPrefs.simpleJudge){
-		rating.x += 5;
-		rating.y -= 5;
-		var time = (Conductor.stepCrochet * 0.001);
-		rating.scale.set(5 * 1.1, 5 * 1.1);
-		rating.updateHitbox();
-
-		if (rating.tween != null)
-		{
-			rating.tween.cancel();
-			rating.tween.destroy();
-		}
-
-		rating.tween = FlxTween.tween(rating.scale, {x: 5, y: 5}, 0.1, {
-			ease: FlxEase.quadOut,
-			onComplete: function(tween:FlxTween)
-			{
-				if (!rating.alive)
-					return;
-
-				rating.tween = FlxTween.tween(rating.scale, {x: 0, y: 0}, time, {
-					startDelay: time * 8,
-					ease: FlxEase.quadIn,
-					onComplete: function(tween:FlxTween)
-					{
-						rating.kill();
-					}
-				});
-			}
-		});
-	}else{
-		rating.scale.set(5, 5);
-		rating.updateHitbox();
-	}
-	
-} */
 
 function makeCountdownSprite(sprImage, swagCounter, tmr){
 	var countdownSpr = new FlxSprite(0, 0, sprImage);

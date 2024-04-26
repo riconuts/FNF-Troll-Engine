@@ -342,12 +342,12 @@ class PlayState extends MusicBeatState
 	private static var prevCamFollowPos:Null<FlxObject> = null;
 
 	public var camZooming:Bool = false;
-	public var camZoomingMult:Float = 1;
-	public var camZoomingDecay:Float = 1;
+	public var camZoomingMult:Float = 1.0;
+	public var camZoomingDecay:Float = 1.0;
 
-	public var cameraSpeed:Float = 1;
-	public var defaultCamZoom:Float = 1;
-	public var defaultHudZoom:Float = 1;
+	public var cameraSpeed:Float = 1.0;
+	public var defaultCamZoom:Float = 1.0;
+	public var defaultHudZoom:Float = 1.0;
 
 	public var sectionCamera = new FlxPoint(); // Default camera focus point
 	public var customCamera = new FlxPoint(); // Used for the 'Camera Follow Pos' event
@@ -4984,7 +4984,7 @@ class RatingSprite extends FlxSprite
 
 	override public function kill(){
 		if (tween != null){
-			tween.cancel();
+			tween.cancelChain();
 			tween.destroy();
 		}
 		return super.kill();
