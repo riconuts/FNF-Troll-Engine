@@ -48,7 +48,7 @@ class HealthIcon extends FlxSprite
 			var oldIcon = Paths.image('icons/$char-old');
 			
 			if(oldIcon == null)
-				oldIcon = Paths.image('icons/char-$char-old'); // psych compat
+				oldIcon = Paths.image('icons/icon-$char-old'); // base game compat
 
 			if (oldIcon != null){
 				changeIconGraphic(oldIcon);
@@ -63,18 +63,28 @@ class HealthIcon extends FlxSprite
 
 	private var iconOffsets:Array<Float> = [0, 0];
 	public function changeIcon(char:String) {
-		var file:Null<FlxGraphic> = Paths.image('icons/$char');
+/* 		var file:Null<FlxGraphic> = Paths.image('characters/icons/$char'); // i'd like to use this some day lol
+
+		if (file == null)
+			file = Paths.image('icons/$char'); // new psych compat */
+
+		var file:Null<FlxGraphic> = Paths.image('icons/$char'); 
 
 		if(file == null)
-			file = Paths.image('icons/icon-$char'); // psych compat
+			file = Paths.image('icons/icon-$char'); // base game compat
 		
 		if(file == null) 
 			file = Paths.image('icons/face'); // Prevents crash from missing icon
 
+		//// TODO: sparrow atlas icons? would make the implementation of extra behaviour (ex: winning icons) way easier
+
 		changeIconGraphic(file);
 		this.char = char;
 
-		antialiasing = char.endsWith("-pixel") ? false : null;
+		if (char.endsWith("-pixel")){
+			antialiasing = false;
+			useDefaultAntialiasing = false;
+		}
 	}
 
 	override function updateHitbox()

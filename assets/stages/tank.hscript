@@ -15,18 +15,18 @@ function onLoad()
 		add(clouds);
 
 		var mountains:BGSprite = new BGSprite('stages/tank/tankMountains', -300, -20, 0.2, 0.2);
-		mountains.setGraphicSize(Std.int(1.2 * mountains.width));
+		mountains.scale.set(1.2, 1.2);
 		mountains.updateHitbox();
 		add(mountains);
 
 		var buildings:BGSprite = new BGSprite('stages/tank/tankBuildings', -200, 0, 0.3, 0.3);
-		buildings.setGraphicSize(Std.int(1.1 * buildings.width));
+		buildings.scale.set(1.1, 1.1);
 		buildings.updateHitbox();
 		add(buildings);
 	}
 
 	var ruins:BGSprite = new BGSprite('stages/tank/tankRuins',-200,0,.35,.35);
-	ruins.setGraphicSize(Std.int(1.1 * ruins.width));
+	ruins.scale.set(1.1, 1.1);
 	ruins.updateHitbox();
 	add(ruins);
 
@@ -51,7 +51,7 @@ function onLoad()
 	this.spriteMap.set("tankmanRun", tankmanRun);
 
 	var ground:BGSprite = new BGSprite('stages/tank/tankGround', -420, -150);
-	ground.setGraphicSize(Std.int(1.15 * ground.width));
+	ground.scale.set(1.15, 1.15);
 	ground.updateHitbox();
 	add(ground);
 	update(0);

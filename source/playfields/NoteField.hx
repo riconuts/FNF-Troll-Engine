@@ -141,7 +141,7 @@ class NoteField extends FieldBase
 				}
 				if (!daNote.isSustainNote)
 				{
-					var pos = modManager.getPos(visPos, diff, curDecBeat, daNote.noteData, modNumber, daNote, this, ['perspectiveDONTUSE'],
+					var pos = modManager.getPos(visPos, diff, curDecBeat, daNote.column, modNumber, daNote, this, ['perspectiveDONTUSE'],
 						daNote.vec3Cache); // perspectiveDONTUSE is excluded because its code is done in the modifyVert function
 					notePos.set(daNote, pos);
 					taps.push(daNote);
@@ -160,8 +160,8 @@ class NoteField extends FieldBase
 		{
 			if (!obj.alive || !obj.visible)
 				continue;
-			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, this, ['perspectiveDONTUSE'], obj.vec3Cache);
-			strumPositions[obj.noteData] = pos;
+			var pos = modManager.getPos(0, 0, curDecBeat, obj.column, modNumber, obj, this, ['perspectiveDONTUSE'], obj.vec3Cache);
+			strumPositions[obj.column] = pos;
 			var object = drawNote(obj, pos);
 			if (object == null)
 				continue;
@@ -202,7 +202,7 @@ class NoteField extends FieldBase
 		{
 			if (!obj.alive || !obj.visible)
 				continue;
-			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, this, ['perspectiveDONTUSE']);
+			var pos = modManager.getPos(0, 0, curDecBeat, obj.column, modNumber, obj, this, ['perspectiveDONTUSE']);
 			var object = drawNote(obj, pos);
 			if (object == null)
 				continue;
@@ -218,7 +218,7 @@ class NoteField extends FieldBase
 				continue;
 			if (!obj.alive || !obj.visible)
 				continue;
-			var pos = modManager.getPos(0, 0, curDecBeat, obj.noteData, modNumber, obj, this, ['perspectiveDONTUSE']);
+			var pos = modManager.getPos(0, 0, curDecBeat, obj.column, modNumber, obj, this, ['perspectiveDONTUSE']);
 			var object = drawNote(obj, pos);
 			if (object == null)
 				continue;
@@ -343,7 +343,7 @@ class NoteField extends FieldBase
 		if (wid == null)
 			wid = hold.frameWidth * hold.scale.x;
 
-		var p1 = modManager.getPos(-(vDiff) * speed, diff, curDecBeat, hold.noteData, modNumber, hold, this, []);
+		var p1 = modManager.getPos(-(vDiff) * speed, diff, curDecBeat, hold.column, modNumber, hold, this, []);
 		var z:Float = p1.z;
 		p1.z = 0;
 		var quad = [new Vector3((-wid / 2)), new Vector3((wid / 2))];
@@ -359,7 +359,7 @@ class NoteField extends FieldBase
 			return [p1.add(quad[0]), p1.add(quad[1]), p1];
 		}
 
-		var p2 = modManager.getPos(-(vDiff + 1) * speed, diff + 1, curDecBeat, hold.noteData, modNumber, hold, this, []);
+		var p2 = modManager.getPos(-(vDiff + 1) * speed, diff + 1, curDecBeat, hold.column, modNumber, hold, this, []);
 		p2.z = 0;
 		var unit = p2.subtract(p1);
 		unit.normalize();
@@ -409,7 +409,7 @@ class NoteField extends FieldBase
 				return tWid;
 		})();
 
-		var basePos = modManager.getPos(0, 0, curDecBeat, hold.noteData, modNumber, hold, this, ['perspectiveDONTUSE']);
+		var basePos = modManager.getPos(0, 0, curDecBeat, hold.column, modNumber, hold, this, ['perspectiveDONTUSE']);
 
 		var strumDiff = (Conductor.songPosition - hold.strumTime);
 		var visualDiff = (Conductor.visualPosition - hold.visualTime); // TODO: get the start and end visualDiff and interpolate so that changing speeds mid-hold will look better
@@ -448,7 +448,7 @@ class NoteField extends FieldBase
 				alpha: hold.alpha,
 				glow: 0,
 				scale: scalePoint
-			}, hold, modNumber, hold.noteData);
+			}, hold, modNumber, hold.column);
 			
 			var topWidth = FlxMath.lerp(tWid, bWid, prog) * scalePoint.x;
 			var botWidth = FlxMath.lerp(tWid, bWid, nextProg) * scalePoint.x;
@@ -569,7 +569,7 @@ class NoteField extends FieldBase
 			alpha: sprite.alpha,
 			glow: 0,
 			scale: scalePoint
-		}, sprite, modNumber, sprite.noteData);
+		}, sprite, modNumber, sprite.column);
 
 		var alpha = info.alpha;
 		var glow = info.glow;
@@ -594,12 +594,9 @@ class NoteField extends FieldBase
 				vert.x += n.typeOffsetX;
 				vert.y += n.typeOffsetY;
 			}
-            // TODO:  remove PerspectiveModifier and do perspective shit? or in a seperate NoteRenderer object maybe?
-            // probably in a seperate NoteRenderer since I also wanna make it so everything is sorted and obeys each triangle's z
-            // (right now even if the opponent notes have a higher Z value they're drawn below the player, no matter what. I wanna fix that lol)
-            // prob just use NotefieldManager instead of a new thing tho tbh
+        
 
-			vert = modManager.modifyVertex(curDecBeat, vert, idx, sprite, pos, modNumber, sprite.noteData, this);
+			vert = modManager.modifyVertex(curDecBeat, vert, idx, sprite, pos, modNumber, sprite.column, this);
 
 			vert.x *= scalePoint.x;
 			vert.y *= scalePoint.y;

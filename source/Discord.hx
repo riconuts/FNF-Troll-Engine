@@ -1,5 +1,6 @@
 package;
 
+#if discord_rpc
 import sys.thread.Mutex;
 import sys.thread.Thread;
 import Sys.sleep;
@@ -204,3 +205,4 @@ class DiscordClient
 	}
 	#end
 }
+#end

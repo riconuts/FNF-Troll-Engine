@@ -1,7 +1,7 @@
 function onLoad()
 {
 	var bg:BGSprite = new BGSprite('stages/mallEvil/evilBG', -400, -500, 0.2, 0.2);
-	bg.setGraphicSize(Std.int(bg.width * 0.8));
+	bg.scale.set(0.8, 0.8);
 	bg.updateHitbox();
 	add(bg);
 

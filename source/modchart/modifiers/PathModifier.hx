@@ -49,7 +49,7 @@ class PathModifier extends NoteModifier
 
 			var result:Float = triangle((Math.PI * (1 / (period + 1)) * ((diff + (100 * (offset))) / Note.swagWidth)));
 
-			pos.x += (perc * Note.swagWidth / 2) * result;
+			pos.x += (perc * Note.swagWidth * 0.5) * result;
         }
         
         if(getSubmodValue("sawtooth", player) != 0){
@@ -90,8 +90,8 @@ class PathModifier extends NoteModifier
 			var playerColumn = data % 4;
 			var columnPhaseShift = playerColumn * Math.PI / 3;
 			var phaseShift = diff / 135;
-			var returnReceptorToZeroOffsetX = (-Math.cos(-columnPhaseShift) + 1) / 2 * Note.swagWidth * 3;
-			var offsetX = (-Math.cos(phaseShift - columnPhaseShift) + 1) / 2 * Note.swagWidth * 3 - returnReceptorToZeroOffsetX;
+			var returnReceptorToZeroOffsetX = (-Math.cos(-columnPhaseShift) + 1) * 0.5 * Note.swagWidth * 3;
+			var offsetX = (-Math.cos(phaseShift - columnPhaseShift) + 1) * 0.5 * Note.swagWidth * 3 - returnReceptorToZeroOffsetX;
 			pos.x += offsetX * getValue(player);
 		}
 		return pos;

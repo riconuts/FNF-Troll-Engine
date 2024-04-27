@@ -13,6 +13,7 @@ class EventTimeline {
     
 
     public function addEvent(event:BaseEvent){
+        event.parent = this;
         if((event is ModEvent)){
             var modEvent:ModEvent = cast event;
 			var name = modEvent.modName;
@@ -32,31 +33,35 @@ class EventTimeline {
         
     }
 
-    public function update(step:Float){
-        for(modName in modEvents.keys()){
-            var garbage:Array<ModEvent> = [];
-            var schedule = modEvents.get(modName);
-            for(event in schedule){
-				if (event.finished)
+    @:allow(modchart.ModManager)
+    function updateMods(step:Float){
+		for (modName in modEvents.keys())
+		{
+			var garbage:Array<ModEvent> = [];
+			var schedule = modEvents.get(modName);
+			for (event in schedule)
+			{
+                if (event.finished)
 					garbage.push(event);
-
-				
+                
 				if (event.ignoreExecution || event.finished)
 					continue;
-
-				if (step >= event.executionStep){
-					event.run(step);
-                }else
-                    break;
                 
-				if (event.finished)
-					garbage.push(event);
-            }
+				if (step >= event.executionStep)
+                {
+					event.run(step);
+				}
+				else
+					break;
+			}
 
-            for(trash in garbage)
-                schedule.remove(trash);
-        }
+			for (trash in garbage)
+				schedule.remove(trash);
+		}
+    }
 
+	@:allow(modchart.ModManager)
+    function updateFuncs(step:Float){
 		var garbage:Array<BaseEvent> = [];
 		for (event in events)
 		{
@@ -72,8 +77,6 @@ class EventTimeline {
 			else
 				break;
 
-			if (event.finished)
-				garbage.push(event);
 		}
 
 		for (trash in garbage)

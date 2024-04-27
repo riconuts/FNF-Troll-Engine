@@ -1,0 +1,14 @@
+function generateModchart(){
+    modManager.queueEase(768, 772, "xmod", 0.05, 'cubeOut', -1, 0);
+    modManager.queueEase(772, 776, "xmod", 0.05, 'cubeOut', -1, 0);
+    modManager.queueEase(776, 780, "xmod", 0.075, 'cubeOut', -1, 0);
+    modManager.queueEase(784, 788, "xmod", 0.1, 'cubeOut', -1, 0);
+    modManager.queueEase(786, 790, "xmod", 0.15, 'cubeOut', -1, 0.05);
+    modManager.queueEase(788, 792, "xmod", 0.175, 'cubeOut', -1, 0.075);
+    modManager.queueEase(790, 794, "xmod", 0.225, 'cubeOut', -1, 0.075);
+    modManager.queueEase(794, 798, "xmod", 0.4, 'cubeOut', -1, 0.1);
+    modManager.queueEase(796, 804, "xmod", 1, 'cubeOut', -1, 0.3);
+
+    modManager.queueSet(748, "noteSpawnTime", 7000);
+    modManager.queueSet(780, "noteSpawnTime", 0);
+}

@@ -35,7 +35,8 @@ class KadeHUD extends BaseHUD
 	var cbString = Paths.getString("cbplural");
 	var npsString = Paths.getString("nps");
 
-	var engineString = 'Troll Engine ${Main.displayedVersion}';
+	var engineStringLong = 'Troll Engine ${Main.displayedVersion}';
+	var engineStringShort = 'TE ${Main.displayedVersion}';
 
 	override function set_displayedHealth(value:Float)
 	{
@@ -48,6 +49,9 @@ class KadeHUD extends BaseHUD
 	{
 		super(iP1, iP2, songName, stats);
 
+		songHighscore = Highscore.getScore(songName);
+		songWifeHighscore = Highscore.getNotesHit(songName);
+
 		//// Health bar
 		healthBar = new FNFHealthBar(iP1, iP2);
 		healthBarBG = healthBar.healthBarBG;
@@ -59,7 +63,7 @@ class KadeHUD extends BaseHUD
 			4, 
 			(ClientPrefs.downScroll) ? (FlxG.height * 0.9 + 45) : (healthBarBG.y + 50), 
 			0,
-			'$songName | $engineString',
+			'',
 			16
 		);
 		watermark.setFormat(Paths.font("vcr.ttf"), 16, 0xFFFFFFFF, RIGHT, FlxTextBorderStyle.OUTLINE, 0xFF000000);
@@ -128,10 +132,16 @@ class KadeHUD extends BaseHUD
 
 		if (ClientPrefs.timeBarType == "Song Name"){
 			timeTxt.text = songName;
-			watermark.text = engineString;
+			watermark.text = engineStringLong;
+
+			if (watermark.x + watermark.width >= healthBarBG.x)
+				watermark.text = engineStringShort;
 		}else{
 			timeTxt.text = "";
-			watermark.text = '$songName | $engineString';
+			watermark.text = '$songName | $engineStringLong';
+
+			if (watermark.x + watermark.width >= healthBarBG.x)
+				watermark.text = '$songName | $engineStringShort';
 		}
 
 		timeTxt.x = timeBarBG.x + (timeBarBG.width / 2) - (timeTxt.text.length * 5);
@@ -152,7 +162,7 @@ class KadeHUD extends BaseHUD
 	{
 		if (healthBar != null)
 		{
-			healthBar.createFilledBar(0xFFFF0000, 0xFF66FF33);
+			PlayState.instance.playOpponent ? healthBar.createFilledBar(0xFF66FF33, 0xFFFF0000) : healthBar.createFilledBar(0xFFFF0000, 0xFF66FF33);
 			healthBar.updateBar();
 		}
 	}
@@ -164,6 +174,9 @@ class KadeHUD extends BaseHUD
 
 	override function update(elapsed:Float)
 	{
+		if (FlxG.keys.justPressed.NINE)
+			iconP1.swapOldIcon();
+
 		var shownScore:String;
 		var isHighscore:Bool;
 		if (ClientPrefs.showWifeScore){
@@ -172,7 +185,7 @@ class KadeHUD extends BaseHUD
 		}else{
 			shownScore = Std.string(score);
 			isHighscore = songHighscore != 0 && score > songHighscore;
-		}		
+		}
 
 		scoreTxt.text = 
 			(isHighscore ? '$hiscoreString: ' : '$scoreString: ') + shownScore +

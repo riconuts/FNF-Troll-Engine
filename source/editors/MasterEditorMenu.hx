@@ -38,7 +38,7 @@ class MasterEditorMenu extends MusicBeatState
 		DiscordClient.changePresence("Editors Menu", null);
 		#end
 
-		var bg:FlxSprite = new FlxSprite(0, 0, Paths.image('menuBGDesat'));
+		var bg:FlxSprite = new FlxSprite(0, 0, Paths.image('menuDesat'));
 		bg.scrollFactor.set();
 		bg.color = 0xFF353535;
 		add(bg);
@@ -109,7 +109,7 @@ class MasterEditorMenu extends MusicBeatState
 		{
 			switch(options[curSelected]) {
 				case 'Character Editor':
-					LoadingState.loadAndSwitchState(new CharacterEditorState(Character.DEFAULT_CHARACTER, false));
+					MusicBeatState.switchState(FlxG.keys.pressed.SHIFT ? new SowyCharacterEditor() : new CharacterEditorState(Character.DEFAULT_CHARACTER, false));
 				/*case 'Week Editor':
 					MusicBeatState.switchState(new WeekEditorState());*/
 				case 'Stage Editor':
@@ -144,7 +144,7 @@ class MasterEditorMenu extends MusicBeatState
 
 	function changeSelection(change:Int = 0)
 	{
-		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4 );
 
 		curSelected += change;
 
@@ -157,7 +157,7 @@ class MasterEditorMenu extends MusicBeatState
 	#if MODS_ALLOWED
 	function changeDirectory(change:Int = 0)
 	{
-		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4 );
 
 		curDirectory += change;
 

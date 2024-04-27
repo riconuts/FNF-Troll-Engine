@@ -8,7 +8,6 @@ import tgt.FreeplayState;
 import tgt.StoryMenuState;
 import tgt.*;
 #else
-import SongSelectState as MainMenuState;
 import SongSelectState as FreeplayState;
 import SongSelectState as StoryMenuState;
 #end

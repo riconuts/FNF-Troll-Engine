@@ -191,7 +191,7 @@ class ComboOffsetSubstate extends MusicBeatSubstate
         }
 
         if (controls.BACK){
-            FlxG.sound.play(Paths.sound("cancelMenu"));
+			FlxG.sound.play(Paths.sound("cancelMenu"));
             close();
         }
 

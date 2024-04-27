@@ -172,13 +172,13 @@ class TestState extends MusicBeatState{
 
 		// Warning : Local variable might be used before being initialAAAAAAAA SHUT UP
 		var bg:Stage = null;
-		var logoBl:RandomTitleLogo = null;
+		var logoBl:TitleLogo = null;
 
 		////
 		group.add(UI_box);
 
 		////
-		var titleNames = TitleState.RandomTitleLogo.getTitlesList();
+		var titleNames = TitleState.TitleLogo.getTitlesList();
 		var titleStepper = new FlxUINumericStepper(10, 40, 1, 0, 0, titleNames.length-1, 0);
 		titleStepper.cameras = [camHUD];
 		group.add(titleStepper);
@@ -196,7 +196,7 @@ class TestState extends MusicBeatState{
 				logoBl = null;
 			}
 			if (logoBl == null){		
-				logoBl = new TitleState.RandomTitleLogo(newLogoName);
+				logoBl = new TitleState.TitleLogo(newLogoName);
 				logoBl.cameras = [camHUD];
 				logoBl.scrollFactor.set();
 				logoBl.screenCenter(XY);

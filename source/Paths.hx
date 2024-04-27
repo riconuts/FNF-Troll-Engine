@@ -238,13 +238,14 @@ class Paths
 
 	#else
 
+	/** Iterates through a directory and call a function with the name of each file contained within it**/
 	inline static public function iterateDirectory(Directory:String, Func):Bool
 	{
 		if (!FileSystem.exists(Directory) || !FileSystem.isDirectory(Directory))
 			return false;
 		
-		for (i in FileSystem.readDirectory(Directory))
-			Func(i);
+		for (name in FileSystem.readDirectory(Directory))
+			Func(name);
 
 		return true;
 	}
@@ -337,6 +338,19 @@ class Paths
 		return 'assets/fonts/$key';
 	}
 
+    public static var locale(default, set):String = 'en-us';
+    static function set_locale(l:String){
+        locale = l.toLowerCase();
+		getAllStrings();
+/*         
+        if(locale != l){
+			for (idx => string in currentStrings){
+                var newString = getString(idx, true);
+				currentStrings.set(idx, newString);
+            }
+        } */
+        return l;
+    }
 
 	// TODO: maybe these should be cached when starting a song
     // once we add a resource (mod/skin) menu we can do caching there for some things
@@ -347,8 +361,13 @@ class Paths
 
 		for (filePath in Paths.getFolders("data"))
 		{
-			var file = filePath + "strings.txt";
-			if (!exists(file)) continue;
+            var checkFiles = ["lang/" + locale + ".txt", "lang/en-us.txt", "strings.txt"];
+			var file = filePath + checkFiles.shift();
+			while (checkFiles.length > 0 && !exists(file))
+                file = filePath + checkFiles.shift();
+			
+			if (!exists(file))continue;
+
 
 			var stringsText = getContent(file);
 			var daLines = stringsText.trim().split("\n");
@@ -363,17 +382,20 @@ class Paths
 		}
 	}
 
-	public static function getString(key:String):String
+	public inline static function hasString(key:String)return getString(key) != key;
+
+	public static function getString(key:String, force:Bool = false):String
 	{
-		if (currentStrings.exists(key))
+		if (!force && currentStrings.exists(key))
 			return currentStrings.get(key);
-		
-		// currentStrings.set(key, '');
+	
 
 		for (filePath in Paths.getFolders("data"))
 		{
-			var file = filePath + "strings.txt";
-			if (!exists(file)) continue;
+			var checkFiles = ["lang/" + locale + ".txt", "lang/en-us.txt", "strings.txt"];
+			var file = filePath + checkFiles.shift();
+			while (checkFiles.length > 0 && !exists(file))
+				file = filePath + checkFiles.shift();
 
 			//trace(filePath);
 			var stringsText = getContent(file);
@@ -607,6 +629,17 @@ class Paths
 		#end
 
 		return getContent(Paths.getPreloadPath(key));
+	}
+
+	static public function getJson(path:String):Null<Dynamic>
+	{
+		try{
+			return Json.parse(Paths.getContent(path));
+		}catch(e){
+			Sys.println('$path: $e');
+		}
+
+		return null;
 	}
 
 	public static var modsList:Array<String> = [];

@@ -752,8 +752,8 @@ class FlxTween implements IFlxDestroyable
 		if (type == FlxTweenType.LOOPING || type == FlxTweenType.PINGPONG)
 		{
             if(songBased){
-                songPos += duration + _delayToUse; // idk if this works lol
-                _secondsSinceStart = (Conductor.songPosition * 0.001) - songPos;
+                songPos += (duration + _delayToUse) * 1000; // idk if this works lol
+                _secondsSinceStart = (Conductor.songPosition * 0.001) - (songPos * 0.001);
             }else
 			    _secondsSinceStart = (_secondsSinceStart - _delayToUse) % duration + _delayToUse;
             
@@ -873,7 +873,7 @@ class FlxTween implements IFlxDestroyable
     {
 		if (songBased)
 		{
-			_secondsSinceStart = (Conductor.songPosition * 0.001) - value;
+			_secondsSinceStart = (Conductor.songPosition * 0.001) - (value * 0.001);
 			if (_secondsSinceStart < 0)
 				_secondsSinceStart = 0;
 

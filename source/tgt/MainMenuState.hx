@@ -438,7 +438,7 @@ class MainMenuState extends MusicBeatState
 						case 'story_mode':
 							MusicBeatState.switchState(new StoryMenuState());
 						case 'freeplay':
-							MusicBeatState.switchState(/*FlxG.keys.pressed.SHIFT ? new SongSelectState() :*/ new FreeplayState());
+							MusicBeatState.switchState(#if !final FlxG.keys.pressed.SHIFT ? new SongSelectState() : #end new FreeplayState());
 						case 'options':
 							LoadingState.loadAndSwitchState(new options.OptionsState());
 					}
@@ -521,8 +521,12 @@ class MainMenuState extends MusicBeatState
 	}
 	var debugKeys:Array<FlxKey>;
     override function update(elapsed:Float){
-		if (FlxG.sound.music != null && FlxG.sound.music.volume < 0.8)
+		var targetVolume:Float =  0.8;
+		if (FlxG.sound.music != null && FlxG.sound.music.volume < targetVolume)
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
+
+		if (FlxG.sound.music.volume > targetVolume)
+			FlxG.sound.music.volume = targetVolume;
 
 		if (!selectedSomethin){
 			if (controls.BACK){

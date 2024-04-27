@@ -4,8 +4,9 @@ package;
 #elseif (hxCodec >= "3.0.0") import hxcodec.flixel.FlxVideo as VideoHandler;
 #elseif (hxCodec >= "2.6.1") import hxcodec.VideoHandler as VideoHandler;
 #elseif (hxCodec == "2.6.0") import VideoHandler;
-#elseif (hxCodec) import vlc.MP4Handler as VideoHandler; #end
-
+#elseif (hxCodec) import vlc.MP4Handler as VideoHandler; 
+#elseif (hxvlc) import hxvlc.flixel.FlxVideo as VideoHandler;
+#end
 class VideoPlayerState extends MusicBeatState
 {  
 	final videoPath:String;
@@ -38,11 +39,22 @@ class VideoPlayerState extends MusicBeatState
 			onComplete();
 			trace('$videoPath does not exist');
 		}else{
-            #if(hxCodec >= "3.0.0")
+			#if (hxvlc) 
+            video = new VideoHandler();
+			video.onEndReached.add(function()
+			{
+				onComplete();
+				video.dispose();
+			});
+			video.load(videoPath);
+            video.play();
+            #elseif(hxCodec >= "3.0.0")
 			video = new VideoHandler();
 			video.onEndReached.add(function(){
 				onComplete();
 				video.dispose();
+				if (FlxG.game.contains(video))
+					FlxG.game.removeChild(video);
             });
 			video.play(videoPath);
             #else

@@ -3,6 +3,17 @@ import flixel.tweens.*;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.input.keyboard.FlxKey;
 
+#if sys
+import Sys.time as getTime;
+#else
+import haxe.Timer.stamp as getTime;
+#end
+
+#if MULTICORE_LOADING
+import sys.thread.Thread;
+import sys.thread.Mutex;
+#end
+
 #if DO_AUTO_UPDATE
 import Github.Release;
 import sys.FileSystem;
@@ -17,7 +28,7 @@ using StringTools;
 
 // Loads the title screen, alongside some other stuff.
 
-class StartupState extends FlxState
+class StartupState extends FlxTransitionableState
 {
 	public static var muteKeys:Array<FlxKey> = [FlxKey.ZERO];
 	public static var volumeDownKeys:Array<FlxKey> = [FlxKey.NUMPADMINUS, FlxKey.MINUS];
@@ -45,6 +56,13 @@ class StartupState extends FlxState
 
 		ClientPrefs.initialize();
 		ClientPrefs.load();
+
+		FlxG.sound.volumeHandler = function(vol:Float)
+            {
+            ClientPrefs.masterVolume = vol;
+			Main.volumeChangedEvent.dispatch(vol);
+		}
+		FlxG.sound.volume = ClientPrefs.masterVolume;
 
 		#if DO_AUTO_UPDATE
 		getRecentGithubRelease();
@@ -98,9 +116,6 @@ class StartupState extends FlxState
 		#end
 		
 		Highscore.load();
-
-		if (FlxG.save.data.weekCompleted != null)
-			Highscore.weekCompleted = FlxG.save.data.weekCompleted;
 		
 		#if discord_rpc
 		Application.current.onExit.add((exitCode)->{
@@ -119,6 +134,8 @@ class StartupState extends FlxState
 		Paths.music('freakyIntro');
 		Paths.music('freakyMenu');
 
+		Paths.getAllStrings();
+        
 		/*
 		if (nextState == PlayState || nextState == editors.ChartingState){
 			Paths.currentModDirectory = "chapter1";
@@ -162,8 +179,13 @@ class StartupState extends FlxState
 
 		if (ClientPrefs.checkForUpdates && recentRelease != null)
 		{
-			if (recentRelease.prerelease)
+            // hoping this works lol
+			var tagName:SemanticVersion = recentRelease.tag_name;
+			outOfDate = tagName > Main.semanticVersion;
+			trace(tagName, Main.semanticVersion);
+/* 			if (recentRelease.prerelease)
 			{
+                
 				var tagName = recentRelease.tag_name;
 				var split = tagName.split("-");
 				var betaVersion = split.length == 1 ? "1" : split.pop();
@@ -178,7 +200,7 @@ class StartupState extends FlxState
 				// if you're in beta and version is the same as the engine version, but just not beta
 				// then you should absolutely be prompted to update
 				outOfDate = Main.beta && Main.engineVersion <= versionName || Main.engineVersion < versionName;
-			}
+			} */
 		}
 
 		Main.outOfDate = outOfDate;
@@ -220,62 +242,120 @@ class StartupState extends FlxState
 		persistentUpdate = true;
 	}
 
+	override function create()
+	{
+		#if tgt
+		this.transIn = FadeTransitionSubstate;
+		//this.transOut = FadeTransitionSubstate;
+		FlxTransitionableState.skipNextTransOut = true;
+
+		warning = new FlxSprite(0, 0, Paths.image("warning"));
+		warning.scale.set(0.65, 0.65);
+		warning.updateHitbox();
+		warning.screenCenter();
+		add(warning);
+		
+		#else
+		this.transIn = null;
+		this.transOut = null;
+		// TODO: Default Flixel Startup Animation :]
+		#end
+
+		super.create();
+	}
+
+	#if tgt
 	private var warning:FlxSprite;
-	private var step = 0;
+	#end
+
+	private var step:Int = 0;
+	private var loadingTime:Float = getTime();
+
+	#if MULTICORE_LOADING
+	private var loadingMutex:Null<Mutex> = null;
+	#end
+
+	inline private function doLoading()
+	{
+		load();
+		final stateLoad:Dynamic = Reflect.getProperty(nextState, "load");
+		if (stateLoad != null) Reflect.callMethod(null, stateLoad, []);
+
+		loadingTime = getTime() - loadingTime;
+	}
 
 	var fadeTwn:FlxTween = null;
-	override function update(elapsed)
+	override function update(elapsed:Float)
 	{
-		// this is kinda stupid but i couldn't find any other way to display the warning while the title screen loaded 
-		// could be worse lol
 		switch (step){
 			case 0:
-				warning = new FlxSprite(0, 0, Paths.image("warning"));
-				warning.scale.set(0.65, 0.65);
-				warning.updateHitbox();
-				warning.screenCenter();
-				add(warning);
+				#if !MULTICORE_LOADING
+				loadingDuration = doLoading();
+				step = 10;
 
-				step = 1;
-			case 1:
-				var startTime = Sys.cpuTime();
+				#else
+				if (loadingMutex == null){
+					loadingMutex = new Mutex();
+					Thread.create(() -> {
+						loadingMutex.acquire();
+						doLoading();
+						loadingMutex.release();
+					});
+				}
+				else if (loadingMutex.tryAcquire()){
+					// is this necessary or at least favorable
+					loadingMutex.release();
+					loadingMutex = null;
 
-				load();
-				if (Reflect.getProperty(nextState, "load") != null)
-					Reflect.callMethod(null, Reflect.getProperty(nextState, "load"), []);
+					step = 10;
+				}
+				//else warning.angle += elapsed * 25;
+				#end
+				
+			case 10:
+				trace('loading lasted $loadingTime');
+
+				#if !tgt
+				step = 50;
+				#else
 
 				#if debug
-				var waitTime:Float = 0;
-				#elseif sys
-				var waitTime:Float = (nextState == PlayState || nextState == editors.ChartingState) ? 0 : Math.max(0, 1.6 - (startTime - Sys.cpuTime()));
+				final waitTime:Float = 0.0;
 				#else
-				var waitTime:Float = 0;
+				final waitTime:Float = (nextState == PlayState || nextState == editors.ChartingState) ? 0.0 : Math.max(0.0, 1.6 - loadingTime);
 				#end
 
-				fadeTwn = FlxTween.tween(warning, {alpha: 0}, 1, {
+				step = 30;
+
+				fadeTwn = FlxTween.tween(warning, {alpha: 0}, 1.0, {
 					ease: FlxEase.expoIn,
 					startDelay: waitTime,
-					onComplete: (twn)->{
-						step = 5;
-					}
+					onStart: (twn)->{step = 40;},
+					onComplete: (twn)->{step = 50;}
 				});
-
-				step = 3;
-			case 3:
-				if ((FlxG.keys.justPressed.ANY || FlxG.mouse.justPressed) && fadeTwn.percent <= 0){
+				
+			case 30:
+				if (FlxG.keys.justPressed.ANY || FlxG.mouse.justPressed){
 					fadeTwn.startDelay = 0;
-					step = 4;
+					step = 40;
 				}
+			case 40:
+				if (FlxG.keys.justPressed.ANY || FlxG.mouse.justPressed){
+					fadeTwn.percent = (1.0 + fadeTwn.percent) * 0.5;
+				}
+				#end
 
-			case 5:
+			case 50:
 				#if DO_AUTO_UPDATE
 				if (Main.outOfDate)
 					MusicBeatState.switchState(new UpdaterState(recentRelease)); // UPDATE!!
 				else
 				#end
 				{
+					/*
 					FlxTransitionableState.skipNextTransIn = true;
 					FlxTransitionableState.skipNextTransOut = true;
+					*/
 					MusicBeatState.switchState(Type.createInstance(nextState, []));
 				}
 		}

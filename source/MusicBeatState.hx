@@ -9,6 +9,7 @@ import openfl.ui.MouseCursor;
 import scripts.FunkinHScript;
 
 
+#if SCRIPTABLE_STATES
 @:autoBuild(scripts.Macro.addScriptingCallbacks([
 	"create",
 	"update",
@@ -19,6 +20,7 @@ import scripts.FunkinHScript;
 	"beatHit",
 	"sectionHit"
 ]))
+#end
 class MusicBeatState extends FlxUIState
 {
     public var script:FunkinHScript;
@@ -109,6 +111,16 @@ class MusicBeatState extends FlxUIState
 			sectionHit();
 		}
 	}
+    
+	override function startOutro(fuck:() -> Void)
+	{
+		return super.startOutro(() ->
+		{
+			scripts.Globals.variables.clear();
+			return fuck();
+		});
+	}
+
 
 	private function rollbackSection():Void
 	{
@@ -202,17 +214,28 @@ class MusicBeatState extends FlxUIState
 		Conductor.changeBPM(180);
 	}; 
 
-	// TODO: check the jukebox selection n shit and play THAT instead? idk lol
+	public static function stopMenuMusic(){
+		if (FlxG.sound.music != null){
+			FlxG.sound.music.stop();
+			FlxG.sound.music.destroy();
+			FlxG.sound.music = null;
+		}
 
-	public static function playMenuMusic(?volume:Float = 1, ?force:Bool = false){		
+		if (MusicBeatState.menuVox != null)
+		{
+			MusicBeatState.menuVox.stop();
+			MusicBeatState.menuVox.destroy();
+			MusicBeatState.menuVox = null;
+		}
+	}
+
+	// TODO: check the jukebox selection n shit and play THAT instead? idk lol
+	public static function playMenuMusic(?volume:Float=1, ?force:Bool = false){	        	
 		if(FlxG.sound.music == null || !FlxG.sound.music.playing || force){
-			if (menuVox!=null){
-				trace("stopped menu vox");
-				menuVox.stop();
-				menuVox.destroy();
-				menuVox = null;
-			}
+			MusicBeatState.stopMenuMusic();
+			#if tgt
 			tgt.gallery.JukeboxState.playIdx = 0;
+			#end
 
 			#if MODS_ALLOWED
 			// i NEED to rewrite the paths shit for real 
@@ -258,8 +281,13 @@ class MusicBeatState extends FlxUIState
 			FlxG.sound.playMusic(Paths.music('freakyIntro'), volume, false);
 			FlxG.sound.music.onComplete = menuLoopFunc;
 			#end
-
+			
+			//// TODO: find a way to soft code this!!! (psych engine already has one so maybe we could just use that and add custom intro text to it :-)
+			#if tgt
 			Conductor.changeBPM(180);
+			#else
+			Conductor.changeBPM(102);
+			#end
 			Conductor.songPosition = 0;
 		}
 	}

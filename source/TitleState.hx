@@ -1,5 +1,6 @@
 package;
 
+import openfl.filters.BlurFilter;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.group.FlxGroup;
 import flixel.input.gamepad.FlxGamepad;
@@ -17,9 +18,22 @@ import Discord.DiscordClient;
 import sys.FileSystem;
 import sys.io.File;
 #end
+// used so stages wont break
+class FakeCharacter
+{
+	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void{}
+
+	public function new(){}
+}
 
 class TitleState extends MusicBeatState
 {
+	// for stage scripts
+	public var gf:FakeCharacter = new FakeCharacter();
+	public var dad:FakeCharacter = new FakeCharacter();
+	public var boyfriend:FakeCharacter = new FakeCharacter();
+	public var inCutscene:Bool = false;
+
 	public static var initialized:Bool = false;
 
 	static var curWacky:Array<String> = [];
@@ -27,8 +41,9 @@ class TitleState extends MusicBeatState
 	static var blackScreen:FlxSprite;
 	static var textGroup:FlxGroup;
 	static var ngSpr:FlxSprite;
+	static var blurFilter:BlurFilter;
 
-	static var logoBl:RandomTitleLogo;
+	static var logoBl:TitleLogo;
 	static var titleText:FlxSprite;
 	static var swagShader:ColorSwap = null;
 	static var bg:Stage;
@@ -46,7 +61,8 @@ class TitleState extends MusicBeatState
 	public var camFollow = new FlxPoint(640, 360);
 	public var camFollowPos = new FlxObject(640, 360, 1, 1);
 	
-	static public function getRandomStage(){
+	static public function getRandomStage()
+	{
 		// Set up a stage list
 		var stages:Array<Array<String>> = []; // [stage name, mod directory]
 
@@ -72,15 +88,17 @@ class TitleState extends MusicBeatState
 		
 		var randomStage = getRandomStage();
 
-		if (randomStage != null){
+		if (randomStage != null)
+		{
 			Paths.currentModDirectory = randomStage[1];
-			bg = new Stage(randomStage[0]);
+			bg = new Stage(randomStage[0], false);
+			bg.startScript(false, ["inTitlescreen" => true]);
 		}
 
 		// Random logoooo
 		swagShader = new ColorSwap();
 
-		logoBl = new RandomTitleLogo();
+		logoBl = new TitleLogo();
 		logoBl.scrollFactor.set();
 		logoBl.screenCenter(XY);
 		
@@ -98,12 +116,19 @@ class TitleState extends MusicBeatState
 		titleText.screenCenter(X);
 
 		//
-		blackScreen = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+		blackScreen = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
+		blackScreen.scale.set(FlxG.width, FlxG.height);
+		blackScreen.updateHitbox();
+
+		blurFilter = new BlurFilter(32, 32);
+
+		titleText.visible = false;
+		logoBl.visible = false;
 
 		textGroup = new FlxGroup();
 
 		//
-		ngSpr = new FlxSprite(0, FlxG.height * 0.52).loadGraphic(Paths.image('newgrounds_logo'));
+		ngSpr = new FlxSprite(0, FlxG.height * 0.52, Paths.image('newgrounds_logo'));
 		ngSpr.visible = false;
 		ngSpr.scale.set(0.8, 0.8);
 		ngSpr.updateHitbox();
@@ -116,19 +141,10 @@ class TitleState extends MusicBeatState
 
 	override public function destroy()
 	{
-		curWacky = [];
+		curWacky = null;
 		swagShader = null;
 
-		/*
-		blackScreen.destroy();
-		textGroup.destroy();
-		ngSpr.destroy();
-	
-		logoBl.destroy();
-		titleText.destroy();
-		bg.destroy();
-		*/
-
+		blurFilter = null;
 		blackScreen = null;
 		textGroup = null;
 		ngSpr = null;
@@ -141,9 +157,12 @@ class TitleState extends MusicBeatState
 
 		return super.destroy();
 	}
-
+	var darkness:FlxSprite;
 	override public function create():Void
 	{
+		if (initialized)
+			Paths.clearStoredMemory();
+
 		if (!loaded) load();
 
 		if (bg != null)
@@ -164,10 +183,15 @@ class TitleState extends MusicBeatState
 
 		camHUD.bgColor = 0x00000000;
 		camGame.follow(camFollowPos);
+	
+		////
+		camGame.filters = [blurFilter];
 
+		////
 		if (bg != null){
 			camGame.zoom = bg.stageData.defaultZoom;
-
+			if (bg.stageData.title_zoom != null)
+				camGame.zoom = bg.stageData.title_zoom;
 			var color = FlxColor.fromString(bg.stageData.bg_color);
 			camGame.bgColor = color != null ? color : FlxColor.BLACK;
 
@@ -181,6 +205,16 @@ class TitleState extends MusicBeatState
 		}else{
 			camGame.bgColor = 0xFF000000;
 		}
+
+		var scale = 1920 / camGame.zoom;
+		darkness = new FlxSprite(0, 0).makeGraphic(1, 1, FlxColor.BLACK);
+		darkness.scale.set(scale, scale);
+		darkness.updateHitbox();
+		darkness.scrollFactor.set(0, 0);
+		darkness.screenCenter(XY);
+		darkness.alpha = 0.4;
+		darkness.cameras = [camGame];
+		add(darkness);
 
 		////
 		logoBl.cameras = [camHUD];
@@ -197,9 +231,10 @@ class TitleState extends MusicBeatState
 
 
 		////
-		if (initialized)
+		if (initialized){
+			Paths.clearUnusedMemory();
 			skipIntro();
-		else{
+        }else{
 			initialized = true;
 			MusicBeatState.playMenuMusic(0, true);
 		}
@@ -241,9 +276,11 @@ class TitleState extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
-		if (bg != null && bg.stageScript != null)
+		if (bg != null && bg.stageScript != null){
+			bg.stageScript.set("curDecBeat", curDecBeat);
+			bg.stageScript.set("curDecStep", curDecStep);
 			bg.stageScript.call('update', [elapsed]);
-
+        }
 		if (FlxG.sound.music != null)
 			Conductor.songPosition = FlxG.sound.music.time;
 
@@ -296,8 +333,9 @@ class TitleState extends MusicBeatState
 				if (titleText != null)
 					titleText.animation.play('press');
 
-				camHUD.flash(ClientPrefs.flashing ? FlxColor.WHITE : 0x4CFFFFFF, 1);
-				FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
+                remove(darkness);
+				camHUD.flash(ClientPrefs.flashing ? FlxColor.WHITE : 0x4CFFFFFF, 1, null, true);
+				FlxG.sound.play(Paths.sound('confirmMenu'), 0.7 );
 
 				transitioning = true;
 
@@ -359,58 +397,101 @@ class TitleState extends MusicBeatState
 	override function beatHit()
 	{
 		super.beatHit();
-
+		if (skippedIntro)
+			if (bg != null && bg.stageScript != null)
+			{
+				bg.stageScript.set("curBeat", curBeat);
+				bg.stageScript.call('onBeatHit', []);
+			}
 		if (logoBl != null)
 			logoBl.time = 0;
 
 		if(!closedState) {
 			sickBeats++;
-			switch (sickBeats * 0.5)
+            // this could prob be replaced with a json, yaml or even a whole "TitleSequence" script?? :shrug:
+			switch (sickBeats #if tgt * 0.5 #end)
 			{
 				case 1:
-					FlxG.sound.music.stop();
-					if (MusicBeatState.menuVox != null)
-					{
-						MusicBeatState.menuVox.stop();
-						MusicBeatState.menuVox.destroy();
-						MusicBeatState.menuVox = null;
-					}
-					
-					
+					// MusicBeatState.stopMenuMusic();
 					MusicBeatState.playMenuMusic(0, true);
-					//FlxG.sound.music.fadeIn(4, 0, 0.7);
+
+					FlxTween.tween(blackScreen, {alpha: 0.86}, Conductor.crochet * 0.005, {
+						ease: FlxEase.quadInOut,
+						songBased: true,
+					});
+
 				case 2:
 					MusicBeatState.playMenuMusic(1, true);
+
+					#if tgt
 					createCoolText(['THE FNF TGT TEAM']);
-				case 4:
-					addMoreText('presents');
-				case 5:
-					deleteCoolText();
-				case 6:
-					createCoolText(['In association', 'with'], -40);
+					#else
+					//createCoolText(['THE TROLL ENGINE TEAM']); // huge if true
+					createCoolText(['RICONUTS', 'NEBULA_ZORUA', 'AND MORE']);
+					#end
+				case 4: addMoreText('presents');
+				case 5: deleteCoolText();
+
+				////
+
+				case 6: createCoolText(['Without any', 'association to'], -40);
 				case 8:
-					addMoreText('tailsgetstrolled dot org', -40);
+					#if tgt	addMoreText('tailsgetstrolled dot org', -40);
+					#else	addMoreText('Newgrounds', -40);
+					#end
 					ngSpr.visible = true;
 				case 9:
 					deleteCoolText();
 					ngSpr.visible = false;
-				case 10:
-					createCoolText([curWacky[0]]);
-				case 12:
-					addMoreText(curWacky[1]);
-				case 13:
-					deleteCoolText();
-				case 14:
-					addMoreText('Tails');
-				case 15:
-					addMoreText('Gets');
-				case 16:
-					addMoreText('Trolled');
+
+				////
+				
+				case 10: createCoolText([curWacky[0]]);
+				case 12: addMoreText(curWacky[1]);
+				case 13: deleteCoolText();
+
+				////
+
+				#if tgt
+				case 14: addMoreText('Tails');
+				case 15: addMoreText('Gets');
+				case 16: addMoreText('Trolled');
+				#else
+				case 14: addMoreText('Friday');
+				case 15: addMoreText('Night');
+				case 16: addMoreText("Funkin");
+				#end
+
+				////
+
 				case 17:
 					skipIntro();
 			}
 		}
 	}
+	var section:Int = -100;
+	override function stepHit()
+	{
+		super.stepHit();
+
+        if (bg != null && bg.stageScript != null)
+        {
+            if (skippedIntro){
+                bg.stageScript.set("curStep", curStep);
+                bg.stageScript.call('onStepHit', []);
+            }
+            var nuSection:Int = Math.floor(curBeat / 4);
+            if (section != nuSection)
+            {
+                section = nuSection;
+                if (skippedIntro){
+                    bg.stageScript.set("curSection", section);
+                    bg.stageScript.call('onSectionHit', []);
+                }
+            }
+        }
+	}
+
 
 	var skippedIntro:Bool = false;
 	var increaseVolume:Bool = false;
@@ -418,6 +499,10 @@ class TitleState extends MusicBeatState
 	{
 		if (!skippedIntro)
 		{
+			camGame.filters.remove(blurFilter);
+
+            titleText.visible = true;
+			logoBl.visible = true;
 			remove(ngSpr);
 			remove(blackScreen);
 			remove(textGroup);
@@ -429,15 +514,19 @@ class TitleState extends MusicBeatState
 	}
 }
 
-class RandomTitleLogo extends FlxSprite
+class TitleLogo extends FlxSprite
 {
 	public var titleName:String;
 
 	public function new(?X:Float, ?Y:Float, ?Name:String)
 	{
-		titleName = Name != null ? Name : FlxG.random.getObject(getTitlesList());
+		var titleGraphic = Paths.image('logo');
 
-		super(X, Y, Paths.image('titles/${titleName}'));
+		if (titleGraphic == null || Name != null){
+			titleGraphic = Paths.image('titles/${Name != null ? Name : FlxG.random.getObject(getTitlesList())}');
+		}
+
+		super(X, Y, titleGraphic);
 		antialiasing = true;
 	}
 

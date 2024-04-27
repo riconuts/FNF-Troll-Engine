@@ -64,15 +64,7 @@ class LoadingState extends MusicBeatState
 		new FlxTimer().start(fadeTime + MIN_TIME, function(_){
 			if (stopMusic)
 			{
-				if (FlxG.sound.music != null)
-					FlxG.sound.music.stop();
-
-				if (MusicBeatState.menuVox != null)
-				{
-					MusicBeatState.menuVox.stop();
-					MusicBeatState.menuVox.destroy();
-					MusicBeatState.menuVox = null;
-				}
+				MusicBeatState.stopMenuMusic();
 			}
 			MusicBeatState.switchState(target);
 		});
@@ -100,15 +92,7 @@ class LoadingState extends MusicBeatState
 
 		if (stopMusic)
 		{
-			if (FlxG.sound.music != null)
-				FlxG.sound.music.stop();
-
-			if (MusicBeatState.menuVox != null)
-			{
-				MusicBeatState.menuVox.stop();
-				MusicBeatState.menuVox.destroy();
-				MusicBeatState.menuVox = null;
-			}
+			MusicBeatState.stopMenuMusic();
 		}
 		
 		return target;

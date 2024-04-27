@@ -5,5 +5,8 @@
 
 	"boyfriend": [810, 100],
 	"girlfriend": [310, 65],
-	"opponent": [20, 100]
+	"opponent": [20, 100],
+
+    "camera_stage": [640, 500],
+    "title_zoom": 0.8
 }

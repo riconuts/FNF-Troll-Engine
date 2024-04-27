@@ -1,5 +1,6 @@
 package hud;
 
+import flixel.graphics.frames.FlxFrame.FlxFrameType;
 import PlayState.Wife3;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxMath;
@@ -11,10 +12,14 @@ class Hitmark extends FlxSprite
 	public var baseAlpha:Float = 1.0;
 	var decayTime:Float = 0.0;
 
-	override function update(elapsed:Float)
+    public function new(?x:Float, ?y:Float){
+        super(x, y);
+        active = false;
+    }
+    
+	override function draw()
 	{
-		super.update(elapsed);
-		decayTime += elapsed;
+		decayTime += FlxG.elapsed;
 
 		var s = Conductor.crochet * 0.001;
 		var decayScale = 1 - (decayTime / (s * 8)); // 8 beats to decay
@@ -26,20 +31,51 @@ class Hitmark extends FlxSprite
 			decayTime = 0.0;
 			kill();
 		}
+
+
+		checkEmptyFrame();
+
+		if (alpha == 0 || _frame.type == FlxFrameType.EMPTY)
+			return;
+
+		if (dirty) // rarely
+			calcFrame(useFramePixels);
+
+		for (camera in cameras)
+		{
+			if (!camera.visible || !camera.exists || !isOnScreen(camera))
+				continue;
+
+			if (isSimpleRender(camera))
+				drawSimple(camera);
+			else
+				drawComplex(camera);
+
+			#if FLX_DEBUG
+			FlxBasic.visibleCount++;
+			#end
+		}
+
+		#if FLX_DEBUG
+		if (FlxG.debugger.drawDebug)
+			drawDebug();
+		#end
 	}
 }
 
 class Hitbar extends FlxSpriteGroup
 {
-	public var mainBar:FlxSprite;
+	static var hitbarPxPerMs = 540 * (1 / 180);
+	static var hitmarkHeight = 20;
+	static var hitbarHeight = 10;
+	
+    
+    public var mainBar:FlxSprite;
 	public var averageIndicator:FlxSprite;
 
 	var maxMarks:Int = 30;
 	var markMS:Array<Float> = [];
 	var markGroup:FlxTypedSpriteGroup<Hitmark> = new FlxTypedSpriteGroup<Hitmark>();
-	var hitbarPxPerMs = 540 * (1 / 180);
-	var hitbarHeight = 10;
-	var hitmarkHeight = 20;
 
 	var metronomeScale:Float = 1;
 	var metronome:FlxSprite;
@@ -137,6 +173,7 @@ class Hitbar extends FlxSpriteGroup
 		metronome.scale.y = scale.y * metronomeScale;
 		averageIndicator.scale.set(scale.x * 0.5, scale.y * 0.5);
 	}
+    
 
 	public function addHit(time:Float)
 	{

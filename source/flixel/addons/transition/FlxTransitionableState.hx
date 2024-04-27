@@ -11,9 +11,9 @@ import flixel.FlxSubState;
 
 class FlxTransitionableState extends FlxState
 {
-  // global default transitions for ALL states, used if transIn/transOut are null
-  public static var defaultTransIn:Class<TransitionSubstate> = null;
-  public static var defaultTransOut:Class<TransitionSubstate> = null;
+	// global default transitions for ALL states, used if transIn/transOut are null
+	public static var defaultTransIn:Class<TransitionSubstate> = null;
+	public static var defaultTransOut:Class<TransitionSubstate> = null;
 
 	public static var skipNextTransIn:Bool = false;
 	public static var skipNextTransOut:Bool = false;
@@ -32,22 +32,10 @@ class FlxTransitionableState extends FlxState
 	 */
 	public function new(?TransIn:Class<TransitionSubstate>, ?TransOut:Class<TransitionSubstate>)
 	{
-		transIn = TransIn;
-		transOut = TransOut;
-
-		if (transIn == null && defaultTransIn != null)
-		{
-	  		//trace("in");
-			transIn = defaultTransIn;
-		}
-		if (transOut == null && defaultTransOut != null)
-		{
-	  		//trace("out");
-			transOut = defaultTransOut;
-		}
+		this.transIn = (TransIn == null) ? defaultTransIn : TransIn;
+		this.transOut = (TransOut == null) ? defaultTransOut : TransOut;
 
 		super();
-
 	}
 
 	override public function destroy():Void
@@ -66,7 +54,6 @@ class FlxTransitionableState extends FlxState
 
 	override public function switchTo(nextState:FlxState):Bool
 	{
-		//trace(!hasTransOut, transOutFinished);
 		if (!hasTransOut)
 			return true;
 
@@ -80,10 +67,7 @@ class FlxTransitionableState extends FlxState
 	{
 		// play the exit transition, and when it's done call FlxG.switchState
 		_exiting = true;
-		transitionOut(function()
-		{
-			FlxG.switchState(nextState);
-		});
+		transitionOut(FlxG.switchState.bind(nextState));
 
 		if (skipNextTransOut)
 		{
@@ -97,25 +81,24 @@ class FlxTransitionableState extends FlxState
 	 */
 	public function transitionIn():Void
 	{
-		if (transIn != null)
+		if (transIn == null)
+			return;
+
+		if (skipNextTransIn)
 		{
-			if (skipNextTransIn)
+			skipNextTransIn = false;
+			if (finishTransIn != null)
 			{
-				skipNextTransIn = false;
-				if (finishTransIn != null)
-				{
-					finishTransIn();
-				}
-				return;
+				finishTransIn();
 			}
-
-
-	  var trans = Type.createInstance(transIn, []);
-			openSubState(trans);
-
-	  trans.finishCallback = finishTransIn;
-			trans.start(OUT);
+			return;
 		}
+
+		var trans = Type.createInstance(transIn, []);
+		openSubState(trans);
+
+		trans.finishCallback = finishTransIn;
+		trans.start(OUT);
 	}
 
 	/**
@@ -124,16 +107,14 @@ class FlxTransitionableState extends FlxState
 	public function transitionOut(?OnExit:Void->Void):Void
 	{
 		_onExit = OnExit;
-		if (hasTransOut)
-		{
-	  var trans = Type.createInstance(transOut, []);
+
+		if (hasTransOut){
+			var trans = Type.createInstance(transOut, []);
 			openSubState(trans);
 
-	  trans.finishCallback = finishTransOut;
+			trans.finishCallback = finishTransOut;
 			trans.start(IN);
-		}
-		else
-		{
+		}else{
 			_onExit();
 		}
 	}

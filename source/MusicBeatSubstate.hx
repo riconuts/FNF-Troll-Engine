@@ -6,6 +6,7 @@ import flixel.FlxG;
 import flixel.FlxSubState;
 import flixel.FlxBasic;
 import flixel.FlxSprite;
+#if SCRIPTABLE_STATES
 @:autoBuild(scripts.Macro.addScriptingCallbacks([
 	"create",
 	"update",
@@ -14,6 +15,7 @@ import flixel.FlxSprite;
 	"stepHit",
 	"beatHit",
 ], "substates"))
+#end
 class MusicBeatSubstate extends FlxSubState
 {
 	public var script:FunkinHScript;

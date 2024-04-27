@@ -479,6 +479,14 @@ class AlphaCharacter extends FlxSprite
 			case "B" | "D" | "E" | "L":
 				y--;
 		}
+		#else
+		if (letterCase == "lowercase"){
+			switch (letter)
+			{
+				case "p" | "q" | "y":
+						y += 10;
+			}
+		}
 		#end
 	}
 

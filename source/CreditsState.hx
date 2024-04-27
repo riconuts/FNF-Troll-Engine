@@ -18,7 +18,7 @@ using StringTools;
 
 class CreditsState extends MusicBeatState
 {	
-    var useHttp:Bool = #if final true #else false #end;
+    var useHttp:Bool = #if final true #else false #end; // shouldnt we check if tgt too		// no, the base engine could use it
 	var bg:FlxSprite;
 
     var hintBg:FlxSprite;
@@ -83,16 +83,24 @@ class CreditsState extends MusicBeatState
 		camFollowPos.setPosition(camFollow.x, camFollow.y);
 
 		////
-		bg = new FlxSprite().loadGraphic(Paths.image("tgtmenus/creditsbg"));
-		
-		if (FlxG.height < FlxG.width)
-			bg.setGraphicSize(0, FlxG.height);
-		else
-			bg.setGraphicSize(FlxG.width, 0);
+		bg = new FlxSprite();
+		#if tgt
+		bg.loadGraphic(Paths.image("tgtmenus/creditsbg"));
+		#else
+		bg.loadGraphic(Paths.image("menuDesat"));
+		#end
 
 		bg.screenCenter().scrollFactor.set();
+
+		if (FlxG.height < FlxG.width){
+			bg.scale.x = bg.scale.y = (FlxG.height * 1.05) / bg.frameHeight;
+		}else{
+			bg.scale.x = bg.scale.y = (FlxG.width * 1.05) / bg.frameWidth;
+		}
+
 		add(bg);
 
+		#if tgt
 		var backdrops = new flixel.addons.display.FlxBackdrop(Paths.image('grid'));
 		backdrops.velocity.set(30, -30);
 		backdrops.scrollFactor.set();
@@ -100,6 +108,7 @@ class CreditsState extends MusicBeatState
 		backdrops.alpha = 0.25;
 		backdrops.x -= 10;
 		add(backdrops);
+		#end
 
         ////
         function loadLine(line:String, ?folder:String)
@@ -132,8 +141,12 @@ class CreditsState extends MusicBeatState
             trace('checking for updated credits');
 			
 			var githubRepo = Main.githubRepo;
+			#if tgt
+			var http = new haxe.Http('https://raw.githubusercontent.com/${githubRepo.user}/${githubRepo.repo}/main/assets-tgt/data/credits.txt'); // hmmmmm
+            #else
 			var http = new haxe.Http('https://raw.githubusercontent.com/${githubRepo.user}/${githubRepo.repo}/main/assets/data/credits.txt');
-            http.onData = function(data:String){
+			#end
+			http.onData = function(data:String){
                 rawCredits = data;
 
                 #if sys
@@ -182,10 +195,6 @@ class CreditsState extends MusicBeatState
 
         updateSelection();
         curSelected = 0;
-
-		#if !FLX_NO_MOUSE
-		FlxG.mouse.visible = true;
-		#end
 	}
 
     var realIndex:Int = 0;
@@ -205,17 +214,16 @@ class CreditsState extends MusicBeatState
             dataArray[id] = data; 
 
 			var iconPath = "credits/" + data[1];
-			if (Paths.image(iconPath) == null)
-				iconPath = "icons/face";
+			if (Paths.image(iconPath) != null){
+				var songIcon = new AttachedSprite(iconPath);
 
-            var songIcon = new AttachedSprite(iconPath);
+				songIcon.xAdd = songTitle.width + 15; 
+				songIcon.yAdd = 15;
+				songIcon.sprTracker = songTitle;
 
-            songIcon.xAdd = songTitle.width + 15; 
-            songIcon.yAdd = 15;
-            songIcon.sprTracker = songTitle;
-
-            iconArray[id] = songIcon;
-            add(songIcon);
+				iconArray[id] = songIcon;
+				add(songIcon);
+			}
         }else if (data[0].trim().length == 0){
             return;
         }else{
@@ -235,15 +243,15 @@ class CreditsState extends MusicBeatState
 	function updateSelection(playSound:Bool = true)
 	{
 		if (playSound)
-			FlxG.sound.play(Paths.sound("scrollMenu"), 0.4);
+			FlxG.sound.play(Paths.sound("scrollMenu"), 0.4 );
 
 		// selectedSong = titleArray[curSelected];
 
 		for (id in 0...titleArray.length)
 		{
 			var title:Alphabet = titleArray[id];
-            var data = dataArray[id];
-			var icon = iconArray[id];
+            var data:Array<String> = dataArray[id];
+			var icon:AttachedSprite = iconArray[id];
 
             if (data == null){ // for the category titles, whatevrr !!!
                 
@@ -252,7 +260,8 @@ class CreditsState extends MusicBeatState
                 title.targetX = 90;
                 title.color = 0xFFFFFFFF;
 
-				icon.color = 0xFFFFFFFF;
+				if (icon != null)
+					icon.color = 0xFFFFFFFF;
 
                 var descText = data[2];
                 if (descText == null){
@@ -290,8 +299,10 @@ class CreditsState extends MusicBeatState
 				title.alpha = (1 - difference * 0.15);
 				title.color = 0xFF000000;
 				
-				var br = 1-(difference * 0.15 + 0.05);
-				icon.color = FlxColor.fromRGBFloat(br,br,br);
+				if (icon != null){
+					var br = 1-(difference * 0.15 + 0.05);
+					icon.color = FlxColor.fromRGBFloat(br,br,br);
+				}
 			}
 
 			if (icon != null)
@@ -303,8 +314,12 @@ class CreditsState extends MusicBeatState
 	var controlLock:Bool = false;
 	override function update(elapsed:Float)
 	{
-		if (FlxG.sound.music != null && FlxG.sound.music.volume < 0.7)
+		var targetVolume:Float =  0.7;
+		if (FlxG.sound.music != null && FlxG.sound.music.volume < targetVolume)
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
+
+		if (FlxG.sound.music.volume > targetVolume)
+			FlxG.sound.music.volume = targetVolume;
 
 		//// update camera
 		var farAwaySpeedup = 0.002 * Math.max(0, Math.abs(camFollowPos.y - camFollow.y) - 360);
@@ -347,9 +362,12 @@ class CreditsState extends MusicBeatState
 		}
 
 		if (controls.ACCEPT){
-            CoolUtil.browserLoad(dataArray[curSelected][3]);
+			var link:Null<String> = dataArray[curSelected][3];
+			if (link != null && link.length > 0)
+            	CoolUtil.browserLoad(link);
 		}
 
+		#if tgt
 		if (FlxG.keys.justPressed.NINE)
 		{
 			for (item in titleArray)
@@ -364,6 +382,7 @@ class CreditsState extends MusicBeatState
 					icon.loadGraphic(Paths.image('credits/peak'));
 			}
 		}
+		#end
 		}
 		
 		super.update(elapsed);

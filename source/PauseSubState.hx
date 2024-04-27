@@ -183,6 +183,7 @@ class PauseSubState extends MusicBeatSubstate
 
 		////
 		pauseMusic = new FlxSound();
+		pauseMusic.context = MUSIC;
 
 		var songName = songName;
 		if (songName == null) songName = 'Breakfast';
@@ -203,7 +204,7 @@ class PauseSubState extends MusicBeatSubstate
 		
 		pauseMusic.volume = 0;
 		pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length* 0.5)));
-		pauseMusic.fadeIn(50, 0, 0.5);
+		pauseMusic.fadeIn(50, 0, 0.5 );
 
 		FlxG.sound.list.add(pauseMusic);
 
@@ -332,13 +333,13 @@ class PauseSubState extends MusicBeatSubstate
 
 					if (controls.UI_LEFT_P)
 					{
-						FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+						FlxG.sound.play(Paths.sound('scrollMenu'), 0.4 );
 						curTime -= 1000 * speed;
 						holdTime = 0;
 					}
 					if (controls.UI_RIGHT_P)
 					{
-						FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+						FlxG.sound.play(Paths.sound('scrollMenu'), 0.4 );
 						curTime += 1000 * speed;
 						holdTime = 0;
 					}
@@ -399,7 +400,7 @@ class PauseSubState extends MusicBeatSubstate
 		curSelected += change;
 
 		if (change != 0)
-			FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+			FlxG.sound.play(Paths.sound('scrollMenu'), 0.4 );
 
 		if (curSelected < 0)
 			curSelected = menuItems.length - 1;

@@ -1,28 +1,31 @@
 package;
 
+import Github.RepoInfo;
 import Github.Release;
-import sowy.Sowy;
-import openfl.system.Capabilities;
 import flixel.FlxG;
-import flixel.FlxGame;
 import flixel.FlxState;
 import openfl.Lib;
 import openfl.display.FPS;
 import openfl.display.Sprite;
 import openfl.display.StageScaleMode;
+import openfl.system.Capabilities;
 import openfl.events.Event;
 using StringTools;
+
 #if CRASH_HANDLER
 import haxe.CallStack;
 import lime.app.Application;
 import openfl.events.UncaughtErrorEvent;
 import sys.io.File;
 #end
+
 #if discord_rpc
 import Discord.DiscordClient;
 #end
 
-
+#if (CRASH_HANDLER && windows && cpp)
+@:cppFileCode('#include <windows.h>')
+#end
 class Main extends Sprite
 {
 	var gameWidth:Int = 1280; // Width of the game in pixels (might be less / more in actual pixels depending on your zoom).
@@ -35,24 +38,31 @@ class Main extends Sprite
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
-	public static var showDebugTraces:Bool = #if (SHOW_DEBUG_TRACES || debug) true #else false #end;
-
+	public static var volumeChangedEvent:lime.app.Event<Float->Void> = new lime.app.Event<Float->Void>();
 	public static var engineVersion:String = '0.2.0'; // Used for autoupdating n stuff
 	public static var betaVersion(get, default):String = 'rc.1'; // beta version, make blank if not on a beta version, otherwise do it based on semantic versioning (alpha.1, beta.1, rc.1, etc)
 	public static var beta:Bool = betaVersion.trim() != '';
 
 	public static var UserAgent:String = 'TrollEngine/${Main.engineVersion}'; // used for http requests. if you end up forking the engine and making your own then make sure to change this!!
-	public static var githubRepo = Github.getCompiledRepoInfo();
+	public static var githubRepo:RepoInfo = Github.getCompiledRepoInfo();
 	public static var downloadBetas:Bool = beta;
 	public static var outOfDate:Bool = false;
 	public static var recentRelease:Release;
-	
+
+	public static var showDebugTraces:Bool = #if (SHOW_DEBUG_TRACES || debug) true #else false #end;
+
+	static function get_betaVersion()
+		return beta ? betaVersion : "0";
+
+    @:isVar
+    public static var semanticVersion(get, null):SemanticVersion = '';
+	static function get_semanticVersion()
+		return '$engineVersion${beta ? '-$betaVersion' : ""}';
+
 	@:isVar
 	public static var displayedVersion(get, null):String = '';
 	static function get_displayedVersion()
-		return 'v${engineVersion}${(beta?("-" + betaVersion):"")}';
-	static function get_betaVersion()
-		return beta ? betaVersion : "0";
+		return 'v${semanticVersion}';
 	    
 	////
 	public static var fpsVar:FPS;
@@ -96,12 +106,12 @@ class Main extends Sprite
 
 	private function setupGame():Void
 	{
+		final screenWidth = Capabilities.screenResolutionX;
+		final screenHeight = Capabilities.screenResolutionY;
+
 		//// Readjust the game size for smaller screens
 		if (zoom == -1)
 		{
-			var screenWidth = Capabilities.screenResolutionX;
-			var screenHeight = Capabilities.screenResolutionY;
-
 			if (!(screenWidth > gameWidth || screenHeight > gameWidth)){
 				var ratioX:Float = screenWidth / gameWidth;
 				var ratioY:Float = screenHeight / gameHeight;
@@ -140,12 +150,29 @@ class Main extends Sprite
 			@:privateAccess
 			FlxG.initSave();
 
+			//// Readjust the window size for larger screens 
+			var scaleFactor:Int = Math.ceil((screenWidth > screenHeight) ? (screenHeight / gameHeight) : (screenWidth / gameWidth));
+			if (scaleFactor > 1) scaleFactor--;
+			
+			final windowWidth:Int = scaleFactor * gameWidth;
+			final windowHeight:Int = scaleFactor * gameHeight;
+
+			Application.current.window.resize(
+				windowWidth, 
+				windowHeight
+			);
+			Application.current.window.move(
+				Std.int((screenWidth - windowWidth) / 2),
+				Std.int((screenHeight - windowHeight) / 2)
+			);
+
+			////
 			if (FlxG.save.data != null && FlxG.save.data.fullscreen != null)
 				startFullscreen = FlxG.save.data.fullscreen;
 		}
 		
 		addChild(new FNFGame(gameWidth, gameHeight, initialState, #if(flixel < "5.0.0") zoom, #end framerate, framerate, skipSplash, startFullscreen));
-		
+
 		FlxG.mouse.useSystemCursor = true;
 		FlxG.mouse.visible = false;
 
@@ -154,9 +181,6 @@ class Main extends Sprite
 			fpsVar = new FPS(10, 3, 0xFFFFFF);
 			fpsVar.visible = false;
 			addChild(fpsVar);
-			
-			Lib.current.stage.align = "tl";
-			Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
 			#end
 
 			bread = new Bread();
@@ -207,10 +231,22 @@ class Main extends Sprite
 		Sys.println(" \n" + errMsg);
 		File.saveContent("crash.txt", errMsg);
 		
+		#if (windows && cpp)
+		windows_showErrorMsgBox(errMsg, errorName);
+		#else
 		Application.current.window.alert(errMsg, errorName);
+		#end
 
+		#if discord_rpc
 		DiscordClient.shutdown();
+		#end
 		Sys.exit(1);
 	}
+
+	#if (windows && cpp)
+	@:functionCode('MessageBox(NULL, message, title, MB_ICONERROR | MB_OK);')
+	function windows_showErrorMsgBox(message:String, title:String){}
+	#end
+
 	#end
 }

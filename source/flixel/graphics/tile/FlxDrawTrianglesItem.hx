@@ -74,26 +74,24 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 		setParameterValue(shader.hasTransform, true);
 		setParameterValue(shader.hasColorTransform, colored || hasColorOffsets);
 
-			#if (openfl > "8.7.0")
-			camera.canvas.graphics.overrideBlendMode(blend);
-			#end
+		#if (openfl > "8.7.0")
+		camera.canvas.graphics.overrideBlendMode(blend);
+		#end
+
 		camera.canvas.graphics.beginShaderFill(shader);
 		#else
 		camera.canvas.graphics.beginBitmapFill(graphics.bitmap, null, true, (camera.antialiasing || antialiasing));
 		#end
 
-		#if !openfl_legacy
 		camera.canvas.graphics.drawTriangles(vertices, indices, uvtData, TriangleCulling.NONE);
-		#else
-		camera.canvas.graphics.drawTriangles(vertices, indices, uvtData, TriangleCulling.NONE, (colored) ? colors : null, blending);
-		#end
 		camera.canvas.graphics.endFill();
+
 		#if FLX_DEBUG
 		if (FlxG.debugger.drawDebug)
 		{
 			var gfx:Graphics = camera.debugLayer.graphics;
 			gfx.lineStyle(1, FlxColor.BLUE, 0.5);
-			gfx.drawTriangles(vertices, indices);
+			gfx.drawTriangles(vertices, indices, uvtData);
 		}
 		#end
 
@@ -103,10 +101,17 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 	override public function reset():Void
 	{
 		super.reset();
+		#if (flash || openfl >= "4.0.0")
+		vertices.length = 0;
+		indices.length = 0;
+		uvtData.length = 0;
+		colors.length = 0;
+		#else
 		vertices.splice(0, vertices.length);
 		indices.splice(0, indices.length);
 		uvtData.splice(0, uvtData.length);
 		colors.splice(0, colors.length);
+		#end
 
 		verticesPosition = 0;
 		indicesPosition = 0;
@@ -136,8 +141,8 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 		#end
 	}
 
-	public function addTrianglesColorArray(vertices:DrawData<Float>, indices:DrawData<Int>, uvtData:DrawData<Float>, ?colors:DrawData<Int>, ?position:FlxPoint,
-			?cameraBounds:FlxRect #if !flash, ?transforms:Array<ColorTransform> #end):Void
+	public function addTrianglesColorArray(vertices:DrawData<Float>, indices:DrawData<Int>, uvtData:DrawData<Float>, ?colors:DrawData<Int>,
+			?position:FlxPoint, ?cameraBounds:FlxRect #if !flash, ?transforms:Array<ColorTransform> #end):Void
 	{
 		if (position == null)
 			position = point.set();
@@ -168,7 +173,6 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 			i += 2;
 		}
 
-
 		var uvtDataLength:Int = uvtData.length;
 		for (i in 0...uvtDataLength)
 		{
@@ -194,7 +198,6 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 
 		verticesPosition += verticesLength;
 		indicesPosition += indicesLength;
-		
 
 		position.putWeak();
 		cameraBounds.putWeak();
@@ -219,36 +222,38 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 			for (_ in 0...(numTriangles))
 			{
 				var transform = transforms[_];
-                for(_ in 0...3){
-                    if (transform != null)
-                    {
-                        colorMultipliers.push(transform.redMultiplier);
-                        colorMultipliers.push(transform.greenMultiplier);
-                        colorMultipliers.push(transform.blueMultiplier);
+				for (_ in 0...3)
+				{
+					if (transform != null)
+					{
+						colorMultipliers.push(transform.redMultiplier);
+						colorMultipliers.push(transform.greenMultiplier);
+						colorMultipliers.push(transform.blueMultiplier);
 
-                        colorOffsets.push(transform.redOffset);
-                        colorOffsets.push(transform.greenOffset);
-                        colorOffsets.push(transform.blueOffset);
-                        colorOffsets.push(transform.alphaOffset);
-                    }
-                    else
-                    {
-                        colorMultipliers.push(1);
-                        colorMultipliers.push(1);
-                        colorMultipliers.push(1);
+						colorOffsets.push(transform.redOffset);
+						colorOffsets.push(transform.greenOffset);
+						colorOffsets.push(transform.blueOffset);
+						colorOffsets.push(transform.alphaOffset);
+					}
+					else
+					{
+						colorMultipliers.push(1);
+						colorMultipliers.push(1);
+						colorMultipliers.push(1);
 
-                        colorOffsets.push(0);
-                        colorOffsets.push(0);
-                        colorOffsets.push(0);
-                        colorOffsets.push(0);
-                    }
+						colorOffsets.push(0);
+						colorOffsets.push(0);
+						colorOffsets.push(0);
+						colorOffsets.push(0);
+					}
 
-                    colorMultipliers.push(1);
-                }
+					colorMultipliers.push(1);
+				}
 			}
 		}
 		#end
 	}
+    
 
 	public function addTriangles(vertices:DrawData<Float>, indices:DrawData<Int>, uvtData:DrawData<Float>, ?colors:DrawData<Int>, ?position:FlxPoint,
 			?cameraBounds:FlxRect #if !flash , ?transform:ColorTransform #end):Void

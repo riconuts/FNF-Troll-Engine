@@ -129,6 +129,10 @@ using flixel.util.FlxColorTransformUtil;
 class FlxSprite extends FlxObject
 {
 	/**
+	 * Whether this sprite should use the default antialiasing
+	 */
+	public var useDefaultAntialiasing:Bool = true;
+	/**
 	 * The default value for `antialiasing` across all `FlxSprites`,
 	 * defaults to `false`.
 	 * @since 5.0.0
@@ -159,7 +163,7 @@ class FlxSprite extends FlxObject
 	 * Controls whether the object is smoothed when rotated, affects performance.
 	 */
     @:isVar
-	public var antialiasing(get, set):Null<Bool>;
+	public var antialiasing(get, set):Bool = false;
 
 	/**
 	 * Set this flag to true to force the sprite to update during the `draw()` call.
@@ -1584,17 +1588,18 @@ class FlxSprite extends FlxObject
 		return flipY = Value;
 	}
 
-    @:noCompletion
+	@:noCompletion
     function get_antialiasing():Bool
-    {
-        return antialiasing == null ? defaultAntialiasing : antialiasing;
-    }
+	{
+		return useDefaultAntialiasing ? defaultAntialiasing : antialiasing;
+	}
 
 	@:noCompletion
-    function set_antialiasing(value:Null<Bool>):Null<Bool>
-    {
-        return antialiasing = value;
-    }
+	function set_antialiasing(value:Bool):Bool
+	{
+		useDefaultAntialiasing = false;
+		return antialiasing = value;
+	}
     /*
 	function set_antialiasing(value:Bool):Bool
 	{

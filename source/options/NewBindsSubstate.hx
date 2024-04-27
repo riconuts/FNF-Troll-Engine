@@ -362,7 +362,7 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 					if (defaultBindKeys != null){
 						var defaultKey:FlxKey = defaultBindKeys[keyboardX];
 						var binded = bind(keyboardY, keyboardX, defaultKey);
-						FlxG.sound.play(Paths.sound(binded[keyboardX] == defaultKey ? 'confirmMenu' : 'cancelMenu'));
+						FlxG.sound.play(Paths.sound(binded[keyboardX] == defaultKey ? 'confirmMenu' : 'cancelMenu') );
 					}
 				}
 			}

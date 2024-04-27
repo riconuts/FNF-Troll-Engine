@@ -96,7 +96,7 @@ class AlphaModifier extends NoteModifier
 			var yPos:Float = 50 + diff;
 
 			var alphaMod = 
-			(1 - getSubmodValue("alpha",player)) * (1 - getSubmodValue('alpha${note.noteData}',player)) * (1 - getSubmodValue("noteAlpha", player))* (1 - getSubmodValue('noteAlpha${note.noteData}', player));
+			(1 - getSubmodValue("alpha",player)) * (1 - getSubmodValue('alpha${note.column}',player)) * (1 - getSubmodValue("noteAlpha", player))* (1 - getSubmodValue('noteAlpha${note.column}', player));
 			var vis = getVisibility(yPos, player, note);
 
 			if (getSubmodValue("hideStealthGlow", player) == 0)
@@ -111,11 +111,11 @@ class AlphaModifier extends NoteModifier
 		}
 		else if (obj is StrumNote){
 			var receptor:StrumNote = cast obj;
-			alpha *= (1 - getSubmodValue("alpha", player)) * (1 - getSubmodValue('alpha${receptor.noteData}', player));
+			alpha *= (1 - getSubmodValue("alpha", player)) * (1 - getSubmodValue('alpha${receptor.column}', player));
 
-			if (getSubmodValue("dark", player) != 0 || getSubmodValue('dark${receptor.noteData}', player) != 0)
+			if (getSubmodValue("dark", player) != 0 || getSubmodValue('dark${receptor.column}', player) != 0)
 			{
-				var vis = (1 - getSubmodValue("dark", player)) * (1 - getSubmodValue('dark${receptor.noteData}', player));
+				var vis = (1 - getSubmodValue("dark", player)) * (1 - getSubmodValue('dark${receptor.column}', player));
 				if (getSubmodValue("hideDarkGlow", player) == 0)
 				{
 					alpha *= getRealAlpha(vis);
@@ -126,7 +126,7 @@ class AlphaModifier extends NoteModifier
 		}
 		else if (obj is NoteObject){
 			var nobj:NoteObject = cast obj;
-			alpha *= (1 - getSubmodValue("alpha", player)) * (1 - getSubmodValue('alpha${nobj.noteData}', player));
+			alpha *= (1 - getSubmodValue("alpha", player)) * (1 - getSubmodValue('alpha${nobj.column}', player));
 		}
 
 		info.alpha = alpha;

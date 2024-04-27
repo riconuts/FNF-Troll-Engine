@@ -34,8 +34,10 @@ typedef StageFile =
 
 	@:optional var bg_color:Null<String>;
 
-	@:optional var camera_stage:Array<Float>; // for the title screen
-	@:optional var pixel_size:Null<Float>;
+    // title screen vars
+	@:optional var camera_stage:Array<Float>; 
+    @:optional var title_zoom:Float;
+
 	@:optional var preloadStrings:Array<String>;
 	#if sys
 	@:optional var preload:Array<Cache.AssetPreload>; // incase you would like to add more information, though you shouldnt really need to
@@ -62,29 +64,34 @@ class Stage extends FlxTypedGroup<FlxBasic>
 	public var stageScript:FunkinHScript;
 	public var spriteMap = new Map<String, FlxBasic>();
 
-	public function new(?StageName = "stage", ?StartScript:Bool = true)
+	public function new(?stageName = "stage", ?runScript:Bool = true)
 	{
 		super();
 
-		if (StageName != null)
-			curStage = StageName;
+		if (stageName != null)
+			curStage = stageName;
 		
 		var newStageData = StageData.getStageFile(curStage);
 		if (newStageData != null)
 			stageData = newStageData;
 
-		if (StartScript)
+		if (runScript)
 			startScript(false);
 	}
 
 	var stageBuilt:Bool = false;
-	public function startScript(?BuildStage = false)
+	public function startScript(?buildStage = false, ?additionalVars:Map<String, Any>)
 	{
 		if (stageScript != null)
 		{
 			trace("Stage script already started!");
 			return;
 		}
+
+		if (additionalVars == null)
+			additionalVars = ["inTitlescreen" => false];
+		else if (!additionalVars.exists("inTitlescreen"))
+			additionalVars.set("inTitlescreen", false);        
 
 		var baseFile:String = 'stages/$curStage.hscript';
 	
@@ -93,7 +100,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 			if (!Paths.exists(file))
 				continue;
 		
-			stageScript = FunkinHScript.fromFile(file);
+			stageScript = FunkinHScript.fromFile(file, file, additionalVars);
 
 			// define variables lolol
 			stageScript.set("stage", this); // for backwards compat lol
@@ -103,7 +110,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 			stageScript.set("this", this);
 			stageScript.set("foreground", foreground);
 			
-			if (BuildStage){
+			if (buildStage){
 				stageScript.call("onLoad", [this, foreground]);
 				stageBuilt = true;
 			}
@@ -115,6 +122,28 @@ class Stage extends FlxTypedGroup<FlxBasic>
 	public function buildStage()
 	{
 		if (!stageBuilt){
+			// In case you want to hardcode your stages
+			/* 
+			switch (curStage)
+			{
+				case "example":
+					var ground = new FlxSprite(-2048, -100);
+					ground.makeGraphic(4096, 1280, 0xFFEAEAEA);
+					this.add(ground);
+
+					var block1 = new FlxSprite(-1750, -250);
+					block1.makeGraphic(512, 512, 0xFF888888);
+					block1.offset.set(256, 256);
+					block1.scrollFactor.set(1.6, 1.2);
+					foreground.add(block1);
+
+					var block2 = new FlxSprite(1000, -250);
+					block2.makeGraphic(512, 512, 0xFF888888);
+					block2.offset.set(256, 256);
+					block2.scrollFactor.set(1.6, 1.2);
+					foreground.add(block2);
+			}
+			*/
 			
 			if (stageScript != null){
 				if (stageScript is FunkinLua)
@@ -146,10 +175,25 @@ class Stage extends FlxTypedGroup<FlxBasic>
 	
 		var daList:Array<String> = [];
 		#if MODS_ALLOWED
-		var modsList = Paths.getText('data/stageList.txt', false);
-		if (modsList != null)
-			for (shit in modsList.split("\n"))daList.push(shit.trim().replace("\n",""));
-		
+		if (modsOnly){
+			var modPath:String = Paths.modFolders('data/stageList.txt');
+			if (FileSystem.exists(modPath))
+			{
+				var modsList = File.getContent(modPath);
+				if (modsList != null && modsList.trim().length > 0)
+                    for (shit in modsList.split("\n"))
+                        daList.push(shit.trim().replace("\n", ""));
+			}
+
+        }else{
+			var modsList = Paths.getText('data/stageList.txt', false);
+			if (modsList != null && modsList.trim().length > 0)
+				for (shit in modsList.split("\n"))
+					daList.push(shit.trim().replace("\n", ""));
+        }
+
+
+		 
 		var path = Paths.modFolders("metadata.json");
 		var rawJson:Null<String> = Paths.getContent(path);
 

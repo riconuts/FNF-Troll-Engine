@@ -38,6 +38,8 @@ class GameOverSubstate extends MusicBeatSubstate
 	public static var voicelineName:Null<String> = null; // if set to null then it will just use the character name
 	// nvm maybe ill use this next time
 
+	var canEnd:Bool = false;
+
 	public static function resetVariables() {
 		characterName = null;
 		deathSoundName = 'fnf_loss_sfx';
@@ -66,9 +68,13 @@ class GameOverSubstate extends MusicBeatSubstate
 
 			var frameRate = 1/24;
 			FlxTween.tween(genericBitch, {"scale.x": 1.22, "scale.y": 1.22, alpha: 1}, 1, {ease: FlxEase.circIn}).then(
-				FlxTween.tween(genericBitch, {"scale.x": 1.196, "scale.y": 1.196}, frameRate, {onComplete: (_)->{ if (!isEnding) FlxG.sound.play(Paths.sound(genericSound), 1, false);}})).then(
+				FlxTween.tween(genericBitch, {"scale.x": 1.196, "scale.y": 1.196}, frameRate, {onComplete: (_)->{ if (!isEnding) FlxG.sound.play(Paths.sound(genericSound), false);}})).then(
 					FlxTween.tween(genericBitch, {"scale.x": 1.1, "scale.y": 1.1}, frameRate*35)).then(
-						FlxTween.tween(genericBitch, {"scale.x": 1, "scale.y": 1}, frameRate*60, {onStart: (fuck)->{ if (!isEnding) FlxG.sound.playMusic(Paths.music(genericMusic), 0.6, true); FlxG.sound.music.fadeIn(0.4, 0.6, 1);}})).then(
+				FlxTween.tween(genericBitch, {"scale.x": 1, "scale.y": 1}, frameRate * 60, {onStart: (fuck) ->
+				{
+					if (!isEnding)
+						FlxG.sound.playMusic(Paths.music(genericMusic), 0.6, true);
+					if (FlxG.sound.music!=null)FlxG.sound.music.fadeIn(0.4, 0.6, 1);}})).then(
 							FlxTween.tween(genericBitch, {"scale.x": 1.01, "scale.y": 1.01}, frameRate * 14, {type: PINGPONG}));
 		}
 		else{
@@ -79,6 +85,7 @@ class GameOverSubstate extends MusicBeatSubstate
 		PlayState.instance.setOnScripts('inGameOver', true);
 		PlayState.instance.callOnScripts('onGameOverStart', []);
 
+		canEnd = true;
 		super.create();
 	}
 
@@ -164,7 +171,7 @@ class GameOverSubstate extends MusicBeatSubstate
 
 	var isFollowingAlready:Bool = false;
 	var isEnding:Bool = false;
-
+    
 	override function update(elapsed:Float)
 	{
 		PlayState.instance.callOnScripts('onUpdate', [elapsed]);
@@ -180,49 +187,52 @@ class GameOverSubstate extends MusicBeatSubstate
 			FlxG.camera.zoom = FlxMath.lerp(defaultCamZoom, FlxG.camera.zoom, lerpVal);
 		}	
 
-		if (controls.ACCEPT && !isEnding)
-		{
-			isEnding = true;
+		if (canEnd){
+            if (controls.ACCEPT && !isEnding)
+            {
+                isEnding = true;
 
-			if (boyfriend != null)
-				boyfriend.playAnim('deathConfirm', true);
+                if (boyfriend != null)
+                    boyfriend.playAnim('deathConfirm', true);
 
-			if (genericBitch != null){
-				FlxTween.cancelTweensOf(genericBitch);
-				FlxTween.tween(genericBitch, {alpha: 0, "scale.x": 0, "scale.y": 0}, 100/120, {ease: FlxEase.quadIn, onComplete: (_)->{remove(genericBitch).destroy();}});
-			}
-			
-			FlxG.sound.music.stop();
-			
-			var endSound = FlxG.sound.play(Paths.music(endSoundName));
-			var endTime = Math.max(endSound.length/1000, 2.7); // wait for both the sound and the fade out to end.
+                if (genericBitch != null){
+                    FlxTween.cancelTweensOf(genericBitch);
+                    FlxTween.tween(genericBitch, {alpha: 0, "scale.x": 0, "scale.y": 0}, 100/120, {ease: FlxEase.quadIn, onComplete: (_)->{remove(genericBitch).destroy();}});
+                }
+                
+                if (FlxG.sound.music != null)FlxG.sound.music.stop();
+                
+                var endSound = FlxG.sound.play(Paths.music(endSoundName));
+                var endTime = Math.max(endSound.length/1000, 2.7); // wait for both the sound and the fade out to end.
 
-			new FlxTimer().start(0.7,		(tmr)->{	FlxG.camera.fade(FlxColor.BLACK, 2, false);	});
-			new FlxTimer().start(endTime,	(tmr)->{	MusicBeatState.resetState(true);			});
+                new FlxTimer().start(0.7,		(tmr)->{	FlxG.camera.fade(FlxColor.BLACK, 2, false);	});
+                new FlxTimer().start(endTime,	(tmr)->{	MusicBeatState.resetState(true);			});
 
-			PlayState.instance.callOnScripts('onGameOverConfirm', [true]);
-		}
+                PlayState.instance.callOnScripts('onGameOverConfirm', [true]);
+            }
+        
 
-		if (controls.BACK)
-		{
-			isEnding = true;
+            if (controls.BACK)
+            {
+                isEnding = true;
 
-			if (genericBitch != null)
-				FlxTween.cancelTweensOf(genericBitch);
+                if (genericBitch != null)
+                    FlxTween.cancelTweensOf(genericBitch);
 
-			FlxG.sound.music.stop();
-			PlayState.deathCounter = 0;
-			PlayState.seenCutscene = false;
+				if (FlxG.sound.music != null)FlxG.sound.music.stop();
+                PlayState.deathCounter = 0;
+                PlayState.seenCutscene = false;
 
-			PlayState.instance.callOnScripts('onGameOverConfirm', [false]);
+                PlayState.instance.callOnScripts('onGameOverConfirm', [false]);
 
-			if (PlayState.isStoryMode)
-				MusicBeatState.switchState(new StoryMenuState());
-			else
-				MusicBeatState.switchState(new FreeplayState());
+                if (PlayState.isStoryMode)
+                    MusicBeatState.switchState(new StoryMenuState());
+                else
+                    MusicBeatState.switchState(new FreeplayState());
 
-			MusicBeatState.playMenuMusic(true);
-		}
+                MusicBeatState.playMenuMusic(true);
+            }
+        }
 
 		if (!isEnding && boyfriend != null && boyfriend.animation.curAnim.name == 'firstDeath')
 		{
@@ -239,7 +249,7 @@ class GameOverSubstate extends MusicBeatSubstate
 			}
 		}
 
-		if (FlxG.sound.music.playing)
+		if (FlxG.sound.music!=null && FlxG.sound.music.playing)
 			Conductor.songPosition = FlxG.sound.music.time;
 		
 		PlayState.instance.callOnScripts('onUpdatePost', [elapsed]);

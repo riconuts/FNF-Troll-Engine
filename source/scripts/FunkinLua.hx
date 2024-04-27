@@ -40,7 +40,7 @@ using StringTools;
 
 class FunkinLua extends FunkinScript
 {
-	static var haxeScript:FunkinHScript;
+	public static var haxeScript:FunkinHScript;
 	public var errorHandler:String->Void;
 	#if LUA_ALLOWED
 	public var lua:State = null;
@@ -65,9 +65,6 @@ class FunkinLua extends FunkinScript
 		
 		scriptType = 'lua';
 		scriptName = name!=null ? name : script;
-
-		if (haxeScript == null)
-			haxeScript = FunkinHScript.fromString('', 'runHaxeCode', null, false);
 
 		#if (haxe >= "4.0.0")
 		accessedProps = new Map();
@@ -502,6 +499,11 @@ class FunkinLua extends FunkinScript
 		});
 
 		addCallback("runHaxeCode", function(code:String){
+			if (haxeScript == null){
+				trace('null');
+				return;
+			}
+
 			// getinfo randomly broke here idk why
 			// so just trace from line 1
 			FunkinHScript.parser.line = 1;
@@ -1634,7 +1636,7 @@ class FunkinLua extends FunkinScript
 		});
 
 		addCallback("playMusic", function(sound:String, volume:Float = 1, loop:Bool = false) {
-			FlxG.sound.playMusic(Paths.music(sound), volume, loop);
+			FlxG.sound.playMusic(Paths.music(sound), volume , loop);
 		});
 		addCallback("playSound", function(sound:String, volume:Float = 1, ?tag:String = null) {
 			if(tag != null && tag.length > 0) {
@@ -1642,13 +1644,13 @@ class FunkinLua extends FunkinScript
 				if(PlayState.instance.modchartSounds.exists(tag)) {
 					PlayState.instance.modchartSounds.get(tag).stop();
 				}
-				PlayState.instance.modchartSounds.set(tag, FlxG.sound.play(Paths.sound(sound), volume, false, function() {
+				PlayState.instance.modchartSounds.set(tag, FlxG.sound.play(Paths.sound(sound), volume , false, function() {
 					PlayState.instance.modchartSounds.remove(tag);
 					PlayState.instance.callOnLuas('onSoundFinished', [tag]);
 				}));
 				return;
 			}
-			FlxG.sound.play(Paths.sound(sound), volume);
+			FlxG.sound.play(Paths.sound(sound), volume );
 		});
 		addCallback("stopSound", function(tag:String) {
 			if(tag != null && tag.length > 1 && PlayState.instance.modchartSounds.exists(tag)) {

@@ -19,10 +19,16 @@ class OptionsState extends MusicBeatState
 			MusicBeatState.switchState(new MainMenuState());
         };
 
- 		bg = new FlxSprite(0, 0, Paths.image('tgtmenus/optionsbg'));
-		bg.screenCenter(XY);
+		#if tgt
+		final bgGraphic = Paths.image('tgtmenus/optionsbg');
+		bg = new FlxSprite((FlxG.width - bgGraphic.width) * 0.5, (FlxG.height - bgGraphic.height) * 0.5, bgGraphic);
+		#else
+		final bgGraphic = Paths.image('menuDesat');
+		bg = new FlxSprite((FlxG.width - bgGraphic.width) * 0.5, (FlxG.height - bgGraphic.height) * 0.5, bgGraphic);
+		bg.color = 0xFFea71fd;
+		#end
 		add(bg);
-        
+
 		backdrop = new flixel.addons.display.FlxBackdrop(Paths.image("grid"));
 		backdrop.velocity.set(30, 30);
 		backdrop.alpha = 0.15;
@@ -34,6 +40,52 @@ class OptionsState extends MusicBeatState
         persistentDraw=true;
 
         super.create();
+
+		#if !tgt
+		// ill clean this up later haha
+
+		var adjustColor = new shaders.AdjustColor();
+		bg.shader = adjustColor.shader;
+		adjustColor.contrast = 1.0;
+		adjustColor.brightness = -0.125;
+
+		bg.alpha = 0.25;
+		bg.blend = INVERT;
+		bg.setColorTransform(-1, -1, -1, 1,
+			Std.int(255 + bg.color.red / 3), 
+			Std.int(255 + bg.color.green / 3), 
+			Std.int(255 + bg.color.blue / 3),
+			0
+		);
+
+		var gradient = flixel.util.FlxGradient.createGradientFlxSprite(FlxG.width, FlxG.height, [0xFFFFFFFF, 0xFF000000]);
+		gradient.alpha = 1.0;
+		insert(0, gradient);
+
+		var bruh = new FlxSprite(bg.x, bg.y).makeGraphic(bg.frameWidth, bg.frameHeight, 0x00000000, false, 'OptionsState_bg');
+		bruh.stamp(bg, 0, 0);
+
+		bg.destroy();
+		remove(bg, true);
+
+		var grid = new openfl.display.BitmapData(2, 2);
+		grid.setPixel32(0, 0, 0xFFC0C0C0);
+		grid.setPixel32(1, 1, 0xFFC0C0C0);
+
+		backdrop.loadGraphic(grid, false, 0, 0, false, 'OptionsState_grid');
+		backdrop.scale.set(FlxG.height / 3, FlxG.height / 3);
+		backdrop.updateHitbox();
+		backdrop.antialiasing = true;
+
+		backdrop.alpha = 0.5;
+		backdrop.blend = ADD;
+		backdrop.color = 0xFFea71fd;
+		
+		var bg = bruh;
+		bg.blend = cast 9;
+		bg.alpha = 1.0;
+		add(bg);
+		#end
     }
 
 	override public function resetSubState(){

@@ -379,8 +379,8 @@ class FlxCamera extends FlxBasic
      * Replicates old behaviour where camera.x moves flashSprite
      * (Old behaviour)
      */
-
     public var positionMovesSprite:Bool = true;
+	
 	/**
 	 * The color tint of the camera display.
 	 */
@@ -1887,6 +1887,18 @@ class FlxCamera extends FlxBasic
 	 */
 	public function onResize():Void
 	{
+        @:privateAccess{
+            if (flashSprite != null){
+                if (flashSprite.__cacheBitmapData != null)
+                {
+                    flashSprite.__cacheBitmapData.disposeImage();
+                    flashSprite.__cacheBitmapData.dispose();
+                }
+                flashSprite.__cacheBitmap = null;
+                flashSprite.__cacheBitmapData = null;
+            }
+        }
+    
 		updateFlashOffset();
 		setScale(scaleX, scaleY);
 	}

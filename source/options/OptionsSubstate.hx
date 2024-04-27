@@ -51,6 +51,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		"judgeDiff", 
 		"noteSkin",
 	];
+	var forceWidgetUpdate:Bool = false;
 
 	static public var requiresRestart = _requiresRestart.copy();
 	static public var recommendsRestart = _recommendsRestart.copy();
@@ -238,6 +239,7 @@ class OptionsSubstate extends MusicBeatSubstate
 	function playPreviewSound(name:String, volume:Float = 1){
 		if (previewSound != null) previewSound.stop().destroy();
 		previewSound = FlxG.sound.play(Paths.sound(name), volume, false, null, true, ()->{previewSound = null;});
+		previewSound.context = MISC;
 	}
 
 	function onNumberChanged(option:String, oldVal:Float, newVal:Float)
@@ -255,9 +257,19 @@ class OptionsSubstate extends MusicBeatSubstate
 			case 'epicWindow' | 'sickWindow' | 'goodWindow' | 'badWindow' | 'hitWindow':
 				checkWindows();
 			case 'hitsoundVolume':
-				playPreviewSound("hitsound", newVal / 100);
+				playPreviewSound("hitsound", newVal * 0.01);
+            case 'sfxVolume':
+				playPreviewSound("scrollMenu", newVal * 0.01);
+            case 'masterVolume':
+                var vol = FlxG.sound.volume;
+                var newVol = newVal * 0.01;
+                if(vol != newVol)FlxG.sound.volume = newVol;
+
+                // TODO: only show sound tray if it would go up/down a step (so prob just check if newVol / 10 is a whole number or sum shit)
+				//FlxG.sound.showSoundTray(vol < newVol);
+
 			case 'missVolume':
-				playPreviewSound('missnote${FlxG.random.int(1, 3)}', newVal / 100);
+				playPreviewSound('missnote${FlxG.random.int(1, 3)}', newVal * 0.01);
 		}
 	}
 
@@ -294,9 +306,12 @@ class OptionsSubstate extends MusicBeatSubstate
 			[
 				"audio", 
 				[
-					"ruin",
+                    "masterVolume",
+                    "songVolume",
+				    'sfxVolume',
 					"hitsoundVolume", 
-					"missVolume"
+					"missVolume",
+					#if tgt "ruin", #end
 				]
 			],
 			[
@@ -392,6 +407,7 @@ class OptionsSubstate extends MusicBeatSubstate
         ],
 		
 		"misc" => [
+			//["audio", ["masterVolume", "songVolume", "hitsoundVolume", "missVolume"]],
 			#if discord_rpc
 			["discord", ["discordRPC"]],
 			#end
@@ -417,7 +433,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		"ui",
 		"video",
 		"controls",
-		#if (discord_rpc || DO_AUTO_UPDATE) "misc", #end /* "Accessibility" */];
+		#if (discord_rpc || DO_AUTO_UPDATE) "misc" #end, /* "Accessibility" */];
 
 	var selected:Int = 0;
 
@@ -473,6 +489,14 @@ class OptionsSubstate extends MusicBeatSubstate
 	}
 
 	var whitePixel = FlxGraphic.fromRectangle(1, 1, 0xFFFFFFFF, false, 'whitePixel');
+    function onVolumeChange(vol:Float){
+        vol *= 100;
+		if (Math.floor(getNumber("masterVolume")) != Math.floor(vol)){
+			forceWidgetUpdate = true;
+            changeNumber("masterVolume", vol, true);
+        }
+    }
+
 	override function create()
 	{
 		//var startTime = Sys.cpuTime();
@@ -540,24 +564,37 @@ class OptionsSubstate extends MusicBeatSubstate
 
 		optionCamera.follow(camFollowPos);
 
+		////
+		final backdropGraphic = Paths.image("optionsMenu/backdrop");
+		final backdropSlice = [22, 22, 89, 89];
+		final tabButtonHeight = 44;
+
 		var lastX:Float = optionMenu.x;
 		for (idx in 0...optionOrder.length)
 		{
 			var tabName = optionOrder[idx];
 
-			var button = new FlxSprite(lastX, optionMenu.y - 3, whitePixel);
+			var text = new FlxText(0, 0, 0, Paths.getString('opt_tabName_$tabName').toUpperCase(), 16);
+			#if tgt
+			text.setFormat(Paths.font("calibrib.ttf"), 32, 0xFFFFFFFF, CENTER);
+			#else
+			text.setFormat(Paths.font("vcr.ttf"), 32, 0xFFFFFFFF, CENTER);
+			text.pixelPerfectRender = true;
+			text.antialiasing = false;
+			#end
+
+			var button = new FlxSprite(lastX, optionMenu.y - 3 - tabButtonHeight, whitePixel);
 			button.ID = idx;
-			button.color = idx == 0 ? FlxColor.fromRGB(128, 128, 128) : FlxColor.fromRGB(82, 82, 82);
 			button.alpha = 0.75;
-
-			var text = new FlxText(button.x, button.y, 0, Paths.getString('opt_tabName_$tabName').toUpperCase(), 16);
-			text.setFormat(Paths.font(#if tgt "calibrib.ttf" #else "vcr.ttf" #end), 32, 0xFFFFFFFF, FlxTextAlign.CENTER);
+			button.color = idx == 0 ? FlxColor.fromRGB(128, 128, 128) : FlxColor.fromRGB(70, 70, 70);
 			
-			button.scale.set(Math.max(86, text.fieldWidth) + 8, 44);
+			button.scale.set(Math.max(86, text.fieldWidth) + 8, tabButtonHeight);
 			button.updateHitbox();
-			button.y -= button.height;
 
-			text.y = button.y + ((button.height - text.height) / 2);
+			text.setPosition(
+				button.x,
+				button.y + ((button.height - text.height) / 2)
+			);
 			text.fieldWidth = button.width;
 			text.updateHitbox();
 
@@ -572,16 +609,21 @@ class OptionsSubstate extends MusicBeatSubstate
 			var widgets:Map<FlxObject, Widget> = [];
 			cameraPositions.push(FlxPoint.get());
 
-			var backdropGraphic = Paths.image("optionsMenu/backdrop");
-			var backdropSlice = [22, 22, 89, 89];
-
 			for (data in options.get(tabName))
 			{
-				var label = data[0];
+				var label:String = data[0];
+
 				var text = new FlxText(8, daY, 0, Paths.getString('opt_label_$label'), 16);
-				text.setFormat(Paths.font(#if tgt "calibrib.ttf" #else "vcr.ttf" #end), 32, 0xFFFFFFFF, FlxTextAlign.LEFT);
+				#if tgt
+				text.setFormat(Paths.font("calibrib.ttf"), 32, 0xFFFFFFFF, LEFT);
+				#else
+				text.setFormat(Paths.font("vcr.ttf"), 32, 0xFFFFFFFF, LEFT);
+				text.pixelPerfectRender = true;
+				text.antialiasing = false;
+				#end
 				text.cameras = [optionCamera];
 				group.add(text);
+
 				daY += text.height;
 
 				var daOpts:Array<String> = data[1];
@@ -593,8 +635,8 @@ class OptionsSubstate extends MusicBeatSubstate
 					var data:OptionData = actualOptions.get(opt);
 
 					data.data.set("optionName", opt);
-					data.display = Paths.getString('opt_display_$opt');
-					data.desc = Paths.getString('opt_desc_$opt');
+					if (Paths.hasString('opt_display_$opt'))data.display = Paths.getString('opt_display_$opt');
+					if (Paths.hasString('opt_desc_$opt'))data.desc = Paths.getString('opt_desc_$opt');
 
 					var text = new FlxText(16, daY, 0, data.display, 16);
 					text.setFormat(Paths.font("calibri.ttf"), 28, 0xFFFFFFFF, FlxTextAlign.LEFT);
@@ -602,17 +644,18 @@ class OptionsSubstate extends MusicBeatSubstate
 
 					var height = Math.max(45, text.height + 12);
 					var rect = new Rectangle(text.x - 12, text.y, optionMenu.width - text.x - 8, height);
+
+					text.y += (height - text.height) / 2;
 					
 					var drop:FlxUI9SliceSprite = new FlxUI9SliceSprite(rect.x, rect.y, backdropGraphic, rect, backdropSlice);
 					drop.cameras = [optionCamera];
+					group.add(drop);
 					
 					var lock:FlxUI9SliceSprite = new FlxUI9SliceSprite(rect.x, rect.y, backdropGraphic, rect, backdropSlice);
 					lock.cameras = [optionCamera];
 					lock.alpha = 0.75;
-					text.y += (height - text.height) / 2;
 
-					var widget = createWidget(opt, drop, text, data);
-					group.add(drop);
+					var widget:Widget = createWidget(opt, drop, text, data);
 					widget.data.set("optionBox", drop);
 					widget.data.set("lockOverlay", lock);
 					if (widget.data.exists("objects"))
@@ -655,17 +698,25 @@ class OptionsSubstate extends MusicBeatSubstate
 		];
 		////
 
-		optionDesc = new FlxText(5, FlxG.height - 48, 0, "", 20);
-		optionDesc.setFormat(Paths.font("vcr.ttf"), #if tgt 20 #else 16 #end, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		optionDesc = new FlxText(5, FlxG.height - 48, 0);
+		#if tgt
+		optionDesc.setFormat(Paths.font("calibri.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		#else
+		optionDesc.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		optionDesc.pixelPerfectRender = true;
+		optionDesc.antialiasing = false;
+		#end
 		optionDesc.textField.background = true;
 		optionDesc.textField.backgroundColor = FlxColor.BLACK;
-		optionDesc.screenCenter(X);
 		optionDesc.cameras = [overlayCamera];
 		optionDesc.alpha = 0;
 		add(optionDesc);
 
 		prevScreenX = FlxG.mouse.screenX;
 		prevScreenY = FlxG.mouse.screenY;
+
+		Main.volumeChangedEvent.add(onVolumeChange);
+		onVolumeChange(FlxG.sound.volume);
 
 		checkWindows();
 
@@ -687,7 +738,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		{
 			case Toggle:
 				var checkbox = new Checkbox();
-				checkbox.scale.set(0.65, 0.65);
+				checkbox.setGraphicSize(36, 36);
 				checkbox.updateHitbox();
 				var text = new FlxText(0, 0, 0, "off", 16);
 				text.setFormat(Paths.font("calibri.ttf"), 24, 0xFFFFFFFF, FlxTextAlign.LEFT);
@@ -809,8 +860,13 @@ class OptionsSubstate extends MusicBeatSubstate
 				objects.add(arrow);
 				objects.add(label);
 			case Number:
-				var box:FlxSprite = new FlxSprite().makeGraphic(240, 24, FlxColor.BLACK);
-				var bar:FlxSprite = new FlxSprite().makeGraphic(240 - 8, 24 - 8, FlxColor.WHITE);
+				var box:FlxSprite = new FlxSprite(whitePixel);
+				box.color = FlxColor.BLACK;
+				box.scale.set(240, 24);
+				box.updateHitbox();
+
+				var bar:FlxSprite = new FlxSprite().makeGraphic(240-8, 24-8);
+				
 				objects.add(box);
 				objects.add(bar);
 
@@ -915,7 +971,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		for (idx in 0...buttons.length)
 		{
 			var butt = buttons[idx];
-			butt.color = idx == selected ? FlxColor.fromRGB(128, 128, 128) : FlxColor.fromRGB(82, 82, 82);
+			butt.color = idx == selected ? FlxColor.fromRGB(128, 128, 128) : FlxColor.fromRGB(70, 70, 70);
 		}
 
 		camFollow.copyFrom(cameraPositions[selected]);
@@ -1353,7 +1409,7 @@ class OptionsSubstate extends MusicBeatSubstate
 	function showOptionDesc(?text:String){
 		if (text == null || text == ''){
 			FlxTween.cancelTweensOf(optionDesc);
-			FlxTween.tween(optionDesc, {alpha: 0}, 0.16, {ease: FlxEase.quadOut});
+			FlxTween.tween(optionDesc, {alpha: 0, y: optionDesc.y + 12}, 0.16, {ease: FlxEase.quadOut});
 			return;
 		}
 		
@@ -1522,7 +1578,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			prevScreenX = FlxG.mouse.screenX;
 			prevScreenY = FlxG.mouse.screenY;
 
-			if (pHov == null || doUpdate || movedMouse || FlxG.mouse.justPressed)
+			if (pHov == null || doUpdate || movedMouse || FlxG.mouse.justPressed || forceWidgetUpdate)
 			{
 				for (object => widget in currentWidgets)
 				{
@@ -1535,6 +1591,7 @@ class OptionsSubstate extends MusicBeatSubstate
 
 					updateWidget(object, widget, elapsed);
 				}
+				forceWidgetUpdate = false;
 			}
 
 			if (curWidget == null){
@@ -1606,6 +1663,7 @@ class OptionsSubstate extends MusicBeatSubstate
 	{
 		_point.put();
 		_mousePoint.put();
+		Main.volumeChangedEvent.remove(onVolumeChange);
 
 		for (val in cameraPositions)
 			val.put();
@@ -1718,11 +1776,11 @@ class Checkbox extends WidgetSprite
 	{
 		super(x, y);
 		frames = Paths.getSparrowAtlas("optionsMenu/checkbox");
-		animation.addByPrefix("toggled", "selected", 0, true);
-		animation.addByPrefix("idle", "deselected", 0, true);
+		animation.addByPrefix("toggled", "selected", 0, false);
+		animation.addByPrefix("idle", "deselected", 0, false);
 		animation.play("idle", true);
 
-		antialiasing = false;
+		// antialiasing = false;
 
 		toggled = defaultToggled;
 	}

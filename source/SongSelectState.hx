@@ -1,6 +1,8 @@
 package;
 
+#if discord_rpc
 import Discord.DiscordClient;
+#end
 import sys.io.File;
 import sys.FileSystem;
 import flixel.text.FlxText;
@@ -9,7 +11,8 @@ import Song;
 using StringTools;
 
 /**
-	Barebones menu that shows a list of available songs
+	Barebones menu that shows a list of every available song and chart
+	Not meant to be a Freeplay menu!!! Just here as a placeholder and song select menu for quick testing
 **/
 class SongSelectState extends MusicBeatState
 {	
@@ -46,51 +49,75 @@ class SongSelectState extends MusicBeatState
 	{
 		StartupState.load();
 
+		#if discord_rpc
 		DiscordClient.changePresence("In the Menus", null);
+		#end
 		FlxG.camera.bgColor = 0xFF000000;
+		////
+		
+		/*
+		var bg = new FlxSprite(Paths.image("menuDesat"));
+		bg.blend = INVERT;
+		bg.setColorTransform(-1.75, -1.75, -1.75, 0.4, Std.int(255 + bg.color.red / 3), Std.int(255 + bg.color.green / 3), Std.int(255 + bg.color.blue / 3), 0);
+		bg.screenCenter();
+		add(bg);
+		*/
 
-		if (FlxG.sound.music == null)
+		////
+		if (FlxG.sound.music == null){
 			MusicBeatState.playMenuMusic(1);
+		}else{
+			FlxG.sound.music.fadeIn(1.0, FlxG.sound.music.volume);
+		}
 
 		var folder = 'assets/songs/';
-		Paths.iterateDirectory(folder, function(path:String){
-			if (FileSystem.isDirectory(folder + path))
-				songMeta.push(new SongMetadata(path));
+		Paths.iterateDirectory(folder, function(name:String){
+			if (FileSystem.isDirectory(folder + name))
+				songMeta.push(new SongMetadata(name));
 		});
 
 		#if MODS_ALLOWED
 		for (modDir in Paths.getModDirectories()){
 			var folder = Paths.mods('$modDir/songs/');
-			Paths.iterateDirectory(folder, function(path:String){
-				if (FileSystem.isDirectory(folder+path))
-					songMeta.push(new SongMetadata(path, modDir));
+			Paths.iterateDirectory(folder, function(name:String){
+				if (FileSystem.isDirectory(folder + name))
+					songMeta.push(new SongMetadata(name, modDir));
 			});
 		}
 		#end
 
-		var border = 8;
-		var spacing = 2;
+		var hPadding = 14;
+		var vPadding = 24;
+		var spacing = 3;
 		var textSize = 16;
 		var width = 16*textSize;
 
 		var ySpace = (textSize+spacing);
 
-		verticalLimit = Math.floor((FlxG.height - border*2)/ySpace);
+		verticalLimit = Math.floor((FlxG.height - vPadding*2)/ySpace);
 
 		for (id in 0...songMeta.length)
 		{
 			var text = new FlxText(
-				border + (Math.floor(id/verticalLimit) * width), 
-				border + (ySpace*(id%verticalLimit)), 
+				hPadding + (Math.floor(id/verticalLimit) * width), 
+				vPadding + (ySpace*(id%verticalLimit)), 
 				width, 
 				songMeta[id].songName,
 				textSize
 			);
+			text.wordWrap = false;
+			text.antialiasing = false;
 			songText.push(text);
 			add(text);
 		}
 
 		curSel = 0;
+
+		var versionTxt = new FlxText(0, 0, 0, Main.displayedVersion, 12);
+		versionTxt.setPosition(FlxG.width - 2 - versionTxt.width, FlxG.height - 2 - versionTxt.height);
+		versionTxt.alpha = 0.6;
+		versionTxt.antialiasing = false;
+		add(versionTxt);
 
 		super.create();
 	}
@@ -102,40 +129,45 @@ class SongSelectState extends MusicBeatState
 	{
 		var speed = 1;
 
-		if (controls.UI_DOWN_P){
-			curSel += speed;
-			ySecsHolding = 0;
-		}
-		if (controls.UI_UP_P){
-			curSel -= speed;
-			ySecsHolding = 0;
-		}
-
 		if (controls.UI_UP || controls.UI_DOWN){
+			if (controls.UI_DOWN_P){
+				curSel += speed;
+				ySecsHolding = 0;
+			}
+			if (controls.UI_UP_P){
+				curSel -= speed;
+				ySecsHolding = 0;
+			}
+
 			var checkLastHold:Int = Math.floor((ySecsHolding - 0.5) * 10);
 			ySecsHolding += e;
 			var checkNewHold:Int = Math.floor((ySecsHolding - 0.5) * 10);
 
 			if(ySecsHolding > 0.35 && checkNewHold - checkLastHold > 0)
-				curSel += (checkNewHold - checkLastHold) * (controls.UI_UP ? -speed : speed);
-		}
-
-		if (controls.UI_RIGHT_P){
-			curSel += verticalLimit;
-			ySecsHolding = 0;
-		}
-		if (controls.UI_LEFT_P){
-			curSel -= verticalLimit;
-			ySecsHolding = 0;
+				curSel += (checkNewHold - checkLastHold) * (controls.UI_UP ? -1 : 1) * speed;
 		}
 
 		if (controls.UI_LEFT || controls.UI_RIGHT){
+			if (controls.UI_RIGHT_P){
+				curSel += verticalLimit;
+				ySecsHolding = 0;
+			}
+			if (controls.UI_LEFT_P){
+				curSel -= verticalLimit;
+				ySecsHolding = 0;
+			}
+
 			var checkLastHold:Int = Math.floor((ySecsHolding - 0.5) * 10);
 			ySecsHolding += e;
 			var checkNewHold:Int = Math.floor((ySecsHolding - 0.5) * 10);
 
 			if(ySecsHolding > 0.35 && checkNewHold - checkLastHold > 0)
-				curSel += (checkNewHold - checkLastHold) * (controls.UI_UP ? -verticalLimit : verticalLimit);
+				curSel += (checkNewHold - checkLastHold) * (controls.UI_LEFT_P ? -1 : 1) * verticalLimit;
+		}
+
+		if (FlxG.keys.pressed.CONTROL)
+		{
+			openSubState(new GameplayChangersSubstate());
 		}
 
 		if (controls.ACCEPT){
@@ -145,13 +177,19 @@ class SongSelectState extends MusicBeatState
 			
 			if (charts.length > 1)
 				MusicBeatState.switchState(new SongChartSelec(songMeta[curSel], charts));
-			else
+			else if (charts.length > 0)
 				Song.playSong(songMeta[curSel], charts[0], 0);
+			else{
+				trace("no charts!");
+				songText[curSel].alpha = 0.6;
+			}
 		}
         else if (controls.BACK)
             MusicBeatState.switchState(new MainMenuState());
 		else if (FlxG.keys.justPressed.SEVEN)
 			MusicBeatState.switchState(new editors.MasterEditorMenu());
+		else if (FlxG.keys.justPressed.SIX)
+			MusicBeatState.switchState(new options.OptionsState());
 
 		super.update(e);
 	}
@@ -223,30 +261,36 @@ class SongChartSelec extends MusicBeatState
 		this.alts = alts;
 	}
 
-	public static function getCharts(metadata:SongMetadata)
+	public static function getCharts(metadata:SongMetadata):Array<String>
 	{
 		Paths.currentModDirectory = metadata.folder;
+		final songName = Paths.formatToSongPath(metadata.songName);
+		
+		trace(songName, metadata.folder);
 
-		var songName = Paths.formatToSongPath(metadata.songName);
-		var folder = (metadata.folder=="") ? Paths.getPath('songs/$songName/') : Paths.mods('${metadata.folder}/songs/$songName/');
-
-		trace(songName, folder);
-
-		var alts = [];
-
-		Paths.iterateDirectory(folder, function(fileName){
+		final charts = new haxe.ds.StringMap();
+		function processFileName(fileName:String)
+		{			
 			if (fileName == '$songName.json'){
-				alts.insert(1, "normal");
-				return;		
-			}
-			
-			if (!fileName.startsWith('$songName-') || !fileName.endsWith('.json'))
+				charts.set("normal", true);
 				return;
+			}
+			else if (!fileName.startsWith('$songName-') || !fileName.endsWith('.json')){
+				return;
+			}
 
-			var prefixLength = songName.length + 1;
-			alts.push(fileName.substr(prefixLength, fileName.length - prefixLength - 5));
-		});
+			final extension_dot = songName.length + 1;
+			charts.set(fileName.substr(extension_dot, fileName.length - extension_dot - 5), true);
+		}
 
-		return alts;
+		#if PE_MOD_COMPATIBILITY
+		final folder = (metadata.folder == "") ? Paths.getPath('data/$songName/') : Paths.mods('${metadata.folder}/data/$songName/');
+		Paths.iterateDirectory(folder, processFileName);
+		#end
+
+		final folder = (metadata.folder == "") ? Paths.getPath('songs/$songName/') : Paths.mods('${metadata.folder}/songs/$songName/');
+		Paths.iterateDirectory(folder, processFileName);
+
+		return [for (name in charts.keys()) name];
 	} 
 }

@@ -25,12 +25,7 @@ class StrumNote extends NoteObject
 	public var zIndex:Float = 0;
 	public var desiredZIndex:Float = 0;
 	public var z:Float = 0;
-	
-	override function destroy()
-	{
-		defScale.put();
-		super.destroy();
-	}	
+
 	public var isQuant:Bool = false;
 	private var colorSwap:ColorSwap;
 	public var resetAnim:Float = 0;
@@ -115,12 +110,17 @@ class StrumNote extends NoteObject
 	
     var field:PlayField;
 
-	public function new(x:Float, y:Float, leData:Int, ?field:PlayField, ?hudSkin:String = 'default') {
+	override function toString()
+	{
+		return '(column: $column | texture $texture | visible: $visible)';
+	}
+
+	public function new(x:Float, y:Float, leColumn:Int, ?field:PlayField, ?hudSkin:String = 'default') {
 		colorSwap = new ColorSwap();
 		shader = colorSwap.shader;
         this.field = field;
 		super(x, y);
-		noteData = leData;
+		column = leColumn;
         
         noteMod = hudSkin;
 
@@ -157,7 +157,7 @@ class StrumNote extends NoteObject
 		setGraphicSize(Std.int(width * 0.7));
 
 		// TODO: proper multi-key support
-		switch (Math.abs(noteData) % 4)
+		switch (Math.abs(column) % 4)
 		{
 			case 0:
 				animation.addByPrefix('static', 'arrowLEFT');
@@ -190,9 +190,9 @@ class StrumNote extends NoteObject
 	{
 		playAnim('static');
 		x -= Note.swagWidth / 2;
-		x = x - (Note.swagWidth * 2) + (Note.swagWidth * noteData) + 54;
+		x = x - (Note.swagWidth * 2) + (Note.swagWidth * column) + 54;
 
-		ID = noteData;
+		ID = column;
 	}
 
 	override function update(elapsed:Float) {
@@ -226,9 +226,9 @@ class StrumNote extends NoteObject
 			if (note == null)
 			{
 				if(!isQuant){
-					colorSwap.hue = ClientPrefs.arrowHSV[noteData % 4][0] / 360;
-					colorSwap.saturation = ClientPrefs.arrowHSV[noteData % 4][1] / 100;
-					colorSwap.brightness = ClientPrefs.arrowHSV[noteData % 4][2] / 100;
+					colorSwap.hue = ClientPrefs.arrowHSV[column % 4][0] / 360;
+					colorSwap.saturation = ClientPrefs.arrowHSV[column % 4][1] / 100;
+					colorSwap.brightness = ClientPrefs.arrowHSV[column % 4][2] / 100;
 				}else{
 					colorSwap.hue =  0;
 					colorSwap.saturation = 0;
