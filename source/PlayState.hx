@@ -3836,23 +3836,22 @@ class PlayState extends MusicBeatState
 		if (callOnHScripts("onApplyNoteJudgment", [note, judgeData, bot]) == Globals.Function_Stop)
 			return null;
 
+		var finalJudgeData:JudgmentData = Reflect.copy(judgeData);
         if (note.noteScript != null){
-			var mutatedJudgeData:Dynamic = callScript(note.noteScript, "mutateJudgeData", [note, judgeData]);
+			var mutatedJudgeData:Dynamic = callScript(note.noteScript, "mutateJudgeData", [note, finalJudgeData]);
 			if (mutatedJudgeData != null && mutatedJudgeData != Globals.Function_Continue)
-				judgeData = cast mutatedJudgeData;
+				finalJudgeData = cast mutatedJudgeData;
         }
-        var mutatedJudgeData:Dynamic = callOnHScripts("mutateJudgeData", [note, judgeData]);
+        var mutatedJudgeData:Dynamic = callOnHScripts("mutateJudgeData", [note, finalJudgeData]);
 
 		if(mutatedJudgeData != null && mutatedJudgeData != Globals.Function_Continue)
-			judgeData = cast mutatedJudgeData; // so you can return your own custom judgements or w/e
-		// Note: Be careful while changing values from the judgeData, cause it will also change the judgeData of every other note with the same judgement.
-		// You should use Reflect.copy() on your script.
+			finalJudgeData = cast mutatedJudgeData; // so you can return your own custom judgements or w/e
 
-		applyJudgmentData(judgeData, note.hitResult.hitDiff, bot, true);
+		applyJudgmentData(finalJudgeData, note.hitResult.hitDiff, bot, true);
 
-		callOnHScripts("onApplyNoteJudgmentPost", [note, judgeData, bot]);
+		callOnHScripts("onApplyNoteJudgmentPost", [note, finalJudgeData, bot]);
 		
-		return judgeData;
+		return finalJudgeData;
 	}
 
 	private function applyJudgment(judge:Judgment, ?diff:Float = 0, ?show:Bool = true)
