@@ -1,6 +1,5 @@
 package hud;
 
-import PlayState.FNFHealthBar;
 import flixel.ui.FlxBar;
 import flixel.tweens.FlxEase;
 import flixel.util.FlxStringUtil;

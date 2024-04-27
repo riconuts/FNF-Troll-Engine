@@ -6,7 +6,6 @@ import flixel.ui.FlxBar;
 import flixel.text.FlxText;
 import JudgmentManager.JudgmentData;
 import flixel.util.FlxColor;
-import PlayState.FNFHealthBar;
 import haxe.exceptions.NotImplementedException;
 import playfields.*;
 
