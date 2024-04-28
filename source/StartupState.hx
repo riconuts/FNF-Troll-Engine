@@ -290,7 +290,7 @@ class StartupState extends FlxTransitionableState
 		switch (step){
 			case 0:
 				#if !MULTICORE_LOADING
-				loadingDuration = doLoading();
+				doLoading();
 				step = 10;
 
 				#else
