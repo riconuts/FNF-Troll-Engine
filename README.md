@@ -4,7 +4,7 @@
 
 
 ## Installation:
-You must have [the most up-to-date version of Haxe](https://haxe.org/download/).
+You must have [Haxe 4.2.5](https://haxe.org/download/version/4.2.5/).
 
 open up a Command Prompt/PowerShell or Terminal, type `haxelib install hmm`
 
