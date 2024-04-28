@@ -129,12 +129,20 @@ class Stats {
 	public var useFlags:Bool = ClientPrefs.gradeSet == 'Etterna';
     @:isVar
     public var comboBreaks(get, set):Int = 0;
-    function get_comboBreaks()return judgements.get("cb");
-	function set_comboBreaks(val:Int){judgements.set("cb", val); return val;}
+    function get_comboBreaks():Int return judgements.get("cb");
+	function set_comboBreaks(val:Int):Int{
+		comboBreaks = val;
+		judgements.set("cb", val); 
+		return val;
+	}
 	@:isVar
 	public var misses(get, set):Int = 0;
-	function get_misses()return judgements.get("miss");
-	function set_misses(val:Int){judgements.set("miss", val);return val;}
+	function get_misses():Int return judgements.get("miss");
+	function set_misses(val:Int):Int{
+		misses = val;
+		judgements.set("miss", val);
+		return val;
+	}
 
 	public function new(?gradeSet:Array<Array<Dynamic>>)
 	{
