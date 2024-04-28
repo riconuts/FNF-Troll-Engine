@@ -1,9 +1,6 @@
 package;
 
 import flixel.util.FlxTimer;
-#if desktop
-import Discord.DiscordClient;
-#end
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
@@ -22,6 +19,10 @@ import editors.MasterEditorMenu;
 import flixel.input.keyboard.FlxKey;
 
 using StringTools;
+
+#if discord_rpc
+import Discord.DiscordClient;
+#end
 
 class MainMenuState extends MusicBeatState
 {
@@ -50,7 +51,7 @@ class MainMenuState extends MusicBeatState
 
 	override function create()
 	{
-		#if desktop
+		#if discord_rpc
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
 		#end

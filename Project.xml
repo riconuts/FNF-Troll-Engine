@@ -54,7 +54,7 @@
 	<define name="HSCRIPT_ALLOWED" />
 	<define name="MODS_ALLOWED" if="desktop" />
 	<define name="CRASH_HANDLER" if="desktop" />
-	<define name="MULTICORE_LOADING" if="windows" />
+	<define name="MULTICORE_LOADING" if="sys windows" />
     <!-- <define name="tgt" if="display"/> --> <!--Uncomment if you want auto complete to assume youre compiling for TGT-->
 
     <!--Remove if you dont want Lua to be usable. Note that if you remove this, you should remove PE_MOD_COMPATIBILITY too -->
@@ -105,8 +105,8 @@
 
 		<define name="USE_EPIC_JUDGEMENT"/>
 		<define name="VIDEOS_ALLOWED"/>
-
-        <!-- <undefine name="SCRIPTABLE_STATES"/> --> <!--Needed for future thing-->
+		<define name="SCRIPTABLE_STATES"/>
+        
         <undefine name="PE_MOD_COMPATIBILITY" if="final"/>
 		<!-- <undefine name="DO_AUTO_UPDATE"/> -->
         <!-- <undefine name="LUA_ALLOWED"/> --> <!-- There's one lua script on TGT and I'm not rewritting it -->

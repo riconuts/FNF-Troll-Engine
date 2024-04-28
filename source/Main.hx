@@ -12,20 +12,21 @@ import openfl.system.Capabilities;
 import openfl.events.Event;
 using StringTools;
 
+#if discord_rpc
+import Discord.DiscordClient;
+#end
+
 #if CRASH_HANDLER
 import haxe.CallStack;
 import lime.app.Application;
 import openfl.events.UncaughtErrorEvent;
 import sys.io.File;
-#end
 
-#if discord_rpc
-import Discord.DiscordClient;
-#end
-
-#if (CRASH_HANDLER && windows && cpp)
+#if (windows && cpp)
 @:cppFileCode('#include <windows.h>')
 #end
+#end
+
 class Main extends Sprite
 {
 	var gameWidth:Int = 1280; // Width of the game in pixels (might be less / more in actual pixels depending on your zoom).
