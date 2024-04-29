@@ -3625,9 +3625,9 @@ class PlayState extends MusicBeatState
 			rating.acceleration.y = 550;
 			rating.velocity.set(FlxG.random.int(-10, 10), -FlxG.random.int(140, 175));
 
-			rating.alpha = 1;
+			rating.alpha = 1.0;
 
-			rating.tween = FlxTween.tween(rating, {alpha: 0}, 0.2, {
+			rating.tween = FlxTween.tween(rating, {alpha: 0.0}, 0.2, {
 				startDelay: Conductor.crochet * 0.001,
 				onComplete: function(wtf)
 				{
@@ -3646,8 +3646,13 @@ class PlayState extends MusicBeatState
 		rating.offset.set(rating.width/2, rating.height/2);
 
 		if (ClientPrefs.worldCombos && !ClientPrefs.simpleJudge){
-			rating.x = ratingOrigin[0] + ClientPrefs.comboOffset[0];
-			rating.y = ratingOrigin[1] - ClientPrefs.comboOffset[1];
+			
+			rating.y = camFollow.y - FlxG.camera.height * 0.1 - 60;
+			rating.x = FlxMath.bound(
+				FlxG.width * 0.55 - 40,
+				camFollow.x - FlxG.camera.width / 2 + rating.width,
+				camFollow.x + FlxG.camera.width / 2 - rating.width
+			);
 		}else{
 			rating.x = FlxG.width * 0.5 + ClientPrefs.comboOffset[0];
 			rating.y = FlxG.height * 0.5 - ClientPrefs.comboOffset[1];
@@ -3696,17 +3701,24 @@ class PlayState extends MusicBeatState
 			comboColor = hud.judgeColours.get("miss");
 		}
 
+		var scoreHW = separatedScore.length * 41 / 2;
+		
 		var worldOffsetX:Float;
 		var worldOffsetY:Float;
+
 		if (ClientPrefs.worldCombos && !ClientPrefs.simpleJudge){
-			worldOffsetX = ratingOrigin[0];
-			worldOffsetY = ratingOrigin[1];
+			worldOffsetY = camFollow.y - FlxG.camera.height * 0.1 + 80;
+			worldOffsetX = FlxMath.bound(
+				FlxG.width * 0.55 - scoreHW * 2, 
+				camFollow.x - FlxG.camera.width / 2 + scoreHW, 
+				camFollow.x + FlxG.camera.width / 2 - scoreHW
+			);
 		}else{
 			worldOffsetX = FlxG.width * 0.5;
-			worldOffsetY = FlxG.height * 0.5;
+			worldOffsetY = FlxG.height * 0.5 - ClientPrefs.comboOffset[3];
 		}
 
-		var numStartX:Float = worldOffsetX + ClientPrefs.comboOffset[2] - separatedScore.length * 41 / 2;
+		var numStartX:Float = worldOffsetX + ClientPrefs.comboOffset[2] - scoreHW;
 		for (daLoop => i in separatedScore)
 		{
 			var numScore:RatingSprite = ratingGroup.recycle(RatingSprite);
@@ -3724,7 +3736,7 @@ class PlayState extends MusicBeatState
 			numScore.offset.set(0, numScore.height / 2);
 
 			numScore.x = numStartX + 41.5 * daLoop;
-			numScore.y = worldOffsetY - ClientPrefs.comboOffset[3];
+			numScore.y = worldOffsetY;
 
 			numScore.color = comboColor;
 			numScore.visible = showComboNum;
@@ -3748,9 +3760,9 @@ class PlayState extends MusicBeatState
 			else
 			{
 				numScore.acceleration.y = FlxG.random.int(200, 300);
-				numScore.velocity.set(FlxG.random.float(-10, 10), -FlxG.random.int(140, 160));
+				numScore.velocity.set(FlxG.random.float(-5, 5), -FlxG.random.int(140, 160));
 
-				numScore.tween = FlxTween.tween(numScore, {alpha: 0}, 0.2, {
+				numScore.tween = FlxTween.tween(numScore, {alpha: 0.0}, 0.2, {
 					onComplete: function(wtf)
 					{
 						numScore.kill();
