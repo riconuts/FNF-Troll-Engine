@@ -1,5 +1,5 @@
 name: Help me!
-description: If you need help using the engine.
+description: If you need help compiling or using the engine.
 labels: [help wanted]
 body:
   - type: textarea
