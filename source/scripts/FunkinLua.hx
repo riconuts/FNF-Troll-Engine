@@ -570,8 +570,9 @@ class FunkinLua extends FunkinScript
 				doPush = true;
 			#end
 
-			if(doPush)
-			{
+			if(!doPush){
+				luaTrace("Script doesn't exist!");
+			}else{
 				if(!ignoreAlreadyRunning)
 				{
 					for (luaInstance in PlayState.instance.luaArray)
@@ -583,13 +584,10 @@ class FunkinLua extends FunkinScript
 						}
 					}
 				}
-				var lua:FunkinLua = new FunkinLua(cervix);
-				PlayState.instance.luaArray.push(lua);
-				PlayState.instance.funkyScripts.push(lua);
-
-				return;
+				
+				PlayState.instance.createLua(cervix);
 			}
-			luaTrace("Script doesn't exist!");
+			
 		});
 		addCallback("removeLuaScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false) { //would be dope asf.
 			var cervix = luaFile.endsWith(".lua") ? luaFile : luaFile + ".lua";
@@ -605,7 +603,7 @@ class FunkinLua extends FunkinScript
 			}
 			else{
 				cervix = Paths.getPreloadPath(cervix);
-				if(FileSystem.exists(cervix))
+				if (FileSystem.exists(cervix))
 					doPush = true;
 			}
 			#else
@@ -614,25 +612,19 @@ class FunkinLua extends FunkinScript
 				doPush = true;
 			#end
 
-			if(doPush)
-			{
-				if(!ignoreAlreadyRunning)
-				{
-					for (luaInstance in PlayState.instance.luaArray)
-					{
-						if(luaInstance.scriptName == cervix)
-						{
-							//luaTrace('The script "' + cervix + '" is already running!');
+			if(!doPush){
+				luaTrace("Script doesn't exist!");
 
-							PlayState.instance.luaArray.remove(luaInstance);
-
-							return;
-						}
+			}else if(!ignoreAlreadyRunning){
+				for (luaInstance in PlayState.instance.luaArray){
+					if(luaInstance.scriptName == cervix){
+						//luaTrace('The script "' + cervix + '" is already running!');
+						PlayState.instance.removeLua(luaInstance);
+						return;
 					}
-				}
-				return;
+				}		
 			}
-			luaTrace("Script doesn't exist!");
+			
 		});
 
 		addCallback("loadSong", function(?name:String = null, ?difficultyNum:Int = 1) {

@@ -981,15 +981,11 @@ class PlayState extends MusicBeatState
 		{
 			Paths.iterateDirectory(folder, function(file:String)
 			{
-				if(filesPushed.contains(file))
+				if(!file.endsWith('.lua') || filesPushed.contains(file))
 					return;
 
-				if(file.endsWith('.lua')) {
-					var script = new FunkinLua(folder + file);
-					luaArray.push(script);
-					funkyScripts.push(script);
-					filesPushed.push(file);
-				}			
+				createLua(folder + file);
+				filesPushed.push(file);
 			});
 		}
 
@@ -1000,9 +996,7 @@ class PlayState extends MusicBeatState
 			if (!Paths.exists(file))
 				continue;
 
-			var script = new FunkinLua(file);
-			luaArray.push(script);
-			funkyScripts.push(script);
+			createLua(file);
 
 			break;
 		}
@@ -1018,12 +1012,10 @@ class PlayState extends MusicBeatState
 		for (folder in foldersToCheck){
 			Paths.iterateDirectory(folder, function(file:String)
 			{
-				if(filesPushed.contains(file) || !file.endsWith('.lua'))
+				if(!file.endsWith('.lua') || filesPushed.contains(file))
 					return;
 
-				var script = new FunkinLua(folder + file);
-				luaArray.push(script);
-				funkyScripts.push(script);
+				createLua(folder + file);
 				filesPushed.push(file);			
 			});
 		}
@@ -1972,9 +1964,7 @@ class PlayState extends MusicBeatState
 						#if LUA_ALLOWED
 						if (ext == 'lua')
 						{
-							var script = new FunkinLua(file, notetype, #if PE_MOD_COMPATIBILITY true #else false #end);
-							luaArray.push(script);
-							funkyScripts.push(script);
+							var script = createLua(file, notetype, #if PE_MOD_COMPATIBILITY true #else false #end);
 							#if PE_MOD_COMPATIBILITY
 							// PE_MOD_COMPATIBILITY to call onCreate at the end of this function
 							luaNotetypeScripts.push(script);
@@ -2022,9 +2012,7 @@ class PlayState extends MusicBeatState
 						#if LUA_ALLOWED
 						if (ext == 'lua')
 						{
-							var script = new FunkinLua(file, event);
-							luaArray.push(script);
-							funkyScripts.push(script);
+							createLua(file, event);
 							// psych lua scripts work the exact same no matter what type of script they are 
 							doPush = true;
 						}
@@ -4498,8 +4486,18 @@ class PlayState extends MusicBeatState
 	#if LUA_ALLOWED
 	private var preventLuaRemove:Bool = false;
 
-	public function removeLua(lua:FunkinLua) {
-		if(luaArray != null && !preventLuaRemove) {
+	public function createLua(path:String, ?scriptName:String, ?ignoreCreateCall:Bool):FunkinLua
+	{
+		var script = new FunkinLua(path, scriptName, ignoreCreateCall);
+		luaArray.push(script);
+		funkyScripts.push(script);
+		return script;
+	}
+
+	public function removeLua(lua:FunkinLua):Void
+	{
+		if (luaArray != null && !preventLuaRemove) {
+			funkyScripts.remove(script);
 			luaArray.remove(lua);
 		}
 	}
