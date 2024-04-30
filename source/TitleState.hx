@@ -92,6 +92,12 @@ class TitleState extends MusicBeatState
 		{
 			Paths.currentModDirectory = randomStage[1];
 			bg = new Stage(randomStage[0], false);
+			
+			#if MULTICORE_LOADING
+			var shitToLoad = bg.stageData.preload;
+			if (shitToLoad != null) Cache.loadWithList(shitToLoad);
+			#end
+
 			bg.startScript(false, ["inTitlescreen" => true]);
 		}
 
