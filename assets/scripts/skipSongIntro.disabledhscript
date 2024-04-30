@@ -1,0 +1,92 @@
+var txt;
+var startTime;
+
+function onCreatePost()
+{
+	if (game.allNotes.length <= 0){
+		script.stop();
+		return;
+	}
+
+	////
+	var mustPressCheck = {
+		if (game.playOpponent)
+			(note)->{return !note.mustPress;}
+		else
+			(note)->{return note.mustPress;}
+	}
+	
+	////
+	var firstNote = game.allNotes[0];
+	
+	if (game.cpuControlled)
+		game.skipCountdown = true;
+	else
+	for (note in game.allNotes)
+	{
+		if (note.strumTime < firstNote.strumTime){
+			firstNote = note;
+		}
+		else if (note.strumTime == firstNote.strumTime){
+			if (mustPressCheck(note)){
+				firstNote = note;
+				break;
+			}
+		}else{
+			break;
+		}
+	}
+	
+	var minTime = firstNote.strumTime;
+	
+	if (!game.cpuControlled && mustPressCheck(firstNote)){
+		minTime -= Conductor.crochet * 5;
+	}
+
+	if (firstNote.strumTime <= 0) {
+		script.stop(); 
+		return;
+	}
+
+	startTime = minTime;
+	//PlayState.startOnTime = Math.floor(Conductor.getBeat(minTime) / 4) * 4 * Conductor.crochet;
+	
+	txt = new FlxText(0, 0, FlxG.width, "Press to SPACE skip intro", 16);
+	txt.setFormat(Paths.font("vcr.ttf"), 28, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+	txt.borderSize = 1.25;
+	//txt.borderColor = 0xFF000000;
+	//txt.alignment = "center";
+	txt.screenCenter();
+	txt.y = 0.5 * ((ClientPrefs.downScroll ? 0 : FlxG.height) + txt.y);
+	txt.alpha = 0;
+	txt.cameras = [game.camHUD];
+	game.add(txt);
+}
+
+function cleanup(){
+	txt.destroy();
+	game.remove(txt);
+			
+	script.stop();
+}
+
+var totalElapsed = -Math.PI / 2;
+function onUpdate(elapsed)
+{
+	if (Conductor.songPosition < 0)
+		return;
+
+	if (Conductor.songPosition < startTime){
+		totalElapsed += elapsed;
+		txt.alpha = Math.sin(totalElapsed) + 1;
+		
+		if (FlxG.keys.justPressed.SPACE){
+			game.setSongTime(startTime);
+			cleanup();
+		}
+	}else{
+		txt.alpha -= elapsed;
+		if (txt.alpha <= 0)
+			cleanup();
+	}
+}
