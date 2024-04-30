@@ -423,13 +423,20 @@ class TitleState extends MusicBeatState
 				case 2:
 					MusicBeatState.playMenuMusic(1, true);
 
-					#if tgt
+				#if tgt
 					createCoolText(['THE FNF TGT TEAM']);
-					#else
-					//createCoolText(['THE TROLL ENGINE TEAM']); // huge if true
-					createCoolText(['RICONUTS', 'NEBULA_ZORUA', 'AND MORE']);
-					#end
 				case 4: addMoreText('presents');
+				#else
+					//createCoolText(['THE TROLL ENGINE TEAM']); // huge if true
+
+					// should probably do proper code for spacing out the text
+					addMoreText('RICONUTS', 0);
+					addMoreText('NEBULA_ZORUA', 8);
+					addMoreText('AND MORE', 16);
+				
+				case 4: addMoreText('presents', 75);
+				#end
+				
 				case 5: deleteCoolText();
 
 				////
