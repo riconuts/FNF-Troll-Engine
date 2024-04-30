@@ -3607,21 +3607,23 @@ class PlayState extends MusicBeatState
 		else
 		{
 			rating = ratingGroup.recycle(RatingSprite);
-			rating.scale.set(0.7, 0.7);
 
 			rating.moves = true;
 			rating.acceleration.y = 550;
 			rating.velocity.set(FlxG.random.int(-10, 10), -FlxG.random.int(140, 175));
 
+			rating.scale.set(0.666, 0.666);
 			rating.alpha = 1.0;
 
-			rating.tween = FlxTween.tween(rating, {alpha: 0.0}, 0.2, {
-				startDelay: Conductor.crochet * 0.001,
-				onComplete: function(wtf)
-				{
-					rating.kill();
-				}
-			});
+			rating.tween = FlxTween.tween(rating.scale, {x: 0.7, y: 0.7}, 0.1, {ease: FlxEase.backOut, onComplete: function(twn){
+					rating.tween = FlxTween.tween(rating, {alpha: 0.0}, 0.2, {
+						startDelay: Conductor.crochet * 0.001,
+						onComplete: function(wtf)
+						{
+							rating.kill();
+						}
+					});
+			}});
 		}
 
         rating.color = 0xFFFFFFFF;
