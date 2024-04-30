@@ -236,7 +236,7 @@ class PlayState extends MusicBeatState
 	public var showComboNum:Bool = true;
 	
 	public var ratingGroup = new FlxTypedGroup<RatingSprite>();
-	public var ratingOrigin = [640, 360];
+	//public var ratingOrigin:Array<Float> = [640, 360];
 	public var timingTxt:FlxText;
 
 	////
@@ -3570,8 +3570,6 @@ class PlayState extends MusicBeatState
 
         if(r)return;
 
-		var time = (Conductor.stepCrochet * 0.001);
-
 		if (ClientPrefs.simpleJudge)
 		{
 			rating = lastJudge;
@@ -3593,6 +3591,7 @@ class PlayState extends MusicBeatState
 					if (!rating.alive)
 						return;
 
+					var time = (Conductor.stepCrochet * 0.001);
 					rating.tween = FlxTween.tween(rating.scale, {x: 0, y: 0}, time, {
 						startDelay: time * 8,
 						ease: FlxEase.quadIn,

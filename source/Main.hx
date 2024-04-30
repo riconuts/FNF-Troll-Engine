@@ -211,35 +211,34 @@ class Main extends Sprite
 	#if CRASH_HANDLER
 	function onCrash(errorName:String):Void
 	{
-		Sys.println("Call stack starts below");
+		Sys.println("\nCall stack starts below");
 
-		var errMsg:String = "";
-		var callStack:Array<StackItem> = CallStack.exceptionStack(true);
+		var callstack:String = "";
 
-		for (stackItem in callStack)
+		for (stackItem in CallStack.exceptionStack(true))
 		{
 			switch (stackItem)
 			{
 				case FilePos(s, file, line, column):
-					errMsg += '$file:$line\n';
+					callstack += '$file:$line\n';
 				default:
 					Sys.println(stackItem);
 			}
 		}
 
-		errMsg += '\n$errorName';
+		callstack += '\n$errorName';
 
-		Sys.println(" \n" + errMsg);
-		File.saveContent("crash.txt", errMsg);
+		Sys.println('\n$callstack\n');
+		File.saveContent("crash.txt", callstack);
 		
 		#if (windows && cpp)
-		windows_showErrorMsgBox(errMsg, errorName);
+		windows_showErrorMsgBox(callstack, errorName);
 		#else
-		Application.current.window.alert(errMsg, errorName);
+		Application.current.window.alert(callstack, errorName);
 		#end
 
 		#if discord_rpc
-		DiscordClient.shutdown();
+		DiscordClient.shutdown(true);
 		#end
 		Sys.exit(1);
 	}
