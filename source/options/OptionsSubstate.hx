@@ -278,13 +278,14 @@ class OptionsSubstate extends MusicBeatSubstate
 	}
 	static var judgeWindows:Map<String, Array<Float>> = [
 		"Standard" => [epicWindowVal(22.5), 45, 90, 135, 180],
-		"Vanilla" => [
+		"Week 7" => [
 			-1,		// epic (-1 to disable)
 			33,		// sick
 			125,	// good
 			150,	// bad
 			166		// shit / max hit window
 		],
+		"V-Slice" => [epicWindowVal(12.5), 45, 90, 135, 160], // https://cdn.discordapp.com/attachments/991571764180156467/1235523554032746556/image.png
 		"Psych" => [-1, 45, 90, 135, 166],
 		"ITG" => [epicWindowVal(21), 43, 102, 135, 180]
 	];

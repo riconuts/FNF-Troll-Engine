@@ -66,7 +66,7 @@ class JudgmentManager {
 			window: ClientPrefs.epicWindow,
             score: 500,
             accuracy: 100,
-            health: 1.15,
+            health: 1.15, // maybe change to 1, to match V-Slice?
 			noteSplash: true,
         },
 		#end
@@ -76,7 +76,7 @@ class JudgmentManager {
 			window: ClientPrefs.sickWindow,
             score: 350,
             accuracy: 90,
-            health: 1.15,
+			health: 1.15, // maybe change to 0.75, to match V-Slice?
 			noteSplash: true,
         },
         TIER3 => {
@@ -85,7 +85,7 @@ class JudgmentManager {
 			window: ClientPrefs.goodWindow,
             score: 100,
             accuracy: 10,
-            health: 0,
+            health: 0, // maybe change to 0.375 to match V-Slice?
 			noteSplash: false,
         },
         TIER2 => {
@@ -94,7 +94,7 @@ class JudgmentManager {
 			window: ClientPrefs.badWindow,
             score: 0,
             accuracy: -75,
-            health: -1.15,
+            health: -1.15, // I think we could make this less punishing, just to be closer to V-Slice, but I think shit should stay where it is
 			comboBehaviour: BREAK,
 			noteSplash: false,
         },
