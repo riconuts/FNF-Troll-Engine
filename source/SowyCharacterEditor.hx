@@ -657,9 +657,9 @@ class SowyCharacterEditor extends MusicBeatState
 
 		if (FlxG.keys.pressed.BACKSPACE){
 			MusicBeatState.switchState(new MainMenuState());
-		}else if (FlxG.keys.pressed.CONTROL && FlxG.keys.justPressed.S)
-			saveCharacter();
-		else
+		}else if (FlxG.keys.pressed.CONTROL && FlxG.keys.justPressed.S){
+			saveJSON((FlxG.keys.pressed.SHIFT) ? charToFunkinData(curChar) : charToPsychData(curChar), curChar.curCharacter);
+		}else
 			updateKeys();
 
 		camGame.zoom = FlxMath.bound(roundTo(curZoom, 0.05), 0.1, 3);
@@ -674,10 +674,21 @@ class SowyCharacterEditor extends MusicBeatState
 		super.update(elapsed);
 	}
 
-	function saveCharacter()
+	///////////
+	// Try moving these somewhere else
+	///////////
+
+	public static function saveJSON(json:Dynamic, ?name:String)
 	{
-		var char=curChar;
-		var json = {
+		var data:String = Json.stringify(json, "\t");
+		if (data.length > 0)
+		{
+			new FileReference().save(data, name==null ? null : '$name.json');
+		}
+	}
+
+	public static function charToPsychData(char:Character){
+		return {
 			"animations": char.animationsArray,
 			"image": char.imageFile,
 			"scale": char.jsonScale,
@@ -689,13 +700,48 @@ class SowyCharacterEditor extends MusicBeatState
 
 			"flip_x": char.originalFlipX,
 			"no_antialiasing": char.noAntialiasing,
-			"healthbar_colors": char.healthColorArray // i hate you, why arent you an hex value
+			"healthbar_colors": char.healthColorArray
 		};
+	}
+	
+	public static function psychToFunkinAnim(anim:AnimArray) return {
+		"name": anim.name,
+		"prefix": anim.anim,
+		"offsets": anim.offsets,
+		"looped": anim.loop,
+		"frameRate": 24,
+		"flipX": false,
+		"flipY": false
+	}
 
-		var data:String = Json.stringify(json, "\t");
-		if (data.length > 0)
-		{
-			new FileReference().save(data, char.curCharacter + ".json");
-		}
+	public static function charToFunkinData(char:Character){
+		return {
+			"generatedBy": "TROLL ENGINE",
+			"version": "1.0.0",
+
+			"name": char.curCharacter,
+			"assetPath": char.imageFile,
+			"renderType": Character.getImageFileType(char.imageFile),
+			"flipX": char.originalFlipX,
+			"scale": char.jsonScale,
+			"isPixel": char.noAntialiasing == true, // i think
+
+			"offsets": char.positionArray,
+			"cameraOffsets": char.cameraPosition,
+
+			"singTime": 16, // char.singDuration * 4, 
+			"danceEvery": char.danceEveryNumBeats,
+			"startingAnimation": char.danceIdle ? "danceLeft" : "idle",
+
+			"healthIcon": {
+				"id": char.healthIcon,
+				"offsets": [0, 0],
+				"isPixel": StringTools.endsWith(char.healthIcon, "-pixel"),
+				"flipX": false,
+				"scale": 1
+			},
+
+			"animations": [for (anim in char.animationsArray) psychToFunkinAnim(anim)],
+		};
 	}
 }

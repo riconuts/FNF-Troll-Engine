@@ -183,6 +183,19 @@ class Character extends FlxSprite
 		return null;
 	}
 
+	/**	
+		Returns "texture", "packer" or "sparrow"
+	**/
+	public static function getImageFileType(path:String):String
+	{
+		if (Paths.fileExists('images/$path/Animation.json', TEXT))
+			return "texture";
+		else if (Paths.fileExists('images/$path.txt', TEXT))
+			return "packer";
+		else
+			return "sparrow";
+	}
+
 	public static function returnCharacterPreload(characterName:String):Array<Cache.AssetPreload>{
 		var char = Character.getCharacterFile(characterName);
 
@@ -305,17 +318,8 @@ class Character extends FlxSprite
 
 				////
 				imageFile = json.image;
-				var spriteType = "sparrow";
-
-				var path = 'images/$imageFile.txt';
-				if (#if MODS_ALLOWED Paths.exists(Paths.modFolders(path)) || #end Paths.exists(Paths.getPath(path, TEXT)))
-					spriteType = "packer";
 				
-				var path = 'images/$imageFile/Animation.json';
-				if (#if MODS_ALLOWED Paths.exists(Paths.modFolders(path)) || #end Paths.exists(Paths.getPath(path, TEXT)))
-					spriteType = "texture";
-				
-				switch (spriteType)
+				switch (getImageFileType(imageFile))
 				{
 					case "texture": frames = AtlasFrameMaker.construct(imageFile);
 					case "packer":	frames = Paths.getPackerAtlas(imageFile);
