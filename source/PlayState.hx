@@ -143,7 +143,6 @@ class PlayState extends MusicBeatState
 	public var ratingStuff:Array<Array<Dynamic>> = Highscore.grades.get(ClientPrefs.gradeSet);
 	
 	public var hud:BaseHUD;
-	var subtitles:Null<SubtitleDisplay>;
 
 	#if PE_MOD_COMPATIBILITY // for backwards compat reasons, these aren't ACTUALLY used
 	public var healthBar:FNFHealthBar = new FNFHealthBar(); 
@@ -1047,14 +1046,6 @@ class PlayState extends MusicBeatState
 			FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 			FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		}
-
-		subtitles = SubtitleDisplay.fromSong(SONG.song);
-		if (subtitles != null){
-			add(subtitles);
-			subtitles.y = FlxG.height - 160;
-			subtitles.cameras = [camOther];
-		}else if(showDebugTraces)
-			trace(SONG.song + " doesnt have subtitles!");
 
 		////
 		callOnAllScripts('onCreatePost');
