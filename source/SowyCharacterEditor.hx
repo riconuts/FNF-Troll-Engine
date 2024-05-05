@@ -705,8 +705,8 @@ class SowyCharacterEditor extends MusicBeatState
 	}
 	
 	public static function psychToFunkinAnim(anim:AnimArray) return {
-		"name": anim.name,
-		"prefix": anim.anim,
+		"name": anim.anim,
+		"prefix": anim.name,
 		"offsets": anim.offsets,
 		"looped": anim.loop,
 		"frameRate": 24,
@@ -729,7 +729,7 @@ class SowyCharacterEditor extends MusicBeatState
 			"offsets": char.positionArray,
 			"cameraOffsets": char.cameraPosition,
 
-			"singTime": 16, // char.singDuration * 4, 
+			"singTime": char.singDuration, 
 			"danceEvery": char.danceEveryNumBeats,
 			"startingAnimation": char.danceIdle ? "danceLeft" : "idle",
 
