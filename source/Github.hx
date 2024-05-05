@@ -97,7 +97,17 @@ class Github {
 			repo: "troll-engine" // default repo
 		}
 		#if !display
-		var process = new sys.io.Process('git', ['config', '--get', 'remote.origin.url']);
+		var process = null; 
+		
+		try{
+			process = new sys.io.Process('git', ['config', '--get', 'remote.origin.url']);
+		}
+		catch (message){
+			var pos = haxe.macro.Context.currentPos();
+			haxe.macro.Context.warning("Cannot execute 'git config --get remote.origin.url'. " + 'Exception: "$message".' , pos);
+			return macro $v{repoInfo};
+		}
+
 		if (process.exitCode() != 0)
 		{
 			var message = process.stderr.readAll().toString();
