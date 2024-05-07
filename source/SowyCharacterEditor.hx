@@ -724,7 +724,7 @@ class SowyCharacterEditor extends MusicBeatState
 			"renderType": Character.getImageFileType(char.imageFile),
 			"flipX": char.originalFlipX,
 			"scale": char.jsonScale,
-			"isPixel": char.noAntialiasing == true, // i think
+			"isPixel": char.noAntialiasing == true, // i think // isPixel also assumes its scaled up by 6 so
 
 			"offsets": char.positionArray,
 			"cameraOffsets": char.cameraPosition,
