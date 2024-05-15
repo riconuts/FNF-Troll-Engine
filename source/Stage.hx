@@ -46,7 +46,7 @@ typedef StageFile =
 
 class Stage extends FlxTypedGroup<FlxBasic>
 {
-	public var curStage = "stage1";
+	public var curStage = "stage" #if tgt + "1" #end;
 	public var stageData:StageFile = {
 		directory: "",
 		defaultZoom: 0.8,
@@ -153,7 +153,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 			}
 
 			stageBuilt = true;
-		}
+		} 
 
 		return this;
 	}
@@ -166,6 +166,10 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		}
 		
 		super.destroy();
+	}
+
+	override function toString(){
+		return 'Stage: "$curStage"';
 	}
 
 	/**
