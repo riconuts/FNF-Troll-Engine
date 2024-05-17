@@ -213,7 +213,6 @@ class Character extends FlxSprite
         for(script in characterScripts)
             removeScript(script, true);
         
-
 		return super.destroy();
 	}
 
@@ -221,27 +220,35 @@ class Character extends FlxSprite
 	{
 		var parsed:Array<Int> = [];
 
-		for (val in indices)
+		for (expr in indices)
 		{
-			if (val is Int)
-				parsed.push(val);
-			else if (val is String)
+			if (expr is Int)
+				parsed.push(expr);
+			else if (expr is String)
 			{
-				var val:String = cast val;
-				var expression:Array<String> = val.split("..."); // might add something for "*" so you can repeat a frame a certain amount of times
-				var startIndex:Null<Int> = Std.parseInt(expression[0]);
-				var endIndex:Null<Int> = Std.parseInt(expression[1]);
+				var expr:String = Std.string(expr);
+				var isRange:Bool = expr.contains("...");
+				var exprArgs:Array<String> = expr.split(isRange ? "..." : "*");
 
-				if (startIndex == null) // Can't do anything
-					continue;
-				else if (endIndex == null)
-				{
-					parsed.push(startIndex); // hmm
-					continue;
-				}
-
-				for (idxNumber in startIndex...(endIndex + 1))
-					parsed.push(idxNumber);
+				switch (exprArgs.length){
+					case 0: 
+						// Can't do anything lol
+					case 1:
+						parsed.push(Std.parseInt(exprArgs[0]));
+					default:
+						var exprA = Std.parseInt(exprArgs[0]);
+						var exprB = Std.parseInt(exprArgs[1]);
+						
+						if (isRange){
+							// starting from 'a' and ending on 'b'
+							for (frameN in exprA...(exprB + 1))
+								parsed.push(frameN);
+						}else{
+							// 'a' repeated 'b' times
+							for (_ in 0...(exprB + 1))
+								parsed.push(exprA);
+						}
+				}		
 			}
 		}
 
