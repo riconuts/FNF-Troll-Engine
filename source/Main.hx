@@ -20,7 +20,10 @@ import Discord.DiscordClient;
 import haxe.CallStack;
 import lime.app.Application;
 import openfl.events.UncaughtErrorEvent;
+
+#if sys
 import sys.io.File;
+#end
 
 #if (windows && cpp)
 @:cppFileCode('#include <windows.h>')
@@ -211,7 +214,14 @@ class Main extends Sprite
 	#if CRASH_HANDLER
 	function onCrash(errorName:String):Void
 	{
-		Sys.println("\nCall stack starts below");
+		////
+		var ogTrace = haxe.Log.trace;
+		haxe.Log.trace = (msg, ?pos)->{
+			ogTrace(msg, null);
+		}
+
+		////
+		trace("\nCall stack starts below");
 
 		var callstack:String = "";
 
@@ -222,15 +232,13 @@ class Main extends Sprite
 				case FilePos(s, file, line, column):
 					callstack += '$file:$line\n';
 				default:
-					Sys.println(stackItem);
 			}
 		}
 
 		callstack += '\n$errorName';
 
-		Sys.println('\n$callstack\n');
-		File.saveContent("crash.txt", callstack);
-		
+		trace('\n$callstack\n');
+
 		#if (windows && cpp)
 		windows_showErrorMsgBox(callstack, errorName);
 		#else
@@ -240,7 +248,11 @@ class Main extends Sprite
 		#if discord_rpc
 		DiscordClient.shutdown(true);
 		#end
+
+		#if sys
+		File.saveContent("crash.txt", callstack);
 		Sys.exit(1);
+		#end
 	}
 
 	#if (windows && cpp)
