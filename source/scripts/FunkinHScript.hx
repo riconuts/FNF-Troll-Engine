@@ -227,7 +227,7 @@ class FunkinHScript extends FunkinScript
 		set("MP4Handler", hxvlc.flixel.FlxVideo);
 		set("MP4Sprite", hxvlc.flixel.FlxVideoSprite);
 		#else
-		set("hxvlc", "0")
+		set("hxvlc", "0");
 		#end
 		#if (hxCodec >= "3.0.0")
 		set("hxcodec", "3.0.0");
