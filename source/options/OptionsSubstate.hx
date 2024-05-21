@@ -321,7 +321,7 @@ class OptionsSubstate extends MusicBeatSubstate
 					"flashing",
 					"camShakeP",
 					"camZoomP",
-					"modcharts" // niixx keeps crying
+					"modcharts" 
 				]
 			],
 			[
@@ -337,7 +337,7 @@ class OptionsSubstate extends MusicBeatSubstate
 					"goodWindow",
 					"badWindow",
 					"hitWindow",
-					"judgeDiff", // for hooda lol
+					"judgeDiff", // fuck you pedophile
 				]
 			]
 		],
