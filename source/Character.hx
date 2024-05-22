@@ -141,6 +141,9 @@ class Character extends FlxSprite
 	/**Set to true if the character has miss animations. Optimization mainly**/
 	public var hasMissAnimations:Bool = false;
     
+	/**Overlay color used for character that don't have miss animations.**/
+	public var missOverlayColor:FlxColor = 0xFFC6A6FF;
+
 	//Used on Character Editor
 	public var animationsArray:Array<AnimArray> = [];
 	public var imageFile:String = '';

@@ -4150,7 +4150,7 @@ class PlayState extends MusicBeatState
 					char.playAnim(animToPlay, true);
 
 					if (!char.hasMissAnimations)
-						char.colorOverlay = 0xFFC6A6FF;
+						char.colorOverlay = char.missOverlayColor;	
 				}	
 			}
 		}
@@ -4218,7 +4218,7 @@ class PlayState extends MusicBeatState
 				{
 					char.playAnim(singAnimations[Std.int(Math.abs(direction))] + 'miss', true);
 					if(!char.hasMissAnimations)
-						char.colorOverlay = 0xFFC6A6FF;	
+						char.colorOverlay = char.missOverlayColor;	
 				}
 			}
 		}
