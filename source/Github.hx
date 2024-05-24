@@ -253,8 +253,14 @@ class Github {
 		var tryRequest:Bool = true;
 		daRequest.onStatus = function(code:Dynamic)
 		{
-			if (redirects.contains(code) && daRequest.responseHeaders.exists("Location")){
-				daRequest.url = daRequest.responseHeaders.get("Location");
+			#if !js
+			var responseHeaders = daRequest.responseHeaders;
+			#else
+			var responseHeaders = new haxe.ds.StringMap(); // TODO
+			#end
+
+			if (redirects.contains(code) && responseHeaders.exists("Location")){
+				daRequest.url = responseHeaders.get("Location");
 				trace("redirecT?? gonna try requesting " + daRequest.url);
 				tryRequest = true;
 			}else if(redirects.contains(code))
@@ -335,9 +341,15 @@ class Github {
 		var tryRequest:Bool = true;
 		daRequest.onStatus = function(code:Dynamic)
 		{
-			if (redirects.contains(code) && daRequest.responseHeaders.exists("Location"))
+			#if !js
+			var responseHeaders = daRequest.responseHeaders;
+			#else
+			var responseHeaders = new haxe.ds.StringMap(); // TODO
+			#end
+
+			if (redirects.contains(code) && responseHeaders.exists("Location"))
 			{
-				daRequest.url = daRequest.responseHeaders.get("Location");
+				daRequest.url = responseHeaders.get("Location");
 				trace("redirecT?? gonna try requesting " + daRequest.url);
 				tryRequest = true;
 			}

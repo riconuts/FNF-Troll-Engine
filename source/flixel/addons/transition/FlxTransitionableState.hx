@@ -54,6 +54,7 @@ class FlxTransitionableState extends FlxState
 
 	override public function switchTo(nextState:FlxState):Bool
 	{
+		// If you get an exception here it's probably because Flixel calls this function using reflection
 		if (!hasTransOut)
 			return true;
 

@@ -1,6 +1,5 @@
 package;
 
-import sys.FileSystem;
 import JudgmentManager.Judgment;
 import editors.ChartingState;
 import math.Vector3;

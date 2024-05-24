@@ -912,9 +912,10 @@ class StageBuilderState extends MusicBeatState
         script += "\n}";
 
         ////
-        Sys.println("STAGE SCRIPT START:");
-        Sys.println(script);
-        Sys.println("STAGE SCRIPT END.");
+        var print = haxe.Log.trace;
+        print("STAGE SCRIPT START:");
+        print(script);
+        print("STAGE SCRIPT END.");
 
         saveFile(script, "stage.hscript");     
     }
@@ -942,9 +943,10 @@ class StageBuilderState extends MusicBeatState
         script += "\nend";
 
         ////
-        Sys.println("STAGE SCRIPT START:");
-        Sys.println(script);
-        Sys.println("STAGE SCRIPT END.");
+        var print = haxe.Log.trace;
+        print("STAGE SCRIPT START:");
+        print(script);
+        print("STAGE SCRIPT END.");
 
         saveFile(script, "stage.lua");       
     }

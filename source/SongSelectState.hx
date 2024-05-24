@@ -1,12 +1,15 @@
 package;
 
+import flixel.text.FlxText;
+import Song;
+
 #if discord_rpc
 import Discord.DiscordClient;
 #end
+#if sys
 import sys.io.File;
 import sys.FileSystem;
-import flixel.text.FlxText;
-import Song;
+#end
 
 using StringTools;
 
@@ -72,7 +75,8 @@ class SongSelectState extends MusicBeatState
 
 		var folder = 'assets/songs/';
 		Paths.iterateDirectory(folder, function(name:String){
-			if (FileSystem.isDirectory(folder + name))
+			trace(name);
+			if (Paths.isDirectory(folder + name))
 				songMeta.push(new SongMetadata(name));
 		});
 
@@ -283,13 +287,23 @@ class SongChartSelec extends MusicBeatState
 			charts.set(fileName.substr(extension_dot, fileName.length - extension_dot - 5), true);
 		}
 
-		#if PE_MOD_COMPATIBILITY
-		final folder = (metadata.folder == "") ? Paths.getPath('data/$songName/') : Paths.mods('${metadata.folder}/data/$songName/');
-		Paths.iterateDirectory(folder, processFileName);
-		#end
 
-		final folder = (metadata.folder == "") ? Paths.getPath('songs/$songName/') : Paths.mods('${metadata.folder}/songs/$songName/');
-		Paths.iterateDirectory(folder, processFileName);
+		if (metadata.folder == "")
+		{
+			#if PE_MOD_COMPATIBILITY
+			Paths.iterateDirectory(Paths.getPath('data/$songName/'), processFileName);
+			#end
+			Paths.iterateDirectory(Paths.getPath('songs/$songName/'), processFileName);
+		}
+		#if MODS_ALLOWED
+		else
+		{
+			#if PE_MOD_COMPATIBILITY
+			Paths.iterateDirectory(Paths.mods('${metadata.folder}/data/$songName/'), processFileName);
+			#end
+			Paths.iterateDirectory(Paths.mods('${metadata.folder}/songs/$songName/'), processFileName);
+		}
+		#end
 
 		return [for (name in charts.keys()) name];
 	} 

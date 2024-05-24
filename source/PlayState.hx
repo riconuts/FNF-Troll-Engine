@@ -466,7 +466,9 @@ class PlayState extends MusicBeatState
 
 		options.OptionsSubstate.resetRestartRecomendations();
 		Paths.clearStoredMemory();
+		#if MODS_ALLOWED
 		Paths.pushGlobalContent();
+		#end
 
 		//// Reset to default
 		PauseSubState.songName = null;
@@ -589,13 +591,10 @@ class PlayState extends MusicBeatState
 		songName = Paths.formatToSongPath(SONG.song);
 		songHighscore = Highscore.getScore(SONG.song);
 
-		if(SONG.metadata != null)
+		if (SONG.metadata != null){
 			metadata = SONG.metadata;
-		else{
-			var jsonPath:String = Paths.modsSongJson('$songName/metadata');
-
-			if (!Paths.exists(jsonPath))
-				jsonPath = Paths.songJson('$songName/metadata');
+		}else{
+			var jsonPath = Paths.___getPath('songs/$songName/metadata.json');
 
 			if (Paths.exists(jsonPath))
 				metadata = cast Json.parse(Paths.getContent(jsonPath));
@@ -635,16 +634,17 @@ class PlayState extends MusicBeatState
 		for (folder in Paths.getFolders('scripts'))
 		{
 			////
-			var orderListPath = folder + 'orderList.txt';
-			if (FileSystem.exists(orderListPath)){
+			var orderListRaw = Paths.getContent(folder + 'orderList.txt');
+
+			if (orderListRaw != null){
 				//trace('$orderListPath exists');
 
-				for (name in File.getContent(orderListPath).split('\n'))
+				for (name in orderListRaw.split('\n'))
 				{
 					var file = '$name.hscript';
 					var filePath = folder + file;
 
-					if (!FileSystem.exists(filePath) || filesPushed.contains(file)){
+					if (!Paths.exists(filePath) || filesPushed.contains(file)){
 						//trace('skipped: $file');
 						continue;
 					}
@@ -654,13 +654,6 @@ class PlayState extends MusicBeatState
 					funkyScripts.push(script);
 					filesPushed.push(file);
 				}
-
-				/*
-				Sys.println('');
-			}
-			else{
-				trace('$orderListPath does not exist!');
-				*/
 			}
 
 			////

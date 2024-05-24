@@ -194,12 +194,16 @@ class TitleState extends MusicBeatState
 		camGame.filters = [blurFilter];
 
 		////
-		if (bg != null){
+		if (bg != null && bg.stageData != null){
 			camGame.zoom = bg.stageData.defaultZoom;
 			if (bg.stageData.title_zoom != null)
 				camGame.zoom = bg.stageData.title_zoom;
-			var color = FlxColor.fromString(bg.stageData.bg_color);
-			camGame.bgColor = color != null ? color : FlxColor.BLACK;
+
+			var bgColor:Null<FlxColor> = null;
+			if (bg.stageData.bg_color != null)
+				bgColor = FlxColor.fromString(bg.stageData.bg_color);
+
+			camGame.bgColor = (bgColor != null) ? bgColor : 0xFF000000;
 
 			var camPos = bg.stageData.camera_stage;
 			if (camPos == null) camPos = [640, 360];
