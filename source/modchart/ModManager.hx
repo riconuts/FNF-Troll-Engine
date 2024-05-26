@@ -619,9 +619,8 @@ class ModManager {
 
 		var easeFunc:EaseFunction = FlxEase.linear;
 
-		if (style == null){
-		
-		}else if (style is String){
+
+		if (style is String){
 			// most common use of the style var is to just use an existing FlxEase
 			easeFunc = CoolUtil.getEaseFromString(style);
 
@@ -629,7 +628,9 @@ class ModManager {
 			// probably gonna be useful SOMEWHERE
 			// maybe custom eases?
 			easeFunc = style;
-		}
+		}else
+            style = FlxEase.linear;
+        
 
 		if (player == -1)
 			for (pN => mods in activeMods)
