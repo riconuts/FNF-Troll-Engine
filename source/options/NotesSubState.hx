@@ -1,29 +1,9 @@
 package options;
 
-#if discord_rpc
-import Discord.DiscordClient;
-#end
-import Controls;
-import flash.text.TextField;
-import flash.text.TextField;
-import flixel.FlxG;
 import flixel.FlxG;
 import flixel.FlxSprite;
-import flixel.FlxSprite;
-import flixel.FlxSubState;
-import flixel.addons.display.FlxGridOverlay;
-import flixel.graphics.FlxGraphic;
 import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.input.keyboard.FlxKey;
-import flixel.math.FlxMath;
-import flixel.text.FlxText;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
-import flixel.util.FlxSave;
-import flixel.util.FlxTimer;
-import haxe.Json;
-import lime.utils.Assets;
 import shaders.ColorSwap;
 
 using StringTools;
@@ -60,6 +40,9 @@ class NotesSubState extends MusicBeatSubstate
 		grpNumbers = new FlxTypedGroup<Alphabet>();
 		add(grpNumbers);
 
+		var noteFrames = Paths.getSparrowAtlas('NOTE_assets');
+		var noteAnimations:Array<String> = ['purple0', 'blue0', 'green0', 'red0'];
+
 		for (i in 0...ClientPrefs.arrowHSV.length) {
 			var yPos:Float = (165 * i) + 35;
 			for (j in 0...3) {
@@ -72,11 +55,9 @@ class NotesSubState extends MusicBeatSubstate
 			}
 
 			var note:FlxSprite = new FlxSprite(posX, yPos);
-			note.frames = Paths.getSparrowAtlas(('NOTE_assets'));
-			var animations:Array<String> = ['purple0', 'blue0', 'green0', 'red0'];
-			note.animation.addByPrefix('idle', animations[i]);
+			note.frames = noteFrames;
+			note.animation.addByPrefix('idle', noteAnimations[i]);
 			note.animation.play('idle');
-			//note.antialiasing = ClientPrefs.globalAntialiasing;
 			grpNotes.add(note);
 
 			var newShader:ColorSwap = new ColorSwap();
