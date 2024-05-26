@@ -383,42 +383,32 @@ class ModManager {
 								for (input_mod in node.in_mods)
 									input_values.push(getValue(input_mod, player));
 
-								var output:Dynamic = node.nodeFunc(input_values, player);
+								var output_values:Array<Float> = node.nodeFunc(input_values, player);
 
 								
 								if (node.out_mods.length > 0)
 								{ // if theres outputs
-									if (output is Array)
-									{
-										var output_values:Array<Float> = cast output;
-										if (output_values.length < node.out_mods.length)
-										{
-											for (i in node.out_mods.length...output_values.length)
-												output_values.push(0); // TODO: check the out_mod to see if i should add in 0 or mod.getValue(player) depending on if its in in_mods
-										}
-										for (idx in 0...node.out_mods.length)
-										{
-											var output_value:Float = output_values[idx];
-											var output_mod_name:String = node.out_mods[idx];
-											var output_mod:Modifier = get(output_mod_name);
-											if (output_mod == null){
-                                                trace(output_mod_name + " is not a valid output, look into fixing pl0x");
-                                                continue;
-                                            }
-											var current_value:Float = output_mod.getValue(player);
-											// if the output is also an input then set it directly, otherwise add it
-											if (node.in_mods.contains(output_mod_name))
-												output_mod.setCurrentValue(output_value, player);
-											else
-												output_mod.setCurrentValue(current_value + output_value, player);
-										}
-									}
-									else
-									{
-										trace("Broken Node!!! Expected an Array of outputs, but did not get that!!!!");
-										garbage.push(node); // broken node!!
-										continue;
-									}
+                                    if (output_values.length < node.out_mods.length)
+                                    {
+                                        for (i in node.out_mods.length...output_values.length)
+                                            output_values.push(0); // TODO: check the out_mod to see if i should add in 0 or mod.getValue(player) depending on if its in in_mods
+                                    }
+                                    for (idx in 0...node.out_mods.length)
+                                    {
+                                        var output_value:Float = output_values[idx];
+                                        var output_mod_name:String = node.out_mods[idx];
+                                        var output_mod:Modifier = get(output_mod_name);
+                                        if (output_mod == null){
+                                            trace(output_mod_name + " is not a valid output, look into fixing pl0x");
+                                            continue;
+                                        }
+                                        var current_value:Float = output_mod.getValue(player);
+                                        // if the output is also an input then set it directly, otherwise add it
+                                        if (node.in_mods.contains(output_mod_name))
+                                            output_mod.setCurrentValue(output_value, player);
+                                        else
+                                            output_mod.setCurrentValue(current_value + output_value, player);
+                                    }
 								}
 							}
 						}
@@ -629,9 +619,8 @@ class ModManager {
 
 		var easeFunc:EaseFunction = FlxEase.linear;
 
-		if (style == null){
-		
-		}else if (style is String){
+
+		if (style is String){
 			// most common use of the style var is to just use an existing FlxEase
 			easeFunc = CoolUtil.getEaseFromString(style);
 
@@ -639,7 +628,8 @@ class ModManager {
 			// probably gonna be useful SOMEWHERE
 			// maybe custom eases?
 			easeFunc = style;
-		}
+        }
+        
 
 		if (player == -1)
 			for (pN => mods in activeMods)
