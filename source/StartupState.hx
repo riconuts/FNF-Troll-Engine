@@ -358,6 +358,7 @@ class StartupState extends FlxTransitionableState
 					*/
 					MusicBeatState.switchState(Type.createInstance(nextState, []));
 				}
+				step = 100000;
 		}
 
 		super.update(elapsed);

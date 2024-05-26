@@ -10,6 +10,8 @@ import openfl.display.Sprite;
 import openfl.display.StageScaleMode;
 import openfl.system.Capabilities;
 import openfl.events.Event;
+import lime.app.Application;
+
 using StringTools;
 
 #if discord_rpc
@@ -18,7 +20,6 @@ import Discord.DiscordClient;
 
 #if CRASH_HANDLER
 import haxe.CallStack;
-import lime.app.Application;
 import openfl.events.UncaughtErrorEvent;
 
 #if sys

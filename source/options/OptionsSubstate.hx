@@ -321,7 +321,7 @@ class OptionsSubstate extends MusicBeatSubstate
 					"flashing",
 					"camShakeP",
 					"camZoomP",
-					"modcharts" 
+					"modcharts"
 				]
 			],
 			[
@@ -434,7 +434,9 @@ class OptionsSubstate extends MusicBeatSubstate
 		"ui",
 		"video",
 		"controls",
-		#if (discord_rpc || DO_AUTO_UPDATE) "misc" #end, /* "Accessibility" */];
+		#if (discord_rpc || DO_AUTO_UPDATE) "misc", #end 
+		/* "Accessibility" */
+	];
 
 	var selected:Int = 0;
 

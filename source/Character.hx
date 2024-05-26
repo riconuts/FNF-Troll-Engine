@@ -7,9 +7,6 @@ import animateatlas.AtlasFrameMaker;
 import flixel.FlxSprite;
 import flixel.tweens.FlxTween;
 import haxe.Json;
-import haxe.format.JsonParser;
-import openfl.utils.AssetType;
-import openfl.utils.Assets;
 import scripts.*;
 using flixel.util.FlxColorTransformUtil;
 using StringTools;
@@ -140,6 +137,9 @@ class Character extends FlxSprite
     
 	/**Set to true if the character has miss animations. Optimization mainly**/
 	public var hasMissAnimations:Bool = false;
+
+	/**Overlay color used for character that don't have miss animations.**/
+	public var missOverlayColor:FlxColor = 0xFFC6A6FF;
     
 	//Used on Character Editor
 	public var animationsArray:Array<AnimArray> = [];
@@ -149,35 +149,33 @@ class Character extends FlxSprite
 	public var originalFlipX:Bool = false;
 	public var healthColorArray:Array<Int> = [255, 0, 0];
 
-	public static function getCharacterFile(character:String):Null<CharacterFile>
+	public static function getCharacterFile(characterName:String):Null<CharacterFile>
 	{
-		var rawContent:Null<String> = Paths.getText('characters/' + character + '.json');		
-		if (rawContent == null){
-			trace('Could not find character "$character" JSON file');
+		var json:Null<CharacterFile> = Paths.json('characters/$characterName.json');
+		if (json == null){
+			trace('Could not find character "$characterName" JSON file');
 			return null;
 		} 
 
 		try{
-			var json:CharacterFile = cast Json.parse(rawContent);
-			
 			for (anim in json.animations)
 				anim.indices = parseIndices(anim.indices);
 
 			if (json.healthbar_colors is String){
 				var color:Null<FlxColor> = FlxColor.fromString(cast json.healthbar_colors);
 				json.healthbar_colors = (color==null) ? null : [color.red, color.green, color.blue];
-			}
+			}/*
 			else if (json.healthbar_colors is Int){
 				var color:FlxColor = FlxColor.fromInt(cast json.healthbar_colors);
 				json.healthbar_colors = [color.red, color.green, color.blue];
-			}
+			}*/
 
 			if (json.healthbar_colors == null)
 				json.healthbar_colors = [192, 192, 192];
 
 			return json;
 		}catch(e){
-			trace('Error loading character "$character" JSON file');
+			trace('Error loading character "$characterName" JSON file');
 		}
 
 		return null;
@@ -399,13 +397,13 @@ class Character extends FlxSprite
 
 			default:
 				var json = getCharacterFile(curCharacter);
+
 				if (json == null){
 					trace('Character file: $curCharacter not found.');
 					json = getCharacterFile(DEFAULT_CHARACTER);
 					curCharacter = DEFAULT_CHARACTER;
 				}
 
-				////
 				loadFromPsychData(json);
 		}
 		originalFlipX = flipX;
