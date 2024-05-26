@@ -1,6 +1,7 @@
 package tgt.gallery;
 
-import lime.app.Application;
+import flixel.FlxG;
+
 import tgt.TGTMenuShit;
 import flixel.addons.display.FlxBackdrop;
 import flixel.util.FlxTimer;
@@ -11,13 +12,15 @@ import flixel.util.FlxColor;
 import flixel.addons.display.shapes.FlxShapeBox;
 import openfl.ui.Mouse;
 import openfl.ui.MouseCursor;
-import flixel.FlxG;
+import lime.app.Application;
 
 #if discord_rpc
 import Discord;
 #end
 #if sys
 import sys.FileSystem;
+#else
+import openfl.Assets;
 #end
 
 using StringTools;
@@ -101,7 +104,15 @@ class JukeboxState extends MusicBeatState {
 	{
 		var modDir:String = modDir==null?'':modDir;
 
-		var getTxt:Dynamic = modDir== '' ? Paths.txt : (file:String)->{return Paths.mods('$modDir/data/$file.txt');};
+		#if MODS_ALLOWED
+		function getModTxt(file:String)
+			return Paths.mods('$modDir/data/$file.txt');
+
+		var getTxt:Dynamic = modDir == '' ? Paths.txt : getModTxt;
+		#else
+		var getTxt = Paths.txt;
+		#end
+		
 		Paths.currentModDirectory = modDir;
 
 		//var added:Array<String> = [];
@@ -416,9 +427,9 @@ class JukeboxState extends MusicBeatState {
 	function getSound(path):Null<openfl.media.Sound>
 	{
 		#if (html5 || flash)
-		if (Assets.exists(gottenPath, SOUND)){
+		if (Assets.exists(path, SOUND)){
 			trackedSounds.push(path);
-			return Assets.getSound(gottenPath, false);
+			return Assets.getSound(path, false);
 		}
 		#else
 		if (FileSystem.exists(path)){

@@ -454,10 +454,10 @@ class Paths
 
 			//trace(filePath);
 			var stringsText = getContent(file);
-			var daLines = stringsText.trim().split("\n");
+			if (stringsText == null) continue;
 
-			for(shit in daLines){
-				var splitted = shit.split("=");
+			for (line in stringsText.trim().split("\n")){
+				var splitted = line.split("=");
 				var thisKey = splitted.shift();
 				if (thisKey == key){
 					currentStrings.set(key, splitted.join("=").trim().replace('\\n', '\n'));
