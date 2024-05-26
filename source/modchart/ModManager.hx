@@ -628,8 +628,7 @@ class ModManager {
 			// probably gonna be useful SOMEWHERE
 			// maybe custom eases?
 			easeFunc = style;
-		}else
-            style = FlxEase.linear;
+        }
         
 
 		if (player == -1)
