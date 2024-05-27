@@ -234,6 +234,8 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		#end
 
 		function readFileNameAndPush(fileName){
+			if (fileName==null)return;
+            
 			if (!fileName.endsWith(".json")) return;
 
 			var name = fileName.substr(0, fileName.length - 5);
