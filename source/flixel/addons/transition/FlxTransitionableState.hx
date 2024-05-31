@@ -8,18 +8,19 @@ package flixel.addons.transition;
 import flixel.FlxState;
 import flixel.FlxSubState;
 
-
 class FlxTransitionableState extends FlxState
 {
-	// global default transitions for ALL states, used if transIn/transOut are null
+	/** Default intro transition. Used when `transIn` is null **/
 	public static var defaultTransIn:Class<TransitionSubstate> = null;
+	/** Default outro transition. Used when `transOut` is null **/
 	public static var defaultTransOut:Class<TransitionSubstate> = null;
 
 	public static var skipNextTransIn:Bool = false;
 	public static var skipNextTransOut:Bool = false;
 
-	// beginning & ending transitions for THIS state:
+	/** Intro transition to use after switching to this state **/
 	public var transIn:Class<TransitionSubstate>;
+	/** Outro transition to use before switching to another state **/
 	public var transOut:Class<TransitionSubstate>;
 
 	public var hasTransIn(get, never):Bool;
@@ -54,7 +55,7 @@ class FlxTransitionableState extends FlxState
 
 	override public function switchTo(nextState:FlxState):Bool
 	{
-		// If you get an exception here it's probably because Flixel calls this function using reflection
+		// If you get an exception here it's probably due to Flixel calling this function using reflection
 		if (!hasTransOut)
 			return true;
 
