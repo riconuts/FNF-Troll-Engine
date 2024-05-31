@@ -233,7 +233,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		var stages:Array<String> = [];
 		#end
 
-		function readFileNameAndPush(fileName){
+		function readFileNameAndPush(fileName: String){
 			if (fileName==null)return;
             
 			if (!fileName.endsWith(".json")) return;
