@@ -511,7 +511,7 @@ class NoteField extends FieldBase
 			hold.shader = shader;
 
 		shader.bitmap.input = hold.graphic.bitmap;
-		shader.bitmap.filter = @:bypassAccessor hold.antialiasing ? LINEAR : NEAREST;
+		shader.bitmap.filter = hold.antialiasing ? LINEAR : NEAREST;
 
 		return {
 			graphic: hold.graphic,
