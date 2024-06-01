@@ -1286,7 +1286,14 @@ class ChartingState extends MusicBeatState
 
 	var waveformTrackDropDown:FlxUIDropDownMenuCustom;
 	var waveformTrack:FlxSound;
-	var trackVolumeStepper:FlxUINumericStepper;
+	var trackVolumeSlider:FlxUISlider;
+	/*
+	private var _curTrackVolume(get, set):Float;
+	function get__curTrackVolume():Float
+		return 0.3;
+	function set__curTrackVolume(val:Float):Float
+		return 0.3;
+	*/
 
 	function addChartingUI() {
 		var tab_group_chart = new FlxUI(null, UI_box);
@@ -1299,8 +1306,6 @@ class ChartingState extends MusicBeatState
 			displayNameList.push(k);
 
 		////
-		var trackVolumeTxt:FlxText = null; // holy shiiit shut the fuck uppp i know what im doinggg
-
 		waveformTrackDropDown = new FlxUIDropDownMenuCustom(10, 100, 
 			FlxUIDropDownMenuCustom.makeStrIdLabelArray(displayNameList, true), 
 			function(idx:String){
@@ -1308,12 +1313,10 @@ class ChartingState extends MusicBeatState
 				waveformTrack = soundTracksMap.get(trackName); 
 
 				if (waveformTrack != null){
-					trackVolumeStepper.value = waveformTrack.volume;
-					trackVolumeStepper.visible = true;
-					trackVolumeTxt.visible = true;
+					trackVolumeSlider.value = waveformTrack.volume;
+					trackVolumeSlider.visible = true;
 				}else{
-					trackVolumeStepper.visible = false;
-					trackVolumeTxt.visible = false;
+					trackVolumeSlider.visible = false;
 				}
 				
 				updateWaveform();
@@ -1386,15 +1389,34 @@ class ChartingState extends MusicBeatState
 		//setAllLabelsOffset(removeTrackButton, -30, 0);
 		*/
 
-		trackVolumeStepper = new FlxUINumericStepper(waveformTrackDropDown.x + waveformTrackDropDown.width + 64, waveformTrackDropDown.y, 0.1, 1, 0, 1, 1);
-		trackVolumeStepper.name = "track_volume";
-		blockPressWhileTypingOnStepper.push(trackVolumeStepper);
-
-		trackVolumeTxt = new FlxText(trackVolumeStepper.x, trackVolumeStepper.y - 15, 0, "Volume:");
+		trackVolumeSlider = new FlxUISlider(
+			this, 
+			'_curTrackVolume', 
+			waveformTrackDropDown.x + 150 - 10, 
+			waveformTrackDropDown.y - 15, 
+			0.0, 
+			1.0, 
+			Math.floor(waveformTrackDropDown.width), 
+			null, 
+			5, 
+			FlxColor.WHITE, 
+			FlxColor.BLACK
+		);
+		trackVolumeSlider.setVariable = false;
+		trackVolumeSlider.callback = (val)->{
+			if (waveformTrack != null)
+				waveformTrack.volume = val;
+			else
+				trace("No track selected.");
+			trackVolumeSlider.value = val;
+		}
+		trackVolumeSlider.value = 1.0;
+		trackVolumeSlider.nameLabel.text = 'Volume';
+		tab_group_chart.add(trackVolumeSlider);
 
 		////////
 
-		var startY = 150;
+		var startY = 165;
 
 		check_warnings = new FlxUICheckBox(10, startY, null, null, "Ignore Progress Warnings", 100);
 		if (FlxG.save.data.ignoreWarnings == null) FlxG.save.data.ignoreWarnings = false;
@@ -1468,12 +1490,10 @@ class ChartingState extends MusicBeatState
 		if (FlxG.save.data.chart_noAutoScroll == null) FlxG.save.data.chart_noAutoScroll = false;
 		disableAutoScrolling.checked = FlxG.save.data.chart_noAutoScroll;
 
-		#if !html5
-		var sliderRate = new FlxUISlider(this, 'playbackSpeed', 68, 270, 0.5, 3, 150, null, 5, FlxColor.WHITE, FlxColor.BLACK);
+		var sliderRate = new FlxUISlider(this, 'playbackSpeed', 68, 300, 0.5, 3, 150, null, 5, FlxColor.WHITE, FlxColor.BLACK);
 		sliderRate.value = playbackSpeed;
 		sliderRate.nameLabel.text = 'Playback Rate';
 		tab_group_chart.add(sliderRate);
-		#end
 
 		tab_group_chart.add(new FlxText(metronomeStepper.x, metronomeStepper.y - 15, 0, 'BPM:'));
 		tab_group_chart.add(new FlxText(metronomeOffsetStepper.x, metronomeOffsetStepper.y - 15, 0, 'Offset (ms):'));
@@ -1491,8 +1511,7 @@ class ChartingState extends MusicBeatState
 		tab_group_chart.add(playSoundDad);
 		tab_group_chart.add(playSoundEvents);
 
-		tab_group_chart.add(trackVolumeTxt);
-		tab_group_chart.add(trackVolumeStepper);
+		tab_group_chart.add(trackVolumeSlider);
 		tab_group_chart.add(new FlxText(waveformTrackDropDown.x, waveformTrackDropDown.y - 15, 0, "Track"));
 		tab_group_chart.add(waveformTrackDropDown);
 		/*
@@ -1503,8 +1522,7 @@ class ChartingState extends MusicBeatState
 		UI_box.addGroup(tab_group_chart);
 
 		// None SHOULD be selected by default so hide these
-		trackVolumeTxt.visible = false;
-		trackVolumeStepper.visible = false;
+		trackVolumeSlider.visible = false;
 	}
 
 	function loadSong():Void
@@ -1638,12 +1656,6 @@ class ChartingState extends MusicBeatState
 				_song.notes[curSec].bpm = nums.value;
 				updateGrid();
 			}
-			else if (wname == 'track_volume'){
-				if (waveformTrack != null)
-					waveformTrack.volume = nums.value;
-				else
-					trace("No track selected.");
-			}
 		}
 		else if(id == FlxUIInputText.CHANGE_EVENT && (sender is FlxUIInputText)) {
 			/*if(sender == noteSplashesInputText) {
@@ -1675,7 +1687,8 @@ class ChartingState extends MusicBeatState
 		}
 		else if (id == FlxUISlider.CHANGE_EVENT && (sender is FlxUISlider))
 		{
-			
+			var sender:FlxUISlider = cast sender;
+
 			
 		}
 
