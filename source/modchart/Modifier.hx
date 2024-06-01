@@ -69,10 +69,10 @@ class Modifier {
 		return '';
 	}
 
-	public function getValue(player:Int):Float
+	inline public function getValue(player:Int):Float
 		return percents[player];
 
-	public function setCurrentValue(value:Float, player:Int = -1) // only set for like a frame
+	inline public function setCurrentValue(value:Float, player:Int = -1) // only set for like a frame
 	{
 		if (player == -1)
 			for (idx in 0...percents.length){
@@ -86,16 +86,16 @@ class Modifier {
         
 	}
 
-	public function getTargetValue(player:Int):Float // because most the time when you getValue you wanna get the CURRENT value, not the target
+	inline public function getTargetValue(player:Int):Float // because most the time when you getValue you wanna get the CURRENT value, not the target
 		return target_percents[player];
 
-	public function getTargetPercent(player:Int):Float
+	inline public function getTargetPercent(player:Int):Float
 		return getTargetValue(player) * 100;
 
-	public function getPercent(player:Int):Float
+	inline public function getPercent(player:Int):Float
 		return getValue(player) * 100;
     
-	public function setValue(value:Float, player:Int = -1) // because most the time when you setValue you wanna set the TARGET value, not the current
+	inline public function setValue(value:Float, player:Int = -1) // because most the time when you setValue you wanna set the TARGET value, not the current
 	{
 		setCurrentValue(value, player);
 		if (player == -1)
@@ -106,17 +106,17 @@ class Modifier {
         
 	}
 
-	public function setCurrentPercent(percent:Float, player:Int = -1)
+	inline public function setCurrentPercent(percent:Float, player:Int = -1)
 		setCurrentValue(percent * 0.01, player);
 
-	public function setPercent(percent:Float, player:Int = -1)
+	inline public function setPercent(percent:Float, player:Int = -1)
 		setValue(percent * 0.01, player);
 	
 
 	public function getSubmods():Array<String>
 		return [];
 
-	public function getSubmodPercent(modName:String, player:Int)
+	inline public function getSubmodPercent(modName:String, player:Int)
 	{
 		if (submods.exists(modName))
 			return submods.get(modName).getPercent(player);
@@ -125,7 +125,7 @@ class Modifier {
 		
 	}
 
-	public function getSubmodValue(modName:String, player:Int)
+	inline public function getSubmodValue(modName:String, player:Int)
 	{
 		if (submods.exists(modName))
 			return submods.get(modName).getValue(player);
@@ -133,7 +133,7 @@ class Modifier {
 			return 0;
 	}
 
-	public function getTargetSubmodPercent(modName:String, player:Int)
+	inline public function getTargetSubmodPercent(modName:String, player:Int)
 	{
 		if (submods.exists(modName))
 			return submods.get(modName).getTargetPercent(player);
@@ -141,7 +141,7 @@ class Modifier {
 			return 0;
 	}
 
-	public function getTargetSubmodValue(modName:String, player:Int)
+	inline public function getTargetSubmodValue(modName:String, player:Int)
 	{
 		if (submods.exists(modName))
 			return submods.get(modName).getTargetValue(player);
@@ -149,41 +149,41 @@ class Modifier {
 			return 0;
 	}
 
-	public function setCurrentSubmodPercent(modName:String, endPercent:Float, player:Int)
+	inline public function setCurrentSubmodPercent(modName:String, endPercent:Float, player:Int)
 		return submods.get(modName).setCurrentPercent(endPercent, player);
 
-	public function setCurrentSubmodValue(modName:String, endValue:Float, player:Int)
+	inline public function setCurrentSubmodValue(modName:String, endValue:Float, player:Int)
 		return submods.get(modName).setCurrentValue(endValue, player);
 
-	public inline function getTargetOtherPercent(modName:String, player:Int)
+	inline public function getTargetOtherPercent(modName:String, player:Int)
 		return modMgr.getTargetPercent(modName, player);
 
-	public inline function getTargetOtherValue(modName:String, player:Int)
+	inline public function getTargetOtherValue(modName:String, player:Int)
 		return modMgr.getTargetValue(modName, player);
 
-	public inline function setCurrentOtherPercent(modName:String, endPercent:Float, player:Int)
+	inline public function setCurrentOtherPercent(modName:String, endPercent:Float, player:Int)
 		return modMgr.setCurrentPercent(modName, endPercent, player);
 
-	public inline function setCurrentOtherValue(modName:String, endValue:Float, player:Int)
+	inline public function setCurrentOtherValue(modName:String, endValue:Float, player:Int)
 		return modMgr.setCurrentValue(modName, endValue, player);
     
 
-	public function setSubmodPercent(modName:String, endPercent:Float, player:Int)
+	inline public function setSubmodPercent(modName:String, endPercent:Float, player:Int)
 		return submods.get(modName).setPercent(endPercent, player);
 
-	public function setSubmodValue(modName:String, endValue:Float, player:Int)
+	inline public function setSubmodValue(modName:String, endValue:Float, player:Int)
 		return submods.get(modName).setValue(endValue, player);
 
-	public inline function getOtherPercent(modName:String, player:Int)
+	inline public function getOtherPercent(modName:String, player:Int)
 		return modMgr.getPercent(modName, player);
 	
-	public inline function getOtherValue(modName:String, player:Int)
+	public function getOtherValue(modName:String, player:Int)
 		return modMgr.getValue(modName, player);
 	
-	public inline function setOtherPercent(modName:String, endPercent:Float, player:Int)
+	inline public function setOtherPercent(modName:String, endPercent:Float, player:Int)
 		return modMgr.setPercent(modName, endPercent, player);
 
-	public inline function setOtherValue(modName:String, endValue:Float, player:Int)
+	inline public function setOtherValue(modName:String, endValue:Float, player:Int)
 		return modMgr.setValue(modName, endValue, player);
     
 	public function new(modMgr:ModManager, ?parent:Modifier)
