@@ -10,7 +10,6 @@ import flixel.math.FlxAngle;
 
 class ConfusionModifier extends NoteModifier {
     override function getName()return 'confusion';
-	override function shouldExecute(player:Int, val:Float)return true;
 	override function isRenderMod()return true;
 
     function getConfusion(?suffix:String = '', beat:Float, column:Int, player:Int, onlyOffset:Bool=false){
@@ -39,15 +38,13 @@ class ConfusionModifier extends NoteModifier {
 			angleX += getSubmodValue("noteAngleX", player) + getSubmodValue("note" + data + "AngleX", player);
 			angleY += getSubmodValue("noteAngleY", player) + getSubmodValue("note" + data + "AngleY", player);
 
-			if(note.isSustainNote){
+			if(note.isSustainNote)
 				angleZ = 0;	
-                trace(angleX, angleY, angleZ);
-            }else{
+            else{
 				var noteBeat = note.beat - beat;
 				
 				angleZ += (noteBeat * getSubmodValue("dizzy", player) % 360) * (180 / Math.PI);
 				angleZ += getSubmodValue("noteAngle", player) + getSubmodValue("note" + data + "Angle", player);
-
 			}
 
 			angleZ += note.typeOffsetAngle;
@@ -61,8 +58,9 @@ class ConfusionModifier extends NoteModifier {
             angleY = 0;
             angleZ = 0;
         }
+		var radians = FlxAngle.TO_RAD;
 
-		vert = VectorHelpers.rotateV3(vert, FlxAngle.TO_RAD *  angleX, FlxAngle.TO_RAD *  angleY, FlxAngle.TO_RAD * angleZ);
+		vert = VectorHelpers.rotateV3(vert, radians * angleX, radians * angleY, radians * angleZ);
         return vert;
 	}
     

@@ -290,8 +290,6 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		var noteList = getNotesWithEnd(data, Conductor.songPosition + ClientPrefs.hitWindow, (note:Note) -> !note.isSustainNote);
 		#if PE_MOD_COMPATIBILITY
 		noteList.sort((a, b) -> Std.int((a.strumTime + (a.lowPriority ? 10000 : 0)) - (b.strumTime + (b.lowPriority ? 10000 : 0)))); // so lowPriority actually works (even though i hate it lol!)
-		#else
-		noteList.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
 		#end
 		while (noteList.length > 0)
 		{
