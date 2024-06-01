@@ -86,7 +86,6 @@ class NoteSplash extends NoteObject
 
 			ret = callOnHScripts("loadSplashAnims", [texture], ["this" => this, "noteData" => noteData, "column" => column]);
 
-			textureLoaded = texture;
 			if (ret != Globals.Function_Stop) 
 				loadAnims(texture);
 		}
@@ -113,6 +112,7 @@ class NoteSplash extends NoteObject
 	}
 
 	function loadAnims(skin:String) {
+		textureLoaded = skin;
 		frames = Paths.getSparrowAtlas(skin);
 		for (i in 1...animationAmount+1)
 		{
