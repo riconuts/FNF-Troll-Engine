@@ -13,8 +13,7 @@ enum ModifierType {
     MISC_MOD; // used for most things else
 }
 
-@:enum
-abstract ModifierOrder(Int) to Int{
+enum abstract ModifierOrder(Int) to Int{
 	var FIRST = -1000;
     var PRE_REVERSE = -3;
     var REVERSE = -2;
@@ -23,10 +22,11 @@ abstract ModifierOrder(Int) to Int{
 	var LAST = 1000;
 }
 
-typedef RenderInfo = {
-	var alpha:Float;
-	var glow:Float;
-	var scale:FlxPoint;
+@:structInit
+class RenderInfo {
+	public var alpha:Float;
+	public var glow:Float;
+	public var scale:FlxPoint;
 }
 
 class Modifier {
