@@ -86,6 +86,7 @@ class NoteSplash extends NoteObject
 
 			ret = callOnHScripts("loadSplashAnims", [texture], ["this" => this, "noteData" => noteData, "column" => column]);
 
+			textureLoaded = texture;
 			if (ret != Globals.Function_Stop) 
 				loadAnims(texture);
 		}
