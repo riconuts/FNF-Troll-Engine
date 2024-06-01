@@ -88,10 +88,10 @@ class AlphaModifier extends NoteModifier
 	override function shouldExecute(player:Int, val:Float)return true;
 	override function isRenderMod()return true;
 
-	override function getExtraInfo(diff:Float, tDiff:Float, beat:Float, info:RenderInfo, obj:FlxSprite, player:Int, data:Int):RenderInfo
+	override function getExtraInfo(diff:Float, tDiff:Float, beat:Float, info:RenderInfo, obj:NoteObject, player:Int, data:Int):RenderInfo
 	{
 		var alpha:Float = info.alpha;
-		if (obj is Note){
+		if (obj.objType == NOTE){
 			var note:Note = cast obj;
 			var yPos:Float = 50 + diff;
 
@@ -109,7 +109,7 @@ class AlphaModifier extends NoteModifier
 
 			alpha *= alphaMod;	
 		}
-		else if (obj is StrumNote){
+		else if (obj.objType == STRUM){
 			var receptor:StrumNote = cast obj;
 			alpha *= (1 - getSubmodValue("alpha", player)) * (1 - getSubmodValue('alpha${receptor.column}', player));
 
@@ -123,11 +123,10 @@ class AlphaModifier extends NoteModifier
 				}else
 					alpha *= vis;
 			}
-		}
-		else if (obj is NoteObject){
-			var nobj:NoteObject = cast obj;
-			alpha *= (1 - getSubmodValue("alpha", player)) * (1 - getSubmodValue('alpha${nobj.column}', player));
-		}
+		}else
+			alpha *= (1 - getSubmodValue("alpha", player)) * (1 - getSubmodValue('alpha${obj.column}', player));
+        
+		
 
 		info.alpha = alpha;
 
