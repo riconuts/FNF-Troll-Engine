@@ -677,7 +677,7 @@ class NoteField extends FieldBase
 			sprite.shader = shader;
 
 		shader.bitmap.input = sprite.graphic.bitmap;
-		shader.bitmap.filter = @:bypassAccessor sprite.antialiasing ? LINEAR : NEAREST;
+		shader.bitmap.filter = sprite.antialiasing ? LINEAR : NEAREST;
 
 		final totalTriangles = Std.int(vertices.length / 3);
 		var alphas = new FastVector<Float>(totalTriangles);
