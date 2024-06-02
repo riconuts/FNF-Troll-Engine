@@ -1972,7 +1972,7 @@ class PlayState extends MusicBeatState
 		}
 
 		//// load events
-		var daEvents = getEvents();
+		var daEvents:Array<EventNote> = getEvents();
 		for (event in daEvents)
 			eventPushedMap.set(event.event, true);
 
