@@ -626,23 +626,25 @@ class CharacterEditorState extends MusicBeatState
 			animationNameInputText.text = anim.name;
 			animationLoopCheckBox.checked = anim.loop;
 			animationNameFramerate.value = anim.fps;
-			if(anim.cameraOffset==null){
+
+			var cameraOffset:Array<Float> = anim.cameraOffset;
+			if (cameraOffset==null){
 				switch(anim.anim){
 					case 'singLEFT' | 'singLEFTmiss' | 'singLEFT-alt':
-						anim.cameraOffset = [-30, 0];
+						cameraOffset = [-30, 0];
 					case 'singRIGHT' | 'singRIGHTmiss' | 'singRIGHT-alt':
-						anim.cameraOffset = [30, 0];
+						cameraOffset = [30, 0];
 					case 'singUP' | 'singUPmiss' | 'singUP-alt':
-						anim.cameraOffset = [0, -30];
+						cameraOffset = [0, -30];
 					case 'singDOWN' | 'singDOWNmiss' | 'singDOWN-alt':
-						anim.cameraOffset = [0, 30];
+						cameraOffset = [0, 30];
 					default:
-						anim.cameraOffset = [0, 0];
+						cameraOffset = [0, 0];
 				}
 
 			}
-			animationXCam.value = anim.cameraOffset[0];
-			animationYCam.value = anim.cameraOffset[1];
+			animationXCam.value = cameraOffset[0];
+			animationYCam.value = cameraOffset[1];
 
 			updatePointerPos();
 
