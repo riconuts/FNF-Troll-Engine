@@ -77,7 +77,8 @@ class ChartingState extends MusicBeatState
 	var redos = [];
 	var eventStuff:Array<Dynamic> =
 	[
-		['', "Nothing. Yep, that's right."],
+		// Name, Description
+		['', ''], // This is used to input custom events.
 		['Hey!', "Plays the \"Hey!\" animation from Bopeebo,\nValue 1: BF = Only Boyfriend, GF = Only Girlfriend,\nSomething else = Both.\nValue 2: Custom animation duration,\nleave it blank for 0.6s"],
 		['Set GF Speed', "Sets GF head bopping speed,\nValue 1: 1 = Normal speed,\n2 = 1/2 speed, 4 = 1/4 speed etc.\nUsed on Fresh during the beatbox parts.\n\nWarning: Value must be integer!"],
 		['Add Camera Zoom', "Used on MILF on that one \"hard\" part\nValue 1: Camera zoom add (Default: 0.015)\nValue 2: UI zoom add (Default: 0.03)\nLeave the values blank if you want to use Default."],
@@ -85,8 +86,8 @@ class ChartingState extends MusicBeatState
 		['Camera Follow Pos', "Value 1: X\nValue 2: Y\n\nThe camera won't change the follow point\nafter using this, for getting it back\nto normal, leave both values blank."],
 		["Change Focus", "Sets who the camera is focusing on.\nNote that the must hit changing on a section will reset\nthe focus.\nValue 1: Who to focus on (dad, bf)"],
 		
-		['Stage Event', ''],
-		['Song Event', ''],
+		['Stage Event', 'Event whose behaviour defined by the stage.'],
+		['Song Event', 'Event whose behaviour defined by the song.'],
 		['Set Property', "Value 1: Variable name\nValue 2: New value"],
 		
 		['Alt Idle Animation', "Sets a specified suffix after the idle animation name.\nYou can use this to trigger 'idle-alt' if you set\nValue 2 to -alt\n\nValue 1: Character to set (Dad, BF or GF)\nValue 2: New suffix (Leave it blank to disable)"],
@@ -1078,8 +1079,21 @@ class ChartingState extends MusicBeatState
 	}
 
 	var eventDropDown:FlxUIDropDownMenuCustom;
+	var eventNameInput:FlxUIInputText;
 	var descText:FlxText;
 	var selectedEventText:FlxText;
+
+	function setSelectedEventType(typeName:String)
+	{
+		if (curSelectedNote != null && eventStuff != null)
+		{
+			if (curSelectedNote[2] == null)
+				curSelectedNote[1][curEventSelected][0] = typeName;
+
+			updateGrid();
+		}
+	}
+
 	function addEventsUI():Void
 	{
 		var tab_group_event = new FlxUI(null, UI_box);
@@ -1117,18 +1131,52 @@ class ChartingState extends MusicBeatState
 
 		var text:FlxText = new FlxText(20, 30, 0, "Event:");
 		tab_group_event.add(text);
-		eventDropDown = new FlxUIDropDownMenuCustom(20, 50, FlxUIDropDownMenuCustom.makeStrIdLabelArray(leEvents, true), function(pressed:String) {
-			var selectedEvent:Int = Std.parseInt(pressed);
-			descText.text = eventStuff[selectedEvent][1];
 
-			if (curSelectedNote != null && eventStuff != null) {
-				if (curSelectedNote != null && curSelectedNote[2] == null){
-					curSelectedNote[1][curEventSelected][0] = eventStuff[selectedEvent][0];
+		eventDropDown = new FlxUIDropDownMenuCustom(
+			20, 50, 
+			FlxUIDropDownMenuCustom.makeStrIdLabelArray(leEvents, true), 
+			function(pressed:String) {
+				var idx:Int = Std.parseInt(pressed);
+				
+				if (idx > 0){
+					var data = eventStuff[idx];
+					if (data != null){
+						setSelectedEventType(data[0]);
+						eventNameInput.text = data[0];
+						descText.text = data[1];
+					}
+				}else{
+					eventNameInput.text = "";
+					eventNameInput.exists = true;
+					eventNameInput.hasFocus = true;
 				}
-				updateGrid();
 			}
-		});
+		);
+		//eventDropDown.getBtnByIndex(0).getLabel().text = "Custom";
 		blockPressWhileScrolling.push(eventDropDown);
+
+		eventNameInput = new FlxUIInputText(
+			eventDropDown.x + 1, eventDropDown.y + 1, 
+			100, 
+			eventDropDown.selectedLabel,
+			8
+		);
+		eventNameInput.resize(100, eventDropDown.header.background.height - 2);
+		eventNameInput.exists = false;
+		eventNameInput.callback = function(inputStr:String, actionName:String){
+			if (actionName == "enter"){
+				setSelectedEventType(inputStr);
+				
+				eventDropDown.header.text.text = inputStr;
+				descText.text = "";
+
+				eventNameInput.exists = false;
+			}
+		}
+		eventNameInput.focusLost = () ->
+		{
+			eventNameInput.callback(eventNameInput.text, "enter");}
+		blockPressWhileTypingOn.push(eventNameInput);
 
 		var text:FlxText = new FlxText(20, 90, 0, "Value 1:");
 		tab_group_event.add(text);
@@ -1248,6 +1296,7 @@ class ChartingState extends MusicBeatState
 		tab_group_event.add(value1InputText);
 		tab_group_event.add(value2InputText);
 		tab_group_event.add(eventDropDown);
+		tab_group_event.add(eventNameInput);
 
 		UI_box.addGroup(tab_group_event);
 	}
@@ -2624,13 +2673,25 @@ class ChartingState extends MusicBeatState
 					}
 				}
 			} else {
-				eventDropDown.selectedLabel = curSelectedNote[1][curEventSelected][0];
-				var selected:Int = Std.parseInt(eventDropDown.selectedId);
-				if(selected > 0 && selected < eventStuff.length) {
-					descText.text = eventStuff[selected][1];
+				var eventData:Array<String> = curSelectedNote[1][curEventSelected];
+				var eventName:String = eventData[0];
+
+				eventDropDown.selectedLabel = eventNameInput.text = eventName;
+				value1InputText.text = eventData[1];
+				value2InputText.text = eventData[2];
+
+				var selectedIdx:Int = 0;
+				for (i in 0...eventStuff.length){
+					if (eventStuff[i][0] == eventName){
+						selectedIdx = i;
+						break;
+					}
 				}
-				value1InputText.text = curSelectedNote[1][curEventSelected][1];
-				value2InputText.text = curSelectedNote[1][curEventSelected][2];
+
+				eventDropDown.selectedId = Std.string(selectedIdx);
+				eventDropDown.header.text.text = eventName;
+				
+				descText.text = eventStuff[selectedIdx][1];
 			}
 			strumTimeInputText.text = '' + curSelectedNote[0];
 		}
@@ -2851,7 +2912,11 @@ class ChartingState extends MusicBeatState
 		return retStr;
 	}
 
+	#if tgt
 	var noteColors:Array<FlxColor> = [0xFFA349A4, 0xFFED1C24, 0xFFB5E61D, 0xFF00A2E8];
+	#else
+	var noteColors:Array<FlxColor> = [0xFFC24B99, 0xFF00FFFF, 0xFF12FA05, 0xFFF9393F];
+	#end
 	var susWidth:Float = 8;
 
 	function setupSusNote(note:Note):Null<FlxSprite> 
@@ -3009,45 +3074,40 @@ class ChartingState extends MusicBeatState
 
 	private function addNote(strum:Null<Float> = null, data:Null<Int> = null, type:Null<Int> = null, click:Bool=true):Void
 	{
-		//curUndoIndex++;
-		//var newsong = _song.notes;
-		//	undos.push(newsong);
-		var noteStrum = getStrumTime(dummyArrow.y * (getSectionBeats() / 4), false) + sectionStartTime();
-		var column = Math.floor((FlxG.mouse.x - GRID_SIZE) / GRID_SIZE);
-		var noteSus = 0;
-		var daAlt = false;
-		var daType = currentType;
+		var noteStrum:Float = strum!=null ? strum : getStrumTime(dummyArrow.y * (getSectionBeats() / 4), false) + sectionStartTime();
+		var column:Int = data!=null ? data : Math.floor((FlxG.mouse.x - GRID_SIZE) / GRID_SIZE);
+		var noteSus:Float = 0.0;
+		var daType:Int = type!=null ? type : currentType;
+		var isEvent:Bool = column < 0;
 
-		if (strum != null) noteStrum = strum;
-		if (data != null) column = data;
-		if (type != null) daType = type;
+		if (isEvent)
+		{
+			var eventType:String = eventNameInput.text; //eventStuff[Std.parseInt(eventDropDown.selectedId)][0];
+			var text1:String = value1InputText.text;
+			var text2:String = value2InputText.text;
 
-		if(column > -1)
-		{
-			_song.notes[curSec].sectionNotes.push([noteStrum, column, noteSus, noteTypeIntMap.get(daType)]);
-			curSelectedNote = _song.notes[curSec].sectionNotes[_song.notes[curSec].sectionNotes.length - 1];
-			if(click)
-				heldNotesClick[column] = _song.notes[curSec].sectionNotes[_song.notes[curSec].sectionNotes.length - 1];
-			else
-				heldNotesVortex[column] = _song.notes[curSec].sectionNotes[_song.notes[curSec].sectionNotes.length - 1];
-		}
-		else
-		{
-			var event = eventStuff[Std.parseInt(eventDropDown.selectedId)][0];
-			var text1 = value1InputText.text;
-			var text2 = value2InputText.text;
-			_song.events.push([noteStrum, [[event, text1, text2]]]);
+			_song.events.push([noteStrum, [[eventType, text1, text2]]]);
 			curSelectedNote = _song.events[_song.events.length - 1];
 			curEventSelected = 0;
 			changeEventSelected();
 		}
+		else		
+		{
+			var noteTypeName:String = noteTypeIntMap.get(daType);
 
-		if(click){
-			if (FlxG.keys.pressed.CONTROL && column > -1)
-			{
-				var note:Array<Dynamic> = [noteStrum, (column + 4) % 8, noteSus, noteTypeIntMap.get(daType)];
-				_song.notes[curSec].sectionNotes.push(note);
-				heldNotesClick[ (column + 4) % 8] = note;
+			_song.notes[curSec].sectionNotes.push([noteStrum, column, noteSus, noteTypeName]);
+			curSelectedNote = _song.notes[curSec].sectionNotes[_song.notes[curSec].sectionNotes.length - 1];
+			
+			if (click){
+				heldNotesClick[column] = curSelectedNote;
+
+				if (FlxG.keys.pressed.CONTROL){
+					var note:Array<Dynamic> = [noteStrum, (column + 4) % 8, noteSus, noteTypeName];
+					_song.notes[curSec].sectionNotes.push(note);
+					heldNotesClick[(column + 4) % 8] = note;
+				}
+			}else{
+				heldNotesVortex[column] = curSelectedNote;
 			}
 		}
 
