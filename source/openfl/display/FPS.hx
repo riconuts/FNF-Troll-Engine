@@ -81,15 +81,11 @@ class FPS extends TextField
 		});
 		#end
 
-		/*
-		#if debug
-		@:privateAccess
-		FlxG.signals.preStateSwitch.add(()->{
-			var nextState = FlxG.game._requestedState;
+		#if (debug && false)
+		FlxG.signals.preStateCreate.add((nextState)->{
 			currentState = Type.getClassName(Type.getClass(nextState));
 		});
 		#end
-		*/
 	}
 
 	// Event Handlers
@@ -113,16 +109,15 @@ class FPS extends TextField
 		{
 			text = "FPS: " + currentFPS;
 			
-			#if (openfl && !final)
+			#if !final
 			var memoryMegas:Float = Math.abs(FlxMath.roundDecimal(System.totalMemory / 1000000, 1));
-			text += "\nMemory: " + memoryMegas + " MB";
+			if (memoryMegas != 0)
+				text += ' • Memory: ${memoryMegas}MB';
 			#end
 
-			/*
-			#if debug
-			text += '\nState: $currentState';
+			#if (debug && false)
+			text += ' • State: $currentState';
 			#end
-			*/
 
 			if (currentFPS <= ClientPrefs.framerate * 0.5)
 				textColor = 0xFFFF0000;
