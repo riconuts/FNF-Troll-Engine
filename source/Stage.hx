@@ -161,6 +161,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		if (stageScript != null){
 			stageScript.call("onDestroy");
 			stageScript.stop();
+			stageScript = null;
 		}
 		
 		super.destroy();

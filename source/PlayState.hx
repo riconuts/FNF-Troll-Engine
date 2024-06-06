@@ -2683,20 +2683,6 @@ class PlayState extends MusicBeatState
 
 		callOnHScripts('update', [elapsed]);
 
-	/* 	for (shit in speedChanges)
-		{
-			if (shit.songTime <= Conductor.songPosition)
-				event = shit;
-			else
-				break;
-		} */
-/* 		if(speedChanges.length > 1){
-			if(speedChanges[1].songTime < Conductor.songPosition)
-				while (speedChanges.length > 1 && speedChanges[1].songTime < Conductor.songPosition)
-					speedChanges.shift();
-		} */
-		
-
 		if (camZooming)
 		{
 			var lerpVal = Math.exp(-elapsed * 3.125 * camZoomingDecay);
