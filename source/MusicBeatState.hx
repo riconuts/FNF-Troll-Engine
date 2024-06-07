@@ -162,9 +162,9 @@ class MusicBeatState extends FlxUIState
 
 	public static function switchState(nextState:FlxState)
 	{
+		FlxG.autoPause = false;
 		FlxG.mouse.visible = false;
 		Mouse.cursor = MouseCursor.AUTO;
-		FlxG.autoPause = false;
 		FlxG.switchState(nextState); // just because im too lazy to goto every instance of switchState and change it to a FlxG call
 	}
 
@@ -175,9 +175,9 @@ class MusicBeatState extends FlxUIState
 		}
 
 		#if HSCRIPT_ALLOWED
-		if (FlxG.state is HScriptState){
-			var hscriptedState:HScriptState = cast FlxG.state;
-			FlxG.switchState(new HScriptState(hscriptedState.file));
+		if (FlxG.state is HScriptedState){
+			var state:HScriptedState = cast FlxG.state;
+			FlxG.switchState(HScriptedState.fromFile(state.scriptPath));
 		}else
 		#end
 			FlxG.resetState();
