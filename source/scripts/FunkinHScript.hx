@@ -820,30 +820,30 @@ class HScriptedSubState extends MusicBeatSubstate
 
 	override function update(e)
 	{
-		if (script.call("onUpdate", [e]) == Globals.Function_Stop)
+		if (stateScript.call("onUpdate", [e]) == Globals.Function_Stop)
 			return;
 
 		super.update(e);
 
-		script.call("onUpdatePost", [e]);
+		stateScript.call("onUpdatePost", [e]);
 	}
 
 	override function close()
 	{
-		if (script != null)
-			script.call("onClose");
+		if (stateScript != null)
+			stateScript.call("onClose");
 
 		return super.close();
 	}
 
 	override function destroy()
 	{
-		if (script != null)
+		if (stateScript != null)
 		{
-			script.call("onDestroy");
-			script.stop();
+			stateScript.call("onDestroy");
+			stateScript.stop();
 		}
-		script = null;
+		stateScript = null;
 
 		return super.destroy();
 	}

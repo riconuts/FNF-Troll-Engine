@@ -7,9 +7,11 @@ import openfl.media.Sound;
 import openfl.ui.Mouse;
 import openfl.ui.MouseCursor;
 
-#if SCRIPTABLE_STATES
+#if HSCRIPT_ALLOWED
 import scripts.FunkinHScript;
+#end
 
+#if SCRIPTABLE_STATES
 @:autoBuild(scripts.Macro.addScriptingCallbacks([
 	"create",
 	"update",
@@ -47,7 +49,12 @@ class MusicBeatState extends FlxUIState
     }
 
 	override public function destroy(){
-		if (script != null) script.stop();
+		#if SCRIPTABLE_STATES
+		if (script != null){ 
+			script.stop();
+			script = null;
+		}
+		#end
 		return super.destroy();
 	}
 
@@ -81,7 +88,7 @@ class MusicBeatState extends FlxUIState
 
 		if (oldStep != curStep)
 		{
-			if(curStep > 0)
+			if (curStep > 0)
 				stepHit();
 
 			if(PlayState.SONG != null)
@@ -96,7 +103,6 @@ class MusicBeatState extends FlxUIState
 
 	override function update(elapsed:Float)
 	{
-		//everyStep();
         updateSteps();
 
 		super.update(elapsed);
@@ -169,7 +175,7 @@ class MusicBeatState extends FlxUIState
 	}
 
 	public static function resetState(?skipTrans:Bool = false) {
-		if(skipTrans){
+		if (skipTrans){
 			FlxTransitionableState.skipNextTransIn = true;
 			FlxTransitionableState.skipNextTransOut = true;
 		}
@@ -207,7 +213,7 @@ class MusicBeatState extends FlxUIState
 	function getBeatsOnSection()
 	{
 		var val:Null<Float> = 4;
-		if(PlayState.SONG != null && PlayState.SONG.notes[curSection] != null) val = PlayState.SONG.notes[curSection].sectionBeats;
+		if (PlayState.SONG != null && PlayState.SONG.notes[curSection] != null) val = PlayState.SONG.notes[curSection].sectionBeats;
 		return val == null ? 4 : val;
 	}
 

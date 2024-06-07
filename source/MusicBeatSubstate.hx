@@ -35,15 +35,18 @@ class MusicBeatSubstate extends FlxSubState
     
 	override public function destroy()
 	{
-		if (script != null)
+		#if SCRIPTABLE_STATES
+		if (script != null){
 			script.stop();
+			script = null;
+		}
+		#end
 		return super.destroy();
 	}
 
 
 	override function update(elapsed:Float)
 	{
-		//everyStep();
 		var oldStep:Int = curStep;
 
 		updateCurStep();

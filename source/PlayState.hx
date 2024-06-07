@@ -4481,11 +4481,11 @@ class PlayState extends MusicBeatState
 		return script;
 	}
 
-	public function removeLua(lua:FunkinLua):Void
+	public function removeLua(luaScript:FunkinLua):Void
 	{
 		if (luaArray != null && !preventLuaRemove) {
-			funkyScripts.remove(script);
-			luaArray.remove(lua);
+			funkyScripts.remove(luaScript);
+			luaArray.remove(luaScript);
 		}
 	}
 	#end
@@ -4992,7 +4992,8 @@ class RatingSprite extends FlxSprite
 		super();
 		moves = !ClientPrefs.simpleJudge;
 
-		cameras = PlayState.instance.ratingGroup.cameras;
+		if (PlayState.instance != null)
+			cameras = PlayState.instance.ratingGroup.cameras;
 		
 		//scrollFactor.set();
 	}
