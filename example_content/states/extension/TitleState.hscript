@@ -1,0 +1,11 @@
+function create(){
+    // anything to be done before the state create code
+    statecreate();
+    // anything after
+}
+
+function update(elapsed:Float){
+    // before state update
+    stateupdate(elapsed);
+    // after state update
+}

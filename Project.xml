@@ -88,7 +88,7 @@
 		<haxeflag name="-dce" value="no"/>
 		-->
 
-		<!-- <define name="SCRIPTABLE_STATES"/> -->
+		<define name="SCRIPTABLE_STATES"/>
 	</section>
 
 	<!-- __________________ lime build windows -release -Dtgt __________________ -->

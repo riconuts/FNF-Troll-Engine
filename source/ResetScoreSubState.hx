@@ -1,6 +1,5 @@
 import flixel.FlxG;
 import flixel.FlxSprite;
-import flixel.FlxSubState;
 import flixel.util.FlxColor;
 
 using StringTools;
@@ -16,13 +15,13 @@ class ResetScoreSubState extends MusicBeatSubstate
 
 	var name:String;
 	var displayName:String;
-	var isChapter:Bool;
+	var isStoryMode:Bool;
 	
-	public function new(name:String, ?isChapter:Bool, ?displayName:String)
+	public function new(name:String, ?isStoryMode:Bool, ?displayName:String)
 	{
 		this.name = name;
 		this.displayName = displayName==null ? name : displayName;
-		this.isChapter = isChapter == true;
+		this.isStoryMode = isStoryMode == true;
 
 		super();
 
@@ -43,7 +42,7 @@ class ResetScoreSubState extends MusicBeatSubstate
 		var text:Alphabet = new Alphabet(0, text.y + 90, displayName + "?", true, false, 0.05, tooLong);
 		text.scrollFactor.set();
 		text.screenCenter(X);
-		//if(!this.isChapter) text.x += 60 * tooLong;
+		//if(!this.isStoryMode) text.x += 60 * tooLong;
 		alphabetArray.push(text);
 		text.alpha = 0;
 		add(text);
@@ -95,7 +94,7 @@ class ResetScoreSubState extends MusicBeatSubstate
 			close();
 		} else if(controls.ACCEPT) {
 			if(onYes) {
-				if(isChapter)
+				if(isStoryMode)
 					Highscore.resetWeek(name);
 				else
 					Highscore.resetSong(name);
