@@ -329,6 +329,15 @@ class NoteOffsetState extends MusicBeatState
 		return super.destroy();
 	}
 
+	function getCurrentState():FlxState{
+		if (onComboMenu)
+			return comboSubstate;
+		else if (subState != null)
+			return subState;
+		
+		return this;
+	}
+
 	var transitioned = false;
 	override public function resetSubState(){
 		super.resetSubState();
@@ -340,7 +349,7 @@ class NoteOffsetState extends MusicBeatState
     }
     
 	override function finishTransIn()
-		subState.closeSubState();
+		getCurrentState().closeSubState();
 	
     
     function doDaInTrans(){
@@ -356,7 +365,7 @@ class NoteOffsetState extends MusicBeatState
 			}
 
 			var trans = Type.createInstance(transIn, []);
-			subState.openSubState(trans);
+			getCurrentState().openSubState(trans);
 
 			trans.finishCallback = finishTransIn;
 			FadeTransitionSubstate.nextCamera = camOther;
@@ -369,7 +378,7 @@ class NoteOffsetState extends MusicBeatState
 		if (hasTransOut)
 		{
 			var trans = Type.createInstance(transOut, []);
-			subState.openSubState(trans);
+			getCurrentState().openSubState(trans);
 
 			trans.finishCallback = finishTransOut;
 			trans.start(IN);
