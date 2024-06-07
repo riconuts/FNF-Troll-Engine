@@ -1,15 +1,15 @@
 package;
 
 import haxe.io.Path;
-import flixel.addons.transition.FlxTransitionableState;
 import flixel.addons.ui.FlxUIState;
+import flixel.addons.transition.FlxTransitionableState;
 import openfl.media.Sound;
 import openfl.ui.Mouse;
 import openfl.ui.MouseCursor;
-import scripts.FunkinHScript;
-
 
 #if SCRIPTABLE_STATES
+import scripts.FunkinHScript;
+
 @:autoBuild(scripts.Macro.addScriptingCallbacks([
 	"create",
 	"update",
@@ -23,7 +23,9 @@ import scripts.FunkinHScript;
 #end
 class MusicBeatState extends FlxUIState
 {
-    public var script:FunkinHScript;
+	#if SCRIPTABLE_STATES
+	public var script:FunkinHScript;
+	#end
 
 	private var curSection:Int = 0;
 	private var stepsToDo:Int = 0;
@@ -202,7 +204,6 @@ class MusicBeatState extends FlxUIState
 		return val == null ? 4 : val;
 	}
 
-	// tgt
 	public static var menuMusic:Sound; // main menu loop
 	public static var menuVox:FlxSound; // jukebox
 
