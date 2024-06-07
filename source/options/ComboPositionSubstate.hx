@@ -4,6 +4,7 @@ import PlayState.RatingSprite;
 
 import flixel.util.FlxColor;
 import flixel.text.FlxText;
+import flixel.math.FlxPoint;
 import flixel.group.FlxGroup.FlxTypedGroup;
 
 class ComboPositionSubstate extends MusicBeatSubstate
@@ -36,6 +37,9 @@ class ComboPositionSubstate extends MusicBeatSubstate
 		camHUD.bgColor = fuckingBgColor;
 		FlxG.cameras.add(camHUD, false);
 
+		FlxG.mouse.getScreenPosition(camHUD, curMousePos);
+		prevMousePos.copyFrom(curMousePos);
+
 		var ratingName:Null<String> = null;
 		var ratingColor:Null<FlxColor> = null;
 
@@ -55,8 +59,13 @@ class ComboPositionSubstate extends MusicBeatSubstate
 
 		if (ratingColor == null){
 			ratingColor = switch(ratingName){
+				#if tgt
 				case "epic": 0xFFE367E5;
 				case "sick": 0xFF00A2E8;
+				#else
+				case "epic": 0xFFBA78FF;
+				case "sick": 0xFF97FFFF;
+				#end
 				default: 0xFFFFFFFF;
 			}
 		}
@@ -167,6 +176,9 @@ class ComboPositionSubstate extends MusicBeatSubstate
 	var mouseGrabbed:Null<Int> = null; 
 	var keyboardGrabbed:Int = 0;
 
+	var prevMousePos:FlxPoint = FlxPoint.get();
+	var curMousePos:FlxPoint = FlxPoint.get();
+
 	override public function update(elapsed)
 	{
 		if (FlxG.mouse.justPressed){
@@ -184,8 +196,11 @@ class ComboPositionSubstate extends MusicBeatSubstate
 		if (FlxG.mouse.justReleased)
 			mouseGrabbed = null;
 
-		var deltaX = FlxG.mouse.deltaX;
-		var deltaY = FlxG.mouse.deltaY;
+		FlxG.mouse.getScreenPosition(camHUD, curMousePos);
+		var deltaX = Std.int(curMousePos.x - prevMousePos.x);
+		var deltaY = Std.int(curMousePos.y - prevMousePos.y);
+		prevMousePos.copyFrom(curMousePos);
+
 		if (deltaX != 0 || deltaY != 0){
 			switch(mouseGrabbed){
 				case 0:
@@ -213,6 +228,8 @@ class ComboPositionSubstate extends MusicBeatSubstate
 
 	override public function destroy(){
 		super.destroy();
+		curMousePos.put();
+		prevMousePos.put();		
 		FlxG.cameras.remove(camHUD, true);
 	}
 }

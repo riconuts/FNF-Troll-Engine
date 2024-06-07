@@ -329,7 +329,7 @@ class NoteOffsetState extends MusicBeatState
 		return super.destroy();
 	}
 
-	function getCurrentState():FlxState{
+	function getLowestState():FlxState{
 		if (onComboMenu)
 			return comboSubstate;
 		else if (subState != null)
@@ -349,7 +349,7 @@ class NoteOffsetState extends MusicBeatState
     }
     
 	override function finishTransIn()
-		getCurrentState().closeSubState();
+		getLowestState().closeSubState();
 	
     
     function doDaInTrans(){
@@ -365,7 +365,7 @@ class NoteOffsetState extends MusicBeatState
 			}
 
 			var trans = Type.createInstance(transIn, []);
-			getCurrentState().openSubState(trans);
+			getLowestState().openSubState(trans);
 
 			trans.finishCallback = finishTransIn;
 			FadeTransitionSubstate.nextCamera = camOther;
@@ -378,7 +378,7 @@ class NoteOffsetState extends MusicBeatState
 		if (hasTransOut)
 		{
 			var trans = Type.createInstance(transOut, []);
-			getCurrentState().openSubState(trans);
+			getLowestState().openSubState(trans);
 
 			trans.finishCallback = finishTransOut;
 			trans.start(IN);
