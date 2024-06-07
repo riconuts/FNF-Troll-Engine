@@ -1,18 +1,17 @@
 package options;
 
-import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
-import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.group.FlxSpriteGroup;
-import flixel.math.FlxPoint;
-import flixel.text.FlxText;
-import flixel.tweens.FlxEase;
+import flixel.FlxCamera;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.ui.FlxBar;
+import flixel.text.FlxText;
+import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import flixel.util.FlxStringUtil;
+import flixel.addons.transition.FlxTransitionableState;
+import options.ComboPositionSubstate;
 
 using StringTools;
 
@@ -26,10 +25,7 @@ class NoteOffsetState extends MusicBeatState
 	public var camGame:FlxCamera;
 	public var camOther:FlxCamera;
 
-	var timingTxt:FlxText;
-	var rating:FlxSprite;
-	var comboNums:FlxSpriteGroup;
-	var dumbTexts:FlxTypedGroup<FlxText>;
+	var comboSubstate:ComboPositionSubstate;
 
 	var barPercent:Float = 0;
 	var delayMin:Int = 0;
@@ -66,18 +62,14 @@ class NoteOffsetState extends MusicBeatState
 
 		//// Stage
 		var randomStage = TitleState.getRandomStage();
-		if (randomStage != null)
-		{
+		if (randomStage != null){
 			Paths.currentModDirectory = randomStage[1];
-			
 			stage = new Stage(randomStage[0]);
-			stage.buildStage();
-			add(stage);
-		
 		}else{
 			stage = new Stage();
-			add(stage);	
 		}
+		stage.buildStage();
+		add(stage);	
 
 		var stageData = stage.stageData;
 		var bgColor = FlxColor.fromString(stageData.bg_color);
@@ -112,44 +104,13 @@ class NoteOffsetState extends MusicBeatState
 		// Stage Foreground
 		add(stage.foreground);
 
-		// Combo stuff
-		rating = new FlxSprite(0, 0, Paths.image(ClientPrefs.useEpics ? 'epic' : 'sick'));
-		rating.cameras = [camHUD];
-		rating.setGraphicSize(Std.int(rating.width * 0.7));
-		rating.updateHitbox();
-		add(rating);
-
-		comboNums = new FlxSpriteGroup();
-		comboNums.cameras = [camHUD];
-
-		var ratingColor = ClientPrefs.useEpics ? 0xFFba82e8 : 0xFF87EDF5;
-		var comboColor = ClientPrefs.coloredCombos ? ratingColor : 0xFFFFFFFF;
-		for (i in 0...3){
-			var numScore = new FlxSprite().loadGraphic(Paths.image('num' + FlxG.random.int(0, 9)));
-			numScore.cameras = [camHUD];
-			numScore.scale.set(0.5, 0.5);
-			numScore.updateHitbox();
-			numScore.color = comboColor;
-			comboNums.add(numScore);
-		}
-		add(comboNums);
-
-		timingTxt = new FlxText(0,0,0,"0ms");
-		timingTxt.setFormat(Paths.font("calibri.ttf"), 28, ratingColor, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		timingTxt.cameras = [camHUD];
-		timingTxt.scrollFactor.set();
-		timingTxt.borderSize = 1.25;
-		add(timingTxt);
-
 		////
-		dumbTexts = new FlxTypedGroup<FlxText>();
-		dumbTexts.cameras = [camHUD];
-		add(dumbTexts);
-		createTexts();
+		comboSubstate = new ComboPositionSubstate(0, false);
+		subStateClosed.add((ss)->
+			this.destroySubStates = (ss != comboSubstate)
+		);
 
-		repositionCombo();
-
-		// Note delay stuff
+		//// Note delay stuff
 		beatText = new Alphabet(0, 0, 'Beat Hit!', true, false, 0.05, 0.6);
 		beatText.cameras = [camHUD];
 		beatText.scrollFactor.set();
@@ -201,7 +162,6 @@ class NoteOffsetState extends MusicBeatState
 		changeModeText.scrollFactor.set();
 		changeModeText.cameras = [camHUD];
 		add(changeModeText);
-		updateMode();
 
 		Conductor.changeBPM(128.0);
 		FlxG.sound.playMusic(Paths.music('offsetSong'), 1 , true);
@@ -214,6 +174,8 @@ class NoteOffsetState extends MusicBeatState
 		camGame.follow(camFollowPos);
 
 		super.create();
+
+		updateMode();
 	}
 
 	var holdTime:Float = 0;
@@ -230,107 +192,7 @@ class NoteOffsetState extends MusicBeatState
 
 		if(onComboMenu)
 		{
-			var controlArray:Array<Bool> = [
-				FlxG.keys.justPressed.LEFT,
-				FlxG.keys.justPressed.RIGHT,
-				FlxG.keys.justPressed.UP,
-				FlxG.keys.justPressed.DOWN,
 			
-				FlxG.keys.justPressed.A,
-				FlxG.keys.justPressed.D,
-				FlxG.keys.justPressed.W,
-				FlxG.keys.justPressed.S,
-
-				FlxG.keys.justPressed.J,
-				FlxG.keys.justPressed.L,
-				FlxG.keys.justPressed.I,
-				FlxG.keys.justPressed.K
-			];
-
-			if(controlArray.contains(true)){
-				for (i in 0...controlArray.length){
-					if(controlArray[i]){
-						switch(i)
-						{
-							case 0:
-								ClientPrefs.comboOffset[0] -= addNum;
-							case 1:
-								ClientPrefs.comboOffset[0] += addNum;
-							case 2:
-								ClientPrefs.comboOffset[1] += addNum;
-							case 3:
-								ClientPrefs.comboOffset[1] -= addNum;
-							
-							////
-							case 4:
-								ClientPrefs.comboOffset[2] -= addNum;
-							case 5:
-								ClientPrefs.comboOffset[2] += addNum;
-							case 6:
-								ClientPrefs.comboOffset[3] += addNum;
-							case 7:
-								ClientPrefs.comboOffset[3] -= addNum;
-
-							////
-							case 8:
-								ClientPrefs.comboOffset[4] -= addNum;
-							case 9:
-								ClientPrefs.comboOffset[4] += addNum;
-							case 10:
-								ClientPrefs.comboOffset[5] += addNum;
-							case 11:
-								ClientPrefs.comboOffset[5] -= addNum;							
-						}
-					}
-				}
-				repositionCombo();
-			}
-
-			// probably there's a better way to do this but, oh well.
-			// TODO: fix this shittt
-			if (FlxG.mouse.justPressed)
-			{
-				holdingObjectType = null;
-				FlxG.mouse.getScreenPosition(camHUD, startMousePos);
-				if (startMousePos.x - comboNums.x >= 0 && startMousePos.x - comboNums.x <= comboNums.width &&
-					startMousePos.y - comboNums.y >= 0 && startMousePos.y - comboNums.y <= comboNums.height)
-				{
-					holdingObjectType = true;
-					startComboOffset.x = ClientPrefs.comboOffset[2];
-					startComboOffset.y = ClientPrefs.comboOffset[3];
-					//trace('yo bro');
-				}
-				else if (startMousePos.x - rating.x >= 0 && startMousePos.x - rating.x <= rating.width &&
-						 startMousePos.y - rating.y >= 0 && startMousePos.y - rating.y <= rating.height)
-				{
-					holdingObjectType = false;
-					startComboOffset.x = ClientPrefs.comboOffset[0];
-					startComboOffset.y = ClientPrefs.comboOffset[1];
-					//trace('heya');
-				}
-			}
-			if(FlxG.mouse.justReleased) {
-				holdingObjectType = null;
-				//trace('dead');
-			}
-
-			if(holdingObjectType != null)
-			{
-				if(FlxG.mouse.justMoved)
-				{
-					var mousePos:FlxPoint = FlxG.mouse.getScreenPosition(camHUD);
-					var addNum:Int = holdingObjectType ? 2 : 0;
-					ClientPrefs.comboOffset[addNum + 0] = Math.round((mousePos.x - startMousePos.x) + startComboOffset.x);
-					ClientPrefs.comboOffset[addNum + 1] = -Math.round((mousePos.y - startMousePos.y) - startComboOffset.y);
-					repositionCombo();
-				}
-			}
-
-			if(controls.RESET)
-			{
-				ClientPrefs.comboOffset = [-60, 60, -260, -80, 0, 0];
-				repositionCombo();
-			}
 		}
 		else
 		{
@@ -398,8 +260,10 @@ class NoteOffsetState extends MusicBeatState
 		super.beatHit();
 
 		if(lastBeatHit == curBeat)
-		{
 			return;
+
+		if (stage != null && stage.stageScript != null){
+			stage.stageScript.call("onBeatHit");
 		}
 
 		if(curBeat % 2 == 0)
@@ -434,63 +298,6 @@ class NoteOffsetState extends MusicBeatState
 		lastBeatHit = curBeat;
 	}
 
-	function repositionCombo()
-	{
-		rating.screenCenter();
-		rating.x += ClientPrefs.comboOffset[0];
-		rating.y -= ClientPrefs.comboOffset[1];
-
-		var daLoop = 0;
-		var numStartX:Float = (FlxG.width - 3 * 41) * 0.5 + ClientPrefs.comboOffset[2];
-		for (numScore in comboNums.members){
-			numScore.x = numStartX + 43 * daLoop++;
-			numScore.screenCenter(Y);
-			numScore.y -= ClientPrefs.comboOffset[3];
-		}
-
-		timingTxt.screenCenter();
-		timingTxt.x += ClientPrefs.comboOffset[4];
-		timingTxt.y -= ClientPrefs.comboOffset[5];
-
-		reloadTexts();
-	}
-
-	function createTexts()
-	{
-		for (i in 0...6)
-		{
-			var text:FlxText = new FlxText(
-				10, 
-				48 + (i * 30) + 24 * Math.floor(i / 2), 
-				0, 
-				'', 
-				24
-			);
-			text.scrollFactor.set();
-			text.setFormat(Paths.font("calibri.ttf"), 24, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, 0xFF000000);
-			text.borderSize = 1.5;
-			text.cameras = [camHUD];
-
-			dumbTexts.add(text);
-		}
-	}
-
-	function reloadTexts()
-	{
-		for (i in 0...dumbTexts.length)
-		{
-			dumbTexts.members[i].text = switch(i){
-				case 0: 'Rating Offset:';
-				case 1: '[${ClientPrefs.comboOffset[0]}, ${ClientPrefs.comboOffset[1]}]';
-				case 2: 'Numbers Offset:';
-				case 3: '[${ClientPrefs.comboOffset[2]}, ${ClientPrefs.comboOffset[3]}]';
-				case 4: 'Miliseconds Offset:';
-				case 5: '[${ClientPrefs.comboOffset[4]}, ${ClientPrefs.comboOffset[5]}]';
-				default: '';
-			}
-		}
-	}
-
 	function updateNoteDelay()
 	{
 		ClientPrefs.noteOffset = Math.round(barPercent);
@@ -499,22 +306,94 @@ class NoteOffsetState extends MusicBeatState
 
 	function updateMode()
 	{
-		rating.visible = onComboMenu;
-		comboNums.visible = onComboMenu;
-		dumbTexts.visible = onComboMenu;
-		timingTxt.visible = onComboMenu;
-		
 		timeBarBG.visible = !onComboMenu;
 		timeBar.visible = !onComboMenu;
 		timeTxt.visible = !onComboMenu;
 		beatText.visible = !onComboMenu;
 
-		if(onComboMenu)
+		if (onComboMenu){
 			changeModeText.text = '< Combo Offset (Press Accept to Switch) >';
-		else
+			openSubState(comboSubstate);
+		}else{
 			changeModeText.text = '< Note/Beat Delay (Press Accept to Switch) >';
+			comboSubstate.close();
+		}
 
 		changeModeText.text = changeModeText.text.toUpperCase();
 		FlxG.mouse.visible = onComboMenu;
 	}
+
+	override function destroy()
+	{
+		comboSubstate.destroy();
+		return super.destroy();
+	}
+
+	var transitioned = false;
+	override public function resetSubState(){
+		super.resetSubState();
+
+		if (!transitioned){
+			transitioned = true;
+		    doDaInTrans();
+        }
+    }
+    
+	override function finishTransIn()
+		subState.closeSubState();
+	
+    
+    function doDaInTrans(){
+		if (transIn != null)
+		{
+			if (FlxTransitionableState.skipNextTransIn)
+			{
+				FlxTransitionableState.skipNextTransIn = false;
+				if (finishTransIn != null)
+					finishTransIn();
+				
+				return;
+			}
+
+			var trans = Type.createInstance(transIn, []);
+			subState.openSubState(trans);
+
+			trans.finishCallback = finishTransIn;
+			FadeTransitionSubstate.nextCamera = camOther;
+			trans.start(OUT);
+		}
+    }
+
+	function doDaOutTrans(?OnExit:Void->Void){
+		_onExit = OnExit;
+		if (hasTransOut)
+		{
+			var trans = Type.createInstance(transOut, []);
+			subState.openSubState(trans);
+
+			trans.finishCallback = finishTransOut;
+			trans.start(IN);
+		}
+		else
+		{
+			_onExit();
+		}
+    }
+
+	override function transitionToState(nextState:FlxState):Void
+	{
+		// play the exit transition, and when it's done call FlxG.switchState
+		_exiting = true;
+		doDaOutTrans(MusicBeatState.switchState.bind(nextState));
+
+		if (FlxTransitionableState.skipNextTransOut){
+			FlxTransitionableState.skipNextTransOut = false;
+			finishTransOut();
+		}
+	}
+
+
+	override public function transitionOut(?OnExit:Void->Void):Void{} // same as transitionin
+	
+	override public function transitionIn():Void{} // so the super.create doesnt transition
 }

@@ -6,7 +6,7 @@ import flixel.util.FlxColor;
 import flixel.text.FlxText;
 import flixel.group.FlxGroup.FlxTypedGroup;
 
-class ComboOffsetSubstate extends MusicBeatSubstate
+class ComboPositionSubstate extends MusicBeatSubstate
 {
     //// Preview    
     var rating:RatingSprite;
@@ -19,24 +19,36 @@ class ComboOffsetSubstate extends MusicBeatSubstate
     var txt_timing:FlxText;
 
     ////
-    var camHUD:FlxCamera;
+    public var camHUD:FlxCamera;
+    private final fuckingBgColor:FlxColor;
+    private final canClose:Bool = true;
 
-    override public function create(){
+    public function new(?bgColor:FlxColor, ?canClose:Bool = true){
+        super();
+
+		this.fuckingBgColor = bgColor==null ? 0x00000000 : bgColor;
+        this.canClose = canClose != false;
+    }
+
+    override public function create()
+    {
         camHUD = new FlxCamera();
+		camHUD.bgColor = fuckingBgColor;
         FlxG.cameras.add(camHUD, false);
 
         var ratingName:Null<String> = null;
         var ratingColor:Null<FlxColor> = null;
 
-        if (FlxG.state == PlayState.instance){ // would be cool
-            var judgeMan = PlayState.instance.judgeManager; 
+		if (PlayState.instance != null && PlayState.instance.hud != null) // could be cool
+        {
+			var hud = PlayState.instance.hud;
+			var highestJudgement = hud.displayedJudges[0];
             
-            ratingName = judgeMan.judgmentData.get(judgeMan.hittableJudgments[0]).internalName;
-            ratingColor = PlayState.instance.hud.judgeColours.get(ratingName);
-
-            camHUD.bgColor = FlxColor.fromRGBFloat(0, 0, 0, 0.6);
-        }else
-            camHUD.bgColor = FlxColor.fromRGBFloat(0, 0, 0, 0);
+			if (highestJudgement != null){
+				ratingName = highestJudgement;
+			    ratingColor = hud.judgeColours.get(ratingName);
+			}				
+        }   
 
         if (ratingName == null)
             ratingName = ClientPrefs.useEpics ? "epic" : "sick";
@@ -49,6 +61,7 @@ class ComboOffsetSubstate extends MusicBeatSubstate
             }
         }
             
+        ////
         
         rating = new RatingSprite();
         rating.scale.set(0.7, 0.7);
@@ -190,15 +203,16 @@ class ComboOffsetSubstate extends MusicBeatSubstate
             }
         }
 
-        if (controls.BACK){
+        if (canClose && controls.BACK){
 			FlxG.sound.play(Paths.sound("cancelMenu"));
             close();
         }
 
         super.update(elapsed);
-    } 
+    }
 
 	override public function destroy(){
+		trace("let yo bih go thru your phone");
         super.destroy();
 		FlxG.cameras.remove(camHUD, true);
     }
