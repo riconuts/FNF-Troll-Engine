@@ -474,7 +474,7 @@ class FunkinHScript extends FunkinScript
 @:noScripting // honestly we could prob use the scripting thing to override shit instead
 class HScriptState extends MusicBeatState
 {
-	var file:String = '';
+	public final file:String = '';
 	var stateScript:FunkinHScript;
 
 	public function new(fileName:String, ?additionalVars:Map<String, Any>)
@@ -487,7 +487,9 @@ class HScriptState extends MusicBeatState
 			var name = filePath + fileName;
 			if (!name.endsWith(".hscript"))
 				name += ".hscript";
-			trace(filePath, name);
+
+			//trace(filePath, name);
+			
 			if (!Paths.exists(name))
 				continue;
 
@@ -511,8 +513,6 @@ class HScriptState extends MusicBeatState
 				for (key in additionalVars.keys())
 					variables.set(key, additionalVars.get(key));
 			}
-
-			trace(name);
 
 			stateScript = FunkinHScript.fromFile(name, variables);
 			stateScript.scriptName = fileName;

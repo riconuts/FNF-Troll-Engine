@@ -173,7 +173,14 @@ class MusicBeatState extends FlxUIState
 			FlxTransitionableState.skipNextTransIn = true;
 			FlxTransitionableState.skipNextTransOut = true;
 		}
-		FlxG.resetState();
+
+		#if HSCRIPT_ALLOWED
+		if (FlxG.state is HScriptState){
+			var hscriptedState:HScriptState = cast FlxG.state;
+			FlxG.switchState(new HScriptState(hscriptedState.file));
+		}else
+		#end
+			FlxG.resetState();
 	}
 
 	public static function getState():MusicBeatState
