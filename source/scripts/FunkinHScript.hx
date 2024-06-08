@@ -506,6 +506,21 @@ class HScriptedState extends MusicBeatState
 		return new HScriptedState(FunkinHScript.fromString(str, "HScriptedState", null, doCreateCall));
 	}
 
+	public static function fromPath(scriptPath:String, ?doCreateCall:Bool = true)
+	{
+		var script:Null<FunkinHScript> = null;
+
+		if (scriptPath != null) {
+			script = FunkinHScript.fromFile(scriptPath, scriptPath, variables, false);
+		} else {
+			trace('State script file "$scriptPath" not found!');
+		}
+
+		var state = new HScriptedState(script, doCreateCall);
+		state.scriptPath = scriptPath;
+		return state;
+	}
+
 	public static function fromFile(fileName:String, ?doCreateCall:Bool = true)
 	{
 		var scriptPath:Null<String> = null;
@@ -523,17 +538,7 @@ class HScriptedState extends MusicBeatState
 			}
 		}
 
-		var script:Null<FunkinHScript> = null;
-
-		if (scriptPath != null){
-			script = FunkinHScript.fromFile(scriptPath, scriptPath, variables, false);			
-		}else{
-			trace('Script file "$fileName" not found!');
-		}
-
-		var state = new HScriptedState(script, doCreateCall);
-		state.scriptPath = scriptPath;
-		return state;
+		return fromPath(scriptPath);
 	}
 
 	override function create()

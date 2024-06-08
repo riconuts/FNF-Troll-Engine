@@ -183,7 +183,7 @@ class MusicBeatState extends FlxUIState
 		#if HSCRIPT_ALLOWED
 		if (FlxG.state is HScriptedState){
 			var state:HScriptedState = cast FlxG.state;
-			FlxG.switchState(HScriptedState.fromFile(state.scriptPath));
+			FlxG.switchState(HScriptedState.fromPath(state.scriptPath));
 		}else
 		#end
 			FlxG.resetState();
