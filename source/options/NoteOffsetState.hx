@@ -10,6 +10,7 @@ import flixel.text.FlxText;
 import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import flixel.util.FlxStringUtil;
+import scripts.FunkinHScript;
 import flixel.addons.transition.FlxTransitionableState;
 import options.ComboPositionSubstate;
 
@@ -18,6 +19,7 @@ using StringTools;
 class NoteOffsetState extends MusicBeatState
 {
 	var stage:Stage;
+	var stageScript:Null<FunkinHScript> = null;
 	var boyfriend:Character;
 	var gf:Character;
 
@@ -69,6 +71,7 @@ class NoteOffsetState extends MusicBeatState
 			stage = new Stage();
 		}
 		stage.buildStage();
+		stageScript = stage.stageScript;
 		add(stage);	
 
 		var stageData = stage.stageData;
@@ -90,13 +93,25 @@ class NoteOffsetState extends MusicBeatState
 		add(stageOpacity);
 
 		//// Characters
-		gf = new Character(stageData.girlfriend[0], stageData.girlfriend[1], 'gf');
+		var gfName:String = 'gf';
+		var bfName:String = 'bf';
+
+		// eugh
+		if (stage.curStage.startsWith("school")){
+			gfName += '-pixel';
+			bfName += '-pixel';
+		}else if (stage.curStage.startsWith("mall")){
+			gfName += '-christmas';
+			bfName += '-christmas';
+		}
+
+		gf = new Character(stageData.girlfriend[0], stageData.girlfriend[1], gfName);
 		gf.x += gf.positionArray[0];
 		gf.y += gf.positionArray[1];
 		gf.scrollFactor.set(0.95, 0.95);
 		add(gf);
 
-		boyfriend = new Character(stageData.boyfriend[0], stageData.boyfriend[1], 'bf', true);
+		boyfriend = new Character(stageData.boyfriend[0], stageData.boyfriend[1], bfName, true);
 		boyfriend.x += boyfriend.positionArray[0];
 		boyfriend.y += boyfriend.positionArray[1];
 		add(boyfriend);
@@ -253,6 +268,21 @@ class NoteOffsetState extends MusicBeatState
 		super.update(elapsed);
 	}
 
+	var lastStepHit:Int = -1;
+	override public function stepHit(){
+		super.stepHit();
+
+		if (lastStepHit == curStep)
+			return;
+
+		if (stageScript != null) {
+			stageScript.set("curStep", curStep);
+			stageScript.call("onStepHit");
+		}
+
+		lastStepHit = curStep;
+	}
+
 	var zoomTween:FlxTween;
 	var lastBeatHit:Int = -1;
 	override public function beatHit()
@@ -262,8 +292,9 @@ class NoteOffsetState extends MusicBeatState
 		if(lastBeatHit == curBeat)
 			return;
 
-		if (stage != null && stage.stageScript != null){
-			stage.stageScript.call("onBeatHit");
+		if (stageScript != null){
+			stageScript.set("curBeat", curBeat);
+			stageScript.call("onBeatHit");
 		}
 
 		if(curBeat % 2 == 0)
