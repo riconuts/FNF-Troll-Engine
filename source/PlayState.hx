@@ -3622,7 +3622,7 @@ class PlayState extends MusicBeatState
 
 		if (ClientPrefs.worldCombos && !ClientPrefs.simpleJudge){
 			
-			rating.y = camFollow.y - FlxG.camera.height * 0.1 - 60;
+			rating.y = FlxG.camera.height / 2.0 - FlxG.camera.height * 0.1 - 60;
 			rating.x = FlxMath.bound(
 				FlxG.width * 0.55 - 40,
 				camFollow.x - FlxG.camera.width / 2 + rating.width,
@@ -3682,7 +3682,7 @@ class PlayState extends MusicBeatState
 		var worldOffsetY:Float;
 
 		if (ClientPrefs.worldCombos && !ClientPrefs.simpleJudge){
-			worldOffsetY = camFollow.y - FlxG.camera.height * 0.1 + 80;
+			worldOffsetY = FlxG.camera.height / 2.0 - FlxG.camera.height * 0.1 + 80;
 			worldOffsetX = FlxMath.bound(
 				FlxG.width * 0.55 - scoreHW * 2, 
 				camFollow.x - FlxG.camera.width / 2 + scoreHW, 
@@ -4995,7 +4995,7 @@ class RatingSprite extends FlxSprite
 		if (PlayState.instance != null)
 			cameras = PlayState.instance.ratingGroup.cameras;
 		
-		//scrollFactor.set();
+		scrollFactor.y = 0.0;
 	}
 
 	override public function kill(){
