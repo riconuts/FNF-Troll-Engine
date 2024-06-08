@@ -191,6 +191,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 
 			//optionText.yAdd += yAdd;
 			optionText.targetY = i;
+			optionText.y = optionText.getTargetY() - FlxG.height / 3;
 
 			optionText.ID = i;
 			
