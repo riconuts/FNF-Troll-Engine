@@ -64,17 +64,29 @@ function onLoad()
 	
 	carTmr = new FlxTimer();
 	
-    if (inTitlescreen){
-		var stageData = this.stageData;
-		limo.x = stageData.camera_stage[0] + (FlxG.width / 2 / stageData.title_zoom);
-		
-		// maybe make this happen after the intro ended
-		FlxTween.tween(limo, {x: limo.x + (-limo.width + 100) / 1.125}, 4.2, {ease: FlxEase.backOut, songPos: Conductor.crochet, songBased: true});
-		
-		fastCarDrive();
-        add(limo);
-        add(foreground);
-    }
+	if (!inTitlescreen)
+		return;
+	
+	var ogLimoPos = limo.x;
+
+	var stageData = this.stageData;
+	limo.x = stageData.camera_stage[0] + ((FlxG.width / 2) / stageData.title_zoom);
+	limo.x -= limo.width - 70;
+	
+	FlxTween.tween(
+		limo, 
+		{x: limo.x - (limo.width / 1.1 - limo.width)}, 
+		4.2, 
+		{
+			ease: FlxEase.backOut,
+			startDelay: Conductor.crochet / 4000
+		}
+	);	
+	limo.x += limo.width;
+
+	fastCarDrive();
+	add(limo);
+	add(foreground);
 }
 
 var fastCarCanDrive = false;
@@ -98,8 +110,7 @@ function fastCarDrive()
 
 	fastCar.velocity.x = (FlxG.random.int(170, 220) / FlxG.elapsed) * 3;
 	fastCarCanDrive = false;
-	carTmr.start(2, function(tmr:FlxTimer)
-	{
+	carTmr.start(2, function(tmr:FlxTimer){
 		resetFastCar();
 	});
 }
