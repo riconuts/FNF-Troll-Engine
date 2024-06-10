@@ -129,12 +129,12 @@ class Main extends Sprite
 	
 		////		
 		var troll = false;
+
 		#if sys
 		for (arg in Sys.args()){
 			switch(arg){
 				case "troll":
 					troll = true;
-					break;
 
 				case "songselect":
 					StartupState.nextState = SongSelectState;
@@ -148,13 +148,13 @@ class Main extends Sprite
 		}
 		#end
 
+		#if tgt
 		if (troll){
-			initialState = SinnerState;
+			initialState = tgt.SinnerState;
 			skipSplash = true;
-		}else{
-			@:privateAccess
-			FlxG.initSave();
-
+		}else
+		#end
+		{
 			//// Readjust the window size for larger screens 
 			var scaleFactor:Int = Math.ceil((screenWidth > screenHeight) ? (screenHeight / gameHeight) : (screenWidth / gameWidth));
 			if (scaleFactor > 1) scaleFactor--;
@@ -172,8 +172,9 @@ class Main extends Sprite
 			);
 
 			////
-			if (FlxG.save.data != null && FlxG.save.data.fullscreen != null)
-				startFullscreen = FlxG.save.data.fullscreen;
+			@:privateAccess
+			FlxG.initSave();
+			startFullscreen = FlxG.save.data.fullscreen;
 		}
 		
 		addChild(new FNFGame(gameWidth, gameHeight, initialState, #if(flixel < "5.0.0") zoom, #end framerate, framerate, skipSplash, startFullscreen));
@@ -181,26 +182,21 @@ class Main extends Sprite
 		FlxG.mouse.useSystemCursor = true;
 		FlxG.mouse.visible = false;
 
-		if (!troll){
-			#if !mobile
-			fpsVar = new FPS(10, 3, 0xFFFFFF);
-			fpsVar.visible = false;
-			addChild(fpsVar);
-			#end
+		#if !mobile
+		fpsVar = new FPS(10, 3, 0xFFFFFF);
+		fpsVar.visible = false;
+		addChild(fpsVar);
+		#end
 
-			bread = new Bread();
-			bread.visible = false;
-			addChild(bread);
-		}
-	
+		bread = new Bread();
+		bread.visible = false;
+		addChild(bread);
 
 		#if CRASH_HANDLER
 		// Original code was made by sqirra-rng, big props to them!!!
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(
 			UncaughtErrorEvent.UNCAUGHT_ERROR, 
-			(event:UncaughtErrorEvent)->{
-				onCrash(event.error);
-			}
+			(event:UncaughtErrorEvent) -> onCrash(event.error)
 		);
 
 

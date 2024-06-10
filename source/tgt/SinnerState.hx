@@ -1,24 +1,18 @@
-package;
+package tgt;
 
-import flixel.FlxBasic;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
-import flixel.effects.FlxFlicker;
 import flixel.text.FlxText;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
-import flixel.util.FlxTimer;
 import lime.app.Application;
 import lime.math.Vector2;
-import lime.system.System;
-import lime.tools.WindowData;
 import lime.ui.Window;
-import lime.ui.WindowAttributes;
 
 class SinnerState extends FlxState
 {
-	var trollface:FlxSprite = new FlxSprite();
+	var trollface:FlxSprite;
 
 	var mainWindow:Window;
 
@@ -34,8 +28,8 @@ class SinnerState extends FlxState
 	var maximumY(get, null):Float;
 
 	var color:FlxColor = FlxColor.RED;
-	var hue:Float = 0;
 	var hueSpeed:Float = 0;
+	var hueTime:Float = 0.0;
 	// var exeName:String;
 
 	var code:Int = 0;
@@ -63,8 +57,10 @@ class SinnerState extends FlxState
 		xSpeed = ySpeed *= desktopSize.y / mainWindow.height;
 
 		//
-		add(trollface.loadGraphic(Paths.image("trollface")).screenCenter());
+		trollface = new FlxSprite(Paths.image("trollface"));
+		trollface.screenCenter();
 		trollface.setGraphicSize(0, Std.int(trollface.height * (mainWindow.height / trollface.height)));
+		add(trollface);
 
 		super.create();
 	}
@@ -129,9 +125,22 @@ class SinnerState extends FlxState
 		}
 
 		hueSpeed = flixel.math.FlxMath.lerp(hueSpeed, 8, elapsed * 10);
-		hue = (hue + hueSpeed * elapsed * 10) % 360;
-		color.hue = hue;
-		trollface.color = color;
+
+		inline function get_r(t:Float)
+			return 0.5 + 0.5 * Math.cos(2.0*Math.PI * t);
+		inline function get_g(t:Float)
+			return 0.5 + 0.5 * Math.cos(2.0*Math.PI * (t - 1.0/3.0));
+		inline function get_b(t:Float)
+			return 0.5 + 0.5 * Math.cos(2.0*Math.PI * (t + 1.0/3.0));
+
+		hueTime += (hueSpeed * elapsed * 10);
+		
+		var hueTime:Float = hueTime / 360.0;
+		trollface.color = FlxColor.fromRGBFloat(
+			get_r(hueTime),
+			get_g(hueTime),
+			get_b(hueTime)
+		);
 
 		super.update(elapsed);
 	}
