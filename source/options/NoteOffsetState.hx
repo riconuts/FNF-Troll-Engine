@@ -79,17 +79,13 @@ class NoteOffsetState extends MusicBeatState
 		camGame.bgColor = bgColor == null ? 0xFF000000 : bgColor;
 
 		////
-		var stageOpacity = new FlxSprite();
-
-		stageOpacity.makeGraphic(1,1,0xFFFFFFFF);
+		var stageOpacity = new FlxSprite().makeGraphic(2, 2, 0xFFFFFFFF);
 		stageOpacity.color = 0xFF000000;
 		stageOpacity.alpha = ClientPrefs.stageOpacity;
 		stageOpacity.cameras=[camStageUnderlay]; // just to force it above camGame but below camHUD
-		stageOpacity.screenCenter();
-		stageOpacity.scale.set(FlxG.width * 100, FlxG.height * 100);
-		stageOpacity.alpha = ClientPrefs.stageOpacity;
 		stageOpacity.scrollFactor.set();
-
+		stageOpacity.screenCenter();
+		stageOpacity.scale.set(FlxG.width * 3, FlxG.height * 3);
 		add(stageOpacity);
 
 		//// Characters
