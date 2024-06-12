@@ -33,9 +33,9 @@
       "version": null
     },
     {
-      "name": "hxCodec",
+      "name": "hxvlc",
       "type": "haxelib",
-      "version": "2.6.1"
+      "version": "1.6.1"
     },
     {
       "name": "hxcpp",
