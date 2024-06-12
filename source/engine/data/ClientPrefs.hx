@@ -76,7 +76,8 @@ class ClientPrefs
 				desc: "Preset for the judgement windows.",
 				type: Dropdown,
 				value: "Standard",
-				data: ["options" => ["Psych", "Vanilla", "Standard", "ITG", "Custom"]]
+                // V-Slice could be named PBOT1??
+				data: ["options" => ["Psych", "V-Slice", "Week 7", "Standard", "ITG", "Custom"]]
 			},
 			"judgeDiff" => {
 				display: "Judge Difficulty",

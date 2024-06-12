@@ -8,7 +8,9 @@ function getOffset(eventNote):Float{
 
 function onTrigger(value1, value2, time)
 {
-	if(game.stageData.camera_speed != null)
+	if (game.stageData.camera_speed == null)
+		game.cameraSpeed = 1.0;
+	else
 		game.cameraSpeed = game.stageData.camera_speed;
 	
 	var sowy = Std.parseFloat(value1);

@@ -4,14 +4,15 @@ import flixel.FlxG;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.addons.display.FlxRuntimeShader;
-import openfl.utils.Assets as Assets;
-import openfl.display.BitmapData;
+import openfl.utils.Assets;
 import openfl.utils.AssetType;
+import openfl.display.BitmapData;
 import openfl.media.Sound;
 import haxe.Json;
 import ChapterData.ChapterMetadata;
 
 using StringTools;
+
 #if sys
 import sys.FileSystem;
 import sys.io.File;
@@ -138,6 +139,7 @@ class Paths
 	static public var currentModAddons:Array<String> = [];
 	static public var currentModDirectory:String = '';
 	static public var currentModLibraries:Array<String> = [];
+
 	public static function getPath(file:String, ?type:AssetType, ?library:Null<String> = null)
 	{
 		return getPreloadPath(file);
@@ -184,62 +186,114 @@ class Paths
 	}
 
 
-	inline static public function exists(asset:String, ?type:lime.utils.AssetType)
+	inline static public function exists(path:String, ?type:AssetType):Bool
 	{
 		#if sys 
-		return FileSystem.exists(asset);
+		return FileSystem.exists(path);
 		#else
-		return Assets.exists(asset, type);
+		return Assets.exists(path, type);
 		#end
 	}
-	inline static public function getContent(asset:String):Null<String>{
+	inline static public function getContent(path:String):Null<String>{
 		#if sys
-		if (FileSystem.exists(asset))
-			return File.getContent(asset);
+		return FileSystem.exists(path) ? File.getContent(path) : null;
 		#else
-		if (Assets.exists(asset))
-			return Assets.getText(asset);
+		return Assets.exists(path) ? Assets.getText(path) : null;
 		#end
+	}
+	inline static public function isDirectory(path:String):Bool{
+		#if sys
+		return FileSystem.exists(path) && FileSystem.isDirectory(path);
+		#else
+		var path = path.endsWith("/") ? path.substr(0, -1) : path; // remove ending slash
+		return dirMap.exists(path);
+		#end
+	}
 
-		return null;
+	static public function getJson(path:String):Null<Dynamic>
+	{
+		var ret:Null<Dynamic> = null;
+		try{
+			var raw = Paths.getContent(path);
+			if (raw != null)
+				ret = haxe.Json.parse(raw);
+		}catch(e){
+			haxe.Log.trace('$path: $e', null);
+		}
+
+		return ret;
 	}
 
 	#if html5
-	// Directory => Array with file names
-	static var pathMap = new Map<String, Array<String>>();
+	// Directory => Array with file/sub-directory names
+	static var dirMap = new Map<String, Array<String>>();
 
 	public static function initPaths(){	
-		pathMap.clear();
+		dirMap.clear();
+		dirMap.set("", []);
 
 		for (path in Assets.list())
 		{
-			var file = path.split("/").pop();
-			var parent = path.substr(0, path.length - (file.length + 1)); // + 1 to remove the ending slash
+			//trace("WORKING WITH PATH:", path);
 
-			if (pathMap.exists(parent))
-				pathMap.get(parent).push(file);
-			else
-				pathMap.set(parent, [file]);
+			var file:String = path.split("/").pop();
+			var parent:String = path.substr(0, path.length - (file.length + 1)); // + 1 to remove the ending slash
+
+			var parentTree = parent.split("/");
+			for (totality in 1...parentTree.length+1)
+			{
+				var totality = parentTree.length - totality;
+				var dirPathSplit = [for (i in 0...totality+1) {parentTree[i];}];
+				var dirPath = dirPathSplit.join("/");
+				
+				if (!dirMap.exists(dirPath)){
+					dirMap.set(dirPath, []);
+					//trace("reg folder", dirPath, "from", path);
+				//}else{
+					//trace("did NOT reg folder", dirPath, "from", path);
+				}
+			}
+			
+			dirMap.get(parent).push(file);
+			//trace("END");
+		}
+		
+		////
+		for (path => dir in dirMap)
+		{
+			var name:String = path.split("/").pop();
+			var parent:String = path.substr(0, path.length - (name.length + 1)); // + 1 to remove the ending slash
+
+			if (dirMap.exists(parent)){
+				var parentDir = dirMap.get(parent);
+				if (!parentDir.contains(name)){
+					parentDir.push(name);
+				}
+			}
 		}
 
-		return pathMap;
+		// trace(dirMap["assets/songs"]);
+
+		return dirMap;
 	}
 	
-	inline static public function iterateDirectory(Directory:String, Func)
+	inline static public function iterateDirectory(Directory:String, Func:haxe.Constraints.Function)
 	{
 		var dir:String = Directory.endsWith("/") ? Directory.substr(0, -1) : Directory; // remove ending slash
 
-		if (!pathMap.exists(dir))
+		if (!dirMap.exists(dir)){
+			trace('Directory $dir does not exist?');
 			return;
+		}
 
-		for (i in pathMap.get(dir))
+		for (i in dirMap.get(dir))
 			Func(i);
 	}
 
 	#else
 
 	/** Iterates through a directory and call a function with the name of each file contained within it**/
-	inline static public function iterateDirectory(Directory:String, Func):Bool
+	inline static public function iterateDirectory(Directory:String, Func:haxe.Constraints.Function):Bool
 	{
 		if (!FileSystem.exists(Directory) || !FileSystem.isDirectory(Directory))
 			return false;
@@ -382,7 +436,8 @@ class Paths
 		}
 	}
 
-	public inline static function hasString(key:String)return getString(key) != key;
+	public inline static function hasString(key:String)
+		return getString(key) != key;
 
 	public static function getString(key:String, force:Bool = false):String
 	{
@@ -399,10 +454,10 @@ class Paths
 
 			//trace(filePath);
 			var stringsText = getContent(file);
-			var daLines = stringsText.trim().split("\n");
+			if (stringsText == null) continue;
 
-			for(shit in daLines){
-				var splitted = shit.split("=");
+			for (line in stringsText.trim().split("\n")){
+				var splitted = line.split("=");
 				var thisKey = splitted.shift();
 				if (thisKey == key){
 					currentStrings.set(key, splitted.join("=").trim().replace('\\n', '\n'));
@@ -417,12 +472,7 @@ class Paths
 
 	inline static public function fileExists(key:String, type:AssetType, ?ignoreMods:Bool = false, ?library:String)
 	{
-		#if MODS_ALLOWED
-		if (FileSystem.exists(mods(currentModDirectory + '/' + key)) || FileSystem.exists(mods(key)))
-			return true;
-		#end
-
-		return Paths.exists(getPath(key, type));
+		return #if MODS_ALLOWED (ignoreMods!=true && FileSystem.exists(modFolders(key))) || #end Paths.exists(getPath(key, type));
 	}
 
 	inline static public function getSparrowAtlas(key:String, ?library:String):FlxAtlasFrames
@@ -466,15 +516,19 @@ class Paths
 	}
 
 	static function getShaderFragment(name:String):Null<String>{
+		#if MODS_ALLOWED
 		var path = Paths.modsShaderFragment(name);
 		if (Paths.exists(path)) return path;
+		#end
 		var path = Paths.shaderFragment(name);
 		if (Paths.exists(path)) return path;
 		return null;
 	}
 	static function getShaderVertex(name:String):Null<String>{
+		#if MODS_ALLOWED
 		var path = Paths.modsShaderVertex(name);
 		if (Paths.exists(path)) return path;
+		#end
 		var path = Paths.shaderVertex(name);
 		if (Paths.exists(path)) return path;
 		return null;
@@ -528,7 +582,12 @@ class Paths
 		#if html5
 		return FlxG.bitmap.add(path, false, path);
 		#elseif sys
-		return FlxGraphic.fromBitmapData(BitmapData.fromFile(path), false, path);
+		var graphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(path), false, path);		
+
+		@:privateAccess
+		graphic.assetsKey = path;
+	
+		return graphic;
 		#end
 	}
 
@@ -597,50 +656,59 @@ class Paths
 		gottenPath = gottenPath.substring(gottenPath.indexOf(':') + 1, gottenPath.length);
 		#end
 
-		var toReturn = currentTrackedSounds.get(gottenPath);
-
-		if (toReturn == null)
-			currentTrackedSounds.set(
-				gottenPath, 
-				toReturn = (
-				#if !html
-				Sound.fromFile('./' + gottenPath)
-				#else
-				Assets.getSound((path == 'songs' ? folder = 'songs:' : '') + getPath('$path/$key.$SOUND_EXT', SOUND, library))
-				#end
-				)
-			);
+		var sound:Null<Sound> = currentTrackedSounds.get(gottenPath);
+		if (sound == null){
+			#if !html
+			sound = Sound.fromFile('./' + gottenPath);
+			#else
+			sound = Assets.getSound(/*(path == 'songs' ? 'songs:' : '') +*/ gottenPath);
+			#end
 			
+			currentTrackedSounds.set(gottenPath, sound);
+		}
+
 		if (!localTrackedAssets.contains(gottenPath))
 			localTrackedAssets.push(gottenPath);
 
-		return toReturn;
+		return sound;
 	}
 
-	// i just fucking realised there's already a function for this wtfff
-	static public function getText(key:String, ?ignoreMods:Bool = false):Null<String>
+	///// TODO: since I completely gutted getPath out of it's original purpose, maybe replace it with this.
+	static public function ___getPath(key:String, ?ignoreMods:Bool = false):String
 	{
 		#if MODS_ALLOWED
 		if (ignoreMods != true){
 			var modPath:String = Paths.modFolders(key);
-			if (FileSystem.exists(modPath))
-				return File.getContent(modPath);
+			if (Paths.exists(modPath))
+				return modPath;
 		}
 		#end
 
-		return getContent(Paths.getPreloadPath(key));
+		return Paths.getPreloadPath(key);
 	}
 
-	static public function getJson(path:String):Null<Dynamic>
+	/** Returns the contents of a file as a string. **/
+	static public function getText(key:String, ?ignoreMods:Bool = false):Null<String>
 	{
-		try{
-			return Json.parse(Paths.getContent(path));
-		}catch(e){
-			Sys.println('$path: $e');
-		}
+		return getContent(___getPath(key, ignoreMods));
+	}
 
+	/** Return the contents of a file, parsed as a JSON. **/
+	static public function json(key:String, ?ignoreMods:Bool = false):Null<Dynamic>
+	{
+		var rawJSON:Null<String> = getText(key, ignoreMods);
+		if (rawJSON == null) 
+			return null;
+		
+		try{
+			return Json.parse(rawJSON);
+		}catch(e){
+			haxe.Log.trace('$key: $e', null);
+		}
+		
 		return null;
 	}
+
 
 	public static var modsList:Array<String> = [];
 	#if MODS_ALLOWED
@@ -678,27 +746,6 @@ class Paths
 	
 	inline static public function modsShaderVertex(key:String, ?library:String)
 		return modFolders('shaders/'+key+'.vert');
-
-	inline static public function getFolders(dir:String, ?modsOnly:Bool = false){
-		var foldersToCheck:Array<String> = [
-			#if MODS_ALLOWED
-			Paths.mods(Paths.currentModDirectory + '/$dir/'),
-			Paths.mods('global/$dir/'),
-			Paths.mods('$dir/'),
-			#end
-		];
-
-		if(!modsOnly)
-			foldersToCheck.push(Paths.getPreloadPath('$dir/'));
-
-		#if MODS_ALLOWED
-		for(mod in preLoadContent)foldersToCheck.push(Paths.mods('$mod/$dir/'));
-		for(mod in getGlobalContent())foldersToCheck.insert(0, Paths.mods('$mod/$dir/'));
-        for(mod in postLoadContent)foldersToCheck.insert(0, Paths.mods('$mod/$dir/'));
-		#end
-
-		return foldersToCheck;
-	}
 
 	inline static public function getGlobalContent(){
 		return globalContent;
@@ -763,7 +810,7 @@ class Paths
 			for (folder in FileSystem.readDirectory(modFolderPath))
 			{
 				var path = haxe.io.Path.join([modFolderPath, folder]);
-				if (sys.FileSystem.isDirectory(path) && !list.contains(folder))
+				if (FileSystem.isDirectory(path) && !list.contains(folder))
 				{
 					list.push(folder);
 				}
@@ -774,6 +821,28 @@ class Paths
 		return list;
 	}
 	#end
+
+	inline static public function getFolders(dir:String, ?modsOnly:Bool = false){
+		#if !MODS_ALLOWED
+		return [Paths.getPreloadPath('$dir/')];
+		
+		#else
+		var foldersToCheck:Array<String> = [
+			Paths.mods(Paths.currentModDirectory + '/$dir/'),
+			Paths.mods('global/$dir/'),
+			Paths.mods('$dir/'),			
+		];
+
+		if(!modsOnly)
+			foldersToCheck.push(Paths.getPreloadPath('$dir/'));
+
+		for(mod in preLoadContent)foldersToCheck.push(Paths.mods('$mod/$dir/'));
+		for(mod in getGlobalContent())foldersToCheck.insert(0, Paths.mods('$mod/$dir/'));
+		for(mod in postLoadContent)foldersToCheck.insert(0, Paths.mods('$mod/$dir/'));
+
+		return foldersToCheck;
+		#end
+	}
 	
 	public static function loadTheFirstEnabledMod()
 	{

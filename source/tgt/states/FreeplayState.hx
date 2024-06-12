@@ -169,9 +169,10 @@ class FreeplayState extends MusicBeatState
 
 		//// Load the songs!!!
 		loadTxtFreeplayList(Paths.txt('freeplaySonglist'));
-		loadTxtFreeplayList(Paths.mods('global/data/freeplaySonglist.txt'));
 
 		#if MODS_ALLOWED
+		loadTxtFreeplayList(Paths.mods('global/data/freeplaySonglist.txt'));
+
 		for (mod in Paths.getModDirectories())
 		{
 			Paths.currentModDirectory = mod;

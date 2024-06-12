@@ -92,6 +92,12 @@ class TitleState extends MusicBeatState
 		{
 			Paths.currentModDirectory = randomStage[1];
 			bg = new Stage(randomStage[0], false);
+			
+			#if MULTICORE_LOADING
+			var shitToLoad = bg.stageData.preload;
+			if (shitToLoad != null) Cache.loadWithList(shitToLoad);
+			#end
+
 			bg.startScript(false, ["inTitlescreen" => true]);
 		}
 
@@ -188,12 +194,16 @@ class TitleState extends MusicBeatState
 		camGame.filters = [blurFilter];
 
 		////
-		if (bg != null){
+		if (bg != null && bg.stageData != null){
 			camGame.zoom = bg.stageData.defaultZoom;
 			if (bg.stageData.title_zoom != null)
 				camGame.zoom = bg.stageData.title_zoom;
-			var color = FlxColor.fromString(bg.stageData.bg_color);
-			camGame.bgColor = color != null ? color : FlxColor.BLACK;
+
+			var bgColor:Null<FlxColor> = null;
+			if (bg.stageData.bg_color != null)
+				bgColor = FlxColor.fromString(bg.stageData.bg_color);
+
+			camGame.bgColor = (bgColor != null) ? bgColor : 0xFF000000;
 
 			var camPos = bg.stageData.camera_stage;
 			if (camPos == null) camPos = [640, 360];
@@ -423,13 +433,20 @@ class TitleState extends MusicBeatState
 				case 2:
 					MusicBeatState.playMenuMusic(1, true);
 
-					#if tgt
+				#if tgt
 					createCoolText(['THE FNF TGT TEAM']);
-					#else
-					//createCoolText(['THE TROLL ENGINE TEAM']); // huge if true
-					createCoolText(['RICONUTS', 'NEBULA_ZORUA', 'AND MORE']);
-					#end
 				case 4: addMoreText('presents');
+				#else
+					//createCoolText(['THE TROLL ENGINE TEAM']); // huge if true
+
+					// should probably do proper code for spacing out the text
+					addMoreText('RICONUTS', 0);
+					addMoreText('NEBULA_ZORUA', 8);
+					addMoreText('AND MORE', 16);
+				
+				case 4: addMoreText('presents', 75);
+				#end
+				
 				case 5: deleteCoolText();
 
 				////

@@ -1,13 +1,15 @@
 package;
 
 import haxe.io.Path;
-import flixel.addons.transition.FlxTransitionableState;
 import flixel.addons.ui.FlxUIState;
+import flixel.addons.transition.FlxTransitionableState;
 import openfl.media.Sound;
 import openfl.ui.Mouse;
 import openfl.ui.MouseCursor;
-import scripts.FunkinHScript;
 
+#if HSCRIPT_ALLOWED
+import scripts.FunkinHScript;
+#end
 
 #if SCRIPTABLE_STATES
 @:autoBuild(scripts.Macro.addScriptingCallbacks([
@@ -23,7 +25,9 @@ import scripts.FunkinHScript;
 #end
 class MusicBeatState extends FlxUIState
 {
-    public var script:FunkinHScript;
+	#if SCRIPTABLE_STATES
+	public var script:FunkinHScript;
+	#end
 
 	private var curSection:Int = 0;
 	private var stepsToDo:Int = 0;
@@ -45,7 +49,12 @@ class MusicBeatState extends FlxUIState
     }
 
 	override public function destroy(){
-		if (script != null) script.stop();
+		#if SCRIPTABLE_STATES
+		if (script != null){ 
+			script.stop();
+			script = null;
+		}
+		#end
 		return super.destroy();
 	}
 
@@ -79,7 +88,7 @@ class MusicBeatState extends FlxUIState
 
 		if (oldStep != curStep)
 		{
-			if(curStep > 0)
+			if (curStep > 0)
 				stepHit();
 
 			if(PlayState.SONG != null)
@@ -94,7 +103,6 @@ class MusicBeatState extends FlxUIState
 
 	override function update(elapsed:Float)
 	{
-		//everyStep();
         updateSteps();
 
 		super.update(elapsed);
@@ -160,18 +168,25 @@ class MusicBeatState extends FlxUIState
 
 	public static function switchState(nextState:FlxState)
 	{
+		FlxG.autoPause = false;
 		FlxG.mouse.visible = false;
 		Mouse.cursor = MouseCursor.AUTO;
-		FlxG.autoPause = false;
 		FlxG.switchState(nextState); // just because im too lazy to goto every instance of switchState and change it to a FlxG call
 	}
 
 	public static function resetState(?skipTrans:Bool = false) {
-		if(skipTrans){
+		if (skipTrans){
 			FlxTransitionableState.skipNextTransIn = true;
 			FlxTransitionableState.skipNextTransOut = true;
 		}
-		FlxG.resetState();
+
+		#if HSCRIPT_ALLOWED
+		if (FlxG.state is HScriptedState){
+			var state:HScriptedState = cast FlxG.state;
+			FlxG.switchState(HScriptedState.fromPath(state.scriptPath));
+		}else
+		#end
+			FlxG.resetState();
 	}
 
 	public static function getState():MusicBeatState
@@ -198,11 +213,10 @@ class MusicBeatState extends FlxUIState
 	function getBeatsOnSection()
 	{
 		var val:Null<Float> = 4;
-		if(PlayState.SONG != null && PlayState.SONG.notes[curSection] != null) val = PlayState.SONG.notes[curSection].sectionBeats;
+		if (PlayState.SONG != null && PlayState.SONG.notes[curSection] != null) val = PlayState.SONG.notes[curSection].sectionBeats;
 		return val == null ? 4 : val;
 	}
 
-	// tgt
 	public static var menuMusic:Sound; // main menu loop
 	public static var menuVox:FlxSound; // jukebox
 
@@ -231,65 +245,67 @@ class MusicBeatState extends FlxUIState
 
 	// TODO: check the jukebox selection n shit and play THAT instead? idk lol
 	public static function playMenuMusic(?volume:Float=1, ?force:Bool = false){	        	
-		if(FlxG.sound.music == null || !FlxG.sound.music.playing || force){
-			MusicBeatState.stopMenuMusic();
-			#if tgt
-			tgt.gallery.JukeboxState.playIdx = 0;
-			#end
+		if (FlxG.sound.music != null && FlxG.sound.music.playing && force != true)
+			return;
 
-			#if MODS_ALLOWED
-			// i NEED to rewrite the paths shit for real 
-			function returnSound(path:String, key:String, ?library:String){
-				var filePath = Path.join([path, key]);
+		MusicBeatState.stopMenuMusic();
+		#if tgt
+		tgt.gallery.JukeboxState.playIdx = 0;
+		#end
 
-				if (!Paths.currentTrackedSounds.exists(filePath))
-					Paths.currentTrackedSounds.set(filePath, openfl.media.Sound.fromFile(filePath));
-				
-				Paths.localTrackedAssets.push(key);
+		#if MODS_ALLOWED
+		// i NEED to rewrite the paths shit for real 
+		function returnSound(path:String, key:String, ?library:String){
+			var filePath = Path.join([path, key]);
 
-				return Paths.currentTrackedSounds.get(filePath);
-			}
-
-            var fuck = [Paths.mods(Paths.currentModDirectory), Paths.mods("global"), "assets"];
-			#if MODS_ALLOWED
-			for (mod in Paths.getGlobalContent())
-				fuck.insert(0, Paths.mods(mod));
-			for (mod in Paths.preLoadContent)
-				fuck.push(Paths.mods(mod));
-			for (mod in Paths.postLoadContent)
-				fuck.insert(0, Paths.mods(mod));
-			#end
-			for (folder in fuck){
-				var daPath = Path.join([folder, "music"]);
-				
-				var menuFilePath = daPath+"/freakyMenu.ogg";
-				if (Paths.exists(menuFilePath)){
-					if (Paths.exists(daPath+"/freakyIntro.ogg")){
-						menuMusic = returnSound(daPath, "freakyMenu.ogg");
-
-						FlxG.sound.playMusic(returnSound(daPath, "freakyIntro.ogg"), volume, false);
-						FlxG.sound.music.onComplete = menuLoopFunc;
-					}else{
-						FlxG.sound.playMusic(returnSound(daPath, "freakyMenu.ogg"), volume, true);
-					}	
-
-					break;
-				}
-			}
-			#else
-			menuMusic = Paths.music('freakyMenu');
-			FlxG.sound.playMusic(Paths.music('freakyIntro'), volume, false);
-			FlxG.sound.music.onComplete = menuLoopFunc;
-			#end
+			if (!Paths.currentTrackedSounds.exists(filePath))
+				Paths.currentTrackedSounds.set(filePath, openfl.media.Sound.fromFile(filePath));
 			
-			//// TODO: find a way to soft code this!!! (psych engine already has one so maybe we could just use that and add custom intro text to it :-)
-			#if tgt
-			Conductor.changeBPM(180);
-			#else
-			Conductor.changeBPM(102);
-			#end
-			Conductor.songPosition = 0;
+			Paths.localTrackedAssets.push(key);
+
+			return Paths.currentTrackedSounds.get(filePath);
 		}
+
+		var fuck = [Paths.mods(Paths.currentModDirectory), Paths.mods("global"), "assets"];
+		#if MODS_ALLOWED
+		for (mod in Paths.getGlobalContent())
+			fuck.insert(0, Paths.mods(mod));
+		for (mod in Paths.preLoadContent)
+			fuck.push(Paths.mods(mod));
+		for (mod in Paths.postLoadContent)
+			fuck.insert(0, Paths.mods(mod));
+		#end
+		for (folder in fuck){
+			var daPath = Path.join([folder, "music"]);
+			
+			var menuFilePath = daPath+"/freakyMenu.ogg";
+			if (Paths.exists(menuFilePath)){
+				if (Paths.exists(daPath+"/freakyIntro.ogg")){
+					menuMusic = returnSound(daPath, "freakyMenu.ogg");
+
+					FlxG.sound.playMusic(returnSound(daPath, "freakyIntro.ogg"), volume, false);
+					FlxG.sound.music.onComplete = menuLoopFunc;
+				}else{
+					FlxG.sound.playMusic(returnSound(daPath, "freakyMenu.ogg"), volume, true);
+				}	
+
+				break;
+			}
+		}
+		#else
+		menuMusic = Paths.music('freakyMenu');
+		FlxG.sound.playMusic(Paths.music('freakyIntro'), volume, false);
+		FlxG.sound.music.onComplete = menuLoopFunc;
+		#end
+		
+		//// TODO: find a way to soft code this!!! (psych engine already has one so maybe we could just use that and add custom intro text to it :-)
+		#if tgt
+		Conductor.changeBPM(180);
+		#else
+		Conductor.changeBPM(102);
+		#end
+		Conductor.songPosition = 0;
 	}
+	
 	//
 }

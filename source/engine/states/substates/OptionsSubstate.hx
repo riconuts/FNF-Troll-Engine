@@ -202,10 +202,11 @@ class OptionsSubstate extends MusicBeatSubstate
 		switch (option)
 		{
 			case 'customizeHUD':
-				if((FlxG.state is OptionsState))
+				if ((_parentState is OptionsState) && !FlxG.keys.pressed.SHIFT)
 					LoadingState.loadAndSwitchState(new options.NoteOffsetState());
-				else if (FlxG.state is PlayState)
-					openSubState(new options.ComboOffsetSubstate());
+				else{
+					openSubState(new options.ComboPositionSubstate(FlxColor.fromRGBFloat(0, 0, 0, 0.6)));
+				}
 			case 'customizeColours':
 				// TODO: check the note colours once you exit to see if any changed
 				openSubState(ClientPrefs.noteSkin == "Quants" ? new options.QuantNotesSubState() : new options.NotesSubState());
@@ -278,13 +279,14 @@ class OptionsSubstate extends MusicBeatSubstate
 	}
 	static var judgeWindows:Map<String, Array<Float>> = [
 		"Standard" => [epicWindowVal(22.5), 45, 90, 135, 180],
-		"Vanilla" => [
+		"Week 7" => [
 			-1,		// epic (-1 to disable)
 			33,		// sick
 			125,	// good
 			150,	// bad
 			166		// shit / max hit window
 		],
+		"V-Slice" => [epicWindowVal(12.5), 45, 90, 135, 160], // https://cdn.discordapp.com/attachments/991571764180156467/1235523554032746556/image.png
 		"Psych" => [-1, 45, 90, 135, 166],
 		"ITG" => [epicWindowVal(21), 43, 102, 135, 180]
 	];
@@ -320,7 +322,7 @@ class OptionsSubstate extends MusicBeatSubstate
 					"flashing",
 					"camShakeP",
 					"camZoomP",
-					"modcharts" // niixx keeps crying
+					"modcharts"
 				]
 			],
 			[
@@ -336,7 +338,7 @@ class OptionsSubstate extends MusicBeatSubstate
 					"goodWindow",
 					"badWindow",
 					"hitWindow",
-					"judgeDiff", // for hooda lol
+					"judgeDiff", // fuck you pedophile
 				]
 			]
 		],
@@ -433,7 +435,9 @@ class OptionsSubstate extends MusicBeatSubstate
 		"ui",
 		"video",
 		"controls",
-		#if (discord_rpc || DO_AUTO_UPDATE) "misc" #end, /* "Accessibility" */];
+		#if (discord_rpc || DO_AUTO_UPDATE) "misc", #end 
+		/* "Accessibility" */
+	];
 
 	var selected:Int = 0;
 

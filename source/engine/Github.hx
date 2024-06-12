@@ -97,7 +97,17 @@ class Github {
 			repo: "troll-engine" // default repo
 		}
 		#if !display
-		var process = new sys.io.Process('git', ['config', '--get', 'remote.origin.url']);
+		var process = null; 
+		
+		try{
+			process = new sys.io.Process('git', ['config', '--get', 'remote.origin.url']);
+		}
+		catch (message){
+			var pos = haxe.macro.Context.currentPos();
+			haxe.macro.Context.warning("Cannot execute 'git config --get remote.origin.url'. " + 'Exception: "$message".' , pos);
+			return macro $v{repoInfo};
+		}
+
 		if (process.exitCode() != 0)
 		{
 			var message = process.stderr.readAll().toString();
@@ -243,8 +253,14 @@ class Github {
 		var tryRequest:Bool = true;
 		daRequest.onStatus = function(code:Dynamic)
 		{
-			if (redirects.contains(code) && daRequest.responseHeaders.exists("Location")){
-				daRequest.url = daRequest.responseHeaders.get("Location");
+			#if !js
+			var responseHeaders = daRequest.responseHeaders;
+			#else
+			var responseHeaders = new haxe.ds.StringMap(); // TODO
+			#end
+
+			if (redirects.contains(code) && responseHeaders.exists("Location")){
+				daRequest.url = responseHeaders.get("Location");
 				trace("redirecT?? gonna try requesting " + daRequest.url);
 				tryRequest = true;
 			}else if(redirects.contains(code))
@@ -325,9 +341,15 @@ class Github {
 		var tryRequest:Bool = true;
 		daRequest.onStatus = function(code:Dynamic)
 		{
-			if (redirects.contains(code) && daRequest.responseHeaders.exists("Location"))
+			#if !js
+			var responseHeaders = daRequest.responseHeaders;
+			#else
+			var responseHeaders = new haxe.ds.StringMap(); // TODO
+			#end
+
+			if (redirects.contains(code) && responseHeaders.exists("Location"))
 			{
-				daRequest.url = daRequest.responseHeaders.get("Location");
+				daRequest.url = responseHeaders.get("Location");
 				trace("redirecT?? gonna try requesting " + daRequest.url);
 				tryRequest = true;
 			}

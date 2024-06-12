@@ -54,7 +54,7 @@
 	<define name="HSCRIPT_ALLOWED" />
 	<define name="MODS_ALLOWED" if="desktop" />
 	<define name="CRASH_HANDLER" if="desktop" />
-	<define name="MULTICORE_LOADING" if="windows" />
+	<define name="MULTICORE_LOADING" if="sys windows" />
     <!-- <define name="tgt" if="display"/> --> <!--Uncomment if you want auto complete to assume youre compiling for TGT-->
 
     <!--Remove if you dont want Lua to be usable. Note that if you remove this, you should remove PE_MOD_COMPATIBILITY too -->
@@ -88,12 +88,12 @@
 		<haxeflag name="-dce" value="no"/>
 		-->
 
-		<!-- <define name="SCRIPTABLE_STATES"/> -->
+		<define name="SCRIPTABLE_STATES"/>
 	</section>
 
 	<!-- __________________ lime build windows -release -Dtgt __________________ -->
 	
-    <section if="tgt"> 
+	<section if="tgt"> 
 		<app title="Tails Gets Trolled" version="0.4.1"/>
 
 		<!--means tgt will build into a seperate folder mainly so I dont have shit break when it relies on TGT specific source stuff + tgt assets-->
@@ -105,11 +105,11 @@
 
 		<define name="USE_EPIC_JUDGEMENT"/>
 		<define name="VIDEOS_ALLOWED"/>
-
-        <!-- <undefine name="SCRIPTABLE_STATES"/> --> <!--Needed for future thing-->
-        <undefine name="PE_MOD_COMPATIBILITY" if="final"/>
+		<define name="SCRIPTABLE_STATES"/>
+		
+		<undefine name="PE_MOD_COMPATIBILITY" if="final"/>
 		<!-- <undefine name="DO_AUTO_UPDATE"/> -->
-        <!-- <undefine name="LUA_ALLOWED"/> --> <!-- There's one lua script on TGT and I'm not rewritting it -->
+		<!-- <undefine name="LUA_ALLOWED"/> --> <!-- There's one lua script on TGT and I'm not rewritting it -->
 
 		<assets path="flixel" embed="true"/> <!-- To override some Flixel assets -->
 
@@ -117,11 +117,10 @@
 		<icon path="art-tgt/icon192.png" size='192'/>
 		<icon path="art-tgt/icon64.png" size='64'/>
 		<icon path="art-tgt/icon32.png" size='32'/>
-		<icon path="art-tgt/icon16.png" size='16'/>0
-    </section>
+		<icon path="art-tgt/icon16.png" size='16'/>
+	</section>
 	<section unless="tgt">
 		<icon path="art/iconOG.png" />
-		<icon path="art/icon192.png" size='192'/>
 		<icon path="art/icon64.png" size='64'/>
 		<icon path="art/icon32.png" size='32'/>
 		<icon path="art/icon16.png" size='16'/>

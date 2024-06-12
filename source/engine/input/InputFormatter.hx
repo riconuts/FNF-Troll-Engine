@@ -1,12 +1,12 @@
-import flixel.FlxG;
 import flixel.input.keyboard.FlxKey;
 
 using StringTools;
 
-class InputFormatter {
+class InputFormatter 
+{
 	public static function getKeyName(key:FlxKey):String 
 	{
-		var key:Null<FlxKey> = key;
+		final key:Null<FlxKey> = key;
 		return switch (key) 
 		{
 			case BACKSPACE: "Backspace";

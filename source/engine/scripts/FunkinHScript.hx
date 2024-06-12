@@ -1,16 +1,16 @@
 package scripts;
 
-import flixel.text.FlxText;
-import editors.ChartingState;
-import flixel.math.FlxPoint;
-import JudgmentManager.Judgment;
-import playfields.*;
-import flixel.util.FlxColor;
-import flixel.FlxG;
-import flixel.math.FlxMath;
-import lime.app.Application;
 import hscript.*;
 import scripts.Globals.*;
+import lime.app.Application;
+import haxe.ds.StringMap;
+import flixel.FlxG;
+import flixel.text.FlxText;
+import flixel.util.FlxColor;
+import flixel.math.FlxMath;
+import flixel.math.FlxPoint;
+import playfields.*;
+import JudgmentManager.Judgment;
 
 using StringTools;
 
@@ -227,7 +227,7 @@ class FunkinHScript extends FunkinScript
 		set("MP4Handler", hxvlc.flixel.FlxVideo);
 		set("MP4Sprite", hxvlc.flixel.FlxVideoSprite);
 		#else
-		set("hxvlc", "0")
+		set("hxvlc", "0");
 		#end
 		#if (hxCodec >= "3.0.0")
 		set("hxcodec", "3.0.0");
@@ -252,8 +252,8 @@ class FunkinHScript extends FunkinScript
 		set("HScriptedHUD", hud.HScriptedHUD);
 		set("HScriptModifier", modchart.HScriptModifier);
 
-		set("HScriptState", HScriptState);
-		set("HScriptSubstate", HScriptSubstate);
+		set("HScriptedState", HScriptedState);
+		set("HScriptedSubstate", HScriptedSubState);
 
 		set("global", Globals.variables);
 
@@ -472,62 +472,73 @@ class FunkinHScript extends FunkinScript
 // tbh i'd *LIKE* to use a macro for this but im lazy lol
 
 @:noScripting // honestly we could prob use the scripting thing to override shit instead
-class HScriptState extends MusicBeatState
+class HScriptedState extends MusicBeatState
 {
-	var file:String = '';
-	var stateScript:FunkinHScript;
+	public var stateScript:FunkinHScript;
+	public var scriptPath:Null<String> = null;
 
-	public function new(fileName:String, ?additionalVars:Map<String, Any>)
+	public function new(?script:FunkinHScript, ?doCreateCall:Bool = true)
 	{
 		super(false); // false because the whole point of this state is its scripted lol
 
-		file = fileName;
-		for (filePath in Paths.getFolders("states"))
+		if (script == null)
+			this.stateScript = FunkinHScript.blankScript();
+		else
+			this.stateScript = script;
+
+		// some shortcuts
+		stateScript.set("this", this);
+		stateScript.set("add", this.add);
+		stateScript.set("remove", this.remove);
+		stateScript.set("insert", this.insert);
+		stateScript.set("members", this.members);
+		// TODO: use a macro to auto-generate code to variables.set all variables/methods of MusicBeatState
+
+		stateScript.set("get_controls", () -> return PlayerSettings.player1.controls);
+		stateScript.set("controls", PlayerSettings.player1.controls);
+
+		if (doCreateCall != false)
+			stateScript.call("onLoad");
+	}
+
+	public static function fromString(str:String, ?doCreateCall:Bool = true)
+	{
+		return new HScriptedState(FunkinHScript.fromString(str, "HScriptedState", null, doCreateCall));
+	}
+
+	public static function fromPath(scriptPath:String, ?doCreateCall:Bool = true)
+	{
+		var script:Null<FunkinHScript> = null;
+
+		if (scriptPath != null) {
+			script = FunkinHScript.fromFile(scriptPath, scriptPath, variables, false);
+		} else {
+			trace('State script file "$scriptPath" not found!');
+		}
+
+		var state = new HScriptedState(script, doCreateCall);
+		state.scriptPath = scriptPath;
+		return state;
+	}
+
+	public static function fromFile(fileName:String, ?doCreateCall:Bool = true)
+	{
+		var scriptPath:Null<String> = null;
+
+		if (!fileName.endsWith(".hscript"))
+			fileName += ".hscript";
+
+		for (folderPath in Paths.getFolders("states"))
 		{
-			var name = filePath + fileName;
-			if (!name.endsWith(".hscript"))
-				name += ".hscript";
-			trace(filePath, name);
-			if (!Paths.exists(name))
-				continue;
+			var filePath = folderPath + fileName;
 
-			// some shortcuts
-			var variables = new Map<String, Dynamic>();
-			variables.set("this", this);
-			variables.set("add", add);
-			variables.set("remove", remove);
-			variables.set("insert", insert);
-			variables.set("members", members);
-			// TODO: use a macro to auto-generate code to variables.set all variables/methods of MusicBeatState
-
-			variables.set("get_controls", function()
-			{
-				return PlayerSettings.player1.controls;
-			});
-			variables.set("controls", PlayerSettings.player1.controls);
-
-			if (additionalVars != null)
-			{
-				for (key in additionalVars.keys())
-					variables.set(key, additionalVars.get(key));
+			if (Paths.exists(filePath)){
+				scriptPath = filePath;
+				break;
 			}
-
-			trace(name);
-
-			stateScript = FunkinHScript.fromFile(name, variables);
-			stateScript.scriptName = fileName;
-
-			break;
 		}
 
-		if (stateScript == null)
-		{
-			stateScript = FunkinHScript.blankScript();
-			trace('Script file "$fileName" not found!');
-			return;
-		}
-
-		stateScript.call("onLoad");
+		return fromPath(scriptPath);
 	}
 
 	override function create()
@@ -537,14 +548,8 @@ class HScriptState extends MusicBeatState
 		// I'd love to modify HScript to add override specifically for troll engine hscript
 		// THSCript...
 
-		if (stateScript == null)
-		{
-			FlxG.switchState(new MainMenuState(false));
-			return;
-		}
-
 		// onCreate is used when the script is created so lol
-		if (stateScript.call("onStateCreate", []) == Globals.Function_Stop) // idk why you'd return stop on create on a hscriptstate but.. sure
+		if (stateScript.call("onStateCreate", []) == Globals.Function_Stop) // idk why you'd return stop on create on a HScriptedState but.. sure
 			return;
 
 		super.create();
@@ -553,11 +558,13 @@ class HScriptState extends MusicBeatState
 
 	override function update(e)
 	{
+		#if debug
 		if (FlxG.keys.justPressed.F7)
-			if (FlxG.keys.pressed.CONTROL)
-				FlxG.switchState(new FreeplayState());
+			if (scriptPath != null && !FlxG.keys.pressed.CONTROL)
+				FlxG.switchState(new HScriptedState(scriptPath));
 			else
-				FlxG.switchState(new HScriptState(file));
+				FlxG.switchState(new FreeplayState());
+		#end
 
 		if (stateScript.call("onUpdate", [e]) == Globals.Function_Stop)
 			return;
@@ -750,81 +757,98 @@ class HScriptState extends MusicBeatState
 }
 
 @:noScripting // honestly we could prob use the scripting thing to override shit instead
-class HScriptSubstate extends MusicBeatSubstate
+class HScriptedSubState extends MusicBeatSubstate
 {
-	public function new(ScriptName:String, ?additionalVars:Map<String, Any>)
+	public var stateScript:FunkinHScript;
+	public var scriptPath:Null<String> = null;
+
+	public function new(?script:FunkinHScript, ?doCreateCall:Bool = true)
 	{
 		super();
 
-		var fileName = 'substates/$ScriptName.hscript';
+		if (script==null)
+			this.stateScript = FunkinHScript.blankScript();
+		else
+			this.stateScript = script;
 
-		for (filePath in [
-			#if MODS_ALLOWED Paths.modFolders(fileName), Paths.mods(fileName), #end
-			Paths.getPreloadPath(fileName)
-		])
+		// some shortcuts
+		stateScript.set("this", this);
+		stateScript.set("add", this.add);
+		stateScript.set("remove", this.remove);
+		stateScript.set("insert", this.insert);
+		stateScript.set("members", this.members);
+		stateScript.set("close", close);
+
+		// TODO: use a macro to auto-generate code to variables.set all variables/methods of MusicBeatState
+
+		stateScript.set("get_controls", () -> return PlayerSettings.player1.controls);
+		stateScript.set("controls", PlayerSettings.player1.controls);
+
+		if (doCreateCall != false)
+			stateScript.call("onLoad");
+	}
+
+	public static function fromString(str:String, ?doCreateCall:Bool = true)
+	{
+		return new HScriptedSubState(FunkinHScript.fromString(str, "HScriptedState", null, doCreateCall));
+	}
+
+	public static function fromFile(fileName:String, ?doCreateCall:Bool = true)
+	{
+		var scriptPath:Null<String> = null;
+
+		if (!fileName.endsWith(".hscript"))
+			fileName += ".hscript";
+
+		for (folderPath in Paths.getFolders("states"))
 		{
-			if (!Paths.exists(filePath))
-				continue;
+			var filePath = folderPath + fileName;
 
-			// some shortcuts
-			var variables = new Map<String, Dynamic>();
-			variables.set("this", this);
-			variables.set("add", add);
-			variables.set("remove", remove);
-			variables.set("get_controls", function()
-			{
-				return PlayerSettings.player1.controls;
-			});
-			variables.set("controls", PlayerSettings.player1.controls);
-			variables.set("close", close);
-
-			if (additionalVars != null)
-			{
-				for (key => val in additionalVars)
-					variables.set(key, val);
+			if (Paths.exists(filePath)){
+				scriptPath = filePath;
+				break;
 			}
-
-			script = FunkinHScript.fromFile(filePath, variables);
-			script.scriptName = ScriptName;
-
-			break;
 		}
 
-		if (script == null)
-		{
-			trace('Script file "$ScriptName" not found!');
-			return close();
+		var script:Null<FunkinHScript> = null;
+
+		if (scriptPath != null){
+			script = FunkinHScript.fromFile(scriptPath, scriptPath, variables, false);			
+		}else{
+			trace('Script file "$fileName" not found!');
 		}
 
-		script.call("onLoad");
+		var state = new HScriptedSubState(script, doCreateCall);
+		state.scriptPath = scriptPath;
+		return state;
 	}
 
 	override function update(e)
 	{
-		if (script.call("onUpdate", [e]) == Globals.Function_Stop)
+		if (stateScript.call("onUpdate", [e]) == Globals.Function_Stop)
 			return;
 
 		super.update(e);
 
-		script.call("onUpdatePost", [e]);
+		stateScript.call("onUpdatePost", [e]);
 	}
 
 	override function close()
 	{
-		if (script != null)
-			script.call("onClose");
+		if (stateScript != null)
+			stateScript.call("onClose");
 
 		return super.close();
 	}
 
 	override function destroy()
 	{
-		if (script != null)
+		if (stateScript != null)
 		{
-			script.call("onDestroy");
-			script.stop();
+			stateScript.call("onDestroy");
+			stateScript.stop();
 		}
-		script = null;
+		stateScript = null;
 
 		return super.destroy();
 	}

@@ -5,6 +5,7 @@ import flixel.math.FlxPoint;
 import modchart.Modifier.ModifierOrder;
 import math.Vector3;
 import playfields.NoteField;
+import flixel.math.FlxMath;
 
 class ScaleModifier extends NoteModifier {
 	override function getName()return 'tiny';
@@ -15,7 +16,6 @@ class ScaleModifier extends NoteModifier {
 	}
 	function daScale(sprite:Dynamic, scale:FlxPoint, data:Int, player:Int)
 	{
-		var y = scale.y;
 		var tiny = getValue(player) + getSubmodValue('tiny${data}', player);
 		var tinyX = (getSubmodValue("tinyX", player) + getSubmodValue('tiny${data}X', player));
 		var tinyY = (getSubmodValue("tinyY", player) + getSubmodValue('tiny${data}Y', player));
@@ -43,13 +43,14 @@ class ScaleModifier extends NoteModifier {
 		var squishX = lerp(1, 2, squish);
 		var squishY = lerp(1, 0.5, squish);
 
-		scale.x *= (Math.sin(angle * Math.PI / 180) * squishY) + (Math.cos(angle * Math.PI / 180) * squishX);
-		scale.x *= (Math.sin(angle * Math.PI / 180) * stretchY) + (Math.cos(angle * Math.PI / 180) * stretchX);
+		scale.x *= (FlxMath.fastSin(angle * Math.PI / 180) * squishY) + (FlxMath.fastCos(angle * Math.PI / 180) * squishX);
+		scale.x *= (FlxMath.fastSin(angle * Math.PI / 180) * stretchY) + (FlxMath.fastCos(angle * Math.PI / 180) * stretchX);
 
-		scale.y *= (Math.cos(angle * Math.PI / 180) * stretchY) + (Math.sin(angle * Math.PI / 180) * stretchX);
-		scale.y *= (Math.cos(angle * Math.PI / 180) * squishY) + (Math.sin(angle * Math.PI / 180) * squishX);
+		scale.y *= (FlxMath.fastCos(angle * Math.PI / 180) * stretchY) + (FlxMath.fastSin(angle * Math.PI / 180) * stretchX);
+		scale.y *= (FlxMath.fastCos(angle * Math.PI / 180) * squishY) + (FlxMath.fastSin(angle * Math.PI / 180) * squishX);
+		
 		if ((sprite is Note) && sprite.isSustainNote)
-			scale.y = y;
+			scale.y = 1.0;
 
 		return scale;
 	}
@@ -93,18 +94,11 @@ class ScaleModifier extends NoteModifier {
 
 	override function getExtraInfo(diff:Float, tDiff:Float, beat:Float, info:RenderInfo, sprite:FlxSprite, player:Int, data:Int):RenderInfo
 	{
-		if (!(sprite is NoteObject))
-			return info;
-
-		var obj:NoteObject = cast sprite;
-		var scale = daScale(obj, info.scale, obj.column, player);
-		if ((sprite is Note))
-		{
-			var note:Note = cast sprite;
-			if (note.isSustainNote)
-				scale.y = 1;
+		if (sprite is NoteObject){
+			var sprite:NoteObject = cast sprite;
+			daScale(sprite, info.scale, sprite.column, player);
 		}
-		info.scale = scale;
+
 		return info;
 	}
 

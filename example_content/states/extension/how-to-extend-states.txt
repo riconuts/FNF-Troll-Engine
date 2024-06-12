@@ -1,0 +1,36 @@
+// This is only available for global content folders (either contents/global or a mod marked as global in its metadata.json)
+// To use you have to add a script to the states/extension directory with the same name as the class of the state you want to extend
+
+// For example, to extend TitleState you'll need to make a script called "TitleState.hscript" on "states/extension/"
+// The script code should be structured like this.
+
+/* SCRIPT START
+function create(){
+    // anything to be done before the state create code
+    statecreate();
+    // anything after
+}
+
+function update(elapsed:Float){
+    // before state update
+    stateupdate(elapsed);
+    // after state update
+}
+*/ SCRIPT END
+
+// statecreate/stateupdate can be replaced with super.create or super.update, if you dont want the code from the original state to be ran
+// they can also only be called in the relevant function, so you cant call stateupdate in create or statecreate in update
+
+// By default you can only extend the following MusicBeatState functions
+/*
+	"create"
+	"update"
+	"destroy"
+	"openSubState"
+	"closeSubState"
+	"stepHit"
+	"beatHit"
+	"sectionHit"
+*/
+
+// this is all a heavy WIP

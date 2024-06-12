@@ -94,12 +94,12 @@ var trainCars = 8;
 var trainCooldown = 0;
 
 function updateTrainPos(){
-	if(trainSound.time >= 4700){
+	if (trainSound.time >= 4700)
 		startedMoving = true;
-		game.gf.playAnim("hairBlow");
-	}
-	if(startedMoving){
+
+	if (startedMoving){
 		phillyTrain.x -= 400;
+		
 		if(phillyTrain.x < -2000 && !trainFinishing){
 			phillyTrain.x = -1150;
 			trainCars--;
@@ -110,6 +110,8 @@ function updateTrainPos(){
 		}
 		if(phillyTrain.x < -4000 && trainFinishing)
 			resetTrain();
+		else
+			game.gf.playAnim("hairBlow");
 	}
 }
 
@@ -118,13 +120,15 @@ function startTrain(){
 	trainSound.play(true);
 }
 
-function resetTrain(){
-	game.gf.playAnim("hairFall");
+function resetTrain()
+{
 	phillyTrain.x = FlxG.width + 200;
 	trainMoving = false;
 	trainFinishing = false;
 	startedMoving = false;
 	trainCars = 8;
+
+	game.gf.playAnim("hairFall");
 }
 
 function switchLight(){
@@ -159,5 +163,5 @@ function onUpdate(elapsed:Float){
 			updateTrainPos();
 			trainFrameTiming -= 1/24;
 		}
-	}	
+	}
 }

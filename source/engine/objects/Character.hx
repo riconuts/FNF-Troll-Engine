@@ -7,9 +7,6 @@ import animateatlas.AtlasFrameMaker;
 import flixel.FlxSprite;
 import flixel.tweens.FlxTween;
 import haxe.Json;
-import haxe.format.JsonParser;
-import openfl.utils.AssetType;
-import openfl.utils.Assets;
 import scripts.*;
 using flixel.util.FlxColorTransformUtil;
 using StringTools;
@@ -140,6 +137,9 @@ class Character extends FlxSprite
     
 	/**Set to true if the character has miss animations. Optimization mainly**/
 	public var hasMissAnimations:Bool = false;
+
+	/**Overlay color used for character that don't have miss animations.**/
+	public var missOverlayColor:FlxColor = 0xFFC6A6FF;
     
 	//Used on Character Editor
 	public var animationsArray:Array<AnimArray> = [];
@@ -149,38 +149,49 @@ class Character extends FlxSprite
 	public var originalFlipX:Bool = false;
 	public var healthColorArray:Array<Int> = [255, 0, 0];
 
-	public static function getCharacterFile(character:String):Null<CharacterFile>
+	public static function getCharacterFile(characterName:String):Null<CharacterFile>
 	{
-		var rawContent:Null<String> = Paths.getText('characters/' + character + '.json');		
-		if (rawContent == null){
-			trace('Could not find character "$character" JSON file');
+		var json:Null<CharacterFile> = Paths.json('characters/$characterName.json');
+		if (json == null){
+			trace('Could not find character "$characterName" JSON file');
 			return null;
 		} 
 
 		try{
-			var json:CharacterFile = cast Json.parse(rawContent);
-			
 			for (anim in json.animations)
 				anim.indices = parseIndices(anim.indices);
 
 			if (json.healthbar_colors is String){
 				var color:Null<FlxColor> = FlxColor.fromString(cast json.healthbar_colors);
 				json.healthbar_colors = (color==null) ? null : [color.red, color.green, color.blue];
-			}
+			}/*
 			else if (json.healthbar_colors is Int){
 				var color:FlxColor = FlxColor.fromInt(cast json.healthbar_colors);
 				json.healthbar_colors = [color.red, color.green, color.blue];
-			}
+			}*/
 
 			if (json.healthbar_colors == null)
 				json.healthbar_colors = [192, 192, 192];
 
 			return json;
 		}catch(e){
-			trace('Error loading character "$character" JSON file');
+			trace('Error loading character "$characterName" JSON file');
 		}
 
 		return null;
+	}
+
+	/**	
+		Returns "texture", "packer" or "sparrow"
+	**/
+	public static function getImageFileType(path:String):String
+	{
+		if (Paths.fileExists('images/$path/Animation.json', TEXT))
+			return "texture";
+		else if (Paths.fileExists('images/$path.txt', TEXT))
+			return "packer";
+		else
+			return "sparrow";
 	}
 
 	public static function returnCharacterPreload(characterName:String):Array<Cache.AssetPreload>{
@@ -200,7 +211,6 @@ class Character extends FlxSprite
         for(script in characterScripts)
             removeScript(script, true);
         
-
 		return super.destroy();
 	}
 
@@ -208,27 +218,35 @@ class Character extends FlxSprite
 	{
 		var parsed:Array<Int> = [];
 
-		for (val in indices)
+		for (expr in indices)
 		{
-			if (val is Int)
-				parsed.push(val);
-			else if (val is String)
+			if (expr is Int)
+				parsed.push(expr);
+			else if (expr is String)
 			{
-				var val:String = cast val;
-				var expression:Array<String> = val.split("..."); // might add something for "*" so you can repeat a frame a certain amount of times
-				var startIndex:Null<Int> = Std.parseInt(expression[0]);
-				var endIndex:Null<Int> = Std.parseInt(expression[1]);
+				var expr:String = Std.string(expr);
+				var isRange:Bool = expr.contains("...");
+				var exprArgs:Array<String> = expr.split(isRange ? "..." : "*");
 
-				if (startIndex == null) // Can't do anything
-					continue;
-				else if (endIndex == null)
-				{
-					parsed.push(startIndex); // hmm
-					continue;
-				}
-
-				for (idxNumber in startIndex...(endIndex + 1))
-					parsed.push(idxNumber);
+				switch (exprArgs.length){
+					case 0: 
+						// Can't do anything lol
+					case 1:
+						parsed.push(Std.parseInt(exprArgs[0]));
+					default:
+						var exprA = Std.parseInt(exprArgs[0]);
+						var exprB = Std.parseInt(exprArgs[1]);
+						
+						if (isRange){
+							// starting from 'a' and ending on 'b'
+							for (frameN in exprA...(exprB + 1))
+								parsed.push(frameN);
+						}else{
+							// 'a' repeated 'b' times
+							for (_ in 0...(exprB + 1))
+								parsed.push(exprA);
+						}
+				}		
 			}
 		}
 
@@ -269,14 +287,105 @@ class Character extends FlxSprite
         #end
     }
 
-
-	public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false, ?debugMode = false)
+	function loadFromPsychData(json:CharacterFile)
 	{
-		super(x, y);
+		//// some troll engine stuff
 
-		curCharacter = character;
-		this.isPlayer = isPlayer;
-		this.debugMode = debugMode == true;
+		deathName = json.death_name != null ? json.death_name : curCharacter;
+		scriptName = json.script_name != null ? json.script_name : curCharacter;
+		
+		if (json.x_facing != null)
+			xFacing *= json.x_facing;
+
+		////
+		imageFile = json.image;
+
+		switch (getImageFileType(imageFile))
+		{
+			case "texture":	frames = AtlasFrameMaker.construct(imageFile);
+			case "packer":	frames = Paths.getPackerAtlas(imageFile);
+			case "sparrow":	frames = Paths.getSparrowAtlas(imageFile);
+		}
+
+		////
+		jsonScale = Math.isNaN(json.scale) ? 1 : json.scale;
+		scale.set(jsonScale, jsonScale);
+		updateHitbox();
+
+		////
+		positionArray = json.position;
+		cameraPosition = json.camera_position;
+
+		healthIcon = json.healthicon;
+		singDuration = json.sing_duration;
+		flipX = json.flip_x == true;
+
+		if (json.no_antialiasing == true)
+		{
+			antialiasing = false;
+			noAntialiasing = true;
+		}
+
+		if (json.healthbar_colors != null && json.healthbar_colors.length > 2)
+			healthColorArray = json.healthbar_colors;
+
+		animationsArray = json.animations;
+
+		if (animationsArray != null && animationsArray.length > 0)
+		{
+			for (anim in animationsArray)
+			{
+				var animAnim:String = '' + anim.anim;
+				var animName:String = '' + anim.name;
+				var animFps:Int = anim.fps;
+				var animLoop:Bool = anim.loop==true;
+				var animIndices:Array<Int> = anim.indices;
+				var camOffset:Null<Array<Float>> = anim.cameraOffset;
+
+				if (!debugMode)
+				{
+					camOffsets[anim.anim] = (camOffset != null) ? [camOffset[0], camOffset[1]] : {
+						if (!animAnim.startsWith('sing'))
+							[0.0, 0.0];
+						else if (animAnim.startsWith('singLEFT'))
+							[-30.0, 0.0];
+						else if (animAnim.startsWith('singDOWN'))
+							[0.0, 30.0];
+						else if (animAnim.startsWith('singUP'))
+							[0.0, -30.0];
+						else if (animAnim.startsWith('singRIGHT'))
+							[30.0, 0.0];
+						else
+							[0.0, 0.0];
+					};
+				}
+
+				////
+				if (animIndices != null && animIndices.length > 0)
+					animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop);
+				else
+					animation.addByPrefix(animAnim, animName, animFps, animLoop);
+
+				////
+				if (anim.offsets != null && anim.offsets.length > 1)
+					addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
+				/* else
+					addOffset(anim.anim, 0, 0); */
+			}
+		}
+		else
+		{
+			quickAnimAdd('idle', 'BF idle dance');
+		}
+	}
+
+	public function new(x:Float, y:Float, ?characterName:String = 'bf', ?isPlayer:Bool = false, ?debugMode:Bool = false)
+	{
+		super(x, y);		
+
+		curCharacter = (characterName == null) ? DEFAULT_CHARACTER : characterName;
+		var isPlayer:Bool = this.isPlayer = isPlayer;
+		var debugMode:Bool = this.debugMode = debugMode;
 
 		xFacing = isPlayer ? -1 : 1;
 		idleWhenHold = !isPlayer;
@@ -288,105 +397,14 @@ class Character extends FlxSprite
 
 			default:
 				var json = getCharacterFile(curCharacter);
+
 				if (json == null){
 					trace('Character file: $curCharacter not found.');
 					json = getCharacterFile(DEFAULT_CHARACTER);
 					curCharacter = DEFAULT_CHARACTER;
 				}
 
-				////
-				if (json.x_facing != null)
-					xFacing *= json.x_facing;
-
-				//// new death
-				deathName = json.death_name != null ? json.death_name : curCharacter;
-				////
-				scriptName = json.script_name != null ? json.script_name : curCharacter;
-
-				////
-				imageFile = json.image;
-				var spriteType = "sparrow";
-
-				var path = 'images/$imageFile.txt';
-				if (#if MODS_ALLOWED Paths.exists(Paths.modFolders(path)) || #end Paths.exists(Paths.getPath(path, TEXT)))
-					spriteType = "packer";
-				
-				var path = 'images/$imageFile/Animation.json';
-				if (#if MODS_ALLOWED Paths.exists(Paths.modFolders(path)) || #end Paths.exists(Paths.getPath(path, TEXT)))
-					spriteType = "texture";
-				
-				switch (spriteType)
-				{
-					case "texture": frames = AtlasFrameMaker.construct(imageFile);
-					case "packer":	frames = Paths.getPackerAtlas(imageFile);
-					case "sparrow":	frames = Paths.getSparrowAtlas(imageFile);
-				}
-
-				////
-				jsonScale = Math.isNaN(json.scale) ? 1 : json.scale;
-				scale.set(jsonScale, jsonScale);
-				updateHitbox();
-
-				////
-				positionArray = json.position;
-				cameraPosition = json.camera_position;
-
-				healthIcon = json.healthicon;
-				singDuration = json.sing_duration;
-				flipX = !!json.flip_x;
-
-				if (json.no_antialiasing == true) {
-					antialiasing = false;
-					noAntialiasing = true;
-				}
-
-				if (json.healthbar_colors != null && json.healthbar_colors.length > 2)
-					healthColorArray = json.healthbar_colors;
-
-				animationsArray = json.animations;
-				
-				if(animationsArray != null && animationsArray.length > 0) {
-					for (anim in animationsArray) {
-						var animAnim:String = '' + anim.anim;
-						var animName:String = '' + anim.name;
-						var animFps:Int = anim.fps;
-						var animLoop:Bool = !!anim.loop; //Bruh
-						var animIndices:Array<Int> = anim.indices;
-						var camOffset:Null<Array<Float>> = anim.cameraOffset;
-						
-						if (!debugMode){
-							camOffsets[anim.anim] = (camOffset != null) ? [camOffset[0], camOffset[1]] : {
-								if (!animAnim.startsWith('sing'))
-									[0.0,	0.0];  
-								else if (animAnim.startsWith('singLEFT'))
-									[-30.0,	0.0];
-								else if (animAnim.startsWith('singDOWN'))
-									[0.0,	30.0];
-								else if (animAnim.startsWith('singUP'))
-									[0.0,	-30.0];
-								else if (animAnim.startsWith('singRIGHT'))
-									[30.0,	0.0];
-								else
-									[0.0,	0.0];	
-							};
-						}
-
-						////
-						if (animIndices != null && animIndices.length > 0)
-							animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop);
-						else
-							animation.addByPrefix(animAnim, animName, animFps, animLoop);
-
-						////
-						if (anim.offsets != null && anim.offsets.length > 1)
-							addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
-						/* else
-							addOffset(anim.anim, 0, 0); */
-					}
-				} else {
-					quickAnimAdd('idle', 'BF idle dance');
-				}
-				//trace('Loaded file to character ' + curCharacter);
+				loadFromPsychData(json);
 		}
 		originalFlipX = flipX;
 
@@ -519,7 +537,7 @@ class Character extends FlxSprite
 
 		if(danceIdle){
 			danced = !danced;
-			playAnim(danced ? 'danceRight' : 'danceLeft' + idleSuffix);
+			playAnim((danced ? 'danceRight' : 'danceLeft') + idleSuffix);
 		}
 		else if(animation.getByName('idle' + idleSuffix) != null) {
 			playAnim('idle' + idleSuffix);

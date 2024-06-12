@@ -1,0 +1,6 @@
+name: Custom Issue
+description: Sometimes you just wanna write an issue and the templates dont cut it so yeah
+body:
+- type: textarea
+  attributes:
+    label: "IDK TYPE HERE!!!"

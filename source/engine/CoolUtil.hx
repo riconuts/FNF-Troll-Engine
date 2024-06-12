@@ -2,6 +2,7 @@ package;
 
 import flixel.tweens.FlxEase;
 import flixel.math.FlxPoint;
+import flixel.math.FlxMath;
 
 using StringTools;
 
@@ -39,7 +40,9 @@ class CoolUtil
 	public static function rotate(x:Float, y:Float, angle:Float, ?point:FlxPoint):FlxPoint
 	{
 		var p = point == null ? FlxPoint.weak() : point;
-		return p.set((x * Math.cos(angle)) - (y * Math.sin(angle)), (x * Math.sin(angle)) + (y * Math.cos(angle)));
+		var sin = FlxMath.fastSin(angle);
+		var cos = FlxMath.fastCos(angle);
+		return p.set((x * cos) - (y * sin), (x * sin) + (y * cos));
 	}
 
 	inline public static function quantizeAlpha(f:Float, interval:Float){

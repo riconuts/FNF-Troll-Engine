@@ -1,0 +1,87 @@
+var huhs = [];
+var huh1 = [];
+var huh2 = [];
+
+for (i in 3...19){
+	huh1.push(i*32);
+}
+
+for (i in 38...45){
+	huh2.push(i*16);
+	huh2.push(i*16+8);
+}
+huh2.push(720);
+for (i in 46...53){
+	huh2.push(i*16);
+	huh2.push(i*16+8);
+}
+huh2.push(848);
+
+function pushEvent(step, ?name, ?value1, ?value2)
+{
+	var eventNote = {
+		strumTime: Conductor.beatToSeconds(step / 4),
+		event: name==null ? "" : name,
+		value1: value1==null ? "" : Std.string(value1),
+		value2: value2==null ? "" : Std.string(value2)
+	};
+
+	game.eventNotes.push(eventNote);
+	game.eventPushed(eventNote);
+}
+
+function onCreate()
+{
+	for (start in huh1){
+		pushEvent(start-1,	"Mult SV", 1.6);
+		pushEvent(start,	"Mult SV", 5.0);
+		pushEvent(start+8,	"Mult SV", 1.0);
+		
+		pushEvent(start,	"Screen Shake",	"0.9, 0.006",	"0.9, 0.004");
+	}
+
+	for (start in huh2){
+		pushEvent(start,	"Mult SV", 2.0);
+		pushEvent(start+8,	"Mult SV", 1.0);
+		
+		pushEvent(start,	"Screen Shake",	"0.9, 0.008",	"0.9, 0.006");
+	}
+	
+	// force disable centered notefields option
+	game.midScroll = false;
+}
+
+function generateModchart()
+{
+	var modMgr = game.modManager;
+	var qEase = modMgr.queueEase;
+	var qSet = modMgr.queueSet;
+
+	modMgr.setValue("opponentSwap", 0.5);
+	modMgr.setValue("alpha", 1.0, 1);
+	
+	modMgr.addHScriptModifier("gyatt", 0.0);
+
+	for (start in huh1)
+	{
+		qEase(start-2,	start,		"gyatt", 1.25, "circIn");
+		qEase(start+4,	start+8,	"gyatt", 0.0, "circIn");
+	}
+	
+	var flip = false;
+	for (start in huh2)
+	{
+		flip = !flip;
+		
+		qEase(start, start+2, "flip", 0.25, "backOut");
+		qEase(start, start+2, "cross", 2/100 * (flip?-1:1), "backOut");
+		qEase(start, start+4, "opponentSwap", (flip?0.45:0.55), "backOut");
+	
+		qEase(start-2,	start,		"gyatt", 1.25, "circIn");
+		qEase(start+4,	start+8,	"gyatt", 0.0, "circIn");
+		
+		qEase(start+6, start+8, "flip", 0.0, "quintOut");
+		qEase(start+6, start+8, "cross", 0.0, "quintOut");
+		qEase(start+6, start+8, "opponentSwap", 0.5, "quintOut");
+	}
+}

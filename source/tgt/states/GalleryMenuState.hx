@@ -1,6 +1,7 @@
 package tgt.gallery;
 
 import sowy.*;
+import tgt.MenuButton;
 import tgt.gallery.*;
 import flixel.math.FlxMath;
 import flixel.util.FlxGradient;
@@ -238,24 +239,4 @@ class GalleryMenuState extends MusicBeatState
         
         super.update(elapsed);
     }
-}
-
-class MenuButton extends SowyBaseButton
-{
-	public var targetX:Float = 0;
-	public var targetY:Float = 0;
-
-	public function new(x:Float = 0, y:Float = 0)
-	{
-		targetX = x;
-		targetY = y;
-		super(x, y);
-	}
-
-	override function update(elapsed:Float)
-	{
-		x = Std.int(FlxMath.lerp(x, targetX, CoolUtil.boundTo(elapsed * 10.2, 0, 1)));
-		y = Std.int(FlxMath.lerp(y, targetY, CoolUtil.boundTo(elapsed * 10.2, 0, 1)));
-		super.update(elapsed);
-	}
 }

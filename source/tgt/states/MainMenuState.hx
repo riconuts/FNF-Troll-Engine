@@ -81,7 +81,7 @@ class MainMenuState extends MusicBeatState
 
 		FadeTransitionSubstate.nextCamera = FlxG.camera; // AAAA
 
-		#if desktop
+		#if discord_rpc
 		// Updating Discord Rich Presence
 		Discord.DiscordClient.changePresence("In the Menus", null);
 		#end
@@ -90,9 +90,11 @@ class MainMenuState extends MusicBeatState
 		
 		debugKeys = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
 		
+		#if MODS_ALLOWED
 		Paths.pushGlobalContent();
 		Paths.loadTheFirstEnabledMod();
-        FlxG.mouse.visible = true;
+        #end
+		FlxG.mouse.visible = true;
 		FlxG.camera.bgColor = FlxColor.BLACK;
 
 		////

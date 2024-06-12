@@ -84,11 +84,12 @@ class DiscordClient
 			discordDaemon.sendMessage(id);
 	}
 
-	public static function shutdown()
+	public static function shutdown(?noTrace:Bool)
 	{
 		if (discordDaemon == null) return;
 
-		trace("Discord Client shitting down...");
+		if (noTrace != true)
+			trace("Discord Client shitting down...");
 
 		mutex.acquire();
 		DiscordRpc.shutdown();

@@ -75,7 +75,11 @@ class QuantNotesSubState extends MusicBeatSubstate
 		grpNumbers = new FlxTypedGroup<Alphabet>();
 		add(grpNumbers);
 
-		for (i in 0...ClientPrefs.quantHSV.length) {
+		var noteFrames = Paths.getSparrowAtlas('QUANTNOTE_assets');
+		var noteAnimations:Array<String> = ['purple0', 'blue0', 'green0', 'red0'];
+
+		for (i in 0...ClientPrefs.quantHSV.length) 
+		{
 			var yPos:Float = (165 * i) + 35;
 			for (j in 0...3) {
 				var optionText:Alphabet = new Alphabet(0, yPos + 60, Std.string(ClientPrefs.quantHSV[i][j]), true);
@@ -87,17 +91,15 @@ class QuantNotesSubState extends MusicBeatSubstate
 			}
 
 			var note:FlxSprite = new FlxSprite(posX, yPos);
-			note.frames = Paths.getSparrowAtlas('QUANTNOTE_assets');
+			note.frames = noteFrames;
+			note.animation.addByPrefix('idle', noteAnimations[i % 4]);
+			note.animation.play('idle');
+			grpNotes.add(note);
 
 			var txt:AttachedText = new AttachedText(quantizations[i], 0, 0, true);
 			txt.sprTracker = note;
-			txt.copyAlpha=true;
+			txt.copyAlpha = true;
 			add(txt);
-			var animations:Array<String> = ['purple0', 'blue0', 'green0', 'red0'];
-			note.animation.addByPrefix('idle', animations[i % 4]);
-			note.animation.play('idle');
-			//note.antialiasing = ClientPrefs.globalAntialiasing;
-			grpNotes.add(note);
 
 			var newShader:ColorSwap = new ColorSwap();
 			note.shader = newShader.shader;
@@ -107,8 +109,10 @@ class QuantNotesSubState extends MusicBeatSubstate
 			shaderArray.push(newShader);
 		}
 
-		hsbText = new Alphabet(0, 0, "Hue     Saturation  Brightness", false, false, 0, 0.65);
+		hsbText = new Alphabet(0, 0, "Hue    Saturation  Brightness", false, false, 0, 0.65);
 		hsbText.x = posX + 240;
+		for (letter in hsbText.lettersArray)
+			letter.setColorTransform(0.0, 0.0, 0.0, 1.0, 255, 255, 255, 0);
 		add(hsbText);
 
 		changeSelection();
@@ -209,20 +213,21 @@ class QuantNotesSubState extends MusicBeatSubstate
 			nextAccept -= 1;
 		}
 
-		for(i in 0...grpNotes.length){
+		for (i in 0...grpNotes.length)
+		{
 			var yIndex = i;
 			var item = grpNotes.members[i];
-			if(curSelected>2)
+			if (curSelected > 2)
 				yIndex -= curSelected - 2;
 
-			var lerpVal:Float = 0.4 * (elapsed / (1/120) );
-
 			var yPos:Float = (165 * yIndex) + 35;
+			var lerpVal:Float = (1 - Math.exp(-48 * elapsed));
 
-			item.y = FlxMath.lerp(item.y, yPos, lerpVal);
-			if(i == curSelected){
-				hsbText.y = FlxMath.lerp(hsbText.y, yPos-70, lerpVal);
-				blackBG.y = FlxMath.lerp(blackBG.y, yPos-20, lerpVal);
+			item.y += (yPos - item.y) * lerpVal;
+
+			if (i == curSelected){
+				hsbText.y += (yPos-70 - hsbText.y) * lerpVal;
+				blackBG.y += (yPos-20 - blackBG.y) * lerpVal;
 			}
 		}
 
