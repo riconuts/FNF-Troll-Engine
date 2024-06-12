@@ -470,7 +470,7 @@ class Paths
 		return key;
 	}
 
-	inline static public function fileExists(key:String, type:AssetType, ?ignoreMods:Bool = false, ?library:String)
+	inline static public function fileExists(key:String, ?type:AssetType, ?ignoreMods:Bool = false, ?library:String)
 	{
 		return #if MODS_ALLOWED (ignoreMods!=true && FileSystem.exists(modFolders(key))) || #end Paths.exists(getPath(key, type));
 	}
@@ -686,6 +686,9 @@ class Paths
 
 		return Paths.getPreloadPath(key);
 	}
+
+	inline public static function imageExists(key:String)
+		return Paths.exists(Paths.___getPath('images/$key.png'));
 
 	/** Returns the contents of a file as a string. **/
 	static public function getText(key:String, ?ignoreMods:Bool = false):Null<String>

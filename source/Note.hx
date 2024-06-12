@@ -29,18 +29,8 @@ typedef HitResult = {
 }
 class Note extends NoteObject
 {
-	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
-	public var hitResult:HitResult = {
-		judgment: UNJUDGED,
-		hitDiff: 0
-	}
-
-	public var mAngle:Float = 0;
-	public var bAngle:Float = 0;
-	
-	public var noteScript:FunkinHScript;
-    public var genScript:FunkinHScript; // note generator script (used for shit like pixel notes or skin mods) ((script provided by the HUD skin))
-
+	public static var swagWidth:Float = 160 * 0.7;
+	public static var colArray:Array<String> = ['purple', 'blue', 'green', 'red'];
 	public static var quants:Array<Int> = [
 		4, // quarter note
 		8, // eight
@@ -55,23 +45,45 @@ class Note extends NoteObject
 		192
 	];
 
+	public static var defaultNotes = [
+		'No Animation',
+		'GF Sing',
+		''
+	];
+
 	public static function getQuant(beat:Float){
 		var row = Conductor.beatToNoteRow(beat);
 		for(data in quants){
-			if(row%(Conductor.ROWS_PER_MEASURE/data) == 0){
+			if (row % (Conductor.ROWS_PER_MEASURE/data) == 0)
 				return data;
-			}
 		}
 		return quants[quants.length-1]; // invalid
 	}
+
+	public static var quantShitCache = new Map<String, Bool>();
+
+	////
+
+	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
+	public var hitResult:HitResult = {
+		judgment: UNJUDGED,
+		hitDiff: 0
+	}
+
+	public var mAngle:Float = 0;
+	public var bAngle:Float = 0;
+	
+	public var noteScript:FunkinHScript;
+    public var genScript:FunkinHScript; // note generator script (used for shit like pixel notes or skin mods) ((script provided by the HUD skin))
+
 	public var noteDiff:Float = 1000;
 
 	// quant shit
     public var row:Int = 0;
-    
 	public var quant:Int = 4;
-	public var extraData:Map<String, Dynamic> = [];
 	public var isQuant:Bool = false; // mainly for color swapping, so it changes color depending on which set (quants or regular notes)
+
+	public var extraData:Map<String, Dynamic> = [];
 	
 	// basic stuff
 	public var beat:Float = 0;
@@ -178,12 +190,10 @@ class Note extends NoteObject
     inline function set_realNoteData(v:Int)
         return realColumn = v;
 
-    
-	public static var swagWidth:Float = 160 * 0.7;
-	
-	
-	private var colArray:Array<String> = ['purple', 'blue', 'green', 'red'];
-
+	/*
+	private var colArray(get, never):Array<String>;
+	inline function set_colArray() return Note.colArray;
+	*/
 
 	// mod manager
 	public var garbage:Bool = false; // if this is true, the note will be removed in the next update cycle
@@ -192,7 +202,7 @@ class Note extends NoteObject
 	public var typeOffsetX:Float = 0; // used to offset notes, mainly for note types. use in place of offset.x and offset.y when offsetting notetypes
 	public var typeOffsetY:Float = 0;
 	public var typeOffsetAngle:Float = 0;
-	public var multSpeed(default, set):Float = 1;
+	public var multSpeed:Float = 1.0;
 	/* useless shit mostly
 	public var offsetAngle:Float = 0;
 	public var multAlpha:Float = 1;
@@ -206,15 +216,6 @@ class Note extends NoteObject
 	public var rating:String = 'unknown';
 	public var ratingMod:Float = 0; //9 = unknown, 0.25 = shit, 0.5 = bad, 0.75 = good, 1 = sick
 
-	public var distance:Float = 2000; //plan on doing scroll directions soon -bb
-
-
-	public static var defaultNotes = [
-		'No Animation',
-		'GF Sing',
-		''
-	];
-
 	public var isSustainEnd:Bool = false;
 	/*
 	@:isVar
@@ -223,10 +224,6 @@ class Note extends NoteObject
 	public function get_isSustainEnd():Bool
 		return (isSustainNote && animation != null && animation.curAnim != null && animation.curAnim.name != null && animation.curAnim.name.endsWith("end"));
 	*/
-
-	private function set_multSpeed(value:Float):Float {
-		return multSpeed = value;
-	}
 
 	public function resizeByRatio(ratio:Float) //haha funny twitter shit
 	{
@@ -365,11 +362,11 @@ class Note extends NoteObject
 		var sat = colorSwap.saturation;
 		var brt = colorSwap.brightness;
 
-
         // TODO: add the ability to override these w/ scripts lol
-        
-		if(column > -1 && noteType != value) {
+		if(column > -1 && noteType != value) 
+		{
 			noteScript = null;
+
 			switch(value) {
 				case 'Hurt Note':
 					ignoreNote = mustPress;
@@ -379,40 +376,34 @@ class Note extends NoteObject
 					colorSwap.hue = 0;
 					colorSwap.saturation = 0;
 					colorSwap.brightness = 0;
-					if(isSustainNote) {
-						missHealth = 0.1;
-					} else {
-						missHealth = 0.3;
-					}
+					missHealth = isSustainNote ? 0.1 : 0.3;
 					hitCausesMiss = true;
 
 				case 'No Animation':
 					noAnimation = true;
 					noMissAnimation = true;
+
 				case 'GF Sing':
 					gfNote = true;
+
 				default:
-					if (!inEditor && PlayState.instance != null)
-						noteScript = PlayState.instance.notetypeScripts.get(value);
-					else if(inEditor && ChartingState.instance!=null){
-						var script:FunkinScript = ChartingState.instance.notetypeScripts.get(value);
-						if (script!=null && script.scriptType == 'hscript')
-						    noteScript = cast script;
-                    }
-					
-					if (noteScript != null)
-					{
-						noteScript.executeFunc("setupNote", [this], this, ["this" => this]);
+					if (inEditor){
+						if (ChartingState.instance != null)
+							noteScript = ChartingState.instance.notetypeScripts.get(value);
+					}else if (PlayState.instance != null){
+						noteScript = PlayState.instance.notetypeScripts.get(value);					
 					}
 
+					if (noteScript != null)
+						noteScript.executeFunc("setupNote", [this], this, ["this" => this]);
+
 					if (genScript != null)
-					{
 						genScript.executeFunc("setupNoteType", [this], this, ["this" => this]);
-					}
 			}
 
 			noteType = value;
 		}
+
 		if(usesDefaultColours){
 			if(colorSwap.hue != hue || colorSwap.saturation != sat || colorSwap.brightness != brt){
 				usesDefaultColours = false;// just incase
@@ -428,25 +419,23 @@ class Note extends NoteObject
 		if(colorSwap.brightness==brt)
 			colorSwap.brightness -= 0.0127;
 
+		////
+
 		if (noteScript != null)
-		{
 			noteScript.executeFunc("postSetupNote", [this], this, ["this" => this]);
-		}
 
 		if (genScript != null)
-        {
 			genScript.executeFunc("postSetupNoteType", [this], this, ["this" => this]);
-        }
 
-		if(isQuant){
+		////
+		if (isQuant) {
 			if (noteSplashTexture == 'noteSplashes' || noteSplashTexture == null || noteSplashTexture.length <= 0)
 				noteSplashTexture = 'QUANTnoteSplashes'; // give it da quant notesplashes!!
-			else if (Paths.exists(Paths.getPath("images/QUANT" + noteSplashTexture + ".png",
-				IMAGE)) #if MODS_ALLOWED || Paths.exists(Paths.modsImages("QUANT" + noteSplashTexture)) #end)
-				noteSplashTexture = 'QUANT${noteSplashTexture}';
+			else if (Paths.exists(Paths.getPath("images/QUANT" + noteSplashTexture + ".png", IMAGE)) #if MODS_ALLOWED || Paths.exists(Paths.modsImages("QUANT" + noteSplashTexture)) #end)
+				noteSplashTexture = 'QUANT$noteSplashTexture';
 		}
 
-		if (isQuant && noteSplashTexture.startsWith("QUANT") || !isQuant){
+		if (!isQuant || (isQuant && noteSplashTexture.startsWith("QUANT"))){
 			noteSplashHue = colorSwap.hue;
 			noteSplashSat = colorSwap.saturation;
 			noteSplashBrt = colorSwap.brightness;
@@ -462,6 +451,7 @@ class Note extends NoteObject
 	public function new(strumTime:Float, column:Int, ?prevNote:Note, ?gottaHitNote:Bool = false, ?sustainNote:Bool = false, ?inEditor:Bool = false, ?noteMod:String = 'default')
 	{
 		super();
+
         this.strumTime = strumTime;
 		this.column = column;
 		this.prevNote = (prevNote==null) ? this : prevNote;
@@ -476,25 +466,18 @@ class Note extends NoteObject
 				quant = getQuant(Conductor.getBeatSinceChange(strumTime));
 		}
 		beat = Conductor.getBeat(strumTime);
-
-		/*
-		x += PlayState.STRUM_X + 50;
-		y -= 2000; // MAKE SURE ITS DEFINITELY OFF SCREEN?
-		*/
 		
-		if(!inEditor){ 
+		if (!inEditor){ 
 			this.strumTime += ClientPrefs.noteOffset;
 			visualTime = PlayState.instance.getNoteInitialTime(this.strumTime);
 		}
 
-		if(column > -1) {
+		if (column > -1)
 			this.noteMod = noteMod;
-		}
+		else
+			this.colorSwap = new ColorSwap();
 
-        if(colorSwap == null)
-            colorSwap = new ColorSwap();
-
-		if(prevNote != null)
+		if (prevNote != null)
 			prevNote.nextNote = this;
 
 		if (isSustainNote && prevNote != null)
@@ -533,14 +516,13 @@ class Note extends NoteObject
 		//x += offsetX;
 	}
 
-	public static var quantShitCache = new Map<String, String>();
 	var lastNoteScaleToo:Float = 1;
 	public var originalHeightForCalcs:Float = 6;
 
 	public var texPrefix:String = '';
 	public var tex:String;
 	public var texSuffix:String = '';
-	public function reloadNote(?prefix:String = '', ?texture:String = '', ?suffix:String = '', ?dir:String = '', hInd:Int = 0, vInd:Int = 0) {
+	public function reloadNote(?prefix:String, ?texture:String, ?suffix:String, ?dir:String = '', hInd:Int = 0, vInd:Int = 0) {
 		if(prefix == null) prefix = '';
 		if(texture == null) texture = '';
 		if(suffix == null) suffix = '';
@@ -550,111 +532,91 @@ class Note extends NoteObject
 		texSuffix = suffix;
 
 		if (genScript != null)
-		{
 			genScript.executeFunc("onReloadNote", [this, prefix, texture, suffix], this);
-		}
         
 		if (noteScript != null)
-		{
 			noteScript.executeFunc("onReloadNote", [this, prefix, texture, suffix], this);
-		}
 
-		if (genScript != null)
-		{
-			if (genScript.executeFunc("preReloadNote", [this, prefix, texture, suffix], this) == Globals.Function_Stop)
-				return;
-		}
+		if (genScript != null && genScript.executeFunc("preReloadNote", [this, prefix, texture, suffix], this) == Globals.Function_Stop)
+			return;
 
 		var animName:String = animation.curAnim != null ? animation.curAnim.name : null;
 		var lastScaleY:Float = scale.y;
 
-		var skin:String = texture;
-		if(texture.length < 1){
-			skin = PlayState.arrowSkin;
-			if(skin == null || skin.length < 1)
-				skin = 'NOTE_assets';
-		}
-
+		////
+		var skin:String = (texture.length > 0) ? texture : PlayState.arrowSkin;
 		var arraySkin:Array<String> = skin.split('/');
 		arraySkin[arraySkin.length - 1] = prefix + arraySkin[arraySkin.length-1] + suffix; // add prefix and suffix to the texture file
 		var blahblah:String = arraySkin.join('/');
-		var wasQuant = isQuant;
-		isQuant = false;
-		
 
-		var daDirs = [
-			''
-		];
-		if(dir.trim() != '')
+		var daDirs = [''];
+		if (dir.trim() != '')
 			daDirs.unshift(dir + '/');	
-		
+
+		var checkQuants:Bool = canQuant && ClientPrefs.noteSkin == 'Quants';
+		var wasQuant:Bool = isQuant;
+		isQuant = false;
 
 		for (dir in daDirs)
 		{
-			if (canQuant && ClientPrefs.noteSkin == 'Quants')
+			var fullPath:String = dir + blahblah;
+
+			if (checkQuants)
 			{
-				var texture = quantShitCache.get(dir + blahblah);
+				var quantBlahblah = "QUANT" + blahblah;
+				var useQuantTex:Bool;
 
-				if (texture == null && (Paths.exists(Paths.getPath("images/" + dir + "QUANT" + blahblah + ".png", IMAGE))
-					#if MODS_ALLOWED
-					|| Paths.exists(Paths.modsImages(dir + "QUANT" + blahblah))
-					#end)) {
-
-					texture = "QUANT" + blahblah;
-					quantShitCache.set(dir + blahblah, texture);
+				if (quantShitCache.exists(fullPath)){
+					useQuantTex = quantShitCache.get(fullPath);
+				}else{
+					useQuantTex = Paths.imageExists(dir + quantBlahblah);
+					quantShitCache.set(fullPath, useQuantTex);
 				}
-				if (texture!=null){
-                    blahblah = texture;
+
+				if (useQuantTex) {
                     isQuant = true;
-                }
+					blahblah = quantBlahblah;
+					fullPath = dir + quantBlahblah;
+				}
 			}
 
 			if (wasQuant != isQuant)
 				updateColours();
 
-			if (Paths.exists(Paths.getPath("images/" + dir + blahblah + ".png",
-				IMAGE)) #if MODS_ALLOWED || Paths.exists(Paths.modsImages(dir + blahblah)) #end)
+			if (Paths.imageExists(fullPath))
 			{
 				if (vInd > 0 && hInd > 0){
-					var graphic = Paths.image(dir + blahblah);
+					var graphic = Paths.image(fullPath);
 					width = graphic.width / hInd;
 					height = graphic.height / vInd;
 					loadGraphic(graphic, true, Math.floor(width), Math.floor(height));
 					loadIndNoteAnims();
 					break;
 				}else{	
-					frames = Paths.getSparrowAtlas(dir + blahblah);
+					frames = Paths.getSparrowAtlas(fullPath);
 					loadNoteAnims();
 					break;
 				}
 			}
 		}
 		
-		if(isSustainNote) {
+		if(isSustainNote)
 			scale.y = lastScaleY;
-		}
 		defScale.copyFrom(scale);
-		updateHitbox();
 
-		if(animName != null)
+		if (animName != null)
 			animation.play(animName, true);
 
-		if(inEditor){
+		if (inEditor)
 			setGraphicSize(ChartingState.GRID_SIZE, ChartingState.GRID_SIZE);
-			updateHitbox();
-		}
+		
+		updateHitbox();
 
 		if (genScript != null)
-		{
 			genScript.executeFunc("postReloadNote", [this, prefix, texture, suffix], this);
-		}
 
 		if (noteScript != null)
-		{
 			noteScript.executeFunc("postReloadNote", [this, prefix, texture, suffix], this);
-		}
-
-
 	}
 
 	public function loadIndNoteAnims()
