@@ -23,9 +23,12 @@ typedef HitResult = {
 
 @:enum abstract SplashBehaviour(Int) from Int to Int
 {
-	var DEFAULT = 0; // only splashes on judgements that have splashes
-	var DISABLED = -1; // never splashes
-	var FORCED = 1; // always splashes
+	/**Only splashes on judgements that have splashes**/
+	var DEFAULT = 0;
+	/**Never splashes**/
+	var DISABLED = -1;
+	/**Always splashes**/
+	var FORCED = 1;
 }
 class Note extends NoteObject
 {
@@ -52,7 +55,7 @@ class Note extends NoteObject
 	];
 
 	public static function getQuant(beat:Float){
-		var row = Conductor.beatToNoteRow(beat);
+		var row:Int = Conductor.beatToNoteRow(beat);
 		for(data in quants){
 			if (row % (Conductor.ROWS_PER_MEASURE/data) == 0)
 				return data;
@@ -64,25 +67,13 @@ class Note extends NoteObject
 
 	////
 
-	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
-	public var hitResult:HitResult = {
-		judgment: UNJUDGED,
-		hitDiff: 0
-	}
+	public var hitResult:HitResult = {judgment: UNJUDGED, hitDiff: 0}
 
 	public var mAngle:Float = 0;
 	public var bAngle:Float = 0;
 	
 	public var noteScript:FunkinHScript;
     public var genScript:FunkinHScript; // note generator script (used for shit like pixel notes or skin mods) ((script provided by the HUD skin))
-
-	public var noteDiff:Float = 1000;
-
-	// quant shit
-    public var row:Int = 0;
-	public var quant:Int = 4;
-	public var isQuant:Bool = false; // mainly for color swapping, so it changes color depending on which set (quants or regular notes)
-
 	public var extraData:Map<String, Dynamic> = [];
 	
 	// basic stuff
@@ -107,17 +98,21 @@ class Note extends NoteObject
 	public var causedMiss:Bool = false;
 	function get_canBeHit()return PlayState.instance.judgeManager.judgeNote(this)!=UNJUDGED;
 	
+	// quant shit
+	public var row:Int = 0;
+	public var quant:Int = 4;
+	public var isQuant:Bool = false; // mainly for color swapping, so it changes color depending on which set (quants or regular notes)
 	
 	// note type/customizable shit
-	
 	public var canQuant:Bool = true; // whether a quant texture should be searched for or not
     public var noteMod(default, set):String = null; 
 	public var noteType(default, set):String = null;  // the note type
 	public var usesDefaultColours:Bool = true; // whether this note uses the default note colours (lets you change colours in options menu)
 	// This automatically gets set if a notetype changes the ColorSwap values
 
-	public var requiresTap:Bool = true; // If you need to tap the note to hit it, or just have the direction be held when it can be judged to hit.
-										// An example is Stepmania mines
+	/** If you need to tap the note to hit it, or just have the direction be held when it can be judged to hit.
+		An example is Stepmania mines **/
+	public var requiresTap:Bool = true; 
 
 	public var blockHit:Bool = false; // whether you can hit this note or not
 	#if PE_MOD_COMPATIBILITY
@@ -126,9 +121,9 @@ class Note extends NoteObject
 	@:isVar
 	public var noteSplashDisabled(get, set):Bool = false; // disables the notesplash when you hit this note
 	function get_noteSplashDisabled()
-		return noteSplashBehaviour==DISABLED;
+		return noteSplashBehaviour == DISABLED;
 	function set_noteSplashDisabled(val:Bool){
-		noteSplashBehaviour = val?DISABLED:DEFAULT;
+		noteSplashBehaviour = val ? DISABLED : DEFAULT;
 		return val;
 	}
 
@@ -182,6 +177,7 @@ class Note extends NoteObject
 	public var zIndex:Float = 0;
 	public var z:Float = 0;
     public var realColumn:Int;
+	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
 
     @:isVar
 	public var realNoteData(get, set):Int; // backwards compat
@@ -205,7 +201,6 @@ class Note extends NoteObject
 	public var multSpeed:Float = 1.0;
 	/* useless shit mostly
 	public var offsetAngle:Float = 0;
-	public var multAlpha:Float = 1;
 	*/
 
 	public var copyX:Bool = true;
@@ -240,21 +235,19 @@ class Note extends NoteObject
     }
 
 	public function updateColours(ignore:Bool=false){		
-		if(!ignore && !usesDefaultColours)return;
-		if (colorSwap==null)return;
-        if(column == -1)return; // FUCKING PSYCH EVENT NOTES!!!
-		if(isQuant){
-			var idx = quants.indexOf(quant);
-			colorSwap.hue = ClientPrefs.quantHSV[idx][0] / 360;
-			colorSwap.saturation = ClientPrefs.quantHSV[idx][1] / 100;
-			colorSwap.brightness = ClientPrefs.quantHSV[idx][2] / 100;
+		if (!ignore && !usesDefaultColours) return;
+		if (colorSwap==null) return;
+		if (column == -1) return; // FUCKING PSYCH EVENT NOTES!!!
+		
+		var hsb = isQuant ? ClientPrefs.quantHSV[quants.indexOf(quant)] : ClientPrefs.arrowHSV[column % 4];
+		if (hsb != null){ // sigh
+			colorSwap.hue = hsb[0] / 360;
+			colorSwap.saturation = hsb[1] / 100;
+			colorSwap.brightness = hsb[2] / 100;
 		}else{
-            if(ClientPrefs.arrowHSV[column % 4]==null)
-                ClientPrefs.arrowHSV[column % 4] = [0,0,0]; // IDK WHERE IT WENT BUT JUST INCASE
-
-			colorSwap.hue = ClientPrefs.arrowHSV[column % 4][0] / 360;
-			colorSwap.saturation = ClientPrefs.arrowHSV[column % 4][1] / 100;
-			colorSwap.brightness = ClientPrefs.arrowHSV[column % 4][2] / 100;
+			colorSwap.hue = 0.0;
+			colorSwap.saturation = 0.0;
+			colorSwap.brightness = 0.0;
 		}
 
 		if (noteScript != null)
@@ -428,12 +421,8 @@ class Note extends NoteObject
 			genScript.executeFunc("postSetupNoteType", [this], this, ["this" => this]);
 
 		////
-		if (isQuant) {
-			if (noteSplashTexture == 'noteSplashes' || noteSplashTexture == null || noteSplashTexture.length <= 0)
-				noteSplashTexture = 'QUANTnoteSplashes'; // give it da quant notesplashes!!
-			else if (Paths.exists(Paths.getPath("images/QUANT" + noteSplashTexture + ".png", IMAGE)) #if MODS_ALLOWED || Paths.exists(Paths.modsImages("QUANT" + noteSplashTexture)) #end)
-				noteSplashTexture = 'QUANT$noteSplashTexture';
-		}
+		if (isQuant && Paths.imageExists('QUANT' + noteSplashTexture))
+			noteSplashTexture = 'QUANT' + noteSplashTexture;
 
 		if (!isQuant || (isQuant && noteSplashTexture.startsWith("QUANT"))){
 			noteSplashHue = colorSwap.hue;
@@ -460,11 +449,12 @@ class Note extends NoteObject
 		this.mustPress = gottaHitNote;
 
 		if (canQuant && ClientPrefs.noteSkin == 'Quants'){
-			if(prevNote != null && isSustainNote)
+			if (isSustainNote && prevNote != null)
 				quant = prevNote.quant;
 			else
-				quant = getQuant(Conductor.getBeatSinceChange(strumTime));
+				quant = getQuant(Conductor.getBeatSinceChange(this.strumTime));
 		}
+		
 		beat = Conductor.getBeat(strumTime);
 		
 		if (!inEditor){ 
@@ -484,22 +474,15 @@ class Note extends NoteObject
 		{
 			sustainMult = 0.5; // early hit mult but just so note-types can set their own and not have sustains fuck them
 			alpha = 0.6;
-			//multAlpha = 0.6;
 			hitsoundDisabled = true;
 			copyAngle = false;
 			//if(ClientPrefs.downScroll) flipY = true;
-
-			//offsetX += width* 0.5;
-
 
 			if (genScript != null && genScript.exists("setupHoldNoteTexture"))
 				genScript.executeFunc("setupHoldNoteTexture", [this]);
 
 			animation.play(colArray[column % 4] + 'holdend');
-
 			updateHitbox();
-
-			//offsetX -= width* 0.5;
 
 			if (prevNote.isSustainNote)
 			{
@@ -507,17 +490,13 @@ class Note extends NoteObject
 
 				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * PlayState.instance.songSpeed * 100;
 				prevNote.updateHitbox();
+
 				prevNote.defScale.copyFrom(prevNote.scale);
-				// prevNote.setGraphicSize();
 			}
 		}
 
 		defScale.copyFrom(scale);
-		//x += offsetX;
 	}
-
-	var lastNoteScaleToo:Float = 1;
-	public var originalHeightForCalcs:Float = 6;
 
 	public var texPrefix:String = '';
 	public var tex:String;
@@ -689,7 +668,7 @@ class Note extends NoteObject
 			animation.addByPrefix(colArray[column] + 'hold', colArray[column] + ' hold piece');
 		}
 
-		setGraphicSize(Std.int(width * 0.7));
+		scale.set(0.7, 0.7);
 		updateHitbox();
 	}
 
