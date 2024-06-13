@@ -343,8 +343,7 @@ function onDisplayCombo(combo)
 
 	return Function_Stop;
 }
-game.playbackRate = 1;
-game.skipCountdown = true;
+
 function onDisplayJudgment(name)
 {
 	if (ClientPrefs.simpleJudge && lastJudge != null){
