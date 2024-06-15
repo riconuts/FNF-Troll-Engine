@@ -441,9 +441,9 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 							if (receptor.animation.finished || receptor.animation.curAnim.name != "confirm") 
 								receptor.playAnim("confirm", true);
 							
-							daNote.tripTimer = 1;
+							daNote.tripTimer = 1.0;
 						}else
-							daNote.tripTimer -= elapsed / (daNote.isRoll ? 0.5 : 0.25) * judgeManager.judgeTimescale; // NOTDO: regrab time multiplier in options
+							daNote.tripTimer -= elapsed / ((daNote.isRoll ? 0.5 : 0.25) * judgeManager.judgeTimescale); // NOTDO: regrab time multiplier in options
 						
 						// RE: nvm its done by the judge diff instead
 
