@@ -289,11 +289,11 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		
 		var noteList = getNotesWithEnd(data, Conductor.songPosition + ClientPrefs.hitWindow, (note:Note) -> !note.isSustainNote && note.requiresTap);
 		#if PE_MOD_COMPATIBILITY
-		noteList.sort((a, b) -> Std.int((a.strumTime + (a.lowPriority ? 10000 : 0)) - (b.strumTime + (b.lowPriority ? 10000 : 0)))); // so lowPriority actually works (even though i hate it lol!)
+		noteList.sort((a, b) -> Std.int((b.strumTime + (b.lowPriority ? 10000 : 0)) - (a.strumTime + (a.lowPriority ? 10000 : 0)))); // so lowPriority actually works (even though i hate it lol!)
 		#end
 		while (noteList.length > 0)
 		{
-			var note:Note = noteList.shift();
+			var note:Note = noteList.pop();
             var judge:Judgment = judgeManager.judgeNote(note);
             if (judge != UNJUDGED){
                 note.hitResult.judgment = judge;
@@ -525,14 +525,17 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 			for(data in 0...keyCount){
 				if (keysPressed[data]){
 					var noteList = getNotesWithEnd(data, Conductor.songPosition + ClientPrefs.hitWindow, (note:Note) -> !note.isSustainNote && !note.requiresTap);
+					
 					#if PE_MOD_COMPATIBILITY
-					noteList.sort((a, b) -> Std.int((a.strumTime + (a.lowPriority ? 10000 : 0)) - (b.strumTime + (b.lowPriority ? 10000 : 0)))); // so lowPriority actually works (even though i hate it lol!)
+					// so lowPriority actually works (even though i hate it lol!)
+					noteList.sort((a, b) -> Std.int((b.strumTime + (b.lowPriority ? 10000 : 0)) - (a.strumTime + (a.lowPriority ? 10000 : 0)))); 
 					#else
-					noteList.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
+					noteList.sort((a, b) -> Std.int(b.strumTime - a.strumTime));
 					#end
+					
 					while (noteList.length > 0)
 					{
-						var note:Note = noteList.shift();
+						var note:Note = noteList.pop();
                         var judge:Judgment = judgeManager.judgeNote(note);
                         if (judge != UNJUDGED)
                         {
