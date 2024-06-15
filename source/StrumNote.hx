@@ -120,6 +120,7 @@ class StrumNote extends NoteObject
 		shader = colorSwap.shader;
         this.field = field;
 		super(x, y);
+		objType = STRUM;
 		column = leColumn;
         
         noteMod = hudSkin;

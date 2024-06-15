@@ -22,13 +22,13 @@ class ConfusionModifier extends NoteModifier {
 		return mainAngle + constAngle;
     }
 
-	override function modifyVert(beat:Float, vert:Vector3, idx:Int, obj:FlxSprite, pos:Vector3, player:Int, data:Int, field:NoteField):Vector3
+	override function modifyVert(beat:Float, vert:Vector3, idx:Int, obj:NoteObject, pos:Vector3, player:Int, data:Int, field:NoteField):Vector3
 	{
 		var angleX:Float = getConfusion("X", beat, data, player);
 		var angleY:Float = getConfusion("Y", beat, data, player);
         var angleZ:Float = getConfusion(beat, data, player);
 
-        if((obj is Note)){
+        if((obj.objType == NOTE)){
 			var note:Note = cast obj;
 			var speed = modMgr.getNoteSpeed(note, player);
 			var yPos:Float = ((Conductor.visualPosition - note.visualTime)) * speed;
@@ -48,7 +48,7 @@ class ConfusionModifier extends NoteModifier {
 			}
 
 			angleZ += note.typeOffsetAngle;
-        }else if((obj is StrumNote)){
+        }else if((obj.objType == STRUM)){
 			angleX += getSubmodValue("receptorAngleX", player) + getSubmodValue("receptor" + data + "AngleX", player);
 			angleY += getSubmodValue("receptorAngleY", player) + getSubmodValue("receptor" + data + "AngleY", player);
 			angleZ += getSubmodValue("receptorAngle", player) + getSubmodValue("receptor" + data + "Angle", player);

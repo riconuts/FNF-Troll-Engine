@@ -16,6 +16,7 @@ class NoteSplash extends NoteObject
 
 	public function new(x:Float = 0, y:Float = 0, ?note:Int = 0) {
 		super(x, y);
+		objType = SPLASH;
 
 		var skin:String = 'noteSplashes';
 		if (PlayState.splashSkin != null && PlayState.splashSkin.length > 0) 
@@ -111,6 +112,7 @@ class NoteSplash extends NoteObject
 	}
 
 	function loadAnims(skin:String) {
+		textureLoaded = skin;
 		frames = Paths.getSparrowAtlas(skin);
 		for (i in 1...animationAmount+1)
 		{

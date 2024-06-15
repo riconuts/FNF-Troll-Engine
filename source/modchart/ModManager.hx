@@ -462,7 +462,7 @@ class ModManager {
 		return x;
 	}
 
-	public function updateObject(beat:Float, obj:FlxSprite, player:Int){
+	public function updateObject(beat:Float, obj:NoteObject, player:Int){
 		if (obj.active)
 		for (name in getActiveMods(player))
 		{
@@ -472,17 +472,17 @@ class ModManager {
 			var mod:Modifier = notemodRegister.get(name);
 			if (mod==null) continue;
 			
-			if(obj is Note){
+			if(obj.objType == NOTE){
 				if (mod.ignoreUpdateNote()) continue;
 				mod.updateNote(beat, cast obj, player);
 			}
-			else if(obj is StrumNote){
+			else if(obj.objType == STRUM){
 				if (mod.ignoreUpdateReceptor()) continue;
 				mod.updateReceptor(beat, cast obj, player);
 			}
 		}
 		
-		if (obj is Note){
+		if (obj.objType == NOTE){
 			obj.updateHitbox();
 
 			var cum:Note = cast obj;
@@ -503,7 +503,7 @@ class ModManager {
 		return (0.45 * (diff) * songSpeed);
 	}
 
-	public function getPos(diff:Float, tDiff:Float, beat:Float, data:Int, player:Int, obj:FlxSprite, field:NoteField, ?exclusions:Array<String>, ?pos:Vector3):Vector3
+	public function getPos(diff:Float, tDiff:Float, beat:Float, data:Int, player:Int, obj:NoteObject, field:NoteField, ?exclusions:Array<String>, ?pos:Vector3):Vector3
 	{
 		if (!obj.alive) 
 			return pos;
@@ -553,7 +553,7 @@ class ModManager {
 		return zoom;
 	}
 
-	public function modifyVertex(beat:Float, vert:Vector3, idx:Int, obj:FlxSprite, pos:Vector3, player:Int, data:Int, field:NoteField, ?exclusions:Array<String>):Vector3
+	public function modifyVertex(beat:Float, vert:Vector3, idx:Int, obj:NoteObject, pos:Vector3, player:Int, data:Int, field:NoteField, ?exclusions:Array<String>):Vector3
 	{
 		if (!obj.active) 
 			return vert;
@@ -576,7 +576,7 @@ class ModManager {
 		return vert;
 	}
 
-	public function getExtraInfo(diff:Float, tDiff:Float, beat:Float, ?info:RenderInfo, obj:FlxSprite, player:Int, data:Int, ?exclusions:Array<String>):RenderInfo
+	public function getExtraInfo(diff:Float, tDiff:Float, beat:Float, ?info:RenderInfo, obj:NoteObject, player:Int, data:Int, ?exclusions:Array<String>):RenderInfo
 	{
 		if (!obj.active)
 			return info;

@@ -287,23 +287,22 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	public function input(data:Int){
 		if(data > keyCount || data < 0)return null;
 		
-		var noteList = getNotesWithEnd(data, Conductor.songPosition + ClientPrefs.hitWindow, (note:Note) -> !note.isSustainNote);
+		var noteList = getNotesWithEnd(data, Conductor.songPosition + ClientPrefs.hitWindow, (note:Note) -> !note.isSustainNote && note.requiresTap);
 		#if PE_MOD_COMPATIBILITY
-		noteList.sort((a, b) -> Std.int((a.strumTime + (a.lowPriority ? 10000 : 0)) - (b.strumTime + (b.lowPriority ? 10000 : 0)))); // so lowPriority actually works (even though i hate it lol!)
+		noteList.sort((a, b) -> Std.int((b.strumTime + (b.lowPriority ? 10000 : 0)) - (a.strumTime + (a.lowPriority ? 10000 : 0)))); // so lowPriority actually works (even though i hate it lol!)
 		#end
 		while (noteList.length > 0)
 		{
-			var note:Note = noteList.shift();
-			if(note.requiresTap){
-				var judge:Judgment = judgeManager.judgeNote(note);
-				if (judge != UNJUDGED){
-					note.hitResult.judgment = judge;
-					note.hitResult.hitDiff = note.strumTime - Conductor.songPosition;
-					noteHitCallback(note, this);
-					return note;
-				}
-			}
+			var note:Note = noteList.pop();
+            var judge:Judgment = judgeManager.judgeNote(note);
+            if (judge != UNJUDGED){
+                note.hitResult.judgment = judge;
+                note.hitResult.hitDiff = note.strumTime - Conductor.songPosition;
+                noteHitCallback(note, this);
+                return note;
+            }
 		}
+
 		return null;
 	}
 
@@ -442,11 +441,10 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 							if (receptor.animation.finished || receptor.animation.curAnim.name != "confirm") 
 								receptor.playAnim("confirm", true);
 							
-							daNote.tripTimer = 1;
-						}else{
-							var regrabTime = (daNote.isRoll ? 0.5 : 0.25) * judgeManager.judgeTimescale;
-							daNote.tripTimer -= elapsed / regrabTime; // NOTDO: regrab time multiplier in options
-						}
+							daNote.tripTimer = 1.0;
+						}else
+							daNote.tripTimer -= elapsed / ((daNote.isRoll ? 0.5 : 0.25) * judgeManager.judgeTimescale); // NOTDO: regrab time multiplier in options
+						
 						// RE: nvm its done by the judge diff instead
 
 						if(daNote.tripTimer <= 0){
@@ -526,24 +524,26 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		}else{
 			for(data in 0...keyCount){
 				if (keysPressed[data]){
-					var noteList = getNotesWithEnd(data, Conductor.songPosition + ClientPrefs.hitWindow, (note:Note) -> !note.isSustainNote);
+					var noteList = getNotesWithEnd(data, Conductor.songPosition + ClientPrefs.hitWindow, (note:Note) -> !note.isSustainNote && !note.requiresTap);
+					
 					#if PE_MOD_COMPATIBILITY
-					noteList.sort((a, b) -> Std.int((a.strumTime + (a.lowPriority ? 10000 : 0)) - (b.strumTime + (b.lowPriority ? 10000 : 0)))); // so lowPriority actually works (even though i hate it lol!)
+					// so lowPriority actually works (even though i hate it lol!)
+					noteList.sort((a, b) -> Std.int((b.strumTime + (b.lowPriority ? 10000 : 0)) - (a.strumTime + (a.lowPriority ? 10000 : 0)))); 
 					#else
-					noteList.sort((a, b) -> Std.int(a.strumTime - b.strumTime));
+					noteList.sort((a, b) -> Std.int(b.strumTime - a.strumTime));
 					#end
+					
 					while (noteList.length > 0)
 					{
-						var note:Note = noteList.shift();
-						if(!note.requiresTap){
-							var judge:Judgment = judgeManager.judgeNote(note);
-							if (judge != UNJUDGED)
-							{
-								note.hitResult.judgment = judge;
-								note.hitResult.hitDiff = note.strumTime - Conductor.songPosition;
-								noteHitCallback(note, this);
-							}
-						}
+						var note:Note = noteList.pop();
+                        var judge:Judgment = judgeManager.judgeNote(note);
+                        if (judge != UNJUDGED)
+                        {
+                            note.hitResult.judgment = judge;
+                            note.hitResult.hitDiff = note.strumTime - Conductor.songPosition;
+                            noteHitCallback(note, this);
+                        }
+						
 					}
 				}
 			}

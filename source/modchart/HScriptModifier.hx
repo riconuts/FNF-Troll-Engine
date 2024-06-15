@@ -138,14 +138,14 @@ class HScriptModifier extends Modifier
 	override public function updateNote(beat:Float, note:Note, player:Int)
 		return script.exists("updateNote") ? script.executeFunc("updateNote", [beat, note, player]) : super.updateNote(beat, note, player);
 
-	override public function getPos(diff:Float, tDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField):Vector3 
+	override public function getPos(diff:Float, tDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:NoteObject, field:NoteField):Vector3 
 		return script.exists("getPos") ? script.executeFunc("getPos", [diff, tDiff, beat, pos, data, player, obj, field]) : super.getPos(diff, tDiff, beat, pos, data, player, obj, field);
 
-	override public function modifyVert(beat:Float, vert:Vector3, idx:Int, obj:FlxSprite, pos:Vector3, player:Int, data:Int, field:NoteField):Vector3 
+	override public function modifyVert(beat:Float, vert:Vector3, idx:Int, obj:NoteObject, pos:Vector3, player:Int, data:Int, field:NoteField):Vector3 
 		return script.exists("modifyVert") ? script.executeFunc("modifyVert",
 			[beat, vert, idx, obj, pos, player, data, field]) : super.modifyVert(beat, vert, idx, obj, pos, player, data, field);
 
-	override public function getExtraInfo(diff:Float, tDiff:Float, beat:Float, info:RenderInfo, obj:FlxSprite, player:Int, data:Int):RenderInfo
+	override public function getExtraInfo(diff:Float, tDiff:Float, beat:Float, info:RenderInfo, obj:NoteObject, player:Int, data:Int):RenderInfo
 	{
 		return script.exists("getExtraInfo") ? script.executeFunc("getExtraInfo",
 			[diff, tDiff, beat, info, obj, player, data]) : super.getExtraInfo(diff, tDiff, beat, info, obj, player, data);

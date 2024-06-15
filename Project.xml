@@ -53,7 +53,7 @@
 	<define name="VIDEOS_ALLOWED" if="tgt cpp || cpp final"/>
 	<define name="HSCRIPT_ALLOWED" />
 	<define name="MODS_ALLOWED" if="desktop" />
-	<define name="CRASH_HANDLER" if="desktop" />
+	<define name="CRASH_HANDLER" if="desktop release || desktop final" />
 	<define name="MULTICORE_LOADING" if="sys windows" />
     <!-- <define name="tgt" if="display"/> --> <!--Uncomment if you want auto complete to assume youre compiling for TGT-->
 
@@ -194,6 +194,6 @@
 	,,,,@,,&,,,,,,,,,%                       @,,,,&,,,&@@@@@@@@@
 	,,@@@@,,@,,,,,,,(                      /*,,,,,@#,,,@@@@@@@@@
 	@@@@@@@&,,,,,,,,@                      ,,,,,,/@@,,,/@@@@@@@@
-	@@@@@@@@@@@,,,,,                      #,,,,,,@@@@,,,@@@@@@@@         
+	@@@@@@@@@@@,,,,,                      #,,,,,,@@@@,,,@@@@@@@@
 	-->
 </project>
