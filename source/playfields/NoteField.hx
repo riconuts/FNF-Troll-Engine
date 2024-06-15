@@ -441,8 +441,10 @@ class NoteField extends FieldBase
 		{
 			var prog = sub / (holdSubdivisions + 1);
 			var nextProg = (sub + 1) / (holdSubdivisions + 1);
-			var strumSub = (crotchet / holdSubdivisions) * sv;
-			var strumOff = (strumSub * sub) * sv;
+			var strumSub = (crotchet / holdSubdivisions);
+			var strumOff = (strumSub * sub);
+			strumSub *= sv;
+            strumOff *= sv;
 			var scale:Float = 1;
 			var fuck = strumDiff;
 
