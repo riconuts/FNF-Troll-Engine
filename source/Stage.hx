@@ -62,16 +62,18 @@ class Stage extends FlxTypedGroup<FlxBasic>
 	public var stageScript:FunkinHScript;
 	public var spriteMap = new Map<String, FlxBasic>();
 
-	public function new(?stageName = "stage", ?runScript:Bool = true)
+	public function new(?name = "stage", ?runScript:Bool = true)
 	{
 		super();
 
-		if (stageName != null)
-			curStage = stageName;
+		if (name != null)
+			curStage = name;
 		
-		var newStageData = StageData.getStageFile(curStage);
-		if (newStageData != null)
-			stageData = newStageData;
+		var stageData = StageData.getStageFile(curStage);
+		if (stageData != null)
+			this.stageData = stageData;
+		else
+			trace('Failed to load StageData file "$curStage"');
 
 		if (runScript)
 			startScript(false);
@@ -295,6 +297,6 @@ class StageData {
 	
 	public static function getStageFile(stageName:String):Null<StageFile> 
 	{
-		return Paths.json('stages/$stageName.json');
+		return Paths.json('stages/$stageName.json', false);
 	}
 }

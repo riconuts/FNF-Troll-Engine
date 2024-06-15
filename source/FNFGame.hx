@@ -2,7 +2,7 @@ package;
 
 #if SCRIPTABLE_STATES
 import scripts.FunkinHScript;
-import scripts.FunkinHScript.HScriptState;
+import scripts.FunkinHScript.HScriptedState;
 #end
 
 class FNFGame extends FlxGame
@@ -28,7 +28,7 @@ class FNFGame extends FlxGame
 					if (Paths.exists(filePath + fileName))
 					{
 						_requestedState.destroy();
-						_requestedState = new HScriptState(fileName);
+						_requestedState = HScriptedState.fromFile(fileName);
 						trace(fileName);
 						return super.switchState();
 					}

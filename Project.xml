@@ -88,12 +88,12 @@
 		<haxeflag name="-dce" value="no"/>
 		-->
 
-		<!-- <define name="SCRIPTABLE_STATES"/> -->
+		<define name="SCRIPTABLE_STATES"/>
 	</section>
 
 	<!-- __________________ lime build windows -release -Dtgt __________________ -->
 	
-    <section if="tgt"> 
+	<section if="tgt"> 
 		<app title="Tails Gets Trolled" version="0.4.1"/>
 
 		<!--means tgt will build into a seperate folder mainly so I dont have shit break when it relies on TGT specific source stuff + tgt assets-->
@@ -106,10 +106,10 @@
 		<define name="USE_EPIC_JUDGEMENT"/>
 		<define name="VIDEOS_ALLOWED"/>
 		<define name="SCRIPTABLE_STATES"/>
-        
-        <undefine name="PE_MOD_COMPATIBILITY" if="final"/>
+		
+		<undefine name="PE_MOD_COMPATIBILITY" if="final"/>
 		<!-- <undefine name="DO_AUTO_UPDATE"/> -->
-        <!-- <undefine name="LUA_ALLOWED"/> --> <!-- There's one lua script on TGT and I'm not rewritting it -->
+		<!-- <undefine name="LUA_ALLOWED"/> --> <!-- There's one lua script on TGT and I'm not rewritting it -->
 
 		<assets path="flixel" embed="true"/> <!-- To override some Flixel assets -->
 
@@ -118,7 +118,7 @@
 		<icon path="art-tgt/icon64.png" size='64'/>
 		<icon path="art-tgt/icon32.png" size='32'/>
 		<icon path="art-tgt/icon16.png" size='16'/>
-    </section>
+	</section>
 	<section unless="tgt">
 		<icon path="art/iconOG.png" />
 		<icon path="art/icon64.png" size='64'/>

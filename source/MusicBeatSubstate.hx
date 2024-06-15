@@ -1,12 +1,10 @@
 package;
 
-import scripts.FunkinHScript;
-import Conductor.BPMChangeEvent;
-import flixel.FlxG;
 import flixel.FlxSubState;
-import flixel.FlxBasic;
-import flixel.FlxSprite;
+
 #if SCRIPTABLE_STATES
+import scripts.FunkinHScript;
+
 @:autoBuild(scripts.Macro.addScriptingCallbacks([
 	"create",
 	"update",
@@ -18,7 +16,9 @@ import flixel.FlxSprite;
 #end
 class MusicBeatSubstate extends FlxSubState
 {
+	#if SCRIPTABLE_STATES
 	public var script:FunkinHScript;
+	#end
 
 	private var lastBeat:Float = 0;
 	private var lastStep:Float = 0;
@@ -35,15 +35,18 @@ class MusicBeatSubstate extends FlxSubState
     
 	override public function destroy()
 	{
-		if (script != null)
+		#if SCRIPTABLE_STATES
+		if (script != null){
 			script.stop();
+			script = null;
+		}
+		#end
 		return super.destroy();
 	}
 
 
 	override function update(elapsed:Float)
 	{
-		//everyStep();
 		var oldStep:Int = curStep;
 
 		updateCurStep();

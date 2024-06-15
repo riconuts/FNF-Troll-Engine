@@ -68,8 +68,10 @@ class NotesSubState extends MusicBeatSubstate
 			shaderArray.push(newShader);
 		}
 
-		hsbText = new Alphabet(0, 0, "Hue     Saturation  Brightness", false, false, 0, 0.65);
+		hsbText = new Alphabet(0, 0, "Hue    Saturation  Brightness", false, false, 0, 0.65);
 		hsbText.x = posX + 240;
+		for (letter in hsbText.lettersArray)
+			letter.setColorTransform(0.0, 0.0, 0.0, 1.0, 255, 255, 255, 0);
 		add(hsbText);
 
 		changeSelection();

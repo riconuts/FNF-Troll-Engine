@@ -1,12 +1,7 @@
 package hud;
 
-import flixel.tweens.*;
-import flixel.util.FlxStringUtil;
-import flixel.ui.FlxBar;
-import flixel.text.FlxText;
-import JudgmentManager.JudgmentData;
 import flixel.util.FlxColor;
-import PlayState.FNFHealthBar;
+import JudgmentManager.JudgmentData;
 import haxe.exceptions.NotImplementedException;
 import playfields.*;
 

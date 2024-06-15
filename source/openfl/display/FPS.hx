@@ -30,8 +30,14 @@ class FPS extends TextField
 	/**
 		The current frame rate, expressed using frames-per-second
 	**/
-	public var currentFPS(default, null):Float;
-	public var currentState(default, null):String;
+	public var currentFPS(default, null):Float = 0.0;
+	public var currentState(default, null):String = "";
+
+	#if final
+	public var showMemory:Bool = false;
+	#else
+	public var showMemory:Bool = true;
+	#end
 
 	@:noCompletion private var cacheCount:Int;
 	@:noCompletion private var currentTime:Float;
@@ -48,11 +54,24 @@ class FPS extends TextField
 		selectable = false;
 		mouseEnabled = false;
 
-		autoSize = LEFT;
 		multiline = true;
 		text = "FPS: ";
 
 		var textFormat = new TextFormat(null, 12, color);
+
+		#if mobile
+		textFormat.align = CENTER;
+		autoSize = CENTER;
+
+		var onGameResize = (stageWidth, stageHeight)->
+			this.x = (stageWidth - this.width) / 2.0;
+		
+		FlxG.signals.gameResized.add(onGameResize);
+		onGameResize(FlxG.width, FlxG.height);
+
+		#else
+		autoSize = LEFT;
+		#end
 		
 		#if tgt
 		var fontPath = Paths.font("calibri.ttf");
@@ -81,15 +100,11 @@ class FPS extends TextField
 		});
 		#end
 
-		/*
-		#if debug
-		@:privateAccess
-		FlxG.signals.preStateSwitch.add(()->{
-			var nextState = FlxG.game._requestedState;
+		#if (debug && false)
+		FlxG.signals.preStateCreate.add((nextState)->{
 			currentState = Type.getClassName(Type.getClass(nextState));
 		});
 		#end
-		*/
 	}
 
 	// Event Handlers
@@ -113,16 +128,12 @@ class FPS extends TextField
 		{
 			text = "FPS: " + currentFPS;
 			
-			#if (openfl && !final)
-			var memoryMegas:Float = Math.abs(FlxMath.roundDecimal(System.totalMemory / 1000000, 1));
-			text += "\nMemory: " + memoryMegas + " MB";
-			#end
+			if (showMemory)
+				text += ' • Memory: ${Math.abs(FlxMath.roundDecimal(System.totalMemory / 1000000, 1))}MB';
 
-			/*
-			#if debug
+			#if (debug && false)
 			text += '\nState: $currentState';
 			#end
-			*/
 
 			if (currentFPS <= ClientPrefs.framerate * 0.5)
 				textColor = 0xFFFF0000;

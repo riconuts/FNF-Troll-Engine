@@ -25,13 +25,6 @@ import scripts.Globals.*;
 
 import modchart.SubModifier;
 
-#if sys
-import sys.FileSystem;
-import sys.io.File;
-#else
-import openfl.Assets;
-#end
-
 #if discord_rpc
 import Discord;
 #end
@@ -52,8 +45,6 @@ class FunkinLua extends FunkinScript
 	public var camTarget:FlxCamera;
 	var gonnaClose:Bool = false;
 
-	public var accessedProps:Map<String, Dynamic> = null;
-
 	public function new(script:String, ?name:String, ?ignoreCreateCall:Bool=false) {
 		#if LUA_ALLOWED
 		lua = LuaL.newstate();
@@ -65,12 +56,6 @@ class FunkinLua extends FunkinScript
 		
 		scriptType = 'lua';
 		scriptName = name!=null ? name : script;
-
-		#if (haxe >= "4.0.0")
-		accessedProps = new Map();
-		#else
-		accessedProps = new Map<String, Dynamic>();
-		#end
 
 		// Lua shit
 		set('Function_StopLua', Function_Halt); // DEPRECATED
@@ -223,7 +208,8 @@ class FunkinLua extends FunkinScript
 				PlayState.instance.modManager.queueEaseP(step, endStep, modName, percent, style, player, startVal);
 			}
 		);
-		
+
+		////
 		addCallback("getRunningScripts", function(){
 			var runningScripts:Array<String> = [];
 			for (idx in 0...PlayState.instance.luaArray.length)
@@ -240,9 +226,8 @@ class FunkinLua extends FunkinScript
 				#end
 				return;
 			}
-			if(args==null)args = [];
-
-			if(exclusions==null)exclusions=[];
+			if(args==null) args = [];
+			if(exclusions==null) exclusions = [];
 
 			Lua.getglobal(lua, 'scriptName');
 			var daScriptName = Lua.tostring(lua, -1);
@@ -267,31 +252,10 @@ class FunkinLua extends FunkinScript
 			if(args==null){
 				args = [];
 			}
-			var cervix = luaFile + ".lua";
-			if(luaFile.endsWith(".lua"))cervix=luaFile;
-			var doPush = false;
-			#if MODS_ALLOWED
-			if(FileSystem.exists(Paths.modFolders(cervix)))
-			{
-				cervix = Paths.modFolders(cervix);
-				doPush = true;
-			}
-			else if(FileSystem.exists(cervix))
-			{
-				doPush = true;
-			}
-			else {
-				cervix = Paths.getPreloadPath(cervix);
-				if(FileSystem.exists(cervix)) {
-					doPush = true;
-				}
-			}
-			#else
-			cervix = Paths.getPreloadPath(cervix);
-			if(Assets.exists(cervix)) {
-				doPush = true;
-			}
-			#end
+
+			var cervix = pussyPath(luaFile);
+			var doPush = cervix==null;
+
 			if(doPush)
 			{
 				for (luaInstance in PlayState.instance.luaArray)
@@ -322,32 +286,11 @@ class FunkinLua extends FunkinScript
 				#end
 				return;
 			}
-			var cervix = luaFile + ".lua";
-			if(luaFile.endsWith(".lua"))cervix=luaFile;
-			var doPush = false;
-			#if MODS_ALLOWED
-			if(FileSystem.exists(Paths.modFolders(cervix)))
-			{
-				cervix = Paths.modFolders(cervix);
-				doPush = true;
-			}
-			else if(FileSystem.exists(cervix))
-			{
-				doPush = true;
-			}
-			else {
-				cervix = Paths.getPreloadPath(cervix);
-				if(FileSystem.exists(cervix)) {
-					doPush = true;
-				}
-			}
-			#else
-			cervix = Paths.getPreloadPath(cervix);
-			if(Assets.exists(cervix)) {
-				doPush = true;
-			}
-			#end
-			if(doPush)
+
+			var cervix = pussyPath(luaFile);
+			var doPush = cervix != null;
+			
+			if (doPush)
 			{
 				for (luaInstance in PlayState.instance.luaArray)
 				{
@@ -375,70 +318,23 @@ class FunkinLua extends FunkinScript
 			Lua.pushnil(lua);
 		});
 		addCallback("setGlobalFromScript", function(luaFile:String, global:String, val:Dynamic){ // returns the global from a script
-			var cervix = luaFile + ".lua";
-			if(luaFile.endsWith(".lua"))cervix=luaFile;
-			var doPush = false;
-			#if MODS_ALLOWED
-			if(FileSystem.exists(Paths.modFolders(cervix)))
-			{
-				cervix = Paths.modFolders(cervix);
-				doPush = true;
-			}
-			else if(FileSystem.exists(cervix))
-			{
-				doPush = true;
-			}
-			else {
-				cervix = Paths.getPreloadPath(cervix);
-				if(FileSystem.exists(cervix)) {
-					doPush = true;
-				}
-			}
-			#else
-			cervix = Paths.getPreloadPath(cervix);
-			if(Assets.exists(cervix)) {
-				doPush = true;
-			}
-			#end
+			var cervix = pussyPath(luaFile);
+			var doPush = cervix != null;
+
 			if(doPush)
 			{
 				for (luaInstance in PlayState.instance.luaArray)
 				{
-					if(luaInstance.scriptName == cervix)
-					{
+					if (luaInstance.scriptName == cervix)
 						luaInstance.set(global, val);
-					}
-
 				}
 			}
 			Lua.pushnil(lua);
 		});
 		addCallback("getGlobals", function(luaFile:String){ // returns a copy of the specified file's globals
-			var cervix = luaFile + ".lua";
-			if(luaFile.endsWith(".lua"))cervix=luaFile;
-			var doPush = false;
-			#if MODS_ALLOWED
-			if(FileSystem.exists(Paths.modFolders(cervix)))
-			{
-				cervix = Paths.modFolders(cervix);
-				doPush = true;
-			}
-			else if(FileSystem.exists(cervix))
-			{
-				doPush = true;
-			}
-			else {
-				cervix = Paths.getPreloadPath(cervix);
-				if(FileSystem.exists(cervix)) {
-					doPush = true;
-				}
-			}
-			#else
-			cervix = Paths.getPreloadPath(cervix);
-			if(Assets.exists(cervix)) {
-				doPush = true;
-			}
-			#end
+			var cervix = pussyPath(luaFile);
+			var doPush = cervix != null;
+			
 			if(doPush)
 			{
 				for (luaInstance in PlayState.instance.luaArray)
@@ -515,27 +411,8 @@ class FunkinLua extends FunkinScript
 		});
 
 		addCallback("isRunning", function(luaFile:String){
-			var cervix = luaFile.endsWith(".lua") ? luaFile : luaFile + ".lua";
-			var doPush = false;
-
-			#if sys
-			if(FileSystem.exists(Paths.modFolders(cervix))){
-				cervix = Paths.modFolders(cervix);
-				doPush = true;
-			}
-			else if(FileSystem.exists(cervix)){
-				doPush = true;
-			}
-			else{
-				cervix = Paths.getPreloadPath(cervix);
-				if(FileSystem.exists(cervix))
-					doPush = true;
-			}
-			#else
-			cervix = Paths.getPreloadPath(cervix);
-			if(Assets.exists(cervix))
-				doPush = true;
-			#end
+			var cervix = pussyPath(luaFile);
+			var doPush = cervix != null;
 
 			if(doPush){
 				for (luaInstance in PlayState.instance.luaArray){
@@ -547,75 +424,39 @@ class FunkinLua extends FunkinScript
 			return false;
 		});
 
-		addCallback("addLuaScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false) { //would be dope asf.
-			var cervix = luaFile.endsWith(".lua") ? luaFile : luaFile + ".lua";
-			var doPush = false;
-
-			#if sys
-			if(FileSystem.exists(Paths.modFolders(cervix))){
-				cervix = Paths.modFolders(cervix);
-				doPush = true;
-			}
-			else if(FileSystem.exists(cervix)){
-				doPush = true;
-			}
-			else{
-				cervix = Paths.getPreloadPath(cervix);
-				if(FileSystem.exists(cervix))
-					doPush = true;
-			}
-			#else
-			cervix = Paths.getPreloadPath(cervix);
-			if(Assets.exists(cervix))
-				doPush = true;
-			#end
+		addCallback("addLuaScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false) { //would be dope asf.	
+			var cervix = pussyPath(luaFile);
+			var doPush = cervix != null;
 
 			if(!doPush){
 				luaTrace("Script doesn't exist!");
-			}else{
-				if(!ignoreAlreadyRunning)
+				return;
+			}
+
+			if (ignoreAlreadyRunning != true)
+			{
+				for (luaInstance in PlayState.instance.luaArray)
 				{
-					for (luaInstance in PlayState.instance.luaArray)
+					if(luaInstance.scriptName == cervix)
 					{
-						if(luaInstance.scriptName == cervix)
-						{
-							luaTrace('The script "' + cervix + '" is already running!');
-							return;
-						}
+						luaTrace('The script "' + cervix + '" is already running!');
+						return;
 					}
 				}
-				
-				PlayState.instance.createLua(cervix);
 			}
 			
+			PlayState.instance.createLua(cervix);
 		});
 		addCallback("removeLuaScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false) { //would be dope asf.
-			var cervix = luaFile.endsWith(".lua") ? luaFile : luaFile + ".lua";
-			var doPush = false;
-
-			#if sys
-			if(FileSystem.exists(Paths.modFolders(cervix))){
-				cervix = Paths.modFolders(cervix);
-				doPush = true;
-			}
-			else if(FileSystem.exists(cervix)){
-				doPush = true;
-			}
-			else{
-				cervix = Paths.getPreloadPath(cervix);
-				if (FileSystem.exists(cervix))
-					doPush = true;
-			}
-			#else
-			cervix = Paths.getPreloadPath(cervix);
-			if(Assets.exists(cervix))
-				doPush = true;
-			#end
+			var cervix = pussyPath(luaFile);
+			var doPush = cervix != null;
 
 			if(!doPush){
 				luaTrace("Script doesn't exist!");
-
-			}else if(!ignoreAlreadyRunning){
+				return;
+			}
+			
+			//if (ignoreAlreadyRunning != true){
 				for (luaInstance in PlayState.instance.luaArray){
 					if(luaInstance.scriptName == cervix){
 						//luaTrace('The script "' + cervix + '" is already running!');
@@ -623,7 +464,7 @@ class FunkinLua extends FunkinScript
 						return;
 					}
 				}		
-			}
+			//}
 			
 		});
 
@@ -1613,7 +1454,7 @@ class FunkinLua extends FunkinScript
 		
 		addCallback("startVideo", function(videoFile:String) {
 			#if VIDEOS_ALLOWED
-			if(FileSystem.exists(Paths.video(videoFile))) {
+			if (Paths.exists(Paths.video(videoFile))) {
 				PlayState.instance.startVideo(videoFile);
 			} else {
 				luaTrace('Video file not found: ' + videoFile);
@@ -2036,6 +1877,32 @@ class FunkinLua extends FunkinScript
 
 		if(!ignoreCreateCall) call('onCreate', []);
 		#end
+	}
+
+	inline public static function pussyPath(luaFile:String):Null<String>
+	{
+		var cervix = luaFile.endsWith(".lua") ? luaFile : luaFile + ".lua";
+		var doPush = false;
+
+		#if MODS_ALLOWED
+		if (Paths.exists(Paths.modFolders(cervix)))
+		{
+			cervix = Paths.modFolders(cervix);
+			doPush = true;
+		}
+		else if (Paths.exists(cervix))
+		{
+			doPush = true;
+		}
+		else
+		#end
+		{
+			cervix = Paths.getPreloadPath(cervix);
+			if (Paths.exists(cervix))
+				doPush = true;
+		}
+
+		return (doPush) ? cervix : null;
 	}
 
 	public static function getProperty(variable:String) {
@@ -2588,10 +2455,6 @@ class FunkinLua extends FunkinScript
 		#if LUA_ALLOWED
 		if(lua == null) {
 			return;
-		}
-
-		if(accessedProps != null) {
-			accessedProps.clear();
 		}
 
 		Lua.close(lua);

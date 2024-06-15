@@ -1450,13 +1450,15 @@ class PlayState extends MusicBeatState
 		#if !tgt
 		if (midScroll)
 		{
-			var off = Math.min(FlxG.width, 1280) / 4;
-			modManager.setValue("transform0X", -off, 1);
-			modManager.setValue("transform1X", -off, 1);
-			modManager.setValue("transform2X", off, 1);
-			modManager.setValue("transform3X", off, 1);
+			var off:Float = Math.min(FlxG.width, 1280) / 4;
+			var opp:Int = playOpponent ? 0 : 1;
 
-			modManager.setValue("alpha", 0.6, 1);
+			modManager.setValue("transform0X", -off, opp);
+			modManager.setValue("transform1X", -off, opp);
+			modManager.setValue("transform2X", off, opp);
+			modManager.setValue("transform3X", off, opp);
+
+			modManager.setValue("alpha", 0.6, opp);
 
 			modManager.setValue("opponentSwap", 0.5);
 		}
@@ -1974,7 +1976,7 @@ class PlayState extends MusicBeatState
 		}
 
 		//// load events
-		var daEvents = getEvents();
+		var daEvents:Array<EventNote> = getEvents();
 		for (event in daEvents)
 			eventPushedMap.set(event.event, true);
 
@@ -3608,7 +3610,7 @@ class PlayState extends MusicBeatState
 
 		if (ClientPrefs.worldCombos && !ClientPrefs.simpleJudge){
 			
-			rating.y = camFollow.y - FlxG.camera.height * 0.1 - 60;
+			rating.y = FlxG.camera.height / 2.0 - FlxG.camera.height * 0.1 - 60;
 			rating.x = FlxMath.bound(
 				FlxG.width * 0.55 - 40,
 				camFollow.x - FlxG.camera.width / 2 + rating.width,
@@ -3668,7 +3670,7 @@ class PlayState extends MusicBeatState
 		var worldOffsetY:Float;
 
 		if (ClientPrefs.worldCombos && !ClientPrefs.simpleJudge){
-			worldOffsetY = camFollow.y - FlxG.camera.height * 0.1 + 80;
+			worldOffsetY = FlxG.camera.height / 2.0 - FlxG.camera.height * 0.1 + 80;
 			worldOffsetX = FlxMath.bound(
 				FlxG.width * 0.55 - scoreHW * 2, 
 				camFollow.x - FlxG.camera.width / 2 + scoreHW, 
@@ -4467,11 +4469,11 @@ class PlayState extends MusicBeatState
 		return script;
 	}
 
-	public function removeLua(lua:FunkinLua):Void
+	public function removeLua(luaScript:FunkinLua):Void
 	{
 		if (luaArray != null && !preventLuaRemove) {
-			funkyScripts.remove(script);
-			luaArray.remove(lua);
+			funkyScripts.remove(luaScript);
+			luaArray.remove(luaScript);
 		}
 	}
 	#end
@@ -4810,166 +4812,6 @@ class PlayState extends MusicBeatState
 	}	
 }
 
-// TODO: think abt this
-class FNFHealthBar extends FlxBar{
-	public var healthBarBG:FlxSprite;
-
-	public var iconP1:HealthIcon;
-	public var iconP2:HealthIcon;
-
-	var leftIcon:HealthIcon;
-	var rightIcon:HealthIcon;
-
-	public var iconOffset:Int = 26;
-
-	// public var value:Float = 1;
-	public var isOpponentMode:Bool = false; // going insane
-
-	override function set_flipX(value:Bool){
-		iconP1.flipX = value;
-		iconP2.flipX = value;
-
-		// aughhh
-		if (value){
-			leftIcon = iconP1;
-			rightIcon = iconP2;
-		}else{
-			leftIcon = iconP2;
-			rightIcon = iconP1;
-		}
-
-		updateHealthBarPos();
-
-		return super.set_flipX(value);
-	}
-
-	override function set_visible(value:Bool){
-		healthBarBG.visible = value;
-		iconP1.visible = value;
-		iconP2.visible = value;
-
-		return super.set_visible(value);
-	}
-
-	override function set_alpha(value:Float)
-	{
-		healthBarBG.alpha = value;
-		iconP1.alpha = value;
-		iconP2.alpha = value;
-
-		return super.set_alpha(value);
-	}
-
-	/** Use this to change the alpha of the bar **/
-	public var real_alpha(default, set):Float = 1.0; 
-	function set_real_alpha(value:Float){
-		set_alpha(value * ClientPrefs.hpOpacity);
-		return real_alpha = value; 
-	}
-
-	public function new(bfHealthIcon = "face", dadHealthIcon = "face")
-	{
-		//
-		var graphic = Paths.image('healthBar');
-
-		healthBarBG = new FlxSprite(0, FlxG.height * (ClientPrefs.downScroll ? 0.11 : 0.89));
-		(graphic==null) ? healthBarBG.makeGraphic(600, 18, 0xFF000000) : healthBarBG.loadGraphic(graphic);	
-		healthBarBG.screenCenter(X);
-		healthBarBG.scrollFactor.set();
-		healthBarBG.antialiasing = false;
-
-		//
-		iconP1 = new HealthIcon(bfHealthIcon, true);
-		iconP2 = new HealthIcon(dadHealthIcon, false);
-		leftIcon = iconP2;
-		rightIcon = iconP1;
-            
-		//
-		isOpponentMode = PlayState.instance == null ? false : PlayState.instance.playOpponent;
-
-		super(
-			healthBarBG.x + 5, healthBarBG.y + 5,
-			RIGHT_TO_LEFT,
-			Std.int(healthBarBG.width - 10), Std.int(healthBarBG.height - 10),
-			null, null,
-			0, 2
-		);
-		
-		value = 1;
-
-		//
-		iconP2.setPosition(
-			healthBarPos - 75 - iconOffset * 2,
-			y + (height - iconP2.height) / 2
-		);
-		iconP1.setPosition(
-			healthBarPos - iconOffset,
-			y + (height - iconP1.height) / 2
-		);
-
-		//
-		antialiasing = false;
-		scrollFactor.set();
-		real_alpha = 1.0;
-		visible = alpha > 0;
-	}
-
-	public var iconScale(default, set) = 1.0;
-	function set_iconScale(value:Float){
-		iconP1.scale.set(value, value);
-		iconP2.scale.set(value, value);
-
-		iconP1.updateHitbox();
-		iconP2.updateHitbox();
-
-		return iconScale = value;
-	}
-
-	private var healthBarPos:Float;
-	private function updateHealthBarPos()
-	{
-		healthBarPos = x + width * (flipX ? value * 0.5 : 1 - value * 0.5) ;
-	}
-
-	override function set_value(val:Float){
-		var val = isOpponentMode ? max-val : val;
-
-		iconP1.animation.curAnim.curFrame = val < 0.4 ? 1 : 0; // 20% ?
-		iconP2.animation.curAnim.curFrame = val > 1.6 ? 1 : 0; // 80% ?
-
-		super.set_value(val);
-
-		updateHealthBarPos();
-
-		return value;
-	}
-
-	override function update(elapsed:Float)
-	{
-		if (!visible){
-			super.update(elapsed);
-			return;
-		}
-
-		healthBarBG.setPosition(x - 5, y - 5);
-
-		if (iconScale != 1){
-			iconScale = FlxMath.lerp(1, iconScale, Math.exp(-elapsed * 9));
-
-			var scaleOff = 75 * iconScale;
-			leftIcon.x = healthBarPos - scaleOff - iconOffset * 2;
-			rightIcon.x = healthBarPos + scaleOff - 75 - iconOffset;
-		}
-		else
-		{
-			leftIcon.x = healthBarPos - 75 - iconOffset * 2;
-			rightIcon.x = healthBarPos - iconOffset;
-		}
-
-		super.update(elapsed);
-	}
-}
-
 class RatingSprite extends FlxSprite
 {
 	public var tween:FlxTween;
@@ -4978,9 +4820,10 @@ class RatingSprite extends FlxSprite
 		super();
 		moves = !ClientPrefs.simpleJudge;
 
-		cameras = PlayState.instance.ratingGroup.cameras;
+		if (PlayState.instance != null)
+			cameras = PlayState.instance.ratingGroup.cameras;
 		
-		//scrollFactor.set();
+		scrollFactor.y = 0.0;
 	}
 
 	override public function kill(){

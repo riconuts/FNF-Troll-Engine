@@ -1,4 +1,6 @@
-/* 
+// NOTE: Scripted modifiers have very poor performance.
+
+/*
 	this:Modifier = {
 		var modMgr:ModManager;
 		var percents:Array<Float> = [0, 0];

@@ -1,14 +1,13 @@
 package;
 
+import flixel.system.FlxAssets.FlxShader;
+import flixel.graphics.frames.FlxFrame.FlxFrameType;
 import flixel.math.FlxPoint;
 import flixel.math.FlxAngle;
 import math.VectorHelpers;
 import math.Vector3;
-import flixel.graphics.frames.FlxFrame.FlxFrameType;
 import openfl.Vector;
 import openfl.geom.ColorTransform;
-import openfl.display.Shader;
-import flixel.system.FlxAssets.FlxShader;
 
 class FlxSprite3D extends FlxSprite {
 	public var z:Float = 0;

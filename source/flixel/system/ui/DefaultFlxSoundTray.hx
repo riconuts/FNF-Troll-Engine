@@ -110,7 +110,7 @@ class DefaultFlxSoundTray extends FlxSoundTray
 		}
 		else if (y > -height)
 		{
-			y -= (MS / 1000) * height * 0.5;
+			y -= (MS / 1000) * FlxG.height * 0.5;
 
 			if (y <= -height)
 			{

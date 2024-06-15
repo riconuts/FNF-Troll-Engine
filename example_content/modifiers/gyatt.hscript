@@ -1,0 +1,73 @@
+var pi = Math.PI;
+var bound;
+var vPadding;
+var sin;
+
+function getName()
+	return 'gyatt';
+
+function getOrder()
+	return LAST;
+
+function getModType()
+	return NOTE_MOD;
+
+function shouldExecute(player:Int, value:Float)
+	return value != 0;
+	
+function isRenderMod()
+	return true;
+	
+function onCreatePost(){
+	vPadding = modMgr.vPadding;
+	sin = FlxMath.fastSin;
+	bound = FlxMath.bound;
+}
+
+function but(val)
+	return (sin(pi * (val - 0.5)) + 1.0) * 0.5;
+	
+function butPos(visualDiff)
+	return but(bound(visualDiff + vPadding - 160, 0, 400) / 200);
+
+
+function getPos(visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
+{	
+	if (Std.isOfType(obj, Note))
+	{	
+		var assPower = getValue(player);		
+		//var side = getSubmodValue("gyattSide", player);
+
+		var b = butPos(visualDiff);
+		
+		pos.z += b * assPower * 480;
+		
+		if (beat % 16.0 > 8.0)
+			assPower *= -1.0;
+		
+		pos.x += b * sin(beat % 4) * assPower * 100;
+	}
+	
+	return pos;
+}
+
+function getExtraInfo(diff:Float, tDiff:Float, beat:Float, info:RenderInfo, obj:FlxSprite, player:Int, data:Int):RenderInfo
+{
+	if (Std.isOfType(obj, Note))
+	{
+		var assPower = getValue(player);
+		
+		if (assPower > 0.0){
+			info.scale.x *= 1.0 + (butPos(diff) * assPower) * 5.0;
+		}
+	}
+	
+	return info;
+}
+
+/*
+function getSubmods(){
+	var subMods = ["gyattSide"];
+	
+	return subMods;
+}*/

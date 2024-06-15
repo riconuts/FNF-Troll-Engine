@@ -202,10 +202,11 @@ class OptionsSubstate extends MusicBeatSubstate
 		switch (option)
 		{
 			case 'customizeHUD':
-				if((FlxG.state is OptionsState))
+				if ((_parentState is OptionsState) && !FlxG.keys.pressed.SHIFT)
 					LoadingState.loadAndSwitchState(new options.NoteOffsetState());
-				else if (FlxG.state is PlayState)
-					openSubState(new options.ComboOffsetSubstate());
+				else{
+					openSubState(new options.ComboPositionSubstate(FlxColor.fromRGBFloat(0, 0, 0, 0.6)));
+				}
 			case 'customizeColours':
 				// TODO: check the note colours once you exit to see if any changed
 				openSubState(ClientPrefs.noteSkin == "Quants" ? new options.QuantNotesSubState() : new options.NotesSubState());
