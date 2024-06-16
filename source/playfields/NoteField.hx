@@ -1,20 +1,19 @@
 package playfields;
 
-import haxe.xml.Fast;
-import flixel.util.FlxDestroyUtil;
-import math.*;
 import flixel.math.FlxMath;
 import flixel.math.FlxAngle;
 import flixel.math.FlxPoint;
 import flixel.math.FlxMatrix;
 import flixel.util.FlxSort;
+import flixel.util.FlxDestroyUtil;
+import flixel.graphics.FlxGraphic;
+import flixel.system.FlxAssets.FlxShader;
+import math.Vector3;
+import math.VectorHelpers;
 import openfl.Vector;
 import openfl.geom.ColorTransform;
-import openfl.display.Shader;
-import flixel.graphics.FlxGraphic;
-import modchart.Modifier.RenderInfo;
 import modchart.ModManager;
-import flixel.system.FlxAssets.FlxShader;
+import modchart.Modifier.RenderInfo;
 import haxe.ds.Vector as FastVector;
 
 using StringTools;
@@ -351,39 +350,40 @@ class NoteField extends FieldBase
 		}
 	}
 
-	function getPoints(hold:Note, ?wid:Float, speed:Float, vDiff:Float, diff:Float)
+	function getPoints(hold:Note, ?wid:Float, speed:Float, vDiff:Float, diff:Float):Array<Vector3>
 	{ // stolen from schmovin'
 		if (wid == null)
 			wid = hold.frameWidth * hold.scale.x;
 
 		var p1 = modManager.getPos(-(vDiff) * speed, diff, curDecBeat, hold.column, modNumber, hold, this, []);
 		var z:Float = p1.z;
-		p1.z = 0;
-		var quad = [new Vector3((-wid / 2)), new Vector3((wid / 2))];
-		var scale:Float = 1;
-		if (z != 0)
-			scale = z;
+		p1.z = 0.0;
+
+		wid /= 2.0;
+		var quad0 = new Vector3(-wid);
+		var quad1 = new Vector3(wid);
+		var scale:Float = z!=0.0 ? z : 1.0;
 
 		if (optimizeHolds)
 		{
 			// less accurate, but higher FPS
-			quad[0].scaleBy(1 / scale);
-			quad[1].scaleBy(1 / scale);
-			return [p1.add(quad[0]), p1.add(quad[1]), p1];
+			scale = 1.0 / scale;
+			quad0.scaleBy(scale);
+			quad1.scaleBy(scale);
+			return [p1.add(quad0, quad0), p1.add(quad1, quad1), p1];
 		}
 
 		var p2 = modManager.getPos(-(vDiff + 1) * speed, diff + 1, curDecBeat, hold.column, modNumber, hold, this, []);
 		p2.z = 0;
+
 		var unit = p2.subtract(p1);
 		unit.normalize();
 
-		var w = (quad[0].subtract(quad[1]).length / 2) / scale;
+		var w = (quad0.subtract(quad1).length / 2) / scale;
+		var off1 = new Vector3(unit.y * w, 	-unit.x * w,	0.0);
+		var off2 = new Vector3(-off1.x, 	-off1.y,		0.0);
 
-		var off1 = new Vector3(unit.y, -unit.x);
-		var off2 = new Vector3(-unit.y, unit.x);
-		off1.scaleBy(w);
-		off2.scaleBy(w);
-		return [p1.add(off1), p1.add(off2), p1];
+		return [p1.add(off1, off1), p1.add(off2, off2), p1];
 	}
 
     
