@@ -1,4 +1,3 @@
-package funkin;
 #if !macro
 import flixel.*;
 import flixel.sound.FlxSound;
@@ -18,9 +17,7 @@ import funkin.tgt.TGTMenuShit;
 import funkin.tgt.TGTSquareButton;
 import funkin.tgt.TGTTextButton;
 import funkin.tgt.SquareTransitionSubstate;
-#end
-
-#if !tgt
+#else
 import funkin.states.SongSelectState as FreeplayState;
 import funkin.states.SongSelectState as StoryMenuState;
 #end

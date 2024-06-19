@@ -44,7 +44,7 @@ typedef StageFile =
 
 class Stage extends FlxTypedGroup<FlxBasic>
 {
-	public var curStage = "stage" #if tgt + "1" #end;
+	public var curStage:String = "stage" #if tgt + "1" #end;
 	public var stageData:StageFile = {
 		directory: "",
 		defaultZoom: 0.8,
@@ -62,12 +62,12 @@ class Stage extends FlxTypedGroup<FlxBasic>
 	public var stageScript:FunkinHScript;
 	public var spriteMap = new Map<String, FlxBasic>();
 
-	public function new(?name = "stage", ?runScript:Bool = true)
+	public function new(?stageName:String, ?runScript:Bool = true)
 	{
 		super();
 
-		if (name != null)
-			curStage = name;
+		if (stageName != null)
+			curStage = stageName;
 		
 		var stageData = StageData.getStageFile(curStage);
 		if (stageData != null)

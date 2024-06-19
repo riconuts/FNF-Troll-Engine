@@ -59,7 +59,7 @@ import funkin.api.Discord.DiscordClient;
 #if (hxCodec >= "3.0.0") import hxcodec.flixel.FlxVideo as VideoHandler;
 #elseif (hxCodec >= "2.6.1") import hxcodec.VideoHandler as VideoHandler;
 #elseif (hxCodec == "2.6.0") import VideoHandler;
-#elseif(hxCodec) import vlc.MP4Handler as VideoHandler; 
+#elseif (hxCodec) import vlc.MP4Handler as VideoHandler; 
 #elseif (hxvlc) import hxvlc.flixel.FlxVideo as VideoHandler;
 #end
 #end
