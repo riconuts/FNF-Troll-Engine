@@ -6,7 +6,7 @@ import flixel.FlxSprite;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.addons.transition.FlxTransitionableState;
-import funkin.ChapterData;
+import funkin.WeekData;
 
 using StringTools;
 

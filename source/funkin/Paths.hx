@@ -9,7 +9,6 @@ import openfl.utils.AssetType;
 import openfl.display.BitmapData;
 import openfl.media.Sound;
 import haxe.Json;
-import funkin.ChapterData.ChapterMetadata;
 
 using StringTools;
 

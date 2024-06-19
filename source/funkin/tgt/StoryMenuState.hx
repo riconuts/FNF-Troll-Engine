@@ -1,6 +1,6 @@
 package funkin.tgt;
 
-import funkin.ChapterData;
+import funkin.WeekData;
 import funkin.tgt.*;
 import flixel.addons.display.shapes.FlxShapeBox;
 import flixel.group.FlxGroup;
