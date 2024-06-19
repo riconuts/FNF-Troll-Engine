@@ -189,9 +189,9 @@ class OptionsSubstate extends MusicBeatSubstate
 			#if DO_AUTO_UPDATE
 			case 'downloadBetas' | 'checkForUpdates':
 				Main.downloadBetas = Main.beta || ClientPrefs.downloadBetas;
-				if(!Main.beta || option == 'checkForUpdates'){
-					StartupState.getRecentGithubRelease();
-					StartupState.checkOutOfDate();
+				if (!Main.beta || option == 'checkForUpdates'){
+					UpdaterState.getRecentGithubRelease();
+					UpdaterState.checkOutOfDate();
 				}
 			#end
 			#if discord_rpc
