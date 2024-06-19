@@ -6,6 +6,7 @@ import funkin.states.FadeTransitionSubstate;
 
 import flixel.FlxG;
 import flixel.FlxState;
+import flixel.FlxSprite;
 import flixel.tweens.*;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.input.keyboard.FlxKey;
@@ -68,11 +69,11 @@ class StartupState extends FlxTransitionableState
 		ClientPrefs.initialize();
 		ClientPrefs.load();
 
+		FlxG.sound.volume = ClientPrefs.masterVolume;
 		FlxG.sound.volumeHandler = (vol:Float)->{
-            ClientPrefs.masterVolume = vol;
+			ClientPrefs.masterVolume = vol;
 			Main.volumeChangedEvent.dispatch(vol);
 		}
-		FlxG.sound.volume = ClientPrefs.masterVolume;
 
 		FlxG.fixedTimestep = false;
 		FlxG.keys.preventDefaultKeys = [TAB];
@@ -211,7 +212,7 @@ class StartupState extends FlxTransitionableState
 				#if debug
 				final waitTime:Float = 0.0;
 				#else
-				final waitTime:Float = (nextState == PlayState || nextState == editors.ChartingState) ? 0.0 : Math.max(0.0, 1.6 - loadingTime);
+				final waitTime:Float = (nextState == funkin.states.PlayState || nextState == funkin.states.editors.ChartingState) ? 0.0 : Math.max(0.0, 1.6 - loadingTime);
 				#end
 
 				step = 30;

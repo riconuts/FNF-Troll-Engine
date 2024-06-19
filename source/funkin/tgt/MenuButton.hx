@@ -1,7 +1,7 @@
 package funkin.tgt;
 
 import flixel.graphics.FlxGraphic;
-import funkin.sowy.SowyBaseButton;
+import funkin.objects.SowyBaseButton;
 
 class MenuButton extends SowyBaseButton
 {

@@ -153,7 +153,7 @@ class Main extends Sprite
 
 		#if tgt
 		if (troll){
-			initialState = tgt.SinnerState;
+			initialState = funkin.tgt.SinnerState;
 			skipSplash = true;
 		}else
 		#end

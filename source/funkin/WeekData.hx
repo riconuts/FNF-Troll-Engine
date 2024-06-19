@@ -64,15 +64,20 @@ class WeekData
 
 			if (daJson != null)
             {
-				if (Reflect.field(daJson, "chapters") != null){
-					var data:ContentMetadata = cast daJson;
-					for (chapter in data.chapters)
-						pushChapter(chapter, mod);
-				}else{
-					// backwards compatibility
-					var chapter:WeekMetadata = cast daJson;
-					pushChapter(chapter, mod);
+				if (Reflect.field(daJson, "weeks") == null)
+				{
+					// tgt compat 
+					var chapters:Dynamic = Reflect.field(daJson, "chapters");
+					if (chapters != null){ 	
+						Reflect.setField(daJson, "weeks", chapters);
+						Reflect.deleteField(daJson, "chapters");
+					}else // old tgt
+						daJson = {weeks: [daJson]};
 				}
+
+				var data:ContentMetadata = cast daJson;
+				for (week in data.weeks)
+					pushChapter(week, mod);
 			}
 
 			#if PE_MOD_COMPATIBILITY
@@ -98,7 +103,7 @@ class WeekData
 				var data = portPsychWeek(Paths.getJson('$modWeeksPath/$fileName'), weekName);
 				if (data != null){
 					pushChapter(data, mod);
-					modWeeksPushed.push(weekName); // what if same name was written more than once :o
+					modWeeksPushed.push(weekName); // what if the same name was written more than once :o
 				}
 			});
 			#end

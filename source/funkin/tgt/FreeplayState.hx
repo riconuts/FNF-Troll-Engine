@@ -200,11 +200,11 @@ class FreeplayState extends MusicBeatState
 						for (song in loadFreeplayList(json.freeplaySongs, defaultCategory))
 							songsAdded.push(song.toLowerCase().replace(" ","-"));
 					}
-					if (json.chapters != null && json.chapters.length > 0)
+					if (json.weeks != null && json.weeks.length > 0)
 					{
-						for (chapter in json.chapters){
-							var category = chapter.freeplayCategory==null ? chapter.category : chapter.freeplayCategory;
-							for (song in chapter.songs){
+						for (week in json.weeks){
+							var category = week.freeplayCategory==null ? week.category : week.freeplayCategory;
+							for (song in week.songs){
 								if (!songsAdded.contains(song.toLowerCase().replace(" ", "-"))){
 									newSongButton(song, category);
 									songsAdded.push(song.toLowerCase().replace(" ", "-"));
@@ -304,7 +304,7 @@ class FreeplayState extends MusicBeatState
 							playSong(songButton.metadata, topDiff, diffIdx);
 						};
 
-						var icum = new HealthIcon(song[1]);
+						var icum = new funkin.objects.hud.HealthIcon(song[1]);
 						icum.scale.set(0.5, 0.5);
 						icum.updateHitbox();
 

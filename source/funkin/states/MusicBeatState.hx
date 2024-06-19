@@ -251,7 +251,7 @@ class MusicBeatState extends FlxUIState
 
 		MusicBeatState.stopMenuMusic();
 		#if tgt
-		tgt.gallery.JukeboxState.playIdx = 0;
+		funkin.tgt.gallery.JukeboxState.playIdx = 0;
 		#end
 
 		#if MODS_ALLOWED

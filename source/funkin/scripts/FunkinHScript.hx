@@ -886,19 +886,19 @@ class CustomFlxColor
 	public static function get_blue(color:FlxColor)
 		return color.blue;
 
-	public static function set_red(color:FlxColor, val)
+	public static function set_red(color:FlxColor, val:Int)
 	{
 		color.red = val;
 		return color;
 	}
 
-	public static function set_green(color:FlxColor, val)
+	public static function set_green(color:FlxColor, val:Int)
 	{
 		color.green = val;
 		return color;
 	}
 
-	public static function set_blue(color:FlxColor, val)
+	public static function set_blue(color:FlxColor, val:Int)
 	{
 		color.blue = val;
 		return color;
@@ -916,21 +916,21 @@ class CustomFlxColor
 	public static function get_blueFloat(color:FlxColor)
 		return color.blueFloat;
 
-	public static function set_redFloat(color:FlxColor, val)
+	public static function set_redFloat(color:FlxColor, val:Float)
 	{
 		color.redFloat = val;
 		return color;
 	}
 
-	public static function set_greenFloat(color:FlxColor, val)
+	public static function set_greenFloat(color:FlxColor, val:Float)
 	{
 		color.greenFloat = val;
 		return color;
 	}
 
-	public static function set_blueFloat(color:FlxColor, val)
+	public static function set_blueFloat(color:FlxColor, val:Float)
 	{
-		color.blue = val;
+		color.blueFloat = val;
 		return color;
 	}
 
@@ -947,25 +947,25 @@ class CustomFlxColor
 	public static function get_brightness(color:FlxColor)
 		return color.brightness;
 
-	public static function set_hue(color:FlxColor, val)
+	public static function set_hue(color:FlxColor, val:Float)
 	{
 		color.hue = val;
 		return color;
 	}
 
-	public static function set_saturation(color:FlxColor, val)
+	public static function set_saturation(color:FlxColor, val:Float)
 	{
 		color.saturation = val;
 		return color;
 	}
 
-	public static function set_lightness(color:FlxColor, val)
+	public static function set_lightness(color:FlxColor, val:Float)
 	{
 		color.lightness = val;
 		return color;
 	}
 
-	public static function set_brightness(color:FlxColor, val)
+	public static function set_brightness(color:FlxColor, val:Float)
 	{
 		color.brightness = val;
 		return color;
@@ -984,25 +984,25 @@ class CustomFlxColor
 	public static function get_black(color:FlxColor)
 		return color.black;
 
-	public static function set_cyan(color:FlxColor, val)
+	public static function set_cyan(color:FlxColor, val:Float)
 	{
 		color.cyan = val;
 		return color;
 	}
 
-	public static function set_magenta(color:FlxColor, val)
+	public static function set_magenta(color:FlxColor, val:Float)
 	{
 		color.magenta = val;
 		return color;
 	}
 
-	public static function set_yellow(color:FlxColor, val)
+	public static function set_yellow(color:FlxColor, val:Float)
 	{
 		color.yellow = val;
 		return color;
 	}
 
-	public static function set_black(color:FlxColor, val)
+	public static function set_black(color:FlxColor, val:Float)
 	{
 		color.black = val;
 		return color;

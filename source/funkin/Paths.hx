@@ -892,9 +892,9 @@ typedef FreeplayCategoryMetadata = {
 
 typedef ContentMetadata = {
 	/**
-		Chapters to be added to the story mode
+		Weeks to be added to the story mode
 	**/
-	var chapters:Array<ChapterMetadata>;
+	var weeks:Array<funkin.WeekData.WeekMetadata>;
 	/**
 		Stages that can appear in the title menu
 	**/
