@@ -1,4 +1,11 @@
+package;
+
+import funkin.*;
+import funkin.states.MusicBeatState;
+import funkin.states.FadeTransitionSubstate;
+
 import flixel.FlxG;
+import flixel.FlxState;
 import flixel.tweens.*;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.input.keyboard.FlxKey;
@@ -15,12 +22,13 @@ import sys.thread.Mutex;
 #end
 
 #if DO_AUTO_UPDATE
-import Github.Release;
 import sys.FileSystem;
+import funkin.api.Github;
+import funkin.states.UpdaterState;
 #end
 
 #if discord_rpc
-import Discord.DiscordClient;
+import funkin.api.Discord.DiscordClient;
 import lime.app.Application;
 #end
 
@@ -35,7 +43,7 @@ class StartupState extends FlxTransitionableState
 	public static var volumeUpKeys:Array<FlxKey> = [FlxKey.NUMPADPLUS, FlxKey.PLUS];
 	public static var fullscreenKeys:Array<FlxKey> = [FlxKey.F11];
 
-	public static var nextState:Class<FlxState> = TitleState;
+	public static var nextState:Class<FlxState> = funkin.states.TitleState;
 
     // vv wait this isnt a musicbeatstate LOL!
 /* 
@@ -57,12 +65,11 @@ class StartupState extends FlxTransitionableState
 		ClientPrefs.initialize();
 		ClientPrefs.load();
 
-		FlxG.sound.volumeHandler = function(vol:Float)
-            {
+		FlxG.sound.volume = ClientPrefs.masterVolume;
+		FlxG.sound.volumeHandler = (vol:Float)->{
             ClientPrefs.masterVolume = vol;
 			Main.volumeChangedEvent.dispatch(vol);
 		}
-		FlxG.sound.volume = ClientPrefs.masterVolume;
 
 		#if DO_AUTO_UPDATE
 		getRecentGithubRelease();
@@ -72,8 +79,6 @@ class StartupState extends FlxTransitionableState
 
 		FlxG.fixedTimestep = false;
 		FlxG.keys.preventDefaultKeys = [TAB];
-		@:privateAccess
-		FlxG.sound.loadSavedPrefs(); // why is flixel not doing this !!!
 
 		#if (windows || linux) // No idea if this also applies to other targets
 		FlxG.stage.addEventListener(
@@ -106,7 +111,7 @@ class StartupState extends FlxTransitionableState
 		Paths.initPaths();
 		#end
 		#if hscript
-		scripts.FunkinHScript.init();
+		funkin.scripts.FunkinHScript.init();
 		#end
 		
 		#if MODS_ALLOWED

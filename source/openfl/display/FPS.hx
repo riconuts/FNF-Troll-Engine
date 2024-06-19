@@ -1,5 +1,7 @@
 package openfl.display;
 
+import funkin.ClientPrefs;
+
 import haxe.Timer;
 import openfl.events.Event;
 import openfl.text.TextField;

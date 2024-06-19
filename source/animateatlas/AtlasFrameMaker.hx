@@ -1,19 +1,23 @@
 package animateatlas;
-import flixel.util.FlxDestroyUtil;
-import openfl.geom.Rectangle;
-import flixel.math.FlxPoint;
-import flixel.math.FlxRect;
-import openfl.Assets;
+
+import funkin.Paths;
+
 import haxe.Json;
+import flixel.math.FlxRect;
+import flixel.math.FlxPoint;
+import flixel.util.FlxDestroyUtil;
+import flixel.graphics.FlxGraphic;
+import flixel.graphics.frames.FlxFramesCollection;
+import flixel.graphics.frames.FlxFrame;
+import openfl.Assets;
+import openfl.geom.Rectangle;
 import openfl.display.BitmapData;
 import animateatlas.JSONData.AtlasData;
 import animateatlas.JSONData.AnimationData;
 import animateatlas.displayobject.SpriteAnimationLibrary;
 import animateatlas.displayobject.SpriteMovieClip;
-import flixel.graphics.FlxGraphic;
-import flixel.graphics.frames.FlxFramesCollection;
-import flixel.graphics.frames.FlxFrame;
-#if desktop
+
+#if sys
 import sys.FileSystem;
 import sys.io.File;
 #else
@@ -46,7 +50,7 @@ class AtlasFrameMaker extends FlxFramesCollection
 
 		if (Paths.fileExists('images/$key/spritemap1.json', TEXT))
 		{
-			PlayState.instance.addTextToDebug("Only Spritemaps made with Adobe Animate 2018 are supported");
+			funkin.states.PlayState.instance.addTextToDebug("Only Spritemaps made with Adobe Animate 2018 are supported");
 			trace("Only Spritemaps made with Adobe Animate 2018 are supported");
 			return null;
 		}

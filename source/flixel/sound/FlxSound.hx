@@ -1,5 +1,7 @@
 package flixel.sound;
 
+import funkin.ClientPrefs;
+
 import lime.system.CFFIPointer;
 import lime.media.openal.ALEffect;
 import lime.media.openal.ALAuxiliaryEffectSlot;

@@ -1,9 +1,9 @@
+package flixel.addons.transition;
 // modified by Nebula the Zorua for Andromeda Engine 1.0
 // replaces the TransitionData bullshit with substates
 // the substate should have a start, setStatus and finishCallback property
 // after that, how the substate behaves is up to you.
 
-package flixel.addons.transition;
 
 import flixel.FlxState;
 import flixel.FlxSubState;
