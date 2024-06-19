@@ -35,6 +35,8 @@ import flixel.group.FlxSpriteGroup;
 import flixel.input.keyboard.FlxKey;
 import flixel.text.FlxText;
 import flixel.ui.FlxBar;
+import NoteObject.ObjectType;
+
 
 import haxe.Json;
 
