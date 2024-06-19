@@ -64,8 +64,6 @@
     <!--Remove if you dont want the engine to autoupdate -->
 	<define name="DO_AUTO_UPDATE" if="desktop sys" unless="debug || tgt final"/>
 
-	<define name="tgt"/>
-
     <!-- _______________________________ Libraries ______________________________ -->
 
 	<haxelib name="flixel" version="5.3.1" />
