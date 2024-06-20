@@ -16,19 +16,13 @@ class NoteSplash extends NoteObject
 	public function new(x:Float = 0, y:Float = 0, ?note:Int = 0) {
 		super(x, y);
 		objType = SPLASH;
-
-		var skin:String = 'noteSplashes';
-		if (PlayState.splashSkin != null && PlayState.splashSkin.length > 0) 
-			skin = PlayState.splashSkin;
-
-		loadAnims(skin);
 		
 		colorSwap = new ColorSwap();
 		shader = colorSwap.shader;
 
+		loadAnims(PlayState.splashSkin);
 		setupNoteSplash(x, y, note);
         visible = false;
-		//antialiasing = ClientPrefs.globalAntialiasing;
 	}
 
 	function callOnHScripts(event:String, ?args:Array<Dynamic>, ?vars:Map<String, Dynamic>, ignoreStops = false, ?exclusions:Array<String>):Dynamic{

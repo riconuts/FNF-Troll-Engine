@@ -1,8 +1,10 @@
 package funkin.data;
+
 #if !macro
 import flixel.util.FlxSave;
 using StringTools;
 #end
+
 enum abstract FCType(Int) from Int to Int
 {
 	var TIER4 = 4; // EFC
@@ -141,11 +143,10 @@ class Highscore {
 	}
 
 	inline public static function floorDecimal(value:Float, decimals:Int):Float
-	{
 		return CoolUtil.floorDecimal(value, decimals);
-	}
 
-	static var formatSong = Paths.formatToSongPath;
+	static inline function formatSong(path:String):String
+		return Paths.formatToSongPath(path);
 
     public static function emptyRecord():ScoreRecord {
         return {

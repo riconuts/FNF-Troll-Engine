@@ -1,21 +1,14 @@
 package funkin.objects;
 
-import funkin.Paths.ContentMetadata;
-
-import funkin.data.Song;
-import flixel.FlxBasic;
-import flixel.group.FlxGroup.FlxTypedGroup;
 import haxe.Json;
+import flixel.group.FlxGroup.FlxTypedGroup;
+import flixel.FlxBasic;
+import funkin.Paths;
+import funkin.Paths.ContentMetadata;
+import funkin.data.Song;
 import funkin.scripts.*;
 
 using StringTools;
-
-#if MODS_ALLOWED
-import sys.FileSystem;
-import sys.io.File;
-#else
-import openfl.utils.Assets;
-#end
 
 typedef StageFile =
 {
@@ -38,6 +31,7 @@ typedef StageFile =
 	@:optional var camera_stage:Array<Float>; 
     @:optional var title_zoom:Float;
 
+	// caching
 	@:optional var preloadStrings:Array<String>;
 	@:optional var preload:Array<funkin.data.Cache.AssetPreload>; // incase you would like to add more information, though you shouldnt really need to
 }
@@ -182,9 +176,9 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		#if MODS_ALLOWED
 		if (modsOnly){
 			var modPath:String = Paths.modFolders('data/stageList.txt');
-			if (FileSystem.exists(modPath))
+			if (Paths.exists(modPath))
 			{
-				var modsList = File.getContent(modPath);
+				var modsList = Paths.getContent(modPath);
 				if (modsList != null && modsList.trim().length > 0)
                     for (shit in modsList.split("\n"))
                         daList.push(shit.trim().replace("\n", ""));

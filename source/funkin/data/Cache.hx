@@ -82,8 +82,10 @@ class Cache
 
 		if (Paths.currentTrackedSounds.exists(file))
 			return null;
-		if (FileSystem.exists(file))
-			return {key: file, sound: Sound.fromFile(file)}
+
+		var leSound = Sound.fromFile(file); 
+		if (leSound != null)
+			return {key: file, sound: leSound}
 		#end
 		
 		////

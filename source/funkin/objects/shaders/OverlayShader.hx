@@ -1,6 +1,6 @@
 package funkin.objects.shaders;
 
-class OverlayShader extends flixel.system.FlxAssets.FlxShader
+class OverlayShader extends FlxShader
 {
 	@:glFragmentSource('
 		#pragma header

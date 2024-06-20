@@ -5,17 +5,17 @@ import haxe.io.Path;
 
 typedef WeekMetadata = {
 	/**
-		Name of the chapter. 
+		Name of the week. 
 	**/
 	var name:String;
 	
 	/**
-		Any chapter that isn't 'main' shouldn't be displayed in the story menus. 
+		Any week that isn't 'main' shouldn't be displayed in the story menus. 
 	**/
 	var category:String;
 
 	/**
-		Incase you want a main chapter to appear in a seperate freeplay category
+		Incase you want a main week to appear in a seperate freeplay category
 	**/
 	@:optional var freeplayCategory:String;
 	
@@ -27,12 +27,12 @@ typedef WeekMetadata = {
 	var unlockCondition:Any;
 	
 	/**
-		Song names of this chapter.
+		Song names of this week.
 	**/
 	var songs:Array<String>;
 	
 	/**
-		Name of the content folder containing this chapter
+		Name of the content folder containing this week
 	**/
     var ?directory:String;
 }

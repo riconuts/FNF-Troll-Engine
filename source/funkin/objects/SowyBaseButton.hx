@@ -9,12 +9,8 @@ class SowyBaseButton extends FlxButton{
 	{
 		super(X, Y, OnClick);
 
-		onOver.callback = function(){
-			onover();
-		}
-		onOut.callback = function(){
-			onout();
-		}
+		onOver.callback = onover;
+		onOut.callback = onout;
 	}
 
 	// wtf it works

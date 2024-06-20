@@ -38,10 +38,7 @@ class BaseHUD extends FlxSpriteGroup {
 		return ClientPrefs.judgeCounter == 'Shortened' ? shortenedDisplays : fullDisplays;
 
 
-    // TODO: add some easier way to customize these through scripts
-    // (maybe pulled from JudgementManager?)
-
-	public var judgeColours:Map<String, FlxColor> = [
+	public static final _judgeColours:Map<String, FlxColor> = [
 		#if tgt
 		"epic" => 0xFFE367E5,
 		"sick" => 0xFF00A2E8,
@@ -60,8 +57,12 @@ class BaseHUD extends FlxSpriteGroup {
 		"cb"	=> 0xFF7F265A
 		#end
 	];
+	public static final _displayedJudges = ["epic", "sick", "good", "bad", "shit", "miss"];
 
-	public var displayedJudges:Array<String> = ["epic", "sick", "good", "bad", "shit", "miss"];
+	// TODO: add some easier way to customize these through scripts
+	// (maybe pulled from JudgementManager?)
+	public var judgeColours:Map<String, FlxColor> = _judgeColours.copy();
+	public var displayedJudges:Array<String> = _displayedJudges;
 
 	// set by PlayState
 	public var time(default, set):Float = 0;
@@ -105,6 +106,9 @@ class BaseHUD extends FlxSpriteGroup {
 		super();
 		this.songName = songName;
 		this.stats = stats;
+
+		if (!ClientPrefs.useEpics)
+			displayedJudges.remove("epic");
 	}
 
 	override public function update(elapsed:Float){

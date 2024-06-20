@@ -156,13 +156,14 @@ class FunkinHScript extends FunkinScript
 			toOpenFL: FlxTextAlign.toOpenFL
 		});
 		/*
-			set("FlxTweenType", {
-				PERSIST: flixel.tweens.FlxTween.FlxTweenType.PERSIST,
-				LOOPING: flixel.tweens.FlxTween.FlxTweenType.LOOPING,
-				PINGPONG: flixel.tweens.FlxTween.FlxTweenType.PINGPONG,
-				ONESHOT: flixel.tweens.FlxTween.FlxTweenType.ONESHOT,
-				BACKWARD: flixel.tweens.FlxTween.FlxTweenType.BACKWARD
-			}); 
+		// These are also defined on FlxTween. Get them from there.
+		set("FlxTweenType", {
+			PERSIST: flixel.tweens.FlxTween.FlxTweenType.PERSIST,
+			LOOPING: flixel.tweens.FlxTween.FlxTweenType.LOOPING,
+			PINGPONG: flixel.tweens.FlxTween.FlxTweenType.PINGPONG,
+			ONESHOT: flixel.tweens.FlxTween.FlxTweenType.ONESHOT,
+			BACKWARD: flixel.tweens.FlxTween.FlxTweenType.BACKWARD
+		}); 
 		 */
 		set("Judgement", {
 			UNJUDGED: Judgment.UNJUDGED,
@@ -210,9 +211,8 @@ class FunkinHScript extends FunkinScript
 		set("Character", funkin.objects.Character);
 		set("HealthIcon", funkin.objects.hud.HealthIcon);
 
-		set("Wife3", funkin.data.JudgmentManager.Wife3);
-
 		set("JudgmentManager", JudgmentManager);
+		set("Wife3", Wife3);
 
 		set("ModManager", funkin.modchart.ModManager);
 		set("Modifier", funkin.modchart.Modifier);

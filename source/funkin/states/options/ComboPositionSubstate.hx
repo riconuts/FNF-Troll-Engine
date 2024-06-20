@@ -1,5 +1,6 @@
 package funkin.states.options;
 
+import funkin.objects.hud.BaseHUD;
 import funkin.states.PlayState.RatingSprite;
 
 import flixel.util.FlxColor;
@@ -51,23 +52,17 @@ class ComboPositionSubstate extends MusicBeatSubstate
 			if (highestJudgement != null){
 				ratingName = highestJudgement;
 				ratingColor = hud.judgeColours.get(ratingName);
-			}				
+			}
 		}   
 
 		if (ratingName == null)
 			ratingName = ClientPrefs.useEpics ? "epic" : "sick";
 
 		if (ratingColor == null){
-			ratingColor = switch(ratingName){
-				#if tgt
-				case "epic": 0xFFE367E5;
-				case "sick": 0xFF00A2E8;
-				#else
-				case "epic": 0xFFBA78FF;
-				case "sick": 0xFF97FFFF;
-				#end
-				default: 0xFFFFFFFF;
-			}
+			if (BaseHUD._judgeColours.exists(ratingName))
+				ratingColor = BaseHUD._judgeColours.get(ratingName);
+			else
+				ratingColor = 0xFFFFFFFF;
 		}
 			
 		////

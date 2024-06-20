@@ -43,9 +43,6 @@ class CommonHUD extends BaseHUD
 	{
 		super(iP1, iP2, songName, stats);
 
-		if (!ClientPrefs.useEpics)
-			displayedJudges.remove("epic");
-
 		healthBar = new FNFHealthBar(iP1, iP2);
 		iconP1 = healthBar.iconP1;
 		iconP2 = healthBar.iconP2;

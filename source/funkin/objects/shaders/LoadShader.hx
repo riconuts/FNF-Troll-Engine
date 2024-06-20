@@ -1,7 +1,5 @@
 package funkin.objects.shaders;
 
-import flixel.system.FlxAssets.FlxShader;
-
 class LoadShader extends FlxShader {
     @:isVar
     public var loaded(get, set):Float = 0;

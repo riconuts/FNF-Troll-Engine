@@ -1,7 +1,5 @@
 package funkin.objects.shaders;
 
-import flixel.system.FlxAssets.FlxShader;
-
 class ColorSwap
 {
 	public var shader(default, null):ColorSwapShader = new ColorSwapShader();

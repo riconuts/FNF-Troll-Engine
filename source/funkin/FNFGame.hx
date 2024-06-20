@@ -1,11 +1,9 @@
 package funkin;
 
 #if SCRIPTABLE_STATES
-import funkin.scripts.FunkinHScript;
+import funkin.states.MusicBeatState;
 import funkin.scripts.FunkinHScript.HScriptedState;
 #end
-
-import funkin.states.MusicBeatState;
 
 class FNFGame extends FlxGame
 {

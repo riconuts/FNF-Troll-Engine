@@ -120,6 +120,8 @@ class PlayState extends MusicBeatState
 	public var scoreTxt:FlxText = new FlxText();
 	public var botplayTxt:FlxText = new FlxText();
 
+	// var songPercent:Float = 0;
+
 	/*
 	public static var STRUM_X = 42;
 	public static var STRUM_X_MIDDLESCROLL = -278;
@@ -335,8 +337,6 @@ class PlayState extends MusicBeatState
 	public var songName:String = "";
 	public var songHighscore:Int = 0;
 	public var songLength:Float = 0;
-
-	var songPercent:Float = 0;
 
 	public static var campaignScore:Int = 0;
 	public static var campaignMisses:Int = 0;
