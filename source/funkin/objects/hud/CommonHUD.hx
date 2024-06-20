@@ -2,7 +2,7 @@ package funkin.objects.hud;
 
 import funkin.objects.playfields.*;
 import funkin.objects.hud.FNFHealthBar;
-import funkin.JudgmentManager.JudgmentData;
+import funkin.data.JudgmentManager.JudgmentData;
 import flixel.ui.FlxBar;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;

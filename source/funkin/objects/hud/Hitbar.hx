@@ -79,7 +79,7 @@ class Hitbar extends FlxSpriteGroup
 	var metronomeScale:Float = 1;
 	var metronome:FlxSprite;
 
-	public var judgeManager:JudgmentManager;
+	public var judgeManager:funkin.data.JudgmentManager;
 
 	@:isVar
 	public var currentAverage(get, null):Float = 0;

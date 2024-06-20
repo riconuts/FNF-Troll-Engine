@@ -352,7 +352,7 @@ class UpdaterState extends MusicBeatState {
         	var recentRelease = Main.recentRelease;
             
             // hoping this works lol
-			var tagName:SemanticVersion = recentRelease.tag_name;
+			var tagName:funkin.data.SemanticVersion = recentRelease.tag_name;
 			if (tagName > Main.semanticVersion){
 				outOfDate = true;
 				trace('New version found! Newest version: $tagName | Current: ${Main.semanticVersion}');

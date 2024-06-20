@@ -95,7 +95,7 @@ class PauseSubState extends MusicBeatSubstate
 				var chartPostfix = PlayState.difficultyName;
 				if (chartPostfix != "")
 					chartPostfix = '-$chartPostfix';
-				PlayState.SONG = Song.loadFromJson(PlayState.SONG.song + chartPostfix, PlayState.SONG.song);
+				PlayState.SONG = funkin.data.Song.loadFromJson(PlayState.SONG.song + chartPostfix, PlayState.SONG.song);
 				PlayState.chartingMode = false;
 				restartSong();
 			},

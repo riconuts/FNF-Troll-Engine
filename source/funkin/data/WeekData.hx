@@ -1,4 +1,4 @@
-package funkin;
+package funkin.data;
 
 import funkin.Paths.ContentMetadata;
 import haxe.io.Path;

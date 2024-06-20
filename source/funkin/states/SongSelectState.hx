@@ -1,7 +1,7 @@
 package funkin.states;
 
 import flixel.text.FlxText;
-import funkin.Song;
+import funkin.data.Song;
 import funkin.states.options.OptionsState;
 import funkin.states.editors.MasterEditorMenu;
 

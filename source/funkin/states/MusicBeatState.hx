@@ -6,7 +6,7 @@ import flixel.addons.transition.FlxTransitionableState;
 import openfl.media.Sound;
 import openfl.ui.Mouse;
 import openfl.ui.MouseCursor;
-import funkin.Controls;
+import funkin.input.Controls;
 
 #if HSCRIPT_ALLOWED
 import funkin.scripts.FunkinHScript;
@@ -60,7 +60,7 @@ class MusicBeatState extends FlxUIState
 	}
 
 	inline function get_controls():Controls
-		return PlayerSettings.player1.controls;
+		return funkin.input.PlayerSettings.player1.controls;
 
 	override function create() {
 		camBeat = FlxG.camera;

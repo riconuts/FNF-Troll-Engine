@@ -476,7 +476,7 @@ class FunkinLua extends FunkinScript
 				name = PlayState.SONG.song;
 
 			var poop = Paths.formatToSongPath(name);
-			PlayState.SONG = Song.loadFromJson(poop, name);
+			PlayState.SONG = funkin.data.Song.loadFromJson(poop, name);
 			PlayState.instance.persistentUpdate = false;
 			PlayState.difficulty = difficultyNum;
 			PlayState.difficultyName = '';
@@ -2189,9 +2189,7 @@ class FunkinLua extends FunkinScript
 			default: FlxG.mouse.justReleased;
 		}
 	}
-
-	//Better optimized than using some getProperty shit or idk
-	// 💀
+	
 	static function getFlxEaseByString(?ease:String):Float->Float
 	{
 		return (ease==null) ? FlxEase.linear : switch(ease.toLowerCase().trim()) 

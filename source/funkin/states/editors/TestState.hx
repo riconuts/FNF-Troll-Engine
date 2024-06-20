@@ -3,7 +3,7 @@ package funkin.states.editors;
 import funkin.states.TitleState.TitleLogo;
 import flixel.util.FlxColor;
 import funkin.objects.Alphabet;
-import funkin.Controls;
+import funkin.input.Controls;
 import funkin.states.TitleState;
 import funkin.states.editors.MasterEditorMenu;
 import flixel.addons.ui.*;

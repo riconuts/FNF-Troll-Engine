@@ -1,6 +1,6 @@
 package funkin.tgt;
 
-import funkin.Song;
+import funkin.data.Song;
 import funkin.Paths;
 import haxe.Json;
 import funkin.states.editors.ChartingState;

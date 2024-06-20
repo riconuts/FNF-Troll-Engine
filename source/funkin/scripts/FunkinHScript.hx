@@ -16,11 +16,13 @@ import flixel.math.FlxPoint;
 import funkin.states.PlayState;
 import funkin.states.MusicBeatState;
 import funkin.states.MusicBeatSubstate;
-import funkin.JudgmentManager;
+import funkin.data.JudgmentManager;
 
 import funkin.objects.*;
 import funkin.objects.playfields.*;
 import funkin.states.PlayState.RatingSprite;
+
+import funkin.input.PlayerSettings;
 
 using StringTools;
 
@@ -181,7 +183,7 @@ class FunkinHScript extends FunkinScript
 		// FNF-specific things
 		set("PlayState", PlayState);
 		set("GameOverSubstate", funkin.states.GameOverSubstate);
-		set("Song", funkin.Song);
+		set("Song", funkin.data.Song);
 		set("BGSprite", funkin.objects.BGSprite);
 		set("RatingSprite", RatingSprite);
 
@@ -208,7 +210,7 @@ class FunkinHScript extends FunkinScript
 		set("Character", funkin.objects.Character);
 		set("HealthIcon", funkin.objects.hud.HealthIcon);
 
-		set("Wife3", funkin.Wife3);
+		set("Wife3", funkin.data.JudgmentManager.Wife3);
 
 		set("JudgmentManager", JudgmentManager);
 

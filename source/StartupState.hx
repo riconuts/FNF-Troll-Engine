@@ -60,7 +60,7 @@ class StartupState extends FlxTransitionableState
 			return;
 		loaded = true;
 
-		PlayerSettings.init();
+		funkin.input.PlayerSettings.init();
 
 		#if hscript
 		funkin.scripts.FunkinHScript.init();
@@ -120,7 +120,7 @@ class StartupState extends FlxTransitionableState
 
 		Paths.getAllStrings();
 		
-		Highscore.load();
+		funkin.data.Highscore.load();
 		
 		#if discord_rpc
 		Application.current.onExit.add((exitCode)->{

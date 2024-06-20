@@ -1,6 +1,5 @@
 package funkin.objects.playfields;
 
-import funkin.JudgmentManager.Judgment;
 import flixel.math.FlxPoint;
 import flixel.math.FlxMath;
 import math.Vector3;
@@ -13,7 +12,8 @@ import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 import lime.app.Event;
 import flixel.math.FlxAngle;
-import funkin.Wife3;
+import funkin.data.JudgmentManager;
+import funkin.data.JudgmentManager.Wife3;
 import funkin.states.PlayState;
 import funkin.states.MusicBeatState;
 

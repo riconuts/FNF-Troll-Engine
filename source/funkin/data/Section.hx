@@ -1,4 +1,4 @@
-package funkin;
+package funkin.data;
 
 typedef SwagSection =
 {

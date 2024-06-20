@@ -1,4 +1,4 @@
-package funkin;
+package funkin.data;
 #if !macro
 import flixel.util.FlxSave;
 using StringTools;
@@ -140,20 +140,9 @@ class Highscore {
 		return idArray.join("-"); 
 	}
 
-	public static function floorDecimal(value:Float, decimals:Int):Float
+	inline public static function floorDecimal(value:Float, decimals:Int):Float
 	{
-		if (decimals < 1)
-		{
-			return Math.floor(value);
-		}
-
-		var tempMult:Float = 1;
-		for (i in 0...decimals)
-		{
-			tempMult *= 10;
-		}
-		var newValue:Float = Math.floor(value * tempMult);
-		return newValue / tempMult;
+		return CoolUtil.floorDecimal(value, decimals);
 	}
 
 	static var formatSong = Paths.formatToSongPath;

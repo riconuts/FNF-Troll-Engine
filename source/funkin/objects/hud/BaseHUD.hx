@@ -1,7 +1,7 @@
 package funkin.objects.hud;
 
 import flixel.util.FlxColor;
-import funkin.JudgmentManager.JudgmentData;
+import funkin.data.JudgmentManager.JudgmentData;
 import haxe.exceptions.NotImplementedException;
 import funkin.objects.playfields.*;
 

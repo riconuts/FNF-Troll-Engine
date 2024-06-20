@@ -1,7 +1,7 @@
 package funkin.objects;
 
 import funkin.states.PlayState;
-import funkin.JudgmentManager.Judgment;
+import funkin.data.JudgmentManager.Judgment;
 import funkin.states.editors.ChartingState;
 import math.Vector3;
 import funkin.scripts.*;

@@ -1,6 +1,6 @@
 package funkin.objects.hud;
 
-import funkin.JudgmentManager.JudgmentData;
+import funkin.data.JudgmentManager.JudgmentData;
 import flixel.util.FlxColor;
 import funkin.objects.playfields.*;
 import flixel.math.FlxMath;

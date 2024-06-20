@@ -1,21 +1,8 @@
-package funkin;
+package funkin.data;
 
-import funkin.Highscore.ScoreRecord;
+import funkin.data.Highscore.ScoreRecord;
 import lime.app.Event;
-/* hud.ratingFC = ratingFC;
-hud.grade = ratingName;
-hud.ratingPercent = ratingPercent;
-hud.misses = songMisses;
-hud.combo = combo;
-hud.comboBreaks = comboBreaks;
-hud.judgements.set("miss", songMisses);
-hud.judgements.set("cb", comboBreaks);
-hud.totalNotesHit = totalNotesHit;
-hud.totalPlayed = totalPlayed;
-hud.score = songScore; */
 
-
-// Might use this some day idk lol
 class Stats {
 	public var changedEvent:Event<(String, Dynamic) -> Void> = new Event<(String, Dynamic)->Void>();
 	function changedCallback(n:String, v:Dynamic)
@@ -23,16 +10,16 @@ class Stats {
 	
 	public var gradeSet:Array<Array<Dynamic>> = [];
 
-    public var score(default, set):Int = 0;
+	public var score(default, set):Int = 0;
 	public var nps(default, set):Int = 0;
 	public var npsPeak(default, set):Int = 0;
-    public var totalPlayed(default, set):Float = 0;
+	public var totalPlayed(default, set):Float = 0;
 	public var totalNotesHit(default, set):Float = 0;
-    public var clearType(default, set):String = '';
-    public var grade(default, set):String = '';
-    public var noteDiffs:Array<Float> = [];
+	public var clearType(default, set):String = '';
+	public var grade(default, set):String = '';
+	public var noteDiffs:Array<Float> = [];
 
-    public var judgements:Map<String, Int> = [
+	public var judgements:Map<String, Int> = [
 		"epic" => 0,
 		"sick" => 0,
 		"good" => 0,
@@ -41,16 +28,16 @@ class Stats {
 		"miss" => 0,
 		"cb" => 0
 	];
-    public var combo(default, set):Int = 0;
+	public var combo(default, set):Int = 0;
 	public var cbCombo(default, set):Int = 0;
 	public var ratingPercent(default, set):Float = 0;
-    function set_score(val:Int){
-        if(score != val){
-            changedCallback("score", val);
-            return score = val;
-        }
-        return val;
-    }
+	function set_score(val:Int){
+		if(score != val){
+			changedCallback("score", val);
+			return score = val;
+		}
+		return val;
+	}
 	function set_nps(val:Int){
 		if (nps != val)
 		{
@@ -71,41 +58,41 @@ class Stats {
 	function set_totalPlayed(val:Float)
 	{
 		if (totalPlayed != val){
-            changedCallback("totalPlayed", val);
-            return totalPlayed = val;
-        }
+			changedCallback("totalPlayed", val);
+			return totalPlayed = val;
+		}
 		return val;
 	}
 	function set_totalNotesHit(val:Float)
 	{
 		if (totalNotesHit != val){
-            changedCallback("totalNotesHit", val);
-            return totalNotesHit = val;
-        }
+			changedCallback("totalNotesHit", val);
+			return totalNotesHit = val;
+		}
 		return val;
 	}
 	function set_clearType(val:String)
 	{
 		if (clearType != val){
-            changedCallback("clearType", val);
-            return clearType = val;
-        }
+			changedCallback("clearType", val);
+			return clearType = val;
+		}
 		return val;
 	}
 	function set_grade(val:String)
 	{
 		if (grade != val){
-            changedCallback("grade", val);
-            return grade = val;
-        }
+			changedCallback("grade", val);
+			return grade = val;
+		}
 		return val;
 	}
 	function set_combo(val:Int)
 	{
 		if (combo != val){
-            changedCallback("combo", val);
-            return combo = val;
-        }
+			changedCallback("combo", val);
+			return combo = val;
+		}
 		return val;
 	}
 	function set_cbCombo(val:Int)
@@ -120,16 +107,16 @@ class Stats {
 	function set_ratingPercent(val:Float)
 	{
 		if (ratingPercent != val){
-            changedCallback("ratingPercent", val);
-            return ratingPercent = val;
-        }
+			changedCallback("ratingPercent", val);
+			return ratingPercent = val;
+		}
 		return val;
 	}
 
 	public var useFlags:Bool = ClientPrefs.gradeSet == 'Etterna';
-    @:isVar
-    public var comboBreaks(get, set):Int = 0;
-    function get_comboBreaks():Int return judgements.get("cb");
+	@:isVar
+	public var comboBreaks(get, set):Int = 0;
+	function get_comboBreaks():Int return judgements.get("cb");
 	function set_comboBreaks(val:Int):Int{
 		comboBreaks = val;
 		judgements.set("cb", val); 
@@ -149,16 +136,16 @@ class Stats {
 		if (gradeSet == null)
 			gradeSet = Highscore.grades.get(ClientPrefs.gradeSet);
 
-        this.gradeSet = gradeSet;
+		this.gradeSet = gradeSet;
 
 		updateVariables();
-    }
+	}
 
-    public function getGrade():String
-    {
+	public function getGrade():String
+	{
 		if (totalPlayed < 1)
-            return '?';
-        
+			return '?';
+		
 		if (ratingPercent >= 1)
 			return gradeSet[0][0]; // Uses first string
 		else
@@ -171,10 +158,10 @@ class Stats {
 		}
 		
 		return '?';
-    }
+	}
 
-    public var sdc = Paths.getString("sdt3");
-    public var sda = Paths.getString("sdt4");
+	public var sdc = Paths.getString("sdt3");
+	public var sda = Paths.getString("sdt4");
 
 	public var cfc = Paths.getString("t3fc");
 	public var afc = Paths.getString("t4fc");
@@ -247,7 +234,7 @@ class Stats {
 	}
 
 
-    public function getScoreRecord():ScoreRecord{
+	public function getScoreRecord():ScoreRecord{
 		return {
 			score: score,
 			comboBreaks: judgements.get("cb"), // since we cant detect the combo breaks from here
@@ -257,13 +244,13 @@ class Stats {
 			noteDiffs: noteDiffs,
 			npsPeak: npsPeak
 		}
-    }
+	}
 
-    public function updateVariables()
-    {
+	public function updateVariables()
+	{
 		ratingPercent = totalNotesHit / totalPlayed;
-        grade = getGrade();
+		grade = getGrade();
 		clearType = getClearType();
 		// trace(score, grade, clearType);
-    }
+	}
 }

@@ -1,6 +1,6 @@
-package funkin;
+package funkin.input;
 
-import funkin.Controls;
+import funkin.input.Controls;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.util.FlxSignal;

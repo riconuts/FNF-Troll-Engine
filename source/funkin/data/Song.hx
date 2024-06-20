@@ -1,8 +1,8 @@
-package funkin;
+package funkin.data;
 
 import funkin.states.LoadingState;
 import funkin.states.PlayState;
-import funkin.Section.SwagSection;
+import funkin.data.Section.SwagSection;
 import haxe.Json;
 import haxe.format.JsonParser;
 import lime.utils.Assets;

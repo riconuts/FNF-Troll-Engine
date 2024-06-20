@@ -1,6 +1,7 @@
 package funkin.states;
 
 import flixel.FlxSubState;
+import funkin.input.Controls;
 
 #if SCRIPTABLE_STATES
 import funkin.scripts.FunkinHScript;
@@ -31,7 +32,7 @@ class MusicBeatSubstate extends FlxSubState
 	private var controls(get, never):Controls;
 
 	inline function get_controls():Controls
-		return PlayerSettings.player1.controls;
+		return funkin.input.PlayerSettings.player1.controls;
     
 	override public function destroy()
 	{

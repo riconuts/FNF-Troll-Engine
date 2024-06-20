@@ -894,7 +894,7 @@ typedef ContentMetadata = {
 	/**
 		Weeks to be added to the story mode
 	**/
-	var weeks:Array<funkin.WeekData.WeekMetadata>;
+	var weeks:Array<funkin.data.WeekData.WeekMetadata>;
 	/**
 		Stages that can appear in the title menu
 	**/

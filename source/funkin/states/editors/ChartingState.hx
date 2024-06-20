@@ -5,8 +5,8 @@ import funkin.scripts.FunkinHScript;
 import funkin.scripts.FunkinScript;
 
 import funkin.Conductor.BPMChangeEvent;
-import funkin.Section.SwagSection;
-import funkin.Song.SwagSong;
+import funkin.data.Section;
+import funkin.data.Song;
 
 import flixel.*;
 import flixel.group.FlxGroup;
@@ -2179,7 +2179,7 @@ class ChartingState extends MusicBeatState
 		bpmTxt.text =
 		"Time: " + Std.string(FlxMath.roundDecimal(Conductor.songPosition / 1000, 2)) + " / " + Std.string(FlxMath.roundDecimal(FlxG.sound.music.length / 1000, 2)) +
 		"\n\nSection: " + curSec +
-		"\nBeat: " + Highscore.floorDecimal(curDecBeat, 2) +
+		"\nBeat: " + funkin.data.Highscore.floorDecimal(curDecBeat, 2) +
 		"\nStep: " + curStep;
 
 		var playedSound:Array<Bool> = []; //Prevents ouchy GF sex sounds

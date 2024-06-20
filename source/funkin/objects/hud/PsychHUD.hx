@@ -1,6 +1,6 @@
 package funkin.objects.hud;
 
-import funkin.JudgmentManager.JudgmentData;
+import funkin.data.JudgmentManager.JudgmentData;
 import flixel.util.FlxColor;
 import funkin.objects.playfields.*;
 
@@ -46,12 +46,14 @@ class PsychHUD extends CommonHUD
 
 		scoreTxt = new FlxText(0, healthBarBG.y + 48, FlxG.width, "", 20);
 		#if tgt
-		scoreTxt.setFormat(Paths.font("calibri.ttf"), 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		scoreTxt.borderSize = 1.25;
+		scoreTxt.setFormat(Paths.font("calibri.ttf"), 20, FlxColor.WHITE, CENTER);
+		scoreTxt.setBorderStyle(OUTLINE, FlxColor.BLACK, 1.25);
 		#else
-		scoreTxt.setFormat(Paths.font("vcr.ttf"), 18, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		scoreTxt.borderSize = 1.15;
+		scoreTxt.setFormat(Paths.font('vcr.ttf'), 18, FlxColor.WHITE, CENTER);
+		scoreTxt.setBorderStyle(OUTLINE, FlxColor.BLACK, 1.5);
 		#end
+
+		scoreTxt.antialiasing = true;
 		scoreTxt.scrollFactor.set();
 		scoreTxt.visible = scoreTxt.alpha > 0;
 
@@ -92,10 +94,21 @@ class PsychHUD extends CommonHUD
 
 	function generateJudgementDisplays()
 	{
+		#if tgt
 		final textBorderSpacing = 6;
-		final textLineSpacing = #if tgt 25 #else 22 #end;
-		final textSize = #if tgt 24 #else 20 #end;
-		final textBorderSize = #if tgt 1.25 #else 1.15 #end;
+		final textLineSpacing = 25;
+		final textSize = 24;
+		final textBorderSize = 1.25;
+		final nameFont = "calibrib.ttf";
+		final numbFont = "calibri.ttf";
+		#else
+		final textBorderSpacing = 6;
+		final textLineSpacing = 22;
+		final textSize = 20;
+		final textBorderSize = 1.5;
+		final nameFont = "vcr.ttf";
+		final numbFont = "vcr.ttf";
+		#end
 
 		var textWidth = ClientPrefs.judgeCounter == 'Shortened' ? 150 : 200;
 		var textPosX = ClientPrefs.hudPosition == 'Right' ? (FlxG.width - textBorderSpacing - textWidth) : textBorderSpacing;
@@ -106,14 +119,14 @@ class PsychHUD extends CommonHUD
 			var judgment = displayedJudges[idx];
 
 			var text = new FlxText(textPosX, textPosY + idx*textLineSpacing, textWidth, displayNames.get(judgment));
-			text.setFormat(Paths.font(#if tgt "calibrib.ttf" #else "vcr.ttf" #end), textSize, judgeColours.get(judgment), LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-			text.borderSize = textBorderSize;
+			text.setFormat(Paths.font(nameFont), textSize, judgeColours.get(judgment), LEFT);
+			text.setBorderStyle(OUTLINE, 0xFF000000, textBorderSize);
 			text.scrollFactor.set();
 			add(text);
 
 			var numb = new FlxText(textPosX, text.y, textWidth, "0");
-			numb.setFormat(Paths.font(#if tgt "calibri.ttf" #else "vcr.ttf" #end), textSize, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-			numb.borderSize = textBorderSize;
+			numb.setFormat(Paths.font(numbFont), textSize, 0xFFFFFFFF, RIGHT);
+			numb.setBorderStyle(OUTLINE, 0xFF000000, textBorderSize);
 			numb.scrollFactor.set();
 			add(numb);
 
@@ -160,27 +173,46 @@ class PsychHUD extends CommonHUD
 		}
 	}
 
+	inline function getGradeText(){
+		if (grade == "?")
+			return grade;
+
+		final ratFC = ratingFC;
+		final comboName = ClientPrefs.wife3 && ratFC == stats.cfc ? stats.fc : ratFC;
+		final ratPerc = Highscore.floorDecimal(ratingPercent * 100, 2);
+
+		return '$ratPerc% / $grade [$comboName]';
+	}
+
 	override function update(elapsed:Float)
 	{
 		var shownScore:String;
 		var isHighscore:Bool;
-		if (ClientPrefs.showWifeScore){
+		
+		if (ClientPrefs.showWifeScore) {
 			shownScore = Std.string(Math.floor(totalNotesHit * 100));
 			isHighscore = songWifeHighscore != 0 && totalNotesHit > songWifeHighscore;
-		}else{
+		} else {
 			shownScore = Std.string(score);
 			isHighscore = songHighscore != 0 && score > songHighscore;
 		}
 
-		scoreTxt.text = 
-			(isHighscore ? '$hiscoreString: ' : '$scoreString: ') + shownScore +
-			' | $cbString: ' + comboBreaks + 
-			' | $ratingString: '
-			+ (grade == '?' ? grade : Highscore.floorDecimal(ratingPercent * 100, 2)
-				+ '% / $grade [${(ratingFC == stats.cfc && ClientPrefs.wife3) ? stats.fc : ratingFC}]');
-		if (ClientPrefs.npsDisplay)
-			scoreTxt.text += ' | $npsString: ${nps} / ${npsPeak}';
+		scoreTxt.text = {
+			final separator = ' • ';
+			
+			var text = 
+				'${isHighscore ? hiscoreString : scoreString}: $shownScore' +
+				separator + 
+				'$cbString: $comboBreaks' + 
+				separator + 
+				'$ratingString: ${getGradeText()}'
+			;
 
+			if (ClientPrefs.npsDisplay)
+				text += separator + ('$npsString: $nps / $npsPeak');
+
+			text;
+		}
 		
 		for (k => v in judgements){
 			if (judgeTexts.exists(k))

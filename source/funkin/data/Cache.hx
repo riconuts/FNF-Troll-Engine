@@ -1,4 +1,4 @@
-package funkin;
+package funkin.data;
 
 import openfl.Assets;
 import openfl.media.Sound;
@@ -29,10 +29,9 @@ typedef AssetPreload =
 	@:optional var library:String; // heh
 }
 
+// May cause a crash once every two months
 class Cache
 {
-	// nvm it still fuckign crashes
-
 	public static function returnUncachedGraphic(key:String, ?library:String)
 	{
 		var path:String;

@@ -2,7 +2,7 @@ package funkin.objects;
 
 import funkin.Paths.ContentMetadata;
 
-import funkin.Song;
+import funkin.data.Song;
 import flixel.FlxBasic;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import haxe.Json;
@@ -39,7 +39,7 @@ typedef StageFile =
     @:optional var title_zoom:Float;
 
 	@:optional var preloadStrings:Array<String>;
-	@:optional var preload:Array<Cache.AssetPreload>; // incase you would like to add more information, though you shouldnt really need to
+	@:optional var preload:Array<funkin.data.Cache.AssetPreload>; // incase you would like to add more information, though you shouldnt really need to
 }
 
 class Stage extends FlxTypedGroup<FlxBasic>

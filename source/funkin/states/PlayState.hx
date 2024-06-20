@@ -1,16 +1,19 @@
 package funkin.states;
 
-import funkin.Cache;
-import funkin.Song;
-import funkin.Section;
+import funkin.data.Cache;
+import funkin.data.Song;
+import funkin.data.Section;
 import funkin.objects.Note;
 import funkin.objects.NoteObject;
+import funkin.objects.NoteObject.ObjectType;
 import funkin.objects.NoteSplash;
 import funkin.objects.StrumNote;
 import funkin.objects.Stage;
 import funkin.objects.Character;
-import funkin.JudgmentManager;
-import funkin.WeekData;
+import funkin.data.Stats;
+import funkin.data.JudgmentManager;
+import funkin.data.Highscore;
+import funkin.data.WeekData;
 import funkin.states.GameOverSubstate;
 import funkin.states.PauseSubState;
 import funkin.objects.hud.*;
@@ -35,8 +38,6 @@ import flixel.group.FlxSpriteGroup;
 import flixel.input.keyboard.FlxKey;
 import flixel.text.FlxText;
 import flixel.ui.FlxBar;
-import NoteObject.ObjectType;
-
 
 import haxe.Json;
 

@@ -9,12 +9,14 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 
+import funkin.data.Cache;
+
 class GameOverSubstate extends MusicBeatSubstate
 {
 	public static var instance:GameOverSubstate;
 
 	public var boyfriend:Character;
-	public var genericBitch:FlxSprite;
+	public var genericBitch:FlxSprite; // TODO: Get rid of this!!! think of some way to do game over screens that don't use the player character instance
 	public var deathSound:FlxSound;
 
 	public var defaultCamZoom:Float = 1;

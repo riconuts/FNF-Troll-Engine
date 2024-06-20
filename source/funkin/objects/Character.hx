@@ -194,7 +194,7 @@ class Character extends FlxSprite
 			return "sparrow";
 	}
 
-	public static function returnCharacterPreload(characterName:String):Array<Cache.AssetPreload>{
+	public static function returnCharacterPreload(characterName:String):Array<funkin.data.Cache.AssetPreload>{
 		var char = Character.getCharacterFile(characterName);
 
 		if (char == null)

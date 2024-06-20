@@ -151,9 +151,22 @@ class CoolUtil
  			case "smootherStepInOut": FlxEase.smootherStepInOut;
  			case "smootherStepOut": FlxEase.smootherStepOut;
 
- 			case "instant": ((t:Float) -> return 1);
+ 			case "instant": (t:Float) -> return 1.0;
 			default: FlxEase.linear;
 		}
+	}
+	
+	public static function floorDecimal(value:Float, decimals:Int):Float
+	{
+		if (decimals < 1)
+			return Math.floor(value);
+
+		var tempMult:Float = 1;
+		for (_ in 0...decimals)
+			tempMult *= 10;
+		
+		var newValue:Float = Math.floor(value * tempMult);
+		return newValue / tempMult;
 	}
 
 	inline public static function numberArray(max:Int, ?min = 0):Array<Int>

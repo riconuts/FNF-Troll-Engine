@@ -13,7 +13,7 @@ import lime.app.Application;
 import funkin.*;
 import funkin.objects.Bread;
 import funkin.api.Github;
-import funkin.SemanticVersion;
+import funkin.data.SemanticVersion;
 
 using StringTools;
 

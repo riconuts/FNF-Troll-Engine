@@ -7,5 +7,5 @@ import funkin.tgt.MainMenuState;
 import funkin.tgt.FreeplayState;
 import funkin.tgt.StoryMenuState;
 
-import funkin.WeekData as ChapterData;
-import funkin.WeekData.WeekMetadata as ChapterMetadata;
+import funkin.data.WeekData as ChapterData;
+import funkin.data.WeekData.WeekMetadata as ChapterMetadata;

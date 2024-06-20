@@ -1,7 +1,7 @@
 package funkin;
 
 #if !macro
-import funkin.Controls.KeyboardScheme;
+import funkin.input.Controls.KeyboardScheme;
 import flixel.util.FlxSave;
 import flixel.input.keyboard.FlxKey;
 
@@ -410,7 +410,7 @@ class ClientPrefs
 				value: "Psych",
 				data: [
 					"options" => {
-						var arr:Array<String> = [for (key in Highscore.grades.keys()) key];
+						var arr:Array<String> = [for (key in funkin.data.Highscore.grades.keys()) key];
 						arr.reverse(); // for some reason keys() returns the map.. backwards
 						arr;
 					}
@@ -802,7 +802,7 @@ class ClientPrefs
 
 	public static function reloadControls()
 	{
-		PlayerSettings.player1.controls.setKeyboardScheme(KeyboardScheme.Solo);
+		funkin.input.PlayerSettings.player1.controls.setKeyboardScheme(KeyboardScheme.Solo);
 
 		StartupState.muteKeys = copyKey(keyBinds.get('volume_mute'));
 		StartupState.volumeDownKeys = copyKey(keyBinds.get('volume_down'));

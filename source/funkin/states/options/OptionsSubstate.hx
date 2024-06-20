@@ -76,7 +76,7 @@ class OptionsSubstate extends MusicBeatSubstate
     public function save(){
 		ClientPrefs.save(actualOptions);
 
-		Highscore.loadData();
+		funkin.data.Highscore.loadData();
     }
 	function windowsChanged()
 	{

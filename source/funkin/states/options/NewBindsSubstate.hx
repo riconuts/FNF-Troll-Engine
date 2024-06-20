@@ -10,6 +10,9 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.math.FlxPoint;
 import openfl.geom.Rectangle;
+
+import funkin.input.InputFormatter;
+
 using StringTools;
 
 private class KeyboardNavHelper{

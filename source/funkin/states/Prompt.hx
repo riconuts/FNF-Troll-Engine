@@ -1,4 +1,4 @@
-package funkin;
+package funkin.states;
 
 import flixel.*;
 import flixel.addons.ui.FlxUIPopup;
