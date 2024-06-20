@@ -2054,7 +2054,7 @@ class PlayState extends MusicBeatState
 				if (type == true) // ??????????????????
 					type = 1;
 				if (Std.isOfType(type, Int)) // Backward compatibility + compatibility with Week 7 charts;
-					type = editors.ChartingState.noteTypeList[type];
+					type = ChartingState.noteTypeList[type];
 
 				var swagNote:Note = new Note(daStrumTime, daColumn, oldNote, gottaHitNote, false, false, hudSkin);
 				swagNote.realColumn = songNotes[1];
