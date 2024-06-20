@@ -143,7 +143,7 @@ class NoteField extends FieldBase
 				var visPos = -((Conductor.visualPosition - daNote.visualTime) * speed);
 				if (visPos > drawDist)
 					continue;
-				if (daNote.wasGoodHit && daNote.tail.length > 0 && daNote.unhitTail.length > 0)
+				if (daNote.wasGoodHit && daNote.sustainLength > 0)
 				{
 					diff = 0;
 					visPos = 0;

@@ -1999,104 +1999,9 @@ class PlayState extends MusicBeatState
 		if (eventNotes.length > 1)
 			eventNotes.sort(sortByTime);
 
+		generateNotes(noteData); // generates the chart
 
 		speedChanges.sort(svSort);
-
-		for (section in noteData)
-		{
-			for (songNotes in section.sectionNotes)
-			{
-				var daStrumTime:Float = songNotes[0];
-				var daColumn:Int = Std.int(songNotes[1] % 4);
-                if(songNotes[1] <= -1)
-                    continue; // RETARDED EVENT NOTES IN OLD PSYCH CHARTS
-                // TODO: AUTO CONVERT TO EVENTNOTES
-
-				var gottaHitNote:Bool = section.mustHitSection;
-
-				if (songNotes[1]%8 > 3)
-					gottaHitNote = !gottaHitNote;
-
-				var oldNote:Note;
-				if (allNotes.length > 0)
-					oldNote = allNotes[Std.int(allNotes.length - 1)];
-				else
-					oldNote = null;
-
-				var type:Dynamic = songNotes[3];
-
-				if (type == true) // ??????????????????
-					type = 1;
-				if (Std.isOfType(type, Int)) // Backward compatibility + compatibility with Week 7 charts;
-					type = ChartingState.noteTypeList[type]; 
-				
-				var swagNote:Note = new Note(daStrumTime, daColumn, oldNote, gottaHitNote, false, false, hudSkin);
-				swagNote.realColumn = songNotes[1];
-				swagNote.sustainLength = songNotes[2];
-                
-				swagNote.gfNote = (section.gfSection && (songNotes[1]<4));
-				
-				swagNote.ID = allNotes.length;
-				modchartObjects.set('note${swagNote.ID}', swagNote);
-
-
-				if (swagNote.fieldIndex==-1 && swagNote.field==null)
-					swagNote.field = swagNote.mustPress ? playerField : dadField;
-
-				if (swagNote.field != null)
-					swagNote.fieldIndex = playfields.members.indexOf(swagNote.field);
-
-				callOnScripts("onGeneratedNote", [swagNote]);
-				swagNote.scrollFactor.set();
-				swagNote.noteType = type;
-
-				var playfield:PlayField = playfields.members[swagNote.fieldIndex];
-
-				if (playfield != null)
-				{
-					playfield.queue(swagNote); // queues the note to be spawned
-					allNotes.push(swagNote); // just for the sake of convenience
-				}
-				else
-				{
-					swagNote.destroy();
-					continue;
-				}
-
-				oldNote = swagNote;
-
-				callOnScripts("onGeneratedNotePost", [swagNote]);
-
-				for (susNote in 0...Math.floor(swagNote.sustainLength / Conductor.stepCrochet))
-				{
-					var sustainNote:Note = new Note(daStrumTime + Conductor.stepCrochet * (susNote + 1), daColumn, oldNote, gottaHitNote, true, false, hudSkin);
-					sustainNote.gfNote = swagNote.gfNote;
-					callOnScripts("onGeneratedHold", [sustainNote]);
-					sustainNote.noteType = type;
-                    
-					if (sustainNote==null || !sustainNote.alive)
-						break;
-                    
-                    sustainNote.scrollFactor.set();
-
-					sustainNote.ID = allNotes.length;
-					modchartObjects.set('note${sustainNote.ID}', sustainNote);
-					
-					swagNote.tail.push(sustainNote);
-					swagNote.unhitTail.push(sustainNote);
-					sustainNote.parent = swagNote;
-					sustainNote.fieldIndex = swagNote.fieldIndex;
-					playfield.queue(sustainNote);
-					allNotes.push(sustainNote);
-
-					callOnScripts("onGeneratedHoldPost", [swagNote]);
-
-					oldNote = sustainNote;
-				}
-
-				oldNote.isSustainEnd = true;
-			}
-		}
 
 		allNotes.sort(sortByNotes);
 
@@ -2116,6 +2021,126 @@ class PlayState extends MusicBeatState
 		checkEventNote();
 		generatedMusic = true;
 	}
+
+	public function generateNotes(noteData:Array<SwagSection>, callScripts:Bool = true, addToFields:Bool = true, ?playfields:Array<PlayField>, ?notes:Array<Note>){
+
+        if(playfields == null)
+            playfields = this.playfields.members;
+
+        if(notes==null)
+            notes = allNotes;
+        
+		for (section in noteData) {
+			for (songNotes in section.sectionNotes) {
+				var daStrumTime:Float = songNotes[0];
+				var daColumn:Int = Std.int(songNotes[1] % 4);
+				if (songNotes[1] <= -1)
+					continue; // RETARDED EVENT NOTES IN OLD PSYCH CHARTS
+				// TODO: AUTO CONVERT TO EVENTNOTES
+
+				var gottaHitNote:Bool = section.mustHitSection;
+
+				if (songNotes[1] % 8 > 3)
+					gottaHitNote = !gottaHitNote;
+
+				var oldNote:Note;
+				if (notes.length > 0)
+					oldNote = notes[Std.int(notes.length - 1)];
+				else
+					oldNote = null;
+
+				var type:Dynamic = songNotes[3];
+
+				if (type == true) // ??????????????????
+					type = 1;
+				if (Std.isOfType(type, Int)) // Backward compatibility + compatibility with Week 7 charts;
+					type = editors.ChartingState.noteTypeList[type];
+
+				var swagNote:Note = new Note(daStrumTime, daColumn, oldNote, gottaHitNote, false, false, hudSkin);
+				swagNote.realColumn = songNotes[1];
+				swagNote.sustainLength = songNotes[2];
+
+				swagNote.gfNote = (section.gfSection && (songNotes[1] < 4));
+
+				swagNote.ID = notes.length;
+				modchartObjects.set('note${swagNote.ID}', swagNote);
+
+                swagNote.noteType = type;
+
+                var playfield:PlayField = null;
+
+				if (swagNote.field != null)
+					playfield = swagNote.field;
+				else
+                {
+                    if (swagNote.fieldIndex == -1)
+                        swagNote.fieldIndex = swagNote.mustPress ? 1 : 0;
+
+					if (playfields[swagNote.fieldIndex] != null)
+						playfield = playfields[swagNote.fieldIndex];
+
+                }
+
+                if(playfield == null && playfields.length > 0){
+                    swagNote.destroy();
+                    continue;
+                }
+
+                swagNote.field = playfield;
+
+                if(callScripts)callOnScripts("onGeneratedNote", [swagNote]);
+
+				swagNote.scrollFactor.set();
+				
+
+                
+                notes.push(swagNote); // just for the sake of convenience
+                if(addToFields)
+                    if (playfield != null)
+                        playfield.queue(swagNote); // queues the note to be spawned
+
+				oldNote = swagNote;
+
+                if(callScripts)callOnScripts("onGeneratedNotePost", [swagNote]);
+
+				for (susNote in 0...Math.floor(swagNote.sustainLength / Conductor.stepCrochet)) {
+					var sustainNote:Note = new Note(daStrumTime + Conductor.stepCrochet * (susNote + 1), daColumn, oldNote, gottaHitNote, true, false, hudSkin);
+					sustainNote.gfNote = swagNote.gfNote;
+					if (callScripts)callOnScripts("onGeneratedHold", [sustainNote]);
+					sustainNote.noteType = type;
+
+					if (sustainNote == null || !sustainNote.alive)
+						break;
+
+					sustainNote.scrollFactor.set();
+
+					sustainNote.ID = notes.length;
+					modchartObjects.set('note${sustainNote.ID}', sustainNote);
+
+					swagNote.tail.push(sustainNote);
+					swagNote.unhitTail.push(sustainNote);
+					sustainNote.parent = swagNote;
+					sustainNote.fieldIndex = swagNote.fieldIndex;
+                    sustainNote.field = swagNote.field;
+
+                    if(addToFields)
+                        if (playfield != null) 
+					        playfield.queue(sustainNote);
+
+					notes.push(sustainNote);
+
+					if (callScripts)callOnScripts("onGeneratedHoldPost", [swagNote]);
+
+					oldNote = sustainNote;
+				}
+
+				oldNote.isSustainEnd = true;
+			}
+		}
+    
+
+        return notes;
+    }
 
 	// everything returned here gets preloaded by the preloader up-top ^
 	function preloadEvent(event:EventNote):Array<AssetPreload>{
@@ -2521,6 +2546,9 @@ class PlayState extends MusicBeatState
 		notefields.add(field.noteField);
 
 		field.judgeManager = judgeManager;
+
+		field.holdPressCallback = stepHold;
+        field.holdReleaseCallback = dropHold;
 
 		field.noteRemoved.add((note:Note, field:PlayField) -> {
 			if(modchartObjects.exists('note${note.ID}'))modchartObjects.remove('note${note.ID}');
@@ -3933,11 +3961,13 @@ class PlayState extends MusicBeatState
 				if (field.inControl && !field.autoPlayed && field.isPlayer)
 				{
 					field.keysPressed[key] = false;
-					var spr:StrumNote = field.strumNotes[key];
-					if (spr != null)
-					{
-						spr.playAnim('static');
-						spr.resetAnim = 0;
+					
+					if(!field.isHolding[key]){
+						var spr:StrumNote = field.strumNotes[key];
+						if (spr != null){
+							spr.playAnim('static');
+							spr.resetAnim = 0;
+						}
 					}
 				}
 			}
@@ -4122,6 +4152,8 @@ class PlayState extends MusicBeatState
 		#end
 		if (daNote.noteScript != null)
 			callScript(daNote.noteScript, "noteMiss", [daNote, field]);
+		if (daNote.genScript != null)
+			callScript(daNote.genScript, "noteMiss", [daNote, field]); 
 	}
 
 	function noteMissPress(direction:Int = 1):Void //You pressed a key when there was no notes to press for this key
@@ -4227,6 +4259,9 @@ class PlayState extends MusicBeatState
 		callOnHScripts("opponentNoteHit", [note, field]);
 		if (note.noteScript != null)
 			callScript(note.noteScript, "opponentNoteHit", [note, field]);	
+
+		if (note.genScript != null)
+			callScript(note.genScript, "noteHit", [note, field]);
 		
 		#if LUA_ALLOWED
 		callOnLuas('opponentNoteHit', [notes.members.indexOf(note), Math.abs(note.column), note.noteType, note.isSustainNote, note.ID]);
@@ -4243,6 +4278,32 @@ class PlayState extends MusicBeatState
 		else if (note.isSustainNote)
 			if (note.parent.unhitTail.contains(note))
 				note.parent.unhitTail.remove(note);
+		
+	}
+
+    // diff from goodNoteHit because it gets called when you release and re-press a hold
+    // prob be useful for noteskins too
+
+    inline function stepHold(note:Note, field:PlayField)
+	{
+		callOnHScripts("onHoldPress", [note, field]);
+		
+		if (note.noteScript != null)
+			callScript(note.noteScript, "onHoldPress", [note, field]);
+
+		if (note.genScript != null)
+			callScript(note.genScript, "onHoldPress", [note, field]);
+	}
+	
+	inline function dropHold(note:Note, field:PlayField): Void
+	{
+		callOnHScripts("onHoldRelease", [note, field]);
+		
+		if (note.noteScript != null)
+			callScript(note.noteScript, "onHoldRelease", [note, field]);
+
+		if (note.genScript != null)
+			callScript(note.genScript, "onHoldRelease", [note, field]);
 		
 	}
 
@@ -4294,7 +4355,7 @@ class PlayState extends MusicBeatState
 			}
 
 			note.wasGoodHit = true;
-			if (!note.isSustainNote && note.tail.length==0)
+			if (!note.isSustainNote && note.sustainLength==0)
 				field.removeNote(note);
 			else if(note.isSustainNote){
 				if (note.parent != null)
@@ -4364,8 +4425,8 @@ class PlayState extends MusicBeatState
 				StrumPlayAnim(field, Std.int(Math.abs(note.column)) % 4, time, note);
 			}else{
 				var spr = field.strumNotes[note.column];
-				if (spr != null && field.keysPressed[note.column])
-					spr.playAnim('confirm', true, note);
+				if (spr != null && (field.keysPressed[note.column] || note.isRoll))
+					spr.playAnim('confirm', true, note.isSustainNote ? note.parent : note);
 			}
 		}
 
@@ -4374,11 +4435,14 @@ class PlayState extends MusicBeatState
 		if (note.noteScript != null)
 			callScript(note.noteScript, "goodNoteHit", [note, field]);
 
+		if (note.genScript != null)
+			callScript(note.genScript, "noteHit", [note, field]); // might be useful for some things i.e judge explosions
+
 		#if LUA_ALLOWED
 		callOnLuas('goodNoteHit', [notes.members.indexOf(note), Math.round(Math.abs(note.column)), note.noteType, note.isSustainNote, note.ID]);
 		#end
 		
-		if (!note.isSustainNote && note.tail.length == 0)
+		if (!note.isSustainNote && note.sustainLength == 0)
 			field.removeNote(note);
 		else if (note.isSustainNote)
 		{

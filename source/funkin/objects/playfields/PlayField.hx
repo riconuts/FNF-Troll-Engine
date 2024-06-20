@@ -49,6 +49,7 @@ The system is seperated into 3 classes:
  */
 
 typedef NoteCallback = (Note, PlayField) -> Void;
+
 class PlayField extends FlxTypedGroup<FlxBasic>
 {
 	override function set_camera(to){
@@ -130,7 +131,10 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return autoPlayed = aP;
 	}
 	public var noteHitCallback:NoteCallback; // function that gets called when the note is hit. goodNoteHit and opponentNoteHit in playstate for eg
-	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>; // notesplashes
+	public var holdPressCallback:NoteCallback; // function that gets called when a hold is stepped on. Only really used for calling script events. Return 'false' to not do hold logic
+    public var holdReleaseCallback:NoteCallback; // function that gets called when a hold is released. Only really used for calling script events.
+
+    public var grpNoteSplashes:FlxTypedGroup<NoteSplash>; // notesplashes
 	public var strumAttachments:FlxTypedGroup<NoteObject>; // things that get "attached" to the receptors. custom splashes, etc.
 
 	public var noteMissed:Event<NoteCallback> = new Event<NoteCallback>(); // event that gets called every time you miss a note. multiple functions can be bound here
@@ -138,6 +142,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	public var noteSpawned:Event<NoteCallback> = new Event<NoteCallback>(); // event that gets called every time a note is spawned. multiple functions can be bound here
 
 	public var keysPressed:Array<Bool> = [false,false,false,false]; // what keys are pressed rn
+    public var isHolding:Array<Bool> = [false,false,false,false];
 
 	public function new(modMgr:ModManager){
 		super();
@@ -285,7 +290,9 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		var noteList = getNotesWithEnd(data, Conductor.songPosition + ClientPrefs.hitWindow, (note:Note) -> !note.isSustainNote && note.requiresTap);
 		#if PE_MOD_COMPATIBILITY
 		noteList.sort((a, b) -> Std.int((b.strumTime + (b.lowPriority ? 10000 : 0)) - (a.strumTime + (a.lowPriority ? 10000 : 0)))); // so lowPriority actually works (even though i hate it lol!)
-		#end
+		#else
+        noteList.sort((a, b) -> Std.int(b.strumTim - a.strumTime)); // so lowPriority actually works (even though i hate it lol!)
+        #end
 		while (noteList.length > 0)
 		{
 			var note:Note = noteList.pop();
@@ -424,26 +431,36 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 				}
 				if(daNote.holdingTime < daNote.sustainLength && inControl && !daNote.blockHit){
 					if(!daNote.tooLate && daNote.wasGoodHit){
-						var isHeld = autoPlayed || keysPressed[daNote.column];
-						//if(daNote.isRoll)isHeld = false; // roll logic is done on press
-						// TODO: write that logic tho
-						var receptor = strumNotes[daNote.column];							
+						var isHeld:Bool = autoPlayed || keysPressed[daNote.column];
+                        var wasHeld:Bool = daNote.isHeld;
+                        daNote.isHeld = isHeld;
+                        isHolding[daNote.column] = true;
+                        if(wasHeld != isHeld){
+                            if(isHeld){
+                                if(holdPressCallback != null)
+                                    holdPressCallback(daNote, this);
+                            }else if(holdReleaseCallback!=null)
+                                holdReleaseCallback(daNote, this);
+                        }
 
+						var receptor = strumNotes[daNote.column];
 						daNote.holdingTime = Conductor.songPosition - daNote.strumTime;
-						
-						if(isHeld){
+
+                        
+						if(isHeld && !daNote.isRoll){ // TODO: find a good natural way to script the isRoll thing
 							// should i do this??? idfk lol
 							if (receptor.animation.finished || receptor.animation.curAnim.name != "confirm") 
 								receptor.playAnim("confirm", true);
 							
-							daNote.tripTimer = 1.0;
+							daNote.tripProgress = 1.0;
 						}else
-							daNote.tripTimer -= elapsed / ((daNote.isRoll ? 0.5 : 0.25) * judgeManager.judgeTimescale); // NOTDO: regrab time multiplier in options
-						
-						// RE: nvm its done by the judge diff instead
+							daNote.tripProgress -= elapsed / (daNote.maxReleaseTime * judgeManager.judgeTimescale);
 
-						if(daNote.tripTimer <= 0){
-							daNote.tripTimer = 0;
+                        if(daNote.isRoll && autoPlayed && daNote.tripProgress <= 0.5)
+                            holdPressCallback(daNote, this); // would set tripProgress back to 1 but idk maybe the roll script wants to do its own shit
+
+						if(daNote.tripProgress <= 0){
+							daNote.tripProgress = 0;
 							daNote.tooLate=true;
 							daNote.wasGoodHit=false;
 							for(tail in daNote.unhitTail){
@@ -451,6 +468,10 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 								tail.blockHit = true;
 								tail.ignoreNote = true;
 							}
+                            isHolding[daNote.column] = false;
+                            if (!isHeld)
+                                receptor.playAnim("static", true);
+
 						}else{
 							for (tail in daNote.unhitTail)
 							{
@@ -459,10 +480,11 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 								}
 							}
 
-							if (daNote.holdingTime >= daNote.sustainLength)
+							if (daNote.holdingTime >= daNote.sustainLength || daNote.unhitTail.length == 0)
 							{
 								daNote.holdingTime = daNote.sustainLength;
-								
+                                trace("finished hold");
+								isHolding[daNote.column] = false;
 								if (!isHeld)
 									receptor.playAnim("static", true);
 							}
@@ -473,10 +495,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 			}
 			// check for note deletion
 			if (daNote.garbage)
-			{
 				garbage.push(daNote);
-				continue;
-			}
 			else
 			{
 
@@ -488,19 +507,19 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 				} 
 
 				if((
-					(daNote.holdingTime>=daNote.sustainLength || daNote.unhitTail.length==0 ) && daNote.sustainLength>0 ||
+					(daNote.holdingTime>=daNote.sustainLength ) && daNote.sustainLength>0 ||
 					daNote.isSustainNote && daNote.strumTime - Conductor.songPosition < -350 ||
 					!daNote.isSustainNote && (daNote.sustainLength==0 || daNote.tooLate) && daNote.strumTime - Conductor.songPosition < -(200 + judgeManager.getWindow(TIER1))) && (daNote.tooLate || daNote.wasGoodHit))
 				{
+					daNote.garbage = true;
 					garbage.push(daNote);
 				}
 				
 			}
 		}
 
-		for(note in garbage){
-			removeNote(note);
-		}
+		for(note in garbage)removeNote(note);
+		
 
 		if (inControl && autoPlayed)
 		{

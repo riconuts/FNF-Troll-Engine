@@ -1,10 +1,10 @@
 function setupNote(note:Note){
-  trace("Called when the note's noteType is set");
-  note.canQuant = false;
-  note.reloadNote("", "NOTE_assets");
-  note.colorSwap.hue = 0;
-  note.colorSwap.saturation = 0;
-  note.colorSwap.lightness = 0;
+    trace("Called when the note's noteType is set");
+    note.canQuant = false;
+    note.reloadNote("", "NOTE_assets");
+    note.colorSwap.hue = 0;
+    note.colorSwap.saturation = 0;
+    note.colorSwap.lightness = 0;
 }
 
 function onReloadNote(note:Note, prefix:String, texture:String, suffix:String){
@@ -37,7 +37,7 @@ function judgeNote(note:Note, msDiff:Float){
         Judgement.TIER5 - Epic/Killer
         Judgement.MISS - Miss/Fail
         Judgement.UNJUDGED - Unjudged. Return this if the note shouldn't be hit.
-        JudgementHIT_MINE - Default mine hit. -200 score, 5% damage, and doesnt cause a combo break.
+        Judgement.HIT_MINE - Default mine hit. -200 score, 5% damage, and doesnt cause a combo break.
         Judgement.MISS_MINE - Miss/Fail, but has no damage. Used when a note has hitCausesMiss, so it can use the note's missHealth as damage.
     */
     trace("Called when the note gets judged");
@@ -89,12 +89,13 @@ function postSpawnNote(note:Note){
     // green is up, red is right, blue is down, purple is left
 */
 
-function loadPixelNoteAnims(note:Note){
+
+function loadNoteAnims(note:Note){
     super(); // if you dont want FNF's normal note anims to be added, just omit this
-    trace("This is called when the note has its pixel animations loaded!");
+    trace("This is called when the note has its animations loaded!");
 }
 
-function loadPixelNoteAnims(note:Note){
+function loadIndNoteAnims(note:Note){
     super(); // if you dont want FNF's normal note anims to be added, just omit this
-    trace("This is called when the note has its pixel animations loaded!");
+    trace("This is called when the note has its animations loaded through indices!"); // pixel notes, etc
 }
