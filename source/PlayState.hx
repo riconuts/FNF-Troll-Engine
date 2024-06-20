@@ -4323,7 +4323,7 @@ class PlayState extends MusicBeatState
 		
 	}
 
-    // diff from goodNoteHit because 1. it can stop holds from being classed as held and 2. gets called when you release and re-press a hold
+    // diff from goodNoteHit because it gets called when you release and re-press a hold
     // prob be useful for noteskins too
 
     inline function stepHold(note:Note, field:PlayField)
