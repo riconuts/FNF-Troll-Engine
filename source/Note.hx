@@ -114,6 +114,9 @@ class Note extends NoteObject
 		An example is Stepmania mines **/
 	public var requiresTap:Bool = true; 
 
+	/** The maximum amount of time you can release a hold before it counts as a miss**/
+	public var maxReleaseTime:Float = 0.25;
+
 	public var blockHit:Bool = false; // whether you can hit this note or not
 	#if PE_MOD_COMPATIBILITY
 	public var lowPriority:Bool = false; // Shadowmario's shitty workaround for really bad mine placement, yet still no *real* hitbox customization lol! Only used when PE Mod Compat is enabled in project.xml
@@ -148,17 +151,14 @@ class Note extends NoteObject
 	// Note that holds automatically have this set to their parent's fieldIndex
 	public var field:PlayField; // same as fieldIndex but lets you set the field directly incase you wanna do that i  guess
 
-	// hold/roll shit
-	public var sustainMult:Float = 1;
+	// hold shit
 	public var tail:Array<Note> = []; 
 	public var unhitTail:Array<Note> = [];
 	public var parent:Note;
 	public var sustainLength:Float = 0;
 	public var isSustainNote:Bool = false;
 	public var holdingTime:Float = 0;
-	public var tripTimer:Float = 0;
-	public var isRoll:Bool = false;
-
+	public var tripProgress:Float = 0;
 	// event shit (prob can be removed??????)
 	public var eventName:String = '';
 	public var eventLength:Int = 0;
@@ -473,7 +473,6 @@ class Note extends NoteObject
 
 		if (isSustainNote && prevNote != null)
 		{
-			sustainMult = 0.5; // early hit mult but just so note-types can set their own and not have sustains fuck them
 			alpha = 0.6;
 			hitsoundDisabled = true;
 			copyAngle = false;

@@ -430,8 +430,6 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 				if(daNote.holdingTime < daNote.sustainLength && inControl && !daNote.blockHit){
 					if(!daNote.tooLate && daNote.wasGoodHit){
 						var isHeld = autoPlayed || keysPressed[daNote.column];
-						//if(daNote.isRoll)isHeld = false; // roll logic is done on press
-						// TODO: write that logic tho
 						var receptor = strumNotes[daNote.column];							
 
 						daNote.holdingTime = Conductor.songPosition - daNote.strumTime;
@@ -441,14 +439,13 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 							if (receptor.animation.finished || receptor.animation.curAnim.name != "confirm") 
 								receptor.playAnim("confirm", true);
 							
-							daNote.tripTimer = 1.0;
+							daNote.tripProgress = 1.0;
 						}else
-							daNote.tripTimer -= elapsed / ((daNote.isRoll ? 0.5 : 0.25) * judgeManager.judgeTimescale); // NOTDO: regrab time multiplier in options
-						
-						// RE: nvm its done by the judge diff instead
+							daNote.tripProgress -= elapsed / (daNote.maxReleaseTime * judgeManager.judgeTimescale);
 
-						if(daNote.tripTimer <= 0){
-							daNote.tripTimer = 0;
+						// ((isRoll ? 0.5 : 0.25) * judgeManager.judgeTimescale);
+						if(daNote.tripProgress <= 0){
+							daNote.tripProgress = 0;
 							daNote.tooLate=true;
 							daNote.wasGoodHit=false;
 							for(tail in daNote.unhitTail){
@@ -478,10 +475,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 			}
 			// check for note deletion
 			if (daNote.garbage)
-			{
 				garbage.push(daNote);
-				continue;
-			}
 			else
 			{
 
@@ -497,15 +491,15 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 					daNote.isSustainNote && daNote.strumTime - Conductor.songPosition < -350 ||
 					!daNote.isSustainNote && (daNote.sustainLength==0 || daNote.tooLate) && daNote.strumTime - Conductor.songPosition < -(200 + judgeManager.getWindow(TIER1))) && (daNote.tooLate || daNote.wasGoodHit))
 				{
+					daNote.garbage = true;
 					garbage.push(daNote);
 				}
 				
 			}
 		}
 
-		for(note in garbage){
-			removeNote(note);
-		}
+		for(note in garbage)removeNote(note);
+		
 
 		if (inControl && autoPlayed)
 		{
