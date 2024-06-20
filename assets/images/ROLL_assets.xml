@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="ROLL_assets.png">
+	<!-- Created with Adobe Animate version 21.0.5.40714 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="blue roll end instance 10000" x="0" y="1" width="50" height="30"/>
+	<SubTexture name="blue roll piece instance 10000" x="51" y="0" width="50" height="48"/>
+	<SubTexture name="green roll end instance 10000" x="101" y="1" width="50" height="30"/>
+	<SubTexture name="green roll piece instance 10000" x="153" y="0" width="50" height="48"/>
+	<SubTexture name="purple roll end instance 10000" x="203" y="1" width="50" height="30"/>
+	<SubTexture name="purple roll piece instance 10000" x="1" y="49" width="50" height="48"/>
+	<SubTexture name="red roll end instance 10000" x="51" y="50" width="50" height="30"/>
+	<SubTexture name="red roll piece instance 10000" x="103" y="49" width="50" height="48"/>
+</TextureAtlas>

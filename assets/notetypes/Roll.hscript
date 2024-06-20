@@ -1,0 +1,26 @@
+function setupNote(note:Note){
+    note.maxReleaseTime = 0.35;
+    note.isRoll = true;
+    if(note.isSustainNote){
+        note.texture = 'ROLL_assets';
+    }
+}
+
+function loadNoteAnims(note){
+    var prefix = Note.colArray[note.column];
+    
+    if(note.isQuant){
+        note.animation.addByPrefix(prefix + 'holdend', 'quant roll end');
+        note.animation.addByPrefix(prefix + 'hold', 'quant roll piece');
+    }else{
+        note.animation.addByPrefix(prefix + 'holdend', prefix + ' roll end');
+        note.animation.addByPrefix(prefix + 'hold', prefix + ' roll piece');
+    }
+    note.scale.set(1.5, 0.7);
+	note.updateHitbox();
+
+}
+
+function onHoldPress(note, field){
+    note.tripProgress = 1;
+}

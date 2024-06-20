@@ -2583,6 +2583,9 @@ class PlayState extends MusicBeatState
 
 		field.judgeManager = judgeManager;
 
+        field.holdPressCallback = stepHold;
+        field.holdReleaseCallback = dropHold;
+
 		field.noteRemoved.add((note:Note, field:PlayField) -> {
 			if(modchartObjects.exists('note${note.ID}'))modchartObjects.remove('note${note.ID}');
 			allNotes.remove(note);
@@ -4001,11 +4004,13 @@ class PlayState extends MusicBeatState
 				{
 					field.keysPressed[key] = false;
 					var spr:StrumNote = field.strumNotes[key];
-					if (spr != null)
-					{
-						spr.playAnim('static');
-						spr.resetAnim = 0;
-					}
+                    if(!field.isHolding[key]){
+                        if (spr != null)
+                        {
+                            spr.playAnim('static');
+                            spr.resetAnim = 0;
+                        }
+                    }
 				}
 			}
 			callOnScripts('onKeyRelease', [key]);
@@ -4189,6 +4194,8 @@ class PlayState extends MusicBeatState
 		#end
 		if (daNote.noteScript != null)
 			callScript(daNote.noteScript, "noteMiss", [daNote, field]);
+       	if (daNote.genScript != null)
+			callScript(daNote.genScript, "noteMiss", [daNote, field]); 
 	}
 
 	function noteMissPress(direction:Int = 1):Void //You pressed a key when there was no notes to press for this key
@@ -4294,7 +4301,10 @@ class PlayState extends MusicBeatState
 		callOnHScripts("opponentNoteHit", [note, field]);
 		if (note.noteScript != null)
 			callScript(note.noteScript, "opponentNoteHit", [note, field]);	
-		
+
+		if (note.genScript != null)
+			callScript(note.genScript, "noteHit", [note, field]);
+
 		#if LUA_ALLOWED
 		callOnLuas('opponentNoteHit', [notes.members.indexOf(note), Math.abs(note.column), note.noteType, note.isSustainNote, note.ID]);
 		#end
@@ -4312,6 +4322,32 @@ class PlayState extends MusicBeatState
 				note.parent.unhitTail.remove(note);
 		
 	}
+
+    // diff from goodNoteHit because 1. it can stop holds from being classed as held and 2. gets called when you release and re-press a hold
+    // prob be useful for noteskins too
+
+    inline function stepHold(note:Note, field:PlayField)
+    {
+        callOnHScripts("onHoldPress", [note, field]);
+        
+        if (note.noteScript != null)
+            callScript(note.noteScript, "onHoldPress", [note, field]);
+
+        if (note.genScript != null)
+            callScript(note.genScript, "onHoldPress", [note, field]);
+    }
+    
+    inline function dropHold(note:Note, field:PlayField): Void
+    {
+        callOnHScripts("onHoldRelease", [note, field]);
+        
+        if (note.noteScript != null)
+            callScript(note.noteScript, "onHoldRelease", [note, field]);
+
+        if (note.genScript != null)
+            callScript(note.genScript, "onHoldRelease", [note, field]);
+        
+    }
 
 	function goodNoteHit(note:Note, field:PlayField):Void
 	{	
@@ -4361,7 +4397,7 @@ class PlayState extends MusicBeatState
 			}
 
 			note.wasGoodHit = true;
-			if (!note.isSustainNote && note.tail.length==0)
+			if (!note.isSustainNote && note.sustainLength==0)
 				field.removeNote(note);
 			else if(note.isSustainNote){
 				if (note.parent != null)
@@ -4431,8 +4467,8 @@ class PlayState extends MusicBeatState
 				StrumPlayAnim(field, Std.int(Math.abs(note.column)) % 4, time, note);
 			}else{
 				var spr = field.strumNotes[note.column];
-				if (spr != null && field.keysPressed[note.column])
-					spr.playAnim('confirm', true, note);
+				if (spr != null && (field.keysPressed[note.column] || note.isRoll))
+					spr.playAnim('confirm', true, note.isSustainNote ? note.parent : note);
 			}
 		}
 
@@ -4441,11 +4477,14 @@ class PlayState extends MusicBeatState
 		if (note.noteScript != null)
 			callScript(note.noteScript, "goodNoteHit", [note, field]);
 
+		if (note.genScript != null)
+			callScript(note.genScript, "noteHit", [note, field]); // might be useful for some things i.e judge explosions
+
 		#if LUA_ALLOWED
 		callOnLuas('goodNoteHit', [notes.members.indexOf(note), Math.round(Math.abs(note.column)), note.noteType, note.isSustainNote, note.ID]);
 		#end
 		
-		if (!note.isSustainNote && note.tail.length == 0)
+		if (!note.isSustainNote && note.sustainLength == 0)
 			field.removeNote(note);
 		else if (note.isSustainNote)
 		{

@@ -159,6 +159,9 @@ class Note extends NoteObject
 	public var isSustainNote:Bool = false;
 	public var holdingTime:Float = 0;
 	public var tripProgress:Float = 0;
+    public var isHeld:Bool = false;
+    public var isRoll:Bool = false;
+
 	// event shit (prob can be removed??????)
 	public var eventName:String = '';
 	public var eventLength:Int = 0;
@@ -442,7 +445,7 @@ class Note extends NoteObject
 		super();
 		objType = NOTE;
 
-    this.strumTime = strumTime;
+        this.strumTime = strumTime;
 		this.column = column;
 		this.prevNote = (prevNote==null) ? this : prevNote;
 		this.isSustainNote = sustainNote;
