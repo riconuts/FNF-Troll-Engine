@@ -2,6 +2,6 @@
 <TextureAtlas imagePath="QUANTROLL_assets.png">
 	<!-- Created with Adobe Animate version 20.0.3.25487 -->
 	<!-- http://www.adobe.com/products/animate.html -->
-	<SubTexture name="quant roll end instance 10000" x="8" y="8" width="50" height="30"/>
-	<SubTexture name="quant roll piece instance 10000" x="66" y="8" width="50" height="50"/>
+	<SubTexture name="quant roll end0000" x="8" y="8" width="50" height="30"/>
+	<SubTexture name="quant roll piece0000" x="66" y="8" width="50" height="50"/>
 </TextureAtlas>
