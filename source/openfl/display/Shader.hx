@@ -366,12 +366,41 @@ class Shader
             {
                 var message = "Unable to initialize the shader program";
                 message += "\n" + gl.getProgramInfoLog(program);
-				trace(message);
                 throw message;
-                //throw message;
             }
         }catch(e:Dynamic){
-            trace(e);
+			#if traceShaderLineNumbers 
+			if (e is String){
+				// sowy
+
+				var split:Array<String> = e.split('\n');
+
+				var errorLog:Array<String> = [];
+				var errorLines:Map<Int, Bool> = [];
+
+				for (_ in 0...split.indexOf('')){
+					var str = split.shift();
+					errorLog.push(str);
+
+					var parS = str.indexOf('(');
+					if (parS == -1) continue;
+
+					var parE = str.indexOf(')', parS);
+					var line:String = str.substr(parS + 1, parE - parS);
+					var lineVal = Std.parseInt(line);
+
+					if (lineVal != null)
+						errorLines.set(lineVal, true);
+				}
+
+				for (n in 1...split.length)
+					split[n] = (errorLines.exists(n) ? 'Error here ->' : '($n)') + split[n];
+
+				e =	split.join('\n') + '\n\n' + errorLog.join('\n');
+			}
+			#end
+			
+			trace(e);
         }
 
 		return program;

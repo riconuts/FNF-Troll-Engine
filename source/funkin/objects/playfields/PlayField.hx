@@ -482,8 +482,8 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 							if (daNote.holdingTime >= daNote.sustainLength || daNote.unhitTail.length == 0)
 							{
+                                //trace("finished hold");
 								daNote.holdingTime = daNote.sustainLength;
-                                trace("finished hold");
 								isHolding[daNote.column] = false;
 								if (!isHeld)
 									receptor.playAnim("static", true);
