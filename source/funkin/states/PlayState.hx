@@ -3323,6 +3323,20 @@ class PlayState extends MusicBeatState
 		}
 	}
 
+	public function restartSong(noTrans:Bool = false)
+	{
+		persistentUpdate = false;
+		paused = true; // For lua
+		
+		inst.volume = 0;
+		vocals.volume = 0;
+
+		if(noTrans)
+			FlxTransitionableState.skipNextTransOut = true;
+
+		MusicBeatState.resetState();
+	}
+
 	public static function gotoMenus()
 	{
 		FlxTransitionableState.skipNextTransIn = false;

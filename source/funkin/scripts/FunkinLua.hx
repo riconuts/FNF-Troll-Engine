@@ -810,8 +810,7 @@ class FunkinLua extends FunkinScript
 			return true;
 		});
 		addCallback("restartSong", function(?skipTransition:Bool = false) {
-			PlayState.instance.persistentUpdate = false;
-			PauseSubState.restartSong(skipTransition);
+			PlayState.instance.restartSong(skipTransition);
 			return true;
 		});
 		addCallback("exitSong", function(?skipTransition:Bool = false) {
