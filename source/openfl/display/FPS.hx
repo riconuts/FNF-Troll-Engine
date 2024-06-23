@@ -1,5 +1,7 @@
 package openfl.display;
 
+import funkin.ClientPrefs;
+
 import haxe.Timer;
 import openfl.events.Event;
 import openfl.text.TextField;
@@ -74,7 +76,7 @@ class FPS extends TextField
 		#end
 		
 		#if tgt
-		var fontPath = Paths.font("calibri.ttf");
+		var fontPath = funkin.Paths.font("calibri.ttf");
 		if (Assets.exists(fontPath, openfl.utils.AssetType.FONT)){
 			embedFonts = true;
 			textFormat.size = 14;

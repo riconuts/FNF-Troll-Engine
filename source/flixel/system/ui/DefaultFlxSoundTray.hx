@@ -68,7 +68,7 @@ class DefaultFlxSoundTray extends FlxSoundTray
 		#end
 
 		#if tgt
-		var dtf:TextFormat = new TextFormat(Paths.font("calibrib.ttf"), 10, 0xffffff);
+		var dtf:TextFormat = new TextFormat(funkin.Paths.font("calibrib.ttf"), 10, 0xffffff);
 		#else
 		var dtf:TextFormat = new TextFormat(FlxAssets.FONT_DEFAULT, 8, 0xffffff);
 		#end

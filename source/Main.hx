@@ -1,7 +1,5 @@
 package;
 
-import Github.RepoInfo;
-import Github.Release;
 import flixel.FlxG;
 import flixel.FlxState;
 import openfl.Lib;
@@ -12,10 +10,15 @@ import openfl.system.Capabilities;
 import openfl.events.Event;
 import lime.app.Application;
 
+import funkin.*;
+import funkin.objects.Bread;
+import funkin.api.Github;
+import funkin.data.SemanticVersion;
+
 using StringTools;
 
 #if discord_rpc
-import Discord.DiscordClient;
+import funkin.api.Discord.DiscordClient;
 #end
 
 #if CRASH_HANDLER
@@ -137,10 +140,10 @@ class Main extends Sprite
 					troll = true;
 
 				case "songselect":
-					StartupState.nextState = SongSelectState;
+					StartupState.nextState = funkin.states.SongSelectState;
 
 				case "debug":
-					PlayState.chartingMode = true;
+					funkin.states.PlayState.chartingMode = true;
 				
 				case "showdebugtraces":
 					Main.showDebugTraces = true;
@@ -150,7 +153,7 @@ class Main extends Sprite
 
 		#if tgt
 		if (troll){
-			initialState = tgt.SinnerState;
+			initialState = funkin.tgt.SinnerState;
 			skipSplash = true;
 		}else
 		#end

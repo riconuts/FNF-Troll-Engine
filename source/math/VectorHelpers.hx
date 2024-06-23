@@ -2,6 +2,7 @@ package math;
 
 import flixel.math.FlxMath;
 import math.Vector3;
+import funkin.CoolUtil;
 
 class VectorHelpers {
 	static var near = 0;

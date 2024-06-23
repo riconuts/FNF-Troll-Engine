@@ -1,5 +1,7 @@
 package flixel.tweens;
 
+import funkin.Conductor;
+
 import flixel.tweens.misc.ShakeTween;
 import flixel.util.FlxAxes;
 import flixel.FlxG;
