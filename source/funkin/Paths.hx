@@ -391,7 +391,7 @@ class Paths
 		return 'assets/fonts/$key';
 	}
 
-    public static var locale(default, set):String = 'en-us';
+    public static var locale(default, set):String = 'en';
     static function set_locale(l:String){
         locale = l.toLowerCase();
 		getAllStrings();
@@ -414,7 +414,7 @@ class Paths
 
 		for (filePath in Paths.getFolders("data"))
 		{
-            var checkFiles = ["lang/" + locale + ".txt", "lang/en-us.txt", "strings.txt"];
+            var checkFiles = ["lang/" + locale + ".txt", "lang/en.txt", "strings.txt"];
 			var file = filePath + checkFiles.shift();
 			while (checkFiles.length > 0 && !exists(file))
                 file = filePath + checkFiles.shift();
@@ -446,7 +446,7 @@ class Paths
 
 		for (filePath in Paths.getFolders("data"))
 		{
-			var checkFiles = ["lang/" + locale + ".txt", "lang/en-us.txt", "strings.txt"];
+			var checkFiles = ["lang/" + locale + ".txt", "lang/en.txt", "strings.txt"];
 			var file = filePath + checkFiles.shift();
 			while (checkFiles.length > 0 && !exists(file))
 				file = filePath + checkFiles.shift();

@@ -653,7 +653,7 @@ class ClientPrefs
 		 0, 0
 	];
 
-    public static var locale:String = 'en-us';
+    public static var locale:String = 'en';
 
 	// I'd like to rewrite the whole Controls.hx thing tbh
 	// I think its shitty and can stand a rewrite but w/e
@@ -693,6 +693,9 @@ class ClientPrefs
 
 	public static function initialize(){
 		defaultOptionDefinitions.get("framerate").value = FlxG.stage.application.window.displayMode.refreshRate;
+		#if MULTILANGUAGE
+		locale = openfl.system.Capabilities.language;
+		#end
 
 		optionSave.bind("options_v2");
 		loadDefaultKeys();
