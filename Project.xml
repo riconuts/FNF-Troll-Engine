@@ -45,7 +45,7 @@
 
 	<classpath path="source" />
 	
-	<assets path="assets"	unless="tgt"/>
+	<assets path="assets" />
 	<assets path='default_content' rename='content' embed='false' exclude="*.mp3"/>
 
     <!-- TROLL ENGINE CUSTOMIZATION -->
@@ -67,7 +67,7 @@
 	
 	<!-- __________________ lime build windows -release -Dtgt __________________ -->
 
-	<!-- <define name="tgt" if="display"/> --> <!--Uncomment if you want auto complete to assume youre compiling for TGT-->
+	<define name="tgt" />
 	<section if="tgt"> 
 		<app title="Tails Gets Trolled" version="0.4.1"/>
 
@@ -75,8 +75,6 @@
 		<set name="BUILD_DIR" value="export/debug-tgt" if="debug"/>
 		<set name="BUILD_DIR" value="export/release-tgt" unless="debug"/>
 		<set name="BUILD_DIR" value="export/32bit-tgt" if="32bits"/>
-
-		<assets path="assets-tgt" rename="assets"/>
 
 		<define name="USE_EPIC_JUDGEMENT"/>
 		<define name="VIDEOS_ALLOWED"/>
@@ -87,19 +85,13 @@
 		<!-- <undefine name="LUA_ALLOWED"/> --> <!-- There's one lua script on TGT and I'm not rewritting it -->
 
 		<assets path="flixel" embed="true"/> <!-- To override some Flixel assets -->
+	</section>
 
-		<icon path="art-tgt/iconOG.png" />
-		<icon path="art-tgt/icon192.png" size='192'/>
-		<icon path="art-tgt/icon64.png" size='64'/>
-		<icon path="art-tgt/icon32.png" size='32'/>
-		<icon path="art-tgt/icon16.png" size='16'/>
-	</section>
-	<section unless="tgt">
-		<icon path="art/iconOG.png" />
-		<icon path="art/icon64.png" size='64'/>
-		<icon path="art/icon32.png" size='32'/>
-		<icon path="art/icon16.png" size='16'/>
-	</section>
+	<icon path="art/iconOG.png" />
+	<icon path="art/icon64.png" size='64'/>
+	<icon path="art/icon32.png" size='32'/>
+	<icon path="art/icon16.png" size='16'/>
+	
 
 	<!-- _______________________________ Libraries ______________________________ -->
 

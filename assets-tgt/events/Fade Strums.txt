@@ -1,2 +1,0 @@
-Value 1: Strum (dad, bf)
-Value 2: Duration (seconds)

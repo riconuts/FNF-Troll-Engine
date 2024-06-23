@@ -1,5 +1,6 @@
 package funkin.tgt;
 
+import funkin.data.Highscore;
 import funkin.data.Song;
 import funkin.Paths;
 import haxe.Json;

@@ -1,12 +1,15 @@
 package funkin.tgt;
 
+import funkin.data.WeekData;
+import funkin.data.Highscore;
+import funkin.data.Song;
+
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.FlxSprite;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.addons.transition.FlxTransitionableState;
-import funkin.data.WeekData;
 
 using StringTools;
 
