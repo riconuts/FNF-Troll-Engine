@@ -6,8 +6,8 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import haxe.Constraints.Function;
 
 typedef OptionCallbacks = {
-	?onSelected:Function,
-	?unSelected:Function,
+	?onSelect:Function,
+	?unSelect:Function,
 	?onAccept:Function
 }
 
@@ -15,7 +15,7 @@ class AlphabetMenu extends FlxTypedGroup<Alphabet>
 {
 	public var curSelected(default, set):Null<Int> = null;
 	public var curItem:Null<Alphabet> = null;
-	public var activeInput:Null<Controls>;
+	public var controls:Null<Controls>;
 	
 	private var itemCallbacks:Map<Alphabet, OptionCallbacks> = [];
 	/** (`Int`, `Alphabet`) -> `Void` **/
@@ -38,24 +38,24 @@ class AlphabetMenu extends FlxTypedGroup<Alphabet>
 		if (prevItem != null){
 			prevItem.alpha = 0.6;
 
-			if (callbacks.unSelected != null)
-				callbacks.unSelected(curSelected, prevItem);
+			if (callbacks.unSelect != null)
+				callbacks.unSelect(curSelected, prevItem);
 
 			var callbacks = itemCallbacks.get(prevItem);
-			if (callbacks != null && callbacks.unSelected != null)
-				callbacks.unSelected();
+			if (callbacks != null && callbacks.unSelect != null)
+				callbacks.unSelect();
 		}
 		
 		curItem = members[value];
 		if (curItem != null){
 			curItem.alpha = 1.0;
 
-			if (callbacks.onSelected != null)
-				callbacks.onSelected(value, curItem);
+			if (callbacks.onSelect != null)
+				callbacks.onSelect(value, curItem);
 
 			var callbacks = itemCallbacks.get(curItem);
-			if (callbacks != null && callbacks.onSelected != null)
-				callbacks.onSelected();
+			if (callbacks != null && callbacks.onSelect != null)
+				callbacks.onSelect();
 		}
 
 		if (value != null){
@@ -149,8 +149,8 @@ class AlphabetMenu extends FlxTypedGroup<Alphabet>
 
 	override public function update(elapsed:Float)
 	{
-		if (activeInput != null)
-			updateInput(elapsed, activeInput);
+		if (controls != null)
+			updateInput(elapsed, controls);
 
 		super.update(elapsed);
 	}

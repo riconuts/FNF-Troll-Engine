@@ -14,6 +14,15 @@ import flixel.util.FlxColor;
 import flixel.util.FlxStringUtil;
 import haxe.Constraints.Function;
 
+/*
+typedef PauseOptionCallbacks = {
+	?onAccept:Function,
+	?onSelect:Function,
+	?unSelect:Function,
+	?onAdded:Function
+}
+*/
+
 class PauseSubState extends MusicBeatSubstate
 {
 	public static var songName:Null<String> = null;
@@ -152,7 +161,7 @@ class PauseSubState extends MusicBeatSubstate
 		FlxTween.tween(bg, {alpha: 0.6}, 0.4, {ease: FlxEase.quartInOut});
 
 		menu = new AlphabetMenu();
-		menu.activeInput = controls;
+		menu.controls = controls;
 		menu.cameras = cameras;
 		add(menu);
 
@@ -185,8 +194,9 @@ class PauseSubState extends MusicBeatSubstate
 			toAdd.set(text, menuItemCallbacks.get(text));
 
 		var addedItems = [for (text in menuItems){
+			var textStringKey = 'pauseoption_${Paths.formatToSongPath(text)}';
 			text => menu.addTextOption(
-				Paths.hasString('pauseoption_${Paths.formatToSongPath(text)}') ? Paths.getString(text) : text,
+				Paths.hasString(textStringKey) ? Paths.getString(textStringKey) : text,
 				toAdd.get(text)	
 			);
 		}];
@@ -203,8 +213,8 @@ class PauseSubState extends MusicBeatSubstate
 			skipTimeText.item = skipTimeItem;
 			
 			var data = toAdd.get("Skip To");
-			data.onSelected = skipTimeText.set_exists.bind(true);
-			data.unSelected = skipTimeText.set_exists.bind(false);
+			data.onSelect = skipTimeText.set_exists.bind(true);
+			data.unSelect = skipTimeText.set_exists.bind(false);
 
 		}else if (skipTimeText != null){
 			remove(skipTimeText);

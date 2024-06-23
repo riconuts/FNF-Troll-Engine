@@ -135,9 +135,9 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		add(bg);
 		
 		menu = new AlphabetMenu();
-		menu.activeInput = controls;
+		menu.controls = controls;
 		menu.cameras = cameras;
-		menu.callbacks.onSelected = (idx, item) -> curOption = optionsArray[idx];
+		menu.callbacks.onSelect = (idx, item) -> curOption = optionsArray[idx];
 		menu.callbacks.onAccept = (idx, item) ->{
 			if (curOption.type != 'bool')
 				return;
