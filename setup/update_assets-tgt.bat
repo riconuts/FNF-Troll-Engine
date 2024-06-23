@@ -14,6 +14,6 @@ exit
 
 ) else (
 
-rmdir /s /q assets-tgt
-xcopy /e %cd%\export\release-tgt\windows\bin\assets\ %cd%\assets-tgt\
+rmdir /s /q assets
+xcopy /e %cd%\export\release-tgt\windows\bin\assets\ %cd%\assets\
 )
