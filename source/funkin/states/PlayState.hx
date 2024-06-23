@@ -3608,7 +3608,7 @@ class PlayState extends MusicBeatState
 		rating.loadGraphic(Paths.image(image));
 		rating.updateHitbox();
 
-		rating.offset.set(rating.width/2, rating.height/2);
+		rating.offset.add(rating.width/2.0, rating.height/2.0);
 
 		if (ClientPrefs.worldCombos && !ClientPrefs.simpleJudge){
 			
@@ -3683,7 +3683,9 @@ class PlayState extends MusicBeatState
 			worldOffsetY = FlxG.height * 0.5 - ClientPrefs.comboOffset[3];
 		}
 
-		var numStartX:Float = worldOffsetX + ClientPrefs.comboOffset[2] - scoreHW;
+		var numStartX:Float = worldOffsetX + ClientPrefs.comboOffset[2];
+		numStartX -= (separatedScore.length-1) * 41 / 2;
+
 		for (daLoop => i in separatedScore)
 		{
 			var numScore:RatingSprite = ratingGroup.recycle(RatingSprite);
@@ -3698,7 +3700,7 @@ class PlayState extends MusicBeatState
 				numScore.updateHitbox();
 			}
 
-			numScore.offset.set(0, numScore.height / 2);
+			numScore.offset.add(numScore.width/2.0, numScore.height/2.0);
 
 			numScore.x = numStartX + 41.5 * daLoop;
 			numScore.y = worldOffsetY;

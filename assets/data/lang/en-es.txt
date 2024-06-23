@@ -1,0 +1,13 @@
+pauseoption_resume=Continuar
+pauseoption_restart-song=Reiniciar cancion
+pauseoption_options=Opciones
+pauseoption_skip-to=Ir a
+pauseoption_leave-charting-mode=Salir del Charting Mode
+pauseoption_change-modifiers=Cambiar modificadores
+pauseoption_exit-to-menu=Volver al menu
+freeplayhint=Presiona CTRL para abrir el menu de modificadores | Presiona R para reiniciar la puntuacion.
+score=Puntaje
+highscore=Record
+rating=Clasificación
+cbplural=Combos Rotos
+cb=Combo Roto
