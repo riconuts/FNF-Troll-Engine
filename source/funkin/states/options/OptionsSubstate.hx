@@ -452,7 +452,13 @@ class OptionsSubstate extends MusicBeatSubstate
 	var currentGroup:FlxTypedGroup<FlxObject>;
 	var groups:Map<String, FlxTypedGroup<FlxObject>> = [];
 	var allWidgets:Map<String, Map<FlxObject, Widget>> = [];
-	var actualOptions = ClientPrefs.getOptionDefinitions();
+	var actualOptions:Map<String, OptionData> = {
+		var definitions = ClientPrefs.getOptionDefinitions();
+		[
+			for (name in ClientPrefs.options)
+				name => definitions.get(name)
+		];
+	};
 
 	var mainCamera:FlxCamera;
 	var optionCamera:FlxCamera;

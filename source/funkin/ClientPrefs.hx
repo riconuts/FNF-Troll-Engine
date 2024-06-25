@@ -33,12 +33,21 @@ typedef OptionData =
 #end
 class ClientPrefs
 {
-	static var defaultOptionDefinitions = getOptionDefinitions();
-
 	#if !USE_EPIC_JUDGEMENT
 	public static final useEpics:Bool = false;
+	public static final epicWindow:Float = -1;
 	#end
 
+	/*	
+		* You can force the value of an option by declaring it outside of the option definitions
+		* This will also remove it from the options menu.
+
+		* For example:
+		// public static final directionalCam = true;
+		// public static final ghostTapping = false;
+	*/
+
+	static var defaultOptionDefinitions = getOptionDefinitions();
 	inline public static function getOptionDefinitions():Map<String, OptionData>
 	{
 		return [
@@ -443,7 +452,6 @@ class ClientPrefs
 				data: ["options" => ["Left", "Right"]]
 			},
 			//// judgement-related (gameplay)
-			#if USE_EPIC_JUDGEMENT
 			"useEpics" => {
 				display: "Use Epics",
 				desc: "When toggled, epics will be used as the highest judgement.",
@@ -451,7 +459,6 @@ class ClientPrefs
 				value: false,
 				data: []
 			},
-
 			"epicWindow" => {
 				display: "Epic Window",
 				desc: "The hit window to hit an Epic judgement.",
@@ -459,7 +466,6 @@ class ClientPrefs
 				value: 22,
 				data: ["suffix" => "ms", "min" => 0, "max" => 200, "step" => 0.1]
 			},
-			#end
 			"sickWindow" => {
 				display: "Sick Window",
 				desc: "The hit window to hit a Sick judgement.",

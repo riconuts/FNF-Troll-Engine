@@ -8,12 +8,27 @@ class OptionMacro
 {
 	public static macro function build():Array<Field>
 	{
-		var fields = Context.getBuildFields();
+		var fields:Array<Field> = Context.getBuildFields();
 		var pos = Context.currentPos();
 
 		var optionNames:Array<String> = [];
 		var definitions = ClientPrefs.getOptionDefinitions(); // gets all the option definitions
+
+		function getField(name:String):Null<Field>{
+			for (field in fields){
+				if (field.name == name)
+					return field;
+			}
+			return null;
+		}
+
 		for(option => key in definitions){
+			var optionField:Null<Field> = getField(option);
+			if (optionField != null){
+				// if (optionField.access.contains(AStatic))
+					continue;
+			}
+
 			optionNames.push(option);
 			switch(key.type){
 				case Toggle:
