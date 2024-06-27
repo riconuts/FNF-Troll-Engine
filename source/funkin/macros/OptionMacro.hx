@@ -1,8 +1,12 @@
 package funkin.macros;
 
 #if macro
+import funkin.ClientPrefs;
+
 import haxe.macro.Context;
 import haxe.macro.Expr;
+
+using funkin.macros.Sowy;
 
 class OptionMacro
 {
@@ -12,18 +16,11 @@ class OptionMacro
 		var pos = Context.currentPos();
 
 		var optionNames:Array<String> = [];
-		var definitions = ClientPrefs.getOptionDefinitions(); // gets all the option definitions
+		var definitions:Map<String, OptionData> = ClientPrefs.getOptionDefinitions(); // gets all the option definitions
 
-		function getField(name:String):Null<Field>{
-			for (field in fields){
-				if (field.name == name)
-					return field;
-			}
-			return null;
-		}
-
+		////
 		for(option => key in definitions){
-			var optionField:Null<Field> = getField(option);
+			var optionField:Null<Field> = fields.findByName(option);
 			if (optionField != null){
 				// if (optionField.access.contains(AStatic))
 					continue;
