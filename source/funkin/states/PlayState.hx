@@ -518,10 +518,10 @@ class PlayState extends MusicBeatState
 		camOther = new FlxCamera();
 		camStageUnderlay = new FlxCamera();
 
-		camStageUnderlay.bgColor = FlxColor.BLACK; 
-		camHUD.bgColor.alpha = 0; 
-		camOverlay.bgColor.alpha = 0;
-		camOther.bgColor.alpha = 0;
+		camHUD.bgColor = 0; 
+		camOverlay.bgColor = 0;
+		camOther.bgColor = 0;
+		camStageUnderlay.bgColor = 0;
 
 		FlxG.cameras.reset(camGame);
 		FlxG.cameras.add(camStageUnderlay, false);
@@ -2379,9 +2379,9 @@ class PlayState extends MusicBeatState
 
 	override function draw(){
 		if((subState is GameOverSubstate))
-			camStageUnderlay.bgColor.alphaFloat = 0;
+			camStageUnderlay.bgColor = 0;
 		else
-			camStageUnderlay.bgColor.alphaFloat = ClientPrefs.stageOpacity;
+			camStageUnderlay.bgColor = Math.floor(0xFF * ClientPrefs.stageOpacity) * 0x1000000;
 
         var ret:Dynamic = callOnScripts('onStateDraw');
 		if(ret != Globals.Function_Stop) 
