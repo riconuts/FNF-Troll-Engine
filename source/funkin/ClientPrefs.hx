@@ -38,6 +38,10 @@ class ClientPrefs
 	public static final epicWindow:Float = -1;
 	#end
 
+	#if !MULTICORE_LOADING
+	public static final multicoreLoading:Bool = false;
+	#end
+
 	/*	
 		* You can force the value of an option by declaring it outside of the option definitions
 		* This will also remove it from the options menu.
