@@ -1,11 +1,11 @@
 package funkin.data;
 
+import flixel.math.FlxMath.minInt;
+import flixel.graphics.FlxGraphic;
 import openfl.Assets;
 import openfl.media.Sound;
 import openfl.display.BitmapData;
-import flixel.graphics.FlxGraphic;
-
-import flixel.math.FlxMath;
+import haxe.ds.List;
 
 #if sys
 import sys.FileSystem;
@@ -24,167 +24,43 @@ typedef LoadingThreadMessage = {
 }
 #end
 
-typedef AssetPreload =
-{
+typedef AssetPreload = {
 	var path:String;
 	@:optional var type:String;
 	@:optional var library:String; // heh
 }
 
-// May cause a crash once every two months
 class Cache
 {
-	public static function returnUncachedGraphic(key:String, ?library:String)
-	{
-		var path:String;
-
-		#if MODS_ALLOWED
-		path = Paths.modsImages(key);
-
-		if (Paths.currentTrackedAssets.exists(path))
-			return null;
-
-		if (FileSystem.exists(path))
-		{
-			@:privateAccess
-			var newGraphic:FlxGraphic = new FlxGraphic(null, BitmapData.fromFile(path));
-			newGraphic.persist = true;
-
-			return {key: path, graphic: newGraphic};
-		}
-		#end
-
-		////
-		path = Paths.getPath('images/$key.png', IMAGE, library);
-
-		if (Paths.exists(path, IMAGE) && !Paths.currentTrackedAssets.exists(path))
-		{
-			#if (html5 || flash)
-			var newGraphic:FlxGraphic = FlxGraphic.fromAssetKey(path, false, path, false);
-			#else
-			@:privateAccess
-			var newGraphic:FlxGraphic = new FlxGraphic(null, BitmapData.fromFile(path));
-			#end
-			newGraphic.persist = true;
-					
-			return {key: path, graphic: newGraphic};
-		}
-
-		return null;
-	}
-
-	inline static var SOUND_EXT = Paths.SOUND_EXT;
-
-	public static function returnUncachedSound(path:String, ?library:String)
-	{
-		var daPath = '$path.$SOUND_EXT';
-		
-		#if MODS_ALLOWED
-		var file:String = Paths.modFolders(daPath);
-
-		if (Paths.currentTrackedSounds.exists(file))
-			return null;
-
-		var leSound = Sound.fromFile(file); 
-		if (leSound != null)
-			return {key: file, sound: leSound}
-		#end
-		
-		////
-		var gottenPath:String = Paths.getPath(daPath, SOUND, library);
-		
-		if (Paths.currentTrackedSounds.exists(gottenPath))
-			return null;
-		
-		#if (html5 || flash)
-		if (Assets.exists(gottenPath, SOUND))
-			return {key: gottenPath, sound: Assets.getSound(gottenPath)};
-		#else
-		var leSound = Sound.fromFile(gottenPath);
-		if (leSound != null)
-			return {key: gottenPath, sound: leSound};
-		#end
-		
-		return null;
-	}
-
-	static public function load(toLoad:AssetPreload){
-		switch (toLoad.type){
-			case 'SOUND':
-				Paths.returnSound("sounds", toLoad.path, toLoad.library);
-			case 'MUSIC':
-				Paths.returnSound("music", toLoad.path, toLoad.library);
-			case 'SONG':
-				Paths.returnSound("songs", toLoad.path, toLoad.library);
-			default:
-				Paths.returnGraphic(toLoad.path, toLoad.library);
-		}
-		
-		#if traceLoading
-		trace("loaded " + toLoad.path);
-		#end
-	}
-
-	static public function loadWithList(shitToLoad:Array<AssetPreload>, ?multicoreOnly = false)
+	public static function loadWithList(shitToLoad:Array<AssetPreload>, ?multicoreOnly = false):Void
 	{
 		#if loadBenchmark
 		var startTime = Sys.time();
 		#end
 
 		#if MULTICORE_LOADING
-		var threadLimit:Int = FlxMath.minInt(shitToLoad.length, numberOfProcessors);
+		final threadLimit:Int = minInt(threadLimit, shitToLoad.length);
 		
 		if (ClientPrefs.multicoreLoading && threadLimit > 1){
-			// clear duplicates
+			//// clear duplicates
 			var uniqueMap:Map<String, AssetPreload> = [];
 			
 			for (shit in shitToLoad){ 
 				if (shit.type == null)
 					shit.type = "IMAGE";
-				uniqueMap.set(shit.type+" "+shit.path, shit);
+				uniqueMap.set(shit.type + ": " + shit.path, shit);
 			}
 
 			//
-			var shitToLoad = [for (k => v in uniqueMap){/*trace(k);*/ v;}];
+			var shitToLoad = new List<AssetPreload>();
+			for (k => v in uniqueMap){
+				/*trace(k);*/ 
+				shitToLoad.add(v);
+			}
 			
-			// TODO: figure out why this sometimes crashes
-
-			var mainThread = Thread.current();
-			var makeThread = Thread.create.bind(() -> {
-				var loadedGraphics:Map<String, FlxGraphic> = [];
-				var loadedSounds:Map<String, Sound> = [];
-
-				var thisThread = Thread.current();
-
-				while (true){
-					var msg:Dynamic = Thread.readMessage(true);
-
-					if (msg == null)
-						continue;
-
-					if (msg == false){ // time to die
-						mainThread.sendMessage({thread: thisThread, terminate: true, loadedGraphics: loadedGraphics, loadedSounds: loadedSounds});
-						break;
-					}
-
-					switch (msg.type){
-						case 'SOUND':
-							var result = returnUncachedSound('sounds/${msg.path}', msg.library);
-							if (result != null) loadedSounds.set(result.key, result.sound);
-						case 'MUSIC':
-							var result = returnUncachedSound('music/${msg.path}', msg.library);
-							if (result != null) loadedSounds.set(result.key, result.sound);
-						case 'SONG':
-							var result = returnUncachedSound('songs/${msg.path}', msg.library);
-							if (result != null) loadedSounds.set(result.key, result.sound);
-						default:
-							var result = returnUncachedGraphic(msg.path, msg.library);
-							if (result != null) loadedGraphics.set(result.key, result.graphic);
-					}
-					
-					mainThread.sendMessage({thread: thisThread, terminate: false});
-				}
-			});
+			////
+			final mainThread = Thread.current();
+			final makeThread = Thread.create.bind(_loadingThreadFunc.bind(mainThread));
 
 			trace('Loading ${shitToLoad.length} items with $threadLimit threads.');
 			
@@ -250,10 +126,146 @@ class Cache
 		#end
 	}
 
-	public static final numberOfProcessors:Int = {	
-		var result = null;
+	#if MULTICORE_LOADING
+	private static function _loadingThreadFunc(mainThread:Thread)
+	{
+		var loadedGraphics:Map<String, FlxGraphic> = [];
+		var loadedSounds:Map<String, Sound> = [];
+
+		var thisThread = Thread.current();
+
+		while (true){
+			var msg:Dynamic = Thread.readMessage(true);
+
+			/*
+			if (msg == null)
+				continue;
+			*/
+
+			if (msg == false){ // time to die
+				mainThread.sendMessage({thread: thisThread, terminate: true, loadedGraphics: loadedGraphics, loadedSounds: loadedSounds});
+				break;
+			}
+
+			switch (msg.type){
+				case 'SOUND':
+					var result = returnUncachedSound('sounds/${msg.path}', msg.library);
+					if (result != null) loadedSounds.set(result.path, result.sound);
+				case 'MUSIC':
+					var result = returnUncachedSound('music/${msg.path}', msg.library);
+					if (result != null) loadedSounds.set(result.path, result.sound);
+				case 'SONG':
+					var result = returnUncachedSound('songs/${msg.path}', msg.library);
+					if (result != null) loadedSounds.set(result.path, result.sound);
+				default:
+					var result = returnUncachedGraphic(msg.path, msg.library);
+					if (result != null) loadedGraphics.set(result.path, result.graphic);
+			}
+			
+			mainThread.sendMessage({thread: thisThread, terminate: false});
+		}
+	}
+	#end
+
+	/** Returns an uncached image graphic, returns null if the image is already cached **/
+	private static function returnUncachedGraphic(key:String, ?library:String)
+	{
+		var path:String;
+
+		#if MODS_ALLOWED
+		path = Paths.modsImages(key);
+
+		if (Paths.currentTrackedAssets.exists(path))
+			return null;
+
+		if (FileSystem.exists(path))
+		{
+			@:privateAccess
+			var newGraphic:FlxGraphic = new FlxGraphic(null, BitmapData.fromFile(path));
+			newGraphic.persist = true;
+
+			return {path: path, graphic: newGraphic};
+		}
+		#end
+
+		////
+		path = Paths.getPath('images/$key.png', IMAGE, library);
+
+		if (Paths.exists(path, IMAGE) && !Paths.currentTrackedAssets.exists(path))
+		{
+			#if (html5 || flash)
+			var newGraphic:FlxGraphic = FlxGraphic.fromAssetKey(path, false, path, false);
+			#else
+			@:privateAccess
+			var newGraphic:FlxGraphic = new FlxGraphic(null, BitmapData.fromFile(path));
+			#end
+			newGraphic.persist = true;
+					
+			return {path: path, graphic: newGraphic};
+		}
+
+		return null;
+	}
+
+	inline static var SOUND_EXT = Paths.SOUND_EXT;
+
+	/** Returns an uncached sound, returns null if the sound is already cached **/
+	public static function returnUncachedSound(path:String, ?library:String)
+	{
+		var daPath = '$path.$SOUND_EXT';
 		
-		#if windows
+		#if MODS_ALLOWED
+		var file:String = Paths.modFolders(daPath);
+
+		if (Paths.currentTrackedSounds.exists(file))
+			return null;
+
+		var leSound = Sound.fromFile(file); 
+		if (leSound != null)
+			return {path: file, sound: leSound}
+		#end
+		
+		////
+		var gottenPath:String = Paths.getPath(daPath, SOUND, library);
+		
+		if (Paths.currentTrackedSounds.exists(gottenPath))
+			return null;
+		
+		#if (html5 || flash)
+		if (Assets.exists(gottenPath, SOUND))
+			return {path: gottenPath, sound: Assets.getSound(gottenPath)};
+		#else
+		var leSound = Sound.fromFile(gottenPath);
+		if (leSound != null)
+			return {path: gottenPath, sound: leSound};
+		#end
+		
+		return null;
+	}
+
+	private static function load(toLoad:AssetPreload){
+		switch (toLoad.type){
+			case 'SOUND':
+				Paths.returnSound("sounds", toLoad.path, toLoad.library);
+			case 'MUSIC':
+				Paths.returnSound("music", toLoad.path, toLoad.library);
+			case 'SONG':
+				Paths.returnSound("songs", toLoad.path, toLoad.library);
+			default:
+				Paths.returnGraphic(toLoad.path, toLoad.library);
+		}
+		
+		#if traceLoading
+		trace("loaded " + toLoad.path);
+		#end
+	}
+
+	public static final threadLimit:Int = {	
+		var result:Null<String> = null;
+
+		#if !MULTICORE_LOADING
+
+		#elseif windows
 		result = Sys.getEnv("NUMBER_OF_PROCESSORS");
 			
 		#elseif linux
@@ -264,7 +276,7 @@ class Cache
 			
 			if (cpuinfo != null) {
 				var split = cpuinfo.split("processor");
-				result = Std.string (split.length - 1);
+				result = Std.string(split.length - 1);
 			}
 		}
 			
@@ -276,14 +288,13 @@ class Cache
 			result = cores.matched(1);
 		#end
 
-		var n:Null<Int> = (result == null) ? 1 : Std.parseInt(result);
-		if (n == null) n = 1;
-
-		n;
+		var n:Null<Int> = (result == null) ? null : Std.parseInt(result);
+		(n == null) ? 1 : n;
 	}
 
 	#if sys
 	// https://github.com/openfl/hxp/blob/master/src/hxp/System.hx
+	@:unreflective
 	private inline static function runProcess(command:String, args:Array<String>):String {
 		var argString = "";
 		for (arg in args) {
