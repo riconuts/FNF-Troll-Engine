@@ -23,9 +23,7 @@ import funkin.modchart.ModManager;
 import funkin.states.editors.*;
 import funkin.states.options.*;
 import funkin.scripts.*;
-#if LUA_ALLOWED
 import funkin.scripts.FunkinLua;
-#end
 
 import flixel.*;
 import flixel.util.*;
