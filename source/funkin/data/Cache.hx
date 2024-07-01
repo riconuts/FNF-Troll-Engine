@@ -9,6 +9,8 @@ import flixel.math.FlxMath;
 
 #if sys
 import sys.FileSystem;
+import sys.io.Process;
+import haxe.io.BytesOutput;
 #end
 
 #if MULTICORE_LOADING
@@ -123,23 +125,6 @@ class Cache
 		#end
 	}
 
-	public static var numberOfProcessors(get, null):Int = -1;
-	static function get_numberOfProcessors():Int
-	{
-		if (numberOfProcessors > 0)
-			return numberOfProcessors;
-
-		#if windows
-		var result = Sys.getEnv("NUMBER_OF_PROCESSORS");
-		numberOfProcessors = result==null ? 1 : Std.parseInt(result);
-		#else
-		// idk
-		numberOfProcessors = 1;
-		#end
-
-		return numberOfProcessors;
-	}
-	
 	static public function loadWithList(shitToLoad:Array<AssetPreload>, ?multicoreOnly = false)
 	{
 		#if loadBenchmark
@@ -264,4 +249,80 @@ class Cache
 		trace('finished loading in ${Sys.time() - startTime} seconds.');
 		#end
 	}
+
+	public static final numberOfProcessors:Int = {	
+		var result = null;
+		
+		#if windows
+		result = Sys.getEnv("NUMBER_OF_PROCESSORS");
+			
+		#elseif linux
+		result = runProcess("nproc", []);
+		
+		if (result == null) {
+			var cpuinfo = runProcess("cat", [ "/proc/cpuinfo" ]);
+			
+			if (cpuinfo != null) {
+				var split = cpuinfo.split("processor");
+				result = Std.string (split.length - 1);
+			}
+		}
+			
+		#elseif mac
+		var cores = ~/Total Number of Cores: (\d+)/;
+		var output = runProcess("/usr/sbin/system_profiler", ["-detailLevel", "full", "SPHardwareDataType"]);
+		
+		if (cores.match(output))
+			result = cores.matched(1);
+		#end
+
+		var n:Null<Int> = (result == null) ? 1 : Std.parseInt(result);
+		if (n == null) n = 1;
+
+		n;
+	}
+
+	#if sys
+	// https://github.com/openfl/hxp/blob/master/src/hxp/System.hx
+	private inline static function runProcess(command:String, args:Array<String>):String {
+		var argString = "";
+		for (arg in args) {
+			if (arg.indexOf(" ") != -1)
+				argString += " \"" + arg + "\"";
+			else
+				argString += " " + arg;
+		}
+
+		var process = new Process(command, args);
+		var buffer = new BytesOutput();
+		var waiting = true;
+
+		while (waiting) {
+			try {
+				var current = process.stdout.readAll(1024);
+				buffer.write(current);
+
+				if (current.length == 0)
+					waiting = false;
+			} catch (e) {
+				waiting = false;
+			}
+		}
+
+		var result = process.exitCode();
+		var output = buffer.getBytes().toString();
+
+		if (output == "") {
+			var error = process.stderr.readAll().toString();
+			process.close();
+
+			if (result != 0 || error != "")
+				return null;
+		} else {
+			process.close();
+		}
+		
+		return output;
+	}
+	#end
 }

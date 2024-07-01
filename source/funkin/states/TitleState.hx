@@ -95,7 +95,7 @@ class TitleState extends MusicBeatState
 			
 			#if MULTICORE_LOADING
 			var shitToLoad = bg.stageData.preload;
-			if (shitToLoad != null) Cache.loadWithList(shitToLoad);
+			if (shitToLoad != null) funkin.data.Cache.loadWithList(shitToLoad);
 			#end
 
 			bg.startScript(false, ["inTitlescreen" => true]);
