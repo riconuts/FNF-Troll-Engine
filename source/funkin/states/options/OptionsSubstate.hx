@@ -31,34 +31,9 @@ typedef Widget =
 
 class OptionsSubstate extends MusicBeatSubstate
 {
-	// TODO: put this all into the ClientPrefs option definitions instead
-	private static final _recommendsRestart:Array<String> = [
-		"etternaHUD",
-		"judgeCounter",
-		"hudPosition",
-		"shaders",
-		"lowQuality",
-		"ruin",
-		#if !tgt "midScroll" #end
-	];
-	public static var requiresRestart = _requiresRestart.copy();
-
-	private static final _requiresRestart:Array<String> = [
-		"modcharts", 
-		"noteOffset", 
-		"ratingOffset", 
-		"wife3", 
-		"useEpics", 
-		"judgePreset", 
-		"epicWindow", 
-		"sickWindow", 
-		"goodWindow", 
-		"badWindow", 
-		"hitWindow",
-		"judgeDiff", 
-		"noteSkin",
-	];
-	public static var recommendsRestart = _recommendsRestart.copy();
+	// for scripting
+	public static final requiresRestart:Map<String, Bool> = [];
+	public static final recommendsRestart:Map<String, Bool> = [];
 
 	static var optionOrder:Array<String> = [
 		"game",
@@ -233,8 +208,8 @@ class OptionsSubstate extends MusicBeatSubstate
 
 	public static function resetRestartRecomendations()
 	{
-		requiresRestart = _requiresRestart.copy();
-		recommendsRestart = _recommendsRestart.copy();
+		requiresRestart.clear();
+		recommendsRestart.clear();
 	}
 
 	var changed:Array<String> = [];
@@ -655,6 +630,11 @@ class OptionsSubstate extends MusicBeatSubstate
 						continue;
 
 					var data:OptionData = actualOptions.get(opt);
+
+					if (data.data.get("requiresRestart"))
+						requiresRestart.set(opt, true);
+					if (data.data.get("recommendsRestart"))
+						recommendsRestart.set(opt, true);
 
 					data.data.set("optionName", opt);
 					if (Paths.hasString('opt_display_$opt'))data.display = Paths.getString('opt_display_$opt');
@@ -1629,9 +1609,9 @@ class OptionsSubstate extends MusicBeatSubstate
 					
 					/*if(oN == 'customizeHUD' )
 						optDesc += "\n(NOTE: This does not work because you're ingame!)";
-					else */if (requiresRestart.contains(oN))
+					else */if (requiresRestart.exists(oN))
 						optDesc += "\nWARNING: You will need to restart the song if you change this!";
-					else if (recommendsRestart.contains(oN))
+					else if (recommendsRestart.exists(oN))
 						optDesc += "\nNOTE: This won't have any effect unless you restart the song!";
 				}
 				

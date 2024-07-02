@@ -92,7 +92,10 @@ class ClientPrefs
 				type: Dropdown,
 				value: "Standard",
                 // V-Slice could be named PBOT1??
-				data: ["options" => ["Psych", "V-Slice", "Week 7", "Standard", "ITG", "Custom"]]
+				data: [
+					"requiresRestart" => true,
+					"options" => ["Psych", "V-Slice", "Week 7", "Standard", "ITG", "Custom"]
+				]
 			},
 			"judgeDiff" => {
 				display: "Judge Difficulty",
@@ -100,6 +103,7 @@ class ClientPrefs
 				type: Dropdown,
 				value: "J4",
 				data: [
+					"requiresRestart" => true,
 					"options" => ["J1","J2","J3","J4","J5","J6","J7","J8","JUSTICE"]
 				]
 			},
@@ -108,14 +112,26 @@ class ClientPrefs
 				desc: "How much to offset notes, song events, etc.",
 				type: Number,
 				value: 0,
-				data: ["suffix" => "ms", "min" => -1000, "max" => 1000, "step" => 1,]
+				data: [
+					"requiresRestart" => true,
+					"min" => -1000, 
+					"max" => 1000, 
+					"step" => 1,
+					"suffix" => "ms" 
+				]
 			},
 			"ratingOffset" => {
 				display: "Judgements Offset",
 				desc: "How much to offset hit windows.",
 				type: Number,
 				value: 0,
-				data: ["suffix" => "ms", "min" => -100, "max" => 100, "step" => 1,]
+				data: [
+					"requiresRestart" => true,
+					"min" => -100, 
+					"max" => 100, 
+					"step" => 1,
+					"suffix" => "ms"
+				]
 			},
 			"hitsoundVolume" => {
 				display: "Hitsound Volume",
@@ -352,14 +368,14 @@ class ClientPrefs
 				desc: "When toggled, notes will be centered.",
 				type: Toggle,
 				value: false,
-				data: []
+				data: [#if !tgt "recommendsRestart" => true #end]
 			},
 			"wife3" => {
 				display: "Wife3",
 				desc: "When toggled, accuracy will be millisecond-based, using Etterna's Wife3 system, instead of judgement-based.",
 				type: Toggle,
 				value: false,
-				data: []
+				data: ["requiresRestart" => true]
 			},
 			"showWifeScore" => {
 				display: "Accuracy Score Display",
@@ -380,7 +396,7 @@ class ClientPrefs
 				desc: "Changes how notes get their colours. Column bases it on direction, Quants bases it on beat.",
 				type: Dropdown,
 				value: "Column",
-				data: ["options" => ["Column", "Quants"]]
+				data: ["requiresRestart" => true, "options" => ["Column", "Quants"]]
 			},
 			"coloredCombos" => {
 				display: "Colored Combos",
@@ -437,6 +453,7 @@ class ClientPrefs
 				type: Dropdown,
 				value: "Default",
 				data: [
+					"recommendsRestart" => true,
 					"options" => ["Default", "Advanced", "Kade"]
 				]
 			},
@@ -447,6 +464,7 @@ class ClientPrefs
 				type: Dropdown,
 				value: "Off",
 				data: [
+					"recommendsRestart" => true,
 					"options" => ["Off", "Shortened", "Full"]
 				]
 			},
@@ -455,7 +473,10 @@ class ClientPrefs
 				desc: "Where to position HUD elements.",
 				type: Dropdown,
 				value: "Left",
-				data: ["options" => ["Left", "Right"]]
+				data: [
+					"recommendsRestart" => true, 
+					"options" => ["Left", "Right"]
+				]
 			},
 			//// judgement-related (gameplay)
 			"useEpics" => {
@@ -463,42 +484,42 @@ class ClientPrefs
 				desc: "When toggled, epics will be used as the highest judgement.",
 				type: Toggle,
 				value: false,
-				data: []
+				data: ["requiresRestart" => true]
 			},
 			"epicWindow" => {
 				display: "Epic Window",
 				desc: "The hit window to hit an Epic judgement.",
 				type: Number,
 				value: 22,
-				data: ["suffix" => "ms", "min" => 0, "max" => 200, "step" => 0.1]
+				data: ["requiresRestart" => true, "suffix" => "ms", "min" => 0, "max" => 200, "step" => 0.1]
 			},
 			"sickWindow" => {
 				display: "Sick Window",
 				desc: "The hit window to hit a Sick judgement.",
 				type: Number,
 				value: 45,
-				data: ["suffix" => "ms", "min" => 0, "max" => 200, "step" => 0.1]
+				data: ["requiresRestart" => true, "suffix" => "ms", "min" => 0, "max" => 200, "step" => 0.1]
 			},
 			"goodWindow" => {
 				display: "Good Window",
 				desc: "The hit window to hit a Good judgement.",
 				type: Number,
 				value: 90,
-				data: ["suffix" => "ms", "min" => 0, "max" => 200, "step" => 0.1]
+				data: ["requiresRestart" => true, "suffix" => "ms", "min" => 0, "max" => 200, "step" => 0.1]
 			},
 			"badWindow" => {
 				display: "Bad Window",
 				desc: "The hit window to hit a Bad judgement.",
 				type: Number,
 				value: 135,
-				data: ["suffix" => "ms", "min" => 0, "max" => 200, "step" => 0.1]
+				data: ["requiresRestart" => true, "suffix" => "ms", "min" => 0, "max" => 200, "step" => 0.1]
 			},
 			"hitWindow" => {
 				display: "Max Hit Window",
 				desc: "The hit window to hit notes at all",
 				type: Number,
 				value: 180,
-				data: ["suffix" => "ms", "min" => 0, "max" => 200, "step" => 0.1]
+				data: ["requiresRestart" => true, "suffix" => "ms", "min" => 0, "max" => 200, "step" => 0.1]
 			},
 
 			////
@@ -521,7 +542,10 @@ class ClientPrefs
 				desc: "Changes which shaders can load.",
 				type: Dropdown,
 				value: "All",
-				data: ["options" => ["All", "Minimal", "None"]]
+				data: [
+					"recommendsRestart" => true,
+					"options" => ["All", "Minimal", "None"]
+				]
 			},
 			"showFPS" => {
 				display: "Show FPS",
@@ -542,7 +566,7 @@ class ClientPrefs
 				desc: "When toggled, many assets won't be loaded to try to reduce strain on lower-end PCs.",
 				type: Toggle,
 				value: false,
-				data: []
+				data: ["recommendsRestart" => true]
 			},
 			"globalAntialiasing" => {
 				display: "Antialiasing",
@@ -563,7 +587,7 @@ class ClientPrefs
 				desc: "When toggled, modcharts will be used on some songs.\nWARNING: Disabling modcharts on modcharted songs will disable scoring!",
 				type: Toggle,
 				value: true,
-				data: []
+				data: ["requiresRestart" => true]
 			},
 			#if tgt
 			"ruin" => {
@@ -571,7 +595,7 @@ class ClientPrefs
 				desc: "Makes the mod really good! improves the mod alot!! the name is a joke guys it makes the mod REALLY REALLY good its not blammed lights i swear",
 				type: Toggle,
 				value: false,
-				data: []
+				data: ["recommendsRestart" => true]
 			},
 			#end
 			"customizeKeybinds" => {
