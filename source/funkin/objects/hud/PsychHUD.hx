@@ -25,6 +25,7 @@ class PsychHUD extends CommonHUD
 	var ratingString = Paths.getString("rating");
 	var cbString = Paths.getString("cbplural");
 	var npsString = Paths.getString("nps");
+	var botplayString = Paths.getString("botplayMark");
 
 	override public function new(iP1:String, iP2:String, songName:String, stats:Stats)
 	{
@@ -197,7 +198,7 @@ class PsychHUD extends CommonHUD
 			isHighscore = songHighscore != 0 && score > songHighscore;
 		}
 
-		scoreTxt.text = {
+		scoreTxt.text = PlayState.instance.cpuControlled ? botplayString : {
 			final separator = ' • ';
 			
 			var text = 
