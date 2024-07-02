@@ -34,12 +34,12 @@ typedef OptionData =
 class ClientPrefs
 {
 	#if !USE_EPIC_JUDGEMENT
-	public static final useEpics:Bool = false;
-	public static final epicWindow:Float = -1;
+	public static inline final useEpics:Bool = false;
+	public static inline final epicWindow:Float = -1;
 	#end
 
 	#if !MULTICORE_LOADING
-	public static final multicoreLoading:Bool = false;
+	public static inline final multicoreLoading:Bool = false;
 	#end
 
 	/*	
@@ -47,9 +47,11 @@ class ClientPrefs
 		* This will also remove it from the options menu.
 
 		* For example:
-		// public static final directionalCam = true;
-		// public static final ghostTapping = false;
+		// public static inline final directionalCam = false;
+		// public static inline final ghostTapping = false;
 	*/
+
+	public static inline final directionalCam = false;
 
 	static var defaultOptionDefinitions = getOptionDefinitions();
 	inline public static function getOptionDefinitions():Map<String, OptionData>
@@ -633,7 +635,7 @@ class ClientPrefs
 
 	inline public static function getGameplaySetting(name:String, defaultValue:Dynamic):Dynamic
 	{
-		return ((!funkin.states.PlayState.isStoryMode && gameplaySettings.exists(name)) ? gameplaySettings.get(name) : defaultValue);
+		return (gameplaySettings.exists(name) ? gameplaySettings.get(name) : defaultValue);
 	}
 
 	public static var quantHSV:Array<Array<Int>> = [

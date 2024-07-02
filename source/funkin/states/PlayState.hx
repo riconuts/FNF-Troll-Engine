@@ -384,9 +384,9 @@ class PlayState extends MusicBeatState
 			{
 				if (!Paths.exists(file))
 					continue;
-				script = FunkinHScript.fromFile(file, value);
-				hscriptArray.push(script);
-				funkyScripts.push(script);
+
+				
+				script = createHScript(file, value);
 				hudSkinScripts.set(value, script);
 			}
 		}
@@ -480,20 +480,32 @@ class PlayState extends MusicBeatState
 			keysPressed.push(false);
 		
 		// Gameplay settings
-		playbackRate = ClientPrefs.getGameplaySetting('songspeed', 1);
-		healthGain = ClientPrefs.getGameplaySetting('healthgain', 1);
-		healthLoss = ClientPrefs.getGameplaySetting('healthloss', 1);
-		playOpponent = ClientPrefs.getGameplaySetting('opponentPlay', false);
-		instakillOnMiss = ClientPrefs.getGameplaySetting('instakill', false);
-		practiceMode = ClientPrefs.getGameplaySetting('practice', false);
-		perfectMode = ClientPrefs.getGameplaySetting('perfect', false);
-		instaRespawn = ClientPrefs.getGameplaySetting('instaRespawn', false);
-		cpuControlled = ClientPrefs.getGameplaySetting('botplay', false);
-		disableModcharts = !ClientPrefs.modcharts; //ClientPrefs.getGameplaySetting('disableModcharts', false);
-		midScroll = ClientPrefs.midScroll;
-        #if tgt
-		playbackRate *= (ClientPrefs.ruin ? 0.8 : 1);
-        #end
+		if (!isStoryMode){
+			playbackRate = ClientPrefs.getGameplaySetting('songspeed', playbackRate);
+			healthGain = ClientPrefs.getGameplaySetting('healthgain', healthGain);
+			healthLoss = ClientPrefs.getGameplaySetting('healthloss', healthLoss);
+			playOpponent = ClientPrefs.getGameplaySetting('opponentPlay', playOpponent);
+			instakillOnMiss = ClientPrefs.getGameplaySetting('instakill', instakillOnMiss);
+			practiceMode = ClientPrefs.getGameplaySetting('practice', practiceMode);
+			perfectMode = ClientPrefs.getGameplaySetting('perfect', perfectMode);
+			instaRespawn = ClientPrefs.getGameplaySetting('instaRespawn', instaRespawn);
+			cpuControlled = ClientPrefs.getGameplaySetting('botplay', cpuControlled);
+			disableModcharts = !ClientPrefs.modcharts; //ClientPrefs.getGameplaySetting('disableModcharts', false);
+			midScroll = ClientPrefs.midScroll;
+
+			#if tgt
+			playbackRate *= (ClientPrefs.ruin ? 0.8 : 1);
+			#end
+
+			healthDrain = switch(ClientPrefs.getGameplaySetting('healthDrain', "Disabled")){
+				default: 0;
+				case "Basic": 0.00055;
+				case "Average": 0.0007;
+				case "Heavy": 0.00085;
+			};
+			opponentHPDrain = ClientPrefs.getGameplaySetting('opponentFightsBack', false) ? 0.0182 : 0;
+		}
+
 		FlxG.timeScale = playbackRate;
 		
 		if(perfectMode){
@@ -501,13 +513,6 @@ class PlayState extends MusicBeatState
 			instakillOnMiss = true;
 		}
 		saveScore = true; //!cpuControlled;
-		healthDrain = switch(ClientPrefs.getGameplaySetting('healthDrain', "Disabled")){
-			default: 0;
-			case "Basic": 0.00055;
-			case "Average": 0.0007;
-			case "Heavy": 0.00085;
-		};
-		opponentHPDrain = ClientPrefs.getGameplaySetting('opponentFightsBack', false) ? 0.0182 : 0;
 
 		//// Camera shit
 		camGame = new FlxCamera();
@@ -615,9 +620,7 @@ class PlayState extends MusicBeatState
 						continue;
 					}
 
-					var script = FunkinHScript.fromFile(filePath);
-					hscriptArray.push(script);
-					funkyScripts.push(script);
+					createHScript(filePath);
 					filesPushed.push(file);
 				}
 			}
@@ -628,9 +631,7 @@ class PlayState extends MusicBeatState
 				if(filesPushed.contains(file) || !file.endsWith('.hscript'))
 					return;
 
-				var script = FunkinHScript.fromFile(folder + file);
-				hscriptArray.push(script);
-				funkyScripts.push(script);
+				createHScript(folder + file);
 				filesPushed.push(file);
 			});
 		}
@@ -663,9 +664,7 @@ class PlayState extends MusicBeatState
 				if(filesPushed.contains(file) || !file.endsWith('.hscript'))
 					return;
 
-				var script = FunkinHScript.fromFile(folder + file);
-				hscriptArray.push(script);
-				funkyScripts.push(script);
+				createHScript(folder + file);
 				filesPushed.push(file);
 			});
 		}
@@ -1807,7 +1806,7 @@ class PlayState extends MusicBeatState
 
 	private function generateSong(dataPath:String):Void
 	{
-		songSpeedType = ClientPrefs.getGameplaySetting('scrolltype','multiplicative');
+		songSpeedType = ClientPrefs.getGameplaySetting('scrolltype', songSpeedType);
 
 		switch(songSpeedType)
 		{
@@ -1925,10 +1924,7 @@ class PlayState extends MusicBeatState
 						}
 						else if (ext == 'hscript') #end
 						{
-							var script = FunkinHScript.fromFile(file, notetype);
-							hscriptArray.push(script);
-							funkyScripts.push(script);
-							notetypeScripts.set(notetype, script);
+							notetypeScripts.set(notetype, createHScript(file, notetype));
 							doPush = true;
 						}
 						
@@ -1964,19 +1960,15 @@ class PlayState extends MusicBeatState
 						#if LUA_ALLOWED
 						if (ext == 'lua')
 						{
-							createLua(file, event);
 							// psych lua scripts work the exact same no matter what type of script they are 
+							createLua(file, event);
 							doPush = true;
 						}
 						else #end if (ext == 'hscript')
 						{
-							var script = FunkinHScript.fromFile(file, event);
-							hscriptArray.push(script);
-							funkyScripts.push(script);
+							createHScript(file, event);
 							eventScripts.set(event, script);
-
 							script.call("onLoad");
-
 							doPush = true;
 						}
 						if (doPush)
@@ -2208,18 +2200,15 @@ class PlayState extends MusicBeatState
 
 
 	function eventNoteEarlyTrigger(event:EventNote):Float {
-		var returnedValue:Float = 0;
-		var currentRV:Float = callOnAllScripts('eventEarlyTrigger', [event.event, event.value1, event.value2]);
-
+		var ret:Dynamic = callOnAllScripts('eventEarlyTrigger', [event.event, event.value1, event.value2]);
+		if (ret != null && (ret is Int || ret is Float))
+			return ret;
+		
 		if (eventScripts.exists(event.event)){
-			var eventScript:FunkinHScript = eventScripts.get(event.event);
-			returnedValue = callScript(eventScript, "getOffset", [event]);
+			var ret:Dynamic = callScript(eventScripts.get(event.event), "getOffset", [event]);
+			if (ret != null && (ret is Int || ret is Float))
+				return ret;
 		}
-		if (currentRV!=0 && returnedValue==0)
-			returnedValue = currentRV;
-
-		if (returnedValue != 0)
-			return returnedValue;
 
 		switch(event.event) {
 			case 'Kill Henchmen': //Better timing so that the kill sound matches the beat intended
@@ -2234,7 +2223,15 @@ class PlayState extends MusicBeatState
 		if (event.value1 == null) event.value1 = '';
 		if (event.value2 == null) event.value2 = '';
 
-		switch(event.event){
+		switch(event.event)
+		{
+			case 'Change Scroll Speed': // Negative duration means using the event time as the tween finish time
+				var duration = Std.parseFloat(event.value2);
+				if (!Math.isNaN(duration) && duration < 0.0){
+					event.strumTime -= duration * 1000;
+					event.value2 = Std.string(-duration);
+				}
+
 			case 'Mult SV' | 'Constant SV':
 				var speed:Float = 1;
 				if(event.event == 'Constant SV'){
@@ -3225,25 +3222,26 @@ class PlayState extends MusicBeatState
 			case 'Change Scroll Speed':
 				if (songSpeedType == "constant")
 					return;
+
 				var val1:Float = Std.parseFloat(value1);
 				var val2:Float = Std.parseFloat(value2);
-				if(Math.isNaN(val1)) val1 = 1;
-				if(Math.isNaN(val2)) val2 = 0;
+				if(Math.isNaN(val1)) val1 = 1.0;
+				if(Math.isNaN(val2)) val2 = 0.0;
 
-				var newValue:Float = SONG.speed * ClientPrefs.getGameplaySetting('scrollspeed', 1) * val1;
+				var newValue:Float = SONG.speed * ClientPrefs.getGameplaySetting('scrollspeed', 1.0) * val1;
 
-				if(val2 <= 0)
-				{
+				// value should never be negative as that should be handled and changed prior to this
+				if (val2 == 0.0)
 					songSpeed = newValue;
-				}
-				else
-				{
-					songSpeedTween = FlxTween.tween(this, {songSpeed: newValue}, val2, {ease: FlxEase.linear, onComplete:
-						function (twn:FlxTween)
+				else{
+					songSpeedTween = FlxTween.num(
+						this.songSpeed, newValue, val2, 
 						{
-							songSpeedTween = null;
-						}
-					});
+							ease: FlxEase.linear, 
+							onComplete: (twn:FlxTween) -> songSpeedTween = null	
+						},
+						this.set_songSpeed
+					);
 				}
 
 			case 'Set Property':
@@ -4516,6 +4514,16 @@ class PlayState extends MusicBeatState
 	}
 	#end
 
+	#if HSCRIPT_ALLOWED
+	public function createHScript(path:String, ?scriptName:String, ?ignoreCreateCall:Bool):FunkinHScript
+	{
+		var script = FunkinHScript.fromFile(path, scriptName, null, ignoreCreateCall!=true);
+		hscriptArray.push(script);
+		funkyScripts.push(script);
+		return script;
+	}
+	#end
+
 	var lastStepHit:Int = -9999;
 	override function stepHit()
 	{
@@ -4625,8 +4633,7 @@ class PlayState extends MusicBeatState
 				continue;
 			}
 			var ret:Dynamic = script.call(event, args, vars);
-			if (ret == Globals.Function_Halt)
-			{
+			if (ret == Globals.Function_Halt){
 				ret = returnVal;
 				if (!ignoreStops)
 					return returnVal;
@@ -4635,8 +4642,7 @@ class PlayState extends MusicBeatState
 				returnVal = ret;
 		}
 		
-		if (returnVal == null) returnVal = Globals.Function_Continue;
-		return returnVal;
+		return (returnVal == null) ? Globals.Function_Continue : returnVal;
         #else
         return Globals.Function_Continue;
         #end

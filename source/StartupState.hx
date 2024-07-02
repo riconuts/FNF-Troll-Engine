@@ -134,21 +134,17 @@ class StartupState extends FlxTransitionableState
 
 	override function create()
 	{
+		this.transIn = null;
+		this.transOut = null;
+
 		#if tgt
 		this.transIn = FadeTransitionSubstate;
-		//this.transOut = FadeTransitionSubstate;
-		FlxTransitionableState.skipNextTransOut = true;
 
 		warning = new FlxSprite(0, 0, Paths.image("warning"));
 		warning.scale.set(0.65, 0.65);
 		warning.updateHitbox();
 		warning.screenCenter();
 		add(warning);
-		
-		#else
-		this.transIn = null;
-		this.transOut = null;
-		// TODO: Default Flixel Startup Animation :]
 		#end
 
 		super.create();
@@ -199,7 +195,6 @@ class StartupState extends FlxTransitionableState
 
 					step = 10;
 				}
-				//else warning.angle += elapsed * 25;
 				#end
 				
 			case 10:

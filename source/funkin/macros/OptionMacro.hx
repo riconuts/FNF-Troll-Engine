@@ -12,13 +12,13 @@ class OptionMacro
 {
 	public static macro function build():Array<Field>
 	{
+		////
 		var fields:Array<Field> = Context.getBuildFields();
 		var pos = Context.currentPos();
 
-		var optionNames:Array<String> = [];
 		var definitions:Map<String, OptionData> = ClientPrefs.getOptionDefinitions(); // gets all the option definitions
+		var optionNames:Array<String> = [];
 
-		////
 		for(option => key in definitions){
 			var optionField:Null<Field> = fields.findByName(option);
 			if (optionField != null){
@@ -56,7 +56,6 @@ class OptionMacro
 				default:
 					// nothing
 			}
-
 		}
 
 		fields.push({
