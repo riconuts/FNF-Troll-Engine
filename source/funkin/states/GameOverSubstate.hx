@@ -96,7 +96,8 @@ class GameOverSubstate extends MusicBeatSubstate
 					if (!isEnding)
 						FlxG.sound.playMusic(Paths.music(genericMusic), 0.6, true);
 					
-					FlxG.sound.music.fadeIn(0.4, 0.6, 1.0);
+					if (FlxG.sound.music != null)
+						FlxG.sound.music.fadeIn(0.4, 0.6, 1.0);
 				}
 			});
 			doTween({"scale.x": 1.01, "scale.y": 1.01}, frameDur * 24, {type: PINGPONG});
@@ -279,12 +280,12 @@ class GameOverSubstate extends MusicBeatSubstate
 			Conductor.songPosition = FlxG.sound.music.time;
 
 		if (canEnd){
-            if (controls.ACCEPT)
+			if (controls.ACCEPT)
 				endGameOver(true);
 
-            if (controls.BACK)
+			if (controls.BACK)
 				endGameOver(false);
-        }
+		}
 		
 		PlayState.instance.callOnScripts('onUpdatePost', [elapsed]);
 		super.update(elapsed);
