@@ -436,13 +436,12 @@ class Paths
 	}
 
 	public inline static function hasString(key:String)
-		return getString(key) != key;
+		return _getString(key) != null;
 
-	public static function getString(key:String, force:Bool = false):String
+	public static function _getString(key:String, force:Bool = false):Null<String>
 	{
 		if (!force && currentStrings.exists(key))
 			return currentStrings.get(key);
-	
 
 		for (filePath in Paths.getFolders("data"))
 		{
@@ -465,8 +464,20 @@ class Paths
 			}
 		}
 
-		trace('$key has no attached value');
-		return key;
+		return null;
+	}
+
+	public static function getString(key:String, force:Bool = false):Null<String>{
+		var str:Null<String> = _getString(key, force);
+		
+		if (str == null){
+			if (Main.showDebugTraces) 
+				trace('$key has no attached value');
+
+			return key;
+		}
+
+		return str;
 	}
 
 	inline static public function fileExists(key:String, ?type:AssetType, ?ignoreMods:Bool = false, ?library:String)

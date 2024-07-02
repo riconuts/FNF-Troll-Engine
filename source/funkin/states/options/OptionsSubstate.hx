@@ -41,6 +41,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		"ruin",
 		#if !tgt "midScroll" #end
 	];
+	public static var requiresRestart = _requiresRestart.copy();
 
 	private static final _requiresRestart:Array<String> = [
 		"modcharts", 
@@ -57,10 +58,178 @@ class OptionsSubstate extends MusicBeatSubstate
 		"judgeDiff", 
 		"noteSkin",
 	];
-	var forceWidgetUpdate:Bool = false;
+	public static var recommendsRestart = _recommendsRestart.copy();
 
-	static public var requiresRestart = _requiresRestart.copy();
-	static public var recommendsRestart = _recommendsRestart.copy();
+	static var optionOrder:Array<String> = [
+		"game",
+		"ui",
+		"video",
+		"controls",
+		#if (discord_rpc || DO_AUTO_UPDATE) "misc", #end 
+		/* "Accessibility" */
+	];
+
+	static var options:Map<String, Array<Dynamic>> = [
+		// maps are annoying and dont preserve order so i have to do this
+		"game" => [
+			[
+				"gameplay", 
+				[
+					"downScroll",
+					"midScroll",
+					"ghostTapping", 
+					"directionalCam", 
+					"noteOffset", 
+					"ratingOffset",
+				]
+			],
+			[
+				"audio", 
+				[
+					"masterVolume",
+					"songVolume",
+					'sfxVolume',
+					"hitsoundVolume", 
+					"missVolume",
+					#if tgt "ruin", #end
+				]
+			],
+			[
+				"accessibility",
+				[
+					"flashing",
+					"camShakeP",
+					"camZoomP",
+					"modcharts"
+				]
+			],
+			[
+				"advanced",
+				[
+					"wife3",
+					"judgePreset",
+					#if USE_EPIC_JUDGEMENT
+					"useEpics",
+					"epicWindow",
+					#end
+					"sickWindow",
+					"goodWindow",
+					"badWindow",
+					"hitWindow",
+					"judgeDiff", // fuck you pedophile
+				]
+			]
+		],
+		"ui" => [
+			[
+				"notes",
+				[
+					"noteOpacity",
+					"downScroll",
+					"midScroll",
+					"noteSplashes",
+					"noteSkin",
+					"customizeColours"
+				]
+			],
+			[
+				"hud",
+				[
+					"timeBarType", 
+					"hudOpacity", 
+					"hpOpacity", 
+					"timeOpacity", 
+					"judgeOpacity",
+					"stageOpacity", 
+					"scoreZoom", 
+					"npsDisplay", 
+					"hitbar", 
+					"showMS", 
+					"coloredCombos",
+					'worldCombos',
+					"simpleJudge",
+					"judgeCounter", 
+					'hudPosition', 
+					"customizeHUD",
+				]
+			],
+			[
+				"advanced", 
+				[
+					"etternaHUD", 
+					"gradeSet",
+					"showWifeScore"
+				]
+			]
+		],
+		"video" => [
+			["video", ["shaders", "showFPS"]],
+			["display", ["framerate", "bread"]],
+			[
+				"performance",
+				[
+					"lowQuality",
+					"globalAntialiasing",
+					"multicoreLoading",
+					"optimizeHolds",
+					"holdSubdivs",
+					"drawDistanceModifier" // apparently i forgot to add this in the new options thing lmao
+				]
+			]
+		],
+		"controls" => [
+			[
+				"keyboard", ["customizeKeybinds",]
+			], 
+			[
+				"controller", ["controllerMode",]
+			]
+		],
+		
+		"misc" => [
+			//["audio", ["masterVolume", "songVolume", "hitsoundVolume", "missVolume"]],
+			#if discord_rpc
+			["discord", ["discordRPC"]],
+			#end
+			#if DO_AUTO_UPDATE
+			["updating", ["checkForUpdates", "downloadBetas"]]
+			#end
+		],
+		
+		/* "accessibility" => [
+				[
+					"gameplay", 
+					[
+						"flashing",
+						"camShakeP",
+						"camZoomP"
+					]
+				]
+			] */
+	];
+
+	static inline function epicWindowVal(val:Float)
+		#if USE_EPIC_JUDGEMENT
+		return val;
+		#else 
+		return -1; 
+		#end
+	
+	static var judgeWindows:Map<String, Array<Float>> = [
+		"Standard" => [epicWindowVal(22.5), 45, 90, 135, 180],
+		"Week 7" => [
+			-1,		// epic (-1 to disable)
+			33,		// sick
+			125,	// good
+			150,	// bad
+			166		// shit / max hit window
+		],
+		"V-Slice" => [epicWindowVal(12.5), 45, 90, 135, 160], // https://cdn.discordapp.com/attachments/991571764180156467/1235523554032746556/image.png
+		"Psych" => [-1, 45, 90, 135, 166],
+		"ITG" => [epicWindowVal(21), 43, 102, 135, 180]
+	];
+
+	////
 
 	public static function resetRestartRecomendations()
 	{
@@ -71,13 +240,12 @@ class OptionsSubstate extends MusicBeatSubstate
 	var changed:Array<String> = [];
 	var originalValues:Map<String, Dynamic> = [];
 
-
 	public var goBack:(Array<String>)->Void;
     public function save(){
 		ClientPrefs.save(actualOptions);
-
 		funkin.data.Highscore.loadData();
     }
+	
 	function windowsChanged()
 	{
 		var windows = ["badWindow", "goodWindow", "sickWindow"];
@@ -280,172 +448,8 @@ class OptionsSubstate extends MusicBeatSubstate
 		}
 	}
 
-	static inline function epicWindowVal(val:Float){
-		return #if USE_EPIC_JUDGEMENT val #else -1 #end ;
-	}
-	static var judgeWindows:Map<String, Array<Float>> = [
-		"Standard" => [epicWindowVal(22.5), 45, 90, 135, 180],
-		"Week 7" => [
-			-1,		// epic (-1 to disable)
-			33,		// sick
-			125,	// good
-			150,	// bad
-			166		// shit / max hit window
-		],
-		"V-Slice" => [epicWindowVal(12.5), 45, 90, 135, 160], // https://cdn.discordapp.com/attachments/991571764180156467/1235523554032746556/image.png
-		"Psych" => [-1, 45, 90, 135, 166],
-		"ITG" => [epicWindowVal(21), 43, 102, 135, 180]
-	];
-
-	static var options:Map<String, Array<Dynamic>> = [
-		// maps are annoying and dont preserve order so i have to do this
-		"game" => [
-			[
-				"gameplay", 
-				[
-					"downScroll",
-					"midScroll",
-					"ghostTapping", 
-					"directionalCam", 
-					"noteOffset", 
-					"ratingOffset",
-				]
-			],
-			[
-				"audio", 
-				[
-                    "masterVolume",
-                    "songVolume",
-				    'sfxVolume',
-					"hitsoundVolume", 
-					"missVolume",
-					#if tgt "ruin", #end
-				]
-			],
-			[
-				"accessibility",
-				[
-					"flashing",
-					"camShakeP",
-					"camZoomP",
-					"modcharts"
-				]
-			],
-			[
-				"advanced",
-				[
-					"wife3",
-					"judgePreset",
-					#if USE_EPIC_JUDGEMENT
-					"useEpics",
-					"epicWindow",
-					#end
-					"sickWindow",
-					"goodWindow",
-					"badWindow",
-					"hitWindow",
-					"judgeDiff", // fuck you pedophile
-				]
-			]
-		],
-		"ui" => [
-			[
-				"notes",
-				[
-					"noteOpacity",
-					"downScroll",
-					"midScroll",
-					"noteSplashes",
-					"noteSkin",
-					"customizeColours"
-				]
-			],
-			[
-				"hud",
-				[
-					"timeBarType", 
-					"hudOpacity", 
-					"hpOpacity", 
-					"timeOpacity", 
-					"judgeOpacity",
-					"stageOpacity", 
-					"scoreZoom", 
-					"npsDisplay", 
-					"hitbar", 
-					"showMS", 
-					"coloredCombos",
-					'worldCombos',
-					"simpleJudge",
-					"judgeCounter", 
-					'hudPosition', 
-					"customizeHUD",
-				]
-			],
-			[
-				"advanced", 
-				[
-					"etternaHUD", 
-					"gradeSet",
-					"showWifeScore"
-				]
-			]
-		],
-		"video" => [
-			["video", ["shaders", "showFPS"]],
-			["display", ["framerate", "bread"]],
-			[
-				"performance",
-				[
-					"lowQuality",
-					"globalAntialiasing",
-					"multicoreLoading",
-					"optimizeHolds",
-					"holdSubdivs",
-					"drawDistanceModifier" // apparently i forgot to add this in the new options thing lmao
-				]
-			]
-		],
-		"controls" => [
-            [
-                "keyboard", ["customizeKeybinds",]
-            ], 
-            [
-                "controller", ["controllerMode",]
-            ]
-        ],
-		
-		"misc" => [
-			//["audio", ["masterVolume", "songVolume", "hitsoundVolume", "missVolume"]],
-			#if discord_rpc
-			["discord", ["discordRPC"]],
-			#end
-			#if DO_AUTO_UPDATE
-			["updating", ["checkForUpdates", "downloadBetas"]]
-			#end
-		],
-		
-		/* "accessibility" => [
-				[
-					"gameplay", 
-					[
-						"flashing",
-						"camShakeP",
-						"camZoomP"
-					]
-				]
-			] */
-	];
-
-	static var optionOrder:Array<String> = [
-		"game",
-		"ui",
-		"video",
-		"controls",
-		#if (discord_rpc || DO_AUTO_UPDATE) "misc", #end 
-		/* "Accessibility" */
-	];
-
 	var selected:Int = 0;
+	var forceWidgetUpdate:Bool = false;
 
 	var buttons:Array<FlxSprite> = [];
 	var currentWidgets:Map<FlxObject, Widget> = [];
@@ -590,7 +594,8 @@ class OptionsSubstate extends MusicBeatSubstate
 		{
 			var tabName = optionOrder[idx];
 
-			var text = new FlxText(0, 0, 0, Paths.getString('opt_tabName_$tabName').toUpperCase(), 16);
+			var strKey = 'opt_tabName_$tabName';
+			var text = new FlxText(0, 0, 0, (Paths.hasString(strKey) ? Paths.getString(strKey) : tabName).toUpperCase(), 16);
 			#if tgt
 			text.setFormat(Paths.font("calibrib.ttf"), 32, 0xFFFFFFFF, CENTER);
 			#else
@@ -629,7 +634,8 @@ class OptionsSubstate extends MusicBeatSubstate
 			{
 				var label:String = data[0];
 
-				var text = new FlxText(8, daY, 0, Paths.getString('opt_label_$label'), 16);
+				var strKey = Paths.getString('opt_label_$label');
+				var text = new FlxText(8, daY, 0, (Paths.hasString(strKey) ? Paths.getString(strKey) : label), 16);
 				#if tgt
 				text.setFormat(Paths.font("calibrib.ttf"), 32, 0xFFFFFFFF, LEFT);
 				#else
