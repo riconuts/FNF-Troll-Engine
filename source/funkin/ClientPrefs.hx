@@ -51,8 +51,6 @@ class ClientPrefs
 		// public static inline final ghostTapping = false;
 	*/
 
-	public static inline final directionalCam = false;
-
 	static var defaultOptionDefinitions = getOptionDefinitions();
 	inline public static function getOptionDefinitions():Map<String, OptionData>
 	{

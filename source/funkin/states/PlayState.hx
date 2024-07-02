@@ -544,7 +544,7 @@ class PlayState extends MusicBeatState
 		////
         
 		if (SONG == null){
-			trace("null SONG");
+			trace("WARNING: null SONG");
 			SONG = Song.loadFromJson('tutorial', 'tutorial');
 		}
 

@@ -609,8 +609,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			{
 				var label:String = data[0];
 
-				var strKey = Paths.getString('opt_label_$label');
-				var text = new FlxText(8, daY, 0, (Paths.hasString(strKey) ? Paths.getString(strKey) : label), 16);
+				var text = new FlxText(8, daY, 0, Paths.getString('opt_label_$label'), 16);
 				#if tgt
 				text.setFormat(Paths.font("calibrib.ttf"), 32, 0xFFFFFFFF, LEFT);
 				#else
