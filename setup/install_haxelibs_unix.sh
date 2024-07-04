@@ -1,6 +1,6 @@
 #!/bin/sh
-haxelib --always --quiet install lime 8.0.2
-haxelib --always --quiet install openfl 9.2.2 
+haxelib --always --quiet install lime 8.1.2
+haxelib --always --quiet install openfl 9.3.1
 haxelib --always --quiet install flixel 5.3.1
 haxelib --always --quiet install flixel-ui 2.5.0
 haxelib --always --quiet install flixel-addons 3.1.1
