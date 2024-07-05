@@ -3444,11 +3444,11 @@ class PlayState extends MusicBeatState
 				//// WEEK END
 
 				// Save week score
-				if (saveScore && WeekData.curChapter != null && !playOpponent){
+				if (saveScore && WeekData.curWeek != null && !playOpponent){
 					if(!ClientPrefs.getGameplaySetting('practice', false) && !ClientPrefs.getGameplaySetting('botplay', false)) {
-						Highscore.saveWeekScore(WeekData.curChapter.directory, campaignScore);
+						Highscore.saveWeekScore(WeekData.curWeek.directory, campaignScore);
 						
-						Highscore.weekCompleted.set(WeekData.curChapter.directory, true);
+						Highscore.weekCompleted.set(WeekData.curWeek.directory, true);
 						FlxG.save.data.weekCompleted = Highscore.weekCompleted;
 						FlxG.save.flush();
 					}

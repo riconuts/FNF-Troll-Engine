@@ -724,6 +724,8 @@ class Paths
 
 
 	public static var modsList:Array<String> = [];
+	public static var contentMetadata:Map<String, ContentMetadata> = [];
+
 	#if MODS_ALLOWED
 	static final modFolderPath:String = "content/";
 
@@ -766,19 +768,11 @@ class Paths
 
 	static public function pushGlobalContent(){
 		globalContent = [];
-		for (mod in Paths.getModDirectories())
-		{
-			var path = Paths.mods('$mod/metadata.json');
-			var rawJson:Null<String> = Paths.getContent(path);
 
-			if (rawJson != null && rawJson.length > 0)
-			{
-				var json:Dynamic = Json.parse(rawJson);
-				var fuck:Bool = Reflect.field(json, "runsGlobally");
-				if (fuck){
-					globalContent.push(mod);
-				}
-			}
+		for (mod => json in getContentMetadata())
+		{
+			if (Reflect.field(json, "runsGlobally") == true) 
+				globalContent.push(mod);
 		}
 
 		return globalContent;
@@ -793,10 +787,6 @@ class Paths
 			if (FileSystem.exists(fileToCheck))
 				return fileToCheck;
 		}
-
-		var fileToCheck = mods('global/' + key);
-		if (FileSystem.exists(fileToCheck))
-			return fileToCheck;
 
 		if (!ignoreGlobal)
 		{
@@ -815,9 +805,12 @@ class Paths
 	// I might end up making this just return an array of loaded mods and require you to press a refresh button to reload content lol
 	// mainly for optimization reasons, so its not going through the entire content folder every single time
 
-	static public function getModDirectories():Array<String> 
+	public static function updateContentLists()
 	{
-		var list:Array<String> = [];
+		var list:Array<String> = modsList = [];
+		contentMetadata.clear();
+
+		trace("BEGIN");
 		if (FileSystem.exists(modFolderPath))
 		{
 			for (folder in FileSystem.readDirectory(modFolderPath))
@@ -826,12 +819,48 @@ class Paths
 				if (FileSystem.isDirectory(path) && !list.contains(folder))
 				{
 					list.push(folder);
+
+					var path = Paths.mods('$folder/metadata.json');
+					var rawJson:Null<String> = Paths.getContent(path);
+		
+					if (rawJson != null && rawJson.length > 0)
+					{
+						var json:Dynamic = Json.parse(rawJson);
+						portContentMetadataStructure(json);
+
+						trace(folder);
+						trace(Json.stringify(json, '\t'));
+
+						contentMetadata.set(folder, json);
+					}
 				}
 			}
 		}
-		modsList = list;
+	}
 
-		return list;
+	inline static function portContentMetadataStructure(data:Dynamic)
+	{
+		if (Reflect.field(data, "weeks") == null){
+			// tgt compat 
+			var chapters:Dynamic = Reflect.field(data, "chapters");
+			if (chapters != null){ 	
+				Reflect.setField(data, "weeks", chapters);
+				Reflect.deleteField(data, "chapters");
+			}else // old tgt
+				data = {weeks: [cast data]};
+		}
+	}
+
+	static public function getModDirectories():Array<String> 
+	{
+		updateContentLists();
+		return modsList;
+	}
+
+	static public function getContentMetadata() 
+	{
+		updateContentLists();
+		return contentMetadata;
 	}
 	#end
 
@@ -842,7 +871,6 @@ class Paths
 		#else
 		var foldersToCheck:Array<String> = [
 			Paths.mods(Paths.currentModDirectory + '/$dir/'),
-			Paths.mods('global/$dir/'),
 			Paths.mods('$dir/'),			
 		];
 

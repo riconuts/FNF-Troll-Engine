@@ -22,7 +22,7 @@ using StringTools;
 **/
 class SongSelectState extends MusicBeatState
 {	
-	var songMeta:Array<SongMetadata> = [];
+	var songMeta:Array<SongMetadata>;
 	var songText:Array<FlxText> = [];
 	var curSel(default, set):Int;
 	function set_curSel(sowy){
@@ -51,6 +51,30 @@ class SongSelectState extends MusicBeatState
 
 	var verticalLimit:Int;
 
+	public static function getEverySong():Array<SongMetadata>
+	{
+		var songMeta = [];
+
+		var folder = 'assets/songs/';
+		Paths.iterateDirectory(folder, function(name:String){
+			trace(name);
+			if (Paths.isDirectory(folder + name))
+				songMeta.push(new SongMetadata(name));
+		});
+
+		#if MODS_ALLOWED
+		for (modDir in Paths.getModDirectories()){
+			var folder = Paths.mods('$modDir/songs/');
+			Paths.iterateDirectory(folder, function(name:String){
+				if (FileSystem.isDirectory(folder + name))
+					songMeta.push(new SongMetadata(name, modDir));
+			});
+		}
+		#end
+
+		return songMeta;
+	}
+
 	override public function create() 
 	{
 		StartupState.load();
@@ -76,22 +100,7 @@ class SongSelectState extends MusicBeatState
 			FlxG.sound.music.fadeIn(1.0, FlxG.sound.music.volume);
 		}
 
-		var folder = 'assets/songs/';
-		Paths.iterateDirectory(folder, function(name:String){
-			trace(name);
-			if (Paths.isDirectory(folder + name))
-				songMeta.push(new SongMetadata(name));
-		});
-
-		#if MODS_ALLOWED
-		for (modDir in Paths.getModDirectories()){
-			var folder = Paths.mods('$modDir/songs/');
-			Paths.iterateDirectory(folder, function(name:String){
-				if (FileSystem.isDirectory(folder + name))
-					songMeta.push(new SongMetadata(name, modDir));
-			});
-		}
-		#end
+		songMeta = getEverySong();
 
 		var hPadding = 14;
 		var vPadding = 24;

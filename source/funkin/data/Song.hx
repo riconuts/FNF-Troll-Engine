@@ -180,15 +180,16 @@ class Song
 	} 
 }
 
+@:structInit
 class SongMetadata
 {
-	public var songName:String = "";
-	public var folder:String = "";
+	public var songName:String = '';
+	public var folder:String = '';
 	// public var charts:Array<String>;
 
-	public function new(song:String, ?folder:String = '')
+	public function new(songName:String, ?folder:String = '')
 	{
-		this.songName = song;
+		this.songName = songName;
 		this.folder = folder != null ? folder : '';
 	}
 }

@@ -17,9 +17,6 @@ import funkin.tgt.TGTMenuShit;
 import funkin.tgt.TGTSquareButton;
 import funkin.tgt.TGTTextButton;
 import funkin.tgt.SquareTransitionSubstate;
-#else
-import funkin.states.SongSelectState as FreeplayState;
-import funkin.states.SongSelectState as StoryMenuState;
 #end
 
 #end

@@ -40,13 +40,13 @@ typedef WeekMetadata = {
 class WeekData
 {
 	// public static var chaptersMap:Map<String, WeekMetadata> = new Map();
-	public static var chaptersList:Array<WeekMetadata> = [];
-	public static var curChapter:Null<WeekMetadata> = null;
+	public static var weekList:Array<WeekMetadata> = [];
+	public static var curWeek:Null<WeekMetadata> = null;
 
 	public static var weekCompleted(get, null):Map<String, Bool>;
 	@:noCompletion static function get_weekCompleted() return Highscore.weekCompleted;
 
-	public static function reloadChapterFiles():Array<WeekMetadata>
+	public static function reloadWeekFiles():Array<WeekMetadata>
 	{
 		var list:Array<WeekMetadata> = [];
 
@@ -56,27 +56,12 @@ class WeekData
 			list.push(chapter);
 		}
 
-		for (mod in Paths.getModDirectories()){
+		for (mod => daJson in Paths.getContentMetadata()){
 			Paths.currentModDirectory = mod;
-
-			var jsonPath:String = Paths.modFolders("metadata.json", false);
-			var daJson:Null<Dynamic> = Paths.getJson(jsonPath);
 
 			if (daJson != null)
             {
-				if (Reflect.field(daJson, "weeks") == null)
-				{
-					// tgt compat 
-					var chapters:Dynamic = Reflect.field(daJson, "chapters");
-					if (chapters != null){ 	
-						Reflect.setField(daJson, "weeks", chapters);
-						Reflect.deleteField(daJson, "chapters");
-					}else // old tgt
-						daJson = {weeks: [daJson]};
-				}
-
-				var data:ContentMetadata = cast daJson;
-				for (week in data.weeks)
+				for (week in daJson.weeks)
 					pushChapter(week, mod);
 			}
 
@@ -111,7 +96,7 @@ class WeekData
 		Paths.currentModDirectory = '';
         #end
 
-		chaptersList = list;
+		weekList = list;
 
 		return list;
 	}
