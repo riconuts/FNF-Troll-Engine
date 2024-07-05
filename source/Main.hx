@@ -113,23 +113,7 @@ class Main extends Sprite
 	}
 
 	private function setupGame():Void
-	{
-		final screenWidth = Capabilities.screenResolutionX;
-		final screenHeight = Capabilities.screenResolutionY;
-
-		//// Readjust the game size for smaller screens
-		if (zoom == -1)
-		{
-			if (!(screenWidth > gameWidth || screenHeight > gameWidth)){
-				var ratioX:Float = screenWidth / gameWidth;
-				var ratioY:Float = screenHeight / gameHeight;
-				
-				zoom = Math.min(ratioX, ratioY);
-				gameWidth = Math.ceil(screenWidth / zoom);
-				gameHeight = Math.ceil(screenHeight / zoom);
-			}
-		}
-	
+	{	
 		////		
 		var troll = false;
 
@@ -158,10 +142,26 @@ class Main extends Sprite
 		}else
 		#end
 		{
+			final screenWidth = Capabilities.screenResolutionX;
+			final screenHeight = Capabilities.screenResolutionY;
+	
+			//// Readjust the game size for smaller screens
+			if (zoom == -1)
+			{
+				if (!(screenWidth > gameWidth || screenHeight > gameWidth)){
+					var ratioX:Float = screenWidth / gameWidth;
+					var ratioY:Float = screenHeight / gameHeight;
+					
+					zoom = Math.min(ratioX, ratioY);
+					gameWidth = Math.ceil(screenWidth / zoom);
+					gameHeight = Math.ceil(screenHeight / zoom);
+				}
+			}
+
 			//// Readjust the window size for larger screens 
-			var scaleFactor:Int = Math.ceil((screenWidth > screenHeight) ? (screenHeight / gameHeight) : (screenWidth / gameWidth));
-			if (scaleFactor > 1) scaleFactor--;
-			
+			var scaleFactor:Int = Math.floor((screenWidth > screenHeight) ? (screenHeight / gameHeight) : (screenWidth / gameWidth));
+			if (scaleFactor < 1) scaleFactor = 1;
+
 			final windowWidth:Int = scaleFactor * gameWidth;
 			final windowHeight:Int = scaleFactor * gameHeight;
 

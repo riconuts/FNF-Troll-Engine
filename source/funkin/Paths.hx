@@ -827,10 +827,6 @@ class Paths
 					{
 						var json:Dynamic = Json.parse(rawJson);
 						portContentMetadataStructure(json);
-
-						trace(folder);
-						trace(Json.stringify(json, '\t'));
-
 						contentMetadata.set(folder, json);
 					}
 				}
