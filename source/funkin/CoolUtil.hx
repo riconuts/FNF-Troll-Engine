@@ -8,6 +8,14 @@ using StringTools;
 
 class CoolUtil
 {
+	inline public static function blankSprite(width, height, color){
+		var spr = new FlxSprite().makeGraphic(1,1);
+		spr.scale.set(width, height);
+		spr.updateHitbox();
+		spr.color = color;
+		return spr;
+	}
+
 	public static function makeOutlinedGraphic(Width:Int, Height:Int, Color:Int, LineThickness:Int, OutlineColor:Int)
 	{
 		var rectangle = flixel.graphics.FlxGraphic.fromRectangle(Width, Height, OutlineColor, true);

@@ -192,4 +192,7 @@ class SongMetadata
 		this.songName = songName;
 		this.folder = folder != null ? folder : '';
 	}
+
+	public function toString()
+		return '$folder:$songName';
 }

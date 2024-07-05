@@ -1,5 +1,6 @@
 package funkin.states;
 
+import funkin.data.Highscore;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.util.FlxColor;

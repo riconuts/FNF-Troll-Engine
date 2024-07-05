@@ -810,7 +810,6 @@ class Paths
 		var list:Array<String> = modsList = [];
 		contentMetadata.clear();
 
-		trace("BEGIN");
 		if (FileSystem.exists(modFolderPath))
 		{
 			for (folder in FileSystem.readDirectory(modFolderPath))
