@@ -1,22 +1,22 @@
 package openfl.display;
 
-import funkin.ClientPrefs;
+import openfl.text.Font;
+import flixel.FlxG;
+import flixel.math.FlxMath;
 
-import haxe.Timer;
-import openfl.events.Event;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
-import flixel.math.FlxMath;
+import openfl.text.TextFormatAlign;
+import openfl.system.System;
+import openfl.events.Event;
+import haxe.Timer;
+
 #if gl_stats
 import openfl.display._internal.stats.Context3DStats;
 import openfl.display._internal.stats.DrawCallContext;
 #end
 #if flash
 import openfl.Lib;
-#end
-
-#if openfl
-import openfl.system.System;
 #end
 
 /**
@@ -41,6 +41,29 @@ class FPS extends TextField
 	public var showMemory:Bool = true;
 	#end
 
+	public var align(default, set):TextFormatAlign;
+	function set_align(val) {		
+		return align = defaultTextFormat.align = switch (val){
+			default: 
+				this.x = 10;
+				autoSize = LEFT;
+				LEFT;
+
+			case CENTER: 
+				this.x = (this.stage.stageWidth - this.textWidth) * 0.5; 
+				autoSize = CENTER;
+				CENTER;
+
+			case RIGHT: 
+				this.x = (this.stage.stageWidth - this.textWidth) - 10; 
+				autoSize = RIGHT;
+				RIGHT;
+		}
+	}
+
+	function onGameResized(windowWidth, ?windowHeight)
+		align = align;
+
 	@:noCompletion private var cacheCount:Int;
 	@:noCompletion private var currentTime:Float;
 	@:noCompletion private var times:Array<Float>;
@@ -52,6 +75,18 @@ class FPS extends TextField
 		this.x = x;
 		this.y = y;
 
+		var textFormat = new TextFormat(null, 12, color);
+
+		#if tgt
+		embedFonts = true;
+		textFormat.size = 14;
+		textFormat.font = "Calibri";
+		#else
+		embedFonts = false;
+		textFormat.font = "_sans";
+		#end
+		defaultTextFormat = textFormat;
+
 		currentFPS = 0;
 		selectable = false;
 		mouseEnabled = false;
@@ -59,48 +94,37 @@ class FPS extends TextField
 		multiline = true;
 		text = "FPS: ";
 
-		var textFormat = new TextFormat(null, 12, color);
-
-		#if mobile
-		textFormat.align = CENTER;
-		autoSize = CENTER;
-
-		var onGameResize = (stageWidth, stageHeight)->
-			this.x = (stageWidth - this.width) / 2.0;
-		
-		FlxG.signals.gameResized.add(onGameResize);
-		onGameResize(FlxG.width, FlxG.height);
-
-		#else
-		autoSize = LEFT;
-		#end
-		
-		#if tgt
-		var fontPath = funkin.Paths.font("calibri.ttf");
-		if (Assets.exists(fontPath, openfl.utils.AssetType.FONT)){
-			embedFonts = true;
-			textFormat.size = 14;
-			textFormat.font = Assets.getFont(fontPath).fontName;
-		}
-		else
-		#end
-		{
-			embedFonts = false;
-			textFormat.font = "_sans";
-		}
-		defaultTextFormat = textFormat;
-
+		////
 		cacheCount = 0;
 		currentTime = 0;
 		times = [];
 
+		////
+		addEventListener(Event.ADDED_TO_STAGE, (e:Event)->{
+			if (align == null)
+				align = #if mobile CENTER #else LEFT #end;
+		});
+		
+		/*
+		addEventListener(openfl.events.KeyboardEvent.KEY_DOWN, (e)->{
+			if (e.keyCode == flixel.input.keyboard.FlxKey.F3)
+				this.align = switch (this.align){
+					case LEFT: CENTER;
+					case CENTER: RIGHT;
+					case RIGHT: LEFT;
+					default: LEFT;
+				}
+		});
+		*/
+
 		#if flash
-		addEventListener(Event.ENTER_FRAME, function(e)
-		{
+		addEventListener(Event.ENTER_FRAME, function(e){
 			var time = Lib.getTimer();
 			__enterFrame(time - currentTime);
 		});
 		#end
+
+		FlxG.signals.gameResized.add(onGameResized);
 
 		#if (debug && false)
 		FlxG.signals.preStateCreate.add((nextState)->{
@@ -122,12 +146,14 @@ class FPS extends TextField
 		}
 
 		var currentCount = times.length;
-		currentFPS = Math.ffloor((currentCount + cacheCount)* 0.5);
-		if (currentFPS > ClientPrefs.framerate)
-			currentFPS = ClientPrefs.framerate;
+		currentFPS = Math.ffloor((currentCount + cacheCount) * 0.5);
+		if (currentFPS > FlxG.drawFramerate)
+			currentFPS = FlxG.drawFramerate;
 
 		if (currentCount != cacheCount)
 		{
+			cacheCount = currentCount;
+
 			text = "FPS: " + currentFPS;
 			
 			if (showMemory)
@@ -137,7 +163,7 @@ class FPS extends TextField
 			text += '\nState: $currentState';
 			#end
 
-			if (currentFPS <= ClientPrefs.framerate * 0.5)
+			if (currentFPS <= FlxG.drawFramerate * 0.5)
 				textColor = 0xFFFF0000;
 			else
 				textColor = 0xFFFFFFFF;
@@ -148,7 +174,5 @@ class FPS extends TextField
 			text += "\nstage3DDC: " + Context3DStats.contextDrawCalls(DrawCallContext.STAGE3D);
 			#end
 		}
-
-		cacheCount = currentCount;
 	}
 }
