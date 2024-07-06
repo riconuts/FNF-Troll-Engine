@@ -48,7 +48,7 @@ class FunkinLua extends FunkinScript
 	public var camTarget:FlxCamera;
 	var gonnaClose:Bool = false;
 
-	public function new(script:String, ?name:String, ?ignoreCreateCall:Bool=false) {
+	public function new(script:String, ?name:String, ?ignoreCreateCall:Bool=false, ?vars:Map<String, Dynamic>) {
 		#if LUA_ALLOWED
 		lua = LuaL.newstate();
 		LuaL.openlibs(lua);
@@ -68,6 +68,9 @@ class FunkinLua extends FunkinScript
 
 		// Song/Week shit
 		setDefaultVars();
+        for(key => val in vars)
+            set(key, val);
+        
 
 		// Camera poo
 		set('cameraX', 0);
