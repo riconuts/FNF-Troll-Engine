@@ -4499,7 +4499,9 @@ class PlayState extends MusicBeatState
 
 	public function createLua(path:String, ?scriptName:String, ?ignoreCreateCall:Bool):FunkinLua
 	{
-        var modName:String = path.split("/")[1];
+        var split = path.split("/");
+        var modName:String = split[0] == "content" ? split[1] : 'assets';
+        
 		var script = new FunkinLua(path, scriptName, ignoreCreateCall, [
             "modName" => modName
         ]);
@@ -4521,7 +4523,8 @@ class PlayState extends MusicBeatState
 	#if HSCRIPT_ALLOWED
 	public function createHScript(path:String, ?scriptName:String, ?ignoreCreateCall:Bool):FunkinHScript
 	{
-        var modName:String = path.split("/")[1];
+        var split = path.split("/");
+        var modName:String = split[0] == "content" ? split[1] : 'assets';
 		var script = FunkinHScript.fromFile(path, scriptName, [
             "modName" => modName
         ], ignoreCreateCall!=true);
