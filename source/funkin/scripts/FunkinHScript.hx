@@ -359,9 +359,8 @@ class FunkinHScript extends FunkinScript
 	{
 		// same as importClass, but for enums
 		// and it cant have enum.*;
-		// EDIT this doesnt work
 		var splitted:Array<String> = enumName.split(".");
-		var daEnum = Type.resolveClass(enumName);
+		var daEnum = Type.resolveEnum(enumName);
 		if (daEnum != null)
 			set(splitted.pop(), daEnum);
 	}
