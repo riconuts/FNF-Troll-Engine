@@ -1208,16 +1208,12 @@ class CharacterEditorState extends MusicBeatState
 				if(FlxG.keys.justPressed.ENTER) {
 					inputTexts[i].hasFocus = false;
 				}
-				FlxG.sound.muteKeys = [];
-				FlxG.sound.volumeDownKeys = [];
-				FlxG.sound.volumeUpKeys = [];
+				StartupState.specialKeysEnabled = false;
 				super.update(elapsed);
 				return;
 			}
 		}
-		FlxG.sound.muteKeys = StartupState.muteKeys;
-		FlxG.sound.volumeDownKeys = StartupState.volumeDownKeys;
-		FlxG.sound.volumeUpKeys = StartupState.volumeUpKeys;
+		StartupState.specialKeysEnabled = true;
 
 		if (testMode){
 			if (controls.NOTE_LEFT_P){

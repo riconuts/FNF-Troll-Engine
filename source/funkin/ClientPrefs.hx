@@ -844,10 +844,6 @@ class ClientPrefs
 		StartupState.muteKeys = copyKey(keyBinds.get('volume_mute'));
 		StartupState.volumeDownKeys = copyKey(keyBinds.get('volume_down'));
 		StartupState.volumeUpKeys = copyKey(keyBinds.get('volume_up'));
-		
-		FlxG.sound.muteKeys = StartupState.muteKeys;
-		FlxG.sound.volumeDownKeys = StartupState.volumeDownKeys;
-		FlxG.sound.volumeUpKeys = StartupState.volumeUpKeys;
 	}
 
 	public static function copyKey(arrayToCopy:Array<FlxKey>):Array<FlxKey>

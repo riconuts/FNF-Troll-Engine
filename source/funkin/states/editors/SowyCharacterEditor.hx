@@ -180,16 +180,14 @@ class SowyCharacterEditor extends MusicBeatState
 	}
 
 	override function destroy(){
-		FlxG.sound.muteKeys = StartupState.muteKeys;
-		FlxG.sound.volumeDownKeys = StartupState.volumeDownKeys;
-		FlxG.sound.volumeUpKeys = StartupState.volumeUpKeys;
+		StartupState.specialKeysEnabled = true;
 
 		return super.destroy();
 	}
 
 	override function create()
 	{
-		FlxG.sound.volumeDownKeys = FlxG.sound.volumeUpKeys = FlxG.sound.muteKeys = [];
+		StartupState.specialKeysEnabled = false;
 
 		camGame = new FlxCamera();
 		camHUD = new FlxCamera();
