@@ -1285,20 +1285,25 @@ class PlayState extends MusicBeatState
 		char.y += char.positionArray[1];
 	}
 
-	public function startVideo(name:String)
+	var curVideo:VideoHandler = null;
+	public function startVideo(name:String):VideoHandler
 	{
-		#if VIDEOS_ALLOWED
+		#if !VIDEOS_ALLOWED
 		inCutscene = true;
+
+		FlxG.log.warn('Video not supported!');
+		startAndEnd();
+		return null;
+		#else
 
 		var filepath:String = Paths.video(name);
 		if (!Paths.exists(filepath))
 		{
 			FlxG.log.warn('Couldnt find video file: ' + name);
 			startAndEnd();
-			return;
+			return null;
 		}
-
-		var video:VideoHandler = new VideoHandler();
+		var video:VideoHandler = curVideo = new VideoHandler();
         #if (hxvlc)
         video.load(filepath);
 		video.onEndReached.add(() ->
@@ -1306,6 +1311,8 @@ class PlayState extends MusicBeatState
             video.dispose();
 			if (FlxG.game.contains(video))
 				FlxG.game.removeChild(video);
+			if (curVideo == video)
+				curVideo = null;
             startAndEnd();
 		});
         video.play();
@@ -1313,17 +1320,17 @@ class PlayState extends MusicBeatState
 		video.play(filepath);
 		video.onEndReached.add(()->{
 			video.dispose();
+
+			if (curVideo == video)
+				curVideo = null;
 			startAndEnd();
 		}, true);
 		#else
 		video.playVideo(filepath);
 		video.finishCallback = startAndEnd;
 		#end
-		
-		#else
-		FlxG.log.warn('Video not supported!');
-		startAndEnd();
-		return;
+
+		return video;
 		#end
 	}
 
@@ -4527,7 +4534,7 @@ class PlayState extends MusicBeatState
         var modName:String = split[0] == "content" ? split[1] : 'assets';
 		var script = FunkinHScript.fromFile(path, scriptName, [
             "modName" => modName
-        ], ignoreCreateCall!=true);
+        ], ignoreCreateCall != true);
 		hscriptArray.push(script);
 		funkyScripts.push(script);
 		return script;
