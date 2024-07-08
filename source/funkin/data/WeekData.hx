@@ -59,7 +59,7 @@ class WeekData
 		for (mod => daJson in Paths.getContentMetadata()){
 			Paths.currentModDirectory = mod;
 
-			if (daJson != null)
+			if (daJson != null && daJson.weeks != null)
             {
 				for (week in daJson.weeks)
 					pushChapter(week, mod);
