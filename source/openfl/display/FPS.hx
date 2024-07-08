@@ -29,17 +29,12 @@ import openfl.Lib;
 #end
 class FPS extends TextField
 {
-	/**
-		The current frame rate, expressed using frames-per-second
-	**/
+	/** The current frame rate, expressed using frames-per-second **/
 	public var currentFPS(default, null):Float = 0.0;
+	/** The current state class name **/
 	public var currentState(default, null):String = "";
-
-	#if final
-	public var showMemory:Bool = false;
-	#else
-	public var showMemory:Bool = true;
-	#end
+	/** Whether to show a memory usage counter or not **/
+	public var showMemory:Bool = #if final false #else true #end;
 
 	public var align(default, set):TextFormatAlign;
 	function set_align(val) {		
@@ -154,7 +149,7 @@ class FPS extends TextField
 		{
 			cacheCount = currentCount;
 
-			text = "FPS: " + currentFPS;
+			text = 'FPS: $currentFPS';
 			
 			if (showMemory)
 				text += ' • Memory: ${Math.abs(FlxMath.roundDecimal(System.totalMemory / 1000000, 1))}MB';
