@@ -43,7 +43,7 @@ class StartupState extends FlxTransitionableState
 	public static var fullscreenKeys:Array<FlxKey> = [FlxKey.F11];
 	public static var specialKeysEnabled(default, set):Bool;
 
-	inline public static function set_specialKeysEnabled(val)
+	@:noCompletion inline public static function set_specialKeysEnabled(val)
 	{
 		if (val) {
 			FlxG.sound.muteKeys = StartupState.muteKeys;
@@ -101,10 +101,8 @@ class StartupState extends FlxTransitionableState
 					e.stopImmediatePropagation();
 
 				// Also add F11 to switch fullscreen mode
-				if (specialKeysEnabled && fullscreenKeys.contains(e.keyCode)){
+				if (specialKeysEnabled && fullscreenKeys.contains(e.keyCode))
 					FlxG.fullscreen = !FlxG.fullscreen;
-					e.stopImmediatePropagation();
-				}
 			}, 
 			false, 
 			100

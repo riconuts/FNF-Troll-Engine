@@ -1,5 +1,9 @@
 package funkin.states.options;
 
+import funkin.CoolUtil.overlapsMouse as overlaps;
+import funkin.states.options.*;
+import funkin.ClientPrefs;
+
 import flixel.graphics.FlxGraphic;
 import flixel.input.keyboard.FlxKey;
 import flixel.tweens.FlxEase;
@@ -9,13 +13,10 @@ import flixel.addons.transition.FlxTransitionableState;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 import flixel.group.FlxGroup.FlxTypedGroup;
-import openfl.geom.Rectangle;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.addons.ui.FlxUI9SliceSprite;
-
-import funkin.ClientPrefs;
-import funkin.states.options.*;
+import openfl.geom.Rectangle;
 
 #if discord_rpc
 import funkin.api.Discord;
@@ -450,27 +451,7 @@ class OptionsSubstate extends MusicBeatSubstate
 
 	var openedDropdown:Widget;
 
-	@:noCompletion
-	var _point:FlxPoint = FlxPoint.get();
-	@:noCompletion
-	var _mousePoint:FlxPoint = FlxPoint.get();
-
-	function overlaps(object:FlxObject, ?camera:FlxCamera)
-	{
-		if (camera == null)
-			camera = optionCamera;
-
-		_point = FlxG.mouse.getPositionInCameraView(camera, _point);
-		if (camera.containsPoint(_point))
-		{
-			_point = FlxG.mouse.getWorldPosition(camera, _point);
-			if (object.overlapsPoint(_point, true, camera))
-				return true;
-		}
-
-		return false;
-	}
-
+	@:noCompletion var _mousePoint:FlxPoint = FlxPoint.get();
 
 	var optionDesc:FlxText;
 
@@ -546,7 +527,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			FlxColor.fromRGB(70, 70, 70)
 		));
 		if (FlxG.width - 160 < optionMenu.width + 160) optionMenu.x = Math.floor((FlxG.width - optionMenu.width)/2);
-		optionMenu.alpha = 0.8;
+		optionMenu.alpha = 0.6;
 		add(optionMenu);
 
 		optionCamera.width = Std.int(optionMenu.width);
@@ -649,6 +630,7 @@ class OptionsSubstate extends MusicBeatSubstate
 					text.y += (height - text.height) / 2;
 					
 					var drop:FlxUI9SliceSprite = new FlxUI9SliceSprite(rect.x, rect.y, backdropGraphic, rect, backdropSlice);
+					drop.alpha = 0.95;
 					drop.cameras = [optionCamera];
 					group.add(drop);
 					
@@ -1035,7 +1017,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				{
 					if (FlxG.mouse.justPressed)
 					{
-						if (overlaps(optBox))
+						if (overlaps(optBox, optionCamera))
 						{
 							checkbox.toggled = !checkbox.toggled;
 							changeToggleW(widget, checkbox.toggled);
@@ -1066,7 +1048,7 @@ class OptionsSubstate extends MusicBeatSubstate
 					if (FlxG.mouse.justPressed)
 					{
 						var interacted:Bool = false;
-						if (overlaps(optBox))
+						if (overlaps(optBox, optionCamera))
 						{
 							if (openedDropdown == widget)
 								openedDropdown = null;
@@ -1161,7 +1143,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				var newVal = oldVal;
 				if (!widget.locked)
 				{
-					if (FlxG.mouse.justPressed && overlaps(box) || FlxG.mouse.pressed && scrubbingBar == bar)
+					if (FlxG.mouse.justPressed && overlaps(box, optionCamera) || FlxG.mouse.pressed && scrubbingBar == bar)
 					{
 						scrubbingBar = bar;
 						_mousePoint = FlxG.mouse.getWorldPosition(optionCamera, _mousePoint);
@@ -1200,7 +1182,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			case Button:
 				if (!widget.locked)
 				{
-					if (FlxG.mouse.justPressed && overlaps(optBox))
+					if (FlxG.mouse.justPressed && overlaps(optBox, optionCamera))
 						onButtonPressed(widget.optionData.data.get("optionName"));
 				}
 		}
@@ -1583,7 +1565,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			{
 				for (object => widget in currentWidgets)
 				{
-					if (movedMouse && widget != pHov && overlaps(widget.data.get("optionBox")))
+					if (movedMouse && widget != pHov && overlaps(widget.data.get("optionBox"), optionCamera))
 					{
 						changeWidget(null); // to reset keyboard selection
 						curWidget = widget;
@@ -1662,7 +1644,6 @@ class OptionsSubstate extends MusicBeatSubstate
 
 	override function destroy()
 	{
-		_point.put();
 		_mousePoint.put();
 		Main.volumeChangedEvent.remove(onVolumeChange);
 

@@ -709,6 +709,7 @@ class ClientPrefs
 		'volume_mute' => [ZERO, NONE],
 		'volume_up' => [NUMPADPLUS, PLUS],
 		'volume_down' => [NUMPADMINUS, MINUS],
+		'fullscreen' => [F11, NONE],
 		'debug_1' => [SEVEN, NONE],
 		'debug_2' => [EIGHT, NONE],
 		'botplay' => [F6, NONE]
@@ -844,6 +845,7 @@ class ClientPrefs
 		StartupState.muteKeys = copyKey(keyBinds.get('volume_mute'));
 		StartupState.volumeDownKeys = copyKey(keyBinds.get('volume_down'));
 		StartupState.volumeUpKeys = copyKey(keyBinds.get('volume_up'));
+		StartupState.fullscreenKeys = copyKey(keyBinds.get("fullscreen"));
 	}
 
 	public static function copyKey(arrayToCopy:Array<FlxKey>):Array<FlxKey>

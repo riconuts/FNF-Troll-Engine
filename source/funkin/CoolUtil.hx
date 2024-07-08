@@ -8,6 +8,23 @@ using StringTools;
 
 class CoolUtil
 {
+	@:noCompletion static var _point:FlxPoint = FlxPoint.get();
+	public static function overlapsMouse(object:FlxObject, ?camera:FlxCamera):Bool
+	{
+		if (camera == null)
+			camera = FlxG.camera;
+
+		_point = FlxG.mouse.getPositionInCameraView(camera, _point);
+		if (camera.containsPoint(_point))
+		{
+			_point = FlxG.mouse.getWorldPosition(camera, _point);
+			if (object.overlapsPoint(_point, true, camera))
+				return true;
+		}
+
+		return false;
+	}
+
 	inline public static function blankSprite(width, height, color){
 		var spr = new FlxSprite().makeGraphic(1,1);
 		spr.scale.set(width, height);

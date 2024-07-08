@@ -205,6 +205,7 @@ control_back=Back
 control_volume_mute=Mute
 control_volume_up=Volume Up
 control_volume_down=Volume Down
+control_fullscreen=Fullscreen
 control_debug_1=Chart Editor
 control_debug_2=Character Editor
 control_botplay=Toggle Botplay
