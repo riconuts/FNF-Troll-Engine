@@ -1966,7 +1966,7 @@ class PlayState extends MusicBeatState
 						}
 						else #end if (ext == 'hscript')
 						{
-							createHScript(file, event);
+							var script = createHScript(file, event);
 							eventScripts.set(event, script);
 							script.call("onLoad");
 							doPush = true;
