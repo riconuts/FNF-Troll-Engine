@@ -13,6 +13,8 @@ class VideoPlayerState extends MusicBeatState
 	final isSkippable:Bool;
 	final onComplete:Void -> Void;
 
+	public var autoDestroy:Bool = true;
+
 	public function new(videoPath:String, onComplete:Void -> Void, isSkippable:Bool = true)
 	{
 		super();
@@ -44,7 +46,6 @@ class VideoPlayerState extends MusicBeatState
 			video.onEndReached.add(function()
 			{
 				onComplete();
-				video.dispose();
 			});
 			video.load(videoPath);
             video.play();
@@ -52,9 +53,6 @@ class VideoPlayerState extends MusicBeatState
 			video = new VideoHandler();
 			video.onEndReached.add(function(){
 				onComplete();
-				video.dispose();
-				if (FlxG.game.contains(video))
-					FlxG.game.removeChild(video);
             });
 			video.play(videoPath);
             #else
@@ -68,13 +66,22 @@ class VideoPlayerState extends MusicBeatState
 
 	#if VIDEOS_ALLOWED
 	override public function update(e) {
-		if (isSkippable && controls.ACCEPT){
-			video.stop();
-			video.dispose();
+		if (isSkippable && controls.ACCEPT)
 			onComplete();
-		}
 
 		super.update(e);
+	}
+
+	override public function destroy(){
+		#if hxvlc
+		video.stop();
+		video.dispose();
+		#elseif(hxCodec >= "3.0.0")
+		if (FlxG.game.contains(video))
+			FlxG.game.removeChild(video);
+		#end
+
+		super.destroy();
 	}
 	#end
 }
