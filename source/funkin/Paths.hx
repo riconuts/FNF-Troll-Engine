@@ -662,13 +662,13 @@ class Paths
 		#end
 
 		var gottenPath:String = getPath('$path/$key.$SOUND_EXT', SOUND, library);
-		#if html
+		#if html5
 		gottenPath = gottenPath.substring(gottenPath.indexOf(':') + 1, gottenPath.length);
 		#end
 
 		var sound:Null<Sound> = currentTrackedSounds.get(gottenPath);
 		if (sound == null){
-			#if !html
+			#if !html5
 			sound = Sound.fromFile('./' + gottenPath);
 			#else
 			sound = Assets.getSound(/*(path == 'songs' ? 'songs:' : '') +*/ gottenPath);
