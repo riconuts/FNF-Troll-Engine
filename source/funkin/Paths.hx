@@ -673,6 +673,13 @@ class Paths
 			#else
 			sound = Assets.getSound(/*(path == 'songs' ? 'songs:' : '') +*/ gottenPath);
 			#end
+
+			if (sound.bytesTotal + sound.length <= 0)
+			{
+				/// fuckkk man
+				trace('Sound file $gottenPath not found!');
+				return null;
+			}
 			
 			currentTrackedSounds.set(gottenPath, sound);
 		}
