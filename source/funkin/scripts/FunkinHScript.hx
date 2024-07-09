@@ -105,6 +105,9 @@ class FunkinHScript extends FunkinScript
 		set("IntMap", haxe.ds.IntMap);
 		set("EnumValueMap", haxe.ds.EnumValueMap);
 
+		set("Date", Date);
+		set("DateTools", DateTools);
+
 		set("FlxG", FlxG);
 		set("FlxSprite", FlxSprite);
 		set("FlxCamera", FlxCamera);
