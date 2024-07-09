@@ -47,25 +47,19 @@ import openfl.events.KeyboardEvent;
 import openfl.filters.BitmapFilter;
 import openfl.filters.ShaderFilter;
 
-#if sys
-import sys.FileSystem;
-import sys.io.File;
-#end
+using StringTools;
 
 #if discord_rpc
 import funkin.api.Discord.DiscordClient;
 #end
 
-#if VIDEOS_ALLOWED 
-#if (hxCodec >= "3.0.0") import hxcodec.flixel.FlxVideo as VideoHandler;
+#if (!VIDEOS_ALLOWED) typedef VideoHandler = Dynamic;
+#elseif (hxCodec >= "3.0.0") import hxcodec.flixel.FlxVideo as VideoHandler;
 #elseif (hxCodec >= "2.6.1") import hxcodec.VideoHandler as VideoHandler;
 #elseif (hxCodec == "2.6.0") import VideoHandler;
 #elseif (hxCodec) import vlc.MP4Handler as VideoHandler; 
 #elseif (hxvlc) import hxvlc.flixel.FlxVideo as VideoHandler;
 #end
-#end
-
-using StringTools;
 
 /*
 okay SO im gonna explain how these work
