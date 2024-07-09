@@ -570,7 +570,7 @@ class ClientPrefs
 				display: "Antialiasing",
 				desc: "When toggled, sprites are able to be antialiased.",
 				type: Toggle,
-				value: false,
+				value: true,
 				data: []
 			},
 			"multicoreLoading" => {
