@@ -123,7 +123,7 @@ class ChartingState extends MusicBeatState
 	var highlight:FlxSprite;
 
 	public static var GRID_SIZE:Int = 40;
-	var CAM_OFFSET:Int = 199;
+	var CAM_OFFSET:Int = GRID_SIZE * 5;
 
 	var dummyArrow:FlxSprite;
 
@@ -142,13 +142,13 @@ class ChartingState extends MusicBeatState
 	var curUndoIndex = 0;
 	var curRedoIndex = 0;
 	var _song:SwagSong;
-	/*
-	 * WILL BE THE CURRENT / LAST PLACED NOTE
-	**/
+	/* WILL BE THE CURRENT / LAST PLACED NOTE */
 	var curSelectedNote:Array<Dynamic> = null;
 
-	var heldNotesClick:Array<Array<Dynamic>> = []; // HELD NOTE FROM CLICKING
-	var heldNotesVortex:Array<Array<Dynamic>> = []; // HELD NOTES FROM VORTEX
+	/** HELD NOTE FROM CLICKING **/
+	private var heldNotesClick:Array<Array<Dynamic>> = []; 
+	/** HELD NOTES FROM VORTEX **/
+	private var heldNotesVortex:Array<Array<Dynamic>> = []; 
 
 	var tempBpm:Float = 0;
 
@@ -228,6 +228,9 @@ class ChartingState extends MusicBeatState
 
 	override function create()
 	{
+		persistentUpdate = true;
+		persistentDraw = true;
+
 		instance = this;
 		PlayState.chartingMode = true;
 
@@ -344,6 +347,12 @@ class ChartingState extends MusicBeatState
 		strumLine = new FlxSprite(0, 50).makeGraphic(Std.int(GRID_SIZE * 9), 4);
 		add(strumLine);
 
+		camPos = new FlxObject();
+		camPos.setPosition(strumLine.x + CAM_OFFSET, strumLine.y);
+		add(camPos);
+
+		FlxG.camera.follow(camPos);
+
 		quant = new AttachedSprite('chart_quant','chart_quant');
 		quant.animation.addByPrefix('q','chart_quant',0,false);
 		quant.animation.play('q', true, false, 0);
@@ -362,9 +371,6 @@ class ChartingState extends MusicBeatState
 			note.scrollFactor.set(1, 1);
 		}
 		add(strumLineNotes);
-
-		camPos = new FlxObject(0, 0, 1, 1);
-		camPos.setPosition(strumLine.x + CAM_OFFSET, strumLine.y);
 
 		dummyArrow = new FlxSprite().makeGraphic(GRID_SIZE, GRID_SIZE);
 		add(dummyArrow);
@@ -401,9 +407,32 @@ class ChartingState extends MusicBeatState
 			{name: "Charting", label: 'Charting'},
 		];
 
+		var ui_start = {
+			var chart_grid_end = FlxG.width / 2 + GRID_SIZE * 4;
+
+			var ui_width_grid_snapped = Math.ceil(300 / GRID_SIZE) * GRID_SIZE;
+			var chart_grid_offset = ui_width_grid_snapped - 300;
+
+			var ui_start = chart_grid_end + chart_grid_offset;
+			var ui_end = chart_grid_end + ui_width_grid_snapped + 300;
+
+			var ui_space_leftover = (FlxG.width - chart_grid_end) - ui_width_grid_snapped;
+			
+			if (ui_space_leftover < 0){
+				ui_start += ui_space_leftover;
+				camPos.x -= ui_space_leftover;
+			}else if (ui_space_leftover <= GRID_SIZE * 2){
+				ui_start += ui_space_leftover / 2;
+			}else if (ui_space_leftover > GRID_SIZE * 2){
+				ui_start += ui_space_leftover - GRID_SIZE;
+			}
+
+			ui_start;
+		}
+
 		UI_box = new FlxUITabMenu(null, tabs, true);
 		UI_box.resize(300, 400);
-		UI_box.setPosition(FlxG.width - 300 - GRID_SIZE * 2, 25);
+		UI_box.setPosition(ui_start, 25);
 		UI_box.scrollFactor.set();
 		add(UI_box);
 
@@ -440,6 +469,11 @@ class ChartingState extends MusicBeatState
 		updateHeads();
 
 		super.create();
+	}
+
+	override function startOutro(fuck){
+		this.persistentUpdate = false;
+		super.startOutro(fuck);
 	}
 
 	function fixEvents(){
@@ -702,8 +736,6 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(stageDropDown);
 
 		UI_box.addGroup(tab_group_song);
-
-		FlxG.camera.follow(camPos);
 	}
 
 	var stepperBeats:FlxUINumericStepper;
