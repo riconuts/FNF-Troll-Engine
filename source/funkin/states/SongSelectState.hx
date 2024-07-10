@@ -187,7 +187,7 @@ class SongSelectState extends MusicBeatState
 		}
 
 		if (controls.ACCEPT){
-			var charts = SongChartSelec.getCharts(songMeta[curSel]);
+			var charts = Song.getCharts(songMeta[curSel]);
 
 			trace(charts);
 			
@@ -276,47 +276,4 @@ class SongChartSelec extends MusicBeatState
 		songMeta = WHO;
 		this.alts = alts;
 	}
-
-	public static function getCharts(metadata:SongMetadata):Array<String>
-	{
-		Paths.currentModDirectory = metadata.folder;
-		final songName = Paths.formatToSongPath(metadata.songName);
-		
-		trace(songName, metadata.folder);
-
-		final charts = new haxe.ds.StringMap();
-		function processFileName(fileName:String)
-		{			
-			if (fileName == '$songName.json'){
-				charts.set("normal", true);
-				return;
-			}
-			else if (!fileName.startsWith('$songName-') || !fileName.endsWith('.json')){
-				return;
-			}
-
-			final extension_dot = songName.length + 1;
-			charts.set(fileName.substr(extension_dot, fileName.length - extension_dot - 5), true);
-		}
-
-
-		if (metadata.folder == "")
-		{
-			#if PE_MOD_COMPATIBILITY
-			Paths.iterateDirectory(Paths.getPath('data/$songName/'), processFileName);
-			#end
-			Paths.iterateDirectory(Paths.getPath('songs/$songName/'), processFileName);
-		}
-		#if MODS_ALLOWED
-		else
-		{
-			#if PE_MOD_COMPATIBILITY
-			Paths.iterateDirectory(Paths.mods('${metadata.folder}/data/$songName/'), processFileName);
-			#end
-			Paths.iterateDirectory(Paths.mods('${metadata.folder}/songs/$songName/'), processFileName);
-		}
-		#end
-
-		return [for (name in charts.keys()) name];
-	} 
 }

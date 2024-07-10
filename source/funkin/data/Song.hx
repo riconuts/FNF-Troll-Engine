@@ -82,20 +82,19 @@ class Song
 			songJson.extraTracks = [];
 		}
 
-		if(songJson.events == null)
-		{
+		if(songJson.events == null){
 			songJson.events = [];
+			
 			for (secNum in 0...songJson.notes.length)
 			{
 				var sec:SwagSection = songJson.notes[secNum];
-
-				var i:Int = 0;
 				var notes:Array<Dynamic> = sec.sectionNotes;
 				var len:Int = notes.length;
+				var i:Int = 0;
 				while(i < len)
 				{
 					var note:Array<Dynamic> = notes[i];
-					if(note[1] < 0)
+					if (note[1] < 0)
 					{
 						songJson.events.push([note[0], [[note[2], note[3], note[4]]]]);
 						notes.remove(note);
@@ -115,6 +114,47 @@ class Song
 		this.song = song;
 		this.notes = notes;
 		this.bpm = bpm;
+	}
+
+	public static function getCharts(metadata:SongMetadata):Array<String>
+	{
+		Paths.currentModDirectory = metadata.folder;
+		final songName = Paths.formatToSongPath(metadata.songName);
+		final charts = new haxe.ds.StringMap();
+		
+		function processFileName(fileName:String)
+		{			
+			if (fileName == '$songName.json'){
+				charts.set("normal", true);
+				return;
+			}
+			else if (!fileName.startsWith('$songName-') || !fileName.endsWith('.json')){
+				return;
+			}
+
+			final extension_dot = songName.length + 1;
+			charts.set(fileName.substr(extension_dot, fileName.length - extension_dot - 5), true);
+		}
+
+
+		if (metadata.folder == "")
+		{
+			#if PE_MOD_COMPATIBILITY
+			Paths.iterateDirectory(Paths.getPath('data/$songName/'), processFileName);
+			#end
+			Paths.iterateDirectory(Paths.getPath('songs/$songName/'), processFileName);
+		}
+		#if MODS_ALLOWED
+		else
+		{
+			#if PE_MOD_COMPATIBILITY
+			Paths.iterateDirectory(Paths.mods('${metadata.folder}/data/$songName/'), processFileName);
+			#end
+			Paths.iterateDirectory(Paths.mods('${metadata.folder}/songs/$songName/'), processFileName);
+		}
+		#end
+
+		return [for (name in charts.keys()) name];
 	}
 
 	public static function loadFromJson(jsonInput:String, ?folder:String):SwagSong
@@ -185,7 +225,9 @@ class SongMetadata
 {
 	public var songName:String = '';
 	public var folder:String = '';
-	// public var charts:Array<String>;
+	public var charts(get, null):Array<String>;
+	function get_charts()
+		return (charts == null) ? charts = Song.getCharts(this) : charts;
 
 	public function new(songName:String, ?folder:String = '')
 	{
