@@ -769,7 +769,7 @@ class CharacterEditorState extends MusicBeatState
 
 	var ghostList:Array<String>;
 	function updateGhostCharList(){
-		ghostList = Character.getCharacterList();
+		ghostList = Character.getAllCharacters();
 		ghostList.insert(0, "");
 		ghostCharDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(ghostList, true));
 	}
@@ -1160,7 +1160,7 @@ class CharacterEditorState extends MusicBeatState
 	}
 
 	function reloadCharacterDropDown() {
-		characterList = Character.getCharacterList();
+		characterList = Character.getAllCharacters();
 
 		charDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(characterList, true));
 		charDropDown.selectedLabel = daAnim;

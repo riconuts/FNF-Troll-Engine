@@ -606,7 +606,7 @@ class ChartingState extends MusicBeatState
 		blockPressWhileTypingOnStepper.push(stepperSpeed);
 
 		////
-		var characters:Array<String> = Character.getCharacterList();
+		var characters:Array<String> = Character.getAllCharacters();
         var skins:Array<String> = ['default'];
         #if MODS_ALLOWED
 		var skinsLoaded:Map<String, Bool> = new Map();

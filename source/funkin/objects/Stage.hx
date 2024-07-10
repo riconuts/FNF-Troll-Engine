@@ -217,18 +217,20 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		Returns an array with every stage in the stages folder(s).
 	**/
 	#if !sys
-	private static var _stageCache:Null<Array<String>> = null;
+	@:noCompletion private static var _listCache:Null<Array<String>> = null;
 	#end
 	public static function getAllStages(modsOnly = false):Array<String>
 	{
 		#if !sys
-		if (_stageCache != null)
-			return _stageCache;
+		if (_listCache != null)
+			return _listCache;
 
-		var stages:Array<String> = _stageCache = [];
+		var stages:Array<String> = _listCache = [];
 		#else
 		var stages:Array<String> = [];
 		#end
+
+		var _stages = new Map<String, Bool>();
 
 		function readFileNameAndPush(fileName: String){
 			if (fileName==null)return;
@@ -236,21 +238,19 @@ class Stage extends FlxTypedGroup<FlxBasic>
 			if (!fileName.endsWith(".json")) return;
 
 			var name = fileName.substr(0, fileName.length - 5);
-			if(!stages.contains(name))stages.push(name);
+			_stages.set(name, true);
 		}
 		
 		for (folderPath in Paths.getFolders("stages", true)){
-			if (Paths.isDirectory(folderPath)){
-				Paths.iterateDirectory(folderPath, readFileNameAndPush);
-			}
+			Paths.iterateDirectory(folderPath, readFileNameAndPush);
 		}
 
 		if (!modsOnly){
-			var folderPath = Paths.getPath('stages/');
-			if (Paths.isDirectory(folderPath)){
-				Paths.iterateDirectory(folderPath, readFileNameAndPush);
-			}
+			Paths.iterateDirectory(Paths.getPath('stages/'), readFileNameAndPush);
 		}
+
+		for (name in _stages.keys())
+			stages.push(name);
 
 		return stages;
 	}

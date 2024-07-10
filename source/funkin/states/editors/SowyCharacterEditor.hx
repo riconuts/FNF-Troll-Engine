@@ -263,7 +263,7 @@ class SowyCharacterEditor extends MusicBeatState
 		openDropdown(null);
 		
 
-	var characterList:Array<String> = Character.getCharacterList();
+	var characterList:Array<String> = Character.getAllCharacters();
 
 	function makeUI()
 	{
@@ -289,7 +289,7 @@ class SowyCharacterEditor extends MusicBeatState
 
 		ui_dropdown = new DropdownList();
 		ui_dropdown.cameras = [ui_dd_cam];
-		ui_dropdown.setElements(Character.getCharacterList());
+		ui_dropdown.setElements(Character.getAllCharacters());
 		ui_dropdown.exists = false;
 		add(ui_dropdown);
 

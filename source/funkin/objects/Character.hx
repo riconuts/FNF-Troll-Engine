@@ -10,10 +10,6 @@ import haxe.Json;
 import funkin.scripts.*;
 using flixel.util.FlxColorTransformUtil;
 using StringTools;
-#if MODS_ALLOWED
-import sys.FileSystem;
-import sys.io.File;
-#end
 
 typedef CharacterFile = {
 	var animations:Array<AnimArray>;
@@ -795,32 +791,43 @@ class Character extends FlxSprite
     }
 
 	/**
-		Returns an array with all the characters contained in the characters folder(s)
+		Returns an array with every character file in the characters folder(s).
 	**/
-	public static function getCharacterList():Array<String>
+	#if !sys
+	@:noCompletion private static var _listCache:Null<Array<String>> = null;
+	#end
+	public static function getAllCharacters(modsOnly = false):Array<String>
 	{
-		#if MODS_ALLOWED
-		var charsLoaded:Map<String, Bool> = new Map();
-		var characterList = [];
-		var directories:Array<String> = Paths.getFolders('characters');
-		for (i in 0...directories.length) {
-			var directory:String = directories[i];
-			if (FileSystem.exists(directory)) {
-				for (file in FileSystem.readDirectory(directory)) {
-					var path = haxe.io.Path.join([directory, file]);
-					if (!FileSystem.isDirectory(path) && file.endsWith('.json')) {
-						var charToCheck:String = file.substr(0, file.length - 5);
-						if(!charsLoaded.exists(charToCheck)) {
-							characterList.push(charToCheck);
-							charsLoaded.set(charToCheck, true);
-						}
-					}
-				}
-			}
-		}
-		return characterList;
+		#if !sys
+		if (_listCache != null)
+			return _listCache;
+
+		var characters:Array<String> = _listCache = [];
 		#else
-		return CoolUtil.coolTextFile(Paths.txt('characterList'));
+		var characters:Array<String> = [];
 		#end
+
+		var _characters = new Map<String, Bool>();
+
+		function readFileNameAndPush(fileName:String){
+			if (fileName==null || !fileName.endsWith(".json"))
+				return;
+
+			var name = fileName.substr(0, fileName.length - 5);
+			_characters.set(name, true);
+		}
+		
+		for (folderPath in Paths.getFolders("characters", true)){
+			Paths.iterateDirectory(folderPath, readFileNameAndPush);
+		}
+
+		if (!modsOnly){
+			Paths.iterateDirectory(Paths.getPath('characters/'), readFileNameAndPush);
+		}
+
+		for (name in _characters.keys())
+			characters.push(name);
+
+		return characters;
 	}
 }
