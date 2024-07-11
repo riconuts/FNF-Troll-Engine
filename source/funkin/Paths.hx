@@ -276,6 +276,10 @@ class Paths
 		return dirMap;
 	}
 	
+	/** 
+		Iterates through a directory and calls a function with the name of each file contained within it
+		Returns true if the directory was a valid folder and false if not.
+	**/
 	inline static public function iterateDirectory(Directory:String, Func:haxe.Constraints.Function)
 	{
 		var dir:String = Directory.endsWith("/") ? Directory.substr(0, -1) : Directory; // remove ending slash
@@ -291,14 +295,17 @@ class Paths
 
 	#else
 
-	/** Iterates through a directory and call a function with the name of each file contained within it**/
-	inline static public function iterateDirectory(Directory:String, Func:haxe.Constraints.Function):Bool
+	/** 
+		Iterates through a directory and calls a function with the name of each file contained within it
+		Returns true if the directory was a valid folder and false if not.
+	**/
+	inline static public function iterateDirectory(path:String, func:haxe.Constraints.Function):Bool
 	{
-		if (!FileSystem.exists(Directory) || !FileSystem.isDirectory(Directory))
+		if (!FileSystem.exists(path) || !FileSystem.isDirectory(path))
 			return false;
 		
-		for (name in FileSystem.readDirectory(Directory))
-			Func(name);
+		for (name in FileSystem.readDirectory(path))
+			func(name);
 
 		return true;
 	}
