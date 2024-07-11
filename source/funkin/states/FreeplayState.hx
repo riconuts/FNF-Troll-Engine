@@ -202,7 +202,7 @@ class FreeplayState extends MusicBeatState
 
 		}
 
-		lerpHighscore = targetHighscore; //CoolUtil.coolLerp(lerpHighscore, targetHighscore, elapsed * 12);
+		lerpHighscore = CoolUtil.coolLerp(lerpHighscore, targetHighscore, elapsed * 12);
 		scoreText.text = 'PERSONAL BEST: ${Math.round(lerpHighscore)}';
 
 		super.update(elapsed);

@@ -25,6 +25,9 @@ class CoolUtil
 		return false;
 	}
 
+	inline public static function coolLerp(current:Float, target:Float, elapsed:Float):Float
+		return FlxMath.lerp(target, current, Math.exp(-elapsed));
+
 	inline public static function blankSprite(width, height, color){
 		var spr = new FlxSprite().makeGraphic(1,1);
 		spr.scale.set(width, height);
