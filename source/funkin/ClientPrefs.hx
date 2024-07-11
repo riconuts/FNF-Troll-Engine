@@ -408,7 +408,7 @@ class ClientPrefs
 				desc: "When toggled, combo sprites are placed on the stage instead of the HUD."
 				+ '\nDoesn'+"'"+'t work with "Alt Judgements" enabled.',
 				type: Toggle,
-				value: true,
+				value: false,
 				data: []
 			},
 			"showMS" => {
@@ -556,7 +556,7 @@ class ClientPrefs
 				display: "Max Framerate",
 				desc: "The highest framerate the game can hit.",
 				type: Number,
-				value: #if macro 60 #else FlxG.stage==null ? 60 : FlxG.stage.application.window.displayMode.refreshRate #end,
+				value: #if !macro FlxG.stage!=null ? FlxG.stage.application.window.displayMode.refreshRate : #end 60,
 				data: ["suffix" => " FPS", "min" => 30, "max" => 240, "step" => 1,]
 			},
 			"lowQuality" => {
