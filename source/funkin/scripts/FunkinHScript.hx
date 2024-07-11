@@ -349,7 +349,7 @@ class FunkinHScript extends FunkinScript
 			}
 			else
 			{
-				FlxG.log.error('Could not import funkin.class $className');
+				FlxG.log.error('Could not import class $className');
 			}
 		}
 		else
