@@ -1499,22 +1499,29 @@ class FlxSprite extends FlxObject
 	 * It changes graphics' `useCount` also for better memory tracking.
 	 */
 	@:noCompletion
-	function set_graphic(Value:FlxGraphic):FlxGraphic
+	function set_graphic(value:FlxGraphic):FlxGraphic
 	{
-		var oldGraphic:FlxGraphic = graphic;
-
-		if ((graphic != Value) && (Value != null))
+		if (graphic != value)
 		{
-			Value.useCount++;
+			#if (flixel < "5.4.0")
+			if (value != null)
+				value.useCount++;
+			
+			if (oldGraphic != null)
+				oldGraphic.useCount--;
+			#else
+			if (value != null)
+				value.incrementUseCount();
+			
+			if (graphic != null)
+				graphic.decrementUseCount();
+			#end
+
+			graphic = value;
 		}
 
-		if ((oldGraphic != null) && (oldGraphic != Value))
-		{
-			oldGraphic.useCount--;
-		}
-
-		return graphic = Value;
-	}
+		return value;
+	}	
 
 	@:noCompletion
 	function set_clipRect(rect:FlxRect):FlxRect
