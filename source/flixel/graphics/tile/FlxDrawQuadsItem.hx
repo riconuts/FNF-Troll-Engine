@@ -68,8 +68,9 @@ class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 		transforms.push(matrix.tx);
 		transforms.push(matrix.ty);
 
+		var transformAlpha = transform != null ? transform.alphaMultiplier : 1.0;
 		for (i in 0...VERTICES_PER_QUAD)
-			alphas.push(transform != null ? transform.alphaMultiplier : 1.0);
+			alphas.push(transformAlpha);
 
 		if (colored || hasColorOffsets)
 		{
