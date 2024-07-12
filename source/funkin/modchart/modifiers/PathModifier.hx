@@ -43,7 +43,7 @@ class PathModifier extends NoteModifier
 	override function getPos(diff:Float, tDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
 	{
 		var zigzag = getSubmodValue("zigzag", player);
-		if (zigzag != 0){
+		if (zigzag != 0) {
 			var offset = getSubmodValue("zigzagOffset", player);
 			var period = getSubmodValue("zigzagPeriod", player);
 			var result:Float = triangle((Math.PI * (1 / (period + 1)) * ((diff + (100 * (offset))) / Note.swagWidth)));
@@ -52,14 +52,15 @@ class PathModifier extends NoteModifier
 		}
 		
 		var sawtooth = getSubmodValue("sawtooth", player);
-		if (sawtooth != 0){
-			var period = (getSubmodValue("sawtoothPeriod", player)) + 1;
-			pos.x += (sawtooth * Note.swagWidth) * ((0.5 / period * diff) / Note.swagWidth - Math.floor((0.5 / period * diff) / Note.swagWidth));
+		if (sawtooth != 0) {
+			var period = getSubmodValue("sawtoothPeriod", player) + 1;
+			var p = (0.5 / period * diff) / Note.swagWidth;
+
+			pos.x += (sawtooth * Note.swagWidth) * (p - Math.floor(p));
 		}
 
 		var squareVal = getSubmodValue("square", player);
-		if (squareVal != 0)
-		{
+		if (squareVal != 0) {
 			var offset = getSubmodValue("squareOffset", player);
 			var period = getSubmodValue("squarePeriod", player);
 			var cum = (Math.PI * (diff + offset) / (Note.swagWidth + (period * Note.swagWidth)));
@@ -68,7 +69,7 @@ class PathModifier extends NoteModifier
 		}
 
 		var bounceVal = getSubmodValue("bounce", player);
-		if (bounceVal != 0){
+		if (bounceVal != 0) {
 			var offset = getSubmodValue("bounceOffset", player);
 			var period = getSubmodValue("bouncePeriod", player);
 			if (period != -1.0){
@@ -78,14 +79,13 @@ class PathModifier extends NoteModifier
 		}
 
 		var xmode = getSubmodValue("xmode", player);
-		if (xmode != 0){
+		if (xmode != 0) {
 			var mod = (player + 1) * 2 - 3;
 			pos.x += xmode * (diff * mod);
 		}
 
 		var tornadoVal = getValue(player);
-		if (tornadoVal != 0)
-		{
+		if (tornadoVal != 0) {
 			// from schmovin!!
 			var playerColumn = data % 4;
 			var columnPhaseShift = playerColumn * Math.PI / 3;
