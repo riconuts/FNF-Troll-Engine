@@ -1,22 +1,17 @@
 package funkin.modchart;
 // @author Nebula_Zorua
 
-import flixel.tweens.FlxEase.EaseFunction;
-import funkin.modchart.Modifier.RenderInfo;
-import flixel.math.FlxPoint;
-import flixel.tweens.FlxEase;
-import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.FlxSprite;
-import flixel.FlxG;
-import math.Vector3;
-import funkin.modchart.Modifier.ModifierType;
+import funkin.objects.playfields.NoteField;
+import funkin.modchart.Modifier;
 import funkin.modchart.modifiers.*;
 import funkin.modchart.events.*;
-import funkin.objects.playfields.NoteField;
+import math.Vector3;
+import flixel.tweens.FlxEase;
+import flixel.math.FlxPoint;
+import flixel.FlxG;
 
 // Weird amalgamation of Schmovin' modifier system, Andromeda modifier system and my own new shit -neb
 // NEW: Now also has some features of mirin (aliases, nodes)
-
 
 /**
  * So, what is a Node?
@@ -31,6 +26,29 @@ typedef Node = {
 }
 
 class ModManager {
+	private var state:PlayState;
+
+	public var timeline:EventTimeline = new EventTimeline();
+
+	var notemodRegister:Map<String, Modifier> = [];
+	var miscmodRegister:Map<String, Modifier> = [];
+
+	public var register:Map<String, Modifier> = [];
+	
+	/** mods that should be executing and will be called by functions like getPos **/ 
+	var activeMods:Array<Array<String>> = [[], []]; 
+	// ^^ maybe this can be seperated into a misc and note one, just so you arent checking misc mods for note shit & vice versa
+	// also so you arent calling shit like getPos on submods etc etc, might be better for optimization to do that
+	var modArray:Array<Modifier> = [];
+	var aliases:Map<String, String> = [];
+	
+	/** maps nodes by their inputs **/ 
+	var nodes:Map<String, Array<Node>> = []; 
+	var nodeArray:Array<Node> = [];
+
+	var touchedMods:Array<Array<String>> = [[], []];
+	var nodeIndex:Int = 0;
+
 	public function new(state:PlayState) {
         this.state=state;
     }
@@ -114,28 +132,6 @@ class ModManager {
 		setValue("flashG", 1, mN);
 		setValue("flashB", 1, mN);
 	}
-
-
-	private var state:PlayState;
-
-	public var timeline:EventTimeline = new EventTimeline();
-
-	var notemodRegister:Map<String, Modifier> = [];
-	var miscmodRegister:Map<String, Modifier> = [];
-
-	public var register:Map<String, Modifier> = [];
-
-	var activeMods:Array<Array<String>> = [[], []]; // mods that should be executing and will be called by functions like getPos
-	// ^^ maybe this can be seperated into a misc and note one, just so you arent checking misc mods for note shit & vice versa
-	// also so you arent calling shit like getPos on submods etc etc, might be better for optimization to do that
-	var modArray:Array<Modifier> = [];
-	var aliases:Map<String, String> = [];
-
-	var nodes:Map<String, Array<Node>> = []; // maps nodes by their inputs
-	var nodeArray:Array<Node> = [];
-
-	var touchedMods:Array<Array<String>> = [[], []];
-	var nodeIndex:Int = 0;
 
     inline public function quickRegister(mod:Modifier)
         registerMod(mod.getName(), mod);
@@ -515,8 +511,8 @@ class ModManager {
 			pos = new Vector3();
 		
 		pos.setTo(
-			(Note.swagWidth * 0.5) + getBaseX(data, player, field.field.keyCount),
-			(Note.swagWidth * 0.5) + 50 + diff,
+			Note.halfWidth + getBaseX(data, player, field.field.keyCount),
+			Note.halfWidth + 50 + diff,
 			0
 		);
 
@@ -663,5 +659,4 @@ class ModManager {
 	
 	public function queueEaseFunc(step:Float, endStep:Float, func:EaseFunction, callback:(EaseEvent, Float, Float) -> Void)
 		timeline.addEvent(new EaseEvent(step, endStep, func, callback, this));
-
 }

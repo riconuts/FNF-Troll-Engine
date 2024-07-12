@@ -33,7 +33,7 @@ typedef HitResult = {
 }
 class Note extends NoteObject
 {
-	public static var swagWidth:Float = 160 * 0.7;
+	public static var swagWidth(default, set):Float = 160 * 0.7;
 	public static var colArray:Array<String> = ['purple', 'blue', 'green', 'red'];
 	public static var quants:Array<Int> = [
 		4, // quarter note
@@ -64,6 +64,11 @@ class Note extends NoteObject
 		return quants[quants.length-1]; // invalid
 	}
 
+	@:noCompletion private static function set_swagWidth(val:Float){
+		halfWidth = val * 0.5;
+		return val;
+	}
+	public static var halfWidth(default, null):Float = swagWidth * 0.5;
 	public static var quantShitCache = new Map<String, Bool>();
 
 	////
