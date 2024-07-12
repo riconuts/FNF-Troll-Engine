@@ -16,20 +16,18 @@ using StringTools;
 
 class StrumNote extends NoteObject
 {
-
 	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
-
+	
+	public var z:Float = 0;
 	public var zIndex:Float = 0;
 	public var desiredZIndex:Float = 0;
-	public var z:Float = 0;
-
-	public var isQuant:Bool = false;
-	private var colorSwap:ColorSwap;
-	public var resetAnim:Float = 0;
-	public var direction:Float = 90;//plan on doing scroll directions soon -bb
-	public var downScroll:Bool = false;//plan on doing scroll directions soon -bb
-	public var sustainReduce:Bool = true;
 	
+	public var isQuant:Bool = false;
+	public var resetAnim:Float = 0;
+	public var sustainReduce:Bool = true;
+	public var downScroll:Bool = false;
+
+	private var colorSwap:ColorSwap;
 	//private var player:Int;
 	
 	public var texture(default, set):String = null;
@@ -125,70 +123,41 @@ class StrumNote extends NoteObject
 		scrollFactor.set();
 	}
 
+	// stupid
+	static var directionUpperArray = ["LEFT", "DOWN", "UP", "RIGHT"];
+	static var directionLowerArray = ["left", "down", "up", "right"];
 	public function reloadNote()
 	{
-        // TODO: add indices support n shit
+		// TODO: add indices support n shit
 
+		var lastAnim:String = animation.curAnim == null ? 'static' : animation.curAnim.name;
+		var textureKey:String = texture;
 		isQuant = false;
-		var lastAnim:String = null;
-		if(animation.curAnim != null) lastAnim = animation.curAnim.name;
-		var br:String = texture;
-
-		if (ClientPrefs.noteSkin == 'Quants')
-		{
-			if (Paths.exists(Paths.getPath("images/QUANT" + texture + ".png", IMAGE))
-			#if MODS_ALLOWED
-			|| Paths.exists(Paths.modsImages("QUANT" + texture))
-			#end) {
-				br = "QUANT" + texture;
+		
+		if (ClientPrefs.noteSkin == 'Quants') {
+			var quantTexKey = 'QUANT$texture';
+			if (Paths.imageExists(quantTexKey)) {
+				textureKey = quantTexKey;
 				isQuant = true;
 			}
 		}
 
-		frames = Paths.getSparrowAtlas(br);
-		animation.addByPrefix('green', 'arrowUP');
-		animation.addByPrefix('blue', 'arrowDOWN');
-		animation.addByPrefix('purple', 'arrowLEFT');
-		animation.addByPrefix('red', 'arrowRIGHT');
+		frames = Paths.getSparrowAtlas(textureKey);
+		animation.addByPrefix('static', 'arrow' + directionUpperArray[column], 24, false);
+		animation.addByPrefix('pressed', directionLowerArray[column] + ' press', 24, false);
+		animation.addByPrefix('confirm', directionLowerArray[column] + ' confirm', 24, false);
+
+		if (lastAnim != null)
+			playAnim(lastAnim, true);
 
 		scale.set(0.7, 0.7);
-
-		// TODO: proper multi-key support
-		switch (Math.abs(column) % 4)
-		{
-			case 0:
-				animation.addByPrefix('static', 'arrowLEFT');
-				animation.addByPrefix('pressed', 'left press', 24, false);
-				animation.addByPrefix('confirm', 'left confirm', 24, false);
-			case 1:
-				animation.addByPrefix('static', 'arrowDOWN');
-				animation.addByPrefix('pressed', 'down press', 24, false);
-				animation.addByPrefix('confirm', 'down confirm', 24, false);
-			case 2:
-				animation.addByPrefix('static', 'arrowUP');
-				animation.addByPrefix('pressed', 'up press', 24, false);
-				animation.addByPrefix('confirm', 'up confirm', 24, false);
-			case 3:
-				animation.addByPrefix('static', 'arrowRIGHT');
-				animation.addByPrefix('pressed', 'right press', 24, false);
-				animation.addByPrefix('confirm', 'right confirm', 24, false);
-		}
-		
 		defScale.copyFrom(scale);
 		updateHitbox();
-
-		if(lastAnim != null)
-		{
-			playAnim(lastAnim, true);
-		}
 	}
 
 	public function postAddedToGroup()
 	{
 		playAnim('static');
-		x -= Note.swagWidth / 2;
-		x = x - (Note.swagWidth * 2) + (Note.swagWidth * column) + 54;
-
 		ID = column;
 	}
 
@@ -215,31 +184,27 @@ class StrumNote extends NoteObject
 		centerOrigin();
 		centerOffsets();
 		updateZIndex();
-		if(animation.curAnim == null || animation.curAnim.name == 'static') {
+
+		if (animation.curAnim == null || animation.curAnim.name == 'static') {
 			colorSwap.hue = 0;
 			colorSwap.saturation = 0;
 			colorSwap.brightness = 0;
-		} else {
-			if (note == null)
-			{
-				if(!isQuant){
-					colorSwap.hue = ClientPrefs.arrowHSV[column % 4][0] / 360;
-					colorSwap.saturation = ClientPrefs.arrowHSV[column % 4][1] / 100;
-					colorSwap.brightness = ClientPrefs.arrowHSV[column % 4][2] / 100;
-				}else{
-					colorSwap.hue =  0;
-					colorSwap.saturation = 0;
-					colorSwap.brightness = 0;
-				}
-			}
-			else
-			{
-				// ok now the quants should b fine lol
-				colorSwap.hue = note.colorSwap.hue;
-				colorSwap.saturation = note.colorSwap.saturation;
-				colorSwap.brightness = note.colorSwap.brightness;
-			}
-
+		} 
+		else if (note != null) {
+			// ok now the quants should b fine lol
+			colorSwap.hue = note.colorSwap.hue;
+			colorSwap.saturation = note.colorSwap.saturation;
+			colorSwap.brightness = note.colorSwap.brightness;
+		}
+		else if(!isQuant) {
+			colorSwap.hue = ClientPrefs.arrowHSV[column % 4][0] / 360;
+			colorSwap.saturation = ClientPrefs.arrowHSV[column % 4][1] / 100;
+			colorSwap.brightness = ClientPrefs.arrowHSV[column % 4][2] / 100;
+		}
+		else {
+			colorSwap.hue =  0;
+			colorSwap.saturation = 0;
+			colorSwap.brightness = 0;
 		}
 	}
 }
