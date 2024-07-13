@@ -48,55 +48,18 @@ class WeekData
 
 	public static function reloadWeekFiles():Array<WeekMetadata>
 	{
-		var list:Array<WeekMetadata> = [];
+		var list:Array<WeekMetadata> = weekList = [];
 
 		#if MODS_ALLOWED
-		inline function pushChapter(chapter, mod){
-			chapter.directory = mod;
-			list.push(chapter);
-		}
-
-		for (mod => daJson in Paths.getContentMetadata()){
-			Paths.currentModDirectory = mod;
-
-			if (daJson != null && daJson.weeks != null)
-            {
-				for (week in daJson.weeks)
-					pushChapter(week, mod);
-			}
-
-			#if PE_MOD_COMPATIBILITY
-			var modWeeksPath:String = Paths.modFolders("weeks", false);
-			var modWeekList:Array<String> = CoolUtil.coolTextFile('$modWeeksPath/weekList.txt');
-			var modWeeksPushed:Array<String> = [];
-
-			for (weekName in modWeekList){
-				var data = portPsychWeek(Paths.getJson('${modWeeksPath}/${weekName}.json'), weekName);
-				if (data != null){
-					pushChapter(data, mod);
-					modWeeksPushed.push(weekName);
+		for (mod => daJson in Paths.getContentMetadata()) {
+			if (daJson != null && daJson.weeks != null) {
+				for (week in daJson.weeks) {
+					week.directory = mod;
+					list.push(week);
 				}
 			}
-
-			Paths.iterateDirectory(modWeeksPath, (fileName:String)->{
-				var path = new Path('$modWeeksPath/$fileName');
-				var weekName:String = path.file;
-
-				if (path.ext != "json" || modWeeksPushed.contains(weekName))
-					return;
-
-				var data = portPsychWeek(Paths.getJson('$modWeeksPath/$fileName'), weekName);
-				if (data != null){
-					pushChapter(data, mod);
-					modWeeksPushed.push(weekName); // what if the same name was written more than once :o
-				}
-			});
-			#end
 		}
-		Paths.currentModDirectory = '';
         #end
-
-		weekList = list;
 
 		return list;
 	}
@@ -130,6 +93,39 @@ class WeekData
 		vChapter.unlockCondition = json.startUnlocked != false; /* || (json.weekBefore!=null && weekCompleted.get(json.weekBefore)); */
 
 		return vChapter;
+	}
+
+	public static function getPsychModWeeks(modName:String)
+	{
+		var modWeeksPath:String = Paths.mods('$modName/weeks');
+		var modWeeksPushed:Map<String, WeekMetadata> = [];
+		var modWeeks:Array<WeekMetadata> = [];
+
+		function sowy(weekName:String, fileName:String) {
+			if (modWeeksPushed.exists(weekName)) // no dupes
+				return;
+
+			var data = portPsychWeek(Paths.getJson('$modWeeksPath/$fileName'), weekName);
+			if (data != null){
+				modWeeksPushed.set(weekName, data); 
+				modWeeks.push(data);
+			}
+		}
+
+		//// Push weeks in the order of the weekList file first.
+		var modWeekList:Array<String> = CoolUtil.coolTextFile('$modWeeksPath/weekList.txt');
+		for (weekName in modWeekList)
+			sowy(weekName, '$weekName.json');
+
+		//// Push the rest of the weeks
+		Paths.iterateDirectory(modWeeksPath, (fileName:String)->{
+			if (StringTools.endsWith(fileName, ".json")) {
+				var weekName:String = fileName.substr(0, fileName.length - 5);
+				sowy(weekName, fileName);
+			}
+		});
+
+		return modWeeks;
 	}
 	#end
 }

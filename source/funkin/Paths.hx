@@ -1,5 +1,6 @@
 package funkin;
 
+import funkin.data.WeekData;
 import flixel.FlxG;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxAtlasFrames;
@@ -8,6 +9,7 @@ import openfl.utils.Assets;
 import openfl.utils.AssetType;
 import openfl.display.BitmapData;
 import openfl.media.Sound;
+import haxe.io.Path;
 import haxe.Json;
 
 using StringTools;
@@ -16,13 +18,6 @@ using StringTools;
 import sys.FileSystem;
 import sys.io.File;
 #end
-
-/*
-#if tgt
-typedef FreeplayCategoryMetadata = FreeplayState.FreeplayCategoryMetadata;
-typedef FreeplaySongMetadata = FreeplayState.FreeplaySongMetadata;
-#end
-*/
 
 class Paths
 {
@@ -711,6 +706,7 @@ class Paths
 		return Paths.getPreloadPath(key);
 	}
 
+	/** Paths.image(key) != null **/
 	inline public static function imageExists(key:String)
 		return Paths.exists(Paths.___getPath('images/$key.png'));
 
@@ -838,25 +834,44 @@ class Paths
 		
 					if (rawJson != null && rawJson.length > 0)
 					{
-						var json:Dynamic = Json.parse(rawJson);
-						portContentMetadataStructure(json);
-						contentMetadata.set(folder, json);
+						var data:Dynamic = Json.parse(rawJson);
+						contentMetadata.set(folder, updateContentMetadataStructure(data));
+						continue;
 					}
+
+					#if PE_MOD_COMPATIBILITY
+					var path = Paths.mods('$folder/pack.json');
+					var rawJson:Null<String> = Paths.getContent(path);
+
+					if (rawJson != null && rawJson.length > 0)
+					{
+						var json:Dynamic = Json.parse(rawJson);
+						contentMetadata.set(
+							folder, 
+							{
+								runsGlobally: Reflect.field(json, 'runsGlobally') == true, 
+								weeks: WeekData.getPsychModWeeks(folder)
+							}
+						);
+					}
+					#end
 				}
 			}
 		}
 	}
-
-	inline static function portContentMetadataStructure(data:Dynamic)
+	
+	inline static function updateContentMetadataStructure(data:Dynamic):ContentMetadata
 	{
-		if (Reflect.field(data, "weeks") == null){
-			// tgt compat 
-			var chapters:Dynamic = Reflect.field(data, "chapters");
-			if (chapters != null){ 	
-				Reflect.setField(data, "weeks", chapters);
-				Reflect.deleteField(data, "chapters");
-			}else // old tgt
-				data = {weeks: [cast data]};
+		if (Reflect.field(data, "weeks") != null)
+			return data; // You are valid :)
+
+		var chapters:Dynamic = Reflect.field(data, "chapters");
+		if (chapters != null) { // TGT
+			Reflect.setField(data, "weeks", chapters);
+			Reflect.deleteField(data, "chapters");
+			return data;
+		}else { // Lets assume it's an old TGT metadata
+			return {weeks: [data]};
 		}
 	}
 
