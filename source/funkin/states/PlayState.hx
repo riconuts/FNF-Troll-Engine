@@ -1016,7 +1016,6 @@ class PlayState extends MusicBeatState
         
 		add(ratingGroup);
 		add(timingTxt);
-		add(strumLineNotes);
 		add(playfields);
 		add(notefields);
 		add(grpNoteSplashes);
