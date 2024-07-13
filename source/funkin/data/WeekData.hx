@@ -65,13 +65,10 @@ class WeekData
 	}
 
 	#if PE_MOD_COMPATIBILITY
-	static function portPsychWeek(json:Dynamic, name):Null<WeekMetadata>
+	public static function addPsychWeek(data:ContentMetadata, weekFile:PsychWeekFile)
 	{
-		if (json == null)
-			return null;
-
 		var vChapter:WeekMetadata = {
-			name: name,
+			name: weekFile.name,
 			songs: [],
 			category: 'psychengine', //'main',
 			// freeplayCategory: '$mod - $name',
@@ -79,34 +76,38 @@ class WeekData
 			//directory: mod
 		};
 
-		if (json.hideStoryMode == true)
+		//vChapter.unlockCondition = weekFile.startUnlocked != false; /* || (json.weekBefore!=null && weekCompleted.get(json.weekBefore)); */
+
+		if (Reflect.field(weekFile, "hideStoryMode") == true)
 			vChapter.category = "hidden";
 
-		var psychSongs:Null<Array<Dynamic>> = json.songs;
-		if (psychSongs != null)
-		{
-			var songs:Array<String> = vChapter.songs;
-			for (songData in psychSongs)
-				songs.push(songData[0]);
+		if (Reflect.hasField(weekFile, "songs")) {
+			for (songData in weekFile.songs)
+				vChapter.songs.push(songData[0]);
 		}
 
-		vChapter.unlockCondition = json.startUnlocked != false; /* || (json.weekBefore!=null && weekCompleted.get(json.weekBefore)); */
+		if (Reflect.field(weekFile, "hideFreeplay") != true) {
+			for (songName in vChapter.songs)
+				data.freeplaySongs.push({name: songName, category: data.defaultCategory});
+		}
 
-		return vChapter;
+		data.weeks.push(vChapter);
 	}
 
-	public static function getPsychModWeeks(modName:String)
+	public static function getPsychModWeeks(modName:String):Array<PsychWeekFile>
 	{
 		var modWeeksPath:String = Paths.mods('$modName/weeks');
-		var modWeeksPushed:Map<String, WeekMetadata> = [];
-		var modWeeks:Array<WeekMetadata> = [];
+		var modWeeksPushed:Map<String, PsychWeekFile> = [];
+		var modWeeks:Array<PsychWeekFile> = [];
 
-		function sowy(weekName:String, fileName:String) {
+		function sowy(weekName:String) {
 			if (modWeeksPushed.exists(weekName)) // no dupes
 				return;
 
-			var data = portPsychWeek(Paths.getJson('$modWeeksPath/$fileName'), weekName);
-			if (data != null){
+			var data:PsychWeekFile = Paths.getJson('$modWeeksPath/$weekName.json');
+			if (data != null) {
+				data.name = weekName;
+
 				modWeeksPushed.set(weekName, data); 
 				modWeeks.push(data);
 			}
@@ -115,13 +116,13 @@ class WeekData
 		//// Push weeks in the order of the weekList file first.
 		var modWeekList:Array<String> = CoolUtil.coolTextFile('$modWeeksPath/weekList.txt');
 		for (weekName in modWeekList)
-			sowy(weekName, '$weekName.json');
+			sowy(weekName);
 
 		//// Push the rest of the weeks
 		Paths.iterateDirectory(modWeeksPath, (fileName:String)->{
 			if (StringTools.endsWith(fileName, ".json")) {
 				var weekName:String = fileName.substr(0, fileName.length - 5);
-				sowy(weekName, fileName);
+				sowy(weekName);
 			}
 		});
 
@@ -129,3 +130,23 @@ class WeekData
 	}
 	#end
 }
+
+#if PE_MOD_COMPATIBILITY
+typedef PsychWeekFile =
+{
+	var name:String; // Not part of the JSON
+	
+	var songs:Array<Dynamic>;
+	var weekCharacters:Array<String>;
+	var weekBackground:String;
+	var weekBefore:String;
+	var storyName:String;
+	var weekName:String;
+	var freeplayColor:Array<Int>;
+	var startUnlocked:Bool;
+	var hiddenUntilUnlocked:Bool;
+	var hideStoryMode:Bool;
+	var hideFreeplay:Bool;
+	var difficulties:String;
+}
+#end

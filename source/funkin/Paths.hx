@@ -840,25 +840,33 @@ class Paths
 					}
 
 					#if PE_MOD_COMPATIBILITY
-					var path = Paths.mods('$folder/pack.json');
-					var rawJson:Null<String> = Paths.getContent(path);
-
-					if (rawJson != null && rawJson.length > 0)
-					{
-						var json:Dynamic = Json.parse(rawJson);
-						contentMetadata.set(
-							folder, 
-							{
-								runsGlobally: Reflect.field(json, 'runsGlobally') == true, 
-								weeks: WeekData.getPsychModWeeks(folder)
-							}
-						);
-					}
+					var psychModMetadata = getPsychModMetadata(folder);
+					if (psychModMetadata != null)
+						contentMetadata.set(folder, psychModMetadata);
 					#end
 				}
 			}
 		}
 	}
+
+	#if PE_MOD_COMPATIBILITY
+	static function getPsychModMetadata(folder:String):ContentMetadata {
+		var packJson:String = Paths.mods('$folder/pack.json');
+		var packJson:Null<String> = Paths.getContent(packJson);
+		var packJson:Dynamic = (packJson == null) ? packJson : Json.parse(packJson);
+
+		var sowy:ContentMetadata = {
+			runsGlobally: (packJson != null) && Reflect.field(packJson, 'runsGlobally') == true, 
+			weeks: [],
+			freeplaySongs: []
+		}
+
+		for (psychWeek in WeekData.getPsychModWeeks(folder))
+			WeekData.addPsychWeek(sowy, psychWeek);
+
+		return sowy;
+	}
+	#end
 	
 	inline static function updateContentMetadataStructure(data:Dynamic):ContentMetadata
 	{
@@ -881,7 +889,7 @@ class Paths
 		return modsList;
 	}
 
-	static public function getContentMetadata() 
+	static public function getContentMetadata():Map<String, ContentMetadata>
 	{
 		updateContentLists();
 		return contentMetadata;
