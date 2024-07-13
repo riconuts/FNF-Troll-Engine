@@ -59,7 +59,7 @@ class OptionsState extends MusicBeatState
 
 		var bg2 = new FlxSprite(bg.x, bg.y).makeGraphic(bg.frameWidth, bg.frameHeight, 0x00000000, false, 'OptionsState_bg');
 		bg2.blend = MULTIPLY;
-		bg2.stamp(bg, 0, 0);
+		bg2.stamp(bg);
 		
 		bg.destroy();
 		bg = bg2;
@@ -68,11 +68,12 @@ class OptionsState extends MusicBeatState
 		grid.setPixel32(0, 0, 0xFFC0C0C0);
 		grid.setPixel32(1, 1, 0xFFC0C0C0);
 
-		backdrop = new flixel.addons.display.FlxBackdrop(Paths.image("grid"));
-		backdrop.velocity.set(30, 30);
-		backdrop.loadGraphic(grid, false, 0, 0, false, 'OptionsState_grid');
-		backdrop.scale.set(FlxG.height / 3, FlxG.height / 3);
+		var grid = flixel.graphics.FlxGraphic.fromBitmapData(grid, false, 'OptionsState_grid');
+
+		backdrop = new flixel.addons.display.FlxBackdrop(grid);
+		backdrop.scale.x = backdrop.scale.y = FlxG.height / 3;
 		backdrop.updateHitbox();
+		backdrop.velocity.set(30, 30);
 		backdrop.antialiasing = true;
 		backdrop.color = color;
 		backdrop.alpha = 0.5;
