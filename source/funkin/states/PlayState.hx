@@ -104,24 +104,6 @@ class PlayState extends MusicBeatState
 	
 	public var hud:BaseHUD;
 
-	#if PE_MOD_COMPATIBILITY // for backwards compat reasons, these aren't ACTUALLY used
-	public var healthBar:FNFHealthBar = new FNFHealthBar(); 
-	public var iconP1:HealthIcon = new HealthIcon();
-	public var iconP2:HealthIcon = new HealthIcon();
-
-	public var scoreTxt:FlxText = new FlxText();
-	public var botplayTxt:FlxText = new FlxText();
-
-	// var songPercent:Float = 0;
-
-	/*
-	public static var STRUM_X = 42;
-	public static var STRUM_X_MIDDLESCROLL = -278;
-
-	public var spawnTime:Float = 1500;
-	*/
-	#end
-
 	public static var curStage:String = '';
 	public static var SONG:SwagSong = null;
 	public static var isStoryMode:Bool = false;
@@ -178,18 +160,14 @@ class PlayState extends MusicBeatState
 	public var allNotes:Array<Note> = []; // all notes
 
 	public var eventNotes:Array<EventNote> = [];
-	 
-	public var strumLineNotes = new FlxTypedGroup<StrumNote>();
-	public var opponentStrums = new FlxTypedGroup<StrumNote>();
-	public var playerStrums = new FlxTypedGroup<StrumNote>();
-
-	public var playerField:PlayField;
-	public var dadField:PlayField;
 
 	public var modManager:ModManager;
 	public var notefields = new NotefieldManager();
 	public var playfields = new FlxTypedGroup<PlayField>();
 	public var grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
+
+	public var playerField:PlayField;
+	public var dadField:PlayField;
 	
 	////
 	public var showRating:Bool = true;
@@ -340,6 +318,26 @@ class PlayState extends MusicBeatState
 	public var inCutscene:Bool = false;
 	public var skipCountdown:Bool = false;
 
+	#if PE_MOD_COMPATIBILITY // for backwards compat reasons. these aren't ACTUALLY used
+	@:noCompletion public var healthBar:FNFHealthBar; 
+	@:noCompletion public var iconP1:HealthIcon;
+	@:noCompletion public var iconP2:HealthIcon;
+
+	@:noCompletion public var scoreTxt:FlxText;
+	@:noCompletion public var botplayTxt:FlxText;
+
+	@:noCompletion var songPercent:Float = 0;
+	
+	@:noCompletion public var spawnTime:Float = 1500;
+
+	@:noCompletion public static var STRUM_X = 42;
+	@:noCompletion public static var STRUM_X_MIDDLESCROLL = -278;
+
+	@:noCompletion public var strumLineNotes:FlxTypedGroup<StrumNote>;
+	@:noCompletion public var opponentStrums:FlxTypedGroup<StrumNote>;
+	@:noCompletion public var playerStrums:FlxTypedGroup<StrumNote>;
+	#end
+
 	#if discord_rpc
 	// Discord RPC variables
 	var detailsText:String = "";
@@ -353,19 +351,17 @@ class PlayState extends MusicBeatState
 
 	// Script shit
 	public static var instance:PlayState;
+
 	public var funkyScripts:Array<FunkinScript> = [];
 	public var hscriptArray:Array<FunkinHScript> = [];
 	#if LUA_ALLOWED
 	public var luaArray:Array<FunkinLua> = [];
 	#end
-
 	public var notetypeScripts:Map<String, FunkinHScript> = []; // custom notetypes for scriptVer '1'
 	public var eventScripts:Map<String, FunkinHScript> = []; // custom events for scriptVer '1'
-
 	public var hudSkinScripts:Map<String, FunkinHScript> = []; // Doing this so you can do shit like i.e having it swap between pixel and normal HUD
 
     public var hudSkinScript:FunkinHScript; // this is the HUD skin used for countdown, judgements, etc
-    
     public var hudSkin(default, set):String;
 
     function set_hudSkin(value:String){
@@ -468,6 +464,23 @@ class PlayState extends MusicBeatState
 			startSpeed: 1,
 			speed: 1,
 		});
+
+		#if PE_MOD_COMPATIBILITY
+		strumLineNotes = opponentStrums = playerStrums = new FlxTypedGroup<StrumNote>();
+		scoreTxt = botplayTxt = new FlxText();
+		iconP1 = iconP2 = new HealthIcon();
+		healthBar = new FNFHealthBar();
+
+		strumLineNotes.exists = false;
+		scoreTxt.exists = false;
+		iconP1.exists = false;
+		healthBar.exists = false;
+
+		add(strumLineNotes);
+		add(scoreTxt);
+		add(iconP1);
+		add(healthBar);
+		#end
 
 		// For the "Just the Two of Us" achievement
 		for (i in 0...keysArray.length)
@@ -977,7 +990,6 @@ class PlayState extends MusicBeatState
 		playerField.cameras = cH;
 		dadField.cameras = cH;
 		playfields.cameras = cH;
-		strumLineNotes.cameras = cH;
 		grpNoteSplashes.cameras = cH;
 		notes.cameras = cH;
 
@@ -3018,8 +3030,8 @@ class PlayState extends MusicBeatState
 	}
 
 	public function triggerEventNote(eventName:String = "", value1:String = "", value2:String = "", ?time:Float) {
-        if(time==null)
-            time = Conductor.songPosition;
+        if (time==null)
+    		time = Conductor.songPosition;
 
 		if(showDebugTraces)
 			trace('Event: ' + eventName + ', Value 1: ' + value1 + ', Value 2: ' + value2 + ', at Time: ' + time);
