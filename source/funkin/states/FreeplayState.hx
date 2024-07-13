@@ -20,8 +20,11 @@ class FreeplayState extends MusicBeatState
 	var bgGrp = new FlxTypedGroup<FlxSprite>();
 	var bg:FlxSprite;
 
-	var targetHighscore:Float = 0;
-	var lerpHighscore:Float = 0;
+	var targetHighscore:Float = 0.0;
+	var lerpHighscore:Float = 0.0;
+
+	var targetRating:Float = 0.0;
+	var lerpRating:Float = 0.0;
 
 	var scoreBG:FlxSprite;
 	var scoreText:FlxText;
@@ -29,6 +32,7 @@ class FreeplayState extends MusicBeatState
 
 	static var lastSelected:Int = 0;
 	var selectedSongData:SongMetadata;
+	var selectedSongCharts:Array<String>;
 	
 	static var curDiffName:String = "normal";
 	static var curDiffIdx:Int = 1;
@@ -41,10 +45,13 @@ class FreeplayState extends MusicBeatState
 
 			for (songName in week.songs){
 				var metadata:SongMetadata = {songName: songName, folder: week.directory};
+				
+				/*
 				if (metadata.charts.length == 0){
 					trace('${week.directory}: $songName doesn\'t have any available charts!');
 					continue;
 				}
+				*/
 				
 				menu.addTextOption(songName).ID = songMeta.length;
 				songMeta.push(metadata);
@@ -56,24 +63,26 @@ class FreeplayState extends MusicBeatState
 
 		add(menu);
 		menu.controls = controls;
-		menu.callbacks.onAccept = (selectedIdx)->{
-			menu.controls = null;
-			Song.playSong(songMeta[selectedIdx], curDiffName);	
+		menu.callbacks.onSelect = (selectedIdx) -> onSelectSong(songMeta[selectedIdx]);
+		menu.callbacks.onAccept = () -> {
+			if (selectedSongCharts.length == 0)
+				FlxG.sound.play(Paths.sound('cancelMenu'));
+			else{
+				menu.controls = null;
+				Song.playSong(selectedSongData, curDiffName, curDiffIdx);	
+			}
 		};
-		menu.callbacks.onSelect = (selectedIdx)->{
-			onSelectSong(songMeta[selectedIdx]);
-		}
 
 		////
-		var textBG = CoolUtil.blankSprite(FlxG.width, 26, 0xFF999999);
-		textBG.y = FlxG.height - 26;
-		textBG.blend = MULTIPLY;
-		add(textBG);
+		var hintBG = CoolUtil.blankSprite(FlxG.width, 26, 0xFF999999);
+		hintBG.y = FlxG.height - 26;
+		hintBG.blend = MULTIPLY;
+		add(hintBG);
 
-		var text:FlxText = new FlxText(textBG.x, textBG.y + 4, FlxG.width, Paths.getString("freeplayhint"));
-		text.setFormat(Paths.font("vcr.ttf"), 16, 0xFFFFFFFF, RIGHT);
-		text.scrollFactor.set();
-		add(text);
+		var hintText:FlxText = new FlxText(hintBG.x, hintBG.y + 4, FlxG.width, Paths.getString("freeplayhint"));
+		hintText.setFormat(Paths.font("vcr.ttf"), 16, 0xFFFFFFFF, RIGHT);
+		hintText.scrollFactor.set();
+		add(hintText);
 
 		////
 		scoreText = new FlxText(FlxG.width * 0.7, 5, 0, 'PERSONAL BEST: 0', 32);
@@ -84,7 +93,8 @@ class FreeplayState extends MusicBeatState
 		scoreBG.blend = MULTIPLY;
 		add(scoreBG);
 
-		diffText = new FlxText(scoreText.x, scoreText.y + 36, 0, "", 24);
+		diffText = new FlxText(scoreText.x, scoreText.y + 36, 100, "", 24);
+		diffText.alignment = CENTER;
 		diffText.font = scoreText.font;
 		add(diffText);
 
@@ -96,62 +106,52 @@ class FreeplayState extends MusicBeatState
 		super.create();
 	}
 
+	override public function update(elapsed:Float)
+	{
+		if (controls.UI_LEFT_P){
+			changeDifficulty(-1);
+		}
+		if (controls.UI_RIGHT_P){
+			changeDifficulty(1);
+		}
+
+		if (controls.BACK){
+			menu.controls = null;
+			FlxG.sound.play(Paths.sound('cancelMenu'));
+			MusicBeatState.switchState(new funkin.states.MainMenuState());	
+			
+		}else if (controls.RESET){
+			openSubState(new funkin.states.ResetScoreSubState(selectedSongData.songName, false));
+			this.subStateClosed.addOnce((_) -> refreshScore());
+			
+		}else if (FlxG.keys.justPressed.CONTROL){
+			openSubState(new funkin.states.GameplayChangersSubstate());
+
+		}
+
+		super.update(elapsed);
+	}
+
 	function onSelectSong(data:SongMetadata)
 	{	
 		selectedSongData = data;
+		selectedSongCharts = data.charts;
 		Paths.currentModDirectory = data.folder;
 
-		updateDifficulty();
-
-		var record = Highscore.getRecord(data.songName);
-		targetHighscore = record.score;
+		changeDifficulty(getNewDiffIdx(), true);
+		refreshScore();
 
 		var modBgGraphic = Paths.image('menuBGBlue');
 		if (bg == null || modBgGraphic != bg.graphic)
 			fadeToBg(modBgGraphic);
 	}
 
-	private function positionHighscore() {
-		scoreText.x = FlxG.width - scoreText.width - 6;
-		scoreBG.scale.x = FlxG.width - scoreText.x + 6;
-		scoreBG.x = FlxG.width - (scoreBG.scale.x / 2);
-		diffText.x = Std.int(scoreBG.x + (scoreBG.width / 2));
-		diffText.x -= diffText.width / 2;
-	}
-
-	function changeDifficulty(val:Int = 0, ?isAbs:Bool)
+	function refreshScore()
 	{
-		var charts = selectedSongData.charts;
-		if (charts.length == 0) return;
-
-		if (isAbs)
-			curDiffIdx = val;
-		else
-			curDiffIdx = FlxMath.wrap(curDiffIdx + val, 0, charts.length - 1);
-
-		curDiffName = charts[curDiffIdx];
-		diffText.text = curDiffName.toUpperCase(); //Paths.getString('freeplayDiff_$curDiffName');
-	}
-
-	function updateDifficulty(){
-		var charts = selectedSongData.charts;
-
-		if (charts.length == 0){
-			diffText.text = "null"; // fuck it
-			return;
-		}
-
-		if (!charts.contains(curDiffName)){
-			var idx = charts.indexOf("normal");
-			if (idx == -1)
-				idx = charts.indexOf("hard");
-			if (idx == -1)
-				idx = FlxMath.maxInt(0, curDiffIdx);
-
-			changeDifficulty(idx, true);
-		}else{
-			diffText.text = curDiffName.toUpperCase(); //Paths.getString('freeplayDiff_$curDiffName');
-		}
+		var data = selectedSongData;
+		var record = Highscore.getRecord(data.songName);
+		targetRating = Highscore.getRatingRecord(record) * 100;
+		targetHighscore = record.score;
 	}
 
 	function fadeToBg(graphic){
@@ -180,32 +180,80 @@ class FreeplayState extends MusicBeatState
 		bgGrp.remove(bg, true);
 		bgGrp.add(bg);
 	}
-	
-	override public function update(elapsed:Float)
+
+	function changeDifficulty(val:Int = 0, ?isAbs:Bool)
 	{
-		if (controls.UI_LEFT_P){
-			changeDifficulty(-1);
+		var charts = selectedSongCharts;
+
+		switch (charts.length){
+			case 0:
+				diffText.text = "NO CHARTS AVAILABLE"; // fuck it
+
+			case 1:
+				curDiffName = charts[0];
+				diffText.text = curDiffName.toUpperCase();
+
+			default:
+				curDiffIdx = isAbs ? val : FlxMath.wrap(curDiffIdx + val, 0, charts.length - 1);
+				curDiffName = charts[curDiffIdx];
+				diffText.text = "< " + curDiffName.toUpperCase() + " >";
 		}
-		if (controls.UI_RIGHT_P){
-			changeDifficulty(1);
-		}
+	}
 
-		if (controls.BACK){
-			menu.controls = null;
-			MusicBeatState.switchState(new funkin.states.MainMenuState());	
-			
-		}else if (controls.RESET){
-			openSubState(new funkin.states.ResetScoreSubState(selectedSongData.songName, false));
-			
-		}else if (FlxG.keys.justPressed.CONTROL){
-			openSubState(new funkin.states.GameplayChangersSubstate());
+	function getNewDiffIdx() {
+		var idx = selectedSongCharts.indexOf(curDiffName);
+		if (idx != -1)
+			return idx;
 
-		}
+		idx = selectedSongCharts.indexOf("normal");
+		if (idx != -1)
+			return idx;
 
-		lerpHighscore = CoolUtil.coolLerp(lerpHighscore, targetHighscore, elapsed * 12);
-		scoreText.text = 'PERSONAL BEST: ${Math.round(lerpHighscore)}';
+		idx = selectedSongCharts.indexOf("hard");
+		if (idx != -1)
+			return idx;
+		
+		return FlxMath.maxInt(0, curDiffIdx);
+	}
 
-		super.update(elapsed);
+	override function draw()
+	{
+		lerpHighscore = CoolUtil.coolLerp(lerpHighscore, targetHighscore, FlxG.elapsed * 12);
+		lerpRating = CoolUtil.coolLerp(lerpRating, targetRating, FlxG.elapsed * 8);
+
+		var score = Math.round(lerpHighscore);
+		var rating = formatRating(lerpRating);
+
+		scoreText.text = 'PERSONAL BEST: $score ($rating%)';
+		positionHighscore();
+
+		super.draw();
+	}
+
+	private static function formatRating(val:Float):String
+	{
+		var str = Std.string(Math.round(val * 100) / 100);
+		var dot = str.indexOf('.');
+
+		if (dot == -1)
+			return str + '.00';
+
+		while (str.length - dot < 3)
+			str += '0';
+
+		return str;
+	}
+
+	private function positionHighscore() {
+		var bgWidth = scoreText.width + 6;
+
+		scoreBG.x = FlxG.width - bgWidth; 
+		scoreBG.scale.x = bgWidth;
+		scoreBG.updateHitbox();
+
+		diffText.x = scoreText.x = scoreBG.x + 3;
+
+		diffText.fieldWidth = bgWidth;
 	}
 
 	override public function destroy()
