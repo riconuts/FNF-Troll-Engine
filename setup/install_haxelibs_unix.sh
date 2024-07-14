@@ -1,3 +1,4 @@
+#!/bin/sh
 haxelib --always --quiet install lime 8.1.2
 haxelib --always --quiet install openfl 9.3.1
 haxelib --always --quiet install flixel 5.5.0

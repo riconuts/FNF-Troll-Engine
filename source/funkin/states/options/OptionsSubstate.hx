@@ -1,5 +1,9 @@
 package funkin.states.options;
 
+import funkin.CoolUtil.overlapsMouse as overlaps;
+import funkin.states.options.*;
+import funkin.ClientPrefs;
+
 import flixel.graphics.FlxGraphic;
 import flixel.input.keyboard.FlxKey;
 import flixel.tweens.FlxEase;
@@ -9,13 +13,10 @@ import flixel.addons.transition.FlxTransitionableState;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 import flixel.group.FlxGroup.FlxTypedGroup;
-import openfl.geom.Rectangle;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.addons.ui.FlxUI9SliceSprite;
-
-import funkin.ClientPrefs;
-import funkin.states.options.*;
+import openfl.geom.Rectangle;
 
 #if discord_rpc
 import funkin.api.Discord;
@@ -31,53 +32,196 @@ typedef Widget =
 
 class OptionsSubstate extends MusicBeatSubstate
 {
-	// TODO: put this all into the ClientPrefs option definitions instead
-	private static final _recommendsRestart:Array<String> = [
-		"etternaHUD",
-		"judgeCounter",
-		"hudPosition",
-		"shaders",
-		"lowQuality",
-		"ruin",
-		#if !tgt "midScroll" #end
+	// for scripting
+	public static final requiresRestart:Map<String, Bool> = [];
+	public static final recommendsRestart:Map<String, Bool> = [];
+
+	static var optionOrder:Array<String> = [
+		"game",
+		"ui",
+		"video",
+		"controls",
+		#if (discord_rpc || DO_AUTO_UPDATE) "misc", #end 
+		/* "Accessibility" */
 	];
 
-	private static final _requiresRestart:Array<String> = [
-		"modcharts", 
-		"noteOffset", 
-		"ratingOffset", 
-		"wife3", 
-		"useEpics", 
-		"judgePreset", 
-		"epicWindow", 
-		"sickWindow", 
-		"goodWindow", 
-		"badWindow", 
-		"hitWindow",
-		"judgeDiff", 
-		"noteSkin",
+	static var options:Map<String, Array<Dynamic>> = [
+		// maps are annoying and dont preserve order so i have to do this
+		"game" => [
+			[
+				"gameplay", 
+				[
+					"downScroll",
+					"midScroll",
+					"ghostTapping", 
+					"directionalCam", 
+					"noteOffset", 
+					"ratingOffset",
+				]
+			],
+			[
+				"audio", 
+				[
+					"masterVolume",
+					"songVolume",
+					'sfxVolume',
+					"hitsoundVolume", 
+					"missVolume",
+					#if tgt "ruin", #end
+				]
+			],
+			[
+				"accessibility",
+				[
+					"flashing",
+					"camShakeP",
+					"camZoomP",
+					"modcharts"
+				]
+			],
+			[
+				"advanced",
+				[
+					"wife3",
+					"judgePreset",
+					#if USE_EPIC_JUDGEMENT
+					"useEpics",
+					"epicWindow",
+					#end
+					"sickWindow",
+					"goodWindow",
+					"badWindow",
+					"hitWindow",
+					"judgeDiff", // fuck you pedophile
+				]
+			]
+		],
+		"ui" => [
+			[
+				"notes",
+				[
+					"noteOpacity",
+					"downScroll",
+					"midScroll",
+					"noteSplashes",
+					"noteSkin",
+					"customizeColours"
+				]
+			],
+			[
+				"hud",
+				[
+					"timeBarType", 
+					"hudOpacity", 
+					"hpOpacity", 
+					"timeOpacity", 
+					"judgeOpacity",
+					"stageOpacity", 
+					"scoreZoom", 
+					"npsDisplay", 
+					"hitbar", 
+					"showMS", 
+					"coloredCombos",
+					'worldCombos',
+					"simpleJudge",
+					"judgeCounter", 
+					'hudPosition', 
+					"customizeHUD",
+				]
+			],
+			[
+				"advanced", 
+				[
+					"etternaHUD", 
+					"gradeSet",
+					"showWifeScore"
+				]
+			]
+		],
+		"video" => [
+			["video", ["shaders", "showFPS"]],
+			["display", ["framerate", "bread"]],
+			[
+				"performance",
+				[
+					"lowQuality",
+					"globalAntialiasing",
+					"multicoreLoading",
+					"optimizeHolds",
+					"holdSubdivs",
+					"drawDistanceModifier" // apparently i forgot to add this in the new options thing lmao
+				]
+			]
+		],
+		"controls" => [
+			[
+				"keyboard", ["customizeKeybinds",]
+			], 
+			[
+				"controller", ["controllerMode",]
+			]
+		],
+		
+		"misc" => [
+			//["audio", ["masterVolume", "songVolume", "hitsoundVolume", "missVolume"]],
+			#if discord_rpc
+			["discord", ["discordRPC"]],
+			#end
+			#if DO_AUTO_UPDATE
+			["updating", ["checkForUpdates", "downloadBetas"]]
+			#end
+		],
+		
+		/* "accessibility" => [
+				[
+					"gameplay", 
+					[
+						"flashing",
+						"camShakeP",
+						"camZoomP"
+					]
+				]
+			] */
 	];
-	var forceWidgetUpdate:Bool = false;
 
-	static public var requiresRestart = _requiresRestart.copy();
-	static public var recommendsRestart = _recommendsRestart.copy();
+	static inline function epicWindowVal(val:Float)
+		#if USE_EPIC_JUDGEMENT
+		return val;
+		#else 
+		return -1; 
+		#end
+	
+	static var judgeWindows:Map<String, Array<Float>> = [
+		"Standard" => [epicWindowVal(22.5), 45, 90, 135, 180],
+		"Week 7" => [
+			-1,		// epic (-1 to disable)
+			33,		// sick
+			125,	// good
+			150,	// bad
+			166		// shit / max hit window
+		],
+		"V-Slice" => [epicWindowVal(12.5), 45, 90, 135, 160], // https://cdn.discordapp.com/attachments/991571764180156467/1235523554032746556/image.png
+		"Psych" => [-1, 45, 90, 135, 166],
+		"ITG" => [epicWindowVal(21), 43, 102, 135, 180]
+	];
+
+	////
 
 	public static function resetRestartRecomendations()
 	{
-		requiresRestart = _requiresRestart.copy();
-		recommendsRestart = _recommendsRestart.copy();
+		requiresRestart.clear();
+		recommendsRestart.clear();
 	}
 
 	var changed:Array<String> = [];
 	var originalValues:Map<String, Dynamic> = [];
 
-
 	public var goBack:(Array<String>)->Void;
     public function save(){
 		ClientPrefs.save(actualOptions);
-
 		funkin.data.Highscore.loadData();
     }
+	
 	function windowsChanged()
 	{
 		var windows = ["badWindow", "goodWindow", "sickWindow"];
@@ -280,179 +424,21 @@ class OptionsSubstate extends MusicBeatSubstate
 		}
 	}
 
-	static inline function epicWindowVal(val:Float){
-		return #if USE_EPIC_JUDGEMENT val #else -1 #end ;
-	}
-	static var judgeWindows:Map<String, Array<Float>> = [
-		"Standard" => [epicWindowVal(22.5), 45, 90, 135, 180],
-		"Week 7" => [
-			-1,		// epic (-1 to disable)
-			33,		// sick
-			125,	// good
-			150,	// bad
-			166		// shit / max hit window
-		],
-		"V-Slice" => [epicWindowVal(12.5), 45, 90, 135, 160], // https://cdn.discordapp.com/attachments/991571764180156467/1235523554032746556/image.png
-		"Psych" => [-1, 45, 90, 135, 166],
-		"ITG" => [epicWindowVal(21), 43, 102, 135, 180]
-	];
-
-	static var options:Map<String, Array<Dynamic>> = [
-		// maps are annoying and dont preserve order so i have to do this
-		"game" => [
-			[
-				"gameplay", 
-				[
-					"downScroll",
-					"midScroll",
-					"ghostTapping", 
-					"directionalCam", 
-					"noteOffset", 
-					"ratingOffset",
-				]
-			],
-			[
-				"audio", 
-				[
-                    "masterVolume",
-                    "songVolume",
-				    'sfxVolume',
-					"hitsoundVolume", 
-					"missVolume",
-					#if tgt "ruin", #end
-				]
-			],
-			[
-				"accessibility",
-				[
-					"flashing",
-					"camShakeP",
-					"camZoomP",
-					"modcharts"
-				]
-			],
-			[
-				"advanced",
-				[
-					"wife3",
-					"judgePreset",
-					#if USE_EPIC_JUDGEMENT
-					"useEpics",
-					"epicWindow",
-					#end
-					"sickWindow",
-					"goodWindow",
-					"badWindow",
-					"hitWindow",
-					"judgeDiff", // fuck you pedophile
-				]
-			]
-		],
-		"ui" => [
-			[
-				"notes",
-				[
-					"noteOpacity",
-					"downScroll",
-					"midScroll",
-					"noteSplashes",
-					"noteSkin",
-					"customizeColours"
-				]
-			],
-			[
-				"hud",
-				[
-					"timeBarType", 
-					"hudOpacity", 
-					"hpOpacity", 
-					"timeOpacity", 
-					"judgeOpacity",
-					"stageOpacity", 
-					"scoreZoom", 
-					"npsDisplay", 
-					"hitbar", 
-					"showMS", 
-					"coloredCombos",
-					'worldCombos',
-					"simpleJudge",
-					"judgeCounter", 
-					'hudPosition', 
-					"customizeHUD",
-				]
-			],
-			[
-				"advanced", 
-				[
-					"etternaHUD", 
-					"gradeSet",
-					"showWifeScore"
-				]
-			]
-		],
-		"video" => [
-			["video", ["shaders", "showFPS"]],
-			["display", ["framerate", "bread"]],
-			[
-				"performance",
-				[
-					"lowQuality",
-					"globalAntialiasing",
-					"multicoreLoading",
-					"optimizeHolds",
-					"holdSubdivs",
-					"drawDistanceModifier" // apparently i forgot to add this in the new options thing lmao
-				]
-			]
-		],
-		"controls" => [
-            [
-                "keyboard", ["customizeKeybinds",]
-            ], 
-            [
-                "controller", ["controllerMode",]
-            ]
-        ],
-		
-		"misc" => [
-			//["audio", ["masterVolume", "songVolume", "hitsoundVolume", "missVolume"]],
-			#if discord_rpc
-			["discord", ["discordRPC"]],
-			#end
-			#if DO_AUTO_UPDATE
-			["updating", ["checkForUpdates", "downloadBetas"]]
-			#end
-		],
-		
-		/* "accessibility" => [
-				[
-					"gameplay", 
-					[
-						"flashing",
-						"camShakeP",
-						"camZoomP"
-					]
-				]
-			] */
-	];
-
-	static var optionOrder:Array<String> = [
-		"game",
-		"ui",
-		"video",
-		"controls",
-		#if (discord_rpc || DO_AUTO_UPDATE) "misc", #end 
-		/* "Accessibility" */
-	];
-
 	var selected:Int = 0;
+	var forceWidgetUpdate:Bool = false;
 
 	var buttons:Array<FlxSprite> = [];
 	var currentWidgets:Map<FlxObject, Widget> = [];
 	var currentGroup:FlxTypedGroup<FlxObject>;
 	var groups:Map<String, FlxTypedGroup<FlxObject>> = [];
 	var allWidgets:Map<String, Map<FlxObject, Widget>> = [];
-	var actualOptions = ClientPrefs.getOptionDefinitions();
+	var actualOptions:Map<String, OptionData> = {
+		var definitions = ClientPrefs.getOptionDefinitions();
+		[
+			for (name in ClientPrefs.options)
+				name => definitions.get(name)
+		];
+	};
 
 	var mainCamera:FlxCamera;
 	var optionCamera:FlxCamera;
@@ -465,27 +451,7 @@ class OptionsSubstate extends MusicBeatSubstate
 
 	var openedDropdown:Widget;
 
-	@:noCompletion
-	var _point:FlxPoint = FlxPoint.get();
-	@:noCompletion
-	var _mousePoint:FlxPoint = FlxPoint.get();
-
-	function overlaps(object:FlxObject, ?camera:FlxCamera)
-	{
-		if (camera == null)
-			camera = optionCamera;
-
-		_point = FlxG.mouse.getPositionInCameraView(camera, _point);
-		if (camera.containsPoint(_point))
-		{
-			_point = FlxG.mouse.getWorldPosition(camera, _point);
-			if (object.overlapsPoint(_point, true, camera))
-				return true;
-		}
-
-		return false;
-	}
-
+	@:noCompletion var _mousePoint:FlxPoint = FlxPoint.get();
 
 	var optionDesc:FlxText;
 
@@ -561,7 +527,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			FlxColor.fromRGB(70, 70, 70)
 		));
 		if (FlxG.width - 160 < optionMenu.width + 160) optionMenu.x = Math.floor((FlxG.width - optionMenu.width)/2);
-		optionMenu.alpha = 0.8;
+		optionMenu.alpha = 0.6;
 		add(optionMenu);
 
 		optionCamera.width = Std.int(optionMenu.width);
@@ -584,7 +550,8 @@ class OptionsSubstate extends MusicBeatSubstate
 		{
 			var tabName = optionOrder[idx];
 
-			var text = new FlxText(0, 0, 0, Paths.getString('opt_tabName_$tabName').toUpperCase(), 16);
+			var strKey = 'opt_tabName_$tabName';
+			var text = new FlxText(0, 0, 0, (Paths.hasString(strKey) ? Paths.getString(strKey) : tabName).toUpperCase(), 16);
 			#if tgt
 			text.setFormat(Paths.font("calibrib.ttf"), 32, 0xFFFFFFFF, CENTER);
 			#else
@@ -644,6 +611,11 @@ class OptionsSubstate extends MusicBeatSubstate
 
 					var data:OptionData = actualOptions.get(opt);
 
+					if (data.data.get("requiresRestart"))
+						requiresRestart.set(opt, true);
+					if (data.data.get("recommendsRestart"))
+						recommendsRestart.set(opt, true);
+
 					data.data.set("optionName", opt);
 					if (Paths.hasString('opt_display_$opt'))data.display = Paths.getString('opt_display_$opt');
 					if (Paths.hasString('opt_desc_$opt'))data.desc = Paths.getString('opt_desc_$opt');
@@ -658,6 +630,7 @@ class OptionsSubstate extends MusicBeatSubstate
 					text.y += (height - text.height) / 2;
 					
 					var drop:FlxUI9SliceSprite = new FlxUI9SliceSprite(rect.x, rect.y, backdropGraphic, rect, backdropSlice);
+					drop.alpha = 0.95;
 					drop.cameras = [optionCamera];
 					group.add(drop);
 					
@@ -1044,7 +1017,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				{
 					if (FlxG.mouse.justPressed)
 					{
-						if (overlaps(optBox))
+						if (overlaps(optBox, optionCamera))
 						{
 							checkbox.toggled = !checkbox.toggled;
 							changeToggleW(widget, checkbox.toggled);
@@ -1075,7 +1048,7 @@ class OptionsSubstate extends MusicBeatSubstate
 					if (FlxG.mouse.justPressed)
 					{
 						var interacted:Bool = false;
-						if (overlaps(optBox))
+						if (overlaps(optBox, optionCamera))
 						{
 							if (openedDropdown == widget)
 								openedDropdown = null;
@@ -1170,7 +1143,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				var newVal = oldVal;
 				if (!widget.locked)
 				{
-					if (FlxG.mouse.justPressed && overlaps(box) || FlxG.mouse.pressed && scrubbingBar == bar)
+					if (FlxG.mouse.justPressed && overlaps(box, optionCamera) || FlxG.mouse.pressed && scrubbingBar == bar)
 					{
 						scrubbingBar = bar;
 						_mousePoint = FlxG.mouse.getWorldPosition(optionCamera, _mousePoint);
@@ -1209,7 +1182,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			case Button:
 				if (!widget.locked)
 				{
-					if (FlxG.mouse.justPressed && overlaps(optBox))
+					if (FlxG.mouse.justPressed && overlaps(optBox, optionCamera))
 						onButtonPressed(widget.optionData.data.get("optionName"));
 				}
 		}
@@ -1592,7 +1565,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			{
 				for (object => widget in currentWidgets)
 				{
-					if (movedMouse && widget != pHov && overlaps(widget.data.get("optionBox")))
+					if (movedMouse && widget != pHov && overlaps(widget.data.get("optionBox"), optionCamera))
 					{
 						changeWidget(null); // to reset keyboard selection
 						curWidget = widget;
@@ -1617,9 +1590,9 @@ class OptionsSubstate extends MusicBeatSubstate
 					
 					/*if(oN == 'customizeHUD' )
 						optDesc += "\n(NOTE: This does not work because you're ingame!)";
-					else */if (requiresRestart.contains(oN))
+					else */if (requiresRestart.exists(oN))
 						optDesc += "\nWARNING: You will need to restart the song if you change this!";
-					else if (recommendsRestart.contains(oN))
+					else if (recommendsRestart.exists(oN))
 						optDesc += "\nNOTE: This won't have any effect unless you restart the song!";
 				}
 				
@@ -1671,7 +1644,6 @@ class OptionsSubstate extends MusicBeatSubstate
 
 	override function destroy()
 	{
-		_point.put();
 		_mousePoint.put();
 		Main.volumeChangedEvent.remove(onVolumeChange);
 

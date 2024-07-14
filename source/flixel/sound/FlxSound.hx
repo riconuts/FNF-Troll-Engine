@@ -43,34 +43,22 @@ enum SoundContext {
 }
 class FlxSound extends FlxBasic
 {
-    public var context:SoundContext = SFX;
+	public static var defaultPitch:Float = 1;
+    
+	public var context:SoundContext = SFX;
 
 	var effectAux:ALAuxiliaryEffectSlot = AL.createAux(); // TODO: add removeAux
+
 	/**
 	 * Filter which gets applied to the sound
 	 */
 	public var filter(default, set):ALFilter;
-
-	function set_filter(v:ALFilter)
-	{
-		filter = v;
-		updateTransform();
-		return filter;
-	}
 
 	/**
 	 * Effect which gets applied to the sound
 	 */
 	public var effect(default, set):Null<ALEffect>;
 
-	function set_effect(v:ALEffect)
-	{
-		effect = v;
-		updateTransform();
-		return effect;
-	}
-
-	public static var defaultPitch:Float = 1;
 	/**
 	 * The x position of this sound in world coordinates.
 	 * Only really matters if you are doing proximity/panning stuff.
@@ -648,30 +636,53 @@ class FlxSound extends FlxBasic
 		if (_channel != null)
 		{
 			_channel.soundTransform = _transform;
-
-			#if cpp
-			@:privateAccess
-			{
-				if (_channel.__source != null){
-					this._channel.__source.__backend.setPitch(_pitch);
-
-					var handle = this._channel.__source.__backend.handle;
-					if(filter!=null)
-						AL.sourcei(handle, AL.DIRECT_FILTER, filter);
-					else
-						AL.removeDirectFilter(handle);
-
-					if(effect!=null){
-						var cffi:CFFIPointer = cast filter;
-						AL.auxi(effectAux, AL.EFFECTSLOT_EFFECT, effect);
-						AL.source3i(handle, AL.AUXILIARY_SEND_FILTER, effectAux, 0, filter == null ? AL.FILTER_NULL : Std.int(cffi.get()));
-					}else
-						AL.source3i(handle, AL.AUXILIARY_SEND_FILTER, AL.FILTER_NULL, 0, AL.FILTER_NULL);
-				}
-				
-			}
-			#end
 		}
+	}
+
+	inline function get_audioSource(){
+		@:privateAccess
+		#if (openfl < "9.3.2")
+		return _channel.__source;
+		#else
+		return _channel.__audioSource;
+		#end
+	}
+
+	function updateFilter(){
+		#if !(flash || js || html5)
+		@:privateAccess
+		if (_channel != null){
+			var source = get_audioSource();
+			if (source == null)
+				return;
+
+			var handle = source.__backend.handle;
+			if (filter != null)
+				AL.sourcei(handle, AL.DIRECT_FILTER, filter);
+			else
+				AL.removeDirectFilter(handle);
+		}
+		#end
+	}
+
+	function updateEffect(){
+		#if !(flash || js || html5)
+		@:privateAccess
+		if (_channel != null){
+			var source = get_audioSource();
+			if (source == null)
+				return;
+
+			var handle = source.__backend.handle;
+
+			if (effect != null){
+				var cffi:CFFIPointer = cast filter;
+				AL.auxi(effectAux, AL.EFFECTSLOT_EFFECT, effect);
+				AL.source3i(handle, AL.AUXILIARY_SEND_FILTER, effectAux, 0, filter == null ? AL.FILTER_NULL : Std.int(cffi.get()));
+			}else
+				AL.source3i(handle, AL.AUXILIARY_SEND_FILTER, AL.FILTER_NULL, 0, AL.FILTER_NULL);
+		}
+		#end
 	}
 
 	/**
@@ -688,9 +699,10 @@ class FlxSound extends FlxBasic
 		_channel = _sound.play(_time, 0, _transform);
 		if (_channel != null)
 		{
-			#if (sys && openfl_legacy)
 			pitch = _pitch;
-			#end
+			updateFilter();
+			updateEffect();
+
 			_channel.addEventListener(Event.SOUND_COMPLETE, stopped);
 			active = true;
 		}
@@ -822,7 +834,28 @@ class FlxSound extends FlxBasic
 
 	function set_pitch(v:Float):Float
 	{
+		@:privateAccess
+		if (_channel != null){
+			var source = get_audioSource();
+			if (source != null)
+				source.pitch = _pitch;
+		}
+
 		return _pitch = v;
+	}
+
+	inline function set_filter(v:ALFilter)
+	{
+		filter = v;
+		updateFilter();
+		return filter;
+	}
+
+	inline function set_effect(v:ALEffect)
+	{
+		effect = v;
+		updateEffect();
+		return effect;
 	}
 
 	inline function get_pan():Float
@@ -832,7 +865,9 @@ class FlxSound extends FlxBasic
 
 	inline function set_pan(pan:Float):Float
 	{
-		return _transform.pan = pan;
+		_transform.pan = pan;
+		updateTransform();
+		return pan;
 	}
 
 	inline function get_time():Float

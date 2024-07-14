@@ -1,10 +1,9 @@
 package funkin.modchart.modifiers;
 
 import funkin.objects.playfields.NoteField;
+import math.Vector3;
 import flixel.math.FlxMath;
 import flixel.FlxSprite;
-import math.Vector3;
-import funkin.objects.playfields.NoteField;
 
 class PathModifier extends NoteModifier
 {
@@ -40,60 +39,62 @@ class PathModifier extends NoteModifier
 		}
 	}
 
+	static final PI_THIRD:Float = Math.PI / 3.0;
 	override function getPos(diff:Float, tDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
 	{
-        if(getSubmodValue("zigzag", player) != 0){
+		var zigzag = getSubmodValue("zigzag", player);
+		if (zigzag != 0) {
 			var offset = getSubmodValue("zigzagOffset", player);
 			var period = getSubmodValue("zigzagPeriod", player);
-			var perc = getSubmodValue("zigzag", player);
+			var result:Float = triangle((Math.PI * (1 / (period + 1)) * ((diff + 100 * offset) / Note.swagWidth)));
 
-			var result:Float = triangle((Math.PI * (1 / (period + 1)) * ((diff + (100 * (offset))) / Note.swagWidth)));
+			pos.x += (zigzag * Note.halfWidth) * result;
+		}
+		
+		var sawtooth = getSubmodValue("sawtooth", player);
+		if (sawtooth != 0) {
+			var period = getSubmodValue("sawtoothPeriod", player) + 1;
+			var p = (0.5 / period * diff) / Note.swagWidth;
 
-			pos.x += (perc * Note.swagWidth * 0.5) * result;
-        }
-        
-        if(getSubmodValue("sawtooth", player) != 0){
-			var percent = getSubmodValue('sawtooth', player);
-			var period = (getSubmodValue("sawtoothPeriod", player)) + 1;
-			pos.x += (percent * Note.swagWidth) * ((0.5 / period * diff) / Note.swagWidth - Math.floor((0.5 / period * diff) / Note.swagWidth));
-        }
+			pos.x += (sawtooth * Note.swagWidth) * (p - Math.floor(p));
+		}
 
-		if (getSubmodValue("square", player) != 0)
-		{
+		var squareVal = getSubmodValue("square", player);
+		if (squareVal != 0) {
 			var offset = getSubmodValue("squareOffset", player);
 			var period = getSubmodValue("squarePeriod", player);
-			var cum:Float = (Math.PI * (diff + offset) / (Note.swagWidth + (period * Note.swagWidth)));
-			var fResult = square(cum);
+			var cum = (Math.PI * (diff + offset) / (Note.swagWidth + (period * Note.swagWidth)));
 
-			pos.x += getSubmodValue('square', player) * Note.swagWidth * 0.5 * fResult;
+			pos.x += squareVal * Note.halfWidth * square(cum);
 		}
 
-        if(getSubmodValue("bounce", player)!=0){
+		var bounceVal = getSubmodValue("bounce", player);
+		if (bounceVal != 0) {
 			var offset = getSubmodValue("bounceOffset", player);
 			var period = getSubmodValue("bouncePeriod", player);
-			var bounce:Float = Math.abs(FlxMath.fastSin(((diff + offset) / (90
-				+ (period * 90)))));
-            //Math.abs(FlxMath.fastSin(((diff + (1 * (offset))) / (90 + 90 * period))));
+			if (period != -1.0){
+				var bounce = Math.abs(FlxMath.fastSin((diff + offset) / (90.0 + 90.0 * period)));
+				pos.x += bounceVal * Note.halfWidth * bounce;
+			}
+		}
 
-			pos.x += getSubmodValue('bounce', player) * Note.swagWidth * 0.5 * bounce;
-        }
-
-
-        if(getSubmodValue("xmode", player) != 0){
+		var xmode = getSubmodValue("xmode", player);
+		if (xmode != 0) {
 			var mod = (player + 1) * 2 - 3;
-			pos.x += getSubmodValue('xmode', player) * (diff * mod);
-        }
+			pos.x += xmode * (diff * mod);
+		}
 
-		if (getValue(player) != 0)
-		{
+		var tornadoVal = getValue(player);
+		if (tornadoVal != 0) {
 			// from schmovin!!
 			var playerColumn = data % 4;
-			var columnPhaseShift = playerColumn * Math.PI / 3;
+			var columnPhaseShift = playerColumn * PI_THIRD;
 			var phaseShift = diff / 135;
-			var returnReceptorToZeroOffsetX = (-Math.cos(-columnPhaseShift) + 1) * 0.5 * Note.swagWidth * 3;
-			var offsetX = (-Math.cos(phaseShift - columnPhaseShift) + 1) * 0.5 * Note.swagWidth * 3 - returnReceptorToZeroOffsetX;
-			pos.x += offsetX * getValue(player);
+			var returnReceptorToZeroOffsetX = (-FlxMath.fastCos(-columnPhaseShift) + 1) * Note.halfWidth * 3;
+			var offsetX = (-FlxMath.fastCos(phaseShift - columnPhaseShift) + 1) * Note.halfWidth * 3 - returnReceptorToZeroOffsetX;
+			pos.x += offsetX * tornadoVal;
 		}
+
 		return pos;
 	}
 

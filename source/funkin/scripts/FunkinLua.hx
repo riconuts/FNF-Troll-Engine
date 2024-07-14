@@ -48,7 +48,7 @@ class FunkinLua extends FunkinScript
 	public var camTarget:FlxCamera;
 	var gonnaClose:Bool = false;
 
-	public function new(script:String, ?name:String, ?ignoreCreateCall:Bool=false) {
+	public function new(script:String, ?name:String, ?ignoreCreateCall:Bool=false, ?vars:Map<String, Dynamic>) {
 		#if LUA_ALLOWED
 		lua = LuaL.newstate();
 		LuaL.openlibs(lua);
@@ -68,6 +68,10 @@ class FunkinLua extends FunkinScript
 
 		// Song/Week shit
 		setDefaultVars();
+		if (vars != null){
+			for(key => val in vars)
+				set(key, val);
+		}
 
 		// Camera poo
 		set('cameraX', 0);
@@ -88,7 +92,7 @@ class FunkinLua extends FunkinScript
 
 		set("curSection", 0);
 
-		set("playbackRate", 1.0); // so psych scripts give one error less 
+		set("playbackRate", 1.0); // for compatibility, do not give it the actual value.
 
 		for (i in 0...5) {
 			// annoying since some scripts use defaultPlayerStrumX/Y 4

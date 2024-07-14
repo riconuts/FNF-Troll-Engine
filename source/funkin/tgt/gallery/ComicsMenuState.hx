@@ -92,7 +92,7 @@ class ComicsMenuState extends MusicBeatState
 
 		#if MODS_ALLOWED
 		// lol im running out of names
-		for (mod in funkin.data.WeekData.reloadChapterFiles())
+		for (mod in funkin.data.WeekData.reloadWeekFiles())
 		{
 			var modDir = mod.directory;
 			var rawList = Paths.getContent(Paths.mods(modDir + "/data/freeplaySonglist.txt"));

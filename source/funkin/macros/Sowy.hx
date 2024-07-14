@@ -1,8 +1,9 @@
 package funkin.macros;
 
-// what DOES sowy mean
+import haxe.macro.Expr.Field;
 using StringTools;
 
+// what DOES sowy mean
 class Sowy
 {
     public static macro function getBuildDate()
@@ -25,5 +26,13 @@ class Sowy
     public static macro function getDefines() 
     {
         return macro $v{haxe.macro.Context.getDefines()};    
+    }
+
+    public static function findByName(fields:Array<Field>, name:String):Null<Field>{
+        for (field in fields){
+            if (field.name == name)
+                return field;
+        }
+        return null;
     }
 }

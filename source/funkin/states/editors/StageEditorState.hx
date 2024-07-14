@@ -433,7 +433,7 @@ class StageEditorState extends MusicBeatState{
 
 	function reloadCharacterArray()
 	{
-		characterList = Character.getCharacterList();
+		characterList = Character.getAllCharacters();
 
 		var weirdArray = FlxUIDropDownMenuCustom.makeStrIdLabelArray(characterList, true);
 		dadDropDown.setData(weirdArray);

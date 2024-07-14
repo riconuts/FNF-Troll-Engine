@@ -1,5 +1,6 @@
 package funkin;
 
+import funkin.data.WeekData;
 import flixel.FlxG;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxAtlasFrames;
@@ -8,6 +9,7 @@ import openfl.utils.Assets;
 import openfl.utils.AssetType;
 import openfl.display.BitmapData;
 import openfl.media.Sound;
+import haxe.io.Path;
 import haxe.Json;
 
 using StringTools;
@@ -16,13 +18,6 @@ using StringTools;
 import sys.FileSystem;
 import sys.io.File;
 #end
-
-/*
-#if tgt
-typedef FreeplayCategoryMetadata = FreeplayState.FreeplayCategoryMetadata;
-typedef FreeplaySongMetadata = FreeplayState.FreeplaySongMetadata;
-#end
-*/
 
 class Paths
 {
@@ -276,6 +271,10 @@ class Paths
 		return dirMap;
 	}
 	
+	/** 
+		Iterates through a directory and calls a function with the name of each file contained within it
+		Returns true if the directory was a valid folder and false if not.
+	**/
 	inline static public function iterateDirectory(Directory:String, Func:haxe.Constraints.Function)
 	{
 		var dir:String = Directory.endsWith("/") ? Directory.substr(0, -1) : Directory; // remove ending slash
@@ -291,14 +290,17 @@ class Paths
 
 	#else
 
-	/** Iterates through a directory and call a function with the name of each file contained within it**/
-	inline static public function iterateDirectory(Directory:String, Func:haxe.Constraints.Function):Bool
+	/** 
+		Iterates through a directory and calls a function with the name of each file contained within it
+		Returns true if the directory was a valid folder and false if not.
+	**/
+	inline static public function iterateDirectory(path:String, func:haxe.Constraints.Function):Bool
 	{
-		if (!FileSystem.exists(Directory) || !FileSystem.isDirectory(Directory))
+		if (!FileSystem.exists(path) || !FileSystem.isDirectory(path))
 			return false;
 		
-		for (name in FileSystem.readDirectory(Directory))
-			Func(name);
+		for (name in FileSystem.readDirectory(path))
+			func(name);
 
 		return true;
 	}
@@ -436,13 +438,12 @@ class Paths
 	}
 
 	public inline static function hasString(key:String)
-		return getString(key) != key;
+		return _getString(key) != null;
 
-	public static function getString(key:String, force:Bool = false):String
+	public static function _getString(key:String, force:Bool = false):Null<String>
 	{
 		if (!force && currentStrings.exists(key))
 			return currentStrings.get(key);
-	
 
 		for (filePath in Paths.getFolders("data"))
 		{
@@ -465,8 +466,20 @@ class Paths
 			}
 		}
 
-		trace('$key has no attached value');
-		return key;
+		return null;
+	}
+
+	public static function getString(key:String, force:Bool = false):Null<String>{
+		var str:Null<String> = _getString(key, force);
+		
+		if (str == null){
+			if (Main.showDebugTraces) 
+				trace('$key has no attached value');
+
+			return key;
+		}
+
+		return str;
 	}
 
 	inline static public function fileExists(key:String, ?type:AssetType, ?ignoreMods:Bool = false, ?library:String)
@@ -651,17 +664,24 @@ class Paths
 		#end
 
 		var gottenPath:String = getPath('$path/$key.$SOUND_EXT', SOUND, library);
-		#if html
+		#if html5
 		gottenPath = gottenPath.substring(gottenPath.indexOf(':') + 1, gottenPath.length);
 		#end
 
 		var sound:Null<Sound> = currentTrackedSounds.get(gottenPath);
 		if (sound == null){
-			#if !html
+			#if !html5
 			sound = Sound.fromFile('./' + gottenPath);
 			#else
 			sound = Assets.getSound(/*(path == 'songs' ? 'songs:' : '') +*/ gottenPath);
 			#end
+
+			if (sound == null || sound.bytesTotal + sound.length <= 0)
+			{
+				/// fuckkk man
+				trace('Sound file $gottenPath not found!');
+				return null;
+			}
 			
 			currentTrackedSounds.set(gottenPath, sound);
 		}
@@ -686,6 +706,7 @@ class Paths
 		return Paths.getPreloadPath(key);
 	}
 
+	/** Paths.image(key) != null **/
 	inline public static function imageExists(key:String)
 		return Paths.exists(Paths.___getPath('images/$key.png'));
 
@@ -713,6 +734,8 @@ class Paths
 
 
 	public static var modsList:Array<String> = [];
+	public static var contentMetadata:Map<String, ContentMetadata> = [];
+
 	#if MODS_ALLOWED
 	static final modFolderPath:String = "content/";
 
@@ -755,19 +778,11 @@ class Paths
 
 	static public function pushGlobalContent(){
 		globalContent = [];
-		for (mod in Paths.getModDirectories())
-		{
-			var path = Paths.mods('$mod/metadata.json');
-			var rawJson:Null<String> = Paths.getContent(path);
 
-			if (rawJson != null && rawJson.length > 0)
-			{
-				var json:Dynamic = Json.parse(rawJson);
-				var fuck:Bool = Reflect.field(json, "runsGlobally");
-				if (fuck){
-					globalContent.push(mod);
-				}
-			}
+		for (mod => json in getContentMetadata())
+		{
+			if (Reflect.field(json, "runsGlobally") == true) 
+				globalContent.push(mod);
 		}
 
 		return globalContent;
@@ -782,10 +797,6 @@ class Paths
 			if (FileSystem.exists(fileToCheck))
 				return fileToCheck;
 		}
-
-		var fileToCheck = mods('global/' + key);
-		if (FileSystem.exists(fileToCheck))
-			return fileToCheck;
 
 		if (!ignoreGlobal)
 		{
@@ -804,9 +815,11 @@ class Paths
 	// I might end up making this just return an array of loaded mods and require you to press a refresh button to reload content lol
 	// mainly for optimization reasons, so its not going through the entire content folder every single time
 
-	static public function getModDirectories():Array<String> 
+	public static function updateContentLists()
 	{
-		var list:Array<String> = [];
+		var list:Array<String> = modsList = [];
+		contentMetadata.clear();
+
 		if (FileSystem.exists(modFolderPath))
 		{
 			for (folder in FileSystem.readDirectory(modFolderPath))
@@ -815,12 +828,71 @@ class Paths
 				if (FileSystem.isDirectory(path) && !list.contains(folder))
 				{
 					list.push(folder);
+
+					var path = Paths.mods('$folder/metadata.json');
+					var rawJson:Null<String> = Paths.getContent(path);
+		
+					if (rawJson != null && rawJson.length > 0)
+					{
+						var data:Dynamic = Json.parse(rawJson);
+						contentMetadata.set(folder, updateContentMetadataStructure(data));
+						continue;
+					}
+
+					#if PE_MOD_COMPATIBILITY
+					var psychModMetadata = getPsychModMetadata(folder);
+					if (psychModMetadata != null)
+						contentMetadata.set(folder, psychModMetadata);
+					#end
 				}
 			}
 		}
-		modsList = list;
+	}
 
-		return list;
+	#if PE_MOD_COMPATIBILITY
+	static function getPsychModMetadata(folder:String):ContentMetadata {
+		var packJson:String = Paths.mods('$folder/pack.json');
+		var packJson:Null<String> = Paths.getContent(packJson);
+		var packJson:Dynamic = (packJson == null) ? packJson : Json.parse(packJson);
+
+		var sowy:ContentMetadata = {
+			runsGlobally: (packJson != null) && Reflect.field(packJson, 'runsGlobally') == true, 
+			weeks: [],
+			freeplaySongs: []
+		}
+
+		for (psychWeek in WeekData.getPsychModWeeks(folder))
+			WeekData.addPsychWeek(sowy, psychWeek);
+
+		return sowy;
+	}
+	#end
+	
+	inline static function updateContentMetadataStructure(data:Dynamic):ContentMetadata
+	{
+		if (Reflect.field(data, "weeks") != null)
+			return data; // You are valid :)
+
+		var chapters:Dynamic = Reflect.field(data, "chapters");
+		if (chapters != null) { // TGT
+			Reflect.setField(data, "weeks", chapters);
+			Reflect.deleteField(data, "chapters");
+			return data;
+		}else { // Lets assume it's an old TGT metadata
+			return {weeks: [data]};
+		}
+	}
+
+	static public function getModDirectories():Array<String> 
+	{
+		updateContentLists();
+		return modsList;
+	}
+
+	static public function getContentMetadata():Map<String, ContentMetadata>
+	{
+		updateContentLists();
+		return contentMetadata;
 	}
 	#end
 
@@ -831,7 +903,6 @@ class Paths
 		#else
 		var foldersToCheck:Array<String> = [
 			Paths.mods(Paths.currentModDirectory + '/$dir/'),
-			Paths.mods('global/$dir/'),
 			Paths.mods('$dir/'),			
 		];
 

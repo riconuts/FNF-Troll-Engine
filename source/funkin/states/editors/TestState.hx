@@ -59,17 +59,6 @@ class TestState extends MusicBeatState{
 	var updateFunction:Void->Void;
 	var lastGroup:FlxTypedGroup<FlxBasic>;
 	var curGroup:FlxTypedGroup<FlxBasic>;
-
-	function disableVolumeKeys(){
-		FlxG.sound.muteKeys = [];
-		FlxG.sound.volumeDownKeys = [];
-		FlxG.sound.volumeUpKeys = [];
-	}
-	function enableVolumeKeys(){
-		FlxG.sound.muteKeys = StartupState.muteKeys;
-		FlxG.sound.volumeDownKeys = StartupState.volumeDownKeys;
-		FlxG.sound.volumeUpKeys = StartupState.volumeUpKeys;
-	}
 	
 	override function update(elapsed:Float)
 	{
@@ -131,11 +120,11 @@ class TestState extends MusicBeatState{
 		
 		////
 		inputText.focusGained = function(){
-			disableVolumeKeys();
+			StartupState.specialKeysEnabled = false;
 			updateFunction = function(){ if (FlxG.keys.justPressed.ENTER) inputText.focusLost();}
 		};
 		inputText.focusLost = function(){
-			enableVolumeKeys();
+			StartupState.specialKeysEnabled = true;
 
 			inputText.hasFocus = false;
 			updateFunction = null;

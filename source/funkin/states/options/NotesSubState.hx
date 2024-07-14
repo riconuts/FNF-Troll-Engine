@@ -27,8 +27,12 @@ class NotesSubState extends MusicBeatSubstate
 	public function new() {
 		super();
 
+		var camPos = new FlxObject(0,0, 1280, 720);
+		add(camPos);
+
 		daCam = new FlxCamera();
 		daCam.bgColor = FlxColor.fromRGBFloat(0, 0, 0, 0.6);
+		daCam.follow(camPos, NO_DEAD_ZONE);
 		FlxG.cameras.add(daCam, false);
 
 		blackBG = new FlxSprite(posX - 25).makeGraphic(870, 200, FlxColor.BLACK);

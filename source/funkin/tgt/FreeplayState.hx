@@ -84,7 +84,7 @@ class FreeplayState extends MusicBeatState
 				persistentUpdate = false;
 
                 
-				var charts = SongChartSelec.getCharts(songButton.metadata);
+				var charts = songButton.metadata.charts;
 
 				if (FlxG.keys.pressed.ALT && charts.length > 0){
 					FlxG.switchState(new SongChartSelec(songButton.metadata, charts)); // we should make this better and add a proper chart selector
@@ -165,8 +165,10 @@ class FreeplayState extends MusicBeatState
 
 		////
 		setCategory("main", "MAIN STORY");
+		/*
 		setCategory("side", "SIDE STORIES");
 		setCategory("remix", "REMIXES / COVERS");
+		*/
 
 		//// Load the songs!!!
 		loadTxtFreeplayList(Paths.txt('freeplaySonglist'));

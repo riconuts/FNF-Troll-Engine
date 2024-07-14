@@ -1,19 +1,31 @@
 package funkin.macros;
 
 #if macro
+import funkin.ClientPrefs;
+
 import haxe.macro.Context;
 import haxe.macro.Expr;
+
+using funkin.macros.Sowy;
 
 class OptionMacro
 {
 	public static macro function build():Array<Field>
 	{
-		var fields = Context.getBuildFields();
+		////
+		var fields:Array<Field> = Context.getBuildFields();
 		var pos = Context.currentPos();
 
+		var definitions:Map<String, OptionData> = ClientPrefs.getOptionDefinitions(); // gets all the option definitions
 		var optionNames:Array<String> = [];
-		var definitions = ClientPrefs.getOptionDefinitions(); // gets all the option definitions
+
 		for(option => key in definitions){
+			var optionField:Null<Field> = fields.findByName(option);
+			if (optionField != null){
+				// if (optionField.access.contains(AStatic))
+					continue;
+			}
+
 			optionNames.push(option);
 			switch(key.type){
 				case Toggle:
@@ -44,7 +56,6 @@ class OptionMacro
 				default:
 					// nothing
 			}
-
 		}
 
 		fields.push({

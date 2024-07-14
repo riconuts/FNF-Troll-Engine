@@ -63,7 +63,7 @@ class PauseSubState extends MusicBeatSubstate
 
 					for (opt in changedOptions)
 					{
-						if (OptionsSubstate.requiresRestart.contains(opt))
+						if (OptionsSubstate.requiresRestart.exists(opt))
 						{
 							canResume = false;
 							break;

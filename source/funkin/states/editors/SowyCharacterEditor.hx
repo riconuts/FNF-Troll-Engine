@@ -180,16 +180,14 @@ class SowyCharacterEditor extends MusicBeatState
 	}
 
 	override function destroy(){
-		FlxG.sound.muteKeys = StartupState.muteKeys;
-		FlxG.sound.volumeDownKeys = StartupState.volumeDownKeys;
-		FlxG.sound.volumeUpKeys = StartupState.volumeUpKeys;
+		StartupState.specialKeysEnabled = true;
 
 		return super.destroy();
 	}
 
 	override function create()
 	{
-		FlxG.sound.volumeDownKeys = FlxG.sound.volumeUpKeys = FlxG.sound.muteKeys = [];
+		StartupState.specialKeysEnabled = false;
 
 		camGame = new FlxCamera();
 		camHUD = new FlxCamera();
@@ -265,7 +263,7 @@ class SowyCharacterEditor extends MusicBeatState
 		openDropdown(null);
 		
 
-	var characterList:Array<String> = Character.getCharacterList();
+	var characterList:Array<String> = Character.getAllCharacters();
 
 	function makeUI()
 	{
@@ -291,7 +289,7 @@ class SowyCharacterEditor extends MusicBeatState
 
 		ui_dropdown = new DropdownList();
 		ui_dropdown.cameras = [ui_dd_cam];
-		ui_dropdown.setElements(Character.getCharacterList());
+		ui_dropdown.setElements(Character.getAllCharacters());
 		ui_dropdown.exists = false;
 		add(ui_dropdown);
 

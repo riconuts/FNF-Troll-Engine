@@ -23,13 +23,17 @@ class AdvancedHUD extends CommonHUD
 	var songHighscore:Int = 0;
 	var songWifeHighscore:Float = 0;
 	var songHighRating:Float = 0;
+	var npsIdx:Int = 0;
 	public var hudPosition(default, null):String = ClientPrefs.hudPosition;
+	private var cpuControlled(get, never):Bool;
+	inline function get_cpuControlled() return PlayState.instance.cpuControlled;
 
 	var npsString:String = Paths.getString("nps");
 	var peakString:String = Paths.getString("peak");
 	var pcString:String = Paths.getString("peakcombo");
+	var botplayString = Paths.getString("botplayMark");
 
-	var npsIdx:Int = 0;
+	
 	override public function new(iP1:String, iP2:String, songName:String, stats:Stats)
 	{
 		super(iP1, iP2, songName, stats);
@@ -75,13 +79,11 @@ class AdvancedHUD extends CommonHUD
 		fcTxt.borderSize = 1.25;
 		add(fcTxt);
 
-		gradeTxt = new FlxText(0, 0, 0, "C", 20);
-		gradeTxt.setFormat(Paths.font("calibri.ttf"), 46, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		gradeTxt.x = 20;
-		gradeTxt.color = 0xFFD800;
+		gradeTxt = new FlxText(20, 0, FlxG.width - 40, "C", 20);
+		gradeTxt.setFormat(Paths.font("calibri.ttf"), 46, 0xFFD800, (hudPosition == 'Right') ? RIGHT : LEFT);
+		gradeTxt.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 1.25);
 		gradeTxt.y = FlxG.height - gradeTxt.height;
 		gradeTxt.scrollFactor.set();
-		gradeTxt.borderSize = 1.25;
 		add(gradeTxt);
 
 		var idx:Int = 0;
@@ -162,8 +164,8 @@ class AdvancedHUD extends CommonHUD
 		hitbar.alpha = alpha;
 		hitbar.visible = ClientPrefs.hitbar;
 		add(hitbar);
-		if (ClientPrefs.hitbar)
-		{
+
+		if (ClientPrefs.hitbar){
 			hitbar.screenCenter(XY);
 			if (ClientPrefs.downScroll)
 			{
@@ -178,7 +180,7 @@ class AdvancedHUD extends CommonHUD
 
 	override function recalculateRating(){
 		gradeTxt.color = (
-			if(grade == '?'){
+			if (cpuControlled || grade == '?'){
 				FlxColor.WHITE;
 
 			}else if (ratingPercent < 0){
@@ -230,9 +232,7 @@ class AdvancedHUD extends CommonHUD
 
 	override function update(elapsed:Float)
 	{
-		gradeTxt.text = grade;
-		if (hudPosition == 'Right') gradeTxt.x = FlxG.width - gradeTxt.width - 20;
-
+		gradeTxt.text = cpuControlled ? botplayString : grade;
 		
 		ratingTxt.text = (grade=="?") ? "0%" : (Highscore.floorDecimal(ratingPercent * 100, 2) + "%");
 		fcTxt.text = (ratingFC==stats.cfc && ClientPrefs.wife3) ? stats.fc : ratingFC;
@@ -243,7 +243,6 @@ class AdvancedHUD extends CommonHUD
 		if(peakCombo < combo) peakCombo = combo;
 		pcTxt.text = '$pcString: $peakCombo';
 		
-
 		for (k => v in judgements){
 			if (judgeTexts.exists(k))
 				judgeTexts.get(k).text = Std.string(v);

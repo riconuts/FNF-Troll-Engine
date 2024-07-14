@@ -1,5 +1,8 @@
 package funkin.states.options;
 
+import funkin.CoolUtil.overlapsMouse as overlaps;
+import funkin.input.InputFormatter;
+
 import flixel.input.keyboard.FlxKey;
 import flixel.math.FlxMath;
 import flixel.addons.ui.FlxUI9SliceSprite;
@@ -10,8 +13,6 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.math.FlxPoint;
 import openfl.geom.Rectangle;
-
-import funkin.input.InputFormatter;
 
 using StringTools;
 
@@ -42,6 +43,7 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 		[Paths.getString('control_note_right'), 'note_right'],
 		[Paths.getString('control_pause'), 'pause'],
 		[Paths.getString('control_reset'), 'reset'],
+
 		[Paths.getString('controls_ui')],
 		[Paths.getString('control_ui_up'), 'ui_up'],
 		[Paths.getString('control_ui_down'), 'ui_down'],
@@ -49,11 +51,13 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 		[Paths.getString('control_ui_right'), 'ui_right'],
 		[Paths.getString('control_accept'), 'accept'],
 		[Paths.getString('control_back'), 'back'],
+
 		[Paths.getString('controls_misc')],
 		[Paths.getString('control_volume_mute'), 'volume_mute'],
 		[Paths.getString('control_volume_up'), 'volume_up'],
 		[Paths.getString('control_volume_down'), 'volume_down'],
-		//['Fullscreen', 'fullscreen'],
+		[Paths.getString('control_fullscreen'), 'fullscreen'],
+
 		[Paths.getString('controls_debug')],
 		// honestly might just replace this with one debug thing
 		// and make it so pressing it in playstate will open a debug menu w/ a bunch of stuff
@@ -86,25 +90,6 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 	var selectionArrow:FlxSprite;
 	var keyboardY:Int = 0;
 	var keyboardX:Int = 0;
-
-	@:noCompletion
-	var _point:FlxPoint = FlxPoint.get();
-
-	function overlaps(object:FlxObject, ?camera:FlxCamera)
-	{
-		if (camera == null)
-			camera = scrollableCam;
-
-		_point = FlxG.mouse.getPositionInCameraView(camera, _point);
-		if (camera.containsPoint(_point))
-		{
-			_point = FlxG.mouse.getWorldPosition(camera, _point);
-			if (object.overlapsPoint(_point, true, camera))
-				return true;
-		}
-
-		return false;
-	}
 
 	var height:Float = 0;
 
@@ -281,6 +266,31 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 		return super.destroy();
 	}
 
+	////
+
+	function exitBinding()
+	{
+		bindID = 0;
+		bindIndex = -1;
+		StartupState.specialKeysEnabled = true;
+	}
+
+	function confirmBinding(key)
+	{
+		FlxG.sound.play(Paths.sound('confirmMenu'));
+				
+		bind(bindIndex, bindID, key);
+		ClientPrefs.saveBinds();
+		ClientPrefs.reloadControls();
+
+		exitBinding();
+	}
+
+	function cancelBinding(){
+		FlxG.sound.play(Paths.sound('cancelMenu'));
+		exitBinding();
+	}
+
 	override function update(elapsed:Float){
 		cam.bgColor = FlxColor.interpolate(0x80000000, cam.bgColor, Math.exp(-elapsed * 6));
 
@@ -428,21 +438,11 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 			overCam.alpha = FlxMath.lerp(1, overCam.alpha, Math.exp(-elapsed * 12));
 
 			var keyPressed:FlxKey = FlxG.keys.firstJustPressed();
-			if (keyPressed == cancelKey){
-				FlxG.sound.play(Paths.sound('cancelMenu'));
-				bindID = 0;
-				bindIndex = -1;
-			}
-			else if (keyPressed != NONE)
-			{
-				FlxG.sound.play(Paths.sound('confirmMenu'));
-				
-				bind(bindIndex, bindID, keyPressed);
-				ClientPrefs.saveBinds();
-				ClientPrefs.reloadControls();
-
-				bindID = 0;
-				bindIndex = -1;
+			if (keyPressed != NONE){
+				if (keyPressed == cancelKey)
+					cancelBinding();
+				else
+					confirmBinding(keyPressed);
 			}
 		}
 
@@ -495,6 +495,7 @@ class NewBindsSubstate extends MusicBeatSubstate  {
 		bindID = id;
 		bindIndex = index;
 		cancelKey = (currentBinded == BACKSPACE) ? FlxKey.ESCAPE : FlxKey.BACKSPACE;
+		StartupState.specialKeysEnabled = false;
 		
 		// 
 		unbindText.visible = forcedBind.contains(internal);

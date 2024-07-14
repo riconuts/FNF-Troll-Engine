@@ -557,7 +557,7 @@ class CharacterEditorState extends MusicBeatState
 		noAntialiasingCheckBox = new FlxUICheckBox(flipXCheckBox.x, flipXCheckBox.y + 40, null, null, "No Antialiasing", 80);
 		noAntialiasingCheckBox.checked = char.noAntialiasing;
 		noAntialiasingCheckBox.callback = function() {
-			char.antialiasing = (!noAntialiasingCheckBox.checked && ClientPrefs.globalAntialiasing);
+			char.antialiasing = !noAntialiasingCheckBox.checked;
 			char.noAntialiasing = noAntialiasingCheckBox.checked;
 		};
 
@@ -769,7 +769,7 @@ class CharacterEditorState extends MusicBeatState
 
 	var ghostList:Array<String>;
 	function updateGhostCharList(){
-		ghostList = Character.getCharacterList();
+		ghostList = Character.getAllCharacters();
 		ghostList.insert(0, "");
 		ghostCharDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(ghostList, true));
 	}
@@ -810,9 +810,11 @@ class CharacterEditorState extends MusicBeatState
 		ghostAnimDropDown = new FlxUIDropDownMenuCustom(15, ghostCharDropDown.y + 50, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(pressed:String) {
 			if (ghostChar == null) return;
 			
-			var selectedAnimation:Int = Std.parseInt(pressed);
-			ghostChar.playAnim(ghostChar.animationsArray[selectedAnimation].anim, true);
-			ghostAnimTxt.text = 'Offset [${ghostChar.offset.x}, ${ghostChar.offset.y}]';
+			var curAnimData = ghostChar.animationsArray[Std.parseInt(pressed)];
+			var offsets = curAnimData.offsets;
+			
+			ghostChar.playAnim(curAnimData.anim, true);
+			ghostAnimTxt.text = 'Offset [${offsets[0]}, ${offsets[1]}]';
 		});
 
 		ghostPlayableCheckbox = new FlxUICheckBox(15, ghostAnimDropDown.y + 50, null, null, "Playable Character", 100);
@@ -840,8 +842,11 @@ class CharacterEditorState extends MusicBeatState
 		var copyGhostOffsets = new FlxButton(400 - 80 - 15, ghostAnimDropDown.y, "Copy Offset", function(){
 			if (ghostChar == null) return;
 
-			var animName = char.animationsArray[curAnim].anim;
-			char.addOffset(animName, ghostChar.offset.x, ghostChar.offset.y);
+			var curAnimData = char.animationsArray[curAnim];
+			var animName = curAnimData.anim;
+			var offsets = curAnimData.offsets;
+			
+			char.addOffset(animName, offsets[0], offsets[1]);
 			char.playAnim(animName, true);
 		});
 
@@ -881,19 +886,23 @@ class CharacterEditorState extends MusicBeatState
 		charLayer.insert(0, ghostChar);
 
 		////
-		var anims:Array<String> = [
-			for (anim in ghostChar.animationsArray){
-				anim.anim;
-			}
+		var animList:Array<String> = [
+			for (anim in ghostChar.animationsArray)
+				anim.anim
 		];
-		if(anims.length < 1) anims.push('NO ANIMATIONS'); // Prevents crash
+		if (animList.length < 1) animList.push('NO ANIMATIONS'); // Prevents crash
 
-		ghostAnimDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(anims, true));
-		var firstAnim = anims.indexOf("idle");
-		ghostAnimDropDown.selectedId = Std.string(firstAnim != -1 ? firstAnim : 0);
+		var firstAnim = animList.indexOf("idle");
+		firstAnim = firstAnim != -1 ? firstAnim : 0;
 
-		ghostChar.playAnim(anims[firstAnim], true);
-		ghostAnimTxt.text = 'Offset [${ghostChar.offset.x}, ${ghostChar.offset.y}]';
+		ghostAnimDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(animList, true));
+		ghostAnimDropDown.selectedId = Std.string(firstAnim);
+
+		var curAnimData = ghostChar.animationsArray[firstAnim];
+		var offsets = curAnimData.offsets;
+		
+		ghostChar.playAnim(curAnimData.anim, true);
+		ghostAnimTxt.text = 'Offset [${offsets[0]}, ${offsets[1]}]';
 	}
 
 	function updateGhostPointerPos() {
@@ -925,18 +934,15 @@ class CharacterEditorState extends MusicBeatState
 		} else if(id == FlxUINumericStepper.CHANGE_EVENT && (sender is FlxUINumericStepper)) {
 			if (sender == scaleStepper)
 			{
-				reloadCharacterImage();
 				char.jsonScale = sender.value;
-
-				char.scale.set(1,1);
-				char.updateHitbox();
-				char.setGraphicSize(Std.int(char.width * char.jsonScale));
-				char.updateHitbox();
+				char.scale.set(sender.value, sender.value);
 
 				updatePointerPos();
 
 				if(char.animation.curAnim != null) {
 					char.playAnim(char.animation.curAnim.name, true);
+				}else{
+					char.updateHitbox();
 				}
 			}
 			else if(sender == positionXStepper)
@@ -1154,7 +1160,7 @@ class CharacterEditorState extends MusicBeatState
 	}
 
 	function reloadCharacterDropDown() {
-		characterList = Character.getCharacterList();
+		characterList = Character.getAllCharacters();
 
 		charDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(characterList, true));
 		charDropDown.selectedLabel = daAnim;
@@ -1177,11 +1183,13 @@ class CharacterEditorState extends MusicBeatState
 	override function update(elapsed:Float)
 	{
 		if (char.animationsArray[curAnim] != null) {
-			var animName = char.animationsArray[curAnim].anim;
-			var curAnim:FlxAnimation = char.animation.getByName(animName);
+			var curAnimData = char.animationsArray[curAnim];
+			var offsets = curAnimData.offsets;
+			var animName = curAnimData.anim;
 
-			textAnim.text = '$animName [${char.offset.x}, ${char.offset.y}]';
+			textAnim.text = '$animName [${offsets[0]}, ${offsets[1]}]';
 
+			var curAnim = char.animation.getByName(animName);
 			if (curAnim == null || curAnim.frames.length < 1)
 				textAnim.text += ' (ERROR!)';
 
@@ -1200,16 +1208,12 @@ class CharacterEditorState extends MusicBeatState
 				if(FlxG.keys.justPressed.ENTER) {
 					inputTexts[i].hasFocus = false;
 				}
-				FlxG.sound.muteKeys = [];
-				FlxG.sound.volumeDownKeys = [];
-				FlxG.sound.volumeUpKeys = [];
+				StartupState.specialKeysEnabled = false;
 				super.update(elapsed);
 				return;
 			}
 		}
-		FlxG.sound.muteKeys = StartupState.muteKeys;
-		FlxG.sound.volumeDownKeys = StartupState.volumeDownKeys;
-		FlxG.sound.volumeUpKeys = StartupState.volumeUpKeys;
+		StartupState.specialKeysEnabled = true;
 
 		if (testMode){
 			if (controls.NOTE_LEFT_P){

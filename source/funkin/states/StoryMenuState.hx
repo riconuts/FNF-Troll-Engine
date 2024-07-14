@@ -1,6 +1,3 @@
 package funkin.states;
 
-class StoryMenuState extends SongSelectState
-{
-	
-}
+typedef StoryMenuState = funkin.states.SongSelectState;

@@ -41,8 +41,24 @@ class StartupState extends FlxTransitionableState
 	public static var volumeDownKeys:Array<FlxKey> = [FlxKey.NUMPADMINUS, FlxKey.MINUS];
 	public static var volumeUpKeys:Array<FlxKey> = [FlxKey.NUMPADPLUS, FlxKey.PLUS];
 	public static var fullscreenKeys:Array<FlxKey> = [FlxKey.F11];
+	public static var specialKeysEnabled(default, set):Bool;
 
-	public static var nextState:Class<FlxState> = funkin.states.TitleState;
+	@:noCompletion inline public static function set_specialKeysEnabled(val)
+	{
+		if (val) {
+			FlxG.sound.muteKeys = StartupState.muteKeys;
+			FlxG.sound.volumeDownKeys = StartupState.volumeDownKeys;
+			FlxG.sound.volumeUpKeys = StartupState.volumeUpKeys;
+		}
+		else {
+			final emptyArr = [];
+			FlxG.sound.muteKeys = emptyArr;
+			FlxG.sound.volumeDownKeys = emptyArr;
+			FlxG.sound.volumeUpKeys = emptyArr;
+		}
+
+		return specialKeysEnabled = val;
+	}
 
 	public function new()
 	{
@@ -53,6 +69,7 @@ class StartupState extends FlxTransitionableState
 		persistentUpdate = true;
 	}
 
+	public static var nextState:Class<FlxState> = funkin.states.TitleState;
 	private static var loaded = false;
 	public static function load():Void
 	{
@@ -61,10 +78,7 @@ class StartupState extends FlxTransitionableState
 		loaded = true;
 
 		funkin.input.PlayerSettings.init();
-
-		#if hscript
-		funkin.scripts.FunkinHScript.init();
-		#end
+		specialKeysEnabled = true;
 
 		ClientPrefs.initialize();
 		ClientPrefs.load();
@@ -87,10 +101,8 @@ class StartupState extends FlxTransitionableState
 					e.stopImmediatePropagation();
 
 				// Also add F11 to switch fullscreen mode
-				if (fullscreenKeys.contains(e.keyCode)){
+				if (specialKeysEnabled && fullscreenKeys.contains(e.keyCode))
 					FlxG.fullscreen = !FlxG.fullscreen;
-					e.stopImmediatePropagation();
-				}
 			}, 
 			false, 
 			100
@@ -121,6 +133,10 @@ class StartupState extends FlxTransitionableState
 		Paths.getAllStrings();
 		
 		funkin.data.Highscore.load();
+
+		#if hscript
+		funkin.scripts.FunkinHScript.init();
+		#end
 		
 		#if discord_rpc
 		Application.current.onExit.add((exitCode)->{
@@ -134,21 +150,17 @@ class StartupState extends FlxTransitionableState
 
 	override function create()
 	{
+		this.transIn = null;
+		this.transOut = null;
+
 		#if tgt
 		this.transIn = FadeTransitionSubstate;
-		//this.transOut = FadeTransitionSubstate;
-		FlxTransitionableState.skipNextTransOut = true;
 
 		warning = new FlxSprite(0, 0, Paths.image("warning"));
 		warning.scale.set(0.65, 0.65);
 		warning.updateHitbox();
 		warning.screenCenter();
 		add(warning);
-		
-		#else
-		this.transIn = null;
-		this.transOut = null;
-		// TODO: Default Flixel Startup Animation :]
 		#end
 
 		super.create();
@@ -199,7 +211,6 @@ class StartupState extends FlxTransitionableState
 
 					step = 10;
 				}
-				//else warning.angle += elapsed * 25;
 				#end
 				
 			case 10:

@@ -27,7 +27,7 @@ class ChapterMenuState extends MusicBeatState
 
 		this.chapData = chapData;
 		Paths.currentModDirectory = chapData.directory;
-		ChapterData.curChapter = chapData;
+		ChapterData.curWeek = chapData;
 	}
 
 	public static function getChapterCover(name:String){
@@ -110,7 +110,7 @@ class ChapterMenuState extends MusicBeatState
 		totalSongTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
 		add(totalSongTxt);
 
-		var totalScoreTxt = new FlxText(1205, totalSongTxt.y, 0, Std.string(Highscore.getWeekScore(ChapterData.curChapter.directory)), 32);
+		var totalScoreTxt = new FlxText(1205, totalSongTxt.y, 0, Std.string(Highscore.getWeekScore(ChapterData.curWeek.directory)), 32);
 		totalScoreTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, FlxTextAlign.RIGHT, FlxTextBorderStyle.NONE, FlxColor.WHITE);
 		totalScoreTxt.x -= totalScoreTxt.width + 15;
 		add(totalScoreTxt);
@@ -154,7 +154,7 @@ class ChapterMenuState extends MusicBeatState
 		}
 
 		Paths.currentModDirectory = chapData.directory;
-		ChapterData.curChapter = chapData;
+		ChapterData.curWeek = chapData;
 
 		// Nevermind that's stupid lmao
 		PlayState.storyPlaylist = chapData.songs;

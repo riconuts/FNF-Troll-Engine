@@ -78,7 +78,7 @@ class StoryMenuState extends MusicBeatState
 
 		var chapN:Int = -1;
 
-		for (chapData in ChapterData.reloadChapterFiles())
+		for (chapData in ChapterData.reloadWeekFiles())
 		{
 			// this is to hide the christmas stuff from story mode, since im not sure if we're gonna make extra stuff for the story mode
 			if (chapData.category != "main")

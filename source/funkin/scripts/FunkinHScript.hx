@@ -105,6 +105,9 @@ class FunkinHScript extends FunkinScript
 		set("IntMap", haxe.ds.IntMap);
 		set("EnumValueMap", haxe.ds.EnumValueMap);
 
+		set("Date", Date);
+		set("DateTools", DateTools);
+
 		set("FlxG", FlxG);
 		set("FlxSprite", FlxSprite);
 		set("FlxCamera", FlxCamera);
@@ -346,7 +349,7 @@ class FunkinHScript extends FunkinScript
 			}
 			else
 			{
-				FlxG.log.error('Could not import funkin.class $className');
+				FlxG.log.error('Could not import class $className');
 			}
 		}
 		else
@@ -359,9 +362,8 @@ class FunkinHScript extends FunkinScript
 	{
 		// same as importClass, but for enums
 		// and it cant have enum.*;
-		// EDIT this doesnt work
 		var splitted:Array<String> = enumName.split(".");
-		var daEnum = Type.resolveClass(enumName);
+		var daEnum = Type.resolveEnum(enumName);
 		if (daEnum != null)
 			set(splitted.pop(), daEnum);
 	}
