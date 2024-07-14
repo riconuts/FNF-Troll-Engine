@@ -43,6 +43,9 @@ class FreeplayState extends MusicBeatState
 		{
 			Paths.currentModDirectory = week.directory;
 
+			if (week.songs == null)
+				continue;
+
 			for (songName in week.songs){
 				var metadata:SongMetadata = {songName: songName, folder: week.directory};
 				
@@ -232,13 +235,14 @@ class FreeplayState extends MusicBeatState
 
 	private static function formatRating(val:Float):String
 	{
-		var str = Std.string(Math.round(val * 100) / 100);
+		var str = Std.string(Math.floor(val * 100.0) / 100.0);
 		var dot = str.indexOf('.');
 
 		if (dot == -1)
 			return str + '.00';
 
-		while (str.length - dot < 3)
+		dot += 3;
+		while (str.length < dot)
 			str += '0';
 
 		return str;
