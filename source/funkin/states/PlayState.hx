@@ -389,7 +389,7 @@ class PlayState extends MusicBeatState
         return hudSkin = value;
     }
 
-	private var luaDebugGroup:FlxTypedGroup<DebugLuaText>;
+	private var luaDebugGroup:FlxTypedGroup<DebugLuaText> = new FlxTypedGroup<DebugLuaText>();
 	public var introSoundsSuffix:String = '';
 
 	// Debug buttons
@@ -985,14 +985,6 @@ class PlayState extends MusicBeatState
 		}
 		#end
 
-		var cH = [camHUD];
-		hud.cameras = cH;
-		playerField.cameras = cH;
-		dadField.cameras = cH;
-		playfields.cameras = cH;
-		grpNoteSplashes.cameras = cH;
-		notes.cameras = cH;
-
 		// EVENT AND NOTE SCRIPTS WILL GET LOADED HERE
 		generateSong(SONG.song);
 
@@ -1013,18 +1005,22 @@ class PlayState extends MusicBeatState
 
 		////
 		callOnAllScripts('onCreatePost');
+
+		var cH = [camHUD];
+		hud.cameras = cH;
+		playfields.cameras = cH;
+		playerField.cameras = cH;
+		dadField.cameras = cH;
+		notes.cameras = cH;
+		grpNoteSplashes.cameras = cH;
+		luaDebugGroup.cameras = [camOther];
         
 		add(ratingGroup);
 		add(timingTxt);
 		add(playfields);
 		add(notefields);
 		add(grpNoteSplashes);
-
-		#if LUA_ALLOWED
-		luaDebugGroup = new FlxTypedGroup<DebugLuaText>();
-		luaDebugGroup.cameras = [camOther];
 		add(luaDebugGroup);
-		#end
 
 		////
 		#if !tgt
@@ -1175,7 +1171,6 @@ class PlayState extends MusicBeatState
 	}
 
 	public function addTextToDebug(text:String, ?color:FlxColor = FlxColor.WHITE) {
-		#if LUA_ALLOWED
 		luaDebugGroup.forEachAlive(function(spr:DebugLuaText) {
 			spr.y += 20;
 		});
@@ -1186,7 +1181,6 @@ class PlayState extends MusicBeatState
 			luaDebugGroup.remove(blah);
 		}
 		luaDebugGroup.insert(0, new DebugLuaText(text, luaDebugGroup));
-		#end
 	}
 
 	public function reloadHealthBarColors() {
