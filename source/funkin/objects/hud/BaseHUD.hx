@@ -62,7 +62,7 @@ class BaseHUD extends FlxSpriteGroup {
 	// TODO: add some easier way to customize these through scripts
 	// (maybe pulled from JudgementManager?)
 	public var judgeColours:Map<String, FlxColor> = _judgeColours.copy();
-	public var displayedJudges:Array<String> = _displayedJudges;
+	public var displayedJudges:Array<String> = _displayedJudges.copy();
 
 	// set by PlayState
 	public var time(default, set):Float = 0;
