@@ -17,7 +17,7 @@ class Macro {
     {
         var fields:Array<Field> = Context.getBuildFields();
 
-        #if (!display && SCRIPTABLE_STATES)
+        #if true//(!display && SCRIPTABLE_STATES)
 		if (Sys.args().indexOf("--no-output") != -1)return fields; // code completion
  
 		if (toInject==null)
@@ -222,9 +222,22 @@ class Macro {
 			kind: FieldType.FVar(macro:{}, macro $v{{}}) // anonymous
 		});
 
-        
+        // the extension script instance
+		fields.push({
+			name: "extensionScript",
+			access: [],
+            meta: [
+                {
+					name: ":noCompletion",
+					pos: Context.currentPos()
+                }
+            ],
+			pos: Context.currentPos(),
+			kind: FieldType.FVar(macro: funkin.scripts.FunkinHScript) 
+		});
+
         var injected:Map<String, Field> = [];
-        for(name in toInject){
+        for (name in toInject) {
             if(funcs.exists(name)){
                 var field = funcs.get(name);
                 switch (field.kind)
@@ -238,9 +251,9 @@ class Macro {
 						if (fn.ret==null || fn.ret.toString() == 'Void'){
 							expr.push(macro
 								{
-									if (script!=null && script.exists($v{name}))
+									if (extensionScript!=null && extensionScript.exists($v{name}))
 									{
-										script.executeFunc($v{name}, $a{args}, null, [$v{'state$name'} => $i{fname}]);
+										extensionScript.executeFunc($v{name}, $a{args}, null, [$v{'state$name'} => $i{fname}]);
 										return;
 									}
 									$i{fname}($a{args});
@@ -249,9 +262,9 @@ class Macro {
                         }else{
 							expr.push(macro
 								{
-									if (script != null && script.exists($v{name}))
+									if (extensionScript != null && extensionScript.exists($v{name}))
 									{
-										return script.executeFunc($v{name}, $a{args}, null, [$v{'state$name'} => $i{fname}]);
+										return extensionScript.executeFunc($v{name}, $a{args}, null, [$v{'state$name'} => $i{fname}]);
 									}
 									return $i{fname}($a{args});
 								}
@@ -260,14 +273,21 @@ class Macro {
 
                         // injections based on function
                         // TODO: make it a metadata thing or something??
-
-                        switch(name){
+                        switch (name){
                             case 'update':
+                                // add it to the verrryy start of the update function, so you can always F7 to escape the state
+                                // (some day I'll come up with a proper key combo for it instead of only pressing F7)
                                 expr.insert(0, macro {
                                     if (FlxG.keys.justPressed.F7)
                                         FlxG.resetState();
-                                }); // add it to the verrryy start of the update function, so you can always F7 to escape the state
-                                    // (some day I'll come up with a proper key combo for it instead of only pressing F7)
+                                }); 
+                            case 'destroy':
+                                expr.push(macro {
+                                    if (extensionScript != null){ 
+                                        extensionScript.stop();
+                                        extensionScript = null;
+                                    }
+                                });        
                             default:
                         }
 
@@ -305,9 +325,9 @@ class Macro {
 						if (daRet.toString() == 'Void'){
 							expr.push(macro
                             {
-                                if (script!=null && script.exists($v{name}))
+                                if (extensionScript!=null && extensionScript.exists($v{name}))
                                 {
-									script.executeFunc($v{name}, $a{args}, null, [$v{'state$name'} => $i{superName}]);
+									extensionScript.executeFunc($v{name}, $a{args}, null, [$v{'state$name'} => $i{superName}]);
                                     return;
                                 }
                                 super.$name($a{args});
@@ -315,9 +335,9 @@ class Macro {
                         }else{
 							expr.push(macro
                             {
-                                if (script!=null && script.exists($v{name}))
+                                if (extensionScript!=null && extensionScript.exists($v{name}))
                                 {
-									return script.executeFunc($v{name}, $a{args}, null, [$v{'state$name'} => $i{superName}]);
+									return extensionScript.executeFunc($v{name}, $a{args}, null, [$v{'state$name'} => $i{superName}]);
                                 }
                                 return super.$name($a{args});
                             });
@@ -526,8 +546,8 @@ class Macro {
                                 if (Paths.exists(file))
                                 {
                                     // TODO: make this an array so you can have mutliple extensions lol
-                                    script = funkin.scripts.FunkinHScript.fromFile(file, $v{className}, defaultVars);
-                                    script.call("new", []);
+                                    extensionScript = funkin.scripts.FunkinHScript.fromFile(file, $v{className}, defaultVars);
+                                    extensionScript.call("new", []);
                                     break;
                                 }
                             }
