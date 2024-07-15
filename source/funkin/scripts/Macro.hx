@@ -13,59 +13,57 @@ using haxe.macro.Tools;
 // And then add "override" as a thing to HScript
 
 class Macro {
-    macro public static function addScriptingCallbacks(?toInject:Array<String>, ?folder:String = 'states'):Array<Field>
-    {
-        var fields:Array<Field> = Context.getBuildFields();
+	macro public static function addScriptingCallbacks(?toInject:Array<String>, ?folder:String = 'states'):Array<Field>
+	{
+		var fields:Array<Field> = Context.getBuildFields();
 
-        #if true//(!display && SCRIPTABLE_STATES)
+		#if true//(!display && SCRIPTABLE_STATES)
 		if (Sys.args().indexOf("--no-output") != -1)return fields; // code completion
  
-		if (toInject==null)
+		if (toInject == null) {
 			toInject = [ // this is like.. the bare minimum lol
-                "create", 
-                "update", 
-                "destroy",
-                "openSubState",
-			    "closeSubState",
+				"create", 
+				"update", 
+				"destroy",
+				"openSubState",
+				"closeSubState",
 				"startOutro",
-                "switchTo"
-            ];
-            
+				"switchTo"
+			];
+		}
 
-        var cl:ClassType = Context.getLocalClass().get();
+		var localClass = Context.getLocalClass();
+		var cl:ClassType = localClass.get();
+		var className = localClass.toString();
 		var classConstructor = cl.constructor == null ? null : cl.constructor.get();
-		var className = cl.name;
 		var clMeta = cl.meta == null ? [] : cl.meta.get();
 
 		var superFields:Map<String, ClassField> = [];
 		var superFieldNames:Array<String> = [];
+		var superduper = cl.superClass;
 
-		if (cl.superClass != null && cl.superClass.t != null)
+		while (superduper != null && superduper.t != null)
 		{
-			var superduper = cl.superClass;
-			while (superduper != null && superduper.t != null)
+			var scl = superduper.t.get();
+			if (classConstructor == null && scl.constructor != null)
+				classConstructor = scl.constructor.get();
+
+			if (scl.fields != null)
 			{
-				var scl = superduper.t.get();
-				if (classConstructor == null && scl.constructor != null)
-					classConstructor = scl.constructor.get();
-
-				if (scl.fields != null)
+				for (field in scl.fields.get())
 				{
-					for (field in scl.fields.get())
-					{
-						if (field.meta.has(":inject"))
-							toInject.push(field.name);
+					if (field.meta.has(":inject"))
+						toInject.push(field.name);
 
-						if (!superFieldNames.contains(field.name))
-						{
-							superFieldNames.push(field.name);
-							superFields.set(field.name, field);
-						}
+					if (!superFieldNames.contains(field.name))
+					{
+						superFieldNames.push(field.name);
+						superFields.set(field.name, field);
 					}
 				}
-				superduper = scl.superClass;
 			}
-		} 
+			superduper = scl.superClass;
+		}
 
 		if (clMeta != null && clMeta.length > 0)
 		{
@@ -222,7 +220,8 @@ class Macro {
 			kind: FieldType.FVar(macro:{}, macro $v{{}}) // anonymous
 		});
 
-        // the extension script instance
+		// The extension script instance
+		// TODO: make this an array so you can have mutliple extensions lol
 		fields.push({
 			name: "extensionScript",
 			access: [],
@@ -538,15 +537,15 @@ class Macro {
                             defaultVars.set("remove", remove);
                             defaultVars.set("insert", insert);
                             defaultVars.set("members", members);
-                            defaultVars.set($v{className}, $i{className});
+                            defaultVars.set($v{className}, $v{className});
 
 							for (filePath in Paths.getFolders($v{folder}))
                             {
-                                var file = filePath + "extension/" + $v{className} + ".hscript";
-                                if (Paths.exists(file))
+                                var path = filePath + "extension/" + $v{className} + ".hscript";
+                                if (Paths.exists(path))
                                 {
                                     // TODO: make this an array so you can have mutliple extensions lol
-                                    extensionScript = funkin.scripts.FunkinHScript.fromFile(file, $v{className}, defaultVars);
+                                    extensionScript = funkin.scripts.FunkinHScript.fromFile(path, path, defaultVars);
                                     extensionScript.call("new", []);
                                     break;
                                 }
