@@ -217,9 +217,6 @@ class FunkinHScript extends FunkinScript
 			BACKWARD: flixel.tweens.FlxTween.FlxTweenType.BACKWARD
 		}); 
 		 */
-		 
-		set("HScriptedState", funkin.states.scripting.HScriptedState);
-		set("HScriptedSubstate", funkin.states.scripting.HScriptedSubstate);
 	}
 
 	private function setVideoVars() {
@@ -273,6 +270,8 @@ class FunkinHScript extends FunkinScript
 		set("newShader", Paths.getShader);
 
 		set("PlayState", PlayState);
+		set("MusicBeatState", MusicBeatState);
+		set("MusicBeatSubstate", MusicBeatSubstate);
 		set("GameOverSubstate", funkin.states.GameOverSubstate);
 		set("Song", funkin.data.Song);
 		set("BGSprite", funkin.objects.BGSprite);
@@ -325,6 +324,9 @@ class FunkinHScript extends FunkinScript
 
 		set("HScriptedHUD", funkin.objects.hud.HScriptedHUD);
 		set("HScriptModifier", funkin.modchart.HScriptModifier);
+
+		set("HScriptedState", funkin.states.scripting.HScriptedState);
+		set("HScriptedSubstate", funkin.states.scripting.HScriptedSubstate);
 	} 
 
 	function importClass(className:String)
