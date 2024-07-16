@@ -1,105 +1,37 @@
 package funkin.states.scripting;
 
-import funkin.input.PlayerSettings;
-import funkin.scripts.Globals;
 import funkin.scripts.FunkinHScript;
 
-using StringTools;
-
-@:noScripting // honestly we could prob use the scripting thing to override shit instead
 class HScriptedSubstate extends MusicBeatSubstate
 {
-	public var stateScript:FunkinHScript;
-	public var scriptPath:Null<String> = null;
+	public var scriptPath:String;
 
-	public function new(?script:FunkinHScript, ?doCreateCall:Bool = true)
+	public function new(scriptFullPath:String, ?scriptVars:Map<String, Dynamic>)
 	{
 		super();
 
-		if (script==null)
-			this.stateScript = FunkinHScript.blankScript();
-		else
-			this.stateScript = script;
+		scriptPath = scriptFullPath;
 
-		// some shortcuts
-		stateScript.set("this", this);
-		stateScript.set("add", this.add);
-		stateScript.set("remove", this.remove);
-		stateScript.set("insert", this.insert);
-		stateScript.set("members", this.members);
-		stateScript.set("close", close);
+		var vars = _getScriptDefaultVars();
 
-		// TODO: use a macro to auto-generate code to variables.set all variables/methods of MusicBeatState
+		if (scriptVars != null) {
+			for (k => v in scriptVars)
+				vars[k] = v;
+		}
 
-		stateScript.set("get_controls", () -> return PlayerSettings.player1.controls);
-		stateScript.set("controls", PlayerSettings.player1.controls);
-
-		if (doCreateCall != false)
-			stateScript.call("onLoad");
+		_extensionScript = FunkinHScript.fromFile(scriptPath, scriptPath, vars, false);
+		_extensionScript.call("new", []);
 	}
 
-	public static function fromString(str:String, ?doCreateCall:Bool = true)
+	static public function fromFile(name:String, ?scriptVars:Map<String, Dynamic>)
 	{
-		return new HScriptedSubstate(FunkinHScript.fromString(str, "HScriptedState", null, doCreateCall));
-	}
-
-	public static function fromFile(fileName:String, ?doCreateCall:Bool = true)
-	{
-		var scriptPath:Null<String> = null;
-
-		if (!fileName.endsWith(".hscript"))
-			fileName += ".hscript";
-
-		for (folderPath in Paths.getFolders("states"))
+		for (filePath in Paths.getFolders("substates"))
 		{
-			var filePath = folderPath + fileName;
-
-			if (Paths.exists(filePath)){
-				scriptPath = filePath;
-				break;
-			}
+			var fullPath = filePath + '$name.hscript';
+			if (Paths.exists(fullPath))
+				return new HScriptedSubstate(fullPath, scriptVars);
 		}
 
-		var script:Null<FunkinHScript> = null;
-
-		if (scriptPath != null){
-			script = FunkinHScript.fromFile(scriptPath, scriptPath, Globals.variables, false);			
-		}else{
-			trace('Script file "$fileName" not found!');
-		}
-
-		var state = new HScriptedSubstate(script, doCreateCall);
-		state.scriptPath = scriptPath;
-		return state;
-	}
-
-	override function update(e)
-	{
-		if (stateScript.call("onUpdate", [e]) == Globals.Function_Stop)
-			return;
-
-		super.update(e);
-
-		stateScript.call("onUpdatePost", [e]);
-	}
-
-	override function close()
-	{
-		if (stateScript != null)
-			stateScript.call("onClose");
-
-		return super.close();
-	}
-
-	override function destroy()
-	{
-		if (stateScript != null)
-		{
-			stateScript.call("onDestroy");
-			stateScript.stop();
-		}
-		stateScript = null;
-
-		return super.destroy();
+		return null;
 	}
 }
