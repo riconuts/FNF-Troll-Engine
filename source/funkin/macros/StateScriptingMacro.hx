@@ -17,28 +17,30 @@ using haxe.macro.Tools;
 
 // NOTE: Not sure how well this works with states that extend another
 
-class StateScriptingMacro {
-	macro public static function addScriptingCallbacks(?toInject:Array<String>, ?folder:String = 'states'):Array<Field>
+class StateScriptingMacro 
+{
+	macro public static function addScriptingCallbacks(toInject:Array<String>, ?folder:String = 'states'):Array<Field>
 	{
 		var fields:Array<Field> = Context.getBuildFields();
- 
-        #if (!display && SCRIPTABLE_STATES)
-        if (Sys.args().indexOf("--no-output") != -1) return fields; // code completion
+
+		#if (!display && SCRIPTABLE_STATES)
+		if (Sys.args().indexOf("--no-output") != -1) return fields; // code completion
 		/*
 		#if true
 		*/
-		if (toInject == null) {
-			toInject = [ // this is like.. the bare minimum lol
-				"create", 
-				"update", 
-				"destroy",
-				"openSubState",
-				"closeSubState",
-				"startOutro",
-				"switchTo"
-			];
-		}
 
+		/**
+		 * Function name wrapper prefix for functions that are defined on the script super object
+		 * For example 'state._super_create()' will be accessible via super.create() on the script.
+		 */
+		final SUPER_WRAPPER_PREFIX = '_super_'; 
+		/**
+		 * for the extending functions that are passed to the script on each function call. 
+		 * Ex: 'stateupdate()'
+		 */
+		final FUNC_EXTENSION_PREFIX = 'state'; 
+
+		////
 		var localClass = Context.getLocalClass();
 		var fullName = localClass.toString();
 		var cl:ClassType = localClass.get();
@@ -49,8 +51,6 @@ class StateScriptingMacro {
 		var superFields:Map<String, ClassField> = [];
 		var superFieldNames:Array<String> = [];
 		var superduper = cl.superClass;
-
-		var funcextension_prefix = 'state';
 
 		while (superduper != null && superduper.t != null)
 		{
@@ -329,7 +329,7 @@ class StateScriptingMacro {
 								{
                                     //trace("void ret", $v{className}, $v{fname});
 									if (_extensionScript!=null && _extensionScript.exists($v{name})) {
-										_extensionScript.executeFunc($v{name}, $a{args}, null, [$v{funcextension_prefix + name} => $i{fname}]);
+										_extensionScript.executeFunc($v{name}, $a{args}, null, [$v{FUNC_EXTENSION_PREFIX + name} => $i{fname}]);
                                         return;
                                     }
 								}
@@ -339,7 +339,7 @@ class StateScriptingMacro {
 								{
                                     //trace("val ret", $v{className}, $v{fname});
 									if (_extensionScript != null && _extensionScript.exists($v{name}))
-										return _extensionScript.executeFunc($v{name}, $a{args}, null, [$v{funcextension_prefix + name} => $i{fname}]);
+										return _extensionScript.executeFunc($v{name}, $a{args}, null, [$v{FUNC_EXTENSION_PREFIX + name} => $i{fname}]);
 								}
                             );
                         }
@@ -373,7 +373,7 @@ class StateScriptingMacro {
                         // nuffin
                 }
             }
-            else if (superFieldNames.contains("_super_" + name))
+            else if (superFieldNames.contains(SUPER_WRAPPER_PREFIX + name))
             {
 
             }
@@ -387,7 +387,7 @@ class StateScriptingMacro {
 
 						var args = [for (arg in daArgs) macro $i{arg.name}];
 						var expr:Array<Expr> = [];
-						var superName = "_super_" + name;
+						var superName = SUPER_WRAPPER_PREFIX + name;
 
                         var returnsVoid = daRet==null || switch(daRet){
                             case TAbstract(t, params): t.get().name == "Void";
@@ -400,7 +400,7 @@ class StateScriptingMacro {
                             {
                                 //trace("super void ret", $v{className}, $v{name});
                                 if (_extensionScript!=null && _extensionScript.exists($v{name})) {
-									_extensionScript.executeFunc($v{name}, $a{args}, null, [$v{funcextension_prefix + name} => $i{superName}]);
+									_extensionScript.executeFunc($v{name}, $a{args}, null, [$v{FUNC_EXTENSION_PREFIX + name} => $i{superName}]);
                                     return;
                                 }
                             });
@@ -409,7 +409,7 @@ class StateScriptingMacro {
                             {
                                 //trace("super val ret", $v{className}, $v{name});
                                 if (_extensionScript!=null && _extensionScript.exists($v{name}))
-									return _extensionScript.executeFunc($v{name}, $a{args}, null, [$v{funcextension_prefix + name} => $i{superName}]);
+									return _extensionScript.executeFunc($v{name}, $a{args}, null, [$v{FUNC_EXTENSION_PREFIX + name} => $i{superName}]);
                             });
                         }
 
@@ -473,7 +473,7 @@ class StateScriptingMacro {
                 switch (injectedField.kind){
                     case FFun(f):
                         var args = [for (arg in f.args) macro $i{arg.name}];
-                        var superName = "_super_" + name;
+                        var superName = SUPER_WRAPPER_PREFIX + name;
                         var feld:Field = {
                             name: superName,
                             access: [], // no access modifiers
