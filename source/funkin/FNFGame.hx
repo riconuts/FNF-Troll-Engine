@@ -1,8 +1,9 @@
 package funkin;
 
 #if SCRIPTABLE_STATES
+import funkin.scripts.FunkinHScript;
 import funkin.states.MusicBeatState;
-import funkin.scripts.FunkinHScript.HScriptedState;
+import funkin.states.scripting.HScriptOverridenState;
 #end
 
 class FNFGame extends FlxGame
@@ -21,15 +22,17 @@ class FNFGame extends FlxGame
 			var state:MusicBeatState = cast _requestedState;
 			if (state.canBeScripted)
 			{
-				var className = Type.getClassName(Type.getClass(_requestedState));
+				var cl = Type.getClass(state);
+				var fullName = Type.getClassName(cl);
 				for (filePath in Paths.getFolders("states"))
 				{
-					var fileName = 'override/$className.hscript';
-					if (Paths.exists(filePath + fileName))
+					var fileName = 'override/$fullName.hscript';
+					var fullPath = filePath + fileName;
+					if (Paths.exists(fullPath))
 					{
 						_requestedState.destroy();
-						_requestedState = HScriptedState.fromFile(fileName);
-						trace(fileName);
+						_requestedState = new HScriptOverridenState(cl, fullPath);
+
 						return super.switchState();
 					}
 				}

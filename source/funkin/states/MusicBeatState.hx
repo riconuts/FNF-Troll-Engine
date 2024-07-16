@@ -1,5 +1,6 @@
 package funkin.states;
 
+import funkin.states.scripting.HScriptOverridenState;
 import funkin.input.Controls;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.addons.ui.FlxUIState;
@@ -10,6 +11,7 @@ import haxe.io.Path;
 
 #if HSCRIPT_ALLOWED
 import funkin.scripts.FunkinHScript;
+import funkin.states.scripting.*;
 #end
 
 #if SCRIPTABLE_STATES
@@ -39,6 +41,16 @@ class MusicBeatState extends FlxUIState
     public var canBeScripted(get, default):Bool = false;
     @:noCompletion function get_canBeScripted() return canBeScripted;
 
+	//// To be defined by the scripting macro
+	@:noCompletion public var _extensionScript:FunkinHScript;
+
+	@:noCompletion public function _getScriptDefaultVars() 
+		return new Map<String, Dynamic>();
+	
+	@:noCompletion public function _startExtensionScript(folder:String, scriptName:String) 
+		return;
+
+	////
     public function new(canBeScripted:Bool = true) {
         super();
         this.canBeScripted = canBeScripted;
@@ -175,6 +187,12 @@ class MusicBeatState extends FlxUIState
 		if (FlxG.state is HScriptedState){
 			var state:HScriptedState = cast FlxG.state;
 			FlxG.switchState(HScriptedState.fromPath(state.scriptPath));
+
+		}else if (FlxG.state is HScriptOverridenState) {
+			var mbs:MusicBeatState = cast FlxG.state;
+			var state:HScriptOverridenState = cast mbs;
+			FlxG.switchState(new HScriptOverridenState(Type.getClass(mbs), state.scriptPath));		
+				
 		}else
 		#end
 			FlxG.resetState();

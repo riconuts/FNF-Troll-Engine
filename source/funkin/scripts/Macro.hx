@@ -7,6 +7,8 @@ import haxe.macro.Expr.Field;
 import haxe.macro.Expr.FieldType;
 import haxe.macro.Context;
 
+using funkin.macros.Sowy;
+using haxe.macro.ExprTools;
 using haxe.macro.Tools;
 
 // TODO: make a macro to add callbacks to scripted things (HScriptedModifier/state/etc)
@@ -16,10 +18,12 @@ class Macro {
 	macro public static function addScriptingCallbacks(?toInject:Array<String>, ?folder:String = 'states'):Array<Field>
 	{
 		var fields:Array<Field> = Context.getBuildFields();
-
-		#if true//(!display && SCRIPTABLE_STATES)
-		if (Sys.args().indexOf("--no-output") != -1)return fields; // code completion
- 
+		#if true
+		/*
+        
+                #if (!display && SCRIPTABLE_STATES)
+                if (Sys.args().indexOf("--no-output") != -1) return fields; // code completion
+		*/
 		if (toInject == null) {
 			toInject = [ // this is like.. the bare minimum lol
 				"create", 
@@ -33,14 +37,17 @@ class Macro {
 		}
 
 		var localClass = Context.getLocalClass();
+		var fullName = localClass.toString();
 		var cl:ClassType = localClass.get();
-		var className = localClass.toString();
+		var className:String = cl.name;
 		var classConstructor = cl.constructor == null ? null : cl.constructor.get();
 		var clMeta = cl.meta == null ? [] : cl.meta.get();
 
 		var superFields:Map<String, ClassField> = [];
 		var superFieldNames:Array<String> = [];
 		var superduper = cl.superClass;
+
+		var funcextension_prefix = 'state';
 
 		while (superduper != null && superduper.t != null)
 		{
@@ -69,66 +76,55 @@ class Macro {
 		{
 			for (entry in clMeta)
 			{
-				if (entry.name == ':noScripting'){
+				if (entry.name == ':noScripting' /*|| (className != "HScriptOverridenState")*/)
+                {
 					// only way i can think of to force-override canBeScripted to always be false
                     // makes it so that you can't use state overrides to script the state, either.
-/* 					fields.push({
-						name: "canBeScripted",
-						access: [APublic],
-						kind: FProp("get", "default", macro:Bool),
-						pos: Context.currentPos()
-					}); */
-
 					var func:FieldType = FFun({
-						expr: (macro
-							{
-								trace("got canbescripted");
+						expr: (macro {
+								//trace("state not scriptable");
 								return false;
 							}),
 						ret: macro :Bool,
 						args: []
 					});
 
-					var access = [AInline];
-					if (superFieldNames.contains("get_canBeScripted"))
-						access.push(AOverride);
-
-                    for(field in fields){
-                        if(field.name == 'get_canBeScripted'){
-							field.kind = func;
-							if (superFieldNames.contains("get_canBeScripted"))
-								field.access.push(AOverride);
-                            return fields;
-                        }
+                    var field = fields.findByName('get_canBeScripted');
+                    if (field != null){
+                        field.kind = func;
+                    }else {
+                        field = {
+                            name: "get_canBeScripted",
+                            access: [AInline],
+                            kind: func,
+                            pos: Context.currentPos()
+                        };
+                        fields.push(field);
                     }
 
-
-
-					fields.push({
-						name: "get_canBeScripted",
-						access: access,
-						kind: func,
-						pos: Context.currentPos()
-					});
+                    if (superFieldNames.contains("get_canBeScripted"))
+                        field.access.push(AOverride);
+					
+                    //trace(fullName, 'noScripting');
 					return fields;
                 }
+                else if (entry.params.length == 0) {
                 
-
+                }
                 else if(entry.name == ':injectFunctions'){
-                    if(entry.params.length > 0)
-                        toInject = entry.params[0].getValue();
-
-                }else if (entry.name == ':injectMoreFunctions'){
-                    if (entry.params.length > 0){
-						var p:Array<String> = entry.params[0].getValue();
-                        for (f in p)
-                            if(!toInject.contains(f))
-								toInject.push(f);
+                    toInject = entry.params[0].getValue();
+                }
+                else if (entry.name == ':injectMoreFunctions'){
+                    var p:Array<String> = entry.params[0].getValue();
+                    for (f in p) {
+                        if(!toInject.contains(f))
+                            toInject.push(f);
                     }
                 }
 			}
 		}
 
+        ////
         var constructor:Field;
 		for (field in fields)
 		{
@@ -137,6 +133,7 @@ class Macro {
 				constructor = field;
 				continue;
 			}
+
 			if (field.meta != null && field.meta.length > 0)
 			{
 				for (entry in field.meta)
@@ -149,66 +146,51 @@ class Macro {
 			}
 		}
 
+        ////
         var funcs:Map<String, Field> = [];
 
-        for(field in fields){
-			if(!toInject.contains(field.name))continue;
-
+        for (field in fields) {
             var name = field.name;
-			var shouldAffect = true;
-            
-			if (field.meta != null && field.meta.length > 0)
-			{
-				for (entry in field.meta)
-				{
-                    if(entry.name == ':dontInject' || entry.name == ':hscriptGenerated')shouldAffect=false;
+			if (!toInject.contains(name))
+                continue;
 
-                    if(!shouldAffect)continue;
+			var ignore = false;
+			if (field.meta != null && field.meta.length > 0) {
+				for (entry in field.meta) {
+                    if (entry.name == ':dontInject' || entry.name == ':hscriptGenerated') {
+                        ignore = true;
+                        break;
+                    }
 				}
 			}
 
-			if (!shouldAffect)continue;
+			if (ignore)
+                continue;
 
-            if(field.access.contains(AStatic))continue;
-            
+            if (field.access.contains(AStatic))
+                continue;
+
             switch(field.kind){
+                default:
                 case FieldType.FFun(func):
                     // insert it into the map
                     funcs.set(field.name, field);
+                    
                     // give it noCompletion
-                    if(field.meta != null)
-                        field.meta.push({
-                            name: ":noCompletion",
-                            pos: field.pos
-                        });
-                    else
-						field.meta = [
-                            {
-                                name: ":noCompletion",
-                                pos: field.pos
-                            }
-                        ];
+                    (field.meta==null ? field.meta = [] : field.meta).push({
+                        name: ":noCompletion",
+                        pos: field.pos
+                    });
+                    
 					// rename it
 					field.name = '_OG$name';
-
-                    // code injection but im not doin that.. atleast, not here LOL (i am for the new func tho)
-/*                     var body:Array<Expr> = [];
-                    switch (func.expr.expr)
-                    {
-                        case EBlock(exprs):
-                            body = exprs;
-                        default:
-                            body = [func.expr];
-                    } */
-
-                default:
-                    // NUFFIN
             }
         } 
 
-        // used as "super" in scripts
+        ////
 		fields.push({
 			name: "_scriptSuperObject",
+			doc: "Used as 'super' in scripts",
 			access: [], // no access modifiers
             meta: [
                 {
@@ -220,10 +202,11 @@ class Macro {
 			kind: FieldType.FVar(macro:{}, macro $v{{}}) // anonymous
 		});
 
-		// The extension script instance
 		// TODO: make this an array so you can have mutliple extensions lol
+        /*
 		fields.push({
-			name: "extensionScript",
+			name: "_extensionScript",
+			doc: "The extension script instance",
 			access: [],
             meta: [
                 {
@@ -234,10 +217,94 @@ class Macro {
 			pos: Context.currentPos(),
 			kind: FieldType.FVar(macro: funkin.scripts.FunkinHScript) 
 		});
+        */
+
+        fields.push({
+            name: "_getScriptDefaultVars",
+            pos: Context.currentPos(),
+            access: [AOverride, APublic],
+            meta: [
+                {
+                    name: ":noCompletion",
+                    pos: Context.currentPos()
+                }
+            ],
+            kind: FFun({
+                args: [],
+                expr: macro {
+                    var defaultVars = new Map<String, Dynamic>();
+                    defaultVars.set($v{className}, $i{className});
+                    defaultVars.set("super", this._scriptSuperObject);
+                    defaultVars.set("this", this);
+                    return defaultVars;
+                }
+            })
+        });
+
+        fields.findByName("_startExtensionScript") != null ? {/*trace('$fullName yeehaw');*/} : fields.push({
+            name: "_startExtensionScript",
+            pos: Context.currentPos(),
+            access: [AOverride, APublic],
+            meta: [
+                {
+                    name: ":noCompletion",
+                    pos: Context.currentPos()
+                }
+            ],
+            kind: FFun({
+                args: [{name: "folder"}, {name: "scriptName"}],
+                expr: macro {
+                    var fileName = '$scriptName.hscript';
+                    for (filePath in Paths.getFolders(folder))
+                    {
+                        var path = filePath + fileName;
+                        if (Paths.exists(path))
+                        {
+                            _extensionScript = funkin.scripts.FunkinHScript.fromFile(path, path, _getScriptDefaultVars());
+                            _extensionScript.call("new", []);
+                            break;
+                        }
+                    }
+                }
+            })
+        });
+
+        //////////
+        // vv i hope this has no repurcussions :clueless:
+        function lazyFuck(type){
+            return switch(type){
+                case TLazy(t): t();
+                default: type;
+            }
+        }
+        //////////
+        function funcBasedInjection(name:String, expr:Array<Expr>){
+            // injections based on function
+            // TODO: make it a metadata thing or something??
+            switch (name){
+                case 'update':
+                    // add it to the verrryy start of the update function, so you can always F7 to escape the state
+                    // (some day I'll come up with a proper key combo for it instead of only pressing F7)
+                    expr.insert(0, macro {
+                        if (FlxG.keys.justPressed.F7)
+                            FlxG.resetState();
+                    }); 
+                case 'destroy':
+                    // important. stop the script so it doesn't stay on memory
+                    expr.push(macro {
+                        if (_extensionScript != null){ 
+                            _extensionScript.stop();
+                            _extensionScript = null;
+                        }
+                    });        
+                default:
+            }
+        }
 
         var injected:Map<String, Field> = [];
         for (name in toInject) {
-            if(funcs.exists(name)){
+            if (funcs.exists(name)) 
+            {
                 var field = funcs.get(name);
                 switch (field.kind)
                 {
@@ -246,50 +313,39 @@ class Macro {
                         var fname = field.name;
                         var expr:Array<Expr> = [];
 
+                        var returnsVoid = fn.ret==null || switch(fn.ret){
+                            case TPath(sowy): sowy.name == "Void" || sowy.sub == "Void";
+                            default: false;
+                        };
+
 						// main bulk of the injected code
-						if (fn.ret==null || fn.ret.toString() == 'Void'){
+						if (returnsVoid){
 							expr.push(macro
 								{
-									if (extensionScript!=null && extensionScript.exists($v{name}))
-									{
-										extensionScript.executeFunc($v{name}, $a{args}, null, [$v{'state$name'} => $i{fname}]);
-										return;
-									}
-									$i{fname}($a{args});
+                                    //trace("void ret", $v{className}, $v{fname});
+									if (_extensionScript!=null && _extensionScript.exists($v{name})) {
+										_extensionScript.executeFunc($v{name}, $a{args}, null, [$v{funcextension_prefix + name} => $i{fname}]);
+                                        return;
+                                    }
 								}
                             );
                         }else{
 							expr.push(macro
 								{
-									if (extensionScript != null && extensionScript.exists($v{name}))
-									{
-										return extensionScript.executeFunc($v{name}, $a{args}, null, [$v{'state$name'} => $i{fname}]);
-									}
-									return $i{fname}($a{args});
+                                    //trace("val ret", $v{className}, $v{fname});
+									if (_extensionScript != null && _extensionScript.exists($v{name}))
+										return _extensionScript.executeFunc($v{name}, $a{args}, null, [$v{funcextension_prefix + name} => $i{fname}]);
 								}
                             );
                         }
 
-                        // injections based on function
-                        // TODO: make it a metadata thing or something??
-                        switch (name){
-                            case 'update':
-                                // add it to the verrryy start of the update function, so you can always F7 to escape the state
-                                // (some day I'll come up with a proper key combo for it instead of only pressing F7)
-                                expr.insert(0, macro {
-                                    if (FlxG.keys.justPressed.F7)
-                                        FlxG.resetState();
-                                }); 
-                            case 'destroy':
-                                expr.push(macro {
-                                    if (extensionScript != null){ 
-                                        extensionScript.stop();
-                                        extensionScript = null;
-                                    }
-                                });        
-                            default:
-                        }
+                        funcBasedInjection(name, expr);
 
+                        expr.push(macro {
+                            return $i{fname}($a{args});
+                        });
+
+                        ////
 						var newField:Field = {
 							name: name,
 							access: field.access.copy(),
@@ -302,17 +358,21 @@ class Macro {
 								expr: macro $b{expr}
 							})
 						}
-                        fields.push(newField);
                         field.access.remove(AOverride);
                         field.access.remove(APublic);
                         field.access.push(APrivate);
+                        fields.push(newField);
+
 						injected.set(name, newField);
                     default:
                         // nuffin
                 }
-            }else if(superFieldNames.contains(name)){
+            }
+            else if (superFieldNames.contains(name)) 
+            {
 				var field = superFields.get(name);
-                switch(field.type){
+
+                switch (lazyFuck(field.type)) {
                     case TFun(daArgs, daRet):
 						var daArgs:Array<{name:String, opt:Bool, t:Type}> = daArgs;
 
@@ -320,44 +380,37 @@ class Macro {
 						var expr:Array<Expr> = [];
 						var superName = "_super_" + name;
 
-						// main bulk of the injected code
-						if (daRet.toString() == 'Void'){
+                        var returnsVoid = daRet==null || switch(daRet){
+                            case TAbstract(t, params): t.get().name == "Void";
+                            default: false;
+                        };
+                        
+                        // main bulk of the injected code
+						if (returnsVoid){
 							expr.push(macro
                             {
-                                if (extensionScript!=null && extensionScript.exists($v{name}))
-                                {
-									extensionScript.executeFunc($v{name}, $a{args}, null, [$v{'state$name'} => $i{superName}]);
+                                //trace("super void ret", $v{className}, $v{name});
+                                if (_extensionScript!=null && _extensionScript.exists($v{name})) {
+									_extensionScript.executeFunc($v{name}, $a{args}, null, [$v{funcextension_prefix + name} => $i{superName}]);
                                     return;
                                 }
-                                super.$name($a{args});
                             });
                         }else{
 							expr.push(macro
                             {
-                                if (extensionScript!=null && extensionScript.exists($v{name}))
-                                {
-									return extensionScript.executeFunc($v{name}, $a{args}, null, [$v{'state$name'} => $i{superName}]);
-                                }
-                                return super.$name($a{args});
+                                //trace("super val ret", $v{className}, $v{name});
+                                if (_extensionScript!=null && _extensionScript.exists($v{name}))
+									return _extensionScript.executeFunc($v{name}, $a{args}, null, [$v{funcextension_prefix + name} => $i{superName}]);
                             });
                         }
 
+                        funcBasedInjection(name, expr);
 
-                        // injections based on function
-                        // TODO: make it a metadata thing or something??
-
-                        switch (name)
-                            {
-                                case 'update':
-                                    expr.insert(0,
-                                        macro
-                                        {
-                                            if (FlxG.keys.justPressed.F7)
-                                                FlxG.resetState();
-                                        }); // add it to the verrryy start of the update function, so you can always F7 to escape the state
-                                // (some day I'll come up with a proper key combo for it instead of only pressing F7)
-                                default:
-                        }
+                        expr.push(macro {
+                            return super.$name($a{args});
+                        });
+                        
+                        ////
                         var fieldArgs:Array<FunctionArg> = [];
                         var defaultValues:Map<String, Dynamic> = [];
                         switch (field.expr().expr)
@@ -402,10 +455,8 @@ class Macro {
         }
 
 
-        // create the _super functions
-        
+        // create the _super functions        
 		var superObject = {};
-
 
         for(name => injectedField in injected){
             // function _super_create()return super.create();
@@ -440,17 +491,9 @@ class Macro {
         
 		// inject code into the constructor to generate the _scriptSuperObject
 
-        if(constructor == null && classConstructor != null){
-			var type = classConstructor.type;
-
-            // vv i hope this has no repurcussions :clueless:
-            switch(type){
-                case TLazy(t):
-                    type = t();
-                default:
-                    // nuffin
-            }
-			switch (type)
+        if(constructor == null && classConstructor != null) 
+        {
+			switch (lazyFuck(classConstructor.type))
 			{
 				case TFun(daArgs, daRet):
                     var daArgs:Array<{name:String, opt:Bool, t:Type}> = daArgs;
@@ -518,43 +561,19 @@ class Macro {
                             body = [func.expr];
                     }
 
-                    // injects code *BEFORE* the existing class new() code
+                    // inject code BEFORE the existing class new() code
                     body.insert(0, macro
                         {
                             this._scriptSuperObject = $v{superObject}
                         }
                     );
                     
-
-                    
-                    // injects code AFTER the existing class new() code
+                    // inject code AFTER the existing class new() code
                     body.push(macro
                         {
-                            var defaultVars:Map<String, Dynamic> = [];
-                            defaultVars.set("super", this._scriptSuperObject);
-                            defaultVars.set("this", this);
-                            defaultVars.set("add", add);
-                            defaultVars.set("remove", remove);
-                            defaultVars.set("insert", insert);
-                            defaultVars.set("members", members);
-                            defaultVars.set($v{className}, $v{className});
-
-							for (filePath in Paths.getFolders($v{folder}))
-                            {
-                                var path = filePath + "extension/" + $v{className} + ".hscript";
-                                if (Paths.exists(path))
-                                {
-                                    // TODO: make this an array so you can have mutliple extensions lol
-                                    extensionScript = funkin.scripts.FunkinHScript.fromFile(path, path, defaultVars);
-                                    extensionScript.call("new", []);
-                                    break;
-                                }
-                            }
-
-
+                            _startExtensionScript($v{folder}, $v{"extension/" + fullName});
                         }
                     );
-                        
 
                     func.expr = macro $b{body};
                 default:

@@ -1,11 +1,10 @@
 package funkin.states;
 
-import flixel.FlxSubState;
 import funkin.input.Controls;
+import flixel.FlxSubState;
 
+/*
 #if SCRIPTABLE_STATES
-import funkin.scripts.FunkinHScript;
-
 @:autoBuild(funkin.scripts.Macro.addScriptingCallbacks([
 	"create",
 	"update",
@@ -15,12 +14,9 @@ import funkin.scripts.FunkinHScript;
 	"beatHit",
 ], "substates"))
 #end
+*/
 class MusicBeatSubstate extends FlxSubState
 {
-	#if SCRIPTABLE_STATES
-	public var script:FunkinHScript;
-	#end
-
 	private var lastBeat:Float = 0;
 	private var lastStep:Float = 0;
 
@@ -35,16 +31,10 @@ class MusicBeatSubstate extends FlxSubState
 		return funkin.input.PlayerSettings.player1.controls;
     
 	override public function destroy()
-	{
-		#if SCRIPTABLE_STATES
-		if (script != null){
-			script.stop();
-			script = null;
-		}
-		#end
 		return super.destroy();
-	}
 
+	@:noCompletion public function _startExtensionScript(folder:String, scriptName:String) 
+		return;
 
 	override function update(elapsed:Float)
 	{
