@@ -295,7 +295,7 @@ class Cache
 	#if sys
 	// https://github.com/openfl/hxp/blob/master/src/hxp/System.hx
 	@:unreflective
-	private inline static function runProcess(command:String, args:Array<String>):String {
+	private inline static function runProcess(command:String, args:Array<String>):Null<String> {
 		var argString = "";
 		for (arg in args) {
 			if (arg.indexOf(" ") != -1)
@@ -322,18 +322,19 @@ class Cache
 
 		var result = process.exitCode();
 		var output = buffer.getBytes().toString();
+		var retVal:Null<String> = output;
 
 		if (output == "") {
 			var error = process.stderr.readAll().toString();
 			process.close();
 
 			if (result != 0 || error != "")
-				return null;
+				retVal = null;
 		} else {
 			process.close();
 		}
 		
-		return output;
+		return retVal;
 	}
 	#end
 }
