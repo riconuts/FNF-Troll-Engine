@@ -202,7 +202,7 @@ class StateScriptingMacro
                 }
             ],
 			pos: Context.currentPos(),
-			kind: FieldType.FVar(macro:{}, macro $v{{}}) // anonymous
+			kind: FieldType.FVar(TypeTools.toComplexType(TDynamic(null)), macro $v{{}}) // anonymous
 		});
 
 		// TODO: make this an array so you can have mutliple extensions lol
@@ -468,7 +468,7 @@ class StateScriptingMacro
 		var superObject = {};
 
         for(name => injectedField in injected){
-            // function _super_create()return super.create();
+            // function _super_create() return super.create();
 			if (superFieldNames.contains(name)){
                 switch (injectedField.kind){
                     case FFun(f):
@@ -491,7 +491,7 @@ class StateScriptingMacro
                             })
                         }
                         fields.push(feld);
-                        Reflect.setField(superObject, name, macro $i{superName});
+                        Reflect.setField(superObject, name, null);
                         
                     default:
                 }
@@ -571,17 +571,15 @@ class StateScriptingMacro
                     }
 
                     // inject code BEFORE the existing class new() code
-                    body.insert(0, macro
-                        {
-                            this._scriptSuperObject = $v{superObject}
-                        }
-                    );
+                    var superInit:Array<Expr> = [
+                        for (name in Reflect.fields(superObject))
+                            macro $p{['this', '_scriptSuperObject', name]} = $p{['this', SUPER_WRAPPER_PREFIX + name]}
+                    ];
+                    body.unshift(macro $b{superInit});
                     
                     // inject code AFTER the existing class new() code
-                    body.push(macro
-                        {
-                            _startExtensionScript($v{folder}, $v{"extension/" + fullName});
-                        }
+                    body.push(macro 
+                        _startExtensionScript($v{folder}, $v{"extension/" + fullName})
                     );
 
                     func.expr = macro $b{body};
