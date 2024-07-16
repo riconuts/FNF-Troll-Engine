@@ -8,11 +8,14 @@ import haxe.macro.Expr.FieldType;
 import haxe.macro.Context;
 
 using funkin.macros.Sowy;
+using haxe.macro.TypeTools;
 using haxe.macro.ExprTools;
 using haxe.macro.Tools;
 
 // TODO: make a macro to add callbacks to scripted things (HScriptedModifier/state/etc)
 // And then add "override" as a thing to HScript
+
+// NOTE: Not sure how well this works with states that extend another
 
 class StateScriptingMacro {
 	macro public static function addScriptingCallbacks(?toInject:Array<String>, ?folder:String = 'states'):Array<Field>
@@ -188,7 +191,7 @@ class StateScriptingMacro {
         } 
 
         ////
-		fields.push({
+		cl.findField("_scriptSuperObject", false) != null ? {} : fields.push({
 			name: "_scriptSuperObject",
 			doc: "Used as 'super' in scripts",
 			access: [], // no access modifiers
@@ -287,7 +290,7 @@ class StateScriptingMacro {
                     // (some day I'll come up with a proper key combo for it instead of only pressing F7)
                     expr.insert(0, macro {
                         if (FlxG.keys.justPressed.F7)
-                            FlxG.resetState();
+                            funkin.states.MusicBeatState.resetState();
                     }); 
                 case 'destroy':
                     // important. stop the script so it doesn't stay on memory
@@ -367,6 +370,10 @@ class StateScriptingMacro {
                     default:
                         // nuffin
                 }
+            }
+            else if (superFieldNames.contains("_super_" + name))
+            {
+
             }
             else if (superFieldNames.contains(name)) 
             {

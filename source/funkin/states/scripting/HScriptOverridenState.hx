@@ -1,33 +1,47 @@
 package funkin.states.scripting;
 
-import funkin.scripts.FunkinHScript;
-
-class HScriptOverridenState extends MusicBeatState 
+class HScriptOverridenState extends HScriptedState 
 {
-	public var scriptPath:String = '';
 	public var parentClass:Class<MusicBeatState> = null;
-
-	inline private static function getShortClassName(cl):String
-		return Type.getClassName(cl).split('.').pop();
 
 	override function _startExtensionScript(folder:String, scriptName:String) 
 		return;
 
-	public function new(parentClass:Class<MusicBeatState>, scriptFullPath:String) 
+	private function new(parentClass:Class<MusicBeatState>, scriptFullPath:String) 
 	{
-		super(false); // false because the whole point of this state is its scripted lol
-		
 		if (parentClass == null || scriptFullPath == null) {
-			trace("Uh oh");
+			trace("Uh oh!", parentClass, scriptFullPath);
 			return;
 		}
 
-		scriptPath = scriptFullPath;
-
-		var defaultVars = _getScriptDefaultVars();
-		defaultVars.set(getShortClassName(parentClass), parentClass);
-
-		_extensionScript = FunkinHScript.fromFile(scriptPath, scriptPath, defaultVars, false);
-		_extensionScript.call("new", []);
+		this.parentClass = parentClass;
+		
+		super(scriptFullPath, [getShortClassName(parentClass) => parentClass]);
 	}
+
+	static public function requestOverride(state:MusicBeatState):Null<HScriptOverridenState>
+	{
+		if (state == null || !state.canBeScripted)
+			return null;
+
+		var cl = Type.getClass(state);
+		var fullName = Type.getClassName(cl);
+		for (filePath in Paths.getFolders("states"))
+		{
+			var fileName = 'override/$fullName.hscript';
+			var fullPath = filePath + fileName;
+			if (Paths.exists(fullPath))
+				return new HScriptOverridenState(cl, fullPath);
+		}
+
+		return null;
+	}
+
+	static public function fromAnother(state:HScriptOverridenState)
+	{
+		return new HScriptOverridenState(state.parentClass, state.scriptPath);
+	}
+
+	inline private static function getShortClassName(cl):String
+		return Type.getClassName(cl).split('.').pop();
 }

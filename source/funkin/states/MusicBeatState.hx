@@ -178,21 +178,24 @@ class MusicBeatState extends FlxUIState
 	}
 
 	public static function resetState(?skipTrans:Bool = false) {
-		if (skipTrans){
+		if (skipTrans) {
 			FlxTransitionableState.skipNextTransIn = true;
 			FlxTransitionableState.skipNextTransOut = true;
 		}
 
 		#if HSCRIPT_ALLOWED
-		if (FlxG.state is HScriptedState){
-			var state:HScriptedState = cast FlxG.state;
-			FlxG.switchState(HScriptedState.fromPath(state.scriptPath));
+		if (FlxG.state is OldHScriptedState){
+			var state:OldHScriptedState = cast FlxG.state;
+			FlxG.switchState(OldHScriptedState.fromPath(state.scriptPath));
 
 		}else if (FlxG.state is HScriptOverridenState) {
-			var mbs:MusicBeatState = cast FlxG.state;
-			var state:HScriptOverridenState = cast mbs;
-			FlxG.switchState(new HScriptOverridenState(Type.getClass(mbs), state.scriptPath));		
+			var state:HScriptOverridenState = cast FlxG.state;
+			FlxG.switchState(HScriptOverridenState.fromAnother(state));		
 				
+		}else if (FlxG.state is HScriptedState) {
+			var state:HScriptedState = cast FlxG.state;
+			FlxG.switchState(new HScriptedState(state.scriptPath));
+
 		}else
 		#end
 			FlxG.resetState();
