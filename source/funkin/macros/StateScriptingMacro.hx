@@ -1,4 +1,4 @@
-package funkin.scripts;
+package funkin.macros;
 
 import haxe.macro.Type;
 import haxe.macro.Type.ClassField;
@@ -14,15 +14,15 @@ using haxe.macro.Tools;
 // TODO: make a macro to add callbacks to scripted things (HScriptedModifier/state/etc)
 // And then add "override" as a thing to HScript
 
-class Macro {
+class StateScriptingMacro {
 	macro public static function addScriptingCallbacks(?toInject:Array<String>, ?folder:String = 'states'):Array<Field>
 	{
 		var fields:Array<Field> = Context.getBuildFields();
-		#if true
+ 
+        #if (!display && SCRIPTABLE_STATES)
+        if (Sys.args().indexOf("--no-output") != -1) return fields; // code completion
 		/*
-        
-                #if (!display && SCRIPTABLE_STATES)
-                if (Sys.args().indexOf("--no-output") != -1) return fields; // code completion
+		#if true
 		*/
 		if (toInject == null) {
 			toInject = [ // this is like.. the bare minimum lol

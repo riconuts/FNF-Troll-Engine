@@ -5,7 +5,7 @@ import flixel.FlxSubState;
 
 /*
 #if SCRIPTABLE_STATES
-@:autoBuild(funkin.scripts.Macro.addScriptingCallbacks([
+@:autoBuild(funkin.macros.StateScriptingMacro.addScriptingCallbacks([
 	"create",
 	"update",
 	"destroy",
