@@ -34,4 +34,16 @@ class HScriptedState extends MusicBeatState
 		_extensionScript = FunkinHScript.fromFile(scriptPath, scriptPath, vars, false);
 		_extensionScript.call("new", []);
 	}
+
+	static public function fromFile(name:String, ?scriptVars)
+	{
+		for (filePath in Paths.getFolders("states"))
+		{
+			var fullPath = filePath + '$name.hscript';
+			if (Paths.exists(fullPath))
+				return new HScriptedState(fullPath, scriptVars);
+		}
+
+		return null;
+	}
 }
