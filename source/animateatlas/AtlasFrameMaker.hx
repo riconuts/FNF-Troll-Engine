@@ -50,7 +50,9 @@ class AtlasFrameMaker extends FlxFramesCollection
 
 		if (Paths.fileExists('images/$key/spritemap1.json', TEXT))
 		{
-			funkin.states.PlayState.instance.addTextToDebug("Only Spritemaps made with Adobe Animate 2018 are supported");
+			var instance = funkin.states.PlayState.instance;
+			if (instance != null)
+				instance.addTextToDebug("Only Spritemaps made with Adobe Animate 2018 are supported");
 			trace("Only Spritemaps made with Adobe Animate 2018 are supported");
 			return null;
 		}

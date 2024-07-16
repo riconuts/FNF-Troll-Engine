@@ -1551,9 +1551,8 @@ class ChartingState extends MusicBeatState
 		MusicBeatState.stopMenuMusic();
 
 		for (trackName in _song.extraTracks){
-			var file:Dynamic = Paths.track(currentSongName, trackName);
-
-			if (Std.isOfType(file, Sound) || OpenFlAssets.exists(file)) {
+			var file:Sound = Paths.track(currentSongName, trackName);
+			if (file != null) {
 				var newTrack = new FlxSound();
 
 				soundTracksMap.set(
@@ -1568,8 +1567,8 @@ class ChartingState extends MusicBeatState
 		vocals = new FlxSound();
 		vocals.context = MUSIC;
 
-		var file:Dynamic = Paths.voices(currentSongName);
-		if (Std.isOfType(file, Sound) || OpenFlAssets.exists(file)) {
+		var file:Sound = Paths.voices(currentSongName);
+		if (file != null) {
 			soundTracksMap.set(
 				"Vocals", 
 				vocals.loadEmbedded(file)
@@ -1782,9 +1781,8 @@ class ChartingState extends MusicBeatState
 			changeSection();
 		}
 
-		FlxG.sound.music.pitch = playbackSpeed;
-		vocals.pitch = playbackSpeed;
-		for (track in extraTracks) track.pitch = playbackSpeed;
+		for (track in soundTracksMap)
+			track.pitch = playbackSpeed;
 
 		FlxG.mouse.visible = true; //cause reasons. trust me
 
