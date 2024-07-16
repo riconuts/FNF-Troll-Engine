@@ -2,11 +2,9 @@ package funkin.scripts;
 
 import hscript.*;
 
-import funkin.hscript.*;
+import funkin.scripts.*;
 import funkin.scripts.Globals.*;
 
-import lime.app.Application;
-import haxe.ds.StringMap;
 import flixel.FlxG;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
@@ -14,15 +12,18 @@ import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 
 import funkin.states.PlayState;
+import funkin.states.PlayState.RatingSprite;
 import funkin.states.MusicBeatState;
 import funkin.states.MusicBeatSubstate;
 import funkin.data.JudgmentManager;
 
 import funkin.objects.*;
 import funkin.objects.playfields.*;
-import funkin.states.PlayState.RatingSprite;
 
 import funkin.input.PlayerSettings;
+
+import lime.app.Application;
+import haxe.ds.StringMap;
 
 using StringTools;
 
@@ -90,10 +91,6 @@ class FunkinHScript extends FunkinScript
 		scriptType = 'hscript';
 		scriptName = name;
 
-		set("script", this);
-
-		setDefaultVars();
-
 		set("Std", Std);
 		set("Type", Type);
 		set("Reflect", Reflect);
@@ -107,170 +104,21 @@ class FunkinHScript extends FunkinScript
 
 		set("Date", Date);
 		set("DateTools", DateTools);
-
-		set("FlxG", FlxG);
-		set("FlxSprite", FlxSprite);
-		set("FlxCamera", FlxCamera);
-		set("FlxSound", FlxSound);
-		set("FlxMath", flixel.math.FlxMath);
-		set("FlxTimer", flixel.util.FlxTimer);
-		set("FlxTween", flixel.tweens.FlxTween);
-		set("FlxEase", flixel.tweens.FlxEase);
-		set("FlxGroup", flixel.group.FlxGroup);
-		set("FlxSave", flixel.util.FlxSave); // should probably give it 1 save instead of giving it FlxSave
-		set("FlxBar", flixel.ui.FlxBar);
-
-		set("FlxText", FlxText); // idk how this wasnt added sooner tbh
-		set("FlxTextBorderStyle", FlxTextBorderStyle);
-
-		set("FlxRuntimeShader", flixel.addons.display.FlxRuntimeShader);
-		set("newShader", Paths.getShader);
-
-		// for some reason these cant be imported so	// dce removes unused classes no matter what ;_;
-		set("FlxParticle", flixel.effects.particles.FlxParticle);
-		set("FlxTypedEmitter", flixel.effects.particles.FlxEmitter.FlxTypedEmitter);
-		set("FlxSkewedSprite", flixel.addons.effects.FlxSkewedSprite);
-
+		
 		set("getClass", Type.resolveClass);
 		set("getEnum", Type.resolveEnum);
-
+		
 		set("importClass", importClass);
 		set("importEnum", importEnum);
-
-		// Abstracts
-		// TODO: maybe add SemanticVersion tho tbh prob not needed
-
-		set("FlxColor", CustomFlxColor);
-		set("FlxPoint", {
-			get: FlxPoint.get,
-			weak: FlxPoint.weak
-		});
-		set("get_controls", () ->
-		{
-			return PlayerSettings.player1.controls;
-		});
-		set("FlxTextAlign", {
-			CENTER: FlxTextAlign.CENTER,
-			LEFT: FlxTextAlign.LEFT,
-			RIGHT: FlxTextAlign.RIGHT,
-			JUSTIFY: FlxTextAlign.JUSTIFY,
-
-			fromOpenFL: FlxTextAlign.fromOpenFL,
-			toOpenFL: FlxTextAlign.toOpenFL
-		});
-		/*
-		// These are also defined on FlxTween. Get them from there.
-		set("FlxTweenType", {
-			PERSIST: flixel.tweens.FlxTween.FlxTweenType.PERSIST,
-			LOOPING: flixel.tweens.FlxTween.FlxTweenType.LOOPING,
-			PINGPONG: flixel.tweens.FlxTween.FlxTweenType.PINGPONG,
-			ONESHOT: flixel.tweens.FlxTween.FlxTweenType.ONESHOT,
-			BACKWARD: flixel.tweens.FlxTween.FlxTweenType.BACKWARD
-		}); 
-		 */
-		set("Judgement", {
-			UNJUDGED: Judgment.UNJUDGED,
-			TIER1: Judgment.TIER1,
-			TIER2: Judgment.TIER2,
-			TIER3: Judgment.TIER3,
-			TIER4: Judgment.TIER4,
-			TIER5: Judgment.TIER5,
-			MISS: Judgment.MISS,
-			DAMAGELESS_MISS: Judgment.DAMAGELESS_MISS,
-			HIT_MINE: Judgment.HIT_MINE,
-			MISS_MINE: Judgment.MISS_MINE,
-			CUSTOM_MINE: Judgment.CUSTOM_MINE
-		});
-
-		set("controls", PlayerSettings.player1.controls);
-
-		// FNF-specific things
-		set("PlayState", PlayState);
-		set("GameOverSubstate", funkin.states.GameOverSubstate);
-		set("Song", funkin.data.Song);
-		set("BGSprite", funkin.objects.BGSprite);
-		set("RatingSprite", RatingSprite);
-
-		set("Note", funkin.objects.Note);
-		set("NoteObject", funkin.objects.NoteObject);
-		set("NoteSplash", funkin.objects.NoteSplash);
-		set("StrumNote", funkin.objects.StrumNote);
-		set("PlayField", PlayField);
-		set("NoteField", NoteField);
-
-		set("ProxyField", funkin.objects.proxies.ProxyField);
-		set("ProxySprite", funkin.objects.proxies.ProxySprite);
-
-		set("FlxSprite3D", funkin.objects.FlxSprite3D);
-
-		set("AttachedSprite", funkin.objects.AttachedSprite);
-		set("AttachedText", funkin.objects.AttachedText);
-
-		set("Paths", funkin.Paths);
-		set("Conductor", funkin.Conductor);
-		set("ClientPrefs", funkin.ClientPrefs);
-		set("CoolUtil", funkin.CoolUtil);
-
-		set("Character", funkin.objects.Character);
-		set("HealthIcon", funkin.objects.hud.HealthIcon);
-
-		set("JudgmentManager", JudgmentManager);
-		set("Wife3", Wife3);
-
-		set("ModManager", funkin.modchart.ModManager);
-		set("Modifier", funkin.modchart.Modifier);
-		set("SubModifier", funkin.modchart.SubModifier);
-		set("NoteModifier", funkin.modchart.NoteModifier);
-		set("EventTimeline", funkin.modchart.EventTimeline);
-		set("StepCallbackEvent", funkin.modchart.events.StepCallbackEvent);
-		set("CallbackEvent", funkin.modchart.events.CallbackEvent);
-		set("ModEvent", funkin.modchart.events.ModEvent);
-		set("EaseEvent", funkin.modchart.events.EaseEvent);
-		set("SetEvent", funkin.modchart.events.SetEvent);
-
-		// TODO: create a compatibility wrapper for the various versions
-		// (so you can use any version of hxcodec and use the same versions)
-
-		#if !VIDEOS_ALLOWED
-		set("hxcodec", "0");
-		set("MP4Handler", null);
-		set("MP4Sprite", null);
-		#else
-		#if (hxvlc)
-		set("hxcodec", "0");
-		set("hxvlc", "1.0.0");
-		set("MP4Handler", hxvlc.flixel.FlxVideo);
-		set("MP4Sprite", hxvlc.flixel.FlxVideoSprite);
-		#else
-		set("hxvlc", "0");
-		#end
-		#if (hxCodec >= "3.0.0")
-		set("hxcodec", "3.0.0");
-		set("MP4Handler", hxcodec.flixel.FlxVideo);
-		set("MP4Sprite", hxcodec.flixel.FlxVideoSprite); // idk how hxcodec 3.0.0 works :clueless:
-		#elseif (hxCodec >= "2.6.1")
-		set("hxcodec", "2.6.1");
-		set("MP4Handler", hxcodec.VideoHandler);
-		set("MP4Sprite", hxcodec.VideoSprite);
-		#elseif (hxCodec == "2.6.0")
-		set("hxcodec", "2.6.0");
-		set("MP4Handler", VideoHandler);
-		set("MP4Sprite", VideoSprite);
-		#elseif (hxCodec)
-		set("hxcodec", "1.0.0");
-		set("MP4Handler", vlc.MP4Handler);
-		set("MP4Sprite", vlc.MP4Sprite);
-		#end
-		#end
+		
+		set("script", this);
+		set("global", Globals.variables);
 		set("FunkinHScript", FunkinHScript);
 
-		set("HScriptedHUD", funkin.objects.hud.HScriptedHUD);
-		set("HScriptModifier", funkin.modchart.HScriptModifier);
-
-		set("HScriptedState", HScriptedState);
-		set("HScriptedSubstate", HScriptedSubState);
-
-		set("global", Globals.variables);
+		setDefaultVars();
+		setFlixelVars();
+		setVideoVars();
+		setFNFVars();
 
 		for (variable => arg in defaultVars)
 			set(variable, arg);
@@ -287,8 +135,7 @@ class FunkinHScript extends FunkinScript
 
 	public function run(parsed:Expr, doCreateCall:Bool=false){
 		var returnValue:Dynamic = null;
-        try
-		{
+        try {
 			trace('Running haxe script: $scriptName');
 			returnValue = interpreter.execute(parsed);
 			if (doCreateCall)
@@ -318,10 +165,169 @@ class FunkinHScript extends FunkinScript
 		if (currentState is PlayState){
 			set("getInstance", getInstance);
 		}else{
-			@:privateAccess
-			set("getInstance", FlxG.get_state);
+			set("getInstance", @:privateAccess FlxG.get_state);
 		}
 	}
+
+	private function setFlixelVars() 
+	{
+		set("FlxG", FlxG);
+		set("FlxSprite", FlxSprite);
+		set("FlxCamera", FlxCamera);
+		set("FlxSound", FlxSound);
+		set("FlxMath", flixel.math.FlxMath);
+		set("FlxTimer", flixel.util.FlxTimer);
+		set("FlxTween", flixel.tweens.FlxTween);
+		set("FlxEase", flixel.tweens.FlxEase);
+		set("FlxGroup", flixel.group.FlxGroup);
+		set("FlxSave", flixel.util.FlxSave); // should probably give it 1 save instead of giving it FlxSave
+		set("FlxBar", flixel.ui.FlxBar);
+
+		set("FlxText", FlxText); // idk how this wasnt added sooner tbh
+		set("FlxTextBorderStyle", FlxTextBorderStyle);
+
+		set("FlxRuntimeShader", flixel.addons.display.FlxRuntimeShader);
+
+		set("FlxParticle", flixel.effects.particles.FlxParticle);
+		set("FlxTypedEmitter", flixel.effects.particles.FlxEmitter.FlxTypedEmitter);
+		set("FlxSkewedSprite", flixel.addons.effects.FlxSkewedSprite);
+
+		// Abstracts
+		set("FlxColor", CustomFlxColor);
+		set("FlxPoint", {
+			get: FlxPoint.get,
+			weak: FlxPoint.weak
+		});
+		set("FlxTextAlign", {
+			CENTER: FlxTextAlign.CENTER,
+			LEFT: FlxTextAlign.LEFT,
+			RIGHT: FlxTextAlign.RIGHT,
+			JUSTIFY: FlxTextAlign.JUSTIFY,
+
+			fromOpenFL: FlxTextAlign.fromOpenFL,
+			toOpenFL: FlxTextAlign.toOpenFL
+		});
+		/*
+		// These defined on FlxTween. Get them from there.
+		set("FlxTweenType", {
+			PERSIST: flixel.tweens.FlxTween.FlxTweenType.PERSIST,
+			LOOPING: flixel.tweens.FlxTween.FlxTweenType.LOOPING,
+			PINGPONG: flixel.tweens.FlxTween.FlxTweenType.PINGPONG,
+			ONESHOT: flixel.tweens.FlxTween.FlxTweenType.ONESHOT,
+			BACKWARD: flixel.tweens.FlxTween.FlxTweenType.BACKWARD
+		}); 
+		 */
+	}
+
+	private function setVideoVars() {
+		// TODO: create a compatibility wrapper for the various versions
+		// (so you can use any version of hxcodec and use the same versions)
+
+		#if !VIDEOS_ALLOWED
+		set("hxcodec", "0");
+		set("MP4Handler", null);
+		set("MP4Sprite", null);
+		#else
+		#if (hxCodec >= "3.0.0")
+		set("hxcodec", "3.0.0");
+		set("MP4Handler", hxcodec.flixel.FlxVideo);
+		set("MP4Sprite", hxcodec.flixel.FlxVideoSprite); // idk how hxcodec 3.0.0 works :clueless:
+		#elseif (hxCodec >= "2.6.1")
+		set("hxcodec", "2.6.1");
+		set("MP4Handler", hxcodec.VideoHandler);
+		set("MP4Sprite", hxcodec.VideoSprite);
+		#elseif (hxCodec == "2.6.0")
+		set("hxcodec", "2.6.0");
+		set("MP4Handler", VideoHandler);
+		set("MP4Sprite", VideoSprite);
+		#elseif (hxCodec)
+		set("hxcodec", "1.0.0");
+		set("MP4Handler", vlc.MP4Handler);
+		set("MP4Sprite", vlc.MP4Sprite);
+		#else
+		set("hxcodec", "0");
+		#end
+		#if (hxvlc)
+		set("hxvlc", "1.0.0");
+		set("MP4Handler", hxvlc.flixel.FlxVideo);
+		set("MP4Sprite", hxvlc.flixel.FlxVideoSprite);
+		#else
+		set("hxvlc", "0");
+		#end
+		#end	
+	}
+
+	private function setFNFVars() {
+		// FNF-specific things
+		set("controls", PlayerSettings.player1.controls);
+		set("get_controls", () -> return PlayerSettings.player1.controls);
+		
+		set("Paths", funkin.Paths);
+		set("Conductor", funkin.Conductor);
+		set("ClientPrefs", funkin.ClientPrefs);
+		set("CoolUtil", funkin.CoolUtil);
+
+		set("newShader", Paths.getShader);
+
+		set("PlayState", PlayState);
+		set("MusicBeatState", MusicBeatState);
+		set("MusicBeatSubstate", MusicBeatSubstate);
+		set("GameOverSubstate", funkin.states.GameOverSubstate);
+		set("Song", funkin.data.Song);
+		set("BGSprite", funkin.objects.BGSprite);
+		set("RatingSprite", RatingSprite);
+
+		set("Note", funkin.objects.Note);
+		set("NoteObject", funkin.objects.NoteObject);
+		set("NoteSplash", funkin.objects.NoteSplash);
+		set("StrumNote", funkin.objects.StrumNote);
+		set("PlayField", PlayField);
+		set("NoteField", NoteField);
+
+		set("ProxyField", funkin.objects.proxies.ProxyField);
+		set("ProxySprite", funkin.objects.proxies.ProxySprite);
+
+		set("FlxSprite3D", funkin.objects.FlxSprite3D);
+
+		set("AttachedSprite", funkin.objects.AttachedSprite);
+		set("AttachedText", funkin.objects.AttachedText);
+
+		set("Character", funkin.objects.Character);
+		set("HealthIcon", funkin.objects.hud.HealthIcon);
+
+		set("Wife3", Wife3);
+		set("JudgmentManager", JudgmentManager);
+		set("Judgement", {
+			UNJUDGED: Judgment.UNJUDGED,
+			TIER1: Judgment.TIER1,
+			TIER2: Judgment.TIER2,
+			TIER3: Judgment.TIER3,
+			TIER4: Judgment.TIER4,
+			TIER5: Judgment.TIER5,
+			MISS: Judgment.MISS,
+			DAMAGELESS_MISS: Judgment.DAMAGELESS_MISS,
+			HIT_MINE: Judgment.HIT_MINE,
+			MISS_MINE: Judgment.MISS_MINE,
+			CUSTOM_MINE: Judgment.CUSTOM_MINE
+		});
+
+		set("ModManager", funkin.modchart.ModManager);
+		set("Modifier", funkin.modchart.Modifier);
+		set("SubModifier", funkin.modchart.SubModifier);
+		set("NoteModifier", funkin.modchart.NoteModifier);
+		set("EventTimeline", funkin.modchart.EventTimeline);
+		set("StepCallbackEvent", funkin.modchart.events.StepCallbackEvent);
+		set("CallbackEvent", funkin.modchart.events.CallbackEvent);
+		set("ModEvent", funkin.modchart.events.ModEvent);
+		set("EaseEvent", funkin.modchart.events.EaseEvent);
+		set("SetEvent", funkin.modchart.events.SetEvent);
+
+		set("HScriptedHUD", funkin.objects.hud.HScriptedHUD);
+		set("HScriptModifier", funkin.modchart.HScriptModifier);
+
+		set("HScriptedState", funkin.states.scripting.HScriptedState);
+		set("HScriptedSubstate", funkin.states.scripting.HScriptedSubstate);
+	} 
 
 	function importClass(className:String)
 	{
@@ -376,6 +382,8 @@ class FunkinHScript extends FunkinScript
 
 	override public function stop()
 	{
+		//trace('stopping $scriptName');
+
 		// idk if there's really a stop function or anythin for hscript so
 		if (interpreter != null && interpreter.variables != null)
 			interpreter.variables.clear();
@@ -480,391 +488,6 @@ class FunkinHScript extends FunkinScript
 			set(key, defaultShit.get(key));
 
 		return returnVal;
-	}
-}
-
-// tbh i'd *LIKE* to use a macro for this but im lazy lol
-
-@:noScripting // honestly we could prob use the scripting thing to override shit instead
-class HScriptedState extends MusicBeatState
-{
-	public var stateScript:FunkinHScript;
-	public var scriptPath:Null<String> = null;
-
-	public function new(?script:FunkinHScript, ?doCreateCall:Bool = true)
-	{
-		super(false); // false because the whole point of this state is its scripted lol
-
-		if (script == null)
-			this.stateScript = FunkinHScript.blankScript();
-		else
-			this.stateScript = script;
-
-		// some shortcuts
-		stateScript.set("this", this);
-		stateScript.set("add", this.add);
-		stateScript.set("remove", this.remove);
-		stateScript.set("insert", this.insert);
-		stateScript.set("members", this.members);
-		// TODO: use a macro to auto-generate code to variables.set all variables/methods of MusicBeatState
-
-		stateScript.set("get_controls", () -> return PlayerSettings.player1.controls);
-		stateScript.set("controls", PlayerSettings.player1.controls);
-
-		if (doCreateCall != false)
-			stateScript.call("onLoad");
-	}
-
-	public static function fromString(str:String, ?doCreateCall:Bool = true)
-	{
-		return new HScriptedState(FunkinHScript.fromString(str, "HScriptedState", null, doCreateCall));
-	}
-
-	public static function fromPath(scriptPath:String, ?doCreateCall:Bool = true)
-	{
-		var script:Null<FunkinHScript> = null;
-
-		if (scriptPath != null) {
-			script = FunkinHScript.fromFile(scriptPath, scriptPath, variables, false);
-		} else {
-			trace('State script file "$scriptPath" not found!');
-		}
-
-		var state = new HScriptedState(script, doCreateCall);
-		state.scriptPath = scriptPath;
-		return state;
-	}
-
-	public static function fromFile(fileName:String, ?doCreateCall:Bool = true)
-	{
-		var scriptPath:Null<String> = null;
-
-		if (!fileName.endsWith(".hscript"))
-			fileName += ".hscript";
-
-		for (folderPath in Paths.getFolders("states"))
-		{
-			var filePath = folderPath + fileName;
-
-			if (Paths.exists(filePath)){
-				scriptPath = filePath;
-				break;
-			}
-		}
-
-		return fromPath(scriptPath);
-	}
-
-	override function create()
-	{
-		// UPDATE: realised I should be using the "on" prefix just so if a script needs to call an internal function it doesnt cause issues
-		// (Also need to figure out how to give the super to the classes incase that's needed in the on[function] funcs though honestly thats what the post functions are for)
-		// I'd love to modify HScript to add override specifically for troll engine hscript
-		// THSCript...
-
-		// onCreate is used when the script is created so lol
-		if (stateScript.call("onStateCreate", []) == Globals.Function_Stop) // idk why you'd return stop on create on a HScriptedState but.. sure
-			return;
-
-		super.create();
-		stateScript.call("onStateCreatePost");
-	}
-
-	override function update(e)
-	{
-		#if debug
-		if (FlxG.keys.justPressed.F7)
-			if (scriptPath != null && !FlxG.keys.pressed.CONTROL)
-				FlxG.switchState(new HScriptedState(scriptPath));
-			else
-				FlxG.switchState(new FreeplayState());
-		#end
-
-		if (stateScript.call("onUpdate", [e]) == Globals.Function_Stop)
-			return;
-
-		super.update(e);
-
-		stateScript.call("onUpdatePost", [e]);
-	}
-
-	override function beatHit()
-	{
-		stateScript.call("onBeatHit");
-		super.beatHit();
-	}
-
-	override function stepHit()
-	{
-		stateScript.call("onStepHit");
-		super.stepHit();
-	}
-
-	override function closeSubState()
-	{
-		if (stateScript.call("onCloseSubState") == Globals.Function_Stop)
-			return;
-
-		super.closeSubState();
-
-		stateScript.call("onCloseSubStatePost");
-	}
-
-	override function onFocus()
-	{
-		if (stateScript.call("onOnFocus") == Globals.Function_Stop)
-			return;
-
-		super.onFocus();
-
-		stateScript.call("onOnFocusPost");
-	}
-
-	override function onFocusLost()
-	{
-		if (stateScript.call("onOnFocusLost") == Globals.Function_Stop)
-			return;
-
-		super.onFocusLost();
-
-		stateScript.call("onOnFocusLostPost");
-	}
-
-	override function onResize(w:Int, h:Int)
-	{
-		if (stateScript.call("onOnResize", [w, h]) == Globals.Function_Stop)
-			return;
-
-		super.onResize(w, h);
-
-		stateScript.call("onOnResizePost", [w, h]);
-	}
-
-	override function openSubState(subState:FlxSubState)
-	{
-		if (stateScript.call("onOpenSubState", [subState]) == Globals.Function_Stop)
-			return;
-
-		super.openSubState(subState);
-
-		stateScript.call("onOpenSubStatePost", [subState]);
-	}
-
-	override function resetSubState()
-	{
-		if (stateScript.call("onResetSubState") == Globals.Function_Stop)
-			return;
-
-		super.resetSubState();
-
-		stateScript.call("onResetSubStatePost");
-	}
-
-	override function startOutro(onOutroFinished:() -> Void)
-	{
-		final currentState = FlxG.state;
-
-		if (stateScript.call("onStartOutro", [onOutroFinished]) == Globals.Function_Stop)
-			return;
-
-		if (FlxG.state == currentState) // if "onOutroFinished" wasnt called by the func above ^ then call onOutroFinished for it
-			onOutroFinished(); // same as super.startOutro(onOutroFinished)
-
-		stateScript.call("onStartOutroPost", []);
-	}
-
-	static var switchToDeprecation = false;
-
-	override function switchTo(s:FlxState)
-	{
-		if (!stateScript.exists("onSwitchTo"))
-			return super.switchTo(s);
-
-		if (!switchToDeprecation)
-		{
-			trace("switchTo is deprecated. Consider using startOutro");
-			switchToDeprecation = true;
-		}
-		if (stateScript.call("onSwitchTo", [s]) == Globals.Function_Stop)
-			return false;
-
-		super.switchTo(s);
-
-		stateScript.call("onSwitchToPost", [s]);
-		return true;
-	}
-
-	override function transitionIn()
-	{
-		if (stateScript.call("onTransitionIn") == Globals.Function_Stop)
-			return;
-
-		super.transitionIn();
-
-		stateScript.call("onTransitionInPost");
-	}
-
-	override function transitionOut(?onExit:() -> Void)
-	{
-		if (stateScript.call("onTransitionOut", [onExit]) == Globals.Function_Stop)
-			return;
-
-		super.transitionOut(onExit);
-
-		stateScript.call("onTransitionOutPost", [onExit]);
-	}
-
-	override function draw()
-	{
-		if (stateScript.call("onDraw", []) == Globals.Function_Stop)
-			return;
-
-		super.draw();
-
-		stateScript.call("onDrawPost", []);
-	}
-
-	override function destroy()
-	{
-		if (stateScript.call("onDestroy", []) == Globals.Function_Stop)
-			return;
-
-		super.destroy();
-
-		stateScript.call("onDestroyPost", []);
-	}
-
-	// idk sometimes you wanna override add/remove
-	override function add(member:FlxBasic):FlxBasic
-	{
-		if (stateScript.call("onAdd", [member], []) == Globals.Function_Stop)
-			return member;
-
-		super.add(member);
-
-		stateScript.call("onAddPost", [member]);
-		return member;
-	}
-
-	override function remove(member:FlxBasic, splice:Bool = false):FlxBasic
-	{
-		if (stateScript.call("onRemove", [member, splice]) == Globals.Function_Stop)
-			return member;
-
-		super.remove(member, splice);
-
-		stateScript.call("onRemovePost", [member, splice]);
-		return member;
-	}
-
-	override function insert(position:Int, member:FlxBasic):FlxBasic
-	{
-		if (stateScript.call("onInsert", [position, member]) == Globals.Function_Stop)
-			return member;
-
-		super.insert(position, member);
-
-		stateScript.call("onInsertPost", [position, member]);
-
-		return member;
-	}
-}
-
-@:noScripting // honestly we could prob use the scripting thing to override shit instead
-class HScriptedSubState extends MusicBeatSubstate
-{
-	public var stateScript:FunkinHScript;
-	public var scriptPath:Null<String> = null;
-
-	public function new(?script:FunkinHScript, ?doCreateCall:Bool = true)
-	{
-		super();
-
-		if (script==null)
-			this.stateScript = FunkinHScript.blankScript();
-		else
-			this.stateScript = script;
-
-		// some shortcuts
-		stateScript.set("this", this);
-		stateScript.set("add", this.add);
-		stateScript.set("remove", this.remove);
-		stateScript.set("insert", this.insert);
-		stateScript.set("members", this.members);
-		stateScript.set("close", close);
-
-		// TODO: use a macro to auto-generate code to variables.set all variables/methods of MusicBeatState
-
-		stateScript.set("get_controls", () -> return PlayerSettings.player1.controls);
-		stateScript.set("controls", PlayerSettings.player1.controls);
-
-		if (doCreateCall != false)
-			stateScript.call("onLoad");
-	}
-
-	public static function fromString(str:String, ?doCreateCall:Bool = true)
-	{
-		return new HScriptedSubState(FunkinHScript.fromString(str, "HScriptedState", null, doCreateCall));
-	}
-
-	public static function fromFile(fileName:String, ?doCreateCall:Bool = true)
-	{
-		var scriptPath:Null<String> = null;
-
-		if (!fileName.endsWith(".hscript"))
-			fileName += ".hscript";
-
-		for (folderPath in Paths.getFolders("states"))
-		{
-			var filePath = folderPath + fileName;
-
-			if (Paths.exists(filePath)){
-				scriptPath = filePath;
-				break;
-			}
-		}
-
-		var script:Null<FunkinHScript> = null;
-
-		if (scriptPath != null){
-			script = FunkinHScript.fromFile(scriptPath, scriptPath, variables, false);			
-		}else{
-			trace('Script file "$fileName" not found!');
-		}
-
-		var state = new HScriptedSubState(script, doCreateCall);
-		state.scriptPath = scriptPath;
-		return state;
-	}
-
-	override function update(e)
-	{
-		if (stateScript.call("onUpdate", [e]) == Globals.Function_Stop)
-			return;
-
-		super.update(e);
-
-		stateScript.call("onUpdatePost", [e]);
-	}
-
-	override function close()
-	{
-		if (stateScript != null)
-			stateScript.call("onClose");
-
-		return super.close();
-	}
-
-	override function destroy()
-	{
-		if (stateScript != null)
-		{
-			stateScript.call("onDestroy");
-			stateScript.stop();
-		}
-		stateScript = null;
-
-		return super.destroy();
 	}
 }
 
