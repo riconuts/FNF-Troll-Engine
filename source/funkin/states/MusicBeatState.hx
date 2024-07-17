@@ -15,7 +15,7 @@ import funkin.states.scripting.*;
 #end
 
 #if SCRIPTABLE_STATES
-@:autoBuild(funkin.macros.StateScriptingMacro.addScriptingCallbacks([
+@:autoBuild(funkin.macros.ScriptingMacro.addScriptingCallbacks([
 	"create",
 	"update",
 	"destroy",

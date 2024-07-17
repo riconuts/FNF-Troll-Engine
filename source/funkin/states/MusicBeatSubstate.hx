@@ -4,7 +4,7 @@ import funkin.scripts.FunkinHScript;
 import funkin.input.Controls;
 import flixel.FlxSubState;
 
-@:autoBuild(funkin.macros.StateScriptingMacro.addScriptingCallbacks([
+@:autoBuild(funkin.macros.ScriptingMacro.addScriptingCallbacks([
 	"create",
 	"update",
 	"destroy",

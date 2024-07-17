@@ -3,7 +3,7 @@ package funkin.states.scripting;
 import funkin.scripts.FunkinHScript;
 
 #if !SCRIPTABLE_STATES
-@:build(funkin.macros.StateScriptingMacro.addScriptingCallbacks([
+@:build(funkin.macros.ScriptingMacro.addScriptingCallbacks([
 	"create",
 	"update",
 	"destroy",

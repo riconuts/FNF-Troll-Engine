@@ -12,13 +12,41 @@ using haxe.macro.TypeTools;
 using haxe.macro.ExprTools;
 using haxe.macro.Tools;
 
-// TODO: make a macro to add callbacks to scripted things (HScriptedModifier/state/etc)
-// And then add "override" as a thing to HScript
-
-// NOTE: Not sure how well this works with states that extend another
-
-class StateScriptingMacro 
+class ScriptingMacro 
 {
+    //// https://code.haxe.org/category/macros/enum-abstract-values.html
+    macro public static function createEnumWrapper(typePath:Expr):Array<Field>
+    {
+        var type = Context.getType(typePath.toString());
+        var fields:Array<Field> = Context.getBuildFields();
+
+        switch (type.follow()) {
+            case TAbstract(_.get() => ab, _) if (ab.meta.has(":enum")):
+                for (field in ab.impl.get().statics.get()) {
+                    var fieldName = field.name;
+
+                    if (fields.findByName(fieldName)==null && field.meta.has(":enum") && field.meta.has(":impl")) {
+                        fields.push({
+                            name: fieldName,
+                            pos: Context.currentPos(),
+                            access: [APublic, AStatic],
+                            kind: FVar(null, macro $typePath.$fieldName)
+                        });
+                    }
+                }
+
+            default:
+                // The given type is not an abstract, or doesn't have @:enum metadata, show a nice error message.
+                throw new Error(type.toString() + " should be @:enum abstract", typePath.pos);
+        }
+        
+        return fields;        
+    }
+
+    // TODO: make a macro to add callbacks to scripted things (HScriptedModifier/state/etc)
+    // And then add "override" as a thing to HScript
+
+    // NOTE: Not sure how well this works with states that extend another
 	macro public static function addScriptingCallbacks(toInject:Array<String>, ?folder:String = 'states'):Array<Field>
 	{
 		var fields:Array<Field> = Context.getBuildFields();

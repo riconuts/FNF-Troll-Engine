@@ -1,29 +1,22 @@
 package funkin.scripts;
 
-import hscript.*;
-
 import funkin.scripts.*;
 import funkin.scripts.Globals.*;
-
-import flixel.FlxG;
-import flixel.text.FlxText;
-import flixel.util.FlxColor;
-import flixel.math.FlxMath;
-import flixel.math.FlxPoint;
 
 import funkin.states.PlayState;
 import funkin.states.PlayState.RatingSprite;
 import funkin.states.MusicBeatState;
 import funkin.states.MusicBeatSubstate;
-import funkin.data.JudgmentManager;
-
-import funkin.objects.*;
-import funkin.objects.playfields.*;
 
 import funkin.input.PlayerSettings;
 
+import flixel.FlxG;
+import flixel.math.FlxPoint;
+
 import lime.app.Application;
 import haxe.ds.StringMap;
+
+import hscript.*;
 
 using StringTools;
 
@@ -183,8 +176,8 @@ class FunkinHScript extends FunkinScript
 		set("FlxSave", flixel.util.FlxSave); // should probably give it 1 save instead of giving it FlxSave
 		set("FlxBar", flixel.ui.FlxBar);
 
-		set("FlxText", FlxText); // idk how this wasnt added sooner tbh
-		set("FlxTextBorderStyle", FlxTextBorderStyle);
+		set("FlxText", flixel.text.FlxText);
+		set("FlxTextBorderStyle", flixel.text.FlxText.FlxTextBorderStyle);
 
 		set("FlxRuntimeShader", flixel.addons.display.FlxRuntimeShader);
 
@@ -193,30 +186,15 @@ class FunkinHScript extends FunkinScript
 		set("FlxSkewedSprite", flixel.addons.effects.FlxSkewedSprite);
 
 		// Abstracts
-		set("FlxColor", CustomFlxColor);
+		set("BlendMode", Wrappers.BlendMode);
+
+		set("FlxColor", Wrappers.SowyColor);
 		set("FlxPoint", {
 			get: FlxPoint.get,
 			weak: FlxPoint.weak
 		});
-		set("FlxTextAlign", {
-			CENTER: FlxTextAlign.CENTER,
-			LEFT: FlxTextAlign.LEFT,
-			RIGHT: FlxTextAlign.RIGHT,
-			JUSTIFY: FlxTextAlign.JUSTIFY,
-
-			fromOpenFL: FlxTextAlign.fromOpenFL,
-			toOpenFL: FlxTextAlign.toOpenFL
-		});
-		/*
-		// These defined on FlxTween. Get them from there.
-		set("FlxTweenType", {
-			PERSIST: flixel.tweens.FlxTween.FlxTweenType.PERSIST,
-			LOOPING: flixel.tweens.FlxTween.FlxTweenType.LOOPING,
-			PINGPONG: flixel.tweens.FlxTween.FlxTweenType.PINGPONG,
-			ONESHOT: flixel.tweens.FlxTween.FlxTweenType.ONESHOT,
-			BACKWARD: flixel.tweens.FlxTween.FlxTweenType.BACKWARD
-		}); 
-		 */
+		set("FlxTextAlign", Wrappers.FlxTextAlign);
+		set("FlxTweenType", Wrappers.FlxTweenType); 
 	}
 
 	private function setVideoVars() {
@@ -281,8 +259,8 @@ class FunkinHScript extends FunkinScript
 		set("NoteObject", funkin.objects.NoteObject);
 		set("NoteSplash", funkin.objects.NoteSplash);
 		set("StrumNote", funkin.objects.StrumNote);
-		set("PlayField", PlayField);
-		set("NoteField", NoteField);
+		set("PlayField", funkin.objects.playfields.PlayField);
+		set("NoteField", funkin.objects.playfields.NoteField);
 
 		set("ProxyField", funkin.objects.proxies.ProxyField);
 		set("ProxySprite", funkin.objects.proxies.ProxySprite);
@@ -295,21 +273,9 @@ class FunkinHScript extends FunkinScript
 		set("Character", funkin.objects.Character);
 		set("HealthIcon", funkin.objects.hud.HealthIcon);
 
-		set("Wife3", Wife3);
-		set("JudgmentManager", JudgmentManager);
-		set("Judgement", {
-			UNJUDGED: Judgment.UNJUDGED,
-			TIER1: Judgment.TIER1,
-			TIER2: Judgment.TIER2,
-			TIER3: Judgment.TIER3,
-			TIER4: Judgment.TIER4,
-			TIER5: Judgment.TIER5,
-			MISS: Judgment.MISS,
-			DAMAGELESS_MISS: Judgment.DAMAGELESS_MISS,
-			HIT_MINE: Judgment.HIT_MINE,
-			MISS_MINE: Judgment.MISS_MINE,
-			CUSTOM_MINE: Judgment.CUSTOM_MINE
-		});
+		set("Wife3", funkin.data.JudgmentManager.Wife3);
+		set("JudgmentManager", funkin.data.JudgmentManager);
+		set("Judgement", Wrappers.Judgment);
 
 		set("ModManager", funkin.modchart.ModManager);
 		set("Modifier", funkin.modchart.Modifier);
@@ -489,213 +455,4 @@ class FunkinHScript extends FunkinScript
 
 		return returnVal;
 	}
-}
-
-// stupidity
-class CustomFlxColor
-{
-	// These aren't part of FlxColor but i thought they could be useful
-	// honestly we should replace source/flixel/FlxColor.hx or w/e with one with these funcs
-	public static function toRGBArray(color:FlxColor)
-		return [color.red, color.green, color.blue];
-
-	public static function lerp(from:FlxColor, to:FlxColor, ratio:Float) // FlxColor.interpolate() exists -_-
-		return FlxColor.fromRGBFloat(FlxMath.lerp(from.redFloat, to.redFloat, ratio), FlxMath.lerp(from.greenFloat, to.greenFloat, ratio),
-			FlxMath.lerp(from.blueFloat, to.blueFloat, ratio), FlxMath.lerp(from.alphaFloat, to.alphaFloat, ratio));
-
-	////
-	public static function get_red(color:FlxColor)
-		return color.red;
-
-	public static function get_green(color:FlxColor)
-		return color.green;
-
-	public static function get_blue(color:FlxColor)
-		return color.blue;
-
-	public static function set_red(color:FlxColor, val:Int)
-	{
-		color.red = val;
-		return color;
-	}
-
-	public static function set_green(color:FlxColor, val:Int)
-	{
-		color.green = val;
-		return color;
-	}
-
-	public static function set_blue(color:FlxColor, val:Int)
-	{
-		color.blue = val;
-		return color;
-	}
-
-	public static function get_rgb(color:FlxColor)
-		return color.rgb;
-
-	public static function get_redFloat(color:FlxColor)
-		return color.redFloat;
-
-	public static function get_greenFloat(color:FlxColor)
-		return color.greenFloat;
-
-	public static function get_blueFloat(color:FlxColor)
-		return color.blueFloat;
-
-	public static function set_redFloat(color:FlxColor, val:Float)
-	{
-		color.redFloat = val;
-		return color;
-	}
-
-	public static function set_greenFloat(color:FlxColor, val:Float)
-	{
-		color.greenFloat = val;
-		return color;
-	}
-
-	public static function set_blueFloat(color:FlxColor, val:Float)
-	{
-		color.blueFloat = val;
-		return color;
-	}
-
-	//
-	public static function get_hue(color:FlxColor)
-		return color.hue;
-
-	public static function get_saturation(color:FlxColor)
-		return color.saturation;
-
-	public static function get_lightness(color:FlxColor)
-		return color.lightness;
-
-	public static function get_brightness(color:FlxColor)
-		return color.brightness;
-
-	public static function set_hue(color:FlxColor, val:Float)
-	{
-		color.hue = val;
-		return color;
-	}
-
-	public static function set_saturation(color:FlxColor, val:Float)
-	{
-		color.saturation = val;
-		return color;
-	}
-
-	public static function set_lightness(color:FlxColor, val:Float)
-	{
-		color.lightness = val;
-		return color;
-	}
-
-	public static function set_brightness(color:FlxColor, val:Float)
-	{
-		color.brightness = val;
-		return color;
-	}
-
-	//
-	public static function get_cyan(color:FlxColor)
-		return color.cyan;
-
-	public static function get_magenta(color:FlxColor)
-		return color.magenta;
-
-	public static function get_yellow(color:FlxColor)
-		return color.yellow;
-
-	public static function get_black(color:FlxColor)
-		return color.black;
-
-	public static function set_cyan(color:FlxColor, val:Float)
-	{
-		color.cyan = val;
-		return color;
-	}
-
-	public static function set_magenta(color:FlxColor, val:Float)
-	{
-		color.magenta = val;
-		return color;
-	}
-
-	public static function set_yellow(color:FlxColor, val:Float)
-	{
-		color.yellow = val;
-		return color;
-	}
-
-	public static function set_black(color:FlxColor, val:Float)
-	{
-		color.black = val;
-		return color;
-	}
-
-	//
-	public static function getAnalogousHarmony(color:FlxColor)
-		return color.getAnalogousHarmony();
-
-	public static function getComplementHarmony(color:FlxColor)
-		return color.getComplementHarmony();
-
-	public static function getSplitComplementHarmony(color:FlxColor)
-		return color.getSplitComplementHarmony();
-
-	public static function getTriadicHarmony(color:FlxColor)
-		return color.getTriadicHarmony();
-
-	public static function getDarkened(color:FlxColor)
-		return color.getDarkened();
-
-	public static function getInverted(color:FlxColor)
-		return color.getInverted();
-
-	public static function getLightened(color:FlxColor)
-		return color.getLightened();
-
-	public static function to24Bit(color:FlxColor)
-		return color.to24Bit();
-
-	public static function getColorInfo(color:FlxColor)
-		return color.getColorInfo;
-
-	public static function toHexString(color:FlxColor)
-		return color.toHexString();
-
-	public static function toWebString(color:FlxColor)
-		return color.toWebString();
-
-	//
-	public static final fromCMYK = FlxColor.fromCMYK;
-	public static final fromHSL = FlxColor.fromHSL;
-	public static final fromHSB = FlxColor.fromHSB;
-	public static final fromInt = FlxColor.fromInt;
-	public static final fromRGBFloat = FlxColor.fromRGBFloat;
-	public static final fromString = FlxColor.fromString;
-	public static final fromRGB = FlxColor.fromRGB;
-
-	public static final getHSBColorWheel = FlxColor.getHSBColorWheel;
-	public static final interpolate = FlxColor.interpolate;
-	public static final gradient = FlxColor.gradient;
-
-	public static final TRANSPARENT:Int = FlxColor.TRANSPARENT;
-	public static final BLACK:Int = FlxColor.BLACK;
-	public static final WHITE:Int = FlxColor.WHITE;
-	public static final GRAY:Int = FlxColor.GRAY;
-
-	public static final GREEN:Int = FlxColor.GREEN;
-	public static final LIME:Int = FlxColor.LIME;
-	public static final YELLOW:Int = FlxColor.YELLOW;
-	public static final ORANGE:Int = FlxColor.ORANGE;
-	public static final RED:Int = FlxColor.RED;
-	public static final PURPLE:Int = FlxColor.PURPLE;
-	public static final BLUE:Int = FlxColor.BLUE;
-	public static final BROWN:Int = FlxColor.BROWN;
-	public static final PINK:Int = FlxColor.PINK;
-	public static final MAGENTA:Int = FlxColor.MAGENTA;
-	public static final CYAN:Int = FlxColor.CYAN;
 }
