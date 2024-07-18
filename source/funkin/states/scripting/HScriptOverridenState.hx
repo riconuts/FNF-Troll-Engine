@@ -44,7 +44,7 @@ class HScriptOverridenState extends HScriptedState
 
 	static public function fromAnother(state:HScriptOverridenState):Null<HScriptOverridenState>
 	{
-		return Paths.exists(state.scriptPath) ? new HScriptOverridenState(state.parentClass, state.scriptPath) : new Yolo();
+		return Paths.exists(state.scriptPath) ? new HScriptOverridenState(state.parentClass, state.scriptPath) : null;
 	}
 
 	inline private static function getShortClassName(cl):String
