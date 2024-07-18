@@ -1,3 +1,4 @@
+#if SCRIPTABLE_STATES
 package funkin.states.scripting;
 
 class HScriptOverridenState extends HScriptedState 
@@ -19,12 +20,8 @@ class HScriptOverridenState extends HScriptedState
 		super(scriptFullPath, [getShortClassName(parentClass) => parentClass]);
 	}
 
-	static public function requestOverride(state:MusicBeatState):Null<HScriptOverridenState>
+	static public function findClassOverride(cl:Class<MusicBeatState>):Null<HScriptOverridenState> 
 	{
-		if (state == null || !state.canBeScripted)
-			return null;
-
-		var cl = Type.getClass(state);
 		var fullName = Type.getClassName(cl);
 		for (filePath in Paths.getFolders("states"))
 		{
@@ -37,11 +34,20 @@ class HScriptOverridenState extends HScriptedState
 		return null;
 	}
 
-	static public function fromAnother(state:HScriptOverridenState)
+	static public function requestOverride(state:MusicBeatState):Null<HScriptOverridenState>
 	{
-		return new HScriptOverridenState(state.parentClass, state.scriptPath);
+		if (state != null && state.canBeScripted)
+			return findClassOverride(Type.getClass(state));
+		
+		return null;
+	}
+
+	static public function fromAnother(state:HScriptOverridenState):Null<HScriptOverridenState>
+	{
+		return Paths.exists(state.scriptPath) ? new HScriptOverridenState(state.parentClass, state.scriptPath) : new Yolo();
 	}
 
 	inline private static function getShortClassName(cl):String
 		return Type.getClassName(cl).split('.').pop();
 }
+#end
