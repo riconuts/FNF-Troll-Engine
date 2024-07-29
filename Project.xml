@@ -51,19 +51,20 @@
     <!-- TROLL ENGINE CUSTOMIZATION -->
 	<define name="USE_EPIC_JUDGEMENT" />
 	<define name="HSCRIPT_ALLOWED" />
-	<define name="SCRIPTABLE_STATES" if="HSCRIPT_ALLOWED"/>
-	<define name="VIDEOS_ALLOWED" if="cpp final" />
+	<define name="VIDEOS_ALLOWED" if="cpp" />
 	<define name="MODS_ALLOWED" if="desktop" />
 	<define name="DISCORD_ALLOWED" if="desktop cpp"/>
 	<define name="MULTICORE_LOADING" if="native" />
 	<define name="CRASH_HANDLER" if="desktop" />
 
+	<!--Remove if you dont want states to be modified with scripts. This only disables extension/overrides and not the HScriptedState class-->
+	<define name="SCRIPTABLE_STATES" if="HSCRIPT_ALLOWED"/>
     <!--Remove if you dont want Lua to be usable. Note that if you remove this, you should remove PE_MOD_COMPATIBILITY too -->
 	<define name="LUA_ALLOWED" if="desktop cpp"/>
     <!--Remove if you dont want Psych Engine mod compatibility -->
 	<define name="PE_MOD_COMPATIBILITY" if="LUA_ALLOWED" />
     <!--Remove if you dont want the engine to autoupdate -->
-	<define name="DO_AUTO_UPDATE" if="native desktop" unless="debug || final"/>
+	<define name="DO_AUTO_UPDATE" if="native desktop OFFICIAL_BUILD" unless="debug || final"/>
 	
 	<!-- __________________ lime build windows -release -Dtgt __________________ -->
 

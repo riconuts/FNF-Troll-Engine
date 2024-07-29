@@ -1,19 +1,22 @@
 package funkin.states;
 
-import haxe.io.Path;
-import flixel.addons.ui.FlxUIState;
-import flixel.addons.transition.FlxTransitionableState;
-import openfl.media.Sound;
-import openfl.ui.Mouse;
-import openfl.ui.MouseCursor;
 import funkin.input.Controls;
+import flixel.addons.transition.FlxTransitionableState;
+import flixel.addons.ui.FlxUIState;
+import openfl.media.Sound;
+import openfl.ui.MouseCursor;
+import openfl.ui.Mouse;
+import haxe.io.Path;
 
 #if HSCRIPT_ALLOWED
 import funkin.scripts.FunkinHScript;
+import funkin.states.scripting.*;
 #end
 
 #if SCRIPTABLE_STATES
-@:autoBuild(funkin.scripts.Macro.addScriptingCallbacks([
+import funkin.states.scripting.HScriptOverridenState;
+
+@:autoBuild(funkin.macros.ScriptingMacro.addScriptingCallbacks([
 	"create",
 	"update",
 	"destroy",
@@ -26,45 +29,44 @@ import funkin.scripts.FunkinHScript;
 #end
 class MusicBeatState extends FlxUIState
 {
-	#if SCRIPTABLE_STATES
-	public var script:FunkinHScript;
-	#end
-
 	private var curSection:Int = 0;
 	private var stepsToDo:Int = 0;
 
 	public var curStep:Int = 0;
 	public var curBeat:Int = 0;
 
-	public var curDecStep:Float = 0;
-	public var curDecBeat:Float = 0;
+	public var curDecStep:Float = 0.0;
+	public var curDecBeat:Float = 0.0;
 	private var controls(get, never):Controls;
 
-	public static var camBeat:FlxCamera;
-
     public var canBeScripted(get, default):Bool = false;
-    function get_canBeScripted() return canBeScripted;
-    public function new(canBeScripted:Bool = true){
+    @:noCompletion function get_canBeScripted() return canBeScripted;
+
+	//// To be defined by the scripting macro
+	@:noCompletion public var _extensionScript:FunkinHScript;
+
+	@:noCompletion public function _getScriptDefaultVars() 
+		return new Map<String, Dynamic>();
+	
+	@:noCompletion public function _startExtensionScript(folder:String, scriptName:String) 
+		return;
+
+	////
+    public function new(canBeScripted:Bool = true) {
         super();
         this.canBeScripted = canBeScripted;
     }
 
-	override public function destroy(){
-		#if SCRIPTABLE_STATES
-		if (script != null){ 
-			script.stop();
-			script = null;
-		}
-		#end
+	override public function destroy() 
+	{
 		return super.destroy();
 	}
 
 	inline function get_controls():Controls
 		return funkin.input.PlayerSettings.player1.controls;
 
-	override function create() {
-		camBeat = FlxG.camera;
-		
+	override function create() 
+	{
 		FlxG.autoPause = true;
 		
 		super.create();
@@ -81,7 +83,8 @@ class MusicBeatState extends FlxUIState
 	}
 
     // mainly moved it away so if a scripted state returns FUNCTION_STOP they can still make the music stuff update
-    public function updateSteps(){
+    public function updateSteps()
+	{
         var oldStep:Int = curStep;
 
 		updateCurStep();
@@ -92,7 +95,7 @@ class MusicBeatState extends FlxUIState
 			if (curStep > 0)
 				stepHit();
 
-			if(PlayState.SONG != null)
+			if (PlayState.SONG != null)
 			{
 				if (oldStep < curStep)
 					updateSection();
@@ -123,10 +126,9 @@ class MusicBeatState extends FlxUIState
     
 	override function startOutro(fuck:() -> Void)
 	{
-		return super.startOutro(() ->
-		{
+		return super.startOutro(() -> {
 			funkin.scripts.Globals.variables.clear();
-			return fuck();
+			fuck();
 		});
 	}
 
@@ -172,19 +174,42 @@ class MusicBeatState extends FlxUIState
 		FlxG.autoPause = false;
 		FlxG.mouse.visible = false;
 		Mouse.cursor = MouseCursor.AUTO;
+
 		FlxG.switchState(nextState); // just because im too lazy to goto every instance of switchState and change it to a FlxG call
 	}
 
 	public static function resetState(?skipTrans:Bool = false) {
-		if (skipTrans){
+		if (skipTrans) {
 			FlxTransitionableState.skipNextTransIn = true;
 			FlxTransitionableState.skipNextTransOut = true;
 		}
 
 		#if HSCRIPT_ALLOWED
-		if (FlxG.state is HScriptedState){
+		if (FlxG.state is OldHScriptedState){
+			var state:OldHScriptedState = cast FlxG.state;
+			FlxG.switchState(OldHScriptedState.fromPath(state.scriptPath));
+
+		#if SCRIPTABLE_STATES
+		}else if (FlxG.state is HScriptOverridenState) {
+			var state:HScriptOverridenState = cast FlxG.state;
+			var overriden = HScriptOverridenState.fromAnother(state);
+
+			if (overriden!=null) {
+				FlxG.switchState(overriden);
+			}else {
+				trace("State override script file is gone!", "Switching to", state.parentClass);
+				FlxG.switchState(Type.createInstance(state.parentClass, []));
+			}
+		#end
+		}else if (FlxG.state is HScriptedState) {
 			var state:HScriptedState = cast FlxG.state;
-			FlxG.switchState(HScriptedState.fromPath(state.scriptPath));
+
+			if (Paths.exists(state.scriptPath))
+				FlxG.switchState(new HScriptedState(state.scriptPath));
+			else{
+				trace("State script file is gone!", "Switching to", MainMenuState);
+				FlxG.switchState(new MainMenuState());
+			}
 		}else
 		#end
 			FlxG.resetState();

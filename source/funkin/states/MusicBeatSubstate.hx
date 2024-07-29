@@ -1,26 +1,34 @@
 package funkin.states;
 
-import flixel.FlxSubState;
-import funkin.input.Controls;
-
-#if SCRIPTABLE_STATES
 import funkin.scripts.FunkinHScript;
+import funkin.input.Controls;
+import flixel.FlxSubState;
 
-@:autoBuild(funkin.scripts.Macro.addScriptingCallbacks([
+@:autoBuild(funkin.macros.ScriptingMacro.addScriptingCallbacks([
 	"create",
 	"update",
 	"destroy",
 	"close",
+	"openSubState",
+	"closeSubState",
 	"stepHit",
 	"beatHit",
 ], "substates"))
-#end
 class MusicBeatSubstate extends FlxSubState
 {
-	#if SCRIPTABLE_STATES
-	public var script:FunkinHScript;
-	#end
+	public var canBeScripted(get, default):Bool = true;
+	@:noCompletion function get_canBeScripted() return canBeScripted;
 
+	//// To be defined by the scripting macro
+	@:noCompletion public var _extensionScript:FunkinHScript;
+
+	@:noCompletion public function _getScriptDefaultVars() 
+		return new Map<String, Dynamic>();
+
+	@:noCompletion public function _startExtensionScript(folder:String, scriptName:String) 
+		return;
+
+	////
 	private var lastBeat:Float = 0;
 	private var lastStep:Float = 0;
 
@@ -33,21 +41,15 @@ class MusicBeatSubstate extends FlxSubState
 
 	inline function get_controls():Controls
 		return funkin.input.PlayerSettings.player1.controls;
-    
-	override public function destroy()
-	{
-		#if SCRIPTABLE_STATES
-		if (script != null){
-			script.stop();
-			script = null;
-		}
-		#end
-		return super.destroy();
-	}
-
 
 	override function update(elapsed:Float)
-	{
+	{		
+		updateSteps();
+
+		super.update(elapsed);
+	}
+
+	private function updateSteps() {
 		var oldStep:Int = curStep;
 
 		updateCurStep();
@@ -55,9 +57,6 @@ class MusicBeatSubstate extends FlxSubState
 
 		if (oldStep != curStep && curStep > 0)
 			stepHit();
-
-
-		super.update(elapsed);
 	}
 
 	private function updateBeat():Void
