@@ -45,8 +45,8 @@
 
 	<classpath path="source" />
 	
-	<assets path="assets" />
-	<assets path='default_content' rename='content' embed='false' exclude="*.mp3"/>
+	<assets path="assets" embed='false' exclude="*.mp3"/>
+	<assets path='content' embed='false' exclude="*.mp3"/>
 
     <!-- TROLL ENGINE CUSTOMIZATION -->
 	<define name="USE_EPIC_JUDGEMENT" />
