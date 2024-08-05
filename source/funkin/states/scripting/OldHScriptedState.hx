@@ -98,7 +98,7 @@ class OldHScriptedState extends MusicBeatState
 		#if debug
 		if (FlxG.keys.justPressed.F7)
 			if (scriptPath != null && !FlxG.keys.pressed.CONTROL)
-				FlxG.switchState(new OldHScriptedState(scriptPath));
+				FlxG.switchState(OldHScriptedState.fromPath(scriptPath));
 			else
 				FlxG.switchState(new FreeplayState());
 		#end

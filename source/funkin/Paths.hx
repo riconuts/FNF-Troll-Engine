@@ -594,10 +594,8 @@ class Paths
 		#if html5
 		return FlxG.bitmap.add(path, false, path);
 		#elseif sys
-		var graphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(path), false, path);		
-
-		@:privateAccess
-		graphic.assetsKey = path;
+		var graphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(path), false, path, false);		
+		@:privateAccess graphic.assetsKey = path;
 	
 		return graphic;
 		#end

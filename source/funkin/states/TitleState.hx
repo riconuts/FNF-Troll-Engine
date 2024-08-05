@@ -90,6 +90,7 @@ class TitleState extends MusicBeatState
 
 		if (randomStage != null)
 		{
+			trace(randomStage);
 			Paths.currentModDirectory = randomStage[1];
 			bg = new Stage(randomStage[0], false);
 			
