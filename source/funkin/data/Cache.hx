@@ -35,7 +35,7 @@ enum abstract AssetPreloadType(String) from String to String{
 typedef AssetPreload = {
 	var path:String;
 	@:optional var type:AssetPreloadType;
-	@:optional var library:Null<String>;
+	@:optional var library:Null<String>; // unused
 }
 
 class Cache
@@ -193,7 +193,7 @@ class Cache
 		#end
 
 		////
-		path = Paths.getPath('images/$key.png', IMAGE, library);
+		path = Paths.png(key, library);
 
 		if (Paths.exists(path, IMAGE) && !Paths.currentTrackedAssets.exists(path))
 		{
@@ -224,7 +224,7 @@ class Cache
 		#end
 		
 		////
-		path = Paths.getPath(key, SOUND, library);
+		path = Paths.getPreloadPath(key);
 		
 		if (Paths.currentTrackedSounds.exists(path))
 			return null;

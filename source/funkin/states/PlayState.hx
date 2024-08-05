@@ -572,7 +572,7 @@ class PlayState extends MusicBeatState
 		if (SONG.metadata != null){
 			metadata = SONG.metadata;
 		}else{
-			var jsonPath = Paths.___getPath('songs/$songName/metadata.json');
+			var jsonPath = Paths.getPath('songs/$songName/metadata.json');
 
 			if (Paths.exists(jsonPath))
 				metadata = cast Json.parse(Paths.getContent(jsonPath));

@@ -566,7 +566,7 @@ class ChartingState extends MusicBeatState
 
 		var loadMetadata:FlxButton = new FlxButton(110, saveMetadata.y + 30, 'Load Metadata', function(){
 			var songName:String = Paths.formatToSongPath(_song.song);
-			var jsonPath = Paths.___getPath('songs/$songName/metadata.json');
+			var jsonPath = Paths.getPath('songs/$songName/metadata.json');
 
 			if (Paths.exists(jsonPath)){
 				var metadata:Song.SongCreditdata = Json.parse(Paths.getContent(jsonPath));

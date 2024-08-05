@@ -185,7 +185,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 			}
 
         }else{
-			var modsList = Paths.getText('data/stageList.txt', false);
+			var modsList = Paths.text('data/stageList.txt', false);
 			if (modsList != null && modsList.trim().length > 0)
 				for (shit in modsList.split("\n"))
 					daList.push(shit.trim().replace("\n", ""));
@@ -246,7 +246,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		}
 
 		if (!modsOnly){
-			Paths.iterateDirectory(Paths.getPath('stages/'), readFileNameAndPush);
+			Paths.iterateDirectory(Paths.getPreloadPath('stages/'), readFileNameAndPush);
 		}
 
 		for (name in _stages.keys())

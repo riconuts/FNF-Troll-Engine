@@ -140,9 +140,9 @@ class Song
 		if (metadata.folder == "")
 		{
 			#if PE_MOD_COMPATIBILITY
-			Paths.iterateDirectory(Paths.getPath('data/$songName/'), processFileName);
+			Paths.iterateDirectory(Paths.getPreloadPath('data/$songName/'), processFileName);
 			#end
-			Paths.iterateDirectory(Paths.getPath('songs/$songName/'), processFileName);
+			Paths.iterateDirectory(Paths.getPreloadPath('songs/$songName/'), processFileName);
 		}
 		#if MODS_ALLOWED
 		else
@@ -160,11 +160,11 @@ class Song
 	public static function loadFromJson(jsonInput:String, ?folder:String):SwagSong
 	{
 		var path:String = Paths.formatToSongPath(folder) + '/' + Paths.formatToSongPath(jsonInput) + '.json';
-		var rawJson:Null<String> = Paths.getText('songs/$path', false);
+		var rawJson:Null<String> = Paths.text('songs/$path', false);
 		
 		#if PE_MOD_COMPATIBILITY
 		if (rawJson == null)
-			rawJson = Paths.getText('data/$path', false);
+			rawJson = Paths.text('data/$path', false);
 		#end
 
 		if (rawJson == null){
