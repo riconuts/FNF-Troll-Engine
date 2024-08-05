@@ -643,14 +643,14 @@ class OptionsSubstate extends MusicBeatSubstate
 					widget.data.set("lockOverlay", lock);
 					if (widget.data.exists("objects"))
 					{
-						var objects:FlxTypedGroup<FlxObject> = widget.data.get("objects");
-						for (obj in objects.members)
+						var objects = widget.data.get("objects");
+						for (obj in (objects:FlxTypedGroup<FlxObject>).members)
 						{
 							@:privateAccess
 							if (obj.cameras == null || obj.cameras == FlxCamera._defaultCameras)
 								obj.cameras = [optionCamera];
 						}
-						group.add(widget.data.get("objects"));
+						group.add(objects);
 					}
 
 					widgets.set(text, widget);
@@ -740,26 +740,22 @@ class OptionsSubstate extends MusicBeatSubstate
 
 				data.value = (checkbox.toggled);
 			case Dropdown:
-				var arrow:FlxSprite = new FlxSprite(Paths.image("optionsMenu/arrow"));
-				arrow.scale.set(0.7, 0.7);
-				arrow.updateHitbox();
-
-				var daCamera = new FlxCamera();
-				daCamera.bgColor = FlxColor.GRAY;
-				daCamera.bgColor.alpha = 204;
-				camerasToRemove.push(daCamera);
-
 				var options:Array<String> = data.data.get("options");
-				var daY:Float = 0;
-				var daW:Float = 100;
 				var drops:Array<FlxUI9SliceSprite> = [];
 				var optionMap:Map<FlxText, String> = [];
 				var dV:String = data.value != null ? cast data.value : options[0];
 				if (options.indexOf(dV) == -1)
 					dV = options[0];
 
-				var label = new FlxText(0, 0, 0, dV, 16);
-				label.setFormat(Paths.font("calibri.ttf"), 24, 0xFFFFFFFF, FlxTextAlign.LEFT);
+				var daY:Float = 0;
+				var daW:Float = 100;
+
+				var daCamera = new FlxCamera();
+				daCamera.bgColor = FlxColor.GRAY;
+				daCamera.bgColor.alpha = 204;
+				camerasToRemove.push(daCamera);
+
+				var backdropGraphic = Paths.image("optionsMenu/backdrop");
 
 				for (idx in 0...options.length)
 				{
@@ -767,35 +763,34 @@ class OptionsSubstate extends MusicBeatSubstate
 					var text = new FlxText(8 + 4, daY + 4, 0, l, 16);
 					text.cameras = [daCamera];
 					text.setFormat(Paths.font("calibri.ttf"), 24, 0xFFFFFFFF, FlxTextAlign.LEFT);
-					var height = 35;
-					var width = text.width + 8;
-					if (width < 50)
-						width = 50;
-					var backDrop:FlxUI9SliceSprite = new FlxUI9SliceSprite(text.x - 4, daY + 4, Paths.image("optionsMenu/backdrop"),
-						new Rectangle(0, 0, width, height), [22, 22, 89, 89]);
-					backDrop.cameras = [daCamera];
-					text.y += (height - text.height) / 2;
+					
+					var width:Float = Math.max(50, text.width + 8);
+					var height:Float = 35;
 
+					text.y += (height - text.height) / 2;
 					text.ID = idx;
+					
+					var backDrop:FlxUI9SliceSprite = new FlxUI9SliceSprite(
+						text.x - 4, daY + 4, 
+						backdropGraphic,
+						new Rectangle(0, 0, width, height), [22, 22, 89, 89]
+					);
+					backDrop.cameras = [daCamera];
+
 					objects.add(backDrop);
 					objects.add(text);
 					drops.push(backDrop);
 					optionMap.set(text, l);
-					daY += backDrop.height + 2;
 
-					if (daW < width + 16)
-						daW = width + 16;
+					daW = Math.max(daW, width + 16);
+					daY += backDrop.height + 2;
 				}
-				for (obj in drops)
-				{
+				for (obj in drops) {
 					obj.resize(daW - 8, obj.height);
 					obj.x -= 4;
 				}
 
-				var height = daY;
-				if (height > 35 * 12)
-					height = 35 * 12;
-				height += 8;
+				var height = Math.min(daY, 35 * 12) + 8;
 				daCamera.height = Std.int(height);
 				daCamera.width = Std.int(daW);
 
@@ -819,6 +814,15 @@ class OptionsSubstate extends MusicBeatSubstate
 				daCamera.targetOffset.x = daCamera.width / 2;
 				daCamera.targetOffset.y = daCamera.height / 2;
 
+				var arrow:FlxSprite = new FlxSprite(Paths.image("optionsMenu/arrow"));
+				arrow.scale.set(0.7, 0.7);
+				arrow.updateHitbox();
+				objects.add(arrow);
+
+				var label = new FlxText(0, 0, 0, dV, 16);
+				label.setFormat(Paths.font("calibri.ttf"), 24, 0xFFFFFFFF, FlxTextAlign.LEFT);
+				objects.add(label);
+
 				FlxG.cameras.add(daCamera, false);
 				daY += 4;
 				widget.data.set("height", daY > height ? daY - height : 0);
@@ -830,8 +834,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				widget.data.set("arrow", arrow);
 				widget.data.set("text", label);
 				widget.data.set("camera", daCamera);
-				if (Reflect.hasField(ClientPrefs, name))
-				{
+				if (Reflect.hasField(ClientPrefs, name)) {
 					var val = Reflect.field(ClientPrefs, name);
 					originalValues.set(name, val);
 					data.value = (val);
@@ -840,8 +843,6 @@ class OptionsSubstate extends MusicBeatSubstate
 				else
 					data.value = (dV);
 
-				objects.add(arrow);
-				objects.add(label);
 			case Number:
 				var box:FlxSprite = new FlxSprite(whitePixel);
 				box.color = FlxColor.BLACK;
