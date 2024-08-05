@@ -589,19 +589,19 @@ class Paths
 	// completely rewritten asset loading? fuck!
 	public static var currentTrackedAssets:Map<String, FlxGraphic> = [];
 
-	public static function getGraphic(path:String):FlxGraphic
+	public static function getGraphic(path:String):Null<FlxGraphic>
 	{
-		#if html5
-		return FlxG.bitmap.add(path, false, path);
-		#elseif sys
-		var graphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(path), false, path, false);		
-		@:privateAccess graphic.assetsKey = path;
-	
-		return graphic;
+		var graphic = FlxGraphic.fromAssetKey(path, false, path);
+		
+		#if sys
+		if (graphic == null && FileSystem.exists(path))
+			return FlxGraphic.fromBitmapData(BitmapData.fromFile(path), false, path);
 		#end
+
+		return graphic;
 	}
 
-	public static function returnGraphic(key:String, ?library:String)
+	public static function returnGraphic(key:String, ?library:String):Null<FlxGraphic>
 	{
 		#if MODS_ALLOWED
 		var modKey:String = modsImages(key);
@@ -634,6 +634,17 @@ class Paths
 	}
 
 	public static var currentTrackedSounds:Map<String, Sound> = [];
+
+	public static function getSound(key:String){
+		var sound = Assets.getSound(key);
+		
+		#if sys
+		if (sound == null && FileSystem.exists(key))
+			return Sound.fromFile(key);
+		#end
+
+		return sound;
+	}
 
 	public static function returnSoundPath(path:String, key:String, ?library:String)
 	{
@@ -668,13 +679,9 @@ class Paths
 
 		var sound:Null<Sound> = currentTrackedSounds.get(gottenPath);
 		if (sound == null){
-			#if !html5
-			sound = Sound.fromFile('./' + gottenPath);
-			#else
-			sound = Assets.getSound(/*(path == 'songs' ? 'songs:' : '') +*/ gottenPath);
-			#end
+			sound = getSound(gottenPath);
 
-			if (sound == null || sound.bytesTotal + sound.length <= 0)
+			if (sound == null)
 			{
 				/// fuckkk man
 				trace('Sound file $gottenPath not found!');
