@@ -80,12 +80,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		{
 			trace("Stage script already started!");
 			return;
-		}
-
-		if (additionalVars == null)
-			additionalVars = ["inTitlescreen" => false];
-		else if (!additionalVars.exists("inTitlescreen"))
-			additionalVars.set("inTitlescreen", false);        
+		}   
 
 		var baseFile:String = 'stages/$curStage.hscript';
 	

@@ -1,5 +1,6 @@
 package funkin.scripts;
 
+import openfl.events.DataEvent;
 import funkin.scripts.*;
 import funkin.scripts.Globals.*;
 
@@ -9,6 +10,7 @@ import funkin.states.MusicBeatState;
 import funkin.states.MusicBeatSubstate;
 
 import funkin.input.PlayerSettings;
+import funkin.api.Windows;
 
 import flixel.FlxG;
 import flixel.math.FlxPoint;
@@ -38,43 +40,70 @@ class FunkinHScript extends FunkinScript
 		parser.preprocesorValues.set("TROLL_ENGINE", Main.semanticVersion);
 	}
 
-	public static function parseString(script:String, ?name:String = "Script")
-		return parser.parseString(script, name);
-
-	public static function parseFile(file:String, ?name:String)
-		return parseString(Paths.getContent(file), (name == null ? file : name));
-
-	public static function blankScript()
+	inline public static function parseString(script:String, ?name:String = "Script")
 	{
 		parser.line = 1;
-		return new FunkinHScript(parser.parseString(""), false);
+		return parser.parseString(script, name);
 	}
 
-	public static function fromString(script:String, ?name:String = "Script", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true)
-	{
-		parser.line = 1;
-		var expr:Expr;
+	inline public static function parseFile(file:String, ?name:String)
+		return parseString(Paths.getContent(file), (name == null ? file : name));
 
-		try
-		{
-			expr = parser.parseString(script, name);
+	public static function blankScript(?name, ?additionalVars)
+	{
+		return new FunkinHScript(null, name, additionalVars, false);
+	}
+
+	/** No exception catching or display */
+	public static function _fromString(script:String, ?name:String = "Script", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true)
+		return new FunkinHScript(parseString(script, name), name, additionalVars, doCreateCall);
+
+	// safe ver
+	public static function fromString(script:String, ?name:String = "Script", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true):FunkinHScript
+	{
+		try {
+			return _fromString(script, name, additionalVars, doCreateCall);
 		}
-		catch (e:haxe.Exception)
-		{
+		catch (e:haxe.Exception) {
 			var errMsg = 'Error parsing hscript! ' #if hscriptPos + '$name:' + parser.line + ', ' #end + e.message;
+			trace(errMsg);
+
 			#if desktop
 			Application.current.window.alert(errMsg, "Error on haxe script!");
 			#end
-			trace(errMsg);
-
-			expr = parser.parseString("", name);
 		}
 
-		return new FunkinHScript(expr, name, additionalVars, doCreateCall);
+		return new FunkinHScript(null, name, additionalVars, doCreateCall);
 	}
 
-	public static function fromFile(file:String, ?name:String, ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true)
-		return fromString(Paths.getContent(file), (name == null ? file : name), additionalVars, doCreateCall);
+	public static function fromFile(file:String, ?name:String, ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true):FunkinHScript
+	{
+		name = (name == null ? file : name);
+
+		try {
+			return _fromString(Paths.getContent(file), name, additionalVars, doCreateCall);
+		}
+		catch(e:haxe.Exception) {
+			var msg = "Error parsing hscript! " + e.message;
+			trace(msg);
+
+			#if desktop
+			var title = "Error on haxe script!";
+
+			#if (cpp && windows)
+			if (Windows.msgBox(msg, title, RETRYCANCEL | ERROR) == RETRY)
+				return fromFile(file, name, additionalVars, doCreateCall);
+			#else
+			Application.current.Windows.alert(msg, title);
+			#end
+			#end
+		}
+
+		return new FunkinHScript(null, name, additionalVars, doCreateCall);
+	}
+
+	public function executeCode(source:String):Dynamic
+		return run(parseString(source, scriptName));
 
 	////
 	var interpreter:Interp = new Interp();
@@ -122,22 +151,41 @@ class FunkinHScript extends FunkinScript
 				set(key, value);
 		}
 
-		if (parsed != null)
-			run(parsed, doCreateCall);
+		if (parsed != null){
+			run(parsed);
+			
+			if (doCreateCall)
+				call('onCreate');
+		}
 	}
 
-	public function run(parsed:Expr, doCreateCall:Bool=false){
+	private static inline function sowy_trim_redundant_repeated_message_error_pos_shit(message:String, posInfo:haxe.PosInfos):String
+	{
+		if (message.startsWith(posInfo.fileName)) {
+			var sowy = posInfo.fileName + ":" + posInfo.lineNumber + ": ";
+			message = message.substr(sowy.length); 
+		}
+
+		return message;
+	}
+	
+	public function run(parsed:Expr){
 		var returnValue:Dynamic = null;
         try {
 			trace('Running haxe script: $scriptName');
 			returnValue = interpreter.execute(parsed);
-			if (doCreateCall)
-				call('onCreate');
 		}
 		catch (e:haxe.Exception)
 		{
-			haxe.Log.trace(e.message, interpreter.posInfos());
-            //stop();
+			var posInfo = interpreter.posInfos();
+			var message = sowy_trim_redundant_repeated_message_error_pos_shit(e.message, posInfo);
+			
+			haxe.Log.trace(message, posInfo);
+			
+			#if (windows && cpp)
+			if (YES == Windows.msgBox(haxe.Log.formatOutput(message, posInfo) + '\nStop script?', e.message, ERROR | YESNO))
+				stop();
+			#end
 		}
         return returnValue;
     }
@@ -154,7 +202,6 @@ class FunkinHScript extends FunkinScript
 		set("state", currentState);
 		set("game", currentState);
 		
-		// set("inTitlescreen", (currentState is TitleState)); // hmmm
 		if (currentState is PlayState){
 			set("getInstance", getInstance);
 		}else{
@@ -338,13 +385,7 @@ class FunkinHScript extends FunkinScript
 		var daEnum = Type.resolveEnum(enumName);
 		if (daEnum != null)
 			set(splitted.pop(), daEnum);
-	}
-
-	public inline function executeCode(script:String):Dynamic{
-        parser.line = 1;
-		return run(parser.parseString(script, scriptName));
-    }
-	
+	}	
 
 	override public function stop()
 	{
@@ -359,26 +400,18 @@ class FunkinHScript extends FunkinScript
 
 	override public function get(varName:String):Dynamic
 	{
-		if (interpreter == null)
-			return null;
-
-		return interpreter.variables.get(varName);
+		return (interpreter == null) ? null : interpreter.variables.get(varName);
 	}
 
 	override public function set(varName:String, value:Dynamic):Void
 	{
-		if (interpreter == null)
-			return;
-
-		interpreter.variables.set(varName, value);
+		if (interpreter != null)
+			interpreter.variables.set(varName, value);
 	}
 
 	public function exists(varName:String):Bool
 	{
-		if (interpreter == null)
-			return false;
-
-		return interpreter.variables.exists(varName);
+		return (interpreter == null) ? false : interpreter.variables.exists(varName);
 	}
 
 	override public function call(func:String, ?parameters:Array<Dynamic>, ?extraVars:Map<String, Dynamic>):Dynamic
@@ -399,59 +432,45 @@ class FunkinHScript extends FunkinScript
 	public function executeFunc(func:String, ?parameters:Array<Dynamic>, ?parentObject:Any, ?extraVars:Map<String, Dynamic>):Dynamic
 	{
 		var daFunc = get(func);
+
 		if (!Reflect.isFunction(daFunc))
 			return null;
 
 		if (parameters == null)
 			parameters = [];
 
-		if (extraVars == null)
-			extraVars = [];
-
-		if (parentObject != null)
+		if (parentObject != null){
+			if (extraVars == null) extraVars = [];
 			extraVars.set("this", parentObject);
-
-		var defaultShit:Map<String, Dynamic> = [];
-		for (key in extraVars.keys())
-		{
-			defaultShit.set(key, get(key)); // Store original values of variables that are being overwritten
-
-			set(key, extraVars.get(key));
 		}
 
-		var returnVal:Any = null;
-		try
-		{
+		var prevVals:Map<String, Dynamic> = null;
+
+		if (extraVars != null) {
+			prevVals = [];
+
+			for (key in extraVars.keys()) {
+				prevVals.set(key, get(key)); // Store original values of variables that are being overwritten
+				set(key, extraVars.get(key));
+			}
+		}
+
+		var returnVal:Dynamic = null;
+		try {
 			returnVal = Reflect.callMethod(parentObject, daFunc, parameters);
 		}
 		catch (e:haxe.Exception)
 		{
-			/* 
-				When you call something outside the script and it throws an exception this traces the exception message but not the line where it came from
-				just the script line that called it in the first place, which is confusing.
-			 */
-			var errorOrigin:String = "";
+			var posInfo = interpreter.posInfos();
+			var message = sowy_trim_redundant_repeated_message_error_pos_shit(e.message, posInfo);
 
-			for (stackItem in e.stack)
-			{
-				switch (stackItem)
-				{
-					default:
-					case FilePos(s, file, line, column):
-						{
-							if (!StringTools.contains(StringTools.ltrim(file), "hscript/Interp.hx:")) // stupid.
-								errorOrigin = '$file:$line - ';
-
-							break;
-						}
-				}
-			}
-
-			haxe.Log.trace(errorOrigin + e.message, interpreter.posInfos());
+			Main.print('$scriptName: Error executing $func(${parameters.join(', ')}): ' + haxe.Log.formatOutput(message, posInfo));
 		}
 
-		for (key in defaultShit.keys())
-			set(key, defaultShit.get(key));
+		if (prevVals != null){
+			for (key => val in prevVals)
+				set(key, val);		
+		}
 
 		return returnVal;
 	}

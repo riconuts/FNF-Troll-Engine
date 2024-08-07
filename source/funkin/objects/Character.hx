@@ -1,13 +1,13 @@
 package funkin.objects;
 
-import openfl.geom.ColorTransform;
-import flixel.util.FlxColor;
-import flixel.animation.FlxAnimation;
-import animateatlas.AtlasFrameMaker;
-import flixel.FlxSprite;
-import flixel.tweens.FlxTween;
-import haxe.Json;
 import funkin.scripts.*;
+import animateatlas.AtlasFrameMaker;
+import flixel.animation.FlxAnimation;
+import flixel.tweens.FlxTween;
+import flixel.util.FlxColor;
+import flixel.FlxSprite;
+import openfl.geom.ColorTransform;
+
 using flixel.util.FlxColorTransformUtil;
 using StringTools;
 
@@ -148,11 +148,12 @@ class Character extends FlxSprite
 	public static function getCharacterFile(characterName:String):Null<CharacterFile>
 	{
 		var json:Null<CharacterFile> = Paths.json('characters/$characterName.json');
+
 		if (json == null){
 			trace('Could not find character "$characterName" JSON file');
 			return null;
-		} 
-
+		}
+		
 		try{
 			for (anim in json.animations){
 				try{
@@ -822,7 +823,7 @@ class Character extends FlxSprite
 		}
 
 		if (!modsOnly){
-			Paths.iterateDirectory(Paths.getPath('characters/'), readFileNameAndPush);
+			Paths.iterateDirectory(Paths.getPreloadPath('characters/'), readFileNameAndPush);
 		}
 
 		for (name in _characters.keys())

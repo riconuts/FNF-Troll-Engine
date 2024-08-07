@@ -99,7 +99,7 @@ class TitleState extends MusicBeatState
 			if (shitToLoad != null) funkin.data.Cache.loadWithList(shitToLoad);
 			#end
 
-			bg.startScript(false, ["inTitlescreen" => true]);
+			bg.startScript(false);
 		}
 
 		// Random logoooo

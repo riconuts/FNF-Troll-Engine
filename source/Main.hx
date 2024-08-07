@@ -9,6 +9,7 @@ import openfl.display.StageScaleMode;
 import openfl.system.Capabilities;
 import openfl.events.Event;
 import lime.app.Application;
+import haxe.Constraints.Function;
 
 import funkin.*;
 import funkin.objects.Bread;
@@ -22,16 +23,17 @@ import funkin.api.Discord.DiscordClient;
 #end
 
 #if CRASH_HANDLER
-import haxe.CallStack;
 import openfl.events.UncaughtErrorEvent;
+import haxe.CallStack;
 
 #if sys
 import sys.io.File;
 #end
 
 #if (windows && cpp)
-@:cppFileCode('#include <windows.h>')
+import funkin.api.Windows;
 #end
+
 #end
 
 class Main extends Sprite
@@ -210,18 +212,26 @@ class Main extends Sprite
 		#end
 	}
 
+	private inline static function _printStr(str){
+		#if js
+		if (js.Syntax.typeof(untyped console) != "undefined" && (untyped console).log != null)
+			(untyped console).log(str);
+		#elseif lua
+		untyped __define_feature__("use._hx_print", _hx_print(str));
+		#elseif sys
+		Sys.println(str);
+		#end
+	}
+	private static function _printArgsArray(args:Array<Dynamic>)
+		return _printStr(args.join(', '));
 	
+	public static final print:Function = #if (js || lua || sys) Reflect.makeVarArgs(_printArgsArray) #else ()->{} #end;
+
 	#if CRASH_HANDLER
-	function onCrash(errorName:String):Void
+	private static function onCrash(errorName:String):Void
 	{
 		////
-		var ogTrace = haxe.Log.trace;
-		haxe.Log.trace = (msg, ?pos)->{
-			ogTrace(msg, null);
-		}
-
-		////
-		trace("\nCall stack starts below");
+		print("\nCall stack starts below");
 
 		var callstack:String = "";
 
@@ -237,10 +247,10 @@ class Main extends Sprite
 
 		callstack += '\n$errorName';
 
-		trace('\n$callstack\n');
+		print('\n$callstack\n');
 
 		#if (windows && cpp)
-		windows_showErrorMsgBox(callstack, errorName);
+		Windows.msgBox(callstack, errorName, ERROR | OK);
 		#else
 		Application.current.window.alert(callstack, errorName);
 		#end
@@ -254,11 +264,6 @@ class Main extends Sprite
 		Sys.exit(1);
 		#end
 	}
-
-	#if (windows && cpp)
-	@:functionCode('MessageBox(NULL, message, title, MB_ICONERROR | MB_OK);')
-	function windows_showErrorMsgBox(message:String, title:String){}
-	#end
 
 	#end
 }

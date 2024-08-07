@@ -937,7 +937,7 @@ class PlayState extends MusicBeatState
 		startingSong = true;
 
 		#if LUA_ALLOWED
-		FunkinLua.haxeScript = FunkinHScript.fromString('', 'runHaxeCode', null, false);
+		FunkinLua.haxeScript = FunkinHScript.blankScript('runHaxeCode');
 
 		//// "GLOBAL" LUA SCRIPTS
 		var filesPushed:Array<String> = [];
@@ -4841,6 +4841,7 @@ class PlayState extends MusicBeatState
 			luaArray.pop();
 		luaArray = null;
 
+		FunkinLua.haxeScript.stop();
 		FunkinLua.haxeScript = null;
 		#end
 

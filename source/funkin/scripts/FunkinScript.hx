@@ -47,6 +47,57 @@ class FunkinScript {
 	function setDefaultVars(){
 		var currentState = flixel.FlxG.state;
 
+		set("scriptName", scriptName);
+
+		set('Function_Halt', Globals.Function_Halt);
+		set('Function_Stop', Globals.Function_Stop);
+		set('Function_Continue', Globals.Function_Continue);
+		set('Function_StopLua', Globals.Function_Halt); // DEPRECATED
+
+		set('version', "0.5.2h"); // version of psych troll engine is based on
+		set('teVersion', Main.displayedVersion.trim());
+		set("trollEngine", true); // so if any psych mods wanna add troll engine specific stuff well there they go
+
+		#if windows
+		set('buildTarget', 'windows');
+		#elseif linux
+		set('buildTarget', 'linux');
+		#elseif mac
+		set('buildTarget', 'mac');
+		#elseif html5
+		set('buildTarget', 'browser');
+		#elseif android
+		set('buildTarget', 'android');
+		#else
+		set('buildTarget', 'unknown');
+		#end
+		
+		set('downscroll', ClientPrefs.downScroll);
+		set('middlescroll', ClientPrefs.midScroll);
+		set('framerate', ClientPrefs.framerate);
+		set('ghostTapping', ClientPrefs.ghostTapping);
+		set('hideHud', ClientPrefs.hudOpacity > 0);
+		set('timeBarType', ClientPrefs.timeBarType);
+		set('scoreZoom', ClientPrefs.scoreZoom);
+		set('cameraZoomOnBeat', ClientPrefs.camZoomP > 0);
+		set('flashingLights', ClientPrefs.flashing);
+		set('noteOffset', ClientPrefs.noteOffset);
+		set('healthBarAlpha', ClientPrefs.hpOpacity);
+		set('lowQuality', ClientPrefs.lowQuality);
+		
+		set('curBpm', Conductor.bpm);
+		set('crochet', Conductor.crochet);
+		set('stepCrochet', Conductor.stepCrochet);
+
+		set('curBeat', 0);
+		set('curStep', 0);
+		set('curDecBeat', 0);
+		set('curDecStep', 0);
+
+		set("inTitlescreen", (currentState is funkin.states.TitleState));
+		set('inGameOver', false);
+		set('inChartEditor', false);
+
 		if (currentState is PlayState && currentState == PlayState.instance)
 		{
 			set("inPlaystate", true);
@@ -58,6 +109,9 @@ class FunkinScript {
 			set('weekRaw', PlayState.storyWeek);
 			set('seenCutscene', PlayState.seenCutscene);
 			// set('week', WeekData.weeksList[PlayState.storyWeek]);
+
+			set("difficulty", PlayState.difficulty);
+			set("difficultyName", PlayState.difficultyName);
 			
 			set('healthGainMult', PlayState.instance.healthGain);
 			set('healthLossMult', PlayState.instance.healthLoss);
@@ -81,43 +135,5 @@ class FunkinScript {
 			set("inPlaystate", false);
 			set("showDebugTraces", Main.showDebugTraces);
 		}
-
-		set("scriptName", scriptName);
-
-		set('Function_Halt', Globals.Function_Halt);
-		set('Function_Stop', Globals.Function_Stop);
-		set('Function_Continue', Globals.Function_Continue);
-
-		set("difficulty", PlayState.difficulty);
-		set("difficultyName", PlayState.difficultyName);
-
-		set('inGameOver', false);
-		
-		set('downscroll', ClientPrefs.downScroll);
-		set('middlescroll', ClientPrefs.midScroll);
-		set('framerate', ClientPrefs.framerate);
-		set('ghostTapping', ClientPrefs.ghostTapping);
-		set('hideHud', ClientPrefs.hudOpacity > 0);
-		set('timeBarType', ClientPrefs.timeBarType);
-		set('scoreZoom', ClientPrefs.scoreZoom);
-		set('cameraZoomOnBeat', ClientPrefs.camZoomP > 0);
-		set('flashingLights', ClientPrefs.flashing);
-		set('noteOffset', ClientPrefs.noteOffset);
-		set('healthBarAlpha', ClientPrefs.hpOpacity);
-		set('lowQuality', ClientPrefs.lowQuality);
-		set("trollEngine", true); // so if any psych mods wanna add troll engine specific stuff well there they go
-
-		
-		set('curBpm', Conductor.bpm);
-		set('crochet', Conductor.crochet);
-		set('stepCrochet', Conductor.stepCrochet);
-
-		set('curBeat', 0);
-		set('curStep', 0);
-		set('curDecBeat', 0);
-		set('curDecStep', 0);
-
-		set('version', "0.5.2h"); // version of psych troll engine is based on
-		set('teVersion', Main.displayedVersion.trim());
 	}
 }

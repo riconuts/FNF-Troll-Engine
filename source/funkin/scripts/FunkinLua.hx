@@ -37,41 +37,19 @@ using StringTools;
 class FunkinLua extends FunkinScript
 {
 	public static var haxeScript:FunkinHScript;
-	public var errorHandler:String->Void;
+	
 	#if LUA_ALLOWED
 	public var lua:State = null;
+	public var errorHandler:String->Void;
 
 	public final addCallback:(String, Dynamic)->Bool;
 	public final removeCallback:String->Bool;	
 	#end
 
-	public var camTarget:FlxCamera;
 	var gonnaClose:Bool = false;
 
-	public function new(script:String, ?name:String, ?ignoreCreateCall:Bool=false, ?vars:Map<String, Dynamic>) {
-		#if LUA_ALLOWED
-		lua = LuaL.newstate();
-		LuaL.openlibs(lua);
-		Lua.init_callbacks(lua);
-		
-		//trace('Lua version: ' + Lua.version());
-		//trace("LuaJIT version: " + Lua.versionJIT());
-		
-		scriptType = 'lua';
-		scriptName = name!=null ? name : script;
-
-		// Lua shit
-		set('Function_StopLua', Function_Halt); // DEPRECATED
-		set('luaDebugMode', false);
-		set('luaDeprecatedWarnings', true);
-		set('inChartEditor', false);
-
-		// Song/Week shit
-		setDefaultVars();
-		if (vars != null){
-			for(key => val in vars)
-				set(key, val);
-		}
+	override function setDefaultVars(){
+		super.setDefaultVars();
 
 		// Camera poo
 		set('cameraX', 0);
@@ -115,20 +93,26 @@ class FunkinLua extends FunkinScript
 		set('boyfriendName', PlayState.SONG.player1);
 		set('dadName', PlayState.SONG.player2);
 		set('gfName', PlayState.SONG.gfVersion);
+	}
 
-		#if windows
-		set('buildTarget', 'windows');
-		#elseif linux
-		set('buildTarget', 'linux');
-		#elseif mac
-		set('buildTarget', 'mac');
-		#elseif html5
-		set('buildTarget', 'browser');
-		#elseif android
-		set('buildTarget', 'android');
-		#else
-		set('buildTarget', 'unknown');
-		#end
+	public function new(script:String, ?name:String, ?ignoreCreateCall:Bool=false, ?vars:Map<String, Dynamic>) {
+		#if LUA_ALLOWED
+		lua = LuaL.newstate();
+		LuaL.openlibs(lua);
+		Lua.init_callbacks(lua);
+		
+		scriptType = 'lua';
+		scriptName = name!=null ? name : script;
+
+		// Lua shit
+		set('luaDebugMode', false);
+		set('luaDeprecatedWarnings', true);
+
+		setDefaultVars();
+		if (vars != null){
+			for(key => val in vars)
+				set(key, val);
+		}
 
 		try
 		{
@@ -402,10 +386,9 @@ class FunkinLua extends FunkinScript
 		});
 
 		addCallback("runHaxeCode", function(code:String){
-			if (haxeScript == null){
-				trace('null');
-				return;
-			}
+			#if HSCRIPT_ALLOWED
+			if (haxeScript == null)
+				return null;
 
 			// getinfo randomly broke here idk why
 			// so just trace from line 1
@@ -415,6 +398,10 @@ class FunkinLua extends FunkinScript
 				retVal = null;
 	
 			return retVal;
+			#else
+			luaTrace('runHaxeCode not supported');
+			return null;
+			#end
 		});
 
 		addCallback("isRunning", function(luaFile:String){
@@ -436,7 +423,7 @@ class FunkinLua extends FunkinScript
 			var doPush = cervix != null;
 
 			if(!doPush){
-				luaTrace("Script doesn't exist!");
+				luaTrace("Script " + luaFile + "doesn't exist!");
 				return;
 			}
 
