@@ -26,7 +26,7 @@ import sys.thread.Mutex;
 import funkin.states.UpdaterState;
 #end
 
-#if discord_rpc
+#if DISCORD_ALLOWED
 import funkin.api.Discord.DiscordClient;
 import lime.app.Application;
 #end
@@ -138,7 +138,7 @@ class StartupState extends FlxTransitionableState
 		funkin.scripts.FunkinHScript.init();
 		#end
 		
-		#if discord_rpc
+		#if DISCORD_ALLOWED
 		Application.current.onExit.add((exitCode)->{
 			DiscordClient.shutdown();
 		});

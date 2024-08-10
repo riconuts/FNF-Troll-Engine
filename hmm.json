@@ -46,11 +46,11 @@
 			"version": "1.6.1"
 		},
 		{
-			"name": "discord_rpc",
+			"name": "hxdiscord_rpc",
 			"type": "git",
 			"dir": null,
-			"ref": "master",
-			"url": "https://github.com/Aidan63/linc_discord-rpc"
+			"ref": "3538a1c2bb07b04208cd014220207f8173acdb21",
+			"url": "https://github.com/MAJigsaw77/hxdiscord_rpc"
 		},
 		{
 			"name": "linc_luajit",

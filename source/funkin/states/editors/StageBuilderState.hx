@@ -799,7 +799,7 @@ class StageBuilderState extends MusicBeatState
 
     override public function create()
     {
-		#if discord_rpc
+		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
 		funkin.api.Discord.DiscordClient.changePresence("Stage Builder", null);
 		#end

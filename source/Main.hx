@@ -18,7 +18,7 @@ import funkin.data.SemanticVersion;
 
 using StringTools;
 
-#if discord_rpc
+#if DISCORD_ALLOWED
 import funkin.api.Discord.DiscordClient;
 #end
 
@@ -255,7 +255,7 @@ class Main extends Sprite
 		Application.current.window.alert(callstack, errorName);
 		#end
 
-		#if discord_rpc
+		#if DISCORD_ALLOWED
 		DiscordClient.shutdown(true);
 		#end
 

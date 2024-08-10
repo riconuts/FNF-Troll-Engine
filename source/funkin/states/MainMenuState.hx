@@ -20,7 +20,7 @@ import flixel.input.keyboard.FlxKey;
 
 using StringTools;
 
-#if discord_rpc
+#if DISCORD_ALLOWED
 import funkin.api.Discord.DiscordClient;
 #end
 
@@ -51,7 +51,7 @@ class MainMenuState extends MusicBeatState
 
 	override function create()
 	{
-		#if discord_rpc
+		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
 		#end

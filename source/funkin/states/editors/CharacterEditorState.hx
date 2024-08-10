@@ -1,7 +1,7 @@
 package funkin.states.editors;
 
 import funkin.objects.hud.HealthIcon;
-#if discord_rpc
+#if DISCORD_ALLOWED
 import funkin.api.Discord.DiscordClient;
 #end
 import funkin.objects.Character;
@@ -1174,7 +1174,7 @@ class CharacterEditorState extends MusicBeatState
 	}
 
 	function updateDiscordPresence() {
-		#if discord_rpc
+		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("Character Editor", "Character: " + daAnim, leHealthIcon.getCharacter());
 		#end

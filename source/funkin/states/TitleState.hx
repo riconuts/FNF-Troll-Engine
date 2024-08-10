@@ -11,7 +11,7 @@ import flixel.util.FlxTimer;
 import funkin.objects.shaders.ColorSwap;
 
 using StringTools;
-#if discord_rpc
+#if DISCORD_ALLOWED
 import funkin.api.Discord.DiscordClient;
 #end
 #if sys
