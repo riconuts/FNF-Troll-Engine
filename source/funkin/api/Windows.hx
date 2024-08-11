@@ -1,5 +1,5 @@
-#if (windows && cpp)
 package funkin.api;
+#if (windows && cpp)
 
 enum abstract MessageBoxOptions(Int) to Int {
 	var OK					= 0x00000000;

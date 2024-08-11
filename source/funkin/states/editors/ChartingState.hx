@@ -37,7 +37,7 @@ import haxe.io.Bytes;
 import openfl.geom.Rectangle;
 import flixel.util.FlxSort;
 
-#if discord_rpc
+#if DISCORD_ALLOWED
 import funkin.api.Discord.DiscordClient;
 #end
 
@@ -274,7 +274,7 @@ class ChartingState extends MusicBeatState
 
 		// Paths.clearMemory();
 
-		#if discord_rpc
+		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("Chart Editor", StringTools.replace(_song.song, '-', ' '));
 		#end

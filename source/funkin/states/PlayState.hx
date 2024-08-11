@@ -49,7 +49,7 @@ import openfl.filters.ShaderFilter;
 
 using StringTools;
 
-#if discord_rpc
+#if DISCORD_ALLOWED
 import funkin.api.Discord.DiscordClient;
 #end
 
@@ -338,7 +338,7 @@ class PlayState extends MusicBeatState
 	@:noCompletion public var playerStrums:FlxTypedGroup<StrumNote>;
 	#end
 
-	#if discord_rpc
+	#if DISCORD_ALLOWED
 	// Discord RPC variables
 	var detailsText:String = "";
 	var detailsPausedText:String = "";
@@ -988,7 +988,7 @@ class PlayState extends MusicBeatState
 		// EVENT AND NOTE SCRIPTS WILL GET LOADED HERE
 		generateSong(SONG.song);
 
-		#if discord_rpc
+		#if DISCORD_ALLOWED
 		// Discord RPC texts
 		detailsText = isStoryMode ? "Story Mode" : "Freeplay";
 		detailsPausedText = "Paused - " + detailsText;
@@ -1703,7 +1703,7 @@ class PlayState extends MusicBeatState
 
 		resyncVocals();
 
-		#if discord_rpc
+		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence (with Time Left)
 		DiscordClient.changePresence(detailsText, SONG.song, songName, true, songLength);
 		#end
@@ -2488,7 +2488,7 @@ class PlayState extends MusicBeatState
 			hud.alpha = ClientPrefs.hudOpacity;
 
 
-			#if discord_rpc
+			#if DISCORD_ALLOWED
 			if (Conductor.songPosition > 0.0)
 			{
 				DiscordClient.changePresence(detailsText, SONG.song, songName, true, songLength - Conductor.songPosition - ClientPrefs.noteOffset);
@@ -2505,7 +2505,7 @@ class PlayState extends MusicBeatState
 
 	override public function onFocus():Void
 	{
-		#if discord_rpc
+		#if DISCORD_ALLOWED
 		if (!isDead && !paused)
 		{
 			if (Conductor.songPosition > 0.0)
@@ -2524,7 +2524,7 @@ class PlayState extends MusicBeatState
 
 	override public function onFocusLost():Void
 	{
-		#if discord_rpc
+		#if DISCORD_ALLOWED
 		if (!isDead)
 			DiscordClient.changePresence(detailsPausedText, SONG.song, songName);
 		#end
@@ -2844,7 +2844,7 @@ class PlayState extends MusicBeatState
 		if (FlxG.keys.pressed.SHIFT) ChartingState.curSec = curSection;
 		MusicBeatState.switchState(new ChartingState());
 
-		#if discord_rpc
+		#if DISCORD_ALLOWED
 		DiscordClient.changePresence("Chart Editor", null, null, true);
 		#end
 	}
@@ -2904,7 +2904,7 @@ class PlayState extends MusicBeatState
 				char.isPlayer
 			));
 
-			#if discord_rpc
+			#if DISCORD_ALLOWED
 			// Game Over doesn't get his own variable because it's only used here
 			DiscordClient.changePresence("Game Over - " + detailsText, SONG.song, songName);
 			#end
@@ -4779,7 +4779,7 @@ class PlayState extends MusicBeatState
 				if (OpenPauseMenu)
 					openSubState(new PauseSubState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
 
-				#if discord_rpc
+				#if DISCORD_ALLOWED
 				DiscordClient.changePresence(detailsPausedText, SONG.song, songName);
 				#end
 			}

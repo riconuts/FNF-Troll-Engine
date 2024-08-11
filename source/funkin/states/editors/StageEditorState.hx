@@ -21,7 +21,7 @@ using StringTools;
 #if sys
 import sys.FileSystem;
 #end
-#if discord_rpc
+#if DISCORD_ALLOWED
 import funkin.api.Discord.DiscordClient;
 #end
 
@@ -139,7 +139,7 @@ class StageEditorState extends MusicBeatState{
 
 	override function create()
 	{
-		#if discord_rpc
+		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Stage Editor", null);
 

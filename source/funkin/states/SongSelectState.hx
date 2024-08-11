@@ -5,7 +5,7 @@ import funkin.data.Song;
 import funkin.states.options.OptionsState;
 import funkin.states.editors.MasterEditorMenu;
 
-#if discord_rpc
+#if DISCORD_ALLOWED
 import funkin.api.Discord.DiscordClient;
 #end
 
@@ -79,7 +79,7 @@ class SongSelectState extends MusicBeatState
 	{
 		StartupState.load();
 
-		#if discord_rpc
+		#if DISCORD_ALLOWED
 		DiscordClient.changePresence("In the Menus", null);
 		#end
 		FlxG.camera.bgColor = 0xFF000000;

@@ -18,7 +18,7 @@ import flixel.util.FlxColor;
 import flixel.addons.ui.FlxUI9SliceSprite;
 import openfl.geom.Rectangle;
 
-#if discord_rpc
+#if DISCORD_ALLOWED
 import funkin.api.Discord;
 #end
 
@@ -41,7 +41,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		"ui",
 		"video",
 		"controls",
-		#if (discord_rpc || DO_AUTO_UPDATE) "misc", #end 
+		#if (hxdiscord_rpc || DO_AUTO_UPDATE) "misc", #end 
 		/* "Accessibility" */
 	];
 
@@ -164,7 +164,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		
 		"misc" => [
 			//["audio", ["masterVolume", "songVolume", "hitsoundVolume", "missVolume"]],
-			#if discord_rpc
+			#if DISCORD_ALLOWED
 			["discord", ["discordRPC"]],
 			#end
 			#if DO_AUTO_UPDATE
@@ -338,7 +338,7 @@ class OptionsSubstate extends MusicBeatSubstate
 					UpdaterState.checkOutOfDate();
 				}
 			#end
-			#if discord_rpc
+			#if DISCORD_ALLOWED
 			case 'discordRPC':
 				val ? DiscordClient.start() : DiscordClient.shutdown();
 			#end

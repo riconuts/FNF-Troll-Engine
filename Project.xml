@@ -77,7 +77,7 @@
 	<haxelib name="flixel-ui" version="2.6.1"/>
 	<haxelib name="flixel-addons" version="3.2.3"/>
 
-	<haxelib name="discord_rpc" if="DISCORD_ALLOWED"/>
+	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
 	<haxelib name="hxvlc" if="VIDEOS_ALLOWED"/> <!--You can replace with hxcodec if you're stubborn and dont wanna use newer and better libs-->
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
 	

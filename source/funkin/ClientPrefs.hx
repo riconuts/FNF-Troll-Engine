@@ -5,7 +5,7 @@ import funkin.input.Controls.KeyboardScheme;
 import flixel.util.FlxSave;
 import flixel.input.keyboard.FlxKey;
 
-#if discord_rpc
+#if DISCORD_ALLOWED
 import funkin.api.Discord.DiscordClient;
 #end
 
@@ -819,7 +819,7 @@ class ClientPrefs
 		FlxSprite.defaultAntialiasing = ClientPrefs.globalAntialiasing;
 		FlxG.stage.quality = ClientPrefs.globalAntialiasing ? openfl.display.StageQuality.BEST : openfl.display.StageQuality.LOW; // does nothing!!!!
 
-		#if discord_rpc
+		#if DISCORD_ALLOWED
 		discordRPC ? DiscordClient.start() : DiscordClient.shutdown();	
 		#end
 

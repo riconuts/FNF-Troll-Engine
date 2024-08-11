@@ -28,7 +28,7 @@ import openfl.display.BlendMode;
 
 import funkin.modchart.SubModifier;
 
-#if discord_rpc
+#if DISCORD_ALLOWED
 import funkin.api.Discord;
 #end
 
@@ -1570,7 +1570,7 @@ class FunkinLua extends FunkinScript
 		});
 
 		addCallback("changePresence", function(details:String, state:Null<String>, ?smallImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float) {
-			#if discord_rpc
+			#if DISCORD_ALLOWED
 			DiscordClient.changePresence(details, state, smallImageKey, hasStartTimestamp, endTimestamp);
 			#end
 		});

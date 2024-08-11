@@ -1,7 +1,8 @@
 package funkin.api;
 
-#if discord_rpc
-import discord_rpc.DiscordRpc;
+#if DISCORD_ALLOWED
+import hxdiscord_rpc.Discord as DiscordRpc;
+import hxdiscord_rpc.Types;
 
 import sys.thread.Mutex;
 import sys.thread.Thread;
@@ -19,7 +20,7 @@ class DiscordClient
 	private static var discordDaemon:Thread;
 	private static var mutex:Mutex = new Mutex(); // whatever the fuck this is
 
-	private static var lastPresence:DiscordPresenceOptions;
+	private static var lastPresence:DiscordRichPresence;
 	public static var currentID:String = defaultID;
 
 	public static function start()
@@ -30,6 +31,15 @@ class DiscordClient
 		}
 
 		trace("Discord Client initializing...");
+
+		function initDiscordRPC(appid:String) {
+			DiscordRpc.Shutdown(); // Nothing should happen if it wasn't started before right???
+			var eventHandler:DiscordEventHandlers = DiscordEventHandlers.create();
+			eventHandler.ready = cpp.Function.fromStaticFunction(onReady);
+			eventHandler.disconnected = cpp.Function.fromStaticFunction(onDisconnected);
+			eventHandler.errored = cpp.Function.fromStaticFunction(onError);
+			DiscordRpc.Initialize(appid, cpp.RawPointer.addressOf(eventHandler), 1, null);
+		}
 
 		discordDaemon = Thread.create(() ->{
 			var id:Null<String> = null;
@@ -50,23 +60,18 @@ class DiscordClient
 				else if (msg!=id || (msg==true && id!=null)){
 					id = msg;
 					trace('Discord Client starting with id: $id');
-
 					mutex.acquire();
-
-					DiscordRpc.shutdown(); // Nothing should happen if it wasn't started before right???
-					DiscordRpc.start({
-						clientID: id,
-						onReady: onReady,
-						onError: onError,
-						onDisconnected: onDisconnected
-					});
-
+					initDiscordRPC(id);
 					mutex.release();
-
 					trace("Discord Client started.");
 				}
 
-				if (id!=null) DiscordRpc.process();
+				if (id!=null) {
+					#if DISCORD_DISABLE_IO_THREAD
+					DiscordRpc.UpdateConnection();
+					#end
+					DiscordRpc.RunCallbacks();
+				}
 
 				sleep(0.6);
 			}
@@ -91,7 +96,7 @@ class DiscordClient
 			trace("Discord Client shitting down...");
 
 		mutex.acquire();
-		DiscordRpc.shutdown();
+		DiscordRpc.Shutdown();
 		mutex.release();
 
 		discordDaemon.sendMessage(false);
@@ -154,43 +159,40 @@ class DiscordClient
 
 		mutex.acquire();
 
-		lastPresence = {
-			details: details,
-			state: state,
+		lastPresence = DiscordRichPresence.create();
+		lastPresence.details = details;
+		lastPresence.state = state;
+		lastPresence.largeImageKey = getImageKey(largeImageKey);
+		#if tgt
+		lastPresence.largeImageText = "Tails Gets Trolled v" + lime.app.Application.current.meta.get('version');
+		#else
+		lastPresence.largeImageText = "Troll Engine " + Main.displayedVersion;
+		#end
+		// Obtained times are in milliseconds so they are divided so Discord can use it
+		lastPresence.startTimestamp = Std.int(startTimestamp / 1000);
+		lastPresence.endTimestamp = Std.int(endTimestamp / 1000);
 
-			largeImageKey: getImageKey(largeImageKey),
-			#if tgt
-			largeImageText: "Tails Gets Trolled v" + lime.app.Application.current.meta.get('version'),
-			#else
-			largeImageText: "Troll Engine " + Main.displayedVersion,
-			#end
-
-			// Obtained times are in milliseconds so they are divided so Discord can use it
-			startTimestamp: Std.int(startTimestamp / 1000),
-			endTimestamp: Std.int(endTimestamp / 1000)
-		};
-
-		DiscordRpc.presence(lastPresence);
+		DiscordRpc.UpdatePresence(cpp.RawConstPointer.addressOf(lastPresence));
 
 		mutex.release();
 		
 		//trace('Discord RPC Updated. Arguments: $details, $state, $smallImageKey, $hasStartTimestamp, $endTimestamp');
 	}
 
-	static function onReady()
+	static function onReady(request:cpp.RawConstPointer<DiscordUser>)
 	{
-		if (lastPresence != null)
-			DiscordRpc.presence(lastPresence);
+		if (lastPresence.instance == 0)
+			DiscordRpc.UpdatePresence(cpp.RawConstPointer.addressOf(lastPresence));
 		else
 			changePresence("In the Menus", null);
 	}
 
-	static function onError(_code:Int, _message:String)
+	static function onError(_code:Int, _message:cpp.ConstCharStar)
 	{
 		trace('Error! $_code : $_message');
 	}
 
-	static function onDisconnected(_code:Int, _message:String)
+	static function onDisconnected(_code:Int, _message:cpp.ConstCharStar)
 	{
 		trace('Disconnected! $_code : $_message');
 	}
