@@ -102,12 +102,18 @@ class NoteField extends FieldBase
      */
 	public var zoom:Float = 1;
 
+	////
+	static function drawQueueSort(Obj1:RenderObject, Obj2:RenderObject)
+	{
+		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.zIndex, Obj2.zIndex);
+	}
+
 	// does all the drawing logic, best not to touch unless you know what youre doing
     override function preDraw()
     {
 		drawQueue = [];
-		if(field==null)return;
-        if(!active || !exists)return;
+		if (field == null) return;
+        if (!active || !exists) return;
 		if ((FlxG.state is MusicBeatState))
 		{
 			var state:MusicBeatState = cast FlxG.state;
@@ -127,38 +133,36 @@ class NoteField extends FieldBase
 		var taps:Array<Note> = [];
 		var holds:Array<Note> = [];
 		var drawMod = modManager.get("drawDistance");
-		var multAllowed = modManager.get("disableDrawDistMult");
 		var drawDist = drawMod == null ? FlxG.height : drawMod.getValue(modNumber);
+		var multAllowed = modManager.get("disableDrawDistMult");
 		if (multAllowed == null || multAllowed.getValue(modNumber) == 0)
 			drawDist *= drawDistMod;
+
 		for (daNote in field.spawnedNotes)
 		{
-			if (!daNote.alive)
+			if (!daNote.alive || !daNote.visible)
 				continue;
 
 			if (songSpeed != 0)
 			{
 				var speed = modManager.getNoteSpeed(daNote, modNumber, songSpeed);
-				var diff = Conductor.songPosition - daNote.strumTime;
 				var visPos = -((Conductor.visualPosition - daNote.visualTime) * speed);
-				if (visPos > drawDist)
-					continue;
-				if (daNote.wasGoodHit && daNote.sustainLength > 0)
+
+				if (visPos > drawDist || (daNote.wasGoodHit && daNote.sustainLength > 0))
 				{
-					diff = 0;
-					visPos = 0;
-					continue; // stops it from drawing lol
+					continue; // don't draw
 				}
-				if (!daNote.isSustainNote)
+				else if (daNote.isSustainNote)
 				{
+					holds.push(daNote);
+				}
+				else
+				{
+					var diff = Conductor.songPosition - daNote.strumTime;
 					var pos = modManager.getPos(visPos, diff, curDecBeat, daNote.column, modNumber, daNote, this, perspectiveArrDontUse,
 						daNote.vec3Cache); // perspectiveDONTUSE is excluded because its code is done in the modifyVert function
 					notePos.set(daNote, pos);
 					taps.push(daNote);
-				}
-				else
-				{
-					holds.push(daNote);
 				}
 			}
 		}
@@ -170,6 +174,7 @@ class NoteField extends FieldBase
 		{
 			if (!obj.alive || !obj.visible)
 				continue;
+
 			var pos = modManager.getPos(0, 0, curDecBeat, obj.column, modNumber, obj, this, perspectiveArrDontUse, obj.vec3Cache);
 			strumPositions[obj.column] = pos;
 			var object = drawNote(obj, pos);
@@ -184,8 +189,6 @@ class NoteField extends FieldBase
 		// draw tap notes
 		for (note in taps)
 		{
-			if (!note.alive || !note.visible)
-				continue;
 			var pos = notePos.get(note);
 			var object = drawNote(note, pos);
 			if (object == null)
@@ -198,8 +201,6 @@ class NoteField extends FieldBase
 		// draw hold notes (credit to 4mbr0s3 2)
 		for (note in holds)
 		{
-			if (!note.alive || !note.visible)
-				continue;
 			var object = drawHold(note);
 			if (object == null)
 				continue;
@@ -213,6 +214,7 @@ class NoteField extends FieldBase
 		{
 			if (!obj.alive || !obj.visible)
 				continue;
+
 			var pos = modManager.getPos(0, 0, curDecBeat, obj.column, modNumber, obj, this, perspectiveArrDontUse);
 			var object = drawNote(obj, pos);
 			if (object == null)
@@ -225,9 +227,7 @@ class NoteField extends FieldBase
 		// draw strumattachments
 		for (obj in field.strumAttachments.members)
 		{
-			if (obj == null)
-				continue;
-			if (!obj.alive || !obj.visible)
+			if (obj == null || !obj.alive || !obj.visible)
 				continue;
 			var pos = modManager.getPos(0, 0, curDecBeat, obj.column, modNumber, obj, this, perspectiveArrDontUse);
 			var object = drawNote(obj, pos);
@@ -244,10 +244,7 @@ class NoteField extends FieldBase
 		// one example would be reimplementing Die Batsards' original bullet mechanic
 		// if you need an example on how this all works just look at the tap note drawing portion
 
-		drawQueue.sort(function(Obj1:RenderObject, Obj2:RenderObject)
-		{
-			return FlxSort.byValues(FlxSort.ASCENDING, Obj1.zIndex, Obj2.zIndex);
-		});
+		drawQueue.sort(drawQueueSort);
 
 		if(zoom != 1){
 			for(object in drawQueue){
@@ -280,8 +277,8 @@ class NoteField extends FieldBase
     }
 
 	var point:FlxPoint = FlxPoint.get(0, 0);
-	
 	var matrix:FlxMatrix = new FlxMatrix();
+	
 	override function draw()
 	{
 		if (!active || !exists || !visible)
@@ -357,19 +354,18 @@ class NoteField extends FieldBase
 		if (wid == null)
 			wid = hold.frameWidth * hold.scale.x;
 
-		var p1 = modManager.getPos(-(vDiff) * speed, diff, curDecBeat, hold.column, modNumber, hold, this, []);
+		var p1 = modManager.getPos(-vDiff * speed, diff, curDecBeat, hold.column, modNumber, hold, this, []);
 		var z:Float = p1.z;
 		p1.z = 0.0;
 
 		wid /= 2.0;
 		var quad0 = new Vector3(-wid);
 		var quad1 = new Vector3(wid);
-		var scale:Float = z!=0.0 ? z : 1.0;
+		var scale:Float = (z!=0.0) ? (1.0 / z) : 1.0;
 
 		if (optimizeHolds)
 		{
 			// less accurate, but higher FPS
-			scale = 1.0 / scale;
 			quad0.scaleBy(scale);
 			quad1.scaleBy(scale);
 			return [p1.add(quad0, quad0), p1.add(quad1, quad1), p1];
@@ -381,15 +377,14 @@ class NoteField extends FieldBase
 		var unit = p2.subtract(p1);
 		unit.normalize();
 
-		var w = (quad0.subtract(quad1).length / 2) / scale;
+		var w = (quad0.subtract(quad1).length / 2) * scale;
 		var off1 = new Vector3(unit.y * w, 	-unit.x * w,	0.0);
 		var off2 = new Vector3(-off1.x, 	-off1.y,		0.0);
 
 		return [p1.add(off1, off1), p1.add(off2, off2), p1];
 	}
 
-    
-    var crotchet = Conductor.getCrotchetAtTime(0) / 4;
+	var crotchet:Float = Conductor.getCrotchetAtTime(0.0) / 4.0;
 	function drawHold(hold:Note, ?prevAlpha:Float, ?prevGlow:Float):Null<RenderObject>
     {
 		if (hold.animation.curAnim == null)
@@ -455,7 +450,7 @@ class NoteField extends FieldBase
 				scale = 1 - ((fuck + crotchet) / crotchet);
 				if (scale < 0)
 					scale = 0;
-				if (scale > 1)
+				else if (scale > 1)
 					scale = 1;
 				strumSub *= scale;
 				strumOff *= scale;
@@ -606,10 +601,12 @@ class NoteField extends FieldBase
 		var glow = info.glow;
 
 		final QUAD_SIZE = 4;
-		var quad0 = new Vector3(-width / 2, -height / 2, 0); // top left
-		var quad1 = new Vector3(width / 2, -height / 2, 0); // top right
-		var quad2 = new Vector3(-width / 2, height / 2, 0); // bottom left
-		var quad3 = new Vector3(width / 2, height / 2, 0); // bottom right
+		final halfWidth = width / 2;
+		final halfHeight = height / 2;
+		var quad0 = new Vector3(-halfWidth, -halfHeight, 0); // top left
+		var quad1 = new Vector3(halfWidth, -halfHeight, 0); // top right
+		var quad2 = new Vector3(-halfWidth, halfHeight, 0); // bottom left
+		var quad3 = new Vector3(halfWidth, halfHeight, 0); // bottom right
 
 		for (idx in 0...QUAD_SIZE)
 		{

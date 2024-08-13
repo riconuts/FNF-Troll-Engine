@@ -3817,22 +3817,21 @@ class PlayState extends MusicBeatState
 		if (callOnHScripts("onApplyNoteJudgment", [note, judgeData, bot]) == Globals.Function_Stop)
 			return null;
 
-		var finalJudgeData:JudgmentData = Reflect.copy(judgeData);
+		var mutatedJudgeData:JudgmentData = Reflect.copy(judgeData);
         if (note.noteScript != null){
-			var mutatedJudgeData:Dynamic = callScript(note.noteScript, "mutateJudgeData", [note, finalJudgeData]);
-			if (mutatedJudgeData != null && mutatedJudgeData != Globals.Function_Continue)
-				finalJudgeData = cast mutatedJudgeData;
+			var ret:Dynamic = callScript(note.noteScript, "mutateJudgeData", [note, mutatedJudgeData]);
+			if (ret != null && ret != Globals.Function_Continue)
+				mutatedJudgeData = cast ret;
         }
-        var mutatedJudgeData:Dynamic = callOnHScripts("mutateJudgeData", [note, finalJudgeData]);
+        var ret:Dynamic = callOnHScripts("mutateJudgeData", [note, mutatedJudgeData]);
+		if (ret != null && ret != Globals.Function_Continue)
+			mutatedJudgeData = cast ret; // so you can return your own custom judgements or w/e
 
-		if(mutatedJudgeData != null && mutatedJudgeData != Globals.Function_Continue)
-			finalJudgeData = cast mutatedJudgeData; // so you can return your own custom judgements or w/e
+		applyJudgmentData(mutatedJudgeData, note.hitResult.hitDiff, bot, true);
 
-		applyJudgmentData(finalJudgeData, note.hitResult.hitDiff, bot, true);
-
-		callOnHScripts("onApplyNoteJudgmentPost", [note, finalJudgeData, bot]);
+		callOnHScripts("onApplyNoteJudgmentPost", [note, mutatedJudgeData, bot]);
 		
-		return finalJudgeData;
+		return mutatedJudgeData;
 	}
 
 	private function applyJudgment(judge:Judgment, ?diff:Float = 0, ?show:Bool = true)
@@ -4626,7 +4625,10 @@ class PlayState extends MusicBeatState
 
 	inline public function callOnAllScripts(event:String, ?args:Array<Dynamic>, ignoreStops:Bool = false, ?exclusions:Array<String>, ?scriptArray:Array<Dynamic>,
 			?vars:Map<String, Dynamic>):Dynamic
-			return callOnScripts(event,args,ignoreStops,exclusions,scriptArray,vars,false);
+			return callOnScripts(event, args, ignoreStops, exclusions, scriptArray, vars, false);
+
+	inline public function isSpecialScript(script:FunkinScript)
+		return notetypeScripts.exists(script.scriptName) || eventScripts.exists(script.scriptName) || hudSkinScripts.exists(script.scriptName);
 
 	public function callOnScripts(event:String, ?args:Array<Dynamic>, ignoreStops:Bool = false, ?exclusions:Array<String>, ?scriptArray:Array<Dynamic>,
 			?vars:Map<String, Dynamic>, ?ignoreSpecialShit:Bool = true):Dynamic
@@ -4639,23 +4641,15 @@ class PlayState extends MusicBeatState
 		var returnVal:Dynamic = Globals.Function_Continue;
 		for (idx in 0...scriptArray.length)
 		{
-			var script = scriptArray[idx];
-            if(script==null)continue;
-            
-			if (exclusions.contains(script.scriptName)
-				|| ignoreSpecialShit
-				&& (notetypeScripts.exists(script.scriptName) || eventScripts.exists(script.scriptName) || hudSkinScripts.exists(script.scriptName) ) )
-			{
+			var script:FunkinScript = scriptArray[idx];
+			if (script==null || exclusions.contains(script.scriptName) || (ignoreSpecialShit && isSpecialScript(script)))			
 				continue;
-			}
+			
 			var ret:Dynamic = script.call(event, args, vars);
-			if (ret == Globals.Function_Halt){
-				ret = returnVal;
-				if (!ignoreStops)
-					return returnVal;
-			};
-			if (ret != Globals.Function_Continue && ret!=null)
+			if (ret==null || ret == Globals.Function_Continue)
 				returnVal = ret;
+			else if (ignoreStops && ret == Globals.Function_Halt)
+				return returnVal;
 		}
 		
 		return (returnVal == null) ? Globals.Function_Continue : returnVal;

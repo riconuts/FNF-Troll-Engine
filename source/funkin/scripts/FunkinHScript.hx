@@ -24,20 +24,23 @@ using StringTools;
 
 class FunkinHScript extends FunkinScript
 {
-	public static final parser:Parser = new Parser();
-	public static final defaultVars:Map<String, Dynamic> = new Map<String, Dynamic>();
+	public static final parser:Parser = {
+		var parser = new Parser();
 
-	public static function init() // BRITISH
-	{
 		parser.allowMetadata = true;
 		parser.allowJSON = true;
 		parser.allowTypes = true;
 
-		final definitions:Map<String, String> = funkin.macros.Sowy.getDefines();
-		for (k => v in definitions)
-			parser.preprocesorValues.set(k, v);
-
+		parser.preprocesorValues = funkin.macros.Sowy.getDefines();
 		parser.preprocesorValues.set("TROLL_ENGINE", Main.semanticVersion);
+
+		parser;
+	};
+	public static final defaultVars:Map<String, Dynamic> = new Map<String, Dynamic>();
+
+	public static function init() // BRITISH
+	{
+		
 	}
 
 	inline public static function parseString(script:String, ?name:String = "Script")
@@ -102,11 +105,18 @@ class FunkinHScript extends FunkinScript
 		return new FunkinHScript(null, name, additionalVars, doCreateCall);
 	}
 
-	public function executeCode(source:String):Dynamic
-		return run(parseString(source, scriptName));
+	private static inline function sowy_trim_redundant_repeated_message_error_pos_shit(message:String, posInfo:haxe.PosInfos):String
+	{
+		if (message.startsWith(posInfo.fileName)) {
+			var sowy = posInfo.fileName + ":" + posInfo.lineNumber + ": ";
+			message = message.substr(sowy.length); 
+		}
+
+		return message;
+	}
 
 	////
-	var interpreter:Interp = new Interp();
+	private var interpreter(default, null):Interp = new Interp();
 
 	public function new(?parsed:Expr, ?name:String = "Script", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true)
 	{
@@ -121,8 +131,8 @@ class FunkinHScript extends FunkinScript
 
 		set("StringMap", haxe.ds.StringMap);
 		set("ObjectMap", haxe.ds.ObjectMap);
-		set("IntMap", haxe.ds.IntMap);
 		set("EnumValueMap", haxe.ds.EnumValueMap);
+		set("IntMap", haxe.ds.IntMap);
 
 		set("Date", Date);
 		set("DateTools", DateTools);
@@ -158,37 +168,6 @@ class FunkinHScript extends FunkinScript
 				call('onCreate');
 		}
 	}
-
-	private static inline function sowy_trim_redundant_repeated_message_error_pos_shit(message:String, posInfo:haxe.PosInfos):String
-	{
-		if (message.startsWith(posInfo.fileName)) {
-			var sowy = posInfo.fileName + ":" + posInfo.lineNumber + ": ";
-			message = message.substr(sowy.length); 
-		}
-
-		return message;
-	}
-	
-	public function run(parsed:Expr){
-		var returnValue:Dynamic = null;
-        try {
-			trace('Running haxe script: $scriptName');
-			returnValue = interpreter.execute(parsed);
-		}
-		catch (e:haxe.Exception)
-		{
-			var posInfo = interpreter.posInfos();
-			var message = sowy_trim_redundant_repeated_message_error_pos_shit(e.message, posInfo);
-			
-			haxe.Log.trace(message, posInfo);
-			
-			#if (windows && cpp)
-			if (YES == Windows.msgBox(haxe.Log.formatOutput(message, posInfo) + '\nStop script?', e.message, ERROR | YESNO))
-				stop();
-			#end
-		}
-        return returnValue;
-    }
 
 	/**
 		Helper function
@@ -385,7 +364,29 @@ class FunkinHScript extends FunkinScript
 		var daEnum = Type.resolveEnum(enumName);
 		if (daEnum != null)
 			set(splitted.pop(), daEnum);
-	}	
+	}
+
+	/**
+	 * Parses and executes string code
+	 */
+	public function executeCode(source:String):Dynamic
+		return run(parseString(source, scriptName));
+	
+	public function run(parsed:Expr) {
+		var returnValue:Dynamic = null;
+        try {
+			trace('Running haxe script: $scriptName');
+			returnValue = interpreter.execute(parsed);
+		}
+		catch (e:haxe.Exception)
+		{
+			var posInfo = interpreter.posInfos();
+			var message = sowy_trim_redundant_repeated_message_error_pos_shit(e.message, posInfo);
+			
+			haxe.Log.trace(message, posInfo);
+		}
+        return returnValue;
+    }
 
 	override public function stop()
 	{
@@ -411,18 +412,13 @@ class FunkinHScript extends FunkinScript
 
 	public function exists(varName:String):Bool
 	{
-		return (interpreter == null) ? false : interpreter.variables.exists(varName);
+		return interpreter != null && interpreter.variables.exists(varName);
 	}
 
 	override public function call(func:String, ?parameters:Array<Dynamic>, ?extraVars:Map<String, Dynamic>):Dynamic
 	{
-        var returnValue:Dynamic = null;
-        
-        try{
-		    returnValue = executeFunc(func, parameters, null, extraVars); // I AM SICK OF THIS CASUING CRASHES
-        }catch(e:haxe.Exception){
-			trace('HScript error (${scriptName}): ${e.message}');
-        }
+        var returnValue:Dynamic = executeFunc(func, parameters, null, extraVars);
+		
 		return returnValue == null ? Function_Continue : returnValue;
 	}
 

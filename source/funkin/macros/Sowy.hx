@@ -23,6 +23,9 @@ class Sowy
         return macro $v{daString};
     }
 
+    /**
+     * Returns a map of all conditional compilation flags that were set.
+     */
     public static macro function getDefines() 
     {
         return macro $v{haxe.macro.Context.getDefines()};    

@@ -102,7 +102,7 @@ class Note extends NoteObject
 	public var nextNote:Note;
 	public var spawned:Bool = false;
 	public var causedMiss:Bool = false;
-	function get_canBeHit()return PlayState.instance.judgeManager.judgeNote(this)!=UNJUDGED;
+	function get_canBeHit() return UNJUDGED != PlayState.instance.judgeManager.judgeNote(this);
 	
 	// quant shit
 	public var row:Int = 0;
