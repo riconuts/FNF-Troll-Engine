@@ -8,11 +8,6 @@ import sys.thread.Mutex;
 import sys.thread.Thread;
 import Sys.sleep;
 
-#if LUA_ALLOWED
-import llua.Lua;
-import llua.State;
-#end
-
 class DiscordClient
 {
 	private static final defaultID = #if tgt "1009523643392475206" #else '814588678700924999' #end;
@@ -141,7 +136,7 @@ class DiscordClient
 	inline static function getImageKey(key):String
 		return allowedImageKeys.contains(key) ? key : allowedImageKeys[0];
 
-	public static function changePresence(details:String, state:Null<String>, largeImageKey:String = "app-logo", ?hasStartTimestamp:Bool, ?endTimestamp:Float)
+	public static function changePresence(details:String, ?state:String, largeImageKey:String = "app-logo", ?hasStartTimestamp:Bool, ?endTimestamp:Float)
 	{
 		/*
 		DiscordRpc.presence({
@@ -196,15 +191,5 @@ class DiscordClient
 	{
 		trace('Disconnected! $_code : $_message');
 	}
-
-	#if LUA_ALLOWED
-	public static function addLuaCallbacks(lua:State)
-	{
-		Lua_helper.add_callback(lua, "changePresence",
-			function(details:String, state:Null<String>, ?smallImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float){
-				changePresence(details, state, smallImageKey, hasStartTimestamp, endTimestamp);
-			});
-	}
-	#end
 }
 #end

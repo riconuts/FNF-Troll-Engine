@@ -1568,13 +1568,10 @@ class FunkinLua extends FunkinScript
 			
 			gonnaClose = true;
 		});
-
-		addCallback("changePresence", function(details:String, state:Null<String>, ?smallImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float) {
-			#if DISCORD_ALLOWED
-			DiscordClient.changePresence(details, state, smallImageKey, hasStartTimestamp, endTimestamp);
-			#end
-		});
-
+		
+		#if DISCORD_ALLOWED
+		addCallback("changePresence", DiscordClient.changePresence);
+		#end
 
 		// LUA TEXTS
 		addCallback("makeLuaText", function(tag:String, text:String, width:Int, x:Float, y:Float) {

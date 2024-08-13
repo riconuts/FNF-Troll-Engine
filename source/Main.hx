@@ -223,9 +223,9 @@ class Main extends Sprite
 		#end
 	}
 	private static function _printArgsArray(args:Array<Dynamic>)
-		return _printStr(args.join(', '));
+		_printStr(args.join(', '));
 	
-	public static final print:Function = #if (js || lua || sys) Reflect.makeVarArgs(_printArgsArray) #else ()->{} #end;
+	public static final print:Function = #if (!no_traces && (js || lua || sys)) Reflect.makeVarArgs(_printArgsArray) #else ()->{} #end;
 
 	#if CRASH_HANDLER
 	private static function onCrash(errorName:String):Void
