@@ -212,6 +212,7 @@ class Main extends Sprite
 		#end
 	}
 
+	#if (!no_traces && (js || lua || sys))
 	private inline static function _printStr(str){
 		#if js
 		if (js.Syntax.typeof(untyped console) != "undefined" && (untyped console).log != null)
@@ -224,8 +225,12 @@ class Main extends Sprite
 	}
 	private static function _printArgsArray(args:Array<Dynamic>)
 		_printStr(args.join(', '));
+
+	public static final print:Function = Reflect.makeVarArgs(_printArgsArray);
+	#else
+	public static final print:Function = ()->{};
+	#end
 	
-	public static final print:Function = #if (!no_traces && (js || lua || sys)) Reflect.makeVarArgs(_printArgsArray) #else ()->{} #end;
 
 	#if CRASH_HANDLER
 	private static function onCrash(errorName:String):Void

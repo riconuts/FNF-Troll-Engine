@@ -1,5 +1,6 @@
 package funkin.scripts;
 
+import funkin.api.Windows;
 #if LUA_ALLOWED
 import llua.Convert;
 import llua.Lua;
@@ -7,6 +8,7 @@ import llua.LuaL;
 import llua.State;
 #end
 
+import funkin.modchart.SubModifier;
 import funkin.states.*;
 import funkin.states.PlayState;
 import funkin.objects.*;
@@ -26,11 +28,11 @@ import flixel.util.FlxSave;
 import flixel.util.FlxTimer;
 import openfl.display.BlendMode;
 
-import funkin.modchart.SubModifier;
-
 #if DISCORD_ALLOWED
 import funkin.api.Discord;
 #end
+
+import haxe.Constraints.Function;
 
 using StringTools;
 
@@ -42,7 +44,9 @@ class FunkinLua extends FunkinScript
 	public var lua:State = null;
 	public var errorHandler:String->Void;
 
-	public final addCallback:(String, Dynamic)->Bool;
+	// note: due to how the currently used linc luajit lib works the use of these functions will affect all scripts.
+	// idgaf about lua scripts so i won't bother updating nor solving that specific issue any time soon lol
+	public final addCallback:(String, Function)->Bool;
 	public final removeCallback:String->Bool;	
 	#end
 
@@ -50,6 +54,10 @@ class FunkinLua extends FunkinScript
 
 	override function setDefaultVars(){
 		super.setDefaultVars();
+
+		// Lua shit
+		set('luaDebugMode', false);
+		set('luaDeprecatedWarnings', true);
 
 		// Camera poo
 		set('cameraX', 0);
@@ -70,7 +78,7 @@ class FunkinLua extends FunkinScript
 
 		set("curSection", 0);
 
-		set("playbackRate", 1.0); // for compatibility, do not give it the actual value.
+		set("playbackRate", 1.0); // for compatibility, don't give it the actual value.
 
 		for (i in 0...5) {
 			// annoying since some scripts use defaultPlayerStrumX/Y 4
@@ -95,48 +103,61 @@ class FunkinLua extends FunkinScript
 		set('gfName', PlayState.SONG.gfVersion);
 	}
 
+	private function _loadFile(script):Bool
+	{
+		trace('loading lua file: $script');
+
+		try {
+			var result:Dynamic = LuaL.dofile(lua, script);
+			var resultStr:String = Lua.tostring(lua, result);
+			if (resultStr != null && result != 0)
+				throw resultStr;
+		}
+		catch (e:haxe.Exception)
+		{
+			var msg = e.message;
+			var title = 'Error on lua script!';
+			trace('$title $msg');
+
+			#if windows
+			var msgBoxResult = Windows.msgBox(msg, title, MessageBoxOptions.RETRYCANCEL | MessageBoxIcon.ERROR);
+			if (msgBoxResult == MessageBoxReturnValue.RETRY)
+				return _loadFile(script);
+
+			#else
+			var window = lime.app.Application.current.window;
+			window.fullscreen = false;
+			window.alert(msg, title);
+
+			#end
+
+			lua = null;
+			return false;
+		}
+
+		return true;
+	}
+
 	public function new(script:String, ?name:String, ?ignoreCreateCall:Bool=false, ?vars:Map<String, Dynamic>) {
+		super((name!=null ? name : script), 'lua');
+
 		#if LUA_ALLOWED
 		lua = LuaL.newstate();
 		LuaL.openlibs(lua);
 		Lua.init_callbacks(lua);
-		
-		scriptType = 'lua';
-		scriptName = name!=null ? name : script;
-
-		// Lua shit
-		set('luaDebugMode', false);
-		set('luaDeprecatedWarnings', true);
 
 		setDefaultVars();
+
 		if (vars != null){
 			for(key => val in vars)
 				set(key, val);
 		}
 
-		try
-		{
-			var result:Dynamic = LuaL.dofile(lua, script);
-			var resultStr:String = Lua.tostring(lua, result);
-			if (resultStr != null && result != 0)
-			{
-				trace('Error on lua script! ' + resultStr);
-				#if windows
-				FlxG.fullscreen = false;
-				lime.app.Application.current.window.alert(resultStr, 'Error on lua script!');
-				#else
-				luaTrace('Error loading lua script: "$script"\n' + resultStr, true, false);
-				#end
-				lua = null;
-				return;
-			}
-		}
-		catch (e:Dynamic)
-		{
-			trace(e);
+		var loaded:Bool = _loadFile(script);
+		if (!loaded)
 			return;
-		}
 
+		////
 		addCallback = Lua_helper.add_callback.bind(lua);
 		removeCallback = Lua_helper.remove_callback.bind(lua);
 
@@ -1863,8 +1884,6 @@ class FunkinLua extends FunkinScript
 			return str.endsWith(end);
 		});
 		
-		trace('lua file loaded: $script');
-
 		if(!ignoreCreateCall) call('onCreate', []);
 		#end
 	}
@@ -2179,7 +2198,7 @@ class FunkinLua extends FunkinScript
 	
 	static function getFlxEaseByString(?ease:String):Float->Float
 	{
-		return (ease==null) ? FlxEase.linear : switch(ease.toLowerCase().trim()) 
+		return (ease==null) ? FlxEase.linear : switch(ease.toLowerCase()) 
 		{
 			case 'backin': FlxEase.backIn;
 			case 'backinout': FlxEase.backInOut;
@@ -2223,7 +2242,7 @@ class FunkinLua extends FunkinScript
 
 	static function blendModeFromString(blend:String):BlendMode
 	{
-		return switch(blend.toLowerCase().trim()) 
+		return switch(blend.toLowerCase()) 
 		{
 			case 'add': ADD;
 			case 'alpha': ALPHA;
@@ -2244,79 +2263,129 @@ class FunkinLua extends FunkinScript
 	}
 
 	static function cameraFromString(cam:String):FlxCamera {
-		switch(cam.toLowerCase()) {
-			case 'camhud' | 'hud': return PlayState.instance.camHUD;
-			case 'camother' | 'other': return PlayState.instance.camOther;
+		return switch(cam.toLowerCase()) {
+			case 'camhud' | 'hud': 
+				PlayState.instance.camHUD;
+			case 'camother' | 'other': 
+				PlayState.instance.camOther;
+			default: 
+				PlayState.instance.camGame;
 		}
-		return PlayState.instance.camGame;
 	}
 
-	public function luaTrace(text:String, ignoreCheck:Bool = false, deprecated:Bool = false) {
-		#if LUA_ALLOWED
-		if(ignoreCheck || getBool('luaDebugMode')) {
-			if(deprecated && !getBool('luaDeprecatedWarnings')) {
+	public static function getPropertyLoopThingWhatever(killMe:Array<String>, ?checkForTextsToo:Bool = true, ?getProperty:Bool=true):Dynamic
+	{
+		var coverMeInPiss:Dynamic = getObjectDirectly(killMe[0], checkForTextsToo);
+		var end = killMe.length;
+		if(getProperty)end=killMe.length-1;
+
+		for (i in 1...end) {
+			coverMeInPiss = getVarInArray(coverMeInPiss, killMe[i]);
+		}
+		return coverMeInPiss;
+	}
+
+	public static function getObjectDirectly(objectName:String, ?checkForTextsToo:Bool = true):Dynamic
+	{
+		var coverMeInPiss:Dynamic = PlayState.instance.getLuaObject(objectName, checkForTextsToo);
+		if(coverMeInPiss==null)
+			coverMeInPiss = getVarInArray(getInstance(), objectName);
+
+		return coverMeInPiss;
+	}
+
+	public static function isOfTypes(value:Any, types:Array<Dynamic>):Bool {
+		for (type in types) {
+			if (Std.isOfType(value, type))
+				return true;
+		}
+		return false;
+	}
+
+	#if LUA_ALLOWED
+	public function luaTrace(text:String, ignoreCheck:Bool = false, deprecated:Bool = false):Void {
+		if (ignoreCheck || getBool('luaDebugMode')) {
+			if (deprecated && !getBool('luaDeprecatedWarnings'))
 				return;
-			}
+			
 			PlayState.instance.addTextToDebug(text);
 			trace(text);
 		}
-		#end
 	}
 
-	/*public function call(event:String, args:Array<Dynamic>):Dynamic {
-		#if LUA_ALLOWED
-		if(lua == null) {
-			return Function_Continue;
+	function resultIsAllowed(leLua:State, leResult:Null<Int>) { //Makes it ignore warnings
+		return switch(Lua.type(leLua, leResult)) {
+			case Lua.LUA_TNIL | Lua.LUA_TBOOLEAN | Lua.LUA_TNUMBER | Lua.LUA_TSTRING | Lua.LUA_TTABLE :
+				true;
+			default:
+				false;
 		}
+	}
 
-		Lua.getglobal(lua, event);
+	public function getBool(variable:String):Bool {
+		var result:String = null;
+		Lua.getglobal(lua, variable);
+		result = Convert.fromLua(lua, -1);
+		Lua.pop(lua, 1);
 
-		for (arg in args) {
-			Convert.toLua(lua, arg);
-		}
+		if (result == null)
+			return false;
 
-		var result:Null<Int> = Lua.pcall(lua, args.length, 1, 0);
-		if(result != null && resultIsAllowed(lua, result)) {
-			if(Lua.type(lua, -1) == Lua.LUA_TSTRING) {
-				var error:String = Lua.tostring(lua, -1);
-				Lua.pop(lua, 1);
-				if(error == 'attempt to call a nil value') { //Makes it ignore warnings and not break stuff if you didn't put the functions on your lua file
-					return Function_Continue;
-				}
-			}
-
-			var conv:Dynamic = Convert.fromLua(lua, result);
-			Lua.pop(lua, 1);
-			return conv;
-		}
-		#end
-		return Function_Continue;
-	}*/
+		// YES! FINALLY IT WORKS
+		//trace('variable: ' + variable + ', ' + result);
+		return (result == 'true');
+	}
 
 	function getErrorMessage() {
-		#if LUA_ALLOWED
 		var v:String = Lua.tostring(lua, -1);
 		Lua.pop(lua, 1);
 		return v;
-		#else
-		return "";
+	}
+	#end
+
+	public function set(variable:String, data:Dynamic):Void
+	{
+		#if LUA_ALLOWED
+		if (lua == null)
+			return;
+
+		Convert.toLua(lua, data);
+		Lua.setglobal(lua, variable);
 		#end
 	}
 
+	public function get(variable:String):Dynamic {
+		#if LUA_ALLOWED
+		if (lua == null)
+			return null;
+		
+		var result:Dynamic = null;
+		Lua.getglobal(lua, variable);
+		result = Convert.fromLua(lua, -1);
+		Lua.pop(lua, 1);
+		return result;
+
+		#else
+		return null;
+		#end
+	}
+
+	#if LUA_ALLOWED
 	var duplicateErrors:Array<String> = [];
 
-	override public function call(func:String, ?args:Array<Dynamic>, ?extraVars:Map<String,Dynamic>): Dynamic{
+	public function call(func:String, ?args:Array<Dynamic>, ?extraVars:Map<String,Dynamic>):Dynamic {
 		#if LUA_ALLOWED
+		if (args==null) args=[];
+		if (lua==null) return Function_Continue;
+		
 		try {
-			if(args==null) args=[];
-			if(lua==null) return Function_Continue;
-
 			Lua.getglobal(lua, func);
 			#if (linc_luajit >= "0.0.6")
-			if(Lua.isfunction(lua, -1)==true){
+			if(Lua.isfunction(lua, -1)==true)
 			#else
-			if(Lua.isfunction(lua, -1)==1){
+			if(Lua.isfunction(lua, -1)==1)
 			#end
+			{
 				for(arg in args) 
 					Convert.toLua(lua, arg);
 				
@@ -2334,7 +2403,7 @@ class FunkinLua extends FunkinScript
 							var args = [for (arg in args){
 								(arg is String ? '"$arg"' : Std.string(arg));
 							}];
-							Sys.println('$scriptName: Error on function $func(${args.join(', ')}): $err');
+							Main.print('$scriptName: Error on function $func(${args.join(', ')}): $err');
 							duplicateErrors.push(err);
 							while(duplicateErrors.length > 20)
 								duplicateErrors.shift();
@@ -2363,103 +2432,15 @@ class FunkinLua extends FunkinScript
 		return Function_Continue;
 	}
 
-	public static function getPropertyLoopThingWhatever(killMe:Array<String>, ?checkForTextsToo:Bool = true, ?getProperty:Bool=true):Dynamic
-	{
-		var coverMeInPiss:Dynamic = getObjectDirectly(killMe[0], checkForTextsToo);
-		var end = killMe.length;
-		if(getProperty)end=killMe.length-1;
-
-		for (i in 1...end) {
-			coverMeInPiss = getVarInArray(coverMeInPiss, killMe[i]);
-		}
-		return coverMeInPiss;
-	}
-
-	public static function getObjectDirectly(objectName:String, ?checkForTextsToo:Bool = true):Dynamic
-	{
-		var coverMeInPiss:Dynamic = PlayState.instance.getLuaObject(objectName, checkForTextsToo);
-		if(coverMeInPiss==null)
-			coverMeInPiss = getVarInArray(getInstance(), objectName);
-
-		return coverMeInPiss;
-	}
-
-
-	#if LUA_ALLOWED
-	function resultIsAllowed(leLua:State, leResult:Null<Int>) { //Makes it ignore warnings
-		return switch(Lua.type(leLua, leResult)) {
-			case Lua.LUA_TNIL | Lua.LUA_TBOOLEAN | Lua.LUA_TNUMBER | Lua.LUA_TSTRING | Lua.LUA_TTABLE :
-				true;
-			default:
-				false;
-		}
-	}
-	#end
-
-	override public function get(variable:String):Dynamic {
-		#if LUA_ALLOWED
-		if (lua == null)
-			return null; // because void doesnt fit under dynamic
+	public function stop() {
 		
-		var result:Dynamic = null;
-		Lua.getglobal(lua, variable);
-		result = Convert.fromLua(lua, -1);
-		Lua.pop(lua, 1);
-		return result;
-		#else
-		return null;
-		#end
-	}
-
-	override public function set(variable:String, data:Dynamic):Void
-	{
-		#if LUA_ALLOWED
-		if(lua == null)
+		if (lua == null)
 			return;
-
-		Convert.toLua(lua, data);
-		Lua.setglobal(lua, variable);
-		#end
-	}
-
-	#if LUA_ALLOWED
-	public function getBool(variable:String) {
-		var result:String = null;
-		Lua.getglobal(lua, variable);
-		result = Convert.fromLua(lua, -1);
-		Lua.pop(lua, 1);
-
-		if(result == null) {
-			return false;
-		}
-
-		// YES! FINALLY IT WORKS
-		//trace('variable: ' + variable + ', ' + result);
-		return (result == 'true');
-	}
-	#end
-
-	override public function stop() {
-		#if LUA_ALLOWED
-		if(lua == null) {
-			return;
-		}
 
 		Lua.close(lua);
 		lua = null;
 		#end
 	}
-
-	public static function isOfTypes(value:Any, types:Array<Dynamic>)
-	{
-		for (type in types)
-		{
-			if (Std.isOfType(value, type))
-				return true;
-		}
-		return false;
-	}
-
 }
 
 class ModchartSprite extends FlxSprite

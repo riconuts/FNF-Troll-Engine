@@ -120,8 +120,7 @@ class FunkinHScript extends FunkinScript
 
 	public function new(?parsed:Expr, ?name:String = "Script", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true)
 	{
-		scriptType = 'hscript';
-		scriptName = name;
+		super(name, 'hscript');
 
 		set("Std", Std);
 		set("Type", Type);
@@ -388,7 +387,7 @@ class FunkinHScript extends FunkinScript
         return returnValue;
     }
 
-	override public function stop()
+	public function stop()
 	{
 		//trace('stopping $scriptName');
 
@@ -399,12 +398,12 @@ class FunkinHScript extends FunkinScript
 		interpreter = null;
 	}
 
-	override public function get(varName:String):Dynamic
+	public function get(varName:String):Dynamic
 	{
 		return (interpreter == null) ? null : interpreter.variables.get(varName);
 	}
 
-	override public function set(varName:String, value:Dynamic):Void
+	public function set(varName:String, value:Dynamic):Void
 	{
 		if (interpreter != null)
 			interpreter.variables.set(varName, value);
@@ -415,7 +414,7 @@ class FunkinHScript extends FunkinScript
 		return interpreter != null && interpreter.variables.exists(varName);
 	}
 
-	override public function call(func:String, ?parameters:Array<Dynamic>, ?extraVars:Map<String, Dynamic>):Dynamic
+	public function call(func:String, ?parameters:Array<Dynamic>, ?extraVars:Map<String, Dynamic>):Dynamic
 	{
         var returnValue:Dynamic = executeFunc(func, parameters, null, extraVars);
 		

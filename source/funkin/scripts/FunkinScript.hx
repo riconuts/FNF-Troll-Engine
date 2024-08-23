@@ -1,52 +1,48 @@
 package funkin.scripts;
 
 import funkin.states.PlayState;
+import funkin.scripts.Globals;
+import funkin.Conductor;
+import funkin.ClientPrefs;
 
-using StringTools;
+/** 
+	Base class meant to be overridden so you can implement custom script types 
+**/
+abstract class FunkinScript 
+{
+	public var scriptName:String;
+	public var scriptType:String;
 
-/** This is a base class meant to be overridden so you can easily implement custom script types **/
-class FunkinScript {
-	public var scriptName:String = '';
-	public var scriptType:String = '';
-	
-	/**
-		Called when the script should be stopped
-	**/
-	public function stop(){
-		throw new haxe.exceptions.NotImplementedException();
+	public function new(scriptName:String = '', scriptType = ''){
+		this.scriptName = scriptName;
+		this.scriptType = scriptType;
 	}
 
 	/**
 		Called to set a variable defined in the script
 	**/
-	public function set(variable:String, data:Dynamic):Void
-	{
-		throw new haxe.exceptions.NotImplementedException();
-	}
+	abstract public function set(variable:String, data:Dynamic):Void;
 
 	/**
 		Called to get a variable defined in the script
 	**/
-	public function get(key:String):Dynamic
-	{
-		throw new haxe.exceptions.NotImplementedException();
-	}
+	abstract public function get(key:String):Dynamic;
 
 	/**
 		Called to call a function within the script
 	**/
-	public function call(func:String, ?args:Array<Dynamic>, ?extraVars:Map<String,Dynamic>):Dynamic
-	{
-		throw new haxe.exceptions.NotImplementedException();
-	}
+	abstract public function call(func:String, ?args:Array<Dynamic>, ?extraVars:Map<String,Dynamic>):Dynamic;
+
+	/**
+		Called when the script should be stopped
+	**/
+	abstract public function stop():Void;
 
 	/**
 		Helper function
 		Sets a bunch of basic variables for the script depending on the state
 	**/
 	function setDefaultVars(){
-		var currentState = flixel.FlxG.state;
-
 		set("scriptName", scriptName);
 
 		set('Function_Halt', Globals.Function_Halt);
@@ -55,7 +51,7 @@ class FunkinScript {
 		set('Function_StopLua', Globals.Function_Halt); // DEPRECATED
 
 		set('version', "0.5.2h"); // version of psych troll engine is based on
-		set('teVersion', Main.displayedVersion.trim());
+		set('teVersion', StringTools.trim(Main.displayedVersion));
 		set("trollEngine", true); // so if any psych mods wanna add troll engine specific stuff well there they go
 
 		#if windows
@@ -76,10 +72,10 @@ class FunkinScript {
 		set('middlescroll', ClientPrefs.midScroll);
 		set('framerate', ClientPrefs.framerate);
 		set('ghostTapping', ClientPrefs.ghostTapping);
-		set('hideHud', ClientPrefs.hudOpacity > 0);
+		set('hideHud', ClientPrefs.hudOpacity > 0.0);
 		set('timeBarType', ClientPrefs.timeBarType);
 		set('scoreZoom', ClientPrefs.scoreZoom);
-		set('cameraZoomOnBeat', ClientPrefs.camZoomP > 0);
+		set('cameraZoomOnBeat', ClientPrefs.camZoomP > 0.0);
 		set('flashingLights', ClientPrefs.flashing);
 		set('noteOffset', ClientPrefs.noteOffset);
 		set('healthBarAlpha', ClientPrefs.hpOpacity);
@@ -91,15 +87,16 @@ class FunkinScript {
 
 		set('curBeat', 0);
 		set('curStep', 0);
-		set('curDecBeat', 0);
-		set('curDecStep', 0);
+		set('curDecBeat', 0.0);
+		set('curDecStep', 0.0);
+
+		var currentState = flixel.FlxG.state;
 
 		set("inTitlescreen", (currentState is funkin.states.TitleState));
 		set('inGameOver', false);
 		set('inChartEditor', false);
 
-		if (currentState is PlayState && currentState == PlayState.instance)
-		{
+		if (currentState is PlayState && currentState == PlayState.instance){
 			set("inPlaystate", true);
 			
 			set('bpm', PlayState.SONG.bpm);

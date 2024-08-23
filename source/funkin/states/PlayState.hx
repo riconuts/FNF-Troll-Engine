@@ -4694,7 +4694,7 @@ class PlayState extends MusicBeatState
 		return Globals.Function_Continue;
 	}
 
-	#if hscript
+	#if HSCRIPT_ALLOWED
 	public function callOnHScripts(event:String, ?args:Array<Dynamic>, ?vars:Map<String, Dynamic>, ignoreStops = false, ?exclusions:Array<String>):Dynamic
 		return callOnScripts(event, args, ignoreStops, exclusions, hscriptArray, vars);
 	
@@ -4706,7 +4706,7 @@ class PlayState extends MusicBeatState
 		return setOnScripts(variable, arg, hscriptArray);
 	}
     #else
-	public function callOnHScripts(event:String, ?args:Array<Dynamic>, ?vars:Map<String, Dynamic>, ignoreStops = false, ?exclusions:Array<String>):Dynamic
+	inline public function callOnHScripts(event:String, ?args:Array<Dynamic>, ?vars:Map<String, Dynamic>, ignoreStops = false, ?exclusions:Array<String>):Dynamic
 		return Globals.Function_Continue;
 	#end
 
@@ -4717,7 +4717,7 @@ class PlayState extends MusicBeatState
 	public function setOnLuas(variable:String, arg:Dynamic)
 		setOnScripts(variable, arg, luaArray);
     #else
-	public function callOnLuas(event:String, ?args:Array<Dynamic>, ignoreStops = false, ?exclusions:Array<String>):Dynamic
+	inline public function callOnLuas(event:String, ?args:Array<Dynamic>, ignoreStops = false, ?exclusions:Array<String>):Dynamic
 		return Globals.Function_Continue;
 	#end
 
