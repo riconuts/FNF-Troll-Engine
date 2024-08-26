@@ -1,5 +1,6 @@
 package funkin.data;
 
+import funkin.Paths.FreeplaySongMetadata;
 import funkin.Paths.ContentMetadata;
 import haxe.io.Path;
 
@@ -24,7 +25,7 @@ typedef WeekMetadata = {
 		In case of being a string it would've been checked from a Map from your save file
 		as FlxG.save.data.unlocks.get(unlockCondition) maybe
 	**/
-	var unlockCondition:Any;
+	var ?unlockCondition:Any;
 	
 	/**
 		Song names of this week.
@@ -46,17 +47,35 @@ class WeekData
 	public static var weekCompleted(get, null):Map<String, Bool>;
 	@:noCompletion static function get_weekCompleted() return Highscore.weekCompleted;
 
-	public static function reloadWeekFiles():Array<WeekMetadata>
+	public static function reloadWeekFiles(includeFreeplaySongs:Bool = false):Array<WeekMetadata>
 	{
 		var list:Array<WeekMetadata> = weekList = [];
 
 		#if MODS_ALLOWED
 		for (mod => daJson in Paths.getContentMetadata()) {
-			if (daJson != null && daJson.weeks != null) {
-				for (week in daJson.weeks) {
-					week.directory = mod;
-					list.push(week);
-				}
+			if (daJson != null) {
+				if (daJson.weeks != null){
+                    for (week in daJson.weeks) {
+                        week.directory = mod;
+                        list.push(week);
+                    }
+                }
+				if (includeFreeplaySongs) {
+					if (daJson.freeplaySongs != null){
+						var week:funkin.data.WeekData.WeekMetadata = {
+							name: "Freeplay Songs",
+                            category: mod + "-freeplay",
+							freeplayCategory: mod + "-freeplay",
+							unlockCondition: true,
+							songs: []
+                            
+                        }
+						var freeplaySongs:Array<FreeplaySongMetadata> = cast daJson.freeplaySongs;
+						for (song in freeplaySongs){
+                            week.songs.push(song.name);
+                        }
+                    }
+                }
 			}
 		}
         #end

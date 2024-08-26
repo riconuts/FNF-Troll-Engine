@@ -43,7 +43,7 @@ class FreeplayState extends MusicBeatState
 		funkin.api.Discord.DiscordClient.changePresence('In the menus');
 		#end
 
-		for (week in WeekData.reloadWeekFiles())
+		for (week in WeekData.reloadWeekFiles(true))
 		{
 			Paths.currentModDirectory = week.directory;
 
