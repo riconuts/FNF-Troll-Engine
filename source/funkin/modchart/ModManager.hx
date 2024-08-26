@@ -136,6 +136,11 @@ class ModManager {
     inline public function quickRegister(mod:Modifier)
         registerMod(mod.getName(), mod);
 
+	inline public function registerBlankMod(modName:String, defaultVal:Float = 0.0, player:Int = -1){
+		quickRegister(new SubModifier(modName, this));
+		setValue(modName, defaultVal, player);
+	}
+
     public function registerAlias(alias:String, mod:String)
 		aliases.set(alias, mod);
 

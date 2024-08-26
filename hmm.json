@@ -26,11 +26,6 @@
 			"version": "3.2.3"
 		},
 		{
-			"name": "hscript",
-			"type": "haxelib",
-			"version": null
-		},
-		{
 			"name": "hxcpp",
 			"type": "haxelib",
 			"version": null
@@ -39,6 +34,13 @@
 			"name": "hxcpp-debug-server",
 			"type": "haxelib",
 			"version": null
+		},
+		{
+			"name": "hscript",
+			"type": "git",
+			"dir": null,
+			"ref": "master",
+			"url": "https://github.com/nebulazorua/t-hscript"		
 		},
 		{
 			"name": "hxvlc",
@@ -57,7 +59,7 @@
 			"type": "git",
 			"dir": null,
 			"ref": "master",
-			"url": "https://github.com/nebulazorua/linc_luajit"
+			"url": "https://github.com/riconuts/linc_luajit"
 		}
 	]
 }

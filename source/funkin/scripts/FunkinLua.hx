@@ -1,6 +1,9 @@
 package funkin.scripts;
 
+#if (cpp && windows)
 import funkin.api.Windows;
+#end
+
 #if LUA_ALLOWED
 import llua.Convert;
 import llua.Lua;
@@ -14,7 +17,6 @@ import funkin.states.PlayState;
 import funkin.objects.*;
 import funkin.scripts.Globals.*;
 
-import Type.ValueType;
 import animateatlas.AtlasFrameMaker;
 import flixel.*;
 import flixel.addons.transition.FlxTransitionableState;
@@ -27,12 +29,12 @@ import flixel.util.FlxColor;
 import flixel.util.FlxSave;
 import flixel.util.FlxTimer;
 import openfl.display.BlendMode;
+import haxe.Constraints.Function;
+import Type.ValueType;
 
 #if DISCORD_ALLOWED
 import funkin.api.Discord;
 #end
-
-import haxe.Constraints.Function;
 
 using StringTools;
 
@@ -42,10 +44,8 @@ class FunkinLua extends FunkinScript
 	
 	#if LUA_ALLOWED
 	public var lua:State = null;
-	public var errorHandler:String->Void;
+	public var errorHandler:String->Void = null;
 
-	// note: due to how the currently used linc luajit lib works the use of these functions will affect all scripts.
-	// idgaf about lua scripts so i won't bother updating nor solving that specific issue any time soon lol
 	public final addCallback:(String, Function)->Bool;
 	public final removeCallback:String->Bool;	
 	#end
@@ -146,13 +146,6 @@ class FunkinLua extends FunkinScript
 		LuaL.openlibs(lua);
 		Lua.init_callbacks(lua);
 
-		setDefaultVars();
-
-		if (vars != null){
-			for(key => val in vars)
-				set(key, val);
-		}
-
 		var loaded:Bool = _loadFile(script);
 		if (!loaded)
 			return;
@@ -160,6 +153,13 @@ class FunkinLua extends FunkinScript
 		////
 		addCallback = Lua_helper.add_callback.bind(lua);
 		removeCallback = Lua_helper.remove_callback.bind(lua);
+		
+		setDefaultVars();
+
+		if (vars != null){
+			for(key => val in vars)
+				set(key, val);
+		}
 
 		////
 		addCallback("getProperty", getProperty);
@@ -170,55 +170,53 @@ class FunkinLua extends FunkinScript
 		addCallback("getPropertyFromClass", getPropertyFromClass);
 		addCallback("setPropertyFromClass", setPropertyFromClass);
 
-		//// mod manager
-		addCallback("setPercent", function(modName:String, val:Float, player:Int = -1)
-		{
-			PlayState.instance.modManager.setPercent(modName, val, player);
+		addCallback("debugPrint", Reflect.makeVarArgs((toPrint:Array<Dynamic>) -> {
+			luaTrace(toPrint.join(", "), true, false);
+		}));
+		addCallback("close", (?printMessage:Bool) -> {
+			if (!gonnaClose && printMessage == true)
+				luaTrace('Stopping lua script: ' + scriptName);
+			
+			stop();
 		});
 
-		addCallback("addBlankMod", function(modName:String, defaultVal:Float = 0, player:Int = -1)
-		{
-			PlayState.instance.modManager.quickRegister(new SubModifier(modName, PlayState.instance.modManager));
-			PlayState.instance.modManager.setValue(modName, defaultVal);
+		//// mod manager
+		addCallback("setPercent", function(modName:String, val:Float, player:Int = -1)
+			PlayState.instance.modManager.setPercent(modName, val, player)
+		);
+
+		addCallback("addBlankMod", function(modName:String, defaultVal:Float = 0, player:Int = -1) {
+			PlayState.instance.modManager.registerBlankMod(modName, defaultVal, player);
 		});
 
 		addCallback("setValue", function(modName:String, val:Float, player:Int = -1)
-		{
-			PlayState.instance.modManager.setValue(modName, val, player);
-		});
+			PlayState.instance.modManager.setValue(modName, val, player)
+		);
 
 		addCallback("getPercent", function(modName:String, player:Int)
-		{
-			return PlayState.instance.modManager.getPercent(modName, player);
-		});
+			return PlayState.instance.modManager.getPercent(modName, player)
+		);
 
 		addCallback("getValue", function(modName:String, player:Int)
-		{
-			return PlayState.instance.modManager.getValue(modName, player);
-		});
+			return PlayState.instance.modManager.getValue(modName, player)
+		);
 		
 		addCallback("queueSet", function(step:Float, modName:String, target:Float, player:Int = -1)
-		{
-			PlayState.instance.modManager.queueSet(step, modName, target, player);
-		});
+			PlayState.instance.modManager.queueSet(step, modName, target, player)
+		);
 
 		addCallback("queueSetP", function(step:Float, modName:String, perc:Float, player:Int = -1)
-		{
-			PlayState.instance.modManager.queueSetP(step, modName, perc, player);
-		});
+			PlayState.instance.modManager.queueSetP(step, modName, perc, player)
+		);
 		
 		addCallback("queueEase",
-			function(step:Float, endStep:Float, modName:String, percent:Float, style:String = 'linear', player:Int = -1, ?startVal:Float) // lua is autistic and can only accept 5 args
-			{
-				PlayState.instance.modManager.queueEase(step, endStep, modName, percent, style, player, startVal);
-			}
+			function(step:Float, endStep:Float, modName:String, percent:Float, style:String = 'linear', player:Int = -1, ?startVal:Float)
+				PlayState.instance.modManager.queueEase(step, endStep, modName, percent, style, player, startVal)
 		);
 
 		addCallback("queueEaseP",
-			function(step:Float, endStep:Float, modName:String, percent:Float, style:String = 'linear', player:Int = -1, ?startVal:Float) // lua is autistic and can only accept 5 args
-			{
-				PlayState.instance.modManager.queueEaseP(step, endStep, modName, percent, style, player, startVal);
-			}
+			function(step:Float, endStep:Float, modName:String, percent:Float, style:String = 'linear', player:Int = -1, ?startVal:Float)
+				PlayState.instance.modManager.queueEaseP(step, endStep, modName, percent, style, player, startVal)
 		);
 
 		////
@@ -411,10 +409,9 @@ class FunkinLua extends FunkinScript
 			if (haxeScript == null)
 				return null;
 
-			// getinfo randomly broke here idk why
-			// so just trace from line 1
-			FunkinHScript.parser.line = 1;
+			haxeScript.set('luaScript', this);
 			var retVal = haxeScript.executeCode(code);
+
 			if (retVal != null && !isOfTypes(retVal, [Bool, Int, Float, String, Array]))
 				retVal = null;
 	
@@ -1579,16 +1576,6 @@ class FunkinLua extends FunkinScript
 				}
 			}
 		});
-
-		addCallback("debugPrint", Reflect.makeVarArgs(function(toPrint:Array<Dynamic>) {
-			luaTrace(toPrint.join(", "), true, false);
-		}));
-		addCallback("close", function(printMessage:Bool) {
-			if(!gonnaClose && printMessage)
-				luaTrace('Stopping lua script: ' + scriptName);
-			
-			gonnaClose = true;
-		});
 		
 		#if DISCORD_ALLOWED
 		addCallback("changePresence", DiscordClient.changePresence);
@@ -2343,24 +2330,47 @@ class FunkinLua extends FunkinScript
 	}
 	#end
 
-	public function set(variable:String, data:Dynamic):Void
+	public function set(name:String, val:Dynamic):Void
 	{
 		#if LUA_ALLOWED
 		if (lua == null)
 			return;
 
-		Convert.toLua(lua, data);
-		Lua.setglobal(lua, variable);
+		/** Convert.toLua(lua, val); **/
+		switch (Type.typeof(val)) {
+			case Type.ValueType.TNull:
+				Lua.pushnil(lua);
+			case Type.ValueType.TBool:
+				Lua.pushboolean(lua, val);
+			case Type.ValueType.TInt:
+				Lua.pushinteger(lua, cast(val, Int));
+			case Type.ValueType.TFloat:
+				Lua.pushnumber(lua, val);
+			case Type.ValueType.TClass(String):
+				Lua.pushstring(lua, cast(val, String));
+			case Type.ValueType.TClass(Array):
+				Convert.arrayToLua(lua, val);
+			case Type.ValueType.TObject:
+				@:privateAccess Convert.objectToLua(lua, val); // {}
+			case Type.ValueType.TFunction:
+				addCallback(name, val);
+				return;
+			default:
+				trace('$scriptName: Unsupported value: $val ${Type.typeof(val)}');
+				return;
+		}
+		
+		Lua.setglobal(lua, name);
 		#end
 	}
 
-	public function get(variable:String):Dynamic {
+	public function get(name:String):Dynamic {
 		#if LUA_ALLOWED
 		if (lua == null)
 			return null;
 		
 		var result:Dynamic = null;
-		Lua.getglobal(lua, variable);
+		Lua.getglobal(lua, name);
 		result = Convert.fromLua(lua, -1);
 		Lua.pop(lua, 1);
 		return result;
@@ -2433,9 +2443,10 @@ class FunkinLua extends FunkinScript
 	}
 
 	public function stop() {
-		
 		if (lua == null)
 			return;
+
+		gonnaClose = true;
 
 		Lua.close(lua);
 		lua = null;
