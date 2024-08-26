@@ -53,7 +53,7 @@
 	<define name="HSCRIPT_ALLOWED" />
 	<define name="VIDEOS_ALLOWED" if="cpp" />
 	<define name="MODS_ALLOWED" if="desktop" />
-	<define name="DISCORD_ALLOWED" if="desktop cpp"/>
+	<define name="DISCORD_ALLOWED" if="desktop cpp" unless="display"/>
 	<define name="MULTICORE_LOADING" if="native" />
 	<define name="CRASH_HANDLER" if="desktop" />
 
