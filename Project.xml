@@ -84,6 +84,8 @@
 	<section if="HSCRIPT_ALLOWED">
 		<haxelib name="hscript"/>
 		<define name="hscriptPos"/>		
+
+		<haxeflag name="--macro" value="include('funkin')" />
 	</section>
 
 	<section if="MULTICORE_LOADING false">

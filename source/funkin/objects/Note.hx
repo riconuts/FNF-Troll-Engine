@@ -66,7 +66,7 @@ class Note extends NoteObject
 
 	@:noCompletion private static function set_swagWidth(val:Float){
 		halfWidth = val * 0.5;
-		return val;
+		return swagWidth = val;
 	}
 	public static var halfWidth(default, null):Float = swagWidth * 0.5;
 	public static var quantShitCache = new Map<String, Bool>();

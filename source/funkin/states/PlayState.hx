@@ -4633,7 +4633,7 @@ class PlayState extends MusicBeatState
 	public function callOnScripts(event:String, ?args:Array<Dynamic>, ignoreStops:Bool = false, ?exclusions:Array<String>, ?scriptArray:Array<Dynamic>,
 			?vars:Map<String, Dynamic>, ?ignoreSpecialShit:Bool = true):Dynamic
 	{
-        #if(LUA_ALLOWED || HSCRIPT_ALLOWED)
+        #if (LUA_ALLOWED || HSCRIPT_ALLOWED)
 		if (args == null) args = [];
 		if (scriptArray == null) scriptArray = funkyScripts;
 		if (exclusions == null) exclusions = [];
@@ -4646,10 +4646,13 @@ class PlayState extends MusicBeatState
 				continue;
 			
 			var ret:Dynamic = script.call(event, args, vars);
-			if (ret==null || ret == Globals.Function_Continue)
+			if (ret == Globals.Function_Halt){
+				ret = returnVal;
+				if (!ignoreStops)
+					return returnVal;
+			};
+			if (ret != Globals.Function_Continue && ret!=null)
 				returnVal = ret;
-			else if (ignoreStops && ret == Globals.Function_Halt)
-				return returnVal;
 		}
 		
 		return (returnVal == null) ? Globals.Function_Continue : returnVal;

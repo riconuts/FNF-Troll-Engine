@@ -103,6 +103,7 @@ class FunkinLua extends FunkinScript
 		set('gfName', PlayState.SONG.gfVersion);
 	}
 
+	#if LUA_ALLOWED
 	private function _loadFile(script):Bool
 	{
 		trace('loading lua file: $script');
@@ -137,6 +138,7 @@ class FunkinLua extends FunkinScript
 
 		return true;
 	}
+	#end
 
 	public function new(script:String, ?name:String, ?ignoreCreateCall:Bool=false, ?vars:Map<String, Dynamic>) {
 		super((name!=null ? name : script), 'lua');
@@ -2381,7 +2383,8 @@ class FunkinLua extends FunkinScript
 	}
 
 	#if LUA_ALLOWED
-	var duplicateErrors:Array<String> = [];
+	private var duplicateErrors:Array<String> = [];
+	#end
 
 	public function call(func:String, ?args:Array<Dynamic>, ?extraVars:Map<String,Dynamic>):Dynamic {
 		#if LUA_ALLOWED
@@ -2442,14 +2445,15 @@ class FunkinLua extends FunkinScript
 		return Function_Continue;
 	}
 
-	public function stop() {
+	public function stop():Void {
+		#if LUA_ALLOWED
 		if (lua == null)
 			return;
 
-		gonnaClose = true;
-
 		Lua.close(lua);
 		lua = null;
+
+		gonnaClose = true;
 		#end
 	}
 }

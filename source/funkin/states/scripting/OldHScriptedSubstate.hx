@@ -50,7 +50,7 @@ class OldHScriptedSubstate extends MusicBeatSubstate
 		if (!fileName.endsWith(".hscript"))
 			fileName += ".hscript";
 
-		for (folderPath in Paths.getFolders("states"))
+		for (folderPath in Paths.getFolders("substates"))
 		{
 			var filePath = folderPath + fileName;
 
