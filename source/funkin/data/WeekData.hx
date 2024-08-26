@@ -36,6 +36,11 @@ typedef WeekMetadata = {
 		Name of the content folder containing this week
 	**/
     var ?directory:String;
+
+    /**
+     *  Hides the week in freeplay
+     */
+	var ?hideFreeplay:Bool;
 }
 
 class WeekData
@@ -47,7 +52,7 @@ class WeekData
 	public static var weekCompleted(get, null):Map<String, Bool>;
 	@:noCompletion static function get_weekCompleted() return Highscore.weekCompleted;
 
-	public static function reloadWeekFiles(includeFreeplaySongs:Bool = false):Array<WeekMetadata>
+	public static function reloadWeekFiles(inFreeplay:Bool = false):Array<WeekMetadata>
 	{
 		var list:Array<WeekMetadata> = weekList = [];
 
@@ -56,13 +61,16 @@ class WeekData
 			if (daJson != null) {
 				if (daJson.weeks != null){
                     for (week in daJson.weeks) {
+                        if(inFreeplay && week.hideFreeplay)
+                            continue;
+                        
                         week.directory = mod;
                         list.push(week);
                     }
                 }
-				if (includeFreeplaySongs) {
+				if (inFreeplay) {
 					if (daJson.freeplaySongs != null){
-						var week:funkin.data.WeekData.WeekMetadata = {
+						var freeplay_week:funkin.data.WeekData.WeekMetadata = {
 							name: "Freeplay Songs",
                             category: mod + "-freeplay",
 							freeplayCategory: mod + "-freeplay",
@@ -73,9 +81,10 @@ class WeekData
                         }
 						var freeplaySongs:Array<FreeplaySongMetadata> = cast daJson.freeplaySongs;
 						for (song in freeplaySongs)
-                            week.songs.push(song.name);
+							freeplay_week.songs.push(song.name);
                         
-                        list.push(week);
+                        
+						list.push(freeplay_week);
                         
                     }
                 }
@@ -108,10 +117,12 @@ class WeekData
 				vChapter.songs.push(songData[0]);
 		}
 
-		if (Reflect.field(weekFile, "hideFreeplay") != true) {
+		data.hideFreeplay = Reflect.field(weekFile, "hideFreeplay");
+
+/* 		if (Reflect.field(weekFile, "hideFreeplay") != true) {
 			for (songName in vChapter.songs)
 				data.freeplaySongs.push({name: songName, category: data.defaultCategory});
-		}
+		} */
 
 		data.weeks.push(vChapter);
 	}
