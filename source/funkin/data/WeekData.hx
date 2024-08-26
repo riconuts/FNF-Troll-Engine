@@ -67,13 +67,16 @@ class WeekData
                             category: mod + "-freeplay",
 							freeplayCategory: mod + "-freeplay",
 							unlockCondition: true,
-							songs: []
+							songs: [],
+                            directory: mod
                             
                         }
 						var freeplaySongs:Array<FreeplaySongMetadata> = cast daJson.freeplaySongs;
-						for (song in freeplaySongs){
+						for (song in freeplaySongs)
                             week.songs.push(song.name);
-                        }
+                        
+                        list.push(week);
+                        
                     }
                 }
 			}
