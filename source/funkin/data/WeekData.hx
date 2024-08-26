@@ -117,7 +117,7 @@ class WeekData
 				vChapter.songs.push(songData[0]);
 		}
 
-		data.hideFreeplay = Reflect.field(weekFile, "hideFreeplay");
+		vChapter.hideFreeplay = Reflect.field(weekFile, "hideFreeplay");
 
 /* 		if (Reflect.field(weekFile, "hideFreeplay") != true) {
 			for (songName in vChapter.songs)
