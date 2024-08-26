@@ -36,7 +36,8 @@ class FreeplayState extends MusicBeatState
 	
 	static var curDiffName:String = "normal";
 	static var curDiffIdx:Int = 1;
-
+	var hintText:FlxText;
+    
 	override public function create()
 	{
 		#if DISCORD_ALLOWED
@@ -86,7 +87,7 @@ class FreeplayState extends MusicBeatState
 		hintBG.blend = MULTIPLY;
 		add(hintBG);
 
-		var hintText:FlxText = new FlxText(hintBG.x, hintBG.y + 4, FlxG.width, Paths.getString("freeplayhint"));
+		hintText = new FlxText(hintBG.x, hintBG.y + 4, FlxG.width, Paths.getString("freeplayhint"));
 		hintText.setFormat(Paths.font("vcr.ttf"), 16, 0xFFFFFFFF, RIGHT);
 		hintText.scrollFactor.set();
 		add(hintText);
@@ -112,6 +113,12 @@ class FreeplayState extends MusicBeatState
 
 		super.create();
 	}
+
+    function reloadFont(){
+		scoreText.font = Paths.font("vcr.ttf");
+		hintText.font = scoreText.font;
+		diffText.font = scoreText.font;
+    }
 
 	override public function update(elapsed:Float)
 	{
@@ -149,6 +156,7 @@ class FreeplayState extends MusicBeatState
 		refreshScore();
 
 		var modBgGraphic = Paths.image('menuBGBlue');
+		reloadFont();
 		if (bg == null || modBgGraphic != bg.graphic)
 			fadeToBg(modBgGraphic);
 	}
