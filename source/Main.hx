@@ -41,43 +41,44 @@ class Main extends Sprite
 	var gameWidth:Int = 1280; // Width of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var gameHeight:Int = 720; // Height of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var initialState:Class<FlxState> = StartupState; // The FlxState the game starts with.
+	var nextState:Class<FlxState> = funkin.states.TitleState; 
 	var zoom:Float = -1; // If -1, zoom is automatically calculated to fit the window dimensions.
 	var framerate:Int = 60; // How many frames per second the game should run at.
 	var skipSplash:Bool = true; // Whether to skip the flixel splash screen that appears in release mode.
 	var startFullscreen:Bool = false; // Whether to start the game in fullscreen on desktop targets
 
-	// You can pretty much ignore everything from here on - your code should go in your states.
+	//// You can pretty much ignore everything from here on - your code should go in your states.
 
-	public static var volumeChangedEvent:lime.app.Event<Float->Void> = new lime.app.Event<Float->Void>();
 	public static var engineVersion:String = '0.2.0'; // Used for autoupdating n stuff
 	public static var betaVersion(get, default):String = 'rc.1'; // beta version, make blank if not on a beta version, otherwise do it based on semantic versioning (alpha.1, beta.1, rc.1, etc)
 	public static var beta:Bool = betaVersion.trim() != '';
 
-	public static var UserAgent:String = 'TrollEngine/${Main.engineVersion}'; // used for http requests. if you end up forking the engine and making your own then make sure to change this!!
+	public static var UserAgent:String = 'TrollEngine/$engineVersion'; // used for http requests. if you end up forking the engine and making your own then make sure to change this!!
 	public static var githubRepo:RepoInfo = Github.getCompiledRepoInfo();
 	public static var downloadBetas:Bool = beta;
 	public static var outOfDate:Bool = false;
 	public static var recentRelease:Release;
 
-	public static var showDebugTraces:Bool = #if (SHOW_DEBUG_TRACES || debug) true #else false #end;
+	public static var displayedVersion(get, never):String;
+    public static var semanticVersion(get, never):SemanticVersion;
 
-	static function get_betaVersion()
+	@:noCompletion static function get_betaVersion()
 		return beta ? betaVersion : "0";
-
-    @:isVar
-    public static var semanticVersion(get, null):SemanticVersion = '';
-	static function get_semanticVersion()
+	
+	@:noCompletion static function get_semanticVersion()
 		return '$engineVersion${beta ? '-$betaVersion' : ""}';
-
-	@:isVar
-	public static var displayedVersion(get, null):String = '';
-	static function get_displayedVersion()
+	
+	@:noCompletion static function get_displayedVersion()
 		return 'v${semanticVersion}';
-	    
+	
 	////
+	public static var showDebugTraces:Bool = #if (debug || SHOW_DEBUG_TRACES) true #else false #end;
+	public static var volumeChangedEvent = new lime.app.Event<Float->Void>();
+
 	public static var fpsVar:FPS;
 	public static var bread:Bread;
 	
+	////
 	public static function main():Void
 	{
 		Lib.current.addChild(new Main());
@@ -117,32 +118,47 @@ class Main extends Sprite
 	private function setupGame():Void
 	{	
 		////		
-		var troll = false;
+		
 
 		#if sys
-		for (arg in Sys.args()){
+		var args = Sys.args();
+		trace(args);
+		for (arg in args){
 			switch(arg){
 				case "troll":
-					troll = true;
+					#if tgt
+					initialState = funkin.tgt.SinnerState;
+					#end
 
 				case "songselect":
-					StartupState.nextState = funkin.states.SongSelectState;
+					nextState = funkin.states.SongSelectState;
 
 				case "debug":
 					funkin.states.PlayState.chartingMode = true;
-				
+
 				case "showdebugtraces":
 					Main.showDebugTraces = true;
+
+				default:
+					/*
+					if (arg.startsWith('song:')) {
+						var split = arg.split(':');
+						var metadata = new funkin.data.Song.SongMetadata(split[1], split[2]);
+						var playSongFunc = funkin.data.Song.playSong.bind(metadata, split[3], Std.parseInt(split[4]));
+
+						trace("starting w song: "+split);
+
+						initialState = flixel.FlxState;
+						FlxG.signals.postStateSwitch.add(()->{
+							StartupState.load();
+							playSongFunc();			
+						});
+					}
+					*/
 			}
 		}
 		#end
 
-		#if tgt
-		if (troll){
-			initialState = funkin.tgt.SinnerState;
-			skipSplash = true;
-		}else
-		#end
 		{
 			final screenWidth = Capabilities.screenResolutionX;
 			final screenHeight = Capabilities.screenResolutionY;
@@ -182,16 +198,15 @@ class Main extends Sprite
 			startFullscreen = FlxG.save.data.fullscreen;
 		}
 		
+		StartupState.nextState = nextState;
 		addChild(new FNFGame(gameWidth, gameHeight, initialState, #if(flixel < "5.0.0") zoom, #end framerate, framerate, skipSplash, startFullscreen));
 
 		FlxG.mouse.useSystemCursor = true;
 		FlxG.mouse.visible = false;
 
-		#if !mobile
 		fpsVar = new FPS(10, 3, 0xFFFFFF);
 		fpsVar.visible = false;
 		addChild(fpsVar);
-		#end
 
 		bread = new Bread();
 		bread.visible = false;
@@ -203,7 +218,6 @@ class Main extends Sprite
 			UncaughtErrorEvent.UNCAUGHT_ERROR, 
 			(event:UncaughtErrorEvent) -> onCrash(event.error)
 		);
-
 
 		#if cpp
 		// Thank you EliteMasterEric, very cool!
