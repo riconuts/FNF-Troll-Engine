@@ -1,6 +1,14 @@
 package funkin.api;
 
-#if DISCORD_ALLOWED
+#if !DISCORD_ALLOWED
+class DiscordClient {
+	public inline static function start() {}
+	public inline static function changeID(id:String) {}
+	public inline static function shutdown(?noTrace:Bool) {}
+	public inline static function changePresence(details:String, ?state:String, largeImageKey:String = "app-logo", ?hasStartTimestamp:Bool, ?endTimestamp:Float) {}
+}
+
+#else
 import hxdiscord_rpc.Discord as DiscordRpc;
 import hxdiscord_rpc.Types;
 
@@ -10,13 +18,18 @@ import Sys.sleep;
 
 class DiscordClient
 {
-	private static final defaultID = #if tgt "1009523643392475206" #else '814588678700924999' #end;
+	private static final defaultID = '814588678700924999';
+	private static final defaultAllowedImageKeys:Array<String> = [
+		"icon"
+	];
 	
 	private static var discordDaemon:Thread;
 	private static var mutex:Mutex = new Mutex(); // whatever the fuck this is
-
 	private static var lastPresence:DiscordRichPresence;
-	public static var currentID:String = defaultID;
+
+	////
+	public static var currentID(default, null):String = defaultID;
+	public static var allowedImageKeys:Array<String> = defaultAllowedImageKeys.copy();
 
 	public static function start()
 	{
@@ -98,41 +111,6 @@ class DiscordClient
 	}
 
 	////
-	static var allowedImageKeys:Array<String> = [
-		#if !tgt
-		"icon",
-		#else
-		"app-logo",
-		"gorgeous",
-		"trollface",
-
-		"talentless-fox",
-		"no-villains",
-		"die-batsards",
-		"taste-for-blood",
-		
-		"high-shovel",
-		"on-your-trail",
-		"proving-nothing",
-
-		"no-heroes",
-		"scars-n-stars",
-		
-		"lonely-looser",
-		"hammerhead",
-		"all-hail-the-king",
-
-		"presentless-fox",
-		"no-grinches",
-		"die-carolers",
-
-		"tricks-for-treats",
-		"lonely-ghouler",
-		"hammerdread",
-		"fear-the-pumpkin-king",
-		"you-cant-consent",
-		#end
-	];
 	inline static function getImageKey(key):String
 		return allowedImageKeys.contains(key) ? key : allowedImageKeys[0];
 
@@ -158,11 +136,8 @@ class DiscordClient
 		lastPresence.details = details;
 		lastPresence.state = state;
 		lastPresence.largeImageKey = getImageKey(largeImageKey);
-		#if tgt
-		lastPresence.largeImageText = "Tails Gets Trolled v" + lime.app.Application.current.meta.get('version');
-		#else
 		lastPresence.largeImageText = "Troll Engine " + Main.displayedVersion;
-		#end
+
 		// Obtained times are in milliseconds so they are divided so Discord can use it
 		lastPresence.startTimestamp = Std.int(startTimestamp / 1000);
 		lastPresence.endTimestamp = Std.int(endTimestamp / 1000);
