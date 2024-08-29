@@ -4678,7 +4678,7 @@ class PlayState extends MusicBeatState
 		pause();
 		persistentUpdate = false;
 		persistentDraw = true;
-		openSubState(new PauseSubState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
+		openSubState(new PauseSubState());
 	}
 
 	public function pause(){

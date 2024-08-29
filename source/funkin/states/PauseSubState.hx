@@ -33,7 +33,7 @@ class PauseSubState extends MusicBeatSubstate
 
 	private var skipTimeText:Null<SkipTimeText> = null;
 
-	public function new(x:Float, y:Float)
+	public function new()
 	{
 		super();
 
