@@ -243,7 +243,7 @@ class Cache
 	private static function load(toLoad:AssetPreload){
 		switch (toLoad.type){
 			default:
-				Paths.returnGraphic(toLoad.path, toLoad.library);
+				Paths.image(toLoad.path, toLoad.library);
 			case SOUND:
 				Paths.returnSound("sounds", toLoad.path, toLoad.library);
 			case MUSIC:
