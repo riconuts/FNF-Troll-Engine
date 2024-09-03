@@ -180,7 +180,6 @@ class FunkinLua extends FunkinScript
 				if (printMessage == true)
 					luaTrace('Stopping lua script: ' + scriptName);
 			
-			stop();
 				PlayState.instance.scriptsToClose.push(this);
 				gonnaClose = true;
 			}
