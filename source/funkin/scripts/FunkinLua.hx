@@ -176,10 +176,14 @@ class FunkinLua extends FunkinScript
 			luaTrace(toPrint.join(", "), true, false);
 		}));
 		addCallback("close", (?printMessage:Bool) -> {
-			if (!gonnaClose && printMessage == true)
-				luaTrace('Stopping lua script: ' + scriptName);
+			if (!gonnaClose){
+				if (printMessage == true)
+					luaTrace('Stopping lua script: ' + scriptName);
 			
 			stop();
+				PlayState.instance.scriptsToClose.push(this);
+				gonnaClose = true;
+			}
 		});
 
 		//// mod manager

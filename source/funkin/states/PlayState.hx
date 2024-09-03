@@ -351,6 +351,8 @@ class PlayState extends MusicBeatState
 	public var funkyScripts:Array<FunkinScript> = [];
 	public var hscriptArray:Array<FunkinHScript> = [];
 	public var luaArray:Array<FunkinLua> = [];
+
+	public var scriptsToClose:Array<FunkinScript> = [];
 	
 	// used by lua scripts
 	public var modchartTweens:Map<String, FlxTween> = new Map();
@@ -4432,7 +4434,7 @@ class PlayState extends MusicBeatState
 
 	public function removeLua(luaScript:FunkinLua):Void
 	{
-		if (luaArray != null && !preventLuaRemove) {
+		if (!preventLuaRemove) {
 			funkyScripts.remove(luaScript);
 			luaArray.remove(luaScript);
 		}
@@ -4548,6 +4550,18 @@ class PlayState extends MusicBeatState
 			?vars:Map<String, Dynamic>, ?ignoreSpecialShit:Bool = true):Dynamic
 	{
         #if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+		while (scriptsToClose.length > 0){
+			var script = scriptsToClose.pop();
+
+			if (script is FunkinLua)
+				luaArray.remove(cast script);
+			else if (script is FunkinHScript)
+				hscriptArray.remove(cast script);
+
+			funkyScripts.remove(script);
+			script.stop();
+		}
+
 		if (args == null) args = [];
 		if (scriptArray == null) scriptArray = funkyScripts;
 		if (exclusions == null) exclusions = [];
