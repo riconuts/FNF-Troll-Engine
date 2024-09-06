@@ -1284,10 +1284,10 @@ class PlayState extends MusicBeatState
         }
 	}
 
-	public function getLuaObject(tag:String, text:Bool=true):FlxSprite {
-		if(modchartObjects.exists(tag)) return modchartObjects.get(tag);
-		if(modchartSprites.exists(tag)) return modchartSprites.get(tag);
-		if(text && modchartTexts.exists(tag)) return modchartTexts.get(tag);
+	public function getLuaObject(tag:String, ?checkForTextsToo:Bool){
+		if (modchartObjects.exists(tag)) return modchartObjects.get(tag);
+		if (modchartSprites.exists(tag)) return modchartSprites.get(tag);
+		if (checkForTextsToo==true && modchartTexts.exists(tag)) return modchartTexts.get(tag);
 		return null;
 	}
 
@@ -2103,14 +2103,8 @@ class PlayState extends MusicBeatState
 				inline function makeSustain(susNote:Int, susPart) {
 					var sustainNote:Note = new Note(daStrumTime + Conductor.stepCrochet * (susNote + 1), daColumn, oldNote, gottaHitNote, susPart, false, hudSkin);
 					sustainNote.gfNote = swagNote.gfNote;
-					if (callScripts)callOnScripts("onGeneratedHold", [sustainNote]);
 					if (callScripts) callOnScripts("onGeneratedHold", [sustainNote]);
 					sustainNote.noteType = type;
-
-					if (sustainNote == null || !sustainNote.alive)
-						break;
-
-					sustainNote.scrollFactor.set();
 
 					sustainNote.ID = notes.length;
 					modchartObjects.set('note${sustainNote.ID}', sustainNote);
@@ -2132,7 +2126,6 @@ class PlayState extends MusicBeatState
 					oldNote = sustainNote;
 				}
 
-				oldNote.isSustainEnd = true;
 				var susLength = Math.floor(swagNote.sustainLength / Conductor.stepCrochet) - 1;
 				if (susLength > 0){
 					for (susNote in 0...susLength)
@@ -2276,7 +2269,7 @@ class PlayState extends MusicBeatState
 						if(Math.isNaN(charType)) charType = 0;
 				}
 				
-				trace(event.value2, charType);
+				//trace(event.value2, charType);
 
 				addCharacterToList(event.value2, charType);
 			default:
@@ -3185,8 +3178,10 @@ class PlayState extends MusicBeatState
 				try{
 					if(killMe.length > 1)
 						FunkinLua.setVarInArray(FunkinLua.getPropertyLoopThingWhatever(killMe, true, true), killMe[killMe.length - 1], value2);
+						ScriptingUtil.setVarInArray(ScriptingUtil.getPropertyLoopThingWhatever(killMe, true, true), killMe[killMe.length - 1], value2);
 					else
 						FunkinLua.setVarInArray(this, value1, value2);
+						ScriptingUtil.setVarInArray(this, value1, value2);
 				}catch (e:haxe.Exception){
 
 				}
@@ -4428,7 +4423,7 @@ class PlayState extends MusicBeatState
         var split = path.split("/");
         var modName:String = split[0] == "content" ? split[1] : 'assets';
         
-		var script = new FunkinLua(path, scriptName, ignoreCreateCall, [
+		var script = FunkinLua.fromFile(path, scriptName, ignoreCreateCall, [
             "modName" => modName
         ]);
 
@@ -4457,6 +4452,11 @@ class PlayState extends MusicBeatState
 		hscriptArray.push(script);
 		funkyScripts.push(script);
 		return script;
+	}
+
+	public function removeHScript(script:FunkinHScript){
+		funkyScripts.remove(script);
+		hscriptArray.remove(script);
 	}
 	#end
 

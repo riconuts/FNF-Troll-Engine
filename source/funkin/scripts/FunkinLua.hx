@@ -13,24 +13,23 @@ import llua.LuaL;
 import llua.State;
 #end
 
-import funkin.modchart.SubModifier;
 import funkin.states.*;
 import funkin.states.PlayState;
-import funkin.objects.*;
 import funkin.scripts.Globals.*;
+import funkin.scripts.Util;
+import funkin.scripts.Util.*;
+import funkin.objects.*;
+import funkin.modchart.SubModifier;
 
-import animateatlas.AtlasFrameMaker;
 import flixel.*;
-import flixel.addons.transition.FlxTransitionableState;
 import flixel.group.FlxGroup.FlxTypedGroup;
+import flixel.addons.transition.FlxTransitionableState;
 import flixel.math.FlxMath;
 import flixel.text.FlxText;
-import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxSave;
 import flixel.util.FlxTimer;
-import openfl.display.BlendMode;
 import haxe.Constraints.Function;
 import Type.ValueType;
 
@@ -46,13 +45,87 @@ class FunkinLua extends FunkinScript
 	
 	#if LUA_ALLOWED
 	public var lua:State = null;
-	public var errorHandler:String->Void = null;
 
-	public final addCallback:(String, Function)->Bool;
-	public final removeCallback:String->Bool;	
+	public static function fromFile(path:String, ?name:String, ?ignoreCreateCall:Bool, ?vars:Map<String, Dynamic>):FunkinLua {
+		trace('loading lua file: $path');
+
+		var lua:State = LuaL.newstate();
+		LuaL.openlibs(lua);
+		Lua.init_callbacks(lua);
+
+		try {
+			var result:Dynamic = LuaL.dofile(lua, path);
+			var resultStr:String = Lua.tostring(lua, result);
+			if (resultStr != null && result != 0)
+				throw resultStr;
+		}
+		catch (e:haxe.Exception)
+		{
+			var msg = e.message;
+			var title = 'Error on lua script!';
+			trace('$title $msg');
+
+			#if windows
+			var msgBoxResult = Windows.msgBox(msg, title, MessageBoxOptions.RETRYCANCEL | MessageBoxIcon.ERROR);
+			if (msgBoxResult == MessageBoxReturnValue.RETRY)
+				return fromFile(path);
+
+			#else
+			var window = lime.app.Application.current.window;
+			window.fullscreen = false;
+			window.alert(msg, title);
+
+			#end
+
+			lua = null;
+		}
+
+		return new FunkinLua(lua, name, ignoreCreateCall, vars);
+	}
+
+	inline private function addCallback(name:String, func:Function):Void
+		Lua_helper.add_callback(lua, name, func);
+
+	inline private function removeCallback(name:String):Void
+		Lua_helper.remove_callback(lua, name);
+
+	inline private function luaError(message:String):Void {
+		#if (linc_luajit >= "0.0.6")
+		LuaL.error(lua, message);
+		#end
+	}
+
+	function resultIsAllowed(leLua:State, leResult:Null<Int>) { //Makes it ignore warnings
+		return switch(Lua.type(leLua, leResult)) {
+			case Lua.LUA_TNIL | Lua.LUA_TBOOLEAN | Lua.LUA_TNUMBER | Lua.LUA_TSTRING | Lua.LUA_TTABLE :
+				true;
+			default:
+				false;
+		}
+	}
+
+	public function getBool(variable:String):Bool {
+		var result:String = null;
+		Lua.getglobal(lua, variable);
+		result = Convert.fromLua(lua, -1);
+		Lua.pop(lua, 1);
+
+		if (result == null)
+			return false;
+
+		// YES! FINALLY IT WORKS
+		//trace('variable: ' + variable + ', ' + result);
+		return (result == 'true');
+	}
+
+	function getErrorMessage() {
+		var v:String = Lua.tostring(lua, -1);
+		Lua.pop(lua, 1);
+		return v;
+	}
 	#end
 
-	var gonnaClose:Bool = false;
+	var gonnaClose:Bool = false; // if this is true, the script will be removed in the next playstate script call
 
 	override function setDefaultVars(){
 		super.setDefaultVars();
@@ -103,67 +176,6 @@ class FunkinLua extends FunkinScript
 		set('boyfriendName', PlayState.SONG.player1);
 		set('dadName', PlayState.SONG.player2);
 		set('gfName', PlayState.SONG.gfVersion);
-	}
-
-	#if LUA_ALLOWED
-	private function _loadFile(script):Bool
-	{
-		trace('loading lua file: $script');
-
-		try {
-			var result:Dynamic = LuaL.dofile(lua, script);
-			var resultStr:String = Lua.tostring(lua, result);
-			if (resultStr != null && result != 0)
-				throw resultStr;
-		}
-		catch (e:haxe.Exception)
-		{
-			var msg = e.message;
-			var title = 'Error on lua script!';
-			trace('$title $msg');
-
-			#if windows
-			var msgBoxResult = Windows.msgBox(msg, title, MessageBoxOptions.RETRYCANCEL | MessageBoxIcon.ERROR);
-			if (msgBoxResult == MessageBoxReturnValue.RETRY)
-				return _loadFile(script);
-
-			#else
-			var window = lime.app.Application.current.window;
-			window.fullscreen = false;
-			window.alert(msg, title);
-
-			#end
-
-			lua = null;
-			return false;
-		}
-
-		return true;
-	}
-	#end
-
-	public function new(script:String, ?name:String, ?ignoreCreateCall:Bool=false, ?vars:Map<String, Dynamic>) {
-		super((name!=null ? name : script), 'lua');
-
-		#if LUA_ALLOWED
-		lua = LuaL.newstate();
-		LuaL.openlibs(lua);
-		Lua.init_callbacks(lua);
-
-		var loaded:Bool = _loadFile(script);
-		if (!loaded)
-			return;
-
-		////
-		addCallback = Lua_helper.add_callback.bind(lua);
-		removeCallback = Lua_helper.remove_callback.bind(lua);
-		
-		setDefaultVars();
-
-		if (vars != null){
-			for(key => val in vars)
-				set(key, val);
-		}
 
 		////
 		addCallback("getProperty", getProperty);
@@ -1015,7 +1027,7 @@ class FunkinLua extends FunkinScript
 			}
 		});
 
-		addCallback("makeLuaSprite", function(tag:String, image:String, x:Float, y:Float) {
+		addCallback("makeLuaSprite", function(tag:String, image:String, ?x:Float, ?y:Float) {
 			tag = tag.replace('.', '');
 			resetSpriteTag(tag);
 			var leSprite:ModchartSprite = new ModchartSprite(x, y);
@@ -1205,7 +1217,7 @@ class FunkinLua extends FunkinScript
 			}
 		});
 		addCallback("addLuaSprite", function(tag:String, front:Bool = false) {
-			if (PlayState.instance == null || !PlayState.instance.modchartSprites.exists(tag))
+			if (!PlayState.instance.modchartSprites.exists(tag))
 				return;
 
 			var spr:ModchartSprite = PlayState.instance.modchartSprites.get(tag);
@@ -1877,463 +1889,91 @@ class FunkinLua extends FunkinScript
 		addCallback("stringEndsWith", function(str:String, end:String) {
 			return str.endsWith(end);
 		});
+	}
+
+	public function new(?state:State, ?name:String = "Lua", ?ignoreCreateCall:Bool, ?vars:Map<String, Dynamic>) {
+		super(name, 'lua');
+
+		#if LUA_ALLOWED
+		if (state == null){
+			lua = LuaL.newstate();
+			LuaL.openlibs(lua);
+			Lua.init_callbacks(lua);
+		}else{
+			lua = state;
+		}
+
+		setDefaultVars();
+
+		if (vars != null){
+			for(key => val in vars)
+				set(key, val);
+		}
 		
-		if(!ignoreCreateCall) call('onCreate', []);
+		if (ignoreCreateCall != true) 
+			call('onCreate');
 		#end
-	}
-
-	inline public static function pussyPath(luaFile:String):Null<String>
-	{
-		var cervix = luaFile.endsWith(".lua") ? luaFile : luaFile + ".lua";
-		var doPush = false;
-
-		#if MODS_ALLOWED
-		if (Paths.exists(Paths.modFolders(cervix)))
-		{
-			cervix = Paths.modFolders(cervix);
-			doPush = true;
-		}
-		else if (Paths.exists(cervix))
-		{
-			doPush = true;
-		}
-		else
-		#end
-		{
-			cervix = Paths.getPreloadPath(cervix);
-			if (Paths.exists(cervix))
-				doPush = true;
-		}
-
-		return (doPush) ? cervix : null;
-	}
-
-	public static function getProperty(variable:String) {
-		var killMe:Array<String> = variable.split('.');
-		if(killMe.length > 1) {
-			return getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
-		}
-		return getVarInArray(getInstance(), variable);
-	}
-	public static function setProperty(variable:String, value:Dynamic) {
-		var killMe:Array<String> = variable.split('.');
-		if(killMe.length > 1) {
-			setVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1], value);
-			return true;
-		}
-		setVarInArray(getInstance(), variable, value);
-		return true;
-	}
-
-	public static function getPropertyFromGroup(obj:String, index:Int, variable:Dynamic) {
-		var shitMyPants:Array<String> = obj.split('.');
-		var realObject:Dynamic = Reflect.getProperty(getInstance(), obj);
-		if(shitMyPants.length>1)
-			realObject = getPropertyLoopThingWhatever(shitMyPants, true, false);
-
-
-		if(Std.isOfType(realObject, FlxTypedGroup))
-			return getGroupStuff(realObject.members[index], variable);
-
-
-		var leArray:Dynamic = realObject[index];
-		if(leArray != null) {
-			if(Type.typeof(variable) == ValueType.TInt) {
-				return leArray[variable];
-			}
-			return getGroupStuff(leArray, variable);
-		}
-		trace("Object #" + index + " from group: " + obj + " doesn't exist!");
-		return null;
-	}
-	public static function setPropertyFromGroup(obj:String, index:Int, variable:Dynamic, value:Dynamic) {
-		var shitMyPants:Array<String> = obj.split('.');
-		var realObject:Dynamic = Reflect.getProperty(getInstance(), obj);
-		if(shitMyPants.length>1)
-			realObject = getPropertyLoopThingWhatever(shitMyPants, true, false);
-
-		if(Std.isOfType(realObject, FlxTypedGroup)) {
-			setGroupStuff(realObject.members[index], variable, value);
-			return;
-		}
-
-		var leArray:Dynamic = realObject[index];
-		if(leArray != null) {
-			if(Type.typeof(variable) == ValueType.TInt) {
-				leArray[variable] = value;
-				return;
-			}
-			setGroupStuff(leArray, variable, value);
-		}
-	}
-	public static function removeFromGroup(obj:String, index:Int, dontDestroy:Bool = false) {
-		var instance = getInstance();
-
-		if(Std.isOfType(Reflect.getProperty(instance, obj), FlxTypedGroup)) {
-			var sex = Reflect.getProperty(instance, obj).members[index];
-			if(!dontDestroy)
-				sex.kill();
-			Reflect.getProperty(instance, obj).remove(sex, true);
-			if(!dontDestroy)
-				sex.destroy();
-			return;
-		}
-		Reflect.getProperty(instance, obj).remove(Reflect.getProperty(instance, obj)[index]);
-	}
-
-	public static function getPropertyFromClass(classVar:String, variable:String) {
-		var killMe:Array<String> = variable.split('.');
-		if(killMe.length > 1) {
-			var coverMeInPiss:Dynamic = getVarInArray(Type.resolveClass(classVar), killMe[0]);
-			for (i in 1...killMe.length-1) {
-				coverMeInPiss = getVarInArray(coverMeInPiss, killMe[i]);
-			}
-			return getVarInArray(coverMeInPiss, killMe[killMe.length-1]);
-		}
-		return getVarInArray(Type.resolveClass(classVar), variable);
-	}
-	public static function setPropertyFromClass(classVar:String, variable:String, value:Dynamic) {
-		var killMe:Array<String> = variable.split('.');
-		if(killMe.length > 1) {
-			var coverMeInPiss:Dynamic = getVarInArray(Type.resolveClass(classVar), killMe[0]);
-			for (i in 1...killMe.length-1) {
-				coverMeInPiss = getVarInArray(coverMeInPiss, killMe[i]);
-			}
-			setVarInArray(coverMeInPiss, killMe[killMe.length-1], value);
-			return true;
-		}
-		setVarInArray(Type.resolveClass(classVar), variable, value);
-		return true;
-	}
-
-	public static function setVarInArray(instance:Dynamic, variable:String, value:Dynamic):Any
-	{
-		var shit:Array<String> = variable.split('[');
-		if(shit.length > 1)
-		{
-			var blah:Dynamic = Reflect.getProperty(instance, shit[0]);
-			for (i in 1...shit.length)
-			{
-				var leNum:Dynamic = shit[i].substr(0, shit[i].length - 1);
-				if(i >= shit.length-1) //Last array
-					blah[leNum] = value;
-				else //Anything else
-					blah = blah[leNum];
-			}
-			return blah;
-		}
-		/*if(Std.isOfType(instance, Map))
-			instance.set(variable,value);
-		else*/
-		switch(Type.typeof(instance)){
-			case ValueType.TClass(haxe.ds.StringMap) | ValueType.TClass(haxe.ds.ObjectMap) | ValueType.TClass(haxe.ds.IntMap) | ValueType.TClass(haxe.ds.EnumValueMap):
-				instance.set(variable, value);
-			default:
-				Reflect.setProperty(instance, variable, value);
-		};
-
-
-		return true;
-	}
-	public static function getVarInArray(instance:Dynamic, variable:String):Any
-	{
-		var shit:Array<String> = variable.split('[');
-		if(shit.length > 1)
-		{
-			var blah:Dynamic = Reflect.getProperty(instance, shit[0]);
-			for (i in 1...shit.length)
-			{
-				var leNum:Dynamic = shit[i].substr(0, shit[i].length - 1);
-				blah = blah[leNum];
-			}
-			return blah;
-		}
-		switch(Type.typeof(instance)){
-			case ValueType.TClass(haxe.ds.StringMap) | ValueType.TClass(haxe.ds.ObjectMap) | ValueType.TClass(haxe.ds.IntMap) | ValueType.TClass(haxe.ds.EnumValueMap):
-				return instance.get(variable);
-			default:
-				return Reflect.getProperty(instance, variable);
-		};
-	}
-
-	inline static function getTextObject(name:String):FlxText
-	{
-		return PlayState.instance.modchartTexts.exists(name) ? PlayState.instance.modchartTexts.get(name) : Reflect.getProperty(PlayState.instance, name);
-	}
-
-	static function getGroupStuff(leArray:Dynamic, variable:String) {
-		var killMe:Array<String> = variable.split('.');
-		if(killMe.length > 1) {
-			var coverMeInPiss:Dynamic = Reflect.getProperty(leArray, killMe[0]);
-			for (i in 1...killMe.length-1) {
-				coverMeInPiss = Reflect.getProperty(coverMeInPiss, killMe[i]);
-			}
-			switch(Type.typeof(coverMeInPiss)){
-				case ValueType.TClass(haxe.ds.StringMap) | ValueType.TClass(haxe.ds.ObjectMap) | ValueType.TClass(haxe.ds.IntMap) | ValueType.TClass(haxe.ds.EnumValueMap):
-					return coverMeInPiss.get(killMe[killMe.length-1]);
-				default:
-					return Reflect.getProperty(coverMeInPiss, killMe[killMe.length-1]);
-			};
-		}
-		switch(Type.typeof(leArray)){
-			case ValueType.TClass(haxe.ds.StringMap) | ValueType.TClass(haxe.ds.ObjectMap) | ValueType.TClass(haxe.ds.IntMap) | ValueType.TClass(haxe.ds.EnumValueMap):
-				return leArray.get(variable);
-			default:
-				return Reflect.getProperty(leArray, variable);
-		};
-	}
-	static function setGroupStuff(leArray:Dynamic, variable:String, value:Dynamic) {
-		var killMe:Array<String> = variable.split('.');
-		if(killMe.length > 1) {
-			var coverMeInPiss:Dynamic = Reflect.getProperty(leArray, killMe[0]);
-			for (i in 1...killMe.length-1) {
-				coverMeInPiss = Reflect.getProperty(coverMeInPiss, killMe[i]);
-			}
-			Reflect.setProperty(coverMeInPiss, killMe[killMe.length-1], value);
-			return;
-		}
-		Reflect.setProperty(leArray, variable, value);
-	}
-
-	static function loadFrames(spr:FlxSprite, image:String, spriteType:String)
-	{
-		switch(spriteType.toLowerCase().trim())
-		{
-			case "texture" | "textureatlas" | "tex":
-				spr.frames = AtlasFrameMaker.construct(image);
-
-			case "texture_noaa" | "textureatlas_noaa" | "tex_noaa":
-				spr.frames = AtlasFrameMaker.construct(image, null, true);
-
-			case "packer" | "packeratlas" | "pac":
-				spr.frames = Paths.getPackerAtlas(image);
-
-			default:
-				spr.frames = Paths.getSparrowAtlas(image);
-		}
-	}
-
-	static function resetTextTag(tag:String) {
-		if(!PlayState.instance.modchartTexts.exists(tag))
-			return;
-
-		var pee:ModchartText = PlayState.instance.modchartTexts.get(tag);
-		pee.kill();
-		if(pee.wasAdded)
-			PlayState.instance.remove(pee, true);
-		
-		pee.destroy();
-		PlayState.instance.modchartTexts.remove(tag);
-	}
-
-	static function resetSpriteTag(tag:String) {
-		if(!PlayState.instance.modchartSprites.exists(tag))
-			return;
-
-		var pee:ModchartSprite = PlayState.instance.modchartSprites.get(tag);
-		pee.kill();
-		if(pee.wasAdded)
-			PlayState.instance.remove(pee, true);
-		
-		pee.destroy();
-		PlayState.instance.modchartSprites.remove(tag);
-	}
-
-	static function cancelTween(tag:String) {
-		if(PlayState.instance.modchartTweens.exists(tag)) {
-			PlayState.instance.modchartTweens.get(tag).cancel();
-			PlayState.instance.modchartTweens.get(tag).destroy();
-			PlayState.instance.modchartTweens.remove(tag);
-		}
-	}
-
-	static function tweenShit(tag:String, vars:String)
-	{
-		cancelTween(tag);
-		var variables:Array<String> = vars.split('.');
-
-		if(variables.length > 1)
-			return getVarInArray(getPropertyLoopThingWhatever(variables), variables[variables.length-1]);
-		
-		return getObjectDirectly(variables[0]);
-	}
-
-	static function cancelTimer(tag:String) {
-		if (PlayState.instance.modchartTimers.exists(tag)) 
-		{
-			var theTimer:FlxTimer = PlayState.instance.modchartTimers.get(tag);
-			theTimer.cancel();
-			theTimer.destroy();
-			PlayState.instance.modchartTimers.remove(tag);
-		}
-	}
-
-	static function getMouseClicked(button:String) {
-		return switch(button){
-			case 'middle': FlxG.mouse.justPressedMiddle;
-			case 'right': FlxG.mouse.justPressedRight;
-			default: FlxG.mouse.justPressed;
-		};
-	}
-	static function getMousePressed(button:String) {
-		return switch(button){
-			case 'middle': FlxG.mouse.pressedMiddle;
-			case 'right': FlxG.mouse.pressedRight;
-			default: FlxG.mouse.pressed;
-		};
-	}
-	static function getMouseReleased(button:String) {
-		return switch(button){
-			case 'middle': FlxG.mouse.justReleasedMiddle;
-			case 'right': FlxG.mouse.justReleasedRight;
-			default: FlxG.mouse.justReleased;
-		}
-	}
-	
-	static function getFlxEaseByString(?ease:String):Float->Float
-	{
-		return (ease==null) ? FlxEase.linear : switch(ease.toLowerCase()) 
-		{
-			case 'backin': FlxEase.backIn;
-			case 'backinout': FlxEase.backInOut;
-			case 'backout': FlxEase.backOut;
-			case 'bouncein': FlxEase.bounceIn;
-			case 'bounceinout': FlxEase.bounceInOut;
-			case 'bounceout': FlxEase.bounceOut;
-			case 'circin': FlxEase.circIn;
-			case 'circinout': FlxEase.circInOut;
-			case 'circout': FlxEase.circOut;
-			case 'cubein': FlxEase.cubeIn;
-			case 'cubeinout': FlxEase.cubeInOut;
-			case 'cubeout': FlxEase.cubeOut;
-			case 'elasticin': FlxEase.elasticIn;
-			case 'elasticinout': FlxEase.elasticInOut;
-			case 'elasticout': FlxEase.elasticOut;
-			case 'expoin': FlxEase.expoIn;
-			case 'expoinout': FlxEase.expoInOut;
-			case 'expoout': FlxEase.expoOut;
-			case 'quadin': FlxEase.quadIn;
-			case 'quadinout': FlxEase.quadInOut;
-			case 'quadout': FlxEase.quadOut;
-			case 'quartin': FlxEase.quartIn;
-			case 'quartinout': FlxEase.quartInOut;
-			case 'quartout': FlxEase.quartOut;
-			case 'quintin': FlxEase.quintIn;
-			case 'quintinout': FlxEase.quintInOut;
-			case 'quintout': FlxEase.quintOut;
-			case 'sinein': FlxEase.sineIn;
-			case 'sineinout': FlxEase.sineInOut;
-			case 'sineout': FlxEase.sineOut;
-			case 'smoothstepin': FlxEase.smoothStepIn;
-			case 'smoothstepinout': FlxEase.smoothStepInOut;
-			case 'smoothstepout': FlxEase.smoothStepInOut;
-			case 'smootherstepin': FlxEase.smootherStepIn;
-			case 'smootherstepinout': FlxEase.smootherStepInOut;
-			case 'smootherstepout': FlxEase.smootherStepOut;
-			default: FlxEase.linear;
-		};
-	}
-
-	static function blendModeFromString(blend:String):BlendMode
-	{
-		return switch(blend.toLowerCase()) 
-		{
-			case 'add': ADD;
-			case 'alpha': ALPHA;
-			case 'darken': DARKEN;
-			case 'difference': DIFFERENCE;
-			case 'erase': ERASE;
-			case 'hardlight': HARDLIGHT;
-			case 'invert': INVERT;
-			case 'layer': LAYER;
-			case 'lighten': LIGHTEN;
-			case 'multiply': MULTIPLY;
-			case 'overlay': OVERLAY;
-			case 'screen': SCREEN;
-			case 'shader': SHADER;
-			case 'subtract': SUBTRACT;
-			default: NORMAL;
-		};
-	}
-
-	static function cameraFromString(cam:String):FlxCamera {
-		return switch(cam.toLowerCase()) {
-			case 'camhud' | 'hud': 
-				PlayState.instance.camHUD;
-			case 'camother' | 'other': 
-				PlayState.instance.camOther;
-			default: 
-				PlayState.instance.camGame;
-		}
-	}
-
-	public static function getPropertyLoopThingWhatever(killMe:Array<String>, ?checkForTextsToo:Bool = true, ?getProperty:Bool=true):Dynamic
-	{
-		var coverMeInPiss:Dynamic = getObjectDirectly(killMe[0], checkForTextsToo);
-		var end = killMe.length;
-		if(getProperty)end=killMe.length-1;
-
-		for (i in 1...end) {
-			coverMeInPiss = getVarInArray(coverMeInPiss, killMe[i]);
-		}
-		return coverMeInPiss;
-	}
-
-	public static function getObjectDirectly(objectName:String, ?checkForTextsToo:Bool = true):Dynamic
-	{
-		var coverMeInPiss:Dynamic = PlayState.instance.getLuaObject(objectName, checkForTextsToo);
-		if(coverMeInPiss==null)
-			coverMeInPiss = getVarInArray(getInstance(), objectName);
-
-		return coverMeInPiss;
-	}
-
-	public static function isOfTypes(value:Any, types:Array<Dynamic>):Bool {
-		for (type in types) {
-			if (Std.isOfType(value, type))
-				return true;
-		}
-		return false;
 	}
 
 	#if LUA_ALLOWED
+	// private var duplicateErrors:Array<String> = [];
+
+	private function executeFunc(name:String, ?args:Array<Dynamic>):Null<Dynamic>
+	{
+		Lua.getglobal(lua, name);
+		#if (linc_luajit >= "0.0.6")
+		if(Lua.isfunction(lua, -1)==true)
+		#else
+		if(Lua.isfunction(lua, -1)==1)
+		#end
+		{
+			var result:Dynamic;
+			if (args != null){
+				for (arg in args) Convert.toLua(lua, arg);
+				result = Lua.pcall(lua, args.length, 1, 0);
+			}else{
+				result = Lua.pcall(lua, 0, 1, 0);
+			}
+
+			if(result!=0){
+				var err = getErrorMessage();
+
+				var args = [for (arg in args){
+					(arg is String ? '"$arg"' : Std.string(arg));
+				}];
+				Main.print('$scriptName: Error on function $name(${args.join(', ')}): $err');
+				
+				/* just so your output isnt SPAMMED
+				if (!duplicateErrors.contains(err)) {
+					var args = [for (arg in args){
+						(arg is String ? '"$arg"' : Std.string(arg));
+					}];
+					Main.print('$scriptName: Error on function $func(${args.join(', ')}): $err');
+					duplicateErrors.push(err);
+					while(duplicateErrors.length > 20)
+						duplicateErrors.shift();
+				}*/
+
+				return null;
+			}else if(result != null){
+				var conv:Dynamic = cast Convert.fromLua(lua, -1);
+				Lua.pop(lua, 1);
+				return conv;
+			}
+		}
+
+		Lua.pop(lua, 1);
+		return null;
+	}
+
 	public function luaTrace(text:String, ignoreCheck:Bool = false, deprecated:Bool = false):Void {
 		if (ignoreCheck || getBool('luaDebugMode')) {
 			if (deprecated && !getBool('luaDeprecatedWarnings'))
 				return;
 			
 			PlayState.instance.addTextToDebug(text);
-			trace(text);
+			Main.print('$scriptName: $text');
 		}
-	}
-
-	function resultIsAllowed(leLua:State, leResult:Null<Int>) { //Makes it ignore warnings
-		return switch(Lua.type(leLua, leResult)) {
-			case Lua.LUA_TNIL | Lua.LUA_TBOOLEAN | Lua.LUA_TNUMBER | Lua.LUA_TSTRING | Lua.LUA_TTABLE :
-				true;
-			default:
-				false;
-		}
-	}
-
-	public function getBool(variable:String):Bool {
-		var result:String = null;
-		Lua.getglobal(lua, variable);
-		result = Convert.fromLua(lua, -1);
-		Lua.pop(lua, 1);
-
-		if (result == null)
-			return false;
-
-		// YES! FINALLY IT WORKS
-		//trace('variable: ' + variable + ', ' + result);
-		return (result == 'true');
-	}
-
-	function getErrorMessage() {
-		var v:String = Lua.tostring(lua, -1);
-		Lua.pop(lua, 1);
-		return v;
 	}
 	#end
 
@@ -2387,61 +2027,13 @@ class FunkinLua extends FunkinScript
 		#end
 	}
 
-	#if LUA_ALLOWED
-	private var duplicateErrors:Array<String> = [];
-	#end
-
-	public function call(func:String, ?args:Array<Dynamic>, ?extraVars:Map<String,Dynamic>):Dynamic {
+	public function call(funcName:String, ?args:Array<Dynamic>, ?extraVars:Map<String,Dynamic>):Dynamic {
 		#if LUA_ALLOWED
-		if (args==null) args=[];
 		if (lua==null) return Function_Continue;
 		
 		try {
-			Lua.getglobal(lua, func);
-			#if (linc_luajit >= "0.0.6")
-			if(Lua.isfunction(lua, -1)==true)
-			#else
-			if(Lua.isfunction(lua, -1)==1)
-			#end
-			{
-				for(arg in args) 
-					Convert.toLua(lua, arg);
-				
-				var result:Dynamic = Lua.pcall(lua, args.length, 1, 0);
-
-				if(result!=0){
-					var err = getErrorMessage();
-					
-					if(errorHandler != null)
-						errorHandler(err);
-					else{
-						if (!duplicateErrors.contains(err)){
-							// just so your output isnt SPAMMED
-
-							var args = [for (arg in args){
-								(arg is String ? '"$arg"' : Std.string(arg));
-							}];
-							Main.print('$scriptName: Error on function $func(${args.join(', ')}): $err');
-							duplicateErrors.push(err);
-							while(duplicateErrors.length > 20)
-								duplicateErrors.shift();
-						}
-					}
-	
-					return Function_Continue;
-				}else{
-					if(result != null){
-						var conv:Dynamic = cast Convert.fromLua(lua, -1);
-						Lua.pop(lua, 1);
-						if (conv == null)
-							return Function_Continue;
-						return conv;
-					}
-				}
-			}else{
-				Lua.pop(lua, 1);
-				return Function_Continue;
-			}
+			var ret = executeFunc(funcName, args);
+			return ret==null ? Function_Continue : ret;
 		}catch(e:Dynamic){
 			trace(e);
 		}

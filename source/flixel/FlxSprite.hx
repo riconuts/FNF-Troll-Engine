@@ -470,6 +470,7 @@ class FlxSprite extends FlxObject
 			height = Sprite.height;
 			centerOffsets();
 		}
+		useDefaultAntialiasing = Sprite.useDefaultAntialiasing;
 		antialiasing = Sprite.antialiasing;
 		animation.copyFrom(Sprite.animation);
 		graphicLoaded();

@@ -718,7 +718,7 @@ class Character extends FlxSprite
 			#if LUA_ALLOWED
 			file = filePath + '$scriptName.lua';
 			if (Paths.exists(file)){
-				var script = new FunkinLua(file);
+				var script = FunkinLua.fromFile(file);
 				pushScript(script);
 				break;
 			}
