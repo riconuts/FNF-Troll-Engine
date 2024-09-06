@@ -525,6 +525,8 @@ class Character extends FlxSprite
 	/**
 	 * FOR GF DANCING SHIT
 	 */
+    
+    var danceIndex:Int = 0;
 	public function dance()
 	{
 		if (debugMode || skipDance || specialAnim || animTimer > 0 || voicelining)
@@ -533,14 +535,21 @@ class Character extends FlxSprite
 		if (callOnScripts("onDance") == Globals.Function_Stop)
 			return;
 
-		if(danceIdle){
+        if(idleSequence.length > 1){
+            danceIndex++;
+            if(danceIndex >= idleSequence.length)
+                danceIndex = 0;
+        }
+        playAnim(idleSequence[danceIndex] + idleSuffix);
+        
+/* 		if(danceIdle){
 			danced = !danced;
 			playAnim((danced ? 'danceRight' : 'danceLeft') + idleSuffix);
 		}
 		else if(animation.getByName('idle' + idleSuffix) != null) {
 			playAnim('idle' + idleSuffix);
 		}
-
+ */
 		callOnScripts("onDancePost");
 	}
 
@@ -645,6 +654,9 @@ class Character extends FlxSprite
 		var lastDanceIdle:Bool = danceIdle;
 		danceIdle = (animation.getByName('danceLeft' + idleSuffix) != null && animation.getByName('danceRight' + idleSuffix) != null);
 
+        if(danceIdle)
+            idleSequence = ["danceLeft" + idleSuffix, "danceRight" + idleSuffix];
+        
 		if(settingCharacterUp)
 		{
 			danceEveryNumBeats = (danceIdle ? 1 : 2);
