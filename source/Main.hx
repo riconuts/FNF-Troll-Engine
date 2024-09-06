@@ -217,6 +217,7 @@ class Main extends Sprite
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(
 			UncaughtErrorEvent.UNCAUGHT_ERROR, 
 			(event:UncaughtErrorEvent) -> onCrash(event.error)
+			}
 		);
 
 		#if cpp
