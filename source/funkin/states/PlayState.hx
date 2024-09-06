@@ -1284,10 +1284,10 @@ class PlayState extends MusicBeatState
         }
 	}
 
-	public function getLuaObject(tag:String, text:Bool=true):FlxSprite {
-		if(modchartObjects.exists(tag)) return modchartObjects.get(tag);
-		if(modchartSprites.exists(tag)) return modchartSprites.get(tag);
-		if(text && modchartTexts.exists(tag)) return modchartTexts.get(tag);
+	public function getLuaObject(tag:String, ?checkForTextsToo:Bool){
+		if (modchartObjects.exists(tag)) return modchartObjects.get(tag);
+		if (modchartSprites.exists(tag)) return modchartSprites.get(tag);
+		if (checkForTextsToo==true && modchartTexts.exists(tag)) return modchartTexts.get(tag);
 		return null;
 	}
 
@@ -3178,8 +3178,10 @@ class PlayState extends MusicBeatState
 				try{
 					if(killMe.length > 1)
 						FunkinLua.setVarInArray(FunkinLua.getPropertyLoopThingWhatever(killMe, true, true), killMe[killMe.length - 1], value2);
+						ScriptingUtil.setVarInArray(ScriptingUtil.getPropertyLoopThingWhatever(killMe, true, true), killMe[killMe.length - 1], value2);
 					else
 						FunkinLua.setVarInArray(this, value1, value2);
+						ScriptingUtil.setVarInArray(this, value1, value2);
 				}catch (e:haxe.Exception){
 
 				}
@@ -4421,7 +4423,7 @@ class PlayState extends MusicBeatState
         var split = path.split("/");
         var modName:String = split[0] == "content" ? split[1] : 'assets';
         
-		var script = new FunkinLua(path, scriptName, ignoreCreateCall, [
+		var script = FunkinLua.fromFile(path, scriptName, ignoreCreateCall, [
             "modName" => modName
         ]);
 
@@ -4450,6 +4452,11 @@ class PlayState extends MusicBeatState
 		hscriptArray.push(script);
 		funkyScripts.push(script);
 		return script;
+	}
+
+	public function removeHScript(script:FunkinHScript){
+		funkyScripts.remove(script);
+		hscriptArray.remove(script);
 	}
 	#end
 

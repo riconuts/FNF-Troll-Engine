@@ -76,7 +76,6 @@ class Util
 			}
 			return getGroupStuff(leArray, variable);
 		}
-
 		trace("Object #" + index + " from group: " + obj + " doesn't exist!");
 		return null;
 	}
@@ -190,6 +189,11 @@ class Util
 		};
 	}
 
+	inline public static function getTextObject(name:String):FlxText
+	{
+		return PlayState.instance.modchartTexts.exists(name) ? PlayState.instance.modchartTexts.get(name) : Reflect.getProperty(PlayState.instance, name);
+	}
+
 	public static function getGroupStuff(leArray:Dynamic, variable:String) {
 		var killMe:Array<String> = variable.split('.');
 		if(killMe.length > 1) {
@@ -222,77 +226,6 @@ class Util
 			return;
 		}
 		Reflect.setProperty(leArray, variable, value);
-	}
-
-	inline public static function getTextObject(name:String):FlxText
-	{
-		return PlayState.instance.modchartTexts.exists(name) ? PlayState.instance.modchartTexts.get(name) : Reflect.getProperty(PlayState.instance, name);
-	}
-
-	public static function getGameObject(tag:String) {
-		var killMe:Array<String> = tag.split('.');
-		if (killMe.length > 1)
-			return getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
-		
-		return getVarInArray(getInstance(), killMe[0]);
-	}
-
-	public static function getModSprite(tag:String, ?checkForTextsToo:Bool){
-		var game = PlayState.instance;
-		if (game.modchartObjects.exists(tag)) return game.modchartObjects.get(tag);
-		if (game.modchartSprites.exists(tag)) return game.modchartSprites.get(tag);
-		if (checkForTextsToo==true && game.modchartTexts.exists(tag)) return game.modchartTexts.get(tag);
-		return null;
-	}	
-
-	public static function getDirectSprite(tag:String, ?checkForTextsToo:Bool = true):Null<FlxSprite> {
-		var modSpr = getModSprite(tag, checkForTextsToo);
-		return modSpr!=null ? modSpr : getGameObject(tag);
-	}
-
-	public static function getObjectDirectly(objectName:String, ?checkForTextsToo:Bool = true):Dynamic
-	{
-		/*
-		var coverMeInPiss:Dynamic = getModSprite(objectName, checkForTextsToo);
-		if (coverMeInPiss==null)
-			coverMeInPiss = getVarInArray(getInstance(), objectName);
-
-		return coverMeInPiss;
-		*/
-		return getDirectSprite(objectName, checkForTextsToo);
-	}
-
-	public static function addSprite(tag:String, front:Bool = false) {
-		if (PlayState.instance == null || !PlayState.instance.modchartSprites.exists(tag))
-			return;
-
-		var spr:ModchartSprite = PlayState.instance.modchartSprites.get(tag);
-		if (spr.wasAdded)
-			return;
-
-		var instance:FlxState = getInstance();
-
-		if (front){
-			instance.add(spr);			
-		}else if (instance is GameOverSubstate){
-			var instance:GameOverSubstate = cast instance; // fucking haxe
-			instance.insert(instance.members.indexOf(instance.boyfriend), spr);
-		}else if (instance is PlayState){
-			var instance:PlayState = cast instance; // fucking haxe
-			
-			var position:Int = instance.members.indexOf(instance.gfGroup);
-			position = FlxMath.minInt(position, instance.members.indexOf(instance.boyfriendGroup));
-			position = FlxMath.minInt(position, instance.members.indexOf(instance.dadGroup));
-
-			if (position == -1)
-				instance.add(spr);
-			else
-				instance.insert(position, spr);
-		}else{
-			instance.add(spr);
-		}
-		
-		spr.wasAdded = true;	
 	}
 
 	public static function loadFrames(spr:FlxSprite, image:String, spriteType:String)
@@ -340,7 +273,7 @@ class Util
 	}
 
 	public static function cancelTween(tag:String) {
-		if(PlayState.instance.modchartTweens.exists(tag)) {
+		if (PlayState.instance.modchartTweens.exists(tag)) {
 			PlayState.instance.modchartTweens.get(tag).cancel();
 			PlayState.instance.modchartTweens.get(tag).destroy();
 			PlayState.instance.modchartTweens.remove(tag);
@@ -479,12 +412,37 @@ class Util
 		return coverMeInPiss;
 	}
 
+	public static function getObjectDirectly(objectName:String, ?checkForTextsToo:Bool = true):Dynamic
+	{
+		var coverMeInPiss:Dynamic = PlayState.instance.getLuaObject(objectName, checkForTextsToo);
+		if(coverMeInPiss==null)
+			coverMeInPiss = getVarInArray(getInstance(), objectName);
+
+		return coverMeInPiss;
+	}
+
 	public static function isOfTypes(value:Any, types:Array<Dynamic>):Bool {
 		for (type in types) {
 			if (Std.isOfType(value, type))
 				return true;
 		}
 		return false;
+	}
+
+	public static function getGameObject(tag:String) {
+		var killMe:Array<String> = tag.split('.');
+		if (killMe.length > 1)
+			return getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
+		
+		return getVarInArray(getInstance(), killMe[0]);
+	}
+
+	inline public static function getLuaObject(tag:String, ?checkForTextsToo:Bool)
+		return PlayState.instance.getLuaObject(tag, checkForTextsToo);
+
+	public static function getDirectSprite(tag:String, ?checkForTextsToo:Bool = true):Null<FlxSprite> {
+		var modSpr = getLuaObject(tag, checkForTextsToo);
+		return modSpr!=null ? modSpr : getGameObject(tag);
 	}
 }
 
