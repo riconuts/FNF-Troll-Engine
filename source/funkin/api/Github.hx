@@ -94,7 +94,7 @@ class Github {
 	{
 		var repoInfo:RepoInfo = {
 			user: "riconuts", // default user
-			repo: "troll-engine" // default repo
+			repo: "FNF-Troll-Engine" // default repo
 		}
 		#if !display
 		var process = null; 

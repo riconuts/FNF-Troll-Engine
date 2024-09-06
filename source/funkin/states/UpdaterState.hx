@@ -314,7 +314,7 @@ class UpdaterState extends MusicBeatState {
         }
     }
 
-	#if DO_AUTO_UPDATE
+	#if(DO_AUTO_UPDATE || display)
 	// gets the most recent release and returns it
 	// if you dont have download betas on, then it'll exclude prereleases
 	public static function getRecentGithubRelease()
@@ -357,22 +357,6 @@ class UpdaterState extends MusicBeatState {
 				outOfDate = true;
 				trace('New version found! Newest version: $tagName | Current: ${Main.semanticVersion}');
 			}
-						
-			/* if (recentRelease.prerelease)
-			{
-				var tagName = recentRelease.tag_name;
-				var split = tagName.split("-");
-				var betaVersion = split.length == 1 ? "1" : split.pop();
-				var versionName = split.pop();
-				outOfDate = (versionName > Main.engineVersion && betaVersion > Main.betaVersion)
-					|| (Main.beta && versionName == Main.engineVersion && betaVersion > Main.betaVersion)
-					|| (versionName > Main.engineVersion);
-			}else{
-				var versionName = recentRelease.tag_name;
-				// if you're in beta and version is the same as the engine version, but just not beta
-				// then you should absolutely be prompted to update
-				outOfDate = Main.beta && Main.engineVersion <= versionName || Main.engineVersion < versionName;
-			} */
 		}
 
 		return Main.outOfDate = outOfDate;

@@ -167,7 +167,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			#if DISCORD_ALLOWED
 			["discord", ["discordRPC"]],
 			#end
-			#if DO_AUTO_UPDATE
+			#if(DO_AUTO_UPDATE || display)
 			["updating", ["checkForUpdates", "downloadBetas"]]
 			#end
 		],
@@ -330,7 +330,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				FlxSprite.defaultAntialiasing = val;
 				FlxG.stage.quality = val ? openfl.display.StageQuality.BEST : openfl.display.StageQuality.LOW; // does nothing!!!!
 				
-			#if DO_AUTO_UPDATE
+			#if(DO_AUTO_UPDATE || display)
 			case 'downloadBetas' | 'checkForUpdates':
 				Main.downloadBetas = Main.beta || ClientPrefs.downloadBetas;
 				if (!Main.beta || option == 'checkForUpdates'){
