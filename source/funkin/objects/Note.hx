@@ -31,9 +31,19 @@ typedef HitResult = {
 	/**Always splashes**/
 	var FORCED = 1;
 }
+
+@:enum abstract SustainPart(Int) from Int to Int
+{
+	var START = 0; // Not a sustain
+	var PART = 1;
+	var END = 2;
+}
+
 class Note extends NoteObject
 {
 	public static var swagWidth(default, set):Float = 160 * 0.7;
+	public static var halfWidth(default, null):Float = swagWidth * 0.5;
+
 	public static var colArray:Array<String> = ['purple', 'blue', 'green', 'red'];
 	public static var quants:Array<Int> = [
 		4, // quarter note
@@ -55,6 +65,8 @@ class Note extends NoteObject
 		''
 	];
 
+	public static var quantShitCache = new Map<String, Bool>();
+
 	public static function getQuant(beat:Float){
 		var row:Int = Conductor.beatToNoteRow(beat);
 		for(data in quants){
@@ -68,16 +80,8 @@ class Note extends NoteObject
 		halfWidth = val * 0.5;
 		return swagWidth = val;
 	}
-	public static var halfWidth(default, null):Float = swagWidth * 0.5;
-	public static var quantShitCache = new Map<String, Bool>();
 
-	////
-
-	public var hitResult:HitResult = {judgment: UNJUDGED, hitDiff: 0}
-
-	public var mAngle:Float = 0;
-	public var bAngle:Float = 0;
-	
+	////	
 	public var noteScript:FunkinHScript;
     public var genScript:FunkinHScript; // note generator script (used for shit like pixel notes or skin mods) ((script provided by the HUD skin))
 	public var extraData:Map<String, Dynamic> = [];
@@ -85,29 +89,41 @@ class Note extends NoteObject
 	// basic stuff
 	public var beat:Float = 0;
 	public var strumTime(default, set):Float = 0;
-    function set_strumTime(val:Float){
-        row = Conductor.secsToRow(val);
-        return strumTime=val;
-    }
 	public var visualTime:Float = 0;
 	public var mustPress:Bool = false;
-	@:isVar
-	public var canBeHit(get, null):Bool = false;
-	public var tooLate:Bool = false;
-	public var wasGoodHit:Bool = false;
 	public var ignoreNote:Bool = false;
-	public var hitByOpponent:Bool = false;
-	public var noteWasHit:Bool = false;
 	public var prevNote:Note;
 	public var nextNote:Note;
-	public var spawned:Bool = false;
-	public var causedMiss:Bool = false;
-	function get_canBeHit() return UNJUDGED != PlayState.instance.judgeManager.judgeNote(this);
-	
+
+	// hold shit
+	public var isSustainNote:Bool = false;
+	public var isSustainEnd:Bool = false;
+	public var isRoll:Bool = false;
+	public var isHeld:Bool = false;
+	public var parent:Note;
+	public var sustainLength:Float = 0;
+	public var holdingTime:Float = 0;
+	public var tripProgress:Float = 0;
+	public var tail:Array<Note> = []; 
+	public var unhitTail:Array<Note> = [];
+
 	// quant shit
 	public var row:Int = 0;
 	public var quant:Int = 4;
 	public var isQuant:Bool = false; // mainly for color swapping, so it changes color depending on which set (quants or regular notes)
+
+	// note status
+	public var spawned:Bool = false;
+	public var tooLate:Bool = false;
+	public var wasGoodHit:Bool = false;
+	public var hitByOpponent:Bool = false;
+	public var noteWasHit:Bool = false;
+	public var causedMiss:Bool = false;
+	public var canBeHit(get, never):Bool;
+
+	public var hitResult:HitResult = {judgment: UNJUDGED, hitDiff: 0}
+	public var rating:String = 'unknown';
+	public var ratingMod:Float = 0; //9 = unknown, 0.25 = shit, 0.5 = bad, 0.75 = good, 1 = sick
 	
 	// note type/customizable shit
 	public var canQuant:Bool = true; // whether a quant texture should be searched for or not
@@ -116,39 +132,13 @@ class Note extends NoteObject
 	public var usesDefaultColours:Bool = true; // whether this note uses the default note colours (lets you change colours in options menu)
 	// This automatically gets set if a notetype changes the ColorSwap values
 
-	/** If you need to tap the note to hit it, or just have the direction be held when it can be judged to hit.
-		An example is Stepmania mines **/
-	public var requiresTap:Bool = true; 
-
-	/** The maximum amount of time you can release a hold before it counts as a miss**/
-	public var maxReleaseTime:Float = 0.25;
-
+	public var texture(default, set):String; // texture for the note
+	public var breaksCombo:Bool = false; // hitting this will cause a combo break
 	public var blockHit:Bool = false; // whether you can hit this note or not
-	#if PE_MOD_COMPATIBILITY
-	public var lowPriority:Bool = false; // Shadowmario's shitty workaround for really bad mine placement, yet still no *real* hitbox customization lol! Only used when PE Mod Compat is enabled in project.xml
-	#end
-	@:isVar
-	public var noteSplashDisabled(get, set):Bool = false; // disables the notesplash when you hit this note
-	function get_noteSplashDisabled()
-		return noteSplashBehaviour == DISABLED;
-	function set_noteSplashDisabled(val:Bool){
-		noteSplashBehaviour = val ? DISABLED : DEFAULT;
-		return val;
-	}
-
-	public var noteSplashBehaviour:SplashBehaviour = DEFAULT;
-	public var noteSplashTexture:String = null; // spritesheet for the notesplash
-	public var noteSplashHue:Float = 0; // hueshift for the notesplash, can be changed in note-type but otherwise its whatever the user sets in options
-	public var noteSplashSat:Float = 0; // ditto, but for saturation
-	public var noteSplashBrt:Float = 0; // ditto, but for brightness
-	//public var ratingDisabled:Bool = false; // disables judging this note
+	public var hitCausesMiss:Bool = false; // hitting this causes a miss
 	public var missHealth:Float = 0; // damage when hitCausesMiss = true and you hit this note
-    @:isVar	
-	public var texture(get, set):String; // texture for the note
 	public var noAnimation:Bool = false; // disables the animation for hitting this note
 	public var noMissAnimation:Bool = false; // disables the animation for missing this note
-	public var hitCausesMiss:Bool = false; // hitting this causes a miss
-	public var breaksCombo:Bool = false; // hitting this will cause a combo break
 	public var hitsoundDisabled:Bool = false; // hitting this does not cause a hitsound when user turns on hitsounds
 	public var gfNote:Bool = false; // gf sings this note (pushes gf into characters array when the note is hit)
 	public var characters:Array<Character> = []; // which characters sing this note, leave blank for the playfield's characters
@@ -157,48 +147,34 @@ class Note extends NoteObject
 	// Note that holds automatically have this set to their parent's fieldIndex
 	public var field:PlayField; // same as fieldIndex but lets you set the field directly incase you wanna do that i  guess
 
-	// hold shit
-	public var tail:Array<Note> = []; 
-	public var unhitTail:Array<Note> = [];
-	public var parent:Note;
-	public var sustainLength:Float = 0;
-	public var isSustainNote:Bool = false;
-	public var holdingTime:Float = 0;
-	public var tripProgress:Float = 0;
-    public var isHeld:Bool = false;
-    public var isRoll:Bool = false;
+	#if PE_MOD_COMPATIBILITY
+	public var lowPriority:Bool = false; // Shadowmario's shitty workaround for really bad mine placement, yet still no *real* hitbox customization lol! Only used when PE Mod Compat is enabled in project.xml
+	#end
+
+	/** If you need to tap the note to hit it, or just have the direction be held when it can be judged to hit.
+	An example is Stepmania mines **/
+	public var requiresTap:Bool = true; 
+
+	/** The maximum amount of time you can release a hold before it counts as a miss**/
+	public var maxReleaseTime:Float = 0.25;
+
+	public var noteSplashBehaviour:SplashBehaviour = DEFAULT;
+	public var noteSplashDisabled(get, set):Bool; // shortcut, disables the notesplash when you hit this note
+	public var noteSplashTexture:String = null; // spritesheet for the notesplash
+	public var noteSplashHue:Float = 0; // hueshift for the notesplash, can be changed in note-type but otherwise its whatever the user sets in options
+	public var noteSplashSat:Float = 0; // ditto, but for saturation
+	public var noteSplashBrt:Float = 0; // ditto, but for brightness
 
 	// event shit (prob can be removed??????)
 	public var eventName:String = '';
-	public var eventLength:Int = 0;
 	public var eventVal1:String = '';
 	public var eventVal2:String = '';
+	public var eventLength:Int = 0;
 
 	// etc
-
 	public var colorSwap:ColorSwap;
 	public var inEditor:Bool = false;
 	public var desiredZIndex:Float = 0;
-	
-	// do not tuch
-	public var baseScaleX:Float = 1;
-	public var baseScaleY:Float = 1;
-	public var zIndex:Float = 0;
-	public var z:Float = 0;
-    public var realColumn:Int;
-	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
-
-    @:isVar
-	public var realNoteData(get, set):Int; // backwards compat
-    inline function get_realNoteData()
-        return realColumn;
-    inline function set_realNoteData(v:Int)
-        return realColumn = v;
-
-	/*
-	private var colArray(get, never):Array<String>;
-	inline function set_colArray() return Note.colArray;
-	*/
 
 	// mod manager
 	public var garbage:Bool = false; // if this is true, the note will be removed in the next update cycle
@@ -208,40 +184,50 @@ class Note extends NoteObject
 	public var typeOffsetY:Float = 0;
 	public var typeOffsetAngle:Float = 0;
 	public var multSpeed:Float = 1.0;
-	/* useless shit mostly
-	public var offsetAngle:Float = 0;
-	*/
 
-	public var copyX:Bool = true;
-	public var copyY:Bool = true;
-	public var copyAngle:Bool = true;
-	public var copyAlpha:Bool = true;
+	// do not tuch
+	public var baseScaleX:Float = 1;
+	public var baseScaleY:Float = 1;
+	public var zIndex:Float = 0;
+	public var z:Float = 0;
+	public var realColumn:Int;
+	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
 
-	public var rating:String = 'unknown';
-	public var ratingMod:Float = 0; //9 = unknown, 0.25 = shit, 0.5 = bad, 0.75 = good, 1 = sick
+	// unused
+	public var mAngle:Float = 0;
+	public var bAngle:Float = 0;
 
-	public var isSustainEnd:Bool = false;
-	/*
-	@:isVar
-	public var isSustainEnd(get, null):Bool = false;
+	// unused pe hold shit
+	@:noCompletion public var copyX:Bool = true;
+	@:noCompletion public var copyY:Bool = true;
+	@:noCompletion public var copyAngle:Bool = true;
+	@:noCompletion public var copyAlpha:Bool = true;
 
-	public function get_isSustainEnd():Bool
-		return (isSustainNote && animation != null && animation.curAnim != null && animation.curAnim.name != null && animation.curAnim.name.endsWith("end"));
-	*/
+	//// backwards compat
+	@:noCompletion public var realNoteData(get, set):Int; 
+	@:noCompletion inline function get_realNoteData() return realColumn;
+	@:noCompletion inline function set_realNoteData(v:Int) return realColumn = v;
+	
+	//public var ratingDisabled:Bool = false; // disables judging this note
 
-	public function resizeByRatio(ratio:Float) //haha funny twitter shit
-	{
-		
-	}
-
-	private function set_texture(value:String):String {
-        if(tex != value)reloadNote(texPrefix, value, texSuffix);
-        return tex;
-	}
-
-    function get_texture():String{
-        return tex;
+	@:noCompletion function set_strumTime(val:Float){
+        row = Conductor.secsToRow(val);
+        return strumTime=val;
     }
+
+	@:noCompletion function get_canBeHit() return UNJUDGED != PlayState.instance.judgeManager.judgeNote(this);
+
+	@:noCompletion inline function get_noteSplashDisabled() return noteSplashBehaviour == DISABLED;
+	@:noCompletion inline function set_noteSplashDisabled(val:Bool) {
+		noteSplashBehaviour = val ? DISABLED : DEFAULT;
+		return val;
+	}
+
+	////
+	private function set_texture(value:String):String {
+        if (tex != value) reloadNote(texPrefix, value, texSuffix);
+        return tex;
+	}
 
 	public function updateColours(ignore:Bool=false){		
 		if (!ignore && !usesDefaultColours) return;
@@ -444,17 +430,19 @@ class Note extends NoteObject
 		return '(column: $column | noteType: $noteType | strumTime: $strumTime | visible: $visible)';
 	}
 
-	public function new(strumTime:Float, column:Int, ?prevNote:Note, ?gottaHitNote:Bool = false, ?sustainNote:Bool = false, ?inEditor:Bool = false, ?noteMod:String = 'default')
+	public function new(strumTime:Float, column:Int, ?prevNote:Note, ?gottaHitNote:Bool = false, ?susPart:SustainPart = START, ?inEditor:Bool = false, ?noteMod:String = 'default')
 	{
 		super();
-		objType = NOTE;
+		this.objType = NOTE;
 
         this.strumTime = strumTime;
 		this.column = column;
 		this.prevNote = (prevNote==null) ? this : prevNote;
-		this.isSustainNote = sustainNote;
-		this.inEditor = inEditor;
 		this.mustPress = gottaHitNote;
+		this.isSustainNote = susPart != START;
+		this.isSustainEnd = susPart == END;
+		this.inEditor = inEditor;
+		this.beat = Conductor.getBeat(strumTime);
 
 		if (canQuant && ClientPrefs.noteSkin == 'Quants'){
 			if (isSustainNote && prevNote != null)
@@ -462,9 +450,7 @@ class Note extends NoteObject
 			else
 				quant = getQuant(Conductor.getBeatSinceChange(this.strumTime));
 		}
-		
-		beat = Conductor.getBeat(strumTime);
-		
+				
 		if (!inEditor){ 
 			this.strumTime += ClientPrefs.noteOffset;
 			visualTime = PlayState.instance.getNoteInitialTime(this.strumTime);
@@ -475,29 +461,24 @@ class Note extends NoteObject
 		else
 			this.colorSwap = new ColorSwap();
 
-		if (prevNote != null)
+		if (prevNote != null){
 			prevNote.nextNote = this;
 
-		if (isSustainNote && prevNote != null)
-		{
-			hitsoundDisabled = true;
-			copyAngle = false;
-			//if(ClientPrefs.downScroll) flipY = true;
-
-			if (genScript != null && genScript.exists("setupHoldNoteTexture"))
-				genScript.executeFunc("setupHoldNoteTexture", [this]);
-
-			animation.play(colArray[column % 4] + 'holdend');
-			updateHitbox();
-
-			if (prevNote.isSustainNote)
+			if (isSustainNote)
 			{
-				prevNote.animation.play(colArray[prevNote.column % 4] + 'hold');
+				hitsoundDisabled = true;
 
-				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * PlayState.instance.songSpeed * 100;
-				prevNote.updateHitbox();
+				if (genScript != null && genScript.exists("setupHoldNoteTexture"))
+					genScript.executeFunc("setupHoldNoteTexture", [this]);
 
-				prevNote.defScale.copyFrom(prevNote.scale);
+				if (isSustainEnd){
+					animation.play(colArray[column % 4] + 'holdend');
+				}else{
+					animation.play(colArray[column % 4] + 'hold');
+				}
+
+				scale.y *= Conductor.stepCrochet * 1.5 * PlayState.instance.songSpeed;
+				updateHitbox();
 			}
 		}
 

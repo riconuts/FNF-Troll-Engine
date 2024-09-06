@@ -426,13 +426,6 @@ class PlayState extends MusicBeatState
 
 	function set_songSpeed(value:Float):Float
 	{
-		if(generatedMusic)
-		{
-			var ratio:Float = value / songSpeed; //funny word huh
-/* 			for (note in notes) note.resizeByRatio(ratio);
-			for (note in unspawnNotes) note.resizeByRatio(ratio); */
-			for(note in allNotes)note.resizeByRatio(ratio);
-		}
 		songSpeed = value;
 		noteKillOffset = 350 / songSpeed;
 		return value;
@@ -2057,6 +2050,7 @@ class PlayState extends MusicBeatState
 					type = ChartingState.noteTypeList[type];
 
 				var swagNote:Note = new Note(daStrumTime, daColumn, oldNote, gottaHitNote, false, false, hudSkin);
+				var swagNote:Note = new Note(daStrumTime, daColumn, oldNote, gottaHitNote, START, false, hudSkin);
 				swagNote.realColumn = songNotes[1];
 				swagNote.sustainLength = songNotes[2];
 
@@ -2104,8 +2098,11 @@ class PlayState extends MusicBeatState
 				oldNote = swagNote;
 				for (susNote in 0...Math.floor(swagNote.sustainLength / Conductor.stepCrochet)) {
 					var sustainNote:Note = new Note(daStrumTime + Conductor.stepCrochet * (susNote + 1), daColumn, oldNote, gottaHitNote, true, false, hudSkin);
+				inline function makeSustain(susNote:Int, susPart) {
+					var sustainNote:Note = new Note(daStrumTime + Conductor.stepCrochet * (susNote + 1), daColumn, oldNote, gottaHitNote, susPart, false, hudSkin);
 					sustainNote.gfNote = swagNote.gfNote;
 					if (callScripts)callOnScripts("onGeneratedHold", [sustainNote]);
+					if (callScripts) callOnScripts("onGeneratedHold", [sustainNote]);
 					sustainNote.noteType = type;
 
 					if (sustainNote == null || !sustainNote.alive)
@@ -2134,6 +2131,12 @@ class PlayState extends MusicBeatState
 				}
 
 				oldNote.isSustainEnd = true;
+				var susLength = Math.floor(swagNote.sustainLength / Conductor.stepCrochet) - 1;
+				if (susLength > 0){
+					for (susNote in 0...susLength)
+						makeSustain(susNote, PART);
+					makeSustain(susLength, END);
+				}
 			}
 		}
     
