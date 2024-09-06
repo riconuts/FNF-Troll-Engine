@@ -1,4 +1,7 @@
 package funkin.states;
+#if(LUA_ALLOWED || HSCRIPT_ALLOWED)
+import funkin.scripts.Util;
+#end
 
 import funkin.data.Cache;
 import funkin.data.Song;
@@ -240,7 +243,9 @@ class PlayState extends MusicBeatState
 	public var timingTxt:FlxText;
 
 	/** debugPrint text container **/
-	private var luaDebugGroup:FlxTypedGroup<DebugLuaText> = new FlxTypedGroup<DebugLuaText>();
+    #if(LUA_ALLOWED || HSCRIPT_ALLOWED)
+    private var luaDebugGroup:FlxTypedGroup<DebugText> = new FlxTypedGroup<DebugText>();
+    #end
 
 	////	
 
@@ -1183,7 +1188,7 @@ class PlayState extends MusicBeatState
 	}
 
 	public function addTextToDebug(text:String, ?color:FlxColor = FlxColor.WHITE) {
-		luaDebugGroup.forEachAlive(function(spr:DebugLuaText) {
+		luaDebugGroup.forEachAlive(function(spr:DebugText) {
 			spr.y += 20;
 		});
 
@@ -1192,7 +1197,7 @@ class PlayState extends MusicBeatState
 			blah.destroy();
 			luaDebugGroup.remove(blah);
 		}
-		luaDebugGroup.insert(0, new DebugLuaText(text, luaDebugGroup));
+		luaDebugGroup.insert(0, new DebugText(text, luaDebugGroup));
 	}
 
 	public function reloadHealthBarColors() {
@@ -2048,7 +2053,6 @@ class PlayState extends MusicBeatState
 				if (Std.isOfType(type, Int)) // Backward compatibility + compatibility with Week 7 charts;
 					type = ChartingState.noteTypeList[type];
 
-				var swagNote:Note = new Note(daStrumTime, daColumn, oldNote, gottaHitNote, false, false, hudSkin);
 				var swagNote:Note = new Note(daStrumTime, daColumn, oldNote, gottaHitNote, START, false, hudSkin);
 				swagNote.realColumn = songNotes[1];
 				swagNote.sustainLength = songNotes[2];
