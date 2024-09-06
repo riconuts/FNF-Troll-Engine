@@ -27,6 +27,7 @@ import funkin.states.editors.*;
 import funkin.states.options.*;
 import funkin.scripts.*;
 import funkin.scripts.FunkinLua;
+import funkin.scripts.Util as ScriptingUtil;
 
 import flixel.*;
 import flixel.util.*;
@@ -3167,22 +3168,16 @@ class PlayState extends MusicBeatState
 				}
 
 			case 'Set Property':
-				var value2:Dynamic = value2;
-
-				switch (value2){
-					case "true": value2 = true;
-					case "false": value2 = false;
+				var value2:Dynamic = switch (value2){
+					case "true": true;
+					case "false": false;
+					default: value2;
 				}
 
-				var killMe:Array<String> = value1.split('.');
 				try{
-					if(killMe.length > 1)
-						Util.setVarInArray(Util.getPropertyLoopThingWhatever(killMe, true, true), killMe[killMe.length - 1], value2);
-                    else
-						Util.setVarInArray(this, value1, value2);
-                    
+					ScriptingUtil.setProperty(value1, value2);                    
 				}catch (e:haxe.Exception){
-
+					trace('Set Property event error: $value1 | $value2');
 				}
 		}
 		callOnScripts('onEvent', [eventName, value1, value2, time]);
