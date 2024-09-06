@@ -3332,12 +3332,9 @@ class PlayState extends MusicBeatState
 			
 			if(Math.isNaN(percent)) percent = 0;
 			
-			// TODO: different score saving for Wife3
-			// TODO: Save more stats?
-
 			if (saveScore && ratingFC!='Fail'){
 				//Highscore.saveScore(SONG.song, stats.score, percent, stats.totalNotesHit);
-                Highscore.saveScoreRecord(SONG.song, stats.getScoreRecord());
+                Highscore.saveScoreRecord(SONG.song, difficultyName == "normal" ? "" : difficultyName, stats.getScoreRecord());
             }
 		}
 

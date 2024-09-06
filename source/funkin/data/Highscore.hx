@@ -148,7 +148,7 @@ class Highscore {
 	static inline function formatSong(path:String):String
 		return Paths.formatToSongPath(path);
 
-    public static function emptyRecord():ScoreRecord {
+    public static inline function emptyRecord():ScoreRecord {
         return {
             scoreSystemV: isWife3 ? wifeVersion : normVersion,
             score: 0,
@@ -168,9 +168,9 @@ class Highscore {
 			fcMedal: NONE
         };
     }
-    public static function getRecord(song:String):ScoreRecord
+    public static inline function getRecord(song:String, ?chartName:String=''):ScoreRecord
     {
-        var formattedSong:String = formatSong(song);
+		var formattedSong:String = '${formatSong(song)}${chartName}';
 		return currentSongData.exists(formattedSong) ? currentSongData.get(formattedSong) : emptyRecord();
     }
 	public static function isValidScoreRecord(record:ScoreRecord){
@@ -179,7 +179,8 @@ class Highscore {
         
         return true;
     }
-	public inline static function hasValidScore(song:String) return isValidScoreRecord(getRecord(song));
+	public inline static function hasValidScore(song:String, ?chartName:String)
+		return isValidScoreRecord(getRecord(song, chartName));
 
 	public static function getRatingRecord(scoreRecord:ScoreRecord):Float{
 		if (scoreRecord.rating != null)
@@ -191,12 +192,12 @@ class Highscore {
 		return (scoreRecord.accuracyScore / scoreRecord.maxAccuracyScore);
 	}
 
-    public inline static function getRating(song:String):Float
-		return getRatingRecord(getRecord(song));
+    public inline static function getRating(song:String, ?chart:String):Float
+		return getRatingRecord(getRecord(song, chart));
     
-    public inline static function getScore(song:String) return getRecord(song).score;
+    public inline static function getScore(song:String, ?chart:String) return getRecord(song, chart).score;
     
-	public inline static function getNotesHit(song:String) return getRecord(song).accuracyScore;
+	public inline static function getNotesHit(song:String, ?chart:String) return getRecord(song, chart).accuracyScore;
 
 	public static function getWeekScore(week:String):Int return currentWeekData.exists(week) ? currentWeekData.get(week) : 0;
 
@@ -217,7 +218,7 @@ class Highscore {
         });
     }
 
-	public static function saveScoreRecord(song:String, scoreRecord:ScoreRecord, ?force:Bool = false){
+	public static function saveScoreRecord(song:String, chartName:String = "", scoreRecord:ScoreRecord, ?force:Bool = false){
 		if (scoreRecord.fcMedal == null){
             if(scoreRecord.comboBreaks > 0)
                 scoreRecord.fcMedal = NONE; // no fc since you have a CB lol
@@ -235,13 +236,13 @@ class Highscore {
         }
 		if (scoreRecord.scoreSystemV==null)scoreRecord.scoreSystemV = isWife3 ? wifeVersion : normVersion;
 
-        var currentRecord = getRecord(song);
+		var currentRecord = getRecord(song, chartName);
 		var currentFC:Int = (currentRecord.fcMedal == null ? NONE : currentRecord.fcMedal);
 		var savingFC:Int = (scoreRecord.fcMedal == null ? NONE : scoreRecord.fcMedal);
 		var isFCHigher = currentFC < savingFC;
 
 		if (force || !isValidScoreRecord(currentRecord) || currentRecord.accuracyScore < scoreRecord.accuracyScore || currentRecord.scoreSystemV < scoreRecord.scoreSystemV || isFCHigher){
-            currentSongData.set(formatSong(song), scoreRecord);
+			currentSongData.set('${formatSong(song)}${chartName}', scoreRecord);
 			save.data.saveData.set(currentLoadedID, currentSongData);
             save.flush();
         }

@@ -122,9 +122,10 @@ class Song
 		final songName = Paths.formatToSongPath(metadata.songName);
 		final charts = new haxe.ds.StringMap();
 		
-		function processFileName(fileName:String)
-		{			
-			if (fileName == '$songName.json'){
+		function processFileName(unprocessedName:String)
+		{		
+			var fileName:String = unprocessedName.toLowerCase();
+            if (fileName == '$songName.json'){
 				charts.set("normal", true);
 				return;
 			}
@@ -205,7 +206,7 @@ class Song
 
 		PlayState.SONG = Song.loadFromJson('$songLowercase${difficulty == null ? "" : '-$difficulty'}', songLowercase);
 		PlayState.difficulty = difficultyIdx;
-		PlayState.difficultyName = difficulty;
+		PlayState.difficultyName = difficulty == null ? '' : difficulty;
 		PlayState.isStoryMode = false;
 
 		if (FlxG.keys.pressed.SHIFT)
@@ -234,6 +235,13 @@ class SongMetadata
 		this.songName = songName;
 		this.folder = folder != null ? folder : '';
 	}
+
+	public function play(?difficultyName:String = ''){
+        if(charts.contains(difficultyName))
+			return Song.playSong(this, difficultyName, charts.indexOf(difficultyName));
+    
+        trace("Attempt to play null difficulty: " + difficultyName);
+    }
 
 	public function toString()
 		return '$folder:$songName';

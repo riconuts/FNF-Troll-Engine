@@ -164,7 +164,7 @@ class FreeplayState extends MusicBeatState
 	function refreshScore()
 	{
 		var data = selectedSongData;
-		var record = Highscore.getRecord(data.songName);
+		var record = Highscore.getRecord(data.songName, curDiffName.toLowerCase() == 'normal' ? '' : curDiffName);
 		targetRating = Highscore.getRatingRecord(record) * 100;
 		targetHighscore = record.score;
 	}
@@ -213,6 +213,7 @@ class FreeplayState extends MusicBeatState
 				curDiffName = charts[curDiffIdx];
 				diffText.text = "< " + curDiffName.toUpperCase() + " >";
 		}
+		refreshScore();
 	}
 
 	function getNewDiffIdx() {
