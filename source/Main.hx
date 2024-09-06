@@ -117,9 +117,7 @@ class Main extends Sprite
 
 	private function setupGame():Void
 	{	
-		////		
-		
-
+		////
 		#if sys
 		var args = Sys.args();
 		trace(args);
@@ -216,7 +214,12 @@ class Main extends Sprite
 		// Original code was made by sqirra-rng, big props to them!!!
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(
 			UncaughtErrorEvent.UNCAUGHT_ERROR, 
-			(event:UncaughtErrorEvent) -> onCrash(event.error)
+			(event:UncaughtErrorEvent) -> {
+				// one of these oughta do it
+				event.stopImmediatePropagation();
+				event.stopPropagation();
+				event.preventDefault();
+				onCrash(event.error);
 			}
 		);
 
@@ -270,7 +273,19 @@ class Main extends Sprite
 		print('\n$callstack\n');
 
 		#if (windows && cpp)
-		Windows.msgBox(callstack, errorName, ERROR | OK);
+		var ret = Windows.msgBox(callstack, errorName, ERROR | MessageBoxOptions.YESNOCANCEL);
+		switch(ret){
+			default: // Close program.
+
+			case NO: // Return to Main Menu.
+			@:privateAccess{
+				FlxG.game._requestedState = new funkin.states.MainMenuState();
+				FlxG.game.switchState();
+				return;
+			}
+			case CANCEL: // Continue with a possibly unstable state
+				return;
+		}
 		#else
 		Application.current.window.alert(callstack, errorName);
 		#end
