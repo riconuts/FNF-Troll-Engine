@@ -3176,13 +3176,11 @@ class PlayState extends MusicBeatState
 
 				var killMe:Array<String> = value1.split('.');
 				try{
-					if(killMe.length > 1){
-						FunkinLua.setVarInArray(FunkinLua.getPropertyLoopThingWhatever(killMe, true, true), killMe[killMe.length - 1], value2);
-						ScriptingUtil.setVarInArray(ScriptingUtil.getPropertyLoopThingWhatever(killMe, true, true), killMe[killMe.length - 1], value2);
-                    }else{
-						FunkinLua.setVarInArray(this, value1, value2);
-						ScriptingUtil.setVarInArray(this, value1, value2);
-                    }
+					if(killMe.length > 1)
+						Util.setVarInArray(Util.getPropertyLoopThingWhatever(killMe, true, true), killMe[killMe.length - 1], value2);
+                    else
+						Util.setVarInArray(this, value1, value2);
+                    
 				}catch (e:haxe.Exception){
 
 				}
