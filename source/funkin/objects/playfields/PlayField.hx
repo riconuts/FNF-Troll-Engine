@@ -508,8 +508,10 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 				if((
 					(daNote.holdingTime>=daNote.sustainLength ) && daNote.sustainLength>0 ||
-					daNote.isSustainNote && daNote.strumTime - Conductor.songPosition < -350 ||
-					!daNote.isSustainNote && (daNote.sustainLength==0 || daNote.tooLate) && daNote.strumTime - Conductor.songPosition < -(200 + judgeManager.getWindow(TIER1))) && (daNote.tooLate || daNote.wasGoodHit))
+					daNote.isSustainNote && daNote.strumTime - Conductor.songPosition < -(350 + daNote.sustainLength) ||
+					!daNote.isSustainNote
+					&& (daNote.sustainLength == 0 || daNote.tooLate)
+					&& daNote.strumTime - Conductor.songPosition < -(200 + judgeManager.getWindow(TIER1) + daNote.sustainLength)) && (daNote.tooLate || daNote.wasGoodHit))
 				{
 					daNote.garbage = true;
 					garbage.push(daNote);

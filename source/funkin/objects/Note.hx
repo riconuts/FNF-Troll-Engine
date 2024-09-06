@@ -1,5 +1,6 @@
 package funkin.objects;
 
+import flixel.math.FlxMath;
 import funkin.states.PlayState;
 import funkin.data.JudgmentManager.Judgment;
 import funkin.states.editors.ChartingState;
@@ -661,7 +662,12 @@ class Note extends NoteObject
 
 	override function draw()
 	{
-		colorSwap.daAlpha = alphaMod * alphaMod2;
+		var holdMult:Float = isSustainNote ? 0.6 : 1;
+
+		if (isSustainNote && parent.wasGoodHit)
+			holdMult = FlxMath.lerp(0.3, 1, parent.tripProgress);
+        
+		colorSwap.daAlpha = alphaMod * alphaMod2 * holdMult;
 
 		if (tooLate && !inEditor)
 		{
