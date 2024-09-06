@@ -2103,14 +2103,8 @@ class PlayState extends MusicBeatState
 				inline function makeSustain(susNote:Int, susPart) {
 					var sustainNote:Note = new Note(daStrumTime + Conductor.stepCrochet * (susNote + 1), daColumn, oldNote, gottaHitNote, susPart, false, hudSkin);
 					sustainNote.gfNote = swagNote.gfNote;
-					if (callScripts)callOnScripts("onGeneratedHold", [sustainNote]);
 					if (callScripts) callOnScripts("onGeneratedHold", [sustainNote]);
 					sustainNote.noteType = type;
-
-					if (sustainNote == null || !sustainNote.alive)
-						break;
-
-					sustainNote.scrollFactor.set();
 
 					sustainNote.ID = notes.length;
 					modchartObjects.set('note${sustainNote.ID}', sustainNote);
@@ -2132,7 +2126,6 @@ class PlayState extends MusicBeatState
 					oldNote = sustainNote;
 				}
 
-				oldNote.isSustainEnd = true;
 				var susLength = Math.floor(swagNote.sustainLength / Conductor.stepCrochet) - 1;
 				if (susLength > 0){
 					for (susNote in 0...susLength)
@@ -2276,7 +2269,7 @@ class PlayState extends MusicBeatState
 						if(Math.isNaN(charType)) charType = 0;
 				}
 				
-				trace(event.value2, charType);
+				//trace(event.value2, charType);
 
 				addCharacterToList(event.value2, charType);
 			default:
