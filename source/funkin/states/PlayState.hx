@@ -498,18 +498,12 @@ class PlayState extends MusicBeatState
 		#if PE_MOD_COMPATIBILITY
 		strumLineNotes = opponentStrums = playerStrums = new FlxTypedGroup<StrumNote>();
 		scoreTxt = botplayTxt = new FlxText();
-		iconP1 = iconP2 = new HealthIcon();
-		healthBar = new FNFHealthBar();
 
 		strumLineNotes.exists = false;
 		scoreTxt.exists = false;
-		iconP1.exists = false;
-		healthBar.exists = false;
 
 		add(strumLineNotes);
 		add(scoreTxt);
-		add(iconP1);
-		add(healthBar);
 		#end
 
 		//// For the "Just the Two of Us" achievement
@@ -905,6 +899,11 @@ class PlayState extends MusicBeatState
 		hud.alpha = ClientPrefs.hudOpacity;
 		add(hud);
 
+        #if PE_MOD_COMPATIBILITY
+		healthBar = hud.getHealthbar();
+        iconP1 = healthBar.iconP1;
+        iconP2 = healthBar.iconP2;
+        #end
 		//// Generate playfields so you can actually, well, play the game
 		callOnScripts("prePlayfieldCreation"); // backwards compat
         // TODO: add deprecation messages to function callbacks somehow
@@ -2096,8 +2095,7 @@ class PlayState extends MusicBeatState
 					callOnScripts("onGeneratedNotePost", [swagNote]);
 				
 				oldNote = swagNote;
-				for (susNote in 0...Math.floor(swagNote.sustainLength / Conductor.stepCrochet)) {
-					var sustainNote:Note = new Note(daStrumTime + Conductor.stepCrochet * (susNote + 1), daColumn, oldNote, gottaHitNote, true, false, hudSkin);
+				
 				inline function makeSustain(susNote:Int, susPart) {
 					var sustainNote:Note = new Note(daStrumTime + Conductor.stepCrochet * (susNote + 1), daColumn, oldNote, gottaHitNote, susPart, false, hudSkin);
 					sustainNote.gfNote = swagNote.gfNote;

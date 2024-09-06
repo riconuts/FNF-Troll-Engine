@@ -22,6 +22,8 @@ class CommonHUD extends BaseHUD
 	public var iconP1:HealthIcon;
 	public var iconP2:HealthIcon;
 	
+    override function  getHealthbar():FNFHealthBar return healthBar;
+    
 	function get_healthBarBG()
 		return healthBar.healthBarBG;
 

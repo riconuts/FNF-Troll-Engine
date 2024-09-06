@@ -31,6 +31,8 @@ class BaseHUD extends FlxSpriteGroup {
 		"miss" => Paths.getString("tier0short"),
 		"cb" => Paths.getString("cbshort")
 	];
+
+    public function getHealthbar():FNFHealthBar return null; // Used for compatibility with Psych scripts
 	
     @:isVar
 	public var displayNames(get, null):Map<String, String>;
@@ -59,8 +61,6 @@ class BaseHUD extends FlxSpriteGroup {
 	];
 	public static final _displayedJudges = ["epic", "sick", "good", "bad", "shit", "miss"];
 
-	// TODO: add some easier way to customize these through scripts
-	// (maybe pulled from JudgementManager?)
 	public var judgeColours:Map<String, FlxColor> = _judgeColours.copy();
 	public var displayedJudges:Array<String> = _displayedJudges.copy();
 
