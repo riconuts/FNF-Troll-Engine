@@ -480,7 +480,6 @@ class Note extends NoteObject
 
 		if (isSustainNote && prevNote != null)
 		{
-			alpha = 0.6;
 			hitsoundDisabled = true;
 			copyAngle = false;
 			//if(ClientPrefs.downScroll) flipY = true;
@@ -679,6 +678,19 @@ class Note extends NoteObject
 		updateHitbox();
 	}
 
+	override function draw()
+	{
+		colorSwap.daAlpha = alphaMod * alphaMod2;
+
+		if (tooLate && !inEditor)
+		{
+			if (alpha > 0.3)
+				alpha = 0.3;
+		}
+
+		super.draw();
+	}
+
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
@@ -692,20 +704,12 @@ class Note extends NoteObject
 				genScript.executeFunc("noteUpdate", [elapsed], this);
             }
 		}
-		
-		colorSwap.daAlpha = alphaMod * alphaMod2;
-		
+
 		if (hitByOpponent)
 			wasGoodHit = true;
 
 		var diff = (strumTime - Conductor.songPosition);
 		if (diff < -Conductor.safeZoneOffset && !wasGoodHit)
 			tooLate = true;
-
-		if (tooLate && !inEditor)
-		{
-			if (alpha > 0.3)
-				alpha = 0.3;
-		}
 	}
 }
