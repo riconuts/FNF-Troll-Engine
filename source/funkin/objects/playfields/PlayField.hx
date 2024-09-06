@@ -287,7 +287,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	public function input(data:Int){
 		if(data > keyCount || data < 0)return null;
 		
-		var noteList = getNotesWithEnd(data, Conductor.songPosition + ClientPrefs.hitWindow, (note:Note) -> !note.isSustainNote && note.requiresTap);
+		var noteList = getNotes(data, (note:Note) -> !note.isSustainNote && note.requiresTap && !note.tooLate);
 		#if PE_MOD_COMPATIBILITY
 		noteList.sort((a, b) -> Std.int((b.strumTime + (b.lowPriority ? 10000 : 0)) - (a.strumTime + (a.lowPriority ? 10000 : 0)))); // so lowPriority actually works (even though i hate it lol!)
 		#else
@@ -296,14 +296,20 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		while (noteList.length > 0)
 		{
 			var note:Note = noteList.pop();
-            var judge:Judgment = judgeManager.judgeNote(note);
-            if (judge != UNJUDGED){
-                note.hitResult.judgment = judge;
-                note.hitResult.hitDiff = note.strumTime - Conductor.songPosition;
-                noteHitCallback(note, this);
-                return note;
+			if (note.wasGoodHit && note.isSustainNote && note.holdingTime < note.sustainLength)
+                return note; // for the sake of ghost-tapping shit
+            else{
+				if (note.wasGoodHit)
+                    continue;
+                var judge:Judgment = judgeManager.judgeNote(note);
+                if (judge != UNJUDGED){
+                    note.hitResult.judgment = judge;
+                    note.hitResult.hitDiff = note.strumTime - Conductor.songPosition;
+                    noteHitCallback(note, this);
+                    return note;
+                }
             }
-		}
+        }
 
 		return null;
 	}
@@ -447,8 +453,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 						daNote.holdingTime = Conductor.songPosition - daNote.strumTime;
 
                         
-						if(isHeld && !daNote.isRoll){ // TODO: find a good natural way to script the isRoll thing
-							// should i do this??? idfk lol
+						if(isHeld && !daNote.isRoll){
 							if (receptor.animation.finished || receptor.animation.curAnim.name != "confirm") 
 								receptor.playAnim("confirm", true);
 							
@@ -526,7 +531,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		if (inControl && autoPlayed)
 		{
 			for(i in 0...keyCount){
-				for (daNote in getNotes(i, (note:Note) -> !note.ignoreNote && !note.hitCausesMiss)){
+				for (daNote in getNotes(i, (note:Note) -> !note.wasGoodHit && !note.tooLate && !note.ignoreNote && !note.hitCausesMiss)){
 					if (!daNote.isSustainNote){
 						var hitDiff = Conductor.songPosition - daNote.strumTime;
 						if (isPlayer && (hitDiff + ClientPrefs.ratingOffset) >= (-5 * (Wife3.timeScale>1 ? 1 : Wife3.timeScale)) || hitDiff >= 0){
@@ -577,7 +582,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		var collected:Array<Note> = [];
 		for (note in spawnedByData[dir])
 		{
-			if (note.alive && note.column == dir && !note.wasGoodHit && !note.tooLate)
+			if (note.alive && note.column == dir)
 			{
 				if (filter == null || filter(note))
 					collected.push(note);

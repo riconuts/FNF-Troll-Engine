@@ -2053,7 +2053,7 @@ class PlayState extends MusicBeatState
 				if (Std.isOfType(type, Int)) // Backward compatibility + compatibility with Week 7 charts;
 					type = ChartingState.noteTypeList[type];
 
-				var swagNote:Note = new Note(daStrumTime, daColumn, oldNote, gottaHitNote, START, false, hudSkin);
+				var swagNote:Note = new Note(daStrumTime, daColumn, oldNote, gottaHitNote, songNotes[2] > 0 ? HEAD : TAP, false, hudSkin);
 				swagNote.realColumn = songNotes[1];
 				swagNote.sustainLength = songNotes[2];
 
@@ -3853,7 +3853,7 @@ class PlayState extends MusicBeatState
                         var ret:Dynamic = callOnHScripts("onFieldInput", [field, data, hitNotes]);
 						if (ret == Globals.Function_Stop)
 							continue;
-                        else if((ret.objType == NOTE))
+                        else if((ret is Note))
                             note = ret;
                         else
 						    note = field.input(data);

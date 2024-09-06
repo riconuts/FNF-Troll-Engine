@@ -2883,7 +2883,7 @@ class ChartingState extends MusicBeatState
 		var daStrumTime = i[0];
 		var daSus:Dynamic = i[2];
 
-		var note:Note = new Note(daStrumTime, daColumn % 4, null, false, START, true);
+		var note:Note = new Note(daStrumTime, daColumn % 4, null, false, daSus <= 0 ? TAP : HEAD, true);
 		if(daSus != null) { //Common note
 			if(!Std.isOfType(i[3], String)) //Convert old note type to new note type format
 			{

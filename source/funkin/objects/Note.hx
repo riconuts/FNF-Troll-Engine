@@ -23,7 +23,7 @@ typedef HitResult = {
 	hitDiff: Float
 }
 
-@:enum abstract SplashBehaviour(Int) from Int to Int
+enum abstract SplashBehaviour(Int) from Int to Int
 {
 	/**Only splashes on judgements that have splashes**/
 	var DEFAULT = 0;
@@ -33,9 +33,10 @@ typedef HitResult = {
 	var FORCED = 1;
 }
 
-@:enum abstract SustainPart(Int) from Int to Int
+enum abstract SustainPart(Int) from Int to Int
 {
-	var START = 0; // Not a sustain
+	var TAP = -1; // Not a sustain
+    var HEAD = 0; // TapNote at the start of a sustain
 	var PART = 1;
 	var END = 2;
 }
@@ -83,6 +84,7 @@ class Note extends NoteObject
 	}
 
 	////	
+    public var holdType:SustainPart = TAP;
 	public var noteScript:FunkinHScript;
     public var genScript:FunkinHScript; // note generator script (used for shit like pixel notes or skin mods) ((script provided by the HUD skin))
 	public var extraData:Map<String, Dynamic> = [];
@@ -431,7 +433,7 @@ class Note extends NoteObject
 		return '(column: $column | noteType: $noteType | strumTime: $strumTime | visible: $visible)';
 	}
 
-	public function new(strumTime:Float, column:Int, ?prevNote:Note, ?gottaHitNote:Bool = false, ?susPart:SustainPart = START, ?inEditor:Bool = false, ?noteMod:String = 'default')
+	public function new(strumTime:Float, column:Int, ?prevNote:Note, gottaHitNote:Bool = false, susPart:SustainPart = TAP, ?inEditor:Bool = false, ?noteMod:String = 'default')
 	{
 		super();
 		this.objType = NOTE;
@@ -440,7 +442,8 @@ class Note extends NoteObject
 		this.column = column;
 		this.prevNote = (prevNote==null) ? this : prevNote;
 		this.mustPress = gottaHitNote;
-		this.isSustainNote = susPart != START;
+		this.holdType = susPart;
+		this.isSustainNote = susPart != HEAD && susPart != TAP; // susPart > HEAD
 		this.isSustainEnd = susPart == END;
 		this.inEditor = inEditor;
 		this.beat = Conductor.getBeat(strumTime);
