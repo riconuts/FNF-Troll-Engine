@@ -1,18 +1,5 @@
 package funkin.scripts;
 
-#if (cpp && windows)
-import funkin.api.Windows;
-#end
-
-import funkin.scripts.Util;
-
-#if LUA_ALLOWED
-import llua.Convert;
-import llua.Lua;
-import llua.LuaL;
-import llua.State;
-#end
-
 import funkin.states.*;
 import funkin.states.PlayState;
 import funkin.scripts.Globals.*;
@@ -33,11 +20,24 @@ import flixel.util.FlxTimer;
 import haxe.Constraints.Function;
 import Type.ValueType;
 
+using StringTools;
+
 #if DISCORD_ALLOWED
 import funkin.api.Discord;
 #end
 
-using StringTools;
+#if (cpp && windows)
+import funkin.api.Windows;
+#end
+
+#if LUA_ALLOWED
+import llua.Convert;
+import llua.Lua;
+import llua.LuaL;
+import llua.State;
+#else
+typedef State = Dynamic;
+#end
 
 class FunkinLua extends FunkinScript
 {
@@ -50,8 +50,6 @@ class FunkinLua extends FunkinScript
 		trace('loading lua file: $path');
 
 		var lua:State = LuaL.newstate();
-		LuaL.openlibs(lua);
-		Lua.init_callbacks(lua);
 
 		try {
 			var result:Dynamic = LuaL.dofile(lua, path);
@@ -80,6 +78,7 @@ class FunkinLua extends FunkinScript
 			lua = null;
 		}
 
+		if (name == null) name = path;
 		return new FunkinLua(lua, name, ignoreCreateCall, vars);
 	}
 
@@ -125,9 +124,8 @@ class FunkinLua extends FunkinScript
 	}
 	#end
 
-	var gonnaClose:Bool = false; // if this is true, the script will be removed in the next playstate script call
-
 	override function setDefaultVars(){
+		#if LUA_ALLOWED
 		super.setDefaultVars();
 
 		// Lua shit
@@ -186,9 +184,7 @@ class FunkinLua extends FunkinScript
 		addCallback("getPropertyFromClass", getPropertyFromClass);
 		addCallback("setPropertyFromClass", setPropertyFromClass);
 
-		addCallback("debugPrint", Reflect.makeVarArgs((toPrint:Array<Dynamic>) -> {
-			luaTrace(toPrint.join(", "), true, false);
-		}));
+		var gonnaClose:Bool = false;
 		addCallback("close", (?printMessage:Bool) -> {
 			if (!gonnaClose){
 				if (printMessage == true)
@@ -198,6 +194,8 @@ class FunkinLua extends FunkinScript
 				gonnaClose = true;
 			}
 		});
+
+		addCallback("debugPrint", Reflect.makeVarArgs((toPrint) -> luaTrace(toPrint.join(", "), true, false)));
 
 		//// mod manager
 		addCallback("setPercent", function(modName:String, val:Float, player:Int = -1)
@@ -1889,19 +1887,16 @@ class FunkinLua extends FunkinScript
 		addCallback("stringEndsWith", function(str:String, end:String) {
 			return str.endsWith(end);
 		});
+		#end
 	}
 
 	public function new(?state:State, ?name:String = "Lua", ?ignoreCreateCall:Bool, ?vars:Map<String, Dynamic>) {
 		super(name, 'lua');
 
 		#if LUA_ALLOWED
-		if (state == null){
-			lua = LuaL.newstate();
-			LuaL.openlibs(lua);
-			Lua.init_callbacks(lua);
-		}else{
-			lua = state;
-		}
+		lua = (state != null) ? state : LuaL.newstate();
+		LuaL.openlibs(lua);
+		Lua.init_callbacks(lua);
 
 		setDefaultVars();
 
@@ -2049,8 +2044,6 @@ class FunkinLua extends FunkinScript
 
 		Lua.close(lua);
 		lua = null;
-
-		gonnaClose = true;
 		#end
 	}
 }
