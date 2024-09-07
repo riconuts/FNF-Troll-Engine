@@ -348,17 +348,17 @@ class Paths
 		return returnSound('music', key, library);
 	}
 
-	inline static public function track(song:String, track:String):Any
+	inline static public function track(song:String, track:String):Null<Sound>
 	{
 		return returnSound('songs', '${formatToSongPath(song)}/$track');
 	}
 
-	inline static public function voices(song:String):Any
+	inline static public function voices(song:String):Null<Sound>
 	{
 		return track(song, "Voices");
 	}
 
-	inline static public function inst(song:String):Any
+	inline static public function inst(song:String):Null<Sound>
 	{
 		return track(song, "Inst");
 	}
