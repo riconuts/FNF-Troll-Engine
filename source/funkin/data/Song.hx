@@ -1,5 +1,11 @@
 package funkin.data;
 
+#if moonchart
+import moonchart.formats.fnf.legacy.FNFPsych as SupportedFormat;
+import moonchart.formats.BasicFormat;
+import moonchart.backend.FormatDetector;
+#end
+
 import funkin.states.LoadingState;
 import funkin.states.PlayState;
 import funkin.data.Section.SwagSection;
@@ -67,48 +73,6 @@ class Song
 
 	public var extraTracks:Array<String> = [];
 
-	private static function onLoadJson(songJson:Dynamic) // Convert old charts to newest format
-	{
-		if(songJson.gfVersion == null){
-			if (songJson.player3 != null){
-				songJson.gfVersion = songJson.player3;
-				songJson.player3 = null;
-			}
-			else
-				songJson.gfVersion = "gf";
-		}
-
-		if (songJson.extraTracks == null){
-			songJson.extraTracks = [];
-		}
-
-		if(songJson.events == null){
-			songJson.events = [];
-			
-			for (secNum in 0...songJson.notes.length)
-			{
-				var sec:SwagSection = songJson.notes[secNum];
-				var notes:Array<Dynamic> = sec.sectionNotes;
-				var len:Int = notes.length;
-				var i:Int = 0;
-				while(i < len)
-				{
-					var note:Array<Dynamic> = notes[i];
-					if (note[1] < 0)
-					{
-						songJson.events.push([note[0], [[note[2], note[3], note[4]]]]);
-						notes.remove(note);
-						len = notes.length;
-					}
-					else i++;
-				}
-			}
-		}
-
-        if(songJson.hudSkin==null)
-            songJson.hudSkin = 'default';
-	}
-
 	public function new(song, notes, bpm)
 	{
 		this.song = song;
@@ -158,7 +122,7 @@ class Song
 		return [for (name in charts.keys()) name];
 	}
 
-	public static function loadFromJson(jsonInput:String, ?folder:String):SwagSong
+	public static function loadFromJson(jsonInput:String, folder:String):SwagSong
 	{
 		var path:String = Paths.formatToSongPath(folder) + '/' + Paths.formatToSongPath(jsonInput) + '.json';
 		var rawJson:Null<String> = Paths.text('songs/$path', false);
@@ -186,6 +150,49 @@ class Song
 		return songJson;
 	}
 
+	/** sanitize/update json values to a valid format**/
+	private static function onLoadJson(songJson:Dynamic)
+	{
+		if(songJson.gfVersion == null){
+			if (songJson.player3 != null){
+				songJson.gfVersion = songJson.player3;
+				songJson.player3 = null;
+			}
+			else
+				songJson.gfVersion = "gf";
+		}
+
+		if (songJson.extraTracks == null){
+			songJson.extraTracks = [];
+		}
+
+		if(songJson.events == null){
+			songJson.events = [];
+			
+			for (secNum in 0...songJson.notes.length)
+			{
+				var sec:SwagSection = songJson.notes[secNum];
+				var notes:Array<Dynamic> = sec.sectionNotes;
+				var len:Int = notes.length;
+				var i:Int = 0;
+				while(i < len)
+				{
+					var note:Array<Dynamic> = notes[i];
+					if (note[1] < 0)
+					{
+						songJson.events.push([note[0], [[note[2], note[3], note[4]]]]);
+						notes.remove(note);
+						len = notes.length;
+					}
+					else i++;
+				}
+			}
+		}
+
+		if(songJson.hudSkin==null)
+			songJson.hudSkin = 'default';
+	}
+
 	public static function parseJSONshit(rawJson:String):SwagSong
 	{
 		var swagShit:SwagSong = cast Json.parse(rawJson).song;
@@ -193,31 +200,72 @@ class Song
 		return swagShit;
 	}
 
-	static public function playSong(metadata:SongMetadata, ?difficulty:String, ?difficultyIdx:Int = 1)
-	{
+	static public function loadSong(metadata:SongMetadata, ?difficulty:String, ?difficultyIdx:Int = 1) {
 		Paths.currentModDirectory = metadata.folder;
 
-		if (difficulty != null && (difficulty.trim() == '' || difficulty.toLowerCase().trim() == 'normal'))
-			difficulty = null;
-
 		var songLowercase:String = Paths.formatToSongPath(metadata.songName);
-		if (Main.showDebugTraces)
-			trace('${Paths.currentModDirectory}, $songLowercase, $difficulty');
+		var diffSuffix:String;
 
-		PlayState.SONG = Song.loadFromJson('$songLowercase${difficulty == null ? "" : '-$difficulty'}', songLowercase);
+		if (difficulty == null){
+			difficulty = '';
+			diffSuffix = '';
+		}else{
+			difficulty = difficulty.trim().toLowerCase();
+			diffSuffix = (difficulty == '' || difficulty == 'normal') ? '' : '-$difficulty';
+		}
+		
+		var chartFileName:String = songLowercase + diffSuffix;
+		
+		if (Main.showDebugTraces)
+			trace('playSong', Paths.currentModDirectory, chartFileName);
+		
+		#if moonchart
+		var chartDirPath:String = 'content/base-game/songs/$songLowercase/';
+		var chartFilePath:String = chartDirPath + chartFileName + '.json';
+
+		var format = FormatDetector.findFormat([chartFilePath]);
+		var formatInfo = FormatDetector.getFormatData(format);
+
+		var SONG:SwagSong = switch(format) {
+			case FNF_LEGACY_PSYCH | FNF_LEGACY:
+				trace('Chart format $format is good to be read ^.^');
+				Song.loadFromJson(chartFileName, songLowercase);
+
+			default:
+				trace('Converting from format $format!');
+				
+				var chart:moonchart.formats.BasicFormat<{}, {}>;
+				chart = Type.createInstance(formatInfo.handler, []);
+				chart = chart.fromFile(chartFilePath);
+				
+				var converted = new SupportedFormat().fromFormat(chart, difficulty);
+				onLoadJson(converted);
+		}
+		#else
+		var SONG:SwagSong = Song.loadFromJson(songLowercase + diffSuffix, songLowercase);
+		#end
+
+		PlayState.SONG = SONG;
 		PlayState.difficulty = difficultyIdx;
 		PlayState.difficultyName = difficulty == null ? '' : difficulty;
-		PlayState.isStoryMode = false;
+		PlayState.isStoryMode = false;	
+	}
 
-		if (FlxG.keys.pressed.SHIFT)
-		{
-			LoadingState.loadAndSwitchState(new funkin.states.editors.ChartingState());
-		}
-		else
-			LoadingState.loadAndSwitchState(new PlayState());
-
+	static public function switchToPlayState()
+	{
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.volume = 0;
+
+		if (FlxG.keys.pressed.SHIFT)
+			LoadingState.loadAndSwitchState(new funkin.states.editors.ChartingState());
+		else
+			LoadingState.loadAndSwitchState(new PlayState());	
+	}
+
+	static public function playSong(metadata:SongMetadata, ?difficulty:String, ?difficultyIdx:Int = 1)
+	{
+		loadSong(metadata, difficulty, difficultyIdx);
+		switchToPlayState();
 	} 
 }
 
