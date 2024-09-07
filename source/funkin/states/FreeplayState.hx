@@ -72,14 +72,7 @@ class FreeplayState extends MusicBeatState
 		add(menu);
 		menu.controls = controls;
 		menu.callbacks.onSelect = (selectedIdx) -> onSelectSong(songMeta[selectedIdx]);
-		menu.callbacks.onAccept = () -> {
-			if (selectedSongCharts.length == 0)
-				FlxG.sound.play(Paths.sound('cancelMenu'));
-			else{
-				menu.controls = null;
-				Song.playSong(selectedSongData, curDiffName, curDiffIdx);	
-			}
-		};
+		menu.callbacks.onAccept = onAccept;
 
 		////
 		var hintBG = CoolUtil.blankSprite(FlxG.width, 26, 0xFF999999);
@@ -120,8 +113,40 @@ class FreeplayState extends MusicBeatState
 		diffText.font = scoreText.font;
     }
 
+	var songLoaded:SongMetadata = null;
+	function onAccept(){
+		if (selectedSongCharts.length == 0)
+			FlxG.sound.play(Paths.sound('cancelMenu'));
+		else{
+			menu.controls = null;
+
+			if (songLoaded != selectedSongData)
+				Song.loadSong(selectedSongData, curDiffName, curDiffIdx);
+
+			if (FlxG.sound.music != null)
+				FlxG.sound.music.fadeOut(0.16);
+	
+			if (FlxG.keys.pressed.SHIFT)
+				LoadingState.loadAndSwitchState(new funkin.states.editors.ChartingState());
+			else
+				LoadingState.loadAndSwitchState(new PlayState());	
+		}
+	}
+
+	// disable menu class controls for one update cycle Dx 
+	var stunned:Bool = false;
+	inline function stun(){
+		stunned = true;
+		menu.controls = null;
+	}
+
 	override public function update(elapsed:Float)
 	{
+		if (stunned){
+			stunned = false;
+			menu.controls = controls;
+		}
+
 		if (controls.UI_LEFT_P){
 			changeDifficulty(-1);
 		}
@@ -129,7 +154,19 @@ class FreeplayState extends MusicBeatState
 			changeDifficulty(1);
 		}
 
-		if (controls.BACK){
+		if (FlxG.keys.justPressed.SPACE){
+			stun();
+
+			// load song json and play inst
+			if (songLoaded != selectedSongData){
+				songLoaded = selectedSongData;
+				Song.loadSong(selectedSongData, curDiffName, curDiffIdx);
+				
+				var instAsset = Paths.inst(PlayState.SONG.song); 
+				FlxG.sound.playMusic(instAsset);
+			}
+
+		}else if (controls.BACK){
 			menu.controls = null;
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			MusicBeatState.switchState(new funkin.states.MainMenuState());	
