@@ -129,7 +129,7 @@ class SongSelectState extends MusicBeatState
 
 		curSel = 0;
 
-		var versionTxt = new FlxText(0, 0, 0, Main.displayedVersion, 12);
+		var versionTxt = new FlxText(0, 0, 0, Main.Version.displayedVersion, 12);
 		versionTxt.setPosition(FlxG.width - 2 - versionTxt.width, FlxG.height - 2 - versionTxt.height);
 		versionTxt.alpha = 0.6;
 		versionTxt.antialiasing = false;

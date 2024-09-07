@@ -33,10 +33,11 @@ class FunkinHScript extends FunkinScript
 		parser.allowTypes = true;
 
 		parser.preprocesorValues = funkin.macros.Sowy.getDefines();
-		parser.preprocesorValues.set("TROLL_ENGINE", Main.semanticVersion);
+		parser.preprocesorValues.set("TROLL_ENGINE", Main.Version.semanticVersion);
 
 		parser;
 	};
+	
 	public static final defaultVars:Map<String, Dynamic> = new Map<String, Dynamic>();
 
 	public static function init() // BRITISH
@@ -119,7 +120,7 @@ class FunkinHScript extends FunkinScript
 	////
 	private var interpreter(default, null):Interp = new Interp();
 
-	public function new(?parsed:Expr, ?name:String = "Script", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true)
+	public function new(?parsed:Expr, ?name:String = "HScript", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true)
 	{
 		super(name, 'hscript');
 

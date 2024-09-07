@@ -1,5 +1,14 @@
 package funkin.api;
 
+#if DISCORD_ALLOWED
+import hxdiscord_rpc.Discord as DiscordRpc;
+import hxdiscord_rpc.Types;
+#end
+
+import sys.thread.Mutex;
+import sys.thread.Thread;
+import Sys.sleep;
+
 #if !DISCORD_ALLOWED
 class DiscordClient {
 	public inline static function start() {}
@@ -7,15 +16,7 @@ class DiscordClient {
 	public inline static function shutdown(?noTrace:Bool) {}
 	public inline static function changePresence(details:String, ?state:String, largeImageKey:String = "app-logo", ?hasStartTimestamp:Bool, ?endTimestamp:Float) {}
 }
-
 #else
-import hxdiscord_rpc.Discord as DiscordRpc;
-import hxdiscord_rpc.Types;
-
-import sys.thread.Mutex;
-import sys.thread.Thread;
-import Sys.sleep;
-
 class DiscordClient
 {
 	private static final defaultID = '814588678700924999';
@@ -136,7 +137,7 @@ class DiscordClient
 		lastPresence.details = details;
 		lastPresence.state = state;
 		lastPresence.largeImageKey = getImageKey(largeImageKey);
-		lastPresence.largeImageText = "Troll Engine " + Main.displayedVersion;
+		lastPresence.largeImageText = "Troll Engine " + Main.Version.displayedVersion;
 
 		// Obtained times are in milliseconds so they are divided so Discord can use it
 		lastPresence.startTimestamp = Std.int(startTimestamp / 1000);

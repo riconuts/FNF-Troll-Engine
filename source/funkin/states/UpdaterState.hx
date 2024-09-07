@@ -68,9 +68,9 @@ class UpdaterState extends MusicBeatState {
     var fileBar:FlxBar;
     override function create(){
 		var beta = release.prerelease ? " (PRE-RELEASE)" : "";
-		var currentBeta = Main.beta ? " (PRE-RELEASE)" : "";
+		var currentBeta = Main.Version.isBeta ? " (PRE-RELEASE)" : "";
 		updateText = new FlxText(0, 0, FlxG.width,
-			'You are on Troll Engine ${Main.displayedVersion}${currentBeta}, but the most recent is v${release.tag_name}${beta}!\n\nY = Update, N = Remind me later, I = Skip this update');
+			'You are on Troll Engine ${Main.Version.displayedVersion}${currentBeta}, but the most recent is v${release.tag_name}${beta}!\n\nY = Update, N = Remind me later, I = Skip this update');
 		updateText.setFormat(Paths.font("calibrib.ttf"), 32, FlxColor.WHITE, CENTER);
 		updateText.updateHitbox();
 		updateText.screenCenter(Y);
@@ -299,8 +299,9 @@ class UpdaterState extends MusicBeatState {
         super.update(elapsed);
         
 		if (downloading)return;
-        if(FlxG.keys.justPressed.N){
+        if (FlxG.keys.justPressed.N){
 			MusicBeatState.switchState(new TitleState());
+
         }else if(FlxG.keys.justPressed.I){
 			Main.outOfDate = false;
 			MusicBeatState.switchState(new TitleState());
@@ -317,7 +318,7 @@ class UpdaterState extends MusicBeatState {
 	#if(DO_AUTO_UPDATE || display)
 	// gets the most recent release and returns it
 	// if you dont have download betas on, then it'll exclude prereleases
-	public static function getRecentGithubRelease()
+	public static function getRecentGithubRelease():Release
 	{
         var recentRelease:Release;
 
@@ -344,7 +345,7 @@ class UpdaterState extends MusicBeatState {
 		return Main.recentRelease = recentRelease;
 	}
 
-	public static function checkOutOfDate(){
+	public static function checkOutOfDate():Bool{
 		var outOfDate = false;
 
 		if (ClientPrefs.checkForUpdates && Main.recentRelease != null)
@@ -375,16 +376,10 @@ class UpdaterState extends MusicBeatState {
 		#end
 	}
 	#else
-	public static function getRecentGithubRelease()
-	{
-		Main.recentRelease = null;
-		Main.outOfDate = false;
-		return null;
-	}
+	public static function getRecentGithubRelease():Release
+		return Main.recentRelease = null;
 
-	public static function checkOutOfDate(){
-		Main.outOfDate = false;
-		return false;
-	}
+	public static function checkOutOfDate():Bool
+		return Main.outOfDate = false;
 	#end
 }

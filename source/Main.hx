@@ -12,9 +12,10 @@ import lime.app.Application;
 import haxe.Constraints.Function;
 
 import funkin.*;
-import funkin.objects.Bread;
 import funkin.api.Github;
+import funkin.macros.Sowy;
 import funkin.data.SemanticVersion;
+import funkin.objects.Bread;
 
 using StringTools;
 
@@ -33,8 +34,20 @@ import sys.io.File;
 #if (windows && cpp)
 import funkin.api.Windows;
 #end
-
 #end
+
+final class Version
+{
+	public static final engineVersion:String = '0.2.0'; // Used for autoupdating n stuff
+	public static final betaVersion:String = 'rc.1'; // beta version, set it to 0 if not on a beta version, otherwise do it based on semantic versioning (alpha.1, beta.1, rc.1, etc)
+	public static final isBeta:Bool = betaVersion != '0';
+
+	public static final buildCode:String = Sowy.getBuildDate();
+	public static final githubRepo:RepoInfo = Github.getCompiledRepoInfo();
+	
+	public static final semanticVersion:SemanticVersion = isBeta ? '$engineVersion-$betaVersion' : engineVersion;
+	public static final displayedVersion:String = 'v$semanticVersion';
+}
 
 class Main extends Sprite
 {
@@ -49,35 +62,20 @@ class Main extends Sprite
 
 	//// You can pretty much ignore everything from here on - your code should go in your states.
 
-	public static var engineVersion:String = '0.2.0'; // Used for autoupdating n stuff
-	public static var betaVersion(get, default):String = 'rc.1'; // beta version, make blank if not on a beta version, otherwise do it based on semantic versioning (alpha.1, beta.1, rc.1, etc)
-	public static var beta:Bool = betaVersion.trim() != '';
+	////
+	public static final UserAgent:String = 'TrollEngine/${Version.engineVersion}'; // used for http requests. if you end up forking the engine and making your own then make sure to change this!!
+	public static final volumeChangedEvent = new lime.app.Event<Float->Void>();
 
-	public static var UserAgent:String = 'TrollEngine/$engineVersion'; // used for http requests. if you end up forking the engine and making your own then make sure to change this!!
-	public static var githubRepo:RepoInfo = Github.getCompiledRepoInfo();
-	public static var downloadBetas:Bool = beta;
+	////
+	public static var showDebugTraces:Bool = #if (debug || SHOW_DEBUG_TRACES) true #else false #end;
+	public static var downloadBetas:Bool = Version.isBeta;
 	public static var outOfDate:Bool = false;
 	public static var recentRelease:Release;
 
-	public static var displayedVersion(get, never):String;
-    public static var semanticVersion(get, never):SemanticVersion;
-
-	@:noCompletion static function get_betaVersion()
-		return beta ? betaVersion : "0";
-	
-	@:noCompletion static function get_semanticVersion()
-		return '$engineVersion${beta ? '-$betaVersion' : ""}';
-	
-	@:noCompletion static function get_displayedVersion()
-		return 'v${semanticVersion}';
-	
 	////
-	public static var showDebugTraces:Bool = #if (debug || SHOW_DEBUG_TRACES) true #else false #end;
-	public static var volumeChangedEvent = new lime.app.Event<Float->Void>();
-
 	public static var fpsVar:FPS;
 	public static var bread:Bread;
-	
+
 	////
 	public static function main():Void
 	{
@@ -85,38 +83,9 @@ class Main extends Sprite
 	}
 
 	public function new()
-	{
+	{	
 		super();
 
-		if (stage != null)
-			init();
-		else
-			addEventListener(Event.ADDED_TO_STAGE, init);
-	}
-
-	private function init(?E:Event):Void
-	{
-		if (hasEventListener(Event.ADDED_TO_STAGE))
-			removeEventListener(Event.ADDED_TO_STAGE, init);
-
-		setupGame();
-	}
-
-	public static function setScaleMode(scale:String){
-		switch(scale){
-			default:
-				Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
-			case 'EXACT_FIT':
-				Lib.current.stage.scaleMode = StageScaleMode.EXACT_FIT;
-			case 'NO_BORDER':
-				Lib.current.stage.scaleMode = StageScaleMode.NO_BORDER;
-			case 'SHOW_ALL':
-				Lib.current.stage.scaleMode = StageScaleMode.SHOW_ALL;
-		}
-	}
-
-	private function setupGame():Void
-	{	
 		////
 		#if sys
 		var args = Sys.args();
@@ -248,7 +217,6 @@ class Main extends Sprite
 	#else
 	public static final print:Function = ()->{};
 	#end
-	
 
 	#if CRASH_HANDLER
 	private static function onCrash(errorName:String):Void
@@ -299,6 +267,5 @@ class Main extends Sprite
 		Sys.exit(1);
 		#end
 	}
-
 	#end
 }

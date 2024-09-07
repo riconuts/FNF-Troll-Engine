@@ -139,7 +139,7 @@ class CreditsState extends MusicBeatState
 		if (useHttp){
             trace('checking for updated credits');
 			
-			var githubRepo = Main.githubRepo;
+			var githubRepo = Main.Version.githubRepo;
 			#if tgt
 			var http = new haxe.Http('https://raw.githubusercontent.com/${githubRepo.user}/${githubRepo.repo}/main/assets-tgt/data/credits.txt'); // hmmmmm
             #else

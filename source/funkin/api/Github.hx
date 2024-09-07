@@ -148,8 +148,9 @@ class Github {
 		301, 302, 308
 	];
     static var baseURL:String = 'https://api.github.com/repos';
-	static var defaultRepo:RepoInfo = Main.githubRepo;
+    static var defaultRepo:RepoInfo = Main.Version.githubRepo;
     public var requestURL:String = '';
+
     public function new(?repoInfo:RepoInfo){ 
 		if (repoInfo == null)
 			repoInfo = defaultRepo;

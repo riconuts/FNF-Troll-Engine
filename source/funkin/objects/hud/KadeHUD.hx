@@ -35,8 +35,8 @@ class KadeHUD extends BaseHUD
 	var cbString = Paths.getString("cbplural");
 	var npsString = Paths.getString("nps");
 
-	var engineStringLong = 'Troll Engine ${Main.displayedVersion}';
-	var engineStringShort = 'TE ${Main.displayedVersion}';
+	var engineStringLong = 'Troll Engine ${Main.Version.displayedVersion}';
+	var engineStringShort = 'TE ${Main.Version.displayedVersion}';
 
 	override function set_displayedHealth(value:Float)
 	{

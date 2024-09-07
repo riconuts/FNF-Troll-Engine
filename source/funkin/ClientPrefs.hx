@@ -1,6 +1,8 @@
 package funkin;
 
 #if !macro
+import Main.Version;
+
 import funkin.input.Controls.KeyboardScheme;
 import flixel.util.FlxSave;
 import flixel.input.keyboard.FlxKey;
@@ -52,6 +54,8 @@ class ClientPrefs
 	*/
 
 	static var defaultOptionDefinitions = getOptionDefinitions();
+	static var manualLoads = ["gameplaySettings", "quantHSV", "arrowHSV", "comboOffset"];
+
 	inline public static function getOptionDefinitions():Map<String, OptionData>
 	{
 		return [
@@ -403,14 +407,6 @@ class ClientPrefs
 				value: false,
 				data: []
 			},
-			"worldCombos" => {
-				display: "World Combos",
-				desc: "When toggled, combo sprites are placed on the stage instead of the HUD."
-				+ '\nDoesn'+"'"+'t work with "Alt Judgements" enabled.',
-				type: Toggle,
-				value: false,
-				data: []
-			},
 			"showMS" => {
 				display: "Show Timing",
 				desc: "When toggled, upon hitting a note it will show the millisecond timing.",
@@ -676,10 +672,11 @@ class ClientPrefs
 
 	//
 	public static var arrowHSV:Array<Array<Int>> = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
+	
 	/**
-		[0] and [1] for ratings.
-		[2] and [3] for combo numbers.
-		[4] and [5] for miliseconds.
+	 * [0] and [1] for ratings.
+	 * [2] and [3] for combo numbers.
+	 * [4] and [5] for miliseconds.
 	**/
 	public static var comboOffset:Array<Int> = [
 		-60, 60, 
@@ -723,8 +720,6 @@ class ClientPrefs
 	}
 
 	static var optionSave:FlxSave = new FlxSave();
-
-	static var manualLoads = ["gameplaySettings", "quantHSV", "arrowHSV", "comboOffset"];
 
 	public static function initialize(){
 		defaultOptionDefinitions.get("framerate").value = FlxG.stage.application.window.displayMode.refreshRate;
@@ -834,8 +829,7 @@ class ClientPrefs
 			FlxG.updateFramerate = Math.floor(framerate);
 		}
 
-		Main.downloadBetas = Main.beta || ClientPrefs.downloadBetas;
-
+		Main.downloadBetas = Version.isBeta || ClientPrefs.downloadBetas;
 	}
 
 	public static function reloadControls()
