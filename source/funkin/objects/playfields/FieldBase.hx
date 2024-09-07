@@ -10,4 +10,14 @@ class FieldBase extends FlxObject {
 	 * Required!
 	 */
 	public var field:PlayField;
+
+	/**
+	 * All of the strums in the playfield attached to this notefield
+	 */
+    @:isVar
+	public var members(get, never):Array<StrumNote> = [];
+
+	function get_members()
+		return field.strumNotes;
+
 }

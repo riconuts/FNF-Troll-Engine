@@ -92,6 +92,17 @@ typedef SpeedEvent =
 @:noScripting
 class PlayState extends MusicBeatState
 {
+    // nightmarevision compatibility shit !
+    public var whosTurn:String = 'dad';
+    @:isVar public var beatsPerZoom(get, set):Int = 4;
+	function get_beatsPerZoom()
+        return zoomEveryBeat;
+	function set_beatsPerZoom(val:Int)
+		return zoomEveryBeat = val;
+
+    public var defaultCamZoomAdd:Float = 0;
+
+    
 	public static var instance:PlayState;
 	public static var SONG:SwagSong = null;
 	public static var isStoryMode:Bool = false;
@@ -1909,7 +1920,7 @@ class PlayState extends MusicBeatState
 			for(file in ["notetypes", #if PE_MOD_COMPATIBILITY "custom_notetypes" #end])
 			{
 				var baseScriptFile:String = '$file/$notetype';
-				for (ext in ["hscript", #if LUA_ALLOWED "lua" #end])
+				for (ext in Paths.SCRIPT_EXTENSIONS)
 				{
 					if (doPush)
 						break;
@@ -1921,7 +1932,7 @@ class PlayState extends MusicBeatState
 							continue;
 
 						#if LUA_ALLOWED
-						if (ext == 'lua')
+						if (Paths.LUA_EXTENSIONS.contains(ext))
 						{
 							var script = createLua(file, notetype, #if PE_MOD_COMPATIBILITY true #else false #end);
 							#if PE_MOD_COMPATIBILITY
@@ -1930,7 +1941,7 @@ class PlayState extends MusicBeatState
 							#end
 							doPush = true;
 						}
-						else if (ext == 'hscript') #end
+						else if (Paths.HSCRIPT_EXTENSIONS.contains(ext)) #end
 						{
 							notetypeScripts.set(notetype, createHScript(file, notetype));
 							doPush = true;
@@ -1954,7 +1965,7 @@ class PlayState extends MusicBeatState
 
 			for(file in ["events", #if PE_MOD_COMPATIBILITY "custom_events" #end]){
 				var baseScriptFile:String = '$file/$event';
-				for (ext in ["hscript", #if LUA_ALLOWED "lua" #end])
+				for (ext in Paths.SCRIPT_EXTENSIONS)
 				{
 					if (doPush)
 						break;
@@ -1966,13 +1977,13 @@ class PlayState extends MusicBeatState
 							continue;
 
 						#if LUA_ALLOWED
-						if (ext == 'lua')
+						if (Paths.LUA_EXTENSIONS.contains(ext))
 						{
 							// psych lua scripts work the exact same no matter what type of script they are 
 							createLua(file, event);
 							doPush = true;
 						}
-						else #end if (ext == 'hscript')
+						else #end if (Paths.HSCRIPT_EXTENSIONS.contains(ext))
 						{
 							var script = createHScript(file, event);
 							eventScripts.set(event, script);
@@ -2640,7 +2651,7 @@ class PlayState extends MusicBeatState
 			var lerpVal = Math.exp(-elapsed * 3.125 * camZoomingDecay);
 
 			camGame.zoom = FlxMath.lerp(
-				defaultCamZoom,
+				defaultCamZoom + defaultCamZoomAdd,
 				camGame.zoom,
 				lerpVal
 			);
@@ -2950,14 +2961,20 @@ class PlayState extends MusicBeatState
 			case 'Change Focus':
 				switch(value1.toLowerCase().trim()){
 					case 'dad' | 'opponent':
-						if (callOnScripts('onMoveCamera', ["dad"]) != Globals.Function_Stop)
+						if (callOnScripts('onMoveCamera', ["dad"]) != Globals.Function_Stop){
+                            whosTurn = 'dad';
 							moveCamera(dad);
+                        }
 					case 'gf':
-						if (callOnScripts('onMoveCamera', ["gf"]) != Globals.Function_Stop)
+						if (callOnScripts('onMoveCamera', ["gf"]) != Globals.Function_Stop){
+                            whosTurn = 'gf';
 							moveCamera(gf);
+                        }
 					default:
-						if (callOnScripts('onMoveCamera', ["bf"]) != Globals.Function_Stop)
+						if (callOnScripts('onMoveCamera', ["bf"]) != Globals.Function_Stop){
+                            whosTurn = 'bf';
 							moveCamera(boyfriend);
+                        }
 				}
 			case 'Game Flash':
 				var dur:Float = Std.parseFloat(value2);

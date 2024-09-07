@@ -28,6 +28,14 @@ class Paths
 
 	inline public static var SOUND_EXT = "ogg";
 	inline public static var VIDEO_EXT = "mp4";
+    public static final HSCRIPT_EXTENSIONS:Array<String> = ["hscript", "hxs", "hx"];
+	public static final LUA_EXTENSIONS:Array<String> = ["lua"];
+    
+	public static final SCRIPT_EXTENSIONS:Array<String> = [
+		"hscript",
+		"hxs",
+		"hx",
+		#if LUA_ALLOWED "lua" #end]; // TODo: initialize this by combining the top 2 vars ^
 
 	public static var dumpExclusions:Array<String> = [
 		'assets/music/freakyIntro.$SOUND_EXT',

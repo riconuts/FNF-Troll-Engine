@@ -1,5 +1,6 @@
 package funkin.scripts;
 
+import funkin.objects.IndependentVideoSprite;
 import openfl.events.DataEvent;
 import funkin.scripts.*;
 import funkin.scripts.Globals.*;
@@ -203,6 +204,7 @@ class FunkinHScript extends FunkinScript
 
 		set("FlxText", flixel.text.FlxText);
 		set("FlxTextBorderStyle", flixel.text.FlxText.FlxTextBorderStyle);
+		set("FlxCameraFollowStyle", flixel.FlxCamera.FlxCameraFollowStyle);
 
 		set("FlxRuntimeShader", flixel.addons.display.FlxRuntimeShader);
 
@@ -220,6 +222,9 @@ class FunkinHScript extends FunkinScript
 		});
 		set("FlxTextAlign", Wrappers.FlxTextAlign);
 		set("FlxTweenType", Wrappers.FlxTweenType); 
+        #if flxanimate
+        set("FlxAnimate", flxanimate.FlxAnimate);
+        #end
 	}
 
 	private function setVideoVars() {
@@ -258,6 +263,8 @@ class FunkinHScript extends FunkinScript
 		set("hxvlc", "0");
 		#end
 		#end	
+		set("VideoSprite", IndependentVideoSprite); // Should use this in future !
+
 	}
 
 	private function setFNFVars() {
@@ -289,6 +296,7 @@ class FunkinHScript extends FunkinScript
 
 		set("ProxyField", funkin.objects.proxies.ProxyField);
 		set("ProxySprite", funkin.objects.proxies.ProxySprite);
+        set("AltBGSprite", funkin.objects.BGSprite.AltBGSprite);
 
 		set("FlxSprite3D", funkin.objects.FlxSprite3D);
 
