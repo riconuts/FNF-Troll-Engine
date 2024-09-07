@@ -688,14 +688,13 @@ class PlayState extends MusicBeatState
 		//// STAGE SCRIPTS
 		stage = new Stage(curStage, true);
 		stageData = stage.stageData;
-		setStageData(stageData);
-
-		//callOnHScripts("onStageCreated");
-
+		
 		if (stage.stageScript != null){
-			hscriptArray.push(cast stage.stageScript);
+			hscriptArray.push(stage.stageScript);
 			funkyScripts.push(stage.stageScript);
 		}
+
+		setStageData(stageData);
 
 		// SONG SPECIFIC SCRIPTS
 		var foldersToCheck:Array<String> = Paths.getFolders('songs/$songName');
