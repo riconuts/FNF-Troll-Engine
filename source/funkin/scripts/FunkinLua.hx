@@ -36,7 +36,7 @@ import llua.Lua;
 import llua.LuaL;
 import llua.State;
 #else
-typedef State = Dynamic;
+private typedef State = Dynamic;
 #end
 
 class FunkinLua extends FunkinScript
@@ -50,6 +50,7 @@ class FunkinLua extends FunkinScript
 		trace('loading lua file: $path');
 
 		var lua:State = LuaL.newstate();
+		LuaL.openlibs(lua);
 
 		try {
 			var result:Dynamic = LuaL.dofile(lua, path);
@@ -1890,12 +1891,11 @@ class FunkinLua extends FunkinScript
 		#end
 	}
 
-	public function new(?state:State, ?name:String = "Lua", ?ignoreCreateCall:Bool, ?vars:Map<String, Dynamic>) {
+	public function new(state:State, ?name:String = "Lua", ?ignoreCreateCall:Bool, ?vars:Map<String, Dynamic>) {
 		super(name, 'lua');
 
 		#if LUA_ALLOWED
-		lua = (state != null) ? state : LuaL.newstate();
-		LuaL.openlibs(lua);
+		lua = state;
 		Lua.init_callbacks(lua);
 
 		setDefaultVars();
