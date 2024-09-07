@@ -1,6 +1,8 @@
 package funkin.api;
-#if (windows && cpp)
 
+// https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-messagebox
+
+#if (windows && cpp)
 enum abstract MessageBoxOptions(Int) to Int {
 	var OK					= 0x00000000;
 	var OKCANCEL			= 0x00000001;
@@ -24,6 +26,13 @@ enum abstract MessageBoxIcon(Int) to Int {
 	var ASTERISK	= 0x00000040;
 }
 
+enum abstract MessageBoxDefaultButton(Int) to Int {
+	var BUTTON1 = 0x00000000;
+	var BUTTON2 = 0x00000100;
+	var BUTTON3 = 0x00000200;
+	var BUTTON4 = 0x00000300;
+}
+
 enum abstract MessageBoxReturnValue(Int) from Int to Int {
 	var OK = 1;
 	var CANCEL = 2;
@@ -39,6 +48,6 @@ enum abstract MessageBoxReturnValue(Int) from Int to Int {
 @:cppFileCode('#include <windows.h>')
 class Windows {
 	public static function msgBox(message:String = "", title:String = "", sowyType:Int = 0):MessageBoxReturnValue
-		return untyped MessageBox(NULL, message, title, sowyType);
+		return untyped MessageBox(NULL, message, title, sowyType | 0x00010000);
 }
 #end
