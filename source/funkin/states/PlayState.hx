@@ -2805,8 +2805,10 @@ class PlayState extends MusicBeatState
 
 	function doGameOver()
 	{
-		if (callOnScripts('onGameOver') == Globals.Function_Stop) 
-			return false;
+		switch(callOnScripts('onGameOver')) {
+			case Globals.Function_Stop: return false;
+			case Globals.Function_Halt: return true;
+		} 
 
 		pause();
 
@@ -2821,16 +2823,8 @@ class PlayState extends MusicBeatState
 		if (instaRespawn){
 			FlxG.camera.bgColor = 0xFF000000;
 			MusicBeatState.resetState(true);
-		}else{
-			var char = playOpponent ? dad : boyfriend;
-			
-			openSubState(new GameOverSubstate(
-				char.getScreenPosition().x - char.positionArray[0],
-				char.getScreenPosition().y - char.positionArray[1],
-				camFollowPos.x,
-				camFollowPos.y,
-				char.isPlayer
-			));
+		}else{			
+			openSubState(new GameOverSubstate(playOpponent ? dad : boyfriend));
 
 			#if DISCORD_ALLOWED
 			// Game Over doesn't get his own variable because it's only used here
