@@ -36,7 +36,6 @@ import funkin.api.Windows;
 #end
 #end
 
-@:structInit
 final class Version
 {
 	public static final engineVersion:String = '0.2.0'; // Used for autoupdating n stuff

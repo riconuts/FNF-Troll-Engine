@@ -314,6 +314,14 @@ class ClientPrefs
 				type: Toggle,
 				data: []
 			},
+            "worldCombos" => {
+				display: "World Combos",
+				desc: "When toggled, combo sprites are placed on the stage instead of the HUD."
+				+ '\nDoesn'+"'"+'t work with "Alt Judgements" enabled.',
+				type: Toggle,
+				value: false,
+				data: []
+			},
 			"scoreZoom" => {
 				display: "Zoom On Hit",
 				desc: "When toggled, the HUD zooms when you hit a note.",
