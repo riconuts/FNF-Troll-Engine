@@ -191,6 +191,8 @@ class Song
 
 		if(songJson.hudSkin==null)
 			songJson.hudSkin = 'default';
+
+		return songJson;
 	}
 
 	public static function parseJSONshit(rawJson:String):SwagSong
@@ -224,10 +226,15 @@ class Song
 		var chartFilePath:String = chartDirPath + chartFileName + '.json';
 
 		var format = FormatDetector.findFormat([chartFilePath]);
+/*         if(format == null){
+            trace("THERES NO FUCKING CHART HERE??? WHAT!!!");
+            // find a good way to notify the user there's no valid chart lol
+            return;
+        } */
 		var formatInfo = FormatDetector.getFormatData(format);
 
 		var SONG:SwagSong = switch(format) {
-			case FNF_LEGACY_PSYCH | FNF_LEGACY:
+			case "FNF_LEGACY_PSYCH" | "FNF_LEGACY":
 				trace('Chart format $format is good to be read ^.^');
 				Song.loadFromJson(chartFileName, songLowercase);
 
