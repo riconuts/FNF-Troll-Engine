@@ -102,7 +102,7 @@ class DiscordClient
 		if (discordDaemon == null) return;
 
 		if (noTrace != true)
-			trace("Discord Client shitting down...");
+			trace("Discord Client shutting down...");
 
 		mutex.acquire();
 		DiscordRpc.Shutdown();
