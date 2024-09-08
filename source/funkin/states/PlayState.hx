@@ -3257,7 +3257,13 @@ class PlayState extends MusicBeatState
 		CustomFadeTransition.nextCamera = null;
 
 		// MusicBeatState.switchState(new MainMenuState());
-		MusicBeatState.switchState(isStoryMode ? new StoryMenuState() : new FreeplayState());
+		if (isStoryMode){
+			MusicBeatState.playMenuMusic(1, true);
+			MusicBeatState.switchState(new StoryMenuState());
+		}else{
+			FreeplayState.comingFromPlayState = true;
+			MusicBeatState.switchState(new FreeplayState());
+		}
 		
 		deathCounter = 0;
 		seenCutscene = false;
@@ -3272,8 +3278,6 @@ class PlayState extends MusicBeatState
 			instance.camFollow.put();
 			instance.camFollowPos.destroy();
 		}
-
-		MusicBeatState.playMenuMusic(1, true);
 	}
 
 
