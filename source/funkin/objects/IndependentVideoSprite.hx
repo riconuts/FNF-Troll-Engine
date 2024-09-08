@@ -8,9 +8,14 @@ package funkin.objects;
 // TODO: add the other video libs (hxcodec and its various versions that change its API)
 
 import haxe.io.Bytes;
-import hxvlc.util.OneOfThree;
 import sys.FileSystem;
 #if (hxvlc)
+#if (hxvlc > "1.5.5")
+import hxvlc.util.typeLimit.OneOfThree;
+#else
+import hxvlc.util.OneOfThree;
+#end
+
 import hxvlc.flixel.FlxVideoSprite as VideoSprite;
 #end
 class IndependentVideoSprite extends VideoSprite {
