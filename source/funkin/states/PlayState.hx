@@ -1,7 +1,4 @@
 package funkin.states;
-#if(LUA_ALLOWED || HSCRIPT_ALLOWED)
-import funkin.scripts.Util;
-#end
 
 import funkin.data.Cache;
 import funkin.data.Song;
@@ -26,7 +23,7 @@ import funkin.modchart.ModManager;
 import funkin.states.editors.*;
 import funkin.states.options.*;
 import funkin.scripts.*;
-import funkin.scripts.FunkinLua;
+import funkin.scripts.Util;
 import funkin.scripts.Util as ScriptingUtil;
 
 import flixel.*;
@@ -91,18 +88,7 @@ typedef SpeedEvent =
 
 @:noScripting
 class PlayState extends MusicBeatState
-{
-    // nightmarevision compatibility shit !
-    public var whosTurn:String = 'dad';
-    @:isVar public var beatsPerZoom(get, set):Int = 4;
-	function get_beatsPerZoom()
-        return zoomEveryBeat;
-	function set_beatsPerZoom(val:Int)
-		return zoomEveryBeat = val;
-
-    public var defaultCamZoomAdd:Float = 0;
-
-    
+{    
 	public static var instance:PlayState;
 	public static var SONG:SwagSong = null;
 	public static var isStoryMode:Bool = false;
@@ -324,6 +310,13 @@ class PlayState extends MusicBeatState
 	@:noCompletion public var opponentStrums:FlxTypedGroup<StrumNote>;
 	@:noCompletion public var playerStrums:FlxTypedGroup<StrumNote>;
 	#end
+
+	// nightmarevision compatibility shit !
+	public var whosTurn:String = 'dad';
+	public var defaultCamZoomAdd:Float = 0;
+	@:isVar public var beatsPerZoom(get, set):Int = 4;
+	@:noCompletion function get_beatsPerZoom()return zoomEveryBeat;
+	@:noCompletion function set_beatsPerZoom(val:Int)return zoomEveryBeat = val;
 
 	////
 	@:isVar public var songScore(get, set):Int = 0;
@@ -688,14 +681,13 @@ class PlayState extends MusicBeatState
 		//// STAGE SCRIPTS
 		stage = new Stage(curStage, true);
 		stageData = stage.stageData;
-		setStageData(stageData);
-
-		//callOnHScripts("onStageCreated");
 
 		if (stage.stageScript != null){
-			hscriptArray.push(cast stage.stageScript);
+			hscriptArray.push(stage.stageScript);
 			funkyScripts.push(stage.stageScript);
 		}
+
+		setStageData(stageData);
 
 		// SONG SPECIFIC SCRIPTS
 		var foldersToCheck:Array<String> = Paths.getFolders('songs/$songName');
@@ -837,6 +829,8 @@ class PlayState extends MusicBeatState
 
 		var splash:NoteSplash = new NoteSplash(100, 100, 0);
 		splash.alpha = 0.0;
+
+		grpNoteSplashes.cameras = [camHUD];
 		grpNoteSplashes.add(splash);
 
 		//// Characters
@@ -913,34 +907,40 @@ class PlayState extends MusicBeatState
 				default: hud = new PsychHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song, stats);
 			}
 		}
+		hud.cameras = [camHUD];
 		hud.alpha = ClientPrefs.hudOpacity;
 		add(hud);
 
         #if PE_MOD_COMPATIBILITY
 		healthBar = hud.getHealthbar();
-        iconP1 = healthBar.iconP1;
-        iconP2 = healthBar.iconP2;
+		if (healthBar != null){
+			iconP1 = healthBar.iconP1;
+			iconP2 = healthBar.iconP2;
+		}
         #end
 		//// Generate playfields so you can actually, well, play the game
 		callOnScripts("prePlayfieldCreation"); // backwards compat
         // TODO: add deprecation messages to function callbacks somehow
 
         callOnScripts("onPlayfieldCreation"); // you should use this
+		playfields.cameras = [camHUD];
+		notes.cameras = [camHUD];
+
 		playerField = new PlayField(modManager);
+		playerField.cameras = [camHUD];
 		playerField.modNumber = 0;
-		playerField.characters = [];
-		for(n => ch in boyfriendMap)playerField.characters.push(ch);
+		playerField.characters = [for(ch in boyfriendMap) ch];
 		
 		playerField.isPlayer = !playOpponent;
 		playerField.autoPlayed = !playerField.isPlayer || cpuControlled;
 		playerField.noteHitCallback = playOpponent ? opponentNoteHit : goodNoteHit;
 
 		dadField = new PlayField(modManager);
+		dadField.cameras = [camHUD];
 		dadField.isPlayer = playOpponent;
 		dadField.autoPlayed = !dadField.isPlayer || cpuControlled;
 		dadField.modNumber = 1;
-		dadField.characters = [];
-		for(n => ch in dadMap)dadField.characters.push(ch);
+		dadField.characters = [for(ch in dadMap) ch];
 		dadField.noteHitCallback = playOpponent ? goodNoteHit : opponentNoteHit;
 
 		dad.idleWhenHold = !dadField.isPlayer;
@@ -1049,20 +1049,12 @@ class PlayState extends MusicBeatState
 		////
 		callOnAllScripts('onCreatePost');
 
-		var cH = [camHUD];
-		hud.cameras = cH;
-		playfields.cameras = cH;
-		playerField.cameras = cH;
-		dadField.cameras = cH;
-		notes.cameras = cH;
-		grpNoteSplashes.cameras = cH;
-		luaDebugGroup.cameras = [camOther];
-        
 		add(ratingGroup);
 		add(timingTxt);
 		add(playfields);
 		add(notefields);
 		add(grpNoteSplashes);
+		luaDebugGroup.cameras = [camOther];
 		add(luaDebugGroup);
 
 		////
@@ -2805,8 +2797,10 @@ class PlayState extends MusicBeatState
 
 	function doGameOver()
 	{
-		if (callOnScripts('onGameOver') == Globals.Function_Stop) 
-			return false;
+		switch(callOnScripts('onGameOver')) {
+			case Globals.Function_Stop: return false;
+			case Globals.Function_Halt: return true;
+		} 
 
 		pause();
 
@@ -2821,16 +2815,8 @@ class PlayState extends MusicBeatState
 		if (instaRespawn){
 			FlxG.camera.bgColor = 0xFF000000;
 			MusicBeatState.resetState(true);
-		}else{
-			var char = playOpponent ? dad : boyfriend;
-			
-			openSubState(new GameOverSubstate(
-				char.getScreenPosition().x - char.positionArray[0],
-				char.getScreenPosition().y - char.positionArray[1],
-				camFollowPos.x,
-				camFollowPos.y,
-				char.isPlayer
-			));
+		}else{			
+			openSubState(new GameOverSubstate(playOpponent ? dad : boyfriend));
 
 			#if DISCORD_ALLOWED
 			// Game Over doesn't get his own variable because it's only used here
@@ -3271,7 +3257,13 @@ class PlayState extends MusicBeatState
 		CustomFadeTransition.nextCamera = null;
 
 		// MusicBeatState.switchState(new MainMenuState());
-		MusicBeatState.switchState(isStoryMode ? new StoryMenuState() : new FreeplayState());
+		if (isStoryMode){
+			MusicBeatState.playMenuMusic(1, true);
+			MusicBeatState.switchState(new StoryMenuState());
+		}else{
+			FreeplayState.comingFromPlayState = true;
+			MusicBeatState.switchState(new FreeplayState());
+		}
 		
 		deathCounter = 0;
 		seenCutscene = false;
@@ -3286,8 +3278,6 @@ class PlayState extends MusicBeatState
 			instance.camFollow.put();
 			instance.camFollowPos.destroy();
 		}
-
-		MusicBeatState.playMenuMusic(1, true);
 	}
 
 
@@ -4813,6 +4803,7 @@ class PlayState extends MusicBeatState
 		});
 		*/
 
+		FlxG.timeScale = 1.0;
 		ClientPrefs.gameplaySettings.set('botplay', cpuControlled);
 
         #if LUA_ALLOWED
@@ -4824,18 +4815,16 @@ class PlayState extends MusicBeatState
 			script.call("onDestroy");
 			script.stop();
 		}
-		funkyScripts = null;
 		
 		while (hscriptArray.length > 0)
 			hscriptArray.pop();
-		hscriptArray = null;
 
 		#if LUA_ALLOWED
 		while (luaArray.length > 0)
 			luaArray.pop();
-		luaArray = null;
 
-		FunkinLua.haxeScript.stop();
+		if (FunkinLua.haxeScript != null)
+			FunkinLua.haxeScript.stop();
 		FunkinLua.haxeScript = null;
 		#end
 
@@ -4846,20 +4835,13 @@ class PlayState extends MusicBeatState
 			cameraPoints.pop().put();
 
 		stats.changedEvent.removeAll();
-		stats.changedEvent = null;
-		stats = null;
 
 		Note.quantShitCache.clear();
 		FunkinHScript.defaultVars.clear();
 
 		notetypeScripts.clear();
-		notetypeScripts = null;
-
-		hudSkinScripts.clear();
-		hudSkinScripts = null;
-		
+		hudSkinScripts.clear();		
 		eventScripts.clear();
-		eventScripts = null;
 
 		instance = null;
 

@@ -28,6 +28,7 @@ class RenderObject {
 	public var glows:Array<Float>;
 	public var uvData:Vector<Float>;
 	public var vertices:Vector<Float>;
+	public var indices:Vector<Int>;
 	public var zIndex:Float;
 }
 
@@ -35,9 +36,17 @@ final scalePoint = new FlxPoint(1, 1);
 
 class NoteField extends FieldBase
 {
+	// order should be LT, RT, RB, LT, LB, RB
+	// R is right L is left T is top B is bottom
+	// order matters! so LT is left, top because they're represented as x, y
+	var NOTE_INDICES:Vector<Int> = new Vector<Int>(6, true, [
+		0, 1, 3,
+		0, 2, 3
+	]);
+	var HOLD_INDICES:Vector<Int> = new Vector<Int>(0, false);
 	var smoothHolds = true; // ClientPrefs.coolHolds;
 
-	public var holdSubdivisions:Int = Std.int(ClientPrefs.holdSubdivs) + 1;
+	public var holdSubdivisions(default, set):Int;
 	public var optimizeHolds = ClientPrefs.optimizeHolds;
 	public var defaultShader:FlxShader = new FlxShader();
 
@@ -46,6 +55,7 @@ class NoteField extends FieldBase
 		super(0, 0);
 		this.field = field;
 		this.modManager = modManager;
+		this.holdSubdivisions = Std.int(ClientPrefs.holdSubdivs) + 1;
 	}
 
 	/**
@@ -249,26 +259,16 @@ class NoteField extends FieldBase
 		if(zoom != 1){
 			for(object in drawQueue){
 				var vertices = object.vertices;
-				var i:Int = 0;
 				var currentVertexPosition:Int = 0;
 
 				var centerX = FlxG.width * 0.5;
 				var centerY = FlxG.height * 0.5;
-				while (i < vertices.length)
+				while (currentVertexPosition < vertices.length)
 				{
-					matrix.identity();
-					matrix.translate(-centerX, -centerY);
-					matrix.scale(zoom, zoom);
-					matrix.translate(centerX, centerY);
-					var xIdx = currentVertexPosition++;
-					var yIdx = currentVertexPosition++;
-					point.set(vertices[xIdx], vertices[yIdx]);
-					point.transform(matrix);
-
-					vertices[xIdx] = point.x;
-					vertices[yIdx] = point.y;
-
-					i += 2;
+					vertices[currentVertexPosition] = (vertices[currentVertexPosition] - centerX) * zoom + centerX;
+					++currentVertexPosition;
+					vertices[currentVertexPosition] = (vertices[currentVertexPosition] - centerY) * zoom + centerY;
+					++currentVertexPosition;
 				}
 				object.vertices = vertices; // i dont think this is needed but its like, JUUUSST incase
 			}
@@ -306,10 +306,7 @@ class NoteField extends FieldBase
 				var glows = object.glows;
 				var vertices = object.vertices;
 				var uvData = object.uvData;
-				var _indices = new FastVector<Int>(vertices.length);
-				for(i in 0...vertices.length)
-					_indices[i] = i;
-				var indices = new Vector<Int>(vertices.length, false, cast _indices);
+				var indices = object.indices;
 				var transforms:Array<ColorTransform> = []; // todo use fastvector
 				var multAlpha = this.alpha * ClientPrefs.noteOpacity;
 				for (n in 0... Std.int(vertices.length / 3)){
@@ -387,9 +384,7 @@ class NoteField extends FieldBase
 	var crotchet:Float = Conductor.getCrotchetAtTime(0.0) / 4.0;
 	function drawHold(hold:Note, ?prevAlpha:Float, ?prevGlow:Float):Null<RenderObject>
     {
-		if (hold.animation.curAnim == null)
-			return null;
-		if (hold.scale == null)
+		if (hold.animation.curAnim == null || hold.scale == null)
 			return null;
 
 		var render = false;
@@ -404,19 +399,11 @@ class NoteField extends FieldBase
 		if (!render)
 			return null;
 
-		var verts:Array<Float> = [];
-		var uv:Array<Float> = [];
+		var vertices = new Vector<Float>(8 * holdSubdivisions, true);
+		var uvData = new Vector<Float>(8 * holdSubdivisions, true);
+		var indices = new Vector<Int>(6 * holdSubdivisions, true);
 		var alphas:Array<Float> = [];
 		var glows:Array<Float> = [];
-
-		inline function addVert(vert:Float) {
-			verts.push(vert);
-		}
-		inline function addVert2(vert:Float, vert2:Float) {
-			verts.push(vert);
-			verts.push(vert2);
-		}
-
 		var lastMe = null;
 
 		var tWid = hold.frameWidth * hold.scale.x;
@@ -483,27 +470,18 @@ class NoteField extends FieldBase
 
 			//var quad:Array<Vector3> = [top[0], top[1], bot[0], bot[1]];
 
-			addVert2(top[0].x, top[0].y);
-			addVert2(top[1].x, top[1].y);
-			addVert2(bot[1].x, bot[1].y);
-			addVert2(top[0].x, top[0].y);
-			addVert2(bot[0].x, bot[0].y);
-			addVert2(bot[1].x, bot[1].y);
+			var subIndex = sub * 8;
+			vertices[subIndex] = top[0].x;
+			vertices[subIndex + 1] = top[0].y;
+			vertices[subIndex + 2] = top[1].x;
+			vertices[subIndex + 3] = top[1].y;
+			vertices[subIndex + 4] = bot[0].x;
+			vertices[subIndex + 5] = bot[0].y;
+			vertices[subIndex + 6] = bot[1].x;
+			vertices[subIndex + 7] = bot[1].y;
 
-			/*verts = verts.concat([
-				quad[0].x, quad[0].y,
-				quad[1].x, quad[1].y,
-				quad[3].x, quad[3].y,
-
-				quad[0].x, quad[0].y,
-				quad[2].x, quad[2].y,
-				quad[3].x, quad[3].y
-			]);*/
-			uv = uv.concat(getUV(hold, false, sub)); // TODO: optimize this
+			appendUV(hold, uvData, false, sub);
 		}
-
-		var vertices = new Vector<Float>(verts.length, false, cast verts);
-		var uvData = new Vector<Float>(uv.length, false, uv);
 
 		var shader = hold.shader != null ? hold.shader : defaultShader;
 		if (shader != hold.shader)
@@ -519,45 +497,36 @@ class NoteField extends FieldBase
 			glows: glows,
 			uvData: uvData,
 			vertices: vertices,
+			indices: HOLD_INDICES,
 			zIndex: zIndex
 		}
 	}
 
-	private function getUV(sprite:FlxSprite, flipY:Bool, sub:Int)
+	private function appendUV(sprite:FlxSprite, uv:Vector<Float>, flipY:Bool, sub:Int)
 	{
 		// i cant be bothered
 		// code by 4mbr0s3 2 (Schmovin')
-		var frameRect = sprite.frame.frame;
-		var sourceBitmap = sprite.graphic.bitmap;
-
-		var leftX = frameRect.left / sourceBitmap.width;
-		var topY = frameRect.top / sourceBitmap.height;
-		var rightX = frameRect.right / sourceBitmap.width;
-		var height = frameRect.height / sourceBitmap.height;
+		var subIndex = sub * 8;
+		var frameRect = sprite.frame.uv;
+		var height = frameRect.height - frameRect.y;
 
 		if (!flipY)
 			sub = (holdSubdivisions - 1) - sub;
 		var uvSub = 1.0 / holdSubdivisions;
 		var uvOffset = uvSub * sub;
+
 		if (flipY)
 		{
-			return [
-				 leftX,           topY + uvOffset * height,
-				rightX,           topY + uvOffset * height,
-				rightX, topY + (uvOffset + uvSub) * height,
-				 leftX,           topY + uvOffset * height,
-				 leftX, topY + (uvOffset + uvSub) * height,
-				rightX, topY + (uvOffset + uvSub) * height
-			];
+			uv[subIndex] = uv[subIndex + 4] = frameRect.x;
+			uv[subIndex + 2] = uv[subIndex + 6] = frameRect.width;
+			uv[subIndex + 1] = uv[subIndex + 3] = frameRect.y + uvOffset * height;
+			uv[subIndex + 5] = uv[subIndex + 7] = frameRect.y + (uvOffset + uvSub) * height;
+			return;
 		}
-		return [
-			 leftX, topY + (uvSub + uvOffset) * height,
-			rightX, topY + (uvSub + uvOffset) * height,
-			rightX,           topY + uvOffset * height,
-			 leftX, topY + (uvSub + uvOffset) * height,
-			 leftX,           topY + uvOffset * height,
-			rightX,           topY + uvOffset * height
-		];
+		uv[subIndex] = uv[subIndex + 4] = frameRect.x;
+		uv[subIndex + 2] = uv[subIndex + 6] = frameRect.width;
+		uv[subIndex + 1] = uv[subIndex + 3] = frameRect.y + (uvSub + uvOffset) * height;
+		uv[subIndex + 5] = uv[subIndex + 7] = frameRect.y + uvOffset * height;
 	}
 
 	function drawNote(sprite:NoteObject, pos:Vector3):Null<RenderObject>
@@ -642,37 +611,20 @@ class NoteField extends FieldBase
 			quad.setTo(vert.x, vert.y, vert.z);
 		}
 
-		var frameRect = sprite.frame.frame;
-		var sourceBitmap = sprite.graphic.bitmap;
+		var frameRect = sprite.frame.uv;
 
-		var leftUV = frameRect.left / sourceBitmap.width;
-		var rightUV = frameRect.right / sourceBitmap.width;
-		var topUV = frameRect.top / sourceBitmap.height;
-		var bottomUV = frameRect.bottom / sourceBitmap.height;
-
-		// order should be LT, RT, RB, LT, LB, RB
-		// R is right L is left T is top B is bottom
-		// order matters! so LT is left, top because they're represented as x, y
-		var vertices = new Vector<Float>(12, false, [
+		var vertices = new Vector<Float>(8, false, [
 			pos.x + quad0.x, pos.y + quad0.y,
 			pos.x + quad1.x, pos.y + quad1.y,
-			pos.x + quad3.x, pos.y + quad3.y,
-
-			pos.x + quad0.x, pos.y + quad0.y,
 			pos.x + quad2.x, pos.y + quad2.y,
 			pos.x + quad3.x, pos.y + quad3.y
 		]);
-
-		var uvData = new Vector<Float>(12, false, [
-			 leftUV,    topUV,
-			rightUV,    topUV,
-			rightUV, bottomUV,
-
-			 leftUV,    topUV,
-			 leftUV, bottomUV,
-			rightUV, bottomUV,
+		var uvData = new Vector<Float>(8, false, [
+			frameRect.x,		frameRect.y,
+			frameRect.width,	frameRect.y,
+			frameRect.x,		frameRect.height,
+			frameRect.width,	frameRect.height
 		]);
-
 		var shader = sprite.shader != null ? sprite.shader : defaultShader;
 		if (shader != sprite.shader)
 			sprite.shader = shader;
@@ -680,7 +632,7 @@ class NoteField extends FieldBase
 		shader.bitmap.input = sprite.graphic.bitmap;
 		shader.bitmap.filter = sprite.antialiasing ? LINEAR : NEAREST;
 
-		final totalTriangles = Std.int(vertices.length / 3);
+		final totalTriangles = Std.int(vertices.length / 2);
 		var alphas = new FastVector<Float>(totalTriangles);
 		var glows = new FastVector<Float>(totalTriangles);
 		for (i in 0...totalTriangles)
@@ -696,6 +648,7 @@ class NoteField extends FieldBase
 			glows: cast glows,
 			uvData: uvData,
 			vertices: vertices,
+			indices: NOTE_INDICES,
 			zIndex: pos.z
 		}
 	}
@@ -704,5 +657,21 @@ class NoteField extends FieldBase
 	{
 		point = FlxDestroyUtil.put(point);
 		super.destroy();
+	}
+
+	function set_holdSubdivisions(to:Int)
+	{
+		HOLD_INDICES.length = (to * 6);
+		for (sub in 0...to)
+		{
+			var vertIndex = sub * 4;
+			var intIndex = sub * 6;
+
+			HOLD_INDICES[intIndex] = HOLD_INDICES[intIndex + 3] = vertIndex; // LT
+			HOLD_INDICES[intIndex + 2] = HOLD_INDICES[intIndex + 5] = vertIndex + 3; // RB
+			HOLD_INDICES[intIndex + 1] = vertIndex + 1; // RT
+			HOLD_INDICES[intIndex + 4] = vertIndex + 2; // LB
+		}
+		return holdSubdivisions = to;
 	}
 }

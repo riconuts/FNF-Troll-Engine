@@ -375,17 +375,24 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	// spawns a notesplash w/ specified skin. optional note to derive the skin and colours from.
 
 	public function spawnSplash(note:Note, splashSkin:String){
-		var skin:String = splashSkin;
-		var hue:Float = ClientPrefs.arrowHSV[note.column % 4][0] / 360;
-		var sat:Float = ClientPrefs.arrowHSV[note.column % 4][1] / 100;
-		var brt:Float = ClientPrefs.arrowHSV[note.column % 4][2] / 100;
+		var skin:String;
+		var hue:Float;
+		var sat:Float;
+		var brt:Float;
 
-		if (note != null)
-		{
+		if (note != null) {
 			skin = note.noteSplashTexture;
 			hue = note.noteSplashHue;
 			sat = note.noteSplashSat;
 			brt = note.noteSplashBrt;
+		}else{
+			skin = splashSkin;
+			hue = sat = brt = 0.0;
+			
+			/*var hsb = ClientPrefs.arrowHSV[note.column % 4]; 
+			hue = hsb[0] / 360;
+			sat = hsb[1] / 100;
+			brt = hsb[2] / 100;*/
 		}
 
 		var splash:NoteSplash = grpNoteSplashes.recycle(NoteSplash);

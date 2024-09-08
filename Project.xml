@@ -115,7 +115,7 @@
 	</section>
 
     <!-- NOTE TO SELF: DISABLE THIS IF ISSUES ARE FOUND -->
-	<haxedef name="LINC_LUA_RELATIVE_DYNAMIC_LIB" /> <!-- stable luas PUT AFTER FIRST LINE WITH APP NAME AND ETC -->
+	<haxedef name="LINC_LUA_RELATIVE_DYNAMIC_LIB" if="LUA_ALLOWED"/> <!-- stable luas PUT AFTER FIRST LINE WITH APP NAME AND ETC -->
 
     <!-- <haxedef name="no_traces" if="final"/> -->
 
