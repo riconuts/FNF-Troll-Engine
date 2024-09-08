@@ -14,6 +14,8 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 
 class FreeplayState extends MusicBeatState
 {
+	public static var comingFromPlayState:Bool = false;
+
 	var menu = new AlphabetMenu();
 	var songMeta:Array<SongMetadata> = [];
 
@@ -31,11 +33,12 @@ class FreeplayState extends MusicBeatState
 	var diffText:FlxText;
 
 	static var lastSelected:Int = 0;
+	static var curDiffName:String = "normal";
+	static var curDiffIdx:Int = 1;
+
 	var selectedSongData:SongMetadata;
 	var selectedSongCharts:Array<String>;
 	
-	static var curDiffName:String = "normal";
-	static var curDiffIdx:Int = 1;
 	var hintText:FlxText;
     
 	override public function create()
@@ -103,8 +106,10 @@ class FreeplayState extends MusicBeatState
 
 		////
 		menu.curSelected = lastSelected;
+		if (comingFromPlayState) playSelectedSongMusic();
 
 		super.create();
+		comingFromPlayState = false;
 	}
 
     function reloadFont(){
@@ -133,6 +138,19 @@ class FreeplayState extends MusicBeatState
 		}
 	}
 
+	function playSelectedSongMusic(){
+		// load song json and play inst
+		if (songLoaded != selectedSongData){
+			songLoaded = selectedSongData;
+			Song.loadSong(selectedSongData, curDiffName, curDiffIdx);
+			
+			if (PlayState.SONG != null){
+				var instAsset = Paths.inst(PlayState.SONG.song); 
+				FlxG.sound.playMusic(instAsset);
+			}
+		}
+	}
+
 	// disable menu class controls for one update cycle Dx 
 	var stunned:Bool = false;
 	inline function stun(){
@@ -156,15 +174,7 @@ class FreeplayState extends MusicBeatState
 
 		if (FlxG.keys.justPressed.SPACE){
 			stun();
-
-			// load song json and play inst
-			if (songLoaded != selectedSongData){
-				songLoaded = selectedSongData;
-				Song.loadSong(selectedSongData, curDiffName, curDiffIdx);
-				
-				var instAsset = Paths.inst(PlayState.SONG.song); 
-				FlxG.sound.playMusic(instAsset);
-			}
+			playSelectedSongMusic();
 
 		}else if (controls.BACK){
 			menu.controls = null;
