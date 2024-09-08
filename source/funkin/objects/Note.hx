@@ -84,9 +84,10 @@ class Note extends NoteObject
 	}
 
 	////	
-    public var holdType:SustainPart = TAP;
+    /**note generator script (used for shit like pixel notes or skin mods) ((script provided by the HUD skin))*/
+    public var genScript:FunkinHScript;
+	/**note type script*/
 	public var noteScript:FunkinHScript;
-    public var genScript:FunkinHScript; // note generator script (used for shit like pixel notes or skin mods) ((script provided by the HUD skin))
 	public var extraData:Map<String, Dynamic> = [];
 	
 	// basic stuff
@@ -99,6 +100,7 @@ class Note extends NoteObject
 	public var nextNote:Note;
 
 	// hold shit
+	public var holdType:SustainPart = TAP;
 	public var isSustainNote:Bool = false;
 	public var isSustainEnd:Bool = false;
 	public var isRoll:Bool = false;
