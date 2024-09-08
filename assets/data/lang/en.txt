@@ -1,6 +1,9 @@
 __WHATISTHIS__=Defines strings to be used in the game. Used for localization, etc mainly. If we add other languages to the mod then a system like this will be used for each language lol
 __SUGGEST__=If you have suggestions for what to add to these localization files then throw them into the Troll Engine issues (https://github.com/riconuts/troll-engine)
 __PR__=You can also add them to the engine yourself and do a pull request if you know what you're doing
+difficultyName_normal=Normal
+difficultyName_hard=Hard
+difficultyName_easy=Easy
 tier5=Epic
 tier4=Sick
 tier3=Good

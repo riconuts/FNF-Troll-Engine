@@ -350,6 +350,7 @@ class PlayState extends MusicBeatState
 	// Discord RPC variables
 	var detailsText:String = "";
 	var detailsPausedText:String = "";
+	var stateText:String = "";
 	#end
 
 	//// Psych achievement shit
@@ -953,7 +954,6 @@ class PlayState extends MusicBeatState
 		initPlayfield(playerField);
 		
 		callOnScripts("postPlayfieldCreation"); // backwards compat
-
         callOnScripts("onPlayfieldCreationPost");
 
 		////
@@ -1032,13 +1032,16 @@ class PlayState extends MusicBeatState
 		// EVENT AND NOTE SCRIPTS WILL GET LOADED HERE
 		generateSong(SONG.song);
 
-		#if DISCORD_ALLOWED
+		#if DISCORD_ALLOWED {
 		// Discord RPC texts
+		var stringId:String = 'difficultyName_$difficultyName';
+		var diffName:String = Paths.hasString(stringId) ? Paths._getString(stringId) : difficultyName;
+		stateText = '${SONG.song} ($diffName)';
 		detailsText = isStoryMode ? "Story Mode" : "Freeplay";
 		detailsPausedText = "Paused - " + detailsText;
 
 		updateSongDiscordPresence();
-		#end
+		}#end
 
 		if(!ClientPrefs.controllerMode)
 		{
@@ -2434,9 +2437,9 @@ class PlayState extends MusicBeatState
 		final detailsText:String = (detailsText!=null) ? detailsText : this.detailsText;
 
 		if (timeLeft > 0.0)
-			DiscordClient.changePresence(detailsText, SONG.song, songName, true, timeLeft);
+			DiscordClient.changePresence(detailsText, stateText, songName, true, timeLeft);
 		else
-			DiscordClient.changePresence(detailsText, SONG.song, songName);
+			DiscordClient.changePresence(detailsText, stateText, songName);
 	}
 	#else
 	// Saves me from having to write #if DISCORD_ALLOWED and blahblah
@@ -2468,7 +2471,7 @@ class PlayState extends MusicBeatState
 	{
 		#if DISCORD_ALLOWED
 		if (!isDead)
-			DiscordClient.changePresence(detailsPausedText, SONG.song, songName);
+			DiscordClient.changePresence(detailsPausedText, stateText, songName);
 		#end
 
 		super.onFocusLost();
@@ -2820,7 +2823,7 @@ class PlayState extends MusicBeatState
 
 			#if DISCORD_ALLOWED
 			// Game Over doesn't get his own variable because it's only used here
-			DiscordClient.changePresence("Game Over - " + detailsText, SONG.song, songName);
+			DiscordClient.changePresence("Game Over - " + detailsText, stateText, songName);
 			#end
 		}
 
@@ -4732,7 +4735,7 @@ class PlayState extends MusicBeatState
 		}
 
 		#if DISCORD_ALLOWED
-		DiscordClient.changePresence(detailsPausedText, SONG.song, songName);
+		DiscordClient.changePresence(detailsPausedText, stateText, songName);
 		#end
 	}
 

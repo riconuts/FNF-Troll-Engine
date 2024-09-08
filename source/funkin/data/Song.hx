@@ -122,7 +122,7 @@ class Song
 		return [for (name in charts.keys()) name];
 	}
 
-	public static function loadFromJson(jsonInput:String, folder:String):SwagSong
+	public static function loadFromJson(jsonInput:String, folder:String):Null<SwagSong>
 	{
 		var path:String = Paths.formatToSongPath(folder) + '/' + Paths.formatToSongPath(jsonInput) + '.json';
 		var rawJson:Null<String> = Paths.text('songs/$path', false);
@@ -208,12 +208,12 @@ class Song
 		var songLowercase:String = Paths.formatToSongPath(metadata.songName);
 		var diffSuffix:String;
 
-		if (difficulty == null){
-			difficulty = '';
+		if (difficulty == null || difficulty == "" || difficulty == "normal"){
+			difficulty = 'normal';
 			diffSuffix = '';
 		}else{
 			difficulty = difficulty.trim().toLowerCase();
-			diffSuffix = (difficulty == '' || difficulty == 'normal') ? '' : '-$difficulty';
+			diffSuffix = '-$difficulty';
 		}
 		
 		var chartFileName:String = songLowercase + diffSuffix;
@@ -254,7 +254,7 @@ class Song
 
 		PlayState.SONG = SONG;
 		PlayState.difficulty = difficultyIdx;
-		PlayState.difficultyName = difficulty == null ? '' : difficulty;
+		PlayState.difficultyName = difficulty;
 		PlayState.isStoryMode = false;	
 	}
 

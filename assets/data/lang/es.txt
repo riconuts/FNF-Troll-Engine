@@ -1,3 +1,6 @@
+difficultyName_normal=Normal
+difficultyName_hard=Dificil
+difficultyName_easy=Facil
 pauseoption_resume=Continuar
 pauseoption_restart-song=Reiniciar cancion
 pauseoption_options=Opciones
