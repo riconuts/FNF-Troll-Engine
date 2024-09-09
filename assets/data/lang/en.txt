@@ -1,6 +1,8 @@
-__WHATISTHIS__=Defines strings to be used in the game. Used for localization, etc mainly. If we add other languages to the mod then a system like this will be used for each language lol
-__SUGGEST__=If you have suggestions for what to add to these localization files then throw them into the Troll Engine issues (https://github.com/riconuts/troll-engine)
-__PR__=You can also add them to the engine yourself and do a pull request if you know what you're doing
+/*
+This is the English localizaion file! This file has most if not all of the English text found within the engine!
+If you have suggestions on what should be accessible through localization files, make sure to put in an issue.
+Alternatively, you can do a pull request! You can also do a pull request if you want to add other languages, too!
+*/
 difficultyName_normal=Normal
 difficultyName_hard=Hard
 difficultyName_easy=Easy

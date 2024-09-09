@@ -420,8 +420,18 @@ class Paths
 			var stringsText = getContent(file);
 			var daLines = stringsText.trim().split("\n");
 
+            var isInComment:Bool = false;
 			for(shit in daLines){
+                var trimmed:String = shit.trim();
+                // Allow comments in lang files
+                if(trimmed.startsWith("*/") && isInComment)isInComment = false;
+				if (trimmed.startsWith("//") || isInComment)continue;
+				if (trimmed.startsWith("/*") && !isInComment){
+					isInComment = true;
+                    continue;
+                }
 				var splitted = shit.split("=");
+                if(splitted.length <= 1)continue; // likely not a localization key
 				var thisKey = splitted.shift();
 
 				if (!currentStrings.exists(thisKey))
