@@ -409,7 +409,8 @@ class Paths
 
 		for (filePath in Paths.getFolders("data"))
 		{
-            var checkFiles = ["lang/" + locale + ".txt", "lang/en.txt", "strings.txt"];
+			var checkFiles = [
+				"lang/" + locale + ".txt", "lang/" + locale + ".lang", "lang/en.txt", "strings.txt"];
 			var file = filePath + checkFiles.shift();
 			while (checkFiles.length > 0 && !exists(file))
                 file = filePath + checkFiles.shift();
@@ -422,14 +423,20 @@ class Paths
 
             var isInComment:Bool = false;
 			for(shit in daLines){
-                var trimmed:String = shit.trim();
-                // Allow comments in lang files
+				// Deal with Bedrock-style comments by regexing them out.
+				var bedrockComments:EReg = ~/(##).+/;
+
+				var trimmed:String = bedrockComments.replace(shit, "").trim();
+                // Allow comments in lang files if a file starts with a //
+                // /* */ also works for comment blocks
                 if(trimmed.startsWith("*/") && isInComment)isInComment = false;
 				if (trimmed.startsWith("//") || isInComment)continue;
 				if (trimmed.startsWith("/*") && !isInComment){
 					isInComment = true;
                     continue;
                 }
+                
+                
 				var splitted = shit.split("=");
                 if(splitted.length <= 1)continue; // likely not a localization key
 				var thisKey = splitted.shift();
