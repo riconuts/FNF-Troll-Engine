@@ -33,7 +33,7 @@ class FreeplayState extends MusicBeatState
 	var diffText:FlxText;
 
 	static var lastSelected:Int = 0;
-	static var curDiffName:String = "normal";
+	static var curDiffStr:String = "normal";
 	static var curDiffIdx:Int = 1;
 
 	var selectedSongData:SongMetadata;
@@ -126,7 +126,7 @@ class FreeplayState extends MusicBeatState
 			menu.controls = null;
 
 			if (songLoaded != selectedSongData)
-				Song.loadSong(selectedSongData, curDiffName, curDiffIdx);
+				Song.loadSong(selectedSongData, curDiffStr, curDiffIdx);
 
 			if (FlxG.sound.music != null)
 				FlxG.sound.music.fadeOut(0.16);
@@ -142,7 +142,7 @@ class FreeplayState extends MusicBeatState
 		// load song json and play inst
 		if (songLoaded != selectedSongData){
 			songLoaded = selectedSongData;
-			Song.loadSong(selectedSongData, curDiffName, curDiffIdx);
+			Song.loadSong(selectedSongData, curDiffStr, curDiffIdx);
 			
 			if (PlayState.SONG != null){
 				var instAsset = Paths.inst(PlayState.SONG.song); 
@@ -182,12 +182,23 @@ class FreeplayState extends MusicBeatState
 			MusicBeatState.switchState(new funkin.states.MainMenuState());	
 			
 		}else if (controls.RESET){
-			openSubState(new funkin.states.ResetScoreSubState(selectedSongData.songName, false));
+			var songName:String = selectedSongData.songName;
+			var _dStrId:String = 'difficultyName_$curDiffStr';
+			
+			var diffName:String = Paths.hasString(_dStrId) ? Paths._getString(_dStrId) : curDiffStr;
+			var displayName:String = '$songName ($diffName)'; // maybe don't specify the difficulty if it's the only available one
+
+			openSubState(new ResetScoreSubState(
+				songName, 
+				curDiffStr.toLowerCase() == 'normal' ? '' : curDiffStr, 
+				false, 
+				displayName
+			));
 			this.subStateClosed.addOnce((_) -> refreshScore());
 			
 		}else if (FlxG.keys.justPressed.CONTROL){
-			openSubState(new funkin.states.GameplayChangersSubstate());
-
+			openSubState(new GameplayChangersSubstate());
+			this.subStateClosed.addOnce((_) -> refreshScore());
 		}
 
 		super.update(elapsed);
@@ -200,7 +211,6 @@ class FreeplayState extends MusicBeatState
 		Paths.currentModDirectory = data.folder;
 
 		changeDifficulty(getNewDiffIdx(), true);
-		refreshScore();
 
 		var modBgGraphic = Paths.image('menuBGBlue');
 		reloadFont();
@@ -211,7 +221,7 @@ class FreeplayState extends MusicBeatState
 	function refreshScore()
 	{
 		var data = selectedSongData;
-		var record = Highscore.getRecord(data.songName, curDiffName.toLowerCase() == 'normal' ? '' : curDiffName);
+		var record = Highscore.getRecord(data.songName, curDiffStr.toLowerCase() == 'normal' ? '' : curDiffStr);
 		targetRating = Highscore.getRatingRecord(record) * 100;
 		targetHighscore = record.score;
 	}
@@ -252,19 +262,19 @@ class FreeplayState extends MusicBeatState
 				diffText.text = "NO CHARTS AVAILABLE"; // fuck it
 
 			case 1:
-				curDiffName = charts[0];
-				diffText.text = curDiffName.toUpperCase();
+				curDiffStr = charts[0];
+				diffText.text = curDiffStr.toUpperCase();
 
 			default:
 				curDiffIdx = isAbs ? val : FlxMath.wrap(curDiffIdx + val, 0, charts.length - 1);
-				curDiffName = charts[curDiffIdx];
-				diffText.text = "< " + curDiffName.toUpperCase() + " >";
+				curDiffStr = charts[curDiffIdx];
+				diffText.text = "< " + curDiffStr.toUpperCase() + " >";
 		}
 		refreshScore();
 	}
 
 	function getNewDiffIdx() {
-		var idx = selectedSongCharts.indexOf(curDiffName);
+		var idx = selectedSongCharts.indexOf(curDiffStr);
 		if (idx != -1)
 			return idx;
 

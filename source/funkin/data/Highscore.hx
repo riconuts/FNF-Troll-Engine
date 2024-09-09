@@ -145,8 +145,8 @@ class Highscore {
 	inline public static function floorDecimal(value:Float, decimals:Int):Float
 		return CoolUtil.floorDecimal(value, decimals);
 
-	static inline function formatSong(path:String):String
-		return Paths.formatToSongPath(path);
+	static inline function formatSong(path:String, chartName:String=""):String
+		return Paths.formatToSongPath(path) + (chartName==''?'':':$chartName');
 
     public static inline function emptyRecord():ScoreRecord {
         return {
@@ -170,7 +170,8 @@ class Highscore {
     }
     public static inline function getRecord(song:String, ?chartName:String=''):ScoreRecord
     {
-		var formattedSong:String = '${formatSong(song)}${chartName}';
+		var formattedSong:String = formatSong(song, chartName);
+		trace('get "$formattedSong"');
 		return currentSongData.exists(formattedSong) ? currentSongData.get(formattedSong) : emptyRecord();
     }
 	public static function isValidScoreRecord(record:ScoreRecord){
@@ -242,7 +243,7 @@ class Highscore {
 		var isFCHigher = currentFC < savingFC;
 
 		if (force || !isValidScoreRecord(currentRecord) || currentRecord.accuracyScore < scoreRecord.accuracyScore || currentRecord.scoreSystemV < scoreRecord.scoreSystemV || isFCHigher){
-			currentSongData.set('${formatSong(song)}${chartName}', scoreRecord);
+			currentSongData.set(formatSong(song, chartName), scoreRecord);
 			save.data.saveData.set(currentLoadedID, currentSongData);
             save.flush();
         }
@@ -260,8 +261,11 @@ class Highscore {
 		save.data.weekSaveData.set(currentLoadedID, currentWeekData);
 		save.flush(); 
     }
-	public static function resetSong(song:String){
-		currentSongData.remove(formatSong(song));
+	public static function resetSong(song:String, chartName:String){
+		var formattedSong:String = formatSong(song, chartName);
+		trace('remove "$formattedSong"');
+
+		currentSongData.remove(formattedSong);
 		save.data.saveData.set(currentLoadedID, currentSongData);
 		save.flush();
     }

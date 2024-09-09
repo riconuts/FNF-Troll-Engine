@@ -17,12 +17,14 @@ class ResetScoreSubState extends MusicBeatSubstate
 	var noText:Alphabet;
 
 	var name:String;
+	var chartName:String;
 	var displayName:String;
 	var isStoryMode:Bool;
 	
-	public function new(name:String, ?isStoryMode:Bool, ?displayName:String)
+	public function new(name:String, chartName:String, ?isStoryMode:Bool, ?displayName:String)
 	{
 		this.name = name;
+		this.chartName = chartName;
 		this.displayName = displayName==null ? name : displayName;
 		this.isStoryMode = isStoryMode == true;
 
@@ -100,7 +102,7 @@ class ResetScoreSubState extends MusicBeatSubstate
 				if(isStoryMode)
 					Highscore.resetWeek(name);
 				else
-					Highscore.resetSong(name);
+					Highscore.resetSong(name, chartName);
 			}
 			FlxG.sound.play(Paths.sound('cancelMenu'),  1);
 			close();
