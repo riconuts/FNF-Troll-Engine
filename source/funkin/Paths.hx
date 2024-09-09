@@ -408,6 +408,22 @@ class Paths
 	static final normalComments:EReg = ~/(\/\/).+/;
     // could add lua-style comments though honestly dont think i need to
 
+    inline static function parseLocalString(trimmedShit:String){
+		// Allow in-line comments
+		var noComments:String = bedrockComments.replace(normalComments.replace(trimmedShit, ""), "");
+
+		if (noComments.length == 0)
+			return;
+
+		var splitted = noComments.split("=");
+		if (splitted.length <= 1)
+			return; // likely not a localization key
+		var thisKey = splitted.shift();
+
+		if (!currentStrings.exists(thisKey))
+			currentStrings.set(thisKey, splitted.join("=").trim().replace('\\n', '\n'));
+    }
+
 	public static function getAllStrings()
 	{
 		currentStrings.clear();
@@ -440,18 +456,7 @@ class Paths
 					continue;
 				}
 
-                // Allow in-line comments
-				var noComments:String = bedrockComments.replace(normalComments.replace(trimmedShit, ""), "");
-                
-				if (noComments.length == 0)continue;
-
-                
-				var splitted = noComments.split("=");
-                if(splitted.length <= 1)continue; // likely not a localization key
-				var thisKey = splitted.shift();
-
-				if (!currentStrings.exists(thisKey))
-					currentStrings.set(thisKey, splitted.join("=").trim().replace('\\n', '\n'));
+				parseLocalString(trimmedShit);
 			}
 		}
 	}
@@ -475,17 +480,26 @@ class Paths
 			var stringsText = getContent(file);
 			if (stringsText == null) continue;
 
-			for (line in stringsText.trim().split("\n")){
-				var splitted = line.split("=");
-				var thisKey = splitted.shift();
-				if (thisKey == key){
-					currentStrings.set(key, splitted.join("=").trim().replace('\\n', '\n'));
-					return currentStrings.get(key);
+			var daLines = stringsText.trim().split("\n");
+
+			var isInComment:Bool = false;
+			for (shit in daLines) {
+				// Allow comment blocks if a line starts with /* and escape block if line starts with */
+				var trimmedShit = shit.trim();
+				if (trimmedShit.startsWith("*/") && isInComment) {
+					isInComment = false;
+					continue;
 				}
+				if (trimmedShit.startsWith("/*") && !isInComment) {
+					isInComment = true;
+					continue;
+				}
+
+				parseLocalString(trimmedShit);
 			}
 		}
 
-		return null;
+		return currentStrings.get(key);
 	}
 
 	public static function getString(key:String, force:Bool = false):Null<String>{
