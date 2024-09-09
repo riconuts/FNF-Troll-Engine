@@ -442,7 +442,7 @@ class Paths
                 }
                 
                 
-				var splitted = shit.split("=");
+				var splitted = trimmed.split("=");
                 if(splitted.length <= 1)continue; // likely not a localization key
 				var thisKey = splitted.shift();
 

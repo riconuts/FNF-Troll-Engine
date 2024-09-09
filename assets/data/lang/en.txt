@@ -1,10 +1,12 @@
 ## This is the English localizaion file! This file has most if not all of the English text found within the engine!
 ## If you have suggestions on what should be accessible through localization files, make sure to put in an issue.
 ## Alternatively, you can do a pull request! You can also do a pull request if you want to add other languages, too!
+## Comments are defined with ## or //
 
 difficultyName_normal=Normal
 difficultyName_hard=Hard
 difficultyName_easy=Easy
+## Judgement-related keyS
 tier5=Epic
 tier4=Sick
 tier3=Good
@@ -26,19 +28,22 @@ tier2short=BD
 tier1short=SH
 tier0short=MS
 cbshort=CB
-whiteflag=WF
-blackflag=BF
-missflag=MF
-sdt4=SDS
-sdt3=SDG
-t5fc=EFC
-t4fc=SFC
-t3fc=GFC
-fc=FC
-sdcb=SDCB
+## Wife3 Flags. Used to denote FCs ruined by 1 judgement
+whiteflag=WF # 1 Sick and the rest Epics
+blackflag=BF # 1 Good and the rest Sicks or Epics
+missflag=MF # 1 Miss
+## Clear Flags
+sdt4=SDS ## Single Digit T4/Sick
+sdt3=SDG ## Single Digit T3/Good
+t5fc=EFC ## T5 Full Combo/Epic Full Combo
+t4fc=SFC ## T4 Full Combo/Sick Full Combo
+t3fc=GFC ## T3 Full Combo/Good Full Combo
+fc=FC ## General Full Combo
+sdcb=SDCB ## Single Digit Combo Break
 clear=Clear
 fail=Fail
-noplay=No Play
+noplay=No Play ## No notes hit yet
+## HUD and UI text
 score=Score
 highscore=Hi-Score
 rating=Rating
@@ -48,6 +53,7 @@ combo=Combo
 peakcombo=Peak Combo
 botplayMark=[BOTPLAY]
 freeplayhint=Press CTRL to open the Gameplay Modifiers menu | Press R to reset a song's score.
+## Options stuff
 opt_display_noteOffset=Offset
 opt_display_ratingOffset=Judgement Offset
 opt_display_ruin=Ruin the Mod
