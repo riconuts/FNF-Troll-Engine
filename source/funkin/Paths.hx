@@ -302,11 +302,13 @@ class Paths
 
 		if (!dirMap.exists(dir)){
 			trace('Directory $dir does not exist?');
-			return;
+			return false;
 		}
 
 		for (i in dirMap.get(dir))
 			Func(i);
+        
+        return true;
 	}
 
 	#else
