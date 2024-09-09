@@ -428,21 +428,25 @@ class Paths
 
             var isInComment:Bool = false;
 			for(shit in daLines){
-				// Deal with Bedrock-style comments by regexing them out.
-				var trimmed:String = bedrockComments.replace(normalComments.replace(shit, ""), "").trim();
-                // Allow comments in lang files if a file starts with a //
-                // /* */ also works for comment blocks
-                if(trimmed.startsWith("*/") && isInComment){
-                    isInComment = false;
-                    continue;
-                }
-				if (trimmed.startsWith("/*") && !isInComment){
+				
+                // Allow comment blocks if a line starts with /* and escape block if line starts with */
+				var trimmedShit = shit.trim();
+                if (trimmedShit.startsWith("*/") && isInComment) {
+					isInComment = false;
+					continue;
+				}
+				if (trimmedShit.startsWith("/*") && !isInComment) {
 					isInComment = true;
-                    continue;
-                }
+					continue;
+				}
+
+                // Allow in-line comments
+				var noComments:String = bedrockComments.replace(normalComments.replace(trimmedShit, ""), "");
                 
+				if (noComments.length == 0)continue;
+
                 
-				var splitted = trimmed.split("=");
+				var splitted = noComments.split("=");
                 if(splitted.length <= 1)continue; // likely not a localization key
 				var thisKey = splitted.shift();
 
