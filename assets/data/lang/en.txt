@@ -1,8 +1,7 @@
-/*
-This is the English localizaion file! This file has most if not all of the English text found within the engine!
-If you have suggestions on what should be accessible through localization files, make sure to put in an issue.
-Alternatively, you can do a pull request! You can also do a pull request if you want to add other languages, too!
-*/
+## This is the English localizaion file! This file has most if not all of the English text found within the engine!
+## If you have suggestions on what should be accessible through localization files, make sure to put in an issue.
+## Alternatively, you can do a pull request! You can also do a pull request if you want to add other languages, too!
+
 difficultyName_normal=Normal
 difficultyName_hard=Hard
 difficultyName_easy=Easy
