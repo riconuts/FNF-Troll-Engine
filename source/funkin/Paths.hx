@@ -403,6 +403,11 @@ class Paths
 	// TODO: maybe these should be cached when starting a song
     // once we add a resource (mod/skin) menu we can do caching there for some things
     // we can populate the entire string map when reloading mods and skins
+
+	static final bedrockComments:EReg = ~/(##).+/;
+	static final normalComments:EReg = ~/(\/\/).+/;
+    // could add lua-style comments though honestly dont think i need to
+
 	public static function getAllStrings()
 	{
 		currentStrings.clear();
@@ -424,13 +429,13 @@ class Paths
             var isInComment:Bool = false;
 			for(shit in daLines){
 				// Deal with Bedrock-style comments by regexing them out.
-				var bedrockComments:EReg = ~/(##).+/;
-
-				var trimmed:String = bedrockComments.replace(shit, "").trim();
+				var trimmed:String = bedrockComments.replace(normalComments.replace(shit, ""), "").trim();
                 // Allow comments in lang files if a file starts with a //
                 // /* */ also works for comment blocks
-                if(trimmed.startsWith("*/") && isInComment)isInComment = false;
-				if (trimmed.startsWith("//") || isInComment)continue;
+                if(trimmed.startsWith("*/") && isInComment){
+                    isInComment = false;
+                    continue;
+                }
 				if (trimmed.startsWith("/*") && !isInComment){
 					isInComment = true;
                     continue;
