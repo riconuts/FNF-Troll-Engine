@@ -29,9 +29,9 @@ tier1short=SH
 tier0short=MS
 cbshort=CB
 ## Wife3 Flags. Used to denote FCs ruined by 1 judgement
-whiteflag=WF # 1 Sick and the rest Epics
-blackflag=BF # 1 Good and the rest Sicks or Epics
-missflag=MF # 1 Miss
+whiteflag=WF ## 1 Sick and the rest Epics
+blackflag=BF ## 1 Good and the rest Sicks or Epics
+missflag=MF ## 1 Miss
 ## Clear Flags
 sdt4=SDS ## Single Digit T4/Sick
 sdt3=SDG ## Single Digit T3/Good

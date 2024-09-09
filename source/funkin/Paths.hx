@@ -447,7 +447,7 @@ class Paths
 				var thisKey = splitted.shift();
 
 				if (!currentStrings.exists(thisKey))
-					currentStrings.set(thisKey, splitted.join("=").trim().replace('\\n', '\n'));
+					currentStrings.set(thisKey, splitted.join("=").replace('\\n', '\n'));
 			}
 		}
 	}
