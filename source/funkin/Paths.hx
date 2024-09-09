@@ -133,15 +133,14 @@ class Paths
 		// flags everything to be cleared out next unused memory clear
 		localTrackedAssets = [];
 		Assets.cache.clear("songs");
-		// remove the cached strings
+		// remove the cached strings 
+        // Should we really do this? I mean, most aren't song specific, so I think we can probably keep most of them??
 		currentStrings.clear();
 	}
 
 	static public var currentStrings:Map<String,String> = [];
 
-	static public var currentModAddons:Array<String> = [];
 	static public var currentModDirectory:String = '';
-	static public var currentModLibraries:Array<String> = [];
 
 	public static function getPath(key:String, ?ignoreMods:Bool = false)
 	{
