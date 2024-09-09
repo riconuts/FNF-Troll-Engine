@@ -1,6 +1,6 @@
 package funkin.data;
 
-#if moonchart
+#if(moonchart)
 import moonchart.formats.fnf.legacy.FNFPsych as SupportedFormat;
 import moonchart.formats.BasicFormat;
 import moonchart.backend.FormatDetector;
@@ -221,20 +221,20 @@ class Song
 		if (Main.showDebugTraces)
 			trace('playSong', Paths.currentModDirectory, chartFileName);
 		
-		#if moonchart
+		#if (moonchart)
 		var chartDirPath:String = 'content/base-game/songs/$songLowercase/';
 		var chartFilePath:String = chartDirPath + chartFileName + '.json';
 
 		var format = FormatDetector.findFormat([chartFilePath]);
-/*         if(format == null){
+        if(format == null){
             trace("THERES NO FUCKING CHART HERE??? WHAT!!!");
             // find a good way to notify the user there's no valid chart lol
             return;
-        } */
+        }
 		var formatInfo = FormatDetector.getFormatData(format);
 
 		var SONG:SwagSong = switch(format) {
-			case "FNF_LEGACY_PSYCH" | "FNF_LEGACY":
+			case FNF_LEGACY_PSYCH | FNF_LEGACY:
 				trace('Chart format $format is good to be read ^.^');
 				Song.loadFromJson(chartFileName, songLowercase);
 
