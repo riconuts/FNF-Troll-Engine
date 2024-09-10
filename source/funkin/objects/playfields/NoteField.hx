@@ -554,8 +554,8 @@ class NoteField extends FieldBase
 		var isNote = (sprite.objType == NOTE);
 		var note:Note = isNote ? cast sprite : null;
 
-		var width = sprite.frameWidth * sprite.scale.x;
-		var height = sprite.frameHeight * sprite.scale.y;
+		var width = sprite.frame.frame.width * sprite.scale.x;
+		var height = sprite.frame.frame.height * sprite.scale.y;
 		scalePoint.set(1, 1);
 		var diff:Float =0;
 		var visPos:Float = 0;
