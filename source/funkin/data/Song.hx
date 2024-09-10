@@ -133,12 +133,6 @@ class Song
 		return songJson;
 	}
 
-	public static function parseJSONshit(rawJson:String):SwagSong {
-		var swagShit:SwagSong = cast Json.parse(rawJson).song;
-		swagShit.validScore = true;
-		return swagShit;
-	}
-
 	/** sanitize/update json values to a valid format**/
 	private static function onLoadJson(songJson:Dynamic)
 	{
