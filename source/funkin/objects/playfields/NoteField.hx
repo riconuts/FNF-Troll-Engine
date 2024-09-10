@@ -535,7 +535,7 @@ class NoteField extends FieldBase
 			return null;
 
 		if (sprite.frame == null){
-            trace("No Frame??????")
+            trace("No Frame??????");
             return null;
         }
 
