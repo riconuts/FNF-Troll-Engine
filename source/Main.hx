@@ -251,7 +251,7 @@ class Main extends Sprite
 					if (FlxG.game._state != null) FlxG.game._state.destroy();
 					FlxG.game._state = null;
 				}catch(e){
-					Main.print("Error destroying unstable state: ", e)
+					print("Error destroying unstable state: ", e);
 				}	
 				
 				FlxG.game._requestedState = new funkin.states.MainMenuState();
