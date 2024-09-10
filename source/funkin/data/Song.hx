@@ -1,5 +1,6 @@
 package funkin.data;
 
+import moonchart.backend.FormatData.Format;
 #if(moonchart)
 import moonchart.formats.fnf.legacy.FNFPsych as SupportedFormat;
 import moonchart.formats.BasicFormat;
@@ -202,6 +203,17 @@ class Song
 		return swagShit;
 	}
 
+    #if moonchart
+	public static var moonchartExtensions(get, null):Array<String> = [];
+    static function get_moonchartExtensions(){
+		if (moonchartExtensions.length == 0){
+		    for (key => data in FormatDetector.formatMap)
+                if (!moonchartExtensions.contains(data.extension))
+                    moonchartExtensions.push(data.extension);
+        }
+		return moonchartExtensions;
+    }
+    #end
 	static public function loadSong(metadata:SongMetadata, ?difficulty:String, ?difficultyIdx:Int = 1) {
 		Paths.currentModDirectory = metadata.folder;
 
@@ -220,17 +232,31 @@ class Song
 		
 		if (Main.showDebugTraces)
 			trace('playSong', Paths.currentModDirectory, chartFileName);
-		
-		#if (moonchart)
-		var chartDirPath:String = 'content/base-game/songs/$songLowercase/';
-		var chartFilePath:String = chartDirPath + chartFileName + '.json';
+		var format:Format = FNF_LEGACY_PSYCH;
 
-		var format = FormatDetector.findFormat([chartFilePath]);
-        if(format == null){
-            trace("THERES NO FUCKING CHART HERE??? WHAT!!!");
-            // find a good way to notify the user there's no valid chart lol
+		#if (moonchart)
+		var chartFilePath:String = '';
+		for (ext in moonchartExtensions){
+			for (input in [songLowercase, songLowercase + diffSuffix]){
+                var path:String = Paths.formatToSongPath(songLowercase) + '/' + Paths.formatToSongPath(input) + '.' + ext;
+                var filePath:String = Paths.getPath("songs/" + path);
+				var fileFormat:Format = FormatDetector.findFormat([filePath]);
+                if(fileFormat != null){
+					chartFilePath = filePath;
+                    format = fileFormat;
+                }
+            }
+			if (chartFilePath != '')
+                break;
+        }
+
+        if(chartFilePath == ''){
+            trace("Couldn't find ANY CHART WTF????");
+            // Find a better way to do this
             return;
         }
+
+		
 		var formatInfo = FormatDetector.getFormatData(format);
 
 		var SONG:SwagSong = switch(format) {
