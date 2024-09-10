@@ -4777,17 +4777,6 @@ class PlayState extends MusicBeatState
 	{
 		callOnScripts("switchingState");
 
-		FlxG.timeScale = 1;
-		
-		pressedGameplayKeys = null;
-
-		if (!ClientPrefs.controllerMode){
-			FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
-			FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
-		}
-
-		FunkinHScript.defaultVars.clear();
-
 		return super.startOutro(onOutroComplete);
 	}
 
@@ -4805,7 +4794,17 @@ class PlayState extends MusicBeatState
 			total;
 		});
 		*/
+		FlxG.timeScale = 1;
 
+		pressedGameplayKeys = null;
+
+		if (!ClientPrefs.controllerMode) {
+			FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
+			FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
+		}
+
+		FunkinHScript.defaultVars.clear();
+        
 		FlxG.timeScale = 1.0;
 		ClientPrefs.gameplaySettings.set('botplay', cpuControlled);
 
