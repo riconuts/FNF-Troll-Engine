@@ -1672,11 +1672,6 @@ class PlayState extends MusicBeatState
 			finishSong(false);
 		};
 
-		vocals.onComplete = function(){
-			vocalsEnded = true;
-			vocals.volume = 0; // just so theres no like vocal restart stuff at the end of the song lol
-		};
-
 		var startOnTime = PlayState.startOnTime;
 
 		if (startOnTime != 0){
@@ -1850,9 +1845,12 @@ class PlayState extends MusicBeatState
 			tracks.push(newTrack);
 		}
 
-		instTracks = [for (name in SONG.tracks.inst) trackMap.get(name)];
-		playerTracks = [for (name in SONG.tracks.player) trackMap.get(name)];
-		opponentTracks = [for (name in SONG.tracks.opponent) trackMap.get(name)];
+		inline function getTrackInstances(nameArray:Null<Array<String>>)
+			return nameArray==null ? [] : [for (name in nameArray) trackMap.get(name)];
+
+		instTracks = getTrackInstances(SONG.tracks.inst);
+		playerTracks = getTrackInstances(SONG.tracks.player);
+		opponentTracks = getTrackInstances(SONG.tracks.opponent);
 
 		inst = instTracks[0];
 		vocals = playerTracks[0];
@@ -2517,8 +2515,10 @@ class PlayState extends MusicBeatState
 		Conductor.songPosition = inst.time;
 
 		for (track in tracks){
-			track.time = Conductor.songPosition;
-			track.play();
+			//if (Conductor.songPosition < track.length){
+				track.time = Conductor.songPosition;
+				track.play();
+			//}
 		}
 
 		updateSongDiscordPresence();
@@ -2652,9 +2652,9 @@ class PlayState extends MusicBeatState
 				
 				Conductor.songPosition = inst.time + resyncTimer;
 				Conductor.lastSongPos = inst.time;
-				if (Math.abs(vocals.time - inst.time) > 25 && !vocalsEnded){
+
+				if (Math.abs(Conductor.songPosition - inst.time) > 30) // uuuhh lollll!!!
 					resyncVocals();
-				}
 				
 			}else
 				Conductor.songPosition += addition;
@@ -3190,12 +3190,6 @@ class PlayState extends MusicBeatState
 		var finishCallback:Void->Void = endSong; //In case you want to change it in a specific song.
 
 		hud.updateTime = false;
-
-		inst.volume = 0;
-		inst.pause();
-
-		vocals.volume = 0;
-		vocals.pause();
 
 		for (track in tracks){
 			track.volume = 0;
