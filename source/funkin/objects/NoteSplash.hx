@@ -40,9 +40,7 @@ class NoteSplash extends NoteObject
         var doR:Bool = false;
 		if (note != null && note.genScript != null){
             var ret:Dynamic = note.genScript.call("preSetupNoteSplash", [x, y, column, texture, hueColor, satColor, brtColor, note], ["this" => this, "noteData" => noteData, "column" => column]);
-            if(ret == Globals.Function_Stop){
-				doR = true;
-            }
+            if(ret == Globals.Function_Stop) doR = true;
         }
         
 		if (callOnHScripts("preSetupNoteSplash", [x, y, column, texture, hueColor, satColor, brtColor, note], ["this" => this, "noteData" => noteData, "column" => column]) == Globals.Function_Stop)
@@ -58,16 +56,12 @@ class NoteSplash extends NoteObject
 		updateHitbox();
 
 		this.column = column;
-		if (texture == null) {
-			texture = PlayState.splashSkin;
-		}
+		if (texture == null) texture = PlayState.splashSkin;
 
         if(note != null && note.genScript != null){
-			if (note.genScript.exists("texturePrefix"))
-				texture = note.genScript.get("texturePrefix") + texture;
+			if (note.genScript.exists("texturePrefix")) texture = note.genScript.get("texturePrefix") + texture;
 
-            if(note.genScript.exists("textureSuffix"))
-                texture += note.genScript.get("textureSuffix");
+            if (note.genScript.exists("textureSuffix")) texture += note.genScript.get("textureSuffix");
         }
 
 		if (textureLoaded != texture) {
@@ -94,12 +88,10 @@ class NoteSplash extends NoteObject
 
 		if (ret != Globals.Function_Stop){
 			var playAnim = 'note$column';
-			if (animationAmount > 1)
-				playAnim += '-${FlxG.random.int(1, animationAmount)}';
+			if (animationAmount > 1) playAnim += '-${FlxG.random.int(1, animationAmount)}';
 
 			animation.play(playAnim, true);
-			if (animation.curAnim != null) 
-				animation.curAnim.frameRate = 24 + FlxG.random.int(-2, 2);
+			if (animation.curAnim != null) animation.curAnim.frameRate = 24 + FlxG.random.int(-2, 2);
 		}
 	}
 
@@ -117,8 +109,7 @@ class NoteSplash extends NoteObject
 
 	override function update(elapsed:Float) 
 	{
-		if(animation.curAnim == null || animation.curAnim.finished) 
-			kill();
+		if (animation.curAnim == null || animation.curAnim.finished)  kill();
 
 		super.update(elapsed);
 	}

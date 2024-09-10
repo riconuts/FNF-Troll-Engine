@@ -116,6 +116,9 @@ class Modifier {
 	public function getSubmods():Array<String>
 		return [];
 
+    public inline function addSubmod(name:String)submods.set(name, new SubModifier(name, modMgr, this));
+    
+
 	inline public function getSubmodPercent(modName:String, player:Int)
 	{
 		if (submods.exists(modName))
@@ -191,7 +194,7 @@ class Modifier {
 		this.modMgr = modMgr;
 		this.parent = parent;
 		for (submod in getSubmods())
-			submods.set(submod, new SubModifier(submod, modMgr, this));
+			addSubmod(submod);
 	}
 
     @:allow(funkin.modchart.ModManager)

@@ -190,7 +190,6 @@ class NoteField extends FieldBase
 			var object = drawNote(obj, pos);
 			if (object == null)
 				continue;
-			object.zIndex += (obj.animation != null && obj.animation.curAnim != null && obj.animation.curAnim.name == 'confirm') ? 1 : 0;
 
 			lookupMap.set(obj, object);
 			drawQueue.push(object);
@@ -348,8 +347,11 @@ class NoteField extends FieldBase
 
 	function getPoints(hold:Note, ?wid:Float, speed:Float, vDiff:Float, diff:Float):Array<Vector3>
 	{ // stolen from schmovin'
+        if(hold.frame == null)
+			return [Vector3.ZERO, Vector3.ZERO];
+
 		if (wid == null)
-			wid = hold.frameWidth * hold.scale.x;
+			wid = hold.frame.frame.width * hold.scale.x;
 
 		var p1 = modManager.getPos(-vDiff * speed, diff, curDecBeat, hold.column, modNumber, hold, this, []);
 		var z:Float = p1.z;
@@ -384,7 +386,7 @@ class NoteField extends FieldBase
 	var crotchet:Float = Conductor.getCrotchetAtTime(0.0) / 4.0;
 	function drawHold(hold:Note, ?prevAlpha:Float, ?prevGlow:Float):Null<RenderObject>
     {
-		if (hold.animation.curAnim == null || hold.scale == null)
+		if (hold.animation.curAnim == null || hold.scale == null || hold.frame == null)
 			return null;
 
 		var render = false;
@@ -504,8 +506,6 @@ class NoteField extends FieldBase
 
 	private function appendUV(sprite:FlxSprite, uv:Vector<Float>, flipY:Bool, sub:Int)
 	{
-		// i cant be bothered
-		// code by 4mbr0s3 2 (Schmovin')
 		var subIndex = sub * 8;
 		var frameRect = sprite.frame.uv;
 		var height = frameRect.height - frameRect.y;
@@ -577,10 +577,14 @@ class NoteField extends FieldBase
 		final QUAD_SIZE = 4;
 		final halfWidth = width / 2;
 		final halfHeight = height / 2;
-		var quad0 = new Vector3(-halfWidth, -halfHeight, 0); // top left
-		var quad1 = new Vector3(halfWidth, -halfHeight, 0); // top right
-		var quad2 = new Vector3(-halfWidth, halfHeight, 0); // bottom left
-		var quad3 = new Vector3(halfWidth, halfHeight, 0); // bottom right
+		final xOff = 0;
+		final yOff = 0;
+        // If someone can make frameX/frameY be taken into account properly then feel free lol ^^
+
+		var quad0 = new Vector3(-halfWidth + xOff, -halfHeight + yOff, 0); // top left
+		var quad1 = new Vector3(halfWidth + xOff, -halfHeight + yOff, 0); // top right
+		var quad2 = new Vector3(-halfWidth + xOff, halfHeight + yOff, 0); // bottom left
+		var quad3 = new Vector3(halfWidth + xOff, halfHeight + yOff, 0); // bottom right
 
 		for (idx in 0...QUAD_SIZE)
 		{

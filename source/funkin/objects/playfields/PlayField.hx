@@ -70,6 +70,8 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return super.set_cameras(to);
 	}
 
+    public var playerId:Int = 0;
+
 	public var spawnTime:Float = 1750; // spawn time for notes
 	public var judgeManager(get, default):JudgmentManager; // for deriving judgements for input reasons
 	function get_judgeManager()
@@ -155,6 +157,9 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	public var keysPressed:Array<Bool> = [false,false,false,false]; // what keys are pressed rn
     public var isHolding:Array<Bool> = [false,false,false,false];
 
+	public inline function getBaseX(direction:Int)
+		return modManager.getBaseX(direction, playerId, keyCount);
+    
 	public function new(modMgr:ModManager){
 		super();
 		this.modManager = modMgr;

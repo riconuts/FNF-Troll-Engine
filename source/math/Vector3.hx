@@ -12,6 +12,10 @@ package math;
 #end
 class Vector3
 {
+    public static var ZERO(get, never):Vector3;
+    static function get_ZERO()
+        return new Vector3(0, 0, 0);
+
 	/**
 		A constant representing the x axis (1, 0, 0)
 	**/

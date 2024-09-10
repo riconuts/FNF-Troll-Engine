@@ -22,7 +22,7 @@ class ColumnRotateModifier extends NoteModifier { // this'll be rotateX in ModMa
         return a+(b-a)*c;
     }
 	 override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField){
-        var x:Float = modMgr.getBaseX(data, player, field.field.keyCount);
+		var x:Float = field.field.getBaseX(data);
 
 		var origin:Vector3 = new Vector3(x, FlxG.height * 0.5);
 

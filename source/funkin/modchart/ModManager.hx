@@ -526,7 +526,7 @@ class ModManager {
 				continue;*/
 			
 			if (exclusions.contains(name)) 
-				continue; // because some modifiers may want the path without reverse, for example. (which is actually more common than you'd think!)
+				continue; // because some modifiers may want the path without reverse, for example.
 			
 			var mod:Modifier = notemodRegister.get(name);
 			if (mod != null && !mod.ignorePos())
