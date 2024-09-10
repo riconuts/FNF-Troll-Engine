@@ -171,7 +171,7 @@ class Highscore {
     public static inline function getRecord(song:String, ?chartName:String=''):ScoreRecord
     {
 		var formattedSong:String = formatSong(song, chartName);
-		trace('get "$formattedSong"');
+		//trace('get "$formattedSong"');
 		return currentSongData.exists(formattedSong) ? currentSongData.get(formattedSong) : emptyRecord();
     }
 	public static function isValidScoreRecord(record:ScoreRecord){
@@ -263,7 +263,7 @@ class Highscore {
     }
 	public static function resetSong(song:String, chartName:String){
 		var formattedSong:String = formatSong(song, chartName);
-		trace('remove "$formattedSong"');
+		trace('reset song score "$formattedSong"');
 
 		currentSongData.remove(formattedSong);
 		save.data.saveData.set(currentLoadedID, currentSongData);
