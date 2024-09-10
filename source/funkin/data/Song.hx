@@ -1,6 +1,6 @@
 package funkin.data;
 
-#if(moonchart)
+#if (moonchart)
 import moonchart.formats.fnf.legacy.FNFPsych as SupportedFormat;
 import moonchart.formats.BasicFormat;
 import moonchart.backend.FormatDetector;
@@ -10,15 +10,8 @@ import funkin.states.LoadingState;
 import funkin.states.PlayState;
 import funkin.data.Section.SwagSection;
 import haxe.Json;
-import haxe.format.JsonParser;
-import lime.utils.Assets;
 
 using StringTools;
-#if sys
-import sys.FileSystem;
-import sys.io.File;
-#end
-
 
 typedef SwagSong =
 {
@@ -56,30 +49,6 @@ typedef SongCreditdata = // beacuse SongMetadata is stolen
 
 class Song
 {
-	public var song:String;
-	public var bpm:Float;
-	public var speed:Float = 1;
-	public var notes:Array<SwagSection>;
-	public var events:Array<Array<Dynamic>>;
-	
-	public var needsVoices:Bool = true;
-	public var arrowSkin:Null<String> = null;
-	public var splashSkin:Null<String> = null;
-
-	public var player1:String = 'bf';
-	public var player2:String = 'dad';
-	public var gfVersion:String = 'gf';
-	public var stage:String;
-
-	public var extraTracks:Array<String> = [];
-
-	public function new(song, notes, bpm)
-	{
-		this.song = song;
-		this.notes = notes;
-		this.bpm = bpm;
-	}
-
 	public static function getCharts(metadata:SongMetadata):Array<String>
 	{
 		Paths.currentModDirectory = metadata.folder;
@@ -153,7 +122,7 @@ class Song
 	/** sanitize/update json values to a valid format**/
 	private static function onLoadJson(songJson:Dynamic)
 	{
-		if(songJson.gfVersion == null){
+		if (songJson.gfVersion == null){
 			if (songJson.player3 != null){
 				songJson.gfVersion = songJson.player3;
 				songJson.player3 = null;
@@ -263,10 +232,7 @@ class Song
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.volume = 0;
 
-		if (FlxG.keys.pressed.SHIFT)
-			LoadingState.loadAndSwitchState(new funkin.states.editors.ChartingState());
-		else
-			LoadingState.loadAndSwitchState(new PlayState());	
+		LoadingState.loadAndSwitchState(new PlayState());	
 	}
 
 	static public function playSong(metadata:SongMetadata, ?difficulty:String, ?difficultyIdx:Int = 1)
