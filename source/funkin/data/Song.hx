@@ -1,9 +1,9 @@
 package funkin.data;
 
-import moonchart.backend.FormatData.Format;
 #if(moonchart)
 import moonchart.formats.fnf.legacy.FNFPsych as SupportedFormat;
 import moonchart.formats.BasicFormat;
+import moonchart.backend.FormatData.Format;
 import moonchart.backend.FormatDetector;
 #end
 
@@ -277,21 +277,20 @@ class Song
 			difficulty = difficulty.trim().toLowerCase();
 			diffSuffix = '-$difficulty';
 		}
-		
-		var chartFileName:String = songLowercase + diffSuffix + ".json";
-		
+				
 		if (Main.showDebugTraces)
-			trace('playSong', Paths.currentModDirectory, chartFileName);
+			trace('playSong', metadata, difficulty);
+		
+		#if (moonchart)
 		var format:Format = FNF_LEGACY_PSYCH;
 
-		#if (moonchart)
 		var chartFilePath:String = '';
 		for (ext in moonchartExtensions){
 			for (input in [songLowercase, songLowercase + diffSuffix]){
                 var path:String = Paths.formatToSongPath(songLowercase) + '/' + Paths.formatToSongPath(input) + '.' + ext;
                 var filePath:String = Paths.getPath("songs/" + path);
-				var fileFormat:Format = FormatDetector.findFormat([filePath]);
-                if(fileFormat != null){
+				var fileFormat:Format = !Paths.exists(filePath) ? null : FormatDetector.findFormat([filePath]);
+                if (fileFormat != null){
 					chartFilePath = filePath;
                     format = fileFormat;
                 }
@@ -306,7 +305,6 @@ class Song
             return;
         }
 
-		
 		var formatInfo = FormatDetector.getFormatData(format);
 
 		var SONG:SwagSong = switch(format) {
