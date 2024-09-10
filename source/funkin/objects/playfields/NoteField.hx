@@ -534,6 +534,11 @@ class NoteField extends FieldBase
 		if (!sprite.visible || !sprite.alive)
 			return null;
 
+		if (sprite.frame == null){
+            trace("No Frame??????")
+            return null;
+        }
+
 		var render = false;
 		for (camera in cameras)
 		{
@@ -546,7 +551,7 @@ class NoteField extends FieldBase
 		if (!render)
 			return null;
 
-		var isNote = (sprite is Note);
+		var isNote = (sprite.objType == NOTE);
 		var note:Note = isNote ? cast sprite : null;
 
 		var width = sprite.frameWidth * sprite.scale.x;
