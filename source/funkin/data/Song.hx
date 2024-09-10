@@ -133,11 +133,41 @@ class Song
 		return songJson;
 	}
 
+	public static function onLoadEvents(songJson:Dynamic){
+		if(songJson.events == null){
+			songJson.events = [];
+			
+			for (secNum in 0...songJson.notes.length)
+			{
+				var sec:SwagSection = songJson.notes[secNum];
+				var notes:Array<Dynamic> = sec.sectionNotes;
+				var len:Int = notes.length;
+				var i:Int = 0;
+				while(i < len)
+				{
+					var note:Array<Dynamic> = notes[i];
+					if (note[1] < 0)
+					{
+						songJson.events.push([note[0], [[note[2], note[3], note[4]]]]);
+						notes.remove(note);
+						len = notes.length;
+					}
+					else i++;
+				}
+			}
+		}
+
+		return songJson;
+	}
+
 	/** sanitize/update json values to a valid format**/
 	private static function onLoadJson(songJson:Dynamic)
 	{
 		var swagJson:SwagSong = songJson;
 
+		onLoadEvents(swagJson);
+
+		////
 		if (songJson.gfVersion == null){
 			if (songJson.player3 != null){
 				songJson.gfVersion = songJson.player3;
@@ -146,12 +176,9 @@ class Song
 			else
 				songJson.gfVersion = "gf";
 		}
-
 		
 		//// new tracks system
-		if (songJson.extraTracks == null) songJson.extraTracks = [];
-
-		if (false && swagJson.tracks == null) {
+		if (swagJson.tracks == null) {
 			var instTracks:Array<String> = ["Inst"];
 
 			if (swagJson.extraTracks != null) {
@@ -204,39 +231,16 @@ class Song
 
 			////
 			swagJson.tracks = {inst: instTracks, player: playerTracks, opponent: opponentTracks};
-
-			/*
-			Main.print();
-			Main.print(swagJson.song);
-			Main.print(Json.stringify(swagJson.tracks, "\t"));
-			Main.print();
-			*/
 		}
 
-		if(songJson.events == null){
-			songJson.events = [];
-			
-			for (secNum in 0...songJson.notes.length)
-			{
-				var sec:SwagSection = songJson.notes[secNum];
-				var notes:Array<Dynamic> = sec.sectionNotes;
-				var len:Int = notes.length;
-				var i:Int = 0;
-				while(i < len)
-				{
-					var note:Array<Dynamic> = notes[i];
-					if (note[1] < 0)
-					{
-						songJson.events.push([note[0], [[note[2], note[3], note[4]]]]);
-						notes.remove(note);
-						len = notes.length;
-					}
-					else i++;
-				}
-			}
-		}
+		////
+		if (swagJson.arrowSkin == null || swagJson.arrowSkin.trim().length == 0)
+			swagJson.arrowSkin = "NOTE_assets";
 
-		if(songJson.hudSkin==null)
+		if (swagJson.splashSkin == null || swagJson.splashSkin.trim().length == 0)
+			swagJson.splashSkin = "noteSplashes";
+
+		if (songJson.hudSkin==null)
 			songJson.hudSkin = 'default';
 
 		return songJson;
