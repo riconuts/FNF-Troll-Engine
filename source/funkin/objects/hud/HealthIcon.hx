@@ -76,10 +76,11 @@ class HealthIcon extends FlxSprite
 		if(file == null) 
 			file = Paths.image('icons/face'); // Prevents crash from missing icon
 
-		//// TODO: sparrow atlas icons? would make the implementation of extra behaviour (ex: winning icons) way easier
-
-		changeIconGraphic(file);
-		this.char = char;
+		if (file != null){
+			//// TODO: sparrow atlas icons? would make the implementation of extra behaviour (ex: winning icons) way easier
+			changeIconGraphic(file);
+			this.char = char;
+		}
 
 		if (char.endsWith("-pixel")){
 			antialiasing = false;
