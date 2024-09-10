@@ -4813,17 +4813,17 @@ class PlayState extends MusicBeatState
 		preventLuaRemove = true;
         #end
 
-		while (funkyScripts.length > 0){
+		if (funkyScripts != null) while (funkyScripts.length > 0){
 			var script = funkyScripts.pop();
 			script.call("onDestroy");
 			script.stop();
 		}
 		
-		while (hscriptArray.length > 0)
+		if (hscriptArray != null) while (hscriptArray.length > 0)
 			hscriptArray.pop();
 
 		#if LUA_ALLOWED
-		while (luaArray.length > 0)
+		if (luaArray != null) while (luaArray.length > 0)
 			luaArray.pop();
 
 		if (FunkinLua.haxeScript != null)
@@ -4834,7 +4834,7 @@ class PlayState extends MusicBeatState
 		sectionCamera.put();
 		customCamera.put();
 		
-		while (cameraPoints.length > 0)
+		if (cameraPoints != null) while (cameraPoints.length > 0)
 			cameraPoints.pop().put();
 
 		stats.changedEvent.removeAll();

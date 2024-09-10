@@ -247,6 +247,13 @@ class Main extends Sprite
 
 			case NO: // Return to Main Menu.
 			@:privateAccess{
+				try{
+					if (FlxG.game._state != null) FlxG.game._state.destroy();
+					FlxG.game._state = null;
+				}catch(e){
+					Main.print("Error destroying unstable state: ", e)
+				}	
+				
 				FlxG.game._requestedState = new funkin.states.MainMenuState();
 				FlxG.game.switchState();
 				return;
