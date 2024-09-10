@@ -147,10 +147,16 @@ class PlayState extends MusicBeatState
 	public var noteHits:Array<Float> = [];
 	public var nps:Int = 0;
 	
-	public var inst:FlxSound;
-	public var vocals:FlxSound;
+	public var trackMap = new Map<String, FlxSound>();
 	public var tracks:Array<FlxSound> = [];
 
+	public var instTracks:Array<FlxSound>;
+	public var playerTracks:Array<FlxSound>;
+	public var opponentTracks:Array<FlxSound>;
+
+	public var inst:FlxSound;
+	public var vocals:FlxSound;
+	
 	var sndFilter:ALFilter = AL.createFilter();
 	var sndEffect:ALEffect = AL.createEffect();
 
@@ -249,8 +255,9 @@ class PlayState extends MusicBeatState
 
 	/** Formatted song name **/
 	public var songName:String = "";
-	public var songHighscore:Int = 0;
 	public var songLength:Float = 0;
+	public var songHighscore:Int = 0;
+	public var songTrackNames:Array<String> = [];
 
 	////
 	private var generatedMusic:Bool = false;
@@ -550,7 +557,7 @@ class PlayState extends MusicBeatState
 
 		FlxG.timeScale = playbackRate;
 		
-		if(perfectMode){
+		if (perfectMode){
 			practiceMode = false;
 			instakillOnMiss = true;
 		}
@@ -611,18 +618,24 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		//// Note texture asset name
-		//// The quant prefix gets handled by the Note class
+		for (groupName in Reflect.fields(SONG.tracks)) {
+			var trackGroup:Array<String> = Reflect.field(SONG.tracks, groupName);
+			for (trackName in trackGroup) {
+				if (trackMap.exists(trackName))
+					continue;
+
+				trackMap.set(trackName, null);
+				songTrackNames.push(trackName);
+			}
+		}
+
+		/**
+		 * Note texture asset names
+		 * The quant prefix gets handled by the Note class
+		 */
 		arrowSkin = SONG.arrowSkin;
 		splashSkin = SONG.splashSkin;
 
-		if (arrowSkin == null || arrowSkin.trim().length == 0)
-			arrowSkin = "NOTE_assets";
-
-		if (splashSkin == null || splashSkin.trim().length == 0)
-			splashSkin = "noteSplashes";
-
-		////
 		hudSkin = SONG.hudSkin;
 
 		//// STAGE SHIT
@@ -803,19 +816,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		shitToLoad.push({
-			path: '$songName/Inst',
-			type: 'SONG'
-		});
-
-		if (SONG.needsVoices)
-			shitToLoad.push({
-				path: '$songName/Voices',
-				type: 'SONG'
-			});
-
-		// extra tracks (ex: die batsards bullet track)
-		for (track in SONG.extraTracks){
+		for (track in songTrackNames){
 			shitToLoad.push({
 				path: '$songName/$track',
 				type: 'SONG'
@@ -1687,20 +1688,11 @@ class PlayState extends MusicBeatState
 
 		Conductor.songPosition = startOnTime;
 
-		vocals.volume = 1;
-		vocals.play(false, startOnTime);
-
-		inst.volume = 1;
-		inst.play(false, startOnTime);
-
 		for (track in tracks)
 			track.play(false, startOnTime);
 
-
 		if (paused) {
 			trace('Oopsie doopsie! Paused sound');
-			inst.pause();
-			vocals.pause();
 			for (track in tracks)
 				track.pause();
 		}
@@ -1744,8 +1736,8 @@ class PlayState extends MusicBeatState
 		var events:Array<EventNote> = [];
 
 		var eventsJSON = Song.loadFromJson('events', songName, false);
-		if (eventsJSON != null)
-		{
+		if (eventsJSON != null) {
+			eventsJSON = Song.onLoadEvents(eventsJSON);
 			var rawEventsData:Array<Array<Dynamic>> = eventsJSON.events;
 			rawEventsData.sort(eventSort);
 
@@ -1817,6 +1809,9 @@ class PlayState extends MusicBeatState
 
 	private function generateSong(dataPath:String):Void
 	{
+		Conductor.changeBPM(PlayState.SONG.bpm);
+
+		////
 		songSpeedType = ClientPrefs.getGameplaySetting('scrolltype', songSpeedType);
 
 		switch(songSpeedType)
@@ -1827,66 +1822,44 @@ class PlayState extends MusicBeatState
 				songSpeed = ClientPrefs.getGameplaySetting('scrollspeed', SONG.speed);
 		}
 
-		// Adjust speed to game size
-		songSpeed *= FlxG.height / 720;
+		songSpeed *= FlxG.height / 720; // Adjust speed to game size
 
-		Conductor.changeBPM(PlayState.SONG.bpm);
-
-		inst = new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.song));
-        inst.context = MUSIC;
-		inst.volume = 0;
-		vocals = new FlxSound();
-        vocals.context = MUSIC;
-		vocals.volume = 0;
-
-		if (SONG.needsVoices)
-			vocals.loadEmbedded(Paths.voices(PlayState.SONG.song));
-		else
-			vocalsEnded = true;
-		
-		vocals.exists = true; // so it doesn't get recycled
-
-		FlxG.sound.list.add(inst);
-		FlxG.sound.list.add(vocals);
-
-		if (SONG.extraTracks != null){
-			for (trackName in SONG.extraTracks){
-				var newTrack = new FlxSound().loadEmbedded(Paths.track(PlayState.SONG.song, trackName));
-				tracks.push(newTrack);
-				FlxG.sound.list.add(newTrack);
-			}
-		}
-
-		AL.filteri(sndFilter, AL.FILTER_TYPE, AL.FILTER_NULL);
-        #if tgt
- 		if(ClientPrefs.ruin){
+		////
+		#if tgt if(ClientPrefs.ruin){
 			AL.effecti(sndEffect, AL.EFFECT_TYPE, AL.EFFECT_REVERB);
 			AL.effectf(sndEffect, AL.REVERB_DECAY_TIME, 5);
 			AL.effectf(sndEffect, AL.REVERB_GAIN, 0.75);
 			AL.effectf(sndEffect, AL.REVERB_DIFFUSION, 0.5);
-		}else
+		}else #end {
 			AL.effecti(sndEffect, AL.EFFECT_TYPE, AL.EFFECT_NULL);
-		
-		var trackEffect = ClientPrefs.ruin ? sndEffect : null;
-		for (track in tracks){
-			track.effect = trackEffect;
-			track.filter = null;
-			track.pitch = playbackRate;
+			AL.filteri(sndFilter, AL.FILTER_TYPE, AL.FILTER_NULL);
 		}
-        
 
-		inst.filter = null;
-		vocals.filter = null;
-		inst.effect = trackEffect;
-		vocals.effect = trackEffect;
-		#end
-		inst.pitch = playbackRate;
-		vocals.pitch = playbackRate;
+		////
+		for (trackName in songTrackNames) {
+			var newTrack = new FlxSound().loadEmbedded(Paths.track(PlayState.SONG.song, trackName));
+			//newTrack.volume = 0.0;
+			newTrack.pitch = playbackRate;
+			newTrack.filter = sndFilter;
+			newTrack.effect = sndEffect;
+			newTrack.context = MUSIC;
+			newTrack.exists = true; // So it doesn't get recycled
+			FlxG.sound.list.add(newTrack);
+			
+			trackMap.set(trackName, newTrack);
+			tracks.push(newTrack);
+		}
 
-		add(notes);
+		instTracks = [for (name in SONG.tracks.inst) trackMap.get(name)];
+		playerTracks = [for (name in SONG.tracks.player) trackMap.get(name)];
+		opponentTracks = [for (name in SONG.tracks.opponent) trackMap.get(name)];
 
-		// NEW SHIT
+		inst = instTracks[0];
+		vocals = playerTracks[0];
+		
+		//// NEW SHIT
 		var noteData:Array<SwagSection> = PlayState.SONG.notes;
+		add(notes);
 
 		// loads note types
 		for (section in noteData)
@@ -2534,18 +2507,14 @@ class PlayState extends MusicBeatState
 		if(finishTimer != null || transitioning || isDead)
 			return;
 
-		if(showDebugTraces)
+		if (showDebugTraces)
 			trace("resync vocals!!");
 		
-		vocals.pause();
 		for (track in tracks)
 			track.pause();
 
 		inst.play();
 		Conductor.songPosition = inst.time;
-
-		vocals.time = vocalsEnded ? vocals.length : Conductor.songPosition;
-		vocals.play();
 
 		for (track in tracks){
 			track.time = Conductor.songPosition;
@@ -4071,7 +4040,8 @@ class PlayState extends MusicBeatState
 			health -= daNote.missHealth * healthLoss;
 		}
 		
-		vocals.volume = 0;
+		for (track in (playOpponent ? opponentTracks : playerTracks))
+			track.volume = 0;
 
 		if (ClientPrefs.ghostTapping && !daNote.isSustainNote && ClientPrefs.missVolume > 0)
 			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), ClientPrefs.missVolume * FlxG.random.float(0.9, 1) );
@@ -4178,7 +4148,8 @@ class PlayState extends MusicBeatState
 		}
 
 		note.hitByOpponent = true;
-		if (!vocalsEnded) vocals.volume = 1;
+		for (track in opponentTracks)
+			track.volume = 1.0;
 
 		// Strum animations
 		if (note.visible){
@@ -4346,8 +4317,9 @@ class PlayState extends MusicBeatState
 		}
 
 		note.wasGoodHit = true;
-		if (!vocalsEnded) vocals.volume = 1;
 		if (cpuControlled) saveScore = false; // if botplay hits a note, then you lose scoring
+		for (track in playerTracks)
+			track.volume = 1.0;
 
 		// Strum animations
 		if (note.visible){
@@ -4706,8 +4678,6 @@ class PlayState extends MusicBeatState
 
 		if (inst != null)
 		{
-			inst.pause();
-			vocals.pause();
 			for (track in tracks)
 				track.pause();
 		}

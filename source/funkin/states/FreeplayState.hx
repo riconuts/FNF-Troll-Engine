@@ -118,14 +118,15 @@ class FreeplayState extends MusicBeatState
 		diffText.font = scoreText.font;
     }
 
-	var songLoaded:SongMetadata = null;
+	var songLoaded:String = null;
+	var selectedSong:String = null;
 	function onAccept(){
 		if (selectedSongCharts.length == 0)
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 		else{
 			menu.controls = null;
 
-			if (songLoaded != selectedSongData)
+			if (songLoaded != selectedSong)
 				Song.loadSong(selectedSongData, curDiffStr, curDiffIdx);
 
 			if (FlxG.sound.music != null)
@@ -140,8 +141,8 @@ class FreeplayState extends MusicBeatState
 
 	function playSelectedSongMusic(){
 		// load song json and play inst
-		if (songLoaded != selectedSongData){
-			songLoaded = selectedSongData;
+		if (songLoaded != selectedSong){
+			songLoaded = selectedSong;
 			Song.loadSong(selectedSongData, curDiffStr, curDiffIdx);
 			
 			if (PlayState.SONG != null){
@@ -270,6 +271,8 @@ class FreeplayState extends MusicBeatState
 				curDiffStr = charts[curDiffIdx];
 				diffText.text = "< " + curDiffStr.toUpperCase() + " >";
 		}
+
+		selectedSong = '$selectedSongData-$curDiffStr';
 		refreshScore();
 	}
 
