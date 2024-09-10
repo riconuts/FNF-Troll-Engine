@@ -9,20 +9,27 @@ import moonchart.backend.FormatDetector;
 import funkin.states.LoadingState;
 import funkin.states.PlayState;
 import funkin.data.Section.SwagSection;
+import haxe.io.Path;
 import haxe.Json;
 
 using StringTools;
 
 typedef SwagSong =
 {
+	//// internal
+	@:optional var path:String;
+	@:optional var validScore:Bool;
+
+	////
 	@:optional var song:String;
 	@:optional var bpm:Float;
 	@:optional var speed:Float;
 	@:optional var notes:Array<SwagSection>;
 	@:optional var events:Array<Array<Dynamic>>;
 	
-	@:optional var needsVoices:Bool;
-	@:optional var validScore:Bool;
+	@:optional var tracks:SongTracks; // currently used
+	@:noCompletion @:optional var extraTracks:Array<String>; // old te
+	@:noCompletion @:optional var needsVoices:Bool; // fnf
 
 	@:optional var player1:String;
 	@:optional var player2:String;
@@ -33,11 +40,17 @@ typedef SwagSong =
 
 	@:optional var arrowSkin:String;
 	@:optional var splashSkin:String;
-
-	@:optional var extraTracks:Array<String>;
+	
+	//// Used for song info showed on the pause menu
 	@:optional var info:Array<String>;
 	@:optional var metadata:SongCreditdata;
 }
+
+typedef SongTracks = {
+	var inst:Array<String>;
+	var ?player:Array<String>;
+	var ?opponent:Array<String>;
+} 
 
 typedef SongCreditdata = // beacuse SongMetadata is stolen
 {
@@ -91,37 +104,45 @@ class Song
 		return [for (name in charts.keys()) name];
 	}
 
-	public static function loadFromJson(jsonInput:String, folder:String):Null<SwagSong>
+	public static function loadFromJson(jsonInput:String, folder:String, ?isSongJson:Bool = true):Null<SwagSong>
 	{
 		var path:String = Paths.formatToSongPath(folder) + '/' + Paths.formatToSongPath(jsonInput) + '.json';
-		var rawJson:Null<String> = Paths.text('songs/$path', false);
+		var fullPath = Paths.getPath('songs/$path', false);
 		
 		#if PE_MOD_COMPATIBILITY
-		if (rawJson == null)
-			rawJson = Paths.text('data/$path', false);
+		if (!Paths.exists(fullPath))
+			fullPath = Paths.getPath('data/$path', false);
 		#end
 
+		var rawJson:Null<String> = Paths.getContent(fullPath);
 		if (rawJson == null){
 			trace('song JSON file not found: $path');
 			return null;
 		}
-
-		rawJson = rawJson.trim();
-
+		
 		// LOL GOING THROUGH THE BULLSHIT TO CLEAN IDK WHATS STRANGE
+		rawJson = rawJson.trim();
 		while (!rawJson.endsWith("}"))
 			rawJson = rawJson.substr(0, rawJson.length - 1);
 
 		var songJson:SwagSong = parseJSONshit(rawJson);
-		// if(jsonInput != 'events') Stage.StageData.loadDirectory(songJson);
-		onLoadJson(songJson);
+		songJson.path = fullPath; 
+		if (isSongJson != false) onLoadJson(songJson);
 
 		return songJson;
+	}
+
+	public static function parseJSONshit(rawJson:String):SwagSong {
+		var swagShit:SwagSong = cast Json.parse(rawJson).song;
+		swagShit.validScore = true;
+		return swagShit;
 	}
 
 	/** sanitize/update json values to a valid format**/
 	private static function onLoadJson(songJson:Dynamic)
 	{
+		var swagJson:SwagSong = songJson;
+
 		if (songJson.gfVersion == null){
 			if (songJson.player3 != null){
 				songJson.gfVersion = songJson.player3;
@@ -131,8 +152,70 @@ class Song
 				songJson.gfVersion = "gf";
 		}
 
-		if (songJson.extraTracks == null){
-			songJson.extraTracks = [];
+		
+		//// new tracks system
+		if (songJson.extraTracks == null) songJson.extraTracks = [];
+
+		if (false && swagJson.tracks == null) {
+			var instTracks:Array<String> = ["Inst"];
+
+			if (swagJson.extraTracks != null) {
+				for (name in swagJson.extraTracks)
+					instTracks.push(name);
+			}
+
+			////
+			var playerTracks:Array<String> = null;
+			var opponentTracks:Array<String> = null;
+
+			/**
+			 * If 'needsVoices' is false, no tracks will be defined for the player or opponent
+			 * If the chart folder couldn't be retrieved then "Voices-Player" and "Voices-Opponent" are used
+			 * If a "Voices-Player" exists then it is defined as a player track, otherwise "Voices" is used
+			 * If a "Voices-Opponent" exists then it is defined as an opponent track, otherwise "Voices" is used
+			 */
+			inline function sowy() {
+				//// 1
+				if (!swagJson.needsVoices) {
+					playerTracks = [];
+					opponentTracks = [];
+					return false;
+				}
+
+				//// 2
+				if (swagJson.path==null) return true;
+				var jsonPath:Path = new Path(swagJson.path);
+
+				var folderPath = jsonPath.dir;
+				if (folderPath == null) return true; // probably means that it's on the same folder as the exe but fuk it
+
+				//// 3 and 4
+				inline function existsInFolder(name)
+					return Paths.exists(Path.join([folderPath, name]));
+
+				var defaultVoices = existsInFolder('Voices.ogg') ? ["Voices"] : [];
+
+				inline function voiceTrack(name)
+					return existsInFolder('$name.ogg') ? [name] : defaultVoices;
+				
+				playerTracks = voiceTrack("Voices-Player");
+				opponentTracks = voiceTrack("Voices-Opponent");
+				return false;
+			}
+			if (sowy()) {
+				playerTracks = ["Voices-Player"];
+				opponentTracks = ["Voices-Opponent"];
+			}
+
+			////
+			swagJson.tracks = {inst: instTracks, player: playerTracks, opponent: opponentTracks};
+
+			/*
+			Main.print();
+			Main.print(swagJson.song);
+			Main.print(Json.stringify(swagJson.tracks, "\t"));
+			Main.print();
+			*/
 		}
 
 		if(songJson.events == null){
@@ -164,13 +247,6 @@ class Song
 		return songJson;
 	}
 
-	public static function parseJSONshit(rawJson:String):SwagSong
-	{
-		var swagShit:SwagSong = cast Json.parse(rawJson).song;
-		swagShit.validScore = true;
-		return swagShit;
-	}
-
 	static public function loadSong(metadata:SongMetadata, ?difficulty:String, ?difficultyIdx:Int = 1) {
 		Paths.currentModDirectory = metadata.folder;
 
@@ -185,19 +261,32 @@ class Song
 			diffSuffix = '-$difficulty';
 		}
 		
-		var chartFileName:String = songLowercase + diffSuffix;
+		var chartFileName:String = songLowercase + diffSuffix + ".json";
 		
 		if (Main.showDebugTraces)
-			trace('playSong', Paths.currentModDirectory, chartFileName);
+			trace('playSong', '"${Paths.currentModDirectory}"', '"$chartFileName"');
 		
 		#if (moonchart)
-		var chartDirPath:String = 'content/base-game/songs/$songLowercase/';
-		var chartFilePath:String = chartDirPath + chartFileName + '.json';
+		var chartFilePath:String = Paths.getPath('songs/$songLowercase/$chartFileName', false);
+		//trace("TE path:",chartFilePath);
+		
+		#if PE_MOD_COMPATIBILITY
+		if (!Paths.exists(chartFilePath)){
+			chartFilePath = Paths.getPath('data/$songLowercase/$chartFileName', false);
+			//trace("PE path:",chartFilePath);
+		}
+		#end
+
+		if (!Paths.exists(chartFilePath)){
+			trace("THERES NO FUCKING CHART HERE??? WHAT!!!");
+			return null;
+		}
+
+		// find a good way to notify the user there's no valid chart lol
 
 		var format = FormatDetector.findFormat([chartFilePath]);
-        if(format == null){
-            trace("THERES NO FUCKING CHART HERE??? WHAT!!!");
-            // find a good way to notify the user there's no valid chart lol
+        if (format == null){
+			trace("No valid format available!");
             return;
         }
 		var formatInfo = FormatDetector.getFormatData(format);
@@ -205,7 +294,7 @@ class Song
 		var SONG:SwagSong = switch(format) {
 			case FNF_LEGACY_PSYCH | FNF_LEGACY:
 				trace('Chart format $format is good to be read ^.^');
-				Song.loadFromJson(chartFileName, songLowercase);
+				Song.loadFromJson(songLowercase + diffSuffix, songLowercase);
 
 			default:
 				trace('Converting from format $format!');
@@ -215,6 +304,7 @@ class Song
 				chart = chart.fromFile(chartFilePath);
 				
 				var converted = new SupportedFormat().fromFormat(chart, difficulty);
+				converted.path = chartFilePath;
 				onLoadJson(converted);
 		}
 		#else

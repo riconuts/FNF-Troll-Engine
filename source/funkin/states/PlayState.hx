@@ -1743,7 +1743,7 @@ class PlayState extends MusicBeatState
 		var songData = SONG;
 		var events:Array<EventNote> = [];
 
-		var eventsJSON = Song.loadFromJson('events', songName);
+		var eventsJSON = Song.loadFromJson('events', songName, false);
 		if (eventsJSON != null)
 		{
 			var rawEventsData:Array<Array<Dynamic>> = eventsJSON.events;
