@@ -453,6 +453,8 @@ class PlayState extends MusicBeatState
 	var shitToLoad:Array<AssetPreload> = [];
 	var finishedCreating = false;
 	
+    var offset:Float = 0;
+
 	override public function create()
 	{
 		Highscore.loadData();
@@ -596,7 +598,8 @@ class PlayState extends MusicBeatState
 			SONG = Song.loadFromJson('tutorial', 'tutorial');
 		}
 
-		Conductor.mapBPMChanges(SONG);
+		offset = SONG.offset != null ? SONG.offset : 0;
+		Conductor.mapBPMChanges(SONG, offset);
 		Conductor.changeBPM(SONG.bpm);
 		
 		lastBeatHit = -5;
@@ -2039,8 +2042,6 @@ class PlayState extends MusicBeatState
 					type = ChartingState.noteTypeList[type];
 
 				var swagNote:Note = new Note(daStrumTime, daColumn, oldNote, gottaHitNote, songNotes[2] > 0 ? HEAD : TAP, false, hudSkin);
-				swagNote.strumTime += SONG.offset == null ? SONG.offset : 0;
-			    swagNote.visualTime = PlayState.instance.getNoteInitialTime(swagNote.strumTime);
                 swagNote.realColumn = songNotes[1];
 				swagNote.sustainLength = songNotes[2];
 
@@ -2090,9 +2091,9 @@ class PlayState extends MusicBeatState
 				inline function makeSustain(susNote:Int, susPart) {
 					var sustainNote:Note = new Note(daStrumTime + Conductor.stepCrochet * (susNote + 1), daColumn, oldNote, gottaHitNote, susPart, false, hudSkin);
 					sustainNote.gfNote = swagNote.gfNote;
-					if (callScripts) callOnScripts("onGeneratedHold", [sustainNote]);
+                    if (callScripts) callOnScripts("onGeneratedHold", [sustainNote]);
 					sustainNote.noteType = type;
-
+                    
 					sustainNote.ID = notes.length;
 					modchartObjects.set('note${sustainNote.ID}', sustainNote);
 

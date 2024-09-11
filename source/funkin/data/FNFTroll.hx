@@ -178,8 +178,8 @@ class FNFTroll extends FNFLegacyBasic<TrollJSONFormat> {
 
 		data.song.gfVersion = chart.meta.extraData.get(PLAYER_3) ?? "gf";
 		data.song.stage = chart.meta.extraData.get(STAGE) ?? "stage";
-        
-        data.song.offset = chart.meta.offset;
+        var offset:Float = chart.meta.offset;
+		data.song.offset = offset;
 
 		for (section in data.song.notes){
 			for (note in section.sectionNotes){

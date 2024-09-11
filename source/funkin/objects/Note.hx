@@ -93,6 +93,7 @@ class Note extends NoteObject
 	// basic stuff
 	public var beat:Float = 0;
 	public var strumTime(default, set):Float = 0;
+
 	public var visualTime:Float = 0;
 	public var mustPress:Bool = false;
 	public var ignoreNote:Bool = false;
@@ -217,7 +218,7 @@ class Note extends NoteObject
 
 	@:noCompletion function set_strumTime(val:Float){
         row = Conductor.secsToRow(val);
-        return strumTime=val;
+        return strumTime = val;
     }
 
 	@:noCompletion function get_canBeHit() return UNJUDGED != PlayState.instance.judgeManager.judgeNote(this);
@@ -459,7 +460,11 @@ class Note extends NoteObject
 				
 		if (!inEditor){ 
 			this.strumTime += ClientPrefs.noteOffset;
-			visualTime = PlayState.instance.getNoteInitialTime(this.strumTime);
+            if((FlxG.state is PlayState))
+                @:privateAccess
+				this.strumTime -= PlayState.instance.offset;
+            
+            visualTime = PlayState.instance.getNoteInitialTime(this.strumTime);
 		}
 
 		if (column > -1)
