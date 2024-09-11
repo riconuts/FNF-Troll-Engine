@@ -24,6 +24,7 @@ typedef TrollJSONFormat = FNFLegacyFormat & {
 	?hudSkin:String,
 	?info:Array<String>,
 	?metadata:Song.SongCreditdata,
+    ?offset:Float,
 
     // deprecated
 	?player3:String,
@@ -56,7 +57,7 @@ class FNFTroll extends FNFLegacyBasic<TrollJSONFormat> {
                 [
                     [
                         "Mult SV",
-						Std.string(event.data.MULTIPLIER), // i think this is how you convert quaver to FNF
+						Std.string(event.data.MULTIPLIER),
                         ""
                     ]
                 ]
@@ -178,6 +179,8 @@ class FNFTroll extends FNFLegacyBasic<TrollJSONFormat> {
 		data.song.gfVersion = chart.meta.extraData.get(PLAYER_3) ?? "gf";
 		data.song.stage = chart.meta.extraData.get(STAGE) ?? "stage";
         
+        data.song.offset = -chart.meta.offset * 1000.0;
+
 		for (section in data.song.notes){
 			for (note in section.sectionNotes){
                 if(note[2] > 0)
@@ -187,12 +190,17 @@ class FNFTroll extends FNFLegacyBasic<TrollJSONFormat> {
                     note[3] = 'Roll';
                 else if(note[3] == ALT_ANIM)
                     note[3] = 'Alt Animation';
-                else if(note[3] == HURT)
+                else if(note[3] == HURT || note[3] == 'STEPMANIA_MINE')
                     note[3] = 'Hurt Note'; // Replace witH Mine maybe?
             }
         }
 		return cast basic;
     }
+	#if (moonchart > "0.3.0" || moonchart == "git")
+	override function prepareNote(note:FNFLegacyNote, offset:Float):FNFLegacyNote {
+		return note;
+	}
+	#end
 }
 #else
 class FNFTroll {}

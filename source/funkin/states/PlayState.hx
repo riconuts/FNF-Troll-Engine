@@ -2039,7 +2039,9 @@ class PlayState extends MusicBeatState
 					type = ChartingState.noteTypeList[type];
 
 				var swagNote:Note = new Note(daStrumTime, daColumn, oldNote, gottaHitNote, songNotes[2] > 0 ? HEAD : TAP, false, hudSkin);
-				swagNote.realColumn = songNotes[1];
+				swagNote.strumTime += SONG.offset == null ? SONG.offset : 0;
+			    swagNote.visualTime = PlayState.instance.getNoteInitialTime(swagNote.strumTime);
+                swagNote.realColumn = songNotes[1];
 				swagNote.sustainLength = songNotes[2];
 
 				swagNote.gfNote = (section.gfSection && (songNotes[1] < 4));
@@ -2113,7 +2115,7 @@ class PlayState extends MusicBeatState
 
 				var susLength = Math.floor(swagNote.sustainLength / Conductor.stepCrochet);
 				if (susLength > 0){
-					for (susNote in 0...susLength)
+					for (susNote in 0...susLength - 1)
 						makeSustain(susNote, PART);
 					makeSustain(susLength, END);
 				}

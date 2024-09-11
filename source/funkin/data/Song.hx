@@ -47,6 +47,8 @@ typedef SwagSong =
 	//// Used for song info showed on the pause menu
 	@:optional var info:Array<String>;
 	@:optional var metadata:SongCreditdata;
+
+    @:optional var offset:Float; // Offsets the chart
 }
 
 typedef SongTracks = {
