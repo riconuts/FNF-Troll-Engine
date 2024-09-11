@@ -1727,7 +1727,7 @@ class PlayState extends MusicBeatState
 	function eventSort(a:Array<Dynamic>, b:Array<Dynamic>)
 		return Std.int(a[0] - b[0]);
 
-	function getEvents()
+	function getEvents():Array<EventNote>
 	{
 		var songData = SONG;
 		var events:Array<EventNote> = [];
@@ -1967,8 +1967,13 @@ class PlayState extends MusicBeatState
 			firstEventPush(event);
 		}
 
-		for (subEvent in daEvents){
+		for (subEvent in daEvents)
 			subEvent.strumTime -= eventNoteEarlyTrigger(subEvent);
+		
+        if(daEvents.length > 1)
+            daEvents.sort(sortByTime);
+
+		for (subEvent in daEvents) {
 			eventNotes.push(subEvent);
 			eventPushed(subEvent);
 		}
@@ -2229,9 +2234,8 @@ class PlayState extends MusicBeatState
 					if (Math.isNaN(speed)) speed = 1;
 				}
 
-				speedChanges.sort(svSort);
 				speedChanges.push({
-					position: getNoteInitialTime(event.strumTime),
+					position: getTimeFromSV(event.strumTime, speedChanges[speedChanges.length - 1]),
 					songTime: event.strumTime,
 					startTime: event.strumTime,
 					speed: speed

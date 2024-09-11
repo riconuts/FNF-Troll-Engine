@@ -94,6 +94,7 @@ class Song
 			if (fileFormat == null)
 				return;
             var formatInfo:FormatData = FormatDetector.getFormatData(fileFormat);
+            var noExtension:String = Path.withoutExtension(fileName);
             switch (fileFormat) {
                 case FNF_LEGACY_PSYCH | FNF_LEGACY:
                     if (fileName == '$songName.json') {
@@ -110,12 +111,23 @@ class Song
                     chart = Type.createInstance(formatInfo.handler, []).fromFile(filePath);
                     // You'll wanna be on the newest moonchart git so this wont take like 10 minutes lol!!
 
-                    if(chart.formatMeta.supportsDiffs){
+					if (chart.formatMeta.supportsDiffs || chart.diffs.length > 0){
                         for (diff in chart.diffs)
                             charts.set(diff, true);
                         
                     }else{
-                        trace("TODO: do this");
+						if (noExtension == songName){
+                            charts.set("normal", true);
+                            return;
+                        }
+						if (noExtension.startsWith('$songName-')){
+							var split = noExtension.split("-");
+                            split.shift();
+                            var diff = split.join("-");
+                            charts.set(diff, true);
+                            return;
+                        }
+
                     }
             }
 

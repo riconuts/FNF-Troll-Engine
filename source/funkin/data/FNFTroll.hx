@@ -49,7 +49,20 @@ class FNFTroll extends FNFLegacyBasic<TrollJSONFormat> {
 		this.formatMeta.supportsEvents = true;
 	}
 
-	function resolvePsychEvent(event:BasicEvent):PsychEvent {
+	function resolveTrollEvent(event:BasicEvent):PsychEvent {
+        if(event.name == 'SLIDER_VELOCITY'){
+            return [
+                event.time,
+                [
+                    [
+                        "Mult SV",
+						Std.string(event.data.MULTIPLIER), // i think this is how you convert quaver to FNF
+                        ""
+                    ]
+                ]
+            ];
+        }
+
 		var values:Array<Dynamic> = Util.resolveEventValues(event);
 
 		var value1:Dynamic = values[0] ?? "";
@@ -159,7 +172,7 @@ class FNFTroll extends FNFLegacyBasic<TrollJSONFormat> {
 
 		data.song.events = [];
 		for (basicEvent in chart.data.events) {
-			data.song.events.push(resolvePsychEvent(basicEvent));
+			data.song.events.push(resolveTrollEvent(basicEvent));
 		}
 
 		data.song.gfVersion = chart.meta.extraData.get(PLAYER_3) ?? "gf";
