@@ -251,8 +251,12 @@ class Highscore {
 
 	public static function saveWeekScore(week:String, score:Int = 0, ?force:Bool=false){
 		if (force || currentWeekData.get(week) < score){
-            currentWeekData.set(week, score);
+			weekCompleted.set(week, true);
+			save.data.weekCompleted = weekCompleted;
+
+			currentWeekData.set(week, score);
  			save.data.weekSaveData.set(currentLoadedID, currentWeekData);
+			
 			save.flush(); 
         }
     }
