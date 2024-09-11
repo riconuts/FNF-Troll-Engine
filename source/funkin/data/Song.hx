@@ -1,9 +1,9 @@
 package funkin.data;
 
-import moonchart.backend.FormatData;
 #if(moonchart)
 import funkin.data.TrollFormat as SupportedFormat;
 import moonchart.formats.BasicFormat;
+import moonchart.backend.FormatData;
 import moonchart.backend.FormatData.Format;
 import moonchart.backend.FormatDetector;
 #end
@@ -64,22 +64,22 @@ typedef SongCreditdata = // beacuse SongMetadata is stolen
 
 class Song
 {
+	#if moonchart
     inline static function findFormat(files:Array<String>){
         var data:Null<Format> = null;
-        try
-        {
+        try{
 			data = FormatDetector.findFormat(files);
-        }
-        catch(e: Any){
+        }catch(e:Any){
             data = null;
         }
-
         return data;
     }
+	#end
 
 	public static function getCharts(metadata:SongMetadata):Array<String>
 	{
 		Paths.currentModDirectory = metadata.folder;
+		
         #if moonchart
         var folder:String = '';
 		final songName = Paths.formatToSongPath(metadata.songName);

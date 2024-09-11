@@ -1,8 +1,9 @@
 package funkin.data;
+
+#if moonchart
 import moonchart.backend.Timing;
 import moonchart.formats.BasicFormat.BasicChart;
 import moonchart.formats.BasicFormat.FormatDifficulty;
-#if moonchart
 import moonchart.formats.fnf.legacy.FNFLegacy;
 import moonchart.formats.fnf.legacy.FNFPsych;
 
@@ -30,8 +31,6 @@ class TrollFormat extends FNFLegacyBasic<TrollJSONFormat> {
 			for (note in section.sectionNotes){
                 if(note[2] > 0)
 					note[2] += Timing.stepCrochet(chart.data.song.bpm, 4);
-                
-                
 
                 if(note[3] == 'STEPMANIA_ROLL')
                     note[3] = 'Roll';
