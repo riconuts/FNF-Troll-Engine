@@ -1,7 +1,8 @@
 package funkin.data;
 
+import haxe.Timer;
 #if(moonchart)
-import funkin.data.TrollFormat as SupportedFormat;
+import funkin.data.FNFTroll as SupportedFormat;
 import moonchart.formats.BasicFormat;
 import moonchart.backend.FormatData;
 import moonchart.backend.FormatData.Format;
@@ -376,11 +377,18 @@ class Song
                 if (fileFormat != null){
                     format = fileFormat;
 					formatInfo = FormatDetector.getFormatData(format);
-					SONG = switch (format) {
-						case FNF_LEGACY_PSYCH | FNF_LEGACY:
-							trace('Chart format $format is good to be read ^.^');
+					SONG = switch(format){
+						case FNF_LEGACY_PSYCH | FNF_LEGACY | "FNF_TROLL":
 							Song.loadFromJson(songLowercase + diffSuffix, songLowercase);
 
+                            // Was benchmarking if this was faster vv
+                            // It was the same fucking speed LOL
+                            // leaving it as an example of moonchart tho
+/*                             Timer.measure(() -> {
+                                var chart:SwagSong = cast new SupportedFormat().fromFile(filePath).data.song;
+                                chart.path = filePath;
+                                return onLoadJson(chart);
+                            }); */
 						default:
 							trace('Converting from format $format!');
 
