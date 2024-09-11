@@ -931,6 +931,7 @@ class PlayState extends MusicBeatState
 		playerField = new PlayField(modManager);
 		playerField.cameras = [camHUD];
 		playerField.modNumber = 0;
+        playerField.playerId = 0;
 		playerField.characters = [for(ch in boyfriendMap) ch];
 		
 		playerField.isPlayer = !playOpponent;
@@ -942,6 +943,7 @@ class PlayState extends MusicBeatState
 		dadField.isPlayer = playOpponent;
 		dadField.autoPlayed = !dadField.isPlayer || cpuControlled;
 		dadField.modNumber = 1;
+		dadField.playerId = 1;
 		dadField.characters = [for(ch in dadMap) ch];
 		dadField.noteHitCallback = playOpponent ? goodNoteHit : opponentNoteHit;
 
@@ -2452,6 +2454,7 @@ class PlayState extends MusicBeatState
 	{
 		var field = new PlayField(modManager);
 		field.modNumber = playfields.members.length;
+        field.playerId = field.modNumber;
 		field.cameras = playfields.cameras;
 		initPlayfield(field);
 		playfields.add(field);
