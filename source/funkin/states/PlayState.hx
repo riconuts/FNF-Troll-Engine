@@ -95,7 +95,7 @@ class PlayState extends MusicBeatState
 	public static var storyWeek:Int = 0;
 	public static var storyPlaylist:Array<String> = [];
 	public static var difficulty:Int = 1; // for psych mod shit
-	public static var difficultyName:String = 'normal'; // for psych mod shit
+	public static var difficultyName:String = 'normal'; // should NOT be set to "" when playing normal diff!!!!!
 	public static var curStage:String = 'stage';
 	public static var arrowSkin:String = 'NOTE_assets'; // dont check for this being null, playstate should not let these be null or an empty string
 	public static var splashSkin:String = 'noteSplashes'; // dont check for this being null, playstate should not let these be null or an empty string
@@ -603,7 +603,7 @@ class PlayState extends MusicBeatState
 		Conductor.songPosition = Conductor.crochet * lastBeatHit;
 
 		songName = Paths.formatToSongPath(SONG.song);
-		songHighscore = Highscore.getScore(SONG.song);
+		songHighscore = Highscore.getScore(SONG.song, difficultyName);
 
 		if (SONG.metadata != null){
 			metadata = SONG.metadata;
@@ -3316,7 +3316,7 @@ class PlayState extends MusicBeatState
 			
 			if (saveScore && ratingFC!='Fail'){
 				//Highscore.saveScore(SONG.song, stats.score, percent, stats.totalNotesHit);
-                Highscore.saveScoreRecord(SONG.song, difficultyName == "normal" ? "" : difficultyName, stats.getScoreRecord());
+                Highscore.saveScoreRecord(SONG.song, difficultyName, stats.getScoreRecord());
             }
 		}
 
@@ -3341,11 +3341,7 @@ class PlayState extends MusicBeatState
 				// Save week score
 				if (saveScore && WeekData.curWeek != null && !playOpponent){
 					if(!ClientPrefs.getGameplaySetting('practice', false) && !ClientPrefs.getGameplaySetting('botplay', false)) {
-						Highscore.saveWeekScore(WeekData.curWeek.directory, campaignScore);
-						
-						Highscore.weekCompleted.set(WeekData.curWeek.directory, true);
-						FlxG.save.data.weekCompleted = Highscore.weekCompleted;
-						FlxG.save.flush();
+						Highscore.saveWeekScore(WeekData.curWeek.name, campaignScore);						
 					}
 				}
 
