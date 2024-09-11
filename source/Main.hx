@@ -238,6 +238,7 @@ class Main extends Sprite
 
 		callstack += '\n$errorName';
 
+		callstack += "\n\nWould you like to goto the main menu?";
 		print('\n$callstack\n');
 
 		#if (windows && cpp)
@@ -245,7 +246,7 @@ class Main extends Sprite
 		switch(ret){
 			default: // Close program.
 
-			case NO: // Return to Main Menu.
+			case YES: // Return to Main Menu.
 			@:privateAccess{
 				try{
 					if (FlxG.game._state != null) FlxG.game._state.destroy();
