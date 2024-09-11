@@ -179,12 +179,12 @@ class FNFTroll extends FNFLegacyBasic<TrollJSONFormat> {
 		data.song.gfVersion = chart.meta.extraData.get(PLAYER_3) ?? "gf";
 		data.song.stage = chart.meta.extraData.get(STAGE) ?? "stage";
         
-        data.song.offset = -chart.meta.offset * 1000.0;
+        data.song.offset = chart.meta.offset;
 
 		for (section in data.song.notes){
 			for (note in section.sectionNotes){
                 if(note[2] > 0)
-					note[2] += Timing.stepCrochet(data.song.bpm, 4);
+					note[2] += Timing.stepCrochet(data.song.bpm, 4) * 2;
 
                 if(note[3] == 'STEPMANIA_ROLL')
                     note[3] = 'Roll';
@@ -196,11 +196,9 @@ class FNFTroll extends FNFLegacyBasic<TrollJSONFormat> {
         }
 		return cast basic;
     }
-	#if (moonchart > "0.3.0" || moonchart == "git")
-	override function prepareNote(note:FNFLegacyNote, offset:Float):FNFLegacyNote {
+	override function prepareNote(note:FNFLegacyNote, offset:Float):FNFLegacyNote
 		return note;
-	}
-	#end
+	
 }
 #else
 class FNFTroll {}
