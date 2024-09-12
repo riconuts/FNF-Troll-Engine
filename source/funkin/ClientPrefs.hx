@@ -54,7 +54,7 @@ class ClientPrefs
 	*/
 
 	static var defaultOptionDefinitions = getOptionDefinitions();
-	static var manualLoads = ["gameplaySettings", "quantHSV", "arrowHSV", "comboOffset"];
+	static var manualLoads = ["gameplaySettings", "quantHSV", "arrowHSV", "comboOffset","ratingPlacement"];
 
 	inline public static function getOptionDefinitions():Map<String, OptionData>
 	{
@@ -312,14 +312,6 @@ class ClientPrefs
 				desc: "Makes judgements pop in alot simpler and displays only one at a time.",
 				value: false,
 				type: Toggle,
-				data: []
-			},
-            "worldCombos" => {
-				display: "World Combos",
-				desc: "When toggled, combo sprites are placed on the stage instead of the HUD."
-				+ '\nDoesn'+"'"+'t work with "Alt Judgements" enabled.',
-				type: Toggle,
-				value: false,
 				data: []
 			},
 			"scoreZoom" => {
@@ -680,7 +672,7 @@ class ClientPrefs
 
 	//
 	public static var arrowHSV:Array<Array<Int>> = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
-	
+
 	/**
 	 * [0] and [1] for ratings.
 	 * [2] and [3] for combo numbers.
@@ -690,6 +682,12 @@ class ClientPrefs
 		-60, 60, 
 		-260, -80,
 		 0, 0
+	];
+
+	public static var ratingPlacement:Array<Float> = [
+		0.5, 0.4,
+		0.5, 0.6,
+		0.6, 0.6,
 	];
 
     public static var locale:String = 'en';

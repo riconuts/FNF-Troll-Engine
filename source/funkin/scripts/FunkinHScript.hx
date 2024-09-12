@@ -6,7 +6,6 @@ import funkin.scripts.*;
 import funkin.scripts.Globals.*;
 
 import funkin.states.PlayState;
-import funkin.states.PlayState.RatingSprite;
 import funkin.states.MusicBeatState;
 import funkin.states.MusicBeatSubstate;
 
@@ -286,7 +285,7 @@ class FunkinHScript extends FunkinScript
 		set("GameOverSubstate", funkin.states.GameOverSubstate);
 		set("Song", funkin.data.Song);
 		set("BGSprite", funkin.objects.BGSprite);
-		set("RatingSprite", RatingSprite);
+		set("RatingSprite", funkin.objects.RatingGroup.RatingSprite);
 
 		set("Note", funkin.objects.Note);
 		set("NoteObject", funkin.objects.NoteObject);

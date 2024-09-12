@@ -1,18 +1,20 @@
 package funkin.states.options;
 
 import funkin.objects.hud.BaseHUD;
-import funkin.states.PlayState.RatingSprite;
+import funkin.objects.RatingGroup;
+import funkin.objects.RatingGroup.RatingSprite;
 
 import flixel.util.FlxColor;
 import flixel.text.FlxText;
 import flixel.math.FlxPoint;
-import flixel.group.FlxGroup.FlxTypedGroup;
+
+// since the rating graphics are now centered to the sprites position the hitbox got fucked up, so TODO: fix that ig 
 
 class ComboPositionSubstate extends MusicBeatSubstate
 {
 	//// Preview	
-	var rating:RatingSprite;
-	var combo:FlxTypedGroup<RatingSprite>;
+	var judge:RatingSprite;
+	var combo:Array<RatingSprite>;
 	var timing:FlxText;
 
 	//// Offset Texts
@@ -37,6 +39,8 @@ class ComboPositionSubstate extends MusicBeatSubstate
 		camHUD = new FlxCamera();
 		camHUD.bgColor = fuckingBgColor;
 		FlxG.cameras.add(camHUD, false);
+
+		this.cameras = [camHUD];
 
 		FlxG.mouse.getScreenPosition(camHUD, curMousePos);
 		prevMousePos.copyFrom(curMousePos);
@@ -65,35 +69,24 @@ class ComboPositionSubstate extends MusicBeatSubstate
 				ratingColor = 0xFFFFFFFF;
 		}
 			
+		////////
+		var rat = new RatingGroup();
+		
 		////
-		
-		rating = new RatingSprite();
-		rating.scale.set(0.7, 0.7);
-		rating.scrollFactor.set();
-		rating.cameras = [camHUD];
-		rating.loadGraphic(Paths.image(ratingName));
-		rating.updateHitbox();
-		add(rating);
+		judge = rat.displayJudgment(ratingName);
+		judge.cameras = [camHUD];
+		add(judge);
 
-
-		combo = new FlxTypedGroup<RatingSprite>();
+		////
 		var comboColor = ClientPrefs.coloredCombos ? ratingColor : 0xFFFFFFFF;
-		var splitCombo = Std.string(Std.random(1000)).split("");
-		while (splitCombo.length < 3) splitCombo.unshift("0");
-		
-		for (number in splitCombo){
-			var num = new RatingSprite();
-			num.loadGraphic(Paths.image('num$number'));
-			num.scale.set(0.5, 0.5);
-			num.scrollFactor.set();
+
+		for (num in combo = rat.displayCombo(10 + Std.random(980))){
 			num.color = comboColor;
 			num.cameras = [camHUD];
-			num.updateHitbox();
-			combo.add(num);
+			add(num);
 		};
-		add(combo);
 
-
+		////
 		timing = new FlxText(0, 0, 0, "0 ms");
 		timing.setFormat(Paths.font("calibri.ttf"), 28, 0xFFFFFFFF, CENTER, FlxTextBorderStyle.OUTLINE, 0xFF000000);
 		timing.color = ratingColor;
@@ -103,7 +96,7 @@ class ComboPositionSubstate extends MusicBeatSubstate
 		timing.updateHitbox();
 		add(timing);
 
-
+		////
 		function makeText(i){
 			var text:FlxText = new FlxText(
 				10, 
@@ -138,21 +131,23 @@ class ComboPositionSubstate extends MusicBeatSubstate
 
 	////
 	function updateRatingPos(){
-		rating.screenCenter();
-		rating.x += ClientPrefs.comboOffset[0];
-		rating.y -= ClientPrefs.comboOffset[1];
+		judge.x = FlxG.width * 0.5 + ClientPrefs.comboOffset[0];
+		judge.y = FlxG.height * 0.5 - ClientPrefs.comboOffset[1];
 		
 		txt_rating.text = '[${ClientPrefs.comboOffset[0]}, ${ClientPrefs.comboOffset[1]}]';
 	}
 
 	function updateComboPos(){
-		var numStartX:Float = (FlxG.width - combo.length * 41) * 0.5 + ClientPrefs.comboOffset[2];
+		var x = FlxG.width * 0.5 + ClientPrefs.comboOffset[2];
+		var y = FlxG.height * 0.5 - ClientPrefs.comboOffset[3];
 
-		for (idx in 0...combo.members.length){
-			var num = combo.members[idx];
-			num.x = numStartX + 41.5 * idx;
-			num.screenCenter(Y);
-			num.y -= ClientPrefs.comboOffset[3];
+		x -= combo[0].width;
+
+		for (i in 0...combo.length){
+			var spr:RatingSprite = combo[i];
+
+			spr.x = x + i *	spr.width;
+			spr.y = y;
 		}
 
 		txt_combo.text = '[${ClientPrefs.comboOffset[2]}, ${ClientPrefs.comboOffset[3]}]';
@@ -167,22 +162,36 @@ class ComboPositionSubstate extends MusicBeatSubstate
 	}
 
 	////
-	// 0: rating, 1: combo, 2: timing, null: NOTHING.
+	// 0: judge, 1: combo, 2: timing, null: NOTHING.
 	var mouseGrabbed:Null<Int> = null; 
 	var keyboardGrabbed:Int = 0;
 
 	var prevMousePos:FlxPoint = FlxPoint.get();
 	var curMousePos:FlxPoint = FlxPoint.get();
 
+	// fuck this nonsense
+	function sowy(okay:Any){
+		if (okay is Array){
+			var okay:Array<Dynamic> = okay;
+			for (i in okay){
+				if (FlxG.mouse.overlaps(i, camHUD))
+					return true;
+			}
+			return false;
+		}else if (okay is FlxSprite){
+			return FlxG.mouse.overlaps(okay, camHUD);
+		}
+		return false;
+	}
+
 	override public function update(elapsed)
 	{
 		if (FlxG.mouse.justPressed){
-			var toCheck = [timing, combo, rating];
-			
 			mouseGrabbed=null;
-			for (idx in 0...toCheck.length){
-				var chk = toCheck[idx];
-				if (FlxG.mouse.overlaps(chk, camHUD)){
+
+			var toCheck:Array<Dynamic> = [timing, combo, judge];
+			for (idx => chk in toCheck){				
+				if (sowy(chk)){
 					mouseGrabbed = toCheck.length-1-idx;
 					break;
 				}
