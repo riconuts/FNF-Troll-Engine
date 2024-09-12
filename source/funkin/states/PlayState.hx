@@ -2191,10 +2191,6 @@ class PlayState extends MusicBeatState
 		return event;
 	}
 
-	public inline function getVisualPosition()
-		return getTimeFromSV(Conductor.songPosition, currentSV);
-
-
 	function eventNoteEarlyTrigger(event:EventNote):Float {
 		var ret:Dynamic = callOnAllScripts('eventEarlyTrigger', [event.event, event.value1, event.value2]);
 		if (ret != null && (ret is Int || ret is Float))
@@ -2536,6 +2532,7 @@ class PlayState extends MusicBeatState
 	var resyncTimer:Float = 0;
 	var prevNoteCount:Int = 0;
 
+    var svIndex:Int =0;
 	override public function update(elapsed:Float)
 	{
 		if (paused){
@@ -2711,8 +2708,14 @@ class PlayState extends MusicBeatState
 		}
 
 		////
-		currentSV = getSV(Conductor.songPosition);
-		Conductor.visualPosition = getVisualPosition();
+        var event:SpeedEvent = speedChanges[svIndex];
+		if (svIndex < speedChanges.length){
+			while (speedChanges[svIndex + 1].startTime <= Conductor.songPosition){
+                svIndex++;
+                event = speedChanges[svIndex];
+            }
+        }
+		Conductor.visualPosition = getTimeFromSV(Conductor.songPosition, event);
 		FlxG.watch.addQuick("visualPos", Conductor.visualPosition);
 
 		checkEventNote();
