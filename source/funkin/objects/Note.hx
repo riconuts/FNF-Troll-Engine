@@ -434,7 +434,7 @@ class Note extends NoteObject
 
         var offset:Float = 0;
 
-		if ((FlxG.state is PlayState) || (FlxG.state is ChartingState))
+		if ((FlxG.state is PlayState))
             offset = -(cast FlxG.state).offset;
 
 		this.strumTime = strumTime + offset;
