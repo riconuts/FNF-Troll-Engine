@@ -2709,7 +2709,7 @@ class PlayState extends MusicBeatState
 
 		////
         var event:SpeedEvent = speedChanges[svIndex];
-		if (svIndex < speedChanges.length){
+		if (svIndex <= speedChanges.length){
 			while (speedChanges[svIndex + 1].startTime <= Conductor.songPosition){
                 svIndex++;
                 event = speedChanges[svIndex];

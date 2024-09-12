@@ -12,7 +12,7 @@ function goodNoteHit(note:Note){
 }
 
 function noteUpdate(elapsed:Float){
-    this.angle += elapsed;
+    this.typeOffsetAngle += elapsed;
 }
 
 function loadNoteAnims(note:Note){
