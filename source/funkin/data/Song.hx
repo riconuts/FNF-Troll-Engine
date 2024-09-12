@@ -324,6 +324,28 @@ class Song
 			swagJson.tracks = {inst: instTracks, player: playerTracks, opponent: opponentTracks};
 		}
 
+        if (swagJson.notes == null)
+            swagJson.notes = [];
+        
+        if(swagJson.notes.length == 0)
+            swagJson.notes.push({
+                sectionNotes: [],
+                typeOfSection: 0,
+                mustHitSection: true,
+                gfSection: false,
+                bpm: 0,
+                changeBPM: false,
+                altAnim: false,
+                sectionBeats: 4
+            });
+        
+        for(section in swagJson.notes){
+			for (note in section.sectionNotes){
+                if(note[3] == 'Hurt Note')
+                    note[3] = 'Mine';
+            }
+        }
+
 		////
 		if (swagJson.arrowSkin == null || swagJson.arrowSkin.trim().length == 0)
 			swagJson.arrowSkin = "NOTE_assets";

@@ -57,6 +57,7 @@ class ChartingState extends MusicBeatState
 {
 	public static var instance:ChartingState;
 	
+    public var offset:Float = 0;
 	public var notetypeScripts:Map<String, FunkinHScript> = [];
 	public static var noteTypeList:Array<String> = //Used for backwards compatibility with 0.1 - 0.3.2 charts, though, you should add your hardcoded custom note types here too.
 	[
@@ -263,6 +264,9 @@ class ChartingState extends MusicBeatState
 			pushSection();
 			PlayState.SONG = _song;
 		}
+
+        offset = _song.offset == null ? 0 : _song.offset;
+        
 		/*
 		if(_song.metadata==null){
 			_song.metadata = {

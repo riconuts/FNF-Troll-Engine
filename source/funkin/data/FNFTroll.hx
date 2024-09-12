@@ -190,8 +190,10 @@ class FNFTroll extends FNFLegacyBasic<TrollJSONFormat> {
                     note[3] = 'Roll';
                 else if(note[3] == ALT_ANIM)
                     note[3] = 'Alt Animation';
-                else if(note[3] == HURT || note[3] == 'STEPMANIA_MINE')
-                    note[3] = 'Hurt Note'; // Replace witH Mine maybe?
+                else if(note[3] == HURT)
+                    note[3] = 'Mine';
+				else if (note[3] == 'STEPMANIA_MINE')
+                    note[3] = 'StepmaniaMine';
             }
         }
 		return cast basic;

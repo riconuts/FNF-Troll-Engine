@@ -455,7 +455,7 @@ class PlayState extends MusicBeatState
 	var shitToLoad:Array<AssetPreload> = [];
 	var finishedCreating = false;
 	
-    var offset:Float = 0;
+    public var offset:Float = 0;
 
 	override public function create()
 	{
@@ -601,7 +601,7 @@ class PlayState extends MusicBeatState
 		}
 
 		offset = SONG.offset != null ? SONG.offset : 0;
-		Conductor.mapBPMChanges(SONG, offset);
+		Conductor.mapBPMChanges(SONG);
 		Conductor.changeBPM(SONG.bpm);
 		
 		lastBeatHit = -5;
