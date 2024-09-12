@@ -10,14 +10,15 @@ import funkin.objects.NoteSplash;
 import funkin.objects.StrumNote;
 import funkin.objects.Stage;
 import funkin.objects.Character;
+import funkin.objects.RatingGroup;
+import funkin.objects.hud.*;
+import funkin.objects.playfields.*;
 import funkin.data.Stats;
 import funkin.data.JudgmentManager;
 import funkin.data.Highscore;
 import funkin.data.WeekData;
 import funkin.states.GameOverSubstate;
 import funkin.states.PauseSubState;
-import funkin.objects.hud.*;
-import funkin.objects.playfields.*;
 import funkin.modchart.Modifier;
 import funkin.modchart.ModManager;
 import funkin.states.editors.*;
@@ -133,6 +134,7 @@ class PlayState extends MusicBeatState
 	public var saveScore:Bool = true; // whether to save the score. modcharted songs should set this to false if disableModcharts is true
 
 	////
+	public var worldCombos:Bool = false;
 	public var showRating:Bool = true;
 	public var showCombo:Bool = false;
 	public var showComboNum:Bool = true;
@@ -243,7 +245,7 @@ class PlayState extends MusicBeatState
 	/** Group instance containing HUD objects **/
 	public var hud:BaseHUD; // perhaps this and 'hudSkins' could and/or should be fused together
 	
-	public var ratingGroup = new FlxTypedGroup<RatingSprite>();
+	public var ratingGroup:RatingGroup;
 	public var timingTxt:FlxText;
 
 	/** debugPrint text container **/
@@ -967,11 +969,9 @@ class PlayState extends MusicBeatState
 		moveCameraSection(SONG.notes[0]);
 
 		////
-
-		//
-		ratingGroup.cameras = [ClientPrefs.worldCombos&&!ClientPrefs.simpleJudge ? camGame : camHUD];
-		for (i in 0...4)
-			(lastJudge = ratingGroup.add(new RatingSprite())).kill();
+		ratingGroup = new RatingGroup();
+		ratingGroup.cameras = [worldCombos ? camGame : camHUD];
+		lastJudge = ratingGroup.lastJudge;
 
 		timingTxt = new FlxText();
 		timingTxt.setFormat(Paths.font("vcr.ttf"), 28, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -1043,6 +1043,7 @@ class PlayState extends MusicBeatState
 		var stringId:String = 'difficultyName_$difficultyName';
 		var diffName:String = Paths.hasString(stringId) ? Paths._getString(stringId) : difficultyName;
 		stateText = '${SONG.song} ($diffName)';
+		
 		detailsText = isStoryMode ? "Story Mode" : "Freeplay";
 		detailsPausedText = "Paused - " + detailsText;
 
@@ -2292,10 +2293,9 @@ class PlayState extends MusicBeatState
 	}
 
 	public function optionsChanged(options:Array<String>){
-		if (options.length < 1){
+		if (options.length < 1)
 			return;
-		}
-
+		
 		trace("changed " + options);
 
 		for(note in allNotes)
@@ -2306,15 +2306,10 @@ class PlayState extends MusicBeatState
 		if(options.contains("gradeSet"))
 			ratingStuff = Highscore.grades.get(ClientPrefs.gradeSet);
 
-		
-		if (!ClientPrefs.simpleJudge)
-		{
-			ratingGroup.cameras[0] = ClientPrefs.worldCombos ? camGame : camHUD;
+		if (!ClientPrefs.simpleJudge) {
 			for (prevCombo in lastCombos)
 				prevCombo.kill();
 		}
-		else
-			ratingGroup.cameras[0] = camHUD;
 		
 		callOnScripts('optionsChanged', [options]);
 		if (hudSkinScript != null) callScript(hudSkinScript, "optionsChanged", [options]);
@@ -2373,7 +2368,7 @@ class PlayState extends MusicBeatState
 			camStageUnderlay.bgColor = Math.floor(0xFF * ClientPrefs.stageOpacity) * 0x1000000;
 
         var ret:Dynamic = callOnScripts('onStateDraw');
-		if(ret != Globals.Function_Stop) 
+		if (ret != Globals.Function_Stop) 
 		    super.draw();
 
         callOnScripts('onStateDrawPost');
@@ -3418,211 +3413,132 @@ class PlayState extends MusicBeatState
 	var lastJudge:RatingSprite;
 	var lastCombos:Array<RatingSprite> = [];
 
-	var msNumber = 0;
-	var msTotal = 0.0;
-
 	private function displayJudgment(image:String){
-		var rating:RatingSprite;
+		var r:Bool = false;
+		if(hudSkinScript!=null && callScript(hudSkinScript, "onDisplayJudgment", [image]) == Globals.Function_Stop)
+			r = true;
+		if(callOnScripts("onDisplayJudgment", [image]) == Globals.Function_Stop)
+			return;
 
-        var r:Bool = false;
-        if(hudSkinScript!=null && callScript(hudSkinScript, "onDisplayJudgment", [image]) == Globals.Function_Stop)
-            r = true;
-        
-        //trace(r);
-        if(callOnScripts("onDisplayJudgment", [image]) == Globals.Function_Stop)
-            return;
+		if(r)return;
 
-        if(r)return;
+		var spr:RatingSprite;
 
-		if (ClientPrefs.simpleJudge)
-		{
-			rating = lastJudge;
-			rating.moves = false;
-			rating.revive();
+		if (ClientPrefs.simpleJudge) {
+			//// this legit just the ratinggroup code, fuckk!!!!
+			spr = ratingGroup.addOnTop(lastJudge);
+			spr.cancelTween();
 
-			if (rating.tween != null)
-			{
-				rating.tween.cancel();
-				rating.tween.destroy();
-			}
+			spr.active = true;
+			spr.alive = true;
+			spr.exists = true;
 
-			rating.scale.set(0.7 * 1.1, 0.7 * 1.1);
+			spr.x = ratingGroup.x + ClientPrefs.comboOffset[0];
+			spr.y = ratingGroup.y - ClientPrefs.comboOffset[1];
 
-			rating.tween = FlxTween.tween(rating.scale, {x: 0.7, y: 0.7}, 0.1, {
+			spr.loadGraphic(Paths.image(image));
+			spr.updateHitbox();
+
+			////
+			spr.moves = false;
+			spr.scale.set(0.7 * 1.1, 0.7 * 1.1);
+			spr.tween = FlxTween.tween(spr.scale, {x: 0.7, y: 0.7}, 0.1, {
 				ease: FlxEase.quadOut,
-				onComplete: function(tween:FlxTween)
-				{
-					if (!rating.alive)
+				onComplete: function(tween:FlxTween) {
+					if (!spr.alive)
 						return;
 
-					var time = (Conductor.stepCrochet * 0.001);
-					rating.tween = FlxTween.tween(rating.scale, {x: 0, y: 0}, time, {
-						startDelay: time * 8,
+					var stepDur = (Conductor.stepCrochet * 0.001);
+					spr.tween = FlxTween.tween(spr.scale, {x: 0, y: 0}, stepDur, {
+						startDelay: stepDur * 8,
 						ease: FlxEase.quadIn,
-						onComplete: function(tween:FlxTween)
-						{
-							rating.kill();
-						}
+						onComplete: (tween:FlxTween) -> spr.kill()
 					});
 				}
 			});
-		}
-		else
-		{
-			rating = ratingGroup.recycle(RatingSprite);
+		} else {
+			spr = worldCombos ? ratingGroup.displayJudgment(image) : ratingGroup.displayJudgment(image, ClientPrefs.comboOffset[0], -ClientPrefs.comboOffset[1]);
 
-			rating.moves = true;
-			rating.acceleration.y = 550;
-			rating.velocity.set(FlxG.random.int(-10, 10), -FlxG.random.int(140, 175));
+			spr.moves = true;
+			spr.acceleration.y = 550;
+			spr.velocity.set(FlxG.random.int(-10, 10), -FlxG.random.int(140, 175));
 
-			rating.scale.set(0.666, 0.666);
-			rating.alpha = 1.0;
+			spr.scale.set(0.666, 0.666);
+			spr.alpha = 1.0;
 
-			rating.tween = FlxTween.tween(rating.scale, {x: 0.7, y: 0.7}, 0.1, {ease: FlxEase.backOut, onComplete: function(twn){
-					rating.tween = FlxTween.tween(rating, {alpha: 0.0}, 0.2, {
+			spr.tween = FlxTween.tween(spr.scale, {x: 0.7, y: 0.7}, 0.1, {ease: FlxEase.backOut, onComplete: function(twn){
+				spr.tween = FlxTween.tween(spr, {alpha: 0.0}, 0.2, {
 						startDelay: Conductor.crochet * 0.001,
-						onComplete: function(wtf)
-						{
-							rating.kill();
-						}
+						onComplete: (_) -> spr.kill()
 					});
 			}});
 		}
 
-        rating.color = 0xFFFFFFFF;
-		rating.alpha = ClientPrefs.judgeOpacity;
-
-		rating.visible = showRating;
-		rating.loadGraphic(Paths.image(image));
-		rating.updateHitbox();
-
-		rating.offset.add(rating.width/2.0, rating.height/2.0);
-
-		if (ClientPrefs.worldCombos && !ClientPrefs.simpleJudge){
-			
-			rating.y = FlxG.camera.height / 2.0 - FlxG.camera.height * 0.1 - 60;
-			rating.x = FlxMath.bound(
-				FlxG.width * 0.55 - 40,
-				camFollow.x - FlxG.camera.width / 2 + rating.width,
-				camFollow.x + FlxG.camera.width / 2 - rating.width
-			);
-		}else{
-			rating.x = FlxG.width * 0.5 + ClientPrefs.comboOffset[0];
-			rating.y = FlxG.height * 0.5 - ClientPrefs.comboOffset[1];
-		}
-
-		ratingGroup.remove(rating, true);
-		ratingGroup.add(rating);
+        spr.color = 0xFFFFFFFF;
+		spr.visible = showRating;
+		spr.alpha = ClientPrefs.judgeOpacity;	
 
         if(hudSkinScript!=null)
-            callScript(hudSkinScript, "onDisplayJudgmentPost", [rating, image]);
-        callOnScripts("onDisplayJudgmentPost", [rating, image]);
+            callScript(hudSkinScript, "onDisplayJudgmentPost", [spr, image]);
+        callOnScripts("onDisplayJudgmentPost", [spr, image]);
 	}
+	
 	var comboColor = 0xFFFFFFFF;
-
 	private function displayCombo(?combo:Int){
-		if (combo==null) combo = stats.combo;
-
         var r:Bool = false;
-        if(hudSkinScript!=null && callScript(hudSkinScript, "onDisplayCombo", [combo]) == Globals.Function_Stop)
+        if (hudSkinScript!=null && callScript(hudSkinScript, "onDisplayCombo", [combo]) == Globals.Function_Stop)
             r = true;
 
-        if(callOnScripts("onDisplayCombo", [combo]) == Globals.Function_Stop)
+        if (callOnScripts("onDisplayCombo", [combo]) == Globals.Function_Stop || r)
             return;
 
-        if(r)return;
+		if (combo == null) 
+			combo = stats.combo;
 
-		if (ClientPrefs.simpleJudge)
-		{
-			for (prevCombo in lastCombos)
-				prevCombo.kill();
+		if (ClientPrefs.simpleJudge) {
+			for (numSpr in lastCombos)
+				numSpr.kill();
 			
 			if (combo == 0)
 				return;
-		}
-		else if (combo > 0 && combo < 10 && combo != 0)
-			return;
-
-		var comboColor = comboColor;
-		var separatedScore:Array<String> = Std.string(Math.abs(combo)).split("");
-		
-		while (separatedScore.length < 3)
-			separatedScore.unshift("0");
-		
-		if (combo < 0){
-			separatedScore.unshift("neg");
-			comboColor = hud.judgeColours.get("miss");
-		}
-
-		var scoreHW = separatedScore.length * 41 / 2;
-		
-		var worldOffsetX:Float;
-		var worldOffsetY:Float;
-
-		if (ClientPrefs.worldCombos && !ClientPrefs.simpleJudge){
-			worldOffsetY = FlxG.camera.height / 2.0 - FlxG.camera.height * 0.1 + 80;
-			worldOffsetX = FlxMath.bound(
-				FlxG.width * 0.55 - scoreHW * 2, 
-				camFollow.x - FlxG.camera.width / 2 + scoreHW, 
-				camFollow.x + FlxG.camera.width / 2 - scoreHW
-			);
 		}else{
-			worldOffsetX = FlxG.width * 0.5;
-			worldOffsetY = FlxG.height * 0.5 - ClientPrefs.comboOffset[3];
+			if (combo > 0 && combo < 10)
+				return;
 		}
-
-		var numStartX:Float = worldOffsetX + ClientPrefs.comboOffset[2];
-		numStartX -= (separatedScore.length-1) * 41 / 2;
-
-		for (daLoop => i in separatedScore)
+		
+		lastCombos = (worldCombos) ? ratingGroup.displayCombo(combo) : ratingGroup.displayCombo(combo, ClientPrefs.comboOffset[2], -ClientPrefs.comboOffset[3]);
+		var comboColor = (combo < 0) ? hud.judgeColours.get("miss") : comboColor;
+		
+		for (numSpr in lastCombos)
 		{
-			var numScore:RatingSprite = ratingGroup.recycle(RatingSprite);
-			numScore.loadGraphic(Paths.image('num' + i));
-			numScore.scale.set(0.5, 0.5);
+			numSpr.color = comboColor;
+			numSpr.visible = showComboNum;
 
-			if (ClientPrefs.simpleJudge){
-				numScore.scale.x = 0.5 * 1.25;
-				numScore.updateHitbox();
-				numScore.scale.y = 0.5 * 0.75;
-			}else{
-				numScore.updateHitbox();
-			}
+			numSpr.alpha = ClientPrefs.judgeOpacity;
 
-			numScore.offset.add(numScore.width/2.0, numScore.height/2.0);
-
-			numScore.x = numStartX + 41.5 * daLoop;
-			numScore.y = worldOffsetY;
-
-			numScore.color = comboColor;
-			numScore.visible = showComboNum;
-
-			numScore.ID = daLoop;
-			numScore.moves = !ClientPrefs.simpleJudge;
-			if (numScore.tween != null){
-				numScore.tween.cancel();
-				numScore.tween.destroy();
-			}
-
-			ratingGroup.remove(numScore, true);
-			ratingGroup.add(numScore);
-
-			numScore.alpha = ClientPrefs.judgeOpacity;
 			if (ClientPrefs.simpleJudge)
 			{
-				numScore.tween = FlxTween.tween(numScore.scale, {x: 0.5, y: 0.5}, 0.2, {ease: FlxEase.circOut});
-				lastCombos.push(numScore);
+				numSpr.moves = false;
+
+				numSpr.scale.set(0.5, 0.5);
+				numSpr.scale.x *= 1.25;
+				numSpr.updateHitbox();
+				numSpr.scale.y *= 0.75;
+
+				numSpr.tween = FlxTween.tween(numSpr.scale, {x: 0.5, y: 0.5}, 0.2, {ease: FlxEase.circOut});
 			}
 			else
 			{
-				numScore.acceleration.y = FlxG.random.int(200, 300);
-				numScore.velocity.set(FlxG.random.float(-5, 5), -FlxG.random.int(140, 160));
+				numSpr.moves = true;
+				numSpr.acceleration.y = FlxG.random.int(200, 300);
+				numSpr.velocity.set(FlxG.random.float(-5, 5), -FlxG.random.int(140, 160));
 
-				numScore.tween = FlxTween.tween(numScore, {alpha: 0.0}, 0.2, {
-					onComplete: function(wtf)
-					{
-						numScore.kill();
-					},
-					startDelay: Conductor.crochet * 0.002
+				numSpr.scale.set(0.5, 0.5);
+				numSpr.updateHitbox();
+
+				numSpr.tween = FlxTween.tween(numSpr, {alpha: 0.0}, 0.2, {
+					startDelay: Conductor.crochet * 0.002,
+					onComplete: (_) -> numSpr.kill()
 				});
 			}
 		}
@@ -3723,7 +3639,10 @@ class PlayState extends MusicBeatState
 	private function applyJudgment(judge:Judgment, ?diff:Float = 0, ?show:Bool = true)
 		applyJudgmentData(judgeManager.judgmentData.get(judge), diff);
 
+	//// for the not done yet, who knows if ever, results screen.
 	var msJudges = [];
+	var msNumber = 0;
+	var msTotal = 0.0;
 
 	private function judge(note:Note, field:PlayField=null){
 		if (field == null)
@@ -4819,27 +4738,4 @@ class PlayState extends MusicBeatState
 
 		super.destroy();
 	}	
-}
-
-class RatingSprite extends FlxSprite
-{
-	public var tween:FlxTween;
-
-	public function new(){
-		super();
-		moves = !ClientPrefs.simpleJudge;
-
-		if (PlayState.instance != null)
-			cameras = PlayState.instance.ratingGroup.cameras;
-		
-		scrollFactor.y = 0.0;
-	}
-
-	override public function kill(){
-		if (tween != null){
-			tween.cancelChain();
-			tween.destroy();
-		}
-		return super.kill();
-	}
 }
