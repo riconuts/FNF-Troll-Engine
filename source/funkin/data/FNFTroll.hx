@@ -7,6 +7,7 @@ import moonchart.backend.Util;
 import moonchart.formats.BasicFormat.BasicEvent;
 import moonchart.backend.FormatData;
 import moonchart.backend.Timing;
+import moonchart.formats.BasicFormat.BasicNoteType;
 import moonchart.formats.BasicFormat.BasicChart;
 import moonchart.formats.BasicFormat.FormatDifficulty;
 import moonchart.formats.fnf.legacy.FNFLegacy;
@@ -186,20 +187,26 @@ class FNFTroll extends FNFLegacyBasic<TrollJSONFormat> {
                 if(note[2] > 0)
 					note[2] += Timing.stepCrochet(data.song.bpm, 4) * 2;
 
-                if(note[3] == 'STEPMANIA_ROLL')
-                    note[3] = 'Roll';
-                else if(note[3] == ALT_ANIM)
-                    note[3] = 'Alt Animation';
-                else if(note[3] == HURT)
-                    note[3] = 'Mine';
-				else if (note[3] == 'STEPMANIA_MINE')
-                    note[3] = 'StepmaniaMine';
             }
         }
 		return cast basic;
     }
-	override function prepareNote(note:FNFLegacyNote, offset:Float):FNFLegacyNote
+	override function prepareNote(note:FNFLegacyNote, offset:Float):FNFLegacyNote {
+		if (note.type is String) {
+			note[3] = switch (cast(note.type, String)) {
+				case MINE:
+					"StepmaniaMine";
+				case ALT_ANIM:
+					PSYCH_ALT_ANIM;
+                case ROLL:
+                    "Roll";
+                
+				default: cast note.type;
+			}
+		}
+
 		return note;
+	}
 	
 }
 #else
