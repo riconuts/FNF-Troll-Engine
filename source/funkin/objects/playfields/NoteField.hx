@@ -308,7 +308,7 @@ class NoteField extends FieldBase
 				var indices = object.indices;
 				var transforms:Array<ColorTransform> = []; // todo use fastvector
 				var multAlpha = this.alpha * ClientPrefs.noteOpacity;
-				for (n in 0... Std.int(vertices.length / 3)){
+				for (n in 0... Std.int(vertices.length / 2)){
 					var glow = glows[n];
 					var transfarm:ColorTransform = new ColorTransform();
 					transfarm.redMultiplier = 1 - glow;

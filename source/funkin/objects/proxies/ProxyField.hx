@@ -66,9 +66,9 @@ class ProxyField extends FieldBase {
 				var glows = object.glows;
 				var vertices = object.vertices;
 				var uvData = object.uvData;
-				var indices = new Vector<Int>(vertices.length, false, cast [for (i in 0...vertices.length) i]);
+				var indices = object.indices;
 				var transforms:Array<ColorTransform> = [];
-				for (n in 0...Std.int(vertices.length / 3))
+				for (n in 0...Std.int(vertices.length / 2))
 				{
 					var glow = glows[n];
 					var transfarm:ColorTransform = new ColorTransform();
