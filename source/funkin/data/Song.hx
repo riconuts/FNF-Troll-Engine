@@ -299,7 +299,7 @@ class Song
 				if (swagJson.path==null) return true;
 				var jsonPath:Path = new Path(swagJson.path
                     #if PE_MOD_COMPATIBILITY
-                    .replace("data/", "song/")
+                    .replace("data/", "songs/")
                     #end);
 
 				var folderPath = jsonPath.dir;

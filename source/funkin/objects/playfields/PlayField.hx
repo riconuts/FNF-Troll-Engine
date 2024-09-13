@@ -517,7 +517,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 								}
 							}
 
-							if (daNote.holdingTime >= daNote.sustainLength || daNote.unhitTail.length == 0)
+							if (daNote.holdingTime >= daNote.sustainLength)
 							{
                                 //trace("finished hold");
 								daNote.holdingTime = daNote.sustainLength;

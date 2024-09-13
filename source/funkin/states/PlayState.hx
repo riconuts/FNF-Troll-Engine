@@ -2115,7 +2115,7 @@ class PlayState extends MusicBeatState
 					oldNote = sustainNote;
 				}
 
-				var susLength = Math.floor(swagNote.sustainLength / Conductor.stepCrochet) - 1;
+				var susLength = Math.round(swagNote.sustainLength / Conductor.stepCrochet) - 1;
 				if (susLength > 0){
 					for (susNote in 0...susLength)
 						makeSustain(susNote, PART);
