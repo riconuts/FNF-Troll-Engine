@@ -407,24 +407,31 @@ class Song
 			for (idx in 0...files.length){
                 var input = files[idx];
                 var path:String = Paths.formatToSongPath(songLowercase) + '/' + Paths.formatToSongPath(input) + '.' + ext;
+                trace(path);
                 var filePath:String = Paths.getPath("songs/" + path);
 				var fileFormat:Format = !Paths.exists(filePath) ? null : findFormat([filePath]);
-                
+                #if PE_MOD_COMPATIBILITY
+				if (fileFormat == null){
+					filePath:= Paths.getPath("data/" + path);
+					fileFormat = !Paths.exists(filePath) ? null : findFormat([filePath]);
+                }
+                #end
                 if (fileFormat != null){
                     format = fileFormat;
 					formatInfo = FormatDetector.getFormatData(format);
 					SONG = switch(format){
 						case FNF_LEGACY_PSYCH | FNF_LEGACY | "FNF_TROLL":
-							Song.loadFromJson(songLowercase + diffSuffix, songLowercase);
+                            trace("bbbbbb");
+							//Song.loadFromJson(songLowercase + diffSuffix, songLowercase);
 
                             // Was benchmarking if this was faster vv
                             // It was the same fucking speed LOL
                             // leaving it as an example of moonchart tho
-/*                             Timer.measure(() -> {
-                                var chart:SwagSong = cast new SupportedFormat().fromFile(filePath).data.song;
-                                chart.path = filePath;
-                                return onLoadJson(chart);
-                            }); */
+                            
+                            var chart:SwagSong = cast new SupportedFormat().fromFile(filePath).data.song;
+                            chart.path = filePath;
+                            onLoadJson(chart);
+                            
 						default:
 							trace('Converting from format $format!');
 
