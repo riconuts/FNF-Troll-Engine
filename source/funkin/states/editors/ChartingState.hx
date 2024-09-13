@@ -610,7 +610,6 @@ class ChartingState extends MusicBeatState
 		blockPressWhileTypingOnStepper.push(stepperSpeed);
 
 		////
-		var characters:Array<String> = Character.getAllCharacters();
         var skins:Array<String> = ['default'];
         #if MODS_ALLOWED
 		var skinsLoaded:Map<String, Bool> = new Map();
@@ -631,6 +630,10 @@ class ChartingState extends MusicBeatState
 			}
 		}
 		#end
+
+		////
+		var characters:Array<String> = Character.getAllCharacters();
+		characters.sort(CoolUtil.alphabeticalSort);
 
 		var player1DropDown = new FlxUIDropDownMenuCustom(10, stepperSpeed.y + 45, FlxUIDropDownMenuCustom.makeStrIdLabelArray(characters, true), function(character:String)
 		{
@@ -659,8 +662,12 @@ class ChartingState extends MusicBeatState
 
 		////
 		var stages = Stage.getAllStages();
-		if (stages.length == 0) stages.push("stage");
 
+		if (stages.length == 0) 
+			stages.push("stage");
+		else
+			stages.sort(CoolUtil.alphabeticalSort);
+		
 		var stageDropDown = new FlxUIDropDownMenuCustom(
 			player1DropDown.x + 140, 
 			player1DropDown.y, 

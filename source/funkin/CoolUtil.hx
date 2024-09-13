@@ -25,6 +25,15 @@ class CoolUtil
 		return false;
 	}
 
+	public static function alphabeticalSort(a:String, b:String) {
+		// https://haxe.motion-twin.narkive.com/BxeZgKeh/sort-an-array-string-alphabetically
+		a = a.toLowerCase();
+		b = b.toLowerCase();
+		if (a < b) return -1;
+		if (a > b) return 1;
+		return 0;	
+	}
+
 	inline public static function coolLerp(current:Float, target:Float, elapsed:Float):Float
 		return FlxMath.lerp(target, current, Math.exp(-elapsed));
 
