@@ -8,10 +8,19 @@ import flixel.util.FlxColor;
 import flixel.text.FlxText;
 import flixel.math.FlxPoint;
 
-// since the rating graphics are now centered to the sprites position the hitbox got fucked up, so TODO: fix that ig 
+private enum abstract RatingElement(Int) from Int to Int {
+	var NONE = -1;
+	var JUDGE = 0;
+	var COMBO = 1;
+	var TIMER = 2;
+}
 
 class ComboPositionSubstate extends MusicBeatSubstate
 {
+	////
+	private final fuckingBgColor:FlxColor;
+	private final canClose:Bool = true;
+
 	//// Preview	
 	var judge:RatingSprite;
 	var combo:Array<RatingSprite>;
@@ -22,10 +31,12 @@ class ComboPositionSubstate extends MusicBeatSubstate
 	var txt_combo:FlxText;
 	var txt_timing:FlxText;
 
-	////
-	public var camHUD:FlxCamera;
-	private final fuckingBgColor:FlxColor;
-	private final canClose:Bool = true;
+	///
+	var mouseGrabbed:RatingElement = NONE; 
+	var keyboardGrabbed:RatingElement = NONE;
+
+	var prevMousePos:FlxPoint = FlxPoint.get();
+	var curMousePos:FlxPoint = FlxPoint.get();
 
 	public function new(?bgColor:FlxColor, ?canClose:Bool = true){
 		super();
@@ -36,17 +47,16 @@ class ComboPositionSubstate extends MusicBeatSubstate
 
 	override public function create()
 	{
-		camHUD = new FlxCamera();
-		camHUD.bgColor = fuckingBgColor;
-		FlxG.cameras.add(camHUD, false);
+		camera = new FlxCamera();
+		camera.bgColor = fuckingBgColor;
+		FlxG.cameras.add(camera, false);
+		this.cameras = [camera];
 
-		this.cameras = [camHUD];
+		FlxG.mouse.getScreenPosition(camera, prevMousePos);
 
-		FlxG.mouse.getScreenPosition(camHUD, curMousePos);
-		prevMousePos.copyFrom(curMousePos);
-
-		var ratingName:Null<String> = null;
-		var ratingColor:Null<FlxColor> = null;
+		////
+		var judgeName:Null<String> = null;
+		var judgeColor:Null<FlxColor> = null;
 
 		if (PlayState.instance != null && PlayState.instance.hud != null) // could be cool
 		{
@@ -54,45 +64,47 @@ class ComboPositionSubstate extends MusicBeatSubstate
 			var highestJudgement = hud.displayedJudges[0];
 			
 			if (highestJudgement != null){
-				ratingName = highestJudgement;
-				ratingColor = hud.judgeColours.get(ratingName);
+				judgeName = highestJudgement;
+				judgeColor = hud.judgeColours.get(judgeName);
 			}
 		}   
 
-		if (ratingName == null)
-			ratingName = ClientPrefs.useEpics ? "epic" : "sick";
+		if (judgeName == null)
+			judgeName = ClientPrefs.useEpics ? "epic" : "sick";
 
-		if (ratingColor == null){
-			if (BaseHUD._judgeColours.exists(ratingName))
-				ratingColor = BaseHUD._judgeColours.get(ratingName);
+		if (judgeColor == null){
+			if (BaseHUD._judgeColours.exists(judgeName))
+				judgeColor = BaseHUD._judgeColours.get(judgeName);
 			else
-				ratingColor = 0xFFFFFFFF;
+				judgeColor = 0xFFFFFFFF;
 		}
-			
+
+		var comboColor:FlxColor = ClientPrefs.coloredCombos ? judgeColor : 0xFFFFFFFF;
+		
 		////////
 		var rat = new RatingGroup();
+		rat.exists = false;
+		add(rat);
 		
 		////
-		judge = rat.displayJudgment(ratingName);
-		judge.cameras = [camHUD];
+		judge = rat.displayJudgment(judgeName);
+		judge.cameras = cameras;
 		add(judge);
 
 		////
-		var comboColor = ClientPrefs.coloredCombos ? ratingColor : 0xFFFFFFFF;
-
 		for (num in combo = rat.displayCombo(10 + Std.random(980))){
 			num.color = comboColor;
-			num.cameras = [camHUD];
+			num.cameras = cameras;
 			add(num);
 		};
 
 		////
 		timing = new FlxText(0, 0, 0, "0 ms");
 		timing.setFormat(Paths.font("calibri.ttf"), 28, 0xFFFFFFFF, CENTER, FlxTextBorderStyle.OUTLINE, 0xFF000000);
-		timing.color = ratingColor;
+		timing.color = judgeColor;
 		timing.scrollFactor.set();
 		timing.borderSize = 1.25;
-		timing.cameras = [camHUD];
+		timing.cameras = cameras;
 		timing.updateHitbox();
 		add(timing);
 
@@ -108,7 +120,7 @@ class ComboPositionSubstate extends MusicBeatSubstate
 			text.scrollFactor.set();
 			text.setFormat(Paths.font("calibri.ttf"), 24, 0xFFFFFFFF, LEFT, FlxTextBorderStyle.OUTLINE, 0xFF000000);
 			text.borderSize = 1.5;
-			text.cameras = [camHUD];
+			text.cameras = cameras;
 			add(text);
 
 			return text;
@@ -121,8 +133,7 @@ class ComboPositionSubstate extends MusicBeatSubstate
 		makeText(4).text = "Timing Offset:";
 		txt_timing = makeText(5);
 
-
-		updateRatingPos();
+		updateJudgePos();
 		updateComboPos();
 		updateTimingPos();
 		
@@ -130,7 +141,7 @@ class ComboPositionSubstate extends MusicBeatSubstate
 	}
 
 	////
-	function updateRatingPos(){
+	function updateJudgePos(){
 		judge.x = FlxG.width * 0.5 + ClientPrefs.comboOffset[0];
 		judge.y = FlxG.height * 0.5 - ClientPrefs.comboOffset[1];
 		
@@ -138,14 +149,11 @@ class ComboPositionSubstate extends MusicBeatSubstate
 	}
 
 	function updateComboPos(){
-		var x = FlxG.width * 0.5 + ClientPrefs.comboOffset[2];
+		var x = FlxG.width * 0.5 + ClientPrefs.comboOffset[2] - combo[0].width;
 		var y = FlxG.height * 0.5 - ClientPrefs.comboOffset[3];
-
-		x -= combo[0].width;
 
 		for (i in 0...combo.length){
 			var spr:RatingSprite = combo[i];
-
 			spr.x = x + i *	spr.width;
 			spr.y = y;
 		}
@@ -162,32 +170,43 @@ class ComboPositionSubstate extends MusicBeatSubstate
 	}
 
 	////
-	// 0: judge, 1: combo, 2: timing, null: NOTHING.
-	var mouseGrabbed:Null<Int> = null; 
-	var keyboardGrabbed:Int = 0;
-
-	var prevMousePos:FlxPoint = FlxPoint.get();
-	var curMousePos:FlxPoint = FlxPoint.get();
 
 	// fuck this nonsense
 	function sowy(okay:Any){
-		if (okay is Array){
-			var okay:Array<Dynamic> = okay;
-			for (i in okay){
-				if (FlxG.mouse.overlaps(i, camHUD))
-					return true;
-			}
+		final mp = curMousePos;
+
+		if (okay is Array) {
+			for (i in (okay:Array<Dynamic>))
+				if (sowy(i)) return true;
+
 			return false;
-		}else if (okay is FlxSprite){
-			return FlxG.mouse.overlaps(okay, camHUD);
 		}
+		else if (okay is RatingSprite) {
+			var okay = (okay:RatingSprite);
+			var hW = okay.width * 0.5;
+			var hH = okay.height * 0.5;
+
+			return (Math.abs(okay.x - mp.x) <= hW && Math.abs(okay.y - mp.y) <= hH);
+		}
+		else if (okay is FlxSprite) {
+			return FlxG.mouse.overlaps(okay, camera);
+		}
+		
 		return false;
 	}
 
 	override public function update(elapsed)
 	{
+		//// Update mouse
+		FlxG.mouse.getScreenPosition(camera, curMousePos);
+		var deltaX:Int = Std.int(curMousePos.x - prevMousePos.x);
+		var deltaY:Int = Std.int(curMousePos.y - prevMousePos.y);
+		prevMousePos.set(curMousePos.x, curMousePos.y);
+
+		FlxG.mouse.visible = true;
+
 		if (FlxG.mouse.justPressed){
-			mouseGrabbed=null;
+			mouseGrabbed = NONE;
 
 			var toCheck:Array<Dynamic> = [timing, combo, judge];
 			for (idx => chk in toCheck){				
@@ -198,42 +217,49 @@ class ComboPositionSubstate extends MusicBeatSubstate
 			}
 		}
 		if (FlxG.mouse.justReleased)
-			mouseGrabbed = null;
-
-		FlxG.mouse.getScreenPosition(camHUD, curMousePos);
-		var deltaX = Std.int(curMousePos.x - prevMousePos.x);
-		var deltaY = Std.int(curMousePos.y - prevMousePos.y);
-		prevMousePos.copyFrom(curMousePos);
+			mouseGrabbed = NONE;
 
 		if (deltaX != 0 || deltaY != 0){
 			switch(mouseGrabbed){
-				case 0:
+				default:
+
+				case JUDGE:
 					ClientPrefs.comboOffset[0] += deltaX;
 					ClientPrefs.comboOffset[1] -= deltaY; // Why the fuck is this inverted!!!!!!!!!!!!!!!!!!!!!!
-					updateRatingPos();
-				case 1:
+					updateJudgePos();
+				case COMBO:
 					ClientPrefs.comboOffset[2] += deltaX;
 					ClientPrefs.comboOffset[3] -= deltaY;
 					updateComboPos();
-				case 2:
+				case TIMER:
 					ClientPrefs.comboOffset[4] += deltaX;
 					ClientPrefs.comboOffset[5] -= deltaY;
 					updateTimingPos();			  
 			}
 		}
 
-		if (canClose && controls.BACK){
+		//// Update keyboard
+
+
+		////
+		super.update(elapsed);
+
+		if (canClose && controls.BACK) {
 			FlxG.sound.play(Paths.sound("cancelMenu"));
 			close();
 		}
-
-		super.update(elapsed);
+		
 	}
 
+	override public function close(){
+		FlxG.cameras.remove(camera, true);
+		super.close();
+	}
+	
 	override public function destroy(){
 		super.destroy();
+		
 		curMousePos.put();
-		prevMousePos.put();		
-		FlxG.cameras.remove(camHUD, true);
+		prevMousePos.put();
 	}
 }
