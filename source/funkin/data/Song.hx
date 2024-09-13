@@ -420,16 +420,8 @@ class Song
 					formatInfo = FormatDetector.getFormatData(format);
 					SONG = switch(format){
 						case FNF_LEGACY_PSYCH | FNF_LEGACY | "FNF_TROLL":
-                            trace("bbbbbb");
-							//Song.loadFromJson(songLowercase + diffSuffix, songLowercase);
+							Song.loadFromJson(songLowercase + diffSuffix, songLowercase);
 
-                            // Was benchmarking if this was faster vv
-                            // It was the same fucking speed LOL
-                            // leaving it as an example of moonchart tho
-                            
-                            var chart:SwagSong = cast new SupportedFormat().fromFile(filePath).data.song;
-                            chart.path = filePath;
-                            onLoadJson(chart);
                             
 						default:
 							trace('Converting from format $format!');
