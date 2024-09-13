@@ -355,7 +355,10 @@ class OptionsSubstate extends MusicBeatSubstate
 				if ((_parentState is OptionsState) && !FlxG.keys.pressed.SHIFT)
 					LoadingState.loadAndSwitchState(new NoteOffsetState());
 				else{
-					openSubState(new ComboPositionSubstate(FlxColor.fromRGBFloat(0, 0, 0, 0.6)));
+					openSubState(new ComboPositionSubstate(!optState ? 0x0 : Math.floor(0xFF * ClientPrefs.stageOpacity) * 0x1000000));
+					
+					this.persistentDraw = false;
+					this.subStateClosed.addOnce((_) -> this.persistentDraw = true);
 				}
 			case 'customizeColours':
 				// TODO: check the note colours once you exit to see if any changed
