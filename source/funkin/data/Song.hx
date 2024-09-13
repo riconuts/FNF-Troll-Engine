@@ -407,12 +407,11 @@ class Song
 			for (idx in 0...files.length){
                 var input = files[idx];
                 var path:String = Paths.formatToSongPath(songLowercase) + '/' + Paths.formatToSongPath(input) + '.' + ext;
-                trace(path);
                 var filePath:String = Paths.getPath("songs/" + path);
 				var fileFormat:Format = !Paths.exists(filePath) ? null : findFormat([filePath]);
                 #if PE_MOD_COMPATIBILITY
 				if (fileFormat == null){
-					filePath:= Paths.getPath("data/" + path);
+					filePath = Paths.getPath("data/" + path);
 					fileFormat = !Paths.exists(filePath) ? null : findFormat([filePath]);
                 }
                 #end
