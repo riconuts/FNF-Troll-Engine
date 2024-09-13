@@ -297,7 +297,10 @@ class Song
 
 				//// 2
 				if (swagJson.path==null) return true;
-				var jsonPath:Path = new Path(swagJson.path);
+				var jsonPath:Path = new Path(swagJson.path
+                    #if PE_MOD_COMPATIBILITY
+                    .replace("data/", "song/")
+                    #end);
 
 				var folderPath = jsonPath.dir;
 				if (folderPath == null) return true; // probably means that it's on the same folder as the exe but fuk it
