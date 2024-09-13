@@ -237,11 +237,11 @@ class Main extends Sprite
 		}
 
 		callstack += '\n$errorName';
-
-		callstack += "\n\nWould you like to goto the main menu?";
 		print('\n$callstack\n');
 
 		#if (windows && cpp)
+		callstack += "\n\nWould you like to goto the main menu?";
+
 		var ret = Windows.msgBox(callstack, errorName, ERROR | MessageBoxOptions.YESNOCANCEL);
 		switch(ret){
 			default: // Close program.
