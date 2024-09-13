@@ -2710,9 +2710,9 @@ class PlayState extends MusicBeatState
 		////
         var event:SpeedEvent = speedChanges[svIndex];
 		if (svIndex < speedChanges.length - 1){
-			while (speedChanges[svIndex + 1].startTime <= Conductor.songPosition){
+            while (speedChanges[svIndex + 1] != null && speedChanges[svIndex + 1].startTime <= Conductor.songPosition){
+                event = speedChanges[svIndex + 1];
                 svIndex++;
-                event = speedChanges[svIndex];
             }
         }
 		Conductor.visualPosition = getTimeFromSV(Conductor.songPosition, event);

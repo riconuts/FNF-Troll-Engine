@@ -534,10 +534,9 @@ class NoteField extends FieldBase
 		if (!sprite.visible || !sprite.alive)
 			return null;
 
-		if (sprite.frame == null){
-            trace("No Frame??????");
+		if (sprite.frame == null)
             return null;
-        }
+        
 
 		var render = false;
 		for (camera in cameras)
