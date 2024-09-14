@@ -40,17 +40,16 @@ class AdvancedHUD extends CommonHUD
 
 		stats.changedEvent.add(statChanged);
 		
-
 		add(healthBarBG);
 		add(healthBar);
 		add(iconP1);
 		add(iconP2);
 		
-		displayedJudges.push("cb");
-		
 		songHighscore = Highscore.getScore(songName);
 		songWifeHighscore = Highscore.getNotesHit(songName);
 		songHighRating = Highscore.getRating(songName);
+
+		////
 		var tWidth = 200;
 		scoreTxt = new FlxText(0, 0, tWidth, "0", 20);
 		scoreTxt.setFormat(Paths.font("calibri.ttf"), 40, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);

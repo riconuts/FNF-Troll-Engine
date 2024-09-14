@@ -32,11 +32,12 @@ class BaseHUD extends FlxSpriteGroup {
 		"cb" => Paths.getString("cbshort")
 	];
 
-    public function getHealthbar():FNFHealthBar return null; // Used for compatibility with Psych scripts
+	// Used for compatibility with Psych scripts
+    public function getHealthbar():FNFHealthBar 
+		return null; 
 	
-    @:isVar
-	public var displayNames(get, null):Map<String, String>;
-    function get_displayNames()
+    @:isVar public var displayNames(get, null):Map<String, String>;
+    @:noCompletion function get_displayNames()
 		return ClientPrefs.judgeCounter == 'Shortened' ? shortenedDisplays : fullDisplays;
 
 
@@ -59,7 +60,7 @@ class BaseHUD extends FlxSpriteGroup {
 		"cb"	=> 0xFF7F265A
 		#end
 	];
-	public static final _displayedJudges = ["epic", "sick", "good", "bad", "shit", "miss"];
+	public static final _displayedJudges = ["epic", "sick", "good", "bad", "shit", "miss", "cb"];
 
 	public var judgeColours:Map<String, FlxColor> = _judgeColours.copy();
 	public var displayedJudges:Array<String> = _displayedJudges.copy();
