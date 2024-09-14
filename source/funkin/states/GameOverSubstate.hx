@@ -173,7 +173,13 @@ class GameOverSubstate extends MusicBeatSubstate
 
 		if (charInfo == null){
 			warn('Could not get Character data for "$deathName".');
-			return doGenericGameOver();
+			deathName = char.curCharacter;
+			charInfo = Character.getCharacterFile(deathName);
+		}
+
+		if (charInfo == null){
+			warn('Could not get Character data for "$deathName".');
+			charInfo = Character.getCharacterFile("bf");
 		}
 
 		////		
