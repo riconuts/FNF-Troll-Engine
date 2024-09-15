@@ -3389,7 +3389,6 @@ class PlayState extends MusicBeatState
 			gotoMenus();
 		}
 		
-		callOnScripts('onSongEnd');
 	}
 
 	public function KillNotes() {
