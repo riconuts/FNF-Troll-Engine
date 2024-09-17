@@ -25,7 +25,7 @@ jobs:
 
       - uses: krdlab/setup-haxe@master
         with:
-          haxe-version: 4.3.0
+          haxe-version: 4.3.6
       # Runs a set of commands using the runners shell
       - name: Restore existing build cache for faster compilation
         uses: actions/cache@v3
@@ -89,7 +89,12 @@ jobs:
   
   buildLinux:
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-${{ matrix.version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        build: [release]
+        version: [20.04, 22.04]
     timeout-minutes: 45
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -99,7 +104,7 @@ jobs:
 
       - uses: krdlab/setup-haxe@master
         with:
-          haxe-version: 4.3.0
+          haxe-version: 4.3.6
       # Runs a set of commands using the runners shell
       - name: Install Haxelib
         run: |
@@ -116,19 +121,25 @@ jobs:
       - name: Publish Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: linuxBuild
-          path: 'export/release/linux/bin' 
+          name: buildUbuntu${{ matrix.version }}-32-${{ matrix.build }}
+          path: 'export/${{ matrix.build }}/linux/bin'
   
   buildMac:
-    runs-on: macos-latest
-
+    runs-on: macos-${{ matrix.version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        build: [release]
+        version: [12, 13]
+    timeout-minutes: 45
+    
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
 
       - uses: krdlab/setup-haxe@master
         with:
-          haxe-version: 4.3.0
+          haxe-version: 4.3.6
       # Runs a set of commands using the runners shell
       - name: Install Haxelib
         run: |
@@ -143,5 +154,5 @@ jobs:
       - name: Publish Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: macBuild
-          path: export/release/macos/bin
+          name: buildMac-${{ matrix.version }}-64-${{ matrix.build }}
+          path: 'export/${{ matrix.build }}/macos/bin'
