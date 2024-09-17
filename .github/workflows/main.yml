@@ -91,6 +91,7 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-${{ matrix.version }}
     strategy:
+      fail-fast: false
       matrix:
         build: [release]
         version: [20.04, 22.04]
@@ -126,10 +127,12 @@ jobs:
   buildMac:
     runs-on: macos-${{ matrix.version }}
     strategy:
+      fail-fast: false
       matrix:
         build: [release]
         version: [11, 12, 13]
-
+    timeout-minutes: 45
+    
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
