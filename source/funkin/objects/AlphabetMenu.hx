@@ -16,6 +16,7 @@ class AlphabetMenu extends FlxTypedGroup<Alphabet>
 	public var curSelected(default, set):Null<Int> = null;
 	public var curItem:Null<Alphabet> = null;
 	public var controls:Null<Controls>;
+	public var inputsActive:Bool = true;
 	
 	private var itemCallbacks:Map<Alphabet, OptionCallbacks> = [];
 	/** (`Int`, `Alphabet`) -> `Void` **/
@@ -92,6 +93,8 @@ class AlphabetMenu extends FlxTypedGroup<Alphabet>
 	private var holdTimer:Float = 0.0;
 	function updateInput(elapsed:Float, controls:Controls)
 	{
+		if (!inputsActive)
+			return;
 		/*
 		var justUp = FlxG.keys.justPressed.UP; 
 		var justDown = FlxG.keys.justPressed.DOWN;
