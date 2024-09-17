@@ -76,7 +76,7 @@ class RatingGroup extends FlxTypedGroup<RatingSprite>
 
 	public function new() {
 		super();
-		getSprite(comboSprs, comboTemplate);
+		for (_ in 0...3) getSprite(comboSprs, comboTemplate);
 		lastJudge = getSprite(judgeSprs, judgeTemplate);
 	}
 
@@ -121,6 +121,7 @@ class RatingGroup extends FlxTypedGroup<RatingSprite>
 		spr.loadGraphic(Paths.image(name));
 		spr.updateHitbox();
 
+		lastJudge = spr;
 		return spr;
 	}
 
@@ -153,6 +154,7 @@ class RatingGroup extends FlxTypedGroup<RatingSprite>
 			numbs[i] = spr;
 		}
 
+		lastCombo = numbs;
 		return numbs;
 	}
 
