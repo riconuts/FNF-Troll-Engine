@@ -93,6 +93,7 @@ class Note extends NoteObject
 	// basic stuff
 	public var beat:Float = 0;
 	public var strumTime(default, set):Float = 0;
+
 	public var visualTime:Float = 0;
 	public var mustPress:Bool = false;
 	public var ignoreNote:Bool = false;
@@ -217,7 +218,7 @@ class Note extends NoteObject
 
 	@:noCompletion function set_strumTime(val:Float){
         row = Conductor.secsToRow(val);
-        return strumTime=val;
+        return strumTime = val;
     }
 
 	@:noCompletion function get_canBeHit() return UNJUDGED != PlayState.instance.judgeManager.judgeNote(this);
@@ -342,6 +343,8 @@ class Note extends NoteObject
 
 	private function set_noteType(value:String):String {
 		noteSplashTexture = PlayState.splashSkin;
+		if (value == 'Hurt Note')
+			value = 'Mine';
 
 		updateColours();
 
@@ -359,17 +362,6 @@ class Note extends NoteObject
 			noteScript = null;
 
 			switch(value) {
-				case 'Hurt Note':
-					ignoreNote = mustPress;
-					reloadNote('HURT');
-					noteSplashTexture = 'HURTnoteSplashes';
-					usesDefaultColours = false;
-					colorSwap.hue = 0;
-					colorSwap.saturation = 0;
-					colorSwap.brightness = 0;
-					missHealth = isSustainNote ? 0.1 : 0.3;
-					hitCausesMiss = true;
-
 				case 'No Animation':
 					noAnimation = true;
 					noMissAnimation = true;
@@ -440,7 +432,14 @@ class Note extends NoteObject
 		super();
 		this.objType = NOTE;
 
-        this.strumTime = strumTime;
+        var offset:Float = 0;
+
+		if ((FlxG.state is PlayState))
+            offset = -(cast FlxG.state).offset;
+
+		this.strumTime = strumTime + offset;
+        
+        
 		this.column = column;
 		this.prevNote = (prevNote==null) ? this : prevNote;
 		this.mustPress = gottaHitNote;
@@ -454,12 +453,12 @@ class Note extends NoteObject
 			if (isSustainNote && prevNote != null)
 				quant = prevNote.quant;
 			else
-				quant = getQuant(Conductor.getBeatSinceChange(this.strumTime));
+				quant = getQuant(Conductor.getBeatSinceChange(this.strumTime - offset));
 		}
 				
 		if (!inEditor){ 
-			this.strumTime += ClientPrefs.noteOffset;
-			visualTime = PlayState.instance.getNoteInitialTime(this.strumTime);
+			this.strumTime += ClientPrefs.noteOffset;            
+            visualTime = PlayState.instance.getNoteInitialTime(this.strumTime);
 		}
 
 		if (column > -1)

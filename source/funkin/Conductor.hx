@@ -153,13 +153,13 @@ class Conductor
 		return Math.floor(getStepRounded(time) * 0.25);
 	}
 
-	public static function mapBPMChanges(song:SwagSong)
+	public static function mapBPMChanges(song:SwagSong, offset:Float=0)
 	{
 		bpmChangeMap = [];
 
 		var curBPM:Float = song.bpm;
-		var totalSteps:Int = 0;
-		var totalPos:Float = 0.0;
+		var totalSteps:Int = -Math.floor(calculateCrochet(curBPM) * 0.25 * offset);
+		var totalPos:Float = -offset;
 
 		inline function pushChange(newBPM:Float) {
 			var event:BPMChangeEvent = {

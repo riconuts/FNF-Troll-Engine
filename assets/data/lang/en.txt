@@ -1,6 +1,12 @@
-__WHATISTHIS__=Defines strings to be used in the game. Used for localization, etc mainly. If we add other languages to the mod then a system like this will be used for each language lol
-__SUGGEST__=If you have suggestions for what to add to these localization files then throw them into the Troll Engine issues (https://github.com/riconuts/troll-engine)
-__PR__=You can also add them to the engine yourself and do a pull request if you know what you're doing
+## This is the English localizaion file! This file has most if not all of the English text found within the engine!
+## If you have suggestions on what should be accessible through localization files, make sure to put in an issue.
+## Alternatively, you can do a pull request! You can also do a pull request if you want to add other languages, too!
+## Comments are defined with ## or //
+
+difficultyName_normal=Normal
+difficultyName_hard=Hard
+difficultyName_easy=Easy
+## Judgement-related keyS
 tier5=Epic
 tier4=Sick
 tier3=Good
@@ -22,19 +28,22 @@ tier2short=BD
 tier1short=SH
 tier0short=MS
 cbshort=CB
-whiteflag=WF
-blackflag=BF
-missflag=MF
-sdt4=SDS
-sdt3=SDG
-t5fc=EFC
-t4fc=SFC
-t3fc=GFC
-fc=FC
-sdcb=SDCB
+## Wife3 Flags. Used to denote FCs ruined by 1 judgement
+whiteflag=WF ## 1 Sick and the rest Epics
+blackflag=BF ## 1 Good and the rest Sicks or Epics
+missflag=MF ## 1 Miss
+## Clear Flags
+sdt4=SDS ## Single Digit T4/Sick
+sdt3=SDG ## Single Digit T3/Good
+t5fc=EFC ## T5 Full Combo/Epic Full Combo
+t4fc=SFC ## T4 Full Combo/Sick Full Combo
+t3fc=GFC ## T3 Full Combo/Good Full Combo
+fc=FC ## General Full Combo
+sdcb=SDCB ## Single Digit Combo Break
 clear=Clear
 fail=Fail
-noplay=No Play
+noplay=No Play ## No notes hit yet
+## HUD and UI text
 score=Score
 highscore=Hi-Score
 rating=Rating
@@ -44,6 +53,7 @@ combo=Combo
 peakcombo=Peak Combo
 botplayMark=[BOTPLAY]
 freeplayhint=Press CTRL to open the Gameplay Modifiers menu | Press R to reset a song's score.
+## Options stuff
 opt_display_noteOffset=Offset
 opt_display_ratingOffset=Judgement Offset
 opt_display_ruin=Ruin the Mod
@@ -52,6 +62,7 @@ opt_display_missVolume=Miss Volume
 opt_display_flashing=Flashing Lights
 opt_display_camShakeP=Camera Shaking
 opt_display_camZoomP=Camera Zooming
+opt_display_countUnpause=Countdown on Resume
 opt_display_modcharts=Modcharts
 opt_display_wife3=Wife3
 opt_display_useEpics=Use Epics
@@ -105,6 +116,7 @@ opt_display_etternaHUD=HUD Style
 opt_display_judgeCounter=Judgement Counter
 opt_display_hudPosition=HUD Position
 opt_display_discordRPC=Discord RPC
+opt_display_autoPause=Auto-pausing
 opt_desc_noteOffset=How much to offset notes, song events, etc.
 opt_desc_ratingOffset=How much to offset hit windows.
 opt_desc_ruin=Makes the mod really good! improves the mod alot!! the name is a joke guys it makes the mod REALLY REALLY good its not blammed lights i swear
@@ -113,6 +125,7 @@ opt_desc_missVolume=The volume of miss sounds.
 opt_desc_flashing=When toggled, flashing lights will be shown.
 opt_desc_camShakeP=A multiplier to camera shake intensity.
 opt_desc_camZoomP=A multiplier to camera zoom intensity.
+opt_desc_countUnpause=Counts down whenever you select "RESUME" on the Pause Menu.
 opt_desc_modcharts=When toggled, modcharts will be used on some songs.\nWARNING: Disabling modcharts on modcharted songs will disable scoring!
 opt_desc_wife3=When toggled, accuracy will be millisecond-based, using Etterna's Wife3 system, instead of judgement-based.\nCalled Complex Accuracy on Kade Engine.
 opt_desc_useEpics=When toggled, Epic will be used as the highest judgement instead of Sick.
@@ -166,6 +179,7 @@ opt_desc_etternaHUD=Changes how the HUD looks
 opt_desc_judgeCounter=How to display the judgement counters.
 opt_desc_hudPosition=Where to position HUD elements.
 opt_desc_discordRPC=Toggles Discord Rich Presence.
+opt_desc_autoPause=When toggled, Game will pause if the window is unfocused.
 opt_label_accessibility=Accessibility
 opt_label_audio=Audio
 opt_label_gameplay=Gameplay

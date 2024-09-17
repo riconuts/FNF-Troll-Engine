@@ -8,9 +8,12 @@ import funkin.objects.Note;
  */
 @:enum abstract ComboBehaviour(Int) from Int to Int
 {
-    var IGNORE = 0; // doesnt increment or break your combo
-    var INCREMENT = 1; // increments your combo by 1
-    var BREAK = -1; // breaks your combo
+    /** doesnt increment or break your combo */
+    var IGNORE = 0;
+    /** increments your combo by 1 */
+    var INCREMENT = 1;
+    /** breaks your combo */
+    var BREAK = -1;
 }
 
 /**
@@ -38,7 +41,7 @@ typedef JudgmentData = {
  */
 @:enum abstract Judgment(String) from String to String // this just makes it easier
 {
-	var UNJUDGED = 'none'; // unjudged
+	var UNJUDGED = 'unjudged'; // yet to be hit
 	var TIER1 = 'tier1'; // shit / retard
 	var TIER2 = 'tier2'; // bad / gay
 	var TIER3 = 'tier3'; // good / cool
@@ -46,10 +49,10 @@ typedef JudgmentData = {
 	var TIER5 = 'tier5'; // epic / killer
 	var MISS = 'miss'; // miss / fail
 	var DROPPED_HOLD = 'holdDrop';
-    var DAMAGELESS_MISS = 'customMiss'; // miss / fail but this doesnt cause damage
+	var DAMAGELESS_MISS = 'customMiss'; // miss / fail but this doesnt cause damage
 	var HIT_MINE = 'mine'; // mine
-    var MISS_MINE = 'missMine'; // hitCausesMiss mine. a mine but with health being derived from the note's .missHealth
-    var CUSTOM_MINE = 'customMine'; // mine, but with no health loss
+	var MISS_MINE = 'missMine'; // hitCausesMiss mine. a mine but with health being derived from the note's .missHealth
+	var CUSTOM_MINE = 'customMine'; // mine, but with no health loss
 }
 
 /**
@@ -61,7 +64,7 @@ class JudgmentManager {
 		#if USE_EPIC_JUDGEMENT
         TIER5 => {
             internalName: "epic",
-            displayName: "Killer",
+            displayName: "Epic",
 			window: ClientPrefs.epicWindow,
             score: 500,
             accuracy: 100,
@@ -71,7 +74,7 @@ class JudgmentManager {
 		#end
         TIER4 => {
             internalName: "sick",
-            displayName: "Awesome",
+            displayName: "Sick",
 			window: ClientPrefs.sickWindow,
             score: 350,
             accuracy: 90,
@@ -80,7 +83,7 @@ class JudgmentManager {
         },
         TIER3 => {
             internalName: "good",
-            displayName: "Cool",
+            displayName: "Good",
 			window: ClientPrefs.goodWindow,
             score: 100,
             accuracy: 10,
@@ -89,7 +92,7 @@ class JudgmentManager {
         },
         TIER2 => {
             internalName: "bad",
-            displayName: "Gay",
+            displayName: "Bad",
 			window: ClientPrefs.badWindow,
             score: 0,
             accuracy: -75,
@@ -99,7 +102,7 @@ class JudgmentManager {
         },
         TIER1 => {
             internalName: "shit",
-            displayName: "Retard",
+            displayName: "Shit",
 			window: ClientPrefs.hitWindow,
             score: -150,
             accuracy: -220,
@@ -109,7 +112,7 @@ class JudgmentManager {
         },
         MISS => {
             internalName: "miss",
-			displayName: "Fail",
+			displayName: "Miss",
             window: -1,
             score: -350,
             accuracy: -275,
@@ -120,7 +123,7 @@ class JudgmentManager {
         },
 		DROPPED_HOLD => {
 			internalName: "miss",
-			displayName: "Fail",
+			displayName: "Miss",
 			window: -1,
 			score: -350,
 			accuracy: -225,
@@ -131,7 +134,7 @@ class JudgmentManager {
 		},
 		DAMAGELESS_MISS => {
 			internalName: "miss",
-			displayName: "Fail",
+			displayName: "Miss",
 			window: -1,
 			score: -350,
 			wifePoints: Wife3.missWeight,
@@ -180,9 +183,26 @@ class JudgmentManager {
 			hideJudge: true
         }
     ];
-    public var judgeTimescale:Float = 1; // scales hit windows
-	public var hittableJudgments:Array<Judgment> = [#if USE_EPIC_JUDGEMENT TIER5, #end TIER4, TIER3, TIER2, TIER1]; // should be from highest to lowest
-    // these are judgments that you can *actually* hit and arent caused by special notes (i.e Mines)
+	// these are judgments that you can *actually* hit and arent caused by special notes (i.e Mines) // should be from highest to lowest
+	public var hittableJudgments:Array<Judgment>; 
+	public var judgeTimescale:Float = 1; // scales hit windows
+	public var useEpics:Bool;
+
+	public function new(?useEpics:Bool)
+	{
+		#if USE_EPIC_JUDGEMENT
+		if (ClientPrefs.useEpics || useEpics==true){
+			this.useEpics = true;
+			hittableJudgments = [TIER5, TIER4, TIER3, TIER2, TIER1];
+			return;
+		}
+		#end
+
+		this.useEpics = false;
+		hittableJudgments = [TIER4, TIER3, TIER2, TIER1];
+		judgmentData.get(TIER4).accuracy = 100;
+		judgmentData.get(TIER2).comboBehaviour = INCREMENT;
+	}
 
     /**
      * Returns the hit window for a judgment, with the judgeTimescale taken into account
@@ -198,25 +218,22 @@ class JudgmentManager {
 	 * @param note Note to return a judgment for
 	 * @param time The position the note time is compared to for judgment
 	 */
-	public function judgeNote(note:Note, ?time:Float)
+	public function judgeNote(note:Note, ?hitTime:Float)
 	{
         // might be inefficient? idk might wanna optimize this at some point if so
 
-		if (time==null)time=Conductor.songPosition;
-
-		var diff = Math.abs(note.strumTime - time);
+		if (hitTime==null) hitTime = Conductor.songPosition;
+		var diff:Float = Math.abs(note.strumTime - hitTime);
 
         switch(note.noteType){
             case 'Hurt Note':
-                if(diff <= getWindow(HIT_MINE))
-                    return HIT_MINE;
+                if (diff <= getWindow(HIT_MINE)) 
+					return HIT_MINE;
+
             default:
-				if (note.noteScript != null && note.noteScript.scriptType == 'hscript')
-				{
-					var noteScript:FunkinHScript = cast note.noteScript;
-					var judge = noteScript.executeFunc("judgeNote", [note, diff], note);
-					if (judge != null)
-						return judge;
+				if (note.noteScript != null){
+					var judge = note.noteScript.executeFunc("judgeNote", [note, diff], note);
+					if (judge != null) return judge;
 				}
 
 				if (note.hitCausesMiss){
@@ -234,23 +251,6 @@ class JudgmentManager {
         // i thought that was interesting
         return UNJUDGED;
         // (aka fake notes when)
-    }
-
-    public var useEpics:Bool;
-    public function new(?useEpics:Bool)
-    {
-        #if USE_EPIC_JUDGEMENT
-		if (ClientPrefs.useEpics || useEpics==true){
-			this.useEpics = true;
-            return;
-		}
-
-		hittableJudgments.remove(TIER5);
-		#end
-
-		judgmentData.get(TIER4).accuracy = 100;
-		judgmentData.get(TIER2).comboBehaviour = INCREMENT;
-		this.useEpics = false;
     }
 }
 

@@ -1,0 +1,22 @@
+function setupNote(note:Note){
+    note.reloadNote('', 'mine', '', '', 1, 1);
+    note.ignoreNote = true;
+    note.hitCausesMiss = true;
+    note.noAnimation = true;
+    note.noMissAnimation = true;
+}
+
+function goodNoteHit(note:Note){
+    FlxG.sound.play(Paths.sound("mineExplode"));
+}
+
+function noteUpdate(elapsed:Float){
+    this.typeOffsetAngle += elapsed;
+}
+
+function loadNoteAnims(note:Note){
+    note.animation.add("greenScroll", [0]);
+    note.animation.add("redScroll", [0]);
+    note.animation.add("blueScroll", [0]);
+    note.animation.add("purpleScroll", [0]);
+}

@@ -237,16 +237,24 @@ class Main extends Sprite
 		}
 
 		callstack += '\n$errorName';
-
 		print('\n$callstack\n');
 
 		#if (windows && cpp)
+		callstack += "\n\nWould you like to goto the main menu?";
+
 		var ret = Windows.msgBox(callstack, errorName, ERROR | MessageBoxOptions.YESNOCANCEL);
 		switch(ret){
 			default: // Close program.
 
-			case NO: // Return to Main Menu.
+			case YES: // Return to Main Menu.
 			@:privateAccess{
+				try{
+					if (FlxG.game._state != null) FlxG.game._state.destroy();
+					FlxG.game._state = null;
+				}catch(e){
+					print("Error destroying unstable state: ", e);
+				}	
+				
 				FlxG.game._requestedState = new funkin.states.MainMenuState();
 				FlxG.game.switchState();
 				return;

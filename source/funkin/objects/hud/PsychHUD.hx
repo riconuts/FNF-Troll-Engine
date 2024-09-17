@@ -18,8 +18,9 @@ class PsychHUD extends CommonHUD
 	var hitbarTween:FlxTween;
 	var scoreTxtTween:FlxTween;
 
-	var songHighscore:Int = 0;
-	var songWifeHighscore:Float = 0;
+	// cached because dont wanna be doing that shit every update cycle lmao
+	// even though it probably doesnt matter since it caches it the first time
+	// i feel like this is probably faster than going through map.get each time
 	var scoreString = Paths.getString("score");
 	var hiscoreString = Paths.getString("highscore");
 	var ratingString = Paths.getString("rating");
@@ -27,25 +28,27 @@ class PsychHUD extends CommonHUD
 	var npsString = Paths.getString("nps");
 	var botplayString = Paths.getString("botplayMark");
 
+	var songHighscore:Int;
+	var songWifeHighscore:Float;
+
+	var showJudgeCounter:Bool;
+	
 	override public function new(iP1:String, iP2:String, songName:String, stats:Stats)
 	{
 		super(iP1, iP2, songName, stats);
 
-        // cached because dont wanna be doing that shit every update cycle lmao
-        // even though it probably doesnt matter since it caches it the first time
-        // i feel like this is probably faster than going through map.get each time
-
 		stats.changedEvent.add(statChanged);
-
-		add(healthBarBG);
-		add(healthBar);
-		add(iconP1);
-		add(iconP2);
 		
 		songHighscore = Highscore.getScore(songName);
 		songWifeHighscore = Highscore.getNotesHit(songName);
 
+		showJudgeCounter = ClientPrefs.judgeCounter != "Off";
+
+		////
 		scoreTxt = new FlxText(0, healthBarBG.y + 48, FlxG.width, "", 20);
+		scoreTxt.antialiasing = true;
+		scoreTxt.scrollFactor.set();
+
 		#if tgt
 		scoreTxt.setFormat(Paths.font("calibri.ttf"), 20, FlxColor.WHITE, CENTER);
 		scoreTxt.setBorderStyle(OUTLINE, FlxColor.BLACK, 1.25);
@@ -53,29 +56,24 @@ class PsychHUD extends CommonHUD
 		scoreTxt.setFormat(Paths.font('vcr.ttf'), 18, FlxColor.WHITE, CENTER);
 		scoreTxt.setBorderStyle(OUTLINE, FlxColor.BLACK, 1.5);
 		#end
-
-		scoreTxt.antialiasing = true;
-		scoreTxt.scrollFactor.set();
-		scoreTxt.visible = scoreTxt.alpha > 0;
-
-		if (ClientPrefs.judgeCounter != 'Off')
-			generateJudgementDisplays();
 		
-		//
+		////
 		hitbar = new Hitbar();
-		hitbar.alpha = alpha;
-		hitbar.visible = ClientPrefs.hitbar;
-		add(hitbar);
-		if (ClientPrefs.hitbar)
-		{
+		if (hitbar.visible = ClientPrefs.hitbar) {
 			hitbar.screenCenter(XY);
-			if (ClientPrefs.downScroll)
-				hitbar.y -= 230;
-			else
-				hitbar.y += 330;
+			hitbar.y += (ClientPrefs.downScroll) ? -230 : 330;
 		}
 
+		////
+		add(healthBarBG);
+		add(healthBar);
+		add(iconP1);
+		add(iconP2);
+		add(hitbar);
 		add(scoreTxt);
+
+		if (showJudgeCounter) 
+			generateJudgementDisplays();
 	}
 
 	function clearJudgementDisplays()
@@ -141,19 +139,16 @@ class PsychHUD extends CommonHUD
 		super.changedOptions(changed);
 
 		scoreTxt.y = healthBarBG.y + 48;
+		ClientPrefs.showWifeScore ? onWifeScoreUpdate() : onScoreUpdate();
 
-		hitbar.visible = ClientPrefs.hitbar;
-
-		if (ClientPrefs.hitbar)
-		{
+		if (hitbar.visible = ClientPrefs.hitbar) {
 			hitbar.screenCenter(XY);
-			if (ClientPrefs.downScroll)
-			{
+			if (ClientPrefs.downScroll) {
 				hitbar.y -= 220;
 				hitbar.averageIndicator.flipY = false;
 				hitbar.averageIndicator.y = hitbar.y - (hitbar.averageIndicator.width + 5);
-			}
-			else
+			
+			}else
 				hitbar.y += 340;
 		}
 
@@ -165,13 +160,37 @@ class PsychHUD extends CommonHUD
 			}
 		}
 
-		if (regenJudgeDisplays)
-		{
+		if (regenJudgeDisplays) {
 			clearJudgementDisplays();
 
-			if (ClientPrefs.judgeCounter != 'Off')
-				generateJudgementDisplays();
+			showJudgeCounter = ClientPrefs.judgeCounter != 'Off';
+			if (showJudgeCounter) generateJudgementDisplays();
 		}
+	}
+
+	var shownScore:String = "0";	
+	var isHighscore:Bool = false;
+
+	function onScoreUpdate(){
+		shownScore = Std.string(score);
+		isHighscore = songHighscore != 0 && score > songHighscore;
+	}
+	function onWifeScoreUpdate(){
+		shownScore = Std.string(Math.floor(totalNotesHit * 100));
+		isHighscore = songWifeHighscore != 0 && totalNotesHit > songWifeHighscore;
+	}
+
+	inline function getScoreText(){
+		final separator = ' • ';
+		
+		var text:String = '${isHighscore ? hiscoreString : scoreString}: $shownScore';
+		if (!showJudgeCounter) text += separator + '$cbString: $comboBreaks';
+		text += separator + '$ratingString: ${getGradeText()}';
+
+		if (ClientPrefs.npsDisplay)
+			text += separator + ('$npsString: $nps / $npsPeak');
+
+		return text;
 	}
 
 	inline function getGradeText(){
@@ -179,7 +198,7 @@ class PsychHUD extends CommonHUD
 			return grade;
 
 		final ratFC = ratingFC;
-		final comboName = ClientPrefs.wife3 && ratFC == stats.cfc ? stats.fc : ratFC;
+		final comboName = ClientPrefs.wife3 && ratFC == stats.gfc ? stats.fc : ratFC;
 		final ratPerc = Highscore.floorDecimal(ratingPercent * 100, 2);
 
 		return '$ratPerc% / $grade [$comboName]';
@@ -187,33 +206,7 @@ class PsychHUD extends CommonHUD
 
 	override function update(elapsed:Float)
 	{
-		var shownScore:String;
-		var isHighscore:Bool;
-		
-		if (ClientPrefs.showWifeScore) {
-			shownScore = Std.string(Math.floor(totalNotesHit * 100));
-			isHighscore = songWifeHighscore != 0 && totalNotesHit > songWifeHighscore;
-		} else {
-			shownScore = Std.string(score);
-			isHighscore = songHighscore != 0 && score > songHighscore;
-		}
-
-		scoreTxt.text = PlayState.instance.cpuControlled ? botplayString : {
-			final separator = ' • ';
-			
-			var text = 
-				'${isHighscore ? hiscoreString : scoreString}: $shownScore' +
-				separator + 
-				'$cbString: $comboBreaks' + 
-				separator + 
-				'$ratingString: ${getGradeText()}'
-			;
-
-			if (ClientPrefs.npsDisplay)
-				text += separator + ('$npsString: $nps / $npsPeak');
-
-			text;
-		}
+		scoreTxt.text = PlayState.instance.cpuControlled ? botplayString : getScoreText();
 		
 		for (k => v in judgements){
 			if (judgeTexts.exists(k))
@@ -283,6 +276,14 @@ class PsychHUD extends CommonHUD
 
 					judgeTxt.text = Std.string(val);
 				}
+			
+			case 'totalNotesHit':
+				if (ClientPrefs.showWifeScore)
+					onWifeScoreUpdate();
+			
+			case 'score':
+				if (!ClientPrefs.showWifeScore)
+					onScoreUpdate();
 		}
 	}
 

@@ -160,19 +160,19 @@ class Stats {
 		return '?';
 	}
 
-	public var sdc = Paths.getString("sdt3");
-	public var sda = Paths.getString("sdt4");
+	public var sdg = Paths.getString("sdt3"); // Single Digit Goods
+	public var sds = Paths.getString("sdt4"); // Single Digit Sicks
 
-	public var cfc = Paths.getString("t3fc");
-	public var afc = Paths.getString("t4fc");
-	public var kfc = Paths.getString("t5fc");
+	public var gfc = Paths.getString("t3fc"); // Good Full Combo
+	public var sfc = Paths.getString("t4fc"); // Sick Full Combo
+	public var efc = Paths.getString("t5fc"); // Epic Full Combo
 	public var fc = Paths.getString("fc");
 
 	public var bf = Paths.getString("blackflag");
 	public var wf = Paths.getString("whiteflag");
 	public var mf = Paths.getString("missflag");
 
-	public var sdcb = Paths.getString("sdcb");
+	public var sdcb = Paths.getString("sdcb"); // Single Digit Combo Breaks
 	public var fail = Paths.getString("fail");
 	public var clear = Paths.getString("clear");
 	public var noplay = Paths.getString("noplay");
@@ -198,19 +198,19 @@ class Stats {
 			if (goods > 0)
 			{
 				if (goods < 10)
-					clear = sdc; // Single Digit Goods
+					clear = sdg; // Single Digit Goods
 				else
-					clear = cfc; // Good Full Combo
+					clear = gfc; // Good Full Combo
 			}
 			else if (sicks > 0)
 			{
 				if (sicks < 10)
-					clear = sda; // Single Digit Sicks
+					clear = sds; // Single Digit Sicks
 				else
-					clear = afc; // Sick Full Combo
+					clear = sfc; // Sick Full Combo
 			}
 			else if (epics > 0)
-				clear = kfc;
+				clear = efc;
 			
 			if (useFlags)
 			{

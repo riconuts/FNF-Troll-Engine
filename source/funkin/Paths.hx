@@ -133,15 +133,11 @@ class Paths
 		// flags everything to be cleared out next unused memory clear
 		localTrackedAssets = [];
 		Assets.cache.clear("songs");
-		// remove the cached strings
-		currentStrings.clear();
 	}
 
 	static public var currentStrings:Map<String,String> = [];
 
-	static public var currentModAddons:Array<String> = [];
 	static public var currentModDirectory:String = '';
-	static public var currentModLibraries:Array<String> = [];
 
 	public static function getPath(key:String, ?ignoreMods:Bool = false)
 	{
@@ -303,11 +299,13 @@ class Paths
 
 		if (!dirMap.exists(dir)){
 			trace('Directory $dir does not exist?');
-			return;
+			return false;
 		}
 
 		for (i in dirMap.get(dir))
 			Func(i);
+        
+        return true;
 	}
 
 	#else
@@ -403,13 +401,35 @@ class Paths
 	// TODO: maybe these should be cached when starting a song
     // once we add a resource (mod/skin) menu we can do caching there for some things
     // we can populate the entire string map when reloading mods and skins
+
+	static final bedrockComments:EReg = ~/(##).+/;
+	static final normalComments:EReg = ~/(\/\/).+/;
+    // could add lua-style comments though honestly dont think i need to
+
+    inline static function parseLocalString(trimmedShit:String){
+		// Allow in-line comments
+		var noComments:String = bedrockComments.replace(normalComments.replace(trimmedShit, ""), "");
+
+		if (noComments.length == 0)
+			return;
+
+		var splitted = noComments.split("=");
+		if (splitted.length <= 1)
+			return; // likely not a localization key
+		var thisKey = splitted.shift();
+
+		if (!currentStrings.exists(thisKey))
+			currentStrings.set(thisKey, splitted.join("=").trim().replace('\\n', '\n'));
+    }
+
 	public static function getAllStrings()
 	{
 		currentStrings.clear();
 
 		for (filePath in Paths.getFolders("data"))
 		{
-            var checkFiles = ["lang/" + locale + ".txt", "lang/en.txt", "strings.txt"];
+			var checkFiles = [
+				"lang/" + locale + ".txt", "lang/" + locale + ".lang", "lang/en.txt", "strings.txt"];
 			var file = filePath + checkFiles.shift();
 			while (checkFiles.length > 0 && !exists(file))
                 file = filePath + checkFiles.shift();
@@ -420,12 +440,21 @@ class Paths
 			var stringsText = getContent(file);
 			var daLines = stringsText.trim().split("\n");
 
+            var isInComment:Bool = false;
 			for(shit in daLines){
-				var splitted = shit.split("=");
-				var thisKey = splitted.shift();
+				
+                // Allow comment blocks if a line starts with /* and escape block if line starts with */
+				var trimmedShit = shit.trim();
+                if (trimmedShit.startsWith("*/") && isInComment) {
+					isInComment = false;
+					continue;
+				}
+				if (trimmedShit.startsWith("/*") && !isInComment) {
+					isInComment = true;
+					continue;
+				}
 
-				if (!currentStrings.exists(thisKey))
-					currentStrings.set(thisKey, splitted.join("=").trim().replace('\\n', '\n'));
+				parseLocalString(trimmedShit);
 			}
 		}
 	}
@@ -449,17 +478,26 @@ class Paths
 			var stringsText = getContent(file);
 			if (stringsText == null) continue;
 
-			for (line in stringsText.trim().split("\n")){
-				var splitted = line.split("=");
-				var thisKey = splitted.shift();
-				if (thisKey == key){
-					currentStrings.set(key, splitted.join("=").trim().replace('\\n', '\n'));
-					return currentStrings.get(key);
+			var daLines = stringsText.trim().split("\n");
+
+			var isInComment:Bool = false;
+			for (shit in daLines) {
+				// Allow comment blocks if a line starts with /* and escape block if line starts with */
+				var trimmedShit = shit.trim();
+				if (trimmedShit.startsWith("*/") && isInComment) {
+					isInComment = false;
+					continue;
 				}
+				if (trimmedShit.startsWith("/*") && !isInComment) {
+					isInComment = true;
+					continue;
+				}
+
+				parseLocalString(trimmedShit);
 			}
 		}
 
-		return null;
+		return currentStrings.get(key);
 	}
 
 	public static function getString(key:String, force:Bool = false):Null<String>{

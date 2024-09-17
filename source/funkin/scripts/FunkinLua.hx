@@ -1894,6 +1894,9 @@ class FunkinLua extends FunkinScript
 	public function new(state:State, ?name:String = "Lua", ?ignoreCreateCall:Bool, ?vars:Map<String, Dynamic>) {
 		super(name, 'lua');
 
+		if (state == null)
+			return;
+
 		#if LUA_ALLOWED
 		lua = state;
 		Lua.init_callbacks(lua);

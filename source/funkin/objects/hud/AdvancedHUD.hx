@@ -40,17 +40,16 @@ class AdvancedHUD extends CommonHUD
 
 		stats.changedEvent.add(statChanged);
 		
-
 		add(healthBarBG);
 		add(healthBar);
 		add(iconP1);
 		add(iconP2);
 		
-		displayedJudges.push("cb");
-		
 		songHighscore = Highscore.getScore(songName);
 		songWifeHighscore = Highscore.getNotesHit(songName);
 		songHighRating = Highscore.getRating(songName);
+
+		////
 		var tWidth = 200;
 		scoreTxt = new FlxText(0, 0, tWidth, "0", 20);
 		scoreTxt.setFormat(Paths.font("calibri.ttf"), 40, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -235,7 +234,7 @@ class AdvancedHUD extends CommonHUD
 		gradeTxt.text = cpuControlled ? botplayString : grade;
 		
 		ratingTxt.text = (grade=="?") ? "0%" : (Highscore.floorDecimal(ratingPercent * 100, 2) + "%");
-		fcTxt.text = (ratingFC==stats.cfc && ClientPrefs.wife3) ? stats.fc : ratingFC;
+		fcTxt.text = (ratingFC==stats.gfc && ClientPrefs.wife3) ? stats.fc : ratingFC;
 		
 		if (ClientPrefs.npsDisplay)
 			npsTxt.text = '$npsString: $nps ($peakString: $npsPeak)';
