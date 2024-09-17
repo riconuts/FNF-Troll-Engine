@@ -89,7 +89,11 @@ jobs:
   
   buildLinux:
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-${{ matrix.version }}
+    strategy:
+      matrix:
+        build: [release]
+        version: [20.04, 22.04]
     timeout-minutes: 45
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -116,11 +120,15 @@ jobs:
       - name: Publish Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: linuxBuild
-          path: 'export/release/linux/bin' 
+          name: buildUbuntu${{ matrix.version }}-32-${{ matrix.build }}
+          path: 'export/${{ matrix.build }}/linux/bin'
   
   buildMac:
-    runs-on: macos-11
+    runs-on: macos-${{ matrix.version }}
+    strategy:
+      matrix:
+        build: [release]
+        version: [11, 12, 13]
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -143,5 +151,5 @@ jobs:
       - name: Publish Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: macBuild
-          path: export/release/macos/bin
+          name: buildMac-${{ matrix.version }}-64-${{ matrix.build }}
+          path: 'export/${{ matrix.build }}/macos/bin'
