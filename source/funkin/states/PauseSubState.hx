@@ -27,10 +27,12 @@ class PauseSubState extends MusicBeatSubstate
 {
 	public static var songName:Null<String> = null;
 
+	public var bg:FlxSprite;
 	public var menu:AlphabetMenu;
 	public var menuItems = ["Resume", "Restart Song", 'Options', "Exit to menu"];
 	var menuItemCallbacks:Map<String, AlphabetMenu.OptionCallbacks>;
 
+	private var allTexts:Array<FlxText>;
 	private var skipTimeText:Null<SkipTimeText> = null;
 
 	public function new()
@@ -40,12 +42,22 @@ class PauseSubState extends MusicBeatSubstate
 		var menuItemFunctions:Map<String, Function> = [
 			"Resume" => () -> {
 				if (ClientPrefs.countUnpause) {
-					var c = new Countdown(this); // https://tenor.com/view/letter-c-darwin-tawog-the-amazing-world-of-gumball-dance-gif-17949158
-					c.onComplete = () -> this.close();
+					var gameCnt = PlayState.instance==null ? null : PlayState.instance.curCountdown;
+					if (gameCnt != null && !gameCnt.finished) // don't make a new countdown if there's already one in progress lol
+						return this.close();
+					
+					for (obj in members) 
+						obj.visible = false;
+
 					menu.inputsActive = false;
+
+					var c = new Countdown(this); // https://tenor.com/view/letter-c-darwin-tawog-the-amazing-world-of-gumball-dance-gif-17949158
+					c.onComplete = this.close;
 					c.start(0.5);
-				}
-				else this.close(); // close immediately
+
+				}else {
+					this.close(); // close immediately
+				} 
 			},
 			"Restart Song" => () ->
 			{
@@ -159,7 +171,7 @@ class PauseSubState extends MusicBeatSubstate
 		var cam:FlxCamera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
 		this.cameras = [cam];
 
-		var bg = new FlxSprite(FlxG.width / 2 - 1, FlxG.height / 2 -1).makeGraphic(2, 2);
+		bg = new FlxSprite(FlxG.width / 2 - 1, FlxG.height / 2 -1).makeGraphic(2, 2);
 		bg.scale.set(FlxG.width, FlxG.height);
 		bg.scrollFactor.set();
 		bg.color = 0xFF000000;
@@ -271,7 +283,7 @@ class PauseSubState extends MusicBeatSubstate
 		songInfo.push("Failed: " + PlayState.deathCounter); // i'd say blueballed but not every character blueballs + you straight up die in die batsards
 
 		////
-		var allTexts:Array<FlxText> = [];
+		allTexts = [];
 		var prevText:FlxText = null;
 
 		for (daText in songInfo){

@@ -278,7 +278,7 @@ class PlayState extends MusicBeatState
 
 	var startTimer:FlxTimer;
 	var finishTimer:FlxTimer = null;
-	var curCountdown:Countdown;
+	public var curCountdown:Countdown;
 	public var songSpeedTween:FlxTween;
 	
 	public var introAlts:Array<Null<String>> = ["onyourmarks", 'ready', 'set', 'go'];
@@ -1564,6 +1564,9 @@ class PlayState extends MusicBeatState
 	public function setSongTime(time:Float)
 	{
 		if(time < 0) time = 0;
+
+		if (curCountdown != null && !curCountdown.finished)
+			curCountdown.destroy();
 
 		inst.pause();
 		vocals.pause();
