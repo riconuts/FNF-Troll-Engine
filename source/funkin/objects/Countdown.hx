@@ -12,6 +12,9 @@ import flixel.util.FlxTimer;
 import funkin.states.PlayState;
 import funkin.scripts.Globals;
 
+/**
+ * Handles Gameplay countdown, also optionally used in the Pause Menu if `ClientPrefs.countUnpause` is set to true.
+**/
 class Countdown {
 	public var sprite:Null<FlxSprite>;
 	public var sound:Null<FlxSound>;
@@ -37,9 +40,9 @@ class Countdown {
 	}
 
 	public function destroy():Void {
+		deleteTween();
 		sprite = null;
 		sound = null;
-		tween = null;
 		timer = null;
 		position = 0;
 		parent = null;
@@ -51,8 +54,11 @@ class Countdown {
 		timer = new FlxTimer();
 		timer.start(time, (_)->{
 			tick(position);
-			if (timer.loopsLeft == 0 && onComplete != null)
+			if (timer.loopsLeft == 0 && onComplete != null) {
 				onComplete();
+				// not sure how much this helps the GC, if this causes issues remove it!!!
+				this.destroy();
+			}
 			position++;
 		}, 5);
 		return this;
@@ -103,9 +109,8 @@ class Countdown {
 					ease: FlxEase.cubeInOut,
 					onComplete: function(twn)
 					{
-						tween.destroy();
 						deleteSprite();
-						tween = null;
+						deleteTween();
 					}
 				});
 			}
@@ -157,5 +162,13 @@ class Countdown {
 		sprite.destroy();
 		papa.remove(sprite);
 		sprite = null;
+	}
+
+	function deleteTween():Void {
+		if (tween != null) {
+			tween.cancel();
+			tween.destroy();
+			tween = null;
+		}
 	}
 }
