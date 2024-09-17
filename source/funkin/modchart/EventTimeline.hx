@@ -23,13 +23,13 @@ class EventTimeline {
 			if (!modEvents.get(name).contains(modEvent))
 			    modEvents.get(name).push(modEvent);
 
-			modEvents.get(name)
-				.sort((a, b) -> Std.int((a.executionStep + modEvents.get(name).indexOf(a)) - (b.executionStep + modEvents.get(name).indexOf(b))));
+            // TODO: figure out why this is different on newer haxe versions vs older haxe versions
+			modEvents.get(name).sort((a, b) -> Std.int(a.executionStep - b.executionStep));
 
         }else
             if(!events.contains(event)){
                 events.push(event);
-			    events.sort((a, b) -> Std.int((a.executionStep + events.indexOf(a)) - (b.executionStep + events.indexOf(b))));
+			    events.sort((a, b) -> Std.int(a.executionStep - b.executionStep));
             }
         
     }
