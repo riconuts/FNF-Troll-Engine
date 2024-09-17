@@ -68,7 +68,7 @@
     <!--Remove if you dont want Psych Engine mod compatibility -->
     <define name="PE_MOD_COMPATIBILITY" if="LUA_ALLOWED" />
     <!--Remove if you dont want the engine to autoupdate -->
-    <define name="DO_AUTO_UPDATE" if="native desktop OFFICIAL_BUILD" unless="debug || final" />
+    <define name="DO_AUTO_UPDATE" if="native desktop OFFICIAL_BUILD" unless="debug" />
 
     <icon path="art/iconOG.png" />
     <icon path="art/icon64.png" size='64' />
