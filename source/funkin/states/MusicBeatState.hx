@@ -39,8 +39,8 @@ class MusicBeatState extends FlxUIState
 	public var curDecBeat:Float = 0.0;
 	private var controls(get, never):Controls;
 
-    public var canBeScripted(get, default):Bool = false;
-    @:noCompletion function get_canBeScripted() return canBeScripted;
+	public var canBeScripted(get, default):Bool = false;
+	@:noCompletion function get_canBeScripted() return canBeScripted;
 
 	//// To be defined by the scripting macro
 	@:noCompletion public var _extensionScript:FunkinHScript;
@@ -52,10 +52,10 @@ class MusicBeatState extends FlxUIState
 		return;
 
 	////
-    public function new(canBeScripted:Bool = true) {
-        super();
-        this.canBeScripted = canBeScripted;
-    }
+	public function new(canBeScripted:Bool = true) {
+		super();
+		this.canBeScripted = canBeScripted;
+	}
 
 	override public function destroy() 
 	{
@@ -82,10 +82,10 @@ class MusicBeatState extends FlxUIState
 		super.onFocusLost();
 	}
 
-    // mainly moved it away so if a scripted state returns FUNCTION_STOP they can still make the music stuff update
-    public function updateSteps()
+	// mainly moved it away so if a scripted state returns FUNCTION_STOP they can still make the music stuff update
+	public function updateSteps()
 	{
-        var oldStep:Int = curStep;
+		var oldStep:Int = curStep;
 
 		updateCurStep();
 		updateBeat();
@@ -103,11 +103,11 @@ class MusicBeatState extends FlxUIState
 					rollbackSection();
 			}
 		}
-    }
+	}
 
 	override function update(elapsed:Float)
 	{
-        updateSteps();
+		updateSteps();
 
 		super.update(elapsed);
 	}
@@ -123,7 +123,7 @@ class MusicBeatState extends FlxUIState
 			sectionHit();
 		}
 	}
-    
+	
 	override function startOutro(fuck:() -> Void)
 	{
 		return super.startOutro(() -> {

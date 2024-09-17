@@ -40,8 +40,9 @@ class EventTimeline {
 		{
 			var garbage:Array<ModEvent> = [];
 			var schedule = modEvents.get(modName);
-			for (event in schedule)
+			for (eventIndex in 0...schedule.length)
 			{
+                var event:ModEvent = schedule[eventIndex];
                 if (event.finished)
 					garbage.push(event);
                 
@@ -49,9 +50,8 @@ class EventTimeline {
 					continue;
                 
 				if (step >= event.executionStep)
-                {
 					event.run(step);
-				}
+				
 				else
 					break;
 			}

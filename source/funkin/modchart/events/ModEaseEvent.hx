@@ -33,7 +33,7 @@ class ModEaseEvent extends ModEvent {
 			finished = true;
 			return;
 		}
-		if (curStep <= endStep)
+		if (curStep < endStep)
 		{
 			if (this.startVal == null)
 				this.startVal = mod.getValue(player);
@@ -44,7 +44,7 @@ class ModEaseEvent extends ModEvent {
 			//mod.setValue(ease(easeFunc, passed, startVal, change, length), player);
 			manager.setValue(modName, ease(easeFunc, passed, startVal, change, length), player);
 		}
-		else if (curStep > endStep)
+		else if (curStep >= endStep)
 		{
 			finished = true;
 			manager.setValue(modName, easeFunc(1) * endVal, player);
