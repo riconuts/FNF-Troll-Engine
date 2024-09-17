@@ -4531,7 +4531,7 @@ class PlayState extends MusicBeatState
 				track.pause();
 		}
 
-		if (curCountdown.timer != null && !curCountdown.timer.finished)
+		if (curCountdown != null && !curCountdown.finished)
 			curCountdown.timer.active = false;
 		if (finishTimer != null && !finishTimer.finished)
 			finishTimer.active = false;
@@ -4568,7 +4568,7 @@ class PlayState extends MusicBeatState
 		if (inst != null && !startingSong)
 			resyncVocals();
 
-		if (curCountdown.timer != null && !curCountdown.timer.finished)
+		if (curCountdown != null && !curCountdown.finished)
 			curCountdown.timer.active = true;
 		if (finishTimer != null && !finishTimer.finished)
 			finishTimer.active = true;
