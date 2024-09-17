@@ -278,6 +278,7 @@ class PlayState extends MusicBeatState
 
 	var startTimer:FlxTimer;
 	var finishTimer:FlxTimer = null;
+	public var curCountdown:Countdown;
 	public var songSpeedTween:FlxTween;
 	
 	public var introAlts:Array<Null<String>> = ["onyourmarks", 'ready', 'set', 'go'];
@@ -1464,111 +1465,34 @@ class PlayState extends MusicBeatState
 		}
 
 		// Do the countdown.
-		var swagCounter:Int = 0;
-		startTimer = new FlxTimer();
-		startTimer.start(
-			Conductor.crochet * 0.001, 
-			(tmr)->{
-				countdownTick(swagCounter);
-				swagCounter++;
-			}, 
-			5
-		);
+		//var swagCounter:Int = 0;
+		var countdown = new funkin.objects.Countdown(this);
+		resetCountdown(countdown);
+		countdown.start(Conductor.crochet * 0.001); // time is optional but here we are
+		curCountdown = countdown;
+		//startTimer = new FlxTimer();
+		//startTimer.start(
+		//	Conductor.crochet * 0.001,
+		//	(tmr)->{
+		//		countdownTick(swagCounter);
+		//		swagCounter++;
+		//	},
+		//	5
+		//);
 	}
 
-	function countdownTick(swagCounter:Int)
-	{
-		final tmr:FlxTimer = startTimer;
-
-		if (curBeat < 0){
-			danceCharacters(tmr.loopsLeft);
+	public function resetCountdown(countdown:funkin.objects.Countdown):Void {
+		if (countdown == null) return;
+		// I don't wanna break scripts so if you have a better way, do it
+		if (countdown.introAlts != introAlts) countdown.introAlts = introAlts;
+		if (countdown.introSnds != introSnds) countdown.introSnds = introSnds;
+		if (countdown.introSoundsSuffix != introSoundsSuffix) countdown.introSoundsSuffix = introSoundsSuffix;
+		countdown.onTick = (pos: Int) -> {
+			countdownSpr = countdown.sprite;
+			countdownSnd = countdown.sound;
+			countdownTwn = countdown.tween;
 		}
-
-		var sprImage:Null<flixel.graphics.FlxGraphic> = Paths.image(introAlts[swagCounter]);
-		if (sprImage != null)
-		{
-			var defaultTransition:Bool = true;
-			if (countdownTwn != null)
-				countdownTwn.cancel();
-
-			if (countdownSpr != null)
-				remove(countdownSpr).destroy();
-
-			var ret:Dynamic = Globals.Function_Continue;
-			if (hudSkinScript != null)
-				ret = callScript(hudSkinScript, "makeCountdownSprite", [sprImage, swagCounter, tmr]);
-
-			if (ret != Globals.Function_Continue)
-			{
-				if ((ret is FlxSprite))
-				{
-					countdownSpr = cast ret; // returned a sprite, so use it as the countdown sprite (use default transition etc)
-				}
-				else
-					defaultTransition = false; // didnt return a sprite and didnt return Function_Continue, so dont do any code related to countdownSpr
-			}
-			else
-			{
-				// default behaviour, create countdownSpr w/ the specified sprImage
-				countdownSpr = new FlxSprite(0, 0, sprImage);
-				countdownSpr.scrollFactor.set();
-				countdownSpr.updateHitbox();
-				countdownSpr.cameras = [camHUD];
-
-				countdownSpr.screenCenter();
-			}
-
-			if (defaultTransition)
-			{
-				insert(members.indexOf(notes), countdownSpr);
-
-				countdownTwn = FlxTween.tween(countdownSpr, {alpha: 0}, Conductor.crochet * 0.001, {
-					ease: FlxEase.cubeInOut,
-					onComplete: function(twn)
-					{
-						countdownTwn.destroy();
-						countdownTwn = null;
-						remove(countdownSpr).destroy();
-						countdownSpr = null;
-					}
-				});
-			}
-
-			callOnHScripts('onCountdownSpritePost', [countdownSpr, swagCounter, tmr]);
-			if (hudSkinScript != null)
-				hudSkinScript.call("onCountdownSpritePost", [countdownSpr, swagCounter, tmr]);
-		}
-
-		var soundName:Null<String> = introSnds[swagCounter];
-		if (soundName != null)
-		{
-			var ret:Dynamic = Globals.Function_Continue;
-			if (hudSkinScript != null)
-				ret = callScript(hudSkinScript, "playCountdownSound", [soundName, introSoundsSuffix, swagCounter, tmr]);
-
-			if (ret == Globals.Function_Continue)
-			{
-				// default behaviour
-				var snd:FlxSound = null;
-				snd = FlxG.sound.play(Paths.sound(soundName + introSoundsSuffix), 0.6, false, null, true, () ->
-				{
-					if (countdownSnd == snd)
-						countdownSnd = null;
-				});
-				#if tgt
-				snd.effect = ClientPrefs.ruin ? sndEffect : null;
-				#end
-				countdownSnd = snd;
-			}
-		}
-
-		callOnHScripts('onCountdownTick', [swagCounter, tmr]);
-		if (hudSkinScript != null)
-			hudSkinScript.call("onCountdownTick", [swagCounter, tmr]);
-
-		#if LUA_ALLOWED
-		callOnLuas('onCountdownTick', [swagCounter]);
-		#end
+		//
 	}
 
 	function danceCharacters(?curBeat:Int)
@@ -1640,6 +1564,9 @@ class PlayState extends MusicBeatState
 	public function setSongTime(time:Float)
 	{
 		if(time < 0) time = 0;
+
+		if (curCountdown != null && !curCountdown.finished)
+			curCountdown.destroy();
 
 		inst.pause();
 		vocals.pause();
@@ -4604,8 +4531,8 @@ class PlayState extends MusicBeatState
 				track.pause();
 		}
 
-		if (startTimer != null && !startTimer.finished)
-			startTimer.active = false;
+		if (curCountdown != null && !curCountdown.finished)
+			curCountdown.timer.active = false;
 		if (finishTimer != null && !finishTimer.finished)
 			finishTimer.active = false;
 		if (songSpeedTween != null)
@@ -4641,8 +4568,8 @@ class PlayState extends MusicBeatState
 		if (inst != null && !startingSong)
 			resyncVocals();
 
-		if (startTimer != null && !startTimer.finished)
-			startTimer.active = true;
+		if (curCountdown != null && !curCountdown.finished)
+			curCountdown.timer.active = true;
 		if (finishTimer != null && !finishTimer.finished)
 			finishTimer.active = true;
 		if (songSpeedTween != null)

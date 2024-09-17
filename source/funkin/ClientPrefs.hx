@@ -234,6 +234,13 @@ class ClientPrefs
 					"type" => "percent" // saved value is value / 100
 				]
 			},
+			"countUnpause" => {
+				display: "Countdown on Resume",
+				desc: "Counts down whenever you select \"RESUME\" on the Pause Menu.",
+				type: Toggle,
+				value: true,
+				data: []
+			},
 			// UI
 			"timeBarType" => {
 				display: "Time Bar",
@@ -598,7 +605,6 @@ class ClientPrefs
 				type: Button,
 				data: []
 			},
-
 			//
 			"discordRPC" => {
 				display: "Discord Rich Presence",
@@ -607,7 +613,14 @@ class ClientPrefs
 				value: true,
 				data: []
 			},
-			
+			"autoPause" => {
+				display: "Auto-pausing",
+				desc: "When toggled, Game will pause if the window is unfocused.",
+				type: Toggle,
+				value: true,
+				data: []
+			},
+			//
 			// updating
 			"downloadBetas" => {
 				display: "Download Betas",
@@ -816,6 +829,8 @@ class ClientPrefs
 
 		if (Main.bread != null)
 			Main.bread.visible = ClientPrefs.bread;
+
+		FlxG.autoPause = ClientPrefs.autoPause;
 
 		FlxSprite.defaultAntialiasing = ClientPrefs.globalAntialiasing;
 		FlxG.stage.quality = ClientPrefs.globalAntialiasing ? openfl.display.StageQuality.BEST : openfl.display.StageQuality.LOW; // does nothing!!!!
