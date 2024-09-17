@@ -30,20 +30,15 @@ class TransformModifier extends NoteModifier { // this'll be transformX in ModMa
 		pos.y += getSubmodValue('transform${data}Y', player) + getSubmodValue('transform${data}Y-a', player);
 		pos.z += getSubmodValue('transform${data}Z', player) + getSubmodValue('transform${data}Z-a', player);
         
+		pos.x += (getSubmodValue("moveX", player) + getSubmodValue('move${data}X', player)) * Note.swagWidth;
+		pos.y += (getSubmodValue("moveY", player) + getSubmodValue('move${data}Y', player)) * Note.swagWidth;
+		pos.z += (getSubmodValue("moveZ", player) + getSubmodValue('move${data}Z', player)) * Note.swagWidth;
+
         return pos;
     }
 
-    override function getAliases(){
-        return [
-            // Outfox/ITG modifiers
-            "moveX" => "transformX", 
-            "moveY" => "transformY",
-            "moveZ" => "transformZ",
-        ];
-    }
-
     override function getSubmods(){
-		var subMods:Array<String> = ["transformY", "transformZ", "transformX-a", "transformY-a", "transformZ-a"];
+		var subMods:Array<String> = ["transformY", "transformZ", "transformX-a", "transformY-a", "transformZ-a", "moveX", "moveY", "moveZ"];
 
         for(i in 0...4){
 			subMods.push('transform${i}X');
@@ -52,6 +47,10 @@ class TransformModifier extends NoteModifier { // this'll be transformX in ModMa
 			subMods.push('transform${i}X-a');
 			subMods.push('transform${i}Y-a');
 			subMods.push('transform${i}Z-a');
+
+			subMods.push('move${i}X');
+			subMods.push('move${i}Y');
+			subMods.push('move${i}Z');
         }
         return subMods;
     }
