@@ -57,7 +57,7 @@
     <define name="HSCRIPT_ALLOWED" />
     <define name="VIDEOS_ALLOWED" if="cpp" />
     <define name="MODS_ALLOWED" if="desktop" />
-    <define name="DISCORD_ALLOWED" if="desktop cpp" unless="display" />
+    <define name="DISCORD_ALLOWED" if="desktop cpp" unless="display || artifact" />
     <define name="MULTICORE_LOADING" if="native" />
     <define name="CRASH_HANDLER" if="desktop" />
 
@@ -87,7 +87,7 @@
     <!--Uncomment if you want to use moonchart, which allows usage of chart formats from other rhythm games and fnf engines-->
     <haxelib name="moonchart" version="git"/>
 
-	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED" unless="artifact"/>
+	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
 	<haxelib name="hxvlc" if="VIDEOS_ALLOWED"/> <!--You can replace with hxcodec if you're stubborn and dont wanna use newer and better libs-->
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
 	
