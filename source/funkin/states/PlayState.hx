@@ -142,6 +142,8 @@ class PlayState extends MusicBeatState
 	public var skipCountdown:Bool = false;
 
 	////
+	public var displayedSong:String;
+	public var displayedDifficulty:String;
 	public var metadata:SongCreditdata; // metadata for the songs (artist, etc)
 
 	public var stats:Stats = new Stats();
@@ -1039,11 +1041,14 @@ class PlayState extends MusicBeatState
 		// EVENT AND NOTE SCRIPTS WILL GET LOADED HERE
 		generateSong(SONG.song);
 
+		var stringId:String = 'difficultyName_$difficultyName';
+		displayedDifficulty = Paths.hasString(stringId) ? Paths._getString(stringId) : difficultyName;
+		
+		displayedSong = SONG.song;
+
 		#if DISCORD_ALLOWED {
 		// Discord RPC texts
-		var stringId:String = 'difficultyName_$difficultyName';
-		var diffName:String = Paths.hasString(stringId) ? Paths._getString(stringId) : difficultyName;
-		stateText = '${SONG.song} ($diffName)';
+		stateText = '${displayedSong} ($displayedDifficulty)';
 		
 		detailsText = isStoryMode ? "Story Mode" : "Freeplay";
 		detailsPausedText = "Paused - " + detailsText;

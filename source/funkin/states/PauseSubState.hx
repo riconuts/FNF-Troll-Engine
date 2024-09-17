@@ -245,29 +245,26 @@ class PauseSubState extends MusicBeatSubstate
 
 	private function regenInfo(){
 		////
+		var game = PlayState.instance;
+		var metadata = game.metadata;
 		var songInfo:Array<String> = [];
-		var metadata = PlayState.instance.metadata;
 
 		function pushInfo(str:String) {
 			for (string in str.split('\n'))
 				songInfo.push(string);
 		}
 
-		if (PlayState.SONG != null && PlayState.SONG.song != null){
-			var songCredit = PlayState.SONG.song;
-
-			if (metadata != null && metadata.artist != null && metadata.artist.length > 0)
-				songCredit += " - " + metadata.artist;
-			
-			pushInfo(songCredit);
-		}
+		songInfo.push(game.displayedSong);
 
 		if (metadata != null){
+			if (metadata.artist != null && metadata.artist.length > 0)		
+				pushInfo("Artist: " + metadata.artist);
+
 			if(metadata.charter != null && metadata.charter.length > 0)
-				pushInfo("Charted by " + metadata.charter);
+				pushInfo("Chart: " + metadata.charter);
 
 			if(metadata.modcharter != null && metadata.modcharter.length > 0)
-				pushInfo("Modcharted by " + metadata.modcharter);
+				pushInfo("Modchart: " + metadata.modcharter);
 		}
 
 		if (PlayState.SONG != null && PlayState.SONG.info != null)
@@ -278,25 +275,27 @@ class PauseSubState extends MusicBeatSubstate
 			for(extraInfo in metadata.extraInfo)
 				pushInfo(extraInfo);
 		}
-		
-		// removed the practice clause cus its just nice to have the counter lol
+
+		songInfo.push("Difficulty: " + game.displayedDifficulty);		
 		songInfo.push("Failed: " + PlayState.deathCounter); // i'd say blueballed but not every character blueballs + you straight up die in die batsards
+		// removed the practice clause cus its just nice to have the counter lol
 
 		////
 		allTexts = [];
-		var prevText:FlxText = null;
+		var fieldX:Float = 20;
+		var fieldWidth:Float = FlxG.width - 40;
 
-		for (daText in songInfo){
-			prevText = new FlxText(20, prevText == null ? 15 : (prevText.y + 36), 0, daText, 32);
-			prevText.setFormat(Paths.font('vcr.ttf'), 32, 0xFFFFFFFF, RIGHT);
-			prevText.scrollFactor.set();
-			prevText.updateHitbox();
-			prevText.alpha = 0;	
+		for (i => str in songInfo){
+			var obj = new FlxText(fieldX, 15+32*i, fieldWidth, str, 32);
+			obj.setFormat(Paths.font('vcr.ttf'), 32, 0xFFFFFFFF, RIGHT);
+			obj.scrollFactor.set();
+			obj.updateHitbox();
+			obj.alpha = 0;
 
-			prevText.x = camera.width - (prevText.width + 20);
+			allTexts.push(obj);
+			add(obj);
 
-			allTexts.push(prevText);
-			add(prevText);
+			FlxTween.tween(obj, {alpha: 1, y: obj.y + 5}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.3 * (i+1)});
 		}
 
 		if (PlayState.chartingMode){
@@ -314,14 +313,6 @@ class PauseSubState extends MusicBeatSubstate
 
 			chartingText.alpha = 0;
 			FlxTween.tween(chartingText, {alpha: 1}, 0.4, {ease: FlxEase.quartInOut});
-		}
-
-		for (id in 0...allTexts.length)
-		{
-			var daText = allTexts[id];
-
-			daText.y -= 5;
-			FlxTween.tween(daText, {alpha: 1, y: daText.y + 5}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.3 * (id+1)});
 		}
 	}
 
