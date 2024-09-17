@@ -73,8 +73,9 @@ class OptionsSubstate extends MusicBeatSubstate
 			[
 				"accessibility",
 				[
-					"flashing",
 					"autoPause", // should probably place this in misc but, up to you two!
+					"countUnpause",
+					"flashing",
 					"camShakeP",
 					"camZoomP",
 					"modcharts",
@@ -141,7 +142,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		],
 		"video" => [
 			["video", ["shaders", "showFPS"]],
-			["display", ["framerate", "bread", "countUnpause"]],
+			["display", ["framerate", "bread"]],
 			[
 				"performance",
 				[
