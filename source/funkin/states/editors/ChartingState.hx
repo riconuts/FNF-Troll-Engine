@@ -2041,7 +2041,7 @@ class ChartingState extends MusicBeatState
 				}
 				else
 				{
-					inst.play();
+					inst.play(false, Conductor.songPosition);
 					Conductor.songPosition = inst.time;
 
 					for (track in tracks){
@@ -2627,6 +2627,7 @@ class ChartingState extends MusicBeatState
 					track.pause();
 					track.time = Conductor.songPosition;
 				}
+                trace(Conductor.songPosition, inst.time);
 
 				updateCurStep();
 			}
