@@ -26,7 +26,7 @@ class EventTimeline {
 			modEvents.get(name).sort((a, b) -> {
 				var diff = Std.int(a.executionStep - b.executionStep);
                 if(diff == 0)
-					return modEvents.get(name).indexOf(a) - modEvents.get(name).indexOf(b);
+					return modEvents.get(name).indexOf(b) - modEvents.get(name).indexOf(a);
                 return diff;
             });
 
