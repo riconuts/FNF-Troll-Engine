@@ -30,6 +30,12 @@ class Countdown {
 
 	public var position:Int = 0; // originally swagCounter
 
+	public var active(get, never):Bool;
+	public var finished(get, never):Bool;
+
+	@:noCompletion function get_active() return timer!=null && timer.active;
+	@:noCompletion function get_finished() return timer==null || timer.finished;
+
 	private var parent:FlxGroup;
 	private var game:PlayState;
 
@@ -41,9 +47,9 @@ class Countdown {
 
 	public function destroy():Void {
 		deleteTween();
+		deleteTimer();
 		sprite = null;
 		sound = null;
-		timer = null;
 		position = 0;
 		parent = null;
 		game = null;
@@ -155,6 +161,14 @@ class Countdown {
 			#end
 		}
 		if (onTick != null) onTick(curPos);
+	}
+
+	function deleteTimer():Void {
+		if (timer != null){
+			timer.cancel();
+			timer.destroy();
+			timer = null;
+		}
 	}
 
 	function deleteSprite():Void {
