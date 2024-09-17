@@ -29,7 +29,7 @@ class EventTimeline {
         }else
             if(!events.contains(event)){
                 events.push(event);
-			    events.sort((a, b) -> Std.int(a.executionStep - b.executionStep));
+			    events.sort((a, b) -> Std.int((a.executionStep + events.indexOf(a)) - (b.executionStep + events.indexOf(b))));
             }
         
     }
