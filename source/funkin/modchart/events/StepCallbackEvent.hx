@@ -14,7 +14,12 @@ class StepCallbackEvent extends CallbackEvent {
 		
         if(curStep<=endStep){
 			progress = (curStep - executionStep) / (endStep - executionStep);
-			callback(this, curStep);
+            try{
+                callback(this, curStep);
+            }catch(e:haxe.Exception){
+                trace("Modchart function error: " + e.toString());
+                finished = true;
+            }
         }else
             finished = true;
 
