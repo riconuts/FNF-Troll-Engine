@@ -138,6 +138,8 @@ class UpdaterState extends MusicBeatState {
 		
     }
 
+    inline static var OS:String = #if windows 'windows' #elseif mac 'mac' #elseif linux 'linux' #end;
+
     function clearFiles(path:String){
 		if (FileSystem.exists(path))
 		{
@@ -167,12 +169,27 @@ class UpdaterState extends MusicBeatState {
 		updateText.text = "Gathering files";
 		prog.files = [];
         for(asset in release.assets){
-			prog.files.push({
-                fileName: asset.name,
-                link: asset.browser_download_url,
-				fileSize: asset.size
-            });
-			prog.totalFiles++;
+			if (asset.name.startsWith(UpdaterState.OS)){
+                prog.files.push({
+                    fileName: asset.name,
+                    link: asset.browser_download_url,
+                    fileSize: asset.size
+                });
+                prog.totalFiles++;
+            }
+        }
+
+        // If no platform-specific release then get every asset
+		if (prog.totalFiles == 0){
+			for (asset in release.assets) {
+                prog.files.push({
+                    fileName: asset.name,
+                    link: asset.browser_download_url,
+                    fileSize: asset.size
+                });
+                prog.totalFiles++;
+				
+			}    
         }
 
 		updateText.text = "Starting download";
@@ -221,6 +238,14 @@ class UpdaterState extends MusicBeatState {
 				trace("Ignoring copying the executable");
 				continue;
 			}
+            if(file == 'content'){
+                trace("TODO: merge content folders");
+                // Maybe add a way to ask the user "Wanna replace the fuckin folders???"
+                // And show a list of what content would be replaced with new content
+                // This ensures that people who edit base game folder will be abl eto say no and keep their changes
+                // rn tho, just skip content so we dont remove anyone's content folders
+                continue;
+            }
 			if (FileSystem.isDirectory(finFile)){
 				if (FileSystem.exists(myFile) && !FileSystem.isDirectory(myFile)){
                     FileSystem.deleteFile(myFile);
