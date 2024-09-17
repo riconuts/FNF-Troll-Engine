@@ -476,7 +476,10 @@ class ChartingState extends MusicBeatState
 		}else{
 			reloadGridLayer();
 			updateHeads();
+            trace(curSec);
+            changeSection(curSec);
 		}
+
 
 		super.create();
 		FlxG.mouse.visible = true;
@@ -1565,7 +1568,7 @@ class ChartingState extends MusicBeatState
 	}
 
 	var finalSectionNumber:Int = 0;
-	var tracksCompleted:Bool = true;
+	var tracksCompleted:Bool = false;
 	function onTrackCompleted(){
 		tracksCompleted = true;
 		Conductor.songPosition = 0.0;
@@ -1609,7 +1612,6 @@ class ChartingState extends MusicBeatState
 
 			soundTracksMap.set(trackName, newTrack);
 			tracks.push(newTrack);
-			
 		}
 		
 		var firstInstName:String = jsonTracks.inst[0];
@@ -1791,7 +1793,7 @@ class ChartingState extends MusicBeatState
 	{
 		if (tracksCompleted){
 			tracksCompleted = false;
-			// trace("track completed");
+			trace("track completed");
 			var pre:Float;
 			for (snd in tracks){
 				pre = snd.volume;
@@ -1804,7 +1806,7 @@ class ChartingState extends MusicBeatState
 			changeSection(0, true);
 		
 		}else if ((inst.playing ? Conductor.songPosition + elapsed * 1000 : Conductor.songPosition) > songLength){
-			// trace("song overflow");
+			trace("song overflow");
 			changeSection(0, true);
 		}
 
