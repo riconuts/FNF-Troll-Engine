@@ -31,11 +31,11 @@ class Countdown {
 	public var position:Int = 0; // originally swagCounter
 
 	private var parent:FlxGroup;
-	private var ps:PlayState;
+	private var game:PlayState;
 
 	public function new(parent:FlxGroup = null):Void {
 		if (parent == null) parent = FlxG.state;
-		if (parent is PlayState) ps = cast(parent, PlayState);
+		if (parent is PlayState) game = cast(parent, PlayState);
 		this.parent = parent;
 	}
 
@@ -46,7 +46,7 @@ class Countdown {
 		timer = null;
 		position = 0;
 		parent = null;
-		ps = null;
+		game = null;
 	}
 
 	public function start(?time:Float = -1):Countdown {
@@ -78,8 +78,8 @@ class Countdown {
 			// ↓ I had no idea how to make script calls not weird, so I just did this
 			// you might wanna replace it with something else and stuff @crowplexus
 			var ret:Dynamic = Globals.Function_Continue;
-			if (ps != null && ps.hudSkinScript != null)
-				ret = ps.callScript(ps.hudSkinScript, "makeCountdownSprite", [sprImage, curPos, timer]);
+			if (game != null && game.hudSkinScript != null)
+				ret = game.callScript(game.hudSkinScript, "makeCountdownSprite", [sprImage, curPos, timer]);
 
 			if (ret != Globals.Function_Continue)
 			{
@@ -96,15 +96,15 @@ class Countdown {
 				sprite = new FlxSprite(0, 0, sprImage);
 				sprite.scrollFactor.set();
 				sprite.updateHitbox();
-				if (ps != null) sprite.cameras = [ps.camHUD];
+				if (game != null) sprite.cameras = [game.camHUD];
 				else sprite.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 				sprite.screenCenter();
 			}
 
 			if (defaultTransition)
 			{
-				if (ps == null) parent.insert(parent.members.length-1,sprite);
-				else ps.insert(ps.members.indexOf(ps.notes),sprite); // how it was layered originally
+				if (game == null) parent.insert(parent.members.length-1,sprite);
+				else game.insert(game.members.indexOf(game.notes),sprite); // how it was layered originally
 				tween = FlxTween.tween(sprite, {alpha: 0}, Conductor.crochet * 0.001, {
 					ease: FlxEase.cubeInOut,
 					onComplete: function(twn)
@@ -115,10 +115,10 @@ class Countdown {
 				});
 			}
 
-			if (ps != null) {
-				ps.callOnHScripts('onCountdownSpritePost', [sprite, curPos, timer]);
-				if (ps.hudSkinScript != null)
-					ps.hudSkinScript.call("onCountdownSpritePost", [sprite, curPos, timer]);
+			if (game != null) {
+				game.callOnHScripts('onCountdownSpritePost', [sprite, curPos, timer]);
+				if (game.hudSkinScript != null)
+					game.hudSkinScript.call("onCountdownSpritePost", [sprite, curPos, timer]);
 			}
 		}
 
@@ -126,8 +126,8 @@ class Countdown {
 		if (soundName != null)
 		{
 			var ret:Dynamic = Globals.Function_Continue;
-			if (ps != null && ps.hudSkinScript != null)
-				ret = ps.callScript(ps.hudSkinScript, "playCountdownSound", [soundName, introSoundsSuffix, curPos, timer]);
+			if (game != null && game.hudSkinScript != null)
+				ret = game.callScript(game.hudSkinScript, "playCountdownSound", [soundName, introSoundsSuffix, curPos, timer]);
 
 			if (ret == Globals.Function_Continue)
 			{
@@ -139,26 +139,26 @@ class Countdown {
 						sound = null;
 				});
 				#if tgt
-				if (ps != null && ps.sndEffect != null && ClientPrefs.ruin)
-					snd.effect = ps.sndEffect;
+				if (game != null && game.sndEffect != null && ClientPrefs.ruin)
+					snd.effect = game.sndEffect;
 				#end
 				sound = snd;
 			}
 		}
 
-		if (ps != null) {
-			ps.callOnHScripts('onCountdownTick', [curPos, timer]);
-			if (ps.hudSkinScript != null)
-				ps.hudSkinScript.call("onCountdownTick", [curPos, timer]);
+		if (game != null) {
+			game.callOnHScripts('onCountdownTick', [curPos, timer]);
+			if (game.hudSkinScript != null)
+				game.hudSkinScript.call("onCountdownTick", [curPos, timer]);
 			#if LUA_ALLOWED
-			ps.callOnLuas('onCountdownTick', [curPos]);
+			game.callOnLuas('onCountdownTick', [curPos]);
 			#end
 		}
 		if (onTick != null) onTick(curPos);
 	}
 
 	function deleteSprite():Void {
-		final papa = (ps!=null ? ps : parent);
+		final papa = (game!=null ? game : parent);
 		sprite.destroy();
 		papa.remove(sprite);
 		sprite = null;
