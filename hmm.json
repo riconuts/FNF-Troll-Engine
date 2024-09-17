@@ -60,6 +60,13 @@
 			"dir": null,
 			"ref": "master",
 			"url": "https://github.com/riconuts/linc_luajit"
-		}
+		},
+        {
+            "name": "moonchart",
+            "type": "git",
+            "dir": null,
+            "ref": "master",
+            "url": "https://github.com/MaybeMaru/moonchart"
+        }
 	]
 }
