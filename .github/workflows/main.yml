@@ -21,7 +21,7 @@ jobs:
     
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2.3.0
+      - uses: actions/checkout@v4
 
       - uses: krdlab/setup-haxe@master
         with:
@@ -29,8 +29,8 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Install Haxelib
         run: |
-          haxelib install hxcpp
-          haxelib install hmm
+          haxelib install hxcpp > /dev/null --quiet
+          haxelib install hmm --quiet
           haxelib run hmm install
         shell: cmd
       - name: Create Version Tag
