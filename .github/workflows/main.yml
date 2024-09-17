@@ -48,7 +48,7 @@ jobs:
       - name: Create Version Tag
         run: echo "${{github.run_id}}" > VERSION
       - name: Compile
-        run: haxelib run lime build windows
+        run: haxelib run lime build windows -Dartifact
       - name: Publish Artifact
         uses: actions/upload-artifact@v4
         with:
