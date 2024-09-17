@@ -40,9 +40,9 @@ jobs:
             cache-build-windows
       - name: Install Haxelib
         run: |
-          haxelib setup C:/haxelib
           haxelib install hxcpp > nul --quiet
           haxelib install hmm --quiet
+          haxelib run hmm setup
           haxelib run hmm install
         shell: cmd
       - name: Create Version Tag
