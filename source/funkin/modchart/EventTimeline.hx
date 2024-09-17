@@ -23,13 +23,8 @@ class EventTimeline {
 			if (!modEvents.get(name).contains(modEvent))
 			    modEvents.get(name).push(modEvent);
 
-/* 			modEvents.get(name).sort((a, b) -> {
-				var diff = Std.int(a.executionStep - b.executionStep);
-                if(diff == 0)
-					return modEvents.get(name).indexOf(a) - modEvents.get(name).indexOf(b);
-                
-                return diff;
-            }); */
+			modEvents.get(name)
+				.sort((a, b) -> Std.int((a.executionStep + modEvents.get(name).indexOf(a)) - (b.executionStep + modEvents.get(name).indexOf(b))));
 
         }else
             if(!events.contains(event)){
