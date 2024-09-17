@@ -68,7 +68,7 @@
     <!--Remove if you dont want Psych Engine mod compatibility -->
     <define name="PE_MOD_COMPATIBILITY" if="LUA_ALLOWED" />
     <!--Remove if you dont want the engine to autoupdate -->
-    <define name="DO_AUTO_UPDATE" if="native desktop OFFICIAL_BUILD" unless="debug || final" />
+    <define name="DO_AUTO_UPDATE" if="native desktop OFFICIAL_BUILD" unless="debug" />
 
     <icon path="art/iconOG.png" />
     <icon path="art/icon64.png" size='64' />
@@ -89,7 +89,7 @@
 
 	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
 	<haxelib name="hxvlc" if="VIDEOS_ALLOWED"/> <!--You can replace with hxcodec if you're stubborn and dont wanna use newer and better libs-->
-	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
+	<haxelib name="linc_luajit" if="LUA_ALLOWED" unless="linux || mac"/>
 	
 	<section if="HSCRIPT_ALLOWED">
 		<haxelib name="hscript"/>
