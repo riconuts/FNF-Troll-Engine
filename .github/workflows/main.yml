@@ -29,7 +29,6 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Install Haxelib
         run: |
-          haxelib setup C:/haxelib
           haxelib install hxcpp > nul
           haxelib install hmm
           haxelib run hmm install
