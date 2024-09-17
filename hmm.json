@@ -8,7 +8,7 @@
 		{
 			"name": "lime",
 			"type": "haxelib",
-			"version": "8.0.2"
+			"version": "8.1.2"
 		},
 		{
 			"name": "flixel",
@@ -58,14 +58,14 @@
 			"name": "linc_luajit",
 			"type": "git",
 			"dir": null,
-			"ref": "main",
+			"ref": "master",
 			"url": "https://github.com/riconuts/linc_luajit"
 		},
         {
             "name": "moonchart",
             "type": "git",
             "dir": null,
-            "ref": "master",
+            "ref": "main",
             "url": "https://github.com/MaybeMaru/moonchart"
         }
 	]
