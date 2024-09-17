@@ -38,7 +38,15 @@ class PauseSubState extends MusicBeatSubstate
 		super();
 
 		var menuItemFunctions:Map<String, Function> = [
-			"Resume" => this.close,
+			"Resume" => () -> {
+				if (ClientPrefs.countUnpause) {
+					var c = new Countdown(this); // https://tenor.com/view/letter-c-darwin-tawog-the-amazing-world-of-gumball-dance-gif-17949158
+					c.onComplete = () -> this.close();
+					menu.inputsActive = false;
+					c.start(0.5);
+				}
+				else this.close(); // close immediately
+			},
 			"Restart Song" => () ->
 			{
 				if (FlxG.keys.pressed.SHIFT)

@@ -74,9 +74,10 @@ class OptionsSubstate extends MusicBeatSubstate
 				"accessibility",
 				[
 					"flashing",
+					"autoPause", // should probably place this in misc but, up to you two!
 					"camShakeP",
 					"camZoomP",
-					"modcharts"
+					"modcharts",
 				]
 			],
 			[
@@ -140,7 +141,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		],
 		"video" => [
 			["video", ["shaders", "showFPS"]],
-			["display", ["framerate", "bread"]],
+			["display", ["framerate", "bread", "countUnpause"]],
 			[
 				"performance",
 				[
@@ -342,6 +343,8 @@ class OptionsSubstate extends MusicBeatSubstate
 			case 'discordRPC':
 				val ? DiscordClient.start() : DiscordClient.shutdown();
 			#end
+			case 'autoPause':
+				FlxG.autoPause = val;
 			default:
 				// nothing
 		}

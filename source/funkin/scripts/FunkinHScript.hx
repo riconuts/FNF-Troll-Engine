@@ -99,7 +99,7 @@ class FunkinHScript extends FunkinScript
 			if (Windows.msgBox(msg, title, RETRYCANCEL | ERROR) == RETRY)
 				return fromFile(file, name, additionalVars, doCreateCall);
 			#else
-			Application.current.Windows.alert(msg, title);
+			Application.current.window.alert(msg, title);
 			#end
 			#end
 		}
