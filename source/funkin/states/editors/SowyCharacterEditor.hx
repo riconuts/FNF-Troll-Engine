@@ -12,8 +12,8 @@ import haxe.Json;
 import flixel.util.FlxSort;
 import flixel.input.keyboard.FlxKey;
 import funkin.objects.Character;
+import funkin.data.CharacterData;
 import flixel.text.FlxText;
-import funkin.objects.shaders.BlendModeEffect;
 import flixel.math.FlxMath;
 import flixel.group.FlxGroup;
 
@@ -263,7 +263,7 @@ class SowyCharacterEditor extends MusicBeatState
 		openDropdown(null);
 		
 
-	var characterList:Array<String> = Character.getAllCharacters();
+	var characterList:Array<String> = CharacterData.getAllCharacters();
 
 	function makeUI()
 	{
@@ -289,7 +289,7 @@ class SowyCharacterEditor extends MusicBeatState
 
 		ui_dropdown = new DropdownList();
 		ui_dropdown.cameras = [ui_dd_cam];
-		ui_dropdown.setElements(Character.getAllCharacters());
+		ui_dropdown.setElements(CharacterData.getAllCharacters());
 		ui_dropdown.exists = false;
 		add(ui_dropdown);
 
@@ -656,7 +656,7 @@ class SowyCharacterEditor extends MusicBeatState
 		if (FlxG.keys.pressed.BACKSPACE){
 			MusicBeatState.switchState(new MainMenuState());
 		}else if (FlxG.keys.pressed.CONTROL && FlxG.keys.justPressed.S){
-			saveJSON((FlxG.keys.pressed.SHIFT) ? charToFunkinData(curChar) : charToPsychData(curChar), curChar.curCharacter);
+			saveJSON((FlxG.keys.pressed.SHIFT) ? CharacterData.charToFunkinData(curChar) : CharacterData.charToPsychData(curChar), curChar.curCharacter);
 		}else
 			updateKeys();
 
@@ -683,63 +683,5 @@ class SowyCharacterEditor extends MusicBeatState
 		{
 			new FileReference().save(data, name==null ? null : '$name.json');
 		}
-	}
-
-	public static function charToPsychData(char:Character){
-		return {
-			"animations": char.animationsArray,
-			"image": char.imageFile,
-			"scale": char.jsonScale,
-			"sing_duration": char.singDuration,
-			"healthicon": char.healthIcon,
-
-			"position": char.positionArray,
-			"camera_position": char.cameraPosition,
-
-			"flip_x": char.originalFlipX,
-			"no_antialiasing": char.noAntialiasing,
-			"healthbar_colors": char.healthColorArray
-		};
-	}
-	
-	public static function psychToFunkinAnim(anim:AnimArray) return {
-		"name": anim.anim,
-		"prefix": anim.name,
-		"offsets": anim.offsets,
-		"looped": anim.loop,
-		"frameRate": 24,
-		"flipX": false,
-		"flipY": false
-	}
-
-	public static function charToFunkinData(char:Character){
-		return {
-			"generatedBy": "TROLL ENGINE",
-			"version": "1.0.0",
-
-			"name": char.curCharacter,
-			"assetPath": char.imageFile,
-			"renderType": Character.getImageFileType(char.imageFile),
-			"flipX": char.originalFlipX,
-			"scale": char.jsonScale,
-			"isPixel": char.noAntialiasing == true, // i think // isPixel also assumes its scaled up by 6 so
-
-			"offsets": char.positionArray,
-			"cameraOffsets": char.cameraPosition,
-
-			"singTime": char.singDuration, 
-			"danceEvery": char.danceEveryNumBeats,
-			"startingAnimation": char.danceIdle ? "danceLeft" : "idle",
-
-			"healthIcon": {
-				"id": char.healthIcon,
-				"offsets": [0, 0],
-				"isPixel": StringTools.endsWith(char.healthIcon, "-pixel"),
-				"flipX": false,
-				"scale": 1
-			},
-
-			"animations": [for (anim in char.animationsArray) psychToFunkinAnim(anim)],
-		};
 	}
 }

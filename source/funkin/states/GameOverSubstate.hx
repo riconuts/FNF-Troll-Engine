@@ -1,5 +1,6 @@
 package funkin.states;
 
+import funkin.data.CharacterData;
 import openfl.media.Sound;
 import funkin.scripts.Globals;
 import funkin.data.Cache;
@@ -169,17 +170,17 @@ class GameOverSubstate extends MusicBeatSubstate
 		}
 
 		var deathName:String = (characterName != null) ? characterName : (char.deathName + "-dead");
-		var charInfo = Character.getCharacterFile(deathName);
+		var charInfo = CharacterData.getCharacterFile(deathName);
 
 		if (charInfo == null){
 			warn('Could not get Character data for "$deathName".');
 			deathName = char.curCharacter;
-			charInfo = Character.getCharacterFile(deathName);
+			charInfo = CharacterData.getCharacterFile(deathName);
 		}
 
 		if (charInfo == null){
 			warn('Could not get Character data for "$deathName".');
-			charInfo = Character.getCharacterFile("bf");
+			charInfo = CharacterData.getCharacterFile("bf");
 		}
 
 		////		

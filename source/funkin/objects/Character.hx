@@ -1,5 +1,8 @@
 package funkin.objects;
 
+import funkin.data.CharacterData.*;
+import funkin.data.CharacterData.AnimArray;
+import funkin.data.CharacterData.CharacterFile;
 import funkin.scripts.*;
 import animateatlas.AtlasFrameMaker;
 import flixel.animation.FlxAnimation;
@@ -10,35 +13,6 @@ import openfl.geom.ColorTransform;
 
 using flixel.util.FlxColorTransformUtil;
 using StringTools;
-
-typedef CharacterFile = {
-	var animations:Array<AnimArray>;
-	var image:String;
-	var scale:Float;
-	var sing_duration:Float;
-	var healthicon:String;
-
-	var position:Array<Float>;
-	var camera_position:Array<Float>;
-
-	var flip_x:Bool;
-	var no_antialiasing:Bool;
-	var healthbar_colors:Array<Int>;
-
-	@:optional var x_facing:Float;
-	@:optional var death_name:String;
-	@:optional var script_name:String;
-}
-
-typedef AnimArray = {
-	var anim:String;
-	var name:String;
-	var fps:Int;
-	var loop:Bool;
-	var indices:Array<Int>;
-	var offsets:Array<Int>;
-	@:optional var cameraOffset:Array<Float>;
-}
 
 class Character extends FlxSprite
 {
@@ -148,110 +122,12 @@ class Character extends FlxSprite
 	public var originalFlipX:Bool = false;
 	public var healthColorArray:Array<Int> = [255, 0, 0];
 
-	public static function getCharacterFile(characterName:String):Null<CharacterFile>
-	{
-		var json:Null<CharacterFile> = Paths.json('characters/$characterName.json');
-
-		if (json == null){
-			trace('Could not find character "$characterName" JSON file');
-			return null;
-		}
-		
-		try{
-			for (anim in json.animations){
-				try{
-					if (anim.indices != null)
-						anim.indices = parseIndices(anim.indices);
-				}catch(e){
-					trace('$characterName: Error parsing anim indices for ${anim.name}');
-				}
-			}
-
-			if (json.healthbar_colors == null)
-				json.healthbar_colors = [192, 192, 192];
-			else if (json.healthbar_colors is String){
-				var color:Null<FlxColor> = FlxColor.fromString(cast json.healthbar_colors);
-				json.healthbar_colors = (color==null) ? null : [color.red, color.green, color.blue];
-			}
-
-			return json;
-		}catch(e){
-			trace('$characterName: Error loading character JSON file');
-		}
-
-		return null;
-	}
-
-	/**	
-		Returns "texture", "packer" or "sparrow"
-	**/
-	public static function getImageFileType(path:String):String
-	{
-		if (Paths.fileExists('images/$path/Animation.json', TEXT))
-			return "texture";
-		else if (Paths.fileExists('images/$path.txt', TEXT))
-			return "packer";
-		else
-			return "sparrow";
-	}
-
-	public static function returnCharacterPreload(characterName:String):Array<funkin.data.Cache.AssetPreload>{
-		var char = Character.getCharacterFile(characterName);
-
-		if (char == null)
-			return [];
-
-		return [
-			{path: char.image}, // spritesheet
-			{path: 'icons/${char.healthicon}'} // icon
-		];
-	}
-
 	override function destroy()
 	{
         for(script in characterScripts)
             removeScript(script, true);
         
 		return super.destroy();
-	}
-
-	public static function parseIndices(indices:Array<Any>):Array<Int>
-	{
-		var parsed:Array<Int> = [];
-
-		for (expr in indices)
-		{
-			if (expr is Int)
-				parsed.push(expr);
-			else if (expr is String)
-			{
-				var expr:String = Std.string(expr);
-				var isRange:Bool = expr.contains("...");
-				var exprArgs:Array<String> = expr.split(isRange ? "..." : "*");
-
-				switch (exprArgs.length){
-					case 0: 
-						// Can't do anything lol
-					case 1:
-						parsed.push(Std.parseInt(exprArgs[0]));
-					default:
-						var exprA = Std.parseInt(exprArgs[0]);
-						var exprB = Std.parseInt(exprArgs[1]);
-						
-						if (isRange){
-							// starting from 'a' and ending on 'b'
-							for (frameN in exprA...(exprB + 1))
-								parsed.push(frameN);
-						}else{
-							// 'a' repeated 'b' times
-							for (_ in 0...(exprB + 1))
-								parsed.push(exprA);
-						}
-				}		
-			}
-		}
-
-		return parsed;
 	}
 
     public function pushScript(script:FunkinScript, alreadyStarted:Bool=false){
@@ -810,45 +686,4 @@ class Character extends FlxSprite
     #end
     return Globals.Function_Continue;
     }
-
-	/**
-		Returns an array with every character file in the characters folder(s).
-	**/
-	#if !sys
-	@:noCompletion private static var _listCache:Null<Array<String>> = null;
-	#end
-	public static function getAllCharacters(modsOnly = false):Array<String>
-	{
-		#if !sys
-		if (_listCache != null)
-			return _listCache;
-
-		var characters:Array<String> = _listCache = [];
-		#else
-		var characters:Array<String> = [];
-		#end
-
-		var _characters = new Map<String, Bool>();
-
-		function readFileNameAndPush(fileName:String){
-			if (fileName==null || !fileName.endsWith(".json"))
-				return;
-
-			var name = fileName.substr(0, fileName.length - 5);
-			_characters.set(name, true);
-		}
-		
-		for (folderPath in Paths.getFolders("characters", true)){
-			Paths.iterateDirectory(folderPath, readFileNameAndPush);
-		}
-
-		if (!modsOnly){
-			Paths.iterateDirectory(Paths.getPreloadPath('characters/'), readFileNameAndPush);
-		}
-
-		for (name in _characters.keys())
-			characters.push(name);
-
-		return characters;
-	}
 }

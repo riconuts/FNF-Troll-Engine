@@ -1,5 +1,6 @@
 package funkin.states.editors;
 
+import funkin.data.CharacterData;
 import funkin.objects.AttachedFlxText;
 import funkin.objects.hud.HealthIcon;
 import funkin.scripts.FunkinHScript;
@@ -642,7 +643,7 @@ class ChartingState extends MusicBeatState
 		#end
 
 		////
-		var characters:Array<String> = Character.getAllCharacters();
+		var characters:Array<String> = CharacterData.getAllCharacters();
 		characters.sort(CoolUtil.alphabeticalSort);
 
 		var player1DropDown = new FlxUIDropDownMenuCustom(10, stepperSpeed.y + 45, FlxUIDropDownMenuCustom.makeStrIdLabelArray(characters, true), function(character:String)
