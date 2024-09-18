@@ -1311,12 +1311,13 @@ class PlayState extends MusicBeatState
 		return null;
 	}
 
-	function startCharacterPos(char:Character, ?gfCheck:Bool = false) {
+	function startCharacterPos(char:Character, ?gfCheck:Bool = false, ?startBopBeat:Float=-5) {
 		if(gfCheck && char.curCharacter.startsWith('gf')) { //IF DAD IS GIRLFRIEND, HE GOES TO HER POSITION
 			char.setPosition(GF_X, GF_Y);
 			char.scrollFactor.set(0.95, 0.95);
 			char.danceEveryNumBeats = 2;
 		}
+        char.nextDanceBeat = startBopBeat;
 		char.x += char.positionArray[0];
 		char.y += char.positionArray[1];
 	}
@@ -1500,34 +1501,40 @@ class PlayState extends MusicBeatState
 		//
 	}
 
-	function danceCharacters(?curBeat:Int)
+	function checkCharacterDance(character:Character, ?beat:Float, ignoreBeat:Bool = false){
+        if(character.danceEveryNumBeats == 0)return;
+        if(character.animation.curAnim == null)return;
+        if(beat == null)
+            beat = this.curBeat;
+
+
+        
+        var shouldBop = beat >= character.nextDanceBeat;
+        if (shouldBop || ignoreBeat){
+            if (shouldBop)
+                character.nextDanceBeat += character.danceEveryNumBeats;
+
+			if (!character.animation.curAnim.name.startsWith("sing") && !character.stunned) 
+                character.dance();
+        }
+        
+    }
+
+	function danceCharacters(?curBeat:Float)
 	{
 		final curBeat = curBeat==null ? this.curBeat : curBeat;
 
 		if (gf != null)
-		{
-			var gfDanceEveryNumBeats = Math.round(gfSpeed * gf.danceEveryNumBeats);
-			if ((gfDanceEveryNumBeats != 0 && curBeat % gfDanceEveryNumBeats == 0)
-				&& gf.animation.curAnim != null
-				&& !gf.animation.curAnim.name.startsWith("sing")
-				&& !gf.stunned)
-				gf.dance();
-		}
+			checkCharacterDance(gf, curBeat);
+		
 
 		for (field in playfields)
 		{
 			for (char in field.characters)
 			{
 				if (char != gf)
-				{
-					if ((char.danceEveryNumBeats != 0 && curBeat % char.danceEveryNumBeats == 0)
-						&& char.animation.curAnim != null
-						&& !char.animation.curAnim.name.startsWith('sing')
-						&& !char.stunned)
-					{
-						char.dance();
-					}
-				}
+					checkCharacterDance(char, curBeat);
+				
 			}
 		}
 	}

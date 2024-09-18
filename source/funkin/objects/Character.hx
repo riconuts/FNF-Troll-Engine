@@ -42,6 +42,9 @@ typedef AnimArray = {
 
 class Character extends FlxSprite
 {
+    /**The next beat the character will dance on**/
+    public var nextDanceBeat:Float = -4;
+
 	/**Whether the character should idle when the player is holding a gameplay key**/
 	public var idleWhenHold:Bool = true;
 
@@ -648,7 +651,7 @@ class Character extends FlxSprite
 		callOnScripts("onAnimPlayed", [AnimName, Force, Reversed, Frame]);
 	}
 
-	public var danceEveryNumBeats:Int = 2;
+	public var danceEveryNumBeats:Float = 2;
 	private var settingCharacterUp:Bool = true;
 	public function recalculateDanceIdle() {
 		var lastDanceIdle:Bool = danceIdle;
