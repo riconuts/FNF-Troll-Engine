@@ -7,17 +7,23 @@ package funkin.objects;
 
 // TODO: add the other video libs (hxcodec and its various versions that change its API)
 
+#if !VIDEOS_ALLOWED
+class IndependentVideoSprite{
+    
+}
+#else
 import haxe.io.Bytes;
 import sys.FileSystem;
+
 #if (hxvlc)
 #if (hxvlc > "1.5.5")
 import hxvlc.util.typeLimit.OneOfThree;
 #else
 import hxvlc.util.OneOfThree;
 #end
-
 import hxvlc.flixel.FlxVideoSprite as VideoSprite;
 #end
+
 class IndependentVideoSprite extends VideoSprite {
     public static final muted:String = ":no-audio";
     public static final looping:String = ':input-repeat=65535';
@@ -132,3 +138,4 @@ class IndependentVideoSprite extends VideoSprite {
         }
 	}
 }
+#end
