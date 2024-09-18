@@ -75,7 +75,7 @@ typedef Release = {
 	var reactions:Reactions;
 }
 
-@:enum abstract HttpReturnType(Int) from Int to Int
+enum abstract HttpReturnType(Int) from Int to Int
 {
     var DATA = 0;
 	var BYTES = 1;

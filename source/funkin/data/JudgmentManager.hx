@@ -6,7 +6,7 @@ import funkin.objects.Note;
 /**
  * Defines how a judgment interacts w/ the combo count
  */
-@:enum abstract ComboBehaviour(Int) from Int to Int
+enum abstract ComboBehaviour(Int) from Int to Int
 {
     /** doesnt increment or break your combo */
     var IGNORE = 0;
@@ -39,7 +39,7 @@ typedef JudgmentData = {
 /**
  * Ease of access to default judgments
  */
-@:enum abstract Judgment(String) from String to String // this just makes it easier
+enum abstract Judgment(String) from String to String // this just makes it easier
 {
 	var UNJUDGED = 'unjudged'; // yet to be hit
 	var TIER1 = 'tier1'; // shit / retard
