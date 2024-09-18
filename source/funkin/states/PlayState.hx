@@ -1523,7 +1523,7 @@ class PlayState extends MusicBeatState
 
 	function danceCharacters(?curBeat:Float)
 	{
-		final curBeat = curBeat==null ? this.curBeat : curBeat;
+		final curBeat = curBeat==null ? this.curDecBeat : curBeat;
 
 		if (gf != null)
 			checkCharacterDance(gf, curBeat);

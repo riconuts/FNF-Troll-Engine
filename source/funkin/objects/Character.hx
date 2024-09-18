@@ -19,6 +19,9 @@ class Character extends FlxSprite
     /**The next beat the character will dance on**/
     public var nextDanceBeat:Float = -5;
 
+	/**Whether to force the dance animation to play**/
+	public var shouldForceDance:Bool = false;
+
 	/**Whether the character should idle when the player is holding a gameplay key**/
 	public var idleWhenHold:Bool = true;
 
@@ -419,7 +422,7 @@ class Character extends FlxSprite
             if(danceIndex >= idleSequence.length)
                 danceIndex = 0;
         }
-        playAnim(idleSequence[danceIndex] + idleSuffix);
+        playAnim(idleSequence[danceIndex] + idleSuffix, shouldForceDance);
         
 /* 		if(danceIdle){
 			danced = !danced;
