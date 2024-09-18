@@ -13,6 +13,7 @@ import funkin.states.PlayState;
 import funkin.scripts.Globals;
 
 /**
+ * @author crowplexus
  * Handles Gameplay countdown, also optionally used in the Pause Menu if `ClientPrefs.countUnpause` is set to true.
 **/
 class Countdown {
