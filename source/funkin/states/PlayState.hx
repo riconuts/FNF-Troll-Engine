@@ -1506,7 +1506,7 @@ class PlayState extends MusicBeatState
         if(character.danceEveryNumBeats == 0)return;
         if(character.animation.curAnim == null)return;
         if(beat == null)
-            beat = this.curBeat;
+            beat = this.curDecBeat;
 
 
         
