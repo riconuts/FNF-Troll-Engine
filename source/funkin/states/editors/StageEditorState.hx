@@ -1,5 +1,6 @@
 package funkin.states.editors;
 
+import funkin.data.CharacterData;
 import funkin.objects.Stage;
 import flixel.FlxCamera;
 import flixel.FlxG;
@@ -433,7 +434,7 @@ class StageEditorState extends MusicBeatState{
 
 	function reloadCharacterArray()
 	{
-		characterList = Character.getAllCharacters();
+		characterList = CharacterData.getAllCharacters();
 
 		var weirdArray = FlxUIDropDownMenuCustom.makeStrIdLabelArray(characterList, true);
 		dadDropDown.setData(weirdArray);

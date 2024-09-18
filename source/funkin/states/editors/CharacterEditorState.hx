@@ -1,10 +1,8 @@
 package funkin.states.editors;
 
 import funkin.objects.hud.HealthIcon;
-#if DISCORD_ALLOWED
-import funkin.api.Discord.DiscordClient;
-#end
 import funkin.objects.Character;
+import funkin.data.CharacterData;
 import animateatlas.AtlasFrameMaker;
 import flixel.FlxCamera;
 import flixel.FlxG;
@@ -36,10 +34,10 @@ import openfl.events.IOErrorEvent;
 import openfl.net.FileReference;
 
 using StringTools;
-#if MODS_ALLOWED
-import sys.FileSystem;
-#end
 
+#if DISCORD_ALLOWED
+import funkin.api.Discord.DiscordClient;
+#end
 
 /**
 	*DEBUG MODE
@@ -655,7 +653,7 @@ class CharacterEditorState extends MusicBeatState
 		});
 
 		var addUpdateButton:FlxButton = new FlxButton(70, animationIndicesInputText.y + 30, "Add/Update", function() {
-			var indices:Array<Int> = Character.parseIndices(animationIndicesInputText.text.trim().split(','));
+			var indices:Array<Int> = CharacterData.parseIndices(animationIndicesInputText.text.trim().split(','));
 			
 			var lastAnim:String = char.animationsArray[curAnim] != null ? char.animationsArray[curAnim].anim : '';
 
@@ -769,7 +767,7 @@ class CharacterEditorState extends MusicBeatState
 
 	var ghostList:Array<String>;
 	function updateGhostCharList(){
-		ghostList = Character.getAllCharacters();
+		ghostList = CharacterData.getAllCharacters();
 		ghostList.insert(0, "");
 		ghostCharDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(ghostList, true));
 	}
@@ -1160,7 +1158,7 @@ class CharacterEditorState extends MusicBeatState
 	}
 
 	function reloadCharacterDropDown() {
-		characterList = Character.getAllCharacters();
+		characterList = CharacterData.getAllCharacters();
 
 		charDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(characterList, true));
 		charDropDown.selectedLabel = daAnim;

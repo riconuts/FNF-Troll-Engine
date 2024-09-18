@@ -1,5 +1,6 @@
 package funkin.states;
 
+import funkin.data.CharacterData;
 import funkin.data.Cache;
 import funkin.data.Song;
 import funkin.data.Section;
@@ -811,7 +812,7 @@ class PlayState extends MusicBeatState
 
 		for (character in characters)
 		{
-			for (data in Character.returnCharacterPreload(character))
+			for (data in CharacterData.returnCharacterPreload(character))
 				shitToLoad.push(data);
 		}
 
@@ -2066,7 +2067,7 @@ class PlayState extends MusicBeatState
 
 		switch(event.event){
 			case "Change Character":
-				return Character.returnCharacterPreload(event.value2);
+				return CharacterData.returnCharacterPreload(event.value2);
 		}
 
 		return preload;
