@@ -45,9 +45,10 @@ class AdvancedHUD extends CommonHUD
 		add(iconP1);
 		add(iconP2);
 		
-		songHighscore = Highscore.getScore(songName);
-		songWifeHighscore = Highscore.getNotesHit(songName);
-		songHighRating = Highscore.getRating(songName);
+		var songRecord = Highscore.getRecord(this.songName, PlayState.difficultyName);
+		songHighscore = songRecord.score;
+		songWifeHighscore = songRecord.accuracyScore;
+		songHighRating = songRecord.rating;
 
 		////
 		var tWidth = 200;

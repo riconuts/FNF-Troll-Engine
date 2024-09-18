@@ -39,8 +39,9 @@ class PsychHUD extends CommonHUD
 
 		stats.changedEvent.add(statChanged);
 		
-		songHighscore = Highscore.getScore(songName);
-		songWifeHighscore = Highscore.getNotesHit(songName);
+		var songRecord = Highscore.getRecord(this.songName, PlayState.difficultyName);
+		songHighscore = songRecord.score;
+		songWifeHighscore = songRecord.accuracyScore;
 
 		showJudgeCounter = ClientPrefs.judgeCounter != "Off";
 

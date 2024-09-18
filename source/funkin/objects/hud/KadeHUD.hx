@@ -49,9 +49,10 @@ class KadeHUD extends BaseHUD
 	{
 		super(iP1, iP2, songName, stats);
 
-		songHighscore = Highscore.getScore(songName);
-		songWifeHighscore = Highscore.getNotesHit(songName);
-
+		var songRecord = Highscore.getRecord(this.songName, PlayState.difficultyName);
+		songHighscore = songRecord.score;
+		songWifeHighscore = songRecord.accuracyScore;
+	
 		//// Health bar
 		healthBar = new FNFHealthBar(iP1, iP2);
 		healthBarBG = healthBar.healthBarBG;
