@@ -1498,7 +1498,6 @@ class PlayState extends MusicBeatState
 			countdownSpr = countdown.sprite;
 			countdownSnd = countdown.sound;
 			countdownTwn = countdown.tween;
-			danceCharacters(pos - 5);
 		}
 		//
 	}
@@ -2662,6 +2661,7 @@ class PlayState extends MusicBeatState
 		checkEventNote();
 
 		super.update(elapsed);
+		danceCharacters(); // Update characters dancing
 		modManager.update(elapsed, curDecBeat, curDecStep);
 
 		if (generatedMusic)
@@ -4332,8 +4332,6 @@ class PlayState extends MusicBeatState
 		{
 			cameraBump();
 		}
-
-		danceCharacters();
 
 		lastBeatHit = curBeat;
 
