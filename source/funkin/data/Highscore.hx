@@ -145,8 +145,8 @@ class Highscore {
 	inline public static function floorDecimal(value:Float, decimals:Int):Float
 		return CoolUtil.floorDecimal(value, decimals);
 
-	static inline function formatSong(path:String, chartName:String=""):String
-		return Paths.formatToSongPath(path) + (chartName==''?'':':$chartName');
+	static inline function formatSong(path:String, chartName:String):String
+		return Paths.formatToSongPath(path) + ((chartName==null||chartName.length==0)?'':':$chartName');
 
     public static inline function emptyRecord():ScoreRecord {
         return {
@@ -168,7 +168,7 @@ class Highscore {
 			fcMedal: NONE
         };
     }
-    public static inline function getRecord(song:String, ?chartName:String=''):ScoreRecord
+    public static inline function getRecord(song:String, chartName:String):ScoreRecord
     {
 		var formattedSong:String = formatSong(song, chartName);
 		//trace('get "$formattedSong"');
@@ -180,7 +180,7 @@ class Highscore {
         
         return true;
     }
-	public inline static function hasValidScore(song:String, ?chartName:String)
+	public inline static function hasValidScore(song:String, chartName:String)
 		return isValidScoreRecord(getRecord(song, chartName));
 
 	public static function getRatingRecord(scoreRecord:ScoreRecord):Float{
@@ -193,20 +193,23 @@ class Highscore {
 		return (scoreRecord.accuracyScore / scoreRecord.maxAccuracyScore);
 	}
 
-    public inline static function getRating(song:String, ?chart:String):Float
+    public inline static function getRating(song:String, chart:String):Float
 		return getRatingRecord(getRecord(song, chart));
     
-    public inline static function getScore(song:String, ?chart:String) return getRecord(song, chart).score;
+    public inline static function getScore(song:String, chart:String):Int
+		return getRecord(song, chart).score;
     
-	public inline static function getNotesHit(song:String, ?chart:String) return getRecord(song, chart).accuracyScore;
+	public inline static function getNotesHit(song:String, chart:String):Float
+		return getRecord(song, chart).accuracyScore;
 
-	public static function getWeekScore(week:String):Int return currentWeekData.exists(week) ? currentWeekData.get(week) : 0;
+	public static function getWeekScore(week:String):Int
+		return currentWeekData.exists(week) ? currentWeekData.get(week) : 0;
 
     @:deprecated("You should use saveScoreRecord in place of saveScore!")
 	public static function saveScore(song:String, score:Int = 0, ?rating:Float = -1, ?notesHit:Float = 0):Void
 	{
         var tNH:Float = notesHit / rating; // total notes hit
-        return saveScoreRecord(song, {
+        return saveScoreRecord(song, '', {
 			scoreSystemV: isWife3 ? wifeVersion : normVersion,
 			score: score,
             comboBreaks: 0, // since we cant detect the combo breaks from here
@@ -219,7 +222,8 @@ class Highscore {
         });
     }
 
-	public static function saveScoreRecord(song:String, chartName:String = "", scoreRecord:ScoreRecord, ?force:Bool = false){
+	public static function saveScoreRecord(song:String, chartName:String, scoreRecord:ScoreRecord, ?force:Bool = false)
+	{
 		if (scoreRecord.fcMedal == null){
             if(scoreRecord.comboBreaks > 0)
                 scoreRecord.fcMedal = NONE; // no fc since you have a CB lol
