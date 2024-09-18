@@ -17,7 +17,7 @@ using StringTools;
 class Character extends FlxSprite
 {
     /**The next beat the character will dance on**/
-    public var nextDanceBeat:Float = -4;
+    public var nextDanceBeat:Float = -5;
 
 	/**Whether the character should idle when the player is holding a gameplay key**/
 	public var idleWhenHold:Bool = true;

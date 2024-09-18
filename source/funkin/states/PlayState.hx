@@ -1498,6 +1498,7 @@ class PlayState extends MusicBeatState
 			countdownSpr = countdown.sprite;
 			countdownSnd = countdown.sound;
 			countdownTwn = countdown.tween;
+			danceCharacters(pos - 5);
 		}
 		//
 	}
