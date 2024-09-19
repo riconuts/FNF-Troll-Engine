@@ -832,7 +832,7 @@ class PlayState extends MusicBeatState
 			});
 		}
 
-		// Paths.getAllStrings();
+		Paths.getAllStrings();
 		Cache.loadWithList(shitToLoad);
 		shitToLoad = [];
 

@@ -130,7 +130,7 @@ class StartupState extends FlxTransitionableState
 		Paths.loadRandomMod();
 		#end
 
-		Paths.getAllStrings();
+		Paths.locale = "en";
 		
 		funkin.data.Highscore.load();
 

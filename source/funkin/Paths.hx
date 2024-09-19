@@ -1,5 +1,7 @@
 package funkin;
 
+import haxe.ds.StringMap;
+import funkin.data.LocalizationMap;
 import funkin.data.WeekData;
 import flixel.addons.display.FlxRuntimeShader;
 import flixel.graphics.frames.FlxAtlasFrames;
@@ -134,8 +136,6 @@ class Paths
 		localTrackedAssets = [];
 		Assets.cache.clear("songs");
 	}
-
-	static public var currentStrings:Map<String,String> = [];
 
 	static public var currentModDirectory:String = '';
 
@@ -382,135 +382,6 @@ class Paths
 			return file;
 		#end
 		return 'assets/fonts/$key';
-	}
-
-    public static var locale(default, set):String = 'en';
-    static function set_locale(l:String){
-        locale = l.toLowerCase();
-		getAllStrings();
-/*         
-        if(locale != l){
-			for (idx => string in currentStrings){
-                var newString = getString(idx, true);
-				currentStrings.set(idx, newString);
-            }
-        } */
-        return l;
-    }
-
-	// TODO: maybe these should be cached when starting a song
-    // once we add a resource (mod/skin) menu we can do caching there for some things
-    // we can populate the entire string map when reloading mods and skins
-
-	static final bedrockComments:EReg = ~/(##).+/;
-	static final normalComments:EReg = ~/(\/\/).+/;
-    // could add lua-style comments though honestly dont think i need to
-
-    inline static function parseLocalString(trimmedShit:String){
-		// Allow in-line comments
-		var noComments:String = bedrockComments.replace(normalComments.replace(trimmedShit, ""), "");
-
-		if (noComments.length == 0)
-			return;
-
-		var splitted = noComments.split("=");
-		if (splitted.length <= 1)
-			return; // likely not a localization key
-		var thisKey = splitted.shift();
-
-		if (!currentStrings.exists(thisKey))
-			currentStrings.set(thisKey, splitted.join("=").trim().replace('\\n', '\n'));
-    }
-
-	public static function getAllStrings()
-	{
-		currentStrings.clear();
-
-		for (filePath in Paths.getFolders("data"))
-		{
-			var checkFiles = [
-				"lang/" + locale + ".txt", "lang/" + locale + ".lang", "lang/en.txt", "strings.txt"];
-			var file = filePath + checkFiles.shift();
-			while (checkFiles.length > 0 && !exists(file))
-                file = filePath + checkFiles.shift();
-			
-			if (!exists(file))continue;
-
-
-			var stringsText = getContent(file);
-			var daLines = stringsText.trim().split("\n");
-
-            var isInComment:Bool = false;
-			for(shit in daLines){
-				
-                // Allow comment blocks if a line starts with /* and escape block if line starts with */
-				var trimmedShit = shit.trim();
-                if (trimmedShit.startsWith("*/") && isInComment) {
-					isInComment = false;
-					continue;
-				}
-				if (trimmedShit.startsWith("/*") && !isInComment) {
-					isInComment = true;
-					continue;
-				}
-
-				parseLocalString(trimmedShit);
-			}
-		}
-	}
-
-	public inline static function hasString(key:String)
-		return _getString(key) != null;
-
-	public static function _getString(key:String, force:Bool = false):Null<String>
-	{
-		if (!force && currentStrings.exists(key))
-			return currentStrings.get(key);
-
-		for (filePath in Paths.getFolders("data"))
-		{
-			var checkFiles = ["lang/" + locale + ".txt", "lang/en.txt", "strings.txt"];
-			var file = filePath + checkFiles.shift();
-			while (checkFiles.length > 0 && !exists(file))
-				file = filePath + checkFiles.shift();
-
-			//trace(filePath);
-			var stringsText = getContent(file);
-			if (stringsText == null) continue;
-
-			var daLines = stringsText.trim().split("\n");
-
-			var isInComment:Bool = false;
-			for (shit in daLines) {
-				// Allow comment blocks if a line starts with /* and escape block if line starts with */
-				var trimmedShit = shit.trim();
-				if (trimmedShit.startsWith("*/") && isInComment) {
-					isInComment = false;
-					continue;
-				}
-				if (trimmedShit.startsWith("/*") && !isInComment) {
-					isInComment = true;
-					continue;
-				}
-
-				parseLocalString(trimmedShit);
-			}
-		}
-
-		return currentStrings.get(key);
-	}
-
-	public static function getString(key:String, force:Bool = false):Null<String>{
-		var str:Null<String> = _getString(key, force);
-		
-		if (str == null){
-			if (Main.showDebugTraces) 
-				trace('$key has no attached value');
-
-			return key;
-		}
-
-		return str;
 	}
 
 	inline static public function fileExists(key:String, ?type:AssetType, ?ignoreMods:Bool = false, ?library:String)
@@ -929,6 +800,46 @@ class Paths
 	{
 		Paths.currentModDirectory = '';
 	}
+
+	//// Strings
+	public static var locale(default, set):String;
+	@:noCompletion static function set_locale(l:String){
+		if (l != locale) {
+			locale = l;
+			getAllStrings();
+		}
+		return locale;
+	}
+
+	private static final currentStrings = new StringMap();
+
+	public static function getAllStrings():Void {
+		currentStrings.clear();
+		// trace("refreshing strings");
+
+		var checkFiles = ['lang/$locale.txt', 'lang/$locale.lang', "lang/en.txt", "strings.txt"]; 
+		for (filePath in Paths.getFolders("data")) {
+			for (fileName in checkFiles) {
+				var path:String = filePath + fileName;
+				if (!Paths.exists(path)) continue;
+				
+				var file = LocalizationMap.fromFile(path);
+				for (k => v in file) {
+					if (!currentStrings.exists(k))
+						currentStrings.set(k, v);
+				}
+			}
+		}
+	}
+
+	public static inline function hasString(key:String):Bool
+		return currentStrings.exists(key);
+
+	public static inline function _getString(key:String):Null<String>
+		return currentStrings.get(key);
+
+	public static inline function getString(key:String, ?defaultValue:String):String
+		return hasString(key) ? _getString(key) : (defaultValue==null ? key : defaultValue);
 }
 
 typedef FreeplaySongMetadata = {
