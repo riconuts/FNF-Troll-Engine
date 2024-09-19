@@ -653,7 +653,8 @@ class CharacterEditorState extends MusicBeatState
 		});
 
 		var addUpdateButton:FlxButton = new FlxButton(70, animationIndicesInputText.y + 30, "Add/Update", function() {
-			var indices:Array<Int> = CharacterData.parseIndices(animationIndicesInputText.text.trim().split(','));
+			var indicesInput = animationIndicesInputText.text.trim();
+			var indices:Array<Int> = indicesInput.length==0 ? null : CharacterData.parseIndices(indicesInput.split(','));
 			
 			var lastAnim:String = char.animationsArray[curAnim] != null ? char.animationsArray[curAnim].anim : '';
 
@@ -678,13 +679,13 @@ class CharacterEditorState extends MusicBeatState
 				cameraOffset: [animationXCam.value, animationYCam.value]
 			};
 
-			if(indices != null && indices.length > 0) {
+			if (indices != null && indices.length > 0) {
 				char.animation.addByIndices(newAnim.anim, newAnim.name, newAnim.indices, "", newAnim.fps, newAnim.loop);
 			} else {
 				char.animation.addByPrefix(newAnim.anim, newAnim.name, newAnim.fps, newAnim.loop);
 			}
 
-			if(!char.animOffsets.exists(newAnim.anim)) {
+			if (!char.animOffsets.exists(newAnim.anim)) {
 				char.addOffset(newAnim.anim, 0, 0);
 			}
 			char.animationsArray.push(newAnim);
