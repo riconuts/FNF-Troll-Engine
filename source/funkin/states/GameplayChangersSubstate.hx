@@ -426,7 +426,7 @@ class GameplayOption
 
 	public function new(name:String, variable:String, type:String = 'bool', defaultValue:Dynamic = 'null variable value', ?options:Array<String> = null)
 	{
-		this.name = name;
+		this.name = Paths.getString('gameplay_modifier_$variable', name);
 		this.variable = variable;
 		this.type = type;
 		this.defaultValue = defaultValue;
