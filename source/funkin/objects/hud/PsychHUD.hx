@@ -1,22 +1,24 @@
 package funkin.objects.hud;
 
-import funkin.data.JudgmentManager.JudgmentData;
-import flixel.util.FlxColor;
-import funkin.objects.playfields.*;
-
-import flixel.tweens.FlxTween;
 import flixel.text.FlxText;
+import flixel.util.FlxColor;
+import flixel.tweens.FlxTween;
+
+import funkin.objects.playfields.PlayField;
+import funkin.data.JudgmentManager.JudgmentData;
 
 class PsychHUD extends CommonHUD 
 {
-	public var judgeTexts:Map<String, FlxText> = [];
-	public var judgeNames:Map<String, FlxText> = [];
+	public var judgeTexts = new Map<String, FlxText>();
+	public var judgeNames = new Map<String, FlxText>();
 	
 	public var scoreTxt:FlxText;
 	public var hitbar:Hitbar;
 
 	var hitbarTween:FlxTween;
 	var scoreTxtTween:FlxTween;
+
+	var separator = ' • ';
 
 	// cached because dont wanna be doing that shit every update cycle lmao
 	// even though it probably doesnt matter since it caches it the first time
@@ -181,9 +183,7 @@ class PsychHUD extends CommonHUD
 		isHighscore = songWifeHighscore != 0 && totalNotesHit > songWifeHighscore;
 	}
 
-	inline function getScoreText(){
-		final separator = ' • ';
-		
+	inline function getScoreText(){	
 		var text:String = '${isHighscore ? hiscoreString : scoreString}: $shownScore';
 		if (!showJudgeCounter) text += separator + '$cbString: $comboBreaks';
 		text += separator + '$ratingString: ${getGradeText()}';
@@ -202,7 +202,7 @@ class PsychHUD extends CommonHUD
 		final comboName = ClientPrefs.wife3 && ratFC == stats.gfc ? stats.fc : ratFC;
 		final ratPerc = Highscore.floorDecimal(ratingPercent * 100, 2);
 
-		return '$ratPerc% / $grade [$comboName]';
+		return '$ratPerc%'+separator+'$grade [$comboName]';
 	}
 
 	override function update(elapsed:Float)
