@@ -71,17 +71,6 @@ class OptionsSubstate extends MusicBeatSubstate
 				]
 			],
 			[
-				"accessibility",
-				[
-					"autoPause", // should probably place this in misc but, up to you two!
-					"countUnpause",
-					"flashing",
-					"camShakeP",
-					"camZoomP",
-					"modcharts",
-				]
-			],
-			[
 				"advanced",
 				[
 					"wife3",
@@ -165,25 +154,30 @@ class OptionsSubstate extends MusicBeatSubstate
 		],
 		
 		"misc" => [
-			//["audio", ["masterVolume", "songVolume", "hitsoundVolume", "missVolume"]],
+			[
+				"accessibility",
+				[
+					"autoPause",
+					"countUnpause",
+					"modcharts",
+					"flashing",
+					"camShakeP",
+					"camZoomP",
+				]
+			],
 			#if DISCORD_ALLOWED
 			["discord", ["discordRPC"]],
 			#end
-			#if(DO_AUTO_UPDATE || display)
-			["updating", ["checkForUpdates", "downloadBetas"]]
+			#if DO_AUTO_UPDATE
+			[
+				"updating", 
+				[
+					"checkForUpdates", 
+					"downloadBetas"
+				]
+			],
 			#end
 		],
-		
-		/* "accessibility" => [
-				[
-					"gameplay", 
-					[
-						"flashing",
-						"camShakeP",
-						"camZoomP"
-					]
-				]
-			] */
 	];
 
 	static inline function epicWindowVal(val:Float)
