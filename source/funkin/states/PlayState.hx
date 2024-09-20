@@ -547,7 +547,7 @@ class PlayState extends MusicBeatState
 			perfectMode = ClientPrefs.getGameplaySetting('perfect', perfectMode);
 			instaRespawn = ClientPrefs.getGameplaySetting('instaRespawn', instaRespawn);
 			cpuControlled = ClientPrefs.getGameplaySetting('botplay', cpuControlled);
-			disableModcharts = !ClientPrefs.modcharts; //ClientPrefs.getGameplaySetting('disableModcharts', false);
+			disableModcharts = ClientPrefs.getGameplaySetting('disableModcharts', false);
 			midScroll = ClientPrefs.midScroll;
 
 			#if tgt
