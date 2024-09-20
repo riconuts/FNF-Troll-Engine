@@ -5,7 +5,6 @@ import flixel.FlxState;
 import openfl.Lib;
 import openfl.display.FPS;
 import openfl.display.Sprite;
-import openfl.display.StageScaleMode;
 import openfl.system.Capabilities;
 import openfl.events.Event;
 import lime.app.Application;
@@ -53,9 +52,9 @@ class Main extends Sprite
 {
 	var gameWidth:Int = 1280; // Width of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var gameHeight:Int = 720; // Height of the game in pixels (might be less / more in actual pixels depending on your zoom).
+	var adjustGameSize:Bool = true; // If true, the game size is adjusted to fit within the screen resolution
 	var initialState:Class<FlxState> = StartupState; // The FlxState the game starts with.
 	var nextState:Class<FlxState> = funkin.states.TitleState; 
-	var zoom:Float = -1; // If -1, zoom is automatically calculated to fit the window dimensions.
 	var framerate:Int = 60; // How many frames per second the game should run at.
 	var skipSplash:Bool = true; // Whether to skip the flixel splash screen that appears in release mode.
 	var startFullscreen:Bool = false; // Whether to start the game in fullscreen on desktop targets
@@ -77,20 +76,14 @@ class Main extends Sprite
 	public static var bread:Bread;
 
 	////
-	public static function main():Void
-	{
-		Lib.current.addChild(new Main());
-	}
-
-	public function new()
-	{	
+	public function new() {
 		super();
 
 		////
 		#if sys
 		var args = Sys.args();
 		trace(args);
-		for (arg in args){
+		for (arg in args) {
 			switch(arg){
 				case "troll":
 					#if tgt
@@ -126,47 +119,44 @@ class Main extends Sprite
 		}
 		#end
 
-		{
-			final screenWidth = Capabilities.screenResolutionX;
-			final screenHeight = Capabilities.screenResolutionY;
-	
+		final screenWidth = Capabilities.screenResolutionX;
+		final screenHeight = Capabilities.screenResolutionY;
+
+		if (adjustGameSize) {
 			//// Readjust the game size for smaller screens
-			if (zoom == -1)
-			{
-				if (!(screenWidth > gameWidth || screenHeight > gameWidth)){
-					var ratioX:Float = screenWidth / gameWidth;
-					var ratioY:Float = screenHeight / gameHeight;
-					
-					zoom = Math.min(ratioX, ratioY);
-					gameWidth = Math.ceil(screenWidth / zoom);
-					gameHeight = Math.ceil(screenHeight / zoom);
-				}
+			if (!(screenWidth > gameWidth || screenHeight > gameWidth)){
+				var ratioX:Float = screenWidth / gameWidth;
+				var ratioY:Float = screenHeight / gameHeight;
+				
+				var zoom = Math.min(ratioX, ratioY);
+				gameWidth = Math.ceil(screenWidth / zoom);
+				gameHeight = Math.ceil(screenHeight / zoom);
 			}
-
-			//// Readjust the window size for larger screens 
-			var scaleFactor:Int = Math.floor((screenWidth > screenHeight) ? (screenHeight / gameHeight) : (screenWidth / gameWidth));
-			if (scaleFactor < 1) scaleFactor = 1;
-
-			final windowWidth:Int = scaleFactor * gameWidth;
-			final windowHeight:Int = scaleFactor * gameHeight;
-
-			Application.current.window.resize(
-				windowWidth, 
-				windowHeight
-			);
-			Application.current.window.move(
-				Std.int((screenWidth - windowWidth) / 2),
-				Std.int((screenHeight - windowHeight) / 2)
-			);
-
-			////
-			@:privateAccess
-			FlxG.initSave();
-			startFullscreen = FlxG.save.data.fullscreen;
 		}
+
+		//// Readjust the window size for larger screens 
+		var scaleFactor:Int = Math.floor((screenWidth > screenHeight) ? (screenHeight / gameHeight) : (screenWidth / gameWidth));
+		if (scaleFactor < 1) scaleFactor = 1;
+
+		final windowWidth:Int = scaleFactor * gameWidth;
+		final windowHeight:Int = scaleFactor * gameHeight;
+
+		Application.current.window.resize(
+			windowWidth, 
+			windowHeight
+		);
+		Application.current.window.move(
+			Std.int((screenWidth - windowWidth) / 2),
+			Std.int((screenHeight - windowHeight) / 2)
+		);
+
+		////
+		@:privateAccess
+		FlxG.initSave();
+		startFullscreen = FlxG.save.data.fullscreen;
 		
 		StartupState.nextState = nextState;
-		addChild(new FNFGame(gameWidth, gameHeight, initialState, #if(flixel < "5.0.0") zoom, #end framerate, framerate, skipSplash, startFullscreen));
+		addChild(new FNFGame(gameWidth, gameHeight, initialState, framerate, framerate, skipSplash, startFullscreen));
 
 		FlxG.mouse.useSystemCursor = true;
 		FlxG.mouse.visible = false;
@@ -180,7 +170,6 @@ class Main extends Sprite
 		addChild(bread);
 
 		#if CRASH_HANDLER
-		// Original code was made by sqirra-rng, big props to them!!!
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(
 			UncaughtErrorEvent.UNCAUGHT_ERROR, 
 			(event:UncaughtErrorEvent) -> {
@@ -219,17 +208,39 @@ class Main extends Sprite
 	#end
 
 	#if CRASH_HANDLER
-	private static function onCrash(errorName:String):Void
-	{
-		////
+	private static function toMainMenu() @:privateAccess {
+		try{
+			if (FlxG.game._state != null) FlxG.game._state.destroy();
+			FlxG.game._state = null;
+		}catch(e){
+			print("Error destroying state: ", e);
+		}	
+		
+		FlxG.game._requestedState = new funkin.states.MainMenuState();
+		FlxG.game.switchState();
+	}
+
+	private static var lastCallstack:String;
+	private static function saveCallStack(callstack) {
+		lastCallstack = callstack;
+		File.saveContent("crash.txt", callstack);
+	}
+
+	inline static function closeProgram() {
+		#if DISCORD_ALLOWED
+		DiscordClient.shutdown(true);
+		#end
+
+		Sys.exit(1);
+	}
+
+	private static function onCrash(errorName:String):Void {
 		print("\nCall stack starts below");
 
 		var callstack:String = "";
 
-		for (stackItem in CallStack.exceptionStack(true))
-		{
-			switch (stackItem)
-			{
+		for (stackItem in CallStack.exceptionStack(true)) {
+			switch (stackItem) {
 				case FilePos(s, file, line, column):
 					callstack += '$file:$line\n';
 				default:
@@ -240,39 +251,31 @@ class Main extends Sprite
 		print('\n$callstack\n');
 
 		#if (windows && cpp)
-		callstack += "\n\nWould you like to goto the main menu?";
+		if (lastCallstack == callstack)
+			return toMainMenu();
+		
+		var boxMessage:String = callstack;
+		boxMessage += "\n";
+		boxMessage += "\nCall stack will be saved as crash.txt";
+		boxMessage += "\nWould you like to goto the main menu?";
 
-		var ret = Windows.msgBox(callstack, errorName, ERROR | MessageBoxOptions.YESNOCANCEL);
-		switch(ret){
-			default: // Close program.
-
+		var ret = Windows.msgBox(boxMessage, errorName, ERROR | MessageBoxOptions.YESNOCANCEL);
+		
+		switch(ret) {
 			case YES: // Return to Main Menu.
-			@:privateAccess{
-				try{
-					if (FlxG.game._state != null) FlxG.game._state.destroy();
-					FlxG.game._state = null;
-				}catch(e){
-					print("Error destroying unstable state: ", e);
-				}	
-				
-				FlxG.game._requestedState = new funkin.states.MainMenuState();
-				FlxG.game.switchState();
-				return;
-			}
+				saveCallStack(callstack);
+				toMainMenu();
+
+			default: // Close program.
+				saveCallStack(callstack);
+				closeProgram();
+
 			case CANCEL: // Continue with a possibly unstable state
-				return;
+				saveCallStack(callstack);
 		}
 		#else
 		Application.current.window.alert(callstack, errorName);
-		#end
-
-		#if DISCORD_ALLOWED
-		DiscordClient.shutdown(true);
-		#end
-
-		#if sys
-		File.saveContent("crash.txt", callstack);
-		Sys.exit(1);
+		closeProgram();
 		#end
 	}
 	#end
