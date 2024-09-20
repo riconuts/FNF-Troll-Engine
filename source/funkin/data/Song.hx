@@ -68,8 +68,17 @@ typedef SongCreditdata = // beacuse SongMetadata is stolen
 class Song
 {
 	#if moonchart
-    inline static function findFormat(files:Array<String>){
-        var data:Null<Format> = null;
+    private static function findFormat(filePaths:Array<String>) {
+        var files:Array<String> = [];
+		for (path in filePaths) {
+			if (Paths.exists(path)) 
+				files.push(path);
+		}
+
+		if (files.length == 0)
+			return null;
+		
+		var data:Null<Format> = null;
         try{
 			data = FormatDetector.findFormat(files);
         }catch(e:Any){
@@ -84,31 +93,37 @@ class Song
 		Paths.currentModDirectory = metadata.folder;
 		
         #if moonchart
-        var folder:String = '';
 		final songName = Paths.formatToSongPath(metadata.songName);
+
+        var folder:String = '';
         var charts:Map<String, Bool> = [];
+		
 		function processFileName(unprocessedName:String) {
 			var fileName:String = unprocessedName.toLowerCase();
-			var filePath = folder + unprocessedName;
-            if(!moonchartExtensions.contains(Path.extension(filePath)))
+			var extension:String = Path.extension(fileName);
+
+            if (!moonchartExtensions.contains(extension))
                 return;
-            var fileFormat:Format = !Paths.exists(filePath) ? null : findFormat([filePath]);
-			if (fileFormat == null)
-				return;
-            var formatInfo:FormatData = FormatDetector.getFormatData(fileFormat);
-            var noExtension:String = Path.withoutExtension(fileName);
+
+			var filePath:String = folder + unprocessedName;
+            var fileFormat:Format = findFormat([filePath]);
+			if (fileFormat == null) return;
+
             switch (fileFormat) {
                 case FNF_LEGACY_PSYCH | FNF_LEGACY:
                     if (fileName == '$songName.json') {
                         charts.set("normal", true);
                         return;
-                    } else if (!fileName.startsWith('$songName-') || !fileName.endsWith('.json'))
+                    } else if (!fileName.startsWith('$songName-') || extension != "json")
                         return;
                     
-
                     final extension_dot = songName.length + 1;
                     charts.set(fileName.substr(extension_dot, fileName.length - extension_dot - 5), true);
+					
                 default:
+					var formatInfo:FormatData = FormatDetector.getFormatData(fileFormat);
+					var noExtension:String = Path.withoutExtension(fileName);
+
                     var chart:moonchart.formats.BasicFormat<{}, {}>;
                     chart = Type.createInstance(formatInfo.handler, []).fromFile(filePath);
                     // You'll wanna be on the newest moonchart git so this wont take like 10 minutes lol!!
@@ -132,7 +147,6 @@ class Song
 
                     }
             }
-
 		}
 
 		if (metadata.folder == "") {
@@ -405,17 +419,17 @@ class Song
 		var SONG:Null<SwagSong> = null;
         // TODO: scan through the song folder and look for the first thing that has a supported extension (if json then check if it has diffSuffix cus FNF formats!!)
 		// Or dont since this current method lets you do a dumb thing AKA have 2 diff chart formats in a folder LOL
-        for (ext in moonchartExtensions){
+        for (ext in moonchartExtensions) {
 			var files:Array<String> = [songLowercase + diffSuffix, songLowercase];
 			for (idx in 0...files.length){
                 var input = files[idx];
                 var path:String = Paths.formatToSongPath(songLowercase) + '/' + Paths.formatToSongPath(input) + '.' + ext;
                 var filePath:String = Paths.getPath("songs/" + path);
-				var fileFormat:Format = !Paths.exists(filePath) ? null : findFormat([filePath]);
+				var fileFormat:Format = findFormat([filePath]);
                 #if PE_MOD_COMPATIBILITY
 				if (fileFormat == null){
 					filePath = Paths.getPath("data/" + path);
-					fileFormat = !Paths.exists(filePath) ? null : findFormat([filePath]);
+					fileFormat = findFormat([filePath]);
                 }
                 #end
                 if (fileFormat != null){
@@ -424,7 +438,6 @@ class Song
 					SONG = switch(format){
 						case FNF_LEGACY_PSYCH | FNF_LEGACY | "FNF_TROLL":
 							Song.loadFromJson(songLowercase + diffSuffix, songLowercase);
-
                             
 						default:
 							trace('Converting from format $format!');
