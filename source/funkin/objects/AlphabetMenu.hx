@@ -61,7 +61,7 @@ class AlphabetMenu extends FlxTypedGroup<Alphabet>
 
 		if (value != null){
 			for (i => item in members)
-				item.targetY = i - value;
+				updateItemPos(item, i - value);
 		}
 
 		if (value != null && value != curSelected)
@@ -70,13 +70,17 @@ class AlphabetMenu extends FlxTypedGroup<Alphabet>
 		return curSelected = value;
 	}
 
+	public function updateItemPos(item:Alphabet, index:Float) {
+		item.targetX = (index * 20) + 90;
+		item.targetY = (index * 120 * 1.3) + (FlxG.height * 0.48);
+	}
+
 	public function addTextOption(text:String, ?callbacks:OptionCallbacks, ?textSize:Float)
 	{
 		var index = members.length;
 
 		var item = new Alphabet(0, 70 * index + 30, text, true, false, null, textSize);
-		item.isMenuItem = true;
-		item.targetY = index;
+		updateItemPos(item, index);
 		item.ID = index;
 		add(item);
 

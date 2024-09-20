@@ -23,16 +23,16 @@ class MasterEditorMenu extends MusicBeatState
 		'Stage Builder',
 		'Test Stage'
 	];
-	private var grpTexts:FlxTypedGroup<Alphabet>;
+	private var menu:AlphabetMenu;
 	private var directories:Array<String> = [null];
 
-	private var curSelected = 0;
 	private var curDirectory = 0;
 	private var directoryTxt:FlxText;
 
 	override function create()
 	{
 		FlxG.camera.bgColor = FlxColor.BLACK;
+
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("Editors Menu", null);
@@ -43,16 +43,25 @@ class MasterEditorMenu extends MusicBeatState
 		bg.color = 0xFF353535;
 		add(bg);
 
-		grpTexts = new FlxTypedGroup<Alphabet>();
-		add(grpTexts);
-
-		for (i in 0...options.length)
-		{
-			var leText:Alphabet = new Alphabet(0, (70 * i) + 30, options[i], true, false);
-			leText.isMenuItem = true;
-			leText.targetY = i;
-			grpTexts.add(leText);
+		menu = new AlphabetMenu();
+		menu.controls = controls;
+		menu.callbacks.onAccept = function(i){
+			switch(options[i]) {
+				case 'Character Editor': MusicBeatState.switchState(FlxG.keys.pressed.SHIFT ? new SowyCharacterEditor() : new CharacterEditorState(Character.DEFAULT_CHARACTER, false));
+				case 'Stage Editor': MusicBeatState.switchState(new StageEditorState());
+				case 'Chart Editor': LoadingState.loadAndSwitchState(new ChartingState(), false);
+				case 'Stage Builder': MusicBeatState.switchState(new StageBuilderState());
+				case "Test Stage": MusicBeatState.switchState(new TestState());
+				default: return;
+			}
+			
+			FlxG.sound.music.volume = 0;
+			menu.controls = null;
 		}
+		for (name in options) menu.addTextOption(name);
+		menu.curSelected = 0;
+		add(menu);
+		
 		
 		#if MODS_ALLOWED
 		var textBG:FlxSprite = new FlxSprite(0, FlxG.height - 42).makeGraphic(FlxG.width, 42, 0xFF000000);
@@ -73,7 +82,6 @@ class MasterEditorMenu extends MusicBeatState
 		if(found > -1) curDirectory = found;
 		changeDirectory();
 		#end
-		changeSelection();
 
 		FlxG.mouse.visible = false;
 		super.create();
@@ -81,77 +89,20 @@ class MasterEditorMenu extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
-		if (controls.UI_UP_P)
-		{
-			changeSelection(-1);
-		}
-		if (controls.UI_DOWN_P)
-		{
-			changeSelection(1);
-		}
 		#if MODS_ALLOWED
 		if(controls.UI_LEFT_P)
-		{
 			changeDirectory(-1);
-		}
 		if(controls.UI_RIGHT_P)
-		{
 			changeDirectory(1);
-		}
 		#end
 
-		if (controls.BACK)
-		{
+		if (controls.BACK) {
+			menu.controls = null;
+			FlxG.sound.play(Paths.sound('cancelMenu'));
 			MusicBeatState.switchState(new MainMenuState());
 		}
-
-		if (controls.ACCEPT)
-		{
-			switch(options[curSelected]) {
-				case 'Character Editor':
-					MusicBeatState.switchState(FlxG.keys.pressed.SHIFT ? new SowyCharacterEditor() : new CharacterEditorState(Character.DEFAULT_CHARACTER, false));
-				/*case 'Week Editor':
-					MusicBeatState.switchState(new WeekEditorState());*/
-				case 'Stage Editor':
-					MusicBeatState.switchState(new StageEditorState());
-				case 'Chart Editor':
-					LoadingState.loadAndSwitchState(new ChartingState(), false);
-				case 'Stage Builder':
-					MusicBeatState.switchState(new StageBuilderState());
-				case "Test Stage":
-					MusicBeatState.switchState(new TestState());
-			}
-			FlxG.sound.music.volume = 0;
-		}
 		
-		var bullShit:Int = 0;
-		for (item in grpTexts.members)
-		{
-			item.targetY = bullShit - curSelected;
-			bullShit++;
-
-			item.alpha = 0.6;
-			// item.setGraphicSize(Std.int(item.width * 0.8));
-
-			if (item.targetY == 0)
-			{
-				item.alpha = 1;
-				// item.setGraphicSize(Std.int(item.width));
-			}
-		}
 		super.update(elapsed);
-	}
-
-	function changeSelection(change:Int = 0)
-	{
-		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4 );
-
-		curSelected += change;
-
-		if (curSelected < 0)
-			curSelected = options.length - 1;
-		if (curSelected >= options.length)
-			curSelected = 0;
 	}
 
 	#if MODS_ALLOWED

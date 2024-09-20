@@ -189,8 +189,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 			optionText.scrollFactor.set();
 			optionText.xAdd = 120;
 			optionText.x += 200;
-			optionText.targetX = 225;
-			optionText.y = optionText.getTargetY() - FlxG.height / 3;
+			optionText.y = optionText.targetY - FlxG.height / 3;
 			///
 
 			if(optionsArray[i].type == 'bool') {

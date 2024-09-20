@@ -231,7 +231,6 @@ class CreditsState extends MusicBeatState
             songTitle.targetX = songTitle.x;
         }
 
-        songTitle.sowyFreeplay = true;
         songTitle.ID = id;
         titleArray[id] = songTitle;
         add(songTitle);

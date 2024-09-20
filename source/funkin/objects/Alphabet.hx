@@ -15,22 +15,17 @@ using StringTools;
  */
 class Alphabet extends FlxSpriteGroup
 {
+	public var text:String = "";
+	public var textSize:Float = 1.0;
+
 	public var delay:Float = 0.05;
 	public var paused:Bool = false;
 
 	// for menu shit
-	public var sowyFreeplay:Bool = false;
-	public var targetX:Float = 0;
-
-	public var forceX:Float = Math.NEGATIVE_INFINITY;
-	public var targetY:Float = 0;
-	public var yMult:Float = 120 * 1.3;
+	public var targetX:Null<Float> = null;
+	public var targetY:Null<Float> = null;
 	public var xAdd:Float = 0;
 	public var yAdd:Float = 0;
-	public var isMenuItem:Bool = false;
-	public var textSize:Float = 1.0;
-
-	public var text:String = "";
 
 	var _finalText:String = "";
 	var yMulti:Float = 1;
@@ -52,7 +47,6 @@ class Alphabet extends FlxSpriteGroup
 	public function new(x:Float, y:Float, text:String = "", ?bold:Bool = false, typed:Bool = false, ?typingSpeed:Float = 0.05, ?textSize:Float = 1)
 	{
 		super(x, y);
-		forceX = Math.NEGATIVE_INFINITY;
 		this.textSize = textSize;
 
 		_finalText = text;
@@ -345,24 +339,13 @@ class Alphabet extends FlxSpriteGroup
 		}
 	}
 
-	inline public function getTargetY(){
-		return (targetY * yMult) + (FlxG.height * 0.48) + yAdd;
-	}
-
 	override function update(elapsed:Float)
 	{
-		var lerpVal:Float = Math.exp(-elapsed * 9.6);
-		
-		if (isMenuItem){
-			y = FlxMath.lerp(getTargetY(), y, lerpVal);
-			
-			if (forceX != Math.NEGATIVE_INFINITY) 
-				x = forceX;
-			else 
-				x = FlxMath.lerp((targetY * 20) + 90 + xAdd, x, lerpVal);
+		if (targetX != null || targetY != null){
+			var lerpVal:Float = Math.exp(-elapsed * 7.2);
+			if (targetX != null) x = FlxMath.lerp(targetX + xAdd, x, lerpVal);
+			if (targetY != null) y = FlxMath.lerp(targetY + yAdd, y, lerpVal);
 		}
-		if (sowyFreeplay)
-			x = FlxMath.lerp(targetX + xAdd, x, lerpVal);
 
 		super.update(elapsed);
 	}
