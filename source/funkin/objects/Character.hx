@@ -1,5 +1,7 @@
 package funkin.objects;
 
+import funkin.objects.playfields.PlayField;
+import flixel.math.FlxPoint;
 import funkin.data.CharacterData.*;
 import funkin.data.CharacterData.AnimArray;
 import funkin.data.CharacterData.CharacterFile;
@@ -98,10 +100,8 @@ class Character extends FlxSprite
 	public var idleSuffix:String = '';
 	/**Character uses "danceLeft" and "danceRight" instead of "idle"**/
 	public var danceIdle:Bool = false;
-
 	/**Stops the idle from playing**/
 	public var skipDance:Bool = false;
-    
 
 	/**Name of the image to be used for the health icon**/
 	public var healthIcon:String = 'face';
@@ -110,11 +110,12 @@ class Character extends FlxSprite
 	public var positionArray:Array<Float> = [0, 0];
 	/**Offsets the camera when its focused on the character**/
 	public var cameraPosition:Array<Float> = [0, 0];
-    
+	/****/
+	public var singAnimations:Array<String> = ["singLEFT", "singDOWN", "singUP", "singRIGHT"];
+	
 	/**Set to true if the character has miss animations. Optimization mainly**/
 	public var hasMissAnimations:Bool = false;
-
-	/**Overlay color used for character that don't have miss animations.**/
+	/**Overlay color used for characters that don't have miss animations.**/
 	public var missOverlayColor:FlxColor = 0xFFC6A6FF;
     
 	//Used on Character Editor
@@ -308,6 +309,20 @@ class Character extends FlxSprite
 			flipX = !flipX;
 	}
 
+	public function getCamera() {
+		var cam:Array<Float> = [
+			x + width * 0.5 + (cameraPosition[0] + 150) * xFacing,
+			y + height * 0.5 + cameraPosition[1] - 100
+		];
+
+		var scriptCam:Null<Array<Float>> = null;
+		
+		var retValue = callOnScripts("getCamera", [cam]);
+		if((retValue is Array))scriptCam = retValue;
+
+		return scriptCam!=null ? scriptCam : cam;
+	}
+
 	override function update(elapsed:Float)
 	{
         if (callOnScripts("onCharacterUpdate", [elapsed]) == Globals.Function_Stop)
@@ -397,44 +412,6 @@ class Character extends FlxSprite
 		callOnScripts("onCharacterUpdatePost", [elapsed]);
 	}
 
-	public var danced:Bool = false;
-
-    public function resetDance(){
-        // called when resetting back to idle from a pose
-        // useful for stuff like sing return animations
-		if(callOnScripts("onResetDance") != Globals.Function_Stop) dance();
-    }
-	/**
-	 * FOR GF DANCING SHIT
-	 */
-    
-    var danceIndex:Int = 0;
-	public function dance()
-	{
-		if (debugMode || skipDance || specialAnim || animTimer > 0 || voicelining)
-			return;
-		
-		if (callOnScripts("onDance") == Globals.Function_Stop)
-			return;
-
-        if(idleSequence.length > 1){
-            danceIndex++;
-            if(danceIndex >= idleSequence.length)
-                danceIndex = 0;
-        }
-        playAnim(idleSequence[danceIndex] + idleSuffix, shouldForceDance);
-        
-/* 		if(danceIdle){
-			danced = !danced;
-			playAnim((danced ? 'danceRight' : 'danceLeft') + idleSuffix);
-		}
-		else if(animation.getByName('idle' + idleSuffix) != null) {
-			playAnim('idle' + idleSuffix);
-		}
- */
-		callOnScripts("onDancePost");
-	}
-
     override function draw(){
         if(callOnScripts("onDraw") == Globals.Function_Stop)
             return;
@@ -450,22 +427,6 @@ class Character extends FlxSprite
 			updateColorTransform();
 		}
 		return colorOverlay;
-	}
-
-	public function getCamera()
-	{
-		var cam:Array<Float> = [
-			x + width * 0.5 + (cameraPosition[0] + 150) * xFacing,
-			y + height * 0.5 + cameraPosition[1] - 100
-		];
-
-		var scriptCam:Null<Array<Float>> = null;
-		
-        var retValue = callOnScripts("getCamera", [cam]);
-        if((retValue is Array))scriptCam = retValue;
-        
-
-		return scriptCam!=null ? scriptCam : cam;
 	}
 
 	override function updateColorTransform():Void
@@ -528,6 +489,90 @@ class Character extends FlxSprite
 
 		////
 		callOnScripts("onAnimPlayed", [AnimName, Force, Reversed, Frame]);
+	}
+
+	public var danced:Bool = false;
+	var danceIndex:Int = 0;    
+    
+	public function dance()
+	{
+		if (debugMode || skipDance || specialAnim || animTimer > 0 || voicelining)
+			return;
+		
+		if (callOnScripts("onDance") == Globals.Function_Stop)
+			return;
+
+        if(idleSequence.length > 1){
+            danceIndex++;
+            if(danceIndex >= idleSequence.length)
+                danceIndex = 0;
+        }
+        playAnim(idleSequence[danceIndex] + idleSuffix, shouldForceDance);
+        
+/* 		if(danceIdle){
+			danced = !danced;
+			playAnim((danced ? 'danceRight' : 'danceLeft') + idleSuffix);
+		}
+		else if(animation.getByName('idle' + idleSuffix) != null) {
+			playAnim('idle' + idleSuffix);
+		}
+ */
+		callOnScripts("onDancePost");
+	}
+
+	public function resetDance(){
+        // called when resetting back to idle from a pose
+        // useful for stuff like sing return animations
+		if(callOnScripts("onResetDance") != Globals.Function_Stop) dance();
+    }
+
+	public function playNote(note:Note, field:PlayField) {
+		if (callOnScripts("playNote", [note, field]) == Globals.Function_Stop)
+			return;
+
+		if (note.noteType == 'Hey!' && animOffsets.exists('hey')) {
+			playAnim('hey', true);
+			specialAnim = true;
+			heyTimer = 0.6;
+			return;
+		}
+
+		if (note.noAnimation || animTimer > 0.0 || voicelining)
+			return;
+
+		var column:Int = note.column;
+
+		var animToPlay:String = singAnimations[column];
+		if (note.noteType == 'Alt Animation')
+			animToPlay += '-alt';
+
+		playAnim(animToPlay, true);
+		holdTimer = 0.0;
+		callOnScripts("playNoteAnim", [animToPlay, note]);
+	}
+
+	public function missNote(note:Note, field:PlayField) {
+		if (animTimer > 0 || voicelining)
+			return;
+
+		var animToPlay:String = singAnimations[note.column];
+		if (note.noteType == 'Alt Animation') 
+			animToPlay += '-alt';
+
+		playAnim(animToPlay + 'miss', true);
+
+		if (!hasMissAnimations)
+			colorOverlay = missOverlayColor;	
+	}
+
+	public function missPress(direction:Int) {
+		if (animTimer > 0 || voicelining)
+			return;
+
+		playAnim(singAnimations[direction] + 'miss', true);
+		
+		if(!hasMissAnimations)
+			colorOverlay = missOverlayColor;	
 	}
 
 	public var danceEveryNumBeats:Float = 2;

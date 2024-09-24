@@ -44,8 +44,10 @@ class CharacterData {
 			return null;
 		}
 
-		if (json.format == "andromeda")
-			return fileFromAndromeda(json);
+		switch (Reflect.field(json, "format")){
+			case "andromeda": return fileFromAndromeda(json);
+			// case "troll.1": // base game better hurry the fuck up on fixing their shit or im making my own format
+		}			
 
 		var json:CharacterFile = json;
 		

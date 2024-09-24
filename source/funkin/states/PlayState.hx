@@ -3880,17 +3880,8 @@ class PlayState extends MusicBeatState
 				gf.specialAnim = true;
 			}
 
-			for(char in chars){
-				if(char != null && char.animTimer <= 0 && !char.voicelining)
-				{
-					var daAlt = (daNote.noteType == 'Alt Animation') ? '-alt' : '';
-					var animToPlay:String = singAnimations[Std.int(Math.abs(daNote.column))] + daAlt + 'miss';
-
-					char.playAnim(animToPlay, true);
-
-					if (!char.hasMissAnimations)
-						char.colorOverlay = char.missOverlayColor;	
-				}	
+			for (char in chars) {
+				char.missNote(daNote, field);
 			}
 		}
 
@@ -3954,14 +3945,8 @@ class PlayState extends MusicBeatState
 			if (!field.isPlayer)
 				continue;
 
-			for(char in field.characters)
-			{
-				if(char.animTimer <= 0 && !char.voicelining)
-				{
-					char.playAnim(singAnimations[Std.int(Math.abs(direction))] + 'miss', true);
-					if(!char.hasMissAnimations)
-						char.colorOverlay = char.missOverlayColor;	
-				}
+			for (char in field.characters) {
+				char.missPress(direction);
 			}
 		}
 
@@ -3984,30 +3969,7 @@ class PlayState extends MusicBeatState
 			chars = field.characters;
 
 		for(char in chars){
-			if (char.callOnScripts("playNote", [note, field]) == Globals.Function_Stop)
-			{
-				// nada
-			}	
-			else if(note.noteType == 'Hey!' && char.animOffsets.exists('hey')) 
-			{
-				char.playAnim('hey', true);
-				char.specialAnim = true;
-				char.heyTimer = 0.6;
-			} 
-			else if(!note.noAnimation) 
-			{
-				var animToPlay:String = singAnimations[Std.int(Math.abs(note.column))];
-
-				var curSection = SONG.notes[curSection];
-				if ((curSection != null && curSection.altAnim) || note.noteType == 'Alt Animation')
-					animToPlay += '-alt';
-
-				if (char.animTimer <= 0 && !char.voicelining){
-					char.playAnim(animToPlay, true);
-					char.holdTimer = 0;
-					char.callOnScripts("playNoteAnim", [animToPlay, note]);
-				}
-			}
+			char.playNote(note, field);
 		}
 
 		note.hitByOpponent = true;
