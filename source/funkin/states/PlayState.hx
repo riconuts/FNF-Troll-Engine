@@ -3852,8 +3852,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		if (ClientPrefs.ghostTapping && !daNote.noMissAnimation)
-		{
+		if (!daNote.noMissAnimation) {
 			var chars:Array<Character> = getNoteCharacters(daNote, field);
 
 			if (stats.combo > 10 && gf!=null && chars.contains(gf) == false && gf.animation.exists('sad')) {
@@ -3878,7 +3877,7 @@ class PlayState extends MusicBeatState
 		for (track in (playOpponent ? opponentTracks : playerTracks))
 			track.volume = 0;
 
-		if (ClientPrefs.ghostTapping && !daNote.isSustainNote && ClientPrefs.missVolume > 0)
+		if (!daNote.isSustainNote && ClientPrefs.missVolume > 0)
 			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), ClientPrefs.missVolume * FlxG.random.float(0.9, 1) );
 
 		if(instakillOnMiss)
