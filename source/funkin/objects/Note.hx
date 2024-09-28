@@ -1,13 +1,13 @@
 package funkin.objects;
 
-import flixel.math.FlxMath;
-import funkin.states.PlayState;
-import funkin.data.JudgmentManager.Judgment;
-import funkin.states.editors.ChartingState;
 import math.Vector3;
+import flixel.math.FlxMath;
 import funkin.scripts.*;
-import funkin.objects.playfields.*;
+import funkin.states.PlayState;
+import funkin.states.editors.ChartingState;
 import funkin.objects.shaders.ColorSwap;
+import funkin.objects.playfields.*;
+import funkin.data.JudgmentManager.Judgment;
 
 using StringTools;
 
@@ -39,6 +39,10 @@ enum abstract SustainPart(Int) from Int to Int
     var HEAD = 0; // TapNote at the start of a sustain
 	var PART = 1;
 	var END = 2;
+}
+
+private typedef NoteScriptState = {
+	var notetypeScripts:Map<String, FunkinHScript>;
 }
 
 class Note extends NoteObject
@@ -270,23 +274,6 @@ class Note extends NoteObject
 
         updateColours();
 
-		// just to make sure they arent 0, 0, 0
-		colorSwap.hue += 0.0127;
-		colorSwap.saturation += 0.0127;
-		colorSwap.brightness += 0.0127;
-		var hue = colorSwap.hue;
-		var sat = colorSwap.saturation;
-		var brt = colorSwap.brightness;
-
-		if (usesDefaultColours) {
-			if (colorSwap.hue != hue || colorSwap.saturation != sat || colorSwap.brightness != brt)
-				usesDefaultColours = false; // just incase
-		}
-
-		if (colorSwap.hue == hue) colorSwap.hue -= 0.0127;
-		if (colorSwap.saturation == sat) colorSwap.saturation -= 0.0127;
-		if (colorSwap.brightness == brt) colorSwap.brightness -= 0.0127;
-
 		////
 		if (!inEditor && PlayState.instance != null)
 			genScript = PlayState.instance.getHudSkinScript(value);
@@ -335,8 +322,6 @@ class Note extends NoteObject
 
 	private function set_noteType(value:String):String {
 		noteSplashTexture = PlayState.splashSkin;
-		if (value == 'Hurt Note')
-			value = 'Mine';
 
 		updateColours();
 
@@ -348,35 +333,36 @@ class Note extends NoteObject
 		var sat = colorSwap.saturation;
 		var brt = colorSwap.brightness;
 
-        // TODO: add the ability to override these w/ scripts lol
-		if(column > -1 && noteType != value) 
-		{
-			noteScript = null;
+		if (value == 'Hurt Note')
+			value = 'Mine';
 
-			switch(value) {
-				case 'No Animation':
-					noAnimation = true;
-					noMissAnimation = true;
+		if (column > -1 && noteType != value) {
+			var instance:NoteScriptState = inEditor ? ChartingState.instance : PlayState.instance;
+			noteScript = (instance == null) ? null : instance.notetypeScripts.get(value);
 
-				case 'GF Sing':
-					gfNote = true;
+			if (noteScript != null) {
+				noteScript.executeFunc("setupNote", [this], this, ["this" => this]);
+			
+			}else { // default notes. these values won't get set if you make a script for them!
+				switch (value) {
+					/* TODO: these notes, hah
+					case 'Alt Animation':
 
-				default:
-					if (inEditor){
-						if (ChartingState.instance != null)
-							noteScript = ChartingState.instance.notetypeScripts.get(value);
-					}else if (PlayState.instance != null){
-						noteScript = PlayState.instance.notetypeScripts.get(value);					
-					}
+					case 'Hey!':
+					*/
+					case 'GF Sing':
+						gfNote = true;
 
-					if (noteScript != null)
-						noteScript.executeFunc("setupNote", [this], this, ["this" => this]);
-
-					if (genScript != null)
-						genScript.executeFunc("setupNoteType", [this], this, ["this" => this]);
+					case 'No Animation':
+						noAnimation = true;
+						noMissAnimation = true;
+				}
 			}
 
 			noteType = value;
+
+			if (genScript != null)
+				genScript.executeFunc("setupNoteType", [this], this, ["this" => this]);
 		}
 
 		if (usesDefaultColours) {
