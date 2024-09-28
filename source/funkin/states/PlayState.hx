@@ -396,21 +396,8 @@ class PlayState extends MusicBeatState
 
 	////
     @:noCompletion function set_hudSkin(value:String){
-		var script = hudSkinScripts.get(value);
-		if (script == null)
-		{
-			var baseFile = 'hudskins/$value.hscript';
-			var files = [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)];
-			for (file in files)
-			{
-				if (!Paths.exists(file))
-					continue;
-
-				
-				script = createHScript(file, value);
-				hudSkinScripts.set(value, script);
-			}
-		}
+		var script = getHudSkinScript(value);
+		
         if (hudSkinScript != null)
             hudSkinScript.call("onSkinUnload");
         
@@ -448,7 +435,7 @@ class PlayState extends MusicBeatState
 		return value;
 	}
 
-	function set_songSpeed(value:Float):Float
+	@:noCompletion function set_songSpeed(value:Float):Float
 	{
 		songSpeed = value;
 		noteKillOffset = 350 / songSpeed;
@@ -4252,9 +4239,26 @@ class PlayState extends MusicBeatState
 		return script;
 	}
 
-	public function removeHScript(script:FunkinHScript){
+	public function removeHScript(script:FunkinHScript):Void {
 		funkyScripts.remove(script);
 		hscriptArray.remove(script);
+	}
+
+	public function getHudSkinScript(name:String):Null<FunkinHScript> {
+		if (hudSkinScripts.exists(name))
+			return hudSkinScripts.get(name);
+
+		var script:FunkinHScript = null;
+
+		var baseFile = 'hudskins/$name.hscript';
+		for (file in [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)]) {
+			if (!Paths.exists(file)) continue;
+			
+			script = createHScript(file, name);
+			hudSkinScripts.set(name, script);
+		}
+
+		return script;
 	}
 	#end
 

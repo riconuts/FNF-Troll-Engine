@@ -77,6 +77,12 @@ class ColorSwap
 		return brightness;
 	}
 
+	inline public function setHSB(h:Float = 0, s:Float = 0, b:Float = 0) {
+		hue=h;
+		saturation=s;
+		brightness=b;
+	}
+
 	public function new()
 	{
 		shader.uTime.value = [0, 0, 0];
