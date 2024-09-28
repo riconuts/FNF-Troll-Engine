@@ -389,11 +389,9 @@ class NoteField extends FieldBase
 		if (hold.animation.curAnim == null || hold.scale == null || hold.frame == null)
 			return null;
 
-		var render = false;
-		for (camera in cameras)
-		{
-			if (camera.alpha > 0 && camera.visible)
-			{
+		var render:Bool = false;
+		for (camera in cameras) {
+			if (camera.alpha > 0 && camera.visible) {
 				render = true;
 				break;
 			}
@@ -403,7 +401,6 @@ class NoteField extends FieldBase
 
 		var vertices = new Vector<Float>(8 * holdSubdivisions, true);
 		var uvData = new Vector<Float>(8 * holdSubdivisions, true);
-		var indices = new Vector<Int>(6 * holdSubdivisions, true);
 		var alphas:Array<Float> = [];
 		var glows:Array<Float> = [];
 		var lastMe = null;
@@ -431,24 +428,21 @@ class NoteField extends FieldBase
 			var strumOff = (strumSub * sub);
 			strumSub *= sv;
             strumOff *= sv;
-			var scale:Float = 1;
-			var fuck = strumDiff;
-
-			if ((hold.wasGoodHit || hold.parent.wasGoodHit) && !hold.tooLate)
-			{
-				scale = 1 - ((fuck + crotchet) / crotchet);
-				if (scale < 0)
-					scale = 0;
-				else if (scale > 1)
-					scale = 1;
-				strumSub *= scale;
-				strumOff *= scale;
+			
+			if ((hold.wasGoodHit || hold.parent.wasGoodHit) && !hold.tooLate) {
+				var scale:Float = 1 - ((strumDiff + crotchet) / crotchet);
+				if (scale <= 0.0) {
+					strumSub = 0;
+					strumOff = 0;
+				}else if (scale < 1) {
+					strumSub *= scale;
+					strumOff *= scale;
+				}
 			}
 
 			scalePoint.set(1, 1);
 
-			var speed = modManager.getNoteSpeed(hold, modNumber, songSpeed);
-
+			var speed:Float = modManager.getNoteSpeed(hold, modNumber, songSpeed);
 			var info:RenderInfo = modManager.getExtraInfo((visualDiff + ((strumOff + strumSub) * 0.45)) * -speed, strumDiff + strumOff + strumSub, curDecBeat,
 			{
 				alpha: hold.alpha,
@@ -456,11 +450,10 @@ class NoteField extends FieldBase
 				scale: scalePoint
 			}, hold, modNumber, hold.column);
 
-			var topWidth = FlxMath.lerp(tWid, bWid, prog) * scalePoint.x;
-			var botWidth = FlxMath.lerp(tWid, bWid, nextProg) * scalePoint.x;
+			var topWidth = scalePoint.x * FlxMath.lerp(tWid, bWid, prog);
+			var botWidth = scalePoint.x * FlxMath.lerp(tWid, bWid, nextProg);
 
-			for (_ in 0...4)
-			{
+			for (_ in 0...field.keyCount) {
 				alphas.push(info.alpha);
 				glows.push(info.glow);
 			}

@@ -16,21 +16,43 @@ using StringTools;
 
 class StrumNote extends NoteObject
 {
-	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
-	
+	static var staticAnimNames = ['arrowLEFT', 'arrowDOWN', 'arrowUP', 'arrowRIGHT']; 
+	static var pressAnimNames = ["left press", "down press", "up press", "right press"];
+	static var confirmAnimNames = ["left confirm", "down confirm", "up confirm", "right confirm"];
+
+	////
+	public var texture(default, set):String = null;
+	public var colorSwap:ColorSwap = new ColorSwap();
+	public var downScroll:Bool = false;
+	public var isQuant:Bool = false;
+	public var resetAnim:Float = 0;
+
+	////
+	public var noteMod(default, set):String;
+	public var genScript:FunkinHScript;
+
+	////
 	public var z:Float = 0;
 	public var zIndex:Float = 0;
 	public var desiredZIndex:Float = 0;
-	
-	public var isQuant:Bool = false;
-	public var resetAnim:Float = 0;
-	public var sustainReduce:Bool = true;
-	public var downScroll:Bool = false;
 
-	private var colorSwap:ColorSwap;
-	//private var player:Int;
+	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code	
+
+	private var field:PlayField;
+
+	public function new(x:Float, y:Float, leColumn:Int, ?playField:PlayField, ?hudSkin:String = 'default') {
+		super(x, y);
+		objType = STRUM;
+		column = leColumn;
+		field = playField;
+		noteMod = hudSkin;
+		
+		shader = colorSwap.shader;
+	}
+
+	override function toString()
+		return '(column: $column | texture $texture | visible: $visible)';
 	
-	public var texture(default, set):String = null;
 	private function set_texture(value:String):String {
 		if(texture != value) {
 			texture = value;
@@ -41,10 +63,12 @@ class StrumNote extends NoteObject
 
 	public function getZIndex(?daZ:Float)
 	{
-		if(daZ==null)daZ = z;
+		if (daZ==null) daZ = z;
+		
 		var animZOffset:Float = 0;
-		if (animation.curAnim != null && animation.curAnim.name == 'confirm')
+		if (animation.name == 'confirm')
 			animZOffset += 1;
+
 		return z + desiredZIndex + animZOffset;
 	}
 
@@ -52,9 +76,6 @@ class StrumNote extends NoteObject
 	{
 		zIndex = getZIndex();
 	}
-
-    public var noteMod(default, set):String;
-    public var genScript:FunkinHScript;
 
     function set_noteMod(value:String){
 		if (PlayState.instance != null)
@@ -102,53 +123,34 @@ class StrumNote extends NoteObject
 
         return noteMod = value;
     }
-	
-    var field:PlayField;
 
-	override function toString()
-	{
-		return '(column: $column | texture $texture | visible: $visible)';
-	}
-
-	public function new(x:Float, y:Float, leColumn:Int, ?field:PlayField, ?hudSkin:String = 'default') {
-		colorSwap = new ColorSwap();
-		shader = colorSwap.shader;
-        this.field = field;
-		super(x, y);
-		objType = STRUM;
-		column = leColumn;
-        
-        noteMod = hudSkin;
-
-		scrollFactor.set();
-	}
-
-	// stupid
-	static var directionUpperArray = ["LEFT", "DOWN", "UP", "RIGHT"];
-	static var directionLowerArray = ["left", "down", "up", "right"];
 	public function reloadNote()
 	{
 		// TODO: add indices support n shit
 
-		var lastAnim:String = animation.curAnim == null ? 'static' : animation.curAnim.name;
 		var textureKey:String = texture;
 		isQuant = false;
 		
 		if (ClientPrefs.noteSkin == 'Quants') {
 			var quantTexKey = 'QUANT$texture';
+
 			if (Paths.imageExists(quantTexKey)) {
 				textureKey = quantTexKey;
 				isQuant = true;
 			}
 		}
 
-		frames = Paths.getSparrowAtlas(textureKey);
-		animation.addByPrefix('static', 'arrow' + directionUpperArray[column], 24, false);
-		animation.addByPrefix('pressed', directionLowerArray[column] + ' press', 24, false);
-		animation.addByPrefix('confirm', directionLowerArray[column] + ' confirm', 24, false);
+		var lastAnim:String = animation.name;
+		if (lastAnim == null) lastAnim = 'static';
 
-		if (lastAnim != null)
-			playAnim(lastAnim, true);
+		frames = Paths.getSparrowAtlas(textureKey);
+
+		var column:Int = column % staticAnimNames.length;
+		animation.addByPrefix('static', staticAnimNames[column], 24, false);
+		animation.addByPrefix('pressed', pressAnimNames[column], 24, false);
+		animation.addByPrefix('confirm', confirmAnimNames[column], 24, false);
+
+		playAnim(lastAnim, true);
 
 		scale.set(0.7, 0.7);
 		defScale.copyFrom(scale);
@@ -162,18 +164,18 @@ class StrumNote extends NoteObject
 	}
 
 	override function update(elapsed:Float) {
-		if(resetAnim > 0) {
+		if (resetAnim > 0) {
 			resetAnim -= elapsed;
-			if(resetAnim <= 0) {
-				playAnim('static');
+
+			if (resetAnim <= 0) {
 				resetAnim = 0;
+				playAnim('static');
 			}
 		}
-		if(animation.curAnim != null){
-			if(animation.curAnim.name == 'confirm') 
-				centerOrigin();
-			
-		}
+
+		if (animation.name == 'confirm') 
+			centerOrigin();	
+		
 		updateZIndex();
 
 		super.update(elapsed);
@@ -185,7 +187,7 @@ class StrumNote extends NoteObject
 		centerOffsets();
 		updateZIndex();
 
-		if (animation.curAnim == null || animation.curAnim.name == 'static') {
+		if (animation.name == 'static') {
 			colorSwap.hue = 0;
 			colorSwap.saturation = 0;
 			colorSwap.brightness = 0;
@@ -197,9 +199,10 @@ class StrumNote extends NoteObject
 			colorSwap.brightness = note.colorSwap.brightness;
 		}
 		else if(!isQuant) {
-			colorSwap.hue = ClientPrefs.arrowHSV[column % 4][0] / 360;
-			colorSwap.saturation = ClientPrefs.arrowHSV[column % 4][1] / 100;
-			colorSwap.brightness = ClientPrefs.arrowHSV[column % 4][2] / 100;
+			var column:Int = column % 4;
+			colorSwap.hue = ClientPrefs.arrowHSV[column][0] / 360;
+			colorSwap.saturation = ClientPrefs.arrowHSV[column][1] / 100;
+			colorSwap.brightness = ClientPrefs.arrowHSV[column][2] / 100;
 		}
 		else {
 			colorSwap.hue =  0;

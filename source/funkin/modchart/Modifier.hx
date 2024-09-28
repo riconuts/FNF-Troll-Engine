@@ -116,8 +116,8 @@ class Modifier {
 	public function getSubmods():Array<String>
 		return [];
 
-    public inline function addSubmod(name:String)submods.set(name, new SubModifier(name, modMgr, this));
-    
+    public inline function addSubmod(name:String)
+		submods.set(name, new SubModifier(name, modMgr, this));    
 
 	inline public function getSubmodPercent(modName:String, player:Int)
 	{
@@ -125,7 +125,6 @@ class Modifier {
 			return submods.get(modName).getPercent(player);
 		else
 			return 0;
-		
 	}
 
 	inline public function getSubmodValue(modName:String, player:Int)
@@ -211,7 +210,9 @@ class Modifier {
 	public function update(elapsed:Float, beat:Float){}
 
 	// used when affectsField() == true and getModType() == MISC_MOD
-	public function getFieldZoom(zoom:Float, beat:Float, songPos:Float, player:Int, field:NoteField){return zoom;}
+	public function getFieldZoom(zoom:Float, beat:Float, songPos:Float, player:Int, field:NoteField) {
+		return zoom;
+	}
 
 	// Note-based overrides (only use if getModType() == NOTE_MOD)
 	// time is the note/receptor strumtime
