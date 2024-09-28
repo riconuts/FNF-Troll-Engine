@@ -135,7 +135,7 @@ class AlphaModifier extends NoteModifier
 
 	override function getSubmods(){
 		var subMods:Array<String> = ["noteAlpha", "alpha", "hidden", "hiddenOffset", "sudden", "suddenOffset", "blink", "vanish", "dark", "hideDarkGlow", "hideStealthGlow", "stealthPastReceptors"];
-		for(i in 0...4){
+		for(i in 0...PlayState.keyCount){
 			subMods.push('noteAlpha$i');
 			subMods.push('alpha$i');
 			subMods.push('dark$i');

@@ -106,7 +106,7 @@ class ScaleModifier extends NoteModifier {
 	{
 		var subMods:Array<String> = ["squish", "stretch", "scale", "scaleX", "scaleY", "tinyX", "tinyY"];
 
-		for (i in 0...4)
+		for (i in 0...PlayState.keyCount)
 		{
 			subMods.push('tiny${i}');
 			subMods.push('tiny${i}X');

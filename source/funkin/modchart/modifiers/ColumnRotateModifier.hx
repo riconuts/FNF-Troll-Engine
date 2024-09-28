@@ -36,7 +36,7 @@ class ColumnRotateModifier extends NoteModifier { // this'll be rotateX in ModMa
         var shid:Array<String>=['rotateX','rotateY','rotateZ'];
 
 		var submods:Array<String> = [
-			for (d in 0...4)
+			for (d in 0...PlayState.keyCount)
 			{
                 for(s in shid)
                     '$d$s';

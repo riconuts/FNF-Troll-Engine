@@ -111,7 +111,7 @@ class DrunkModifier extends NoteModifier {
                 var p = props[i];
                 for(prop in p)submods.push('$mod$axe$prop');
                 
-                for(d in 0...4){
+                for(d in 0...PlayState.keyCount){
                     submods.push('$mod$axe$d');
                     for(prop in p)submods.push('$mod$axe$d$prop');
                 }

@@ -2628,7 +2628,7 @@ class ChartingState extends MusicBeatState
 					track.pause();
 					track.time = Conductor.songPosition;
 				}
-                trace(Conductor.songPosition, inst.time);
+                //trace(Conductor.songPosition, inst.time);
 
 				updateCurStep();
 			}

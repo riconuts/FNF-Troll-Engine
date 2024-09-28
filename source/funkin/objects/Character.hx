@@ -542,7 +542,7 @@ class Character extends FlxSprite
 
 		var column:Int = note.column;
 
-		var animToPlay:String = singAnimations[column];
+		var animToPlay:String = singAnimations[column % singAnimations.length];
 		if (note.noteType == 'Alt Animation')
 			animToPlay += '-alt';
 
@@ -555,7 +555,7 @@ class Character extends FlxSprite
 		if (animTimer > 0 || voicelining)
 			return;
 
-		var animToPlay:String = singAnimations[note.column];
+		var animToPlay:String = singAnimations[note.column % singAnimations.length];
 		if (note.noteType == 'Alt Animation') 
 			animToPlay += '-alt';
 
@@ -569,7 +569,7 @@ class Character extends FlxSprite
 		if (animTimer > 0 || voicelining)
 			return;
 
-		playAnim(singAnimations[direction] + 'miss', true);
+		playAnim(singAnimations[direction % singAnimations.length] + 'miss', true);
 		
 		if(!hasMissAnimations)
 			colorOverlay = missOverlayColor;	

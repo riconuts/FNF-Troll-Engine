@@ -89,7 +89,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	public var modManager:ModManager; // the mod manager. will be set automatically by playstate so dw bout this
 	public var isPlayer:Bool = false; // if this playfield takes input from the player
 	public var inControl:Bool = true; // if this playfield will take input at all
-	public var keyCount(default, set):Int = 4; // How many lanes are in this field
+	public var keyCount(default, set):Int = PlayState.keyCount; // How many lanes are in this field
 	public var autoPlayed(default, set):Bool = false; // if this playfield should be played automatically (botplay, opponent, etc)
 
     public var x:Float = 0;
@@ -164,6 +164,8 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		super();
 		this.modManager = modMgr;
 
+		keyCount = PlayState.keyCount;
+
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 		add(grpNoteSplashes);
 
@@ -204,12 +206,12 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 	// queues a note to be spawned
 	public function queue(note:Note){
-		if(noteQueue[note.column]==null)
-			noteQueue[note.column] = [];
-		noteQueue[note.column].push(note);
-
-		noteQueue[note.column].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
-		
+		if (noteQueue[note.column] == null)
+			noteQueue[note.column] = [note];
+		else{
+			noteQueue[note.column].push(note);
+			noteQueue[note.column].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
+		}
 	}
 
 	// unqueues a note

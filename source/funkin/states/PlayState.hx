@@ -107,6 +107,7 @@ class PlayState extends MusicBeatState
 	public static var campaignMisses:Int = 0;
 	public static var seenCutscene:Bool = false;
 	public static var deathCounter:Int = 0;
+	public static var keyCount:Int = 4; // scuffed extra key support
 
 	////
 	public var showDebugTraces:Bool = #if debug true #else Main.showDebugTraces #end;
@@ -300,7 +301,7 @@ class PlayState extends MusicBeatState
 	private var debugKeysCharacter:Array<FlxKey>;
 
 	// Less laggy controls
-	private var keysArray:Array<Dynamic>;
+	private var keysArray:Array<Array<FlxKey>>;
 	private var controlArray:Array<String>;
 
 	//// for backwards compat reasons. these aren't ACTUALLY used
@@ -490,7 +491,7 @@ class PlayState extends MusicBeatState
 			ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_left')),
 			ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_down')),
 			ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_up')),
-			ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_right'))
+			ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_right')),
 		];
 
 		controlArray = [
@@ -624,7 +625,10 @@ class PlayState extends MusicBeatState
 				songTrackNames.push(trackName);
 			}
 		}
-
+		
+		PlayState.keyCount = SONG.keyCount==null ? 4 : SONG.keyCount;
+		Note.spriteScale = (4 / keyCount) * 0.7;
+		Note.swagWidth = Note.spriteScale * 160;
 		/**
 		 * Note texture asset names
 		 * The quant prefix gets handled by the Note class
@@ -923,7 +927,7 @@ class PlayState extends MusicBeatState
         callOnScripts("onPlayfieldCreation"); // you should use this
 		playfields.cameras = [camHUD];
 		notes.cameras = [camHUD];
-
+		
 		playerField = new PlayField(modManager);
 		playerField.cameras = [camHUD];
 		playerField.modNumber = 0;
@@ -1044,10 +1048,9 @@ class PlayState extends MusicBeatState
 		updateSongDiscordPresence();
 		}#end
 
-		if(!ClientPrefs.controllerMode)
-		{
-			FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
-			FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
+		if (!ClientPrefs.controllerMode) {
+			FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDownEvent);
+			FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUpEvent);
 		}
 
 		////
@@ -1945,38 +1948,35 @@ class PlayState extends MusicBeatState
         
 		for (section in noteData) {
 			for (songNotes in section.sectionNotes) {
-				var daStrumTime:Float = songNotes[0];
-				var daColumn:Int = Std.int(songNotes[1] % 4);
 				if (songNotes[1] <= -1)
 					continue; // RETARDED EVENT NOTES IN OLD PSYCH CHARTS
 				// TODO: AUTO CONVERT TO EVENTNOTES
+				
+				var daStrumTime:Float = songNotes[0];
+				var daNoteData:Int = Std.int(songNotes[1]);
+				var gottaHitNote:Bool = section.mustHitSection ? (daNoteData < keyCount) : (daNoteData >= keyCount);
 
-				var gottaHitNote:Bool = section.mustHitSection;
+				var daColumn:Int = daNoteData % keyCount;
 
-				if (songNotes[1] % 8 > 3)
-					gottaHitNote = !gottaHitNote;
-
-				var oldNote:Note;
-				if (notes.length > 0)
-					oldNote = notes[Std.int(notes.length - 1)];
-				else
-					oldNote = null;
+				var oldNote:Note = null;
+				if (notes.length > 0) oldNote = notes[notes.length - 1];
 
 				var type:Dynamic = songNotes[3];
+				var daType:String = null;
 
 				if (type == true) // ??????????????????
 					type = 1;
 				if (Std.isOfType(type, Int)) // Backward compatibility + compatibility with Week 7 charts;
 					type = ChartingState.noteTypeList[type];
+				if (Std.isOfType(type, String))
+					daType = type;
 
 				var swagNote:Note = new Note(daStrumTime, daColumn, oldNote, gottaHitNote, songNotes[2] > 0 ? HEAD : TAP, false, hudSkin);
-                swagNote.realColumn = songNotes[1];
+                swagNote.realColumn = daNoteData;
 				swagNote.sustainLength = songNotes[2];
-
-				swagNote.gfNote = (section.gfSection && (songNotes[1] < 4));
-
-				swagNote.ID = notes.length;
+				swagNote.gfNote = section.gfSection;
                 swagNote.noteType = type;
+				swagNote.ID = notes.length;
 
                 var playfield:PlayField = null;
 
@@ -2252,6 +2252,14 @@ class PlayState extends MusicBeatState
 			field.noteField.optimizeHolds = ClientPrefs.optimizeHolds;
 			field.noteField.drawDistMod = ClientPrefs.drawDistanceModifier;
 			field.noteField.holdSubdivisions = Std.int(ClientPrefs.holdSubdivs) + 1;
+		}
+
+		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDownEvent);
+		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyUpEvent);
+
+		if (!ClientPrefs.controllerMode) {
+			FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDownEvent);
+			FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUpEvent);		
 		}
 		
 		if(reBind){
@@ -3635,112 +3643,109 @@ class PlayState extends MusicBeatState
 	public var strumsBlocked:Array<Bool> = [];
 	var pressed:Array<FlxKey> = [];
 
-	private function onKeyPress(event:KeyboardEvent):Void
+	private function onKeyDownEvent(event:KeyboardEvent)
+		onKeyPress(event.keyCode);
+	
+	private function onKeyUpEvent(event:KeyboardEvent)
+		onKeyRelease(event.keyCode);
+
+	private function onKeyPress(key:FlxKey):Void
 	{
 		if (paused || !startedCountdown || inCutscene)
 			return;
-
-		var eventKey:FlxKey = event.keyCode;
-		var data:Int = getKeyFromEvent(eventKey);
-
-		if (pressed.contains(eventKey))
+		
+		if (pressed.contains(key)) return;
+        pressed.push(key);
+		
+        if (callOnScripts("onKeyDown", [key]) == Globals.Function_Stop)
             return;
-        pressed.push(eventKey);
+		
+		var column:Int = getColumnFromKey(key);
+		if (column < 0) return;
 
-        if (callOnScripts("onKeyDown", [event]) == Globals.Function_Stop)
-            return;
+		if (strumsBlocked[column]) return;
+		
+		if (callOnScripts("onKeyPress", [column]) == Globals.Function_Stop)
+			return;
 
-		if (data > -1){
-			var hitNotes:Array<Note> = [];
-            var controlledFields:Array<PlayField> = [];
+		var hitNotes:Array<Note> = [];
+		var controlledFields:Array<PlayField> = [];
+	
+		for(field in playfields.members){
+			if(!field.autoPlayed && field.isPlayer && field.inControl){
+				controlledFields.push(field);
+				field.keysPressed[column] = true;
+				if(generatedMusic && !endingSong){
+					var note:Note = null;
+					var ret:Dynamic = callOnHScripts("onFieldInput", [field, column, hitNotes]);
+					if (ret == Globals.Function_Stop)
+						continue;
+					else if((ret is Note))
+						note = ret;
+					else
+						note = field.input(column);
 
-			if(strumsBlocked[data]) return;
-            
-			if (callOnScripts("onKeyPress", [data]) == Globals.Function_Stop)
-				return;
-        
-			for(field in playfields.members){
-				if(!field.autoPlayed && field.isPlayer && field.inControl){
-                    controlledFields.push(field);
-					field.keysPressed[data] = true;
-					if(generatedMusic && !endingSong){
-                        var note:Note = null;
-                        var ret:Dynamic = callOnHScripts("onFieldInput", [field, data, hitNotes]);
-						if (ret == Globals.Function_Stop)
-							continue;
-                        else if((ret is Note))
-                            note = ret;
-                        else
-						    note = field.input(data);
-
-						if(note==null){
-							var spr:StrumNote = field.strumNotes[data];
-							if (spr != null && spr.animation.curAnim.name != 'confirm')
-							{
-								spr.playAnim('pressed');
-								spr.resetAnim = 0;
-							}
-						}else
-							hitNotes.push(note);
-                        
-
-					}
-				}
-			}
-			if (hitNotes.length==0 && controlledFields.length > 0){
-				callOnScripts('onGhostTap', [data]);
-				
-				if (!ClientPrefs.ghostTapping)
-					noteMissPress(data);
-			}
-		}
-	}
-	private function onKeyRelease(event:KeyboardEvent):Void
-	{
-		var eventKey:FlxKey = event.keyCode;
-		var key:Int = getKeyFromEvent(eventKey);
-		if(pressed.contains(eventKey))pressed.remove(eventKey);
-        
-        if (callOnScripts("onKeyUp", [event]) == Globals.Function_Stop)
-            return;
-
-		if(startedCountdown && key > -1)
-		{
-			// doesnt matter if THIS is done while paused
-			// only worry would be if we implemented Lifts
-			// but afaik we arent doing that
-			// (though could be interesting to add)
-			for(field in playfields.members){
-				if (field.inControl && !field.autoPlayed && field.isPlayer)
-				{
-					field.keysPressed[key] = false;
-					
-					if(!field.isHolding[key]){
-						var spr:StrumNote = field.strumNotes[key];
-						if (spr != null){
-							spr.playAnim('static');
+					if(note==null){
+						var spr:StrumNote = field.strumNotes[column];
+						if (spr != null && spr.animation.name != 'confirm') {
+							spr.playAnim('pressed');
 							spr.resetAnim = 0;
 						}
+					}else
+						hitNotes.push(note);
+					
+				}
+			}
+		}
+
+		if (hitNotes.length==0 && controlledFields.length > 0){
+			callOnScripts('onGhostTap', [column]);
+			
+			if (!ClientPrefs.ghostTapping)
+				noteMissPress(column);
+		}
+	}
+	private function onKeyRelease(key:FlxKey):Void
+	{
+		if (pressed.contains(key)) pressed.remove(key);
+        
+        if (callOnScripts("onKeyUp", [key]) == Globals.Function_Stop)
+            return;
+		
+		// doesnt matter if THIS is done while paused
+		// only worry would be if we implemented Lifts
+		// but afaik we arent doing that
+		// (though could be interesting to add)
+		if (!startedCountdown) return;
+		
+		var column:Int = getColumnFromKey(key);
+		if (column < 0) return;
+
+		for (field in playfields.members) {
+			if (field.inControl && !field.autoPlayed && field.isPlayer) {
+				field.keysPressed[column] = false;
+				
+				if(!field.isHolding[column]){
+					var spr:StrumNote = field.strumNotes[column];
+					if (spr != null){
+						spr.playAnim('static');
+						spr.resetAnim = 0;
 					}
 				}
 			}
-			callOnScripts('onKeyRelease', [key]);
 		}
+		callOnScripts('onKeyRelease', [column]);
+		
 		//trace('released: ' + controlArray);
 	}
 
-	private function getKeyFromEvent(key:FlxKey):Int
+	private function getColumnFromKey(key:FlxKey):Int
 	{
-		if(key != NONE)
-		{
-			for (i in 0...keysArray.length)
-			{
-				for (j in 0...keysArray[i].length)
-				{
+		if (key != NONE) {
+			for (i in 0...keysArray.length) {
+				for (j in 0...keysArray[i].length) {
 					if(key == keysArray[i][j])
-					{
 						return i;
-					}
 				}
 			}
 		}
@@ -3752,53 +3757,24 @@ class PlayState extends MusicBeatState
 
 	private function keyShit():Void
 	{
-		if (inCutscene) return;
-
-
 		// HOLDING
 		var parsedHoldArray:Array<Bool> = parseKeys();
 		pressedGameplayKeys = parsedHoldArray;
 
-		// TO DO: Find a better way to handle controller inputs, this should work for now
-		if (ClientPrefs.controllerMode)
-		{
+		//// TO DO: Find a better way to handle controller inputs, this should work for now
+		
+		if (ClientPrefs.controllerMode) {
 			var parsedArray:Array<Bool> = parseKeys('_P');
-			if (parsedArray.contains(true))
-			{
-				for (i in 0...parsedArray.length)
-				{
-					if (parsedArray[i] && strumsBlocked[i] != true)
-						onKeyPress(new KeyboardEvent(KeyboardEvent.KEY_DOWN, true, true, -1, keysArray[i][0]));
-				}
+			for (i in 0...parsedArray.length) {
+				if (parsedArray[i] && strumsBlocked[i] != true)
+					onKeyPress(keysArray[i][0]);
 			}
 		}
 
-		/*
-		if (startedCountdown && !boyfriend.stunned && generatedMusic)
-		{
-			if (parsedHoldArray.contains(true) && !endingSong) {
-				#if ACHIEVEMENTS_ALLOWED
-				var achieve:String = checkForAchievement(['oversinging']);
-				if (achieve != null) {
-					startAchievement(achieve);
-				}
-				#end
-			}
-		}
-		*/
-
-		// TO DO: Find a better way to handle controller inputs, this should work for now
-		if (ClientPrefs.controllerMode || strumsBlocked.contains(true))
-		{
-			var parsedArray:Array<Bool> = parseKeys('_R');
-			if (parsedArray.contains(true))
-			{
-				for (i in 0...parsedArray.length)
-				{
-					if (parsedArray[i] || strumsBlocked[i] == true)
-						onKeyRelease(new KeyboardEvent(KeyboardEvent.KEY_UP, true, true, -1, keysArray[i][0]));
-				}
-			}
+		var parsedArray:Array<Bool> = parseKeys('_R');
+		for (i in 0...parsedArray.length) {
+			if ((ClientPrefs.controllerMode && parsedArray[i]) || strumsBlocked[i] == true)
+				onKeyRelease(keysArray[i][0]);
 		}
 	}
 
@@ -3953,7 +3929,7 @@ class PlayState extends MusicBeatState
 			if (note.isSustainNote && !note.isSustainEnd)
 				time += 0.15;
 
-			StrumPlayAnim(field, Std.int(Math.abs(note.column)) % 4, time, note);
+			StrumPlayAnim(field, note.column % keyCount, time, note);
 		}
 
 		// Sing animations
@@ -4093,7 +4069,7 @@ class PlayState extends MusicBeatState
 				if (note.isSustainNote && !note.isSustainEnd)
 					time += 0.15;
 
-				StrumPlayAnim(field, Std.int(Math.abs(note.column)) % 4, time, note);
+				StrumPlayAnim(field, note.column % 4, time, note);
 			}else{
 				var spr = field.strumNotes[note.column];
 				if (spr != null && (field.keysPressed[note.column] || note.isRoll))
@@ -4553,10 +4529,8 @@ class PlayState extends MusicBeatState
 
 		pressedGameplayKeys = null;
 
-		if (!ClientPrefs.controllerMode) {
-			FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
-			FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
-		}
+		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDownEvent);
+		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyUpEvent);
 
 		FunkinHScript.defaultVars.clear();
         

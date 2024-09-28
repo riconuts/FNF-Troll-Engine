@@ -27,6 +27,7 @@ typedef SwagSong =
 	@:optional var song:String;
 	@:optional var bpm:Float;
 	@:optional var speed:Float;
+	@:optional var keyCount:Int;
 	@:optional var notes:Array<SwagSection>;
 	@:optional var events:Array<Array<Dynamic>>;
 	
@@ -382,27 +383,37 @@ class Song
 			swagJson.tracks = {inst: instTracks, player: playerTracks, opponent: opponentTracks};
 		}
 
-        if (swagJson.notes == null)
-            swagJson.notes = [];
+		//// must have at least one section
+        if (swagJson.notes == null || swagJson.notes.length == 0) {		
+			swagJson.notes = [{
+				sectionNotes: [],
+				typeOfSection: 0,
+				mustHitSection: true,
+				gfSection: false,
+				bpm: 0,
+				changeBPM: false,
+				altAnim: false,
+				sectionBeats: 4
+			}];
+		}
+
+		//// vs shaggy chart!!!!
+		if (swagJson.keyCount == null) {
+			swagJson.keyCount = switch(Reflect.field(songJson, "mania")) {
+				default: 4;
+				case 1: 6;
+				case 2: 7;
+				case 3: 9;
+			}
+		}
         
-        if(swagJson.notes.length == 0)
-            swagJson.notes.push({
-                sectionNotes: [],
-                typeOfSection: 0,
-                mustHitSection: true,
-                gfSection: false,
-                bpm: 0,
-                changeBPM: false,
-                altAnim: false,
-                sectionBeats: 4
-            });
-        
-        for(section in swagJson.notes){
-			for (note in section.sectionNotes){
-                if(note[3] == 'Hurt Note')
-                    note[3] = 'Mine';
-            }
-        }
+		////
+		for (section in swagJson.notes) {
+			for (note in section.sectionNotes) {
+				if (note[3] == 'Hurt Note')
+					note[3] = 'Mine';
+			}
+		}
 
 		////
 		if (swagJson.arrowSkin == null || swagJson.arrowSkin.trim().length == 0)

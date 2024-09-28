@@ -47,7 +47,8 @@ private typedef NoteScriptState = {
 
 class Note extends NoteObject
 {
-	public static var swagWidth(default, set):Float = 160 * 0.7;
+	public static var spriteScale:Float = 0.7;
+	public static var swagWidth(default, set):Float = 160 * spriteScale;
 	public static var halfWidth(default, null):Float = swagWidth * 0.5;
 
 	public static var colArray:Array<String> = ['purple', 'blue', 'green', 'red'];
@@ -350,6 +351,9 @@ class Note extends NoteObject
 
 					case 'Hey!':
 					*/
+					case 'Hurt Note':
+						
+
 					case 'GF Sing':
 						gfNote = true;
 
@@ -595,17 +599,18 @@ class Note extends NoteObject
 	}
 
 	function _loadNoteAnims() {
-		animation.addByPrefix(colArray[column] + 'Scroll', colArray[column] + '0');
+		var color = colArray[column % colArray.length];
+		animation.addByPrefix(color + 'Scroll', color + '0');
 
 		if (isSustainNote)
 		{
 			animation.addByPrefix('purpleholdend', 'pruple end hold'); // ?????
             // this is autistic wtf
-			animation.addByPrefix(colArray[column] + 'holdend', colArray[column] + ' hold end');
-			animation.addByPrefix(colArray[column] + 'hold', colArray[column] + ' hold piece');
+			animation.addByPrefix(color + 'holdend', '$color hold end');
+			animation.addByPrefix(color + 'hold', '$color hold piece');
 		}
 
-		scale.set(0.7, 0.7);
+		scale.set(spriteScale, spriteScale);
 		updateHitbox();
 	}
 

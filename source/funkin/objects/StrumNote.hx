@@ -152,7 +152,7 @@ class StrumNote extends NoteObject
 
 		playAnim(lastAnim, true);
 
-		scale.set(0.7, 0.7);
+		scale.x = scale.y = Note.spriteScale;
 		defScale.copyFrom(scale);
 		updateHitbox();
 	}

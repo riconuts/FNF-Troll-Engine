@@ -24,7 +24,8 @@ class ReverseModifier extends NoteModifier
 		return false;
 
     public function getReverseValue(dir:Int, player:Int){
-        var kNum = 4;
+        var kNum = PlayState.keyCount;
+
         var val:Float = 0;
         if(dir>=kNum * 0.5)
             val += getSubmodValue("split" ,player);
@@ -38,7 +39,7 @@ class ReverseModifier extends NoteModifier
         if(dir>=first && dir<=last)
             val += getSubmodValue("cross" ,player);
 
-        val += getValue(player) + getSubmodValue("reverse" + Std.string(dir), player);
+        val += getValue(player) + getSubmodValue('reverse$dir', player);
 
 
         if(getSubmodValue("unboundedReverse",player)==0){
@@ -86,7 +87,7 @@ class ReverseModifier extends NoteModifier
     override function getSubmods(){
         var subMods:Array<String> = ["cross", "split", "alternate", "centered", "unboundedReverse"];
 
-		for (i in 0...4){
+		for (i in 0...PlayState.keyCount){
             subMods.push('reverse${i}');
         }
 

@@ -90,7 +90,7 @@ class ModManager {
 		registerAux("xmod");
 		registerAux("cmod");
 		registerAux("movePastReceptors");
-		for (i in 0...4){
+		for (i in 0...PlayState.keyCount){
 			registerAux("xmod" + i);
 			registerAux("cmod" + i);
 			registerAux("noteSpawnTime" + i);
@@ -107,10 +107,6 @@ class ModManager {
 /* 		for(modName => mod in register){
 			setValue(modName, 0, mN);
         } */
-		
-		for (i in 0...4)
-			setValue("noteSpawnTime" + i, 0, mN);
-		
 		setValue("noteSpawnTime", 0, mN); // when this is <= 0, it defaults to field.spawnTime
 		setValue("drawDistance", FlxG.height * 1.1, mN); // MAY NOT REPRESENT ACTUAL DRAWDISTANCE: drawDistance is modified by the notefields aswell
 		// so whAT you set drawDistance to might be lower or higher than expected because of the draw distance mult. setting
@@ -120,17 +116,20 @@ class ModManager {
 		setValue("scale", 1, mN);
 		setValue("scaleX", 1, mN);
 		setValue("scaleY", 1, mN);
-		for (i in 0...4){
+
+		setValue("movePastReceptors", 0);
+		setValue("flashR", 1, mN);
+		setValue("flashG", 1, mN);
+		setValue("flashB", 1, mN);
+
+		for (i in 0...PlayState.keyCount){
+			setValue('noteSpawnTime$i', 0, mN);
 			setValue('cmod$i', -1, mN);
 			setValue('xmod$i', 1, mN);
 			setValue('scale${i}', 1, mN);
 			setValue('scale${i}X', 1, mN);
 			setValue('scale${i}Y', 1, mN);
 		}
-		setValue("movePastReceptors", 0);
-		setValue("flashR", 1, mN);
-		setValue("flashG", 1, mN);
-		setValue("flashB", 1, mN);
 	}
 
     inline public function quickRegister(mod:Modifier)
