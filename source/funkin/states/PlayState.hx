@@ -3854,15 +3854,9 @@ class PlayState extends MusicBeatState
 
 		if (ClientPrefs.ghostTapping && !daNote.noMissAnimation)
 		{
-			var chars:Array<Character> = daNote.characters;
+			var chars:Array<Character> = getNoteCharacters(daNote, field);
 
-			if (daNote.gfNote && gf != null)
-				chars.push(gf);
-			else if (chars.length == 0)
-				chars = field.characters;
-
-			if (stats.combo > 10 && gf!=null && chars.contains(gf) == false && gf.animOffsets.exists('sad'))
-			{
+			if (stats.combo > 10 && gf!=null && chars.contains(gf) == false && gf.animation.exists('sad')) {
 				gf.playAnim('sad');
 				gf.specialAnim = true;
 			}
@@ -3949,16 +3943,7 @@ class PlayState extends MusicBeatState
 
 		camZooming = true;
 
-		var chars:Array<Character> = note.characters;
-		if (note.gfNote && gf != null)
-			chars.push(gf);
-		if (chars.length == 0)
-			chars = field.characters;
-
-		for(char in chars){
-			char.playNote(note, field);
-		}
-
+		//
 		note.hitByOpponent = true;
 		for (track in opponentTracks)
 			track.volume = 1.0;
@@ -3970,6 +3955,11 @@ class PlayState extends MusicBeatState
 				time += 0.15;
 
 			StrumPlayAnim(field, Std.int(Math.abs(note.column)) % 4, time, note);
+		}
+
+		// Sing animations
+		for(char in getNoteCharacters(note, field)){
+			char.playNote(note, field);
 		}
 
 		// Script shit
@@ -4024,6 +4014,17 @@ class PlayState extends MusicBeatState
 		
 	}
 
+	inline function getNoteCharacters(note:Note, field:PlayField) {
+		var chars:Array<Character> = note.characters;
+
+		if (note.gfNote && gf != null)
+			chars.push(gf);
+		else if (chars.length == 0)
+			chars = field.characters;
+
+		return chars;
+	}
+
 	function goodNoteHit(note:Note, field:PlayField):Void
 	{	
 		if (note.wasGoodHit || (field.autoPlayed && (note.ignoreNote || note.breaksCombo)))
@@ -4054,15 +4055,9 @@ class PlayState extends MusicBeatState
 			{
 				switch (note.noteType)
 				{
-					case 'Hurt Note': // Hurt note
-						var chars:Array<Character> = note.characters;
-						if (note.gfNote)
-							chars.push(gf);
-						else if (chars.length == 0)
-							chars = field.characters;
-
-						for(char in chars){
-							if (char.animation.getByName('hurt') != null){
+					case 'Hurt Note':
+						for (char in getNoteCharacters(note, field)) {
+							if (char.animation.exists('hurt')){
 								char.playAnim('hurt', true);
 								char.specialAnim = true;
 							}
@@ -4086,48 +4081,7 @@ class PlayState extends MusicBeatState
 		if (!note.isSustainNote)
 			judge(note, field);
 
-		// Sing animations
-		var chars:Array<Character> = note.characters;
-		if (note.gfNote && gf != null)
-			chars.push(gf);
-		if (chars.length == 0)
-			chars = field.characters;
-		
-		for (char in chars)
-		{
-			if (char.callOnScripts("playNote", [note, field]) == Globals.Function_Stop)
-			{
-				// nada
-			}	
-			else if(note.noteType == 'Hey!') 
-			{
-				char.playAnim('hey', true);
-				char.specialAnim = true;
-				char.heyTimer = 0.6;
-
-				if (gf != null && gf.animOffsets.exists('cheer')) 
-				{
-					gf.playAnim('cheer', true);
-					gf.specialAnim = true;
-					gf.heyTimer = 0.6;
-				}
-			} 
-			else if(!note.noAnimation) 
-			{
-				var animToPlay:String = singAnimations[Std.int(Math.abs(note.column))];
-
-				var curSection = SONG.notes[curSection];
-				if ((curSection != null && curSection.altAnim) || note.noteType == 'Alt Animation')
-					animToPlay += '-alt';
-
-				if (char.animTimer <= 0 && !char.voicelining){
-					char.playAnim(animToPlay, true);
-					char.holdTimer = 0;
-					char.callOnScripts("playNoteAnim", [animToPlay, note]);
-				}
-			}
-		}
-
+		//
 		note.wasGoodHit = true;
 		if (cpuControlled) saveScore = false; // if botplay hits a note, then you lose scoring
 		for (track in playerTracks)
@@ -4146,6 +4100,11 @@ class PlayState extends MusicBeatState
 				if (spr != null && (field.keysPressed[note.column] || note.isRoll))
 					spr.playAnim('confirm', true, note.isSustainNote ? note.parent : note);
 			}
+		}
+
+		// Sing animations
+		for(char in getNoteCharacters(note, field)){
+			char.playNote(note, field);
 		}
 
 		// Script shit
