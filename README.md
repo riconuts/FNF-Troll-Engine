@@ -16,11 +16,11 @@ The setup files for Troll Engine's specific libraries can be installed with the 
 
 ## Engine Credits / Special Thanks
 - [Nebula the Zorua](https://x.com/Nebula_Zorua) - Most engine stuff
-- [Riconuts](https://x.com/riconuts) - 
+- [riconuts](https://x.com/riconuts) - Main engine maintainer
 - [crowplexus](https://x.com/crowplexus) - Countdown class and hxdiscord_rpc implementation
-- [4mbr0s3_2](https://www.youtube.com/@4mbr0s3-2) Modifier system inspiration
+- [4mbr0s3_2](https://www.youtube.com/@4mbr0s3-2) - Modifier system inspiration
 - [Lat](https://x.com/latzephr) - Week 6 Health Bar and Timer assets
-- [moxie-coder](https://x.com/moxie_specalist) - Mac building and workflow help
+- [moxie-coder](https://github.com/moxie-coder/) - Mac building and workflow help
 - Echolocated - Made the Epic judgement graphic
 - [AllyTS](https://x.com/NewTioSans) - Made the Mine note texture
-- [Psych Engine](https://github.com/ShadowMario/FNF-PsychEngine) dad engine
+- [Psych Engine](https://github.com/ShadowMario/FNF-PsychEngine) - Dad engine
