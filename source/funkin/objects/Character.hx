@@ -63,7 +63,7 @@ class Character extends FlxSprite
     Stops note anims and idle from playing. Make sure to set this to false once the animation is done.**/
 	public var voicelining:Bool = false; 
 
-	/**Unused. Might eventually be used to create an "idleSequence" which lets you create your own custom sequence of animations to be played during idling, instead of only idle or danceLeft and danceRight.**/
+	/**Might eventually be used to create an "idleSequence" which lets you create your own custom sequence of animations to be played during idling, instead of only idle or danceLeft and danceRight.**/
 	public var idleSequence:Array<String> = ['idle'];
 	/**How each animation offsets the character**/
     public var animOffsets = new Map<String, Array<Dynamic>>();
