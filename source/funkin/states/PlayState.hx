@@ -683,17 +683,11 @@ class PlayState extends MusicBeatState
 			////
 			Paths.iterateDirectory(folder, function(file:String)
 			{
-				if(filesPushed.contains(file))
+				if (filesPushed.contains(file))
 					return;
 
-                var isHScript:Bool = false;
-                for(ext in Paths.HSCRIPT_EXTENSIONS)
-                    if(file.endsWith(ext)){
-                        isHScript = true;
-                        break;
-                    }
-
-                if(!isHScript)return;
+				if (!Paths.isHScript(file))
+					return;
 
 				createHScript(folder + file);
 				filesPushed.push(file);
