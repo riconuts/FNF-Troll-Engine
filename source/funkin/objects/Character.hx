@@ -520,6 +520,13 @@ class Character extends FlxSprite
 		callOnScripts("onDancePost");
 	}
 
+	public inline function canResetDance(holdingKeys:Bool = false) {
+		return animation.curAnim != null
+			&& holdTimer > Conductor.stepCrochet * 0.001 * singDuration
+			&& animation.curAnim.name.startsWith('sing')
+			&& !animation.curAnim.name.endsWith('miss')
+			&& (idleWhenHold || holdingKeys);
+    }
 	public function resetDance(){
         // called when resetting back to idle from a pose
         // useful for stuff like sing return animations

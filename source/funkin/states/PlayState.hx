@@ -2667,17 +2667,11 @@ class PlayState extends MusicBeatState
 			{
 				if (!field.isPlayer)
 					continue;
-					
-				for(char in field.characters)
-				{
-					if (char.animation.curAnim != null
-						&& char.holdTimer > Conductor.stepCrochet * 0.0011 * char.singDuration
-						&& char.animation.curAnim.name.startsWith('sing')
-						&& !char.animation.curAnim.name.endsWith('miss')
-						&& (char.idleWhenHold || !pressedGameplayKeys.contains(true))
-					)
-                        char.resetDance();
-				}
+
+                for (char in field.characters){
+					if (char.canResetDance(!pressedGameplayKeys.contains(true)))
+						char.resetDance();
+                }
 			}
 		}
 		
@@ -3657,7 +3651,7 @@ class PlayState extends MusicBeatState
 		if (pressed.contains(key)) return;
         pressed.push(key);
 		
-        if (callOnScripts("onKeyDown", [key]) == Globals.Function_Stop)
+        if (callOnScripts("onKeyDown", [key]) == Globals.Function_Stop) // wish this wasnt changed it broke old code of mine lol
             return;
 		
 		var column:Int = getColumnFromKey(key);
