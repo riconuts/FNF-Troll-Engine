@@ -1435,14 +1435,14 @@ class PlayState extends MusicBeatState
 		{
 			var off:Float = Math.min(FlxG.width, 1280) / 4;
 			var opp:Int = playOpponent ? 0 : 1;
+			var halfKeys:Int = Math.ceil(keyCount / 2);
 
-			modManager.setValue("transform0X", -off, opp);
-			modManager.setValue("transform1X", -off, opp);
-			modManager.setValue("transform2X", off, opp);
-			modManager.setValue("transform3X", off, opp);
+			for (i in 0...halfKeys)
+				modManager.setValue('transform${i}X', -off, opp);
+			for (i in halfKeys...keyCount)
+				modManager.setValue('transform${i}X', off, opp);
 
 			modManager.setValue("alpha", 0.6, opp);
-
 			modManager.setValue("opponentSwap", 0.5);
 		}
 		#end
