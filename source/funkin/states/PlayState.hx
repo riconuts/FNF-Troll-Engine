@@ -222,8 +222,6 @@ class PlayState extends MusicBeatState
 	public var opponentCameraOffset:Array<Float> = null;
 	public var girlfriendCameraOffset:Array<Float> = null;
 
-	private var singAnimations:Array<String> = ["singLEFT", "singDOWN", "singUP", "singRIGHT"];
-
 	public var focusedChar:Character;
 	public var gfSpeed:Int = 1;
 
@@ -3381,8 +3379,9 @@ class PlayState extends MusicBeatState
 
 			////
 			spr.moves = false;
-			spr.scale.set(0.7 * 1.1, 0.7 * 1.1);
-			spr.tween = FlxTween.tween(spr.scale, {x: 0.7, y: 0.7}, 0.1, {
+
+			spr.scale.copyFrom(ratingGroup.judgeTemplate.scale);
+			spr.tween = FlxTween.tween(spr.scale, {x: spr.scale.x, y: spr.scale.y}, 0.1, {
 				ease: FlxEase.quadOut,
 				onComplete: function(tween:FlxTween) {
 					if (!spr.alive)
@@ -3396,6 +3395,8 @@ class PlayState extends MusicBeatState
 					});
 				}
 			});
+			spr.scale.scale(1.1, 1.1);
+
 		} else {
 			spr = worldCombos ? ratingGroup.displayJudgment(image) : ratingGroup.displayJudgment(image, ClientPrefs.comboOffset[0], -ClientPrefs.comboOffset[1]);
 
@@ -3403,15 +3404,16 @@ class PlayState extends MusicBeatState
 			spr.acceleration.y = 550;
 			spr.velocity.set(FlxG.random.int(-10, 10), -FlxG.random.int(140, 175));
 
-			spr.scale.set(0.666, 0.666);
-			spr.alpha = 1.0;
-
-			spr.tween = FlxTween.tween(spr.scale, {x: 0.7, y: 0.7}, 0.1, {ease: FlxEase.backOut, onComplete: function(twn){
+			spr.scale.copyFrom(ratingGroup.judgeTemplate.scale);
+			spr.tween = FlxTween.tween(spr.scale, {x: spr.scale.x, y: spr.scale.y}, 0.1, {ease: FlxEase.backOut, onComplete: function(twn){
 				spr.tween = FlxTween.tween(spr, {alpha: 0.0}, 0.2, {
-						startDelay: Conductor.crochet * 0.001,
-						onComplete: (_) -> spr.kill()
-					});
+					startDelay: Conductor.crochet * 0.001,
+					onComplete: (_) -> spr.kill()
+				});
 			}});
+
+			spr.alpha = 1.0;
+			spr.scale.scale(0.96, 0.96);
 		}
 
         spr.color = 0xFFFFFFFF;
@@ -3460,12 +3462,12 @@ class PlayState extends MusicBeatState
 			{
 				numSpr.moves = false;
 
-				numSpr.scale.set(0.5, 0.5);
+				numSpr.scale.copyFrom(ratingGroup.comboTemplate.scale);
+				numSpr.tween = FlxTween.tween(numSpr.scale, {x: numSpr.scale.x, y: numSpr.scale.y}, 0.2, {ease: FlxEase.circOut});
+
 				numSpr.scale.x *= 1.25;
 				numSpr.updateHitbox();
 				numSpr.scale.y *= 0.75;
-
-				numSpr.tween = FlxTween.tween(numSpr.scale, {x: 0.5, y: 0.5}, 0.2, {ease: FlxEase.circOut});
 			}
 			else
 			{
@@ -3473,7 +3475,7 @@ class PlayState extends MusicBeatState
 				numSpr.acceleration.y = FlxG.random.int(200, 300);
 				numSpr.velocity.set(FlxG.random.float(-5, 5), -FlxG.random.int(140, 160));
 
-				numSpr.scale.set(0.5, 0.5);
+				numSpr.scale.copyFrom(ratingGroup.comboTemplate.scale);
 				numSpr.updateHitbox();
 
 				numSpr.tween = FlxTween.tween(numSpr, {alpha: 0.0}, 0.2, {
