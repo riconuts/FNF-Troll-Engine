@@ -27,9 +27,11 @@ class HScriptedSubstate extends MusicBeatSubstate
 	{
 		for (filePath in Paths.getFolders("substates"))
 		{
-			var fullPath = filePath + '$name.hscript';
-			if (Paths.exists(fullPath))
-				return new HScriptedSubstate(fullPath, scriptVars);
+            for(ext in Paths.HSCRIPT_EXTENSIONS){
+                var fullPath = filePath + '$name.$ext';
+                if (Paths.exists(fullPath))
+                    return new HScriptedSubstate(fullPath, scriptVars);
+            }
 		}
 
 		return null;

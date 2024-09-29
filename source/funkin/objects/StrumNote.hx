@@ -82,18 +82,13 @@ class StrumNote extends NoteObject
 		{
             var script = PlayState.instance.hudSkinScripts.get(value);
             if(script == null){
-				var baseFile = 'hudskins/$value.hscript';
-				var files = [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)];
-				for (file in files)
-				{
-					if (!Paths.exists(file))
-						continue;
-                    script = FunkinHScript.fromFile(file, value);
-                    PlayState.instance.hscriptArray.push(script);
-                    PlayState.instance.funkyScripts.push(script);
-                    PlayState.instance.hudSkinScripts.set(value, script);
+                var file = Paths.getHScriptPath('hudskins/$value');
+                if(file != null){
+					script = FunkinHScript.fromFile(file, value);
+					PlayState.instance.hscriptArray.push(script);
+					PlayState.instance.funkyScripts.push(script);
+					PlayState.instance.hudSkinScripts.set(value, script);
                 }
-
             }
 			genScript = script;
 		}

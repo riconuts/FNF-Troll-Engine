@@ -5,8 +5,6 @@ import funkin.data.Cache;
 import funkin.data.Song;
 import funkin.data.Section;
 import funkin.objects.Note;
-import funkin.objects.NoteObject;
-import funkin.objects.NoteObject.ObjectType;
 import funkin.objects.NoteSplash;
 import funkin.objects.StrumNote;
 import funkin.objects.Stage;
@@ -27,7 +25,7 @@ import funkin.states.options.*;
 import funkin.scripts.*;
 import funkin.scripts.Util;
 import funkin.scripts.Util as ScriptingUtil;
-
+import funkin.scripts.FunkinScript.ScriptType;
 import flixel.*;
 import flixel.util.*;
 import flixel.math.*;
@@ -667,24 +665,35 @@ class PlayState extends MusicBeatState
 
 				for (name in orderListRaw.split('\n'))
 				{
-					var file = '$name.hscript';
-					var filePath = folder + file;
+                    for(ext in Paths.HSCRIPT_EXTENSIONS){
+                        var file = '$name.$ext';
+                        var filePath = folder + file;
 
-					if (!Paths.exists(filePath) || filesPushed.contains(file)){
-						//trace('skipped: $file');
-						continue;
-					}
+                        if (!Paths.exists(filePath) || filesPushed.contains(file)){
+                            //trace('skipped: $file');
+                            continue;
+                        }
 
-					createHScript(filePath);
-					filesPushed.push(file);
+                        createHScript(filePath);
+                        filesPushed.push(file);
+                    }
 				}
 			}
 
 			////
 			Paths.iterateDirectory(folder, function(file:String)
 			{
-				if(filesPushed.contains(file) || !file.endsWith('.hscript'))
+				if(filesPushed.contains(file))
 					return;
+
+                var isHScript:Bool = false;
+                for(ext in Paths.HSCRIPT_EXTENSIONS)
+                    if(file.endsWith(ext)){
+                        isHScript = true;
+                        break;
+                    }
+
+                if(!isHScript)return;
 
 				createHScript(folder + file);
 				filesPushed.push(file);
@@ -999,7 +1008,11 @@ class PlayState extends MusicBeatState
 		}
 
 		//// STAGE LUA SCRIPTS
-		var baseFile:String = 'stages/$curStage.lua';
+        var file = Paths.getLuaPath('stages/$curStage');
+        if(file != null)
+            createLua(file);
+        
+/* 		var baseFile:String = 'stages/$curStage.lua';
 		for (file in [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)])
 		{
 			if (!Paths.exists(file))
@@ -1008,7 +1021,7 @@ class PlayState extends MusicBeatState
 			createLua(file);
 
 			break;
-		}
+		} */
 
 		// SONG SPECIFIC LUA SCRIPTS
 		var foldersToCheck:Array<String> = Paths.getFolders('songs/$songName');
@@ -4178,10 +4191,8 @@ class PlayState extends MusicBeatState
 
 		var script:FunkinHScript = null;
 
-		var baseFile = 'hudskins/$name.hscript';
-		for (file in [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)]) {
-			if (!Paths.exists(file)) continue;
-			
+		var file = Paths.getHScriptPath('hudskins/$name');
+		if (file != null){
 			script = createHScript(file, name);
 			hudSkinScripts.set(name, script);
 		}
@@ -4286,9 +4297,9 @@ class PlayState extends MusicBeatState
 		while (scriptsToClose.length > 0){
 			var script = scriptsToClose.pop();
 
-			if (script is FunkinLua)
+			if (script.scriptType == PSYCH_LUA)
 				luaArray.remove(cast script);
-			else if (script is FunkinHScript)
+			else if (script.scriptType == HSCRIPT)
 				hscriptArray.remove(cast script);
 
 			funkyScripts.remove(script);

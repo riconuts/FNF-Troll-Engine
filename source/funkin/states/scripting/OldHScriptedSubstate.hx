@@ -47,7 +47,15 @@ class OldHScriptedSubstate extends MusicBeatSubstate
 	{
 		var scriptPath:Null<String> = null;
 
-		if (!fileName.endsWith(".hscript"))
+		var hasExtension = false;
+		for (ext in Paths.HSCRIPT_EXTENSIONS) {
+			if (fileName.endsWith('.$ext')) {
+				hasExtension = true;
+				break;
+			}
+		}
+
+		if (!hasExtension)
 			fileName += ".hscript";
 
 		for (folderPath in Paths.getFolders("substates"))

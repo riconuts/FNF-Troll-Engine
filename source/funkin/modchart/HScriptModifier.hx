@@ -61,22 +61,20 @@ class HScriptModifier extends Modifier
 
 	public static function fromName(modMgr:ModManager, ?parent:Modifier, scriptName:String):Null<HScriptModifier>
 	{		
-		var fileName:String = 'modifiers/$scriptName.hscript';
-		for (filePath in [#if MODS_ALLOWED Paths.modFolders(fileName), #end Paths.getPreloadPath(fileName)])
-		{
-			if (!Paths.exists(filePath)) continue;
+		var filePath:String = Paths.getHScriptPath('modifiers/$scriptName');
+        if(filePath == null){
+			trace('Modifier script: $scriptName not found!');
+			return null;
+        }
 
-			var mod = new HScriptModifier(
-				modMgr, 
-				parent, 
-				FunkinHScript.fromFile(filePath, filePath, _scriptEnums, false)
-			);
-			mod.name = scriptName;
-			return mod;
-		}
+        var mod = new HScriptModifier(
+            modMgr, 
+            parent, 
+            FunkinHScript.fromFile(filePath, filePath, _scriptEnums, false)
+        );
+        mod.name = scriptName;
+        return mod;
 
-		trace('Modifier script: $scriptName not found!');
-		return null;
 	}
 
 	//// this is where a macro could have helped me, if i weren't so stupid.

@@ -5,6 +5,11 @@ import funkin.scripts.Globals;
 import funkin.Conductor;
 import funkin.ClientPrefs;
 
+enum abstract ScriptType(String) from String to String {
+	var HSCRIPT = "hscript";
+    var PSYCH_LUA = "lua";
+}
+
 /** 
 	Base class meant to be overridden so you can implement custom script types 
 **/

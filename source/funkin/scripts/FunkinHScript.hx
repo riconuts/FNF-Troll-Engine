@@ -1,5 +1,6 @@
 package funkin.scripts;
 
+import funkin.scripts.FunkinScript.ScriptType;
 import funkin.objects.IndependentVideoSprite;
 import openfl.events.DataEvent;
 import funkin.scripts.*;
@@ -121,13 +122,14 @@ class FunkinHScript extends FunkinScript
 
 	public function new(?parsed:Expr, ?name:String = "HScript", ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true)
 	{
-		super(name, 'hscript');
+		super(name, ScriptType.HSCRIPT);
 
 		set("Std", Std);
 		set("Type", Type);
 		set("Reflect", Reflect);
 		set("Math", Math);
 		set("StringTools", StringTools);
+        set("Main", Main);
 
 		set("StringMap", haxe.ds.StringMap);
 		set("ObjectMap", haxe.ds.ObjectMap);

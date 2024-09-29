@@ -1,5 +1,6 @@
 package funkin.scripts;
 
+import funkin.scripts.FunkinScript.ScriptType;
 import funkin.states.*;
 import funkin.states.PlayState;
 import funkin.scripts.Globals.*;
@@ -1892,7 +1893,7 @@ class FunkinLua extends FunkinScript
 	}
 
 	public function new(state:State, ?name:String = "Lua", ?ignoreCreateCall:Bool, ?vars:Map<String, Dynamic>) {
-		super(name, 'lua');
+		super(name, ScriptType.PSYCH_LUA);
 
 		if (state == null)
 			return;

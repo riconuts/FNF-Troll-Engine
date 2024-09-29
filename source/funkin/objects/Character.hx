@@ -1,5 +1,6 @@
 package funkin.objects;
 
+import funkin.scripts.FunkinScript.ScriptType;
 import funkin.objects.playfields.PlayField;
 import flixel.math.FlxPoint;
 import funkin.data.CharacterData.*;
@@ -150,7 +151,7 @@ class Character extends FlxSprite
 
     public function startScript(script:FunkinScript){        
 		#if HSCRIPT_ALLOWED
-        if(script.scriptType == 'hscript'){
+        if(script.scriptType == ScriptType.HSCRIPT){
 		    callScript(script, "onLoad", [this]);
         }
         #end
@@ -158,7 +159,7 @@ class Character extends FlxSprite
 
     public function stopScript(script:FunkinScript, destroy:Bool=false){
         #if HSCRIPT_ALLOWED
-        if (script.scriptType == 'hscript'){
+        if (script.scriptType == ScriptType.HSCRIPT){
             callScript(script, "onStop", [this]);
             if(destroy){
 		        script.call("onDestroy");
@@ -643,25 +644,23 @@ class Character extends FlxSprite
 
 		for (filePath in Paths.getFolders("characters"))
 		{
-            for(ext in Paths.HSCRIPT_EXTENSIONS){
-                var file = filePath + '$scriptName.${ext}';
-                if (Paths.exists(file)){
-                    var script = FunkinHScript.fromFile(file, file, defaultVars);
-                    pushScript(script);
-                    return this;
-                }
+            #if HSCRIPT_ALLOWED
+			var hscriptFile = Paths.getHScriptPath('$filePath/$scriptName');
+			if (hscriptFile != null) {
+				var script = FunkinHScript.fromFile(hscriptFile, hscriptFile, defaultVars);
+				pushScript(script);
+				return this;
             }
-			#if LUA_ALLOWED
+            #end
 
-			for (ext in Paths.LUA_EXTENSIONS) {
-				var file = filePath + '$scriptName.${ext}';
-			    if (Paths.exists(file)){
-                    var script = FunkinLua.fromFile(file);
-                    pushScript(script);
-                    return this;
-                }
-            }
-			#end
+            #if LUA_ALLOWED
+			var luaFile = Paths.getLuaPath('$filePath/$scriptName');
+			if (luaFile != null) {
+				var script = FunkinLua.fromFile(luaFile, luaFile, defaultVars);
+				pushScript(script);
+				return this;
+			}
+            #end
 		}
 
 		return this;

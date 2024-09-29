@@ -39,6 +39,43 @@ class Paths
 		"hx",
 		#if LUA_ALLOWED "lua" #end]; // TODo: initialize this by combining the top 2 vars ^
 
+
+	public static function getFileWithExtensions(scriptPath:String, extensions:Array<String>) {
+		for (fileExt in extensions) {
+			var baseFile:String = '$scriptPath.$fileExt';
+			for (file in [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)]) {
+				if (Paths.exists(file))
+					return file;
+			}
+		}
+
+		return null;
+	}
+
+    public static function isHScript(file:String){
+        for(ext in Paths.HSCRIPT_EXTENSIONS)
+            if(file.endsWith('.$ext'))
+                return true;
+        
+		return false;
+    }
+    public inline static function getHScriptPath(scriptPath:String)
+    {
+        #if HSCRIPT_ALLOWED
+		return getFileWithExtensions(scriptPath, Paths.HSCRIPT_EXTENSIONS);
+        #else
+        return null;
+        #end
+    }
+
+	public inline static function getLuaPath(scriptPath:String) {
+		#if LUA_ALLOWED
+		return getFileWithExtensions(scriptPath, Paths.LUA_EXTENSIONS);
+		#else
+		return null;
+		#end
+	}
+
 	public static var dumpExclusions:Array<String> = [
 		'assets/music/freakyIntro.$SOUND_EXT',
 		'assets/music/freakyMenu.$SOUND_EXT',
@@ -194,8 +231,14 @@ class Paths
 
 	inline static public function lua(key:String, ?library:String)
 	{
-		return file('$key.lua', TEXT, library);
+        for(ext in Paths.LUA_EXTENSIONS){
+			var r = file('$key.ext', TEXT, library);
+			if (Paths.exists(r))
+			    return r;
+        }
+        return null;
 	}
+    
 
 
 	inline static public function exists(path:String, ?type:AssetType):Bool

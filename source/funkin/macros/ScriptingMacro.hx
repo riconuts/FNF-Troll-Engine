@@ -285,15 +285,18 @@ class ScriptingMacro
             kind: FFun({
                 args: [{name: "folder"}, {name: "scriptName"}],
                 expr: macro {
-                    var fileName = '$scriptName.hscript';
-                    for (filePath in Paths.getFolders(folder))
-                    {
-                        var path = filePath + fileName;
-                        if (Paths.exists(path))
+                    for(fileExt in Paths.HSCRIPT_EXTENSIONS){
+						if (_extensionScript != null)break;
+						var fileName = '$scriptName.$fileExt';
+                        for (filePath in Paths.getFolders(folder))
                         {
-                            _extensionScript = funkin.scripts.FunkinHScript.fromFile(path, path, _getScriptDefaultVars());
-                            _extensionScript.call("new", []);
-                            break;
+                            var path = filePath + fileName;
+                            if (Paths.exists(path))
+                            {
+                                _extensionScript = funkin.scripts.FunkinHScript.fromFile(path, path, _getScriptDefaultVars());
+                                _extensionScript.call("new", []);
+                                break;
+                            }
                         }
                     }
                 }

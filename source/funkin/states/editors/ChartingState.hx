@@ -630,7 +630,7 @@ class ChartingState extends MusicBeatState
 			if(FileSystem.exists(directory)) {
 				for (file in FileSystem.readDirectory(directory)) {
 					var path = haxe.io.Path.join([directory, file]);
-					if (!FileSystem.isDirectory(path) && file.endsWith('.hscript')) {
+					if (!FileSystem.isDirectory(path) && Paths.isHScript(path)) {
 						var skinToCheck:String = file.substr(0, file.length - 8);
 						if(!skinsLoaded.exists(skinToCheck)) {
 							skins.push(skinToCheck);

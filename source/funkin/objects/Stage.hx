@@ -82,13 +82,8 @@ class Stage extends FlxTypedGroup<FlxBasic>
 			return;
 		}   
 
-		var baseFile:String = 'stages/$curStage.hscript';
-	
-		for (file in [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)])
-		{
-			if (!Paths.exists(file))
-				continue;
-		
+		var file = Paths.getHScriptPath('stages/$curStage');
+		if (file != null){
 			stageScript = FunkinHScript.fromFile(file, file, additionalVars);
 
 			// define variables lolol
@@ -98,14 +93,12 @@ class Stage extends FlxTypedGroup<FlxBasic>
 			stageScript.set("insert", insert);
 			stageScript.set("this", this);
 			stageScript.set("foreground", foreground);
-			
-			if (buildStage){
+
+			if (buildStage) {
 				stageScript.call("onLoad", [this, foreground]);
 				stageBuilt = true;
-			}
-
-			break;
-		}
+			} 
+        }
 	}
 
 	public function buildStage()
