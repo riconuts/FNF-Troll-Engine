@@ -297,27 +297,6 @@ class Note extends NoteObject
 				texture = genScript.get("noteTexture");
 		}
 
-		////
-		if (column < 0) {
-			// How
-
-		}else if (!isSustainNote) {
-			var color = colArray[column % colArray.length];
-			animation.play(color + 'Scroll');
-
-        }else {
-			if (genScript != null && genScript.exists("setupHoldNoteTexture"))
-				genScript.executeFunc("setupHoldNoteTexture", [this]);
-
-			var color = colArray[column % colArray.length];
-			animation.play(color + (isSustainEnd ? 'holdend' : 'hold'));
-
-			scale.y *= Conductor.stepCrochet * 1.5 * PlayState.instance.songSpeed;
-			defScale.copyFrom(scale);
-
-			updateHitbox();
-		}
-
         return noteMod = value;
     }
 
@@ -469,25 +448,29 @@ class Note extends NoteObject
 		if (genScript != null && genScript.executeFunc("preReloadNote", [this, prefix, texture, suffix], this) == Globals.Function_Stop)
 			return;
 
-		var prevAnim:String = animation.name;
-		var lastScaleY:Float = scale.y;
-
 		////
 		var skin:String = (texture.length > 0) ? texture : PlayState.arrowSkin;
-		var arraySkin:Array<String> = skin.split('/');
-		arraySkin[arraySkin.length - 1] = prefix + arraySkin[arraySkin.length-1] + suffix; // add prefix and suffix to the texture file
+		var fileName:String;
 		
-		var fileName:String = arraySkin.join('/');
-		var foldersToCheck:Array<String> = (folderName == '') ? [''] : ['$folderName/', ''];
-
-		var checkQuants:Bool = canQuant && ClientPrefs.noteSkin == 'Quants';
+		if (prefix.length + suffix.length == 0) 
+			fileName = skin;
+		else {
+			var split:Array<String> = skin.split('/');
+			split[split.length - 1] = prefix + split[split.length-1] + suffix; // add prefix and suffix to the texture file
+			fileName = split.join('/');
+		}
+		
+		var loadQuants:Bool = canQuant && ClientPrefs.noteSkin=='Quants';
 		var wasQuant:Bool = isQuant;
 		isQuant = false;
+		
+		var foldersToCheck:Array<String> = (folderName == '') ? [''] : ['$folderName/', ''];
+		var fullPath:String = '';
 
 		for (dir in foldersToCheck) {
-			var fullPath:String = dir + fileName;
+			fullPath = dir + fileName;
 
-			if (checkQuants) {
+			if (loadQuants) {
 				var quantFileName:String = "QUANT" + fileName;
 				var quantFileExists:Bool;
 
@@ -499,44 +482,35 @@ class Note extends NoteObject
 				}
 
 				if (quantFileExists) {
-					isQuant = true;
-					fileName = quantFileName;
 					fullPath = dir + quantFileName;
-
-				}else if (!Paths.imageExists(fullPath))
-					continue;
-				// lol it's written twice so it doesn't checked twice
-			}else if (!Paths.imageExists(fullPath))
-				continue;
-
-			if (wasQuant != isQuant)
-				updateColours();
-
-			if (vInd > 0 && hInd > 0){
-				var graphic = Paths.image(fullPath);
-				width = graphic.width / hInd;
-				height = graphic.height / vInd;
-				loadGraphic(graphic, true, Math.floor(width), Math.floor(height));
-				loadIndNoteAnims();
-				break;
-			}else{	
-				frames = Paths.getSparrowAtlas(fullPath);
-				loadNoteAnims();
-				break;
+					isQuant = true;
+					break;
+				}
 			}
+			
+			if (!Paths.imageExists(fullPath))
+				continue;
 		}
-		
-		////
-		if (isSustainNote)
-			scale.y = lastScaleY;
-		defScale.copyFrom(scale);
-
-		if (prevAnim != null)
-			animation.play(prevAnim, true);
-
+ 
+		if (wasQuant != isQuant)
+			updateColours();
+ 		
+		if (vInd > 0 && hInd > 0){
+			var graphic = Paths.image(fullPath);
+			width = graphic.width / hInd;
+			height = graphic.height / vInd;
+			loadGraphic(graphic, true, Math.floor(width), Math.floor(height));
+			loadIndNoteAnims();
+		}else{	
+			frames = Paths.getSparrowAtlas(fullPath);
+			loadNoteAnims();
+		} 
+	
+		////		
 		if (inEditor)
 			setGraphicSize(ChartingState.GRID_SIZE, ChartingState.GRID_SIZE);
 		
+		defScale.copyFrom(scale);
 		updateHitbox();
 
 		if (genScript != null)
@@ -568,14 +542,30 @@ class Note extends NoteObject
 			_loadIndNoteAnims();
 	}
 
-	function _loadIndNoteAnims()
-	{
-		if (isSustainNote) {
-			animation.add(colArray[column] + 'holdend', [column + 4]);
-			animation.add(colArray[column] + 'hold', [column]);
-		}else
-			animation.add(colArray[column] + 'Scroll', [column + 4]);
-	}
+	function _loadIndNoteAnims() {
+		var colorName:String = colArray[column % colArray.length];		
+		var animName:String;
+		var animFrames:Array<Int>;
+
+		switch (holdType) {
+			default:	
+				animName = colorName+'Scroll';
+				animFrames = [column + 4];
+
+			case PART:
+				animName = colorName+'hold';
+				animFrames = [column];
+ 
+			case END:
+				animName = colorName+'holdend';
+				animFrames = [column + 4];
+		} 
+ 
+		animation.add(animName, animFrames);
+		animation.play(animName, true);
+
+		scale.set(6, 6);
+	} 
 
 	public function loadNoteAnims() {
         var changed = false;
@@ -598,21 +588,33 @@ class Note extends NoteObject
 			_loadNoteAnims();
 	}
 
-	function _loadNoteAnims() {
-		var color = colArray[column % colArray.length];
-		animation.addByPrefix(color + 'Scroll', color + '0');
+	function _loadNoteAnims() { 
+		var colorName:String = colArray[column % colArray.length];		
+		var animName:String;
+		var animPrefix:String;
 
-		if (isSustainNote)
-		{
-			animation.addByPrefix('purpleholdend', 'pruple end hold'); // ?????
-            // this is autistic wtf
-			animation.addByPrefix(color + 'holdend', '$color hold end');
-			animation.addByPrefix(color + 'hold', '$color hold piece');
-		}
-
-		scale.set(spriteScale, spriteScale);
-		updateHitbox();
-	}
+		switch (holdType) {
+			default:	
+				animName = colorName+'Scroll';
+				animPrefix = colorName+'0';
+ 
+			case PART:
+				animName = colorName+'hold';
+				animPrefix = '$colorName hold piece';
+				
+				if (colorName == "purple") animation.addByPrefix(animName, 'pruple end hold'); // ?????
+				// this is autistic wtf
+ 
+			case END:
+				animName = colorName+'holdend';
+				animPrefix = '$colorName hold end';
+		} 
+ 
+		animation.addByPrefix(animName, animPrefix);
+		animation.play(animName, true);
+ 
+		scale.set(spriteScale, spriteScale); 
+	} 
 
 	override function draw()
 	{
