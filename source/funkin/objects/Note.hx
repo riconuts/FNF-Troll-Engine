@@ -154,7 +154,7 @@ class Note extends NoteObject
 	public var noMissAnimation:Bool = false; // disables the animation for missing this note
 	public var hitsoundDisabled:Bool = false; // hitting this does not cause a hitsound when user turns on hitsounds
 	public var gfNote:Bool = false; // gf sings this note (pushes gf into characters array when the note is hit)
-	//public var ratingDisabled:Bool = false; // disables judging this note
+	public var ratingDisabled:Bool = false; // disables judging this note
 
 	/** If you need to tap the note to hit it, or just have the direction be held when it can be judged to hit.
 	 * An example is Stepmania mines **/
@@ -398,8 +398,8 @@ class Note extends NoteObject
 		this.isSustainNote = susPart != HEAD && susPart != TAP; // susPart > HEAD
 		this.isSustainEnd = susPart == END;
 		this.inEditor = inEditor;
-		this.beat = Conductor.getBeat(strumTime);
 
+		this.beat = Conductor.getBeat(strumTime);
 		this.hitsoundDisabled = isSustainNote;
 
 		if (canQuant && ClientPrefs.noteSkin == 'Quants') {

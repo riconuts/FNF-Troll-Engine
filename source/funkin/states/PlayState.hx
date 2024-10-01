@@ -3779,12 +3779,19 @@ class PlayState extends MusicBeatState
 		return ret;
 	}
 
-	function breakCombo(){
+	function breakCombo() {
+		while (lastCombos.length > 0)
+			lastCombos.shift().kill();
+
+		if (stats.combo > 10 && gf != null && gf.animOffsets.exists('sad')){
+			gf.playAnim('sad');
+			gf.specialAnim = true;
+		}
+
 		stats.comboBreaks++;
 		stats.cbCombo++;
 		stats.combo = 0;
-		while (lastCombos.length > 0)
-			lastCombos.shift().kill();
+
 		RecalculateRating();
 	}
 
@@ -3821,36 +3828,32 @@ class PlayState extends MusicBeatState
 			}
 		}
 
+		if (!daNote.ratingDisabled) {
+			if (!mine) {
+				songMisses++;
+				applyJudgment(daNote.hitResult.judgment);
+			}else {
+				applyJudgment(MISS_MINE);
+				health -= daNote.missHealth * healthLoss;
+			}
+
+			for (track in (playOpponent ? opponentTracks : playerTracks))
+				track.volume = 0;
+	
+			if (!daNote.isSustainNote && ClientPrefs.missVolume > 0)
+				FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), ClientPrefs.missVolume * FlxG.random.float(0.9, 1));
+	
+			if (instakillOnMiss)
+				doDeathCheck(true);
+		}
+
 		if (!daNote.noMissAnimation) {
 			var chars:Array<Character> = getNoteCharacters(daNote, field);
-
-			if (stats.combo > 10 && gf!=null && chars.contains(gf) == false && gf.animation.exists('sad')) {
-				gf.playAnim('sad');
-				gf.specialAnim = true;
-			}
 
 			for (char in chars) {
 				char.missNote(daNote, field);
 			}
 		}
-
-		
-		if (!mine){
-			songMisses++;
-			applyJudgment(daNote.hitResult.judgment);
-		}else{
-			applyJudgment(MISS_MINE);
-			health -= daNote.missHealth * healthLoss;
-		}
-		
-		for (track in (playOpponent ? opponentTracks : playerTracks))
-			track.volume = 0;
-
-		if (!daNote.isSustainNote && ClientPrefs.missVolume > 0)
-			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), ClientPrefs.missVolume * FlxG.random.float(0.9, 1) );
-
-		if(instakillOnMiss)
-			doDeathCheck(true);
 
 		////
 		callOnHScripts("noteMiss", [daNote, field]);
@@ -3872,11 +3875,6 @@ class PlayState extends MusicBeatState
 
 		if(instakillOnMiss)
 			doDeathCheck(true);
-
-		if (stats.combo > 10 && gf != null && gf.animOffsets.exists('sad')){
-			gf.playAnim('sad');
-			gf.specialAnim = true;
-		}
 		
 		if(!practiceMode) stats.score -= 10;
 		if(!endingSong) songMisses++;
@@ -4014,10 +4012,15 @@ class PlayState extends MusicBeatState
 		if (!note.hitsoundDisabled && ClientPrefs.hitsoundVolume > 0)
 			FlxG.sound.play(Paths.sound('hitsound'), ClientPrefs.hitsoundVolume );
 
-		// tbh I hate hitCausesMiss lol its retarded
-		// added a shitty judge to deal w/ it tho!! 
- 		if (note.hitResult.judgment == MISS_MINE) 
-		{
+		if (note.ratingDisabled) {
+			// NOTHING!!!!
+
+		}else if (note.hitResult.judgment != MISS_MINE) 
+			judge(note, field);
+
+		else {
+			// tbh I hate hitCausesMiss lol its retarded
+			// added a shitty judge to deal w/ it tho!! 
 			noteMiss(note, field, true);
 
 			if (!note.noMissAnimation)
@@ -4046,9 +4049,6 @@ class PlayState extends MusicBeatState
 
 			return;
 		} 
-
-		if (!note.isSustainNote)
-			judge(note, field);
 
 		//
 		note.wasGoodHit = true;
@@ -4260,8 +4260,8 @@ class PlayState extends MusicBeatState
 
 		if (lastSection != sectionNumber)
 		{
-			lastSection = sectionNumber;
 			callOnScripts("onSectionHit");
+			lastSection = sectionNumber;
 		}
 
 		if (generatedMusic && !endingSong)
