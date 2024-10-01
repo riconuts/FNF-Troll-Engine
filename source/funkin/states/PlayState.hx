@@ -3867,7 +3867,8 @@ class PlayState extends MusicBeatState
 	{
 		health -= 0.05 * healthLoss;
 		
-		vocals.volume = 0;
+		for (track in (playOpponent ? opponentTracks : playerTracks))
+			track.volume = 0;
 
 		if(instakillOnMiss)
 			doDeathCheck(true);
