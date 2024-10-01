@@ -1451,7 +1451,7 @@ class PlayState extends MusicBeatState
 			modManager.setValue("opponentSwap", 0.5);
 		}
 		#end
-		
+
 		startedCountdown = true;
 		setOnScripts('startedCountdown', true);
 		callOnScripts('onCountdownStarted');
@@ -1576,20 +1576,10 @@ class PlayState extends MusicBeatState
 		if (curCountdown != null && !curCountdown.finished)
 			curCountdown.destroy();
 
-		inst.pause();
-		vocals.pause();
 		for (track in tracks)
 			track.pause();
 
 		////
-		inst.time = time;
-		inst.volume = 1;
-		inst.play();
-
-		vocals.time = time;
-		vocals.volume = 1;
-		vocals.play();
-
 		for (track in tracks){
 			track.time = time;
 			track.play();
