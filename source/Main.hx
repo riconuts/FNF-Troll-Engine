@@ -241,9 +241,9 @@ class Main extends Sprite
 		FlxG.game.switchState();
 	}
 
-	private static var lastCallstack:String;
+	//private static var lastCallstack:String;
 	private static function saveCallStack(callstack) {
-		lastCallstack = callstack;
+		//lastCallstack = callstack;
 		File.saveContent("crash.txt", callstack);
 	}
 
@@ -272,8 +272,10 @@ class Main extends Sprite
 		print('\n$callstack\n');
 
 		#if (windows && cpp)
-		if (lastCallstack == callstack)
+		/*if (lastCallstack == callstack) {
+			lastCallstack = null;
 			return toMainMenu();
+		}*/
 		
 		var boxMessage:String = callstack;
 		boxMessage += "\n";
