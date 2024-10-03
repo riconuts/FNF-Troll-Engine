@@ -15,6 +15,16 @@ typedef BPMChangeEvent =
 
 class Conductor
 {
+    static inline var _internalJackLimit:Float = 192 / 16;
+    @:isVar
+	public static var jackLimit(get, default):Float = -1;
+	static function get_jackLimit(){
+        if(jackLimit < 0)
+			jackLimit = Conductor.stepCrochet / _internalJackLimit;
+
+        return jackLimit;
+    }
+
 	public static var judgeScales:Map<String, Float> = [
 		// since APPARENTLY Map<Float, String> is bad
 		"J1" => 1.50,
@@ -43,6 +53,23 @@ class Conductor
 	public inline static function secsToRow(sex:Float):Int
 		return Math.round(getBeat(sex) * ROWS_PER_BEAT);
     
+
+    @:isVar
+    public static var stepCrotchet(get, set):Float = 0;
+    static function get_stepCrotchet()
+        return stepCrochet;
+
+	static function set_stepCrotchet(v:Float)
+		return stepCrochet = v;
+
+	@:isVar
+	public static var crotchet(get, set):Float = 0;
+
+	static function get_crotchet()
+		return crochet;
+
+	static function set_crotchet(v:Float)
+		return crochet = v;
 
 	public static var bpm:Float = 100;
 	public static var crochet:Float = ((60 / bpm) * 1000); // beats in milliseconds
@@ -205,6 +232,7 @@ class Conductor
 
 	public static function changeBPM(newBpm:Float)
 	{
+		Conductor.jackLimit = -1;
 		bpm = newBpm;
 
 		crochet = calculateCrochet(bpm);

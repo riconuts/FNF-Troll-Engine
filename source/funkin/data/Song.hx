@@ -206,7 +206,25 @@ class Song
 		}
 		#end
 
-		return [for (name in charts.keys()) name];
+		var allCharts:Array<String> = [for (name in charts.keys()) name];
+		var allChartsLower:Array<String> = [for (name in charts.keys()) name.toLowerCase()];
+        var chartNames:Array<String> = [];
+
+		if (metadata.difficulties.length > 0){
+            for(diff in metadata.difficulties){
+				if (allChartsLower.contains(diff)){
+					var index = allChartsLower.indexOf(diff);
+                    chartNames.push(diff);
+					allCharts.splice(index, 1);
+					allChartsLower.remove(diff);
+                }
+            }
+        }
+
+		for (name in allCharts)
+            chartNames.push(name);
+
+		return chartNames;
         #else
 		final songName = Paths.formatToSongPath(metadata.songName);
 		final charts = new haxe.ds.StringMap();
@@ -562,14 +580,16 @@ class SongMetadata
 {
 	public var songName:String = '';
 	public var folder:String = '';
+    public var difficulties:Array<String> = [];
 	public var charts(get, null):Array<String>;
 	function get_charts()
 		return (charts == null) ? charts = Song.getCharts(this) : charts;
 
-	public function new(songName:String, ?folder:String = '')
+	public function new(songName:String, ?folder:String = '', ?difficulties:Array<String>)
 	{
 		this.songName = songName;
 		this.folder = folder != null ? folder : '';
+		this.difficulties = difficulties != null ? difficulties : [];
 	}
 
 	public function play(?difficultyName:String = ''){

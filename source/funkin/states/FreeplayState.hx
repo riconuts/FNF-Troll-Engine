@@ -55,7 +55,7 @@ class FreeplayState extends MusicBeatState
 				continue;
 
 			for (songName in week.songs){
-				var metadata:SongMetadata = {songName: songName, folder: week.directory};
+				var metadata:SongMetadata = {songName: songName, folder: week.directory, difficulties: week.difficulties != null ? week.difficulties : []};
 				
 				/*
 				if (metadata.charts.length == 0){

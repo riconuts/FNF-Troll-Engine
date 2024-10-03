@@ -89,6 +89,18 @@ typedef SpeedEvent =
 @:noScripting
 class PlayState extends MusicBeatState
 {    
+    // here for backwards compat reasons. You should be using character.singAnimations instead!!
+    public var singAnimations(get, null):Array<String> = [];
+    function get_singAnimations(){ // to show a deprecation warning
+        if(singAnimations.length == 0){
+			addTextToDebug("PlayState.singAnimations is deprecated! You should be using character.singAnimations instead!");
+            trace("PlayState.singAnimations is deprecated! You should be using character.singAnimations instead!");
+            singAnimations = ["singLEFT", "singDOWN", "singUP", "singRIGHT"];
+        }   
+        return singAnimations;
+    }
+
+
 	public static var instance:PlayState;
 	public static var SONG:SwagSong = null;
 	public static var isStoryMode:Bool = false;
@@ -1671,7 +1683,7 @@ class PlayState extends MusicBeatState
 			for (event in rawEventsData){
 				var last = eventsData[eventsData.length-1];
 				
-				if (last != null && Math.abs(last[0] - event[0]) <= Conductor.stepCrochet / (192 / 16)){
+				if (last != null && Math.abs(last[0] - event[0]) <= Conductor.jackLimit){
 					var fuck:Array<Array<Dynamic>> = event[1];
 					for (shit in fuck) eventsData[eventsData.length - 1][1].push(shit);
 				}else
@@ -1704,7 +1716,7 @@ class PlayState extends MusicBeatState
 		for (event in rawEventsData){
 			var last = eventsData[eventsData.length-1];
 
-			if (last != null && Math.abs(last[0] - event[0]) <= Conductor.stepCrochet / (192 / 16)){
+			if (last != null && Math.abs(last[0] - event[0]) <= Conductor.jackLimit){
 				var fuck:Array<Array<Dynamic>> = event[1];
 				for (shit in fuck) eventsData[eventsData.length - 1][1].push(shit);
 			}else
@@ -1968,7 +1980,7 @@ class PlayState extends MusicBeatState
 
 				var swagNote:Note = new Note(daStrumTime, daColumn, oldNote, gottaHitNote, songNotes[2] > 0 ? HEAD : TAP, false, hudSkin);
                 swagNote.realColumn = daNoteData;
-				swagNote.sustainLength = songNotes[2];
+				swagNote.sustainLength = songNotes[2] > Conductor.stepCrotchet ? songNotes[2] - Conductor.stepCrotchet : songNotes[2];
 				swagNote.gfNote = section.gfSection;
                 swagNote.noteType = type;
 				swagNote.ID = notes.length;
@@ -2037,7 +2049,7 @@ class PlayState extends MusicBeatState
 					oldNote = sustainNote;
 				}
 
-				var susLength = Math.round(swagNote.sustainLength / Conductor.stepCrochet) - 1;
+				var susLength = Math.round(songNotes[2] / Conductor.stepCrochet) - 1;
 				if (susLength > 0){
 					for (susNote in 0...susLength)
 						makeSustain(susNote, PART);
@@ -4303,7 +4315,6 @@ class PlayState extends MusicBeatState
 			var script:FunkinScript = scriptArray[idx];
 			if (script==null || exclusions.contains(script.scriptName) || (ignoreSpecialShit && isSpecialScript(script)))			
 				continue;
-			
 			var ret:Dynamic = script.call(event, args, vars);
 			if (ret == Globals.Function_Halt){
 				ret = returnVal;

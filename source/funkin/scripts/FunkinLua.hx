@@ -932,7 +932,9 @@ class FunkinLua extends FunkinScript
 			PlayState.instance.ratingPercent = value;
 		});
 		addCallback("setRatingName", function(value:String) {
-			PlayState.instance.ratingName = value;
+			//PlayState.instance.ratingName = value;/
+            // Barely works ^^ 
+            // Maybe add Stats.overrideGrade????
 		});
 		addCallback("setRatingFC", function(value:String) {
 			PlayState.instance.ratingFC = value;
@@ -1475,11 +1477,13 @@ class FunkinLua extends FunkinScript
 		});
 		
 		addCallback("startDialogue", function(dialogueFile:String, music:String = null) {
-			if(PlayState.instance.endingSong) {
-				PlayState.instance.endSong();
-			} else {
-				PlayState.instance.startCountdown();
-			}
+            new FlxTimer().start(0.2, (tmr:FlxTimer) -> {
+                if(PlayState.instance.endingSong) {
+                    PlayState.instance.endSong();
+                } else {
+                    PlayState.instance.startCountdown();
+                }
+            });
 		});
 		
 		addCallback("startVideo", function(videoFile:String) {

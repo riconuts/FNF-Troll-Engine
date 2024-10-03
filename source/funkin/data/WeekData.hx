@@ -33,6 +33,12 @@ typedef WeekMetadata = {
 		Song names of this week.
 	**/
 	var songs:Array<String>;
+
+	/**
+        Difficulties in this week.
+        Mainly used for Psych weeks.
+	**/
+    var ?difficulties:Array<String>;
 	
 	/**
 		Name of the content folder containing this week
@@ -83,6 +89,7 @@ class WeekData
 							freeplayCategory: mod + "-freeplay",
 							unlockCondition: true,
 							songs: [],
+                            difficulties: [],
                             directory: mod
                             
                         }
@@ -102,6 +109,7 @@ class WeekData
 							freeplayCategory: mod + "-default_category",
 							unlockCondition: true,
 							songs: [],
+							difficulties: [],
 							directory: mod
 						}
 						var dir = Paths.mods(mod + "/songs");
@@ -131,6 +139,7 @@ class WeekData
 			name: weekFile.name,
 			songs: [],
 			category: 'psychengine', //'main',
+            difficulties: [for(v in weekFile.difficulties.split(","))v.toLowerCase().trim()],
 			// freeplayCategory: '$mod - $name',
 			unlockCondition: true,
 			//directory: mod
