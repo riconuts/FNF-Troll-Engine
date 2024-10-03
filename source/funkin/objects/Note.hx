@@ -72,7 +72,23 @@ class Note extends NoteObject
 		''
 	];
 
-	public static var quantShitCache = new Map<String, Bool>();
+	public static final quantShitCache = new Map<String, Null<String>>();
+
+	// should move this to Paths maybe
+	public static function getQuantTexture(dir:String, fileName:String, textureKey:String) {
+		var quantKey:Null<String>;
+
+		if (quantShitCache.exists(textureKey)) {
+			quantKey = quantShitCache.get(textureKey);
+
+		}else {
+			quantKey = dir + "QUANT" + fileName;
+			if (!Paths.imageExists(quantKey)) quantKey = null;
+			quantShitCache.set(textureKey, quantKey);
+		}
+
+		return quantKey;
+	}
 
 	public static function getQuant(beat:Float){
 		var row:Int = Conductor.beatToNoteRow(beat);
@@ -430,10 +446,11 @@ class Note extends NoteObject
 	public var texPrefix:String = '';
 	public var tex:String;
 	public var texSuffix:String = '';
-	public function reloadNote(?prefix:String, ?texture:String, ?suffix:String, ?folderName:String = '', hInd:Int = 0, vInd:Int = 0) {
+	public function reloadNote(?prefix:String, ?texture:String, ?suffix:String, ?folder:String, hInd:Int = 0, vInd:Int = 0) {
 		if(prefix == null) prefix = '';
 		if(texture == null) texture = '';
 		if(suffix == null) suffix = '';
+		if(folder == null) folder = '';
 
 		texPrefix = prefix;
 		tex = texture;
@@ -449,70 +466,68 @@ class Note extends NoteObject
 			return;
 
 		////
-		var skin:String = (texture.length > 0) ? texture : PlayState.arrowSkin;
-		var fileName:String;
-		
-		if (prefix.length + suffix.length == 0) 
-			fileName = skin;
-		else {
+
+		/** Should join and check for shit in the following order:
+		 * 
+		 * folder + "/" + "QUANT" + prefix + name + suffix
+		 * folder + "/" + prefix + name + suffix
+		 * "QUANT"+ prefix + name + suffix
+		 * prefix + name + suffix
+		 */
+		inline function getTextureKey() { // made it a function just cause i think it's easier to read it like this
+			var skin:String = (texture.length>0) ? texture : PlayState.arrowSkin;
 			var split:Array<String> = skin.split('/');
 			split[split.length - 1] = prefix + split[split.length-1] + suffix; // add prefix and suffix to the texture file
-			fileName = split.join('/');
-		}
-		
-		var loadQuants:Bool = canQuant && ClientPrefs.noteSkin=='Quants';
-		var wasQuant:Bool = isQuant;
-		isQuant = false;
-		
-		var foldersToCheck:Array<String> = (folderName == '') ? [''] : ['$folderName/', ''];
-		var fullPath:String = '';
 
-		for (dir in foldersToCheck) {
-			fullPath = dir + fileName;
+			var fileName:String = split.pop();
+			var folderName:String = folder + split.join('/');
+			var foldersToCheck:Array<String> = (folderName == '') ? [''] : ['$folderName/', ''];
+			var loadQuants:Bool = canQuant && ClientPrefs.noteSkin=='Quants';
 
-			if (loadQuants) {
-				var quantFileName:String = "QUANT" + fileName;
-				var quantFileExists:Bool;
-
-				if (quantShitCache.exists(fullPath)) {
-					quantFileExists = quantShitCache.get(fullPath);
-				}else {
-					quantFileExists = Paths.imageExists(dir + quantFileName);
-					quantShitCache.set(fullPath, quantFileExists);
+			var key:String = null;
+			for (dir in foldersToCheck) {
+				key = dir + fileName;
+	
+				if (loadQuants) {
+					var quantKey:Null<String> = getQuantTexture(dir, fileName, key);
+					if (quantKey != null) {
+						key = quantKey;
+						isQuant = true;
+						break;
+					}
 				}
-
-				if (quantFileExists) {
-					fullPath = dir + quantFileName;
-					isQuant = true;
+				
+				if (Paths.imageExists(key)) {
+					isQuant = false;
 					break;
 				}
 			}
 			
-			if (!Paths.imageExists(fullPath))
-				continue;
+			return key; 
 		}
- 
-		if (wasQuant != isQuant)
-			updateColours();
+
+		////
+		var wasQuant:Bool = isQuant;
+		var textureKey:String = getTextureKey();
+		if (wasQuant != isQuant) updateColours();
  		
-		if (vInd > 0 && hInd > 0){
-			var graphic = Paths.image(fullPath);
-			width = graphic.width / hInd;
-			height = graphic.height / vInd;
+		if (vInd > 0 && hInd > 0) {
+			var graphic = Paths.image(textureKey);
+			setSize(graphic.width / hInd, graphic.height / vInd);
 			loadGraphic(graphic, true, Math.floor(width), Math.floor(height));
 			loadIndNoteAnims();
-		}else{	
-			frames = Paths.getSparrowAtlas(fullPath);
+		}else {	
+			frames = Paths.getSparrowAtlas(textureKey);
 			loadNoteAnims();
 		} 
 	
-		////		
 		if (inEditor)
 			setGraphicSize(ChartingState.GRID_SIZE, ChartingState.GRID_SIZE);
 		
 		defScale.copyFrom(scale);
 		updateHitbox();
-
+		
+		////	
 		if (genScript != null)
 			genScript.executeFunc("postReloadNote", [this, prefix, texture, suffix], this);
 

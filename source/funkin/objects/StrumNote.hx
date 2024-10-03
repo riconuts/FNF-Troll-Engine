@@ -77,29 +77,17 @@ class StrumNote extends NoteObject
 		zIndex = getZIndex();
 	}
 
-    function set_noteMod(value:String){
-		if (PlayState.instance != null)
-		{
-            var script = PlayState.instance.hudSkinScripts.get(value);
-            if(script == null){
-                var file = Paths.getHScriptPath('hudskins/$value');
-                if(file != null){
-					script = FunkinHScript.fromFile(file, value);
-					PlayState.instance.hscriptArray.push(script);
-					PlayState.instance.funkyScripts.push(script);
-					PlayState.instance.hudSkinScripts.set(value, script);
-                }
-            }
-			genScript = script;
-		}
-		// trace(noteData);
+    function set_noteMod(value:String) {
+		genScript = (PlayState.instance == null) ? null : PlayState.instance.getHudSkinScript(value);
 
-		if (genScript != null && genScript.exists("setupReceptorTexture"))
+		if (genScript == null) {
+			texture = PlayState.arrowSkin;
+
+		}else if (genScript.exists("setupReceptorTexture")) {
 			genScript.executeFunc("setupReceptorTexture", [this]);
-		else{
+		
+		}else {
 			var skin:String = PlayState.arrowSkin;
-			if (skin == null || skin.length < 1)
-				skin = 'NOTE_assets';
 
 			var newTex = (genScript != null && genScript.exists("texture")) ? genScript.get("texture") : skin;
 			if (genScript != null)
@@ -112,9 +100,7 @@ class StrumNote extends NoteObject
 			}
 
 			texture = newTex; // Load texture and anims
-            
         }
-		
 
         return noteMod = value;
     }
@@ -123,17 +109,15 @@ class StrumNote extends NoteObject
 	{
 		// TODO: add indices support n shit
 
-		var textureKey:String = texture;
-		isQuant = false;
-		
-		if (ClientPrefs.noteSkin == 'Quants') {
-			var quantTexKey = 'QUANT$texture';
+		var textureKey:String;
 
-			if (Paths.imageExists(quantTexKey)) {
-				textureKey = quantTexKey;
-				isQuant = true;
-			}
-		}
+		if (ClientPrefs.noteSkin == 'Quants') {
+			textureKey = Note.getQuantTexture('', texture, texture);
+			if (textureKey != null) isQuant = true;
+			else textureKey = texture;
+
+		}else
+			textureKey = texture;
 
 		var lastAnim:String = animation.name;
 		if (lastAnim == null) lastAnim = 'static';
