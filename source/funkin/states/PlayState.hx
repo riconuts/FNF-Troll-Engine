@@ -89,6 +89,18 @@ typedef SpeedEvent =
 @:noScripting
 class PlayState extends MusicBeatState
 {    
+    // here for backwards compat reasons. You should be using character.singAnimations instead!!
+    public var singAnimations(get, null):Array<String> = [];
+    function get_singAnimations(){ // to show a deprecation warning
+        if(singAnimations.length == 0){
+			addTextToDebug("PlayState.singAnimations is deprecated! You should be using character.singAnimations instead!");
+            trace("PlayState.singAnimations is deprecated! You should be using character.singAnimations instead!");
+            singAnimations = ["singLEFT", "singDOWN", "singUP", "singRIGHT"];
+        }   
+        return singAnimations;
+    }
+
+
 	public static var instance:PlayState;
 	public static var SONG:SwagSong = null;
 	public static var isStoryMode:Bool = false;
