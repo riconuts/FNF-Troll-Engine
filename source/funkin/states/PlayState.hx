@@ -1430,8 +1430,8 @@ class PlayState extends MusicBeatState
 			field.fadeIn(isStoryMode || skipArrowStartTween); // TODO: check if its the first song so it should fade the notes in on song 1 of story mode
 
 		callOnScripts('preModifierRegister'); // deprecated
-		callOnScripts('onModifierRegister');
-		modManager.registerDefaultModifiers();
+		if (callOnScripts('onModifierRegister') != Globals.Function_Stop)
+			modManager.registerDefaultModifiers();
 		callOnScripts('postModifierRegister'); // deprecated
 		callOnScripts('onModifierRegisterPost');
 
@@ -1995,7 +1995,7 @@ class PlayState extends MusicBeatState
                 swagNote.field = playfield;
 
                 if (callScripts)
-					callOnScripts("onGeneratedNote", [swagNote]);
+					callOnScripts("onGeneratedNote", [swagNote, section]);
 				
 				playfield = swagNote.field;
 				swagNote.fieldIndex = playfield.modNumber;
@@ -2007,14 +2007,14 @@ class PlayState extends MusicBeatState
                         playfield.queue(swagNote); // queues the note to be spawned
 
                 if (callScripts)
-					callOnScripts("onGeneratedNotePost", [swagNote]);
+					callOnScripts("onGeneratedNotePost", [swagNote, section]);
 				
 				oldNote = swagNote;
 				
 				inline function makeSustain(susNote:Int, susPart) {
 					var sustainNote:Note = new Note(daStrumTime + Conductor.stepCrochet * (susNote + 1), daColumn, oldNote, gottaHitNote, susPart, false, hudSkin);
 					sustainNote.gfNote = swagNote.gfNote;
-                    if (callScripts) callOnScripts("onGeneratedHold", [sustainNote]);
+                    if (callScripts) callOnScripts("onGeneratedHold", [sustainNote, section]);
 					sustainNote.noteType = type;
                     
 					sustainNote.ID = notes.length;
@@ -2032,7 +2032,7 @@ class PlayState extends MusicBeatState
 
 					notes.push(sustainNote);
 
-					if (callScripts)callOnScripts("onGeneratedHoldPost", [swagNote]);
+					if (callScripts) callOnScripts("onGeneratedHoldPost", [swagNote, section]);
 
 					oldNote = sustainNote;
 				}
