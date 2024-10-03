@@ -1,5 +1,6 @@
 package funkin.objects;
 
+import funkin.states.PlayState;
 import funkin.scripts.FunkinScript.ScriptType;
 import funkin.objects.playfields.PlayField;
 import flixel.math.FlxPoint;
@@ -112,7 +113,7 @@ class Character extends FlxSprite
 	/**Offsets the camera when its focused on the character**/
 	public var cameraPosition:Array<Float> = [0, 0];
 	/****/
-	public var singAnimations:Array<String> = ["singLEFT", "singDOWN", "singUP", "singRIGHT"];
+	public var singAnimations:Array<String> = (PlayState.instance!=null) ? PlayState.instance.singAnimations : ["singLEFT", "singDOWN", "singUP", "singRIGHT"];
 	
 	/**Set to true if the character has miss animations. Optimization mainly**/
 	public var hasMissAnimations:Bool = false;

@@ -88,19 +88,7 @@ typedef SpeedEvent =
 
 @:noScripting
 class PlayState extends MusicBeatState
-{    
-    // here for backwards compat reasons. You should be using character.singAnimations instead!!
-    public var singAnimations(get, null):Array<String> = [];
-    function get_singAnimations(){ // to show a deprecation warning
-        if(singAnimations.length == 0){
-			addTextToDebug("PlayState.singAnimations is deprecated! You should be using character.singAnimations instead!");
-            trace("PlayState.singAnimations is deprecated! You should be using character.singAnimations instead!");
-            singAnimations = ["singLEFT", "singDOWN", "singUP", "singRIGHT"];
-        }   
-        return singAnimations;
-    }
-
-
+{
 	public static var instance:PlayState;
 	public static var SONG:SwagSong = null;
 	public static var isStoryMode:Bool = false;
@@ -233,6 +221,9 @@ class PlayState extends MusicBeatState
 	public var boyfriendCameraOffset:Array<Float> = null;
 	public var opponentCameraOffset:Array<Float> = null;
 	public var girlfriendCameraOffset:Array<Float> = null;
+
+	// Default sing animations. You should be using character.singAnimations instead!!
+	public var singAnimations:Array<String> = ["singLEFT", "singDOWN", "singUP", "singRIGHT"];
 
 	public var focusedChar:Character;
 	public var gfSpeed:Int = 1;
@@ -863,7 +854,7 @@ class PlayState extends MusicBeatState
 
             gf.setDefaultVar("used", true);
 			startCharacter(gf);
-			gf.scrollFactor.set(0.95, 0.95);
+			gf.scrollFactor.set(0.95, 0.95); // should this be set by the stage instead lol
 			gfMap.set(gf.curCharacter, gf);
 			gfGroup.add(gf);
 		}
@@ -1055,7 +1046,7 @@ class PlayState extends MusicBeatState
 		
 		displayedSong = SONG.song;
 
-		#if DISCORD_ALLOWED {
+		#if DISCORD_ALLOWED
 		// Discord RPC texts
 		stateText = '${displayedSong} ($displayedDifficulty)';
 		
@@ -1063,7 +1054,7 @@ class PlayState extends MusicBeatState
 		detailsPausedText = "Paused - " + detailsText;
 
 		updateSongDiscordPresence();
-		}#end
+		#end
 
 		if (!ClientPrefs.controllerMode) {
 			FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDownEvent);
