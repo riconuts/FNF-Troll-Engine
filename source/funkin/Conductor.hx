@@ -54,6 +54,23 @@ class Conductor
 		return Math.round(getBeat(sex) * ROWS_PER_BEAT);
     
 
+    @:isVar
+    public static var stepCrotchet(get, set):Float = 0;
+    static function get_stepCrotchet()
+        return stepCrochet;
+
+	static function set_stepCrotchet(v:Float)
+		return stepCrochet = v;
+
+	@:isVar
+	public static var crotchet(get, set):Float = 0;
+
+	static function get_crotchet()
+		return crochet;
+
+	static function set_crotchet(v:Float)
+		return crochet = v;
+
 	public static var bpm:Float = 100;
 	public static var crochet:Float = ((60 / bpm) * 1000); // beats in milliseconds
 	public static var stepCrochet:Float = crochet / 4; // steps in milliseconds
