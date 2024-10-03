@@ -26,7 +26,6 @@ import funkin.api.Discord.DiscordClient;
 
 class MainMenuState extends MusicBeatState
 {
-	public static var psychEngineVersion:String = ''; // Fuck off
 	public static var curSelected:Int = 0;
 
 	var menuItems:FlxTypedGroup<FlxSprite>;
