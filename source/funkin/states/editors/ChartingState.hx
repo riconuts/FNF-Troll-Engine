@@ -3198,9 +3198,10 @@ class ChartingState extends MusicBeatState
 
 	function autosaveSong():Void
 	{
-		FlxG.save.data.autosave = Json.stringify({
-			"song": _song
-		});
+		var _song = Reflect.copy(_song);
+		Reflect.deleteField(_song, "path");
+		
+		FlxG.save.data.autosave = Json.stringify({"song": _song});
 		FlxG.save.flush();
 	}
 
