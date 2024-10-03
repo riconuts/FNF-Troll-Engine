@@ -697,6 +697,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 	// kills all notes which are stacked
 	public function clearStackedNotes(){
+
 		var goobaeg:Array<Note> = [];
 		for (column in noteQueue)
 		{
@@ -712,7 +713,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 						continue; // holds only get fukt if their parents get fukt
 					if (!last.alive || !current.alive)
 						continue; // just incase
-					if (Math.abs(last.strumTime - current.strumTime) <= Conductor.stepCrochet / (192 / 16))
+					if (Math.abs(last.strumTime - current.strumTime) <= Conductor.jackLimit)
 					{
 						if (last.sustainLength < current.sustainLength) // keep the longer hold
 							removeNote(last);

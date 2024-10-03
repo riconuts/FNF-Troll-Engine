@@ -504,7 +504,7 @@ class ChartingState extends MusicBeatState
 			}
 			else
 			{
-				if (Math.abs(last[0] - event[0]) <= Conductor.stepCrochet / (192 / 16))
+				if (Math.abs(last[0] - event[0]) <= Conductor.jackLimit)
 				{
 					var fuck:Array<Array<Dynamic>> = event[1];
 					for (shit in fuck)
@@ -2725,7 +2725,7 @@ class ChartingState extends MusicBeatState
 
 	
 	inline function fuckFloatingPoints(n:Float):Float // haha decimals
-		return CoolUtil.snap(n, Conductor.stepCrochet / (192 / 16));
+		return CoolUtil.snap(n, Conductor.jackLimit);
 
 	inline function wipeGroup(group:FlxTypedGroup<Dynamic>)
 	{

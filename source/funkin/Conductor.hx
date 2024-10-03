@@ -15,6 +15,16 @@ typedef BPMChangeEvent =
 
 class Conductor
 {
+    static inline var _internalJackLimit:Float = 192 / 16;
+    @:isVar
+	public static var jackLimit(get, default):Float = -1;
+	static function get_jackLimit(){
+        if(jackLimit < 0)
+			jackLimit = Conductor.stepCrochet / _internalJackLimit;
+
+        return jackLimit;
+    }
+
 	public static var judgeScales:Map<String, Float> = [
 		// since APPARENTLY Map<Float, String> is bad
 		"J1" => 1.50,
@@ -205,6 +215,7 @@ class Conductor
 
 	public static function changeBPM(newBpm:Float)
 	{
+		Conductor.jackLimit = -1;
 		bpm = newBpm;
 
 		crochet = calculateCrochet(bpm);

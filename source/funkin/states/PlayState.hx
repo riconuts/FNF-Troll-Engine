@@ -1671,7 +1671,7 @@ class PlayState extends MusicBeatState
 			for (event in rawEventsData){
 				var last = eventsData[eventsData.length-1];
 				
-				if (last != null && Math.abs(last[0] - event[0]) <= Conductor.stepCrochet / (192 / 16)){
+				if (last != null && Math.abs(last[0] - event[0]) <= Conductor.jackLimit){
 					var fuck:Array<Array<Dynamic>> = event[1];
 					for (shit in fuck) eventsData[eventsData.length - 1][1].push(shit);
 				}else
@@ -1704,7 +1704,7 @@ class PlayState extends MusicBeatState
 		for (event in rawEventsData){
 			var last = eventsData[eventsData.length-1];
 
-			if (last != null && Math.abs(last[0] - event[0]) <= Conductor.stepCrochet / (192 / 16)){
+			if (last != null && Math.abs(last[0] - event[0]) <= Conductor.jackLimit){
 				var fuck:Array<Array<Dynamic>> = event[1];
 				for (shit in fuck) eventsData[eventsData.length - 1][1].push(shit);
 			}else
