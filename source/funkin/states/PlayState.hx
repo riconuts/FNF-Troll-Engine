@@ -223,8 +223,9 @@ class PlayState extends MusicBeatState
 	public var girlfriendCameraOffset:Array<Float> = null;
 
 	// Default sing animations. You should be using character.singAnimations instead!!
+	#if ALLOW_DEPRECATION
 	public var singAnimations:Array<String> = ["singLEFT", "singDOWN", "singUP", "singRIGHT"];
-
+    #end
 	public var focusedChar:Character;
 	public var gfSpeed:Int = 1;
 
@@ -1420,22 +1421,31 @@ class PlayState extends MusicBeatState
 		if (skipCountdown || startOnTime > 0)
 			skipArrowStartTween = true;
 
+        #if ALLOW_DEPRECATION
 		callOnScripts('preReceptorGeneration'); // backwards compat, deprecated
+        #end
 		callOnScripts('onReceptorGeneration');
 
 		for(field in playfields.members)
 			field.generateStrums();
 
+        #if ALLOW_DEPRECATION
 		callOnScripts('postReceptorGeneration'); // deprecated
+        #end
 		callOnScripts('onReceptorGenerationPost');
 
 		for(field in playfields.members)
 			field.fadeIn(isStoryMode || skipArrowStartTween); // TODO: check if its the first song so it should fade the notes in on song 1 of story mode
 
+        #if ALLOW_DEPRECATION
 		callOnScripts('preModifierRegister'); // deprecated
+        #end
+
 		if (callOnScripts('onModifierRegister') != Globals.Function_Stop)
 			modManager.registerDefaultModifiers();
+        #if ALLOW_DEPRECATION
 		callOnScripts('postModifierRegister'); // deprecated
+        #end
 		callOnScripts('onModifierRegisterPost');
 
 		#if !tgt
@@ -4405,9 +4415,10 @@ class PlayState extends MusicBeatState
 		stats.updateVariables();
 		
 		hud.recalculateRating();
-
+        #if ALLOW_DEPRECATION
 		callOnScripts('postRecalculateRating'); // deprecated
-        
+        #end
+
         callOnScripts('onRecalculateRatingPost');
 
 		setOnScripts('rating', ratingPercent);

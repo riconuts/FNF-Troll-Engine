@@ -206,6 +206,7 @@ class OldHScriptedState extends MusicBeatState
 
 	static var switchToDeprecation = false;
 
+    #if ALLOW_DEPRECATION
 	override function switchTo(s:FlxState)
 	{
 		if (!stateScript.exists("onSwitchTo"))
@@ -224,7 +225,7 @@ class OldHScriptedState extends MusicBeatState
 		stateScript.call("onSwitchToPost", [s]);
 		return true;
 	}
-
+    #end
 	override function transitionIn()
 	{
 		if (stateScript.call("onTransitionIn") == Globals.Function_Stop)
