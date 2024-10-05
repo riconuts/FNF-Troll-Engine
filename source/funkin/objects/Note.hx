@@ -617,12 +617,14 @@ class Note extends NoteObject
 				animName = colorName+'hold';
 				animPrefix = '$colorName hold piece';
 				
-				if (colorName == "purple") animation.addByPrefix(animName, 'pruple end hold'); // ?????
-				// this is autistic wtf
  
 			case END:
 				animName = colorName+'holdend';
 				animPrefix = '$colorName hold end';
+				if (colorName == "purple")
+					animPrefix ='pruple end hold'; // ?????
+				// this is autistic wtf
+                
 		} 
  
 		animation.addByPrefix(animName, animPrefix);
