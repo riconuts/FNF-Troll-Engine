@@ -583,7 +583,7 @@ class Note extends NoteObject
 		animation.add(animName, animFrames);
 		animation.play(animName, true);
 
-		scale.set(6, 6);
+		//scale.set(6, 6); // causd mines to be huge lol
 	} 
 
 	public function loadNoteAnims() {
