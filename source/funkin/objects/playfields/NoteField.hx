@@ -1,5 +1,6 @@
 package funkin.objects.playfields;
 
+import funkin.modchart.Modifier;
 import flixel.math.FlxMath;
 import flixel.math.FlxAngle;
 import flixel.math.FlxPoint;
@@ -89,7 +90,7 @@ class NoteField extends FieldBase
 	var curDecStep:Float = 0;
 	var curDecBeat:Float = 0;
 
-	final perspectiveArrDontUse:Array<String> = ['perspectiveDONTUSE'];
+	final perspectiveArrDontUse:Array<String> = ['__perspective'];
 
 	/**
 	 * The position of every receptor for a given frame.
@@ -159,9 +160,19 @@ class NoteField extends FieldBase
 				var visPos = -((Conductor.visualPosition - daNote.visualTime) * speed);
 
 				if (visPos > drawDist || (daNote.wasGoodHit && daNote.sustainLength > 0))
-				{
 					continue; // don't draw
+
+				if (!daNote.copyX && !daNote.copyY) {
+					daNote.vec3Cache.setTo(
+                        daNote.x,
+                        daNote.y,
+                        0
+                    );
+					notePos.set(daNote, daNote.vec3Cache);
+					taps.push(daNote);
+					continue;
 				}
+				
 				else if (daNote.isSustainNote)
 				{
 					holds.push(daNote);
@@ -171,6 +182,12 @@ class NoteField extends FieldBase
 					var diff = Conductor.songPosition - daNote.strumTime;
 					var pos = modManager.getPos(visPos, diff, curDecBeat, daNote.column, modNumber, daNote, this, perspectiveArrDontUse,
 						daNote.vec3Cache); // perspectiveDONTUSE is excluded because its code is done in the modifyVert function
+					if (!daNote.copyX)
+                        pos.x = daNote.x;
+
+					if (!daNote.copyY)
+						pos.y = daNote.y;
+                    
 					notePos.set(daNote, pos);
 					taps.push(daNote);
 				}
@@ -184,6 +201,7 @@ class NoteField extends FieldBase
 		{
 			if (!obj.alive || !obj.visible)
 				continue;
+            // maybe add copyX and copyT to strums too???????
 
 			var pos = modManager.getPos(0, 0, curDecBeat, obj.column, modNumber, obj, this, perspectiveArrDontUse, obj.vec3Cache);
 			strumPositions[obj.column] = pos;
@@ -353,7 +371,20 @@ class NoteField extends FieldBase
 		if (wid == null)
 			wid = hold.frame.frame.width * hold.scale.x;
 
-		var p1 = modManager.getPos(-vDiff * speed, diff, curDecBeat, hold.column, modNumber, hold, this, []);
+        var simpleDraw = !hold.copyX && !hold.copyY;
+
+		var p1 = simpleDraw ? hold.vec3Cache : modManager.getPos(-vDiff * speed, diff, curDecBeat, hold.column, modNumber, hold, this, [], hold.vec3Cache);
+        
+        if(!hold.copyX)
+            p1.x = hold.x;
+
+        if(!hold.copyY)
+			p1.y = hold.y;
+        
+
+		if (simpleDraw)
+            p1.z = 0;
+
 		var z:Float = p1.z;
 		p1.z = 0.0;
 
@@ -362,7 +393,7 @@ class NoteField extends FieldBase
 		var quad1 = new Vector3(wid);
 		var scale:Float = (z!=0.0) ? (1.0 / z) : 1.0;
 
-		if (optimizeHolds)
+		if (optimizeHolds || simpleDraw)
 		{
 			// less accurate, but higher FPS
 			quad0.scaleBy(scale);
@@ -399,6 +430,9 @@ class NoteField extends FieldBase
 		if (!render)
 			return null;
 
+		var simpleDraw = !hold.copyX && !hold.copyY;
+        // TODO: make simpleDraw reduce the amount of subdivisions used by the hold
+
 		var vertices = new Vector<Float>(8 * holdSubdivisions, true);
 		var uvData = new Vector<Float>(8 * holdSubdivisions, true);
 		var alphas:Array<Float> = [];
@@ -413,11 +447,22 @@ class NoteField extends FieldBase
 				tWid
 		);
 
-		var basePos = modManager.getPos(0, 0, curDecBeat, hold.column, modNumber, hold, this, perspectiveArrDontUse);
+        
+    
+		var basePos = simpleDraw ? hold.vec3Cache : modManager.getPos(0, 0, curDecBeat, hold.column, modNumber, hold, this, perspectiveArrDontUse, hold.vec3Cache);
 
-		var strumDiff = (Conductor.songPosition - hold.strumTime);
+        if(!hold.copyX)
+            basePos.x = hold.x;
+
+        if(!hold.copyY)
+            basePos.y = hold.y;
+
+		if (simpleDraw)
+            basePos.z = 0;
+		
+        var strumDiff = (Conductor.songPosition - hold.strumTime);
 		var visualDiff = (Conductor.visualPosition - hold.visualTime); // TODO: get the start and end visualDiff and interpolate so that changing speeds mid-hold will look better
-		var zIndex:Float = basePos.z;
+		var zIndex:Float = basePos.z + hold.zIndex;
 		var sv = PlayState.instance.getSV(hold.strumTime).speed;
 
 		for (sub in 0...holdSubdivisions)
@@ -443,27 +488,44 @@ class NoteField extends FieldBase
 			scalePoint.set(1, 1);
 
 			var speed:Float = modManager.getNoteSpeed(hold, modNumber, songSpeed);
-			var info:RenderInfo = modManager.getExtraInfo((visualDiff + ((strumOff + strumSub) * 0.45)) * -speed, strumDiff + strumOff + strumSub, curDecBeat,
-			{
+			var info:RenderInfo = {
 				alpha: hold.alpha,
 				glow: 0,
 				scale: scalePoint
-			}, hold, modNumber, hold.column);
+			};
+
+			if (hold.copyAlpha)
+			    info = modManager.getExtraInfo((visualDiff + ((strumOff + strumSub) * 0.45)) * -speed, strumDiff + strumOff + strumSub, curDecBeat, info, hold, modNumber, hold.column);
 
 			var topWidth = scalePoint.x * FlxMath.lerp(tWid, bWid, prog);
 			var botWidth = scalePoint.x * FlxMath.lerp(tWid, bWid, nextProg);
 
-			for (_ in 0...field.keyCount) {
+			for (_ in 0...4) { // why was this keyCount lol??  
 				alphas.push(info.alpha);
 				glows.push(info.glow);
 			}
 
 			var top = lastMe == null ? getPoints(hold, topWidth, speed, (visualDiff + (strumOff * 0.45)), strumDiff + strumOff) : lastMe;
 			var bot = getPoints(hold, botWidth, speed, (visualDiff + ((strumOff + strumSub) * 0.45)), strumDiff + strumOff + strumSub);
-
+            if(!hold.copyY){
+                if(lastMe == null){
+					top[0].y -= FlxMath.lerp(0, (crotchet + 1) * 0.45 * speed, prog);
+					top[1].y -= FlxMath.lerp(0, (crotchet + 1) * 0.45 * speed, prog);
+                }
+				bot[0].y -= FlxMath.lerp(0, (crotchet + 1) * 0.45 * speed, nextProg);
+				bot[1].y -= FlxMath.lerp(0, (crotchet + 1) * 0.45 * speed, nextProg);
+            }
 			lastMe = bot;
+            top[0].x += hold.offsetX + hold.typeOffsetX;
+            top[1].x += hold.offsetX + hold.typeOffsetX;
+			bot[0].x += hold.offsetX + hold.typeOffsetX;
+			bot[1].x += hold.offsetX + hold.typeOffsetX;
 
-			//var quad:Array<Vector3> = [top[0], top[1], bot[0], bot[1]];
+			top[0].y += hold.offsetY + hold.typeOffsetY;
+			top[1].y += hold.offsetY + hold.typeOffsetY;
+			bot[0].y += hold.offsetY + hold.typeOffsetY;
+			bot[1].y += hold.offsetY + hold.typeOffsetY;
+
 
 			var subIndex = sub * 8;
 			vertices[subIndex] = top[0].x;
@@ -557,11 +619,14 @@ class NoteField extends FieldBase
 			visPos = -((Conductor.visualPosition - note.visualTime) * speed);
 		}
 
-		var info:RenderInfo = modManager.getExtraInfo(visPos, diff, curDecBeat, {
+		var info:RenderInfo = {
 			alpha: sprite.alpha,
 			glow: 0,
 			scale: scalePoint
-		}, sprite, modNumber, sprite.column);
+		};
+
+        if(!isNote || note.copyAlpha)
+		    info = modManager.getExtraInfo(visPos, diff, curDecBeat, info, sprite, modNumber, sprite.column);
 
 		var alpha = info.alpha;
 		var glow = info.glow;
@@ -597,7 +662,14 @@ class NoteField extends FieldBase
 				vert.y = vert.y + note.typeOffsetY;
 			}
 
-			vert = modManager.modifyVertex(curDecBeat, vert, idx, sprite, pos, modNumber, sprite.column, this);
+			if (isNote && !note.copyVerts){
+                // still should have perspective, even if not copying verts!
+                // Maybe we should move perspective stuff out of a modifier???
+				var mod:Modifier = modManager.register.get("__perspective");
+				if (mod != null && mod.isRenderMod())
+					vert = mod.modifyVert(curDecBeat, vert, idx, sprite, pos, modNumber, sprite.column, this);
+            }else
+			    vert = modManager.modifyVertex(curDecBeat, vert, idx, sprite, pos, modNumber, sprite.column, this);
 
 			vert.x = vert.x * scalePoint.x;
 			vert.y = vert.y * scalePoint.y;

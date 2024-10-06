@@ -27,7 +27,7 @@ import funkin.objects.playfields.NoteField;
 
 class PerspectiveModifier extends NoteModifier 
 {
-	override function getName() return 'perspectiveDONTUSE';
+	override function getName() return '__perspective';
 	override function getOrder() return Modifier.ModifierOrder.LAST + 1000; // should ALWAYS go last
 	override function shouldExecute(player:Int, val:Float) return true;
 	override function isRenderMod() return true;

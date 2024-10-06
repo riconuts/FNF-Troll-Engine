@@ -231,16 +231,20 @@ class Note extends NoteObject
 	public var realColumn:Int;
 	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
 
-	// unused
-	public var mAngle:Float = 0;
-	public var bAngle:Float = 0;
+	// Determines how the note can be modified by the modchart system
+    // Could be moved into NoteObject? idk lol
+	public var copyX:Bool = true;
+	public var copyY:Bool = true;
+	public var copyAlpha:Bool = true;
+    public var copyVerts:Bool = true;
+    #if PE_MOD_COMPATIBILITY
+    // Angle is controlled by verts in the modchart system
 
-	// unused pe hold shit
-	@:noCompletion public var copyX:Bool = true;
-	@:noCompletion public var copyY:Bool = true;
-	@:noCompletion public var copyAngle:Bool = true;
-	@:noCompletion public var copyAlpha:Bool = true;
-
+    @:isVar
+	public var copyAngle(get, set):Bool;
+    function get_copyAngle()return copyVerts;
+    function set_copyAngle(val:Bool)return copyVerts = val;
+    #end
 	//// backwards compat
 	@:noCompletion public var realNoteData(get, set):Int; 
 	@:noCompletion inline function get_realNoteData() return realColumn;
