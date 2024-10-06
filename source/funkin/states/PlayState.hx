@@ -1983,7 +1983,7 @@ class PlayState extends MusicBeatState
 
 				var swagNote:Note = new Note(daStrumTime, daColumn, oldNote, gottaHitNote, songNotes[2] > 0 ? HEAD : TAP, false, hudSkin);
                 swagNote.realColumn = daNoteData;
-				swagNote.sustainLength = songNotes[2] <= Conductor.stepCrotchet ? songNotes[2] : susLength * Conductor.stepCrotchet; 
+				swagNote.sustainLength = songNotes[2] <= Conductor.stepCrotchet ? songNotes[2] : (susLength + 1) * Conductor.stepCrotchet; // +1 because hold end
 				swagNote.gfNote = section.gfSection;
                 swagNote.noteType = type;
 				swagNote.ID = notes.length;
