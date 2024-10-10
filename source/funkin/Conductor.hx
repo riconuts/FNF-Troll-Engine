@@ -24,26 +24,9 @@ class Conductor
 
         return jackLimit;
     }
-
-	public static var judgeScales:Map<String, Float> = [
-		"J1" => 1.50,
-		"J2" => 1.33,
-		"J3" => 1.16,
-		"J4" => 1.0,
-		"J5" => 0.84,
-		"J6" => 0.66,
-		"J7" => 0.5,
-		"J8" => 0.33,
-		"JUSTICE" => 0.2
-	];
-
-	public static var ROWS_PER_BEAT:Int = 48;
-	public static var ROWS_PER_MEASURE:Int = ROWS_PER_BEAT * 4;
-
-	public inline static function secsToRow(sex:Float):Int
-		return Math.round(getBeat(sex) * ROWS_PER_BEAT);
+	public inline static final ROWS_PER_BEAT:Int = 48;
+	public inline static final ROWS_PER_MEASURE:Int = ROWS_PER_BEAT * 4;
     
-
     @:isVar
     public static var stepCrotchet(get, set):Float = 0;
     static function get_stepCrotchet()
