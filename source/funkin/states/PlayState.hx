@@ -448,7 +448,7 @@ class PlayState extends MusicBeatState
 	var shitToLoad:Array<AssetPreload> = [];
 	var finishedCreating = false;
 	
-    public var offset:Float = 0;
+	public var offset:Float = 0;
 
 	override public function create()
 	{
@@ -458,7 +458,7 @@ class PlayState extends MusicBeatState
 		Paths.postLoadContent = [];
 		
 		Conductor.safeZoneOffset = ClientPrefs.hitWindow;
-		Wife3.timeScale = Conductor.judgeScales.get(ClientPrefs.judgeDiff);
+		Wife3.timeScale = Wife3.judgeScales.get(ClientPrefs.judgeDiff);
 
 		judgeManager = new JudgmentManager();
 		judgeManager.judgeTimescale = Wife3.timeScale;
