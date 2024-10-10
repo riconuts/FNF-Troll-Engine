@@ -144,7 +144,6 @@ class Note extends NoteObject
 	public var spawned:Bool = false;
 	public var tooLate:Bool = false;
 	public var wasGoodHit:Bool = false;
-	public var hitByOpponent:Bool = false;
 	public var noteWasHit:Bool = false;
 	public var causedMiss:Bool = false;
 	public var canBeHit(get, never):Bool;
@@ -668,9 +667,6 @@ class Note extends NoteObject
 				genScript.executeFunc("noteUpdate", [elapsed], this);
             }
 		}
-
-		if (hitByOpponent)
-			wasGoodHit = true;
 
 		var diff = (strumTime - Conductor.songPosition);
 		if (diff < -Conductor.safeZoneOffset && !wasGoodHit)

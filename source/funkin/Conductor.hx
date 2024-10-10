@@ -26,7 +26,6 @@ class Conductor
     }
 
 	public static var judgeScales:Map<String, Float> = [
-		// since APPARENTLY Map<Float, String> is bad
 		"J1" => 1.50,
 		"J2" => 1.33,
 		"J3" => 1.16,

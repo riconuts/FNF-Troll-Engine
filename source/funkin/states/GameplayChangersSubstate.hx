@@ -72,6 +72,9 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		option.displayFormat = '%vX';
 		optionsArray.push(option);
 
+		var option:GameplayOption = new GameplayOption('Holds Give Health', 'holdsgivehp', 'bool', false);
+		optionsArray.push(option);
+
 		//// andromeda engine modifiers!!!!
 		var option:GameplayOption = new GameplayOption("Health Drain", 'healthDrain', 'string', 'Disabled', [
 			"Disabled",
