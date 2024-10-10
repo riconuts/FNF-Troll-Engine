@@ -1960,10 +1960,6 @@ class PlayState extends MusicBeatState
         
 		for (section in noteData) {
 			for (songNotes in section.sectionNotes) {
-				if (songNotes[1] <= -1)
-					continue; // RETARDED EVENT NOTES IN OLD PSYCH CHARTS
-				// TODO: AUTO CONVERT TO EVENTNOTES
-				
 				var daStrumTime:Float = songNotes[0];
 				var daNoteData:Int = Std.int(songNotes[1]);
 				var gottaHitNote:Bool = section.mustHitSection ? (daNoteData < keyCount) : (daNoteData >= keyCount);

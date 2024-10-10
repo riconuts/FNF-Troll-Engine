@@ -295,26 +295,25 @@ class Song
 	}
 
 	public static function onLoadEvents(songJson:Dynamic){
-		if(songJson.events == null){
+		if (songJson.events == null){
 			songJson.events = [];
-			
-			for (secNum in 0...songJson.notes.length)
+		}
+
+		for (secNum in 0...songJson.notes.length) {
+			var sec:SwagSection = songJson.notes[secNum];
+			var notes:Array<Dynamic> = sec.sectionNotes;
+			var len:Int = notes.length;
+			var i:Int = 0;
+			while(i < len)
 			{
-				var sec:SwagSection = songJson.notes[secNum];
-				var notes:Array<Dynamic> = sec.sectionNotes;
-				var len:Int = notes.length;
-				var i:Int = 0;
-				while(i < len)
+				var note:Array<Dynamic> = notes[i];
+				if (note[1] < 0)
 				{
-					var note:Array<Dynamic> = notes[i];
-					if (note[1] < 0)
-					{
-						songJson.events.push([note[0], [[note[2], note[3], note[4]]]]);
-						notes.remove(note);
-						len = notes.length;
-					}
-					else i++;
+					songJson.events.push([note[0], [[note[2], note[3], note[4]]]]);
+					notes.remove(note);
+					len = notes.length;
 				}
+				else i++;
 			}
 		}
 
