@@ -75,10 +75,10 @@ class IndependentVideoSprite extends VideoSprite {
     
     #if(hxCodec)
     public function load(file:String, args:Array<String>){
-        if (args.contains(muted))
+        if (args.contains(muted)){}
             // mute the video
 
-        if(args.contains(looping))
+        if (args.contains(looping)){}
             // loop it
 
         // If we can pass args straight to the vlc thing then dont do this shit ^
