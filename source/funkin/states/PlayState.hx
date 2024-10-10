@@ -2646,7 +2646,6 @@ class PlayState extends MusicBeatState
 		if (generatedMusic && !isDead) {
 			if (ClientPrefs.controllerMode) {
 				keyShit();
-				controllerShit();
 			}
 
 			for (field in playfields) {
@@ -3639,7 +3638,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		trace('strum down: $column');
+		//trace('strum down: $column');
 	}
 
 	private function strumKeyUp(column:Int, player:Int = -1) {
@@ -3649,7 +3648,7 @@ class PlayState extends MusicBeatState
 		// (though could be interesting to add)
 		if (!startedCountdown) return;
 		
-		trace('strum up: $column');
+		//trace('strum up: $column');
 
 		if (player == -1) player = playOpponent ? 1 : 0;
 
@@ -3688,9 +3687,8 @@ class PlayState extends MusicBeatState
 			if (FlxG.keys.anyJustPressed(actionBinds)) strumKeyDown(column);
 			if (FlxG.keys.anyJustReleased(actionBinds)) strumKeyUp(column);
 		}
-	}
 
-	private function controllerShit():Void {
+		////
 		var gamepad = FlxG.gamepads.firstActive;
 		if (gamepad == null) return;
 

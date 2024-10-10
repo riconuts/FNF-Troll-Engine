@@ -266,7 +266,7 @@ class Character extends FlxSprite
 	}
 
 	public function createPlaceholderAnims() {
-		for (animName in singAnimations) {
+		for (animName in ["singLEFT", "singDOWN", "singUP", "singRIGHT"]) {
 			cloneAnimation(animName,		animName+'miss');
 			cloneAnimation(animName,		animName+'-alt');
 			cloneAnimation(animName+'-alt',	animName+'-altmiss');
