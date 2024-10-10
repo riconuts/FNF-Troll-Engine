@@ -41,8 +41,9 @@ class Character extends FlxSprite
 	/**Name of the death character to be used. Can be used to share 1 game over character across multiple characters**/
 	public var deathName:String = DEFAULT_CHARACTER;
 
-	/**Name of the script to be ran. Can be used to share 1 script across multiple characters**/
+	/**Name of the script to be ran. Can be used to share 1 script file across multiple characters**/
 	public var scriptName:String = DEFAULT_CHARACTER;
+
 	/**LEGACY. DO NOT USE.**/
 	public var characterScript(get, set):FunkinScript;
 	inline function get_characterScript()
@@ -137,40 +138,6 @@ class Character extends FlxSprite
 		return super.destroy();
 	}
 
-    public function pushScript(script:FunkinScript, alreadyStarted:Bool=false){
-        characterScripts.push(script);
-        if(!alreadyStarted)
-            startScript(script);
-    }
-
-	public function removeScript(script:FunkinScript, destroy:Bool = false, alreadyStopped:Bool = false)
-	{
-		characterScripts.remove(script);
-		if (!alreadyStopped)
-			stopScript(script, destroy);
-	}
-
-
-    public function startScript(script:FunkinScript){        
-		#if HSCRIPT_ALLOWED
-        if(script.scriptType == ScriptType.HSCRIPT){
-		    callScript(script, "onLoad", [this]);
-        }
-        #end
-    }
-
-    public function stopScript(script:FunkinScript, destroy:Bool=false){
-        #if HSCRIPT_ALLOWED
-        if (script.scriptType == ScriptType.HSCRIPT){
-            callScript(script, "onStop", [this]);
-            if(destroy){
-		        script.call("onDestroy");
-		        script.stop();
-            }
-        }
-        #end
-    }
-
 	function loadFromPsychData(json:CharacterFile)
 	{
 		//// some troll engine stuff
@@ -202,10 +169,9 @@ class Character extends FlxSprite
 
 		healthIcon = json.healthicon;
 		singDuration = json.sing_duration;
-		flipX = json.flip_x == true;
+		originalFlipX = json.flip_x == true;
 
-		if (json.no_antialiasing == true)
-		{
+		if (json.no_antialiasing == true) {
 			antialiasing = false;
 			noAntialiasing = true;
 		}
@@ -253,8 +219,6 @@ class Character extends FlxSprite
 				////
 				if (anim.offsets != null && anim.offsets.length > 1)
 					addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
-				/* else
-					addOffset(anim.anim, 0, 0); */
 			}
 		}
 		else
@@ -268,48 +232,48 @@ class Character extends FlxSprite
 		super(x, y);		
 
 		curCharacter = (characterName == null) ? DEFAULT_CHARACTER : characterName;
-		var isPlayer:Bool = this.isPlayer = isPlayer;
-		var debugMode:Bool = this.debugMode = debugMode;
+		this.isPlayer = isPlayer;
+		this.debugMode = debugMode;
 
 		xFacing = isPlayer ? -1 : 1;
 		idleWhenHold = !isPlayer;
 		controlled = isPlayer;
+	}
 
-		switch (curCharacter)
-		{
-			//case 'your character name in case you want to hardcode them instead':
-
-			default:
-				var json = getCharacterFile(curCharacter);
-
-				if (json == null){
-					trace('Character file: $curCharacter not found.');
-					json = getCharacterFile(DEFAULT_CHARACTER);
-					curCharacter = DEFAULT_CHARACTER;
-				}
-
-				loadFromPsychData(json);
-		}
-		originalFlipX = flipX;
-
-		if(animOffsets.exists('singLEFTmiss') && animOffsets.exists('singDOWNmiss') && animOffsets.exists('singUPmiss') && animOffsets.exists('singRIGHTmiss')) 
-			hasMissAnimations = true;
-
-		//// placeholder animations
-		if (!this.debugMode){
-			for (animName in ['singLEFT', 'singRIGHT', 'singUP', 'singDOWN'])
-			{
-				cloneAnimation(animName,		animName+'miss');
-				cloneAnimation(animName,		animName+'-alt');
-				cloneAnimation(animName+'-alt',	animName+'-altmiss');
+	public function setupCharacter()
+	{
+		if (characterScript != null && characterScript.scriptType == HSCRIPT) {
+			var characterScript:FunkinHScript = cast characterScript;
+			if (characterScript.call('setupCharacter', [this]) == Globals.Function_Stop) {
+				return;
 			}
 		}
+
+		var json = getCharacterFile(curCharacter);
+		if (json == null) {
+			trace('Character file: $curCharacter not found.');
+			json = getCharacterFile(DEFAULT_CHARACTER);
+			curCharacter = DEFAULT_CHARACTER;
+		}
+
+		loadFromPsychData(json);
+		
+		hasMissAnimations = (animOffsets.exists('singLEFTmiss') && animOffsets.exists('singDOWNmiss') && animOffsets.exists('singUPmiss') && animOffsets.exists('singRIGHTmiss'));
+
+		if (!debugMode) createPlaceholderAnims();
 
 		recalculateDanceIdle();
 		dance();
 
-		if (isPlayer)
-			flipX = !flipX;
+		flipX = isPlayer ? !originalFlipX : originalFlipX;
+	}
+
+	public function createPlaceholderAnims() {
+		for (animName in singAnimations) {
+			cloneAnimation(animName,		animName+'miss');
+			cloneAnimation(animName,		animName+'-alt');
+			cloneAnimation(animName+'-alt',	animName+'-altmiss');
+		}
 	}
 
 	public function getCamera() {
@@ -621,6 +585,11 @@ class Character extends FlxSprite
 		animation.addByPrefix(name, anim, 24, false);
 	}
 
+	/**
+	 * @param ogName Name of the animation to be cloned. 
+	 * @param cloneName Name of the resulting clone.
+	 * @param force Whether to override the resulting animation, if it exists.
+	 */
 	function cloneAnimation(ogName:String, cloneName:String, ?force:Bool)
 	{
 		var daAnim:FlxAnimation = animation.getByName(ogName);
@@ -639,6 +608,39 @@ class Character extends FlxSprite
     public function setDefaultVar(i:String, v:Dynamic)
 		defaultVars.set(i, v);
     
+	public function pushScript(script:FunkinScript, alreadyStarted:Bool=false){
+		characterScripts.push(script);
+		if (!alreadyStarted)
+			startScript(script);
+	} 
+
+	public function removeScript(script:FunkinScript, destroy:Bool = false, alreadyStopped:Bool = false)
+	{
+		characterScripts.remove(script);
+		if (!alreadyStopped)
+			stopScript(script, destroy);
+	}
+
+
+	public function startScript(script:FunkinScript){        
+		#if HSCRIPT_ALLOWED
+		if(script.scriptType == ScriptType.HSCRIPT){
+			callScript(script, "onLoad", [this]);
+		}
+		#end
+	}
+
+	public function stopScript(script:FunkinScript, destroy:Bool=false){
+		#if HSCRIPT_ALLOWED
+		if (script.scriptType == ScriptType.HSCRIPT){
+			callScript(script, "onStop", [this]);
+			if(destroy){
+				script.call("onDestroy");
+				script.stop();
+			}
+		}
+		#end
+	}
 
 	public function startScripts()
 	{
@@ -646,100 +648,100 @@ class Character extends FlxSprite
 
 		for (filePath in Paths.getFolders("characters"))
 		{
-            #if HSCRIPT_ALLOWED
-			var hscriptFile = Paths.getHScriptPath('$filePath/$scriptName');
+			#if HSCRIPT_ALLOWED
+			var hscriptFile = Paths.getHScriptPath('$filePath/$curCharacter');
 			if (hscriptFile != null) {
 				var script = FunkinHScript.fromFile(hscriptFile, hscriptFile, defaultVars);
 				pushScript(script);
 				return this;
-            }
-            #end
+			}
+			#end
 
-            #if LUA_ALLOWED
-			var luaFile = Paths.getLuaPath('$filePath/$scriptName');
+			#if LUA_ALLOWED
+			var luaFile = Paths.getLuaPath('$filePath/$curCharacter');
 			if (luaFile != null) {
 				var script = FunkinLua.fromFile(luaFile, luaFile, defaultVars);
 				pushScript(script);
 				return this;
 			}
-            #end
+			#end
 		}
 
 		return this;
 	}
 
-    public function callOnScripts(event:String, ?args:Array<Dynamic>, ignoreStops:Bool = false, ?exclusions:Array<String>, ?scriptArray:Array<Dynamic>,
-        ?vars:Map<String, Dynamic>, ?ignoreSpecialShit:Bool = true):Dynamic
-    {
-    #if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-    if (args == null)
-        args = [];
-    if (scriptArray == null)
-        scriptArray = characterScripts;
-    if (exclusions == null)
-        exclusions = [];
+	public function callOnScripts(event:String, ?args:Array<Dynamic>, ignoreStops:Bool = false, ?exclusions:Array<String>, ?scriptArray:Array<Dynamic>, ?vars:Map<String, Dynamic>, ?ignoreSpecialShit:Bool = true):Dynamic
+	{
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+		if (args == null)
+			args = [];
+		if (exclusions == null)
+			exclusions = [];
+		if (scriptArray == null)
+			scriptArray = characterScripts;
 
-    var returnVal:Dynamic = Globals.Function_Continue;
-    for (script in scriptArray)
-    {
-        if (exclusions.contains(script.scriptName))
-            continue;
-        
-        var ret:Dynamic = script.call(event, args, vars);
-        if (ret == Globals.Function_Halt)
-        {
-            ret = returnVal;
-            if (!ignoreStops)
-                return returnVal;
-        };
-        if (ret != Globals.Function_Continue && ret != null)
-            returnVal = ret;
-    }
+		var returnVal:Dynamic = Globals.Function_Continue;
 
-    if (returnVal == null)
-        returnVal = Globals.Function_Continue;
-    return returnVal;
-    #else
-    return Globals.Function_Continue
-    #end
-    }
+		for (script in scriptArray)
+		{
+			if (exclusions.contains(script.scriptName))
+				continue;
+			
+			var ret:Dynamic = script.call(event, args, vars);
+			if (ret == Globals.Function_Halt)
+			{
+				ret = returnVal;
+				if (!ignoreStops)
+					return returnVal;
+			};
+			if (ret != Globals.Function_Continue && ret != null)
+				returnVal = ret;
+		}
 
-    public function setOnScripts(variable:String, value:Dynamic, ?scriptArray:Array<Dynamic>)
-    {
-    if (scriptArray == null)
-        scriptArray = characterScripts;
+		if (returnVal == null)
+			returnVal = Globals.Function_Continue;
 
-    for (script in scriptArray)
-    {
-        script.set(variable, value);
-        // trace('set $variable, $value, on ${script.scriptName}');
-    }
-    }
+		return returnVal;
+		#else
+		return Globals.Function_Continue
+		#end
+	}
 
-    public function callScript(script:Dynamic, event:String, ?args:Array<Dynamic>):Dynamic
-    {
-    #if (LUA_ALLOWED || HSCRIPT_ALLOWED) // no point in calling this code if you.. for whatever reason, disabled scripting.
-    if ((script is FunkinScript))
-    {
-        return callOnScripts(event, args, true, [], [script], [], false);
-    }
-    else if ((script is Array))
-    {
-        return callOnScripts(event, args, true, [], script, [], false);
-    }
-    else if ((script is String))
-    {
-        var scripts:Array<FunkinScript> = [];
+	public function setOnScripts(variable:String, value:Dynamic, ?scriptArray:Array<Dynamic>)
+	{
+		if (scriptArray == null)
+			scriptArray = characterScripts;
 
-        for (scr in characterScripts)
-        {
-            if (scr.scriptName == script)
-                scripts.push(scr);
-        }
+		for (script in scriptArray) {
+			script.set(variable, value);
+			// trace('set $variable, $value, on ${script.scriptName}');
+		}
+	}
 
-        return callOnScripts(event, args, true, [], scripts, [], false);
-    }
-    #end
-    return Globals.Function_Continue;
-    }
+	public function callScript(script:Dynamic, event:String, ?args:Array<Dynamic>):Dynamic
+	{
+		#if (LUA_ALLOWED || HSCRIPT_ALLOWED) // no point in calling this code if you.. for whatever reason, disabled scripting.
+		if ((script is FunkinScript))
+		{
+			return callOnScripts(event, args, true, [], [script], [], false);
+		}
+		else if ((script is Array))
+		{
+			return callOnScripts(event, args, true, [], script, [], false);
+		}
+		else if ((script is String))
+		{
+			var scripts:Array<FunkinScript> = [];
+
+			for (scr in characterScripts)
+			{
+				if (scr.scriptName == script)
+					scripts.push(scr);
+			}
+
+			return callOnScripts(event, args, true, [], scripts, [], false);
+		}
+		#end
+		return Globals.Function_Continue;
+	}
 }

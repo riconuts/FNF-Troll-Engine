@@ -62,6 +62,12 @@ import funkin.api.Discord.DiscordClient;
 #elseif (hxvlc) import hxvlc.flixel.FlxVideo as VideoHandler;
 #end
 
+enum abstract CharacterType(Int) from Int to Int {
+	var BF = 0;
+	var DAD = 1;
+	var GF = 2;
+}
+
 /*
 okay SO im gonna explain how these work
 
@@ -842,51 +848,46 @@ class PlayState extends MusicBeatState
 
 		//// Characters
 
-		var gfVersion:String = SONG.gfVersion;
-
-		if (stageData.hide_girlfriend != true)
-		{
-			gf = new Character(0, 0, gfVersion);
-
-			if (stageData.camera_girlfriend != null){
-				gf.cameraPosition[0] += stageData.camera_girlfriend[0];
-				gf.cameraPosition[1] += stageData.camera_girlfriend[1];
-			}
-
-            gf.setDefaultVar("used", true);
-			startCharacter(gf);
-			gf.scrollFactor.set(0.95, 0.95); // should this be set by the stage instead lol
-			gfMap.set(gf.curCharacter, gf);
-			gfGroup.add(gf);
-		}
-
 		dad = new Character(0, 0, SONG.player2);
-
-		if (stageData.camera_opponent != null){
-			dad.cameraPosition[0] += stageData.camera_opponent[0];
-			dad.cameraPosition[1] += stageData.camera_opponent[1];
-		}
-        dad.setDefaultVar("used", true);
-		startCharacter(dad, true);
-		
 		dadMap.set(dad.curCharacter, dad);
 		dadGroup.add(dad);
 
-		boyfriend = new Character(0, 0, SONG.player1, true);
-		if (stageData.camera_boyfriend != null){
-			boyfriend.cameraPosition[0] += stageData.camera_boyfriend[0];
-			boyfriend.cameraPosition[1] += stageData.camera_boyfriend[1];
-		}
-		boyfriend.setDefaultVar("used", true);
-		startCharacter(boyfriend);
+		dad.setDefaultVar("used", true);
+		startCharacter(dad, true);
 
+		if (stageData.camera_opponent != null) {
+			dad.cameraPosition[0] += stageData.camera_opponent[0];
+			dad.cameraPosition[1] += stageData.camera_opponent[1];
+		}
+
+		////
+		boyfriend = new Character(0, 0, SONG.player1, true);
 		boyfriendMap.set(boyfriend.curCharacter, boyfriend);
 		boyfriendGroup.add(boyfriend);
 
-		if(dad.curCharacter.startsWith('gf')) {
-			dad.setPosition(GF_X, GF_Y);
-			if(gf != null)
-				gf.visible = false;
+		boyfriend.setDefaultVar("used", true);
+		startCharacter(boyfriend);
+
+		if (stageData.camera_boyfriend != null) {
+			boyfriend.cameraPosition[0] += stageData.camera_boyfriend[0];
+			boyfriend.cameraPosition[1] += stageData.camera_boyfriend[1];
+		}
+
+		////
+		if (stageData.hide_girlfriend != true) {
+			gf = new Character(0, 0, SONG.gfVersion);
+			gfMap.set(gf.curCharacter, gf);
+			gfGroup.add(gf);
+
+			gf.setDefaultVar("used", true);
+			startCharacter(gf);
+
+			gf.scrollFactor.set(0.95, 0.95);
+	
+			if (stageData.camera_girlfriend != null) {
+				gf.cameraPosition[0] += stageData.camera_girlfriend[0];
+				gf.cameraPosition[1] += stageData.camera_girlfriend[1];
+			}
 		}
 
 		////
@@ -1070,6 +1071,7 @@ class PlayState extends MusicBeatState
 		add(playfields);
 		add(notefields);
 		add(grpNoteSplashes);
+
 		luaDebugGroup.cameras = [camOther];
 		add(luaDebugGroup);
 
@@ -1229,72 +1231,72 @@ class PlayState extends MusicBeatState
 		hud.reloadHealthBarColors(dadColor, bfColor);
 	}
 
-	public function addCharacterToList(newCharacter:String, type:Int) {
+	public function addCharacterToList(name:String, type:CharacterType) {
 		switch(type) {
-			case 0:
-				if(!boyfriendMap.exists(newCharacter)) {
-					var newBoyfriend:Character = new Character(0, 0, newCharacter, true);
-					newBoyfriend.cameraPosition[0] += stageData.camera_boyfriend[0];
-					newBoyfriend.cameraPosition[1] += stageData.camera_boyfriend[1];
+			case BF:
+				if (boyfriendMap.exists(name))
+					return;
 
-					newBoyfriend.alpha = 0.00001;
-					if(playerField!=null)
-						playerField.characters.push(newBoyfriend);
+				var char = new Character(0, 0, name, true);
+				boyfriendMap.set(name, char);
+				boyfriendGroup.add(char);
 
-					boyfriendMap.set(newCharacter, newBoyfriend);
-					boyfriendGroup.add(newBoyfriend);
+				char.setDefaultVar("used", false);
+				char.alpha = 0.00001;
 
-					startCharacter(newBoyfriend);
+				startCharacter(char);
 
-                    newBoyfriend.setOnScripts("used", false); // used to determine when a character is actually being used
-				}
+				char.cameraPosition[0] += stageData.camera_boyfriend[0];
+				char.cameraPosition[1] += stageData.camera_boyfriend[1];
+				
+				if (playerField != null)
+					playerField.characters.push(char);
 
-			case 1:
-				if(!dadMap.exists(newCharacter)) {
-					var newDad:Character = new Character(0, 0, newCharacter);
-					newDad.cameraPosition[0] += stageData.camera_opponent[0];
-					newDad.cameraPosition[1] += stageData.camera_opponent[1];
-					if(dadField!=null)
-						dadField.characters.push(newDad);
-					dadMap.set(newCharacter, newDad);
-					dadGroup.add(newDad);
-					startCharacter(newDad, true);
-					newDad.alpha = 0.00001;
+			case DAD:
+				if (dadMap.exists(name))
+					return;
 
-					newDad.setOnScripts("used", false); // used to determine when a character is actually being used
-				}
+				var char = new Character(0, 0, name);
+				dadMap.set(name, char);
+				dadGroup.add(char);
 
-			case 2:
-				if(gf != null && !gfMap.exists(newCharacter)) {
-					var newGf:Character = new Character(0, 0, newCharacter);
-					newGf.cameraPosition[0] += stageData.camera_girlfriend[0];
-					newGf.cameraPosition[1] += stageData.camera_girlfriend[1];
-					newGf.scrollFactor.set(0.95, 0.95);
+				char.setDefaultVar("used", false);
+				char.alpha = 0.00001;
 
-					newGf.alpha = 0.00001;
+				startCharacter(char, true);
 
-					gfMap.set(newCharacter, newGf);
-					gfGroup.add(newGf);
-					startCharacter(newGf);
+				char.cameraPosition[0] += stageData.camera_opponent[0];
+				char.cameraPosition[1] += stageData.camera_opponent[1];
 
-					newGf.setOnScripts("used", false); // used to determine when a character is actually being used
+				if (dadField!=null)
+					dadField.characters.push(char);
+				
+			case GF:
+				if (gf == null || gfMap.exists(name)) 
+					return;
 
-				}
+				var char = new Character(0, 0, name);
+				gfMap.set(name, char);
+				gfGroup.add(char);
+				
+				char.setDefaultVar("used", false);
+				char.alpha = 0.00001;
+
+				startCharacter(char);
+
+				char.cameraPosition[0] += stageData.camera_girlfriend[0];
+				char.cameraPosition[1] += stageData.camera_girlfriend[1];
+				char.scrollFactor.set(0.95, 0.95);
 		}
 	}
 
-	function startCharacter(char:Character, gf:Bool=false){
-		startCharacterPos(char, gf);
-		startCharacterScript(char);
-	}
-
-	function startCharacterScript(char:Character)
-	{
+	function startCharacter(char:Character, ?gfCheck:Bool=false) {
 		char.startScripts();
+		char.setupCharacter();
 
-        for(script in char.characterScripts){
+        for (script in char.characterScripts) {
             #if LUA_ALLOWED
-            if((script is FunkinLua))
+            if (script is FunkinLua)
                 luaArray.push(cast script);
             else
             #end
@@ -1302,6 +1304,8 @@ class PlayState extends MusicBeatState
 
             funkyScripts.push(script);
         }
+
+		startCharacterPos(char, gfCheck);
 	}
 
 	public function getLuaObject(tag:String, ?checkForTextsToo:Bool){
@@ -1312,7 +1316,7 @@ class PlayState extends MusicBeatState
 	}
 
 	function startCharacterPos(char:Character, ?gfCheck:Bool = false, ?startBopBeat:Float=-5) {
-		if(gfCheck && char.curCharacter.startsWith('gf')) { //IF DAD IS GIRLFRIEND, HE GOES TO HER POSITION
+		if (gfCheck && char.curCharacter.startsWith('gf')) { //IF DAD IS GIRLFRIEND, HE GOES TO HER POSITION
 			char.setPosition(GF_X, GF_Y);
 			char.scrollFactor.set(0.95, 0.95);
 			char.danceEveryNumBeats = 2;
@@ -2179,20 +2183,9 @@ class PlayState extends MusicBeatState
 				});
 				
 			case 'Change Character':
-				var charType:Int = 0;
-				switch(event.value1.toLowerCase()) {
-					case 'gf' | 'girlfriend' | '2':
-						charType = 2;
-					case 'dad' | 'opponent' | '1':
-						charType = 1;
-					default:
-						charType = Std.parseInt(event.value1);
-						if(Math.isNaN(charType)) charType = 0;
-				}
-				
-				//trace(event.value2, charType);
+				var charType = getCharacterTypeFromString(event.value1);
+				if (charType != -1) addCharacterToList(event.value2, charType);
 
-				addCharacterToList(event.value2, charType);
 			default:
 				if (eventScripts.exists(event.event))
 					callScript(eventScripts.get(event.event), "onPush", [event]);
@@ -2765,95 +2758,105 @@ class PlayState extends MusicBeatState
 		return pressed;
 	}
 
-	function changeCharacter(name:String, charType:Int){
+	function changeCharacter(name:String, charType:CharacterType)
+	{
+		var oldChar:Character;
+		var newChar:Character;
+		var varName:String;
+
 		switch(charType) {
-			case 0:
-				if(boyfriend.curCharacter != name) {
-					trace("turned bf into " + name);
-					var shiftFocus:Bool = focusedChar==boyfriend;
-					var oldChar = boyfriend;
-					if(!boyfriendMap.exists(name)) {
-						addCharacterToList(name, charType);
-					}
+			default: return;
+			
+			case BF:
+				if (boyfriend.curCharacter == name) return;
+				
+				if (!boyfriendMap.exists(name)) 
+					addCharacterToList(name, charType);
+				
+				oldChar = boyfriend;
+				newChar = boyfriend = boyfriendMap.get(name);
+				varName = 'boyfriendName';
 
-					var lastAlpha:Float = boyfriend.alpha;
-					boyfriend.alpha = 0.00001;
-					boyfriend = boyfriendMap.get(name);
-					boyfriend.alpha = lastAlpha;
-					if(shiftFocus)focusedChar=boyfriend;
-					//hud.iconP1.changeIcon(boyfriend.healthIcon);
-                    //hud.iconChange(1, boyfriend.healthIcon);
-                    hud.changedCharacter(1, boyfriend);
-                    oldChar.setOnScripts("used", false);
-					boyfriend.setOnScripts("used", true);
-                    oldChar.callOnScripts("changedOut", [oldChar, boyfriend]); // oldChar, newChar
-                    boyfriend.callOnScripts("onAdded", [boyfriend, oldChar]); // if you can come up w/ a better name for this callback then change it lol
-                    // (this also gets called for the characters set by the chart's player1/player2)
+			case DAD:
+				if (dad.curCharacter == name) return;
 
+				if (!dadMap.exists(name)) 
+					addCharacterToList(name, charType);
+				
+				oldChar = dad;
+				newChar = dad = dadMap.get(name);
+				varName = 'dadName';
+
+				if (gf != null) {
+					if (oldChar.curCharacter.startsWith('gf')) // if the old character was hiding gf, make her visible again.
+						gf.visible = true;
+
+					if (newChar.curCharacter.startsWith('gf')) // if the new character is a gf character, hide the actual gf as this will take it's position 
+						gf.visible = false; 
 				}
-				setOnScripts('boyfriendName', boyfriend.curCharacter);
 
-			case 1:
-				if(dad.curCharacter != name) {
-					trace("turned dad into " + name);
-					var shiftFocus:Bool = focusedChar==dad;
-					var oldChar = dad;
-					if(!dadMap.exists(name)) {
-						addCharacterToList(name, charType);
-					}
+			case GF:
+				if (gf == null || gf.curCharacter == name) 
+					return;
 
-					var wasGf:Bool = dad.curCharacter.startsWith('gf');
-					var lastAlpha:Float = dad.alpha;
-					dad.alpha = 0.00001;
-					dad = dadMap.get(name);
-					if(!dad.curCharacter.startsWith('gf')) {
-						if(wasGf && gf != null) {
-							gf.visible = true;
-						}
-					} else if(gf != null) {
-						gf.visible = false;
-					}
-					if(shiftFocus)focusedChar=dad;
-					dad.alpha = lastAlpha;
-					//hud.iconP2.changeIcon(dad.healthIcon);
-					hud.changedCharacter(2, dad);
-					oldChar.setOnScripts("used", false);
-					dad.setOnScripts("used", true);
-					oldChar.callOnScripts("changedOut", [oldChar, dad]); // oldChar, newChar
-					dad.callOnScripts("onAdded", [dad, oldChar]); // if you can come up w/ a better name for this callback then change it lol
-					// (this also gets called for the characters set by the chart's player1/player2)
-				}
-				setOnScripts('dadName', dad.curCharacter);
-
-			case 2:
-				if(gf != null)
-				{
-					if(gf.curCharacter != name)
-					{
-						trace("turned gf into " + name);
-						var shiftFocus:Bool = focusedChar==gf;
-						var oldChar = gf;
-						if(!gfMap.exists(name))
-						{
-							addCharacterToList(name, charType);
-						}
-
-						var lastAlpha:Float = gf.alpha;
-						gf.alpha = 0.00001;
-						gf = gfMap.get(name);
-						gf.alpha = lastAlpha;
-						if(shiftFocus)focusedChar=gf;
-						hud.changedCharacter(3, gf);
-					    oldChar.setOnScripts("used", false);
-					    gf.setOnScripts("used", true);
-						oldChar.callOnScripts("changedOut", [oldChar, gf]); // oldChar, newChar
-                        gf.callOnScripts("onAdded", [gf, oldChar]); // if you can come up w/ a better name for this callback then change it lol
-						// (this also gets called for the characters set by the chart's player1/player2)
-					}
-					setOnScripts('gfName', gf.curCharacter);
-				}
+				if (!gfMap.exists(name))
+					addCharacterToList(name, charType);
+		
+				oldChar = gf;
+				newChar = gf = gfMap.get(name);
+				varName = "gfName";
 		}
+
+		if (showDebugTraces)
+			trace('turning $charType into ' + name);
+
+		setOnScripts(varName, name);
+
+		newChar.alpha = oldChar.alpha;
+		newChar.setOnScripts("used", true);
+		newChar.callOnScripts("onAdded", [newChar, oldChar]); // if you can come up w/ a better name for this callback then change it lol
+		// (this also gets called for the characters set by the chart's player1/player2)
+
+		oldChar.alpha = 0.00001;
+		oldChar.setOnScripts("used", false);
+		oldChar.callOnScripts("changedOut", [oldChar, newChar]);
+
+		if (focusedChar == oldChar) focusedChar = newChar;
+		hud.changedCharacter(charType, newChar);
+
+		/////
+		if (name.startsWith(oldChar.curCharacter) || oldChar.curCharacter.startsWith(name)) {
+			if (oldChar.animation!=null && oldChar.animation.curAnim!=null) {
+				var anim:String = oldChar.animation.curAnim.name;
+				var frame:Int = oldChar.animation.curAnim.curFrame;
+
+				if (newChar.animation.exists(anim)) {
+					newChar.playAnim(anim, true);
+					newChar.animation.curAnim.curFrame = frame;
+				}
+			}
+		}
+
+		////
 		reloadHealthBarColors();
+	}
+
+	function getCharacterFromString(str:String):Null<Character> {
+		return switch (str.toLowerCase().trim()) {
+			case 'bf'	| 'boyfriend'	| '0': boyfriend;
+			case 'dad'	| 'opponent'	| '1': dad;	
+			case 'gf'	| 'girlfriend'	| '2': gf;
+			default: null;
+		}
+	}
+
+	function getCharacterTypeFromString(str:String):CharacterType {
+		return switch (str.toLowerCase().trim()) {
+			case 'bf'	| 'boyfriend'	| '0': BF;
+			case 'dad'	| 'opponent'	| '1': DAD;	
+			case 'gf'	| 'girlfriend'	| '2': GF;
+			default: -1;
+		}
 	}
 
 	public function triggerEventNote(eventName:String = "", value1:String = "", value2:String = "", ?time:Float) {
@@ -2871,7 +2874,7 @@ class PlayState extends MusicBeatState
                             whosTurn = 'dad';
 							moveCamera(dad);
                         }
-					case 'gf':
+					case 'gf' | 'girlfriend':
 						if (callOnScripts('onMoveCamera', ["gf"]) != Globals.Function_Stop){
                             whosTurn = 'gf';
 							moveCamera(gf);
@@ -2882,6 +2885,7 @@ class PlayState extends MusicBeatState
 							moveCamera(boyfriend);
                         }
 				}
+
 			case 'Game Flash':
 				var dur:Float = Std.parseFloat(value2);
 				if(Math.isNaN(dur)) dur = 0.5;
@@ -2890,13 +2894,12 @@ class PlayState extends MusicBeatState
 				if (col == null) col = 0xFFFFFFFF;
 
 				FlxG.camera.flash(col, dur, null, true);
+
 			case 'Hey!':
-				var value:Int = 2;
-				switch(value1.toLowerCase().trim()) {
-					case 'bf' | 'boyfriend' | '0':
-						value = 0;
-					case 'gf' | 'girlfriend' | '1':
-						value = 1;
+				var value:Int = switch (value1.toLowerCase().trim()) {
+					case 'bf' | 'boyfriend' | '0': 0;
+					case 'gf' | 'girlfriend' | '1': 1;
+					default: 2;
 				}
 
 				var time:Float = Std.parseFloat(value2);
@@ -2923,6 +2926,7 @@ class PlayState extends MusicBeatState
 				var value:Int = Std.parseInt(value1);
 				if(Math.isNaN(value) || value < 1) value = 1;
 				gfSpeed = value;
+
 			case 'Add Camera Zoom':
 				if (ClientPrefs.camZoomP > 0) {
 					var camZoom:Float = Std.parseFloat(value1);
@@ -2932,29 +2936,13 @@ class PlayState extends MusicBeatState
 
 					cameraBump(camZoom, hudZoom);
 				}
+				
 			case 'Play Animation':
-				//trace('Anim to play: ' + value1);
-				var char:Character = dad;
-				switch(value2.toLowerCase().trim()) {
-					case 'bf' | 'boyfriend':
-						char = boyfriend;
-					case 'gf' | 'girlfriend':
-						char = gf;
-					default:
-						var val2:Int = Std.parseInt(value2);
-						if(Math.isNaN(val2)) val2 = 0;
-
-						switch(val2) {
-							case 1: char = boyfriend;
-							case 2: char = gf;
-						}
-				}
-
-				if (char != null){
+				var char:Character = getCharacterFromString(value2);
+				if (char != null) {
 					char.playAnim(value1, true);
 					char.specialAnim = true;
 				}
-
 
 			case 'Camera Follow Pos':
 				var val1:Float = Std.parseFloat(value1);
@@ -2972,24 +2960,8 @@ class PlayState extends MusicBeatState
 				}
 
 			case 'Alt Idle Animation':
-				var char:Character = dad;
-				switch(value1.toLowerCase()) {
-					case 'gf' | 'girlfriend':
-						char = gf;
-					case 'boyfriend' | 'bf':
-						char = boyfriend;
-					default:
-						var val:Int = Std.parseInt(value1);
-						if(Math.isNaN(val)) val = 0;
-
-						switch(val) {
-							case 1: char = boyfriend;
-							case 2: char = gf;
-						}
-				}
-
-				if (char != null)
-				{
+				var char:Character = getCharacterFromString(value1);
+				if (char != null) {
 					char.idleSuffix = value2;
 					char.recalculateDanceIdle();
 				}
@@ -3012,58 +2984,8 @@ class PlayState extends MusicBeatState
 				}
 
 			case 'Change Character':
-				var charType:Int = 0;
-				switch(value1.toLowerCase().trim()) {
-					case 'gf' | 'girlfriend':
-						charType = 2;
-					case 'dad' | 'opponent':
-						charType = 1;
-					default:
-						charType = Std.parseInt(value1);
-						if(Math.isNaN(charType)) charType = 0;
-				}
-
-				var curChar:Character = boyfriend;
-				switch(charType){
-					case 2:
-						curChar = gf;
-					case 1:
-						curChar = dad;
-					case 0:
-						curChar = boyfriend;
-				}
-
-				var newCharacter:String = value2;
-				var anim:String = '';
-				var frame:Int = 0;
-				if(newCharacter.startsWith(curChar.curCharacter) || curChar.curCharacter.startsWith(newCharacter)){
-					if(curChar.animation!=null && curChar.animation.curAnim!=null){
-						anim = curChar.animation.curAnim.name;
-						frame = curChar.animation.curAnim.curFrame;
-					}
-				}
-
-				trace(value2, charType);
-
-				changeCharacter(value2, charType);
-
-                
-				if(anim!=''){
-					var char:Character = boyfriend;
-					switch(charType){
-						case 2:
-							char = gf;
-						case 1:
-							char = dad;
-						case 0:
-							char = boyfriend;
-					}
-
-					if(char.animation.getByName(anim)!=null){
-						char.playAnim(anim, true);
-						char.animation.curAnim.curFrame = frame;
-					}
-				}
+				var charType:CharacterType = getCharacterTypeFromString(value1);
+				if (charType != -1) changeCharacter(value2, charType);
 
 			case 'Change Scroll Speed':
 				if (songSpeedType == "constant")
@@ -3091,7 +3013,7 @@ class PlayState extends MusicBeatState
 				}
 
 			case 'Set Property':
-				var value2:Dynamic = switch (value2){
+				var value2:Dynamic = switch(value2){
 					case "true": true;
 					case "false": false;
 					default: value2;
@@ -3131,7 +3053,8 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	static public function getCharacterCamera(char:Character) return char.getCamera();
+	static public function getCharacterCamera(char:Character) 
+		return char.getCamera();
 
 	public function finishSong(?ignoreNoteOffset:Bool = false):Void
 	{
