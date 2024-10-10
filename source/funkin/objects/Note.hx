@@ -90,8 +90,11 @@ class Note extends NoteObject
 		return quantKey;
 	}
 
+	inline public static function beatToNoteRow(beat:Float):Int
+		return Math.round(beat * Conductor.ROWS_PER_BEAT);
+
 	public static function getQuant(beat:Float){
-		var row:Int = Conductor.beatToNoteRow(beat);
+		var row:Int = beatToNoteRow(beat);
 		for (data in quants) {
 			if (row % (Conductor.ROWS_PER_MEASURE/data) == 0)
 				return data;
@@ -114,7 +117,7 @@ class Note extends NoteObject
 	
 	// basic stuff
 	public var beat:Float = 0;
-	public var strumTime(default, set):Float = 0;
+	public var strumTime:Float = 0;
 
 	public var visualTime:Float = 0;
 	public var mustPress:Bool = false;
@@ -136,7 +139,6 @@ class Note extends NoteObject
 	public var unhitTail:Array<Note> = [];
 
 	// quant shit
-	public var row:Int = 0;
 	public var quant:Int = 4;
 	public var isQuant:Bool = false; // Whether the loaded texture is a quant texture.
 
@@ -249,10 +251,6 @@ class Note extends NoteObject
 	@:noCompletion inline function get_realNoteData() return realColumn;
 	@:noCompletion inline function set_realNoteData(v:Int) return realColumn = v;
 	
-	@:noCompletion function set_strumTime(val:Float){
-        row = Conductor.secsToRow(val);
-        return strumTime = val;
-    }
 
 	@:noCompletion function get_canBeHit() return UNJUDGED != PlayState.instance.judgeManager.judgeNote(this);
 

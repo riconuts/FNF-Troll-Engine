@@ -38,16 +38,7 @@ class Conductor
 	];
 
 	public static var ROWS_PER_BEAT:Int = 48;
-	// its 48 in ITG but idk because FNF doesnt work w/ note rows
-	public static var ROWS_PER_MEASURE:Int = ROWS_PER_BEAT*4;
-
-	public static var MAX_NOTE_ROW = 1 << 30; // from Stepmania
-
-	public inline static function beatToRow(beat:Float):Int
-		return Math.round(beat * ROWS_PER_BEAT);
-
-	public inline static function rowToBeat(row:Int):Float
-		return row / ROWS_PER_BEAT;
+	public static var ROWS_PER_MEASURE:Int = ROWS_PER_BEAT * 4;
 
 	public inline static function secsToRow(sex:Float):Int
 		return Math.round(getBeat(sex) * ROWS_PER_BEAT);
@@ -95,20 +86,7 @@ class Conductor
 		}
 		return UNJUDGED;
 	}
-
-	inline public static function beatToNoteRow(beat:Float):Int{
-		return Math.round(beat*Conductor.ROWS_PER_BEAT);
-	}
-
-	inline public static function noteRowToBeat(row:Float):Float{
-		return row/Conductor.ROWS_PER_BEAT;
-	}
-
-	public static function timeSinceLastBPMChange(time:Float):Float{
-		var lastChange = getBPMFromSeconds(time);
-		return time-lastChange.songTime;
-	}
-
+	
 	public static function getBeatSinceChange(time:Float):Float{
 		var lastBPMChange = getBPMFromSeconds(time);
 		return (time-lastBPMChange.songTime) / (lastBPMChange.stepCrochet*4);
@@ -155,29 +133,22 @@ class Conductor
 		return lastChange;
 	}
 
-	public static function beatToSeconds(beat:Float): Float{
-		var step = beat * 4;
-		var lastChange = getBPMFromStep(step);
-		return lastChange.songTime + ((step - lastChange.stepTime) / (lastChange.bpm / 60) * 0.25) * 1000; // TODO: make less shit and take BPM into account PROPERLY
-	}
-
-	public static function getStep(time:Float){
+	public inline static function getStep(time:Float){
 		var lastChange = getBPMFromSeconds(time);
 		return lastChange.stepTime + (time - lastChange.songTime) / lastChange.stepCrochet;
 	}
 
-	public static function getStepRounded(time:Float){
-		var lastChange = getBPMFromSeconds(time);
-		return lastChange.stepTime + Math.floor(time - lastChange.songTime) / lastChange.stepCrochet;
-	}
+	public inline static function getStepRounded(time:Float):Int
+		return Math.floor(getStep(time));
+	
 
-	public static function getBeat(time:Float){
+	public inline static function getBeat(time:Float)
 		return getStep(time) * 0.25;
-	}
+	
 
-	public static function getBeatRounded(time:Float):Int{
+	public inline static function getBeatRounded(time:Float):Int
 		return Math.floor(getStepRounded(time) * 0.25);
-	}
+	
 
 	public static function mapBPMChanges(song:SwagSong, offset:Float=0)
 	{
