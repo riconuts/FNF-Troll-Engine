@@ -1,7 +1,6 @@
 package funkin.data;
 
-import haxe.Timer;
-#if(moonchart)
+#if (moonchart)
 import funkin.data.FNFTroll as SupportedFormat;
 import moonchart.formats.BasicFormat;
 import moonchart.backend.FormatData;
@@ -11,6 +10,7 @@ import moonchart.backend.FormatDetector;
 
 import funkin.states.LoadingState;
 import funkin.states.PlayState;
+import funkin.states.editors.ChartingState;
 import funkin.data.Section.SwagSection;
 import haxe.io.Path;
 import haxe.Json;
@@ -336,6 +336,20 @@ class Song
 			}
 			else
 				songJson.gfVersion = "gf";
+		}
+
+		for (section in swagJson.notes) {
+			for (note in section.sectionNotes) {
+				var type:Dynamic = note[3];
+				
+				// Backward compatibility + compatibility with Week 7 charts;
+				if (type == true)
+					type = "Alt Animation";
+				else if (Std.isOfType(type, Int) && type > 0)
+					type = ChartingState.noteTypeList[type];
+
+				note[3] = Std.isOfType(type, String) ? type : null;
+			}
 		}
 		
 		//// new tracks system

@@ -153,7 +153,7 @@ class Note extends NoteObject
 	public var rating:String = 'unknown';
 	public var ratingMod:Float = 0; // 0 = unknown, 0.25 = shit, 0.5 = bad, 0.75 = good, 1 = sick
 	
-	// note type/customizable shit
+	//// note type/customizable shit
     public var noteMod(default, set):String = null; 
 	public var noteType(default, set):String = null;  // the note type
 	public var texture(default, set):String; // texture for the note
@@ -161,16 +161,26 @@ class Note extends NoteObject
 	public var usesDefaultColours:Bool = true; // whether this note uses the default note colours (lets you change colours in options menu)
 	// This automatically gets set if a notetype changes the ColorSwap values
 
-	// note behaviour
+	//// note behaviour
 	public var breaksCombo:Bool = false; // hitting this will cause a combo break
 	public var blockHit:Bool = false; // whether you can hit this note or not
 	public var hitCausesMiss:Bool = false; // hitting this causes a miss
 	public var missHealth:Float = 0; // damage when hitCausesMiss = true and you hit this note
+	public var ratingDisabled:Bool = false; // disables judging this note
+	public var hitsoundDisabled:Bool = false; // hitting this does not cause a hitsound when user turns on hitsounds
+
+	public var gfNote:Bool = false; // gf sings this note (pushes gf into characters array when the note is hit)
 	public var noAnimation:Bool = false; // disables the animation for hitting this note
 	public var noMissAnimation:Bool = false; // disables the animation for missing this note
-	public var hitsoundDisabled:Bool = false; // hitting this does not cause a hitsound when user turns on hitsounds
-	public var gfNote:Bool = false; // gf sings this note (pushes gf into characters array when the note is hit)
-	public var ratingDisabled:Bool = false; // disables judging this note
+
+	/** If not null, then the characters will play these anims instead of the default ones when hitting this note. **/
+	public var characterHitAnimName:Null<String> = null;
+	/** If not null, then the characters will play these anims instead of the default ones when missing this note. **/
+	public var characterMissAnimName:Null<String> = null;
+	// suffix to be added to the base default anim names (for ex. the resulting anim name to be played would be 'singLEFT'+'suffix'+'miss')
+	// gets unused if the default anim names are overriden by the vars above
+	public var characterHitAnimSuffix:String = "";
+	public var characterMissAnimSuffix:String = "";
 
 	/** If you need to tap the note to hit it, or just have the direction be held when it can be judged to hit.
 	 * An example is Stepmania mines **/
@@ -228,7 +238,6 @@ class Note extends NoteObject
 	public var baseScaleY:Float = 1;
 	public var zIndex:Float = 0;
 	public var z:Float = 0;
-	public var realColumn:Int;
 	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
 
 	// Determines how the note can be modified by the modchart system
@@ -240,15 +249,18 @@ class Note extends NoteObject
     #if PE_MOD_COMPATIBILITY
     // Angle is controlled by verts in the modchart system
 
-    @:isVar
-	public var copyAngle(get, set):Bool;
+    @:isVar public var copyAngle(get, set):Bool;
     function get_copyAngle()return copyVerts;
     function set_copyAngle(val:Bool)return copyVerts = val;
     #end
+
+	#if ALLOW_DEPRECATION
+	public var realColumn:Int; 
 	//// backwards compat
 	@:noCompletion public var realNoteData(get, set):Int; 
 	@:noCompletion inline function get_realNoteData() return realColumn;
 	@:noCompletion inline function set_realNoteData(v:Int) return realColumn = v;
+	#end
 	
 	@:noCompletion function set_strumTime(val:Float){
         row = Conductor.secsToRow(val);
@@ -345,13 +357,15 @@ class Note extends NoteObject
 			
 			}else { // default notes. these values won't get set if you make a script for them!
 				switch (value) {
-					/* TODO: these notes, hah
 					case 'Alt Animation':
+						characterHitAnimSuffix = "-alt";
+						characterMissAnimSuffix = "-alt";
 
-					case 'Hey!':
-					*/
-					case 'Hurt Note':
-						
+					case 'Hey!': 
+						// TODO
+
+					//case 'Hurt Note':
+							
 
 					case 'GF Sing':
 						gfNote = true;

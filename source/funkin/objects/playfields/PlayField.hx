@@ -1,17 +1,11 @@
 package funkin.objects.playfields;
 
-import flixel.math.FlxPoint;
-import flixel.math.FlxMath;
-import math.Vector3;
-import openfl.Vector;
-import openfl.geom.Vector3D;
-import funkin.modchart.ModManager;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.util.FlxSort;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 import lime.app.Event;
-import flixel.math.FlxAngle;
+import funkin.modchart.ModManager;
 import funkin.data.JudgmentManager;
 import funkin.data.JudgmentManager.Wife3;
 import funkin.states.PlayState;
@@ -70,23 +64,23 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return super.set_cameras(to);
 	}
 
-    public var playerId:Int = 0;
+    public var playerId:Int = 0; // used to calculate the base position of the strums
 
 	public var spawnTime:Float = 1750; // spawn time for notes
-	public var judgeManager(get, default):JudgmentManager; // for deriving judgements for input reasons
-	function get_judgeManager()
-		return judgeManager == null ? PlayState.instance.judgeManager : judgeManager;
 	public var spawnedNotes:Array<Note> = []; // spawned notes
+	
 	public var spawnedByData:Array<Array<Note>> = [[], [], [], []]; // spawned notes by data. Used for input
-
 	public var tapsByData:Array<Array<Note>> = [[], [], [], []]; // spawned tap notes by data. Used for input but can't change spawnedByData cus of holds n shit lol!
-
 	public var noteQueue:Array<Array<Note>> = [[], [], [], []]; // unspawned notes
+	
 	public var strumNotes:Array<StrumNote> = []; // receptors
 	public var characters:Array<Character> = []; // characters that sing when field is hit
+	// public var singAnimations:Array<String> = ["singLEFT", "singDOWN", "singUP", "singRIGHT"]; // default character animations to play for each column
+	
 	public var noteField:NoteField; // renderer
-	public var modNumber:Int = 0; // used for the mod manager. can be set to a different number to give it a different set of modifiers. can be set to 0 to sync the modifiers w/ bf's, and 1 to sync w/ the opponent's
+	public var judgeManager(get, default):JudgmentManager; // for deriving judgements for input reasons
 	public var modManager:ModManager; // the mod manager. will be set automatically by playstate so dw bout this
+	public var modNumber:Int = 0; // used for the mod manager. can be set to a different number to give it a different set of modifiers. can be set to 0 to sync the modifiers w/ bf's, and 1 to sync w/ the opponent's
 	public var isPlayer:Bool = false; // if this playfield takes input from the player
 	public var inControl:Bool = true; // if this playfield will take input at all
 	public var keyCount(default, set):Int = PlayState.keyCount; // How many lanes are in this field
@@ -94,6 +88,9 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
     public var x:Float = 0;
     public var y:Float = 0;
+
+	function get_judgeManager() 
+		return judgeManager == null ? PlayState.instance.judgeManager : judgeManager;
     
 	function set_keyCount(cnt:Int){
 		if (cnt < 0)

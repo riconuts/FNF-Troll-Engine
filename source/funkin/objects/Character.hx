@@ -113,9 +113,17 @@ class Character extends FlxSprite
 	public var positionArray:Array<Float> = [0, 0];
 	/**Offsets the camera when its focused on the character**/
 	public var cameraPosition:Array<Float> = [0, 0];
-	/****/
+	/** Default sing animations for each column **/
 	public var singAnimations:Array<String> =
 		#if ALLOW_DEPRECATION (PlayState.instance!=null) ? PlayState.instance.singAnimations : #end ["singLEFT", "singDOWN", "singUP", "singRIGHT"];
+
+		// some thoughts/reasoning i'd like to remember later:
+		// ok so i only did this to flip the character anim directions when changing flipX (not yet implemented) though I might want to take another approach on that.
+		// why? because of custom key counts! i can't just switch 0 and 3 on songs with more than 4+ keys as they might have different and more columns that point to those directions
+		// besides i don't really see why would you change them per character. maybe for some sort of event/effect but that'd be a pretty rare use case i think.
+		// so, what do! maybe set them per playfield or just leave them on playstate, maybe the former would be ideal as playNote and missNote have the field as a required argument except..
+		// oh no! noteMissPress so yeah maybe in the end we shouldn't deprecate the playstate sing animations. 
+		// also note that PlayState.singAnimations is from psych so some lua scripts might use them but idgaf i have no mercy for lua slop lol
 	
 	/**Set to true if the character has miss animations. Optimization mainly**/
 	public var hasMissAnimations:Bool = false;
@@ -504,6 +512,9 @@ class Character extends FlxSprite
 		if (callOnScripts("playNote", [note, field]) == Globals.Function_Stop)
 			return;
 
+		if (note.noAnimation || animTimer > 0.0 || voicelining)
+			return;
+
 		if (note.noteType == 'Hey!' && animOffsets.exists('hey')) {
 			playAnim('hey', true);
 			specialAnim = true;
@@ -511,14 +522,11 @@ class Character extends FlxSprite
 			return;
 		}
 
-		if (note.noAnimation || animTimer > 0.0 || voicelining)
-			return;
-
-		var column:Int = note.column;
-
-		var animToPlay:String = singAnimations[column % singAnimations.length];
-		if (note.noteType == 'Alt Animation')
-			animToPlay += '-alt';
+		var animToPlay:String = note.characterHitAnimName;
+		if (animToPlay == null) {
+			animToPlay = singAnimations[note.column % singAnimations.length];
+			animToPlay += note.characterHitAnimSuffix;
+		}
 
 		playAnim(animToPlay, true);
 		holdTimer = 0.0;
@@ -529,9 +537,11 @@ class Character extends FlxSprite
 		if (animTimer > 0 || voicelining)
 			return;
 
-		var animToPlay:String = singAnimations[note.column % singAnimations.length];
-		if (note.noteType == 'Alt Animation') 
-			animToPlay += '-alt';
+		var animToPlay:String = note.characterMissAnimName;
+		if (animToPlay == null) {
+			animToPlay = singAnimations[note.column % singAnimations.length];
+			animToPlay += note.characterMissAnimSuffix;
+		}
 
 		playAnim(animToPlay + 'miss', true);
 
