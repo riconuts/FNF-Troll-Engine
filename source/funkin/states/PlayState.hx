@@ -35,6 +35,7 @@ import flixel.addons.transition.FlxTransitionableState;
 import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;
 import flixel.input.keyboard.FlxKey;
+import flixel.input.gamepad.FlxGamepadInputID;
 import flixel.text.FlxText;
 import flixel.ui.FlxBar;
 
@@ -228,7 +229,7 @@ class PlayState extends MusicBeatState
 	public var opponentCameraOffset:Array<Float> = null;
 	public var girlfriendCameraOffset:Array<Float> = null;
 
-	// Default sing animations. You should be using character.singAnimations instead!!
+	// Default sing animations. You should be using playfield.singAnimations instead!!
 	#if ALLOW_DEPRECATION
 	public var singAnimations:Array<String> = ["singLEFT", "singDOWN", "singUP", "singRIGHT"];
     #end
@@ -308,7 +309,7 @@ class PlayState extends MusicBeatState
 
 	// Less laggy controls
 	private var keysArray:Array<Array<FlxKey>>;
-	private var controlArray:Array<String>;
+	private var buttonsArray:Array<Array<FlxGamepadInputID>>;
 
 	//// for backwards compat reasons. these aren't ACTUALLY used
 	#if PE_MOD_COMPATIBILITY
@@ -374,7 +375,6 @@ class PlayState extends MusicBeatState
 	#end
 
 	//// Psych achievement shit
-	var keysPressed:Array<Bool> = [];
 	var boyfriendIdleTime:Float = 0.0;
 	var boyfriendIdled:Bool = false;
 
@@ -500,11 +500,11 @@ class PlayState extends MusicBeatState
 			ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_right')),
 		];
 
-		controlArray = [
-			'NOTE_LEFT',
-			'NOTE_DOWN',
-			'NOTE_UP',
-			'NOTE_RIGHT'
+		buttonsArray = [
+			[X, DPAD_LEFT],
+			[A, DPAD_DOWN],
+			[Y, DPAD_UP],
+			[B, DPAD_RIGHT],
 		];
 
 		speedChanges.push({
@@ -525,10 +525,6 @@ class PlayState extends MusicBeatState
 		add(strumLineNotes);
 		add(scoreTxt);
 		#end
-
-		//// For the "Just the Two of Us" achievement
-		for (i in 0...keysArray.length)
-			keysPressed.push(false);
 		
 		//// Gameplay settings
 		if (!isStoryMode){
@@ -2265,18 +2261,16 @@ class PlayState extends MusicBeatState
 			];
 
 			// unpress everything
-			for (field in playfields.members)
-			{
-				if (field.inControl && !field.autoPlayed && field.isPlayer)
-				{
-					for (idx in 0...field.keysPressed.length)
-						field.keysPressed[idx] = false;
+			for (field in playfields.members) {
+				if (!field.inControl || field.autoPlayed || !field.isPlayer)
+					continue;
 
-					for (obj in field.strumNotes)
-					{
-						obj.playAnim("static");
-						obj.resetAnim = 0;
-					}
+				for (idx in 0...field.keysPressed.length)
+					field.keysPressed[idx] = false;
+
+				for(obj in field.strumNotes) {
+					obj.playAnim("static");
+					obj.resetAnim = 0;
 				}
 			}
 		}
@@ -2649,18 +2643,18 @@ class PlayState extends MusicBeatState
 		danceCharacters(); // Update characters dancing
 		modManager.update(elapsed, curDecBeat, curDecStep);
 
-		if (generatedMusic)
-		{
-			keyShit();
+		if (generatedMusic && !isDead) {
+			if (ClientPrefs.controllerMode) {
+				keyShit();
+				controllerShit();
+			}
 
-			for(field in playfields)
-			{
-				if (!field.isPlayer)
-					continue;
-
+			for (field in playfields) {
                 for (char in field.characters){
-					if (char.canResetDance(!pressedGameplayKeys.contains(true)))
+					if (char.canResetDance(field.keysPressed.contains(true))) {
+						// trace("reset");
 						char.resetDance();
+					}
                 }
 			}
 		}
@@ -3581,85 +3575,104 @@ class PlayState extends MusicBeatState
 		var column:Int = getColumnFromKey(key);
 		if (column < 0) return;
 
+		strumKeyDown(column);
+	}
+
+	private function onKeyRelease(key:FlxKey):Void
+	{
+		pressed.remove(key);
+		
+		if (callOnScripts("onKeyUp", [key]) == Globals.Function_Stop)
+			return;
+		
+		var column:Int = getColumnFromKey(key);
+		if (column < 0) return;
+
+		strumKeyUp(column);		
+	}
+
+	private function strumKeyDown(column:Int, player:Int = -1) {
 		if (strumsBlocked[column]) return;
 		
 		if (callOnScripts("onKeyPress", [column]) == Globals.Function_Stop)
 			return;
 
-		var hitNotes:Array<Note> = [];
+		if (player == -1) player = playOpponent ? 1 : 0;
+		
+		var hitNotes:Array<Note> = []; // what could scripts possibly do with this information
 		var controlledFields:Array<PlayField> = [];
-	
-		for(field in playfields.members){
-			if(!field.autoPlayed && field.isPlayer && field.inControl){
-				controlledFields.push(field);
-				field.keysPressed[column] = true;
-				if(generatedMusic && !endingSong){
-					var note:Note = null;
-					var ret:Dynamic = callOnHScripts("onFieldInput", [field, column, hitNotes]);
-					if (ret == Globals.Function_Stop)
-						continue;
-					else if((ret is Note))
-						note = ret;
-					else
-						note = field.input(column);
+		
+		for (field in playfields.members) {
+			if (field.playerId != player || !field.isPlayer || !field.inControl || field.autoPlayed) 
+				continue;
 
-					if(note==null){
-						var spr:StrumNote = field.strumNotes[column];
-						if (spr != null && spr.animation.name != 'confirm') {
-							spr.playAnim('pressed');
-							spr.resetAnim = 0;
-						}
-					}else
-						hitNotes.push(note);
-					
+			controlledFields.push(field);
+			field.keysPressed[column] = true;
+
+			if (endingSong) 
+				continue;
+
+			var note:Note = {
+				var ret:Dynamic = callOnHScripts("onFieldInput", [this, column, hitNotes]);
+				if (ret == Globals.Function_Stop) null;
+				else if (ret is Note) ret;
+				else field.input(column);
+			}
+
+			if (note == null) {
+				var spr:StrumNote = field.strumNotes[column];
+				if (spr != null) {
+					spr.playAnim('pressed');
+					spr.resetAnim = 0;
 				}
+			}else {
+				hitNotes.push(note);
+			}
+		}
+		
+		if (hitNotes.length == 0) {
+			for (field in controlledFields) {				
+				callOnScripts('onGhostTap', [column, field]);
+
+				if (!ClientPrefs.ghostTapping)
+					noteMissPress(column, field);
 			}
 		}
 
-		if (hitNotes.length==0 && controlledFields.length > 0){
-			callOnScripts('onGhostTap', [column]);
-			
-			if (!ClientPrefs.ghostTapping)
-				noteMissPress(column);
-		}
+		trace('strum down: $column');
 	}
-	private function onKeyRelease(key:FlxKey):Void
-	{
-		if (pressed.contains(key)) pressed.remove(key);
-        
-        if (callOnScripts("onKeyUp", [key]) == Globals.Function_Stop)
-            return;
-		
+
+	private function strumKeyUp(column:Int, player:Int = -1) {
 		// doesnt matter if THIS is done while paused
 		// only worry would be if we implemented Lifts
 		// but afaik we arent doing that
 		// (though could be interesting to add)
 		if (!startedCountdown) return;
 		
-		var column:Int = getColumnFromKey(key);
-		if (column < 0) return;
+		trace('strum up: $column');
+
+		if (player == -1) player = playOpponent ? 1 : 0;
 
 		for (field in playfields.members) {
-			if (field.inControl && !field.autoPlayed && field.isPlayer) {
-				field.keysPressed[column] = false;
-				
-				if(!field.isHolding[column]){
-					var spr:StrumNote = field.strumNotes[column];
-					if (spr != null){
-						spr.playAnim('static');
-						spr.resetAnim = 0;
-					}
+			if (field.playerId != player || !field.isPlayer || !field.inControl || field.autoPlayed) 
+				continue;
+
+			field.keysPressed[column] = false;
+			
+			if (!field.isHolding[column]) {
+				var spr:StrumNote = field.strumNotes[column];
+				if (spr != null){
+					spr.playAnim('static');
+					spr.resetAnim = 0;
 				}
 			}
 		}
+
 		callOnScripts('onKeyRelease', [column]);
-		
-		//trace('released: ' + controlArray);
 	}
 
-	private function getColumnFromKey(key:FlxKey):Int
-	{
-		if (key != NONE) {
+	private function getColumnFromKey(key:FlxKey):Int {
+		if (key != -1) {
 			for (i in 0...keysArray.length) {
 				for (j in 0...keysArray[i].length) {
 					if(key == keysArray[i][j])
@@ -3670,38 +3683,21 @@ class PlayState extends MusicBeatState
 		return -1;
 	}
 
-	// Hold notes
-	public static var pressedGameplayKeys:Array<Bool> = [];
-
-	private function keyShit():Void
-	{
-		// HOLDING
-		var parsedHoldArray:Array<Bool> = parseKeys();
-		pressedGameplayKeys = parsedHoldArray;
-
-		//// TO DO: Find a better way to handle controller inputs, this should work for now
-		
-		if (ClientPrefs.controllerMode) {
-			var parsedArray:Array<Bool> = parseKeys('_P');
-			for (i in 0...parsedArray.length) {
-				if (parsedArray[i] && strumsBlocked[i] != true)
-					onKeyPress(keysArray[i][0]);
-			}
-		}
-
-		var parsedArray:Array<Bool> = parseKeys('_R');
-		for (i in 0...parsedArray.length) {
-			if ((ClientPrefs.controllerMode && parsedArray[i]) || strumsBlocked[i] == true)
-				onKeyRelease(keysArray[i][0]);
+	private function keyShit():Void {
+		for (column => actionBinds in keysArray) {
+			if (FlxG.keys.anyJustPressed(actionBinds)) strumKeyDown(column);
+			if (FlxG.keys.anyJustReleased(actionBinds)) strumKeyUp(column);
 		}
 	}
 
-	private function parseKeys(?suffix:String = ''):Array<Bool>
-	{
-		var ret:Array<Bool> = [];
-		for (i in 0...controlArray.length)
-			ret[i] = Reflect.getProperty(controls, controlArray[i] + suffix);
-		return ret;
+	private function controllerShit():Void {
+		var gamepad = FlxG.gamepads.firstActive;
+		if (gamepad == null) return;
+
+		for (column => actionBinds in buttonsArray) {
+			if (gamepad.anyJustPressed(actionBinds)) strumKeyDown(column);
+			if (gamepad.anyJustReleased(actionBinds)) strumKeyUp(column);
+		}
 	}
 
 	function breakCombo() {
@@ -3791,7 +3787,7 @@ class PlayState extends MusicBeatState
 			callScript(daNote.genScript, "noteMiss", [daNote, field]); 
 	}
 
-	function noteMissPress(direction:Int = 1):Void //You pressed a key when there was no notes to press for this key
+	function noteMissPress(direction:Int = 1, field:PlayField):Void //You pressed a key when there was no notes to press for this key
 	{
 		health -= 0.05 * healthLoss;
 		
@@ -3813,15 +3809,8 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.missVolume > 0)
 			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), ClientPrefs.missVolume  * FlxG.random.float(0.9, 1));
 
-		for (field in playfields.members)
-		{
-			if (!field.isPlayer)
-				continue;
-
-			for (char in field.characters) {
-				char.missPress(direction);
-			}
-		}
+		for (char in field.characters) 
+			char.missPress(direction, field);
 
 		callOnScripts('noteMissPress', [direction]);
 	}
@@ -4354,8 +4343,7 @@ class PlayState extends MusicBeatState
 	public function pause(){
 		paused = true;
 
-		if (inst != null)
-		{
+		if (inst != null) {
 			for (track in tracks)
 				track.pause();
 		}
@@ -4443,8 +4431,6 @@ class PlayState extends MusicBeatState
 		});
 		*/
 		FlxG.timeScale = 1;
-
-		pressedGameplayKeys = null;
 
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDownEvent);
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyUpEvent);

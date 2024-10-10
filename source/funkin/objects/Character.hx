@@ -26,7 +26,7 @@ class Character extends FlxSprite
 	/**Whether to force the dance animation to play**/
 	public var shouldForceDance:Bool = false;
 
-	/**Whether the character should idle when the player is holding a gameplay key**/
+	/**Whether the character can go back to the idle while the player is holding a gameplay key**/
 	public var idleWhenHold:Bool = true;
 
 	/**In case a character is missing, it will use BF on its place**/
@@ -113,17 +113,6 @@ class Character extends FlxSprite
 	public var positionArray:Array<Float> = [0, 0];
 	/**Offsets the camera when its focused on the character**/
 	public var cameraPosition:Array<Float> = [0, 0];
-	/** Default sing animations for each column **/
-	public var singAnimations:Array<String> =
-		#if ALLOW_DEPRECATION (PlayState.instance!=null) ? PlayState.instance.singAnimations : #end ["singLEFT", "singDOWN", "singUP", "singRIGHT"];
-
-		// some thoughts/reasoning i'd like to remember later:
-		// ok so i only did this to flip the character anim directions when changing flipX (not yet implemented) though I might want to take another approach on that.
-		// why? because of custom key counts! i can't just switch 0 and 3 on songs with more than 4+ keys as they might have different and more columns that point to those directions
-		// besides i don't really see why would you change them per character. maybe for some sort of event/effect but that'd be a pretty rare use case i think.
-		// so, what do! maybe set them per playfield or just leave them on playstate, maybe the former would be ideal as playNote and missNote have the field as a required argument except..
-		// oh no! noteMissPress so yeah maybe in the end we shouldn't deprecate the playstate sing animations. 
-		// also note that PlayState.singAnimations is from psych so some lua scripts might use them but idgaf i have no mercy for lua slop lol
 	
 	/**Set to true if the character has miss animations. Optimization mainly**/
 	public var hasMissAnimations:Bool = false;
@@ -305,63 +294,43 @@ class Character extends FlxSprite
 		
 		if(!debugMode && animation.curAnim != null)
 		{
-			if(animTimer > 0){
+			if (animTimer > 0) {
 				animTimer -= elapsed;
-				if(animTimer<=0){
+				if(animTimer<=0) {
 					animTimer=0;
 					dance();
 				}
 			}
-			if(heyTimer > 0)
-			{
+
+			if (heyTimer > 0) {
 				heyTimer -= elapsed;
-				if(heyTimer <= 0)
-				{
-					if(specialAnim && (animation.curAnim.name == 'hey' || animation.curAnim.name == 'cheer'))
-					{
-						specialAnim = false;
-						dance();
-					}
+
+				if (heyTimer <= 0) {
 					heyTimer = 0;
+					if (specialAnim && (animation.curAnim.name == 'hey' || animation.curAnim.name == 'cheer'))
+						animation.curAnim.finish();
 				}
-			} else if(specialAnim && animation.curAnim.finished)
-			{
-				// trace("special done");
+			} 
+
+			if (specialAnim && animation.curAnim.finished) {
 				specialAnim = false;
 				dance();
 
 				callOnScripts("onSpecialAnimFinished", [animation.curAnim.name]);
 			}
 
-			if (!controlled)
-			{
-				if (animation.curAnim.name.startsWith('sing'))
-				{
-					holdTimer += elapsed;
-				}
+			if (animation.name.startsWith('sing'))
+				holdTimer += elapsed;
+			else
+				holdTimer = 0;
 
-				if (holdTimer >= Conductor.stepCrochet * 0.0011 * singDuration
-					&& (idleWhenHold || !funkin.states.PlayState.pressedGameplayKeys.contains(true)))
-				{
+			if (animation.finished) {
+				if (animation.name.endsWith('miss')) {
 					dance();
-					holdTimer = 0;
+				
+				}else if (animation.exists(animation.name + '-loop')) {
+					playAnim(animation.name + '-loop');
 				}
-			}else{
-				if (animation.curAnim.name.startsWith('sing'))
-					holdTimer += elapsed;
-				else
-					holdTimer = 0;
-
-				if (animation.curAnim.name.endsWith('miss') && animation.curAnim.finished && !debugMode)
-				{
-					dance(); // playAnim('idle', true, false, 10);
-				}
-
-			}
-
-			if(animation.curAnim.finished && animation.getByName(animation.curAnim.name + '-loop') != null)
-			{
-				playAnim(animation.curAnim.name + '-loop');
 			}
 		}
 
@@ -496,11 +465,12 @@ class Character extends FlxSprite
 	}
 
 	public inline function canResetDance(holdingKeys:Bool = false) {
-		return animation.curAnim != null
-			&& holdTimer > Conductor.stepCrochet * 0.001 * singDuration
-			&& animation.curAnim.name.startsWith('sing')
-			&& !animation.curAnim.name.endsWith('miss')
-			&& (idleWhenHold || holdingKeys);
+		return animation.name==null || (
+			holdTimer > Conductor.stepCrochet * 0.001 * singDuration
+			&& (!holdingKeys || idleWhenHold)
+			&& animation.name.startsWith('sing') 
+			&& !animation.name.endsWith('miss') // will go back to the idle once it finishes
+		);
     }
 	public function resetDance(){
         // called when resetting back to idle from a pose
@@ -524,7 +494,7 @@ class Character extends FlxSprite
 
 		var animToPlay:String = note.characterHitAnimName;
 		if (animToPlay == null) {
-			animToPlay = singAnimations[note.column % singAnimations.length];
+			animToPlay = field.singAnimations[note.column % field.singAnimations.length];
 			animToPlay += note.characterHitAnimSuffix;
 		}
 
@@ -539,7 +509,7 @@ class Character extends FlxSprite
 
 		var animToPlay:String = note.characterMissAnimName;
 		if (animToPlay == null) {
-			animToPlay = singAnimations[note.column % singAnimations.length];
+			animToPlay = field.singAnimations[note.column % field.singAnimations.length];
 			animToPlay += note.characterMissAnimSuffix;
 		}
 
@@ -549,11 +519,12 @@ class Character extends FlxSprite
 			colorOverlay = missOverlayColor;	
 	}
 
-	public function missPress(direction:Int) {
+	public function missPress(direction:Int, field:PlayField) {
 		if (animTimer > 0 || voicelining)
 			return;
 
-		playAnim(singAnimations[direction % singAnimations.length] + 'miss', true);
+		var animToPlay:String = field.singAnimations[direction % field.singAnimations.length];
+		playAnim(animToPlay + 'miss', true);
 		
 		if(!hasMissAnimations)
 			colorOverlay = missOverlayColor;	

@@ -75,7 +75,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	
 	public var strumNotes:Array<StrumNote> = []; // receptors
 	public var characters:Array<Character> = []; // characters that sing when field is hit
-	// public var singAnimations:Array<String> = ["singLEFT", "singDOWN", "singUP", "singRIGHT"]; // default character animations to play for each column
+	public var singAnimations:Array<String> = ["singLEFT", "singDOWN", "singUP", "singRIGHT"]; // default character animations to play for each column
 	
 	public var noteField:NoteField; // renderer
 	public var judgeManager(get, default):JudgmentManager; // for deriving judgements for input reasons
@@ -140,6 +140,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		}
 		return autoPlayed = aP;
 	}
+	
 	public var noteHitCallback:NoteCallback; // function that gets called when the note is hit. goodNoteHit and opponentNoteHit in playstate for eg
 	public var holdPressCallback:NoteCallback; // function that gets called when a hold is stepped on. Only really used for calling script events. Return 'false' to not do hold logic
     public var holdReleaseCallback:NoteCallback; // function that gets called when a hold is released. Only really used for calling script events.
@@ -308,9 +309,10 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return spawnedNotes.contains(note) || noteQueue[note.column]!=null && noteQueue[note.column].contains(note);
 	
 	// sends an input to the playfield
-	public function input(data:Int){
-		if(data > keyCount || data < 0)return null;
-		
+	public function input(data:Int):Null<Note> {
+		if (data < 0 || data > keyCount) 
+			return null;
+
 		var noteList = getTapNotes(data, (note:Note) -> !note.isSustainNote && note.requiresTap && !note.tooLate);
 		#if PE_MOD_COMPATIBILITY
 		noteList.sort((a, b) -> Std.int((b.strumTime + (b.lowPriority ? 10000 : 0)) - (a.strumTime + (a.lowPriority ? 10000 : 0)))); // so lowPriority actually works (even though i hate it lol!)
