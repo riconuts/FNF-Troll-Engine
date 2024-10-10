@@ -125,7 +125,7 @@ class Character extends FlxSprite
 	//Used on Character Editor
 	public var animationsArray:Array<AnimArray> = [];
 	public var imageFile:String = '';
-	public var jsonScale:Float = 1;
+	public var baseScale:Float = 1;
 	public var noAntialiasing:Bool = false;
 	public var originalFlipX:Bool = false;
 	public var healthColorArray:Array<Int> = [255, 0, 0];
@@ -159,8 +159,8 @@ class Character extends FlxSprite
 		}
 
 		////
-		jsonScale = Math.isNaN(json.scale) ? 1 : json.scale;
-		scale.set(jsonScale, jsonScale);
+		baseScale = Math.isNaN(json.scale) ? 1.0 : json.scale;
+		scale.set(baseScale, baseScale);
 		updateHitbox();
 
 		////
