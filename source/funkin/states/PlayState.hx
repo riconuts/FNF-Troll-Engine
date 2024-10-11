@@ -2427,27 +2427,10 @@ class PlayState extends MusicBeatState
 				callScript(dunceNote.noteScript, "postSpawnNote", [dunceNote]);
 		});
 
-		field.holdUpdated.add((daNote:Note, field:PlayField, dtMs:Float) -> {
-			if(!field.isPlayer)return;
-			if (stats.accuracySystem == 'PBot'){
-				stats.totalNotesHit += PBot.holdScorePerSecond * 0.01 * (dtMs * 0.001);
-				stats.totalPlayed += PBot.holdScorePerSecond * 0.01 * (dtMs * 0.001);
-				RecalculateRating();
-			}
-		});
 
-		field.holdDropped.add((daNote:Note, field:PlayField) -> {
-			if (!field.isPlayer)return;
-			if (stats.accuracySystem == 'PBot') {
-				var dtMs:Float = daNote.sustainLength - daNote.holdingTime;
-				stats.totalPlayed += PBot.holdScorePerSecond * 0.01 * (dtMs * 0.001);
-				RecalculateRating();
-			}
-		});
+		
 
-		// vv Should give the same score as above ^^ but updates only at the end of a hold, rather than DURING a hold
-
-/* 		field.holdDropped.add((daNote:Note, field:PlayField) -> {
+ 		field.holdDropped.add((daNote:Note, field:PlayField) -> {
 			if (!field.isPlayer)return;
 			if (stats.accuracySystem == 'PBot') {
 				var dtMs:Float = daNote.sustainLength - daNote.holdingTime;
@@ -2462,7 +2445,7 @@ class PlayState extends MusicBeatState
 				stats.totalNotesHit += PBot.holdScorePerSecond * 0.01 * (daNote.sustainLength * 0.001);
 				RecalculateRating();
 			}
-		}); */
+		}); 
 
 	}
 
