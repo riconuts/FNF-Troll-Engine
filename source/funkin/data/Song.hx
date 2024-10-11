@@ -299,6 +299,9 @@ class Song
 			songJson.events = [];
 		}
 
+		if(songJson.notes == null)
+			return songJson;
+		
 		for (secNum in 0...songJson.notes.length) {
 			var sec:SwagSection = songJson.notes[secNum];
 			var notes:Array<Dynamic> = sec.sectionNotes;

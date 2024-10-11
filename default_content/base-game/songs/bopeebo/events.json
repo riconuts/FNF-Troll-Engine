@@ -1,346 +1,176 @@
 {
 	"song": {
-		"player1": "bf",
-		"song": "Bopeebo",
-		"player2": "dad",
-		"notes": [
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [],
-				"mustHitSection": false
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [
+		"events": [
+			[
+				4200,
+				[
 					[
-						4290,
-						-1,
 						"Hey!",
 						"0",
 						""
 					]
-				],
-				"mustHitSection": true
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [],
-				"mustHitSection": false
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [
+				]
+			],
+			[
+				9000,
+				[
 					[
-						9090,
-						-1,
 						"Hey!",
 						"0",
 						""
 					]
-				],
-				"mustHitSection": true
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [],
-				"mustHitSection": false
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [
+				]
+			],
+			[
+				13800,
+				[
 					[
-						13890,
-						-1,
 						"Hey!",
 						"0",
 						""
 					]
-				],
-				"mustHitSection": true
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [],
-				"mustHitSection": false
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [
+				]
+			],
+			[
+				18600,
+				[
 					[
-						18690,
-						-1,
 						"Hey!",
 						"0",
 						""
 					]
-				],
-				"mustHitSection": true
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [],
-				"mustHitSection": false
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [
+				]
+			],
+			[
+				23400,
+				[
 					[
-						23490,
-						-1,
 						"Hey!",
 						"0",
 						""
 					]
-				],
-				"mustHitSection": true
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [],
-				"mustHitSection": false
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [
+				]
+			],
+			[
+				28200,
+				[
 					[
-						28290,
-						-1,
 						"Hey!",
 						"0",
 						""
 					]
-				],
-				"mustHitSection": true
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [],
-				"mustHitSection": false
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [
+				]
+			],
+			[
+				28500,
+				[
 					[
-						33090,
-						-1,
 						"Hey!",
 						"0",
 						""
 					]
-				],
-				"mustHitSection": true
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [],
-				"mustHitSection": false
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [
+				]
+			],
+			[
+				33000,
+				[
 					[
-						37890,
-						-1,
 						"Hey!",
 						"0",
 						""
 					]
-				],
-				"mustHitSection": true
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [],
-				"mustHitSection": false
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [
+				]
+			],
+			[
+				37800,
+				[
 					[
-						42690,
-						-1,
 						"Hey!",
 						"0",
 						""
 					]
-				],
-				"mustHitSection": true
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [],
-				"mustHitSection": false
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [
+				]
+			],
+			[
+				42600,
+				[
 					[
-						47490,
-						-1,
 						"Hey!",
 						"0",
 						""
 					]
-				],
-				"mustHitSection": true
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [],
-				"mustHitSection": false
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [
+				]
+			],
+			[
+				52200,
+				[
 					[
-						52290,
-						-1,
 						"Hey!",
 						"0",
 						""
 					]
-				],
-				"mustHitSection": true
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [],
-				"mustHitSection": false
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [
+				]
+			],
+			[
+				57000,
+				[
 					[
-						57090,
-						-1,
 						"Hey!",
 						"0",
 						""
 					]
-				],
-				"mustHitSection": true
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [],
-				"mustHitSection": false
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [
+				]
+			],
+			[
+				61800,
+				[
 					[
-						61890,
-						-1,
 						"Hey!",
 						"0",
 						""
 					]
-				],
-				"mustHitSection": true
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [],
-				"mustHitSection": false
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [
+				]
+			],
+			[
+				66600,
+				[
 					[
-						66690,
-						-1,
 						"Hey!",
 						"0",
 						""
 					]
-				],
-				"mustHitSection": true
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [],
-				"mustHitSection": false
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [
+				]
+			],
+			[
+				66900,
+				[
 					[
-						71490,
-						-1,
 						"Hey!",
 						"0",
 						""
 					]
-				],
-				"mustHitSection": true
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [],
-				"mustHitSection": false
-			},
-			{
-				"lengthInSteps": 16,
-				"sectionNotes": [
+				]
+			],
+			[
+				71400,
+				[
 					[
-						76290,
-						-1,
 						"Hey!",
 						"0",
 						""
 					]
-				],
-				"mustHitSection": true
-			},
-			{
-				"sectionNotes": [],
-				"typeOfSection": 0,
-				"lengthInSteps": 16,
-				"altAnim": false,
-				"mustHitSection": true,
-				"changeBPM": false,
-				"bpm": 100
-			},
-			{
-				"sectionNotes": [],
-				"typeOfSection": 0,
-				"lengthInSteps": 16,
-				"altAnim": false,
-				"mustHitSection": true,
-				"changeBPM": false,
-				"bpm": 100
-			},
-			{
-				"sectionNotes": [],
-				"typeOfSection": 0,
-				"lengthInSteps": 16,
-				"altAnim": false,
-				"mustHitSection": true,
-				"changeBPM": false,
-				"bpm": 100
-			},
-			{
-				"sectionNotes": [],
-				"typeOfSection": 0,
-				"lengthInSteps": 16,
-				"altAnim": false,
-				"mustHitSection": true,
-				"changeBPM": false,
-				"bpm": 100
-			},
-			{
-				"lengthInSteps": 16,
-				"altAnim": false,
-				"typeOfSection": 0,
-				"sectionNotes": [],
-				"bpm": 100,
-				"changeBPM": false,
-				"mustHitSection": true
-			}
-		],
-		"needsVoices": true,
-		"validScore": true,
-		"bpm": 100,
-		"speed": 1.3
+				]
+			],
+			[
+				76200,
+				[
+					[
+						"Hey!",
+						"0",
+						""
+					]
+				]
+			]
+		]
 	}
 }
