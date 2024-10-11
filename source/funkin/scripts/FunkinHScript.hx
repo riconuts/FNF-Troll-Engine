@@ -328,6 +328,8 @@ class FunkinHScript extends FunkinScript
 
 		set("HScriptedState", funkin.states.scripting.HScriptedState);
 		set("HScriptedSubstate", funkin.states.scripting.HScriptedSubstate);
+
+		set("Highscore", funkin.data.Highscore);
 	} 
 
 	function importClass(className:String)

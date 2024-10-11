@@ -1,5 +1,6 @@
 package;
 
+import funkin.data.Level;
 import flixel.FlxG;
 import flixel.FlxState;
 import openfl.Lib;

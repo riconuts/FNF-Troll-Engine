@@ -1,5 +1,7 @@
 package funkin.data;
 
+import sys.io.File;
+import haxe.Json;
 import funkin.scripts.FunkinHScript;
 using funkin.CoolerStringTools;
 using StringTools;
@@ -40,7 +42,7 @@ class Level
 			trace("Level ID " + id + " isn't valid!");
 			return newLevel;
 		}
-		newLevel.data = cast json;
+		newLevel.data = cast Json.parse(File.getContent(json));
 		return newLevel;
 	}
 
@@ -65,49 +67,55 @@ class Level
 		return data.name;
 	}
 
-	public function getLevelAsset():String {
+	public function getLevelAsset():String 
+	{
 		if (script != null && script.exists("getLevelAsset"))
 			return script.executeFunc("getLevelAsset", []);
 
 		return data.levelAsset;
 	}
 
-	public function getPlayer():String {
+	public function getPlayer():String 
+	{
 		if (script != null && script.exists("getPlayer"))
 			return script.executeFunc("getPlayer", []);
 
 		return data.player;
 	}
 
-	public function getOpponent():String {
+	public function getOpponent():String 
+	{
 		if (script != null && script.exists("getOpponent"))
 			return script.executeFunc("getOpponent", []);
 
 		return data.opponent;
 	}
 
-	public function getGirlfriend():String {
+	public function getGirlfriend():String 
+	{
 		if (script != null && script.exists("getGirlfriend"))
 			return script.executeFunc("getGirlfriend", []);
 
 		return data.girlfriend;
 	}
 
-	public function getSongs():Array<String> {
+	public function getSongs():Array<String> 
+	{
 		if (script != null && script.exists("getSongs"))
 			return script.executeFunc("getSongs", []);
 
 		return data.songs;
 	}
 
-	public function getDisplayedSongs():Array<String> {
+	public function getDisplayedSongs():Array<String> 
+	{
 		if (script != null && script.exists("getDisplayedSongs"))
 			return script.executeFunc("getDisplayedSongs", []);
 
 		if (data.displayedSongs == null || data.displayedSongs.length == 0){
 			var displayedArray:Array<String> = [];
 
-			for(song in data.songs)
+			for(song in getSongs())
 				displayedArray.push(song.replace("-"," ").capitalize());
 			
 			return displayedArray;
