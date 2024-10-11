@@ -496,6 +496,8 @@ class PlayField extends FlxTypedGroup<FlxBasic>
                         var oldSteps:Int = Math.floor(daNote.holdingTime / Conductor.stepCrotchet);
 						var lastTime:Float = daNote.holdingTime;
 						daNote.holdingTime = Conductor.songPosition - daNote.strumTime;
+						if (daNote.holdingTime > daNote.sustainLength)
+							daNote.holdingTime = daNote.sustainLength;
                         var currentSteps:Int = Math.floor(daNote.holdingTime / Conductor.stepCrotchet);
                         if(oldSteps < currentSteps)
                             if(holdStepCallback != null)

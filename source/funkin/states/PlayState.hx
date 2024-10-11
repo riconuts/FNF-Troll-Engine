@@ -2430,30 +2430,12 @@ class PlayState extends MusicBeatState
 				callScript(dunceNote.noteScript, "postSpawnNote", [dunceNote]);
 		});
 
-		field.holdUpdated.add((daNote:Note, field:PlayField, dtMs:Float) -> {
-			if(!field.isPlayer)return;
-			if (stats.accuracySystem == 'PBot'){
-				stats.totalNotesHit += PBot.holdScorePerSecond * 0.01 * (dtMs * 0.001);
-				stats.totalPlayed += PBot.holdScorePerSecond * 0.01 * (dtMs * 0.001);
-				RecalculateRating();
-			}
-		});
 
 		field.holdDropped.add((daNote:Note, field:PlayField) -> {
 			if (!field.isPlayer)return;
 			if (stats.accuracySystem == 'PBot') {
 				var dtMs:Float = daNote.sustainLength - daNote.holdingTime;
-				stats.totalPlayed += PBot.holdScorePerSecond * 0.01 * (dtMs * 0.001);
-				RecalculateRating();
-			}
-		});
-
-		// vv Should give the same score as above ^^ but updates only at the end of a hold, rather than DURING a hold
-
-/* 		field.holdDropped.add((daNote:Note, field:PlayField) -> {
-			if (!field.isPlayer)return;
-			if (stats.accuracySystem == 'PBot') {
-				var dtMs:Float = daNote.sustainLength - daNote.holdingTime;
+				stats.totalPlayed += (PBot.holdScorePerSecond * (daNote.sustainLength * 0.001)) * 0.01;
 				stats.totalNotesHit += PBot.holdScorePerSecond * 0.01 * (dtMs * 0.001);
 				RecalculateRating();
 			}
@@ -2462,10 +2444,11 @@ class PlayState extends MusicBeatState
 		field.holdFinished.add((daNote:Note, field:PlayField) -> {
 			if (!field.isPlayer)return;
 			if (stats.accuracySystem == 'PBot') {
+				stats.totalPlayed += (PBot.holdScorePerSecond * (daNote.sustainLength * 0.001)) * 0.01;
 				stats.totalNotesHit += PBot.holdScorePerSecond * 0.01 * (daNote.sustainLength * 0.001);
 				RecalculateRating();
 			}
-		}); */
+		});
 
 	}
 
@@ -4037,8 +4020,6 @@ class PlayState extends MusicBeatState
 			return;
 		} 
 
-/* 		if(stats.accuracySystem == 'PBot')
-			stats.totalPlayed += (PBot.holdScorePerSecond * (note.sustainLength * 0.001)) * 0.01; */
 		
 		//
 		if (cpuControlled) saveScore = false; // if botplay hits a note, then you lose scoring
