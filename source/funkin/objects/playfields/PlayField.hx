@@ -514,7 +514,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 						}else{
 							for (tail in daNote.unhitTail)
 							{
-								if (tail.strumTime <= Conductor.songPosition && !tail.wasGoodHit && !tail.tooLate){
+								if ((tail.strumTime - 25) <= Conductor.songPosition && !tail.wasGoodHit && !tail.tooLate){
 									noteHitCallback(tail, this);
 								}
 							}
@@ -546,7 +546,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 				} 
 
 				if((
-					(daNote.holdingTime>=daNote.sustainLength && daNote.unhitTail.length == 0) && daNote.sustainLength>0 ||
+					(daNote.holdingTime>=daNote.sustainLength) && daNote.sustainLength>0 ||
 					daNote.isSustainNote && daNote.strumTime - Conductor.songPosition < -350 ||
 					!daNote.isSustainNote
 					&& (daNote.sustainLength == 0 || daNote.tooLate)
