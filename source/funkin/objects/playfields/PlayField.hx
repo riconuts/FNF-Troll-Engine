@@ -142,16 +142,19 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	}
 	
 	public var noteHitCallback:NoteCallback; // function that gets called when the note is hit. goodNoteHit and opponentNoteHit in playstate for eg
-	public var holdPressCallback:NoteCallback; // function that gets called when a hold is stepped on. Only really used for calling script events. Return 'false' to not do hold logic
-    public var holdReleaseCallback:NoteCallback; // function that gets called when a hold is released. Only really used for calling script events.
+	public var holdPressCallback:NoteCallback; // function that gets called when a hold is stepped on. Only really used for calling script events.
+	public var holdReleaseCallback:NoteCallback; // function that gets called when a hold is released. Only really used for calling script events.
 
     public var grpNoteSplashes:FlxTypedGroup<NoteSplash>; // notesplashes
 	public var strumAttachments:FlxTypedGroup<NoteObject>; // things that get "attached" to the receptors. custom splashes, etc.
 
-	public var noteMissed:Event<NoteCallback> = new Event<NoteCallback>(); // event that gets called every time you miss a note. multiple functions can be bound here
-	public var noteRemoved:Event<NoteCallback> = new Event<NoteCallback>(); // event that gets called every time a note is removed. multiple functions can be bound here
-	public var noteSpawned:Event<NoteCallback> = new Event<NoteCallback>(); // event that gets called every time a note is spawned. multiple functions can be bound here
-
+	public var noteMissed:Event<NoteCallback> = new Event<NoteCallback>(); // event that gets called every time you miss a note.
+	public var noteRemoved:Event<NoteCallback> = new Event<NoteCallback>(); // event that gets called every time a note is removed.
+	public var noteSpawned:Event<NoteCallback> = new Event<NoteCallback>(); // event that gets called every time a note is spawned.
+	public var holdDropped:Event<NoteCallback> = new Event<NoteCallback>(); // event that gets called every time a hold is dropped
+	public var holdFinished:Event<NoteCallback> = new Event<NoteCallback>(); // event that gets called every time a hold is finished
+	public var holdUpdated:Event<(Note, PlayField, Float) -> Void> = new Event<(Note, PlayField, Float) -> Void>(); // event that gets called every time a hold is updated
+	
 	public var keysPressed:Array<Bool> = [false,false,false,false]; // what keys are pressed rn
     public var isHolding:Array<Bool> = [false,false,false,false];
 
@@ -483,9 +486,11 @@ class PlayField extends FlxTypedGroup<FlxBasic>
                         }
 
 						var receptor = strumNotes[daNote.column];
+						var lastTime:Float = daNote.holdingTime;
 						daNote.holdingTime = Conductor.songPosition - daNote.strumTime;
 
-                        
+						holdUpdated.dispatch(daNote, this, daNote.holdingTime - lastTime);
+
 						if(isHeld && !daNote.isRoll){
 							if(daNote.unhitTail.length > 0)
 								if (receptor.animation.finished || receptor.animation.curAnim.name != "confirm") 
@@ -499,6 +504,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
                             holdPressCallback(daNote, this); // would set tripProgress back to 1 but idk maybe the roll script wants to do its own shit
 
 						if(daNote.tripProgress <= 0){
+							holdDropped.dispatch(daNote, this);
 							daNote.tripProgress = 0;
 							daNote.tooLate=true;
 							daNote.wasGoodHit=false;
@@ -522,6 +528,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 							if (daNote.holdingTime >= daNote.sustainLength)
 							{
                                 //trace("finished hold");
+								holdFinished.dispatch(daNote, this);
 								daNote.holdingTime = daNote.sustainLength;
 								isHolding[daNote.column] = false;
 								if (!isHeld)

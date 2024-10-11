@@ -105,6 +105,9 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 
 		var option:GameplayOption = new GameplayOption('Disable Modcharts', 'disableModcharts', 'bool', false);
 		optionsArray.push(option);
+
+		var option:GameplayOption = new GameplayOption('Hold Drop Doesn\'t Miss', 'noDropPenalty', 'bool', false);
+		optionsArray.push(option);
 	}
 
 	public function getOptionByName(name:String)

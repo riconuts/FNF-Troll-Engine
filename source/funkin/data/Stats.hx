@@ -1,7 +1,18 @@
 package funkin.data;
 
+import funkin.data.JudgmentManager.PBot;
+import funkin.data.JudgmentManager.Wife3;
+import funkin.data.JudgmentManager.JudgmentData;
 import funkin.data.Highscore.ScoreRecord;
 import lime.app.Event;
+
+enum abstract AccuracySystem(String) from String to String
+{
+	var SIMPLE = "Simple";
+	var JUDGEMENT = "Judgement";
+	var WIFE3 = "Wife3";
+	var PBOT = "PBot";
+}
 
 class Stats {
 	public var changedEvent:Event<(String, Dynamic) -> Void> = new Event<(String, Dynamic)->Void>();
@@ -9,7 +20,7 @@ class Stats {
 		changedEvent.dispatch(n, v);
 	
 	public var gradeSet:Array<Array<Dynamic>> = [];
-
+	public var accuracySystem:AccuracySystem = SIMPLE;
 	public var score(default, set):Int = 0;
 	public var nps(default, set):Int = 0;
 	public var npsPeak(default, set):Int = 0;
@@ -183,6 +194,7 @@ class Stats {
 
 		if (comboBreaks <= 0)
 		{
+			var bads = judgements.get("bad");
 			var goods = judgements.get("good");
 			var sicks = judgements.get("sick");
 			var epics = judgements.get("epic");
@@ -193,9 +205,10 @@ class Stats {
 				return clear;
 			}
 
-			clear = fc;
-
-			if (goods > 0)
+			
+			if(bads > 0) // forgot that bads wont cause a combo break if epics arent enabled lol
+				clear = fc;
+			else if (goods > 0)
 			{
 				if (goods < 10)
 					clear = sdg; // Single Digit Goods
@@ -252,5 +265,37 @@ class Stats {
 		grade = getGrade();
 		clearType = getClearType();
 		// trace(score, grade, clearType);
+	}
+
+	public function calculateAccuracy(data:JudgmentData, diff:Float){
+		switch(accuracySystem){
+			case SIMPLE: // -1 acc if breaks combo, +1 otherwise
+				if(data.comboBehaviour == BREAK)
+					totalNotesHit--;
+				else
+					totalNotesHit++;
+
+				totalPlayed++;
+			case WIFE3: // Milisecond-based accuracy, using Etterna's Wife3 algorithm
+				if (data.wifePoints == null)
+					totalNotesHit += Wife3.getAcc(diff);
+				else
+					totalNotesHit += data.wifePoints;
+
+				totalPlayed += 2;
+			case PBOT: // Milisecond-based accuracy, using V-Slice's PBOT1 algorithm
+				trace(diff, PBot.getAcc(Math.abs(diff)), data.pbotPoints);
+
+				if (data.pbotPoints == null)
+					totalNotesHit += PBot.getAcc(Math.abs(diff));
+				else
+					totalNotesHit += data.pbotPoints;
+
+				
+				totalPlayed += 5;
+			default: // accuracy depends on the judgement
+				totalNotesHit += data.accuracy * 0.01;
+				totalPlayed++;
+		}
 	}
 }

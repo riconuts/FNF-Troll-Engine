@@ -1,5 +1,6 @@
 package funkin.states;
 
+import funkin.objects.playfields.PlayField.NoteCallback;
 import funkin.data.CharacterData;
 import funkin.data.Cache;
 import funkin.data.Song;
@@ -134,6 +135,7 @@ class PlayState extends MusicBeatState
 	public var instaRespawn:Bool = false;
 	public var cpuControlled(default, set) = false;
 
+	public var noDropPenalty:Bool = false;
 	public var playOpponent:Bool = false;
 	public var instakillOnMiss:Bool = false;
 
@@ -467,7 +469,11 @@ class PlayState extends MusicBeatState
 
 		judgeManager = new JudgmentManager();
 		judgeManager.judgeTimescale = Wife3.timeScale;
+		
+		PBot.missThreshold = ClientPrefs.hitWindow;
 
+		stats.accuracySystem = ClientPrefs.accuracyCalc;
+		
 		modManager = new ModManager(this);
 
 		OptionsSubstate.resetRestartRecomendations();
@@ -538,6 +544,7 @@ class PlayState extends MusicBeatState
 			instaRespawn = ClientPrefs.getGameplaySetting('instaRespawn', instaRespawn);
 			cpuControlled = ClientPrefs.getGameplaySetting('botplay', cpuControlled);
 			disableModcharts = ClientPrefs.getGameplaySetting('disableModcharts', false);
+			noDropPenalty = ClientPrefs.getGameplaySetting('noDropPenalty', false);
 			midScroll = ClientPrefs.midScroll;
 
 			#if tgt
@@ -2384,8 +2391,8 @@ class PlayState extends MusicBeatState
 
 		field.judgeManager = judgeManager;
 
-		field.holdPressCallback = stepHold;
-        field.holdReleaseCallback = dropHold;
+		field.holdPressCallback = pressHold;
+        field.holdReleaseCallback = releaseHold;
 
 		field.noteRemoved.add((note:Note, field:PlayField) -> {
 			if(modchartObjects.exists('note${note.ID}'))modchartObjects.remove('note${note.ID}');
@@ -2398,6 +2405,7 @@ class PlayState extends MusicBeatState
 				noteMiss(daNote, field);
 
 		});
+
 		field.noteSpawned.add((dunceNote:Note, field:PlayField) -> {
 			callOnHScripts('onSpawnNote', [dunceNote]);
 			#if LUA_ALLOWED
@@ -2418,6 +2426,42 @@ class PlayState extends MusicBeatState
 			if (dunceNote.noteScript != null)
 				callScript(dunceNote.noteScript, "postSpawnNote", [dunceNote]);
 		});
+
+		field.holdUpdated.add((daNote:Note, field:PlayField, dtMs:Float) -> {
+			if(!field.isPlayer)return;
+			if (stats.accuracySystem == 'PBot'){
+				stats.totalNotesHit += PBot.holdScorePerSecond * 0.01 * (dtMs * 0.001);
+				stats.totalPlayed += PBot.holdScorePerSecond * 0.01 * (dtMs * 0.001);
+				RecalculateRating();
+			}
+		});
+
+		field.holdDropped.add((daNote:Note, field:PlayField) -> {
+			if (!field.isPlayer)return;
+			if (stats.accuracySystem == 'PBot') {
+				var dtMs:Float = daNote.sustainLength - daNote.holdingTime;
+				stats.totalPlayed += PBot.holdScorePerSecond * 0.01 * (dtMs * 0.001);
+				RecalculateRating();
+			}
+		});
+
+/* 		field.holdDropped.add((daNote:Note, field:PlayField) -> {
+			if (!field.isPlayer)return;
+			if (stats.accuracySystem == 'PBot') {
+				var dtMs:Float = daNote.sustainLength - daNote.holdingTime;
+				stats.totalNotesHit += PBot.holdScorePerSecond * 0.01 * (dtMs * 0.001);
+				RecalculateRating();
+			}
+		});
+
+		field.holdFinished.add((daNote:Note, field:PlayField) -> {
+			if (!field.isPlayer)return;
+			if (stats.accuracySystem == 'PBot') {
+				stats.totalNotesHit += PBot.holdScorePerSecond * 0.01 * (daNote.sustainLength * 0.001);
+				RecalculateRating();
+			}
+		}); */
+
 	}
 
 	function resyncVocals():Void
@@ -3409,17 +3453,7 @@ class PlayState extends MusicBeatState
 		health += (judgeData.health * 0.02) * (judgeData.health < 0 ? healthLoss : healthGain);
 		songHits++;
 
-
-		if(ClientPrefs.wife3){
-			if (judgeData.wifePoints == null)
-				stats.totalNotesHit += Wife3.getAcc(diff);
-			else
-				stats.totalNotesHit += judgeData.wifePoints;
-			stats.totalPlayed += 2;
-		}else{
-			stats.totalNotesHit += judgeData.accuracy * 0.01;
-			stats.totalPlayed++;
-		}
+		stats.calculateAccuracy(judgeData, diff); // deals with accuracy calculations
 
 		switch(judgeData.comboBehaviour){
 			default:
@@ -3683,10 +3717,11 @@ class PlayState extends MusicBeatState
 	}
 
 	private function keyShit():Void {
-		for (column => actionBinds in keysArray) {
+		// RICO WE ALREADY HAVE EVENT CONTROLS
+/* 		for (column => actionBinds in keysArray) {
 			if (FlxG.keys.anyJustPressed(actionBinds)) strumKeyDown(column);
 			if (FlxG.keys.anyJustReleased(actionBinds)) strumKeyUp(column);
-		}
+		} */
 
 		////
 		var gamepad = FlxG.gamepads.firstActive;
@@ -3727,9 +3762,9 @@ class PlayState extends MusicBeatState
 				field.removeNote(note);
 		}
 
-		if (daNote.sustainLength > 0 && ClientPrefs.wife3)
+		if (daNote.sustainLength > 0 && daNote.hitResult.judgment != UNJUDGED){
 			daNote.hitResult.judgment = DROPPED_HOLD;
-		else
+		}else
 			daNote.hitResult.judgment = MISS;
 
 		if(callOnHScripts("preNoteMiss", [daNote, field]) == Globals.Function_Stop)
@@ -3747,12 +3782,19 @@ class PlayState extends MusicBeatState
 			}
 		}
 
+		if (noDropPenalty && daNote.hitResult.judgment == DROPPED_HOLD){ // PBot doesnt fucking penalize dropping holds for some reason
+			// Unsure if we wanna keep that behaviour but i dont but im keeping for parity LOL
+			daNote.ratingDisabled = true;
+			daNote.noMissAnimation = true;
+		}
+		
+
 		if (!daNote.ratingDisabled) {
 			if (!mine) {
 				songMisses++;
-				applyJudgment(daNote.hitResult.judgment);
+				applyJudgment(daNote.hitResult.judgment, Conductor.safeZoneOffset);
 			}else {
-				applyJudgment(MISS_MINE);
+				applyJudgment(MISS_MINE, Conductor.safeZoneOffset);
 				health -= daNote.missHealth * healthLoss;
 			}
 
@@ -3773,6 +3815,7 @@ class PlayState extends MusicBeatState
 				char.missNote(daNote, field);
 			}
 		}
+		
 
 		////
 		callOnHScripts("noteMiss", [daNote, field]);
@@ -3870,7 +3913,7 @@ class PlayState extends MusicBeatState
     // diff from goodNoteHit because it gets called when you release and re-press a hold
     // prob be useful for noteskins too
 
-    inline function stepHold(note:Note, field:PlayField)
+    inline function pressHold(note:Note, field:PlayField)
 	{
 		callOnHScripts("onHoldPress", [note, field]);
 		
@@ -3881,7 +3924,7 @@ class PlayState extends MusicBeatState
 			callScript(note.genScript, "onHoldPress", [note, field]);
 	}
 	
-	inline function dropHold(note:Note, field:PlayField): Void
+	inline function releaseHold(note:Note, field:PlayField): Void
 	{
 		callOnHScripts("onHoldRelease", [note, field]);
 		
@@ -3962,6 +4005,9 @@ class PlayState extends MusicBeatState
 			return;
 		} 
 
+/* 		if(stats.accuracySystem == 'PBot')
+			stats.totalPlayed += (PBot.holdScorePerSecond * (note.sustainLength * 0.001)) * 0.01; */
+		
 		//
 		note.wasGoodHit = true;
 		if (cpuControlled) saveScore = false; // if botplay hits a note, then you lose scoring

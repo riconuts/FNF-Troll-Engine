@@ -41,7 +41,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		"ui",
 		"video",
 		"controls",
-		#if (hxdiscord_rpc || DO_AUTO_UPDATE) "misc", #end 
+		"misc", 
 		/* "Accessibility" */
 	];
 
@@ -73,7 +73,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			[
 				"advanced",
 				[
-					"wife3",
+					"accuracyCalc",
 					"judgePreset",
 					#if USE_EPIC_JUDGEMENT
 					"useEpics",
@@ -149,7 +149,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				"keyboard", ["customizeKeybinds",]
 			], 
 			[
-				"controller", ["controllerMode",]
+				"controller", ["controllerMode",] // TODO customize binds for controllers
 			]
 		],
 		
@@ -196,7 +196,8 @@ class OptionsSubstate extends MusicBeatSubstate
 			150,	// bad
 			166		// shit / max hit window
 		],
-		"V-Slice" => [epicWindowVal(12.5), 45, 90, 135, 160], // https://cdn.discordapp.com/attachments/991571764180156467/1235523554032746556/image.png
+		"V-Slice" => [-1, 45, 90, 135, 160], // pbot1 without epics
+		"PBot" => [epicWindowVal(12.5), 45, 90, 135, 160],
 		"Psych" => [-1, 45, 90, 135, 166],
 		"ITG" => [epicWindowVal(21), 43, 102, 135, 180]
 	];
