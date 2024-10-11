@@ -309,6 +309,7 @@ class FunkinHScript extends FunkinScript
 		set("HealthIcon", funkin.objects.hud.HealthIcon);
 
 		set("Wife3", funkin.data.JudgmentManager.Wife3);
+		set("PBot", funkin.data.JudgmentManager.PBot);
 		set("JudgmentManager", funkin.data.JudgmentManager);
 		set("Judgement", Wrappers.Judgment);
 

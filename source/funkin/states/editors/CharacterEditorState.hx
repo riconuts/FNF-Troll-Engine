@@ -468,7 +468,7 @@ class CharacterEditorState extends MusicBeatState
 				character.cameraPosition = parsedJson.camera_position;
 
 				character.imageFile = parsedJson.image;
-				character.jsonScale = parsedJson.scale;
+				character.baseScale = parsedJson.scale;
 				character.noAntialiasing = parsedJson.no_antialiasing;
 				character.originalFlipX = parsedJson.flip_x;
 				character.healthIcon = parsedJson.healthicon;
@@ -933,7 +933,7 @@ class CharacterEditorState extends MusicBeatState
 		} else if(id == FlxUINumericStepper.CHANGE_EVENT && (sender is FlxUINumericStepper)) {
 			if (sender == scaleStepper)
 			{
-				char.jsonScale = sender.value;
+				char.baseScale = sender.value;
 				char.scale.set(sender.value, sender.value);
 
 				updatePointerPos();
@@ -1133,7 +1133,7 @@ class CharacterEditorState extends MusicBeatState
 			imageInputText.text = char.imageFile;
 			healthIconInputText.text = char.healthIcon;
 			singDurationStepper.value = char.singDuration;
-			scaleStepper.value = char.jsonScale;
+			scaleStepper.value = char.baseScale;
 			flipXCheckBox.checked = char.originalFlipX;
 			noAntialiasingCheckBox.checked = char.noAntialiasing;
 			resetHealthBarColor();
@@ -1391,7 +1391,7 @@ class CharacterEditorState extends MusicBeatState
 		var json = {
 			"animations": char.animationsArray,
 			"image": char.imageFile,
-			"scale": char.jsonScale,
+			"scale": char.baseScale,
 			"sing_duration": char.singDuration,
 			"healthicon": char.healthIcon,
 

@@ -34,6 +34,17 @@ typedef ScoreRecord = {
 // Judges will be used for FC medals
 
 class Highscore {
+	static final accSystems:Map<String, String> = [
+		"s" => "Simple",
+		"Simple" => "s",
+		"" => "Judgement",
+		"Judgement" => "",
+		"w3" => "Wife3",
+		"Wife3" => "w3",
+		"pb" => "PBot",
+		"PBot" => "pb"
+	];
+
 	public static var grades:Map<String, Array<Array<Dynamic>>> = [
 		"Psych" => [
 			["Perfect!!", 1],
@@ -97,17 +108,27 @@ class Highscore {
 		]
 	];
 
-    static var wifeVersion:Float = 1; // wife version. TECHNICALLY 3, but doing 1 for the sake of being easy
-    static var normVersion:Float = 2; // normal acc version
+	static final systemVersions:Map<String, Float> = [
+		"w3" => 1, // wife3
+		"pb" => 1, // pbot
+		"s" => 1, // simple
+		"" => 2 // judgement
+	];
+/* 	static var wifeVersion:Float = Wife3.version; // wife version. TECHNICALLY 3, but doing 1 for the sake of being easy
+	static var pbotVersion:Float = 1; // PBot version.
+    static var normVersion:Float = 2; // judgement acc version */
+
 	#if !macro
 	static var save:FlxSave = new FlxSave(); // high-score save file
     static var currentSongData:Map<String, ScoreRecord> = []; // all song score records
 	static var currentWeekData:Map<String, Int> = []; // all week scores (might eventually change to its own WeekScoreRecord idk lol prob not tho)
     static var currentLoadedID:String = '';
 
-    public static var isWife3:Bool = false;
+    public static var accSystem:String = '';
 	public static var hasEpic:Bool = false;
 	public static var judgeDiff:String = 'J4';
+	public static var version:Float = systemVersions.get("");
+
 
 	public static var weekCompleted:Map<String, Bool> = new Map<String, Bool>(); // maybe move this to WeekData oops
 
@@ -117,8 +138,8 @@ class Highscore {
 
 
 		idArray.push(hasEpic ? 't' : 'f');
-		if (isWife3)
-			idArray.push("w3");
+		if (accSystem != '')
+			idArray.push(accSystem);
 
 		var windows = ['sick', 'good', 'bad', 'hit'];
 		if (hasEpic)
@@ -150,7 +171,7 @@ class Highscore {
 
     public static inline function emptyRecord():ScoreRecord {
         return {
-            scoreSystemV: isWife3 ? wifeVersion : normVersion,
+			scoreSystemV: version,
             score: 0,
             comboBreaks: 0,
             accuracyScore: 0,
@@ -175,7 +196,7 @@ class Highscore {
 		return currentSongData.exists(formattedSong) ? currentSongData.get(formattedSong) : emptyRecord();
     }
 	public static function isValidScoreRecord(record:ScoreRecord){
-		if (record.scoreSystemV == null || record.scoreSystemV < (isWife3 ? wifeVersion : normVersion))
+		if (record.scoreSystemV == null || record.scoreSystemV < version)
 			return false;
         
         return true;
@@ -210,7 +231,7 @@ class Highscore {
 	{
         var tNH:Float = notesHit / rating; // total notes hit
         return saveScoreRecord(song, '', {
-			scoreSystemV: isWife3 ? wifeVersion : normVersion,
+			scoreSystemV: version,
 			score: score,
             comboBreaks: 0, // since we cant detect the combo breaks from here
 			accuracyScore: notesHit,
@@ -239,7 +260,7 @@ class Highscore {
                 scoreRecord.fcMedal = curMedal;
             }
         }
-		if (scoreRecord.scoreSystemV==null)scoreRecord.scoreSystemV = isWife3 ? wifeVersion : normVersion;
+		if (scoreRecord.scoreSystemV==null)scoreRecord.scoreSystemV = version;
 
 		var currentRecord = getRecord(song, chartName);
 		var currentFC:Int = (currentRecord.fcMedal == null ? NONE : currentRecord.fcMedal);
@@ -281,7 +302,7 @@ class Highscore {
 	public static function loadData(?ID:String, ?shouldMigrate:Bool=true)
 	{
 		if (ID==null){
-			isWife3 = ClientPrefs.wife3;
+			accSystem = accSystems.get(ClientPrefs.accuracyCalc);
 			hasEpic = ClientPrefs.useEpics;
 			judgeDiff = ClientPrefs.judgeDiff;
             ID = getID();
@@ -291,13 +312,14 @@ class Highscore {
 			if (currentLoadedID == ID)
 				return;
             var idData = ID.split("-");
-            isWife3 = idData[1] == 'w3';
+			accSystem = accSystems.exists(idData[1]) ? accSystems.get(idData[1]) : '';
             hasEpic = idData[0] == 't';
-			judgeDiff = isWife3 ? idData[2] : idData[1];
+			judgeDiff = accSystem == '' ? idData[2] : idData[1];
 			if (!Math.isNaN(Std.parseFloat(judgeDiff)))
 				judgeDiff = 'J4';
         }
         
+		version = systemVersions.get(accSystem);
 
         currentLoadedID = ID;
 		currentSongData = [];
@@ -382,7 +404,6 @@ class Highscore {
 			//migrationSave.data.songOldScores = null;
         }
 		if (scores == null){  // doesnt matter since theres no scores here TO migrate
-            trace(id + " is an empty score save lol");
  			if (!migrationSave.isEmpty())
                 migrationSave.erase(); 
 

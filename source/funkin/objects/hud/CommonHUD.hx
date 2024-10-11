@@ -122,11 +122,11 @@ class CommonHUD extends BaseHUD
     override function changedCharacter(id:Int, char:Character){
 
         switch(id){
-            case 1:
+            case 0:
 				iconP1.changeIcon(char.healthIcon);
-            case 2:
+            case 1:
 				iconP2.changeIcon(char.healthIcon);
-            case 3:
+            case 2:
                 // gf icon
             default:
                 // idk

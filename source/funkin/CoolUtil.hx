@@ -26,6 +26,11 @@ class CoolUtil
 		return false;
 	}
 
+	public static function centerOn(spr1:FlxObject, spr2:FlxObject) {
+		spr1.x = spr2.x + (spr2.width - spr1.width) / 2;
+		spr1.y = spr2.y + (spr2.height - spr1.height) / 2;
+	}
+
 	public static function alphabeticalSort(a:String, b:String) {
 		// https://haxe.motion-twin.narkive.com/BxeZgKeh/sort-an-array-string-alphabetically
 		a = a.toLowerCase();

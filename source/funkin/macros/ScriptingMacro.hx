@@ -317,14 +317,12 @@ class ScriptingMacro
             // TODO: make it a metadata thing or something??
             switch (name){
                 case 'update':
-                    /*
                     // add it to the verrryy start of the update function, so you can always F7 to escape the state
                     // (some day I'll come up with a proper key combo for it instead of only pressing F7)
                     expr.insert(0, macro {
-                        if (FlxG.keys.justPressed.F7)
+                        if (FlxG.keys.justPressed.F5)
                             funkin.states.MusicBeatState.resetState();
                     });
-                    */ 
                 case 'destroy':
                     // important. stop the script so it doesn't stay on memory
                     expr.push(macro {

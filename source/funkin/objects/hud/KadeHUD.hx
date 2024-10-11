@@ -193,7 +193,7 @@ class KadeHUD extends BaseHUD
 			' | $cbString: ' + comboBreaks + 
 			' | $ratingString: '
 			+ (grade == '?' ? grade : Highscore.floorDecimal(ratingPercent * 100, 2)
-				+ '% / $grade [${(ratingFC == stats.gfc && ClientPrefs.wife3) ? stats.fc : ratingFC}]');
+				+ '% / $grade [${(ratingFC == stats.gfc && stats.accuracySystem == WIFE3) ? stats.fc : ratingFC}]');
 		if (ClientPrefs.npsDisplay)
 			scoreTxt.text += ' | $npsString: ${nps} / ${npsPeak}';
 

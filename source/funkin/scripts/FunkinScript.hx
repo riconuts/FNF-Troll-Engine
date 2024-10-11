@@ -120,6 +120,7 @@ abstract class FunkinScript
 			set('instakillOnMiss', PlayState.instance.instakillOnMiss);
 			set('botPlay', PlayState.instance.cpuControlled);
 			set('disableModcharts', PlayState.instance.disableModcharts);
+			set('noDropPenalty', PlayState.instance.noDropPenalty);
 			set('practice', PlayState.instance.practiceMode);
 			set('opponentPlay', PlayState.instance.playOpponent);
 			set("showDebugTraces", PlayState.instance.showDebugTraces);

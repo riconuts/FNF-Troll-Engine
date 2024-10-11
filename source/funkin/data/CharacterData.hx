@@ -176,7 +176,7 @@ class CharacterData {
 		return {
 			"animations": char.animationsArray,
 			"image": char.imageFile,
-			"scale": char.jsonScale,
+			"scale": char.baseScale,
 			"sing_duration": char.singDuration,
 			"healthicon": char.healthIcon,
 
@@ -208,7 +208,7 @@ class CharacterData {
 			"assetPath": char.imageFile,
 			"renderType": CharacterData.getImageFileType(char.imageFile),
 			"flipX": char.originalFlipX,
-			"scale": char.jsonScale,
+			"scale": char.baseScale,
 			"isPixel": char.noAntialiasing == true, // i think // isPixel also assumes its scaled up by 6 so
 
 			"offsets": char.positionArray,

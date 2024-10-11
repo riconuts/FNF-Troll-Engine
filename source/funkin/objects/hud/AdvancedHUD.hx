@@ -235,7 +235,7 @@ class AdvancedHUD extends CommonHUD
 		gradeTxt.text = cpuControlled ? botplayString : grade;
 		
 		ratingTxt.text = (grade=="?") ? "0%" : (Highscore.floorDecimal(ratingPercent * 100, 2) + "%");
-		fcTxt.text = (ratingFC==stats.gfc && ClientPrefs.wife3) ? stats.fc : ratingFC;
+		fcTxt.text = (ratingFC == stats.gfc && stats.accuracySystem == WIFE3) ? stats.fc : ratingFC;
 		
 		if (ClientPrefs.npsDisplay)
 			npsTxt.text = '$npsString: $nps ($peakString: $npsPeak)';

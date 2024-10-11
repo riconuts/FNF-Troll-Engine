@@ -96,7 +96,7 @@ class ClientPrefs
 				// V-Slice could be named PBOT1??
 				data: [
 					"requiresRestart" => true,
-					"options" => ["Psych", "V-Slice", "Week 7", "Standard", "ITG", "Custom"]
+					"options" => ["Psych", "V-Slice", "PBot", "Week 7", "Standard", "ITG", "Custom"]
 				]
 			},
 			"judgeDiff" => {
@@ -379,12 +379,19 @@ class ClientPrefs
 				value: false,
 				data: [#if !tgt "recommendsRestart" => true #end]
 			},
-			"wife3" => {
-				display: "Wife3",
-				desc: "When toggled, accuracy will be millisecond-based, using Etterna's Wife3 system, instead of judgement-based.",
-				type: Toggle,
-				value: false,
-				data: ["requiresRestart" => true]
+			"accuracyCalc" => {
+				display: "Accuracy Calculation",
+				desc: "The method used to calculate your song accuracy. Wife3 is Etterna's and PBot is V-Slice's.",
+				type: Dropdown,
+				value: "Judgement",
+				data: [
+					"options" => [
+						"Simple",
+						"Judgement",
+						"Wife3",
+						"PBot"
+					]
+				]
 			},
 			"showWifeScore" => {
 				display: "Accuracy Score Display",
@@ -664,7 +671,9 @@ class ClientPrefs
 		'perfect' => false,
 		'instaRespawn' => false,
 		'botplay' => false,
-		'opponentplay' => false
+		'opponentplay' => false,
+		'disableModcharts' => false,
+		'noDropPenalty' => false,
 	];
 
 	inline public static function getGameplaySetting(name:String, defaultValue:Dynamic):Dynamic

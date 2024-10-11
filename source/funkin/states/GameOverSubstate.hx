@@ -280,7 +280,7 @@ class GameOverSubstate extends MusicBeatSubstate
 	{
 		PlayState.instance.callOnScripts('onUpdate', [elapsed]);
 
-		if (!isEnding && boyfriend != null && boyfriend.animation.curAnim.name == 'firstDeath')
+		if (!isEnding && boyfriend != null && boyfriend.animation.name == 'firstDeath')
 		{
 			if(boyfriend.animation.curAnim.curFrame >= 12 && !isFollowingAlready)
 			{

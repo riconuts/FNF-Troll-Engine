@@ -20,19 +20,20 @@ enum abstract ComboBehaviour(Int) from Int to Int
  * Defines how a judgment behaves (hit window, score, etc)
  */
 typedef JudgmentData = {
-	var internalName:String; // internal name of the judge
-	var displayName:String; // how this judge is displayed in UI, etc
-	var window:Float; // hit window to hit this judge
-	var score:Int; // score you gain when hitting this judge
-	var accuracy:Float; // how much accuracy is added by this judge. unused by wife3
-	var health:Float; // % of health to add/remove
-	var noteSplash:Bool; // whether this judge should cause a note splash
-	// var frame:Int; // where in the judgment sheet this judgment lies
+    internalName:String, // internal name of the judge
+    displayName:String, // how this judge is displayed in UI, etc
+    window:Float, // hit window to hit this judge
+    score:Int, // score you gain when hitting this judge
+    accuracy:Float, // how much accuracy is added by this judge. unused by wife3
+    health:Float, // % of health to add/remove
+	noteSplash:Bool, // whether this judge should cause a note splash
+    // var frame:Int; // where in the judgment sheet this judgment lies
 
-	@:optional var wifePoints:Float; // if this isn't null, then Wife3 wont do any calculations and will instead just add these to the wife score/accuracy
-	@:optional var hideJudge:Bool; // if this is true then this judge wont show a judgment image
-	@:optional var comboBehaviour:ComboBehaviour; // how this judge affects your combo (IGNORE, INCREMENT or BREAK). Defaults to INCREMENT
-	@:optional var badJudgment:Bool; // used for mines, etc. makes it so the window isnt scaled by the judge difficulty. defaults to false
+	?wifePoints:Float, // if this isn't null, then Wife3 wont do any calculations and will instead just add these to the wife score/accuracy
+	?pbotPoints:Float, // if this isn't null, then PBOT wont do any calculations and will instead just add these to the pbot score/accuracy
+	?hideJudge:Bool, // if this is true then this judge wont show a judgment image
+    ?comboBehaviour:ComboBehaviour, // how this judge affects your combo (IGNORE, INCREMENT or BREAK). Defaults to INCREMENT
+    ?badJudgment:Bool // used for mines, etc. makes it so the window isnt scaled by the judge difficulty. defaults to false
 
 }
 
@@ -42,14 +43,14 @@ typedef JudgmentData = {
 enum abstract Judgment(String) from String to String // this just makes it easier
 {
 	var UNJUDGED = 'unjudged'; // yet to be hit
-	var TIER1 = 'tier1'; // shit / retard
-	var TIER2 = 'tier2'; // bad / gay
-	var TIER3 = 'tier3'; // good / cool
-	var TIER4 = 'tier4'; // sick / awesome
-	var TIER5 = 'tier5'; // epic / killer
-	var MISS = 'miss'; // miss / fail
-	var DROPPED_HOLD = 'holdDrop';
-	var DAMAGELESS_MISS = 'customMiss'; // miss / fail but this doesnt cause damage
+	var TIER1 = 'tier1'; // shit
+	var TIER2 = 'tier2'; // bad
+	var TIER3 = 'tier3'; // good
+	var TIER4 = 'tier4'; // sick
+	var TIER5 = 'tier5'; // epic
+	var MISS = 'miss'; // miss
+	var DROPPED_HOLD = 'holdDrop'; // miss but when a hold is attached
+	var DAMAGELESS_MISS = 'customMiss'; // miss but this doesnt cause damage
 	var HIT_MINE = 'mine'; // mine
 	var MISS_MINE = 'missMine'; // hitCausesMiss mine. a mine but with health being derived from the note's .missHealth
 	var CUSTOM_MINE = 'customMine'; // mine, but with no health loss
@@ -117,7 +118,8 @@ class JudgmentManager {
 			score: -350,
 			accuracy: -275,
 			wifePoints: Wife3.missWeight,
-			health: -5,
+			pbotPoints: PBot.missWeight,
+            health: -5,
 			comboBehaviour: BREAK,
 			noteSplash: false,
 		},
@@ -126,8 +128,9 @@ class JudgmentManager {
 			displayName: "Miss",
 			window: -1,
 			score: -350,
-			accuracy: -225,
+			accuracy: -175,
 			wifePoints: Wife3.holdDropWeight,
+			pbotPoints: PBot.missWeight,
 			health: -2.5,
 			comboBehaviour: BREAK,
 			noteSplash: false,
@@ -138,6 +141,7 @@ class JudgmentManager {
 			window: -1,
 			score: -350,
 			wifePoints: Wife3.missWeight,
+			pbotPoints: PBot.missWeight,
 			accuracy: -450,
 			health: 0, //-5,
 			comboBehaviour: BREAK,
@@ -150,8 +154,9 @@ class JudgmentManager {
 			score: -200,
 			accuracy: -450,
 			wifePoints: Wife3.mineWeight,
-			health: -5,
-			badJudgment: true,
+			pbotPoints: PBot.mineWeight,
+            health: -5,
+            badJudgment: true,
 			comboBehaviour: IGNORE,
 			noteSplash: false,
 			hideJudge: true
@@ -163,6 +168,7 @@ class JudgmentManager {
 			score: -200,
 			accuracy: -450,
 			wifePoints: Wife3.mineWeight,
+			pbotPoints: PBot.mineWeight,
 			health: 0,
 			badJudgment: true,
 			comboBehaviour: BREAK,
@@ -176,8 +182,9 @@ class JudgmentManager {
 			score: 0,
 			accuracy: -450,
 			wifePoints: Wife3.mineWeight,
-			health: 0,
-			badJudgment: true,
+			pbotPoints: PBot.mineWeight,
+            health: 0,
+            badJudgment: true,
 			comboBehaviour: IGNORE,
 			noteSplash: false,
 			hideJudge: true
@@ -254,32 +261,58 @@ class JudgmentManager {
 	}
 }
 
+// V-Slice
+
+class PBot
+{
+	public static inline final version:Float = 1; // increment this if any values for scoring changes
+	
+	public static var missThreshold:Float = 160.0; // This gets set in PlayState
+	
+
+	static inline final perfectThreshold:Float = 5.0;
+	public static var holdScorePerSecond:Float = 250.0;
+	public static final missWeight = -10; // PBot is weird and barely penalizes a miss lol
+	public static final minWeight = 0;
+	public static final perfectWeight:Float = 500; // PBot is out of 500
+
+	// troll-specific
+	public static final mineWeight = -500;
+
+	static inline final scoringSlope = 0.080;
+	static inline final scoringOffset = 54.99;
+
+
+	public static function getAcc(noteDiff:Float){
+		// TODO: find a math wizard who can add timescale to this
+		return (switch (noteDiff) {
+			case(_ > missThreshold) => true:
+				missWeight;
+			case(_ <= perfectThreshold) => true:
+				perfectWeight;
+			default:
+				// Fancy equation.
+				var factor:Float = 1.0 - (1.0 / (1.0 + Math.exp(-scoringSlope * (noteDiff - scoringOffset))));
+
+				Std.int(perfectWeight * factor + minWeight);
+		}) * 0.01;
+	}
+}
 // Etterna
 class Wife3
 {
-	public static var judgeScales:Map<String, Float> = [
-		"J1" => 1.50,
-		"J2" => 1.33,
-		"J3" => 1.16,
-		"J4" => 1.0,
-		"J5" => 0.84,
-		"J6" => 0.66,
-		"J7" => 0.5,
-		"J8" => 0.33,
-		"JUSTICE" => 0.2
-	];
+	public static inline final version:Float = 1; // increment this if any values for scoring changes
 
+	public static final missWeight:Float = -5.5;
+	public static final mineWeight:Float = -7;
+	public static final holdDropWeight:Float = -4.5;
 	
-	public static var missWeight:Float = -5.5;
-	public static var mineWeight:Float = -7;
-	public static var holdDropWeight:Float = -4.5;
-	
-	public static var a1 = 0.254829592;
-	public static var a2 = -0.284496736;
-	public static var a3 = 1.421413741;
-	public static var a4 = -1.453152027;
-	public static var a5 = 1.061405429;
-	public static var p = 0.3275911;
+	static inline final a1 = 0.254829592;
+	static inline final a2 = -0.284496736;
+	static inline final a3 = 1.421413741;
+	static inline final a4 = -1.453152027;
+	static inline final a5 = 1.061405429;
+	static inline final p = 0.3275911;
 
 	public static function werwerwerwerf(x:Float):Float
 	{
@@ -291,7 +324,7 @@ class Wife3
 	}
 
 	public static var timeScale:Float = 1;
-	public static function getAcc(noteDiff:Float, ?ts:Float):Float{ // https://github.com/etternagame/etterna/blob/0a7bd768cffd6f39a3d84d76964097e43011ce33/src/RageUtil/Utils/RageUtil.h
+	public static function getAcc(noteDiff:Float, ?ts:Float):Float { // https://github.com/etternagame/etterna/blob/0a7bd768cffd6f39a3d84d76964097e43011ce33/src/RageUtil/Utils/RageUtil.h
 		if(ts==null)ts=timeScale;
 		if(ts>1)ts=1;
 		var jPow:Float = 0.75;

@@ -199,7 +199,7 @@ class PsychHUD extends CommonHUD
 			return grade;
 
 		final ratFC = ratingFC;
-		final comboName = ClientPrefs.wife3 && ratFC == stats.gfc ? stats.fc : ratFC;
+		final comboName = stats.accuracySystem == WIFE3 && ratFC == stats.gfc ? stats.fc : ratFC;
 		final ratPerc = Highscore.floorDecimal(ratingPercent * 100, 2);
 
 		return '$ratPerc%'+separator+'$grade [$comboName]';
