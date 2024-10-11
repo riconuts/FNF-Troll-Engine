@@ -301,6 +301,18 @@ class PBot
 // Etterna
 class Wife3
 {
+	public static var judgeScales:Map<String, Float> = [
+		"J1" => 1.50,
+		"J2" => 1.33,
+		"J3" => 1.16,
+		"J4" => 1.0,
+		"J5" => 0.84,
+		"J6" => 0.66,
+		"J7" => 0.5,
+		"J8" => 0.33,
+		"JUSTICE" => 0.2
+	];
+	
 	public static inline final version:Float = 1; // increment this if any values for scoring changes
 
 	public static final missWeight:Float = -5.5;

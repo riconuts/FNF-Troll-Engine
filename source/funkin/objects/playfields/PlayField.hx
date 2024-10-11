@@ -494,6 +494,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 						var receptor = strumNotes[daNote.column];
                         var oldSteps:Int = Math.floor(daNote.holdingTime / Conductor.stepCrotchet);
+						var lastTime:Float = daNote.holdingTime;
 						daNote.holdingTime = Conductor.songPosition - daNote.strumTime;
                         var currentSteps:Int = Math.floor(daNote.holdingTime / Conductor.stepCrotchet);
                         if(oldSteps < currentSteps)
