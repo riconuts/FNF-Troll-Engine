@@ -130,7 +130,7 @@ class JudgmentManager {
 			score: -350,
 			accuracy: -175,
 			wifePoints: Wife3.holdDropWeight,
-			pbotPoints: PBot.missWeight,
+			pbotPoints: 0,
 			health: -2.5,
 			comboBehaviour: BREAK,
 			noteSplash: false,
