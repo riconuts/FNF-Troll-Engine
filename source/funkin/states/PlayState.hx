@@ -635,7 +635,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 		
-		PlayState.keyCount = SONG.keyCount==null ? 4 : SONG.keyCount;
+		PlayState.keyCount = SONG.keyCount;
 		Note.spriteScale = (4 / keyCount) * 0.7;
 		Note.swagWidth = Note.spriteScale * 160;
 		/**

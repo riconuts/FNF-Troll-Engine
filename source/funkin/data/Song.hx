@@ -17,39 +17,44 @@ import haxe.Json;
 
 using StringTools;
 
-typedef SwagSong =
-{
+typedef SwagSong = {
 	//// internal
 	@:optional var path:String;
-	@:optional var validScore:Bool;
+	var validScore:Bool;
 
 	////
-	@:optional var song:String;
-	@:optional var bpm:Float;
-	@:optional var speed:Float;
-	@:optional var keyCount:Int;
-	@:optional var notes:Array<SwagSection>;
-	@:optional var events:Array<Array<Dynamic>>;
+	var song:String;
+	var bpm:Float;
+	var tracks:SongTracks; // currently used
 	
-	@:optional var tracks:SongTracks; // currently used
-	@:noCompletion @:optional var extraTracks:Array<String>; // old te
-	@:noCompletion @:optional var needsVoices:Bool; // fnf
+	var speed:Float;
+	var keyCount:Int;
+	var notes:Array<SwagSection>;
+	var events:Array<Array<Dynamic>>;
+	
+	var player1:String;
+	var player2:String;
+	var gfVersion:String;
+	var stage:String;
+	var hudSkin:String;
 
-	@:optional var player1:String;
-	@:optional var player2:String;
-	@:optional var player3:String;
-	@:optional var gfVersion:String;
-	@:optional var stage:String;
-    @:optional var hudSkin:String;
-
-	@:optional var arrowSkin:String;
-	@:optional var splashSkin:String;
+	var arrowSkin:String;
+	var splashSkin:String;
 	
 	//// Used for song info showed on the pause menu
 	@:optional var info:Array<String>;
 	@:optional var metadata:SongCreditdata;
 
-    @:optional var offset:Float; // Offsets the chart
+	@:optional var offset:Float; // Offsets the chart
+}
+
+typedef JsonSong = {
+	> SwagSong,
+
+	var ?player3:String; // old psych
+	var ?extraTracks:Array<String>; // old te
+	var ?needsVoices:Bool; // fnf
+	var ?mania:Int; // vs shaggy
 }
 
 typedef SongTracks = {
@@ -287,76 +292,115 @@ class Song
 		while (!rawJson.endsWith("}"))
 			rawJson = rawJson.substr(0, rawJson.length - 1);
 
-		var songJson:SwagSong = parseJSONshit(rawJson);
-		songJson.path = fullPath; 
-		if (isSongJson != false) onLoadJson(songJson);
+		var songJson:JsonSong = cast Json.parse(rawJson).song;
+		songJson.path = fullPath;
 
-		return songJson;
+		return isSongJson ? onLoadJson(songJson) : onLoadEvents(songJson);
 	}
 
-	public static function onLoadEvents(songJson:Dynamic){
+	public static function onLoadEvents(songJson:SwagSong) {
 		if (songJson.events == null){
 			songJson.events = [];
 		}
 
-		for (secNum in 0...songJson.notes.length) {
-			var sec:SwagSection = songJson.notes[secNum];
-			var notes:Array<Dynamic> = sec.sectionNotes;
-			var len:Int = notes.length;
-			var i:Int = 0;
-			while(i < len)
-			{
-				var note:Array<Dynamic> = notes[i];
-				if (note[1] < 0)
+		//// convert ancient psych event notes
+		if (songJson.notes != null) {
+			for (secNum in 0...songJson.notes.length) {
+				var sec:SwagSection = songJson.notes[secNum];
+				var notes:Array<Dynamic> = sec.sectionNotes;
+				var len:Int = notes.length;
+				var i:Int = 0;
+				while(i < len)
 				{
-					songJson.events.push([note[0], [[note[2], note[3], note[4]]]]);
-					notes.remove(note);
-					len = notes.length;
+					var note:Array<Dynamic> = notes[i];
+					if (note[1] < 0)
+					{
+						songJson.events.push([note[0], [[note[2], note[3], note[4]]]]);
+						notes.remove(note);
+						len = notes.length;
+					}
+					else i++;
 				}
-				else i++;
 			}
-		}
+		}	
 
 		return songJson;
 	}
 
-	/** sanitize/update json values to a valid format**/
-	private static function onLoadJson(songJson:Dynamic)
+	private static function onLoadJson(songJson:JsonSong):SwagSong
 	{
 		var swagJson:SwagSong = songJson;
 
-		onLoadEvents(swagJson);
+		swagJson.validScore = true;
 
-		////
-		if (songJson.gfVersion == null){
-			if (songJson.player3 != null){
-				songJson.gfVersion = songJson.player3;
-				songJson.player3 = null;
+		if (songJson.player1 == null)
+			songJson.player1 = "bf";
+
+		if (songJson.player2 == null)
+			songJson.player2 = "dad";
+
+		if (songJson.gfVersion == null)
+			songJson.gfVersion = (songJson.player3 != null) ? songJson.player3 : "gf";
+		
+		if (swagJson.arrowSkin == null || swagJson.arrowSkin.trim().length == 0)
+			swagJson.arrowSkin = "NOTE_assets";
+
+		if (swagJson.splashSkin == null || swagJson.splashSkin.trim().length == 0)
+			swagJson.splashSkin = "noteSplashes";
+
+		if (songJson.hudSkin == null)
+			songJson.hudSkin = 'default';
+
+		trace(swagJson.keyCount, songJson.mania);
+		if (null == swagJson.keyCount) {
+			swagJson.keyCount = switch(songJson.mania) {
+				default: 4;
+				case 1: 6;
+				case 2: 7;
+				case 3: 9;
 			}
-			else
-				songJson.gfVersion = "gf";
 		}
 
-		for (section in swagJson.notes) {
-			for (note in section.sectionNotes) {
-				var type:Dynamic = note[3];
-				
-				// Backward compatibility + compatibility with Week 7 charts;
-				if (type == true)
-					type = "Alt Animation";
-				else if (Std.isOfType(type, Int) && type > 0)
-					type = ChartingState.noteTypeList[type];
+        if (swagJson.notes == null || swagJson.notes.length == 0) {		
+			//// must have at least one section
+			swagJson.notes = [{
+				sectionNotes: [],
+				typeOfSection: 0,
+				mustHitSection: true,
+				gfSection: false,
+				bpm: 0,
+				changeBPM: false,
+				altAnim: false,
+				sectionBeats: 4
+			}];
+			
+		}else {
+			onLoadEvents(swagJson);
 
-				note[3] = Std.isOfType(type, String) ? type : null;
+			////
+			for (section in swagJson.notes) {
+				for (note in section.sectionNotes) {
+					var type:Dynamic = note[3];
+					
+					if (Std.isOfType(type, String)) {
+						if (type == 'Hurt Note')
+							type = 'Mine';
+					}else if (type == true)
+						type = "Alt Animation";
+					else if (Std.isOfType(type, Int) && type > 0)
+						type = ChartingState.noteTypeList[type];
+						
+					note[3] = type;
+				}
 			}
-		}
+		}		
 		
 		//// new tracks system
 		if (swagJson.tracks == null) {
 			var instTracks:Array<String> = ["Inst"];
 
-			if (swagJson.extraTracks != null) {
-				for (name in swagJson.extraTracks)
+			if (songJson.extraTracks != null) {
+				for (name in songJson.extraTracks)
 					instTracks.push(name);
 			}
 
@@ -372,7 +416,7 @@ class Song
 			 */
 			inline function sowy() {
 				//// 1
-				if (!swagJson.needsVoices) {
+				if (!songJson.needsVoices) {
 					playerTracks = [];
 					opponentTracks = [];
 					return false;
@@ -386,7 +430,7 @@ class Song
                     #end);
 
 				var folderPath = jsonPath.dir;
-				if (folderPath == null) return true; // probably means that it's on the same folder as the exe but fuk it
+				if (folderPath == null) return true; // could mean that it's somehow on the same folder as the exe but fuck it
 
 				//// 3 and 4
 				inline function existsInFolder(name)
@@ -414,56 +458,7 @@ class Song
 			swagJson.tracks = {inst: instTracks, player: playerTracks, opponent: opponentTracks};
 		}
 
-		//// must have at least one section
-        if (swagJson.notes == null || swagJson.notes.length == 0) {		
-			swagJson.notes = [{
-				sectionNotes: [],
-				typeOfSection: 0,
-				mustHitSection: true,
-				gfSection: false,
-				bpm: 0,
-				changeBPM: false,
-				altAnim: false,
-				sectionBeats: 4
-			}];
-		}
-
-		//// vs shaggy chart!!!!
-		if (swagJson.keyCount == null) {
-			swagJson.keyCount = switch(Reflect.field(songJson, "mania")) {
-				default: 4;
-				case 1: 6;
-				case 2: 7;
-				case 3: 9;
-			}
-		}
-        
-		////
-		for (section in swagJson.notes) {
-			for (note in section.sectionNotes) {
-				if (note[3] == 'Hurt Note')
-					note[3] = 'Mine';
-			}
-		}
-
-		////
-		if (swagJson.arrowSkin == null || swagJson.arrowSkin.trim().length == 0)
-			swagJson.arrowSkin = "NOTE_assets";
-
-		if (swagJson.splashSkin == null || swagJson.splashSkin.trim().length == 0)
-			swagJson.splashSkin = "noteSplashes";
-
-		if (songJson.hudSkin==null)
-			songJson.hudSkin = 'default';
-
-		return songJson;
-	}
-
-	public static function parseJSONshit(rawJson:String):SwagSong
-	{
-		var swagShit:SwagSong = cast Json.parse(rawJson).song;
-		swagShit.validScore = true;
-		return swagShit;
+		return swagJson;
 	}
 
 	static public function loadSong(metadata:SongMetadata, ?difficulty:String, ?difficultyIdx:Int = 1) {
@@ -501,7 +496,7 @@ class Song
 					isVSlice = true;
 
 					var converted = new SupportedFormat().fromFormat(chart, rawDifficulty);
-					var chart:SwagSong = cast converted.data.song;
+					var chart:JsonSong = cast converted.data.song;
 					chart.path = chartsFilePath;
 					chart.song = songLowercase;
 					chart.tracks = null;
@@ -545,7 +540,7 @@ class Song
 								if(chart.formatMeta.supportsDiffs && !chart.diffs.contains(rawDifficulty))continue;
 
 								var converted = new SupportedFormat().fromFormat(chart, rawDifficulty);
-								var chart:SwagSong = cast converted.data.song;
+								var chart:JsonSong = cast converted.data.song;
 								chart.path = filePath;
 								chart.song = songLowercase;
 								onLoadJson(chart);

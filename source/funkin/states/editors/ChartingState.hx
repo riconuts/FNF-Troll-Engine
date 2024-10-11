@@ -254,15 +254,14 @@ class ChartingState extends MusicBeatState
 				offset: 0,
 
 				stage: 'stage',
-
 				player1: 'bf',
 				player2: 'dad',
 				gfVersion: 'gf',
 
-				arrowSkin: '',
-				splashSkin: '',
+				arrowSkin: 'NOTE_assets',
+				splashSkin: 'noteSplashes',
+				hudSkin: 'default',
 
-				needsVoices: true,
 				tracks: {
 					inst: ["Inst"],
 					player: ["Voices"],
@@ -271,6 +270,7 @@ class ChartingState extends MusicBeatState
 
 				validScore: false,
 
+				keyCount: 4,
 				notes: [],
 				events: [],
 			};
@@ -544,8 +544,15 @@ class ChartingState extends MusicBeatState
 
 		var loadAutosaveBtn:FlxButton = new FlxButton(reloadSongJson.x, reloadSongJson.y + 30, 'Load Autosave', function()
 		{
-			PlayState.SONG = Song.parseJSONshit(FlxG.save.data.autosave);
-			MusicBeatState.resetState();
+			var autosaved:Dynamic = FlxG.save.data.autosave;
+			if (autosaved == null) {
+				openSubState(new Prompt("There is no autosaved data", 0, null, null, false, "OK", "OK"));
+			}else if (!Std.isOfType(autosaved, String)) {
+				openSubState(new Prompt("Invalid autosaved data", 0, null, null, false, "OK", "OK"));
+			}else{
+				PlayState.SONG = cast Json.parse(autosaved);
+				MusicBeatState.resetState();
+			}
 		});
 
 		var loadEventJson:FlxButton = new FlxButton(loadAutosaveBtn.x, loadAutosaveBtn.y + 30, 'Load Events', function()
@@ -3190,11 +3197,8 @@ class ChartingState extends MusicBeatState
 	}
 
 	function autosaveSong():Void
-	{
-		var _song = Reflect.copy(_song);
-		Reflect.deleteField(_song, "path");
-		
-		FlxG.save.data.autosave = Json.stringify({"song": _song});
+	{		
+		FlxG.save.data.autosave = Json.stringify(_song);
 		FlxG.save.flush();
 	}
 
