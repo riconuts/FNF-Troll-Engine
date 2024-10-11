@@ -15,22 +15,22 @@ typedef BPMChangeEvent =
 
 class Conductor
 {
-    static inline var _internalJackLimit:Float = 192 / 16;
-    @:isVar
+	static inline var _internalJackLimit:Float = 192 / 16;
+	@:isVar
 	public static var jackLimit(get, default):Float = -1;
 	static function get_jackLimit(){
-        if(jackLimit < 0)
+		if(jackLimit < 0)
 			jackLimit = Conductor.stepCrochet / _internalJackLimit;
 
-        return jackLimit;
-    }
+		return jackLimit;
+	}
 	public inline static final ROWS_PER_BEAT:Int = 48;
 	public inline static final ROWS_PER_MEASURE:Int = ROWS_PER_BEAT * 4;
-    
-    @:isVar
-    public static var stepCrotchet(get, set):Float = 0;
-    static function get_stepCrotchet()
-        return stepCrochet;
+	
+	@:isVar
+	public static var stepCrotchet(get, set):Float = 0;
+	static function get_stepCrotchet()
+		return stepCrochet;
 
 	static function set_stepCrotchet(v:Float)
 		return stepCrochet = v;

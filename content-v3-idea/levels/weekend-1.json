@@ -5,5 +5,6 @@
     "player": "pico",
     "girlfriend": "nene",
     "opponent": "darnell",
+    "difficulties": ["easy", "normal", "hard"],
     "songs": ["darnell", "lit-up", "2hot", "blazin"]
 }

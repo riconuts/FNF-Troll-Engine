@@ -18,34 +18,34 @@ using StringTools;
 
 class CreditsState extends MusicBeatState
 {	
-    var useHttp:Bool = #if final true #else false #end; // shouldnt we check if tgt too		// no, the base engine could use it
+	var useHttp:Bool = #if final true #else false #end; // shouldnt we check if tgt too		// no, the base engine could use it
 	var bg:FlxSprite;
 
-    var hintBg:FlxSprite;
+	var hintBg:FlxSprite;
 	var hintText:FlxText;
 
 	var camFollow = new FlxPoint(FlxG.width * 0.5, FlxG.height * 0.5);
 	var camFollowPos = new FlxObject();
 
-    var dataArray:Array<Array<String>> = [];
+	var dataArray:Array<Array<String>> = [];
 	var titleArray:Array<Alphabet> = [];
 	var iconArray:Array<AttachedSprite> = [];
 
-    var curSelected(default, set):Int = 0;
+	var curSelected(default, set):Int = 0;
 	
 	function set_curSelected(sowy:Int)
-    {
-        if (dataArray[sowy] == null){ // skip empty spaces and titles
-            sowy += (sowy < curSelected) ? -1 : 1;
+	{
+		if (dataArray[sowy] == null){ // skip empty spaces and titles
+			sowy += (sowy < curSelected) ? -1 : 1;
 
-            // also skip any following spaces
-            if (sowy >= titleArray.length)
-                sowy = sowy - titleArray.length;
-            else if (sowy < 0)
-                sowy = titleArray.length + sowy;
+			// also skip any following spaces
+			if (sowy >= titleArray.length)
+				sowy = sowy - titleArray.length;
+			else if (sowy < 0)
+				sowy = titleArray.length + sowy;
 
-            return set_curSelected(sowy); 
-        }
+			return set_curSelected(sowy); 
+		}
 
 		if (sowy >= titleArray.length)
 			curSelected = sowy - titleArray.length;
@@ -109,8 +109,8 @@ class CreditsState extends MusicBeatState
 		add(backdrops);
 		#end
 
-        ////
-        function loadLine(line:String, ?folder:String)
+		////
+		function loadLine(line:String, ?folder:String)
 			addSong(line.split("::"), folder);
 
 		//// Get credits list
@@ -137,40 +137,40 @@ class CreditsState extends MusicBeatState
 		// Just in case we forget someone!!!
 		
 		if (useHttp){
-            trace('checking for updated credits');
+			trace('checking for updated credits');
 			
 			var githubRepo = Main.Version.githubRepo;
 			#if tgt
 			var http = new haxe.Http('https://raw.githubusercontent.com/${githubRepo.user}/${githubRepo.repo}/main/assets-tgt/data/credits.txt'); // hmmmmm
-            #else
+			#else
 			var http = new haxe.Http('https://raw.githubusercontent.com/${githubRepo.user}/${githubRepo.repo}/main/assets/data/credits.txt');
 			#end
 			http.onData = function(data:String){
-                rawCredits = data;
+				rawCredits = data;
 
-                #if sys
-                try{
-                    trace('updating credits...');
-                    if (FileSystem.exists("assets/data/credits.txt")){
-                        trace("updated credits!!!");
-                        File.saveContent("assets/data/credits.txt", data);
-                    }else
-                        trace("no credits file to write to!");
-                }catch(e){
-                    trace("couldn't update credits: " + e);
-                }
-                #end
+				#if sys
+				try{
+					trace('updating credits...');
+					if (FileSystem.exists("assets/data/credits.txt")){
+						trace("updated credits!!!");
+						File.saveContent("assets/data/credits.txt", data);
+					}else
+						trace("no credits file to write to!");
+				}catch(e){
+					trace("couldn't update credits: " + e);
+				}
+				#end
 
-                trace('using credits from github');
-            }
-            http.onError = function(error){
-                trace('error: $error');
-                getLocalCredits();
-            }
+				trace('using credits from github');
+			}
+			http.onError = function(error){
+				trace('error: $error');
+				getLocalCredits();
+			}
 
-            http.request();
-        }else
-            getLocalCredits();
+			http.request();
+		}else
+			getLocalCredits();
 
 		for (i in CoolUtil.listFromString(rawCredits))
 			loadLine(i);
@@ -178,7 +178,7 @@ class CreditsState extends MusicBeatState
 		////
 		hintBg = new FlxSprite(0, FlxG.height - 130).makeGraphic(1, 1);
 		hintBg.scale.set(FlxG.width - 100, 120);
-        hintBg.updateHitbox();
+		hintBg.updateHitbox();
 		hintBg.screenCenter(X);
 		hintBg.color = 0xFF000000;
 		hintBg.alpha = 0.6;
@@ -188,29 +188,29 @@ class CreditsState extends MusicBeatState
 		hintText = new FlxText(hintBg.x + 25, hintBg.y + hintBg.height * 0.5 - 16, hintBg.width - 50, "asfgh", 32);
 		hintText.setFormat(Paths.font("calibri.ttf"), 32, 0xFFFFFFFF, CENTER);
 		hintText.scrollFactor.set();
-        add(hintText);
+		add(hintText);
 		
 		super.create();
 
-        updateSelection();
-        curSelected = 0;
+		updateSelection();
+		curSelected = 0;
 	}
 
-    var realIndex:Int = 0;
+	var realIndex:Int = 0;
 	public function addSong(data:Array<String>, ?folder:String)
 	{
 		Paths.currentModDirectory = folder == null ? "" : folder;
 
-        var songTitle:Alphabet; 
+		var songTitle:Alphabet; 
 		var id = realIndex++;
 
-        if (data.length > 1)
-        {
-            songTitle = new Alphabet(0, 240 * id, data[0], false);
-            songTitle.x = 120;
-            songTitle.targetX = 90;
+		if (data.length > 1)
+		{
+			songTitle = new Alphabet(0, 240 * id, data[0], false);
+			songTitle.x = 120;
+			songTitle.targetX = 90;
 
-            dataArray[id] = data; 
+			dataArray[id] = data; 
 
 			var iconPath = "credits/" + data[1];
 			if (Paths.image(iconPath) != null){
@@ -223,17 +223,17 @@ class CreditsState extends MusicBeatState
 				iconArray[id] = songIcon;
 				add(songIcon);
 			}
-        }else if (data[0].trim().length == 0){
-            return;
-        }else{
-            songTitle = new Alphabet(0, 240 * id, data[0], true);
-            songTitle.screenCenter(X);
-            songTitle.targetX = songTitle.x;
-        }
+		}else if (data[0].trim().length == 0){
+			return;
+		}else{
+			songTitle = new Alphabet(0, 240 * id, data[0], true);
+			songTitle.screenCenter(X);
+			songTitle.targetX = songTitle.x;
+		}
 
-        songTitle.ID = id;
-        titleArray[id] = songTitle;
-        add(songTitle);
+		songTitle.ID = id;
+		titleArray[id] = songTitle;
+		add(songTitle);
 	}
 
 	var moveTween:FlxTween;
@@ -248,46 +248,46 @@ class CreditsState extends MusicBeatState
 		for (id in 0...titleArray.length)
 		{
 			var title:Alphabet = titleArray[id];
-            var data:Array<String> = dataArray[id];
+			var data:Array<String> = dataArray[id];
 			var icon:AttachedSprite = iconArray[id];
 
-            if (data == null){ // for the category titles, whatevrr !!!
-                
-            }else if (id == curSelected){
+			if (data == null){ // for the category titles, whatevrr !!!
+				
+			}else if (id == curSelected){
 				title.alpha = 1;
-                title.targetX = 90;
-                title.color = 0xFFFFFFFF;
+				title.targetX = 90;
+				title.color = 0xFFFFFFFF;
 
 				if (icon != null)
 					icon.color = 0xFFFFFFFF;
 
-                var descText = data[2];
-                if (descText == null){
-                    hintText.alpha = 0;
-                    hintText.text = "";
-                }else{
-                    hintText.text = descText;
+				var descText = data[2];
+				if (descText == null){
+					hintText.alpha = 0;
+					hintText.text = "";
+				}else{
+					hintText.text = descText;
 
-                    hintBg.scale.y = 30 + hintText.height;
-                    hintBg.updateHitbox();
-                    hintBg.y = FlxG.height - hintBg.height - 10;
+					hintBg.scale.y = 30 + hintText.height;
+					hintBg.updateHitbox();
+					hintBg.y = FlxG.height - hintBg.height - 10;
 
-                    hintText.y = hintBg.y + hintBg.height * 0.5 - hintText.height * 0.5;
+					hintText.y = hintBg.y + hintBg.height * 0.5 - hintText.height * 0.5;
 
-                    //// FUCK
-                    var sby = hintBg.y + 15;
-                    var eby = hintBg.y;
-                    var sty = hintText.y + 15;
-                    var ety = hintText.y;
-                    var sba = hintBg.alpha;
+					//// FUCK
+					var sby = hintBg.y + 15;
+					var eby = hintBg.y;
+					var sty = hintText.y + 15;
+					var ety = hintText.y;
+					var sba = hintBg.alpha;
 					if (moveTween != null)
 						moveTween.cancel();
-                    moveTween = FlxTween.num(0, 1, 0.25, {ease: FlxEase.sineOut}, function(v){
-                        hintBg.y = FlxMath.lerp(sby, eby, v);
-                        hintText.y = FlxMath.lerp(sty, ety, v);
-                        hintBg.alpha = FlxMath.lerp(sba, 0.6, v);
-                    });
-                }
+					moveTween = FlxTween.num(0, 1, 0.25, {ease: FlxEase.sineOut}, function(v){
+						hintBg.y = FlxMath.lerp(sby, eby, v);
+						hintText.y = FlxMath.lerp(sty, ety, v);
+						hintBg.alpha = FlxMath.lerp(sba, 0.6, v);
+					});
+				}
 
 				camFollow.y = title.y + title.height * 0.5 + 20;
 			}else{
@@ -362,7 +362,7 @@ class CreditsState extends MusicBeatState
 		if (controls.ACCEPT){
 			var link:Null<String> = dataArray[curSelected][3];
 			if (link != null && link.length > 0)
-            	CoolUtil.browserLoad(link);
+				CoolUtil.browserLoad(link);
 		}
 
 		#if tgt

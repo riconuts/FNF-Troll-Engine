@@ -93,7 +93,7 @@ class ClientPrefs
 				desc: "Preset for the judgement windows.",
 				type: Dropdown,
 				value: "Standard",
-                // V-Slice could be named PBOT1??
+				// V-Slice could be named PBOT1??
 				data: [
 					"requiresRestart" => true,
 					"options" => ["Psych", "V-Slice", "Week 7", "Standard", "ITG", "Custom"]
@@ -706,7 +706,7 @@ class ClientPrefs
 		0.6, 0.6,
 	];
 
-    public static var locale:String = 'en';
+	public static var locale:String = 'en';
 
 	// I'd like to rewrite the whole Controls.hx thing tbh
 	// I think its shitty and can stand a rewrite but w/e
@@ -751,7 +751,7 @@ class ClientPrefs
 
 		optionSave.bind("options_v2");
 		loadDefaultKeys();
-    }
+	}
 	
 
 	public static function save(?definitions:Map<String, OptionData>)

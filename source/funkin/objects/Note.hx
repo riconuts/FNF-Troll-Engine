@@ -36,7 +36,7 @@ enum abstract SplashBehaviour(Int) from Int to Int
 enum abstract SustainPart(Int) from Int to Int
 {
 	var TAP = -1; // Not a sustain
-    var HEAD = 0; // TapNote at the start of a sustain
+	var HEAD = 0; // TapNote at the start of a sustain
 	var PART = 1;
 	var END = 2;
 }
@@ -109,8 +109,8 @@ class Note extends NoteObject
 
 	////
 
-    /**note generator script (used for shit like pixel notes or skin mods) ((script provided by the HUD skin))*/
-    public var genScript:FunkinHScript;
+	/**note generator script (used for shit like pixel notes or skin mods) ((script provided by the HUD skin))*/
+	public var genScript:FunkinHScript;
 	/**note type script*/
 	public var noteScript:FunkinHScript;
 	public var extraData:Map<String, Dynamic> = [];
@@ -155,7 +155,7 @@ class Note extends NoteObject
 	public var ratingMod:Float = 0; // 0 = unknown, 0.25 = shit, 0.5 = bad, 0.75 = good, 1 = sick
 	
 	// note type/customizable shit
-    public var noteMod(default, set):String = null; 
+	public var noteMod(default, set):String = null; 
 	public var noteType(default, set):String = null;  // the note type
 	public var texture(default, set):String; // texture for the note
 	public var canQuant:Bool = true; // whether a quant texture should be searched for or not
@@ -233,19 +233,19 @@ class Note extends NoteObject
 	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
 
 	// Determines how the note can be modified by the modchart system
-    // Could be moved into NoteObject? idk lol
+	// Could be moved into NoteObject? idk lol
 	public var copyX:Bool = true;
 	public var copyY:Bool = true;
 	public var copyAlpha:Bool = true;
-    public var copyVerts:Bool = true;
-    #if PE_MOD_COMPATIBILITY
-    // Angle is controlled by verts in the modchart system
+	public var copyVerts:Bool = true;
+	#if PE_MOD_COMPATIBILITY
+	// Angle is controlled by verts in the modchart system
 
-    @:isVar
+	@:isVar
 	public var copyAngle(get, set):Bool;
-    function get_copyAngle()return copyVerts;
-    function set_copyAngle(val:Bool)return copyVerts = val;
-    #end
+	function get_copyAngle()return copyVerts;
+	function set_copyAngle(val:Bool)return copyVerts = val;
+	#end
 	//// backwards compat
 	@:noCompletion public var realNoteData(get, set):Int; 
 	@:noCompletion inline function get_realNoteData() return realColumn;
@@ -262,8 +262,8 @@ class Note extends NoteObject
 
 	////
 	private function set_texture(value:String):String {
-        if (tex != value) reloadNote(texPrefix, value, texSuffix);
-        return tex;
+		if (tex != value) reloadNote(texPrefix, value, texSuffix);
+		return tex;
 	}
 
 	public function updateColours(ignore:Bool=false){		
@@ -285,12 +285,12 @@ class Note extends NoteObject
 			genScript.executeFunc("onUpdateColours", [this], this);
 	}
 
-    private function set_noteMod(value:String):String
-    {
-        if (value == null)
-            value = 'default';
+	private function set_noteMod(value:String):String
+	{
+		if (value == null)
+			value = 'default';
 
-        updateColours();
+		updateColours();
 
 		////
 		if (!inEditor && PlayState.instance != null)
@@ -314,8 +314,8 @@ class Note extends NoteObject
 				texture = genScript.get("noteTexture");
 		}
 
-        return noteMod = value;
-    }
+		return noteMod = value;
+	}
 
 	private function set_noteType(value:String):String {
 		noteSplashTexture = PlayState.splashSkin;
@@ -427,11 +427,11 @@ class Note extends NoteObject
 		}
 
 		if ((FlxG.state is PlayState))
-            this.strumTime -= (cast FlxG.state).offset;
+			this.strumTime -= (cast FlxG.state).offset;
 
 		if (!inEditor) {
 			this.strumTime += ClientPrefs.noteOffset;            
-            visualTime = PlayState.instance.getNoteInitialTime(this.strumTime);
+			visualTime = PlayState.instance.getNoteInitialTime(this.strumTime);
 		}
 
 		if (prevNote != null) 
@@ -459,7 +459,7 @@ class Note extends NoteObject
 
 		if (genScript != null)
 			genScript.executeFunc("onReloadNote", [this, prefix, texture, suffix], this);
-        
+		
 		if (noteScript != null)
 			noteScript.executeFunc("onReloadNote", [this, prefix, texture, suffix], this);
 
@@ -584,7 +584,7 @@ class Note extends NoteObject
 	} 
 
 	public function loadNoteAnims() {
-        var changed = false;
+		var changed = false;
 
 		if (noteScript != null) {
 			if (noteScript.exists("loadNoteAnims") && Reflect.isFunction(noteScript.get("loadNoteAnims"))) {
@@ -625,7 +625,7 @@ class Note extends NoteObject
 				if (colorName == "purple")
 					animPrefix ='pruple end hold'; // ?????
 				// this is autistic wtf
-                
+				
 		} 
  
 		animation.addByPrefix(animName, animPrefix);
@@ -640,7 +640,7 @@ class Note extends NoteObject
 
 		if (isSustainNote && parent.wasGoodHit)
 			holdMult = FlxMath.lerp(0.3, 1, parent.tripProgress);
-        
+		
 		colorSwap.daAlpha = alphaMod * alphaMod2 * holdMult;
 
 		if (tooLate && !inEditor)
@@ -663,7 +663,7 @@ class Note extends NoteObject
 
 			if (genScript != null){
 				genScript.executeFunc("noteUpdate", [elapsed], this);
-            }
+			}
 		}
 
 		var diff = (strumTime - Conductor.songPosition);

@@ -213,10 +213,10 @@ class OptionsSubstate extends MusicBeatSubstate
 	var originalValues:Map<String, Dynamic> = [];
 
 	public var goBack:(Array<String>)->Void;
-    public function save(){
+	public function save(){
 		ClientPrefs.save(actualOptions);
 		funkin.data.Highscore.loadData();
-    }
+	}
 	
 	function windowsChanged()
 	{
@@ -410,14 +410,14 @@ class OptionsSubstate extends MusicBeatSubstate
 				checkWindows();
 			case 'hitsoundVolume':
 				playPreviewSound("hitsound", newVal * 0.01);
-            case 'sfxVolume':
+			case 'sfxVolume':
 				playPreviewSound("scrollMenu", newVal * 0.01);
-            case 'masterVolume':
-                var vol = FlxG.sound.volume;
-                var newVol = newVal * 0.01;
-                if(vol != newVol)FlxG.sound.volume = newVol;
+			case 'masterVolume':
+				var vol = FlxG.sound.volume;
+				var newVol = newVal * 0.01;
+				if(vol != newVol)FlxG.sound.volume = newVol;
 
-                // TODO: only show sound tray if it would go up/down a step (so prob just check if newVol / 10 is a whole number or sum shit)
+				// TODO: only show sound tray if it would go up/down a step (so prob just check if newVol / 10 is a whole number or sum shit)
 				//FlxG.sound.showSoundTray(vol < newVol);
 
 			case 'missVolume':
@@ -466,13 +466,13 @@ class OptionsSubstate extends MusicBeatSubstate
 	}
 
 	var whitePixel = FlxGraphic.fromRectangle(1, 1, 0xFFFFFFFF, false, 'whitePixel');
-    function onVolumeChange(vol:Float){
-        vol *= 100;
+	function onVolumeChange(vol:Float){
+		vol *= 100;
 		if (Math.floor(getNumber("masterVolume")) != Math.floor(vol)){
 			forceWidgetUpdate = true;
-            changeNumber("masterVolume", vol, true);
-        }
-    }
+			changeNumber("masterVolume", vol, true);
+		}
+	}
 
 	override function create()
 	{
@@ -487,7 +487,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		optionCamera.bgColor.alpha = 0;
 		overlayCamera = new FlxCamera();
 		overlayCamera.bgColor.alpha = 0;
-        
+		
 		transCamera.bgColor.alpha = 0;
 		if(optState){
 			FlxG.cameras.reset(mainCamera);
@@ -1635,10 +1635,10 @@ class OptionsSubstate extends MusicBeatSubstate
 		{
 			if (controls.BACK)
 			{
-                save();
+				save();
 				FlxG.sound.play(Paths.sound('cancelMenu'));
-            
-                if(goBack!=null)
+			
+				if(goBack!=null)
 					goBack(changed);
 			}
 		} 

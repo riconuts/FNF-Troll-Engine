@@ -275,7 +275,7 @@ class GameOverSubstate extends MusicBeatSubstate
 		
 		PlayState.gotoMenus();
 	}
-    
+	
 	override function update(elapsed:Float)
 	{
 		PlayState.instance.callOnScripts('onUpdate', [elapsed]);
