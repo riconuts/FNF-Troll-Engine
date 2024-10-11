@@ -284,8 +284,6 @@ class Stats {
 
 				totalPlayed += 2;
 			case PBOT: // Milisecond-based accuracy, using V-Slice's PBOT1 algorithm
-				trace(diff, PBot.getAcc(Math.abs(diff)), data.pbotPoints);
-
 				if (data.pbotPoints == null)
 					totalNotesHit += PBot.getAcc(Math.abs(diff));
 				else

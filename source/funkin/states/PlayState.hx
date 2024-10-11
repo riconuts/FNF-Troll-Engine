@@ -2445,6 +2445,8 @@ class PlayState extends MusicBeatState
 			}
 		});
 
+		// vv Should give the same score as above ^^ but updates only at the end of a hold, rather than DURING a hold
+
 /* 		field.holdDropped.add((daNote:Note, field:PlayField) -> {
 			if (!field.isPlayer)return;
 			if (stats.accuracySystem == 'PBot') {
