@@ -3990,8 +3990,8 @@ class PlayState extends MusicBeatState
 			return;
 		} 
 
-/* 		if(stats.accuracySystem == 'PBot')
-			stats.totalPlayed += (PBot.holdScorePerSecond * (note.sustainLength * 0.001)) * 0.01; */
+ 		if(stats.accuracySystem == 'PBot')
+			stats.totalPlayed += (PBot.holdScorePerSecond * (note.sustainLength * 0.001)) * 0.01;
 		
 		//
 		note.wasGoodHit = true;
