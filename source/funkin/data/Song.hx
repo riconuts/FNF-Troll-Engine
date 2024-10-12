@@ -461,10 +461,10 @@ class Song
 		return swagJson;
 	}
 
-	static public function loadSong(metadata:SongMetadata, ?difficulty:String, ?difficultyIdx:Int = 1) {
-		Paths.currentModDirectory = metadata.folder;
+	static public function loadSong(toPlay:SongMetadata, ?difficulty:String, ?difficultyIdx:Int = 1) {
+		Paths.currentModDirectory = toPlay.folder;
 
-		var songLowercase:String = Paths.formatToSongPath(metadata.songName);
+		var songLowercase:String = Paths.formatToSongPath(toPlay.songName);
 		var diffSuffix:String;
 
         var rawDifficulty:String = difficulty;
@@ -478,14 +478,14 @@ class Song
 		}
 				
 		if (Main.showDebugTraces)
-			trace('playSong', metadata, difficulty);
+			trace('playSong', toPlay, difficulty);
 		
 		#if (moonchart)
 		var SONG:Null<SwagSong> = null;
 
 		var isVSlice:Bool = false;
-		if (metadata.folder != ""){
-			var sdfghjk = Paths.mods(metadata.folder + '/songs/$songLowercase/$songLowercase');
+		if (toPlay.folder != ""){
+			var sdfghjk = Paths.mods(toPlay.folder + '/songs/$songLowercase/$songLowercase');
 			var chartsFilePath = '$sdfghjk-chart.json';
 			var metadataPath = '$sdfghjk-metadata.json';
 
@@ -553,9 +553,11 @@ class Song
 			}
 		}
 
-		if (SONG == null){
-            trace("No file format found for the chart!");
+		if (SONG == null) {
+			PlayState.SONG = null;
+			
             // Find a better way to show the error to the user
+            trace("No file format found for the chart!");
             return;
         }
 		#else

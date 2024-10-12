@@ -120,26 +120,31 @@ class FreeplayState extends MusicBeatState
 
 	var songLoaded:String = null;
 	var selectedSong:String = null;
-	function onAccept(){
-		if (selectedSongCharts.length == 0)
-			FlxG.sound.play(Paths.sound('cancelMenu'));
-		else{
-			menu.controls = null;
-
-			if (songLoaded != selectedSong)
-				Song.loadSong(selectedSongData, curDiffStr, curDiffIdx);
-
-			if (FlxG.sound.music != null)
-				FlxG.sound.music.fadeOut(0.16);
-	
-			if (FlxG.keys.pressed.SHIFT)
-				LoadingState.loadAndSwitchState(new funkin.states.editors.ChartingState());
-			else
-				LoadingState.loadAndSwitchState(new PlayState());	
+	function onAccept() {
+		var proceed:Bool = false;
+		
+		if (selectedSongCharts.length == 0 && songLoaded != selectedSong) {
+			Song.loadSong(selectedSongData, curDiffStr, curDiffIdx);
+			proceed = PlayState.SONG != null;
 		}
+
+		if (!proceed) {
+			FlxG.sound.play(Paths.sound('cancelMenu'));
+			return;
+		}
+
+		menu.controls = null;
+
+		if (FlxG.sound.music != null)
+			FlxG.sound.music.fadeOut(0.16);
+
+		if (FlxG.keys.pressed.SHIFT)
+			LoadingState.loadAndSwitchState(new funkin.states.editors.ChartingState());
+		else
+			LoadingState.loadAndSwitchState(new PlayState());
 	}
 
-	function playSelectedSongMusic(){
+	function playSelectedSongMusic() {
 		// load song json and play inst
 		if (songLoaded != selectedSong){
 			songLoaded = selectedSong;
