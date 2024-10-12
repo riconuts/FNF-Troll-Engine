@@ -267,7 +267,7 @@ class Stats {
 		// trace(score, grade, clearType);
 	}
 
-	public function calculateAccuracy(data:JudgmentData, diff:Float){
+	public function calculateAccuracy(data:JudgmentData, diff:Float, ?incrementPlayed:Bool = true){
 		switch(accuracySystem){
 			case SIMPLE: // -1 acc if breaks combo, +1 otherwise
 				if(data.comboBehaviour == BREAK)
@@ -275,14 +275,16 @@ class Stats {
 				else
 					totalNotesHit++;
 
-				totalPlayed++;
+				if(data.countAsHit != false)
+					totalPlayed++;
 			case WIFE3: // Milisecond-based accuracy, using Etterna's Wife3 algorithm
 				if (data.wifePoints == null)
 					totalNotesHit += Wife3.getAcc(diff);
 				else
 					totalNotesHit += data.wifePoints;
 
-				totalPlayed += 2;
+				if (data.countAsHit != false)
+					totalPlayed += 2;
 			case PBOT: // Milisecond-based accuracy, using V-Slice's PBOT1 algorithm
 				if (data.pbotPoints == null)
 					totalNotesHit += PBot.getAcc(Math.abs(diff));
@@ -290,10 +292,13 @@ class Stats {
 					totalNotesHit += data.pbotPoints;
 
 				
-				totalPlayed += 5;
+				if (data.countAsHit != false)
+					totalPlayed += 5;
 			default: // accuracy depends on the judgement
 				totalNotesHit += data.accuracy * 0.01;
-				totalPlayed++;
+
+				if (data.countAsHit != false)
+					totalPlayed++;
 		}
 	}
 }

@@ -33,7 +33,8 @@ typedef JudgmentData = {
 	?pbotPoints:Float, // if this isn't null, then PBOT wont do any calculations and will instead just add these to the pbot score/accuracy
 	?hideJudge:Bool, // if this is true then this judge wont show a judgment image
     ?comboBehaviour:ComboBehaviour, // how this judge affects your combo (IGNORE, INCREMENT or BREAK). Defaults to INCREMENT
-    ?badJudgment:Bool // used for mines, etc. makes it so the window isnt scaled by the judge difficulty. defaults to false
+    ?badJudgment:Bool, // used for mines, etc. makes it so the window isnt scaled by the judge difficulty. defaults to false
+	?countAsHit:Bool // False for stuff like hold drops
 
 }
 
@@ -134,6 +135,7 @@ class JudgmentManager {
 			health: -2.5,
 			comboBehaviour: BREAK,
 			noteSplash: false,
+			countAsHit: false
 		},
 		DAMAGELESS_MISS => {
 			internalName: "miss",
