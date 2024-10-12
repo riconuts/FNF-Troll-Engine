@@ -442,9 +442,6 @@ class FunkinHScript extends FunkinScript
 		return returnValue == null ? Function_Continue : returnValue;
 	}
 
-	// Stores original values of variables that get overwritten during a function call
-	@:noCompletion var _executeFunc_prevVals = new Map<String, Dynamic>();
-
 	/**
 	 * Calls a function within the script
 	**/
@@ -463,9 +460,13 @@ class FunkinHScript extends FunkinScript
 			extraVars.set("this", parentObject);
 		}
 
+		var prevVals:Map<String, Dynamic>;
+
 		if (extraVars != null) {
+			prevVals = [];
+
 			for (name => value in extraVars) {
-				_executeFunc_prevVals.set(name, get(name));
+				prevVals.set(name, get(name));
 				set(name, value);
 			}
 		}
@@ -482,9 +483,10 @@ class FunkinHScript extends FunkinScript
 			print('$scriptName: Error executing $funcName(${parameters.join(', ')}): ' + haxe.Log.formatOutput(message, posInfo));
 		}
 
-		for (name => value in _executeFunc_prevVals)
-			set(name, value);
-		_executeFunc_prevVals.clear();
+		if (prevVals != null) {
+			for (name => value in prevVals)
+				set(name, value);
+		}
 
 		return returnVal;
 	}
