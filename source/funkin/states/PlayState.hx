@@ -2434,9 +2434,8 @@ class PlayState extends MusicBeatState
 		field.holdDropped.add((daNote:Note, field:PlayField) -> {
 			if (!field.isPlayer)return;
 			if (stats.accuracySystem == 'PBot') {
-				var dtMs:Float = daNote.sustainLength - daNote.holdingTime;
 				stats.totalPlayed += (PBot.holdScorePerSecond * (daNote.sustainLength * 0.001)) * 0.01;
-				stats.totalNotesHit += PBot.holdScorePerSecond * 0.01 * (dtMs * 0.001);
+				stats.totalNotesHit += PBot.holdScorePerSecond * 0.01 * (daNote.holdingTime * 0.001);
 				RecalculateRating();
 			}
 		});
