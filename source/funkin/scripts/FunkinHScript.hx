@@ -460,7 +460,7 @@ class FunkinHScript extends FunkinScript
 			extraVars.set("this", parentObject);
 		}
 
-		var prevVals:Map<String, Dynamic>;
+		var prevVals:Map<String, Dynamic> = null;
 
 		if (extraVars != null) {
 			prevVals = [];
