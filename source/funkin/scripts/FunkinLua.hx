@@ -1944,14 +1944,14 @@ class FunkinLua extends FunkinScript
 				var args = [for (arg in args){
 					(arg is String ? '"$arg"' : Std.string(arg));
 				}];
-				Main.print('$scriptName: Error on function $name(${args.join(', ')}): $err');
+				print('$scriptName: Error on function $name(${args.join(', ')}): $err');
 				
 				/* just so your output isnt SPAMMED
 				if (!duplicateErrors.contains(err)) {
 					var args = [for (arg in args){
 						(arg is String ? '"$arg"' : Std.string(arg));
 					}];
-					Main.print('$scriptName: Error on function $func(${args.join(', ')}): $err');
+					print('$scriptName: Error on function $func(${args.join(', ')}): $err');
 					duplicateErrors.push(err);
 					while(duplicateErrors.length > 20)
 						duplicateErrors.shift();
@@ -1975,7 +1975,7 @@ class FunkinLua extends FunkinScript
 				return;
 			
 			PlayState.instance.addTextToDebug(text);
-			Main.print('$scriptName: $text');
+			print('$scriptName: $text');
 		}
 	}
 	#end

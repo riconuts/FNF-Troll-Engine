@@ -206,27 +206,8 @@ class Main extends Sprite
 			sprite.__cacheBitmap = null;
 			sprite.__cacheBitmapData = null;
 		}
+
 	}
-
-
-	#if (!no_traces && (js || lua || sys))
-	private inline static function _printStr(str){
-		#if js
-		if (js.Syntax.typeof(untyped console) != "undefined" && (untyped console).log != null)
-			(untyped console).log(str);
-		#elseif lua
-		untyped __define_feature__("use._hx_print", _hx_print(str));
-		#elseif sys
-		Sys.println(str);
-		#end
-	}
-	private static function _printArgsArray(args:Array<Dynamic>)
-		_printStr(args.join(', '));
-
-	public static final print:Function = Reflect.makeVarArgs(_printArgsArray);
-	#else
-	public static final print:Function = ()->{};
-	#end
 
 	#if CRASH_HANDLER
 	private static function toMainMenu() @:privateAccess {

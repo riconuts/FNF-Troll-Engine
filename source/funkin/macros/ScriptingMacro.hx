@@ -107,7 +107,7 @@ class ScriptingMacro
 		{
 			for (entry in clMeta)
 			{
-				if (entry.name == ':noScripting' /*|| (className != "HScriptOverridenState")*/)
+				if (entry.name == ':noScripting')
                 {
 					// only way i can think of to force-override canBeScripted to always be false
                     // makes it so that you can't use state overrides to script the state, either.

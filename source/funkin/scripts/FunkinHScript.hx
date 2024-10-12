@@ -2,7 +2,6 @@ package funkin.scripts;
 
 import funkin.scripts.FunkinScript.ScriptType;
 import funkin.objects.IndependentVideoSprite;
-import openfl.events.DataEvent;
 import funkin.scripts.*;
 import funkin.scripts.Globals.*;
 
@@ -17,7 +16,7 @@ import flixel.FlxG;
 import flixel.math.FlxPoint;
 
 import lime.app.Application;
-import haxe.ds.StringMap;
+import haxe.Constraints.Function;
 
 import hscript.*;
 
@@ -107,11 +106,11 @@ class FunkinHScript extends FunkinScript
 		return new FunkinHScript(null, name, additionalVars, doCreateCall);
 	}
 
-	private static inline function sowy_trim_redundant_repeated_message_error_pos_shit(message:String, posInfo:haxe.PosInfos):String
+	private static inline function trim_redundant_error_trace(message:String, posInfo:haxe.PosInfos):String
 	{
 		if (message.startsWith(posInfo.fileName)) {
-			var sowy = posInfo.fileName + ":" + posInfo.lineNumber + ": ";
-			message = message.substr(sowy.length); 
+			var to_remove = posInfo.fileName + ":" + posInfo.lineNumber + ": ";
+			message = message.substr(to_remove.length); 
 		}
 
 		return message;
@@ -144,6 +143,8 @@ class FunkinHScript extends FunkinScript
 		
 		set("importClass", importClass);
 		set("importEnum", importEnum);
+
+		set("print", print);
 		
 		set("script", this);
 		set("global", Globals.variables);
@@ -184,9 +185,18 @@ class FunkinHScript extends FunkinScript
 		set("game", currentState);
 		
 		if (currentState is PlayState){
+			var currentState:PlayState = cast currentState;
+			var debugPrint:Function = Reflect.makeVarArgs(function(toPrint) {
+				currentState.addTextToDebug('$scriptName: ${toPrint.join(', ')}');
+			});
+
 			set("getInstance", getInstance);
+			set("debugPrint", debugPrint);
+
 		}else{
 			set("getInstance", @:privateAccess FlxG.get_state);
+			set("debugPrint", get("trace"));
+			
 		}
 	}
 
@@ -391,7 +401,7 @@ class FunkinHScript extends FunkinScript
 		catch (e:haxe.Exception)
 		{
 			var posInfo = interpreter.posInfos();
-			var message = sowy_trim_redundant_repeated_message_error_pos_shit(e.message, posInfo);
+			var message = trim_redundant_error_trace(e.message, posInfo);
 			
 			haxe.Log.trace(message, posInfo);
 		}
@@ -432,12 +442,15 @@ class FunkinHScript extends FunkinScript
 		return returnValue == null ? Function_Continue : returnValue;
 	}
 
+	// Stores original values of variables that get overwritten during a function call
+	@:noCompletion var _executeFunc_prevVals = new Map<String, Dynamic>();
+
 	/**
 	 * Calls a function within the script
 	**/
-	public function executeFunc(func:String, ?parameters:Array<Dynamic>, ?parentObject:Any, ?extraVars:Map<String, Dynamic>):Dynamic
+	public function executeFunc(funcName:String, ?parameters:Array<Dynamic>, ?parentObject:Any, ?extraVars:Map<String, Dynamic>):Dynamic
 	{
-		var daFunc = get(func);
+		var daFunc:Function = get(funcName);
 
 		if (!Reflect.isFunction(daFunc))
 			return null;
@@ -450,14 +463,10 @@ class FunkinHScript extends FunkinScript
 			extraVars.set("this", parentObject);
 		}
 
-		var prevVals:Map<String, Dynamic> = null;
-
 		if (extraVars != null) {
-			prevVals = [];
-
-			for (key in extraVars.keys()) {
-				prevVals.set(key, get(key)); // Store original values of variables that are being overwritten
-				set(key, extraVars.get(key));
+			for (name => value in extraVars) {
+				_executeFunc_prevVals.set(name, get(name));
+				set(name, value);
 			}
 		}
 
@@ -468,15 +477,14 @@ class FunkinHScript extends FunkinScript
 		catch (e:haxe.Exception)
 		{
 			var posInfo = interpreter.posInfos();
-			var message = sowy_trim_redundant_repeated_message_error_pos_shit(e.message, posInfo);
+			var message = trim_redundant_error_trace(e.message, posInfo);
 
-			Main.print('$scriptName: Error executing $func(${parameters.join(', ')}): ' + haxe.Log.formatOutput(message, posInfo));
+			print('$scriptName: Error executing $funcName(${parameters.join(', ')}): ' + haxe.Log.formatOutput(message, posInfo));
 		}
 
-		if (prevVals != null){
-			for (key => val in prevVals)
-				set(key, val);		
-		}
+		for (name => value in _executeFunc_prevVals)
+			set(name, value);
+		_executeFunc_prevVals.clear();
 
 		return returnVal;
 	}
