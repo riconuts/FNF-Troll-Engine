@@ -2357,12 +2357,16 @@ class PlayState extends MusicBeatState
 		super.onFocus();
 	}
 
+	private var justUnfocused = false; 
 	override public function onFocusLost():Void
 	{
 		#if DISCORD_ALLOWED
 		if (!isDead)
 			DiscordClient.changePresence(detailsPausedText, stateText, songName);
 		#end
+
+		if (ClientPrefs.autoPause)
+			justUnfocused = true;
 
 		super.onFocusLost();
 	}
@@ -2644,8 +2648,10 @@ class PlayState extends MusicBeatState
 				doGameOver();
 			}else if (doDeathCheck()){
 				// die lol
-			}else if (controls.PAUSE && startedCountdown && canPause && !paused)
+			}else if ((controls.PAUSE || justUnfocused) && startedCountdown && canPause && !paused) {
+				justUnfocused = false;
 				openPauseMenu();
+			}
 		}
 
 		////
