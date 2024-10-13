@@ -9,6 +9,14 @@ using StringTools;
 
 class CoolUtil
 {
+	public static function structureToMap(st:Dynamic):Map<String, Dynamic> {
+		return [
+			for (k in Reflect.fields(st)){
+				k => Reflect.field(st, k);
+			}
+		];
+	}
+
 	@:noCompletion static var _point:FlxPoint = FlxPoint.get();
 	public static function overlapsMouse(object:FlxObject, ?camera:FlxCamera):Bool
 	{

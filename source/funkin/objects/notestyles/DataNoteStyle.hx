@@ -3,19 +3,10 @@ package funkin.objects.notestyles;
 import funkin.scripts.FunkinHScript;
 import funkin.objects.shaders.ColorSwap;
 import funkin.data.NoteStyles;
+import funkin.CoolUtil.structureToMap;
 
 class DataNoteStyle extends BaseNoteStyle
 {
-	var script:FunkinHScript;
-
-	private static function structureToMap(st):Map<String, Dynamic> {
-		return [
-			for (k in Reflect.fields(st)){
-				k => Reflect.field(st, k);
-			}
-		];
-	}
-
 	private static function getData(name:String):NoteStyleData {
 		var path = Paths.getPath('notestyles/$name.json');
 		var json = Paths.getJson(path);
@@ -46,8 +37,12 @@ class DataNoteStyle extends BaseNoteStyle
 		return data == null ? null : new DataNoteStyle(name, data);
 	}
 
+	////
+
 	final loadedNotes:Array<Note> = []; 
 	final data:NoteStyleData;
+
+	var script:FunkinHScript;
 
 	private function new(id:String, data:NoteStyleData) {
 		this.data = data;
@@ -62,6 +57,7 @@ class DataNoteStyle extends BaseNoteStyle
 				"getStyleData" => (() -> return this.data)
 			], false);
 		}
+
 		super(id);
 	}
 
@@ -70,11 +66,7 @@ class DataNoteStyle extends BaseNoteStyle
 		var colorSwap:ColorSwap = note.colorSwap;
 
 		if (colorSwap != null) {
-			(hsb == null) ? colorSwap.setHSB() : colorSwap.setHSB(
-				hsb[0] / 360, 
-				hsb[1] / 100, 
-				hsb[2] / 100
-			);
+			colorSwap.setHSBIntArray(hsb);
 		}
 	}
 
@@ -98,8 +90,7 @@ class DataNoteStyle extends BaseNoteStyle
 				var asset = data.assets.get("QUANT" + name);
 				asset.quant = true;
 				return asset;
-			}
-			
+			}	
 		}
 
 		return data.assets.get(name);
@@ -119,7 +110,7 @@ class DataNoteStyle extends BaseNoteStyle
 		inline function getAnimData(a:Dynamic){
 			if (a is Array) {
 				var data:Array<Any> = cast a;
-				return data[FlxG.random.int(0, data.length - 1)];
+				return data[Std.random(data.length)];
 			} else
 				return a;
 		}
@@ -128,13 +119,12 @@ class DataNoteStyle extends BaseNoteStyle
 		{
 			return switch(animation.type){
 				case COLUMN:
-					if (animation.data == null)null;
+					(animation.data == null) ? null : getAnimData(animation.data[obj.column]);
 
-					getAnimData(animation.data[obj.column]);
-
-				case STATIC:
+				case STATIC: 
 					getAnimData(animation.animation);
-				default:
+					
+				default: 
 					null;
 			}
 		}
@@ -142,8 +132,13 @@ class DataNoteStyle extends BaseNoteStyle
 		switch(asset.type){
 			case INDICES:
 				var asset:NoteStyleIndicesAsset = cast asset;
-				obj.loadGraphic(Paths.image(asset.imageKey), true, asset.hInd, asset.vInd);
-				if(asset.animations != null){
+				
+				var graphic = Paths.image(asset.imageKey);
+				var hInd = asset.columns != null ? Math.floor(graphic.width / asset.columns) : asset.hInd;
+				var vInd = asset.rows != null ? Math.floor(graphic.height / asset.rows) : asset.vInd;
+				obj.loadGraphic(graphic, true, hInd, vInd);
+
+				if (asset.animations != null){
 					for(animation in asset.animations){
 						var animData:Array<Int> = getAnimation(animation);
 						obj.animation.add(animation.name, animData, 
@@ -151,6 +146,7 @@ class DataNoteStyle extends BaseNoteStyle
 					}
 					obj.animation.play(asset.animations[0].name);
 				}
+
 			case SPARROW:
 				var asset:NoteStyleIndicesAsset = cast asset;
 				obj.frames = Paths.getSparrowAtlas(asset.imageKey);
@@ -162,14 +158,15 @@ class DataNoteStyle extends BaseNoteStyle
 					}
 					obj.animation.play(asset.animations[0].name);
 				}
+
 			case SINGLE:
 				obj.loadGraphic(Paths.image(asset.imageKey));
+
 			case SOLID:
 				obj.makeGraphic(1, 1, CoolUtil.colorFromString(asset.imageKey), false, asset.imageKey);
-			default:
-		}
 			
-		
+			default:
+		}	
 	}
 
 	override function optionsChanged(changed) { // Maybe we should add an event to PlayState for this
@@ -222,7 +219,10 @@ class DataNoteStyle extends BaseNoteStyle
 
 
 			case INDICES: var asset:NoteStyleIndicesAsset = cast asset;
-				note.loadGraphic(Paths.image(asset.imageKey), true, asset.hInd, asset.vInd);
+				var graphic = Paths.image(asset.imageKey);
+				var hInd:Int = (asset.columns != null) ? Math.floor(graphic.width / asset.columns) : asset.hInd;
+				var vInd:Int = (asset.rows != null) ? Math.floor(graphic.height / asset.rows) : asset.vInd;
+				note.loadGraphic(graphic, true, hInd, vInd);
 				
 				var anim:Array<Int> = getNoteAnim(note, asset);
 				note.animation.add('', anim);
@@ -243,11 +243,8 @@ class DataNoteStyle extends BaseNoteStyle
 		note.antialiasing = (data.antialiasing ?? asset.antialiasing) ?? true;
 		note.useDefaultAntialiasing = note.antialiasing;
 		
-
 		if (asset.canBeColored == false) {
-			note.colorSwap.hue = 0;
-			note.colorSwap.brightness = 0;
-			note.colorSwap.saturation = 0;
+			note.colorSwap.setHSB();
 		}else
 			updateColours(note);
 		

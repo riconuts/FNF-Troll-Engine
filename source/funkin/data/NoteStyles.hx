@@ -45,7 +45,6 @@ typedef NoteStyleAnimationData<T:Any> = {
 	?animation:OneOfTwo<T, Array<T>>, // used for 'static' type. If its an array then randomly pick
 
 	?framerate:Float // prob default to 24?
-	
 }
 
 typedef NoteStyleAnimatedAsset<T:Any> = {
@@ -67,11 +66,12 @@ typedef NoteStyleIndicesAsset = {
 	var hInd:Int;
 	var vInd:Int;
 
-	// TODO: use graphic.width / columns, graphic.height / rows in place of hInd and vInd when these are present vv
 	@:optional var rows:Int;
 	@:optional var columns:Int;
 }
-class NoteStyles {
+
+class NoteStyles 
+{
 	private static final map:Map<String, BaseNoteStyle> = [];
 	
 	private static function set(name, style:BaseNoteStyle){
