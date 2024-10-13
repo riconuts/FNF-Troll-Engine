@@ -646,12 +646,7 @@ class PlayState extends MusicBeatState
 		splashSkin = SONG.splashSkin;
 
 		hudSkin = SONG.hudSkin;
-
-		//// STAGE SHIT
-		if (SONG.stage == null || SONG.stage.length < 1)
-			curStage = 'stage';
-		else
-			curStage = SONG.stage;
+		curStage = SONG.stage;
 
 		////
 		instance = this;
@@ -672,8 +667,6 @@ class PlayState extends MusicBeatState
 			var orderListRaw = Paths.getContent(folder + 'orderList.txt');
 
 			if (orderListRaw != null){
-				//trace('$orderListPath exists');
-
 				for (name in orderListRaw.split('\n'))
 				{
                     for(ext in Paths.HSCRIPT_EXTENSIONS){
@@ -729,7 +722,7 @@ class PlayState extends MusicBeatState
 		{
 			Paths.iterateDirectory(folder, function(file:String)
 			{
-				if(filesPushed.contains(file) || !file.endsWith('.hscript'))
+				if (filesPushed.contains(file) || !Paths.isHScript(file))
 					return;
 
 				createHScript(folder + file);
