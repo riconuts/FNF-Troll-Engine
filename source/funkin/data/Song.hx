@@ -333,6 +333,9 @@ class Song
 
 		swagJson.validScore = true;
 
+		if (songJson.stage == null)
+			songJson.stage = 'stage';
+
 		if (songJson.player1 == null)
 			songJson.player1 = "bf";
 

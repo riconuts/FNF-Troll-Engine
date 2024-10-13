@@ -264,6 +264,14 @@ class Paths
 		return dirMap.exists(path);
 		#end
 	}
+	inline static public function getDirectoryFileList(path:String):Array<String> {
+		#if sys
+		return !isDirectory(path) ? [] : FileSystem.readDirectory(path);
+		#else
+		var dir:String = Directory.endsWith("/") ? Directory.substr(0, -1) : Directory; // remove ending slash
+		return !dirMap.exists(dir) ? [] : [for (i in dirMap.get(dir)) i];
+		#end
+	}
 
 	static public function getJson(path:String):Null<Dynamic>
 	{
