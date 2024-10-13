@@ -123,9 +123,15 @@ class FreeplayState extends MusicBeatState
 	function onAccept() {
 		var proceed:Bool = false;
 		
-		if (selectedSongCharts.length == 0 && songLoaded != selectedSong) {
-			Song.loadSong(selectedSongData, curDiffStr, curDiffIdx);
-			proceed = PlayState.SONG != null;
+		if (selectedSongCharts.length == 0)
+			proceed = false;
+		else{
+			proceed = songLoaded == selectedSong && PlayState.SONG != null;
+		
+			if (!proceed) {
+				Song.loadSong(selectedSongData, curDiffStr, curDiffIdx);
+				proceed = PlayState.SONG != null;
+			}
 		}
 
 		if (!proceed) {
