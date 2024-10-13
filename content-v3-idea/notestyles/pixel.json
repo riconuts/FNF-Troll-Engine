@@ -4,7 +4,7 @@
 	"assets": {
 		"tap": {
 			"type": "indices",
-			"path": "pixelUI/NOTE_assets",
+			"imageKey": "pixelUI/NOTE_assets",
 			"data": [
 				[4],
 				[5],
@@ -14,7 +14,7 @@
 		},
 		"receptor": {
 			"type": "indices",
-			"path": "pixelUI/NOTE_assets",
+			"imageKey": "pixelUI/NOTE_assets",
 			"animations": {
 				"static": [
 					[0],
@@ -38,7 +38,7 @@
 		},
 		"hold": {
 			"type": "indices",
-			"path": "pixelUI/NOTE_assetsENDS",
+			"imageKey": "pixelUI/NOTE_assetsENDS",
 			"data": [
 				[0],
 				[1],
@@ -48,7 +48,7 @@
 		},
 		"holdEnd": {
 			"type": "indices",
-			"path": "pixelUI/NOTE_assetsENDS",
+			"imageKey": "pixelUI/NOTE_assetsENDS",
 			"data": [
 				[4],
 				[5],
@@ -57,7 +57,7 @@
 			]
 		},
 		"noteSplash": {
-			"visible": false
+			"type": "none"
 		}
 	}
 }

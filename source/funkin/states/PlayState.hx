@@ -5,8 +5,8 @@ import funkin.data.CharacterData;
 import funkin.data.Cache;
 import funkin.data.Song;
 import funkin.data.Section;
+import funkin.data.NoteStyles;
 import funkin.objects.Note;
-import funkin.objects.NoteStyle;
 import funkin.objects.NoteSplash;
 import funkin.objects.StrumNote;
 import funkin.objects.Stage;
@@ -643,7 +643,7 @@ class PlayState extends MusicBeatState
 		PlayState.keyCount = SONG.keyCount==null ? 4 : SONG.keyCount;
 		Note.spriteScale = (4 / keyCount) * 0.7;
 		Note.swagWidth = Note.spriteScale * 160;
-		NoteStyle.loadDefault();
+		NoteStyles.loadDefault();
 		/**
 		 * Note texture asset names
 		 * The quant prefix gets handled by the Note class
@@ -2232,7 +2232,7 @@ class PlayState extends MusicBeatState
 		}
 
 		hud.changedOptions(options);
-		for (ns in NoteStyle.iterator()) {
+		for (ns in NoteStyles) {
 			ns.optionsChanged(options);
 		}
 		

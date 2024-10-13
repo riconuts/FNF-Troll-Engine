@@ -4,7 +4,7 @@
 	"assets": {
 		"tap": {
 			"type": "sparrow",
-			"path": "NOTE_assets",
+			"imageKey": "NOTE_assets",
 			"data": [
 				"purple",
 				"blue",
@@ -14,7 +14,7 @@
 		},
 		"receptor": {
 			"type": "sparrow",
-			"path": "NOTE_assets",
+			"imageKey": "NOTE_assets",
 			"animations": {
 				"static": [
 					"arrowLEFT",
@@ -38,7 +38,7 @@
 		},
 		"hold": {
 			"type": "sparrow",
-			"path": "NOTE_assets",
+			"imageKey": "NOTE_assets",
 			"data": [
 				"purple hold piece",
 				"blue hold piece",
@@ -48,7 +48,7 @@
 		},
 		"holdEnd": {
 			"type": "sparrow",
-			"path": "NOTE_assets",
+			"imageKey": "NOTE_assets",
 			"data": [
 				"pruple end hold",
 				"blue hold end",
@@ -58,7 +58,7 @@
 		},
 		"roll": {
 			"type": "sparrow",
-			"path": "ROLL_assets",
+			"imageKey": "ROLL_assets",
 			"scale": 1.5,
 			"data": [
 				"purple roll piece",
@@ -69,7 +69,7 @@
 		},
 		"rollEnd": {
 			"type": "sparrow",
-			"path": "ROLL_assets",
+			"imageKey": "ROLL_assets",
 			"scale": 1.5,
 			"data": [
 				"purple roll end",
@@ -78,21 +78,21 @@
 				"red roll end"
 			]
 		},
-		"quantRoll": {
+		"QUANTroll": {
 			"type": "sparrow",
-			"path": "QUANTROLL_assets",
+			"imageKey": "QUANTROLL_assets",
 			"scale": 1.5,
 			"animation": "quant roll piece"
 		},
-		"quantRollEnd": {
+		"QUANTrollEnd": {
 			"type": "sparrow",
-			"path": "QUANTROLL_assets",
+			"imageKey": "QUANTROLL_assets",
 			"scale": 1.5,
 			"animation": "quant roll end"
 		},
 		"noteSplash": {
 			"type": "sparrow",
-			"path": "noteSplashes",
+			"imageKey": "noteSplashes",
 			"animations": [
 				{
 					"type": "random",

@@ -3,7 +3,8 @@
 	"assets": {
 		"tap": {
 			"type": "single",
-			"path": "mine",
+			"imageKey": "mine",
+			"canBeColored": false,
 			"scale": 1,
 			"antialiasing": true
 		}

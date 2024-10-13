@@ -5,7 +5,8 @@ import flixel.math.FlxMath;
 import funkin.scripts.*;
 import funkin.states.PlayState;
 import funkin.states.editors.ChartingState;
-import funkin.objects.NoteStyle;
+import funkin.data.NoteStyles;
+import funkin.objects.notestyles.BaseNoteStyle;
 import funkin.objects.shaders.ColorSwap;
 import funkin.objects.playfields.*;
 import funkin.data.JudgmentManager.Judgment;
@@ -166,7 +167,6 @@ class Note extends NoteObject
     public var noteMod(default, set):String = null; 
 	public var noteType(default, set):String = null;  // the note type
 	public var noteStyle(default, set) = null; // the note's visual appearance
-	public var texture:String = null;
 	public var canQuant:Bool = true; // whether a quant texture should be searched for or not
 	public var usesDefaultColours:Bool = true; // whether this note uses the default note colours (lets you change colours in options menu)
 	// This automatically gets set if a notetype changes the ColorSwap values
@@ -298,19 +298,19 @@ class Note extends NoteObject
 			return name;
 
 		if (noteStyle != null) {
-			var prevStyle:NoteStyle = NoteStyle.get(noteStyle);
+			var prevStyle:BaseNoteStyle = NoteStyles.get(noteStyle);
 			prevStyle.unloadNote(this);
 		}
 		
 		// find the first existing style in the following order [hudskin.getNoteStyle(name), name, 'default']
-		var newStyle:NoteStyle = null;
+		var newStyle:BaseNoteStyle = null;
 
 		if (genScript != null) {
 			var ret = genScript.executeFunc("getNoteStyle", [name]);
-			if (ret is String) newStyle = NoteStyle.get(ret, name);
+			if (ret is String) newStyle = NoteStyles.get(ret, name);
 		}
 
-		if (newStyle == null) newStyle = NoteStyle.get(name, 'default');
+		if (newStyle == null) newStyle = NoteStyles.get(name, 'default');
 		if (newStyle.loadNote(this))
 			noteStyle = name; // yes, the base name, not the hudskin name.
 		
