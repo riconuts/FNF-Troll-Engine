@@ -643,7 +643,7 @@ class PlayState extends MusicBeatState
 		PlayState.keyCount = SONG.keyCount==null ? 4 : SONG.keyCount;
 		NoteStyles.loadDefault();
 		// TODO: check song notestyle
-		Note.spriteScale = (4 / keyCount) * NoteStyles.get("default").scale;
+		Note.spriteScale = (4 / keyCount) * 0.7; //NoteStyles.get("default").scale;
 		Note.swagWidth = Note.spriteScale * 160;
 		/**
 		 * Note texture asset names

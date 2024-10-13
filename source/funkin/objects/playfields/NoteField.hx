@@ -652,7 +652,12 @@ class NoteField extends FieldBase
 				case 3: quad3;
 				default: null;
 			};
-			var vert = VectorHelpers.rotateV3(quad, 0, 0, FlxAngle.TO_RAD * sprite.angle);
+			var angle = sprite.angle;
+
+			if(isNote)
+				angle += note.typeOffsetAngle;
+			
+			var vert = VectorHelpers.rotateV3(quad, 0, 0, FlxAngle.TO_RAD * angle);
 			vert.x = vert.x + sprite.offsetX;
 			vert.y = vert.y + sprite.offsetY;
 

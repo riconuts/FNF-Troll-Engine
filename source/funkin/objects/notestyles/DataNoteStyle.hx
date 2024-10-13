@@ -27,7 +27,7 @@ class DataNoteStyle extends BaseNoteStyle
 
 		for (name => asset in assetsMap) {
 			asset.canBeColored = asset.canBeColored != false;
-			if (asset.scale == null) asset.scale = 1.0;
+			//if (asset.scale == null) asset.scale = 1.0;
 			if (asset.alpha == null) asset.alpha = 1.0;
 
 /* 			if (asset.animations != null)
@@ -159,7 +159,7 @@ class DataNoteStyle extends BaseNoteStyle
 					obj.animation.play(asset.animations[0].name);
 				}
 			case SINGLE:
-				obj.loadGraphic(asset.imageKey);
+				obj.loadGraphic(Paths.image(asset.imageKey));
 			case SOLID:
 				obj.makeGraphic(1, 1, CoolUtil.colorFromString(asset.imageKey), false, asset.imageKey);
 			default:
@@ -224,7 +224,7 @@ class DataNoteStyle extends BaseNoteStyle
 				note.animation.play('');
 
 			case SINGLE:
-				note.loadGraphic(asset.imageKey);
+				note.loadGraphic(Paths.image(asset.imageKey));
 
 			case SOLID: // lol
 				note.makeGraphic(1, 1, CoolUtil.colorFromString(asset.imageKey), false, asset.imageKey);
@@ -242,13 +242,12 @@ class DataNoteStyle extends BaseNoteStyle
 		}
 
 		if (asset.canBeColored == false) {
-			note.colorSwap = null;
-			note.shader = null;
-		}else {
-			note.colorSwap = new ColorSwap(); 
-			note.shader = note.colorSwap.shader;
+			note.colorSwap.hue = 0;
+			note.colorSwap.brightness = 0;
+			note.colorSwap.saturation = 0;
+		}else
 			updateColours(note);
-		}
+		
 		
 		note.scale.x = note.scale.y = (asset.scale ?? data.scale);
 		note.defScale.copyFrom(note.scale);

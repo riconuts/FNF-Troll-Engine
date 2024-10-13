@@ -1,2 +1,4 @@
-function noteUpdate(elapsed:Float)
-	note.offsetAngle += elapsed; // rotate the mf
+
+function noteUpdate(note:Note, elapsed:Float){
+	note.typeOffsetAngle += elapsed * 45; // rotate the mf
+}

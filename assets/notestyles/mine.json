@@ -1,11 +1,11 @@
 {
 	"name": "Mine",
+	"scale": 0.7,
 	"assets": {
 		"tap": {
 			"type": "single",
 			"imageKey": "mine",
 			"canBeColored": false,
-			"scale": 1,
 			"antialiasing": true
 		}
 	}

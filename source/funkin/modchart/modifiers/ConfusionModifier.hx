@@ -47,7 +47,6 @@ class ConfusionModifier extends NoteModifier {
 				angleZ += getSubmodValue("noteAngle", player) + getSubmodValue("note" + data + "Angle", player);
 			}
 
-			angleZ += note.typeOffsetAngle;
         }else if((obj.objType == STRUM)){
 			angleX += getSubmodValue("receptorAngleX", player) + getSubmodValue("receptor" + data + "AngleX", player);
 			angleY += getSubmodValue("receptorAngleY", player) + getSubmodValue("receptor" + data + "AngleY", player);
