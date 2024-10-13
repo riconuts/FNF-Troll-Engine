@@ -50,7 +50,7 @@ typedef NoteStyleAnimatedAsset<T:Any> = {
 	> NoteStyleAsset,
 
 	@:optional var framerate:Float; // default framerate
-	
+
 	@:optional var animations:Array<NoteStyleAnimationData<T>>; // primarily for stuff like receptors
 	//@:optional var data:Array<OneOfTwo<T, NoteStyleAnimationData<T>>>; // I cant check for typedef kms
 
@@ -73,7 +73,23 @@ class NoteStyles {
 		return style;
 	} 
 
-	public static function get(name:String, fallback:String = 'default'):Null<BaseNoteStyle> {
+	public static function tryGetNewStyle(name:String){
+		var dataStyle = DataNoteStyle.fromName(name);
+		if(dataStyle != null)return dataStyle;
+/* 		var scriptedStyle = ScriptedNoteStyle.fromName(name);
+		if(scriptedStyle != null)return scriptedStyle; */
+		return null;
+	}
+
+	public static function get(name:String, fallback:String = 'default', ?tryToCreate:Bool = true):Null<BaseNoteStyle> {
+		if (tryToCreate && !exists(name)){
+			var newStyle:BaseNoteStyle = tryGetNewStyle(name);
+			if(newStyle != null){
+				map.set(name, newStyle);
+				return newStyle;
+			}
+		}
+
 		return map.get(exists(name) ? name : fallback);
 	}
 

@@ -27,7 +27,7 @@ class DataNoteStyle extends BaseNoteStyle
 
 		for (name => asset in assetsMap) {
 			asset.canBeColored = asset.canBeColored != false;
-			// if (asset.scale == null) asset.scale = 1.0;
+			if (asset.scale == null) asset.scale = 1.0;
 			if (asset.alpha == null) asset.alpha = 1.0;
 
 /* 			if (asset.animations != null)
@@ -51,6 +51,7 @@ class DataNoteStyle extends BaseNoteStyle
 
 	private function new(id:String, data:NoteStyleData) {
 		this.data = data;
+		this.scale = data.scale;
 
 		// maybe this can be moved to fromName? idk lol
 		var scriptPath:String = Paths.getHScriptPath('notestyles/$id');
@@ -214,7 +215,6 @@ class DataNoteStyle extends BaseNoteStyle
 				note.animation.addByPrefix('', anim); // might want to use the json anim name, whatever
 				note.animation.play('');
 
-				trace(note, asset, anim);
 
 			case INDICES: var asset:NoteStyleIndicesAsset = cast asset;
 				note.loadGraphic(Paths.image(asset.imageKey), true, asset.hInd, asset.vInd);

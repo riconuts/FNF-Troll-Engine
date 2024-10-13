@@ -2,6 +2,8 @@ package funkin.objects.notestyles;
 
 class BaseNoteStyle 
 {
+	public var scale:Float = 1;
+	
 	public final id:String;
 
 	public function new(id:String) {
