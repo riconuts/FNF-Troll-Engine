@@ -6,6 +6,7 @@ import funkin.data.Cache;
 import funkin.data.Song;
 import funkin.data.Section;
 import funkin.objects.Note;
+import funkin.objects.NoteStyle;
 import funkin.objects.NoteSplash;
 import funkin.objects.StrumNote;
 import funkin.objects.Stage;
@@ -640,6 +641,7 @@ class PlayState extends MusicBeatState
 		PlayState.keyCount = SONG.keyCount==null ? 4 : SONG.keyCount;
 		Note.spriteScale = (4 / keyCount) * 0.7;
 		Note.swagWidth = Note.spriteScale * 160;
+		NoteStyle.loadDefault();
 		/**
 		 * Note texture asset names
 		 * The quant prefix gets handled by the Note class
@@ -2215,18 +2217,21 @@ class PlayState extends MusicBeatState
 			return;
 		
 		trace("changed " + options);
-
-		for(note in allNotes)
-			note.updateColours();
-			
-		hud.changedOptions(options);
 		
 		if(options.contains("gradeSet"))
 			ratingStuff = Highscore.grades.get(ClientPrefs.gradeSet);
 
+		if (!ClientPrefs.coloredCombos)
+			comboColor = 0xFFFFFFFF;
+
 		if (!ClientPrefs.simpleJudge) {
 			for (prevCombo in lastCombos)
 				prevCombo.kill();
+		}
+
+		hud.changedOptions(options);
+		for (ns in NoteStyle.iterator()) {
+			ns.optionsChanged(options);
 		}
 		
 		callOnScripts('optionsChanged', [options]);
@@ -2239,9 +2244,6 @@ class PlayState extends MusicBeatState
 				break;
 			}
 		}
-
-		if (!ClientPrefs.coloredCombos)
-			comboColor = 0xFFFFFFFF;
 		
 		for(field in playfields){
 			field.noteField.optimizeHolds = ClientPrefs.optimizeHolds;
@@ -3704,7 +3706,7 @@ class PlayState extends MusicBeatState
 	}
 
 	private function keyShit():Void {
-		// RICO WE ALREADY HAVE EVENT CONTROLS
+		// RICO WE ALREADY HAVE EVENT CONTROLS // THAT'S HOW IT WORKED BEFORE
 /* 		for (column => actionBinds in keysArray) {
 			if (FlxG.keys.anyJustPressed(actionBinds)) strumKeyDown(column);
 			if (FlxG.keys.anyJustReleased(actionBinds)) strumKeyUp(column);
