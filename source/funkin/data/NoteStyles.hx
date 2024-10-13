@@ -21,6 +21,7 @@ enum abstract NoteStyleAnimationType(String) from String to String
 typedef NoteStyleData = {
 	var name:String;
 	var scale:Float;
+	var antialiasing:Bool;
 	var assets:Map<String, NoteStyleAsset>;
 } 
 
@@ -65,6 +66,10 @@ typedef NoteStyleIndicesAsset = {
 	> NoteStyleAnimatedAsset<Array<Int>>, // this is kinda nuts
 	var hInd:Int;
 	var vInd:Int;
+
+	// TODO: use graphic.width / columns, graphic.height / rows in place of hInd and vInd when these are present vv
+	@:optional var rows:Int;
+	@:optional var columns:Int;
 }
 class NoteStyles {
 	private static final map:Map<String, BaseNoteStyle> = [];
@@ -74,24 +79,30 @@ class NoteStyles {
 		return style;
 	} 
 
-	public static function tryGetNewStyle(name:String){
+	public static function tryGetNewStyle(name:String, ?useCache:Bool = true){
+		if (exists(name) && useCache)
+			return map.get(name);
+		
 		var dataStyle = DataNoteStyle.fromName(name);
-		if(dataStyle != null)return dataStyle;
+		if(dataStyle != null){
+			if (useCache)
+				set(name, dataStyle);
+			return dataStyle;
+		}
 /* 		var scriptedStyle = ScriptedNoteStyle.fromName(name);
 		if(scriptedStyle != null)return scriptedStyle; */
 		return null;
 	}
 
-	public static function get(name:String, fallback:String = 'default', ?tryToCreate:Bool = true):Null<BaseNoteStyle> {
+	public static function get(name:String, fallback:Null<String> = 'default', ?tryToCreate:Bool = true):Null<BaseNoteStyle> {
 		if (tryToCreate && !exists(name)){
 			var newStyle:BaseNoteStyle = tryGetNewStyle(name);
-			if(newStyle != null){
-				map.set(name, newStyle);
+			if(newStyle != null)
 				return newStyle;
-			}
+			
 		}
 
-		return map.get(exists(name) ? name : fallback);
+		return fallback == null ? map.get(name) : map.get(exists(name) ? name : fallback);
 	}
 
 	public static function loadDefault() {

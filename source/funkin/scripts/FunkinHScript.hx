@@ -273,6 +273,8 @@ class FunkinHScript extends FunkinScript
 		// FNF-specific things
 		set("controls", PlayerSettings.player1.controls);
 		set("get_controls", () -> return PlayerSettings.player1.controls);
+
+		set("NoteStyles", funkin.data.NoteStyles);
 		
 		set("Paths", funkin.Paths);
 		set("Conductor", funkin.Conductor);

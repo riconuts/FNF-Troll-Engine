@@ -240,11 +240,9 @@ class DataNoteStyle extends BaseNoteStyle
 
 		// note.alpha = asset.alpha;
 
-		if (asset.antialiasing != null) {
-			note.antialiasing = asset.antialiasing;
-		}else {
-			note.useDefaultAntialiasing = true;
-		}
+		note.antialiasing = (data.antialiasing ?? asset.antialiasing) ?? true;
+		note.useDefaultAntialiasing = note.antialiasing;
+		
 
 		if (asset.canBeColored == false) {
 			note.colorSwap.hue = 0;

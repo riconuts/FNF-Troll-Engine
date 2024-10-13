@@ -1,10 +1,25 @@
 {
 	"name": "Funkin' Pixel",
 	"scale": 6,
+	"antialiasing": false,
 	"assets": {
 		"tap": {
 			"type": "indices",
 			"imageKey": "pixelUI/NOTE_assets",
+			"hInd": 17,
+			"vInd": 17,
+			"data": [
+				[4],
+				[5],
+				[6],
+				[7]
+			]
+		},
+		"QUANTtap": {
+			"type": "indices",
+			"imageKey": "pixelUI/QUANTNOTE_assets",
+			"hInd": 17,
+			"vInd": 17,
 			"data": [
 				[4],
 				[5],
@@ -15,6 +30,8 @@
 		"receptor": {
 			"type": "indices",
 			"imageKey": "pixelUI/NOTE_assets",
+			"hInd": 17,
+			"vInd": 17,
 			"animations": [
 				{
 					"type": "column",
@@ -52,6 +69,8 @@
 		"hold": {
 			"type": "indices",
 			"imageKey": "pixelUI/NOTE_assetsENDS",
+			"hInd": 7,
+			"vInd": 6,
 			"data": [
 				[0],
 				[1],
@@ -62,6 +81,32 @@
 		"holdEnd": {
 			"type": "indices",
 			"imageKey": "pixelUI/NOTE_assetsENDS",
+			"hInd": 7,
+			"vInd": 6,
+			"data": [
+				[4],
+				[5],
+				[6],
+				[7]
+			]
+		},
+		"QUANThold": {
+			"type": "indices",
+			"imageKey": "pixelUI/QUANTNOTE_assetsENDS",
+			"hInd": 7,
+			"vInd": 6,
+			"data": [
+				[0],
+				[1],
+				[2],
+				[3]
+			]
+		},
+		"QUANTholdEnd": {
+			"type": "indices",
+			"imageKey": "pixelUI/QUANTNOTE_assetsENDS",
+			"hInd": 7,
+			"vInd": 6,
 			"data": [
 				[4],
 				[5],
