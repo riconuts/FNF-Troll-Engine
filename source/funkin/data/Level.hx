@@ -6,6 +6,11 @@ import funkin.scripts.FunkinHScript;
 using funkin.CoolerStringTools;
 using StringTools;
 
+enum abstract SongListState(String) from String to String {
+	var STORY = "storymode";
+	var FREEPLAY = "freeplay";
+}
+
 typedef LevelJSON = {
 	?id:String,
 	name:String,
@@ -52,7 +57,9 @@ class Level
 		if(scriptPath != null){
 			script = FunkinHScript.fromFile(scriptPath, scriptPath, [
 				"this" => this,
-				"getData" => (() -> return this.data)
+				"getData" => (() -> return this.data),
+				"STORY" => SongListState.STORY,
+				"FREEPLAY" => SongListState.FREEPLAY,
 			], false);
 		}
 	}
@@ -99,18 +106,18 @@ class Level
 		return data.girlfriend;
 	}
 
-	public function getSongs():Array<String> 
+	public function getSongs(?state:String = SongListState.STORY):Array<String> 
 	{
 		if (script != null && script.exists("getSongs"))
-			return script.executeFunc("getSongs", []);
+			return script.executeFunc("getSongs", [state]);
 
 		return data.songs;
 	}
 
-	public function getDisplayedSongs():Array<String> 
+	public function getDisplayedSongs(?state:String = SongListState.STORY):Array<String> 
 	{
 		if (script != null && script.exists("getDisplayedSongs"))
-			return script.executeFunc("getDisplayedSongs", []);
+			return script.executeFunc("getDisplayedSongs", [state]);
 
 		if (data.displayedSongs == null || data.displayedSongs.length == 0){
 			var displayedArray:Array<String> = [];
