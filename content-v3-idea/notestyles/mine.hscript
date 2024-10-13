@@ -1,0 +1,2 @@
+function noteUpdate(elapsed:Float)
+	this.offsetAngle += elapsed; // rotate the mf

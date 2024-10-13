@@ -472,6 +472,8 @@ class PlayState extends MusicBeatState
 		judgeManager.judgeTimescale = Wife3.timeScale;
 		
 		PBot.missThreshold = ClientPrefs.hitWindow;
+		if(PBot.missThreshold < 160)
+			PBot.missThreshold = 160;
 
 		stats.accuracySystem = ClientPrefs.accuracyCalc;
 		

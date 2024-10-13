@@ -601,14 +601,14 @@ class Note extends NoteObject
 		var changed = false;
 
 		if (noteScript != null) {
-			if (noteScript.exists("loadNoteAnims") && Reflect.isFunction(noteScript.get("loadNoteAnims"))) {
+			if (noteScript.exists("loadNoteAnims")) {
 				noteScript.executeFunc("loadNoteAnims", [this], this, ["super" => _loadNoteAnims]);
 				changed = true;
 			}
 		}
 
 		if (genScript != null) {
-			if (genScript.exists("loadNoteAnims") && Reflect.isFunction(genScript.get("loadNoteAnims"))) {
+			if (genScript.exists("loadNoteAnims")) {
 				genScript.executeFunc("loadNoteAnims", [this], this, ["super" => _loadNoteAnims, "noteTypeLoaded" => changed]);
 				changed = true;
 			}

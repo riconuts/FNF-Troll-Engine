@@ -1,0 +1,11 @@
+{
+	"name": "Mine",
+	"assets": {
+		"tap": {
+			"type": "single",
+			"path": "mine",
+			"scale": 1,
+			"antialiasing": true
+		}
+	}
+}

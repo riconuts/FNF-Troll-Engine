@@ -286,12 +286,13 @@ class PBot
 
 
 	public static function getAcc(noteDiff:Float){
+		trace(noteDiff, missThreshold);
 		// TODO: find a math wizard who can add timescale to this
 		return (switch (noteDiff) {
-			case(_ > missThreshold) => true:
-				missWeight;
 			case(_ <= perfectThreshold) => true:
 				perfectWeight;
+			case(_ > missThreshold) => true:
+				missWeight;
 			default:
 				// Fancy equation.
 				var factor:Float = 1.0 - (1.0 / (1.0 + Math.exp(-scoringSlope * (noteDiff - scoringOffset))));

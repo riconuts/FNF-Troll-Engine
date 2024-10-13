@@ -1,0 +1,128 @@
+{
+	"name": "Funkin'",
+	"scale": 0.7,
+	"assets": {
+		"tap": {
+			"type": "sparrow",
+			"path": "NOTE_assets",
+			"data": [
+				"purple",
+				"blue",
+				"green",
+				"red"
+			]
+		},
+		"receptor": {
+			"type": "sparrow",
+			"path": "NOTE_assets",
+			"animations": {
+				"static": [
+					"arrowLEFT",
+					"arrowDOWN",
+					"arrowUP",
+					"arrowRIGHT"
+				],
+				"confirm": [
+					"left confirm",
+					"up confirm",
+					"down confirm",
+					"right confirm"
+				],
+				"press": [
+					"left press",
+					"up press",
+					"down press",
+					"right press"
+				]
+			}
+		},
+		"hold": {
+			"type": "sparrow",
+			"path": "NOTE_assets",
+			"data": [
+				"purple hold piece",
+				"blue hold piece",
+				"green hold piece",
+				"red hold piece"
+			]
+		},
+		"holdEnd": {
+			"type": "sparrow",
+			"path": "NOTE_assets",
+			"data": [
+				"pruple end hold",
+				"blue hold end",
+				"green hold end",
+				"red hold end"
+			]
+		},
+		"roll": {
+			"type": "sparrow",
+			"path": "ROLL_assets",
+			"scale": 1.5,
+			"data": [
+				"purple roll piece",
+				"blue roll piece",
+				"green roll piece",
+				"red roll piece"
+			]
+		},
+		"rollEnd": {
+			"type": "sparrow",
+			"path": "ROLL_assets",
+			"scale": 1.5,
+			"data": [
+				"purple roll end",
+				"blue roll end",
+				"green roll end",
+				"red roll end"
+			]
+		},
+		"quantRoll": {
+			"type": "sparrow",
+			"path": "QUANTROLL_assets",
+			"scale": 1.5,
+			"animation": "quant roll piece"
+		},
+		"quantRollEnd": {
+			"type": "sparrow",
+			"path": "QUANTROLL_assets",
+			"scale": 1.5,
+			"animation": "quant roll end"
+		},
+		"noteSplash": {
+			"type": "sparrow",
+			"path": "noteSplashes",
+			"animations": [
+				{
+					"type": "random",
+					"animations": [
+						"note splash purple 1",
+						"note splash purple 2"
+					]
+				},
+				{
+					"type": "random",
+					"animations": [
+						"note splash blue 1",
+						"note splash blue 2"
+					]
+				},
+				{
+					"type": "random",
+					"animations": [
+						"note splash green 1",
+						"note splash green 2"
+					]
+				},
+				{
+					"type": "random",
+					"animations": [
+						"note splash red 1",
+						"note splash red 2"	
+					]
+				}
+			]
+		}
+	}
+}
