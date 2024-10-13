@@ -640,7 +640,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 		
-		PlayState.keyCount = SONG.keyCount==null ? 4 : SONG.keyCount;
+		PlayState.keyCount = SONG.keyCount;
 		NoteStyles.loadDefault();
 		// TODO: check song notestyle
 		Note.spriteScale = (4 / keyCount) * 0.7; //NoteStyles.get("default").scale;
@@ -2452,7 +2452,7 @@ class PlayState extends MusicBeatState
 				stats.totalNotesHit += PBot.holdScorePerSecond * 0.01 * (daNote.sustainLength * 0.001);
 				RecalculateRating();
 			}
-		});
+		}); 
 
 	}
 

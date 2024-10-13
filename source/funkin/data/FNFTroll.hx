@@ -2,11 +2,11 @@ package funkin.data;
 
 #if moonchart
 import haxe.Json;
-import moonchart.formats.BasicFormat.BasicMetaData;
 import moonchart.backend.Util;
-import moonchart.formats.BasicFormat.BasicEvent;
-import moonchart.backend.FormatData;
 import moonchart.backend.Timing;
+import moonchart.backend.FormatData;
+import moonchart.formats.BasicFormat.BasicEvent;
+import moonchart.formats.BasicFormat.BasicMetaData;
 import moonchart.formats.BasicFormat.BasicNoteType;
 import moonchart.formats.BasicFormat.BasicChart;
 import moonchart.formats.BasicFormat.FormatDifficulty;

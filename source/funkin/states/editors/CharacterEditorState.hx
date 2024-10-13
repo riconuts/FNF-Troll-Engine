@@ -877,6 +877,7 @@ class CharacterEditorState extends MusicBeatState
 
 	function reloadGhost(charName:String) {
 		ghostChar = new Character(0, 0, charName, ghostPlayableCheckbox.checked, true);
+		ghostChar.setupCharacter();
 		ghostChar.alpha = 0.6;
 		ghostChar.color = 0xFF666688;
 
@@ -1080,6 +1081,7 @@ class CharacterEditorState extends MusicBeatState
 		}
 
 		char = new Character(0, 0, daAnim, !isDad, true);
+		char.setupCharacter();
 		if(char.animationsArray[0] != null)
 			char.playAnim(char.animationsArray[0].anim, true);
 

@@ -261,6 +261,7 @@ class Character extends FlxSprite
 
 		recalculateDanceIdle();
 		dance();
+		animation.finish();
 
 		flipX = isPlayer ? !originalFlipX : originalFlipX;
 	}

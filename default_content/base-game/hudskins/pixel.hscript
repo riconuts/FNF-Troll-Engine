@@ -161,12 +161,13 @@ function setupReceptorTexture(strum:StrumNote){
 		lastAnim = strum.animation.curAnim.name;
 	
 	var br:String = 'NOTE_assets';
-	if (PlayState.SONG.arrowSkin != null && PlayState.SONG.arrowSkin.length > 1)
-		br = PlayState.SONG.arrowSkin;
 	
-	if (ClientPrefs.noteSkin == 'Quants')
-	{
-		if (Paths.exists(Paths.getPath("images/pixelUI/QUANT" + br + ".png", "IMAGE")) || Paths.exists(Paths.modsImages("pixelUI/QUANT" + br))) {
+	var arrowSkin = PlayState.SONG.arrowSkin;
+	if (Paths.imageExists("pixelUI/" + arrowSkin))
+		br = arrowSkin;
+	
+	if (ClientPrefs.noteSkin == 'Quants') {
+		if (Paths.imageExists("pixelUI/QUANT"+br)) {
 			br = "QUANT" + br;
 			strum.isQuant = true;
 		}
