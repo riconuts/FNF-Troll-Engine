@@ -5,6 +5,7 @@ import flixel.math.FlxMath;
 import funkin.scripts.*;
 import funkin.states.PlayState;
 import funkin.states.editors.ChartingState;
+import funkin.objects.NoteStyle;
 import funkin.objects.shaders.ColorSwap;
 import funkin.objects.playfields.*;
 import funkin.data.JudgmentManager.Judgment;
@@ -45,6 +46,12 @@ private typedef NoteScriptState = {
 	var notetypeScripts:Map<String, FunkinHScript>;
 }
 
+class NoteType {
+	public function new() {
+	
+	}
+}
+
 class Note extends NoteObject
 {
 	public static var spriteScale:Float = 0.7;
@@ -72,10 +79,11 @@ class Note extends NoteObject
 		''
 	];
 
+	// should move these to Paths maybe
 	public static final quantShitCache = new Map<String, Null<String>>();
 
-	// should move this to Paths maybe
-	public static function getQuantTexture(dir:String, fileName:String, textureKey:String) {
+	/** Return null if there's no quant texture file **/
+	public static function getQuantTexture(dir:String, fileName:String, textureKey:String):Null<String> {
 		var quantKey:Null<String>;
 
 		if (quantShitCache.exists(textureKey)) {
@@ -157,7 +165,8 @@ class Note extends NoteObject
 	//// note type/customizable shit
     public var noteMod(default, set):String = null; 
 	public var noteType(default, set):String = null;  // the note type
-	public var texture(default, set):String; // texture for the note
+	public var noteStyle(default, set) = null; // the note's visual appearance
+	public var texture:String = null;
 	public var canQuant:Bool = true; // whether a quant texture should be searched for or not
 	public var usesDefaultColours:Bool = true; // whether this note uses the default note colours (lets you change colours in options menu)
 	// This automatically gets set if a notetype changes the ColorSwap values
@@ -247,16 +256,16 @@ class Note extends NoteObject
 	public var copyY:Bool = true;
 	public var copyAlpha:Bool = true;
 	public var copyVerts:Bool = true;
+	
 	#if PE_MOD_COMPATIBILITY
 	// Angle is controlled by verts in the modchart system
-
     @:isVar public var copyAngle(get, set):Bool;
     function get_copyAngle()return copyVerts;
     function set_copyAngle(val:Bool)return copyVerts = val;
     #end
 
 	#if ALLOW_DEPRECATION
-	public var realColumn:Int; 
+	public var realColumn:Int; // i'd like for the chart to save columns in player order though (0-3 bf, 4-7 dad), n get rid of mustHitSection
 	//// backwards compat
 	@:noCompletion public var realNoteData(get, set):Int; 
 	@:noCompletion inline function get_realNoteData() return realColumn;
@@ -272,80 +281,46 @@ class Note extends NoteObject
 		return val;
 	}
 
-	////
-	private function set_texture(value:String):String {
-		if (tex != value) reloadNote(texPrefix, value, texSuffix);
-		return tex;
-	}
-
-	public function updateColours(ignore:Bool=false){		
-		if (!ignore && !usesDefaultColours) return;
-		if (colorSwap==null) return;
-		if (column == -1) return; // FUCKING PSYCH EVENT NOTES!!!
-		
-		var hsb = isQuant ? ClientPrefs.quantHSV[quants.indexOf(quant)] : ClientPrefs.arrowHSV[column % 4];
-		(hsb == null) ? colorSwap.setHSB() : colorSwap.setHSB(
-			hsb[0] / 360, 
-			hsb[1] / 100, 
-			hsb[2] / 100
-		);
-
-		if (noteScript != null)
-			noteScript.executeFunc("onUpdateColours", [this], this);
-
-		if (genScript != null)
-			genScript.executeFunc("onUpdateColours", [this], this);
-	}
-
 	private function set_noteMod(value:String):String
 	{
 		if (value == null)
 			value = 'default';
 
-		updateColours();
-
 		////
 		if (!inEditor && PlayState.instance != null)
 			genScript = PlayState.instance.getHudSkinScript(value);
 
-		////
-		if (genScript == null){
-			texture = "";
+		return noteMod = value;
+	}
 
-		}else if (genScript.exists("setupNoteTexture")) {
-			genScript.executeFunc("setupNoteTexture", [this]);
+	private function set_noteStyle(name:String):String {
+		if (noteStyle == name)
+			return name;
 
-		}else {
-			if (genScript.exists("texturePrefix"))
-				texPrefix = genScript.get("texturePrefix");
+		if (noteStyle != null) {
+			var prevStyle:NoteStyle = NoteStyle.get(noteStyle);
+			prevStyle.unloadNote(this);
+		}
+		
+		// find the first existing style in the following order [hudskin.getNoteStyle(name), name, 'default']
+		var newStyle:NoteStyle = null;
 
-			if (genScript.exists("textureSuffix"))
-				texSuffix = genScript.get("textureSuffix");
-
-			if (genScript.exists("noteTexture"))
-				texture = genScript.get("noteTexture");
+		if (genScript != null) {
+			var ret = genScript.executeFunc("getNoteStyle", [name]);
+			if (ret is String) newStyle = NoteStyle.get(ret, name);
 		}
 
-		return noteMod = value;
+		if (newStyle == null) newStyle = NoteStyle.get(name, 'default');
+		if (newStyle.loadNote(this))
+			noteStyle = name; // yes, the base name, not the hudskin name.
+		
+		return noteStyle;
 	}
 
 	private function set_noteType(value:String):String {
 		noteSplashTexture = PlayState.splashSkin;
 
-		updateColours();
-
-		// just to make sure they arent 0, 0, 0
-		colorSwap.hue += 0.0127;
-		colorSwap.saturation += 0.0127;
-		colorSwap.brightness += 0.0127;
-		var hue = colorSwap.hue;
-		var sat = colorSwap.saturation;
-		var brt = colorSwap.brightness;
-
-		if (value == 'Hurt Note')
-			value = 'Mine';
-
-		if (column > -1 && noteType != value) {
+		if (column > -1 && (noteType==null || noteType != value)) {
 			var instance:NoteScriptState = inEditor ? ChartingState.instance : PlayState.instance;
 			noteScript = (instance == null) ? null : instance.notetypeScripts.get(value);
 
@@ -374,30 +349,12 @@ class Note extends NoteObject
 			}
 
 			noteType = value;
-
-			if (genScript != null)
-				genScript.executeFunc("setupNoteType", [this], this, ["this" => this]);
+			if (noteStyle == null) noteStyle = 'default';
 		}
-
-		if (usesDefaultColours) {
-			if (colorSwap.hue != hue || colorSwap.saturation != sat || colorSwap.brightness != brt)
-				usesDefaultColours = false;// just incase
-		}
-
-		if (colorSwap.hue==hue)
-			colorSwap.hue -= 0.0127;
-		if (colorSwap.saturation==sat)
-			colorSwap.saturation -= 0.0127;
-		if (colorSwap.brightness==brt)
-			colorSwap.brightness -= 0.0127;
-
 		////
 
 		if (noteScript != null)
 			noteScript.executeFunc("postSetupNote", [this], this, ["this" => this]);
-
-		if (genScript != null)
-			genScript.executeFunc("postSetupNoteType", [this], this, ["this" => this]);
 
 		////
 		if (isQuant && Paths.imageExists('QUANT' + noteSplashTexture))
@@ -408,12 +365,13 @@ class Note extends NoteObject
 			noteSplashSat = colorSwap.saturation;
 			noteSplashBrt = colorSwap.brightness;
 		}
-		return value;
+
+		return noteType;
 	}
 
 	override function toString()
 	{
-		return '(column: $column | noteType: $noteType | strumTime: $strumTime | visible: $visible)';
+		return '(ID: $ID, column: $column | noteType: $noteType | strumTime: $strumTime | visible: $visible)';
 	}
 
 	public function new(strumTime:Float, column:Int, ?prevNote:Note, gottaHitNote:Bool = false, susPart:SustainPart = TAP, ?inEditor:Bool = false, ?noteMod:String = 'default')
@@ -457,196 +415,6 @@ class Note extends NoteObject
 		if (column >= 0) 
 			this.noteMod = noteMod;
 	}
-
-	public var texPrefix:String = '';
-	public var tex:String;
-	public var texSuffix:String = '';
-	public function reloadNote(?prefix:String, ?texture:String, ?suffix:String, ?folder:String, hInd:Int = 0, vInd:Int = 0) {
-		if(prefix == null) prefix = '';
-		if(texture == null) texture = '';
-		if(suffix == null) suffix = '';
-		if(folder == null) folder = '';
-
-		texPrefix = prefix;
-		tex = texture;
-		texSuffix = suffix;
-
-		if (genScript != null)
-			genScript.executeFunc("onReloadNote", [this, prefix, texture, suffix], this);
-		
-		if (noteScript != null)
-			noteScript.executeFunc("onReloadNote", [this, prefix, texture, suffix], this);
-
-		if (genScript != null && genScript.executeFunc("preReloadNote", [this, prefix, texture, suffix], this) == Globals.Function_Stop)
-			return;
-
-		////
-
-		/** Should join and check for shit in the following order:
-		 * 
-		 * folder + "/" + "QUANT" + prefix + name + suffix
-		 * folder + "/" + prefix + name + suffix
-		 * "QUANT"+ prefix + name + suffix
-		 * prefix + name + suffix
-		 */
-		inline function getTextureKey() { // made it a function just cause i think it's easier to read it like this
-			var skin:String = (texture.length>0) ? texture : PlayState.arrowSkin;
-			var split:Array<String> = skin.split('/');
-			split[split.length - 1] = prefix + split[split.length-1] + suffix; // add prefix and suffix to the texture file
-
-			var fileName:String = split.pop();
-			var folderName:String = folder + split.join('/');
-			var foldersToCheck:Array<String> = (folderName == '') ? [''] : ['$folderName/', ''];
-			var loadQuants:Bool = canQuant && ClientPrefs.noteSkin=='Quants';
-
-			var key:String = null;
-			for (dir in foldersToCheck) {
-				key = dir + fileName;
-	
-				if (loadQuants) {
-					var quantKey:Null<String> = getQuantTexture(dir, fileName, key);
-					if (quantKey != null) {
-						key = quantKey;
-						isQuant = true;
-						break;
-					}
-				}
-				
-				if (Paths.imageExists(key)) {
-					isQuant = false;
-					break;
-				}
-			}
-			
-			return key; 
-		}
-
-		////
-		var wasQuant:Bool = isQuant;
-		var textureKey:String = getTextureKey();
-		if (wasQuant != isQuant) updateColours();
- 		
-		if (vInd > 0 && hInd > 0) {
-			var graphic = Paths.image(textureKey);
-			setSize(graphic.width / hInd, graphic.height / vInd);
-			loadGraphic(graphic, true, Math.floor(width), Math.floor(height));
-			loadIndNoteAnims();
-		}else {	
-			frames = Paths.getSparrowAtlas(textureKey);
-			loadNoteAnims();
-		} 
-	
-		if (inEditor)
-			setGraphicSize(ChartingState.GRID_SIZE, ChartingState.GRID_SIZE);
-		
-		defScale.copyFrom(scale);
-		updateHitbox();
-		
-		////	
-		if (genScript != null)
-			genScript.executeFunc("postReloadNote", [this, prefix, texture, suffix], this);
-
-		if (noteScript != null)
-			noteScript.executeFunc("postReloadNote", [this, prefix, texture, suffix], this);
-	}
-
-	public function loadIndNoteAnims()
-	{
-		var changed = false;
-
-		if (noteScript != null) {
-			if (noteScript.exists("loadIndNoteAnims") && Reflect.isFunction(noteScript.get("loadIndNoteAnims"))) {
-				noteScript.executeFunc("loadIndNoteAnims", [this], this, ["super" => _loadIndNoteAnims]);
-				changed = true;
-			}
-		}
-
-		if (genScript != null) {
-			if (genScript.exists("loadIndNoteAnims") && Reflect.isFunction(genScript.get("loadIndNoteAnims"))) {
-				genScript.executeFunc("loadIndNoteAnims", [this], this, ["super" => _loadIndNoteAnims, "noteTypeLoaded" => changed]);
-				changed = true;
-			}
-		}
-
-		if (!changed)
-			_loadIndNoteAnims();
-	}
-
-	function _loadIndNoteAnims() {
-		var colorName:String = colArray[column % colArray.length];		
-		var animName:String;
-		var animFrames:Array<Int>;
-
-		switch (holdType) {
-			default:	
-				animName = colorName+'Scroll';
-				animFrames = [column + 4];
-
-			case PART:
-				animName = colorName+'hold';
-				animFrames = [column];
- 
-			case END:
-				animName = colorName+'holdend';
-				animFrames = [column + 4];
-		} 
- 
-		animation.add(animName, animFrames);
-		animation.play(animName, true);
-
-		//scale.set(6, 6); // causd mines to be huge lol
-	} 
-
-	public function loadNoteAnims() {
-		var changed = false;
-
-		if (noteScript != null) {
-			if (noteScript.exists("loadNoteAnims")) {
-				noteScript.executeFunc("loadNoteAnims", [this], this, ["super" => _loadNoteAnims]);
-				changed = true;
-			}
-		}
-
-		if (genScript != null) {
-			if (genScript.exists("loadNoteAnims")) {
-				genScript.executeFunc("loadNoteAnims", [this], this, ["super" => _loadNoteAnims, "noteTypeLoaded" => changed]);
-				changed = true;
-			}
-		}
-
-		if (!changed)
-			_loadNoteAnims();
-	}
-
-	function _loadNoteAnims() { 
-		var colorName:String = colArray[column % colArray.length];		
-		var animName:String;
-		var animPrefix:String;
-
-		switch (holdType) {
-			default:	
-				animName = colorName+'Scroll';
-				animPrefix = colorName+'0';
- 
-			case PART:
-				animName = colorName+'hold';
-				animPrefix = '$colorName hold piece';
-				
- 
-			case END:
-				animName = colorName+'holdend';
-				animPrefix = '$colorName hold end';
-				if (colorName == "purple")
-					animPrefix ='pruple end hold'; // ?????
-				// this is autistic wtf
-				
-		} 
- 
-		animation.addByPrefix(animName, animPrefix);
-		animation.play(animName, true);
- 
-		scale.set(spriteScale, spriteScale); 
-	} 
 
 	override function draw()
 	{

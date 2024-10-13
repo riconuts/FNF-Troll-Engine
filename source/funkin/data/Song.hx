@@ -350,7 +350,7 @@ class Song
 				else if (Std.isOfType(type, Int) && type > 0)
 					type = ChartingState.noteTypeList[type];
 
-				note[3] = Std.isOfType(type, String) ? type : null;
+				note[3] = Std.isOfType(type, String) ? type : '';
 			}
 		}
 		
