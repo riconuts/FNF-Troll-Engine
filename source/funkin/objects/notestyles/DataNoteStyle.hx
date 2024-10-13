@@ -93,8 +93,12 @@ class DataNoteStyle extends BaseNoteStyle
 		}
 
 		if (usingQuants) {
-			if (data.assets.exists("QUANT"+name))
-				return data.assets.get("QUANT"+name);
+			if (data.assets.exists("QUANT" + name)){
+				// hacky, replace at some point probably
+				var asset = data.assets.get("QUANT" + name);
+				asset.quant = true;
+				return asset;
+			}
 			
 		}
 
@@ -206,6 +210,7 @@ class DataNoteStyle extends BaseNoteStyle
 		loadedNotes.push(note);
 
 		var asset:NoteStyleAsset = getNoteAsset(note);
+		note.isQuant = asset.quant ?? false;
 
 		switch (asset.type) {
 			case SPARROW: var asset:NoteStyleSparrowAsset = cast asset;

@@ -34,6 +34,7 @@ typedef NoteStyleAsset = {
 	var antialiasing:Null<Bool>;
 	var scale:Float;
 	var alpha:Float;
+	@:optional var quant:Bool;
 }
 
 typedef NoteStyleAnimationData<T:Any> = {
