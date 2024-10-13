@@ -429,7 +429,7 @@ class FunkinHScript extends FunkinScript
 
 	public function call(func:String, ?parameters:Array<Dynamic>, ?extraVars:Map<String, Dynamic>):Dynamic
 	{
-        var returnValue:Dynamic = executeFunc(func, parameters, null, extraVars);
+		var returnValue:Dynamic = executeFunc(func, parameters, null, extraVars);
 		
 		return returnValue == null ? Function_Continue : returnValue;
 	}
@@ -439,6 +439,9 @@ class FunkinHScript extends FunkinScript
 	**/
 	public function executeFunc(func:String, ?parameters:Array<Dynamic>, ?parentObject:Any, ?extraVars:Map<String, Dynamic>):Dynamic
 	{
+		if(!exists(func))
+			return null;
+
 		var daFunc = get(func);
 
 		if (!Reflect.isFunction(daFunc))
