@@ -1,5 +1,6 @@
 package funkin.data;
 
+import flixel.util.typeLimit.OneOfTwo;
 import funkin.objects.notestyles.*;
 
 enum abstract NoteStyleAssetType(String) from String to String {
@@ -8,6 +9,13 @@ enum abstract NoteStyleAssetType(String) from String to String {
 	var SINGLE = "single";
 	var SOLID = "solid";
 	var NONE = "none";
+}
+
+enum abstract NoteStyleAnimationType(String) from String to String
+{
+	var COLUMN = "column";
+	var STATIC = "static";
+	// might wanna add more so!!
 }
 
 typedef NoteStyleData = {
@@ -28,13 +36,27 @@ typedef NoteStyleAsset = {
 	var alpha:Float;
 }
 
+typedef NoteStyleAnimationData<T:Any> = {
+	type:NoteStyleAnimationType,
+	name:String,
+	?data:Array<OneOfTwo<T, Array<T>>>, // used for 'column' typE. If its an array then it should randomly pick between the 2 options
+	?animation:OneOfTwo<T, Array<T>>, // used for 'static' type. If its an array then randomly pick
+
+	?framerate:Float // prob default to 24?
+	
+}
+
 typedef NoteStyleAnimatedAsset<T:Any> = {
 	> NoteStyleAsset,
+
+	@:optional var framerate:Float; // default framerate
 	
-	@:optional var animations:Map<String, Array<T>>; // for stuff like receptors, splashes
+	@:optional var animations:Array<NoteStyleAnimationData<T>>; // primarily for stuff like receptors
+	//@:optional var data:Array<OneOfTwo<T, NoteStyleAnimationData<T>>>; // I cant check for typedef kms
+
 	@:optional var data:Array<T>; // for stuff like notes
 	@:optional var animation:T; // for whatever
-} 
+}
 
 typedef NoteStyleSparrowAsset = NoteStyleAnimatedAsset<String>;
 
@@ -43,7 +65,6 @@ typedef NoteStyleIndicesAsset = {
 	var hInd:Int;
 	var vInd:Int;
 }
-
 class NoteStyles {
 	private static final map:Map<String, BaseNoteStyle> = [];
 	

@@ -45,4 +45,8 @@ class BaseNoteStyle
 	public function unloadNoteSplash(splash:NoteSplash):Void {
 		
 	}
+
+	public function noteUpdate(note:Note, dt:Float):Void {
+
+	}
 }

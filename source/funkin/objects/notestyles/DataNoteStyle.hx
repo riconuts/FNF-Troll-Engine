@@ -1,10 +1,13 @@
 package funkin.objects.notestyles;
 
+import funkin.scripts.FunkinHScript;
 import funkin.objects.shaders.ColorSwap;
 import funkin.data.NoteStyles;
 
 class DataNoteStyle extends BaseNoteStyle
 {
+	var script:FunkinHScript;
+
 	private static function structureToMap(st):Map<String, Dynamic> {
 		return [
 			for (k in Reflect.fields(st)){
@@ -27,8 +30,8 @@ class DataNoteStyle extends BaseNoteStyle
 			// if (asset.scale == null) asset.scale = 1.0;
 			if (asset.alpha == null) asset.alpha = 1.0;
 
-			if (asset.animations != null)
-				asset.animations = structureToMap(asset.animations);
+/* 			if (asset.animations != null)
+				asset.animations = structureToMap(asset.animations); */
 		}
 
 		return cast json;
@@ -40,7 +43,7 @@ class DataNoteStyle extends BaseNoteStyle
 
 	public static function fromName(name:String):Null<DataNoteStyle> {
 		var data = getData(name);
-		return data==null ? null : new DataNoteStyle(name, null);
+		return data == null ? null : new DataNoteStyle(name, data);
 	}
 
 	final loadedNotes:Array<Note> = []; 
@@ -49,8 +52,15 @@ class DataNoteStyle extends BaseNoteStyle
 	private function new(id:String, data:NoteStyleData) {
 		this.data = data;
 
-		trace("made default with", data.assets);
+		// maybe this can be moved to fromName? idk lol
+		var scriptPath:String = Paths.getHScriptPath('notestyles/$id');
 
+		if (scriptPath != null) {
+			script = FunkinHScript.fromFile(scriptPath, scriptPath, [
+				"this" => this,
+				"getStyleData" => (() -> return this.data)
+			], false);
+		}
 		super(id);
 	}
 
@@ -75,12 +85,16 @@ class DataNoteStyle extends BaseNoteStyle
 			case PART: "hold";
 			case END: "holdEnd";
 			// what abt rolls
+			// maybe note.holdSubtype??
+			// NORMAL and ROLL
+			// then we can just .replace("hold", "roll") if subType == ROLL
+			// then everything the roll script does we can just hardcode because honestly dont think it needs to be soft-coded
 		}
 
 		if (usingQuants) {
-			if (data.assets.exists("QUANT"+name)){
+			if (data.assets.exists("QUANT"+name))
 				return data.assets.get("QUANT"+name);
-			}
+			
 		}
 
 		return data.assets.get(name);
@@ -90,21 +104,102 @@ class DataNoteStyle extends BaseNoteStyle
 		if (asset.animation != null) 
 			return asset.animation 
 		else if (asset.data != null)
-			return asset.data[note.column];
+			return asset.data[note.column % asset.data.length];
 		else
 			return null;
 	}
 
-	override function optionsChanged(changed) {
+	inline function loadAnimations(obj:NoteObject, asset:NoteStyleAsset)
+	{
+		inline function getAnimData(a:Dynamic){
+			if (a is Array) {
+				var data:Array<Any> = cast a;
+				return data[FlxG.random.int(0, data.length - 1)];
+			} else
+				return a;
+		}
+
+		inline function getAnimation(animation:NoteStyleAnimationData<Any>):Null<Any>
+		{
+			return switch(animation.type){
+				case COLUMN:
+					if (animation.data == null)null;
+
+					getAnimData(animation.data[obj.column]);
+
+				case STATIC:
+					getAnimData(animation.animation);
+				default:
+					null;
+			}
+		}
+
+		switch(asset.type){
+			case INDICES:
+				var asset:NoteStyleIndicesAsset = cast asset;
+				obj.loadGraphic(Paths.image(asset.imageKey), true, asset.hInd, asset.vInd);
+				if(asset.animations != null){
+					for(animation in asset.animations){
+						var animData:Array<Int> = getAnimation(animation);
+						obj.animation.add(animation.name, animData, 
+							animation.framerate == null ? (asset.framerate == null ? 30 : asset.framerate) : animation.framerate);
+					}
+					obj.animation.play(asset.animations[0].name);
+				}
+			case SPARROW:
+				var asset:NoteStyleIndicesAsset = cast asset;
+				obj.frames = Paths.getSparrowAtlas(asset.imageKey);
+				if (asset.animations != null) {
+					for (animation in asset.animations) {
+						var animData:String = getAnimation(animation);
+						obj.animation.addByPrefix(animation.name, animData,
+							animation.framerate == null ? (asset.framerate == null ? 30 : asset.framerate) : animation.framerate);
+					}
+					obj.animation.play(asset.animations[0].name);
+				}
+			case SINGLE:
+				obj.loadGraphic(asset.imageKey);
+			case SOLID:
+				obj.makeGraphic(1, 1, CoolUtil.colorFromString(asset.imageKey), false, asset.imageKey);
+			default:
+		}
+			
+		
+	}
+
+	override function optionsChanged(changed) { // Maybe we should add an event to PlayState for this
+		// Or maybe a global OptionsState.updated event
+		// then we dont need to call this manually everywhere lol
+
 		if (true) {
 			for (note in loadedNotes)
 				updateColours(note);
 		}
+
+		if(script != null)
+			script.executeFunc("optionsChanged", [changed]);
+		
 	}
 
-	override function unloadNote(note:Note) {
-		loadedNotes.remove(note);
+	override function noteUpdate(note:Note, dt:Float){
+		if (script != null)
+			script.executeFunc("noteUpdate", [note, dt]);
 	}
+
+	override function destroy(){
+		super.destroy();
+		// JUST to make sure shit is cleared properly lol
+		loadedNotes.resize(0); 
+		if (script != null)
+			script.executeFunc("destroy", []);
+	}
+
+	override function unloadNote(note:Note){
+		loadedNotes.remove(note);
+		if (script != null)
+			script.executeFunc("unloadNote", [note]);
+	}
+	
 
 	override function loadNote(note:Note) {
 		loadedNotes.push(note);
@@ -158,6 +253,9 @@ class DataNoteStyle extends BaseNoteStyle
 		note.scale.x = note.scale.y = (asset.scale ?? data.scale);
 		note.defScale.copyFrom(note.scale);
 		note.updateHitbox();
+
+		if (script != null)
+			script.executeFunc("loadNote", [note]);
 
 		return true; 
 	}

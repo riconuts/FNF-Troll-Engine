@@ -167,6 +167,7 @@ class Note extends NoteObject
     public var noteMod(default, set):String = null; 
 	public var noteType(default, set):String = null;  // the note type
 	public var noteStyle(default, set) = null; // the note's visual appearance
+	var _noteStyle:BaseNoteStyle = NoteStyles.get('default'); // the actual note style script
 	public var canQuant:Bool = true; // whether a quant texture should be searched for or not
 	public var usesDefaultColours:Bool = true; // whether this note uses the default note colours (lets you change colours in options menu)
 	// This automatically gets set if a notetype changes the ColorSwap values
@@ -314,6 +315,7 @@ class Note extends NoteObject
 		if (newStyle.loadNote(this))
 			noteStyle = name; // yes, the base name, not the hudskin name.
 		
+		_noteStyle = newStyle;
 		return noteStyle;
 	}
 
@@ -446,10 +448,20 @@ class Note extends NoteObject
 			if (genScript != null){
 				genScript.executeFunc("noteUpdate", [elapsed], this);
 			}
+
+			_noteStyle.noteUpdate(this, elapsed);
 		}
 
 		var diff = (strumTime - Conductor.songPosition);
 		if (diff < -Conductor.safeZoneOffset && !wasGoodHit)
 			tooLate = true;
+	}
+
+	override function destroy(){
+		super.destroy();
+		if (noteStyle != null) {
+			var prevStyle:BaseNoteStyle = NoteStyles.get(noteStyle);
+			prevStyle.unloadNote(this);
+		}
 	}
 }

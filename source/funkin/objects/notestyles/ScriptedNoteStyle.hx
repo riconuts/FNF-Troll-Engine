@@ -4,6 +4,7 @@ import funkin.scripts.FunkinHScript;
 import funkin.objects.notestyles.BaseNoteStyle;
 
 // todooooooooo
+// Maybe this can be used if json == null but hscript exists??
 class ScriptedNoteStyle extends BaseNoteStyle
 {
 	public static function fromPath(path:String):Null<ScriptedNoteStyle> {
