@@ -204,11 +204,11 @@ class DataNoteStyle extends BaseNoteStyle
 	
 
 	override function loadNote(note:Note) {
-		loadedNotes.push(note);
-
 		var asset:NoteStyleAsset = getNoteAsset(note);
 		if (asset == null)return false; // dont set the style!!!
-		
+		loadedNotes.push(note);
+
+
 		note.isQuant = asset.quant ?? false;
 
 		switch (asset.type) {
