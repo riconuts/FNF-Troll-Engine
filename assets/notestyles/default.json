@@ -12,16 +12,6 @@
 				"red0"
 			]
 		},
-		"QUANTtap": {
-			"type": "sparrow",
-			"imageKey": "QUANTNOTE_assets",
-			"data": [
-				"purple0",
-				"blue0",
-				"green0",
-				"red0"
-			]
-		},
 		"receptor": {
 			"type": "sparrow",
 			"imageKey": "NOTE_assets",
@@ -71,26 +61,6 @@
 		"holdEnd": {
 			"type": "sparrow",
 			"imageKey": "NOTE_assets",
-			"data": [
-				"pruple end hold",
-				"blue hold end",
-				"green hold end",
-				"red hold end"
-			]
-		},
-		"QUANThold": {
-			"type": "sparrow",
-			"imageKey": "QUANTNOTE_assets",
-			"data": [
-				"purple hold piece",
-				"blue hold piece",
-				"green hold piece",
-				"red hold piece"
-			]
-		},
-		"QUANTholdEnd": {
-			"type": "sparrow",
-			"imageKey": "QUANTNOTE_assets",
 			"data": [
 				"pruple end hold",
 				"blue hold end",

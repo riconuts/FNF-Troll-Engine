@@ -208,12 +208,21 @@ class DataNoteStyle extends BaseNoteStyle
 		if (asset == null)return false; // dont set the style!!!
 		loadedNotes.push(note);
 
-
 		note.isQuant = asset.quant ?? false;
+		
+		var imageKey:String = asset.imageKey;
+
+		if (ClientPrefs.noteSkin == 'Quants'){
+			var quantKey = Note.getQuantTexture('', imageKey, imageKey);
+			if (!note.isQuant && quantKey != null){
+				note.isQuant = true;
+				imageKey = quantKey;
+			}	
+		}
 
 		switch (asset.type) {
 			case SPARROW: var asset:NoteStyleSparrowAsset = cast asset;
-				note.frames = Paths.getSparrowAtlas(asset.imageKey);
+				note.frames = Paths.getSparrowAtlas(imageKey);
 
 				var anim:String = getNoteAnim(note, asset);
 				note.animation.addByPrefix('', anim); // might want to use the json anim name, whatever
@@ -221,7 +230,7 @@ class DataNoteStyle extends BaseNoteStyle
 
 
 			case INDICES: var asset:NoteStyleIndicesAsset = cast asset;
-				var graphic = Paths.image(asset.imageKey);
+				var graphic = Paths.image(imageKey);
 				var hInd:Int = (asset.columns != null) ? Math.floor(graphic.width / asset.columns) : asset.hInd;
 				var vInd:Int = (asset.rows != null) ? Math.floor(graphic.height / asset.rows) : asset.vInd;
 				note.loadGraphic(graphic, true, hInd, vInd);
@@ -231,10 +240,10 @@ class DataNoteStyle extends BaseNoteStyle
 				note.animation.play('');
 
 			case SINGLE:
-				note.loadGraphic(Paths.image(asset.imageKey));
+				note.loadGraphic(Paths.image(imageKey));
 
 			case SOLID: // lol
-				note.makeGraphic(1, 1, CoolUtil.colorFromString(asset.imageKey), false, asset.imageKey);
+				note.makeGraphic(1, 1, CoolUtil.colorFromString(imageKey), false, imageKey);
 
 			default: //case NONE: 
 				note.makeGraphic(1,1,0,false,'invisible'); // idfk something might want to change .visible so
