@@ -544,11 +544,13 @@ class NoteField extends FieldBase
 		if (shader != hold.shader)
 			hold.shader = shader;
 
-		shader.bitmap.input = hold.graphic.bitmap;
+		var graphic:FlxGraphic = hold.frame == null ? hold.graphic : hold.frame.parent;
+
+		shader.bitmap.input = graphic.bitmap;
 		shader.bitmap.filter = hold.antialiasing ? LINEAR : NEAREST;
 
 		return {
-			graphic: hold.graphic,
+			graphic: graphic,
 			shader: shader,
 			alphas: alphas,
 			glows: glows,
@@ -707,7 +709,9 @@ class NoteField extends FieldBase
 		if (shader != sprite.shader)
 			sprite.shader = shader;
 
-		shader.bitmap.input = sprite.graphic.bitmap;
+		var graphic:FlxGraphic = sprite.frame == null ? sprite.graphic : sprite.frame.parent;
+
+		shader.bitmap.input = graphic.bitmap;
 		shader.bitmap.filter = sprite.antialiasing ? LINEAR : NEAREST;
 
 		final totalTriangles = Std.int(vertices.length / 2);
@@ -720,7 +724,7 @@ class NoteField extends FieldBase
 		}
 
 		return {
-			graphic: sprite.graphic,
+			graphic: graphic,
 			shader: shader,
 			alphas: cast alphas,
 			glows: cast glows,

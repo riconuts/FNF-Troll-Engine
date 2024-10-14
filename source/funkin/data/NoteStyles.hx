@@ -6,6 +6,7 @@ import funkin.objects.notestyles.*;
 enum abstract NoteStyleAssetType(String) from String to String {
 	var INDICES = "indices";
 	var SPARROW = "sparrow";
+	var MULTISPARROW = "multisparrow";
 	var SINGLE = "single";
 	var SOLID = "solid";
 	var NONE = "none";
@@ -44,7 +45,9 @@ typedef NoteStyleAnimationData<T:Any> = {
 	?data:Array<OneOfTwo<T, Array<T>>>, // used for 'column' typE. If its an array then it should randomly pick between the 2 options
 	?animation:OneOfTwo<T, Array<T>>, // used for 'static' type. If its an array then randomly pick
 
-	?framerate:Float // prob default to 24?
+	?framerate:Float, // prob default to 24?
+
+	?imageKey:String // only used in multisparrow!!
 }
 
 typedef NoteStyleAnimatedAsset<T:Any> = {
@@ -60,6 +63,11 @@ typedef NoteStyleAnimatedAsset<T:Any> = {
 }
 
 typedef NoteStyleSparrowAsset = NoteStyleAnimatedAsset<String>;
+
+typedef NoteStyleMultiSparrowAsset = {
+	> NoteStyleAnimatedAsset<String>,
+	additionalAtlases:Array<String>
+}
 
 typedef NoteStyleIndicesAsset = {
 	> NoteStyleAnimatedAsset<Array<Int>>, // this is kinda nuts

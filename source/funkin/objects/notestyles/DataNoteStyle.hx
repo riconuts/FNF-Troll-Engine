@@ -1,5 +1,6 @@
 package funkin.objects.notestyles;
 
+import flixel.graphics.frames.FlxAtlasFrames;
 import funkin.scripts.FunkinHScript;
 import funkin.objects.shaders.ColorSwap;
 import funkin.data.NoteStyles;
@@ -130,8 +131,7 @@ class DataNoteStyle extends BaseNoteStyle
 		}
 
 		switch(asset.type){
-			case INDICES:
-				var asset:NoteStyleIndicesAsset = cast asset;
+			case INDICES:var asset:NoteStyleIndicesAsset = cast asset;
 				
 				var graphic = Paths.image(asset.imageKey);
 				var hInd = asset.columns != null ? Math.floor(graphic.width / asset.columns) : asset.hInd;
@@ -147,8 +147,40 @@ class DataNoteStyle extends BaseNoteStyle
 					obj.animation.play(asset.animations[0].name);
 				}
 
-			case SPARROW:
-				var asset:NoteStyleIndicesAsset = cast asset;
+			case MULTISPARROW:
+				var asset:NoteStyleMultiSparrowAsset = cast asset;
+				var baseAsset:FlxAtlasFrames = Paths.getSparrowAtlas(asset.imageKey);
+				var atlases:Array<String> = [];
+				if (asset.animations != null) {
+					for (anim in asset.animations) {
+						if (anim.imageKey != null)
+							atlases.push(anim.imageKey);
+					}
+				}
+
+				for (atlas in asset.additionalAtlases)
+					atlases.push(atlas);
+
+				for (atlas in atlases) {
+					var subAtlas:FlxAtlasFrames = Paths.getSparrowAtlas(atlas);
+					trace(atlas, subAtlas);
+					if (subAtlas == null)
+						continue;
+
+					baseAsset.addAtlas(subAtlas);
+				}
+
+				obj.frames = baseAsset;
+				if (asset.animations != null) {
+					for (animation in asset.animations) {
+						var animData:String = getAnimation(animation);
+						obj.animation.addByPrefix(animation.name, animData,
+							animation.framerate == null ? (asset.framerate == null ? 30 : asset.framerate) : animation.framerate);
+					}
+					obj.animation.play(asset.animations[0].name);
+				}
+
+			case SPARROW:var asset:NoteStyleIndicesAsset = cast asset;
 				obj.frames = Paths.getSparrowAtlas(asset.imageKey);
 				if (asset.animations != null) {
 					for (animation in asset.animations) {
@@ -221,6 +253,36 @@ class DataNoteStyle extends BaseNoteStyle
 		}
 
 		switch (asset.type) {
+			case MULTISPARROW: var asset:NoteStyleMultiSparrowAsset = cast asset;
+				var baseAtlas:FlxAtlasFrames = Paths.getSparrowAtlas(imageKey);
+				var frames:FlxAtlasFrames = new FlxAtlasFrames(baseAtlas.parent); 
+				frames.parent.destroyOnNoUse = false;
+				frames.addAtlas(baseAtlas, true);
+				var atlases:Array<String> = [];
+				if(asset.animations != null){
+					for (anim in asset.animations) {
+						if (anim.imageKey != null && !atlases.contains(anim.imageKey))
+							atlases.push(anim.imageKey);
+					}
+				}
+
+				for (atlas in asset.additionalAtlases)if(!atlases.contains(atlas))atlases.push(atlas);
+				
+				for(atlas in atlases){
+					// TODO: check quant first lol
+
+					var subAtlas:FlxAtlasFrames = Paths.getSparrowAtlas(atlas);
+					if(subAtlas==null)continue;
+					subAtlas.parent.destroyOnNoUse = false;
+					frames.addAtlas(subAtlas, true);
+				}
+				
+				note.frames = frames;
+
+				var anim:String = getNoteAnim(note, asset);
+
+				note.animation.addByPrefix('', anim); // might want to use the json anim name, whatever
+				note.animation.play('', true);
 			case SPARROW: var asset:NoteStyleSparrowAsset = cast asset;
 				note.frames = Paths.getSparrowAtlas(imageKey);
 

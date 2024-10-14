@@ -2372,7 +2372,7 @@ class PlayState extends MusicBeatState
 			DiscordClient.changePresence(detailsPausedText, stateText, songName);
 		#end
 
-		if (ClientPrefs.autoPause)
+		if (ClientPrefs.autoPause && !paused)
 			justUnfocused = true;
 
 		super.onFocusLost();
