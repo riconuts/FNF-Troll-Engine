@@ -207,6 +207,8 @@ class DataNoteStyle extends BaseNoteStyle
 		loadedNotes.push(note);
 
 		var asset:NoteStyleAsset = getNoteAsset(note);
+		if (asset == null)return false; // dont set the style!!!
+		
 		note.isQuant = asset.quant ?? false;
 
 		switch (asset.type) {
