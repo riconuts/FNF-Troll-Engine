@@ -11,9 +11,16 @@ enum abstract ObjectType(#if cpp cpp.UInt8 #else Int #end)
 	var SPLASH;
 }
 
-class NoteObject extends FlxSprite {
-	public var objType:ObjectType = UNKNOWN;
+interface IColorable
+{
+	var colorSwap:funkin.objects.shaders.ColorSwap;
+}
 
+class NoteObject extends FlxSprite {
+	public var isQuant:Bool = false;
+	
+	public var objType:ObjectType = UNKNOWN;
+	public var assetKey:String = ''; // Used for the NoteStyle system, so custom NoteObjects can define their own NoteStyle asset key (scripted hold covers or whatever)
     public var column:Int = 0;
     @:isVar
     public var noteData(get,set):Int; // backwards compat

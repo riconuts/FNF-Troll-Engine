@@ -28,21 +28,25 @@
 				},
 				{
 					"type": "column",
-					"name": "static",
+					"name": "confirm",
+					"framerate": 24,
+					"looped": false,
 					"data": [
 						"left confirm",
-						"up confirm",
 						"down confirm",
+						"up confirm",
 						"right confirm"
 					]
 				},
 				{
 					"type": "column",
 					"name": "press",
+					"framerate": 24,
+					"looped": false,
 					"data": [
 						"left press",
-						"up press",
 						"down press",
+						"up press",
 						"right press"
 					]
 				}

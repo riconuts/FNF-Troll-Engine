@@ -1,5 +1,6 @@
 package funkin.objects.notestyles;
 
+import funkin.objects.NoteObject.IColorable;
 import haxe.io.Path;
 import sys.io.File;
 import flixel.graphics.frames.FlxAtlasFrames;
@@ -64,13 +65,49 @@ class DataNoteStyle extends BaseNoteStyle
 		super(id);
 	}
 
-	function updateColours(note:Note):Void {
+	function updateNoteColours(note:Note):Void {
 		var hsb:Array<Int> = note.isQuant ? ClientPrefs.quantHSV[Note.quants.indexOf(note.quant)] : ClientPrefs.arrowHSV[note.column];
 		var colorSwap:ColorSwap = note.colorSwap;
 
 		if (colorSwap != null) {
 			colorSwap.setHSBIntArray(hsb);
 		}
+	}
+	
+	inline function updateColours(obj:NoteObject){
+		if (!(obj is IColorable))return;
+		var colorableObj:IColorable = cast obj;
+
+		colorableObj.colorSwap.setHSBIntArray(ClientPrefs.arrowHSV[obj.column]);
+	}
+	
+
+	function getAsset(name:String):Null<NoteStyleAsset> {
+		var usingQuants = ClientPrefs.noteSkin == "Quants";
+		if (usingQuants) {
+			trace("QUANT" + name, data.assets.exists("QUANT" + name));
+			if (data.assets.exists("QUANT" + name)) {
+				var asset:NoteStyleAsset = data.assets.get("QUANT" + name);
+				asset.quant = true;
+				return asset;
+			}
+		}
+		return data.assets.get(name);
+	}
+
+	function getNoteObjectAsset(obj:NoteObject):Null<NoteStyleAsset> {
+		var name:String = switch(obj.objType){
+			case STRUM: 'receptor';
+			case SPLASH: 'noteSplash';
+			case NOTE: 'tap'; // shouldnt happen tho!!
+			default: obj.assetKey;
+		}
+		if(name == '')
+			return null;
+		if(name == 'tap')
+			return getNoteAsset(cast(obj, Note));
+
+		return getAsset(name);
 	}
 
 	function getNoteAsset(note:Note):Null<NoteStyleAsset> {
@@ -85,17 +122,7 @@ class DataNoteStyle extends BaseNoteStyle
 			// then everything the roll script does we can just hardcode because honestly dont think it needs to be soft-coded
 		}
 
-		var usingQuants = ClientPrefs.noteSkin == "Quants";
-		if (usingQuants) {
-			if (data.assets.exists("QUANT" + name)){
-				// hacky, replace at some point probably
-				var asset = data.assets.get("QUANT" + name);
-				asset.quant = true;
-				return asset;
-			}	
-		}
-
-		return data.assets.get(name);
+		return getAsset(name);
 	}
 
 	inline function getNoteAnim(note:Note, asset:NoteStyleAnimatedAsset<Any>):Null<Any> {
@@ -110,7 +137,8 @@ class DataNoteStyle extends BaseNoteStyle
 	inline function loadAnimations(obj:NoteObject, asset:NoteStyleAsset)
 	{
 		inline function getAnimData(a:Dynamic){
-			if (a is Array) {
+			// HACK: Check if array[0] is Int. If it's Int, then it's indices and we shouldn't be randomizing as we should only randomize if its ["a", "b"] / [[0], [1]] etc
+			if (a is Array && a.length > 0 && !(a[0] is Int)) {
 				var data:Array<Any> = cast a;
 				return data[Std.random(data.length)];
 			} else
@@ -131,10 +159,22 @@ class DataNoteStyle extends BaseNoteStyle
 			}
 		}
 
+
+		var imageKey:String = asset.imageKey;
+		if (ClientPrefs.noteSkin == 'Quants' && !obj.isQuant) {
+			var quantKey = Note.getQuantTexture(Path.directory(imageKey) + "/", Path.withoutDirectory(imageKey), imageKey);
+			if (quantKey != null) {
+				obj.isQuant = true;
+				imageKey = quantKey;
+			}
+		}
+		
+
+		// TODO: add stuff for other animation things (data, animation)
 		switch(asset.type){
 			case INDICES:var asset:NoteStyleIndicesAsset = cast asset;
 				
-				var graphic = Paths.image(asset.imageKey);
+				var graphic = Paths.image(imageKey);
 				var hInd = asset.columns != null ? Math.floor(graphic.width / asset.columns) : asset.hInd;
 				var vInd = asset.rows != null ? Math.floor(graphic.height / asset.rows) : asset.vInd;
 				obj.loadGraphic(graphic, true, hInd, vInd);
@@ -143,19 +183,19 @@ class DataNoteStyle extends BaseNoteStyle
 					for(animation in asset.animations){
 						var animData:Array<Int> = getAnimation(animation);
 						obj.animation.add(animation.name, animData, 
-							animation.framerate == null ? (asset.framerate == null ? 30 : asset.framerate) : animation.framerate);
+							animation.framerate == null ? (asset.framerate ?? 24) : animation.framerate, animation.looped ?? false);
 					}
 					obj.animation.play(asset.animations[0].name);
 				}
 
 			case MULTISPARROW:
 				var asset:NoteStyleMultiSparrowAsset = cast asset;
-				var baseAsset:FlxAtlasFrames = Paths.getSparrowAtlas(asset.imageKey);
+				var baseAsset:FlxAtlasFrames = Paths.getSparrowAtlas(imageKey);
 				var atlases:Array<String> = [];
 				if (asset.animations != null) {
 					for (anim in asset.animations) {
 						if (anim.imageKey != null)
-							atlases.push(anim.imageKey);
+							atlases.push(anim.imageKey); // TODO: check for quants
 					}
 				}
 
@@ -164,7 +204,6 @@ class DataNoteStyle extends BaseNoteStyle
 
 				for (atlas in atlases) {
 					var subAtlas:FlxAtlasFrames = Paths.getSparrowAtlas(atlas);
-					trace(atlas, subAtlas);
 					if (subAtlas == null)
 						continue;
 
@@ -176,27 +215,27 @@ class DataNoteStyle extends BaseNoteStyle
 					for (animation in asset.animations) {
 						var animData:String = getAnimation(animation);
 						obj.animation.addByPrefix(animation.name, animData,
-							animation.framerate == null ? (asset.framerate == null ? 30 : asset.framerate) : animation.framerate);
+							animation.framerate == null ? (asset.framerate ?? 24) : animation.framerate, animation.looped == null ? (asset.looped ?? false) : animation.looped);
 					}
 					obj.animation.play(asset.animations[0].name);
 				}
 
 			case SPARROW:var asset:NoteStyleIndicesAsset = cast asset;
-				obj.frames = Paths.getSparrowAtlas(asset.imageKey);
+				obj.frames = Paths.getSparrowAtlas(imageKey);
 				if (asset.animations != null) {
 					for (animation in asset.animations) {
 						var animData:String = getAnimation(animation);
 						obj.animation.addByPrefix(animation.name, animData,
-							animation.framerate == null ? (asset.framerate == null ? 30 : asset.framerate) : animation.framerate);
+							animation.framerate == null ? (asset.framerate ?? 24) : animation.framerate, animation.looped == null ? (asset.looped ?? false) : animation.looped);
 					}
 					obj.animation.play(asset.animations[0].name);
 				}
 
 			case SINGLE:
-				obj.loadGraphic(Paths.image(asset.imageKey));
+				obj.loadGraphic(Paths.image(imageKey));
 
 			case SOLID:
-				obj.makeGraphic(1, 1, CoolUtil.colorFromString(asset.imageKey), false, asset.imageKey);
+				obj.makeGraphic(1, 1, CoolUtil.colorFromString(imageKey), false, imageKey);
 			
 			default:
 		}	
@@ -208,7 +247,7 @@ class DataNoteStyle extends BaseNoteStyle
 
 		if (changed.contains("customizeColours")) {
 			for (note in loadedNotes)
-				updateColours(note);
+				updateNoteColours(note);
 		}
 
 		if(script != null)
@@ -238,8 +277,46 @@ class DataNoteStyle extends BaseNoteStyle
 			script.executeFunc("unloadNote", [note]);
 	}
 	
+	override public function loadReceptor(strum:StrumNote){
+		if (script != null) {
+			var rVal:Dynamic = script.executeFunc("loadReceptor", [strum]);
+			if (rVal is Bool)
+				return rVal;
+		}
+		var asset:NoteStyleAsset = getNoteObjectAsset(strum);
+		
+		strum.isQuant = asset.quant ?? false;
+
+		strum.antialiasing = (data.antialiasing ?? asset.antialiasing) ?? true;
+		strum.useDefaultAntialiasing = strum.antialiasing;
+
+		loadAnimations(strum, asset);
+		strum.animation.play("static", true);
+		// this is dealt with in strum.playanim
+		
+/* 		if (asset.canBeColored == false) {
+			strum.colorSwap.setHSB();
+		} else
+			updateColours(strum);
+ */
+		strum.scale.x = strum.scale.y = (asset.scale ?? data.scale);
+		strum.defScale.copyFrom(strum.scale);
+		strum.updateHitbox();
+
+		if (script != null)
+			script.executeFunc("loadReceptorPost", [strum]);
+
+
+		return true;
+	}
 
 	override function loadNote(note:Note) {
+		if (script != null){
+			var rVal:Dynamic = script.executeFunc("loadNote", [note]);
+			if(rVal is Bool)
+				return rVal;
+		}
+
 		var asset:NoteStyleAsset = getNoteAsset(note);
 		if (asset == null)return false; // dont set the style!!!
 		loadedNotes.push(note);
@@ -249,7 +326,7 @@ class DataNoteStyle extends BaseNoteStyle
 		var imageKey:String = asset.imageKey;
 
 		if (ClientPrefs.noteSkin == 'Quants' && !note.isQuant){
-			var quantKey = Note.getQuantTexture(Path.directory(imageKey), Path.withoutDirectory(imageKey), imageKey);
+			var quantKey = Note.getQuantTexture(Path.directory(imageKey) + "/", Path.withoutDirectory(imageKey), imageKey);
 			if (quantKey != null){
 				note.isQuant = true;
 				imageKey = quantKey;
@@ -285,13 +362,14 @@ class DataNoteStyle extends BaseNoteStyle
 
 				var anim:String = getNoteAnim(note, asset);
 
-				note.animation.addByPrefix('', anim); // might want to use the json anim name, whatever
+
+				note.animation.addByPrefix('', anim, asset.framerate ?? 24, asset.looped ?? false); // might want to use the json anim name, whatever
 				note.animation.play('', true);
 			case SPARROW: var asset:NoteStyleSparrowAsset = cast asset;
 				note.frames = Paths.getSparrowAtlas(imageKey);
 
 				var anim:String = getNoteAnim(note, asset);
-				note.animation.addByPrefix('', anim); // might want to use the json anim name, whatever
+				note.animation.addByPrefix('', anim, asset.framerate ?? 24, asset.looped ?? false); // might want to use the json anim name, whatever
 				note.animation.play('');
 
 
@@ -302,7 +380,7 @@ class DataNoteStyle extends BaseNoteStyle
 				note.loadGraphic(graphic, true, hInd, vInd);
 				
 				var anim:Array<Int> = getNoteAnim(note, asset);
-				note.animation.add('', anim);
+				note.animation.add('', anim, 24, false);
 				note.animation.play('');
 
 			case SINGLE:
@@ -323,7 +401,7 @@ class DataNoteStyle extends BaseNoteStyle
 		if (asset.canBeColored == false) {
 			note.colorSwap.setHSB();
 		}else
-			updateColours(note);
+			updateNoteColours(note);
 		
 		
 		note.scale.x = note.scale.y = (asset.scale ?? data.scale);
@@ -331,7 +409,7 @@ class DataNoteStyle extends BaseNoteStyle
 		note.updateHitbox();
 
 		if (script != null)
-			script.executeFunc("loadNote", [note]);
+			script.executeFunc("loadNotePost", [note]);
 
 		return true; 
 	}

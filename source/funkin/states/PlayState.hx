@@ -3646,7 +3646,7 @@ class PlayState extends MusicBeatState
 			if (note == null) {
 				var spr:StrumNote = field.strumNotes[column];
 				if (spr != null) {
-					spr.playAnim('pressed');
+					spr.playAnim('press');
 					spr.resetAnim = 0;
 				}
 			}else {

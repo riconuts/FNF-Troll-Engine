@@ -42,10 +42,12 @@ typedef NoteStyleAsset = {
 typedef NoteStyleAnimationData<T:Any> = {
 	type:NoteStyleAnimationType,
 	name:String,
-	?data:Array<OneOfTwo<T, Array<T>>>, // used for 'column' typE. If its an array then it should randomly pick between the 2 options
-	?animation:OneOfTwo<T, Array<T>>, // used for 'static' type. If its an array then randomly pick
+	//?hasRandom:Bool, // because I forgot indices use an array LOL
+	?data:Array<OneOfTwo<T, Array<T>>>, // used for 'column' typE. If its an array and hasRandom is true then it should randomly pick between the 2 options
+	?animation:OneOfTwo<T, Array<T>>, // used for 'static' type. If its an array and hasRandom is true then randomly pick
 
-	?framerate:Float, // prob default to 24?
+	?framerate:Int, // prob default to 24?
+	?looped:Bool,
 
 	?imageKey:String // only used in multisparrow!!
 }
@@ -53,13 +55,15 @@ typedef NoteStyleAnimationData<T:Any> = {
 typedef NoteStyleAnimatedAsset<T:Any> = {
 	> NoteStyleAsset,
 
-	@:optional var framerate:Float; // default framerate
+	@:optional var framerate:Int; // default framerate
 
 	@:optional var animations:Array<NoteStyleAnimationData<T>>; // primarily for stuff like receptors
 	//@:optional var data:Array<OneOfTwo<T, NoteStyleAnimationData<T>>>; // I cant check for typedef kms
 
 	@:optional var data:Array<T>; // for stuff like notes
 	@:optional var animation:T; // for whatever
+
+	@:optional var looped:Bool; // default looped
 }
 
 typedef NoteStyleSparrowAsset = NoteStyleAnimatedAsset<String>;

@@ -6,7 +6,7 @@ import math.Vector3;
 import flixel.FlxG;
 import funkin.objects.shaders.ColorSwap;
 
-class NoteSplash extends NoteObject
+class NoteSplash extends NoteObject implements NoteObject.IColorable
 {
 	public var colorSwap:ColorSwap = null;
 	private var idleAnim:String;

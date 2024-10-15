@@ -33,7 +33,7 @@
 				},
 				{
 					"type": "column",
-					"name": "static",
+					"name": "confirm",
 					"data": [
 						[12, 16],
 						[13, 17],

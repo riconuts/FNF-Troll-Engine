@@ -1,5 +1,6 @@
 package funkin.objects;
 
+import funkin.objects.NoteObject.IColorable;
 import math.Vector3;
 import flixel.math.FlxMath;
 import funkin.scripts.*;
@@ -53,7 +54,7 @@ class NoteType {
 	}
 }
 
-class Note extends NoteObject
+class Note extends NoteObject implements IColorable
 {
 	public static var spriteScale:Float = 0.7;
 	public static var swagWidth(default, set):Float = 160 * spriteScale;
@@ -149,7 +150,6 @@ class Note extends NoteObject
 
 	// quant shit
 	public var quant:Int = 4;
-	public var isQuant:Bool = false; // Whether the loaded texture is a quant texture.
 
 	// note status
 	public var spawned:Bool = false;
@@ -201,7 +201,7 @@ class Note extends NoteObject
 	public var maxReleaseTime:Float = 0.25;
 
 	#if PE_MOD_COMPATIBILITY
-	public var lowPriority:Bool = false; // Shadowmario's shitty workaround for really bad mine placement, yet still no *real* hitbox customization lol! Only used when PE Mod Compat is enabled in project.xml
+	public var lowPriority:Bool = false; // John Psych Engine's shitty workaround for really bad mine placement, yet still no *real* hitbox customization lol! Only used when PE Mod Compat is enabled in project.xml
 	#end
 
 	/** Which characters sing this note, if it's blank then the playfield's characters are used **/
@@ -298,10 +298,9 @@ class Note extends NoteObject
 		if (noteStyle == name)
 			return name;
 
-		if (noteStyle != null) {
-			var prevStyle:BaseNoteStyle = NoteStyles.get(noteStyle);
-			prevStyle.unloadNote(this);
-		}
+		if (_noteStyle != null) 
+			_noteStyle.unloadNote(this);
+		
 		
 		// find the first existing style in the following order [hudskin.getNoteStyle(name), name, 'default']
 		var newStyle:BaseNoteStyle = null;

@@ -32,11 +32,11 @@ class BaseNoteStyle
 
 	}
 
-	public function loadReceptor(note:Note):Bool {
+	public function loadReceptor(strum:StrumNote):Bool {
 		return true; 
 	}
 	
-	public function unloadReceptor(note:Note):Void {
+	public function unloadReceptor(strum:StrumNote):Void {
 
 	}
 
