@@ -1,5 +1,7 @@
 package funkin.objects.notestyles;
 
+import haxe.io.Path;
+import sys.io.File;
 import flixel.graphics.frames.FlxAtlasFrames;
 import funkin.scripts.FunkinHScript;
 import funkin.objects.shaders.ColorSwap;
@@ -245,7 +247,7 @@ class DataNoteStyle extends BaseNoteStyle
 		var imageKey:String = asset.imageKey;
 
 		if (ClientPrefs.noteSkin == 'Quants'){
-			var quantKey = Note.getQuantTexture('', imageKey, imageKey);
+			var quantKey = Note.getQuantTexture(Path.directory(imageKey), Path.withoutDirectory(imageKey), imageKey);
 			if (!note.isQuant && quantKey != null){
 				note.isQuant = true;
 				imageKey = quantKey;
