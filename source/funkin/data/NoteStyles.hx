@@ -60,8 +60,8 @@ typedef NoteStyleAnimatedAsset<T:Any> = {
 	@:optional var animations:Array<NoteStyleAnimationData<T>>; // primarily for stuff like receptors
 	//@:optional var data:Array<OneOfTwo<T, NoteStyleAnimationData<T>>>; // I cant check for typedef kms
 
-	@:optional var data:Array<T>; // for stuff like notes
-	@:optional var animation:T; // for whatever
+	@:optional var data:Array<OneOfTwo<T, Array<T>>>; // for stuff like notes
+	@:optional var animation:OneOfTwo<T, Array<T>>; // for whatever
 
 	@:optional var looped:Bool; // default looped
 }
