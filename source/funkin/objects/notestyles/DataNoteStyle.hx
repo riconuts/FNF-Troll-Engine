@@ -125,25 +125,27 @@ class DataNoteStyle extends BaseNoteStyle
 		return getAsset(name);
 	}
 
+	inline function getAnimData(a:Dynamic) {
+		// HACK: Check if array[0] is Int. If it's Int, then it's indices and we shouldn't be randomizing as we should only randomize if its ["a", "b"] / [[0], [1]] etc
+		if (a is Array && a.length > 0 && !(a[0] is Int)) {
+			var data:Array<Any> = cast a;
+			return data[Std.random(data.length)];
+		} else
+			return a;
+	}
+
+	
 	inline function getNoteAnim(note:Note, asset:NoteStyleAnimatedAsset<Any>):Null<Any> {
 		if (asset.animation != null) 
-			return asset.animation 
+			return getAnimData(asset.animation);
 		else if (asset.data != null)
-			return asset.data[note.column % asset.data.length];
+			return getAnimData(asset.data[note.column % asset.data.length]);
 		else
 			return null;
 	}
 
 	inline function loadAnimations(obj:NoteObject, asset:NoteStyleAsset)
 	{
-		inline function getAnimData(a:Dynamic){
-			// HACK: Check if array[0] is Int. If it's Int, then it's indices and we shouldn't be randomizing as we should only randomize if its ["a", "b"] / [[0], [1]] etc
-			if (a is Array && a.length > 0 && !(a[0] is Int)) {
-				var data:Array<Any> = cast a;
-				return data[Std.random(data.length)];
-			} else
-				return a;
-		}
 
 		inline function getAnimation(animation:NoteStyleAnimationData<Any>):Null<Any>
 		{
