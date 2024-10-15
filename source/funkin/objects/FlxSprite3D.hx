@@ -43,10 +43,8 @@ class FlxSprite3D extends FlxSprite {
 		var camPos = new Vector3();
 		var camOrigin = new Vector3(); // vertex origin
 
-        // TODO: take origin into account properly without this bandaid fix vv
-
-        var bandaidOrigin = FlxPoint.weak();
-		bandaidOrigin.set(origin.x - halfW, origin.y - halfH);
+        var spriteOrigin = FlxPoint.weak();
+		spriteOrigin.set(origin.x - halfW, origin.y - halfH);
 		for (camera in cameras)
 		{
 			if (!camera.visible || !camera.exists || camera.canvas == null || camera.canvas.graphics == null)
@@ -63,7 +61,7 @@ class FlxSprite3D extends FlxSprite {
 			];
             
 			getScreenPosition(_point, camera).subtractPoint(offset);
-            //_point.add(bandaidOrigin.x, bandaidOrigin.y);
+            //_point.add(spriteOrigin.x, spriteOrigin.y);
 			var pos = new Vector3(_point.x, _point.y, z);
 
 			for (idx => vert in quad)
@@ -72,8 +70,8 @@ class FlxSprite3D extends FlxSprite {
 					vert.x *= -1;
 				if (flipY)
 					vert.y *= -1;
-                vert.x -= bandaidOrigin.x;
-                vert.y -= bandaidOrigin.y;
+                vert.x -= spriteOrigin.x;
+                vert.y -= spriteOrigin.y;
                 vert.x *= scale.x;
                 vert.y *= scale.y;
 				
@@ -82,8 +80,8 @@ class FlxSprite3D extends FlxSprite {
 				var projected = VectorHelpers.project(originMod.subtract(camPos));
 				vert = projected.subtract(pos).add(camOrigin); // puts the vertex back to default pos
 
-                vert.x += bandaidOrigin.x;
-                vert.y += bandaidOrigin.y;
+                vert.x += spriteOrigin.x;
+                vert.y += spriteOrigin.y;
 
 				quad[idx] = vert;
                 
@@ -154,7 +152,7 @@ class FlxSprite3D extends FlxSprite {
 			FlxBasic.visibleCount++;
 			#end
 		}
-		bandaidOrigin.putWeak();
+		spriteOrigin.putWeak();
         
 
 		#if FLX_DEBUG
