@@ -5,9 +5,11 @@
 
 ## Installation:
 
-Refer to [Psych Engine's build instructions](https://github.com/ShadowMario/FNF-PsychEngine/blob/main/BUILDING.md).
+Must have Haxe 4.3.0 or greater.
 
-The setup files for Troll Engine's specific libraries can be installed with the `install_haxelibs` files located in the `setup` folder.
+The setup files for Troll Engine's specific haxe libraries can be installed with the `install_haxelibs` files located in the `setup` folder.
+
+Refer to [Psych Engine's build instructions](https://github.com/ShadowMario/FNF-PsychEngine/blob/main/BUILDING.md).
 
 ## Original Funkin' team
 - [ninjamuffin99](https://twitter.com/ninja_muffin99) - Programmer

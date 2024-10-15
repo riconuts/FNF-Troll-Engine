@@ -360,8 +360,14 @@ class OptionsSubstate extends MusicBeatSubstate
 					this.subStateClosed.addOnce((_) -> this.persistentDraw = true);
 				}
 			case 'customizeColours':
-				// TODO: check the note colours once you exit to see if any changed
-				openSubState(ClientPrefs.noteSkin == "Quants" ? new QuantNotesSubState() : new NotesSubState());
+				var noteState = ClientPrefs.noteSkin=="Quants" ? new QuantNotesSubState() : new NotesSubState();
+				openSubState(noteState);
+
+				subStateClosed.addOnce((ss) -> {
+					if (ss == noteState /*&& noteState.changedAnything*/)  
+						changed.push('customizeColours');
+				});
+
 			case 'customizeKeybinds':
 				var substate = new NewBindsSubstate();
 				var currentBinds:Map<String, Array<FlxKey>> = [];

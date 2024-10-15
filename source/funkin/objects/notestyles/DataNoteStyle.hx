@@ -74,8 +74,6 @@ class DataNoteStyle extends BaseNoteStyle
 	}
 
 	function getNoteAsset(note:Note):Null<NoteStyleAsset> {
-		var usingQuants = ClientPrefs.noteSkin=="Quants";
-
 		var name:String = switch(note.holdType) {
 			default: "tap";
 			case PART: "hold";
@@ -87,6 +85,7 @@ class DataNoteStyle extends BaseNoteStyle
 			// then everything the roll script does we can just hardcode because honestly dont think it needs to be soft-coded
 		}
 
+		var usingQuants = ClientPrefs.noteSkin == "Quants";
 		if (usingQuants) {
 			if (data.assets.exists("QUANT" + name)){
 				// hacky, replace at some point probably
@@ -207,14 +206,13 @@ class DataNoteStyle extends BaseNoteStyle
 		// Or maybe a global OptionsState.updated event
 		// then we dont need to call this manually everywhere lol
 
-		if (true) {
+		if (changed.contains("customizeColours")) {
 			for (note in loadedNotes)
 				updateColours(note);
 		}
 
 		if(script != null)
 			script.executeFunc("optionsChanged", [changed]);
-		
 	}
 
 	override function noteUpdate(note:Note, dt:Float){
@@ -222,12 +220,16 @@ class DataNoteStyle extends BaseNoteStyle
 			script.executeFunc("noteUpdate", [note, dt]);
 	}
 
-	override function destroy(){
+	override function destroy() {
+		if (script != null) {
+			script.executeFunc("destroy");
+			script.stop();
+			script=null;
+		}
+
 		super.destroy();
 		// JUST to make sure shit is cleared properly lol
 		loadedNotes.resize(0); 
-		if (script != null)
-			script.executeFunc("destroy", []);
 	}
 
 	override function unloadNote(note:Note){
@@ -246,9 +248,9 @@ class DataNoteStyle extends BaseNoteStyle
 		
 		var imageKey:String = asset.imageKey;
 
-		if (ClientPrefs.noteSkin == 'Quants'){
+		if (ClientPrefs.noteSkin == 'Quants' && !note.isQuant){
 			var quantKey = Note.getQuantTexture(Path.directory(imageKey), Path.withoutDirectory(imageKey), imageKey);
-			if (!note.isQuant && quantKey != null){
+			if (quantKey != null){
 				note.isQuant = true;
 				imageKey = quantKey;
 			}	
