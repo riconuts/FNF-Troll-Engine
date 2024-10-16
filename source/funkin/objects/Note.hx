@@ -310,8 +310,6 @@ class Note extends NoteObject implements IColorable
 	}
 
 	private function set_noteType(value:String):String {
-		noteSplashTexture = PlayState.splashSkin;
-
 		if (column > -1 && (noteType==null || noteType != value)) {
 			var instance:NoteScriptState = inEditor ? ChartingState.instance : PlayState.instance;
 			noteScript = (instance == null) ? null : instance.notetypeScripts.get(value);
@@ -341,15 +339,19 @@ class Note extends NoteObject implements IColorable
 			}
 
 			noteType = value;
-			if (noteStyle == null) noteStyle = 'default';
-		}
-		////
+			
+			if (noteStyle == null) 
+				noteStyle = (field==null) ? 'default' : field.defaultNoteStyle;
 
-		if (noteScript != null)
-			noteScript.executeFunc("postSetupNote", [this], this, ["this" => this]);
+			if (noteScript != null)
+				noteScript.executeFunc("postSetupNote", [this], this, ["this" => this]);
+		}
 
 		// this should prob be determined by notestyle
-		////
+
+		if (noteSplashTexture == null)
+			noteSplashTexture = PlayState.splashSkin;
+
 		if (isQuant && Paths.imageExists('QUANT' + noteSplashTexture))
 			noteSplashTexture = 'QUANT' + noteSplashTexture;
 

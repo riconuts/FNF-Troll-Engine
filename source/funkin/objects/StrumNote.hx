@@ -39,14 +39,13 @@ class StrumNote extends NoteObject implements NoteObject.IColorable
 		if (newStyle == null)
 			newStyle = NoteStyles.get(name, 'default');
 
-		trace("loading recepor");
+		trace("loading recepor", name, (newStyle==null?null:newStyle.id));
 		if (newStyle.loadReceptor(this))
 			noteStyle = name; // yes, the base name, not the hudskin name.
 
 		_noteStyle = newStyle;
 		return noteStyle;
 	}
-
 
 	////
 	public var colorSwap:ColorSwap = new ColorSwap();
@@ -66,7 +65,7 @@ class StrumNote extends NoteObject implements NoteObject.IColorable
 
 	private var field:PlayField;
 
-	public function new(x:Float, y:Float, leColumn:Int, ?playField:PlayField, ?hudSkin:String = 'default', ?noteStyle:String = 'default') {
+	public function new(x:Float, y:Float, leColumn:Int, ?playField:PlayField, ?hudSkin:String = 'default', ?noteStyle:String) {
 		super(x, y);
 		objType = STRUM;
 		column = leColumn;
@@ -74,7 +73,11 @@ class StrumNote extends NoteObject implements NoteObject.IColorable
 		noteMod = hudSkin;
 		
 		shader = colorSwap.shader;
-		this.noteStyle = noteStyle;
+
+		if (noteStyle == null && field != null) 
+			this.noteStyle = field.defaultNoteStyle;
+		else
+			this.noteStyle = noteStyle;
 	}
 
 	override function toString()

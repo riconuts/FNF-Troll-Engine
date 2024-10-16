@@ -80,6 +80,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	public var singAnimations:Array<String> = ["singLEFT", "singDOWN", "singUP", "singRIGHT"]; // default character animations to play for each column
 	
 	public var noteField:NoteField; // renderer
+	public var defaultNoteStyle = 'default';	
 	public var judgeManager(get, default):JudgmentManager; // for deriving judgements for input reasons
 	public var modManager:ModManager; // the mod manager. will be set automatically by playstate so dw bout this
 	public var modNumber:Int = 0; // used for the mod manager. can be set to a different number to give it a different set of modifiers. can be set to 0 to sync the modifiers w/ bf's, and 1 to sync w/ the opponent's
@@ -351,9 +352,9 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	}
 
 	// generates the receptors
-	public function generateStrums(){
-		for(i in 0...keyCount){
-			var babyArrow:StrumNote = new StrumNote(0, 0, i, this, (FlxG.state == PlayState.instance) ? PlayState.instance.hudSkin : 'default');
+	public function generateStrums() {
+		for(i in 0...keyCount) {
+			var babyArrow:StrumNote = new StrumNote(0, 0, i, this, this.defaultNoteStyle);
 			babyArrow.downScroll = ClientPrefs.downScroll;
 			babyArrow.alpha = 0;
 			insert(0, babyArrow);
