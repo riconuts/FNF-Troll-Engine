@@ -48,7 +48,8 @@ class BaseNoteStyle
 		
 	}
 
-	public function noteUpdate(note:Note, dt:Float):Void {
+	public function updateObject(obj:NoteObject, dt:Float):Void {
 
 	}
+
 }

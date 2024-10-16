@@ -122,6 +122,9 @@ class StrumNote extends NoteObject implements NoteObject.IColorable
 		
 		updateZIndex();
 
+		if (_noteStyle != null)
+			_noteStyle.updateObject(this, elapsed);
+		
 		super.update(elapsed);
 	}
 

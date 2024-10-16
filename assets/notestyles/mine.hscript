@@ -1,2 +1,6 @@
-function noteUpdate(elapsed:Float)
-	note.offsetAngle += elapsed; // rotate the mf
+function updateObject(object, elapsed:Float){
+	if(object.type == NOTE)
+		object.typeOffsetAngle += elapsed; // rotate the mf
+	else
+		object.angle += elapsed;
+}

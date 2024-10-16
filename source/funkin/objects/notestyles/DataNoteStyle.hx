@@ -8,7 +8,8 @@ import funkin.scripts.FunkinHScript;
 import funkin.objects.shaders.ColorSwap;
 import funkin.data.NoteStyles;
 import funkin.CoolUtil.structureToMap;
-
+using funkin.CoolerStringTools;
+using StringTools;
 class DataNoteStyle extends BaseNoteStyle
 {
 	private static function getData(name:String):NoteStyleData {
@@ -58,7 +59,12 @@ class DataNoteStyle extends BaseNoteStyle
 		if (scriptPath != null) {
 			script = FunkinHScript.fromFile(scriptPath, scriptPath, [
 				"this" => this,
-				"getStyleData" => (() -> return this.data)
+				"getStyleData" => (() -> return this.data),
+				"getAsset" => getAsset,
+				"getNoteObjectAsset" => getNoteObjectAsset,
+				"getNoteAsset" => getNoteAsset,
+				"loadAnimations" => loadAnimations,
+				"getAnimData" => getAnimData
 			], false);
 		}
 
@@ -255,9 +261,20 @@ class DataNoteStyle extends BaseNoteStyle
 			script.executeFunc("optionsChanged", [changed]);
 	}
 
-	override function noteUpdate(note:Note, dt:Float){
-		if (script != null)
-			script.executeFunc("noteUpdate", [note, dt]);
+	override function updateObject(obj:NoteObject, dt:Float){
+		if (script != null){
+			script.executeFunc("updateObject", [obj, dt]);
+
+			// vv this might be going a bit far LMAO idfk
+/* 			script.executeFunc("update" + (switch (obj.objType){
+				case NOTE: "Note";
+				case STRUM: "Receptor";
+				case SPLASH: "Splash";
+				case UNKNOWN:
+					obj.assetKey.trim() == '' ? 'Unknown' : obj.assetKey.capitalize().replace(" ","-"); // for ease of access
+			}), [obj, dt]); */
+
+		}
 	}
 
 	override function destroy() {

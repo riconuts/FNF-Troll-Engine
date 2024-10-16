@@ -452,7 +452,7 @@ class Note extends NoteObject implements IColorable
 
 		}
 		if (_noteStyle != null)
-			_noteStyle.noteUpdate(this, elapsed);
+			_noteStyle.updateObject(this, elapsed);
 
 		var diff = (strumTime - Conductor.songPosition);
 		if (diff < -Conductor.safeZoneOffset && !wasGoodHit)
