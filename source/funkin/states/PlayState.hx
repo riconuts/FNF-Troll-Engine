@@ -1932,29 +1932,34 @@ class PlayState extends MusicBeatState
 
 	public function generateNotes(noteData:Array<SwagSection>, callScripts:Bool = true, addToFields:Bool = true, ?playfields:Array<PlayField>, ?notes:Array<Note>){
 
-		if(playfields == null)
+		if (playfields == null)
 			playfields = this.playfields.members;
 
-		if(notes==null)
-			notes = allNotes;
+		if (notes == null)
+			notes = this.allNotes;
+
+		var prevNote:Note = null;
 		
 		for (section in noteData) {
 			for (songNotes in section.sectionNotes) {
 				var daStrumTime:Float = songNotes[0];
-				var daNoteData:Int = Std.int(songNotes[1]);
-				var gottaHitNote:Bool = section.mustHitSection ? (daNoteData < keyCount) : (daNoteData >= keyCount);
-
-				var daColumn:Int = daNoteData % keyCount;
-				var susLength = Math.round(songNotes[2] / Conductor.stepCrochet) - 1;
-				var prevNote:Note = (notes.length > 0) ? notes[notes.length - 1] : null;
+				var daColumn:Int = Std.int(songNotes[1]);
+				var susLength:Int = Math.round(songNotes[2] / Conductor.stepCrochet) - 1;
 				var daType:String = songNotes[3];
+				
+				////
+				var gottaHitNote:Bool = section.mustHitSection ? (daColumn < keyCount) : (daColumn >= keyCount);
+				var fieldIndex = gottaHitNote ? 0 : 1;
+				daColumn %= keyCount;
 
+				////
 				var swagNote:Note = new Note(daStrumTime, daColumn, prevNote, gottaHitNote, songNotes[2] > 0 ? HEAD : TAP, false, hudSkin);
-				swagNote.realColumn = daNoteData;
 				swagNote.sustainLength = songNotes[2] <= Conductor.stepCrotchet ? songNotes[2] : (susLength + 1) * Conductor.stepCrotchet; // +1 because hold end
 				swagNote.ID = notes.length;
-
 				modchartObjects.set('note${swagNote.ID}', swagNote);
+
+				swagNote.fieldIndex = fieldIndex;
+				swagNote.field = playfields[swagNote.fieldIndex];
 
 				////
 				if (section.altAnim) {
@@ -1963,63 +1968,43 @@ class PlayState extends MusicBeatState
 				}
 				swagNote.gfNote = section.gfSection;
 				swagNote.noteType = daType;
+				
+				notes.push(swagNote); // just for the sake of convenience
 
-				////
-				var playfield:PlayField = swagNote.field;
-
-				if (playfield == null && playfields.length > 0) {
-					if (swagNote.fieldIndex == -1)
-						swagNote.fieldIndex = swagNote.mustPress ? 1 : 0;
-
-					if (playfields[swagNote.fieldIndex] != null) {
-						playfield = playfields[swagNote.fieldIndex];
-						swagNote.field = playfield;
-					}
+				if (addToFields && swagNote.field != null) {
+					swagNote.field.queue(swagNote); // queues the note to be spawned
 				}
 
 				if (callScripts)
 					callOnScripts("onGeneratedNote", [swagNote, section]);
 				
-				playfield = swagNote.field;
-				swagNote.fieldIndex = playfield.modNumber;
-				
-				notes.push(swagNote); // just for the sake of convenience
-
-				if (addToFields && playfield != null)
-					playfield.queue(swagNote); // queues the note to be spawned
-
-				if (callScripts)
-					callOnScripts("onGeneratedNotePost", [swagNote, section]);
-				
 				prevNote = swagNote;
 				
 				inline function makeSustain(susNote:Int, susPart:SustainPart) {
 					var sustainNote:Note = new Note(daStrumTime + Conductor.stepCrochet * (susNote + 1), daColumn, prevNote, gottaHitNote, susPart, false, hudSkin);
-					sustainNote.realColumn = daNoteData;
 					sustainNote.ID = notes.length;
 					modchartObjects.set('note${sustainNote.ID}', sustainNote);
 
-					sustainNote.characterHitAnimSuffix = swagNote.characterHitAnimSuffix;
-					sustainNote.characterMissAnimSuffix = swagNote.characterMissAnimSuffix;
-					sustainNote.gfNote = swagNote.gfNote;
-					sustainNote.noteType = daType;
-					
-					if (callScripts) 
-						callOnScripts("onGeneratedHold", [sustainNote, section]);
-
-					swagNote.tail.push(sustainNote);
-					swagNote.unhitTail.push(sustainNote);
 					sustainNote.parent = swagNote;
 					sustainNote.fieldIndex = swagNote.fieldIndex;
 					sustainNote.field = swagNote.field;
 
-					if (addToFields && playfield != null)
-						playfield.queue(sustainNote);
+					sustainNote.characterHitAnimSuffix = swagNote.characterHitAnimSuffix;
+					sustainNote.characterMissAnimSuffix = swagNote.characterMissAnimSuffix;
+					sustainNote.gfNote = swagNote.gfNote;
+					sustainNote.noteType = swagNote.noteType;
+
+					swagNote.tail.push(sustainNote);
+					swagNote.unhitTail.push(sustainNote);
 
 					notes.push(sustainNote);
 
+					if (addToFields && sustainNote.field != null) {
+						sustainNote.field.queue(sustainNote);
+					}
+
 					if (callScripts) 
-						callOnScripts("onGeneratedHoldPost", [swagNote, section]);
+						callOnScripts("onGeneratedHold", [sustainNote, section]);
 
 					prevNote = sustainNote;
 				}
@@ -2031,7 +2016,6 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
-	
 
 		return notes;
 	}
@@ -2385,6 +2369,7 @@ class PlayState extends MusicBeatState
 	public function initPlayfield(field:PlayField){
 		notefields.add(field.noteField);
 
+		field.defaultNoteStyle = hudSkin; // dfjdshfg
 		field.judgeManager = judgeManager;
 
 		field.holdPressCallback = pressHold;

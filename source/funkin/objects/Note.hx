@@ -265,15 +265,6 @@ class Note extends NoteObject implements IColorable
     function set_copyAngle(val:Bool)return copyVerts = val;
     #end
 
-	#if ALLOW_DEPRECATION
-	public var realColumn:Int; // i'd like for the chart to save columns in player order though (0-3 bf, 4-7 dad), n get rid of mustHitSection
-	//// backwards compat
-	@:noCompletion public var realNoteData(get, set):Int; 
-	@:noCompletion inline function get_realNoteData() return realColumn;
-	@:noCompletion inline function set_realNoteData(v:Int) return realColumn = v;
-	#end
-	
-
 	@:noCompletion function get_canBeHit() return UNJUDGED != PlayState.instance.judgeManager.judgeNote(this);
 
 	@:noCompletion inline function get_noteSplashDisabled() return noteSplashBehaviour == DISABLED;
