@@ -85,7 +85,6 @@ class DataNoteStyle extends BaseNoteStyle
 	function getAsset(name:String):Null<NoteStyleAsset> {
 		var usingQuants = ClientPrefs.noteSkin == "Quants";
 		if (usingQuants) {
-			trace("QUANT" + name, data.assets.exists("QUANT" + name));
 			if (data.assets.exists("QUANT" + name)) {
 				var asset:NoteStyleAsset = data.assets.get("QUANT" + name);
 				asset.quant = true;
