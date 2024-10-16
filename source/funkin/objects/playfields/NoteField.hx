@@ -45,7 +45,6 @@ class NoteField extends FieldBase
 		0, 2, 3
 	]);
 	var HOLD_INDICES:Vector<Int> = new Vector<Int>(0, false);
-	var smoothHolds = true; // ClientPrefs.coolHolds;
 
 	public var holdSubdivisions(default, set):Int;
 	public var optimizeHolds = ClientPrefs.optimizeHolds;

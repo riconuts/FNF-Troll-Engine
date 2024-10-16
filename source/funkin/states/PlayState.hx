@@ -666,7 +666,7 @@ class PlayState extends MusicBeatState
 		FunkinLua.haxeScript = FunkinHScript.blankScript('runHaxeCode');
 		#end
 
-		//// GLOBAL SCRIPTS
+		//// GLOBAL SONG SCRIPTS
 		var filesPushed:Array<String> = [];
 		for (folder in Paths.getFolders('scripts'))
 		{
@@ -937,33 +937,25 @@ class PlayState extends MusicBeatState
 		playfields.cameras = [camHUD];
 		notes.cameras = [camHUD];
 		
-		playerField = new PlayField(modManager);
-		playerField.cameras = [camHUD];
-		playerField.modNumber = 0;
-		playerField.playerId = 0;
-		playerField.characters = [for(ch in boyfriendMap) ch];
+		modManager.playerAmount = 2;
+		for (i in 0...modManager.playerAmount)
+			newPlayfield();
 		
-		playerField.isPlayer = !playOpponent;
-		playerField.autoPlayed = !playerField.isPlayer || cpuControlled;
-		playerField.noteHitCallback = playOpponent ? opponentNoteHit : goodNoteHit;
+		playerField = playfields.members[0];
+		if (playerField != null) {
+			playerField.characters = [for(ch in boyfriendMap) ch];
+			playerField.isPlayer = !playOpponent;
+			playerField.autoPlayed = !playerField.isPlayer || cpuControlled;
+			playerField.noteHitCallback = playOpponent ? opponentNoteHit : goodNoteHit;
+		}
 
-		dadField = new PlayField(modManager);
-		dadField.cameras = [camHUD];
-		dadField.isPlayer = playOpponent;
-		dadField.autoPlayed = !dadField.isPlayer || cpuControlled;
-		dadField.modNumber = 1;
-		dadField.playerId = 1;
-		dadField.characters = [for(ch in dadMap) ch];
-		dadField.noteHitCallback = playOpponent ? goodNoteHit : opponentNoteHit;
-
-		dad.idleWhenHold = !dadField.isPlayer;
-		boyfriend.idleWhenHold = !playerField.isPlayer;
-
-		playfields.add(dadField);
-		playfields.add(playerField);
-
-		initPlayfield(dadField);
-		initPlayfield(playerField);
+		dadField = playfields.members[1];
+		if (dadField != null) {
+			dadField.characters = [for(ch in dadMap) ch];
+			dadField.isPlayer = playOpponent;
+			dadField.autoPlayed = !dadField.isPlayer || cpuControlled;
+			dadField.noteHitCallback = playOpponent ? goodNoteHit : opponentNoteHit;
+		}
 		
 		callOnScripts("postPlayfieldCreation"); // backwards compat
 		callOnScripts("onPlayfieldCreationPost");
@@ -1428,21 +1420,7 @@ class PlayState extends MusicBeatState
 		if (skipCountdown || startOnTime > 0)
 			skipArrowStartTween = true;
 
-		#if ALLOW_DEPRECATION
-		callOnScripts('preReceptorGeneration'); // backwards compat, deprecated
-		#end
-		callOnScripts('onReceptorGeneration');
-
-		for(field in playfields.members)
-			field.generateStrums();
-
-		#if ALLOW_DEPRECATION
-		callOnScripts('postReceptorGeneration'); // deprecated
-		#end
-		callOnScripts('onReceptorGenerationPost');
-
-		for(field in playfields.members)
-			field.fadeIn(isStoryMode || skipArrowStartTween); // TODO: check if its the first song so it should fade the notes in on song 1 of story mode
+		generateStrums();
 
 		#if ALLOW_DEPRECATION
 		callOnScripts('preModifierRegister'); // deprecated
@@ -1578,8 +1556,7 @@ class PlayState extends MusicBeatState
 			if(daNote.strumTime < time)
 			{
 				daNote.ignoreNote = true;
-				if (modchartObjects.exists('note${daNote.ID}'))
-					modchartObjects.remove('note${daNote.ID}');
+				modchartObjects.remove('note${daNote.ID}');
 				for (field in playfields)
 					field.removeNote(daNote);
 
@@ -2317,8 +2294,23 @@ class PlayState extends MusicBeatState
 	}
 
 	public var skipArrowStartTween:Bool = false; //for lua
-	private function generateStaticArrows(player:Int):Void
+	private function generateStrums():Void
 	{
+		#if ALLOW_DEPRECATION
+		callOnScripts('preReceptorGeneration'); // backwards compat, deprecated
+		#end
+		callOnScripts('onReceptorGeneration');
+
+		for(field in playfields.members)
+			field.generateStrums();
+
+		#if ALLOW_DEPRECATION
+		callOnScripts('postReceptorGeneration'); // deprecated
+		#end
+		callOnScripts('onReceptorGenerationPost');
+
+		for(field in playfields.members)
+			field.fadeIn(isStoryMode || skipArrowStartTween); // TODO: check if its the first song so it should fade the notes in on song 1 of story mode
 
 	}
 
@@ -2400,7 +2392,7 @@ class PlayState extends MusicBeatState
 		field.holdReleaseCallback = releaseHold;
 
 		field.noteRemoved.add((note:Note, field:PlayField) -> {
-			if(modchartObjects.exists('note${note.ID}'))modchartObjects.remove('note${note.ID}');
+			modchartObjects.remove('note${note.ID}');
 			allNotes.remove(note);
 			unspawnNotes.remove(note);
 			notes.remove(note);

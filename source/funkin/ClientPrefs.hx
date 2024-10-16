@@ -842,6 +842,7 @@ class ClientPrefs
 		if (Main.bread != null)
 			Main.bread.visible = ClientPrefs.bread;
 
+		FlxG.sound.volume = ClientPrefs.masterVolume;
 		FlxG.autoPause = ClientPrefs.autoPause;
 
 		FlxSprite.defaultAntialiasing = ClientPrefs.globalAntialiasing;

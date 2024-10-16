@@ -26,8 +26,8 @@ class Character extends FlxSprite
 	/**Whether to force the dance animation to play**/
 	public var shouldForceDance:Bool = false;
 
-	/**Whether the character can go back to the idle while the player is holding a gameplay key**/
-	public var idleWhenHold:Bool = true;
+	/**If true, the character will go back to it's idle even if the player is holding a gameplay key**/
+	public var idleWhenHold:Bool = false;
 
 	/**In case a character is missing, it will use BF on its place**/
 	public static var DEFAULT_CHARACTER:String = 'bf'; 
@@ -233,7 +233,6 @@ class Character extends FlxSprite
 		this.debugMode = debugMode;
 
 		xFacing = isPlayer ? -1 : 1;
-		idleWhenHold = !isPlayer;
 		controlled = isPlayer;
 	}
 

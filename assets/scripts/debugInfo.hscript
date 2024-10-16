@@ -2,14 +2,11 @@ update = null;
 onBeatHit = null;
 onStepHit = null;
 
-var pukeTxt;
-
-function onCreate(){
-	var pukeFunc = getClass("Reflect").makeVarArgs(function(vomit){
-		pukeTxt.text = Std.string(vomit);
-	});
-	global.set("puke", pukeFunc);
-}
+var puke_text = ()->{};
+var puke = getClass("Reflect").makeVarArgs((p)->{
+	puke_text(Std.string(p));
+});
+global.set("puke", puke);
 
 function onCreatePost()
 {	
@@ -31,8 +28,6 @@ function onCreatePost()
 	if (PlayState.chartingMode != true)
 		return;
 
-	var game = getInstance();
-
 	var songPosTxt = new FlxText(0, downscroll ? 0 : FlxG.height - 20, FlxG.width, "", 20);
 	songPosTxt.setFormat(Paths.font("calibri.ttf"), 20, 0xFFFFFFFF, null, null, 0xFF000000);
 	songPosTxt.scrollFactor.set();
@@ -40,14 +35,9 @@ function onCreatePost()
 	songPosTxt.cameras = [game.camOverlay];
 	game.add(songPosTxt);
 
-	onBeatHit = function(){
+	onBeatHit = onStepHit = ()->{
 		songPosTxt.text = 'curBeat: '+curBeat+', curStep: '+curStep;
 	};
-
-	onStepHit = function(){
-		songPosTxt.text = 'curBeat: '+curBeat+', curStep: '+curStep;
-	};
-	
 
 	pukeTxt = new FlxText(0, songPosTxt.y + (downscroll ? 24 : -24), FlxG.width, "", 20);
 	pukeTxt.setFormat(Paths.font("calibri.ttf"), 20, 0xFFFFFFFF, null, null, 0xFF000000);
@@ -55,6 +45,9 @@ function onCreatePost()
 	pukeTxt.borderSize = 1.25;
 	pukeTxt.cameras = [game.camOverlay];
 	game.add(pukeTxt);
+	
+	puke_text = pukeTxt.set_text;
+	puke("puke");
 
     /*
 	update = function(){
