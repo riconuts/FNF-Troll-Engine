@@ -159,6 +159,7 @@ class Main extends Sprite
 		StartupState.nextState = nextState;
 		addChild(new FNFGame(gameWidth, gameHeight, initialState, framerate, framerate, skipSplash, startFullscreen));
 
+		FlxG.sound.volume = FlxG.save.data.volume;
 		FlxG.mouse.useSystemCursor = true;
 		FlxG.mouse.visible = false;
 

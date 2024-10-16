@@ -84,9 +84,14 @@ class StartupState extends FlxTransitionableState
 		ClientPrefs.initialize();
 		ClientPrefs.load();
 
-		FlxG.sound.volume = ClientPrefs.masterVolume;
 		FlxG.sound.volumeHandler = (vol:Float)->{
 			ClientPrefs.masterVolume = vol;
+
+			@:privateAccess {
+				Reflect.setField(ClientPrefs.optionSave.data, "masterVolume", vol);
+				ClientPrefs.optionSave.flush();
+			}
+
 			Main.volumeChangedEvent.dispatch(vol);
 		}
 
