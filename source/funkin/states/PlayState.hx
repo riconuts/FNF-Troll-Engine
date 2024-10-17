@@ -90,8 +90,9 @@ typedef SpeedEvent =
 {
 	position:Float, // the y position where the change happens (modManager.getVisPos(songTime))
 	startTime:Float, // the song position (conductor.songTime) where the change starts
-	songTime:Float, // the song position (conductor.songTime) when the change ends
-	?startSpeed:Float, // the starting speed
+	startSpeed:Float, // the previous event's speed
+	?endTime:Float, // the song position (conductor.songTime) when the change ends
+	?easeFunc:EaseFunction,
 	speed:Float // speed mult after the change
 }
 
@@ -246,7 +247,7 @@ class PlayState extends MusicBeatState
 	public var eventNotes:Array<EventNote> = [];
 
 	var speedChanges:Array<SpeedEvent> = [];
-	public var currentSV:SpeedEvent = {position: 0, startTime: 0, songTime:0, speed: 1, startSpeed: 1};
+	public var currentSV:SpeedEvent = {position: 0, startTime: 0, speed: 1, startSpeed: 1};
 	public var judgeManager:JudgmentManager;
 
 	public var modManager:ModManager;
@@ -519,10 +520,9 @@ class PlayState extends MusicBeatState
 
 		speedChanges.push({
 			position: 0,
-			songTime: 0,
 			startTime: 0,
-			startSpeed: 1,
 			speed: 1,
+			startSpeed: 1,
 		});
 
 		#if PE_MOD_COMPATIBILITY
@@ -2044,39 +2044,30 @@ class PlayState extends MusicBeatState
 		return c * e(time) + b;
 	}
 
-	public inline function getTimeFromSV(time:Float, event:SpeedEvent){
+	public inline function getTimeFromSV(time:Float, event:SpeedEvent): Float
+	{
+		var currentSpeed:Float = event.speed;
+		var func:EaseFunction = event.easeFunc == null ? FlxEase.linear : event.easeFunc;
+		if(event.endTime != null){
+			if(time <= event.endTime){
+				var timeElapsed:Float = FlxMath.remapToRange(time, event.startTime, event.endTime, 0, 1);
+				currentSpeed = FlxMath.lerp(event.startSpeed, event.speed, func(timeElapsed));
+			}
+		}
 
-		// TODO: make easing SVs work somehow
+		//trace(event.position, time - event.startTime, event.position + (modManager.getBaseVisPosD(time - event.startTime, 1) * currentSpeed));
 
-		//if(time >= event.songTime || event.songTime == event.startTime) // practically the same start and end time
-			return event.position + (modManager.getBaseVisPosD(time - event.songTime, 1) * event.speed);
-/* 		else{
-			// ease(easeFunc, passed, startVal, change, length)
-			// var passed = curStep - executionStep;
-			// var change = endVal - startVal;
-			if(event.startSpeed==null)event.startSpeed = currentSV.speed;
-
-			var speed = ease(FlxEase.linear, time - event.songTime, event.startSpeed, event.speed - event.startSpeed, event.songTime - event.startTime);
-			trace(speed);
-			return event.position + (modManager.getBaseVisPosD(time - event.startTime, 1) * speed);
-		} */
+		return event.position + (modManager.getBaseVisPosD(time - event.startTime, 1) * currentSpeed);
 	}
 
 	public function getSV(time:Float){
-		var event:SpeedEvent = {
-			position: 0,
-			songTime: 0,
-			startTime: 0,
-			startSpeed: 1,
-			speed: 1
-		};
-		for (shit in speedChanges)
-		{
-			if (shit.startTime <= time && shit.startTime >= event.startTime){
-				if(shit.startSpeed == null)
-					shit.startSpeed = event.speed;
-				event = shit;
-				
+		var svIndex:Int = 0;
+
+		var event:SpeedEvent = speedChanges[svIndex];
+		if (svIndex < speedChanges.length - 1) {
+			while (speedChanges[svIndex + 1] != null && speedChanges[svIndex + 1].startTime <= time) {
+				event = speedChanges[svIndex + 1];
+				svIndex++;
 			}
 		}
 
@@ -2126,10 +2117,30 @@ class PlayState extends MusicBeatState
 					if (Math.isNaN(speed)) speed = 1;
 				}
 
+				var endTime:Null<Float> = null;
+				var easeFunc:Null<EaseFunction> = null;
+
+				var tweenOptions = event.value2.split("/");
+				if(tweenOptions.length >= 1){
+					easeFunc = FlxEase.linear;
+					var parsed:Float = Std.parseFloat(tweenOptions[0]);
+					if(!Math.isNaN(parsed))
+						endTime = event.strumTime + (parsed * 1000);
+
+					if(tweenOptions.length > 1){
+						var f:EaseFunction = ScriptingUtil.getFlxEaseByString(tweenOptions[1]);
+						if(f != null)
+							easeFunc = f;
+					}
+				}
+
+				var lastChange:SpeedEvent = speedChanges[speedChanges.length - 1];
 				speedChanges.push({
-					position: getTimeFromSV(event.strumTime, speedChanges[speedChanges.length - 1]),
-					songTime: event.strumTime,
+					position: getTimeFromSV(event.strumTime, lastChange),
 					startTime: event.strumTime,
+					endTime: endTime,
+					easeFunc: easeFunc,
+					startSpeed: lastChange.speed,
 					speed: speed
 				});
 				
