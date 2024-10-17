@@ -237,15 +237,7 @@ class Character extends FlxSprite
 		controlled = isPlayer;
 	}
 
-	public function setupCharacter()
-	{
-		if (characterScript != null && characterScript.scriptType == HSCRIPT) {
-			var characterScript:FunkinHScript = cast characterScript;
-			if (characterScript.call('setupCharacter', [this]) == Globals.Function_Stop) {
-				return;
-			}
-		}
-
+	function _setupCharacter() {
 		var json = getCharacterFile(curCharacter);
 		if (json == null) {
 			trace('Character file: $curCharacter not found.');
@@ -264,6 +256,19 @@ class Character extends FlxSprite
 		animation.finish();
 
 		flipX = isPlayer ? !originalFlipX : originalFlipX;
+	}
+
+	public function setupCharacter()
+	{
+		if (characterScript != null && characterScript.scriptType == HSCRIPT) {
+			var characterScript:FunkinHScript = cast characterScript;
+			if (characterScript.exists('setupCharacter')) {
+				characterScript.executeFunc('setupCharacter', null, this, ["super" => _setupCharacter]);
+				return;
+			}
+		}
+
+		_setupCharacter();
 	}
 
 	public function createPlaceholderAnims() {
@@ -628,26 +633,25 @@ class Character extends FlxSprite
 	{
 		setDefaultVar("this", this);
 
-		for (filePath in Paths.getFolders("characters"))
-		{
-			#if HSCRIPT_ALLOWED
-			var hscriptFile = Paths.getHScriptPath('$filePath/$curCharacter');
-			if (hscriptFile != null) {
-				var script = FunkinHScript.fromFile(hscriptFile, hscriptFile, defaultVars);
-				pushScript(script);
-				return this;
-			}
-			#end
+		var key:String = 'characters/$curCharacter';
 
-			#if LUA_ALLOWED
-			var luaFile = Paths.getLuaPath('$filePath/$curCharacter');
-			if (luaFile != null) {
-				var script = FunkinLua.fromFile(luaFile, luaFile, defaultVars);
-				pushScript(script);
-				return this;
-			}
-			#end
+		#if HSCRIPT_ALLOWED
+		var hscriptFile = Paths.getHScriptPath(key);
+		if (hscriptFile != null) {
+			var script = FunkinHScript.fromFile(hscriptFile, hscriptFile, defaultVars);
+			pushScript(script);
+			return this;
 		}
+		#end
+
+		#if LUA_ALLOWED
+		var luaFile = Paths.getLuaPath(key);
+		if (luaFile != null) {
+			var script = FunkinLua.fromFile(luaFile, luaFile, defaultVars);
+			pushScript(script);
+			return this;
+		}
+		#end
 
 		return this;
 	}
