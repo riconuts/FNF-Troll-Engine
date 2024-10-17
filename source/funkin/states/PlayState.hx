@@ -2047,7 +2047,10 @@ class PlayState extends MusicBeatState
 			if(timeElapsed < 0)timeElapsed = 0;
 				currentSpeed = FlxMath.lerp(event.startSpeed, event.speed, func(timeElapsed));
 			
-			return event.position + (modManager.getBaseVisPosD(time - event.endTime, 1) * currentSpeed);
+			var duration:Float = event.endTime - event.startTime;
+			var diff:Float = time - event.endTime;
+
+			return event.position + (modManager.getBaseVisPosD(duration, 1) + modManager.getBaseVisPosD(diff, 1) * currentSpeed);
 		}
 
 		return event.position + (modManager.getBaseVisPosD(time - event.startTime, 1) * currentSpeed);
