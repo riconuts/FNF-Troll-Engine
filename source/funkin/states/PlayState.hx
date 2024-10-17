@@ -462,6 +462,7 @@ class PlayState extends MusicBeatState
 
 	override public function create()
 	{
+		print('\nCreating PlayState\n');
 		Highscore.loadData();
 
 		Paths.preLoadContent = [];
@@ -4109,14 +4110,10 @@ class PlayState extends MusicBeatState
 		if (hudSkinScripts.exists(name))
 			return hudSkinScripts.get(name);
 
-		var script:FunkinHScript = null;
-
-		var file = Paths.getHScriptPath('hudskins/$name');
-		if (file != null){
-			script = createHScript(file, name);
-			hudSkinScripts.set(name, script);
-		}
-
+		var path = Paths.getHScriptPath('hudskins/$name');
+		var script:FunkinHScript = (path==null) ? null : createHScript(path, name);
+		
+		hudSkinScripts.set(name, script);
 		return script;
 	}
 	#end
@@ -4222,6 +4219,7 @@ class PlayState extends MusicBeatState
 			else if (script.scriptType == HSCRIPT)
 				hscriptArray.remove(cast script);
 
+			trace('Closed ${script.scriptName}');
 			funkyScripts.remove(script);
 			script.stop();
 		}
@@ -4469,12 +4467,12 @@ class PlayState extends MusicBeatState
 			script.stop();
 		}
 		
-		if (hscriptArray != null) while (hscriptArray.length > 0)
-			hscriptArray.pop();
+		if (hscriptArray != null)
+			hscriptArray.resize(0);
 
 		#if LUA_ALLOWED
-		if (luaArray != null) while (luaArray.length > 0)
-			luaArray.pop();
+		if (luaArray != null) 
+			luaArray.resize(0);
 
 		if (FunkinLua.haxeScript != null)
 			FunkinLua.haxeScript.stop();
