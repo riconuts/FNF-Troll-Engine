@@ -519,8 +519,8 @@ class PlayState extends MusicBeatState
 		];
 
 		speedChanges.push({
-			position: 0,
-			startTime: 0,
+			position: -6000 * 0.45,
+			startTime: -6000,
 			speed: 1,
 			startSpeed: 1,
 		});
@@ -1903,13 +1903,13 @@ class PlayState extends MusicBeatState
 			eventNotes.push(subEvent);
 			eventPushed(subEvent);
 		}
+		speedChanges.sort(svSort);
 
 		if (eventNotes.length > 1)
 			eventNotes.sort(sortByTime);
 
 		generateNotes(noteData); // generates the chart
 
-		speedChanges.sort(svSort);
 
 		allNotes.sort(sortByNotes);
 
@@ -2038,24 +2038,17 @@ class PlayState extends MusicBeatState
 		return getTimeFromSV(time, event);
 	}
 
-	function ease(e:EaseFunction, t:Float, b:Float, c:Float, d:Float)
-	{ // elapsed, begin, change (ending-beginning), duration
-		var time = t / d;
-		return c * e(time) + b;
-	}
-
-	public inline function getTimeFromSV(time:Float, event:SpeedEvent): Float
-	{
+	public function getTimeFromSV(time:Float, event:SpeedEvent):Float {
 		var currentSpeed:Float = event.speed;
 		var func:EaseFunction = event.easeFunc == null ? FlxEase.linear : event.easeFunc;
-		if(event.endTime != null){
-			if(time <= event.endTime){
-				var timeElapsed:Float = FlxMath.remapToRange(time, event.startTime, event.endTime, 0, 1);
+		if (event.endTime != null) {
+			var timeElapsed:Float = FlxMath.remapToRange(time, event.startTime, event.endTime, 0, 1);
+			if(timeElapsed > 1)timeElapsed = 1;
+			if(timeElapsed < 0)timeElapsed = 0;
 				currentSpeed = FlxMath.lerp(event.startSpeed, event.speed, func(timeElapsed));
-			}
+			
+			return event.position + (modManager.getBaseVisPosD(time - event.endTime, 1) * currentSpeed);
 		}
-
-		//trace(event.position, time - event.startTime, event.position + (modManager.getBaseVisPosD(time - event.startTime, 1) * currentSpeed));
 
 		return event.position + (modManager.getBaseVisPosD(time - event.startTime, 1) * currentSpeed);
 	}
@@ -2140,7 +2133,7 @@ class PlayState extends MusicBeatState
 					startTime: event.strumTime,
 					endTime: endTime,
 					easeFunc: easeFunc,
-					startSpeed: lastChange.speed,
+					startSpeed: lastChange.startSpeed,
 					speed: speed
 				});
 				
