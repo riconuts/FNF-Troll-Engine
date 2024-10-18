@@ -4136,9 +4136,13 @@ class PlayState extends MusicBeatState
 
 	public function cameraBump(camZoom:Float = 0.015, hudZoom:Float = 0.03)
 	{
-		if(FlxG.camera.zoom < (defaultCamZoom * 1.35))
-			FlxG.camera.zoom += camZoom * camZoomingMult * ClientPrefs.camZoomP;
-		camHUD.zoom += hudZoom * camZoomingMult * ClientPrefs.camZoomP;
+		var zoomMult = camZoomingMult * ClientPrefs.camZoomP;
+		var gameCap = Math.max(camGame.zoom, defaultCamZoom * 1.35);
+
+		camGame.zoom += camZoom * zoomMult;
+		camHUD.zoom += hudZoom * zoomMult;
+
+		if (camGame.zoom > gameCap) camGame.zoom = gameCap;
 	}
 
 	public var zoomEveryBeat:Int = 4;
