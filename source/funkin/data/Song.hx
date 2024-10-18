@@ -24,6 +24,7 @@ typedef SwagSong = {
 
 	////
 	var song:String;
+	// var displayName:String;
 	var bpm:Float;
 	var tracks:SongTracks; // currently used
 	
@@ -414,8 +415,8 @@ class Song
 			/**
 			 * 1. If 'needsVoices' is false, no tracks will be defined for the player or opponent
 			 * 2. If the chart folder couldn't be retrieved then "Voices-Player" and "Voices-Opponent" are used
-			 * 3. If a "Voices-Player" exists then it is defined as a player track, otherwise "Voices" is used
-			 * 4. If a "Voices-Opponent" exists then it is defined as an opponent track, otherwise "Voices" is used
+			 * 3. Define the first one existing in ['Voices-$player1', 'Voices-Player', 'Voices'] as a player track;
+			 * 4. Define the first one existing in ['Voices-$player2', 'Voices-Opponent', 'Voices'] as an opponent track;
 			 */
 			inline function sowy() {
 				//// 1
