@@ -61,6 +61,9 @@
     <define name="MULTICORE_LOADING" if="native" />
     <define name="CRASH_HANDLER" if="desktop native" />
 
+	<!--EXPERIMENTAL! Very buggy and work in progress!!-->
+<!-- 	<define name="EASED_SVs" /> -->
+
     <!--Remove if you dont want states to be modified with scripts. This only disables extension/overrides and not the HScriptedState class-->
     <define name="SCRIPTABLE_STATES" if="HSCRIPT_ALLOWED" />
     <!--Remove if you dont want Lua to be usable. Note that if you remove this, you should remove PE_MOD_COMPATIBILITY too -->
