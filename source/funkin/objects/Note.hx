@@ -355,11 +355,10 @@ class Note extends NoteObject implements IColorable
 		if (isQuant && Paths.imageExists('QUANT' + noteSplashTexture))
 			noteSplashTexture = 'QUANT' + noteSplashTexture;
 
-		if (!isQuant || (isQuant && noteSplashTexture.startsWith("QUANT"))){
-			noteSplashHue = colorSwap.hue;
-			noteSplashSat = colorSwap.saturation;
-			noteSplashBrt = colorSwap.brightness;
-		}
+		noteSplashHue = colorSwap.hue;
+		noteSplashSat = colorSwap.saturation;
+		noteSplashBrt = colorSwap.brightness;
+		
 
 		return noteType;
 	}

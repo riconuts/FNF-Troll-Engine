@@ -178,7 +178,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		strumAttachments.visible = false;
 		add(strumAttachments);
 
-		var splash:NoteSplash = new NoteSplash(100, 100, 0);
+		var splash:NoteSplash = new NoteSplash();
 		splash.handleRendering = false;
 		grpNoteSplashes.add(splash);
 		grpNoteSplashes.visible = false; // so they dont get drawn
@@ -392,7 +392,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	// spawns a notesplash w/ specified skin. optional note to derive the skin and colours from.
 
 	public function spawnSplash(note:Note, splashSkin:String){
-		var skin:String;
+/* 		var skin:String;
 		var hue:Float;
 		var sat:Float;
 		var brt:Float;
@@ -405,15 +405,10 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		}else{
 			skin = splashSkin;
 			hue = sat = brt = 0.0;
-			
-			/*var hsb = ClientPrefs.arrowHSV[note.column % 4]; 
-			hue = hsb[0] / 360;
-			sat = hsb[1] / 100;
-			brt = hsb[2] / 100;*/
-		}
+		} */
 
 		var splash:NoteSplash = grpNoteSplashes.recycle(NoteSplash);
-		splash.setupNoteSplash(0, 0, note.column, skin, hue, sat, brt, note);
+		splash.hitNote(note);
 		splash.handleRendering = false;
 		grpNoteSplashes.add(splash);
 		return splash;

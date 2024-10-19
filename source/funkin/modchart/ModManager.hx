@@ -108,7 +108,7 @@ class ModManager {
 			setValue(modName, 0, mN);
         } */
 		setValue("noteSpawnTime", 0, mN); // when this is <= 0, it defaults to field.spawnTime
-		setValue("drawDistance", FlxG.height * 1.1, mN); // MAY NOT REPRESENT ACTUAL DRAWDISTANCE: drawDistance is modified by the notefields aswell
+		setValue("drawDistance", 1600, mN); // MAY NOT REPRESENT ACTUAL DRAWDISTANCE: drawDistance is modified by the notefields aswell
 		// so whAT you set drawDistance to might be lower or higher than expected because of the draw distance mult. setting
 		// If you want to disable the usage of draw distance muitiplier, you can set 'disableDrawDistMult' to anything but 0
 		setValue("xmod", 1, mN);

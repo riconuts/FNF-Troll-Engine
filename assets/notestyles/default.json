@@ -109,6 +109,8 @@
 		"noteSplash": {
 			"type": "sparrow",
 			"imageKey": "noteSplashes",
+			"scale": 0.8,
+			"alpha": 0.6,
 			"animations": [
 				{
 					"type": "column",

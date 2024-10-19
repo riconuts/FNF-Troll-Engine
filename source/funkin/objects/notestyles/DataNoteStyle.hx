@@ -19,6 +19,7 @@ class DataNoteStyle extends BaseNoteStyle
 
 		var assetsMap = structureToMap(json.assets);
 		json.assets = assetsMap;
+		trace(json.scale);
 		if (json.scale == null) json.scale = 1.0;
 
 		for (name => asset in assetsMap) {
@@ -51,7 +52,6 @@ class DataNoteStyle extends BaseNoteStyle
 
 	private function new(id:String, data:NoteStyleData) {
 		this.data = data;
-		this.scale = data.scale;
 
 		// maybe this can be moved to fromName? idk lol
 		var scriptPath:String = Paths.getHScriptPath('notestyles/$id');
@@ -69,6 +69,8 @@ class DataNoteStyle extends BaseNoteStyle
 		}
 
 		super(id);
+		trace(data.scale);
+		this.scale = data.scale;
 	}
 
 	function updateNoteColours(note:Note):Void {
@@ -170,6 +172,7 @@ class DataNoteStyle extends BaseNoteStyle
 		var imageKey:String = asset.imageKey;
 		if (ClientPrefs.noteSkin == 'Quants' && !obj.isQuant) {
 			var quantKey = Note.getQuantTexture(Path.directory(imageKey) + "/", Path.withoutDirectory(imageKey), imageKey);
+			trace(quantKey);
 			if (quantKey != null) {
 				obj.isQuant = true;
 				imageKey = quantKey;
@@ -317,6 +320,7 @@ class DataNoteStyle extends BaseNoteStyle
 		} else
 			updateColours(strum);
  */
+		strum.alpha = asset.alpha;
 		strum.scale.x = strum.scale.y = (asset.scale ?? data.scale);
 		strum.defScale.copyFrom(strum.scale);
 		strum.updateHitbox();
@@ -327,6 +331,40 @@ class DataNoteStyle extends BaseNoteStyle
 
 		return true;
 	}
+
+	override public function loadNoteSplash(splash:NoteSplash) {
+		if (script != null) {
+			var rVal:Dynamic = script.executeFunc("loadNoteSplash", [splash]);
+			if (rVal is Bool)
+				return rVal;
+		}
+		var asset:NoteStyleAsset = getNoteObjectAsset(splash);
+
+		splash.isQuant = asset.quant ?? false;
+
+		splash.antialiasing = (data.antialiasing ?? asset.antialiasing) ?? true;
+		splash.useDefaultAntialiasing = splash.antialiasing;
+
+		loadAnimations(splash, asset);
+		splash.alpha = asset.alpha;
+		splash.animation.play("static", true);
+		// this is dealt with in strum.playanim
+
+/* 			if (asset.canBeColored == false) {
+				strum.colorSwap.setHSB();
+			} else
+				updateColours(strum); */
+		
+		splash.scale.x = splash.scale.y = (asset.scale ?? data.scale);
+		splash.defScale.copyFrom(splash.scale);
+		splash.updateHitbox();
+
+		if (script != null)
+			script.executeFunc("loadNoteSplashPost", [splash]);
+
+		return true;
+	}
+
 
 	override function loadNote(note:Note) {
 		if (script != null){

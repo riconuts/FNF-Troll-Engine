@@ -651,8 +651,13 @@ class PlayState extends MusicBeatState
 		
 		PlayState.keyCount = SONG.keyCount;
 		NoteStyles.loadDefault();
-		// TODO: check song notestyle
-		Note.spriteScale = (4 / keyCount) * 0.7; //NoteStyles.get("default").scale;
+		@:privateAccess
+		trace(cast (NoteStyles.get("default"), funkin.objects.notestyles.DataNoteStyle).data.scale);
+		Note.spriteScale = (4 / PlayState.keyCount) * NoteStyles.get("default" /**SONG.noteStyle**/).scale;
+		// honestly we should kill Note.swagWidth and shit and have each field keep track of its own noteWidth
+		// keep swagWidth as a constant 160 * 0.7 or whatever for when its used outside of PlayFields
+		// but i think that'd be better lol
+
 		Note.swagWidth = Note.spriteScale * 160;
 		/**
 		 * Note texture asset names
@@ -852,7 +857,7 @@ class PlayState extends MusicBeatState
 
 		//// Asset precaching end
 
-		var splash:NoteSplash = new NoteSplash(100, 100, 0);
+		var splash:NoteSplash = new NoteSplash();
 		splash.alpha = 0.0;
 
 		grpNoteSplashes.cameras = [camHUD];
