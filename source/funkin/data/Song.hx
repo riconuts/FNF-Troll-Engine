@@ -49,6 +49,13 @@ typedef SwagSong = {
 	@:optional var offset:Float; // Offsets the chart
 }
 
+typedef EventNote = {
+	strumTime:Float,
+	event:String,
+	value1:String,
+	value2:String
+}
+
 typedef JsonSong = {
 	> SwagSong,
 
@@ -463,6 +470,40 @@ class Song
 		}
 
 		return swagJson;
+	}
+
+	public static function getEventNotes(rawEventsData:Array<Array<Dynamic>>, ?events:Array<EventNote>):Array<EventNote>
+	{
+		if (events==null) events = [];
+		
+		var eventsData:Array<Array<Dynamic>> = [];
+		for (event in rawEventsData) {
+			var last = eventsData[eventsData.length-1];
+			
+			if (last != null && Math.abs(last[0] - event[0]) <= Conductor.jackLimit){
+				var fuck:Array<Array<Dynamic>> = event[1];
+				for (shit in fuck) eventsData[eventsData.length - 1][1].push(shit);
+			}else
+				eventsData.push(event);
+		}
+
+		for (event in eventsData) //Event Notes
+		{
+			var eventTime:Float = event[0] + ClientPrefs.noteOffset;
+			var subEvents:Array<Array<Dynamic>> = event[1];
+
+			for (eventData in subEvents) {
+				var eventNote:EventNote = {
+					strumTime: eventTime,
+					event: eventData[0],
+					value1: eventData[1],
+					value2: eventData[2]
+				};
+				events.push(eventNote);
+			}
+		}
+
+		return events;
 	}
 
 	static public function loadSong(toPlay:SongMetadata, ?difficulty:String, ?difficultyIdx:Int = 1) {
