@@ -1746,8 +1746,6 @@ class PlayState extends MusicBeatState
 				songSpeed = ClientPrefs.getGameplaySetting('scrollspeed', SONG.speed);
 		}
 
-		songSpeed *= FlxG.height / 720; // Adjust speed to game size
-
 		////
 		#if tgt if(ClientPrefs.ruin){
 			AL.effecti(sndEffect, AL.EFFECT_TYPE, AL.EFFECT_REVERB);
