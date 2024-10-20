@@ -127,7 +127,15 @@ class Conductor
 
 	public inline static function getBeat(time:Float)
 		return getStep(time) * 0.25;
-	
+
+	public static function stepToSeconds(step:Float):Float {
+		var lastChange = getBPMFromStep(step);
+		return lastChange.songTime + ((step - lastChange.stepTime) / (lastChange.bpm / 60) / 4);
+	}
+
+	public inline static function stepToMs(step:Float):Float {
+		return stepToSeconds(step) * 1000;
+	}
 
 	public inline static function getBeatRounded(time:Float):Int
 		return Math.floor(getStepRounded(time) * 0.25);
