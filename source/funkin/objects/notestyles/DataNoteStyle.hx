@@ -144,7 +144,7 @@ class DataNoteStyle extends BaseNoteStyle
 		}
 	}
 
-	private static function getData(name:String):NoteStyleData {
+	public static function getData(name:String):NoteStyleData {
 		var path = Paths.getPath('notestyles/$name.json');
 		var json = Paths.getJson(path);
 		if (json == null) return null;

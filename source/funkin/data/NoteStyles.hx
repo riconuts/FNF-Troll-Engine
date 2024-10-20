@@ -120,7 +120,7 @@ class NoteStyles
 	public static function loadDefault(arrowSkin="NOTE_assets", splashSkin="noteSplashes", rollSkin="ROLL_assets") {
 		clear();
 
-		var data = DataNoteStyle.generateDefaultData(arrowSkin, splashSkin, rollSkin);
+		var data = DataNoteStyle.getData('default') ?? DataNoteStyle.generateDefaultData(arrowSkin, splashSkin, rollSkin);
 		set("default", DataNoteStyle.fromData("default", data));
 	}
 
@@ -133,7 +133,6 @@ class NoteStyles
 			ns.destroy();
 		}
 
-		DataNoteStyle.defaultData = null;
 		map.clear();
 	}
 

@@ -424,7 +424,7 @@ class Note extends NoteObject implements IColorable
 	{
 		super.update(elapsed);
 
-		if(!inEditor){
+		if (!inEditor) {
 			if (noteScript != null){
 				noteScript.executeFunc("noteUpdate", [elapsed], this);
 			}
@@ -432,9 +432,8 @@ class Note extends NoteObject implements IColorable
 			if (genScript != null){
 				genScript.executeFunc("noteUpdate", [elapsed], this);
 			}
-
-
 		}
+
 		if (_noteStyle != null)
 			_noteStyle.updateObject(this, elapsed);
 
