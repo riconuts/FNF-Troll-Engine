@@ -191,7 +191,9 @@ class FunkinLua extends FunkinScript
 			if (!gonnaClose){
 				if (printMessage == true)
 					luaTrace('Stopping lua script: ' + scriptName);
-			
+				else
+					trace('Stopping lua script $scriptName');
+
 				PlayState.instance.scriptsToClose.push(this);
 				gonnaClose = true;
 			}

@@ -2,54 +2,47 @@ package funkin.objects.notestyles;
 
 class BaseNoteStyle 
 {
-	public var scale:Float = 1;
-	
 	public final id:String;
+	public var scale:Float = 1.0;
 
-	public function new(id:String) {
+	public function new(id:String)
 		this.id = id;
-	}
-	
-	public function update(elapsed:Float):Void {
-		
-	}
 
-	public function optionsChanged(changed:Array<String>):Void {
-		
-	}
+	public function getPreload():Array<funkin.data.Cache.AssetPreload>
+		return [];
 	
-	public function destroy():Void {
-		
-	}
+	public function update(elapsed:Float):Void
+		return;
+
+	public function optionsChanged(changed:Array<String>):Void
+		return;
+
+	public function destroy():Void 
+		return;
 
 	////
 
-	public function loadNote(note:Note):Bool {
-		return true; // Whether the style was applied or not
-	}
-	
-	public function unloadNote(note:Note):Void {
-
-	}
-
-	public function loadReceptor(strum:StrumNote):Bool {
-		return true; 
-	}
-	
-	public function unloadReceptor(strum:StrumNote):Void {
-
-	}
-
-	public function loadNoteSplash(splash:NoteSplash):Bool {
+	/**@return Whether the style was applied or not*/
+	public function loadNote(note:Note):Bool
 		return true;
-	}
+	
+	public function unloadNote(note:Note):Void
+		return;
 
-	public function unloadNoteSplash(splash:NoteSplash):Void {
-		
-	}
+	/**@return Whether the style was applied or not*/
+	public function loadReceptor(strum:StrumNote):Bool
+		return true;
+	
+	public function unloadReceptor(strum:StrumNote):Void
+		return;
 
-	public function updateObject(obj:NoteObject, dt:Float):Void {
+	/**@return Whether the style was applied or not*/
+	public function loadNoteSplash(splash:NoteSplash):Bool
+		return true;
 
-	}
+	public function unloadNoteSplash(splash:NoteSplash):Void
+		return;
 
+	public function updateObject(obj:NoteObject, dt:Float):Void
+		return;
 }

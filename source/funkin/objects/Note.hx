@@ -49,8 +49,7 @@ class NoteType {
 
 class Note extends NoteObject implements IColorable
 {
-	public static var spriteScale:Float = 0.7;
-	public static var swagWidth(default, set):Float = 160 * spriteScale;
+	public static var swagWidth(default, set):Float = 160 * 0.7;
 	public static var halfWidth(default, null):Float = swagWidth * 0.5;
 
 	public static var colArray:Array<String> = ['purple', 'blue', 'green', 'red'];

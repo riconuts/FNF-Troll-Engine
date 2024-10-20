@@ -169,8 +169,6 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		super();
 		this.modManager = modMgr;
 
-		keyCount = PlayState.keyCount;
-
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 		add(grpNoteSplashes);
 

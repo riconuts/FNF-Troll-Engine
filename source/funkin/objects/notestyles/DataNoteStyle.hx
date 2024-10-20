@@ -2,16 +2,148 @@ package funkin.objects.notestyles;
 
 import funkin.objects.NoteObject.IColorable;
 import haxe.io.Path;
-import sys.io.File;
 import flixel.graphics.frames.FlxAtlasFrames;
 import funkin.scripts.FunkinHScript;
 import funkin.objects.shaders.ColorSwap;
 import funkin.data.NoteStyles;
 import funkin.CoolUtil.structureToMap;
+
 using funkin.CoolerStringTools;
 using StringTools;
+
 class DataNoteStyle extends BaseNoteStyle
 {
+	public static function generateDefaultData(arrowSkin="NOTE_assets", splashSkin="noteSplashes", rollSkin="ROLL_assets"):NoteStyleData {
+		return {
+			"name": "Funkin'",
+			"scale": 0.7,
+			"assets": [
+				"tap" => cast {
+					"type": "sparrow",
+					"imageKey": arrowSkin,
+					"data": [
+						"purple0",
+						"blue0",
+						"green0",
+						"red0"
+					]
+				},
+				"receptor" => cast {
+					"type": "sparrow",
+					"imageKey": arrowSkin,
+					"animations": [
+						{
+							"type": "column",
+							"name": "static",
+							"data": [
+								"arrowLEFT",
+								"arrowDOWN",
+								"arrowUP",
+								"arrowRIGHT"
+							]
+						},
+						{
+							"type": "column",
+							"name": "confirm",
+							"framerate": 24,
+							"looped": false,
+							"data": [
+								"left confirm",
+								"down confirm",
+								"up confirm",
+								"right confirm"
+							]
+						},
+						{
+							"type": "column",
+							"name": "press",
+							"framerate": 24,
+							"looped": false,
+							"data": [
+								"left press",
+								"down press",
+								"up press",
+								"right press"
+							]
+						}
+					]
+				},
+				"hold" => cast {
+					"type": "sparrow",
+					"imageKey": arrowSkin,
+					"data": [
+						"purple hold piece",
+						"blue hold piece",
+						"green hold piece",
+						"red hold piece"
+					]
+				},
+				"holdEnd" => cast {
+					"type": "sparrow",
+					"imageKey": arrowSkin,
+					"data": [
+						"pruple end hold",
+						"blue hold end",
+						"green hold end",
+						"red hold end"
+					]
+				},
+				"roll" => cast {
+					"type": "sparrow",
+					"imageKey": rollSkin,
+					"scale": 1.5,
+					"data": [
+						"purple roll piece",
+						"blue roll piece",
+						"green roll piece",
+						"red roll piece"
+					]
+				},
+				"rollEnd" => cast {
+					"type": "sparrow",
+					"imageKey": rollSkin,
+					"scale": 1.5,
+					"data": [
+						"purple roll end",
+						"blue roll end",
+						"green roll end",
+						"red roll end"
+					]
+				},
+				"noteSplash" => cast {
+					"type": "sparrow",
+					"imageKey": splashSkin,
+					"scale": 0.8,
+					"alpha": 0.6,
+					"animations": [
+						{
+							"type": "column",
+							"name": "splash",
+							"data": [
+								[
+									"note splash purple 1",
+									"note splash purple 2"
+								],
+								[
+									"note splash blue 1",
+									"note splash blue 2"
+								],
+								[
+									"note splash green 1",
+									"note splash green 2"
+								],
+								[
+									"note splash red 1",
+									"note splash red 2"
+								]
+							]
+						}
+					]
+				}
+			]
+		}
+	}
+
 	private static function getData(name:String):NoteStyleData {
 		var path = Paths.getPath('notestyles/$name.json');
 		var json = Paths.getJson(path);
@@ -34,13 +166,13 @@ class DataNoteStyle extends BaseNoteStyle
 		return cast json;
 	}
 
-	public static function getDefault():DataNoteStyle {
-		return new DataNoteStyle('default', getData('default'));
-	}
-
 	public static function fromName(name:String):Null<DataNoteStyle> {
 		var data = getData(name);
-		return data == null ? null : new DataNoteStyle(name, data);
+		return (data==null) ? null : new DataNoteStyle(name, data);
+	}
+
+	public static function fromData(name:String, data:NoteStyleData):DataNoteStyle {
+		return new DataNoteStyle(name, data);
 	}
 
 	////

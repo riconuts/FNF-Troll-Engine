@@ -22,7 +22,7 @@ enum abstract NoteStyleAnimationType(String) from String to String
 typedef NoteStyleData = {
 	var name:String;
 	var scale:Float;
-	var antialiasing:Bool;
+	@:optional var antialiasing:Bool;
 	var assets:Map<String, NoteStyleAsset>;
 } 
 
@@ -32,10 +32,10 @@ typedef NoteStyleAsset = {
 	var imageKey:String;
 
 	////
-	var canBeColored:Bool; // affected by ClientPrefs.arrowHSV and shit
-	var antialiasing:Null<Bool>;
-	var scale:Float;
-	var alpha:Float;
+	@:optional var canBeColored:Bool; // affected by ClientPrefs.arrowHSV and shit
+	@:optional var antialiasing:Null<Bool>;
+	@:optional var scale:Float;
+	@:optional var alpha:Float;
 	@:optional var quant:Bool;
 }
 
@@ -117,9 +117,11 @@ class NoteStyles
 		return fallback == null ? map.get(name) : map.get(exists(name) ? name : fallback);
 	}
 
-	public static function loadDefault() {
+	public static function loadDefault(arrowSkin="NOTE_assets", splashSkin="noteSplashes", rollSkin="ROLL_assets") {
 		clear();
-		set("default", DataNoteStyle.getDefault());
+
+		var data = DataNoteStyle.generateDefaultData(arrowSkin, splashSkin, rollSkin);
+		set("default", DataNoteStyle.fromData("default", data));
 	}
 
 	public static function exists(name:String) {
@@ -130,6 +132,8 @@ class NoteStyles
 		for (ns in map) {
 			ns.destroy();
 		}
+
+		DataNoteStyle.defaultData = null;
 		map.clear();
 	}
 

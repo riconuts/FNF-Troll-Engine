@@ -649,23 +649,22 @@ class PlayState extends MusicBeatState
 				songTrackNames.push(trackName);
 			}
 		}
-		
-		PlayState.keyCount = SONG.keyCount;
-		NoteStyles.loadDefault();
-		@:privateAccess
-		trace(cast (NoteStyles.get("default"), funkin.objects.notestyles.DataNoteStyle).data.scale);
-		Note.spriteScale = (4 / PlayState.keyCount) * NoteStyles.get("default" /**SONG.noteStyle**/).scale;
-		// honestly we should kill Note.swagWidth and shit and have each field keep track of its own noteWidth
-		// keep swagWidth as a constant 160 * 0.7 or whatever for when its used outside of PlayFields
-		// but i think that'd be better lol
 
-		Note.swagWidth = Note.spriteScale * 160;
 		/**
 		 * Note texture asset names
 		 * The quant prefix gets handled by the Note class
 		 */
 		arrowSkin = SONG.arrowSkin;
 		splashSkin = SONG.splashSkin;
+		NoteStyles.loadDefault(arrowSkin, splashSkin);
+		
+		PlayState.keyCount = SONG.keyCount;
+		@:privateAccess
+		trace(cast (NoteStyles.get("default"), funkin.objects.notestyles.DataNoteStyle).data.scale);
+		Note.swagWidth = NoteStyles.get("default" /**SONG.noteStyle**/).scale * 160;
+		// honestly we should kill Note.swagWidth and shit and have each field keep track of its own noteWidth
+		// keep swagWidth as a constant 160 * 0.7 or whatever for when its used outside of PlayFields
+		// but i think that'd be better lol
 
 		hudSkin = SONG.hudSkin;
 		curStage = SONG.stage;
@@ -773,15 +772,6 @@ class PlayState extends MusicBeatState
 			shitToLoad.push({path: Paths.formatToSongPath(ClientPrefs.pauseMusic), type: 'MUSIC'}); 
 		shitToLoad.push({path: "breakfast", type: 'MUSIC'}); 
 		*/
-
-		////
-		if (ClientPrefs.noteSkin == 'Quants'){
-			shitToLoad.push({path: 'QUANT$arrowSkin'});
-			shitToLoad.push({path: 'QUANT$splashSkin'});
-		}else{
-			shitToLoad.push({path: arrowSkin});
-			shitToLoad.push({path: splashSkin});
-		}
 
 		////
 		if (stageData.preloadStrings != null)
