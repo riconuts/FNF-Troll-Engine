@@ -1,0 +1,70 @@
+{
+	"name": "Funkin'",
+	"assets": {
+		"comboNumbers": {
+			"type": "indices",
+			"imageKey": "comboNums",
+			"columns": 12,
+			"rows": 1,
+			"animations": {
+				"0": [0],
+				"1": [1],
+				"2": [2],
+				"3": [3],
+				"4": [4],
+				"5": [5],
+				"6": [6],
+				"7": [7],
+				"8": [8],
+				"9": [9],
+				"-": [10],
+				".": [11]
+			}
+		},
+		"combo": {
+			"type": "single",
+			"imageKey": "combo"
+		},
+		"judgements": {
+			"type": "multiimage",
+			"imageKeys": [
+				"epic",
+				"sick",
+				"good",
+				"bad",
+				"shit",
+				"miss"
+			],
+			"animations": {
+				"epic": "epic",
+				"sick": "sick",
+				"good": "good",
+				"bad": "bad",
+				"shit": "Shit",
+				"miss": "miss"
+			}
+		},
+		"countdown": {
+			"sprite": {
+				"type": "multiimage",
+				"imageKeys": [
+					"ready",
+					"set",
+					"go"
+				],
+				"animations": {
+					"onyourmarks": "",
+					"ready": "ready",
+					"set": "set",
+					"go": "go"
+				}
+			},
+			"sounds": {
+				"onyourmarks": "intro3",
+				"ready": "intro2",
+				"set": "intro1",
+				"go": "introGo"
+			}
+		}
+	}
+}
