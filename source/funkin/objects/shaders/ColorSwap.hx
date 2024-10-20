@@ -82,6 +82,28 @@ class ColorSwap
 		saturation=s;
 		brightness=b;
 	}
+	
+	inline public function setHSBInt(h:Int = 0, s:Int = 0, b:Int = 0) {
+		hue=h/360;
+		saturation=s/100;
+		brightness=b/100;
+	}
+
+	inline public function setHSBArray(ray:Array<Float>) {
+		ray==null ? setHSB() : setHSB(ray[0], ray[1], ray[2]);
+	}
+	
+	inline public function setHSBIntArray(ray:Array<Int>) {
+		ray==null ? setHSB() : setHSBInt(ray[0], ray[1], ray[2]);
+	}
+
+	inline public function copyFrom(colorSwap:ColorSwap) {
+		setHSB(
+			colorSwap.hue,
+			colorSwap.saturation,
+			colorSwap.brightness	
+		);
+	}
 
 	public function new()
 	{
