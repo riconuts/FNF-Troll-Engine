@@ -1,8 +1,9 @@
 var animationNotes:Array<Dynamic> = [];
 
-function onLoad(char:Character){
-    char.skipDance = true;
-    char.playAnim("shoot1");
+function setupCharacter(){
+	super();
+    this.skipDance = true;
+    this.playAnim("shoot1-loop", true);
     var noteData:Array<SwagSection> = Song.loadFromJson('picospeaker', Paths.formatToSongPath(PlayState.SONG.song)).notes;
     for (section in noteData) {
         for (songNotes in section.sectionNotes) {
