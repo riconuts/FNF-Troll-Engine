@@ -287,14 +287,11 @@ class Note extends NoteObject implements IColorable
 		
 		// find the first existing style in the following order [hudskin.getNoteStyle(name), name, 'default']
 		var newStyle:BaseNoteStyle = null;
-		var notestyleName:String = name;
 
 		if (genScript != null) {
 			var ret = genScript.executeFunc("getNoteStyle", [name]);
-			if (ret is String){
-				notestyleName = ret;
-				newStyle = NoteStyles.get(ret, name);
-			}
+			if (ret is String)newStyle = NoteStyles.get(ret, name);
+			
 		}
 
 		if (newStyle == null) newStyle = NoteStyles.get(name, 'default');
