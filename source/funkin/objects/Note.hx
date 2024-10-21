@@ -341,12 +341,6 @@ class Note extends NoteObject implements IColorable
 
 		// this should prob be determined by notestyle
 
-		if (noteSplashTexture == null)
-			noteSplashTexture = PlayState.splashSkin;
-
-		if (isQuant && Paths.imageExists('QUANT' + noteSplashTexture))
-			noteSplashTexture = 'QUANT' + noteSplashTexture;
-
 		noteSplashHue = colorSwap.hue;
 		noteSplashSat = colorSwap.saturation;
 		noteSplashBrt = colorSwap.brightness;

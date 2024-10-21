@@ -13,6 +13,9 @@ using StringTools;
 
 class DataNoteStyle extends BaseNoteStyle
 {
+
+	// Maybe this should be its own NoteStyle?
+	// DefaultNoteStyle or whatever which just replicates this functionality
 	public static function generateDefaultData(arrowSkin="NOTE_assets", splashSkin="noteSplashes", rollSkin="ROLL_assets"):NoteStyleData {
 		return {
 			"name": "Funkin'",
@@ -464,6 +467,15 @@ class DataNoteStyle extends BaseNoteStyle
 		return true;
 	}
 
+	override public function reloadNoteSplash(splash:NoteSplash, note:Note){ // called when a note is hit
+		var asset:NoteStyleAsset = getNoteObjectAsset(splash);
+		var oldKey:String = asset.imageKey;
+		if (note.noteSplashTexture != null && note.noteSplashTexture.trim() != '') 
+			asset.imageKey = note.noteSplashTexture;
+		loadAnimations(splash, asset);
+		asset.imageKey = oldKey;
+	}
+
 	override public function loadNoteSplash(splash:NoteSplash) {
 		if (script != null) {
 			var rVal:Dynamic = script.executeFunc("loadNoteSplash", [splash]);
@@ -479,14 +491,8 @@ class DataNoteStyle extends BaseNoteStyle
 
 		loadAnimations(splash, asset);
 		splash.alpha = asset.alpha;
-		splash.animation.play("static", true);
-		// this is dealt with in strum.playanim
-
-/* 			if (asset.canBeColored == false) {
-				strum.colorSwap.setHSB();
-			} else
-				updateColours(strum); */
-		
+		splash.animation.play("splash", true);
+	
 		splash.scale.x = splash.scale.y = (asset.scale ?? data.scale);
 		splash.defScale.copyFrom(splash.scale);
 		splash.updateHitbox();

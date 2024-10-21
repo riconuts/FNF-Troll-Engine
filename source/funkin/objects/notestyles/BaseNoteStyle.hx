@@ -40,6 +40,9 @@ class BaseNoteStyle
 	public function loadNoteSplash(splash:NoteSplash):Bool
 		return true;
 
+	public function reloadNoteSplash(splash:NoteSplash, note:Note):Void
+		return;
+
 	public function unloadNoteSplash(splash:NoteSplash):Void
 		return;
 

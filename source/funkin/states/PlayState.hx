@@ -660,7 +660,6 @@ class PlayState extends MusicBeatState
 		
 		PlayState.keyCount = SONG.keyCount;
 		@:privateAccess
-		trace(cast (NoteStyles.get("default"), funkin.objects.notestyles.DataNoteStyle).data.scale);
 		Note.swagWidth = NoteStyles.get("default" /**SONG.noteStyle**/).scale * 160;
 		// honestly we should kill Note.swagWidth and shit and have each field keep track of its own noteWidth
 		// keep swagWidth as a constant 160 * 0.7 or whatever for when its used outside of PlayFields

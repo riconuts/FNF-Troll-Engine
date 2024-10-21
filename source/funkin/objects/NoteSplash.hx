@@ -3,6 +3,8 @@ import funkin.data.NoteStyles;
 import funkin.objects.notestyles.BaseNoteStyle;
 import funkin.objects.shaders.ColorSwap;
 import math.Vector3;
+using StringTools;
+
 class NoteSplash extends NoteObject implements NoteObject.IColorable {
 	public var colorSwap:ColorSwap = null;
 
@@ -53,11 +55,10 @@ class NoteSplash extends NoteObject implements NoteObject.IColorable {
 	{
 		visible = true;
 		column = note.column;
+
 		this.noteStyle = note.noteStyle; // Set the notesplash
-
-		_noteStyle.loadNoteSplash(this); // Force a reload, to get new animations etc, incase of randomization
-		// Maybe there should be a reloadNotesplash function??
-
+		
+		_noteStyle.reloadNoteSplash(this, note); 
 
 		animation.play("splash", true);
 		if (animation.curAnim != null) animation.curAnim.frameRate += FlxG.random.int(-2, 2); // TODO: figure out a way to make this data-driven or otherwise driven by the NoteStyle
