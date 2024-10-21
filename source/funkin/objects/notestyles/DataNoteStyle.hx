@@ -264,6 +264,9 @@ class DataNoteStyle extends BaseNoteStyle
 			// then everything the roll script does we can just hardcode because honestly dont think it needs to be soft-coded
 		}
 
+		if(note.isRoll)
+			name = name.replace("hold", "roll");
+
 		return getAsset(name);
 	}
 
@@ -301,6 +304,11 @@ class DataNoteStyle extends BaseNoteStyle
 				default: 
 					null;
 			}
+		}
+
+		if(asset.type == NONE){
+			obj.makeGraphic(1, 1, 0, false, 'invisible'); // idfk something might want to change .visible so
+			return;
 		}
 
 

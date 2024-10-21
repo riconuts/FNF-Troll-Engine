@@ -7,9 +7,7 @@ using StringTools;
 
 class NoteSplash extends NoteObject implements NoteObject.IColorable {
 	public var colorSwap:ColorSwap = null;
-
 	public var vec3Cache:Vector3 = new Vector3();
-
 	public var noteStyle(default, set):String;
 
 	var _noteStyle:BaseNoteStyle;
@@ -32,7 +30,6 @@ class NoteSplash extends NoteObject implements NoteObject.IColorable {
 		if (newStyle == null)
 			newStyle = NoteStyles.get(name, 'default');
 
-		trace("loading splash", name, (newStyle == null ? null : newStyle.id));
 		if (newStyle.loadNoteSplash(this)){
 			noteStyle = name; // yes, the base name, not the hudskin name.
 			_noteStyle = newStyle;
@@ -53,10 +50,18 @@ class NoteSplash extends NoteObject implements NoteObject.IColorable {
 
 	public function hitNote(note:Note)
 	{
+		// TODO: make this code less shit vv
+		
 		visible = true;
 		column = note.column;
 
-		this.noteStyle = note.noteStyle; // Set the notesplash
+		var style:String = note.noteStyle;
+		if (note.genScript != null) {
+			var ret = note.genScript.executeFunc("getNoteStyle", [style]);
+			if (ret is String) style = ret;	
+		}
+
+		this.noteStyle = style; // Set the notesplash
 		
 		_noteStyle.loadNoteSplash(this, note); 
 
