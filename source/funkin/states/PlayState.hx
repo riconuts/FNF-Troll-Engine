@@ -2265,7 +2265,8 @@ class PlayState extends MusicBeatState
 	public function initPlayfield(field:PlayField){
 		notefields.add(field.noteField);
 
-		field.defaultNoteStyle = hudSkin; // dfjdshfg
+		//field.defaultNoteStyle = hudSkin; // dfjdshfg
+		// ^^ broke pixel songs + I think it'd be good to add a seperate notestyle variable alongside hudskin
 		field.judgeManager = judgeManager;
 
 		field.holdPressCallback = pressHold;
