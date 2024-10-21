@@ -2,8 +2,10 @@
 	"dependencies": [
 		{
 			"name": "openfl",
-			"type": "haxelib",
-			"version": "9.2.2"
+			"type": "git",
+			"dir": null,
+			"ref": "master",
+			"url": "https://github.com/nebulazorua/openfl"
 		},
 		{
 			"name": "lime",

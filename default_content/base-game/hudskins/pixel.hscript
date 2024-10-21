@@ -30,6 +30,7 @@ function onSkinLoad()
 
 	spr.loadGraphic(comboNumsGraphic, true, Math.floor(comboNumsGraphic.width / 12), comboNumsGraphic.height);
 	spr.antialiasing = false;
+	spr.useDefaultAntialiasing = false;
 	
 	for (n in 0...10) spr.animation.add(Std.string(n), [n], 0, false);
 	spr.animation.add("-", [10], 0, false);
@@ -43,10 +44,19 @@ function onSkinLoad()
 	////
 	var spr = new RatingSprite();
 	spr.antialiasing = false;
+	spr.useDefaultAntialiasing = false;
 	spr.scale.set(6, 6);
 	
 	game.ratingGroup.judgeTemplate = spr;
 	
+	for(number in game.ratingGroup.comboSprs){
+		number.antialiasing = false;
+		number.useDefaultAntialiasing = false;
+	}
+	for(number in game.ratingGroup.judgeSprs){
+		number.antialiasing = false;
+		number.useDefaultAntialiasing = false;
+	}
 	////
 	hud = game.hud;
 	
