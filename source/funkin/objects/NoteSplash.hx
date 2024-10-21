@@ -58,7 +58,7 @@ class NoteSplash extends NoteObject implements NoteObject.IColorable {
 
 		this.noteStyle = note.noteStyle; // Set the notesplash
 		
-		_noteStyle.reloadNoteSplash(this, note); 
+		_noteStyle.loadNoteSplash(this, note); 
 
 		animation.play("splash", true);
 		if (animation.curAnim != null) animation.curAnim.frameRate += FlxG.random.int(-2, 2); // TODO: figure out a way to make this data-driven or otherwise driven by the NoteStyle

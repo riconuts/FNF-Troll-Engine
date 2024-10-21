@@ -467,16 +467,8 @@ class DataNoteStyle extends BaseNoteStyle
 		return true;
 	}
 
-	override public function reloadNoteSplash(splash:NoteSplash, note:Note){ // called when a note is hit
-		var asset:NoteStyleAsset = getNoteObjectAsset(splash);
-		var oldKey:String = asset.imageKey;
-		if (note.noteSplashTexture != null && note.noteSplashTexture.trim() != '') 
-			asset.imageKey = note.noteSplashTexture;
-		loadAnimations(splash, asset);
-		asset.imageKey = oldKey;
-	}
 
-	override public function loadNoteSplash(splash:NoteSplash) {
+	override public function loadNoteSplash(splash:NoteSplash, ?note:Note) {
 		if (script != null) {
 			var rVal:Dynamic = script.executeFunc("loadNoteSplash", [splash]);
 			if (rVal is Bool)
@@ -488,8 +480,13 @@ class DataNoteStyle extends BaseNoteStyle
 
 		splash.antialiasing = (data.antialiasing ?? asset.antialiasing) ?? true;
 		splash.useDefaultAntialiasing = splash.antialiasing;
-
+		var oldKey:String = asset.imageKey;
+		if (note != null) {
+			if (note.noteSplashTexture != null && note.noteSplashTexture.trim() != '')
+				asset.imageKey = note.noteSplashTexture;
+		}
 		loadAnimations(splash, asset);
+		asset.imageKey = oldKey;
 		splash.alpha = asset.alpha;
 		splash.animation.play("splash", true);
 	

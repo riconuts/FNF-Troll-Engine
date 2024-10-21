@@ -37,11 +37,8 @@ class BaseNoteStyle
 		return;
 
 	/**@return Whether the style was applied or not*/
-	public function loadNoteSplash(splash:NoteSplash):Bool
+	public function loadNoteSplash(splash:NoteSplash, ?note:Note):Bool
 		return true;
-
-	public function reloadNoteSplash(splash:NoteSplash, note:Note):Void
-		return;
 
 	public function unloadNoteSplash(splash:NoteSplash):Void
 		return;
