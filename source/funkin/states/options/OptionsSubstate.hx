@@ -329,8 +329,8 @@ class OptionsSubstate extends MusicBeatSubstate
 				
 			#if(DO_AUTO_UPDATE || display)
 			case 'downloadBetas' | 'checkForUpdates':
-				Main.downloadBetas = Version.isBeta || ClientPrefs.downloadBetas;
-				if (!Version.isBeta || option == 'checkForUpdates'){
+				Main.downloadBetas = Main.Version.isBeta || ClientPrefs.downloadBetas;
+				if (!Main.Version.isBeta || option == 'checkForUpdates'){
 					UpdaterState.getRecentGithubRelease();
 					UpdaterState.checkOutOfDate();
 				}
@@ -706,7 +706,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		prevScreenX = FlxG.mouse.screenX;
 		prevScreenY = FlxG.mouse.screenY;
 
-		Main.volumeChangedEvent.add(onVolumeChange);
+		FlxG.sound.onVolumeChange.add(onVolumeChange);
 		onVolumeChange(FlxG.sound.volume);
 
 		checkWindows();
@@ -1654,7 +1654,7 @@ class OptionsSubstate extends MusicBeatSubstate
 	override function destroy()
 	{
 		_mousePoint.put();
-		Main.volumeChangedEvent.remove(onVolumeChange);
+		FlxG.sound.onVolumeChange.remove(onVolumeChange);
 
 		for (val in cameraPositions)
 			val.put();

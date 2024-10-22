@@ -64,7 +64,6 @@ class Main extends Sprite
 
 	////
 	public static final UserAgent:String = 'TrollEngine/${Version.engineVersion}'; // used for http requests. if you end up forking the engine and making your own then make sure to change this!!
-	public static final volumeChangedEvent = new lime.app.Event<Float->Void>();
 
 	////
 	public static var showDebugTraces:Bool = #if (debug || SHOW_DEBUG_TRACES) true #else false #end;
@@ -75,6 +74,10 @@ class Main extends Sprite
 	////
 	public static var fpsVar:FPS;
 	public static var bread:Bread;
+
+	@:noCompletion @:deprecated("volumeChangedEvent is deprecated, use FlxG.sound.onVolumeChange, instead") 
+	public static var volumeChangedEvent(get, never):flixel.util.FlxSignal.FlxTypedSignal<Float -> Void>;
+	@:noCompletion inline static function get_volumeChangedEvent() return FlxG.sound.onVolumeChange;
 
 	////
 	public function new() {
