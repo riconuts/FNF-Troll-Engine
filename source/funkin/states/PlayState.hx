@@ -504,23 +504,7 @@ class PlayState extends MusicBeatState
 
 		MusicBeatState.stopMenuMusic();
 
-		debugKeysChart = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
-		debugKeysCharacter = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_2'));
-		debugKeysBotplay = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('botplay'));
-
-		keysArray = [
-			ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_left')),
-			ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_down')),
-			ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_up')),
-			ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_right')),
-		];
-
-		buttonsArray = [
-			[X, DPAD_LEFT],
-			[A, DPAD_DOWN],
-			[Y, DPAD_UP],
-			[B, DPAD_RIGHT],
-		];
+		updateKeybinds();
 
 		speedChanges.push({
 			position: -6000 * 0.45,
@@ -1009,10 +993,7 @@ class PlayState extends MusicBeatState
 		updateSongDiscordPresence();
 		#end
 
-		if (!ClientPrefs.controllerMode) {
-			FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDownEvent);
-			FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUpEvent);
-		}
+		addKeyboardEvents();
 
 		////
 		callOnAllScripts('onCreatePost');
@@ -1101,6 +1082,26 @@ class PlayState extends MusicBeatState
 		CustomFadeTransition.nextCamera = camOther;
 	
 		Paths.clearUnusedMemory();
+	}
+
+	function updateKeybinds() {
+		debugKeysChart = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
+		debugKeysCharacter = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_2'));
+		debugKeysBotplay = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('botplay'));
+
+		keysArray = [
+			ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_left')),
+			ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_down')),
+			ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_up')),
+			ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_right'))
+		];
+
+		buttonsArray = [
+			ClientPrefs.copyKey(ClientPrefs.buttonBinds.get('note_left')),
+			ClientPrefs.copyKey(ClientPrefs.buttonBinds.get('note_down')),
+			ClientPrefs.copyKey(ClientPrefs.buttonBinds.get('note_up')),
+			ClientPrefs.copyKey(ClientPrefs.buttonBinds.get('note_right'))
+		];
 	}
 
 	function setStageData(stageData:StageFile)
@@ -2065,6 +2066,18 @@ class PlayState extends MusicBeatState
 			callScript(notetypeScripts.get(type), "onLoad", []);
 	}
 
+	inline function addKeyboardEvents() {
+		if (!ClientPrefs.controllerMode) {
+			FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDownEvent);
+			FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUpEvent);		
+		}
+	}
+	
+	inline function removeKeyboardEvents() {
+		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDownEvent);
+		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyUpEvent);
+	}
+
 	public function optionsChanged(options:Array<String>){
 		if (options.length < 1)
 			return;
@@ -2104,25 +2117,11 @@ class PlayState extends MusicBeatState
 			field.noteField.holdSubdivisions = Std.int(ClientPrefs.holdSubdivs) + 1;
 		}
 
-		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDownEvent);
-		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyUpEvent);
-
-		if (!ClientPrefs.controllerMode) {
-			FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDownEvent);
-			FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUpEvent);		
-		}
+		addKeyboardEvents();
+		removeKeyboardEvents();
 		
-		if(reBind){
-			debugKeysChart = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
-			debugKeysCharacter = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_2'));
-			debugKeysBotplay = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('botplay'));
-
-			keysArray = [
-				ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_left')),
-				ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_down')),
-				ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_up')),
-				ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_right'))
-			];
+		if (reBind) {
+			updateKeybinds();
 
 			// unpress everything
 			for (field in playfields.members) {
@@ -4344,10 +4343,9 @@ class PlayState extends MusicBeatState
 			total;
 		});
 		*/
-		FlxG.timeScale = 1;
 
-		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDownEvent);
-		FlxG.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyUpEvent);
+		////
+		removeKeyboardEvents();
 
 		FunkinHScript.defaultVars.clear();
 		

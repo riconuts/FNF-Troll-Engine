@@ -369,25 +369,24 @@ class OptionsSubstate extends MusicBeatSubstate
 				});
 
 			case 'customizeKeybinds':
-				var substate = new NewBindsSubstate();
-				var currentBinds:Map<String, Array<FlxKey>> = [];
-
-				for (key => val in ClientPrefs.keyBinds.copy()) // copy the keys to the array
-				{
-					currentBinds.set(key, []);
-					for (i => v in val)
-						currentBinds.get(key)[i] = v;
-				}
-
-				substate.changedBind = function(action:String, index:Int, newBind:FlxKey){
+				var substate:Dynamic = ClientPrefs.controllerMode ? new ButtonBindsSubstate() : new KeyBindsSubstate();
+				var bindsMap:Map<String, Array<Int>> = ClientPrefs.controllerMode ? ClientPrefs.buttonBinds : ClientPrefs.keyBinds;
+				
+				var currentBinds:Map<String, Array<Int>> = [];
+				for (key in bindsMap.keys())
+					currentBinds.set(key, bindsMap[key].copy());
+					
+				substate.changedBind = (action:String, index:Int, newBind:Int) -> {
 					var daId = '${action}${index}-bind';
+					
 					trace(daId, currentBinds.get(action)[index], newBind, currentBinds.get(action)[index] == newBind);
+					
 					if (currentBinds.get(action)[index] == newBind)
 						changed.remove(daId);
-					else
-					if (!changed.contains(daId))
+					else if (!changed.contains(daId))
 						changed.push(daId);
 				}
+
 				openSubState(substate);
 			default:
 				// nothing

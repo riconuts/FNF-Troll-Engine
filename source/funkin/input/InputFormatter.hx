@@ -7,7 +7,7 @@ class InputFormatter
 {
 	public static function getKeyName(key:FlxKey):String 
 	{
-		final key:Null<FlxKey> = key;
+		if (null==key) key = NONE;
 		return switch (key) 
 		{
 			case BACKSPACE: "Backspace";
@@ -54,7 +54,7 @@ class InputFormatter
 			case RIGHT: 'Right Arrow';
 			case UP: 'Up Arrow';
 			case DOWN: 'Down Arrow';
-			case NONE | null: '---';
+			case NONE: '---';
 			default: 
 				var label:String = key.toString(); 
 				(label.charAt(0).toUpperCase() + label.substr(1).toLowerCase());
