@@ -34,14 +34,49 @@ class NotesSubState extends MusicBeatSubstate
 	var namesArray:Array<String>;
 	var noteFrames:flixel.graphics.frames.FlxAtlasFrames; 
 	var noteAnimations:Array<String>;
+	var defaults:Array<Array<Int>>;
 
 	public function new() {
 		super();
 
-		valuesArray = ClientPrefs.arrowHSV;
-		namesArray = ["Left", "Down", "Up", "Right"];
-		noteFrames = Paths.getSparrowAtlas('NOTE_assets');
-		noteAnimations = ['purple0', 'blue0', 'green0', 'red0'];
+		if (ClientPrefs.noteSkin == "Quants") {
+			// fuck you
+			valuesArray = ClientPrefs.quantHSV;
+			noteFrames = Paths.getSparrowAtlas('QUANTNOTE_assets');
+			noteAnimations = ['purple0', 'blue0', 'green0', 'red0'];
+			namesArray = [
+				"4th",
+				"8th",
+				"12th",
+				"16th",
+				"20th",
+				"24th",
+				"32nd",
+				"48th",
+				"64th",
+				"96th",
+				"192nd"
+			];
+			defaults = [
+				[0, -20, 0], // 4th
+				[-130, -20, 0], // 8th
+				[-80, -20, 0], // 12th
+				[128, -30, 0], // 16th
+				[-120, -70, -35], // 20th
+				[-80, -20, 0], // 24th
+				[50, -20, 0], // 32nd
+				[-80, -20, 0], // 48th
+				[160, -15, 0], // 64th
+				[-120, -70, -35], // 96th
+				[-120, -70, -35], // 192nd
+			];
+		} else {
+			valuesArray = ClientPrefs.arrowHSV;
+			noteFrames = Paths.getSparrowAtlas('NOTE_assets');
+			noteAnimations = ['purple0', 'blue0', 'green0', 'red0'];
+			namesArray = ["Left", "Down", "Up", "Right"];
+			defaults = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
+		}
 	}
 
 	override public function create() {
@@ -296,7 +331,7 @@ class NotesSubState extends MusicBeatSubstate
 	}
 
 	function resetValue(selected:Int, type:Int) {
-		curValue = 0;
+		curValue = defaults[selected][type];
 		changeValue(selected, type, curValue);
 	}
 

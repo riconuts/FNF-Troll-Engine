@@ -360,7 +360,7 @@ class OptionsSubstate extends MusicBeatSubstate
 					this.subStateClosed.addOnce((_) -> this.persistentDraw = true);
 				}
 			case 'customizeColours':
-				var noteState = ClientPrefs.noteSkin=="Quants" ? new QuantNotesSubState() : new NotesSubState();
+				var noteState = new NotesSubState();
 				openSubState(noteState);
 
 				subStateClosed.addOnce((ss) -> {
