@@ -3,15 +3,14 @@ package funkin.objects;
 import funkin.states.PlayState;
 import funkin.scripts.FunkinScript.ScriptType;
 import funkin.objects.playfields.PlayField;
-import flixel.math.FlxPoint;
+import funkin.data.CharacterData;
 import funkin.data.CharacterData.*;
-import funkin.data.CharacterData.AnimArray;
-import funkin.data.CharacterData.CharacterFile;
 import funkin.scripts.*;
 import animateatlas.AtlasFrameMaker;
 import flixel.animation.FlxAnimation;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
+import flixel.math.FlxPoint;
 import flixel.FlxSprite;
 import openfl.geom.ColorTransform;
 
@@ -191,20 +190,7 @@ class Character extends FlxSprite
 
 				if (!debugMode)
 				{
-					camOffsets[anim.anim] = (camOffset != null) ? [camOffset[0], camOffset[1]] : {
-						if (!animAnim.startsWith('sing'))
-							[0.0, 0.0];
-						else if (animAnim.startsWith('singLEFT'))
-							[-30.0, 0.0];
-						else if (animAnim.startsWith('singDOWN'))
-							[0.0, 30.0];
-						else if (animAnim.startsWith('singUP'))
-							[0.0, -30.0];
-						else if (animAnim.startsWith('singRIGHT'))
-							[30.0, 0.0];
-						else
-							[0.0, 0.0];
-					};
+					camOffsets[anim.anim] = (camOffset != null) ? [camOffset[0], camOffset[1]] : CharacterData.getDefaultAnimCamOffset(animAnim);
 				}
 
 				////

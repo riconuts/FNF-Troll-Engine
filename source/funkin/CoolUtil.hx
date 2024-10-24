@@ -100,22 +100,14 @@ class CoolUtil
 		return Std.int((f+interval/2)/interval)*interval;
 	}
 
-	inline public static function quantize(f:Float, snap:Float){
-		// changed so this actually works lol
-		var m:Float = Math.fround(f * snap);
-		return (m / snap);
-	}
+	inline public static function quantize(f:Float, snap:Float):Float
+		return Math.fround(f * snap) / snap;
 
-	inline public static function snap(f:Float, snap:Float)
-	{
-		// changed so this actually works lol
-		var m:Float = Math.fround(f / snap);
-		return (m * snap);
-	}
+	inline public static function snap(f:Float, snap:Float):Float
+		return Math.fround(f / snap) * snap;
 
-	inline public static function boundTo(value:Float, min:Float, max:Float):Float {
+	inline public static function boundTo(value:Float, min:Float, max:Float):Float
 		return Math.max(min, Math.min(max, value));
-	}
 
 	public static function coolTextFile(path:String):Array<String>
 	{
