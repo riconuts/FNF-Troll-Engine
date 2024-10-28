@@ -28,6 +28,7 @@ import funkin.scripts.Util as ScriptingUtil;
 import funkin.scripts.FunkinScript.ScriptType;
 import flixel.*;
 import flixel.util.*;
+import flixel.util.FlxSignal.FlxTypedSignal;
 import flixel.math.*;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
@@ -388,6 +389,8 @@ class PlayState extends MusicBeatState
 	public var luaArray:Array<FunkinLua> = [];
 
 	public var scriptsToClose:Array<FunkinScript> = [];
+
+	public var signals = new PlayStateSignals();
 
 	////
 	var noteTypeMap:Map<String, Bool> = [];
@@ -1383,12 +1386,15 @@ class PlayState extends MusicBeatState
 		callOnScripts('preModifierRegister'); // deprecated
 		#end
 
-		if (callOnScripts('onModifierRegister') != Globals.Function_Stop)
+		if (callOnScripts('onModifierRegister') != Globals.Function_Stop) {
 			modManager.registerDefaultModifiers();
+			signals.onModifierRegister.dispatch();
+		}
 		#if ALLOW_DEPRECATION
 		callOnScripts('postModifierRegister'); // deprecated
 		#end
 		callOnScripts('onModifierRegisterPost');
+		signals.onModifierRegisterPost.dispatch();
 
 		#if !tgt
 		if (midScroll)
@@ -3981,8 +3987,6 @@ class PlayState extends MusicBeatState
 	#if HSCRIPT_ALLOWED
 	public function createHScript(path:String, ?scriptName:String, ?ignoreCreateCall:Bool = false):FunkinHScript
 	{
-		trace(path, scriptName);
-
 		var split = path.split("/");
 		var modName:String = split[0] == "content" ? split[1] : 'assets';
 		var script = FunkinHScript.fromFile(path, scriptName, [
@@ -4286,6 +4290,8 @@ class PlayState extends MusicBeatState
 		#if DISCORD_ALLOWED
 		DiscordClient.changePresence(detailsPausedText, stateText, songName);
 		#end
+
+		signals.onPause.dispatch();
 	}
 
 	public function resume(){
@@ -4320,6 +4326,8 @@ class PlayState extends MusicBeatState
 		}
 
 		updateSongDiscordPresence();
+
+		signals.onResume.dispatch();
 	} 
 
 	override public function startOutro(onOutroComplete)
@@ -4343,6 +4351,8 @@ class PlayState extends MusicBeatState
 			total;
 		});
 		*/
+
+		signals.onDestroy.dispatch();
 
 		////
 		removeKeyboardEvents();
@@ -4393,4 +4403,57 @@ class PlayState extends MusicBeatState
 
 		super.destroy();
 	}	
+}
+
+/*
+	been considering this for a while mostly for addOnce and because special scripts don't/barely have anything called onto them.
+	this is also handy for source code mods even if that's a little out of fashion by now 
+
+	maybe it'd be good to get rid of the previous way of calling everything onto scripts
+	but im worried of the tedium that might be typing 'game.signals.onBlahBlah.add(onBlahBlah)' possibly several times 
+
+	That and Function_Stop, maybe making our own class that has something like openfl's preventDefaultBehaviour() shit,
+	but then that miiiight require also passing along an event/signal/callback instance or whatever, ahhhhhh so gayy 
+*/
+
+class PlayStateSignals /*extends MusicBeatSignals*/
+{
+	public var onCreatePost = new FlxTypedSignal<Void -> Void>();
+	
+	public var onUpdate = new FlxTypedSignal<Float -> Void>();
+	public var onUpdatePost = new FlxTypedSignal<Float -> Void>();
+
+	public var onCountdownStarted = new FlxTypedSignal<Void -> Void>();
+
+	public var onModifierRegister = new FlxTypedSignal<Void -> Void>();	
+	public var onModifierRegisterPost = new FlxTypedSignal<Void -> Void>();
+
+	public var onSongStart = new FlxTypedSignal<Void -> Void>();
+	public var onSongEnd = new FlxTypedSignal<Void -> Void>();
+
+	public var onBeatHit = new FlxTypedSignal<Int -> Void>();
+	public var onStepHit = new FlxTypedSignal<Int -> Void>();
+
+	public var goodNoteHit = new FlxTypedSignal<(Note, NoteField) -> Void>();
+	public var opponentNoteHit = new FlxTypedSignal<(Note, NoteField) -> Void>();
+	
+	public var noteMiss = new FlxTypedSignal<(Note, NoteField) -> Void>();
+	public var noteMissPress = new FlxTypedSignal<(Note, NoteField) -> Void>();
+
+	public var onPause = new FlxTypedSignal<Void -> Void>();
+	public var onResume = new FlxTypedSignal<Void -> Void>();
+
+	public var onDestroy = new FlxTypedSignal<Void -> Void>();
+
+	@:allow(funkin.states.PlayState)
+	function new() {}
+
+	/* time to write a macro for this woohoo im so happy abt this information
+	public function setupScriptSignals(script:FunkinHScript) {
+		var sf = script.get("onUpdate");
+		if (Reflect.isFunction(sf)) {
+			onUpdate.add(sf);
+		}
+	}
+	*/
 }
