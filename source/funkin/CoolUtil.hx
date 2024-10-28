@@ -9,6 +9,19 @@ using StringTools;
 
 class CoolUtil
 {
+	/**
+	 * @param spr The sprite on which to clone the animation
+	 * @param ogName Name of the animation to be cloned. 
+	 * @param cloneName Name of the resulting clone.
+	 * @param force Whether to override the resulting animation, if it exists.
+	 */
+	public static function cloneSpriteAnimation(spr:FlxSprite, ogName:String, cloneName:String, ?force:Bool)
+	{
+		var daAnim = spr.animation.getByName(ogName);
+		if (daAnim!=null && (force==true || !spr.animation.exists(cloneName)))
+			spr.animation.add(cloneName, daAnim.frames, daAnim.frameRate, daAnim.looped, daAnim.flipX, daAnim.flipY);
+	}
+
 	public static function structureToMap(st:Dynamic):Map<String, Dynamic> {
 		return [
 			for (k in Reflect.fields(st)){

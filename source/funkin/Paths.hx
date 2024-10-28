@@ -176,7 +176,7 @@ class Paths
 
 	static public var currentModDirectory:String = '';
 
-	public static function getPath(key:String, ?ignoreMods:Bool = false)
+	public static function getPath(key:String, ?ignoreMods:Bool = false):String
 	{
 		#if MODS_ALLOWED
 		if (ignoreMods != true){
@@ -414,7 +414,10 @@ class Paths
 
 	/** Paths.image(key) != null **/
 	inline public static function imageExists(key:String):Bool
-		return Paths.exists(getPath('images/$key.png'));
+		return Paths.exists(imagePath(key));
+
+	inline public static function imagePath(key:String):String
+		return getPath('images/$key.png');
 
 	inline static public function image(key:String, ?library:String):Null<FlxGraphic>
 	{

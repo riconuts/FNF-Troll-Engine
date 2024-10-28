@@ -46,6 +46,9 @@ class CommonHUD extends BaseHUD
 		iconP1 = healthBar.iconP1;
 		iconP2 = healthBar.iconP2;
 
+		setupHealthbar();
+		healthBar.screenCenter(X);
+
 		// prob gonna do my own time bar too lol but for now idc
 		timeTxt = new FlxText(FlxG.width * 0.5 - 200, 0, 400, "", 32);
 		timeTxt.setFormat(Paths.font("vcr.ttf"), 32, 0xFFFFFFFF, CENTER, FlxTextBorderStyle.OUTLINE, 0xFF000000);
@@ -135,6 +138,13 @@ class CommonHUD extends BaseHUD
 		super.changedCharacter(id, char);
     }
 
+	function setupHealthbar() {
+		healthBar.y = FlxG.height * (ClientPrefs.downScroll ? 0.11 : 0.89) - healthBar.height / 2;
+		healthBar.iconP1.y = healthBar.y + (healthBar.height - healthBar.iconP1.height) / 2;
+		healthBar.iconP2.y = healthBar.y + (healthBar.height - healthBar.iconP2.height) / 2;
+		healthBar.real_alpha = healthBar.real_alpha;
+	}
+
 	function updateTimeBarAlpha()
 	{
 		var timeBarAlpha = ClientPrefs.timeOpacity * alpha * tweenProg;
@@ -189,12 +199,7 @@ class CommonHUD extends BaseHUD
 
 	override function changedOptions(changed:Array<String>)
 	{
-		healthBar.healthBarBG.y = FlxG.height * (ClientPrefs.downScroll ? 0.11 : 0.89);
-		healthBar.y = healthBarBG.y + 5;
-		healthBar.iconP1.y = healthBar.y + (healthBar.height - healthBar.iconP1.height) / 2;
-		healthBar.iconP2.y = healthBar.y + (healthBar.height - healthBar.iconP2.height) / 2;
-		healthBar.real_alpha = healthBar.real_alpha;
-
+		setupHealthbar();
 		updateTimeBarType();
 	}
 

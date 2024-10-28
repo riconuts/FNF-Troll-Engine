@@ -40,10 +40,7 @@ class AdvancedHUD extends CommonHUD
 
 		stats.changedEvent.add(statChanged);
 		
-		add(healthBarBG);
 		add(healthBar);
-		add(iconP1);
-		add(iconP2);
 		
 		var songRecord = Highscore.getRecord(this.songName, PlayState.difficultyName);
 		songHighscore = songRecord.score;

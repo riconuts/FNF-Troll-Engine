@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="fugi.png">
+	<!-- Created with Adobe Animate version 20.0.3.25487 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="idle0000" x="8" y="8" width="120" height="114" frameX="0" frameY="-3" frameWidth="120" frameHeight="120"/>
+	<SubTexture name="idle0001" x="136" y="8" width="120" height="112" frameX="0" frameY="-4" frameWidth="120" frameHeight="120"/>
+	<SubTexture name="idle0002" x="264" y="8" width="114" height="109" frameX="-5" frameY="-3" frameWidth="120" frameHeight="120"/>
+	<SubTexture name="idle0003" x="386" y="8" width="105" height="113" frameX="-11" frameY="-2" frameWidth="120" frameHeight="120"/>
+	<SubTexture name="idle0004" x="499" y="8" width="106" height="112" frameX="-11" frameY="-3" frameWidth="120" frameHeight="120"/>
+	<SubTexture name="idle0005" x="613" y="8" width="114" height="116" frameX="-5" frameY="-2" frameWidth="120" frameHeight="120"/>
+	<SubTexture name="idle0006" x="735" y="8" width="115" height="120" frameX="-2" frameY="0" frameWidth="120" frameHeight="120"/>
+	<SubTexture name="idle0007" x="858" y="8" width="113" height="118" frameX="-4" frameY="-2" frameWidth="120" frameHeight="120"/>
+	<SubTexture name="idle0008" x="8" y="136" width="111" height="112" frameX="-7" frameY="-6" frameWidth="120" frameHeight="120"/>
+	<SubTexture name="idle0009" x="127" y="136" width="115" height="103" frameX="-4" frameY="-12" frameWidth="120" frameHeight="120"/>
+	<SubTexture name="idle0010" x="250" y="136" width="112" height="109" frameX="-4" frameY="-9" frameWidth="120" frameHeight="120"/>
+	<SubTexture name="idle0011" x="370" y="136" width="118" height="114" frameX="-1" frameY="-4" frameWidth="120" frameHeight="120"/>
+	<SubTexture name="idle0012" x="496" y="136" width="120" height="113" frameX="0" frameY="-3" frameWidth="120" frameHeight="120"/>
+	<SubTexture name="idle0013" x="624" y="136" width="117" height="110" frameX="-1" frameY="-5" frameWidth="120" frameHeight="120"/>
+	<SubTexture name="idle0014" x="749" y="136" width="108" height="112" frameX="-4" frameY="-6" frameWidth="120" frameHeight="120"/>
+	<SubTexture name="idle0015" x="865" y="136" width="102" height="113" frameX="-5" frameY="-4" frameWidth="120" frameHeight="120"/>
+	<SubTexture name="idle0016" x="8" y="258" width="111" height="113" frameX="-2" frameY="-3" frameWidth="120" frameHeight="120"/>
+	<SubTexture name="idle0017" x="127" y="258" width="116" height="119" frameX="-2" frameY="-1" frameWidth="120" frameHeight="120"/>
+	<SubTexture name="idle0018" x="251" y="258" width="114" height="120" frameX="-4" frameY="0" frameWidth="120" frameHeight="120"/>
+	<SubTexture name="idle0019" x="373" y="258" width="111" height="114" frameX="-4" frameY="-2" frameWidth="120" frameHeight="120"/>
+	<SubTexture name="idle0020" x="492" y="258" width="114" height="106" frameX="-1" frameY="-4" frameWidth="120" frameHeight="120"/>
+	<SubTexture name="idle0021" x="614" y="258" width="114" height="103" frameX="-3" frameY="-4" frameWidth="120" frameHeight="120"/>
+	<SubTexture name="idle0022" x="736" y="258" width="117" height="111" frameX="-2" frameY="-2" frameWidth="120" frameHeight="120"/>
+	<SubTexture name="idle0023" x="8" y="8" width="120" height="114" frameX="0" frameY="-3" frameWidth="120" frameHeight="120"/>
+	<SubTexture name="losing0000" x="861" y="258" width="117" height="126" frameX="0" frameY="0" frameWidth="142" frameHeight="126"/>
+	<SubTexture name="losing0001" x="861" y="258" width="117" height="126" frameX="0" frameY="0" frameWidth="142" frameHeight="126"/>
+	<SubTexture name="losing0002" x="8" y="392" width="133" height="121" frameX="0" frameY="-5" frameWidth="142" frameHeight="126"/>
+	<SubTexture name="losing0003" x="8" y="392" width="133" height="121" frameX="0" frameY="-5" frameWidth="142" frameHeight="126"/>
+	<SubTexture name="losing0004" x="149" y="392" width="139" height="114" frameX="0" frameY="-12" frameWidth="142" frameHeight="126"/>
+	<SubTexture name="losing0005" x="149" y="392" width="139" height="114" frameX="0" frameY="-12" frameWidth="142" frameHeight="126"/>
+	<SubTexture name="losing0006" x="296" y="392" width="142" height="126"/>
+	<SubTexture name="losing0007" x="296" y="392" width="142" height="126"/>
+	<SubTexture name="losing0008" x="8" y="392" width="133" height="121" frameX="0" frameY="-5" frameWidth="142" frameHeight="126"/>
+	<SubTexture name="losing0009" x="8" y="392" width="133" height="121" frameX="0" frameY="-5" frameWidth="142" frameHeight="126"/>
+	<SubTexture name="losing0010" x="149" y="392" width="139" height="114" frameX="0" frameY="-12" frameWidth="142" frameHeight="126"/>
+	<SubTexture name="losing0011" x="149" y="392" width="139" height="114" frameX="0" frameY="-12" frameWidth="142" frameHeight="126"/>
+	<SubTexture name="losing0012" x="446" y="392" width="142" height="114" frameX="0" frameY="-12" frameWidth="142" frameHeight="126"/>
+	<SubTexture name="losing0013" x="446" y="392" width="142" height="114" frameX="0" frameY="-12" frameWidth="142" frameHeight="126"/>
+	<SubTexture name="winning0000" x="596" y="392" width="102" height="112" frameX="-23" frameY="-20" frameWidth="140" frameHeight="132"/>
+	<SubTexture name="winning0001" x="706" y="392" width="113" height="132" frameX="-23" frameY="0" frameWidth="140" frameHeight="132"/>
+	<SubTexture name="winning0002" x="827" y="392" width="117" height="130" frameX="-23" frameY="-2" frameWidth="140" frameHeight="132"/>
+	<SubTexture name="winning0003" x="827" y="392" width="117" height="130" frameX="-23" frameY="-2" frameWidth="140" frameHeight="132"/>
+	<SubTexture name="winning0004" x="8" y="532" width="108" height="123" frameX="-23" frameY="-9" frameWidth="140" frameHeight="132"/>
+	<SubTexture name="winning0005" x="124" y="532" width="102" height="117" frameX="-23" frameY="-15" frameWidth="140" frameHeight="132"/>
+	<SubTexture name="winning0006" x="596" y="392" width="102" height="112" frameX="-23" frameY="-20" frameWidth="140" frameHeight="132"/>
+	<SubTexture name="winning0007" x="596" y="392" width="102" height="112" frameX="-23" frameY="-20" frameWidth="140" frameHeight="132"/>
+	<SubTexture name="winning0008" x="234" y="532" width="121" height="112" frameX="-4" frameY="-20" frameWidth="140" frameHeight="132"/>
+	<SubTexture name="winning0009" x="363" y="532" width="125" height="112" frameX="0" frameY="-20" frameWidth="140" frameHeight="132"/>
+	<SubTexture name="winning0010" x="363" y="532" width="125" height="112" frameX="0" frameY="-20" frameWidth="140" frameHeight="132"/>
+	<SubTexture name="winning0011" x="496" y="532" width="116" height="112" frameX="-9" frameY="-20" frameWidth="140" frameHeight="132"/>
+	<SubTexture name="winning0012" x="620" y="532" width="110" height="112" frameX="-15" frameY="-20" frameWidth="140" frameHeight="132"/>
+	<SubTexture name="winning0013" x="596" y="392" width="102" height="112" frameX="-23" frameY="-20" frameWidth="140" frameHeight="132"/>
+</TextureAtlas>

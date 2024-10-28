@@ -48,7 +48,7 @@ class PsychHUD extends CommonHUD
 		showJudgeCounter = ClientPrefs.judgeCounter != "Off";
 
 		////
-		scoreTxt = new FlxText(0, healthBarBG.y + 48, FlxG.width, "", 20);
+		scoreTxt = new FlxText(0, healthBar.y + 50, FlxG.width, "", 20);
 		scoreTxt.antialiasing = true;
 		scoreTxt.scrollFactor.set();
 
@@ -68,10 +68,7 @@ class PsychHUD extends CommonHUD
 		}
 
 		////
-		add(healthBarBG);
 		add(healthBar);
-		add(iconP1);
-		add(iconP2);
 		add(hitbar);
 		add(scoreTxt);
 
@@ -141,7 +138,7 @@ class PsychHUD extends CommonHUD
 	{
 		super.changedOptions(changed);
 
-		scoreTxt.y = healthBarBG.y + 48;
+		scoreTxt.y = healthBar.y + 50;
 		ClientPrefs.showWifeScore ? onWifeScoreUpdate() : onScoreUpdate();
 
 		if (hitbar.visible = ClientPrefs.hitbar) {

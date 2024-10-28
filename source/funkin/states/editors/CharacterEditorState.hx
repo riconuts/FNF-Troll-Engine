@@ -261,7 +261,7 @@ class CharacterEditorState extends MusicBeatState
 
 		var tipTextArray:Array<String> = "E/Q - Camera Zoom In/Out
 		\nR - Reset Camera Zoom
-		\nJKLI - Move Camera
+		\nIJKL - Move Camera
 		\nW/S - Previous/Next Animation
 		\nSpace - Play Animation
 		\nArrow Keys - Move Character Offset
@@ -1068,6 +1068,23 @@ class CharacterEditorState extends MusicBeatState
 		healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
 	}
 
+	function changeCurOffset(x:Int, y:Int, isAbs:Bool=false) {
+		var curAnimData = char.animationsArray[curAnim];
+
+		if (isAbs) {
+			curAnimData.offsets[0] = x;
+			curAnimData.offsets[1] = y;
+		}else {
+			curAnimData.offsets[0] += x;
+			curAnimData.offsets[1] += y;	
+		}
+
+		char.addOffset(curAnimData.anim, curAnimData.offsets[0], curAnimData.offsets[1]);
+		char.playAnim(curAnimData.anim, true);
+
+		genBoyOffsets();
+	}
+
 	function updateDiscordPresence() {
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
@@ -1076,11 +1093,21 @@ class CharacterEditorState extends MusicBeatState
 	}
 
 	override function draw() {
-		var unscaleFactor = 1 / FlxG.camera.zoom;
+		var unscaleFactor = (1 / FlxG.camera.zoom);
 		originMarker.scale.set(unscaleFactor, unscaleFactor);
 		originMarker.centerOrigin();
 		
 		super.draw();
+	}
+
+	function close() {
+		if (goToPlayState) {
+			MusicBeatState.switchState(new PlayState());
+		} else {
+			MusicBeatState.switchState(new MasterEditorMenu());
+			MusicBeatState.playMenuMusic(true);
+		}
+		FlxG.mouse.visible = false;
 	}
 
 	override function update(elapsed:Float)
@@ -1103,28 +1130,40 @@ class CharacterEditorState extends MusicBeatState
 		}
 		StartupState.specialKeysEnabled = true;
 
-		if (testMode){
-			if (controls.NOTE_LEFT_P){
-				char.playAnim("singLEFT", true);
+		if (testMode) {
+			var alt = FlxG.keys.pressed.SHIFT ? "-alt" : '';
+			// who cares anymore
+			if (FlxG.keys.justPressed.SPACE){
+				char.playAnim("idle", true);
 			}
-			if (controls.NOTE_RIGHT_P){
-				char.playAnim("singRIGHT", true);
+			if (FlxG.keys.justPressed.D){
+				char.playAnim("singLEFT"+alt, true);
 			}
-			if (controls.NOTE_DOWN_P){
-				char.playAnim("singDOWN", true);
+			if (FlxG.keys.justPressed.F){
+				char.playAnim("singDOWN"+alt, true);
 			}
-			if (controls.NOTE_UP_P){
-				char.playAnim("singUP", true);
+			if (FlxG.keys.justPressed.J){
+				char.playAnim("singUP"+alt, true);
 			}
-		}else if(!charDropDown.dropPanel.visible) {
+			if (FlxG.keys.justPressed.K){
+				char.playAnim("singRIGHT"+alt, true);
+			}
+			if (FlxG.keys.justPressed.E){
+				char.playAnim("singLEFTmiss", true);
+			}
+			if (FlxG.keys.justPressed.R){
+				char.playAnim("singDOWNmiss", true);
+			}
+			if (FlxG.keys.justPressed.U){
+				char.playAnim("singUPmiss", true);
+			}
+			if (FlxG.keys.justPressed.I){
+				char.playAnim("singRIGHTmiss", true);
+			}
+		}
+		else if(!charDropDown.dropPanel.visible) {
 			if (FlxG.keys.justPressed.ESCAPE) {
-				if(goToPlayState) {
-					MusicBeatState.switchState(new PlayState());
-				} else {
-					MusicBeatState.switchState(new MasterEditorMenu());
-					MusicBeatState.playMenuMusic(true);
-				}
-				FlxG.mouse.visible = false;
+				close();
 				return;
 			}
 
@@ -1159,11 +1198,17 @@ class CharacterEditorState extends MusicBeatState
 			}
 
 			if (char.animationsArray.length > 0) {
-				if (FlxG.keys.justPressed.W)
-					curAnim -= 1;
+				var replayAnim = FlxG.keys.justPressed.SPACE;
 
-				if (FlxG.keys.justPressed.S)
+				if (FlxG.keys.justPressed.W) {
+					curAnim -= 1;
+					replayAnim = true;
+				}
+
+				if (FlxG.keys.justPressed.S) {
 					curAnim += 1;
+					replayAnim = true;
+				}
 
 				if (curAnim < 0)
 					curAnim = char.animationsArray.length - 1;
@@ -1171,39 +1216,27 @@ class CharacterEditorState extends MusicBeatState
 				if (curAnim >= char.animationsArray.length)
 					curAnim = 0;
 
-				if (FlxG.keys.justPressed.S || FlxG.keys.justPressed.W || FlxG.keys.justPressed.SPACE)
-				{
+				if (replayAnim) {
 					char.playAnim(char.animationsArray[curAnim].anim, true);
 					genBoyOffsets();
 				}
+
+				var multiplier:Int = FlxG.keys.pressed.SHIFT ? 10 : 1;
+
+				if (FlxG.keys.justPressed.LEFT)
+					changeCurOffset(multiplier, 0);
+
+				if (FlxG.keys.justPressed.RIGHT)
+					changeCurOffset(-multiplier, 0);
+
+				if (FlxG.keys.justPressed.DOWN)
+					changeCurOffset(0, -multiplier);
+
+				if (FlxG.keys.justPressed.UP)
+					changeCurOffset(0, multiplier);
+
 				if (FlxG.keys.justPressed.T)
-				{
-					var curAnimData = char.animationsArray[curAnim];
-					curAnimData.offsets = [0, 0];
-
-					char.addOffset(curAnimData.anim, curAnimData.offsets[0], curAnimData.offsets[1]);
-					char.playAnim(curAnimData.anim, true);
-
-					genBoyOffsets();
-				}
-
-				var controlArray:Array<Bool> = [FlxG.keys.justPressed.LEFT, FlxG.keys.justPressed.RIGHT, FlxG.keys.justPressed.UP, FlxG.keys.justPressed.DOWN];
-
-				for (i in 0...controlArray.length) {
-					if (controlArray[i]) {
-						var multiplier:Int = FlxG.keys.pressed.SHIFT ? 10 : 1;
-						var arrayVal:Int = (i > 1) ? 1 : 0;
-						var negaMult:Int = (i % 2 != 0) ? -1 : 1;
-
-						var animData = char.animationsArray[curAnim];
-						animData.offsets[arrayVal] += negaMult * multiplier;
-
-						char.addOffset(animData.anim, animData.offsets[0], animData.offsets[1]);
-						char.playAnim(animData.anim, false);
-
-						genBoyOffsets();
-					}
-				}
+					changeCurOffset(0, 0, true);
 			}
 		}
 

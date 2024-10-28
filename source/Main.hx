@@ -1,6 +1,5 @@
 package;
 
-import funkin.data.Level;
 import flixel.FlxG;
 import flixel.FlxState;
 import openfl.Lib;
@@ -9,7 +8,6 @@ import openfl.display.Sprite;
 import openfl.system.Capabilities;
 import openfl.events.Event;
 import lime.app.Application;
-import haxe.Constraints.Function;
 
 import funkin.*;
 import funkin.api.Github;
@@ -60,12 +58,10 @@ class Main extends Sprite
 	var skipSplash:Bool = true; // Whether to skip the flixel splash screen that appears in release mode.
 	var startFullscreen:Bool = false; // Whether to start the game in fullscreen on desktop targets
 
+	public static final UserAgent:String = 'TrollEngine/${Version.engineVersion}'; // used for http requests. if you end up forking the engine and making your own then make sure to change this!!
+	
 	//// You can pretty much ignore everything from here on - your code should go in your states.
 
-	////
-	public static final UserAgent:String = 'TrollEngine/${Version.engineVersion}'; // used for http requests. if you end up forking the engine and making your own then make sure to change this!!
-
-	////
 	public static var showDebugTraces:Bool = #if (debug || SHOW_DEBUG_TRACES) true #else false #end;
 	public static var downloadBetas:Bool = Version.isBeta;
 	public static var outOfDate:Bool = false;
@@ -75,9 +71,11 @@ class Main extends Sprite
 	public static var fpsVar:FPS;
 	public static var bread:Bread;
 
+	#if ALLOW_DEPRECATION
 	@:noCompletion @:deprecated("volumeChangedEvent is deprecated, use FlxG.sound.onVolumeChange, instead") 
 	public static var volumeChangedEvent(get, never):flixel.util.FlxSignal.FlxTypedSignal<Float -> Void>;
 	@:noCompletion inline static function get_volumeChangedEvent() return FlxG.sound.onVolumeChange;
+	#end
 
 	////
 	public function new() {
