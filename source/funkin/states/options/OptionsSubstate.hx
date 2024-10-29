@@ -337,7 +337,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			#end
 			#if DISCORD_ALLOWED
 			case 'discordRPC':
-				val ? DiscordClient.start() : DiscordClient.shutdown();
+				val ? DiscordClient.start(true) : DiscordClient.shutdown(true);
 			#end
 			case 'autoPause':
 				FlxG.autoPause = val;

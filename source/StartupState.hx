@@ -144,7 +144,7 @@ class StartupState extends FlxTransitionableState
 		
 		#if DISCORD_ALLOWED
 		Application.current.onExit.add((exitCode)->{
-			DiscordClient.shutdown();
+			DiscordClient.shutdown(true);
 		});
 		#end
 
