@@ -416,19 +416,19 @@ class OptionsSubstate extends MusicBeatSubstate
 				checkWindows();
 
 			case 'masterVolume':
-				var newVol = newVal * 0.01;
+				if (ignoreVolumeChange) return;
 
 				var prevVol = FlxG.sound.volume;
-				if (prevVol != newVol) {
-					FlxG.sound.volume = newVol;
+				var newVol = newVal * 0.01;
+				var snappedVol = CoolUtil.snap(newVol, 0.1);
 
-					newVol = CoolUtil.snap(newVol, 0.1);
+				ignoreVolumeChange = true;
+				FlxG.sound.volume = newVol;
+				ignoreVolumeChange = false;
 
-					// show sound tray if changes enough to go up/down a step
-					if (lastFlixelVolume != newVol) {
-						lastFlixelVolume = newVol;
-						FlxG.sound.showSoundTray(newVol > prevVol);
-					}
+				if (lastFlixelVolume != snappedVol) {
+					lastFlixelVolume = snappedVol;
+					FlxG.sound.showSoundTray(snappedVol > prevVol);
 				}
 
 			case 'sfxVolume':
@@ -481,12 +481,16 @@ class OptionsSubstate extends MusicBeatSubstate
 	}
 
 	var whitePixel = FlxGraphic.fromRectangle(1, 1, 0xFFFFFFFF, false, 'whitePixel');
-	function onVolumeChange(vol:Float){
-		vol *= 100;
-		if (Math.floor(getNumber("masterVolume")) != Math.floor(vol)){
-			forceWidgetUpdate = true;
-			changeNumber("masterVolume", vol, true);
-		}
+
+	var ignoreVolumeChange:Bool = false;
+	function onVolumeChange(val:Float) {
+		if (ignoreVolumeChange || FlxG.sound.muted)
+			return;
+
+		forceWidgetUpdate = true;
+		ignoreVolumeChange = true;
+		changeNumber("masterVolume", Math.ffloor(val * 100), true);
+		ignoreVolumeChange = false;
 	}
 
 	override function create()
@@ -1169,20 +1173,27 @@ class OptionsSubstate extends MusicBeatSubstate
 
 	function changeNumber(name:String, val:Float, abs:Bool = false)
 	{
-		var data = actualOptions.get(name);
-		var newVal = abs ? val : data.value + val; // data.data.get("step");
-		if (newVal > data.data.get("max"))
-			newVal = data.data.get("max");
-		else if (newVal < data.data.get("min"))
-			newVal = data.data.get("min");
-		var snappedVal = CoolUtil.snap(newVal, data.data.get("step"));
-		var oldVal = data.value;
-		data.value = (snappedVal);
+		var option:OptionData = actualOptions.get(name);
+		var valSnap:Float = option.data.get("step");
+		var maxVal:Float = option.data.get("max");
+		var minVal:Float = option.data.get("min");
+
+		var oldVal = option.value;
+		var newVal = abs ? val : (oldVal + val);
+
+		if (newVal > maxVal)
+			newVal = maxVal;
+		else if (newVal < minVal)
+			newVal = minVal;
+
+		var snappedVal:Float = CoolUtil.snap(newVal, valSnap);
+		option.value = snappedVal;
+		
 		if (oldVal != snappedVal)
 			onNumberChanged(name, oldVal, snappedVal);
 
-		if (Reflect.hasField(ClientPrefs, name)){
-			var val = snappedVal / (data.data.get("type") == 'percent' ? 100 : 1);
+		if (Reflect.hasField(ClientPrefs, name)) {
+			var val = snappedVal / (option.data.get("type") == 'percent' ? 100 : 1);
 			Reflect.setField(ClientPrefs, name, val);
 			if(Std.string(originalValues.get(name)) != Std.string(val)){
 				if (!changed.contains(name))changed.push(name);
