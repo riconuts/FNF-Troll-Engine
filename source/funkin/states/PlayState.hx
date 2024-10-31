@@ -4447,13 +4447,4 @@ class PlayStateSignals /*extends MusicBeatSignals*/
 
 	@:allow(funkin.states.PlayState)
 	function new() {}
-
-	/* time to write a macro for this woohoo im so happy abt this information
-	public function setupScriptSignals(script:FunkinHScript) {
-		var sf = script.get("onUpdate");
-		if (Reflect.isFunction(sf)) {
-			onUpdate.add(sf);
-		}
-	}
-	*/
 }

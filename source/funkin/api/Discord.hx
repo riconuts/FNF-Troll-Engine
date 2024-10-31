@@ -22,7 +22,7 @@ private final defaultRPCInfo:DiscordRPCInfo = {
 	applicationId: '814588678700924999',
 	allowedImageKeys: ["icon"],
 
-	defaultLargeImageText: 'Troll Engine ${Main.Version.displayedVersion}',
+	defaultLargeImageText: 'Troll Engine ' + Main.Version.displayedVersion,
 
 	defaultLargeImageKey: 'icon',
 	defaultSmallImageKey: 'none'
@@ -158,10 +158,7 @@ class DiscordClient
 
 	static function onReady(request:cpp.RawConstPointer<DiscordUser>)
 	{
-		if (lastPresence.instance == 0) { // is this ever not 0 '_'
-			DiscordRpc.UpdatePresence(cpp.RawConstPointer.addressOf(lastPresence));
-		}else
-			changePresence("In the Menus", null);
+		changePresence("Presence Unknown");
 	}
 
 	static function onError(_code:Int, _message:cpp.ConstCharStar)

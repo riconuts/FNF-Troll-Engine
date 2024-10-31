@@ -97,7 +97,15 @@ class ClientPrefs
 				// V-Slice could be named PBOT1??
 				data: [
 					"requiresRestart" => true,
-					"options" => ["Psych", "V-Slice", "PBot", "Week 7", "Standard", "ITG", "Custom"]
+					"options" => [
+						"Psych", 
+						"V-Slice", 
+						#if USE_EPIC_JUDGEMENT "PBot", #end
+						"Week 7", 
+						"Standard", 
+						"ITG", 
+						"Custom"
+					]
 				]
 			},
 			"judgeDiff" => {
@@ -869,7 +877,7 @@ class ClientPrefs
 		FlxG.autoPause = ClientPrefs.autoPause;
 
 		FlxSprite.defaultAntialiasing = ClientPrefs.globalAntialiasing;
-		FlxG.stage.quality = ClientPrefs.globalAntialiasing ? openfl.display.StageQuality.BEST : openfl.display.StageQuality.LOW; // does nothing!!!!
+		FlxG.stage.quality = ClientPrefs.globalAntialiasing ? BEST : LOW; // does nothing!!!!
 
 		#if DISCORD_ALLOWED
 		discordRPC ? DiscordClient.start() : DiscordClient.shutdown();	

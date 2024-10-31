@@ -8,8 +8,7 @@ class InputFormatter
 	public static function getKeyName(key:FlxKey):String 
 	{
 		if (null==key) key = NONE;
-		return switch (key) 
-		{
+		return switch (key) {
 			case BACKSPACE: "Backspace";
 			case CONTROL: "Ctrl";
 			case ALT: "Alt";
@@ -55,9 +54,7 @@ class InputFormatter
 			case UP: 'Up Arrow';
 			case DOWN: 'Down Arrow';
 			case NONE: '---';
-			default: 
-				var label:String = key.toString(); 
-				(label.charAt(0).toUpperCase() + label.substr(1).toLowerCase());
+			default: CoolerStringTools.capitalize(key.toString());		
 		}
 	}
 }

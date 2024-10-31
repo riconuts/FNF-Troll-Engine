@@ -12,7 +12,7 @@ class HealthIcon extends FlxSprite
 	private var isOldIcon:Bool = false;
 	private var iconOffsets:Array<Float> = [0, 0];
 
-	public function new(char:String = 'bf', isPlayer:Bool = false)
+	public function new(char:String = 'face', isPlayer:Bool = false)
 	{
 		super();
 
@@ -48,7 +48,7 @@ class HealthIcon extends FlxSprite
 		animation.addByPrefix('idle', 'idle', 24, true);
 		animation.addByPrefix('losing', 'losing', 24, true);
 		animation.addByPrefix('winning', 'winning', 24, true);
-		
+
 		CoolUtil.cloneSpriteAnimation(this, 'idle', 'losing');
 		CoolUtil.cloneSpriteAnimation(this, 'idle', 'winning');
 		animation.play('idle');
