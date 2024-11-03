@@ -996,7 +996,8 @@ class PlayState extends MusicBeatState
 		updateSongDiscordPresence();
 		#end
 
-		addKeyboardEvents();
+		if (!ClientPrefs.controllerMode)
+			addKeyboardEvents();
 
 		////
 		callOnAllScripts('onCreatePost');
@@ -2073,10 +2074,8 @@ class PlayState extends MusicBeatState
 	}
 
 	inline function addKeyboardEvents() {
-		if (!ClientPrefs.controllerMode) {
-			FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDownEvent);
-			FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUpEvent);		
-		}
+		FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDownEvent);
+		FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUpEvent);		
 	}
 	
 	inline function removeKeyboardEvents() {
@@ -2109,22 +2108,25 @@ class PlayState extends MusicBeatState
 		callOnScripts('optionsChanged', [options]);
 		if (hudSkinScript != null) callScript(hudSkinScript, "optionsChanged", [options]);
 		
-		var reBind:Bool = false;
-		for(opt in options){
-			if(opt.startsWith("bind")){
-				reBind = true;
-				break;
-			}
-		}
-		
 		for(field in playfields){
 			field.noteField.optimizeHolds = ClientPrefs.optimizeHolds;
 			field.noteField.drawDistMod = ClientPrefs.drawDistanceModifier;
 			field.noteField.holdSubdivisions = Std.int(ClientPrefs.holdSubdivs) + 1;
 		}
 
-		addKeyboardEvents();
-		removeKeyboardEvents();
+		if (ClientPrefs.controllerMode) {
+			removeKeyboardEvents();
+		}else {
+			addKeyboardEvents();
+		}
+
+		var reBind:Bool = false;
+		for (opt in options) {
+			if(opt.startsWith("bind")){
+				reBind = true;
+				break;
+			}
+		}
 		
 		if (reBind) {
 			updateKeybinds();
@@ -3687,7 +3689,6 @@ class PlayState extends MusicBeatState
 			}
 		}
 		
-
 		////
 		callOnHScripts("noteMiss", [daNote, field]);
 		#if LUA_ALLOWED
@@ -3718,14 +3719,12 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.missVolume > 0)
 			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), ClientPrefs.missVolume  * FlxG.random.float(0.9, 1));
 
-		for (field in playfields.members)
-		{
+		if (field != null) {
 			for (track in field.tracks)
 				track.volume = 0;
 
 			for (char in field.characters) 
-				char.missPress(direction, field);
-			
+				char.missPress(direction, field);	
 		}
 
 		callOnScripts('noteMissPress', [direction]);
@@ -3751,8 +3750,7 @@ class PlayState extends MusicBeatState
 		callOnLuas('opponentNoteHit', [notes.members.indexOf(note), Math.abs(note.column), note.noteType, note.isSustainNote, note.ID]);
 		#end
 
-		if (!note.isSustainNote)
-		{
+		if (!note.isSustainNote) {
 			if (opponentHPDrain > 0 && health > opponentHPDrain)
 				health -= opponentHPDrain;
 
