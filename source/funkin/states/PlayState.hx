@@ -553,13 +553,8 @@ class PlayState extends MusicBeatState
 			playbackRate *= (ClientPrefs.ruin ? 0.8 : 1);
 			#end
 
-			healthDrain = switch(ClientPrefs.getGameplaySetting('healthDrain', "Disabled")){
-				default: 0;
-				case "Basic": 0.00055;
-				case "Average": 0.0007;
-				case "Heavy": 0.00085;
-			};
-			opponentHPDrain = ClientPrefs.getGameplaySetting('opponentFightsBack', false) ? 0.0182 : 0;
+			healthDrain = 0.0;
+			opponentHPDrain = 0.0;
 		}
 
 		FlxG.timeScale = playbackRate;

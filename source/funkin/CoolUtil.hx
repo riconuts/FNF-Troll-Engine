@@ -9,6 +9,35 @@ using StringTools;
 
 class CoolUtil
 {
+	public static function coolNumber(val:Float, decimals:Int):String {
+		var strNum:String = '';
+		var splitNum:Array<String> = Std.string(Std.int(val)).split("");
+
+		if (decimals > 0) {
+			strNum = Std.string(val % 1).substr(2, decimals);
+
+			while (strNum.length < decimals)
+				strNum += '0';
+
+			strNum = '.' + strNum;
+		}
+
+		strNum = splitNum[splitNum.length - 1] + strNum;
+		if (splitNum.length > 1) {
+			for (i in 1...splitNum.length - 1) {
+				var digi:String = splitNum[splitNum.length - 1 - i];
+				if (i % 3 == 0)
+					strNum = digi + ',' + strNum;
+				else
+					strNum = digi + strNum;
+			}
+
+			strNum = splitNum[0] + strNum;
+		}
+
+		return strNum;
+	}
+
 	/**
 	 * @param spr The sprite on which to clone the animation
 	 * @param ogName Name of the animation to be cloned. 

@@ -1733,7 +1733,7 @@ class Checkbox extends WidgetSprite
 	}
 }
 
-private class TextFormats {
+class TextFormats {
 	public static final TAB_NAME:FlxTextFormatData = {
 		font: "vcr.ttf",
 		pixelPerfectRender: true,
