@@ -229,7 +229,7 @@ class Stats {
 			{
 				if (goods == 1)
 					clear = bf; // Black Flag (SFC missed by 1 good)
-				else if (sicks == 1)
+				else if (sicks == 1 && goods == 0)
 					clear = wf; // White Flag (EFC missed by 1 sick)
 			}
 		}
