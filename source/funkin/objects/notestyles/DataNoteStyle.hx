@@ -154,7 +154,6 @@ class DataNoteStyle extends BaseNoteStyle
 
 		var assetsMap = structureToMap(json.assets);
 		json.assets = assetsMap;
-		trace(json.scale);
 		if (json.scale == null) json.scale = 1.0;
 
 		for (name => asset in assetsMap) {
@@ -204,7 +203,6 @@ class DataNoteStyle extends BaseNoteStyle
 		}
 
 		super(id);
-		trace(data.scale);
 		this.scale = data.scale;
 	}
 
@@ -315,7 +313,6 @@ class DataNoteStyle extends BaseNoteStyle
 		var imageKey:String = asset.imageKey;
 		if (ClientPrefs.noteSkin == 'Quants' && !obj.isQuant) {
 			var quantKey = Note.getQuantTexture(Path.directory(imageKey) + "/", Path.withoutDirectory(imageKey), imageKey);
-			trace(quantKey);
 			if (quantKey != null) {
 				obj.isQuant = true;
 				imageKey = quantKey;
