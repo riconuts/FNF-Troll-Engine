@@ -788,7 +788,7 @@ class Paths
 		Paths.currentModDirectory = '';
 	}
 
-	//// Strings
+	//// String stuff, should maybe move this to a diff class¿¿¿
 	public static var locale(default, set):String;
 	
 	private static final currentStrings:Map<String, String> = [];

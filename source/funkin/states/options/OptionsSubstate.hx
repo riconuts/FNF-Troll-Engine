@@ -623,8 +623,8 @@ class OptionsSubstate extends MusicBeatSubstate
 						recommendsRestart.set(opt, true);
 
 					data.data.set("optionName", opt);
-					if (Paths.hasString('opt_display_$opt')) data.display = Paths.getString('opt_display_$opt');
-					if (Paths.hasString('opt_desc_$opt')) data.desc = Paths.getString('opt_desc_$opt');
+					data.display = Paths.getString('opt_display_$opt', data.display);
+					data.desc = Paths.getString('opt_desc_$opt', data.desc);
 
 					var text = new FlxText(16, daY, 0, data.display);
 					text.applyFormat(TextFormats.OPT_NAME);

@@ -11,13 +11,11 @@ import flixel.util.FlxTimer;
 import funkin.objects.shaders.ColorSwap;
 
 using StringTools;
+
 #if DISCORD_ALLOWED
 import funkin.api.Discord.DiscordClient;
 #end
-#if sys
-import sys.FileSystem;
-import sys.io.File;
-#end
+
 // used so stages wont break
 class FakeCharacter
 {
