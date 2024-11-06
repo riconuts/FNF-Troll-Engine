@@ -2,7 +2,6 @@ package funkin.data;
 
 import flixel.math.FlxMath.minInt;
 import flixel.graphics.FlxGraphic;
-import openfl.Assets;
 import openfl.media.Sound;
 import openfl.display.BitmapData;
 
@@ -172,38 +171,18 @@ class Cache
 	}
 	#end
 
+	inline static var IMAGE_EXT = Paths.IMAGE_EXT;
+
 	/** Returns an uncached image graphic, returns null if the image is already cached **/
 	private static function returnUncachedGraphic(key:String, ?library:String)
 	{
-		var path:String;
-
-		#if MODS_ALLOWED
-		path = Paths.modsImages(key);
+		var path:String = Paths.getPath('images/$key.$IMAGE_EXT');
 
 		if (Paths.currentTrackedAssets.exists(path))
 			return null;
-
-		if (FileSystem.exists(path))
-		{
-			var newGraphic = FlxGraphic.fromBitmapData(BitmapData.fromFile(path), false, path);
-			newGraphic.persist = true;
-
-			return {path: path, graphic: newGraphic};
-		}
-		#end
-
-		////
-		path = Paths.png(key, library);
-
-		if (Paths.exists(path, IMAGE) && !Paths.currentTrackedAssets.exists(path))
-		{
-			var newGraphic = Paths.getGraphic(path);
-			newGraphic.persist = true;
-					
-			return {path: path, graphic: newGraphic};
-		}
-
-		return null;
+		
+		var newGraphic = Paths.getGraphic(path, false, false);
+		return (newGraphic==null) ? null : {path: path, graphic: newGraphic};
 	}
 
 	inline static var SOUND_EXT = Paths.SOUND_EXT;
@@ -211,33 +190,13 @@ class Cache
 	/** Returns an uncached sound, returns null if the sound is already cached **/
 	public static function returnUncachedSound(key:String, ?library:String):{path:String, sound:Sound}
 	{
-		var path = '$key.$SOUND_EXT';
-		
-		#if MODS_ALLOWED
-		path = Paths.modFolders(key);
+		var path:String = Paths.getPath('$key.$SOUND_EXT');
 
 		if (Paths.currentTrackedSounds.exists(path))
 			return null;
-
-		if (FileSystem.exists(path))
-			return {path: path, sound: Sound.fromFile(path)};
-		#end
 		
-		////
-		path = Paths.getPreloadPath(key);
-		
-		if (Paths.currentTrackedSounds.exists(path))
-			return null;
-		
-		#if (html5 || flash)
-		if (Assets.exists(path, SOUND))
-			return {path: path, sound: Assets.getSound(path)};
-		#else
-		if (FileSystem.exists(path))
-			return {path: path, sound: Sound.fromFile(path)};
-		#end
-		
-		return null;
+		var newSnd = Paths.getSound(path);
+		return (newSnd==null) ? null : {path: path, sound: newSnd};
 	}
 
 	private static function load(toLoad:AssetPreload){

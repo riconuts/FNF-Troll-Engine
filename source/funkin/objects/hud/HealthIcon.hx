@@ -27,7 +27,7 @@ class HealthIcon extends FlxSprite
 
 	function setupGraphic(pngPath:String)
 	{
-		var graphic:FlxGraphic = FlxG.bitmap.add(pngPath, false);
+		var graphic:FlxGraphic = Paths.getGraphic(pngPath, true);
 		loadGraphic(graphic, true, graphic.height, graphic.height);
 
 		animation.add('idle', [0], 0, false);

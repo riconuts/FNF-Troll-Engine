@@ -24,10 +24,7 @@ import sys.io.File;
 
 class Paths
 {
-	public static var globalContent:Array<String> = [];
-	public static var preLoadContent:Array<String> = [];
-	public static var postLoadContent:Array<String> = [];
-
+	inline public static var IMAGE_EXT = "png";
 	inline public static var SOUND_EXT = "ogg";
 	inline public static var VIDEO_EXT = "mp4";
 	public static final HSCRIPT_EXTENSIONS:Array<String> = ["hscript", "hxs", "hx"];
@@ -76,6 +73,10 @@ class Paths
 		#end
 	}
 
+	public static var localTrackedAssets:Array<String> = [];
+	public static var currentTrackedAssets:Map<String, FlxGraphic> = [];
+	public static var currentTrackedSounds:Map<String, Sound> = [];
+
 	public static var dumpExclusions:Array<String> = [
 		'assets/music/freakyIntro.$SOUND_EXT',
 		'assets/music/freakyMenu.$SOUND_EXT',
@@ -83,7 +84,7 @@ class Paths
 		'content/global/music/freakyIntro.$SOUND_EXT',
 		'content/global/music/freakyMenu.$SOUND_EXT',
 		'content/global/music/breakfast.$SOUND_EXT',
-		"assets/images/Garlic-Bread-PNG-Images.png"
+		'assets/images/Garlic-Bread-PNG-Images.$IMAGE_EXT'
 	];
 
 	public static function excludeAsset(key:String)
@@ -141,18 +142,13 @@ class Paths
 		//return false;
 	}
 
-	// define the locally tracked assets
-	public static var localTrackedAssets:Array<String> = [];
-
 	public static function clearStoredMemory()
 	{
 		// clear anything not in the tracked assets list
 		@:privateAccess
-		for (key in FlxG.bitmap._cache.keys())
-		{
+		for (key in FlxG.bitmap._cache.keys()) {
 			var obj = FlxG.bitmap._cache.get(key);
-			if (obj != null && !currentTrackedAssets.exists(key))
-			{
+			if (obj != null && !currentTrackedAssets.exists(key)) {
 				Assets.cache.removeBitmapData(key);
 				FlxG.bitmap._cache.remove(key);
 				obj.destroy();
@@ -160,21 +156,19 @@ class Paths
 		}
 
 		// clear all sounds that are cached
-		for (key in currentTrackedSounds.keys())
-		{
+		for (key in currentTrackedSounds.keys()) {
 			if (!localTrackedAssets.contains(key) && !dumpExclusions.contains(key) && key != null)
 			{
 				// trace('test: ' + dumpExclusions, key);
-				Assets.cache.clear(key);
+				Assets.cache.removeSound(key);
 				currentTrackedSounds.remove(key);
 			}
 		}
+
 		// flags everything to be cleared out next unused memory clear
 		localTrackedAssets = [];
 		Assets.cache.clear("songs");
 	}
-
-	static public var currentModDirectory:String = '';
 
 	public static function getPath(key:String, ?ignoreMods:Bool = false):String
 	{
@@ -229,153 +223,10 @@ class Paths
 		return file('shaders/$key.vert', TEXT, library);
 	}
 
-	inline static public function lua(key:String, ?library:String)
+	inline static public function font(key:String)
 	{
-		for(ext in Paths.LUA_EXTENSIONS){
-			var r = file('$key.ext', TEXT, library);
-			if (Paths.exists(r))
-				return r;
-		}
-		return null;
+		return getPath('fonts/$key');
 	}
-	
-
-
-	inline static public function exists(path:String, ?type:AssetType):Bool
-	{
-		#if sys 
-		return FileSystem.exists(path);
-		#else
-		return Assets.exists(path, type);
-		#end
-	}
-	inline static public function getContent(path:String):Null<String>{
-		#if sys
-		return FileSystem.exists(path) ? File.getContent(path) : null;
-		#else
-		return Assets.exists(path) ? Assets.getText(path) : null;
-		#end
-	}
-	inline static public function isDirectory(path:String):Bool{
-		#if sys
-		return FileSystem.exists(path) && FileSystem.isDirectory(path);
-		#else
-		var path = path.endsWith("/") ? path.substr(0, -1) : path; // remove ending slash
-		return dirMap.exists(path);
-		#end
-	}
-	inline static public function getDirectoryFileList(path:String):Array<String> {
-		#if sys
-		return !isDirectory(path) ? [] : FileSystem.readDirectory(path);
-		#else
-		var dir:String = Directory.endsWith("/") ? Directory.substr(0, -1) : Directory; // remove ending slash
-		return !dirMap.exists(dir) ? [] : [for (i in dirMap.get(dir)) i];
-		#end
-	}
-
-	static public function getJson(path:String):Null<Dynamic>
-	{
-		var ret:Null<Dynamic> = null;
-		try{
-			var raw = Paths.getContent(path);
-			if (raw != null)
-				ret = haxe.Json.parse(raw);
-		}catch(e){
-			haxe.Log.trace('$path: $e', null);
-		}
-
-		return ret;
-	}
-
-	#if html5
-	// Directory => Array with file/sub-directory names
-	static var dirMap = new Map<String, Array<String>>();
-
-	public static function initPaths(){	
-		dirMap.clear();
-		dirMap.set("", []);
-
-		for (path in Assets.list())
-		{
-			//trace("WORKING WITH PATH:", path);
-
-			var file:String = path.split("/").pop();
-			var parent:String = path.substr(0, path.length - (file.length + 1)); // + 1 to remove the ending slash
-
-			var parentTree = parent.split("/");
-			for (totality in 1...parentTree.length+1)
-			{
-				var totality = parentTree.length - totality;
-				var dirPathSplit = [for (i in 0...totality+1) {parentTree[i];}];
-				var dirPath = dirPathSplit.join("/");
-				
-				if (!dirMap.exists(dirPath)){
-					dirMap.set(dirPath, []);
-					//trace("reg folder", dirPath, "from", path);
-				//}else{
-					//trace("did NOT reg folder", dirPath, "from", path);
-				}
-			}
-			
-			dirMap.get(parent).push(file);
-			//trace("END");
-		}
-		
-		////
-		for (path => dir in dirMap)
-		{
-			var name:String = path.split("/").pop();
-			var parent:String = path.substr(0, path.length - (name.length + 1)); // + 1 to remove the ending slash
-
-			if (dirMap.exists(parent)){
-				var parentDir = dirMap.get(parent);
-				if (!parentDir.contains(name)){
-					parentDir.push(name);
-				}
-			}
-		}
-
-		// trace(dirMap["assets/songs"]);
-
-		return dirMap;
-	}
-	
-	/** 
-		Iterates through a directory and calls a function with the name of each file contained within it
-		Returns true if the directory was a valid folder and false if not.
-	**/
-	inline static public function iterateDirectory(Directory:String, Func:haxe.Constraints.Function)
-	{
-		var dir:String = Directory.endsWith("/") ? Directory.substr(0, -1) : Directory; // remove ending slash
-
-		if (!dirMap.exists(dir)){
-			trace('Directory $dir does not exist?');
-			return false;
-		}
-
-		for (i in dirMap.get(dir))
-			Func(i);
-		
-		return true;
-	}
-
-	#else
-
-	/** 
-		Iterates through a directory and calls a function with the name of each file contained within it
-		Returns true if the directory was a valid folder and false if not.
-	**/
-	inline static public function iterateDirectory(path:String, func:haxe.Constraints.Function):Bool
-	{
-		if (!FileSystem.exists(path) || !FileSystem.isDirectory(path))
-			return false;
-		
-		for (name in FileSystem.readDirectory(path))
-			func(name);
-
-		return true;
-	}
-	#end
 
 	static public function video(key:String, ignoreMods:Bool = false):String
 	{
@@ -412,31 +263,128 @@ class Paths
 		return track(song, "Inst");
 	}
 
+	inline static public function lua(key:String, ?library:String)
+	{
+		for (ext in Paths.LUA_EXTENSIONS){
+			var r = file('$key.$ext', TEXT, library);
+			if (Paths.exists(r))
+				return r;
+		}
+		return null;
+	}
+
+	inline static public function withoutEndingSlash(path:String)
+		return path.endsWith("/") ? path.substr(0, -1) : path;
+
+	inline static public function exists(path:String, ?type:AssetType):Bool {
+		#if sys 
+		return FileSystem.exists(path);
+		#else
+		return Assets.exists(path, type);
+		#end
+	}
+	inline static public function getContent(path:String):Null<String> {
+		#if sys
+		return FileSystem.exists(path) ? File.getContent(path) : null;
+		#else
+		return Assets.exists(path) ? Assets.getText(path) : null;
+		#end
+	}
+	inline static public function isDirectory(path:String):Bool {
+		#if sys
+		return FileSystem.exists(path) && FileSystem.isDirectory(path);
+		#else
+		return HTML5Paths.isDirectory(path);
+		#end
+	}
+	inline static public function getDirectoryFileList(path:String):Array<String> {
+		#if sys
+		return !isDirectory(path) ? [] : FileSystem.readDirectory(path);
+		#else
+		return HTML5Paths.getDirectoryFileList(path);
+		#end
+	}
+
+	public static function getText(path:String):Null<String> {
+		#if sys
+		if (FileSystem.exists(path))
+			return File.getContent(path);
+		#end
+
+		if (Assets.exists(path))
+			return Assets.getText(path);
+
+		return null;
+	}
+	public static function getBitmapData(path:String):Null<BitmapData> {
+		#if sys
+		if (FileSystem.exists(path))
+			return BitmapData.fromFile(path);
+		#end
+
+		if (Assets.exists(path, IMAGE))
+			return Assets.getBitmapData(path);
+
+		return null;
+	}
+	public static function getSound(key:String){
+		#if sys
+		if (FileSystem.exists(key))
+			return Sound.fromFile(key);
+		#end
+
+		if (Assets.exists(key))
+			return Assets.getSound(key);
+
+		return null;
+	}
+	static public function getJson(path:String):Null<Dynamic>
+	{
+		var ret:Null<Dynamic> = null;
+		try{
+			var raw = Paths.getContent(path);
+			if (raw != null)
+				ret = haxe.Json.parse(raw);
+		}catch(e){
+			haxe.Log.trace('$path: $e', null);
+		}
+
+		return ret;
+	}
+
+	/** 
+		Iterates through a directory and calls a function with the name of each file contained within it
+		Returns true if the directory was a valid folder and false if not.
+	**/
+	inline static public function iterateDirectory(path:String, func:haxe.Constraints.Function):Bool
+	{
+		#if sys
+		if (!FileSystem.exists(path) || !FileSystem.isDirectory(path))
+			return false;
+		
+		for (name in FileSystem.readDirectory(path))
+			func(name);
+
+		return true;
+		
+		#else
+		return HTML5Paths.iterateDirectory(path, func);
+		#end
+	}
+
 	/** Paths.image(key) != null **/
 	inline public static function imageExists(key:String):Bool
 		return Paths.exists(imagePath(key));
 
 	inline public static function imagePath(key:String):String
-		return getPath('images/$key.png');
+		return getPath('images/$key.$IMAGE_EXT');
 
 	inline static public function image(key:String, ?library:String):Null<FlxGraphic>
-	{
 		return returnGraphic(key, library);
-	}
 
 	/** Returns the contents of a file as a string. **/
 	inline public static function text(key:String, ?ignoreMods:Bool = false):Null<String>
 		return getContent(getPath(key, ignoreMods));
-
-	inline static public function font(key:String)
-	{
-		#if MODS_ALLOWED
-		var file:String = modsFont(key);
-		if (FileSystem.exists(file))
-			return file;
-		#end
-		return 'assets/fonts/$key';
-	}
 
 	inline static public function fileExists(key:String, ?type:AssetType, ?ignoreMods:Bool = false, ?library:String)
 	{
@@ -532,65 +480,44 @@ class Paths
 		return finalPath.toLowerCase();
 	}
 
-	// completely rewritten asset loading? fuck!
-	public static var currentTrackedAssets:Map<String, FlxGraphic> = [];
-
-	public static function getGraphic(path:String):Null<FlxGraphic>
+	public static function getGraphic(path:String, cache:Bool = true, gpu:Bool = false):Null<FlxGraphic>
 	{
-		var graphic = FlxGraphic.fromAssetKey(path, false, path);
-		
-		#if sys
-		if (graphic == null && FileSystem.exists(path))
-			return FlxGraphic.fromBitmapData(BitmapData.fromFile(path), false, path);
-		#end
+		var bitmap:BitmapData = getBitmapData(path);
+		if (bitmap == null)
+			return null;
 
-		return graphic;
+		if (gpu) {
+			var texture = FlxG.stage.context3D.createRectangleTexture(bitmap.width, bitmap.height, BGRA, true);
+			texture.uploadFromBitmapData(bitmap);
+			bitmap.image.data = null;
+			bitmap.dispose();
+			bitmap = BitmapData.fromTexture(texture);
+		}
+		
+		var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, path, cache);
+		if (cache) {
+			newGraphic.persist = true;
+			newGraphic.destroyOnNoUse = false;
+	
+			localTrackedAssets.push(path);
+			currentTrackedAssets.set(path, newGraphic);
+		}
+
+		return newGraphic;
 	}
 
 	public static function returnGraphic(key:String, ?library:String):Null<FlxGraphic>
 	{
-		#if MODS_ALLOWED
-		var modKey:String = modsImages(key);
-		if (FileSystem.exists(modKey))
-		{
-			if (!currentTrackedAssets.exists(modKey)){
-				var newGraphic:FlxGraphic = getGraphic(modKey);
-				newGraphic.persist = true;
-				currentTrackedAssets.set(modKey, newGraphic);
-			}
-			if (!localTrackedAssets.contains(modKey))localTrackedAssets.push(modKey);
-			return currentTrackedAssets.get(modKey);
-		}
-		#end
+		var path:String = getPath('images/$key.$IMAGE_EXT');
 
-		var path = png(key, library);
-		if (Paths.exists(path, IMAGE))
-		{
-			if (!currentTrackedAssets.exists(path)){
-				var newGraphic:FlxGraphic = getGraphic(path);
-				newGraphic.persist = true;
-				currentTrackedAssets.set(path, newGraphic);
-			}
-			if (!localTrackedAssets.contains(path))localTrackedAssets.push(path);
+		if (currentTrackedAssets.exists(path))
 			return currentTrackedAssets.get(path);
-		}
 
-		if (Main.showDebugTraces) trace('image "$key" returned null.');
-		return null;
-	}
+		var graphic = getGraphic(path);
+		if (graphic==null && Main.showDebugTraces)
+			trace('bitmap "$key" => "$path" returned null.');
 
-	public static var currentTrackedSounds:Map<String, Sound> = [];
-
-	public static function getSound(key:String){
-		#if sys
-		if (FileSystem.exists(key))
-			return Sound.fromFile(key);
-		#end
-
-		if (Assets.exists(key))
-			return Assets.getSound(key);
-
-		return null;
+		return graphic;
 	}
 
 	public static function returnSoundPath(path:String, key:String, ?library:String)
@@ -660,45 +587,51 @@ class Paths
 		return null;
 	}
 
+	////
+	public static var currentModDirectory:String = '';
+
+	public static var globalContent:Array<String> = [];
+	public static var preLoadContent:Array<String> = [];
+	public static var postLoadContent:Array<String> = [];
 
 	public static var modsList:Array<String> = [];
 	public static var contentMetadata:Map<String, ContentMetadata> = [];
 
 	#if MODS_ALLOWED
-	static final modFolderPath:String = "content/";
+	static inline final modFolderPath:String = "content/";
 
 	inline static public function mods(key:String = '')
 		return modFolderPath + key;
 
 	inline static public function modsFont(key:String)
-		return modFolders('fonts/' + key);
+		return modFolders('fonts/$key');
 
 	inline static public function modsSongJson(key:String)
-		return modFolders('songs/' + key + '.json');
+		return modFolders('songs/$key.json');
 
 	inline static public function modsVideo(key:String, extension:String = VIDEO_EXT)
-		return modFolders('videos/' + key + '.' + extension);
+		return modFolders('videos/$key.$extension');
 
 	inline static public function modsSounds(path:String, key:String)
-		return modFolders(path + '/' + key + '.' + SOUND_EXT);
+		return modFolders('$path/$key.$SOUND_EXT');
 
 	inline static public function modsImages(key:String)
-		return modFolders('images/' + key + '.png');
+		return modFolders('images/$key.$IMAGE_EXT');
 
 	inline static public function modsXml(key:String)
-		return modFolders('images/' + key + '.xml');
+		return modFolders('images/$key.xml');
 
 	inline static public function modsTxt(key:String)
-		return modFolders('data/' + key + '.txt');
+		return modFolders('data/$key.txt');
 
 	inline static public function modsJson(key:String)
-		return modFolders('data/' + key + '.json');
+		return modFolders('data/$key.json');
 
 	inline static public function modsShaderFragment(key:String, ?library:String)
-		return modFolders('shaders/'+key+'.frag');
+		return modFolders('shaders/$key.frag');
 	
 	inline static public function modsShaderVertex(key:String, ?library:String)
-		return modFolders('shaders/'+key+'.vert');
+		return modFolders('shaders/$key.vert');
 
 	inline static public function getGlobalContent(){
 		return globalContent;
@@ -831,7 +764,7 @@ class Paths
 		#else
 		var foldersToCheck:Array<String> = [
 			Paths.mods(Paths.currentModDirectory + '/$dir/'),
-			Paths.mods('$dir/'),			
+			Paths.mods('$dir/'),
 		];
 
 		if(!modsOnly)
@@ -857,6 +790,9 @@ class Paths
 
 	//// Strings
 	public static var locale(default, set):String;
+	
+	private static final currentStrings:Map<String, String> = [];
+	
 	@:noCompletion static function set_locale(l:String){
 		if (l != locale) {
 			locale = l;
@@ -864,8 +800,6 @@ class Paths
 		}
 		return locale;
 	}
-
-	private static final currentStrings = new StringMap();
 
 	public static function getAllStrings():Void {
 		currentStrings.clear();
@@ -894,6 +828,93 @@ class Paths
 
 	public static inline function getString(key:String, ?defaultValue:String):String
 		return hasString(key) ? _getString(key) : (defaultValue==null ? key : defaultValue);
+}
+
+class HTML5Paths {
+	#if !sys 
+	// Directory => Array with file/sub-directory names
+	static var dirMap = new Map<String, Array<String>>();
+
+	public static function initPaths(){	
+		dirMap.clear();
+		dirMap.set("", []);
+
+		for (path in Assets.list())
+		{
+			//trace("WORKING WITH PATH:", path);
+
+			var file:String = path.split("/").pop();
+			var parent:String = path.substr(0, path.length - (file.length + 1)); // + 1 to remove the ending slash
+
+			var parentTree = parent.split("/");
+			for (totality in 1...parentTree.length+1)
+			{
+				var totality = parentTree.length - totality;
+				var dirPathSplit = [for (i in 0...totality+1) {parentTree[i];}];
+				var dirPath = dirPathSplit.join("/");
+				
+				if (!dirMap.exists(dirPath)){
+					dirMap.set(dirPath, []);
+					//trace("reg folder", dirPath, "from", path);
+				//}else{
+					//trace("did NOT reg folder", dirPath, "from", path);
+				}
+			}
+			
+			dirMap.get(parent).push(file);
+			//trace("END");
+		}
+		
+		////
+		for (path => dir in dirMap)
+		{
+			var name:String = path.split("/").pop();
+			var parent:String = path.substr(0, path.length - (name.length + 1)); // + 1 to remove the ending slash
+
+			if (dirMap.exists(parent)){
+				var parentDir = dirMap.get(parent);
+				if (!parentDir.contains(name)){
+					parentDir.push(name);
+				}
+			}
+		}
+
+		// trace(dirMap["assets/songs"]);
+
+		return dirMap;
+	}
+
+	inline static public function withoutEndingSlash(path:String)
+		return path.endsWith("/") ? path.substr(0, -1) : path;
+
+	inline static public function isDirectory(path:String):Bool {
+		return dirMap.exists(withoutEndingSlash(path));
+	}
+
+	inline static public function getDirectoryFileList(path:String):Array<String> {
+		var dir:String = withoutEndingSlash(path);
+		return !dirMap.exists(dir) ? [] : [for (i in dirMap.get(dir)) i];
+	}
+
+	/** 
+		Iterates through a directory and calls a function with the name of each file contained within it
+		Returns true if the directory was a valid folder and false if not.
+	**/
+	inline static public function iterateDirectory(path:String, Func:haxe.Constraints.Function)
+	{
+		var dir:String = withoutEndingSlash(path);
+
+		if (!dirMap.exists(dir)){
+			trace('Directory $dir does not exist?');
+			return false;
+		}
+
+		for (i in dirMap.get(dir))
+			Func(i);
+		
+		return true;
+	}
+	#end
 }
 
 typedef FreeplaySongMetadata = {
