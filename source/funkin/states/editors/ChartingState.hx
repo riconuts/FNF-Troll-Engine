@@ -569,17 +569,10 @@ class ChartingState extends MusicBeatState
 
 		var loadEventJson:FlxButton = new FlxButton(loadAutosaveBtn.x, loadAutosaveBtn.y + 30, 'Load Events', function()
 		{
-
 			var songName:String = Paths.formatToSongPath(_song.song);
-			var file:String = Paths.songJson(songName + '/events');
-			#if sys
-			if (#if MODS_ALLOWED FileSystem.exists(Paths.modsSongJson(songName + '/events')) || #end FileSystem.exists(file))
-			#else
-			if (OpenFlAssets.exists(file))
-			#end
-			{
+			var events:SwagSong = Song.loadFromJson('events', songName, false);
+			if (events != null) {
 				clearEvents();
-				var events:SwagSong = Song.loadFromJson('events', songName, false);
 				_song.events = events.events;
 				changeSection(curSec);
 			}
@@ -1630,7 +1623,7 @@ class ChartingState extends MusicBeatState
 		}
 		
 		var firstInstName:String = jsonTracks.inst[0];
-		if (soundTracksMap.exists(firstInstName)){
+		if (soundTracksMap.exists(firstInstName)) {
 			inst = soundTracksMap.get(firstInstName);
 			inst.volume = 0.6;
 

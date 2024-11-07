@@ -329,7 +329,7 @@ class PauseSubState extends MusicBeatSubstate
 			songName = Paths.formatToSongPath(songName);
 			pauseMusic.loadEmbedded(Paths.music(songName), true, true);
 			
-			var loopTimePath = new haxe.io.Path(Paths.returnSoundPath("music", songName));
+			var loopTimePath = new haxe.io.Path(Paths.soundPath("music", songName));
 			loopTimePath.file += "-loopTime";
 			loopTimePath.ext = "txt";
 

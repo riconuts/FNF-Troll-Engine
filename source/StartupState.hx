@@ -131,7 +131,6 @@ class StartupState extends FlxTransitionableState
 		#if MODS_ALLOWED
 		Paths.pushGlobalContent();
 		Paths.getModDirectories();
-		Paths.loadRandomMod();
 		#end
 
 		Paths.locale = "en";
