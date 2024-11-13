@@ -2844,16 +2844,15 @@ class ChartingState extends MusicBeatState
 	}
 
 	function initNoteType(notetype:String){
-		if(notetype == '')return;
-		if(notetypeScripts.exists(notetype))return;
+		if(notetype == '') return;
+		if(notetypeScripts.exists(notetype)) return;
 		var did:Bool = false;
+
 		#if PE_MOD_COMPATIBILITY
-		var fuck = ["notetypes", "custom_notetypes"];
-		for (file in fuck)
-		{
+		for (file in ["notetypes", "custom_notetypes"]) {
 			var baseScriptFile:String = '$file/$notetype';
 		#else
-		var baseScriptFile:String = 'notetypes/$notetype';
+			var baseScriptFile:String = 'notetypes/$notetype';
 		#end
 			var exts = Paths.HSCRIPT_EXTENSIONS; // TODO: maybe FunkinScript.extensions, FunkinScript.hscriptExtensions and FunkinScript.luaExtensions??
 			for (ext in exts)
@@ -3243,8 +3242,12 @@ class ChartingState extends MusicBeatState
 
 	private function saveLevel()
 	{
-		if(_song.events != null && _song.events.length > 1) _song.events.sort(sortByTime);
+		if (_song.events != null && _song.events.length > 1) 
+			_song.events.sort(sortByTime);
 		
+		var _song = Reflect.copy(_song);
+		Reflect.deleteField(_song, "path");
+
 		var json = {"song": _song};
 		var data:String = Json.stringify(json, "\t");
 

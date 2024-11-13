@@ -93,6 +93,17 @@ class Paths
 			dumpExclusions.push(key);
 	}
 
+	public static function init() {
+		#if html5
+		HTML5Paths.initPaths();
+		#end
+
+		#if MODS_ALLOWED
+		Paths.pushGlobalContent();
+		Paths.getModDirectories();
+		#end
+	}
+
 	/// haya I love you for the base cache dump I took to the max
 	public static function clearUnusedMemory()
 	{
@@ -144,8 +155,7 @@ class Paths
 	{
 		// clear anything not in the tracked assets list
 		@:privateAccess
-		for (key in FlxG.bitmap._cache.keys()) {
-			var obj = FlxG.bitmap._cache.get(key);
+		for (key => obj in FlxG.bitmap._cache) {
 			if (obj != null && !currentTrackedAssets.exists(key)) {
 				Assets.cache.removeBitmapData(key);
 				FlxG.bitmap._cache.remove(key);
@@ -154,9 +164,8 @@ class Paths
 		}
 
 		// clear all sounds that are cached
-		for (key in currentTrackedSounds.keys()) {
-			if (!localTrackedAssets.contains(key) && !dumpExclusions.contains(key) && key != null)
-			{
+		for (key => obj in currentTrackedSounds) {
+			if (obj != null && !localTrackedAssets.contains(key) && !dumpExclusions.contains(key)) {
 				Assets.cache.removeSound(key);
 				currentTrackedSounds.remove(key);
 			}
@@ -293,6 +302,13 @@ class Paths
 		return FileSystem.exists(path) ? File.getContent(path) : null;
 		#else
 		return Assets.exists(path) ? Assets.getText(path) : null;
+		#end
+	}
+	inline static public function getBytes(path:String):Null<haxe.io.Bytes> {
+		#if sys
+		return FileSystem.exists(path) ? File.getBytes(path) : null;
+		#else
+		return Assets.exists(path) ? Assets.getBytes(path) : null;
 		#end
 	}
 	inline static public function isDirectory(path:String):Bool {
@@ -505,8 +521,12 @@ class Paths
 	{
 		var gottenPath:String = soundPath(path, key, library);
 	
-		if (currentTrackedSounds.exists(gottenPath))
+		if (currentTrackedSounds.exists(gottenPath)) {
+			if (!localTrackedAssets.contains(gottenPath))
+				localTrackedAssets.push(gottenPath);
+
 			return currentTrackedSounds.get(gottenPath);
+		}
 		
 		var sound = getSound(gottenPath);
 		if (sound != null) {
@@ -518,7 +538,9 @@ class Paths
 			return sound;
 		}
 		
-		trace('Sound file $gottenPath not found!');
+		if (Main.showDebugTraces)
+			trace('sound $path, $key => $gottenPath returned null');
+		
 		return null;
 	}
 

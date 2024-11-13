@@ -39,19 +39,17 @@ class FunkinHScript extends FunkinScript
 	
 	public static final defaultVars:Map<String, Dynamic> = new Map<String, Dynamic>();
 
-	public static function init() // BRITISH
-	{
-		
-	}
-
 	inline public static function parseString(script:String, ?name:String = "Script")
 	{
 		parser.line = 1;
 		return parser.parseString(script, name);
 	}
 
-	inline public static function parseFile(file:String, ?name:String)
-		return parseString(Paths.getContent(file), (name == null ? file : name));
+	inline public static function parseFile(file:String, ?name:String):Null<Expr>
+	{
+		var raw = Paths.getContent(file);
+		return raw==null ? null : parseString(raw, (name == null ? file : name));
+	}
 
 	public static function blankScript(?name, ?additionalVars)
 	{

@@ -223,6 +223,17 @@ class JudgmentManager {
 	}
 	
 	/**
+	 * Returns a judgment for a time difference.
+	 */
+	public function judgeTimeDiff(diff:Float) {
+		for (judge in hittableJudgments) {
+			if (diff <= getWindow(judge))
+				return judge;
+		}
+		return UNJUDGED;
+	}
+
+	/**
 	 * Returns a judgment for a note.
 	 * @param note Note to return a judgment for
 	 * @param time The position the note time is compared to for judgment
@@ -245,16 +256,12 @@ class JudgmentManager {
 					if (judge != null) return judge;
 				}
 
-				if (note.hitCausesMiss){
+				if (note.hitCausesMiss) {
 					if (diff <= getWindow(MISS_MINE))
 						return MISS_MINE;
-				}else{
-					for(judge in hittableJudgments){
-						if(diff <= getWindow(judge))
-							return judge;
-					}
 				}
-
+				
+				return judgeTimeDiff(diff);
 		}
 		// did you know if you always return UNJUDGED a note won't be hittable?
 		// i thought that was interesting

@@ -493,6 +493,9 @@ class OptionsSubstate extends MusicBeatSubstate
 		ignoreVolumeChange = false;
 	}
 
+	var color1 = FlxColor.fromRGB(82, 82, 82);
+	var color2 = FlxColor.fromRGB(70, 70, 70);
+
 	override function create()
 	{
 		//var startTime = Sys.cpuTime();
@@ -541,9 +544,9 @@ class OptionsSubstate extends MusicBeatSubstate
 		var optionMenu = new FlxSprite(80, 80, CoolUtil.makeOutlinedGraphic(
 			FlxMath.minInt(920, FlxG.width), 
 			FlxG.height-140, 
-			FlxColor.fromRGB(82, 82, 82), 
+			color1, 
 			2, 
-			FlxColor.fromRGB(70, 70, 70)
+			color2
 		));
 		if (FlxG.width - 160 < optionMenu.width + 160) optionMenu.x = Math.floor((FlxG.width - optionMenu.width)/2);
 		optionMenu.alpha = 0.6;
@@ -939,7 +942,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		for (idx in 0...buttons.length)
 		{
 			var butt = buttons[idx];
-			butt.color = idx == selected ? FlxColor.fromRGB(128, 128, 128) : FlxColor.fromRGB(70, 70, 70);
+			butt.color = idx == selected ? color2 + FlxColor.fromRGB(60, 60, 60) : color2;
 		}
 
 		camFollow.copyFrom(cameraPositions[selected]);

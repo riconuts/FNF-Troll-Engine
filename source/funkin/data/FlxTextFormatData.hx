@@ -12,6 +12,7 @@ class FlxTextFormatData{
 	public var font:Null<String> = null;
 	public var size:Null<Int> = null;
 	public var color:Null<Int> = null;
+	public var alpha:Null<Float> = null;
 	
 	public var borderStyle:Null<FlxTextBorderStyle> = null;
 	public var borderSize:Null<Float> = null;

@@ -495,6 +495,9 @@ class Character extends FlxSprite
 	}
 
 	public function missNote(note:Note, field:PlayField) {
+		if (callOnScripts("missNote", [note, field]) == Globals.Function_Stop)
+			return;
+
 		if (animTimer > 0 || voicelining)
 			return;
 

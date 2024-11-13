@@ -312,6 +312,8 @@ class ScriptingMacro
             }
         }
         //////////
+
+        /*
         function funcBasedInjection(name:String, expr:Array<Expr>){
             // injections based on function
             // TODO: make it a metadata thing or something??
@@ -334,6 +336,7 @@ class ScriptingMacro
                 default:
             }
         }
+        */
 
         var injected:Map<String, Field> = [];
         for (name in toInject) {
@@ -373,7 +376,7 @@ class ScriptingMacro
                             );
                         }
 
-                        funcBasedInjection(name, expr);
+                        //funcBasedInjection(name, expr);
 
                         expr.push(macro {
                             return $i{fname}($a{args});
@@ -442,7 +445,7 @@ class ScriptingMacro
                             });
                         }
 
-                        funcBasedInjection(name, expr);
+                        //funcBasedInjection(name, expr);
 
                         expr.push(macro {
                             return super.$name($a{args});

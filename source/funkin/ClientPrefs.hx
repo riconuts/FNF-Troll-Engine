@@ -785,9 +785,7 @@ class ClientPrefs
 
 	public static function initialize(){
 		defaultOptionDefinitions.get("framerate").value = FlxG.stage.application.window.displayMode.refreshRate;
-		#if MULTILANGUAGE
-		locale = openfl.system.Capabilities.language;
-		#end
+		//locale = openfl.system.Capabilities.language;
 
 		optionSave.bind("options_v2");
 		loadDefaultKeys();
@@ -866,6 +864,8 @@ class ClientPrefs
 		for (name in manualLoads)
 			if (Reflect.field(optionSave.data, name) != null)
 				Reflect.setField(ClientPrefs, name, Reflect.field(optionSave.data, name));
+
+		Paths.locale = ClientPrefs.locale;
 
 		if (Main.fpsVar != null)
 			Main.fpsVar.visible = ClientPrefs.showFPS;

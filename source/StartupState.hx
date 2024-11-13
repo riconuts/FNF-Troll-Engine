@@ -1,13 +1,16 @@
 package;
 
 import funkin.data.Level;
+
 import funkin.*;
 import funkin.states.MusicBeatState;
 import funkin.states.FadeTransitionSubstate;
 
+import funkin.data.Highscore;
+import funkin.input.PlayerSettings;
+
 import flixel.FlxG;
 import flixel.FlxState;
-import flixel.FlxSprite;
 import flixel.tweens.*;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.input.keyboard.FlxKey;
@@ -23,13 +26,8 @@ import sys.thread.Thread;
 import sys.thread.Mutex;
 #end
 
-#if(DO_AUTO_UPDATE || display)
+#if (DO_AUTO_UPDATE || display)
 import funkin.states.UpdaterState;
-#end
-
-#if DISCORD_ALLOWED
-import funkin.api.Discord.DiscordClient;
-import lime.app.Application;
 #end
 
 using StringTools;
@@ -78,13 +76,15 @@ class StartupState extends FlxTransitionableState
 			return;
 		loaded = true;
 
-		funkin.input.PlayerSettings.init();
-		specialKeysEnabled = true;
-
+		Paths.init();
+		PlayerSettings.init();
+		
 		ClientPrefs.initialize();
 		ClientPrefs.load();
 
-		FlxG.sound.onVolumeChange.add((vol:Float)->{
+		Highscore.load();
+
+		FlxG.sound.onVolumeChange.add((vol:Float) -> {
 			ClientPrefs.masterVolume = vol;
 
 			@:privateAccess {
@@ -93,6 +93,7 @@ class StartupState extends FlxTransitionableState
 			}
 		});
 
+		specialKeysEnabled = true;
 		FlxG.fixedTimestep = false;
 		FlxG.keys.preventDefaultKeys = [TAB];
 
@@ -118,33 +119,14 @@ class StartupState extends FlxTransitionableState
 		);
 		#end
 
-		#if(DO_AUTO_UPDATE || display)
+		#if (DO_AUTO_UPDATE || display)
 		UpdaterState.getRecentGithubRelease();
 		UpdaterState.checkOutOfDate();
 		UpdaterState.clearTemps("./");
 		#end
-
-		#if html5
-		Paths.initPaths();
-		#end
-		
-		#if MODS_ALLOWED
-		Paths.pushGlobalContent();
-		Paths.getModDirectories();
-		#end
-
-		Paths.locale = "en";
-		
-		funkin.data.Highscore.load();
-
-		#if hscript
-		funkin.scripts.FunkinHScript.init();
-		#end
 		
 		#if DISCORD_ALLOWED
-		Application.current.onExit.add((exitCode)->{
-			DiscordClient.shutdown(true);
-		});
+		FlxG.stage.application.onExit.add((exitCode) -> funkin.api.Discord.DiscordClient.shutdown(true));
 		#end
 
 		var testLevel = Level.fromId("weekend1");
