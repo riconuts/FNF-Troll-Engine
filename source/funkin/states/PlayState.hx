@@ -736,9 +736,6 @@ class PlayState extends MusicBeatState
 		for (judgeData in judgeManager.judgmentData)
 			shitToLoad.push({path: judgeData.internalName});
 
-		for (i in 0...10)
-			shitToLoad.push({path: 'num$i'});
-
 		for (i in 1...3) // TODO: Be able to add more than 3 miss sounds
 			shitToLoad.push({path: 'missnote$i', type: 'SOUND'});
 
@@ -1417,9 +1414,9 @@ class PlayState extends MusicBeatState
 
 		callOnScripts("generateModchart"); // this is where scripts should generate modcharts from here on out lol
 
-		if (startOnTime != 0 || skipCountdown) {
+		if (PlayState.startOnTime >= 500 || skipCountdown) {
 			trace('starting on time: $startOnTime, skipping countdown: $skipCountdown');
-			startSong();
+			startSong(PlayState.startOnTime - 500);
 			return;
 		}
 
@@ -1545,39 +1542,24 @@ class PlayState extends MusicBeatState
 		songTime = time;
 	}
 
-	var previousFrameTime:Int = 0;
 	var songTime:Float = 0;
 	var vocalsEnded:Bool = false;
-	function startSong():Void
+	function startSong(startOnTime:Float=0):Void
 	{
 		startingSong = false;
 
-		previousFrameTime = FlxG.game.ticks;
-
-		inst.onComplete = function(){
-			trace("song ended!?");
-			finishSong(false);
-		};
-
-		var startOnTime = PlayState.startOnTime;
-
-		if (startOnTime != 0){
-			startOnTime = startOnTime > 500 ? startOnTime - 500 : 0;
+		if (startOnTime > 0) {
 			startedOnTime = startOnTime;
-			PlayState.startOnTime = 0;
 			clearNotesBefore(startOnTime + 500);
 		}
 
 		Conductor.songPosition = startOnTime;
 
-		for (track in tracks)
-			track.play(false, startOnTime);
-
-		if (paused) {
-			trace('Oopsie doopsie! Paused sound');
-			for (track in tracks)
-				track.pause();
-		}
+		inst.time = Conductor.songPosition;
+		inst.onComplete = function(){
+			trace("song ended!?");
+			finishSong(false);
+		};
 
 		// Song duration in a float, useful for the time left feature
 		songLength = inst.length;
@@ -1696,6 +1678,8 @@ class PlayState extends MusicBeatState
 
 		inst = instTracks[0];
 		vocals = playerField.tracks[0];
+
+		songLength = inst.length;
 		
 		//// NEW SHIT
 		var noteData:Array<SwagSection> = PlayState.SONG.notes;
@@ -2490,9 +2474,9 @@ class PlayState extends MusicBeatState
 				Conductor.songPosition += addition;
 			
 			////
-			if (startingSong){
+			if (startingSong) {
 				if (Conductor.songPosition >= 0)
-					startSong();
+					startSong(0);
 			}
 		}
 		
@@ -2946,6 +2930,19 @@ class PlayState extends MusicBeatState
 
 	static public function getCharacterCamera(char:Character) 
 		return char.getCamera();
+
+	public function skipToTime(newTime:Float) {
+		if (newTime < Conductor.songPosition) {
+			PlayState.startOnTime = newTime;
+			PlayState.instance.restartSong(true);
+		}
+		else {
+			if (newTime != Conductor.songPosition) {
+				PlayState.instance.clearNotesBefore(newTime);
+				PlayState.instance.setSongTime(newTime - 500);
+			}
+		}
+	}
 
 	public function finishSong(?ignoreNoteOffset:Bool = false):Void
 	{

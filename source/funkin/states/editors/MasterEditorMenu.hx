@@ -45,7 +45,7 @@ class MasterEditorMenu extends MusicBeatState
 
 		menu = new AlphabetMenu();
 		menu.controls = controls;
-		menu.callbacks.onAccept = function(i){
+		menu.callbacks.onAccept = function(i, _){
 			switch(options[i]) {
 				case 'Character Editor': MusicBeatState.switchState(new CharacterEditorState(Character.DEFAULT_CHARACTER, false));
 				case 'Stage Editor': MusicBeatState.switchState(new StageEditorState());
