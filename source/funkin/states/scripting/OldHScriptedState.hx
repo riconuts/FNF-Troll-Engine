@@ -226,12 +226,12 @@ class OldHScriptedState extends MusicBeatState
 		return true;
 	}
 	#end
-	override function transitionIn()
+	override function transitionIn(?onEnter:() -> Void)
 	{
-		if (stateScript.call("onTransitionIn") == Globals.Function_Stop)
+		if (stateScript.call("onTransitionIn", [onEnter]) == Globals.Function_Stop)
 			return;
 
-		super.transitionIn();
+		super.transitionIn(onEnter);
 
 		stateScript.call("onTransitionInPost");
 	}

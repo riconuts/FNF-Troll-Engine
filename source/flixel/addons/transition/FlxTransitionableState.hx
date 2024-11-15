@@ -26,6 +26,15 @@ class FlxTransitionableState extends FlxState
 	public var hasTransIn(get, never):Bool;
 	public var hasTransOut(get, never):Bool;
 
+	////
+	var transOutFinished:Bool = false;
+
+	var _exiting:Bool = false;
+	var _onExit:Void->Void;
+	var _onEnter:Void->Void;
+
+	////
+
 	/**
 	 * Create a state with the ability to do visual transitions
 	 * @param	TransIn		Plays when the state begins
@@ -45,6 +54,7 @@ class FlxTransitionableState extends FlxState
 		transIn = null;
 		transOut = null;
 		_onExit = null;
+		_onEnter = null;
 	}
 
 	override public function create():Void
@@ -81,18 +91,13 @@ class FlxTransitionableState extends FlxState
 	/**
 	 * Starts the in-transition. Can be called manually at any time.
 	 */
-	public function transitionIn():Void
+	public function transitionIn(?OnEnter:Void->Void):Void
 	{
-		if (transIn == null)
-			return;
+		_onEnter = OnEnter;
 
-		if (skipNextTransIn)
-		{
+		if (skipNextTransIn || !hasTransIn) {
 			skipNextTransIn = false;
-			if (finishTransIn != null)
-			{
-				finishTransIn();
-			}
+			finishTransIn();
 			return;
 		}
 
@@ -121,11 +126,6 @@ class FlxTransitionableState extends FlxState
 		}
 	}
 
-	var transOutFinished:Bool = false;
-
-	var _exiting:Bool = false;
-	var _onExit:Void->Void;
-
 	function get_hasTransIn():Bool
 	{
 		return transIn != null;
@@ -139,6 +139,11 @@ class FlxTransitionableState extends FlxState
 	function finishTransIn()
 	{
 		closeSubState();
+
+		if (_onEnter != null)
+		{
+			_onEnter();
+		}
 	}
 
 	function finishTransOut()
