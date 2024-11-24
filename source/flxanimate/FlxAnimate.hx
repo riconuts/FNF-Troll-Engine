@@ -99,7 +99,7 @@ class FlxAnimate extends FlxSprite
 
 	public function loadAtlas(Path:String)
 	{
-		if(haxe.io.Path.extension(Path) != "zip" && #if sys !sys.FileSystem.exists('$Path/Animation.json') #else !Assets.exists('$Path/Animation.json') #end )
+		if(haxe.io.Path.extension(Path) != "zip" && !Assets.exists('$Path/Animation.json') )
 		{
 			FlxG.log.error('Animation file not found in specified path: "$path", have you written the correct path?');
 			return;
@@ -540,11 +540,7 @@ class FlxAnimate extends FlxSprite
 		var jsontxt:AnimAtlas = null;
 		if (haxe.io.Path.extension(Path) == "zip")
 		{
-			#if sys
-			var thing = Zip.readZip(sys.io.File.getBytes(Path));
-			#else
 			var thing = Zip.readZip(Assets.getBytes(Path));
-			#end
 			
 			for (list in Zip.unzip(thing))
 			{
@@ -560,11 +556,7 @@ class FlxAnimate extends FlxSprite
 		}
 		else
 		{
-			#if sys
-			jsontxt = haxe.Json.parse(sys.io.File.getContent('$Path/Animation.json'));
-			#else
-			jsontxt = haxe.Json.parse(openfl.Assets.getText('$Path/Animation.json'));
-			#end
+			jsontxt = haxe.Json.parse(Assets.getText('$Path/Animation.json'));
 		}
 
 		return jsontxt;
@@ -578,7 +570,7 @@ class FlxAnimate extends FlxSprite
 			var trimmed:String = pathOrStr.trim();
 			trimmed = trimmed.substr(trimmed.length - 5).toLowerCase();
 
-			if(trimmed == '.json') myJson = sys.io.File.getContent(myJson); //is a path
+			if(trimmed == '.json') myJson = Assets.getContent(myJson); //is a path
 			animJson = cast haxe.Json.parse(_removeBOM(myJson));
 		}
 		else animJson = cast myJson;
@@ -591,12 +583,12 @@ class FlxAnimate extends FlxSprite
 
 		if(trimmed == '.json') //Path is json
 		{
-			myData = sys.io.File.getContent(pathOrStr);
+			myData = Assets.getContent(pathOrStr);
 			isXml = false;
 		}
 		else if (trimmed.substr(1) == '.xml') //Path is xml
 		{
-			myData = sys.io.File.getContent(pathOrStr);
+			myData = Assets.getContent(pathOrStr);
 			isXml = true;
 		}
 		myData = _removeBOM(myData);

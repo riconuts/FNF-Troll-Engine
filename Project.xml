@@ -87,12 +87,10 @@
     <haxelib name="flixel" version="5.5.0" />
     <haxelib name="flixel-ui" version="2.6.1" />
     <haxelib name="flixel-addons" version="3.2.3" />
-
-    <!--Uncomment if you want to use flxanimate, which allows usage of animate atlases. Note that this doesnt work in the content folder atm, only in the assets folder!!-->
-    <!--<haxelib name="flxanimate"/>-->
+    <haxelib name="flxanimate"/>
 
     <!--Uncomment if you want to use moonchart, which allows usage of chart formats from other rhythm games and fnf engines-->
-    <haxelib name="moonchart" version="git" if="native"/>
+    <haxelib name="moonchart" if="native"/>
 
 	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
 	<haxelib name="hxvlc" if="VIDEOS_ALLOWED"/> <!--You can replace with hxcodec if you're stubborn and dont wanna use newer and better libs-->
