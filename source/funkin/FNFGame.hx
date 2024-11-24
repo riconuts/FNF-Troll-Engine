@@ -1,5 +1,6 @@
 package funkin;
 
+import Main.resetSpriteCache;
 import funkin.scripts.Globals;
 import funkin.states.MusicBeatState;
 
@@ -13,6 +14,18 @@ class FNFGame extends FlxGame
 	{
 		super(gameWidth, gameHeight, initialState, updateFramerate, drawFramerate, skipSplash, startFullscreen);
 		_customSoundTray = flixel.system.ui.DefaultFlxSoundTray;
+
+		// shader coords fix
+		function resetSpriteCaches() {
+			for (cam in FlxG.cameras.list) {
+				if (cam != null && cam.filters != null)
+					resetSpriteCache(cam.flashSprite);
+			}
+			resetSpriteCache(this);
+		}
+
+		FlxG.signals.gameResized.add((w, h) -> resetSpriteCaches());
+		FlxG.signals.focusGained.add(resetSpriteCaches);
 	}
 
 	override function update():Void

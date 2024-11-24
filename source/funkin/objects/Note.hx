@@ -169,7 +169,7 @@ class Note extends NoteObject implements IColorable
 	public var blockHit:Bool = false; // whether you can hit this note or not
 	public var hitCausesMiss:Bool = false; // hitting this causes a miss
 	public var missHealth:Float = 0; // damage when hitCausesMiss = true and you hit this note
-	public var ratingDisabled:Bool = false; // disables judging this note
+	public var ratingDisabled:Bool = false; // hitting or missing this note shouldn't affect stats, this doesn't prevent sing/miss animations and sounds from playing! 
 	public var hitsoundDisabled:Bool = false; // hitting this does not cause a hitsound when user turns on hitsounds
 
 	public var gfNote:Bool = false; // gf sings this note (pushes gf into characters array when the note is hit)

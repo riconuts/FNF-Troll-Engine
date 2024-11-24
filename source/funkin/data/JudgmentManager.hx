@@ -1,6 +1,5 @@
 package funkin.data;
 
-import funkin.scripts.FunkinHScript;
 import funkin.objects.Note;
 
 /**
@@ -277,7 +276,6 @@ class PBot
 	public static inline final version:Float = 1; // increment this if any values for scoring changes
 	
 	public static var missThreshold:Float = 160.0; // This gets set in PlayState
-	
 
 	static inline final perfectThreshold:Float = 5.0;
 	public static var holdScorePerSecond:Float = 250.0;
@@ -291,10 +289,11 @@ class PBot
 	static inline final scoringSlope = 0.080;
 	static inline final scoringOffset = 54.99;
 
+	public static function getAcc(noteDiff:Float) {
+		// trace(noteDiff, missThreshold);
 
-	public static function getAcc(noteDiff:Float){
-		trace(noteDiff, missThreshold);
 		// TODO: find a math wizard who can add timescale to this
+		
 		return (switch (noteDiff) {
 			case(_ <= perfectThreshold) => true:
 				perfectWeight;

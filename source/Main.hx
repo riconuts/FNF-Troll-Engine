@@ -6,7 +6,6 @@ import openfl.Lib;
 import openfl.display.FPS;
 import openfl.display.Sprite;
 import openfl.system.Capabilities;
-import openfl.events.Event;
 import lime.app.Application;
 
 import funkin.*;
@@ -158,7 +157,9 @@ class Main extends Sprite
 		startFullscreen = FlxG.save.data.fullscreen;
 		
 		StartupState.nextState = nextState;
-		addChild(new FNFGame(gameWidth, gameHeight, initialState, framerate, framerate, skipSplash, startFullscreen));
+
+		var game = new FNFGame(gameWidth, gameHeight, initialState, framerate, framerate, skipSplash, startFullscreen);
+		addChild(game);
 
 		FlxG.sound.volume = FlxG.save.data.volume;
 		FlxG.mouse.useSystemCursor = true;
@@ -189,22 +190,9 @@ class Main extends Sprite
 		untyped __global__.__hxcpp_set_critical_error_handler(onCrash);
 		#end
 		#end
-
-		// shader coords fix
-		FlxG.signals.gameResized.add(function(w, h) {
-			if (FlxG.cameras != null) {
-				for (cam in FlxG.cameras.list) {
-					if (cam != null && cam.filters != null)
-						resetSpriteCache(cam.flashSprite);
-				}
-			}
-
-			if (FlxG.game != null)
-				resetSpriteCache(FlxG.game);
-		});
 	}
 
-	static function resetSpriteCache(sprite:Sprite):Void {
+	public static function resetSpriteCache(sprite:Sprite):Void {
 		@:privateAccess {
 			sprite.__cacheBitmap = null;
 			sprite.__cacheBitmapData = null;

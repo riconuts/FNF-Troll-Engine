@@ -9,7 +9,7 @@ using StringTools;
 
 class CoolUtil
 {
-	public static function coolNumber(val:Float, decimals:Int):String {
+	public static function prettyNumber(val:Float, decimals:Int):String {
 		var strNum:String = '';
 		var splitNum:Array<String> = Std.string(Std.int(val)).split("");
 
@@ -38,19 +38,6 @@ class CoolUtil
 		return strNum;
 	}
 
-	/**
-	 * @param spr The sprite on which to clone the animation
-	 * @param ogName Name of the animation to be cloned. 
-	 * @param cloneName Name of the resulting clone.
-	 * @param force Whether to override the resulting animation, if it exists.
-	 */
-	public static function cloneSpriteAnimation(spr:FlxSprite, ogName:String, cloneName:String, ?force:Bool)
-	{
-		var daAnim = spr.animation.getByName(ogName);
-		if (daAnim!=null && (force==true || !spr.animation.exists(cloneName)))
-			spr.animation.add(cloneName, daAnim.frames, daAnim.frameRate, daAnim.looped, daAnim.flipX, daAnim.flipY);
-	}
-
 	public static function structureToMap(st:Dynamic):Map<String, Dynamic> {
 		return [
 			for (k in Reflect.fields(st)){
@@ -59,29 +46,7 @@ class CoolUtil
 		];
 	}
 
-	@:noCompletion static var _point:FlxPoint = FlxPoint.get();
-	public static function overlapsMouse(object:FlxObject, ?camera:FlxCamera):Bool
-	{
-		if (camera == null)
-			camera = FlxG.camera;
-
-		_point = FlxG.mouse.getPositionInCameraView(camera, _point);
-		if (camera.containsPoint(_point))
-		{
-			_point = FlxG.mouse.getWorldPosition(camera, _point);
-			if (object.overlapsPoint(_point, true, camera))
-				return true;
-		}
-
-		return false;
-	}
-
-	public static function centerOn(spr1:FlxObject, spr2:FlxObject) {
-		spr1.x = spr2.x + (spr2.width - spr1.width) / 2;
-		spr1.y = spr2.y + (spr2.height - spr1.height) / 2;
-	}
-
-	public static function alphabeticalSort(a:String, b:String) {
+	public static function alphabeticalSort(a:String, b:String):Int {
 		// https://haxe.motion-twin.narkive.com/BxeZgKeh/sort-an-array-string-alphabetically
 		a = a.toLowerCase();
 		b = b.toLowerCase();
@@ -90,17 +55,65 @@ class CoolUtil
 		return 0;	
 	}
 
+	////
 	inline public static function coolLerp(current:Float, target:Float, elapsed:Float):Float
 		return FlxMath.lerp(target, current, Math.exp(-elapsed));
 
-	inline public static function blankSprite(width, height, color=0xFFFFFFFF){
-		var spr = new FlxSprite().makeGraphic(1,1);
+	inline public static function scale(x:Float, lower1:Float, higher1:Float, lower2:Float, higher2:Float):Float
+		return (x - lower1) * (higher2 - lower2) / (higher1 - lower1) + lower2;
+
+	inline public static function quantizeAlpha(f:Float, interval:Float):Float
+		return Std.int((f+interval/2)/interval) * interval;
+
+	inline public static function quantize(f:Float, snap:Float):Float
+		return Math.fround(f * snap) / snap;
+
+	inline public static function snap(f:Float, snap:Float):Float
+		return Math.fround(f / snap) * snap;
+
+	inline public static function boundTo(value:Float, min:Float, max:Float):Float
+		return Math.max(min, Math.min(max, value));
+
+	inline public static function clamp(n:Float, lower:Float, higher:Float):Float
+	{
+		if (n > higher)
+			n = higher;
+		if (n < lower)
+			n = lower;
+
+		return n;
+	}
+
+	public static function floorDecimal(value:Float, decimals:Int):Float
+	{
+		if (decimals < 1)
+			return Math.ffloor(value);
+
+		var tempMult:Float = 1;
+		for (_ in 0...decimals)
+			tempMult *= 10;
+		
+		return Math.ffloor(value * tempMult) / tempMult;
+	}
+
+	////
+	public static function rotate(x:Float, y:Float, angle:Float, ?point:FlxPoint):FlxPoint
+	{
+		var p = point == null ? FlxPoint.weak() : point;
+		var sin = FlxMath.fastSin(angle);
+		var cos = FlxMath.fastCos(angle);
+		return p.set((x * cos) - (y * sin), (x * sin) + (y * cos));
+	}
+
+	////
+	inline public static function blankSprite(width, height, color=0xFFFFFFFF) {
+		var spr = new FlxSprite().makeGraphic(1, 1);
 		spr.scale.set(width, height);
 		spr.updateHitbox();
 		spr.color = color;
 		return spr;
 	}
-
+	
 	public static function makeOutlinedGraphic(Width:Int, Height:Int, Color:Int, LineThickness:Int, OutlineColor:Int)
 	{
 		var rectangle = flixel.graphics.FlxGraphic.fromRectangle(Width, Height, OutlineColor, true);
@@ -117,48 +130,42 @@ class CoolUtil
 		return rectangle;
 	};
 
-	inline public static function scale(x:Float, l1:Float, h1:Float, l2:Float, h2:Float):Float
-		return ((x - l1) * (h2 - l2) / (h1 - l1) + l2);
-
-	inline public static function clamp(n:Float, l:Float, h:Float)
+	/**
+	 * @param spr The sprite on which to clone the animation
+	 * @param ogName Name of the animation to be cloned. 
+	 * @param cloneName Name of the resulting clone.
+	 * @param force Whether to override the resulting animation, if it exists.
+	 */
+	public static function cloneSpriteAnimation(spr:FlxSprite, ogName:String, cloneName:String, force:Bool=false)
 	{
-		if (n > h)
-			n = h;
-		if (n < l)
-			n = l;
-
-		return n;
+		var daAnim = spr.animation.getByName(ogName);
+		if (daAnim!=null && (force==true || !spr.animation.exists(cloneName)))
+			spr.animation.add(cloneName, daAnim.frames, daAnim.frameRate, daAnim.looped, daAnim.flipX, daAnim.flipY);
 	}
 
-	public static function rotate(x:Float, y:Float, angle:Float, ?point:FlxPoint):FlxPoint
+	@:noCompletion static var _point:FlxPoint = new FlxPoint();
+	public static function overlapsMouse(object:FlxObject, ?camera:FlxCamera):Bool
 	{
-		var p = point == null ? FlxPoint.weak() : point;
-		var sin = FlxMath.fastSin(angle);
-		var cos = FlxMath.fastCos(angle);
-		return p.set((x * cos) - (y * sin), (x * sin) + (y * cos));
+		if (camera == null)
+			camera = FlxG.camera;
+
+		_point = FlxG.mouse.getPositionInCameraView(camera, _point);
+		if (camera.containsPoint(_point)) {
+			_point = FlxG.mouse.getWorldPosition(camera, _point);
+			if (object.overlapsPoint(_point, true, camera))
+				return true;
+		}
+
+		return false;
 	}
 
-	inline public static function quantizeAlpha(f:Float, interval:Float){
-		return Std.int((f+interval/2)/interval)*interval;
+	public static function centerOnObject(obj1:FlxObject, obj2:FlxObject) {
+		obj1.x = obj2.x + (obj2.width - obj1.width) / 2;
+		obj1.y = obj2.y + (obj2.height - obj2.height) / 2;
+		return obj1;
 	}
 
-	inline public static function quantize(f:Float, snap:Float):Float
-		return Math.fround(f * snap) / snap;
-
-	inline public static function snap(f:Float, snap:Float):Float
-		return Math.fround(f / snap) * snap;
-
-	inline public static function boundTo(value:Float, min:Float, max:Float):Float
-		return Math.max(min, Math.min(max, value));
-
-	public static function coolTextFile(path:String):Array<String>
-	{
-		var rawList = Paths.getContent(path);
-		if (rawList == null)
-			return [];
-
-		return listFromString(rawList);
-	}
+	////
 	public static function listFromString(string:String):Array<String>
 	{
 		var daList:Array<String> = [
@@ -168,25 +175,35 @@ class CoolUtil
 
 		return daList;
 	}
+	public static function coolTextFile(path:String):Array<String>
+	{
+		var rawList = Paths.getContent(path);
+		if (rawList == null)
+			return [];
+
+		return listFromString(rawList);
+	}
+
 	public static function dominantColor(sprite:flixel.FlxSprite):Int{
 		var countByColor:Map<Int, Int> = [];
-		for(col in 0...sprite.frameWidth){
-			for(row in 0...sprite.frameHeight){
-			  var colorOfThisPixel:Int = sprite.pixels.getPixel32(col, row);
-			  if(colorOfThisPixel != 0){
-				  if(countByColor.exists(colorOfThisPixel)){
-					countByColor[colorOfThisPixel] =  countByColor[colorOfThisPixel] + 1;
-				  }else if(countByColor[colorOfThisPixel] != 13520687 - (2*13520687)){
-					 countByColor[colorOfThisPixel] = 1;
-				  }
-			  }
+		for(col in 0...sprite.frameWidth) {
+			for(row in 0...sprite.frameHeight) {
+				var colorOfThisPixel:Int = sprite.pixels.getPixel32(col, row);
+				if (colorOfThisPixel != 0){
+					if (countByColor.exists(colorOfThisPixel)) {
+						countByColor[colorOfThisPixel] =  countByColor[colorOfThisPixel] + 1;
+					}else if (countByColor[colorOfThisPixel] != 13520687 - (2*13520687)){
+						countByColor[colorOfThisPixel] = 1;
+					}
+				}
 			}
-		 }
+		}
 		var maxCount = 0;
 		var maxKey:Int = 0;//after the loop this will store the max color
+		
 		countByColor[flixel.util.FlxColor.BLACK] = 0;
-			for(key in countByColor.keys()){
-			if(countByColor[key] >= maxCount){
+		for (key in countByColor.keys()) {
+			if (countByColor[key] >= maxCount) {
 				maxCount = countByColor[key];
 				maxKey = key;
 			}
@@ -194,6 +211,7 @@ class CoolUtil
 		return maxKey;
 	}
 
+	////
 	public static function colorFromString(color:String):FlxColor
 	{
 		var hideChars = ~/[\t\n\r]/;
@@ -250,19 +268,6 @@ class CoolUtil
  			case "instant": (t:Float) -> return 1.0;
 			default: FlxEase.linear;
 		}
-	}
-	
-	public static function floorDecimal(value:Float, decimals:Int):Float
-	{
-		if (decimals < 1)
-			return Math.floor(value);
-
-		var tempMult:Float = 1;
-		for (_ in 0...decimals)
-			tempMult *= 10;
-		
-		var newValue:Float = Math.floor(value * tempMult);
-		return newValue / tempMult;
 	}
 
 	inline public static function numberArray(max:Int, ?min = 0):Array<Int>

@@ -1,6 +1,5 @@
 package funkin.states;
 
-import funkin.states.options.OptionsSubstate.TextFormats;
 using funkin.data.FlxTextFormatData;
 
 import funkin.data.GameplayOption;
@@ -153,7 +152,17 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 			bg.alpha = 0.6;
 
 			var optionDesc = new FlxText(5, FlxG.height - 48, 0, "NOTE: These won't have any effect until you reset the song!", 20);
-			optionDesc.applyFormat(TextFormats.OPT_DESC);
+			optionDesc.applyFormat({
+				font: "vcr.ttf",
+				antialiasing: false,
+			
+				size: 16,
+				color: 0xFFFFFFFF,
+				alignment: CENTER,
+			
+				borderStyle: OUTLINE,
+				borderColor: 0xFF000000
+			});
 			optionDesc.textField.background = true;
 			optionDesc.textField.backgroundColor = FlxColor.BLACK;
 			optionDesc.screenCenter(X);

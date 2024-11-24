@@ -157,6 +157,7 @@ class Paths
 		@:privateAccess
 		for (key => obj in FlxG.bitmap._cache) {
 			if (obj != null && !currentTrackedAssets.exists(key)) {
+				// trace('cleared $key');
 				Assets.cache.removeBitmapData(key);
 				FlxG.bitmap._cache.remove(key);
 				obj.destroy();
@@ -472,12 +473,12 @@ class Paths
 			bitmap.dispose();
 			bitmap = BitmapData.fromTexture(texture);
 		}
-		
+
 		var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, path, cache);
 		if (cache) {
 			newGraphic.persist = true;
 			newGraphic.destroyOnNoUse = false;
-	
+
 			localTrackedAssets.push(path);
 			currentTrackedAssets.set(path, newGraphic);
 		}

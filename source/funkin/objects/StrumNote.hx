@@ -39,7 +39,7 @@ class StrumNote extends NoteObject implements NoteObject.IColorable
 		if (newStyle == null)
 			newStyle = NoteStyles.get(name, 'default');
 
-		trace("loading recepor", name, (newStyle==null?null:newStyle.id));
+		//trace("loading recepor", name, (newStyle==null?null:newStyle.id));
 		if (newStyle.loadReceptor(this))
 			noteStyle = name; // yes, the base name, not the hudskin name.
 

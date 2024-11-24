@@ -254,7 +254,6 @@ class NoteOffsetState extends MusicBeatState
 			if(beatTween != null) beatTween.cancel();
 
 			persistentUpdate = false;
-			CustomFadeTransition.nextCamera = camOther;
 			MusicBeatState.switchState(new funkin.states.options.OptionsState());
 			MusicBeatState.playMenuMusic(true);
 			FlxG.mouse.visible = false;

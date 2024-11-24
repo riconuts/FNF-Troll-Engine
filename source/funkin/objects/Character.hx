@@ -283,11 +283,11 @@ class Character extends FlxSprite
         if (callOnScripts("onCharacterUpdate", [elapsed]) == Globals.Function_Stop)
 			return;
 		
-		if(!debugMode && animation.curAnim != null)
+		if (!debugMode && animation.curAnim != null)
 		{
 			if (animTimer > 0) {
 				animTimer -= elapsed;
-				if(animTimer<=0) {
+				if (animTimer<=0) {
 					animTimer=0;
 					dance();
 				}
@@ -303,54 +303,47 @@ class Character extends FlxSprite
 				}
 			} 
 
-			if (specialAnim && animation.curAnim.finished) {
-				specialAnim = false;
-				dance();
-
-				callOnScripts("onSpecialAnimFinished", [animation.curAnim.name]);
-			}
-
 			if (animation.name.startsWith('sing'))
 				holdTimer += elapsed;
 			else
 				holdTimer = 0;
 
 			if (animation.finished) {
-				if (animation.name.endsWith('miss')) {
+				var name:String = animation.curAnim.name;
+
+				if (specialAnim) {
+					specialAnim = false;
 					dance();
-				
-				}else if (animation.exists(animation.name + '-loop')) {
-					playAnim(animation.name + '-loop');
+	
+					callOnScripts("onSpecialAnimFinished", [name]);
 				}
-			}
-		}
-
-		super.update(elapsed);
-
-		if(!debugMode){
-			if(animation.curAnim!=null){
-				var name = animation.curAnim.name;
-				if(name.startsWith("hold")){
-					if(name.endsWith("Start") && animation.curAnim.finished){
-						var newName = name.substring(0,name.length-5);
+				else if (name.endsWith('miss')) {
+					dance();
+				}
+				else if (animation.exists(name + '-loop')) {
+					playAnim(name + '-loop');
+				}
+				else if (name.startsWith("hold") && name.endsWith("Start")) {
+					var newName = name.substring(0, name.length-5);
+					if (animation.exists(newName)) {
+						playAnim(newName,true);
+					}else {
 						var singName = "sing" + name.substring(3, name.length-5);
-						if(animation.getByName(newName)!=null){
-							playAnim(newName,true);
-						}else{
-							playAnim(singName,true);
-						}
+						playAnim(singName,true);
 					}
 				}
 			}
 		}
-
+		
+		super.update(elapsed);
 		callOnScripts("onCharacterUpdatePost", [elapsed]);
 	}
 
-    override function draw(){
-        if(callOnScripts("onDraw") == Globals.Function_Stop)
+    override function draw() {
+        if (callOnScripts("onDraw") == Globals.Function_Stop)
             return;
-        super.draw();
+        
+		super.draw();
         callOnScripts("onDrawPost");
     }
 
@@ -528,26 +521,19 @@ class Character extends FlxSprite
 	private var settingCharacterUp:Bool = true;
 	public function recalculateDanceIdle() {
 		var lastDanceIdle:Bool = danceIdle;
-		danceIdle = (animation.getByName('danceLeft' + idleSuffix) != null && animation.getByName('danceRight' + idleSuffix) != null);
+		danceIdle = animation.exists('danceLeft' + idleSuffix) && animation.exists('danceRight' + idleSuffix);
 
-        if(danceIdle)
+        if (danceIdle)
             idleSequence = ["danceLeft" + idleSuffix, "danceRight" + idleSuffix];
         
-		if(settingCharacterUp)
-		{
+		if (settingCharacterUp) {
+			settingCharacterUp = false;
 			danceEveryNumBeats = (danceIdle ? 1 : 2);
 		}
-		else if(lastDanceIdle != danceIdle)
-		{
-			var calc:Float = danceEveryNumBeats;
-			if(danceIdle) 
-				calc /= 2;
-			else
-				calc *= 2;
-
+		else if(lastDanceIdle != danceIdle) {
+			var calc:Float = danceEveryNumBeats * (danceIdle ? 0.5 : 2.0);
 			danceEveryNumBeats = Math.round(Math.max(calc, 1));
 		}
-		settingCharacterUp = false;
 	}
 
 	public function addOffset(name:String, x:Float = 0, y:Float = 0)
