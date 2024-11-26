@@ -25,10 +25,10 @@ class HealthIcon extends FlxSprite
 	public function getCharacter():String
 		return char;
 
-	function setupGraphic(pngPath:String)
+	private function setupGraphic(pngPath:String)
 	{
 		var graphic:FlxGraphic = Paths.getGraphic(pngPath, true);
-		loadGraphic(graphic, true, graphic.height, graphic.height);
+		loadGraphic(graphic, true, graphic.height, graphic.height, false, pngPath);
 
 		animation.add('idle', [0], 0, false);
 		animation.add('losing', [1], 0, false);
@@ -41,13 +41,13 @@ class HealthIcon extends FlxSprite
 		updateOffsets();
 	}
 
-	function setupSparrowAtlas(pngPath:String, xmlPath:String)
+	private function setupSparrowAtlas(pngPath:String, xmlPath:String)
 	{
 		frames = FlxAtlasFrames.fromSparrow(pngPath, Paths.getContent(xmlPath));
 
-		animation.addByPrefix('idle', 'idle', 24, true);
-		animation.addByPrefix('losing', 'losing', 24, true);
-		animation.addByPrefix('winning', 'winning', 24, true);
+		animation.addByPrefix('idle', 'idle0', 24, true);
+		animation.addByPrefix('losing', 'losing0', 24, true);
+		animation.addByPrefix('winning', 'winning0', 24, true);
 
 		CoolUtil.cloneSpriteAnimation(this, 'idle', 'losing');
 		CoolUtil.cloneSpriteAnimation(this, 'idle', 'winning');
@@ -69,34 +69,44 @@ class HealthIcon extends FlxSprite
 		offset.y = iconOffsets[1];
 	}
 
-	public function swapOldIcon() 
-	{
-		/*
-		if (!isOldIcon){
-			var oldIcon = Paths.image('icons/$char-old');
-			
-			if(oldIcon == null)
-				oldIcon = Paths.image('icons/icon-$char-old'); // base game compat
-
-			if (oldIcon != null){
-				changeIconGraphic(oldIcon);
-				isOldIcon = true;
-				return;
-			}
-		}
-
-		changeIcon(char);
-		isOldIcon = false;
-		*/
+	private function setIconImage(pngPath:String) {
+		var xmlPath = pngPath.substr(0, -4) + '.xml';
+		Paths.exists(xmlPath) ? setupSparrowAtlas(pngPath, xmlPath) : setupGraphic(pngPath);
 	}
 
 	public function changeIcon(char:String) {
-/*
+		var pngPath = getIconImage(char);
+
+		if (pngPath == null)
+			pngPath = getIconImage('face');
+
+		this.char = char;
+		this.antialiasing = false;
+		this.useDefaultAntialiasing = !char.endsWith("-pixel");
+		setIconImage(pngPath);
+	}
+
+	public function swapOldIcon() {
+		if (!isOldIcon) {
+			var oldPng = getIconImage('$char-old');
+			if (oldPng != null) {
+				setIconImage(oldPng);
+				this.isOldIcon = true;
+			}
+		}else {
+			setIconImage(getIconImage(char));
+			this.isOldIcon = false;
+		}
+	}
+
+	////
+	public static function getIconImage(char:String):Null<String> {
+		/*
 		var pngPath:String = Paths.imagePath('characters/icons/$char'); // i'd like to use this some day lol
 
 		if (!Paths.exists(pngPath))
 			pngPath = Paths.imagePath('icons/$char');
-*/
+		*/
 		var pngPath:String = Paths.imagePath('icons/$char'); 
 
 		#if ALLOW_DEPRECATION
@@ -104,20 +114,6 @@ class HealthIcon extends FlxSprite
 			pngPath = Paths.imagePath('icons/icon-$char'); // base game compat
 		#end
 
-		if (!Paths.exists(pngPath)) {
-			trace('Icon $char not found.');
-			pngPath = Paths.imagePath('icons/face'); // Prevents crash from missing icon
-		}
-
-		if (Paths.exists(pngPath)) {
-			var xmlPath = pngPath.substr(0, -4) + '.xml';
-			trace(xmlPath);
-			Paths.exists(xmlPath) ? setupSparrowAtlas(pngPath, xmlPath) : setupGraphic(pngPath);
-			
-			this.char = char;
-
-			this.antialiasing = false;
-			this.useDefaultAntialiasing = !char.endsWith("-pixel");
-		}
+		return Paths.exists(pngPath) ? pngPath : null;
 	}
 }

@@ -113,22 +113,18 @@ class FNFHealthBar extends FlxBar{
 		var val = isOpponentMode ? max-val : val;
 		var perc = val / max;
 
-		iconP1.animation.play({
-			if (perc < 0.2)
-				'losing';
-			else if (perc > 0.8)
-				'winning';
-			else
-				'idle';
-		});
-		iconP2.animation.play({
-			if (perc < 0.2)
-				'winning';
-			else if (perc > 0.8)
-				'losing';
-			else
-				'idle';
-		});
+		if (perc < 0.2) {
+			iconP1.animation.play('losing');
+			iconP2.animation.play('winning');
+		}
+		else if (perc > 0.8) {
+			iconP1.animation.play('winning');
+			iconP2.animation.play('losing');
+		}
+		else {
+			iconP1.animation.play('idle');
+			iconP2.animation.play('idle');
+		}
 
 		super.set_value(val);
 		updateHealthBarPos();
@@ -148,27 +144,21 @@ class FNFHealthBar extends FlxBar{
 
 	override function update(elapsed:Float)
 	{
+		if (FlxG.keys.justPressed.NINE)
+			(isOpponentMode ? iconP2 : iconP1).swapOldIcon();
+
 		healthBarBG.update(elapsed);
 		super.update(elapsed);
 		iconP1.update(elapsed);
 		iconP2.update(elapsed);	
-		
-		if (!visible)
-			return;
 
 		healthBarBG.setPosition(x - 5, y - 5);
 
-		if (iconScale != 1){
+		if (iconScale != 1)
 			iconScale = FlxMath.lerp(1, iconScale, Math.exp(-elapsed * 9));
 
-			var scaleOff = 75 * iconScale;
-			leftIcon.x = healthBarPos - scaleOff - iconOffset * 2;
-			rightIcon.x = healthBarPos + scaleOff - 75 - iconOffset;
-		}
-		else
-		{
-			leftIcon.x = healthBarPos - 75 - iconOffset * 2;
-			rightIcon.x = healthBarPos - iconOffset;
-		}
+		var scaleOff = 75 * iconScale;
+		leftIcon.x = healthBarPos - scaleOff - iconOffset * 2;
+		rightIcon.x = healthBarPos + scaleOff - 75 - iconOffset;
 	}
 }
