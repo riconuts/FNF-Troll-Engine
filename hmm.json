@@ -61,10 +61,8 @@
 		},
         {
             "name": "moonchart",
-            "type": "git",
-            "dir": null,
-            "ref": "main",
-            "url": "https://github.com/MaybeMaru/moonchart"
+            "type": "haxelib",
+            "version": "0.4.0"
         }
 	]
 }
