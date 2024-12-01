@@ -1,13 +1,5 @@
 package funkin.modchart.modifiers;
 
-import funkin.objects.playfields.NoteField;
-import funkin.ui.*;
-import funkin.modchart.*;
-import flixel.math.FlxPoint;
-import flixel.math.FlxMath;
-import math.*;
-import flixel.math.FlxAngle;
-
 class ConfusionModifier extends NoteModifier {
     override function getName()return 'confusion';
 	override function isRenderMod()return true;
@@ -58,9 +50,15 @@ class ConfusionModifier extends NoteModifier {
             angleY = 0;
             angleZ = 0;
         }
+		
 		var radians = FlxAngle.TO_RAD;
-
-		vert = VectorHelpers.rotateV3(vert, radians * angleX, radians * angleY, radians * angleZ);
+		VectorHelpers.rotateV3(
+			vert, 
+			radians * angleX, 
+			radians * angleY, 
+			radians * angleZ, 
+			vert
+		);
         return vert;
 	}
     

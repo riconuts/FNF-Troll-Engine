@@ -1,12 +1,4 @@
 package funkin.modchart.modifiers;
-import flixel.FlxSprite;
-import funkin.ui.*;
-import funkin.modchart.*;
-import flixel.math.FlxPoint;
-import flixel.math.FlxMath;
-import flixel.FlxG;
-import math.*;
-import funkin.objects.playfields.NoteField;
 
 class DrunkModifier extends NoteModifier {
     override function getName()return 'drunk';

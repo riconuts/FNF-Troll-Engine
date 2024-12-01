@@ -1,7 +1,5 @@
 package funkin.modchart.modifiers;
 
-import funkin.objects.playfields.NoteField;
-
 class ZoomModifier extends Modifier {
     override public function getName()return 'mini';
 

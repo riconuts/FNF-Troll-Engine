@@ -1,43 +1,14 @@
 package funkin.modchart.modifiers;
 
-import funkin.objects.playfields.NoteField;
-import math.Vector3;
-import flixel.math.FlxMath;
-import flixel.FlxSprite;
+import math.CoolMath.triangle;
+import math.CoolMath.square;
+import flixel.math.FlxMath.fastSin as sin;
+import flixel.math.FlxMath.fastCos as cos;
 
 class PathModifier extends NoteModifier
 {
 	override function getName()
 		return 'tornado';
-
-	inline function square(angle:Float)
-	{
-		var fAngle = angle % (Math.PI * 2);
-
-		return fAngle >= Math.PI ? -1.0 : 1.0;
-	}
-
-	inline function triangle(angle:Float)
-	{
-		var fAngle:Float = angle % (Math.PI * 2.0);
-		if (fAngle < 0.0)
-		{
-			fAngle += Math.PI * 2.0;
-		}
-		var result:Float = fAngle * (1 / Math.PI);
-		if (result < .5)
-		{
-			return result * 2.0;
-		}
-		else if (result < 1.5)
-		{
-			return 1.0 - ((result - .5) * 2.0);
-		}
-		else
-		{
-			return -4.0 + (result * 2.0);
-		}
-	}
 
 	static final PI_THIRD:Float = Math.PI / 3.0;
 	override function getPos(diff:Float, tDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
@@ -73,7 +44,7 @@ class PathModifier extends NoteModifier
 			var offset = getSubmodValue("bounceOffset", player);
 			var period = getSubmodValue("bouncePeriod", player);
 			if (period != -1.0){
-				var bounce = Math.abs(FlxMath.fastSin((diff + offset) / (90.0 + 90.0 * period)));
+				var bounce = Math.abs(sin((diff + offset) / (90.0 + 90.0 * period)));
 				pos.x += bounceVal * Note.halfWidth * bounce;
 			}
 		}
@@ -90,8 +61,8 @@ class PathModifier extends NoteModifier
 			var playerColumn = data % 4;
 			var columnPhaseShift = playerColumn * PI_THIRD;
 			var phaseShift = diff / 135;
-			var returnReceptorToZeroOffsetX = (-FlxMath.fastCos(-columnPhaseShift) + 1) * Note.halfWidth * 3;
-			var offsetX = (-FlxMath.fastCos(phaseShift - columnPhaseShift) + 1) * Note.halfWidth * 3 - returnReceptorToZeroOffsetX;
+			var returnReceptorToZeroOffsetX = (-cos(-columnPhaseShift) + 1) * Note.halfWidth * 3;
+			var offsetX = (-cos(phaseShift - columnPhaseShift) + 1) * Note.halfWidth * 3 - returnReceptorToZeroOffsetX;
 			pos.x += offsetX * tornadoVal;
 		}
 

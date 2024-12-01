@@ -1,11 +1,4 @@
 package funkin.modchart.modifiers;
-import flixel.FlxSprite;
-import funkin.ui.*;
-import funkin.modchart.*;
-import flixel.math.FlxPoint;
-import flixel.math.FlxMath;
-import math.*;
-import funkin.objects.playfields.NoteField;
 
 class BeatModifier extends NoteModifier {
     override function getName()return 'beat';

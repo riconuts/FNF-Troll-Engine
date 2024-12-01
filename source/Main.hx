@@ -122,6 +122,14 @@ class Main extends Sprite
 		final screenWidth = Capabilities.screenResolutionX;
 		final screenHeight = Capabilities.screenResolutionY;
 
+		#if sys
+		if (sys.FileSystem.exists("gameSize.txt")) {
+			var d = sys.io.File.getContent("gameSize.txt").split(" ");
+			gameWidth = Std.parseInt(d[0]);
+			gameHeight = Std.parseInt(d[1]);
+		}
+		#end
+
 		if (adjustGameSize) {
 			//// Readjust the game size for smaller screens
 			if (!(screenWidth > gameWidth || screenHeight > gameWidth)){
@@ -263,7 +271,7 @@ class Main extends Sprite
 		boxMessage += "\nCall stack will be saved as crash.txt";
 		boxMessage += "\nWould you like to goto the main menu?";
 
-		var ret = Windows.msgBox(boxMessage, errorName, ERROR | MessageBoxOptions.YESNOCANCEL);
+		var ret = Windows.msgBox(boxMessage, errorName, ERROR | MessageBoxOptions.YESNOCANCEL | MessageBoxDefaultButton.BUTTON3);
 		
 		switch(ret) {
 			case YES: // Return to Main Menu.

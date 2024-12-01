@@ -238,7 +238,6 @@ class Note extends NoteObject
 	public var baseScaleY:Float = 1;
 	public var zIndex:Float = 0;
 	public var z:Float = 0;
-	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
 
 	// Determines how the note can be modified by the modchart system
     // Could be moved into NoteObject? idk lol

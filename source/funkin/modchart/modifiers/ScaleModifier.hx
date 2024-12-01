@@ -1,19 +1,9 @@
 package funkin.modchart.modifiers;
 
-import funkin.modchart.Modifier.RenderInfo;
-import flixel.math.FlxPoint;
-import funkin.modchart.Modifier.ModifierOrder;
-import math.Vector3;
-import funkin.objects.playfields.NoteField;
-import flixel.math.FlxMath;
-
 class ScaleModifier extends NoteModifier {
-	override function getName()return 'tiny';
-	override function getOrder()return PRE_REVERSE;
-	inline function lerp(a:Float, b:Float, c:Float)
-	{
-		return a + (b - a) * c;
-	}
+	override function getName() return 'tiny';
+	override function getOrder() return ModifierOrder.PRE_REVERSE;
+
 	function daScale(sprite:Dynamic, scale:FlxPoint, data:Int, player:Int)
 	{
 		var tiny = getValue(player) + getSubmodValue('tiny${data}', player);
@@ -32,8 +22,7 @@ class ScaleModifier extends NoteModifier {
 			* getSubmodValue('scale${data}', player) 
 			* getSubmodValue('scaleY', player)
 			* getSubmodValue('scale${data}Y', player);
-		var angle = 0;
-
+		
 		var stretch = getSubmodValue("stretch", player) + getSubmodValue('stretch${data}', player);
 		var squish = getSubmodValue("squish", player) + getSubmodValue('squish${data}', player);
 
@@ -43,11 +32,16 @@ class ScaleModifier extends NoteModifier {
 		var squishX = lerp(1, 2, squish);
 		var squishY = lerp(1, 0.5, squish);
 
-		scale.x *= (FlxMath.fastSin(angle * Math.PI / 180) * squishY) + (FlxMath.fastCos(angle * Math.PI / 180) * squishX);
-		scale.x *= (FlxMath.fastSin(angle * Math.PI / 180) * stretchY) + (FlxMath.fastCos(angle * Math.PI / 180) * stretchX);
+		var angle = 0;
+		var rad = angle * Math.PI / 180;
+		var sin = FlxMath.fastSin(rad);
+		var cos = FlxMath.fastCos(rad);
 
-		scale.y *= (FlxMath.fastCos(angle * Math.PI / 180) * stretchY) + (FlxMath.fastSin(angle * Math.PI / 180) * stretchX);
-		scale.y *= (FlxMath.fastCos(angle * Math.PI / 180) * squishY) + (FlxMath.fastSin(angle * Math.PI / 180) * squishX);
+		scale.x *= (sin * squishY) + (cos * squishX);
+		scale.y *= (cos * squishY) + (sin * squishX);
+		
+		scale.x *= (sin * stretchY) + (cos * stretchX);
+		scale.y *= (cos * stretchY) + (sin * stretchX);
 		
 		if ((sprite is Note) && sprite.isSustainNote)
 			scale.y = 1.0;

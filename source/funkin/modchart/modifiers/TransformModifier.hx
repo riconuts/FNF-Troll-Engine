@@ -1,19 +1,6 @@
 package funkin.modchart.modifiers;
-import flixel.FlxSprite;
-import funkin.ui.*;
-import funkin.modchart.*;
-import flixel.math.FlxPoint;
-import flixel.math.FlxMath;
-import flixel.FlxG;
-import math.Vector3;
-import math.*;
-import funkin.objects.playfields.NoteField;
 
 class TransformModifier extends NoteModifier { // this'll be transformX in ModManager
-    inline function lerp(a:Float,b:Float,c:Float){
-        return a+(b-a)*c;
-    }
-
 	override function getName()
 		return 'transformX';
 

@@ -1,20 +1,9 @@
 package funkin.modchart.modifiers;
 
-import funkin.modchart.Modifier.ModifierOrder;
-import funkin.modchart.*;
-import math.*;
-
-import flixel.FlxG;
-import flixel.FlxSprite;
-import funkin.objects.playfields.NoteField;
-import funkin.objects.NoteObject.ObjectType;
 class ReverseModifier extends NoteModifier 
 {
-	inline function lerp(a:Float, b:Float, c:Float) 
-		return a + (b - a) * c;
-
 	override function getOrder() 
-		return REVERSE;
+		return ModifierOrder.REVERSE;
 	override function getName() 
 		return 'reverse';
 

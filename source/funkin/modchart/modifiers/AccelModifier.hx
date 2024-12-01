@@ -1,21 +1,7 @@
 package funkin.modchart.modifiers;
 
-import funkin.ui.*;
-import funkin.modchart.*;
-import flixel.math.FlxPoint;
-import flixel.math.FlxMath;
-import flixel.FlxG;
-import math.Vector3;
-import math.*;
-import funkin.objects.playfields.NoteField;
-
 class AccelModifier extends NoteModifier
 { // this'll be boost in ModManager
-	inline function lerp(a:Float, b:Float, c:Float)
-	{
-		return a + (b - a) * c;
-	}
-
 	override function getName()
 		return 'boost';
 

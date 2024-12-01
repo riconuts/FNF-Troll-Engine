@@ -2,6 +2,7 @@ package funkin.objects;
 
 import flixel.util.FlxDestroyUtil;
 import flixel.math.FlxPoint;
+import math.Vector3;
 
 enum abstract ObjectType(#if cpp cpp.UInt8 #else Int #end)
 {
@@ -24,6 +25,8 @@ class NoteObject extends FlxSprite {
 	public var offsetY:Float = 0;
 	public var defScale:FlxPoint = FlxPoint.get(); // for modcharts to keep the scaling
 	public var handleRendering:Bool = true;
+
+	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
 	
 	override function toString()
 	{

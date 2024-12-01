@@ -1,13 +1,5 @@
 package funkin.modchart.modifiers;
 
-import funkin.modchart.Modifier.RenderInfo;
-import funkin.ui.*;
-import funkin.modchart.*;
-import flixel.math.FlxPoint;
-import flixel.math.FlxMath;
-import math.*;
-import flixel.FlxG;
-
 class AlphaModifier extends NoteModifier 
 {
 	override function getName()
