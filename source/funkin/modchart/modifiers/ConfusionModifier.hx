@@ -57,9 +57,15 @@ class ConfusionModifier extends NoteModifier {
             angleY = 0;
             angleZ = 0;
         }
+		
 		var radians = FlxAngle.TO_RAD;
-
-		vert = VectorHelpers.rotateV3(vert, radians * angleX, radians * angleY, radians * angleZ);
+		VectorHelpers.rotateV3(
+			vert, 
+			radians * angleX, 
+			radians * angleY, 
+			radians * angleZ, 
+			vert
+		);
         return vert;
 	}
     

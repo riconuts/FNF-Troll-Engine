@@ -69,6 +69,7 @@ class Vector3
 		this.x = x;
 		this.y = y;
 		this.z = z;
+		//trace(x,y,z);
 	}
 
 	/**
@@ -110,19 +111,24 @@ class Vector3
 	}
 
 	/**
-		Creates a new `Vector3` instance linearly interpolated between this Vector3 and the given goal by the given alpha
+		Linearly interpolates the values between this `Vector3` instance and the given goal `Vector3` by the given alpha
 		@param goal A `Vector3` instance to interpolate towards
 		@param alpha How far the interpolation is
-		@return A `Vector3 instance linearly interpolated`
+		@param	result	(Optional) A `Vector3` instance to store the result
+		@return A `Vector3` instance containing the linearly interpolated value
 	**/
+	public function lerp(goal:Vector3, alpha:Float, result:Null<Vector3> = null):Vector3{
+		if (result==null) 
+			result = new Vector3();
 
-	//https://gamedev.stackexchange.com/questions/18615/how-do-i-linearly-interpolate-between-two-vectors
-	public function lerp(goal:Vector3, alpha:Float):Vector3{
-		return new Vector3(
+		//https://gamedev.stackexchange.com/questions/18615/how-do-i-linearly-interpolate-between-two-vectors
+		result.setTo(
 			alpha*goal.x + x*(1-alpha),
 			alpha*goal.y + y*(1-alpha),
 			alpha*goal.z + z*(1-alpha)
 		);
+
+		return result;
 	}
 
 

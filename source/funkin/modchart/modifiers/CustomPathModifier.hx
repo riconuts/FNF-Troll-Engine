@@ -41,6 +41,7 @@ class CustomPathModifier extends NoteModifier {
 
 		// TODO: rewrite this.
 
+		var hehe = new Vector3(-Note.halfWidth, -Note.halfWidth);
 		while(dir<path.length){
 			var idx = 0;
 			totalDists[dir] = 0;
@@ -58,7 +59,7 @@ class CustomPathModifier extends NoteModifier {
 				}
 
 				pathData[dir].push({
-					position: pos.add(new Vector3(-Note.halfWidth,-Note.halfWidth)),
+					position: pos.add(hehe),
 					start: totalDists[dir],
 					end: 0,
 					dist: 0
@@ -89,7 +90,7 @@ class CustomPathModifier extends NoteModifier {
 		var progress = (vDiff / -moveSpeed) * totalDists[data];
 		var daPath = pathData[data];
 
-		if (progress <= 0) return pos.lerp(daPath[0].position, value);
+		if (progress <= 0) return pos.lerp(daPath[0].position, value, pos);
 		var outPos = pos.clone();
 
 		var idx:Int = 0;
@@ -103,7 +104,7 @@ class CustomPathModifier extends NoteModifier {
 				if (progress > cData.start && progress < cData.end){
 					var alpha = (cData.start - progress) / cData.dist;
 					var interpPos:Vector3 = cData.position.lerp(nData.position,alpha);
-					outPos = pos.lerp(interpPos, value);
+					pos.lerp(interpPos, value, outPos);
 				}
 			}
 			idx++;

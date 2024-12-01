@@ -28,28 +28,30 @@ class LocalRotateModifier extends NoteModifier { // this'll be rotateX in ModMan
 
     }
 
-	 override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField){
+	private var origin = new Vector3();
+	override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField){
 		var x:Float = (FlxG.width* 0.5) - Note.swagWidth - 54 + Note.swagWidth * 1.5;
-        switch (player)
-        {
-            case 0:
-                x += FlxG.width* 0.5 - Note.swagWidth * 2 - 100;
-            case 1:
-                x -= FlxG.width* 0.5 - Note.swagWidth * 2 - 100;
-        }
-		
-		x -= 56;
+		switch (player)  {
+			case 0:  x += FlxG.width* 0.5 - Note.swagWidth * 2 - 100;
+			case 1:  x -= FlxG.width* 0.5 - Note.swagWidth * 2 - 100;
+		}
+		origin.x = x - 56;
+		origin.y = FlxG.height * 0.5;
+		var scale = FlxG.height;
 
-		var origin:Vector3 = new Vector3(x, FlxG.height* 0.5);
+		pos.decrementBy(origin); // diff
+		pos.z *= scale;
 
-        var diff = pos.subtract(origin);
-        var scale = FlxG.height;
-        diff.z *= scale;
-		var out = VectorHelpers.rotateV3(diff, (getValue(player) + getSubmodValue('${prefix}${data}rotateX', player)) * FlxAngle.TO_RAD,
+		VectorHelpers.rotateV3(pos, // out 
+			(getValue(player) + getSubmodValue('${prefix}${data}rotateX', player)) * FlxAngle.TO_RAD,
 			(getSubmodValue('${prefix}rotateY', player) + getSubmodValue('${prefix}${data}rotateY', player)) * FlxAngle.TO_RAD,
-			(getSubmodValue('${prefix}rotateZ', player) + getSubmodValue('${prefix}${data}rotateZ', player)) * FlxAngle.TO_RAD);
-        out.z /= scale;
-        return origin.add(out);
+			(getSubmodValue('${prefix}rotateZ', player) + getSubmodValue('${prefix}${data}rotateZ', player)) * FlxAngle.TO_RAD
+		);
+		
+		pos.z /= scale;
+		pos.incrementBy(origin);
+
+		return pos;
     }
 
     override function getSubmods(){

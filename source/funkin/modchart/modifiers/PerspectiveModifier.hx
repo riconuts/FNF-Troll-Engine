@@ -49,7 +49,7 @@ class PerspectiveModifier extends NoteModifier
 
 	var origin = new Vector3(FlxG.width * 0.5, FlxG.height * 0.5); // vertex origin
 	var fieldPos = new Vector3();
-	override function getPos(visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
+	override function getPos(visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField):Vector3
 	{
 		fieldPos.setTo( // playfield pos
 			-getSubmodValue("fieldX", player),
@@ -57,27 +57,63 @@ class PerspectiveModifier extends NoteModifier
 			1280 + getSubmodValue("fieldZ", player)
 		); 
 		
-		var originMod = pos.subtract(origin); // moves the vertex to the appropriate position on screen based on origin
-		var rotated = VectorHelpers.rotateV3(originMod, getSubmodValue("fieldPitch", player) * FlxAngle.TO_RAD, getSubmodValue("fieldYaw", player) * FlxAngle.TO_RAD, getSubmodValue("fieldRoll", player) * FlxAngle.TO_RAD); // rotate the vertex properly
-		var projected = VectorHelpers.project(rotated.subtract(fieldPos)); // perpsective projection
+		// moves the vertex to the appropriate position on screen based on origin
+		pos.decrementBy(origin); 
+		
+		// rotate the vertex properly
+		VectorHelpers.rotateV3(pos, 
+			getSubmodValue("fieldPitch", player) * FlxAngle.TO_RAD, 
+			getSubmodValue("fieldYaw", player) * FlxAngle.TO_RAD, 
+			getSubmodValue("fieldRoll", player) * FlxAngle.TO_RAD,
+			pos
+		); 
+		
+		// perpsective projection
+		pos.decrementBy(fieldPos);
+		VectorHelpers.project(pos, pos); 
 
 		// TODO: move alot of this into a ColumnRenderer class and do some rewriting to fields etc YET AGAIN
         // mainly for like.. column-based rotation etc etc lole
-		return projected.add(origin); // puts the vertex back to default pos 
+
+		// puts the vertex back to default pos 
+		pos.incrementBy(origin);
+
+		return pos;
 	}
 
 	override function modifyVert(beat:Float, vert:Vector3, idx:Int, sprite:FlxSprite, pos:Vector3, player:Int, data:Int, field:NoteField):Vector3
 	{
-		if (sprite is Note){
+		if (sprite is Note) {
 			var shit:Note = cast sprite;
 			if (shit.isSustainNote) return vert;
 		}
 
-		fieldPos.setTo(-getSubmodValue("fieldX", player), -getSubmodValue("fieldY", player), 1280 + getSubmodValue("fieldZ", player)); // playfield pos
-		var originMod = vert.add(pos).subtract(origin); // moves the vertex to the appropriate position on screen based on origin
-		var rotated = VectorHelpers.rotateV3(originMod, getSubmodValue("fieldPitch", player) * FlxAngle.TO_RAD, getSubmodValue("fieldYaw", player) * FlxAngle.TO_RAD, getSubmodValue("fieldRoll", player) * FlxAngle.TO_RAD); // rotate the vertex properly
-		var projected = VectorHelpers.project(rotated.subtract(fieldPos)); // perpsective projection
+		fieldPos.setTo( // playfield pos
+			-getSubmodValue("fieldX", player), 
+			-getSubmodValue("fieldY", player), 
+			1280 + getSubmodValue("fieldZ", player)
+		); 
 
-		return projected.subtract(pos).add(origin); // puts the vertex back to default pos 
+		// moves the vertex to the appropriate position on screen based on origin
+		vert.incrementBy(pos);
+		vert.decrementBy(origin);
+
+		// rotate the vertex properly
+		VectorHelpers.rotateV3(vert, 
+			getSubmodValue("fieldPitch", player) * FlxAngle.TO_RAD, 
+			getSubmodValue("fieldYaw", player) * FlxAngle.TO_RAD, 
+			getSubmodValue("fieldRoll", player) * FlxAngle.TO_RAD,
+			vert
+		);
+
+		// perpsective projection
+		vert.decrementBy(fieldPos);
+		VectorHelpers.project(vert, vert);
+
+		// puts the vertex back to default pos
+		vert.decrementBy(pos);
+		vert.incrementBy(origin); 
+
+		return vert;
 	}
 }

@@ -520,7 +520,7 @@ class ModManager {
 			0
 		);
 
- 		for (name in getActiveMods(player)){
+ 		for (name in getActiveMods(player)) {
 			/*if (!obj.alive) 
 				continue;*/
 			

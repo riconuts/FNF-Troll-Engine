@@ -14,21 +14,26 @@ class VectorHelpers {
 	}
 
 	// thanks schmoovin'
-	public static function rotateV3(vec:Vector3, xA:Float, yA:Float, zA:Float):Vector3
+	public static function rotateV3(vec:Vector3, xA:Float, yA:Float, zA:Float, resultVector:Null<Vector3> = null):Vector3
 	{
 		var rotateZ = CoolUtil.rotate(vec.x, vec.y, zA);
 		var rotateY = CoolUtil.rotate(rotateZ.x, vec.z, yA);
 		var rotateX = CoolUtil.rotate(rotateY.y, rotateZ.y, xA);
-		var returnedVector = new Vector3(rotateY.x, rotateX.y, rotateX.x);
+
+		if (resultVector == null) {
+			resultVector = new Vector3(rotateY.x, rotateX.y, rotateX.x);
+		}else {
+			resultVector.setTo(rotateY.x, rotateX.y, rotateX.x);
+		}		
 
 		rotateZ.putWeak();
 		rotateX.putWeak();
 		rotateY.putWeak();
 
-		return returnedVector;
+		return resultVector;
 	}
 
-	public static function project(pos:Vector3):Vector3
+	public static function project(pos:Vector3, resultVector:Null<Vector3> = null):Vector3
 	{
 		var oX = pos.x;
 		var oY = pos.y;
@@ -46,9 +51,14 @@ class VectorHelpers {
 		var a = (near + far) / (near - far);
 		var b = 2 * near * far / (near - far);
 		var z = (a * shit + b);
-		var returnedVector = new Vector3(x / z, y / z, z);
 
-		return returnedVector;
+		if (resultVector == null) {
+			resultVector = new Vector3(x / z, y / z, z);
+		}else {
+			resultVector.setTo(x / z, y / z, z);		
+		}
+
+		return resultVector;
 	}
 
 }

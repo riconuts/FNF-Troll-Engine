@@ -2,12 +2,10 @@ package funkin.objects;
 import funkin.data.NoteStyles;
 import funkin.objects.notestyles.BaseNoteStyle;
 import funkin.objects.shaders.ColorSwap;
-import math.Vector3;
 using StringTools;
 
 class NoteSplash extends NoteObject implements NoteObject.IColorable {
 	public var colorSwap:ColorSwap = null;
-	public var vec3Cache:Vector3 = new Vector3();
 	public var noteStyle(default, set):String;
 
 	var _noteStyle:BaseNoteStyle;

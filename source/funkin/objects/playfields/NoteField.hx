@@ -241,7 +241,7 @@ class NoteField extends FieldBase
 			if (!obj.alive || !obj.visible)
 				continue;
 
-			var pos = modManager.getPos(0, 0, curDecBeat, obj.column, modNumber, obj, this, perspectiveArrDontUse);
+			var pos = modManager.getPos(0, 0, curDecBeat, obj.column, modNumber, obj, this, perspectiveArrDontUse, obj.vec3Cache);
 			var object = drawNote(obj, pos);
 			if (object == null)
 				continue;
@@ -255,7 +255,7 @@ class NoteField extends FieldBase
 		{
 			if (obj == null || !obj.alive || !obj.visible)
 				continue;
-			var pos = modManager.getPos(0, 0, curDecBeat, obj.column, modNumber, obj, this, perspectiveArrDontUse);
+			var pos = modManager.getPos(0, 0, curDecBeat, obj.column, modNumber, obj, this, perspectiveArrDontUse, obj.vec3Cache);
 			var object = drawNote(obj, pos);
 			if (object == null)
 				continue;
@@ -364,7 +364,7 @@ class NoteField extends FieldBase
 
 	function getPoints(hold:Note, ?wid:Float, speed:Float, vDiff:Float, diff:Float):Array<Vector3>
 	{ // stolen from schmovin'
-        if(hold.frame == null)
+        if (hold.frame == null)
 			return [Vector3.ZERO, Vector3.ZERO];
 
 		if (wid == null)
@@ -392,8 +392,7 @@ class NoteField extends FieldBase
 		var quad1 = new Vector3(wid);
 		var scale:Float = (z!=0.0) ? (1.0 / z) : 1.0;
 
-		if (optimizeHolds || simpleDraw)
-		{
+		if (optimizeHolds || simpleDraw) {
 			// less accurate, but higher FPS
 			quad0.scaleBy(scale);
 			quad1.scaleBy(scale);
@@ -403,10 +402,11 @@ class NoteField extends FieldBase
 		var p2 = modManager.getPos(-(vDiff + 1) * speed, diff + 1, curDecBeat, hold.column, modNumber, hold, this, []);
 		p2.z = 0;
 
-		var unit = p2.subtract(p1);
-		unit.normalize();
+		p2.decrementBy(p1);
+		p2.normalize();
+		var unit = p2;
 
-		var w = (quad0.subtract(quad1).length / 2) * scale;
+		var w = (quad0.subtract(quad1, quad0).length / 2) * scale;
 		var off1 = new Vector3(unit.y * w, 	-unit.x * w,	0.0);
 		var off2 = new Vector3(-off1.x, 	-off1.y,		0.0);
 
@@ -504,7 +504,7 @@ class NoteField extends FieldBase
 				glows.push(info.glow);
 			}
 
-			var top = lastMe == null ? getPoints(hold, topWidth, speed, (visualDiff + (strumOff * 0.45)), strumDiff + strumOff) : lastMe;
+			var top = lastMe ?? getPoints(hold, topWidth, speed, (visualDiff + (strumOff * 0.45)), strumDiff + strumOff);
 			var bot = getPoints(hold, botWidth, speed, (visualDiff + ((strumOff + strumSub) * 0.45)), strumDiff + strumOff + strumSub);
             if(!hold.copyY){
                 if(lastMe == null){
@@ -585,6 +585,10 @@ class NoteField extends FieldBase
 		uv[subIndex + 5] = uv[subIndex + 7] = frameRect.y + uvOffset * height;
 	}
 
+	private var quad0 = new Vector3(); // top left
+	private var quad1 = new Vector3(); // top right
+	private var quad2 = new Vector3(); // bottom left
+	private var quad3 = new Vector3(); // bottom right
 	function drawNote(sprite:NoteObject, pos:Vector3):Null<RenderObject>
 	{
 		if (!sprite.visible || !sprite.alive)
@@ -639,10 +643,10 @@ class NoteField extends FieldBase
 		final yOff = 0;
         // If someone can make frameX/frameY be taken into account properly then feel free lol ^^
 
-		var quad0 = new Vector3(-halfWidth + xOff, -halfHeight + yOff, 0); // top left
-		var quad1 = new Vector3(halfWidth + xOff, -halfHeight + yOff, 0); // top right
-		var quad2 = new Vector3(-halfWidth + xOff, halfHeight + yOff, 0); // bottom left
-		var quad3 = new Vector3(halfWidth + xOff, halfHeight + yOff, 0); // bottom right
+		quad0.setTo(-halfWidth + xOff, -halfHeight + yOff, 0); // top left
+		quad1.setTo(halfWidth + xOff, -halfHeight + yOff, 0); // top right
+		quad2.setTo(-halfWidth + xOff, halfHeight + yOff, 0); // bottom left
+		quad3.setTo(halfWidth + xOff, halfHeight + yOff, 0); // bottom right
 
 		for (idx in 0...QUAD_SIZE)
 		{
@@ -658,7 +662,7 @@ class NoteField extends FieldBase
 			if(isNote)
 				angle += note.typeOffsetAngle;
 			
-			var vert = VectorHelpers.rotateV3(quad, 0, 0, FlxAngle.TO_RAD * angle);
+			var vert = VectorHelpers.rotateV3(quad, 0, 0, FlxAngle.TO_RAD * angle, quad);
 			vert.x = vert.x + sprite.offsetX;
 			vert.y = vert.y + sprite.offsetY;
 
@@ -686,8 +690,8 @@ class NoteField extends FieldBase
 				vert.x = -vert.x;
 			if (sprite.flipY)
 				vert.y = -vert.x;
-			//quad[idx] = vert;
-			quad.setTo(vert.x, vert.y, vert.z);
+			
+			//quad.setTo(vert.x, vert.y, vert.z);
 		}
 
 		var frameRect = sprite.frame.uv;

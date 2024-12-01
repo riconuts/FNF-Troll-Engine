@@ -6,7 +6,6 @@ import funkin.states.PlayState;
 import funkin.objects.playfields.PlayField;
 import funkin.scripts.FunkinHScript;
 #if !macro
-import math.Vector3;
 import funkin.objects.shaders.ColorSwap;
 
 using StringTools;
@@ -60,8 +59,6 @@ class StrumNote extends NoteObject implements NoteObject.IColorable
 	public var z:Float = 0;
 	public var zIndex:Float = 0;
 	public var desiredZIndex:Float = 0;
-
-	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code	
 
 	private var field:PlayField;
 
