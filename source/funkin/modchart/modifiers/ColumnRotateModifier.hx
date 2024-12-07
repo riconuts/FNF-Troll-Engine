@@ -1,16 +1,5 @@
 package funkin.modchart.modifiers;
 
-import flixel.math.FlxAngle;
-import flixel.FlxSprite;
-import funkin.ui.*;
-import funkin.modchart.*;
-import flixel.math.FlxPoint;
-import flixel.math.FlxMath;
-import flixel.FlxG;
-import math.Vector3;
-import math.*;
-import funkin.objects.playfields.NoteField;
-
 class ColumnRotateModifier extends NoteModifier { // this'll be rotateX in ModManager
 	override function getName()
 		return 'columnrotater';
@@ -18,10 +7,6 @@ class ColumnRotateModifier extends NoteModifier { // this'll be rotateX in ModMa
 	override function getOrder()
 		return Modifier.ModifierOrder.LAST - 10;
 
-	inline function lerp(a:Float,b:Float,c:Float){
-		return a+(b-a)*c;
-	}
-	
 	private var origin = new Vector3(); 
 	override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField){
 		origin.x = field.field.getBaseX(data);

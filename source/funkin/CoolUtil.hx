@@ -1,41 +1,33 @@
 package funkin;
 
+import math.CoolMath;
+import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import flixel.tweens.FlxEase;
-import flixel.math.FlxPoint;
-import flixel.math.FlxMath;
 
 using StringTools;
 
-class CoolUtil
-{
-	public static function prettyNumber(val:Float, decimals:Int):String {
-		var strNum:String = '';
-		var splitNum:Array<String> = Std.string(Std.int(val)).split("");
+class CoolUtil {
+	public static function prettyInteger(num:Int):String {
+		var buf = new StringBuf();
 
-		if (decimals > 0) {
-			strNum = Std.string(val % 1).substr(2, decimals);
-
-			while (strNum.length < decimals)
-				strNum += '0';
-
-			strNum = '.' + strNum;
+		if (num < 0) {
+			num = -num;
+			buf.add('-');
 		}
 
-		strNum = splitNum[splitNum.length - 1] + strNum;
-		if (splitNum.length > 1) {
-			for (i in 1...splitNum.length - 1) {
-				var digi:String = splitNum[splitNum.length - 1 - i];
-				if (i % 3 == 0)
-					strNum = digi + ',' + strNum;
-				else
-					strNum = digi + strNum;
-			}
+		var str = Std.string(num);
+		var h = str.length - 1;
+		var i = 1;
 
-			strNum = splitNum[0] + strNum;
+		buf.add(str.charAt(0));
+		while (i < str.length) {
+			if (h % 3 == 0) buf.add(',');
+			buf.add(str.charAt(i));
+			h--; i++;
 		}
 
-		return strNum;
+		return buf.toString();
 	}
 
 	public static function structureToMap(st:Dynamic):Map<String, Dynamic> {
@@ -53,56 +45,6 @@ class CoolUtil
 		if (a < b) return -1;
 		if (a > b) return 1;
 		return 0;	
-	}
-
-	////
-	inline public static function coolLerp(current:Float, target:Float, elapsed:Float):Float
-		return FlxMath.lerp(target, current, Math.exp(-elapsed));
-
-	inline public static function scale(x:Float, lower1:Float, higher1:Float, lower2:Float, higher2:Float):Float
-		return (x - lower1) * (higher2 - lower2) / (higher1 - lower1) + lower2;
-
-	inline public static function quantizeAlpha(f:Float, interval:Float):Float
-		return Std.int((f+interval/2)/interval) * interval;
-
-	inline public static function quantize(f:Float, snap:Float):Float
-		return Math.fround(f * snap) / snap;
-
-	inline public static function snap(f:Float, snap:Float):Float
-		return Math.fround(f / snap) * snap;
-
-	inline public static function boundTo(value:Float, min:Float, max:Float):Float
-		return Math.max(min, Math.min(max, value));
-
-	inline public static function clamp(n:Float, lower:Float, higher:Float):Float
-	{
-		if (n > higher)
-			n = higher;
-		if (n < lower)
-			n = lower;
-
-		return n;
-	}
-
-	public static function floorDecimal(value:Float, decimals:Int):Float
-	{
-		if (decimals < 1)
-			return Math.ffloor(value);
-
-		var tempMult:Float = 1;
-		for (_ in 0...decimals)
-			tempMult *= 10;
-		
-		return Math.ffloor(value * tempMult) / tempMult;
-	}
-
-	////
-	public static function rotate(x:Float, y:Float, angle:Float, ?point:FlxPoint):FlxPoint
-	{
-		var p = point == null ? FlxPoint.weak() : point;
-		var sin = FlxMath.fastSin(angle);
-		var cos = FlxMath.fastCos(angle);
-		return p.set((x * cos) - (y * sin), (x * sin) + (y * cos));
 	}
 
 	////
@@ -292,4 +234,32 @@ class CoolUtil
 		flixel.FlxG.openURL(site);
 		#end
 	}
+
+	////
+	inline public static function coolLerp(current:Float, target:Float, elapsed:Float):Float
+		return CoolMath.coolLerp(current, target, elapsed);
+
+	inline public static function scale(x:Float, lower1:Float, higher1:Float, lower2:Float, higher2:Float):Float
+		return CoolMath.scale(x, lower1, higher1, lower2, higher2);
+
+	inline public static function quantizeAlpha(f:Float, interval:Float):Float
+		return CoolMath.quantizeAlpha(f, interval);
+
+	inline public static function quantize(f:Float, snap:Float):Float
+		return CoolMath.quantize(f, snap);
+
+	inline public static function snap(f:Float, snap:Float):Float
+		return CoolMath.snap(f, snap);
+
+	inline public static function boundTo(value:Float, min:Float, max:Float):Float
+		return CoolMath.boundTo(value, min, max);
+
+	inline public static function clamp(n:Float, lower:Float, higher:Float):Float
+		return CoolMath.clamp(n, lower, higher);
+
+	inline public static function floorDecimal(value:Float, decimals:Int):Float
+		return CoolMath.floorDecimal(value, decimals);
+
+	inline public static function rotate(x:Float, y:Float, rads:Float, ?point:FlxPoint):FlxPoint
+		return CoolMath.rotate(x, y, rads, point);
 }

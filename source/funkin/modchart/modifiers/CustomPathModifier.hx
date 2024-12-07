@@ -1,10 +1,5 @@
 package funkin.modchart.modifiers;
 
-import funkin.modchart.*;
-import funkin.objects.playfields.NoteField;
-import math.Vector3;
-import flixel.FlxSprite;
-
 typedef PathInfo = {
 	var position:Vector3;
 	var dist:Float;
@@ -29,8 +24,7 @@ class CustomPathModifier extends NoteModifier {
 	public function new(modMgr:ModManager, ?parent:Modifier){
 		super(modMgr, parent);
 		moveSpeed = getMoveSpeed();
-		var path:Array<Array<Vector3>> = getPath();
-		var dir:Int = 0;
+
 		// ridiculous that haxe doesnt have a numeric for loop
 
 		// neb from the future here
@@ -39,45 +33,41 @@ class CustomPathModifier extends NoteModifier {
 		// You just can't set the interval.
 		// how did i forget it fucking has a numeric for loop im gonna kms.
 
-		// TODO: rewrite this.
+		// epic fail
 
-		var hehe = new Vector3(-Note.halfWidth, -Note.halfWidth);
-		while(dir<path.length){
-			var idx = 0;
-			totalDists[dir] = 0;
-			pathData[dir] = [];
-
-			while(idx < path[dir].length){
-				var pos = path[dir][idx];
-
-				if(idx!=0){
-					var last = pathData[dir][idx-1];
-					totalDists[dir] += Vector3.distance(last.position, pos);
-					var totalDist = totalDists[dir];
+		for (col => points in getPath()) {
+			var dirPath:Array<PathInfo> = [];
+			var totalDist:Float = 0.0;
+			
+			for (idx => pos in points) {
+				if (idx != 0) {
+					var last = dirPath[idx-1];
+					totalDist += Vector3.distance(last.position, pos);
 					last.end = totalDist;
 					last.dist = last.start - totalDist; // used for interpolation
 				}
 
-				pathData[dir].push({
-					position: pos.add(hehe),
-					start: totalDists[dir],
+				dirPath.push({
+					position: pos,
+					start: totalDist,
 					end: 0,
 					dist: 0
 				});
-				idx++;
 			}
-			dir++;
+
+			totalDists[col] = totalDist;
+			pathData[col] = dirPath;
 		}
 
-		if (Main.showDebugTraces){
-			for(dir in 0...totalDists.length){
-				trace(dir, totalDists[dir]);
+		if (Main.showDebugTraces) {
+			for(col in 0...totalDists.length) {
+				trace(col, totalDists[col]);
 			}
 		}
 	}
 
 
-	 override function getPos(visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
+	override function getPos(visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
 	{
 		var value:Float = getValue(player);
 		if (value == 0) return pos;
@@ -110,9 +100,5 @@ class CustomPathModifier extends NoteModifier {
 			idx++;
 		}
 		return outPos;
-	}
-
-	override function getSubmods(){
-		return [];
 	}
 }

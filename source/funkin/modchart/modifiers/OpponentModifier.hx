@@ -1,10 +1,5 @@
 package funkin.modchart.modifiers;
 
-import flixel.FlxSprite;
-import funkin.modchart.*;
-import math.*;
-import funkin.objects.playfields.NoteField;
-
 class OpponentModifier extends NoteModifier {
 	override function getName()
 		return 'opponentSwap';

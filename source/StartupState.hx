@@ -201,13 +201,15 @@ class StartupState extends FlxTransitionableState
 				}
 				#end
 				
+			#if !tgt
 			case 10:
 				trace('loading lasted $loadingTime');
-
-				#if !tgt
 				step = 50;
-				#else
-
+			#end
+			
+			#if tgt
+			case 10:
+				trace('loading lasted $loadingTime');
 				#if debug
 				final waitTime:Float = 0.0;
 				#else
@@ -232,7 +234,7 @@ class StartupState extends FlxTransitionableState
 				if (FlxG.keys.justPressed.ANY || FlxG.mouse.justPressed){
 					fadeTwn.percent = (1.0 + fadeTwn.percent) * 0.5;
 				}
-				#end
+			#end
 
 			case 50:
 				#if(DO_AUTO_UPDATE || display)

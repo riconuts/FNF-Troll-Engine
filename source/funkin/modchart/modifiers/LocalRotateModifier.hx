@@ -1,16 +1,5 @@
 package funkin.modchart.modifiers;
 
-import flixel.math.FlxAngle;
-import flixel.FlxSprite;
-import funkin.ui.*;
-import funkin.modchart.*;
-import flixel.math.FlxPoint;
-import flixel.math.FlxMath;
-import flixel.FlxG;
-import math.Vector3;
-import math.*;
-import funkin.objects.playfields.NoteField;
-
 class LocalRotateModifier extends NoteModifier { // this'll be rotateX in ModManager
 	override function getName()
 		return '${prefix}rotateX';
@@ -18,9 +7,6 @@ class LocalRotateModifier extends NoteModifier { // this'll be rotateX in ModMan
 	override function getOrder()
 		return Modifier.ModifierOrder.POST_REVERSE;
 
-    inline function lerp(a:Float,b:Float,c:Float){
-        return a+(b-a)*c;
-    }
     var prefix:String;
 	public function new(modMgr:ModManager, ?prefix:String = '', ?parent:Modifier){
         this.prefix=prefix;

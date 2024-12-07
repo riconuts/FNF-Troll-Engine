@@ -68,7 +68,7 @@ class ModManager {
 			ConfusionModifier, 
 			OpponentModifier, 
 			TransformModifier, 
-			// InfinitePathModifier,  // broken
+			InfinitePathModifier,
 			PathModifier,
 			AccelModifier,
 			PerspectiveModifier,
@@ -619,12 +619,15 @@ class ModManager {
 
 		var easeFunc:EaseFunction = FlxEase.linear;
 
-
-		if (style is String){
+		if (style == null) {
+			
+		}
+		else if (style is String) {
 			// most common use of the style var is to just use an existing FlxEase
 			easeFunc = CoolUtil.getEaseFromString(style);
 
-		}else if (Reflect.isFunction(style)){
+		}
+		else if (Reflect.isFunction(style)) {
 			// probably gonna be useful SOMEWHERE
 			// maybe custom eases?
 			easeFunc = style;

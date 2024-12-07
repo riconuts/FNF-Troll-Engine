@@ -1,9 +1,5 @@
 package funkin.modchart.modifiers;
 
-import flixel.FlxSprite;
-import math.Vector3;
-import funkin.objects.playfields.NoteField;
-
 class SwapModifier extends NoteModifier
 {
 	override function getName()

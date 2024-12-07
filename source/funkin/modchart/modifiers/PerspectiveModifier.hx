@@ -1,17 +1,5 @@
 package funkin.modchart.modifiers;
 
-import flixel.math.FlxAngle;
-import flixel.FlxSprite;
-import funkin.ui.*;
-import funkin.modchart.*;
-import flixel.math.FlxPoint;
-import math.Vector3;
-import flixel.math.FlxMath;
-import flixel.FlxG;
-using StringTools;
-import math.*;
-import funkin.objects.playfields.NoteField;
-
 // NOTE: THIS SHOULDNT HAVE ITS PERCENTAGE MODIFIED
 // THIS IS JUST HERE TO ALLOW OTHER MODIFIERS TO HAVE PERSPECTIVE
 
