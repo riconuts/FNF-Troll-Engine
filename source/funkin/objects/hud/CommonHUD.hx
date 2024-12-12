@@ -21,6 +21,7 @@ class CommonHUD extends BaseHUD
 	public var healthBarBG(get, null):FlxSprite;
 	public var iconP1:HealthIcon;
 	public var iconP2:HealthIcon;
+	public var playbackRate:Float = 1;
 	
     override function  getHealthbar():FNFHealthBar return healthBar;
     
@@ -45,6 +46,8 @@ class CommonHUD extends BaseHUD
 		healthBar = new FNFHealthBar(iP1, iP2);
 		iconP1 = healthBar.iconP1;
 		iconP2 = healthBar.iconP2;
+
+		playbackRate = ClientPrefs.getGameplaySetting('songspeed', playbackRate);
 
 		// prob gonna do my own time bar too lol but for now idc
 		timeTxt = new FlxText(FlxG.width * 0.5 - 200, 0, 400, "", 32);
@@ -165,9 +168,9 @@ class CommonHUD extends BaseHUD
 				case "Percentage":
 					timeTxt.text = Math.floor(songPercent * 100) + "%";
 				case "Time Left":
-					timeCalc = (songLength - time);
+					timeCalc = (songLength - time) / playbackRate;
 				case "Time Elapsed":
-					timeCalc = time;
+					timeCalc = time / playbackRate;
 			}
 
 			if (timeCalc != null)

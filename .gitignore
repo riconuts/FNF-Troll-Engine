@@ -11,3 +11,4 @@ export/*
 # Local history which shouldn't be shared.
 .history
 .ionide
+.DS_Store
