@@ -315,6 +315,7 @@ class PlayState extends MusicBeatState
 
 	//// for backwards compat reasons. these aren't ACTUALLY used
 	#if PE_MOD_COMPATIBILITY
+	@:noCompletion public var isCameraOnForcedPos:Bool;
 	@:noCompletion public var healthBar:FNFHealthBar; 
 	@:noCompletion public var iconP1:HealthIcon;
 	@:noCompletion public var iconP2:HealthIcon;
@@ -2509,6 +2510,9 @@ class PlayState extends MusicBeatState
 
 		callOnScripts('onUpdate', [elapsed], null, null, null, null, false);
 		*/
+		#if PE_MOD_COMPATIBILITY
+		isCameraOnForcedPos = cameraPoints[cameraPoints.length - 1] != sectionCamera;
+		#end
 		callOnScripts('onUpdate', [elapsed]);
         if (hudSkinScript != null)
             hudSkinScript.call("onUpdate", [elapsed]);
@@ -2555,6 +2559,7 @@ class PlayState extends MusicBeatState
 			script.call("update", [elapsed]);
 		for (script in eventScripts)
 			script.call("update", [elapsed]);
+
 
 		callOnHScripts('update', [elapsed]);
 
