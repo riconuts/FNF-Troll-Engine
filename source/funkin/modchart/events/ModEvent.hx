@@ -15,7 +15,8 @@ class ModEvent extends BaseEvent {
 		this.modName = modName;
 		this.player = player;
 		endVal = target;
-
-		this.mod = modMgr.get(modName);
 	}
+
+	override function addedToTimeline()this.mod = manager.get(modName);
+	
 }

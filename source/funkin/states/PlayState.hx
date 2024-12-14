@@ -115,6 +115,10 @@ class PlayState extends MusicBeatState
 	public static var deathCounter:Int = 0;
 	public static var keyCount:Int = 4; // scuffed extra key support
 
+
+	public var onPause:lime.app.Event<Void->Void> = new lime.app.Event<Void->Void>();
+	public var onResume:lime.app.Event<Void->Void> = new lime.app.Event<Void->Void>();
+
 	////
 	public var showDebugTraces:Bool = #if debug true #else Main.showDebugTraces #end;
 
@@ -315,10 +319,23 @@ class PlayState extends MusicBeatState
 
 	//// for backwards compat reasons. these aren't ACTUALLY used
 	#if PE_MOD_COMPATIBILITY
+	#if NMV_MOD_COMPATIBILITY
+	@:isVar
+	@:noCompletion public var allowedToUpdateScoreTXT(get, set):Bool = true;
+	function get_allowedToUpdateScoreTXT()
+		return hud.isUpdating;
+
+	function set_allowedToUpdateScoreTXT(val:Bool)
+		return hud.isUpdating = val;
+	#end
 	@:noCompletion public var isCameraOnForcedPos:Bool;
 	@:noCompletion public var healthBar:FNFHealthBar; 
+	@:noCompletion public var healthBarBG:FlxSprite; 
 	@:noCompletion public var iconP1:HealthIcon;
 	@:noCompletion public var iconP2:HealthIcon;
+	@:noCompletion public var timeBar:FlxBar;
+	@:noCompletion public var timeBarBG:FlxSprite;
+	@:noCompletion public var timeTxt:FlxText;
 
 	@:noCompletion public var scoreTxt:FlxText;
 	@:noCompletion public var botplayTxt:FlxText;
@@ -922,6 +939,11 @@ class PlayState extends MusicBeatState
 		if (healthBar != null){
 			iconP1 = healthBar.iconP1;
 			iconP2 = healthBar.iconP2;
+			healthBarBG = healthBar.healthBarBG;
+
+			if(hud.timeBar != null)timeBar = hud.timeBar;
+			if(hud.timeBarBG != null)timeBarBG = hud.timeBarBG;
+			if(hud.timeTxt != null)timeTxt = hud.timeTxt;
 		}
         #end
 		//// Generate playfields so you can actually, well, play the game
@@ -4401,6 +4423,8 @@ class PlayState extends MusicBeatState
 			timer.active = false;
 		}
 
+
+		onPause.dispatch();
 		#if DISCORD_ALLOWED
 		DiscordClient.changePresence(detailsPausedText, stateText, songName);
 		#end
@@ -4436,6 +4460,8 @@ class PlayState extends MusicBeatState
 		for (timer in modchartTimers) {
 			timer.active = true;
 		}
+
+		onResume.dispatch();
 
 		updateSongDiscordPresence();
 	} 

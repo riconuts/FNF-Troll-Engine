@@ -18,7 +18,7 @@ class PsychHUD extends CommonHUD
 	var hitbarTween:FlxTween;
 	var scoreTxtTween:FlxTween;
 
-	var separator = ' • ';
+	public var separator:String = ' • ';
 
 	// cached because dont wanna be doing that shit every update cycle lmao
 	// even though it probably doesnt matter since it caches it the first time
@@ -207,7 +207,8 @@ class PsychHUD extends CommonHUD
 
 	override function update(elapsed:Float)
 	{
-		scoreTxt.text = PlayState.instance.cpuControlled ? botplayString : getScoreText();
+		if (isUpdating)
+			scoreTxt.text = PlayState.instance.cpuControlled ? botplayString : getScoreText();
 		
 		for (k => v in judgements){
 			if (judgeTexts.exists(k))

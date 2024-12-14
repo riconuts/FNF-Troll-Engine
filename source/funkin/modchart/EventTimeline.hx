@@ -14,6 +14,7 @@ class EventTimeline {
 
     public function addEvent(event:BaseEvent){
         event.parent = this;
+		event.addedToTimeline();
         if((event is ModEvent)){
             var modEvent:ModEvent = cast event;
 			var name = modEvent.modName;

@@ -20,9 +20,6 @@ class KadeHUD extends BaseHUD
 	var scoreTxt:FlxText;
 	var originalX:Float;
 
-	var timeBarBG:FlxSprite;
-	var timeBar:FlxBar;
-	var timeTxt:FlxText;
 
 	var watermark:FlxText;
 
@@ -188,14 +185,16 @@ class KadeHUD extends BaseHUD
 			isHighscore = songHighscore != 0 && score > songHighscore;
 		}
 
-		scoreTxt.text = 
-			(isHighscore ? '$hiscoreString: ' : '$scoreString: ') + shownScore +
-			' | $cbString: ' + comboBreaks + 
-			' | $ratingString: '
-			+ (grade == '?' ? grade : Highscore.floorDecimal(ratingPercent * 100, 2)
-				+ '% / $grade [${(ratingFC == stats.gfc && stats.accuracySystem == WIFE3) ? stats.fc : ratingFC}]');
-		if (ClientPrefs.npsDisplay)
-			scoreTxt.text += ' | $npsString: ${nps} / ${npsPeak}';
+		if (isUpdating){
+			scoreTxt.text = 
+				(isHighscore ? '$hiscoreString: ' : '$scoreString: ') + shownScore +
+				' | $cbString: ' + comboBreaks + 
+				' | $ratingString: '
+				+ (grade == '?' ? grade : Highscore.floorDecimal(ratingPercent * 100, 2)
+					+ '% / $grade [${(ratingFC == stats.gfc && stats.accuracySystem == WIFE3) ? stats.fc : ratingFC}]');
+			if (ClientPrefs.npsDisplay)
+				scoreTxt.text += ' | $npsString: ${nps} / ${npsPeak}';
+		}
 
 		var lengthInPx = scoreTxt.textField.length * scoreTxt.frameHeight; // bad way but does more or less a better job
 		scoreTxt.x = (originalX - (lengthInPx / 2)) + 335;

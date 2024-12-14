@@ -12,5 +12,7 @@ class BaseEvent {
 		this.executionStep = step;
 	}
 
+	public function addedToTimeline(){}
+	
     public function run(curStep:Float){}
 }

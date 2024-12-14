@@ -7,6 +7,7 @@ package funkin.objects;
 
 // TODO: add the other video libs (hxcodec and its various versions that change its API)
 
+import funkin.states.PlayState;
 #if !VIDEOS_ALLOWED
 class IndependentVideoSprite{
     
@@ -49,9 +50,15 @@ class IndependentVideoSprite extends VideoSprite {
 		if (addToState)
             FlxG.state.add(this);
 
-        // TODO: add pausing when in PlayState
+		if(FlxG.state == PlayState.instance){
+			PlayState.instance.onPause.add(pause);
+			PlayState.instance.onResume.add(resume);
+			bitmap.rate = PlayState.instance.playbackRate;
+		}
         
 	}
+
+
 
     // for nightmarevision
     public function addCallback(callbackName:String, callback:Void->Void, once:Bool=false){

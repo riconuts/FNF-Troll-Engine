@@ -26,6 +26,21 @@ typedef Node = {
 }
 
 class ModManager {
+	public var isAvailable:Bool = false; // Set to true after default modifiers are set
+	public var queuedEvents:Array<BaseEvent> = [];
+
+	public inline function addEvent(event:BaseEvent){
+		if(isAvailable)
+			timeline.addEvent(event);
+		else{
+			#if debug
+			trace('Event is pushed before ModManager is available!');
+			// TODO: add toString to every event to dump the info about the event here
+			#end
+			queuedEvents.push(event);
+		}
+	}
+
 	private var state:PlayState;
 
 	public var timeline:EventTimeline = new EventTimeline();
@@ -100,6 +115,11 @@ class ModManager {
 			setDefaultValues(playerNumber);
 			updateActiveMods(playerNumber);
         }
+
+		isAvailable = true;
+		for (shit in queuedEvents)
+			timeline.addEvent(shit);
+		
 
 	}
 
@@ -636,9 +656,9 @@ class ModManager {
 
 		if (player == -1)
 			for (pN => mods in activeMods)
-				timeline.addEvent(new ModEaseEvent(step, endStep, modName, target, easeFunc, pN, this, startVal));				
+				addEvent(new ModEaseEvent(step, endStep, modName, target, easeFunc, pN, this, startVal));				
 		else
-			timeline.addEvent(new ModEaseEvent(step, endStep, modName, target, easeFunc, player, this, startVal));
+			addEvent(new ModEaseEvent(step, endStep, modName, target, easeFunc, player, this, startVal));
 	}
 
 	public function queueSet(step:Float, modName:String, target:Float, player:Int = -1)
@@ -646,9 +666,9 @@ class ModManager {
 		//modName = getActualModName(modName);
 		if (player == -1)
 			for (pN => mods in activeMods)
-				timeline.addEvent(new SetEvent(step, modName, target, pN, this));
+				addEvent(new SetEvent(step, modName, target, pN, this));
 		else
-			timeline.addEvent(new SetEvent(step, modName, target, player, this));
+			addEvent(new SetEvent(step, modName, target, player, this));
 		
 	}
 
@@ -659,11 +679,11 @@ class ModManager {
 		queueSet(step, modName, percent * 0.01, player);
 
 	public function queueFunc(step:Float, endStep:Float, callback:(CallbackEvent, Float) -> Void)
-		timeline.addEvent(new StepCallbackEvent(step, endStep, callback, this));
+		addEvent(new StepCallbackEvent(step, endStep, callback, this));
     
 	public function queueFuncOnce(step:Float, callback:(CallbackEvent, Float) -> Void)
-		timeline.addEvent(new CallbackEvent(step, callback, this));
+		addEvent(new CallbackEvent(step, callback, this));
 	
 	public function queueEaseFunc(step:Float, endStep:Float, func:EaseFunction, callback:(EaseEvent, Float, Float) -> Void)
-		timeline.addEvent(new EaseEvent(step, endStep, func, callback, this));
+		addEvent(new EaseEvent(step, endStep, func, callback, this));
 }

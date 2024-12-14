@@ -1,5 +1,7 @@
 package funkin.objects.hud;
 
+import flixel.text.FlxText;
+import flixel.ui.FlxBar;
 import flixel.util.FlxColor;
 import funkin.data.JudgmentManager.JudgmentData;
 import haxe.exceptions.NotImplementedException;
@@ -10,6 +12,12 @@ import flixel.group.FlxSpriteGroup;
 // bunch of basic stuff to be extended by other HUDs
 
 class BaseHUD extends FlxSpriteGroup {
+	public var isUpdating:Bool = true;
+	public var timeBar:FlxBar;
+	public var timeTxt:FlxText;
+	public var timeBarBG:FlxSprite;
+
+	
 	var stats:Stats;
 	// just some ref vars
 	var fullDisplays:Map<String, String> = [

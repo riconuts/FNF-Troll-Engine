@@ -33,11 +33,6 @@ class CommonHUD extends BaseHUD
 		return value;
 	}
 
-	public var timeBar:FlxBar;
-	public var timeTxt:FlxText;
-
-	private var timeBarBG:FlxSprite;
-
 	public function new(iP1:String, iP2:String, songName:String, stats:Stats)
 	{
 		super(iP1, iP2, songName, stats);

@@ -287,6 +287,8 @@ class AdvancedHUD extends CommonHUD
     }
 
 	function statChanged(stat:String, val:Dynamic){
+		// Maybe add isUpdating shit to here??
+		// Idk though
 		switch(stat){
 			case 'score':
 				if(!ClientPrefs.showWifeScore){
