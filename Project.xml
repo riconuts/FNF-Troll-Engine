@@ -47,12 +47,13 @@
     <set name="BUILD_DIR" value="export/32bit" if="32bits" />
 
     <classpath path="source" />
+	<classpath path="flxAnimateShadow"/> <!--Remove if FlxAnimate updates and lets you write your own code to determine how filesystem shit is gotten-->
 
     <assets path="assets" />
     <assets path="alsoft.ini" />
     <assets path='default_content' rename='content' embed='false' exclude="*.mp3" />
 
-    <!-- TROLL ENGINE CUSTOMIZATION -->
+	<!-- TROLL ENGINE CUSTOMIZATION -->
     <define name="USE_EPIC_JUDGEMENT" />
     <define name="HSCRIPT_ALLOWED" />
     <define name="VIDEOS_ALLOWED" if="cpp" />
@@ -61,19 +62,23 @@
     <define name="MULTICORE_LOADING" if="native" />
     <define name="CRASH_HANDLER" if="desktop native" />
 
-    <!--Remove if you dont want states to be modified with scripts. This only disables extension/overrides and not the HScriptedState class-->
+	<!--Remove if you dont want states to be modified with scripts. This only disables extension/overrides and not the HScriptedState class-->
     <define name="SCRIPTABLE_STATES" if="HSCRIPT_ALLOWED" />
-    <!--Remove if you dont want Lua to be usable. Note that if you remove this, you should remove PE_MOD_COMPATIBILITY too -->
+	<!--Remove if you dont want Lua to be usable. Note that if you remove this, you should remove PE_MOD_COMPATIBILITY too -->
     <define name="LUA_ALLOWED" if="desktop cpp" unless="linux || mac" />
-    <!--Remove if you dont want Psych Engine mod compatibility -->
+	<!--Remove if you don't want Psych Engine mod compatibility -->
     <define name="PE_MOD_COMPATIBILITY" if="LUA_ALLOWED MODS_ALLOWED" />
+	<!--Remove if you don't want NightmareVision mod compatibility-->
 	<define name="NMV_MOD_COMPATIBILITY" if="PE_MOD_COMPATIBILITY MODS_ALLOWED HSCRIPT_ALLOWED"/>
 
-    <!--Remove if you dont want the engine to autoupdate -->
+	<!--Remove if you don't want to use FlxAnimate-->
+	<define name="USING_FLXANIMATE" />
+
+	<!--Remove if you dont want the engine to autoupdate -->
     <define name="DO_AUTO_UPDATE" if="native desktop OFFICIAL_BUILD" unless="debug" />
 
-    <!--Remove if you don't want to allow deprecated engine features.-->
-    <!--Anything marked as deprecated should be removed after a major or minor version but not after patches. (major.minor.patch)-->
+	<!--Remove if you don't want to allow deprecated engine features.-->
+	<!--Anything marked as deprecated should be removed after a major or minor version but not after patches. (major.minor.patch)-->
     <define name="ALLOW_DEPRECATION" unless="final"/>
 
     <icon path="art/iconOG.png" />
@@ -81,16 +86,15 @@
     <icon path="art/icon32.png" size='32' />
     <icon path="art/icon16.png" size='16' />
 
-    <!-- _______________________________ Libraries ______________________________ -->
+	<!-- _______________________________ Libraries ______________________________ -->
 
     <haxelib name="flixel" version="5.5.0" />
     <haxelib name="flixel-ui" version="2.6.1" />
     <haxelib name="flixel-addons" version="3.2.3" />
 
-    <!--Uncomment if you want to use flxanimate, which allows usage of animate atlases. Note that this doesnt work in the content folder atm, only in the assets folder!!-->
-    <!--<haxelib name="flxanimate"/>-->
+	 <haxelib name="flxanimate" if="USING_FLXANIMATE"/>
 
-    <!--Uncomment if you want to use moonchart, which allows usage of chart formats from other rhythm games and fnf engines-->
+	<!--Uncomment if you want to use moonchart, which allows usage of chart formats from other rhythm games and fnf engines-->
     <haxelib name="moonchart" version="0.4.0" if="native"/>
 
 	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
@@ -112,7 +116,7 @@
 	<haxelib name="faxe" if='switch'/>
 	<haxelib name="hxcpp-debug-server" if="debug" unless="telemetry"/>
 
-    <!-- ______________________________ Haxedefines _____________________________ -->
+	<!-- ______________________________ Haxedefines _____________________________ -->
 
 	<section if="CRASH_HANDLER">
 		<haxedef name="HXCPP_STACK_TRACE" />
@@ -121,42 +125,42 @@
 		<haxedef name="openfl-enable-handle-error" />
 	</section>
 
-    <!-- NOTE TO SELF: DISABLE THIS IF ISSUES ARE FOUND -->
+	<!-- NOTE TO SELF: DISABLE THIS IF ISSUES ARE FOUND -->
 	<haxedef name="LINC_LUA_RELATIVE_DYNAMIC_LIB" if="LUA_ALLOWED" /> <!-- stable luas PUT AFTER FIRST LINE WITH APP NAME AND ETC -->
 
-    <!-- <haxedef name="no_traces" if="final"/> -->
+	<!-- <haxedef name="no_traces" if="final"/> -->
 
-    <!--Enable the Flixel core recording system-->
-    <!--<haxedef name="FLX_RECORD" />-->
+	<!--Enable the Flixel core recording system-->
+	<!--<haxedef name="FLX_RECORD" />-->
 
-    <!--Disable the right and middle mouse buttons-->
-    <!-- <haxedef name="FLX_NO_MOUSE_ADVANCED" /> -->
+	<!--Disable the right and middle mouse buttons-->
+	<!-- <haxedef name="FLX_NO_MOUSE_ADVANCED" /> -->
 
-    <!--Disable the native cursor API on Flash-->
-    <!--<haxedef name="FLX_NO_NATIVE_CURSOR" />-->
+	<!--Disable the native cursor API on Flash-->
+	<!--<haxedef name="FLX_NO_NATIVE_CURSOR" />-->
 
-    <!--Optimise inputs, be careful you will get null errors if you don't use conditionals in your game-->
+	<!--Optimise inputs, be careful you will get null errors if you don't use conditionals in your game-->
 	<haxedef name="FLX_NO_MOUSE" if="mobile" />
 	<haxedef name="FLX_NO_TOUCH" if="desktop" />
-    <!-- <haxedef name="FLX_NO_KEYBOARD" if="mobile" /> -->
-    <!--<haxedef name="FLX_NO_GAMEPAD" />-->
+	<!-- <haxedef name="FLX_NO_KEYBOARD" if="mobile" /> -->
+	<!--<haxedef name="FLX_NO_GAMEPAD" />-->
 
-    <!--Disable the Flixel core sound tray-->
-    <!--<haxedef name="FLX_NO_SOUND_TRAY" />-->
+	<!--Disable the Flixel core sound tray-->
+	<!--<haxedef name="FLX_NO_SOUND_TRAY" />-->
 
-    <!--Disable the Flixel sound management code-->
-    <!--<haxedef name="FLX_NO_SOUND_SYSTEM" />-->
+	<!--Disable the Flixel sound management code-->
+	<!--<haxedef name="FLX_NO_SOUND_SYSTEM" />-->
 
-    <!--Disable the Flixel core focus lost screen-->
+	<!--Disable the Flixel core focus lost screen-->
 	<haxedef name="FLX_NO_FOCUS_LOST_SCREEN" />
 
-    <!--Disable the Flixel core debugger. Automatically gets set whenever you compile in release mode!-->
+	<!--Disable the Flixel core debugger. Automatically gets set whenever you compile in release mode!-->
 	<haxedef name="FLX_NO_DEBUG" unless="debug" />
 
-    <!--Enable this for Nape release builds for a serious peformance improvement-->
+	<!--Enable this for Nape release builds for a serious peformance improvement-->
 	<haxedef name="NAPE_RELEASE_BUILD" unless="debug" />
 
-    <!--
+	<!--
 	@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 	@@@@@@@@@@@@@@@,,,,@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 	@@@@@@@@@@@@@@@    @,,,@@@@@@@@@@@@@,,@@@@@@@@@@@@@@@@@@@@@@

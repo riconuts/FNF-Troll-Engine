@@ -1,5 +1,8 @@
 package funkin.scripts;
 
+#if USING_FLXANIMATE
+import funkin.objects.FlxAnimateCompat; // vscode stfu
+#end
 import funkin.scripts.FunkinScript.ScriptType;
 import funkin.objects.IndependentVideoSprite;
 import funkin.scripts.*;
@@ -214,6 +217,8 @@ class FunkinHScript extends FunkinScript
 		set("FlxSave", flixel.util.FlxSave); // should probably give it 1 save instead of giving it FlxSave
 		set("FlxBar", flixel.ui.FlxBar);
 
+		set("FlxAxes", Wrappers.FlxAxes);
+		set("FlxBarFillDirection", flixel.ui.FlxBar.FlxBarFillDirection);
 		set("FlxText", flixel.text.FlxText);
 		set("FlxTextBorderStyle", flixel.text.FlxText.FlxTextBorderStyle);
 		set("FlxCameraFollowStyle", flixel.FlxCamera.FlxCameraFollowStyle);
@@ -234,8 +239,8 @@ class FunkinHScript extends FunkinScript
 		});
 		set("FlxTextAlign", Wrappers.FlxTextAlign);
 		set("FlxTweenType", Wrappers.FlxTweenType); 
-        #if flxanimate
-        set("FlxAnimate", flxanimate.FlxAnimate);
+		#if USING_FLXANIMATE
+        set("FlxAnimate", FlxAnimateCompat);
         #end
 	}
 

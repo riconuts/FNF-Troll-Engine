@@ -32,6 +32,8 @@ class PerspectiveModifier extends NoteModifier
             // however theres no good way to rotate the columns seperately atm
         }
 
+		subMods.push("legacyZAxis"); // Set to 1 to use a 0-1 Z axis instead of 0-1280
+
 		return subMods;
 	}
 
@@ -39,10 +41,12 @@ class PerspectiveModifier extends NoteModifier
 	var fieldPos = new Vector3();
 	override function getPos(visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField):Vector3
 	{
+		var legacyZAxis:Bool = getSubmodValue("legacyZAxis", player) > 0;
+
 		fieldPos.setTo( // playfield pos
 			-getSubmodValue("fieldX", player),
 			-getSubmodValue("fieldY", player),
-			1280 + getSubmodValue("fieldZ", player)
+			(legacyZAxis ? 1 : 1280) + getSubmodValue("fieldZ", player)
 		); 
 		
 		// moves the vertex to the appropriate position on screen based on origin
@@ -58,7 +62,7 @@ class PerspectiveModifier extends NoteModifier
 		
 		// perpsective projection
 		pos.decrementBy(fieldPos);
-		VectorHelpers.project(pos, pos); 
+		VectorHelpers.project(pos, pos, legacyZAxis ? 1 : 1280); 
 
 		// TODO: move alot of this into a ColumnRenderer class and do some rewriting to fields etc YET AGAIN
         // mainly for like.. column-based rotation etc etc lole
@@ -71,6 +75,8 @@ class PerspectiveModifier extends NoteModifier
 
 	override function modifyVert(beat:Float, vert:Vector3, idx:Int, sprite:FlxSprite, pos:Vector3, player:Int, data:Int, field:NoteField):Vector3
 	{
+		var legacyZAxis:Bool = getSubmodValue("legacyZAxis", player) > 0;
+
 		if (sprite is Note) {
 			var shit:Note = cast sprite;
 			if (shit.isSustainNote) return vert;
@@ -79,13 +85,13 @@ class PerspectiveModifier extends NoteModifier
 		fieldPos.setTo( // playfield pos
 			-getSubmodValue("fieldX", player), 
 			-getSubmodValue("fieldY", player), 
-			1280 + getSubmodValue("fieldZ", player)
+			(legacyZAxis ? 1 : 1280) + getSubmodValue("fieldZ", player)
 		); 
 
 		// moves the vertex to the appropriate position on screen based on origin
 		vert.incrementBy(pos);
 		vert.decrementBy(origin);
-
+ 
 		// rotate the vertex properly
 		VectorHelpers.rotateV3(vert, 
 			getSubmodValue("fieldPitch", player) * FlxAngle.TO_RAD, 
@@ -96,7 +102,7 @@ class PerspectiveModifier extends NoteModifier
 
 		// perpsective projection
 		vert.decrementBy(fieldPos);
-		VectorHelpers.project(vert, vert);
+		VectorHelpers.project(vert, vert, legacyZAxis ? 1 : 1280);
 
 		// puts the vertex back to default pos
 		vert.decrementBy(pos);

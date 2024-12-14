@@ -12,6 +12,9 @@ class FlxTextAlign{}
 @:build(funkin.macros.ScriptingMacro.createEnumWrapper(openfl.display.BlendMode))
 class BlendMode{}
 
+@:build(funkin.macros.ScriptingMacro.createEnumWrapper(flixel.util.FlxAxes))
+class FlxAxes {}
+
 typedef FlxTweenType = flixel.tweens.FlxTween; // lol
 
 // stupidity

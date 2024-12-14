@@ -41,6 +41,8 @@ class ModManager {
 		}
 	}
 
+	public var defaultValues:Map<String, {value: Float, playerIndex:Int}> = []; // Modifiers defined here are set to these values in setDefaultValues
+
 	private var state:PlayState;
 
 	public var timeline:EventTimeline = new EventTimeline();
@@ -111,12 +113,12 @@ class ModManager {
 			registerAux("noteSpawnTime" + i);
 		}
 
+		isAvailable = true;
 		for (playerNumber => mods in activeMods){
 			setDefaultValues(playerNumber);
 			updateActiveMods(playerNumber);
         }
 
-		isAvailable = true;
 		for (shit in queuedEvents)
 			timeline.addEvent(shit);
 		
@@ -150,6 +152,11 @@ class ModManager {
 			setValue('scale${i}X', 1, mN);
 			setValue('scale${i}Y', 1, mN);
 		}
+
+		for (mod => data in defaultValues){
+			if(data.playerIndex == mN || data.playerIndex == -1)
+				setValue(mod, data.value, mN);
+		}
 	}
 
     inline public function quickRegister(mod:Modifier)
@@ -157,7 +164,7 @@ class ModManager {
 
 	inline public function registerBlankMod(modName:String, defaultVal:Float = 0.0, player:Int = -1){
 		quickRegister(new SubModifier(modName, this));
-		setValue(modName, defaultVal, player);
+		setValue(modName, defaultVal, player, true);
 	}
 
     public function registerAlias(alias:String, mod:String)
@@ -212,7 +219,7 @@ class ModManager {
 			}
         }
 
-		setValue(modName, 0); // so if it should execute it gets added Automagically
+		setValue(modName, 0, -1, true); // so if it should execute it gets added Automagically
 		modArray.sort((a, b) -> Std.int(a.getOrder() - b.getOrder()));
 
     }
@@ -223,7 +230,7 @@ class ModManager {
 		if (modifier == null) return null;
 	
 		quickRegister(modifier);
-		setValue(modifier.getName(), defaultVal==null ? 0 : defaultVal);
+		setValue(modifier.getName(), defaultVal==null ? 0 : defaultVal, -1, true);
 		
 		return modifier;
 	}
@@ -309,11 +316,17 @@ class ModManager {
 			touchedMods[player].push(name);
 	}
 
-    public function setValue(modName:String, val:Float, player:Int=-1){
+    public function setValue(modName:String, val:Float, player:Int=-1, ?ignoreAvailability:Bool = false){
+		if (!ignoreAvailability && !isAvailable ){
+			trace('setting default $modName to $val for $player');
+			defaultValues.set(modName, {value: val, playerIndex: player});
+		}
+		
+
 		if (player == -1)
 		{
 			for (pN => mods in activeMods)
-				setValue(modName, val, pN);
+				setValue(modName, val, pN, ignoreAvailability);
 		}else{
             var daMod = get(modName);
 			if (daMod == null)

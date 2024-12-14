@@ -1,5 +1,6 @@
 package funkin;
 
+import haxe.io.Bytes;
 import haxe.ds.StringMap;
 import funkin.data.LocalizationMap;
 import funkin.data.WeekData;
@@ -256,6 +257,12 @@ class Paths
 		return Assets.exists(path) ? Assets.getText(path) : null;
 		#end
 	}
+
+	// TODO: OpenFL version uses bytearray
+	inline static public function getBytes(path:String):Null<Bytes> {
+		return FileSystem.exists(path) ? File.getBytes(path) : null;
+	}
+
 	inline static public function isDirectory(path:String):Bool{
 		#if sys
 		return FileSystem.exists(path) && FileSystem.isDirectory(path);
@@ -424,6 +431,9 @@ class Paths
 	/** Returns the contents of a file as a string. **/
 	inline public static function text(key:String, ?ignoreMods:Bool = false):Null<String>
 		return getContent(getPath(key, ignoreMods));
+	
+	inline public static function bytes(key:String, ?ignoreMods:Bool = false):Null<Bytes>
+		return getBytes(getPath(key, ignoreMods));
 
 	inline static public function font(key:String)
 	{
@@ -544,33 +554,29 @@ class Paths
 		return graphic;
 	}
 
+	public static inline function cacheGraphic(path:String):Null<FlxGraphic>{
+		if (!currentTrackedAssets.exists(path)) {
+			var newGraphic:FlxGraphic = getGraphic(path);
+			newGraphic.persist = true;
+			currentTrackedAssets.set(path, newGraphic);
+		}
+		if (!localTrackedAssets.contains(path))
+			localTrackedAssets.push(path);
+		return currentTrackedAssets.get(path);
+	}
+
 	public static function returnGraphic(key:String, ?library:String):Null<FlxGraphic>
 	{
 		#if MODS_ALLOWED
 		var modKey:String = modsImages(key);
 		if (FileSystem.exists(modKey))
-		{
-			if (!currentTrackedAssets.exists(modKey)){
-				var newGraphic:FlxGraphic = getGraphic(modKey);
-				newGraphic.persist = true;
-				currentTrackedAssets.set(modKey, newGraphic);
-			}
-			if (!localTrackedAssets.contains(modKey))localTrackedAssets.push(modKey);
-			return currentTrackedAssets.get(modKey);
-		}
+			return cacheGraphic(modKey);
+		
 		#end
 
 		var path = png(key, library);
 		if (Paths.exists(path, IMAGE))
-		{
-			if (!currentTrackedAssets.exists(path)){
-				var newGraphic:FlxGraphic = getGraphic(path);
-				newGraphic.persist = true;
-				currentTrackedAssets.set(path, newGraphic);
-			}
-			if (!localTrackedAssets.contains(path))localTrackedAssets.push(path);
-			return currentTrackedAssets.get(path);
-		}
+			return cacheGraphic(path);
 
 		if (Main.showDebugTraces) trace('image "$key" returned null.');
 		return null;
