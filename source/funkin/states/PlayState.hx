@@ -97,6 +97,11 @@ typedef SpeedEvent =
 @:noScripting
 class PlayState extends MusicBeatState
 {
+	var legacyOnCreatePost:Bool = true; // Can be set by scripts to make onCreatePost be called where it used to be (before the countdown and super.create)
+	// NOTE: Make this false probably before 1.0 or 1.1 releases
+	// true by default rn just for the sake of not breaking things
+	// You can set it to false in a script if you wanna make sure things dont break when its false tho
+
 	public static var instance:PlayState;
 	public static var SONG:SwagSong = null;
 	public static var isStoryMode:Bool = false;
@@ -327,6 +332,9 @@ class PlayState extends MusicBeatState
 
 	function set_allowedToUpdateScoreTXT(val:Bool)
 		return hud.isUpdating = val;
+
+	@:noCompletion
+	public var updateScoreBar:Void->Void;
 	#end
 	@:noCompletion public var isCameraOnForcedPos:Bool;
 	@:noCompletion public var healthBar:FNFHealthBar; 
@@ -541,7 +549,12 @@ class PlayState extends MusicBeatState
 		});
 
 		#if PE_MOD_COMPATIBILITY
-		strumLineNotes = opponentStrums = playerStrums = new FlxTypedGroup<StrumNote>();
+		strumLineNotes = new FlxTypedGroup<StrumNote>();
+
+		// Because some things do actually use these lol
+		opponentStrums = new FlxTypedGroup<StrumNote>();
+		playerStrums = new FlxTypedGroup<StrumNote>();
+
 		scoreTxt = botplayTxt = new FlxText();
 
 		strumLineNotes.exists = false;
@@ -1084,7 +1097,8 @@ class PlayState extends MusicBeatState
 		}
 
 		////
-		callOnAllScripts('onCreatePost');
+		if(legacyOnCreatePost) // Just incase shit breaks???
+			callOnAllScripts('onCreatePost');
 
 		add(ratingGroup);
 		add(timingTxt);
@@ -1159,6 +1173,9 @@ class PlayState extends MusicBeatState
 
 		RecalculateRating();
 		startCountdown();
+
+		if(!legacyOnCreatePost) // Just incase shit breaks???
+			callOnAllScripts('onCreatePost');
 
 		finishedCreating = true;
 
@@ -1461,6 +1478,16 @@ class PlayState extends MusicBeatState
 		for(field in playfields.members)
 			field.fadeIn(isStoryMode || skipArrowStartTween); // TODO: check if its the first song so it should fade the notes in on song 1 of story mode
 
+		
+		#if PE_MOD_COMPATIBILITY
+		for(i in dadField.strumNotes)
+			opponentStrums.add(i);
+
+		for (i in playerField.strumNotes)
+			playerStrums.add(i);
+		#end
+
+		
         #if ALLOW_DEPRECATION
 		callOnScripts('preModifierRegister'); // deprecated
         #end
@@ -2389,7 +2416,7 @@ class PlayState extends MusicBeatState
 			DiscordClient.changePresence(detailsPausedText, stateText, songName);
 		#end
 
-		if (ClientPrefs.autoPause)
+		if (ClientPrefs.autoPause && !paused)
 			justUnfocused = true;
 
 		super.onFocusLost();

@@ -186,4 +186,8 @@ class StrumNote extends NoteObject
 			colorSwap.brightness = 0;
 		}
 	}
+
+	#if NMV_MOD_COMPATIBILITY
+	public function addOffset(name:String, x:Float = 0, y:Float = 0) {} // StrumNotes dont have offsets
+	#end
 }

@@ -228,6 +228,8 @@ class Note extends NoteObject
 	public var garbage:Bool = false; // if this is true, the note will be removed in the next update cycle
 	public var alphaMod:Float = 1;
 	public var alphaMod2:Float = 1; // TODO: unhardcode this shit lmao
+	// What is this even used for anymore??
+
 	public var typeOffsetX:Float = 0; // used to offset notes, mainly for note types. use in place of offset.x and offset.y when offsetting notetypes
 	public var typeOffsetY:Float = 0;
 	public var typeOffsetAngle:Float = 0;
@@ -246,6 +248,11 @@ class Note extends NoteObject
 	public var copyAlpha:Bool = true;
     public var copyVerts:Bool = true;
     #if PE_MOD_COMPATIBILITY
+	@:isVar
+	public var multAlpha(get, set):Float;
+	function get_multAlpha()return alphaMod;
+	function set_multAlpha(v:Float)return alphaMod = v;
+	
     // Angle is controlled by verts in the modchart system
 
     @:isVar public var copyAngle(get, set):Bool;

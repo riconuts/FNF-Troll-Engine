@@ -1,5 +1,6 @@
 package flixel;
 
+import flixel.util.FlxAxes;
 import openfl.display.BitmapData;
 import openfl.display.BlendMode;
 import openfl.geom.ColorTransform;
@@ -500,6 +501,9 @@ class FlxSprite extends FlxObject
 	 */
 	public function loadGraphic(Graphic:FlxGraphicAsset, Animated = false, FrameWidth = 0, FrameHeight = 0, Unique = false, ?Key:String):FlxSprite
 	{
+		if (Graphic is String && funkin.Paths.imageExists(Graphic))
+			Graphic = funkin.Paths.image(Graphic);
+
 		var graph:FlxGraphic = FlxG.bitmap.add(Graphic, Unique, Key);
 		if (graph == null)
 			return this;
@@ -705,7 +709,7 @@ class FlxSprite extends FlxObject
 	 * @param   Width    How wide the graphic should be. If `<= 0`, and `Height` is set, the aspect ratio will be kept.
 	 * @param   Height   How high the graphic should be. If `<= 0`, and `Width` is set, the aspect ratio will be kept.
 	 */
-	public function setGraphicSize(Width:Int = 0, Height:Int = 0):Void
+	public function setGraphicSize(Width:Float = 0, Height:Float = 0):Void
 	{
 		if (Width <= 0 && Height <= 0)
 			return;
@@ -1662,6 +1666,7 @@ class FlxSprite extends FlxObject
 		}
 		return doFlipY;
 	}
+	
 }
 
 interface IFlxSprite extends IFlxBasic
