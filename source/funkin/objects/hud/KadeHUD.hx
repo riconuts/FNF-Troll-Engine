@@ -42,6 +42,9 @@ class KadeHUD extends BaseHUD
 		return value;
 	}
 
+	override function getHealthbar():FNFHealthBar 
+		return healthBar;
+
 	public function new(iP1:String, iP2:String, songName:String, stats:Stats)
 	{
 		super(iP1, iP2, songName, stats);

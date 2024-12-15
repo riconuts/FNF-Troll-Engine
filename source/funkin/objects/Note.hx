@@ -47,6 +47,9 @@ private typedef NoteScriptState = {
 
 class Note extends NoteObject
 {
+	public var holdGlow:Bool = true; // Whether holds should "glow" / increase in alpha when held
+	public var baseAlpha:Float = 1;
+
 	public static var spriteScale:Float = 0.7;
 	public static var swagWidth(default, set):Float = 160 * spriteScale;
 	public static var halfWidth(default, null):Float = swagWidth * 0.5;
@@ -449,6 +452,9 @@ class Note extends NoteObject
 				quant = getQuant(Conductor.getBeatSinceChange(strumTime));
 		}
 
+		baseAlpha = isSustainNote ? 0.6 : 1;
+		
+
 		if ((FlxG.state is PlayState))
             this.strumTime -= (cast FlxG.state).offset;
 
@@ -659,9 +665,9 @@ class Note extends NoteObject
 
 	override function draw()
 	{
-		var holdMult:Float = isSustainNote ? 0.6 : 1;
+		var holdMult:Float = baseAlpha;
 
-		if (isSustainNote && parent.wasGoodHit)
+		if (isSustainNote && parent.wasGoodHit && holdGlow)
 			holdMult = FlxMath.lerp(0.3, 1, parent.tripProgress);
         
 		colorSwap.daAlpha = alphaMod * alphaMod2 * holdMult;

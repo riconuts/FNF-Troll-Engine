@@ -97,6 +97,8 @@ typedef SpeedEvent =
 @:noScripting
 class PlayState extends MusicBeatState
 {
+	public var extraData:Map<String, Dynamic> = [];
+
 	var legacyOnCreatePost:Bool = true; // Can be set by scripts to make onCreatePost be called where it used to be (before the countdown and super.create)
 	// NOTE: Make this false probably before 1.0 or 1.1 releases
 	// true by default rn just for the sake of not breaking things
@@ -324,18 +326,6 @@ class PlayState extends MusicBeatState
 
 	//// for backwards compat reasons. these aren't ACTUALLY used
 	#if PE_MOD_COMPATIBILITY
-	#if NMV_MOD_COMPATIBILITY
-	@:isVar
-	@:noCompletion public var allowedToUpdateScoreTXT(get, set):Bool = true;
-	function get_allowedToUpdateScoreTXT()
-		return hud.isUpdating;
-
-	function set_allowedToUpdateScoreTXT(val:Bool)
-		return hud.isUpdating = val;
-
-	@:noCompletion
-	public var updateScoreBar:Void->Void;
-	#end
 	@:noCompletion public var isCameraOnForcedPos:Bool;
 	@:noCompletion public var healthBar:FNFHealthBar; 
 	@:noCompletion public var healthBarBG:FlxSprite; 
@@ -361,11 +351,13 @@ class PlayState extends MusicBeatState
 	#end
 
 	// nightmarevision compatibility shit !
+	#if NMV_MOD_COMPATIBILITY
 	public var whosTurn:String = 'dad';
 	public var defaultCamZoomAdd:Float = 0;
 	@:isVar public var beatsPerZoom(get, set):Int = 4;
 	@:noCompletion function get_beatsPerZoom()return zoomEveryBeat;
 	@:noCompletion function set_beatsPerZoom(val:Int)return zoomEveryBeat = val;
+	#end
 
 	////
 	@:isVar public var songScore(get, set):Int = 0;
@@ -377,7 +369,8 @@ class PlayState extends MusicBeatState
 	@:isVar public var ratingPercent(get, set):Float;
 	@:isVar public var ratingFC(get, set):String;
 	
-	@:noCompletion public inline function get_songScore()return stats.score;
+	@:noCompletion public inline function get_songScore()
+		return ClientPrefs.showWifeScore ? Math.floor(stats.totalNotesHit * 200) : stats.score; // Alot of the time, songScore is used in HUDs
 	@:noCompletion public inline function get_totalPlayed()return stats.totalPlayed;
 	@:noCompletion public inline function get_totalNotesHit()return stats.totalNotesHit;
 	@:noCompletion public inline function get_combo()return stats.combo;
@@ -953,11 +946,27 @@ class PlayState extends MusicBeatState
 			iconP1 = healthBar.iconP1;
 			iconP2 = healthBar.iconP2;
 			healthBarBG = healthBar.healthBarBG;
-
-			if(hud.timeBar != null)timeBar = hud.timeBar;
-			if(hud.timeBarBG != null)timeBarBG = hud.timeBarBG;
-			if(hud.timeTxt != null)timeTxt = hud.timeTxt;
 		}
+
+		if(hud.timeBar != null)
+			timeBar = hud.timeBar;
+		else
+			timeBar = new FlxBar();
+
+		if(hud.timeBarBG != null)
+			timeBarBG = hud.timeBarBG;
+		else
+			timeBarBG = new FlxSprite();
+		
+		if(hud.timeTxt != null)
+			timeTxt = hud.timeTxt;
+		else
+			timeTxt = new FlxText();
+
+		if(hud is PsychHUD || hud is KadeHUD)
+			@:privateAccess
+			scoreTxt = (cast hud).scoreTxt;
+		
         #end
 		//// Generate playfields so you can actually, well, play the game
 		callOnScripts("prePlayfieldCreation"); // backwards compat
@@ -1594,7 +1603,6 @@ class PlayState extends MusicBeatState
 			{
 				if (char != gf)
 					checkCharacterDance(char, curBeat);
-				
 			}
 		}
 	}
@@ -2617,7 +2625,7 @@ class PlayState extends MusicBeatState
 			var lerpVal = Math.exp(-elapsed * 3.125 * camZoomingDecay);
 
 			camGame.zoom = FlxMath.lerp(
-				defaultCamZoom + defaultCamZoomAdd,
+				defaultCamZoom #if NMV_MOD_COMPATIBILITY + defaultCamZoomAdd #end,
 				camGame.zoom,
 				lerpVal
 			);
@@ -3669,13 +3677,11 @@ class PlayState extends MusicBeatState
 		if (callOnScripts("onKeyPress", [column]) == Globals.Function_Stop)
 			return;
 
-		if (player == -1) player = playOpponent ? 1 : 0;
-		
 		var hitNotes:Array<Note> = []; // what could scripts possibly do with this information
 		var controlledFields:Array<PlayField> = [];
 		
 		for (field in playfields.members) {
-			if (field.playerId != player || !field.isPlayer || !field.inControl || field.autoPlayed) 
+			if ((player != -1 && field.playerId != player) || !field.isPlayer || !field.inControl || field.autoPlayed) 
 				continue;
 
 			controlledFields.push(field);
@@ -4555,7 +4561,6 @@ class PlayState extends MusicBeatState
 		stats.changedEvent.removeAll();
 
 		Note.quantShitCache.clear();
-		FunkinHScript.defaultVars.clear();
 
 		notetypeScripts.clear();
 		hudSkinScripts.clear();		

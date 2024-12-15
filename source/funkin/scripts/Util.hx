@@ -1,5 +1,6 @@
 package funkin.scripts;
 
+import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.util.FlxColor;
 import funkin.scripts.Globals.*;
 import funkin.states.PlayState;
@@ -488,9 +489,9 @@ class ModchartSprite extends FlxSprite
 	//public var isInFront:Bool = false;
 	public var animOffsets:Map<String, Array<Float>> = new Map<String, Array<Float>>();
 
-	public function new(?x:Float = 0, ?y:Float = 0)
+	public function new(?x:Float = 0, ?y:Float = 0, ?Graphic:FlxGraphicAsset)
 	{
-		super(x, y);
+		super(x, y, Graphic);
 		//antialiasing = ClientPrefs.globalAntialiasing;
 	}
 
