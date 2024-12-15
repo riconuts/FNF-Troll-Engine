@@ -102,7 +102,7 @@
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
 	
 	<section if="HSCRIPT_ALLOWED">
-		<haxelib name="hscript"/>
+		<haxelib name="thscript"/>
 		<define name="hscriptPos"/>		
 
 		<haxeflag name="--macro" value="include('funkin')" />
