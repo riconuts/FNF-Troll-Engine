@@ -810,7 +810,9 @@ class Paths
 			Reflect.deleteField(data, "chapters");
 			return data;
 		}else { // Lets assume it's an old TGT metadata
-			return {weeks: [data]};
+			var runsGlobally = Reflect.field(data, "runsGlobally");
+			Reflect.deleteField(data, "runsGlobally");
+			return {runsGlobally: runsGlobally, weeks: [data]};
 		}
 	}
 
