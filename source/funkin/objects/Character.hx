@@ -20,8 +20,8 @@ using StringTools;
 
 class Character extends FlxSprite
 {
-    /**The next beat the character will dance on**/
-    public var nextDanceBeat:Float = -5;
+	/**The next beat the character will dance on**/
+	public var nextDanceBeat:Float = -5;
 
 	/**Whether to force the dance animation to play**/
 	public var shouldForceDance:Bool = false;
@@ -49,33 +49,33 @@ class Character extends FlxSprite
 	inline function get_characterScript()
 		return characterScripts[0];
 	function set_characterScript(script:FunkinScript){ // you REALLY shouldnt be setting characterScript, you should be using the removeScript and addScript functions though;
-        var oldScript = characterScripts.shift(); // removes the first script
-        stopScript(oldScript, true);
-        characterScripts.unshift(script); // and replaces it w/ the new one
+		var oldScript = characterScripts.shift(); // removes the first script
+		stopScript(oldScript, true);
+		characterScripts.unshift(script); // and replaces it w/ the new one
 		startScript(script);
-        return script;
-    }
+		return script;
+	}
 		
-    /**Scripts running on the character. You should not modify this directly! Use pushScript/removeScript!
-     * If you must modify it directly, atleast call character.startScript(script)/character.stopScript(script) after adding/removing it**/
-    public var characterScripts:Array<FunkinScript> = [];
+	/**Scripts running on the character. You should not modify this directly! Use pushScript/removeScript!
+	 * If you must modify it directly, atleast call character.startScript(script)/character.stopScript(script) after adding/removing it**/
+	public var characterScripts:Array<FunkinScript> = [];
 
 	/**for fleetway, mainly.
 		but whenever you need to play an anim that has to be manually interrupted, here you go.
-        
-    Stops note anims and idle from playing. Make sure to set this to false once the animation is done.**/
+		
+	Stops note anims and idle from playing. Make sure to set this to false once the animation is done.**/
 	public var voicelining:Bool = false; 
 
 	/**The set of animations, in order, to be played for the character idling.**/
 	public var idleSequence:Array<String> = ['idle'];
 	/**How each animation offsets the character**/
-    public var animOffsets = new Map<String, Array<Dynamic>>();
+	public var animOffsets = new Map<String, Array<Dynamic>>();
 	/**How each animation offsets the camera**/
-    public var camOffsets:Map<String, Array<Float>> = [];
+	public var camOffsets:Map<String, Array<Float>> = [];
 	/**Used by the character editor. Disables most functions of the character besides animations**/
 	public var debugMode:Bool = false;
 	/**Camera horizontal offset from the animation**/
-    public var camOffX:Float = 0;
+	public var camOffX:Float = 0;
 	/**Camera vertical offset from the animation**/
 	public var camOffY:Float = 0;
 	/**Whether this character is playable. Not really used much anymore**/
@@ -94,7 +94,7 @@ class Character extends FlxSprite
 	/**Disables dancing while the hey/cheer animations are playing**/
 	public var specialAnim:Bool = false;
 	/**Disables the ability for characters to manually reset to idle**/
-    public var stunned:Bool = false;
+	public var stunned:Bool = false;
 	
 	/**How many steps a character should hold their sing animation for**/
 	public var singDuration:Float = 4;
@@ -118,7 +118,7 @@ class Character extends FlxSprite
 	public var hasMissAnimations:Bool = false;
 	/**Overlay color used for characters that don't have miss animations.**/
 	public var missOverlayColor:FlxColor = 0xFFC6A6FF;
-    
+	
 	//Used on Character Editor
 	public var animationsArray:Array<AnimArray> = [];
 	public var imageFile:String = '';
@@ -129,9 +129,9 @@ class Character extends FlxSprite
 
 	override function destroy()
 	{
-        for(script in characterScripts)
-            removeScript(script, true);
-        
+		for(script in characterScripts)
+			removeScript(script, true);
+		
 		return super.destroy();
 	}
 
@@ -295,7 +295,7 @@ class Character extends FlxSprite
 
 	override function update(elapsed:Float)
 	{
-        if (callOnScripts("onCharacterUpdate", [elapsed]) == Globals.Function_Stop)
+		if (callOnScripts("onCharacterUpdate", [elapsed]) == Globals.Function_Stop)
 			return;
 		
 		if(!debugMode && animation.curAnim != null)
@@ -362,12 +362,12 @@ class Character extends FlxSprite
 		callOnScripts("onCharacterUpdatePost", [elapsed]);
 	}
 
-    override function draw(){
-        if(callOnScripts("onDraw") == Globals.Function_Stop)
-            return;
-        super.draw();
-        callOnScripts("onDrawPost");
-    }
+	override function draw(){
+		if(callOnScripts("onDraw") == Globals.Function_Stop)
+			return;
+		super.draw();
+		callOnScripts("onDrawPost");
+	}
 
 	public var colorOverlay(default, set):FlxColor = FlxColor.WHITE;
 
@@ -442,8 +442,8 @@ class Character extends FlxSprite
 	}
 
 	public var danced:Bool = false;
-	var danceIndex:Int = 0;    
-    
+	var danceIndex:Int = 0;	
+	
 	public function dance()
 	{
 		if (debugMode || skipDance || specialAnim || animTimer > 0 || voicelining)
@@ -452,13 +452,13 @@ class Character extends FlxSprite
 		if (callOnScripts("onDance") == Globals.Function_Stop)
 			return;
 
-        if(idleSequence.length > 1){
-            danceIndex++;
-            if(danceIndex >= idleSequence.length)
-                danceIndex = 0;
-        }
-        playAnim(idleSequence[danceIndex] + idleSuffix, shouldForceDance);
-        
+		if(idleSequence.length > 1){
+			danceIndex++;
+			if(danceIndex >= idleSequence.length)
+				danceIndex = 0;
+		}
+		playAnim(idleSequence[danceIndex] + idleSuffix, shouldForceDance);
+		
 /* 		if(danceIdle){
 			danced = !danced;
 			playAnim((danced ? 'danceRight' : 'danceLeft') + idleSuffix);
@@ -477,12 +477,12 @@ class Character extends FlxSprite
 			&& animation.name.startsWith('sing') 
 			&& !animation.name.endsWith('miss') // will go back to the idle once it finishes
 		);
-    }
+	}
 	public function resetDance(){
-        // called when resetting back to idle from a pose
-        // useful for stuff like sing return animations
+		// called when resetting back to idle from a pose
+		// useful for stuff like sing return animations
 		if(callOnScripts("onResetDance") != Globals.Function_Stop) dance();
-    }
+	}
 
 	public function playNote(note:Note, field:PlayField) {
 		if (callOnScripts("playNote", [note, field]) == Globals.Function_Stop)
@@ -542,9 +542,9 @@ class Character extends FlxSprite
 		var lastDanceIdle:Bool = danceIdle;
 		danceIdle = (animation.getByName('danceLeft' + idleSuffix) != null && animation.getByName('danceRight' + idleSuffix) != null);
 
-        if(danceIdle)
-            idleSequence = ["danceLeft" + idleSuffix, "danceRight" + idleSuffix];
-        
+		if(danceIdle)
+			idleSequence = ["danceLeft" + idleSuffix, "danceRight" + idleSuffix];
+		
 		if(settingCharacterUp)
 		{
 			danceEveryNumBeats = (danceIdle ? 1 : 2);
@@ -591,10 +591,10 @@ class Character extends FlxSprite
 	}
 
 	////
-    public var defaultVars:Map<String, Dynamic> = [];
-    public function setDefaultVar(i:String, v:Dynamic)
+	public var defaultVars:Map<String, Dynamic> = [];
+	public function setDefaultVar(i:String, v:Dynamic)
 		defaultVars.set(i, v);
-    
+	
 	public function pushScript(script:FunkinScript, alreadyStarted:Bool=false){
 		characterScripts.push(script);
 		if (!alreadyStarted)
@@ -609,7 +609,7 @@ class Character extends FlxSprite
 	}
 
 
-	public function startScript(script:FunkinScript){        
+	public function startScript(script:FunkinScript){		
 		#if HSCRIPT_ALLOWED
 		if(script.scriptType == ScriptType.HSCRIPT){
 			callScript(script, "onLoad", [this]);

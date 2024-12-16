@@ -40,7 +40,7 @@ class FreeplayState extends MusicBeatState
 	var selectedSongCharts:Array<String>;
 	
 	var hintText:FlxText;
-    
+	
 	override public function create()
 	{
 		#if DISCORD_ALLOWED
@@ -112,11 +112,11 @@ class FreeplayState extends MusicBeatState
 		comingFromPlayState = false;
 	}
 
-    function reloadFont(){
+	function reloadFont(){
 		scoreText.font = Paths.font("vcr.ttf");
 		hintText.font = scoreText.font;
 		diffText.font = scoreText.font;
-    }
+	}
 
 	var songLoaded:String = null;
 	var selectedSong:String = null;

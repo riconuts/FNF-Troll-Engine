@@ -117,7 +117,7 @@ class AlphaModifier extends NoteModifier
 			}
 		}else
 			alpha *= (1 - getSubmodValue("alpha", player)) * (1 - getSubmodValue('alpha${obj.column}', player));
-        
+		
 		
 
 		info.alpha = alpha;

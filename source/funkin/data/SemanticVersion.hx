@@ -4,15 +4,15 @@ using StringTools;
 
 abstract SemanticVersion(String) from String to String
 {
-    public var major(get, set):Int;
-    public var minor(get, set):Int;
-    public var patch(get, set):Int;
-    public var prerelease_id(get, set):String;
+	public var major(get, set):Int;
+	public var minor(get, set):Int;
+	public var patch(get, set):Int;
+	public var prerelease_id(get, set):String;
 	inline function get_prerelease_id(){
 		var shit = this.split("-");
-        shit.shift();
-        return shit.join("-");
-    }
+		shit.shift();
+		return shit.join("-");
+	}
 
 	inline function set_prerelease_id(id:String)
 	{
@@ -22,19 +22,19 @@ abstract SemanticVersion(String) from String to String
 		return id;
 	}
 
-    inline function strip_prerelease(){
-        return this.split("-").shift();
-    }
+	inline function strip_prerelease(){
+		return this.split("-").shift();
+	}
 
-    inline function get_major()
+	inline function get_major()
 		return Std.parseInt(strip_prerelease().split(".")[0]);
-    
+	
 
-    inline function get_minor()
+	inline function get_minor()
 		return Std.parseInt(strip_prerelease().split(".")[1]);
-    
+	
 
-    inline function get_patch()
+	inline function get_patch()
 		return Std.parseInt(strip_prerelease().split(".")[2]);
 
 	inline function set_major(i:Int)
@@ -58,10 +58,10 @@ abstract SemanticVersion(String) from String to String
 		return i;
 	}
 
-    // operators
-    @:op(A==B)
+	// operators
+	@:op(A==B)
 	static function eq(A:SemanticVersion, B:SemanticVersion)return A.major == B.major && A.minor == B.minor && A.patch == B.patch && A.prerelease_id == B.prerelease_id;
-    
+	
 	@:op(A >= B)
 	static function gte(A:SemanticVersion, B:SemanticVersion):Bool
 	{
@@ -86,21 +86,21 @@ abstract SemanticVersion(String) from String to String
 		return false;
 	}
 
-    @:op(A > B)
-    static function gt(A:SemanticVersion, B:SemanticVersion):Bool{
-        if(A.major > B.major || A.minor > B.minor || A.patch > B.patch){
-            return true;
-        }else{
-            if(A.prerelease_id.trim() == '' && B.prerelease_id.trim() != ''){
-                return true;
+	@:op(A > B)
+	static function gt(A:SemanticVersion, B:SemanticVersion):Bool{
+		if(A.major > B.major || A.minor > B.minor || A.patch > B.patch){
+			return true;
+		}else{
+			if(A.prerelease_id.trim() == '' && B.prerelease_id.trim() != ''){
+				return true;
 			}
 			else if (B.prerelease_id.trim() != '' && A.prerelease_id > B.prerelease_id){
-                return true;
-            }
-            else
-                return false;
-        }
+				return true;
+			}
+			else
+				return false;
+		}
 
-        return false;
-    }
+		return false;
+	}
 }

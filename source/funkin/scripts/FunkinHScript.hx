@@ -132,7 +132,7 @@ class FunkinHScript extends FunkinScript
 		set("Reflect", Reflect);
 		set("Math", Math);
 		set("StringTools", StringTools);
-        set("Main", Main);
+		set("Main", Main);
 
 		set("StringMap", haxe.ds.StringMap);
 		set("ObjectMap", haxe.ds.ObjectMap);
@@ -279,8 +279,8 @@ class FunkinHScript extends FunkinScript
 		set("FlxTextAlign", Wrappers.FlxTextAlign);
 		set("FlxTweenType", Wrappers.FlxTweenType); 
 		#if USING_FLXANIMATE
-        set("FlxAnimate", FlxAnimateCompat);
-        #end
+		set("FlxAnimate", FlxAnimateCompat);
+		#end
 	}
 
 	private function setVideoVars() {
@@ -352,7 +352,7 @@ class FunkinHScript extends FunkinScript
 
 		set("ProxyField", funkin.objects.proxies.ProxyField);
 		set("ProxySprite", funkin.objects.proxies.ProxySprite);
-        set("AltBGSprite", funkin.objects.BGSprite.AltBGSprite);
+		set("AltBGSprite", funkin.objects.BGSprite.AltBGSprite);
 
 		set("FlxSprite3D", funkin.objects.FlxSprite3D);
 
@@ -438,7 +438,7 @@ class FunkinHScript extends FunkinScript
 	
 	public function run(parsed:Expr) {
 		var returnValue:Dynamic = null;
-        try {
+		try {
 			trace('Running haxe script: $scriptName');
 			returnValue = interpreter.execute(parsed);
 		}
@@ -449,8 +449,8 @@ class FunkinHScript extends FunkinScript
 			
 			haxe.Log.trace(message, posInfo);
 		}
-        return returnValue;
-    }
+		return returnValue;
+	}
 
 	public function stop()
 	{
@@ -481,7 +481,7 @@ class FunkinHScript extends FunkinScript
 
 	public function call(func:String, ?parameters:Array<Dynamic>, ?extraVars:Map<String, Dynamic>):Dynamic
 	{
-        var returnValue:Dynamic = executeFunc(func, parameters, null, extraVars);
+		var returnValue:Dynamic = executeFunc(func, parameters, null, extraVars);
 		
 		return returnValue == null ? Function_Continue : returnValue;
 	}

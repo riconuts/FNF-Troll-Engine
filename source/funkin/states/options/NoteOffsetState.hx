@@ -371,15 +371,15 @@ class NoteOffsetState extends MusicBeatState
 
 		if (!transitioned){
 			transitioned = true;
-		    doDaInTrans();
-        }
-    }
-    
+			doDaInTrans();
+		}
+	}
+	
 	override function finishTransIn()
 		getLowestState().closeSubState();
 	
-    
-    function doDaInTrans(){
+	
+	function doDaInTrans(){
 		if (transIn != null)
 		{
 			if (FlxTransitionableState.skipNextTransIn)
@@ -398,7 +398,7 @@ class NoteOffsetState extends MusicBeatState
 			FadeTransitionSubstate.nextCamera = camOther;
 			trans.start(OUT);
 		}
-    }
+	}
 
 	function doDaOutTrans(?OnExit:Void->Void){
 		_onExit = OnExit;
@@ -414,7 +414,7 @@ class NoteOffsetState extends MusicBeatState
 		{
 			_onExit();
 		}
-    }
+	}
 
 	override function transitionToState(nextState:FlxState):Void
 	{

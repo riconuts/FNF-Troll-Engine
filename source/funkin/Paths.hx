@@ -31,9 +31,9 @@ class Paths
 
 	inline public static var SOUND_EXT = "ogg";
 	inline public static var VIDEO_EXT = "mp4";
-    public static final HSCRIPT_EXTENSIONS:Array<String> = ["hscript", "hxs", "hx"];
+	public static final HSCRIPT_EXTENSIONS:Array<String> = ["hscript", "hxs", "hx"];
 	public static final LUA_EXTENSIONS:Array<String> = ["lua"];
-    
+	
 	public static final SCRIPT_EXTENSIONS:Array<String> = [
 		"hscript",
 		"hxs",
@@ -53,21 +53,21 @@ class Paths
 		return null;
 	}
 
-    public static function isHScript(file:String){
-        for(ext in Paths.HSCRIPT_EXTENSIONS)
-            if(file.endsWith('.$ext'))
-                return true;
-        
+	public static function isHScript(file:String){
+		for(ext in Paths.HSCRIPT_EXTENSIONS)
+			if(file.endsWith('.$ext'))
+				return true;
+		
 		return false;
-    }
-    public inline static function getHScriptPath(scriptPath:String)
-    {
-        #if HSCRIPT_ALLOWED
+	}
+	public inline static function getHScriptPath(scriptPath:String)
+	{
+		#if HSCRIPT_ALLOWED
 		return getFileWithExtensions(scriptPath, Paths.HSCRIPT_EXTENSIONS);
-        #else
-        return null;
-        #end
-    }
+		#else
+		return null;
+		#end
+	}
 
 	public inline static function getLuaPath(scriptPath:String) {
 		#if LUA_ALLOWED
@@ -232,14 +232,14 @@ class Paths
 
 	inline static public function lua(key:String, ?library:String)
 	{
-        for(ext in Paths.LUA_EXTENSIONS){
+		for(ext in Paths.LUA_EXTENSIONS){
 			var r = file('$key.ext', TEXT, library);
 			if (Paths.exists(r))
-			    return r;
-        }
-        return null;
+				return r;
+		}
+		return null;
 	}
-    
+	
 
 
 	inline static public function exists(path:String, ?type:AssetType):Bool
@@ -362,8 +362,8 @@ class Paths
 
 		for (i in dirMap.get(dir))
 			Func(i);
-        
-        return true;
+		
+		return true;
 	}
 
 	#else
@@ -509,7 +509,7 @@ class Paths
 			return new FlxRuntimeShader(
 				fragFile==null ? null : Paths.getContent(fragPath), 
 				vertFile==null ? null : Paths.getContent(vertPath),
-                version
+				version
 			);
 		}catch(e:Dynamic){
 			trace("Shader compilation error:" + e.message);

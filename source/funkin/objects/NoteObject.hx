@@ -15,11 +15,11 @@ enum abstract ObjectType(#if cpp cpp.UInt8 #else Int #end)
 class NoteObject extends FlxSprite {
 	public var objType:ObjectType = UNKNOWN;
 
-    public var column:Int = 0;
-    @:isVar
-    public var noteData(get,set):Int; // backwards compat
-    inline function get_noteData()return column;
-    inline function set_noteData(v:Int)return column = v;
+	public var column:Int = 0;
+	@:isVar
+	public var noteData(get,set):Int; // backwards compat
+	inline function get_noteData()return column;
+	inline function set_noteData(v:Int)return column = v;
 
 	public var offsetX:Float = 0;
 	public var offsetY:Float = 0;

@@ -152,8 +152,8 @@ class ColorSwapShader extends FlxShader
 			return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 		}
 
-        vec4 colorMult(vec4 color){
-            if (!hasTransform)
+		vec4 colorMult(vec4 color){
+			if (!hasTransform)
 			{
 				return color;
 			}
@@ -183,8 +183,8 @@ class ColorSwapShader extends FlxShader
 				return vec4(color.rgb * color.a * openfl_Alphav, color.a * openfl_Alphav);
 			}
 
-            return vec4(0.0, 0.0, 0.0, 0.0);
-        }
+			return vec4(0.0, 0.0, 0.0, 0.0);
+		}
 
 		void main()
 		{

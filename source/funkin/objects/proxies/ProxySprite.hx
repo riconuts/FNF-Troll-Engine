@@ -4,11 +4,11 @@ import flixel.math.FlxRect;
 import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
 
 class ProxySprite extends FlxSprite {
-    var proxiedSprite:FlxSprite;
+	var proxiedSprite:FlxSprite;
 
-    public function new(x:Float, y:Float, sprite:FlxSprite){
-        super(x, y);
-        proxiedSprite = sprite;
+	public function new(x:Float, y:Float, sprite:FlxSprite){
+		super(x, y);
+		proxiedSprite = sprite;
 	}
 
 	override public function getScreenBounds(?newRect:FlxRect, ?camera:FlxCamera):FlxRect
@@ -44,7 +44,7 @@ class ProxySprite extends FlxSprite {
 			_point.floor();
 
 		_point.copyToFlash(_flashPoint);
-        @:privateAccess
+		@:privateAccess
 		camera.copyPixels(proxiedSprite._frame, proxiedSprite.framePixels, _flashRect, _flashPoint, colorTransform, blend, antialiasing);
 	}
 
@@ -78,5 +78,5 @@ class ProxySprite extends FlxSprite {
 		@:privateAccess
 		camera.drawPixels(proxiedSprite._frame, proxiedSprite.framePixels, _matrix, colorTransform, blend, antialiasing, shader);
 	}
-    
+	
 }
