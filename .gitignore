@@ -4,6 +4,9 @@ export/*
 # why does hmm install it here what the fuuck why not install it into my main haxelib
 .haxelib
 
+dump/*
+.DS_Store
+
 ### VS Code
 .vscode/*
 *.code-workspace
