@@ -8,6 +8,7 @@ import flixel.math.FlxMatrix;
 import flixel.util.FlxSort;
 import flixel.util.FlxDestroyUtil;
 import flixel.graphics.FlxGraphic;
+import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
 import flixel.system.FlxAssets.FlxShader;
 import math.Vector3;
 import math.VectorHelpers;
@@ -564,25 +565,53 @@ class NoteField extends FieldBase
 	{
 		var subIndex = sub * 8;
 		var frameRect = sprite.frame.uv;
-		var height = frameRect.height - frameRect.y;
 
 		if (!flipY)
 			sub = (holdSubdivisions - 1) - sub;
 		var uvSub = 1.0 / holdSubdivisions;
 		var uvOffset = uvSub * sub;
 
+		var top = 0.0;
+		var bottom = 0.0;
+		switch (sprite.frame.angle) {
+			case ANGLE_0:
+				var height = frameRect.height - frameRect.y;
+				top = frameRect.y + (uvSub + uvOffset) * height;
+				bottom = frameRect.y + uvOffset * height;
+			case ANGLE_90:
+				var width = frameRect.width - frameRect.x;
+				top = frameRect.x + (uvSub + uvOffset) * width;
+				bottom = frameRect.x + uvOffset * width;
+			case ANGLE_270:
+				var width = frameRect.x - frameRect.width;
+				top = frameRect.width + uvOffset * width;
+				bottom = frameRect.width + (uvSub + uvOffset) * width;
+		}
+
 		if (flipY)
 		{
-			uv[subIndex] = uv[subIndex + 4] = frameRect.x;
-			uv[subIndex + 2] = uv[subIndex + 6] = frameRect.width;
-			uv[subIndex + 1] = uv[subIndex + 3] = frameRect.y + uvOffset * height;
-			uv[subIndex + 5] = uv[subIndex + 7] = frameRect.y + (uvOffset + uvSub) * height;
-			return;
+			var ogTop = top;
+			top = bottom;
+			bottom = top;
 		}
-		uv[subIndex] = uv[subIndex + 4] = frameRect.x;
-		uv[subIndex + 2] = uv[subIndex + 6] = frameRect.width;
-		uv[subIndex + 1] = uv[subIndex + 3] = frameRect.y + (uvSub + uvOffset) * height;
-		uv[subIndex + 5] = uv[subIndex + 7] = frameRect.y + uvOffset * height;
+
+		switch (sprite.frame.angle) {
+			case ANGLE_0:
+				uv[subIndex] = uv[subIndex + 4] = frameRect.x;
+				uv[subIndex + 2] = uv[subIndex + 6] = frameRect.width;
+				uv[subIndex + 1] = uv[subIndex + 3] = top;
+				uv[subIndex + 5] = uv[subIndex + 7] = bottom;
+			case ANGLE_90:
+				uv[subIndex] = uv[subIndex + 4] = top;
+				uv[subIndex + 2] = uv[subIndex + 6] = bottom;
+				uv[subIndex + 1] = uv[subIndex + 3] = frameRect.height;
+				uv[subIndex + 5] = uv[subIndex + 7] = frameRect.y;
+			case ANGLE_270:
+				uv[subIndex] = uv[subIndex + 2] = bottom;
+				uv[subIndex + 4] = uv[subIndex + 6] = top;
+				uv[subIndex + 1] = uv[subIndex + 5] = frameRect.y;
+				uv[subIndex + 3] = uv[subIndex + 7] = frameRect.height;
+		}
 	}
 
 	private var quad0 = new Vector3(); // top left
@@ -696,12 +725,29 @@ class NoteField extends FieldBase
 
 		var frameRect = sprite.frame.uv;
 
-		var vertices = new Vector<Float>(8, false, [
-			pos.x + quad0.x, pos.y + quad0.y,
-			pos.x + quad1.x, pos.y + quad1.y,
-			pos.x + quad2.x, pos.y + quad2.y,
-			pos.x + quad3.x, pos.y + quad3.y
-		]);
+		var vertices = switch (sprite.frame.angle) {
+			case ANGLE_0:
+				new Vector<Float>(8, false, [
+					pos.x + quad0.x, pos.y + quad0.y,
+					pos.x + quad1.x, pos.y + quad1.y,
+					pos.x + quad2.x, pos.y + quad2.y,
+					pos.x + quad3.x, pos.y + quad3.y
+				]);
+			case ANGLE_90:
+				new Vector<Float>(8, false, [
+					pos.x + quad1.x, pos.y + quad1.y,
+					pos.x + quad3.x, pos.y + quad3.y,
+					pos.x + quad0.x, pos.y + quad0.y,
+					pos.x + quad2.x, pos.y + quad2.y
+				]);
+			case ANGLE_270:
+				new Vector<Float>(8, false, [
+					pos.x + quad2.x, pos.y + quad2.y,
+					pos.x + quad0.x, pos.y + quad0.y,
+					pos.x + quad3.x, pos.y + quad3.y,
+					pos.x + quad1.x, pos.y + quad1.y
+				]);
+		}
 		var uvData = new Vector<Float>(8, false, [
 			frameRect.x,		frameRect.y,
 			frameRect.width,	frameRect.y,
