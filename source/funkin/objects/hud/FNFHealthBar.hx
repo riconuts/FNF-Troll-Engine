@@ -125,12 +125,10 @@ class FNFHealthBar extends FlxBar{
 	}
 
 	override function set_value(val:Float){
-		var val = isOpponentMode ? max-val : val;
+		iconP1.animation.curAnim.curFrame = percent < 20 ? 1 : 0; // 20% ?
+		iconP2.animation.curAnim.curFrame = percent > 80 ? 1 : 0; // 80% ?
 
-		iconP1.animation.curAnim.curFrame = val < 0.4 ? 1 : 0; // 20% ?
-		iconP2.animation.curAnim.curFrame = val > 1.6 ? 1 : 0; // 80% ?
-
-		super.set_value(val);
+		super.set_value(isOpponentMode ? max - val : val);
 
 		updateHealthBarPos();
 
