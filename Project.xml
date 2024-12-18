@@ -92,7 +92,7 @@
     <haxelib name="flixel-ui" version="2.6.1" />
     <haxelib name="flixel-addons" version="3.2.3" />
 
-	 <haxelib name="flxanimate" if="USING_FLXANIMATE"/>
+	<haxelib name="flxanimate" if="USING_FLXANIMATE"/>
 
 	<!--Uncomment if you want to use moonchart, which allows usage of chart formats from other rhythm games and fnf engines-->
     <haxelib name="moonchart" version="0.4.0" if="native"/>
