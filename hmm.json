@@ -59,10 +59,10 @@
 			"ref": "master",
 			"url": "https://github.com/riconuts/linc_luajit"
 		},
-        {
-            "name": "moonchart",
-            "type": "haxelib",
-            "version": "0.4.0"
-        }
+		{
+			"name": "moonchart",
+			"type": "haxelib",
+			"version": "0.4.0"
+		}
 	]
 }
