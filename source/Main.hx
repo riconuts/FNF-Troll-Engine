@@ -6,9 +6,7 @@ import openfl.Lib;
 import openfl.display.FPS;
 import openfl.display.Sprite;
 import openfl.system.Capabilities;
-import openfl.events.Event;
 import lime.app.Application;
-import haxe.Constraints.Function;
 
 import funkin.*;
 import funkin.api.Github;
@@ -59,13 +57,10 @@ class Main extends Sprite
 	var skipSplash:Bool = true; // Whether to skip the flixel splash screen that appears in release mode.
 	var startFullscreen:Bool = false; // Whether to start the game in fullscreen on desktop targets
 
+	public static final UserAgent:String = 'TrollEngine/${Version.engineVersion}'; // used for http requests. if you end up forking the engine and making your own then make sure to change this!!
+	
 	//// You can pretty much ignore everything from here on - your code should go in your states.
 
-	////
-	public static final UserAgent:String = 'TrollEngine/${Version.engineVersion}'; // used for http requests. if you end up forking the engine and making your own then make sure to change this!!
-	public static final volumeChangedEvent = new lime.app.Event<Float->Void>();
-
-	////
 	public static var showDebugTraces:Bool = #if (debug || SHOW_DEBUG_TRACES) true #else false #end;
 	public static var downloadBetas:Bool = Version.isBeta;
 	public static var outOfDate:Bool = false;
@@ -74,6 +69,12 @@ class Main extends Sprite
 	////
 	public static var fpsVar:FPS;
 	public static var bread:Bread;
+
+	#if ALLOW_DEPRECATION
+	@:noCompletion @:deprecated("volumeChangedEvent is deprecated, use FlxG.sound.onVolumeChange, instead") 
+	public static var volumeChangedEvent(get, never):flixel.util.FlxSignal.FlxTypedSignal<Float -> Void>;
+	@:noCompletion inline static function get_volumeChangedEvent() return FlxG.sound.onVolumeChange;
+	#end
 
 	////
 	public function new() {
@@ -164,8 +165,11 @@ class Main extends Sprite
 		startFullscreen = FlxG.save.data.fullscreen;
 		
 		StartupState.nextState = nextState;
-		addChild(new FNFGame(gameWidth, gameHeight, initialState, framerate, framerate, skipSplash, startFullscreen));
 
+		var game = new FNFGame(gameWidth, gameHeight, initialState, framerate, framerate, skipSplash, startFullscreen);
+		addChild(game);
+
+		FlxG.sound.volume = FlxG.save.data.volume;
 		FlxG.mouse.useSystemCursor = true;
 		FlxG.mouse.visible = false;
 
@@ -194,22 +198,9 @@ class Main extends Sprite
 		untyped __global__.__hxcpp_set_critical_error_handler(onCrash);
 		#end
 		#end
-
-		// shader coords fix
-		FlxG.signals.gameResized.add(function(w, h) {
-			if (FlxG.cameras != null) {
-				for (cam in FlxG.cameras.list) {
-					if (cam != null && cam.filters != null)
-						resetSpriteCache(cam.flashSprite);
-				}
-			}
-
-			if (FlxG.game != null)
-				resetSpriteCache(FlxG.game);
-		});
 	}
 
-	static function resetSpriteCache(sprite:Sprite):Void {
+	public static function resetSpriteCache(sprite:Sprite):Void {
 		@:privateAccess {
 			sprite.__cacheBitmap = null;
 			sprite.__cacheBitmapData = null;

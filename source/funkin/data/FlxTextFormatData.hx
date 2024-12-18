@@ -1,14 +1,18 @@
 package funkin.data;
 
 import flixel.text.FlxText;
+import funkin.Paths;
 
 @:structInit
 @:build(funkin.macros.FlxTextFormatterMacro.build())
-class FlxTextFormat{
+class FlxTextFormatData{
 	public var fieldWidth:Null<Float> = null;
+	public var alignment:Null<FlxTextAlign> = null;
+
 	public var font:Null<String> = null;
 	public var size:Null<Int> = null;
 	public var color:Null<Int> = null;
+	public var alpha:Null<Float> = null;
 	
 	public var borderStyle:Null<FlxTextBorderStyle> = null;
 	public var borderSize:Null<Float> = null;
@@ -21,5 +25,5 @@ class FlxTextFormat{
 	public var antialiasing:Null<Bool> = null;
 	public var pixelPerfectRender:Null<Bool> = null;
 
-	public static function applyFormat(textObject:FlxText, textFormat:FlxTextFormat);
+	public static function applyFormat(textObject:FlxText, textFormat:FlxTextFormatData);
 }

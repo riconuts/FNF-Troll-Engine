@@ -101,16 +101,16 @@ abstract class FunkinScript
 		set('inGameOver', false);
 		set('inChartEditor', false);
 
-		if (currentState is PlayState && currentState == PlayState.instance){
+		if (currentState is PlayState && currentState == PlayState.instance) {
 			set("inPlaystate", true);
 			
 			set('bpm', PlayState.SONG.bpm);
 			set('scrollSpeed', PlayState.SONG.speed);
 			set('songName', PlayState.SONG.song);
 			set('isStoryMode', PlayState.isStoryMode);
-			set('weekRaw', PlayState.storyWeek);
 			set('seenCutscene', PlayState.seenCutscene);
 			// set('week', WeekData.weeksList[PlayState.storyWeek]);
+			// set('weekRaw', PlayState.storyWeek);
 
 			set("difficulty", PlayState.difficulty);
 			set("difficultyName", PlayState.difficultyName);
