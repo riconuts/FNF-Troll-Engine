@@ -42,8 +42,8 @@
 
 	<!-- _____________________________ Path Settings ____________________________ -->
 
-    <set name="BUILD_DIR" value="export/debug" if="debug" />
     <set name="BUILD_DIR" value="export/release" />
+    <set name="BUILD_DIR" value="export/debug" if="debug" />
     <set name="BUILD_DIR" value="export/32bit" if="32bits" />
 
     <classpath path="source" />
@@ -100,10 +100,10 @@
 	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
 	<haxelib name="hxvlc" if="VIDEOS_ALLOWED"/> <!--You can replace with hxcodec if you're stubborn and dont wanna use newer and better libs-->
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
-	
+
 	<section if="HSCRIPT_ALLOWED">
 		<haxelib name="hscript"/>
-		<define name="hscriptPos"/>		
+		<define name="hscriptPos"/>
 
 		<haxeflag name="--macro" value="include('funkin')" />
 	</section>
@@ -112,7 +112,7 @@
 		<define name="traceLoading"/>
 		<define name="loadBenchmark"/>
 	</section>
-	
+
 	<haxelib name="faxe" if='switch'/>
 	<haxelib name="hxcpp-debug-server" if="debug" unless="telemetry"/>
 
@@ -187,6 +187,6 @@
 	,,,,@,,&,,,,,,,,,%                       @,,,,&,,,&@@@@@@@@@
 	,,@@@@,,@,,,,,,,(                      /*,,,,,@#,,,@@@@@@@@@
 	@@@@@@@&,,,,,,,,@                      ,,,,,,/@@,,,/@@@@@@@@
-	@@@@@@@@@@@,,,,,                      #,,,,,,@@@@,,,@@@@@@@@         
+	@@@@@@@@@@@,,,,,                      #,,,,,,@@@@,,,@@@@@@@@
 	-->
 </project>
