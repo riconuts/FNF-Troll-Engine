@@ -19,12 +19,19 @@ class FlxTextFormatterMacro
 			switch (f.kind) {
 				default:
 				case FVar(t,_):
-					// wow it really is just that fucking simple
-					setupExpressions.push(macro 
-						if ($p{["textFormat", f.name]} != $v{null}){
-							$p{["textObject", f.name]} = $p{["textFormat", f.name]}
-						}
-					);
+					if (f.name == "font") {
+						setupExpressions.push(macro {
+							if (textFormat.font != null)
+								textObject.font = Paths.font(textFormat.font);
+						});
+					}else {
+						setupExpressions.push(macro 
+							if ($p{["textFormat", f.name]} != $v{null}){
+								$p{["textObject", f.name]} = $p{["textFormat", f.name]}
+							}
+						);					
+					}
+
 			}
 		}
 

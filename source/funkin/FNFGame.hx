@@ -1,8 +1,11 @@
 package funkin;
 
+import Main.resetSpriteCache;
+import funkin.scripts.Globals;
+import funkin.states.MusicBeatState;
+
 #if SCRIPTABLE_STATES
 import funkin.states.scripting.HScriptOverridenState;
-import funkin.states.MusicBeatState;
 #end
 
 class FNFGame extends FlxGame
@@ -11,11 +14,31 @@ class FNFGame extends FlxGame
 	{
 		super(gameWidth, gameHeight, initialState, updateFramerate, drawFramerate, skipSplash, startFullscreen);
 		_customSoundTray = flixel.system.ui.DefaultFlxSoundTray;
+
+		// shader coords fix
+		function resetSpriteCaches() {
+			for (cam in FlxG.cameras.list) {
+				if (cam != null && cam.filters != null)
+					resetSpriteCache(cam.flashSprite);
+			}
+			resetSpriteCache(this);
+		}
+
+		FlxG.signals.gameResized.add((w, h) -> resetSpriteCaches());
+		FlxG.signals.focusGained.add(resetSpriteCaches);
 	}
 
-	#if SCRIPTABLE_STATES
+	override function update():Void
+	{
+		super.update();
+
+		if (FlxG.keys.justPressed.F5)
+			MusicBeatState.resetState();
+	}
+
 	override function switchState():Void
 	{
+		#if SCRIPTABLE_STATES
 		if (_requestedState is MusicBeatState)
 		{
 			var ogState:MusicBeatState = cast _requestedState;
@@ -26,8 +49,9 @@ class FNFGame extends FlxGame
 				_requestedState = nuState;
 			}
 		}
+		#end
 
-		return super.switchState();
+		Globals.variables.clear();
+		super.switchState();
 	}
-	#end
 }

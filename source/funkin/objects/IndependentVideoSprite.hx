@@ -51,8 +51,8 @@ class IndependentVideoSprite extends VideoSprite {
 			FlxG.state.add(this);
 
 		if(FlxG.state == PlayState.instance){
-			PlayState.instance.onPause.add(pause);
-			PlayState.instance.onResume.add(resume);
+			PlayState.instance.signals.onPause.add(pause);
+			PlayState.instance.signals.onResume.add(resume);
 			bitmap.rate = PlayState.instance.playbackRate;
 		}
 		

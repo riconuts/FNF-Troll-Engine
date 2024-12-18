@@ -11,13 +11,11 @@ import flixel.util.FlxTimer;
 import funkin.objects.shaders.ColorSwap;
 
 using StringTools;
+
 #if DISCORD_ALLOWED
 import funkin.api.Discord.DiscordClient;
 #end
-#if sys
-import sys.FileSystem;
-import sys.io.File;
-#end
+
 // used so stages wont break
 class FakeCharacter
 {
@@ -255,34 +253,18 @@ class TitleState extends MusicBeatState
 	{
 		var swagGoodArray:Array<Array<String>> = [];
 
-		Paths.currentModDirectory = "";
-		var rawFile:Null<String> = Paths.getContent(Paths.txt('introText'));
-
-		if (rawFile != null){
-			for (line in rawFile.rtrim().split('\n'))
-				swagGoodArray.push(line.split('--'));
-		}
-
-		#if MODS_ALLOWED
-		for (mod in Paths.getModDirectories()){
-			Paths.currentModDirectory = mod;
-
-			var rawFile:Null<String> = Paths.getContent(Paths.modsTxt("introText.txt"));
-
-			if (rawFile != null){
+		for (folder in Paths.getFolders("data")) {
+			var rawFile:Null<String> = Paths.getText('$folder/introText.txt');
+			if (rawFile != null) {
 				for (line in rawFile.rtrim().split('\n'))
 					swagGoodArray.push(line.split('--'));
 			}	
 		}
-		Paths.currentModDirectory = '';
-		#end
 
-		////
 		return swagGoodArray;
 	}
 
 	var transitioning:Bool = false;
-	private static var playJingle:Bool = false;
 	var titleTimer:Float = 0;
 
 	override function update(elapsed:Float)

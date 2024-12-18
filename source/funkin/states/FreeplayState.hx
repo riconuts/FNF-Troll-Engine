@@ -74,8 +74,8 @@ class FreeplayState extends MusicBeatState
 
 		add(menu);
 		menu.controls = controls;
-		menu.callbacks.onSelect = (selectedIdx) -> onSelectSong(songMeta[selectedIdx]);
-		menu.callbacks.onAccept = onAccept;
+		menu.callbacks.onSelect = (selectedIdx, _) -> onSelectSong(songMeta[selectedIdx]);
+		menu.callbacks.onAccept = (_, _) -> onAccept();
 
 		////
 		var hintBG = CoolUtil.blankSprite(FlxG.width, 26, 0xFF999999);

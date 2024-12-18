@@ -47,7 +47,6 @@
     <set name="BUILD_DIR" value="export/32bit" if="32bits" />
 
     <classpath path="source" />
-	<classpath path="flxAnimateShadow"/> <!--Remove if FlxAnimate updates and lets you write your own code to determine how filesystem shit is gotten-->
 
     <assets path="assets" />
     <assets path="alsoft.ini" />
@@ -92,13 +91,16 @@
     <haxelib name="flixel-ui" version="2.6.1" />
     <haxelib name="flixel-addons" version="3.2.3" />
 
-	<haxelib name="flxanimate" if="USING_FLXANIMATE"/>
+	<section if="USING_FLXANIMATE">
+		<haxelib name="flxanimate" version="3.0.4"/>
+		<classpath path="flxAnimateShadow"/> <!--Remove if FlxAnimate updates and lets you write your own code to determine how filesystem shit is gotten-->
+	</section>
 
 	<!--Uncomment if you want to use moonchart, which allows usage of chart formats from other rhythm games and fnf engines-->
     <haxelib name="moonchart" version="0.4.0" if="native"/>
 
 	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
-	<haxelib name="hxvlc" if="VIDEOS_ALLOWED"/> <!--You can replace with hxcodec if you're stubborn and dont wanna use newer and better libs-->
+	<haxelib name="hxvlc" version="1.6.1" if="VIDEOS_ALLOWED"/> <!--You can replace with hxcodec if you're stubborn and dont wanna use newer and better libs-->
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
 
 	<section if="HSCRIPT_ALLOWED">
