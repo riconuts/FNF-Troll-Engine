@@ -4,18 +4,18 @@ import flixel.FlxSprite;
 
 class AltBGSprite extends FlxSprite
 {
-    public function new(x:Float = 0, y:Float = 0, image:String, ?anim:String, ?loop:Bool=false) {
+	public function new(x:Float = 0, y:Float = 0, image:String, ?anim:String, ?loop:Bool=false) {
 		super(x, y);
 		frames = Paths.getSparrowAtlas(image);
 		animation.addByPrefix("idle", anim, 24, loop);
 		animation.play("idle");
-    }
+	}
 }
 
 class BGSprite extends FlxSprite
 {
 	private var idleAnim:String;
-    
+	
 	public function new(image:String, x:Float = 0, y:Float = 0, ?scrollX:Float = 1, ?scrollY:Float = 1, ?animArray:Array<String> = null, ?loop:Bool = false) {
 		super(x, y);
 

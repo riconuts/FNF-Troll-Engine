@@ -22,13 +22,13 @@ class Util
 {
 	inline public static function pussyPath(luaFile:String):Null<String>
 	{
-        var hasLuaExtension = false;
-        for(ext in Paths.LUA_EXTENSIONS){
+		var hasLuaExtension = false;
+		for(ext in Paths.LUA_EXTENSIONS){
 			if (luaFile.endsWith('.$ext')){
 				hasLuaExtension = true;
-                break;
-            }
-        }
+				break;
+			}
+		}
 
 		var cervix = hasLuaExtension ? luaFile : luaFile + ".lua";
 		var doPush = false;

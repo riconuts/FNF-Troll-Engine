@@ -3,14 +3,14 @@ package funkin.objects.shaders;
 import flixel.util.FlxColor;
 
 /**
-    mimics adobe flash's "adjust color" filter
+	mimics adobe flash's "adjust color" filter
 **/
 class AdjustColor{
 	public var saturation(default, set):Float = 0.0;
 	public var contrast(default, set):Float = 0.0;
 	public var brightness(default, set):Float = 0.0;
 
-    /*
+	/*
 	public var tintColor(default, set):FlxColor = 0;
 	function set_tintColor(val:FlxColor){
 
@@ -21,7 +21,7 @@ class AdjustColor{
 		
 		return tintColor = val;
 	}
-    */
+	*/
 
 	function set_saturation(val:Float){
 		bcs[2] = 1.0 + val;
@@ -39,7 +39,7 @@ class AdjustColor{
 	}
 
 	public final shader:AdjustColorShader;
-    private final bcs:Array<Float> = [0.0, 0.0, 0.0];
+	private final bcs:Array<Float> = [0.0, 0.0, 0.0];
 	private final tint:Array<Float> = [0.0, 0.0, 0.0, 0.0];
 
 	public function new(){

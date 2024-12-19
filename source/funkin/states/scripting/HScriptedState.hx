@@ -39,11 +39,11 @@ class HScriptedState extends MusicBeatState
 	{
 		for (filePath in Paths.getFolders("states"))
 		{
-            for(ext in Paths.HSCRIPT_EXTENSIONS){
-                var fullPath = filePath + '$name.$ext';
-                if (Paths.exists(fullPath))
-                    return new HScriptedState(fullPath, scriptVars);
-            }
+			for(ext in Paths.HSCRIPT_EXTENSIONS){
+				var fullPath = filePath + '$name.$ext';
+				if (Paths.exists(fullPath))
+					return new HScriptedState(fullPath, scriptVars);
+			}
 		}
 
 		return null;

@@ -33,7 +33,7 @@ class FlxSprite3D extends FlxSprite {
 		if (dirty) // rarely
 			calcFrame(useFramePixels);
 
-        // TODO: take origin into consideration properly
+		// TODO: take origin into consideration properly
 		var wid = frameWidth;
 		var hei = frameHeight;
 
@@ -43,9 +43,9 @@ class FlxSprite3D extends FlxSprite {
 		var camPos = new Vector3();
 		var camOrigin = new Vector3(); // vertex origin
 
-        // TODO: take origin into account properly without this bandaid fix vv
+		// TODO: take origin into account properly without this bandaid fix vv
 
-        var bandaidOrigin = FlxPoint.weak();
+		var bandaidOrigin = FlxPoint.weak();
 		bandaidOrigin.set(origin.x - halfW, origin.y - halfH);
 		for (camera in cameras)
 		{
@@ -61,9 +61,9 @@ class FlxSprite3D extends FlxSprite {
 				new Vector3(-halfW, halfH, 0),
 				new Vector3(halfW, halfH, 0)
 			];
-            
+			
 			getScreenPosition(_point, camera).subtractPoint(offset);
-            //_point.add(bandaidOrigin.x, bandaidOrigin.y);
+			//_point.add(bandaidOrigin.x, bandaidOrigin.y);
 			var pos = new Vector3(_point.x, _point.y, z);
 
 			for (idx => vert in quad)
@@ -72,22 +72,22 @@ class FlxSprite3D extends FlxSprite {
 					vert.x *= -1;
 				if (flipY)
 					vert.y *= -1;
-                vert.x -= bandaidOrigin.x;
-                vert.y -= bandaidOrigin.y;
-                vert.x *= scale.x;
-                vert.y *= scale.y;
+				vert.x -= bandaidOrigin.x;
+				vert.y -= bandaidOrigin.y;
+				vert.x *= scale.x;
+				vert.y *= scale.y;
 				
-                var vert = VectorHelpers.rotateV3(vert, FlxAngle.TO_RAD * pitch, FlxAngle.TO_RAD * yaw, FlxAngle.TO_RAD * roll);
+				var vert = VectorHelpers.rotateV3(vert, FlxAngle.TO_RAD * pitch, FlxAngle.TO_RAD * yaw, FlxAngle.TO_RAD * roll);
 				var originMod = vert.add(pos).subtract(camOrigin);
 				var projected = VectorHelpers.project(originMod.subtract(camPos));
 				vert = projected.subtract(pos).add(camOrigin); // puts the vertex back to default pos
 
-                vert.x += bandaidOrigin.x;
-                vert.y += bandaidOrigin.y;
+				vert.x += bandaidOrigin.x;
+				vert.y += bandaidOrigin.y;
 
 				quad[idx] = vert;
-                
-            }
+				
+			}
 			var frameRect = frame.frame;
 			var sourceBitmap = graphic.bitmap;
 
@@ -110,11 +110,11 @@ class FlxSprite3D extends FlxSprite {
 			]);
 
 			var uvData = new Vector<Float>(12, false, [
-				 leftUV,    topUV,
-				rightUV,    topUV,
+				 leftUV,	topUV,
+				rightUV,	topUV,
 				rightUV, bottomUV,
 
-				 leftUV,    topUV,
+				 leftUV,	topUV,
 				 leftUV, bottomUV,
 				rightUV, bottomUV,
 			]);
@@ -127,19 +127,19 @@ class FlxSprite3D extends FlxSprite {
 			shader.bitmap.filter = antialiasing ? LINEAR : NEAREST;
 
 			var transforms:Array<ColorTransform> = [];
-            var transfarm:ColorTransform = new ColorTransform();
+			var transfarm:ColorTransform = new ColorTransform();
 			transfarm.redMultiplier = colorTransform.redMultiplier;
 			transfarm.greenMultiplier = colorTransform.greenMultiplier;
 			transfarm.blueMultiplier = colorTransform.blueMultiplier;
 			transfarm.redOffset = colorTransform.redOffset;
 			transfarm.greenOffset = colorTransform.greenOffset;
 			transfarm.blueOffset = colorTransform.blueOffset;
-            transfarm.alphaOffset = colorTransform.alphaOffset;
-            transfarm.alphaMultiplier = colorTransform.alphaMultiplier * camera.alpha;
+			transfarm.alphaOffset = colorTransform.alphaOffset;
+			transfarm.alphaMultiplier = colorTransform.alphaMultiplier * camera.alpha;
 
 			for (n in 0...Std.int(vertices.length / 3))
 				transforms.push(transfarm);
-    
+	
 
 			var indices = new Vector<Int>(vertices.length, false, cast [for (i in 0...vertices.length) i]);
 			var drawItem = camera.startTrianglesBatch(graphic, antialiasing, true, blend, true, shader);
@@ -155,7 +155,7 @@ class FlxSprite3D extends FlxSprite {
 			#end
 		}
 		bandaidOrigin.putWeak();
-        
+		
 
 		#if FLX_DEBUG
 		if (FlxG.debugger.drawDebug)

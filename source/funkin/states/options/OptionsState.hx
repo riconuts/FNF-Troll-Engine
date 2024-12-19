@@ -4,28 +4,28 @@ import flixel.addons.transition.FlxTransitionableState;
 
 class OptionsState extends MusicBeatState 
 {
-    var bg:FlxSprite;
+	var bg:FlxSprite;
 	var backdrop:flixel.addons.display.FlxBackdrop;
 
 	var daSubstate:OptionsSubstate;
 
 	var transCamera:FlxCamera; // JUST for the transition	
-    var transitioned:Bool = false;
+	var transitioned:Bool = false;
 
-    override function create()
+	override function create()
 	{
-        persistentUpdate = true;
-        persistentDraw = true;
+		persistentUpdate = true;
+		persistentDraw = true;
 
-        daSubstate = new OptionsSubstate(true);
+		daSubstate = new OptionsSubstate(true);
 		daSubstate.goBack = (changedOptions:Array<String>)->{
 			FadeTransitionSubstate.nextCamera = daSubstate.transCamera;
 			MusicBeatState.switchState(new MainMenuState());
-        };
+		};
 
 		openSubState(daSubstate);
 
-        super.create();
+		super.create();
 
 		#if tgt
 		var bgGraphic = Paths.image('tgtmenus/optionsbg');
@@ -85,22 +85,22 @@ class OptionsState extends MusicBeatState
 		add(backdrop);
 		add(bg);
 		#end
-    }
+	}
 
 	override public function resetSubState(){
 		super.resetSubState();
 		if (!transitioned){
 			transitioned = true;
 			transCamera = daSubstate.transCamera;
-		    doDaInTrans();
-        }
-    }
-    
+			doDaInTrans();
+		}
+	}
+	
 	override function finishTransIn()
 		subState.closeSubState();
 	
-    
-    function doDaInTrans(){
+	
+	function doDaInTrans(){
 		if (transIn != null)
 		{
 			if (FlxTransitionableState.skipNextTransIn)
@@ -119,7 +119,7 @@ class OptionsState extends MusicBeatState
 			FadeTransitionSubstate.nextCamera = transCamera;
 			trans.start(OUT);
 		}
-    }
+	}
 
 	function doDaOutTrans(?OnExit:Void->Void){
 		_onExit = OnExit;
@@ -135,7 +135,7 @@ class OptionsState extends MusicBeatState
 		{
 			_onExit();
 		}
-    }
+	}
 
 	override function transitionToState(nextState:FlxState):Void
 	{

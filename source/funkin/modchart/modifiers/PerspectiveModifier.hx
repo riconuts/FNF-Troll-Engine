@@ -24,13 +24,13 @@ class PerspectiveModifier extends NoteModifier
 	{
 		var subMods:Array<String> = ["fieldRoll", "fieldYaw", "fieldPitch", "fieldX", "fieldY", "fieldZ"];
 
-        for(col in 0...PlayState.keyCount){
-            subMods.push('${col}Roll');
+		for(col in 0...PlayState.keyCount){
+			subMods.push('${col}Roll');
 			subMods.push('${col}Yaw');
 			subMods.push('${col}Pitch');
-            // I dont see any real practical use for [col]X, Y, Z esp since transform[col]X/Y/Z exists
-            // however theres no good way to rotate the columns seperately atm
-        }
+			// I dont see any real practical use for [col]X, Y, Z esp since transform[col]X/Y/Z exists
+			// however theres no good way to rotate the columns seperately atm
+		}
 
 		subMods.push("legacyZAxis"); // Set to 1 to use a 0-1 Z axis instead of 0-1280
 
@@ -65,7 +65,7 @@ class PerspectiveModifier extends NoteModifier
 		VectorHelpers.project(pos, pos, legacyZAxis ? 1 : 1280); 
 
 		// TODO: move alot of this into a ColumnRenderer class and do some rewriting to fields etc YET AGAIN
-        // mainly for like.. column-based rotation etc etc lole
+		// mainly for like.. column-based rotation etc etc lole
 
 		// puts the vertex back to default pos 
 		pos.incrementBy(origin);

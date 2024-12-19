@@ -72,24 +72,24 @@ class PathModifier extends NoteModifier
 	override function getSubmods()
 	{
 		return [
-            'xmode',
+			'xmode',
 
-            'zigzag',
-            'zigzagPeriod',
-            'zigzagOffset',
+			'zigzag',
+			'zigzagPeriod',
+			'zigzagOffset',
 
-            'sawtooth',
-            'sawtoothPeriod',
+			'sawtooth',
+			'sawtoothPeriod',
 
-            'square',
-            'squareOffset',
-            'squarePeriod',
+			'square',
+			'squareOffset',
+			'squarePeriod',
 
-            'bounce',
-            'bounceOffset',
-            'bouncePeriod',
+			'bounce',
+			'bounceOffset',
+			'bouncePeriod',
 
-            // TODO: maybe some sorta scrollDirectionX/Y/Z which'll make it so the note moves towards the receptor in that direction
-        ];
+			// TODO: maybe some sorta scrollDirectionX/Y/Z which'll make it so the note moves towards the receptor in that direction
+		];
 	}
 }

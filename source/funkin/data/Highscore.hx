@@ -10,23 +10,23 @@ enum abstract FCType(Int) from Int to Int
 	var TIER4 = 4; // EFC
 	var TIER3 = 3; // SFC
 	var TIER2 = 2; // GFC
-    var TIER1 = 1; // FC
-    var NONE = 0; // NO FC
+	var TIER1 = 1; // FC
+	var NONE = 0; // NO FC
 }
 
 typedef ScoreRecord = {
-    @:optional var scoreSystemV:Float; // version for the score system
-    var score:Int; // score based on judgements
-    var comboBreaks:Int;
-    var accuracyScore:Float; // score based on accuracy. Judge-based on normal, MS-based on Wife3
+	@:optional var scoreSystemV:Float; // version for the score system
+	var score:Int; // score based on judgements
+	var comboBreaks:Int;
+	var accuracyScore:Float; // score based on accuracy. Judge-based on normal, MS-based on Wife3
 	var maxAccuracyScore:Float; // score if you hit every note 100% accurately
-    // accuracy = (notesHit / totalNotesHit) * 100 
-    var judges:Map<String, Int>; // keeps track of the judgements you hit
-    var noteDiffs:Array<Float>; // hit diffs for every note
+	// accuracy = (notesHit / totalNotesHit) * 100 
+	var judges:Map<String, Int>; // keeps track of the judgements you hit
+	var noteDiffs:Array<Float>; // hit diffs for every note
 	var npsPeak:Int; // peak notes-per-second
-    @:optional var fcMedal:FCType;
+	@:optional var fcMedal:FCType;
 
-    @:optional var rating:Float; // backwards compat, never saved for new scores, only migrated.
+	@:optional var rating:Float; // backwards compat, never saved for new scores, only migrated.
 }
 
 // TODO: maybe a score history?
@@ -116,15 +116,15 @@ class Highscore {
 	];
 /* 	static var wifeVersion:Float = Wife3.version; // wife version. TECHNICALLY 3, but doing 1 for the sake of being easy
 	static var pbotVersion:Float = 1; // PBot version.
-    static var normVersion:Float = 2; // judgement acc version */
+	static var normVersion:Float = 2; // judgement acc version */
 
 	#if !macro
 	static var save:FlxSave = new FlxSave(); // high-score save file
-    static var currentSongData:Map<String, ScoreRecord> = []; // all song score records
+	static var currentSongData:Map<String, ScoreRecord> = []; // all song score records
 	static var currentWeekData:Map<String, Int> = []; // all week scores (might eventually change to its own WeekScoreRecord idk lol prob not tho)
-    static var currentLoadedID:String = '';
+	static var currentLoadedID:String = '';
 
-    public static var accSystem:String = '';
+	public static var accSystem:String = '';
 	public static var hasEpic:Bool = false;
 	public static var judgeDiff:String = 'J4';
 	public static var version:Float = systemVersions.get("");
@@ -146,7 +146,7 @@ class Highscore {
 			windows.insert(0, 'epic');
 		if (judgeDiff != 'J4')
 			idArray.push(judgeDiff);
-        
+		
 		for (window in windows)
 		{
 			var realWindow = Reflect.field(ClientPrefs, window + "Window");
@@ -169,38 +169,38 @@ class Highscore {
 	static inline function formatSong(path:String, chartName:String):String
 		return Paths.formatToSongPath(path) + ((chartName==null||chartName.length==0)?'':':$chartName');
 
-    public static inline function emptyRecord():ScoreRecord {
-        return {
+	public static inline function emptyRecord():ScoreRecord {
+		return {
 			scoreSystemV: version,
-            score: 0,
-            comboBreaks: 0,
-            accuracyScore: 0,
-            maxAccuracyScore: 0,
-            judges: [
-                "epic" => 0,
-                "sick" => 0,
-                "good" => 0,
-                "bad" => 0,
-                "shit" => 0,
-                "miss" => 0
-            ],
+			score: 0,
+			comboBreaks: 0,
+			accuracyScore: 0,
+			maxAccuracyScore: 0,
+			judges: [
+				"epic" => 0,
+				"sick" => 0,
+				"good" => 0,
+				"bad" => 0,
+				"shit" => 0,
+				"miss" => 0
+			],
 			noteDiffs: [],
 			npsPeak: 0,
 			fcMedal: NONE
-        };
-    }
-    public static inline function getRecord(song:String, chartName:String):ScoreRecord
-    {
+		};
+	}
+	public static inline function getRecord(song:String, chartName:String):ScoreRecord
+	{
 		var formattedSong:String = formatSong(song, chartName);
 		//trace('get "$formattedSong"');
 		return currentSongData.exists(formattedSong) ? currentSongData.get(formattedSong) : emptyRecord();
-    }
+	}
 	public static function isValidScoreRecord(record:ScoreRecord){
 		if (record.scoreSystemV == null || record.scoreSystemV < version)
 			return false;
-        
-        return true;
-    }
+		
+		return true;
+	}
 	public inline static function hasValidScore(song:String, chartName:String)
 		return isValidScoreRecord(getRecord(song, chartName));
 
@@ -214,52 +214,52 @@ class Highscore {
 		return (scoreRecord.accuracyScore / scoreRecord.maxAccuracyScore);
 	}
 
-    public inline static function getRating(song:String, chart:String):Float
+	public inline static function getRating(song:String, chart:String):Float
 		return getRatingRecord(getRecord(song, chart));
-    
-    public inline static function getScore(song:String, chart:String):Int
+	
+	public inline static function getScore(song:String, chart:String):Int
 		return getRecord(song, chart).score;
-    
+	
 	public inline static function getNotesHit(song:String, chart:String):Float
 		return getRecord(song, chart).accuracyScore;
 
 	public static function getWeekScore(week:String):Int
 		return currentWeekData.exists(week) ? currentWeekData.get(week) : 0;
 
-    @:deprecated("You should use saveScoreRecord in place of saveScore!")
+	@:deprecated("You should use saveScoreRecord in place of saveScore!")
 	public static function saveScore(song:String, score:Int = 0, ?rating:Float = -1, ?notesHit:Float = 0):Void
 	{
-        var tNH:Float = notesHit / rating; // total notes hit
-        return saveScoreRecord(song, '', {
+		var tNH:Float = notesHit / rating; // total notes hit
+		return saveScoreRecord(song, '', {
 			scoreSystemV: version,
 			score: score,
-            comboBreaks: 0, // since we cant detect the combo breaks from here
+			comboBreaks: 0, // since we cant detect the combo breaks from here
 			accuracyScore: notesHit,
 			maxAccuracyScore: tNH,
 			judges: ["epic" => 0, "sick" => 0, "good" => 0, "bad" => 0, "shit" => 0, "miss" => 0],
 			noteDiffs: [],
 			npsPeak: 0,
-            fcMedal: rating == 1 ? TIER4 : NONE
-        });
-    }
+			fcMedal: rating == 1 ? TIER4 : NONE
+		});
+	}
 
 	public static function saveScoreRecord(song:String, chartName:String, scoreRecord:ScoreRecord, ?force:Bool = false)
 	{
 		if (scoreRecord.fcMedal == null){
-            if(scoreRecord.comboBreaks > 0)
-                scoreRecord.fcMedal = NONE; // no fc since you have a CB lol
-            else{
+			if(scoreRecord.comboBreaks > 0)
+				scoreRecord.fcMedal = NONE; // no fc since you have a CB lol
+			else{
 				var ordering:Array<Array<Dynamic>> = [["miss",NONE],["shit",TIER1],["bad",TIER1],["good",TIER2],["sick",TIER3],["epic",TIER4]]; // just to make sure the order is correct
-                var curMedal = NONE;
+				var curMedal = NONE;
 				for (data in ordering){
 					if (scoreRecord.judges.get(data[0]) > 0){
 						curMedal = data[1];
-                        break;
-                    }
-                }
-                scoreRecord.fcMedal = curMedal;
-            }
-        }
+						break;
+					}
+				}
+				scoreRecord.fcMedal = curMedal;
+			}
+		}
 		if (scoreRecord.scoreSystemV==null)scoreRecord.scoreSystemV = version;
 
 		var currentRecord = getRecord(song, chartName);
@@ -270,9 +270,9 @@ class Highscore {
 		if (force || !isValidScoreRecord(currentRecord) || currentRecord.accuracyScore < scoreRecord.accuracyScore || currentRecord.scoreSystemV < scoreRecord.scoreSystemV || isFCHigher){
 			currentSongData.set(formatSong(song, chartName), scoreRecord);
 			save.data.saveData.set(currentLoadedID, currentSongData);
-            save.flush();
-        }
-    }
+			save.flush();
+		}
+	}
 
 	public static function saveWeekScore(week:String, score:Int = 0, ?force:Bool=false){
 		if (force || currentWeekData.get(week) < score){
@@ -283,13 +283,13 @@ class Highscore {
  			save.data.weekSaveData.set(currentLoadedID, currentWeekData);
 			
 			save.flush(); 
-        }
-    }
+		}
+	}
 	public static function resetWeek(week:String){
 		currentWeekData.set(week, 0);
 		save.data.weekSaveData.set(currentLoadedID, currentWeekData);
 		save.flush(); 
-    }
+	}
 	public static function resetSong(song:String, chartName:String){
 		var formattedSong:String = formatSong(song, chartName);
 		trace('reset song score "$formattedSong"');
@@ -297,7 +297,7 @@ class Highscore {
 		currentSongData.remove(formattedSong);
 		save.data.saveData.set(currentLoadedID, currentSongData);
 		save.flush();
-    }
+	}
 
 	public static function loadData(?ID:String, ?shouldMigrate:Bool=true)
 	{
@@ -305,25 +305,25 @@ class Highscore {
 			accSystem = accSystems.get(ClientPrefs.accuracyCalc);
 			hasEpic = ClientPrefs.useEpics;
 			judgeDiff = ClientPrefs.judgeDiff;
-            ID = getID();
+			ID = getID();
 			if (currentLoadedID == ID)
 				return;
-        }else{
+		}else{
 			if (currentLoadedID == ID)
 				return;
-            var idData = ID.split("-");
+			var idData = ID.split("-");
 			accSystem = accSystems.exists(idData[1]) ? accSystems.get(idData[1]) : '';
-            hasEpic = idData[0] == 't';
+			hasEpic = idData[0] == 't';
 			judgeDiff = accSystem == '' ? idData[2] : idData[1];
 			if (!Math.isNaN(Std.parseFloat(judgeDiff)))
 				judgeDiff = 'J4';
-        }
-        
+		}
+		
 		version = systemVersions.get(accSystem);
 
-        currentLoadedID = ID;
+		currentLoadedID = ID;
 		currentSongData = [];
-        currentWeekData = [];
+		currentWeekData = [];
 
 		var songSaveData:Map<String, Map<String, ScoreRecord>> = [];
 		var weekSaveData:Map<String, Map<String, Int>> = [];
@@ -336,23 +336,23 @@ class Highscore {
 		}else
 			songSaveData = save.data.saveData;
 
-        if(save.data.weekSaveData == null)
-        {
+		if(save.data.weekSaveData == null)
+		{
 			save.data.weekSaveData = weekSaveData;
-            saveNeedsFlushing = true;
-        }else
-            weekSaveData = save.data.weekSaveData;
-        
+			saveNeedsFlushing = true;
+		}else
+			weekSaveData = save.data.weekSaveData;
+		
 		if (songSaveData.exists(ID + "songs")){
 			songSaveData.set(ID, songSaveData.get(ID + "songs"));
 			songSaveData.remove(ID + "songs");
-        }
+		}
 
 		if (!songSaveData.exists(ID)){
 			songSaveData.set(ID, []);
 			save.data.saveData = songSaveData;
 			saveNeedsFlushing = true;
-        }else
+		}else
 			currentSongData = songSaveData.get(ID);
 
 		if (!weekSaveData.exists(ID))
@@ -367,49 +367,49 @@ class Highscore {
 		if (shouldMigrate)
 			if(migrateSave(false))
 				saveNeedsFlushing = true;
-        
+		
 		if (saveNeedsFlushing)
-            save.flush();
-    }
-    
-    public static function migrateSave(?id:String, ?shouldFlush:Bool = false)
-    {
+			save.flush();
+	}
+	
+	public static function migrateSave(?id:String, ?shouldFlush:Bool = false)
+	{
 		if (id == null)
-            id = currentLoadedID;
+			id = currentLoadedID;
 
-        var oldID = currentLoadedID;
-        var needsFlush:Bool = false;
+		var oldID = currentLoadedID;
+		var needsFlush:Bool = false;
 
 		loadData(id, false);
 
-        var migrationSave:FlxSave = new FlxSave();
-        
+		var migrationSave:FlxSave = new FlxSave();
+		
 		migrationSave.bind('scores$id');
-        
+		
 
 		if (!migrationSave.isEmpty()){
 			var backupSave = new FlxSave();
 			backupSave.bind('scores${id}_BAK');
 			backupSave.mergeData(migrationSave.data, true);
 			backupSave.close();
-        }
+		}
 
 		var scores:Map<String, Int> = migrationSave.isEmpty() ? null : migrationSave.data.songScores;
 		if (migrationSave.data.songOldScores != null){
 			var oldScores:Map<String, Int> = migrationSave.data.songOldScores;
 			for (song => score in oldScores){
-                scores.set(song, score);
-                oldScores.remove(song);
-            }
+				scores.set(song, score);
+				oldScores.remove(song);
+			}
 			//migrationSave.data.songOldScores = null;
-        }
+		}
 		if (scores == null){  // doesnt matter since theres no scores here TO migrate
  			if (!migrationSave.isEmpty())
-                migrationSave.erase(); 
+				migrationSave.erase(); 
 
-            migrationSave.close();
-            return false;
-        }
+			migrationSave.close();
+			return false;
+		}
 		trace("migrating " + id);
 		var wifeScores:Map<String, Float> = [];
 		var songRatings:Map<String, Float> = [];
@@ -424,7 +424,7 @@ class Highscore {
 			weekScores = migrationSave.data.weekScores;
 
 /* 		var idData = id.split("-");
-        var wife3 = idData[1] == 'w3'; */
+		var wife3 = idData[1] == 'w3'; */
 
 		for (song => wScore in wifeScores)
 		{
@@ -434,43 +434,43 @@ class Highscore {
 		}
 
 		for (song => rating in songRatings){
-            if(!scores.exists(song))
-                scores.set(song, 0); // same as above
-        }
+			if(!scores.exists(song))
+				scores.set(song, 0); // same as above
+		}
 
 
-        var successfulMigrations:Int = 0;
-        var count:Int = 0;
-        for(song => score in scores){
+		var successfulMigrations:Int = 0;
+		var count:Int = 0;
+		for(song => score in scores){
 			count++;
-            try{
+			try{
 				if (!currentSongData.exists(song)){
-                    var newRecord:ScoreRecord = emptyRecord();
-                    newRecord.score = score;
-                    if (songRatings.exists(song)){
-                        var rating = songRatings.get(song);
+					var newRecord:ScoreRecord = emptyRecord();
+					newRecord.score = score;
+					if (songRatings.exists(song)){
+						var rating = songRatings.get(song);
 						if (wifeScores.exists(song)){
-                            var notesHit = wifeScores.get(song);
-                            newRecord.accuracyScore = notesHit;
-                            newRecord.maxAccuracyScore = notesHit / rating;    
-                        }else
-                            newRecord.rating = rating;
-                        newRecord.scoreSystemV = 1.0;
-                        newRecord.fcMedal = rating == 1 ? TIER4 : NONE; // since we cant really detect it from here lol
-                    }
-                    
-                    wifeScores.remove(song);
-                    songRatings.remove(song);
-                    scores.remove(song);
-                    currentSongData.set(song, newRecord);
-                }
-                successfulMigrations++;
-                
-            }
-            catch(e:Dynamic){
-                trace("error migrating scores: " + e);
-            }
-        }
+							var notesHit = wifeScores.get(song);
+							newRecord.accuracyScore = notesHit;
+							newRecord.maxAccuracyScore = notesHit / rating;	
+						}else
+							newRecord.rating = rating;
+						newRecord.scoreSystemV = 1.0;
+						newRecord.fcMedal = rating == 1 ? TIER4 : NONE; // since we cant really detect it from here lol
+					}
+					
+					wifeScores.remove(song);
+					songRatings.remove(song);
+					scores.remove(song);
+					currentSongData.set(song, newRecord);
+				}
+				successfulMigrations++;
+				
+			}
+			catch(e:Dynamic){
+				trace("error migrating scores: " + e);
+			}
+		}
 
 		save.data.saveData.set(id, currentSongData);
 		needsFlush = true;
@@ -482,35 +482,35 @@ class Highscore {
 			migrationSave.data.songWifeScores = wifeScores;
 
 		migrationSave.data.songScores = scores;
-        
+		
 		trace('successfully migrated $successfulMigrations/$count saved scores');
 		if (weekScores!=null){
 			for (week => score in weekScores){
 				currentWeekData.set(week, score);
 				weekScores.remove(week);
-            }
+			}
 			migrationSave.data.weekScores = weekScores;
-            save.data.weekSaveData.set(id, currentWeekData);
+			save.data.weekSaveData.set(id, currentWeekData);
 			needsFlush = true;
-        }
+		}
 
 		if (shouldFlush && needsFlush)
-            save.flush();
-        
+			save.flush();
+		
 		if (successfulMigrations == count){
-            trace("successfully migrated shit, erasing save");
-            migrationSave.erase(); // erase the old data since it has been migrated successfully
+			trace("successfully migrated shit, erasing save");
+			migrationSave.erase(); // erase the old data since it has been migrated successfully
 			migrationSave.destroy();
-        }else{
-            trace("not everything successfully migrated so the save is being kept");
+		}else{
+			trace("not everything successfully migrated so the save is being kept");
 			migrationSave.close();
-        }
+		}
 
 
 		loadData(oldID, false);
 
 		return needsFlush;
-    }
+	}
 
 	public static function load():Void
 	{
@@ -520,5 +520,5 @@ class Highscore {
 		if (FlxG.save.data.weekCompleted != null)
 			Highscore.weekCompleted = FlxG.save.data.weekCompleted;
 	}
-    #end
+	#end
 }

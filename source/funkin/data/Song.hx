@@ -75,8 +75,8 @@ typedef SongCreditdata = // beacuse SongMetadata is stolen
 class Song
 {
 	#if moonchart
-    private static function findFormat(filePaths:Array<String>) {
-        var files:Array<String> = [];
+	private static function findFormat(filePaths:Array<String>) {
+		var files:Array<String> = [];
 		for (path in filePaths) {
 			if (Paths.exists(path)) 
 				files.push(path);
@@ -86,13 +86,13 @@ class Song
 			return null;
 		
 		var data:Null<Format> = null;
-        try{
+		try{
 			data = FormatDetector.findFormat(files);
-        }catch(e:Any){
-            data = null;
-        }
-        return data;
-    }
+		}catch(e:Any){
+			data = null;
+		}
+		return data;
+	}
 
 	public static var moonchartExtensions(get, null):Array<String> = [];
 	static function get_moonchartExtensions(){
@@ -120,11 +120,11 @@ class Song
 	{
 		Paths.currentModDirectory = metadata.folder;
 		
-        #if moonchart
+		#if moonchart
 		final songName = Paths.formatToSongPath(metadata.songName);
 
-        var folder:String = '';
-        var charts:Map<String, Bool> = [];
+		var folder:String = '';
+		var charts:Map<String, Bool> = [];
 		
 		function processFileName(unprocessedName:String) {
 			var fileName:String = unprocessedName.toLowerCase();
@@ -133,14 +133,14 @@ class Song
 			if (!isAMoonchartRecognizedFile(fileName))
 				return;
 
-            var fileFormat:Format = findFormat([filePath]);
+			var fileFormat:Format = findFormat([filePath]);
 			if (fileFormat == null) return;
 
-            switch (fileFormat) {
-                case FNF_LEGACY_PSYCH | FNF_LEGACY:
-                    if (fileName == '$songName.json') {
-                        charts.set("normal", true);
-                        return;
+			switch (fileFormat) {
+				case FNF_LEGACY_PSYCH | FNF_LEGACY:
+					if (fileName == '$songName.json') {
+						charts.set("normal", true);
+						return;
 					} 
 					else if (fileName.startsWith('$songName-')) {
 						final extension_dot = songName.length + 1;
@@ -214,31 +214,31 @@ class Song
 
 		var allCharts:Array<String> = [for (name in charts.keys()) name];
 		var allChartsLower:Array<String> = [for (name in charts.keys()) name.toLowerCase()];
-        var chartNames:Array<String> = [];
+		var chartNames:Array<String> = [];
 
 		if (metadata.difficulties.length > 0){
-            for(diff in metadata.difficulties){
+			for(diff in metadata.difficulties){
 				if (allChartsLower.contains(diff)){
 					var index = allChartsLower.indexOf(diff);
-                    chartNames.push(diff);
+					chartNames.push(diff);
 					allCharts.splice(index, 1);
 					allChartsLower.remove(diff);
-                }
-            }
-        }
+				}
+			}
+		}
 
 		for (name in allCharts)
-            chartNames.push(name);
+			chartNames.push(name);
 
 		return chartNames;
-        #else
+		#else
 		final songName = Paths.formatToSongPath(metadata.songName);
 		final charts = new haxe.ds.StringMap();
 		
 		function processFileName(unprocessedName:String)
 		{		
 			var fileName:String = unprocessedName.toLowerCase();
-            if (fileName == '$songName.json'){
+			if (fileName == '$songName.json'){
 				charts.set("normal", true);
 				return;
 			}
@@ -267,9 +267,9 @@ class Song
 			Paths.iterateDirectory(Paths.mods('${metadata.folder}/songs/$songName/'), processFileName);
 		}
 		#end
-        
+		
 		return [for (name in charts.keys()) name];
-        #end
+		#end
 	}
 
 	public static function loadFromJson(jsonInput:String, folder:String, ?isSongJson:Bool = true):Null<SwagSong>
@@ -365,7 +365,7 @@ class Song
 			}
 		}
 
-        if (swagJson.notes == null || swagJson.notes.length == 0) {		
+		if (swagJson.notes == null || swagJson.notes.length == 0) {		
 			//// must have at least one section
 			swagJson.notes = [{
 				sectionNotes: [],
@@ -429,9 +429,9 @@ class Song
 				//// 2
 				if (swagJson.path==null) return true;
 				var jsonPath:Path = new Path(swagJson.path
-                    #if PE_MOD_COMPATIBILITY
-                    .replace("data/", "songs/")
-                    #end);
+					#if PE_MOD_COMPATIBILITY
+					.replace("data/", "songs/")
+					#end);
 
 				var folderPath = jsonPath.dir;
 				if (folderPath == null) return true; // could mean that it's somehow on the same folder as the exe but fuck it
@@ -471,7 +471,7 @@ class Song
 		var songLowercase:String = Paths.formatToSongPath(toPlay.songName);
 		var diffSuffix:String;
 
-        var rawDifficulty:String = difficulty;
+		var rawDifficulty:String = difficulty;
 
 		if (difficulty == null || difficulty == "" || difficulty == "normal"){
 			difficulty = 'normal';
@@ -560,10 +560,10 @@ class Song
 		if (SONG == null) {
 			PlayState.SONG = null;
 			
-            // Find a better way to show the error to the user
-            trace("No file format found for the chart!");
-            return;
-        }
+			// Find a better way to show the error to the user
+			trace("No file format found for the chart!");
+			return;
+		}
 		#else
 		var SONG:SwagSong = Song.loadFromJson(songLowercase + diffSuffix, songLowercase);
 		#end
@@ -594,7 +594,7 @@ class SongMetadata
 {
 	public var songName:String = '';
 	public var folder:String = '';
-    public var difficulties:Array<String> = [];
+	public var difficulties:Array<String> = [];
 	public var charts(get, null):Array<String>;
 	function get_charts()
 		return (charts == null) ? charts = Song.getCharts(this) : charts;
@@ -607,11 +607,11 @@ class SongMetadata
 	}
 
 	public function play(?difficultyName:String = ''){
-        if(charts.contains(difficultyName))
+		if(charts.contains(difficultyName))
 			return Song.playSong(this, difficultyName, charts.indexOf(difficultyName));
-    
-        trace("Attempt to play null difficulty: " + difficultyName);
-    }
+	
+		trace("Attempt to play null difficulty: " + difficultyName);
+	}
 
 	public function toString()
 		return '$folder:$songName';

@@ -27,9 +27,9 @@ typedef StageFile =
 
 	@:optional var bg_color:Null<String>;
 
-    // title screen vars
+	// title screen vars
 	@:optional var camera_stage:Array<Float>; 
-    @:optional var title_zoom:Float;
+	@:optional var title_zoom:Float;
 
 	// caching
 	@:optional var preloadStrings:Array<String>;
@@ -98,7 +98,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 				stageScript.call("onLoad", [this, foreground]);
 				stageBuilt = true;
 			} 
-        }
+		}
 	}
 
 	public function buildStage()
@@ -168,16 +168,16 @@ class Stage extends FlxTypedGroup<FlxBasic>
 			{
 				var modsList = Paths.getContent(modPath);
 				if (modsList != null && modsList.trim().length > 0)
-                    for (shit in modsList.split("\n"))
-                        daList.push(shit.trim().replace("\n", ""));
+					for (shit in modsList.split("\n"))
+						daList.push(shit.trim().replace("\n", ""));
 			}
 
-        }else{
+		}else{
 			var modsList = Paths.text('data/stageList.txt', false);
 			if (modsList != null && modsList.trim().length > 0)
 				for (shit in modsList.split("\n"))
 					daList.push(shit.trim().replace("\n", ""));
-        }
+		}
 
 
 		 
@@ -222,7 +222,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 
 		function readFileNameAndPush(fileName: String){
 			if (fileName==null)return;
-            
+			
 			if (!fileName.endsWith(".json")) return;
 
 			var name = fileName.substr(0, fileName.length - 5);

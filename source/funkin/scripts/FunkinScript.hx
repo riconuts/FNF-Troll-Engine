@@ -7,7 +7,7 @@ import funkin.ClientPrefs;
 
 enum abstract ScriptType(String) from String to String {
 	var HSCRIPT = "hscript";
-    var PSYCH_LUA = "lua";
+	var PSYCH_LUA = "lua";
 }
 
 /** 

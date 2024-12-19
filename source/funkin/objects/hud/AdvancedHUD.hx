@@ -250,8 +250,8 @@ class AdvancedHUD extends CommonHUD
 
 		super.update(elapsed);
 	}
-    
-    function refreshFCColour(){
+	
+	function refreshFCColour(){
 		fcTxt.color =
 			{
 				var color:FlxColor = 0xFFA3A3A3;
@@ -284,7 +284,7 @@ class AdvancedHUD extends CommonHUD
 
 				color;
 			};
-    }
+	}
 
 	function statChanged(stat:String, val:Dynamic){
 		// Maybe add isUpdating shit to here??

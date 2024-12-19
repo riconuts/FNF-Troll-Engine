@@ -12,35 +12,35 @@ class ReverseModifier extends NoteModifier
 	override function ignoreUpdateNote()
 		return false;
 
-    public function getReverseValue(dir:Int, player:Int){
-        var kNum = PlayState.keyCount;
+	public function getReverseValue(dir:Int, player:Int){
+		var kNum = PlayState.keyCount;
 
-        var val:Float = 0;
-        if(dir>=kNum * 0.5)
-            val += getSubmodValue("split" ,player);
+		var val:Float = 0;
+		if(dir>=kNum * 0.5)
+			val += getSubmodValue("split" ,player);
 
-        if((dir%2)==1)
-            val += getSubmodValue("alternate" ,player);
+		if((dir%2)==1)
+			val += getSubmodValue("alternate" ,player);
 
-        var first = kNum * 0.25;
-        var last = kNum-1-first;
+		var first = kNum * 0.25;
+		var last = kNum-1-first;
 
-        if(dir>=first && dir<=last)
-            val += getSubmodValue("cross" ,player);
+		if(dir>=first && dir<=last)
+			val += getSubmodValue("cross" ,player);
 
-        val += getValue(player) + getSubmodValue('reverse$dir', player);
+		val += getValue(player) + getSubmodValue('reverse$dir', player);
 
 
-        if(getSubmodValue("unboundedReverse",player)==0){
-            val %=2;
-            if(val>1)val=2-val;
-        }
+		if(getSubmodValue("unboundedReverse",player)==0){
+			val %=2;
+			if(val>1)val=2-val;
+		}
 
-       	if(ClientPrefs.downScroll)
-            val = 1 - val;
+	   	if(ClientPrefs.downScroll)
+			val = 1 - val;
 
-        return val;
-    }
+		return val;
+	}
 
 	private inline function getCenterValue(player:Int){
 		var centerPercent = getSubmodValue("centered", player);
@@ -68,18 +68,18 @@ class ReverseModifier extends NoteModifier
 			pos.y += n.typeOffsetY;
 		}
 
-        pos.y += obj.offsetY;
+		pos.y += obj.offsetY;
 
 		return pos;
 	}
 
-    override function getSubmods(){
-        var subMods:Array<String> = ["cross", "split", "alternate", "centered", "unboundedReverse"];
+	override function getSubmods(){
+		var subMods:Array<String> = ["cross", "split", "alternate", "centered", "unboundedReverse"];
 
 		for (i in 0...PlayState.keyCount){
-            subMods.push('reverse${i}');
-        }
+			subMods.push('reverse${i}');
+		}
 
-        return subMods;
-    }
+		return subMods;
+	}
 }

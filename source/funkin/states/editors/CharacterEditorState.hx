@@ -176,7 +176,7 @@ class CharacterEditorState extends MusicBeatState
 		camFollow.setPosition(mid.x, mid.y);
 		add(camFollow);
 
-        var camPos = char.getCamera();
+		var camPos = char.getCamera();
 
 		camFollow.x = camPos[0];
 		camFollow.y = camPos[1];
@@ -249,9 +249,9 @@ class CharacterEditorState extends MusicBeatState
 		super.create();
 	}
 
-    override function onFocus(){
+	override function onFocus(){
 		FlxG.mouse.visible = true;
-    }
+	}
 	var testMode:Bool = false;
 	var onPixelBG:Bool = false;
 	function reloadBGs() {

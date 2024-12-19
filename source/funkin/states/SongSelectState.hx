@@ -200,8 +200,8 @@ class SongSelectState extends MusicBeatState
 				songText[curSel].alpha = 0.6;
 			}
 		}
-        else if (controls.BACK)
-            MusicBeatState.switchState(new MainMenuState());
+		else if (controls.BACK)
+			MusicBeatState.switchState(new MainMenuState());
 		else if (FlxG.keys.justPressed.SEVEN)
 			MusicBeatState.switchState(new MasterEditorMenu());
 		else if (FlxG.keys.justPressed.SIX)

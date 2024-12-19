@@ -9,16 +9,16 @@ import math.Vector3;
 // Based on Schmovin' and Andromeda's modifier systems
 
 enum ModifierType {
-    NOTE_MOD; // used when the mod moves notes
-    MISC_MOD; // used for most things else
+	NOTE_MOD; // used when the mod moves notes
+	MISC_MOD; // used for most things else
 }
 
 enum abstract ModifierOrder(Int) to Int{
 	var FIRST = -1000;
-    var PRE_REVERSE = -3;
-    var REVERSE = -2;
-    var POST_REVERSE = -1;
-    var DEFAULT = 0;
+	var PRE_REVERSE = -3;
+	var REVERSE = -2;
+	var POST_REVERSE = -1;
+	var DEFAULT = 0;
 	var LAST = 1000;
 }
 
@@ -33,7 +33,7 @@ class Modifier {
 	public var modMgr:ModManager;
 	@:allow(modchart.ModManager)
 	var target_percents:Array<Float> = [0, 0];
-    public var percents:Array<Float> = [0, 0];
+	public var percents:Array<Float> = [0, 0];
 
 	public var submods:Map<String, Modifier> = [];
 	public var parent:Modifier; // for submods
@@ -41,7 +41,7 @@ class Modifier {
 	public function affectsField()
 		return false;
 	
-    public function getModType()
+	public function getModType()
 		return MISC_MOD; // if this is NOTE_MOD then this will be called on notes & receptors
 	
 	public function ignorePos()
@@ -53,18 +53,18 @@ class Modifier {
 	public function ignoreUpdateNote()
 		return true;
 
-    public function doesUpdate()
-        return getModType()==MISC_MOD; // override in your modifier if you want it to have update(elapsed, beat) called
-    
+	public function doesUpdate()
+		return getModType()==MISC_MOD; // override in your modifier if you want it to have update(elapsed, beat) called
+	
 	public function shouldExecute(player:Int, value:Float):Bool
 	{
 		return value != 0; // override if your modifier should run, even if percent isn't 0
 	}
 
-    public function getOrder():Int
+	public function getOrder():Int
 		return DEFAULT;
 
-    public function getName():String{
+	public function getName():String{
 		throw new haxe.exceptions.NotImplementedException(); // override in your modifier!!! 
 		return '';
 	}
@@ -78,12 +78,12 @@ class Modifier {
 			for (idx in 0...percents.length){
 				modMgr.touchMod(getName(), idx);
 				percents[idx] = value;
-            }
+			}
 		else{
 			modMgr.touchMod(getName(), player);
-            percents[player] = value;
-        }
-        
+			percents[player] = value;
+		}
+		
 	}
 
 	inline public function getTargetValue(player:Int):Float // because most the time when you getValue you wanna get the CURRENT value, not the target
@@ -94,7 +94,7 @@ class Modifier {
 
 	inline public function getPercent(player:Int):Float
 		return getValue(player) * 100;
-    
+	
 	inline public function setValue(value:Float, player:Int = -1) // because most the time when you setValue you wanna set the TARGET value, not the current
 	{
 		setCurrentValue(value, player);
@@ -102,8 +102,8 @@ class Modifier {
 			for (idx in 0...target_percents.length)
 				target_percents[idx] = value;
 		else
-            target_percents[player] = value;
-        
+			target_percents[player] = value;
+		
 	}
 
 	inline public function setCurrentPercent(percent:Float, player:Int = -1)
@@ -116,8 +116,8 @@ class Modifier {
 	public function getSubmods():Array<String>
 		return [];
 
-    public inline function addSubmod(name:String)
-		submods.set(name, new SubModifier(name, modMgr, this));    
+	public inline function addSubmod(name:String)
+		submods.set(name, new SubModifier(name, modMgr, this));	
 
 	inline public function getSubmodPercent(modName:String, player:Int)
 	{
@@ -168,7 +168,7 @@ class Modifier {
 
 	inline public function setCurrentOtherValue(modName:String, endValue:Float, player:Int)
 		return modMgr.setCurrentValue(modName, endValue, player);
-    
+	
 
 	inline public function setSubmodPercent(modName:String, endPercent:Float, player:Int)
 		return submods.get(modName).setPercent(endPercent, player);
@@ -187,7 +187,7 @@ class Modifier {
 
 	inline public function setOtherValue(modName:String, endValue:Float, player:Int)
 		return modMgr.setValue(modName, endValue, player);
-    
+	
 	public function new(modMgr:ModManager, ?parent:Modifier)
 	{
 		this.modMgr = modMgr;
@@ -196,15 +196,15 @@ class Modifier {
 			addSubmod(submod);
 	}
 
-    @:allow(funkin.modchart.ModManager)
-    private function _internalUpdate(){
-        for(pN in 0...target_percents.length){
+	@:allow(funkin.modchart.ModManager)
+	private function _internalUpdate(){
+		for(pN in 0...target_percents.length){
 			percents[pN] = target_percents[pN];
-        }
+		}
 
-        //for(mod in submods)mod._internalUpdate();
-        
-    }
+		//for(mod in submods)mod._internalUpdate();
+		
+	}
 
 	// Available whenever shouldUpdate() == true
 	public function update(elapsed:Float, beat:Float){}
@@ -222,11 +222,11 @@ class Modifier {
 	// player is 0 for bf, 1 for dad
 	// column is the direction/notedata
 	// note/receptor is self-explanatory
-    public function updateReceptor(beat:Float, receptor:StrumNote, player:Int){}
+	public function updateReceptor(beat:Float, receptor:StrumNote, player:Int){}
 	public function updateNote(beat:Float, note:Note, player:Int){}
 	public function getPos(diff:Float, tDiff:Float, beat:Float, pos:Vector3, column:Int, player:Int, obj:NoteObject, field:NoteField):Vector3{return pos;}
 	public function modifyVert(beat:Float, vert:Vector3, idx:Int, obj:NoteObject, pos:Vector3, player:Int, column:Int, field:NoteField):Vector3{return vert;}
 	public function getExtraInfo(diff:Float, tDiff:Float, beat:Float, info:RenderInfo, obj:NoteObject, player:Int, column:Int):RenderInfo{return info;}
 	public function isRenderMod():Bool{return false;} // Override and return true if your modifier uses modifyVert or getExtraInfo
-    public function getAliases():Map<String,String>{return [];}
+	public function getAliases():Map<String,String>{return [];}
 }

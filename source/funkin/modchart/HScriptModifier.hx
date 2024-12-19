@@ -62,18 +62,18 @@ class HScriptModifier extends Modifier
 	public static function fromName(modMgr:ModManager, ?parent:Modifier, scriptName:String):Null<HScriptModifier>
 	{		
 		var filePath:String = Paths.getHScriptPath('modifiers/$scriptName');
-        if(filePath == null){
+		if(filePath == null){
 			trace('Modifier script: $scriptName not found!');
 			return null;
-        }
+		}
 
-        var mod = new HScriptModifier(
-            modMgr, 
-            parent, 
-            FunkinHScript.fromFile(filePath, filePath, _scriptEnums, false)
-        );
-        mod.name = scriptName;
-        return mod;
+		var mod = new HScriptModifier(
+			modMgr, 
+			parent, 
+			FunkinHScript.fromFile(filePath, filePath, _scriptEnums, false)
+		);
+		mod.name = scriptName;
+		return mod;
 
 	}
 

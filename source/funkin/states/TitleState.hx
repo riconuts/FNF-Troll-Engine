@@ -245,7 +245,7 @@ class TitleState extends MusicBeatState
 		if (initialized){
 			Paths.clearUnusedMemory();
 			skipIntro();
-        }else{
+		}else{
 			initialized = true;
 			MusicBeatState.playMenuMusic(0, true);
 		}
@@ -291,7 +291,7 @@ class TitleState extends MusicBeatState
 			bg.stageScript.set("curDecBeat", curDecBeat);
 			bg.stageScript.set("curDecStep", curDecStep);
 			bg.stageScript.call('update', [elapsed]);
-        }
+		}
 		if (FlxG.sound.music != null)
 			Conductor.songPosition = FlxG.sound.music.time;
 
@@ -344,7 +344,7 @@ class TitleState extends MusicBeatState
 				if (titleText != null)
 					titleText.animation.play('press');
 
-                remove(darkness);
+				remove(darkness);
 				camHUD.flash(ClientPrefs.flashing ? FlxColor.WHITE : 0x4CFFFFFF, 1, null, true);
 				FlxG.sound.play(Paths.sound('confirmMenu'), 0.7 );
 
@@ -419,7 +419,7 @@ class TitleState extends MusicBeatState
 
 		if(!closedState) {
 			sickBeats++;
-            // this could prob be replaced with a json, yaml or even a whole "TitleSequence" script?? :shrug:
+			// this could prob be replaced with a json, yaml or even a whole "TitleSequence" script?? :shrug:
 			switch (sickBeats #if tgt * 0.5 #end)
 			{
 				case 1:
@@ -492,22 +492,22 @@ class TitleState extends MusicBeatState
 	{
 		super.stepHit();
 
-        if (bg != null && bg.stageScript != null)
-        {
-            if (skippedIntro){
-                bg.stageScript.set("curStep", curStep);
-                bg.stageScript.call('onStepHit', []);
-            }
-            var nuSection:Int = Math.floor(curBeat / 4);
-            if (section != nuSection)
-            {
-                section = nuSection;
-                if (skippedIntro){
-                    bg.stageScript.set("curSection", section);
-                    bg.stageScript.call('onSectionHit', []);
-                }
-            }
-        }
+		if (bg != null && bg.stageScript != null)
+		{
+			if (skippedIntro){
+				bg.stageScript.set("curStep", curStep);
+				bg.stageScript.call('onStepHit', []);
+			}
+			var nuSection:Int = Math.floor(curBeat / 4);
+			if (section != nuSection)
+			{
+				section = nuSection;
+				if (skippedIntro){
+					bg.stageScript.set("curSection", section);
+					bg.stageScript.call('onSectionHit', []);
+				}
+			}
+		}
 	}
 
 
@@ -519,7 +519,7 @@ class TitleState extends MusicBeatState
 		{
 			camGame.filters.remove(blurFilter);
 
-            titleText.visible = true;
+			titleText.visible = true;
 			logoBl.visible = true;
 			remove(ngSpr);
 			remove(blackScreen);

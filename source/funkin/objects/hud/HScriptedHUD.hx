@@ -22,10 +22,10 @@ class HScriptedHUD extends BaseHUD {
 	}
 
 	override function set_displayedHealth(nV:Float):Float 
-    {
+	{
 		script.call("set_displayedHealth", [nV]);
 		return nV;
-    }
+	}
 
 	override function reloadHealthBarColors(dadColor:FlxColor, bfColor:FlxColor)
 		script.call("reloadHealthBarColors", [dadColor, bfColor]);
@@ -35,8 +35,8 @@ class HScriptedHUD extends BaseHUD {
 	
 
 	function statChanged(stat:String, val:Dynamic)
-        script.call("statChanged", [stat, val]);
-    
+		script.call("statChanged", [stat, val]);
+	
 
 	override public function songStarted()
 		script.call("songStarted");

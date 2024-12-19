@@ -1,22 +1,22 @@
 package funkin.modchart.modifiers;
 
 class BeatModifier extends NoteModifier {
-    override function getName()return 'beat';
-    override function doesUpdate(){
-        return true;
-    }
+	override function getName()return 'beat';
+	override function doesUpdate(){
+		return true;
+	}
 
 	var beatFactors:Array<Array<Float>> = [];
 
-    override function update(elapsed:Float, beat:Float){
-        for(pn => f in beatFactors){
+	override function update(elapsed:Float, beat:Float){
+		for(pn => f in beatFactors){
 			updateBeat(0, beat, pn, getSubmodValue('beatOffset', pn), getSubmodValue('beatMult', pn));
 			updateBeat(1, beat, pn, getSubmodValue('beatYOffset', pn), getSubmodValue('beatYMult', pn));
 			updateBeat(2, beat, pn, getSubmodValue('beatZOffset', pn), getSubmodValue('beatZMult', pn));
-        }
-    }
+		}
+	}
 
-    function updateBeat(axis:Int, beat:Float, pn:Int, offset:Float, mult:Float){
+	function updateBeat(axis:Int, beat:Float, pn:Int, offset:Float, mult:Float){
 		if (beatFactors[pn] == null)
 			beatFactors[pn] = [];
 
@@ -52,37 +52,37 @@ class BeatModifier extends NoteModifier {
 		beatFactors[pn][axis] = 40 * amount;
 
 
-    }
+	}
 
-     override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField){
+	 override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField){
 		if (beatFactors[player] == null){
 			updateBeat(0, beat, player, getSubmodValue('beatOffset', player), getSubmodValue('beatMult', player));
 			updateBeat(1, beat, player, getSubmodValue('beatYOffset', player), getSubmodValue('beatYMult', player));
 			updateBeat(2, beat, player, getSubmodValue('beatZOffset', player), getSubmodValue('beatZMult', player));
-        }
+		}
 
 		pos.x += getValue(player) * (beatFactors[player][0] * FlxMath.fastSin((visualDiff / ((getSubmodValue('beatPeriod', player) * 30) + 30)) + Math.PI * 0.5));
 		pos.y += getSubmodValue('beatY', player) * (beatFactors[player][1] * FlxMath.fastSin((visualDiff / ((getSubmodValue('beatYPeriod', player) * 30) + 30)) + Math.PI * 0.5));
 		pos.z += getSubmodValue('beatZ', player) * (beatFactors[player][2] * FlxMath.fastSin((visualDiff / ((getSubmodValue('beatZPeriod', player) * 30) + 30)) + Math.PI * 0.5));
-        return pos;
-    }
+		return pos;
+	}
 
 	override function getSubmods()
 	{
 		return [
-            'beatOffset',
-            'beatPeriod',
-            'beatMult',
-            
-            'beatY',
-            'beatYOffset',
-            'beatYPeriod',
-            'beatYMult',
+			'beatOffset',
+			'beatPeriod',
+			'beatMult',
+			
+			'beatY',
+			'beatYOffset',
+			'beatYPeriod',
+			'beatYMult',
 
-            'beatZ',
-            'beatZOffset',
-            'beatZPeriod',
-            'beatZMult'
+			'beatZ',
+			'beatZOffset',
+			'beatZPeriod',
+			'beatZMult'
 		];
 	}
 }
