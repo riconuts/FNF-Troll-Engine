@@ -1,6 +1,6 @@
 package flxanimate.animate;
 
-
+#if USING_FLXANIMATE
 import flixel.math.FlxMath;
 import haxe.extern.EitherType;
 import flxanimate.animate.SymbolParameters;
@@ -492,3 +492,6 @@ class FlxMetaData
 		frameRate = 0;
 	}
 }
+#else
+class FlxAnim {}
+#end
