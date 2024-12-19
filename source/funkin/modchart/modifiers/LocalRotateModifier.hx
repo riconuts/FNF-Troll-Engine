@@ -7,12 +7,12 @@ class LocalRotateModifier extends NoteModifier { // this'll be rotateX in ModMan
 	override function getOrder()
 		return Modifier.ModifierOrder.POST_REVERSE;
 
-    var prefix:String;
+	var prefix:String;
 	public function new(modMgr:ModManager, ?prefix:String = '', ?parent:Modifier){
-        this.prefix=prefix;
-        super(modMgr, parent);
+		this.prefix=prefix;
+		super(modMgr, parent);
 
-    }
+	}
 
 	private var origin = new Vector3();
 	override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField){
@@ -38,9 +38,9 @@ class LocalRotateModifier extends NoteModifier { // this'll be rotateX in ModMan
 		pos.incrementBy(origin);
 
 		return pos;
-    }
+	}
 
-    override function getSubmods(){
+	override function getSubmods(){
 		var shid:Array<String> = ['rotateX', 'rotateY', 'rotateZ'];
 
 		var submods:Array<String> = [
@@ -54,5 +54,5 @@ class LocalRotateModifier extends NoteModifier { // this'll be rotateX in ModMan
 		submods.push('${prefix}rotateY');
 		submods.push('${prefix}rotateZ');
 		return submods;
-    }
+	}
 }

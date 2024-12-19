@@ -3,9 +3,9 @@ package funkin.objects.playfields;
 import haxe.exceptions.NotImplementedException;
 
 class FieldBase extends FlxObject {
-    public function preDraw()throw new NotImplementedException();
-    public var alpha:Float = 1;
-    /*
+	public function preDraw()throw new NotImplementedException();
+	public var alpha:Float = 1;
+	/*
 	 * The PlayField used to determine the notes to render
 	 * Required!
 	 */
@@ -14,7 +14,7 @@ class FieldBase extends FlxObject {
 	/**
 	 * All of the strums in the playfield attached to this notefield
 	 */
-    @:isVar
+	@:isVar
 	public var members(get, never):Array<StrumNote> = [];
 
 	function get_members()

@@ -11,11 +11,11 @@ class Hitmark extends FlxSprite
 	public var baseAlpha:Float = 1.0;
 	var decayTime:Float = 0.0;
 
-    public function new(?x:Float, ?y:Float){
-        super(x, y);
-        active = false;
-    }
-    
+	public function new(?x:Float, ?y:Float){
+		super(x, y);
+		active = false;
+	}
+	
 	override function draw()
 	{
 		decayTime += FlxG.elapsed;
@@ -68,8 +68,8 @@ class Hitbar extends FlxSpriteGroup
 	static var hitmarkHeight = 20;
 	static var hitbarHeight = 10;
 	
-    
-    public var mainBar:FlxSprite;
+	
+	public var mainBar:FlxSprite;
 	public var averageIndicator:FlxSprite;
 
 	var maxMarks:Int = 30;
@@ -172,7 +172,7 @@ class Hitbar extends FlxSpriteGroup
 		metronome.scale.y = scale.y * metronomeScale;
 		averageIndicator.scale.set(scale.x * 0.5, scale.y * 0.5);
 	}
-    
+	
 
 	public function addHit(time:Float)
 	{

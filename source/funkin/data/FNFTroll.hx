@@ -14,25 +14,25 @@ import moonchart.formats.fnf.legacy.FNFLegacy;
 import moonchart.formats.fnf.legacy.FNFPsych;
 
 typedef TrollJSONFormat = FNFLegacyFormat & {
-    // Psych 0.6
+	// Psych 0.6
 	?events:Array<PsychEvent>,
 	?gfVersion:String,
 	stage:String,
 	?arrowSkin:String,
 	?splashSkin:String,
 
-    // Troll-specific
+	// Troll-specific
 	?hudSkin:String,
 	?info:Array<String>,
 	?metadata:Song.SongCreditdata,
-    ?offset:Float,
+	?offset:Float,
 
-    // deprecated
+	// deprecated
 	?player3:String,
 }
 
 class FNFTroll extends FNFLegacyBasic<TrollJSONFormat> {
-    // From Psych Engine
+	// From Psych Engine
 	public static function __getFormat():FormatData {
 		return {
 			ID: "FNF_TROLL",
@@ -52,18 +52,18 @@ class FNFTroll extends FNFLegacyBasic<TrollJSONFormat> {
 	}
 
 	function resolveTrollEvent(event:BasicEvent):PsychEvent {
-        if(event.name == 'SLIDER_VELOCITY'){
-            return [
-                event.time,
-                [
-                    [
-                        "Mult SV",
+		if(event.name == 'SLIDER_VELOCITY'){
+			return [
+				event.time,
+				[
+					[
+						"Mult SV",
 						Std.string(event.data.MULTIPLIER),
-                        ""
-                    ]
-                ]
-            ];
-        }
+						""
+					]
+				]
+			];
+		}
 
 		var values:Array<Dynamic> = Util.resolveEventValues(event);
 
@@ -167,7 +167,7 @@ class FNFTroll extends FNFLegacyBasic<TrollJSONFormat> {
 		}
 	}
 
-    // Troll Engine shit
+	// Troll Engine shit
 	override function fromBasicFormat(chart:BasicChart, ?diff:FormatDifficulty):FNFTroll {
 		var basic = super.fromBasicFormat(chart, diff);
 		var data = basic.data;
@@ -179,18 +179,18 @@ class FNFTroll extends FNFLegacyBasic<TrollJSONFormat> {
 
 		data.song.gfVersion = chart.meta.extraData.get(PLAYER_3) ?? "gf";
 		data.song.stage = chart.meta.extraData.get(STAGE) ?? "stage";
-        var offset:Float = chart.meta.offset;
+		var offset:Float = chart.meta.offset;
 		data.song.offset = offset;
 
 		for (section in data.song.notes){
 			for (note in section.sectionNotes){
-                if(note[2] > 0)
+				if(note[2] > 0)
 					note[2] += Timing.stepCrochet(data.song.bpm, 4) * 2;
 
-            }
-        }
+			}
+		}
 		return cast basic;
-    }
+	}
 	override function prepareNote(note:FNFLegacyNote, offset:Float):FNFLegacyNote {
 		if (note.type is String) {
 			note[3] = switch (cast(note.type, String)) {
@@ -198,9 +198,9 @@ class FNFTroll extends FNFLegacyBasic<TrollJSONFormat> {
 					"StepmaniaMine";
 				case ALT_ANIM:
 					PSYCH_ALT_ANIM;
-                case ROLL:
-                    "Roll";
-                
+				case ROLL:
+					"Roll";
+				
 				default: cast note.type;
 			}
 		}

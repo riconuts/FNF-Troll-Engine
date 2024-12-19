@@ -74,7 +74,7 @@ class StrumNote extends NoteObject
 		zIndex = getZIndex();
 	}
 
-    function set_noteMod(value:String) {
+	function set_noteMod(value:String) {
 		genScript = (PlayState.instance == null) ? null : PlayState.instance.getHudSkinScript(value);
 
 		if (genScript == null) {
@@ -97,10 +97,10 @@ class StrumNote extends NoteObject
 			}
 
 			texture = newTex; // Load texture and anims
-        }
+		}
 
-        return noteMod = value;
-    }
+		return noteMod = value;
+	}
 
 	public function reloadNote()
 	{

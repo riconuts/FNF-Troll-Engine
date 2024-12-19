@@ -58,7 +58,7 @@ class ChartingState extends MusicBeatState
 {
 	public static var instance:ChartingState;
 	
-    public var offset:Float = 0;
+	public var offset:Float = 0;
 	public var notetypeScripts:Map<String, FunkinHScript> = [];
 	public static var noteTypeList:Array<String> = //Used for backwards compatibility with 0.1 - 0.3.2 charts, though, you should add your hardcoded custom note types here too.
 	[
@@ -70,9 +70,9 @@ class ChartingState extends MusicBeatState
 		'No Animation'
 	];
 
-    var hudList:Array<String> = [
-        'Default'
-    ];
+	var hudList:Array<String> = [
+		'Default'
+	];
 
 	private var noteTypeIntMap:Map<Int, String> = new Map<Int, String>();
 	private var noteTypeMap:Map<String, Null<Int>> = new Map<String, Null<Int>>();
@@ -280,7 +280,7 @@ class ChartingState extends MusicBeatState
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("Chart Editor", _song.song);
 		#end
-        
+		
 		/*
 		if(_song.metadata==null){
 			_song.metadata = {
@@ -477,8 +477,8 @@ class ChartingState extends MusicBeatState
 		}else{
 			reloadGridLayer();
 			updateHeads();
-            trace(curSec);
-            changeSection(curSec);
+			trace(curSec);
+			changeSection(curSec);
 		}
 
 
@@ -622,8 +622,8 @@ class ChartingState extends MusicBeatState
 		blockPressWhileTypingOnStepper.push(stepperSpeed);
 
 		////
-        var skins:Array<String> = ['default'];
-        #if MODS_ALLOWED
+		var skins:Array<String> = ['default'];
+		#if MODS_ALLOWED
 		var skinsLoaded:Map<String, Bool> = new Map();
 		var directories:Array<String> = Paths.getFolders('hudskins');
 		for (i in 0...directories.length) {
@@ -729,7 +729,7 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(saveButton);
 		tab_group_song.add(saveEvents);
 
-        // TODO: per-song metadata 
+		// TODO: per-song metadata 
 /* 		tab_group_song.add(saveMetadata);
 		tab_group_song.add(loadMetadata); */
 		tab_group_song.add(reloadSong);
@@ -1710,23 +1710,23 @@ class ChartingState extends MusicBeatState
 				_song.song = UI_songTitle.text;
 			}else if(curSelectedNote != null)
 			{
-                if(curSelectedNote[1][curEventSelected] != null){
-				    if(sender == value1InputText) {
-                        curSelectedNote[1][curEventSelected][1] = value1InputText.text;
-                        updateGrid();
-                    }
-                    else if(sender == value2InputText) {
-                        curSelectedNote[1][curEventSelected][2] = value2InputText.text;
-                        updateGrid();
-                    }
-                }
-                if(sender == strumTimeInputText) {
-                    var value:Float = Std.parseFloat(strumTimeInputText.text);
-                    if(Math.isNaN(value)) value = 0;
-                    curSelectedNote[0] = value;
-                    updateGrid();
-                }
-                
+				if(curSelectedNote[1][curEventSelected] != null){
+					if(sender == value1InputText) {
+						curSelectedNote[1][curEventSelected][1] = value1InputText.text;
+						updateGrid();
+					}
+					else if(sender == value2InputText) {
+						curSelectedNote[1][curEventSelected][2] = value2InputText.text;
+						updateGrid();
+					}
+				}
+				if(sender == strumTimeInputText) {
+					var value:Float = Std.parseFloat(strumTimeInputText.text);
+					if(Math.isNaN(value)) value = 0;
+					curSelectedNote[0] = value;
+					updateGrid();
+				}
+				
 			}
 		}
 		else if (id == FlxUISlider.CHANGE_EVENT && (sender is FlxUISlider))
@@ -2629,7 +2629,7 @@ class ChartingState extends MusicBeatState
 					track.pause();
 					track.time = Conductor.songPosition;
 				}
-                //trace(Conductor.songPosition, inst.time);
+				//trace(Conductor.songPosition, inst.time);
 
 				updateCurStep();
 			}

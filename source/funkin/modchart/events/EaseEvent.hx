@@ -9,15 +9,15 @@ class EaseEvent extends BaseEvent
 	public var callback:(EaseEvent, Float, Float) -> Void;
 	public var endStep:Float = 0;
 	public var progress:Float = 0;
-    public var value:Float = 0;
-    public var length:Float = 0;
+	public var value:Float = 0;
+	public var length:Float = 0;
 
 	public function new(step:Float, endStep:Float, easeFunc:EaseFunction, callback:(EaseEvent, Float, Float) -> Void, modMgr:ModManager)
 	{
 		super(step, modMgr);
 		this.callback = callback;
 		this.easeFunc = easeFunc;
-        this.endStep = endStep;
+		this.endStep = endStep;
 
 		length = endStep - step;
 	}
@@ -28,7 +28,7 @@ class EaseEvent extends BaseEvent
 		{
 			var passed = curStep - executionStep;
 			progress = passed / (endStep - executionStep);
-            	
+				
 			value = easeFunc(passed / length);
 			callback(this, value, curStep);
 		}

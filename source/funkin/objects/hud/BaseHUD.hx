@@ -41,11 +41,11 @@ class BaseHUD extends FlxSpriteGroup {
 	];
 
 	// Used for compatibility with Psych scripts
-    public function getHealthbar():FNFHealthBar 
+	public function getHealthbar():FNFHealthBar 
 		return null; 
 	
-    @:isVar public var displayNames(get, null):Map<String, String>;
-    @:noCompletion function get_displayNames()
+	@:isVar public var displayNames(get, null):Map<String, String>;
+	@:noCompletion function get_displayNames()
 		return ClientPrefs.judgeCounter == 'Shortened' ? shortenedDisplays : fullDisplays;
 
 
@@ -128,7 +128,7 @@ class BaseHUD extends FlxSpriteGroup {
 
 	public function changedOptions(changed:Array<String>){}
 	public function songStarted(){}
-    public function changedCharacter(id:Int, char:Character){}
+	public function changedCharacter(id:Int, char:Character){}
 	public function songEnding(){}
 
 	public function stepHit(step:Int){}

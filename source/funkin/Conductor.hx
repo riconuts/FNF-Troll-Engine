@@ -15,15 +15,15 @@ typedef BPMChangeEvent =
 
 class Conductor
 {
-    static inline var _internalJackLimit:Float = 192 / 16;
-    @:isVar
+	static inline var _internalJackLimit:Float = 192 / 16;
+	@:isVar
 	public static var jackLimit(get, default):Float = -1;
 	static function get_jackLimit(){
-        if(jackLimit < 0)
+		if(jackLimit < 0)
 			jackLimit = Conductor.stepCrochet / _internalJackLimit;
 
-        return jackLimit;
-    }
+		return jackLimit;
+	}
 
 	public static var judgeScales:Map<String, Float> = [
 		// since APPARENTLY Map<Float, String> is bad
@@ -52,12 +52,12 @@ class Conductor
 
 	public inline static function secsToRow(sex:Float):Int
 		return Math.round(getBeat(sex) * ROWS_PER_BEAT);
-    
+	
 
-    @:isVar
-    public static var stepCrotchet(get, set):Float = 0;
-    static function get_stepCrotchet()
-        return stepCrochet;
+	@:isVar
+	public static var stepCrotchet(get, set):Float = 0;
+	static function get_stepCrotchet()
+		return stepCrochet;
 
 	static function set_stepCrotchet(v:Float)
 		return stepCrochet = v;

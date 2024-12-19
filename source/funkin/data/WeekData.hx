@@ -35,19 +35,19 @@ typedef WeekMetadata = {
 	var songs:Array<String>;
 
 	/**
-        Difficulties in this week.
-        Mainly used for Psych weeks.
+		Difficulties in this week.
+		Mainly used for Psych weeks.
 	**/
-    var ?difficulties:Array<String>;
+	var ?difficulties:Array<String>;
 	
 	/**
 		Name of the content folder containing this week
 	**/
-    var ?directory:String;
+	var ?directory:String;
 
-    /**
-     *  Hides the week in freeplay
-     */
+	/**
+	 *  Hides the week in freeplay
+	 */
 	var ?hideFreeplay:Bool;
 }
 
@@ -67,41 +67,41 @@ class WeekData
 		#if MODS_ALLOWED
 		for (mod => daJson in Paths.getContentMetadata()) {
 			if (daJson != null) {
-                var loaded_songs:Array<String> = [];
+				var loaded_songs:Array<String> = [];
 
 				if (daJson.weeks != null){
-                    for (week in daJson.weeks) {
-                        if(inFreeplay && week.hideFreeplay)
-                            continue;
-                        
-                        week.directory = mod;
-                        if(week.songs != null)
-                            for (song in week.songs)
-                                loaded_songs.push(song.toLowerCase().replace(" ", "-"));
-                        list.push(week);
-                    }
-                }
+					for (week in daJson.weeks) {
+						if(inFreeplay && week.hideFreeplay)
+							continue;
+						
+						week.directory = mod;
+						if(week.songs != null)
+							for (song in week.songs)
+								loaded_songs.push(song.toLowerCase().replace(" ", "-"));
+						list.push(week);
+					}
+				}
 				if (inFreeplay) {
 					if (daJson.freeplaySongs != null){
 						var freeplay_week:funkin.data.WeekData.WeekMetadata = {
 							name: "Freeplay Songs",
-                            category: mod + "-freeplay",
+							category: mod + "-freeplay",
 							freeplayCategory: mod + "-freeplay",
 							unlockCondition: true,
 							songs: [],
-                            difficulties: [],
-                            directory: mod
-                            
-                        }
+							difficulties: [],
+							directory: mod
+							
+						}
 						var freeplaySongs:Array<FreeplaySongMetadata> = cast daJson.freeplaySongs;
 						for (song in freeplaySongs){
 							freeplay_week.songs.push(song.name);
 							loaded_songs.push(song.name.toLowerCase().replace(" ", "-"));
-                        }
-                        
-                        
+						}
+						
+						
 						list.push(freeplay_week);
-                    }
+					}
 					if (daJson.defaultCategory != null && daJson.defaultCategory.length > 0){
 						var default_week:funkin.data.WeekData.WeekMetadata = {
 							name: "Default Songs",
@@ -122,12 +122,12 @@ class WeekData
 							}
 						});
 						if (default_week.songs.length > 0)
-                            list.push(default_week);
-                    }
-                }
+							list.push(default_week);
+					}
+				}
 			}
 		}
-        #end
+		#end
 
 		return list;
 	}
@@ -139,7 +139,7 @@ class WeekData
 			name: weekFile.name,
 			songs: [],
 			category: 'psychengine', //'main',
-            difficulties: [for(v in weekFile.difficulties.split(","))v.toLowerCase().trim()],
+			difficulties: [for(v in weekFile.difficulties.split(","))v.toLowerCase().trim()],
 			// freeplayCategory: '$mod - $name',
 			unlockCondition: true,
 			//directory: mod

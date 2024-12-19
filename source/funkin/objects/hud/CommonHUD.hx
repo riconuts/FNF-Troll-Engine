@@ -22,8 +22,8 @@ class CommonHUD extends BaseHUD
 	public var iconP1:HealthIcon;
 	public var iconP2:HealthIcon;
 	
-    override function  getHealthbar():FNFHealthBar return healthBar;
-    
+	override function  getHealthbar():FNFHealthBar return healthBar;
+	
 	function get_healthBarBG()
 		return healthBar.healthBarBG;
 
@@ -61,11 +61,11 @@ class CommonHUD extends BaseHUD
 		timeBar.scrollFactor.set();
 
 		#if (PE_MOD_COMPATIBILITY && false)
-        if(FlxG.state == PlayState.instance){
-            PlayState.instance.healthBar = healthBar;
+		if(FlxG.state == PlayState.instance){
+			PlayState.instance.healthBar = healthBar;
 			PlayState.instance.iconP1 = iconP1;
 			PlayState.instance.iconP2 = iconP2;
-        }
+		}
 		#end
 		updateTimeBarType();
 
@@ -114,21 +114,21 @@ class CommonHUD extends BaseHUD
 		updateTimeBarAlpha();
 	}
 
-    override function changedCharacter(id:Int, char:Character){
+	override function changedCharacter(id:Int, char:Character){
 
-        switch(id){
-            case 0:
+		switch(id){
+			case 0:
 				iconP1.changeIcon(char.healthIcon);
-            case 1:
+			case 1:
 				iconP2.changeIcon(char.healthIcon);
-            case 2:
-                // gf icon
-            default:
-                // idk
-        }
-        
+			case 2:
+				// gf icon
+			default:
+				// idk
+		}
+		
 		super.changedCharacter(id, char);
-    }
+	}
 
 	function updateTimeBarAlpha()
 	{
