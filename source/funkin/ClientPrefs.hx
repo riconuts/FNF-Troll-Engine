@@ -419,7 +419,7 @@ class ClientPrefs
 			"noteSkin" => {
 				display: "Note Colours",
 				desc: "Changes how notes get their colours. Column bases it on direction, Quants bases it on beat.",
-				type: Dropdown,
+				type: Dropdown, // hey so why is this a dd, what other note coloring methods exist, why can't I just do ClientPrefs.quantNotes !!!
 				value: "Column",
 				data: ["requiresRestart" => true, "options" => ["Column", "Quants"]]
 			},

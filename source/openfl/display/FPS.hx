@@ -47,20 +47,20 @@ class FPS extends TextField
 	}
 
 	public var align(default, set):TextFormatAlign;
-	function set_align(val) {		
+	function set_align(val) {
 		return align = defaultTextFormat.align = switch (val){
-			default: 
+			default:
 				this.x = 10;
 				autoSize = LEFT;
 				LEFT;
 
-			case CENTER: 
-				this.x = (this.stage.stageWidth - this.textWidth) * 0.5; 
+			case CENTER:
+				this.x = (this.stage.stageWidth - this.textWidth) * 0.5;
 				autoSize = CENTER;
 				CENTER;
 
-			case RIGHT: 
-				this.x = (this.stage.stageWidth - this.textWidth) - 10; 
+			case RIGHT:
+				this.x = (this.stage.stageWidth - this.textWidth) - 10;
 				autoSize = RIGHT;
 				RIGHT;
 		}
@@ -109,7 +109,7 @@ class FPS extends TextField
 			if (align == null)
 				align = #if mobile CENTER #else LEFT #end;
 		});
-		
+
 		/*
 		addEventListener(openfl.events.KeyboardEvent.KEY_DOWN, (e)->{
 			if (e.keyCode == flixel.input.keyboard.FlxKey.F3)
@@ -160,7 +160,7 @@ class FPS extends TextField
 			cacheCount = currentCount;
 
 			text = 'FPS: $currentFPS';
-			
+
 			if (showMemory)
 				text += ' • Memory: ' + FlxStringUtil.formatBytes(getTotalMemory());
 

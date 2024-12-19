@@ -40,10 +40,7 @@ class AdvancedHUD extends CommonHUD
 
 		stats.changedEvent.add(statChanged);
 		
-		add(healthBarBG);
 		add(healthBar);
-		add(iconP1);
-		add(iconP2);
 		
 		var songRecord = Highscore.getRecord(this.songName, PlayState.difficultyName);
 		songHighscore = songRecord.score;
@@ -114,7 +111,7 @@ class AdvancedHUD extends CommonHUD
 			}
 		}else{
 			var text = new FlxText(0, 0, tWidth, Paths.getString("tier0plural"), 20);
-			text.setFormat(Paths.font("calibrib.ttf"), 24, 0xBDBDBD, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.WHITE);
+			text.setFormat(Paths.font("calibrib.ttf"), 24, 0xBDBDBD, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 			text.screenCenter(Y);
 			text.y -= 35;
 			text.x += 20 - 15;

@@ -64,6 +64,8 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return super.set_cameras(to);
 	}
 
+
+	public var tracks:Array<FlxSound> = []; // tracks managed by this field
 	public var playerId:Int = 0; // used to calculate the base position of the strums
 
 	public var spawnTime:Float = 1750; // spawn time for notes
@@ -78,6 +80,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	public var singAnimations:Array<String> = ["singLEFT", "singDOWN", "singUP", "singRIGHT"]; // default character animations to play for each column
 	
 	public var noteField:NoteField; // renderer
+	public var defaultNoteStyle = 'default';	
 	public var judgeManager(get, default):JudgmentManager; // for deriving judgements for input reasons
 	public var modManager:ModManager; // the mod manager. will be set automatically by playstate so dw bout this
 	public var modNumber:Int = 0; // used for the mod manager. can be set to a different number to give it a different set of modifiers. can be set to 0 to sync the modifiers w/ bf's, and 1 to sync w/ the opponent's
@@ -144,8 +147,9 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	}
 	
 	public var noteHitCallback:NoteCallback; // function that gets called when the note is hit. goodNoteHit and opponentNoteHit in playstate for eg
-	public var holdPressCallback:NoteCallback; // function that gets called when a hold is stepped on. Only really used for calling script events.
+	public var holdPressCallback:NoteCallback; // function that gets called when a hold is stepped on. Only really used for calling script events. Return 'false' to not do hold logic
 	public var holdReleaseCallback:NoteCallback; // function that gets called when a hold is released. Only really used for calling script events.
+	public var holdStepCallback:NoteCallback; // function that gets called for every 'step' that a hold is pressed for.
 
 	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>; // notesplashes
 	public var strumAttachments:FlxTypedGroup<NoteObject>; // things that get "attached" to the receptors. custom splashes, etc.
@@ -167,8 +171,6 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		super();
 		this.modManager = modMgr;
 
-		keyCount = PlayState.keyCount;
-
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 		add(grpNoteSplashes);
 
@@ -176,7 +178,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		strumAttachments.visible = false;
 		add(strumAttachments);
 
-		var splash:NoteSplash = new NoteSplash(100, 100, 0);
+		var splash:NoteSplash = new NoteSplash();
 		splash.handleRendering = false;
 		grpNoteSplashes.add(splash);
 		grpNoteSplashes.visible = false; // so they dont get drawn
@@ -230,6 +232,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	public function removeNote(daNote:Note){
 		daNote.active = false;
 		daNote.visible = false;
+		daNote.kill();
 
 		noteRemoved.dispatch(daNote, this);
 
@@ -324,11 +327,14 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		#else
 		noteList.sort((a, b) -> Std.int(b.strumTime - a.strumTime)); // so lowPriority actually works (even though i hate it lol!)
 		#end
+		var recentHold:Null<Note> = null;
+
 		while (noteList.length > 0)
 		{
 			var note:Note = noteList.pop();
 			if (note.wasGoodHit && note.holdType == HEAD && note.holdingTime < note.sustainLength)
-				return note; // for the sake of ghost-tapping shit
+				recentHold = note; // for the sake of ghost-tapping shit.
+				// returned lower so that holds dont interrupt hitting other notes as, even though that'd make sense, it also feels like shit to play on some songs i.e Bopeebo
 			else{
 				if (note.wasGoodHit)
 					continue;
@@ -342,13 +348,13 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 			}
 		}
 
-		return null;
+		return recentHold;
 	}
 
 	// generates the receptors
-	public function generateStrums(){
-		for(i in 0...keyCount){
-			var babyArrow:StrumNote = new StrumNote(0, 0, i, this, (FlxG.state == PlayState.instance) ? PlayState.instance.hudSkin : 'default');
+	public function generateStrums() {
+		for(i in 0...keyCount) {
+			var babyArrow:StrumNote = new StrumNote(0, 0, i, this, FlxG.state == PlayState.instance ? PlayState.instance.hudSkin : "default", this.defaultNoteStyle);
 			babyArrow.downScroll = ClientPrefs.downScroll;
 			babyArrow.alpha = 0;
 			insert(0, babyArrow);
@@ -388,7 +394,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	// spawns a notesplash w/ specified skin. optional note to derive the skin and colours from.
 
 	public function spawnSplash(note:Note, splashSkin:String){
-		var skin:String;
+/* 		var skin:String;
 		var hue:Float;
 		var sat:Float;
 		var brt:Float;
@@ -401,15 +407,10 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		}else{
 			skin = splashSkin;
 			hue = sat = brt = 0.0;
-			
-			/*var hsb = ClientPrefs.arrowHSV[note.column % 4]; 
-			hue = hsb[0] / 360;
-			sat = hsb[1] / 100;
-			brt = hsb[2] / 100;*/
-		}
+		} */
 
 		var splash:NoteSplash = grpNoteSplashes.recycle(NoteSplash);
-		splash.setupNoteSplash(0, 0, note.column, skin, hue, sat, brt, note);
+		splash.hitNote(note);
 		splash.handleRendering = false;
 		grpNoteSplashes.add(splash);
 		return splash;
@@ -490,9 +491,15 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 						}
 
 						var receptor = strumNotes[daNote.column];
+						var oldSteps:Int = Math.floor(daNote.holdingTime / Conductor.stepCrotchet);
 						var lastTime:Float = daNote.holdingTime;
 						daNote.holdingTime = Conductor.songPosition - daNote.strumTime;
-
+						if (daNote.holdingTime > daNote.sustainLength)
+							daNote.holdingTime = daNote.sustainLength;
+						var currentSteps:Int = Math.floor(daNote.holdingTime / Conductor.stepCrotchet);
+						if(oldSteps < currentSteps)
+							if(holdStepCallback != null)
+								holdStepCallback(daNote, this);
 						holdUpdated.dispatch(daNote, this, daNote.holdingTime - lastTime);
 
 						if(isHeld && !daNote.isRoll){
@@ -576,8 +583,9 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		if (inControl && autoPlayed)
 		{
 			for(i in 0...keyCount){
-				for (daNote in getTapNotes(i, (note:Note) -> !note.wasGoodHit && !note.tooLate && !note.ignoreNote && !note.hitCausesMiss)){
+				for (daNote in getTapNotes(i, (note:Note) -> !note.wasGoodHit && !note.ignoreNote && !note.hitCausesMiss)){
 					var hitDiff = Conductor.songPosition - daNote.strumTime;
+					daNote.tooLate = false;
 					if (isPlayer && (hitDiff + ClientPrefs.ratingOffset) >= (-5 * (Wife3.timeScale>1 ? 1 : Wife3.timeScale)) || hitDiff >= 0){
 						daNote.hitResult.judgment = judgeManager.useEpics ? TIER5 : TIER4;
 						daNote.hitResult.hitDiff = (hitDiff > -5) ? -5 : hitDiff; 

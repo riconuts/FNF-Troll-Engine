@@ -55,6 +55,8 @@ class KadeHUD extends BaseHUD
 	
 		//// Health bar
 		healthBar = new FNFHealthBar(iP1, iP2);
+		healthBar.screenCenter(X);
+		
 		healthBarBG = healthBar.healthBarBG;
 		iconP1 = healthBar.iconP1;
 		iconP2 = healthBar.iconP2;
@@ -97,11 +99,7 @@ class KadeHUD extends BaseHUD
 		timeTxt.scrollFactor.set();
 		add(timeTxt);
 	
-		
-		add(healthBarBG);
 		add(healthBar);
-		add(iconP1);
-		add(iconP2);
 
 		// fuck it
 		changedOptions([]);

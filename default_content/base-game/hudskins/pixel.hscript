@@ -30,6 +30,7 @@ function onSkinLoad()
 
 	spr.loadGraphic(comboNumsGraphic, true, Math.floor(comboNumsGraphic.width / 12), comboNumsGraphic.height);
 	spr.antialiasing = false;
+	spr.useDefaultAntialiasing = false;
 	
 	for (n in 0...10) spr.animation.add(Std.string(n), [n], 0, false);
 	spr.animation.add("-", [10], 0, false);
@@ -43,10 +44,19 @@ function onSkinLoad()
 	////
 	var spr = new RatingSprite();
 	spr.antialiasing = false;
+	spr.useDefaultAntialiasing = false;
 	spr.scale.set(6, 6);
 	
 	game.ratingGroup.judgeTemplate = spr;
 	
+	for(number in game.ratingGroup.comboSprs){
+		number.antialiasing = false;
+		number.useDefaultAntialiasing = false;
+	}
+	for(number in game.ratingGroup.judgeSprs){
+		number.antialiasing = false;
+		number.useDefaultAntialiasing = false;
+	}
 	////
 	hud = game.hud;
 	
@@ -153,16 +163,6 @@ function makeCountdownSprite(sprImage, swagCounter, tmr){
 	return countdownSpr;
 }
 
-function setupNoteTexture(note:Note){
-	if(note.isSustainNote)
-		note.reloadNote(note.texPrefix, 'NOTE_assets', note.texSuffix + 'ENDS', 'pixelUI', 4, 2);
-	else
-		note.reloadNote(note.texPrefix, 'NOTE_assets', note.texSuffix, 'pixelUI', 4, 5);
-
-	note.scale.set(6, 6);
-	note.antialiasing = false;
-}
-
 function setupReceptorTexture(strum:StrumNote){
 	strum.isQuant = false;
 	
@@ -204,6 +204,15 @@ function setupReceptorTexture(strum:StrumNote){
 		strum.playAnim(lastAnim, true);
 	}
 }
+
+function getNoteStyle(currentStyle:Null<String>){
+	NoteStyles.tryGetNewStyle(currentStyle + "-pixel"); // make it if it doesnt exist
+	if(NoteStyles.exists(currentStyle + "-pixel"))
+		return currentStyle + "-pixel";
+
+	return currentStyle;
+}
+
 
 function preSetupNoteSplash(){
 	this.kill();

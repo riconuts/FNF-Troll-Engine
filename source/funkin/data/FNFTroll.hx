@@ -12,6 +12,7 @@ import moonchart.formats.BasicFormat.BasicChart;
 import moonchart.formats.BasicFormat.FormatDifficulty;
 import moonchart.formats.fnf.legacy.FNFLegacy;
 import moonchart.formats.fnf.legacy.FNFPsych;
+import moonchart.formats.fnf.legacy.FNFPsych.PsychEvent;
 
 typedef TrollJSONFormat = FNFLegacyFormat & {
 	// Psych 0.6

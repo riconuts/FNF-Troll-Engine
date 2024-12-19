@@ -1,5 +1,7 @@
 package;
 
+import funkin.data.Level;
+
 import funkin.*;
 import funkin.states.MusicBeatState;
 import funkin.states.FadeTransitionSubstate;
@@ -127,6 +129,9 @@ class StartupState extends FlxTransitionableState
 		FlxG.stage.application.onExit.add((exitCode) -> funkin.api.Discord.DiscordClient.shutdown(true));
 		#end
 
+		var testLevel = Level.fromId("weekend1");
+		trace(testLevel.getDisplayedSongs());
+		
 		FlxTransitionableState.defaultTransIn = FadeTransitionSubstate;
 		FlxTransitionableState.defaultTransOut = FadeTransitionSubstate;
 	}
