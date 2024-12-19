@@ -146,10 +146,11 @@ class FunkinHScript extends FunkinScript
 		set("getEnum", Type.resolveEnum);
 		
 		#if NMV_MOD_COMPATIBILITY
+		set("Yoshi", funkin.objects.Yoshi);
 		set("addHaxeLibrary", function(c:String, ?p:String){
 			// Dumb hardcoded whatever idc!!!
 
-			if (c == 'KUTValueHandler')
+			if(get(c) != null)
 				return;
 
 			if (c == 'HitSingleMenu'){
