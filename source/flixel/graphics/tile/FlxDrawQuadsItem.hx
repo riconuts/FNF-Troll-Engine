@@ -10,6 +10,8 @@ import openfl.Vector;
 import openfl.display.ShaderParameter;
 import openfl.geom.ColorTransform;
 
+import funkin.objects.shaders.NoteColorSwap;
+
 class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 {
 	static inline var VERTICES_PER_QUAD = #if (openfl >= "8.5.0") 4 #else 6 #end;
@@ -22,6 +24,11 @@ class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 	var colorMultipliers:Array<Float>;
 	var colorOffsets:Array<Float>;
 
+	var hsvShifts:Array<Float>;
+	var daAlphas:Array<Float>;
+	var flashes:Array<Float>;
+	var flashColors:Array<Float>;
+
 	public function new()
 	{
 		super();
@@ -29,6 +36,11 @@ class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 		rects = new Vector<Float>();
 		transforms = new Vector<Float>();
 		alphas = [];
+
+		hsvShifts = [];
+		daAlphas = [];
+		flashes = [];
+		flashColors = [];
 	}
 
 	override public function reset():Void
@@ -37,6 +49,12 @@ class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 		rects.length = 0;
 		transforms.length = 0;
 		alphas.splice(0, alphas.length);
+
+		hsvShifts.splice(0, hsvShifts.length);
+		daAlphas.splice(0, daAlphas.length);
+		flashes.splice(0, flashes.length);
+		flashColors.splice(0, flashColors.length);
+
 		if (colorMultipliers != null)
 			colorMultipliers.splice(0, colorMultipliers.length);
 		if (colorOffsets != null)
@@ -51,9 +69,14 @@ class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 		alphas = null;
 		colorMultipliers = null;
 		colorOffsets = null;
+
+		hsvShifts = null;
+		daAlphas = null;
+		flashes = null;
+		flashColors = null;
 	}
 
-	override public function addQuad(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform):Void
+	override public function addQuad(frame:FlxFrame, matrix:FlxMatrix, ?transform:ColorTransform, ?colorSwap:NoteColorSwap):Void
 	{
 		var rect = frame.frame;
 		rects.push(rect.x);
@@ -71,6 +94,25 @@ class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 		var transformAlpha = transform != null ? transform.alphaMultiplier : 1.0;
 		for (i in 0...VERTICES_PER_QUAD)
 			alphas.push(transformAlpha);
+
+		if (colorSwap != null)
+		{
+			for (i in 0...VERTICES_PER_QUAD)
+			{
+				hsvShifts.push(colorSwap.hue);
+				hsvShifts.push(colorSwap.saturation);
+				hsvShifts.push(colorSwap.brightness);
+
+				daAlphas.push(colorSwap.daAlpha);
+
+				flashes.push(colorSwap.flash);
+
+				flashColors.push(colorSwap.flashR);
+				flashColors.push(colorSwap.flashG);
+				flashColors.push(colorSwap.flashB);
+				flashColors.push(colorSwap.flashA);
+			}
+		}
 
 		if (colored || hasColorOffsets)
 		{
@@ -128,6 +170,15 @@ class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 		{
 			shader.colorMultiplier.value = colorMultipliers;
 			shader.colorOffset.value = colorOffsets;
+		}
+
+		if (shader is NoteColorSwapShader)
+		{
+			var swapShader:NoteColorSwapShader = cast shader;
+			swapShader.hsvShift.value = hsvShifts;
+			swapShader.daAlpha.value = daAlphas;
+			swapShader.flash.value = flashes;
+			swapShader.flashColor.value = flashColors;
 		}
 
 		setParameterValue(shader.hasTransform, true);
