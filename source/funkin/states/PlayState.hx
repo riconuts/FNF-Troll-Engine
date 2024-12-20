@@ -617,7 +617,7 @@ class PlayState extends MusicBeatState
 		}
 
 		lastBeatHit = -5;
-		offset = SONG.offset ?? 0;
+		offset = SONG.offset ?? 0.0;
 		Conductor.mapBPMChanges(SONG);
 		Conductor.changeBPM(SONG.bpm);
 		Conductor.songPosition = Conductor.crochet * lastBeatHit;

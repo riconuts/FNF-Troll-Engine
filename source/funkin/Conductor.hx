@@ -179,7 +179,7 @@ class Conductor
 	}
 
 	inline static function sectionBeats(section:SwagSection):Float {
-		return section.sectionBeats ?? 4;
+		return section.sectionBeats ?? 4.0;
 	}
 
 	inline static function sectionSteps(section:SwagSection):Float {
