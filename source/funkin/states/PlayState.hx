@@ -2498,7 +2498,7 @@ class PlayState extends MusicBeatState
 
 		if (showDebugTraces)
 			trace("resync vocals!!");
-		
+
 		for (track in tracks)
 			track.pause();
 
@@ -2669,6 +2669,7 @@ class PlayState extends MusicBeatState
 						if(!inst.playing || inst.time == Conductor.lastSongPos)
 							lastMixTimer += elapsed;
 						else{
+							trace("mixed");
 							lastMixTimer = 0;
 							Conductor.lastSongPos = inst.time;
 						}
@@ -3334,6 +3335,8 @@ class PlayState extends MusicBeatState
 
 		if (ClientPrefs.simpleJudge) {
 			//// this legit just the ratinggroup code, fuckk!!!!
+			// We should move THIS INTO RATINGGROUP!!
+
 			spr = ratingGroup.addOnTop(lastJudge);
 			spr.cancelTween();
 
@@ -3344,7 +3347,8 @@ class PlayState extends MusicBeatState
 			spr.x = ratingGroup.x + ClientPrefs.comboOffset[0];
 			spr.y = ratingGroup.y - ClientPrefs.comboOffset[1];
 
-			spr.loadGraphic(Paths.image(image));
+			//spr.loadGraphic(Paths.image(image));
+			RatingGroup.setJudgementSprite(image, spr);
 			spr.updateHitbox();
 
 			////
