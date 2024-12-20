@@ -512,8 +512,6 @@ class Song
 		}
 		
 		if (!isVSlice) {
-			// TODO: scan through the song folder and look for the first thing that has a supported extension (if json then check if it has diffSuffix cus FNF formats!!)
-			// Or dont since this current method lets you do a dumb thing AKA have 2 diff chart formats in a folder LOL
 			for (ext in moonchartExtensions) {
 				var files:Array<String> = [songLowercase + diffSuffix, songLowercase];
 				for (idx in 0...files.length){
