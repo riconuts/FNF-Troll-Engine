@@ -44,6 +44,7 @@ jobs:
           haxelib install hmm --quiet
           haxelib run hmm setup
           haxelib run hmm install
+          haxelib install hxvlc 1.4.1
         shell: cmd
       - name: Create Version Tag
         run: echo "${{github.run_id}}" > VERSION
@@ -114,6 +115,7 @@ jobs:
           haxelib install hxcpp > /dev/null --quiet
           haxelib install hmm --quiet
           haxelib run hmm install
+          haxelib install hxvlc 1.4.1
       - name: Create Version Tag
         run: echo "${{github.run_id}}" > VERSION
       - name: Compile
@@ -147,6 +149,7 @@ jobs:
           haxelib install hxcpp > /dev/null --quiet
           haxelib install hmm --quiet
           haxelib run hmm install
+          haxelib install hxvlc 1.4.1
       - name: Create Version Tag
         run: echo "${{github.run_id}}" > VERSION
       - name: Compile
