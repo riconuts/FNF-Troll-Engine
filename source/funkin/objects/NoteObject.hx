@@ -4,6 +4,8 @@ import flixel.util.FlxDestroyUtil;
 import flixel.math.FlxPoint;
 import math.Vector3;
 
+import funkin.objects.shaders.NoteColorSwap;
+
 enum abstract ObjectType(#if cpp cpp.UInt8 #else Int #end)
 {
 	var UNKNOWN = -1;
@@ -20,6 +22,8 @@ class NoteObject extends FlxSprite {
 	public var noteData(get,set):Int; // backwards compat
 	inline function get_noteData()return column;
 	inline function set_noteData(v:Int)return column = v;
+
+	public var colorSwap:NoteColorSwap;
 
 	public var offsetX:Float = 0;
 	public var offsetY:Float = 0;

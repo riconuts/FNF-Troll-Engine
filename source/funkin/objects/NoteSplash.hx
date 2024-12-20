@@ -3,11 +3,10 @@ package funkin.objects;
 import funkin.states.PlayState;
 import funkin.scripts.Globals;
 import flixel.FlxG;
-import funkin.objects.shaders.ColorSwap;
+import funkin.objects.shaders.NoteColorSwap;
 
 class NoteSplash extends NoteObject
 {
-	public var colorSwap:ColorSwap = null;
 	private var idleAnim:String;
 	private var textureLoaded:String = null;
 
@@ -15,8 +14,8 @@ class NoteSplash extends NoteObject
 		super(x, y);
 		objType = SPLASH;
 		
-		colorSwap = new ColorSwap();
-		shader = colorSwap.shader;
+		colorSwap = new NoteColorSwap();
+		shader = NoteColorSwap.shader;
 
 		loadAnims(PlayState.splashSkin);
 		setupNoteSplash(x, y, note);

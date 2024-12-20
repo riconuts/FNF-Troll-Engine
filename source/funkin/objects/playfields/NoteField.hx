@@ -16,6 +16,7 @@ import openfl.Vector;
 import openfl.geom.ColorTransform;
 import funkin.modchart.ModManager;
 import funkin.modchart.Modifier.RenderInfo;
+import funkin.objects.shaders.NoteColorSwap;
 import funkin.states.PlayState;
 import funkin.states.MusicBeatState;
 import haxe.ds.Vector as FastVector;
@@ -32,6 +33,7 @@ class RenderObject {
 	public var vertices:Vector<Float>;
 	public var indices:Vector<Int>;
 	public var zIndex:Float;
+	public var colorSwap:NoteColorSwap;
 }
 
 final scalePoint = new FlxPoint(1, 1);
@@ -324,6 +326,7 @@ class NoteField extends FieldBase
 				var vertices = object.vertices;
 				var uvData = object.uvData;
 				var indices = object.indices;
+				var colorSwap = object.colorSwap;
 				var transforms:Array<ColorTransform> = []; // todo use fastvector
 				var multAlpha = this.alpha * ClientPrefs.noteOpacity;
 				for (n in 0... Std.int(vertices.length / 2)){
@@ -353,7 +356,7 @@ class NoteField extends FieldBase
 
 						@:privateAccess
 						{
-							drawItem.addTrianglesColorArray(vertices, indices, uvData, null, point, camera._bounds, transforms);
+							drawItem.addTrianglesColorArray(vertices, indices, uvData, null, point, camera._bounds, transforms, colorSwap);
 						}
 						for (n in 0...transforms.length)
 							transforms[n].alphaMultiplier = alphas[n] * multAlpha;
@@ -557,7 +560,8 @@ class NoteField extends FieldBase
 			uvData: uvData,
 			vertices: vertices,
 			indices: HOLD_INDICES,
-			zIndex: zIndex
+			zIndex: zIndex,
+			colorSwap: hold.colorSwap
 		}
 	}
 
@@ -780,7 +784,8 @@ class NoteField extends FieldBase
 			uvData: uvData,
 			vertices: vertices,
 			indices: NOTE_INDICES,
-			zIndex: pos.z
+			zIndex: pos.z,
+			colorSwap: sprite.colorSwap
 		}
 	}
 

@@ -1,5 +1,7 @@
 package funkin.objects.shaders;
 
+import funkin.objects.shaders.NoteColorSwap;
+
 class ColorSwap
 {
 	public var shader(default, null):ColorSwapShader = new ColorSwapShader();
@@ -105,6 +107,14 @@ class ColorSwap
 		);
 	}
 
+	inline public function copyFromNoteSwap(colorSwap:NoteColorSwap) {
+		setHSB(
+			colorSwap.hue,
+			colorSwap.saturation,
+			colorSwap.brightness	
+		);
+	}
+
 	public function new()
 	{
 		shader.uTime.value = [0, 0, 0];
@@ -116,22 +126,12 @@ class ColorSwap
 
 class ColorSwapShader extends FlxShader
 {
-	@:glFragmentSource('
-		#pragma header
-
-		uniform vec3 uTime;
-		uniform float daAlpha;
-		uniform float flash;
-		uniform vec4 flashColor;
-
+	@:glFragmentHeader('
 		const float offset = 1.0 / 128.0;
+		const vec3 colorNormalizer = vec3(1.0 / 255.0);
 		vec3 normalizeColor(vec3 color)
 		{
-			return vec3(
-				color[0] / 255.0,
-				color[1] / 255.0,
-				color[2] / 255.0
-			);
+			return color * colorNormalizer;
 		}
 
 		vec3 rgb2hsv(vec3 c)
@@ -170,13 +170,7 @@ class ColorSwapShader extends FlxShader
 
 			color = vec4(color.rgb / color.a, color.a);
 
-			mat4 colorMultiplier = mat4(0);
-			colorMultiplier[0][0] = openfl_ColorMultiplierv.x;
-			colorMultiplier[1][1] = openfl_ColorMultiplierv.y;
-			colorMultiplier[2][2] = openfl_ColorMultiplierv.z;
-			colorMultiplier[3][3] = openfl_ColorMultiplierv.w;
-
-			color = clamp(openfl_ColorOffsetv + (color * colorMultiplier), 0.0, 1.0);
+			color = clamp(openfl_ColorOffsetv + (color * openfl_ColorMultiplierv), 0.0, 1.0);
 
 			if (color.a > 0.0)
 			{
@@ -185,42 +179,35 @@ class ColorSwapShader extends FlxShader
 
 			return vec4(0.0, 0.0, 0.0, 0.0);
 		}
+	')
+	@:glFragmentSource('
+		#pragma header
+
+		uniform vec3 uTime;
+		uniform float daAlpha;
+		uniform float flash;
+		uniform vec4 flashColor;
 
 		void main()
 		{
 			vec4 color = texture2D(bitmap, openfl_TextureCoordv);
 
-			vec4 swagColor = vec4(
-				rgb2hsv(
-					vec3(color[0], color[1], color[2])
-				), 
-				color[3]
-			);
+			vec3 swagColor = rgb2hsv(color.rgb);
 
 			// hue
 			swagColor[0] = swagColor[0] + uTime[0];
 			// sat
-			swagColor[1] = swagColor[1] * (1.0 + uTime[1]);
+			swagColor[1] = clamp(swagColor[1] * (1.0 + uTime[1]), 0.0, 1.0);
 			// val
 			swagColor[2] = swagColor[2] * (1.0 + uTime[2]);
-			
-			if(swagColor[1] < 0.0)
-			{
-				swagColor[1] = 0.0;
-			}
-			else if(swagColor[1] > 1.0)
-			{
-				swagColor[1] = 1.0;
-			}
 
-			color = vec4(hsv2rgb(vec3(swagColor[0], swagColor[1], swagColor[2])), swagColor[3]);
+			color.rgb = hsv2rgb(swagColor);
 
 			if(flash != 0.0){
 				color = mix(color, flashColor, flash) * color.a;
 			}
 			color *= daAlpha;
 			gl_FragColor = colorMult(color);
-
 		}')
 	public function new()
 	{

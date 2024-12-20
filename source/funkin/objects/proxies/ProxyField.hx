@@ -67,6 +67,7 @@ class ProxyField extends FieldBase {
 				var vertices = object.vertices;
 				var uvData = object.uvData;
 				var indices = object.indices;
+				var colorSwap = object.colorSwap;
 				var transforms:Array<ColorTransform> = [];
 				for (n in 0...Std.int(vertices.length / 2))
 				{
@@ -95,7 +96,7 @@ class ProxyField extends FieldBase {
 						var drawItem = camera.startTrianglesBatch(graphic, shader.bitmap.filter == 4, true, null, true, shader);
 						@:privateAccess
 						{
-							drawItem.addTrianglesColorArray(vertices, indices, uvData, null, point, camera._bounds, transforms);
+							drawItem.addTrianglesColorArray(vertices, indices, uvData, null, point, camera._bounds, transforms, colorSwap);
 						}
 						for (n in 0...transforms.length)
 							transforms[n].alphaMultiplier = alphas[n];
