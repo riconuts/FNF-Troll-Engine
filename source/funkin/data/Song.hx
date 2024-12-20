@@ -413,14 +413,13 @@ class Song
 			var opponentTracks:Array<String> = null;
 
 			/**
-			 * 1. If 'needsVoices' is false, no tracks will be defined for the player or opponent
 			 * 2. If the chart folder couldn't be retrieved then "Voices-Player" and "Voices-Opponent" are used
 			 * 3. Define the first one existing in ['Voices-$player1', 'Voices-Player', 'Voices'] as a player track;
 			 * 4. Define the first one existing in ['Voices-$player2', 'Voices-Opponent', 'Voices'] as an opponent track;
 			 */
 			inline function sowy() {
 				//// 1
-				if (!songJson.needsVoices) {
+				if (songJson.needsVoices == false) {
 					playerTracks = [];
 					opponentTracks = [];
 					return false;

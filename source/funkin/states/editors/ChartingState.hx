@@ -557,17 +557,10 @@ class ChartingState extends MusicBeatState
 
 		var loadEventJson:FlxButton = new FlxButton(loadAutosaveBtn.x, loadAutosaveBtn.y + 30, 'Load Events', function()
 		{
-
 			var songName:String = Paths.formatToSongPath(_song.song);
-			var file:String = Paths.songJson(songName + '/events');
-			#if sys
-			if (#if MODS_ALLOWED FileSystem.exists(Paths.modsSongJson(songName + '/events')) || #end FileSystem.exists(file))
-			#else
-			if (OpenFlAssets.exists(file))
-			#end
-			{
+			var events:SwagSong = Song.loadFromJson('events', songName, false);
+			if (events != null) {
 				clearEvents();
-				var events:SwagSong = Song.loadFromJson('events', songName, false);
 				_song.events = events.events;
 				changeSection(curSec);
 			}
@@ -1618,7 +1611,7 @@ class ChartingState extends MusicBeatState
 		}
 		
 		var firstInstName:String = jsonTracks.inst[0];
-		if (soundTracksMap.exists(firstInstName)){
+		if (soundTracksMap.exists(firstInstName)) {
 			inst = soundTracksMap.get(firstInstName);
 			inst.volume = 0.6;
 
@@ -2839,13 +2832,12 @@ class ChartingState extends MusicBeatState
 	}
 
 	function initNoteType(notetype:String){
-		if(notetype == '')return;
-		if(notetypeScripts.exists(notetype))return;
+		if(notetype == '') return;
+		if(notetypeScripts.exists(notetype)) return;
 		var did:Bool = false;
+
 		#if PE_MOD_COMPATIBILITY
-		var fuck = ["notetypes", "custom_notetypes"];
-		for (file in fuck)
-		{
+		for (file in ["notetypes", "custom_notetypes"]) {
 			var baseScriptFile:String = '$file/$notetype';
 		#else
 		var baseScriptFile:String = 'notetypes/$notetype';
@@ -3238,8 +3230,12 @@ class ChartingState extends MusicBeatState
 
 	private function saveLevel()
 	{
-		if(_song.events != null && _song.events.length > 1) _song.events.sort(sortByTime);
+		if (_song.events != null && _song.events.length > 1) 
+			_song.events.sort(sortByTime);
 		
+		var _song = Reflect.copy(_song);
+		Reflect.deleteField(_song, "path");
+
 		var json = {"song": _song};
 		var data:String = Json.stringify(json, "\t");
 

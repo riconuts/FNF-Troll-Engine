@@ -9,6 +9,7 @@ import flixel.system.FlxAssets;
 import flixel.sound.FlxSound;
 import flixel.sound.FlxSoundGroup;
 import flixel.system.ui.FlxSoundTray;
+import flixel.util.FlxSignal;
 import openfl.Assets;
 import openfl.media.Sound;
 #if (openfl >= "8.0.0")
@@ -35,7 +36,13 @@ class SoundFrontEnd
 	 * Set this hook to get a callback whenever the volume changes.
 	 * Function should take the form myVolumeHandler(volume:Float).
 	 */
+	@:deprecated("volumeHandler is deprecated, use onVolumeChange, instead")
 	public var volumeHandler:Float->Void;
+
+	/**
+	 * A signal that gets dispatched whenever the volume changes.
+	 */
+	public var onVolumeChange(default, null):FlxTypedSignal<Float->Void> = new FlxTypedSignal<Float->Void>();
 
 	#if FLX_KEYBOARD
 	/**
@@ -333,14 +340,15 @@ class SoundFrontEnd
 	/**
 	 * Toggles muted, also activating the sound tray.
 	 */
+	@:haxe.warning("-WDeprecated")
 	public function toggleMuted():Void
 	{
 		muted = !muted;
 
 		if (volumeHandler != null)
-		{
 			volumeHandler(muted ? 0 : volume);
-		}
+		
+		onVolumeChange.dispatch(muted ? 0 : volume);
 
 		showSoundTray(true);
 	}
@@ -449,15 +457,16 @@ class SoundFrontEnd
 		}
 	}
 
+	@:haxe.warning("-WDeprecated")
 	function set_volume(Volume:Float):Float
 	{
 		Volume = FlxMath.bound(Volume, 0, 1);
-
+		
 		if (volumeHandler != null)
-		{
-			var param:Float = muted ? 0 : Volume;
-			volumeHandler(param);
-		}
+			volumeHandler(muted ? 0 : Volume);
+		
+		onVolumeChange.dispatch(muted ? 0 : Volume);
+
 		return volume = Volume;
 	}
 }

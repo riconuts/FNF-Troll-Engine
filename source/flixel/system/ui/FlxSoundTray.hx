@@ -3,14 +3,7 @@ package flixel.system.ui;
 #if FLX_SOUND_SYSTEM
 import flixel.FlxG;
 import flixel.system.FlxAssets;
-import flixel.util.FlxColor;
-import openfl.Lib;
-import openfl.display.Bitmap;
-import openfl.display.BitmapData;
 import openfl.display.Sprite;
-import openfl.text.TextField;
-import openfl.text.TextFormat;
-import openfl.text.TextFormatAlign;
 #if flash
 import flash.text.AntiAliasType;
 import flash.text.GridFitType;

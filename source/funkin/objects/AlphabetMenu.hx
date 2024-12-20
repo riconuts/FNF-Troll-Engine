@@ -11,6 +11,12 @@ typedef OptionCallbacks = {
 	?onAccept:Function
 }
 
+typedef MenuCallbacks = {
+	?onSelect:(Int, Alphabet) -> Void,
+	?unSelect:(Int, Alphabet) -> Void,
+	?onAccept:(Int, Alphabet) -> Void
+}
+
 class AlphabetMenu extends FlxTypedGroup<Alphabet>
 {
 	public var curSelected(default, set):Null<Int> = null;
@@ -19,8 +25,7 @@ class AlphabetMenu extends FlxTypedGroup<Alphabet>
 	public var inputsActive:Bool = true;
 	
 	private var itemCallbacks:Map<Alphabet, OptionCallbacks> = [];
-	/** (`Int`, `Alphabet`) -> `Void` **/
-	public final callbacks:OptionCallbacks = {}
+	public final callbacks:MenuCallbacks = {}
 
 	function set_curSelected(value:Null<Int>)
 	{

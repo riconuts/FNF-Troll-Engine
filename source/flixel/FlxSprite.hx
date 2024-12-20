@@ -1,6 +1,5 @@
 package flixel;
 
-import flixel.util.FlxAxes;
 import openfl.display.BitmapData;
 import openfl.display.BlendMode;
 import openfl.geom.ColorTransform;
@@ -1666,7 +1665,6 @@ class FlxSprite extends FlxObject
 		}
 		return doFlipY;
 	}
-	
 }
 
 interface IFlxSprite extends IFlxBasic

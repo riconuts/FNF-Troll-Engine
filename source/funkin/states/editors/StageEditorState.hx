@@ -5,9 +5,7 @@ import funkin.objects.Stage;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxObject;
-import flixel.FlxSprite;
 import flixel.addons.ui.*;
-import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.group.FlxSpriteGroup;
 import flixel.math.*;
 import flixel.text.FlxText;
@@ -19,9 +17,7 @@ import openfl.events.IOErrorEvent;
 import openfl.net.FileReference;
 
 using StringTools;
-#if sys
-import sys.FileSystem;
-#end
+
 #if DISCORD_ALLOWED
 import funkin.api.Discord.DiscordClient;
 #end
@@ -114,7 +110,8 @@ class StageEditorState extends MusicBeatState{
 			boyfriendGroup.remove(boyfriend, true);
 			boyfriend.destroy();
 		}
-		boyfriend = new Character(0, 0, name);
+		boyfriend = new Character(0, 0, name, true);
+		boyfriend.setupCharacter();
 		startCharacterPos(boyfriend);
 		boyfriendGroup.add(boyfriend);
 	}
@@ -124,6 +121,7 @@ class StageEditorState extends MusicBeatState{
 			dad.destroy();
 		}
 		dad = new Character(0, 0, name);
+		dad.setupCharacter();
 		startCharacterPos(dad);
 		dadGroup.add(dad);
 	}
@@ -133,6 +131,7 @@ class StageEditorState extends MusicBeatState{
 			gf.destroy();
 		}
 		gf = new Character(0, 0, name);
+		gf.setupCharacter();
 		gf.scrollFactor.set(0.95, 0.95);
 		startCharacterPos(gf);
 		gfGroup.add(gf);

@@ -83,6 +83,10 @@ class OptionsState extends MusicBeatState
 
 		add(gradient);
 		add(backdrop);
+
+		bg.setGraphicSize(0, FlxG.height);
+		bg.updateHitbox();
+		bg.screenCenter();
 		add(bg);
 		#end
 	}
@@ -156,9 +160,6 @@ class OptionsState extends MusicBeatState
 	}
 
 
-	override public function transitionOut(?OnExit:Void->Void):Void{} // same as transitionin
-	
-	override public function transitionIn():Void{} // so the super.create doesnt transition
-	
-
+	override public function transitionIn(?OnEnter:Void->Void):Void {} // so the super.create doesnt transition
+	override public function transitionOut(?OnExit:Void->Void):Void {} // same as transitionin
 }

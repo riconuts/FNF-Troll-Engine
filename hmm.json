@@ -40,7 +40,7 @@
 			"type": "git",
 			"dir": null,
 			"ref": "master",
-			"url": "https://github.com/nebulazorua/t-hscript"		
+			"url": "https://github.com/nebulazorua/t-hscript"
 		},
 		{
 			"name": "hxvlc",
@@ -48,9 +48,14 @@
 			"version": "1.4.1"
 		},
 		{
+			"name": "flxanimate",
+			"type": "haxelib",
+			"version": "3.0.4"
+		},
+		{
 			"name": "hxdiscord_rpc",
 			"type": "haxelib",
-			"version": "1.1.1"			
+			"version": "1.1.1"
 		},
 		{
 			"name": "linc_luajit",
@@ -59,10 +64,10 @@
 			"ref": "master",
 			"url": "https://github.com/riconuts/linc_luajit"
 		},
-        {
-            "name": "moonchart",
-            "type": "haxelib",
-            "version": "0.4.0"
-        }
+		{
+			"name": "moonchart",
+			"type": "haxelib",
+			"version": "0.4.0"
+		}
 	]
 }
