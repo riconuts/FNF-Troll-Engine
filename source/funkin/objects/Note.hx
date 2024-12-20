@@ -5,7 +5,7 @@ import flixel.math.FlxMath;
 import funkin.scripts.*;
 import funkin.states.PlayState;
 import funkin.states.editors.ChartingState;
-import funkin.objects.shaders.ColorSwap;
+import funkin.objects.shaders.NoteColorSwap;
 import funkin.objects.playfields.*;
 import funkin.data.JudgmentManager.Judgment;
 
@@ -226,7 +226,6 @@ class Note extends NoteObject
 	public var eventLength:Int = 0;
 
 	// etc
-	public var colorSwap:ColorSwap;
 	public var inEditor:Bool = false;
 	public var desiredZIndex:Float = 0;
 
@@ -464,8 +463,8 @@ class Note extends NoteObject
 		if (prevNote != null) 
 			prevNote.nextNote = this;
 
-		colorSwap = new ColorSwap();
-		shader = colorSwap.shader;
+		colorSwap = new NoteColorSwap();
+		shader = NoteColorSwap.shader;
 
 		if (column >= 0) 
 			this.noteMod = noteMod;

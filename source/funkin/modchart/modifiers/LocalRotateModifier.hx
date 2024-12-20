@@ -31,8 +31,8 @@ class LocalRotateModifier extends NoteModifier { // this'll be rotateX in ModMan
 		VectorHelpers.rotateV3(pos, // out 
 			(getValue(player) + getSubmodValue('${prefix}${data}rotateX', player)) * FlxAngle.TO_RAD,
 			(getSubmodValue('${prefix}rotateY', player) + getSubmodValue('${prefix}${data}rotateY', player)) * FlxAngle.TO_RAD,
-			(getSubmodValue('${prefix}rotateZ', player) + getSubmodValue('${prefix}${data}rotateZ', player)) * FlxAngle.TO_RAD
-		);
+			(getSubmodValue('${prefix}rotateZ', player) + getSubmodValue('${prefix}${data}rotateZ', player)) * FlxAngle.TO_RAD,
+		pos);
 		
 		pos.z /= scale;
 		pos.incrementBy(origin);
