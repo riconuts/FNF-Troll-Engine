@@ -250,6 +250,13 @@ class ClientPrefs
 				value: true,
 				data: []
 			},
+			"songSyncMode" => {
+				display: "Sync Mode",
+				desc: "The method used to sync the music to the game.\nOnly touch this if your game is going off-sync.",
+				type: Dropdown,
+				value: "Last Mix",
+				data: ["options" => ["Last Mix", "Psych 1.0", "Direct", "Legacy"]]
+			},
 			// UI
 			"timeBarType" => {
 				display: "Time Bar",

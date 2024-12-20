@@ -70,6 +70,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			[
 				"advanced",
 				[
+					"songSyncMode",
 					"accuracyCalc",
 					"judgePreset",
 					#if USE_EPIC_JUDGEMENT

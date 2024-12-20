@@ -2508,7 +2508,7 @@ class PlayState extends MusicBeatState
 	public var canReset:Bool = true;
 	var startedCountdown:Bool = false;
 	var canPause:Bool = true;
-	var resyncTimer:Float = 0;
+	var lastMixTimer:Float = 0;
 	var prevNoteCount:Int = 0;
 
 	var svIndex:Int =0;
@@ -2627,16 +2627,43 @@ class PlayState extends MusicBeatState
 
 		////
 		if (startedCountdown && !paused) {
-			Conductor.songPosition += elapsed * 1000;
+
+			if (startingSong || !inst.playing || ClientPrefs.songSyncMode == 'Psych 1.0')
+				Conductor.songPosition += elapsed * 1000;
 
 			if (Conductor.songPosition >= 0) {
 				if (startingSong)
 					startSong(0);
-				
-				Conductor.songPosition = FlxMath.lerp(inst.time, Conductor.songPosition, Math.exp(-elapsed * 5));
-				var timeDiff:Float = Math.abs(inst.time - Conductor.songPosition);
-				if (timeDiff > 1000)
-					Conductor.songPosition = Conductor.songPosition + 1000 * FlxMath.signOf(timeDiff);
+
+				switch(ClientPrefs.songSyncMode ){
+					case "Direct":
+						// Ludem Dare sync
+						// Jittery and retarded, but works maybe
+						Conductor.songPosition = inst.time;
+					case "Legacy":
+						// Resync Vocals
+						// FUCKING SUCKS DONT USE LMFAO! It's here just incase though
+						Conductor.songPosition += elapsed * 1000;
+						
+					case "Psych 1.0":
+						// Psych 1.0 method
+						// Since this works better for Rico so might work better for some other machines too
+						Conductor.songPosition = FlxMath.lerp(inst.time, Conductor.songPosition, Math.exp(-elapsed * 5));
+						var timeDiff:Float = Math.abs(inst.time - Conductor.songPosition);
+						if (timeDiff > 1000)
+							Conductor.songPosition = Conductor.songPosition + 1000 * FlxMath.signOf(timeDiff);
+					case "Last Mix":
+						// Stepmania method
+						// Works for most people it seems??
+						if(!inst.playing || inst.time == Conductor.lastSongPos)
+							lastMixTimer += elapsed;
+						else{
+							lastMixTimer = 0;
+							Conductor.lastSongPos = inst.time;
+						}
+						Conductor.songPosition = inst.time + lastMixTimer;
+
+				}
 			}
 		}
 		
@@ -4116,6 +4143,23 @@ class PlayState extends MusicBeatState
 	override function stepHit()
 	{
 		super.stepHit();
+		if(ClientPrefs.songSyncMode == 'Legacy'){
+			var needsResync:Bool = false;
+			if(Math.abs(inst.time - Conductor.songPosition) > 25)
+				needsResync = true;
+			
+			if(!needsResync){
+				for(track in tracks){
+					if(Math.abs(track.time - Conductor.songPosition) > 25){
+						needsResync = true;
+						break;
+					}
+				}
+			}
+
+			if(needsResync)
+				resyncVocals();
+		}
 		if (curStep < lastStepHit) 
 			return;
 		
