@@ -3729,10 +3729,10 @@ class PlayState extends MusicBeatState
 		
 		//trace('strum up: $column');
 
-		if (player == -1) player = playOpponent ? 1 : 0;
+		//if (player == -1) player = playOpponent ? 1 : 0;
 
 		for (field in playfields.members) {
-			if (field.playerId != player || !field.isPlayer || !field.inControl || field.autoPlayed) 
+			if ((player != -1 && field.playerId != player) || !field.isPlayer || !field.inControl || field.autoPlayed) 
 				continue;
 
 			field.keysPressed[column] = false;
