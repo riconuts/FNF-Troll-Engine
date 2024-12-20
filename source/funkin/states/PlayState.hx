@@ -1659,6 +1659,14 @@ class PlayState extends MusicBeatState
 			finishSong(false);
 		};
 
+		for (track in tracks)
+			track.play(false, startOnTime);
+
+		if (paused) {
+			trace('Oopsie doopsie! Paused sound');
+			for (track in tracks)
+				track.pause();
+		}
 		// Song duration in a float, useful for the time left feature
 		songLength = inst.length;
 		hud.songLength = songLength;
@@ -2490,6 +2498,9 @@ class PlayState extends MusicBeatState
 
 		if (showDebugTraces)
 			trace("resync vocals!!");
+		
+		for (track in tracks)
+			track.pause();
 
 		inst.play();
 		Conductor.songPosition = inst.time;
