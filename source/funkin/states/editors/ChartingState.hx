@@ -2949,10 +2949,16 @@ class ChartingState extends MusicBeatState
 			note.x + (GRID_SIZE - susWidth) * 0.5, 
 			note.y + tailOffset
 		);
-		spr.makeGraphic(1, 1, note.isQuant ? 0xFFFF0000 : noteColors[note.column % noteColors.length]);
+		var color:FlxColor = note.isQuant ? 0xFFFF0000 : noteColors[note.column % noteColors.length];
+		color.setHSB(
+			((color.hue + note.colorSwap.hue * 360) % 360 + 360) % 360,
+			CoolUtil.boundTo(color.saturation * 0.01 * (1.0 + note.colorSwap.saturation), 0.0, 1.0) * 100.0,
+			(color.brightness * 0.01 * (1.0 + note.colorSwap.brightness)) * 100.0,
+			color.alphaFloat
+		);
+		spr.makeGraphic(1, 1, color);
 		spr.scale.set(susWidth, height);
 		spr.updateHitbox();
-		spr.shader = note.shader;
 		
 		return spr;
 	}
