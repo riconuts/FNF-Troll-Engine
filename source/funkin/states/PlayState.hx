@@ -2666,8 +2666,8 @@ class PlayState extends MusicBeatState
 					case "Last Mix":
 						// Stepmania method
 						// Works for most people it seems??
-						if(!inst.playing || inst.time == Conductor.lastSongPos)
-							lastMixTimer += elapsed;
+						if (inst.playing && inst.time == Conductor.lastSongPos)
+							lastMixTimer += elapsed * 1000;
 						else{
 							lastMixTimer = 0;
 							Conductor.lastSongPos = inst.time;
