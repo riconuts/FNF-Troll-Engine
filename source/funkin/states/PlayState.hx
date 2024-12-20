@@ -2932,17 +2932,23 @@ class PlayState extends MusicBeatState
 				switch(value1.toLowerCase().trim()){
 					case 'dad' | 'opponent':
 						if (callOnScripts('onMoveCamera', ["dad"]) != Globals.Function_Stop){
+							#if NMV_MOD_COMPATIBILITY
 							whosTurn = 'dad';
+							#end
 							moveCamera(dad);
 						}
 					case 'gf' | 'girlfriend':
 						if (callOnScripts('onMoveCamera', ["gf"]) != Globals.Function_Stop){
+							#if NMV_MOD_COMPATIBILITY
 							whosTurn = 'gf';
+							#end
 							moveCamera(gf);
 						}
 					default:
 						if (callOnScripts('onMoveCamera', ["bf"]) != Globals.Function_Stop){
+							#if NMV_MOD_COMPATIBILITY
 							whosTurn = 'bf';
+							#end
 							moveCamera(boyfriend);
 						}
 				}
