@@ -163,7 +163,7 @@ class KadeHUD extends BaseHUD
 	{
 		if (healthBar != null)
 		{
-			PlayState.instance.playOpponent ? healthBar.createFilledBar(0xFF66FF33, 0xFFFF0000) : healthBar.createFilledBar(0xFFFF0000, 0xFF66FF33);
+			healthBar.createFilledBar(0xFFFF0000, 0xFF66FF33);
 			healthBar.updateBar();
 		}
 	}
