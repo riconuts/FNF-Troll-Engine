@@ -2669,7 +2669,6 @@ class PlayState extends MusicBeatState
 						if (inst.playing && inst.time == Conductor.lastSongPos)
 							lastMixTimer += elapsed * 1000;
 						else{
-							trace("mixed");
 							lastMixTimer = 0;
 							Conductor.lastSongPos = inst.time;
 						}
