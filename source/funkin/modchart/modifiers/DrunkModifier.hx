@@ -1,7 +1,15 @@
 package funkin.modchart.modifiers;
+using StringTools;
 
 class DrunkModifier extends NoteModifier {
 	override function getName()return 'drunk';
+
+	inline function adjust(axis:String, val:Float, plr:Int):Float {
+		if(axis.startsWith("Z") && getOtherValue("legacyZAxis", plr) > 0)
+			return val / 1280;
+
+		return val;
+	}
 
 	inline function applyDrunk(axis:String, player:Int, time:Float, visualDiff:Float, data:Float){
 		var perc = axis == '' ? getValue(player) : getSubmodValue('drunk${axis}', player);
@@ -11,7 +19,7 @@ class DrunkModifier extends NoteModifier {
 
 		if(perc!=0){
 			var angle = time * (1 + speed) + data * ((offset * 0.2) + 0.2) + visualDiff * ((period * 10) + 10) / FlxG.height;
-			return perc * (FlxMath.fastCos(angle) * Note.halfWidth);
+			return adjust(axis, perc * (FlxMath.fastCos(angle) * Note.halfWidth), player);
 		}
 		return 0;
 	}
@@ -23,7 +31,7 @@ class DrunkModifier extends NoteModifier {
 		var offset = getSubmodValue('tipsy${axis}Offset', player);
 
 		if (perc != 0)
-			return perc * (FlxMath.fastCos((time * ((speed * 1.2) + 1.2) + data * ((offset * 1.8) + 1.8))) * Note.swagWidth * .4);
+			return adjust(axis, perc * (FlxMath.fastCos((time * ((speed * 1.2) + 1.2) + data * ((offset * 1.8) + 1.8))) * Note.swagWidth * .4), player);
 		
 		return 0;
 	}
@@ -34,7 +42,7 @@ class DrunkModifier extends NoteModifier {
 		var offset = getSubmodValue('bumpy${axis}Offset', player);
 		if (perc != 0 && period != -1){
 			var angle = (visualDiff + (100.0 * offset)) / ((period * 24.0) + 24.0);
-			return (perc * 40 * FlxMath.fastSin(angle));
+			return adjust(axis, perc * 40 * FlxMath.fastSin(angle), player);
 		}
 		return 0;
 	}

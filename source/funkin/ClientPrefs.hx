@@ -756,7 +756,7 @@ class ClientPrefs
 		'fullscreen' => [F11, NONE],
 		'debug_1' => [SEVEN, NONE],
 		'debug_2' => [EIGHT, NONE],
-		'botplay' => [F6, NONE]
+		'botplay' => [F8, NONE]
 	];
 	public static var buttonBinds:Map<String, Array<FlxGamepadInputID>> = [
 		'note_left'	=> [X, DPAD_LEFT],

@@ -22,7 +22,7 @@ typedef Node = {
 	var lastIndex:Int; // to make sure it doesnt get hit multiple times per update
 	var in_mods:Array<String>; /// the modifiers that get input into this node
 	var out_mods:Array<String>; // the modifiers that get transformed by this node
-	var nodeFunc:(Array<Float>, Int)->Dynamic; // takes an array of the input mods' values, and returns an array of transformed modifier values, if out_mods.length > 0
+	var nodeFunc:(Array<Float>, Int)->Array<Float>; // takes an array of the input mods' values, and returns an array of transformed modifier values, if out_mods.length > 0
 }
 
 class ModManager {
@@ -113,6 +113,16 @@ class ModManager {
 			registerAux("noteSpawnTime" + i);
 		}
 
+		var toAlternate:Array<String> = ["transformX", "transformY", "transformZ"];
+		for(i in 0...PlayState.keyCount){
+			toAlternate.push('transform${i}X');
+			toAlternate.push('transform${i}Y');
+			toAlternate.push('transform${i}Z');
+		}
+		
+		for(shit in toAlternate)
+			registerAltNode(shit);
+
 		isAvailable = true;
 		for (playerNumber => mods in activeMods){
 			setDefaultValues(playerNumber);
@@ -181,7 +191,7 @@ class ModManager {
 		nodeArray.push(node);
 	}
 
-	public function quickNode(inputs:Array<String>, nodeFunc:(Array<Dynamic>, Int) -> Dynamic, ?outputs:Array<String>){
+	public function quickNode(inputs:Array<String>, nodeFunc:(Array<Float>, Int) -> Array <Float>, ?outputs:Array<String>){
 		if (outputs == null)
 			outputs=[];
 		registerNode({
@@ -190,6 +200,13 @@ class ModManager {
 			out_mods: outputs,
 			nodeFunc: nodeFunc
 		});
+	}
+
+	inline public function registerAltNode(mod:String) { // Generates an alt node for a modifier
+		registerAux(mod + "-a");
+		quickNode([mod + "-a"], function(values:Array<Float>, pN:Int) {
+			return values;
+		}, [mod]);
 	}
 
 	function getActualModName(m:String)
@@ -417,7 +434,6 @@ class ModManager {
 									input_values.push(getValue(input_mod, player));
 
 								var output_values:Array<Float> = node.nodeFunc(input_values, player);
-
 								
 								if (node.out_mods.length > 0)
 								{ // if theres outputs

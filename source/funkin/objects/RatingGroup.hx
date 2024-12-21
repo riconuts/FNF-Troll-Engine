@@ -38,6 +38,7 @@ class RatingSprite extends FlxSprite
 @:allow(funkin.states.PlayState)
 class RatingGroup extends FlxTypedGroup<RatingSprite>
 {
+	public var comboPadding:Int = 3;
 	public var x:Float = FlxG.width * 0.5;
 	public var y:Float = FlxG.height * 0.5;
 	
@@ -102,8 +103,11 @@ class RatingGroup extends FlxTypedGroup<RatingSprite>
 			spr.loadGraphic(judgementGraphic);
 			spr.animation.add(char, [0], 0);
 		} else {
+			// TODO: JudgeManager should hold indices into the judgement graphic and also point to which graphic to use, maybe?
+
 			var judgementsGraphic:FlxGraphic = Paths.image("judgements");
 			spr.loadGraphic(judgementsGraphic, true, judgementsGraphic.width, Math.floor(judgementsGraphic.height / 6));
+
 			spr.animation.add("epic", [0], 0);
 			spr.animation.add("sick", [1], 0);
 			spr.animation.add("good", [2], 0);
@@ -147,7 +151,7 @@ class RatingGroup extends FlxTypedGroup<RatingSprite>
 
 	public function displayCombo(combo:Int, offsetX:Float=0.0, offsetY:Float=0.0):Array<RatingSprite> 
 	{	
-		var str:String = Std.string(Math.abs(combo)).lpad("0", 3);
+		var str:String = Std.string(Math.abs(combo)).lpad("0", comboPadding);
 		var x:Float = this.x + offsetX;
 		var y:Float = this.y + offsetY;
 		
