@@ -5,6 +5,7 @@ package funkin.objects;
 import flixel.graphics.FlxGraphic;
 import flixel.tweens.FlxTween;
 import flixel.group.FlxGroup.FlxTypedGroup;
+using StringTools;
 
 class RatingSprite extends FlxSprite
 {
@@ -144,14 +145,13 @@ class RatingGroup extends FlxTypedGroup<RatingSprite>
 		return spr;
 	}
 
-	public function displayCombo(combo:Int, offsetX:Float=0.0, offsetY:Float=0.0):Array<RatingSprite> {
-		var str:String = Std.string(Math.abs(combo));
-		while (str.length < 3) str = "0" + str;
-
+	public function displayCombo(combo:Int, offsetX:Float=0.0, offsetY:Float=0.0):Array<RatingSprite> 
+	{	
+		var str:String = Std.string(Math.abs(combo)).lpad("0", 3);
 		var x:Float = this.x + offsetX;
 		var y:Float = this.y + offsetY;
-
-		if (combo < 0){
+		
+		if (combo < 0) {
 			str = '-$str';
 			x -= comboTemplate.width * str.length * 0.5;
 		}else{
