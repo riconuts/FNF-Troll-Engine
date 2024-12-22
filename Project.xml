@@ -118,6 +118,9 @@
 	<haxelib name="faxe" if='switch'/>
 	<haxelib name="hxcpp-debug-server" if="debug" unless="telemetry"/>
 
+	<echo value="video allowed" if="VIDEOS_ALLOWED"/>
+	<echo value="fuck you ${hxvlc}"/>
+		
 	<!-- ______________________________ Haxedefines _____________________________ -->
 
 	<section if="CRASH_HANDLER">
