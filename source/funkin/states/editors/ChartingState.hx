@@ -477,7 +477,6 @@ class ChartingState extends MusicBeatState
 		}else{
 			reloadGridLayer();
 			updateHeads();
-			trace(curSec);
 			changeSection(curSec);
 		}
 
@@ -1801,6 +1800,29 @@ class ChartingState extends MusicBeatState
 		}
 	}
 
+	var inputBlocked = false;
+	function checkInputBlocked():Bool {
+		for (inputText in blockPressWhileTypingOn) {
+			if (inputText.hasFocus)
+				return true;
+		}
+
+		for (stepper in blockPressWhileTypingOnStepper) {
+			@:privateAccess
+			var leText:Dynamic = stepper.text_field;
+			var leText:FlxUIInputText = leText;
+			if (leText.hasFocus)
+				return true;
+		}
+
+		for (dropDownMenu in blockPressWhileScrolling) {
+			if (dropDownMenu.dropPanel.visible)
+				return true;
+		}
+
+		return false;
+	}
+
 	override function update(elapsed:Float)
 	{
 		if (tracksCompleted){
@@ -1919,258 +1941,17 @@ class ChartingState extends MusicBeatState
 			curDummyY = null;
 		}
 
-		var blockInput:Bool = false;
-		for (inputText in blockPressWhileTypingOn) {
-			if(inputText.hasFocus) {
-				StartupState.specialKeysEnabled = false;
-				blockInput = true;
-				break;
-			}
+		if (checkInputBlocked() != inputBlocked) {
+			inputBlocked = !inputBlocked;
+			StartupState.specialKeysEnabled = !inputBlocked;
 		}
 
-		if(!blockInput) {
-			for (stepper in blockPressWhileTypingOnStepper) {
-				@:privateAccess
-				var leText:Dynamic = stepper.text_field;
-				var leText:FlxUIInputText = leText;
-				if(leText.hasFocus) {
-					StartupState.specialKeysEnabled = false;
-					blockInput = true;
-					break;
-				}
-			}
-		}
-
-		if(!blockInput) {
-			StartupState.specialKeysEnabled = true;
-			for (dropDownMenu in blockPressWhileScrolling) {
-				if(dropDownMenu.dropPanel.visible) {
-					blockInput = true;
-					break;
-				}
-			}
-		}
-
-		if (!blockInput)
-		{
-			if (FlxG.keys.justPressed.ENTER)
-			{
-				autosaveSong();
-				if (_song.events != null && _song.events.length > 1)
-					_song.events.sort(sortByTime);
-				PlayState.SONG = _song;
-				PlayState.chartingMode = true;
-
-				if (FlxG.keys.pressed.SHIFT)
-					PlayState.startOnTime = Conductor.songPosition;
-
-				FlxG.sound.pause();
-
-				LoadingState.loadAndSwitchState(new PlayState());
-
-				return;
-			}
-
-			if (FlxG.keys.justPressed.M)
-			{
-				var mustHit = !_song.notes[curSec].mustHitSection;
-				_song.notes[curSec].mustHitSection = mustHit;
-				check_mustHitSection.checked = mustHit;
-
-				if (FlxG.keys.pressed.CONTROL){
-					for (i in 0..._song.notes[curSec].sectionNotes.length)
-					{
-						var note:Array<Dynamic> = _song.notes[curSec].sectionNotes[i];
-						note[1] = (note[1] + 4) % 8;
-						_song.notes[curSec].sectionNotes[i] = note;
-					}
-				}
-
-				updateGrid();
-				updateHeads();	
-			}	
-
-			if(curSelectedNote != null && curSelectedNote[1] > -1) {
-				if (FlxG.keys.justPressed.E)
-				{
-					changeNoteSustain(Conductor.stepCrochet);
-				}
-				if (FlxG.keys.justPressed.Q)
-				{
-					changeNoteSustain(-Conductor.stepCrochet);
-				}
-			}
-
-
-			if (FlxG.keys.justPressed.BACKSPACE) {
-				//if(onMasterEditor) {
-					PlayState.chartingMode = false;
-					MusicBeatState.switchState(new funkin.states.editors.MasterEditorMenu());
-					MusicBeatState.playMenuMusic(true);
-				//}
-				FlxG.mouse.visible = false;
-				return;
-			}
-
-			if(FlxG.keys.justPressed.Z && FlxG.keys.pressed.CONTROL) {
-				undo();
-			}
-
-
-
-			if(FlxG.keys.justPressed.Z && curZoom > 0 && !FlxG.keys.pressed.CONTROL) {
-				--curZoom;
-				updateZoom();
-			}
-			if(FlxG.keys.justPressed.X && curZoom < zoomList.length-1) {
-				curZoom++;
-				updateZoom();
-			}
-
-			if (FlxG.keys.justPressed.TAB)
-			{
-				if (FlxG.keys.pressed.SHIFT)
-				{
-					if (--UI_box.selected_tab < 0)
-						UI_box.selected_tab = UI_box.get_numTabs() - 1;
-				}
-				else
-				{					
-					if (++UI_box.selected_tab < 0)
-						UI_box.selected_tab = 0;
-				}
-			}
-
-			if (FlxG.keys.justPressed.SPACE) {
-				if (inst.playing) {
-					pauseTracks();
-				}else {
-					resumeTracks();
-				}
-			}
-
-			if (FlxG.keys.justPressed.R)
-				resetSection(FlxG.keys.pressed.SHIFT);
-
-			if (FlxG.mouse.wheel != 0) {
-				if (!mouseQuant)
-					Conductor.songPosition -= (FlxG.mouse.wheel * Conductor.stepCrochet);
-				else{
-					var snap = Conductor.stepCrochet / quantizationMult;
-					Conductor.songPosition = CoolUtil.snap(Conductor.songPosition, snap) - (snap * FlxG.mouse.wheel);
-				}
-
-				pauseTracks();
-			}
-
-			if (FlxG.keys.pressed.W || FlxG.keys.pressed.S)
-			{
-				var holdingShift:Float = 1;
-				if (FlxG.keys.pressed.CONTROL) holdingShift = 0.25;
-				else if (FlxG.keys.pressed.SHIFT) holdingShift = 4;
-
-				var daTime:Float = 720 * FlxG.elapsed * holdingShift;
-
-				if (FlxG.keys.pressed.W)
-					Conductor.songPosition -= daTime;
-				else
-					Conductor.songPosition += daTime;
-
-				pauseTracks();
-			}
-
-			//AWW YOU MADE IT SEXY <3333 THX SHADMAR
-
-			if(FlxG.keys.justPressed.RIGHT){
-				if (++curQuant > quantizations.length-1)
-					curQuant = 0;
-
-				updateQuantization();
-			}else if(FlxG.keys.justPressed.LEFT){
-				if (--curQuant < 0)
-					curQuant = quantizations.length-1;
-
-				updateQuantization();
-			}
-			
-			//ARROW VORTEX SHIT NO DEADASS
-			if(vortex){
-				var controlArray:Array<Bool> = [
-					FlxG.keys.justPressed.ONE, FlxG.keys.justPressed.TWO, FlxG.keys.justPressed.THREE, FlxG.keys.justPressed.FOUR,
-					FlxG.keys.justPressed.FIVE, FlxG.keys.justPressed.SIX, FlxG.keys.justPressed.SEVEN, FlxG.keys.justPressed.EIGHT
-				];
-				var holdArray:Array<Bool> = [
-					FlxG.keys.pressed.ONE, FlxG.keys.pressed.TWO, FlxG.keys.pressed.THREE, FlxG.keys.pressed.FOUR,
-					FlxG.keys.pressed.FIVE, FlxG.keys.pressed.SIX, FlxG.keys.pressed.SEVEN, FlxG.keys.pressed.EIGHT
-				];
-
-				if (heldNotesVortex.length > 0 && holdArray.contains(true))
-				{
-					for(i in 0...holdArray.length){
-						if (holdArray[i]){
-							var note = heldNotesVortex[i];
-							if (note != null){
-								var len = CoolUtil.snap(Conductor.songPosition - note[0], Conductor.stepCrochet);
-								setNoteSustain(len, note);
-							}
-						}else if(heldNotesVortex[i]!=null)
-							heldNotesVortex[i] = null;
-						
-					}
-				}else{
-					heldNotesVortex = [];
-				}
-
-				if (controlArray.contains(true))
-				{
-					for (i in 0...controlArray.length)
-					{
-						if(controlArray[i])
-							doANoteThing(Conductor.songPosition, i, currentType);
-					}
-				}
-			}	
-
-			if (FlxG.keys.justPressed.UP || FlxG.keys.justPressed.DOWN) {
-				pauseTracks();
-
-				var snap:Float = Conductor.stepCrochet / quantizationMult;
-				var feces:Float = CoolUtil.snap(Conductor.songPosition, snap) + (FlxG.keys.justPressed.UP ? -snap : snap);
-
-				FlxTween.tween(Conductor, {songPosition: feces}, 0.1, {ease: FlxEase.circOut});
-			}
-			
-
-			var shiftThing:Int = 1;
-			if (FlxG.keys.pressed.SHIFT)
-				shiftThing = 4;
-
-			for(i in curSec ... curSec + shiftThing + 1){
-				if(_song.notes[i] == null){
-					if(setSectionStartTime(i) < inst.length)
-						insertSection(i);
-				}
-			}
-
-			if (FlxG.keys.justPressed.A) {
-				var nextSection:Int = curSec - shiftThing;
-				
-				if (nextSection < 0) {
-					changeSection(finalSectionNumber + nextSection);
-				}else{
-					changeSection(nextSection);
-				} 
-			}
-			if (FlxG.keys.justPressed.D){
-				var nextSection:Int = (curSec + shiftThing) % _song.notes.length;
-				changeSection(nextSection);
-			}
-		} 
-		else if (FlxG.keys.justPressed.ENTER) {
-			for (i in 0...blockPressWhileTypingOn.length) {
-				if(blockPressWhileTypingOn[i].hasFocus) {
-					blockPressWhileTypingOn[i].hasFocus = false;
-				}
+		if (!inputBlocked) {
+			updateKeys(elapsed);
+		}else if (FlxG.keys.justPressed.ENTER) {
+			for (typebox in blockPressWhileTypingOn) {
+				if (typebox.hasFocus)
+					typebox.hasFocus = false;
 			}
 		}
 
@@ -2285,6 +2066,193 @@ class ChartingState extends MusicBeatState
 		}
 
 		super.update(elapsed);
+	}
+
+	function updateKeys(elapsed:Float) {
+		if (FlxG.keys.justPressed.M) {
+			// Change mustHitSection value
+			var mustHit = !_song.notes[curSec].mustHitSection;
+			_song.notes[curSec].mustHitSection = mustHit;
+			check_mustHitSection.checked = mustHit;
+
+			if (!FlxG.keys.pressed.CONTROL) {
+				// Move notes to accomodate for the change
+				for (i in 0..._song.notes[curSec].sectionNotes.length) {
+					var note:Array<Dynamic> = _song.notes[curSec].sectionNotes[i];
+					note[1] = (note[1] + 4) % 8;
+					_song.notes[curSec].sectionNotes[i] = note;
+				}
+			}
+
+			updateGrid();
+			updateHeads();	
+		}	
+
+		if (curSelectedNote != null && curSelectedNote[1] > -1) {
+			if (FlxG.keys.justPressed.E)
+				changeNoteSustain(Conductor.stepCrochet);
+			if (FlxG.keys.justPressed.Q)
+				changeNoteSustain(-Conductor.stepCrochet);
+		}
+
+		if (FlxG.keys.justPressed.Z && FlxG.keys.pressed.CONTROL) {
+			undo();
+		}
+
+		if(FlxG.keys.justPressed.Z && curZoom > 0 && !FlxG.keys.pressed.CONTROL) {
+			--curZoom;
+			updateZoom();
+		}
+		if(FlxG.keys.justPressed.X && curZoom < zoomList.length-1) {
+			curZoom++;
+			updateZoom();
+		}
+
+		if (FlxG.keys.justPressed.TAB) {
+			if (FlxG.keys.pressed.SHIFT) {
+				if (--UI_box.selected_tab < 0)
+					UI_box.selected_tab = UI_box.get_numTabs() - 1;
+			} else {					
+				if (++UI_box.selected_tab < 0)
+					UI_box.selected_tab = 0;
+			}
+		}
+
+		if (FlxG.keys.justPressed.SPACE)
+			(inst.playing) ? pauseTracks() : resumeTracks();
+
+		if (FlxG.keys.justPressed.R)
+			(FlxG.keys.pressed.SHIFT) ? changeSection(0, true) : resetSection();
+
+		if (FlxG.mouse.wheel != 0) {
+			if (!mouseQuant)
+				Conductor.songPosition -= (FlxG.mouse.wheel * Conductor.stepCrochet);
+			else{
+				var snap = Conductor.stepCrochet / quantizationMult;
+				Conductor.songPosition = CoolUtil.snap(Conductor.songPosition, snap) - (snap * FlxG.mouse.wheel);
+			}
+
+			pauseTracks();
+		}
+
+		if (FlxG.keys.pressed.W || FlxG.keys.pressed.S)
+		{
+			var mult:Float = 1;
+			if (FlxG.keys.pressed.CONTROL) mult = 0.25;
+			else if (FlxG.keys.pressed.SHIFT) mult = 4;
+
+			var daTime:Float = 720 * elapsed * mult;
+
+			if (FlxG.keys.pressed.S)
+				Conductor.songPosition += daTime;
+			else
+				Conductor.songPosition -= daTime;
+
+			pauseTracks();
+		}
+
+		//AWW YOU MADE IT SEXY <3333 THX SHADMAR
+
+		if(FlxG.keys.justPressed.RIGHT){
+			if (++curQuant > quantizations.length-1)
+				curQuant = 0;
+
+			updateQuantization();
+		}else if(FlxG.keys.justPressed.LEFT){
+			if (--curQuant < 0)
+				curQuant = quantizations.length-1;
+
+			updateQuantization();
+		}
+		
+		//ARROW VORTEX SHIT NO DEADASS
+		if(vortex){
+			var controlArray:Array<Bool> = [
+				FlxG.keys.justPressed.ONE, FlxG.keys.justPressed.TWO, FlxG.keys.justPressed.THREE, FlxG.keys.justPressed.FOUR,
+				FlxG.keys.justPressed.FIVE, FlxG.keys.justPressed.SIX, FlxG.keys.justPressed.SEVEN, FlxG.keys.justPressed.EIGHT
+			];
+			var holdArray:Array<Bool> = [
+				FlxG.keys.pressed.ONE, FlxG.keys.pressed.TWO, FlxG.keys.pressed.THREE, FlxG.keys.pressed.FOUR,
+				FlxG.keys.pressed.FIVE, FlxG.keys.pressed.SIX, FlxG.keys.pressed.SEVEN, FlxG.keys.pressed.EIGHT
+			];
+
+			if (heldNotesVortex.length > 0 && holdArray.contains(true))
+			{
+				for(i in 0...holdArray.length){
+					if (holdArray[i]){
+						var note = heldNotesVortex[i];
+						if (note != null){
+							var len = CoolUtil.snap(Conductor.songPosition - note[0], Conductor.stepCrochet);
+							setNoteSustain(len, note);
+						}
+					}else if(heldNotesVortex[i]!=null)
+						heldNotesVortex[i] = null;
+					
+				}
+			}else{
+				heldNotesVortex = [];
+			}
+
+			if (controlArray.contains(true))
+			{
+				for (i in 0...controlArray.length)
+				{
+					if(controlArray[i])
+						doANoteThing(Conductor.songPosition, i, currentType);
+				}
+			}
+		}	
+
+		if (FlxG.keys.justPressed.UP || FlxG.keys.justPressed.DOWN) {
+			pauseTracks();
+
+			var snap:Float = Conductor.stepCrochet / quantizationMult;
+			var feces:Float = CoolUtil.snap(Conductor.songPosition, snap) + (FlxG.keys.justPressed.UP ? -snap : snap);
+
+			FlxTween.tween(Conductor, {songPosition: feces}, 0.1, {ease: FlxEase.circOut});
+		}
+		
+		var shiftThing:Int = 1;
+		if (FlxG.keys.pressed.SHIFT)
+			shiftThing = 4;
+
+		for(i in curSec ... curSec + shiftThing + 1){
+			if(_song.notes[i] == null){
+				if(setSectionStartTime(i) < inst.length)
+					insertSection(i);
+			}
+		}
+
+		if (FlxG.keys.justPressed.A) {
+			var nextSection:Int = curSec - shiftThing;
+			changeSection((nextSection < 0) ? finalSectionNumber + nextSection : nextSection);
+		}
+		if (FlxG.keys.justPressed.D) {
+			var nextSection:Int = (curSec + shiftThing) % _song.notes.length;
+			changeSection(nextSection);
+		}
+
+		if (FlxG.keys.justPressed.ENTER) {
+			autosaveSong();
+			if (_song.events != null && _song.events.length > 1)
+				_song.events.sort(sortByTime);
+			PlayState.SONG = _song;
+			PlayState.chartingMode = true;
+
+			if (FlxG.keys.pressed.SHIFT)
+				PlayState.startOnTime = Conductor.songPosition;
+
+			FlxG.sound.pause();
+
+			LoadingState.loadAndSwitchState(new PlayState());
+		}
+		else if (FlxG.keys.justPressed.BACKSPACE) {
+			PlayState.chartingMode = false;
+			MusicBeatState.switchState(new funkin.states.editors.MasterEditorMenu());
+			MusicBeatState.playMenuMusic(true);
+
+			FlxG.mouse.visible = false;
+		}
 	}
 
 	function updateZoom() {
@@ -2593,23 +2561,10 @@ class ChartingState extends MusicBeatState
 		return curStep;
 	}
 
-	function resetSection(songBeginning:Bool = false):Void
-	{
-		updateGrid();
-
-		// Basically old shit from changeSection???
+	// Go to the current section's start time
+	function resetSection():Void {
 		Conductor.songPosition = sectionStartTime();
-
-		if (songBeginning)
-		{
-			Conductor.songPosition = 0;
-			curSec = 0;
-		}
-
-		for (track in tracks){
-			track.pause();
-			track.time = Conductor.songPosition;
-		}
+		pauseTracks();
 		updateCurStep();
 
 		updateGrid();
@@ -2619,13 +2574,12 @@ class ChartingState extends MusicBeatState
 
 	function changeSection(sec:Int = 0, ?updateMusic:Bool = true):Void
 	{
-		if (_song.notes[sec] != null)
-		{
+		if (_song.notes[sec] != null) {
 			curSec = sec;
+
 			if (updateMusic) {
 				Conductor.songPosition = sectionStartTime();
 				pauseTracks();
-
 				updateCurStep();
 			}
 
