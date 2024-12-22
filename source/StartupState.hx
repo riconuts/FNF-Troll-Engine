@@ -128,9 +128,6 @@ class StartupState extends FlxTransitionableState
 		#if DISCORD_ALLOWED
 		FlxG.stage.application.onExit.add((exitCode) -> funkin.api.Discord.DiscordClient.shutdown(true));
 		#end
-
-		var testLevel = Level.fromId("weekend1");
-		trace(testLevel.getDisplayedSongs());
 		
 		FlxTransitionableState.defaultTransIn = FadeTransitionSubstate;
 		FlxTransitionableState.defaultTransOut = FadeTransitionSubstate;
