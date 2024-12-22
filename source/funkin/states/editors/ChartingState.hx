@@ -1779,10 +1779,27 @@ class ChartingState extends MusicBeatState
 	}
 
 	var lastConductorPos:Float = -1;
+	var lastMixTimer:Float = 0;
 	var colorSine:Float = 0;
 	//// sustain note dragging 
 	var startDummyY:Null<Float> = null;
 	var curDummyY:Null<Float> = null;
+
+	// pause tracks and set them to the conductor song position
+	function pauseTracks() {
+		for (track in tracks) {
+			track.pause();
+			track.time = Conductor.songPosition;
+		}
+	}
+
+	// set tracks to the conductor song position and play them
+	function resumeTracks() {
+		for (track in tracks) {
+			track.time = Conductor.songPosition;
+			track.play(false, Conductor.songPosition);
+		}
+	}
 
 	override function update(elapsed:Float)
 	{
@@ -1798,10 +1815,6 @@ class ChartingState extends MusicBeatState
 				snd.time = 0.0;
 				snd.volume = pre;
 			}
-			changeSection(0, true);
-		
-		}else if ((inst.playing ? Conductor.songPosition + elapsed * 1000 : Conductor.songPosition) > songLength){
-			trace("song overflow");
 			changeSection(0, true);
 		}
 
@@ -2028,38 +2041,26 @@ class ChartingState extends MusicBeatState
 				}
 			}
 
-			if (FlxG.keys.justPressed.SPACE)
-			{
-				if (inst.playing)
-				{
-					for (track in tracks) track.pause();
-				}
-				else
-				{
-					inst.play(false, Conductor.songPosition);
-					Conductor.songPosition = inst.time;
-
-					for (track in tracks){
-						track.pause();
-						track.time = Conductor.songPosition;
-						track.play(false, Conductor.songPosition);
-					}
+			if (FlxG.keys.justPressed.SPACE) {
+				if (inst.playing) {
+					pauseTracks();
+				}else {
+					resumeTracks();
 				}
 			}
 
 			if (FlxG.keys.justPressed.R)
 				resetSection(FlxG.keys.pressed.SHIFT);
 
-			if (FlxG.mouse.wheel != 0)
-			{
-				for (track in tracks) track.pause();
-
+			if (FlxG.mouse.wheel != 0) {
 				if (!mouseQuant)
 					Conductor.songPosition -= (FlxG.mouse.wheel * Conductor.stepCrochet);
 				else{
 					var snap = Conductor.stepCrochet / quantizationMult;
 					Conductor.songPosition = CoolUtil.snap(Conductor.songPosition, snap) - (snap * FlxG.mouse.wheel);
 				}
+
+				pauseTracks();
 			}
 
 			if (FlxG.keys.pressed.W || FlxG.keys.pressed.S)
@@ -2075,10 +2076,7 @@ class ChartingState extends MusicBeatState
 				else
 					Conductor.songPosition += daTime;
 
-				for (track in tracks){
-					track.pause();
-					track.time = Conductor.songPosition;
-				}
+				pauseTracks();
 			}
 
 			//AWW YOU MADE IT SEXY <3333 THX SHADMAR
@@ -2133,9 +2131,8 @@ class ChartingState extends MusicBeatState
 				}
 			}	
 
-			if (FlxG.keys.justPressed.UP || FlxG.keys.justPressed.DOWN)
-			{
-				for (track in tracks) track.pause();
+			if (FlxG.keys.justPressed.UP || FlxG.keys.justPressed.DOWN) {
+				pauseTracks();
 
 				var snap:Float = Conductor.stepCrochet / quantizationMult;
 				var feces:Float = CoolUtil.snap(Conductor.songPosition, snap) + (FlxG.keys.justPressed.UP ? -snap : snap);
@@ -2179,21 +2176,30 @@ class ChartingState extends MusicBeatState
 
 		_song.bpm = tempBpm;
 		
-		lastConductorPos = Conductor.songPosition;
-		if (inst.playing){
-			Conductor.songPosition = inst.time;
-		}else{
-			for (track in tracks)
+		if (inst.playing && inst.time == Conductor.lastSongPos)
+			lastMixTimer += elapsed * 1000;
+		else{
+			lastMixTimer = 0;
+			Conductor.lastSongPos = inst.time;
+		}
+
+		if (inst.playing) {
+			Conductor.songPosition = inst.time + lastMixTimer;
+			if (Conductor.songPosition > inst.length)
+				changeSection(0, true);
+		}else {
+			for (track in tracks) 
 				track.time = Conductor.songPosition;
 		}
 
 		strumLineUpdateY();
 		camPos.y = strumLine.y;
 
-		if (strumLineNotes.visible = quant.visible = vortex){
-			for (i in 0...8){
-				strumLineNotes.members[i].y = strumLine.y;
-				strumLineNotes.members[i].alpha = inst.playing ? 1 : 0.35;
+		if (strumLineNotes.visible = quant.visible = vortex) {
+			var alpha = inst.playing ? 1 : 0.35;
+			for (receptor in strumLineNotes){
+				receptor.y = strumLine.y;
+				receptor.alpha = alpha;
 			}
 		}
 
@@ -2268,13 +2274,13 @@ class ChartingState extends MusicBeatState
 				note.alpha = 1;
 		});
 
-		if(metronome.checked && lastConductorPos != Conductor.songPosition) {
+		if (metronome.checked && lastConductorPos != Conductor.songPosition) {
 			var metroInterval:Float = 60 / metronomeStepper.value;
 			var metroStep:Int = Math.floor(((Conductor.songPosition + metronomeOffsetStepper.value) / metroInterval) / 1000);
 			var lastMetroStep:Int = Math.floor(((lastConductorPos + metronomeOffsetStepper.value) / metroInterval) / 1000);
-			if(metroStep != lastMetroStep) { // this should be rewritten to be in sync w/ some shit like playScheduled but not really since we dont have that in flixel
+			if (metroStep != lastMetroStep) {
 				FlxG.sound.play(Paths.sound('Metronome_Tick'));
-				//trace('Ticked');
+				lastConductorPos = Conductor.songPosition;
 			}
 		}
 
@@ -2618,11 +2624,7 @@ class ChartingState extends MusicBeatState
 			curSec = sec;
 			if (updateMusic) {
 				Conductor.songPosition = sectionStartTime();
-				for (track in tracks){
-					track.pause();
-					track.time = Conductor.songPosition;
-				}
-				//trace(Conductor.songPosition, inst.time);
+				pauseTracks();
 
 				updateCurStep();
 			}
