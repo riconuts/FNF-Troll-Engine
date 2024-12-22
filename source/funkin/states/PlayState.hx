@@ -1659,14 +1659,6 @@ class PlayState extends MusicBeatState
 			finishSong(false);
 		};
 
-		for (track in tracks)
-			track.play(false, startOnTime);
-
-		if (paused) {
-			trace('Oopsie doopsie! Paused sound');
-			for (track in tracks)
-				track.pause();
-		}
 		// Song duration in a float, useful for the time left feature
 		songLength = inst.length;
 		hud.songLength = songLength;
@@ -1792,8 +1784,6 @@ class PlayState extends MusicBeatState
 				songSpeed = ClientPrefs.getGameplaySetting('scrollspeed', SONG.speed);
 		}
 
-		songSpeed *= FlxG.height / 720; // Adjust speed to game size
-
 		////
 		#if tgt if(ClientPrefs.ruin){
 			AL.effecti(sndEffect, AL.EFFECT_TYPE, AL.EFFECT_REVERB);
@@ -1818,6 +1808,12 @@ class PlayState extends MusicBeatState
 			
 			trackMap.set(trackName, newTrack);
 			tracks.push(newTrack);
+
+			newTrack.volume = 0.0;
+			newTrack.play();
+			newTrack.pause();
+			newTrack.volume = 1.0;
+			newTrack.time = 0;
 		}
 
 		inline function getTrackInstances(nameArray:Null<Array<String>>)
@@ -1829,6 +1825,8 @@ class PlayState extends MusicBeatState
 
 		inst = instTracks[0];
 		vocals = playerTracks[0];
+
+		songLength = inst.length;
 		
 		//// NEW SHIT
 		var noteData:Array<SwagSection> = PlayState.SONG.notes;
@@ -4165,12 +4163,12 @@ class PlayState extends MusicBeatState
 		super.stepHit();
 		if(ClientPrefs.songSyncMode == 'Legacy'){
 			var needsResync:Bool = false;
-			if(Math.abs(inst.time - Conductor.songPosition) > 25)
+			if(Math.abs(inst.time - Conductor.songPosition) > 30)
 				needsResync = true;
 			
 			if(!needsResync){
 				for(track in tracks){
-					if(Math.abs(track.time - Conductor.songPosition) > 25){
+					if(Math.abs(track.time - Conductor.songPosition) > 30){
 						needsResync = true;
 						break;
 					}
