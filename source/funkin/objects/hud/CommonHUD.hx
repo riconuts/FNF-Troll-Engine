@@ -38,6 +38,7 @@ class CommonHUD extends BaseHUD
 		super(iP1, iP2, songName, stats);
 
 		healthBar = new FNFHealthBar(iP1, iP2);
+		healthBar.screenCenter(X);
 		iconP1 = healthBar.iconP1;
 		iconP2 = healthBar.iconP2;
 
@@ -60,18 +61,12 @@ class CommonHUD extends BaseHUD
 		timeBar.numDivisions = 800; // How much lag this causes?? Should i tone it down to idk, 400 or 200?
 		timeBar.scrollFactor.set();
 
-		#if (PE_MOD_COMPATIBILITY && false)
-		if(FlxG.state == PlayState.instance){
-			PlayState.instance.healthBar = healthBar;
-			PlayState.instance.iconP1 = iconP1;
-			PlayState.instance.iconP2 = iconP2;
-		}
-		#end
+		repositionHealthBar();
 		updateTimeBarType();
 
 		add(timeBarBG);
 		add(timeBar);
-		add(timeTxt);
+		add(timeTxt);	
 	}
 
 	override function reloadHealthBarColors(dadColor:FlxColor, bfColor:FlxColor)
@@ -83,6 +78,13 @@ class CommonHUD extends BaseHUD
 		}
 	}
 
+	function repositionHealthBar() {
+		healthBar.healthBarBG.y = FlxG.height * (ClientPrefs.downScroll ? 0.11 : 0.89);
+		healthBar.y = healthBarBG.y + 5;
+		healthBar.iconP1.y = healthBar.y + (healthBar.height - healthBar.iconP1.height) / 2;
+		healthBar.iconP2.y = healthBar.y + (healthBar.height - healthBar.iconP2.height) / 2;
+		healthBar.real_alpha = healthBar.real_alpha;
+	}
 
 	function updateTimeBarType()
 	{
@@ -184,12 +186,7 @@ class CommonHUD extends BaseHUD
 
 	override function changedOptions(changed:Array<String>)
 	{
-		healthBar.healthBarBG.y = FlxG.height * (ClientPrefs.downScroll ? 0.11 : 0.89);
-		healthBar.y = healthBarBG.y + 5;
-		healthBar.iconP1.y = healthBar.y + (healthBar.height - healthBar.iconP1.height) / 2;
-		healthBar.iconP2.y = healthBar.y + (healthBar.height - healthBar.iconP2.height) / 2;
-		healthBar.real_alpha = healthBar.real_alpha;
-
+		repositionHealthBar();
 		updateTimeBarType();
 	}
 
