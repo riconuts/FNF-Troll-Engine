@@ -1550,22 +1550,17 @@ class PlayState extends MusicBeatState
 	}
 
 	function checkCharacterDance(character:Character, ?beat:Float, ignoreBeat:Bool = false){
-		if(character.danceEveryNumBeats == 0)return;
-		if(character.animation.curAnim == null)return;
-		if(beat == null)
-			beat = this.curDecBeat;
-
-
+		if (character.danceEveryNumBeats == 0) return;
+		if (beat == null) beat = this.curDecBeat;
 		
 		var shouldBop = beat >= character.nextDanceBeat;
 		if (shouldBop || ignoreBeat){
 			if (shouldBop)
 				character.nextDanceBeat += character.danceEveryNumBeats;
 
-			if (!character.animation.curAnim.name.startsWith("sing") && !character.stunned) 
+			if ((character.animation.curAnim == null || !character.animation.curAnim.name.startsWith("sing")) && !character.stunned) 
 				character.dance();
 		}
-		
 	}
 
 	function danceCharacters(?curBeat:Float)
@@ -2740,12 +2735,17 @@ class PlayState extends MusicBeatState
 			}
 
 			for (field in playfields) {
-				for (char in field.characters){
-					if (char.canResetDance(field.keysPressed.contains(true))) {
-						// trace("reset");
+				var holdingField = field.keysPressed.contains(true);
+				for (char in field.characters) {
+					if (char != gf && char.canResetDance(holdingField)) {
 						char.resetDance();
 					}
 				}
+			}
+
+			// TODO: maybe give gf her own playfield
+			if (gf != null && gf.canResetDance()) {
+				gf.resetDance();
 			}
 		}
 		
