@@ -587,7 +587,7 @@ class Paths
 		else
 			dependencies = [];
 
-		trace('set to $v with ${dependencies.length} dependencies');
+		//trace('set to $v with ${dependencies.length} dependencies');
 
 		return currentModDirectory = v;
 	}

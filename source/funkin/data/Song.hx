@@ -167,6 +167,9 @@ class Song
 							var split = woExtension.split("-");
 							split.shift();
 							var diff = split.join("-");
+							if(diff == 'DEFAULT_DIFF')
+								diff = 'Moonchart';
+							
 							charts.set(diff, true);
 							return;
 						}
