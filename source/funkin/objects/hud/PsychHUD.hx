@@ -1,5 +1,7 @@
 package funkin.objects.hud;
 
+import funkin.objects.hud.JudgementCounter.JudgementCounters;
+import funkin.objects.hud.JudgementCounter.JudgeCounterSettings;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.tweens.FlxTween;
@@ -8,10 +10,7 @@ import funkin.objects.playfields.PlayField;
 import funkin.data.JudgmentManager.JudgmentData;
 
 class PsychHUD extends CommonHUD 
-{
-	public var judgeTexts = new Map<String, FlxText>();
-	public var judgeNames = new Map<String, FlxText>();
-	
+{	
 	public var scoreTxt:FlxText;
 	public var hitbar:Hitbar;
 
@@ -19,7 +18,6 @@ class PsychHUD extends CommonHUD
 	var scoreTxtTween:FlxTween;
 
 	public var separator:String = ' • ';
-
 	// cached because dont wanna be doing that shit every update cycle lmao
 	// even though it probably doesnt matter since it caches it the first time
 	// i feel like this is probably faster than going through map.get each time
@@ -46,7 +44,6 @@ class PsychHUD extends CommonHUD
 		songWifeHighscore = songRecord.accuracyScore;
 
 		showJudgeCounter = ClientPrefs.judgeCounter != "Off";
-
 		////
 		scoreTxt = new FlxText(0, healthBarBG.y + 48, FlxG.width, "", 20);
 		scoreTxt.antialiasing = true;
@@ -81,60 +78,44 @@ class PsychHUD extends CommonHUD
 
 	function clearJudgementDisplays()
 	{
-		for (text in judgeTexts){
-			remove(text);
-			text.destroy();
-		}
-		judgeTexts.clear();
-
-		for (text in judgeNames){
-			remove(text);
-			text.destroy();
-		}
-		judgeNames.clear();
+		remove(judgeCounters);
+		judgeCounters.destroy();
+		judgeCounters = null;
 	}
+
+	// Maybe we should move this into CommonHUD??
+	var counterOptions:JudgeCounterSettings = {
+		#if tgt
+		textBorderSpacing: 6,
+		textLineSpacing: 25,
+		textSize: 24,
+		textBorderSize: 1.25,
+		nameFont: "calibrib.ttf",
+		numbFont: "calibri.ttf"
+		#else
+		textBorderSpacing: 6,
+		textLineSpacing: 22,
+		textSize: 20,
+		textBorderSize: 1.5,
+		nameFont: "vcr.ttf",
+		numbFont: "vcr.ttf"
+		#end
+	}
+	var judgeCounters:JudgementCounters;
 
 	function generateJudgementDisplays()
 	{
-		#if tgt
-		final textBorderSpacing = 6;
-		final textLineSpacing = 25;
-		final textSize = 24;
-		final textBorderSize = 1.25;
-		final nameFont = "calibrib.ttf";
-		final numbFont = "calibri.ttf";
-		#else
-		final textBorderSpacing = 6;
-		final textLineSpacing = 22;
-		final textSize = 20;
-		final textBorderSize = 1.5;
-		final nameFont = "vcr.ttf";
-		final numbFont = "vcr.ttf";
-		#end
-
 		var textWidth = ClientPrefs.judgeCounter == 'Shortened' ? 150 : 200;
-		var textPosX = ClientPrefs.hudPosition == 'Right' ? (FlxG.width - textBorderSpacing - textWidth) : textBorderSpacing;
-		var textPosY = (FlxG.height - displayedJudges.length * textLineSpacing) * 0.5;
-
-		for (idx in 0...displayedJudges.length)
-		{
-			var judgment = displayedJudges[idx];
-
-			var text = new FlxText(textPosX, textPosY + idx*textLineSpacing, textWidth, displayNames.get(judgment));
-			text.setFormat(Paths.font(nameFont), textSize, judgeColours.get(judgment), LEFT);
-			text.setBorderStyle(OUTLINE, 0xFF000000, textBorderSize);
-			text.scrollFactor.set();
-			add(text);
-
-			var numb = new FlxText(textPosX, text.y, textWidth, "0");
-			numb.setFormat(Paths.font(numbFont), textSize, 0xFFFFFFFF, RIGHT);
-			numb.setBorderStyle(OUTLINE, 0xFF000000, textBorderSize);
-			numb.scrollFactor.set();
-			add(numb);
-
-			judgeTexts.set(judgment, numb);
-			judgeNames.set(judgment, text);
-		}
+		counterOptions.length = ClientPrefs.judgeCounter;
+		judgeCounters = new JudgementCounters(
+			ClientPrefs.hudPosition == 'Right' ? (FlxG.width - counterOptions.textBorderSpacing - textWidth) : counterOptions.textBorderSpacing,
+			FlxG.height, // TODO: Alter the math so this can be FlxG.height * 0.5, since that'd make more sense	for users
+			displayNames,
+			judgeColours,
+			counterOptions,
+			displayedJudges
+		);
+		add(judgeCounters);
 	}
 
 	override function changedOptions(changed:Array<String>)
@@ -208,12 +189,11 @@ class PsychHUD extends CommonHUD
 	override function update(elapsed:Float)
 	{
 		if (isUpdating)
-			scoreTxt.text = PlayState.instance.cpuControlled ? botplayString : getScoreText();
+			scoreTxt.text = PlayState.instance.cpuControlled && useSubtleMark ? botplayString : getScoreText();
 		
-		for (k => v in judgements){
-			if (judgeTexts.exists(k))
-				judgeTexts.get(k).text = Std.string(v);
-		}
+		for (k => v in judgements)
+			judgeCounters.setCount(k, v);
+		
 
 		super.update(elapsed);
 	}
@@ -230,20 +210,7 @@ class PsychHUD extends CommonHUD
 			if (scoreTxtTween != null)
 				scoreTxtTween.cancel();
 
-			var judgeName = judgeNames.get(judge.internalName);
-			var judgeTxt = judgeTexts.get(judge.internalName);
-			if (judgeName != null)
-			{
-				FlxTween.cancelTweensOf(judgeName.scale);
-				judgeName.scale.set(1.075, 1.075);
-				FlxTween.tween(judgeName.scale, {x: 1, y: 1}, 0.2);
-			}
-			if (judgeTxt != null)
-			{
-				FlxTween.cancelTweensOf(judgeTxt.scale);
-				judgeTxt.scale.set(1.075, 1.075);
-				FlxTween.tween(judgeTxt.scale, {x: 1, y: 1}, 0.2);
-			}
+			judgeCounters.bump(judge.internalName);
 
 			scoreTxt.scale.x = 1.075;
 			scoreTxt.scale.y = 1.075;
@@ -262,22 +229,8 @@ class PsychHUD extends CommonHUD
 		{
 			case 'misses':
 				misses = val;
-				var judgeName = judgeNames.get('miss');
-				var judgeTxt = judgeTexts.get('miss');
-				if (judgeName != null)
-				{
-					FlxTween.cancelTweensOf(judgeName.scale);
-					judgeName.scale.set(1.075, 1.075);
-					FlxTween.tween(judgeName.scale, {x: 1, y: 1}, 0.2);
-				}
-				if (judgeTxt != null)
-				{
-					FlxTween.cancelTweensOf(judgeTxt.scale);
-					judgeTxt.scale.set(1.075, 1.075);
-					FlxTween.tween(judgeTxt.scale, {x: 1, y: 1}, 0.2);
-
-					judgeTxt.text = Std.string(val);
-				}
+				judgeCounters.bump('miss');
+				judgeCounters.setCount('miss', val);
 			
 			case 'totalNotesHit':
 				if (ClientPrefs.showWifeScore)

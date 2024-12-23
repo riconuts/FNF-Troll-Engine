@@ -113,8 +113,9 @@ class OptionsSubstate extends MusicBeatSubstate
 					"coloredCombos",
 					'worldCombos',
 					"simpleJudge",
-					"judgeCounter", 
+					"judgeCounter",
 					'hudPosition', 
+					"botplayMarker", 
 					"customizeHUD",
 				]
 			],

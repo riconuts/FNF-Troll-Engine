@@ -21,6 +21,10 @@ class CommonHUD extends BaseHUD
 	public var healthBarBG(get, null):FlxSprite;
 	public var iconP1:HealthIcon;
 	public var iconP2:HealthIcon;
+
+	public var useSubtleMark:Bool = false;
+
+	public var botplayText:BotplayText = new BotplayText();
 	
 	override function  getHealthbar():FNFHealthBar return healthBar;
 	
@@ -65,6 +69,10 @@ class CommonHUD extends BaseHUD
 		add(timeBarBG);
 		add(timeBar);
 		add(timeTxt);
+		useSubtleMark = ClientPrefs.botplayMarker == 'Subtle';
+
+		botplayText.active = botplayText.visible = ClientPrefs.botplayMarker == 'Psych';
+		add(botplayText);
 	}
 
 	override function reloadHealthBarColors(dadColor:FlxColor, bfColor:FlxColor)
@@ -186,6 +194,9 @@ class CommonHUD extends BaseHUD
 		healthBar.iconP1.y = healthBar.y + (healthBar.height - healthBar.iconP1.height) / 2;
 		healthBar.iconP2.y = healthBar.y + (healthBar.height - healthBar.iconP2.height) / 2;
 		healthBar.real_alpha = healthBar.real_alpha;
+
+		botplayText.active = botplayText.visible = ClientPrefs.botplayMarker == 'Psych';
+		useSubtleMark = ClientPrefs.botplayMarker == 'Subtle';
 
 		updateTimeBarType();
 	}

@@ -492,6 +492,15 @@ class ClientPrefs
 					"options" => ["Off", "Shortened", "Full"]
 				]
 			},
+			"botplayMarker" => {
+				display: "Botplay Mark",
+				desc: "How to display the Botplay mark.",
+				type: Dropdown,
+				value: "Subtle",
+				data: [
+					"options" => ["Hidden", "Subtle", "Psych"]
+				],
+			},
 			"hudPosition" => {
 				display: "HUD Position",
 				desc: "Where to position HUD elements.",
