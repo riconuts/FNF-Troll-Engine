@@ -3476,7 +3476,7 @@ class PlayState extends MusicBeatState
 		if(callOnScripts("onApplyJudgmentData", [judgeData, diff, bot, show]) == Globals.Function_Stop)
 			return;
 
-		if (!bot)stats.score += Math.floor(judgeData.score * playbackRate);
+		stats.score += Math.floor(judgeData.score * playbackRate);
 		health += (judgeData.health * 0.02) * (judgeData.health < 0 ? healthLoss : healthGain);
 		songHits++;
 
