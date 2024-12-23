@@ -1,5 +1,6 @@
 package funkin.objects.hud;
 
+import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.util.FlxStringUtil;
 import flixel.ui.FlxBar;
 import flixel.text.FlxText;
@@ -11,6 +12,8 @@ import funkin.states.PlayState;
 **/
 class KadeHUD extends BaseHUD
 {
+	var counters = new Map<String, FlxText>();
+
 	var healthBar:FNFHealthBar;
 	var healthBarBG:FlxSprite;
 
@@ -103,12 +106,38 @@ class KadeHUD extends BaseHUD
 		add(iconP1);
 		add(iconP2);
 
+		for(counterIdx => judge in displayedJudges){
+			var offset = -40+(counterIdx*20);
+
+			var txt = new FlxText(4, (FlxG.height/2)+offset, FlxG.width - 8, "", 20);
+			txt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
+			txt.scrollFactor.set();
+			add(txt);
+			counters.set(judge,txt);
+			updateJudgeCounter(judge);
+		}
+
 		// fuck it
 		changedOptions([]);
 	}
 
+	private function updateJudgeCounter(id:String) {
+		if (counters.exists(id))
+			counters.get(id).text = '${displayNames[id]}: ${judgements[id]}';
+	}
+
 	override function changedOptions(changed){
 		super.changedOptions(changed);
+
+		////
+		{
+			var visible = ClientPrefs.judgeCounter != "Off";
+			var align = ClientPrefs.hudPosition!="Left" ? RIGHT : LEFT;
+			for (obj in counters) {
+				obj.visible = visible;
+				obj.alignment = align;
+			}
+		}
 
 		////
 		healthBar.y = (ClientPrefs.downScroll) ? 50 : (FlxG.height * 0.9);
@@ -175,6 +204,9 @@ class KadeHUD extends BaseHUD
 
 	override function update(elapsed:Float)
 	{
+		for (k => v in judgements)
+			updateJudgeCounter(k);
+
 		if (FlxG.keys.justPressed.NINE)
 			iconP1.swapOldIcon();
 
