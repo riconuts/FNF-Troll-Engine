@@ -48,8 +48,12 @@
 
     <classpath path="source" />
 
+	<section if="desktop">
+		<assets path="alsoft.txt" rename="alsoft.ini" if="windows" />
+		<assets path="alsoft.txt" rename="alsoft.conf" unless="windows" />
+	</section>
+
     <assets path="assets" />
-    <assets path="alsoft.ini" />
     <assets path='default_content' rename='content' embed='false' exclude="*.mp3" />
 
 	<!-- TROLL ENGINE CUSTOMIZATION -->
