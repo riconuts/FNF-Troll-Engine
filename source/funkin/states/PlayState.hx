@@ -1803,12 +1803,6 @@ class PlayState extends MusicBeatState
 			
 			trackMap.set(trackName, newTrack);
 			tracks.push(newTrack);
-
-			newTrack.volume = 0.0;
-			newTrack.play();
-			newTrack.pause();
-			newTrack.volume = 1.0;
-			newTrack.time = 0;
 		}
 
 		inline function getTrackInstances(nameArray:Null<Array<String>>)
@@ -2495,7 +2489,6 @@ class PlayState extends MusicBeatState
 		for (track in tracks)
 			track.pause();
 
-		inst.play();
 		Conductor.songPosition = inst.time;
 
 		for (track in tracks){
@@ -2505,6 +2498,9 @@ class PlayState extends MusicBeatState
 			}
 		}
 
+		Conductor.lastSongPos = Conductor.songPosition;
+		lastMixTimer2 = Main.getTime();
+		
 		updateSongDiscordPresence();
 	}
 
@@ -2513,6 +2509,7 @@ class PlayState extends MusicBeatState
 	var startedCountdown:Bool = false;
 	var canPause:Bool = true;
 	var lastMixTimer:Float = 0;
+	var lastMixTimer2:Float = 0;
 	var prevNoteCount:Int = 0;
 
 	var svIndex:Int =0;
@@ -2659,14 +2656,26 @@ class PlayState extends MusicBeatState
 					case "Last Mix":
 						// Stepmania method
 						// Works for most people it seems??
-						if (inst.playing && inst.time == Conductor.lastSongPos)
-							lastMixTimer += elapsed * 1000;
-						else{
-							lastMixTimer = 0;
+						if (Conductor.lastSongPos != inst.time) {
 							Conductor.lastSongPos = inst.time;
-						}
+							lastMixTimer = 0;
+						}else
+							lastMixTimer += elapsed * 1000;
+						
 						Conductor.songPosition = inst.time + lastMixTimer;
 
+					case "Sys Last Mix":
+						// Last Mix but using Sys.time() instead of elapsed as it's slightly less precise
+						var offset:Float = 0;
+
+						if (Conductor.lastSongPos != inst.time) {
+							Conductor.lastSongPos = inst.time;
+							lastMixTimer2 = Main.getTime();
+						}else{
+							offset = (Main.getTime() - lastMixTimer2);
+						}
+
+						Conductor.songPosition = inst.time + offset;
 				}
 			}
 		}
@@ -4160,23 +4169,19 @@ class PlayState extends MusicBeatState
 	override function stepHit()
 	{
 		super.stepHit();
-		if(ClientPrefs.songSyncMode == 'Legacy'){
+
+		if (ClientPrefs.songSyncMode == 'Legacy') {
 			var needsResync:Bool = false;
-			if(Math.abs(inst.time - Conductor.songPosition) > 30)
-				needsResync = true;
-			
-			if(!needsResync){
-				for(track in tracks){
-					if(Math.abs(track.time - Conductor.songPosition) > 30){
-						needsResync = true;
-						break;
-					}
+			for (track in tracks) {
+				if (Math.abs(track.time - Conductor.songPosition) > 30){
+					needsResync = true;
+					break;
 				}
 			}
-
 			if(needsResync)
 				resyncVocals();
 		}
+		
 		if (curStep < lastStepHit) 
 			return;
 		

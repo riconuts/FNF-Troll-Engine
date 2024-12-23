@@ -147,17 +147,8 @@ class Main extends Sprite
 		var scaleFactor:Int = Math.floor((screenWidth > screenHeight) ? (screenHeight / gameHeight) : (screenWidth / gameWidth));
 		if (scaleFactor < 1) scaleFactor = 1;
 
-		final windowWidth:Int = scaleFactor * gameWidth;
-		final windowHeight:Int = scaleFactor * gameHeight;
-
-		Application.current.window.resize(
-			windowWidth, 
-			windowHeight
-		);
-		Application.current.window.move(
-			Std.int((screenWidth - windowWidth) / 2),
-			Std.int((screenHeight - windowHeight) / 2)
-		);
+		resizeWindow(gameWidth * scaleFactor, gameHeight * scaleFactor);
+		centerWindow();
 
 		////
 		@:privateAccess
@@ -198,6 +189,33 @@ class Main extends Sprite
 		untyped __global__.__hxcpp_set_critical_error_handler(onCrash);
 		#end
 		#end
+	}
+
+	public static function getTime():Float {
+		#if flash
+		return flash.Lib.getTimer();
+		#elseif ((js && !nodejs) || electron)
+		return Browser.window.performance.now();
+		#elseif sys
+		return Sys.time() * 1000;
+		#elseif (lime_cffi && !macro)
+		@:privateAccess
+		return cast lime._internal.backend.native.NativeCFFI.lime_system_get_timer();
+		#elseif cpp
+		return untyped __global__.__time_stamp() * 1000;
+		#else
+		return 0;
+		#end
+	}
+
+	public static function resizeWindow(width:Int, height:Int)
+		Application.current.window.resize(width, height);
+
+	public static function centerWindow() {
+		Application.current.window.move(
+			Std.int((Application.current.window.display.bounds.width - Application.current.window.width) / 2),
+			Std.int((Application.current.window.display.bounds.height - Application.current.window.height) / 2)
+		);
 	}
 
 	public static function resetSpriteCache(sprite:Sprite):Void {
