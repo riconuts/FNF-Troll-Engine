@@ -3,15 +3,14 @@ package funkin.objects;
 import funkin.states.PlayState;
 import funkin.scripts.FunkinScript.ScriptType;
 import funkin.objects.playfields.PlayField;
-import flixel.math.FlxPoint;
+import funkin.data.CharacterData;
 import funkin.data.CharacterData.*;
-import funkin.data.CharacterData.AnimArray;
-import funkin.data.CharacterData.CharacterFile;
 import funkin.scripts.*;
 import animateatlas.AtlasFrameMaker;
 import flixel.animation.FlxAnimation;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
+import flixel.math.FlxPoint;
 import flixel.FlxSprite;
 import openfl.geom.ColorTransform;
 
@@ -26,8 +25,8 @@ class Character extends FlxSprite
 	/**Whether to force the dance animation to play**/
 	public var shouldForceDance:Bool = false;
 
-	/**Whether the character can go back to the idle while the player is holding a gameplay key**/
-	public var idleWhenHold:Bool = true;
+	/**If true, the character will go back to it's idle even if the player is holding a gameplay key**/
+	public var idleWhenHold:Bool = false;
 
 	/**In case a character is missing, it will use BF on its place**/
 	public static var DEFAULT_CHARACTER:String = 'bf'; 
@@ -191,20 +190,7 @@ class Character extends FlxSprite
 
 				if (!debugMode)
 				{
-					camOffsets[anim.anim] = (camOffset != null) ? [camOffset[0], camOffset[1]] : {
-						if (!animAnim.startsWith('sing'))
-							[0.0, 0.0];
-						else if (animAnim.startsWith('singLEFT'))
-							[-30.0, 0.0];
-						else if (animAnim.startsWith('singDOWN'))
-							[0.0, 30.0];
-						else if (animAnim.startsWith('singUP'))
-							[0.0, -30.0];
-						else if (animAnim.startsWith('singRIGHT'))
-							[30.0, 0.0];
-						else
-							[0.0, 0.0];
-					};
+					camOffsets[anim.anim] = (camOffset != null) ? [camOffset[0], camOffset[1]] : CharacterData.getDefaultAnimCamOffset(animAnim);
 				}
 
 				////
@@ -233,7 +219,6 @@ class Character extends FlxSprite
 		this.debugMode = debugMode;
 
 		xFacing = isPlayer ? -1 : 1;
-		idleWhenHold = !isPlayer;
 		controlled = isPlayer;
 	}
 
@@ -298,11 +283,11 @@ class Character extends FlxSprite
 		if (callOnScripts("onCharacterUpdate", [elapsed]) == Globals.Function_Stop)
 			return;
 		
-		if(!debugMode && animation.curAnim != null)
+		if (!debugMode && animation.curAnim != null)
 		{
 			if (animTimer > 0) {
 				animTimer -= elapsed;
-				if(animTimer<=0) {
+				if (animTimer<=0) {
 					animTimer=0;
 					dance();
 				}
@@ -318,47 +303,39 @@ class Character extends FlxSprite
 				}
 			} 
 
-			if (specialAnim && animation.curAnim.finished) {
-				specialAnim = false;
-				dance();
-
-				callOnScripts("onSpecialAnimFinished", [animation.curAnim.name]);
-			}
-
 			if (animation.name.startsWith('sing'))
 				holdTimer += elapsed;
 			else
 				holdTimer = 0;
 
 			if (animation.finished) {
-				if (animation.name.endsWith('miss')) {
+				var name:String = animation.curAnim.name;
+
+				if (specialAnim) {
+					specialAnim = false;
 					dance();
-				
-				}else if (animation.exists(animation.name + '-loop')) {
-					playAnim(animation.name + '-loop');
+	
+					callOnScripts("onSpecialAnimFinished", [name]);
 				}
-			}
-		}
-
-		super.update(elapsed);
-
-		if(!debugMode){
-			if(animation.curAnim!=null){
-				var name = animation.curAnim.name;
-				if(name.startsWith("hold")){
-					if(name.endsWith("Start") && animation.curAnim.finished){
-						var newName = name.substring(0,name.length-5);
+				else if (name.endsWith('miss')) {
+					dance();
+				}
+				else if (animation.exists(name + '-loop')) {
+					playAnim(name + '-loop');
+				}
+				else if (name.startsWith("hold") && name.endsWith("Start")) {
+					var newName = name.substring(0, name.length-5);
+					if (animation.exists(newName)) {
+						playAnim(newName,true);
+					}else {
 						var singName = "sing" + name.substring(3, name.length-5);
-						if(animation.getByName(newName)!=null){
-							playAnim(newName,true);
-						}else{
-							playAnim(singName,true);
-						}
+						playAnim(singName,true);
 					}
 				}
 			}
 		}
-
+		
+		super.update(elapsed);
 		callOnScripts("onCharacterUpdatePost", [elapsed]);
 	}
 
@@ -510,6 +487,9 @@ class Character extends FlxSprite
 	}
 
 	public function missNote(note:Note, field:PlayField) {
+		if (callOnScripts("missNote", [note, field]) == Globals.Function_Stop)
+			return;
+
 		if (animTimer > 0 || voicelining)
 			return;
 
@@ -540,26 +520,19 @@ class Character extends FlxSprite
 	private var settingCharacterUp:Bool = true;
 	public function recalculateDanceIdle() {
 		var lastDanceIdle:Bool = danceIdle;
-		danceIdle = (animation.getByName('danceLeft' + idleSuffix) != null && animation.getByName('danceRight' + idleSuffix) != null);
+		danceIdle = animation.exists('danceLeft' + idleSuffix) && animation.exists('danceRight' + idleSuffix);
 
-		if(danceIdle)
+		if (danceIdle)
 			idleSequence = ["danceLeft" + idleSuffix, "danceRight" + idleSuffix];
 		
-		if(settingCharacterUp)
-		{
+		if (settingCharacterUp) {
+			settingCharacterUp = false;
 			danceEveryNumBeats = (danceIdle ? 1 : 2);
 		}
-		else if(lastDanceIdle != danceIdle)
-		{
-			var calc:Float = danceEveryNumBeats;
-			if(danceIdle) 
-				calc /= 2;
-			else
-				calc *= 2;
-
+		else if(lastDanceIdle != danceIdle) {
+			var calc:Float = danceEveryNumBeats * (danceIdle ? 0.5 : 2.0);
 			danceEveryNumBeats = Math.round(Math.max(calc, 1));
 		}
-		settingCharacterUp = false;
 	}
 
 	public function addOffset(name:String, x:Float = 0, y:Float = 0)

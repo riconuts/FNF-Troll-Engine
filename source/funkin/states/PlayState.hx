@@ -1550,22 +1550,17 @@ class PlayState extends MusicBeatState
 	}
 
 	function checkCharacterDance(character:Character, ?beat:Float, ignoreBeat:Bool = false){
-		if(character.danceEveryNumBeats == 0)return;
-		if(character.animation.curAnim == null)return;
-		if(beat == null)
-			beat = this.curDecBeat;
-
-
+		if (character.danceEveryNumBeats == 0) return;
+		if (beat == null) beat = this.curDecBeat;
 		
 		var shouldBop = beat >= character.nextDanceBeat;
 		if (shouldBop || ignoreBeat){
 			if (shouldBop)
 				character.nextDanceBeat += character.danceEveryNumBeats;
 
-			if (!character.animation.curAnim.name.startsWith("sing") && !character.stunned) 
+			if ((character.animation.curAnim == null || !character.animation.curAnim.name.startsWith("sing")) && !character.stunned) 
 				character.dance();
 		}
-		
 	}
 
 	function danceCharacters(?curBeat:Float)
@@ -1808,12 +1803,6 @@ class PlayState extends MusicBeatState
 			
 			trackMap.set(trackName, newTrack);
 			tracks.push(newTrack);
-
-			newTrack.volume = 0.0;
-			newTrack.play();
-			newTrack.pause();
-			newTrack.volume = 1.0;
-			newTrack.time = 0;
 		}
 
 		inline function getTrackInstances(nameArray:Null<Array<String>>)
@@ -2006,7 +1995,7 @@ class PlayState extends MusicBeatState
 					swagNote.characterHitAnimSuffix = '-alt';
 					swagNote.characterMissAnimSuffix = '-alt';
 				}
-				swagNote.gfNote = section.gfSection;
+				swagNote.gfNote = section.gfSection && daNoteData < keyCount;
 				swagNote.noteType = daType;
 
 				////
@@ -2500,7 +2489,6 @@ class PlayState extends MusicBeatState
 		for (track in tracks)
 			track.pause();
 
-		inst.play();
 		Conductor.songPosition = inst.time;
 
 		for (track in tracks){
@@ -2510,6 +2498,9 @@ class PlayState extends MusicBeatState
 			}
 		}
 
+		Conductor.lastSongPos = Conductor.songPosition;
+		lastMixTimer2 = Main.getTime();
+		
 		updateSongDiscordPresence();
 	}
 
@@ -2518,6 +2509,7 @@ class PlayState extends MusicBeatState
 	var startedCountdown:Bool = false;
 	var canPause:Bool = true;
 	var lastMixTimer:Float = 0;
+	var lastMixTimer2:Float = 0;
 	var prevNoteCount:Int = 0;
 
 	var svIndex:Int =0;
@@ -2664,14 +2656,26 @@ class PlayState extends MusicBeatState
 					case "Last Mix":
 						// Stepmania method
 						// Works for most people it seems??
-						if (inst.playing && inst.time == Conductor.lastSongPos)
-							lastMixTimer += elapsed * 1000;
-						else{
-							lastMixTimer = 0;
+						if (Conductor.lastSongPos != inst.time) {
 							Conductor.lastSongPos = inst.time;
-						}
+							lastMixTimer = 0;
+						}else
+							lastMixTimer += elapsed * 1000;
+						
 						Conductor.songPosition = inst.time + lastMixTimer;
 
+					case "Sys Last Mix":
+						// Last Mix but using Sys.time() instead of elapsed as it's slightly less precise
+						var offset:Float = 0;
+
+						if (Conductor.lastSongPos != inst.time) {
+							Conductor.lastSongPos = inst.time;
+							lastMixTimer2 = Main.getTime();
+						}else{
+							offset = (Main.getTime() - lastMixTimer2);
+						}
+
+						Conductor.songPosition = inst.time + offset;
 				}
 			}
 		}
@@ -2740,12 +2744,17 @@ class PlayState extends MusicBeatState
 			}
 
 			for (field in playfields) {
-				for (char in field.characters){
-					if (char.canResetDance(field.keysPressed.contains(true))) {
-						// trace("reset");
+				var holdingField = field.keysPressed.contains(true);
+				for (char in field.characters) {
+					if (char != gf && char.canResetDance(holdingField)) {
 						char.resetDance();
 					}
 				}
+			}
+
+			// TODO: maybe give gf her own playfield
+			if (gf != null && gf.canResetDance()) {
+				gf.resetDance();
 			}
 		}
 		
@@ -3329,26 +3338,17 @@ class PlayState extends MusicBeatState
 		if(r)return;
 
 		var spr:RatingSprite;
+		
+		lastJudge = ratingGroup.lastJudge;
+		if (ClientPrefs.simpleJudge && lastJudge != null)
+			lastJudge.kill();
+
+		if (worldCombos)
+			spr = ratingGroup.displayJudgment(image, -40, -60);
+		else
+			spr = ratingGroup.displayJudgment(image, ClientPrefs.comboOffset[0], -ClientPrefs.comboOffset[1]);
 
 		if (ClientPrefs.simpleJudge) {
-			//// this legit just the ratinggroup code, fuckk!!!!
-			// We should move THIS INTO RATINGGROUP!!
-
-			spr = ratingGroup.addOnTop(lastJudge);
-			spr.cancelTween();
-
-			spr.active = true;
-			spr.alive = true;
-			spr.exists = true;
-
-			spr.x = ratingGroup.x + ClientPrefs.comboOffset[0];
-			spr.y = ratingGroup.y - ClientPrefs.comboOffset[1];
-
-			//spr.loadGraphic(Paths.image(image));
-			RatingGroup.setJudgementSprite(image, spr);
-			spr.updateHitbox();
-
-			////
 			spr.moves = false;
 
 			spr.scale.copyFrom(ratingGroup.judgeTemplate.scale);
@@ -3366,22 +3366,26 @@ class PlayState extends MusicBeatState
 					});
 				}
 			});
+
+			spr.alpha = 1.0;
 			spr.scale.scale(1.1, 1.1);
 
-		} else {
-			spr = worldCombos ? ratingGroup.displayJudgment(image) : ratingGroup.displayJudgment(image, ClientPrefs.comboOffset[0], -ClientPrefs.comboOffset[1]);
-
+		} 
+		else {
 			spr.moves = true;
 			spr.acceleration.y = 550;
 			spr.velocity.set(FlxG.random.int(-10, 10), -FlxG.random.int(140, 175));
 
 			spr.scale.copyFrom(ratingGroup.judgeTemplate.scale);
-			spr.tween = FlxTween.tween(spr.scale, {x: spr.scale.x, y: spr.scale.y}, 0.1, {ease: FlxEase.backOut, onComplete: function(twn){
-				spr.tween = FlxTween.tween(spr, {alpha: 0.0}, 0.2, {
-					startDelay: Conductor.crochet * 0.001,
-					onComplete: (_) -> spr.kill()
-				});
-			}});
+			spr.tween = FlxTween.tween(spr.scale, {x: spr.scale.x, y: spr.scale.y}, 0.1, {
+				ease: FlxEase.backOut, 
+				onComplete: function(twn) {
+					spr.tween = FlxTween.tween(spr, {alpha: 0.0}, 0.2, {
+						startDelay: Conductor.crochet * 0.001,
+						onComplete: (_) -> spr.kill()
+					});
+				}
+			});
 
 			spr.alpha = 1.0;
 			spr.scale.scale(0.96, 0.96);
@@ -3419,7 +3423,11 @@ class PlayState extends MusicBeatState
 				return;
 		}
 		
-		lastCombos = (worldCombos) ? ratingGroup.displayCombo(combo) : ratingGroup.displayCombo(combo, ClientPrefs.comboOffset[2], -ClientPrefs.comboOffset[3]);
+		if (worldCombos)
+			lastCombos = ratingGroup.displayCombo(combo, 0, 80)
+		else
+			lastCombos = ratingGroup.displayCombo(combo, ClientPrefs.comboOffset[2], -ClientPrefs.comboOffset[3]);
+		
 		var comboColor = (combo < 0) ? hud.judgeColours.get("miss") : comboColor;
 		
 		for (numSpr in lastCombos)
@@ -4161,23 +4169,19 @@ class PlayState extends MusicBeatState
 	override function stepHit()
 	{
 		super.stepHit();
-		if(ClientPrefs.songSyncMode == 'Legacy'){
+
+		if (ClientPrefs.songSyncMode == 'Legacy') {
 			var needsResync:Bool = false;
-			if(Math.abs(inst.time - Conductor.songPosition) > 30)
-				needsResync = true;
-			
-			if(!needsResync){
-				for(track in tracks){
-					if(Math.abs(track.time - Conductor.songPosition) > 30){
-						needsResync = true;
-						break;
-					}
+			for (track in tracks) {
+				if (Math.abs(track.time - Conductor.songPosition) > 30){
+					needsResync = true;
+					break;
 				}
 			}
-
 			if(needsResync)
 				resyncVocals();
 		}
+		
 		if (curStep < lastStepHit) 
 			return;
 		
