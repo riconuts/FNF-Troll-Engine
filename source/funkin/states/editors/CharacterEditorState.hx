@@ -1056,6 +1056,7 @@ class CharacterEditorState extends MusicBeatState
 
 	function reloadCharacterDropDown() {
 		characterList = CharacterData.getAllCharacters();
+		characterList.sort(CoolUtil.alphabeticalSort);
 
 		charDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(characterList, true));
 		charDropDown.selectedLabel = charName;
