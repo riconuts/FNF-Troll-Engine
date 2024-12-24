@@ -744,7 +744,7 @@ class Paths
 		if(!modsOnly)
 			foldersToCheck.push(Paths.getPreloadPath('$dir/'));
 		
-		for(mod in dependencies)foldersToCheck.push(Paths.mods('$mod/$dir/'));
+		for(mod in dependencies)foldersToCheck.insert(0, Paths.mods('$mod/$dir/'));
 		for(mod in preLoadContent)foldersToCheck.push(Paths.mods('$mod/$dir/'));
 		for(mod in getGlobalContent())foldersToCheck.insert(0, Paths.mods('$mod/$dir/'));
 		for(mod in postLoadContent)foldersToCheck.insert(0, Paths.mods('$mod/$dir/'));
