@@ -1,5 +1,6 @@
 package funkin.data;
 
+import funkin.Paths.ContentData;
 import funkin.data.Song.SongMetadata;
 import sys.io.File;
 import haxe.Json;
@@ -37,20 +38,15 @@ class Level
 	private final data:LevelJSON;
 	private final script:FunkinHScript;
 
-	public static function fromId(id:String) {
-		var jsonPath:String = Paths.getFileWithExtensions('levels/$id', ["json"]);
-		var jsonData:LevelJSON = jsonPath == null ? null : cast Json.parse(File.getContent(jsonPath));
+	private final content:ContentData;
 
-		return new Level(id, jsonData);
-	}
-
-	public function new(id:String, ?data:LevelJSON){
+	public function new(content:ContentData, id:String, ?data:LevelJSON, ?scriptPath:String){
 		this.id = id;
 		this.data = data;
+		this.content = content;
 
-		var scriptPath:String = Paths.getHScriptPath('levels/$id');
 		if (scriptPath != null){
-			script = FunkinHScript.fromFile(scriptPath, scriptPath, [
+			this.script = FunkinHScript.fromFile(scriptPath, scriptPath, [
 				"this" => this,
 				"getData" => (() -> return this.data),
 				"STORY" => SongListState.STORY,
@@ -59,10 +55,10 @@ class Level
 
 			this.data = script.executeFunc("getData") ?? data;
 		}else {
-			script = null;
+			this.script = null;
 		}
 		
-		if (this.data == null) {
+		if (this.data == null && this.script == null) {
 			throw ("Level ID " + id + " isn't valid!");
 		}
 		if (this.data.difficulties == null)

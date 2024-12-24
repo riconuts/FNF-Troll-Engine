@@ -13,8 +13,8 @@ import flixel.FlxCamera.FlxCameraFollowStyle;
 class StoryMenuState extends MusicBeatState 
 {
 	var levels:Array<Level> = [
-		new Level("week1"),
-		Level.fromId("weekend1")
+		/*new Level("week1"),
+		Level.fromId("weekend1")*/
 	];
 	var curLevel:Level = null;
 
