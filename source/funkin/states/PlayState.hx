@@ -1661,6 +1661,10 @@ class PlayState extends MusicBeatState
 
 		resyncVocals();
 
+		// PLEASE DONT REMOVE YOU REMOVED MY LAST FIXES FOR STARTONTIME :sob:
+		for (track in tracks)
+			track.time = startOnTime;
+		
 		setOnScripts('songLength', songLength);
 		callOnScripts('onSongStart');
 	}
@@ -3470,7 +3474,7 @@ class PlayState extends MusicBeatState
 
 	private function applyJudgmentData(judgeData:JudgmentData, diff:Float, ?bot:Bool = false, ?show:Bool = true){
 		if(judgeData==null){
-			trace("you didnt give a valid JudgmentData to applyJudgmentData!");
+			trace("You didnt give a valid JudgmentData to applyJudgmentData!");
 			return;
 		}
 		if(callOnScripts("onApplyJudgmentData", [judgeData, diff, bot, show]) == Globals.Function_Stop)
