@@ -838,7 +838,7 @@ class FlxSound extends FlxBasic
 		if (_channel != null){
 			var source = get_audioSource();
 			if (source != null)
-				source.pitch = _pitch;
+				source.pitch = v;
 		}
 
 		return _pitch = v;
