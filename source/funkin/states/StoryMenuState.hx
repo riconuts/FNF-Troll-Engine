@@ -2,7 +2,7 @@ package funkin.states;
 
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.math.FlxMath;
-import funkin.data.Level;
+import funkin.data.Level.Level as Level;
 import funkin.data.Highscore;
 import flixel.util.FlxColor;
 import flixel.util.FlxGradient;
@@ -43,7 +43,17 @@ class StoryMenuState extends MusicBeatState
 	var intendedScore:Float = 0;
 	var lerpScore:Float = 0;
 
-	override function create() {
+	override function create() 
+	{
+		for (content in Paths.contentRegistry) {
+			for (level in content.levels) {
+				if (level.getVisible())
+					levels.push(level);
+			}
+		}
+
+		this.persistentUpdate = true;
+
 		cam = FlxG.camera;
 		cam.bgColor = 0xFFF9CF51;
 		cam.height = 54 + 386;
@@ -64,7 +74,7 @@ class StoryMenuState extends MusicBeatState
 		FadeTransitionSubstate.nextCamera = transitionCamera;
 
 		//
-		camFollowPos = new FlxObject(0, -30, camOptions.width, camOptions.height);
+		camFollowPos = new FlxObject(0, 0, camOptions.width, camOptions.height);
 		camOptions.follow(camFollowPos, FlxCameraFollowStyle.NO_DEAD_ZONE);
 		camOptions.scrollOffset.y -= 30;
 		add(camFollowPos);
@@ -124,10 +134,12 @@ class StoryMenuState extends MusicBeatState
 
 		var prev:FlxSprite = null;
 		for (i => level in levels) {
+			Paths.currentModDirectory = level.content.id;
+
 			var optionSpr = new FlxSprite(
 				FlxG.width / 2,
 				0,
-				level.getLevelAsset()	
+				Paths.image('storymenu/' + level.getLevelAsset())
 			);
 			optionSpr.x -= optionSpr.width / 2;
 			optionSpr.y = prev==null ? 0 : prev.y + prev.height + 30;
@@ -142,12 +154,12 @@ class StoryMenuState extends MusicBeatState
 		super.create();
 	}
 
-	function changeSelection(val:Int, isAbs:Bool=false) {
-		if (!isAbs)
-			FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
-
+	function changeSelection(val:Int, isAbs:Bool=false) 
+	{
 		curSelected = (isAbs) ? val : CoolUtil.updateIndex(curSelected, val, optionsGrp.length);
 		curLevel = levels[curSelected];
+
+		Paths.currentModDirectory = curLevel.content.id;
 
 		curDiffList = curLevel.getDifficulties();
 		changeDifficulty(CoolUtil.updateDifficultyIndex(curDiffIdx, curDiffStr, curDiffList), true);
@@ -157,6 +169,8 @@ class StoryMenuState extends MusicBeatState
 		selSpr = optionsGrp.members[curSelected];
 
 		songListText.text = curLevel.getDisplayedSongs().join('\n');
+	
+		if (!isAbs) FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
 	}
 
 	function changeDifficulty(val:Int, isAbs:Bool=false) {
@@ -167,7 +181,8 @@ class StoryMenuState extends MusicBeatState
 		diffText.text = '< ${curDiffStr.toUpperCase()} >';
 	}
 
-	override function update(elapsed:Float) {
+	var controlsActive = true;
+	function updateControls(elapsed:Float) {
 		if (controls.UI_UP_P) {
 			changeSelection(-1);
 		}
@@ -180,8 +195,50 @@ class StoryMenuState extends MusicBeatState
 		if (controls.UI_RIGHT_P) {
 			changeDifficulty(1);			
 		}
+
 		if (controls.BACK) {
+			controlsActive = false;
 			MusicBeatState.switchState(new funkin.states.MainMenuState());
+		}
+		else if (controls.ACCEPT) {
+			if (playLevel()) {
+				controlsActive = false;
+				FlxG.sound.play(Paths.sound('confirmMenu'), 0.4);
+			}else {
+				FlxG.sound.play(Paths.sound('cancelMenu'), 0.4);
+			}
+		}
+	}
+
+	private function playLevel() {			
+		if (curLevel.getUnlocked() == false)
+			return false;
+
+		// move to level ?
+
+		var playlist = curLevel.getPlaylist(curDiffStr);
+		if (playlist.length == 0) return false;
+
+		var idx:Int = 0;
+
+		playlist[idx].play(curDiffStr);		
+		PlayState.songPlaylistIdx = idx;
+		PlayState.songPlaylist = playlist;
+
+		PlayState.chartingMode = false;
+		PlayState.isStoryMode = true;
+
+		PlayState.campaignScore = 0;
+		PlayState.deathCounter = 0;
+
+		//MusicBeatState.switchState(new PlayState());
+
+		return true;
+	}
+
+	override function update(elapsed:Float) {
+		if (controlsActive) {
+			updateControls(elapsed);
 		}
 
 		camFollowPos.y = CoolUtil.coolLerp(camFollowPos.y, selSpr.y, elapsed * 10);

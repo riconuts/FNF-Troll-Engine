@@ -92,7 +92,7 @@ class FunkinHScript extends FunkinScript
 			return _fromString(Paths.getContent(file), name, additionalVars, doCreateCall);
 		}
 		catch(e:haxe.Exception) {
-			var msg = "Error parsing hscript! " + e.message;
+			var msg = "Error parsing hscript! " + e.details();
 			trace(msg);
 
 			#if desktop

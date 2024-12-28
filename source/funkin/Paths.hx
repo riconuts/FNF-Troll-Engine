@@ -1,14 +1,7 @@
 package funkin;
 
-import funkin.data.Level;
-import funkin.data.Song.SongMetadata;
-import haxe.io.Path;
-import funkin.data.Song.SongMetadata as SongData;
-import haxe.io.Bytes;
-import openfl.utils.ByteArray;
-import haxe.ds.StringMap;
+import funkin.data.ContentData;
 import funkin.data.LocalizationMap;
-import funkin.data.WeekData;
 import flixel.addons.display.FlxRuntimeShader;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.graphics.FlxGraphic;
@@ -17,6 +10,8 @@ import openfl.media.Sound;
 import openfl.display.BitmapData;
 import openfl.utils.AssetType;
 import openfl.utils.Assets;
+import haxe.io.Path;
+import haxe.io.Bytes;
 import haxe.Json;
 
 using StringTools;
@@ -105,8 +100,7 @@ class Paths
 		#end
 
 		#if MODS_ALLOWED
-		Paths.pushGlobalContent();
-		Paths.getModDirectories();
+		Paths.updateContentList();
 		#end
 	}
 
@@ -576,139 +570,225 @@ class Paths
 	}
 
 	////	
+	private static final assetsContent = {
+		var c = new ContentData("assets", "assets");
+		c.runsGlobally = true;
+		c;
+	};
+	private static final contentContent = {
+		var c = new ContentData("content", "content");
+		c.runsGlobally = true;
+		c;
+	}
+
+	public static var contentRegistry:Map<String, ContentData> = [];
+	
 	public static var currentModDirectory(default, set):String = '';
+	public static var currentContent(default, set):ContentData = null;
+	public static var dependencies(default, null):Array<ContentData> = [];
+	public static var globalContent(default, null):Array<ContentData> = [];
+
+	static var modsToLoad:Array<String> = [];
+	/*
+	static var contentActiveMap:Map<String, Bool> = [];
+	static var contentOrderMap:Map<String, Int> = [];
+*/
+	static function set_currentContent(mod:ContentData) {
+		dependencies.resize(0);
+
+		if (mod != null) {
+			for (name in mod.dependencies) {
+				if (contentRegistry.exists(name))
+					dependencies.push(contentRegistry.get(name));
+			}
+		}
+
+		return currentContent = mod;
+	}
+	
 	static function set_currentModDirectory(v:String){
+		if (!contentRegistry.exists(v)) {
+			currentContent = null;
+			return currentModDirectory = '';
+		}
+		
 		if (currentModDirectory == v)
 			return currentModDirectory;
-
-		if (!contentMetadata.exists(v))
-			return currentModDirectory = v;
-
-		if (!contentDirectories.exists(v))return currentModDirectory = '';
 		
-		if (contentMetadata.get(v).dependencies != null)
-			dependencies = contentMetadata.get(v).dependencies;
-		else
-			dependencies = [];
-
-		//trace('set to $v with ${dependencies.length} dependencies');
-
+		currentContent = contentRegistry.get(v);
 		return currentModDirectory = v;
 	}
 
-	// TODO: Write all of this to be not shit and use just like a generic load order thing
-	public static var globalContent:Array<String> = [];
-	public static var dependencies:Array<String> = [];
-	public static var preLoadContent:Array<String> = [];
-	public static var postLoadContent:Array<String> = [];
-
-	public static var modsList:Array<String> = [];
-	public static var contentDirectories:Map<String, String> = [];
-	public static var contentMetadata:Map<String, ContentMetadata> = [];
-
-	#if MODS_ALLOWED
-	inline static public function mods(key:String)
-		return 'content/$key';
-
-	inline static public function getGlobalContent(){
-		return globalContent;
+	inline public static function getModPath(mod:String, key:String = "") {
+		return Paths.contentRegistry.get(mod).getPath(key);
 	}
 
-	static public function pushGlobalContent(){
-		globalContent = [];
-
-		for (mod => json in getContentMetadata())
-		{
-			if (Reflect.field(json, "runsGlobally") == true) 
-				globalContent.push(mod);
+	public static function updateContentList() {
+		/*
+		contentActiveMap.clear();
+		contentOrderMap.clear();
+		
+		var rawFucking = Paths.getContent('modList.txt');
+		if (rawFucking != null) {
+			var splitFucking:Array<String> = CoolUtil.listFromString(rawFucking);
+			for (index => line in splitFucking) {
+				var values = line.split('=');
+				var id:String = values[0];
+				var active:Bool = values[1] != 'false';
+				contentOrderMap.set(id, index);
+				contentActiveMap.set(id, active);
+			}
 		}
+		*/
 
-		return globalContent;
-	}
-	
-	static public function modFolders(key:String, ignoreGlobal:Bool = false)
-	{
-		var shitToCheck:Array<String> = [];
-		if (Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
-			shitToCheck.push(Paths.currentModDirectory);
-
-		for (mod in dependencies)
-			shitToCheck.push(mod);
-
-		if (shitToCheck.length > 0) {
-			for (shit in shitToCheck){
-				var fileToCheck:String = contentDirectories.get(shit) + '/' + key;
-				if (exists(fileToCheck))
-					return fileToCheck;
+		var rawFucking = Paths.getContent('modList.txt');
+		if (rawFucking != null) {
+			trace("Reading modList.txt");
+			var splitFucking:Array<String> = CoolUtil.listFromString(rawFucking);
+			for (index => line in splitFucking) {
+				var values = line.split('=');
+				var id:String = values[0];
+				var active:Bool = values[1] != 'false';
+				
+				if (active && !modsToLoad.contains(id)) {
+					modsToLoad.push(id);
+				}
 			}
 		}
 
-		if (ignoreGlobal != true) {
-			for (mod in getGlobalContent()) {
-				var fileToCheck:String = contentDirectories.get(mod) + '/' + key;
-				if (exists(fileToCheck))
-					return fileToCheck;
-			}
-		}
+		// should new mods (not part of the list) be automatically added ???
 
-		return mods(key);
+		reloadContent();
 	}
 
 	// I might end up making this just return an array of loaded mods and require you to press a refresh button to reload content lol
 	// mainly for optimization reasons, so its not going through the entire content folder every single time
-	public static function updateContentLists()
+	public static function reloadContent()
 	{
-		var list:Array<String> = modsList = [];
-		contentMetadata.clear();
+		trace("Reloading content!");
 
-		contentDirectories.clear();
-		contentDirectories.set('', 'content');
+		var sowy:Array<ContentData> = [];
+		inline function push(c:ContentData)
+			sowy.push(c);
+		
+		/*
+		add(assetsContent);
+		add(contentContent);
+		*/
 
-		iterateDirectory('content', (folderName) -> {
+		function loadContentMod(folderName) {
 			var folderPath = 'content/$folderName';
-
-			if (isDirectory(folderPath) && !list.contains(folderName))
-			{
-				list.push(folderName);
-				contentDirectories.set(folderName, folderPath);
-
-				var rawJson:Null<String> = Paths.getContent('$folderPath/metadata.json');
-				if (rawJson != null && rawJson.length > 0) {
-					var data:Dynamic = Json.parse(rawJson);
-					contentMetadata.set(folderName, updateContentMetadataStructure(data));
-					return;
-				}
-
-				#if PE_MOD_COMPATIBILITY
-				var psychModMetadata = getPsychModMetadata(folderName);
-				if (psychModMetadata != null)
-					contentMetadata.set(folderName, psychModMetadata);
-				#end
+			if (!Paths.isDirectory(folderPath)) {
+				trace('Erm, $folderPath is not a valid content directory');
+				return;
 			}
-		});
-	}
 
-	#if PE_MOD_COMPATIBILITY
-	static function getPsychModMetadata(folderName:String):ContentMetadata {
-		var packJson:String = Paths.mods('$folderName/pack.json');
-		var packJson:Null<String> = Paths.getContent(packJson);
-		var packJson:Dynamic = (packJson == null) ? packJson : Json.parse(packJson);
+			#if PE_MOD_COMPATIBILITY
+			var packdataPath:String = '$folderPath/pack.json';
+			var packdata:Dynamic = Paths.getJson(packdataPath);
 
-		var sowy:ContentMetadata = {
-			runsGlobally: (packJson != null) && Reflect.field(packJson, 'runsGlobally') == true, 
-			weeks: [],
-			freeplaySongs: []
+			if (packdata != null) {
+				trace('Psych mod found: $folderPath');
+
+				var id = Paths.formatToSongPath(folderName);
+				var cd = new PsychContentData(id, folderPath);
+				push(cd);
+				return;
+			}
+			#end
+
+			var metadataPath:String = '$folderPath/metadata.json';
+			var metadata:Dynamic = Paths.getJson(metadataPath);
+			var metadata = updateContentMetadataStructure(metadata);
+
+			if (metadata != null) {
+				trace('content found: $folderPath');
+
+				var id = Paths.formatToSongPath(folderName);
+				var cd = new ContentData(id, folderPath);
+				
+				cd.runsGlobally = metadata.runsGlobally == true;
+				cd.dependencies = metadata.dependencies ?? [];
+				
+				push(cd);
+				return;
+			}
+
+			trace('Wtf! folder with no metadata: $folderPath', "will not load");
+		}
+		
+		//Paths.iterateDirectory('content', loadContentMod);
+		for (id in modsToLoad) {
+			loadContentMod(id);
 		}
 
-		for (psychWeek in WeekData.getPsychModWeeks(folderName))
-			WeekData.addPsychWeek(sowy, psychWeek);
+		Paths.contentRegistry.clear();
+		Paths.globalContent.resize(0);
 
-		return sowy;
+		for (cd in sowy) {
+			trace('mod id:' + cd.id);
+			Paths.contentRegistry.set(cd.id, cd);
+
+			if (cd.runsGlobally) {
+				trace("GLOBAL");
+				Paths.globalContent.push(cd);
+			}
+
+			cd.scanSongs();
+			cd.scanLevels();
+
+			trace('songs: [');
+			for (song in cd.songs)
+				print('	'+song);
+			print(']');
+
+			trace('levels: [');
+			for (level in cd.levels)
+				print('	'+level.id);
+			print(']');
+		}
+
+		Paths.currentModDirectory = Paths.currentModDirectory; // ""; // ?
+
+		trace("Content reloaded :D");
 	}
-	#end
+
+	#if MODS_ALLOWED
+	static public function modFolders(key:String, ignoreGlobal:Bool = false):Null<String>
+	{
+		var path:Null<String> = null;
+		inline function existsOnMod(mod:ContentData):Bool {
+			path = mod.getPath(key);
+			return exists(path);
+		}
+
+		if (currentContent != null)
+			if (existsOnMod(currentContent))
+				return path;
+		
+		for (mod in dependencies) 
+			if (existsOnMod(mod)) 
+				return path;
+
+		if (ignoreGlobal != true) {
+			for (mod in globalContent) {
+				if (existsOnMod(mod)) 
+					return path;
+			}
+
+			if (existsOnMod(contentContent))
+				return path;
+		}
+
+		// IT RETURNS NULL NOW!!! GRAHHHHH!!!!!
+		return null;
+	}
 	
 	inline static function updateContentMetadataStructure(data:Dynamic):ContentMetadata
 	{
+		if (data == null)
+			return null;
+		
 		if (Reflect.field(data, "weeks") != null)
 			return data; // You are valid :)
 
@@ -722,45 +802,31 @@ class Paths
 		}
 	}
 
-	static public function getModDirectories():Array<String> 
-	{
-		updateContentLists();
-		return modsList;
-	}
-
-	static public function getContentMetadata():Map<String, ContentMetadata>
-	{
-		updateContentLists();
-		return contentMetadata;
-	}
 	#end
 
 	inline static public function getFolders(dir:String, ?modsOnly:Bool = false){
 		#if !MODS_ALLOWED
-		return [Paths.getPreloadPath('$dir/')];
+		return modsOnly ? [] : [Paths.getPreloadPath('$dir/')];
 		
 		#else
-		var foldersToCheck:Array<String> = [
-			Paths.mods(Paths.currentModDirectory + '/$dir/'),
-			Paths.mods('$dir/'),
-		];
+		var foldersToCheck:Array<String> = [];
+		inline function push(mod) return foldersToCheck.push(mod.getPath('$dir/'));
 
-		if(!modsOnly)
-			foldersToCheck.push(Paths.getPreloadPath('$dir/'));
+		if (currentContent != null)
+			push(currentContent);
+
+		for (mod in dependencies)
+			push(mod);
 		
-		for(mod in dependencies)foldersToCheck.insert(0, Paths.mods('$mod/$dir/'));
-		for(mod in preLoadContent)foldersToCheck.push(Paths.mods('$mod/$dir/'));
-		for(mod in getGlobalContent())foldersToCheck.insert(0, Paths.mods('$mod/$dir/'));
-		for(mod in postLoadContent)foldersToCheck.insert(0, Paths.mods('$mod/$dir/'));
-
+		for (mod in globalContent) 
+			push(mod);
+		
+		push(contentContent);
+		if (!modsOnly) 
+			push(assetsContent);
 
 		return foldersToCheck;
 		#end
-	}
-	
-	public static function loadRandomMod()
-	{
-		Paths.currentModDirectory = '';
 	}
 
 	//// String stuff, should maybe move this to a diff class¿¿¿
@@ -923,98 +989,6 @@ typedef FreeplayCategoryMetadata = {
 		(Defaults are main, side and remix)
 	**/
 	var id:String;
-}
-
-class ContentData 
-{
-	/**
-	 * Content folder id
-	 */
-	public var id:String = "";
-
-	/**
-	 * Content folder path
-	 */
-	public var path:String = "assets";
-
-	/**
-		Content to load before this one.
-	**/
-	public var dependencies:Array<String> = [];
-
-
-	public var songs:Map<String, SongData> = [];
-	public var levels:Map<String, Level> = []; 
-	public var vars:Map<String, Dynamic> = []; // for some not too important values, scripts could store shit here to make up for the lack of static variables
-
-	public function new(id:String, path:String) 
-	{
-		this.id = id;
-		this.path = path;
-
-		scanSongs();
-		scanLevels();
-	}
-
-	public function scanSongs() {
-		this.songs.clear();
-
-		function scanFolderForSongs(path) {
-			Paths.iterateDirectory(path, (name) -> {
-				if (this.songs.exists(name))
-					return;
-
-				var song = new SongData(name, this.id);
-				if (song.charts.length > 0)
-					this.songs.set(name, song);
-			});
-		}
-
-		#if PE_MOD_COMPATIBILITY
-		scanFolderForSongs(Path.join([this.path, "data"]));
-		#end
-		scanFolderForSongs(Path.join([this.path, "songs"]));
-
-		return this.songs;
-	}
-
-	public function scanLevels() {
-		this.levels.clear();
-
-		var folderPath:String = Path.join([this.path, "levels"]);
-		Paths.iterateDirectory(folderPath, function(fileName) {
-			var p = new Path(Path.join([folderPath, fileName]));
-			var id = p.file;
-
-			if (levels.exists(id))
-				return;
-
-			p.ext = null;
-			var basePath:String = p.toString();
-			
-			var jsonPath:String = '$basePath.json';
-			var jsonData:Dynamic = Paths.getJson(jsonPath);
-
-			var scriptPath:Null<String> = null;
-			for (ext in Paths.HSCRIPT_EXTENSIONS) {
-				var path = '$basePath.$ext';
-				if (Paths.exists(path)) {
-					scriptPath = path;
-					break;
-				}
-			}
-			
-			if (jsonData == null && scriptPath == null) {
-				//trace('$basePath: no json or script to register level');
-				return;
-			}
-
-			var level = new Level(this, id, jsonData, scriptPath);
-			this.levels.set(level.id, level);
-		});
-
-		return this.levels;
-	}
 }
 
 typedef ContentMetadata = {

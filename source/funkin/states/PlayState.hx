@@ -1,5 +1,6 @@
 package funkin.states;
 
+import funkin.data.Level;
 import funkin.data.CharacterData;
 import funkin.data.Cache;
 import funkin.data.Song;
@@ -16,7 +17,6 @@ import funkin.objects.playfields.*;
 import funkin.data.Stats;
 import funkin.data.JudgmentManager;
 import funkin.data.Highscore;
-import funkin.data.WeekData;
 import funkin.states.GameOverSubstate;
 import funkin.states.PauseSubState;
 import funkin.modchart.ModManager;
@@ -110,14 +110,14 @@ class PlayState extends MusicBeatState
 	public static var instance:PlayState;
 	
 	public static var SONG:SwagSong = null;
-	public static var songPlaylist:Array<SongMetadata> = [];
+	public static var songPlaylist:Array<Song> = [];
 	public static var songPlaylistIdx = 0;
 
 	public static var difficulty:Int = 1; // for psych mod shit
 	public static var difficultyName:String = 'normal'; // should NOT be set to "" when playing normal diff!!!!!
 
 	public static var isStoryMode:Bool = false;
-	// public static var storyWeek:Int = 0;
+	public static var curLevel:Level = null;
 	public static var campaignScore:Int = 0;
 	public static var campaignMisses:Int = 0;
 	public static var deathCounter:Int = 0;
@@ -508,11 +508,6 @@ class PlayState extends MusicBeatState
 
 		OptionsSubstate.resetRestartRecomendations();
 		Paths.clearStoredMemory();
-		#if MODS_ALLOWED
-		Paths.preLoadContent = [];
-		Paths.postLoadContent = [];
-		Paths.pushGlobalContent();
-		#end
 
 		//// Reset to default
 		PauseSubState.songName = null;
@@ -3036,7 +3031,7 @@ class PlayState extends MusicBeatState
 			Highscore.saveScoreRecord(SONG.song, difficultyName, stats.getScoreRecord());
 
 		var gotoNextThing:Void -> Void = gotoMenus;
-		var nextSong:SongMetadata = null;
+		var nextSong:Song = null;
 
 		if (chartingMode) {
 			gotoNextThing = null;
@@ -3052,13 +3047,6 @@ class PlayState extends MusicBeatState
 			if (ratingFC != 'Fail')
 				campaignScore += stats.score;
 			campaignMisses += songMisses;
-
-			if (nextSong == null && saveScore && WeekData.curWeek != null) {
-				// Week ended, save week score
-				if (!practiceMode && !cpuControlled && !playOpponent) {
-					Highscore.saveWeekScore(WeekData.curWeek.name, campaignScore);						
-				}
-			}
 		}
 
 		if (nextSong != null) {
@@ -3073,6 +3061,14 @@ class PlayState extends MusicBeatState
 					FlxTransitionableState.skipNextTransOut = true;
 				}
 				nextSong.play(difficultyName);
+			}
+		}else {
+			trace("Playlist end");
+			
+			if (isStoryMode && curLevel != null) {
+				if (saveScore && !practiceMode && !cpuControlled && !playOpponent) {
+					Highscore.saveWeekScore(curLevel.id, campaignScore);						
+				}
 			}
 		}
 

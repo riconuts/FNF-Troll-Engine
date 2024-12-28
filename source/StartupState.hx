@@ -1,8 +1,5 @@
 package;
 
-import funkin.Paths.ContentData;
-import funkin.data.Level;
-
 import funkin.*;
 import funkin.states.MusicBeatState;
 import funkin.states.FadeTransitionSubstate;
@@ -77,8 +74,8 @@ class StartupState extends FlxTransitionableState
 			return;
 		loaded = true;
 
-		Paths.init();
 		PlayerSettings.init();
+		Paths.init();
 		
 		ClientPrefs.initialize();
 		ClientPrefs.load();
@@ -132,15 +129,6 @@ class StartupState extends FlxTransitionableState
 		
 		FlxTransitionableState.defaultTransIn = FadeTransitionSubstate;
 		FlxTransitionableState.defaultTransOut = FadeTransitionSubstate;
-
-		var cd:ContentData = new ContentData("base-game", "content/base-game");
-		for (song in cd.scanSongs()) {
-			print(song.songName, song.charts);
-		}
-		print();
-		for (level in cd.scanLevels()) {
-			print(level.id, level.getSongs());
-		}
 	}
 
 	override function create()

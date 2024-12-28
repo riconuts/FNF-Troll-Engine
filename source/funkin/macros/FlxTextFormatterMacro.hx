@@ -5,7 +5,7 @@ import haxe.macro.Context;
 import haxe.macro.Expr;
 import haxe.macro.Expr.Field;
 
-using funkin.macros.Sowy;
+using funkin.macros.SowyUtil;
 
 class FlxTextFormatterMacro
 {

@@ -7,7 +7,7 @@ import haxe.macro.Expr.Field;
 import haxe.macro.Expr.FieldType;
 import haxe.macro.Context;
 
-using funkin.macros.Sowy;
+using funkin.macros.SowyUtil;
 using haxe.macro.TypeTools;
 using haxe.macro.ExprTools;
 using haxe.macro.Tools;

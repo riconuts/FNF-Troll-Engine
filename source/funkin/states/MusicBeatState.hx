@@ -277,7 +277,6 @@ class MusicBeatState extends FlxUIState
 		#end
 
 		#if MODS_ALLOWED
-		// i NEED to rewrite the paths shit for real 
 		function returnSound(path:String, key:String, ?library:String){
 			var filePath = Path.join([path, key]);
 
@@ -289,18 +288,7 @@ class MusicBeatState extends FlxUIState
 			return Paths.currentTrackedSounds.get(filePath);
 		}
 
-		var fuck = [Paths.mods(Paths.currentModDirectory), Paths.mods("global"), "assets"];
-		#if MODS_ALLOWED
-		for (mod in Paths.getGlobalContent())
-			fuck.insert(0, Paths.mods(mod));
-		for (mod in Paths.preLoadContent)
-			fuck.push(Paths.mods(mod));
-		for (mod in Paths.postLoadContent)
-			fuck.insert(0, Paths.mods(mod));
-		#end
-		for (folder in fuck){
-			var daPath = Path.join([folder, "music"]);
-			
+		for (daPath in Paths.getFolders("music")) {
 			var menuFilePath = daPath+"/freakyMenu.ogg";
 			if (Paths.exists(menuFilePath)){
 				if (Paths.exists(daPath+"/freakyIntro.ogg")){

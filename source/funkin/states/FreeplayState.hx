@@ -47,25 +47,10 @@ class FreeplayState extends MusicBeatState
 		funkin.api.Discord.DiscordClient.changePresence('In the menus');
 		#end
 
-		for (week in WeekData.reloadWeekFiles(true))
-		{
-			Paths.currentModDirectory = week.directory;
-
-			if (week.songs == null)
-				continue;
-
-			for (songName in week.songs){
-				var metadata:SongMetadata = {songName: songName, folder: week.directory, difficulties: week.difficulties != null ? week.difficulties : []};
-				
-				/*
-				if (metadata.charts.length == 0){
-					trace('${week.directory}: $songName doesn\'t have any available charts!');
-					continue;
-				}
-				*/
-				
-				menu.addTextOption(songName).ID = songMeta.length;
-				songMeta.push(metadata);
+		for (modId => content in Paths.contentRegistry) {
+			for (song in content.freeplaySonglist) {	
+				menu.addTextOption(song.songName).ID = songMeta.length;
+				songMeta.push(song);
 			}
 		}
 
@@ -143,6 +128,8 @@ class FreeplayState extends MusicBeatState
 
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.fadeOut(0.16);
+
+		PlayState.isStoryMode = false;
 
 		if (FlxG.keys.pressed.SHIFT)
 			LoadingState.loadAndSwitchState(new funkin.states.editors.ChartingState());

@@ -6,7 +6,7 @@ import funkin.ClientPrefs;
 import haxe.macro.Context;
 import haxe.macro.Expr;
 
-using funkin.macros.Sowy;
+using funkin.macros.SowyUtil;
 
 class OptionMacro
 {

@@ -52,7 +52,7 @@ class Main extends Sprite
 	var gameHeight:Int = 720; // Height of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var adjustGameSize:Bool = true; // If true, the game size is adjusted to fit within the screen resolution
 	var initialState:Class<FlxState> = StartupState; // The FlxState the game starts with.
-	var nextState:Class<FlxState> = funkin.states.TitleState; 
+	var nextState:Class<FlxState> = funkin.states.SongSelectState; 
 	var framerate:Int = 60; // How many frames per second the game should run at.
 	var skipSplash:Bool = true; // Whether to skip the flixel splash screen that appears in release mode.
 	var startFullscreen:Bool = false; // Whether to start the game in fullscreen on desktop targets
@@ -232,7 +232,7 @@ class Main extends Sprite
 		DiscordClient.shutdown(true);
 		#end
 
-		Sys.exit(1);
+		lime.system.System.exit(1);
 	}
 
 	private static function onCrash(errorName:String):Void {

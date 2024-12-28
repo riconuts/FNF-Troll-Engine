@@ -19,7 +19,7 @@ using StringTools;
 
 typedef SwagSong = {
 	//// internal
-	@:optional var path:String;
+	@:optional var path:String; 
 	var validScore:Bool;
 
 	////
@@ -80,8 +80,8 @@ typedef SongCreditdata = // beacuse SongMetadata is stolen
 	?extraInfo:Array<String>,
 }
 
-@:deprecated("SongMetadata was deprecated, please rename to Song instead!")
-typedef SongMetadata = Song;
+@:deprecated("funkin.data.SongMetadata was moved to funkin.data.Song")
+@:noCompletion typedef SongMetadata = Song;
 
 @:structInit
 class Song
@@ -91,13 +91,13 @@ class Song
 	public var difficulties:Array<String> = [];
 	public var charts(get, null):Array<String>;
 	function get_charts()
-		return (charts == null) ? charts = Song.getCharts(this) : charts;
+		return charts ?? (charts = Song.getCharts(this));
 
-	public function new(songName:String, ?folder:String = '', ?difficulties:Array<String>)
+	public function new(songName:String, folder:String = '', ?difficulties:Array<String>)
 	{
 		this.songName = songName;
-		this.folder = folder != null ? folder : '';
-		this.difficulties = difficulties != null ? difficulties : [];
+		this.folder = folder;
+		this.difficulties = difficulties ?? [];
 	}
 
 	public function play(?difficultyName:String = ''){
@@ -143,8 +143,6 @@ class Song
 	}
 
 	static function isAMoonchartRecognizedFile(fileName:String) {
-		// return moonchartExtensions.contains(Path.extension(fileName)); // short and elegant, probably slow too
-
 		for (ext in moonchartExtensions) {
 			if (fileName.endsWith('.$ext'))
 				return true;
@@ -223,7 +221,7 @@ class Song
 			var spoon:Array<String> = [];
 			var crumb:Array<String> = [];
 
-			folder = Paths.mods('${metadata.folder}/songs/$songName/');
+			folder = Paths.getModPath(metadata.folder, 'songs/$songName/');
 			Paths.iterateDirectory(folder, (fileName)->{
 				if (isAMoonchartRecognizedFile(fileName)){
 					spoon.push(folder+fileName);
@@ -244,7 +242,7 @@ class Song
 
 			////
 			#if PE_MOD_COMPATIBILITY
-			folder = Paths.mods('${metadata.folder}/data/$songName/');
+			folder = Paths.getModPath(metadata.folder, 'data/$songName/');
 			Paths.iterateDirectory(folder, processFileName);
 			#end
 		}
@@ -573,7 +571,7 @@ class Song
 			if (toPlay.folder == "")
 				basePath = Paths.getPreloadPath(sowy);
 			else
-				basePath = Paths.mods(toPlay.folder + '/' + sowy);
+				basePath = Paths.getModPath(toPlay.folder, sowy);
 
 			var chartsFilePath = '$basePath-chart.json';
 			var metadataPath = '$basePath-metadata.json';
@@ -665,7 +663,6 @@ class Song
 		PlayState.SONG = SONG;
 		PlayState.difficulty = difficultyIdx;
 		PlayState.difficultyName = difficulty;
-		PlayState.isStoryMode = false;
 	}
 
 	static public function switchToPlayState()
