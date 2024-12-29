@@ -75,7 +75,7 @@
 	<define name="NMV_MOD_COMPATIBILITY" if="PE_MOD_COMPATIBILITY MODS_ALLOWED HSCRIPT_ALLOWED"/>
 
 	<!--Remove if you don't want to use FlxAnimate-->
-<!-- <define name="USING_FLXANIMATE" />-->
+	<define name="USING_FLXANIMATE" />
 
 	<!--Remove if you dont want the engine to autoupdate -->
     <define name="DO_AUTO_UPDATE" if="native desktop OFFICIAL_BUILD" unless="debug" />
