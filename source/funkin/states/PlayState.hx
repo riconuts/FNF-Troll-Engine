@@ -3712,7 +3712,6 @@ class PlayState extends MusicBeatState
 		if (!startedCountdown) return;
 		
 		//trace('strum up: $column');
-
 		for (field in playfields.members) {
 			if ((player != -1 && field.playerId != player) || !field.isPlayer || !field.inControl || field.autoPlayed) 
 				continue;
