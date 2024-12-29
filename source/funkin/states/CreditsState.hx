@@ -117,19 +117,9 @@ class CreditsState extends MusicBeatState
 		var rawCredits:String;
 		var creditsPath:String;
 
-		function getLocalCredits(){
-			#if MODS_ALLOWED
-			Paths.currentModDirectory = '';
-	
-			var modCredits = Paths.modsTxt('credits');
-			if (Paths.exists(modCredits)){
-				trace('using credits from mod folder');
-				creditsPath = modCredits;
-			}else
-			#end{
-				trace('using credits from assets folder');
-				creditsPath = Paths.txt('credits');
-			}
+		function getLocalCredits(){	
+			var creditsPath = Paths.getPath('data/credits.txt');
+			trace('using local credits $creditsPath');
 
 			rawCredits = Paths.getContent(creditsPath);
 		}

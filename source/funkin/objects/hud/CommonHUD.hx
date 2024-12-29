@@ -21,6 +21,10 @@ class CommonHUD extends BaseHUD
 	public var healthBarBG(get, null):FlxSprite;
 	public var iconP1:HealthIcon;
 	public var iconP2:HealthIcon;
+
+	public var useSubtleMark:Bool = false;
+
+	public var botplayText:BotplayText = new BotplayText();
 	
 	override function  getHealthbar():FNFHealthBar return healthBar;
 	
@@ -60,25 +64,26 @@ class CommonHUD extends BaseHUD
 		timeBar.numDivisions = 800; // How much lag this causes?? Should i tone it down to idk, 400 or 200?
 		timeBar.scrollFactor.set();
 
-		#if (PE_MOD_COMPATIBILITY && false)
-		if(FlxG.state == PlayState.instance){
-			PlayState.instance.healthBar = healthBar;
-			PlayState.instance.iconP1 = iconP1;
-			PlayState.instance.iconP2 = iconP2;
-		}
-		#end
 		updateTimeBarType();
 
 		add(timeBarBG);
 		add(timeBar);
 		add(timeTxt);
+		useSubtleMark = ClientPrefs.botplayMarker == 'Subtle';
+
+		botplayText.active = botplayText.visible = ClientPrefs.botplayMarker == 'Psych';
+		add(botplayText);
 	}
 
 	override function reloadHealthBarColors(dadColor:FlxColor, bfColor:FlxColor)
 	{
 		if (healthBar != null)
 		{
-			healthBar.createFilledBar(dadColor, bfColor);
+			if (healthBar.isOpponentMode)
+				healthBar.createFilledBar(bfColor, dadColor);
+			else
+				healthBar.createFilledBar(dadColor, bfColor);
+			
 			healthBar.updateBar();
 		}
 	}
@@ -189,6 +194,9 @@ class CommonHUD extends BaseHUD
 		healthBar.iconP1.y = healthBar.y + (healthBar.height - healthBar.iconP1.height) / 2;
 		healthBar.iconP2.y = healthBar.y + (healthBar.height - healthBar.iconP2.height) / 2;
 		healthBar.real_alpha = healthBar.real_alpha;
+
+		botplayText.active = botplayText.visible = ClientPrefs.botplayMarker == 'Psych';
+		useSubtleMark = ClientPrefs.botplayMarker == 'Subtle';
 
 		updateTimeBarType();
 	}

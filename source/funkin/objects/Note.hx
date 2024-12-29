@@ -5,7 +5,7 @@ import flixel.math.FlxMath;
 import funkin.scripts.*;
 import funkin.states.PlayState;
 import funkin.states.editors.ChartingState;
-import funkin.objects.shaders.ColorSwap;
+import funkin.objects.shaders.NoteColorSwap;
 import funkin.objects.playfields.*;
 import funkin.data.JudgmentManager.Judgment;
 
@@ -93,8 +93,11 @@ class Note extends NoteObject
 		return quantKey;
 	}
 
+	inline public static function beatToNoteRow(beat:Float):Int
+		return Math.round(beat * Conductor.ROWS_PER_BEAT);
+
 	public static function getQuant(beat:Float){
-		var row:Int = Conductor.beatToNoteRow(beat);
+		var row:Int = beatToNoteRow(beat);
 		for (data in quants) {
 			if (row % (Conductor.ROWS_PER_MEASURE/data) == 0)
 				return data;
@@ -117,7 +120,7 @@ class Note extends NoteObject
 	
 	// basic stuff
 	public var beat:Float = 0;
-	public var strumTime(default, set):Float = 0;
+	public var strumTime:Float = 0;
 
 	public var visualTime:Float = 0;
 	public var mustPress:Bool = false;
@@ -223,7 +226,6 @@ class Note extends NoteObject
 	public var eventLength:Int = 0;
 
 	// etc
-	public var colorSwap:ColorSwap;
 	public var inEditor:Bool = false;
 	public var desiredZIndex:Float = 0;
 
@@ -270,11 +272,6 @@ class Note extends NoteObject
 	@:noCompletion inline function get_realNoteData() return realColumn;
 	@:noCompletion inline function set_realNoteData(v:Int) return realColumn = v;
 	#end
-	
-	@:noCompletion function set_strumTime(val:Float){
-		row = Conductor.secsToRow(val);
-		return strumTime = val;
-	}
 
 	@:noCompletion function get_canBeHit() return UNJUDGED != PlayState.instance.judgeManager.judgeNote(this);
 
@@ -466,8 +463,8 @@ class Note extends NoteObject
 		if (prevNote != null) 
 			prevNote.nextNote = this;
 
-		colorSwap = new ColorSwap();
-		shader = colorSwap.shader;
+		colorSwap = new NoteColorSwap();
+		shader = NoteColorSwap.shader;
 
 		if (column >= 0) 
 			this.noteMod = noteMod;

@@ -1,6 +1,5 @@
 package flixel;
 
-import flixel.util.FlxAxes;
 import openfl.display.BitmapData;
 import openfl.display.BlendMode;
 import openfl.geom.ColorTransform;
@@ -830,11 +829,10 @@ class FlxSprite extends FlxObject
 	}
 
 	@:noCompletion
-	function drawComplex(camera:FlxCamera):Void
+	function prepareMatrix(camera:FlxCamera):Void
 	{
 		_frame.prepareMatrix(_matrix, FlxFrameAngle.ANGLE_0, checkFlipX(), checkFlipY());
 		_matrix.translate(-origin.x, -origin.y);
-
 
 		_matrix.scale(scale.x, scale.y);
 
@@ -856,7 +854,12 @@ class FlxSprite extends FlxObject
 			_matrix.tx = Math.floor(_matrix.tx);
 			_matrix.ty = Math.floor(_matrix.ty);
 		}
+	}
 
+	@:noCompletion
+	function drawComplex(camera:FlxCamera):Void
+	{
+		prepareMatrix(camera);
 		camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, shader);
 	}
 
@@ -1667,7 +1670,6 @@ class FlxSprite extends FlxObject
 		}
 		return doFlipY;
 	}
-	
 }
 
 interface IFlxSprite extends IFlxBasic

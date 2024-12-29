@@ -1,5 +1,6 @@
 package flixel;
 
+import funkin.objects.shaders.NoteColorSwap;
 import funkin.ClientPrefs;
 
 import openfl.display.Bitmap;
@@ -170,6 +171,7 @@ class FlxCamera extends FlxBasic
 	 * make the camera look at specified point in world coordinates.
 	 */
 	public var scroll:FlxPoint = FlxPoint.get();
+	public var scrollZ:Float = 0; // for FlxSprite3D
 
 	/**
 	 * `scroll`, but without the offset
@@ -793,7 +795,7 @@ class FlxCamera extends FlxBasic
 	}
 
 	public function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool = false,
-			?shader:FlxShader):Void
+			?shader:FlxShader, ?colorSwap:NoteColorSwap):Void
 	{
 		if (FlxG.renderBlit)
 		{
@@ -816,16 +818,16 @@ class FlxCamera extends FlxBasic
 			var hasColorOffsets:Bool = (transform != null && transform.hasRGBAOffsets());
 
 			#if FLX_RENDER_TRIANGLE
-			var drawItem:FlxDrawTrianglesItem = startTrianglesBatch(frame.parent, smoothing, isColored, blend);
+			var drawItem:FlxDrawTrianglesItem = startTrianglesBatch(frame.parent, smoothing, isColored, blend, hasColorOffsets, shader);
 			#else
 			var drawItem = startQuadBatch(frame.parent, isColored, hasColorOffsets, blend, smoothing, shader);
 			#end
-			drawItem.addQuad(frame, matrix, transform);
+			drawItem.addQuad(frame, matrix, transform, colorSwap);
 		}
 	}
 
 	public function copyPixels(?frame:FlxFrame, ?pixels:BitmapData, ?sourceRect:Rectangle, destPoint:Point, ?transform:ColorTransform, ?blend:BlendMode,
-			?smoothing:Bool = false, ?shader:FlxShader):Void
+			?smoothing:Bool = false, ?shader:FlxShader, ?colorSwap:NoteColorSwap):Void
 	{
 		if (FlxG.renderBlit)
 		{
@@ -862,14 +864,14 @@ class FlxCamera extends FlxBasic
 			#if !FLX_RENDER_TRIANGLE
 			var drawItem = startQuadBatch(frame.parent, isColored, hasColorOffsets, blend, smoothing, shader);
 			#else
-			var drawItem:FlxDrawTrianglesItem = startTrianglesBatch(frame.parent, smoothing, isColored, blend);
+			var drawItem:FlxDrawTrianglesItem = startTrianglesBatch(frame.parent, smoothing, isColored, blend, hasColorOffsets, shader);
 			#end
-			drawItem.addQuad(frame, _helperMatrix, transform);
+			drawItem.addQuad(frame, _helperMatrix, transform, colorSwap);
 		}
 	}
 
 	public function drawTriangles(graphic:FlxGraphic, vertices:DrawData<Float>, indices:DrawData<Int>, uvtData:DrawData<Float>, ?colors:DrawData<Int>,
-			?position:FlxPoint, ?blend:BlendMode, repeat:Bool = false, smoothing:Bool = false, ?transform:ColorTransform, ?shader:FlxShader):Void
+			?position:FlxPoint, ?blend:BlendMode, repeat:Bool = false, smoothing:Bool = false, ?transform:ColorTransform, ?shader:FlxShader, ?colorSwap:NoteColorSwap):Void
 	{
 		if (FlxG.renderBlit)
 		{
@@ -953,7 +955,7 @@ class FlxCamera extends FlxBasic
 			var hasColorOffsets:Bool = (transform != null && transform.hasRGBAOffsets());
 			isColored = isColored || (transform != null && transform.hasRGBMultipliers());
 			var drawItem:FlxDrawTrianglesItem = startTrianglesBatch(graphic, smoothing, isColored, blend, hasColorOffsets, shader);
-			drawItem.addTriangles(vertices, indices, uvtData, colors, position, _bounds, transform);
+			drawItem.addTriangles(vertices, indices, uvtData, colors, position, _bounds, transform, colorSwap);
 			#else
 			var drawItem:FlxDrawTrianglesItem = startTrianglesBatch(graphic, smoothing, isColored, blend);
 			drawItem.addTriangles(vertices, indices, uvtData, colors, position, _bounds);

@@ -167,6 +167,9 @@ class Song
 							var split = woExtension.split("-");
 							split.shift();
 							var diff = split.join("-");
+							if(diff == 'DEFAULT_DIFF')
+								diff = 'Moonchart';
+							
 							charts.set(diff, true);
 							return;
 						}
@@ -413,14 +416,13 @@ class Song
 			var opponentTracks:Array<String> = null;
 
 			/**
-			 * 1. If 'needsVoices' is false, no tracks will be defined for the player or opponent
 			 * 2. If the chart folder couldn't be retrieved then "Voices-Player" and "Voices-Opponent" are used
 			 * 3. Define the first one existing in ['Voices-$player1', 'Voices-Player', 'Voices'] as a player track;
 			 * 4. Define the first one existing in ['Voices-$player2', 'Voices-Opponent', 'Voices'] as an opponent track;
 			 */
 			inline function sowy() {
 				//// 1
-				if (!songJson.needsVoices) {
+				if (songJson.needsVoices == false) {
 					playerTracks = [];
 					opponentTracks = [];
 					return false;
@@ -513,8 +515,6 @@ class Song
 		}
 		
 		if (!isVSlice) {
-			// TODO: scan through the song folder and look for the first thing that has a supported extension (if json then check if it has diffSuffix cus FNF formats!!)
-			// Or dont since this current method lets you do a dumb thing AKA have 2 diff chart formats in a folder LOL
 			for (ext in moonchartExtensions) {
 				var files:Array<String> = [songLowercase + diffSuffix, songLowercase];
 				for (idx in 0...files.length){

@@ -45,7 +45,12 @@
 		{
 			"name": "hxvlc",
 			"type": "haxelib",
-			"version": "1.4.1"
+			"version": "1.6.1"
+		},
+		{
+			"name": "flxanimate",
+			"type": "haxelib",
+			"version": "3.0.4"
 		},
 		{
 			"name": "hxdiscord_rpc",

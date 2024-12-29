@@ -25,7 +25,6 @@ import flixel.input.keyboard.FlxKey;
 import flixel.system.debug.interaction.tools.Pointer.GraphicCursorCross;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
-import flixel.ui.FlxSpriteButton;
 import flixel.util.FlxColor;
 import haxe.Json;
 import lime.system.Clipboard;
@@ -39,27 +38,122 @@ using StringTools;
 import funkin.api.Discord.DiscordClient;
 #end
 
-/**
-	*DEBUG MODE
- */
+final TemplateCharacter:String = '{
+	"animations": [
+		{
+			"loop": false,
+			"offsets": [
+				0,
+				0
+			],
+			"fps": 24,
+			"anim": "idle",
+			"indices": [],
+			"name": "Dad idle dance"
+		},
+		{
+			"offsets": [
+				0,
+				0
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singLEFT",
+			"loop": false,
+			"name": "Dad Sing Note LEFT"
+		},
+		{
+			"offsets": [
+				0,
+				0
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singDOWN",
+			"loop": false,
+			"name": "Dad Sing Note DOWN"
+		},
+		{
+			"offsets": [
+				0,
+				0
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singUP",
+			"loop": false,
+			"name": "Dad Sing Note UP"
+		},
+		{
+			"offsets": [
+				0,
+				0
+			],
+			"indices": [],
+			"fps": 24,
+			"anim": "singRIGHT",
+			"loop": false,
+			"name": "Dad Sing Note RIGHT"
+		}
+	],
+	"no_antialiasing": false,
+	"image": "characters/DADDY_DEAREST",
+	"position": [
+		0,
+		0
+	],
+	"healthicon": "face",
+	"flip_x": false,
+	"healthbar_colors": [
+		161,
+		161,
+		161
+	],
+	"camera_position": [
+		0,
+		0
+	],
+	"sing_duration": 6.1,
+	"scale": 1
+}';
+
 class CharacterEditorState extends MusicBeatState
 {
+	static function getAnimOrder(name:String):Int {
+		var points = 0;
+
+		for (i => aaa in ['idle', 'singLEFT', 'singDOWN', 'singUP', 'singRIGHT']){
+			if (name.startsWith(aaa))
+				points += (-272727) + i*10;
+		}
+		for (i => aaa in ['miss', 'alt', 'loop']){
+			if (name.endsWith(aaa))
+				points += (2727) + i;
+		}
+
+		return points;
+	}
+	
+	static function animSortFunc(a:AnimArray, b:AnimArray)
+		return getAnimOrder(a.anim) - getAnimOrder(b.anim);
+
+	////
+	var goToPlayState:Bool = true;
+
+	var originMarker:FlxSprite;
 	var char:Character;
 	var ghostChar:Null<Character>;
-	var textAnim:FlxText;
 	var bgLayer:FlxTypedGroup<FlxSprite>;
 	var charLayer:FlxTypedGroup<Character>;
 	var dumbTexts:FlxTypedGroup<FlxText>;
 	//var animList:Array<String> = [];
 	var curAnim:Int = 0;
-	var daAnim:String = 'spooky';
-	var goToPlayState:Bool = true;
+	var charName:String = 'pico';
 	var camFollow:FlxObject;
 
-	public function new(daAnim:String = 'spooky', goToPlayState:Bool = true)
-	{
+	public function new(charName:String = 'pico', goToPlayState:Bool = true) {
 		super();
-		this.daAnim = daAnim;
+		this.charName = charName;
 		this.goToPlayState = goToPlayState;
 	}
 
@@ -116,12 +210,9 @@ class CharacterEditorState extends MusicBeatState
 		cameraFollowPointer.color = FlxColor.RED;
 		add(cameraFollowPointer);
 
-		var zeroTwoPointer = new FlxSprite().loadGraphic(pointer);
-		zeroTwoPointer.setGraphicSize(40, 40);
-		zeroTwoPointer.updateHitbox();
-		zeroTwoPointer.color = FlxColor.RED;
-		zeroTwoPointer.setPosition(-zeroTwoPointer.width* 0.5, -zeroTwoPointer.height* 0.5);
-		add(zeroTwoPointer);
+		originMarker = new FlxSprite(0, 0, Paths.image("stageeditor/originMarker"));
+		originMarker.offset.set(originMarker.width / 2, originMarker.height / 2);
+		add(originMarker);
 
 		testModeButton = new FlxButton(FlxG.width - 360, 25, "Test: OFF", function()
 		{
@@ -136,7 +227,9 @@ class CharacterEditorState extends MusicBeatState
 		});
 		changeBGbutton.cameras = [camMenu];
 
-		loadChar(!daAnim.startsWith('bf'), false);
+		dumbTexts = new FlxTypedGroup<FlxText>();
+		add(dumbTexts);
+		dumbTexts.cameras = [camHUD];
 
 		var healthbarGraphic = Paths.image('healthBar');
 		if (healthbarGraphic == null)
@@ -147,24 +240,10 @@ class CharacterEditorState extends MusicBeatState
 		add(healthBarBG);
 		healthBarBG.cameras = [camHUD];
 
-		leHealthIcon = new HealthIcon(char.healthIcon, false);
+		leHealthIcon = new HealthIcon();
 		leHealthIcon.y = FlxG.height - 150;
 		add(leHealthIcon);
 		leHealthIcon.cameras = [camHUD];
-
-		dumbTexts = new FlxTypedGroup<FlxText>();
-		add(dumbTexts);
-		dumbTexts.cameras = [camHUD];
-
-		textAnim = new FlxText(300, 16);
-		textAnim.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		textAnim.borderSize = 1;
-		textAnim.size = 32;
-		textAnim.scrollFactor.set();
-		textAnim.cameras = [camHUD];
-		add(textAnim);
-
-		genBoyOffsets();
 
 		var height = FlxG.height;
 		var greenHill = new FlxSprite(-height* 0.5 + 220, -height + 718);
@@ -175,18 +254,14 @@ class CharacterEditorState extends MusicBeatState
 		var mid = greenHill.getMidpoint();
 		camFollow.setPosition(mid.x, mid.y);
 		add(camFollow);
+		FlxG.camera.follow(camFollow);
 
-		var camPos = char.getCamera();
-
-		camFollow.x = camPos[0];
-		camFollow.y = camPos[1];
-
-		FlxG.camera.zoom = 1;
-
+		loadChar(charName.startsWith('bf'));
+		resetCam();
 
 		var tipTextArray:Array<String> = "E/Q - Camera Zoom In/Out
 		\nR - Reset Camera Zoom
-		\nJKLI - Move Camera
+		\nIJKL - Move Camera
 		\nW/S - Previous/Next Animation
 		\nSpace - Play Animation
 		\nArrow Keys - Move Character Offset
@@ -202,8 +277,6 @@ class CharacterEditorState extends MusicBeatState
 			tipText.borderSize = 1;
 			add(tipText);
 		}
-
-		FlxG.camera.follow(camFollow);
 
 		var tabs = [
 			//{name: 'Offsets', label: 'Offsets'},
@@ -249,6 +322,14 @@ class CharacterEditorState extends MusicBeatState
 		super.create();
 	}
 
+	function resetCam() {
+		var camPos = char.getCamera();
+		camFollow.x = camPos[0];
+		camFollow.y = camPos[1];
+
+		FlxG.camera.zoom = 1;
+	}
+
 	override function onFocus(){
 		FlxG.mouse.visible = true;
 	}
@@ -256,159 +337,7 @@ class CharacterEditorState extends MusicBeatState
 	var onPixelBG:Bool = false;
 	function reloadBGs() {
 		FlxG.camera.bgColor = onPixelBG ? FlxColor.BLACK : FlxColor.WHITE;
-
-		/*
-		var i:Int = bgLayer.members.length-1;
-		while(i >= 0) {
-			var memb:FlxSprite = bgLayer.members[i];
-			if(memb != null) {
-				memb.kill();
-				bgLayer.remove(memb);
-				memb.destroy();
-			}
-			--i;
-		}
-		bgLayer.clear();
-		*/
 	}
-
-	/*var animationInputText:FlxUIInputText;
-	function addOffsetsUI() {
-		var tab_group = new FlxUI(null, UI_box);
-		tab_group.name = "Offsets";
-
-		animationInputText = new FlxUIInputText(15, 30, 100, 'idle', 8);
-
-		var addButton:FlxButton = new FlxButton(animationInputText.x + animationInputText.width + 23, animationInputText.y - 2, "Add", function()
-		{
-			var theText:String = animationInputText.text;
-			if(theText != '') {
-				var alreadyExists:Bool = false;
-				for (i in 0...animList.length) {
-					if(animList[i] == theText) {
-						alreadyExists = true;
-						break;
-					}
-				}
-
-				if(!alreadyExists) {
-					char.animOffsets.set(theText, [0, 0]);
-					animList.push(theText);
-				}
-			}
-		});
-
-		var removeButton:FlxButton = new FlxButton(animationInputText.x + animationInputText.width + 23, animationInputText.y + 20, "Remove", function()
-		{
-			var theText:String = animationInputText.text;
-			if(theText != '') {
-				for (i in 0...animList.length) {
-					if(animList[i] == theText) {
-						if(char.animOffsets.exists(theText)) {
-							char.animOffsets.remove(theText);
-						}
-
-						animList.remove(theText);
-						if(char.animation.curAnim.name == theText && animList.length > 0) {
-							char.playAnim(animList[0], true);
-						}
-						break;
-					}
-				}
-			}
-		});
-
-		var saveButton:FlxButton = new FlxButton(animationInputText.x, animationInputText.y + 35, "Save Offsets", function()
-		{
-			saveOffsets();
-		});
-
-		tab_group.add(new FlxText(10, animationInputText.y - 18, 0, 'Add/Remove Animation:'));
-		tab_group.add(addButton);
-		tab_group.add(removeButton);
-		tab_group.add(saveButton);
-		tab_group.add(animationInputText);
-		UI_box.addGroup(tab_group);
-	}*/
-	
-	var TemplateCharacter:String = '{
-			"animations": [
-				{
-					"loop": false,
-					"offsets": [
-						0,
-						0
-					],
-					"fps": 24,
-					"anim": "idle",
-					"indices": [],
-					"name": "Dad idle dance"
-				},
-				{
-					"offsets": [
-						0,
-						0
-					],
-					"indices": [],
-					"fps": 24,
-					"anim": "singLEFT",
-					"loop": false,
-					"name": "Dad Sing Note LEFT"
-				},
-				{
-					"offsets": [
-						0,
-						0
-					],
-					"indices": [],
-					"fps": 24,
-					"anim": "singDOWN",
-					"loop": false,
-					"name": "Dad Sing Note DOWN"
-				},
-				{
-					"offsets": [
-						0,
-						0
-					],
-					"indices": [],
-					"fps": 24,
-					"anim": "singUP",
-					"loop": false,
-					"name": "Dad Sing Note UP"
-				},
-				{
-					"offsets": [
-						0,
-						0
-					],
-					"indices": [],
-					"fps": 24,
-					"anim": "singRIGHT",
-					"loop": false,
-					"name": "Dad Sing Note RIGHT"
-				}
-			],
-			"no_antialiasing": false,
-			"image": "characters/DADDY_DEAREST",
-			"position": [
-				0,
-				0
-			],
-			"healthicon": "face",
-			"flip_x": false,
-			"healthbar_colors": [
-				161,
-				161,
-				161
-			],
-			"camera_position": [
-				0,
-				0
-			],
-			"sing_duration": 6.1,
-			"scale": 1
-		}';
 
 	var charDropDown:FlxUIDropDownMenuCustom;
 	function addSettingsUI() {
@@ -416,9 +345,8 @@ class CharacterEditorState extends MusicBeatState
 		tab_group.name = "Settings";
 
 		var check_player = new FlxUICheckBox(10, 60, null, null, "Playable Character", 100);
-		check_player.checked = daAnim.startsWith('bf');
-		check_player.callback = function()
-		{
+		check_player.checked = char.isPlayer;
+		check_player.callback = function() {
 			char.isPlayer = !char.isPlayer;
 			char.flipX = !char.flipX;
 			char.xFacing = char.isPlayer ? -1 : 1;
@@ -427,54 +355,42 @@ class CharacterEditorState extends MusicBeatState
 			reloadBGs();
 		};
 
-		charDropDown = new FlxUIDropDownMenuCustom(10, 30, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(character:String)
-		{
-			daAnim = characterList[Std.parseInt(character)];
-			trace(daAnim);
-
-			//check_player.checked = daAnim.startsWith('bf');
+		charDropDown = new FlxUIDropDownMenuCustom(10, 30, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(character:String) {
+			charName = characterList[Std.parseInt(character)];
 			
-			loadChar(!check_player.checked);
+			loadChar(check_player.checked);
 			updateDiscordPresence();
 			reloadCharacterDropDown();
 		});
-		charDropDown.selectedLabel = daAnim;
-		reloadCharacterDropDown();
 
-		var reloadCharacter:FlxButton = new FlxButton(140, 20, "Reload Char", function()
-		{
-			loadChar(!check_player.checked);
+		var reloadCharacter:FlxButton = new FlxButton(140, 20, "Reload Char", function() {
+			loadChar(check_player.checked);
 			reloadCharacterDropDown();
 		});
 
-		var templateCharacter:FlxButton = new FlxButton(140, 50, "Load Template", function()
-		{
+		var templateCharacter:FlxButton = new FlxButton(140, 50, "Load Template", function() {
 			var parsedJson:CharacterFile = cast Json.parse(TemplateCharacter);
-			var characters:Array<Character> = [char];
-			for (character in characters)
-			{
-				character.animOffsets.clear();
-				character.animationsArray = parsedJson.animations;
-				for (anim in character.animationsArray)
-				{
-					character.addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
-				}
-				if(character.animationsArray[0] != null) {
-					character.playAnim(character.animationsArray[0].anim, true);
-				}
 
-				character.singDuration = parsedJson.sing_duration;
-				character.positionArray = parsedJson.position;
-				character.cameraPosition = parsedJson.camera_position;
-
-				character.imageFile = parsedJson.image;
-				character.baseScale = parsedJson.scale;
-				character.noAntialiasing = parsedJson.no_antialiasing;
-				character.originalFlipX = parsedJson.flip_x;
-				character.healthIcon = parsedJson.healthicon;
-				character.healthColorArray = parsedJson.healthbar_colors;
-				character.setPosition(character.positionArray[0], character.positionArray[1]);
+			char.animOffsets.clear();
+			char.animationsArray = parsedJson.animations;
+			for (anim in char.animationsArray) {
+				char.addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
 			}
+			if (char.animationsArray[0] != null) {
+				char.playAnim(char.animationsArray[0].anim, true);
+			}
+
+			char.singDuration = parsedJson.sing_duration;
+			char.positionArray = parsedJson.position;
+			char.cameraPosition = parsedJson.camera_position;
+
+			char.imageFile = parsedJson.image;
+			char.baseScale = parsedJson.scale;
+			char.noAntialiasing = parsedJson.no_antialiasing;
+			char.originalFlipX = parsedJson.flip_x;
+			char.healthIcon = parsedJson.healthicon;
+			char.healthColorArray = parsedJson.healthbar_colors;
+			char.setPosition(char.positionArray[0], char.positionArray[1]);
 
 			reloadCharacterImage();
 			reloadCharacterDropDown();
@@ -493,6 +409,9 @@ class CharacterEditorState extends MusicBeatState
 		tab_group.add(reloadCharacter);
 		tab_group.add(templateCharacter);
 		UI_box.addGroup(tab_group);
+
+		charDropDown.selectedLabel = charName;
+		reloadCharacterDropDown();
 	}
 
 	var imageInputText:FlxUIInputText;
@@ -621,35 +540,21 @@ class CharacterEditorState extends MusicBeatState
 		animationDropDown = new FlxUIDropDownMenuCustom(15, animationInputText.y - 55, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(pressed:String) {
 			var selectedAnimation:Int = Std.parseInt(pressed);
 			var anim:AnimArray = char.animationsArray[selectedAnimation];
+
+			if (anim == null)
+				return;
+
 			animationInputText.text = anim.anim;
 			animationNameInputText.text = anim.name;
 			animationLoopCheckBox.checked = anim.loop;
 			animationNameFramerate.value = anim.fps;
+			
+			animationIndicesInputText.text = (anim.indices==null) ? '' : anim.indices.join(',');
 
-			var cameraOffset:Array<Float> = anim.cameraOffset;
-			if (cameraOffset==null){
-				switch(anim.anim){
-					case 'singLEFT' | 'singLEFTmiss' | 'singLEFT-alt':
-						cameraOffset = [-30, 0];
-					case 'singRIGHT' | 'singRIGHTmiss' | 'singRIGHT-alt':
-						cameraOffset = [30, 0];
-					case 'singUP' | 'singUPmiss' | 'singUP-alt':
-						cameraOffset = [0, -30];
-					case 'singDOWN' | 'singDOWNmiss' | 'singDOWN-alt':
-						cameraOffset = [0, 30];
-					default:
-						cameraOffset = [0, 0];
-				}
-
-			}
+			var cameraOffset:Array<Float> = anim.cameraOffset ?? CharacterData.getDefaultAnimCamOffset(anim.anim);
 			animationXCam.value = cameraOffset[0];
 			animationYCam.value = cameraOffset[1];
-
 			updatePointerPos();
-
-
-			var indicesStr:String = anim.indices.toString();
-			animationIndicesInputText.text = indicesStr.substr(1, indicesStr.length - 2);
 		});
 
 		var addUpdateButton:FlxButton = new FlxButton(70, animationIndicesInputText.y + 30, "Add/Update", function() {
@@ -660,11 +565,11 @@ class CharacterEditorState extends MusicBeatState
 
 			var lastOffsets:Array<Int> = [0, 0];
 			for (anim in char.animationsArray) {
-				if(animationInputText.text == anim.anim) {
+				if (animationInputText.text == anim.anim) {
 					lastOffsets = anim.offsets;
-					if(char.animation.getByName(animationInputText.text) != null) {
+					if (char.animation.exists(animationInputText.text))
 						char.animation.remove(animationInputText.text);
-					}
+					
 					char.animationsArray.remove(anim);
 				}
 			}
@@ -685,10 +590,11 @@ class CharacterEditorState extends MusicBeatState
 				char.animation.addByPrefix(newAnim.anim, newAnim.name, newAnim.fps, newAnim.loop);
 			}
 
-			if (!char.animOffsets.exists(newAnim.anim)) {
+			if (!char.animOffsets.exists(newAnim.anim))
 				char.addOffset(newAnim.anim, 0, 0);
-			}
+			
 			char.animationsArray.push(newAnim);
+			char.animationsArray.sort(animSortFunc);
 
 			if(lastAnim == animationInputText.text) {
 				var leAnim:FlxAnimation = char.animation.getByName(lastAnim);
@@ -715,21 +621,23 @@ class CharacterEditorState extends MusicBeatState
 
 		var removeButton:FlxButton = new FlxButton(180, animationIndicesInputText.y + 30, "Remove", function() {
 			for (anim in char.animationsArray) {
-				if(animationInputText.text == anim.anim) {
-					var resetAnim:Bool = false;
-					if(char.animation.curAnim != null && anim.anim == char.animation.curAnim.name) resetAnim = true;
+				if (animationInputText.text == anim.anim) {
+					var resetAnim:Bool = (anim.anim == char.animation.name);
 
-					if(char.animation.getByName(anim.anim) != null) {
+					if (resetAnim)
+						char.animation.curAnim = null;
+
+					if (char.animation.exists(anim.anim)) 
 						char.animation.remove(anim.anim);
-					}
-					if(char.animOffsets.exists(anim.anim)) {
+					
+					if (char.animOffsets.exists(anim.anim))
 						char.animOffsets.remove(anim.anim);
-					}
+					
 					char.animationsArray.remove(anim);
 
-					if(resetAnim && char.animationsArray.length > 0) {
+					if (resetAnim && char.animationsArray.length > 0)
 						char.playAnim(char.animationsArray[0].anim, true);
-					}
+					
 					reloadAnimationDropDown();
 					genBoyOffsets();
 					trace('Removed animation: ' + animationInputText.text);
@@ -769,6 +677,7 @@ class CharacterEditorState extends MusicBeatState
 	var ghostList:Array<String>;
 	function updateGhostCharList(){
 		ghostList = CharacterData.getAllCharacters();
+		ghostList.sort(CoolUtil.alphabeticalSort);
 		ghostList.insert(0, "");
 		ghostCharDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(ghostList, true));
 	}
@@ -1036,71 +945,54 @@ class CharacterEditorState extends MusicBeatState
 		ghostAnimDropDown.selectedLabel = '';
 	}
 
-	function genBoyOffsets():Void
-	{
-		var daLoop:Int = 0;
+	function genBoyOffsets():Void {
+		dumbTexts.killMembers();
 
-		var i:Int = dumbTexts.members.length-1;
-		while(i >= 0) {
-			var memb:FlxText = dumbTexts.members[i];
-			if(memb != null) {
-				memb.kill();
-				dumbTexts.remove(memb);
-				memb.destroy();
-			}
-			--i;
-		}
-		dumbTexts.clear();
-
-		for (anim => offsets in char.animOffsets)
-		{
-			var text:FlxText = new FlxText(10, 20 + (18 * daLoop), 0, anim + ": " + offsets, 15);
-			text.setFormat(null, 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		if (char.animationsArray.length < 1) {
+			var text:FlxText = dumbTexts.recycle(FlxText, () -> return new FlxText());
+			text.text = 'NO ANIMATIONS AVAILABLE.';
+			text.setPosition(10, 20);
+			text.setFormat(null, 16, 0xFFFF0000, CENTER);
+			text.setBorderStyle(FlxTextBorderStyle.OUTLINE, FlxColor.BLACK, 2);
 			text.scrollFactor.set();
-			text.borderSize = 1;
-			dumbTexts.add(text);
 			text.cameras = [camHUD];
-
-			daLoop++;
-		}
-
-		textAnim.visible = true;
-		if(dumbTexts.length < 1) {
-			var text:FlxText = new FlxText(10, 38, 0, "ERROR! No animations found.", 15);
-			text.scrollFactor.set();
-			text.borderSize = 1;
 			dumbTexts.add(text);
-			textAnim.visible = false;
+
+			return;
+		} 
+
+		char.animationsArray.sort(animSortFunc);
+		for (i => anim in char.animationsArray) {
+			var name = anim.anim;
+			var offsets = char.animOffsets.get(name);
+			var isSelected = i==curAnim;
+
+			var text:FlxText = dumbTexts.recycle(FlxText, () -> return new FlxText());
+			text.text = (isSelected ? '> ' : '') + '$name: $offsets';
+			text.setPosition(isSelected ? 16 : 10, 20 + (18 * i));
+			text.setFormat(null, 16, isSelected ? 0xFF00FF00 : 0xFFFFFFFF, CENTER);
+			text.setBorderStyle(FlxTextBorderStyle.OUTLINE, FlxColor.BLACK, 1);
+			text.scrollFactor.set();
+			text.cameras = [camHUD];
+			dumbTexts.add(text);
 		}
 	}
 
-	function loadChar(isDad:Bool, blahBlahBlah:Bool = true) {
-		if (char != null){
+	function loadChar(isPlayer:Bool) {
+		if (char != null) {
 			charLayer.remove(char);
 			char.destroy();
 		}
 
-		char = new Character(0, 0, daAnim, !isDad, true);
+		char = new Character(0, 0, charName, isPlayer, true);
 		char.setupCharacter();
-		if(char.animationsArray[0] != null)
+		if (char.animationsArray[0] != null)
 			char.playAnim(char.animationsArray[0].anim, true);
-
+		
+		char.setPosition(char.positionArray[0], char.positionArray[1]);
 		charLayer.add(char);
 
-		char.setPosition(char.positionArray[0], char.positionArray[1]);
-
-		/* THIS FUNCTION WAS USED TO PUT THE .TXT OFFSETS INTO THE .JSON
-
-		for (anim => offset in char.animOffsets) {
-			var leAnim:AnimArray = findAnimationByName(anim);
-			if(leAnim != null) {
-				leAnim.offsets = [offset[0], offset[1]];
-			}
-		}*/
-
-		if(blahBlahBlah) {
-			genBoyOffsets();
-		}
+		genBoyOffsets();
 		reloadCharacterOptions();
 		reloadBGs();
 		updatePointerPos();
@@ -1152,19 +1044,22 @@ class CharacterEditorState extends MusicBeatState
 	function reloadAnimationDropDown() {
 		var anims:Array<String> = [];
 
+		char.animationsArray.sort(animSortFunc);
 		for (anim in char.animationsArray)
 			anims.push(anim.anim);
 		
-		if(anims.length < 1) anims.push('NO ANIMATIONS'); //Prevents crash
+		if (anims.length < 1) 
+			anims.push('NO ANIMATIONS'); // Prevents crash		
 
 		animationDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(anims, true));
 	}
 
 	function reloadCharacterDropDown() {
 		characterList = CharacterData.getAllCharacters();
+		characterList.sort(CoolUtil.alphabeticalSort);
 
 		charDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(characterList, true));
-		charDropDown.selectedLabel = daAnim;
+		charDropDown.selectedLabel = charName;
 	}
 
 	function resetHealthBarColor() {
@@ -1174,30 +1069,50 @@ class CharacterEditorState extends MusicBeatState
 		healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
 	}
 
+	function changeCurOffset(x:Int, y:Int, isAbs:Bool=false) {
+		var curAnimData = char.animationsArray[curAnim];
+
+		if (isAbs) {
+			curAnimData.offsets[0] = x;
+			curAnimData.offsets[1] = y;
+		}else {
+			curAnimData.offsets[0] += x;
+			curAnimData.offsets[1] += y;	
+		}
+
+		char.addOffset(curAnimData.anim, curAnimData.offsets[0], curAnimData.offsets[1]);
+		char.playAnim(curAnimData.anim, true);
+
+		genBoyOffsets();
+	}
+
 	function updateDiscordPresence() {
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
-		DiscordClient.changePresence("Character Editor", "Character: " + daAnim, leHealthIcon.getCharacter());
+		DiscordClient.changePresence("Character Editor", "Character: " + charName, leHealthIcon.getCharacter());
 		#end
+	}
+
+	override function draw() {
+		var unscaleFactor = (1 / FlxG.camera.zoom);
+		originMarker.scale.set(unscaleFactor, unscaleFactor);
+		originMarker.centerOrigin();
+		
+		super.draw();
+	}
+
+	function close() {
+		if (goToPlayState) {
+			MusicBeatState.switchState(new PlayState());
+		} else {
+			MusicBeatState.switchState(new MasterEditorMenu());
+			MusicBeatState.playMenuMusic(true);
+		}
+		FlxG.mouse.visible = false;
 	}
 
 	override function update(elapsed:Float)
 	{
-		if (char.animationsArray[curAnim] != null) {
-			var curAnimData = char.animationsArray[curAnim];
-			var offsets = curAnimData.offsets;
-			var animName = curAnimData.anim;
-
-			textAnim.text = '$animName [${offsets[0]}, ${offsets[1]}]';
-
-			var curAnim = char.animation.getByName(animName);
-			if (curAnim == null || curAnim.frames.length < 1)
-				textAnim.text += ' (ERROR!)';
-
-		} else {
-			textAnim.text = '';
-		}
-
 		var inputTexts:Array<FlxUIInputText> = [animationInputText, imageInputText, healthIconInputText, animationNameInputText, animationIndicesInputText];
 		for (i in 0...inputTexts.length) {
 			if(inputTexts[i].hasFocus) {
@@ -1216,38 +1131,45 @@ class CharacterEditorState extends MusicBeatState
 		}
 		StartupState.specialKeysEnabled = true;
 
-		if (testMode){
-			if (controls.NOTE_LEFT_P){
-				char.playAnim("singLEFT", true);
+		if (testMode) {
+			var alt = FlxG.keys.pressed.SHIFT ? "-alt" : '';
+			// who cares anymore
+			if (FlxG.keys.justPressed.SPACE){
+				char.playAnim("idle", true);
 			}
-			if (controls.NOTE_RIGHT_P){
-				char.playAnim("singRIGHT", true);
+			if (FlxG.keys.justPressed.D){
+				char.playAnim("singLEFT"+alt, true);
 			}
-			if (controls.NOTE_DOWN_P){
-				char.playAnim("singDOWN", true);
+			if (FlxG.keys.justPressed.F){
+				char.playAnim("singDOWN"+alt, true);
 			}
-			if (controls.NOTE_UP_P){
-				char.playAnim("singUP", true);
+			if (FlxG.keys.justPressed.J){
+				char.playAnim("singUP"+alt, true);
 			}
-		}else if(!charDropDown.dropPanel.visible) {
+			if (FlxG.keys.justPressed.K){
+				char.playAnim("singRIGHT"+alt, true);
+			}
+			if (FlxG.keys.justPressed.E){
+				char.playAnim("singLEFTmiss", true);
+			}
+			if (FlxG.keys.justPressed.R){
+				char.playAnim("singDOWNmiss", true);
+			}
+			if (FlxG.keys.justPressed.U){
+				char.playAnim("singUPmiss", true);
+			}
+			if (FlxG.keys.justPressed.I){
+				char.playAnim("singRIGHTmiss", true);
+			}
+		}
+		else if(!charDropDown.dropPanel.visible) {
 			if (FlxG.keys.justPressed.ESCAPE) {
-				if(goToPlayState) {
-					MusicBeatState.switchState(new PlayState());
-				} else {
-					MusicBeatState.switchState(new MasterEditorMenu());
-					MusicBeatState.playMenuMusic(true);
-				}
-				FlxG.mouse.visible = false;
+				close();
 				return;
 			}
 
 			if (FlxG.keys.justPressed.R) {
-				var camPos = char.getCamera();
-
-				camFollow.x = camPos[0];
-				camFollow.y = camPos[1];
-				
-				FlxG.camera.zoom = 1;
+				resetCam();
 			}
 
 			if (FlxG.keys.pressed.E && FlxG.camera.zoom < 3) {
@@ -1276,15 +1198,17 @@ class CharacterEditorState extends MusicBeatState
 					camFollow.x += addToCam;
 			}
 
-			if(char.animationsArray.length > 0) {
-				if (FlxG.keys.justPressed.W)
-				{
+			if (char.animationsArray.length > 0) {
+				var replayAnim = FlxG.keys.justPressed.SPACE;
+
+				if (FlxG.keys.justPressed.W) {
 					curAnim -= 1;
+					replayAnim = true;
 				}
 
-				if (FlxG.keys.justPressed.S)
-				{
+				if (FlxG.keys.justPressed.S) {
 					curAnim += 1;
+					replayAnim = true;
 				}
 
 				if (curAnim < 0)
@@ -1293,69 +1217,34 @@ class CharacterEditorState extends MusicBeatState
 				if (curAnim >= char.animationsArray.length)
 					curAnim = 0;
 
-				if (FlxG.keys.justPressed.S || FlxG.keys.justPressed.W || FlxG.keys.justPressed.SPACE)
-				{
+				if (replayAnim) {
 					char.playAnim(char.animationsArray[curAnim].anim, true);
 					genBoyOffsets();
 				}
+
+				var multiplier:Int = FlxG.keys.pressed.SHIFT ? 10 : 1;
+
+				if (FlxG.keys.justPressed.LEFT)
+					changeCurOffset(multiplier, 0);
+
+				if (FlxG.keys.justPressed.RIGHT)
+					changeCurOffset(-multiplier, 0);
+
+				if (FlxG.keys.justPressed.DOWN)
+					changeCurOffset(0, -multiplier);
+
+				if (FlxG.keys.justPressed.UP)
+					changeCurOffset(0, multiplier);
+
 				if (FlxG.keys.justPressed.T)
-				{
-					var curAnimData = char.animationsArray[curAnim];
-					curAnimData.offsets = [0, 0];
-
-					char.addOffset(curAnimData.anim, curAnimData.offsets[0], curAnimData.offsets[1]);
-					char.playAnim(curAnimData.anim, true);
-
-					genBoyOffsets();
-				}
-
-				var controlArray:Array<Bool> = [FlxG.keys.justPressed.LEFT, FlxG.keys.justPressed.RIGHT, FlxG.keys.justPressed.UP, FlxG.keys.justPressed.DOWN];
-
-
-
-				for (i in 0...controlArray.length) {
-					if(controlArray[i]) {
-						var holdShift = FlxG.keys.pressed.SHIFT;
-						var multiplier = 1;
-						if (holdShift)
-							multiplier = 10;
-
-						var arrayVal = 0;
-						if(i > 1) arrayVal = 1;
-
-						var negaMult:Int = 1;
-						if(i % 2 == 1) negaMult = -1;
-						char.animationsArray[curAnim].offsets[arrayVal] += negaMult * multiplier;
-
-						char.addOffset(char.animationsArray[curAnim].anim, char.animationsArray[curAnim].offsets[0], char.animationsArray[curAnim].offsets[1]);
-						char.playAnim(char.animationsArray[curAnim].anim, false);
-
-						genBoyOffsets();
-					}
-				}
+					changeCurOffset(0, 0, true);
 			}
 		}
-		//camMenu.zoom = FlxG.camera.zoom;
+
 		super.update(elapsed);
 	}
 
 	var _file:FileReference;
-	/*private function saveOffsets()
-	{
-		var data:String = '';
-		for (anim => offsets in char.animOffsets) {
-			data += anim + ' ' + offsets[0] + ' ' + offsets[1] + '\n';
-		}
-
-		if (data.length > 0)
-		{
-			_file = new FileReference();
-			_file.addEventListener(Event.COMPLETE, onSaveComplete);
-			_file.addEventListener(Event.CANCEL, onSaveCancel);
-			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-			_file.save(data, daAnim + "Offsets.txt");
-		}
-	}*/
 
 	function onSaveComplete(_):Void
 	{
@@ -1413,7 +1302,7 @@ class CharacterEditorState extends MusicBeatState
 			_file.addEventListener(Event.COMPLETE, onSaveComplete);
 			_file.addEventListener(Event.CANCEL, onSaveCancel);
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-			_file.save(data, daAnim + ".json");
+			_file.save(data, charName + ".json");
 		}
 	}
 

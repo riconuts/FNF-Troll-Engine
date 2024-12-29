@@ -54,7 +54,14 @@ class BeatModifier extends NoteModifier {
 
 	}
 
-	 override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField){
+	inline function adjust(val:Float, plr:Int):Float {
+		if (getOtherValue("legacyZAxis", plr) > 0)
+			return val / 1280;
+
+		return val;
+	}
+
+	override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField){
 		if (beatFactors[player] == null){
 			updateBeat(0, beat, player, getSubmodValue('beatOffset', player), getSubmodValue('beatMult', player));
 			updateBeat(1, beat, player, getSubmodValue('beatYOffset', player), getSubmodValue('beatYMult', player));
@@ -63,7 +70,7 @@ class BeatModifier extends NoteModifier {
 
 		pos.x += getValue(player) * (beatFactors[player][0] * FlxMath.fastSin((visualDiff / ((getSubmodValue('beatPeriod', player) * 30) + 30)) + Math.PI * 0.5));
 		pos.y += getSubmodValue('beatY', player) * (beatFactors[player][1] * FlxMath.fastSin((visualDiff / ((getSubmodValue('beatYPeriod', player) * 30) + 30)) + Math.PI * 0.5));
-		pos.z += getSubmodValue('beatZ', player) * (beatFactors[player][2] * FlxMath.fastSin((visualDiff / ((getSubmodValue('beatZPeriod', player) * 30) + 30)) + Math.PI * 0.5));
+		pos.z += adjust(getSubmodValue('beatZ', player) * (beatFactors[player][2] * FlxMath.fastSin((visualDiff / ((getSubmodValue('beatZPeriod', player) * 30) + 30)) + Math.PI * 0.5)), player);
 		return pos;
 	}
 

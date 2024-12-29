@@ -6,6 +6,7 @@ import Main.Version;
 import funkin.input.Controls.KeyboardScheme;
 import flixel.util.FlxSave;
 import flixel.input.keyboard.FlxKey;
+import flixel.input.gamepad.FlxGamepadInputID;
 
 #if DISCORD_ALLOWED
 import funkin.api.Discord.DiscordClient;
@@ -96,7 +97,15 @@ class ClientPrefs
 				// V-Slice could be named PBOT1??
 				data: [
 					"requiresRestart" => true,
-					"options" => ["Psych", "V-Slice", "PBot", "Week 7", "Standard", "ITG", "Custom"]
+					"options" => [
+						"Psych", 
+						"V-Slice", 
+						#if USE_EPIC_JUDGEMENT "PBot", #end
+						"Week 7", 
+						"Standard", 
+						"ITG", 
+						"Custom"
+					]
 				]
 			},
 			"judgeDiff" => {
@@ -240,6 +249,13 @@ class ClientPrefs
 				type: Toggle,
 				value: true,
 				data: []
+			},
+			"songSyncMode" => {
+				display: "Sync Mode",
+				desc: "The method used to sync the music to the game.\nOnly touch this if your game is going off-sync.",
+				type: Dropdown,
+				value: "Last Mix",
+				data: ["options" => ["Sys Last Mix", "Last Mix", "Psych 1.0", "Direct", "Legacy"]]
 			},
 			// UI
 			"timeBarType" => {
@@ -476,6 +492,15 @@ class ClientPrefs
 					"options" => ["Off", "Shortened", "Full"]
 				]
 			},
+			"botplayMarker" => {
+				display: "Botplay Mark",
+				desc: "How to display the Botplay mark.",
+				type: Dropdown,
+				value: "Subtle",
+				data: [
+					"options" => ["Hidden", "Subtle", "Psych"]
+				],
+			},
 			"hudPosition" => {
 				display: "HUD Position",
 				desc: "Where to position HUD elements.",
@@ -567,7 +592,7 @@ class ClientPrefs
 				desc: "The highest framerate the game can hit.",
 				type: Number,
 				value: #if !macro FlxG.stage!=null ? FlxG.stage.application.window.displayMode.refreshRate : #end 60,
-				data: ["suffix" => " FPS", "min" => 30, "max" => 240, "step" => 1,]
+				data: ["suffix" => " FPS", "min" => 30, "max" => 360, "step" => 1,]
 			},
 			"lowQuality" => {
 				display: "Low Quality",
@@ -665,6 +690,7 @@ class ClientPrefs
 		'songspeed' => 1.0,
 		'healthgain' => 1.0,
 		'healthloss' => 1.0,
+		'holdsgivehp' => false,
 		'instakill' => false,
 		'practice' => false,
 		'perfect' => false,
@@ -724,7 +750,7 @@ class ClientPrefs
 		'note_down' => [S, DOWN],
 		'note_up' => [W, UP],
 		'note_right' => [D, RIGHT],
-		'dodge' => [SPACE],
+		'dodge' => [SPACE, NONE],
 		'ui_left' => [A, LEFT],
 		'ui_down' => [S, DOWN],
 		'ui_up' => [W, UP],
@@ -739,23 +765,43 @@ class ClientPrefs
 		'fullscreen' => [F11, NONE],
 		'debug_1' => [SEVEN, NONE],
 		'debug_2' => [EIGHT, NONE],
-		'botplay' => [F6, NONE]
+		'botplay' => [F8, NONE]
+	];
+	public static var buttonBinds:Map<String, Array<FlxGamepadInputID>> = [
+		'note_left'	=> [X, DPAD_LEFT],
+		'note_down'	=> [A, DPAD_DOWN],
+		'note_up'	=> [Y, DPAD_UP],
+		'note_right'=> [B, DPAD_RIGHT],
+
+		/*
+		'dodge' => [],
+
+		'pause' => [],
+		'reset' => [],
+
+		'ui_left' => [DPAD_LEFT],
+		'ui_down' => [DPAD_DOWN],
+		'ui_up' => [DPAD_UP],
+		'ui_right' => [DPAD_RIGHT],
+		
+		'accept' => [A],
+		'back' => [B],
+		*/
 	];
 	public static var defaultKeys:Map<String, Array<FlxKey>> = null;
+	public static var defaultButtons:Map<String, Array<FlxGamepadInputID>> = null;
 
 	public static function loadDefaultKeys()
 	{
 		defaultKeys = keyBinds.copy();
-		// trace(defaultKeys);
+		defaultButtons = buttonBinds.copy();
 	}
 
 	static var optionSave:FlxSave = new FlxSave();
 
 	public static function initialize(){
 		defaultOptionDefinitions.get("framerate").value = FlxG.stage.application.window.displayMode.refreshRate;
-		#if MULTILANGUAGE
-		locale = openfl.system.Capabilities.language;
-		#end
+		//locale = openfl.system.Capabilities.language;
 
 		optionSave.bind("options_v2");
 		loadDefaultKeys();
@@ -835,16 +881,19 @@ class ClientPrefs
 			if (Reflect.field(optionSave.data, name) != null)
 				Reflect.setField(ClientPrefs, name, Reflect.field(optionSave.data, name));
 
+		Paths.locale = ClientPrefs.locale;
+
 		if (Main.fpsVar != null)
 			Main.fpsVar.visible = ClientPrefs.showFPS;
 
 		if (Main.bread != null)
 			Main.bread.visible = ClientPrefs.bread;
 
+		FlxG.sound.volume = ClientPrefs.masterVolume;
 		FlxG.autoPause = ClientPrefs.autoPause;
 
 		FlxSprite.defaultAntialiasing = ClientPrefs.globalAntialiasing;
-		FlxG.stage.quality = ClientPrefs.globalAntialiasing ? openfl.display.StageQuality.BEST : openfl.display.StageQuality.LOW; // does nothing!!!!
+		FlxG.stage.quality = ClientPrefs.globalAntialiasing ? BEST : LOW; // does nothing!!!!
 
 		#if DISCORD_ALLOWED
 		discordRPC ? DiscordClient.start() : DiscordClient.shutdown();	
@@ -874,9 +923,9 @@ class ClientPrefs
 		StartupState.fullscreenKeys = copyKey(keyBinds.get("fullscreen"));
 	}
 
-	public static function copyKey(arrayToCopy:Array<FlxKey>):Array<FlxKey>
+	public static function copyKey(arrayToCopy:Array<Int>):Array<Int>
 	{
-		var copiedArray:Array<FlxKey> = arrayToCopy.copy();
+		var copiedArray:Array<Int> = arrayToCopy.copy();
 		var i:Int = 0;
 		var len:Int = copiedArray.length;
 

@@ -15,7 +15,6 @@ class FNFHealthBar extends FlxBar{
 
 	public var iconOffset:Int = 26;
 
-	// public var value:Float = 1;
 	public var isOpponentMode:Bool = false; // going insane
 
 	override function set_flipX(value:Bool){
@@ -31,7 +30,7 @@ class FNFHealthBar extends FlxBar{
 			rightIcon = iconP1;
 		}
 
-		updateHealthBarPos();
+		updateIconPos();
 
 		return super.set_flipX(value);
 	}
@@ -78,26 +77,34 @@ class FNFHealthBar extends FlxBar{
 		rightIcon = iconP1;
 			
 		//
-		isOpponentMode = PlayState.instance == null ? false : PlayState.instance.playOpponent;
+		var maxHealth:Float = 2.0;
+		var curHealth:Float = 1.0;
+		var minHealth:Float = 0.0;
+
+		if (PlayState.instance != null) {
+			isOpponentMode = PlayState.instance.playOpponent;
+			maxHealth = PlayState.instance.maxHealth;
+			curHealth = PlayState.instance.health;
+		}
 
 		super(
 			healthBarBG.x + 5, healthBarBG.y + 5,
-			RIGHT_TO_LEFT,
+			isOpponentMode ? LEFT_TO_RIGHT : RIGHT_TO_LEFT, // changing this later on breaks the bar visually idk why
 			Std.int(healthBarBG.width - 10), Std.int(healthBarBG.height - 10),
 			null, null,
-			0, 2
+			minHealth, maxHealth
 		);
 		
-		value = 1;
+		value = curHealth;
 
 		//
 		iconP2.setPosition(
-			healthBarPos - 75 - iconOffset * 2,
-			y + (height - iconP2.height) / 2
+			iconPosX - 75 - iconOffset * 2,
+			iconPosY - iconP2.height * 0.5
 		);
 		iconP1.setPosition(
-			healthBarPos - iconOffset,
-			y + (height - iconP1.height) / 2
+			iconPosX - iconOffset,
+			iconPosY - iconP1.height * 0.5
 		);
 
 		//
@@ -118,23 +125,43 @@ class FNFHealthBar extends FlxBar{
 		return iconScale = value;
 	}
 
-	private var healthBarPos:Float;
-	private function updateHealthBarPos()
+	private var iconPosX:Float;
+	private var iconPosY:Float;
+	private function updateIconPos()
 	{
-		healthBarPos = x + width * (flipX ? value * 0.5 : 1 - value * 0.5) ;
+		switch (fillDirection) {
+			case LEFT_TO_RIGHT:
+				iconPosX = x + width * (flipX ? (100 - percent) : percent) / 100;
+				iconPosY = y + height * 0.5;
+
+			case RIGHT_TO_LEFT:
+				iconPosX = x + width * (flipX ? percent : (100 - percent)) / 100;
+				iconPosY = y + height * 0.5;
+
+			default:
+			/* // TODO: vertical healthbars would b cool
+			case TOP_TO_BOTTOM:
+				iconPosX = x + width * 0.5;
+				iconPosY = y + height * (flipY ? (100 - percent) : percent) / 100;
+
+			case BOTTOM_TO_TOP:
+				iconPosX = x + width * 0.5;
+				iconPosY = y + height * (flipY ? percent : (100 - percent)) / 100;
+
+			default: // idk lol
+				iconPosX = x + width * 0.5;
+				iconPosY = y + height * 0.5;
+			*/
+		}
 	}
 
-	override function set_value(val:Float){
-		var val = isOpponentMode ? max-val : val;
+	override function updateBar() {
+		super.updateBar();
+		updateIconPos();
 
-		iconP1.animation.curAnim.curFrame = val < 0.4 ? 1 : 0; // 20% ?
-		iconP2.animation.curAnim.curFrame = val > 1.6 ? 1 : 0; // 80% ?
-
-		super.set_value(val);
-
-		updateHealthBarPos();
-
-		return value;
+		var percent = isOpponentMode ? 100 - percent : percent;
+		iconP1.animation.curAnim.curFrame = percent < 20 ? 1 : 0;
+		iconP2.animation.curAnim.curFrame = percent > 80 ? 1 : 0;
 	}
 
 	override function update(elapsed:Float)
@@ -150,13 +177,13 @@ class FNFHealthBar extends FlxBar{
 			iconScale = FlxMath.lerp(1, iconScale, Math.exp(-elapsed * 9));
 
 			var scaleOff = 75 * iconScale;
-			leftIcon.x = healthBarPos - scaleOff - iconOffset * 2;
-			rightIcon.x = healthBarPos + scaleOff - 75 - iconOffset;
+			leftIcon.x = iconPosX - scaleOff - iconOffset * 2;
+			rightIcon.x = iconPosX + scaleOff - 75 - iconOffset;
 		}
 		else
 		{
-			leftIcon.x = healthBarPos - 75 - iconOffset * 2;
-			rightIcon.x = healthBarPos - iconOffset;
+			leftIcon.x = iconPosX - 75 - iconOffset * 2;
+			rightIcon.x = iconPosX - iconOffset;
 		}
 
 		super.update(elapsed);

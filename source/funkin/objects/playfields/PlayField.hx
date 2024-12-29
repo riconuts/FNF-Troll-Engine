@@ -131,7 +131,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	}
 
 	function set_autoPlayed(aP:Bool){
-		if(aP == autoPlayed)return;
+		if(aP == autoPlayed)return aP;
 		for (idx in 0...keysPressed.length)
 			keysPressed[idx] = false;
 		

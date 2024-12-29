@@ -1,5 +1,7 @@
 package funkin.objects.hud;
 
+import funkin.objects.hud.JudgementCounter;
+import funkin.objects.hud.JudgementCounter.JudgeCounterSettings;
 import funkin.data.JudgmentManager.JudgmentData;
 import flixel.util.FlxColor;
 import funkin.objects.playfields.*;
@@ -9,8 +11,6 @@ import flixel.text.FlxText;
 
 class AdvancedHUD extends CommonHUD
 {
-	public var judgeTexts:Map<String, FlxText> = [];
-	public var judgeNames:Map<String, FlxText> = [];
 	public var gradeTxt:FlxText;
 	public var scoreTxt:FlxText;
 	public var ratingTxt:FlxText;
@@ -33,7 +33,57 @@ class AdvancedHUD extends CommonHUD
 	var pcString:String = Paths.getString("peakcombo");
 	var botplayString = Paths.getString("botplayMark");
 
-	
+	// Maybe we should move this into CommonHUD??
+	var counterOptions:JudgeCounterSettings = {
+		textBorderSpacing: 5,
+		textLineSpacing: 25,
+		textSize: 24,
+		textBorderSize: 1.25,
+		nameFont: "calibrib.ttf",
+		numbFont: "calibri.ttf"
+	}
+	var judgeCounters:JudgementCounters;
+
+	function regenJudgeDisplay()
+	{
+		remove(judgeCounters);
+		judgeCounters.destroy();
+		judgeCounters = null;
+		generateJudgementDisplays();
+	}
+
+	function generateJudgementDisplays()
+	{
+		var textWidth = 200;
+		counterOptions.length = FULL;
+		if (ClientPrefs.judgeCounter != 'Off') {
+			judgeCounters = new JudgementCounters(
+				hudPosition == 'Right' ? (FlxG.width - counterOptions.textBorderSpacing - textWidth) : counterOptions.textBorderSpacing,
+				FlxG.height + 100, // TODO: Alter the math so this can be FlxG.height * 0.5, since that'd make more sense	for users
+				displayNames,
+				judgeColours,
+				counterOptions,
+				displayedJudges
+			);
+		} else {
+			judgeCounters = new JudgementCounters(
+				hudPosition == 'Right' ? (FlxG.width - counterOptions.textBorderSpacing - 200) : counterOptions.textBorderSpacing,
+				FlxG.height + 100, // TODO: Alter the math so this can be FlxG.height * 0.5, since that'd make more sense	for users
+				displayNames,
+				judgeColours,
+				counterOptions,
+				["miss"]
+			);
+		}
+		add(judgeCounters);
+
+		npsIdx = judgeCounters.len;
+		if (npsTxt != null){
+			npsTxt.screenCenter(Y);
+			npsTxt.y -= 5 - (25 * npsIdx);
+		}
+	}
+
 	override public function new(iP1:String, iP2:String, songName:String, stats:Stats)
 	{
 		super(iP1, iP2, songName, stats);
@@ -86,59 +136,12 @@ class AdvancedHUD extends CommonHUD
 		gradeTxt.scrollFactor.set();
 		add(gradeTxt);
 
-		var idx:Int = 0;
-		if (ClientPrefs.judgeCounter != 'Off'){
-			// maybe this'd benefit from a JudgeCounter object idk
-			for (judgment in displayedJudges){
-				var text = new FlxText(0, 0, tWidth, displayNames.get(judgment), 20);
-				text.setFormat(Paths.font("calibrib.ttf"), 24, judgeColours.get(judgment), LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-				text.screenCenter(Y);
-				text.y -= 35 - (25 * idx);
-				text.x += 20 - 15;
-				text.scrollFactor.set();
-				text.borderSize = 1.25;
-				add(text);
+		generateJudgementDisplays();
 
-				var numb = new FlxText(0, 0, tWidth, "0", 20);
-				numb.setFormat(Paths.font("calibri.ttf"), 24, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-				numb.screenCenter(Y);
-				numb.y -= 35 - (25 * idx);
-				numb.x += 25 - 15;
-				numb.scrollFactor.set();
-				numb.borderSize = 1.25;
-				add(numb);
-
-				judgeTexts.set(judgment, numb);
-				judgeNames.set(judgment, text);
-				idx++;
-			}
-		}else{
-			var text = new FlxText(0, 0, tWidth, Paths.getString("tier0plural"), 20);
-			text.setFormat(Paths.font("calibrib.ttf"), 24, 0xBDBDBD, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.WHITE);
-			text.screenCenter(Y);
-			text.y -= 35;
-			text.x += 20 - 15;
-			text.scrollFactor.set();
-			text.borderSize = 1.25;
-			add(text);
-			var numb = new FlxText(0, 0, tWidth, "0", 20);
-			numb.setFormat(Paths.font("calibri.ttf"), 24, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-			numb.screenCenter(Y);
-			numb.y -= 35;
-			numb.x += 25 - 15;
-			numb.scrollFactor.set();
-			numb.borderSize = 1.25;
-			add(numb);
-			judgeTexts.set('miss', numb);
-			judgeNames.set('miss', text);
-			idx++;
-		}
-
-		npsIdx = idx;
 		npsTxt = new FlxText(0, 0, tWidth, '$npsString: 0 ($peakString: 0)', 20);
 		npsTxt.setFormat(Paths.font("calibri.ttf"), 26, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		npsTxt.screenCenter(Y);
-		npsTxt.y -= 5 - (25 * idx);
+		npsTxt.y -= 5 - (25 * npsIdx);
 		npsTxt.x += 20 - 15;
 		npsTxt.scrollFactor.set();
 		npsTxt.borderSize = 1.25;
@@ -148,15 +151,17 @@ class AdvancedHUD extends CommonHUD
 		pcTxt = new FlxText(0, 0, tWidth, '$pcString: 0', 20);
 		pcTxt.setFormat(Paths.font("calibri.ttf"), 26, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		pcTxt.screenCenter(Y);
-		pcTxt.y -= 5 - (25 * (ClientPrefs.npsDisplay ? (idx + 1) : idx));
+		pcTxt.y -= 5 - (25 * (ClientPrefs.npsDisplay ? (npsIdx + 1) : npsIdx));
 		pcTxt.x += 20 - 15;
 		pcTxt.scrollFactor.set();
 		pcTxt.borderSize = 1.25;
 		add(pcTxt);
 
 		if (hudPosition == 'Right'){
-			for(obj in members)
-				obj.x = FlxG.width - obj.width - obj.x;
+			for(obj in members){
+				if(obj != judgeCounters)
+					obj.x = FlxG.width - obj.width - obj.x;
+			}
 		}
 
 		//
@@ -203,8 +208,13 @@ class AdvancedHUD extends CommonHUD
 	override function changedOptions(changed:Array<String>){
 		super.changedOptions(changed);
 
-		pcTxt.screenCenter(Y);
-		pcTxt.y -= 5 - (25 * (ClientPrefs.npsDisplay ? npsIdx + 1 : npsIdx));
+		if (changed.contains('judgeCounter'))
+			regenJudgeDisplay();
+
+		if (changed.contains('judgeCounter') || changed.contains('npsDisplay')){
+			pcTxt.screenCenter(Y);
+			pcTxt.y -= 5 - (25 * (ClientPrefs.npsDisplay ? npsIdx + 1 : npsIdx));
+		}
 
 		npsTxt.visible = ClientPrefs.npsDisplay;
 
@@ -232,7 +242,7 @@ class AdvancedHUD extends CommonHUD
 
 	override function update(elapsed:Float)
 	{
-		gradeTxt.text = cpuControlled ? botplayString : grade;
+		gradeTxt.text = cpuControlled && useSubtleMark ? botplayString : grade;
 		
 		ratingTxt.text = (grade=="?") ? "0%" : (Highscore.floorDecimal(ratingPercent * 100, 2) + "%");
 		fcTxt.text = (ratingFC == stats.gfc && stats.accuracySystem == WIFE3) ? stats.fc : ratingFC;
@@ -243,10 +253,8 @@ class AdvancedHUD extends CommonHUD
 		if(peakCombo < combo) peakCombo = combo;
 		pcTxt.text = '$pcString: $peakCombo';
 		
-		for (k => v in judgements){
-			if (judgeTexts.exists(k))
-				judgeTexts.get(k).text = Std.string(v);
-		}
+		for (k => v in judgements)
+			judgeCounters.setCount(k, v);
 
 		super.update(elapsed);
 	}
@@ -328,49 +336,13 @@ class AdvancedHUD extends CommonHUD
 				gradeTxt.scale.set(1.2, 1.2);
 				FlxTween.tween(gradeTxt.scale, {x: 1, y: 1}, 0.2, {ease: FlxEase.circOut});
 			case 'misses':
-				var judgeName = judgeNames.get('miss');
-				var judgeTxt = judgeTexts.get('miss');
+				judgeCounters.setCount('miss', val);
 				if (ClientPrefs.scoreZoom)
-				{
-					if (judgeName != null)
-					{
-						FlxTween.cancelTweensOf(judgeName.scale);
-						judgeName.scale.set(1.075, 1.075);
-						FlxTween.tween(judgeName.scale, {x: 1, y: 1}, 0.2);
-					}
-				}
-				if (judgeTxt != null)
-				{
-					if (ClientPrefs.scoreZoom)
-					{
-						FlxTween.cancelTweensOf(judgeTxt.scale);
-						judgeTxt.scale.set(1.075, 1.075);
-						FlxTween.tween(judgeTxt.scale, {x: 1, y: 1}, 0.2);
-					}
-					judgeTxt.text = Std.string(val);
-				}
+					judgeCounters.bump('miss');
 			case 'comboBreaks':
-				var judgeName = judgeNames.get('cb');
-				var judgeTxt = judgeTexts.get('cb');
+				judgeCounters.setCount('cb', val);
 				if (ClientPrefs.scoreZoom)
-				{
-					if (judgeName != null)
-					{
-						FlxTween.cancelTweensOf(judgeName.scale);
-						judgeName.scale.set(1.075, 1.075);
-						FlxTween.tween(judgeName.scale, {x: 1, y: 1}, 0.2);
-					}
-				}
-				if (judgeTxt != null)
-				{
-					if (ClientPrefs.scoreZoom)
-					{
-						FlxTween.cancelTweensOf(judgeTxt.scale);
-						judgeTxt.scale.set(1.075, 1.075);
-						FlxTween.tween(judgeTxt.scale, {x: 1, y: 1}, 0.2);
-					}
-					judgeTxt.text = Std.string(val);
-				}
+					judgeCounters.bump('cb');
 			case 'ratingPercent':
 				if (ClientPrefs.scoreZoom)
 				{
@@ -394,21 +366,7 @@ class AdvancedHUD extends CommonHUD
 			FlxTween.cancelTweensOf(scoreTxt.scale);
 			scoreTxt.scale.set(1.075, 1.075);
 			FlxTween.tween(scoreTxt.scale, {x: 1, y: 1}, 0.2);
-
-			var judgeName = judgeNames.get(judge.internalName);
-			var judgeTxt = judgeTexts.get(judge.internalName);
-			if(judgeName!=null){
-				FlxTween.cancelTweensOf(judgeName.scale);
-				judgeName.scale.set(1.075, 1.075);
-				FlxTween.tween(judgeName.scale, {x: 1, y: 1}, 0.2);
-			}
-			if (judgeTxt != null)
-			{
-				FlxTween.cancelTweensOf(judgeTxt.scale);
-				judgeTxt.scale.set(1.075, 1.075);
-				FlxTween.tween(judgeTxt.scale, {x: 1, y: 1}, 0.2);
-			}
-
+			judgeCounters.bump(judge.internalName);
 		}
 
 		refreshFCColour();

@@ -2,8 +2,10 @@
 
 package funkin.objects;
 
+import flixel.graphics.FlxGraphic;
 import flixel.tweens.FlxTween;
 import flixel.group.FlxGroup.FlxTypedGroup;
+using StringTools;
 
 class RatingSprite extends FlxSprite
 {
@@ -36,6 +38,7 @@ class RatingSprite extends FlxSprite
 @:allow(funkin.states.PlayState)
 class RatingGroup extends FlxTypedGroup<RatingSprite>
 {
+	public var comboPadding:Int = 3;
 	public var x:Float = FlxG.width * 0.5;
 	public var y:Float = FlxG.height * 0.5;
 	
@@ -94,8 +97,31 @@ class RatingGroup extends FlxTypedGroup<RatingSprite>
 		return spr;
 	}
 
+	public static inline function setJudgementSprite(char:String, spr:FlxSprite){
+		var judgementGraphic = Paths.image(char);
+		if (judgementGraphic != null) {
+			spr.loadGraphic(judgementGraphic);
+			spr.animation.add(char, [0], 0);
+		} else {
+			// TODO: JudgeManager should hold indices into the judgement graphic and also point to which graphic to use, maybe?
+
+			var judgementsGraphic:FlxGraphic = Paths.image("judgements");
+			spr.loadGraphic(judgementsGraphic, true, judgementsGraphic.width, Math.floor(judgementsGraphic.height / 6));
+
+			spr.animation.add("epic", [0], 0);
+			spr.animation.add("sick", [1], 0);
+			spr.animation.add("good", [2], 0);
+			spr.animation.add("bad", [3], 0);
+			spr.animation.add("shit", [4], 0);
+			spr.animation.add("miss", [5], 0);
+		}
+	}
+	
 	private inline function getJudgeSpr(char:String):RatingSprite {
 		var spr = getSprite(judgeSprs, judgeTemplate);
+
+		setJudgementSprite(char, spr);
+
 		spr.animation.play(char);
 		return spr;
 	}
@@ -117,22 +143,19 @@ class RatingGroup extends FlxTypedGroup<RatingSprite>
 
 		spr.x = this.x + offsetX;
 		spr.y = this.y + offsetY;
-
-		spr.loadGraphic(Paths.image(name));
 		spr.updateHitbox();
 
 		lastJudge = spr;
 		return spr;
 	}
 
-	public function displayCombo(combo:Int, offsetX:Float=0.0, offsetY:Float=0.0):Array<RatingSprite> {
-		var str:String = Std.string(Math.abs(combo));
-		while (str.length < 3) str = "0" + str;
-
+	public function displayCombo(combo:Int, offsetX:Float=0.0, offsetY:Float=0.0):Array<RatingSprite> 
+	{	
+		var str:String = Std.string(Math.abs(combo)).lpad("0", comboPadding);
 		var x:Float = this.x + offsetX;
 		var y:Float = this.y + offsetY;
-
-		if (combo < 0){
+		
+		if (combo < 0) {
 			str = '-$str';
 			x -= comboTemplate.width * str.length * 0.5;
 		}else{

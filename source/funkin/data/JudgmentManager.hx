@@ -1,6 +1,5 @@
 package funkin.data;
 
-import funkin.scripts.FunkinHScript;
 import funkin.objects.Note;
 
 /**
@@ -33,7 +32,8 @@ typedef JudgmentData = {
 	?pbotPoints:Float, // if this isn't null, then PBOT wont do any calculations and will instead just add these to the pbot score/accuracy
 	?hideJudge:Bool, // if this is true then this judge wont show a judgment image
 	?comboBehaviour:ComboBehaviour, // how this judge affects your combo (IGNORE, INCREMENT or BREAK). Defaults to INCREMENT
-	?badJudgment:Bool // used for mines, etc. makes it so the window isnt scaled by the judge difficulty. defaults to false
+	?badJudgment:Bool, // used for mines, etc. makes it so the window isnt scaled by the judge difficulty. defaults to false
+	?countAsHit:Bool // False for stuff like hold drops
 
 }
 
@@ -130,10 +130,11 @@ class JudgmentManager {
 			score: -350,
 			accuracy: -175,
 			wifePoints: Wife3.holdDropWeight,
-			pbotPoints: PBot.missWeight,
+			pbotPoints: 0,
 			health: -2.5,
 			comboBehaviour: BREAK,
 			noteSplash: false,
+			countAsHit: false
 		},
 		DAMAGELESS_MISS => {
 			internalName: "miss",
@@ -221,6 +222,17 @@ class JudgmentManager {
 	}
 	
 	/**
+	 * Returns a judgment for a time difference.
+	 */
+	public function judgeTimeDiff(diff:Float) {
+		for (judge in hittableJudgments) {
+			if (diff <= getWindow(judge))
+				return judge;
+		}
+		return UNJUDGED;
+	}
+
+	/**
 	 * Returns a judgment for a note.
 	 * @param note Note to return a judgment for
 	 * @param time The position the note time is compared to for judgment
@@ -243,16 +255,12 @@ class JudgmentManager {
 					if (judge != null) return judge;
 				}
 
-				if (note.hitCausesMiss){
+				if (note.hitCausesMiss) {
 					if (diff <= getWindow(MISS_MINE))
 						return MISS_MINE;
-				}else{
-					for(judge in hittableJudgments){
-						if(diff <= getWindow(judge))
-							return judge;
-					}
 				}
-
+				
+				return judgeTimeDiff(diff);
 		}
 		// did you know if you always return UNJUDGED a note won't be hittable?
 		// i thought that was interesting
@@ -268,7 +276,6 @@ class PBot
 	public static inline final version:Float = 1; // increment this if any values for scoring changes
 	
 	public static var missThreshold:Float = 160.0; // This gets set in PlayState
-	
 
 	static inline final perfectThreshold:Float = 5.0;
 	public static var holdScorePerSecond:Float = 250.0;
@@ -282,14 +289,16 @@ class PBot
 	static inline final scoringSlope = 0.080;
 	static inline final scoringOffset = 54.99;
 
+	public static function getAcc(noteDiff:Float) {
+		// trace(noteDiff, missThreshold);
 
-	public static function getAcc(noteDiff:Float){
 		// TODO: find a math wizard who can add timescale to this
+		
 		return (switch (noteDiff) {
-			case(_ > missThreshold) => true:
-				missWeight;
 			case(_ <= perfectThreshold) => true:
 				perfectWeight;
+			case(_ > missThreshold) => true:
+				missWeight;
 			default:
 				// Fancy equation.
 				var factor:Float = 1.0 - (1.0 / (1.0 + Math.exp(-scoringSlope * (noteDiff - scoringOffset))));
@@ -301,6 +310,18 @@ class PBot
 // Etterna
 class Wife3
 {
+	public static var judgeScales:Map<String, Float> = [
+		"J1" => 1.50,
+		"J2" => 1.33,
+		"J3" => 1.16,
+		"J4" => 1.0,
+		"J5" => 0.84,
+		"J6" => 0.66,
+		"J7" => 0.5,
+		"J8" => 0.33,
+		"JUSTICE" => 0.2
+	];
+	
 	public static inline final version:Float = 1; // increment this if any values for scoring changes
 
 	public static final missWeight:Float = -5.5;
