@@ -206,7 +206,7 @@ class StageEditorState extends MusicBeatState{
 
 		var tab_group = new FlxUI(null, UI_characterbox);
 
-		var stages = Stage.getAllStages();
+		var stages = StageData.getAllStages();
 		var stageDropDown = new FlxUIDropDownMenuCustom(15, 30, FlxUIDropDownMenuCustom.makeStrIdLabelArray(stages, true), function(character:String){
 			curStage = stages[Std.parseInt(character)];
 			makeStage();

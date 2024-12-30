@@ -33,7 +33,7 @@ class StoryMenuState extends MusicBeatState
 	var diffText:FlxText;
 
 	//// status
-	var curSelected = 0;
+	static var curSelected:Int = 0;
 	var selSpr:FlxSprite = null;
 
 	var curDiffIdx:Int = -1;
@@ -45,8 +45,9 @@ class StoryMenuState extends MusicBeatState
 
 	override function create() 
 	{
-		for (content in Paths.contentRegistry) {
-			for (level in content.levels) {
+		for (modId in Paths.modsToLoad) {
+			var content = Paths.contentRegistry.get(modId);
+			for (level in content.getStoryModeLevelList()) {
 				if (level.getVisible())
 					levels.push(level);
 			}
@@ -139,7 +140,7 @@ class StoryMenuState extends MusicBeatState
 			var optionSpr = new FlxSprite(
 				FlxG.width / 2,
 				0,
-				Paths.image('storymenu/' + level.getLevelAsset())
+				Paths.image(level.getLevelAsset())
 			);
 			optionSpr.x -= optionSpr.width / 2;
 			optionSpr.y = prev==null ? 0 : prev.y + prev.height + 30;
@@ -150,7 +151,8 @@ class StoryMenuState extends MusicBeatState
 		}
 
 		//
-		changeSelection(0, true);
+		curSelected = FlxMath.minInt(curSelected, levels.length);
+		changeSelection(curSelected, true);
 		super.create();
 	}
 

@@ -588,11 +588,8 @@ class Paths
 	public static var dependencies(default, null):Array<ContentData> = [];
 	public static var globalContent(default, null):Array<ContentData> = [];
 
-	static var modsToLoad:Array<String> = [];
-	/*
-	static var contentActiveMap:Map<String, Bool> = [];
-	static var contentOrderMap:Map<String, Int> = [];
-*/
+	public static var modsToLoad:Array<String> = [];
+
 	static function set_currentContent(mod:ContentData) {
 		dependencies.resize(0);
 
@@ -619,45 +616,61 @@ class Paths
 		return currentModDirectory = v;
 	}
 
+	// ContentData to get stuff from when calling Paths.image, Paths.sound, etc
+	public static function getContentOrder(ignoreGlobal:Bool = false):Array<ContentData> {
+		var order = [];
+
+		if (currentContent != null)
+			order.push(currentContent);
+		
+		for (mod in dependencies)
+			order.push(mod);
+		
+		if (!ignoreGlobal)
+			for (mod in globalContent)
+				order.push(mod);
+		
+		return order;
+	}
+
 	inline public static function getModPath(mod:String, key:String = "") {
 		return Paths.contentRegistry.get(mod).getPath(key);
 	}
 
 	public static function updateContentList() {
-		/*
-		contentActiveMap.clear();
-		contentOrderMap.clear();
+		
+		var disabledList:Map<String, Bool> = [];
+		var splitFucking:Array<String> = [];
 		
 		var rawFucking = Paths.getContent('modList.txt');
 		if (rawFucking != null) {
-			var splitFucking:Array<String> = CoolUtil.listFromString(rawFucking);
-			for (index => line in splitFucking) {
-				var values = line.split('=');
+			splitFucking = CoolUtil.listFromString(rawFucking);
+			for (line in splitFucking) {
+				var values = line.split(':');
 				var id:String = values[0];
-				var active:Bool = values[1] != 'false';
-				contentOrderMap.set(id, index);
-				contentActiveMap.set(id, active);
-			}
-		}
-		*/
-
-		var rawFucking = Paths.getContent('modList.txt');
-		if (rawFucking != null) {
-			trace("Reading modList.txt");
-			var splitFucking:Array<String> = CoolUtil.listFromString(rawFucking);
-			for (index => line in splitFucking) {
-				var values = line.split('=');
-				var id:String = values[0];
-				var active:Bool = values[1] != 'false';
-				
-				if (active && !modsToLoad.contains(id)) {
-					modsToLoad.push(id);
-				}
+				var disabled:Bool = values[1] == 'false';
+				disabledList.set(id, disabled);
 			}
 		}
 
-		// should new mods (not part of the list) be automatically added ???
+		modsToLoad.resize(0);
+		for (name in Paths.getDirectoryFileList('content')) {
+			if (!isDirectory('content/$name')) continue;
 
+			if (!disabledList.exists(name)) 
+				splitFucking.push('$name:true');
+
+			if (disabledList.get(name) != true) 
+				modsToLoad.push(name);
+		}
+
+		#if sys
+		// Update modList file
+		rawFucking = splitFucking.join('\n');
+		File.saveContent('modList.txt', rawFucking);
+		#end
+
+		// TODO: mod menu!
 		reloadContent();
 	}
 
@@ -699,7 +712,7 @@ class Paths
 
 			var metadataPath:String = '$folderPath/metadata.json';
 			var metadata:Dynamic = Paths.getJson(metadataPath);
-			var metadata = updateContentMetadataStructure(metadata);
+			var metadata:ContentMetadata = updateContentMetadataStructure(metadata);
 
 			if (metadata != null) {
 				trace('content found: $folderPath');
@@ -726,29 +739,15 @@ class Paths
 		Paths.globalContent.resize(0);
 
 		for (cd in sowy) {
-			trace('mod id:' + cd.id);
 			Paths.contentRegistry.set(cd.id, cd);
-
-			if (cd.runsGlobally) {
-				trace("GLOBAL");
+			if (cd.runsGlobally)
 				Paths.globalContent.push(cd);
-			}
-
-			cd.scanSongs();
-			cd.scanLevels();
-
-			trace('songs: [');
-			for (song in cd.songs)
-				print('	'+song);
-			print(']');
-
-			trace('levels: [');
-			for (level in cd.levels)
-				print('	'+level.id);
-			print(']');
+			
+			trace(cd.id);
+			cd.create();
 		}
 
-		Paths.currentModDirectory = Paths.currentModDirectory; // ""; // ?
+		Paths.currentModDirectory = Paths.currentModDirectory; // refresh dependencies and whatever
 
 		trace("Content reloaded :D");
 	}
@@ -762,6 +761,7 @@ class Paths
 			return exists(path);
 		}
 
+		/*
 		if (currentContent != null)
 			if (existsOnMod(currentContent))
 				return path;
@@ -777,6 +777,11 @@ class Paths
 			}
 
 			if (existsOnMod(contentContent))
+				return path;
+		}
+		*/
+		for (mod in getContentOrder()) {
+			if (existsOnMod(mod))
 				return path;
 		}
 

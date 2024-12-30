@@ -8,6 +8,7 @@ import funkin.scripts.FunkinHScript;
 using funkin.CoolerStringTools;
 using StringTools;
 
+final defaultDifficulties:Array<String> = ["easy", "normal", "hard"];
 
 @:autoBuild(funkin.macros.Sowy.inheritFieldDocs())
 /** Class to get data for the Story Mode menu **/ 
@@ -55,7 +56,11 @@ abstract class Level
 	abstract public function getOpponent():String;
 
 	abstract public function getGirlfriend():String;
+
+	public function destroy():Void {}
 	
+	////
+
 	private function getSongInstances(keys:Array<String>):Array<Song> {
 		var list = [];
 		
@@ -68,31 +73,87 @@ abstract class Level
 	}
 }
 
+/*
+class TestLevel extends Level 
+{
+	public function new(content:ContentData, id:String) {
+		super(content, id);
+	}
+
+	public function getName():String {
+		return this.id;
+	}
+
+	public function getSongs():Array<String> {
+		return [];
+	}
+
+	public function getPlaylist(?difficulty:String):Array<Song> {
+		return getSongInstances(getSongs());
+	}
+
+	public function getVisible():Bool {
+		return true;
+	}
+
+	public function getUnlocked():Bool {
+		return true;
+	}
+
+	public function getDisplayedSongs():Array<String> {
+		return getSongs().map((song) -> return song.replace("-"," ").capitalize());
+	}
+
+	public function getDifficulties():Array<String> {
+		return defaultDifficulties;
+	}
+
+	public function getTitle():String {
+		return this.id;
+	}
+
+	public function getLevelAsset():String {
+		return this.id;
+	}
+
+	public function getPlayer():String {
+		return "bf";
+	}
+
+	public function getOpponent():String {
+		return "dad";
+	}
+
+	public function getGirlfriend():String {
+		return "gf";
+	}
+}
+*/
+
 class DataLevel extends Level
 {
 	private final data:LevelJSON;
-	private final script:FunkinHScript;
 
-	public function new(content:ContentData, id:String, ?data:LevelJSON, ?scriptPath:String){
+	public function new(content:ContentData, id:String, ?data:LevelJSON)
+	{
 		super(content, id);
 		this.data = data;
 
-		if (scriptPath != null){
-			this.script = FunkinHScript.fromFile(scriptPath, scriptPath, [
-				"this" => this,
-				"getData" => (() -> return this.data)
-			], false);
+		if (this.data == null) {
+			throw 'Level $id has no data!';
+			return;
+		}
 
-			this.data = script.executeFunc("getData") ?? data;
-		}else {
-			this.script = null;
-		}
-		
-		if (this.data == null && this.script == null) {
-			throw ("Level ID " + id + " isn't valid!");
-		}
+		if (this.data.title == null)
+			this.data.title = "";
+		else
+			this.data.title = this.data.title.toUpperCase(); 
+
+		if (this.data.levelAsset == null)
+			this.data.levelAsset = "storymenu/" + this.id;
+
 		if (this.data.difficulties == null)
-			this.data.difficulties = ["easy", "normal", "hard"];
+			this.data.difficulties = defaultDifficulties;
 	}
 
 	public function getName():String
@@ -164,11 +225,56 @@ class DataLevel extends Level
 	}
 }
 
+/*
+class ScriptedDataLevel extends DataLevel
+{
+	final script:FunkinHScript;
+
+	public static function fromPath(path:String, content:ContentData, id:String, ?data:LevelJSON):Null<ScriptedDataLevel>
+	{
+		var expr = ExprStuff.fromFile(path);
+		if (expr == null) return null;
+
+		var script = new FunkinHScript();
+		var level = new ScriptedDataLevel(content, id, data, script);
+
+		try {
+			script.set("this", level);
+			script._run(expr);
+			script.executeFunc("onCreate");
+		}catch(e:Dynamic) {
+			trace('Error in script for level $id: $e');
+			script.stop();
+			return null;
+		}
+		
+		return level;
+	}
+
+	@:noScripting
+	private function new(content:ContentData, id:String, data:LevelJSON, script:FunkinHScript)
+	{
+		this.script = script;
+		super(content, id, data);
+	}
+
+	@:noScripting
+	override public function destroy()
+	{
+		// idk...
+		script.executeFunc("destroy");
+		script.stop();
+		script = null;
+		super.destroy();
+	}
+}
+*/
+
 typedef LevelJSON = {
 	?id:String,
 	name:String,
 	title:String,
-	levelAsset:String,
+	?levelAsset:String,
 	
 	songs:Array<String>,
 	?displayedSongs:Array<String>,
@@ -190,7 +296,7 @@ class PsychLevel extends Level
 		name = data.weekName;
 		title = data.storyName;
 
-		levelAsset = data.name;
+		levelAsset = "storymenu/" + data.name;
 		girlfriend = data.weekCharacters[2];
 		opponent = data.weekCharacters[0];
 		player = data.weekCharacters[1];
@@ -213,7 +319,7 @@ class PsychLevel extends Level
 			}
 		}
 		if (difficulties.length == 0)
-			difficulties = ["easy", "normal", "hard"];
+			difficulties = defaultDifficulties;
 
 		return this.data = data;
 	}

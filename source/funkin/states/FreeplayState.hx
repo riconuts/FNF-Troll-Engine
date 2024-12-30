@@ -1,12 +1,10 @@
 package funkin.states;
 
 import funkin.data.Highscore;
-import flixel.math.FlxMath;
-import funkin.states.SongSelectState.SongChartSelec;
 import funkin.data.Song;
 import funkin.data.Song.SongMetadata;
-import funkin.data.WeekData;
 
+import flixel.math.FlxMath;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 import flixel.text.FlxText;
@@ -48,7 +46,7 @@ class FreeplayState extends MusicBeatState
 		#end
 
 		for (modId => content in Paths.contentRegistry) {
-			for (song in content.freeplaySonglist) {	
+			for (song in content.getFreeplaySongList()) {	
 				menu.addTextOption(song.songName).ID = songMeta.length;
 				songMeta.push(song);
 			}

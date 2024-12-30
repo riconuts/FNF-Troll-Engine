@@ -154,112 +154,6 @@ class Stage extends FlxTypedGroup<FlxBasic>
 	override function toString(){
 		return 'Stage: "$curStage"';
 	}
-
-	/**
-		Return an array with the names in the stageList file(s).
-	**/ 
-	public static function getTitleStages(modsOnly = false):Array<String>{
-	
-		var daList:Array<String> = [];
-		#if MODS_ALLOWED
-		if (modsOnly){
-			var modPath:String = Paths.modFolders('data/stageList.txt');
-			if (Paths.exists(modPath))
-			{
-				var modsList = Paths.getContent(modPath);
-				if (modsList != null && modsList.trim().length > 0)
-					for (shit in modsList.split("\n"))
-						daList.push(shit.trim().replace("\n", ""));
-			}
-
-		}else{
-			var modsList = Paths.text('data/stageList.txt', false);
-			if (modsList != null && modsList.trim().length > 0)
-				for (shit in modsList.split("\n"))
-					daList.push(shit.trim().replace("\n", ""));
-		}
-
-
-		 
-		var path = Paths.modFolders("metadata.json");
-		var rawJson:Null<String> = Paths.getContent(path);
-
-		if (rawJson != null && rawJson.length > 0)
-		{
-			var daJson:Dynamic = Json.parse(rawJson);
-			if (Reflect.field(daJson, "titleStages") != null)
-			{
-				var data:ContentMetadata = cast daJson;
-				for (stage in data.titleStages)
-				{
-					daList.push(stage.trim().replace("\n",""));
-				}
-			}
-		}
-
-		#end
-		return daList;
-	}
-
-	/**
-		Returns an array with every stage in the stages folder(s).
-	**/
-	#if !sys
-	@:noCompletion private static var _listCache:Null<Array<String>> = null;
-	#end
-	public static function getAllStages(modsOnly = false):Array<String>
-	{
-		#if !sys
-		if (_listCache != null)
-			return _listCache;
-
-		var stages:Array<String> = _listCache = [];
-		#else
-		var stages:Array<String> = [];
-		#end
-
-		var _stages = new Map<String, Bool>();
-
-		function readFileNameAndPush(fileName: String){
-			if (fileName==null)return;
-			
-			if (!fileName.endsWith(".json")) return;
-
-			var name = fileName.substr(0, fileName.length - 5);
-			_stages.set(name, true);
-		}
-		
-		for (folderPath in Paths.getFolders("stages", true)){
-			Paths.iterateDirectory(folderPath, readFileNameAndPush);
-		}
-
-		if (!modsOnly){
-			Paths.iterateDirectory(Paths.getPreloadPath('stages/'), readFileNameAndPush);
-		}
-
-		for (name in _stages.keys())
-			stages.push(name);
-
-		return stages;
-	}
-
-	/*
-	//// stage -> modDirectory
-	public static function getStageMap():Map<String, String>
-	{
-		var directories:Array<String> = [
-			#if MODS_ALLOWED
-			Paths.mods(Paths.currentModDirectory + '/stages/'),
-			Paths.mods('stages/'),
-			#end
-			Paths.getPreloadPath('stages/')
-		];
-
-		var theMap:Map<String, String> = new Map();
-
-		return theMap;
-	}
-	*/
 }
 
 class StageData {
@@ -280,5 +174,18 @@ class StageData {
 	public static function getStageFile(stageName:String):Null<StageFile> 
 	{
 		return Paths.json('stages/$stageName.json', false);
+	}
+
+	/** Return all stages that can currently be loaded **/
+	public static function getAllStages():Array<String> {
+		var m = new Map<String, Bool>();
+
+		for (mod in Paths.getContentOrder()) {
+			for (stage in mod.stageList) {
+				m.set(stage, true);
+			}
+		}
+
+		return [for (k in m.keys()) k];
 	}
 }

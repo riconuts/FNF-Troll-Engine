@@ -1,5 +1,6 @@
 package funkin.states.editors;
 
+import funkin.objects.Stage.StageData;
 import funkin.data.CharacterData;
 import funkin.objects.AttachedFlxText;
 import funkin.objects.hud.HealthIcon;
@@ -678,7 +679,7 @@ class ChartingState extends MusicBeatState
 
 
 		////
-		var stages = Stage.getAllStages();
+		var stages = StageData.getAllStages();
 
 		if (stages.length == 0) 
 			stages.push("stage");

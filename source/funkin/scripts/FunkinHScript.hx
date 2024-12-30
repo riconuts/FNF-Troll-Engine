@@ -26,6 +26,60 @@ import hscript.*;
 
 using StringTools;
 
+class ExprStuff
+{
+	public static function _fromString(s:String, origin:String = "hscript"):Expr
+	{
+		return FunkinHScript.parser.parseString(s, origin);
+	}
+
+	public static function _fromFile(path:String):Expr
+	{
+		return fromString(Paths.getContent(path), path);
+	}
+
+	public static function fromString(s:String, origin:String = "hscript"):Null<Expr>
+	{
+		try {
+			return _fromString(s, origin);
+		}
+		catch (e:haxe.Exception) {
+			var msg = "Error parsing hscript! " + e.details();
+			trace(msg);
+		}
+
+		return null;
+	}
+
+	public static function fromFile(path:String, ?name:String):Null<Expr>
+	{
+		var name:String = name ?? path;
+		try {
+			var fileContent = Paths.getContent(path);
+			return fileContent==null ? null : _fromString(fileContent, name);
+		}
+		catch (e:haxe.Exception) {
+			var msg = "Error parsing hscript! " + e.details();
+			trace(msg);
+
+			#if desktop
+			var title = "Error on haxe script!";
+
+			#if (cpp && windows)
+			switch (Windows.msgBox(msg, title, RETRYCANCEL | ERROR)) {
+				case RETRY: return fromFile(path, name);
+				default: return null;
+			}
+			#else
+			Application.current.window.alert(msg, title);
+			#end
+			#end
+		}
+
+		return null;
+	}
+}
+
 class FunkinHScript extends FunkinScript
 {
 	public static final parser:Parser = {
@@ -99,8 +153,10 @@ class FunkinHScript extends FunkinScript
 			var title = "Error on haxe script!";
 
 			#if (cpp && windows)
-			if (Windows.msgBox(msg, title, RETRYCANCEL | ERROR) == RETRY)
-				return fromFile(file, name, additionalVars, doCreateCall);
+			switch (Windows.msgBox(msg, title, RETRYCANCEL | ERROR)) {
+				case RETRY: return fromFile(file, name, additionalVars, doCreateCall);
+				default:
+			}
 			#else
 			Application.current.window.alert(msg, title);
 			#end
@@ -450,6 +506,10 @@ class FunkinHScript extends FunkinScript
 			haxe.Log.trace(message, posInfo);
 		}
 		return returnValue;
+	}
+
+	public function _run(parsed:Expr) {
+		return interpreter.execute(parsed);
 	}
 
 	public function stop()

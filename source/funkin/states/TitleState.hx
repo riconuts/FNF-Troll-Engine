@@ -1,5 +1,6 @@
 package funkin.states;
 
+import funkin.objects.Stage.StageData;
 import openfl.filters.BlurFilter;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.group.FlxGroup;
@@ -65,16 +66,12 @@ class TitleState extends MusicBeatState
 		var stages:Array<Array<String>> = []; // [stage name, mod directory]
 
 		Paths.currentModDirectory = "";
-		for (stage in Stage.getTitleStages())
-			stages.push([stage, ""]);
 
-		#if MODS_ALLOWED
-		for (modId in Paths.contentRegistry.keys()) {
+		for (modId => mod in Paths.contentRegistry) {
 			Paths.currentModDirectory = modId;
-			for (stage in Stage.getTitleStages(true))
-				stages.push([stage, modId]);
+			for (stageId in mod.getTitleStages())
+				stages.push([stageId, modId]);
 		}
-		#end
 
 		return FlxG.random.getObject(stages); // Get a random stage from the list
 	}

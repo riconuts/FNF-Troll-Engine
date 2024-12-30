@@ -22,12 +22,16 @@ class ContentData
 
 	public var dependencies:Array<String> = [];
 
+	////
 	public var songs:Map<String, Song> = [];
 
 	public var levels:Map<String, Level> = []; 
 
+	public var stageList:Array<String> = [];
+
 	public var vars:Map<String, Dynamic> = []; // scripts could store shit here to make up for the lack of static variables
 
+	////
 	public function new(id:String, path:String) 
 	{
 		path = path.endsWith("/") ? path.substr(0, path.length-1) : path;
@@ -36,7 +40,14 @@ class ContentData
 		this.path = path;
 	}
 
-	// For path code convenience
+	public function create() 
+	{
+		this.scanSongs();
+		this.scanLevels();
+		this.scanStages();
+	}
+
+	////
 	public function getPath(key:String):String 
 	{
 		return '$path/$key';
@@ -59,7 +70,23 @@ class ContentData
 
 	////
 
-	public function scanSongs() {
+	public function getFreeplaySongList():Array<Song> {
+		// TODO: FreeplaySong class
+		// For opponent icons, bg colors, and possibly different bg's per song instead of per mod
+		
+		return fileFreeplaySongList;
+	}
+
+	public function getStoryModeLevelList():Array<Level> {
+		return fileStoryModeLevelList;
+	}
+
+	public function getTitleStages():Array<String> {
+		return stageList;
+	}
+
+	//// 
+	private function scanSongs() {
 		this.songs.clear();
 
 		scanFolderForSongs('songs');
@@ -82,7 +109,7 @@ class ContentData
 		});
 	}
 
-	public function scanLevels() {
+	private function scanLevels() {
 		this.levels.clear();
 
 		var folderPath:String = getPath("levels");
@@ -100,45 +127,87 @@ class ContentData
 			var jsonData:Dynamic = Paths.getJson(jsonPath);
 
 			var scriptPath:Null<String> = null;
-			for (ext in Paths.HSCRIPT_EXTENSIONS) {
+			/*for (ext in Paths.HSCRIPT_EXTENSIONS) {
 				var path = '$basePath.$ext';
 				if (Paths.exists(path)) {
 					scriptPath = path;
 					break;
 				}
-			}
+			}*/
 			
 			if (jsonData == null && scriptPath == null) {
 				//trace('$basePath: no json or script to register level');
 				return;
 			}
 
-			var level = new DataLevel(this, id, jsonData, scriptPath);
+			var level = new DataLevel(this, id, jsonData);
 			this.levels.set(level.id, level);
 		});
 
 		return this.levels;
 	}
 
-	public var freeplaySonglist(get, null):Array<Song> = null;
-	function get_freeplaySonglist():Array<Song> {
-		if (freeplaySonglist != null)
-			return freeplaySonglist;
+	private function scanStages():Array<String> {
+		if (stageList != null)
+			return stageList;
+
+		var map:Map<String, Bool> = [];
+		var folderPath = this.getPath("stages");
+		Paths.iterateDirectory(folderPath, (fileName:String) -> {			
+			if (fileName.endsWith(".json") || Paths.isHScript(fileName)) 
+				map.set(Path.withoutExtension(fileName), true);
+		});
+		
+		return [for (k in map.keys()) k];
+	}
+
+	private var fileFreeplaySongList(get, null):Array<Song> = null;
+	private function get_fileFreeplaySongList():Array<Song> {
+		if (fileFreeplaySongList != null)
+			return fileFreeplaySongList;
 
 		var rawFile = this.getContent('data/freeplaySonglist.txt');
 		if (rawFile != null) {
 			var list = [];
 
 			for (line in rawFile.split('\n')) {
-				var id = line.rtrim();
-				var song = this.songs.get(id);
-				if (song != null) list.push(song);
+				var lineSplit = line.rtrim().split(':');
+				var songId = lineSplit[0];	
+				var iconId = lineSplit[1];
+				var bgColor = lineSplit[2];
+				//var bgGraphic = lineSplit[3];
+
+				if (this.songs.exists(songId)) {
+					list.push(this.songs.get(songId));
+				}
 			}
 
 			return list;
 		}
 
 		return [for (song in this.songs) song];
+	}
+
+	private var fileStoryModeLevelList(get, null):Array<Level> = null;
+	private function get_fileStoryModeLevelList():Array<Level> {
+		if (fileStoryModeLevelList != null)
+			return fileStoryModeLevelList;
+
+		var rawFile = this.getContent('data/levelList.txt');
+		if (rawFile != null) {
+			var list = [];
+
+			for (line in rawFile.split('\n')) {
+				var levelId = line.rtrim();
+				if (this.levels.exists(levelId)) {
+					list.push(this.levels.get(levelId));
+				}
+			}
+
+			return list;
+		}
+
+		return [for (level in this.levels) level];
 	}
 }
 
@@ -175,7 +244,7 @@ class PsychContentData extends ContentData
 		return this.levels;
 	}
 
-	override function get_freeplaySonglist():Array<Song> {
+	override function get_fileFreeplaySongList():Array<Song> {
 		var list = [];
 
 		for (level in this.levels) {
