@@ -1,0 +1,10 @@
+{	
+	"name": "Week 5",
+	"title": "RED SNOW",
+	"levelAsset": "storymenu/week5",
+	"player": "bf",
+	"girlfriend": "gf",
+	"opponent": "parents-christmas",
+	"difficulties": ["easy", "normal", "hard"],
+	"songs": ["cocoa", "eggnog", "winter-horrorland"]
+}

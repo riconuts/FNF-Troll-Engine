@@ -1,0 +1,9 @@
+{	
+	"name": "Tutorial",
+	"title": "",
+	"player": "bf",
+	"girlfriend": "gf",
+	"opponent": "dad",
+	"difficulties": ["easy", "normal", "hard"],
+	"songs": ["tutorial"]
+}

@@ -1,0 +1,10 @@
+{
+    "name": "Weekend 1",
+    "title": "DUE DEBTS",
+    "levelAsset": "storymenu/weekend1",
+    "player": "pico",
+    "girlfriend": "nene",
+    "opponent": "darnell",
+    "difficulties": ["easy", "normal", "hard"],
+    "songs": ["darnell", "lit-up", "2hot", "blazin"]
+}

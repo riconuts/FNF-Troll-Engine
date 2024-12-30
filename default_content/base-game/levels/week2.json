@@ -1,0 +1,10 @@
+{	
+	"name": "Week 2",
+	"title": "Spooky Month",
+	"levelAsset": "storymenu/week2",
+	"player": "bf",
+	"girlfriend": "gf",
+	"opponent": "spooky",
+	"difficulties": ["easy", "normal", "hard"],
+	"songs": ["spookeez", "south", "monster"]
+}

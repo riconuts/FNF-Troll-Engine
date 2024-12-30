@@ -1,0 +1,10 @@
+{	
+	"name": "Week 3",
+	"title": "PICO",
+	"levelAsset": "storymenu/week3",
+	"player": "bf",
+	"girlfriend": "gf",
+	"opponent": "pico",
+	"difficulties": ["easy", "normal", "hard"],
+	"songs": ["pico", "philly-nice", "blammed"]
+}

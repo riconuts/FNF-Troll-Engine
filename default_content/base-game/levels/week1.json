@@ -1,0 +1,10 @@
+{	
+	"name": "Week 1",
+	"title": "DADDY DEAREST",
+	"levelAsset": "storymenu/week1",
+	"player": "bf",
+	"girlfriend": "gf",
+	"opponent": "dad",
+	"difficulties": ["easy", "normal", "hard"],
+	"songs": ["bopeebo", "fresh", "dad-battle"]
+}
