@@ -46,8 +46,10 @@ class AdvancedHUD extends CommonHUD
 
 	function regenJudgeDisplay()
 	{
-		remove(judgeCounters);
-		judgeCounters.destroy();
+		if (judgeCounters != null) {
+			remove(judgeCounters);
+			judgeCounters.destroy();
+		}
 		judgeCounters = null;
 		generateJudgementDisplays();
 	}
@@ -253,8 +255,9 @@ class AdvancedHUD extends CommonHUD
 		if(peakCombo < combo) peakCombo = combo;
 		pcTxt.text = '$pcString: $peakCombo';
 		
-		for (k => v in judgements)
-			judgeCounters.setCount(k, v);
+		if (judgeCounters != null) 
+			for (k => v in judgements)
+				judgeCounters.setCount(k, v);
 
 		super.update(elapsed);
 	}
@@ -336,13 +339,17 @@ class AdvancedHUD extends CommonHUD
 				gradeTxt.scale.set(1.2, 1.2);
 				FlxTween.tween(gradeTxt.scale, {x: 1, y: 1}, 0.2, {ease: FlxEase.circOut});
 			case 'misses':
-				judgeCounters.setCount('miss', val);
-				if (ClientPrefs.scoreZoom)
-					judgeCounters.bump('miss');
+				if (judgeCounters != null) {
+					judgeCounters.setCount('miss', val);
+					if (ClientPrefs.scoreZoom)
+						judgeCounters.bump('miss');
+				}
 			case 'comboBreaks':
-				judgeCounters.setCount('cb', val);
-				if (ClientPrefs.scoreZoom)
-					judgeCounters.bump('cb');
+				if (judgeCounters != null) {
+					judgeCounters.setCount('cb', val);
+					if (ClientPrefs.scoreZoom)
+						judgeCounters.bump('cb');
+				}
 			case 'ratingPercent':
 				if (ClientPrefs.scoreZoom)
 				{
@@ -366,7 +373,8 @@ class AdvancedHUD extends CommonHUD
 			FlxTween.cancelTweensOf(scoreTxt.scale);
 			scoreTxt.scale.set(1.075, 1.075);
 			FlxTween.tween(scoreTxt.scale, {x: 1, y: 1}, 0.2);
-			judgeCounters.bump(judge.internalName);
+			if (judgeCounters != null)
+				judgeCounters.bump(judge.internalName);
 		}
 
 		refreshFCColour();

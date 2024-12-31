@@ -78,8 +78,10 @@ class PsychHUD extends CommonHUD
 
 	function clearJudgementDisplays()
 	{
-		remove(judgeCounters);
-		judgeCounters.destroy();
+		if (judgeCounters != null){
+			remove(judgeCounters);
+			judgeCounters.destroy();
+		}
 		judgeCounters = null;
 	}
 
@@ -191,8 +193,10 @@ class PsychHUD extends CommonHUD
 		if (isUpdating)
 			scoreTxt.text = PlayState.instance.cpuControlled && useSubtleMark ? botplayString : getScoreText();
 		
-		for (k => v in judgements)
-			judgeCounters.setCount(k, v);
+		if (judgeCounters != null){
+			for (k => v in judgements)
+				judgeCounters.setCount(k, v);
+		}
 		
 
 		super.update(elapsed);
@@ -210,7 +214,8 @@ class PsychHUD extends CommonHUD
 			if (scoreTxtTween != null)
 				scoreTxtTween.cancel();
 
-			judgeCounters.bump(judge.internalName);
+			if (judgeCounters != null)
+				judgeCounters.bump(judge.internalName);
 
 			scoreTxt.scale.x = 1.075;
 			scoreTxt.scale.y = 1.075;
@@ -229,8 +234,10 @@ class PsychHUD extends CommonHUD
 		{
 			case 'misses':
 				misses = val;
-				judgeCounters.bump('miss');
-				judgeCounters.setCount('miss', val);
+				if (judgeCounters != null){
+					judgeCounters.bump('miss');
+					judgeCounters.setCount('miss', val);
+				}
 			
 			case 'totalNotesHit':
 				if (ClientPrefs.showWifeScore)
