@@ -191,9 +191,10 @@ class PsychHUD extends CommonHUD
 		if (isUpdating)
 			scoreTxt.text = PlayState.instance.cpuControlled && useSubtleMark ? botplayString : getScoreText();
 		
-		for (k => v in judgements)
-			judgeCounters.setCount(k, v);
-		
+		if (judgeCounters != null) {
+			for (k => v in judgements)
+				judgeCounters.setCount(k, v);
+		}
 
 		super.update(elapsed);
 	}
