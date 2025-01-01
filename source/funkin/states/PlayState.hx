@@ -348,6 +348,10 @@ class PlayState extends MusicBeatState
 	@:noCompletion public var botplayTxt:FlxText;
 
 	@:noCompletion var songPercent:Float = 0;
+
+	//// Psych achievement shit
+	@:noCompletion var boyfriendIdleTime:Float = 0.0;
+	@:noCompletion var boyfriendIdled:Bool = false
 	
 	@:noCompletion public var spawnTime:Float = 1500;
 
@@ -403,10 +407,6 @@ class PlayState extends MusicBeatState
 	var detailsPausedText:String = "";
 	var stateText:String = "";
 	#end
-
-	//// Psych achievement shit
-	var boyfriendIdleTime:Float = 0.0;
-	var boyfriendIdled:Bool = false;
 
 	//// Script shit
 	public var funkyScripts:Array<FunkinScript> = [];
@@ -2576,19 +2576,6 @@ class PlayState extends MusicBeatState
 			if (!startingSong && !endingSong){
 				if (health > healthDrain)
 					health -= healthDrain * elapsed;
-
-				/*
-				if (boyfriend != null
-					&& boyfriend.animation.curAnim != null 
-					&& boyfriend.animation.curAnim.name.startsWith('idle')
-				) {
-					boyfriendIdleTime += elapsed;
-					if(boyfriendIdleTime >= 0.15) { // Kind of a mercy thing for making the achievement easier to get as it's apparently frustrating to some playerss
-						boyfriendIdled = true;
-				} else {
-					boyfriendIdleTime = 0.0;
-				}
-				*/
 			}
 		}
 
