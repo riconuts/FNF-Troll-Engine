@@ -351,7 +351,7 @@ class PlayState extends MusicBeatState
 
 	//// Psych achievement shit
 	@:noCompletion var boyfriendIdleTime:Float = 0.0;
-	@:noCompletion var boyfriendIdled:Bool = false
+	@:noCompletion var boyfriendIdled:Bool = false;
 	
 	@:noCompletion public var spawnTime:Float = 1500;
 
