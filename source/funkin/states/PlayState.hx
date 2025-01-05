@@ -3828,21 +3828,19 @@ class PlayState extends MusicBeatState
 				applyJudgment(MISS_MINE, Conductor.safeZoneOffset);
 				health -= daNote.missHealth * healthLoss;
 			}
-
-			for (track in (playOpponent ? opponentTracks : playerTracks))
-				track.volume = 0;
-	
-			if (!daNote.isSustainNote && ClientPrefs.missVolume > 0)
-				FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), ClientPrefs.missVolume * FlxG.random.float(0.9, 1));
 	
 			if (instakillOnMiss)
 				doDeathCheck(true);
 		}
 
-		if (!daNote.noMissAnimation) {
-			var chars:Array<Character> = getNoteCharacters(daNote, field);
+		for(track in field.tracks)
+			track.volume = 0;
 
-			for (char in chars) {
+		if (!daNote.isSustainNote && ClientPrefs.missVolume > 0)
+			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), ClientPrefs.missVolume * FlxG.random.float(0.9, 1));
+
+		if (!daNote.noMissAnimation) {
+			for (char in getNoteCharacters(daNote, field)) {
 				char.missNote(daNote, field);
 			}
 		}
@@ -3898,27 +3896,7 @@ class PlayState extends MusicBeatState
 			return;
 		if (callOnHScripts("preOpponentNoteHit", [note, field]) == Globals.Function_Stop)
 			return;
-
-		camZooming = true;
-
-		//
-		note.hitByOpponent = true;
-		for (track in opponentTracks)
-			track.volume = 1.0;
-
-		// Strum animations
-		if (note.visible){
-			var time:Float = 0.15;
-			if (note.isSustainNote && !note.isSustainEnd)
-				time += 0.15;
-
-			StrumPlayAnim(field, note.column % keyCount, time, note);
-		}
-
-		// Sing animations
-		for(char in getNoteCharacters(note, field)){
-			char.playNote(note, field);
-		}
+		commonNoteHit(note, field);
 
 		// Script shit
 		callOnHScripts("opponentNoteHit", [note, field]);
@@ -3946,8 +3924,6 @@ class PlayState extends MusicBeatState
 		
 	}
 
-	// diff from goodNoteHit because it gets called when you release and re-press a hold
-	// prob be useful for noteskins too
 
 	inline function stepHold(note:Note, field:PlayField)
 	{
@@ -4002,6 +3978,32 @@ class PlayState extends MusicBeatState
 		return chars;
 	}
 
+	function commonNoteHit(note:Note, field:PlayField){ // things done by all note hit functions
+		camZooming = true;
+
+		note.wasGoodHit = true;
+
+		for (track in field.tracks)
+			track.volume = 1;
+
+		// Sing animations
+		for (char in getNoteCharacters(note, field)) 
+			char.playNote(note, field);
+		
+		// Strum animations
+		if (field.autoPlayed) {
+			var time:Float = 0.15;
+			if (note.isSustainNote && !note.isSustainEnd)
+				time += 0.15;
+
+			StrumPlayAnim(field, note.column % 4, time, note);
+		} else {
+			var spr = field.strumNotes[note.column];
+			if (spr != null && (field.keysPressed[note.column] || note.isRoll))
+				spr.playAnim('confirm', true, note.isSustainNote ? note.parent : note);
+		}
+	}
+
 	function goodNoteHit(note:Note, field:PlayField):Void
 	{	
 		if (note.wasGoodHit || (field.autoPlayed && (note.ignoreNote || note.breaksCombo)))
@@ -4012,9 +4014,7 @@ class PlayState extends MusicBeatState
 		if (callOnHScripts("preGoodNoteHit", [note, field]) == Globals.Function_Stop)
 			return;
 
-		camZooming = true;
-
-		if(!note.isSustainNote){
+		if (!note.isSustainNote) {
 			noteHits.push(Conductor.songPosition); // used for NPS
 			stats.noteDiffs.push(note.hitResult.hitDiff + ClientPrefs.ratingOffset); // used for stat saving (i.e viewing song stats after you beaten it)
 		}
@@ -4023,7 +4023,7 @@ class PlayState extends MusicBeatState
 			FlxG.sound.play(Paths.sound('hitsound'), ClientPrefs.hitsoundVolume );
 
 		if (note.ratingDisabled) {
-			// NOTHING!!!!
+			// NOTHING!!!! Note will just dissappear
 
 		}else if (note.hitResult.judgment != MISS_MINE) 
 			judge(note, field);
@@ -4060,35 +4060,11 @@ class PlayState extends MusicBeatState
 			return;
 		} 
 
- 		if(stats.accuracySystem == 'PBot')
-			stats.totalPlayed += (PBot.holdScorePerSecond * (note.sustainLength * 0.001)) * 0.01;
 		
 		//
-		note.wasGoodHit = true;
 		if (cpuControlled) saveScore = false; // if botplay hits a note, then you lose scoring
-		for (track in playerTracks)
-			track.volume = 1.0;
 
-		// Strum animations
-		if (note.visible){
-			if(field.autoPlayed){
-				var time:Float = 0.15;
-				if (note.isSustainNote && !note.isSustainEnd)
-					time += 0.15;
-
-				StrumPlayAnim(field, note.column % 4, time, note);
-			}else{
-				var spr = field.strumNotes[note.column];
-				if (spr != null && (field.keysPressed[note.column] || note.isRoll))
-					spr.playAnim('confirm', true, note.isSustainNote ? note.parent : note);
-			}
-		}
-
-		// Sing animations
-		for(char in getNoteCharacters(note, field)){
-			char.playNote(note, field);
-		}
-
+		commonNoteHit(note, field);
 		// Script shit
 		callOnHScripts("goodNoteHit", [note, field]);
 		if (note.noteScript != null)
@@ -4101,14 +4077,13 @@ class PlayState extends MusicBeatState
 		callOnLuas('goodNoteHit', [notes.members.indexOf(note), Math.round(Math.abs(note.column)), note.noteType, note.isSustainNote, note.ID]);
 		#end
 		
-		if (!note.isSustainNote && note.sustainLength == 0)
-			field.removeNote(note);
-		else if (note.isSustainNote)
-		{
+		if (note.isSustainNote) {
 			if (note.parent != null)
 				if (note.parent.unhitTail.contains(note))
 					note.parent.unhitTail.remove(note);
 		}
+		else if (note.sustainLength == 0)
+			field.removeNote(note);
 	}
 
 	function getFieldFromNote(note:Note){
