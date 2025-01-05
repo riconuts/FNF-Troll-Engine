@@ -139,6 +139,7 @@ class PlayState extends MusicBeatState
 	public var healthLoss:Float = 1.0;
 	public var healthDrain:Float = 0.0;
 	public var opponentHPDrain:Float = 0.0;
+	public var holdsGiveHP:Bool = false;
 
 	public var songSpeed(default, set):Float = 1.0;
 	public var songSpeedType:String = "multiplicative";
@@ -557,6 +558,7 @@ class PlayState extends MusicBeatState
 			playbackRate = ClientPrefs.getGameplaySetting('songspeed', playbackRate);
 			healthGain = ClientPrefs.getGameplaySetting('healthgain', healthGain);
 			healthLoss = ClientPrefs.getGameplaySetting('healthloss', healthLoss);
+			holdsGiveHP = ClientPrefs.getGameplaySetting('holdsgivehp', holdsGiveHP);
 			playOpponent = ClientPrefs.getGameplaySetting('opponentPlay', playOpponent);
 			instakillOnMiss = ClientPrefs.getGameplaySetting('instakill', instakillOnMiss);
 			practiceMode = ClientPrefs.getGameplaySetting('practice', practiceMode);
@@ -961,33 +963,25 @@ class PlayState extends MusicBeatState
 		playfields.cameras = [camHUD];
 		notes.cameras = [camHUD];
 		
-		playerField = new PlayField(modManager);
-		playerField.cameras = [camHUD];
-		playerField.modNumber = 0;
-		playerField.playerId = 0;
-		playerField.characters = [for(ch in boyfriendMap) ch];
+		modManager.playerAmount = 2;
+		for (i in 0...modManager.playerAmount)
+			newPlayfield();
 		
-		playerField.isPlayer = !playOpponent;
-		playerField.autoPlayed = !playerField.isPlayer || cpuControlled;
-		playerField.noteHitCallback = playOpponent ? opponentNoteHit : goodNoteHit;
+		playerField = playfields.members[0];
+		if (playerField != null) {
+			playerField.characters = [for(ch in boyfriendMap) ch];
+			playerField.isPlayer = !playOpponent;
+			playerField.autoPlayed = !playerField.isPlayer || cpuControlled;
+			playerField.noteHitCallback = playOpponent ? opponentNoteHit : goodNoteHit;
+		}
 
-		dadField = new PlayField(modManager);
-		dadField.cameras = [camHUD];
-		dadField.isPlayer = playOpponent;
-		dadField.autoPlayed = !dadField.isPlayer || cpuControlled;
-		dadField.modNumber = 1;
-		dadField.playerId = 1;
-		dadField.characters = [for(ch in dadMap) ch];
-		dadField.noteHitCallback = playOpponent ? goodNoteHit : opponentNoteHit;
-
-		dad.idleWhenHold = !dadField.isPlayer;
-		boyfriend.idleWhenHold = !playerField.isPlayer;
-
-		playfields.add(dadField);
-		playfields.add(playerField);
-
-		initPlayfield(dadField);
-		initPlayfield(playerField);
+		dadField = playfields.members[1];
+		if (dadField != null) {
+			dadField.characters = [for(ch in dadMap) ch];
+			dadField.isPlayer = playOpponent;
+			dadField.autoPlayed = !dadField.isPlayer || cpuControlled;
+			dadField.noteHitCallback = playOpponent ? goodNoteHit : opponentNoteHit;
+		}
 		
 		callOnScripts("postPlayfieldCreation"); // backwards compat
 		callOnScripts("onPlayfieldCreationPost");
@@ -1604,8 +1598,7 @@ class PlayState extends MusicBeatState
 			if(daNote.strumTime < time)
 			{
 				daNote.ignoreNote = true;
-				if (modchartObjects.exists('note${daNote.ID}'))
-					modchartObjects.remove('note${daNote.ID}');
+				modchartObjects.remove('note${daNote.ID}');
 				for (field in playfields)
 					field.removeNote(daNote);
 
@@ -1816,6 +1809,9 @@ class PlayState extends MusicBeatState
 		playerTracks = getTrackInstances(SONG.tracks.player);
 		opponentTracks = getTrackInstances(SONG.tracks.opponent);
 
+		playerField.tracks = playerTracks;
+		dadField.tracks = opponentTracks;
+
 		inst = instTracks[0];
 		vocals = playerTracks[0];
 
@@ -2007,7 +2003,7 @@ class PlayState extends MusicBeatState
 
 				if (playfield == null && playfields.length > 0) {
 					if (swagNote.fieldIndex == -1)
-						swagNote.fieldIndex = swagNote.mustPress ? 1 : 0;
+						swagNote.fieldIndex = swagNote.mustPress ? 0 : 1;
 
 					if (playfields[swagNote.fieldIndex] != null) {
 						playfield = playfields[swagNote.fieldIndex];
@@ -2350,6 +2346,14 @@ class PlayState extends MusicBeatState
 
 		for(field in playfields.members)
 			field.fadeIn(skipArrowStartTween);
+
+		#if PE_MOD_COMPATIBILITY
+		for (i in dadField.strumNotes)
+			opponentStrums.add(i);
+
+		for (i in playerField.strumNotes)
+			playerStrums.add(i);
+		#end
 	}
 
 	override function openSubState(SubState:FlxSubState)
@@ -2425,10 +2429,11 @@ class PlayState extends MusicBeatState
 		field.judgeManager = judgeManager;
 
 		field.holdPressCallback = pressHold;
+		field.holdStepCallback = stepHold;
 		field.holdReleaseCallback = releaseHold;
 
 		field.noteRemoved.add((note:Note, field:PlayField) -> {
-			if(modchartObjects.exists('note${note.ID}'))modchartObjects.remove('note${note.ID}');
+			modchartObjects.remove('note${note.ID}');
 			allNotes.remove(note);
 			unspawnNotes.remove(note);
 			notes.remove(note);
@@ -2461,13 +2466,11 @@ class PlayState extends MusicBeatState
 		});
 
 
-		
-
- 		field.holdDropped.add((daNote:Note, field:PlayField) -> {
+		field.holdDropped.add((daNote:Note, field:PlayField) -> {
 			if (!field.isPlayer)return;
 			if (stats.accuracySystem == 'PBot') {
-				var dtMs:Float = daNote.sustainLength - daNote.holdingTime;
-				stats.totalNotesHit += PBot.holdScorePerSecond * 0.01 * (dtMs * 0.001);
+				stats.totalPlayed += (PBot.holdScorePerSecond * (daNote.sustainLength * 0.001)) * 0.01;
+				stats.totalNotesHit += PBot.holdScorePerSecond * 0.01 * (daNote.holdingTime * 0.001);
 				RecalculateRating();
 			}
 		});
@@ -2475,6 +2478,7 @@ class PlayState extends MusicBeatState
 		field.holdFinished.add((daNote:Note, field:PlayField) -> {
 			if (!field.isPlayer)return;
 			if (stats.accuracySystem == 'PBot') {
+				stats.totalPlayed += (PBot.holdScorePerSecond * (daNote.sustainLength * 0.001)) * 0.01;
 				stats.totalNotesHit += PBot.holdScorePerSecond * 0.01 * (daNote.sustainLength * 0.001);
 				RecalculateRating();
 			}
@@ -3877,8 +3881,13 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.missVolume > 0)
 			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), ClientPrefs.missVolume  * FlxG.random.float(0.9, 1));
 
-		for (char in field.characters) 
-			char.missPress(direction, field);
+		if (field != null) {
+			for (track in field.tracks)
+				track.volume = 0;
+
+			for (char in field.characters) 
+				char.missPress(direction, field);	
+		}
 
 		callOnScripts('noteMissPress', [direction]);
 	}
@@ -3939,6 +3948,25 @@ class PlayState extends MusicBeatState
 
 	// diff from goodNoteHit because it gets called when you release and re-press a hold
 	// prob be useful for noteskins too
+
+	inline function stepHold(note:Note, field:PlayField)
+	{
+		callOnHScripts("onHoldStep", [note, field]);
+		
+		if (note.noteScript != null)
+			callScript(note.noteScript, "onHoldStep", [note, field]);
+
+		if (note.genScript != null)
+			callScript(note.genScript, "onHoldStep", [note, field]);
+
+		if(field.isPlayer){
+			if (holdsGiveHP && note.hitResult.judgment != UNJUDGED){
+				var judgeData:JudgmentData = judgeManager.judgmentData.get(note.hitResult.judgment);
+				if(judgeData.health > 0)
+					health += judgeData.health * 0.02 * healthGain;
+			}
+		}
+	}
 
 	inline function pressHold(note:Note, field:PlayField)
 	{
