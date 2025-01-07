@@ -90,8 +90,11 @@ typedef SpeedEvent =
 {
 	position:Float, // the y position where the change happens (modManager.getVisPos(songTime))
 	startTime:Float, // the song position (conductor.songTime) where the change starts
-	songTime:Float, // the song position (conductor.songTime) when the change ends
-	?startSpeed:Float, // the starting speed
+	#if EASED_SVs
+	startSpeed:Float, // the previous event's speed
+	?endTime:Float, // the song position (conductor.songTime) when the change ends
+	?easeFunc:EaseFunction,
+	#end
 	speed:Float // speed mult after the change
 }
 
@@ -271,7 +274,7 @@ class PlayState extends MusicBeatState
 	public var eventNotes:Array<EventNote> = [];
 
 	var speedChanges:Array<SpeedEvent> = [];
-	public var currentSV:SpeedEvent = {position: 0, startTime: 0, songTime:0, speed: 1, startSpeed: 1};
+	public var currentSV:SpeedEvent = {position: 0, startTime: 0, speed: 1 #if EASED_SVs , startSpeed: 1 #end};
 	public var judgeManager:JudgmentManager;
 
 	public var modManager:ModManager;
@@ -533,12 +536,17 @@ class PlayState extends MusicBeatState
 		updateKeybinds();
 
 		speedChanges.push({
-			position: 0,
-			songTime: 0,
-			startTime: 0,
+			position: -6000 * 0.45,
+			startTime: -6000,
+			speed: 1, 
+			#if EASED_SVs
 			startSpeed: 1,
-			speed: 1,
+			#end
 		});
+
+		#if EASED_SVs
+		resetSVDeltas();
+		#end
 
 		#if PE_MOD_COMPATIBILITY
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
@@ -1798,6 +1806,9 @@ class PlayState extends MusicBeatState
 		}
 
 		speedChanges.sort(svSort);
+		#if EASED_SVs
+		resetSVDeltas();
+		#end
 		if (eventNotes.length > 1)
 			eventNotes.sort(sortByTime);
 
@@ -1926,8 +1937,9 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
-	
-
+		#if EASED_SVs
+		resetSVDeltas();
+		#end
 		return notes;
 	}
 
@@ -1949,45 +1961,54 @@ class PlayState extends MusicBeatState
 		return getTimeFromSV(time, event);
 	}
 
-	function ease(e:EaseFunction, t:Float, b:Float, c:Float, d:Float)
-	{ // elapsed, begin, change (ending-beginning), duration
-		var time = t / d;
-		return c * e(time) + b;
+	#if EASED_SVs
+	var lastSVTime:Float = 0;
+	var lastSVElapsed:Float = 0;
+	var lastSVPos:Float = 0;
+	
+	inline function resetSVDeltas(){
+		if(speedChanges.length > 0){
+			lastSVTime = speedChanges[0].startTime;
+			lastSVElapsed = 0;
+			lastSVPos = speedChanges[0].position;
+		}else{
+			lastSVTime = -5000;
+			lastSVElapsed = 0;
+			lastSVPos = -5000 * 0.45;
+		}
 	}
+	#end
 
-	public inline function getTimeFromSV(time:Float, event:SpeedEvent){
+	public function getTimeFromSV(time:Float, event:SpeedEvent):Float {
+		#if EASED_SVs
+		var func:EaseFunction = event.easeFunc == null ? FlxEase.linear : event.easeFunc;
+		if (event.endTime != null) {
+			var timeElapsed:Float = FlxMath.remapToRange(time, event.startTime, event.endTime, 0, 1);
+			if(timeElapsed > 1)timeElapsed = 1;
+			if(timeElapsed < 0)timeElapsed = 0;
+			var currentSpeed = FlxMath.lerp(event.startSpeed, event.speed, func(lastSVElapsed));
 
-		// TODO: make easing SVs work somehow
+			var toAdd:Float = time - lastSVTime;
+			var finalPosition:Float = lastSVPos + toAdd * currentSpeed;
+			
+			lastSVPos = finalPosition;
+			lastSVTime = time;
+			lastSVElapsed = timeElapsed;
+			return finalPosition;
+		}
+		#end
 
-		//if(time >= event.songTime || event.songTime == event.startTime) // practically the same start and end time
-			return event.position + (modManager.getBaseVisPosD(time - event.songTime, 1) * event.speed);
-/* 		else{
-			// ease(easeFunc, passed, startVal, change, length)
-			// var passed = curStep - executionStep;
-			// var change = endVal - startVal;
-			if(event.startSpeed==null)event.startSpeed = currentSV.speed;
-
-			var speed = ease(FlxEase.linear, time - event.songTime, event.startSpeed, event.speed - event.startSpeed, event.songTime - event.startTime);
-			trace(speed);
-			return event.position + (modManager.getBaseVisPosD(time - event.startTime, 1) * speed);
-		} */
+		return event.position + (modManager.getBaseVisPosD(time - event.startTime, 1) * event.speed);
 	}
 
 	public function getSV(time:Float){
-		var event:SpeedEvent = {
-			position: 0,
-			songTime: 0,
-			startTime: 0,
-			startSpeed: 1,
-			speed: 1
-		};
-		for (shit in speedChanges)
-		{
-			if (shit.startTime <= time && shit.startTime >= event.startTime){
-				if(shit.startSpeed == null)
-					shit.startSpeed = event.speed;
-				event = shit;
-				
+		var svIndex:Int = 0;
+
+		var event:SpeedEvent = speedChanges[svIndex];
+		if (svIndex < speedChanges.length - 1) {
+			while (speedChanges[svIndex + 1] != null && speedChanges[svIndex + 1].startTime <= time) {
+				event = speedChanges[svIndex + 1];
+				svIndex++;
 			}
 		}
 
@@ -2036,13 +2057,41 @@ class PlayState extends MusicBeatState
 					speed = Std.parseFloat(event.value1);
 					if (Math.isNaN(speed)) speed = 1;
 				}
+				#if EASED_SVs
+				var endTime:Null<Float> = null;
+				var easeFunc:Null<EaseFunction> = null;
 
+				var tweenOptions = event.value2.split("/");
+				if(tweenOptions.length >= 1){
+					easeFunc = FlxEase.linear;
+					var parsed:Float = Std.parseFloat(tweenOptions[0]);
+					if(!Math.isNaN(parsed))
+						endTime = event.strumTime + (parsed * 1000);
+
+					if(tweenOptions.length > 1){
+						var f:EaseFunction = ScriptingUtil.getFlxEaseByString(tweenOptions[1]);
+						if(f != null)
+							easeFunc = f;
+					}
+				}
+
+				var lastChange:SpeedEvent = speedChanges[speedChanges.length - 1];
 				speedChanges.push({
-					position: getTimeFromSV(event.strumTime, speedChanges[speedChanges.length - 1]),
-					songTime: event.strumTime,
+					position: getTimeFromSV(event.strumTime, lastChange),
+					startTime: event.strumTime,
+					endTime: endTime,
+					easeFunc: easeFunc,
+					startSpeed: lastChange.startSpeed,
+					speed: speed
+				});
+				#else
+				var lastChange:SpeedEvent = speedChanges[speedChanges.length - 1];
+				speedChanges.push({
+					position: getTimeFromSV(event.strumTime, lastChange),
 					startTime: event.strumTime,
 					speed: speed
 				});
+				#end
 				
 			case 'Change Character':
 				var charType = getCharacterTypeFromString(event.value1);
