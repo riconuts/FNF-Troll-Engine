@@ -416,6 +416,10 @@ class PlayState extends MusicBeatState
 	public var scriptsToClose:Array<FunkinScript> = [];
 
 	public var signals = new PlayStateSignals();
+
+	////
+	var noteTypeMap:Map<String, Bool> = [];
+	var eventPushedMap:Map<String, Bool> = [];
 	
 	// used by lua scripts
 	public var modchartTweens:Map<String, FlxTween> = new Map();
@@ -777,15 +781,6 @@ class PlayState extends MusicBeatState
 		for (character in characters) {
 			for (data in CharacterData.returnCharacterPreload(character))
 				shitToLoad.push(data);
-		}
-
-		for (event in getEvents())
-		{
-			for (data in preloadEvent(event))
-			{ // preloads everythin for events
-				if (!shitToLoad.contains(data))
-					shitToLoad.push(data);
-			}
 		}
 
 		for (track in songTrackNames){
@@ -1613,104 +1608,60 @@ class PlayState extends MusicBeatState
 		callOnScripts('onSongStart');
 	}
 
-	private var noteTypeMap:Map<String, Bool> = new Map<String, Bool>();
-	private var eventPushedMap:Map<String, Bool> = new Map<String, Bool>();
-
 	function shouldPush(event:EventNote){
 		switch(event.event){
 			default:
-				if (eventScripts.exists(event.event))
-				{
-					var eventScript:FunkinScript = eventScripts.get(event.event);
-					var returnVal:Dynamic = callScript(eventScript, "shouldPush", [event]);
-
-					if (returnVal == Globals.Function_Stop) returnVal = false;
-
-					return !(returnVal == false);
+				if (eventScripts.exists(event.event)) {
+					var script = eventScripts.get(event.event);
+					var returnVal:Dynamic = script.call('shouldPush', [event]);
+					
+					//trace(event.event, "shouldPush", returnVal);
+					
+					if (returnVal == true)
+						return true;
+					if (returnVal == false)
+						return false;
+					if (returnVal == Globals.Function_Stop)
+						return false;					
 				}
 		}
 
 		return true;
 	}
 
-	function eventSort(a:Array<Dynamic>, b:Array<Dynamic>)
-		return Std.int(a[0] - b[0]);
+	static function eventNoteSort(a:EventNote, b:EventNote)
+		return Std.int(a.strumTime - b.strumTime);
 
-	function getEvents():Array<EventNote>
+	function getSongEventNotes():Array<EventNote>
 	{
-		var songData = SONG;
-		var events:Array<EventNote> = [];
+		var allEvents:Array<EventNote> = [];
 
 		var eventsJSON = Song.loadFromJson('events', songName, false);
-		if (eventsJSON != null) {
-			eventsJSON = Song.onLoadEvents(eventsJSON);
-			var rawEventsData:Array<Array<Dynamic>> = eventsJSON.events;
-			rawEventsData.sort(eventSort);
+		if (eventsJSON != null) Song.getEventNotes(eventsJSON.events, allEvents);
 
-			var eventsData:Array<Array<Dynamic>> = [];
-			for (event in rawEventsData){
-				var last = eventsData[eventsData.length-1];
-				
-				if (last != null && Math.abs(last[0] - event[0]) <= Conductor.jackLimit){
-					var fuck:Array<Array<Dynamic>> = event[1];
-					for (shit in fuck) eventsData[eventsData.length - 1][1].push(shit);
-				}else
-					eventsData.push(event);
-			}
+		Song.getEventNotes(SONG.events, allEvents);
 
-			for (event in eventsData) //Event Notes
-			{
-				var eventTime:Float = event[0] + ClientPrefs.noteOffset;
-				var subEvents:Array<Dynamic> = event[1];
-	
-				for (eventData in subEvents)
-				{
-					var eventNote:EventNote = {
-						strumTime: eventTime,
-						event: eventData[0],
-						value1: eventData[1],
-						value2: eventData[2]
-					};
-					if (shouldPush(eventNote)) events.push(eventNote);
-				}
+		return allEvents;
+	}
+
+	private function createFirstScriptFromFolders(name:String, folders:Array<String>, ignoreCreateCall:Bool = false):FunkinScript {
+		for (folder in folders)  {
+			var pathKey:String = '$folder/$name';
+
+			var hscriptPath = Paths.getHScriptPath(pathKey);
+			if (hscriptPath != null) {
+				return createHScript(hscriptPath, name, true);
 			}
+			
+			#if LUA_ALLOWED
+			var luaPath = Paths.getLuaPath(pathKey);
+			if (luaPath != null) {
+				return createLua(luaPath, name, true);
+			}
+			#end
 		}
 
-		////
-		var rawEventsData:Array<Array<Dynamic>> = songData.events;
-		rawEventsData.sort(eventSort);
-		var eventsData:Array<Array<Dynamic>>  = [];
-
-		for (event in rawEventsData){
-			var last = eventsData[eventsData.length-1];
-
-			if (last != null && Math.abs(last[0] - event[0]) <= Conductor.jackLimit){
-				var fuck:Array<Array<Dynamic>> = event[1];
-				for (shit in fuck) eventsData[eventsData.length - 1][1].push(shit);
-			}else
-				eventsData.push(event);
-		}
-
-		songData.events = eventsData;		
-
-		for (event in songData.events) //Event Notes
-		{
-			var eventTime:Float = event[0] + ClientPrefs.noteOffset;
-			var subEvents:Array<Dynamic> = event[1];
-
-			for (eventData in subEvents)
-			{
-				var eventNote:EventNote = {
-					strumTime: eventTime,
-					event: eventData[0],
-					value1: eventData[1],
-					value2: eventData[2]
-				};
-				if (shouldPush(eventNote)) events.push(eventNote);
-			}
-		}
-
-		return events;
+		return null;
 	}
 
 	private function generateSong(dataPath:String):Void
@@ -1773,145 +1724,99 @@ class PlayState extends MusicBeatState
 		var noteData:Array<SwagSection> = PlayState.SONG.notes;
 		add(notes);
 
-		// loads note types
-		for (section in noteData)
-		{
-			for (songNotes in section.sectionNotes)
-			{
-				var type:Dynamic = songNotes[3];
-				/*
-				if (Std.isOfType(type, Int)) 
-					type = editors.ChartingState.noteTypeList[type];
-				*/
+		// get note types to load
+		for (section in noteData) {
+			for (songNotes in section.sectionNotes) {
+				var type:String = songNotes[3];
+				if (noteTypeMap.exists(type))
+					continue;
 
-				if (!noteTypeMap.exists(type)) {
-					firstNotePush(type);
-					noteTypeMap.set(type, true);
-				}
+				noteTypeMap.set(type, true);
 			}
 		}
 
-		#if (LUA_ALLOWED && PE_MOD_COMPATIBILITY)
-		var luaNotetypeScripts = [];
-		#end
-		for (notetype in noteTypeMap.keys())
-		{
-			var doPush:Bool = false;
-			for(file in ["notetypes", #if PE_MOD_COMPATIBILITY "custom_notetypes" #end])
-			{
-				var baseScriptFile:String = '$file/$notetype';
-				for (ext in Paths.SCRIPT_EXTENSIONS)
-				{
-					if (doPush)
-						break;
-					var baseFile = '$baseScriptFile.$ext';
-					var files = [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)];
-					for (file in files)
-					{
-						if (!Paths.exists(file))
-							continue;
+		//// get event names to load
+		var daEvents:Array<EventNote> = getSongEventNotes();
+		for (eventNote in daEvents) {
+			var name:String = eventNote.event;
+			if (eventPushedMap.exists(name))
+				continue;
 
-						#if LUA_ALLOWED
-						if (Paths.LUA_EXTENSIONS.contains(ext))
-						{
-							var script = createLua(file, notetype, #if PE_MOD_COMPATIBILITY true #else false #end);
-							#if PE_MOD_COMPATIBILITY
-							// PE_MOD_COMPATIBILITY to call onCreate at the end of this function
-							luaNotetypeScripts.push(script);
-							#end
-							doPush = true;
-						}
-						else if (Paths.HSCRIPT_EXTENSIONS.contains(ext)) #end
-						{
-							notetypeScripts.set(notetype, createHScript(file, notetype));
-							doPush = true;
-						}
-						
-						if (doPush)
-							break;
-					}
-				}
-			}
+			eventPushedMap.set(name, true);
 		}
 
-		//// load events
-		var daEvents:Array<EventNote> = getEvents();
-		for (event in daEvents)
-			eventPushedMap.set(event.event, true);
+		// for psych compatibility reasons
+		var specialLuaScripts:Array<FunkinLua> = [];
 
-		for (event in eventPushedMap.keys())
-		{
-			var doPush:Bool = false;
+		// create note type scripts
+		final notetypeFolders = ["notetypes", #if PE_MOD_COMPATIBILITY "custom_notetypes" #end];
+		for (notetype in noteTypeMap.keys()) {
+			var script = createFirstScriptFromFolders(notetype, notetypeFolders, true);
 
-			for(file in ["events", #if PE_MOD_COMPATIBILITY "custom_events" #end]){
-				var baseScriptFile:String = '$file/$event';
-				for (ext in Paths.SCRIPT_EXTENSIONS)
-				{
-					if (doPush)
-						break;
-					var baseFile = '$baseScriptFile.$ext';
-					var files = [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)];
-					for (file in files)
-					{
-						if (!Paths.exists(file))
-							continue;
-
-						#if LUA_ALLOWED
-						if (Paths.LUA_EXTENSIONS.contains(ext))
-						{
-							// psych lua scripts work the exact same no matter what type of script they are 
-							createLua(file, event);
-							doPush = true;
-						}
-						else #end if (Paths.HSCRIPT_EXTENSIONS.contains(ext))
-						{
-							var script = createHScript(file, event);
-							eventScripts.set(event, script);
-							script.call("onLoad");
-							doPush = true;
-						}
-						if (doPush)
-							break;
-					}
-				}
+			if (script != null) switch (script.scriptType) {
+				case HSCRIPT: notetypeScripts.set(notetype, cast script);
+				case PSYCH_LUA: specialLuaScripts.push(cast script);
 			}
-
-			firstEventPush(event);
+			
+			firstNotePush(notetype);
 		}
 
-		for (subEvent in daEvents)
-			subEvent.strumTime -= eventNoteEarlyTrigger(subEvent);
+		// create event scripts
+		final eventFolders = ["events", #if PE_MOD_COMPATIBILITY "custom_events" #end];
+		for (eventName in eventPushedMap.keys()) {
+			var script:FunkinScript = createFirstScriptFromFolders(eventName, eventFolders, true);
+			
+			if (script != null) switch (script.scriptType) {
+				case HSCRIPT: eventScripts.set(eventName, cast script);
+				case PSYCH_LUA: specialLuaScripts.push(cast script);
+			}
+
+			firstEventPush(eventName);
+		}
+
+		// apply event time offsets
+		for (eventNote in daEvents)
+			eventNote.strumTime -= eventNoteEarlyTrigger(eventNote);
 		
 		if(daEvents.length > 1)
 			daEvents.sort(sortByTime);
 
-		for (subEvent in daEvents) {
-			eventNotes.push(subEvent);
-			eventPushed(subEvent);
+		// push events
+		for (eventNote in daEvents) {
+			var sp = shouldPush(eventNote);
+			
+			if (sp) {
+				eventNotes.push(eventNote);
+
+				for(shit in getEventNotePreload(eventNote))
+					shitToLoad.push(shit);
+				
+				eventPushed(eventNote);
+			}/*else{
+				trace("not pushing", eventNote.event, eventNote);
+			}*/
 		}
 
+		speedChanges.sort(svSort);
 		if (eventNotes.length > 1)
 			eventNotes.sort(sortByTime);
 
+		////
+		var prevTime = Sys.time();
 		generateNotes(noteData); // generates the chart
-
-		speedChanges.sort(svSort);
+		print('generateNotes() took ${Sys.time() - prevTime} seconds');
 
 		allNotes.sort(sortByNotes);
 
 		for(fuck in allNotes)
 			unspawnNotes.push(fuck);
 		
-		
 		for (field in playfields.members)
 			field.clearStackedNotes();
 
-
-		#if (LUA_ALLOWED && PE_MOD_COMPATIBILITY)
-		for (script in luaNotetypeScripts)
+		for (script in specialLuaScripts)
 			script.call("onCreate");
-		luaNotetypeScripts = null;
-		#end
+
 		checkEventNote();
 		generatedMusic = true;
 	}
@@ -2027,7 +1932,7 @@ class PlayState extends MusicBeatState
 	}
 
 	// everything returned here gets preloaded by the preloader up-top ^
-	function preloadEvent(event:EventNote):Array<AssetPreload>{
+	function getEventNotePreload(event:EventNote):Array<AssetPreload>{
 		var preload:Array<AssetPreload> = [];
 
 		switch(event.event){
@@ -2144,35 +2049,25 @@ class PlayState extends MusicBeatState
 				if (charType != -1) addCharacterToList(event.value2, charType);
 
 			default:
-				if (eventScripts.exists(event.event))
-					callScript(eventScripts.get(event.event), "onPush", [event]);
+				if (eventScripts.exists(event.event)) {
+					eventScripts.get(event.event).call("onPush", [event]);
+				}
 		}
 
 		callOnHScripts("eventPushed", [event]);
 	}
 
 	// called only once for each different event
-	function firstEventPush(eventName:String){
-
-		/* onLoad is called on script creation soo...
-		switch (eventName)
-		{
-			default:
-				// should PROBABLY turn this into a function, callEventScript(eventNote, "func") or something, idk
-				if (eventScripts.exists(eventName))
-					eventScripts.get(eventName).call("onLoad");
-		}
-		*/
+	function firstEventPush(eventName:String) {
+		if (eventScripts.exists(eventName))
+			eventScripts.get(eventName).call("onLoad");
 
 		callOnHScripts("firstEventPush", [eventName]);
 	}
 
-	function firstNotePush(type:String){
-		switch(type){
-			default:
-				if (notetypeScripts.exists(type))
-					callScript(notetypeScripts.get(type), "onLoad", []);
-		}
+	function firstNotePush(type:String) {
+		if (notetypeScripts.exists(type))
+			callScript(notetypeScripts.get(type), "onLoad", []);
 	}
 
 	inline function addKeyboardEvents() {

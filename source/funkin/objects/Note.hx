@@ -11,13 +11,6 @@ import funkin.data.JudgmentManager.Judgment;
 
 using StringTools;
 
-typedef EventNote = {
-	strumTime:Float,
-	event:String,
-	value1:String,
-	value2:String
-}
-
 typedef HitResult = {
 	judgment: Judgment,
 	hitDiff: Float
