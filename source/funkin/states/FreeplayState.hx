@@ -197,7 +197,7 @@ class FreeplayState extends MusicBeatState
 			var songName:String = selectedSongData.songName;
 			var _dStrId:String = 'difficultyName_$curDiffStr';
 			
-			var diffName:String = Paths.hasString(_dStrId) ? Paths._getString(_dStrId) : curDiffStr;
+			var diffName:String = Paths.getString(_dStrId, curDiffStr);
 			var displayName:String = '$songName ($diffName)'; // maybe don't specify the difficulty if it's the only available one
 
 			openSubState(new ResetScoreSubState(

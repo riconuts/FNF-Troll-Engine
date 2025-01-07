@@ -56,6 +56,9 @@ class Conductor
 	public static function mapBPMChanges(song:SwagSong, offset:Float=0) {
 		Conductor.bpmChangeMap = [];
 
+		if (song == null)
+			return;
+
 		var curBPM:Float = song.bpm;
 		var totalSteps:Int = 0;
 		var totalPos:Float = 0;
@@ -94,18 +97,8 @@ class Conductor
 	{
 		Conductor.jackLimit = -1;
 		Conductor.bpm = newBpm;
-		Conductor.crochet = calculateCrochet(bpm);
-		Conductor.stepCrochet = crochet / 4;
-	}
-
-	public static function getBeatSinceChange(time:Float):Float {
-		var lastBPMChange = getBPMFromSeconds(time);
-		return (time-lastBPMChange.songTime) / (lastBPMChange.stepCrochet*4);
-	}
-
-	public static function getCrotchetAtTime(time:Float):Float {
-		var lastChange = getBPMFromSeconds(time);
-		return lastChange.stepCrochet*4;
+		Conductor.crochet = Conductor.calculateCrochet(newBpm);
+		Conductor.stepCrochet = Conductor.calculateStepCrochet(newBpm);
 	}
 
 	public static function getBPMFromSeconds(time:Float):BPMChangeEvent {
@@ -149,14 +142,14 @@ class Conductor
 		return lastChange.stepTime + (time - lastChange.songTime) / lastChange.stepCrochet;
 	}
 
+	public inline static function getBeat(time:Float)
+		return getStep(time) * 0.25;
+
 	public inline static function getStepRounded(time:Float):Int
 		return Math.floor(getStep(time));
 	
 	public inline static function getBeatRounded(time:Float):Int
-		return Math.floor(getStepRounded(time) * 0.25);
-
-	public inline static function getBeat(time:Float)
-		return getStep(time) * 0.25;
+		return Math.floor(getBeat(time));
 
 	public static function stepToSeconds(step:Float):Float {
 		var lastChange = getBPMFromStep(step);
@@ -165,6 +158,16 @@ class Conductor
 
 	public inline static function stepToMs(step:Float):Float {
 		return stepToSeconds(step) * 1000;
+	}
+
+	public static function getBeatSinceChange(time:Float):Float {
+		var lastBPMChange = getBPMFromSeconds(time);
+		return (time-lastBPMChange.songTime) / (lastBPMChange.stepCrochet*4);
+	}
+
+	public static function getCrotchetAtTime(time:Float):Float {
+		var lastChange = getBPMFromSeconds(time);
+		return lastChange.stepCrochet*4;
 	}
 
 	////

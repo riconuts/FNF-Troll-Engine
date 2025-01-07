@@ -1,6 +1,9 @@
 var tankGround:BGSprite;
-var tankmanRun;
 var boppers = [];
+
+//// Stress
+tankmenGroup = null;
+tankmenArray = [];
 
 function onLoad()
 {
@@ -45,10 +48,9 @@ function onLoad()
 	tankGround = new BGSprite('stages/tank/tankRolling', 300, 300, 0.5, 0.5,['BG tank w lighting'], true);
 	add(tankGround);
 
-	var FlxTypedGroup = getClass("flixel.group.FlxTypedGroup");
-	tankmanRun = new FlxTypedGroup();
-	add(tankmanRun);
-	this.spriteMap.set("tankmanRun", tankmanRun);
+	tankmenGroup = new FlxGroup();
+	this.spriteMap.set("tankmanRun", tankmenGroup);
+	add(tankmenGroup);
 
 	var ground:BGSprite = new BGSprite('stages/tank/tankGround', -420, -150);
 	ground.scale.set(1.15, 1.15);
@@ -70,16 +72,16 @@ var tankAngle:Float = FlxG.random.int(-90, 45);
 
 function update(elapsed)
 {
-	if(!game.inCutscene)
-	{
-		tankAngle += elapsed * tankSpeed;
-		tankGround.angle = tankAngle - 90 + 15;
-		tankGround.x = tankX + 1500 * Math.cos(Math.PI / 180 * (1 * tankAngle + 180));
-		tankGround.y = 1300 + 1100 * Math.sin(Math.PI / 180 * (1 * tankAngle + 180));
-	}
+	tankAngle += elapsed * tankSpeed;
+	tankGround.angle = tankAngle - 90 + 15;
+	tankGround.x = tankX + 1500 * Math.cos(Math.PI / 180 * (1 * tankAngle + 180));
+	tankGround.y = 1300 + 1100 * Math.sin(Math.PI / 180 * (1 * tankAngle + 180));
+	
+	for (guy in tankmenArray)			
+		updateTankmen(guy, elapsed);
 }
 
-function dance(){
+function dance() {
 	for (guy in boppers){
 		guy.dance();
 	}
@@ -88,3 +90,72 @@ function dance(){
 script.set("onSongStart", dance);
 script.set("onBeatHit", dance);
 script.set("onCountdownTick", dance);
+
+////////
+function newTankmen(x:Float, y:Float, isGoingRight:Bool)
+{
+	var spr = new FlxSprite(x, y);
+
+	spr.frames = Paths.getSparrowAtlas('stages/tank/tankmanKilled1');
+	spr.animation.addByPrefix('run', 'tankman running', 24, true);
+	spr.animation.addByPrefix('shot', 'John Shot ' + FlxG.random.int(1, 2), 24, false);
+
+	spr.animation.play('run');
+	spr.animation.curAnim.curFrame = FlxG.random.int(0, spr.animation.curAnim.numFrames - 1);
+
+	spr.flipX = isGoingRight;
+
+	spr.scale.set(0.8, 0.8);
+	spr.updateHitbox();
+	
+	var data = {
+		spr: spr,
+		
+		strumTime: 0,
+		tankSpeed: FlxG.random.float(0.6, 1),
+
+		endingOffset: FlxG.random.float(50, 200)
+	}
+	
+	tankmenArray.push(data);
+	tankmenGroup.add(spr);
+	
+	return data;
+}
+
+function updateTankmen(data, elapsed:Float)
+{
+	var spr = data.spr;
+	var strumTime = data.strumTime;
+
+	spr.visible = !(spr.x >= FlxG.width * 1.2 || spr.x <= FlxG.width * -0.5);
+
+	if (spr.animation.curAnim.name == 'run')
+	{
+		if (spr.flipX)
+		{
+			var endDirection = (FlxG.width * 0.02) - data.endingOffset;
+			spr.x = (endDirection + (Conductor.songPosition - strumTime) * data.tankSpeed);
+		}
+		else
+		{
+			var endDirection:Float = (FlxG.width * 0.74) + data.endingOffset;
+			spr.x = (endDirection - (Conductor.songPosition - strumTime) * data.tankSpeed);
+		}
+	}
+
+	if (Conductor.songPosition > strumTime)
+	{
+		spr.animation.play('shot');
+
+		if (spr.flipX)
+			spr.offset.set(300, 200);			
+	}
+
+	if (spr.animation.curAnim.name == 'shot' && spr.animation.curAnim.curFrame >= spr.animation.curAnim.frames.length - 1)
+	{
+		tankmenGroup.remove(spr);
+		spr.destroy();
+		tankmenArray.remove(data);
+	}
+}

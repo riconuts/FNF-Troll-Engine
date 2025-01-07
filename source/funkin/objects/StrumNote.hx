@@ -164,26 +164,17 @@ class StrumNote extends NoteObject
 		updateZIndex();
 
 		if (animation.name == 'static') {
-			colorSwap.hue = 0;
-			colorSwap.saturation = 0;
-			colorSwap.brightness = 0;
+			colorSwap.setHSB();
 		} 
 		else if (note != null) {
 			// ok now the quants should b fine lol
-			colorSwap.hue = note.colorSwap.hue;
-			colorSwap.saturation = note.colorSwap.saturation;
-			colorSwap.brightness = note.colorSwap.brightness;
+			colorSwap.copyFrom(note.colorSwap);
 		}
 		else if(!isQuant) {
-			var column:Int = column % 4;
-			colorSwap.hue = ClientPrefs.arrowHSV[column][0] / 360;
-			colorSwap.saturation = ClientPrefs.arrowHSV[column][1] / 100;
-			colorSwap.brightness = ClientPrefs.arrowHSV[column][2] / 100;
+			colorSwap.setHSBIntArray(ClientPrefs.arrowHSV[column % 4]);
 		}
 		else {
-			colorSwap.hue =  0;
-			colorSwap.saturation = 0;
-			colorSwap.brightness = 0;
+			colorSwap.setHSB();
 		}
 	}
 

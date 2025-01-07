@@ -2796,7 +2796,7 @@ class ChartingState extends MusicBeatState
 		for (file in ["notetypes", "custom_notetypes"]) {
 			var baseScriptFile:String = '$file/$notetype';
 		#else
-		var baseScriptFile:String = 'notetypes/$notetype';
+			var baseScriptFile:String = 'notetypes/$notetype';
 		#end
 			var exts = Paths.HSCRIPT_EXTENSIONS; // TODO: maybe FunkinScript.extensions, FunkinScript.hscriptExtensions and FunkinScript.luaExtensions??
 			for (ext in exts)
