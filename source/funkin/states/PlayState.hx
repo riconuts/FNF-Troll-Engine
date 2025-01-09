@@ -3740,6 +3740,16 @@ class PlayState extends MusicBeatState
 
 	function noteMissPress(direction:Int = 1, field:PlayField):Void //You pressed a key when there was no notes to press for this key
 	{
+		if (!inst.playing) {
+			if (field != null) {
+				for (char in field.characters) 
+					char.missPress(direction, field);
+			}
+
+			callOnScripts('noteMissPress', [direction]);
+			return;
+		}
+
 		health -= 0.05 * healthLoss;
 		
 		if (instakillOnMiss)
