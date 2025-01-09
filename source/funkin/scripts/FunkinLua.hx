@@ -191,7 +191,9 @@ class FunkinLua extends FunkinScript
 			if (!gonnaClose){
 				if (printMessage == true)
 					luaTrace('Stopping lua script: ' + scriptName);
-			
+				else
+					trace('Stopping lua script $scriptName');
+
 				PlayState.instance.scriptsToClose.push(this);
 				gonnaClose = true;
 			}
@@ -842,15 +844,12 @@ class FunkinLua extends FunkinScript
 			return true;
 		});
 		addCallback("exitSong", function(?skipTransition:Bool = false) {
-			if(skipTransition)
-			{
+			if (skipTransition) {
 				FlxTransitionableState.skipNextTransIn = true;
 				FlxTransitionableState.skipNextTransOut = true;
 			}
 
-			PlayState.instance.cancelMusicFadeTween();
-
-			if(PlayState.isStoryMode)
+			if (PlayState.isStoryMode)
 				MusicBeatState.switchState(new StoryMenuState());
 			else
 				MusicBeatState.switchState(new FreeplayState());

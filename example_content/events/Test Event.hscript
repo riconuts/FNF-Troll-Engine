@@ -21,3 +21,7 @@ function onPush(eventNote){
 function onTrigger(value1:Dynamic, value2:Dynamic, time:Float){
 	trace("Event was triggered with values " + value1 + " and " + value2);
 }
+
+function update(elapsed:Float) {
+	// Called on every PlayState update cycle
+}

@@ -1,121 +1,56 @@
 var animationNotes:Array<Dynamic> = [];
 
-function onLoad(char:Character){
-    char.skipDance = true;
-    char.playAnim("shoot1");
+function onLoad() 
+{	
     var noteData:Array<SwagSection> = Song.loadFromJson('picospeaker', Paths.formatToSongPath(PlayState.SONG.song)).notes;
     for (section in noteData) {
         for (songNotes in section.sectionNotes) {
             animationNotes.push(songNotes);
         }
     }
+	
     animationNotes.sort((a, b) -> Std.int(a[0] - b[0]));
 }
 
-function onUpdate(elapsed:Float){
-    while(animationNotes.length > 0 && Conductor.songPosition > animationNotes[0][0])
-    {
-        var noteData:Int = 1;
-        if(animationNotes[0][1] > 2) noteData = 3;
-
-        noteData += FlxG.random.int(0, 1);
-        this.playAnim('shoot' + noteData, true);
-        animationNotes.shift();
-    }
-    if(this.animation.curAnim.finished) this.playAnim(this.animation.curAnim.name, false, false, this.animation.curAnim.frames.length - 3);
-        
+function setupCharacter() {
+	super();
+    this.skipDance = true;
+    this.playAnim("shoot1-loop");
 }
-
-////
-
-function newTankmen(x:Float, y:Float, isGoingRight:Bool)
-{
-	var spr = new FlxSprite(x, y);
-
-	spr.frames = Paths.getSparrowAtlas('stages/tank/tankmanKilled1');
-	spr.animation.addByPrefix('run', 'tankman running', 24, true);
-	spr.animation.addByPrefix('shot', 'John Shot ' + FlxG.random.int(1, 2), 24, false);
-
-	spr.animation.play('run');
-	spr.animation.curAnim.curFrame = FlxG.random.int(0, spr.animation.curAnim.numFrames - 1);
-
-	spr.flipX = isGoingRight;
-
-	spr.scale.set(0.8, 0.8);
-	spr.updateHitbox();
-	
-	return {
-		spr: spr,
-		
-		strumTime: 0,
-		tankSpeed: FlxG.random.float(0.6, 1),
-
-		endingOffset: FlxG.random.float(50, 200)
-	};
-}
-
-var tankGroup;
-var tankArray;
 
 function onCreatePost()
 {
-	if (!game.stage.spriteMap.exists("tankmanRun"))
+	var stageScript = game.stage.stageScript;
+	if (stageScript == null) {
+		trace("Couldn't get Stage Script");
 		return;
+	}
 		
-	tankGroup = game.stage.spriteMap.get("tankmanRun");
-	tankArray = [];
+	var newTankmen = stageScript.get("newTankmen");
+	if (newTankmen == null) {
+		trace("Couldn't get newTankmen function");
+		return;
+	}
 	
-	for (note in animationNotes)
-	{
+	for (note in animationNotes) {
 		if (!FlxG.random.bool(16)) 
 			continue;
 		
 		var tankGuy = newTankmen(500, FlxG.random.int(250, 300), note[1] < 2);
 		tankGuy.strumTime = note[0];
-		
-		tankArray.push(tankGuy);
-		tankGroup.add(tankGuy.spr);
 	}
-	
-	script.set("update", (elapsed)->{
-		for (guy in tankArray)			
-			updateTankmen(guy, elapsed);
-	});
 }
 
-function updateTankmen(data, elapsed:Float)
-{
-	var spr = data.spr;
-	var strumTime = data.strumTime;
+function onUpdate(elapsed:Float){
+	while (animationNotes.length > 0 && Conductor.songPosition > animationNotes[0][0]) {
+		var noteData:Int = 1;
+		if (animationNotes[0][1] > 2) noteData = 3;
 
-	spr.visible = !(spr.x >= FlxG.width * 1.2 || spr.x <= FlxG.width * -0.5);
-
-	if (spr.animation.curAnim.name == 'run')
-	{
-		if (spr.flipX)
-		{
-			var endDirection = (FlxG.width * 0.02) - data.endingOffset;
-			spr.x = (endDirection + (Conductor.songPosition - strumTime) * data.tankSpeed);
-		}
-		else
-		{
-			var endDirection:Float = (FlxG.width * 0.74) + data.endingOffset;
-			spr.x = (endDirection - (Conductor.songPosition - strumTime) * data.tankSpeed);
-		}
+		noteData += FlxG.random.int(0, 1);
+		this.playAnim('shoot' + noteData, true);
+		animationNotes.shift();
 	}
-
-	if (Conductor.songPosition > strumTime)
-	{
-		spr.animation.play('shot');
-
-		if (spr.flipX)
-			spr.offset.set(300, 200);			
-	}
-
-	if (spr.animation.curAnim.name == 'shot' && spr.animation.curAnim.curFrame >= spr.animation.curAnim.frames.length - 1)
-	{
-		tankGroup.remove(spr);
-		spr.destroy();
-		tankArray.remove(data);
-	}
+	
+	if (this.animation.finished) 
+		this.playAnim(this.animation.curAnim.name, false, false, this.animation.curAnim.frames.length - 3);   
 }

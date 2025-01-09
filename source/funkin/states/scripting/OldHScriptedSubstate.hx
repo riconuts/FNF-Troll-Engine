@@ -71,7 +71,7 @@ class OldHScriptedSubstate extends MusicBeatSubstate
 		var script:Null<FunkinHScript> = null;
 
 		if (scriptPath != null){
-			script = FunkinHScript.fromFile(scriptPath, scriptPath, Globals.variables, false);			
+			script = FunkinHScript.fromFile(scriptPath, scriptPath, null, false);			
 		}else{
 			trace('Script file "$fileName" not found!');
 		}

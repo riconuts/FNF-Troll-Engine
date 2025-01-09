@@ -64,6 +64,8 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return super.set_cameras(to);
 	}
 
+
+	public var tracks:Array<FlxSound> = []; // tracks managed by this field
 	public var playerId:Int = 0; // used to calculate the base position of the strums
 
 	public var spawnTime:Float = 1750; // spawn time for notes
@@ -144,8 +146,9 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	}
 	
 	public var noteHitCallback:NoteCallback; // function that gets called when the note is hit. goodNoteHit and opponentNoteHit in playstate for eg
-	public var holdPressCallback:NoteCallback; // function that gets called when a hold is stepped on. Only really used for calling script events.
+	public var holdPressCallback:NoteCallback; // function that gets called when a hold is stepped on. Only really used for calling script events. Return 'false' to not do hold logic
 	public var holdReleaseCallback:NoteCallback; // function that gets called when a hold is released. Only really used for calling script events.
+	public var holdStepCallback:NoteCallback; // function that gets called for every 'step' that a hold is pressed for.
 
 	public var grpNoteSplashes:FlxTypedGroup<NoteSplash>; // notesplashes
 	public var strumAttachments:FlxTypedGroup<NoteObject>; // things that get "attached" to the receptors. custom splashes, etc.
@@ -166,8 +169,6 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	public function new(modMgr:ModManager){
 		super();
 		this.modManager = modMgr;
-
-		keyCount = PlayState.keyCount;
 
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 		add(grpNoteSplashes);
@@ -230,6 +231,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	public function removeNote(daNote:Note){
 		daNote.active = false;
 		daNote.visible = false;
+		daNote.kill();
 
 		noteRemoved.dispatch(daNote, this);
 
@@ -324,11 +326,14 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		#else
 		noteList.sort((a, b) -> Std.int(b.strumTime - a.strumTime)); // so lowPriority actually works (even though i hate it lol!)
 		#end
+		var recentHold:Null<Note> = null;
+
 		while (noteList.length > 0)
 		{
 			var note:Note = noteList.pop();
 			if (note.wasGoodHit && note.holdType == HEAD && note.holdingTime < note.sustainLength)
-				return note; // for the sake of ghost-tapping shit
+				recentHold = note; // for the sake of ghost-tapping shit.
+				// returned lower so that holds dont interrupt hitting other notes as, even though that'd make sense, it also feels like shit to play on some songs i.e Bopeebo
 			else{
 				if (note.wasGoodHit)
 					continue;
@@ -342,7 +347,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 			}
 		}
 
-		return null;
+		return recentHold;
 	}
 
 	// generates the receptors
@@ -490,9 +495,15 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 						}
 
 						var receptor = strumNotes[daNote.column];
+						var oldSteps:Int = Math.floor(daNote.holdingTime / Conductor.stepCrotchet);
 						var lastTime:Float = daNote.holdingTime;
 						daNote.holdingTime = Conductor.songPosition - daNote.strumTime;
-
+						if (daNote.holdingTime > daNote.sustainLength)
+							daNote.holdingTime = daNote.sustainLength;
+						var currentSteps:Int = Math.floor(daNote.holdingTime / Conductor.stepCrotchet);
+						if(oldSteps < currentSteps)
+							if(holdStepCallback != null)
+								holdStepCallback(daNote, this);
 						holdUpdated.dispatch(daNote, this, daNote.holdingTime - lastTime);
 
 						if(isHeld && !daNote.isRoll){
@@ -576,8 +587,9 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		if (inControl && autoPlayed)
 		{
 			for(i in 0...keyCount){
-				for (daNote in getTapNotes(i, (note:Note) -> !note.wasGoodHit && !note.tooLate && !note.ignoreNote && !note.hitCausesMiss)){
+				for (daNote in getTapNotes(i, (note:Note) -> !note.wasGoodHit && !note.ignoreNote && !note.hitCausesMiss)){
 					var hitDiff = Conductor.songPosition - daNote.strumTime;
+					daNote.tooLate = false;
 					if (isPlayer && (hitDiff + ClientPrefs.ratingOffset) >= (-5 * (Wife3.timeScale>1 ? 1 : Wife3.timeScale)) || hitDiff >= 0){
 						daNote.hitResult.judgment = judgeManager.useEpics ? TIER5 : TIER4;
 						daNote.hitResult.hitDiff = (hitDiff > -5) ? -5 : hitDiff; 

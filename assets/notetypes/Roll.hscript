@@ -1,5 +1,5 @@
 function setupNote(note:Note){
-    note.maxReleaseTime = 0.35;
+    note.maxReleaseTime = 0.5;
     note.isRoll = true;
     if(note.isSustainNote){
         note.texture = 'ROLL_assets';

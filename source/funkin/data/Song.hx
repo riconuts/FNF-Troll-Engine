@@ -49,13 +49,21 @@ typedef SwagSong = {
 	@:optional var offset:Float; // Offsets the chart
 }
 
+typedef EventNote = {
+	strumTime:Float,
+	event:String,
+	value1:String,
+	value2:String
+}
+
 typedef JsonSong = {
 	> SwagSong,
 
-	var ?player3:String; // old psych
-	var ?extraTracks:Array<String>; // old te
-	var ?needsVoices:Bool; // fnf
-	var ?mania:Int; // vs shaggy
+	@:optional var player3:String; // old psych
+	@:optional var extraTracks:Array<String>; // old te
+	@:optional var needsVoices:Bool; // fnf
+	@:optional var mania:Int; // vs shaggy
+	@:optional var keyCount:Int;
 }
 
 typedef SongTracks = {
@@ -151,7 +159,7 @@ class Song
 				default:
 					var formatInfo:FormatData = FormatDetector.getFormatData(fileFormat);
 					var chart:moonchart.formats.BasicFormat<{}, {}>;
-					chart = Type.createInstance(formatInfo.handler, []).fromFile(filePath);
+					chart = cast Type.createInstance(formatInfo.handler, []).fromFile(filePath);
 
 					if (chart.formatMeta.supportsDiffs || chart.diffs.length > 0){
 						for (diff in chart.diffs)
@@ -358,8 +366,7 @@ class Song
 		if (songJson.hudSkin == null)
 			songJson.hudSkin = 'default';
 
-		trace(swagJson.keyCount, songJson.mania);
-		if (null == swagJson.keyCount) {
+		if (songJson.keyCount == null) {
 			swagJson.keyCount = switch(songJson.mania) {
 				default: 4;
 				case 1: 6;
@@ -462,9 +469,44 @@ class Song
 
 			////
 			swagJson.tracks = {inst: instTracks, player: playerTracks, opponent: opponentTracks};
+			trace(swagJson.tracks);
 		}
 
 		return swagJson;
+	}
+
+	public static function getEventNotes(rawEventsData:Array<Array<Dynamic>>, ?resultArray:Array<EventNote>):Array<EventNote>
+	{
+		if (resultArray==null) resultArray = [];
+		
+		var eventsData:Array<Array<Dynamic>> = [];
+		for (event in rawEventsData) {
+			var last = eventsData[eventsData.length-1];
+			
+			if (last != null && Math.abs(last[0] - event[0]) <= Conductor.jackLimit){
+				var fuck:Array<Array<Dynamic>> = event[1];
+				for (shit in fuck) eventsData[eventsData.length - 1][1].push(shit);
+			}else
+				eventsData.push(event);
+		}
+
+		for (event in eventsData) //Event Notes
+		{
+			var eventTime:Float = event[0] + ClientPrefs.noteOffset;
+			var subEvents:Array<Array<Dynamic>> = event[1];
+
+			for (eventData in subEvents) {
+				var eventNote:EventNote = {
+					strumTime: eventTime,
+					event: eventData[0],
+					value1: eventData[1],
+					value2: eventData[2]
+				};
+				resultArray.push(eventNote);
+			}
+		}
+
+		return resultArray;
 	}
 
 	static public function loadSong(toPlay:SongMetadata, ?difficulty:String, ?difficultyIdx:Int = 1) {
@@ -475,7 +517,14 @@ class Song
 
 		var rawDifficulty:String = difficulty;
 
-		if (difficulty == null || difficulty == "" || difficulty == "normal"){
+		if (difficulty == null || difficulty == "") {
+			if (toPlay.charts.contains("normal"))
+				difficulty = "normal";
+			else
+				difficulty = toPlay.charts[0];
+		}
+		
+		if (difficulty == "normal") {
 			difficulty = 'normal';
 			diffSuffix = '';
 		}else{
@@ -489,68 +538,86 @@ class Song
 		#if (moonchart)
 		var SONG:Null<SwagSong> = null;
 
-		var isVSlice:Bool = false;
-		if (toPlay.folder != ""){
-			var sdfghjk = Paths.mods(toPlay.folder + '/songs/$songLowercase/$songLowercase');
-			var chartsFilePath = '$sdfghjk-chart.json';
-			var metadataPath = '$sdfghjk-metadata.json';
+		inline function findVSlice():Bool {
+			// less strict v-slice format detection
+			var sowy = 'songs/$songLowercase/$songLowercase';
+			var basePath:String;
+			
+			if (toPlay.folder == "")
+				basePath = Paths.getPreloadPath(sowy);
+			else
+				basePath = Paths.mods(toPlay.folder + '/' + sowy);
 
+			var chartsFilePath = '$basePath-chart.json';
+			var metadataPath = '$basePath-metadata.json';
+
+			var found:Bool = false;
 			if (Paths.exists(chartsFilePath) && Paths.exists(metadataPath)) {
 				var chart = new moonchart.formats.fnf.FNFVSlice().fromFile(chartsFilePath, metadataPath);
-				if (chart.diffs.contains(rawDifficulty)){
-					trace("CONVERTING FROM VSLICE AAAAAAAAAAAAAAAGGHGD");
-					isVSlice = true;
-
+				if (chart.diffs.contains(rawDifficulty)) {
+					trace("CONVERTING FROM VSLICE");
+					
 					var converted = new SupportedFormat().fromFormat(chart, rawDifficulty);
 					var chart:JsonSong = cast converted.data.song;
 					chart.path = chartsFilePath;
 					chart.song = songLowercase;
 					chart.tracks = null;
 					SONG = onLoadJson(chart);
-
+					found = true;
 				}else{
 					trace('VSLICE FILES DO NOT CONTAIN DIFFICULTY: $rawDifficulty');
 				}
 			}
+
+			return found;
 		}
 		
-		if (!isVSlice) {
+		if (!findVSlice()) {
+			// TODO: scan through the song folder and look for the first thing that has a supported extension (if json then check if it has diffSuffix cus FNF formats!!)
+			// Or dont since this current method lets you do a dumb thing AKA have 2 diff chart formats in a folder LOL
+
+			var files:Array<String> = [];
+			if (diffSuffix != '') files.push(songLowercase + diffSuffix);
+			files.push(songLowercase);
+
 			for (ext in moonchartExtensions) {
-				var files:Array<String> = [songLowercase + diffSuffix, songLowercase];
-				for (idx in 0...files.length){
-					var input = files[idx];
+				for (input in files) {
 					var path:String = Paths.formatToSongPath(songLowercase) + '/' + Paths.formatToSongPath(input) + '.' + ext;
 					var filePath:String = Paths.getPath("songs/" + path);
 					var fileFormat:Format = findFormat([filePath]);
+
 					#if PE_MOD_COMPATIBILITY
 					if (fileFormat == null){
 						filePath = Paths.getPath("data/" + path);
 						fileFormat = findFormat([filePath]);
 					}
 					#end
-					if (fileFormat != null){
-						var format:Format = fileFormat;
-						var formatInfo:Null<FormatData> = FormatDetector.getFormatData(format);
-						SONG = switch(format){
-							case FNF_LEGACY_PSYCH | FNF_LEGACY | "FNF_TROLL":
-								Song.loadFromJson(songLowercase + diffSuffix, songLowercase);
-								
-							default:
-								trace('Converting from format $format!');
 
-								var chart:moonchart.formats.BasicFormat<{}, {}>;
-								chart = Type.createInstance(formatInfo.handler, []);
-								chart = chart.fromFile(filePath);
-								if(chart.formatMeta.supportsDiffs && !chart.diffs.contains(rawDifficulty))continue;
+					if (fileFormat == null) continue;
+					var formatInfo:Null<FormatData> = FormatDetector.getFormatData(fileFormat);
 
-								var converted = new SupportedFormat().fromFormat(chart, rawDifficulty);
-								var chart:JsonSong = cast converted.data.song;
-								chart.path = filePath;
-								chart.song = songLowercase;
-								onLoadJson(chart);
-						}
-						break;
+					SONG = switch(fileFormat) {
+						case FNF_LEGACY_PSYCH | FNF_LEGACY | "FNF_TROLL":
+							Song.loadFromJson(songLowercase + diffSuffix, songLowercase);
+							
+						default:
+							trace('Converting from format $fileFormat!');
+
+							var chart:moonchart.formats.BasicFormat<{}, {}>;
+							chart = cast Type.createInstance(formatInfo.handler, []);
+							chart = chart.fromFile(filePath);
+
+							if (chart.formatMeta.supportsDiffs && !chart.diffs.contains(rawDifficulty))
+								continue;
+
+							var converted = new SupportedFormat().fromFormat(chart, rawDifficulty);
+							var chart:JsonSong = cast converted.data.song;
+							chart.path = filePath;
+							chart.song = songLowercase;
+							onLoadJson(chart);
 					}
+
+					break;
 				}
 				if (SONG != null)
 					break;

@@ -11,13 +11,6 @@ import funkin.data.JudgmentManager.Judgment;
 
 using StringTools;
 
-typedef EventNote = {
-	strumTime:Float,
-	event:String,
-	value1:String,
-	value2:String
-}
-
 typedef HitResult = {
 	judgment: Judgment,
 	hitDiff: Float
@@ -172,7 +165,7 @@ class Note extends NoteObject
 	public var blockHit:Bool = false; // whether you can hit this note or not
 	public var hitCausesMiss:Bool = false; // hitting this causes a miss
 	public var missHealth:Float = 0; // damage when hitCausesMiss = true and you hit this note
-	public var ratingDisabled:Bool = false; // disables judging this note
+	public var ratingDisabled:Bool = false; // hitting or missing this note shouldn't affect stats, this doesn't prevent sing/miss animations and sounds from playing! 
 	public var hitsoundDisabled:Bool = false; // hitting this does not cause a hitsound when user turns on hitsounds
 
 	public var gfNote:Bool = false; // gf sings this note (pushes gf into characters array when the note is hit)
@@ -196,7 +189,7 @@ class Note extends NoteObject
 	public var maxReleaseTime:Float = 0.25;
 
 	#if PE_MOD_COMPATIBILITY
-	public var lowPriority:Bool = false; // Shadowmario's shitty workaround for really bad mine placement, yet still no *real* hitbox customization lol! Only used when PE Mod Compat is enabled in project.xml
+	public var lowPriority:Bool = false; // John Psych Engine's shitty workaround for really bad mine placement, yet still no *real* hitbox customization lol! Only used when PE Mod Compat is enabled in project.xml
 	#end
 
 	/** Which characters sing this note, if it's blank then the playfield's characters are used **/
