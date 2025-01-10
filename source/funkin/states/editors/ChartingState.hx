@@ -169,7 +169,6 @@ class ChartingState extends MusicBeatState
 	
 	var currentSongName:String;
 	var songLength:Float = 0.0;
-	var tempBpm:Float = 0;
 
 	var leftIcon:HealthIcon;
 	var rightIcon:HealthIcon;
@@ -303,7 +302,6 @@ class ChartingState extends MusicBeatState
 		*/
 
 		currentSongName = Paths.formatToSongPath(_song.song);
-		tempBpm = _song.bpm;
 		
 		MusicBeatState.stopMenuMusic();
 
@@ -1687,9 +1685,9 @@ class ChartingState extends MusicBeatState
 			}
 			else if (wname == 'song_bpm')
 			{
-				tempBpm = nums.value;
+				_song.bpm = nums.value;
 				Conductor.mapBPMChanges(_song);
-				Conductor.changeBPM(nums.value);
+				updateGrid();
 			}
 			else if (wname == 'note_susLength')
 			{
@@ -1703,6 +1701,7 @@ class ChartingState extends MusicBeatState
 			else if (wname == 'section_bpm')
 			{
 				_song.notes[curSec].bpm = nums.value;
+				Conductor.mapBPMChanges(_song);
 				updateGrid();
 			}
 		}
@@ -1966,8 +1965,6 @@ class ChartingState extends MusicBeatState
 					typebox.hasFocus = false;
 			}
 		}
-
-		_song.bpm = tempBpm;
 		
 		if (inst.playing && inst.time == Conductor.lastSongPos)
 			lastMixTimer += elapsed * 1000;
