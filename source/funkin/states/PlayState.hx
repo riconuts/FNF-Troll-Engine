@@ -2422,7 +2422,19 @@ class PlayState extends MusicBeatState
 	var lastMixTimer2:Float = 0;
 	var prevNoteCount:Int = 0;
 
-	var svIndex:Int =0;
+	private var svIndex:Int =0;
+	private inline function updateVisualPosition() {
+		var event:SpeedEvent = speedChanges[svIndex];
+		if (svIndex < speedChanges.length - 1){
+			while (speedChanges[svIndex + 1] != null && speedChanges[svIndex + 1].startTime <= Conductor.songPosition){
+				event = speedChanges[svIndex + 1];
+				svIndex++;
+			}
+		}
+		Conductor.visualPosition = getTimeFromSV(Conductor.songPosition, event);
+		FlxG.watch.addQuick("visualPos", Conductor.visualPosition);
+	}
+
 	override public function update(elapsed:Float)
 	{
 		if (paused){
@@ -2621,20 +2633,10 @@ class PlayState extends MusicBeatState
 		}
 
 		////
-		var event:SpeedEvent = speedChanges[svIndex];
-		if (svIndex < speedChanges.length - 1){
-			while (speedChanges[svIndex + 1] != null && speedChanges[svIndex + 1].startTime <= Conductor.songPosition){
-				event = speedChanges[svIndex + 1];
-				svIndex++;
-			}
-		}
-		Conductor.visualPosition = getTimeFromSV(Conductor.songPosition, event);
-		FlxG.watch.addQuick("visualPos", Conductor.visualPosition);
-
-		checkEventNote();
-
 		super.update(elapsed);
+		updateVisualPosition();
 		danceCharacters(); // Update characters dancing
+		checkEventNote();
 		modManager.update(elapsed, curDecBeat, curDecStep);
 
 		if (generatedMusic && !isDead) {
