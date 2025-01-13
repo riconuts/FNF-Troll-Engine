@@ -195,7 +195,7 @@ class Main extends Sprite
 		#if flash
 		return flash.Lib.getTimer();
 		#elseif ((js && !nodejs) || electron)
-		return Browser.window.performance.now();
+		return js.Browser.window.performance.now();
 		#elseif sys
 		return Sys.time() * 1000;
 		#elseif (lime_cffi && !macro)
