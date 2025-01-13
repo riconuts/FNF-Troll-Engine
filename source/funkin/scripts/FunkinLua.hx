@@ -708,7 +708,7 @@ class FunkinLua extends FunkinScript
 
 		//stupid bietch ass functions
 		addCallback("addScore", function(value:Int = 0) {
-			PlayState.instance.songScore += value;
+			PlayState.instance.stats.score += value;
 			PlayState.instance.RecalculateRating();
 		});
 		addCallback("addMisses", function(value:Int = 0) {
