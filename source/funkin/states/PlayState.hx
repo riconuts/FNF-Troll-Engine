@@ -2526,12 +2526,14 @@ class PlayState extends MusicBeatState
 		////
 		if (startedCountdown && !paused) {
 
-			if (startingSong || !inst.playing || ClientPrefs.songSyncMode == 'Psych 1.0')
+			if (startingSong) {
 				Conductor.songPosition += elapsed * 1000;
-
-			if (Conductor.songPosition >= 0) {
-				if (startingSong)
+				if (Conductor.songPosition >= 0)
 					startSong(0);
+			}
+			else if (Conductor.songPosition >= 0) 
+			{
+				var instTime = inst.time;
 
 				switch(ClientPrefs.songSyncMode ){
 					case "Direct":
@@ -2546,10 +2548,12 @@ class PlayState extends MusicBeatState
 					case "Psych 1.0":
 						// Psych 1.0 method
 						// Since this works better for Rico so might work better for some other machines too
+						Conductor.songPosition += elapsed * 1000;
 						Conductor.songPosition = FlxMath.lerp(inst.time, Conductor.songPosition, Math.exp(-elapsed * 5));
 						var timeDiff:Float = Math.abs(inst.time - Conductor.songPosition);
 						if (timeDiff > 1000)
 							Conductor.songPosition = Conductor.songPosition + 1000 * FlxMath.signOf(timeDiff);
+					
 					case "Last Mix":
 						// Stepmania method
 						// Works for most people it seems??
@@ -2576,9 +2580,6 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
-		
-		FlxG.watch.addQuick("beatShit", curBeat);
-		FlxG.watch.addQuick("stepShit", curStep);		
 		
 		if (!endingSong){
 			//// time travel
