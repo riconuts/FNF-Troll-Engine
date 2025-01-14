@@ -917,10 +917,12 @@ class PlayState extends MusicBeatState
 			scoreTxt = (cast hud).scoreTxt;
 		
 		#end
+		
 		//// Generate playfields so you can actually, well, play the game
+		#if ALLOW_DEPRECATION
 		callOnScripts("prePlayfieldCreation"); // backwards compat
 		// TODO: add deprecation messages to function callbacks somehow
-
+		#end
 		callOnScripts("onPlayfieldCreation"); // you should use this
 		playfields.cameras = [camHUD];
 		notes.cameras = [camHUD];
@@ -945,7 +947,9 @@ class PlayState extends MusicBeatState
 			dadField.noteHitCallback = playOpponent ? goodNoteHit : opponentNoteHit;
 		}
 		
+		#if ALLOW_DEPRECATION
 		callOnScripts("postPlayfieldCreation"); // backwards compat
+		#end
 		callOnScripts("onPlayfieldCreationPost");
 
 		////
@@ -989,19 +993,7 @@ class PlayState extends MusicBeatState
 
 		//// STAGE LUA SCRIPTS
 		var file = Paths.getLuaPath('stages/$curStage');
-		if(file != null)
-			createLua(file);
-		
-/* 		var baseFile:String = 'stages/$curStage.lua';
-		for (file in [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)])
-		{
-			if (!Paths.exists(file))
-				continue;
-
-			createLua(file);
-
-			break;
-		} */
+		if (file != null) createLua(file);
 
 		// SONG SPECIFIC LUA SCRIPTS
 		var foldersToCheck:Array<String> = Paths.getFolders('songs/$songName');
