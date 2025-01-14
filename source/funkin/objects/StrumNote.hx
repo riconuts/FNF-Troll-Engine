@@ -15,9 +15,9 @@ using StringTools;
 
 class StrumNote extends NoteObject
 {
-	static var staticAnimNames = ['arrowLEFT', 'arrowDOWN', 'arrowUP', 'arrowRIGHT']; 
-	static var pressAnimNames = ["left press", "down press", "up press", "right press"];
-	static var confirmAnimNames = ["left confirm", "down confirm", "up confirm", "right confirm"];
+	public static var defaultStaticAnimNames:Array<String> = null; 
+	public static var defaultPressAnimNames:Array<String> = null;
+	public static var defaultConfirmAnimNames:Array<String> = null;
 
 	////
 	public var texture(default, set):String = null;
@@ -121,10 +121,9 @@ class StrumNote extends NoteObject
 
 		frames = Paths.getSparrowAtlas(textureKey);
 
-		var column:Int = column % staticAnimNames.length;
-		animation.addByPrefix('static', staticAnimNames[column], 24, false);
-		animation.addByPrefix('pressed', pressAnimNames[column], 24, false);
-		animation.addByPrefix('confirm', confirmAnimNames[column], 24, false);
+		animation.addByPrefix('static', defaultStaticAnimNames[column], 24, false);
+		animation.addByPrefix('pressed', defaultPressAnimNames[column], 24, false);
+		animation.addByPrefix('confirm', defaultConfirmAnimNames[column], 24, false);
 
 		playAnim(lastAnim, true);
 

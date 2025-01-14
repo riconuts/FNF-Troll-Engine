@@ -47,7 +47,12 @@ class Note extends NoteObject
 	public static var swagWidth(default, set):Float = 160 * spriteScale;
 	public static var halfWidth(default, null):Float = swagWidth * 0.5;
 
-	public static var colArray:Array<String> = ['purple', 'blue', 'green', 'red'];
+	private static var colArray:Array<String> = ['purple', 'blue', 'green', 'red'];
+
+	public static var defaultNoteAnimNames:Array<String> = null;
+	public static var defaultHoldAnimNames:Array<String> = null;
+	public static var defaultTailAnimNames:Array<String> = null;
+
 	public static var quants:Array<Int> = [
 		4, // quarter note
 		8, // eight
@@ -578,24 +583,12 @@ class Note extends NoteObject
 	}
 
 	function _loadIndNoteAnims() {
-		var colorName:String = colArray[column % colArray.length];		
-		var animName:String;
-		var animFrames:Array<Int>;
-
-		switch (holdType) {
-			default:	
-				animName = colorName+'Scroll';
-				animFrames = [column + 4];
-
-			case PART:
-				animName = colorName+'hold';
-				animFrames = [column];
- 
-			case END:
-				animName = colorName+'holdend';
-				animFrames = [column + 4];
-		} 
- 
+		final animName:String = 'default';
+		final animFrames:Array<Int> = switch (holdType) {
+			default: [column + 4];
+			case PART: [column];
+			case END: [column + 4];
+		}
 		animation.add(animName, animFrames);
 		animation.play(animName, true);
 
@@ -623,30 +616,17 @@ class Note extends NoteObject
 			_loadNoteAnims();
 	}
 
-	function _loadNoteAnims() { 
-		var colorName:String = colArray[column % colArray.length];		
-		var animName:String;
-		var animPrefix:String;
+	function _loadNoteAnims() {		
+		final animName:String = 'default';
+		final animPrefix:String = switch (holdType) {
+			default: defaultNoteAnimNames[column];
+			case PART: defaultHoldAnimNames[column];
+			case END: defaultTailAnimNames[column];
+		}
 
-		switch (holdType) {
-			default:	
-				animName = colorName+'Scroll';
-				animPrefix = colorName+'0';
- 
-			case PART:
-				animName = colorName+'hold';
-				animPrefix = '$colorName hold piece';
-				
- 
-			case END:
-				animName = colorName+'holdend';
-				animPrefix = '$colorName hold end';
-				if (colorName == "purple")
-					animPrefix ='pruple end hold'; // ?????
-				// this is autistic wtf
-				
-		} 
- 
+		if (column == 0) animation.addByPrefix(animName, 'pruple end hold'); // ?????
+		// this is autistic wtf
+
 		animation.addByPrefix(animName, animPrefix);
 		animation.play(animName, true);
  

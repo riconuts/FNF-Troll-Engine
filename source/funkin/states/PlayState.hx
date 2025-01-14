@@ -659,6 +659,12 @@ class PlayState extends MusicBeatState
 		}
 		
 		PlayState.keyCount = SONG.keyCount;
+		StrumNote.defaultStaticAnimNames = ['arrowLEFT', 'arrowDOWN', 'arrowUP', 'arrowRIGHT']; 
+		StrumNote.defaultPressAnimNames = ["left press", "down press", "up press", "right press"];
+		StrumNote.defaultConfirmAnimNames = ["left confirm", "down confirm", "up confirm", "right confirm"];
+		Note.defaultNoteAnimNames = ['purple0', 'blue0', 'green0', 'red0'];
+		Note.defaultHoldAnimNames = ['purple hold piece', 'blue hold piece', 'green hold piece', 'red hold piece'];
+		Note.defaultTailAnimNames = ['purple hold end', 'blue hold end', 'green hold end', 'red hold end'];
 		Note.spriteScale = (4 / keyCount) * 0.7;
 		Note.swagWidth = Note.spriteScale * 160;
 		/**
