@@ -2799,11 +2799,11 @@ class PlayState extends MusicBeatState
 		if (name.startsWith(oldChar.curCharacter) || oldChar.curCharacter.startsWith(name)) {
 			if (oldChar.animation!=null && oldChar.animation.curAnim!=null) {
 				var anim:String = oldChar.animation.curAnim.name;
-				var frame:Int = oldChar.animation.curAnim.curFrame;
-
+				
 				if (newChar.animation.exists(anim)) {
-					newChar.playAnim(anim, true);
-					newChar.animation.curAnim.curFrame = frame;
+					var reversed:Bool = oldChar.animation.curAnim.reversed;
+					var frame:Int = oldChar.animation.curAnim.curFrame;
+					newChar.playAnim(anim, true, reversed, frame);
 				}
 			}
 		}
