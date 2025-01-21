@@ -191,8 +191,10 @@ class Project extends HXProject
 		
 		setupTrollEngineDefines();
 
+		/* Weird stuff happens
 		addHaxelib('openfl', "9.4.1");
 		addHaxelib('lime', '8.2.2');
+		*/
 
 		setupFlixel();
 
