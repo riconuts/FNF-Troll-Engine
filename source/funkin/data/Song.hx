@@ -1,6 +1,6 @@
 package funkin.data;
 
-#if (moonchart)
+#if USING_MOONCHART
 import funkin.data.FNFTroll as SupportedFormat;
 import moonchart.formats.BasicFormat;
 import moonchart.backend.FormatData;
@@ -82,7 +82,7 @@ typedef SongCreditdata = // beacuse SongMetadata is stolen
 
 class Song
 {
-	#if moonchart
+	#if USING_MOONCHART
 	private static function findFormat(filePaths:Array<String>) {
 		var files:Array<String> = [];
 		for (path in filePaths) {
@@ -128,7 +128,7 @@ class Song
 	{
 		Paths.currentModDirectory = metadata.folder;
 		
-		#if moonchart
+		#if USING_MOONCHART
 		final songName = Paths.formatToSongPath(metadata.songName);
 
 		var folder:String = '';
@@ -535,7 +535,7 @@ class Song
 		if (Main.showDebugTraces)
 			trace('playSong', toPlay, difficulty);
 		
-		#if (moonchart)
+		#if USING_MOONCHART
 		var SONG:Null<SwagSong> = null;
 
 		inline function findVSlice():Bool {
