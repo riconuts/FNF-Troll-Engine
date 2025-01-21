@@ -77,6 +77,75 @@ class Project extends HXProject
 				haxeDefine(name, value);
 			}
 		}
+
+		////
+		if (troll.USING_FLXANIMATE) {
+			addHaxelib("flxanimate", "3.0.4");
+			sources.push("flxAnimateShadow"); // Remove if FlxAnimate updates and lets you write your own code to determine how filesystem shit is gotten
+		}
+
+		if (troll.USING_MOONCHART) {			
+			addHaxelib("moonchart", "0.4.0");
+		}
+
+		if (troll.DISCORD_ALLOWED) {
+			addHaxelib("hxdiscord_rpc");
+		}
+
+		if (troll.VIDEOS_ALLOWED) {
+			// You can replace with hxcodec if you're stubborn and dont wanna use newer and better libs
+			addHaxelib("hxvlc", "1.6.1");
+		}
+
+		if (troll.LUA_ALLOWED) {
+			addHaxelib("linc_luajit");
+			haxeDefine("LINC_LUA_RELATIVE_DYNAMIC_LIB");
+		}
+
+		if (troll.HSCRIPT_ALLOWED) {
+			addHaxelib("hscript");
+			haxeDefine("hscriptPos");
+			addHaxeMacro("include('funkin')");
+		}
+
+		if (troll.MULTICORE_LOADING && false) {
+			haxeDefine("traceLoading");
+			haxeDefine("loadBenchmark");
+		}
+
+		if (troll.CRASH_HANDLER) {
+			haxeDefine("HXCPP_STACK_TRACE");
+			haxeDefine("HXCPP_CHECK_POINTER");
+			haxeDefine("HXCPP_STACK_LINE");
+			haxeDefine("openfl-enable-handle-error");
+		}
+	}
+
+	function setupFlixel() {
+		addHaxelib('flixel', "5.5.0");
+		addHaxelib("flixel-ui", "2.6.1");
+		addHaxelib("flixel-addons", "3.2.3");
+
+		// Disable the Flixel core focus lost screen
+		haxeDefine("FLX_NO_FOCUS_LOST_SCREEN");
+
+		// Disable the Flixel core sound tray
+		// haxeDefine("FLX_NO_SOUND_TRAY");
+
+		// Optimise inputs, be careful you will get null errors if you don't use conditionals in your game
+		if (MOBILE) haxeDefine("FLX_NO_MOUSE");
+		if (DESKTOP) haxeDefine("FLX_NO_TOUCH");
+		// if (MOBILE) haxeDefine(FLX_NO_KEYBOARD");
+		// haxeDefine("FLX_NO_GAMEPAD");
+		
+		// Disable the Flixel core debugger. Automatically gets set whenever you compile in release mode!
+		if (!DEBUG) haxeDefine("FLX_NO_DEBUG");
+
+		// Disable the Flixel sound management code
+		// haxeDefine("FLX_NO_SOUND_SYSTEM");
+		
+		// Enable this for Nape release builds for a serious peformance improvement
+		if (!DEBUG) haxeDefine("NAPE_RELEASE_BUILD");
 	}
 
 	function shit() {
@@ -88,6 +157,8 @@ class Project extends HXProject
 		this.app.file = "Funkin";
 		this.app.main = "Main";
 		this.app.preloader = "flixel.system.FlxPreloader";
+		this.app.path = (debug ? "export/debug" : "export/release");
+		this.app.swfVersion = 1.18;
 
 		this.window.width = 1280;
 		this.window.height = 720;
@@ -123,43 +194,7 @@ class Project extends HXProject
 		addHaxelib('openfl', "9.4.1");
 		addHaxelib('lime', '8.2.2');
 
-		addHaxelib('flixel', "5.5.0");
-		addHaxelib("flixel-ui", "2.6.1");
-		addHaxelib("flixel-addons", "3.2.3");
-
-		if (troll.USING_FLXANIMATE) {
-			addHaxelib("flxanimate", "3.0.4");
-			sources.push("flxAnimateShadow"); // Remove if FlxAnimate updates and lets you write your own code to determine how filesystem shit is gotten
-		}
-
-		if (troll.USING_MOONCHART) {			
-			addHaxelib("moonchart", "0.4.0");
-		}
-
-		if (troll.DISCORD_ALLOWED) {
-			addHaxelib("hxdiscord_rpc");
-		}
-
-		if (troll.VIDEOS_ALLOWED) {
-			// You can replace with hxcodec if you're stubborn and dont wanna use newer and better libs
-			addHaxelib("hxvlc", "1.6.1");
-		}
-
-		if (troll.LUA_ALLOWED) {
-			addHaxelib("linc_luajit");
-			haxeDefine("LINC_LUA_RELATIVE_DYNAMIC_LIB");
-		}
-
-		if (troll.HSCRIPT_ALLOWED) {
-			addHaxelib("hscript");
-			define("hscriptPos");
-			addHaxeMacro("include('funkin')");
-		}
-
-		if (troll.MULTICORE_LOADING && false) {
-			define("traceLoading");
-			define("loadBenchmark");
-		}
+		setupFlixel();
 
 		/*
 		if (SWITCH) {
@@ -172,13 +207,6 @@ class Project extends HXProject
 			addHaxelib("hxcpp-debug-server")
 		}
 		*/
-
-		if (troll.CRASH_HANDLER) {
-			haxeDefine("HXCPP_STACK_TRACE");
-			haxeDefine("HXCPP_CHECK_POINTER");
-			haxeDefine("HXCPP_STACK_LINE");
-			haxeDefine("openfl-enable-handle-error");
-		}
 	}
 
 	// Platform Type
