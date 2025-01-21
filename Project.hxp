@@ -1,0 +1,515 @@
+import hxp.*;
+import lime.tools.*;
+
+import haxe.io.Path;
+import sys.io.File;
+import sys.FileSystem;
+
+import lime.tools.ProjectXMLParser;
+import haxe.xml.Access;
+
+using StringTools;
+
+class TrollEngine {
+	public var USE_EPIC_JUDGEMENT:Bool;
+	public var HSCRIPT_ALLOWED:Bool;
+	public var VIDEOS_ALLOWED:Bool;
+	public var CRASH_HANDLER:Bool;
+	public var DISCORD_ALLOWED:Bool;
+	public var MULTICORE_LOADING:Bool;
+	public var MODS_ALLOWED:Bool;
+
+	public var LUA_ALLOWED:Bool;
+	public var SCRIPTABLE_STATES:Bool;
+	public var PE_MOD_COMPATIBILITY:Bool;
+	public var NMV_MOD_COMPATIBILITY:Bool;
+
+	public var OFFICIAL_BUILD:Bool;
+
+	public var USING_FLXANIMATE:Bool;
+	public var USING_MOONCHART:Bool;
+
+	public var DO_AUTO_UPDATE:Bool;
+	public var ALLOW_DEPRECATION:Bool;
+
+	public function new() {}
+}
+
+class Project extends HXProject 
+{
+	final troll = new TrollEngine();
+	function setupTrollEngineDefines() {
+		//// TROLL ENGINE CUSTOMIZATION
+		troll.USE_EPIC_JUDGEMENT = true;
+		troll.HSCRIPT_ALLOWED = true;
+		troll.VIDEOS_ALLOWED = (CPP);
+		troll.CRASH_HANDLER = (DESKTOP);
+		troll.DISCORD_ALLOWED = (DESKTOP && CPP);
+		troll.MULTICORE_LOADING = (DESKTOP && CPP);
+		troll.MODS_ALLOWED = (DESKTOP);
+		
+		// Remove if you dont want states to be modified with scripts. This only disables extension/overrides and not the HScriptedState class
+		troll.SCRIPTABLE_STATES = (troll.HSCRIPT_ALLOWED);
+		// Remove if you dont want Lua to be usable. Note that if you disable this, you should remove PE_MOD_COMPATIBILITY too
+		troll.LUA_ALLOWED = (DESKTOP && WINDOWS && CPP);
+		// Remove if you don't want Psych Engine mod compatibility -->
+		troll.PE_MOD_COMPATIBILITY = (troll.LUA_ALLOWED && troll.MODS_ALLOWED);
+		// Remove if you don't want NightmareVision mod compatibility-->
+		troll.NMV_MOD_COMPATIBILITY = (troll.PE_MOD_COMPATIBILITY && troll.MODS_ALLOWED && troll.HSCRIPT_ALLOWED);
+
+		// Remove if you don't want to use FlxAnimate
+		troll.USING_FLXANIMATE = true;
+
+		// Remove if you don't want to use Moonchart, which allows usage of chart formats from other rhythm games and fnf engines
+		troll.USING_MOONCHART = true;
+		
+		// Remove if you dont want the engine to autoupdate
+		troll.DO_AUTO_UPDATE = (NATIVE && DESKTOP && troll.OFFICIAL_BUILD && !DEBUG);
+		
+		// Remove if you don't want to allow deprecated engine features.
+		// Anything marked as deprecated should be removed after a major or minor version but not after patches. (major.minor.patch)
+		troll.ALLOW_DEPRECATION = !FINAL;
+
+		////
+		for (name in Reflect.fields(troll)) {
+			var v:Dynamic = Reflect.field(troll, name);
+			if (v != null && v != false) {
+				var value:String = (v==true) ? "" : Std.string(v);
+				trace(name);
+				define(name, value);
+			}
+		}
+	}
+
+	public function shit() {
+		this.meta.title = "Friday Night Funkin'";
+		this.meta.packageName = "com.sowy.trollengine";
+		this.meta.version = "0.2.8";
+		this.meta.company = "Sowy";
+
+		this.app.file = "Funkin";
+		this.app.main = "Main";
+		this.app.preloader = "flixel.system.FlxPreloader";
+
+		this.window.width = 1280;
+		this.window.height = 720;
+		this.window.fps = 60;
+		this.window.background = 0xFF000000;
+		this.window.hardware = true;
+		this.window.vsync = false;
+		this.window.fullscreen = false;
+		this.window.resizable = true;
+		this.window.borderless = false;
+		this.window.orientation = Orientation.LANDSCAPE;
+		this.window.allowShaders = true;
+		this.window.requireShaders = true;
+		this.window.depthBuffer = false;
+		this.window.stencilBuffer = false;
+		this.window.antialiasing = 0;
+
+		addIcon("art/iconOG.png");
+		addIcon("art/icon64.png", 64);
+		addIcon("art/icon32.png", 32);
+		addIcon("art/icon16.png", 16);
+
+		sources.push("source");
+
+		if (DESKTOP) 
+			includeAsset("alsoft.txt", (WINDOWS ? "alsoft.ini" : "alsoft.conf"));
+
+		includeAssets("assets");
+		includeAssets("default_content", "content", null, ["*.mp3"]);
+		
+		setupTrollEngineDefines();
+
+		addHaxelib('openfl', "9.4.1");
+		addHaxelib('lime', '8.2.2');
+
+		addHaxelib('flixel', "5.5.0");
+		addHaxelib("flixel-ui", "2.6.1");
+		addHaxelib("flixel-addons", "3.2.3");
+
+		if (troll.USING_FLXANIMATE) {
+			addHaxelib("flxanimate", "3.0.4");
+			sources.push("flxAnimateShadow"); // Remove if FlxAnimate updates and lets you write your own code to determine how filesystem shit is gotten
+		}
+
+		if (troll.USING_MOONCHART) {			
+			addHaxelib("moonchart", "0.4.0");
+		}
+
+		if (troll.DISCORD_ALLOWED) {
+			addHaxelib("hxdiscord_rpc");
+		}
+
+		if (troll.VIDEOS_ALLOWED) {
+			// You can replace with hxcodec if you're stubborn and dont wanna use newer and better libs
+			addHaxelib("hxvlc", "1.6.1");
+		}
+
+		if (troll.LUA_ALLOWED) {
+			addHaxelib("linc_luajit");
+			haxeDefine("LINC_LUA_RELATIVE_DYNAMIC_LIB");
+		}
+
+		if (troll.HSCRIPT_ALLOWED) {
+			addHaxelib("hscript");
+			define("hscriptPos");
+			addHaxeMacro("include('funkin')");
+		}
+
+		if (troll.MULTICORE_LOADING && false) {
+			define("traceLoading");
+			define("loadBenchmark");
+		}
+
+		/*
+		if (SWITCH) {
+			addHaxelib("faxe");
+		}
+		*/
+
+		/*
+		if (DEBUG && !telemetry) {
+			addHaxelib("hxcpp-debug-server")
+		}
+		*/
+
+		if (troll.CRASH_HANDLER) {
+			haxeDefine("HXCPP_STACK_TRACE");
+			haxeDefine("HXCPP_CHECK_POINTER");
+			haxeDefine("HXCPP_STACK_LINE");
+			haxeDefine("openfl-enable-handle-error");
+		}
+	}
+
+	// Platform Type
+	final DESKTOP:Bool;
+	final MOBILE:Bool;
+	final WEB:Bool;
+	final CONSOLE:Bool;
+
+	// Language
+	//final HTML5:Bool;
+	final HASHLINK:Bool;
+	final NEKO:Bool;
+	final JAVA:Bool;
+	final NODEJS:Bool;
+	final CSHARP:Bool;
+	final CPP:Bool;
+
+	final NATIVE:Bool;
+
+	// Platform
+	final WINDOWS:Bool;
+	final AIR:Bool;
+	final ANDROID:Bool;
+	final BLACKBERRY:Bool;
+	final CONSOLE_PC:Bool;
+	final FIREFOX:Bool;
+	final FLASH:Bool;
+	final HTML5:Bool;
+	final IOS:Bool;
+	final LINUX:Bool;
+	final MAC:Bool;
+	final PS3:Bool;
+	final PS4:Bool;
+	final TIZEN:Bool;
+	final VITA:Bool;
+	final WEB_ASSEMBLY:Bool;
+	final WEBOS:Bool;
+	final WIIU:Bool;
+	final XBOX1:Bool;
+	final EMSCRIPTEN:Bool;
+	final TVOS:Bool;
+	final CUSTOM:Bool;
+
+	//
+	final DEBUG:Bool;
+	final FINAL:Bool;
+	final RELEASE:Bool;
+
+	public function new() {
+		super();
+
+		DESKTOP = platformType == PlatformType.DESKTOP;
+		MOBILE = platformType == PlatformType.MOBILE;
+		WEB = platformType == PlatformType.WEB;
+		CONSOLE = platformType == PlatformType.CONSOLE;
+	
+		WINDOWS = target == Platform.WINDOWS;
+		AIR = target == Platform.AIR;
+		ANDROID = target == Platform.ANDROID;
+		BLACKBERRY = target == Platform.BLACKBERRY;
+		CONSOLE_PC = target == Platform.CONSOLE_PC;
+		FIREFOX = target == Platform.FIREFOX;
+		FLASH = target == Platform.FLASH;
+		HTML5 = target == Platform.HTML5;
+		IOS = target == Platform.IOS;
+		LINUX = target == Platform.LINUX;
+		MAC = target == Platform.MAC;
+		PS3 = target == Platform.PS3;
+		PS4 = target == Platform.PS4;
+		TIZEN = target == Platform.TIZEN;
+		VITA = target == Platform.VITA;
+		WEB_ASSEMBLY = target == Platform.WEB_ASSEMBLY;
+		WEBOS = target == Platform.WEBOS;
+		WIIU = target == Platform.WIIU;
+		XBOX1 = target == Platform.XBOX1;
+		EMSCRIPTEN = target == Platform.EMSCRIPTEN;
+		TVOS = target == Platform.TVOS;
+		CUSTOM = target == Platform.CUSTOM;	
+
+		// HTML5 = WEB;
+		HASHLINK = targetFlags.exists("hl");
+		NEKO = targetFlags.exists("neko");
+		JAVA = targetFlags.exists("java");
+		NODEJS = targetFlags.exists("nodejs");
+		CSHARP = targetFlags.exists("cs");
+		CPP = !(HTML5 || HASHLINK || NEKO || JAVA || NODEJS || CSHARP);
+		NATIVE = CPP || JAVA || CSHARP || HASHLINK || NEKO; // php, cpp, java, python, macro, cs, lua, hl, neko
+
+		if (debug)
+			DEBUG = true;
+		else if (targetFlags.exists("final"))
+			FINAL = true;
+		else
+			RELEASE = true;
+
+		info('$platformType, $target');
+		shit();
+	}
+
+	function define(name:String, value:String = "") {
+		defines.set(name, value);
+		haxedefs.set(name, value);
+	}
+
+	function haxeDefine(name:String, value:String = "") {
+		haxedefs.set(name, value);
+	}
+
+	public function includeAsset(path:String = "", rename:String = "", type:AssetType = null, embed:Null<Bool> = null, setDefaults:Bool = true) {
+		var ass = new Asset(path, rename, type, embed, setDefaults);
+		assets.push(ass);
+		return ass;
+	}
+
+	public function addIcon(path:String, size:Int = 0, priority:Int = 0) {
+		var icon = new Icon (path, size, priority);
+		icons.push (icon);
+		return icon;
+	}
+
+	public function addHaxelib(name:String, version:String = ""):Haxelib {
+		var hl = new Haxelib(name, version);
+		this.haxelibs.push(hl);
+		return hl;
+	}
+
+	public function addHaxeFlag(value:String):Void {
+		this.haxeflags.push(value);
+	}
+
+	public function addHaxeMacro(value:String):Void {
+		addHaxeFlag('--macro ${value}');
+	}
+
+	/** Display an error message. This should also stop the building process **/
+	private function error(message:String) {
+		Log.error(message);
+	}
+
+	/** Display an info message. This should not stop the building process **/
+	private function info(message:String) {
+		Log.info(message);
+	}
+
+	private function getFileContent(relativePath:String):Null<String> {
+		var filePath = Path.normalize(Sys.getCwd()) + '/$relativePath';                
+		return FileSystem.exists(filePath) ? File.getContent(filePath) : null;
+	}
+
+	private function includeProjectXMLFile(file:String = "Project.xml") {
+		var raw:Null<String> = getFileContent(file);
+		
+		if (raw == null) {
+			info('Warning: Couldn\'t get file $file');
+			return false;
+		}
+		
+		this.includeXML(raw);
+		return false;
+	}
+
+	// copied from lime because it doesnt get called nor is it accessible here
+	private function initializeDefines():Void
+	{
+		switch (platformType)
+		{
+			case PlatformType.MOBILE:
+				defines.set("platformType", "mobile");
+				defines.set("mobile", "1");
+
+			case PlatformType.DESKTOP:
+				defines.set("platformType", "desktop");
+				defines.set("desktop", "1");
+
+			case PlatformType.WEB:
+				defines.set("platformType", "web");
+				defines.set("web", "1");
+
+			case PlatformType.CONSOLE:
+				defines.set("platformType", "console");
+				defines.set("console", "1");
+		}
+
+		if (targetFlags.exists("neko"))
+		{
+			defines.set("targetType", "neko");
+			defines.set("native", "1");
+			defines.set("neko", "1");
+		}
+		else if (targetFlags.exists("hl"))
+		{
+			defines.set("targetType", "hl");
+			defines.set("native", "1");
+			defines.set("hl", "1");
+			if (targetFlags.exists("hlc"))
+			{
+				defines.set("hlc", "1");
+			}
+		}
+		else if (targetFlags.exists("java"))
+		{
+			defines.set("targetType", "java");
+			defines.set("native", "1");
+			defines.set("java", "1");
+		}
+		else if (targetFlags.exists("nodejs"))
+		{
+			defines.set("targetType", "nodejs");
+			defines.set("native", "1");
+			defines.set("nodejs", "1");
+		}
+		else if (targetFlags.exists("cs"))
+		{
+			defines.set("targetType", "cs");
+			defines.set("native", "1");
+			defines.set("cs", "1");
+		}
+		else if (target == Platform.FIREFOX)
+		{
+			defines.set("targetType", "js");
+			defines.set("html5", "1");
+		}
+		else if (target == Platform.AIR)
+		{
+			defines.set("targetType", "swf");
+			defines.set("flash", "1");
+			if (targetFlags.exists("ios")) defines.set("ios", "1");
+			if (targetFlags.exists("android")) defines.set("android", "1");
+		}
+		else if (target == Platform.WINDOWS && (targetFlags.exists("uwp") || targetFlags.exists("winjs")))
+		{
+			targetFlags.set("uwp", "");
+			targetFlags.set("winjs", "");
+
+			defines.set("targetType", "js");
+			defines.set("html5", "1");
+			defines.set("uwp", "1");
+			defines.set("winjs", "1");
+		}
+		else if (platformType == PlatformType.DESKTOP && (cast target) != System.hostPlatform)
+		{
+			defines.set("native", "1");
+
+			if (target == Platform.LINUX && targetFlags.exists("cpp"))
+			{
+				defines.set("targetType", "cpp");
+				defines.set("cpp", "1");
+			}
+			else if (target == Platform.WINDOWS && (targetFlags.exists("cpp") || targetFlags.exists("mingw")))
+			{
+				defines.set("targetType", "cpp");
+				defines.set("cpp", "1");
+				defines.set("mingw", "1");
+			}
+			else
+			{
+				targetFlags.set("neko", "1");
+
+				defines.set("targetType", "neko");
+				defines.set("neko", "1");
+			}
+		}
+		else if (target == Platform.WEB_ASSEMBLY)
+		{
+			defines.set("webassembly", "1");
+			defines.set("wasm", "1");
+			defines.set("emscripten", "1");
+			defines.set("targetType", "cpp");
+			defines.set("native", "1");
+			defines.set("cpp", "1");
+		}
+		else if (targetFlags.exists("cpp")
+			|| ((platformType != PlatformType.WEB) && !targetFlags.exists("html5")))
+		{
+			defines.set("targetType", "cpp");
+			defines.set("native", "1");
+			defines.set("cpp", "1");
+		}
+		else if (target == Platform.FLASH)
+		{
+			defines.set("targetType", "swf");
+		}
+
+		if (debug)
+		{
+			defines.set("buildType", "debug");
+			defines.set("debug", "1");
+		}
+		else if (targetFlags.exists("final"))
+		{
+			defines.set("buildType", "final");
+			defines.set("final", "1");
+		}
+		else
+		{
+			defines.set("buildType", "release");
+			defines.set("release", "1");
+		}
+
+		if (targetFlags.exists("static"))
+		{
+			defines.set("static_link", "1");
+		}
+
+		if (defines.exists("SWF_PLAYER"))
+		{
+			environment.set("SWF_PLAYER", defines.get("SWF_PLAYER"));
+		}
+
+		defines.set(Std.string(target).toLowerCase(), "1");
+		defines.set("target", Std.string(target).toLowerCase());
+		defines.set("platform", defines.get("target"));
+
+		switch (System.hostPlatform)
+		{
+			case HostPlatform.WINDOWS:
+				defines.set("host", "windows");
+			case HostPlatform.MAC:
+				defines.set("host", "mac");
+			case HostPlatform.LINUX:
+				defines.set("host", "linux");
+			default:
+				defines.set("host", "unknown");
+		}
+
+		#if lime
+		defines.set("lime-tools", "1");
+		#end
+
+		defines.set("hxp", "1"); // TODO: Version?
+	}
+}
