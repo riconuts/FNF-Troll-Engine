@@ -351,14 +351,14 @@ class Paths
 
 		return null;
 	}
-	inline public static function getSound(key:String):Null<Sound> {
+	inline public static function getSound(path:String):Null<Sound> {
 		#if sys
-		if (FileSystem.exists(key))
-			return Sound.fromFile(key);
+		if (FileSystem.exists(path))
+			return Sound.fromFile(path);
 		#end
 
-		if (Assets.exists(key))
-			return Assets.getSound(key);
+		if (Assets.exists(path))
+			return Assets.getSound(path);
 
 		return null;
 	}
