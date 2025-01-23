@@ -1466,7 +1466,7 @@ class PlayState extends MusicBeatState
 
 		if (PlayState.startOnTime >= 500) {
 			trace('starting on time: $startOnTime');
-			startSong(PlayState.startOnTime - 500);
+			startSong(PlayState.startOnTime, -500);
 			PlayState.startOnTime = 0;
 			return;
 		}
@@ -1577,39 +1577,28 @@ class PlayState extends MusicBeatState
 		}
 
 		Conductor.songPosition = time;
-		songTime = time;
 	}
 
-	var songTime:Float = 0;
-	var vocalsEnded:Bool = false;
-	function startSong(startOnTime:Float=0):Void
+	function startSong(startOnTime:Float=0, offset:Float = 0):Void
 	{
 		startingSong = false;
 
-		if (startOnTime > 0) {
+		var realStartTime = startOnTime + offset;
+		if (realStartTime > 0) {
 			startedOnTime = startOnTime;
-			clearNotesBefore(startOnTime + 500);
+			clearNotesBefore(startOnTime);
+		}else {
+			realStartTime = 0;
 		}
 
-		Conductor.songPosition = startOnTime;
-
-		inst.time = Conductor.songPosition;
-		inst.onComplete = function(){
-			trace("song ended!?");
-			finishSong(false);
-		};
+		Conductor.songPosition = inst.time = realStartTime;
+		resyncVocals();
 
 		// Song duration in a float, useful for the time left feature
 		songLength = inst.length;
 		hud.songLength = songLength;
 		hud.songStarted();
 
-		resyncVocals();
-
-		// PLEASE DONT REMOVE YOU REMOVED MY LAST FIXES FOR STARTONTIME :sob:
-		for (track in tracks)
-			track.time = startOnTime;
-		
 		setOnScripts('songLength', songLength);
 		callOnScripts('onSongStart');
 	}
@@ -1725,6 +1714,10 @@ class PlayState extends MusicBeatState
 		vocals = playerTracks[0];
 
 		songLength = inst.length;
+		inst.onComplete = function() {
+			trace("song ended!?");
+			finishSong(false);
+		};
 		
 		//// NEW SHIT
 		var noteData:Array<SwagSection> = PlayState.SONG.notes;
@@ -2396,7 +2389,7 @@ class PlayState extends MusicBeatState
 		for (track in tracks){
 			if (Conductor.songPosition < track.length){
 				track.time = Conductor.songPosition;
-				track.play();
+				track.play(false, Conductor.songPosition);
 			}
 		}
 
