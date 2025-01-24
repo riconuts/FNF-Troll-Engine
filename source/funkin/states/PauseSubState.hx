@@ -185,7 +185,7 @@ class PauseSubState extends MusicBeatSubstate
 			opt.displayName = getBotplayTxt();
 			opt.onAccept = ()->{
 				PlayState.instance.cpuControlled = !PlayState.instance.cpuControlled;
-				opt.text.changeText(getBotplayTxt());
+				opt.text.set_text(getBotplayTxt());
 			};
 		}
 
@@ -385,7 +385,7 @@ class SkipTimeOption extends PauseMenuOption
 	}
 
 	override function unselect() {
-		text.changeText(this.displayName);
+		text.set_text(this.displayName);
 	}
 
 	override function update(elapsed:Float){
@@ -422,7 +422,7 @@ class SkipTimeOption extends PauseMenuOption
 
 	function updateSkipTimeText() {
 		var str = this.displayName + ': ' + formatTime(curTime) + ' / ' + formatTime(songLength);
-		text.changeText(str);
+		text.set_text(str);
 	}
 
 	static inline function formatTime(msTime:Float, showMS:Bool = false)

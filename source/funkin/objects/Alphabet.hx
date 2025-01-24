@@ -15,7 +15,7 @@ using StringTools;
  */
 class Alphabet extends FlxSpriteGroup
 {
-	public var text:String = "";
+	public var text(default, set):String = "";
 	public var textSize:Float = 1.0;
 
 	public var delay:Float = 0.05;
@@ -49,35 +49,17 @@ class Alphabet extends FlxSpriteGroup
 		super(x, y);
 		this.textSize = textSize;
 
-		_finalText = text;
-		this.text = text;
 		this.typed = typed;
-		isBold = bold;
+		this.isBold = bold;
 
-		if (text != "")
-		{
-			if (typed)
-			{
-				startTypedText(typingSpeed);
-			}
-			else
-			{
-				addText();
-			}
-		} else {
-			finishedText = true;
-		}
+		this.set_text(text);
 	}
 
-	public function changeText(newText:String, newTypingSpeed:Float = -1)
+	public function set_text(newText:String)
 	{
-		for (i in 0...lettersArray.length) {
-			var letter = lettersArray[0];
-			letter.destroy();
-			remove(letter);
-			lettersArray.remove(letter);
-		}
-		lettersArray = [];
+		while (lettersArray.length > 0) 
+			remove(lettersArray.pop()).destroy();
+		
 		splitWords = [];
 		loopNum = 0;
 		xPos = 0;
@@ -91,21 +73,24 @@ class Alphabet extends FlxSpriteGroup
 		x = 0;
 		_finalText = newText;
 		text = newText;
-		if(newTypingSpeed != -1) {
-			typingSpeed = newTypingSpeed;
-		}
 
-		if (text != "") {
-			if (typed)
-			{
-				startTypedText(typingSpeed);
-			} else {
-				addText();
-			}
-		} else {
+		if (text == "") 
 			finishedText = true;
-		}
+		else if (typed)
+			startTypedText(typingSpeed);
+		else 
+			addText();
+
 		x = lastX;
+
+		return newText;
+	}
+
+	public function changeText(newText:String, newTypingSpeed:Float = -1) {
+		if (newTypingSpeed >= 0)
+			typingSpeed = newTypingSpeed;
+		
+		set_text(newText);
 	}
 
 	public function addText()

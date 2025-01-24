@@ -1,14 +1,17 @@
 package funkin.data;
 
-import funkin.objects.Alphabet;
 import haxe.Constraints.Function;
+
+typedef TextObject = {
+	function set_text(str:String):String;
+}
 
 class PauseMenuOption
 {
 	public var name:String;
 	
 	public var displayName:String;
-	public var text:Alphabet = null;
+	public var text:TextObject = null;
 
 	public var onSelect:Function = null;
 	public var unSelect:Function = null;
