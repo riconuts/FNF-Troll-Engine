@@ -15,9 +15,9 @@ using StringTools;
 
 class StrumNote extends NoteObject
 {
-	public static var defaultStaticAnimNames:Array<String> = null; 
-	public static var defaultPressAnimNames:Array<String> = null;
-	public static var defaultConfirmAnimNames:Array<String> = null;
+	public static var defaultStaticAnimNames:Array<String> = ['arrowLEFT', 'arrowDOWN', 'arrowUP', 'arrowRIGHT'];
+	public static var defaultPressAnimNames:Array<String> = ["left press", "down press", "up press", "right press"];
+	public static var defaultConfirmAnimNames:Array<String> = ["left confirm", "down confirm", "up confirm", "right confirm"];
 
 	////
 	public var texture(default, set):String = null;

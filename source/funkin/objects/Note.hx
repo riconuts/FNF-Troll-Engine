@@ -49,9 +49,9 @@ class Note extends NoteObject
 
 	private static var colArray:Array<String> = ['purple', 'blue', 'green', 'red'];
 
-	public static var defaultNoteAnimNames:Array<String> = null;
-	public static var defaultHoldAnimNames:Array<String> = null;
-	public static var defaultTailAnimNames:Array<String> = null;
+	public static var defaultNoteAnimNames:Array<String> = ['purple0', 'blue0', 'green0', 'red0'];
+	public static var defaultHoldAnimNames:Array<String> = ['purple hold piece', 'blue hold piece', 'green hold piece', 'red hold piece'];
+	public static var defaultTailAnimNames:Array<String> = ['purple hold end', 'blue hold end', 'green hold end', 'red hold end'];
 
 	public static var quants:Array<Int> = [
 		4, // quarter note
