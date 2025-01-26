@@ -396,8 +396,8 @@ class ScriptingMacro
 							})
 						}
 						field.access.remove(AOverride);
-						field.access.remove(APublic);
-						field.access.push(APrivate);
+						if (field.access.remove(APublic))
+							field.access.push(APrivate);
 						fields.push(newField);
 
 						injected.set(name, newField);

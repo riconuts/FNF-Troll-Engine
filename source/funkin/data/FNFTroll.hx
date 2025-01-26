@@ -1,6 +1,6 @@
 package funkin.data;
 
-#if moonchart
+#if USING_MOONCHART
 import haxe.Json;
 import moonchart.backend.Util;
 import moonchart.backend.Timing;

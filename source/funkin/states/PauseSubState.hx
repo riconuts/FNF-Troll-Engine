@@ -1,5 +1,6 @@
 package funkin.states;
 
+import funkin.data.Song;
 import funkin.data.PauseMenuOption;
 import funkin.input.Controls;
 import funkin.states.options.OptionsSubstate;
@@ -191,6 +192,22 @@ class PauseSubState extends MusicBeatSubstate
 		newOpt('Exit to menu', PlayState.gotoMenus);
 	}
 
+	private function getInfo():Array<String> {
+		var songInfo:Array<String> = [];
+		var game = PlayState.instance;
+
+		songInfo.push(game.displayedSong);
+
+		for (info in Song.getMetadataInfo(game.metadata))
+			songInfo.push(info);
+
+		songInfo.push("Difficulty: " + game.displayedDifficulty.toUpperCase());		
+		songInfo.push("Failed: " + PlayState.deathCounter); // i'd say blueballed but not every character blueballs + you straight up die in die batsards
+		// removed the practice clause cus its just nice to have the counter lol
+
+		return songInfo;
+	}
+
 	override public function create()
 	{
 		instance = this;
@@ -264,45 +281,12 @@ class PauseSubState extends MusicBeatSubstate
 
 	private function regenInfo() {
 		////
-		var game = PlayState.instance;
-		var metadata = game.metadata;
-		var songInfo:Array<String> = [];
-
-		function pushInfo(str:String) {
-			for (string in str.split('\n'))
-				songInfo.push(string);
-		}
-
-		songInfo.push(game.displayedSong);
-
-		if (metadata != null){
-			if (metadata.artist != null && metadata.artist.length > 0)		
-				pushInfo("Artist: " + metadata.artist);
-
-			if(metadata.charter != null && metadata.charter.length > 0)
-				pushInfo("Chart: " + metadata.charter);
-
-			if(metadata.modcharter != null && metadata.modcharter.length > 0)
-				pushInfo("Modchart: " + metadata.modcharter);
-		}
-
-		if (PlayState.SONG != null && PlayState.SONG.info != null)
-			for (extraInfo in PlayState.SONG.info)
-				pushInfo(extraInfo);
-		
-		if (metadata != null && metadata.extraInfo!=null){
-			for(extraInfo in metadata.extraInfo)
-				pushInfo(extraInfo);
-		}
-
-		songInfo.push("Difficulty: " + game.displayedDifficulty.toUpperCase());		
-		songInfo.push("Failed: " + PlayState.deathCounter); // i'd say blueballed but not every character blueballs + you straight up die in die batsards
-		// removed the practice clause cus its just nice to have the counter lol
+		var songInfo:Array<String> = getInfo();
 
 		////
 		allTexts = [];
 		var fieldX:Float = 20;
-		var fieldWidth:Float = FlxG.width - 40;
+		var fieldWidth:Float = camera.width - 40;
 
 		for (i => str in songInfo){
 			var obj = new FlxText(fieldX, 15+32*i, fieldWidth, str, 32);
@@ -341,10 +325,8 @@ class PauseSubState extends MusicBeatSubstate
 		pauseMusic = new FlxSound();
 		pauseMusic.context = MUSIC;
 
-		var songName = songName;
-		if (songName == null) songName = 'Breakfast';
-
-		if (songName != 'None'){
+		var songName:String = songName ?? 'Breakfast';
+		if (songName != 'None') {
 			songName = Paths.formatToSongPath(songName);
 			pauseMusic.loadEmbedded(Paths.music(songName), true, true);
 			
@@ -359,7 +341,7 @@ class PauseSubState extends MusicBeatSubstate
 		
 		pauseMusic.volume = 0;
 		pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length* 0.5)));
-		pauseMusic.fadeIn(50, 0, 0.5 );
+		pauseMusic.fadeIn(50, 0, 0.5);
 
 		FlxG.sound.list.add(pauseMusic);
 	}

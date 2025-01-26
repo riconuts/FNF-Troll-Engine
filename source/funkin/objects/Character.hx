@@ -461,6 +461,15 @@ class Character extends FlxSprite
 		if(callOnScripts("onResetDance") != Globals.Function_Stop) dance();
 	}
 
+	public static function getNoteAnimation(note:Note, field:PlayField):String {
+		var animToPlay:String = note.characterHitAnimName;
+		if (animToPlay == null) {
+			animToPlay = field.singAnimations[note.column % field.singAnimations.length];
+			animToPlay += note.characterHitAnimSuffix;
+		}
+		return animToPlay;
+	}
+
 	public function playNote(note:Note, field:PlayField) {
 		if (callOnScripts("playNote", [note, field]) == Globals.Function_Stop)
 			return;
@@ -475,11 +484,7 @@ class Character extends FlxSprite
 			return;
 		}
 
-		var animToPlay:String = note.characterHitAnimName;
-		if (animToPlay == null) {
-			animToPlay = field.singAnimations[note.column % field.singAnimations.length];
-			animToPlay += note.characterHitAnimSuffix;
-		}
+		var animToPlay:String = Character.getNoteAnimation(note, field);
 
 		playAnim(animToPlay, true);
 		holdTimer = 0.0;
@@ -662,7 +667,7 @@ class Character extends FlxSprite
 
 		return returnVal;
 		#else
-		return Globals.Function_Continue
+		return Globals.Function_Continue;
 		#end
 	}
 

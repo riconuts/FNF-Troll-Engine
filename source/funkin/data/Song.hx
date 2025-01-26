@@ -1,6 +1,6 @@
 package funkin.data;
 
-#if (moonchart)
+#if USING_MOONCHART
 import funkin.data.FNFTroll as SupportedFormat;
 import moonchart.formats.BasicFormat;
 import moonchart.backend.FormatData;
@@ -43,7 +43,6 @@ typedef SwagSong = {
 	var splashSkin:String;
 	
 	//// Used for song info showed on the pause menu
-	@:optional var info:Array<String>;
 	@:optional var metadata:SongCreditdata;
 
 	@:optional var offset:Float; // Offsets the chart
@@ -64,6 +63,8 @@ typedef JsonSong = {
 	@:optional var needsVoices:Bool; // fnf
 	@:optional var mania:Int; // vs shaggy
 	@:optional var keyCount:Int;
+
+	// @:optional var info:Array<String>; // old te
 }
 
 typedef SongTracks = {
@@ -74,6 +75,7 @@ typedef SongTracks = {
 
 typedef SongCreditdata = // beacuse SongMetadata is stolen
 {
+	// ?songName:String,
 	?artist:String,
 	?charter:String,
 	?modcharter:String,
@@ -82,7 +84,34 @@ typedef SongCreditdata = // beacuse SongMetadata is stolen
 
 class Song
 {
-	#if moonchart
+	public static function getMetadataInfo(metadata:SongCreditdata):Array<String> {
+		var info:Array<String> = [];
+		
+		inline function pushInfo(str:String) {
+			for (string in str.split('\n'))
+				info.push(string);
+		}
+
+		if (metadata != null) {
+			if (metadata.artist != null && metadata.artist.length > 0)		
+				pushInfo("Artist: " + metadata.artist);
+
+			if (metadata.charter != null && metadata.charter.length > 0)
+				pushInfo("Chart: " + metadata.charter);
+
+			if (metadata.modcharter != null && metadata.modcharter.length > 0)
+				pushInfo("Modchart: " + metadata.modcharter);
+		}
+
+		if (metadata != null && metadata.extraInfo != null) {
+			for (extraInfo in metadata.extraInfo)
+				pushInfo(extraInfo);
+		}
+
+		return info;
+	}
+
+	#if USING_MOONCHART
 	private static function findFormat(filePaths:Array<String>) {
 		var files:Array<String> = [];
 		for (path in filePaths) {
@@ -128,7 +157,7 @@ class Song
 	{
 		Paths.currentModDirectory = metadata.folder;
 		
-		#if moonchart
+		#if USING_MOONCHART
 		final songName = Paths.formatToSongPath(metadata.songName);
 
 		var folder:String = '';
@@ -535,7 +564,7 @@ class Song
 		if (Main.showDebugTraces)
 			trace('playSong', toPlay, difficulty);
 		
-		#if (moonchart)
+		#if USING_MOONCHART
 		var SONG:Null<SwagSong> = null;
 
 		inline function findVSlice():Bool {

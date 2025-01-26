@@ -232,6 +232,25 @@ class HTML5AudioSource
 		return loops = value;
 	}
 
+	public function getPitch():Float
+	{
+		#if lime_howlerjs
+		return parent.buffer.__srcHowl.rate();
+		#else
+		return 1;
+		#end
+	}
+
+	public function setPitch(value:Float):Float
+	{
+		#if lime_howlerjs
+		parent.buffer.__srcHowl.rate(value);
+		#end
+		
+		return getPitch();
+	}
+	
+
 	public function getPosition():Vector4
 	{
 		#if lime_howlerjs
@@ -255,7 +274,7 @@ class HTML5AudioSource
 		position.w = value.w;
 
 		#if lime_howlerjs
-		if (parent.buffer.__srcHowl != null && parent.buffer.__srcHowl.pos != null) parent.buffer.__srcHowl.pos(position.x, position.y, position.z, id);
+		if (parent.buffer != null && parent.buffer.__srcHowl != null && parent.buffer.__srcHowl.pos != null) parent.buffer.__srcHowl.pos(position.x, position.y, position.z, id);
 		// There are more settings to the position of the sound on the "pannerAttr()" function of howler. Maybe somebody who understands sound should look into it?
 		#end
 

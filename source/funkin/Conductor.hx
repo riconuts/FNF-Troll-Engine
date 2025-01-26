@@ -25,18 +25,13 @@ class Conductor
 	public static var bpmChangeMap:Array<BPMChangeEvent> = [];
 
 	////
-	@:isVar public static var crotchet(get, set):Float = 0;
-	@:isVar public static var stepCrotchet(get, set):Float = 0;
-
-	@:noCompletion static function get_crotchet()
-		return crochet;
-	@:noCompletion static function set_crotchet(v:Float)
-		return crochet = v;
-
-	@:noCompletion static function get_stepCrotchet()
-		return stepCrochet;
-	@:noCompletion static function set_stepCrotchet(v:Float)
-		return stepCrochet = v;
+	@:noCompletion @:isVar public static var crotchet(get, set):Float = 0;
+	@:noCompletion static function get_crotchet() return crochet;
+	@:noCompletion static function set_crotchet(v:Float) return crochet = v;
+	
+	@:noCompletion @:isVar public static var stepCrotchet(get, set):Float = 0;
+	@:noCompletion static function get_stepCrotchet() return stepCrochet;
+	@:noCompletion static function set_stepCrotchet(v:Float) return stepCrochet = v;
 
 	////
 	private inline static final _internalJackLimit:Float = 192 / 16;
