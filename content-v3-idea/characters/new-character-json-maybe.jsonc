@@ -1,0 +1,28 @@
+{
+	"dance_interval": 4,
+	"dance_sequence": ["idle"], // If omitted then will default to idle unless danceLeft and danceRight are present
+	"sing_animations": ["singLEFT", "singDOWn", "dodge", "singUP", "singRIGHT"], // Exists for multikey reasons mainly, can be omitted to default to default anims based on Character.singAnimations 9normally just the default singLEFT, singDOWN, singUP, singRIGHT)
+	"allows_antialiasing": true,
+	"icon": "pico",
+	"scale": 6,
+	"sing_duration": 1, // in beats now because fuck you use decimals idiot
+	"healthbar_colour": "#66EE99",
+	"foot_position": [0, 0],
+	"camera_offset": [0, 0],
+	"flip_x": false,
+	"script_file": "script",
+	"sprite": [
+		"Pico_Assets",
+		"PlayablePico_Misses"
+	],
+	"animations": [
+		{
+			"name": "idle",
+			"prefix": "idle",
+			"fps": 24,
+			"looped": false,
+			"offset": [0, 0],
+			"directional_offset": [0, 0], // Unused when the "Directional Camera" option is off
+		}
+	]
+}
