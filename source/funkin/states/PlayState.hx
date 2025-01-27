@@ -3549,7 +3549,7 @@ class PlayState extends MusicBeatState
 				continue;
 
 			var note:Note = {
-				var ret:Dynamic = callOnHScripts("onFieldInput", [this, column, hitNotes]);
+				var ret:Dynamic = callOnHScripts("onFieldInput", [field, column, hitNotes]);
 				if (ret == Globals.Function_Stop) null;
 				else if (ret is Note) ret;
 				else field.input(column);
