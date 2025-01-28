@@ -87,6 +87,8 @@
 	<!--Anything marked as deprecated should be removed after a major or minor version but not after patches. (major.minor.patch)-->
     <define name="ALLOW_DEPRECATION" unless="final"/>
 
+	<haxedef name="traceShaderLineNumbers"/>
+
     <icon path="art/iconOG.png" />
     <icon path="art/icon64.png" size='64' />
     <icon path="art/icon32.png" size='32' />
