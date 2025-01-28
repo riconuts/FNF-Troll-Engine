@@ -22,10 +22,26 @@ class SowyColor
 {
 	// These aren't part of FlxColor but i thought they could be useful
 	// honestly we should replace source/flixel/FlxColor.hx or w/e with one with these funcs
-	public static function toRGBArray(color:FlxColor)
-		return [color.red, color.green, color.blue];
+	public static function toRGBArray(color:FlxColor, ?resultArray:Array<Int>):Array<Int> {
+		var resultArray = resultArray ?? [];
+		resultArray[0] = color.red;
+		resultArray[1] = color.green;
+		resultArray[2] = color.blue;
+		resultArray[3] = color.alpha;
+		return resultArray;
+	}
 
-	public static function lerp(from:FlxColor, to:FlxColor, ratio:Float) // FlxColor.interpolate() exists -_-
+	public static function toFloatArray(color:FlxColor, ?resultArray:Array<Float>):Array<Float> {
+		var resultArray = resultArray ?? [];
+		resultArray[0] = color.redFloat;
+		resultArray[1] = color.greenFloat;
+		resultArray[2] = color.blueFloat;
+		resultArray[3] = color.alphaFloat;
+		return resultArray;
+	}
+
+	// FlxColor.interpolate exists but im keeping this anyways
+	public static function lerp(from:FlxColor, to:FlxColor, ratio:Float)
 		return FlxColor.fromRGBFloat(FlxMath.lerp(from.redFloat, to.redFloat, ratio), FlxMath.lerp(from.greenFloat, to.greenFloat, ratio),
 			FlxMath.lerp(from.blueFloat, to.blueFloat, ratio), FlxMath.lerp(from.alphaFloat, to.alphaFloat, ratio));
 
@@ -160,6 +176,15 @@ class SowyColor
 		color.black = val;
 		return color;
 	}
+
+	public static function multiply(lhs:FlxColor, rhs:FlxColor):FlxColor
+		return FlxColor.fromRGBFloat(lhs.redFloat * rhs.redFloat, lhs.greenFloat * rhs.greenFloat, lhs.blueFloat * rhs.blueFloat);
+
+	public static function add(lhs:FlxColor, rhs:FlxColor):FlxColor
+		return FlxColor.fromRGB(lhs.red + rhs.red, lhs.green + rhs.green, lhs.blue + rhs.blue);
+
+	public static function subtract(lhs:FlxColor, rhs:FlxColor):FlxColor
+		return FlxColor.fromRGB(lhs.red - rhs.red, lhs.green - rhs.green, lhs.blue - rhs.blue);
 
 	//
 	public static function getAnalogousHarmony(color:FlxColor)
