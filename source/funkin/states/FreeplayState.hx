@@ -157,8 +157,8 @@ class FreeplayState extends MusicBeatState
 			Song.loadSong(selectedSongData, curDiffStr, curDiffIdx);
 			
 			if (PlayState.SONG != null){
-				var instAsset = Paths.inst(PlayState.SONG.song); 
-				FlxG.sound.playMusic(instAsset);
+				var instAsset = Paths.track(PlayState.SONG.song, PlayState.SONG.tracks.inst[0]);
+				FlxG.sound.playMusic(instAsset, 0.6);
 			}
 		}
 	}
