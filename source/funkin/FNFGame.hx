@@ -4,6 +4,8 @@ import Main.resetSpriteCache;
 import funkin.scripts.Globals;
 import funkin.states.MusicBeatState;
 
+import flixel.util.typeLimit.NextState;
+
 #if CRASH_HANDLER
 import haxe.CallStack;
 import openfl.events.UncaughtErrorEvent;
@@ -28,7 +30,7 @@ import funkin.states.scripting.HScriptOverridenState;
 
 class FNFGame extends FlxGame
 {
-	public function new(gameWidth = 0, gameHeight = 0, ?initialState:Class<FlxState>, updateFramerate = 60, drawFramerate = 60, skipSplash = false, ?startFullscreen:Bool)
+	public function new(gameWidth = 0, gameHeight = 0, ?initialState:InitialState, updateFramerate = 60, drawFramerate = 60, skipSplash = false, ?startFullscreen:Bool)
 	{
 		@:privateAccess FlxG.initSave();
 		startFullscreen = startFullscreen ?? FlxG.save.data.fullscreen;
@@ -81,14 +83,14 @@ class FNFGame extends FlxGame
 	override function switchState():Void
 	{
 		#if SCRIPTABLE_STATES
-		if (_requestedState is MusicBeatState)
+		if (_nextState is MusicBeatState)
 		{
-			var ogState:MusicBeatState = cast _requestedState;
+			var ogState:MusicBeatState = cast _nextState;
 			var nuState = HScriptOverridenState.requestOverride(ogState);
 			
 			if (nuState != null) {
 				ogState.destroy();
-				_requestedState = nuState;
+				_nextState = nuState;
 			}
 		}
 		#end
@@ -154,8 +156,8 @@ class FNFGame extends FlxGame
 			print("Error destroying state: ", e);
 		}	
 		
-		_requestedState = new funkin.states.MainMenuState();
-		switchState();
+		FlxG.game._nextState = new funkin.states.MainMenuState();
+		FlxG.game.switchState();
 	}
 	#end
 }
