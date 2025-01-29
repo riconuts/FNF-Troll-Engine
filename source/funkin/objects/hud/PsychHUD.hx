@@ -210,8 +210,8 @@ class PsychHUD extends CommonHUD
 		{
 			if (scoreTxtTween != null)
 				scoreTxtTween.cancel();
-
-			judgeCounters.bump(judge.internalName);
+			if (judgeCounters != null)
+				judgeCounters.bump(judge.internalName);
 
 			scoreTxt.scale.x = 1.075;
 			scoreTxt.scale.y = 1.075;
@@ -230,8 +230,10 @@ class PsychHUD extends CommonHUD
 		{
 			case 'misses':
 				misses = val;
-				judgeCounters.bump('miss');
-				judgeCounters.setCount('miss', val);
+				if (judgeCounters != null) {
+					judgeCounters.bump('miss');
+					judgeCounters.setCount('miss', val);
+				}
 			
 			case 'totalNotesHit':
 				if (ClientPrefs.showWifeScore)
