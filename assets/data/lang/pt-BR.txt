@@ -6,7 +6,7 @@ difficultyName_hard=Difícil
 difficultyName_easy=Fácil
 ## Judgement-related keyS
 ## Translations for these would be:
-## Èpico, Írado, Boa, Ruim, Merda, Erro
+## Èpico, Írado, Boa, Ruim, Bosta, Erro
 tier5=Epic
 tier4=Sick
 tier3=Good
@@ -15,7 +15,7 @@ tier1=Shit
 tier0=Miss
 cb=Quebra de Combo
 ## Would be:
-## Épicos, Írados, Boas, Ruins, Merdas, Erros
+## Épicos, Írados, Boas, Ruins, Bostas, Erros
 tier5plural=Epics
 tier4plural=Sicks
 tier3plural=Goods
@@ -24,7 +24,7 @@ tier1plural=Shits
 tier0plural=Misses
 cbplural=Quebras de Combo
 ## Would be:
-## ÉP, ÍD, BA, RN, MD, ER
+## ÉP, ÍD, BA, RN, BT, ER
 tier5short=EP
 tier4short=SK
 tier3short=GD
