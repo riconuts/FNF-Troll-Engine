@@ -58,7 +58,7 @@ botplayMark=[AUTOMÁTICO]
 freeplayhint=Pressione CTRL para abrir o Menu de Modificadores | Pressione R para limpar seu recorde na música.
 ## Options stuff
 opt_display_noteOffset=Offset
-opt_display_ratingOffset=Offset do Judement
+opt_display_ratingOffset=Offset do Judgement
 opt_display_ruin=Estragar o Mod
 opt_display_hitsoundVolume=Volume do Hitsound
 opt_display_missVolume=Volume do som de Erro
