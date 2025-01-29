@@ -222,7 +222,7 @@ class FreeplayState extends MusicBeatState
 		selectedSongCharts = data.charts;
 		Paths.currentModDirectory = data.folder;
 
-		changeDifficulty(getNewDiffIdx(), true);
+		changeDifficulty(CoolUtil.updateDifficultyIndex(curDiffIdx, curDiffStr, selectedSongCharts), true);
 
 		var modBgGraphic = Paths.image('menuBGBlue');
 		reloadFont();
@@ -285,22 +285,6 @@ class FreeplayState extends MusicBeatState
 
 		selectedSong = '$selectedSongData-$curDiffStr';
 		refreshScore();
-	}
-
-	function getNewDiffIdx() {
-		var idx = selectedSongCharts.indexOf(curDiffStr);
-		if (idx != -1)
-			return idx;
-
-		idx = selectedSongCharts.indexOf("normal");
-		if (idx != -1)
-			return idx;
-
-		idx = selectedSongCharts.indexOf("hard");
-		if (idx != -1)
-			return idx;
-		
-		return FlxMath.maxInt(0, curDiffIdx);
 	}
 
 	override function draw()

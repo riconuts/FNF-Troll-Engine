@@ -8,6 +8,34 @@ import flixel.tweens.FlxEase;
 using StringTools;
 
 class CoolUtil {
+	// TIRED OF WRITING THIS FUCKING SHIT
+	public static function updateIndex(curIdx:Int, val:Int, length:Int) {
+		curIdx += val;
+
+		if (curIdx < 0)
+			curIdx += length;
+		else if (curIdx >= length)
+			curIdx %= length;
+
+		return curIdx;
+	}
+
+	public static function updateDifficultyIndex(curDiffIdx:Int, curDiffId:String, newDiffIds:Array<String>) {
+		var idx = newDiffIds.indexOf(curDiffId);
+		if (idx != -1)
+			return idx;
+
+		idx = newDiffIds.indexOf("normal");
+		if (idx != -1)
+			return idx;
+
+		idx = newDiffIds.indexOf("hard");
+		if (idx != -1)
+			return idx;
+		
+		return curDiffIdx < 0 ? 0 : curDiffIdx;
+	}
+
 	public static function prettyInteger(num:Int):String {
 		var buf = new StringBuf();
 
