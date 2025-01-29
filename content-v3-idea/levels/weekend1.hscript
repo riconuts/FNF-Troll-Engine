@@ -1,0 +1,6 @@
+function getDisplayedSongs(){
+    if(Highscore.weekCompleted.get("weekend-1", false) == true)
+        return ["Darnell", "Lit Up", "2hot", "Blazin'"];
+    
+    return ["Darnell", "Lit Up", "2hot"];
+}
