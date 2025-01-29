@@ -5,12 +5,6 @@ import flixel.graphics.FlxGraphic;
 import openfl.media.Sound;
 import openfl.display.BitmapData;
 
-#if sys
-import sys.FileSystem;
-import sys.io.Process;
-import haxe.io.BytesOutput;
-#end
-
 #if MULTICORE_LOADING
 import sys.thread.Thread;
 
@@ -225,10 +219,10 @@ class Cache
 		result = Sys.getEnv("NUMBER_OF_PROCESSORS");
 			
 		#elseif linux
-		result = runProcess("nproc", []);
+		result = Main.runProcess("nproc", []);
 		
 		if (result == null) {
-			var cpuinfo = runProcess("cat", [ "/proc/cpuinfo" ]);
+			var cpuinfo = Main.runProcess("cat", [ "/proc/cpuinfo" ]);
 			
 			if (cpuinfo != null) {
 				var split = cpuinfo.split("processor");
@@ -238,7 +232,7 @@ class Cache
 			
 		#elseif mac
 		var cores = ~/Total Number of Cores: (\d+)/;
-		var output = runProcess("/usr/sbin/system_profiler", ["-detailLevel", "full", "SPHardwareDataType"]);
+		var output = Main.runProcess("/usr/sbin/system_profiler", ["-detailLevel", "full", "SPHardwareDataType"]);
 		
 		if (cores.match(output))
 			result = cores.matched(1);
@@ -247,50 +241,4 @@ class Cache
 		var n:Null<Int> = (result == null) ? null : Std.parseInt(result);
 		(n == null) ? 1 : n;
 	}
-
-	#if sys
-	// https://github.com/openfl/hxp/blob/master/src/hxp/System.hx
-	@:unreflective
-	private inline static function runProcess(command:String, args:Array<String>):Null<String> {
-		var argString = "";
-		for (arg in args) {
-			if (arg.indexOf(" ") != -1)
-				argString += " \"" + arg + "\"";
-			else
-				argString += " " + arg;
-		}
-
-		var process = new Process(command, args);
-		var buffer = new BytesOutput();
-		var waiting = true;
-
-		while (waiting) {
-			try {
-				var current = process.stdout.readAll(1024);
-				buffer.write(current);
-
-				if (current.length == 0)
-					waiting = false;
-			} catch (e) {
-				waiting = false;
-			}
-		}
-
-		var result = process.exitCode();
-		var output = buffer.getBytes().toString();
-		var retVal:Null<String> = output;
-
-		if (output == "") {
-			var error = process.stderr.readAll().toString();
-			process.close();
-
-			if (result != 0 || error != "")
-				retVal = null;
-		} else {
-			process.close();
-		}
-		
-		return retVal;
-	}
-	#end
 }
