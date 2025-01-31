@@ -244,6 +244,39 @@ class ChartingState extends MusicBeatState
 	public static var vortex:Bool = false;
 	public var mouseQuant:Bool = false;
 
+	// move notes to their corresponding sections
+	// ok not adding it yet because it doesn't change the note column to accomodate mustHitSection changes
+	function fixNotes() {
+		var allSections:Array<SwagSection> = _song.notes;
+		var allNotes:Array<Array<Dynamic>> = [];
+		var sectionStarts:Array<Float> = [];
+		
+		var beat:Float = 0;
+		for (i => section in allSections) {			
+			while (section.sectionNotes.length > 0)
+				allNotes.push(section.sectionNotes.pop());
+			
+			sectionStarts[i] = (Conductor.stepToMs(beat * 4));
+			beat += getSectionBeats(i);
+		}
+		
+		allNotes.sort((a, b) -> return Std.int(b[0] - a[0])); // descending order
+
+		var curSection = 0;
+		while (allNotes.length > 0) {
+			var note:Array<Dynamic> = allNotes.pop();
+			var noteTime:Float = note[0];
+
+			for (i => sectionStart in sectionStarts) {
+				if (noteTime >= sectionStart) {
+					curSection = i;		
+				}
+			}
+
+			allSections[curSection].sectionNotes.push(note); 
+		}
+	}
+
 	override function create()
 	{
 		instance = this;
@@ -255,8 +288,7 @@ class ChartingState extends MusicBeatState
 
 		if (PlayState.SONG != null){
 			_song = PlayState.SONG;
-			offset = _song.offset == null ? 0 : _song.offset;
-		
+			offset = _song.offset == null ? 0 : _song.offset;		
 		}else {
 			PlayState.SONG = _song = {
 				song: 'Test',
@@ -1744,7 +1776,7 @@ class ChartingState extends MusicBeatState
 
 	var updatedSection:Bool = false;
 
-	function setSectionStartTime(sec:Int = 0):Float
+	function getSectionStartTime(sec:Int):Float
 	{
 		var daBPM:Float = _song.bpm;
 		var daPos:Float = 0;
@@ -1757,28 +1789,13 @@ class ChartingState extends MusicBeatState
 			if (_song.notes[i].changeBPM)
 				daBPM = _song.notes[i].bpm;
 			
-			daPos += getSectionBeats(i) * (1000 * 60 / daBPM);		
+			daPos += getSectionBeats(i) * (1000 * 60 / daBPM);
 		}
 		return daPos;
 	}
 
-	function sectionStartTime(add:Int = 0):Float
-	{
-		var daBPM:Float = _song.bpm;
-		var daPos:Float = 0;
-
-		for (i in 0...curSec + add)
-		{
-			if(_song.notes[i] == null)
-				continue;
-			
-			if (_song.notes[i].changeBPM)
-				daBPM = _song.notes[i].bpm;
-			
-			daPos += getSectionBeats(i) * (1000 * 60 / daBPM);		
-		}
-		return daPos;
-	}
+	inline function sectionStartTime(add:Int = 0):Float
+		return getSectionStartTime(curSec + add);
 
 	function updateQuantization(){
 		quantization = quantizations[curQuant];
@@ -2225,9 +2242,9 @@ class ChartingState extends MusicBeatState
 		if (FlxG.keys.pressed.SHIFT)
 			shiftThing = 4;
 
-		for(i in curSec ... curSec + shiftThing + 1){
-			if(_song.notes[i] == null){
-				if(setSectionStartTime(i) < inst.length)
+		for (i in curSec ... curSec + shiftThing + 1) {
+			if (_song.notes[i] == null) {
+				if (getSectionStartTime(i) < inst.length)
 					insertSection(i);
 			}
 		}
