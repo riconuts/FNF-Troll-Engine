@@ -24,11 +24,6 @@ import openfl.display.ShaderParameterType;
  */
 class FlxRuntimeShader extends FlxShader
 {
-	#if FLX_DRAW_QUADS
-	// We need to add stuff from FlxGraphicsShader too!
-	#else
-	// Only stuff from openfl.display.Shader is needed
-	#end
 	// These variables got copied from openfl.display.GraphicsShader
 	// and from flixel.graphics.tile.FlxGraphicsShader,
 	// and probably won't change ever.
@@ -73,8 +68,6 @@ class FlxRuntimeShader extends FlxShader
 		uniform vec2 openfl_TextureSize;
 		uniform sampler2D bitmap;
 	"
-
-	#if FLX_DRAW_QUADS
 	// Add on more stuff!
 	+ "
 		uniform bool hasTransform;
@@ -108,10 +101,7 @@ class FlxRuntimeShader extends FlxShader
 			return vec4(0.0, 0.0, 0.0, 0.0);
 		}
 	";
-	#else
-	// No additional data.
-	;
-	#end
+
 	static final BASE_FRAGMENT_BODY:String = "
 		vec4 color = texture2D (bitmap, openfl_TextureCoordv);
 		if (color.a == 0.0) {
@@ -134,7 +124,6 @@ class FlxRuntimeShader extends FlxShader
 		}
 	";
 
-	#if FLX_DRAW_QUADS
 	static final DEFAULT_FRAGMENT_SOURCE:String = "
 		#pragma header
 		
@@ -143,16 +132,7 @@ class FlxRuntimeShader extends FlxShader
 			gl_FragColor = flixel_texture2D(bitmap, openfl_TextureCoordv);
 		}
 	";
-	#else
-	static final DEFAULT_FRAGMENT_SOURCE:String = "
-		#pragma header
-		void main(void) {
-			#pragma body
-		}
-	";
-	#end
 
-	#if FLX_DRAW_QUADS
 	static final DEFAULT_VERTEX_SOURCE:String = "
 		#pragma header
 		
@@ -174,14 +154,6 @@ class FlxRuntimeShader extends FlxShader
 			}
 		}
 	";
-	#else
-	static final DEFAULT_VERTEX_SOURCE:String = "
-		#pragma header
-		void main(void) {
-			#pragma body
-		}
-	";
-	#end
 
 	static final PRAGMA_HEADER:String = "#pragma header";
 	static final PRAGMA_BODY:String = "#pragma body";
