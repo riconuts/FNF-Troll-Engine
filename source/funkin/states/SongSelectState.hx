@@ -193,8 +193,13 @@ class SongSelectState extends MusicBeatState
 			
 			if (charts.length > 1)
 				MusicBeatState.switchState(new SongChartSelec(songMeta[curSel], charts));
-			else if (charts.length > 0)
-				Song.playSong(songMeta[curSel], charts[0], 0);
+			else if (charts.length > 0) {
+				Song.loadSong(songMeta[curSel], charts[0], 0);
+				if (FlxG.keys.pressed.SHIFT)
+					LoadingState.loadAndSwitchState(new funkin.states.editors.ChartingState());
+				else
+					LoadingState.loadAndSwitchState(new PlayState());
+			}
 			else{
 				trace("no charts!");
 				songText[curSel].alpha = 0.6;
@@ -263,7 +268,11 @@ class SongChartSelec extends MusicBeatState
 			MusicBeatState.switchState(new FreeplayState());
 		else if (controls.ACCEPT){
 			var daDiff = alts[curSel];
-			Song.playSong(songMeta, (daDiff=="normal") ? null : daDiff, curSel);
+			Song.loadSong(songMeta, (daDiff=="normal") ? null : daDiff, curSel);
+			if (FlxG.keys.pressed.SHIFT)
+				LoadingState.loadAndSwitchState(new funkin.states.editors.ChartingState());
+			else
+				LoadingState.loadAndSwitchState(new PlayState());
 		}
 
 		super.update(e);
