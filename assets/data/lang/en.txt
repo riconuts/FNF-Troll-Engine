@@ -3,10 +3,14 @@
 ## Alternatively, you can do a pull request! You can also do a pull request if you want to add other languages, too!
 ## Comments are defined with ## or //
 
+## Difficulty Names
 difficultyName_normal=Normal
 difficultyName_hard=Hard
 difficultyName_easy=Easy
-## Judgement-related keyS
+difficultyName_erect=Erect
+difficultyName_nightmare=Nightmare
+
+## Judgement-related keys
 tier5=Epic
 tier4=Sick
 tier3=Good
@@ -117,6 +121,18 @@ opt_display_judgeCounter=Judgement Counter
 opt_display_hudPosition=HUD Position
 opt_display_discordRPC=Discord RPC
 opt_display_autoPause=Auto-pausing
+opt_display_songVolume=Music Volume
+opt_display_songSyncMode=Sync Mode
+opt_display_sfxVolume=SFX Volume
+opt_display_masterVolume=Master Volume
+opt_display_botplayMarker=Botplay Mark
+opt_display_accuracyCalc=Accuracy Calculation
+opt_desc_songVolume=The volume of music.
+opt_desc_songSyncMode=The method used to sync the music to the game.\nOnly touch this if your game is going off-sync.
+opt_desc_sfxVolume=The volume of the sound effects.
+opt_desc_masterVolume=The volume of the game.
+opt_desc_botplayMarker=How to display the Botplay mark.
+opt_desc_accuracyCalc=The method used to calculate your song accuracy. Wife3 is Etterna's and PBot is V-Slice's.
 opt_desc_noteOffset=How much to offset notes, song events, etc.
 opt_desc_ratingOffset=How much to offset hit windows.
 opt_desc_ruin=Makes the mod really good! improves the mod alot!! the name is a joke guys it makes the mod REALLY REALLY good its not blammed lights i swear
@@ -227,3 +243,27 @@ control_default=Reset to Defaults
 control_rebind=Press any key to bind, or press {cancelKey} to cancel.
 control_unbind=Press {unbindKey} to unbind.
 control_binding=CURRENTLY BINDING {controlNameUpper}
+reset_score_dialog=Reset the score of {name}?
+gameplay_modifier_botplay=Botplay
+gameplay_modifier_disableModcharts=Disable Modcharts
+gameplay_modifier_healthgain=Health Gain Multiplier
+gameplay_modifier_healthloss=Health Loss Multiplier
+gameplay_modifier_holdsgivehp=Holds Give Health
+gameplay_modifier_instaRespawn=Instant Respawn
+gameplay_modifier_instakill=Instakill on Miss
+gameplay_modifier_noDropPenalty=Hold Drop Doesn't Miss
+gameplay_modifier_opponentPlay=Opponent Mode
+gameplay_modifier_perfect=Perfect Mode
+gameplay_modifier_practice=Practice Mode
+gameplay_modifier_scrollspeed=Scroll Speed
+gameplay_modifier_scrolltype=Scroll Type
+gameplay_modifier_songspeed=Playback Rate
+pauseoption_change-modifiers=Change Modifiers
+pauseoption_end-song=End song
+pauseoption_exit-to-menu=Exit to menu
+pauseoption_leave-charting-mode=Leave charting mode
+pauseoption_options=Options
+pauseoption_restart-song=Restart Song
+pauseoption_resume=Resume
+pauseoption_skip-to=Skip to
+pauseoption_toggle-botplay=Toggle botplay
