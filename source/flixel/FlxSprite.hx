@@ -818,7 +818,8 @@ class FlxSprite extends FlxObject
 		if (dirty) // rarely
 			calcFrame(useFramePixels);
 
-		for (camera in getCamerasLegacy())
+		//for (camera in getCamerasLegacy())
+		for (camera in cameras)
 		{
 			if (!camera.visible || !camera.exists || !isOnScreen(camera))
 				continue;
@@ -1242,7 +1243,8 @@ class FlxSprite extends FlxObject
 	public function getGraphicMidpoint(?point:FlxPoint):FlxPoint
 	{
 		final rect = getGraphicBounds();
-		point = rect.getMidpoint(point);
+		(point ?? (point=FlxPoint.get())).set(rect.x + 0.5 * rect.width, rect.y + 0.5 * rect.height);
+		//point = rect.getMidpoint(point);
 		rect.put();
 		return point;
 	}
