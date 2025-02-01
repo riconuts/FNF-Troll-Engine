@@ -217,17 +217,6 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 		{
 			this.indices[prevIndicesLength + i] = indices[i] + prevNumberOfVertices;
 		}
-		#if openfl_legacy
-		if (colored)
-		{
-			for (i in 0...numberOfVertices)
-			{
-				this.colors[prevColorsLength + i] = colors[i];
-			}
-
-			colorsPosition += numberOfVertices;
-		}
-		#end
 
 		verticesPosition += verticesLength;
 		indicesPosition += indicesLength;
