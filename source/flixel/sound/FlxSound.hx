@@ -37,14 +37,14 @@ import openfl.utils.AssetType;
  */
 
 enum SoundContext {
-    SFX;
-    MUSIC;
-    MISC;
+	SFX;
+	MUSIC;
+	MISC;
 }
 class FlxSound extends FlxBasic
 {
 	public static var defaultPitch:Float = 1;
-    
+	
 	public var context:SoundContext = SFX;
 
 	var effectAux:ALAuxiliaryEffectSlot = AL.createAux(); // TODO: add removeAux
@@ -623,11 +623,11 @@ class FlxSound extends FlxBasic
 	{
 		if (_transform != null)
 		{
-            var mod:Float = 1;
-            if(context == SFX)
-                mod = ClientPrefs.sfxVolume;
-            else if(context == MUSIC)
-                mod = ClientPrefs.songVolume;
+			var mod:Float = 1;
+			if(context == SFX)
+				mod = ClientPrefs.sfxVolume;
+			else if(context == MUSIC)
+				mod = ClientPrefs.songVolume;
 
 			_transform.volume = #if FLX_SOUND_SYSTEM (FlxG.sound.muted ? 0 : 1) * FlxG.sound.volume * #end
 				(group != null ? group.volume : 1) * _volume * _volumeAdjust * mod;
@@ -639,7 +639,8 @@ class FlxSound extends FlxBasic
 		}
 	}
 
-	inline function get_audioSource(){
+	inline function get_audioSource()
+	{
 		@:privateAccess
 		#if (openfl < "9.3.2")
 		return _channel.__source;
@@ -648,10 +649,12 @@ class FlxSound extends FlxBasic
 		#end
 	}
 
-	function updateFilter(){
+	function updateFilter()
+	{
 		#if !(flash || js || html5)
 		@:privateAccess
-		if (_channel != null){
+		if (_channel != null)
+		{
 			var source = get_audioSource();
 			if (source == null)
 				return;
@@ -665,17 +668,20 @@ class FlxSound extends FlxBasic
 		#end
 	}
 
-	function updateEffect(){
+	function updateEffect()
+	{
 		#if !(flash || js || html5)
 		@:privateAccess
-		if (_channel != null){
+		if (_channel != null)
+		{
 			var source = get_audioSource();
 			if (source == null)
 				return;
 
 			var handle = source.__backend.handle;
 
-			if (effect != null){
+			if (effect != null)
+			{
 				var cffi:CFFIPointer = cast filter;
 				AL.auxi(effectAux, AL.EFFECTSLOT_EFFECT, effect);
 				AL.source3i(handle, AL.AUXILIARY_SEND_FILTER, effectAux, 0, filter == null ? AL.FILTER_NULL : Std.int(cffi.get()));
@@ -835,7 +841,8 @@ class FlxSound extends FlxBasic
 	function set_pitch(v:Float):Float
 	{
 		@:privateAccess
-		if (_channel != null){
+		if (_channel != null)
+		{
 			var source = get_audioSource();
 			if (source != null)
 				source.pitch = v;
