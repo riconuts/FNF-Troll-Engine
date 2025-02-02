@@ -175,7 +175,7 @@ class Main extends Sprite
 
 	#if sys
 	// https://github.com/openfl/hxp/blob/master/src/hxp/System.hx
-	@:unreflective private static function runProcess(command:String, ?args:Array<String>):Null<String> {
+	public static function runProcess(command:String, ?args:Array<String>):Null<String> {
 		var process = new Process(command, args);
 		var buffer = new BytesOutput();
 		var waiting = true;
