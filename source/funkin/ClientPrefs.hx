@@ -591,7 +591,7 @@ class ClientPrefs
 				display: "Max Framerate",
 				desc: "The highest framerate the game can hit.",
 				type: Number,
-				value: #if !macro FlxG.stage!=null ? FlxG.stage.application.window.displayMode.refreshRate : #end 60,
+				value: #if (!macro && !linux) FlxG.stage!=null ? FlxG.stage.application.window.displayMode.refreshRate : #end 60,
 				data: ["suffix" => " FPS", "min" => 30, "max" => 360, "step" => 1,]
 			},
 			"lowQuality" => {
@@ -800,7 +800,7 @@ class ClientPrefs
 	static var optionSave:FlxSave = new FlxSave();
 
 	public static function initialize(){
-		defaultOptionDefinitions.get("framerate").value = FlxG.stage.application.window.displayMode.refreshRate;
+		defaultOptionDefinitions.get("framerate").value = #if linux 60 #else FlxG.stage.application.window.displayMode.refreshRate #end;
 		//locale = openfl.system.Capabilities.language;
 
 		optionSave.bind("options_v2");
