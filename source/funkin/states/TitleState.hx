@@ -212,6 +212,7 @@ class TitleState extends MusicBeatState
 			camFollowPos.setPosition(camPos[0], camPos[1]);
 
 			add(bg);
+			add(bg.foreground);
 		}else{
 			camGame.bgColor = 0xFF000000;
 		}
