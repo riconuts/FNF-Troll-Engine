@@ -106,15 +106,7 @@ class FNFGame extends FlxGame
 	private function onCrash(errorName:String):Void {
 		print("\nCall stack starts below");
 
-		var callstack:String = "";
-		for (stackItem in CallStack.exceptionStack(true)) {
-			switch (stackItem) {
-				case FilePos(s, file, line, column):
-					callstack += '$file:$line\n';
-				default:
-			}
-		}
-
+		var callstack:String = Main.callstackToString(CallStack.exceptionStack(true));
 		print('\n$callstack\n$errorName');
 
 		////
