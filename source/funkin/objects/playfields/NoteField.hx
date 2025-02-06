@@ -143,6 +143,8 @@ class NoteField extends FieldBase
 
 		zoom = modManager.getFieldZoom(baseZoom, curDecBeat, (Conductor.songPosition - ClientPrefs.noteOffset), modNumber, this);
 		var notePos:Map<Note, Vector3> = [];
+		// can probably do orient a better way eventually buti m fuckinbg lazy rn
+		var nextNotePos:Map<Note, Vector3> = []; // for orient
 		var taps:Array<Note> = [];
 		var holds:Array<Note> = [];
 		var drawMod = modManager.get("drawDistance");
@@ -150,7 +152,8 @@ class NoteField extends FieldBase
 		var multAllowed = modManager.get("disableDrawDistMult");
 		if (multAllowed == null || multAllowed.getValue(modNumber) == 0)
 			drawDist *= drawDistMod;
-
+		var lookAheadTime = modManager.getValue("lookAheadTime", modNumber);
+		
 		for (daNote in field.spawnedNotes)
 		{
 			if (!daNote.alive || !daNote.visible)
@@ -189,6 +192,13 @@ class NoteField extends FieldBase
 
 					if (!daNote.copyY)
 						pos.y = daNote.y;
+
+					if (modManager.getValue("orient", modNumber) != 0){
+		
+
+						var nextPos = modManager.getPos(visPos + lookAheadTime, diff + lookAheadTime, curDecBeat, daNote.column, modNumber, daNote, this, perspectiveArrDontUse); // perspectiveDONTUSE is excluded because its code is done in the modifyVert function
+						nextNotePos.set(daNote, nextPos);
+					}
 					
 					notePos.set(daNote, pos);
 					taps.push(daNote);
@@ -219,7 +229,7 @@ class NoteField extends FieldBase
 		for (note in taps)
 		{
 			var pos = notePos.get(note);
-			var object = drawNote(note, pos);
+			var object = drawNote(note, pos, nextNotePos.get(note));
 			if (object == null)
 				continue;
 			object.zIndex = pos.z + note.zIndex;
@@ -366,7 +376,7 @@ class NoteField extends FieldBase
 		}
 	}
 
-	function getPoints(hold:Note, ?wid:Float, speed:Float, vDiff:Float, diff:Float):Array<Vector3>
+	function getPoints(hold:Note, ?wid:Float, speed:Float, vDiff:Float, diff:Float, ?lookAhead:Float = 1):Array<Vector3>
 	{ // stolen from schmovin'
 		if (hold.frame == null)
 			return [Vector3.ZERO, Vector3.ZERO];
@@ -403,7 +413,7 @@ class NoteField extends FieldBase
 			return [p1.add(quad0, quad0), p1.add(quad1, quad1), p1];
 		}
 
-		var p2 = modManager.getPos(-(vDiff + 1) * speed, diff + 1, curDecBeat, hold.column, modNumber, hold, this, []);
+		var p2 = modManager.getPos(-(vDiff + lookAhead) * speed, diff + lookAhead, curDecBeat, hold.column, modNumber, hold, this, []);
 		p2.z = 0;
 
 		p2.decrementBy(p1);
@@ -468,6 +478,8 @@ class NoteField extends FieldBase
 		var zIndex:Float = basePos.z + hold.zIndex;
 		var sv = PlayState.instance.getSV(hold.strumTime).speed;
 
+		var lookAheadTime = modManager.getValue("lookAheadTime", modNumber);
+
 		for (sub in 0...holdSubdivisions)
 		{
 			var prog = sub / (holdSubdivisions + 1);
@@ -508,8 +520,8 @@ class NoteField extends FieldBase
 				glows.push(info.glow);
 			}
 
-			var top = lastMe ?? getPoints(hold, topWidth, speed, (visualDiff + (strumOff * 0.45)), strumDiff + strumOff);
-			var bot = getPoints(hold, botWidth, speed, (visualDiff + ((strumOff + strumSub) * 0.45)), strumDiff + strumOff + strumSub);
+			var top = lastMe ?? getPoints(hold, topWidth, speed, (visualDiff + (strumOff * 0.45)), strumDiff + strumOff, lookAheadTime);
+			var bot = getPoints(hold, botWidth, speed, (visualDiff + ((strumOff + strumSub) * 0.45)), strumDiff + strumOff + strumSub, lookAheadTime);
 			if(!hold.copyY){
 				if(lastMe == null){
 					top[0].y -= FlxMath.lerp(0, (crotchet + 1) * 0.45 * speed, prog);
@@ -622,7 +634,7 @@ class NoteField extends FieldBase
 	private var quad1 = new Vector3(); // top right
 	private var quad2 = new Vector3(); // bottom left
 	private var quad3 = new Vector3(); // bottom right
-	function drawNote(sprite:NoteObject, pos:Vector3):Null<RenderObject>
+	function drawNote(sprite:NoteObject, pos:Vector3, ?nextPos:Vector3):Null<RenderObject>
 	{
 		if (!sprite.visible || !sprite.alive)
 			return null;
@@ -691,11 +703,21 @@ class NoteField extends FieldBase
 				default: null;
 			};
 			var angle = sprite.angle;
+			var radAngles:Float = 0;
+
+			if (nextPos != null){
+				var diffX = nextPos.x - pos.x;
+				var diffY = nextPos.y - pos.y;
+				var orient = modManager.getValue("orient", modNumber);
+
+				radAngles += Math.atan2(diffY, diffX) * orient;
+				angle -= 90 * orient;
+			}
 
 			if(isNote)
 				angle += note.typeOffsetAngle;
 			
-			var vert = VectorHelpers.rotateV3(quad, 0, 0, FlxAngle.TO_RAD * angle, quad);
+			var vert = VectorHelpers.rotateV3(quad, 0, 0, (FlxAngle.TO_RAD * angle) + radAngles, quad);
 			vert.x = vert.x + sprite.offsetX;
 			vert.y = vert.y + sprite.offsetY;
 

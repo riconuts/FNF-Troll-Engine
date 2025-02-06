@@ -77,7 +77,10 @@ class FNFGame extends FlxGame
 		super.update();
 
 		if (FlxG.keys.justPressed.F5)
-			MusicBeatState.resetState();
+			if(FlxG.keys.pressed.SHIFT)
+				FlxG.switchState(new funkin.states.MainMenuState());
+			else
+				MusicBeatState.resetState();
 	}
 
 	override function switchState():Void

@@ -89,7 +89,8 @@ class ModManager {
 			PathModifier,
 			AccelModifier,
 			PerspectiveModifier,
-			ZoomModifier
+			ZoomModifier,
+			SnapModifier
 		];
 		for (mod in quickRegs)
 			quickRegister(Type.createInstance(mod, [this]));
@@ -97,6 +98,12 @@ class ModManager {
 		quickRegister(new RotateModifier(this));
 		quickRegister(new RotateModifier(this, 'center', new Vector3(FlxG.width* 0.5, FlxG.height* 0.5)));
 		quickRegister(new LocalRotateModifier(this, 'local'));
+
+		registerAux("orient");
+		registerAux("lookAheadTime"); // used for holds and orient
+		
+		registerAux("centeredPath");
+		registerAlias("centered2", "centeredPath");
 
 		registerAux("noteSpawnTime");
 		registerAux("drawDistance");
@@ -149,7 +156,13 @@ class ModManager {
 		setValue("scaleX", 1, mN);
 		setValue("scaleY", 1, mN);
 
-		setValue("movePastReceptors", 0);
+		setValue("lookAheadTime", 1, mN);
+
+		setValue("snapXInterval", 1, mN);
+		setValue("snapYInterval", 1, mN);
+		setValue("snapZInterval", 1, mN);
+
+		setValue("movePastReceptors", 0, mN);
 		setValue("flashR", 1, mN);
 		setValue("flashG", 1, mN);
 		setValue("flashB", 1, mN);
@@ -562,6 +575,8 @@ class ModManager {
 		
 		if (pos == null)
 			pos = new Vector3();
+
+		diff += getValue("centeredPath", player) * Note.swagWidth; // Each 100% moves the path by receptor size
 		
 		pos.setTo(
 			Note.halfWidth + getBaseX(data, player, field.field.keyCount),
