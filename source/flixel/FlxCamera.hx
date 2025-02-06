@@ -1230,7 +1230,7 @@ class FlxCamera extends FlxBasic
 		{
 			target.getMidpoint(_point);
 			_point.addPoint(targetOffset);
-			_scrollTarget.set(_point.x - width * 0.5, _point.y - height * 0.5);
+			focusOn(_point);
 		}
 		else
 		{
@@ -1240,22 +1240,22 @@ class FlxCamera extends FlxBasic
 
 			if (style == SCREEN_BY_SCREEN)
 			{
-				if (targetX >= viewRight)
+				if (targetX >= (_scrollInternal.x + width))
 				{
-					_scrollTarget.x += viewWidth;
+					_scrollTarget.x += width;
 				}
-				else if (targetX + target.width < viewLeft)
+				else if (targetX < _scrollInternal.x)
 				{
-					_scrollTarget.x -= viewWidth;
+					_scrollTarget.x -= width;
 				}
 
-				if (targetY >= viewBottom)
+				if (targetY >= (_scrollInternal.y + height))
 				{
-					_scrollTarget.y += viewHeight;
+					_scrollTarget.y += height;
 				}
-				else if (targetY + target.height < viewTop)
+				else if (targetY < _scrollInternal.y)
 				{
-					_scrollTarget.y -= viewHeight;
+					_scrollTarget.y -= height;
 				}
 				
 				// without this we see weird behavior when switching to SCREEN_BY_SCREEN at arbitrary scroll positions
