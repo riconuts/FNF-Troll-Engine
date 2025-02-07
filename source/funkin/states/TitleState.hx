@@ -73,17 +73,13 @@ class TitleState extends MusicBeatState
 	public var boyfriend:FakeCharacter = new FakeCharacter();
 	public var inCutscene:Bool = false;
 
-	var curWacky:Array<String> = [];
-
-	var blackScreen:FlxSprite;
-	var textGroup:FlxTypedGroup<Alphabet>;
-	var ngSpr:FlxSprite;
-	var blurFilter:BlurFilter;
+	var intro:IntroSequenceGroup;
 
 	var logoBl:TitleLogo;
 	var titleText:FlxSprite;
 	var swagShader:ColorSwap = null;
 	var bg:Stage;
+	var darkness:FlxSprite;
 
 	//
 	var titleTextColors:Array<FlxColor> = [0xFF33FFFF, 0xFF3333CC];
@@ -96,7 +92,8 @@ class TitleState extends MusicBeatState
 	public var camFollow:FlxPoint;
 	public var camFollowPos:FlxObject;
 
-	var darkness:FlxSprite;
+	var blurFilter:BlurFilter;
+
 	override public function create():Void
 	{
 		if (initialized)
@@ -197,40 +194,16 @@ class TitleState extends MusicBeatState
 		add(titleText);
 
 		////
-		blackScreen = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
-		blackScreen.scale.set(FlxG.width, FlxG.height);
-		blackScreen.updateHitbox();
-		blackScreen.cameras = [camHUD];
-		add(blackScreen);
-		
-		FlxTween.tween(blackScreen, {alpha: 0.86}, Conductor.crochet * 0.005, {
-			ease: FlxEase.quadInOut,
-			songBased: true,
-		});
-
-		//
-		textGroup = new FlxTypedGroup<Alphabet>();
-		textGroup.cameras = [camHUD];
-		add(textGroup);
-		
-		//
-		curWacky = FlxG.random.getObject(getIntroTextShit());
-
-		//
-		ngSpr = new FlxSprite(0, FlxG.height * 0.52, Paths.image('newgrounds_logo'));
-		ngSpr.exists = false;
-		ngSpr.scale.set(0.8, 0.8);
-		ngSpr.updateHitbox();
-		ngSpr.screenCenter(X);
-		ngSpr.cameras = [camHUD];
-		add(ngSpr);
-		
-		////
 		if (initialized){
 			Paths.clearUnusedMemory();
 			skipIntro();
 		}else{
 			initialized = true;
+
+			intro = new IntroSequenceGroup();
+			intro.camera = camHUD;
+			add(intro);
+			
 			generateSequence();
 		}
 	}
@@ -240,32 +213,43 @@ class TitleState extends MusicBeatState
 
 	function generateSequence() {
 		// this could prob be replaced with a json, yaml or even a whole "TitleSequence" script?? :shrug:
-		queueOnBeat(0, clearLines);
-		queueOnBeat(0, playMusic.bind(null));
-		queueNewLineOnBeat(0, 'troll engine by', -15);
-		queueNewLineOnBeat(0, 'riconuts', -8);
-		queueNewLineOnBeat(0, 'nebula_zorua', -8);
 
-		queueNewLineOnBeat(3, 'and more', -8);
-		queueOnBeat(4, clearLines);
+		var ngSpr = new FlxSprite(0, FlxG.height * 0.52, Paths.image('newgrounds_logo'));
+		ngSpr.exists = false;
+		ngSpr.scale.set(0.8, 0.8);
+		ngSpr.updateHitbox();
+		ngSpr.screenCenter(X);
+		ngSpr.cameras = [camHUD];
+		intro.add(ngSpr);
 
-		queueNewLineOnBeat(5, 'Without any', 40);
-		queueNewLineOnBeat(5, 'association to');
+		var curWacky = FlxG.random.getObject(getIntroTextShit());
 
-		queueNewLineOnBeat(7, "Newgrounds");
-		queueOnBeat(7, () -> ngSpr.exists = true);
+		intro.queueOnBeat(0, intro.clearLines);
+		intro.queueOnBeat(0, playMusic.bind(null));
+		intro.queueNewLineOnBeat(0, 'troll engine by', -15);
+		intro.queueNewLineOnBeat(0, 'riconuts', -8);
+		intro.queueNewLineOnBeat(0, 'nebula_zorua', -8);
 
-		queueOnBeat(8, () -> ngSpr.exists = false);
-		queueOnBeat(8, clearLines);
+		intro.queueNewLineOnBeat(3, 'and more', -8);
+		intro.queueOnBeat(4, intro.clearLines);
 
-		queueNewLineOnBeat(9, curWacky[0]);
-		queueNewLineOnBeat(11, curWacky[1]);
-		queueOnBeat(12, clearLines);
+		intro.queueNewLineOnBeat(5, 'Without any', 40);
+		intro.queueNewLineOnBeat(5, 'association to');
+
+		intro.queueNewLineOnBeat(7, "Newgrounds");
+		intro.queueOnBeat(7, () -> ngSpr.exists = true);
+
+		intro.queueOnBeat(8, () -> ngSpr.exists = false);
+		intro.queueOnBeat(8, intro.clearLines);
+
+		intro.queueNewLineOnBeat(9, curWacky[0]);
+		intro.queueNewLineOnBeat(11, curWacky[1]);
+		intro.queueOnBeat(12, intro.clearLines);
 		
-		queueNewLineOnBeat(13, "Friday");
-		queueNewLineOnBeat(14, "Night");
-		queueNewLineOnBeat(15, "Funkin");
-		queueOnBeat(16, skipIntro);
+		intro.queueNewLineOnBeat(13, "Friday");
+		intro.queueNewLineOnBeat(14, "Night");
+		intro.queueNewLineOnBeat(15, "Funkin");
+		intro.queueOnBeat(16, skipIntro);
 	}
 
 	public function playMusic(?key:String) {
@@ -276,91 +260,24 @@ class TitleState extends MusicBeatState
 			MusicBeatState.playMenuMusic(1, true);
 	}
 
-	public function getLineObj(i:Int = 0):Null<Alphabet> 
-	{
-		var l = textGroup.length;
-		if (l == 0) return null;
-		i = CoolUtil.updateIndex(l-1, -i, l);
-		return textGroup.members[i];
-	}
-
-	public function newLine(text:String, offset:Float = 0)
-	{
-		var lastObj = getLineObj();
-		var y = ((lastObj!=null) ? (lastObj.y+60) : 200) - offset;
-		var obj = new Alphabet(0, y, text, true);
-		obj.cameras = textGroup.cameras;
-		obj.screenCenter(X);
-		return textGroup.add(obj);
-	}
-
-	public function clearLines()
-	{
-		for (obj in textGroup)
-			obj.destroy();
-		textGroup.clear();
-	}
-
-	public function setLineText(i:Int = 0, text:String)
-	{
-		var obj = getLineObj(i);
-		if (obj != null) obj.text = text;
-	}
-
-	public function appendLineText(i:Int = 0, text:String)
-	{
-		var obj = getLineObj(i);
-		if (obj != null) obj.text += text;
-	}
-
 	var skippedIntro:Bool = false;
 	function skipIntro():Void
 	{
-		if (skippedIntro) return;
-		camGame.filters.remove(blurFilter);
+		if (skippedIntro) 
+			return;
 
+		if (intro != null) {
+			intro.destroy();
+			remove(intro);
+		}
+
+		camGame.filters.remove(blurFilter);
 		titleText.exists = true;
 		logoBl.exists = true;
-		
-		ngSpr.exists = false;
-		blackScreen.exists = false;
-		textGroup.exists = false;
 
 		camHUD.flash(FlxColor.WHITE, 4);
 		
 		skippedIntro = true;
-	}
-
-	var introEvents:Array<Array<Dynamic>> = [];
-	public function queueOnTime(time:Float, func:() -> Void)
-		introEvents.push([time, func]);
-
-	public function queueOnStep(step:Float, func:() -> Void)
-		queueOnTime(Conductor.stepToMs(step), func);
-
-	public function queueOnBeat(beat:Float, func:() -> Void)
-		queueOnStep(beat * 4, func);
-
-	public function queueNewLineOnBeat(beat:Float, text:String, offset:Float = 0)
-		queueOnBeat(beat, newLine.bind(text, offset));
-
-	private var introEventIdx:Int = 0;
-	private function updateIntro()
-	{
-		while (introEventIdx < introEvents.length) {
-			var event = introEvents[introEventIdx];
-
-			if (Conductor.songPosition < event[0]) 
-				break;
-
-			try {
-				event[1]();
-			}catch(e){
-				trace(curDecBeat, introEventIdx, e, event[1]);
-			}
-
-			introEventIdx++;
-		}
 	}
 
 	override function beatHit()
@@ -461,14 +378,11 @@ class TitleState extends MusicBeatState
 
 		titleTimer = (titleTimer + elapsed) % 2;
 
-		if (getPressedEnter())
-			skipIntro();
-
 		if (!skippedIntro) {
-			updateIntro();
+			if (getPressedEnter())
+				skipIntro();
 		}
-		else
-		{
+		else {
 			if (transitioning) {
 				if (getPressedEnter()) {
 					MusicBeatState.switchState(new MainMenuState());
@@ -572,5 +486,111 @@ class TitleLogo extends FlxSprite
 			titleNames.push("");
 
 		return titleNames;
+	}
+}
+
+class IntroSequenceGroup extends FlxTypedGroup<FlxBasic> {
+	var bg:FlxSprite;
+	var textGroup:FlxTypedGroup<Alphabet>;
+
+	public function new() {
+		super();
+
+		// kinda annoying
+		@:privateAccess 
+		this.cameras = FlxCamera._defaultCameras.copy();
+
+		//
+		bg = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
+		bg.scale.set(FlxG.width, FlxG.height);
+		bg.updateHitbox();
+		bg.cameras = this.cameras;
+		add(bg);
+		
+		FlxTween.tween(bg, {alpha: 0.86}, Conductor.crochet * 0.005, {
+			ease: FlxEase.quadInOut,
+			songBased: true,
+		});
+
+		//
+		textGroup = new FlxTypedGroup<Alphabet>();
+		textGroup.cameras = this.cameras;
+		add(textGroup);
+	}
+
+	////
+	public function getLineObj(i:Int = 0):Null<Alphabet> 
+	{
+		var l = textGroup.length;
+		if (l == 0) return null;
+		i = CoolUtil.updateIndex(l-1, -i, l);
+		return textGroup.members[i];
+	}
+
+	public function newLine(text:String, offset:Float = 0)
+	{
+		var lastObj = getLineObj();
+		var y = ((lastObj!=null) ? (lastObj.y+60) : 200) - offset;
+		var obj = new Alphabet(0, y, text, true);
+		obj.cameras = textGroup.cameras;
+		obj.screenCenter(X);
+		return textGroup.add(obj);
+	}
+
+	public function clearLines()
+	{
+		for (obj in textGroup)
+			obj.destroy();
+		textGroup.clear();
+	}
+
+	public function setLineText(i:Int = 0, text:String)
+	{
+		var obj = getLineObj(i);
+		if (obj != null) obj.text = text;
+	}
+
+	public function appendLineText(i:Int = 0, text:String)
+	{
+		var obj = getLineObj(i);
+		if (obj != null) obj.text += text;
+	}
+
+	////
+	var introEvents:Array<Array<Dynamic>> = [];
+	public function queueOnTime(time:Float, func:() -> Void)
+		introEvents.push([time, func]);
+
+	public function queueOnStep(step:Float, func:() -> Void)
+		queueOnTime(Conductor.stepToMs(step), func);
+
+	public function queueOnBeat(beat:Float, func:() -> Void)
+		queueOnStep(beat * 4, func);
+
+	public function queueNewLineOnBeat(beat:Float, text:String, offset:Float = 0)
+		queueOnBeat(beat, newLine.bind(text, offset));
+
+	private var introEventIdx:Int = 0;
+	private function updateIntro()
+	{
+		while (introEventIdx < introEvents.length) {
+			var event = introEvents[introEventIdx];
+
+			if (Conductor.songPosition < event[0]) 
+				break;
+
+			try {
+				event[1]();
+			}catch(e){
+				trace(e, introEventIdx, event);
+			}
+
+			introEventIdx++;
+		}
+	}
+
+	override function update(e) {
+		super.update(e);
+		updateIntro();
 	}
 }
