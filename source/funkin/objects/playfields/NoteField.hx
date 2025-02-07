@@ -58,7 +58,7 @@ class NoteField extends FieldBase
 		super(0, 0);
 		this.field = field;
 		this.modManager = modManager;
-		this.holdSubdivisions = Std.int(ClientPrefs.holdSubdivs) + 1;
+		this.holdSubdivisions = Std.int(ClientPrefs.holdSubdivs);
 	}
 
 	/**
@@ -341,6 +341,7 @@ class NoteField extends FieldBase
 				var multAlpha = this.alpha * ClientPrefs.noteOpacity;
 				for (n in 0... Std.int(vertices.length / 2)){
 					var glow = glows[n];
+
 					var transfarm:ColorTransform = new ColorTransform();
 					transfarm.redMultiplier = 1 - glow;
 					transfarm.greenMultiplier = 1 - glow;
@@ -515,15 +516,17 @@ class NoteField extends FieldBase
 			var topWidth = scalePoint.x * FlxMath.lerp(tWid, bWid, prog);
 			var botWidth = scalePoint.x * FlxMath.lerp(tWid, bWid, nextProg);
 
-			for (_ in 0...4) { // why was this keyCount lol??  
-				alphas.push(info.alpha);
-				glows.push(info.glow);
-			}
+			var alphaMult = hold.baseAlpha;
+
+			if (hold.parent.wasGoodHit && hold.holdGlow)
+				alphaMult = FlxMath.lerp(0.3, 1, hold.parent.tripProgress);
+			
+			info.alpha *= FlxMath.lerp(alphaMult, 1, info.glow);
 
 			var top = lastMe ?? getPoints(hold, topWidth, speed, (visualDiff + (strumOff * 0.45)), strumDiff + strumOff, lookAheadTime);
 			var bot = getPoints(hold, botWidth, speed, (visualDiff + ((strumOff + strumSub) * 0.45)), strumDiff + strumOff + strumSub, lookAheadTime);
-			if(!hold.copyY){
-				if(lastMe == null){
+			if (!hold.copyY) {
+				if (lastMe == null) {
 					top[0].y -= FlxMath.lerp(0, (crotchet + 1) * 0.45 * speed, prog);
 					top[1].y -= FlxMath.lerp(0, (crotchet + 1) * 0.45 * speed, prog);
 				}
@@ -531,6 +534,12 @@ class NoteField extends FieldBase
 				bot[1].y -= FlxMath.lerp(0, (crotchet + 1) * 0.45 * speed, nextProg);
 			}
 			lastMe = bot;
+
+			for (_ in 0...2) { // why was this keyCount lol??  
+				alphas.push(info.alpha);
+				glows.push(info.glow);
+			}
+
 			top[0].x += hold.offsetX + hold.typeOffsetX;
 			top[1].x += hold.offsetX + hold.typeOffsetX;
 			bot[0].x += hold.offsetX + hold.typeOffsetX;

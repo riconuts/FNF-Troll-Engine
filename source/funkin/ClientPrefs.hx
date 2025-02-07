@@ -365,12 +365,12 @@ class ClientPrefs
 			},
 			"holdSubdivs" => {
 				display: "Hold Subdivisions",
-				desc: "How many times each hold note should be subdivided. Higher numbers means more lag, but smoother holds.",
+				desc: "How many times each hold note should be subdivided. Higher numbers means more lag, but smoother holds.\nIf your PC is on the lower end, try to keep it below 12!",
 				type: Number,
 				value: 2,
 				data: [
 					"min" => 1,
-					"max" => 6,
+					"max" => 16,
 					"step" => 1
 				]
 			},
