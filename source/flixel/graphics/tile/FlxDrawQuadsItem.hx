@@ -1,5 +1,6 @@
 package flixel.graphics.tile;
 
+import openfl.display.Sprite;
 import flixel.FlxCamera;
 import flixel.graphics.frames.FlxFrame;
 import flixel.graphics.tile.FlxDrawBaseItem.FlxDrawItemType;
@@ -152,7 +153,7 @@ class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 	}
 
 	#if !flash
-	override public function render(camera:FlxCamera):Void
+	override public function render(sprite:Sprite, ?antialiasing:Bool = true, ?debugLayer:Sprite):Void
 	{
 		if (rects.length == 0)
 			return;
@@ -162,7 +163,7 @@ class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 			return;
 
 		shader.bitmap.input = graphics.bitmap;
-		shader.bitmap.filter = (camera.antialiasing || antialiasing) ? LINEAR : NEAREST;
+		shader.bitmap.filter = (antialiasing || this.antialiasing) ? LINEAR : NEAREST;
 		shader.alpha.value = alphas;
 
 		if (colored || hasColorOffsets)
@@ -184,12 +185,12 @@ class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 		setParameterValue(shader.hasColorTransform, colored || hasColorOffsets);
 
 		#if (openfl > "8.7.0")
-		camera.canvas.graphics.overrideBlendMode(blend);
+		sprite.graphics.overrideBlendMode(blend);
 		#end
-		camera.canvas.graphics.beginShaderFill(shader);
-		camera.canvas.graphics.drawQuads(rects, null, transforms);
+		sprite.graphics.beginShaderFill(shader);
+		sprite.graphics.drawQuads(rects, null, transforms);
 
-		super.render(camera);
+		super.render(sprite, antialiasing, debugLayer);
 	}
 
 	inline function setParameterValue(parameter:ShaderParameter<Bool>, value:Bool):Void

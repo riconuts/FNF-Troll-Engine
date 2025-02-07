@@ -90,7 +90,8 @@ class ModManager {
 			AccelModifier,
 			PerspectiveModifier,
 			ZoomModifier,
-			SnapModifier
+			SnapModifier,
+			SpiralModifier
 		];
 		for (mod in quickRegs)
 			quickRegister(Type.createInstance(mod, [this]));

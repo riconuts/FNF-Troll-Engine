@@ -1,5 +1,6 @@
 package flixel.graphics.tile;
 
+import openfl.display.Sprite;
 import flixel.FlxCamera;
 import flixel.graphics.frames.FlxFrame;
 import flixel.math.FlxMatrix;
@@ -57,7 +58,12 @@ class FlxDrawBaseItem<T>
 		nextTyped = null;
 	}
 
-	public function render(camera:FlxCamera):Void
+	public function renderCamera(camera:FlxCamera):Void
+	{
+		render(camera.canvas, camera.antialiasing#if FLX_DEBUG , camera.debugLayer #end);
+	}
+
+	public function render(sprite:Sprite, ?antialiasing:Bool = true, ?debugLayer:Sprite):Void
 	{
 		drawCalls++;
 	}

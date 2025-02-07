@@ -1,5 +1,6 @@
 package flixel.graphics.tile;
 
+import openfl.display.Sprite;
 import flixel.FlxCamera;
 import flixel.graphics.frames.FlxFrame;
 import flixel.graphics.tile.FlxDrawBaseItem.FlxDrawItemType;
@@ -62,7 +63,7 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 		#end
 	}
 
-	override public function render(camera:FlxCamera):Void
+	override public function render(sprite:Sprite, ?antialiasing:Bool = true, ?debugLayer:Sprite):Void
 	{
 		if (!FlxG.renderTile)
 			return;
@@ -73,7 +74,7 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 		#if !flash
 		var shader = shader != null ? shader : graphics.shader;
 		shader.bitmap.input = graphics.bitmap;
-		shader.bitmap.filter = (camera.antialiasing || antialiasing) ? LINEAR : NEAREST;
+		shader.bitmap.filter = (antialiasing || this.antialiasing) ? LINEAR : NEAREST;
 		shader.bitmap.wrap = REPEAT; // in order to prevent breaking tiling behaviour in classes that use drawTriangles
 		shader.alpha.value = alphas;
 
@@ -96,27 +97,27 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 		setParameterValue(shader.hasColorTransform, colored || hasColorOffsets);
 
 		#if (openfl > "8.7.0")
-		camera.canvas.graphics.overrideBlendMode(blend);
+		sprite.graphics.overrideBlendMode(blend);
 		#end
 
-		camera.canvas.graphics.beginShaderFill(shader);
+		sprite.graphics.beginShaderFill(shader);
 		#else
-		camera.canvas.graphics.beginBitmapFill(graphics.bitmap, null, true, (camera.antialiasing || antialiasing));
+		sprite.graphics.beginBitmapFill(graphics.bitmap, null, true, (antialiasing || this.antialiasing));
 		#end
 
-		camera.canvas.graphics.drawTriangles(vertices, indices, uvtData, TriangleCulling.NONE);
-		camera.canvas.graphics.endFill();
+		sprite.graphics.drawTriangles(vertices, indices, uvtData, TriangleCulling.NONE);
+		sprite.graphics.endFill();
 
 		#if FLX_DEBUG
-		if (FlxG.debugger.drawDebug)
+		if (FlxG.debugger.drawDebug && debugLayer != null)
 		{
-			var gfx:Graphics = camera.debugLayer.graphics;
+			var gfx:Graphics = debugLayer.graphics;
 			gfx.lineStyle(1, FlxColor.BLUE, 0.5);
 			gfx.drawTriangles(vertices, indices, uvtData);
 		}
 		#end
 
-		super.render(camera);
+		super.render(sprite, antialiasing, debugLayer);
 	}
 
 	override public function reset():Void
