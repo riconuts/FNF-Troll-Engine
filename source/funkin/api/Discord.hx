@@ -35,7 +35,8 @@ class DiscordClient
 
 	private static final mutex = new Mutex();
 	private static final waitMutex = new Mutex();
-	private static final thread:Thread = Thread.create(() ->{
+	private static final thread:Thread = Thread.create(threadLoop);
+	private static function threadLoop() {
 		var curId:String = "";
 		var isActive:Bool = false;
 
