@@ -28,13 +28,15 @@ private final defaultRPCInfo:DiscordRPCInfo = {
 	defaultSmallImageKey: 'none'
 };
 
+// this is kinda fucked up i think
 class DiscordClient
 {
 	private static var lastPresence:DiscordRichPresence;
 
 	private static final mutex = new Mutex();
 	private static final waitMutex = new Mutex();
-	private static final thread:Thread = Thread.create(() ->{
+	private static final thread:Thread = Thread.create(threadLoop);
+	private static function threadLoop() {
 		var curId:String = "";
 		var isActive:Bool = false;
 
@@ -81,7 +83,24 @@ class DiscordClient
 			mutex.release();
 			sleep(0.6);
 		}
-	});
+	}
+
+	private static function onReady(request:cpp.RawConstPointer<DiscordUser>)
+	{
+		var presence = DiscordRichPresence.create();
+		presence.details = "Presence Unknown";
+		DiscordRpc.UpdatePresence(cpp.RawConstPointer.addressOf(lastPresence));
+	}
+
+	private static function onError(_code:Int, _message:cpp.ConstCharStar)
+	{
+		trace('Error! $_code : $_message');
+	}
+
+	private static function onDisconnected(_code:Int, _message:cpp.ConstCharStar)
+	{
+		trace('Disconnected! $_code : $_message');
+	}
 
 	private static inline function wait_until_it_started() {
 		while (waitMutex.tryAcquire())
@@ -92,25 +111,32 @@ class DiscordClient
 		waitMutex.release();
 	}
 
+	public static function isActive():Bool {
+		if (waitMutex.tryAcquire()) {
+			waitMutex.release();
+			return false;
+		}
+		return true;
+	}
+
 	////
 	@:isVar private static var currentInfo(null, null):DiscordRPCInfo;
 	
 	public static function start(wait:Bool = false)
 	{
-		if (currentInfo == null) currentInfo = defaultRPCInfo;
-		thread.sendMessage(currentInfo.applicationId);
-		if (wait) wait_until_it_started();
+		if (!isActive()) {
+			currentInfo ??= defaultRPCInfo;
+			thread.sendMessage(currentInfo.applicationId);
+			if (wait) wait_until_it_started();
+		}
 	}
 
-	public static function setRPCInfo(info:DiscordRPCInfo) {
+	public static function setRPCInfo(info:DiscordRPCInfo, wait:Bool = false) {
 		currentInfo = info ?? defaultRPCInfo;
 
-		if (ClientPrefs.discordRPC) {
+		if (isActive()) {
 			thread.sendMessage(currentInfo.applicationId);
-			wait_until_it_started();
-		}else {
-			thread.sendMessage(false);
-			wait_until_it_shatdown();
+			if (wait) wait_until_it_started();
 		}
 		
 		return currentInfo; 
@@ -118,13 +144,18 @@ class DiscordClient
 
 	public static function shutdown(wait:Bool = false)
 	{
-		thread.sendMessage(false);
-		if (wait) wait_until_it_shatdown();
+		if (isActive()) {
+			thread.sendMessage(false);
+			if (wait) wait_until_it_shatdown();
+		}
 	}
 
 	////
 	public static function changePresence(details:String, ?state:String, ?largeImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float)
 	{
+		if (!isActive())
+			return;
+
 		////
 		var startTimestamp:Float = hasStartTimestamp ? Date.now().getTime() : 0;
 
@@ -154,21 +185,6 @@ class DiscordClient
 		mutex.release();
 		
 		// trace('Discord RPC Updated. Arguments: $details, $state, $largeImageKey, $hasStartTimestamp, $endTimestamp');
-	}
-
-	static function onReady(request:cpp.RawConstPointer<DiscordUser>)
-	{
-		changePresence("Presence Unknown");
-	}
-
-	static function onError(_code:Int, _message:cpp.ConstCharStar)
-	{
-		trace('Error! $_code : $_message');
-	}
-
-	static function onDisconnected(_code:Int, _message:cpp.ConstCharStar)
-	{
-		trace('Disconnected! $_code : $_message');
 	}
 }
 

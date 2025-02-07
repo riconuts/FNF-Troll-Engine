@@ -7,7 +7,7 @@ import haxe.macro.Expr.Field;
 
 using funkin.macros.Sowy;
 
-class FlxTextFormatterMacro
+class FlxTextFormatDataMacro
 {
 	//// https://code.haxe.org/category/macros/build-value-objects.html
 	public static function build()

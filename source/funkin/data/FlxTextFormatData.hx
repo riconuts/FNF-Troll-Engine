@@ -4,7 +4,7 @@ import flixel.text.FlxText;
 import funkin.Paths;
 
 @:structInit
-@:build(funkin.macros.FlxTextFormatterMacro.build())
+@:build(funkin.macros.FlxTextFormatDataMacro.build())
 class FlxTextFormatData{
 	public var fieldWidth:Null<Float> = null;
 	public var alignment:Null<FlxTextAlign> = null;
@@ -13,6 +13,7 @@ class FlxTextFormatData{
 	public var size:Null<Int> = null;
 	public var color:Null<Int> = null;
 	public var alpha:Null<Float> = null;
+	public var letterSpacing:Null<Float> = null;
 	
 	public var borderStyle:Null<FlxTextBorderStyle> = null;
 	public var borderSize:Null<Float> = null;

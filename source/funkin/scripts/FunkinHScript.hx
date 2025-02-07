@@ -1,5 +1,6 @@
 package funkin.scripts;
 
+import haxe.CallStack;
 import funkin.scripts.Util.ModchartSprite;
 #if USING_FLXANIMATE
 import funkin.objects.FlxAnimateCompat; // vscode stfu
@@ -524,7 +525,8 @@ class FunkinHScript extends FunkinScript
 			var posInfo = interpreter.posInfos();
 			var message = trim_redundant_error_trace(e.message, posInfo);
 
-			print('$scriptName: Error executing $funcName(${parameters.join(', ')}): ' + haxe.Log.formatOutput(message, posInfo));
+			print('$scriptName: Error executing $funcName(${  parameters.join(', ')  })');
+			print(haxe.Log.formatOutput(message, posInfo));
 		}
 
 		if (prevVals != null) {

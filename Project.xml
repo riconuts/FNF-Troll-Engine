@@ -101,9 +101,9 @@
 
 	<!-- _______________________________ Libraries ______________________________ -->
 
-    <haxelib name="flixel" version="5.6.2" />
-    <haxelib name="flixel-ui" version="2.6.1" />
-    <haxelib name="flixel-addons" version="3.2.3" />
+	<haxelib name="flixel" version="5.6.2" />
+	<haxelib name="flixel-ui" version="2.6.1" />
+	<haxelib name="flixel-addons" version="3.2.3" />
 
 	<section if="USING_FLXANIMATE">
 		<haxelib name="flxanimate" version="3.0.4"/>
