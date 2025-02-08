@@ -2530,8 +2530,6 @@ class PlayState extends MusicBeatState
 			}
 			else if (Conductor.songPosition >= 0) 
 			{
-				var instTime = inst.time;
-
 				switch(ClientPrefs.songSyncMode ){
 					case "Direct":
 						// Ludem Dare sync
@@ -2551,7 +2549,7 @@ class PlayState extends MusicBeatState
 						if (timeDiff > 1000)
 							Conductor.songPosition = Conductor.songPosition + 1000 * FlxMath.signOf(timeDiff);
 					
-					case "Last Mix":
+					default: //case "Last Mix":
 						// Stepmania method
 						// Works for most people it seems??
 						if (Conductor.lastSongPos != inst.time) {
