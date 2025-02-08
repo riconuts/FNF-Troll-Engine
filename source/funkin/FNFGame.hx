@@ -83,6 +83,83 @@ class FNFGame extends FlxGame
 				MusicBeatState.resetState();
 	}
 
+	var p_ticks:Float = 0;
+	var p_startTime:Float = 0;
+	var p_total:Float = 0;
+
+	inline function p_getTicks():Float
+		return Main.getTime() - p_startTime;
+
+	override function create(_) {
+		p_startTime = Main.getTime();
+		p_total = p_getTicks();
+		return super.create(_);
+	}
+
+	override function onEnterFrame(_):Void
+	{
+		ticks = Math.floor(p_ticks = p_getTicks());
+		_elapsedMS = p_ticks - p_total;
+		_total = Math.floor(p_total = p_ticks);
+
+		#if FLX_SOUND_TRAY
+		if (soundTray != null && soundTray.active)
+			soundTray.update(_elapsedMS);
+		#end
+
+		if (!_lostFocus || !FlxG.autoPause)
+		{
+			if (FlxG.vcr.paused)
+			{
+				if (FlxG.vcr.stepRequested)
+				{
+					FlxG.vcr.stepRequested = false;
+				}
+				else if (_nextState == null) // don't pause a state switch request
+				{
+					#if FLX_DEBUG
+					debugger.update();
+					// If the interactive debug is active, the screen must
+					// be rendered because the user might be doing changes
+					// to game objects (e.g. moving things around).
+					if (debugger.interaction.isActive())
+					{
+						draw();
+					}
+					#end
+					return;
+				}
+			}
+
+			if (FlxG.fixedTimestep)
+			{
+				_accumulator += _elapsedMS;
+				_accumulator = (_accumulator > _maxAccumulation) ? _maxAccumulation : _accumulator;
+
+				while (_accumulator >= _stepMS)
+				{
+					step();
+					_accumulator -= _stepMS;
+				}
+			}
+			else
+			{
+				step();
+			}
+
+			#if FLX_DEBUG
+			FlxBasic.visibleCount = 0;
+			#end
+
+			draw();
+
+			#if FLX_DEBUG
+			debugger.stats.visibleObjects(FlxBasic.visibleCount);
+			debugger.update();
+			#end
+		}
+	}
+
 	override function switchState():Void
 	{
 		#if SCRIPTABLE_STATES
