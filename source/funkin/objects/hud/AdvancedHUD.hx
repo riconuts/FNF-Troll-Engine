@@ -1,13 +1,13 @@
 package funkin.objects.hud;
 
-import funkin.objects.hud.JudgementCounter;
-import funkin.objects.hud.JudgementCounter.JudgeCounterSettings;
-import funkin.data.JudgmentManager.JudgmentData;
-import flixel.util.FlxColor;
-import funkin.objects.playfields.*;
-import flixel.math.FlxMath;
-import flixel.tweens.*;
 import flixel.text.FlxText;
+import flixel.util.FlxColor;
+import flixel.tweens.*;
+import funkin.objects.hud.JudgementCounter;
+import funkin.data.JudgmentManager.JudgmentData;
+import funkin.objects.playfields.*;
+
+using funkin.data.FlxTextFormatData;
 
 class AdvancedHUD extends CommonHUD
 {
@@ -35,14 +35,34 @@ class AdvancedHUD extends CommonHUD
 
 	// Maybe we should move this into CommonHUD??
 	var counterOptions:JudgeCounterSettings = {
-		textBorderSpacing: 5,
+		#if tgt
+		textBorderSpacing: 6,
 		textLineSpacing: 25,
 		textSize: 24,
 		textBorderSize: 1.25,
 		nameFont: "calibrib.ttf",
 		numbFont: "calibri.ttf"
+		#else
+		textBorderSpacing: 6,
+		textLineSpacing: 22,
+		textSize: 20,
+		textBorderSize: 1.5,
+		nameFont: "vcr.ttf",
+		numbFont: "vcr.ttf"
+		#end
 	}
 	var judgeCounters:JudgementCounters;
+
+	var textStyle:FlxTextFormatData = {
+		#if tgt
+		font: "calibri.ttf",
+		#else
+		font: "vcr.ttf",
+		#end
+		borderStyle: FlxTextBorderStyle.OUTLINE,
+		borderColor: FlxColor.BLACK,
+		borderSize: 1.25,
+	};
 
 	function regenJudgeDisplay()
 	{
@@ -101,60 +121,80 @@ class AdvancedHUD extends CommonHUD
 		songHighRating = songRecord.rating;
 
 		////
+		#if tgt
 		var tWidth = 200;
-		scoreTxt = new FlxText(0, 0, tWidth, "0", 20);
-		scoreTxt.setFormat(Paths.font("calibri.ttf"), 40, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		var scoreSize = 40;
+		var ratingSize = 32;
+		var fcSize = 32;
+		var gradeSize = 46;
+		var npsSize = 26;
+		var pcSize = 26; 
+		#else
+		var tWidth = 200;
+		var scoreSize = 32;
+		var ratingSize = 24;
+		var fcSize = 24;
+		var gradeSize = 38;
+		var npsSize = 20;
+		var pcSize = 20;
+		#end
+
+		scoreTxt = new FlxText(0, 0, tWidth, "0", scoreSize);
+		scoreTxt.applyFormat(textStyle);
+		scoreTxt.alignment = CENTER;
 		scoreTxt.screenCenter(Y);
 		scoreTxt.y -= 120;
 		scoreTxt.x += 20 - 15;
 		scoreTxt.scrollFactor.set();
-		scoreTxt.borderSize = 1.25;
 		add(scoreTxt);
 
-		ratingTxt = new FlxText(0, 0, tWidth, "100%", 20);
-		ratingTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		ratingTxt = new FlxText(0, 0, tWidth, "100%", ratingSize);
+		ratingTxt.applyFormat(textStyle);
+		ratingTxt.alignment = CENTER;
 		ratingTxt.screenCenter(Y);
 		ratingTxt.y -= 90;
 		ratingTxt.x += 20 - 15;
 		ratingTxt.scrollFactor.set();
-		ratingTxt.borderSize = 1.25;
 		add(ratingTxt);
 
-		fcTxt = new FlxText(0, 0, tWidth, "Clear", 20);
-		fcTxt.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		fcTxt = new FlxText(0, 0, tWidth, "Clear", fcSize);
+		fcTxt.applyFormat(textStyle);
+		fcTxt.alignment = CENTER;
 		fcTxt.screenCenter(Y);
 		fcTxt.y -= 60;
 		fcTxt.x += 20 - 15;
 		fcTxt.scrollFactor.set();
-		fcTxt.borderSize = 1.25;
 		add(fcTxt);
 
-		gradeTxt = new FlxText(20, 0, FlxG.width - 40, "C", 20);
-		gradeTxt.setFormat(Paths.font("calibri.ttf"), 46, 0xFFD800, (hudPosition == 'Right') ? RIGHT : LEFT);
-		gradeTxt.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 1.25);
+		gradeTxt = new FlxText(20, 0, FlxG.width - 40, "C", gradeSize);
+		gradeTxt.applyFormat(textStyle);
+		gradeTxt.alignment = (hudPosition == 'Right') ? RIGHT : LEFT;
+		gradeTxt.color = 0xFFFFD800;
+		@:privateAccess gradeTxt.regenGraphic();
 		gradeTxt.y = FlxG.height - gradeTxt.height;
 		gradeTxt.scrollFactor.set();
 		add(gradeTxt);
 
 		generateJudgementDisplays();
 
-		npsTxt = new FlxText(0, 0, tWidth, '$npsString: 0 ($peakString: 0)', 20);
-		npsTxt.setFormat(Paths.font("calibri.ttf"), 26, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		npsTxt = new FlxText(0, 0, tWidth, '$npsString: 0 ($peakString: 0)', npsSize);
+		npsTxt.applyFormat(textStyle);
+		npsTxt.alignment = CENTER;
+		npsTxt.wordWrap = false; // vcr font spaces are huuge compared to calibri so fuck it just clip it
 		npsTxt.screenCenter(Y);
 		npsTxt.y -= 5 - (25 * npsIdx);
 		npsTxt.x += 20 - 15;
 		npsTxt.scrollFactor.set();
-		npsTxt.borderSize = 1.25;
 		npsTxt.visible = ClientPrefs.npsDisplay;
 		add(npsTxt);
 		
-		pcTxt = new FlxText(0, 0, tWidth, '$pcString: 0', 20);
-		pcTxt.setFormat(Paths.font("calibri.ttf"), 26, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		pcTxt = new FlxText(0, 0, tWidth, '$pcString: 0', pcSize);
+		pcTxt.applyFormat(textStyle);
+		pcTxt.alignment = CENTER;
 		pcTxt.screenCenter(Y);
 		pcTxt.y -= 5 - (25 * (ClientPrefs.npsDisplay ? (npsIdx + 1) : npsIdx));
 		pcTxt.x += 20 - 15;
 		pcTxt.scrollFactor.set();
-		pcTxt.borderSize = 1.25;
 		add(pcTxt);
 
 		if (hudPosition == 'Right'){
