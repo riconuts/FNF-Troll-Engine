@@ -2394,7 +2394,6 @@ class PlayState extends MusicBeatState
 		}
 
 		Conductor.lastSongPos = Conductor.songPosition;
-		lastMixTimer2 = Main.getTime();
 		
 		updateSongDiscordPresence();
 	}
@@ -2404,7 +2403,6 @@ class PlayState extends MusicBeatState
 	var startedCountdown:Bool = false;
 	var canPause:Bool = true;
 	var lastMixTimer:Float = 0;
-	var lastMixTimer2:Float = 0;
 	var prevNoteCount:Int = 0;
 
 	private var svIndex:Int =0;
@@ -2560,18 +2558,6 @@ class PlayState extends MusicBeatState
 						
 						Conductor.songPosition = inst.time + lastMixTimer;
 
-					case "Sys Last Mix":
-						// Last Mix but using Sys.time() instead of elapsed as it's slightly less precise
-						var offset:Float = 0;
-
-						if (Conductor.lastSongPos != inst.time) {
-							Conductor.lastSongPos = inst.time;
-							lastMixTimer2 = Main.getTime();
-						}else{
-							offset = (Main.getTime() - lastMixTimer2);
-						}
-
-						Conductor.songPosition = inst.time + offset;
 				}
 			}
 		}
