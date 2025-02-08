@@ -6,7 +6,7 @@ class DrunkModifier extends NoteModifier {
 	override function getName()return 'drunk';
 
 	inline function adjust(axis:String, val:Float, plr:Int):Float {
-		if(axis.startsWith("Z") && getOtherValue("legacyZAxis", plr) > 0)
+		if ((axis.startsWith("Z") || axis.startsWith("TanZ")) && getOtherValue("legacyZAxis", plr) > 0)
 			return val / 1280;
 
 		return val;
@@ -90,8 +90,8 @@ class DrunkModifier extends NoteModifier {
 
 		pos.x += 
 			applyDrunk("Tan", player, time, visualDiff, data, CoolMath.fastTan) + 
-			applyTipsy("X", player, time, visualDiff, data, CoolMath.fastTan)
-			+ applyBumpy("X", player, time, visualDiff, data, CoolMath.fastTan);
+			applyTipsy("TanX", player, time, visualDiff, data, CoolMath.fastTan)
+			+ applyBumpy("TanX", player, time, visualDiff, data, CoolMath.fastTan);
 		pos.y += 
 			applyDrunk("TanY", player, time, visualDiff, data, CoolMath.fastTan) 
 			+ applyTipsy("Tan", player, time, visualDiff, data, CoolMath.fastTan)
@@ -146,7 +146,7 @@ class DrunkModifier extends NoteModifier {
 			var mod = shids[i];
 			for(a in 0...axes.length){
 				var axe = axes[a];
-				if(a==i)axe='';
+				if(a==(i % axes.length))axe='';
 				submods.push('$mod$axe');
 				var p = props[i];
 				for(prop in p)submods.push('$mod$axe$prop');

@@ -122,7 +122,7 @@ class PathModifier extends NoteModifier
 			var phaseShift = (diff / 135) * (1 + getSubmodValue("tornadoTanZPeriod", player));
 			var returnReceptorToZeroOffsetX = (-sin(-columnPhaseShift) + 1) * Note.halfWidth * 3;
 			var offsetX = (-tan(phaseShift - columnPhaseShift) + 1) * Note.halfWidth * 3 - returnReceptorToZeroOffsetX;
-			pos.z += offsetX * tornadoTanVal;
+			pos.z += offsetX * tornadoTanZVal;
 		}
 		
 		var itgTornadoVal = getSubmodValue("itgTornado", player);
