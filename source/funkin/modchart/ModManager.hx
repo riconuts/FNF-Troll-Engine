@@ -717,6 +717,15 @@ class ModManager {
 		
 	}
 
+	inline public function queueEaseL(step:Float, length:Float, modName:String, value:Float, style:Dynamic = 'linear', player = -1, ?startVal:Float)
+		queueEase(step, step + length, modName, value, style, player, startVal);
+	
+	inline public function queueEaseBL(beat:Float, length:Float, modName:String, value:Float, style:Dynamic = 'linear', player = -1, ?startVal:Float)
+		queueEase(beat * 4, (beat + length) * 4, modName, value, style, player, startVal);
+
+	inline public function queueSetB(beat:Float, modName:String, value:Float, player = -1)
+		queueSet(beat * 4, modName, value, player);
+
 	public function queueEaseP(step:Float, endStep:Float, modName:String, percent:Float, style:Dynamic = 'linear', player:Int = -1, ?startVal:Float)
 		queueEase(step, endStep, modName, percent * 0.01, style, player, startVal * 0.01);
 	

@@ -1,12 +1,13 @@
 package funkin.modchart.modifiers;
 
+import math.CoolMath;
 import math.CoolMath.triangle;
 import math.CoolMath.square;
 import flixel.math.FlxMath.fastSin as sin;
 import flixel.math.FlxMath.fastCos as cos;
-
+import math.CoolMath.fastTan as tan;
 class PathModifier extends NoteModifier
-{
+{	
 	override function getName()
 		return 'tornado';
 
@@ -15,7 +16,7 @@ class PathModifier extends NoteModifier
 	}
 
 	static final PI_THIRD:Float = Math.PI / 3.0;
-	override function getPos(diff:Float, tDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
+	override function getPos(diff:Float, tDiff:Float, beat:Float, pos:Vector3, column:Int, player:Int, obj:FlxSprite, field:NoteField)
 	{
 		var zigzag = getSubmodValue("zigzag", player);
 		if (zigzag != 0) {
@@ -83,12 +84,81 @@ class PathModifier extends NoteModifier
 		var tornadoVal = getValue(player);
 		if (tornadoVal != 0) {
 			// from schmovin!!
-			var playerColumn = data % 4;
-			var columnPhaseShift = playerColumn * PI_THIRD;
-			var phaseShift = diff / 135;
+			var playerColumn = column % 4;
+			var columnPhaseShift = (playerColumn * PI_THIRD) + getSubmodValue("tornadoOffset", player);
+			var phaseShift = (diff / 135) * (1 + getSubmodValue("tornadoPeriod", player));
 			var returnReceptorToZeroOffsetX = (-cos(-columnPhaseShift) + 1) * Note.halfWidth * 3;
 			var offsetX = (-cos(phaseShift - columnPhaseShift) + 1) * Note.halfWidth * 3 - returnReceptorToZeroOffsetX;
 			pos.x += offsetX * tornadoVal;
+		}
+
+		var tornadoTanVal = getSubmodValue("tornadoTan", player);
+		if (tornadoTanVal != 0) {
+			// from schmovin!!
+			var playerColumn = column % 4;
+			var columnPhaseShift = (playerColumn * PI_THIRD) + getSubmodValue("tornadoTanOffset", player);
+			var phaseShift = (diff / 135) * (1 + getSubmodValue("tornadoTanPeriod", player));
+			var returnReceptorToZeroOffsetX = (-cos(-columnPhaseShift) + 1) * Note.halfWidth * 3;
+			var offsetX = (-tan(phaseShift - columnPhaseShift) + 1) * Note.halfWidth * 3 - returnReceptorToZeroOffsetX;
+			pos.x += offsetX * tornadoTanVal;
+		}
+
+		var tornadoZVal = getSubmodValue("tornadoZ", player);
+		if (tornadoZVal != 0) {
+			// from schmovin!!
+			var playerColumn = column % 4;
+			var columnPhaseShift = (playerColumn * PI_THIRD) + getSubmodValue("tornadoZOffset", player);
+			var phaseShift = (diff / 135) * (1 + getSubmodValue("tornadoZPeriod", player));
+			var returnReceptorToZeroOffsetX = (-sin(-columnPhaseShift) + 1) * Note.halfWidth * 3;
+			var offsetX = (-sin(phaseShift - columnPhaseShift) + 1) * Note.halfWidth * 3 - returnReceptorToZeroOffsetX;
+			pos.z += offsetX * tornadoZVal;
+		}
+
+		var tornadoTanZVal = getSubmodValue("tornadoTanZ", player);
+		if (tornadoTanZVal != 0) {
+			// from schmovin!!
+			var playerColumn = column % 4;
+			var columnPhaseShift = (playerColumn * PI_THIRD) + getSubmodValue("tornadoTanZOffset", player) + Math.PI;
+			var phaseShift = (diff / 135) * (1 + getSubmodValue("tornadoTanZPeriod", player));
+			var returnReceptorToZeroOffsetX = (-sin(-columnPhaseShift) + 1) * Note.halfWidth * 3;
+			var offsetX = (-tan(phaseShift - columnPhaseShift) + 1) * Note.halfWidth * 3 - returnReceptorToZeroOffsetX;
+			pos.z += offsetX * tornadoTanVal;
+		}
+		
+		var itgTornadoVal = getSubmodValue("itgTornado", player);
+		var itgTornadoTanVal = getSubmodValue("itgTornadoTan", player);
+
+		if (itgTornadoVal != 0 || itgTornadoTanVal != 0){
+			// OpenITG/NotITG Tornado
+
+			var wide = field.field.keyCount > 4;
+			var width = wide ? 2 : 3;
+			var startColumn:Int = Std.int(CoolMath.boundTo(column - width, 0, field.field.keyCount - 1));
+			var endColumn:Int = Std.int(CoolMath.boundTo(column + width, 0, field.field.keyCount - 1));
+
+			var minX = modMgr.getBaseX(startColumn, player, field.field.keyCount);
+			var maxX = modMgr.getBaseX(endColumn, player, field.field.keyCount);
+			var realPixel = modMgr.getBaseX(column, player, field.field.keyCount);
+
+			var posBetween = CoolMath.scale(realPixel, minX, maxX, -1, 1);
+
+			if(tornadoVal != 0){
+				var rads = Math.acos(posBetween);
+				var period = getSubmodValue("itgTornadoPeriod", player);
+				var offset = getSubmodValue("itgTornadoOffset", player);
+				rads += (diff + offset) * (6 + period * 6) / FlxG.height;
+				var adjusted = CoolMath.scale(cos(rads), -1, 1, minX, maxX);
+				pos.x += (adjusted - realPixel) * tornadoVal;
+			}
+
+			if (tornadoTanVal != 0){
+				var rads = Math.acos(posBetween);
+				var period = getSubmodValue("itgTornadoTanPeriod", player);
+				var offset = getSubmodValue("itgTornadoTanOffset", player);
+				rads += (diff + offset) * (6 + period * 6) / FlxG.height;
+				var adjusted = CoolMath.scale(tan(rads), -1, 1, minX, maxX);
+				pos.x += (adjusted - realPixel) * tornadoTanVal;
+			}
 		}
 
 		var digitalVal = getSubmodValue("digital", player);
@@ -148,7 +218,30 @@ class PathModifier extends NoteModifier
 			"digitalZ",
 			'digitalZSteps',
 			"digitalZOffset",
-			"digitalZPeriod"
+			"digitalZPeriod",
+			
+			"tornadoPeriod",
+			"tornadoOffset",
+			
+			"tornadoZ",
+			"tornadoZPeriod",
+			"tornadoZOffset",
+			
+			"tornadoTan",
+			"tornadoTanPeriod",
+			"tornadoTanOffset",
+
+			"tornadoTanZ",
+			"tornadoTanZPeriod",
+			"tornadoTanZOffset",
+
+			"itgTornado",
+			"itgTornadoTan",
+			"itgTornadoOffset",
+			"itgTornadoPeriod",
+			"itgTornadoTanOffset",
+			"itgTornadoTanPeriod",
+
 
 			// TODO: maybe some sorta scrollDirectionX/Y/Z which'll make it so the note moves towards the receptor in that direction
 		];
