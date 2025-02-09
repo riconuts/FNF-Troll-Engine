@@ -11,7 +11,8 @@ import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 import flixel.text.FlxText;
 import flixel.group.FlxGroup.FlxTypedGroup;
-
+using StringTools;
+using funkin.CoolerStringTools;
 class FreeplayState extends MusicBeatState
 {
 	public static var comingFromPlayState:Bool = false;
@@ -64,7 +65,7 @@ class FreeplayState extends MusicBeatState
 				}
 				*/
 				
-				menu.addTextOption(songName).ID = songMeta.length;
+				menu.addTextOption(songName.replace("-", " ").capitalize()).ID = songMeta.length;
 				songMeta.push(metadata);
 			}
 		}

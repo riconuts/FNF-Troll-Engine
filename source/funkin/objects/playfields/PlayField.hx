@@ -320,7 +320,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		if (data < 0 || data > keyCount) 
 			return null;
 
-		var noteList = getTapNotes(data, (note:Note) -> !note.isSustainNote && note.requiresTap && !note.tooLate);
+		var noteList = getTapNotes(data, (note:Note) -> note.requiresTap && !note.tooLate);
 		#if PE_MOD_COMPATIBILITY
 		noteList.sort((a, b) -> Std.int((b.strumTime + (b.lowPriority ? 10000 : 0)) - (a.strumTime + (a.lowPriority ? 10000 : 0)))); // so lowPriority actually works (even though i hate it lol!)
 		#else
@@ -587,9 +587,8 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		if (inControl && autoPlayed)
 		{
 			for(i in 0...keyCount){
-				for (daNote in getTapNotes(i, (note:Note) -> !note.wasGoodHit && !note.ignoreNote && !note.hitCausesMiss)){
+				for (daNote in getTapNotes(i, (note:Note) -> !note.tooLate && !note.wasGoodHit && !note.ignoreNote && !note.hitCausesMiss)){
 					var hitDiff = Conductor.songPosition - daNote.strumTime;
-					daNote.tooLate = false;
 					if (isPlayer && (hitDiff + ClientPrefs.ratingOffset) >= (-5 * (Wife3.timeScale>1 ? 1 : Wife3.timeScale)) || hitDiff >= 0){
 						daNote.hitResult.judgment = judgeManager.useEpics ? TIER5 : TIER4;
 						daNote.hitResult.hitDiff = (hitDiff > -5) ? -5 : hitDiff; 
@@ -666,6 +665,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	public function getTapNotesWithEnd(dir:Int, end:Float, ?filter:Note->Bool):Array<Note> {
 		if (tapsByData[dir] == null)
 			return [];
+
 		var collected:Array<Note> = [];
 		for (note in tapsByData[dir]) {
 			if (note.strumTime > end)

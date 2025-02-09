@@ -3829,6 +3829,10 @@ class PlayState extends MusicBeatState
 
 		if (note.genScript != null)
 			callScript(note.genScript, "onHoldPress", [note, field]);
+
+		if (cpuControlled && note.isRoll) 
+			playShithound();
+		
 	}
 	
 	inline function releaseHold(note:Note, field:PlayField): Void

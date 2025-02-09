@@ -1,3 +1,4 @@
+trace("penis");
 function setupNote(note:Note){
     note.maxReleaseTime = 0.5;
     note.isRoll = true;
@@ -9,13 +10,22 @@ function setupNote(note:Note){
 function loadNoteAnims(note){
     var prefix = Note.colArray[note.column];
     
+	var animName = '';
     if(note.isQuant){
+		if(note.holdType == 1)
+			animName = 'quant roll piece';
+		else if(note.holdType == 2)
+			animName = 'quant roll end';
+		
         note.animation.addByPrefix(prefix + 'holdend', 'quant roll end');
-        note.animation.addByPrefix(prefix + 'hold', 'quant roll piece');
     }else{
-        note.animation.addByPrefix(prefix + 'holdend', prefix + ' roll end');
-        note.animation.addByPrefix(prefix + 'hold', prefix + ' roll piece');
+		if(note.holdType == 1)
+			animName = prefix + ' roll piece';
+		else if(note.holdType == 2)
+			animName = prefix + ' roll end';
     }
+	note.animation.addByPrefix('default', animName);
+	note.animation.play('default', true);
     note.scale.set(1.5, 0.7);
 	note.updateHitbox();
 

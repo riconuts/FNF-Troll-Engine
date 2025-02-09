@@ -35,7 +35,7 @@ function onSkinLoad()
 	spr.animation.add("-", [10], 0, false);
 	spr.animation.add(".", [11], 0, false);
 	
-	spr.scale.set(6, 6);
+	spr.scale.set(5, 5);
 	spr.updateHitbox();
 	
 	game.ratingGroup.comboTemplate = spr;	
@@ -43,7 +43,7 @@ function onSkinLoad()
 	////
 	var spr = new RatingSprite();
 	spr.antialiasing = false;
-	spr.scale.set(6, 6);
+	spr.scale.set(5, 5);
 	
 	game.ratingGroup.judgeTemplate = spr;
 	
