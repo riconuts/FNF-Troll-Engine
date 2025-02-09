@@ -691,16 +691,16 @@ class NoteField extends FieldBase
 		var glow = info.glow;
 
 		final QUAD_SIZE = 4;
-		final halfWidth = width / 2;
-		final halfHeight = height / 2;
-		final xOff = 0;
-		final yOff = 0;
+		final halfWidth = sprite.frameWidth * sprite.scale.x * 0.5;
+		final halfHeight = sprite.frameHeight * sprite.scale.y * 0.5;
+		final xOff = sprite.frame.offset.x * sprite.scale.x;
+		final yOff = sprite.frame.offset.y * sprite.scale.y;
 		// If someone can make frameX/frameY be taken into account properly then feel free lol ^^
 
-		quad0.setTo(-halfWidth + xOff, -halfHeight + yOff, 0); // top left
-		quad1.setTo(halfWidth + xOff, -halfHeight + yOff, 0); // top right
-		quad2.setTo(-halfWidth + xOff, halfHeight + yOff, 0); // bottom left
-		quad3.setTo(halfWidth + xOff, halfHeight + yOff, 0); // bottom right
+		quad0.setTo(xOff - halfWidth, 			yOff - halfHeight, 			0); // top left
+		quad1.setTo(width + xOff - halfWidth, 	yOff - halfHeight, 			0); // top right
+		quad2.setTo(xOff - halfWidth, 			height + yOff - halfHeight,	0); // bottom left
+		quad3.setTo(width + xOff - halfWidth, 	height + yOff - halfHeight,	0); // bottom right
 
 		for (idx in 0...QUAD_SIZE)
 		{
