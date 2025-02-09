@@ -4086,15 +4086,17 @@ class PlayState extends MusicBeatState
 
 	public function cameraBump(camZoom:Float = 0.015, hudZoom:Float = 0.03)
 	{
-		if(FlxG.camera.zoom < (defaultCamZoom * 1.35))
-			FlxG.camera.zoom += camZoom * camZoomingMult * ClientPrefs.camZoomP;
-		camHUD.zoom += hudZoom * camZoomingMult * ClientPrefs.camZoomP;
+		var zoomMult = camZoomingMult * ClientPrefs.camZoomP;
+		if (FlxG.camera.zoom < (defaultCamZoom * 1.35))
+			FlxG.camera.zoom += camZoom * zoomMult;
+		camHUD.zoom += hudZoom * zoomMult;
 	}
 
-	public var zoomEveryBeat:Int = 4;
+	// -1 = zoom every section
+	// 0 = dont zoom
+	public var zoomEveryBeat:Int = -1;
 	public var beatToZoom:Int = 0;
 		
-	var lastBeatHit:Int;
 	override function beatHit()
 	{
 		super.beatHit();
@@ -4103,7 +4105,7 @@ class PlayState extends MusicBeatState
 		
 		hud.beatHit(curBeat);
 
-		if (camZooming && ClientPrefs.camZoomP>0 && zoomEveryBeat > 0 && curBeat % zoomEveryBeat == beatToZoom)
+		if (camZooming && zoomEveryBeat > 0 && curBeat % zoomEveryBeat == beatToZoom)
 		{
 			cameraBump();
 		}
@@ -4121,6 +4123,11 @@ class PlayState extends MusicBeatState
 
 		if (curSection == null)
 			return;
+
+		if (camZooming && zoomEveryBeat < 0) 
+		{
+			cameraBump();
+		}
 
 		if (curSection.changeBPM)
 		{
