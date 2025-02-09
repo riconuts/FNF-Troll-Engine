@@ -79,6 +79,7 @@ class KadeHUD extends BaseHUD
 		add(watermark);
 		
 		scoreTxt = new FlxText(FlxG.width / 2 - 235, healthBarBG.y + 50, 0, "", 20);
+		scoreTxt.screenCenter(X);
 		originalX = scoreTxt.x;
 		scoreTxt.scrollFactor.set();
 		scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, 0xFFFFFFFF, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, 0xFF000000);
@@ -251,9 +252,11 @@ class KadeHUD extends BaseHUD
 			scoreTxt.text = text; // because i wanna be able to use multi line in code but not display it in the text lol!
 		}
 
-		scoreTxt.x = originalX;
-/* 		var lengthInPx = scoreTxt.textField.length * scoreTxt.frameHeight; // bad way but does more or less a better job
-		scoreTxt.x = (originalX - (lengthInPx / 2)) + 335; */
+/* 		scoreTxt.x = originalX; */
+
+// what the fuck THIS IS ACTUALLY DONE IN KE 1.5.4???
+		var lengthInPx = scoreTxt.textField.length * scoreTxt.frameHeight; // bad way but does more or less a better job
+		scoreTxt.x = (originalX - (lengthInPx / 2)) + 335;
 
 		////
 		if (updateTime)
