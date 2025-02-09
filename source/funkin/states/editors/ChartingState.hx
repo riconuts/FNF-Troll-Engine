@@ -1641,6 +1641,7 @@ class ChartingState extends MusicBeatState
 			var newTrack = new FlxSound().loadEmbedded(file);
 			newTrack.time = Conductor.songPosition;
 			newTrack.context = MUSIC;
+			newTrack.exists = true;
 			FlxG.sound.list.add(newTrack);
 			
 			newTrack.onComplete = onTrackCompleted;
@@ -1651,16 +1652,14 @@ class ChartingState extends MusicBeatState
 			tracks.push(newTrack);
 		}
 		
-		var firstInstName:String = jsonTracks.inst[0];
-		if (soundTracksMap.exists(firstInstName)) {
-			inst = soundTracksMap.get(firstInstName);
-			inst.volume = 0.6;
-
-		}else{
+		inst = soundTracksMap.get(jsonTracks.inst[0]);
+		if (inst == null) {
 			var newTrack = new FlxSound();
 			newTrack.context = MUSIC;
 			newTrack.exists = true;
 			FlxG.sound.list.add(newTrack);
+
+			inst = newTrack;
 		}
 
 		//// get final section accessible section
@@ -3221,8 +3220,15 @@ class ChartingState extends MusicBeatState
 		if (_song.events != null && _song.events.length > 1) 
 			_song.events.sort(sortByTime);
 		
-		var _song = Reflect.copy(_song);
-		Reflect.deleteField(_song, "path");
+		var fileName:String;
+		var _song:SwagSong = Reflect.copy(_song);
+
+		if (Reflect.hasField(_song, "path")) {
+			fileName = haxe.io.Path.withoutDirectory(_song.path);
+			Reflect.deleteField(_song, "path");
+		}else {
+			fileName = Paths.formatToSongPath(_song.song) + ".json";
+		}
 
 		var json = {"song": _song};
 		var data:String = Json.stringify(json, "\t");
@@ -3233,7 +3239,7 @@ class ChartingState extends MusicBeatState
 			_file.addEventListener(Event.COMPLETE, onSaveComplete);
 			_file.addEventListener(Event.CANCEL, onSaveCancel);
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-			_file.save(data.trim(), Paths.formatToSongPath(_song.song) + ".json");
+			_file.save(data.trim(), fileName);
 		}
 	}
 

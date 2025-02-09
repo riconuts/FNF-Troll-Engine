@@ -167,20 +167,20 @@ class Conductor
 
 	////
 	/** Beat duration in milliseconds */
-	inline public static function calculateCrochet(bpm:Float):Float {
+	public inline static function calculateCrochet(bpm:Float):Float {
 		return 60000 / bpm; // (60/bpm) * 1000;
 	}
 
 	/** Step duration in milliseconds */
-	inline public static function calculateStepCrochet(bpm:Float):Float {
+	public inline static function calculateStepCrochet(bpm:Float):Float {
 		return 15000 / bpm; // calculateCrochet(bpm) / 4;
 	}
 
-	inline static function sectionBeats(section:SwagSection):Float {
+	public inline static function sectionBeats(section:SwagSection):Float {
 		return section.sectionBeats ?? 4.0;
 	}
 
-	inline static function sectionSteps(section:SwagSection):Float {
+	public inline static function sectionSteps(section:SwagSection):Float {
 		return sectionBeats(section) * 4;
 	}
 }

@@ -185,9 +185,9 @@ class MusicBeatState extends FlxUIState
 		if (FlxG.state is OldHScriptedState){
 			var state:OldHScriptedState = cast FlxG.state;
 			FlxG.switchState(OldHScriptedState.fromPath(state.scriptPath));
-
+		}
 		#if SCRIPTABLE_STATES
-		}else if (FlxG.state is HScriptOverridenState) {
+		else if (FlxG.state is HScriptOverridenState) {
 			var state:HScriptOverridenState = cast FlxG.state;
 			var overriden = HScriptOverridenState.fromAnother(state);
 
@@ -197,8 +197,9 @@ class MusicBeatState extends FlxUIState
 				trace("State override script file is gone!", "Switching to", state.parentClass);
 				FlxG.switchState(Type.createInstance(state.parentClass, []));
 			}
+		}
 		#end
-		}else if (FlxG.state is HScriptedState) {
+		else if (FlxG.state is HScriptedState) {
 			var state:HScriptedState = cast FlxG.state;
 
 			if (Paths.exists(state.scriptPath))
@@ -207,8 +208,9 @@ class MusicBeatState extends FlxUIState
 				trace("State script file is gone!", "Switching to", MainMenuState);
 				FlxG.switchState(new MainMenuState());
 			}
-		}else
+		}
 		#end
+		else
 			FlxG.resetState();
 	}
 
@@ -233,11 +235,10 @@ class MusicBeatState extends FlxUIState
 		//trace('Section: ' + curSection + ', Beat: ' + curBeat + ', Step: ' + curStep);
 	}
 
-	function getBeatsOnSection()
-	{
-		var val:Null<Float> = 4;
-		if (PlayState.SONG != null && PlayState.SONG.notes[curSection] != null) val = PlayState.SONG.notes[curSection].sectionBeats;
-		return val == null ? 4 : val;
+	function getBeatsOnSection():Float
+	{		
+		var section = PlayState?.SONG.notes[curSection];
+		return section==null ? 4 : Conductor.sectionBeats(section);
 	}
 
 	public static var menuMusic:Sound; // main menu loop

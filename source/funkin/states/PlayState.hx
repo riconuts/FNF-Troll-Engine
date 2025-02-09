@@ -1501,7 +1501,7 @@ class PlayState extends MusicBeatState
 
 	function checkCharacterDance(character:Character, ?beat:Float, ignoreBeat:Bool = false){
 		if (character.danceEveryNumBeats == 0) return;
-		if (beat == null) beat = this.curDecBeat;
+		beat ??= this.curDecBeat;
 		
 		var shouldBop = beat >= character.nextDanceBeat;
 		if (shouldBop || ignoreBeat){
@@ -1515,11 +1515,10 @@ class PlayState extends MusicBeatState
 
 	function danceCharacters(?curBeat:Float)
 	{
-		final curBeat = curBeat==null ? this.curDecBeat : curBeat;
+		curBeat ??= this.curDecBeat;
 
 		if (gf != null)
-			checkCharacterDance(gf, curBeat);
-		
+			checkCharacterDance(gf, curBeat);	
 
 		for (field in playfields)
 		{
@@ -2415,13 +2414,18 @@ class PlayState extends MusicBeatState
 
 	private var svIndex:Int =0;
 	private inline function updateVisualPosition() {
-		var event:SpeedEvent = speedChanges[svIndex];
-		if (svIndex < speedChanges.length - 1){
-			while (speedChanges[svIndex + 1] != null && speedChanges[svIndex + 1].startTime <= Conductor.songPosition){
-				event = speedChanges[svIndex + 1];
-				svIndex++;
-			}
+		var event:SpeedEvent = null;
+
+		for (i in svIndex+1...speedChanges.length) {
+			var nextEvent = speedChanges[i];
+			if (nextEvent.startTime > Conductor.songPosition)
+				break;
+
+			svIndex = i;
+			event = nextEvent;
 		}
+		event ??= speedChanges[svIndex];
+		
 		Conductor.visualPosition = getTimeFromSV(Conductor.songPosition, event);
 		FlxG.watch.addQuick("visualPos", Conductor.visualPosition);
 	}
