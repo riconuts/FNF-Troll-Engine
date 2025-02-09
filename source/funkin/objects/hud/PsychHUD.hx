@@ -109,7 +109,7 @@ class PsychHUD extends CommonHUD
 		counterOptions.length = ClientPrefs.judgeCounter;
 		judgeCounters = new JudgementCounters(
 			ClientPrefs.hudPosition == 'Right' ? (FlxG.width - counterOptions.textBorderSpacing - textWidth) : counterOptions.textBorderSpacing,
-			FlxG.height, // TODO: Alter the math so this can be FlxG.height * 0.5, since that'd make more sense	for users
+			FlxG.height * 0.5,
 			displayNames,
 			judgeColours,
 			counterOptions,
