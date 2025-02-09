@@ -180,7 +180,7 @@ class KadeHUD extends BaseHUD
 
 			var diffName:String = Paths.getString(_dStrId, id);
 
-			var sognNaim = songName.replace("-", " ").capitalize() + " " + diffName;
+			var sognNaim = PlayState.SONG.song + " " + diffName; //
 
 			watermark.text = '$sognNaim | $engineStringLong';
 
