@@ -52,6 +52,7 @@ import openfl.filters.BitmapFilter;
 import openfl.filters.ShaderFilter;
 
 using StringTools;
+using funkin.CoolerStringTools;
 
 #if DISCORD_ALLOWED
 import funkin.api.Discord.DiscordClient;
@@ -1024,7 +1025,7 @@ class PlayState extends MusicBeatState
 		var stringId:String = 'difficultyName_$difficultyName';
 		displayedDifficulty = Paths.getString(stringId, CoolerStringTools.capitalize(difficultyName));
 		
-		displayedSong = SONG.song;
+		displayedSong = SONG.song.replace("-"," ").capitalize();
 
 		#if DISCORD_ALLOWED
 		// Discord RPC texts
