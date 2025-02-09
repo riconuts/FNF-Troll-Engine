@@ -114,7 +114,6 @@ class Note extends NoteObject
 	public var genScript:FunkinHScript;
 	/**note type script*/
 	public var noteScript:FunkinHScript;
-	public var extraData:Map<String, Dynamic> = [];
 	
 	// basic stuff
 	public var beat:Float = 0;
