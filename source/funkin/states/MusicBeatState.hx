@@ -32,11 +32,21 @@ class MusicBeatState extends FlxUIState
 	private var curSection:Int = 0;
 	private var stepsToDo:Int = 0;
 
-	public var curStep:Int = 0;
-	public var curBeat:Int = 0;
+	#if true
+	private var curStep(get, set):Int;
+	private var curBeat(get, set):Int;
+	private var curDecStep(get, set):Float;
+	private var curDecBeat(get, set):Float;
+	@:noCompletion inline function get_curStep() return Conductor.curStep;
+	@:noCompletion inline function get_curBeat() return Conductor.curBeat;
+	@:noCompletion inline function get_curDecStep() return Conductor.curDecStep;
+	@:noCompletion inline function get_curDecBeat() return Conductor.curDecBeat;
+	@:noCompletion inline function set_curStep(v) return Conductor.curStep=v;
+	@:noCompletion inline function set_curBeat(v) return Conductor.curBeat=v;
+	@:noCompletion inline function set_curDecStep(v) return Conductor.curDecStep=v;
+	@:noCompletion inline function set_curDecBeat(v) return Conductor.curDecBeat=v;
+	#end
 
-	public var curDecStep:Float = 0.0;
-	public var curDecBeat:Float = 0.0;
 	private var controls(get, never):Controls;
 
 	public var canBeScripted(get, default):Bool = false;
@@ -87,16 +97,12 @@ class MusicBeatState extends FlxUIState
 		super.onFocusLost();
 	}
 
-	// mainly moved it away so if a scripted state returns FUNCTION_STOP they can still make the music stuff update
-	public function updateSteps()
-	{
-		var oldStep:Int = curStep;
+	private function updateSteps() {
+		var oldStep:Int = Conductor.curStep;
+		Conductor.updateSteps();
+		var curStep:Int = Conductor.curStep;
 
-		updateCurStep();
-		updateBeat();
-
-		if (oldStep != curStep)
-		{
+		if (oldStep != curStep) {
 			if (curStep > 0)
 				stepHit();
 
@@ -149,21 +155,6 @@ class MusicBeatState extends FlxUIState
 		}
 
 		if(curSection > lastSection) sectionHit();
-	}
-
-	private function updateBeat():Void
-	{
-		curBeat = Math.floor(curStep / 4);
-		curDecBeat = curDecStep/4;
-	}
-
-	private function updateCurStep():Void
-	{
-		var lastChange = Conductor.getBPMFromSeconds(Conductor.songPosition);
-
-		var shit = ((Conductor.songPosition - ClientPrefs.noteOffset) - lastChange.songTime) / lastChange.stepCrochet;
-		curDecStep = lastChange.stepTime + shit;
-		curStep = lastChange.stepTime + Math.floor(shit);
 	}
 
 	public static function switchState(nextState:FlxState)

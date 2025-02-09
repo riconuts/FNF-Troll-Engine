@@ -130,19 +130,9 @@ class NoteField extends FieldBase
 		drawQueue = [];
 		if (field == null) return;
 		if (!active || !exists) return;
-		if ((FlxG.state is MusicBeatState))
-		{
-			var state:MusicBeatState = cast FlxG.state;
-			@:privateAccess
-			curDecStep = state.curDecStep;
-		}
-		else
-		{
-			var lastChange = Conductor.getBPMFromSeconds(Conductor.songPosition);
-			var shit = ((Conductor.songPosition - ClientPrefs.noteOffset) - lastChange.songTime) / lastChange.stepCrochet;
-			curDecStep = lastChange.stepTime + shit;
-		}
-		curDecBeat = curDecStep / 4;
+		
+		curDecStep = Conductor.curDecStep;
+		curDecBeat = Conductor.curDecBeat;
 
 		zoom = modManager.getFieldZoom(baseZoom, curDecBeat, (Conductor.songPosition - ClientPrefs.noteOffset), modNumber, this);
 		var notePos:Map<Note, Vector3> = [];

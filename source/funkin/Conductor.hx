@@ -14,6 +14,11 @@ typedef BPMChangeEvent =
 
 class Conductor
 {
+	public static var curStep:Int = 0;
+	public static var curBeat:Int = 0;
+	public static var curDecStep:Float = 0;
+	public static var curDecBeat:Float = 0;
+
 	////
 	public static var bpm:Float = 100;
 	public static var crochet:Float = (60 / bpm) * 1000; // beats in milliseconds
@@ -130,6 +135,17 @@ class Conductor
 		}
 
 		return lastChange;
+	}
+
+	public static function updateSteps() {
+		var lastChange = Conductor.getBPMFromSeconds(Conductor.songPosition);
+		var shit = ((Conductor.songPosition - ClientPrefs.noteOffset) - lastChange.songTime) / lastChange.stepCrochet;
+		
+		curDecStep = lastChange.stepTime + shit;
+		curStep = lastChange.stepTime + Math.floor(shit);
+		
+		curDecBeat = curDecStep / 4;
+		curBeat = Math.floor(curStep / 4);
 	}
 
 	public inline static function getStep(time:Float):Float {

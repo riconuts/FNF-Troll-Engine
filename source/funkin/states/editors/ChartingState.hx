@@ -1867,8 +1867,6 @@ class ChartingState extends MusicBeatState
 			changeSection(0, true);
 		}
 
-		curStep = recalculateSteps();
-
 		FlxG.mouse.visible = true; //cause reasons. trust me
 
 		if (!disableAutoScrolling.checked) 
@@ -1997,6 +1995,9 @@ class ChartingState extends MusicBeatState
 			for (track in tracks) 
 				track.time = Conductor.songPosition;
 		}
+
+		Conductor.updateSteps();
+		// Conductor.curStep = recalculateSteps();
 
 		strumLineUpdateY();
 		camPos.y = strumLine.y;
@@ -2567,30 +2568,11 @@ class ChartingState extends MusicBeatState
 		setNoteSustain(note[2] + value, note);
 	}
 
-	function recalculateSteps(add:Float = 0):Int
-	{
-		var lastChange:BPMChangeEvent = {
-			stepTime: 0,
-			songTime: 0,
-			bpm: 0
-		}
-		for (i in 0...Conductor.bpmChangeMap.length)
-		{
-			if (Conductor.songPosition > Conductor.bpmChangeMap[i].songTime)
-				lastChange = Conductor.bpmChangeMap[i];
-		}
-
-		curStep = lastChange.stepTime + Math.floor((Conductor.songPosition - lastChange.songTime + add) / Conductor.stepCrochet);
-		updateBeat();
-
-		return curStep;
-	}
-
 	// Go to the current section's start time
 	function resetSection():Void {
 		Conductor.songPosition = sectionStartTime();
+		Conductor.updateSteps();
 		pauseTracks();
-		updateCurStep();
 
 		updateGrid();
 		updateSectionUI();
@@ -2604,8 +2586,8 @@ class ChartingState extends MusicBeatState
 
 			if (updateMusic) {
 				Conductor.songPosition = sectionStartTime();
+				Conductor.updateSteps();
 				pauseTracks();
-				updateCurStep();
 			}
 
 			var blah1:Float = getSectionBeats();

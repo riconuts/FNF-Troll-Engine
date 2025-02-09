@@ -428,21 +428,8 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		for (char in characters)
 			char.controlled = isPlayer;
 		
-		var curDecStep:Float = 0;
-
-		if ((FlxG.state is MusicBeatState))
-		{
-			var state:MusicBeatState = cast FlxG.state;
-			@:privateAccess
-			curDecStep = state.curDecStep;
-		}
-		else
-		{
-			var lastChange = Conductor.getBPMFromSeconds(Conductor.songPosition);
-			var shit = ((Conductor.songPosition - ClientPrefs.noteOffset) - lastChange.songTime) / lastChange.stepCrochet;
-			curDecStep = lastChange.stepTime + shit;
-		}
-		var curDecBeat = curDecStep / 4;
+		var curDecStep = Conductor.curDecStep;
+		var curDecBeat = Conductor.curDecBeat;
 
 		for (data => column in noteQueue)
 		{
