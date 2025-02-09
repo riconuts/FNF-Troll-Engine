@@ -7,6 +7,9 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import funkin.states.PlayState;
 import funkin.objects.hud.FNFHealthBar.ShittyBar;
+using StringTools;
+using funkin.CoolerStringTools;
+
 /**
 	Joke. Taken from Kade Engine 1.6
 **/
@@ -72,6 +75,7 @@ class KadeHUD extends BaseHUD
 		);
 		watermark.setFormat(Paths.font("vcr.ttf"), 16, 0xFFFFFFFF, RIGHT, FlxTextBorderStyle.OUTLINE, 0xFF000000);
 		watermark.scrollFactor.set();
+		watermark.cameras = [FlxG.camera];
 		add(watermark);
 		
 		scoreTxt = new FlxText(FlxG.width / 2 - 235, healthBarBG.y + 50, 0, "", 20);
@@ -167,10 +171,20 @@ class KadeHUD extends BaseHUD
 				watermark.text = engineStringShort;
 		}else{
 			timeTxt.text = "";
-			watermark.text = '${PlayState.SONG.song} | $engineStringLong';
+			var id = PlayState.difficultyName;
+			if (id == '')
+				id = 'normal';
+
+			var _dStrId:String = 'difficultyName_${id.toLowerCase()}';
+
+			var diffName:String = Paths.getString(_dStrId, id);
+
+			var sognNaim = songName.replace("-", " ").capitalize() + " " + diffName;
+
+			watermark.text = '$sognNaim | $engineStringLong';
 
 			if (watermark.x + watermark.width >= healthBarBG.x)
-				watermark.text = '$songName | $engineStringShort';
+				watermark.text = '$sognNaim | $engineStringShort';
 		}
 
 		timeTxt.x = timeBarBG.x + (timeBarBG.width / 2) - (timeTxt.text.length * 5);
@@ -220,12 +234,6 @@ class KadeHUD extends BaseHUD
 		}
 
 		if (isUpdating){
-/* 			scoreTxt.text = 
-				(isHighscore ? '$hiscoreString: ' : '$scoreString: ') + shownScore +
-				' | $cbString: ' + comboBreaks + 
-				' | $ratingString: '
-				+ (grade == '?' ? grade : Highscore.floorDecimal(ratingPercent * 100, 2)
-					+ '% / $grade [${(ratingFC == stats.gfc && stats.accuracySystem == WIFE3) ? stats.fc : ratingFC}]'); */
 			var scareText = isHighscore ? hiscoreString : scoreString;
 			
 			var text = '';
