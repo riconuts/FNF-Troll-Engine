@@ -632,11 +632,10 @@ class PlayState extends MusicBeatState
 			SONG = Song.loadFromJson('tutorial', 'tutorial');
 		}
 
-		lastBeatHit = -5;
 		offset = SONG.offset ?? 0.0;
 		Conductor.mapBPMChanges(SONG);
 		Conductor.changeBPM(SONG.bpm);
-		Conductor.songPosition = Conductor.crochet * lastBeatHit;
+		Conductor.songPosition = Conductor.crochet * -5;
 
 		songName = Paths.formatToSongPath(SONG.song);
 		songHighscore = Highscore.getScore(SONG.song, difficultyName);
@@ -4058,7 +4057,6 @@ class PlayState extends MusicBeatState
 	}
 	#end
 
-	var lastStepHit:Int = -9999;
 	override function stepHit()
 	{
 		super.stepHit();
@@ -4075,11 +4073,7 @@ class PlayState extends MusicBeatState
 				resyncVocals();
 		}
 		
-		if (curStep < lastStepHit) 
-			return;
-		
 		hud.stepHit(curStep);
-		lastStepHit = curStep;
 		setOnScripts('curStep', curStep);
 		callOnScripts('onStepHit');
 	}
@@ -4100,8 +4094,6 @@ class PlayState extends MusicBeatState
 	override function beatHit()
 	{
 		super.beatHit();
-		if (curBeat < lastBeatHit) 
-			return;
 		
 		hud.beatHit(curBeat);
 
@@ -4110,7 +4102,6 @@ class PlayState extends MusicBeatState
 			cameraBump();
 		}
 
-		lastBeatHit = curBeat;
 
 		setOnScripts('curBeat', curBeat);
 		callOnScripts('onBeatHit');
