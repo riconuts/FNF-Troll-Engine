@@ -86,13 +86,13 @@ class JudgementCounters extends FlxTypedSpriteGroup<JudgementCounter>
 		super(x, y);
 		var displayedJudges:Array<String> = displayedJudges ?? [for(i in displayNames.keys())i];
 
-		var textPosY = (y - displayedJudges.length * settings.textLineSpacing) * 0.5;
-		
+		var halfPoint = displayedJudges.length / 2;
+
 		for (idx => id in displayedJudges){
 			var cnt = new JudgementCounter(0, 0, displayNames.get(id), judgeColors.get(id), settings);
 			counters.set(id, cnt);
 			add(cnt);
-			cnt.y = textPosY + idx * settings.textLineSpacing;
+			cnt.y = y + ((idx - halfPoint) * settings.textLineSpacing);
 			len++;
 		}
 	}

@@ -18,12 +18,13 @@ class AdvancedHUD extends CommonHUD
 	public var npsTxt:FlxText;
 	public var pcTxt:FlxText;
 	public var hitbar:Hitbar;
+	
+	public var hudY:Float = (FlxG.height / 2) + 50;
 
 	var peakCombo:Int = 0;
 	var songHighscore:Int = 0;
 	var songWifeHighscore:Float = 0;
 	var songHighRating:Float = 0;
-	var npsIdx:Int = 0;
 	public var hudPosition(default, null):String = ClientPrefs.hudPosition;
 	private var cpuControlled(get, never):Bool;
 	inline function get_cpuControlled() return PlayState.instance.cpuControlled;
@@ -44,11 +45,11 @@ class AdvancedHUD extends CommonHUD
 		numbFont: "calibri.ttf"
 		#else
 		textBorderSpacing: 6,
-		textLineSpacing: 22,
-		textSize: 20,
-		textBorderSize: 1.5,
-		nameFont: "vcr.ttf",
-		numbFont: "vcr.ttf"
+		textLineSpacing: 24,
+		textSize: 22,
+		textBorderSize: 1.25,
+		nameFont: "quanticob.ttf",
+		numbFont: "quantico.ttf"
 		#end
 	}
 	var judgeCounters:JudgementCounters;
@@ -57,7 +58,7 @@ class AdvancedHUD extends CommonHUD
 		#if tgt
 		font: "calibri.ttf",
 		#else
-		font: "vcr.ttf",
+		font: "quantico.ttf",
 		#end
 		borderStyle: FlxTextBorderStyle.OUTLINE,
 		borderColor: FlxColor.BLACK,
@@ -79,7 +80,7 @@ class AdvancedHUD extends CommonHUD
 		if (ClientPrefs.judgeCounter != 'Off') {
 			judgeCounters = new JudgementCounters(
 				hudPosition == 'Right' ? (FlxG.width - counterOptions.textBorderSpacing - textWidth) : counterOptions.textBorderSpacing,
-				FlxG.height + 100, // TODO: Alter the math so this can be FlxG.height * 0.5, since that'd make more sense	for users
+				hudY,
 				displayNames,
 				judgeColours,
 				counterOptions,
@@ -88,7 +89,7 @@ class AdvancedHUD extends CommonHUD
 		} else {
 			judgeCounters = new JudgementCounters(
 				hudPosition == 'Right' ? (FlxG.width - counterOptions.textBorderSpacing - 200) : counterOptions.textBorderSpacing,
-				FlxG.height + 100, // TODO: Alter the math so this can be FlxG.height * 0.5, since that'd make more sense	for users
+				hudY,
 				displayNames,
 				judgeColours,
 				counterOptions,
@@ -97,11 +98,22 @@ class AdvancedHUD extends CommonHUD
 		}
 		add(judgeCounters);
 
-		npsIdx = judgeCounters.len;
-		if (npsTxt != null){
-			npsTxt.screenCenter(Y);
-			npsTxt.y -= 5 - (25 * npsIdx);
-		}
+
+		repositionHud();
+	}
+
+	function repositionHud(){
+		var offset = judgeCounters.height / 2;
+
+		scoreTxt.y = hudY - offset - 90;
+		ratingTxt.y = hudY - offset - 60;
+		fcTxt.y = hudY - offset - 30;
+		npsTxt.y = hudY + offset;
+		pcTxt.y = hudY + offset + 25;
+
+		if (!npsTxt.visible) 
+			pcTxt.y -= 25;
+		
 	}
 
 	override public function new(iP1:String, iP2:String, songName:String, stats:Stats)
@@ -132,8 +144,8 @@ class AdvancedHUD extends CommonHUD
 		#else
 		var tWidth = 200;
 		var scoreSize = 32;
-		var ratingSize = 24;
-		var fcSize = 24;
+		var ratingSize = 28;
+		var fcSize = 28;
 		var gradeSize = 38;
 		var npsSize = 20;
 		var pcSize = 20;
@@ -143,7 +155,6 @@ class AdvancedHUD extends CommonHUD
 		scoreTxt.applyFormat(textStyle);
 		scoreTxt.alignment = CENTER;
 		scoreTxt.screenCenter(Y);
-		scoreTxt.y -= 120;
 		scoreTxt.x += 20 - 15;
 		scoreTxt.scrollFactor.set();
 		add(scoreTxt);
@@ -152,7 +163,6 @@ class AdvancedHUD extends CommonHUD
 		ratingTxt.applyFormat(textStyle);
 		ratingTxt.alignment = CENTER;
 		ratingTxt.screenCenter(Y);
-		ratingTxt.y -= 90;
 		ratingTxt.x += 20 - 15;
 		ratingTxt.scrollFactor.set();
 		add(ratingTxt);
@@ -161,7 +171,6 @@ class AdvancedHUD extends CommonHUD
 		fcTxt.applyFormat(textStyle);
 		fcTxt.alignment = CENTER;
 		fcTxt.screenCenter(Y);
-		fcTxt.y -= 60;
 		fcTxt.x += 20 - 15;
 		fcTxt.scrollFactor.set();
 		add(fcTxt);
@@ -175,15 +184,12 @@ class AdvancedHUD extends CommonHUD
 		gradeTxt.scrollFactor.set();
 		add(gradeTxt);
 
-		generateJudgementDisplays();
 
 		npsTxt = new FlxText(0, 0, tWidth, '$npsString: 0 ($peakString: 0)', npsSize);
 		npsTxt.applyFormat(textStyle);
 		npsTxt.alignment = CENTER;
 		npsTxt.wordWrap = false; // vcr font spaces are huuge compared to calibri so fuck it just clip it
 		npsTxt.screenCenter(Y);
-		npsTxt.y -= 5 - (25 * npsIdx);
-		npsTxt.x += 20 - 15;
 		npsTxt.scrollFactor.set();
 		npsTxt.visible = ClientPrefs.npsDisplay;
 		add(npsTxt);
@@ -192,10 +198,11 @@ class AdvancedHUD extends CommonHUD
 		pcTxt.applyFormat(textStyle);
 		pcTxt.alignment = CENTER;
 		pcTxt.screenCenter(Y);
-		pcTxt.y -= 5 - (25 * (ClientPrefs.npsDisplay ? (npsIdx + 1) : npsIdx));
 		pcTxt.x += 20 - 15;
 		pcTxt.scrollFactor.set();
 		add(pcTxt);
+
+		generateJudgementDisplays();
 
 		if (hudPosition == 'Right'){
 			for(obj in members){
@@ -204,6 +211,8 @@ class AdvancedHUD extends CommonHUD
 			}
 		}
 
+
+		repositionHud();
 		//
 		hitbar = new Hitbar();
 		hitbar.alpha = alpha;
@@ -251,14 +260,14 @@ class AdvancedHUD extends CommonHUD
 		if (changed.contains('judgeCounter'))
 			regenJudgeDisplay();
 
-		if (changed.contains('judgeCounter') || changed.contains('npsDisplay')){
-			pcTxt.screenCenter(Y);
-			pcTxt.y -= 5 - (25 * (ClientPrefs.npsDisplay ? npsIdx + 1 : npsIdx));
-		}
+		
 
+		
 		npsTxt.visible = ClientPrefs.npsDisplay;
-
+		
 		hitbar.visible = ClientPrefs.hitbar;
+		if (changed.contains('judgeCounter') || changed.contains('npsDisplay')) 
+			repositionHud();
 
 		statChanged("totalNotesHit", totalNotesHit);
 		statChanged("score", score);

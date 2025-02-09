@@ -200,6 +200,8 @@ class PlayState extends MusicBeatState
 	public var inst:FlxSound;
 	public var vocals:FlxSound;
 	
+	public var hitsound:FlxSound;
+
 	var sndFilter:ALFilter = AL.createFilter();
 	var sndEffect:ALEffect = AL.createEffect();
 
@@ -882,6 +884,7 @@ class PlayState extends MusicBeatState
 			switch(ClientPrefs.etternaHUD){
 				case 'Advanced': hud = new AdvancedHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song, stats);
 				case 'Kade': hud = new KadeHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song, stats);
+				case 'Classic': hud = new ClassicHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song, stats);
 				default: hud = new PsychHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song, stats);
 			}
 		}
@@ -1706,6 +1709,10 @@ class PlayState extends MusicBeatState
 		instTracks = getTrackInstances(SONG.tracks.inst);
 		playerTracks = getTrackInstances(SONG.tracks.player);
 		opponentTracks = getTrackInstances(SONG.tracks.opponent);
+
+		hitsound = new FlxSound().loadEmbedded(Paths.sound("hitsound"));
+		hitsound.exists = true;
+		FlxG.sound.list.add(hitsound);
 
 		playerField.tracks = playerTracks;
 		dadField.tracks = opponentTracks;
@@ -3519,6 +3526,9 @@ class PlayState extends MusicBeatState
 		if (callOnScripts("onKeyPress", [column]) == Globals.Function_Stop)
 			return;
 
+		if(ClientPrefs.hitsoundBehav == 'Key Press' && !cpuControlled)
+			playShithound();
+		
 		var hitNotes:Array<Note> = []; // what could scripts possibly do with this information
 		var controlledFields:Array<PlayField> = [];
 		
@@ -3870,6 +3880,13 @@ class PlayState extends MusicBeatState
 		}
 	}
 
+	inline function playShithound(){
+		hitsound.volume = ClientPrefs.hitsoundVolume;
+		if(ClientPrefs.hitsoundVolume > 0){
+			hitsound.time = 0;
+			hitsound.play();
+		}
+	}
 	function goodNoteHit(note:Note, field:PlayField):Void
 	{	
 		if (note.wasGoodHit || (field.autoPlayed && (note.ignoreNote || note.breaksCombo)))
@@ -3885,8 +3902,9 @@ class PlayState extends MusicBeatState
 			stats.noteDiffs.push(note.hitResult.hitDiff + ClientPrefs.ratingOffset); // used for stat saving (i.e viewing song stats after you beaten it)
 		}
 
-		if (!note.hitsoundDisabled && ClientPrefs.hitsoundVolume > 0)
-			FlxG.sound.play(Paths.sound('hitsound'), ClientPrefs.hitsoundVolume );
+		if (!note.hitsoundDisabled && (ClientPrefs.hitsoundBehav == 'Note Hit' || cpuControlled)){
+			playShithound();
+		}
 
 		if (note.ratingDisabled) {
 			// NOTHING!!!! Note will just dissappear

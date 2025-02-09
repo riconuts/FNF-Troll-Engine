@@ -51,6 +51,7 @@ noplay=No Play ## No notes hit yet
 score=Score
 highscore=Hi-Score
 rating=Rating
+accuracy=Accuracy ## For Kade HUD
 nps=NPS
 peak=Peak
 combo=Combo

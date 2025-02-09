@@ -5,12 +5,21 @@ import flixel.FlxSprite;
 
 using StringTools;
 
+// class HScriptedHealthicon
+// maybe some day lol
+
 class HealthIcon extends FlxSprite
 {
 	public var sprTracker:FlxObject;
 	private var isOldIcon:Bool = false;
 	private var isPlayer:Bool = false;
 	private var char:String = '';
+
+	public function updateState(relativePercent:Float){
+		animation.play(relativePercent < 20 ? "losing" : "idle"); // Exists so that you can extend the HealthIcon class and do like animated icons n shit
+		// (Maybe could be made easier in cv3 by adding more icon options to the character data)
+		// ((Or icon jsons but that sounds dumb but we could do it because could be useful for stuff like icons like Yourself's which has like 6 different icons on it which are all idle))
+	}
 
 	public function new(char:String = 'bf', isPlayer:Bool = false)
 	{
@@ -37,9 +46,12 @@ class HealthIcon extends FlxSprite
 		iconOffsets[0] = (width - 150) * 0.5;
 		iconOffsets[1] = (width - 150) * 0.5;
 		updateHitbox();
+		trace(iconOffsets[0], iconOffsets[1]);
 
-		animation.add(char, [0, 1], 0, false, isPlayer);
-		animation.play(char);
+		animation.add("idle", [0], 0, false, isPlayer);
+		animation.add("losing", [1], 0, false, isPlayer);
+
+		animation.play('idle');
 	}
 
 	public function swapOldIcon() 

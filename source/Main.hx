@@ -49,7 +49,7 @@ class Main extends Sprite
 	
 	//// You can pretty much ignore everything from here on - your code should go in your states.
 
-	public static var showDebugTraces:Bool = true; // #if (debug || SHOW_DEBUG_TRACES) true #else false #end;
+	public static var showDebugTraces:Bool = #if (debug || SHOW_DEBUG_TRACES) true #else false #end;
 	public static var downloadBetas:Bool = Version.isBeta;
 	public static var outOfDate:Bool = false;
 	public static var recentRelease:Release;

@@ -155,13 +155,28 @@ class FNFHealthBar extends FlxBar{
 		}
 	}
 
+	public function updateIcons(elapsed:Float){
+		if (iconScale != 1) {
+			iconScale = FlxMath.lerp(1, iconScale, Math.exp(-elapsed * 9));
+
+			var scaleOff = 75 * iconScale;
+			leftIcon.x = iconPosX - scaleOff - iconOffset * 2;
+			rightIcon.x = iconPosX + scaleOff - 75 - iconOffset;
+		} else {
+			leftIcon.x = iconPosX - 75 - iconOffset * 2;
+			rightIcon.x = iconPosX - iconOffset;
+		}
+	}
+
 	override function updateBar() {
 		super.updateBar();
 		updateIconPos();
 
-		var percent = isOpponentMode ? 100 - percent : percent;
-		iconP1.animation.curAnim.curFrame = percent < 20 ? 1 : 0;
-		iconP2.animation.curAnim.curFrame = percent > 80 ? 1 : 0;
+		var p1Percent = isOpponentMode ? 100 - percent : percent;
+		var p2Percent = isOpponentMode ? percent : 100 - percent;
+
+		iconP1.updateState(p1Percent);
+		iconP2.updateState(p2Percent);
 	}
 
 	override function update(elapsed:Float)
@@ -173,19 +188,28 @@ class FNFHealthBar extends FlxBar{
 
 		healthBarBG.setPosition(x - 5, y - 5);
 
-		if (iconScale != 1){
-			iconScale = FlxMath.lerp(1, iconScale, Math.exp(-elapsed * 9));
-
-			var scaleOff = 75 * iconScale;
-			leftIcon.x = iconPosX - scaleOff - iconOffset * 2;
-			rightIcon.x = iconPosX + scaleOff - 75 - iconOffset;
-		}
-		else
-		{
-			leftIcon.x = iconPosX - 75 - iconOffset * 2;
-			rightIcon.x = iconPosX - iconOffset;
-		}
+		updateIcons(elapsed);
 
 		super.update(elapsed);
+	}
+}
+
+
+// Old icon behaviour from pre-VSlice
+class ShittyBar extends FNFHealthBar {
+	override function updateIcons(elapsed:Float) {
+		iconP1.setGraphicSize(Std.int(FlxMath.lerp(150, iconP1.width, 0.85)));
+		iconP2.setGraphicSize(Std.int(FlxMath.lerp(150, iconP2.width, 0.85)));
+
+		iconP1.updateHitbox();
+		iconP2.updateHitbox();
+
+		iconP1.centerOffsets();
+		iconP2.centerOffsets();
+
+		var iconOffset:Int = 26;
+
+		iconP1.x = x + (width * (FlxMath.remapToRange(percent, 0, 100, 100, 0) * 0.01) - iconOffset);
+		iconP2.x = x + (width * (FlxMath.remapToRange(percent, 0, 100, 100, 0) * 0.01)) - (iconP2.width - iconOffset);
 	}
 }

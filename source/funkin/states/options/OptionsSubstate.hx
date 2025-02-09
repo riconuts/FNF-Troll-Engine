@@ -62,6 +62,7 @@ class OptionsSubstate extends MusicBeatSubstate
 					"masterVolume",
 					"songVolume",
 					'sfxVolume',
+					"hitsoundBehav",
 					"hitsoundVolume", 
 					"missVolume",
 					#if tgt "ruin", #end
