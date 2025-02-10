@@ -1,24 +1,72 @@
 package funkin.objects.hud;
 
+import flixel.graphics.frames.FlxFrame;
 import flixel.graphics.FlxGraphic;
 import flixel.FlxSprite;
 
 using StringTools;
 
-// class HScriptedHealthicon
-// maybe some day lol
+// Should we incluide this?? Should we just have it as part of base HealthIcon if icon has an xml??
+/* class SparrowHealthIcon extends HealthIcon
+{
+	public static final IDLE_PREFIX = 'idle';
+	public static final LOSING_PREFIX = 'losing';
+	public static final WINNING_PREFIX = 'winning';
+	override function swapOldIcon()
+		trace("TODO");
 
+	// I am just trusting the user on this one that the icon is formatted correctly lol
+	// Maybe the prefix constants should be in the health icon instead???
+	
+	override function changeIcon(char:String){
+		frames = Paths.getSparrowAtlas('icons/$char');
+		animation.addByPrefix("idle", IDLE_PREFIX, 24);
+		animation.addByPrefix("losing", LOSING_PREFIX, 24);
+		final animFrames:Array<FlxFrame> = new Array<FlxFrame>();
+		animation.findByPrefix(animFrames, WINNING_PREFIX);
+		if (animFrames.length > 0)
+			animation.addByPrefix("winning", WINNING_PREFIX, 24);
+		else
+			animation.addByPrefix("winning", IDLE_PREFIX, 24);
+	}
+} */
 class HealthIcon extends FlxSprite
 {
+	public var autoUpdatesAnims:Bool = true;
+
 	public var sprTracker:FlxObject;
 	private var isOldIcon:Bool = false;
 	private var isPlayer:Bool = false;
 	private var char:String = '';
 
+	public var relativePercent(default, set):Float = 0;
+
+	function set_relativePercent(percent:Float){
+		if (!autoUpdatesAnims)
+			updateState(percent);
+		
+		return relativePercent = percent;
+	}
+
+	public var losingPercent:Float = 20;
+	public var winningPercent:Float = 80;
+
+	// Done to allow more customization by simply extending HealthIcon
+	// Can also be used by scripts to do stuff w/ health icons
+	// I.e adding transitions between animations
+	
+	public function getAnimation(relativePercent:Float){
+		if (relativePercent <= losingPercent)
+			return 'losing';
+		else if(relativePercent >= winningPercent)
+			return 'winning';
+
+		return 'idle';
+
+	}
+	
 	public function updateState(relativePercent:Float){
-		animation.play(relativePercent < 20 ? "losing" : "idle"); // Exists so that you can extend the HealthIcon class and do like animated icons n shit
-		// (Maybe could be made easier in cv3 by adding more icon options to the character data)
-		// ((Or icon jsons but that sounds dumb but we could do it because could be useful for stuff like icons like Yourself's which has like 6 different icons on it which are all idle))
+		animation.play(getAnimation(relativePercent), true);
 	}
 
 	public function new(char:String = 'bf', isPlayer:Bool = false)
@@ -50,6 +98,7 @@ class HealthIcon extends FlxSprite
 
 		animation.add("idle", [0], 0, false, isPlayer);
 		animation.add("losing", [1], 0, false, isPlayer);
+		animation.add("winning", [0], 0, false, isPlayer);
 
 		animation.play('idle');
 	}
@@ -75,11 +124,6 @@ class HealthIcon extends FlxSprite
 
 	private var iconOffsets:Array<Float> = [0, 0];
 	public function changeIcon(char:String) {
-/* 		var file:Null<FlxGraphic> = Paths.image('characters/icons/$char'); // i'd like to use this some day lol
-
-		if (file == null)
-			file = Paths.image('icons/$char'); // new psych compat */
-
 		var file:Null<FlxGraphic> = Paths.image('icons/$char'); 
 
 		if(file == null)

@@ -5,6 +5,8 @@ import flixel.ui.FlxBar;
 
 // TODO: think abt this
 class FNFHealthBar extends FlxBar{
+	public var autoPositionIcons:Bool = true;
+	
 	public var healthBarBG:FlxSprite;
 
 	public var iconP1:HealthIcon;
@@ -170,13 +172,16 @@ class FNFHealthBar extends FlxBar{
 
 	override function updateBar() {
 		super.updateBar();
-		updateIconPos();
+		if (autoPositionIcons)
+			updateIconPos();
 
 		var p1Percent = isOpponentMode ? 100 - percent : percent;
 		var p2Percent = isOpponentMode ? percent : 100 - percent;
-
-		iconP1.updateState(p1Percent);
-		iconP2.updateState(p2Percent);
+		
+		// Icon behavioural code should be done via extending HealthIcon or turning off icon.autoUpdatesAnims
+		
+		iconP1.relativePercent = p1Percent;
+		iconP2.relativePercent = p2Percent;
 	}
 
 	override function update(elapsed:Float)
