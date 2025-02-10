@@ -50,6 +50,8 @@ class NoteField extends FieldBase
 	]);
 	var HOLD_INDICES:Vector<Int> = new Vector<Int>(0, false);
 
+	public var tryForceHoldsBehind:Bool = true; // Field tries to push holds behind receptors and notes
+
 	public var holdSubdivisions(default, set):Int;
 	public var optimizeHolds = ClientPrefs.optimizeHolds;
 	public var defaultShader:FlxShader = new FlxShader();
@@ -233,7 +235,7 @@ class NoteField extends FieldBase
 			var object = drawNote(note, pos, nextNotePos.get(note));
 			if (object == null)
 				continue;
-			object.zIndex = pos.z + note.zIndex;
+			object.zIndex = pos.z + note.zIndex + 0.01; // a little zindex bump to try to put notes always above holds because it looks weird having holds ontop of notes
 			lookupMap.set(note, object);
 			drawQueue.push(object);
 		}
@@ -244,7 +246,10 @@ class NoteField extends FieldBase
 			var object = drawHold(note);
 			if (object == null)
 				continue;
-			object.zIndex -= 1;
+			
+			if (tryForceHoldsBehind)
+				object.zIndex -= 1;
+
 			lookupMap.set(note, object);
 			drawQueue.push(object);
 		}

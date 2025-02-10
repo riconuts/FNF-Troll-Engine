@@ -208,8 +208,18 @@ class ShittyBar extends FNFHealthBar {
 		iconP2.centerOffsets();
 
 		var iconOffset:Int = 26;
+		var percent = flipX ? 100 - percent : percent;
+		
+		switch (fillDirection) {
+			case RIGHT_TO_LEFT:
+				iconP1.x = x + (width * (FlxMath.remapToRange(percent, 0, 100, 100, 0) * 0.01) - iconOffset);
+				iconP2.x = x + (width * (FlxMath.remapToRange(percent, 0, 100, 100, 0) * 0.01)) - (iconP2.width - iconOffset);
 
-		iconP1.x = x + (width * (FlxMath.remapToRange(percent, 0, 100, 100, 0) * 0.01) - iconOffset);
-		iconP2.x = x + (width * (FlxMath.remapToRange(percent, 0, 100, 100, 0) * 0.01)) - (iconP2.width - iconOffset);
+			case LEFT_TO_RIGHT:
+				iconP1.x = x + (width * (percent * 0.01) - iconOffset);
+				iconP2.x = x + (width * (percent * 0.01)) - (iconP2.width - iconOffset);
+			default:
+			
+		}
 	}
 }

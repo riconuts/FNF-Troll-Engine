@@ -58,22 +58,6 @@ class StrumNote extends NoteObject
 		return value;
 	}
 
-	public function getZIndex(?daZ:Float)
-	{
-		if (daZ==null) daZ = z;
-		
-		var animZOffset:Float = 0;
-		if (animation.name == 'confirm')
-			animZOffset += 1;
-
-		return z + desiredZIndex + animZOffset;
-	}
-
-	function updateZIndex()
-	{
-		zIndex = getZIndex();
-	}
-
 	function set_noteMod(value:String) {
 		genScript = (PlayState.instance == null) ? null : PlayState.instance.getHudSkinScript(value);
 
@@ -150,9 +134,6 @@ class StrumNote extends NoteObject
 
 		if (animation.name == 'confirm') 
 			centerOrigin();	
-		
-		updateZIndex();
-
 		super.update(elapsed);
 	}
 
@@ -160,7 +141,6 @@ class StrumNote extends NoteObject
 		animation.play(anim, force);
 		centerOrigin();
 		centerOffsets();
-		updateZIndex();
 
 		if (animation.name == 'static') {
 			colorSwap.setHSB();
