@@ -1022,7 +1022,7 @@ class PlayState extends MusicBeatState
 		generateSong(SONG.song);
 
 		var stringId:String = 'difficultyName_$difficultyName';
-		displayedDifficulty = Paths.getString(stringId, CoolerStringTools.capitalize(difficultyName));
+		displayedDifficulty = Paths.getString(stringId, difficultyName.replace("-"," ").capitalize());
 		
 		displayedSong = SONG.song.replace("-"," ").capitalize();
 
