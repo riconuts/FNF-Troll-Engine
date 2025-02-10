@@ -44,7 +44,7 @@ class SpiralModifier extends NoteModifier {
 		
 		// Best combined with reverse 0.5 and flip 0.5
 		if(schmovinSpiralX != 0){
-			var dist = getSubmodValue("schmovinSpiralXSpeed", player) * 33.5;
+			var dist = getSubmodValue("schmovinSpiralXSpacing", player) * 33.5;
 			var beat = ((getSubmodValue("schmovinSpiralXSpeed", player) * beat) + (getSubmodValue("schmovinSpiralXOffset", player))) * Math.PI / 4;
 			var radiusOffset = -visualDiff / 4; 
 			var radius = radiusOffset + dist * column % 4;
@@ -52,7 +52,7 @@ class SpiralModifier extends NoteModifier {
 			pos.x += FlxMath.fastCos(-visualDiff / Conductor.crotchet * Math.PI + beat) * radius * schmovinSpiralX;
 		}
 		if (schmovinSpiralY != 0) {
-			var dist = getSubmodValue("schmovinSpiralYSpeed", player) * 33.5;
+			var dist = getSubmodValue("schmovinSpiralYSpacing", player) * 33.5;
 			var beat = ((getSubmodValue("schmovinSpiralYSpeed", player) * beat) + (getSubmodValue("schmovinSpiralYOffset", player))) * Math.PI / 4;
 			var radiusOffset = -visualDiff / 4;
 			var radius = radiusOffset + dist * column % 4;
@@ -60,7 +60,7 @@ class SpiralModifier extends NoteModifier {
 			pos.y += FlxMath.fastSin(-visualDiff / Conductor.crotchet * Math.PI + beat) * radius * schmovinSpiralY;
 		}
 		if (schmovinSpiralZ != 0) {
-			var dist = getSubmodValue("schmovinSpiralZSpeed", player) * 33.5;
+			var dist = getSubmodValue("schmovinSpiralZSpacing", player) * 33.5;
 			var beat = ((getSubmodValue("schmovinSpiralZSpeed", player) * beat) + (getSubmodValue("schmovinSpiralZOffset", player))) * Math.PI / 4;
 			var radiusOffset = 	-visualDiff / 4;
 			var radius = radiusOffset + dist * column % 4;
