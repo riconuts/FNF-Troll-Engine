@@ -193,7 +193,13 @@ class Highscore {
 	{
 		var formattedSong:String = formatSong(song, chartName);
 		//trace('get "$formattedSong"');
-		return currentSongData.exists(formattedSong) ? currentSongData.get(formattedSong) : emptyRecord();
+		var record:Null<ScoreRecord> = currentSongData.get(formattedSong);
+		if(chartName == 'normal' && record == null){
+			// look for one without a difficulty string
+			var noDiff:String = formatSong(song, '');
+			record = currentSongData.get(formattedSong);
+		}
+		return record == null ? emptyRecord() : record;
 	}
 	public static function isValidScoreRecord(record:ScoreRecord){
 		if (record.scoreSystemV == null || record.scoreSystemV < version)

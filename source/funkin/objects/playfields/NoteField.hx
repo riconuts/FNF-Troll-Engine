@@ -1,5 +1,6 @@
 package funkin.objects.playfields;
 
+import funkin.modchart.modifiers.ReverseModifier;
 import funkin.modchart.Modifier;
 import flixel.math.FlxMath;
 import flixel.math.FlxAngle;
@@ -187,8 +188,6 @@ class NoteField extends FieldBase
 						pos.y = daNote.y;
 
 					if (modManager.getValue("orient", modNumber) != 0){
-		
-
 						var nextPos = modManager.getPos(visPos + lookAheadTime, diff + lookAheadTime, curDecBeat, daNote.column, modNumber, daNote, this, perspectiveArrDontUse); // perspectiveDONTUSE is excluded because its code is done in the modifyVert function
 						nextNotePos.set(daNote, nextPos);
 					}
@@ -715,7 +714,8 @@ class NoteField extends FieldBase
 				var orient = modManager.getValue("orient", modNumber);
 
 				radAngles += Math.atan2(diffY, diffX) * orient;
-				angle -= 90 * orient;
+				var reverse:ReverseModifier = cast modManager.register.get("reverse");
+				angle -= 90 * orient * reverse.getReverseValue(sprite.column, modNumber);
 			}
 
 			if(isNote)

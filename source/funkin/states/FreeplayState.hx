@@ -234,7 +234,8 @@ class FreeplayState extends MusicBeatState
 	function refreshScore()
 	{
 		var data = selectedSongData;
-		var record = Highscore.getRecord(data.songName, curDiffStr.toLowerCase() == 'normal' ? '' : curDiffStr);
+		var record = Highscore.getRecord(data.songName, curDiffStr);
+
 		targetRating = Highscore.getRatingRecord(record) * 100;
 		targetHighscore = record.score;
 	}

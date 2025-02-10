@@ -3129,7 +3129,6 @@ class PlayState extends MusicBeatState
 
 		// Save song score and rating.
 
-		trace(SONG.song);
 		if (saveScore && SONG.validScore && ratingFC != stats.fail)
 			Highscore.saveScoreRecord(SONG.song, difficultyName, stats.getScoreRecord());
 
