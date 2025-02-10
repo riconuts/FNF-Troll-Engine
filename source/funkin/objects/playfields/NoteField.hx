@@ -715,7 +715,7 @@ class NoteField extends FieldBase
 
 				radAngles += Math.atan2(diffY, diffX) * orient;
 				var reverse:ReverseModifier = cast modManager.register.get("reverse");
-				angle -= 90 * orient * reverse.getReverseValue(sprite.column, modNumber);
+				angle -= 90 * orient * FlxMath.lerp(1, -1, reverse.getReverseValue(sprite.column, modNumber));
 			}
 
 			if(isNote)
