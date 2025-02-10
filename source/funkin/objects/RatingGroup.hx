@@ -187,11 +187,12 @@ class RatingGroup extends FlxTypedGroup<RatingSprite>
 			var spr = comboSprs.pop();
 			spr.destroy();
 		}
+		
 		while (judgeSprs.length > 0) {
-			var spr = comboSprs.pop();
+			var spr = judgeSprs.pop();
 			spr.destroy();
 		}
-		
+
 		for (_ in 0...3)
 			getSprite(comboSprs, comboTemplate);
 		lastJudge = getSprite(judgeSprs, judgeTemplate);
