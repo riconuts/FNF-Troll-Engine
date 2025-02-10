@@ -82,8 +82,38 @@ typedef SongCreditdata = // beacuse SongMetadata is stolen
 	?extraInfo:Array<String>,
 }
 
+@:deprecated("SongMetadata was deprecated, please rename to Song instead!")
+typedef SongMetadata = Song;
+
+@:structInit
 class Song
 {
+	public var songName:String = '';
+	public var folder:String = '';
+	public var difficulties:Array<String> = [];
+	public var charts(get, null):Array<String>;
+	function get_charts()
+		return (charts == null) ? charts = Song.getCharts(this) : charts;
+
+	public function new(songName:String, ?folder:String = '', ?difficulties:Array<String>)
+	{
+		this.songName = songName;
+		this.folder = folder != null ? folder : '';
+		this.difficulties = difficulties != null ? difficulties : [];
+	}
+
+	public function play(?difficultyName:String = ''){
+		if(charts.contains(difficultyName))
+			return Song.playSong(this, difficultyName, charts.indexOf(difficultyName));
+	
+		trace("Attempt to play null difficulty: " + difficultyName);
+	}
+
+	public function toString()
+		return '$folder:$songName';
+
+	////
+
 	public static function getMetadataInfo(metadata:SongCreditdata):Array<String> {
 		var info:Array<String> = [];
 		
@@ -683,32 +713,4 @@ class Song
 		loadSong(metadata, difficulty, difficultyIdx);
 		switchToPlayState();
 	} 
-}
-
-@:structInit
-class SongMetadata
-{
-	public var songName:String = '';
-	public var folder:String = '';
-	public var difficulties:Array<String> = [];
-	public var charts(get, null):Array<String>;
-	function get_charts()
-		return (charts == null) ? charts = Song.getCharts(this) : charts;
-
-	public function new(songName:String, ?folder:String = '', ?difficulties:Array<String>)
-	{
-		this.songName = songName;
-		this.folder = folder != null ? folder : '';
-		this.difficulties = difficulties != null ? difficulties : [];
-	}
-
-	public function play(?difficultyName:String = ''){
-		if(charts.contains(difficultyName))
-			return Song.playSong(this, difficultyName, charts.indexOf(difficultyName));
-	
-		trace("Attempt to play null difficulty: " + difficultyName);
-	}
-
-	public function toString()
-		return '$folder:$songName';
 }
