@@ -42,7 +42,7 @@ class HealthIcon extends FlxSprite
 	public var relativePercent(default, set):Float = 0;
 
 	function set_relativePercent(percent:Float){
-		if (!autoUpdatesAnims)
+		if (autoUpdatesAnims)
 			updateState(percent);
 		
 		return relativePercent = percent;
