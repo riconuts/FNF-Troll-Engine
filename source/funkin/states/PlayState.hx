@@ -3125,7 +3125,9 @@ class PlayState extends MusicBeatState
 		transitioning = true;
 
 		// Save song score and rating.
-		if (saveScore && SONG.validScore && ratingFC != 'Fail')
+
+		trace(SONG.song);
+		if (saveScore && SONG.validScore && ratingFC != stats.fail)
 			Highscore.saveScoreRecord(SONG.song, difficultyName, stats.getScoreRecord());
 
 		var gotoNextThing:Void -> Void = gotoMenus;
