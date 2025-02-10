@@ -93,7 +93,7 @@ class AdvancedHUD extends CommonHUD
 				displayNames,
 				judgeColours,
 				counterOptions,
-				["miss"]
+				["cb"]
 			);
 		}
 		add(judgeCounters);
