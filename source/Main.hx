@@ -135,9 +135,11 @@ class Main extends Sprite
 		fpsVar.visible = false;
 		addChild(fpsVar);
 
+		#if BREAD_ALLOWED
 		bread = new Bread();
 		bread.visible = false;
 		addChild(bread);
+		#end
 	}
 
 	public static function getTime():Float {

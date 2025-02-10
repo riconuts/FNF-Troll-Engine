@@ -64,6 +64,7 @@
     <define name="DISCORD_ALLOWED" if="desktop cpp" unless="display || artifact" />
     <define name="MULTICORE_LOADING" if="native" />
     <define name="CRASH_HANDLER" />
+    <define name="BREAD_ALLOWED" />
 
 	<!--Remove if you dont want states to be modified with scripts. This only disables extension/overrides and not the HScriptedState class-->
     <define name="SCRIPTABLE_STATES" if="HSCRIPT_ALLOWED" />
