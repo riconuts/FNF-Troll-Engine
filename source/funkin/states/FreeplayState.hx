@@ -237,7 +237,10 @@ class FreeplayState extends MusicBeatState
 		var record = Highscore.getRecord(data.songName, curDiffStr);
 
 		targetRating = Highscore.getRatingRecord(record) * 100;
-		targetHighscore = record.score;
+		if(ClientPrefs.showWifeScore)
+			targetHighscore = record.score;
+		else
+			targetHighscore = record.accuracyScore * 100;
 	}
 
 	function fadeToBg(graphic){
