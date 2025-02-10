@@ -34,6 +34,7 @@ class RenderObject {
 	public var indices:Vector<Int>;
 	public var zIndex:Float;
 	public var colorSwap:NoteColorSwap;
+	public var antialiasing:Bool;
 }
 
 final scalePoint = new FlxPoint(1, 1);
@@ -363,7 +364,7 @@ class NoteField extends FieldBase
 						for(shit in transforms)
 							shit.alphaMultiplier *= camera.alpha;
 						getScreenPosition(point, camera);
-						var drawItem = camera.startTrianglesBatch(graphic, shader.bitmap.filter == LINEAR, true, null, true, shader);
+						var drawItem = camera.startTrianglesBatch(graphic, object.antialiasing, true, null, true, shader);
 
 						@:privateAccess
 						{
@@ -570,8 +571,6 @@ class NoteField extends FieldBase
 
 		var graphic:FlxGraphic = hold.frame == null ? hold.graphic : hold.frame.parent;
 
-		shader.bitmap.input = graphic.bitmap;
-		shader.bitmap.filter = hold.antialiasing ? LINEAR : NEAREST;
 
 		return {
 			graphic: graphic,
@@ -582,7 +581,8 @@ class NoteField extends FieldBase
 			vertices: vertices,
 			indices: HOLD_INDICES,
 			zIndex: zIndex,
-			colorSwap: hold.colorSwap
+			colorSwap: hold.colorSwap,
+			antialiasing: hold.antialiasing
 		}
 	}
 
@@ -795,9 +795,6 @@ class NoteField extends FieldBase
 
 		var graphic:FlxGraphic = sprite.frame == null ? sprite.graphic : sprite.frame.parent;
 
-		shader.bitmap.input = graphic.bitmap;
-		shader.bitmap.filter = sprite.antialiasing ? LINEAR : NEAREST;
-
 		final totalTriangles = Std.int(vertices.length / 2);
 		var alphas = new FastVector<Float>(totalTriangles);
 		var glows = new FastVector<Float>(totalTriangles);
@@ -816,7 +813,8 @@ class NoteField extends FieldBase
 			vertices: vertices,
 			indices: NOTE_INDICES,
 			zIndex: pos.z,
-			colorSwap: sprite.colorSwap
+			colorSwap: sprite.colorSwap,
+			antialiasing: sprite.antialiasing
 		}
 	}
 
