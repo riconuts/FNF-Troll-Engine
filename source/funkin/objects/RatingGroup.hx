@@ -181,6 +181,24 @@ class RatingGroup extends FlxTypedGroup<RatingSprite>
 		return numbs;
 	}
 
+	public function regenerateCaches()
+	{
+		while(comboSprs.length > 0){
+			var spr = comboSprs.pop();
+			spr.destroy();
+		}
+		while (judgeSprs.length > 0) {
+			var spr = comboSprs.pop();
+			spr.destroy();
+		}
+		
+		for (_ in 0...3)
+			getSprite(comboSprs, comboTemplate);
+		lastJudge = getSprite(judgeSprs, judgeTemplate);
+
+	}
+	
+
 	////
 	private static function getSprite(array:Array<RatingSprite>, ?template:RatingSprite):RatingSprite {
 		var spr:RatingSprite; 

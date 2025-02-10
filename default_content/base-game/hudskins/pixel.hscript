@@ -46,6 +46,8 @@ function onSkinLoad()
 	spr.scale.set(5, 5);
 	
 	game.ratingGroup.judgeTemplate = spr;
+
+	game.ratingGroup.regenerateCaches();
 	
 	////
 	hud = game.hud;
