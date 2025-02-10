@@ -32,7 +32,8 @@ typedef SwagSong = {
 	var keyCount:Int;
 	var notes:Array<SwagSection>;
 	var events:Array<Array<Dynamic>>;
-	
+	var offset:Float; // Offsets the chart
+
 	var player1:String;
 	var player2:String;
 	var gfVersion:String;
@@ -43,9 +44,7 @@ typedef SwagSong = {
 	var splashSkin:String;
 	
 	//// Used for song info showed on the pause menu
-	@:optional var metadata:SongCreditdata;
-
-	@:optional var offset:Float; // Offsets the chart
+	@:optional var metadata:SongMetadata;
 }
 
 typedef EventNote = {
@@ -63,6 +62,7 @@ typedef JsonSong = {
 	@:optional var needsVoices:Bool; // fnf
 	@:optional var mania:Int; // vs shaggy
 	@:optional var keyCount:Int;
+	@:optional var offset:Float;
 
 	// @:optional var info:Array<String>; // old te
 }
@@ -142,12 +142,9 @@ class Song
 	}
 
 	static function isAMoonchartRecognizedFile(fileName:String) {
-		// return moonchartExtensions.contains(Path.extension(fileName)); // short and elegant, probably slow too
-
-		for (ext in moonchartExtensions) {
+		for (ext in moonchartExtensions)
 			if (fileName.endsWith('.$ext'))
 				return true;
-		}
 		
 		return false;
 	}
@@ -374,17 +371,11 @@ class Song
 
 		swagJson.validScore = true;
 
-		if (songJson.stage == null)
-			songJson.stage = 'stage';
+		songJson.stage ??= 'stage';
 
-		if (songJson.player1 == null)
-			songJson.player1 = "bf";
-
-		if (songJson.player2 == null)
-			songJson.player2 = "dad";
-
-		if (songJson.gfVersion == null)
-			songJson.gfVersion = (songJson.player3 != null) ? songJson.player3 : "gf";
+		songJson.player1 ??= "bf";
+		songJson.player2 ??= "dad";
+		songJson.gfVersion ??= songJson.player3 ?? "gf";
 		
 		if (swagJson.arrowSkin == null || swagJson.arrowSkin.trim().length == 0)
 			swagJson.arrowSkin = "NOTE_assets";
@@ -392,16 +383,14 @@ class Song
 		if (swagJson.splashSkin == null || swagJson.splashSkin.trim().length == 0)
 			swagJson.splashSkin = "noteSplashes";
 
-		if (songJson.hudSkin == null)
-			songJson.hudSkin = 'default';
+		songJson.hudSkin ??= 'default';
 
-		if (songJson.keyCount == null) {
-			swagJson.keyCount = switch(songJson.mania) {
-				default: 4;
-				case 1: 6;
-				case 2: 7;
-				case 3: 9;
-			}
+		songJson.offset ??= 0.0;
+		songJson.keyCount ??= switch(songJson.mania) {
+			case 3: 9;
+			case 2: 7;
+			case 1: 6;
+			default: 4;
 		}
 
 		if (swagJson.notes == null || swagJson.notes.length == 0) {		
