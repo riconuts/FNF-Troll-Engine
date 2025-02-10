@@ -101,6 +101,7 @@ class Conductor
 		Conductor.stepCrochet = Conductor.calculateStepCrochet(newBpm);
 	}
 
+	/** From MILLISECONDS actually **/ 
 	public static function getBPMFromSeconds(time:Float):BPMChangeEvent {
 		var lastChange:BPMChangeEvent = {
 			stepTime: 0,

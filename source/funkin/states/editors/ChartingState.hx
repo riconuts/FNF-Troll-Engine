@@ -2903,9 +2903,10 @@ class ChartingState extends MusicBeatState
 
 	function setupSusNote(note:Note):Null<FlxSprite> 
 	{
-		var tailOffset:Float = GRID_SIZE * 0.5;
-		var height:Float = (note.sustainLength / Conductor.stepCrochet) * GRID_SIZE * zoomList[curZoom];
-
+		final tailOffset:Float = GRID_SIZE * 0.5;
+		final stepLength = (Conductor.getBPMFromSeconds(note.strumTime).stepCrochet);
+		final tailSteps:Float = note.sustainLength / stepLength;
+		var height:Float = tailSteps * GRID_SIZE * zoomList[curZoom] - tailOffset;
 		if (height <= 0) return null;
 		
 		var spr:FlxSprite = new FlxSprite(
