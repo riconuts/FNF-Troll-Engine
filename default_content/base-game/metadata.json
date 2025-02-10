@@ -1,6 +1,13 @@
 {
 	"chapters": [
 		{
+			"name": "Tutorial",
+			"category": "main",
+			"freeplayCategory": "basefnf",
+			"unlockCondition": true,
+			"songs": ["Tutorial"]
+		},
+		{
 			"name": "Week 1",
 			"category": "main",
 			"freeplayCategory": "basefnf",

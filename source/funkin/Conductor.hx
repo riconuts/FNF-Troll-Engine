@@ -14,6 +14,11 @@ typedef BPMChangeEvent =
 
 class Conductor
 {
+	public static var curStep:Int = 0;
+	public static var curBeat:Int = 0;
+	public static var curDecStep:Float = 0;
+	public static var curDecBeat:Float = 0;
+
 	////
 	public static var bpm:Float = 100;
 	public static var crochet:Float = (60 / bpm) * 1000; // beats in milliseconds
@@ -96,6 +101,7 @@ class Conductor
 		Conductor.stepCrochet = Conductor.calculateStepCrochet(newBpm);
 	}
 
+	/** From MILLISECONDS actually **/ 
 	public static function getBPMFromSeconds(time:Float):BPMChangeEvent {
 		var lastChange:BPMChangeEvent = {
 			stepTime: 0,
@@ -130,6 +136,17 @@ class Conductor
 		}
 
 		return lastChange;
+	}
+
+	public static function updateSteps() {
+		var lastChange = Conductor.getBPMFromSeconds(Conductor.songPosition);
+		var shit = ((Conductor.songPosition - ClientPrefs.noteOffset) - lastChange.songTime) / lastChange.stepCrochet;
+		
+		curDecStep = lastChange.stepTime + shit;
+		curStep = lastChange.stepTime + Math.floor(shit);
+		
+		curDecBeat = curDecStep / 4;
+		curBeat = Math.floor(curStep / 4);
 	}
 
 	public inline static function getStep(time:Float):Float {
@@ -167,20 +184,20 @@ class Conductor
 
 	////
 	/** Beat duration in milliseconds */
-	inline public static function calculateCrochet(bpm:Float):Float {
+	public inline static function calculateCrochet(bpm:Float):Float {
 		return 60000 / bpm; // (60/bpm) * 1000;
 	}
 
 	/** Step duration in milliseconds */
-	inline public static function calculateStepCrochet(bpm:Float):Float {
+	public inline static function calculateStepCrochet(bpm:Float):Float {
 		return 15000 / bpm; // calculateCrochet(bpm) / 4;
 	}
 
-	inline static function sectionBeats(section:SwagSection):Float {
+	public inline static function sectionBeats(section:SwagSection):Float {
 		return section.sectionBeats ?? 4.0;
 	}
 
-	inline static function sectionSteps(section:SwagSection):Float {
+	public inline static function sectionSteps(section:SwagSection):Float {
 		return sectionBeats(section) * 4;
 	}
 }

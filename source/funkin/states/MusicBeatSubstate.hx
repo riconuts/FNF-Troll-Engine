@@ -29,14 +29,21 @@ class MusicBeatSubstate extends FlxSubState
 		return;
 
 	////
-	private var lastBeat:Float = 0;
-	private var lastStep:Float = 0;
+	#if true
+	private var curStep(get, set):Int;
+	private var curBeat(get, set):Int;
+	private var curDecStep(get, set):Float;
+	private var curDecBeat(get, set):Float;
+	@:noCompletion function get_curStep() return Conductor.curStep;
+	@:noCompletion function get_curBeat() return Conductor.curBeat;
+	@:noCompletion function get_curDecStep() return Conductor.curDecStep;
+	@:noCompletion function get_curDecBeat() return Conductor.curDecBeat;
+	@:noCompletion function set_curStep(v) return Conductor.curStep=v;
+	@:noCompletion function set_curBeat(v) return Conductor.curBeat=v;
+	@:noCompletion function set_curDecStep(v) return Conductor.curDecStep=v;
+	@:noCompletion function set_curDecBeat(v) return Conductor.curDecBeat=v;
+	#end
 
-	private var curStep:Int = 0;
-	private var curBeat:Int = 0;
-
-	private var curDecStep:Float = 0;
-	private var curDecBeat:Float = 0;
 	private var controls(get, never):Controls;
 
 	inline function get_controls():Controls
@@ -52,26 +59,10 @@ class MusicBeatSubstate extends FlxSubState
 	private function updateSteps() {
 		var oldStep:Int = curStep;
 
-		updateCurStep();
-		updateBeat();
+		Conductor.updateSteps();
 
 		if (oldStep != curStep && curStep > 0)
 			stepHit();
-	}
-
-	private function updateBeat():Void
-	{
-		curBeat = Math.floor(curStep / 4);
-		curDecBeat = curDecStep/4;
-	}
-
-	private function updateCurStep():Void
-	{
-		var lastChange = Conductor.getBPMFromSeconds(Conductor.songPosition);
-
-		var shit = ((Conductor.songPosition - ClientPrefs.noteOffset) - lastChange.songTime) / lastChange.stepCrochet;
-		curDecStep = lastChange.stepTime + shit;
-		curStep = lastChange.stepTime + Math.floor(shit);
 	}
 
 	public function stepHit():Void
