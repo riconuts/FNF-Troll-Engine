@@ -112,7 +112,7 @@ class PlayState extends MusicBeatState
 	public static var instance:PlayState;
 
 	public static var SONG:SwagSong = null;
-	public static var songPlaylist:Array<SongMetadata> = [];
+	public static var songPlaylist:Array<Song> = [];
 	public static var songPlaylistIdx = 0;
 
 	public static var difficulty:Int = 1; // for psych mod shit
@@ -184,7 +184,7 @@ class PlayState extends MusicBeatState
 	////
 	public var displayedSong:String;
 	public var displayedDifficulty:String;
-	public var metadata:SongCreditdata; // metadata for the songs (artist, etc)
+	public var metadata:SongMetadata; // metadata for the songs (artist, etc)
 
 	public var stats:Stats;
 	public var ratingStuff:Array<Array<Dynamic>>;
@@ -3154,7 +3154,7 @@ class PlayState extends MusicBeatState
 			Highscore.saveScoreRecord(SONG.song, difficultyName, stats.getScoreRecord());
 
 		var gotoNextThing:Void -> Void = gotoMenus;
-		var nextSong:SongMetadata = null;
+		var nextSong:Song = null;
 
 		if (chartingMode) {
 			gotoNextThing = null;
