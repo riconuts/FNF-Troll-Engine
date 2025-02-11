@@ -887,7 +887,8 @@ class PlayState extends MusicBeatState
 		}
 
 		if (hud == null) {
-			// TODO: load invisible icon
+			// TODO: make these not be obligatory values
+			// initial icons should be loaded by changeCharacter instead idk
 			var iP1:String = boyfriend?.healthIcon ?? "face";
 			var iP2:String = dad?.healthIcon ?? "face";
 
@@ -1240,10 +1241,12 @@ class PlayState extends MusicBeatState
 	}
 
 	public function reloadHealthBarColors() {
-		var dadArray = dad?.healthColorArray ?? [127, 127, 127];
-		var bfArray = boyfriend?.healthColorArray ?? [127, 127, 127];
-		var dadColor:FlxColor = FlxColor.fromRGB(dadArray[0], dadArray[1], dadArray[2]);
-		var bfColor:FlxColor = FlxColor.fromRGB(bfArray[0], bfArray[1], bfArray[2]);
+		// TODO: fuck this move it to hud.changedCharacter
+		var dadArray = dad?.healthColorArray;
+		var bfArray = boyfriend?.healthColorArray;
+		var dadColor:FlxColor = (dadArray==null) ? 0xFFFF0000 : FlxColor.fromRGB(dadArray[0], dadArray[1], dadArray[2]);
+		var bfColor:FlxColor = (bfArray==null) ? 0xFF00FF00 : FlxColor.fromRGB(bfArray[0], bfArray[1], bfArray[2]);
+		
 		if(callOnHScripts('reloadHealthBarColors', [hud, dadColor, bfColor]) == Globals.Function_Stop)
 			return;
 
