@@ -63,6 +63,10 @@ class NotefieldManager extends FlxBasic {
 			
 			var realField:NoteField = cast field.isProxy ? cast(field, ProxyField).proxiedField : field;
 
+			var glowColour = realField.modManager == null ? FlxColor.WHITE : FlxColor.fromRGBFloat(realField.modManager.getValue("flashR",
+				realField.modNumber), realField.modManager.getValue("flashG", realField.modNumber),
+				realField.modManager.getValue("flashB", realField.modNumber));
+
 			var queue:Array<RenderObject> = field.drawQueue;
 			for (object in queue){
 				finalDrawQueue.push({
@@ -77,11 +81,7 @@ class NotefieldManager extends FlxBasic {
 					colorSwap: object.colorSwap,
 					antialiasing: object.antialiasing,
 					sourceField: field,
-					glowColour: realField.modManager == null ? FlxColor.WHITE : FlxColor.fromRGBFloat(
-						realField.modManager.getValue("flashR", realField.modNumber),
-						realField.modManager.getValue("flashG", realField.modNumber),
-						realField.modManager.getValue("flashB", realField.modNumber)
-					),  // Maybe this should be part of the regular RenderObject?
+					glowColour: glowColour,  // Maybe this should be part of the regular RenderObject?
 					cameras: field.cameras
 				});
 			}
