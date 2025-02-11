@@ -1,3 +1,5 @@
+importClass("funkin.objects.Stage");
+
 // fuck you edu
 
 stageMap = new StringMap();
