@@ -158,7 +158,7 @@ class ModManager {
 		setValue("scaleX", 1, mN);
 		setValue("scaleY", 1, mN);
 
-		setValue("lookAheadTime", 1, mN);
+		setValue("lookAheadTime", 2, mN);
 
 		setValue("snapXInterval", 1, mN);
 		setValue("snapYInterval", 1, mN);
@@ -740,9 +740,27 @@ class ModManager {
 	public function queueFunc(step:Float, endStep:Float, callback:(CallbackEvent, Float) -> Void)
 		addEvent(new StepCallbackEvent(step, endStep, callback, this));
 	
+	public function queueFuncL(step:Float, length:Float, callback:(CallbackEvent, Float) -> Void)
+		addEvent(new StepCallbackEvent(step, step + length, callback, this));
+
+	public function queueFuncB(beat:Float, endBeat:Float, callback:(CallbackEvent, Float) -> Void)
+		addEvent(new StepCallbackEvent(beat * 4, endBeat * 4, callback, this));
+
+	public function queueFuncLB(beat:Float, length:Float, callback:(CallbackEvent, Float) -> Void)
+		addEvent(new StepCallbackEvent(beat * 4, (beat + length) * 4, callback, this));
+
 	public function queueFuncOnce(step:Float, callback:(CallbackEvent, Float) -> Void)
 		addEvent(new CallbackEvent(step, callback, this));
 	
 	public function queueEaseFunc(step:Float, endStep:Float, func:EaseFunction, callback:(EaseEvent, Float, Float) -> Void)
 		addEvent(new EaseEvent(step, endStep, func, callback, this));
+
+	public function queueEaseFuncL(step:Float, length:Float, func:EaseFunction, callback:(EaseEvent, Float, Float) -> Void)
+		addEvent(new EaseEvent(step, step + length, func, callback, this));
+
+	public function queueEaseFuncB(beat:Float, endBeat:Float, func:EaseFunction, callback:(EaseEvent, Float, Float) -> Void)
+		addEvent(new EaseEvent(beat * 4, endBeat * 4, func, callback, this));
+
+	public function queueEaseFuncLB(beat:Float, length:Float, func:EaseFunction, callback:(EaseEvent, Float, Float) -> Void)
+		addEvent(new EaseEvent(beat * 4, (beat + length) * 4, func, callback, this));
 }
