@@ -141,6 +141,7 @@ class ChartingState extends MusicBeatState
 	var highlight:FlxSprite;
 
 	public static var GRID_SIZE:Int = 40;
+	public static var GRID_HALF:Float = GRID_SIZE * 0.5;
 	var CAM_OFFSET:Int = GRID_SIZE * 5;
 
 	var dummyArrow:FlxSprite;
@@ -534,15 +535,17 @@ class ChartingState extends MusicBeatState
 		quantTxt.scrollFactor.set();
 		add(quantTxt);
 
-		if (lastSong != currentSongName){
+		if (lastSong != currentSongName) {
 			lastSong = currentSongName;
-			changeSection(0);
-		}else{
-			reloadGridLayer();
-			updateHeads();
-			changeSection(curSec);
+			curSec = 0;
 		}
 
+		changeSection(curSec);
+
+		if (soundTracksMap.exists(lastSelectedTrack))
+			selectTrack(lastSelectedTrack);
+		else
+			waveformTrackDropDown.selectedId = "None";
 
 		super.create();
 		FlxG.mouse.visible = true;
@@ -1454,6 +1457,7 @@ class ChartingState extends MusicBeatState
 	var playSoundDad:FlxUICheckBox = null;
 	var playSoundEvents:FlxUICheckBox = null;
 
+	static var lastSelectedTrack = "Voices";
 	var waveformTrackDropDown:FlxUIDropDownMenuCustom;
 	var waveformTrack:Null<FlxSound> = null;
 	var trackVolumeSlider:FlxUISlider;
@@ -1462,6 +1466,8 @@ class ChartingState extends MusicBeatState
 		waveformTrack = soundTracksMap.get(trackName); 
 
 		if (waveformTrack != null){
+			waveformTrackDropDown.selectedId = trackName;
+
 			trackVolumeSlider.value = waveformTrack.volume;
 			trackVolumeSlider.visible = true;
 		/*}else{
@@ -1469,6 +1475,7 @@ class ChartingState extends MusicBeatState
 		}
 		
 		updateWaveform();
+		lastSelectedTrack = trackName;
 	}
 
 	function changeSelectedTrackVolume(val:Float)
@@ -1486,27 +1493,19 @@ class ChartingState extends MusicBeatState
 		tab_group_chart.name = 'Charting';
 
 		////////
-
 		var trackNamesArray = ["None"];
 		for (trackName in soundTracksMap.keys())
 			trackNamesArray.push(trackName);
 
-		/*var curSelectedTrackName = "None";
-		for (trackName => snd in soundTracksMap){
-			trackNamesArray.push(trackName);
-			if (snd == waveformTrack) 
-				curSelectedTrackName = trackName;
-		}*/
-
-		////
+		//
 		waveformTrackDropDown = new FlxUIDropDownMenuCustom(
 			10, 100, 
 			FlxUIDropDownMenuCustom.makeStrIdLabelArray(trackNamesArray, false), 
 			selectTrack
 		);
-		waveformTrackDropDown.selectedId = "None"; //curSelectedTrackName;
 		blockPressWhileScrolling.push(waveformTrackDropDown);
 
+		//
 		trackVolumeSlider = new FlxUISlider(
 			this, 
 			'_curTrackVolume', 
@@ -1523,7 +1522,6 @@ class ChartingState extends MusicBeatState
 		trackVolumeSlider.nameLabel.text = 'Track Volume';
 		trackVolumeSlider.setVariable = false;
 		trackVolumeSlider.callback = changeSelectedTrackVolume;
-		trackVolumeSlider.value = 1.0;
 
 		////////
 
@@ -1659,16 +1657,22 @@ class ChartingState extends MusicBeatState
 
 		songLength = 0.0;
 
-		for (trackName in songTrackNames){
+		inline function createMusicTrack() {
+			var newTrack = new FlxSound();
+			newTrack.context = MUSIC;
+			newTrack.exists = true;
+			FlxG.sound.list.add(newTrack);
+			return newTrack;
+		}
+
+		for (trackName in songTrackNames) {
 			var file:Sound = Paths.track(currentSongName, trackName);
 			if (file == null || file.length <= 0) 
 				continue;
 
-			var newTrack = new FlxSound().loadEmbedded(file);
+			var newTrack = createMusicTrack();
+			newTrack.loadEmbedded(file);
 			newTrack.time = Conductor.songPosition;
-			newTrack.context = MUSIC;
-			newTrack.exists = true;
-			FlxG.sound.list.add(newTrack);
 			
 			newTrack.onComplete = onTrackCompleted;
 
@@ -1679,14 +1683,9 @@ class ChartingState extends MusicBeatState
 		}
 		
 		inst = soundTracksMap.get(jsonTracks.inst[0]);
-		if (inst == null) {
-			var newTrack = new FlxSound();
-			newTrack.context = MUSIC;
-			newTrack.exists = true;
-			FlxG.sound.list.add(newTrack);
-
-			inst = newTrack;
-		}
+		if (inst == null)
+			inst = createMusicTrack();
+		inst.volume = 0.6;
 
 		//// get final section accessible section
 		var prevSec = curSec;
@@ -2929,19 +2928,21 @@ class ChartingState extends MusicBeatState
 	var noteColors:Array<FlxColor> = [0xFFC24B99, 0xFF00FFFF, 0xFF12FA05, 0xFFF9393F];
 	#end
 	var susWidth:Float = 8;
-
+	var showSusTail:Bool = true; // to visualise the head/cap/end of the tail
+	// because they looked WAY too short
+	
 	function setupSusNote(note:Note):Null<FlxSprite> 
 	{
-		final tailOffset:Float = GRID_SIZE * 0.5;
 		final stepLength = (Conductor.getBPMFromSeconds(note.strumTime).stepCrochet);
 		final tailSteps:Float = note.sustainLength / stepLength;
-		var height:Float = (tailSteps * GRID_SIZE * zoomList[curZoom] - tailOffset) + GRID_SIZE / 2; // Adding the gridsize / 2 to visualise the head/cap/end of the tail
-		// because these looked WAY too short
+		var height:Float = tailSteps * GRID_SIZE * zoomList[curZoom];
+		if (!showSusTail) height -= GRID_HALF;
+		
 		if (height <= 0) return null;
 		
 		var spr:FlxSprite = new FlxSprite(
 			note.x + (GRID_SIZE - susWidth) * 0.5, 
-			note.y + tailOffset
+			note.y + GRID_HALF
 		);
 		var color:FlxColor = note.isQuant ? 0xFFFF0000 : noteColors[note.column % noteColors.length];
 		color.setHSB(
