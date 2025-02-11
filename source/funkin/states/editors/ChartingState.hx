@@ -645,7 +645,7 @@ class ChartingState extends MusicBeatState
 			var jsonPath = Paths.getPath('songs/$songName/metadata.json');
 
 			if (Paths.exists(jsonPath)){
-				var metadata:Song.SongCreditdata = Json.parse(Paths.getContent(jsonPath));
+				var metadata:Song.SongMetadata = Json.parse(Paths.getContent(jsonPath));
 				_song.metadata = metadata;
 			}
 			

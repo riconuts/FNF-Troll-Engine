@@ -184,7 +184,7 @@ class PlayState extends MusicBeatState
 	////
 	public var displayedSong:String;
 	public var displayedDifficulty:String;
-	public var metadata:SongCreditdata; // metadata for the songs (artist, etc)
+	public var metadata:SongMetadata; // metadata for the songs (artist, etc)
 
 	public var stats:Stats;
 	public var ratingStuff:Array<Array<Dynamic>>;

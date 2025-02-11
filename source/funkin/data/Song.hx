@@ -73,7 +73,7 @@ typedef SongTracks = {
 	var ?opponent:Array<String>;
 } 
 
-typedef SongCreditdata = // beacuse SongMetadata is stolen
+typedef SongMetadata =
 {
 	// ?songName:String,
 	?artist:String,
@@ -81,9 +81,6 @@ typedef SongCreditdata = // beacuse SongMetadata is stolen
 	?modcharter:String,
 	?extraInfo:Array<String>,
 }
-
-@:deprecated("SongMetadata was deprecated, please rename to Song instead!")
-typedef SongMetadata = Song;
 
 @:structInit
 class Song
@@ -114,7 +111,7 @@ class Song
 
 	////
 
-	public static function getMetadataInfo(metadata:SongCreditdata):Array<String> {
+	public static function getMetadataInfo(metadata:SongMetadata):Array<String> {
 		var info:Array<String> = [];
 		
 		inline function pushInfo(str:String) {
