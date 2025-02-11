@@ -364,12 +364,12 @@ class ChartingState extends MusicBeatState
 		fixEvents();
 
 		plrHitsound = new FlxSound().loadEmbedded(Paths.sound("monoHitsound"));
-		plrHitsound.pan = -0.35;
+		plrHitsound.pan = -0.75;
 		plrHitsound.exists = true;
 		FlxG.sound.list.add(plrHitsound);
 
 		oppHitsound = new FlxSound().loadEmbedded(Paths.sound("monoHitsound"));
-		oppHitsound.pan = 0.35;
+		oppHitsound.pan = 0.75;
 		oppHitsound.exists = true;
 		FlxG.sound.list.add(oppHitsound);
 
