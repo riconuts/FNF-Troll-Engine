@@ -4,7 +4,6 @@ import funkin.data.Highscore;
 import flixel.math.FlxMath;
 import funkin.states.SongSelectState.SongChartSelec;
 import funkin.data.Song;
-import funkin.data.Song.SongMetadata;
 import funkin.data.WeekData;
 
 import flixel.tweens.FlxTween;
@@ -18,7 +17,7 @@ class FreeplayState extends MusicBeatState
 	public static var comingFromPlayState:Bool = false;
 
 	var menu = new AlphabetMenu();
-	var songMeta:Array<SongMetadata> = [];
+	var songMeta:Array<Song> = [];
 
 	var bgGrp = new FlxTypedGroup<FlxSprite>();
 	var bg:FlxSprite;
@@ -37,7 +36,7 @@ class FreeplayState extends MusicBeatState
 	static var curDiffStr:String = "normal";
 	static var curDiffIdx:Int = 1;
 
-	var selectedSongData:SongMetadata;
+	var selectedSongData:Song;
 	var selectedSongCharts:Array<String>;
 	
 	var hintText:FlxText;
@@ -56,7 +55,7 @@ class FreeplayState extends MusicBeatState
 				continue;
 
 			for (songName in week.songs){
-				var metadata:SongMetadata = {songName: songName, folder: week.directory, difficulties: week.difficulties != null ? week.difficulties : []};
+				var metadata:Song = {songName: songName, folder: week.directory, difficulties: week.difficulties != null ? week.difficulties : []};
 				
 				/*
 				if (metadata.charts.length == 0){
@@ -217,7 +216,7 @@ class FreeplayState extends MusicBeatState
 		super.update(elapsed);
 	}
 
-	function onSelectSong(data:SongMetadata)
+	function onSelectSong(data:Song)
 	{	
 		selectedSongData = data;
 		selectedSongCharts = data.charts;

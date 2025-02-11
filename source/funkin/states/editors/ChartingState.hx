@@ -299,38 +299,33 @@ class ChartingState extends MusicBeatState
 
 		PlayState.chartingMode = true;
 
-		if (PlayState.SONG != null){
-			_song = PlayState.SONG;
-			offset = _song.offset == null ? 0 : _song.offset;		
-		}else {
-			PlayState.SONG = _song = {
-				song: 'Test',
-				bpm: 150.0,
-				speed: 1,
-				offset: 0,
+		this._song = PlayState.SONG ??= {
+			song: 'Test',
+			bpm: 150.0,
+			speed: 1,
+			offset: 0,
 
-				stage: 'stage',
-				player1: 'bf',
-				player2: 'dad',
-				gfVersion: 'gf',
+			stage: 'stage',
+			player1: 'bf',
+			player2: 'dad',
+			gfVersion: 'gf',
 
-				arrowSkin: 'NOTE_assets',
-				splashSkin: 'noteSplashes',
-				hudSkin: 'default',
+			arrowSkin: 'NOTE_assets',
+			splashSkin: 'noteSplashes',
+			hudSkin: 'default',
 
-				tracks: {
-					inst: ["Inst"],
-					player: ["Voices"],
-					opponent: ["Voices"]
-				},
+			tracks: {
+				inst: ["Inst"],
+				player: ["Voices"],
+				opponent: ["Voices"]
+			},
 
-				validScore: false,
+			validScore: false,
 
-				keyCount: 4,
-				notes: [],
-				events: [],
-			};
-		}
+			keyCount: 4,
+			notes: [],
+			events: [],
+		};
 
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
@@ -645,7 +640,7 @@ class ChartingState extends MusicBeatState
 			var jsonPath = Paths.getPath('songs/$songName/metadata.json');
 
 			if (Paths.exists(jsonPath)){
-				var metadata:Song.SongCreditdata = Json.parse(Paths.getContent(jsonPath));
+				var metadata:Song.SongMetadata = Json.parse(Paths.getContent(jsonPath));
 				_song.metadata = metadata;
 			}
 			
