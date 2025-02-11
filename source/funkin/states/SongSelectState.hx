@@ -22,7 +22,7 @@ using StringTools;
 **/
 class SongSelectState extends MusicBeatState
 {	
-	var songMeta:Array<SongMetadata>;
+	var songMeta:Array<Song>;
 	var songText:Array<FlxText> = [];
 	var curSel(default, set):Int;
 	function set_curSel(sowy){
@@ -51,7 +51,7 @@ class SongSelectState extends MusicBeatState
 
 	var verticalLimit:Int;
 
-	public static function getEverySong():Array<SongMetadata>
+	public static function getEverySong():Array<Song>
 	{
 		var songMeta = [];
 
@@ -59,7 +59,7 @@ class SongSelectState extends MusicBeatState
 		Paths.iterateDirectory(folder, function(name:String){
 			trace(name);
 			if (Paths.isDirectory(folder + name))
-				songMeta.push(new SongMetadata(name));
+				songMeta.push(new Song(name));
 		});
 
 		#if MODS_ALLOWED
@@ -67,7 +67,7 @@ class SongSelectState extends MusicBeatState
 			var folder = Paths.mods('$modDir/songs/');
 			Paths.iterateDirectory(folder, function(name:String){
 				if (FileSystem.isDirectory(folder + name))
-					songMeta.push(new SongMetadata(name, modDir));
+					songMeta.push(new Song(name, modDir));
 			});
 		}
 		#end
@@ -218,7 +218,7 @@ class SongSelectState extends MusicBeatState
 
 class SongChartSelec extends MusicBeatState
 {
-	var songMeta:SongMetadata;
+	var songMeta:Song;
 	var alts:Array<String>;
 
 	var texts:Array<FlxText> = [];
@@ -278,7 +278,7 @@ class SongChartSelec extends MusicBeatState
 		super.update(e);
 	} 
 
-	public function new(WHO:SongMetadata, alts) 
+	public function new(WHO:Song, alts) 
 	{
 		super();
 		

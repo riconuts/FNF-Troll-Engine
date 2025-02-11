@@ -183,12 +183,12 @@ class Song
 	}
 	#end
 
-	public static function getCharts(metadata:SongMetadata):Array<String>
+	public static function getCharts(song:Song):Array<String>
 	{
-		Paths.currentModDirectory = metadata.folder;
+		Paths.currentModDirectory = song.folder;
 		
 		#if USING_MOONCHART
-		final songName = Paths.formatToSongPath(metadata.songName);
+		final songName = Paths.formatToSongPath(song.songName);
 
 		var folder:String = '';
 		var charts:Map<String, Bool> = [];
@@ -245,7 +245,7 @@ class Song
 			}
 		}
 
-		if (metadata.folder == "") {
+		if (song.folder == "") {
 			folder = Paths.getPreloadPath('songs/$songName/');
 			Paths.iterateDirectory(folder, processFileName);
 		}
@@ -255,7 +255,7 @@ class Song
 			var spoon:Array<String> = [];
 			var crumb:Array<String> = [];
 
-			folder = Paths.mods('${metadata.folder}/songs/$songName/');
+			folder = Paths.mods('${song.folder}/songs/$songName/');
 			Paths.iterateDirectory(folder, (fileName)->{
 				if (isAMoonchartRecognizedFile(fileName)){
 					spoon.push(folder+fileName);
@@ -276,7 +276,7 @@ class Song
 
 			////
 			#if PE_MOD_COMPATIBILITY
-			folder = Paths.mods('${metadata.folder}/data/$songName/');
+			folder = Paths.mods('${song.folder}/data/$songName/');
 			Paths.iterateDirectory(folder, processFileName);
 			#end
 		}
@@ -286,8 +286,8 @@ class Song
 		var allChartsLower:Array<String> = [for (name in charts.keys()) name.toLowerCase()];
 		var chartNames:Array<String> = [];
 
-		if (metadata.difficulties.length > 0){
-			for(diff in metadata.difficulties){
+		if (song.difficulties.length > 0){
+			for(diff in song.difficulties){
 				if (allChartsLower.contains(diff)){
 					var index = allChartsLower.indexOf(diff);
 					chartNames.push(diff);
@@ -302,7 +302,7 @@ class Song
 
 		return chartNames;
 		#else
-		final songName = Paths.formatToSongPath(metadata.songName);
+		final songName = Paths.formatToSongPath(song.songName);
 		final charts = new haxe.ds.StringMap();
 		
 		function processFileName(unprocessedName:String)
@@ -321,7 +321,7 @@ class Song
 		}
 
 
-		if (metadata.folder == "")
+		if (song.folder == "")
 		{
 			#if PE_MOD_COMPATIBILITY
 			Paths.iterateDirectory(Paths.getPreloadPath('data/$songName/'), processFileName);
@@ -332,9 +332,9 @@ class Song
 		else
 		{
 			#if PE_MOD_COMPATIBILITY
-			Paths.iterateDirectory(Paths.mods('${metadata.folder}/data/$songName/'), processFileName);
+			Paths.iterateDirectory(Paths.mods('${song.folder}/data/$songName/'), processFileName);
 			#end
-			Paths.iterateDirectory(Paths.mods('${metadata.folder}/songs/$songName/'), processFileName);
+			Paths.iterateDirectory(Paths.mods('${song.folder}/songs/$songName/'), processFileName);
 		}
 		#end
 		
@@ -568,7 +568,7 @@ class Song
 		return resultArray;
 	}
 
-	static public function loadSong(toPlay:SongMetadata, ?difficulty:String, ?difficultyIdx:Int = 1) {
+	static public function loadSong(toPlay:Song, ?difficulty:String, ?difficultyIdx:Int = 1) {
 		Paths.currentModDirectory = toPlay.folder;
 
 		var songLowercase:String = Paths.formatToSongPath(toPlay.songName);
@@ -708,9 +708,9 @@ class Song
 		LoadingState.loadAndSwitchState(new PlayState());	
 	}
 
-	static public function playSong(metadata:SongMetadata, ?difficulty:String, ?difficultyIdx:Int = 1)
+	static public function playSong(song:Song, ?difficulty:String, ?difficultyIdx:Int = 1)
 	{
-		loadSong(metadata, difficulty, difficultyIdx);
+		loadSong(song, difficulty, difficultyIdx);
 		switchToPlayState();
 	} 
 }
