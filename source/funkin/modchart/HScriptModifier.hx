@@ -104,32 +104,9 @@ class HScriptModifier extends Modifier
 	override public function getName():String
 		return script.exists("getName") ? script.executeFunc("getName") : name;
 
-	// shouldnt be overriding getValue/getPercent/etc
-	// they're used purely to get the value of a modifier and should not be overwritten
-	// you sure
-
-	/* 	override public function getValue(player:Int):Float
-		return script.exists("getValue") ? script.executeFunc("getValue", [player]) : super.getValue(player);
-
-	override public function getPercent(player:Int):Float
-		return script.exists("getPercent") ? script.executeFunc("getPercent", [player]) : super.getPercent(player);
-
-	override public function setValue(value:Float, player:Int = -1)
-		return script.exists("setValue") ? script.executeFunc("setValue", [value, player]) : super.setValue(value, player);
-
-	override public function setPercent(percent:Float, player:Int = -1)
-		return script.exists("setPercent") ? script.executeFunc("setValue", [percent, player]) : super.setValue(percent, player);
-
-	override public function getSubmodPercent(modName:String, player:Int)
-		return script.exists("getSubmodPercent") ? script.executeFunc("getSubmodPercent", [modName, player]) : super.getSubmodPercent(modName, player);
-
-	override public function getSubmodValue(modName:String, player:Int)
-		return script.exists("getSubmodValue") ? script.executeFunc("getSubmodValue", [modName, player]) : super.getSubmodValue(modName, player); */
-
 	override public function getSubmods():Array<String>
 		return script.exists("getSubmods") ? script.executeFunc("getSubmods") : super.getSubmods();
 
-	//
 	override public function updateReceptor(beat:Float, receptor:StrumNote, player:Int) 
 		return script.exists("updateReceptor") ? script.executeFunc("updateReceptor", [beat, receptor, player]) : super.updateReceptor(beat, receptor, player);
 

@@ -4238,6 +4238,11 @@ class PlayState extends MusicBeatState
 		return Globals.Function_Continue;
 	}
 
+	public function setDefaultLuas(variable:String, arg:Dynamic){
+		FunkinLua.defaultVars.set(variable, arg);
+		return setOnScripts(variable, arg, luaArray);
+	}
+
 	#if HSCRIPT_ALLOWED
 	public function callOnHScripts(event:String, ?args:Array<Dynamic>, ?vars:Map<String, Dynamic>, ignoreStops = false, ?exclusions:Array<String>):Dynamic
 		return callOnScripts(event, args, ignoreStops, exclusions, hscriptArray, vars);
@@ -4411,6 +4416,7 @@ class PlayState extends MusicBeatState
 		removeKeyboardEvents();
 
 		FunkinHScript.defaultVars.clear();
+		FunkinLua.defaultVars.clear();
 		
 		FlxG.timeScale = 1.0;
 		ClientPrefs.gameplaySettings.set('botplay', cpuControlled);
@@ -4447,6 +4453,7 @@ class PlayState extends MusicBeatState
 
 		Note.quantShitCache.clear();
 		FunkinHScript.defaultVars.clear();
+		FunkinLua.defaultVars.clear();
 
 		notetypeScripts.clear();
 		hudSkinScripts.clear();		
