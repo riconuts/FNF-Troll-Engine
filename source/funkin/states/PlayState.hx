@@ -5,6 +5,7 @@ import funkin.data.CharacterData;
 import funkin.data.Cache;
 import funkin.data.Song;
 import funkin.data.Section;
+import funkin.data.NoteStyles;
 import funkin.objects.Note;
 import funkin.objects.NoteSplash;
 import funkin.objects.StrumNote;
@@ -659,22 +660,21 @@ class PlayState extends MusicBeatState
 				songTrackNames.push(trackName);
 			}
 		}
-		
-		PlayState.keyCount = SONG.keyCount;
-		StrumNote.defaultStaticAnimNames = ['arrowLEFT', 'arrowDOWN', 'arrowUP', 'arrowRIGHT']; 
-		StrumNote.defaultPressAnimNames = ["left press", "down press", "up press", "right press"];
-		StrumNote.defaultConfirmAnimNames = ["left confirm", "down confirm", "up confirm", "right confirm"];
-		Note.defaultNoteAnimNames = ['purple0', 'blue0', 'green0', 'red0'];
-		Note.defaultHoldAnimNames = ['purple hold piece', 'blue hold piece', 'green hold piece', 'red hold piece'];
-		Note.defaultTailAnimNames = ['purple hold end', 'blue hold end', 'green hold end', 'red hold end'];
-		Note.spriteScale = (4 / keyCount) * 0.7;
-		Note.swagWidth = Note.spriteScale * 160;
+
 		/**
 		 * Note texture asset names
 		 * The quant prefix gets handled by the Note class
 		 */
 		arrowSkin = SONG.arrowSkin;
 		splashSkin = SONG.splashSkin;
+		NoteStyles.loadDefault(arrowSkin, splashSkin);
+		
+		PlayState.keyCount = SONG.keyCount;
+		@:privateAccess
+		Note.swagWidth = NoteStyles.get("default" /**SONG.noteStyle**/).scale * 160;
+		// honestly we should kill Note.swagWidth and shit and have each field keep track of its own noteWidth
+		// keep swagWidth as a constant 160 * 0.7 or whatever for when its used outside of PlayFields
+		// but i think that'd be better lol
 
 		hudSkin = SONG.hudSkin;
 		curStage = SONG.stage;
@@ -745,11 +745,14 @@ class PlayState extends MusicBeatState
 		}
 
 		//// Asset precaching start		
+		for (ns in NoteStyles) {
+			for (shit in ns.getPreload()) {
+				shitToLoad.push(shit);
+			}
+		}
+
 		for (judgeData in judgeManager.judgmentData)
 			shitToLoad.push({path: judgeData.internalName});
-
-		for (i in 0...10)
-			shitToLoad.push({path: 'num$i'});
 
 		for (i in 1...3) // TODO: Be able to add more than 3 miss sounds
 			shitToLoad.push({path: 'missnote$i', type: 'SOUND'});
@@ -757,23 +760,6 @@ class PlayState extends MusicBeatState
 		shitToLoad.push({path: 'hitsound', type: 'SOUND'});
 		shitToLoad.push({path: "healthBar"});
 		shitToLoad.push({path: "timeBar"});
-
-		/* 
-		if (PauseSubState.songName != null)
-			shitToLoad.push({path: PauseSubState.songName, type: 'MUSIC'});
-		else if (ClientPrefs.pauseMusic != 'None')
-			shitToLoad.push({path: Paths.formatToSongPath(ClientPrefs.pauseMusic), type: 'MUSIC'}); 
-		shitToLoad.push({path: "breakfast", type: 'MUSIC'}); 
-		*/
-
-		////
-		if (ClientPrefs.noteSkin == 'Quants'){
-			shitToLoad.push({path: 'QUANT$arrowSkin'});
-			shitToLoad.push({path: 'QUANT$splashSkin'});
-		}else{
-			shitToLoad.push({path: arrowSkin});
-			shitToLoad.push({path: splashSkin});
-		}
 
 		////
 		if (stageData.preloadStrings != null) {
@@ -814,11 +800,7 @@ class PlayState extends MusicBeatState
 
 		//// Asset precaching end
 
-		var splash:NoteSplash = new NoteSplash(100, 100, 0);
-		splash.alpha = 0.0;
-
 		grpNoteSplashes.cameras = [camHUD];
-		grpNoteSplashes.add(splash);
 
 		//// Characters
 
@@ -2174,6 +2156,9 @@ class PlayState extends MusicBeatState
 
 		hud.alpha = ClientPrefs.hudOpacity;
 		hud.changedOptions(options);
+		for (ns in NoteStyles) {
+			ns.optionsChanged(options);
+		}
 		
 		callOnScripts('optionsChanged', [options]);
 		if (hudSkinScript != null) callScript(hudSkinScript, "optionsChanged", [options]);
@@ -2343,6 +2328,8 @@ class PlayState extends MusicBeatState
 	public function initPlayfield(field:PlayField){
 		notefields.add(field.noteField);
 
+		//field.defaultNoteStyle = hudSkin; // dfjdshfg
+		// ^^ broke pixel songs + I think it'd be good to add a seperate notestyle variable alongside hudskin
 		field.judgeManager = judgeManager;
 
 		field.holdPressCallback = pressHold;
@@ -3581,7 +3568,7 @@ class PlayState extends MusicBeatState
 			if (note == null) {
 				var spr:StrumNote = field.strumNotes[column];
 				if (spr != null) {
-					spr.playAnim('pressed');
+					spr.playAnim('press');
 					spr.resetAnim = 0;
 				}
 			}else {

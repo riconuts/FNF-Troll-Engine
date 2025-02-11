@@ -155,16 +155,6 @@ function makeCountdownSprite(sprImage, swagCounter, tmr){
 	return countdownSpr;
 }
 
-function setupNoteTexture(note:Note){
-	if(note.isSustainNote)
-		note.reloadNote(note.texPrefix, 'NOTE_assets', note.texSuffix + 'ENDS', 'pixelUI', 4, 2);
-	else
-		note.reloadNote(note.texPrefix, 'NOTE_assets', note.texSuffix, 'pixelUI', 4, 5);
-
-	note.scale.set(6, 6);
-	note.antialiasing = false;
-}
-
 function setupReceptorTexture(strum:StrumNote){
 	strum.isQuant = false;
 	
@@ -206,6 +196,15 @@ function setupReceptorTexture(strum:StrumNote){
 		strum.playAnim(lastAnim, true);
 	}
 }
+
+function getNoteStyle(currentStyle:Null<String>){
+	NoteStyles.tryGetNewStyle(currentStyle + "-pixel"); // make it if it doesnt exist
+	if(NoteStyles.exists(currentStyle + "-pixel"))
+		return currentStyle + "-pixel";
+
+	return currentStyle;
+}
+
 
 function preSetupNoteSplash(){
 	this.kill();

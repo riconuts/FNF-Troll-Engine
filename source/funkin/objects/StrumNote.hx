@@ -1,5 +1,7 @@
 package funkin.objects;
 
+import funkin.data.NoteStyles;
+import funkin.objects.notestyles.BaseNoteStyle;
 import funkin.states.PlayState;
 import funkin.objects.playfields.PlayField;
 import funkin.scripts.FunkinHScript;
@@ -15,14 +17,37 @@ using StringTools;
 
 class StrumNote extends NoteObject
 {
-	public static var defaultStaticAnimNames:Array<String> = ['arrowLEFT', 'arrowDOWN', 'arrowUP', 'arrowRIGHT'];
-	public static var defaultPressAnimNames:Array<String> = ["left press", "down press", "up press", "right press"];
-	public static var defaultConfirmAnimNames:Array<String> = ["left confirm", "down confirm", "up confirm", "right confirm"];
+	public var noteStyle(default, set):String;
+	var _noteStyle:BaseNoteStyle;
+	private function set_noteStyle(name:String):String {
+		if (noteStyle == name)
+			return name;
+
+		if (_noteStyle != null) 
+			_noteStyle.unloadReceptor(this);
+
+		// find the first existing style in the following order [hudskin.getNoteStyle(name), name, 'default']
+		var newStyle:BaseNoteStyle = null;
+
+		if (genScript != null) {
+			var ret = genScript.executeFunc("getNoteStyle", [name]);
+			if (ret is String)
+				newStyle = NoteStyles.get(ret, name);
+		}
+
+		if (newStyle == null)
+			newStyle = NoteStyles.get(name, 'default');
+
+		//trace("loading recepor", name, (newStyle==null?null:newStyle.id));
+		if (newStyle.loadReceptor(this))
+			noteStyle = name; // yes, the base name, not the hudskin name.
+
+		_noteStyle = newStyle;
+		return noteStyle;
+	}
 
 	////
-	public var texture(default, set):String = null;
 	public var downScroll:Bool = false;
-	public var isQuant:Bool = false;
 	public var resetAnim:Float = 0;
 
 	////
@@ -36,86 +61,46 @@ class StrumNote extends NoteObject
 
 	private var field:PlayField;
 
-	public function new(x:Float, y:Float, leColumn:Int, ?playField:PlayField, ?hudSkin:String = 'default') {
+	public function new(x:Float, y:Float, leColumn:Int, ?playField:PlayField, ?hudSkin:String = 'default', ?noteStyle:String) {
 		super(x, y);
-		colorSwap = new NoteColorSwap();
-		shader = NoteColorSwap.shader;
-
 		objType = STRUM;
 		column = leColumn;
 		field = playField;
 		noteMod = hudSkin;
+		
+		colorSwap = new NoteColorSwap();
+		shader = NoteColorSwap.shader;
+
+		if (noteStyle == null && field != null) 
+			this.noteStyle = field.defaultNoteStyle;
+		else
+			this.noteStyle = noteStyle;
 	}
 
 	override function toString()
-		return '(column: $column | texture $texture | visible: $visible)';
-	
-	private function set_texture(value:String):String {
-		if(texture != value) {
-			texture = value;
-			reloadNote();
-		}
-		return value;
+		return '(column: $column | visible: $visible)';
+
+	public function getZIndex(?daZ:Float)
+	{
+		if (daZ==null) daZ = z;
+
+		return z + desiredZIndex;
 	}
 
-	function set_noteMod(value:String) {
-		genScript = (PlayState.instance == null) ? null : PlayState.instance.getHudSkinScript(value);
+	function updateZIndex()
+		zIndex = getZIndex();
+	
 
-		if (genScript == null) {
-			texture = PlayState.arrowSkin;
+	function set_noteMod(value:String):String {
+		if (value == null)
+			value = 'default';
 
-		}else if (genScript.exists("setupReceptorTexture")) {
-			genScript.executeFunc("setupReceptorTexture", [this]);
-		
-		}else {
-			var skin:String = PlayState.arrowSkin;
-
-			var newTex = (genScript != null && genScript.exists("texture")) ? genScript.get("texture") : skin;
-			if (genScript != null)
-			{
-				if (genScript.exists("texturePrefix"))
-					newTex = genScript.get("texturePrefix") + texture;
-
-				if (genScript.exists("textureSuffix"))
-					newTex += genScript.get("textureSuffix");
-			}
-
-			texture = newTex; // Load texture and anims
-		}
+		////
+		if (PlayState.instance != null)
+			genScript = PlayState.instance.getHudSkinScript(value);
 
 		return noteMod = value;
 	}
-
-	public function reloadNote()
-	{
-		// TODO: add indices support n shit
-
-		var textureKey:String;
-
-		if (ClientPrefs.noteSkin == 'Quants') {
-			textureKey = Note.getQuantTexture('', texture, texture);
-			if (textureKey != null) isQuant = true;
-			else textureKey = texture;
-
-		}else
-			textureKey = texture;
-
-		var lastAnim:String = animation.name;
-		if (lastAnim == null) lastAnim = 'static';
-
-		frames = Paths.getSparrowAtlas(textureKey);
-
-		animation.addByPrefix('static', defaultStaticAnimNames[column], 24, false);
-		animation.addByPrefix('pressed', defaultPressAnimNames[column], 24, false);
-		animation.addByPrefix('confirm', defaultConfirmAnimNames[column], 24, false);
-
-		playAnim(lastAnim, true);
-
-		scale.x = scale.y = Note.spriteScale;
-		defScale.copyFrom(scale);
-		updateHitbox();
-	}
-
 	public function postAddedToGroup()
 	{
 		playAnim('static');
@@ -134,6 +119,12 @@ class StrumNote extends NoteObject
 
 		if (animation.name == 'confirm') 
 			centerOrigin();	
+		
+		updateZIndex();
+
+		if (_noteStyle != null)
+			_noteStyle.updateObject(this, elapsed);
+		
 		super.update(elapsed);
 	}
 
