@@ -21,22 +21,11 @@ import funkin.objects.shaders.NoteColorSwap;
 import funkin.states.PlayState;
 import funkin.states.MusicBeatState;
 import haxe.ds.Vector as FastVector;
+import funkin.objects.playfields.FieldBase;
 
 using StringTools;
 
-@:structInit
-class RenderObject {
-	public var graphic:FlxGraphic;
-	public var shader:FlxShader;
-	public var alphas:Array<Float>;
-	public var glows:Array<Float>;
-	public var uvData:Vector<Float>;
-	public var vertices:Vector<Float>;
-	public var indices:Vector<Int>;
-	public var zIndex:Float;
-	public var colorSwap:NoteColorSwap;
-	public var antialiasing:Bool;
-}
+
 
 final scalePoint = new FlxPoint(1, 1);
 
@@ -103,11 +92,6 @@ class NoteField extends FieldBase
 	 */
 	public var strumPositions:Array<Vector3> = [];
 	
-	/**
-	 * Used by preDraw to store RenderObjects to be drawn
-	*/
-	@:allow(funkin.objects.proxies.ProxyField)
-	private var drawQueue:Array<RenderObject> = [];
 	/**
 	 * How zoomed this NoteField is without taking modifiers into account. 2 is 2x zoomed, 0.5 is half zoomed.
 	 * If you want to modify a NoteField's zoom in code, you should use this!
@@ -278,7 +262,8 @@ class NoteField extends FieldBase
 		// one example would be reimplementing Die Batsards' original bullet mechanic
 		// if you need an example on how this all works just look at the tap note drawing portion
 
-		drawQueue.sort(drawQueueSort);
+		// No longer required since its done in the manager
+		//drawQueue.sort(drawQueueSort);
 
 		if(zoom != 1){
 			for(object in drawQueue){
@@ -300,76 +285,11 @@ class NoteField extends FieldBase
 
 	}
 
-	var point:FlxPoint = FlxPoint.get(0, 0);
 	var matrix:FlxMatrix = new FlxMatrix();
 	
-	override function draw()
-	{
-		if (!active || !exists || !visible)
-			return; // dont draw if visible = false
-		super.draw();
-
-		if ((FlxG.state is PlayState))
-			PlayState.instance.callOnHScripts("notefieldDraw", [this],
-				["drawQueue" => drawQueue]); // lets you do custom rendering in scripts, if needed
-
-		var glowR = modManager.getValue("flashR", modNumber);
-		var glowG = modManager.getValue("flashG", modNumber);
-		var glowB = modManager.getValue("flashB", modNumber);
-		
-		// actually draws everything
-		if (drawQueue.length > 0)
-		{
-			for (object in drawQueue)
-			{
-				if (object == null)
-					continue;
-				var shader = object.shader;
-				var graphic = object.graphic;
-				var alphas = object.alphas;
-				var glows = object.glows;
-				var vertices = object.vertices;
-				var uvData = object.uvData;
-				var indices = object.indices;
-				var colorSwap = object.colorSwap;
-				var transforms:Array<ColorTransform> = []; // todo use fastvector
-				var multAlpha = this.alpha * ClientPrefs.noteOpacity;
-				for (n in 0... Std.int(vertices.length / 2)){
-					var glow = glows[n];
-
-					var transfarm:ColorTransform = new ColorTransform();
-					transfarm.redMultiplier = 1 - glow;
-					transfarm.greenMultiplier = 1 - glow;
-					transfarm.blueMultiplier = 1 - glow;
-					transfarm.redOffset = glowR * glow * 255;
-					transfarm.greenOffset = glowG * glow * 255;
-					transfarm.blueOffset = glowB * glow * 255;
-
-					transfarm.alphaMultiplier = alphas[n] * multAlpha;
-					transforms.push(transfarm);
-				}
-
-				for (camera in cameras)
-				{
-					if (camera != null && camera.canvas != null && camera.canvas.graphics != null)
-					{
-						if (camera.alpha == 0 || !camera.visible)
-							continue;
-						for(shit in transforms)
-							shit.alphaMultiplier *= camera.alpha;
-						getScreenPosition(point, camera);
-						var drawItem = camera.startTrianglesBatch(graphic, object.antialiasing, true, null, true, shader);
-
-						@:privateAccess
-						{
-							drawItem.addTrianglesColorArray(vertices, indices, uvData, null, point, camera._bounds, transforms, colorSwap);
-						}
-						for (n in 0...transforms.length)
-							transforms[n].alphaMultiplier = alphas[n] * multAlpha;
-					}
-				}
-			}
-		}
+	override function draw(){
+		// Drawing is handled by NotefieldManager now (maybe rename to NotefieldRenderer?)
+		return;
 	}
 
 	function getPoints(hold:Note, ?wid:Float, speed:Float, vDiff:Float, diff:Float, ?lookAhead:Float = 1):Array<Vector3>
@@ -811,12 +731,6 @@ class NoteField extends FieldBase
 			colorSwap: sprite.colorSwap,
 			antialiasing: sprite.antialiasing
 		}
-	}
-
-	override function destroy()
-	{
-		point = FlxDestroyUtil.put(point);
-		super.destroy();
 	}
 
 	function set_holdSubdivisions(to:Int)

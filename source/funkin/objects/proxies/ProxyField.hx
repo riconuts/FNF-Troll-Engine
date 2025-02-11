@@ -21,88 +21,20 @@ import funkin.states.PlayState;
 */
 
 class ProxyField extends FieldBase {
+	@:allow(funkin.objects.playfields.NotefieldManager)
 	var proxiedField:NoteField;
-	var transfarm:ColorTransform = new ColorTransform();
 
 	public function new(field:NoteField){
 		super(0,0);
 		proxiedField = field;
 	}
 
-	override function preDraw(){
-		// does nothing, since this uses info from its linked notefield
-	}
+	override function draw()
+		drawQueue = proxiedField.drawQueue; // Just use the host field's queue
+	
 	
 	override function update(elapsed:Float){
 		field = proxiedField.field;
 		super.update(elapsed);
-	}
-	var point = FlxPoint.get(0, 0);
-	override function draw(){
-		if (!active || !exists || !visible || !proxiedField.exists || !proxiedField.active)
-			return; // dont draw if visible = false
-
-		var drawQueue = proxiedField.drawQueue;
-		super.draw();
-
-		if ((FlxG.state is PlayState))
-			PlayState.instance.callOnHScripts("playfieldDraw", [this], ["drawQueue" => drawQueue]); // lets you do custom rendering in scripts, if needed
-
-		var glowR = proxiedField.modManager.getValue("flashR", proxiedField.modNumber);
-		var glowG = proxiedField.modManager.getValue("flashG", proxiedField.modNumber);
-		var glowB = proxiedField.modManager.getValue("flashB", proxiedField.modNumber);
-
-
-		// actually draws everything
-		if (drawQueue.length > 0)
-		{
-			for (object in drawQueue)
-			{
-				if (object == null)
-					continue;
-				var shader:Dynamic = object.shader;
-				var graphic:FlxGraphic = object.graphic;
-				var alphas = object.alphas;
-				var glows = object.glows;
-				var vertices = object.vertices;
-				var uvData = object.uvData;
-				var indices = object.indices;
-				var colorSwap = object.colorSwap;
-				var transforms:Array<ColorTransform> = [];
-				for (n in 0...Std.int(vertices.length / 2))
-				{
-					var glow = glows[n];
-					var transfarm:ColorTransform = new ColorTransform();
-					transfarm.redMultiplier = 1 - glow;
-					transfarm.greenMultiplier = 1 - glow;
-					transfarm.blueMultiplier = 1 - glow;
-					transfarm.redOffset = glowR * glow * 255;
-					transfarm.greenOffset = glowG * glow * 255;
-					transfarm.blueOffset = glowB * glow * 255;
-					transfarm.alphaMultiplier = alphas[n] * this.alpha * ClientPrefs.noteOpacity;
-					transforms.push(transfarm);
-				}
-
-				for (camera in cameras)
-				{
-					if (camera != null && camera.canvas != null && camera.canvas.graphics != null)
-					{
-						if (camera.alpha == 0 || !camera.visible)
-							continue;
-						for (shit in transforms)
-							shit.alphaMultiplier *= camera.alpha;
-
-						getScreenPosition(point, camera);
-						var drawItem = camera.startTrianglesBatch(graphic, shader.bitmap.filter == 4, true, null, true, shader);
-						@:privateAccess
-						{
-							drawItem.addTrianglesColorArray(vertices, indices, uvData, null, point, camera._bounds, transforms, colorSwap);
-						}
-						for (n in 0...transforms.length)
-							transforms[n].alphaMultiplier = alphas[n];
-					}
-				}
-			}
-		}
 	}
 }

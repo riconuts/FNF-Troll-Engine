@@ -273,7 +273,7 @@ class ModManager {
 	inline public function getPercent(modName:String, player:Int)
 		return !register.exists(getActualModName(modName))?0:get(modName).getPercent(player);
 
-	inline public function getValue(modName:String, player:Int)
+	inline public function getValue(modName:String, player:Int):Float
 		return !register.exists(getActualModName(modName))?0:get(modName).getValue(player);
 
 	inline public function setPercent(modName:String, val:Float, player:Int=-1)
