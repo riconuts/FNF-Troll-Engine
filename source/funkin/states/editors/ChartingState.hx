@@ -2940,7 +2940,8 @@ class ChartingState extends MusicBeatState
 		final tailOffset:Float = GRID_SIZE * 0.5;
 		final stepLength = (Conductor.getBPMFromSeconds(note.strumTime).stepCrochet);
 		final tailSteps:Float = note.sustainLength / stepLength;
-		var height:Float = tailSteps * GRID_SIZE * zoomList[curZoom] - tailOffset;
+		var height:Float = (tailSteps * GRID_SIZE * zoomList[curZoom] - tailOffset) + GRID_SIZE / 2; // Adding the gridsize / 2 to visualise the head/cap/end of the tail
+		// because these looked WAY too short
 		if (height <= 0) return null;
 		
 		var spr:FlxSprite = new FlxSprite(
