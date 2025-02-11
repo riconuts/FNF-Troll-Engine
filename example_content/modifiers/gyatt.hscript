@@ -33,10 +33,9 @@ function butPos(visualDiff)
 
 function getPos(visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
 {	
-	if (Std.isOfType(obj, Note))
+	if (obj.objType == 0)
 	{	
 		var assPower = getValue(player);		
-		//var side = getSubmodValue("gyattSide", player);
 
 		var b = butPos(visualDiff);
 		
@@ -64,10 +63,3 @@ function getExtraInfo(diff:Float, tDiff:Float, beat:Float, info:RenderInfo, obj:
 	
 	return info;
 }
-
-/*
-function getSubmods(){
-	var subMods = ["gyattSide"];
-	
-	return subMods;
-}*/
