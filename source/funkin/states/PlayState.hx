@@ -795,8 +795,10 @@ class PlayState extends MusicBeatState
 		}
 
 		for (character in characters) {
-			for (data in CharacterData.returnCharacterPreload(character))
-				shitToLoad.push(data);
+			if (character != null) {
+				for (data in CharacterData.returnCharacterPreload(character))
+					shitToLoad.push(data);
+			}
 		}
 
 		for (track in songTrackNames){
@@ -820,33 +822,37 @@ class PlayState extends MusicBeatState
 
 		//// Characters
 
-		dad = new Character(0, 0, SONG.player2);
-		dadMap.set(dad.curCharacter, dad);
-		dadGroup.add(dad);
-
-		dad.setDefaultVar("used", true);
-		startCharacter(dad, true);
-
-		if (stageData.camera_opponent != null) {
-			dad.cameraPosition[0] += stageData.camera_opponent[0];
-			dad.cameraPosition[1] += stageData.camera_opponent[1];
+		if (SONG.player2 != null) {
+			dad = new Character(0, 0, SONG.player2);
+			dadMap.set(dad.curCharacter, dad);
+			dadGroup.add(dad);
+	
+			dad.setDefaultVar("used", true);
+			startCharacter(dad, true);
+	
+			if (stageData.camera_opponent != null) {
+				dad.cameraPosition[0] += stageData.camera_opponent[0];
+				dad.cameraPosition[1] += stageData.camera_opponent[1];
+			}		
 		}
 
 		////
-		boyfriend = new Character(0, 0, SONG.player1, true);
-		boyfriendMap.set(boyfriend.curCharacter, boyfriend);
-		boyfriendGroup.add(boyfriend);
-
-		boyfriend.setDefaultVar("used", true);
-		startCharacter(boyfriend);
-
-		if (stageData.camera_boyfriend != null) {
-			boyfriend.cameraPosition[0] += stageData.camera_boyfriend[0];
-			boyfriend.cameraPosition[1] += stageData.camera_boyfriend[1];
+		if (SONG.player1 != null) {
+			boyfriend = new Character(0, 0, SONG.player1, true);
+			boyfriendMap.set(boyfriend.curCharacter, boyfriend);
+			boyfriendGroup.add(boyfriend);
+	
+			boyfriend.setDefaultVar("used", true);
+			startCharacter(boyfriend);
+	
+			if (stageData.camera_boyfriend != null) {
+				boyfriend.cameraPosition[0] += stageData.camera_boyfriend[0];
+				boyfriend.cameraPosition[1] += stageData.camera_boyfriend[1];
+			}
 		}
 
 		////
-		if (stageData.hide_girlfriend != true) {
+		if (SONG.gfVersion != null && stageData.hide_girlfriend != true) {
 			gf = new Character(0, 0, SONG.gfVersion);
 			gfMap.set(gf.curCharacter, gf);
 			gfGroup.add(gf);
@@ -880,12 +886,16 @@ class PlayState extends MusicBeatState
 			add(stage.foreground);
 		}
 
-		if (hud == null){
+		if (hud == null) {
+			// TODO: load invisible icon
+			var iP1:String = boyfriend?.healthIcon ?? "face";
+			var iP2:String = dad?.healthIcon ?? "face";
+
 			switch(ClientPrefs.etternaHUD){
-				case 'Advanced': hud = new AdvancedHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song, stats);
-				case 'Kade': hud = new KadeHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song, stats);
-				case 'Classic': hud = new ClassicHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song, stats);
-				default: hud = new PsychHUD(boyfriend.healthIcon, dad.healthIcon, SONG.song, stats);
+				case 'Advanced': hud = new AdvancedHUD(iP1, iP2, SONG.song, stats);
+				case 'Kade': hud = new KadeHUD(iP1, iP2, SONG.song, stats);
+				case 'Classic': hud = new ClassicHUD(iP1, iP2, SONG.song, stats);
+				default: hud = new PsychHUD(iP1, iP2, SONG.song, stats);
 			}
 		}
 		hud.cameras = [camHUD];
@@ -1054,31 +1064,40 @@ class PlayState extends MusicBeatState
 
 		////
 		#if !tgt
-		if (prevCamFollowPos != null){
-			// do nothing
-		}else if(SONG.notes[0].mustHitSection)
+		if (prevCamFollowPos != null)
 		{
-			var cam = dad.getCamera();
-			camFollow.set(cam[0], cam[1]);
-
-			var cam = boyfriend.getCamera();
-			sectionCamera.set(cam[0], cam[1]); 
+			// do nothing
+		}
+		else if(SONG.notes[0].mustHitSection)
+		{
+			if (boyfriend != null) {
+				var cam = (dad ?? boyfriend).getCamera();
+				camFollow.set(cam[0], cam[1]);
+	
+				var cam = boyfriend.getCamera();
+				sectionCamera.set(cam[0], cam[1]); 
+			}
 		}
 		else if(SONG.notes[0].gfSection && gf != null)
 		{
-			var cam = boyfriend.getCamera();
-			sectionCamera.set(cam[0], cam[1]); 
-			
-			var cam = gf.getCamera();
-			sectionCamera.set(cam[0], cam[1]); 
+			if (gf != null) {
+				var cam = (boyfriend ?? gf).getCamera();
+				camFollow.set(cam[0], cam[1]); 
+				
+				var cam = gf.getCamera();
+				sectionCamera.set(cam[0], cam[1]); 
+			}
 		}
 		else
 		{
-			var cam = boyfriend.getCamera();
-			camFollow.set(cam[0], cam[1]);
+			if (dad != null) {
+				var cam = (boyfriend ?? dad).getCamera();
+				camFollow.set(cam[0], cam[1]);
+	
+				var cam = dad.getCamera();
+				sectionCamera.set(cam[0], cam[1]); 
+			}
 
-			var cam = dad.getCamera();
-			sectionCamera.set(cam[0], cam[1]); 
 		}
 		camFollowPos.setPosition(camFollow.x, camFollow.y);
 		#end
@@ -1109,8 +1128,8 @@ class PlayState extends MusicBeatState
 
 		if(gf!=null) gf.callOnScripts("onAdded", [gf, null]); // if you can come up w/ a better name for this callback then change it lol
 		// (this also gets called for the characters changed in changeCharacter)
-		boyfriend.callOnScripts("onAdded", [boyfriend, null]);
-		dad.callOnScripts("onAdded", [dad, null]); 
+		if(boyfriend!=null) boyfriend.callOnScripts("onAdded", [boyfriend, null]);
+		if(dad!=null) dad.callOnScripts("onAdded", [dad, null]); 
 
 		super.create();
 
@@ -1221,8 +1240,10 @@ class PlayState extends MusicBeatState
 	}
 
 	public function reloadHealthBarColors() {
-		var dadColor:FlxColor = FlxColor.fromRGB(dad.healthColorArray[0], dad.healthColorArray[1], dad.healthColorArray[2]);
-		var bfColor:FlxColor = FlxColor.fromRGB(boyfriend.healthColorArray[0], boyfriend.healthColorArray[1], boyfriend.healthColorArray[2]);
+		var dadArray = dad?.healthColorArray ?? [127, 127, 127];
+		var bfArray = boyfriend?.healthColorArray ?? [127, 127, 127];
+		var dadColor:FlxColor = FlxColor.fromRGB(dadArray[0], dadArray[1], dadArray[2]);
+		var bfColor:FlxColor = FlxColor.fromRGB(bfArray[0], bfArray[1], bfArray[2]);
 		if(callOnHScripts('reloadHealthBarColors', [hud, dadColor, bfColor]) == Globals.Function_Stop)
 			return;
 

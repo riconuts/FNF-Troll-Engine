@@ -34,9 +34,9 @@ typedef SwagSong = {
 	var events:Array<Array<Dynamic>>;
 	var offset:Float; // Offsets the chart
 
-	var player1:String;
-	var player2:String;
-	var gfVersion:String;
+	var player1:Null<String>;
+	var player2:Null<String>;
+	var gfVersion:Null<String>;
 	var stage:String;
 	var hudSkin:String;
 
@@ -372,10 +372,12 @@ class Song
 		swagJson.validScore = true;
 
 		songJson.stage ??= 'stage';
-
+		/*
 		songJson.player1 ??= "bf";
 		songJson.player2 ??= "dad";
 		songJson.gfVersion ??= songJson.player3 ?? "gf";
+		*/
+		songJson.gfVersion ??= songJson.player3;
 		
 		if (swagJson.arrowSkin == null || swagJson.arrowSkin.trim().length == 0)
 			swagJson.arrowSkin = "NOTE_assets";
