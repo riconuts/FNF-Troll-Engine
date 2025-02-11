@@ -208,7 +208,6 @@ class NoteField extends FieldBase
 			var object = drawNote(note, pos, nextNotePos.get(note));
 			if (object == null)
 				continue;
-			object.zIndex = pos.z + note.zIndex + 0.01; // a little zindex bump to try to put notes always above holds because it looks weird having holds ontop of notes
 			lookupMap.set(note, object);
 			drawQueue.push(object);
 		}
@@ -237,7 +236,7 @@ class NoteField extends FieldBase
 			var object = drawNote(obj, pos);
 			if (object == null)
 				continue;
-			object.zIndex += 2;
+			object.zIndex += 0.5;
 			lookupMap.set(obj, object);
 			drawQueue.push(object);
 		}
@@ -251,7 +250,7 @@ class NoteField extends FieldBase
 			var object = drawNote(obj, pos);
 			if (object == null)
 				continue;
-			object.zIndex += 2;
+			object.zIndex += 0.5;
 			lookupMap.set(obj, object);
 			drawQueue.push(object);
 		}
@@ -727,7 +726,7 @@ class NoteField extends FieldBase
 			uvData: uvData,
 			vertices: vertices,
 			indices: NOTE_INDICES,
-			zIndex: pos.z,
+			zIndex: pos.z + sprite.zIndex,
 			colorSwap: sprite.colorSwap,
 			antialiasing: sprite.antialiasing
 		}

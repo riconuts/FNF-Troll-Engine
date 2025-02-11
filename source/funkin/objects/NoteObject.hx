@@ -15,6 +15,7 @@ enum abstract ObjectType(#if cpp cpp.UInt8 #else Int #end)
 }
 
 class NoteObject extends FlxSprite {
+	public var zIndex:Float = 0;
 	public var objType:ObjectType = UNKNOWN;
 
 	public var extraData:Map<String, Dynamic> = [];

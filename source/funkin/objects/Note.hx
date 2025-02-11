@@ -240,7 +240,6 @@ class Note extends NoteObject
 	// do not tuch
 	public var baseScaleX:Float = 1;
 	public var baseScaleY:Float = 1;
-	public var zIndex:Float = 0;
 	public var z:Float = 0;
 
 	// Determines how the note can be modified by the modchart system
