@@ -122,9 +122,18 @@ class Song
 		return charts ?? (charts = Song.getCharts(this));
 	
 	function get_metadata() {
-		static var gotMetadata = false;
-		if (gotMetadata || metadata != null) return metadata;
-		return metadata = Paths.getJson(getSongFile('metadata.json'));
+		if (metadata != null) return metadata;
+		
+		var path:String = getSongFile('metadata.json');
+		var json:SongMetadata = Paths.getJson(path); 
+		
+		if (json == null) {
+			json = {};
+			if (Main.showDebugTraces)
+				trace('$this: No metadata found. Maybe add some? $path');
+		}
+		
+		return metadata = json;
 	}
 
 	function get_songPath() {
