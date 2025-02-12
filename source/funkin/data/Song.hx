@@ -85,18 +85,18 @@ typedef SongMetadata =
 @:structInit
 class Song
 {
-	public var songName:String = '';
-	public var folder:String = '';
+	public final songId:String;
+	public final folder:String = '';
 	public var difficulties:Array<String> = [];
-	public var charts(get, null):Array<String>;
-	function get_charts()
-		return (charts == null) ? charts = Song.getCharts(this) : charts;
 
-	public function new(songName:String, ?folder:String = '', ?difficulties:Array<String>)
+	public var charts(get, null):Array<String>;
+	function get_charts() return charts ?? (charts = Song.getCharts(this));
+
+	public function new(songId:String, ?folder:String, ?difficulties:Array<String>)
 	{
-		this.songName = songName;
-		this.folder = folder != null ? folder : '';
-		this.difficulties = difficulties != null ? difficulties : [];
+		this.songId = songId;
+		this.folder = folder ?? '';
+		this.difficulties = difficulties ?? [];
 	}
 
 	public function play(?difficultyName:String = ''){
@@ -107,7 +107,7 @@ class Song
 	}
 
 	public function toString()
-		return '$folder:$songName';
+		return '$folder:$songId';
 
 	////
 
@@ -181,11 +181,11 @@ class Song
 	{
 		Paths.currentModDirectory = song.folder;
 		
-		#if USING_MOONCHART
-		final songName = Paths.formatToSongPath(song.songName);
+		final songId:String = Paths.formatToSongPath(song.songId);
+		final charts:Map<String, Bool> = [];
 
+		#if USING_MOONCHART
 		var folder:String = '';
-		var charts:Map<String, Bool> = [];
 		
 		function processFileName(unprocessedName:String) {
 			var fileName:String = unprocessedName.toLowerCase();
@@ -199,12 +199,12 @@ class Song
 
 			switch (fileFormat) {
 				case FNF_LEGACY_PSYCH | FNF_LEGACY:
-					if (fileName == '$songName.json') {
+					if (fileName == '$songId.json') {
 						charts.set("normal", true);
 						return;
 					} 
-					else if (fileName.startsWith('$songName-')) {
-						final extension_dot = songName.length + 1;
+					else if (fileName.startsWith('$songId-')) {
+						final extension_dot = songId.length + 1;
 						charts.set(fileName.substr(extension_dot, fileName.length - extension_dot - 5), true);
 						return;
 					}
@@ -220,11 +220,11 @@ class Song
 						
 					}else{
 						var woExtension:String = Path.withoutExtension(filePath);
-						if (woExtension == songName){
+						if (woExtension == songId){
 							charts.set("normal", true);
 							return;
 						}
-						if (woExtension.startsWith('$songName-')){
+						if (woExtension.startsWith('$songId-')){
 							var split = woExtension.split("-");
 							split.shift();
 							var diff = split.join("-");
@@ -240,7 +240,7 @@ class Song
 		}
 
 		if (song.folder == "") {
-			folder = Paths.getPreloadPath('songs/$songName/');
+			folder = Paths.getPreloadPath('songs/$songId/');
 			Paths.iterateDirectory(folder, processFileName);
 		}
 		#if MODS_ALLOWED
@@ -249,7 +249,7 @@ class Song
 			var spoon:Array<String> = [];
 			var crumb:Array<String> = [];
 
-			folder = Paths.mods('${song.folder}/songs/$songName/');
+			folder = Paths.mods('${song.folder}/songs/$songId/');
 			Paths.iterateDirectory(folder, (fileName)->{
 				if (isAMoonchartRecognizedFile(fileName)){
 					spoon.push(folder+fileName);
@@ -259,8 +259,8 @@ class Song
 
 			var ALL_FILES_DETECTED_FORMAT = findFormat(spoon);
 			if (ALL_FILES_DETECTED_FORMAT == FNF_VSLICE) {
-				var chartsFilePath:String = folder + songName + '-chart.json';
-				var metadataPath:String = folder + songName + '-metadata.json';
+				var chartsFilePath:String = folder + songId + '-chart.json';
+				var metadataPath:String = folder + songId + '-metadata.json';
 				var chart = new moonchart.formats.fnf.FNFVSlice().fromFile(chartsFilePath, metadataPath);
 				for (diff in chart.diffs) charts.set(diff, true);
 				
@@ -270,7 +270,7 @@ class Song
 
 			////
 			#if PE_MOD_COMPATIBILITY
-			folder = Paths.mods('${song.folder}/data/$songName/');
+			folder = Paths.mods('${song.folder}/data/$songId/');
 			Paths.iterateDirectory(folder, processFileName);
 			#end
 		}
@@ -296,21 +296,19 @@ class Song
 
 		return chartNames;
 		#else
-		final songName = Paths.formatToSongPath(song.songName);
-		final charts = new haxe.ds.StringMap();
 		
 		function processFileName(unprocessedName:String)
 		{		
 			var fileName:String = unprocessedName.toLowerCase();
-			if (fileName == '$songName.json'){
+			if (fileName == '$songId.json'){
 				charts.set("normal", true);
 				return;
 			}
-			else if (!fileName.startsWith('$songName-') || !fileName.endsWith('.json')){
+			else if (!fileName.startsWith('$songId-') || !fileName.endsWith('.json')){
 				return;
 			}
 
-			final extension_dot = songName.length + 1;
+			final extension_dot = songId.length + 1;
 			charts.set(fileName.substr(extension_dot, fileName.length - extension_dot - 5), true);
 		}
 
@@ -318,17 +316,17 @@ class Song
 		if (song.folder == "")
 		{
 			#if PE_MOD_COMPATIBILITY
-			Paths.iterateDirectory(Paths.getPreloadPath('data/$songName/'), processFileName);
+			Paths.iterateDirectory(Paths.getPreloadPath('data/$songId/'), processFileName);
 			#end
-			Paths.iterateDirectory(Paths.getPreloadPath('songs/$songName/'), processFileName);
+			Paths.iterateDirectory(Paths.getPreloadPath('songs/$songId/'), processFileName);
 		}
 		#if MODS_ALLOWED
 		else
 		{
 			#if PE_MOD_COMPATIBILITY
-			Paths.iterateDirectory(Paths.mods('${song.folder}/data/$songName/'), processFileName);
+			Paths.iterateDirectory(Paths.mods('${song.folder}/data/$songId/'), processFileName);
 			#end
-			Paths.iterateDirectory(Paths.mods('${song.folder}/songs/$songName/'), processFileName);
+			Paths.iterateDirectory(Paths.mods('${song.folder}/songs/$songId/'), processFileName);
 		}
 		#end
 		
@@ -591,7 +589,7 @@ class Song
 	static public function loadSong(toPlay:Song, ?difficulty:String, ?difficultyIdx:Int = 1) {
 		Paths.currentModDirectory = toPlay.folder;
 
-		var songLowercase:String = Paths.formatToSongPath(toPlay.songName);
+		var songId:String = toPlay.songId;
 		var diffSuffix:String;
 
 		var rawDifficulty:String = difficulty;
@@ -619,7 +617,7 @@ class Song
 
 		inline function findVSlice():Bool {
 			// less strict v-slice format detection
-			var sowy = 'songs/$songLowercase/$songLowercase';
+			var sowy = 'songs/$songId/$songId';
 			var basePath:String;
 			
 			if (toPlay.folder == "")
@@ -639,7 +637,7 @@ class Song
 					var converted = new SupportedFormat().fromFormat(chart, rawDifficulty);
 					var chart:JsonSong = cast converted.data.song;
 					chart.path = chartsFilePath;
-					chart.song = songLowercase;
+					chart.song = songId;
 					chart.tracks = null;
 					SONG = onLoadJson(chart);
 					found = true;
@@ -656,12 +654,12 @@ class Song
 			// Or dont since this current method lets you do a dumb thing AKA have 2 diff chart formats in a folder LOL
 
 			var files:Array<String> = [];
-			if (diffSuffix != '') files.push(songLowercase + diffSuffix);
-			files.push(songLowercase);
+			if (diffSuffix != '') files.push(songId + diffSuffix);
+			files.push(songId);
 
 			for (ext in moonchartExtensions) {
 				for (input in files) {
-					var path:String = Paths.formatToSongPath(songLowercase) + '/' + Paths.formatToSongPath(input) + '.' + ext;
+					var path:String = Paths.formatToSongPath(songId) + '/' + Paths.formatToSongPath(input) + '.' + ext;
 					var filePath:String = Paths.getPath("songs/" + path);
 					var fileFormat:Format = findFormat([filePath]);
 
@@ -677,7 +675,7 @@ class Song
 
 					SONG = switch(fileFormat) {
 						case FNF_LEGACY_PSYCH | FNF_LEGACY | "FNF_TROLL":
-							Song.loadFromJson(songLowercase + diffSuffix, songLowercase);
+							Song.loadFromJson(songId + diffSuffix, songId);
 							
 						default:
 							trace('Converting from format $fileFormat!');
@@ -692,7 +690,7 @@ class Song
 							var converted = new SupportedFormat().fromFormat(chart, rawDifficulty);
 							var chart:JsonSong = cast converted.data.song;
 							chart.path = filePath;
-							chart.song = songLowercase;
+							chart.song = songId;
 							onLoadJson(chart);
 					}
 
@@ -711,7 +709,7 @@ class Song
 			return;
 		}
 		#else
-		var SONG:SwagSong = Song.loadFromJson(songLowercase + diffSuffix, songLowercase);
+		var SONG:SwagSong = Song.loadFromJson(songId + diffSuffix, songId);
 		#end
 
 		PlayState.SONG = SONG;
