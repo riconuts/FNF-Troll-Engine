@@ -87,10 +87,14 @@ class Song
 {
 	public final songId:String;
 	public final folder:String = '';
+	
+	// this is like unused lol, freeplay shows all charts i think
+	// maybe move to metadata
 	public var difficulties:Array<String> = [];
 
 	public var charts(get, null):Array<String>;
-	function get_charts() return charts ?? (charts = Song.getCharts(this));
+	public var metadata(get, null):SongMetadata;
+	public var songPath(get, null):String;
 
 	public function new(songId:String, ?folder:String, ?difficulties:Array<String>)
 	{
@@ -98,6 +102,9 @@ class Song
 		this.folder = folder ?? '';
 		this.difficulties = difficulties ?? [];
 	}
+
+	public function getSongFile(fileName:String)
+		return songPath + '/' + fileName;
 
 	public function play(?difficultyName:String = ''){
 		var idx = charts.indexOf(difficultyName);
@@ -109,6 +116,25 @@ class Song
 
 	public function toString()
 		return '$folder:$songId';
+
+	//
+	function get_charts() 
+		return charts ?? (charts = Song.getCharts(this));
+	
+	function get_metadata() {
+		static var gotMetadata = false;
+		if (gotMetadata || metadata != null) return metadata;
+		return metadata = Paths.getJson(getSongFile('metadata.json'));
+	}
+
+	function get_songPath() {
+		return if (songPath != null)
+			songPath;
+		else if (folder == '')
+			songPath = Paths.getPreloadPath('songs/$songId');
+		else
+			songPath = Paths.mods('$folder/songs/$songId');
+	}
 
 	////
 
