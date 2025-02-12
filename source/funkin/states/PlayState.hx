@@ -1035,7 +1035,7 @@ class PlayState extends MusicBeatState
 		var stringId:String = 'difficultyName_$difficultyName';
 		displayedDifficulty = Paths.getString(stringId, difficultyName.replace("-"," ").capitalize());
 		
-		displayedSong = SONG.song.replace("-"," ").capitalize();
+		displayedSong = metadata?.songName ?? SONG.song.replace("-"," ").capitalize();
 
 		#if DISCORD_ALLOWED
 		// Discord RPC texts

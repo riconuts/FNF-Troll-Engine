@@ -55,9 +55,8 @@ class FreeplayState extends MusicBeatState
 				continue;
 
 			for (songName in week.songs){
-				var songId = Paths.formatToSongPath(songName);
 				var song:Song = {
-					songId: songId, 
+					songId: Paths.formatToSongPath(songName), 
 					folder: week.directory, 
 					difficulties: week.difficulties ?? []
 				};
@@ -67,7 +66,7 @@ class FreeplayState extends MusicBeatState
 					continue;
 				}
 				
-				menu.addTextOption(songName.replace("-", " ").capitalize()).ID = songData.length;
+				menu.addTextOption(song.metadata.songName).ID = songData.length;
 				songData.push(song);
 			}
 		}

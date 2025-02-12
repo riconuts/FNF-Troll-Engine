@@ -15,6 +15,7 @@ import funkin.data.Section.SwagSection;
 import haxe.io.Path;
 import haxe.Json;
 
+using funkin.CoolerStringTools;
 using StringTools;
 
 typedef SwagSong = {
@@ -75,7 +76,7 @@ typedef SongTracks = {
 
 typedef SongMetadata =
 {
-	// ?songName:String,
+	?songName:String,
 	?artist:String,
 	?charter:String,
 	?modcharter:String,
@@ -129,6 +130,7 @@ class Song
 			if (Main.showDebugTraces)
 				trace('$this: No metadata found. Maybe add some? $path');
 		}
+		json.songName ??= songId.replace("-", " ").capitalize();
 		
 		return metadata = json;
 	}
