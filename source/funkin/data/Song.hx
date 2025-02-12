@@ -100,10 +100,11 @@ class Song
 	}
 
 	public function play(?difficultyName:String = ''){
-		if(charts.contains(difficultyName))
-			return Song.playSong(this, difficultyName, charts.indexOf(difficultyName));
+		var idx = charts.indexOf(difficultyName);
+		if (idx != -1)
+			return Song.playSong(this, difficultyName, idx);
 	
-		trace("Attempt to play null difficulty: " + difficultyName);
+		trace('$this: Attempt to play null difficulty: ' + difficultyName);
 	}
 
 	public function toString()
