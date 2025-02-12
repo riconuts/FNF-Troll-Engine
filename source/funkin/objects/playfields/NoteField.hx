@@ -381,7 +381,7 @@ class NoteField extends FieldBase
 		var sv = PlayState.instance.getSV(hold.strumTime).speed;
 
 
-		var basePos = simpleDraw ? hold.vec3Cache : modManager.getPos(visualDiff, strumDiff, curDecBeat, hold.column, modNumber, hold, this,
+/* 		var basePos = simpleDraw ? hold.vec3Cache : modManager.getPos(visualDiff, strumDiff, curDecBeat, hold.column, modNumber, hold, this,
 			perspectiveArrDontUse, hold.vec3Cache);
 
 		// basePos been doing nothing for like 100 years time to mak eit do something
@@ -394,7 +394,11 @@ class NoteField extends FieldBase
 			basePos.y = hold.y;
 
 		if (simpleDraw)
-			basePos.z = 0;
+			basePos.z = 0; */
+		// ^^ dOESNT WORK!!
+
+		var zIndex:Float = 0;
+
 
 		var lookAheadTime = modManager.getValue("lookAheadTime", modNumber);
 		var useSpiralHolds = modManager.getValue("spiralHolds", modNumber) != 0;
@@ -442,6 +446,13 @@ class NoteField extends FieldBase
 			
 			info.alpha *= FlxMath.lerp(alphaMult, 1, info.glow);
 
+			if(lastMe == null) // first sexment
+			{
+				var basePos = modManager.getPos(-(visualDiff + ((strumOff + strumSub) * 0.45)) * speed, strumDiff + strumOff + strumSub, curDecBeat, hold.column, modNumber, hold, this,
+					perspectiveArrDontUse, hold.vec3Cache);
+
+				zIndex = basePos.z;
+			}
 			var top = lastMe ?? getPoints(hold, topWidth, speed, (visualDiff + (strumOff * 0.45)), strumDiff + strumOff, useSpiralHolds, lookAheadTime);
 			var bot = getPoints(hold, botWidth, speed, (visualDiff + ((strumOff + strumSub) * 0.45)), strumDiff + strumOff + strumSub, useSpiralHolds, lookAheadTime);
 			if (!hold.copyY) {
