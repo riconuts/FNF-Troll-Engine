@@ -215,6 +215,12 @@ class ShittyBar extends FNFHealthBar {
 		return val;
 	}
 
+	public function new(p1:String = "face", p2:String = "face"){
+		super(p1, p2);
+		iconP1.y = y - (iconP1.height / 2);
+		iconP2.y = y - (iconP2.height / 2);
+	}
+
 	override function updateFilledBar():Void {
 		var val = value;
 		if(vSlice)
@@ -322,6 +328,13 @@ class ShittyBar extends FNFHealthBar {
 				iconP2.x = x + (width * (percent * 0.01)) - (iconP2.width - iconOffset);
 			default:
 			
+		}
+
+		if(vSlice){
+			iconP1.y = y - iconP1.height / 2;
+			iconP2.y = y - iconP2.height / 2;
+		}else{
+
 		}
 	}
 }
