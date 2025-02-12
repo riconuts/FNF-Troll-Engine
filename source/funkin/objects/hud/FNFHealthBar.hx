@@ -89,13 +89,16 @@ class FNFHealthBar extends FlxBar{
 			curHealth = PlayState.instance.health;
 		}
 
+
 		super(
 			healthBarBG.x + 5, healthBarBG.y + 5,
 			isOpponentMode ? LEFT_TO_RIGHT : RIGHT_TO_LEFT, // changing this later on breaks the bar visually idk why
-			Std.int(healthBarBG.width - 10), Std.int(healthBarBG.height - 10),
+			Std.int(healthBarBG.width - 10), Std.int(healthBarBG.height -	 10),
 			null, null,
 			minHealth, maxHealth
 		);
+
+		numDivisions = Std.int(width * 2);
 		
 		value = curHealth;
 
@@ -202,9 +205,100 @@ class FNFHealthBar extends FlxBar{
 
 // Old icon behaviour from pre-VSlice
 class ShittyBar extends FNFHealthBar {
+	public var vSlice:Bool = false; // Uses V-Slice lerping
+
+	public var currentValue(default, set):Float = 1; // For lerping w/ vslice
+
+	function set_currentValue(val:Float){
+		currentValue = val;
+		updateBar();
+		return val;
+	}
+
+	override function updateFilledBar():Void {
+		var val = value;
+		if(vSlice)
+			val = currentValue;
+
+		_filledBarRect.width = barWidth;
+		_filledBarRect.height = barHeight;
+
+		var fraction:Float = (val - min) / range;
+		var percent:Float = fraction * _maxPercent;
+		var maxScale:Float = (_fillHorizontal) ? barWidth : barHeight;
+		var scaleInterval:Float = maxScale / numDivisions;
+		var interval:Float = Math.round(Std.int(fraction * maxScale / scaleInterval) * scaleInterval);
+
+		if (_fillHorizontal) {
+			_filledBarRect.width = Std.int(interval);
+		} else {
+			_filledBarRect.height = Std.int(interval);
+		}
+
+		if (percent > 0) {
+			switch (fillDirection) {
+				case LEFT_TO_RIGHT, TOP_TO_BOTTOM:
+					//	Already handled above
+
+				case BOTTOM_TO_TOP:
+					_filledBarRect.y = barHeight - _filledBarRect.height;
+					_filledBarPoint.y = barHeight - _filledBarRect.height;
+
+				case RIGHT_TO_LEFT:
+					_filledBarRect.x = barWidth - _filledBarRect.width;
+					_filledBarPoint.x = barWidth - _filledBarRect.width;
+
+				case HORIZONTAL_INSIDE_OUT:
+					_filledBarRect.x = Std.int((barWidth / 2) - (_filledBarRect.width / 2));
+					_filledBarPoint.x = Std.int((barWidth / 2) - (_filledBarRect.width / 2));
+
+				case HORIZONTAL_OUTSIDE_IN:
+					_filledBarRect.width = Std.int(maxScale - interval);
+					_filledBarPoint.x = Std.int((barWidth - _filledBarRect.width) / 2);
+
+				case VERTICAL_INSIDE_OUT:
+					_filledBarRect.y = Std.int((barHeight / 2) - (_filledBarRect.height / 2));
+					_filledBarPoint.y = Std.int((barHeight / 2) - (_filledBarRect.height / 2));
+
+				case VERTICAL_OUTSIDE_IN:
+					_filledBarRect.height = Std.int(maxScale - interval);
+					_filledBarPoint.y = Std.int((barHeight - _filledBarRect.height) / 2);
+			}
+
+			if (FlxG.renderBlit) {
+				pixels.copyPixels(_filledBar, _filledBarRect, _filledBarPoint, null, null, true);
+			} else {
+				if (frontFrames != null) {
+					_filledFlxRect.copyFromFlash(_filledBarRect).round();
+					if (Std.int(percent) > 0) {
+						_frontFrame = frontFrames.frame.clipTo(_filledFlxRect, _frontFrame);
+					}
+				}
+			}
+		}
+
+		if (FlxG.renderBlit) {
+			dirty = true;
+		}
+	}
+
+	override function update(elapsed:Float){
+		if(vSlice)
+			currentValue = FlxMath.lerp(currentValue, value, 0.15 * (elapsed * 60));
+		
+
+		super.update(elapsed);
+	}
+
 	override function updateIcons(elapsed:Float) {
-		iconP1.setGraphicSize(Std.int(FlxMath.lerp(150, iconP1.width, 0.85)));
-		iconP2.setGraphicSize(Std.int(FlxMath.lerp(150, iconP2.width, 0.85)));
+		if (vSlice){
+			var frameFix = elapsed * 60;
+			iconP1.setGraphicSize(Std.int(FlxMath.lerp(iconP1.width, 150, 0.15 * frameFix)));
+			iconP2.setGraphicSize(Std.int(FlxMath.lerp(iconP2.width, 150, 0.15 * frameFix)));
+		}else{
+			iconP1.setGraphicSize(Std.int(FlxMath.lerp(150, iconP1.width, 0.85)));
+			iconP2.setGraphicSize(Std.int(FlxMath.lerp(150, iconP2.width, 0.85)));	
+		}
 
 		iconP1.updateHitbox();
 		iconP2.updateHitbox();
@@ -213,7 +307,10 @@ class ShittyBar extends FNFHealthBar {
 		iconP2.centerOffsets();
 
 		var iconOffset:Int = 26;
-		var percent = flipX ? 100 - percent : percent;
+
+		var perc = vSlice ? (currentValue / 2) * 100 : percent;
+
+		var percent = flipX ? 100 - perc : perc;
 		
 		switch (fillDirection) {
 			case RIGHT_TO_LEFT:
