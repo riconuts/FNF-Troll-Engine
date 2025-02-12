@@ -115,6 +115,10 @@ class PlayState extends MusicBeatState
 	public static var songPlaylist:Array<Song> = [];
 	public static var songPlaylistIdx = 0;
 
+	// hmmm
+	private static var song(get, null):Song;
+	private static function get_song() return song ?? (song = songPlaylist[songPlaylistIdx]);
+
 	public static var difficulty:Int = 1; // for psych mod shit
 	public static var difficultyName:String = 'normal'; // should NOT be set to "" when playing normal diff!!!!!
 
@@ -637,10 +641,10 @@ class PlayState extends MusicBeatState
 		Conductor.changeBPM(SONG.bpm);
 		Conductor.songPosition = Conductor.crochet * -5;
 
-		songName = Paths.formatToSongPath(SONG.song);
-		songHighscore = Highscore.getScore(SONG.song, difficultyName);
+		songName = (song?.songId) ?? Paths.formatToSongPath(SONG.song);
+		songHighscore = Highscore.getScore(songName, difficultyName);
 
-		metadata = SONG.metadata ?? Paths.json('songs/$songName/metadata.json');
+		metadata = SONG.metadata ?? (song?.metadata);
 		if (showDebugTraces && metadata == null)
 			trace('No metadata for $songName. Maybe add some?');
 
