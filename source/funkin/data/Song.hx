@@ -104,7 +104,7 @@ class Song
 		if (idx != -1)
 			return Song.playSong(this, difficultyName, idx);
 	
-		trace("Attempt to play null difficulty: " + difficultyName);
+		trace('$this: Attempt to play null difficulty: ' + difficultyName);
 	}
 
 	public function toString()
