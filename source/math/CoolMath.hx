@@ -64,9 +64,18 @@ class CoolMath/*Games*/{
 	}
 
 	public static function rotate(x:Float, y:Float, radians:Float, ?point:FlxPoint):FlxPoint {
-		var s = FlxMath.fastSin(radians);
-		var c = FlxMath.fastCos(radians);
+		var s:Float = FlxMath.fastSin(radians);
+		var c:Float = FlxMath.fastCos(radians);
 		var p = point ?? FlxPoint.weak();
-		return p.set((x * c) - (y * s), (x * s) + (y * c));
+		p.set((x * c) - (y * s), (x * s) + (y * c));
+
+		// because computerss suck
+		if(Math.abs(p.x) < 0.0001)
+			p.x = 0;
+		
+		if (Math.abs(p.y) < 0.0001)
+			p.y = 0;
+
+		return p;
 	}
 }
