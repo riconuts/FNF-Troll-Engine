@@ -101,6 +101,7 @@ class ModManager {
 		quickRegister(new RotateModifier(this, 'center', new Vector3(FlxG.width* 0.5, FlxG.height* 0.5)));
 		quickRegister(new LocalRotateModifier(this, 'local'));
 
+		registerAux("spiralHolds");
 		registerAux("orient");
 		registerAux("lookAheadTime"); // used for holds and orient
 		

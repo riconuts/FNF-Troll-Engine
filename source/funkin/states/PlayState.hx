@@ -2179,7 +2179,7 @@ class PlayState extends MusicBeatState
 		if (hudSkinScript != null) callScript(hudSkinScript, "optionsChanged", [options]);
 		
 		for(field in playfields){
-			field.noteField.optimizeHolds = ClientPrefs.optimizeHolds;
+/* 			field.noteField.optimizeHolds = ClientPrefs.optimizeHolds; */
 			field.noteField.drawDistMod = ClientPrefs.drawDistanceModifier;
 			field.noteField.holdSubdivisions = Std.int(ClientPrefs.holdSubdivs) + 1;
 		}

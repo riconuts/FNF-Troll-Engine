@@ -43,7 +43,7 @@ class NoteField extends FieldBase
 	public var tryForceHoldsBehind:Bool = true; // Field tries to push holds behind receptors and notes
 
 	public var holdSubdivisions(default, set):Int;
-	public var optimizeHolds = ClientPrefs.optimizeHolds;
+	public var optimizeHolds = false; //ClientPrefs.optimizeHolds;
 	public var defaultShader:FlxShader = new FlxShader();
 
 	public function new(field:PlayField, modManager:ModManager)
@@ -291,7 +291,7 @@ class NoteField extends FieldBase
 		return;
 	}
 
-	function getPoints(hold:Note, ?wid:Float, speed:Float, vDiff:Float, diff:Float, ?lookAhead:Float = 1):Array<Vector3>
+	function getPoints(hold:Note, ?wid:Float, speed:Float, vDiff:Float, diff:Float, spiralHolds:Bool = false, ?lookAhead:Float = 1):Array<Vector3>
 	{ // stolen from schmovin'
 		if (hold.frame == null)
 			return [Vector3.ZERO, Vector3.ZERO];
@@ -320,7 +320,7 @@ class NoteField extends FieldBase
 		var quad1 = new Vector3(wid);
 		var scale:Float = (z!=0.0) ? (1.0 / z) : 1.0;
 
-		if (optimizeHolds || simpleDraw) {
+		if (spiralHolds || simpleDraw) {
 			// less accurate, but higher FPS
 			quad0.scaleBy(scale);
 			quad1.scaleBy(scale);
@@ -397,8 +397,8 @@ class NoteField extends FieldBase
 			basePos.z = 0;
 
 		var lookAheadTime = modManager.getValue("lookAheadTime", modNumber);
+		var useSpiralHolds = modManager.getValue("spiralHolds", modNumber) != 0;
 
-		
 
 		for (sub in 0...holdSubdivisions)
 		{
@@ -442,8 +442,8 @@ class NoteField extends FieldBase
 			
 			info.alpha *= FlxMath.lerp(alphaMult, 1, info.glow);
 
-			var top = lastMe ?? getPoints(hold, topWidth, speed, (visualDiff + (strumOff * 0.45)), strumDiff + strumOff, lookAheadTime);
-			var bot = getPoints(hold, botWidth, speed, (visualDiff + ((strumOff + strumSub) * 0.45)), strumDiff + strumOff + strumSub, lookAheadTime);
+			var top = lastMe ?? getPoints(hold, topWidth, speed, (visualDiff + (strumOff * 0.45)), strumDiff + strumOff, useSpiralHolds, lookAheadTime);
+			var bot = getPoints(hold, botWidth, speed, (visualDiff + ((strumOff + strumSub) * 0.45)), strumDiff + strumOff + strumSub, useSpiralHolds, lookAheadTime);
 			if (!hold.copyY) {
 				if (lastMe == null) {
 					top[0].y -= FlxMath.lerp(0, (crotchet + 1) * 0.45 * speed, prog);

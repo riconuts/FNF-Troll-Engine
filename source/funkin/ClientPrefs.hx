@@ -381,13 +381,13 @@ class ClientPrefs
 					"step" => 1
 				]
 			},
-			"optimizeHolds" => {
+/* 			"optimizeHolds" => {
 				display: "Optimize Holds",
 				desc: "When toggled, hold notes will be less accurate, but they'll use less calls and thus less lag.",
 				type: Toggle,
 				value: true,
 				data: []
-			},
+			}, */
 			"downScroll" => {
 				display: "Downscroll",
 				desc: "When toggled, notes will move from top to bottom instead of bottom to top.",
