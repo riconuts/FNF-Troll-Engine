@@ -309,7 +309,6 @@ class NoteField extends FieldBase
 		if(!hold.copyY)
 			p1.y = hold.y;
 		
-
 		if (simpleDraw)
 			p1.z = 0;
 
@@ -376,24 +375,30 @@ class NoteField extends FieldBase
 		);
 
 		
-	
-		var basePos = simpleDraw ? hold.vec3Cache : modManager.getPos(0, 0, curDecBeat, hold.column, modNumber, hold, this, perspectiveArrDontUse, hold.vec3Cache);
+		
+		var strumDiff = (Conductor.songPosition - hold.strumTime);
+		var visualDiff = (Conductor.visualPosition - hold.visualTime); // TODO: get the start and end visualDiff and interpolate so that changing speeds mid-hold will look better
+		var sv = PlayState.instance.getSV(hold.strumTime).speed;
 
-		if(!hold.copyX)
+
+		var basePos = simpleDraw ? hold.vec3Cache : modManager.getPos(visualDiff, strumDiff, curDecBeat, hold.column, modNumber, hold, this,
+			perspectiveArrDontUse, hold.vec3Cache);
+
+		// basePos been doing nothing for like 100 years time to mak eit do something
+		var zIndex:Float = basePos.z;
+
+		if (!hold.copyX)
 			basePos.x = hold.x;
 
-		if(!hold.copyY)
+		if (!hold.copyY)
 			basePos.y = hold.y;
 
 		if (simpleDraw)
 			basePos.z = 0;
-		
-		var strumDiff = (Conductor.songPosition - hold.strumTime);
-		var visualDiff = (Conductor.visualPosition - hold.visualTime); // TODO: get the start and end visualDiff and interpolate so that changing speeds mid-hold will look better
-		var zIndex:Float = basePos.z + hold.zIndex;
-		var sv = PlayState.instance.getSV(hold.strumTime).speed;
 
 		var lookAheadTime = modManager.getValue("lookAheadTime", modNumber);
+
+		
 
 		for (sub in 0...holdSubdivisions)
 		{
@@ -484,7 +489,6 @@ class NoteField extends FieldBase
 
 		var graphic:FlxGraphic = hold.frame == null ? hold.graphic : hold.frame.parent;
 
-
 		return {
 			graphic: graphic,
 			shader: shader,
@@ -493,7 +497,7 @@ class NoteField extends FieldBase
 			uvData: uvData,
 			vertices: vertices,
 			indices: HOLD_INDICES,
-			zIndex: zIndex,
+			zIndex: zIndex + hold.zIndex,
 			colorSwap: hold.colorSwap,
 			antialiasing: hold.antialiasing
 		}
