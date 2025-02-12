@@ -90,7 +90,8 @@ class Song
 	public var difficulties:Array<String> = [];
 
 	public var charts(get, null):Array<String>;
-	function get_charts() return charts ?? (charts = Song.getCharts(this));
+	public var metadata(get, null):SongMetadata;
+	public var songPath(get, null):String;
 
 	public function new(songId:String, ?folder:String, ?difficulties:Array<String>)
 	{
@@ -98,6 +99,9 @@ class Song
 		this.folder = folder ?? '';
 		this.difficulties = difficulties ?? [];
 	}
+
+	public function getSongFile(fileName:String)
+		return '$songPath/$fileName';
 
 	public function play(?difficultyName:String = ''){
 		var idx = charts.indexOf(difficultyName);
@@ -109,6 +113,34 @@ class Song
 
 	public function toString()
 		return '$folder:$songId';
+
+	//
+	function get_charts() 
+		return charts ?? (charts = Song.getCharts(this));
+	
+	function get_metadata() {
+		if (metadata != null) return metadata;
+		
+		var path:String = getSongFile('metadata.json');
+		var json:SongMetadata = Paths.getJson(path); 
+		
+		if (json == null) {
+			json = {};
+			if (Main.showDebugTraces)
+				trace('$this: No metadata found. Maybe add some? $path');
+		}
+		
+		return metadata = json;
+	}
+
+	function get_songPath() {
+		return if (songPath != null)
+			songPath;
+		else if (folder == '')
+			songPath = Paths.getPreloadPath('songs/$songId');
+		else
+			songPath = Paths.mods('$folder/songs/$songId');
+	}
 
 	////
 
@@ -616,16 +648,8 @@ class Song
 
 		inline function findVSlice():Bool {
 			// less strict v-slice format detection
-			var sowy = 'songs/$songId/$songId';
-			var basePath:String;
-			
-			if (toPlay.folder == "")
-				basePath = Paths.getPreloadPath(sowy);
-			else
-				basePath = Paths.mods(toPlay.folder + '/' + sowy);
-
-			var chartsFilePath = '$basePath-chart.json';
-			var metadataPath = '$basePath-metadata.json';
+			var chartsFilePath = toPlay.getSongFile('$songId-chart.json');
+			var metadataPath = toPlay.getSongFile('$songId-metadata.json');
 
 			var found:Bool = false;
 			if (Paths.exists(chartsFilePath) && Paths.exists(metadataPath)) {
