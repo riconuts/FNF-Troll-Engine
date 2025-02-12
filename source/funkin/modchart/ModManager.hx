@@ -433,6 +433,8 @@ class ModManager {
 			{
 				nodeIndex++; // used to prevent calling the same node over and over when it has multiple inputs
 				// could do a ran_nodes array but honestly this is probably better for optimization since its not having to store the entire node, just an index
+				
+				// I dont think this works ^^ TODO: fix
 
 				for (mod in mods)
 				{
