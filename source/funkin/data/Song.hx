@@ -722,7 +722,10 @@ class Song
 		PlayState.SONG = SONG;
 		PlayState.difficulty = difficultyIdx;
 		PlayState.difficultyName = difficulty;
-		PlayState.isStoryMode = false;	
+		PlayState.isStoryMode = false;
+
+		PlayState.songPlaylist = [toPlay];
+		PlayState.songPlaylistIdx = 0;
 	}
 
 	static public function switchToPlayState()
