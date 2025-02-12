@@ -118,7 +118,7 @@ class SongSelectState extends MusicBeatState
 				hPadding + (Math.floor(id/verticalLimit) * width), 
 				vPadding + (ySpace*(id%verticalLimit)), 
 				width, 
-				songMeta[id].songName,
+				songMeta[id].songId,
 				textSize
 			);
 			text.wordWrap = false;
@@ -241,7 +241,7 @@ class SongChartSelec extends MusicBeatState
 
 	override function create()
 	{
-		add(new FlxText(0, 5, FlxG.width, songMeta.songName).setFormat(null, 20, 0xFFFFFFFF, CENTER));
+		add(new FlxText(0, 5, FlxG.width, songMeta.songId).setFormat(null, 20, 0xFFFFFFFF, CENTER));
 
 		for (id in 0...alts.length){
 			var alt = alts[id];
