@@ -56,6 +56,8 @@ using Lambda;
 
 class ChartingState extends MusicBeatState
 {
+	var oppHitsound:FlxSound;
+	var plrHitsound:FlxSound;
 	var hitsound:FlxSound;
 
 	public static var instance:ChartingState;
@@ -239,6 +241,8 @@ class ChartingState extends MusicBeatState
 	
 	public var hitsoundVolume(default, set):Float = 1.0;
 	@:noCompletion function set_hitsoundVolume(val:Float){
+		plrHitsound.volume = val;
+		oppHitsound.volume = val;
 		hitsound.volume = val;
 		return hitsoundVolume = val;
 	}
@@ -354,6 +358,16 @@ class ChartingState extends MusicBeatState
 
 		loadTracks();
 		fixEvents();
+
+		plrHitsound = new FlxSound().loadEmbedded(Paths.sound("monoHitsound"));
+		plrHitsound.pan = -0.75;
+		plrHitsound.exists = true;
+		FlxG.sound.list.add(plrHitsound);
+
+		oppHitsound = new FlxSound().loadEmbedded(Paths.sound("monoHitsound"));
+		oppHitsound.pan = 0.75;
+		oppHitsound.exists = true;
+		FlxG.sound.list.add(oppHitsound);
 
 		hitsound = new FlxSound().loadEmbedded(Paths.sound("hitsound"));
 		hitsound.exists = true;
@@ -2077,7 +2091,13 @@ class ChartingState extends MusicBeatState
 						
 							if (!note.hitsoundDisabled && playedSound[data] != true && (note.mustPress ? playSoundBf.checked : playSoundDad.checked))
 							{
-								hitsound.play(true);
+								if (playSoundBf.checked && playSoundDad.checked) {
+									if(note.mustPress)
+										plrHitsound.play(true);
+									else
+										oppHitsound.play(true);
+								}else
+									hitsound.play(true);
 
 								playedSound[data] = true;
 							}
