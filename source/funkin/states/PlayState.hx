@@ -281,7 +281,7 @@ class PlayState extends MusicBeatState
 	public var judgeManager:JudgmentManager;
 
 	public var modManager:ModManager;
-	public var notefields = new NotefieldManager();
+	public var notefields = new NotefieldRenderer();
 	public var playfields = new FlxTypedGroup<PlayField>();
 	public var grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 

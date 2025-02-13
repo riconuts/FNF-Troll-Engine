@@ -24,7 +24,7 @@ class FinalRenderObject extends RenderObject {
 
 }
 
-class NotefieldManager extends FlxBasic {
+class NotefieldRenderer extends FlxBasic {
 	public var members:Array<FieldBase> = [];
 
 	public function add(field:FieldBase){

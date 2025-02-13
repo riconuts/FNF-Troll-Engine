@@ -12,7 +12,7 @@ import funkin.states.PlayState;
 	I'm gonna have to do some changes to NoteField to allow this to happen, but
 	The idea is that ProxyField would be more optimized to use en masse compared to NoteFields, as this'd just copy what the field draws, rather than getting every pos etc itself
 	Just need to figure out how I'm gonna write it tho
-	chances are what i'd have to do is have some sorta "NotefieldManager" which'd handle drawing notefields in specific
+	chances are what i'd have to do is have some sorta "NotefieldRenderer" which'd handle drawing notefields in specific
 	and it'd be put into 2 phases
 	pre-draw and draw
 	pre-draw grabs all the notes from the playfield its linked to, gets the position they'd be drawn at, etc. This'd store all the drawing info into an array in the notefield
@@ -21,7 +21,7 @@ import funkin.states.PlayState;
 */
 
 class ProxyField extends FieldBase {
-	@:allow(funkin.objects.playfields.NotefieldManager)
+	@:allow(funkin.objects.playfields.NotefieldRenderer)
 	var proxiedField:NoteField;
 
 	public function new(field:NoteField){
