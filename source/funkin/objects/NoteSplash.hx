@@ -66,10 +66,10 @@ class NoteSplash extends NoteObject
 
 			if (note != null && note.genScript != null)
 				ret = note.genScript.call("loadSplashAnims", [texture], ["this" => this, "noteData" => noteData, "column" => column]);
+			
+			var ret2 = callOnHScripts("loadSplashAnims", [texture], ["this" => this, "noteData" => noteData, "column" => column]);
 
-			ret = callOnHScripts("loadSplashAnims", [texture], ["this" => this, "noteData" => noteData, "column" => column]);
-
-			if (ret != Globals.Function_Stop) 
+			if (ret != Globals.Function_Stop && ret2 != Globals.Function_Stop) 
 				loadAnims(texture);
 		}
 
@@ -81,9 +81,9 @@ class NoteSplash extends NoteObject
 		if (note != null && note.genScript != null)
 			ret = note.genScript.call("postSetupNoteSplash", [x, y, column, texture, hueColor, satColor, brtColor, note], ["this" => this, "noteData" => noteData, "column" => column]);
 		
-		ret = callOnHScripts("postSetupNoteSplash", [x, y, column, texture, hueColor, satColor, brtColor, note], ["this" => this, "noteData" => noteData, "column" => column]);
+		var ret2 = callOnHScripts("postSetupNoteSplash", [x, y, column, texture, hueColor, satColor, brtColor, note], ["this" => this, "noteData" => noteData, "column" => column]);
 
-		if (ret != Globals.Function_Stop){
+		if (ret != Globals.Function_Stop && ret2 != Globals.Function_Stop){
 			var playAnim = 'note$column';
 			if (animationAmount > 1) playAnim += '-${FlxG.random.int(1, animationAmount)}';
 
