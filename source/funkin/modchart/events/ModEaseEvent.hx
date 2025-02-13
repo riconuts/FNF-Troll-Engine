@@ -49,7 +49,7 @@ class ModEaseEvent extends ModEvent {
 		else if (curStep >= endStep)
 		{
 			finished = true;
-			manager.setValue(modName, easeFunc(1) * endVal, player);
+			manager.setValue(modName, endVal, player); // expoInOut doesnt end at the correct value WHAT
 		}
 	}
 }

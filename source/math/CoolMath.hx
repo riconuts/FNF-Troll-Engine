@@ -76,6 +76,7 @@ class CoolMath/*Games*/{
 		var p = point ?? FlxPoint.weak();
 		p.set((x * c) - (y * s), (x * s) + (y * c));
 
+
 		return p;
 	}
 }
