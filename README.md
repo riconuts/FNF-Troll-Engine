@@ -18,6 +18,8 @@ Refer to [Psych Engine's build instructions](https://github.com/ShadowMario/FNF-
 - [SrtHero278](https://github.com/SrtHero278) - Various NoteField improvements
 - [Lat](https://x.com/latzephr) - Week 6 Health Bar and Timer assets
 - [moxie-coder](https://github.com/moxie-coder/) - Mac building and workflow help
+- [swordcube](https://bsky.app/profile/swordcube.bsky.social) - Pixel notesplashes
+- [SRT](https://bsky.app/profile/SrtPro278.bsky.social) - Notefield optimizations
 - Gab - We like him
 - [AllyTS](https://x.com/NewTioSans) - Made the Mine note texture
 - [Psych Engine](https://github.com/ShadowMario/FNF-PsychEngine) - Dad engine

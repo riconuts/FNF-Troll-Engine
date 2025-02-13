@@ -207,8 +207,32 @@ function setupReceptorTexture(strum:StrumNote){
 	}
 }
 
-function preSetupNoteSplash(){
-	this.kill();
+
+var suffixes = [
+	"left",
+	"down",
+	"up",
+	"right"
+];
+
+function preSetupNoteSplash(x, y, column, texture, hueColor, satColor, brtColor, note){
+	if(this.textureLoaded == texture && !StringTools.startsWith(texture, "pixelUI") && Paths.imageExists("pixelUI/" + texture)){
+		this.textureLoaded = 'pixelUI/' + texture;
+	}
+}
+
+function loadSplashAnims(texture){
+	this.frames = Paths.getSparrowAtlas('pixelUI/' + texture);
+	this.animation.addByPrefix("splash", "note splash " + suffixes[column % 4] + " " + FlxG.random.int(1, 2), 24, false);
+	this.scale.set(5, 5);
+	this.antialiasing = false;
+	this.updateHitbox();
+	return Function_Stop;
+}
+
+
+function postSetupNoteSplash(x, y, column, texture, hueColor, satColor, brtColor, note){
+	this.animation.play("splash", true);
 	return Function_Stop;
 }
 
