@@ -2096,7 +2096,7 @@ class ChartingState extends MusicBeatState
 						
 							if (!note.hitsoundDisabled && playedSound[data] != true && (note.mustPress ? playSoundBf.checked : playSoundDad.checked))
 							{
-								if (playSoundBf.checked && playSoundDad.checked && panHitSounds.checked) {
+								if (panHitSounds.checked) {
 									if(note.mustPress)
 										plrHitsound.play(true);
 									else
