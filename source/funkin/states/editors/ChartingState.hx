@@ -1537,44 +1537,42 @@ class ChartingState extends MusicBeatState
 		check_warnings.checked = FlxG.save.data.ignoreWarnings;
 
 
-		check_vortex = new FlxUICheckBox(10, startY + 40, null, null, "Vortex Editor (BETA)", 100);
-		if (FlxG.save.data.chart_vortex == null) FlxG.save.data.chart_vortex = false;
+		check_vortex = new FlxUICheckBox(10, startY + 30, null, null, "Vortex Editor", 100);
 		check_vortex.callback = function()
 		{
 			FlxG.save.data.chart_vortex = check_vortex.checked;
 			vortex = FlxG.save.data.chart_vortex;
 			reloadGridLayer();
 		};
-		check_vortex.checked = FlxG.save.data.chart_vortex;
+		check_vortex.checked = FlxG.save.data.chart_vortex == true;
 
 
-		mouseScrollingQuant = new FlxUICheckBox(10, startY + 80, null, null, "Mouse Scrolling Quantization", 100);
-		if (FlxG.save.data.mouseScrollingQuant == null) FlxG.save.data.mouseScrollingQuant = false;
+		mouseScrollingQuant = new FlxUICheckBox(10, startY + 60, null, null, "Mouse Scrolling Quantization", 100);
 		mouseQuant = FlxG.save.data.mouseScrollingQuant;
 		mouseScrollingQuant.callback = function()
 		{
 			FlxG.save.data.mouseScrollingQuant = mouseScrollingQuant.checked;
 			mouseQuant = FlxG.save.data.mouseScrollingQuant;
 		};
-		mouseScrollingQuant.checked = FlxG.save.data.mouseScrollingQuant;
+		mouseScrollingQuant.checked = FlxG.save.data.mouseScrollingQuant == true;
 
 		////////
 		var xPos = 10 + 150;
 
-		playSoundBf = new FlxUICheckBox(xPos, startY, null, null, 'Play Sound (Boyfriend notes)', 100,
-			()->{FlxG.save.data.chart_playSoundBf = playSoundBf.checked;}
+		playSoundBf = new FlxUICheckBox(xPos, startY, null, null, 'Play Hit Sound (Boyfriend notes)', 100,
+			()->FlxG.save.data.chart_playSoundBf = playSoundBf.checked
 		);
 		playSoundBf.checked = FlxG.save.data.chart_playSoundBf == true;
 
 
-		playSoundDad = new FlxUICheckBox(xPos, startY + 40, null, null, 'Play Sound (Opponent notes)', 100,
-			()->{FlxG.save.data.chart_playSoundDad = playSoundDad.checked;}
+		playSoundDad = new FlxUICheckBox(xPos, startY + 30, null, null, 'Play Hit Sound (Opponent notes)', 100,
+			()->FlxG.save.data.chart_playSoundDad = playSoundDad.checked
 		);
 		playSoundDad.checked = FlxG.save.data.chart_playSoundDad == true;
 
 		
-		playSoundEvents = new FlxUICheckBox(xPos, startY + 80, null, null, 'Play Sound (Event notes)', 100,
-			()->{FlxG.save.data.chart_playSoundEvents = playSoundEvents.checked;}
+		playSoundEvents = new FlxUICheckBox(xPos, startY + 60, null, null, 'Play Hit Sound (Event notes)', 100,
+			()->FlxG.save.data.chart_playSoundEvents = playSoundEvents.checked
 		);
 		playSoundEvents.checked = FlxG.save.data.chart_playSoundEvents == true;
 
