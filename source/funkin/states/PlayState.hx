@@ -1039,7 +1039,7 @@ class PlayState extends MusicBeatState
 
 		#if DISCORD_ALLOWED
 		// Discord RPC texts
-		stateText = '${displayedSong} ($displayedDifficulty)';
+		stateText = '${displayedSong} [$displayedDifficulty]';
 		
 		detailsText = isStoryMode ? "Story Mode" : "Freeplay";
 		detailsPausedText = "Paused - " + detailsText;

@@ -1443,6 +1443,8 @@ class ChartingState extends MusicBeatState
 	var playSoundDad:FlxUICheckBox = null;
 	var playSoundEvents:FlxUICheckBox = null;
 
+	var panHitSounds:FlxUICheckBox = null;
+
 	static var lastSelectedTrack = "Voices";
 	var waveformTrackDropDown:FlxUIDropDownMenuCustom;
 	var waveformTrack:Null<FlxSound> = null;
@@ -1523,46 +1525,49 @@ class ChartingState extends MusicBeatState
 		check_warnings.checked = FlxG.save.data.ignoreWarnings;
 
 
-		check_vortex = new FlxUICheckBox(10, startY + 40, null, null, "Vortex Editor (BETA)", 100);
-		if (FlxG.save.data.chart_vortex == null) FlxG.save.data.chart_vortex = false;
+		check_vortex = new FlxUICheckBox(10, startY + 30, null, null, "Vortex Editor", 100);
 		check_vortex.callback = function()
 		{
 			FlxG.save.data.chart_vortex = check_vortex.checked;
 			vortex = FlxG.save.data.chart_vortex;
 			reloadGridLayer();
 		};
-		check_vortex.checked = FlxG.save.data.chart_vortex;
+		check_vortex.checked = FlxG.save.data.chart_vortex == true;
 
 
-		mouseScrollingQuant = new FlxUICheckBox(10, startY + 80, null, null, "Mouse Scrolling Quantization", 100);
-		if (FlxG.save.data.mouseScrollingQuant == null) FlxG.save.data.mouseScrollingQuant = false;
+		mouseScrollingQuant = new FlxUICheckBox(10, startY + 60, null, null, "Mouse Scrolling Quantization", 100);
 		mouseQuant = FlxG.save.data.mouseScrollingQuant;
 		mouseScrollingQuant.callback = function()
 		{
 			FlxG.save.data.mouseScrollingQuant = mouseScrollingQuant.checked;
 			mouseQuant = FlxG.save.data.mouseScrollingQuant;
 		};
-		mouseScrollingQuant.checked = FlxG.save.data.mouseScrollingQuant;
+		mouseScrollingQuant.checked = FlxG.save.data.mouseScrollingQuant == true;
 
 		////////
 		var xPos = 10 + 150;
 
-		playSoundBf = new FlxUICheckBox(xPos, startY, null, null, 'Play Sound (Boyfriend notes)', 100,
-			()->{FlxG.save.data.chart_playSoundBf = playSoundBf.checked;}
+		playSoundBf = new FlxUICheckBox(xPos, startY, null, null, 'Play Hit Sound (Boyfriend notes)', 100,
+			()->FlxG.save.data.chart_playSoundBf = playSoundBf.checked
 		);
 		playSoundBf.checked = FlxG.save.data.chart_playSoundBf == true;
 
 
-		playSoundDad = new FlxUICheckBox(xPos, startY + 40, null, null, 'Play Sound (Opponent notes)', 100,
-			()->{FlxG.save.data.chart_playSoundDad = playSoundDad.checked;}
+		playSoundDad = new FlxUICheckBox(xPos, startY + 30, null, null, 'Play Hit Sound (Opponent notes)', 100,
+			()->FlxG.save.data.chart_playSoundDad = playSoundDad.checked
 		);
 		playSoundDad.checked = FlxG.save.data.chart_playSoundDad == true;
 
 		
-		playSoundEvents = new FlxUICheckBox(xPos, startY + 80, null, null, 'Play Sound (Event notes)', 100,
-			()->{FlxG.save.data.chart_playSoundEvents = playSoundEvents.checked;}
+		playSoundEvents = new FlxUICheckBox(xPos, startY + 60, null, null, 'Play Hit Sound (Event notes)', 100,
+			()->FlxG.save.data.chart_playSoundEvents = playSoundEvents.checked
 		);
 		playSoundEvents.checked = FlxG.save.data.chart_playSoundEvents == true;
+
+		panHitSounds = new FlxUICheckBox(xPos, startY + 90, null, null, 'Pan Hit Sounds', 100,
+			()->FlxG.save.data.chart_panHitSounds = panHitSounds.checked
+		);
+		panHitSounds.checked = FlxG.save.data.chart_panHitSounds == true;
 
 		////////
 		metronome = new FlxUICheckBox(10, 15, null, null, "Metronome Enabled", 100,
@@ -1580,16 +1585,16 @@ class ChartingState extends MusicBeatState
 		);
 		disableAutoScrolling.checked = FlxG.save.data.chart_noAutoScroll == true;
 
-		var sliderRate = new FlxUISlider(this, 'playbackSpeed', 68, 275, 0.5, 3, 150, null, 5, FlxColor.WHITE, FlxColor.BLACK);
-		sliderRate.nameLabel.text = 'Playback Rate';
-		sliderRate.value = playbackSpeed;
-
-		var sliderHitVol = new FlxUISlider(this, 'hitsoundVolume', 68, 325, 0, 1, 150, null, 5, FlxColor.WHITE, FlxColor.BLACK);
+		var sliderHitVol = new FlxUISlider(this, 'hitsoundVolume', 10, startY + 90, 0, 1, 125, null, 5, FlxColor.WHITE, FlxColor.BLACK);
 		sliderHitVol.nameLabel.text = 'Hitsound Volume';
 		sliderHitVol.value = hitsoundVolume;
 
-		tab_group_chart.add(sliderRate);
+		var sliderRate = new FlxUISlider(this, 'playbackSpeed', 68, 325, 0.5, 3, 150, null, 5, FlxColor.WHITE, FlxColor.BLACK);
+		sliderRate.nameLabel.text = 'Playback Rate';
+		sliderRate.value = playbackSpeed;
+
 		tab_group_chart.add(sliderHitVol);
+		tab_group_chart.add(sliderRate);
 
 		tab_group_chart.add(mouseScrollingQuant);
 		tab_group_chart.add(check_vortex);
@@ -1598,6 +1603,8 @@ class ChartingState extends MusicBeatState
 		tab_group_chart.add(playSoundEvents);
 		tab_group_chart.add(playSoundDad);
 		tab_group_chart.add(playSoundBf);
+
+		tab_group_chart.add(panHitSounds);
 
 		tab_group_chart.add(metronomeStepper);
 		tab_group_chart.add(metronomeOffsetStepper);
