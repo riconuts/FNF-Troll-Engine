@@ -115,6 +115,9 @@ class Note extends NoteObject
 	/**note type script*/
 	public var noteScript:FunkinHScript;
 	
+	// editor stuff for hit sounds
+	public var editorHitBeat:Float = 0;
+
 	// basic stuff
 	public var beat:Float = 0;
 	public var strumTime:Float = 0;
@@ -648,15 +651,16 @@ class Note extends NoteObject
 	{
 		super.update(elapsed);
 
-		if(!inEditor){
-			if (noteScript != null){
-				noteScript.executeFunc("noteUpdate", [elapsed], this);
-			}
+		if(inEditor)return;
 
-			if (genScript != null){
-				genScript.executeFunc("noteUpdate", [elapsed], this);
-			}
+		if (noteScript != null){
+			noteScript.executeFunc("noteUpdate", [elapsed], this);
 		}
+
+		if (genScript != null){
+			genScript.executeFunc("noteUpdate", [elapsed], this);
+		}
+		
 
 		if (hitByOpponent)
 			wasGoodHit = true;

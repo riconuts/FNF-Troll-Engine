@@ -2070,10 +2070,15 @@ class ChartingState extends MusicBeatState
 				}
 			}
 			
-			if (note.strumTime <= Conductor.songPosition) 
+			if(!inst.playing)
+				note.editorHitBeat = 0;
+
+			if (note.beat <= Conductor.curDecBeat) 
 			{
-				if (note.alpha != 0.4 && inst.playing) 
+				note.editorHitBeat = note.beat;
+				if (!note.wasGoodHit && inst.playing) 
 				{
+					note.wasGoodHit = true;
 					if (note.column > -1)
 					{
 						// This is a note.
@@ -2112,8 +2117,10 @@ class ChartingState extends MusicBeatState
 				}
 
 				note.alpha = 0.4;
-			}else
+			}else if(note.editorHitBeat < Conductor.curDecBeat){
+				note.wasGoodHit = false;
 				note.alpha = 1;
+			}
 		});
 
 		if (metronome.checked && lastConductorPos != Conductor.songPosition) {

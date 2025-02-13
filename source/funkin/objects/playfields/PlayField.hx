@@ -72,7 +72,8 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	public var spawnedNotes:Array<Note> = []; // spawned notes
 	
 	public var spawnedByData:Array<Array<Note>> = [[], [], [], []]; // spawned notes by data. Used for input
-	public var tapsByData:Array<Array<Note>> = [[], [], [], []]; // spawned tap notes by data. Used for input but can't change spawnedByData cus of holds n shit lol!
+	public var tapsByData:Array<Array<Note>> = [[], [], [], []]; // spawned tap notes (with requiresTap) by data. Used for input but can't change spawnedByData cus of holds n shit lol!
+	public var noTapsByData:Array<Array<Note>> = [[], [], [], []]; // spawned tap notes (without requiresTap) by data. Used for input but can't change spawnedByData cus of holds n shit lol!
 	public var noteQueue:Array<Array<Note>> = [[], [], [], []]; // unspawned notes
 	
 	public var strumNotes:Array<StrumNote> = []; // receptors
@@ -111,7 +112,15 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		} else if (tapsByData.length > cnt) {
 			for (_ in cnt...tapsByData.length)
 				tapsByData.pop();
-		}   
+		} 
+
+		if (noTapsByData.length < cnt) {
+			for (_ in (noTapsByData.length)...cnt)
+				noTapsByData.push([]);
+		} else if (noTapsByData.length > cnt) {
+			for (_ in cnt...noTapsByData.length)
+				noTapsByData.pop();
+		} 
 
 		if (noteQueue.length < cnt)
 		{
@@ -243,6 +252,9 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		if (tapsByData[daNote.column] != null)
 			tapsByData[daNote.column].remove(daNote);
 
+		if (noTapsByData[daNote.column] != null)
+			noTapsByData[daNote.column].remove(daNote);
+
 		if (noteQueue[daNote.column] != null)
 			noteQueue[daNote.column].remove(daNote);
 
@@ -280,8 +292,14 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		
 
 		if(note.holdType == HEAD || note.holdType == TAP){
-			if (tapsByData[note.column] != null)
-				tapsByData[note.column].push(note);
+			if(note.requiresTap){
+				if (tapsByData[note.column] != null)
+					tapsByData[note.column].push(note);
+			}else{
+				if (noTapsByData[note.column] != null)
+					noTapsByData[note.column].push(note);
+			}
+
 		}
 
 		noteSpawned.dispatch(note, this);
@@ -320,7 +338,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		if (data < 0 || data > keyCount) 
 			return null;
 
-		var noteList = getTapNotes(data, (note:Note) -> note.requiresTap && !note.tooLate);
+		var noteList = getTapNotes(data, (note:Note) -> !note.tooLate);
 		#if PE_MOD_COMPATIBILITY
 		noteList.sort((a, b) -> Std.int((b.strumTime + (b.lowPriority ? 10000 : 0)) - (a.strumTime + (a.lowPriority ? 10000 : 0)))); // so lowPriority actually works (even though i hate it lol!)
 		#else
@@ -587,7 +605,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		}else{
 			for(data in 0...keyCount){
 				if (keysPressed[data]){
-					var noteList = getTapNotesWithEnd(data, Conductor.songPosition + ClientPrefs.hitWindow, (note:Note) -> !note.isSustainNote && !note.requiresTap);
+					var noteList = getTapNotesWithEnd(data, Conductor.songPosition + ClientPrefs.hitWindow, (note:Note) -> !note.isSustainNote, false);
 					
 					#if PE_MOD_COMPATIBILITY
 					// so lowPriority actually works (even though i hate it lol!)
@@ -634,12 +652,14 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	}
  
 	// get all living TAP notes
-	public function getTapNotes(dir:Int, ?filter:Note->Bool):Array<Note> {
-		if (tapsByData[dir] == null)
+	public function getTapNotes(dir:Int, ?filter:Note->Bool, requiresTap:Bool = true):Array<Note> {
+		var array = requiresTap ? tapsByData[dir] : noTapsByData[dir];
+
+		if (array == null)
 			return [];
 
 		var collected:Array<Note> = [];
-		for (note in tapsByData[dir]) {
+		for (note in array) {
 			if (note.alive && note.column == dir) {
 				if (filter == null || filter(note))
 					collected.push(note);
@@ -649,12 +669,14 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	}
 
 	// gets all living TAP notes before a certain time w/ optional filter
-	public function getTapNotesWithEnd(dir:Int, end:Float, ?filter:Note->Bool):Array<Note> {
-		if (tapsByData[dir] == null)
+	public function getTapNotesWithEnd(dir:Int, end:Float, ?filter:Note->Bool, requiresTap:Bool = true):Array<Note> {
+		var array = requiresTap ? tapsByData[dir] : noTapsByData[dir];
+
+		if (array == null)
 			return [];
 
 		var collected:Array<Note> = [];
-		for (note in tapsByData[dir]) {
+		for (note in array) {
 			if (note.strumTime > end)
 				break;
 			if (note.alive && note.column == dir && !note.wasGoodHit && !note.tooLate) {
