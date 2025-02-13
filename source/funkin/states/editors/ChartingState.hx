@@ -360,12 +360,10 @@ class ChartingState extends MusicBeatState
 		fixEvents();
 
 		plrHitsound = new FlxSound().loadEmbedded(Paths.sound("monoHitsound"));
-		plrHitsound.pan = -0.75;
 		plrHitsound.exists = true;
 		FlxG.sound.list.add(plrHitsound);
 
 		oppHitsound = new FlxSound().loadEmbedded(Paths.sound("monoHitsound"));
-		oppHitsound.pan = 0.75;
 		oppHitsound.exists = true;
 		FlxG.sound.list.add(oppHitsound);
 
@@ -1457,6 +1455,8 @@ class ChartingState extends MusicBeatState
 	var playSoundDad:FlxUICheckBox = null;
 	var playSoundEvents:FlxUICheckBox = null;
 
+	var panHitSounds:FlxUICheckBox = null;
+
 	static var lastSelectedTrack = "Voices";
 	var waveformTrackDropDown:FlxUIDropDownMenuCustom;
 	var waveformTrack:Null<FlxSound> = null;
@@ -1576,6 +1576,11 @@ class ChartingState extends MusicBeatState
 		);
 		playSoundEvents.checked = FlxG.save.data.chart_playSoundEvents == true;
 
+		panHitSounds = new FlxUICheckBox(xPos, startY + 90, null, null, 'Pan Hit Sounds', 100,
+			()->FlxG.save.data.chart_panHitSounds = panHitSounds.checked
+		);
+		panHitSounds.checked = FlxG.save.data.chart_panHitSounds == true;
+
 		////////
 		metronome = new FlxUICheckBox(10, 15, null, null, "Metronome Enabled", 100,
 			()->{FlxG.save.data.chart_metronome = metronome.checked;}
@@ -1592,16 +1597,16 @@ class ChartingState extends MusicBeatState
 		);
 		disableAutoScrolling.checked = FlxG.save.data.chart_noAutoScroll == true;
 
-		var sliderRate = new FlxUISlider(this, 'playbackSpeed', 68, 275, 0.5, 3, 150, null, 5, FlxColor.WHITE, FlxColor.BLACK);
-		sliderRate.nameLabel.text = 'Playback Rate';
-		sliderRate.value = playbackSpeed;
-
-		var sliderHitVol = new FlxUISlider(this, 'hitsoundVolume', 68, 325, 0, 1, 150, null, 5, FlxColor.WHITE, FlxColor.BLACK);
+		var sliderHitVol = new FlxUISlider(this, 'hitsoundVolume', 10, startY + 90, 0, 1, 125, null, 5, FlxColor.WHITE, FlxColor.BLACK);
 		sliderHitVol.nameLabel.text = 'Hitsound Volume';
 		sliderHitVol.value = hitsoundVolume;
 
-		tab_group_chart.add(sliderRate);
+		var sliderRate = new FlxUISlider(this, 'playbackSpeed', 68, 325, 0.5, 3, 150, null, 5, FlxColor.WHITE, FlxColor.BLACK);
+		sliderRate.nameLabel.text = 'Playback Rate';
+		sliderRate.value = playbackSpeed;
+
 		tab_group_chart.add(sliderHitVol);
+		tab_group_chart.add(sliderRate);
 
 		tab_group_chart.add(mouseScrollingQuant);
 		tab_group_chart.add(check_vortex);
@@ -1610,6 +1615,8 @@ class ChartingState extends MusicBeatState
 		tab_group_chart.add(playSoundEvents);
 		tab_group_chart.add(playSoundDad);
 		tab_group_chart.add(playSoundBf);
+
+		tab_group_chart.add(panHitSounds);
 
 		tab_group_chart.add(metronomeStepper);
 		tab_group_chart.add(metronomeOffsetStepper);
@@ -2082,13 +2089,17 @@ class ChartingState extends MusicBeatState
 						
 							if (!note.hitsoundDisabled && playedSound[data] != true && (note.mustPress ? playSoundBf.checked : playSoundDad.checked))
 							{
-								if (playSoundBf.checked && playSoundDad.checked) {
-									if(note.mustPress)
-										plrHitsound.play(true);
-									else
-										oppHitsound.play(true);
-								}else
-									hitsound.play(true);
+								final panAllowed = panHitSounds.checked && playSoundBf.checked && playSoundDad.checked;
+								final panIntensity = panAllowed ? 0.75 : 0;
+								
+								if (note.mustPress) {
+									plrHitsound.play(true);
+									plrHitsound.pan = panIntensity;
+								}
+								else {
+									oppHitsound.play(true);
+									oppHitsound.pan = -panIntensity;
+								}
 
 								playedSound[data] = true;
 							}
