@@ -97,6 +97,7 @@ class Main extends Sprite
 
 		#if sys
 		if (FileSystem.exists("gameSize.txt")) {
+			adjustGameSize = false;
 			var d = sys.io.File.getContent("gameSize.txt").split(" ");
 			gameWidth = Std.parseInt(d[0]);
 			gameHeight = Std.parseInt(d[1]);
