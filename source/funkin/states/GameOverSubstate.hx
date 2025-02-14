@@ -199,6 +199,8 @@ class GameOverSubstate extends MusicBeatSubstate
 			deathName, 
 			char.isPlayer
 		);
+		boyfriend.startScripts();
+		boyfriend.setupCharacter();
 		boyfriend.x += boyfriend.positionArray[0];
 		boyfriend.y += boyfriend.positionArray[1];
 		add(boyfriend);
