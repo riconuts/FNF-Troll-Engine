@@ -1681,6 +1681,7 @@ class PlayState extends MusicBeatState
 		Conductor.changeBPM(PlayState.SONG.bpm);
 		Conductor.tracks = this.tracks;
 		Conductor.pitch = this.playbackRate;
+		Conductor.useAccPosition = ClientPrefs.songSyncMode=="System Time";
 
 		////
 		songSpeedType = ClientPrefs.getGameplaySetting('scrolltype', songSpeedType);
