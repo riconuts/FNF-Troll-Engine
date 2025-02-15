@@ -23,10 +23,66 @@ class Conductor
 	public static var bpmChangeMap:Array<BPMChangeEvent> = [];
 	public static var songPosition:Float = 0;
 	public static var offset:Float = 0;
+	public static var tracks:Array<FlxSound> = [];
+	public static var pitch:Float = 1.0;
 
 	public static var safeZoneOffset:Float = ClientPrefs.hitWindow;
 	public static var visualPosition:Float = 0;
 	public static var lastSongPos:Float;
+
+	/** Whether the song is currently playing. Use startSong and pauseSong to change this **/
+	public static var playing(default, null):Bool = false;
+	/** real time at which the song started playing **/
+	private static var songStartTimestamp:Float = 0;
+	/** elapsed playback time before the song was paused **/ 
+	private static var songStartOffset:Float = 0;
+	
+	public static function startSong(offset:Float = 0)
+	{
+		Conductor.songStartTimestamp = Main.getTime();
+		Conductor.songStartOffset = offset;
+		Conductor.playing = true;
+
+		resyncTracks();
+	}
+
+	public static function resyncTracks() {
+		Conductor.songPosition = getAccPosition();
+		for (snd in tracks) {
+			snd.stop();
+			snd.pitch = pitch;
+			snd.play(true, getAccPosition());
+		}
+	}
+
+	public static function pauseSong() 
+	{
+		Conductor.songStartOffset = getAccPosition();
+		Conductor.playing = false;
+
+		for (snd in tracks) {
+			snd.stop();
+		}
+	}
+
+	public static function resumeSong()
+	{
+		startSong(songStartOffset);
+	}
+	
+	public static var useAccPosition:Bool = false;
+	public static function getAccPosition():Float {
+		if (playing && useAccPosition)
+			return songStartOffset + (Main.getTime() - songStartTimestamp) * pitch;
+		else
+			return Conductor.songPosition;
+	}
+
+	public static function cleanup() {
+		if (Conductor.playing) Conductor.pauseSong();
+		Conductor.bpmChangeMap = [];
+		Conductor.tracks = [];
+	}
 
 	////
 	public static var crochet:Float = (60 / bpm) * 1000; // beat length in milliseconds

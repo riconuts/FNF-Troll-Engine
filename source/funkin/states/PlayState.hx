@@ -1593,16 +1593,7 @@ class PlayState extends MusicBeatState
 		if (curCountdown != null && !curCountdown.finished)
 			curCountdown.destroy();
 
-		for (track in tracks)
-			track.pause();
-
-		////
-		for (track in tracks){
-			track.time = time;
-			track.play();
-		}
-
-		Conductor.songPosition = time;
+		Conductor.startSong(time);
 	}
 
 	function startSong(startOnTime:Float=0, offset:Float = 0):Void
@@ -1617,8 +1608,8 @@ class PlayState extends MusicBeatState
 			realStartTime = 0;
 		}
 
-		Conductor.songPosition = inst.time = realStartTime;
-		resyncVocals();
+		Conductor.startSong(realStartTime);
+		updateSongDiscordPresence();
 
 		// Song duration in a float, useful for the time left feature
 		songLength = inst.length;
@@ -1688,6 +1679,8 @@ class PlayState extends MusicBeatState
 	private function generateSong(dataPath:String):Void
 	{
 		Conductor.changeBPM(PlayState.SONG.bpm);
+		Conductor.tracks = this.tracks;
+		Conductor.pitch = this.playbackRate;
 
 		////
 		songSpeedType = ClientPrefs.getGameplaySetting('scrolltype', songSpeedType);
@@ -2153,6 +2146,8 @@ class PlayState extends MusicBeatState
 	public function optionsChanged(options:Array<String>){
 		if (options.length < 1)
 			return;
+
+		Conductor.useAccPosition = (ClientPrefs.songSyncMode == "System Time");
 		
 		trace("changed " + options);
 				
@@ -2411,18 +2406,7 @@ class PlayState extends MusicBeatState
 		if (showDebugTraces)
 			trace("resync vocals!!");
 
-		for (track in tracks)
-			track.pause();
-
-		Conductor.songPosition = inst.time;
-
-		for (track in tracks){
-			if (Conductor.songPosition < track.length){
-				track.time = Conductor.songPosition;
-				track.play(false, Conductor.songPosition);
-			}
-		}
-
+		Conductor.resyncTracks();
 		Conductor.lastSongPos = Conductor.songPosition;
 		
 		updateSongDiscordPresence();
@@ -2581,6 +2565,9 @@ class PlayState extends MusicBeatState
 						var timeDiff:Float = Math.abs(inst.time - Conductor.songPosition);
 						if (timeDiff > 1000)
 							Conductor.songPosition = Conductor.songPosition + 1000 * FlxMath.signOf(timeDiff);
+
+					case "System Time":
+						Conductor.songPosition = Conductor.getAccPosition();
 					
 					default: //case "Last Mix":
 						// Stepmania method
@@ -4343,10 +4330,7 @@ class PlayState extends MusicBeatState
 	public function pause(){
 		paused = true;
 
-		if (inst != null) {
-			for (track in tracks)
-				track.pause();
-		}
+		Conductor.pauseSong();
 
 		if (curCountdown != null && !curCountdown.finished)
 			curCountdown.timer.active = false;
@@ -4385,7 +4369,10 @@ class PlayState extends MusicBeatState
 		active = true;
 
 		if (!startingSong)
-			resyncVocals();
+		{
+			Conductor.resumeSong();
+		}
+		updateSongDiscordPresence();
 
 		if (curCountdown != null && !curCountdown.finished)
 			curCountdown.timer.active = true;
@@ -4485,6 +4472,7 @@ class PlayState extends MusicBeatState
 		hudSkinScripts.clear();		
 		eventScripts.clear();
 
+		Conductor.cleanup();
 		instance = null;
 
 		super.destroy();

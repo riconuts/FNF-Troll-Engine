@@ -241,7 +241,7 @@ class JudgmentManager {
 	{
 		// might be inefficient? idk might wanna optimize this at some point if so
 
-		if (hitTime==null) hitTime = Conductor.songPosition;
+		if (hitTime==null) hitTime = Conductor.getAccPosition();
 		var diff:Float = Math.abs(note.strumTime - hitTime);
 
 		switch(note.noteType){
