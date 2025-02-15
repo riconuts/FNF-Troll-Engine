@@ -2112,7 +2112,7 @@ class ChartingState extends MusicBeatState
 						// This is an event.
 
 						if (playSoundEvents.checked)
-							hitsound.play();
+							hitsound.play(true);
 					}
 				}
 
