@@ -83,24 +83,24 @@ class FNFGame extends FlxGame
 				MusicBeatState.resetState();
 	}
 
-	var p_ticks:Float = 0;
-	var p_startTime:Float = 0;
-	var p_total:Float = 0;
+	var f_ticks:Float = 0;
+	var f_startTime:Float = 0;
+	var f_total:Float = 0;
 
-	inline function p_getTicks():Float
-		return Main.getTime() - p_startTime;
+	inline function f_getTicks():Float
+		return Main.getTime() - f_startTime;
 
 	override function create(_) {
-		p_startTime = Main.getTime();
-		p_total = p_getTicks();
+		f_startTime = Main.getTime();
+		f_total = f_getTicks();
 		return super.create(_);
 	}
 
 	override function onEnterFrame(_):Void
 	{
-		ticks = Math.floor(p_ticks = p_getTicks());
-		_elapsedMS = p_ticks - p_total;
-		_total = Math.floor(p_total = p_ticks);
+		ticks = Math.floor(f_ticks = f_getTicks());
+		_elapsedMS = f_ticks - f_total;
+		_total = Math.floor(f_total = f_ticks);
 
 		#if FLX_SOUND_TRAY
 		if (soundTray != null && soundTray.active)
