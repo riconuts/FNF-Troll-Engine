@@ -549,19 +549,11 @@ class ModManager {
 			}
 		}
 		
-		if (obj.objType == NOTE){
-			obj.updateHitbox();
-
+		obj.updateHitbox();
+		if (obj.objType == NOTE) {
 			var cum:Note = cast obj;
-			if(!cum.isSustainNote){
-				obj.centerOrigin();
-				obj.centerOffsets();
-			}
 			cum.offset.x += cum.typeOffsetX;
 			cum.offset.y += cum.typeOffsetY;
-		}else{
-			obj.centerOrigin();
-			obj.centerOffsets();
 		}
 	}
 

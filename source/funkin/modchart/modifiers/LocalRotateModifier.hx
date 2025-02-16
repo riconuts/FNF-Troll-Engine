@@ -36,7 +36,7 @@ class LocalRotateModifier extends NoteModifier { // this'll be rotateX in ModMan
 
 	override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField):Vector3 {
 		var origin = getFieldOrigin(field);
-		origin.x+=Note.swagWidth * 0.5;
+		origin.x+=Note.halfWidth;
 
 		pos.decrementBy(origin); // diff
 
