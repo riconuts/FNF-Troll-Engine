@@ -1,5 +1,5 @@
 name: Bug report
-description: Report bugs with the unmodified engine here (if you changed anything create a help request issue!)
+description: Report bugs that occur on the unmodified engine here (if you are trying to compile or are making a mod create a help request issue!)
 labels: [bug]
 body:
   - type: textarea
