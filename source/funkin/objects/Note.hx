@@ -77,17 +77,15 @@ class Note extends NoteObject
 
 	// should move this to Paths maybe
 	public static function getQuantTexture(dir:String, fileName:String, textureKey:String) {
-		var quantKey:Null<String>;
-
-		if (quantShitCache.exists(textureKey)) {
-			quantKey = quantShitCache.get(textureKey);
-
-		}else {
-			quantKey = dir + "QUANT" + fileName;
-			if (!Paths.imageExists(quantKey)) quantKey = null;
-			quantShitCache.set(textureKey, quantKey);
-		}
-
+		
+		if (quantShitCache.exists(textureKey))
+			return quantShitCache.get(textureKey);
+		
+		var quantKey:Null<String> = dir + "QUANT" + fileName;
+		// trace('$textureKey = "$dir", "$fileName", "$quantKey"');
+		if (!Paths.imageExists(quantKey)) quantKey = null;
+		
+		quantShitCache.set(textureKey, quantKey);
 		return quantKey;
 	}
 
@@ -495,21 +493,27 @@ class Note extends NoteObject
 
 		/** Should join and check for shit in the following order:
 		 * 
-		 * folder + "/" + "QUANT" + prefix + name + suffix
+		 * folder + "/" + "QUANT" + prefix + name + suffix (if quants are enabled)
 		 * folder + "/" + prefix + name + suffix
-		 * "QUANT"+ prefix + name + suffix
+		 * "QUANT"+ prefix + name + suffix (if quants are enabled)
 		 * prefix + name + suffix
+		 *
+		 * Sets isQuant to true if a quant texture is to be returned
 		 */
 		inline function getTextureKey() { // made it a function just cause i think it's easier to read it like this
+			var loadQuants:Bool = this.canQuant && ClientPrefs.noteSkin=='Quants';
+
 			var skin:String = (texture.length>0) ? texture : PlayState.arrowSkin;
 			var split:Array<String> = skin.split('/');
-			split[split.length - 1] = prefix + split[split.length-1] + suffix; // add prefix and suffix to the texture file
 
-			var fileName:String = split.pop();
-			var folderName:String = folder + split.join('/');
-			var foldersToCheck:Array<String> = (folderName == '') ? [''] : ['$folderName/', ''];
-			var loadQuants:Bool = canQuant && ClientPrefs.noteSkin=='Quants';
-
+			var fileName:String = prefix + split.pop() + suffix;
+			var folderPath:String = folder + split.join('/') + "/";
+			
+			var foldersToCheck:Array<String> = [];
+			if (folderPath != '')
+				foldersToCheck.push(folderPath);
+			foldersToCheck.push('');
+			
 			var key:String = null;
 			for (dir in foldersToCheck) {
 				key = dir + fileName;

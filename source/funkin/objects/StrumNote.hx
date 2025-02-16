@@ -91,7 +91,11 @@ class StrumNote extends NoteObject
 		var textureKey:String;
 
 		if (ClientPrefs.noteSkin == 'Quants') {
-			textureKey = Note.getQuantTexture('', texture, texture);
+			var split = texture.split('/');
+			var fileName = split.pop();
+			var folderPath = split.join('/') + '/';
+
+			textureKey = Note.getQuantTexture(folderPath, fileName, texture);
 			if (textureKey != null) isQuant = true;
 			else textureKey = texture;
 
