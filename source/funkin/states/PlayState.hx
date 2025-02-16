@@ -2542,6 +2542,45 @@ class PlayState extends MusicBeatState
 			stats.npsPeak = nps;
 
 		////
+		if (!endingSong){
+			//// time travel
+			if (!startingSong #if !debug && chartingMode #end){
+				if (FlxG.keys.justPressed.ONE) {
+					KillNotes();
+					inst.onComplete();
+				}else if(FlxG.keys.justPressed.TWO) { //Go 10 seconds into the future :O
+					setSongTime(Conductor.songPosition + 10000);
+					clearNotesBefore(Conductor.songPosition);
+				}
+			}
+
+			if (FlxG.keys.anyJustPressed(debugKeysBotplay))
+				cpuControlled = !cpuControlled;
+
+			//// editors
+			if (FlxG.keys.anyJustPressed(debugKeysChart)) {
+				FlxTransitionableState.skipNextTransOut = true;
+				openChartEditor();
+
+			}else if (FlxG.keys.anyJustPressed(debugKeysCharacter)) {
+				FlxTransitionableState.skipNextTransOut = true;
+				persistentUpdate = false;
+				pause();
+				MusicBeatState.switchState(new CharacterEditorState(SONG.player2));
+
+			}else if (canReset && !inCutscene && startedCountdown && controls.RESET) {
+				// RESET = Quick Game Over Screen
+				doGameOver();
+
+			}else if (doDeathCheck()) {
+				// die lol
+
+			}else if ((controls.PAUSE || justUnfocused) && startedCountdown && canPause && !paused) {
+				justUnfocused = false;
+				openPauseMenu();
+			}
+		}
+
 		if (startedCountdown && !paused) {
 
 			if (startingSong) {
@@ -2585,45 +2624,6 @@ class PlayState extends MusicBeatState
 						Conductor.songPosition = inst.time + lastMixTimer;
 
 				}
-			}
-		}
-		
-		if (!endingSong){
-			//// time travel
-			if (!startingSong #if !debug && chartingMode #end){
-				if (FlxG.keys.justPressed.ONE) {
-					KillNotes();
-					inst.onComplete();
-				}else if(FlxG.keys.justPressed.TWO) { //Go 10 seconds into the future :O
-					setSongTime(Conductor.songPosition + 10000);
-					clearNotesBefore(Conductor.songPosition);
-				}
-			}
-
-			if (FlxG.keys.anyJustPressed(debugKeysBotplay))
-				cpuControlled = !cpuControlled;
-
-			//// editors
-			if (FlxG.keys.anyJustPressed(debugKeysChart)) {
-				FlxTransitionableState.skipNextTransOut = true;
-				openChartEditor();
-
-			}else if (FlxG.keys.anyJustPressed(debugKeysCharacter)) {
-				FlxTransitionableState.skipNextTransOut = true;
-				persistentUpdate = false;
-				pause();
-				MusicBeatState.switchState(new CharacterEditorState(SONG.player2));
-
-			}else if (canReset && !inCutscene && startedCountdown && controls.RESET) {
-				// RESET = Quick Game Over Screen
-				doGameOver();
-
-			}else if (doDeathCheck()) {
-				// die lol
-
-			}else if ((controls.PAUSE || justUnfocused) && startedCountdown && canPause && !paused) {
-				justUnfocused = false;
-				openPauseMenu();
 			}
 		}
 
