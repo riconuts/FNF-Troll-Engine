@@ -58,7 +58,7 @@ class Conductor
 
 	public static function pauseSong() 
 	{
-		//Conductor.songPosition = getAccPosition();
+		Conductor.songPosition = getAccPosition();
 		Conductor.playing = false;
 
 		for (snd in tracks) {
