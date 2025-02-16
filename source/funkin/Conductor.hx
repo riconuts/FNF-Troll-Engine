@@ -42,6 +42,7 @@ class Conductor
 		Conductor.songStartTimestamp = Main.getTime();
 		Conductor.songStartOffset = offset;
 		Conductor.playing = true;
+		Conductor.songPosition = offset;
 
 		resyncTracks();
 	}

@@ -370,7 +370,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 				var judge:Judgment = judgeManager.judgeNote(note);
 				if (judge != UNJUDGED){
 					note.hitResult.judgment = judge;
-					note.hitResult.hitDiff = note.strumTime - Conductor.songPosition;
+					note.hitResult.hitDiff = note.strumTime - Conductor.getAccPosition();
 					noteHitCallback(note, this);
 					return note;
 				}
