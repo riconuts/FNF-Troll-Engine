@@ -2438,6 +2438,12 @@ class PlayState extends MusicBeatState
 		FlxG.watch.addQuick("visualPos", Conductor.visualPosition);
 	}
 
+	override function updateSteps() {
+		super.updateSteps();
+		setOnScripts('curDecStep', curDecStep);
+		setOnScripts('curDecBeat', curDecBeat);
+	}
+
 	override public function update(elapsed:Float)
 	{
 		if (paused){
@@ -2455,9 +2461,6 @@ class PlayState extends MusicBeatState
 		////
 		for (idx in 0...playfields.members.length)
 			playfields.members[idx].noteField.songSpeed = songSpeed;
-		
-		setOnScripts('curDecStep', curDecStep);
-		setOnScripts('curDecBeat', curDecBeat);
 		
 		/*
 		for (script in notetypeScripts)
