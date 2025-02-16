@@ -101,6 +101,7 @@ class ModManager {
 		quickRegister(new RotateModifier(this, 'center', new Vector3(FlxG.width* 0.5, FlxG.height* 0.5)));
 		quickRegister(new LocalRotateModifier(this, 'local'));
 
+		registerAux("spiralHolds");
 		registerAux("orient");
 		registerAux("lookAheadTime"); // used for holds and orient
 		
@@ -158,7 +159,7 @@ class ModManager {
 		setValue("scaleX", 1, mN);
 		setValue("scaleY", 1, mN);
 
-		setValue("lookAheadTime", 1, mN);
+		setValue("lookAheadTime", 2, mN);
 
 		setValue("snapXInterval", 1, mN);
 		setValue("snapYInterval", 1, mN);
@@ -273,7 +274,7 @@ class ModManager {
 	inline public function getPercent(modName:String, player:Int)
 		return !register.exists(getActualModName(modName))?0:get(modName).getPercent(player);
 
-	inline public function getValue(modName:String, player:Int)
+	inline public function getValue(modName:String, player:Int):Float
 		return !register.exists(getActualModName(modName))?0:get(modName).getValue(player);
 
 	inline public function setPercent(modName:String, val:Float, player:Int=-1)
@@ -433,6 +434,8 @@ class ModManager {
 			{
 				nodeIndex++; // used to prevent calling the same node over and over when it has multiple inputs
 				// could do a ran_nodes array but honestly this is probably better for optimization since its not having to store the entire node, just an index
+				
+				// I dont think this works ^^ TODO: fix
 
 				for (mod in mods)
 				{
@@ -721,7 +724,7 @@ class ModManager {
 	inline public function queueEaseL(step:Float, length:Float, modName:String, value:Float, style:Dynamic = 'linear', player = -1, ?startVal:Float)
 		queueEase(step, step + length, modName, value, style, player, startVal);
 	
-	inline public function queueEaseBL(beat:Float, length:Float, modName:String, value:Float, style:Dynamic = 'linear', player = -1, ?startVal:Float)
+	inline public function queueEaseLB(beat:Float, length:Float, modName:String, value:Float, style:Dynamic = 'linear', player = -1, ?startVal:Float)
 		queueEase(beat * 4, (beat + length) * 4, modName, value, style, player, startVal);
 
 
@@ -740,9 +743,27 @@ class ModManager {
 	public function queueFunc(step:Float, endStep:Float, callback:(CallbackEvent, Float) -> Void)
 		addEvent(new StepCallbackEvent(step, endStep, callback, this));
 	
+	public function queueFuncL(step:Float, length:Float, callback:(CallbackEvent, Float) -> Void)
+		addEvent(new StepCallbackEvent(step, step + length, callback, this));
+
+	public function queueFuncB(beat:Float, endBeat:Float, callback:(CallbackEvent, Float) -> Void)
+		addEvent(new StepCallbackEvent(beat * 4, endBeat * 4, callback, this));
+
+	public function queueFuncLB(beat:Float, length:Float, callback:(CallbackEvent, Float) -> Void)
+		addEvent(new StepCallbackEvent(beat * 4, (beat + length) * 4, callback, this));
+
 	public function queueFuncOnce(step:Float, callback:(CallbackEvent, Float) -> Void)
 		addEvent(new CallbackEvent(step, callback, this));
 	
 	public function queueEaseFunc(step:Float, endStep:Float, func:EaseFunction, callback:(EaseEvent, Float, Float) -> Void)
 		addEvent(new EaseEvent(step, endStep, func, callback, this));
+
+	public function queueEaseFuncL(step:Float, length:Float, func:EaseFunction, callback:(EaseEvent, Float, Float) -> Void)
+		addEvent(new EaseEvent(step, step + length, func, callback, this));
+
+	public function queueEaseFuncB(beat:Float, endBeat:Float, func:EaseFunction, callback:(EaseEvent, Float, Float) -> Void)
+		addEvent(new EaseEvent(beat * 4, endBeat * 4, func, callback, this));
+
+	public function queueEaseFuncLB(beat:Float, length:Float, func:EaseFunction, callback:(EaseEvent, Float, Float) -> Void)
+		addEvent(new EaseEvent(beat * 4, (beat + length) * 4, func, callback, this));
 }

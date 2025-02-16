@@ -56,8 +56,6 @@ class StrumNote extends NoteObject
 
 	////
 	public var z:Float = 0;
-	public var zIndex:Float = 0;
-	public var desiredZIndex:Float = 0;
 
 	private var field:PlayField;
 
@@ -78,18 +76,7 @@ class StrumNote extends NoteObject
 	}
 
 	override function toString()
-		return '(column: $column | visible: $visible)';
-
-	public function getZIndex(?daZ:Float)
-	{
-		if (daZ==null) daZ = z;
-
-		return z + desiredZIndex;
-	}
-
-	function updateZIndex()
-		zIndex = getZIndex();
-	
+		return '(column: $column | visible: $visible)';	
 
 	function set_noteMod(value:String):String {
 		if (value == null)
@@ -120,8 +107,6 @@ class StrumNote extends NoteObject
 		if (animation.name == 'confirm') 
 			centerOrigin();	
 		
-		updateZIndex();
-
 		if (_noteStyle != null)
 			_noteStyle.updateObject(this, elapsed);
 		

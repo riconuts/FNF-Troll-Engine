@@ -14,43 +14,97 @@ typedef BPMChangeEvent =
 
 class Conductor
 {
-	public static var curStep:Int = 0;
-	public static var curBeat:Int = 0;
-	public static var curDecStep:Float = 0;
-	public static var curDecBeat:Float = 0;
-
-	////
-	public static var bpm:Float = 100;
-	public static var crochet:Float = (60 / bpm) * 1000; // beats in milliseconds
-	public static var stepCrochet:Float = crochet / 4; // steps in milliseconds
-	public static var songPosition:Float = 0;
-	public static var visualPosition:Float = 0;
-	public static var lastSongPos:Float;
-	public static var offset:Float = 0;
-	public static var bpmChangeMap:Array<BPMChangeEvent> = [];
-
-	////
-	@:noCompletion @:isVar public static var crotchet(get, set):Float = 0;
-	@:noCompletion static function get_crotchet() return crochet;
-	@:noCompletion static function set_crotchet(v:Float) return crochet = v;
-	
-	@:noCompletion @:isVar public static var stepCrotchet(get, set):Float = 0;
-	@:noCompletion static function get_stepCrotchet() return stepCrochet;
-	@:noCompletion static function set_stepCrotchet(v:Float) return stepCrochet = v;
-
-	////
 	private inline static final _internalJackLimit:Float = 192 / 16;
 	public inline static final ROWS_PER_BEAT:Int = 48;
 	public inline static final ROWS_PER_MEASURE:Int = ROWS_PER_BEAT * 4;
 
-	public static var safeZoneOffset:Float = ClientPrefs.hitWindow;
-	public static var jackLimit(get, default):Float = -1;
-	@:noCompletion static function get_jackLimit() {
-		if (jackLimit < 0)
-			jackLimit = Conductor.stepCrochet / _internalJackLimit;
+	////
+	public static var bpm:Float = 100;
+	public static var bpmChangeMap:Array<BPMChangeEvent> = [];
+	public static var songPosition:Float = 0;
+	public static var offset:Float = 0;
+	public static var tracks:Array<FlxSound> = [];
+	public static var pitch:Float = 1.0;
 
-		return jackLimit;
+	public static var safeZoneOffset:Float = ClientPrefs.hitWindow;
+	public static var visualPosition:Float = 0;
+	public static var lastSongPos:Float;
+
+	/** Whether the song is currently playing. Use startSong and pauseSong to change this **/
+	public static var playing(default, null):Bool = false;
+	/** real time at which the song started playing **/
+	private static var songStartTimestamp:Float = 0;
+	/** elapsed playback time before the song was paused **/ 
+	private static var songStartOffset:Float = 0;
+	
+	public static function startSong(offset:Float = 0)
+	{
+		Conductor.songStartTimestamp = Main.getTime();
+		Conductor.songStartOffset = offset;
+		Conductor.playing = true;
+
+		resyncTracks();
 	}
+
+	public static function resyncTracks() {
+		Conductor.songPosition = getAccPosition();
+		for (snd in tracks) {
+			snd.stop();
+			snd.pitch = pitch;
+			snd.play(true, getAccPosition());
+		}
+	}
+
+	public static function pauseSong() 
+	{
+		Conductor.songStartOffset = getAccPosition();
+		Conductor.playing = false;
+
+		for (snd in tracks) {
+			snd.stop();
+		}
+	}
+
+	public static function resumeSong()
+	{
+		startSong(songStartOffset);
+	}
+	
+	public static var useAccPosition:Bool = false;
+	public static function getAccPosition():Float {
+		if (playing && useAccPosition)
+			return songStartOffset + (Main.getTime() - songStartTimestamp) * pitch;
+		else
+			return Conductor.songPosition;
+	}
+
+	public static function cleanup() {
+		if (Conductor.playing) Conductor.pauseSong();
+		Conductor.bpmChangeMap = [];
+		Conductor.tracks = [];
+	}
+
+	////
+	public static var crochet:Float = (60 / bpm) * 1000; // beat length in milliseconds
+	public static var stepCrochet:Float = crochet / 4; // step length in milliseconds
+
+	public static var curDecStep:Float = 0;
+	public static var curDecBeat:Float = 0;
+	public static var curStep:Int = 0;
+	public static var curBeat:Int = 0;
+
+	public static var jackLimit(get, default):Float = -1;
+	@:noCompletion static function get_jackLimit()
+		return (jackLimit < 0) ? (jackLimit = Conductor.stepCrochet / _internalJackLimit) : jackLimit;
+
+	////
+	@:noCompletion public static var crotchet(get, set):Float;
+	@:noCompletion static inline function get_crotchet() return crochet;
+	@:noCompletion static inline function set_crotchet(v:Float) return crochet = v;
+	
+	@:noCompletion @:isVar public static var stepCrotchet(get, set):Float;
+	@:noCompletion static inline function get_stepCrotchet() return stepCrochet;
+	@:noCompletion static inline function set_stepCrotchet(v:Float) return stepCrochet = v;
 
 	////
 	public static function mapBPMChanges(song:SwagSong, offset:Float=0) {

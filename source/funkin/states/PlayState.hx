@@ -282,7 +282,7 @@ class PlayState extends MusicBeatState
 	public var judgeManager:JudgmentManager;
 
 	public var modManager:ModManager;
-	public var notefields = new NotefieldManager();
+	public var notefields = new NotefieldRenderer();
 	public var playfields = new FlxTypedGroup<PlayField>();
 	public var grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 
@@ -1021,7 +1021,7 @@ class PlayState extends MusicBeatState
 
 		#if DISCORD_ALLOWED
 		// Discord RPC texts
-		stateText = '${displayedSong} ($displayedDifficulty)';
+		stateText = '${displayedSong} [$displayedDifficulty]';
 		
 		detailsText = isStoryMode ? "Story Mode" : "Freeplay";
 		detailsPausedText = "Paused - " + detailsText;
@@ -1575,16 +1575,7 @@ class PlayState extends MusicBeatState
 		if (curCountdown != null && !curCountdown.finished)
 			curCountdown.destroy();
 
-		for (track in tracks)
-			track.pause();
-
-		////
-		for (track in tracks){
-			track.time = time;
-			track.play();
-		}
-
-		Conductor.songPosition = time;
+		Conductor.startSong(time);
 	}
 
 	function startSong(startOnTime:Float=0, offset:Float = 0):Void
@@ -1599,8 +1590,8 @@ class PlayState extends MusicBeatState
 			realStartTime = 0;
 		}
 
-		Conductor.songPosition = inst.time = realStartTime;
-		resyncVocals();
+		Conductor.startSong(realStartTime);
+		updateSongDiscordPresence();
 
 		// Song duration in a float, useful for the time left feature
 		songLength = inst.length;
@@ -1670,6 +1661,9 @@ class PlayState extends MusicBeatState
 	private function generateSong(dataPath:String):Void
 	{
 		Conductor.changeBPM(PlayState.SONG.bpm);
+		Conductor.tracks = this.tracks;
+		Conductor.pitch = this.playbackRate;
+		Conductor.useAccPosition = ClientPrefs.songSyncMode=="System Time";
 
 		////
 		songSpeedType = ClientPrefs.getGameplaySetting('scrolltype', songSpeedType);
@@ -2135,6 +2129,8 @@ class PlayState extends MusicBeatState
 	public function optionsChanged(options:Array<String>){
 		if (options.length < 1)
 			return;
+
+		Conductor.useAccPosition = (ClientPrefs.songSyncMode == "System Time");
 		
 		trace("changed " + options);
 				
@@ -2164,7 +2160,7 @@ class PlayState extends MusicBeatState
 		if (hudSkinScript != null) callScript(hudSkinScript, "optionsChanged", [options]);
 		
 		for(field in playfields){
-			field.noteField.optimizeHolds = ClientPrefs.optimizeHolds;
+/* 			field.noteField.optimizeHolds = ClientPrefs.optimizeHolds; */
 			field.noteField.drawDistMod = ClientPrefs.drawDistanceModifier;
 			field.noteField.holdSubdivisions = Std.int(ClientPrefs.holdSubdivs) + 1;
 		}
@@ -2398,18 +2394,7 @@ class PlayState extends MusicBeatState
 		if (showDebugTraces)
 			trace("resync vocals!!");
 
-		for (track in tracks)
-			track.pause();
-
-		Conductor.songPosition = inst.time;
-
-		for (track in tracks){
-			if (Conductor.songPosition < track.length){
-				track.time = Conductor.songPosition;
-				track.play(false, Conductor.songPosition);
-			}
-		}
-
+		Conductor.resyncTracks();
 		Conductor.lastSongPos = Conductor.songPosition;
 		
 		updateSongDiscordPresence();
@@ -2568,6 +2553,9 @@ class PlayState extends MusicBeatState
 						var timeDiff:Float = Math.abs(inst.time - Conductor.songPosition);
 						if (timeDiff > 1000)
 							Conductor.songPosition = Conductor.songPosition + 1000 * FlxMath.signOf(timeDiff);
+
+					case "System Time":
+						Conductor.songPosition = Conductor.getAccPosition();
 					
 					default: //case "Last Mix":
 						// Stepmania method
@@ -2881,8 +2869,8 @@ class PlayState extends MusicBeatState
 				var time:Float = Std.parseFloat(value2);
 				if(Math.isNaN(time) || time <= 0) time = 0.6;
 
-				if(value != 0) {
-					if(dad.curCharacter.startsWith('gf')) { //Tutorial GF is actually Dad! The GF is an imposter!! ding ding ding ding ding ding ding, dindinding, end my suffering
+				if (value != 0) {
+					if (dad != null && dad.curCharacter.startsWith('gf')) { //Tutorial GF is actually Dad! The GF is an imposter!! ding ding ding ding ding ding ding, dindinding, end my suffering
 						dad.playAnim('cheer', true);
 						dad.specialAnim = true;
 						dad.heyTimer = time;
@@ -2892,7 +2880,7 @@ class PlayState extends MusicBeatState
 						gf.heyTimer = time;
 					}
 				}
-				if(value != 1) {
+				if (value != 1 && boyfriend != null) {
 					boyfriend.playAnim('hey', true);
 					boyfriend.specialAnim = true;
 					boyfriend.heyTimer = time;
@@ -2973,6 +2961,8 @@ class PlayState extends MusicBeatState
 				if(Math.isNaN(val2)) val2 = 0.0;
 
 				var newValue:Float = SONG.speed * ClientPrefs.getGameplaySetting('scrollspeed', 1.0) * val1;
+				if (songSpeedTween != null)
+					songSpeedTween.cancel();
 
 				// value should never be negative as that should be handled and changed prior to this
 				if (val2 == 0.0)
@@ -4328,10 +4318,7 @@ class PlayState extends MusicBeatState
 	public function pause(){
 		paused = true;
 
-		if (inst != null) {
-			for (track in tracks)
-				track.pause();
-		}
+		Conductor.pauseSong();
 
 		if (curCountdown != null && !curCountdown.finished)
 			curCountdown.timer.active = false;
@@ -4370,7 +4357,10 @@ class PlayState extends MusicBeatState
 		active = true;
 
 		if (!startingSong)
-			resyncVocals();
+		{
+			Conductor.resumeSong();
+		}
+		updateSongDiscordPresence();
 
 		if (curCountdown != null && !curCountdown.finished)
 			curCountdown.timer.active = true;
@@ -4470,6 +4460,7 @@ class PlayState extends MusicBeatState
 		hudSkinScripts.clear();		
 		eventScripts.clear();
 
+		Conductor.cleanup();
 		instance = null;
 
 		super.destroy();

@@ -262,7 +262,7 @@ class ClientPrefs
 				desc: "The method used to sync the music to the game.\nOnly touch this if your game is going off-sync.",
 				type: Dropdown,
 				value: "Last Mix",
-				data: ["options" => ["Last Mix", "Psych 1.0", "Direct", "Legacy"]]
+				data: ["options" => ["System Time", "Last Mix", "Psych 1.0", "Direct", "Legacy"]]
 			},
 			// UI
 			"timeBarType" => {
@@ -381,13 +381,13 @@ class ClientPrefs
 					"step" => 1
 				]
 			},
-			"optimizeHolds" => {
+/* 			"optimizeHolds" => {
 				display: "Optimize Holds",
 				desc: "When toggled, hold notes will be less accurate, but they'll use less calls and thus less lag.",
 				type: Toggle,
 				value: true,
 				data: []
-			},
+			}, */
 			"downScroll" => {
 				display: "Downscroll",
 				desc: "When toggled, notes will move from top to bottom instead of bottom to top.",
@@ -602,7 +602,7 @@ class ClientPrefs
 				desc: "The highest framerate the game can hit.",
 				type: Number,
 				value: #if (!macro && !linux) FlxG.stage!=null ? FlxG.stage.application.window.displayMode.refreshRate : #end 60,
-				data: ["suffix" => " FPS", "min" => 30, "max" => 360, "step" => 1,]
+				data: ["suffix" => " FPS", "min" => 10, "max" => 360, "step" => 1,]
 			},
 			"lowQuality" => {
 				display: "Low Quality",

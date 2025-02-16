@@ -34,13 +34,11 @@ class LocalRotateModifier extends NoteModifier { // this'll be rotateX in ModMan
 		return origin;
 	}
 
-	private var scale:Float = FlxG.height;
 	override function getPos( visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField):Vector3 {
 		var origin = getFieldOrigin(field);
 		origin.x+=Note.swagWidth * 0.5;
 
 		pos.decrementBy(origin); // diff
-		pos.z *= scale;
 
 		VectorHelpers.rotateV3(pos, // out 
 			(getValue(player) + getSubmodValue('${prefix}${data}rotateX', player)) * FlxAngle.TO_RAD,
@@ -48,7 +46,6 @@ class LocalRotateModifier extends NoteModifier { // this'll be rotateX in ModMan
 			(getSubmodValue('${prefix}rotateZ', player) + getSubmodValue('${prefix}${data}rotateZ', player)) * FlxAngle.TO_RAD,
 		pos);
 		
-		pos.z /= scale;
 		pos.incrementBy(origin);
 
 		return pos;

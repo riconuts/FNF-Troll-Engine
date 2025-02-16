@@ -5,7 +5,7 @@ import flixel.util.FlxColor;
 import flixel.text.FlxText;
 import flixel.ui.FlxBar;
 import funkin.objects.hud.FNFHealthBar.ShittyBar;
-
+import flixel.util.FlxStringUtil;
 
 class ClassicHUD extends CommonHUD {
 	var scoreTxt:FlxText;
@@ -30,6 +30,7 @@ class ClassicHUD extends CommonHUD {
 		// Idk lol
 
 		healthBar = new ShittyBar(iP1, iP2);
+		cast (healthBar, ShittyBar).vSlice = true;
 		healthBarBG = healthBar.healthBarBG;
 
 		iconP1 = healthBar.iconP1;
@@ -62,6 +63,7 @@ class ClassicHUD extends CommonHUD {
 			var txt = new FlxText(4, (FlxG.height / 2) + offset, FlxG.width - 8, "", 20);
 			txt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 			txt.scrollFactor.set();
+			txt.visible = ClientPrefs.judgeCounter != 'Off';
 			add(txt);
 			counters.set(judge, txt);
 			updateJudgeCounter(judge);
@@ -101,18 +103,27 @@ class ClassicHUD extends CommonHUD {
 		for (k => v in judgements)
 			updateJudgeCounter(k);
 
-		var shownScore:String;
+		var shownScore:Float = 0;
 		if (ClientPrefs.showWifeScore)
-			shownScore = Std.string(Math.floor(stats.totalNotesHit * 100));
+			shownScore = Math.floor(stats.totalNotesHit * 100);
 		else
-			shownScore = Std.string(stats.score);
+			shownScore = stats.score;
 
-		scoreTxt.text = scoreString + ":" + shownScore;
+		if (ClientPrefs.botplayMarker != 'Off' && PlayState.instance.cpuControlled)
+			scoreTxt.text = 'Botplay Enabled';
+		else
+			scoreTxt.text = '$scoreString: ${FlxStringUtil.formatMoney(shownScore, false, true)}';
+
 	}
 
 	override function changedOptions(changed:Array<String>)
 	{
 		super.changedOptions(changed);
+		if (changed.contains("judgeCounter")){
+			for (id => cnt in counters)
+				cnt.visible = ClientPrefs.judgeCounter != 'Off';
+		}
+
 		if (changed.contains("downScroll"))
 		{
 			healthBar.healthBarBG.y = FlxG.height * (ClientPrefs.downScroll ? 0.1 : 0.9);

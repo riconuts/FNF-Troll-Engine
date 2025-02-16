@@ -47,11 +47,9 @@ class BeatModifier extends NoteModifier {
 			amount = CoolUtil.scale(beat, accelTime, totalTime, 1, 0);
 			amount = 1 - (1 - amount) * (1 - amount);
 		}
+
 		if (evenBeat)
 			amount *= -1;
-
-		if(Math.abs(amount) <= 0.01)
-			amount = 0;
 
 		beatFactors[pn][axis] = 40 * amount;
 
