@@ -2916,6 +2916,9 @@ class ChartingState extends MusicBeatState
 			}
 		}
 
+		note.editorHitBeat = note.beat;
+		note.wasGoodHit = note.beat <= Conductor.curBeat;
+
 		var beats:Float = getSectionBeats(isNextSection ? 1 : 0);
 		note.y = getYfromStrumNotes(note.strumTime - sectionStartTime(), beats);
 		//if(isNextSection) note.y += gridBG.height;
