@@ -82,6 +82,8 @@
 	<!--Remove if you don't want to use Moonchart, which allows usage of chart formats from other rhythm games and fnf engines-->
 	<define name="USING_MOONCHART" if="native" />
 
+	<!-- <define name="USING_NEW_MOONCHART" />--> <!--If you're using git, set this, because Haxe sucks fuck and cant detect if youre on git or 0.4.0 for some fucking reason welcome to haxe ladies and gentlemen-->
+
 	<!--Remove if you dont want the engine to autoupdate -->
     <define name="DO_AUTO_UPDATE" if="native desktop OFFICIAL_BUILD" unless="debug" />
 
@@ -112,7 +114,8 @@
 		<classpath path="flxAnimateShadow"/> <!--Remove if FlxAnimate updates and lets you write your own code to determine how filesystem shit is gotten-->
 	</section>
 
-	<haxelib name="moonchart" version="0.4.0" if="USING_MOONCHART"/>
+	<haxelib name="moonchart" version="0.4.0" if="USING_MOONCHART" unless="USING_NEW_MOONCHART"/>
+	<haxelib name="moonchart" version="git" if="USING_NEW_MOONCHART"/>
 
 	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
 	<haxelib name="hxvlc" version="1.6.1" if="VIDEOS_ALLOWED"/> <!--You can replace with hxcodec if you're stubborn and dont wanna use newer and better libs-->
