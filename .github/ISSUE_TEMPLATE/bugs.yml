@@ -1,5 +1,5 @@
 name: Bug report
-description: Report bugs with the engine here
+description: Report bugs with the unmodified engine here (if you changed anything create a help request issue)
 labels: [bug]
 body:
   - type: textarea
@@ -18,16 +18,6 @@ body:
       required: false
 
   - type: dropdown
-    id: modding
-    attributes:
-      label: "Are you modding a build from source or with Lua?"
-      options:
-        - Lua
-        - Source
-    validations:
-      required: true
-
-  - type: dropdown
     id: btarget
     attributes:
       label: "What is your build target?"
@@ -38,13 +28,5 @@ body:
         - "HTML5"
         - "Flash/Air-based target"
         - "Neko, HashLink, or other build system"
-    validations:
-      required: true
-
-  - type: input
-    id: buildsummary
-    attributes:
-      label: "Did you edit anything in this build? If so, mention or summarize your changes."
-      placeholder: "Yes, I edited ClientPrefs.hx and tried to add a new setting"
     validations:
       required: true
