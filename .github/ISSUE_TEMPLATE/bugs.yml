@@ -1,5 +1,5 @@
 name: Bug report
-description: Report bugs with the unmodified engine here (if you changed anything create a help request issue)
+description: Report bugs with the unmodified engine here (if you changed anything create a help request issue!)
 labels: [bug]
 body:
   - type: textarea
@@ -8,14 +8,6 @@ body:
       label: "Describe your bug here."
     validations:
       required: true
-
-  - type: textarea
-    id: terminal
-    attributes:
-      label: "Command Prompt/Terminal logs (if existing)"
-      render: bash
-    validations:
-      required: false
 
   - type: dropdown
     id: btarget
@@ -30,3 +22,11 @@ body:
         - "Neko, HashLink, or other build system"
     validations:
       required: true
+
+  - type: textarea
+    id: terminal
+    attributes:
+      label: "Command Prompt/Terminal logs (if existing)"
+      render: bash
+    validations:
+      required: false
