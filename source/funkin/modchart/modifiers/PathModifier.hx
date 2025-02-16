@@ -136,9 +136,9 @@ class PathModifier extends NoteModifier
 			var startColumn:Int = Std.int(CoolMath.boundTo(column - width, 0, field.field.keyCount - 1));
 			var endColumn:Int = Std.int(CoolMath.boundTo(column + width, 0, field.field.keyCount - 1));
 
-			var minX = modMgr.getBaseX(startColumn, player, field.field.keyCount);
-			var maxX = modMgr.getBaseX(endColumn, player, field.field.keyCount);
-			var realPixel = modMgr.getBaseX(column, player, field.field.keyCount);
+			var minX = field.field.getBaseX(startColumn);
+			var maxX = field.field.getBaseX(endColumn);
+			var realPixel = field.field.getBaseX(column);
 
 			var posBetween = CoolMath.scale(realPixel, minX, maxX, -1, 1);
 

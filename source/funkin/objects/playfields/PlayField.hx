@@ -375,7 +375,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 			babyArrow.downScroll = ClientPrefs.downScroll;
 			babyArrow.alpha = 0;
 			insert(0, babyArrow);
-			babyArrow.x = modManager.getBaseX(i, playerId, keyCount);
+			babyArrow.x = getBaseX(i);
 			babyArrow.y = 50;
 			babyArrow.handleRendering = false; // NoteField handles rendering
 			babyArrow.cameras = cameras;
