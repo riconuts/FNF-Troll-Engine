@@ -101,6 +101,7 @@ class ModManager {
 		quickRegister(new RotateModifier(this, 'center', new Vector3(FlxG.width* 0.5, FlxG.height* 0.5)));
 		quickRegister(new LocalRotateModifier(this, 'local'));
 
+		registerAux("alwaysDraw");
 		registerAux("spiralHolds");
 		registerAux("orient");
 		registerAux("lookAheadTime"); // used for holds and orient
@@ -555,11 +556,6 @@ class ModManager {
 			cum.offset.x += cum.typeOffsetX;
 			cum.offset.y += cum.typeOffsetY;
 		}
-	}
-
-	public inline function getBaseVisPosD(diff:Float, songSpeed:Float = 1)
-	{
-		return (0.45 * (diff) * songSpeed);
 	}
 
 	public function getPos(diff:Float, tDiff:Float, beat:Float, data:Int, player:Int, obj:NoteObject, field:NoteField, ?exclusions:Array<String>, ?pos:Vector3):Vector3

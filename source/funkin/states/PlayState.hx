@@ -2013,7 +2013,7 @@ class PlayState extends MusicBeatState
 		}
 		#end
 
-		return event.position + (modManager.getBaseVisPosD(time - event.startTime, 1) * event.speed);
+		return event.position + ((time - event.startTime) * 0.45 * event.speed);
 	}
 
 	public function getSV(time:Float){

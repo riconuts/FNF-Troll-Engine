@@ -555,13 +555,17 @@ class Song
 		if (resultArray==null) resultArray = [];
 		
 		var eventsData:Array<Array<Dynamic>> = [];
+		
 		for (event in rawEventsData) {
-			var last = eventsData[eventsData.length-1];
+			// TODO: Probably just add a button in the chart editor to consolidate events, instead of automatically doing it
+			// As automatically doing this breaks some charts vv
+
+/* 			var last = eventsData[eventsData.length-1];
 			
 			if (last != null && Math.abs(last[0] - event[0]) <= Conductor.jackLimit){
 				var fuck:Array<Array<Dynamic>> = event[1];
 				for (shit in fuck) eventsData[eventsData.length - 1][1].push(shit);
-			}else
+			}else */
 				eventsData.push(event);
 		}
 
