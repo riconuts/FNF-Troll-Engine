@@ -2067,7 +2067,7 @@ class PlayState extends MusicBeatState
 				var speed:Float = 1;
 				if(event.event == 'Constant SV'){
 					var b = Std.parseFloat(event.value1);
-					speed = Math.isNaN(b) ? songSpeed : (songSpeed / b);
+					speed = Math.isNaN(b) ? 1 : (b / songSpeed);
 				}else{
 					speed = Std.parseFloat(event.value1);
 					if (Math.isNaN(speed)) speed = 1;
