@@ -58,7 +58,7 @@ class Conductor
 
 	public static function pauseSong() 
 	{
-		Conductor.songStartOffset = getAccPosition();
+		Conductor.songPosition = getAccPosition();
 		Conductor.playing = false;
 
 		for (snd in tracks) {
@@ -68,7 +68,7 @@ class Conductor
 
 	public static function resumeSong()
 	{
-		startSong(songStartOffset);
+		startSong(Conductor.songPosition);
 	}
 	
 	public static var useAccPosition:Bool = false;
