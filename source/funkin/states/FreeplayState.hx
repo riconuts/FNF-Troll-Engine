@@ -57,8 +57,7 @@ class FreeplayState extends MusicBeatState
 			for (songName in week.songs){
 				var song:Song = {
 					songId: Paths.formatToSongPath(songName), 
-					folder: week.directory, 
-					difficulties: week.difficulties ?? []
+					folder: week.directory
 				};
 				
 				if (Main.showDebugTraces && song.charts.length == 0) {

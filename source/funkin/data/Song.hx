@@ -87,17 +87,15 @@ class Song
 {
 	public final songId:String;
 	public final folder:String = '';
-	public var difficulties:Array<String> = [];
 
 	public var charts(get, null):Array<String>;
 	public var metadata(get, null):SongMetadata;
 	public var songPath(get, null):String;
 
-	public function new(songId:String, ?folder:String, ?difficulties:Array<String>)
+	public function new(songId:String, ?folder:String)
 	{
 		this.songId = songId;
 		this.folder = folder ?? '';
-		this.difficulties = difficulties ?? [];
 	}
 
 	public function getSongFile(fileName:String)
@@ -308,19 +306,7 @@ class Song
 		#end
 
 		var allCharts:Array<String> = [for (name in charts.keys()) name];
-		var allChartsLower:Array<String> = [for (name in charts.keys()) name.toLowerCase()];
 		var chartNames:Array<String> = [];
-
-		if (song.difficulties.length > 0){
-			for(diff in song.difficulties){
-				if (allChartsLower.contains(diff)){
-					var index = allChartsLower.indexOf(diff);
-					chartNames.push(diff);
-					allCharts.splice(index, 1);
-					allChartsLower.remove(diff);
-				}
-			}
-		}
 
 		for (name in allCharts)
 			chartNames.push(name);
