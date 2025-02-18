@@ -103,12 +103,12 @@ class Song
 	public function getSongFile(fileName:String)
 		return '$songPath/$fileName';
 
-	public function play(?difficultyName:String = ''){
-		var idx = charts.indexOf(difficultyName);
+	public function play(?chartName:String = ''){
+		var idx = charts.indexOf(chartName);
 		if (idx != -1)
-			return Song.playSong(this, difficultyName, idx);
+			return Song.playSong(this, chartName, idx);
 	
-		trace('$this: Attempt to play null difficulty: ' + difficultyName);
+		trace('$this: Attempt to play null chart: ' + chartName);
 	}
 
 	public function toString()
