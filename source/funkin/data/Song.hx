@@ -104,11 +104,13 @@ class Song
 		return '$songPath/$fileName';
 
 	public function play(?chartName:String = ''){
-		var idx = charts.indexOf(chartName);
-		if (idx != -1)
-			return Song.playSong(this, chartName, idx);
+		if (charts.contains(chartName)) {
+			Song.playSong(this, chartName);
+			return true;
+		}
 	
 		trace('$this: Attempt to play null chart: ' + chartName);
+		return false;
 	}
 
 	public function toString()
@@ -609,7 +611,7 @@ class Song
 		return resultArray;
 	}
 
-	static public function loadSong(toPlay:Song, ?difficulty:String, ?difficultyIdx:Int = 1) {
+	static public function loadSong(toPlay:Song, ?difficulty:String) {
 		Paths.currentModDirectory = toPlay.folder;
 
 		var songId:String = toPlay.songId;
@@ -720,7 +722,7 @@ class Song
 		#end
 
 		PlayState.SONG = SONG;
-		PlayState.difficulty = difficultyIdx;
+		PlayState.difficulty = toPlay.charts.indexOf(difficulty);
 		PlayState.difficultyName = difficulty;
 		PlayState.isStoryMode = false;
 
@@ -736,9 +738,9 @@ class Song
 		LoadingState.loadAndSwitchState(new PlayState());	
 	}
 
-	static public function playSong(song:Song, ?difficulty:String, ?difficultyIdx:Int = 1)
+	static public function playSong(song:Song, ?difficulty:String)
 	{
-		loadSong(song, difficulty, difficultyIdx);
+		loadSong(song, difficulty);
 		switchToPlayState();
 	} 
 }

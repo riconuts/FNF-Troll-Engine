@@ -131,7 +131,7 @@ class FreeplayState extends MusicBeatState
 			proceed = songLoaded == selectedSong && PlayState.SONG != null;
 		
 			if (!proceed) {
-				Song.loadSong(selectedSongData, curDiffStr, curDiffIdx);
+				Song.loadSong(selectedSongData, curDiffStr);
 				proceed = PlayState.SONG != null;
 			}
 		}
@@ -156,7 +156,7 @@ class FreeplayState extends MusicBeatState
 		// load song json and play inst
 		if (songLoaded != selectedSong){
 			songLoaded = selectedSong;
-			Song.loadSong(selectedSongData, curDiffStr, curDiffIdx);
+			Song.loadSong(selectedSongData, curDiffStr);
 			
 			if (PlayState.SONG != null){
 				var instAsset = Paths.track(PlayState.SONG.song, PlayState.SONG.tracks.inst[0]);
