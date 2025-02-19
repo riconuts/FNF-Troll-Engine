@@ -134,12 +134,7 @@ class Song
 	}
 
 	function get_songPath() {
-		return if (songPath != null)
-			songPath;
-		else if (folder == '')
-			songPath = Paths.getPreloadPath('songs/$songId');
-		else
-			songPath = Paths.mods('$folder/songs/$songId');
+		return songPath ?? (songPath = Paths.getFolderPath(this.folder) + '/songs/$songId');
 	}
 
 	////
@@ -345,23 +340,11 @@ class Song
 			charts.set(fileName.substr(extension_dot, fileName.length - extension_dot - 5), true);
 		}
 
-
-		if (song.folder == "")
-		{
-			#if PE_MOD_COMPATIBILITY
-			Paths.iterateDirectory(Paths.getPreloadPath('data/$songId/'), processFileName);
-			#end
-			Paths.iterateDirectory(Paths.getPreloadPath('songs/$songId/'), processFileName);
-		}
-		#if MODS_ALLOWED
-		else
-		{
-			#if PE_MOD_COMPATIBILITY
-			Paths.iterateDirectory(Paths.mods('${song.folder}/data/$songId/'), processFileName);
-			#end
-			Paths.iterateDirectory(Paths.mods('${song.folder}/songs/$songId/'), processFileName);
-		}
+		var contentPath = Paths.getFolderPath(song.folder);
+		#if PE_MOD_COMPATIBILITY
+		Paths.iterateDirectory('$contentPath/data/$songId/', processFileName);
 		#end
+		Paths.iterateDirectory('$contentPath/songs/$songId/', processFileName);
 		
 		return [for (name in charts.keys()) name];
 		#end

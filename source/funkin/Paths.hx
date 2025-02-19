@@ -571,6 +571,9 @@ class Paths
 		return null;
 	}
 
+	public static inline function getFolderPath(folder:String = ""):String
+		return (folder == "") ? getPreloadPath() : mods(folder);
+
 	////	
 	public static var currentModDirectory(default, set):String = '';
 	static function set_currentModDirectory(v:String){
