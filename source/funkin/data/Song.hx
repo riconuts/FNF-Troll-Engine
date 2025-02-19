@@ -335,6 +335,12 @@ class Song
 		#end
 	}
 
+	// TODO: GEt rid of this, just save the charts as "-normal" grrrr
+	public inline static function getDifficultyFileSuffix(diff:String) {
+		diff = Paths.formatToSongPath(diff);
+		return (diff=="" || diff=="normal") ? "" : '-$diff';
+	}
+
 	public static function loadFromJson(jsonInput:String, folder:String, ?isSongJson:Bool = true):Null<SwagSong>
 	{
 		var path:String = Paths.formatToSongPath(folder) + '/' + Paths.formatToSongPath(jsonInput) + '.json';
@@ -591,8 +597,6 @@ class Song
 		Paths.currentModDirectory = toPlay.folder;
 
 		var songId:String = toPlay.songId;
-		var diffSuffix:String;
-
 		var rawDifficulty:String = difficulty;
 
 		if (difficulty == null || difficulty == "") {
@@ -602,13 +606,7 @@ class Song
 				difficulty = toPlay.charts[0];
 		}
 		
-		if (difficulty == "normal") {
-			difficulty = 'normal';
-			diffSuffix = '';
-		}else{
-			difficulty = Paths.formatToSongPath(difficulty);
-			diffSuffix = '-$difficulty';
-		}
+		var diffSuffix:String = getDifficultyFileSuffix(difficulty);
 				
 		if (Main.showDebugTraces)
 			trace('loadSong', toPlay, difficulty);
