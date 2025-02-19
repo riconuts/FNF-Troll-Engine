@@ -896,7 +896,7 @@ class PlayState extends MusicBeatState
 				case 'Advanced': hud = new AdvancedHUD(iP1, iP2, SONG.song, stats);
 				case 'Kade': hud = new KadeHUD(iP1, iP2, SONG.song, stats);
 				case 'Classic': hud = new ClassicHUD(iP1, iP2, SONG.song, stats);
-				default: hud = new PsychHUD(iP1, iP2, SONG.song, stats);
+				default: hud = new TraditionalHUD(iP1, iP2, SONG.song, stats);
 			}
 		}
 		hud.cameras = [camHUD];
@@ -926,7 +926,7 @@ class PlayState extends MusicBeatState
 		else
 			timeTxt = new FlxText();
 
-		if(hud is PsychHUD || hud is KadeHUD)
+		if(hud is TraditionalHUD || hud is KadeHUD || hud is ClassicHUD)
 			@:privateAccess
 			scoreTxt = (cast hud).scoreTxt;
 		

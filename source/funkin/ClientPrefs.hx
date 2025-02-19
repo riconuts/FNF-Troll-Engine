@@ -98,7 +98,7 @@ class ClientPrefs
 				data: [
 					"requiresRestart" => true,
 					"options" => [
-						"Psych", 
+						"Traditional", 
 						"V-Slice", 
 						#if USE_EPIC_JUDGEMENT "PBot", #end
 						"Week 7", 
