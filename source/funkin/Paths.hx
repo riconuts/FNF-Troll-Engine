@@ -603,7 +603,7 @@ class Paths
 	public static var contentMetadata:Map<String, ContentMetadata> = [];
 
 	#if MODS_ALLOWED
-	inline static public function mods(key:String)
+	inline static public function mods(key:String = '')
 		return 'content/$key';
 
 	inline static public function getGlobalContent(){
