@@ -210,7 +210,7 @@ class Song
 	{
 		Paths.currentModDirectory = song.folder;
 		
-		final songId:String = Paths.formatToSongPath(song.songId);
+		final songId:String = song.songId;
 		final charts:Map<String, Bool> = [];
 
 		#if USING_MOONCHART
@@ -654,7 +654,7 @@ class Song
 
 			for (ext in moonchartExtensions) {
 				for (input in files) {
-					var path:String = '$songId/${Paths.formatToSongPath(input)}.$ext';
+					var path:String = '$songId/$input.$ext';
 					var filePath:String = Paths.getPath("songs/" + path);
 					var fileFormat:Format = findFormat([filePath]);
 
