@@ -1,4 +1,3 @@
-trace("penis");
 function setupNote(note:Note){
     note.maxReleaseTime = 0.5;
     note.isRoll = true;

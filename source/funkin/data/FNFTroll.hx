@@ -210,6 +210,12 @@ class FNFTroll extends FNFLegacyBasic<TrollJSONFormat> {
 
 			}
 		}
+
+		data.song.metadata ??= {};
+		//data.song.metadata.songName = chart.meta.title;
+		data.song.metadata.artist = chart.meta.extraData.get("SONG_ARTIST");
+		data.song.metadata.charter = chart.meta.extraData.get("SONG_CHARTER");
+
 		return cast basic;
 	}
 	/* #if(moonchart > "0.4.0") */ // WHY DOES THIS NOT WORK???

@@ -87,7 +87,9 @@ class FunkinHScript extends FunkinScript
 
 	public static function fromFile(file:String, ?name:String, ?additionalVars:Map<String, Any>, ?doCreateCall:Bool = true):FunkinHScript
 	{
-		name = (name == null ? file : name);
+		name ??= file;
+
+		trace('Loading haxe script from: $file');
 
 		try {
 			return _fromString(Paths.getContent(file), name, additionalVars, doCreateCall);
@@ -438,10 +440,8 @@ class FunkinHScript extends FunkinScript
 		return run(parseString(source, scriptName));
 	
 	public function run(parsed:Expr) {
-		var returnValue:Dynamic = null;
 		try {
-			trace('Running haxe script: $scriptName');
-			returnValue = interpreter.execute(parsed);
+			return interpreter.execute(parsed);
 		}
 		catch (e:haxe.Exception)
 		{
@@ -450,7 +450,7 @@ class FunkinHScript extends FunkinScript
 			
 			haxe.Log.trace(message, posInfo);
 		}
-		return returnValue;
+		return null;
 	}
 
 	public function stop()
