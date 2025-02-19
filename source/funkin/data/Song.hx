@@ -25,7 +25,6 @@ typedef SwagSong = {
 
 	////
 	var song:String;
-	// var displayName:String;
 	var bpm:Float;
 	var tracks:SongTracks; // currently used
 	
