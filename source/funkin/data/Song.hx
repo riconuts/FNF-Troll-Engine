@@ -88,9 +88,9 @@ class Song
 	public final songId:String;
 	public final folder:String = '';
 
-	public var charts(get, null):Array<String>;
-	public var metadata(get, null):SongMetadata;
 	public var songPath(get, null):String;
+	public var charts(get, null):Array<String>;
+	private var metadataCache = new Map<String, SongMetadata>();
 
 	public function new(songId:String, ?folder:String)
 	{
@@ -114,25 +114,52 @@ class Song
 	public function toString()
 		return '$folder:$songId';
 
+	/** get uncached metadata **/
+	private function _getMetadata(chart:String):Null<SongMetadata> {
+		var suffix = getDifficultyFileSuffix(chart);
+		var fileName:String = 'metadata' + suffix + '.json';
+		var path:String = getSongFile(fileName);
+		return Paths.getJson(path);
+	}
+
+	/**
+	 * Returns metadata for the requested chart. 
+	 * If it doesn't exist, metadata for the 'normal' chart is returned instead
+	 * 
+	 * @param chartId The song chart for which you want to request metadata
+	**/
+	public function getMetadata(chartId:String = "normal"):SongMetadata {
+		if (chartId=="")
+			chartId="normal";
+
+		if (metadataCache.exists(chartId)) {
+			//trace('$this: Returning cached metadata for $chartId');
+			return metadataCache.get(chartId);
+		}
+
+		var meta = _getMetadata(chartId);
+		if (meta != null) {
+			//trace('$this: Found metadata for $chartId');
+		}
+		else if (chartId != "normal") {
+			if (Main.showDebugTraces)
+				trace('$this: Metadata not found for [$chartId]. Using default');
+			return getMetadata("normal");
+		}
+		else {
+			if (Main.showDebugTraces)
+				trace('$this: No metadata found! Maybe add some?');
+			meta = {};
+		}
+		meta.songName ??= songId.replace("-", " ").capitalize();
+
+		metadataCache.set(chartId, meta);
+		return meta;
+	}
+
 	//
 	function get_charts() 
 		return charts ?? (charts = Song.getCharts(this));
-	
-	function get_metadata() {
-		if (metadata != null) return metadata;
-		
-		var path:String = getSongFile('metadata.json');
-		var json:SongMetadata = Paths.getJson(path); 
-		
-		if (json == null) {
-			json = {};
-			if (Main.showDebugTraces)
-				trace('$this: No metadata found. Maybe add some? $path');
-		}
-		json.songName ??= songId.replace("-", " ").capitalize();
-		
-		return metadata = json;
-	}
 
 	function get_songPath() {
 		return songPath ?? (songPath = Paths.getFolderPath(this.folder) + '/songs/$songId');

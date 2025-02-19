@@ -65,7 +65,7 @@ class FreeplayState extends MusicBeatState
 					continue;
 				}
 				
-				menu.addTextOption(song.metadata.songName).ID = songData.length;
+				menu.addTextOption(song.getMetadata().songName).ID = songData.length;
 				songData.push(song);
 			}
 		}

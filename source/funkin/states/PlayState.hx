@@ -643,7 +643,7 @@ class PlayState extends MusicBeatState
 		songName = (song?.songId) ?? Paths.formatToSongPath(SONG.song);
 		songHighscore = Highscore.getScore(songName, difficultyName);
 
-		metadata = SONG.metadata ?? (song?.metadata);
+		metadata = SONG.metadata ?? (song?.getMetadata(difficultyName));
 		if (showDebugTraces && metadata == null)
 			trace('No metadata for $songName. Maybe add some?');
 
