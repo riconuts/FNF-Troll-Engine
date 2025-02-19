@@ -613,7 +613,7 @@ class Song
 		}
 				
 		if (Main.showDebugTraces)
-			trace('playSong', toPlay, difficulty);
+			trace('loadSong', toPlay, difficulty);
 		
 		#if USING_MOONCHART
 		var SONG:Null<SwagSong> = null;
