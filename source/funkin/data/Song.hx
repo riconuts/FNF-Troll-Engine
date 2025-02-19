@@ -606,7 +606,7 @@ class Song
 			difficulty = 'normal';
 			diffSuffix = '';
 		}else{
-			difficulty = difficulty.trim().toLowerCase();
+			difficulty = Paths.formatToSongPath(difficulty);
 			diffSuffix = '-$difficulty';
 		}
 				
@@ -660,7 +660,7 @@ class Song
 
 			for (ext in moonchartExtensions) {
 				for (input in files) {
-					var path:String = Paths.formatToSongPath(songId) + '/' + Paths.formatToSongPath(input) + '.' + ext;
+					var path:String = '$songId/${Paths.formatToSongPath(input)}.$ext';
 					var filePath:String = Paths.getPath("songs/" + path);
 					var fileFormat:Format = findFormat([filePath]);
 
