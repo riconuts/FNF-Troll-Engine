@@ -91,15 +91,41 @@ class Song
 	public var charts(get, null):Array<String>;
 	private var metadataCache = new Map<String, SongMetadata>();
 
+	#if PE_MOD_COMPATIBILITY
+	private final defaultSongPath:String;
+	private final dataPath:String;
+
+	inline function isUsingDefaultSongPath():Bool {
+		@:bypassAccessor
+		return this.songPath == null;
+	}
+	#end
+
 	public function new(songId:String, ?folder:String)
 	{
 		this.songId = songId;
 		this.folder = folder ?? '';
+		#if !PE_MOD_COMPATIBILITY
 		this.songPath = Paths.getFolderPath(this.folder) + '/songs/$songId';
+		#else
+		var contentFolder = Paths.getFolderPath(this.folder);
+		this.defaultSongPath = '$contentFolder/songs/$songId';
+		this.dataPath = '$contentFolder/data/$songId';
+		#end
 	}
 
-	public function getSongFile(fileName:String)
-		return '$songPath/$fileName';
+	public function getSongFile(fileName:String) {
+		var path = '$songPath/$fileName';
+
+		#if PE_MOD_COMPATIBILITY
+		if (isUsingDefaultSongPath() && !Paths.exists(path)) {
+			var pp = '$dataPath/$fileName';
+			if (Paths.exists(pp)) path = pp;
+		}
+		#end
+
+		return path;
+	}
 
 	public function play(?chartName:String = ''){
 		if (charts.contains(chartName)) {
@@ -162,7 +188,7 @@ class Song
 		return charts ?? (charts = Song.getCharts(this));
 
 	function get_songPath()
-		return songPath; 
+		return songPath #if PE_MOD_COMPATIBILITY ?? defaultSongPath #end;
 
 	////
 
