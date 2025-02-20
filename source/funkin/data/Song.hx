@@ -87,7 +87,7 @@ class Song
 	public final songId:String;
 	public final folder:String = '';
 
-	public var songPath(get, null):String;
+	public var songPath(get, default):String;
 	public var charts(get, null):Array<String>;
 	private var metadataCache = new Map<String, SongMetadata>();
 
@@ -95,6 +95,7 @@ class Song
 	{
 		this.songId = songId;
 		this.folder = folder ?? '';
+		this.songPath = Paths.getFolderPath(this.folder) + '/songs/$songId';
 	}
 
 	public function getSongFile(fileName:String)
@@ -160,9 +161,8 @@ class Song
 	function get_charts() 
 		return charts ?? (charts = Song.getCharts(this));
 
-	function get_songPath() {
-		return songPath ?? (songPath = Paths.getFolderPath(this.folder) + '/songs/$songId');
-	}
+	function get_songPath()
+		return songPath; 
 
 	////
 
