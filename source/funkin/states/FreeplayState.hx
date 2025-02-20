@@ -55,10 +55,10 @@ class FreeplayState extends MusicBeatState
 				continue;
 
 			for (songName in week.songs){
-				var song:Song = {
-					songId: Paths.formatToSongPath(songName), 
-					folder: week.directory
-				};
+				var song = new Song(
+					Paths.formatToSongPath(songName), 
+					week.directory
+				);
 				
 				if (Main.showDebugTraces && song.charts.length == 0) {
 					trace('"$song" doesn\'t have any available charts!');

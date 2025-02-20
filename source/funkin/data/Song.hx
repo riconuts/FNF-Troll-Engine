@@ -82,7 +82,6 @@ typedef SongMetadata =
 	?extraInfo:Array<String>,
 }
 
-@:structInit
 class Song
 {
 	public final songId:String;
