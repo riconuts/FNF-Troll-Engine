@@ -397,22 +397,11 @@ class Song
 		return (diff=="" || diff=="normal") ? "" : '-$diff';
 	}
 
-	public static function loadFromJson(jsonInput:String, folder:String, ?isSongJson:Bool = true):Null<SwagSong>
-	{
-		var path:String = Paths.formatToSongPath(folder) + '/' + Paths.formatToSongPath(jsonInput) + '.json';
-		var fullPath = Paths.getPath('songs/$path', false);
-		
-		#if PE_MOD_COMPATIBILITY
-		if (!Paths.exists(fullPath))
-			fullPath = Paths.getPath('data/$path', false);
-		#end
+	private static function _parseSongJson(filePath:String, isChartJson:Bool = true):SwagSong {
+		var rawJson:Null<String> = Paths.getContent(filePath);
+		if (rawJson == null)
+			throw 'song JSON file NOT FOUND: $filePath';
 
-		var rawJson:Null<String> = Paths.getContent(fullPath);
-		if (rawJson == null){
-			trace('song JSON file not found: $path');
-			return null;
-		}
-		
 		// LOL GOING THROUGH THE BULLSHIT TO CLEAN IDK WHATS STRANGE
 		rawJson = rawJson.trim();
 		while (!rawJson.endsWith("}"))
@@ -420,7 +409,7 @@ class Song
 
 		var uncastedJson:Dynamic = Json.parse(rawJson);
 		var songJson:JsonSong;
-		if (uncastedJson.song is String){
+		if (isChartJson && uncastedJson.song is String){
 			// PSYCH 1.0 FUCKING DUMBSHIT FIX IT RETARD
 			// why did shadowmario make such a useless format change oh my god :sob:
 			
@@ -434,13 +423,33 @@ class Song
 					note[2] = note[2] > 0 ? note[2] : 0;
 				}
 			}
-
 		}else
 			songJson = cast uncastedJson.song;
 
-		songJson.path = fullPath;
+		songJson.path = filePath;
+		return isChartJson ? onLoadJson(songJson) : onLoadEvents(songJson);
+	}
 
-		return isSongJson ? onLoadJson(songJson) : onLoadEvents(songJson);
+	private static function parseSongJson(filePath:String, isChartJson:Bool = true):Null<SwagSong> {
+		try {
+			return _parseSongJson(filePath, isChartJson);
+		}catch(e) {
+			trace('ERROR parsing song JSON: $filePath', e.message);
+			return null;
+		}
+	}
+
+	public static function loadFromJson(jsonInput:String, folder:String, isChartJson:Bool = true):Null<SwagSong>
+	{
+		var path:String = Paths.formatToSongPath(folder) + '/' + Paths.formatToSongPath(jsonInput) + '.json';
+		var fullPath = Paths.getPath('songs/$path', false);
+
+		#if PE_MOD_COMPATIBILITY
+		if (!Paths.exists(fullPath))
+			fullPath = Paths.getPath('data/$path', false);
+		#end
+
+		return parseSongJson(fullPath);
 	}
 
 	public static function onLoadEvents(songJson:SwagSong) {
