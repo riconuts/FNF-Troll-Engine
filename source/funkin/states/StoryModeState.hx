@@ -419,7 +419,7 @@ class StoryModeState extends MusicBeatState {
 	override function update(elapsed:Float){
 		super.update(elapsed);
 		var radius:Float = 60 + (levels.length * 15);
-		var lerpVal:Float = elapsed * 60 * 0.5;
+		var lerpVal:Float = 1.0 - Math.exp(-elapsed * 16.0);
 		
 		for(idx in 0...levelTitles.members.length){
 			var title:LevelTitle = levelTitles.members[idx];
