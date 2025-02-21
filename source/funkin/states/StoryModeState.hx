@@ -78,7 +78,7 @@ class LevelStageProp extends FlxSprite
 
 	var nextDanceBeat:Float = 0;
 	override public function new(?x:Float, ?y:Float, ?graphic:FlxGraphicAsset){
-		nextDanceBeat = Conductor.curBeat;
+		nextDanceBeat = Conductor.curDecBeat;
 		super(x, y, graphic);
 	}
 
@@ -414,6 +414,7 @@ class StoryModeState extends MusicBeatState {
 		
 		changeLevel(selectedLevel, true, true);
 		
+		this.persistentUpdate = true;
 		super.create();
 	}
 
