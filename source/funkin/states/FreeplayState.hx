@@ -17,7 +17,7 @@ class FreeplayState extends MusicBeatState
 	public static var comingFromPlayState:Bool = false;
 
 	var menu = new AlphabetMenu();
-	var songMeta:Array<Song> = [];
+	var songData:Array<Song> = [];
 
 	var bgGrp = new FlxTypedGroup<FlxSprite>();
 	var bg:FlxSprite;
@@ -55,17 +55,18 @@ class FreeplayState extends MusicBeatState
 				continue;
 
 			for (songName in week.songs){
-				var metadata:Song = {songName: songName, folder: week.directory, difficulties: week.difficulties != null ? week.difficulties : []};
+				var song = new Song(
+					Paths.formatToSongPath(songName), 
+					week.directory
+				);
 				
-				/*
-				if (metadata.charts.length == 0){
-					trace('${week.directory}: $songName doesn\'t have any available charts!');
+				if (Main.showDebugTraces && song.charts.length == 0) {
+					trace('"$song" doesn\'t have any available charts!');
 					continue;
 				}
-				*/
 				
-				menu.addTextOption(songName.replace("-", " ").capitalize()).ID = songMeta.length;
-				songMeta.push(metadata);
+				menu.addTextOption(song.getMetadata().songName).ID = songData.length;
+				songData.push(song);
 			}
 		}
 
@@ -74,7 +75,7 @@ class FreeplayState extends MusicBeatState
 
 		add(menu);
 		menu.controls = controls;
-		menu.callbacks.onSelect = (selectedIdx, _) -> onSelectSong(songMeta[selectedIdx]);
+		menu.callbacks.onSelect = (selectedIdx, _) -> onSelectSong(songData[selectedIdx]);
 		menu.callbacks.onAccept = (_, _) -> onAccept();
 
 		////
@@ -129,7 +130,7 @@ class FreeplayState extends MusicBeatState
 			proceed = songLoaded == selectedSong && PlayState.SONG != null;
 		
 			if (!proceed) {
-				Song.loadSong(selectedSongData, curDiffStr, curDiffIdx);
+				Song.loadSong(selectedSongData, curDiffStr);
 				proceed = PlayState.SONG != null;
 			}
 		}
@@ -154,7 +155,7 @@ class FreeplayState extends MusicBeatState
 		// load song json and play inst
 		if (songLoaded != selectedSong){
 			songLoaded = selectedSong;
-			Song.loadSong(selectedSongData, curDiffStr, curDiffIdx);
+			Song.loadSong(selectedSongData, curDiffStr);
 			
 			if (PlayState.SONG != null){
 				var instAsset = Paths.track(PlayState.SONG.song, PlayState.SONG.tracks.inst[0]);
@@ -194,7 +195,7 @@ class FreeplayState extends MusicBeatState
 			MusicBeatState.switchState(new funkin.states.MainMenuState());	
 			
 		}else if (controls.RESET){
-			var songName:String = selectedSongData.songName;
+			var songName:String = selectedSongData.songId;
 			var _dStrId:String = 'difficultyName_$curDiffStr';
 			
 			var diffName:String = Paths.getString(_dStrId, curDiffStr);
@@ -233,7 +234,7 @@ class FreeplayState extends MusicBeatState
 	function refreshScore()
 	{
 		var data = selectedSongData;
-		var record = Highscore.getRecord(data.songName, curDiffStr);
+		var record = Highscore.getRecord(data.songId, curDiffStr);
 
 		targetRating = Highscore.getRatingRecord(record) * 100;
 		if(ClientPrefs.showWifeScore)

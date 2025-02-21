@@ -118,7 +118,7 @@ class SongSelectState extends MusicBeatState
 				hPadding + (Math.floor(id/verticalLimit) * width), 
 				vPadding + (ySpace*(id%verticalLimit)), 
 				width, 
-				songMeta[id].songName,
+				songMeta[id].songId,
 				textSize
 			);
 			text.wordWrap = false;
@@ -194,7 +194,7 @@ class SongSelectState extends MusicBeatState
 			if (charts.length > 1)
 				MusicBeatState.switchState(new SongChartSelec(songMeta[curSel], charts));
 			else if (charts.length > 0) {
-				Song.loadSong(songMeta[curSel], charts[0], 0);
+				Song.loadSong(songMeta[curSel], charts[0]);
 				if (FlxG.keys.pressed.SHIFT)
 					LoadingState.loadAndSwitchState(new funkin.states.editors.ChartingState());
 				else
@@ -241,7 +241,7 @@ class SongChartSelec extends MusicBeatState
 
 	override function create()
 	{
-		add(new FlxText(0, 5, FlxG.width, songMeta.songName).setFormat(null, 20, 0xFFFFFFFF, CENTER));
+		add(new FlxText(0, 5, FlxG.width, songMeta.songId).setFormat(null, 20, 0xFFFFFFFF, CENTER));
 
 		for (id in 0...alts.length){
 			var alt = alts[id];
@@ -267,8 +267,8 @@ class SongChartSelec extends MusicBeatState
 		if (controls.BACK)
 			MusicBeatState.switchState(new FreeplayState());
 		else if (controls.ACCEPT){
-			var daDiff = alts[curSel];
-			Song.loadSong(songMeta, (daDiff=="normal") ? null : daDiff, curSel);
+			Song.loadSong(songMeta, alts[curSel]);
+
 			if (FlxG.keys.pressed.SHIFT)
 				LoadingState.loadAndSwitchState(new funkin.states.editors.ChartingState());
 			else
