@@ -661,7 +661,6 @@ class Song
 	static public function loadSong(toPlay:Song, ?difficulty:String) {
 		Paths.currentModDirectory = toPlay.folder;
 
-		var songId:String = toPlay.songId;
 		var rawDifficulty:String = difficulty;
 
 		if (difficulty == null || difficulty == "") {
@@ -671,7 +670,7 @@ class Song
 				difficulty = toPlay.charts[0];
 		}
 		
-		var diffSuffix:String = getDifficultyFileSuffix(difficulty);
+		var songId:String = toPlay.songId;
 				
 		if (Main.showDebugTraces)
 			trace('loadSong', toPlay, difficulty);
@@ -710,6 +709,7 @@ class Song
 			// Or dont since this current method lets you do a dumb thing AKA have 2 diff chart formats in a folder LOL
 
 			var files:Array<String> = [];
+			var diffSuffix:String = getDifficultyFileSuffix(difficulty);
 			if (diffSuffix != '') files.push(songId + diffSuffix);
 			files.push(songId);
 
@@ -719,7 +719,6 @@ class Song
 					var fileFormat:Format = findFormat([filePath]);
 
 					if (fileFormat == null) continue;
-					var formatInfo:Null<FormatData> = FormatDetector.getFormatData(fileFormat);
 
 					SONG = switch(fileFormat) {
 						case FNF_LEGACY_PSYCH | FNF_LEGACY | "FNF_TROLL":
@@ -728,6 +727,7 @@ class Song
 						default:
 							trace('Converting from format $fileFormat!');
 
+							var formatInfo:Null<FormatData> = FormatDetector.getFormatData(fileFormat);
 							var chart:moonchart.formats.BasicFormat<{}, {}>;
 							chart = cast Type.createInstance(formatInfo.handler, []);
 							chart = chart.fromFile(filePath);
