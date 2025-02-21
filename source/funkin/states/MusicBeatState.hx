@@ -29,6 +29,8 @@ import funkin.states.scripting.HScriptOverridenState;
 #end
 class MusicBeatState extends FlxUIState
 {
+	public var updateSongPos:Bool = true;
+	
 	private var curSection:Int = 0;
 	private var stepsToDo:Int = 0;
 
@@ -119,7 +121,13 @@ class MusicBeatState extends FlxUIState
 	override function update(elapsed:Float)
 	{
 		updateSteps();
+		if(updateSongPos){
+			if (FlxG.sound.music != null)
+				Conductor.songPosition = FlxG.sound.music.time;
+			else
+				Conductor.songPosition += elapsed;
 
+		}
 		super.update(elapsed);
 	}
 
@@ -240,7 +248,7 @@ class MusicBeatState extends FlxUIState
 
 		FlxG.sound.playMusic(menuMusic != null ? menuMusic : Paths.music('freakyMenu'), FlxG.sound.music.volume, true);
 
-		Conductor.changeBPM(180);
+		Conductor.changeBPM(102);
 	}; 
 
 	public static function stopMenuMusic(){

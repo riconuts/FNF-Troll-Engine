@@ -499,6 +499,7 @@ class PlayState extends MusicBeatState
 
 	override public function create()
 	{
+		updateSongPos = false;
 		print('\nCreating PlayState\n');
 		Highscore.loadData();
 		
@@ -3087,7 +3088,7 @@ class PlayState extends MusicBeatState
 		// MusicBeatState.switchState(new MainMenuState());
 		if (isStoryMode){
 			MusicBeatState.playMenuMusic(1, true);
-			MusicBeatState.switchState(new StoryMenuState());
+			MusicBeatState.switchState(new StoryModeState());
 		}else{
 			FreeplayState.comingFromPlayState = true;
 			MusicBeatState.switchState(new FreeplayState());
