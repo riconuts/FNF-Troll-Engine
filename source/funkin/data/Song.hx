@@ -128,13 +128,7 @@ class Song
 	}
 
 	public function play(?chartName:String = ''){
-		if (charts.contains(chartName)) {
-			Song.playSong(this, chartName);
-			return true;
-		}
-	
-		trace('$this: Attempt to play null chart: ' + chartName);
-		return false;
+		Song.playSong(this, chartName);
 	}
 
 	public function toString()
