@@ -661,9 +661,10 @@ class Song
 	static public function loadSong(toPlay:Song, ?difficulty:String) {
 		Paths.currentModDirectory = toPlay.folder;
 
-		var rawDifficulty:String = difficulty;
-
-		if (difficulty == null || difficulty == "") {
+		if (difficulty == "") {
+			difficulty = "normal";
+		}
+		else if (difficulty == null) {
 			if (toPlay.charts.contains("normal"))
 				difficulty = "normal";
 			else
@@ -686,10 +687,10 @@ class Song
 			var found:Bool = false;
 			if (Paths.exists(chartsFilePath) && Paths.exists(metadataPath)) {
 				var chart = new moonchart.formats.fnf.FNFVSlice().fromFile(chartsFilePath, metadataPath);
-				if (chart.diffs.contains(rawDifficulty)) {
+				if (chart.diffs.contains(difficulty)) {
 					trace("CONVERTING FROM VSLICE");
 					
-					var converted = new SupportedFormat().fromFormat(chart, rawDifficulty);
+					var converted = new SupportedFormat().fromFormat(chart, difficulty);
 					var chart:JsonSong = cast converted.data.song;
 					chart.path = chartsFilePath;
 					chart.song = songId;
@@ -697,7 +698,7 @@ class Song
 					SONG = onLoadJson(chart);
 					found = true;
 				}else{
-					trace('VSLICE FILES DO NOT CONTAIN DIFFICULTY: $rawDifficulty');
+					trace('VSLICE FILES DO NOT CONTAIN DIFFICULTY: $difficulty');
 				}
 			}
 
@@ -732,10 +733,10 @@ class Song
 							chart = cast Type.createInstance(formatInfo.handler, []);
 							chart = chart.fromFile(filePath);
 
-							if (chart.formatMeta.supportsDiffs && !chart.diffs.contains(rawDifficulty))
+							if (chart.formatMeta.supportsDiffs && !chart.diffs.contains(difficulty))
 								continue;
 
-							var converted = new SupportedFormat().fromFormat(chart, rawDifficulty);
+							var converted = new SupportedFormat().fromFormat(chart, difficulty);
 							var chart:JsonSong = cast converted.data.song;
 							chart.path = filePath;
 							chart.song = songId;
