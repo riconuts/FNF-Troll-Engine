@@ -706,16 +706,8 @@ class Song
 
 			for (ext in moonchartExtensions) {
 				for (input in files) {
-					var path:String = '$songId/$input.$ext';
-					var filePath:String = Paths.getPath("songs/" + path);
+					var filePath:String = toPlay.getSongFile('$input.$ext');
 					var fileFormat:Format = findFormat([filePath]);
-
-					#if PE_MOD_COMPATIBILITY
-					if (fileFormat == null){
-						filePath = Paths.getPath("data/" + path);
-						fileFormat = findFormat([filePath]);
-					}
-					#end
 
 					if (fileFormat == null) continue;
 					var formatInfo:Null<FormatData> = FormatDetector.getFormatData(fileFormat);
