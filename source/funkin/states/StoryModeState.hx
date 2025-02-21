@@ -348,7 +348,7 @@ class StoryModeState extends MusicBeatState {
 	
 	var levels:Array<Level> = [];
 
-	var selectedLevel:Int = 0;
+	static var selectedLevel:Int = 0;
 	var levelTitles:FlxTypedSpriteGroup<LevelTitle>;
 	var levelProps:Array<FlxSpriteGroup> = [];
 	
@@ -397,6 +397,7 @@ class StoryModeState extends MusicBeatState {
 		for(idx in 0...levels.length){
 			var level:Level = levels[idx];
 			var title = level.createTitle();
+			title.alpha = idx==selectedLevel ? 1 : 0;
 			title.ID = idx;
 			levelTitles.add(title);
 			var propGroup = new FlxSpriteGroup();
@@ -411,7 +412,7 @@ class StoryModeState extends MusicBeatState {
 		add(infoBar);
 		add(levelName);
 		
-		changeLevel(0, true, true);
+		changeLevel(selectedLevel, true, true);
 		
 		super.create();
 	}
