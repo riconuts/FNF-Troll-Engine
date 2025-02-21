@@ -458,6 +458,9 @@ class StoryModeState extends MusicBeatState {
 			
 		}
 
+		if(FlxG.keys.justPressed.BACKSPACE){
+			MusicBeatState.switchState(new funkin.states.MainMenuState());
+		}
 		
 	}
 

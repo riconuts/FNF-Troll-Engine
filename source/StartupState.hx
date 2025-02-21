@@ -66,7 +66,7 @@ class StartupState extends FlxTransitionableState
 		persistentUpdate = true;
 	}
 
-	public static var nextState:Class<FlxState> = funkin.states.StoryModeState;
+	public static var nextState:Class<FlxState> = funkin.states.TitleState;
 	private static var loaded = false;
 	public static function load():Void
 	{
