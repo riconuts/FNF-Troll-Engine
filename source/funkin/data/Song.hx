@@ -183,6 +183,81 @@ class Song
 		return meta;
 	}
 
+	public function getSwagSong(chartId:String):Null<SwagSong> {
+		if (chartId == '')
+			chartId = 'normal';
+
+		#if !USING_MOONCHART
+		var suffix = getDifficultyFileSuffix(chartId);
+		var path = getSongFile(songId + suffix);
+		return parseSongJson(path);
+		#else
+		
+		// less strict v-slice format detection
+		// cause it won't detect it if you place the audio files in the same folder
+		var chartsFilePath = getSongFile('$songId-chart.json');
+		var metadataPath = getSongFile('$songId-metadata.json');
+
+		if (Paths.exists(chartsFilePath) && Paths.exists(metadataPath)) {
+			var chart = new moonchart.formats.fnf.FNFVSlice().fromFile(chartsFilePath, metadataPath);
+			if (chart.diffs.contains(chartId)) {
+				trace("CONVERTING FROM VSLICE");
+				
+				var converted = new SupportedFormat().fromFormat(chart, chartId);
+				var chart:JsonSong = cast converted.data.song;
+				chart.path = chartsFilePath;
+				chart.song = songId;
+				chart.tracks = null;
+				return onLoadJson(chart);
+			}else{
+				trace('VSLICE FILES DO NOT CONTAIN DIFFICULTY CHART: $chartId');
+			}
+		}
+	
+		// TODO: scan through the song folder and look for the first thing that has a supported extension (if json then check if it has diffSuffix cus FNF formats!!)
+		// Or dont since this current method lets you do a dumb thing AKA have 2 diff chart formats in a folder LOL
+
+		var files:Array<String> = [];
+		var diffSuffix:String = getDifficultyFileSuffix(chartId);
+		if (diffSuffix != '') files.push(songId + diffSuffix);
+		files.push(songId);
+
+		for (ext in moonchartExtensions) {
+			for (input in files) {
+				var filePath:String = getSongFile('$input.$ext');
+				var fileFormat:Null<Format> = findFormat([filePath]);
+
+				switch(fileFormat) {
+					case null:
+						continue;
+
+					case FNF_LEGACY_PSYCH | FNF_LEGACY | "FNF_TROLL":
+						return parseSongJson(filePath);
+						
+					default:
+						trace('Converting from format $fileFormat!');
+
+						var formatInfo:Null<FormatData> = FormatDetector.getFormatData(fileFormat);
+						var chart:moonchart.formats.BasicFormat<{}, {}>;
+						chart = cast Type.createInstance(formatInfo.handler, []);
+						chart = chart.fromFile(filePath);
+
+						if (chart.formatMeta.supportsDiffs && !chart.diffs.contains(chartId))
+							continue;
+
+						var converted = new SupportedFormat().fromFormat(chart, chartId);
+						var chart:JsonSong = cast converted.data.song;
+						chart.path = filePath;
+						chart.song = songId;
+						return onLoadJson(chart);
+				}
+			}
+		}
+
+		return null;
+		#end
+	}
+
 	//
 	function get_charts() 
 		return charts ?? (charts = Song.getCharts(this));
@@ -670,98 +745,11 @@ class Song
 			else
 				difficulty = toPlay.charts[0];
 		}
-		
-		var songId:String = toPlay.songId;
-				
+
 		if (Main.showDebugTraces)
 			trace('loadSong', toPlay, difficulty);
-		
-		#if USING_MOONCHART
-		var SONG:Null<SwagSong> = null;
 
-		inline function findVSlice():Bool {
-			// less strict v-slice format detection
-			var chartsFilePath = toPlay.getSongFile('$songId-chart.json');
-			var metadataPath = toPlay.getSongFile('$songId-metadata.json');
-
-			var found:Bool = false;
-			if (Paths.exists(chartsFilePath) && Paths.exists(metadataPath)) {
-				var chart = new moonchart.formats.fnf.FNFVSlice().fromFile(chartsFilePath, metadataPath);
-				if (chart.diffs.contains(difficulty)) {
-					trace("CONVERTING FROM VSLICE");
-					
-					var converted = new SupportedFormat().fromFormat(chart, difficulty);
-					var chart:JsonSong = cast converted.data.song;
-					chart.path = chartsFilePath;
-					chart.song = songId;
-					chart.tracks = null;
-					SONG = onLoadJson(chart);
-					found = true;
-				}else{
-					trace('VSLICE FILES DO NOT CONTAIN DIFFICULTY: $difficulty');
-				}
-			}
-
-			return found;
-		}
-		
-		if (!findVSlice()) {
-			// TODO: scan through the song folder and look for the first thing that has a supported extension (if json then check if it has diffSuffix cus FNF formats!!)
-			// Or dont since this current method lets you do a dumb thing AKA have 2 diff chart formats in a folder LOL
-
-			var files:Array<String> = [];
-			var diffSuffix:String = getDifficultyFileSuffix(difficulty);
-			if (diffSuffix != '') files.push(songId + diffSuffix);
-			files.push(songId);
-
-			for (ext in moonchartExtensions) {
-				for (input in files) {
-					var filePath:String = toPlay.getSongFile('$input.$ext');
-					var fileFormat:Format = findFormat([filePath]);
-
-					if (fileFormat == null) continue;
-
-					SONG = switch(fileFormat) {
-						case FNF_LEGACY_PSYCH | FNF_LEGACY | "FNF_TROLL":
-							Song.loadFromJson(songId + diffSuffix, songId);
-							
-						default:
-							trace('Converting from format $fileFormat!');
-
-							var formatInfo:Null<FormatData> = FormatDetector.getFormatData(fileFormat);
-							var chart:moonchart.formats.BasicFormat<{}, {}>;
-							chart = cast Type.createInstance(formatInfo.handler, []);
-							chart = chart.fromFile(filePath);
-
-							if (chart.formatMeta.supportsDiffs && !chart.diffs.contains(difficulty))
-								continue;
-
-							var converted = new SupportedFormat().fromFormat(chart, difficulty);
-							var chart:JsonSong = cast converted.data.song;
-							chart.path = filePath;
-							chart.song = songId;
-							onLoadJson(chart);
-					}
-
-					break;
-				}
-				if (SONG != null)
-					break;
-			}
-		}
-
-		if (SONG == null) {
-			PlayState.SONG = null;
-			
-			// Find a better way to show the error to the user
-			trace("No file format found for the chart!");
-			return;
-		}
-		#else
-		var SONG:SwagSong = Song.loadFromJson(songId + diffSuffix, songId);
-		#end
-
-		PlayState.SONG = SONG;
+		PlayState.SONG = toPlay.getSwagSong(difficulty);
 		PlayState.difficulty = toPlay.charts.indexOf(difficulty);
 		PlayState.difficultyName = difficulty;
 		PlayState.isStoryMode = false;
