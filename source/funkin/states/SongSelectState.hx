@@ -267,8 +267,8 @@ class SongChartSelec extends MusicBeatState
 		if (controls.BACK)
 			MusicBeatState.switchState(new FreeplayState());
 		else if (controls.ACCEPT){
-			var daDiff = alts[curSel];
-			Song.loadSong(songMeta, (daDiff=="normal") ? null : daDiff);
+			Song.loadSong(songMeta, alts[curSel]);
+
 			if (FlxG.keys.pressed.SHIFT)
 				LoadingState.loadAndSwitchState(new funkin.states.editors.ChartingState());
 			else
