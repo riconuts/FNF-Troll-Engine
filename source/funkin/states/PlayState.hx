@@ -625,9 +625,9 @@ class PlayState extends MusicBeatState
 		camFollow = prevCamFollow != null ? prevCamFollow : new FlxPoint();
 		camFollowPos = prevCamFollowPos != null ? prevCamFollowPos : new FlxObject();
 
-		FlxG.camera.follow(camFollowPos, LOCKON, 1);
-		FlxG.camera.focusOn(camFollow);
-		FlxG.camera.zoom = defaultCamZoom;
+		camGame.follow(camFollowPos, LOCKON, 1);
+		camGame.focusOn(camFollow);
+		camGame.zoom = defaultCamZoom;
 
 		////
 		if (SONG == null){
@@ -2881,7 +2881,7 @@ class PlayState extends MusicBeatState
 				var col:Null<FlxColor> = FlxColor.fromString(value1);
 				if (col == null) col = 0xFFFFFFFF;
 
-				FlxG.camera.flash(col, dur, null, true);
+				camGame.flash(col, dur, null, true);
 
 			case 'Hey!':
 				var value:Int = switch (value1.toLowerCase().trim()) {
@@ -4107,8 +4107,8 @@ class PlayState extends MusicBeatState
 	public function cameraBump(camZoom:Float = 0.015, hudZoom:Float = 0.03)
 	{
 		var zoomMult = camZoomingMult * ClientPrefs.camZoomP;
-		if (FlxG.camera.zoom < (defaultCamZoom * 1.35))
-			FlxG.camera.zoom += camZoom * zoomMult;
+		if (camGame.zoom < (defaultCamZoom * 1.35))
+			camGame.zoom += camZoom * zoomMult;
 		camHUD.zoom += hudZoom * zoomMult;
 	}
 
