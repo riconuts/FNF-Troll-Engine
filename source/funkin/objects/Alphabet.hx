@@ -101,10 +101,17 @@ class Alphabet extends FlxTypedSpriteGroup<AlphaCharacter>
 			obj.setPosition(curWidth, 0);
 			obj.alpha = this.alpha;
 			obj.scale.copyFrom(this.scale);
-			(bold ? obj.createBoldCharacter : obj.createCharacter)(char);
-			obj.ID = charIndex;
-			curWord.push(obj);
-			curWidth = obj.x + obj.width;
+
+			var created = (bold ? obj.createBoldCharacter : obj.createCharacter)(char);
+			if (created) {
+				obj.ID = charIndex;
+				curWord.push(obj);
+				curWidth = obj.x + obj.width;
+			}else {
+				obj.kill();
+				curWord.push(null);
+				curWidth += 40 * this.scale.x;
+			}
 		}
 		wordWidths.push(curWidth);
 		words.push(curWord);
@@ -159,6 +166,9 @@ class Alphabet extends FlxTypedSpriteGroup<AlphaCharacter>
 			}
 
 			for (obj in wordObjs) {
+				if (obj == null)
+					continue;
+				
 				obj.x += xPos;
 				obj.y += yPos;
 
@@ -249,8 +259,19 @@ class AlphaCharacter extends FlxSprite
 	public function createCharacter(character:String) {
 		curCharacter = character;
 
-		animation.addByPrefix('normal', getCharacterXmlPrefix(character), 24);
-		animation.play('normal');
+		var prefix = getCharacterXmlPrefix(character);
+		
+		animation.remove('normal');
+		animation.addByPrefix('normal', prefix, 24);
+		
+		if (animation.exists('normal')) {
+			animation.play('normal');
+		}else {
+			if (Main.showDebugTraces)
+				trace('unexistant normal [$character], attempted prefix: [$prefix]');
+			return false;			
+		}
+
 		updateHitbox();
 		y = 60 - height;
 
@@ -278,13 +299,26 @@ class AlphaCharacter extends FlxSprite
 				y -= 16;
 		}
 		#end
+
+		return true;
 	}
 
 	public function createBoldCharacter(character:String) {
 		curCharacter = character;
 
-		animation.addByPrefix('bold', getBoldCharacterXmlPrefix(character), 24);
-		animation.play('bold');
+		var prefix = getBoldCharacterXmlPrefix(character);
+		
+		animation.remove('bold');
+		animation.addByPrefix('bold', prefix, 24);
+		
+		if (animation.exists('bold')) {
+			animation.play('bold');
+		}else {
+			if (Main.showDebugTraces)
+				trace('unexistant bold [$character], attempted prefix: [$prefix]');
+			return false;			
+		}
+		
 		updateHitbox();
 
 		switch (character)
@@ -307,5 +341,7 @@ class AlphaCharacter extends FlxSprite
 				x += 5 * scale.x;
 				offset.x += 3 * scale.x;
 		}
+
+		return true;
 	}
 }
