@@ -118,8 +118,8 @@ class TestState extends MusicBeatState{
 		boldCheckbox.cameras = [camHUD];
 
 		function updateText(){
-			alphabetInstance.isBold = boldCheckbox.checked;
-			alphabetInstance.changeText(inputText.text);
+			alphabetInstance.bold = boldCheckbox.checked;
+			alphabetInstance.text = inputText.text;
 			alphabetInstance.screenCenter();
 
 			alphabetBG.scale.set(alphabetInstance.width, alphabetInstance.height);

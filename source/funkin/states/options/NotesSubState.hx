@@ -106,8 +106,8 @@ class NotesSubState extends MusicBeatSubstate
 
 				var optionText:Alphabet = new Alphabet(0, yPos + 60, Std.string(roundedValue), true);
 				optionText.x = posX + (225 * j) + 250;
-				optionText.offset.x = (40 * (optionText.lettersArray.length - 1)) * 0.5;
-				if (roundedValue < 0) optionText.offset.x += 10;
+				optionText.x -= (40 * (optionText.lettersArray.length - 1)) * 0.5;
+				if (roundedValue < 0) optionText.x -= 10;
 				
 				grpNumbers.add(optionText);
 			}
@@ -323,7 +323,7 @@ class NotesSubState extends MusicBeatSubstate
 		shaderArray[selected].setHSBIntArray(hsbArray);
 
 		var item = grpNumbers.members[(selected * 3) + type];
-		item.changeText(Std.string(roundedValue));
+		item.text = Std.string(roundedValue);
 		item.offset.x = (40 * (item.lettersArray.length - 1))* 0.5;
 		if(roundedValue < 0) item.offset.x += 10;
 
