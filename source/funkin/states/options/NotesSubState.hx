@@ -1,5 +1,6 @@
 package funkin.states.options;
 
+import flixel.group.FlxSpriteGroup;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
@@ -23,8 +24,7 @@ class NotesSubState extends MusicBeatSubstate
 	private var grpNotes:FlxTypedGroup<FlxSprite>;
 	private var shaderArray:Array<ColorSwap> = [];
 	
-	var blackBG:FlxSprite;
-	var hsbText:Alphabet;
+	var selectionOverlay:FlxSpriteGroup;
 
 	var posX = 230;
 	var daCam:FlxCamera;
@@ -89,9 +89,24 @@ class NotesSubState extends MusicBeatSubstate
 		FlxG.cameras.add(daCam, false);
 		this.cameras = [daCam];
 
-		blackBG = new FlxSprite(posX - 25).makeGraphic(870, 200, FlxColor.BLACK);
+		selectionOverlay = new FlxSpriteGroup(posX - 25);
+		add(selectionOverlay);
+
+		var blackBG = new FlxSprite().makeGraphic(900, 200, FlxColor.BLACK);
 		blackBG.alpha = 0.4;
-		add(blackBG);
+		selectionOverlay.add(blackBG);
+
+		for (i => valueName in ['Hue', 'Sat', 'Brt']) {
+			var txt = new Alphabet(posX + 80 + (225 * i), 5, '', false, false, 0, 0.65);
+			txt.alignment = CENTER;
+			txt.fieldWidth = 225;
+			txt.text = valueName;
+
+			for (letter in txt.members)
+				letter.setColorTransform(0.0, 0.0, 0.0, 1.0, 255, 255, 255, 0);
+			
+			selectionOverlay.add(txt);
+		}
 
 		grpNotes = new FlxTypedGroup<FlxSprite>();
 		add(grpNotes);
@@ -104,10 +119,11 @@ class NotesSubState extends MusicBeatSubstate
 			for (j in 0...3) {
 				var roundedValue:Int = Math.round(valuesArray[i][j]);
 
-				var optionText:Alphabet = new Alphabet(0, yPos + 60, Std.string(roundedValue), true);
-				optionText.x = posX + (225 * j) + 250;
-				optionText.x -= (40 * (optionText.lettersArray.length - 1)) * 0.5;
-				if (roundedValue < 0) optionText.x -= 10;
+				var optionText:Alphabet = new Alphabet(0, yPos + 60, '', true);
+				optionText.fieldWidth = 225;
+				optionText.alignment = CENTER;
+				optionText.x = posX + 250 + (225 * j);
+				optionText.text = Std.string(roundedValue);
 				
 				grpNumbers.add(optionText);
 			}
@@ -128,12 +144,6 @@ class NotesSubState extends MusicBeatSubstate
 			newShader.setHSBIntArray(valuesArray[i]);
 			shaderArray.push(newShader);
 		}
-
-		hsbText = new Alphabet(0, 0, "Hue    Saturation  Brightness", false, false, 0, 0.65);
-		hsbText.x = posX + 240;
-		for (letter in hsbText.lettersArray)
-			letter.setColorTransform(0.0, 0.0, 0.0, 1.0, 255, 255, 255, 0);
-		add(hsbText);
 		
 		////
 		changeSelection();
@@ -232,22 +242,23 @@ class NotesSubState extends MusicBeatSubstate
 			nextAccept -= 1;
 		}
 
+		var lerpVal:Float = (1 - Math.exp(-48 * elapsed));
+
 		for (i in 0...grpNotes.length)
 		{
 			var yIndex = i;
 			var item = grpNotes.members[i];
+
+			// scroll down
 			if (curSelected > 2 && valuesArray.length > 4)
 				yIndex -= curSelected - 2;
 
 			var yPos:Float = (165 * yIndex) + 35;
-			var lerpVal:Float = (1 - Math.exp(-48 * elapsed));
-
 			item.y += (yPos - item.y) * lerpVal;
-
-			if (i == curSelected){
-				hsbText.y += (yPos-70 - hsbText.y) * lerpVal;
-				blackBG.y += (yPos-20 - blackBG.y) * lerpVal;
-			}
+		}
+		{
+			var yPos:Float = (165 * curSelected) + 15;
+			selectionOverlay.y += (yPos - selectionOverlay.y) * lerpVal;
 		}
 
 		for (i in 0...grpNumbers.length) {
@@ -324,8 +335,6 @@ class NotesSubState extends MusicBeatSubstate
 
 		var item = grpNumbers.members[(selected * 3) + type];
 		item.text = Std.string(roundedValue);
-		item.offset.x = (40 * (item.lettersArray.length - 1))* 0.5;
-		if(roundedValue < 0) item.offset.x += 10;
 
 		changedAnything = true;
 	}
