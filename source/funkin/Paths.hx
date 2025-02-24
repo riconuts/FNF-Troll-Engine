@@ -467,8 +467,14 @@ class Paths
 
 	public static function getGraphic(path:String, cache:Bool = true, gpu:Bool = false):Null<FlxGraphic>
 	{
-		var newGraphic:FlxGraphic = cache ? currentTrackedAssets.get(path) : null;
-		if (newGraphic == null) {
+		var newGraphic:FlxGraphic;
+
+		if (cache && currentTrackedAssets.exists(path)) {
+			newGraphic = currentTrackedAssets.get(path);
+			if (!localTrackedAssets.contains(path)) 
+				localTrackedAssets.push(path);
+		}
+		else {
 			var bitmap:BitmapData = getBitmapData(path);
 			if (bitmap == null) return null;
 
@@ -508,13 +514,6 @@ class Paths
 	public static function returnGraphic(key:String, ?library:String):Null<FlxGraphic>
 	{
 		var path:String = imagePath(key);
-
-		if (currentTrackedAssets.exists(path)) {
-			if (!localTrackedAssets.contains(path)) 
-				localTrackedAssets.push(path);
-
-			return currentTrackedAssets.get(path);
-		}
 
 		var graphic = getGraphic(path);
 		if (graphic==null && Main.showDebugTraces)
