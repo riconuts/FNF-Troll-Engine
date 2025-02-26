@@ -30,6 +30,7 @@ class NotesSubState extends MusicBeatSubstate
 	var daCam:FlxCamera;
 
 	////
+	var valueNames:Array<String> = ['Hue', 'Sat', 'Brt'];
 	var valuesArray:Array<Array<Int>>; 
 	var namesArray:Array<String>;
 	var noteFrames:flixel.graphics.frames.FlxAtlasFrames; 
@@ -96,7 +97,7 @@ class NotesSubState extends MusicBeatSubstate
 		blackBG.alpha = 0.4;
 		selectionOverlay.add(blackBG);
 
-		for (i => valueName in ['Hue', 'Sat', 'Brt']) {
+		for (i => valueName in valueNames) {
 			var txt = new Alphabet(posX + 80 + (225 * i), 5, '', false, false, 0, 0.65);
 			txt.alignment = CENTER;
 			txt.fieldWidth = 225;
@@ -116,14 +117,11 @@ class NotesSubState extends MusicBeatSubstate
 		////
 		for (i in 0...valuesArray.length) {
 			var yPos:Float = (165 * i) + 35;
-			for (j in 0...3) {
-				var roundedValue:Int = Math.round(valuesArray[i][j]);
-
+			for (j in 0...valueNames.length) {
 				var optionText:Alphabet = new Alphabet(0, yPos + 60, '', true);
 				optionText.fieldWidth = 225;
 				optionText.alignment = CENTER;
 				optionText.x = posX + 250 + (225 * j);
-				optionText.text = Std.string(roundedValue);
 				
 				grpNumbers.add(optionText);
 			}
@@ -141,13 +139,24 @@ class NotesSubState extends MusicBeatSubstate
 
 			var newShader:ColorSwap = new ColorSwap();
 			note.shader = newShader.shader;
-			newShader.setHSBIntArray(valuesArray[i]);
 			shaderArray.push(newShader);
 		}
+
+		updateValueVisuals();
 		
 		////
 		changeSelection();
 		super.create();
+	}
+
+	function updateValueVisuals() {
+		for (i => noteHSB in valuesArray) {
+			for (j in 0...noteHSB.length) {
+				var roundedValue:Int = Math.round(noteHSB[j]);
+				grpNumbers.members[i * 3 + j].text = Std.string(roundedValue);
+			}
+			shaderArray[i].setHSBIntArray(noteHSB);
+		}
 	}
 
 	function menuUpdate(elapsed:Float) {
@@ -243,21 +252,18 @@ class NotesSubState extends MusicBeatSubstate
 		}
 
 		var lerpVal:Float = (1 - Math.exp(-48 * elapsed));
+		var yIndexOffset:Float = (valuesArray.length > 4) ? Math.max(0, curSelected - 2) : 0;
 
 		for (i in 0...grpNotes.length)
 		{
-			var yIndex = i;
 			var item = grpNotes.members[i];
-
-			// scroll down
-			if (curSelected > 2 && valuesArray.length > 4)
-				yIndex -= curSelected - 2;
-
+			var yIndex:Float = i - yIndexOffset;
 			var yPos:Float = (165 * yIndex) + 35;
 			item.y += (yPos - item.y) * lerpVal;
 		}
 		{
-			var yPos:Float = (165 * curSelected) + 15;
+			var yIndex:Float = curSelected - yIndexOffset;
+			var yPos:Float = (165 * yIndex) + 15;
 			selectionOverlay.y += (yPos - selectionOverlay.y) * lerpVal;
 		}
 
