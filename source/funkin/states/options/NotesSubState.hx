@@ -81,6 +81,13 @@ class NotesSubState extends MusicBeatSubstate
 	}
 
 	override public function create() {
+		valuesFileDialog.onOpen.add(
+			function(res:lime.utils.Resource) {
+				var str:String = (res:haxe.io.Bytes).toString();
+				loadFromString(str);
+			}
+		);
+
 		var camPos = new FlxObject(0,0, 1280, 720);
 		add(camPos);
 
@@ -159,7 +166,53 @@ class NotesSubState extends MusicBeatSubstate
 		}
 	}
 
+	function loadFromString(str:String) {
+		var strLines = str.split('\n');
+		for (i in 0...strLines.length) {
+			var hsb = valuesArray[i];
+			if (hsb == null) break;
+
+			var line = strLines[i];
+			if (line == null) break;
+
+			for (j => v in line.split(','))
+				hsb[j] = Std.parseInt(v) ?? 0;
+		}
+		updateValueVisuals();
+	}
+
+	function saveToString():String {
+		var txt = "";
+		for (vals in valuesArray)
+			txt += vals.join(" ") + "\n";
+		return txt.rtrim();
+	}
+
+	var valuesFileDialog = new lime.ui.FileDialog();
+
+	function openValuesFile() {
+		valuesFileDialog.open(
+			'txt',
+			'assets/pingas.txt'
+		);	
+	}
+
+	function saveValuesFile() {
+		var str = saveToString();
+		valuesFileDialog.save(
+			lime.utils.Bytes.ofString(str),
+			'txt',
+			'assets/pingas.txt',
+		);
+	}
+
 	function menuUpdate(elapsed:Float) {
+		if (FlxG.keys.pressed.CONTROL) {
+			if (FlxG.keys.justPressed.O)
+				openValuesFile();
+			else if (FlxG.keys.justPressed.S)
+				saveValuesFile();
+		}else
 		if(changingNote) {
 			if(holdTime < 0.5) {
 				if(controls.UI_LEFT_P) {
