@@ -175,7 +175,7 @@ class NotesSubState extends MusicBeatSubstate
 			var line = strLines[i];
 			if (line == null) break;
 
-			for (j => v in line.split(','))
+			for (j => v in line.split(' '))
 				hsb[j] = Std.parseInt(v) ?? 0;
 		}
 		updateValueVisuals();
@@ -192,17 +192,19 @@ class NotesSubState extends MusicBeatSubstate
 
 	function openValuesFile() {
 		valuesFileDialog.open(
-			'txt',
-			'assets/pingas.txt'
+			null,
+			'user_hsb/'
 		);	
 	}
 
 	function saveValuesFile() {
+		sys.FileSystem.createDirectory('user_hsb');
+
 		var str = saveToString();
 		valuesFileDialog.save(
 			lime.utils.Bytes.ofString(str),
-			'txt',
-			'assets/pingas.txt',
+			null,
+			'user_hsb/',
 		);
 	}
 
