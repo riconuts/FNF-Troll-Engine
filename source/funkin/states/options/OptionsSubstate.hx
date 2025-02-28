@@ -588,16 +588,13 @@ class OptionsSubstate extends MusicBeatSubstate
 		final backdropSlice = [22, 22, 89, 89];
 		final tabButtonHeight = 44;
 
-		var lastX:Float = optionMenu.x;
-		for (idx in 0...tabOrder.length)
+		var tabX:Float = optionMenu.x;
+		for (idx => tabName in tabOrder)
 		{
-			var tabName = tabOrder[idx];
-
-			var strKey = 'opt_tabName_$tabName';
-			var text = new FlxText(0, 0, 0, Paths.getString(strKey, tabName).toUpperCase(), 16);
+			var text = new FlxText(0, 0, 0, Paths.getString('opt_tabName_$tabName', tabName).toUpperCase(), 16);
 			text.applyFormat(TextFormats.TAB_NAME);
 
-			var button = new FlxSprite(lastX, optionMenu.y - 3 - tabButtonHeight, whitePixel);
+			var button = new FlxSprite(tabX, optionMenu.y - 3 - tabButtonHeight, whitePixel);
 			button.ID = idx;
 			button.alpha = 0.75;
 			
@@ -611,7 +608,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			text.fieldWidth = button.width;
 			text.updateHitbox();
 
-			lastX += button.width + 3;
+			tabX += button.width + 3;
 			add(button);
 			add(text);
 			tabButtons.push(button);
