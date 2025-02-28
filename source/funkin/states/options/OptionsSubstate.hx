@@ -30,11 +30,16 @@ typedef Widget = {
 
 class OptionsSubstate extends MusicBeatSubstate
 {
-	// for scripting
+	// scripts can make options require/recommend a restart
 	public static final requiresRestart:Map<String, Bool> = [];
 	public static final recommendsRestart:Map<String, Bool> = [];
 
-	static var optionOrder:Array<String> = [
+	public static function resetRestartRecomendations() {
+		requiresRestart.clear();
+		recommendsRestart.clear();
+	}
+
+	static var tabOrder:Array<String> = [
 		"game",
 		"ui",
 		"video",
@@ -42,7 +47,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		"misc", 
 	];
 
-	static var options:Map<String, Array<Dynamic>> = [
+	static var tabData:Map<String, Array<Dynamic>> = [
 		// maps are annoying and dont preserve order so i have to do this
 		"game" => [
 			[
@@ -223,13 +228,6 @@ class OptionsSubstate extends MusicBeatSubstate
 
 
 	////
-
-	public static function resetRestartRecomendations()
-	{
-		requiresRestart.clear();
-		recommendsRestart.clear();
-	}
-
 	var changed:Array<String> = [];
 	var originalValues:Map<String, Dynamic> = [];
 
@@ -461,14 +459,18 @@ class OptionsSubstate extends MusicBeatSubstate
 		}
 	}
 
-	var selected:Int = 0;
 	var forceWidgetUpdate:Bool = false;
 
-	var buttons:Array<FlxSprite> = [];
+	var currentTabIdx:Int = 0;
 	var currentWidgets:Map<FlxObject, Widget> = [];
 	var currentGroup:FlxTypedGroup<FlxObject>;
-	var groups:Map<String, FlxTypedGroup<FlxObject>> = [];
-	var allWidgets:Map<String, Map<FlxObject, Widget>> = [];
+
+	var tabButtons:Array<FlxSprite> = [];
+	var tabHeights:Array<Float> = [];
+	var tabCameraPositions:Array<FlxPoint> = [];
+	var tabGroups:Map<String, FlxTypedGroup<FlxObject>> = [];
+	var tabWidgets:Map<String, Map<FlxObject, Widget>> = [];
+
 	var actualOptions:Map<String, OptionData> = {
 		var definitions = ClientPrefs.getOptionDefinitions();
 		[
@@ -480,8 +482,6 @@ class OptionsSubstate extends MusicBeatSubstate
 	var mainCamera:FlxCamera;
 	var optionCamera:FlxCamera;
 	var overlayCamera:FlxCamera;
-	var cameraPositions:Array<FlxPoint> = [];
-	var heights:Array<Float> = [];
 
 	var camFollow = new FlxPoint(0, 0);
 	var camFollowPos = new FlxObject(0, 0);
@@ -589,9 +589,9 @@ class OptionsSubstate extends MusicBeatSubstate
 		final tabButtonHeight = 44;
 
 		var lastX:Float = optionMenu.x;
-		for (idx in 0...optionOrder.length)
+		for (idx in 0...tabOrder.length)
 		{
-			var tabName = optionOrder[idx];
+			var tabName = tabOrder[idx];
 
 			var strKey = 'opt_tabName_$tabName';
 			var text = new FlxText(0, 0, 0, Paths.getString(strKey, tabName).toUpperCase(), 16);
@@ -614,15 +614,15 @@ class OptionsSubstate extends MusicBeatSubstate
 			lastX += button.width + 3;
 			add(button);
 			add(text);
-			buttons.push(button);
+			tabButtons.push(button);
 
 			////
 			var daY:Float = 0;
 			var group = new FlxTypedGroup<FlxObject>();
 			var widgets:Map<FlxObject, Widget> = [];
-			cameraPositions.push(FlxPoint.get());
+			tabCameraPositions.push(FlxPoint.get());
 
-			for (data in options.get(tabName))
+			for (data in tabData.get(tabName))
 			{
 				var label:String = data[0];
 
@@ -690,9 +690,9 @@ class OptionsSubstate extends MusicBeatSubstate
 			
 			daY += 4;
 			var height = daY > optionCamera.height ? daY - optionCamera.height : 0;
-			heights.push(height);
-			groups.set(tabName, group);
-			allWidgets.set(tabName, widgets);
+			tabHeights.push(height);
+			tabGroups.set(tabName, group);
+			tabWidgets.set(tabName, widgets);
 		}
 
 		optionDesc = new FlxText(5, FlxG.height - 48, 0);
@@ -710,7 +710,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		onVolumeChange(FlxG.sound.volume);
 
 		checkWindows();
-		changeCategory(0, true);
+		changeTab(currentTabIdx, true);
 
 		super.create();
 		//trace('OptionState creation took ${Sys.cpuTime() - startTime} seconds.');
@@ -945,42 +945,40 @@ class OptionsSubstate extends MusicBeatSubstate
 		return widget;
 	}
 
-	function changeCategory(?val:Int = 0, absolute:Bool = false)
-	{
-		//selected = FlxMath.wrap(absolute ? val : selected+val, 0, buttons.length-1);
-		
-		if (absolute)
-			selected = val;
+	function changeTab(?val:Int = 0, isAbs:Bool = false)
+	{		
+		if (isAbs)
+			currentTabIdx = val;
 		else
-			selected += val;
+			currentTabIdx += val;
 
-		if (selected >= buttons.length)
-			selected = 0;
-		else if (selected < 0)
-			selected = buttons.length - 1;
+		if (currentTabIdx >= tabButtons.length)
+			currentTabIdx = 0;
+		else if (currentTabIdx < 0)
+			currentTabIdx = tabButtons.length - 1;
 
 		////
-		for (idx in 0...buttons.length)
+		for (idx in 0...tabButtons.length)
 		{
-			var butt = buttons[idx];
-			butt.color = idx == selected ? color2 + FlxColor.fromRGB(60, 60, 60) : color2;
+			var butt = tabButtons[idx];
+			butt.color = idx == currentTabIdx ? color2 + FlxColor.fromRGB(60, 60, 60) : color2;
 		}
 
-		camFollow.copyFrom(cameraPositions[selected]);
+		camFollow.copyFrom(tabCameraPositions[currentTabIdx]);
 		camFollowPos.setPosition(camFollow.x, camFollow.y);
 
 		remove(currentGroup);
 
-		for (idx in 0...optionOrder.length)
+		for (idx in 0...tabOrder.length)
 		{
-			var n = optionOrder[idx];
-			var group = groups.get(n);
-			if (members.contains(group) && idx != selected)
+			var n = tabOrder[idx];
+			var group = tabGroups.get(n);
+			if (members.contains(group) && idx != currentTabIdx)
 				remove(group);
-			else if (!members.contains(group) && idx == selected)
+			else if (!members.contains(group) && idx == currentTabIdx)
 			{
 				add(group);
-				currentWidgets = allWidgets.get(n);
+				currentWidgets = tabWidgets.get(n);
 				currentGroup = group;
 			}
 		}
@@ -1285,7 +1283,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		changeDropdown(widget.optionData.data.get("optionName"), val);
 
 	function getHeight():Float
-		return heights[selected];
+		return tabHeights[currentTabIdx];
 
 	//// For keyboard
 	var selectableWidgetObjects:Array<FlxObject> = [];
@@ -1395,7 +1393,7 @@ class OptionsSubstate extends MusicBeatSubstate
 
 			if (FlxG.keys.justPressed.TAB){
 				FlxG.sound.play(Paths.sound("scrollMenu"));
-				changeCategory(1);
+				changeTab(1);
 				
 				doUpdate = true;
 				pHov = null;
@@ -1499,11 +1497,11 @@ class OptionsSubstate extends MusicBeatSubstate
 				scrubbingBar = null;
 			else if (FlxG.mouse.justPressed)
 			{
-				for (idx in 0...optionOrder.length)
+				for (idx => button in tabButtons)
 				{
-					if (FlxG.mouse.overlaps(buttons[idx], mainCamera))
+					if (FlxG.mouse.overlaps(button, mainCamera))
 					{
-						changeCategory(idx, true);
+						changeTab(idx, true);
 						pHov = null;
 						break;
 					}
@@ -1578,7 +1576,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			);
 			camFollowPos.y = FlxMath.bound(camFollowPos.y, 0, height);
 
-			cameraPositions[selected].copyFrom(camFollow);
+			tabCameraPositions[currentTabIdx].copyFrom(camFollow);
 		}
 
 		super.update(elapsed);
@@ -1600,7 +1598,7 @@ class OptionsSubstate extends MusicBeatSubstate
 	{
 		_mousePoint.put();
 
-		for (val in cameraPositions)
+		for (val in tabCameraPositions)
 			val.put();
 
 		super.destroy();
