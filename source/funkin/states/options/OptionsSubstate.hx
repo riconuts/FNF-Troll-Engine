@@ -484,7 +484,6 @@ class OptionsSubstate extends MusicBeatSubstate
 	var camFollow = new FlxPoint(0, 0);
 	var camFollowPos = new FlxObject(0, 0);
 
-	var openedDropdown:Widget;
 
 	@:noCompletion var _mousePoint:FlxPoint = FlxPoint.get();
 
@@ -747,71 +746,9 @@ class OptionsSubstate extends MusicBeatSubstate
 
 			case Dropdown:
 				var options:Array<String> = data.data.get("options");
-				var drops:Array<FlxUI9SliceSprite> = [];
-				var optionMap:Map<FlxText, String> = [];
-				var dV:String = data.value != null ? cast data.value : options[0];
-				if (options.indexOf(dV) == -1)
+				var dV:String = cast data.value;
+				if (dV == null || options.indexOf(dV) == -1)
 					dV = options[0];
-
-				var daY:Float = 0;
-				var daW:Float = 100;
-
-				var ddCamera = new FlxCamera();
-				ddCamera.bgColor = FlxColor.GRAY;
-				ddCamera.bgColor.alpha = 204;
-				camerasToRemove.push(ddCamera);
-
-				var backdropGraphic = Paths.image("optionsMenu/backdrop");
-
-				for (idx in 0...options.length) {
-					var l = options[idx];
-					var text = new FlxText(8 + 4, daY + 4, 0, l, 16);
-					text.cameras = [ddCamera];
-					text.applyFormat(TextFormats.OPT_DROPDOWN_OPTION_TEXT);
-					
-					var width:Float = Math.max(50, text.width + 8);
-					var height:Float = 35;
-
-					text.y += (height - text.height) / 2;
-					text.ID = idx;
-					
-					var backDrop:FlxUI9SliceSprite = new FlxUI9SliceSprite(
-						text.x - 4, daY + 4, 
-						backdropGraphic,
-						new Rectangle(0, 0, width, height), [22, 22, 89, 89]
-					);
-					backDrop.cameras = [ddCamera];
-
-					objects.add(backDrop);
-					objects.add(text);
-					drops.push(backDrop);
-					optionMap.set(text, l);
-
-					daW = Math.max(daW, width + 16);
-					daY += backDrop.height + 2;
-				}
-				for (obj in drops) {
-					obj.resize(daW - 8, obj.height);
-					obj.x -= 4;
-				}
-
-				var height = Math.min(daY, 35 * 12) + 8;
-				ddCamera.height = Std.int(height);
-				ddCamera.width = Std.int(daW);
-
-				ddCamera.x = optionCamera.x + drop.x + drop.width + 25; // wow thats alot of math
-				ddCamera.y = optionCamera.y + optionCamera.scroll.y + drop.y;
-				if (ddCamera.y + ddCamera.height > FlxG.height)
-					ddCamera.y = FlxG.height - ddCamera.height; // kick it up so nothing ends up off screen
-				ddCamera.alpha = 0;
-
-				var hitbox = new FlxSprite(0, 0, whitePixel);
-				hitbox.alpha = 0.1;
-				hitbox.scale.set(ddCamera.width, ddCamera.height);
-				hitbox.updateHitbox();
-				hitbox.scrollFactor.set();
-				hitbox.cameras = [ddCamera];
-				objects.add(hitbox);
 
 				var arrow:FlxSprite = new FlxSprite(Paths.image("optionsMenu/arrow"));
 				arrow.scale.set(0.7, 0.7);
@@ -822,23 +759,8 @@ class OptionsSubstate extends MusicBeatSubstate
 				label.applyFormat(TextFormats.OPT_VALUE_TEXT);
 				objects.add(label);
 
-				var camFollow:FlxPoint = new FlxPoint(0, 0);
-				var camFollowPos:FlxObject = new FlxObject(0, 0);
-				ddCamera.follow(camFollowPos);
-				ddCamera.targetOffset.x = ddCamera.width / 2;
-				ddCamera.targetOffset.y = ddCamera.height / 2;
-				FlxG.cameras.add(ddCamera, false);
-
-				daY += 4;
-				widget.data.set("height", daY > height ? daY - height : 0);
-				widget.data.set("camFollow", camFollow);
-				widget.data.set("camFollowPos", camFollowPos);
-				widget.data.set("optionMap", optionMap);
-				widget.data.set("boxes", drops);
-				widget.data.set("hitbox", hitbox);
 				widget.data.set("arrow", arrow);
 				widget.data.set("text", label);
-				widget.data.set("camera", ddCamera);
 				
 				if (Reflect.hasField(ClientPrefs, name)) {
 					var val = Reflect.field(ClientPrefs, name);
@@ -1020,83 +942,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				checkbox.y = object.y + ((object.height - checkbox.height) / 2);
 			case Dropdown:
 				var arrow:FlxSprite = widget.data.get("arrow");
-				var daCamera:FlxCamera = widget.data.get("camera");
 				var label:FlxText = widget.data.get("text");
-				var dropBox:FlxSprite = widget.data.get("hitbox");
-				var camFollowPos:FlxObject = widget.data.get("camFollowPos");
-				var camFollow:FlxPoint = widget.data.get("camFollow");
-				var height:Float = widget.data.get("height");
-
-				var optionMap:Map<FlxText, String> = widget.data.get("optionMap");
-				var boxes:Array<FlxUI9SliceSprite> = widget.data.get("boxes");
-
-				if (!widget.locked)
-				{
-					if (FlxG.mouse.justPressed)
-					{
-						var interacted:Bool = false;
-						if (overlaps(optBox, optionCamera))
-						{
-							if (openedDropdown == widget)
-								openedDropdown = null;
-							else
-								openedDropdown = widget;
-							interacted = true;
-						}
-
-						if (openedDropdown == widget)
-						{
-							for (obj => opt in optionMap)
-							{
-								if (obj.isOnScreen(daCamera))
-								{
-									if (overlaps(obj, daCamera) || overlaps(boxes[obj.ID], daCamera))
-									{
-										// widget.optionData.value = (opt);
-										interacted = true;
-										openedDropdown = null;
-										changeDropdownW(widget, opt);
-										// onDropdownChanged(widget.optionData.data.get("optionName"), widget.optionData.value, opt);
-										break;
-									}
-								}
-							}
-
-							if (!interacted)
-							{
-								if (overlaps(dropBox, daCamera))
-									interacted = true;
-							}
-
-							if (!interacted)
-								openedDropdown = null;
-						}
-					}
-				}
-				else if (openedDropdown == widget)
-					openedDropdown = null;
-
-				if (openedDropdown == widget && overlaps(dropBox, daCamera))
-				{
-					var wheel = FlxG.mouse.wheel;
-					camFollow.y -= wheel * 35;
-					camFollowPos.y -= wheel * 35;
-
-					if (camFollow.y < 0)
-						camFollow.y = 0;
-					if (camFollow.y > height)
-						camFollow.y = height;
-				}
-
-				var lerpVal = Math.exp(-elapsed * 12);
-				camFollowPos.setPosition(
-					FlxMath.lerp(camFollow.x, camFollowPos.x, lerpVal), 
-					FlxMath.lerp(camFollow.y, camFollowPos.y, lerpVal)
-				);
-				if (camFollowPos.y < 0)
-					camFollowPos.y = 0;
-				if (camFollowPos.y > height)
-					camFollowPos.y = height;
 
 				switch (widget.optionData.data.get("optionName"))
 				{
@@ -1105,20 +951,13 @@ class OptionsSubstate extends MusicBeatSubstate
 				}
 
 				var active = openedDropdown == widget;
-				daCamera.alpha = FlxMath.lerp(daCamera.alpha, active ? 1 : 0, lerpVal);
-				arrow.angle = active ? -90 : 0; // FlxMath.lerp(arrow.angle, active?-90:0, lerpVal * 2);
+				arrow.angle = active ? -90 : 0;
 
 				arrow.x = object.x + 800;
 				arrow.y = object.y + ((object.height - arrow.height) / 2);
 
 				label.x = object.x + 450;
 				label.y = object.y + ((object.height - label.height) / 2);
-
-				daCamera.x = optionCamera.x + optBox.x + optBox.width + 25; // wow thats alot of math
-				daCamera.y = optionCamera.y - optionCamera.scroll.y + optBox.y;
-
-				if (daCamera.y + daCamera.height > FlxG.height)
-					daCamera.y = FlxG.height - daCamera.height; // kick it up so nothing ends up off screen
 
 			case Number:
 				var box:FlxSprite = widget.data.get("box");
