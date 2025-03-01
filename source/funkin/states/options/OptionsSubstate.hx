@@ -1371,6 +1371,8 @@ class OptionsSubstate extends MusicBeatSubstate
 
 	override function update(elapsed:Float)
 	{
+		super.update(elapsed);
+
 		if (subState == null)
 		{
 			var pHov = curWidget;
@@ -1560,12 +1562,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				FlxMath.lerp(camFollow.y, camFollowPos.y, lerpVal)
 			);
 			camFollowPos.y = FlxMath.bound(camFollowPos.y, 0, height);
-		}
 
-		super.update(elapsed);
-
-		if (subState == null)
-		{
 			if (controls.BACK)
 			{
 				save();
