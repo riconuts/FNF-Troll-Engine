@@ -186,23 +186,41 @@ class OptionsSubstate extends MusicBeatSubstate
 		#else 
 		return -1; 
 		#end
-	
-	static var windowPresets:Map<String, Array<Float>> = [
-		"Standard" => [epicWindowVal(22.5), 45, 90, 135, 180],
-		"Week 7" => [
-			-1,		// epic (-1 to disable)
-			33,		// sick
-			125,	// good
-			150,	// bad
-			166		// shit / max hit window
-		],
+
+	static final windowPresets = {
+		var presets = new Map<String, haxe.ds.Vector<Float>>();
+
+		inline function definePreset(name:String, epic:Float, sick:Float, good:Float, bad:Float, shit:Float) {
+			var vec = new haxe.ds.Vector<Float>(5, -1);
+			vec[0] = epicWindowVal(epic);
+			vec[1] = sick;
+			vec[2] = good;
+			vec[3] = bad;
+			vec[4] = shit;
+			presets.set(name, vec);
+		}
+
+		/*definePreset(
+			"Example", // name
+			12.5, // epic (-1 to disable)
+			37.5, // sick
+			75.0, // good
+			112.5, // bad
+			150.0, // shit / max hit window
+		);*/
+
+		definePreset("Standard", 22.5, 45, 90, 135, 180);
+		definePreset("Week 7", -1, 33, 125, 150, 166);
 		#if USE_EPIC_JUDGEMENT
-		"PBot" => [epicWindowVal(12.5), 45, 90, 135, 160],
+		definePreset("PBot", 12.5, 45, 90, 135, 160);
 		#end
-		"V-Slice" => [-1, 45, 90, 135, 160], // pbot1 without epics
-		"Psych" => [-1, 45, 90, 135, 166],
-		"ITG" => [epicWindowVal(21), 43, 102, 135, 180]
-	];
+		definePreset("V-Slice", -1, 45, 90, 135, 160); // pbot1 without epics
+		definePreset("Psych", -1, 45, 90, 135, 166);
+		definePreset("ITG", 21, 43, 102, 135, 180);
+		
+		presets;
+	}
+
 
 	////
 
