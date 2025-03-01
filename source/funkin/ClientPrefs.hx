@@ -98,7 +98,6 @@ class ClientPrefs
 				data: [
 					"requiresRestart" => true,
 					"options" => [
-						"Traditional", 
 						"V-Slice", 
 						#if USE_EPIC_JUDGEMENT "PBot", #end
 						"Week 7", 
@@ -486,9 +485,9 @@ class ClientPrefs
 				data: [
 					"recommendsRestart" => true,
 					// Default exists so that mods can tell if they're allowed to fuck w/ the HUD or not
-					// In Vanilla Troll use it just defaults to Psych
+					// In Vanilla Troll use it just defaults to Psych (called Traditional now)
 					// Mods can choose to not honour it but I think they should, generally
-					"options" => ["Default", "Psych", "Advanced", "Classic", "Kade"]
+					"options" => ["Default", "Traditional", "Advanced", "Classic", "Kade"]
 				]
 			},
 
