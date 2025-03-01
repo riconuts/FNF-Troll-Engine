@@ -462,14 +462,12 @@ class OptionsSubstate extends MusicBeatSubstate
 	var forceWidgetUpdate:Bool = false;
 
 	var currentTabIdx:Int = 0;
-	var currentWidgets:Map<FlxObject, Widget> = [];
+	var currentTab:TabInstance;
+	var currentWidgets:Map<FlxObject, Widget>;
 	var currentGroup:FlxTypedGroup<FlxObject>;
 
 	var tabButtons:Array<FlxSprite> = [];
-	var tabHeights:Array<Float> = [];
-	var tabCameraPositions:Array<FlxPoint> = [];
-	var tabGroups:Map<String, FlxTypedGroup<FlxObject>> = [];
-	var tabWidgets:Map<String, Map<FlxObject, Widget>> = [];
+	var tabs:Array<TabInstance> = [];
 
 	var actualOptions:Map<String, OptionData> = {
 		var definitions = ClientPrefs.getOptionDefinitions();
@@ -612,11 +610,13 @@ class OptionsSubstate extends MusicBeatSubstate
 			tabButtons.push(button);
 
 			////
-			var daY:Float = 0;
-			var group = new FlxTypedGroup<FlxObject>();
-			var widgets:Map<FlxObject, Widget> = [];
-			tabCameraPositions.push(FlxPoint.get());
+			var tab = new TabInstance();
+			this.tabs.push(tab);
 
+			var group = tab.group;
+			var widgets = tab.widgets;
+			
+			var daY:Float = 0;
 			for (data in tabData.get(tabName))
 			{
 				var label:String = data[0];
@@ -684,10 +684,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			}
 			
 			daY += 4;
-			var height = daY > optionCamera.height ? daY - optionCamera.height : 0;
-			tabHeights.push(height);
-			tabGroups.set(tabName, group);
-			tabWidgets.set(tabName, widgets);
+			tab.height = daY > optionCamera.height ? daY - optionCamera.height : 0;
 		}
 
 		optionDesc = new FlxText(5, FlxG.height - 48, 0);
@@ -959,24 +956,15 @@ class OptionsSubstate extends MusicBeatSubstate
 			butt.color = idx == currentTabIdx ? color2 + FlxColor.fromRGB(60, 60, 60) : color2;
 		}
 
-		camFollow.copyFrom(tabCameraPositions[currentTabIdx]);
-		camFollowPos.setPosition(camFollow.x, camFollow.y);
-
 		remove(currentGroup);
 
-		for (idx in 0...tabOrder.length)
-		{
-			var n = tabOrder[idx];
-			var group = tabGroups.get(n);
-			if (members.contains(group) && idx != currentTabIdx)
-				remove(group);
-			else if (!members.contains(group) && idx == currentTabIdx)
-			{
-				add(group);
-				currentWidgets = tabWidgets.get(n);
-				currentGroup = group;
-			}
-		}
+		currentTab = tabs[currentTabIdx];
+		currentWidgets = currentTab.widgets;
+		currentGroup = currentTab.group;
+		add(currentGroup);
+
+		camFollow = currentTab.cameraPosition;
+		camFollowPos.setPosition(camFollow.x, camFollow.y);
 
 		////
 		selectableWidgetObjects = [
@@ -1277,9 +1265,6 @@ class OptionsSubstate extends MusicBeatSubstate
 	function changeDropdownW(widget:Widget, val:String)
 		changeDropdown(widget.optionData.data.get("optionName"), val);
 
-	function getHeight():Float
-		return tabHeights[currentTabIdx];
-
 	//// For keyboard
 	var selectableWidgetObjects:Array<FlxObject> = [];
 	var curOption:Null<Int> = null;
@@ -1561,7 +1546,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				camFollowPos.y += movement;
 			}
 
-			var height = getHeight();
+			var height = currentTab.height;
 			camFollow.y = FlxMath.bound(camFollow.y, 0, height);
 
 			var lerpVal = Math.exp(-elapsed * 12);
@@ -1570,8 +1555,6 @@ class OptionsSubstate extends MusicBeatSubstate
 				FlxMath.lerp(camFollow.y, camFollowPos.y, lerpVal)
 			);
 			camFollowPos.y = FlxMath.bound(camFollowPos.y, 0, height);
-
-			tabCameraPositions[currentTabIdx].copyFrom(camFollow);
 		}
 
 		super.update(elapsed);
@@ -1593,10 +1576,27 @@ class OptionsSubstate extends MusicBeatSubstate
 	{
 		_mousePoint.put();
 
-		for (val in tabCameraPositions)
-			val.put();
+		for (tab in tabs)
+			tab.cameraPosition.put();
 
 		super.destroy();
+	}
+}
+
+class TabInstance {
+	public var group:FlxTypedGroup<FlxObject>;
+	public var widgets:Map<FlxObject, Widget>;
+
+	public var cameraPosition:FlxPoint;
+	public var height:Float;
+
+	public function new()
+	{
+		group = new FlxTypedGroup<FlxObject>();
+		widgets = new Map<FlxObject, Widget>();
+
+		cameraPosition = FlxPoint.get();
+		height = 0;
 	}
 }
 
