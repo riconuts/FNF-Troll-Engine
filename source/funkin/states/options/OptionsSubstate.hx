@@ -1266,41 +1266,6 @@ class OptionsSubstate extends MusicBeatSubstate
 	function changeDropdownW(widget:Widget, val:String)
 		changeDropdown(widget.optionData.data.get("optionName"), val);
 
-	// stolen from flxspritegroup
-	function findMinYHelper()
-	{
-		var value = Math.POSITIVE_INFINITY;
-		var sprites:Array<FlxSprite> = cast currentGroup.members;
-		for (member in sprites)
-		{
-			if (member == null)
-				continue;
-
-			var minY:Float = member.y;
-
-			if (minY < value)
-				value = minY;
-		}
-		return value;
-	}
-
-	function findMaxYHelper()
-	{
-		var value = Math.NEGATIVE_INFINITY;
-		var sprites:Array<FlxSprite> = cast currentGroup.members;
-		for (member in sprites)
-		{
-			if (member == null)
-				continue;
-
-			var maxY:Float = member.y + member.height;
-
-			if (maxY > value)
-				value = maxY;
-		}
-		return value;
-	}
-
 	function getHeight():Float
 		return heights[selected];
 
