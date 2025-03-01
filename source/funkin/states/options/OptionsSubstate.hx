@@ -589,7 +589,7 @@ class OptionsSubstate extends MusicBeatSubstate
 
 		var tabY:Float = optionMenu.y - tabButtonPadding - tabButtonHeight;
 		var tabX:Float = optionMenu.x;
-		for (idx => tabName in tabOrder)
+		inline function newTabButton(tabName:String)
 		{
 			var text = new FlxText(0, 0, 0, Paths.getString('opt_tabName_$tabName', tabName).toUpperCase());
 			text.applyFormat(TextFormats.TAB_NAME);
@@ -608,7 +608,10 @@ class OptionsSubstate extends MusicBeatSubstate
 			add(button);
 			add(text);
 			tabButtons.push(button);
+		}
 
+		for (tabName in tabOrder)
+		{
 			////
 			var tab = new TabInstance();
 			this.tabs.push(tab);
@@ -617,22 +620,17 @@ class OptionsSubstate extends MusicBeatSubstate
 			var widgets = tab.widgets;
 			
 			var daY:Float = 0;
-			for (data in tabData.get(tabName))
-			{
-				var label:String = data[0];
-
+			inline function newLabel(label:String) {
 				var text = new FlxText(8, daY, 0, Paths.getString('opt_label_$label'), 16);
 				text.applyFormat(TextFormats.OPT_LABEL);
 				text.cameras = [optionCamera];
 				group.add(text);
 
 				daY += text.height;
-
-				var daOpts:Array<String> = data[1];
-				for (opt in daOpts)
-				{
+			}
+			inline function newOption(opt:String) {
 					if (!actualOptions.exists(opt))
-						continue;
+						return;
 
 					var data:OptionData = actualOptions.get(opt);
 
@@ -680,7 +678,14 @@ class OptionsSubstate extends MusicBeatSubstate
 					group.add(text);
 					group.add(lock);
 					daY += height + 3;
-				}
+			}
+
+			////
+			newTabButton(tabName);
+			for (data in tabData.get(tabName)) {
+				newLabel(data[0]);
+				for (opt in (data[1]:Array<String>))
+					newOption(opt);
 			}
 			
 			daY += 4;
