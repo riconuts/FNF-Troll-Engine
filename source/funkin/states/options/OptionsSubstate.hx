@@ -1460,7 +1460,7 @@ class OptionsSubstate extends MusicBeatSubstate
 						if (change != 0){
 							var sowy = actualOptions.get(optionName);
 							var allOptions:Array<String> = sowy.data.get("options");
-							var idx = FlxMath.wrap(allOptions.indexOf(sowy.value) + change, 0, allOptions.length-1);
+							var idx = CoolUtil.updateIndex(allOptions.indexOf(sowy.value), change, allOptions.length);
 
 							changeDropdown(optionName, allOptions[idx]);
 
