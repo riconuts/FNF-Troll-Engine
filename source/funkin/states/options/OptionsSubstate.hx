@@ -706,7 +706,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		prevScreenX = FlxG.mouse.screenX;
 		prevScreenY = FlxG.mouse.screenY;
 
-		FlxG.sound.onVolumeChange.add(onVolumeChange);
+		add(new FlxSignalHolder(FlxG.sound.onVolumeChange, onVolumeChange));
 		onVolumeChange(FlxG.sound.volume);
 
 		checkWindows();
@@ -1599,7 +1599,6 @@ class OptionsSubstate extends MusicBeatSubstate
 	override function destroy()
 	{
 		_mousePoint.put();
-		FlxG.sound.onVolumeChange.remove(onVolumeChange);
 
 		for (val in cameraPositions)
 			val.put();
