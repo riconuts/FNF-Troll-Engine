@@ -587,28 +587,26 @@ class OptionsSubstate extends MusicBeatSubstate
 		final backdropGraphic = Paths.image("optionsMenu/backdrop");
 		final backdropSlice = [22, 22, 89, 89];
 		final tabButtonHeight = 44;
+		final tabButtonPadding = 3;
 
+		var tabY:Float = optionMenu.y - tabButtonPadding - tabButtonHeight;
 		var tabX:Float = optionMenu.x;
 		for (idx => tabName in tabOrder)
 		{
-			var text = new FlxText(0, 0, 0, Paths.getString('opt_tabName_$tabName', tabName).toUpperCase(), 16);
+			var text = new FlxText(0, 0, 0, Paths.getString('opt_tabName_$tabName', tabName).toUpperCase());
 			text.applyFormat(TextFormats.TAB_NAME);
-
-			var button = new FlxSprite(tabX, optionMenu.y - 3 - tabButtonHeight, whitePixel);
-			button.ID = idx;
-			button.alpha = 0.75;
-			
-			button.scale.set(Math.max(86, text.fieldWidth) + 8, tabButtonHeight);
-			button.updateHitbox();
-
-			text.setPosition(
-				button.x,
-				button.y + ((button.height - text.height) / 2)
-			);
-			text.fieldWidth = button.width;
+			text.fieldWidth = Math.max(86, text.width) + 8;
+			@:privateAccess text.regenGraphic();
 			text.updateHitbox();
+			text.x = tabX;
+			text.y = tabY + (tabButtonHeight - text.height) / 2;
 
-			tabX += button.width + 3;
+			var button = CoolUtil.blankSprite(text.fieldWidth, tabButtonHeight);
+			button.alpha = 0.75;
+			button.x = tabX;
+			button.y = tabY;
+
+			tabX += button.width + tabButtonPadding;
 			add(button);
 			add(text);
 			tabButtons.push(button);
