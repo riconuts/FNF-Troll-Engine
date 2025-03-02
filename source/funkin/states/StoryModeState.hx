@@ -355,6 +355,7 @@ class LevelTitle extends flixel.group.FlxSpriteGroup {
 class StoryModeState extends MusicBeatState {
 	var levelBG:FlxSprite;
 	var levelName:FlxText;
+	var trackList:FlxText;
 	
 	var levels:Array<Level> = [];
 	
@@ -403,6 +404,10 @@ class StoryModeState extends MusicBeatState {
 		levelName = new FlxText(0, 10, FlxG.width, "DADDY DEAREST", 32);
 		levelName.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.fromRGB(180, 180, 180, 255), RIGHT);
 		add(levelBG);
+
+		trackList = new FlxText(-100, 500, 600, "TRACKS:\n\npenis\nshit\nfuck", 32);
+		trackList.setFormat(Paths.font("vcr.ttf"), 32, 0xFFE55777, CENTER);
+		add(trackList);
 
 		for(idx in 0...levels.length){
 			var level:Level = levels[idx];
@@ -490,14 +495,14 @@ class StoryModeState extends MusicBeatState {
 
 		if(controls.BACK)
 			MusicBeatState.switchState(new funkin.states.MainMenuState());
-		
-		
 	}
 
 	function updateTexts(){
 		levelName.text = levels[selectedLevel].name;
+		trackList.text = "TRACKS\n\n";
+		trackList.text += levels[selectedLevel].getDisplayedSongs().join("\n");
 	}
-
+	
 	function changeLevel(selection:Int, abs:Bool = false, silent:Bool = false){
 		var newLevel = abs ? selection : selectedLevel + selection;
 		if(newLevel < 0)
