@@ -228,7 +228,8 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 
 		if (!directAlpha)
 			for (obj in _sprites)
-				obj.updateColorTransform(); // reset back to default
+				if(obj != null && obj.colorTransform != null)
+					obj.updateColorTransform(); // reset back to default
 		
 
 		#if FLX_DEBUG
