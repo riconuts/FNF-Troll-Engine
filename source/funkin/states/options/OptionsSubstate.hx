@@ -484,6 +484,9 @@ class OptionsSubstate extends MusicBeatSubstate
 	var camFollow = new FlxPoint(0, 0);
 	var camFollowPos = new FlxObject(0, 0);
 
+	var dropdown:Dropdown;
+	var openedDropdown(get, never):Widget;
+	function get_openedDropdown() return dropdown.currentWidget;
 
 	@:noCompletion var _mousePoint:FlxPoint = FlxPoint.get();
 
@@ -690,6 +693,9 @@ class OptionsSubstate extends MusicBeatSubstate
 			daY += 4;
 			tab.height = daY > optionCamera.height ? daY - optionCamera.height : 0;
 		}
+
+		dropdown = new Dropdown();
+		add(dropdown);
 
 		optionDesc = new FlxText(5, FlxG.height - 48, 0);
 		optionDesc.applyFormat(TextFormats.OPT_DESC);
@@ -944,6 +950,41 @@ class OptionsSubstate extends MusicBeatSubstate
 				var arrow:FlxSprite = widget.data.get("arrow");
 				var label:FlxText = widget.data.get("text");
 
+				if (widget.locked)
+				{
+					if (openedDropdown == widget)
+						dropdown.close();
+				}
+				else if (openedDropdown == widget)
+				{
+					var idx:Null<Int> = dropdown.updateInput(elapsed);
+					switch (idx) {
+						case null: // didnt click anything
+
+						case -1: // clicked outside
+							dropdown.close();
+						
+						default: // clicked something
+							var options = widget.optionData.data.get("options");
+							changeDropdownW(widget, options[idx]);
+							dropdown.close();
+					}
+				}
+				else if (FlxG.mouse.justPressed && overlaps(optBox, optionCamera))
+				{
+					dropdown.open(widget);
+				}
+
+				if (openedDropdown == widget) {
+					dropdown.x = optionCamera.x + optionCamera.width + 6;
+					dropdown.y = optionCamera.y - optionCamera.scroll.y + optBox.y;
+	
+					if (dropdown.y + dropdown.height > FlxG.height)
+						dropdown.y = FlxG.height - dropdown.height; // kick it up so nothing ends up off screen
+					else if (dropdown.y < optionCamera.y)
+						dropdown.y = optionCamera.y;
+				}
+
 				switch (widget.optionData.data.get("optionName"))
 				{
 					default:
@@ -1171,6 +1212,10 @@ class OptionsSubstate extends MusicBeatSubstate
 				widget.data.get("leftAdjust").release();
 				widget.data.get("rightAdjust").release();
 			
+			case Dropdown:
+				if (widget == openedDropdown)
+					dropdown.close();
+
 			default:
 		}
 	}
@@ -1241,6 +1286,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				pHov = null;
 			}
 
+			if (openedDropdown == null){
 			if (FlxG.keys.justPressed.UP){
 				FlxG.sound.play(Paths.sound("scrollMenu"));
 				changeWidget(-1);
@@ -1249,7 +1295,9 @@ class OptionsSubstate extends MusicBeatSubstate
 				FlxG.sound.play(Paths.sound("scrollMenu"));
 				changeWidget(1);
 			}
+			}
 
+			// TODO: move this to updateWidget
 			if (curWidget != null && !curWidget.locked){
 				var optionName:String = curWidget.optionData.data.get("optionName");
 
@@ -1311,6 +1359,9 @@ class OptionsSubstate extends MusicBeatSubstate
 						}
 
 					case Dropdown:
+						if (openedDropdown == curWidget) {
+							doUpdate = true;
+						}else{
 						var change = 0;
 						if (FlxG.keys.justPressed.LEFT) change--;
 						if (FlxG.keys.justPressed.RIGHT) change++;
@@ -1331,7 +1382,13 @@ class OptionsSubstate extends MusicBeatSubstate
 							doUpdate = true;
 						}
 
-						doUpdate=true; // wont fade in and out otherwise :T
+						if (FlxG.keys.justPressed.ENTER) {
+							var options = curWidget.optionData.data.get("options");
+							var dV = curWidget.optionData.value;
+							dropdown.open(curWidget);
+							dropdown.changeSelected(options.indexOf(dV), true);
+						}
+						}
 				}
 			}
 
@@ -1436,6 +1493,220 @@ class OptionsSubstate extends MusicBeatSubstate
 			tab.cameraPosition.put();
 
 		super.destroy();
+	}
+}
+
+class Dropdown extends FlxTypedGroup<FlxBasic>
+{
+	public var x(get, set):Float;
+	function get_x() return ddCamera.x;
+	function set_x(x) return ddCamera.x = x;
+	
+	public var y(get, set):Float;
+	function get_y() return ddCamera.y;
+	function set_y(y) return ddCamera.y = y;
+
+	public var width(get, set):Int;
+	function get_width() return ddCamera.width;
+	function set_width(width) return ddCamera.width = width;
+
+	public var height(get, set):Int;
+	function get_height() return ddCamera.height;
+	function set_height(height) return ddCamera.height = height;
+
+	public var ddCamera:FlxCamera;
+
+	// TODO: max dropdown height
+	var camFollow = new FlxPoint();
+	var camFollowPos = new FlxObject();
+
+	private final boxGrp = new FlxTypedGroup<FlxUI9SliceSprite>();
+	private final labelGrp = new FlxTypedGroup<FlxText>();
+
+	var boxes(get, never):Array<FlxUI9SliceSprite>;
+	function get_boxes() return boxGrp.members;
+	var labels(get, never):Array<FlxText>;
+	function get_labels() return labelGrp.members;
+
+	private var backdropGraphic = Paths.image("optionsMenu/backdrop");
+	private var backdropSlice = [22, 22, 89, 89];
+
+	public function new() {
+		super();
+
+		ddCamera = new FlxCamera();
+		ddCamera.bgColor = FlxColor.fromRGB(0x80, 0x80, 0x80, 204);
+		ddCamera.alpha = 0;
+		FlxG.cameras.add(ddCamera, false);
+
+		this.cameras = [ddCamera];
+		//this.camera.follow(camFollowPos, LOCKON);
+
+		this.add(camFollowPos);
+
+		this.add(boxGrp);
+		this.add(labelGrp);
+	}
+
+	override public function destroy() {
+		FlxG.cameras.remove(ddCamera, true);
+		this._cameras.remove(ddCamera);
+		ddCamera = null;
+		super.destroy();
+	}
+
+	override public function update(elapsed:Float) {
+		if (ddCamera != null) {
+			#if true
+			final duration = 0.06;
+			ddCamera.alpha += (elapsed / duration) * (currentWidget==null ? -1 : 1);
+			#else
+			final lerpVal = Math.exp(-elapsed * 12);
+			ddCamera.alpha = FlxMath.lerp(ddCamera.alpha, (currentWidget==null ? 0 : 1), lerpVal);
+			#end
+		}
+
+		super.update(elapsed);
+	}
+
+	public var currentWidget:Widget;
+	public var curSelected:Int = -1;
+	public var options:Array<String>;
+
+	public function open(widget:Widget)
+	{
+		currentWidget = widget;
+		setupOptions(widget.optionData.data.get("options"));
+		// ddCamera.alpha = 1;
+
+		if (curSelected != -1) {
+			labels[curSelected].color = 0xFFFFFFFF;
+			curSelected = -1;
+		}
+	}
+
+	public function close()
+	{
+		currentWidget = null;
+		// ddCamera.alpha = 0;
+	}
+
+	public function changeSelected(val:Int, isAbs:Bool = false)
+	{
+		if (curSelected != -1)
+			labels[curSelected].color = 0xFFFFFFFF;
+
+		if (isAbs)
+			curSelected = val;
+		else if (curSelected < 0)
+			curSelected = 0;
+		else 
+			curSelected = CoolUtil.updateIndex(curSelected, val, options.length);
+		
+		if (curSelected != -1)
+			labels[curSelected].color = 0xFFFFFF00;
+	}
+
+	public function updateInput(elapsed:Float):Null<Int> {
+		if (FlxG.mouse.justPressed) {
+			for (idx => box in boxes) {
+				if (overlaps(box, ddCamera))
+					return idx; // pressed box idx
+			}
+			return -1; // pressed outside of dropdown
+		}
+
+		////
+		var change = 0;
+
+		if (FlxG.keys.justPressed.UP)
+			change--;
+
+		if (FlxG.keys.justPressed.DOWN)
+			change++;
+		
+		if (change != 0)
+			changeSelected(change);
+		
+		if (FlxG.keys.justPressed.BACKSPACE)
+			return -1;
+		
+		if (FlxG.keys.justPressed.ENTER)
+			return curSelected;
+
+		////
+		return null; // did nothing
+	}
+
+	private function makeText() {
+		var text = new FlxText(0, 0, 0, '', 16);
+		text.cameras = this.cameras;
+		text.applyFormat(TextFormats.OPT_DROPDOWN_OPTION_TEXT);
+		return text;
+	}
+
+	private function makeBackdrop() {
+		var backdrop = new FlxUI9SliceSprite(
+			0, 0,
+			backdropGraphic.bitmap,
+			backdropGraphic.bitmap.rect,
+			backdropSlice,
+			0x00, // TILE_NONE,
+			true,
+			"optionsDropdownBackdrop"
+		);
+		// TODO: fix the backdrops turning completely white 
+		// It's a flixel-ui issue ffs, fuck this stupid flixel life
+		backdrop.cameras = this.cameras;
+		return backdrop;
+	}
+	
+	private function setupOptions(options:Array<String>) {
+		this.options = options;
+
+		// wish there was a way to know the width in advance
+		var maxTextWidth:Float = 0;
+		for (idx => value in options)
+		{
+			var label = labels[idx] ??= makeText();
+			label.text = value;
+			@:privateAccess label.regenGraphic();
+
+			if (maxTextWidth < label.width) 
+				maxTextWidth = label.width;
+		}
+
+		final boxWidth:Float = Math.max(50, maxTextWidth + 24);
+		final boxHeight:Float = 35;
+		final boxPadding:Float = 2;
+
+		final sowY = boxHeight + boxPadding;
+		final height = sowY * options.length - boxPadding;
+		for (idx in 0...options.length)
+		{
+			var box = boxes[idx] ??= makeBackdrop();
+			box.exists = true;
+			box.x = 0;
+			box.y = idx * sowY;
+			box.resize(boxWidth, boxHeight);
+
+			var label = labels[idx];
+			label.exists = true;
+			label.x = box.x + (boxWidth - label.width) / 2;
+			label.y = box.y + (boxHeight - label.height) / 2;
+		}
+
+		for (idx in options.length...labels.length)
+		{
+			labels[idx].exists = false;
+			boxes[idx].exists = false;
+		}
+
+		final borderPadding = 3;
+		this.width = Std.int(boxWidth) + borderPadding + borderPadding;
+		this.height = Std.int(height) + borderPadding + borderPadding;
+		@:privateAccess ddCamera._scrollInternal.set(-borderPadding, -borderPadding);
+		//camFollowPos.setSize(ddCamera.width, ddCamera.height);
 	}
 }
 
@@ -1610,7 +1881,6 @@ class TextFormats {
 		font: "calibri.ttf",
 		size: 24,
 		color: 0xFFFFFFFF,
-		alignment: LEFT
 	};
 
 	public static final OPT_DESC:FlxTextFormatData = {
