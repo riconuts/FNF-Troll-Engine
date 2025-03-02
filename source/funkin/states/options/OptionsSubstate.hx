@@ -1305,14 +1305,25 @@ class OptionsSubstate extends MusicBeatSubstate
 		if (curWidget != null)
 			onWidgetUnselected(curWidget);
 
-		if (nextWidget != null) {
-			// Focus camera on option
-			var optBox:FlxObject = nextWidget.data.get("optionBox");
-			camFollow.y = optBox.y + (optBox.height - optBox.camera.height) / 2;
+		if (nextWidget != curWidget) {
+			curWidget = nextWidget;
+			onWidgetSelected(nextWidget);
 		}
 
-		curWidget = nextWidget;
 		curOption = nextOption;
+	}
+
+	function onWidgetSelected(widget:Widget) {
+		if (widget == null)
+			return;
+
+		// Focus camera on option
+		var optBox:FlxObject = widget.data.get("optionBox");
+		camFollow.y = optBox.y + (optBox.height - optBox.camera.height) / 2;
+
+		switch(widget.type) {
+			default:
+		}
 	}
 	
 	function onWidgetUnselected(widget:Widget) {
