@@ -1389,6 +1389,11 @@ class OptionsSubstate extends MusicBeatSubstate
 			var pHov = curWidget;
 			var doUpdate = false;
 
+			if (forceWidgetUpdate) {
+				forceWidgetUpdate = false;
+				doUpdate = true;
+			}
+
 			if (FlxG.keys.justPressed.TAB){
 				FlxG.sound.play(Paths.sound("scrollMenu"));
 				changeTab(1);
@@ -1511,7 +1516,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			prevScreenX = FlxG.mouse.screenX;
 			prevScreenY = FlxG.mouse.screenY;
 
-			if (pHov == null || doUpdate || movedMouse || FlxG.mouse.justPressed || forceWidgetUpdate)
+			if (pHov == null || doUpdate || movedMouse || FlxG.mouse.justPressed)
 			{
 				for (object => widget in currentWidgets)
 				{
@@ -1524,7 +1529,6 @@ class OptionsSubstate extends MusicBeatSubstate
 
 					updateWidget(object, widget, elapsed);
 				}
-				forceWidgetUpdate = false;
 			}
 
 			if (curWidget == null){
