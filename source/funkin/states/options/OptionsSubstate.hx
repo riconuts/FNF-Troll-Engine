@@ -987,7 +987,7 @@ class OptionsSubstate extends MusicBeatSubstate
 
 	function updateWidget(object:FlxObject, widget:Widget, elapsed:Float)
 	{
-		var optBox = widget.data.get("optionBox");
+		var optBox:FlxObject = widget.data.get("optionBox");
 		var locked:Bool = widget.optionData.data.exists("locked") ? widget.optionData.data.get("locked") : false;
 
 		widget.data.get("lockOverlay").visible = locked;
