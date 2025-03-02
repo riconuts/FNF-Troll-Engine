@@ -4,6 +4,7 @@ import haxe.CallStack;
 import openfl.display.Sprite;
 import openfl.display.FPS;
 import lime.app.Application;
+import lime.graphics.Image;
 import flixel.FlxG;
 import flixel.FlxState;
 
@@ -131,6 +132,10 @@ class Main extends Sprite
 
 		var game = new FNFGame(gameWidth, gameHeight, initialState, framerate, framerate, skipSplash, startFullscreen);
 		addChild(game);
+
+		#if linux
+		FlxG.stage.window.setIcon(Image.fromFile("icon.png"));
+		#end
 
 		fpsVar = new FPS(10, 3, 0xFFFFFF);
 		fpsVar.visible = false;

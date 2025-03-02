@@ -53,6 +53,8 @@
 		<assets path="alsoft.txt" rename="alsoft.conf" unless="windows" />
 	</section>
 
+	<assets path="art/iconOG.png" rename="icon.png" if="linux" />
+
     <assets path="assets" />
     <assets path='default_content' rename='content' embed='false' exclude="*.mp3" />
 
