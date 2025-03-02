@@ -54,6 +54,7 @@ typedef LevelPropData = {
 	?x:Float,
 	?y:Float,
 	graphic:String,
+	?alpha:Float,
 	?scale:Array<Float>,
 	?antialiasing:Bool,
 	?animations:Array<LevelPropAnimation>,
@@ -181,6 +182,8 @@ class LevelStageProp extends FlxSprite
 			prop.bopTime = propData.danceBeat;
 			prop.playAnim(prop.idleSequence[0], true);
 		}
+		
+		prop.alpha = propData?.alpha ?? 1.0;
 
 		return prop;
 	}
@@ -314,18 +317,25 @@ class Level {
 	 * Creates the props for the visuals in the story menu.
 	 * This is usually the main characters of the level (BF, GF, and Opponent)
 	 * Sometimes includes a background in Psych Engine and similar engines
-	 * @param group The group to be populated by props
+	 * @param group The group to be populated by props.
+	 * @param bgGroup The background group to be populated by props. This group is automatically layered behind all props and fades when changing levels.
 	 */
 
-	public function populateGroup(group:FlxSpriteGroup){
-		if(callScript("prePopulateGroup", [group]) == Globals.Function_Stop)
+	public function populateGroup(group:FlxSpriteGroup, bgGroup:FlxSpriteGroup){
+		if (callScript("prePopulateGroup", [group, bgGroup]) == Globals.Function_Stop)
 			return;
 
 		for(propData in getProps()){
 			var prop = LevelStageProp.buildFromData(propData);
-			group.add(prop);
+			var layer = propData.layer.toLowerCase();
+
+			if (layer == 'background' || layer == 'bg')
+				bgGroup.add(prop);
+			else
+				group.add(prop);
 		}
-		callScript("postPopulateGroup", [group]);
+
+		callScript("postPopulateGroup", [group, bgGroup]);
 	}
 }
 
@@ -347,15 +357,15 @@ class StoryModeState extends MusicBeatState {
 	var levelName:FlxText;
 	
 	var levels:Array<Level> = [];
-
+	
 	static var selectedLevel:Int = 0;
 	var levelTitles:FlxTypedSpriteGroup<LevelTitle>;
+	var levelBGGroups:Array<FlxSpriteGroup> = []; // used for fading when going between levels
 	var levelProps:Array<FlxSpriteGroup> = [];
 	
 	public override function create(){
-
-		var levelNames:Array<String> = [];
-
+		if (FlxG.sound.music == null || !FlxG.sound.music.playing)
+			MusicBeatState.playMenuMusic();
 
 		// Get the levels
 		var shitToCheck = [
@@ -400,13 +410,29 @@ class StoryModeState extends MusicBeatState {
 			title.alpha = idx==selectedLevel ? 1 : 0;
 			title.ID = idx;
 			levelTitles.add(title);
+			var backgroundGroup = new FlxSpriteGroup();
+			backgroundGroup.ID = idx;
+			backgroundGroup.y = 56;
 			var propGroup = new FlxSpriteGroup();
 			propGroup.ID = idx;
 			propGroup.y = 56;
 			// todo bg group
-			level.populateGroup(propGroup);
-			add(propGroup);
+			level.populateGroup(propGroup, backgroundGroup);
+			levelBGGroups.push(backgroundGroup);
 			levelProps.push(propGroup);
+		}
+
+		// layer all backgrounds behind all the props lol
+
+		for (idx in 0...levels.length){
+			var bg = levelBGGroups[idx];
+			if(bg != null)add(bg);
+		}
+
+		for (idx in 0...levels.length) {
+			var props = levelProps[idx];
+			if (props != null)
+				add(props);
 		}
 
 		add(infoBar);
@@ -432,8 +458,7 @@ class StoryModeState extends MusicBeatState {
 			title.scale.x = FlxMath.lerp(title.scale.x, (relativeIndex == 0 ? 1.1 : 0.9) + (((FlxMath.fastCos(ang) - 1) * radius) / 1280), lerpVal);
 				
 			title.y = FlxMath.lerp(title.y, levelTitles.y + ((FlxMath.fastSin(ang) * radius)), lerpVal);
-			title.alpha = FlxMath.lerp(title.alpha, FlxMath.fastCos(ang) * (relativeIndex == 0 ? 1 : 0.6), lerpVal); // TODO: change this so that they fade out earlier even when you have alot of levels
-/* 			} */
+			title.alpha = FlxMath.lerp(title.alpha, FlxMath.fastCos(ang) * (relativeIndex == 0 ? 1 : 0.6), lerpVal);
 			title.scale.y = title.scale.x;
 
 			if(title.alpha < 0)title.alpha = 0;
@@ -446,23 +471,26 @@ class StoryModeState extends MusicBeatState {
 			
 		}
 
+		for (group in levelBGGroups)
+			group.alpha = FlxMath.lerp(group.alpha, group.ID == selectedLevel ? 1 : 0, lerpVal * 0.5);
+
 		levelTitles.sort((order, obj1, obj2) -> {
 			return FlxSort.byValues(order, obj1.alpha, obj2.alpha);
 		});
 
-		if(FlxG.keys.justPressed.DOWN)
+		if(controls.UI_DOWN_P)
 			changeLevel(1);
 
-		if (FlxG.keys.justPressed.UP)
+		if (controls.UI_UP_P)
 			changeLevel(-1);
 
-		if(FlxG.keys.justPressed.ENTER){
+		if(controls.ACCEPT){
 			
 		}
 
-		if(FlxG.keys.justPressed.BACKSPACE){
+		if(controls.BACK)
 			MusicBeatState.switchState(new funkin.states.MainMenuState());
-		}
+		
 		
 	}
 

@@ -386,6 +386,8 @@ class FunkinHScript extends FunkinScript
 
 		set("HScriptedState", funkin.states.scripting.HScriptedState);
 		set("HScriptedSubstate", funkin.states.scripting.HScriptedSubstate);
+
+		set("Highscore", funkin.data.Highscore); // Useful for stuff like levels showing diff songs before and after finishing (i.e Weekend 1)
 	} 
 
 	function importClass(className:String)
