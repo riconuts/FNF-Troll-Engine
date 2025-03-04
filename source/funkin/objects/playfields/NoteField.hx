@@ -322,7 +322,7 @@ class NoteField extends FieldBase
 		var quad1 = new Vector3(wid);
 		var scale:Float = (z!=0.0) ? (1.0 / z) : 1.0;
 
-		if (spiralHolds || simpleDraw) {
+		if (!spiralHolds || simpleDraw) {
 			// less accurate, but higher FPS
 			quad0.scaleBy(scale);
 			quad1.scaleBy(scale);
