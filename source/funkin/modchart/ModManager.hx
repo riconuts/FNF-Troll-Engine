@@ -267,6 +267,12 @@ class ModManager {
 			}
 		}
 
+		var defaultValues = mod.getDefaultValues();
+		if (defaultValues != null){
+			for (k => v in defaultValues)
+				setValue(k, v, -1);
+		}
+
 		setValue(modName, 0, -1, true); // so if it should execute it gets added Automagically
 		modArray.sort((a, b) -> Std.int(a.getOrder() - b.getOrder()));
 
