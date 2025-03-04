@@ -1,19 +1,5 @@
 package funkin.modchart.modifiers;
 
-/* class NoteModSpiral extends NoteModBase {
-	override function executePath(currentBeat:Float, strumTimeDiff:Float, column:Int, player:Int, pos:Vector4, playfield:SchmovinPlayfield):Vector4 {
-		var centerX = FlxG.width / 2;
-		var centerY = FlxG.height / 2;
-		var radiusOffset = -strumTimeDiff / 4;
-		var radius = radiusOffset + getOtherPercent('spiraldist', playfield) * column % 4;
-		var outX = centerX + Math.cos(-strumTimeDiff / GroovinConductor.getCrotchetNow() * Math.PI + currentBeat * Math.PI / 4) * radius;
-		var outY = centerY + Math.sin(-strumTimeDiff / GroovinConductor.getCrotchetNow() * Math.PI - currentBeat * Math.PI / 4) * radius;
-
-		return SchmovinUtil.vec4Lerp(pos, new Vector4(outX, outY, radius / FlxG.height * 2 - 1, 0), getPercent(playfield));
-	}
-} */
-
-
 class SpiralModifier extends NoteModifier {
 	override function getPos(visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, column:Int, player:Int, obj:FlxSprite, field:NoteField) {
 		var spiralX = getValue(player);

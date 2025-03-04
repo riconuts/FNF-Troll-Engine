@@ -1,5 +1,6 @@
 package funkin.modchart.modifiers;
 
+@:keep
 class InfinitePathModifier extends CustomPathModifier {
 	override function getName() return 'infinite';
 	override function getMoveSpeed() {

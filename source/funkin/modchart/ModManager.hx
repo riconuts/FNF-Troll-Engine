@@ -83,7 +83,7 @@ class ModManager {
 			ConfusionModifier, 
 			OpponentModifier, 
 			TransformModifier, 
-			InfinitePathModifier,
+			//InfinitePathModifier,
 			PathModifier,
 			AccelModifier,
 			PerspectiveModifier,
