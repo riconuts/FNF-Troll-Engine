@@ -19,7 +19,6 @@ import flixel.FlxG;
  * (for example you can have a screen bounce aux mod + node w/ that aux mod as an input, and then change transformX)
  */
 typedef Node = {
-	var lastIndex:Int; // to make sure it doesnt get hit multiple times per update
 	var in_mods:Array<String>; /// the modifiers that get input into this node
 	var out_mods:Array<String>; // the modifiers that get transformed by this node
 	var nodeFunc:(Array<Float>, Int)->Array<Float>; // takes an array of the input mods' values, and returns an array of transformed modifier values, if out_mods.length > 0
@@ -64,7 +63,6 @@ class ModManager {
 	var nodeArray:Array<Node> = [];
 
 	var touchedMods:Array<Array<String>> = [[], []];
-	var nodeIndex:Int = 0;
 
 	public function new(state:PlayState) {
 		this.state=state;
@@ -190,7 +188,7 @@ class ModManager {
 		registerMod(mod.getName(), mod);
 
 	inline public function registerBlankMod(modName:String, defaultVal:Float = 0.0, player:Int = -1){
-		quickRegister(new SubModifier(modName, this));
+		registerAux(modName);
 		setValue(modName, defaultVal, player, true);
 	}
 
@@ -212,7 +210,6 @@ class ModManager {
 		if (outputs == null)
 			outputs=[];
 		registerNode({
-			lastIndex: -1,
 			in_mods: inputs,
 			out_mods: outputs,
 			nodeFunc: nodeFunc
@@ -229,7 +226,25 @@ class ModManager {
 	function getActualModName(m:String)
 		return aliases.exists(m) ? aliases.get(m) : m;
 
-	public function registerMod(modName:String, mod:Modifier, ?registerSubmods = true){
+	public function registerMod(modName:String, mod:Modifier, registerSubmods = true, ?forceReplace:Bool = false){
+		if(register.get(modName) != null){
+			if (forceReplace){
+				var oldMod = register.get(modName);
+				modArray.remove(oldMod);
+				switch (oldMod.getModType()) {
+					case NOTE_MOD:
+						notemodRegister.remove(modName);
+					case MISC_MOD:
+						miscmodRegister.remove(modName);
+				}
+				// TODO: Maybe kill all the submods?
+
+			}else{
+				trace('$modName already exists! You should register your modifier under a new name!');
+				return;
+			}
+		}
+		
 		register.set(modName, mod);
 		switch (mod.getModType()){
 			case NOTE_MOD:
@@ -244,7 +259,6 @@ class ModManager {
 		for(a => m in mod.getAliases())
 			registerAlias(a, m);
 		
-
 		if (registerSubmods){
 			for (name in mod.submods.keys())
 			{
@@ -392,10 +406,11 @@ class ModManager {
 					// if they can execute then we shouldnt be discarding this mod since the parent mod executes the logic for submods
 
 					for(submod_name => submod in mod.submods){
-						if (submod.shouldExecute(player, submod.getValue(player)))
+						if (submod.shouldExecute(player, submod.getValue(player))){
 							can_discard = false; // we CANNOT discard since a submod can execute still
+							break;
+						}
 					}
-
 
 					if(can_discard)
 						discarded_mods.push(mod_name); // shit is inactive, remove it later (cant in this loop)
@@ -429,61 +444,56 @@ class ModManager {
 
 	function runNodes()
 	{
-		if (nodeArray.length > 0)
-		{
-			for (player => mods in touchedMods)
-			{
-				nodeIndex++; // used to prevent calling the same node over and over when it has multiple inputs
-				// could do a ran_nodes array but honestly this is probably better for optimization since its not having to store the entire node, just an index
-				
-				// I dont think this works ^^ TODO: fix
+		if(nodeArray.length > 0){
+			for(player => mods in touchedMods){
+				var runningNodes:Array<Node> = []; // Store all nodes that need to be run in this frame
 
-				for (mod in mods)
-				{
-					if (nodes.exists(mod))
-					{
-						var garbage = [];
-						for (node in nodes.get(mod))
-						{
-							if (node.lastIndex != nodeIndex)
-							{
-								var input_values:Array<Float> = [];
-
-								for (input_mod in node.in_mods)
-									input_values.push(getValue(input_mod, player));
-
-								var output_values:Array<Float> = node.nodeFunc(input_values, player);
-								
-								if (node.out_mods.length > 0)
-								{ // if theres outputs
-									if (output_values.length < node.out_mods.length)
-									{
-										for (i in node.out_mods.length...output_values.length)
-											output_values.push(0); // TODO: check the out_mod to see if i should add in 0 or mod.getValue(player) depending on if its in in_mods
-									}
-									for (idx in 0...node.out_mods.length)
-									{
-										var output_value:Float = output_values[idx];
-										var output_mod_name:String = node.out_mods[idx];
-										var output_mod:Modifier = get(output_mod_name);
-										if (output_mod == null){
-											trace(output_mod_name + " is not a valid output, look into fixing pl0x");
-											continue;
-										}
-										var current_value:Float = output_mod.getValue(player);
-										// if the output is also an input then set it directly, otherwise add it
-										if (node.in_mods.contains(output_mod_name))
-											output_mod.setCurrentValue(output_value, player);
-										else
-											output_mod.setCurrentValue(current_value + output_value, player);
-									}
-								}
-							}
-						}
-						for (node in garbage)
-							nodes.get(mod).remove(node);
+				for(mod in mods){
+					// Collect all of the nodes that need to be ran this frame, avoiding duplicate nodes. This is so nodes with multiple inputs don't run multiple times
+					var nodes:Array<Node> = nodes.get(mod);
+					if(nodes == null)continue;
+					for(node in nodes){
+						if(!runningNodes.contains(node))
+							runningNodes.push(node);	
 					}
 				}
+
+				// iterate through the running nodes and execute their code, applying to outputs if required
+				for(node in runningNodes){
+					var input:Array<Float> = [];
+					for(mod in node.in_mods)
+						input.push(getValue(mod, player));
+
+					var output:Array<Float> = node.nodeFunc(input, player); // Get output values from the node
+
+					// Ensure the output has the same length as the output mods.
+					if(node.out_mods.length > 0){
+						if (output.length < node.out_mods.length) {
+							for (i in (output.length - 1)...node.out_mods.length)
+								output.push(node.in_mods.contains(node.out_mods[i]) ? getValue(node.out_mods[i], player) : 0); // If input mods contains the output mod, use the current value, else use 0.
+						}
+					}
+
+					for(idx in 0...node.out_mods.length){
+						var outputValue:Float = output[idx];
+						var outputName:String = node.out_mods[idx];
+						var outputMod:Modifier = get(outputName);
+
+						if(outputMod == null){
+							trace('$outputName is not a valid output!');
+							continue;
+						}
+
+						var currentValue = outputMod.getValue(player);
+						
+						// If the output is also an input, set the value directly, otherwise just add to the current value.
+						if(node.in_mods.contains(outputName))
+							outputMod.setCurrentValue(outputValue, player);
+						else
+							outputMod.setCurrentValue(currentValue + outputValue, player);
+					}
+				}
+
 			}
 		}
 	}
