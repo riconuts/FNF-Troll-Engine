@@ -143,8 +143,6 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 				keysPressed.push(false);
 		}
 
-		trace(noteQueue.length);
-
 		setDefaultBaseXPositions();
 
 		return keyCount = cnt;

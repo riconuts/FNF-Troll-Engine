@@ -81,47 +81,49 @@ class PathModifier extends NoteModifier
 			pos.x += xmode * (diff * mod);
 		}
 
+		var keyCunt:Float = field.field.keyCount - 1;
+
 		var tornadoVal = getValue(player);
 		if (tornadoVal != 0) {
 			// from schmovin!!
-			var playerColumn = column % 4;
+			var playerColumn = column % field.field.keyCount;
 			var columnPhaseShift = (playerColumn * PI_THIRD) + getSubmodValue("tornadoOffset", player);
 			var phaseShift = (diff / 135) * (1 + getSubmodValue("tornadoPeriod", player));
-			var returnReceptorToZeroOffsetX = (-cos(-columnPhaseShift) + 1) * Note.halfWidth * 3;
-			var offsetX = (-cos(phaseShift - columnPhaseShift) + 1) * Note.halfWidth * 3 - returnReceptorToZeroOffsetX;
+			var returnReceptorToZeroOffsetX = (-cos(-columnPhaseShift) + 1) * Note.halfWidth * keyCunt;
+			var offsetX = (-cos(phaseShift - columnPhaseShift) + 1) * Note.halfWidth * keyCunt - returnReceptorToZeroOffsetX;
 			pos.x += offsetX * tornadoVal;
 		}
 
 		var tornadoTanVal = getSubmodValue("tornadoTan", player);
 		if (tornadoTanVal != 0) {
 			// from schmovin!!
-			var playerColumn = column % 4;
+			var playerColumn = column % field.field.keyCount;
 			var columnPhaseShift = (playerColumn * PI_THIRD) + getSubmodValue("tornadoTanOffset", player);
 			var phaseShift = (diff / 135) * (1 + getSubmodValue("tornadoTanPeriod", player));
-			var returnReceptorToZeroOffsetX = (-cos(-columnPhaseShift) + 1) * Note.halfWidth * 3;
-			var offsetX = (-tan(phaseShift - columnPhaseShift) + 1) * Note.halfWidth * 3 - returnReceptorToZeroOffsetX;
+			var returnReceptorToZeroOffsetX = (-cos(-columnPhaseShift) + 1) * Note.halfWidth * keyCunt;
+			var offsetX = (-tan(phaseShift - columnPhaseShift) + 1) * Note.halfWidth * keyCunt - returnReceptorToZeroOffsetX;
 			pos.x += offsetX * tornadoTanVal;
 		}
 
 		var tornadoZVal = getSubmodValue("tornadoZ", player);
 		if (tornadoZVal != 0) {
 			// from schmovin!!
-			var playerColumn = column % 4;
+			var playerColumn = column % field.field.keyCount;
 			var columnPhaseShift = (playerColumn * PI_THIRD) + getSubmodValue("tornadoZOffset", player);
 			var phaseShift = (diff / 135) * (1 + getSubmodValue("tornadoZPeriod", player));
-			var returnReceptorToZeroOffsetX = (-sin(-columnPhaseShift) + 1) * Note.halfWidth * 3;
-			var offsetX = (-sin(phaseShift - columnPhaseShift) + 1) * Note.halfWidth * 3 - returnReceptorToZeroOffsetX;
+			var returnReceptorToZeroOffsetX = (-sin(-columnPhaseShift) + 1) * Note.halfWidth * keyCunt;
+			var offsetX = (-sin(phaseShift - columnPhaseShift) + 1) * Note.halfWidth * keyCunt - returnReceptorToZeroOffsetX;
 			pos.z += offsetX * tornadoZVal;
 		}
 
 		var tornadoTanZVal = getSubmodValue("tornadoTanZ", player);
 		if (tornadoTanZVal != 0) {
 			// from schmovin!!
-			var playerColumn = column % 4;
+			var playerColumn = column % field.field.keyCount;
 			var columnPhaseShift = (playerColumn * PI_THIRD) + getSubmodValue("tornadoTanZOffset", player) + Math.PI;
 			var phaseShift = (diff / 135) * (1 + getSubmodValue("tornadoTanZPeriod", player));
-			var returnReceptorToZeroOffsetX = (-sin(-columnPhaseShift) + 1) * Note.halfWidth * 3;
-			var offsetX = (-tan(phaseShift - columnPhaseShift) + 1) * Note.halfWidth * 3 - returnReceptorToZeroOffsetX;
+			var returnReceptorToZeroOffsetX = (-sin(-columnPhaseShift) + 1) * Note.halfWidth * keyCunt;
+			var offsetX = (-tan(phaseShift - columnPhaseShift) + 1) * Note.halfWidth * keyCunt - returnReceptorToZeroOffsetX;
 			pos.z += offsetX * tornadoTanZVal;
 		}
 		

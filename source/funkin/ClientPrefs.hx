@@ -633,7 +633,7 @@ class ClientPrefs
 				data: ["requiresRestart" => true]
 			},
 			*/
-			#if tgt
+			#if FUNNY_ALLOWED
 			"ruin" => {
 				display: "Ruin The Mod",
 				desc: "Makes the mod really good! improves the mod alot!! the name is a joke guys it makes the mod REALLY REALLY good its not blammed lights i swear",
@@ -895,9 +895,11 @@ class ClientPrefs
 		if (Main.fpsVar != null)
 			Main.fpsVar.visible = ClientPrefs.showFPS;
 
+		#if FUNNY_ALLOWED
 		if (Main.bread != null)
 			Main.bread.visible = ClientPrefs.bread;
-
+		#end
+		
 		FlxG.sound.volume = ClientPrefs.masterVolume;
 		FlxG.autoPause = ClientPrefs.autoPause;
 

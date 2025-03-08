@@ -625,7 +625,6 @@ class NoteField extends FieldBase
 		final halfHeight = sprite.frameHeight * sprite.scale.y * 0.5;
 		final xOff = sprite.frame.offset.x * sprite.scale.x;
 		final yOff = sprite.frame.offset.y * sprite.scale.y;
-		// If someone can make frameX/frameY be taken into account properly then feel free lol ^^
 
 		quad0.setTo(xOff - halfWidth, 			yOff - halfHeight, 			0); // top left
 		quad1.setTo(width + xOff - halfWidth, 	yOff - halfHeight, 			0); // top right

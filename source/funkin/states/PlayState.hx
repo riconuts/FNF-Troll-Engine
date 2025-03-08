@@ -3909,7 +3909,7 @@ class PlayState extends MusicBeatState
 			if (note.isSustainNote && !note.isSustainEnd)
 				time += 0.15;
 
-			StrumPlayAnim(field, note.column % 4, time, note);
+			StrumPlayAnim(field, note.column % field.keyCount, time, note);
 		} else {
 			var spr = field.strumNotes[note.column];
 			if (spr != null && (field.keysPressed[note.column] || note.isRoll))
