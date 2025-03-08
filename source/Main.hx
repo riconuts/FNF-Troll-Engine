@@ -141,7 +141,7 @@ class Main extends Sprite
 		fpsVar.visible = false;
 		addChild(fpsVar);
 
-		#if BREAD_ALLOWED
+		#if FUNNY_ALLOWED
 		bread = new Bread();
 		bread.visible = false;
 		addChild(bread);

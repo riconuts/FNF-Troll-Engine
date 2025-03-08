@@ -91,7 +91,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	public var modNumber:Int = 0; // used for the mod manager. can be set to a different number to give it a different set of modifiers. can be set to 0 to sync the modifiers w/ bf's, and 1 to sync w/ the opponent's
 	public var isPlayer:Bool = false; // if this playfield takes input from the player
 	public var inControl:Bool = true; // if this playfield will take input at all
-	public var keyCount(default, set):Int = PlayState.keyCount; // How many lanes are in this field
+	public var keyCount(default, set):Int = 4; // How many lanes are in this field
 	public var autoPlayed(default, set):Bool = false; // if this playfield should be played automatically (botplay, opponent, etc)
 
 	public var x:Float = 0;
@@ -187,9 +187,10 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	public inline function getBaseX(direction:Int)
 		return baseXPositions[direction];
 	
-	public function new(modMgr:ModManager){
+	public function new(modMgr:ModManager, ?keyCount:Int){
 		super();
 		this.modManager = modMgr;
+		this.keyCount = keyCount == null ? PlayState.keyCount : keyCount;
 
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 		add(grpNoteSplashes);

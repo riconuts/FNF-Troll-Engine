@@ -1856,13 +1856,16 @@ class PlayState extends MusicBeatState
 		generatedMusic = true;
 	}
 
-	public function generateNotes(noteData:Array<SwagSection>, callScripts:Bool = true, addToFields:Bool = true, ?playfields:Array<PlayField>, ?notes:Array<Note>){
+	public function generateNotes(noteData:Array<SwagSection>, callScripts:Bool = true, addToFields:Bool = true, ?keyCount:Int, ?playfields:Array<PlayField>, ?notes:Array<Note>){
 
 		if (playfields == null)
 			playfields = this.playfields.members;
 
 		if (notes==null)
 			notes = this.allNotes;
+
+		if(keyCount == null)
+			keyCount = PlayState.keyCount;
 		
 		for (section in noteData) {
 			for (songNotes in section.sectionNotes) {
@@ -3906,7 +3909,7 @@ class PlayState extends MusicBeatState
 			if (note.isSustainNote && !note.isSustainEnd)
 				time += 0.15;
 
-			StrumPlayAnim(field, note.column % 4, time, note);
+			StrumPlayAnim(field, note.column % field.keyCount, time, note);
 		} else {
 			var spr = field.strumNotes[note.column];
 			if (spr != null && (field.keysPressed[note.column] || note.isRoll))

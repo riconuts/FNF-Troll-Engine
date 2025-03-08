@@ -136,7 +136,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		],
 		"video" => [
 			["video", ["shaders", "showFPS"]],
-			["display", ["framerate", #if BREAD_ALLOWED "bread" #end]],
+			["display", ["framerate", #if FUNNY_ALLOWED "bread" #end]],
 			[
 				"performance",
 				[
@@ -338,9 +338,11 @@ class OptionsSubstate extends MusicBeatSubstate
 			case 'showFPS':
 				if (Main.fpsVar != null)
 					Main.fpsVar.visible = val;
+			#if FUNNY_ALLOWED
 			case 'bread':
 				if (Main.bread != null)
 					Main.bread.visible = val;
+			#end
 			case 'globalAntialiasing':
 				FlxSprite.defaultAntialiasing = val;
 				FlxG.stage.quality = val ? BEST : LOW; // does nothing!!!!
