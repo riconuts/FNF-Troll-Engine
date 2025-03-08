@@ -1,11 +1,11 @@
 package funkin.modchart.modifiers.optional;
 
 
-@:keep
 
 // Bopeebo Rumble "wobble"
 // Resembles putting WiggleEffect on the holds + notes
 
+@:keep
 class WiggleModifier extends NoteModifier {
 	override function getName()
 		return "wiggle";

@@ -142,22 +142,22 @@ class PathModifier extends NoteModifier
 
 			var posBetween = CoolMath.scale(realPixel, minX, maxX, -1, 1);
 
-			if(tornadoVal != 0){
+			if (itgTornadoVal != 0){
 				var rads = Math.acos(posBetween);
 				var period = getSubmodValue("itgTornadoPeriod", player);
 				var offset = getSubmodValue("itgTornadoOffset", player);
 				rads += (diff + offset) * (6 + period * 6) / FlxG.height;
 				var adjusted = CoolMath.scale(cos(rads), -1, 1, minX, maxX);
-				pos.x += (adjusted - realPixel) * tornadoVal;
+				pos.x += (adjusted - realPixel) * itgTornadoVal;
 			}
 
-			if (tornadoTanVal != 0){
+			if (itgTornadoTanVal != 0){
 				var rads = Math.acos(posBetween);
 				var period = getSubmodValue("itgTornadoTanPeriod", player);
 				var offset = getSubmodValue("itgTornadoTanOffset", player);
 				rads += (diff + offset) * (6 + period * 6) / FlxG.height;
 				var adjusted = CoolMath.scale(tan(rads), -1, 1, minX, maxX);
-				pos.x += (adjusted - realPixel) * tornadoTanVal;
+				pos.x += (adjusted - realPixel) * itgTornadoTanVal;
 			}
 		}
 
