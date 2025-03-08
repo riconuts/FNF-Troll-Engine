@@ -6,7 +6,7 @@ import funkin.input.Controls.KeyboardScheme;
 import flixel.util.FlxSave;
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;
-#if (!macro && !linux)
+#if (!macro && linux)
 import funkin.api.Linux;
 #end
 #if DISCORD_ALLOWED
@@ -599,7 +599,7 @@ class ClientPrefs {
 				desc: "The highest framerate the game can hit.",
 				type: Number,
 				value: #if (!macro && !linux) FlxG.stage != null ? FlxG.stage.application.window.displayMode.refreshRate : #end
-				#if (!macro && !linux)
+				#if (!macro && linux)
 				Linux.getMonitorRefreshRate()
 				#else
 				60
