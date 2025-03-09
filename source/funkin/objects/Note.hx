@@ -165,7 +165,8 @@ class Note extends NoteObject
 	public var usesDefaultColours:Bool = true; // whether this note uses the default note colours (lets you change colours in options menu)
 	// This automatically gets set if a notetype changes the ColorSwap values
 
-	//// note behaviour
+	//// note 
+	public var defaultJudgement:Judgment;
 	public var breaksCombo:Bool = false; // hitting this will cause a combo break
 	public var blockHit:Bool = false; // whether you can hit this note or not
 	public var hitCausesMiss:Bool = false; // hitting this causes a miss
