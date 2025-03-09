@@ -54,7 +54,8 @@ class OptionsSubstate extends MusicBeatSubstate
 				"gameplay", 
 				[
 					"downScroll",
-					"midScroll",
+					"middleScroll",
+					"centerNotefield",
 					"ghostTapping", 
 					"directionalCam", 
 					"noteOffset", 
@@ -97,7 +98,8 @@ class OptionsSubstate extends MusicBeatSubstate
 				[
 					"noteOpacity",
 					"downScroll",
-					"midScroll",
+					"middleScroll",
+					"centerNotefield",
 					"noteSplashes",
 					"noteSkin",
 					"customizeColours"

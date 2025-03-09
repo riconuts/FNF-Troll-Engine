@@ -169,8 +169,16 @@ class PlayState extends MusicBeatState
 	public var playOpponent:Bool = false;
 	public var instakillOnMiss:Bool = false;
 
-	public var midScroll:Bool = false; // whether midscroll is active, songs can force this off prior to countdown start and modchart generation
-	public var saveScore:Bool = true; // whether to save the score. modcharted songs should set this to false if disableModcharts is true
+	/** Songs can force this off prior to countdown start and modchart generation **/
+	public var centerNotefield:Bool = false;
+	/** Whether to save the score. modcharted songs should set this to false if disableModcharts is true **/
+	public var saveScore:Bool = true;
+	
+	#if ALLOW_DEPRECATION
+	@:deprecated public var midScroll(get, set):Bool;
+	@:noCompletion function get_midScroll() return centerNotefield;
+	@:noCompletion function set_midScroll(v) return centerNotefield = v;
+	#end
 
 	////
 	public var worldCombos:Bool = false;
@@ -584,7 +592,7 @@ class PlayState extends MusicBeatState
 			cpuControlled = ClientPrefs.getGameplaySetting('botplay', cpuControlled);
 			disableModcharts = ClientPrefs.getGameplaySetting('disableModcharts', false);
 			noDropPenalty = ClientPrefs.getGameplaySetting('noDropPenalty', false);
-			midScroll = ClientPrefs.midScroll;
+			centerNotefield = ClientPrefs.centerNotefield;
 
 			#if tgt
 			playbackRate *= (ClientPrefs.ruin ? 0.8 : 1);
@@ -1459,8 +1467,7 @@ class PlayState extends MusicBeatState
 		if (callOnScripts('onModifierRegister') != Globals.Function_Stop) {
 			modManager.registerDefaultModifiers();
 
-			#if !tgt
-			if (midScroll) {
+			if (centerNotefield) {
 				var off:Float = Math.min(FlxG.width, 1280) / 4;
 				var opp:Int = playOpponent ? 0 : 1;
 				
@@ -1476,7 +1483,6 @@ class PlayState extends MusicBeatState
 				modManager.setValue("alpha", 0.6, opp);
 				modManager.setValue("opponentSwap", 0.5);
 			}
-			#end
 
 			signals.onModifierRegister.dispatch();
 		}
