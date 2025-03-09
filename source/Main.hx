@@ -1,5 +1,6 @@
 package;
 
+import haxe.io.Path;
 import haxe.CallStack;
 import openfl.display.Sprite;
 import openfl.display.FPS;
@@ -66,6 +67,24 @@ class Main extends Sprite
 	#end
 
 	////
+
+	#if desktop
+	// stolen from psych engine lol
+	static function __init__(){
+		var configPath:String = Path.directory(Path.withoutExtension(#if hl Sys.getCwd() #else Sys.programPath() #end));
+
+		#if windows
+		configPath += "/alsoft.ini";
+		#elseif mac
+		configPath = Path.directory(configPath) + "/Resources/alsoft.conf";
+		#elseif linux
+		configPath += "/alsoft.conf";
+		#end
+
+		Sys.putEnv("ALSOFT_CONF", configPath);
+	}
+	#end
+
 	public function new() {
 		super();
 
