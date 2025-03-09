@@ -394,12 +394,21 @@ class ClientPrefs
 				value: false,
 				data: []
 			},
-			"midScroll" => {
+			#if FUNNY_ALLOWED
+			"middleScroll" => {
 				display: "Middlescroll",
-				desc: "When toggled, notes will be centered.",
+				desc: "When toggled, notes will move towards the center of the screens.",
 				type: Toggle,
 				value: false,
-				data: [#if !tgt "recommendsRestart" => true #end]
+				data: []
+			},
+			#end
+			"centerNotefield" => {
+				display: "Centered Notefield",
+				desc: "When toggled, the player's notefield will be centered horizontally on the screen.",
+				type: Toggle,
+				value: false,
+				data: ["recommendsRestart" => true]
 			},
 			"accuracyCalc" => {
 				display: "Accuracy Calculation",

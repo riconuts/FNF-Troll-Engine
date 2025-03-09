@@ -44,8 +44,8 @@ class ReverseModifier extends NoteModifier
 
 	private inline function getCenterValue(player:Int){
 		var centerPercent = getSubmodValue("centered", player);
-		#if tgt
-		return (ClientPrefs.midScroll) ? 1 - centerPercent : centerPercent;
+		#if FUNNY_ALLOWED
+		return (ClientPrefs.middleScroll) ? 1 - centerPercent : centerPercent;
 		#else
 		return centerPercent;
 		#end
