@@ -739,9 +739,9 @@ class ModManager {
 					setValue(bit, level, player);
 				else
 					queueSet(step, bit, level, player);
-			}else {
+			}else 
 				queueEaseL(step == null ? Conductor.curDecStep : step, ((level / speed) * 1000) / Conductor.stepCrotchet, bit, level, 'linear', player);
-			}
+			
 		}
 	}
 

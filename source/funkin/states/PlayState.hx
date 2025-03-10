@@ -3870,7 +3870,7 @@ class PlayState extends MusicBeatState
 		if (note.genScript != null)
 			callScript(note.genScript, "onHoldPress", [note, field]);
 
-		if (cpuControlled && note.isRoll) 
+		if (cpuControlled && note.isRoll && ClientPrefs.hitsoundBehav == 'Key Press') 
 			playShithound();
 		
 	}
