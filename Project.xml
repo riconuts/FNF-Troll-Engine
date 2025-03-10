@@ -79,7 +79,7 @@
 	<define name="NMV_MOD_COMPATIBILITY" if="PE_MOD_COMPATIBILITY MODS_ALLOWED HSCRIPT_ALLOWED"/>
 
 	<!--Remove if you don't want to use FlxAnimate-->
-<!-- <define name="USING_FLXANIMATE" />-->
+	<define name="USING_FLXANIMATE" />
 
 	<!--Remove if you don't want to use Moonchart, which allows usage of chart formats from other rhythm games and fnf engines-->
 	<define name="USING_MOONCHART" if="native" />

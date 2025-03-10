@@ -9,7 +9,7 @@ import math.Vector3;
 import flixel.tweens.FlxEase;
 import flixel.math.FlxPoint;
 import flixel.FlxG;
-
+using StringTools;
 // Weird amalgamation of Schmovin' modifier system, Andromeda modifier system and my own new shit -neb
 // NEW: Now also has some features of mirin (aliases, nodes)
 
@@ -104,8 +104,11 @@ class ModManager {
 		registerAux("orient");
 		registerAux("lookAheadTime"); // used for holds and orient
 		
-		registerAux("centeredPath");
-		registerAlias("centered2", "centeredPath");
+		registerAux("movePath");
+		registerAlias("centered2", "movePath");
+		registerAlias("centeredPath", "movePath");
+
+		registerAux("transformPath");	
 
 		registerAux("noteSpawnTime");
 		registerAux("drawDistance");
@@ -585,7 +588,10 @@ class ModManager {
 		if (pos == null)
 			pos = new Vector3();
 
-		diff += getValue("centeredPath", player) * Note.swagWidth; // Each 100% moves the path by receptor size
+		diff += (
+			getValue("movePath", player) * 112) + 
+			getValue("transformPath", player
+		); 
 		
 		pos.setTo(
 			Note.halfWidth + field.field.getBaseX(data),
@@ -679,6 +685,64 @@ class ModManager {
 		}
 
 		return info;
+	}
+
+	
+	public function parseITGModstring(modStr:String, ?step:Float, ?player:Int = -1){
+		// modstring examples:
+
+		// drunk (100% drunk over 1 second)
+		// 1.5 drunk (150% drunk over 1.5 seconds)
+		// *2 200% drunk (200% drunk over 1 second)
+		// *0.1 1 drunk (100% drunk over 10 seconds)
+		// no drunk (disables drunk over 1 second)
+		// *0.5 c3.2 (3.2 cmod over 6.4 seconds)
+		// *-1 x3 (3 xmod instantly)
+
+		// a fully formatted modstring might look like this:
+		// *2 drunk, *0.25 50% tipsy, *-1 1 invert
+		
+		var bits = modStr.split(",");
+		for (bit in bits) {
+			bit = bit.trim();
+			var parts = bit.split(" ");
+			var level:Float = 1;
+			var speed:Float = 1;
+
+			for (part in parts) {
+				part = part.trim();
+				if (part.toLowerCase() == 'no')
+					level = 0;
+				else if (Std.parseInt(part.charAt(0)) != null || part.charAt(0) == '-') {
+					if (part.charAt(part.length - 1) == '%')
+						level = Std.parseFloat(part.substr(0, -1)) / 100;
+					else
+						level = Std.parseFloat(part);
+				} else if (part.charAt(0) == '*')
+					speed = Std.parseFloat(part.split("*")[1]);
+			}
+			bit = parts[parts.length - 1].trim();
+
+			var mod = new EReg("^(\\w)(\\d*\\.?\\d*)$", ""); // matches shit like x1 or c3.2
+			if (mod.match(bit)) {
+				var type = mod.matched(1);
+	
+				level = Std.parseFloat(mod.matched(2));
+				if (Math.isNaN(level))
+					level = 0;
+
+				bit = type + 'mod';
+			} 
+
+			if (speed <= 0){ // we gaming, just set it
+				if(step == null)
+					setValue(bit, level, player);
+				else
+					queueSet(step, bit, level, player);
+			}else {
+				queueEaseL(step == null ? Conductor.curDecStep : step, ((level / speed) * 1000) / Conductor.stepCrotchet, bit, level, 'linear', player);
+			}
+		}
 	}
 
 	public function queueEase(step:Float, endStep:Float, modName:String, target:Float, style:Any, player:Int = -1, ?startVal:Float)

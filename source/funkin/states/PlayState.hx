@@ -647,6 +647,7 @@ class PlayState extends MusicBeatState
 		Conductor.mapBPMChanges(SONG);
 		Conductor.changeBPM(SONG.bpm);
 		Conductor.songPosition = Conductor.crochet * -5;
+		Conductor.updateSteps();
 
 		songName = (song?.songId) ?? Paths.formatToSongPath(SONG.song);
 		songHighscore = Highscore.getScore(songName, difficultyName);
