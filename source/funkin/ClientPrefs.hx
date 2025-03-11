@@ -637,6 +637,7 @@ class ClientPrefs {
 				value: false,
 				data: []
 			},
+			/*
 			"modcharts" => {
 				display: "Modcharts",
 				desc: "When toggled, modcharts will be used on some songs.\nWARNING: Disabling modcharts on modcharted songs will disable scoring!",
