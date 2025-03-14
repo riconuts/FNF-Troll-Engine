@@ -82,6 +82,9 @@ class BaseHUD extends FlxSpriteGroup {
 	public var displayedHealth(default, set):Float = 0;
 	function set_displayedHealth(nV:Float)return displayedHealth = nV; // override healthbar shit here lol
 
+	public var displayedSong(get, null):String;
+	function get_displayedSong()return PlayState.instance.displayedSong;
+
 	public var comboBreaks(get, null):Float = 0;
 	function get_comboBreaks()return stats.comboBreaks;
 	public var misses(get, null):Int = 0;

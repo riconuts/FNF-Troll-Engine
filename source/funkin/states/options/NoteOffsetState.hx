@@ -162,7 +162,7 @@ class NoteOffsetState extends MusicBeatState
 
 		///////////////////////
 
-		var blackBox:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, 40, FlxColor.BLACK);
+		/*var blackBox:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, 40, FlxColor.BLACK);
 		blackBox.scrollFactor.set();
 		blackBox.alpha = 0.6;
 		blackBox.cameras = [camHUD];
@@ -172,7 +172,7 @@ class NoteOffsetState extends MusicBeatState
 		changeModeText.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER);
 		changeModeText.scrollFactor.set();
 		changeModeText.cameras = [camHUD];
-		add(changeModeText);
+		add(changeModeText);*/
 
 		Conductor.changeBPM(128.0);
 		FlxG.sound.playMusic(Paths.music('offsetSong'), 1 , true);
@@ -242,11 +242,11 @@ class NoteOffsetState extends MusicBeatState
 			}
 		}
 
-		if(controls.ACCEPT)
+		/*if(controls.ACCEPT)
 		{
 			onComboMenu = !onComboMenu;
 			updateMode();
-		}
+		}*/
 
 		if(controls.BACK)
 		{
@@ -332,20 +332,20 @@ class NoteOffsetState extends MusicBeatState
 
 	function updateMode()
 	{
-		timeBarBG.visible = !onComboMenu;
+		/*timeBarBG.visible = !onComboMenu;
 		timeBar.visible = !onComboMenu;
 		timeTxt.visible = !onComboMenu;
-		beatText.visible = !onComboMenu;
+		beatText.visible = !onComboMenu;*/
 
 		if (onComboMenu){
-			changeModeText.text = '< Combo Offset (Press Accept to Switch) >';
+			// changeModeText.text = '< Combo Offset (Press Accept to Switch) >';
 			openSubState(comboSubstate);
 		}else{
-			changeModeText.text = '< Note/Beat Delay (Press Accept to Switch) >';
+			// changeModeText.text = '< Note/Beat Delay (Press Accept to Switch) >';
 			comboSubstate.close();
 		}
 
-		changeModeText.text = changeModeText.text.toUpperCase();
+		// changeModeText.text = changeModeText.text.toUpperCase();
 		FlxG.mouse.visible = onComboMenu;
 	}
 
@@ -432,3 +432,9 @@ class NoteOffsetState extends MusicBeatState
 	
 	override public function transitionIn(?_):Void{} // so the super.create doesnt transition
 }
+
+/*
+	NOTE: THE CHANGES MADE TO THIS STATE ARE JUST DUCT TAPE SO IT WORKS IN GAMEPLAY!!
+	THIS SHIT SHOULD ABSOLUTELY BE MADE GOOD LATER!!
+	(also removing the note offset part completely might not be the best move, just because having a visual indicator for the timing might be better for some ppl)
+*/

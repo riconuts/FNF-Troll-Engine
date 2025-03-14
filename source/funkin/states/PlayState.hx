@@ -898,6 +898,11 @@ class PlayState extends MusicBeatState
 			add(stage.foreground);
 		}
 
+		var stringId:String = 'difficultyName_$difficultyName';
+		displayedDifficulty = Paths.getString(stringId, difficultyName.replace("-"," ").capitalize());
+		
+		displayedSong = metadata?.songName ?? SONG.song.replace("-"," ").capitalize();
+
 		if (hud == null) {
 			// TODO: make these not be obligatory values
 			// initial icons should be loaded by changeCharacter instead idk
@@ -1043,11 +1048,6 @@ class PlayState extends MusicBeatState
 
 		// EVENT AND NOTE SCRIPTS WILL GET LOADED HERE
 		generateSong(SONG.song);
-
-		var stringId:String = 'difficultyName_$difficultyName';
-		displayedDifficulty = Paths.getString(stringId, difficultyName.replace("-"," ").capitalize());
-		
-		displayedSong = metadata?.songName ?? SONG.song.replace("-"," ").capitalize();
 
 		#if DISCORD_ALLOWED
 		// Discord RPC texts
@@ -3338,7 +3338,7 @@ class PlayState extends MusicBeatState
 		}
 		
 		if (worldCombos)
-			lastCombos = ratingGroup.displayCombo(combo, 0, 80)
+			lastCombos = ratingGroup.displayCombo(combo, -150, 80)
 		else
 			lastCombos = ratingGroup.displayCombo(combo, ClientPrefs.comboOffset[2], -ClientPrefs.comboOffset[3]);
 		

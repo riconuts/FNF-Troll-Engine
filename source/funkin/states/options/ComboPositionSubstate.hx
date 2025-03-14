@@ -100,7 +100,11 @@ class ComboPositionSubstate extends MusicBeatSubstate
 
 		////
 		timing = new FlxText(0, 0, 0, "0 ms");
+		#if tgt
 		timing.setFormat(Paths.font("calibri.ttf"), 28, 0xFFFFFFFF, CENTER, FlxTextBorderStyle.OUTLINE, 0xFF000000);
+		#else
+		timing.setFormat(Paths.font("vcr.ttf"), 28, 0xFFFFFFFF, CENTER, FlxTextBorderStyle.OUTLINE, 0xFF000000);
+		#end
 		timing.color = judgeColor;
 		timing.scrollFactor.set();
 		timing.borderSize = 1.25;
@@ -118,15 +122,20 @@ class ComboPositionSubstate extends MusicBeatSubstate
 				24
 			);
 			text.scrollFactor.set();
+			#if tgt
 			text.setFormat(Paths.font("calibri.ttf"), 24, 0xFFFFFFFF, LEFT, FlxTextBorderStyle.OUTLINE, 0xFF000000);
 			text.borderSize = 1.5;
+			#else
+			text.setFormat(Paths.font("vcr.ttf"), 24, 0xFFFFFFFF, LEFT, FlxTextBorderStyle.OUTLINE, 0xFF000000);
+			text.borderSize = 2;
+			#end
 			text.cameras = cameras;
 			add(text);
 
 			return text;
 		}
 
-		makeText(0).text = "Rating Offset:";
+		makeText(0).text = "Judgement Offset:";
 		txt_rating = makeText(1);
 		makeText(2).text = "Combo Offset:";
 		txt_combo = makeText(3);
@@ -239,7 +248,79 @@ class ComboPositionSubstate extends MusicBeatSubstate
 		}
 
 		//// Update keyboard
+		var addNum:Int = 1;
+		if(FlxG.keys.pressed.SHIFT) addNum = 10;
 
+		// bringing back this old ass shit for now JUST because the keybinds are helpful
+		var controlArray:Array<Bool> = [
+			FlxG.keys.justPressed.LEFT,
+			FlxG.keys.justPressed.RIGHT,
+			FlxG.keys.justPressed.UP,
+			FlxG.keys.justPressed.DOWN,
+		
+			FlxG.keys.justPressed.A,
+			FlxG.keys.justPressed.D,
+			FlxG.keys.justPressed.W,
+			FlxG.keys.justPressed.S,
+
+			FlxG.keys.justPressed.J,
+			FlxG.keys.justPressed.L,
+			FlxG.keys.justPressed.I,
+			FlxG.keys.justPressed.K
+		];
+
+		if(controlArray.contains(true)) {
+			for (i in 0...controlArray.length){
+				if(controlArray[i]){
+					switch(i)
+					{
+						case 0:
+							ClientPrefs.comboOffset[0] -= addNum;
+						case 1:
+							ClientPrefs.comboOffset[0] += addNum;
+						case 2:
+							ClientPrefs.comboOffset[1] += addNum;
+						case 3:
+							ClientPrefs.comboOffset[1] -= addNum;
+						
+						////
+						case 4:
+							ClientPrefs.comboOffset[2] -= addNum;
+						case 5:
+							ClientPrefs.comboOffset[2] += addNum;
+						case 6:
+							ClientPrefs.comboOffset[3] += addNum;
+						case 7:
+							ClientPrefs.comboOffset[3] -= addNum;
+
+						////
+						case 8:
+							ClientPrefs.comboOffset[4] -= addNum;
+						case 9:
+							ClientPrefs.comboOffset[4] += addNum;
+						case 10:
+							ClientPrefs.comboOffset[5] += addNum;
+						case 11:
+							ClientPrefs.comboOffset[5] -= addNum;							
+					}
+					updateJudgePos();
+					updateComboPos();
+					updateTimingPos();
+				}
+			}
+		}
+
+		if(controls.RESET) {
+			ClientPrefs.comboOffset[0] = -60;
+			ClientPrefs.comboOffset[1] = 60;
+			ClientPrefs.comboOffset[2] = -260;
+			ClientPrefs.comboOffset[3] = -80;
+			ClientPrefs.comboOffset[4] = 0;
+			ClientPrefs.comboOffset[5] = 0;
+			updateJudgePos();
+			updateComboPos();
+			updateTimingPos();
+		}
 
 		////
 		super.update(elapsed);

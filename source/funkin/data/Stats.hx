@@ -209,9 +209,9 @@ class Stats {
 					type = gfc; // Good Full Combo
 			}
 			else if (sicks > 0) {
-				if (useFlags && sicks == 1 && epics > 0)
+				if (useFlags && sicks == 1 && epics > 0 && ClientPrefs.useEpics)
 					type = wf; // White Flag (EFC missed by 1 sick)
-				else if (sicks < 10)
+				else if (sicks < 10 && ClientPrefs.useEpics)
 					type = sds; // Single Digit Sicks
 				else
 					type = sfc; // Sick Full Combo

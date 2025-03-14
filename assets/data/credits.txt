@@ -5,7 +5,6 @@ Nebula The Zorua::nebulazorua::True and Honest programmer
 Engine Contirbutors
 4mbr0s3 2::4mbr0s3_2::Modchart system::https://www.youtube.com/@4mbr0s3-2
 Lat::latzephr::Made the Week 6 UI concept::https://twitter.com/latzephr/status/1771139155881234576
-Echolocated::echolocated::Made the "Epic" judgement rating
 Psych Engine::psychengine::Dad engine::https://github.com/ShadowMario/FNF-PsychEngine
 
 Funkin' Crew
