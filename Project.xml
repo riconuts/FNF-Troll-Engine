@@ -7,7 +7,7 @@
 
 	<!-- _________________________ Application Settings _________________________ -->
 
-    <app title="Troll Engine" file="Trolled" packageName="com.sowy.trollengine"
+    <app title="Friday Night Funkin': Troll Engine" file="Trolled" packageName="com.sowy.trollengine"
         package="com.sowy.trollengine" main="Main" version="0.2.8" company="Sowy" />
 
 	<!--Switch Export with Unique ApplicationID and Icon-->
