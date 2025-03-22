@@ -59,11 +59,11 @@ class DiscordClient
 					trace('Discord Client starting with id: $curId');
 
 					DiscordRpc.Shutdown();
-					var eventHandler:DiscordEventHandlers = DiscordEventHandlers.create();
+					var eventHandler:DiscordEventHandlers = #if (hxdiscord_rpc >=  "1.3.0") new DiscordEventHandlers() #else DiscordEventHandlers.create() #end;
 					eventHandler.ready = cpp.Function.fromStaticFunction(onReady);
 					eventHandler.disconnected = cpp.Function.fromStaticFunction(onDisconnected);
 					eventHandler.errored = cpp.Function.fromStaticFunction(onError);
-					DiscordRpc.Initialize(curId, cpp.RawPointer.addressOf(eventHandler), 1, null);
+					DiscordRpc.Initialize(curId, cpp.RawPointer.addressOf(eventHandler), #if (hxdiscord_rpc >=  "1.3.0") true #else 1 #end, null);
 					
 					trace("Discord Client started.");
 					waitMutex.acquire();
@@ -87,7 +87,7 @@ class DiscordClient
 
 	private static function onReady(request:cpp.RawConstPointer<DiscordUser>)
 	{
-		var presence = DiscordRichPresence.create();
+		var presence = #if (hxdiscord_rpc >=  "1.3.0") new DiscordRichPresence() #else DiscordRichPresence.create() #end;
 		presence.details = "Presence Unknown";
 		DiscordRpc.UpdatePresence(cpp.RawConstPointer.addressOf(lastPresence));
 	}
@@ -170,7 +170,7 @@ class DiscordClient
 
 		mutex.acquire();
 
-		lastPresence = DiscordRichPresence.create();
+		lastPresence = #if (hxdiscord_rpc >=  "1.3.0") new DiscordRichPresence() #else DiscordRichPresence.create() #end;
 		lastPresence.details = details;
 		lastPresence.state = state;
 		lastPresence.largeImageKey = largeImageKey;
