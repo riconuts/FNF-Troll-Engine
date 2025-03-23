@@ -35,12 +35,10 @@ class TitleState extends MusicBeatState
 	{
 		var swagGoodArray:Array<Array<String>> = [];
 
-		for (folder in Paths.getFolders("data")) {
-			var rawFile:Null<String> = Paths.getText('$folder/introText.txt');
-			if (rawFile != null) {
-				for (line in rawFile.rtrim().split('\n'))
-					swagGoodArray.push(line.split('--'));
-			}	
+		var rawFile:Null<String> = Paths.getText(Paths.getPath('data/introText.txt'));
+		if (rawFile != null) {
+			for (line in rawFile.rtrim().split('\n'))
+				swagGoodArray.push(line.split('--'));
 		}
 
 		return swagGoodArray;
