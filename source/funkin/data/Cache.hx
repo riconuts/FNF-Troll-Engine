@@ -198,11 +198,11 @@ class Cache
 			default:
 				Paths.image(toLoad.path, toLoad.library);
 			case SOUND:
-				Paths.returnSound("sounds", toLoad.path, toLoad.library);
+				Paths.returnFolderSound("sounds", toLoad.path, toLoad.library);
 			case MUSIC:
-				Paths.returnSound("music", toLoad.path, toLoad.library);
+				Paths.returnFolderSound("music", toLoad.path, toLoad.library);
 			case SONG:
-				Paths.returnSound("songs", toLoad.path, toLoad.library);
+				Paths.returnFolderSound("songs", toLoad.path, toLoad.library);
 		}
 		
 		#if traceLoading

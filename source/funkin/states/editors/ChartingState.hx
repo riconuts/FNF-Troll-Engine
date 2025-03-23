@@ -357,7 +357,7 @@ class ChartingState extends MusicBeatState
 		}
 
 		loadTracks();
-		fixEvents();
+/* 		fixEvents(); */
 
 		plrHitsound = new FlxSound().loadEmbedded(Paths.sound("monoHitsound"));
 		plrHitsound.pan = -0.75;
@@ -936,10 +936,10 @@ class ChartingState extends MusicBeatState
 				}
 			}
 
-			if(check_eventsSec.checked)
+/* 			if(check_eventsSec.checked)
 			{
 				fixEvents();
-			}
+			} */
 			updateGrid();
 		});
 
@@ -1024,7 +1024,7 @@ class ChartingState extends MusicBeatState
 						_song.events.push([strumTime, copiedEventArray]);
 					}
 				}
-				fixEvents();
+/* 				fixEvents(); */
 			}
 			updateGrid();
 		});
@@ -2915,6 +2915,9 @@ class ChartingState extends MusicBeatState
 				note.x += GRID_SIZE * 4;
 			}
 		}
+
+		note.editorHitBeat = note.beat;
+		note.wasGoodHit = note.beat <= Conductor.curBeat;
 
 		var beats:Float = getSectionBeats(isNextSection ? 1 : 0);
 		note.y = getYfromStrumNotes(note.strumTime - sectionStartTime(), beats);

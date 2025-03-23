@@ -94,7 +94,7 @@ class HealthIcon extends FlxSprite
 		iconOffsets[0] = (width - 150) * 0.5;
 		iconOffsets[1] = (width - 150) * 0.5;
 		updateHitbox();
-		trace(iconOffsets[0], iconOffsets[1]);
+		//trace(iconOffsets[0], iconOffsets[1]);
 
 		animation.add("idle", [0], 0, false, isPlayer);
 		animation.add("losing", [1], 0, false, isPlayer);

@@ -1,19 +1,5 @@
 package funkin.modchart.modifiers;
 
-/* class NoteModSpiral extends NoteModBase {
-	override function executePath(currentBeat:Float, strumTimeDiff:Float, column:Int, player:Int, pos:Vector4, playfield:SchmovinPlayfield):Vector4 {
-		var centerX = FlxG.width / 2;
-		var centerY = FlxG.height / 2;
-		var radiusOffset = -strumTimeDiff / 4;
-		var radius = radiusOffset + getOtherPercent('spiraldist', playfield) * column % 4;
-		var outX = centerX + Math.cos(-strumTimeDiff / GroovinConductor.getCrotchetNow() * Math.PI + currentBeat * Math.PI / 4) * radius;
-		var outY = centerY + Math.sin(-strumTimeDiff / GroovinConductor.getCrotchetNow() * Math.PI - currentBeat * Math.PI / 4) * radius;
-
-		return SchmovinUtil.vec4Lerp(pos, new Vector4(outX, outY, radius / FlxG.height * 2 - 1, 0), getPercent(playfield));
-	}
-} */
-
-
 class SpiralModifier extends NoteModifier {
 	override function getPos(visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, column:Int, player:Int, obj:FlxSprite, field:NoteField) {
 		var spiralX = getValue(player);
@@ -47,7 +33,7 @@ class SpiralModifier extends NoteModifier {
 			var dist = getSubmodValue("schmovinSpiralXSpacing", player) * 33.5;
 			var beat = ((getSubmodValue("schmovinSpiralXSpeed", player) * beat) + (getSubmodValue("schmovinSpiralXOffset", player))) * Math.PI / 4;
 			var radiusOffset = -visualDiff / 4; 
-			var radius = radiusOffset + dist * column % 4;
+			var radius = radiusOffset + dist * column % field.field.keyCount;
 
 			pos.x += FlxMath.fastCos(-visualDiff / Conductor.crotchet * Math.PI + beat) * radius * schmovinSpiralX;
 		}
@@ -55,7 +41,7 @@ class SpiralModifier extends NoteModifier {
 			var dist = getSubmodValue("schmovinSpiralYSpacing", player) * 33.5;
 			var beat = ((getSubmodValue("schmovinSpiralYSpeed", player) * beat) + (getSubmodValue("schmovinSpiralYOffset", player))) * Math.PI / 4;
 			var radiusOffset = -visualDiff / 4;
-			var radius = radiusOffset + dist * column % 4;
+			var radius = radiusOffset + dist * column % field.field.keyCount;
 
 			pos.y += FlxMath.fastSin(-visualDiff / Conductor.crotchet * Math.PI + beat) * radius * schmovinSpiralY;
 		}
@@ -63,7 +49,7 @@ class SpiralModifier extends NoteModifier {
 			var dist = getSubmodValue("schmovinSpiralZSpacing", player) * 33.5;
 			var beat = ((getSubmodValue("schmovinSpiralZSpeed", player) * beat) + (getSubmodValue("schmovinSpiralZOffset", player))) * Math.PI / 4;
 			var radiusOffset = 	-visualDiff / 4;
-			var radius = radiusOffset + dist * column % 4;
+			var radius = radiusOffset + dist * column % field.field.keyCount;
 
 			pos.z += FlxMath.fastSin(-visualDiff / Conductor.crotchet * Math.PI + beat) * radius * schmovinSpiralZ;
 		}

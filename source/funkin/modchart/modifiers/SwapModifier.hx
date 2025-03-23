@@ -15,7 +15,7 @@ class SwapModifier extends NoteModifier
 		
 		var flipVal = getValue(player);
 		if (flipVal != 0){
-			var distance = Note.swagWidth * 2 * (1.5 - data);
+			var distance = Note.swagWidth * 2 * (((field.field.keyCount - 1) * 0.5) - data);
 			pos.x += distance * flipVal;
 		}
 		return pos;

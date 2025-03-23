@@ -1,0 +1,276 @@
+importClass("EReg");
+importClass("sys.io.File");
+importClass("haxe.format.JsonPrinter");
+importClass("math.CoolMath");
+var FLY_OUT = -1;
+var NEXT = 0;
+var FLY_IN = 1;
+var OFF = -2;
+
+var lyricData = [];
+
+function eventPushed(event){
+	if(event.event == 'Set Lyrics'){
+		var timings = [];
+		if(event.value1 == '')
+			timings = null;
+
+		lyricData.push({
+			time: event.strumTime / 1000,
+			lyrics: event.value1,
+			lyricTimings: timings,
+		});
+	}else if(event.event == 'Next Word'){
+		if(lyricData[lyricData.length - 1].lyricTimings == null)
+			lyricData[lyricData.length - 1].lyricTimings = [];
+		lyricData[lyricData.length - 1].lyricTimings.push(event.strumTime / 1000);
+	}
+}
+
+var positionData = [];
+var icon:HealthIcon;
+
+function onCreate(){
+	var jsonSubs = Paths.json('songs/' + Paths.formatToSongPath(PlayState.SONG.song) + '/lyrics.json');
+	if(jsonSubs != null)
+		lyricData = jsonSubs.lyrics;	
+}
+
+function onCreatePost(){
+/* 	var parsedLyricData = [];
+	for(i in 0...lyricData.length){
+		var d = lyricData[i];
+		parsedLyricData[i] = d;
+		parsedLyricData[i].time = CoolMath.floorDecimal(d.time, 2);
+		if(d.lyricTimings == null)continue;
+		
+		for(id in 0...d.lyricTimings.length)
+			parsedLyricData[i].lyricTimings[id] = CoolMath.floorDecimal(d.lyricTimings[id], 2);
+	}
+	File.saveContent("assets/data/monster-subs.json", JsonPrinter.print(
+		{
+			lyrics: parsedLyricData 
+		}, null, "\t")); */
+    text = new FlxText(0, 600, FlxG.width, '', 20);
+    text.setFormat(Paths.font("quantico.ttf"), 36, FlxColor.WHITE, "center", FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+    text.scrollFactor.set();
+    text.borderSize = 1.25;
+    text.updateHitbox();
+	text.screenCenter();
+	text.cameras = [game.camOverlay];
+    text.y = 600;
+    game.add(text);
+
+	positionData.push({
+		time: 0,
+		x: 1000,
+		type: OFF
+	});
+	for(idx in 0...lyricData.length){
+		var data= lyricData[idx];
+		var word = data.lyrics;
+		var pattern = "\\[(.*?)\\]";
+		if(data.pattern != null)
+			pattern = data.pattern;
+
+		var ereg = new EReg(pattern, '');
+		var startIndex = 0;
+		var positions = [];
+		var matchingWord = word;
+		var newText = '';
+		var splitData = [];
+
+		var startIndex:Int = 0;
+		
+		while (ereg.match(matchingWord)) { 
+			var capture = ereg.matched(1);
+			var data = {
+				str: capture,
+				startIndex: newText.length
+			};
+			var leftOver = ereg.split(matchingWord)[0];
+			newText += leftOver + capture;
+			data.startIndex += leftOver.length;
+			data.endIndex = newText.length - 1;
+			splitData.push(data);
+			matchingWord = ereg.matchedRight();
+		}
+ 
+		text.text = newText;
+		data.text = newText;
+
+		for(data in splitData){
+			var startIndex = data.startIndex;
+			var endIndex = data.endIndex;
+			var bounds = text.textField.getCharBoundaries(startIndex);
+			var endBounds = text.textField.getCharBoundaries(endIndex);
+
+			if(bounds == null || endBounds)continue;
+			
+			var wordCenter = endBounds.x - (endBounds.x - bounds.x) / 2;
+			wordCenter += bounds.width / 2;
+
+			positions.push(wordCenter);
+		} 
+
+
+		if(newText == ''){
+			positionData.push({
+				time: data.time * 1000,
+				x: 1000,
+				type: FLY_OUT
+			});
+			positionData.push({
+				time: (data.time * 1000) + 175,
+				x: 1000,
+				type: OFF
+			});
+
+		}else if(data.lyricTimings != null){
+			var lastPos = positionData[positionData.length - 1];
+			for(tIdx in 0...data.lyricTimings.length){
+				var d = data.lyricTimings[tIdx] ;
+				var inferredType = NEXT;
+				if(tIdx == 0)
+					inferredType = FLY_IN;
+
+				var t = 0;
+				var pos = 0;
+				var type = inferredType;
+				
+				
+				if(!Math.isNaN(Std.parseFloat(Std.string(d)))){ // I LOVE HSCRIPT
+					t = d * 1000;
+					pos = positions[tIdx];
+				}else{
+					if(d.type != null)
+						type = d.type;
+
+					t = d.time * 1000;
+					pos = positions[d.wordIndex];
+				}
+
+				if(tIdx == 0 && lastPos != null && lastPos.type != FLY_OUT){
+					trace("inserting fly out");
+					var time = t - 175;
+					if(time < lastPos.time)
+						time = lastPos.time + 175;
+
+					if(time > t){
+						time = lastPos.time + 75; // now we hope and pray
+						trace("FUCK!", time > t);
+					}
+					
+					positionData.push({
+						time: time,
+						x: 1000,
+						type: FLY_OUT
+					});
+				}
+
+				positionData.push({
+					time: t,
+					x: pos,
+					type: type
+				});
+			}
+		}
+	}
+
+	text.text = '';
+
+	icon = new HealthIcon(game.dad.healthIcon, false);
+	icon.scale.set(0.5, 0.5);
+	icon.updateHitbox();
+	icon.centerOffsets();
+	icon.cameras = [game.camOverlay];
+	icon.x = positionData[0].x - icon.width / 2;
+	icon.y = text.y - icon.height / 2 - 16;
+	icon.visible = false;
+	game.add(icon);
+}
+
+var curPosIdx:Int = -1;
+var curLyrIdx:Int = -1;
+
+// eases from fuckin PLANTS VS ZOMBIES..
+// I think curves is just smoothStep and then bounce isnt an existing flixel one
+// then quad is just.. quad
+
+function curves(t:Float)
+    return 3 * t * t - 2 * t * t * t;
+
+function eInOut(t:Float)
+    return curves(curves(t));
+
+function quad(t:Float)
+    return t * t;
+
+function bounce(t:Float)
+    return 1 - Math.abs(2 * t - 1);
+
+function bounceFM(t:Float)
+    return quad(bounce(t));
+
+function onUpdatePost(elapsed:Float){
+	if(curPosIdx < positionData.length - 1){
+		for(i in curPosIdx...positionData.length){
+			var data = positionData[i];
+			if(data == null)continue;
+			if(data.time > Conductor.songPosition)
+				break;
+
+			curPosIdx = i;
+
+
+			var current = positionData[i];
+			var next = positionData[i + 1];
+			
+			if(current == null || next == null)continue;
+			var progress = (Conductor.songPosition - current.time) / (next.time - current.time);
+
+			var cX = current.x - icon.width / 2;
+			var nX = next.x - icon.width / 2;
+
+			if(next.type == FLY_IN){
+				icon.visible = true;
+				icon.x = FlxMath.lerp(-100, nX, curves(progress));
+				icon.y = FlxMath.lerp(545, 500, Math.sin(progress * 3.14));
+			}else if(next.type == FLY_OUT){
+				icon.x = FlxMath.lerp(cX, 1300, curves(progress));
+				icon.y = FlxMath.lerp(545, 500, Math.sin(progress * 3.14));
+			}else if(current.type == FLY_IN || current.type == NEXT){
+				icon.visible = true;
+				icon.x = FlxMath.lerp(cX, nX, curves(progress));
+				icon.y = FlxMath.lerp(545, 525, Math.sin(progress * 3.14));
+			}else{
+				icon.visible = false;
+			}
+
+/* 			if(current.type == FLY_IN)
+				icon.x = FlxMath.lerp(cX, nX, progress);
+			else
+				icon.x = FlxMath.lerp(cX, nX, progress); */
+		}
+	}
+
+	if(curLyrIdx < lyricData.length - 1){
+		for(i in curLyrIdx...lyricData.length){
+			var data = lyricData[i];
+			if(data == null)continue;
+			if(data.time * 1000 > Conductor.songPosition)
+				break;
+
+			curLyrIdx = i;
+
+			var newText = lyricData[i].text;
+			if(newText == ''){
+				text.visible = false;
+			}else{
+				text.visible = true;
+			}
+			text.text = newText;
+			
+		}
+	}
+}

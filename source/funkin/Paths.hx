@@ -252,7 +252,7 @@ class Paths
 
 	inline static public function sound(key:String, ?library:String):Null<Sound>
 	{
-		return returnSound('sounds', key, library);
+		return returnFolderSound('sounds', key, library);
 	}
 
 	inline static public function soundRandom(key:String, min:Int, max:Int, ?library:String)
@@ -262,12 +262,12 @@ class Paths
 
 	inline static public function music(key:String, ?library:String):Null<Sound>
 	{
-		return returnSound('music', key, library);
+		return returnFolderSound('music', key, library);
 	}
 
 	inline static public function track(song:String, track:String):Null<Sound>
 	{
-		return returnSound('songs', '${formatToSongPath(song)}/$track');
+		return returnFolderSound('songs', '${formatToSongPath(song)}/$track');
 	}
 
 	inline static public function voices(song:String):Null<Sound>
@@ -467,8 +467,14 @@ class Paths
 
 	public static function getGraphic(path:String, cache:Bool = true, gpu:Bool = false):Null<FlxGraphic>
 	{
-		var newGraphic:FlxGraphic = cache ? currentTrackedAssets.get(path) : null;
-		if (newGraphic == null) {
+		var newGraphic:FlxGraphic;
+
+		if (cache && currentTrackedAssets.exists(path)) {
+			newGraphic = currentTrackedAssets.get(path);
+			if (!localTrackedAssets.contains(path)) 
+				localTrackedAssets.push(path);
+		}
+		else {
 			var bitmap:BitmapData = getBitmapData(path);
 			if (bitmap == null) return null;
 
@@ -509,13 +515,6 @@ class Paths
 	{
 		var path:String = imagePath(key);
 
-		if (currentTrackedAssets.exists(path)) {
-			if (!localTrackedAssets.contains(path)) 
-				localTrackedAssets.push(path);
-
-			return currentTrackedAssets.get(path);
-		}
-
 		var graphic = getGraphic(path);
 		if (graphic==null && Main.showDebugTraces)
 			trace('bitmap "$key" => "$path" returned null.');
@@ -528,29 +527,30 @@ class Paths
 		return getPath('$path/$key.$SOUND_EXT');
 	}
 
-	public static function returnSound(path:String, key:String, ?library:String)
-	{
-		var gottenPath:String = soundPath(path, key, library);
-	
-		if (currentTrackedSounds.exists(gottenPath)) {
-			if (!localTrackedAssets.contains(gottenPath))
-				localTrackedAssets.push(gottenPath);
+	inline public static function returnFolderSound(path:String, key:String, ?library:String)
+		return returnSound(soundPath(path, key, library), library);
 
-			return currentTrackedSounds.get(gottenPath);
+	public static function returnSound(path:String, ?library:String)
+	{	
+		if (currentTrackedSounds.exists(path)) {
+			if (!localTrackedAssets.contains(path))
+				localTrackedAssets.push(path);
+
+			return currentTrackedSounds.get(path);
 		}
 		
-		var sound = getSound(gottenPath);
+		var sound = getSound(path);
 		if (sound != null) {
-			currentTrackedSounds.set(gottenPath, sound);
+			currentTrackedSounds.set(path, sound);
 	
-			if (!localTrackedAssets.contains(gottenPath))
-				localTrackedAssets.push(gottenPath);	
+			if (!localTrackedAssets.contains(path))
+				localTrackedAssets.push(path);	
 			
 			return sound;
 		}
 		
 		if (Main.showDebugTraces)
-			trace('sound $path, $key => $gottenPath returned null');
+			trace('sound $path returned null');
 		
 		return null;
 	}
@@ -570,6 +570,9 @@ class Paths
 		
 		return null;
 	}
+
+	public static inline function getFolderPath(folder:String = ""):String
+		return (folder == "") ? getPreloadPath() : mods(folder);
 
 	////	
 	public static var currentModDirectory(default, set):String = '';
@@ -603,7 +606,7 @@ class Paths
 	public static var contentMetadata:Map<String, ContentMetadata> = [];
 
 	#if MODS_ALLOWED
-	inline static public function mods(key:String)
+	inline static public function mods(key:String = '')
 		return 'content/$key';
 
 	inline static public function getGlobalContent(){

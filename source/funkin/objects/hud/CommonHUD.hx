@@ -101,7 +101,7 @@ class CommonHUD extends BaseHUD
 
 		if (ClientPrefs.timeBarType == 'Song Name')
 		{
-			timeTxt.text = songName;
+			timeTxt.text = displayedSong;
 			timeTxt.size = 24;
 			timeTxt.offset.y = -3;
 		}

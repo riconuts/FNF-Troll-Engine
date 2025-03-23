@@ -72,19 +72,17 @@ class Note extends NoteObject
 	// should move these to Paths maybe
 	public static final quantShitCache = new Map<String, Null<String>>();
 
-	/** Return null if there's no quant texture file **/
-	public static function getQuantTexture(dir:String, fileName:String, textureKey:String):Null<String> {
-		var quantKey:Null<String>;
-
-		if (quantShitCache.exists(textureKey)) {
-			quantKey = quantShitCache.get(textureKey);
-
-		}else {
-			quantKey = dir + "QUANT" + fileName;
-			if (!Paths.imageExists(quantKey)) quantKey = null;
-			quantShitCache.set(textureKey, quantKey);
-		}
-
+	// should move this to Paths maybe
+	public static function getQuantTexture(dir:String, fileName:String, textureKey:String) {
+		
+		if (quantShitCache.exists(textureKey))
+			return quantShitCache.get(textureKey);
+		
+		var quantKey:Null<String> = dir + "QUANT" + fileName;
+		// trace('$textureKey = "$dir", "$fileName", "$quantKey"');
+		if (!Paths.imageExists(quantKey)) quantKey = null;
+		
+		quantShitCache.set(textureKey, quantKey);
 		return quantKey;
 	}
 
@@ -162,7 +160,8 @@ class Note extends NoteObject
 	public var usesDefaultColours:Bool = true; // whether this note uses the default note colours (lets you change colours in options menu)
 	// This automatically gets set if a notetype changes the ColorSwap values
 
-	//// note behaviour
+	//// note 
+	public var defaultJudgement:Judgment;
 	public var breaksCombo:Bool = false; // hitting this will cause a combo break
 	public var blockHit:Bool = false; // whether you can hit this note or not
 	public var hitCausesMiss:Bool = false; // hitting this causes a miss

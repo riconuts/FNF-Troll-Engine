@@ -223,7 +223,15 @@ class FunkinLua extends FunkinScript
 		addCallback("getValue", function(modName:String, player:Int)
 			return PlayState.instance.modManager.getValue(modName, player)
 		);
+
+		addCallback("setCurrentValue", function(modName:String, val:Float, ?player:Int = -1){
+			return PlayState.instance.modManager.setCurrentValue(modName, val, player);
+		});
 		
+		addCallback("getTargetValue", function(modName:String, player:Int){
+			return PlayState.instance.modManager.getTargetValue(modName, player);
+		});
+
 		addCallback("queueSet", function(step:Float, modName:String, target:Float, player:Int = -1)
 			PlayState.instance.modManager.queueSet(step, modName, target, player)
 		);

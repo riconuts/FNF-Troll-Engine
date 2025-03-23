@@ -9,7 +9,9 @@ import flixel.tweens.FlxTween;
 import funkin.objects.playfields.PlayField;
 import funkin.data.JudgmentManager.JudgmentData;
 
-class PsychHUD extends CommonHUD 
+typedef PsychHUD = TraditionalHUD;
+
+class TraditionalHUD extends CommonHUD 
 {	
 	public var scoreTxt:FlxText;
 	public var hitbar:Hitbar;

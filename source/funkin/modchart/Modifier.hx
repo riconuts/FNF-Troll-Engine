@@ -188,6 +188,10 @@ class Modifier {
 	inline public function setOtherValue(modName:String, endValue:Float, player:Int)
 		return modMgr.setValue(modName, endValue, player);
 	
+	public function getDefaultValues():Null<Map<String, Float>>{
+		return null;
+	}
+
 	public function new(modMgr:ModManager, ?parent:Modifier)
 	{
 		this.modMgr = modMgr;

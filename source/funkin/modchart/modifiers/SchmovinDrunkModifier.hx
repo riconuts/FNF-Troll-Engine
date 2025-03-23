@@ -13,8 +13,8 @@ class SchmovinDrunkModifier extends NoteModifier {
 		return val;
 	}
 
-	inline function applyDrunk(axis:String, player:Int, beat:Float, visualDiff:Float, column:Float, ?mathFunc:Float->Float) {
-		var playerColumn = column % 4;
+	inline function applyDrunk(axis:String, player:Int, beat:Float, visualDiff:Float, column:Int, keyCount:Int, ?mathFunc:Float->Float) {
+		var playerColumn = column % keyCount;
 		var prefix = 'schmovinDrunk${axis}';
 
 		var perc = axis == '' ? getValue(player) : getSubmodValue(prefix, player);
@@ -27,8 +27,8 @@ class SchmovinDrunkModifier extends NoteModifier {
 		return adjust(axis, offsetX, player);
 	}
 
-	inline function applyTipsy(axis:String, player:Int, beat:Float, visualDiff:Float, column:Float, ?mathFunc:Float->Float) {
-		var playerColumn = column % 4;
+	inline function applyTipsy(axis:String, player:Int, beat:Float, visualDiff:Float, column:Int, keyCount:Int, ?mathFunc:Float->Float) {
+		var playerColumn = column % keyCount;
 		var prefix = 'schmovinTipsy${axis}';
 
 		var perc = getSubmodValue(prefix, player);
@@ -53,30 +53,30 @@ class SchmovinDrunkModifier extends NoteModifier {
 	override function getPos(visualDiff:Float, timeDiff:Float, beat:Float, pos:Vector3, data:Int, player:Int, obj:FlxSprite, field:NoteField)
 	{
 		pos.x += 
-			applyDrunk('', player, beat, visualDiff, data, FlxMath.fastSin) +
-			applyTipsy('X', player, beat, visualDiff, data, FlxMath.fastSin) +
+			applyDrunk('', player, beat, visualDiff, data, field.field.keyCount, FlxMath.fastSin) +
+			applyTipsy('X', player, beat, visualDiff, data, field.field.keyCount, FlxMath.fastSin) +
 			applyBumpy('X', player, beat, visualDiff, data, FlxMath.fastSin);
 
 		pos.y += 
-			applyDrunk('Y', player, beat, visualDiff, data, FlxMath.fastSin) +
-			applyTipsy('', player, beat, visualDiff, data, FlxMath.fastSin) +
+			applyDrunk('Y', player, beat, visualDiff, data, field.field.keyCount, FlxMath.fastSin) +
+			applyTipsy('', player, beat, visualDiff, data, field.field.keyCount, FlxMath.fastSin) +
 			applyBumpy('Y', player, beat, visualDiff, data, FlxMath.fastSin);
 
 		pos.z += 
-			applyDrunk('Z', player, beat, visualDiff, data, FlxMath.fastSin) +
-			applyTipsy('Z', player, beat, visualDiff, data, FlxMath.fastSin) +
+			applyDrunk('Z', player, beat, visualDiff, data, field.field.keyCount, FlxMath.fastSin) +
+			applyTipsy('Z', player, beat, visualDiff, data, field.field.keyCount, FlxMath.fastSin) +
 			applyBumpy('', player, beat, visualDiff, data, FlxMath.fastSin);
 
-		pos.x += applyDrunk('Tan', player, beat, visualDiff, data, CoolMath.fastTan)
-			+ applyTipsy('TanX', player, beat, visualDiff, data, CoolMath.fastTan)
+		pos.x += applyDrunk('Tan', player, beat, visualDiff, data, field.field.keyCount, CoolMath.fastTan)
+			+ applyTipsy('TanX', player, beat, visualDiff, data, field.field.keyCount, CoolMath.fastTan)
 			+ applyBumpy('TanX', player, beat, visualDiff, data, CoolMath.fastTan);
 
-		pos.y += applyDrunk('TanY', player, beat, visualDiff, data, CoolMath.fastTan)
-			+ applyTipsy('Tan', player, beat, visualDiff, data, CoolMath.fastTan)
+		pos.y += applyDrunk('TanY', player, beat, visualDiff, data, field.field.keyCount, CoolMath.fastTan)
+			+ applyTipsy('Tan', player, beat, visualDiff, data, field.field.keyCount, CoolMath.fastTan)
 			+ applyBumpy('TanY', player, beat, visualDiff, data, CoolMath.fastTan);
 
-		pos.z += applyDrunk('TanZ', player, beat, visualDiff, data, CoolMath.fastTan)
-			+ applyTipsy('TanZ', player, beat, visualDiff, data, CoolMath.fastTan)
+		pos.z += applyDrunk('TanZ', player, beat, visualDiff, data, field.field.keyCount, CoolMath.fastTan)
+			+ applyTipsy('TanZ', player, beat, visualDiff, data, field.field.keyCount, CoolMath.fastTan)
 			+ applyBumpy('Tan', player, beat, visualDiff, data, CoolMath.fastTan);
 
 		return pos;

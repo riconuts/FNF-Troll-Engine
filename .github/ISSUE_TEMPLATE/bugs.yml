@@ -1,29 +1,11 @@
 name: Bug report
-description: Report bugs with the engine here
+description: Report bugs that occur on the unmodified engine here (if you are trying to compile or are making a mod create a help request issue!)
 labels: [bug]
 body:
   - type: textarea
     id: description
     attributes:
       label: "Describe your bug here."
-    validations:
-      required: true
-
-  - type: textarea
-    id: terminal
-    attributes:
-      label: "Command Prompt/Terminal logs (if existing)"
-      render: bash
-    validations:
-      required: false
-
-  - type: dropdown
-    id: modding
-    attributes:
-      label: "Are you modding a build from source or with Lua?"
-      options:
-        - Lua
-        - Source
     validations:
       required: true
 
@@ -41,10 +23,10 @@ body:
     validations:
       required: true
 
-  - type: input
-    id: buildsummary
+  - type: textarea
+    id: terminal
     attributes:
-      label: "Did you edit anything in this build? If so, mention or summarize your changes."
-      placeholder: "Yes, I edited ClientPrefs.hx and tried to add a new setting"
+      label: "Command Prompt/Terminal logs (if existing)"
+      render: bash
     validations:
-      required: true
+      required: false

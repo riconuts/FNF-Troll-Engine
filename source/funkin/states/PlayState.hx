@@ -116,6 +116,9 @@ class PlayState extends MusicBeatState
 	public static var songPlaylist:Array<Song> = [];
 	public static var songPlaylistIdx = 0;
 
+	private static var song(get, never):Song;
+	private static function get_song() return songPlaylist[songPlaylistIdx];
+
 	public static var difficulty:Int = 1; // for psych mod shit
 	public static var difficultyName:String = 'normal'; // should NOT be set to "" when playing normal diff!!!!!
 
@@ -167,8 +170,16 @@ class PlayState extends MusicBeatState
 	public var playOpponent:Bool = false;
 	public var instakillOnMiss:Bool = false;
 
-	public var midScroll:Bool = false; // whether midscroll is active, songs can force this off prior to countdown start and modchart generation
-	public var saveScore:Bool = true; // whether to save the score. modcharted songs should set this to false if disableModcharts is true
+	/** Songs can force this off prior to countdown start and modchart generation **/
+	public var centerNotefield:Bool = false;
+	/** Whether to save the score. modcharted songs should set this to false if disableModcharts is true **/
+	public var saveScore:Bool = true;
+	
+	#if ALLOW_DEPRECATION
+	@:deprecated public var midScroll(get, set):Bool;
+	@:noCompletion function get_midScroll() return centerNotefield;
+	@:noCompletion function set_midScroll(v) return centerNotefield = v;
+	#end
 
 	////
 	public var worldCombos:Bool = false;
@@ -582,7 +593,7 @@ class PlayState extends MusicBeatState
 			cpuControlled = ClientPrefs.getGameplaySetting('botplay', cpuControlled);
 			disableModcharts = ClientPrefs.getGameplaySetting('disableModcharts', false);
 			noDropPenalty = ClientPrefs.getGameplaySetting('noDropPenalty', false);
-			midScroll = ClientPrefs.midScroll;
+			centerNotefield = ClientPrefs.centerNotefield;
 
 			#if tgt
 			playbackRate *= (ClientPrefs.ruin ? 0.8 : 1);
@@ -623,9 +634,9 @@ class PlayState extends MusicBeatState
 		camFollow = prevCamFollow != null ? prevCamFollow : new FlxPoint();
 		camFollowPos = prevCamFollowPos != null ? prevCamFollowPos : new FlxObject();
 
-		FlxG.camera.follow(camFollowPos, LOCKON, 1);
-		FlxG.camera.focusOn(camFollow);
-		FlxG.camera.zoom = defaultCamZoom;
+		camGame.follow(camFollowPos, LOCKON, 1);
+		camGame.focusOn(camFollow);
+		camGame.zoom = defaultCamZoom;
 
 		////
 		if (SONG == null){
@@ -637,11 +648,12 @@ class PlayState extends MusicBeatState
 		Conductor.mapBPMChanges(SONG);
 		Conductor.changeBPM(SONG.bpm);
 		Conductor.songPosition = Conductor.crochet * -5;
+		Conductor.updateSteps();
 
-		songName = Paths.formatToSongPath(SONG.song);
-		songHighscore = Highscore.getScore(SONG.song, difficultyName);
+		songName = (song?.songId) ?? Paths.formatToSongPath(SONG.song);
+		songHighscore = Highscore.getScore(songName, difficultyName);
 
-		metadata = SONG.metadata ?? Paths.json('songs/$songName/metadata.json');
+		metadata = SONG.metadata ?? (song?.getMetadata(difficultyName));
 		if (showDebugTraces && metadata == null)
 			trace('No metadata for $songName. Maybe add some?');
 
@@ -868,6 +880,11 @@ class PlayState extends MusicBeatState
 			add(stage.foreground);
 		}
 
+		var stringId:String = 'difficultyName_$difficultyName';
+		displayedDifficulty = Paths.getString(stringId, difficultyName.replace("-"," ").capitalize());
+		
+		displayedSong = metadata?.songName ?? SONG.song.replace("-"," ").capitalize();
+
 		if (hud == null) {
 			// TODO: make these not be obligatory values
 			// initial icons should be loaded by changeCharacter instead idk
@@ -878,7 +895,7 @@ class PlayState extends MusicBeatState
 				case 'Advanced': hud = new AdvancedHUD(iP1, iP2, SONG.song, stats);
 				case 'Kade': hud = new KadeHUD(iP1, iP2, SONG.song, stats);
 				case 'Classic': hud = new ClassicHUD(iP1, iP2, SONG.song, stats);
-				default: hud = new PsychHUD(iP1, iP2, SONG.song, stats);
+				default: hud = new TraditionalHUD(iP1, iP2, SONG.song, stats);
 			}
 		}
 		hud.cameras = [camHUD];
@@ -908,7 +925,7 @@ class PlayState extends MusicBeatState
 		else
 			timeTxt = new FlxText();
 
-		if(hud is PsychHUD || hud is KadeHUD)
+		if(hud is TraditionalHUD || hud is KadeHUD || hud is ClassicHUD)
 			@:privateAccess
 			scoreTxt = (cast hud).scoreTxt;
 		
@@ -1013,11 +1030,6 @@ class PlayState extends MusicBeatState
 
 		// EVENT AND NOTE SCRIPTS WILL GET LOADED HERE
 		generateSong(SONG.song);
-
-		var stringId:String = 'difficultyName_$difficultyName';
-		displayedDifficulty = Paths.getString(stringId, difficultyName.replace("-"," ").capitalize());
-		
-		displayedSong = SONG.song.replace("-"," ").capitalize();
 
 		#if DISCORD_ALLOWED
 		// Discord RPC texts
@@ -1438,8 +1450,7 @@ class PlayState extends MusicBeatState
 		if (callOnScripts('onModifierRegister') != Globals.Function_Stop) {
 			modManager.registerDefaultModifiers();
 
-			#if !tgt
-			if (midScroll) {
+			if (centerNotefield) {
 				var off:Float = Math.min(FlxG.width, 1280) / 4;
 				var opp:Int = playOpponent ? 0 : 1;
 				
@@ -1455,7 +1466,6 @@ class PlayState extends MusicBeatState
 				modManager.setValue("alpha", 0.6, opp);
 				modManager.setValue("opponentSwap", 0.5);
 			}
-			#end
 
 			signals.onModifierRegister.dispatch();
 		}
@@ -1689,7 +1699,13 @@ class PlayState extends MusicBeatState
 
 		////
 		for (trackName in songTrackNames) {
-			var newTrack = new FlxSound().loadEmbedded(Paths.track(PlayState.SONG.song, trackName));
+			var sndAsset = {
+				if (song != null)
+					Paths.returnSound(song.getSongFile(trackName) + ".ogg");
+				else
+					Paths.track(PlayState.SONG.song, trackName);
+			}
+			var newTrack = new FlxSound().loadEmbedded(sndAsset);
 			//newTrack.volume = 0.0;
 			newTrack.pitch = playbackRate;
 			newTrack.filter = sndFilter;
@@ -1829,13 +1845,16 @@ class PlayState extends MusicBeatState
 		generatedMusic = true;
 	}
 
-	public function generateNotes(noteData:Array<SwagSection>, callScripts:Bool = true, addToFields:Bool = true, ?playfields:Array<PlayField>, ?notes:Array<Note>){
+	public function generateNotes(noteData:Array<SwagSection>, callScripts:Bool = true, addToFields:Bool = true, ?keyCount:Int, ?playfields:Array<PlayField>, ?notes:Array<Note>){
 
 		if (playfields == null)
 			playfields = this.playfields.members;
 
 		if (notes==null)
 			notes = this.allNotes;
+
+		if(keyCount == null)
+			keyCount = PlayState.keyCount;
 		
 		for (section in noteData) {
 			for (songNotes in section.sectionNotes) {
@@ -1995,7 +2014,7 @@ class PlayState extends MusicBeatState
 		}
 		#end
 
-		return event.position + (modManager.getBaseVisPosD(time - event.startTime, 1) * event.speed);
+		return event.position + ((time - event.startTime) * 0.45 * event.speed);
 	}
 
 	public function getSV(time:Float){
@@ -2049,7 +2068,7 @@ class PlayState extends MusicBeatState
 				var speed:Float = 1;
 				if(event.event == 'Constant SV'){
 					var b = Std.parseFloat(event.value1);
-					speed = Math.isNaN(b) ? songSpeed : (songSpeed / b);
+					speed = Math.isNaN(b) ? 1 : (b / songSpeed);
 				}else{
 					speed = Std.parseFloat(event.value1);
 					if (Math.isNaN(speed)) speed = 1;
@@ -2295,7 +2314,6 @@ class PlayState extends MusicBeatState
 		super.onFocus();
 	}
 
-	private var justUnfocused = false; 
 	override public function onFocusLost():Void
 	{
 		#if DISCORD_ALLOWED
@@ -2303,8 +2321,9 @@ class PlayState extends MusicBeatState
 			DiscordClient.changePresence(detailsPausedText, stateText, songName);
 		#end
 
-		if (ClientPrefs.autoPause && !paused)
-			justUnfocused = true;
+		if (ClientPrefs.autoPause && !paused && startedCountdown && canPause) {
+			openPauseMenu();
+		}
 
 		super.onFocusLost();
 	}
@@ -2425,6 +2444,12 @@ class PlayState extends MusicBeatState
 		FlxG.watch.addQuick("visualPos", Conductor.visualPosition);
 	}
 
+	override function updateSteps() {
+		super.updateSteps();
+		setOnScripts('curDecStep', curDecStep);
+		setOnScripts('curDecBeat', curDecBeat);
+	}
+
 	override public function update(elapsed:Float)
 	{
 		if (paused){
@@ -2442,9 +2467,6 @@ class PlayState extends MusicBeatState
 		////
 		for (idx in 0...playfields.members.length)
 			playfields.members[idx].noteField.songSpeed = songSpeed;
-		
-		setOnScripts('curDecStep', curDecStep);
-		setOnScripts('curDecBeat', curDecBeat);
 		
 		/*
 		for (script in notetypeScripts)
@@ -2526,6 +2548,43 @@ class PlayState extends MusicBeatState
 			stats.npsPeak = nps;
 
 		////
+		if (!endingSong){
+			//// time travel
+			if (!startingSong #if !debug && chartingMode #end){
+				if (FlxG.keys.justPressed.ONE) {
+					KillNotes();
+					inst.onComplete();
+				}else if(FlxG.keys.justPressed.TWO) { //Go 10 seconds into the future :O
+					setSongTime(Conductor.songPosition + 10000);
+					clearNotesBefore(Conductor.songPosition);
+				}
+			}
+
+			if (FlxG.keys.anyJustPressed(debugKeysBotplay))
+				cpuControlled = !cpuControlled;
+
+			//// editors
+			if (FlxG.keys.anyJustPressed(debugKeysChart)) {
+				openChartEditor();
+
+			}else if (FlxG.keys.anyJustPressed(debugKeysCharacter)) {
+				FlxTransitionableState.skipNextTransOut = true;
+				persistentUpdate = false;
+				pause();
+				MusicBeatState.switchState(new CharacterEditorState(SONG.player2));
+
+			}else if (canReset && !inCutscene && startedCountdown && controls.RESET) {
+				// RESET = Quick Game Over Screen
+				doGameOver();
+
+			}else if (doDeathCheck()) {
+				// die lol
+
+			}else if (controls.PAUSE && startedCountdown && canPause) {
+				openPauseMenu();
+			}
+		}
+
 		if (startedCountdown && !paused) {
 
 			if (startingSong) {
@@ -2571,45 +2630,6 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
-		
-		if (!endingSong){
-			//// time travel
-			if (!startingSong #if !debug && chartingMode #end){
-				if (FlxG.keys.justPressed.ONE) {
-					KillNotes();
-					inst.onComplete();
-				}else if(FlxG.keys.justPressed.TWO) { //Go 10 seconds into the future :O
-					setSongTime(Conductor.songPosition + 10000);
-					clearNotesBefore(Conductor.songPosition);
-				}
-			}
-
-			if (FlxG.keys.anyJustPressed(debugKeysBotplay))
-				cpuControlled = !cpuControlled;
-
-			//// editors
-			if (FlxG.keys.anyJustPressed(debugKeysChart)) {
-				FlxTransitionableState.skipNextTransOut = true;
-				openChartEditor();
-
-			}else if (FlxG.keys.anyJustPressed(debugKeysCharacter)) {
-				FlxTransitionableState.skipNextTransOut = true;
-				persistentUpdate = false;
-				pause();
-				MusicBeatState.switchState(new CharacterEditorState(SONG.player2));
-
-			}else if (canReset && !inCutscene && startedCountdown && controls.RESET) {
-				// RESET = Quick Game Over Screen
-				doGameOver();
-
-			}else if (doDeathCheck()) {
-				// die lol
-
-			}else if ((controls.PAUSE || justUnfocused) && startedCountdown && canPause && !paused) {
-				justUnfocused = false;
-				openPauseMenu();
-			}
-		}
 
 		////
 		super.update(elapsed);
@@ -2648,6 +2668,7 @@ class PlayState extends MusicBeatState
 
 	function openChartEditor()
 	{
+		FlxTransitionableState.skipNextTransOut = true;
 		persistentUpdate = false;
 		pause();
 
@@ -2857,7 +2878,7 @@ class PlayState extends MusicBeatState
 				var col:Null<FlxColor> = FlxColor.fromString(value1);
 				if (col == null) col = 0xFFFFFFFF;
 
-				FlxG.camera.flash(col, dur, null, true);
+				camGame.flash(col, dur, null, true);
 
 			case 'Hey!':
 				var value:Int = switch (value1.toLowerCase().trim()) {
@@ -3304,7 +3325,7 @@ class PlayState extends MusicBeatState
 		}
 		
 		if (worldCombos)
-			lastCombos = ratingGroup.displayCombo(combo, 0, 80)
+			lastCombos = ratingGroup.displayCombo(combo, -150, 80)
 		else
 			lastCombos = ratingGroup.displayCombo(combo, ClientPrefs.comboOffset[2], -ClientPrefs.comboOffset[3]);
 		
@@ -3836,7 +3857,7 @@ class PlayState extends MusicBeatState
 		if (note.genScript != null)
 			callScript(note.genScript, "onHoldPress", [note, field]);
 
-		if (cpuControlled && note.isRoll) 
+		if (cpuControlled && note.isRoll && ClientPrefs.hitsoundBehav == 'Key Press') 
 			playShithound();
 		
 	}
@@ -3882,7 +3903,7 @@ class PlayState extends MusicBeatState
 			if (note.isSustainNote && !note.isSustainEnd)
 				time += 0.15;
 
-			StrumPlayAnim(field, note.column % 4, time, note);
+			StrumPlayAnim(field, note.column % field.keyCount, time, note);
 		} else {
 			var spr = field.strumNotes[note.column];
 			if (spr != null && (field.keysPressed[note.column] || note.isRoll))
@@ -4083,8 +4104,8 @@ class PlayState extends MusicBeatState
 	public function cameraBump(camZoom:Float = 0.015, hudZoom:Float = 0.03)
 	{
 		var zoomMult = camZoomingMult * ClientPrefs.camZoomP;
-		if (FlxG.camera.zoom < (defaultCamZoom * 1.35))
-			FlxG.camera.zoom += camZoom * zoomMult;
+		if (camGame.zoom < (defaultCamZoom * 1.35))
+			camGame.zoom += camZoom * zoomMult;
 		camHUD.zoom += hudZoom * zoomMult;
 	}
 

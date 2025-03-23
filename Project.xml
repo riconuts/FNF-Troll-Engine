@@ -7,7 +7,7 @@
 
 	<!-- _________________________ Application Settings _________________________ -->
 
-    <app title="Troll Engine" file="Trolled" packageName="com.sowy.trollengine"
+    <app title="Friday Night Funkin': Troll Engine" file="Trolled" packageName="com.sowy.trollengine"
         package="com.sowy.trollengine" main="Main" version="0.2.8" company="Sowy" />
 
 	<!--Switch Export with Unique ApplicationID and Icon-->
@@ -53,6 +53,8 @@
 		<assets path="alsoft.txt" rename="alsoft.conf" unless="windows" />
 	</section>
 
+	<assets path="art/iconOG.png" rename="icon.png" if="linux" />
+
     <assets path="assets" />
     <assets path='default_content' rename='content' embed='false' exclude="*.mp3" />
 
@@ -62,24 +64,27 @@
     <define name="VIDEOS_ALLOWED" if="cpp" />
     <define name="MODS_ALLOWED" if="desktop" />
     <define name="DISCORD_ALLOWED" if="desktop cpp" unless="display || artifact" />
-    <define name="MULTICORE_LOADING" if="native" />
+    <!--<define name="MULTICORE_LOADING" if="native" />-->
+	<!--I don't recommend turning on MULTICORE_LOADING until we rewrite it to be less crashy -Neb-->
     <define name="CRASH_HANDLER" />
-    <define name="BREAD_ALLOWED" />
+    <define name="FUNNY_ALLOWED" /> <!--Allows funny shit like Ruin the Mod and Garlic Bread-->
 
 	<!--Remove if you dont want states to be modified with scripts. This only disables extension/overrides and not the HScriptedState class-->
     <define name="SCRIPTABLE_STATES" if="HSCRIPT_ALLOWED" />
 	<!--Remove if you dont want Lua to be usable. Note that if you remove this, you should remove PE_MOD_COMPATIBILITY too -->
-    <define name="LUA_ALLOWED" if="desktop cpp" unless="mac" />
+    <define name="LUA_ALLOWED" if="desktop cpp" />
 	<!--Remove if you don't want Psych Engine mod compatibility -->
     <define name="PE_MOD_COMPATIBILITY" if="LUA_ALLOWED MODS_ALLOWED" />
 	<!--Remove if you don't want NightmareVision mod compatibility-->
 	<define name="NMV_MOD_COMPATIBILITY" if="PE_MOD_COMPATIBILITY MODS_ALLOWED HSCRIPT_ALLOWED"/>
 
 	<!--Remove if you don't want to use FlxAnimate-->
-<!-- <define name="USING_FLXANIMATE" />-->
+	<define name="USING_FLXANIMATE" />
 
 	<!--Remove if you don't want to use Moonchart, which allows usage of chart formats from other rhythm games and fnf engines-->
 	<define name="USING_MOONCHART" if="native" />
+
+	<!-- <define name="USING_NEW_MOONCHART" />--> <!--If you're using git, set this, because Haxe sucks fuck and cant detect if youre on git or 0.4.0 for some fucking reason welcome to haxe ladies and gentlemen-->
 
 	<!--Remove if you dont want the engine to autoupdate -->
     <define name="DO_AUTO_UPDATE" if="native desktop OFFICIAL_BUILD" unless="debug" />
@@ -111,7 +116,8 @@
 		<classpath path="flxAnimateShadow"/> <!--Remove if FlxAnimate updates and lets you write your own code to determine how filesystem shit is gotten-->
 	</section>
 
-	<haxelib name="moonchart" version="0.4.0" if="USING_MOONCHART"/>
+	<haxelib name="moonchart" version="0.4.0" if="USING_MOONCHART" unless="USING_NEW_MOONCHART"/>
+	<haxelib name="moonchart" version="git" if="USING_NEW_MOONCHART"/>
 
 	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
 	<haxelib name="hxvlc" version="1.6.1" if="VIDEOS_ALLOWED"/> <!--You can replace with hxcodec if you're stubborn and dont wanna use newer and better libs-->

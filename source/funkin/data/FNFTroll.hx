@@ -1,5 +1,10 @@
 package funkin.data;
 
+#if USING_NEW_MOONCHART
+import moonchart.formats.fnf.FNFGlobal.FNFLegacyNoteType;
+import moonchart.formats.fnf.FNFGlobal;
+#end
+import funkin.data.Song.SongTracks;
 #if USING_MOONCHART
 import haxe.Json;
 import moonchart.backend.Util;
@@ -27,10 +32,25 @@ typedef TrollJSONFormat = FNFLegacyFormat & {
 	?info:Array<String>,
 	?metadata:Song.SongMetadata,
 	?offset:Float,
-
+	?tracks: SongTracks,
+	?keyCount: Int,
+	
 	// deprecated
+	?extraTracks: Array<String>,
 	?player3:String,
 }
+
+#if USING_NEW_MOONCHART
+enum abstract FNFTrollNoteType(String) from String to String
+{
+	var TROLL_MINE = "Mine";
+	var TROLL_ROLL = "Roll";
+	// Psych ones, because Haxe sucks
+	var TROLL_ALT_ANIM = "Alt Animation";
+	var TROLL_NO_ANIM = "No Animation";
+	var TROLL_GF_SING = "GF Sing";
+}
+#end
 
 class FNFTroll extends FNFLegacyBasic<TrollJSONFormat> {
 	// From Psych Engine
@@ -42,7 +62,7 @@ class FNFTroll extends FNFLegacyBasic<TrollJSONFormat> {
 			extension: "json",
 			hasMetaFile: POSSIBLE,
 			metaFileExtension: "json",
-			specialValues: ['"extraTracks":', '"hudSkin":'],
+			specialValues: ['"tracks":', '"hudSkin":'],
 			handler: FNFTroll
 		}
 	}
@@ -190,8 +210,25 @@ class FNFTroll extends FNFLegacyBasic<TrollJSONFormat> {
 
 			}
 		}
+
+		data.song.metadata ??= {};
+		data.song.metadata.songName = chart.meta.title;
+		data.song.metadata.artist = chart.meta.extraData.get("SONG_ARTIST");
+		data.song.metadata.charter = chart.meta.extraData.get("SONG_CHARTER");
+
 		return cast basic;
 	}
+	/* #if(moonchart > "0.4.0") */ // WHY DOES THIS NOT WORK???
+	#if USING_NEW_MOONCHART
+	override function resolveBasicNoteType(type:String):FNFLegacyNoteType {
+		return cast switch (type) {
+			case MINE: TROLL_MINE;
+			case ALT_ANIM: TROLL_ALT_ANIM;
+			case ROLL: TROLL_ROLL;
+			default: type;
+		}
+	}
+	#else
 	override function prepareNote(note:FNFLegacyNote, offset:Float):FNFLegacyNote {
 		if (note.type is String) {
 			note[3] = switch (cast(note.type, String)) {
@@ -208,8 +245,10 @@ class FNFTroll extends FNFLegacyBasic<TrollJSONFormat> {
 
 		return note;
 	}
+	#end
 	
 }
+
 #else
 class FNFTroll {}
 #end

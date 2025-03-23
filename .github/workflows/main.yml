@@ -130,7 +130,7 @@ jobs:
       fail-fast: false
       matrix:
         build: [release]
-        version: [12, 13]
+        version: [13]
     timeout-minutes: 45
     
     steps:

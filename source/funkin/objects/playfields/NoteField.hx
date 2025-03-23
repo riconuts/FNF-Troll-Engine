@@ -128,6 +128,8 @@ class NoteField extends FieldBase
 		var drawMod = modManager.get("drawDistance");
 		var drawDist = drawMod == null ? FlxG.height : drawMod.getValue(modNumber);
 		var multAllowed = modManager.get("disableDrawDistMult");
+		var alwaysDraw = modManager.get("alwaysDraw").getValue(modNumber) != 0; // Forces notes to draw, no matter the draw distance
+
 		if (multAllowed == null || multAllowed.getValue(modNumber) == 0)
 			drawDist *= drawDistMod;
 		var lookAheadTime = modManager.getValue("lookAheadTime", modNumber);
@@ -140,9 +142,9 @@ class NoteField extends FieldBase
 			if (songSpeed != 0)
 			{
 				var speed = modManager.getNoteSpeed(daNote, modNumber, songSpeed);
-				var visPos = -((Conductor.visualPosition - daNote.visualTime) * speed);
+				var visPos = ((daNote.visualTime - Conductor.visualPosition) * speed);
 
-				if (visPos > drawDist || (daNote.wasGoodHit && daNote.sustainLength > 0))
+				if ((visPos > drawDist && !alwaysDraw) || (daNote.wasGoodHit && daNote.sustainLength > 0))
 					continue; // don't draw
 
 				if (!daNote.copyX && !daNote.copyY) {
@@ -320,7 +322,7 @@ class NoteField extends FieldBase
 		var quad1 = new Vector3(wid);
 		var scale:Float = (z!=0.0) ? (1.0 / z) : 1.0;
 
-		if (spiralHolds || simpleDraw) {
+		if (!spiralHolds || simpleDraw) {
 			// less accurate, but higher FPS
 			quad0.scaleBy(scale);
 			quad1.scaleBy(scale);
@@ -623,7 +625,6 @@ class NoteField extends FieldBase
 		final halfHeight = sprite.frameHeight * sprite.scale.y * 0.5;
 		final xOff = sprite.frame.offset.x * sprite.scale.x;
 		final yOff = sprite.frame.offset.y * sprite.scale.y;
-		// If someone can make frameX/frameY be taken into account properly then feel free lol ^^
 
 		quad0.setTo(xOff - halfWidth, 			yOff - halfHeight, 			0); // top left
 		quad1.setTo(width + xOff - halfWidth, 	yOff - halfHeight, 			0); // top right

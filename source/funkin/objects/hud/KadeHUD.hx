@@ -165,7 +165,7 @@ class KadeHUD extends BaseHUD
 		timeTxt.exists = updateTime;
 
 		if (ClientPrefs.timeBarType == "Song Name"){
-			timeTxt.text = songName;
+			timeTxt.text = displayedSong;
 			watermark.text = engineStringLong;
 
 			if (watermark.x + watermark.width >= healthBarBG.x)
