@@ -31,7 +31,7 @@ class TitleState extends MusicBeatState
 	public static var initialized:Bool = false;
 	public static var closedState:Bool = false;
 
-	static function getIntroTextShit():Array<Array<String>>
+	public static function getIntroText():Array<Array<String>>
 	{
 		var swagGoodArray:Array<Array<String>> = [];
 
@@ -222,7 +222,7 @@ class TitleState extends MusicBeatState
 		ngSpr.cameras = [camHUD];
 		intro.add(ngSpr);
 
-		var curWacky = FlxG.random.getObject(getIntroTextShit());
+		var curWacky = FlxG.random.getObject(getIntroText());
 
 		intro.queueOnBeat(0, intro.clearLines);
 		intro.queueOnBeat(0, playMusic.bind(null));
