@@ -23,6 +23,7 @@ import lime.app.Application;
 import haxe.Constraints.Function;
 
 import hscript.*;
+import hscript.TrollInterp as Interp;
 
 using StringTools;
 
