@@ -120,7 +120,7 @@
 	<haxelib name="moonchart" version="git" if="USING_NEW_MOONCHART"/>
 
 	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
-	<haxelib name="hxvlc" version="1.6.1" if="VIDEOS_ALLOWED"/> <!--You can replace with hxcodec if you're stubborn and dont wanna use newer and better libs-->
+	<haxelib name="hxvlc" if="VIDEOS_ALLOWED"/> <!--You can replace with hxcodec if you're stubborn and dont wanna use newer and better libs-->
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
 
 	<section if="HSCRIPT_ALLOWED">

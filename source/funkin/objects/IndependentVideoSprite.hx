@@ -106,11 +106,13 @@ class IndependentVideoSprite extends VideoSprite {
 			FlxG.signals.focusLost.remove(pause);
 		
 
+		#if (hxvlc <= "1.9.3")
 		if (!FlxG.signals.focusGained.has(_autoResume))
 			FlxG.signals.focusGained.add(_autoResume);
 
 		if (!FlxG.signals.focusLost.has(_autoPause))
 			FlxG.signals.focusLost.add(_autoPause);
+		#end
 
 		return returnValue;
 		
@@ -118,6 +120,7 @@ class IndependentVideoSprite extends VideoSprite {
 	}
 	#end
 
+	#if (hxvlc <= "1.9.3")
 	override function pause(){
 		_paused = true;
 		super.pause();
@@ -144,5 +147,6 @@ class IndependentVideoSprite extends VideoSprite {
 				bitmap.resume();
 		}
 	}
+	#end
 }
 #end
