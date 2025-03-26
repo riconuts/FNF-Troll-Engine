@@ -36,8 +36,32 @@ class NotefieldRenderer extends FlxBasic {
 			members.remove(field);
 	}
 	
-	static function drawQueueSort(Obj1:FinalRenderObject, Obj2:FinalRenderObject) 
-		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.zIndex, Obj2.zIndex);
+	static inline function zindexSort(Order:Int, Obj1:FinalRenderObject, Obj2:FinalRenderObject):Int {
+		var result:Int = 0;
+		var Value1:Float = Obj1.zIndex;
+		var Value2:Float = Obj2.zIndex;
+
+		if (Value1 < Value2) {
+			result = Order;
+		} else if (Value1 > Value2) {
+			result = -Order;
+		}
+
+		if(result == 0){
+			var isObj1Note = Obj1.objectType == NOTE;
+			var isObj2Note = Obj2.objectType == NOTE;
+			if (isObj1Note && !isObj2Note)
+				result = -Order;
+			else if(isObj2Note)
+				result = Order;
+		}
+
+		return result;
+	}
+
+	static function drawQueueSort(Obj1:FinalRenderObject, Obj2:FinalRenderObject) {
+		return zindexSort(FlxSort.ASCENDING, Obj1, Obj2);
+	}
 	
 	var point:FlxPoint = FlxPoint.get(0, 0);
 	
@@ -79,6 +103,7 @@ class NotefieldRenderer extends FlxBasic {
 					indices: object.indices,
 					zIndex: object.zIndex + field.zIndexMod,
 					colorSwap: object.colorSwap,
+					objectType: object.objectType,
 					antialiasing: object.antialiasing,
 					sourceField: field,
 					glowColour: glowColour,  // Maybe this should be part of the regular RenderObject?

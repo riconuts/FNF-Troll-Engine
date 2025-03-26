@@ -40,8 +40,6 @@ class NoteField extends FieldBase
 	]);
 	var HOLD_INDICES:Vector<Int> = new Vector<Int>(0, false);
 
-	public var tryForceHoldsBehind:Bool = true; // Field tries to push holds behind receptors and notes
-
 	public var holdSubdivisions(default, set):Int;
 	public var optimizeHolds = false; //ClientPrefs.optimizeHolds;
 	public var defaultShader:FlxShader = new FlxShader();
@@ -512,6 +510,7 @@ class NoteField extends FieldBase
 			indices: HOLD_INDICES,
 			zIndex: zIndex + hold.zIndex,
 			colorSwap: hold.colorSwap,
+			objectType: hold.objType,
 			antialiasing: hold.antialiasing
 		}
 	}
@@ -744,6 +743,7 @@ class NoteField extends FieldBase
 			indices: NOTE_INDICES,
 			zIndex: pos.z + sprite.zIndex,
 			colorSwap: sprite.colorSwap,
+			objectType: sprite.objType,
 			antialiasing: sprite.antialiasing
 		}
 	}
