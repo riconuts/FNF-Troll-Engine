@@ -432,6 +432,27 @@ class Song
 		for (name in allCharts)
 			chartNames.push(name);
 
+
+		// stolen from v-slice lol!
+		var defaultDifficultyOrdering:Array<String>  = ["easy", "normal", "hard", "erect", "nightmare"];
+		chartNames.sort((a, b)->{
+			a = a.toLowerCase();
+			b = b.toLowerCase();
+			if(a==b)return 0;
+
+			var aHasDefault = defaultDifficultyOrdering.contains(a);
+			var bHasDefault = defaultDifficultyOrdering.contains(b);
+			if (aHasDefault && bHasDefault)
+				return defaultDifficultyOrdering.indexOf(a) - defaultDifficultyOrdering.indexOf(b);
+			else if(aHasDefault)
+				return 1;
+			else if(bHasDefault)
+				return -1;
+
+			return a > b ? -1 : 1;
+			
+		});
+
 		return chartNames;
 		#else
 		

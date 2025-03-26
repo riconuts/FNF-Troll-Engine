@@ -77,7 +77,7 @@ class NotefieldRenderer extends FlxBasic {
 					uvData: object.uvData,
 					vertices: object.vertices,
 					indices: object.indices,
-					zIndex: object.zIndex,
+					zIndex: object.zIndex + field.zIndexMod,
 					colorSwap: object.colorSwap,
 					antialiasing: object.antialiasing,
 					sourceField: field,

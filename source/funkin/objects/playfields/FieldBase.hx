@@ -24,6 +24,12 @@ class FieldBase extends FlxObject {
 	public function preDraw()throw new NotImplementedException();
 
 	public var isProxy:Bool = false; // dumb and hardcoded but oh well
+	
+	/**
+	 * Z-Index Modifier
+	 * Used to push the field behind others or pull it infront of others.
+	 */
+	public var zIndexMod:Float = 0;
 
 	/**
 	 * Used by preDraw to store RenderObjects to be drawn
