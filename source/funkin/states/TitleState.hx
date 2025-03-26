@@ -31,16 +31,14 @@ class TitleState extends MusicBeatState
 	public static var initialized:Bool = false;
 	public static var closedState:Bool = false;
 
-	static function getIntroTextShit():Array<Array<String>>
+	public static function getIntroText():Array<Array<String>>
 	{
 		var swagGoodArray:Array<Array<String>> = [];
 
-		for (folder in Paths.getFolders("data")) {
-			var rawFile:Null<String> = Paths.getText('$folder/introText.txt');
-			if (rawFile != null) {
-				for (line in rawFile.rtrim().split('\n'))
-					swagGoodArray.push(line.split('--'));
-			}	
+		var rawFile:Null<String> = Paths.getText(Paths.getPath('data/introText.txt'));
+		if (rawFile != null) {
+			for (line in rawFile.rtrim().split('\n'))
+				swagGoodArray.push(line.split('--'));
 		}
 
 		return swagGoodArray;
@@ -222,7 +220,7 @@ class TitleState extends MusicBeatState
 		ngSpr.cameras = [camHUD];
 		intro.add(ngSpr);
 
-		var curWacky = FlxG.random.getObject(getIntroTextShit());
+		var curWacky = FlxG.random.getObject(getIntroText());
 
 		intro.queueOnBeat(0, intro.clearLines);
 		intro.queueOnBeat(0, playMusic.bind(null));

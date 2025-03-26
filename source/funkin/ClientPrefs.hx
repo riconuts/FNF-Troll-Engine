@@ -6,9 +6,6 @@ import funkin.input.Controls.KeyboardScheme;
 import flixel.util.FlxSave;
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;
-#if (!macro && linux)
-import funkin.api.Linux;
-#end
 #if DISCORD_ALLOWED
 import funkin.api.Discord.DiscordClient;
 #end
@@ -604,17 +601,12 @@ class ClientPrefs {
 				data: []
 			},
 			"framerate" => {
-				display: "Max Framerate",
-				desc: "The highest framerate the game can hit.",
-				type: Number,
-				value: #if (!macro && !linux) FlxG.stage != null ? FlxG.stage.application.window.displayMode.refreshRate : #end
-				#if (!macro && linux)
-				Linux.getMonitorRefreshRate()
-				#else
-				60
-				#end
-				,
-				data: ["suffix" => " FPS", "min" => 5, "max" => 360, "step" => 1,]
+				display:"Max Framerate",
+				desc:"The highest framerate the game can hit.",
+				type:Number,
+				value:#if !macro FlxG.stage != null ? FlxG.stage.application.window.displayMode.refreshRate : #end
+				60,
+				data:["suffix" => " FPS", "min" => 5, "max" => 360, "step" => 1,]
 			},
 			"lowQuality" => {
 				display: "Low Quality",
@@ -638,14 +630,14 @@ class ClientPrefs {
 				data: []
 			},
 			/*
-			"modcharts" => {
-				display: "Modcharts",
-				desc: "When toggled, modcharts will be used on some songs.\nWARNING: Disabling modcharts on modcharted songs will disable scoring!",
-				type: Toggle,
-				value: true,
-				data: ["requiresRestart" => true]
-			},
-			*/
+				"modcharts" => {
+					display: "Modcharts",
+					desc: "When toggled, modcharts will be used on some songs.\nWARNING: Disabling modcharts on modcharted songs will disable scoring!",
+					type: Toggle,
+					value: true,
+					data: ["requiresRestart" => true]
+				},
+			 */
 			#if FUNNY_ALLOWED
 			"ruin" => {
 				display: "Ruin The Mod",
@@ -820,7 +812,7 @@ class ClientPrefs {
 
 	public static function initialize() {
 		defaultOptionDefinitions.get("framerate")
-			.value = #if (linux && cpp) funkin.api.Linux.getMonitorRefreshRate() #else FlxG.stage.application.window.displayMode.refreshRate #end;
+			.value = #if linux funkin.api.Linux.getMonitorRefreshRate() #else FlxG.stage.application.window.displayMode.refreshRate #end;
 		// locale = openfl.system.Capabilities.language;
 
 		optionSave.bind("options_v2");
@@ -899,7 +891,7 @@ class ClientPrefs {
 		if (Main.bread != null)
 			Main.bread.visible = ClientPrefs.bread;
 		#end
-		
+
 		FlxG.sound.volume = ClientPrefs.masterVolume;
 		FlxG.autoPause = ClientPrefs.autoPause;
 

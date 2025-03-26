@@ -2578,7 +2578,6 @@ class PlayState extends MusicBeatState
 
 			//// editors
 			if (FlxG.keys.anyJustPressed(debugKeysChart)) {
-				FlxTransitionableState.skipNextTransOut = true;
 				openChartEditor();
 
 			}else if (FlxG.keys.anyJustPressed(debugKeysCharacter)) {
@@ -2682,6 +2681,7 @@ class PlayState extends MusicBeatState
 
 	function openChartEditor()
 	{
+		FlxTransitionableState.skipNextTransOut = true;
 		persistentUpdate = false;
 		pause();
 

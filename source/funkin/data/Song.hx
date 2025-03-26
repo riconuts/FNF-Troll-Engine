@@ -82,6 +82,7 @@ typedef SongMetadata =
 	?extraInfo:Array<String>,
 }
 
+inline final DEFAULT_CHART_ID = "normal";
 class Song
 {
 	public final songId:String;
@@ -143,14 +144,14 @@ class Song
 	}
 
 	/**
-	 * Returns metadata for the requested chart. 
-	 * If it doesn't exist, metadata for the 'normal' chart is returned instead
+	 * Returns metadata for the requested chartId. 
+	 * If it doesn't exist, metadata for the default chart is returned instead
 	 * 
 	 * @param chartId The song chart for which you want to request metadata
 	**/
-	public function getMetadata(chartId:String = "normal"):SongMetadata {
+	public function getMetadata(chartId:String = DEFAULT_CHART_ID):SongMetadata {
 		if (chartId=="")
-			chartId="normal";
+			chartId=DEFAULT_CHART_ID;
 
 		if (metadataCache.exists(chartId)) {
 			//trace('$this: Returning cached metadata for $chartId');
@@ -161,10 +162,10 @@ class Song
 		if (meta != null) {
 			//trace('$this: Found metadata for $chartId');
 		}
-		else if (chartId != "normal") {
+		else if (chartId != DEFAULT_CHART_ID) {
 			if (Main.showDebugTraces)
 				trace('$this: Metadata not found for [$chartId]. Using default');
-			return getMetadata("normal");
+			return getMetadata(DEFAULT_CHART_ID);
 		}
 		else {
 			if (Main.showDebugTraces)
@@ -177,9 +178,15 @@ class Song
 		return meta;
 	}
 
-	public function getSwagSong(chartId:String):Null<SwagSong> {
+	/**
+	 * Returns chart data for the requested chartId. 
+	 * If it doesn't exist, null is returned instead
+	 * 
+	 * @param chartId The song chart for which you want to request chart data
+	**/
+	public function getSwagSong(chartId:String = DEFAULT_CHART_ID):Null<SwagSong> {
 		if (chartId == '')
-			chartId = 'normal';
+			chartId = DEFAULT_CHART_ID;
 
 		#if !USING_MOONCHART
 		var suffix = getDifficultyFileSuffix(chartId);
@@ -461,14 +468,12 @@ class Song
 			var fileName:String = unprocessedName.toLowerCase();
 			if (fileName == '$songId.json'){
 				charts.set("normal", true);
-				return;
 			}
-			else if (!fileName.startsWith('$songId-') || !fileName.endsWith('.json')){
-				return;
+			else if (fileName.startsWith('$songId-') && fileName.endsWith('.json')) {
+				final extension_dot = songId.length + 1;
+				charts.set(fileName.substr(extension_dot, fileName.length - extension_dot - 5), true);
 			}
 
-			final extension_dot = songId.length + 1;
-			charts.set(fileName.substr(extension_dot, fileName.length - extension_dot - 5), true);
 		}
 
 		var contentPath = Paths.getFolderPath(song.folder);
@@ -481,7 +486,6 @@ class Song
 		#end
 	}
 
-	// TODO: GEt rid of this, just save the charts as "-normal" grrrr
 	public inline static function getDifficultyFileSuffix(diff:String) {
 		diff = Paths.formatToSongPath(diff);
 		return (diff=="" || diff=="normal") ? "" : '-$diff';
@@ -751,12 +755,9 @@ class Song
 	static public function loadSong(toPlay:Song, ?difficulty:String) {
 		Paths.currentModDirectory = toPlay.folder;
 
-		if (difficulty == "") {
-			difficulty = "normal";
-		}
-		else if (difficulty == null) {
-			if (toPlay.charts.contains("normal"))
-				difficulty = "normal";
+		if (difficulty == null || difficulty == "") {
+			if (toPlay.charts.contains(DEFAULT_CHART_ID))
+				difficulty = DEFAULT_CHART_ID;
 			else
 				difficulty = toPlay.charts[0];
 		}
