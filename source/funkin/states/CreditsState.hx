@@ -18,7 +18,10 @@ using StringTools;
 
 class CreditsState extends MusicBeatState
 {	
-	var useHttp:Bool = #if final true #else false #end; // shouldnt we check if tgt too		// no, the base engine could use it
+	// Removed usehttp since engine no longer has credits baseline
+	// Maybe we could add it back some day w/ github contributors n shit tho
+	
+
 	var bg:FlxSprite;
 
 	var hintBg:FlxSprite;
@@ -62,6 +65,8 @@ class CreditsState extends MusicBeatState
 		persistentUpdate = false;
 		return onOutroFinished();
 	}
+	
+	var backdrop:flixel.addons.display.FlxBackdrop;
 
 	override function create()
 	{
@@ -86,7 +91,53 @@ class CreditsState extends MusicBeatState
 		#if tgt
 		bg = new FlxSprite(Paths.image("tgtmenus/creditsbg"));
 		#else
-		bg = new FlxSprite(Paths.image("menuDesat"));
+		// the cool thing from the options state
+		var color = 0xFFea71fd; 
+		var bgGraphic = Paths.image('menuDesat');
+		var adjustColor = new funkin.objects.shaders.AdjustColor();
+		adjustColor.contrast = 1.0;
+		adjustColor.brightness = -0.125;
+
+		bg = new FlxSprite((FlxG.width - bgGraphic.width) * 0.5, (FlxG.height - bgGraphic.height) * 0.5, bgGraphic);
+		bg.shader = adjustColor.shader;
+		bg.blend = INVERT;
+		bg.color = color;
+		bg.alpha = 0.25;
+		bg.setColorTransform(-1, -1, -1, 1, Std.int(255 + bg.color.red / 3), Std.int(255 + bg.color.green / 3), Std.int(255 + bg.color.blue / 3), 0);
+
+		var bg2 = new FlxSprite(bg.x, bg.y).makeGraphic(bg.frameWidth, bg.frameHeight, 0x00000000, false, 'OptionsState_bg');
+		bg2.blend = MULTIPLY;
+		bg2.stamp(bg);
+
+		bg.destroy();
+		bg = bg2;
+
+		var grid = new openfl.display.BitmapData(2, 2);
+		grid.setPixel32(0, 0, 0xFFC0C0C0);
+		grid.setPixel32(1, 1, 0xFFC0C0C0);
+
+		var grid = flixel.graphics.FlxGraphic.fromBitmapData(grid, false, 'OptionsState_grid');
+
+		backdrop = new flixel.addons.display.FlxBackdrop(grid);
+		backdrop.scale.x = backdrop.scale.y = FlxG.height / 3;
+		backdrop.updateHitbox();
+		backdrop.y -= backdrop.height / 2;
+		backdrop.velocity.set(30, 30);
+		backdrop.antialiasing = true;
+		backdrop.color = color;
+		backdrop.scrollFactor.set(0, 0);
+		backdrop.alpha = 0.5;
+		backdrop.blend = ADD;
+
+		var gradient = flixel.util.FlxGradient.createGradientFlxSprite(FlxG.width, FlxG.height, [0xFFFFFFFF, 0xFF000000]);
+		gradient.scrollFactor.set(0, 0);
+		add(gradient);
+		add(backdrop);
+
+		bg.setGraphicSize(0, FlxG.height);
+		bg.updateHitbox();
+		bg.screenCenter();
+		add(bg);
 		#end
 
 		bg.screenCenter().scrollFactor.set();
@@ -114,55 +165,12 @@ class CreditsState extends MusicBeatState
 			addSong(line.split("::"), folder);
 
 		//// Get credits list
-		var rawCredits:String;
-		var creditsPath:String;
 
-		function getLocalCredits(){	
-			var creditsPath = Paths.getPath('data/credits.txt');
-			trace('using local credits $creditsPath');
+		// TODO: Allow mods to add their own credits
 
-			rawCredits = Paths.getContent(creditsPath);
-		}
+		var creditsPath = Paths.getPath('data/credits.txt');
 
-		// Just in case we forget someone!!!
-		
-		if (useHttp){
-			trace('checking for updated credits');
-			
-			var githubRepo = Main.Version.githubRepo;
-			#if tgt
-			var http = new haxe.Http('https://raw.githubusercontent.com/${githubRepo.user}/${githubRepo.repo}/main/assets-tgt/data/credits.txt'); // hmmmmm
-			#else
-			var http = new haxe.Http('https://raw.githubusercontent.com/${githubRepo.user}/${githubRepo.repo}/main/assets/data/credits.txt');
-			#end
-			http.onData = function(data:String){
-				rawCredits = data;
-
-				#if sys
-				try{
-					trace('updating credits...');
-					if (FileSystem.exists("assets/data/credits.txt")){
-						trace("updated credits!!!");
-						File.saveContent("assets/data/credits.txt", data);
-					}else
-						trace("no credits file to write to!");
-				}catch(e){
-					trace("couldn't update credits: " + e);
-				}
-				#end
-
-				trace('using credits from github');
-			}
-			http.onError = function(error){
-				trace('error: $error');
-				getLocalCredits();
-			}
-
-			http.request();
-		}else
-			getLocalCredits();
-
-		for (i in CoolUtil.listFromString(rawCredits))
+		for (i in CoolUtil.listFromString(Paths.getContent(creditsPath)))
 			loadLine(i);
 
 		////
@@ -187,6 +195,7 @@ class CreditsState extends MusicBeatState
 	}
 
 	var realIndex:Int = 0;
+	var margin = 240;
 	public function addSong(data:Array<String>, ?folder:String)
 	{
 		Paths.currentModDirectory = folder == null ? "" : folder;
@@ -196,7 +205,7 @@ class CreditsState extends MusicBeatState
 
 		if (data.length > 1)
 		{
-			songTitle = new Alphabet(0, 240 * id, data[0], false);
+			songTitle = new Alphabet(0, margin * id, data[0], false);
 			songTitle.x = 120;
 			songTitle.targetX = 90;
 
@@ -207,7 +216,7 @@ class CreditsState extends MusicBeatState
 				var songIcon = new AttachedSprite(iconPath);
 
 				songIcon.xAdd = songTitle.width + 15; 
-				songIcon.yAdd = 15;
+				songIcon.yAdd = (-songIcon.height / 2) + 15;
 				songIcon.sprTracker = songTitle;
 
 				iconArray[id] = songIcon;
@@ -216,7 +225,7 @@ class CreditsState extends MusicBeatState
 		}else if (data[0].trim().length == 0){
 			return;
 		}else{
-			songTitle = new Alphabet(0, 240 * id, data[0], true);
+			songTitle = new Alphabet(0, margin * id, data[0], true);
 			songTitle.screenCenter(X);
 			songTitle.targetX = songTitle.x;
 		}
