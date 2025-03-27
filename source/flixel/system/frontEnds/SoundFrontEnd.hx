@@ -125,8 +125,8 @@ class SoundFrontEnd
 		music.loadEmbedded(embeddedMusic, looped);
 		music.volume = volume;
 		music.persist = true;
-		music.group = (group == null) ? defaultMusicGroup : group;
 		music.context = MUSIC;
+		music.group = (group == null) ? defaultMusicGroup : group;
 		music.play();
 	}
 
