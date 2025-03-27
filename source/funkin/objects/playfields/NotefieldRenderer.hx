@@ -47,14 +47,14 @@ class NotefieldRenderer extends FlxBasic {
 			result = -Order;
 		}
 
-		if(result == 0){
+/* 		if(result == 0){
 			var isObj1Note = Obj1.objectType == NOTE;
 			var isObj2Note = Obj2.objectType == NOTE;
 			if (isObj1Note && !isObj2Note)
 				result = -Order;
 			else if(isObj2Note)
 				result = Order;
-		}
+		} */
 
 		return result;
 	}
