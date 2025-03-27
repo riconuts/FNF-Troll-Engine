@@ -127,10 +127,12 @@ class FlxSound extends FlxBasic
 	 */
 	public var volume(get, set):Float;
 
+	#if FLX_PITCH
 	/**
 	 * Set pitch, which also alters the playback speed. Default is 1.
 	 */
 	public var pitch(get, set):Float;
+	#end
 
 	/**
 	 * The position in runtime of the music playback in milliseconds.
@@ -209,10 +211,12 @@ class FlxSound extends FlxBasic
 	 */
 	var _length:Float = 0;
 
+	#if FLX_PITCH
 	/**
 	 * Internal tracker for pitch.
 	 */
 	var _pitch:Float = defaultPitch;
+	#end
 
 	/**
 	 * Internal tracker for total volume adjustment.
@@ -464,6 +468,9 @@ class FlxSound extends FlxBasic
 		updateTransform();
 		exists = true;
 		onComplete = OnComplete;
+		#if FLX_PITCH
+		pitch = defaultPitch;
+		#end
 		_length = (_sound == null) ? 0 : _sound.length;
 		endTime = _length;
 		return this;
@@ -705,7 +712,9 @@ class FlxSound extends FlxBasic
 		_channel = _sound.play(_time, 0, _transform);
 		if (_channel != null)
 		{
+			#if FLX_PITCH
 			pitch = _pitch;
+			#end
 			updateFilter();
 			updateEffect();
 
@@ -833,6 +842,7 @@ class FlxSound extends FlxBasic
 		return Volume;
 	}
 
+	#if FLX_PITCH
 	inline function get_pitch():Float
 	{
 		return _pitch;
@@ -850,6 +860,7 @@ class FlxSound extends FlxBasic
 
 		return _pitch = v;
 	}
+	#end
 
 	inline function set_filter(v:ALFilter)
 	{
