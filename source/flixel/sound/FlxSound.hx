@@ -8,13 +8,6 @@ import lime.media.openal.ALAuxiliaryEffectSlot;
 import lime.media.openal.ALFilter;
 import lime.media.openal.AL;
 
-import openfl.events.Event;
-import openfl.events.IEventDispatcher;
-import openfl.media.Sound;
-import openfl.media.SoundChannel;
-import openfl.media.SoundTransform;
-import openfl.net.URLRequest;
-
 import flixel.FlxBasic;
 import flixel.FlxG;
 import flixel.math.FlxMath;
@@ -25,6 +18,12 @@ import flixel.util.FlxStringUtil;
 import flixel.sound.FlxSoundGroup;
 
 import openfl.Assets;
+import openfl.events.Event;
+import openfl.events.IEventDispatcher;
+import openfl.media.Sound;
+import openfl.media.SoundChannel;
+import openfl.media.SoundTransform;
+import openfl.net.URLRequest;
 #if flash11
 import flash.utils.ByteArray;
 #end
@@ -914,8 +913,7 @@ class FlxSound extends FlxBasic
 			LabelValuePair.weak("playing", playing),
 			LabelValuePair.weak("time", time),
 			LabelValuePair.weak("length", length),
-			LabelValuePair.weak("volume", volume),
-			LabelValuePair.weak("pitch", pitch)
+			LabelValuePair.weak("volume", volume)
 		]);
 	}
 }
