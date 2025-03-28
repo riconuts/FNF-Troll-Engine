@@ -709,8 +709,13 @@ class OptionsSubstate extends MusicBeatSubstate
 		optionDesc.alpha = 0;
 		add(optionDesc);
 
+		#if (flixel >= "5.9.0")
 		prevScreenX = FlxG.mouse.viewX;
 		prevScreenY = FlxG.mouse.viewY;
+		#else
+		prevScreenX = FlxG.mouse.screenX;
+		prevScreenY = FlxG.mouse.screenY;
+		#end
 
 		add(new FlxSignalHolder(FlxG.sound.onVolumeChange, onVolumeChange));
 		onVolumeChange(FlxG.sound.volume);
@@ -1411,10 +1416,16 @@ class OptionsSubstate extends MusicBeatSubstate
 				}
 			}
 
+			#if (flixel >= "5.9.0")
 			var movedMouse = Math.abs(FlxG.mouse.wheel) + Math.abs(FlxG.mouse.viewX - prevScreenX) + Math.abs(FlxG.mouse.viewY - prevScreenY) != 0;
-			if (movedMouse) FlxG.mouse.visible = true;
 			prevScreenX = FlxG.mouse.viewX;
 			prevScreenY = FlxG.mouse.viewY;
+			#else
+			var movedMouse = Math.abs(FlxG.mouse.wheel) + Math.abs(FlxG.mouse.screenX - prevScreenX) + Math.abs(FlxG.mouse.screenY - prevScreenY) != 0;
+			prevScreenX = FlxG.mouse.screenX;
+			prevScreenY = FlxG.mouse.screenY;
+			#end
+			if (movedMouse) FlxG.mouse.visible = true;
 
 			if (pHov == null || doUpdate || movedMouse || FlxG.mouse.justPressed)
 			{
