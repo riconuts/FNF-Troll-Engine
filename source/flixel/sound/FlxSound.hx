@@ -25,7 +25,7 @@ import openfl.media.SoundChannel;
 import openfl.media.SoundTransform;
 import openfl.net.URLRequest;
 #if flash11
-import flash.utils.ByteArray;
+import openfl.utils.ByteArray;
 #end
 #if (openfl >= "8.0.0")
 import openfl.utils.AssetType;
