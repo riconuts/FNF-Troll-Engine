@@ -11,6 +11,7 @@ import flixel.math.FlxMath;
 import flixel.tweens.FlxEase.EaseFunction;
 import flixel.tweens.misc.AngleTween;
 import flixel.tweens.misc.ColorTween;
+import flixel.tweens.misc.FlickerTween;
 import flixel.tweens.misc.NumTween;
 import flixel.tweens.misc.VarTween;
 import flixel.tweens.motion.CircularMotion;
@@ -256,7 +257,39 @@ class FlxTween implements IFlxDestroyable
 	{
 		return globalManager.num(FromValue, ToValue, Duration, Options, TweenFunction);
 	}
-
+	
+	/**
+	 * Flickers the desired object
+	 *
+	 * @param   basic     The object to flicker
+	 * @param   duration  Duration of the tween, in seconds
+	 * @param   period    How often, in seconds, the visibility cycles
+	 * @param   options   A structure with flicker and tween options
+	 * @since 5.7.0
+	 */
+	public static function flicker(basic:FlxBasic, duration = 1.0, period = 0.08, ?options:FlickerTweenOptions)
+	{
+		return globalManager.flicker(basic, duration, period, options);
+	}
+	
+	/**
+	 * Whether the object is flickering via the global tween manager
+	 * @since 5.7.0
+	 */
+	public static function isFlickering(basic:FlxBasic)
+	{
+		return globalManager.isFlickering(basic);
+	}
+	
+	/**
+	 * Cancels all flicker tweens on the object in the global tween manager
+	 * @since 5.7.0
+	 */
+	public static function stopFlickering(basic:FlxBasic)
+	{
+		return globalManager.stopFlickering(basic);
+	}
+	
 	/**
 	 * A simple shake effect for FlxSprite. Shorthand for creating a ShakeTween, starting it and adding it to the TweenManager.
 	 *
@@ -1068,6 +1101,40 @@ class FlxTweenManager extends FlxBasic
 		var tween = new NumTween(Options, this);
 		tween.tween(FromValue, ToValue, Duration, TweenFunction);
 		return add(tween);
+	}
+	
+	/**
+	 * Flickers the desired object
+	 *
+	 * @param   basic     The object to flicker
+	 * @param   duration  Duration of the tween, in seconds
+	 * @param   period    How often, in seconds, the visibility cycles
+	 * @param   options   A structure with flicker and tween options
+	 * @since 5.7.0
+	 */
+	public function flicker(basic:FlxBasic, duration = 1.0, period = 0.08, ?options:FlickerTweenOptions)
+	{
+		final tween = new FlickerTween(options, this);
+		tween.tween(basic, duration, period);
+		return add(tween);
+	}
+	
+	/**
+	 * Whether the object is flickering via this manager
+	 * @since 5.7.0
+	 */
+	public function isFlickering(basic:FlxBasic)
+	{
+		return containsTweensOf(basic, ["flicker"]);
+	}
+	
+	/**
+	 * Cancels all flicker tweens on the object
+	 * @since 5.7.0
+	 */
+	public function stopFlickering(basic:FlxBasic)
+	{
+		return cancelTweensOf(basic, ["flicker"]);
 	}
 
 	/**
