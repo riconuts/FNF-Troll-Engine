@@ -526,6 +526,12 @@ class FlxTween implements IFlxDestroyable
 	public var finished(default, null):Bool;
 	public var scale(default, null):Float = 0;
 	public var backward(default, null):Bool;
+	
+	/**
+	 * The total time passed since start
+	 * @since 5.7.0
+	 */
+	public var time(get, never):Float;
 
 	/**
 	 * How many times this tween has been executed / has finished so far - useful to
@@ -903,10 +909,15 @@ class FlxTween implements IFlxDestroyable
 		}
 		return loopDelay = dly;
 	}
+	
+	inline function get_time():Float
+	{
+		return Math.max(_secondsSinceStart - _delayToUse, 0);
+	}
 
 	inline function get_percent():Float
 	{
-		return Math.max((_secondsSinceStart - _delayToUse), 0) / duration;
+		return time / duration;
 	}
 
 	function set_percent(value:Float):Float
@@ -1453,37 +1464,37 @@ class FlxTweenManager extends FlxBasic
 	 *
 	 * Note: loops backwards to allow removals.
 	 *
-	 * @param Object The object with tweens you are searching for.
-	 * @param FieldPaths Optional list of the tween field paths to check. If null or empty, any tween of the specified
-	 * object will match. Allows dot paths to check child properties.
-	 * @param Function The function to call on each matching tween.
+	 * @param   object      The object with tweens you are searching for.
+	 * @param   fieldPaths  List of the tween field paths to check. If `null` or empty, any tween of
+	 *                      the specified object will match. Allows dot paths to check child properties.
+	 * @param   func        The function to call on each matching tween.
 	 * 
 	 * @since 4.9.0
 	 */
-	function forEachTweensOf(Object:Dynamic, ?FieldPaths:Array<String>, Function:FlxTween->Void)
+	function forEachTweensOf(object:Dynamic, ?fieldPaths:Array<String>, func:FlxTween->Void)
 	{
-		if (Object == null)
+		if (object == null)
 			throw "Cannot cancel tween variables of an object that is null.";
 		
-		if (FieldPaths == null || FieldPaths.length == 0)
+		if (fieldPaths == null || fieldPaths.length == 0)
 		{
 			var i = _tweens.length;
 			while (i-- > 0)
 			{
 				var tween = _tweens[i];
-				if (tween.isTweenOf(Object))
-					Function(tween);
+				if (tween.isTweenOf(object))
+					func(tween);
 			}
 		}
 		else
 		{
 			// check for dot paths and convert to object/field pairs
 			var propertyInfos = new Array<TweenProperty>();
-			for (fieldPath in FieldPaths)
+			for (fieldPath in fieldPaths)
 			{
-				var target = Object;
-				var path = fieldPath.split(".");
-				var field = path.pop();
+				var target = object;
+				final path = fieldPath.split(".");
+				final field = path.pop();
 				for (component in path)
 				{
 					target = Reflect.getProperty(target, component);
@@ -1498,17 +1509,29 @@ class FlxTweenManager extends FlxBasic
 			var i = _tweens.length;
 			while (i-- > 0)
 			{
-				var tween = _tweens[i];
+				final tween = _tweens[i];
 				for (info in propertyInfos)
 				{
 					if (tween.isTweenOf(info.object, info.field))
 					{
-						Function(tween);
+						func(tween);
 						break;
 					}
 				} 
 			}
 		}
+	}
+	
+	/**
+	 * Crude helper to search for any tweens with the desired properties
+	 * 
+	 * @since 5.7.0
+	 */
+	function containsTweensOf(object:Dynamic, ?fieldPaths:Array<String>):Bool
+	{
+		var found = false;
+		forEachTweensOf(object, fieldPaths, (_)->found = true);
+		return found;
 	}
 
 	/**
