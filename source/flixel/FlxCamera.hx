@@ -1298,16 +1298,16 @@ class FlxCamera extends FlxBasic
 				_lastTargetPosition.x = target.x;
 				_lastTargetPosition.y = target.y;
 			}
+		}
 
-			if (followLerp >= 60 / FlxG.updateFramerate)
-			{
-				_scrollInternal.copyFrom(_scrollTarget); // no easing
-			}
-			else
-			{
-				_scrollInternal.x += (_scrollTarget.x - _scrollInternal.x) * followLerp * FlxG.updateFramerate / 60;
-				_scrollInternal.y += (_scrollTarget.y - _scrollInternal.y) * followLerp * FlxG.updateFramerate / 60;
-			}
+		if (followLerp >= 60 / FlxG.updateFramerate)
+		{
+			_scrollInternal.copyFrom(_scrollTarget); // no easing
+		}
+		else
+		{
+			_scrollInternal.x += (_scrollTarget.x - _scrollInternal.x) * followLerp * FlxG.updateFramerate / 60;
+			_scrollInternal.y += (_scrollTarget.y - _scrollInternal.y) * followLerp * FlxG.updateFramerate / 60;
 		}
 	}
 
