@@ -2760,7 +2760,8 @@ class PlayState extends MusicBeatState
 			default: return;
 			
 			case BF:
-				if (boyfriend.curCharacter == name) return;
+				if (boyfriend != null && boyfriend.curCharacter == name)
+					return;
 				
 				if (!boyfriendMap.exists(name)) 
 					addCharacterToList(name, charType);
@@ -2770,7 +2771,8 @@ class PlayState extends MusicBeatState
 				varName = 'boyfriendName';
 
 			case DAD:
-				if (dad.curCharacter == name) return;
+				if (dad != null && dad.curCharacter == name)
+					return;
 
 				if (!dadMap.exists(name)) 
 					addCharacterToList(name, charType);
@@ -2780,15 +2782,15 @@ class PlayState extends MusicBeatState
 				varName = 'dadName';
 
 				if (gf != null) {
-					if (oldChar.curCharacter.startsWith('gf')) // if the old character was hiding gf, make her visible again.
+					if (oldChar != null && oldChar.curCharacter.startsWith('gf')) // if the old character was hiding gf, make her visible again.
 						gf.visible = true;
 
-					if (newChar.curCharacter.startsWith('gf')) // if the new character is a gf character, hide the actual gf as this will take it's position 
+					if (newChar != null && newChar.curCharacter.startsWith('gf')) // if the new character is a gf character, hide the actual gf as this will take it's position 
 						gf.visible = false; 
 				}
 
 			case GF:
-				if (gf == null || gf.curCharacter == name) 
+				if (gf != null && gf.curCharacter == name) 
 					return;
 
 				if (!gfMap.exists(name))
@@ -2804,22 +2806,13 @@ class PlayState extends MusicBeatState
 
 		setOnScripts(varName, name);
 
-		newChar.alpha = oldChar.alpha;
-		newChar.setOnScripts("used", true);
-		newChar.callOnScripts("onAdded", [newChar, oldChar]); // if you can come up w/ a better name for this callback then change it lol
-		// (this also gets called for the characters set by the chart's player1/player2)
-
-		oldChar.alpha = 0.00001;
-		oldChar.setOnScripts("used", false);
-		oldChar.callOnScripts("changedOut", [oldChar, newChar]);
-
-		if (focusedChar == oldChar) focusedChar = newChar;
-		hud.changedCharacter(charType, newChar);
-
-		/////
-		if (name.startsWith(oldChar.curCharacter) || oldChar.curCharacter.startsWith(name)) {
-			if (oldChar.animation!=null && oldChar.animation.curAnim!=null) {
-				var anim:String = oldChar.animation.curAnim.name;
+		if (oldChar != null) {
+			oldChar.alpha = 0.00001;
+			oldChar.setOnScripts("used", false);
+			oldChar.callOnScripts("changedOut", [oldChar, newChar]);
+		
+			if (name.startsWith(oldChar.curCharacter) || oldChar.curCharacter.startsWith(name)) {
+				var anim:String = oldChar.animation.name;
 				
 				if (newChar.animation.exists(anim)) {
 					var reversed:Bool = oldChar.animation.curAnim.reversed;
@@ -2828,8 +2821,16 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
+		else 
+			newChar.alpha = 1.0;
 
-		////
+		newChar.setOnScripts("used", true);
+		newChar.callOnScripts("onAdded", [newChar, oldChar]); // if you can come up w/ a better name for this callback then change it lol
+		// (this also gets called for the characters set by the chart's player1/player2)
+
+		if (focusedChar == oldChar) focusedChar = newChar;
+
+		hud.changedCharacter(charType, newChar);
 		reloadHealthBarColors();
 	}
 
