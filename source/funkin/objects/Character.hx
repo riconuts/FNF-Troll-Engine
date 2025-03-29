@@ -40,9 +40,6 @@ class Character extends FlxSprite
 	/**Name of the death character to be used. Can be used to share 1 game over character across multiple characters**/
 	public var deathName:String = DEFAULT_CHARACTER;
 
-	/**Name of the script to be ran. Can be used to share 1 script file across multiple characters**/
-	public var scriptName:String = DEFAULT_CHARACTER;
-
 	/**LEGACY. DO NOT USE.**/
 	public var characterScript(get, set):FunkinScript;
 	inline function get_characterScript()
@@ -139,7 +136,6 @@ class Character extends FlxSprite
 		//// some troll engine stuff
 
 		deathName = json.death_name != null ? json.death_name : curCharacter;
-		scriptName = json.script_name != null ? json.script_name : curCharacter;
 		
 		if (json.x_facing != null)
 			xFacing *= json.x_facing;
