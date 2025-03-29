@@ -421,6 +421,10 @@ class TitleState extends MusicBeatState
 			bg.stageScript.call('onUpdate', [elapsed]);
 
 		super.update(elapsed);
+
+		if (bg != null && bg.stageScript != null)
+			bg.stageScript.call('onUpdatePost', [elapsed]);
+
 	}
 }
 
