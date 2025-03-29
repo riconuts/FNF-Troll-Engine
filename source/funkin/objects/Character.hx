@@ -52,43 +52,61 @@ class Character extends FlxSprite
 		return script;
 	}
 		
-	/**Scripts running on the character. You should not modify this directly! Use pushScript/removeScript!
-	 * If you must modify it directly, atleast call character.startScript(script)/character.stopScript(script) after adding/removing it**/
+	/**
+	 * Scripts running on the character. 
+	 *
+	 * You should not modify this directly! Use `pushScript`/`removeScript`!
+	 *
+	 * If you must modify it directly, remember to call `startScript`/`stopScript` after adding/removing it
+	 */
 	public var characterScripts:Array<FunkinScript> = [];
 
-	/**for fleetway, mainly.
-		but whenever you need to play an anim that has to be manually interrupted, here you go.
-		
-	Stops note anims and idle from playing. Make sure to set this to false once the animation is done.**/
-	public var voicelining:Bool = false; 
+	/**
+	 * Stops note anims and idle from playing.
+	 * Make sure to set this to false once the animation is done.
+	 */
+	public var voicelining:Bool = false; // for fleetway, mainly
+	// but whenever you need to play an anim that has to be manually interrupted, here you go
 
 	/**The set of animations, in order, to be played for the character idling.**/
 	public var idleSequence:Array<String> = ['idle'];
+
 	/**How each animation offsets the character**/
 	public var animOffsets = new Map<String, Array<Dynamic>>();
+
 	/**How each animation offsets the camera**/
 	public var camOffsets:Map<String, Array<Float>> = [];
+
 	/**Used by the character editor. Disables most functions of the character besides animations**/
 	public var debugMode:Bool = false;
+
 	/**Camera horizontal offset from the animation**/
 	public var camOffX:Float = 0;
+
 	/**Camera vertical offset from the animation**/
 	public var camOffY:Float = 0;
+
 	/**Whether this character is playable. Not really used much anymore**/
 	public var isPlayer:Bool = false;
+
 	/**Name of the character**/
 	public var curCharacter:String = DEFAULT_CHARACTER;
 
 	/**BLAMMED LIGHTS!! idk not used anymore**/
 	public var colorTween:FlxTween;
+
 	/**How long in seconds the current sing animation has been held for**/
 	public var holdTimer:Float = 0;
+
 	/**How long in seconds to hold the hey/cheer anim**/
 	public var heyTimer:Float = 0;
+
 	/**Automatically resets the character to idle once this hits 0 after being set to any value above 0**/
 	public var animTimer:Float = 0;
+
 	/**Disables dancing while the hey/cheer animations are playing**/
 	public var specialAnim:Bool = false;
+
 	/**Disables the ability for characters to manually reset to idle**/
 	public var stunned:Bool = false;
 	
@@ -97,8 +115,10 @@ class Character extends FlxSprite
 
 	/**String to be appended to idle animation names. For example, if this is -alt, then the animation used for idling will be idle-alt or danceLeft-alt/danceRight-alt**/
 	public var idleSuffix:String = '';
+
 	/**Character uses "danceLeft" and "danceRight" instead of "idle"**/
 	public var danceIdle:Bool = false;
+
 	/**Stops the idle from playing**/
 	public var skipDance:Bool = false;
 
@@ -107,11 +127,13 @@ class Character extends FlxSprite
 
 	/**Offsets the character on the stage**/
 	public var positionArray:Array<Float> = [0, 0];
+
 	/**Offsets the camera when its focused on the character**/
 	public var cameraPosition:Array<Float> = [0, 0];
 	
 	/**Set to true if the character has miss animations. Optimization mainly**/
 	public var hasMissAnimations:Bool = false;
+
 	/**Overlay color used for characters that don't have miss animations.**/
 	public var missOverlayColor:FlxColor = 0xFFC6A6FF;
 	
@@ -206,16 +228,16 @@ class Character extends FlxSprite
 		}
 	}
 
-	public function new(x:Float, y:Float, ?characterName:String = 'bf', ?isPlayer:Bool = false, ?debugMode:Bool = false)
+	public function new(x:Float, y:Float, ?characterName:String, ?isPlayer:Bool = false, ?debugMode:Bool = false)
 	{
-		super(x, y);		
+		super(x, y);
 
-		curCharacter = (characterName == null) ? DEFAULT_CHARACTER : characterName;
+		this.curCharacter = characterName ?? DEFAULT_CHARACTER;
 		this.isPlayer = isPlayer;
 		this.debugMode = debugMode;
 
-		xFacing = isPlayer ? -1 : 1;
-		controlled = isPlayer;
+		this.xFacing = this.isPlayer ? -1 : 1;
+		this.controlled = this.isPlayer;
 	}
 
 	function _setupCharacter() {
