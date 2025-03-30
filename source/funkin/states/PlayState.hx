@@ -1304,7 +1304,7 @@ class PlayState extends MusicBeatState
 					dadField.characters.push(char);
 				
 			case GF:
-				if (gf == null || gfMap.exists(name)) 
+				if (gfMap.exists(name)) 
 					return;
 
 				var char = new Character(0, 0, name);
@@ -2805,6 +2805,8 @@ class PlayState extends MusicBeatState
 		setOnScripts(varName, name);
 
 		if (oldChar != null) {
+			newChar.alpha = oldChar.alpha;
+
 			oldChar.alpha = 0.00001;
 			oldChar.setOnScripts("used", false);
 			oldChar.callOnScripts("changedOut", [oldChar, newChar]);
