@@ -839,72 +839,7 @@ class PlayState extends MusicBeatState
 		grpNoteSplashes.cameras = [camHUD];
 		grpNoteSplashes.add(splash);
 
-		//// Characters
-
-		if (SONG.player2 != null) {
-			dad = new Character(0, 0, SONG.player2);
-			dadMap.set(dad.characterId, dad);
-			dadGroup.add(dad);
-	
-			dad.setDefaultVar("used", true);
-			startCharacter(dad, true);
-	
-			if (stageData.camera_opponent != null) {
-				dad.cameraPosition[0] += stageData.camera_opponent[0];
-				dad.cameraPosition[1] += stageData.camera_opponent[1];
-			}		
-		}
-
 		////
-		if (SONG.player1 != null) {
-			boyfriend = new Character(0, 0, SONG.player1, true);
-			boyfriendMap.set(boyfriend.characterId, boyfriend);
-			boyfriendGroup.add(boyfriend);
-	
-			boyfriend.setDefaultVar("used", true);
-			startCharacter(boyfriend);
-	
-			if (stageData.camera_boyfriend != null) {
-				boyfriend.cameraPosition[0] += stageData.camera_boyfriend[0];
-				boyfriend.cameraPosition[1] += stageData.camera_boyfriend[1];
-			}
-		}
-
-		////
-		if (SONG.gfVersion != null && stageData.hide_girlfriend != true) {
-			gf = new Character(0, 0, SONG.gfVersion);
-			gfMap.set(gf.characterId, gf);
-			gfGroup.add(gf);
-
-			gf.setDefaultVar("used", true);
-			startCharacter(gf);
-
-			gf.scrollFactor.set(0.95, 0.95);
-	
-			if (stageData.camera_girlfriend != null) {
-				gf.cameraPosition[0] += stageData.camera_girlfriend[0];
-				gf.cameraPosition[1] += stageData.camera_girlfriend[1];
-			}
-		}
-
-		////
-		stage.buildStage();
-
-		// in case you want to layer characters or objects in a specific way (like in infimario for example)
-		// RICO CAN WE STOP USING SLURS IN THE CODE
-		// we???
-		// fine, can YOU stop using slurs in the code >:(
-		if (Globals.Function_Stop != callOnHScripts("onAddSpriteGroups"))
-		{
-			add(stage);
-
-			add(gfGroup);
-			add(dadGroup);
-			add(boyfriendGroup);
-
-			add(stage.foreground);
-		}
-
 		var stringId:String = 'difficultyName_$difficultyName';
 		displayedDifficulty = Paths.getString(stringId, difficultyName.replace("-"," ").capitalize());
 		
@@ -953,8 +888,39 @@ class PlayState extends MusicBeatState
 		if(hud is TraditionalHUD || hud is KadeHUD || hud is ClassicHUD)
 			@:privateAccess
 			scoreTxt = (cast hud).scoreTxt;
-		
 		#end
+
+		//// Characters
+
+		if (SONG.player1 != null) {
+			changeCharacter(SONG.player1, BF);
+		}
+
+		if (SONG.player2 != null) {
+			changeCharacter(SONG.player2, DAD);
+		}
+
+		if (SONG.gfVersion != null && stageData.hide_girlfriend != true) {
+			changeCharacter(SONG.gfVersion, GF);
+		}
+
+		////
+		stage.buildStage();
+
+		// in case you want to layer characters or objects in a specific way (like in infimario for example)
+		// RICO CAN WE STOP USING SLURS IN THE CODE
+		// we???
+		// fine, can YOU stop using slurs in the code >:(
+		if (Globals.Function_Stop != callOnHScripts("onAddSpriteGroups"))
+		{
+			add(stage);
+
+			add(gfGroup);
+			add(dadGroup);
+			add(boyfriendGroup);
+
+			add(stage.foreground);
+		}
 		
 		//// Generate playfields so you can actually, well, play the game
 		#if ALLOW_DEPRECATION
