@@ -627,26 +627,27 @@ class Paths
 	
 	static public function modFolders(key:String, ignoreGlobal:Bool = false)
 	{
-		var shitToCheck:Array<String> = [];
-		if (Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
-			shitToCheck.push(Paths.currentModDirectory);
+		var path:Null<String> = null;
 
-		for (mod in dependencies)
-			shitToCheck.push(mod);
+		inline function check(mod:String) {
+			var fileToCheck:String = contentDirectories.get(mod) + '/' + key;
+			if (exists(fileToCheck)) path = fileToCheck;
+		}
 
-		if (shitToCheck.length > 0) {
-			for (shit in shitToCheck){
-				var fileToCheck:String = contentDirectories.get(shit) + '/' + key;
-				if (exists(fileToCheck))
-					return fileToCheck;
-			}
+		if (Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0) {
+			check(Paths.currentModDirectory);
+			if (path != null) return path;
+		}
+
+		for (mod in dependencies) {
+			check(mod);
+			if (path != null) return path;
 		}
 
 		if (ignoreGlobal != true) {
 			for (mod in getGlobalContent()) {
-				var fileToCheck:String = contentDirectories.get(mod) + '/' + key;
-				if (exists(fileToCheck))
-					return fileToCheck;
+				check(mod);
+				if (path != null) return path;
 			}
 		}
 
