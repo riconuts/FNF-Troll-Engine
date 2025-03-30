@@ -133,6 +133,7 @@ class Character extends FlxSprite
 	public var originalFlipX:Bool = false;
 	public var healthColorArray:Array<Int> = [255, 0, 0];
 
+	#if ALLOW_DEPRECATION
 	@:deprecated("curCharacter is deprecated. Use characterId instead.")
 	public var curCharacter(get, set):String;
 	inline function get_curCharacter() return characterId;
@@ -157,6 +158,7 @@ class Character extends FlxSprite
 		startScript(script);
 		return script;
 	}
+	#end
 
 	override function destroy()
 	{
