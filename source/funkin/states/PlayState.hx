@@ -800,18 +800,16 @@ class PlayState extends MusicBeatState
 				shitToLoad.push(i);
 		}
 
-		var characters:Array<String> = [SONG.player1, SONG.player2];
-		if (!stageData.hide_girlfriend)
-		{
-			characters.push(SONG.gfVersion);
-		}
-
-		for (character in characters) {
+		inline function preloadCharacter(character:String):Void {
 			if (character != null) {
 				for (data in CharacterData.returnCharacterPreload(character))
 					shitToLoad.push(data);
 			}
 		}
+		preloadCharacter(SONG.player1);
+		preloadCharacter(SONG.player2);
+		if (!stageData.hide_girlfriend)
+			preloadCharacter(SONG.gfVersion);
 
 		for (track in songTrackNames){
 			shitToLoad.push({
