@@ -174,7 +174,7 @@ class GameOverSubstate extends MusicBeatSubstate
 
 		if (charInfo == null){
 			warn('Could not get Character data for "$deathName".');
-			deathName = char.curCharacter;
+			deathName = char.characterId;
 			charInfo = CharacterData.getCharacterFile(deathName);
 		}
 

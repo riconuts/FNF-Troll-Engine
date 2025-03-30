@@ -37,8 +37,8 @@ class Character extends FlxSprite
 	/**Whether the character is facing left or right. -1 means it's facing to the left, 1 means its facing to the right.**/
 	public var xFacing:Float = 1;
 
-	/**Name of the death character to be used. Can be used to share 1 game over character across multiple characters**/
-	public var deathName:String = DEFAULT_CHARACTER;
+	/**Id of the death character to be used. Can be used to share 1 game over character across multiple characters**/
+	public var deathId:String = DEFAULT_CHARACTER;
 
 	/**
 	 * Scripts running on the character. 
@@ -77,8 +77,8 @@ class Character extends FlxSprite
 	/**Whether this character is playable. Not really used much anymore**/
 	public var isPlayer:Bool = false;
 
-	/**Name of the character**/
-	public var curCharacter:String = DEFAULT_CHARACTER;
+	/**Id of the character**/
+	public var characterId:String = DEFAULT_CHARACTER;
 
 	/**BLAMMED LIGHTS!! idk not used anymore**/
 	public var colorTween:FlxTween;
@@ -133,6 +133,16 @@ class Character extends FlxSprite
 	public var originalFlipX:Bool = false;
 	public var healthColorArray:Array<Int> = [255, 0, 0];
 
+	@:deprecated("curCharacter is deprecated. Use characterId instead.")
+	public var curCharacter(get, set):String;
+	inline function get_curCharacter() return characterId;
+	inline function set_curCharacter(v:String) return characterId = v;
+	
+	@:deprecated("deathName is deprecated. Use deathId instead.")
+	public var deathName(get, set):String;
+	inline function get_deathName() return deathId;
+	inline function set_deathName(v:String) return deathId = v;
+
 	/**LEGACY. DO NOT USE.**/
 	@:deprecated("characterScript is deprecated. Use pushScript and removeScript instead.")
 	public var characterScript(get, set):FunkinScript;
@@ -160,7 +170,7 @@ class Character extends FlxSprite
 	{
 		//// some troll engine stuff
 
-		deathName = json.death_name != null ? json.death_name : curCharacter;
+		deathId = json.death_name != null ? json.death_name : characterId;
 		
 		if (json.x_facing != null)
 			xFacing *= json.x_facing;
@@ -231,11 +241,11 @@ class Character extends FlxSprite
 		}
 	}
 
-	public function new(x:Float, y:Float, ?characterName:String, ?isPlayer:Bool = false, ?debugMode:Bool = false)
+	public function new(x:Float, y:Float, ?characterId:String, ?isPlayer:Bool = false, ?debugMode:Bool = false)
 	{
 		super(x, y);
 
-		this.curCharacter = characterName ?? DEFAULT_CHARACTER;
+		this.characterId = characterId ?? DEFAULT_CHARACTER;
 		this.isPlayer = isPlayer;
 		this.debugMode = debugMode;
 
@@ -244,11 +254,11 @@ class Character extends FlxSprite
 	}
 
 	function _setupCharacter() {
-		var json = getCharacterFile(curCharacter);
+		var json = getCharacterFile(characterId);
 		if (json == null) {
-			trace('Character file: $curCharacter not found.');
+			trace('Character file: $characterId not found.');
 			json = getCharacterFile(DEFAULT_CHARACTER);
-			curCharacter = DEFAULT_CHARACTER;
+			characterId = DEFAULT_CHARACTER;
 		}
 
 		loadFromPsychData(json);
@@ -424,7 +434,7 @@ class Character extends FlxSprite
 		}
 
 		////
-		if (curCharacter.startsWith('gf'))
+		if (characterId.startsWith('gf'))
 		{
 			if (AnimName == 'singLEFT')
 				danced = true;
@@ -633,7 +643,7 @@ class Character extends FlxSprite
 	{
 		setDefaultVar("this", this);
 
-		var key:String = 'characters/$curCharacter';
+		var key:String = 'characters/$characterId';
 
 		#if HSCRIPT_ALLOWED
 		var hscriptFile = Paths.getHScriptPath(key);
