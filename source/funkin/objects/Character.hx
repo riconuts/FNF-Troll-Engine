@@ -40,18 +40,6 @@ class Character extends FlxSprite
 	/**Name of the death character to be used. Can be used to share 1 game over character across multiple characters**/
 	public var deathName:String = DEFAULT_CHARACTER;
 
-	/**LEGACY. DO NOT USE.**/
-	public var characterScript(get, set):FunkinScript;
-	inline function get_characterScript()
-		return characterScripts[0];
-	function set_characterScript(script:FunkinScript){ // you REALLY shouldnt be setting characterScript, you should be using the removeScript and addScript functions though;
-		var oldScript = characterScripts.shift(); // removes the first script
-		stopScript(oldScript, true);
-		characterScripts.unshift(script); // and replaces it w/ the new one
-		startScript(script);
-		return script;
-	}
-		
 	/**
 	 * Scripts running on the character. 
 	 *
@@ -144,6 +132,21 @@ class Character extends FlxSprite
 	public var noAntialiasing:Bool = false;
 	public var originalFlipX:Bool = false;
 	public var healthColorArray:Array<Int> = [255, 0, 0];
+
+	/**LEGACY. DO NOT USE.**/
+	@:deprecated("characterScript is deprecated. Use pushScript and removeScript instead.")
+	public var characterScript(get, set):FunkinScript;
+	@:noCompletion
+	inline function get_characterScript()
+		return characterScripts[0];
+	@:noCompletion
+	function set_characterScript(script:FunkinScript){ // you REALLY shouldnt be setting characterScript, you should be using the removeScript and addScript functions though;
+		var oldScript = characterScripts.shift(); // removes the first script
+		stopScript(oldScript, true);
+		characterScripts.unshift(script); // and replaces it w/ the new one
+		startScript(script);
+		return script;
+	}
 
 	override function destroy()
 	{
@@ -263,6 +266,7 @@ class Character extends FlxSprite
 
 	public function setupCharacter()
 	{
+		var characterScript = characterScripts[0];
 		if (characterScript != null && characterScript.scriptType == HSCRIPT) {
 			var characterScript:FunkinHScript = cast characterScript;
 			if (characterScript.exists('setupCharacter')) {
