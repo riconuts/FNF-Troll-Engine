@@ -16,12 +16,13 @@
 - [crowplexus](https://x.com/crowplexus) - Countdown class and hxdiscord_rpc implementation
 - [4mbr0s3_2](https://www.youtube.com/@4mbr0s3-2) - Modifier system inspiration
 - [SrtHero278](https://github.com/SrtHero278) - Notefield optimizations
-- [moxie-coder](https://github.com/moxie-coder/) - Mac building and workflow help
+- [moxie-coder](https://github.com/moxie-coder) - Mac building and workflow help
+- [Vortex2Oblivion](https://github.com/Vortex2Oblivion) - Bunch of Linux and other little improvements
 - [Lat](https://x.com/latzephr) - Made the original Week 6 health bar and timer assets
 - [swordcube](https://bsky.app/profile/swordcube.bsky.social) - Pixel note splashes
 - [Gab](https://github.com/michisock) - We like him
 - [AllyTS](https://x.com/NewTioSans) - Made the Mine note texture
-- [Psych Engine](https://github.com/ShadowMario/FNF-PsychEngine) - Dad Engine, this project was built on top of Psych Engine's v0.5.2h codebase
+- [Psych Engine](https://github.com/ShadowMario/FNF-PsychEngine) - Dad Engine
 
 ## Original Funkin' team
 - [ninjamuffin99](https://twitter.com/ninja_muffin99) - Programmer
