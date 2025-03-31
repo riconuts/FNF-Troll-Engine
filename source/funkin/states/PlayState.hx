@@ -522,6 +522,8 @@ class PlayState extends MusicBeatState
 		print('\nCreating PlayState\n');
 		Highscore.loadData();
 		
+		this.songSyncMode = SongSyncMode.fromString(ClientPrefs.songSyncMode);
+
 		Conductor.safeZoneOffset = ClientPrefs.hitWindow;
 		Wife3.timeScale = Wife3.judgeScales.get(ClientPrefs.judgeDiff);
 		PBot.missThreshold = Math.max(160, ClientPrefs.hitWindow);
@@ -1661,7 +1663,6 @@ class PlayState extends MusicBeatState
 		Conductor.changeBPM(PlayState.SONG.bpm);
 		Conductor.tracks = this.tracks;
 		Conductor.pitch = this.playbackRate;
-		Conductor.useAccPosition = ClientPrefs.songSyncMode=="System Time";
 
 		////
 		songSpeedType = ClientPrefs.getGameplaySetting('scrolltype', songSpeedType);
@@ -2137,7 +2138,7 @@ class PlayState extends MusicBeatState
 		if (options.length < 1)
 			return;
 
-		Conductor.useAccPosition = (ClientPrefs.songSyncMode == "System Time");
+		this.songSyncMode = SongSyncMode.fromString(ClientPrefs.songSyncMode);
 		
 		trace("changed " + options);
 				
@@ -2388,7 +2389,12 @@ class PlayState extends MusicBeatState
 
 	}
 
+	@:noCompletion
+	@:deprecated('resyncVocals is deprecated, use resyncTracks instead')
 	function resyncVocals():Void
+		return resyncTracks();
+
+	override function resyncTracks():Void
 	{
 		if (finishTimer != null || transitioning || isDead)
 			return;
@@ -2396,8 +2402,7 @@ class PlayState extends MusicBeatState
 		if (showDebugTraces)
 			trace("resync vocals!!");
 
-		Conductor.resyncTracks();
-		Conductor.lastSongPos = Conductor.songPosition;
+		super.resyncTracks();
 		
 		updateSongDiscordPresence();
 	}
@@ -2406,7 +2411,6 @@ class PlayState extends MusicBeatState
 	public var canReset:Bool = true;
 	var startedCountdown:Bool = false;
 	var canPause:Bool = true;
-	var lastMixTimer:Float = 0;
 	var prevNoteCount:Int = 0;
 
 	private var svIndex:Int =0;
@@ -2577,40 +2581,7 @@ class PlayState extends MusicBeatState
 			}
 			else if (Conductor.songPosition >= 0) 
 			{
-				switch(ClientPrefs.songSyncMode ){
-					case "Direct":
-						// Ludem Dare sync
-						// Jittery and retarded, but works maybe
-						Conductor.songPosition = inst.time;
-					case "Legacy":
-						// Resync Vocals
-						// FUCKING SUCKS DONT USE LMFAO! It's here just incase though
-						Conductor.songPosition += elapsed * 1000;
-						
-					case "Psych 1.0":
-						// Psych 1.0 method
-						// Since this works better for Rico so might work better for some other machines too
-						Conductor.songPosition += elapsed * 1000;
-						Conductor.songPosition = FlxMath.lerp(inst.time, Conductor.songPosition, Math.exp(-elapsed * 5));
-						var timeDiff:Float = Math.abs(inst.time - Conductor.songPosition);
-						if (timeDiff > 1000)
-							Conductor.songPosition = Conductor.songPosition + 1000 * FlxMath.signOf(timeDiff);
-
-					case "System Time":
-						Conductor.songPosition = Conductor.getAccPosition();
-					
-					default: //case "Last Mix":
-						// Stepmania method
-						// Works for most people it seems??
-						if (Conductor.lastSongPos != inst.time) {
-							Conductor.lastSongPos = inst.time;
-							lastMixTimer = 0;
-						}else
-							lastMixTimer += elapsed * 1000;
-						
-						Conductor.songPosition = inst.time + lastMixTimer;
-
-				}
+				updateSongPosition(elapsed);
 			}
 		}
 
@@ -4045,18 +4016,6 @@ class PlayState extends MusicBeatState
 	override function stepHit()
 	{
 		super.stepHit();
-
-		if (ClientPrefs.songSyncMode == 'Legacy') {
-			var needsResync:Bool = false;
-			for (track in tracks) {
-				if (Math.abs(track.time - Conductor.songPosition) > 30){
-					needsResync = true;
-					break;
-				}
-			}
-			if(needsResync)
-				resyncVocals();
-		}
 		
 		hud.stepHit(curStep);
 		setOnScripts('curStep', curStep);

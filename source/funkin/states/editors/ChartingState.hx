@@ -348,6 +348,7 @@ class ChartingState extends MusicBeatState
 
 		Conductor.changeBPM(_song.bpm);
 		Conductor.mapBPMChanges(_song);
+		Conductor.tracks = this.tracks;
 
 		if (_song.notes.length == 0){
 			pushSection();
@@ -1837,27 +1838,18 @@ class ChartingState extends MusicBeatState
 	}
 
 	var lastConductorPos:Float = -1;
-	var lastMixTimer:Float = 0;
 	var colorSine:Float = 0;
 	//// sustain note dragging 
 	var startDummyY:Null<Float> = null;
 	var curDummyY:Null<Float> = null;
 
 	// pause tracks and set them to the conductor song position
-	function pauseTracks() {
-		for (track in tracks) {
-			track.pause();
-			track.time = Conductor.songPosition;
-		}
-	}
+	inline function pauseTracks()
+		Conductor.pauseSong();
 
 	// set tracks to the conductor song position and play them
-	function resumeTracks() {
-		for (track in tracks) {
-			track.time = Conductor.songPosition;
-			track.play(false, Conductor.songPosition);
-		}
-	}
+	inline function resumeTracks()
+		Conductor.resumeSong();
 
 	var inputBlocked = false;
 	function checkInputBlocked():Bool {
@@ -2011,16 +2003,10 @@ class ChartingState extends MusicBeatState
 					typebox.hasFocus = false;
 			}
 		}
-		
-		if (inst.playing && inst.time == Conductor.lastSongPos)
-			lastMixTimer += elapsed * 1000;
-		else{
-			lastMixTimer = 0;
-			Conductor.lastSongPos = inst.time;
-		}
 
-		if (inst.playing) {
-			Conductor.songPosition = inst.time + lastMixTimer;
+		if (Conductor.playing) {
+			updateSongPosition(elapsed);
+
 			if (Conductor.songPosition > inst.length)
 				changeSection(0, true);
 		}else {
@@ -2029,7 +2015,6 @@ class ChartingState extends MusicBeatState
 		}
 
 		Conductor.updateSteps();
-		// Conductor.curStep = recalculateSteps();
 
 		strumLineUpdateY();
 		camPos.y = strumLine.y;
@@ -2187,7 +2172,7 @@ class ChartingState extends MusicBeatState
 		}
 
 		if (FlxG.keys.justPressed.SPACE)
-			(inst.playing) ? pauseTracks() : resumeTracks();
+			(Conductor.playing) ? pauseTracks() : resumeTracks();
 
 		if (FlxG.keys.justPressed.R)
 			(FlxG.keys.pressed.SHIFT) ? changeSection(0, true) : resetSection();
@@ -2627,9 +2612,9 @@ class ChartingState extends MusicBeatState
 			curSec = sec;
 
 			if (updateMusic) {
+				pauseTracks();
 				Conductor.songPosition = sectionStartTime();
 				Conductor.updateSteps();
-				pauseTracks();
 			}
 
 			var blah1:Float = getSectionBeats();
@@ -2644,8 +2629,6 @@ class ChartingState extends MusicBeatState
 			
 			updateSectionUI();
 		}
-
-		Conductor.songPosition = inst.time;
 	}
 
 	function updateSectionUI():Void
