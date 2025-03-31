@@ -4,7 +4,7 @@
 difficultyName_normal=Normal
 difficultyName_hard=Difícil
 difficultyName_easy=Fácil
-## Judgement-related keyS
+## Judgement-related keys
 ## Translations for these would be:
 ## Èpico, Írado, Boa, Ruim, Bosta, Erro
 tier5=Epic
@@ -50,7 +50,7 @@ noplay=No Play ## No notes hit yet - would be "Sem Jogo"
 score=Pontos
 highscore=Recorde
 rating=Avaliação
-nps=NPS - would be "Notas por Segundo" in full
+nps=NPS ## - would be "Notas por Segundo" in full
 peak=Máximo
 combo=Combo
 peakcombo=Combo Máximo
