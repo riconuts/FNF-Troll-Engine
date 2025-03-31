@@ -83,7 +83,7 @@ class FNFGame extends FlxGame
 				MusicBeatState.resetState();
 	}
 
-	var f_ticks:Float = 0;
+	public var f_ticks:Float = 0;
 	var f_startTime:Float = 0;
 	var f_total:Float = 0;
 

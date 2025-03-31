@@ -57,6 +57,7 @@ class Main extends Sprite
 	public static var recentRelease:Release;
 
 	////
+	public static var game:FNFGame;
 	public static var fpsVar:FPS;
 	public static var bread:Bread;
 
@@ -149,7 +150,7 @@ class Main extends Sprite
 		////		
 		StartupState.nextState = nextState;
 
-		var game = new FNFGame(gameWidth, gameHeight, initialState, framerate, framerate, skipSplash, startFullscreen);
+		game = new FNFGame(gameWidth, gameHeight, initialState, framerate, framerate, skipSplash, startFullscreen);
 		addChild(game);
 
 		#if linux
