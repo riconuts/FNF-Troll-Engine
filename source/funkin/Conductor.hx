@@ -70,6 +70,15 @@ class Conductor
 	{
 		startSong(Conductor.songPosition);
 	}
+
+	public static function changePitch(pitch:Float)
+	{
+		Conductor.pauseSong();
+		Conductor.pitch = pitch;
+		for (track in tracks)
+			track.pitch = pitch;
+		Conductor.resumeSong();
+	}
 	
 	public static var useAccPosition:Bool = false;
 	public static function getAccPosition():Float {

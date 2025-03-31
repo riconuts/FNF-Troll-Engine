@@ -166,7 +166,7 @@ class PlayState extends MusicBeatState
 	public var songSpeed(default, set):Float = 1.0;
 	public var songSpeedType:String = "multiplicative";
 	public var noteKillOffset:Float = 350;
-	public var playbackRate:Float = 1.0;
+	public var playbackRate(default, set):Float = 1.0;
 
 	public var disableModcharts:Bool = false;
 	public var practiceMode:Bool = false;
@@ -1691,6 +1691,13 @@ class PlayState extends MusicBeatState
 		}
 
 		return null;
+	}
+
+	@:noCompletion
+	private function set_playbackRate(pitch:Float):Float {		
+		FlxG.timeScale = pitch;
+		Conductor.changePitch(pitch);
+		return playbackRate = pitch;
 	}
 
 	private function generateSong(dataPath:String):Void
