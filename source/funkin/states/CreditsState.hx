@@ -23,9 +23,6 @@ class CreditsState extends MusicBeatState
 	// Removed usehttp since engine no longer has credits baseline
 	// Maybe we could add it back some day w/ github contributors n shit tho
 
-	var bg:FlxSprite;
-	var backdrop:flixel.addons.display.FlxBackdrop;
-
 	var hintBg:FlxSprite;
 	var hintText:FlxText;
 
@@ -104,75 +101,28 @@ class CreditsState extends MusicBeatState
 
 		////
 		#if tgt
-		bg = new FlxSprite(Paths.image("tgtmenus/creditsbg"));
-		#else
-		// the cool thing from the options state
-		var color = 0xFFea71fd; 
-		var bgGraphic = Paths.image('menuDesat');
-		var adjustColor = new funkin.objects.shaders.AdjustColor();
-		adjustColor.contrast = 1.0;
-		adjustColor.brightness = -0.125;
+		var bg = new FlxSprite(Paths.image("tgtmenus/creditsbg"));
+		bg.scrollFactor.set();
+		bg.screenCenter();
 
-		bg = new FlxSprite((FlxG.width - bgGraphic.width) * 0.5, (FlxG.height - bgGraphic.height) * 0.5, bgGraphic);
-		bg.shader = adjustColor.shader;
-		bg.blend = INVERT;
-		bg.color = color;
-		bg.alpha = 0.25;
-		bg.setColorTransform(-1, -1, -1, 1, Std.int(255 + bg.color.red / 3), Std.int(255 + bg.color.green / 3), Std.int(255 + bg.color.blue / 3), 0);
+		if (FlxG.height < FlxG.width)
+			bg.scale.x = bg.scale.y = (FlxG.height * 1.05) / bg.frameHeight;
+		else
+			bg.scale.x = bg.scale.y = (FlxG.width * 1.05) / bg.frameWidth;
+		
+		add(bg);
 
-		var bg2 = new FlxSprite(bg.x, bg.y).makeGraphic(bg.frameWidth, bg.frameHeight, 0x00000000, false, 'OptionsState_bg');
-		bg2.blend = MULTIPLY;
-		bg2.stamp(bg);
-
-		bg.destroy();
-		bg = bg2;
-
-		var grid = new openfl.display.BitmapData(2, 2);
-		grid.setPixel32(0, 0, 0xFFC0C0C0);
-		grid.setPixel32(1, 1, 0xFFC0C0C0);
-
-		var grid = flixel.graphics.FlxGraphic.fromBitmapData(grid, false, 'OptionsState_grid');
-
-		backdrop = new flixel.addons.display.FlxBackdrop(grid);
-		backdrop.scale.x = backdrop.scale.y = FlxG.height / 3;
-		backdrop.updateHitbox();
-		backdrop.y -= backdrop.height / 2;
-		backdrop.velocity.set(30, 30);
-		backdrop.antialiasing = true;
-		backdrop.color = color;
-		backdrop.scrollFactor.set(0, 0);
-		backdrop.alpha = 0.5;
-		backdrop.blend = ADD;
-
-		var gradient = flixel.util.FlxGradient.createGradientFlxSprite(FlxG.width, FlxG.height, [0xFFFFFFFF, 0xFF000000]);
-		gradient.scrollFactor.set(0, 0);
-		add(gradient);
+		var backdrop = new flixel.addons.display.FlxBackdrop(Paths.image('grid'));
+		backdrop.velocity.set(30, -30);
+		backdrop.scrollFactor.set();
+		backdrop.blend = MULTIPLY;
+		backdrop.alpha = 0.25;
+		backdrop.x -= 10;
 		add(backdrop);
 
-		bg.setGraphicSize(0, FlxG.height);
-		bg.updateHitbox();
-		bg.screenCenter();
+		#else
+		var bg = new funkin.objects.CoolMenuBG(Paths.image('menuDesat'), 0xFFea71fd);
 		add(bg);
-		#end
-
-		bg.screenCenter().scrollFactor.set();
-
-		if (FlxG.height < FlxG.width){
-			bg.scale.x = bg.scale.y = (FlxG.height * 1.05) / bg.frameHeight;
-		}else{
-			bg.scale.x = bg.scale.y = (FlxG.width * 1.05) / bg.frameWidth;
-		}
-
-		add(bg);
-
-		#if tgt
-		var backdrops = new flixel.addons.display.FlxBackdrop(Paths.image('grid'));
-		backdrops.velocity.set(30, -30);
-		backdrops.scrollFactor.set();
-		backdrops.blend = MULTIPLY;
-		backdrops.alpha = 0.25;
-		backdrops.x -= 10;
-		add(backdrops);
 		#end
 
 		////
