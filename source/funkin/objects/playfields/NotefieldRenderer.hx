@@ -85,7 +85,7 @@ class NotefieldRenderer extends FlxBasic {
 			if(!field.visible || !field.active || !field.exists)
 				continue;
 			
-			var realField:NoteField = cast field.isProxy ? cast(field, ProxyField).proxiedField : field;
+			var realField:NoteField = field.getNotefield();
 
 			var glowColour = realField.modManager == null ? FlxColor.WHITE : FlxColor.fromRGBFloat(realField.modManager.getValue("flashR",
 				realField.modNumber), realField.modManager.getValue("flashG", realField.modNumber),

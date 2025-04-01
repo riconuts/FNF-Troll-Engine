@@ -51,6 +51,7 @@ class NoteField extends FieldBase
 		this.modManager = modManager;
 		this.holdSubdivisions = Std.int(ClientPrefs.holdSubdivs);
 	}
+	override public function getNotefield() {return this;}
 
 	/**
 	 * The Draw Distance Modifier
