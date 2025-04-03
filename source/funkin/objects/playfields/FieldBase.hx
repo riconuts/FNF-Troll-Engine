@@ -56,4 +56,5 @@ class FieldBase extends FlxObject {
 	function get_members()
 		return field.strumNotes;
 
+	public function getNotefield() {return null;}
 }
