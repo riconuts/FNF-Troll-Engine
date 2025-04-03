@@ -1,18 +1,20 @@
 function onAnimPlayed(animName, force, reversed, frame)
 {
-    if (StringTools.startsWith(animName, 'hair'))
-    {
-        this.specialAnim = true;
-        this.skipDance = true;
-        this.danced = true;
-    }
+	if (StringTools.startsWith(animName, 'hair'))
+	{
+		this.specialAnim = true;
+		this.skipDance = true;
+		this.danced = true;
+		this.danceIndex = 1;
+	}
 }
 
 function onSpecialAnimFinished(name)
 {
-    if (name == "hairFall"){
-        this.playAnim("danceRight", true);
-        this.skipDance = false;
-        this.danced = false;
-    }
+	if (name == "hairFall"){
+		this.playAnim("danceRight", true);
+		this.skipDance = false;
+		this.danced = false;
+		this.danceIndex = 0;
+	}
 }
