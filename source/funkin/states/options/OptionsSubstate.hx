@@ -1879,23 +1879,22 @@ class TextFormats {
 	};
 	
 	public static final OPT_NAME:FlxTextFormatData = {
-		font: "calibri.ttf",
-		
-		size: 28,
+		font: "quantico.ttf",	
+		size: 25,
 		color: 0xFFFFFFFF,
 		alignment: LEFT
 	};
 
 	public static final OPT_VALUE_TEXT:FlxTextFormatData = {
-		font: "calibri.ttf",
-		size: 24,
+		font: "quantico.ttf",
+		size: 22,
 		color: 0xFFFFFFFF,
 		alignment: LEFT
 	};
 	
 	public static final OPT_DROPDOWN_OPTION_TEXT:FlxTextFormatData = {
-		font: "calibri.ttf",
-		size: 24,
+		font: "quantico.ttf",
+		size: 22,
 		color: 0xFFFFFFFF,
 	};
 

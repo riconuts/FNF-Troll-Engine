@@ -34,7 +34,7 @@ class BindButton<T:Int> extends FlxUI9SliceSprite
 			bind = cast -1; // FUCK YOU
 
 		textObject = new FlxText(x, y, 0, _getBindedName(bind), 16);
-		textObject.setFormat(Paths.font("calibri.ttf"), 24, 0xFFFFFFFF, CENTER);
+		textObject.setFormat(Paths.font("quantico.ttf"), 24, 0xFFFFFFFF, CENTER);
 		textObject.updateHitbox();
 		textObject.y += (height - textObject.height) / 2;
 		this.bind = bind;
