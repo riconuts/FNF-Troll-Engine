@@ -42,7 +42,7 @@ class OptionsState extends MusicBeatState
 		add(backdrop);
 
 		#else
-		var bg = new funkin.objects.CoolMenuBG(Paths.image('menuDesat'), 0xff7186fd);
+		var bg = new funkin.objects.CoolMenuBG(Paths.image('menuDesat', null, false), 0xff7186fd);
 		add(bg);
 		#end
 	}

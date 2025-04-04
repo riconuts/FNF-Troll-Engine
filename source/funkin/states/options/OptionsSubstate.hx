@@ -144,6 +144,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				[
 					"lowQuality",
 					"globalAntialiasing",
+					"cacheOnGPU",
 					"multicoreLoading",
 					"optimizeHolds",
 					"holdSubdivs",
@@ -588,7 +589,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		optionCamera.follow(camFollowPos);
 
 		////
-		final backdropGraphic = Paths.image("optionsMenu/backdrop");
+		final backdropGraphic = Paths.image("optionsMenu/backdrop", null, false);
 		final backdropSlice = [22, 22, 89, 89];
 		final tabButtonHeight = 44;
 		final tabButtonPadding = 3;

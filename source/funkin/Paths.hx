@@ -23,7 +23,7 @@ import sys.io.File;
 #end
 
 //// idgaf about libraries
-
+@:access(openfl.display.BitmapData)
 class Paths
 {
 	inline public static var IMAGE_EXT = "png";
@@ -120,11 +120,8 @@ class Paths
 				@:privateAccess
 				if (obj != null)
 				{
-					Assets.cache.removeBitmapData(key);
-					FlxG.bitmap._cache.remove(key);
-					obj.destroy();
+					destroyGraphic(obj);
 					currentTrackedAssets.remove(key);
-
 					// trace('cleared $key');
 				}
 			}
@@ -137,20 +134,21 @@ class Paths
 	public static function removeBitmap(key:String)
 	{
 		var obj = currentTrackedAssets.get(key);
-		if (obj != null) @:privateAccess {
+		@:privateAccess
+		if (obj != null)
+		{
 			localTrackedAssets.remove(key);
-
-			Assets.cache.removeBitmapData(key);
-			FlxG.bitmap._cache.remove(key);
-			obj.destroy();
-			currentTrackedAssets.remove(key);
-			
-			//trace('removed $key');
-			//return true;
+			destroyGraphic(obj);
+			currentTrackedAssets.remove(key);		
 		}
+	}
 
-		//trace('did not remove $key');
-		//return false;
+	inline static function destroyGraphic(graphic:FlxGraphic)
+	{
+		// free some gpu memory
+		if (graphic != null && graphic.bitmap != null && graphic.bitmap.__texture != null)
+			graphic.bitmap.__texture.dispose();
+		FlxG.bitmap.remove(graphic);
 	}
 
 	public static function clearStoredMemory()
@@ -160,9 +158,7 @@ class Paths
 		for (key => obj in FlxG.bitmap._cache) {
 			if (obj != null && !currentTrackedAssets.exists(key)) {
 				// trace('cleared $key');
-				Assets.cache.removeBitmapData(key);
-				FlxG.bitmap._cache.remove(key);
-				obj.destroy();
+				destroyGraphic(obj);
 			}
 		}
 
@@ -465,7 +461,7 @@ class Paths
 		return finalPath.toLowerCase();
 	}
 
-	public static function getGraphic(path:String, cache:Bool = true, gpu:Bool = false):Null<FlxGraphic>
+	public static function getGraphic(path:String, cache:Bool = true, gpu:Bool = true):Null<FlxGraphic>
 	{
 		var newGraphic:FlxGraphic;
 
@@ -478,12 +474,19 @@ class Paths
 			var bitmap:BitmapData = getBitmapData(path);
 			if (bitmap == null) return null;
 
-			if (gpu) {
-				var texture = FlxG.stage.context3D.createRectangleTexture(bitmap.width, bitmap.height, BGRA, true);
-				texture.uploadFromBitmapData(bitmap);
+			// GPU caching made by Raltyro
+			if (gpu && ClientPrefs.cacheOnGPU && bitmap.image != null) {
+				bitmap.lock();
+				if (bitmap.__texture == null)
+				{
+					bitmap.image.premultiplied = true;
+					bitmap.getTexture(FlxG.stage.context3D);
+				}
+				bitmap.getSurface();
+				bitmap.disposeImage();
 				bitmap.image.data = null;
-				bitmap.dispose();
-				bitmap = BitmapData.fromTexture(texture);
+				bitmap.image = null;
+				bitmap.readable = true;
 			}
 
 			newGraphic = FlxGraphic.fromBitmapData(bitmap, false, path, cache);
@@ -502,20 +505,17 @@ class Paths
 	inline public static function cacheGraphic(path:String):Null<FlxGraphic>
 		return getGraphic(path, true);
 
-	inline public static function imagePath(key:String):String
+	inline public static function imagePath(key:String, ?folder:String):String
 		return getPath('images/$key.$IMAGE_EXT');
 
 	inline public static function imageExists(key:String):Bool
 		return Paths.exists(imagePath(key));
 
-	inline static public function image(key:String, ?library:String):Null<FlxGraphic>
-		return returnGraphic(key, library);
-
-	public static function returnGraphic(key:String, ?library:String):Null<FlxGraphic>
+	public static function image(key:String, ?folder:String = null, allowGPU:Bool = true):Null<FlxGraphic>
 	{
-		var path:String = imagePath(key);
+		var path:String = imagePath(key, folder);
 
-		var graphic = getGraphic(path);
+		var graphic = getGraphic(path, true, allowGPU);
 		if (graphic==null && Main.showDebugTraces)
 			trace('bitmap "$key" => "$path" returned null.');
 

@@ -121,7 +121,7 @@ class CreditsState extends MusicBeatState
 		add(backdrop);
 
 		#else
-		var bg = new funkin.objects.CoolMenuBG(Paths.image('menuDesat'), 0xFFea71fd);
+		var bg = new funkin.objects.CoolMenuBG(Paths.image('menuDesat', null, false), 0xFFea71fd);
 		add(bg);
 		#end
 
