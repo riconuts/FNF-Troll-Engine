@@ -1,5 +1,7 @@
 package funkin.objects;
 
+import flixel.util.FlxColor;
+import openfl.geom.ColorTransform;
 import funkin.objects.shaders.AdjustColor;
 import flixel.util.FlxGradient;
 import flixel.addons.display.FlxBackdrop;
@@ -21,33 +23,24 @@ class CoolMenuBG extends FlxSpriteGroup
 		return this.color = color;
 	}
 
-	public function new(simpleGraphic:FlxGraphicAsset, color:Int = 0xFFFFFFFF) {
+	public function new(simpleGraphic:FlxGraphicAsset, color:FlxColor = 0xFFFFFFFF) {
 		super();
 		this.scrollFactor.set();
 
-		var adjustColor = new AdjustColor();
-		adjustColor.contrast = 1.0;
-		adjustColor.brightness = -0.125;
-
-		bg = new FlxSprite(0, 0, simpleGraphic);
-		bg.shader = adjustColor.shader;
-		bg.blend = INVERT;
-		bg.color = color;
-		bg.alpha = 0.25;
-		bg.setColorTransform(-1, -1, -1, 1,
-			Std.int(255 + bg.color.red / 3),
-			Std.int(255 + bg.color.green / 3),
-			Std.int(255 + bg.color.blue / 3),
+		var colorTransform = new ColorTransform(-1, -1, -1, 1,
+			Std.int(255 + color.red / 3),
+			Std.int(255 + color.green / 3),
+			Std.int(255 + color.blue / 3),
 			0
 		);
 
-		var bg2 = new FlxSprite().makeGraphic(bg.frameWidth, bg.frameHeight, 0x00000000, false, 'CoolBG_bg');
-		bg2.scrollFactor.set();
-		bg2.blend = MULTIPLY;
-		bg2.stamp(bg);
-
-		bg.destroy();
-		bg = bg2;
+		bg = new FlxSprite(0, 0, simpleGraphic);
+		var bitmap = bg.updateFramePixels();
+		if (bitmap != null) {
+			bg.makeGraphic(bitmap.width, bitmap.height, 0x00000000, false, 'CoolBG_bg_$color');
+			bg.graphic.bitmap.draw(bitmap, null, colorTransform, INVERT, null, true);
+			bg.blend = MULTIPLY;
+		}
 
 		var grid = new BitmapData(2, 2);
 		grid.setPixel32(0, 0, 0xFFC0C0C0);
