@@ -70,6 +70,15 @@ enum abstract CharacterType(Int) from Int to Int {
 	var BF = 0;
 	var DAD = 1;
 	var GF = 2;
+
+	public static function fromString(str:String):CharacterType {
+		return switch (str.toLowerCase().trim()) {
+			case 'bf'	| 'boyfriend'	| '0': BF;
+			case 'dad'	| 'opponent'	| '1': DAD;	
+			case 'gf'	| 'girlfriend'	| '2': GF;
+			default: -1;
+		}
+	}
 }
 
 /*
@@ -2843,14 +2852,8 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	public static function getCharacterTypeFromString(str:String):CharacterType {
-		return switch (str.toLowerCase().trim()) {
-			case 'bf'	| 'boyfriend'	| '0': BF;
-			case 'dad'	| 'opponent'	| '1': DAD;	
-			case 'gf'	| 'girlfriend'	| '2': GF;
-			default: -1;
-		}
-	}
+	public static function getCharacterTypeFromString(str:String):CharacterType
+		return CharacterType.fromString(str);
 
 	public function triggerEventNote(eventName:String = "", value1:String = "", value2:String = "", ?time:Float) {
 		if (time==null)
