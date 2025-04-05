@@ -229,12 +229,9 @@ class Stage extends FlxTypedGroup<FlxBasic>
 			_stages.set(name, true);
 		}
 		
-		for (folderPath in Paths.getFolders("stages", true)){
+		for (folderPath in Paths.getFolders("stages", modsOnly))
+		{
 			Paths.iterateDirectory(folderPath, readFileNameAndPush);
-		}
-
-		if (!modsOnly){
-			Paths.iterateDirectory(Paths.getPreloadPath('stages/'), readFileNameAndPush);
 		}
 
 		for (name in _stages.keys())
@@ -242,24 +239,6 @@ class Stage extends FlxTypedGroup<FlxBasic>
 
 		return stages;
 	}
-
-	/*
-	//// stage -> modDirectory
-	public static function getStageMap():Map<String, String>
-	{
-		var directories:Array<String> = [
-			#if MODS_ALLOWED
-			Paths.mods(Paths.currentModDirectory + '/stages/'),
-			Paths.mods('stages/'),
-			#end
-			Paths.getPreloadPath('stages/')
-		];
-
-		var theMap:Map<String, String> = new Map();
-
-		return theMap;
-	}
-	*/
 }
 
 class StageData {

@@ -42,10 +42,9 @@ class Paths
 	public static function getFileWithExtensions(scriptPath:String, extensions:Array<String>) {
 		for (fileExt in extensions) {
 			var baseFile:String = '$scriptPath.$fileExt';
-			for (file in [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)]) {
-				if (Paths.exists(file))
-					return file;
-			}
+			var file:String = getPath(baseFile);
+			if (Paths.exists(file))
+				return file;
 		}
 
 		return null;
@@ -188,16 +187,7 @@ class Paths
 
 	public static function _getPath(key:String, ignoreMods:Bool = false):Null<String>
 	{
-		var path:String;
-
-		#if MODS_ALLOWED
-		if (ignoreMods != true) {
-			path = Paths.modFolders(key);
-			if (Paths.exists(path)) return path;
-		}
-		#end
-
-		path = Paths.getPreloadPath(key);
+		var path:String = getPath(key, ignoreMods);
 		return Paths.exists(path) ? path : null;
 	}
 

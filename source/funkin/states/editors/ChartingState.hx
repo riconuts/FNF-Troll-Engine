@@ -2839,7 +2839,6 @@ class ChartingState extends MusicBeatState
 	function initNoteType(notetype:String){
 		if(notetype == '') return;
 		if(notetypeScripts.exists(notetype)) return;
-		var did:Bool = false;
 
 		#if PE_MOD_COMPATIBILITY
 		for (file in ["notetypes", "custom_notetypes"]) {
@@ -2850,22 +2849,16 @@ class ChartingState extends MusicBeatState
 			var exts = Paths.HSCRIPT_EXTENSIONS; // TODO: maybe FunkinScript.extensions, FunkinScript.hscriptExtensions and FunkinScript.luaExtensions??
 			for (ext in exts)
 			{
-				if (did)
-					break;
 				var baseFile = '$baseScriptFile.$ext';
-				var files = [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)];
-				for (file in files)
+				var file = Paths.getPath(baseFile);
+				if (Paths.exists(file))
 				{
-					if (!Paths.exists(file))
-						continue;
 					if (ext == 'hscript')
 					{
 						var script = FunkinHScript.fromFile(file);
 						notetypeScripts.set(notetype, script);
-						did = true;
-					}
-					if (did)
 						break;
+					}
 				}
 			}
 		#if PE_MOD_COMPATIBILITY

@@ -30,28 +30,7 @@ class Util
 			}
 		}
 
-		var cervix = hasLuaExtension ? luaFile : luaFile + ".lua";
-		var doPush = false;
-
-		#if MODS_ALLOWED
-		if (Paths.exists(Paths.modFolders(cervix)))
-		{
-			cervix = Paths.modFolders(cervix);
-			doPush = true;
-		}
-		else if (Paths.exists(cervix))
-		{
-			doPush = true;
-		}
-		else
-		#end
-		{
-			cervix = Paths.getPreloadPath(cervix);
-			if (Paths.exists(cervix))
-				doPush = true;
-		}
-
-		return (doPush) ? cervix : null;
+		return Paths._getPath(hasLuaExtension ? luaFile : '$luaFile.lua');
 	}
 
 	public static function getProperty(variable:String) {

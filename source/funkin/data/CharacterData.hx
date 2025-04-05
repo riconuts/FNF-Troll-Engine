@@ -270,12 +270,9 @@ class CharacterData {
 			_characters.set(name, true);
 		}
 		
-		for (folderPath in Paths.getFolders("characters", true)){
+		for (folderPath in Paths.getFolders("characters", modsOnly))
+		{
 			Paths.iterateDirectory(folderPath, readFileNameAndPush);
-		}
-
-		if (!modsOnly){
-			Paths.iterateDirectory(Paths.getPreloadPath('characters/'), readFileNameAndPush);
 		}
 
 		for (name in _characters.keys())
