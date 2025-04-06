@@ -421,6 +421,26 @@ class Util
 				false;
 		};
 	}
+
+	public static function parseFloatArray(str:String):Array<Float> {
+		var arr:Array<Float> = new Array<Float>();
+		for (s in str.split(',')) {
+			if (s != "") {
+				arr.push(Std.parseFloat(s));
+			}
+		}
+		return arr;
+	}
+	
+	public static function parseIntArray(str:String):Array<Int> {
+		var arr:Array<Int> = new Array<Int>();
+		for (s in str.split(',')) {
+			if (s != "") {
+				arr.push(Std.parseInt(s));
+			}
+		}
+		return arr;
+	}
 }
 
 class DebugText extends FlxText

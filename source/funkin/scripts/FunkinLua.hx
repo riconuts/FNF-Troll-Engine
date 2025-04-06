@@ -923,14 +923,9 @@ class FunkinLua extends FunkinScript
 		});
 
 		addCallback("addAnimationByIndices", function(obj:String, name:String, prefix:String, indices:String, framerate:Int = 24) {
-			var strIndices:Array<String> = indices.trim().split(',');
-			var die:Array<Int> = [];
-			for (i in 0...strIndices.length) {
-				die.push(Std.parseInt(strIndices[i]));
-			}
-
 			var pussy:FlxSprite = getObjectSimple(obj);
 			if(pussy != null) {
+				var die:Array<Int> = parseIntArray(indices);
 				pussy.animation.addByIndices(name, prefix, die, '', framerate, false);
 				if(pussy.animation.curAnim == null) {
 					pussy.animation.play(name, true);
@@ -940,14 +935,15 @@ class FunkinLua extends FunkinScript
 		
 		addCallback("playAnim", function(obj:String, name:String, forced:Bool = false, ?reverse:Bool = false, ?startFrame:Int = 0)
 		{
-			var luaObj:FlxSprite = getLuaObject(obj,false);
-			if (luaObj != null) {
-				if(luaObj.animation.getByName(name) != null)
+			var spr:FlxSprite = getObjectDirectly(obj);
+			if (spr != null)
+			{
+				if(spr.animation.exists(name))
 				{
-					luaObj.animation.play(name, forced, reverse, startFrame);
-					if(Std.isOfType(luaObj, ModchartSprite))
+					if(Std.isOfType(spr, ModchartSprite))
 					{
-						var luaObj:ModchartSprite = cast luaObj;
+						var luaObj:ModchartSprite = cast spr;
+						luaObj.animation.play(name, forced, reverse, startFrame);
 						
 						if (luaObj.animOffsets.exists(name))
 						{
@@ -955,19 +951,9 @@ class FunkinLua extends FunkinScript
 							luaObj.offset.set(daOffset[0], daOffset[1]);
 						}
 					}
-				}
-				return true;
-			}
-
-			var spr:FlxSprite = Reflect.getProperty(getInstance(), obj);
-			if (spr != null) {
-				if(spr.animation.getByName(name) != null)
-				{
-					if(Std.isOfType(spr, Character))
+					else if(Std.isOfType(spr, Character))
 					{
-						//convert spr to Character
-						var obj:Dynamic = spr;
-						var spr:Character = obj;
+						var spr:Character = cast spr;
 						spr.playAnim(name, forced, reverse, startFrame);
 					}
 					else
@@ -1091,11 +1077,12 @@ class FunkinLua extends FunkinScript
 		addCallback("isNoteChild", function(parentID:Int, childID:Int){
 			var parent: Note = cast getLuaObject('note${parentID}',false);
 			var child: Note = cast getLuaObject('note${childID}',false);
-			if(parent!=null && child!=null)
-				return parent.tail.contains(child);
+			if (parent==null || child==null) {
+				luaTrace('${parentID} or ${childID} is not a valid note ID');
+				return false;
+			}
 
-			luaTrace('${parentID} or ${childID} is not a valid note ID');
-			return false;
+			return parent.tail.contains(child);
 		});
 
 		addCallback("removeLuaSprite", function(tag:String, destroy:Bool = true) {
@@ -1120,8 +1107,7 @@ class FunkinLua extends FunkinScript
 		});
 
 		addCallback("setObjectCamera", function(obj:String, camera:String = '') {
-			var object:FlxSprite = getLuaObject(obj);
-			if (object==null) object = getObject(obj);
+			var object:FlxSprite = getObject(obj);
 
 			if(object == null) {
 				luaTrace("Object " + obj + " doesn't exist!");
@@ -1132,8 +1118,7 @@ class FunkinLua extends FunkinScript
 			return true;
 		});
 		addCallback("setBlendMode", function(obj:String, blend:String = '') {
-			var spr:FlxSprite = getLuaObject(obj);
-			if (spr==null) spr = getObject(obj);
+			var spr:FlxSprite = getObject(obj);
 
 			if (spr == null) {
 				luaTrace("Object " + obj + " doesn't exist!");
@@ -1144,28 +1129,18 @@ class FunkinLua extends FunkinScript
 			return true;
 		});
 		addCallback("screenCenter", function(obj:String, pos:String = 'xy') {
-			var spr:FlxSprite = getLuaObject(obj);
+			var spr:FlxSprite = getObject(obj);
 
-			if(spr==null){
-				spr = getObject(obj);
+			if (spr == null) {
+				luaTrace("Object " + obj + " doesn't exist!");
+				return;
 			}
 
-			if(spr != null)
-			{
-				switch(pos.trim().toLowerCase())
-				{
-					case 'x':
-						spr.screenCenter(X);
-						return;
-					case 'y':
-						spr.screenCenter(Y);
-						return;
-					default:
-						spr.screenCenter(XY);
-						return;
-				}
+			switch(pos.trim().toLowerCase()) {
+				case 'x': spr.screenCenter(X);
+				case 'y': spr.screenCenter(Y);
+				default: spr.screenCenter(XY);						
 			}
-			luaTrace("Object " + obj + " doesn't exist!");
 		});
 		addCallback("objectsOverlap", function(tag1:String, tag2:String) {
 			var obj1 = getObjectSimple(tag1);
@@ -1174,31 +1149,13 @@ class FunkinLua extends FunkinScript
 		});
 		addCallback("getPixelColor", function(obj:String, x:Int, y:Int) {
 			var spr:FlxSprite = getObject(obj);
-
-			if(spr != null)
-			{
-				if(spr.framePixels != null) spr.framePixels.getPixel32(x, y);
-				return spr.pixels.getPixel32(x, y);
-			}
-			return 0;
+			return (spr == null) ? 0 : (spr.framePixels ?? spr.pixels).getPixel32(x, y);
 		});
 		addCallback("getRandomInt", function(min:Int, max:Int = FlxMath.MAX_VALUE_INT, exclude:String = '') {
-			var excludeArray:Array<String> = exclude.split(',');
-			var toExclude:Array<Int> = [];
-			for (i in 0...excludeArray.length)
-			{
-				toExclude.push(Std.parseInt(excludeArray[i].trim()));
-			}
-			return FlxG.random.int(min, max, toExclude);
+			return FlxG.random.int(min, max, parseIntArray(exclude));
 		});
 		addCallback("getRandomFloat", function(min:Float, max:Float = 1, exclude:String = '') {
-			var excludeArray:Array<String> = exclude.split(',');
-			var toExclude:Array<Float> = [];
-			for (i in 0...excludeArray.length)
-			{
-				toExclude.push(Std.parseFloat(excludeArray[i].trim()));
-			}
-			return FlxG.random.float(min, max, toExclude);
+			return FlxG.random.float(min, max, parseFloatArray(exclude));
 		});
 		addCallback("getRandomBool", function(chance:Float = 50) {
 			return FlxG.random.bool(chance);
@@ -1533,11 +1490,7 @@ class FunkinLua extends FunkinScript
 		addCallback("luaSpriteAddAnimationByIndices", function(tag:String, name:String, prefix:String, indices:String, framerate:Int = 24) {
 			luaTrace("luaSpriteAddAnimationByIndices is deprecated! Use addAnimationByIndices instead", false, true);
 			if(PlayState.instance.modchartSprites.exists(tag)) {
-				var strIndices:Array<String> = indices.trim().split(',');
-				var die:Array<Int> = [];
-				for (i in 0...strIndices.length) {
-					die.push(Std.parseInt(strIndices[i]));
-				}
+				var die:Array<Int> = parseIntArray(indices);
 				var pussy:ModchartSprite = PlayState.instance.modchartSprites.get(tag);
 				pussy.animation.addByIndices(name, prefix, die, '', framerate, false);
 				if(pussy.animation.curAnim == null) {
