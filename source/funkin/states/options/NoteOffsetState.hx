@@ -63,13 +63,9 @@ class NoteOffsetState extends MusicBeatState
 		FlxG.sound.pause();
 
 		//// Stage
-		var randomStage = TitleState.getRandomStage();
-		if (randomStage != null){
-			Paths.currentModDirectory = randomStage[1];
-			stage = new Stage(randomStage[0]);
-		}else{
-			stage = new Stage();
-		}
+		var stages = Stage.getTitleStages();
+		var stageId = FlxG.random.getObject(stages);
+		stage = new Stage(stageId);
 		stage.buildStage();
 		stageScript = stage.stageScript;
 		add(stage);	
