@@ -48,13 +48,9 @@ class FreeplayState extends MusicBeatState
 	var selectedSongCharts:Array<String>;
 	
 	var hintText:FlxText;
-	
-	override public function create()
-	{
-		#if DISCORD_ALLOWED
-		funkin.api.Discord.DiscordClient.changePresence('In the menus');
-		#end
 
+	public static function getFreeplaySongs():Array<Song> {
+		var list = [];
 		for (week in WeekData.reloadWeekFiles(true))
 		{
 			Paths.currentModDirectory = week.directory;
@@ -67,15 +63,21 @@ class FreeplayState extends MusicBeatState
 					Paths.formatToSongPath(songName), 
 					week.directory
 				);
-				
-				if (Main.showDebugTraces && song.charts.length == 0) {
-					trace('"$song" doesn\'t have any available charts!');
-					continue;
-				}
-				
-				menu.addTextOption(song.getMetadata().songName).ID = songData.length;
-				songData.push(song);
+				list.push(song);
 			}
+		}
+		return list;
+	} 
+	
+	override public function create()
+	{
+		#if DISCORD_ALLOWED
+		funkin.api.Discord.DiscordClient.changePresence('In the menus');
+		#end
+
+		for (song in getFreeplaySongs()) {			
+			menu.addTextOption(song.getMetadata().songName).ID = songData.length;
+			songData.push(song);
 		}
 
 		////
