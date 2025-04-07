@@ -2925,8 +2925,8 @@ class PlayState extends MusicBeatState
 				}
 
 			case 'Set GF Speed':
-				var value:Int = Std.parseInt(value1);
-				if(Math.isNaN(value) || value < 1) value = 1;
+				var value:Null<Int> = Std.parseInt(value1);
+				if (value == null || value < 1) value = 1;
 				gfSpeed = value;
 
 			case 'Add Camera Zoom':
