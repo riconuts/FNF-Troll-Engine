@@ -1323,11 +1323,6 @@ class PlayState extends MusicBeatState
 	}
 
 	function startCharacterPos(char:Character, ?gfCheck:Bool = false, ?startBopBeat:Float=-5) {
-		if (gfCheck && char.characterId.startsWith('gf')) { //IF DAD IS GIRLFRIEND, HE GOES TO HER POSITION
-			char.setPosition(GF_X, GF_Y);
-			char.scrollFactor.set(0.95, 0.95);
-			char.danceEveryNumBeats = 2;
-		}
 		char.nextDanceBeat = startBopBeat;
 		char.x += char.positionArray[0];
 		char.y += char.positionArray[1];
@@ -2761,14 +2756,6 @@ class PlayState extends MusicBeatState
 				newChar = dad = dadMap.get(name);
 				varName = 'dadName';
 
-				if (gf != null) {
-					if (oldChar != null && oldChar.characterId.startsWith('gf')) // if the old character was hiding gf, make her visible again.
-						gf.visible = true;
-
-					if (newChar != null && newChar.characterId.startsWith('gf')) // if the new character is a gf character, hide the actual gf as this will take it's position 
-						gf.visible = false; 
-				}
-
 			case GF:
 				if (gf != null && gf.characterId == name) 
 					return;
@@ -2880,16 +2867,10 @@ class PlayState extends MusicBeatState
 				var time:Float = Std.parseFloat(value2);
 				if(Math.isNaN(time) || time <= 0) time = 0.6;
 
-				if (value != 0) {
-					if (dad != null && dad.characterId.startsWith('gf')) { //Tutorial GF is actually Dad! The GF is an imposter!! ding ding ding ding ding ding ding, dindinding, end my suffering
-						dad.playAnim('cheer', true);
-						dad.specialAnim = true;
-						dad.heyTimer = time;
-					} else if (gf != null) {
-						gf.playAnim('cheer', true);
-						gf.specialAnim = true;
-						gf.heyTimer = time;
-					}
+				if (value != 0 && gf != null) {
+					gf.playAnim('cheer', true);
+					gf.specialAnim = true;
+					gf.heyTimer = time;
 				}
 				if (value != 1 && boyfriend != null) {
 					boyfriend.playAnim('hey', true);
