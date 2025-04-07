@@ -1,0 +1,4 @@
+function onCreatePost() {
+	game.dad.scrollFactor.set(0.95, 0.95);
+	game.dadGroup.setPosition(game.gfGroup.x, game.gfGroup.y);
+}

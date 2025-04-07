@@ -1,0 +1,10 @@
+var lastWho = null;
+function onMoveCamera(who:String) {
+	if (who == lastWho)
+		return;
+	
+	var zoom = (who == "dad") ? 1.3 : 1.0;
+	game.defaultCamZoom = zoom;
+	FlxTween.tween(FlxG.camera, {zoom: zoom}, (Conductor.stepCrochet * 4 / 1000), {ease: FlxEase.elasticInOut});
+	lastWho = who;
+}
