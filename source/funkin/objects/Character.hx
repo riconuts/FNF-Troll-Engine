@@ -463,12 +463,13 @@ class Character extends FlxSprite
 		if (callOnScripts("onDance") == Globals.Function_Stop)
 			return;
 
-		if(idleSequence.length > 1){
+		playAnim(idleSequence[danceIndex] + idleSuffix, shouldForceDance);
+		
+		if (idleSequence.length > 1) {
 			danceIndex++;
-			if(danceIndex >= idleSequence.length)
+			if (danceIndex >= idleSequence.length)
 				danceIndex = 0;
 		}
-		playAnim(idleSequence[danceIndex] + idleSuffix, shouldForceDance);
 		
 /* 		if(danceIdle){
 			danced = !danced;
