@@ -19,45 +19,28 @@ using StringTools;
 
 class Character extends FlxSprite
 {
-	/**The next beat the character will dance on**/
-	public var nextDanceBeat:Float = -5;
+	/**Character to use if the requested one fails to load**/
+	public static final DEFAULT_CHARACTER:String = 'bf';
 
-	/**Whether to force the dance animation to play**/
-	public var shouldForceDance:Bool = false;
+	////
 
-	/**If true, the character will go back to it's idle even if the player is holding a gameplay key**/
-	public var idleWhenHold:Bool = false;
-
-	/**In case a character is missing, it will use BF on its place**/
-	public static var DEFAULT_CHARACTER:String = 'bf'; 
-
-	/**Whether the player controls this character**/
-	public var controlled:Bool = false;
-
-	/**Whether the character is facing left or right. -1 means it's facing to the left, 1 means its facing to the right.**/
-	public var xFacing:Float = 1;
+	/**Id of the character**/
+	public var characterId:String = DEFAULT_CHARACTER;
 
 	/**Id of the death character to be used. Can be used to share 1 game over character across multiple characters**/
 	public var deathId:String = DEFAULT_CHARACTER;
 
-	/**
-	 * Scripts running on the character. 
-	 *
-	 * You should not modify this directly! Use `pushScript`/`removeScript`!
-	 *
-	 * If you must modify it directly, remember to call `startScript`/`stopScript` after adding/removing it
-	 */
-	public var characterScripts:Array<FunkinScript> = [];
+	/**Name of the image to be used for the health icon**/
+	public var healthIcon:String = 'face';
 
-	/**
-	 * Stops note anims and idle from playing.
-	 * Make sure to set this to false once the animation is done.
-	 */
-	public var voicelining:Bool = false; // for fleetway, mainly
-	// but whenever you need to play an anim that has to be manually interrupted, here you go
+	/**Whether this character is playable. Not really used much anymore**/
+	public var isPlayer:Bool = false;
 
-	/**The set of animations, in order, to be played for the character idling.**/
-	public var idleSequence:Array<String> = ['idle'];
+	/**Whether the player controls this character**/
+	public var controlled:Bool = false;
+
+	/**Used by the character editor. Disables most functions of the character besides animations**/
+	public var debugMode:Bool = false;
 
 	/**How each animation offsets the character**/
 	public var animOffsets = new Map<String, Array<Dynamic>>();
@@ -65,24 +48,50 @@ class Character extends FlxSprite
 	/**How each animation offsets the camera**/
 	public var camOffsets:Map<String, Array<Float>> = [];
 
-	/**Used by the character editor. Disables most functions of the character besides animations**/
-	public var debugMode:Bool = false;
+	/**Offsets the character on the stage**/
+	public var positionArray:Array<Float> = [0, 0];
 
-	/**Camera horizontal offset from the animation**/
-	public var camOffX:Float = 0;
+	/**Offsets the camera when its focused on the character**/
+	public var cameraPosition:Array<Float> = [0, 0];
 
-	/**Camera vertical offset from the animation**/
-	public var camOffY:Float = 0;
+	/**Whether the character is facing left or right. -1 means it's facing to the left, 1 means its facing to the right.**/
+	public var xFacing:Float = 1;
 
-	/**Whether this character is playable. Not really used much anymore**/
-	public var isPlayer:Bool = false;
+	/**The set of animations, in order, to be played for the character idling.**/
+	public var idleSequence:Array<String> = ['idle'];
 
-	/**Id of the character**/
-	public var characterId:String = DEFAULT_CHARACTER;
+	/**String to be appended to idle animation names. For example, if this is -alt, then the animation used for idling will be idle-alt or danceLeft-alt/danceRight-alt**/
+	public var idleSuffix:String = '';
 
-	/**BLAMMED LIGHTS!! idk not used anymore**/
-	public var colorTween:FlxTween;
+	/**Character uses "danceLeft" and "danceRight" instead of "idle"**/
+	public var danceIdle:Bool = false;
 
+	/**How many steps a character should hold their sing animation for**/
+	public var singDuration:Float = 4;
+
+	/**If true, the character will go back to it's idle even if the player is holding a gameplay key**/
+	public var idleWhenHold:Bool = false;
+
+	/**Set to true if the character has miss animations. Optimization mainly**/
+	public var hasMissAnimations:Bool = false;
+
+	/**Allows the current dance animation to restart (if it hasn't finished)**/
+	public var shouldForceDance:Bool = false;
+
+	/**
+	 * Beats to be added to `nextDanceBeat`
+	 * How many beats should be waited before the character should dance again
+	**/
+	public var danceEveryNumBeats:Float = 2;
+
+	////
+
+	/**The next beat the character will dance on. Set by PlayState**/
+	public var nextDanceBeat:Float = -5;
+
+	/**Index of the next animation to play on the dance sequence**/
+	public var danceIndex:Int = 0;
+	
 	/**How long in seconds the current sing animation has been held for**/
 	public var holdTimer:Float = 0;
 
@@ -92,38 +101,36 @@ class Character extends FlxSprite
 	/**Automatically resets the character to idle once this hits 0 after being set to any value above 0**/
 	public var animTimer:Float = 0;
 
-	/**Disables dancing while the hey/cheer animations are playing**/
+	/**
+	 * Disables dancing if true.
+	 * Automatically gets set to false once the current animation finishes.
+	**/
 	public var specialAnim:Bool = false;
 
 	/**Disables the ability for characters to manually reset to idle**/
 	public var stunned:Bool = false;
-	
-	/**How many steps a character should hold their sing animation for**/
-	public var singDuration:Float = 4;
-
-	/**String to be appended to idle animation names. For example, if this is -alt, then the animation used for idling will be idle-alt or danceLeft-alt/danceRight-alt**/
-	public var idleSuffix:String = '';
-
-	/**Character uses "danceLeft" and "danceRight" instead of "idle"**/
-	public var danceIdle:Bool = false;
 
 	/**Stops the idle from playing**/
 	public var skipDance:Bool = false;
 
-	/**Name of the image to be used for the health icon**/
-	public var healthIcon:String = 'face';
+	/**
+	 * Stops note anims and idle from playing.
+	 * Make sure to set this to false once the animation is done.
+	**/
+	public var voicelining:Bool = false; // for fleetway, mainly
+	// but whenever you need to play an anim that has to be manually interrupted, here you go
 
-	/**Offsets the character on the stage**/
-	public var positionArray:Array<Float> = [0, 0];
+	/**Camera horizontal offset from the animation**/
+	public var camOffX:Float = 0;
 
-	/**Offsets the camera when its focused on the character**/
-	public var cameraPosition:Array<Float> = [0, 0];
-	
-	/**Set to true if the character has miss animations. Optimization mainly**/
-	public var hasMissAnimations:Bool = false;
+	/**Camera vertical offset from the animation**/
+	public var camOffY:Float = 0;
 
 	/**Overlay color used for characters that don't have miss animations.**/
 	public var missOverlayColor:FlxColor = 0xFFC6A6FF;
+
+	/**BLAMMED LIGHTS!! idk not used anymore**/
+	public var colorTween:FlxTween;
 	
 	//Used on Character Editor
 	public var animationsArray:Array<AnimArray> = [];
@@ -134,6 +141,9 @@ class Character extends FlxSprite
 	public var healthColorArray:Array<Int> = [255, 0, 0];
 
 	#if ALLOW_DEPRECATION
+	@:deprecated
+	public var danced:Bool = false;
+
 	@:deprecated("curCharacter is deprecated. Use characterId instead.")
 	public var curCharacter(get, set):String;
 	inline function get_curCharacter() return characterId;
@@ -436,24 +446,8 @@ class Character extends FlxSprite
 		}
 
 		////
-		if (characterId.startsWith('gf'))
-		{
-			if (AnimName == 'singLEFT')
-				danced = true;
-			
-			else if (AnimName == 'singRIGHT')
-				danced = false;
-			
-			else if (AnimName == 'singUP' || AnimName == 'singDOWN')
-				danced = !danced;
-		}
-
-		////
 		callOnScripts("onAnimPlayed", [AnimName, Force, Reversed, Frame]);
 	}
-
-	public var danced:Bool = false;
-	var danceIndex:Int = 0;	
 	
 	public function dance()
 	{
@@ -471,14 +465,6 @@ class Character extends FlxSprite
 				danceIndex = 0;
 		}
 		
-/* 		if(danceIdle){
-			danced = !danced;
-			playAnim((danced ? 'danceRight' : 'danceLeft') + idleSuffix);
-		}
-		else if(animation.getByName('idle' + idleSuffix) != null) {
-			playAnim('idle' + idleSuffix);
-		}
- */
 		callOnScripts("onDancePost");
 	}
 
@@ -556,7 +542,6 @@ class Character extends FlxSprite
 			colorOverlay = missOverlayColor;	
 	}
 
-	public var danceEveryNumBeats:Float = 2;
 	private var settingCharacterUp:Bool = true;
 	public function recalculateDanceIdle() {
 		var lastDanceIdle:Bool = danceIdle;
@@ -604,6 +589,15 @@ class Character extends FlxSprite
 	}
 
 	////
+	/**
+	 * Scripts running on the character. 
+	 *
+	 * You should not modify this directly! Use `pushScript`/`removeScript`!
+	 *
+	 * If you must modify it directly, remember to call `startScript`/`stopScript` after adding/removing it
+	**/
+	public var characterScripts:Array<FunkinScript> = [];
+
 	public var defaultVars:Map<String, Dynamic> = [];
 	public function setDefaultVar(i:String, v:Dynamic)
 		defaultVars.set(i, v);
