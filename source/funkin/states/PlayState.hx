@@ -2723,48 +2723,44 @@ class PlayState extends MusicBeatState
 	public function changeCharacter(name:String, charType:CharacterType)
 	{
 		var oldChar:Character;
-		var newChar:Character;
+		var charMap:Map<String, Character>;
 		var varName:String;
 
 		switch(charType) {
-			default: return;
-			
 			case BF:
-				if (boyfriend != null && boyfriend.characterId == name)
-					return;
-				
-				if (!boyfriendMap.exists(name)) 
-					addCharacterToList(name, charType);
-				
 				oldChar = boyfriend;
-				newChar = boyfriend = boyfriendMap.get(name);
+				charMap = boyfriendMap;
 				varName = 'boyfriendName';
 
 			case DAD:
-				if (dad != null && dad.characterId == name)
-					return;
-
-				if (!dadMap.exists(name)) 
-					addCharacterToList(name, charType);
-				
 				oldChar = dad;
-				newChar = dad = dadMap.get(name);
+				charMap = dadMap;
 				varName = 'dadName';
 
 			case GF:
-				if (gf != null && gf.characterId == name) 
-					return;
-
-				if (!gfMap.exists(name))
-					addCharacterToList(name, charType);
-		
 				oldChar = gf;
-				newChar = gf = gfMap.get(name);
+				charMap = gfMap;
 				varName = "gfName";
+
+			default: return;
 		}
+
+		if (oldChar != null && oldChar.characterId == name)
+			return;
 
 		if (showDebugTraces)
 			trace('turning $charType into ' + name);
+		
+		if (!charMap.exists(name))
+			addCharacterToList(name, charType);
+		
+		var newChar:Character = charMap.get(name);
+		
+		switch(charType) {
+			case BF: boyfriend = newChar;
+			case DAD: dad = newChar;
+			case GF: gf = newChar;
+		}
 
 		setOnScripts(varName, name);
 
