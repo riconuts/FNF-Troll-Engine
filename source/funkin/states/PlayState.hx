@@ -1112,11 +1112,6 @@ class PlayState extends MusicBeatState
 		Cache.loadWithList(shitToLoad);
 		shitToLoad = [];
 
-		if(gf!=null) gf.callOnScripts("onAdded", [gf, null]); // if you can come up w/ a better name for this callback then change it lol
-		// (this also gets called for the characters changed in changeCharacter)
-		if(boyfriend!=null) boyfriend.callOnScripts("onAdded", [boyfriend, null]);
-		if(dad!=null) dad.callOnScripts("onAdded", [dad, null]); 
-
 		super.create();
 
 		RecalculateRating();
