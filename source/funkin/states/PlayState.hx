@@ -3808,13 +3808,16 @@ class PlayState extends MusicBeatState
 		
 	}
 
-	inline function getNoteCharacters(note:Note, field:PlayField) {
-		var chars:Array<Character> = note.characters;
+	inline function getNoteCharacters(note:Note, field:PlayField):Array<Character> {
+		var chars:Array<Character> = note.characters.copy();
 
-		if (note.gfNote && gf != null)
-			chars.push(gf);
-		else if (chars.length == 0)
-			chars = field.characters;
+		if (note.gfNote)
+			if (gf != null) chars.push(gf);
+		
+		if (chars.length == 0) {
+			for (c in field.characters)
+				chars.push(c);
+		}
 
 		return chars;
 	}
