@@ -79,11 +79,15 @@ class Conductor
 
 	public static function changePitch(pitch:Float)
 	{
+		var wasPlaying:Bool = Conductor.playing;
 		Conductor.pauseSong();
+
 		Conductor.pitch = pitch;
 		for (track in tracks)
 			track.pitch = pitch;
-		Conductor.resumeSong();
+
+		if (wasPlaying)
+			Conductor.resumeSong();
 	}
 	
 	public static var useAccPosition:Bool = false;
