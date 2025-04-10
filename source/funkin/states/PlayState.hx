@@ -1320,8 +1320,8 @@ class PlayState extends MusicBeatState
 		return null;
 	}
 
-	function startCharacterPos(char:Character, ?gfCheck:Bool = false, ?startBopBeat:Float=-5) {
-		char.nextDanceBeat = startBopBeat;
+	function startCharacterPos(char:Character, ?gfCheck:Bool = false, ?startBopBeat:Float) {
+		if (startBopBeat != null) char.nextDanceBeat = startBopBeat;
 		char.x += char.positionArray[0];
 		char.y += char.positionArray[1];
 	}
