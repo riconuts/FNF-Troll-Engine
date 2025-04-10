@@ -2738,27 +2738,13 @@ class PlayState extends MusicBeatState
 
 		if (oldChar != null) {
 			newChar.alpha = oldChar.alpha;
-
 			oldChar.alpha = 0.00001;
-			oldChar.setOnScripts("used", false);
-			oldChar.callOnScripts("changedOut", [oldChar, newChar]);
-		
-			if (name.startsWith(oldChar.characterId) || oldChar.characterId.startsWith(name)) {
-				var anim:String = oldChar.animation.name;
-				
-				if (newChar.animation.exists(anim)) {
-					var reversed:Bool = oldChar.animation.curAnim.reversed;
-					var frame:Int = oldChar.animation.curAnim.curFrame;
-					newChar.playAnim(anim, true, reversed, frame);
-				}
-			}
+			oldChar.changedOut(newChar);
 		}
 		else 
 			newChar.alpha = 1.0;
 
-		newChar.setOnScripts("used", true);
-		newChar.callOnScripts("onAdded", [newChar, oldChar]); // if you can come up w/ a better name for this callback then change it lol
-		// (this also gets called for the characters set by the chart's player1/player2)
+		newChar.changedIn(oldChar);
 
 		if (focusedChar == oldChar) focusedChar = newChar;
 
