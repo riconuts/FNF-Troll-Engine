@@ -346,6 +346,7 @@ class ChartingState extends MusicBeatState
 		
 		MusicBeatState.stopMenuMusic();
 
+		Conductor.cleanup();
 		Conductor.changeBPM(_song.bpm);
 		Conductor.mapBPMChanges(_song);
 		Conductor.tracks = this.tracks;

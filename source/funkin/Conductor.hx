@@ -58,6 +58,9 @@ class Conductor
 
 	public static function pauseSong() 
 	{
+		if (!Conductor.playing)
+			return;
+
 		Conductor.songPosition = getAccPosition();
 		Conductor.playing = false;
 
@@ -68,6 +71,9 @@ class Conductor
 
 	public static function resumeSong()
 	{
+		if (Conductor.playing)
+			return;
+
 		startSong(Conductor.songPosition);
 	}
 
@@ -89,7 +95,14 @@ class Conductor
 	}
 
 	public static function cleanup() {
-		if (Conductor.playing) Conductor.pauseSong();
+		for (snd in tracks)
+			snd.stop();
+
+		Conductor.songStartTimestamp = 0;
+		Conductor.songStartOffset = 0;
+
+		Conductor.songPosition = 0;
+		Conductor.playing = false;
 		Conductor.bpmChangeMap = [];
 		Conductor.tracks = [];
 	}

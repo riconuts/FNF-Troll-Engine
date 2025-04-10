@@ -524,6 +524,7 @@ class PlayState extends MusicBeatState
 		
 		this.songSyncMode = SongSyncMode.fromString(ClientPrefs.songSyncMode);
 
+		Conductor.cleanup();
 		Conductor.safeZoneOffset = ClientPrefs.hitWindow;
 		Wife3.timeScale = Wife3.judgeScales.get(ClientPrefs.judgeDiff);
 		PBot.missThreshold = Math.max(160, ClientPrefs.hitWindow);
