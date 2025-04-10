@@ -117,9 +117,9 @@ class AdvancedHUD extends CommonHUD
 		
 	}
 
-	override public function new(iP1:String, iP2:String, songName:String, stats:Stats)
+	override public function new(songName:String, stats:Stats)
 	{
-		super(iP1, iP2, songName, stats);
+		super(songName, stats);
 
 		stats.changedEvent.add(statChanged);
 		

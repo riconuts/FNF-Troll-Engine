@@ -7,7 +7,7 @@ import funkin.scripts.FunkinHScript;
 
 class HScriptedHUD extends BaseHUD {
 	private var script:FunkinHScript;
-	override public function new(iP1:String, iP2:String, songName:String, stats:Stats, script:FunkinHScript)
+	override public function new(songName:String, stats:Stats, script:FunkinHScript)
 	{
 		this.script = script;
 		script.set("this", this);
@@ -17,8 +17,8 @@ class HScriptedHUD extends BaseHUD {
 
 		stats.changedEvent.add(statChanged);
 
-		super(iP1, iP2, songName, stats);
-		script.call("createHUD", [iP1, iP2, songName, stats]);
+		super(songName, stats);
+		script.call("createHUD", ['bf', 'dad', songName, stats]);
 	}
 
 	override function set_displayedHealth(nV:Float):Float 
@@ -105,14 +105,14 @@ class HScriptedHUD extends BaseHUD {
 
 	public static function fromString(iP1:String, iP2:String, songName:String, stats:Stats, scriptSource:String):HScriptedHUD
 	{
-		return new HScriptedHUD(iP1, iP2, songName, stats, FunkinHScript.fromString(scriptSource, "HScriptedHUD"));
+		return new HScriptedHUD(songName, stats, FunkinHScript.fromString(scriptSource, "HScriptedHUD"));
 	}
 
 	public static function fromFile(iP1:String, iP2:String, songName:String, stats:Stats, fileName:String):Null<HScriptedHUD>
 	{
 		var file = Paths.getHScriptPath('$fileName');
 		if (file != null)
-			return new HScriptedHUD(iP1, iP2, songName, stats, FunkinHScript.fromFile(file));
+			return new HScriptedHUD(songName, stats, FunkinHScript.fromFile(file));
 		
 
 		trace('HUD script: $fileName not found!');
@@ -124,8 +124,6 @@ class HScriptedHUD extends BaseHUD {
 		var file = Paths.getHScriptPath('huds/$scriptName');
 		if (file != null)
 			return new HScriptedHUD(
-				iP1, 
-				iP2, 
 				songName, 
 				stats,
 				FunkinHScript.fromFile(file)

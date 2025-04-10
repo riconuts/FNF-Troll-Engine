@@ -51,16 +51,16 @@ class KadeHUD extends BaseHUD
 	override function getHealthbar():FNFHealthBar 
 		return healthBar;
 
-	public function new(iP1:String, iP2:String, songName:String, stats:Stats)
+	public function new(songName:String, stats:Stats)
 	{
-		super(iP1, iP2, songName, stats);
+		super(songName, stats);
 
 		var songRecord = Highscore.getRecord(this.songName, PlayState.difficultyName);
 		songHighscore = songRecord.score;
 		songWifeHighscore = songRecord.accuracyScore;
 	
 		//// Health bar
-		healthBar = new ShittyBar(iP1, iP2);
+		healthBar = new ShittyBar('bf', 'dad');
 		healthBarBG = healthBar.healthBarBG;
 		iconP1 = healthBar.iconP1;
 		iconP2 = healthBar.iconP2;

@@ -855,16 +855,12 @@ class PlayState extends MusicBeatState
 		displayedSong = metadata?.songName ?? songId.replace("-"," ").capitalize();
 
 		if (hud == null) {
-			// TODO: make these not be obligatory values
-			// initial icons should be loaded by changeCharacter instead idk
-			var iP1:String = boyfriend?.healthIcon ?? "face";
-			var iP2:String = dad?.healthIcon ?? "face";
-
+			// TODO: replace songId with the song object !?!?
 			switch(ClientPrefs.etternaHUD){
-				case 'Advanced': hud = new AdvancedHUD(iP1, iP2, songId, stats);
-				case 'Kade': hud = new KadeHUD(iP1, iP2, songId, stats);
-				case 'Classic': hud = new ClassicHUD(iP1, iP2, songId, stats);
-				default: hud = new TraditionalHUD(iP1, iP2, songId, stats);
+				case 'Advanced': hud = new AdvancedHUD(songId, stats);
+				case 'Kade': hud = new KadeHUD(songId, stats);
+				case 'Classic': hud = new ClassicHUD(songId, stats);
+				default: hud = new TraditionalHUD(songId, stats);
 			}
 		}
 		hud.cameras = [camHUD];
