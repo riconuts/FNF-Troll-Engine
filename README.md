@@ -1,7 +1,23 @@
 # Friday Night Funkin': Troll Engine
 
-[Troll Engine](https://github.com/riconuts/troll-engine) is the fork of [Psych Engine](https://github.com/ShadowMario/FNF-PsychEngine) originally made for the [Tails Gets Trolled mod](https://gamebanana.com/mods/320596).
+[Troll Engine](https://github.com/riconuts/troll-engine) is the fork of [Psych Engine](https://github.com/ShadowMario/FNF-PsychEngine) 0.5.2h originally made for the [Tails Gets Trolled mod](https://gamebanana.com/mods/320596).
 
+## NOTE:
+
+This engine is a ****WORK IN PROGRESS****!!! 
+
+Expect bugs, breaking changes and no documentation!!!
+
+Compatibility with Psych Engine mods is limited and will be removed in the future.
+
+## Features:
+
+ - Quant note skins
+ - Lots of hud customization (NPS counter, note hit timing info, colored combos, judgement counters, options for other hud styles too)
+ - An awesome modchart system
+ - Custom hscript implementation (scriptable notetypes, events, stages, characters and song scripts)
+ - Scriptable states
+ - A lot more!!!
 
 ## Installation / Requirements:
 
