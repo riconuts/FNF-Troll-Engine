@@ -39,8 +39,7 @@ class KadeHUD extends BaseHUD
 	var cbString = Paths.getString("cbplural");
 	var npsString = Paths.getString("nps");
 
-	var engineStringLong = 'Troll Engine ${Main.Version.displayedVersion}';
-	var engineStringShort = 'TE ${Main.Version.displayedVersion}';
+	var engineName = 'Troll Engine';
 
 	override function set_displayedHealth(value:Float)
 	{
@@ -84,6 +83,7 @@ class KadeHUD extends BaseHUD
 		originalX = scoreTxt.x;
 		scoreTxt.scrollFactor.set();
 		scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, 0xFFFFFFFF, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, 0xFF000000);
+		scoreTxt.pixelPerfectRender = true; // that blurry text is driving me insane
 		add(scoreTxt);
 
 		////
@@ -167,10 +167,7 @@ class KadeHUD extends BaseHUD
 
 		if (ClientPrefs.timeBarType == "Song Name"){
 			timeTxt.text = displayedSong;
-			watermark.text = engineStringLong;
-
-			if (watermark.x + watermark.width >= healthBarBG.x)
-				watermark.text = engineStringShort;
+			watermark.text = engineName;
 		}else{
 			timeTxt.text = "";
 			var id = PlayState.difficultyName;
@@ -183,10 +180,7 @@ class KadeHUD extends BaseHUD
 
 			var sognNaim = PlayState.SONG.song + " " + diffName; //
 
-			watermark.text = '$sognNaim | $engineStringLong';
-
-			if (watermark.x + watermark.width >= healthBarBG.x)
-				watermark.text = '$sognNaim | $engineStringShort';
+			watermark.text = '$sognNaim | $engineName';
 		}
 
 		timeTxt.x = timeBarBG.x + (timeBarBG.width / 2) - (timeTxt.text.length * 5);
