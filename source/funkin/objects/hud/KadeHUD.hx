@@ -165,22 +165,18 @@ class KadeHUD extends BaseHUD
 		timeBar.exists = updateTime;
 		timeTxt.exists = updateTime;
 
-		if (ClientPrefs.timeBarType == "Song Name"){
+		if (ClientPrefs.timeBarType == "Song Name")
+		{
 			timeTxt.text = displayedSong;
 			watermark.text = engineName;
-		}else{
+		}
+		else
+		{
+			var diffId:String = PlayState.difficultyName;
+			var diffName:String = Paths.getString('difficultyName_$diffId', diffId);
+
+			watermark.text = '$displayedSong $diffName | $engineName';
 			timeTxt.text = "";
-			var id = PlayState.difficultyName;
-			if (id == '')
-				id = 'normal';
-
-			var _dStrId:String = 'difficultyName_${id.toLowerCase()}';
-
-			var diffName:String = Paths.getString(_dStrId, id);
-
-			var sognNaim = PlayState.SONG.song + " " + diffName; //
-
-			watermark.text = '$sognNaim | $engineName';
 		}
 
 		timeTxt.x = timeBarBG.x + (timeBarBG.width / 2) - (timeTxt.text.length * 5);
