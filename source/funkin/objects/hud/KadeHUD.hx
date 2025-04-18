@@ -1,5 +1,6 @@
 package funkin.objects.hud;
 
+import math.CoolMath;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.util.FlxStringUtil;
 import flixel.ui.FlxBar;
@@ -243,7 +244,7 @@ class KadeHUD extends BaseHUD
 
 			text += '$scareText: $shownScore | ' +
 			'$cbString: $comboBreaks | ' +
-			'$ratingString: ${grade == '?' ? 0 : Highscore.floorDecimal(ratingPercent * 100, 2)}% | ';
+			'$ratingString: ${grade == '?' ? 0 : CoolMath.floorDecimal(ratingPercent * 100, 2)}% | ';
 			if(grade == '?')
 				text += "N/A";
 			else

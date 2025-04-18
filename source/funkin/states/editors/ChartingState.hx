@@ -2031,7 +2031,7 @@ class ChartingState extends MusicBeatState
 		bpmTxt.text =
 		"Time: " + Std.string(FlxMath.roundDecimal(Conductor.songPosition / 1000, 2)) + " / " + Std.string(FlxMath.roundDecimal(inst.length / 1000, 2)) +
 		"\n\nSection: " + curSec +
-		"\nBeat: " + funkin.data.Highscore.floorDecimal(curDecBeat, 2) +
+		"\nBeat: " + math.CoolMath.floorDecimal(curDecBeat, 2) +
 		"\nStep: " + curStep;
 
 		var playedSound:Array<Bool> = []; //Prevents ouchy GF sex sounds
