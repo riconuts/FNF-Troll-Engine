@@ -201,7 +201,7 @@ class ChartingState extends MusicBeatState
 
 	private var blockPressWhileTypingOn:Array<FlxUIInputText> = [];
 	private var blockPressWhileTypingOnStepper:Array<FlxUINumericStepper> = [];
-	private var blockPressWhileScrolling:Array<FlxUIDropDownMenuCustom> = [];
+	private var blockPressWhileScrolling:Array<FlxUIDropDownMenu> = [];
 
 	var waveformSprite:FlxSprite;
 	var gridLayer:FlxTypedGroup<FlxSprite>;
@@ -707,7 +707,7 @@ class ChartingState extends MusicBeatState
 		var characters:Array<String> = CharacterData.getAllCharacters();
 		characters.sort(CoolUtil.alphabeticalSort);
 
-		var player1DropDown = new FlxUIDropDownMenuCustom(10, stepperSpeed.y + 45, FlxUIDropDownMenuCustom.makeStrIdLabelArray(characters, true), function(character:String)
+		var player1DropDown = new FlxUIDropDownMenu(10, stepperSpeed.y + 45, FlxUIDropDownMenu.makeStrIdLabelArray(characters, true), function(character:String)
 		{
 			_song.player1 = characters[Std.parseInt(character)];
 			updateHeads();
@@ -715,7 +715,7 @@ class ChartingState extends MusicBeatState
 		player1DropDown.selectedLabel = _song.player1;
 		blockPressWhileScrolling.push(player1DropDown);
 
-		var gfVersionDropDown = new FlxUIDropDownMenuCustom(player1DropDown.x, player1DropDown.y + 40, FlxUIDropDownMenuCustom.makeStrIdLabelArray(characters, true), function(character:String)
+		var gfVersionDropDown = new FlxUIDropDownMenu(player1DropDown.x, player1DropDown.y + 40, FlxUIDropDownMenu.makeStrIdLabelArray(characters, true), function(character:String)
 		{
 			_song.gfVersion = characters[Std.parseInt(character)];
 			updateHeads();
@@ -723,7 +723,7 @@ class ChartingState extends MusicBeatState
 		gfVersionDropDown.selectedLabel = _song.gfVersion;
 		blockPressWhileScrolling.push(gfVersionDropDown);
 
-		var player2DropDown = new FlxUIDropDownMenuCustom(player1DropDown.x, gfVersionDropDown.y + 40, FlxUIDropDownMenuCustom.makeStrIdLabelArray(characters, true), function(character:String)
+		var player2DropDown = new FlxUIDropDownMenu(player1DropDown.x, gfVersionDropDown.y + 40, FlxUIDropDownMenu.makeStrIdLabelArray(characters, true), function(character:String)
 		{
 			_song.player2 = characters[Std.parseInt(character)];
 			updateHeads();
@@ -740,10 +740,10 @@ class ChartingState extends MusicBeatState
 		else
 			stages.sort(CoolUtil.alphabeticalSort);
 		
-		var stageDropDown = new FlxUIDropDownMenuCustom(
+		var stageDropDown = new FlxUIDropDownMenu(
 			player1DropDown.x + 140, 
 			player1DropDown.y, 
-			FlxUIDropDownMenuCustom.makeStrIdLabelArray(stages, true), 
+			FlxUIDropDownMenu.makeStrIdLabelArray(stages, true), 
 			function(character:String)
 			{
 				_song.stage = stages[Std.parseInt(character)];
@@ -753,9 +753,9 @@ class ChartingState extends MusicBeatState
 		stageDropDown.selectedLabel = _song.stage;
 		blockPressWhileScrolling.push(stageDropDown);
 
-		var skinDropdown = new FlxUIDropDownMenuCustom(
+		var skinDropdown = new FlxUIDropDownMenu(
 			stageDropDown.x, stageDropDown.y + 40, 
-			FlxUIDropDownMenuCustom.makeStrIdLabelArray(skins, true), 
+			FlxUIDropDownMenu.makeStrIdLabelArray(skins, true), 
 			function(skin:String){
 				_song.hudSkin = skins[Std.parseInt(skin)];
 			}
@@ -1104,7 +1104,7 @@ class ChartingState extends MusicBeatState
 
 	var stepperSusLength:FlxUINumericStepper;
 	var strumTimeInputText:FlxUIInputText; //I wanted to use a stepper but we can't scale these as far as i know :(
-	var noteTypeDropDown:FlxUIDropDownMenuCustom;
+	var noteTypeDropDown:FlxUIDropDownMenu;
 	var currentType:Int = 0;
 
 	function addNoteUI():Void
@@ -1177,7 +1177,7 @@ class ChartingState extends MusicBeatState
 			displayNameList[i] = i + '. ' + displayNameList[i];
 		}
 
-		noteTypeDropDown = new FlxUIDropDownMenuCustom(10, 105, FlxUIDropDownMenuCustom.makeStrIdLabelArray(displayNameList, true), function(character:String)
+		noteTypeDropDown = new FlxUIDropDownMenu(10, 105, FlxUIDropDownMenu.makeStrIdLabelArray(displayNameList, true), function(character:String)
 		{
 			currentType = Std.parseInt(character);
 			if(curSelectedNote != null && curSelectedNote[1] > -1) {
@@ -1198,7 +1198,7 @@ class ChartingState extends MusicBeatState
 		UI_box.addGroup(tab_group_note);
 	}
 
-	var eventDropDown:FlxUIDropDownMenuCustom;
+	var eventDropDown:FlxUIDropDownMenu;
 	var eventNameInput:FlxUIInputText;
 	var descText:FlxText;
 	var selectedEventText:FlxText;
@@ -1252,9 +1252,9 @@ class ChartingState extends MusicBeatState
 		var text:FlxText = new FlxText(20, 30, 0, "Event:");
 		tab_group_event.add(text);
 
-		eventDropDown = new FlxUIDropDownMenuCustom(
+		eventDropDown = new FlxUIDropDownMenu(
 			20, 50, 
-			FlxUIDropDownMenuCustom.makeStrIdLabelArray(leEvents, true), 
+			FlxUIDropDownMenu.makeStrIdLabelArray(leEvents, true), 
 			function(pressed:String) {
 				var idx:Int = Std.parseInt(pressed);
 				
@@ -1462,7 +1462,7 @@ class ChartingState extends MusicBeatState
 	var panHitSounds:FlxUICheckBox = null;
 
 	static var lastSelectedTrack = "Voices";
-	var waveformTrackDropDown:FlxUIDropDownMenuCustom;
+	var waveformTrackDropDown:FlxUIDropDownMenu;
 	var waveformTrack:Null<FlxSound> = null;
 	var trackVolumeSlider:FlxUISlider;
 
@@ -1502,9 +1502,9 @@ class ChartingState extends MusicBeatState
 			trackNamesArray.push(trackName);
 
 		//
-		waveformTrackDropDown = new FlxUIDropDownMenuCustom(
+		waveformTrackDropDown = new FlxUIDropDownMenu(
 			10, 100, 
-			FlxUIDropDownMenuCustom.makeStrIdLabelArray(trackNamesArray, false), 
+			FlxUIDropDownMenu.makeStrIdLabelArray(trackNamesArray, false), 
 			selectTrack
 		);
 		blockPressWhileScrolling.push(waveformTrackDropDown);

@@ -97,9 +97,9 @@ class StageEditorState extends MusicBeatState{
 	var UI_stagebox:FlxUITabMenu;
 	*/
 	var characterList:Array<String> = [];
-	var dadDropDown:FlxUIDropDownMenuCustom;
-	var gfDropDown:FlxUIDropDownMenuCustom;
-	var bfDropDown:FlxUIDropDownMenuCustom;
+	var dadDropDown:FlxUIDropDownMenu;
+	var gfDropDown:FlxUIDropDownMenu;
+	var bfDropDown:FlxUIDropDownMenu;
 
 	var charTxt:FlxText;
 	var xPosTxt:FlxText;
@@ -159,8 +159,8 @@ class StageEditorState extends MusicBeatState{
 		var tab_group = new FlxUI(null, UI_characterbox);
 		tab_group.name = "Character Preview";
 
-		var weirdArray = FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true);
-		dadDropDown = new FlxUIDropDownMenuCustom(15, 110, weirdArray, function(character:String)
+		var weirdArray = FlxUIDropDownMenu.makeStrIdLabelArray([''], true);
+		dadDropDown = new FlxUIDropDownMenu(15, 110, weirdArray, function(character:String)
 		{
 			var daAnim = characterList[Std.parseInt(character)];
 			updateDad(daAnim);
@@ -168,7 +168,7 @@ class StageEditorState extends MusicBeatState{
 			reloadCharacterArray();
 			dadDropDown.selectedLabel = daAnim;
 		});
-		gfDropDown = new FlxUIDropDownMenuCustom(15, 70, weirdArray, function(character:String)
+		gfDropDown = new FlxUIDropDownMenu(15, 70, weirdArray, function(character:String)
 		{
 			var daAnim = characterList[Std.parseInt(character)];
 			updateGF(daAnim);
@@ -176,7 +176,7 @@ class StageEditorState extends MusicBeatState{
 			reloadCharacterArray();
 			gfDropDown.selectedLabel = daAnim;
 		});
-		bfDropDown = new FlxUIDropDownMenuCustom(15, 30, weirdArray, function(character:String)
+		bfDropDown = new FlxUIDropDownMenu(15, 30, weirdArray, function(character:String)
 		{
 			var daAnim = characterList[Std.parseInt(character)];
 			updateBF(daAnim);
@@ -207,7 +207,7 @@ class StageEditorState extends MusicBeatState{
 		var tab_group = new FlxUI(null, UI_characterbox);
 
 		var stages = Stage.getAllStages();
-		var stageDropDown = new FlxUIDropDownMenuCustom(15, 30, FlxUIDropDownMenuCustom.makeStrIdLabelArray(stages, true), function(character:String){
+		var stageDropDown = new FlxUIDropDownMenu(15, 30, FlxUIDropDownMenu.makeStrIdLabelArray(stages, true), function(character:String){
 			curStage = stages[Std.parseInt(character)];
 			makeStage();
 		});
@@ -401,7 +401,7 @@ class StageEditorState extends MusicBeatState{
 		camFollow.set(camPos.x, camPos.y);
 
 		////
-		if (dad.curCharacter.startsWith('gf')){
+		if (dad.characterId.startsWith('gf')){
 			dad.setPosition(GF_X, GF_Y);
 			if (gf != null)
 				gf.visible = false;
@@ -422,7 +422,7 @@ class StageEditorState extends MusicBeatState{
 
 	function startCharacterPos(char:Character, ?gfCheck:Bool = false)
 	{
-		if (gfCheck && char.curCharacter.startsWith('gf')){ // IF DAD IS GIRLFRIEND, HE GOES TO HER POSITION
+		if (gfCheck && char.characterId.startsWith('gf')){ // IF DAD IS GIRLFRIEND, HE GOES TO HER POSITION
 			char.setPosition(GF_X, GF_Y);
 			char.scrollFactor.set(0.95, 0.95);
 			char.danceEveryNumBeats = 2;
@@ -435,7 +435,7 @@ class StageEditorState extends MusicBeatState{
 	{
 		characterList = CharacterData.getAllCharacters();
 
-		var weirdArray = FlxUIDropDownMenuCustom.makeStrIdLabelArray(characterList, true);
+		var weirdArray = FlxUIDropDownMenu.makeStrIdLabelArray(characterList, true);
 		dadDropDown.setData(weirdArray);
 		gfDropDown.setData(weirdArray);
 		bfDropDown.setData(weirdArray);
