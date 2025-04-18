@@ -36,15 +36,6 @@ class ClassicHUD extends CommonHUD {
 		iconP1 = healthBar.iconP1;
 		iconP2 = healthBar.iconP2;
 
-		#if (PE_MOD_COMPATIBILITY && false)
-		if (FlxG.state == PlayState.instance)
-		{
-			PlayState.instance.healthBar = healthBar;
-			PlayState.instance.iconP1 = iconP1;
-			PlayState.instance.iconP2 = iconP2;
-		}
-		#end
-
 		healthBar.healthBarBG.y = FlxG.height * (ClientPrefs.downScroll ? 0.1 : 0.9);
 		healthBar.y = healthBarBG.y + 5;
 		healthBar.iconP1.y = healthBar.y - 75;
