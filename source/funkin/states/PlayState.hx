@@ -938,7 +938,8 @@ class PlayState extends MusicBeatState
 		callOnScripts("onPlayfieldCreation"); // you should use this
 		playfields.cameras = [camHUD];
 		notes.cameras = [camHUD];
-		
+		add(notes);
+
 		modManager.playerAmount = 2;
 		for (i in 0...modManager.playerAmount)
 			newPlayfield();
@@ -1738,7 +1739,6 @@ class PlayState extends MusicBeatState
 		
 		//// NEW SHIT
 		var noteData:Array<SwagSection> = PlayState.SONG.notes;
-		add(notes);
 
 		// get note types to load
 		for (section in noteData) {
