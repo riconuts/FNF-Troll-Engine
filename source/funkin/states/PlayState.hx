@@ -1028,7 +1028,7 @@ class PlayState extends MusicBeatState
 		#end
 
 		// EVENT AND NOTE SCRIPTS WILL GET LOADED HERE
-		generateSong(SONG.song);
+		generateSong();
 
 		#if DISCORD_ALLOWED
 		// Discord RPC texts
@@ -1664,7 +1664,7 @@ class PlayState extends MusicBeatState
 		return playbackRate = pitch;
 	}
 
-	private function generateSong(dataPath:String):Void
+	private function generateSong():Void
 	{
 		Conductor.changeBPM(PlayState.SONG.bpm);
 		Conductor.tracks = this.tracks;
@@ -2366,8 +2366,7 @@ class PlayState extends MusicBeatState
 			#end
 
 			notes.add(dunceNote);
-			var index:Int = unspawnNotes.indexOf(dunceNote);
-			unspawnNotes.splice(index, 1);
+			unspawnNotes.remove(dunceNote);
 
 			callOnHScripts('onSpawnNotePost', [dunceNote]);
 			if (dunceNote.noteScript != null)
