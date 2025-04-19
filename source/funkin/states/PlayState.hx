@@ -846,7 +846,7 @@ class PlayState extends MusicBeatState
 		var stringId:String = 'difficultyName_$difficultyName';
 		displayedDifficulty = Paths.getString(stringId, difficultyName.replace("-"," ").capitalize());
 		
-		displayedSong = metadata?.songName ?? SONG.song.replace("-"," ").capitalize();
+		displayedSong = metadata?.songName ?? songName.replace("-"," ").capitalize();
 
 		if (hud == null) {
 			// TODO: make these not be obligatory values
@@ -855,10 +855,10 @@ class PlayState extends MusicBeatState
 			var iP2:String = dad?.healthIcon ?? "face";
 
 			switch(ClientPrefs.etternaHUD){
-				case 'Advanced': hud = new AdvancedHUD(iP1, iP2, SONG.song, stats);
-				case 'Kade': hud = new KadeHUD(iP1, iP2, SONG.song, stats);
-				case 'Classic': hud = new ClassicHUD(iP1, iP2, SONG.song, stats);
-				default: hud = new TraditionalHUD(iP1, iP2, SONG.song, stats);
+				case 'Advanced': hud = new AdvancedHUD(iP1, iP2, songName, stats);
+				case 'Kade': hud = new KadeHUD(iP1, iP2, songName, stats);
+				case 'Classic': hud = new ClassicHUD(iP1, iP2, songName, stats);
+				default: hud = new TraditionalHUD(iP1, iP2, songName, stats);
 			}
 		}
 		hud.cameras = [camHUD];
@@ -1693,7 +1693,7 @@ class PlayState extends MusicBeatState
 				if (song != null)
 					Paths.returnSound(song.getSongFile(trackName) + ".ogg");
 				else
-					Paths.track(PlayState.SONG.song, trackName);
+					Paths.track(songName, trackName);
 			}
 			var newTrack = new FlxSound().loadEmbedded(sndAsset);
 			//newTrack.volume = 0.0;
@@ -3072,7 +3072,7 @@ class PlayState extends MusicBeatState
 		// Save song score and rating.
 
 		if (saveScore && SONG.validScore && ratingFC != stats.fail)
-			Highscore.saveScoreRecord(SONG.song, difficultyName, stats.getScoreRecord());
+			Highscore.saveScoreRecord(songName, difficultyName, stats.getScoreRecord());
 
 		var gotoNextThing:Void -> Void = gotoMenus;
 		var nextSong:Song = null;
