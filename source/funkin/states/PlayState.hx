@@ -319,13 +319,18 @@ class PlayState extends MusicBeatState
 	private var luaDebugGroup:FlxTypedGroup<DebugText> = new FlxTypedGroup<DebugText>();
 	#end
 
-	////	
-
-	/** Formatted song name **/
-	public var songName:String = "";
+	////
+	public var songId:String = "";
 	public var songLength:Float = 0;
 	public var songHighscore:Int = 0;
 	public var songTrackNames:Array<String> = [];
+
+	#if ALLOW_DEPRECATION
+	/** Formatted song name **/
+	@:deprecated("songName is deprecated! use songId instead!")
+	public var songName(get, never):String;
+	function get_songName() return songId;
+	#end
 
 	////
 	private var generatedMusic:Bool = false;
@@ -661,15 +666,15 @@ class PlayState extends MusicBeatState
 		Conductor.songPosition = Conductor.crochet * -5;
 		Conductor.updateSteps();
 
-		songName = (song?.songId) ?? Paths.formatToSongPath(SONG.song);
-		songHighscore = Highscore.getScore(songName, difficultyName);
+		songId = (song?.songId) ?? Paths.formatToSongPath(SONG.song);
+		songHighscore = Highscore.getScore(songId, difficultyName);
 
 		metadata = SONG.metadata ?? (song?.getMetadata(difficultyName));
 		if (showDebugTraces && metadata == null)
-			trace('No metadata for $songName. Maybe add some?');
+			trace('No metadata for $songId. Maybe add some?');
 
 		if (isStoryMode) {
-			postSongVideo = Paths.formatToSongPath('$songName-end');
+			postSongVideo = Paths.formatToSongPath('$songId-end');
 			skipArrowStartTween = (songPlaylistIdx > 0);
 		}
 
@@ -752,9 +757,9 @@ class PlayState extends MusicBeatState
 		setStageData(stageData);
 
 		// SONG SPECIFIC SCRIPTS
-		var foldersToCheck:Array<String> = Paths.getFolders('songs/$songName');
+		var foldersToCheck:Array<String> = Paths.getFolders('songs/$songId');
 		#if PE_MOD_COMPATIBILITY
-		for (dir in Paths.getFolders('data/$songName'))
+		for (dir in Paths.getFolders('data/$songId'))
 			foldersToCheck.push(dir);
 		#end
 
@@ -825,7 +830,7 @@ class PlayState extends MusicBeatState
 
 		for (track in songTrackNames){
 			shitToLoad.push({
-				path: '$songName/$track',
+				path: '$songId/$track',
 				type: 'SONG'
 			});
 		}
@@ -846,7 +851,7 @@ class PlayState extends MusicBeatState
 		var stringId:String = 'difficultyName_$difficultyName';
 		displayedDifficulty = Paths.getString(stringId, difficultyName.replace("-"," ").capitalize());
 		
-		displayedSong = metadata?.songName ?? songName.replace("-"," ").capitalize();
+		displayedSong = metadata?.songName ?? songId.replace("-"," ").capitalize();
 
 		if (hud == null) {
 			// TODO: make these not be obligatory values
@@ -855,10 +860,10 @@ class PlayState extends MusicBeatState
 			var iP2:String = dad?.healthIcon ?? "face";
 
 			switch(ClientPrefs.etternaHUD){
-				case 'Advanced': hud = new AdvancedHUD(iP1, iP2, songName, stats);
-				case 'Kade': hud = new KadeHUD(iP1, iP2, songName, stats);
-				case 'Classic': hud = new ClassicHUD(iP1, iP2, songName, stats);
-				default: hud = new TraditionalHUD(iP1, iP2, songName, stats);
+				case 'Advanced': hud = new AdvancedHUD(iP1, iP2, songId, stats);
+				case 'Kade': hud = new KadeHUD(iP1, iP2, songId, stats);
+				case 'Classic': hud = new ClassicHUD(iP1, iP2, songId, stats);
+				default: hud = new TraditionalHUD(iP1, iP2, songId, stats);
 			}
 		}
 		hud.cameras = [camHUD];
@@ -1003,9 +1008,9 @@ class PlayState extends MusicBeatState
 		if (file != null) createLua(file);
 
 		// SONG SPECIFIC LUA SCRIPTS
-		var foldersToCheck:Array<String> = Paths.getFolders('songs/$songName');
+		var foldersToCheck:Array<String> = Paths.getFolders('songs/$songId');
 		#if PE_MOD_COMPATIBILITY
-		for (dir in Paths.getFolders('data/$songName'))
+		for (dir in Paths.getFolders('data/$songId'))
 			foldersToCheck.push(dir);
 		#end
 
@@ -1624,7 +1629,7 @@ class PlayState extends MusicBeatState
 	{
 		var allEvents:Array<EventNote> = [];
 
-		var eventsJSON = Song.loadFromJson('events', songName, false);
+		var eventsJSON = Song.loadFromJson('events', songId, false);
 		if (eventsJSON != null) Song.getEventNotes(eventsJSON.events, allEvents);
 
 		Song.getEventNotes(SONG.events, allEvents);
@@ -1693,7 +1698,7 @@ class PlayState extends MusicBeatState
 				if (song != null)
 					Paths.returnSound(song.getSongFile(trackName) + ".ogg");
 				else
-					Paths.track(songName, trackName);
+					Paths.track(songId, trackName);
 			}
 			var newTrack = new FlxSound().loadEmbedded(sndAsset);
 			//newTrack.volume = 0.0;
@@ -2276,9 +2281,9 @@ class PlayState extends MusicBeatState
 		final detailsText:String = (detailsText!=null) ? detailsText : this.detailsText;
 
 		if (timeLeft > 0.0)
-			DiscordClient.changePresence(detailsText, stateText, songName, true, timeLeft);
+			DiscordClient.changePresence(detailsText, stateText, songId, true, timeLeft);
 		else
-			DiscordClient.changePresence(detailsText, stateText, songName);
+			DiscordClient.changePresence(detailsText, stateText, songId);
 	}
 	#else
 	// Saves me from having to write #if DISCORD_ALLOWED and blahblah
@@ -2305,7 +2310,7 @@ class PlayState extends MusicBeatState
 	{
 		#if DISCORD_ALLOWED
 		if (ClientPrefs.autoPause && !isDead)
-			DiscordClient.changePresence(detailsPausedText, stateText, songName);
+			DiscordClient.changePresence(detailsPausedText, stateText, songId);
 		#end
 
 		if (ClientPrefs.autoPause && !paused && startedCountdown && canPause) {
@@ -2667,7 +2672,7 @@ class PlayState extends MusicBeatState
 
 			#if DISCORD_ALLOWED
 			// Game Over doesn't get his own variable because it's only used here
-			DiscordClient.changePresence("Game Over - " + detailsText, stateText, songName);
+			DiscordClient.changePresence("Game Over - " + detailsText, stateText, songId);
 			#end
 		}
 
@@ -3072,7 +3077,7 @@ class PlayState extends MusicBeatState
 		// Save song score and rating.
 
 		if (saveScore && SONG.validScore && ratingFC != stats.fail)
-			Highscore.saveScoreRecord(songName, difficultyName, stats.getScoreRecord());
+			Highscore.saveScoreRecord(songId, difficultyName, stats.getScoreRecord());
 
 		var gotoNextThing:Void -> Void = gotoMenus;
 		var nextSong:Song = null;
@@ -4275,7 +4280,7 @@ class PlayState extends MusicBeatState
 		}
 
 		#if DISCORD_ALLOWED
-		DiscordClient.changePresence(detailsPausedText, stateText, songName);
+		DiscordClient.changePresence(detailsPausedText, stateText, songId);
 		#end
 
 		signals.onPause.dispatch();
