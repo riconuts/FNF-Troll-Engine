@@ -12,8 +12,8 @@ import flixel.group.FlxSpriteGroup;
 
 class BaseHUD extends FlxSpriteGroup
 {
-	private static final _displayedJudges = ["epic", "sick", "good", "bad", "shit", "miss", "cb"];
-	private static final _judgeColours:Map<String, FlxColor> = [
+	public static final _displayedJudges = ["epic", "sick", "good", "bad", "shit", "miss", "cb"];
+	public static final _judgeColours:Map<String, FlxColor> = [
 		#if tgt
 		"epic" 	=> 0xFFE367E5,
 		"sick" 	=> 0xFF00A2E8,
@@ -96,7 +96,7 @@ class BaseHUD extends FlxSpriteGroup
 		this.songName = songName;
 		this.stats = stats;
 
-		this.judgeColours =  = _judgeColours.copy();
+		this.judgeColours =  _judgeColours.copy();
 		this.displayedJudges = _displayedJudges.copy();
 		if (!ClientPrefs.useEpics)
 			this.displayedJudges.remove("epic");
