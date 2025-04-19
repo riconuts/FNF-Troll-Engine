@@ -991,41 +991,20 @@ class PlayState extends MusicBeatState
 
 		#if LUA_ALLOWED
 		//// "GLOBAL" LUA SCRIPTS
-		var filesPushed:Array<String> = [];
-		for (folder in Paths.getFolders('scripts'))
-		{
-			Paths.iterateDirectory(folder, function(file:String)
-			{
-				if(!file.endsWith('.lua') || filesPushed.contains(file))
-					return;
-
-				createLua(folder + file);
-				filesPushed.push(file);
-			});
-		}
+		createLuasFromFolders(Paths.getFolders('scripts'));
 
 		//// STAGE LUA SCRIPTS
 		var file = Paths.getLuaPath('stages/$curStage');
 		if (file != null) createLua(file);
 
 		// SONG SPECIFIC LUA SCRIPTS
-		var foldersToCheck:Array<String> = Paths.getFolders('songs/$songId');
+		var songFolders:Array<String> = Paths.getFolders('songs/$songId');
 		#if PE_MOD_COMPATIBILITY
 		for (dir in Paths.getFolders('data/$songId'))
-			foldersToCheck.push(dir);
+			songFolders.push(dir);
 		#end
 
-		var filesPushed:Array<String> = [];
-		for (folder in foldersToCheck){
-			Paths.iterateDirectory(folder, function(file:String)
-			{
-				if(!file.endsWith('.lua') || filesPushed.contains(file))
-					return;
-
-				createLua(folder + file);
-				filesPushed.push(file);			
-			});
-		}
+		createLuasFromFolders(songFolders);
 		#end
 
 		// EVENT AND NOTE SCRIPTS WILL GET LOADED HERE
@@ -3669,7 +3648,7 @@ class PlayState extends MusicBeatState
 		////
 		callOnHScripts("noteMiss", [daNote, field]);
 		#if LUA_ALLOWED
-		callOnLuas('noteMiss', [notes.members.indexOf(daNote), daNote.column, daNote.noteType, daNote.isSustainNote, daNote.ID]);
+		callOnLuas('noteMiss', getLuaNoteCallbackArguments(daNote));
 		#end
 		if (daNote.noteScript != null)
 			callScript(daNote.noteScript, "noteMiss", [daNote, field]);
@@ -3734,7 +3713,7 @@ class PlayState extends MusicBeatState
 			callScript(note.genScript, "noteHit", [note, field]);
 		
 		#if LUA_ALLOWED
-		callOnLuas('opponentNoteHit', [notes.members.indexOf(note), Math.abs(note.column), note.noteType, note.isSustainNote, note.ID]);
+		callOnLuas('opponentNoteHit', getLuaNoteCallbackArguments(note));
 		#end
 
 		if (!note.isSustainNote)
@@ -3916,7 +3895,7 @@ class PlayState extends MusicBeatState
 			callScript(note.genScript, "noteHit", [note, field]); // might be useful for some things i.e judge explosions
 
 		#if LUA_ALLOWED
-		callOnLuas('goodNoteHit', [notes.members.indexOf(note), Math.round(Math.abs(note.column)), note.noteType, note.isSustainNote, note.ID]);
+		callOnLuas('goodNoteHit', getLuaNoteCallbackArguments(note));
 		#end
 		
 		if (note.isSustainNote) {
@@ -3975,6 +3954,23 @@ class PlayState extends MusicBeatState
 			luaArray.remove(luaScript);
 		}
 	}
+
+	private function createLuasFromFolders(foldersToCheck:Array<String>):Void
+	{
+		var filesPushed:Array<String> = [];
+		for (folder in foldersToCheck) {
+			Paths.iterateDirectory(folder, function(file:String) {
+				if (!file.endsWith('.lua') || filesPushed.contains(file))
+					return;
+
+				createLua(folder + file);
+				filesPushed.push(file);
+			});
+		}
+	}
+
+	inline private function getLuaNoteCallbackArguments(note:Note):Array<Dynamic>
+		return [notes.members.indexOf(note), note.column, note.noteType, note.isSustainNote, note.ID];
 	#end
 
 	#if HSCRIPT_ALLOWED
