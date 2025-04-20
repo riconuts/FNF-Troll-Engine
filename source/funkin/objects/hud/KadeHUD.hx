@@ -175,7 +175,7 @@ class KadeHUD extends BaseHUD
 			var diffId:String = PlayState.difficultyName;
 			var diffName:String = Paths.getString('difficultyName_$diffId', diffId);
 
-			watermark.text = '$displayedSong $diffName | $engineName';
+			watermark.text = '$displayedSong - $diffName | $engineName';
 			timeTxt.text = "";
 		}
 
