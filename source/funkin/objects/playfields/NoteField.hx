@@ -265,13 +265,14 @@ class NoteField extends FieldBase
 		// No longer required since its done in the manager
 		//drawQueue.sort(drawQueueSort);
 
-		if(zoom != 1){
-			for(object in drawQueue){
+		if (zoom != 1) {
+			var centerX = FlxG.width * 0.5;
+			var centerY = FlxG.height * 0.5;
+
+			for (object in drawQueue) {
 				var vertices = object.vertices;
 				var currentVertexPosition:Int = 0;
 
-				var centerX = FlxG.width * 0.5;
-				var centerY = FlxG.height * 0.5;
 				while (currentVertexPosition < vertices.length)
 				{
 					vertices[currentVertexPosition] = (vertices[currentVertexPosition] - centerX) * zoom + centerX;
