@@ -38,7 +38,7 @@ typedef StageFile =
 
 class Stage extends FlxTypedGroup<FlxBasic>
 {
-	public var curStage(default, null):String;
+	public var stageId(default, null):String;
 	public var stageData(default, null):StageFile;
 	
 	public var foreground = new FlxTypedGroup<FlxBasic>();
@@ -46,12 +46,18 @@ class Stage extends FlxTypedGroup<FlxBasic>
 	public var stageScript:FunkinHScript;
 	public var spriteMap = new Map<String, FlxBasic>();
 
-	public function new(stageName:String, runScript:Bool = true)
+	#if ALLOW_DEPRECATION
+	@:deprecated("curStage is deprecated. Use stageId instead.")
+	public var curStage(get, never):String;
+	inline function get_curStage() return stageId;
+	#end
+
+	public function new(stageId:String, runScript:Bool = true)
 	{
 		super();
 
-		this.curStage = stageName;
-		this.stageData = StageData.getStageFile(stageName) ?? {
+		this.stageId = stageId;
+		this.stageData = StageData.getStageFile(stageId) ?? {
 			directory: "",
 			defaultZoom: 0.8,
 			boyfriend: [500, 100],
@@ -77,7 +83,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 			return;
 		}   
 
-		var file = Paths.getHScriptPath('stages/$curStage');
+		var file = Paths.getHScriptPath('stages/$stageId');
 		if (file != null){
 			stageScript = FunkinHScript.fromFile(file, file, additionalVars);
 
@@ -105,7 +111,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		if (!stageBuilt){
 			// In case you want to hardcode your stages
 			/* 
-			switch (curStage)
+			switch (stageId)
 			{
 				case "example":
 					var ground = new FlxSprite(-2048, -100);
@@ -151,7 +157,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 	}
 
 	override function toString(){
-		return 'Stage($curStage)';
+		return 'Stage($stageId)';
 	}
 
 	/**
@@ -255,8 +261,8 @@ class StageData {
 		forceNextDirectory = stageFile == null ? '' : stageFile.directory;
 	}
 	
-	public static function getStageFile(stageName:String):Null<StageFile> 
+	public static function getStageFile(stageId:String):Null<StageFile> 
 	{
-		return Paths.json('stages/$stageName.json', false);
+		return Paths.json('stages/$stageId.json', false);
 	}
 }
