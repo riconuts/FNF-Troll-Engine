@@ -40,8 +40,6 @@ class NoteField extends FieldBase
 	]);
 	var HOLD_INDICES:Vector<Int> = new Vector<Int>(0, false);
 
-	public var tryForceHoldsBehind:Bool = true; // Field tries to push holds behind receptors and notes
-
 	public var holdSubdivisions(default, set):Int;
 	public var optimizeHolds = false; //ClientPrefs.optimizeHolds;
 	public var defaultShader:FlxShader = new FlxShader();
@@ -53,6 +51,7 @@ class NoteField extends FieldBase
 		this.modManager = modManager;
 		this.holdSubdivisions = Std.int(ClientPrefs.holdSubdivs);
 	}
+	override public function getNotefield() {return this;}
 
 	/**
 	 * The Draw Distance Modifier
@@ -266,13 +265,14 @@ class NoteField extends FieldBase
 		// No longer required since its done in the manager
 		//drawQueue.sort(drawQueueSort);
 
-		if(zoom != 1){
-			for(object in drawQueue){
+		if (zoom != 1) {
+			var centerX = FlxG.width * 0.5;
+			var centerY = FlxG.height * 0.5;
+
+			for (object in drawQueue) {
 				var vertices = object.vertices;
 				var currentVertexPosition:Int = 0;
 
-				var centerX = FlxG.width * 0.5;
-				var centerY = FlxG.height * 0.5;
 				while (currentVertexPosition < vertices.length)
 				{
 					vertices[currentVertexPosition] = (vertices[currentVertexPosition] - centerX) * zoom + centerX;
@@ -512,6 +512,7 @@ class NoteField extends FieldBase
 			indices: HOLD_INDICES,
 			zIndex: zIndex + hold.zIndex,
 			colorSwap: hold.colorSwap,
+			objectType: hold.objType,
 			antialiasing: hold.antialiasing
 		}
 	}
@@ -744,6 +745,7 @@ class NoteField extends FieldBase
 			indices: NOTE_INDICES,
 			zIndex: pos.z + sprite.zIndex,
 			colorSwap: sprite.colorSwap,
+			objectType: sprite.objType,
 			antialiasing: sprite.antialiasing
 		}
 	}

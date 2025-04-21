@@ -1,4 +1,4 @@
-package funkin.objects;
+package funkin.objects.notes;
 
 import funkin.data.NoteStyles;
 import funkin.objects.notestyles.BaseNoteStyle;

@@ -1,5 +1,6 @@
 package funkin.objects.hud;
 
+import math.CoolMath;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.tweens.*;
@@ -293,7 +294,7 @@ class AdvancedHUD extends CommonHUD
 	{
 		gradeTxt.text = cpuControlled && useSubtleMark ? botplayString : grade;
 		
-		ratingTxt.text = (grade=="?") ? "0%" : (Highscore.floorDecimal(ratingPercent * 100, 2) + "%");
+		ratingTxt.text = (grade=="?") ? "0%" : (CoolMath.floorDecimal(ratingPercent * 100, 2) + "%");
 		fcTxt.text = (ratingFC == stats.gfc && stats.accuracySystem == WIFE3) ? stats.fc : ratingFC;
 		
 		if (ClientPrefs.npsDisplay)

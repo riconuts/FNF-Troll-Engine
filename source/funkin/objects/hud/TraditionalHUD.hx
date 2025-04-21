@@ -1,5 +1,6 @@
 package funkin.objects.hud;
 
+import math.CoolMath;
 import funkin.objects.hud.JudgementCounter.JudgementCounters;
 import funkin.objects.hud.JudgementCounter.JudgeCounterSettings;
 import flixel.text.FlxText;
@@ -183,7 +184,7 @@ class TraditionalHUD extends CommonHUD
 
 		final ratFC = ratingFC;
 		final comboName = stats.accuracySystem == WIFE3 && ratFC == stats.gfc ? stats.fc : ratFC;
-		final ratPerc = Highscore.floorDecimal(ratingPercent * 100, 2);
+		final ratPerc = CoolMath.floorDecimal(ratingPercent * 100, 2);
 
 		return '$ratPerc%'+separator+'$grade [$comboName]';
 	}

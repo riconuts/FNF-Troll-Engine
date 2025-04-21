@@ -165,9 +165,8 @@ class WeekData
 		data.weeks.push(vChapter);
 	}
 
-	public static function getPsychModWeeks(modName:String):Array<PsychWeekFile>
+	public static function getFolderPsychWeeks(modWeeksPath:String):Array<PsychWeekFile>
 	{
-		var modWeeksPath:String = Paths.mods('$modName/weeks');
 		var modWeeksPushed:Map<String, PsychWeekFile> = [];
 		var modWeeks:Array<PsychWeekFile> = [];
 
@@ -198,6 +197,12 @@ class WeekData
 		});
 
 		return modWeeks;
+	}
+
+	public static function getPsychModWeeks(modId:String):Array<PsychWeekFile>
+	{
+		var modWeeksPath:String = Paths.mods('$modId/weeks');
+		return getFolderPsychWeeks(modWeeksPath);
 	}
 	#end
 }

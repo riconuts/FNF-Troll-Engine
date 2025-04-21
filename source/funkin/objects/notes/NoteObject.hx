@@ -1,4 +1,4 @@
-package funkin.objects;
+package funkin.objects.notes;
 
 import flixel.util.FlxDestroyUtil;
 import flixel.math.FlxPoint;

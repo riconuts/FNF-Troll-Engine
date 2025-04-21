@@ -163,9 +163,6 @@ class Highscore {
 		return idArray.join("-"); 
 	}
 
-	inline public static function floorDecimal(value:Float, decimals:Int):Float
-		return CoolUtil.floorDecimal(value, decimals);
-
 	static inline function formatSong(path:String, chartName:String):String
 		return Paths.formatToSongPath(path) + ((chartName==null||chartName.length==0)?'':':$chartName');
 

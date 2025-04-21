@@ -25,10 +25,16 @@ class HScriptOverridenState extends HScriptedState
 		var fullName = Type.getClassName(cl);
 		for (filePath in Paths.getFolders("states"))
 		{
+			var folderedName = 'override/${fullName.split(".").join("/")}';
+			var fileName = 'override/$fullName'; // deprecated
 			for(ext in Paths.HSCRIPT_EXTENSIONS){
-				var fileName = 'override/$fullName.$ext';
-				var fullPath = filePath + fileName;
-				if (Paths.exists(fullPath))
+				var fullPath = filePath + fileName + '.$ext';
+				var fullFolderPath = filePath + folderedName + '.$ext';
+				// TODO: Trim off the funkin.states and check that, too.
+				
+				if (Paths.exists(fullFolderPath))
+					return new HScriptOverridenState(cl, fullFolderPath);
+				else if (Paths.exists(fullPath))
 					return new HScriptOverridenState(cl, fullPath);
 			}
 		}

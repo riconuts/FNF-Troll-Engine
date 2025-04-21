@@ -12,6 +12,14 @@ import flixel.text.FlxText;
 import flixel.group.FlxGroup.FlxTypedGroup;
 using StringTools;
 using funkin.CoolerStringTools;
+
+@:injectMoreFunctions([
+	"onSelectSong",
+	"onAccept",
+	"refreshScore",
+	"changeDifficulty",
+	"positionHighscore"
+])
 class FreeplayState extends MusicBeatState
 {
 	public static var comingFromPlayState:Bool = false;

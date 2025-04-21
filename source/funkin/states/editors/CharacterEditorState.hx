@@ -10,6 +10,7 @@ import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.addons.display.FlxGridOverlay;
+import flixel.addons.ui.FlxUIDropDownMenu;
 import flixel.addons.ui.FlxInputText;
 import flixel.addons.ui.FlxUI9SliceSprite;
 import flixel.addons.ui.FlxUI;
@@ -339,7 +340,7 @@ class CharacterEditorState extends MusicBeatState
 		FlxG.camera.bgColor = onPixelBG ? FlxColor.BLACK : FlxColor.WHITE;
 	}
 
-	var charDropDown:FlxUIDropDownMenuCustom;
+	var charDropDown:FlxUIDropDownMenu;
 	function addSettingsUI() {
 		var tab_group = new FlxUI(null, UI_box);
 		tab_group.name = "Settings";
@@ -355,7 +356,7 @@ class CharacterEditorState extends MusicBeatState
 			reloadBGs();
 		};
 
-		charDropDown = new FlxUIDropDownMenuCustom(10, 30, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(character:String) {
+		charDropDown = new FlxUIDropDownMenu(10, 30, FlxUIDropDownMenu.makeStrIdLabelArray([''], true), function(character:String) {
 			charName = characterList[Std.parseInt(character)];
 			
 			loadChar(check_player.checked);
@@ -516,7 +517,7 @@ class CharacterEditorState extends MusicBeatState
 		UI_characterbox.addGroup(tab_group);
 	}
 
-	var animationDropDown:FlxUIDropDownMenuCustom;
+	var animationDropDown:FlxUIDropDownMenu;
 	var animationInputText:FlxUIInputText;
 	var animationXCam:FlxUINumericStepper;
 	var animationYCam:FlxUINumericStepper;
@@ -537,7 +538,7 @@ class CharacterEditorState extends MusicBeatState
 		animationXCam = new FlxUINumericStepper(animationNameFramerate.x + 75, animationNameFramerate.y, 10, 0, -9000, 9000, 0);
 		animationYCam = new FlxUINumericStepper(animationXCam.x + 75, animationXCam.y, 10, 0, -9000, 9000, 0);
 
-		animationDropDown = new FlxUIDropDownMenuCustom(15, animationInputText.y - 55, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(pressed:String) {
+		animationDropDown = new FlxUIDropDownMenu(15, animationInputText.y - 55, FlxUIDropDownMenu.makeStrIdLabelArray([''], true), function(pressed:String) {
 			var selectedAnimation:Int = Std.parseInt(pressed);
 			var anim:AnimArray = char.animationsArray[selectedAnimation];
 
@@ -669,8 +670,8 @@ class CharacterEditorState extends MusicBeatState
 		UI_characterbox.addGroup(tab_group);
 	}
 
-	var ghostCharDropDown:FlxUIDropDownMenuCustom;
-	var ghostAnimDropDown:FlxUIDropDownMenuCustom;
+	var ghostCharDropDown:FlxUIDropDownMenu;
+	var ghostAnimDropDown:FlxUIDropDownMenu;
 	var ghostAnimTxt:FlxText;
 	var ghostPlayableCheckbox:FlxUICheckBox;
 
@@ -679,14 +680,14 @@ class CharacterEditorState extends MusicBeatState
 		ghostList = CharacterData.getAllCharacters();
 		ghostList.sort(CoolUtil.alphabeticalSort);
 		ghostList.insert(0, "");
-		ghostCharDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(ghostList, true));
+		ghostCharDropDown.setData(FlxUIDropDownMenu.makeStrIdLabelArray(ghostList, true));
 	}
 
 	function addGhostUI(){
 		var tab_group = new FlxUI(null, UI_box);
 		tab_group.name = "Ghost";
 
-		ghostCharDropDown = new FlxUIDropDownMenuCustom(15, 30, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(pressed:String) {
+		ghostCharDropDown = new FlxUIDropDownMenu(15, 30, FlxUIDropDownMenu.makeStrIdLabelArray([''], true), function(pressed:String) {
 			var idx:Int = Std.parseInt(pressed);
 			var charName = ghostList[idx];
 
@@ -704,7 +705,7 @@ class CharacterEditorState extends MusicBeatState
 				char.alpha = 0.85;
 				cameraFollowPointer.alpha = 0.85;
 			}else{
-				ghostAnimDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true));
+				ghostAnimDropDown.setData(FlxUIDropDownMenu.makeStrIdLabelArray([''], true));
 				ghostAnimTxt.text = "";
 
 				char.alpha = 1;
@@ -715,7 +716,7 @@ class CharacterEditorState extends MusicBeatState
 		});
 		updateGhostCharList();
 
-		ghostAnimDropDown = new FlxUIDropDownMenuCustom(15, ghostCharDropDown.y + 50, FlxUIDropDownMenuCustom.makeStrIdLabelArray([''], true), function(pressed:String) {
+		ghostAnimDropDown = new FlxUIDropDownMenu(15, ghostCharDropDown.y + 50, FlxUIDropDownMenu.makeStrIdLabelArray([''], true), function(pressed:String) {
 			if (ghostChar == null) return;
 			
 			var curAnimData = ghostChar.animationsArray[Std.parseInt(pressed)];
@@ -804,7 +805,7 @@ class CharacterEditorState extends MusicBeatState
 		var firstAnim = animList.indexOf("idle");
 		firstAnim = firstAnim != -1 ? firstAnim : 0;
 
-		ghostAnimDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(animList, true));
+		ghostAnimDropDown.setData(FlxUIDropDownMenu.makeStrIdLabelArray(animList, true));
 		ghostAnimDropDown.selectedId = Std.string(firstAnim);
 
 		var curAnimData = ghostChar.animationsArray[firstAnim];
@@ -1051,14 +1052,14 @@ class CharacterEditorState extends MusicBeatState
 		if (anims.length < 1) 
 			anims.push('NO ANIMATIONS'); // Prevents crash		
 
-		animationDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(anims, true));
+		animationDropDown.setData(FlxUIDropDownMenu.makeStrIdLabelArray(anims, true));
 	}
 
 	function reloadCharacterDropDown() {
 		characterList = CharacterData.getAllCharacters();
 		characterList.sort(CoolUtil.alphabeticalSort);
 
-		charDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(characterList, true));
+		charDropDown.setData(FlxUIDropDownMenu.makeStrIdLabelArray(characterList, true));
 		charDropDown.selectedLabel = charName;
 	}
 

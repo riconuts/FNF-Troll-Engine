@@ -1,5 +1,7 @@
 package funkin.objects.notestyles;
 
+import funkin.objects.notes.*;
+
 class BaseNoteStyle 
 {
 	public final id:String;

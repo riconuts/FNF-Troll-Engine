@@ -1,5 +1,6 @@
 package funkin.scripts;
 
+import flixel.tweens.FlxTween;
 import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.util.FlxColor;
 import funkin.scripts.Globals.*;
@@ -29,53 +30,43 @@ class Util
 				break;
 			}
 		}
+		return Paths._getPath(hasLuaExtension ? luaFile : '$luaFile.lua');
+	}
 
-		var cervix = hasLuaExtension ? luaFile : luaFile + ".lua";
-		var doPush = false;
+	public static function getLuaInstance(scriptName:String):Null<FunkinLua>
+	{
+		for (luaInstance in PlayState.instance.luaArray) {
+			if (luaInstance.scriptName == scriptName)
+				return luaInstance;
+		}
+		return null;
+	}
 
-		#if MODS_ALLOWED
-		if (Paths.exists(Paths.modFolders(cervix)))
-		{
-			cervix = Paths.modFolders(cervix);
-			doPush = true;
-		}
-		else if (Paths.exists(cervix))
-		{
-			doPush = true;
-		}
-		else
-		#end
-		{
-			cervix = Paths.getPreloadPath(cervix);
-			if (Paths.exists(cervix))
-				doPush = true;
-		}
-
-		return (doPush) ? cervix : null;
+	inline public static function getLuaFileInstance(luaFile:String):Null<FunkinLua>
+	{
+		return getLuaInstance(pussyPath(luaFile));
 	}
 
 	public static function getProperty(variable:String) {
 		var killMe:Array<String> = variable.split('.');
-		if (killMe.length > 1) {
+		if (killMe.length > 1)
 			return getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
-		}
-		return getVarInArray(getInstance(), variable);
+		else
+			return getVarInArray(getInstance(), variable);
 	}
 	public static function setProperty(variable:String, value:Dynamic) {
 		var killMe:Array<String> = variable.split('.');
-		if (killMe.length > 1) {
+		if (killMe.length > 1)
 			setVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1], value);
-			return true;
-		}
-		setVarInArray(getInstance(), variable, value);
-		return true;
+		else
+			setVarInArray(getInstance(), variable, value);
 	}
 
 	public static function getPropertyFromGroup(obj:String, index:Int, variable:Dynamic) {
 		var shitMyPants:Array<String> = obj.split('.');
 		var realObject:Dynamic = Reflect.getProperty(getInstance(), obj);
 		if(shitMyPants.length>1)
-			realObject = getPropertyLoopThingWhatever(shitMyPants, true, false);
+			realObject = getPropertyLoopThingWhatever(shitMyPants, false);
 
 		if(Std.isOfType(realObject, FlxTypedGroup))
 			return getGroupStuff(realObject.members[index], variable);
@@ -94,7 +85,7 @@ class Util
 		var shitMyPants:Array<String> = obj.split('.');
 		var realObject:Dynamic = Reflect.getProperty(getInstance(), obj);
 		if(shitMyPants.length>1)
-			realObject = getPropertyLoopThingWhatever(shitMyPants, true, false);
+			realObject = getPropertyLoopThingWhatever(shitMyPants, false);
 
 		if(Std.isOfType(realObject, FlxTypedGroup)) {
 			setGroupStuff(realObject.members[index], variable, value);
@@ -150,59 +141,76 @@ class Util
 		return true;
 	}
 
+	public static function getPropertyLoopThingWhatever(killMe:Array<String>, getProperty:Bool = true):Dynamic {
+		var coverMeInPiss:Dynamic = getObjectDirectly(killMe[0]);
+		for (i in 1...(getProperty ? killMe.length-1 : killMe.length))
+			coverMeInPiss = getVarInArray(coverMeInPiss, killMe[i]);
+
+		return coverMeInPiss;
+	}
+
+	inline public static function getLuaObject(tag:String, ?checkForTextsToo:Bool):Null<FlxSprite>
+		return PlayState.instance.getLuaObject(tag, checkForTextsToo);
+
+	inline public static function getObjectDirectly(tag:String):Null<Dynamic>
+		return getLuaObject(tag, true) ?? getVarInArray(getInstance(), tag);
+
+	public static function getObjectSimple(tag:String):Null<Dynamic>
+		return getLuaObject(tag, true) ?? Reflect.getProperty(getInstance(), tag);
+
+	public static function getTextObject(name:String):Null<FlxText> {
+		if (PlayState.instance.modchartTexts.exists(name))
+			return PlayState.instance.modchartTexts.get(name);
+		var obj = Reflect.getProperty(PlayState.instance, name);
+		return (obj is FlxText) ? obj : null;
+	}
+
+	public static function getObject(tag:String):Null<Dynamic> {
+		var killMe:Array<String> = tag.split('.');
+		if (killMe.length > 1)
+			return getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
+		else
+			return getObjectSimple(killMe[0]);
+	}
+
 	public static function setVarInArray(instance:Dynamic, variable:String, value:Dynamic):Any
 	{
 		var shit:Array<String> = variable.split('[');
-		if(shit.length > 1)
-		{
+		if (shit.length > 1) {
 			var blah:Dynamic = Reflect.getProperty(instance, shit[0]);
-			for (i in 1...shit.length)
-			{
+			for (i in 1...shit.length) {
 				var leNum:Dynamic = shit[i].substr(0, shit[i].length - 1);
-				if(i >= shit.length-1) //Last array
+				if (i >= shit.length-1) //Last array
 					blah[leNum] = value;
 				else //Anything else
 					blah = blah[leNum];
 			}
 			return blah;
 		}
-		/*if(Std.isOfType(instance, Map))
-			instance.set(variable,value);
-		else*/
-		switch(Type.typeof(instance)){
-			case ValueType.TClass(haxe.ds.StringMap) | ValueType.TClass(haxe.ds.ObjectMap) | ValueType.TClass(haxe.ds.IntMap) | ValueType.TClass(haxe.ds.EnumValueMap):
-				instance.set(variable, value);
-			default:
-				Reflect.setProperty(instance, variable, value);
-		};
 
+		if (isMap(instance))
+			instance.set(variable, value);
+		else
+			Reflect.setProperty(instance, variable, value);
 
 		return true;
 	}
 	public static function getVarInArray(instance:Dynamic, variable:String):Any
 	{
 		var shit:Array<String> = variable.split('[');
-		if(shit.length > 1)
-		{
+		if (shit.length > 1) {
 			var blah:Dynamic = Reflect.getProperty(instance, shit[0]);
-			for (i in 1...shit.length)
-			{
+			for (i in 1...shit.length) {
 				var leNum:Dynamic = shit[i].substr(0, shit[i].length - 1);
 				blah = blah[leNum];
 			}
 			return blah;
 		}
-		switch(Type.typeof(instance)){
-			case ValueType.TClass(haxe.ds.StringMap) | ValueType.TClass(haxe.ds.ObjectMap) | ValueType.TClass(haxe.ds.IntMap) | ValueType.TClass(haxe.ds.EnumValueMap):
-				return instance.get(variable);
-			default:
-				return Reflect.getProperty(instance, variable);
-		};
-	}
-
-	inline public static function getTextObject(name:String):FlxText
-	{
-		return PlayState.instance.modchartTexts.exists(name) ? PlayState.instance.modchartTexts.get(name) : Reflect.getProperty(PlayState.instance, name);
+		
+		if (isMap(instance))
+			return instance.get(variable);
+		else
+			return Reflect.getProperty(instance, variable);
 	}
 
 	public static function getGroupStuff(leArray:Dynamic, variable:String) {
@@ -212,19 +220,16 @@ class Util
 			for (i in 1...killMe.length-1) {
 				coverMeInPiss = Reflect.getProperty(coverMeInPiss, killMe[i]);
 			}
-			switch(Type.typeof(coverMeInPiss)){
-				case ValueType.TClass(haxe.ds.StringMap) | ValueType.TClass(haxe.ds.ObjectMap) | ValueType.TClass(haxe.ds.IntMap) | ValueType.TClass(haxe.ds.EnumValueMap):
-					return coverMeInPiss.get(killMe[killMe.length-1]);
-				default:
-					return Reflect.getProperty(coverMeInPiss, killMe[killMe.length-1]);
-			};
+			if (isMap(coverMeInPiss))
+				return coverMeInPiss.get(killMe[killMe.length-1]);
+			else
+				return Reflect.getProperty(coverMeInPiss, killMe[killMe.length-1]);
 		}
-		switch(Type.typeof(leArray)){
-			case ValueType.TClass(haxe.ds.StringMap) | ValueType.TClass(haxe.ds.ObjectMap) | ValueType.TClass(haxe.ds.IntMap) | ValueType.TClass(haxe.ds.EnumValueMap):
-				return leArray.get(variable);
-			default:
-				return Reflect.getProperty(leArray, variable);
-		};
+
+		if (isMap(leArray))
+			return leArray.get(variable);
+		else
+			return Reflect.getProperty(leArray, variable);
 	}
 	public static function setGroupStuff(leArray:Dynamic, variable:String, value:Dynamic) {
 		var killMe:Array<String> = variable.split('.');
@@ -285,29 +290,18 @@ class Util
 
 	public static function cancelTween(tag:String) {
 		if (PlayState.instance.modchartTweens.exists(tag)) {
-			PlayState.instance.modchartTweens.get(tag).cancel();
-			PlayState.instance.modchartTweens.get(tag).destroy();
+			var twn = PlayState.instance.modchartTweens.get(tag);
+			twn.cancel();
+			twn.destroy();
 			PlayState.instance.modchartTweens.remove(tag);
 		}
 	}
 
-	public static function tweenShit(tag:String, vars:String)
-	{
-		cancelTween(tag);
-
-		var variables:Array<String> = vars.split('.');
-		if (variables.length > 1)
-			return getVarInArray(getPropertyLoopThingWhatever(variables), variables[variables.length-1]);
-		
-		return getObjectDirectly(variables[0]);
-	}
-
 	public static function cancelTimer(tag:String) {
-		if (PlayState.instance.modchartTimers.exists(tag)) 
-		{
-			var theTimer = PlayState.instance.modchartTimers.get(tag);
-			theTimer.cancel();
-			theTimer.destroy();
+		if (PlayState.instance.modchartTimers.exists(tag)) {
+			var tmr = PlayState.instance.modchartTimers.get(tag);
+			tmr.cancel();
+			tmr.destroy();
 			PlayState.instance.modchartTimers.remove(tag);
 		}
 	}
@@ -411,27 +405,6 @@ class Util
 		}
 	}
 
-	public static function getPropertyLoopThingWhatever(killMe:Array<String>, ?checkForTextsToo:Bool = true, ?getProperty:Bool=true):Dynamic
-	{
-		var coverMeInPiss:Dynamic = getObjectDirectly(killMe[0], checkForTextsToo);
-		var end = killMe.length;
-		if(getProperty)end=killMe.length-1;
-
-		for (i in 1...end) {
-			coverMeInPiss = getVarInArray(coverMeInPiss, killMe[i]);
-		}
-		return coverMeInPiss;
-	}
-
-	public static function getObjectDirectly(objectName:String, ?checkForTextsToo:Bool = true):Dynamic
-	{
-		var coverMeInPiss:Dynamic = PlayState.instance.getLuaObject(objectName, checkForTextsToo);
-		if(coverMeInPiss==null)
-			coverMeInPiss = getVarInArray(getInstance(), objectName);
-
-		return coverMeInPiss;
-	}
-
 	public static function isOfTypes(value:Any, types:Array<Dynamic>):Bool {
 		for (type in types) {
 			if (Std.isOfType(value, type))
@@ -440,20 +413,33 @@ class Util
 		return false;
 	}
 
-	public static function getGameObject(tag:String) {
-		var killMe:Array<String> = tag.split('.');
-		if (killMe.length > 1)
-			return getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
-		
-		return getVarInArray(getInstance(), killMe[0]);
+	inline public static function isMap(obj:Dynamic) {
+		return switch(Type.typeof(obj)) {
+			case ValueType.TClass(haxe.ds.StringMap) | ValueType.TClass(haxe.ds.ObjectMap) | ValueType.TClass(haxe.ds.IntMap) | ValueType.TClass(haxe.ds.EnumValueMap):
+				true;
+			default:
+				false;
+		};
 	}
 
-	inline public static function getLuaObject(tag:String, ?checkForTextsToo:Bool)
-		return PlayState.instance.getLuaObject(tag, checkForTextsToo);
-
-	public static function getDirectSprite(tag:String, ?checkForTextsToo:Bool = true):Null<FlxSprite> {
-		var modSpr = getLuaObject(tag, checkForTextsToo);
-		return modSpr!=null ? modSpr : getGameObject(tag);
+	public static function parseFloatArray(str:String):Array<Float> {
+		var arr:Array<Float> = new Array<Float>();
+		for (s in str.split(',')) {
+			if (s != "") {
+				arr.push(Std.parseFloat(s));
+			}
+		}
+		return arr;
+	}
+	
+	public static function parseIntArray(str:String):Array<Int> {
+		var arr:Array<Int> = new Array<Int>();
+		for (s in str.split(',')) {
+			if (s != "") {
+				arr.push(Std.parseInt(s));
+			}
+		}
+		return arr;
 	}
 }
 

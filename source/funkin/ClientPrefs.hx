@@ -622,6 +622,13 @@ class ClientPrefs {
 				value: true,
 				data: []
 			},
+			"cacheOnGPU" => {
+				display: "GPU Caching",
+				desc: "When toggled, allows the GPU to be used for caching images.\nDon't turn this on if you have a shitty graphics card!",
+				type: Toggle,
+				value: false,
+				data: []
+			},
 			"multicoreLoading" => {
 				display: "Multicore Loading",
 				desc: "When toggled, multiple threads will be used for asset loading when possible.\nMay cause crashes, but speeds up load times.",

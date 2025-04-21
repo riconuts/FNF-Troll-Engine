@@ -23,7 +23,7 @@ import sys.io.File;
 #end
 
 //// idgaf about libraries
-
+@:access(openfl.display.BitmapData)
 class Paths
 {
 	inline public static var IMAGE_EXT = "png";
@@ -42,10 +42,9 @@ class Paths
 	public static function getFileWithExtensions(scriptPath:String, extensions:Array<String>) {
 		for (fileExt in extensions) {
 			var baseFile:String = '$scriptPath.$fileExt';
-			for (file in [#if MODS_ALLOWED Paths.modFolders(baseFile), #end Paths.getPreloadPath(baseFile)]) {
-				if (Paths.exists(file))
-					return file;
-			}
+			var file:String = getPath(baseFile);
+			if (Paths.exists(file))
+				return file;
 		}
 
 		return null;
@@ -120,11 +119,8 @@ class Paths
 				@:privateAccess
 				if (obj != null)
 				{
-					Assets.cache.removeBitmapData(key);
-					FlxG.bitmap._cache.remove(key);
-					obj.destroy();
+					destroyGraphic(obj);
 					currentTrackedAssets.remove(key);
-
 					// trace('cleared $key');
 				}
 			}
@@ -137,20 +133,21 @@ class Paths
 	public static function removeBitmap(key:String)
 	{
 		var obj = currentTrackedAssets.get(key);
-		if (obj != null) @:privateAccess {
+		@:privateAccess
+		if (obj != null)
+		{
 			localTrackedAssets.remove(key);
-
-			Assets.cache.removeBitmapData(key);
-			FlxG.bitmap._cache.remove(key);
-			obj.destroy();
-			currentTrackedAssets.remove(key);
-			
-			//trace('removed $key');
-			//return true;
+			destroyGraphic(obj);
+			currentTrackedAssets.remove(key);		
 		}
+	}
 
-		//trace('did not remove $key');
-		//return false;
+	inline static function destroyGraphic(graphic:FlxGraphic)
+	{
+		// free some gpu memory
+		if (graphic != null && graphic.bitmap != null && graphic.bitmap.__texture != null)
+			graphic.bitmap.__texture.dispose();
+		FlxG.bitmap.remove(graphic);
 	}
 
 	public static function clearStoredMemory()
@@ -160,9 +157,7 @@ class Paths
 		for (key => obj in FlxG.bitmap._cache) {
 			if (obj != null && !currentTrackedAssets.exists(key)) {
 				// trace('cleared $key');
-				Assets.cache.removeBitmapData(key);
-				FlxG.bitmap._cache.remove(key);
-				obj.destroy();
+				destroyGraphic(obj);
 			}
 		}
 
@@ -192,16 +187,7 @@ class Paths
 
 	public static function _getPath(key:String, ignoreMods:Bool = false):Null<String>
 	{
-		var path:String;
-
-		#if MODS_ALLOWED
-		if (ignoreMods != true) {
-			path = Paths.modFolders(key);
-			if (Paths.exists(path)) return path;
-		}
-		#end
-
-		path = Paths.getPreloadPath(key);
+		var path:String = getPath(key, ignoreMods);
 		return Paths.exists(path) ? path : null;
 	}
 
@@ -465,7 +451,7 @@ class Paths
 		return finalPath.toLowerCase();
 	}
 
-	public static function getGraphic(path:String, cache:Bool = true, gpu:Bool = false):Null<FlxGraphic>
+	public static function getGraphic(path:String, cache:Bool = true, gpu:Bool = true):Null<FlxGraphic>
 	{
 		var newGraphic:FlxGraphic;
 
@@ -478,12 +464,19 @@ class Paths
 			var bitmap:BitmapData = getBitmapData(path);
 			if (bitmap == null) return null;
 
-			if (gpu) {
-				var texture = FlxG.stage.context3D.createRectangleTexture(bitmap.width, bitmap.height, BGRA, true);
-				texture.uploadFromBitmapData(bitmap);
+			// GPU caching made by Raltyro
+			if (gpu && ClientPrefs.cacheOnGPU && bitmap.image != null) {
+				bitmap.lock();
+				if (bitmap.__texture == null)
+				{
+					bitmap.image.premultiplied = true;
+					bitmap.getTexture(FlxG.stage.context3D);
+				}
+				bitmap.getSurface();
+				bitmap.disposeImage();
 				bitmap.image.data = null;
-				bitmap.dispose();
-				bitmap = BitmapData.fromTexture(texture);
+				bitmap.image = null;
+				bitmap.readable = true;
 			}
 
 			newGraphic = FlxGraphic.fromBitmapData(bitmap, false, path, cache);
@@ -502,20 +495,17 @@ class Paths
 	inline public static function cacheGraphic(path:String):Null<FlxGraphic>
 		return getGraphic(path, true);
 
-	inline public static function imagePath(key:String):String
+	inline public static function imagePath(key:String, ?folder:String):String
 		return getPath('images/$key.$IMAGE_EXT');
 
 	inline public static function imageExists(key:String):Bool
 		return Paths.exists(imagePath(key));
 
-	inline static public function image(key:String, ?library:String):Null<FlxGraphic>
-		return returnGraphic(key, library);
-
-	public static function returnGraphic(key:String, ?library:String):Null<FlxGraphic>
+	public static function image(key:String, ?folder:String = null, allowGPU:Bool = true):Null<FlxGraphic>
 	{
-		var path:String = imagePath(key);
+		var path:String = imagePath(key, folder);
 
-		var graphic = getGraphic(path);
+		var graphic = getGraphic(path, true, allowGPU);
 		if (graphic==null && Main.showDebugTraces)
 			trace('bitmap "$key" => "$path" returned null.');
 
@@ -627,26 +617,27 @@ class Paths
 	
 	static public function modFolders(key:String, ignoreGlobal:Bool = false)
 	{
-		var shitToCheck:Array<String> = [];
-		if (Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0)
-			shitToCheck.push(Paths.currentModDirectory);
+		var path:Null<String> = null;
 
-		for (mod in dependencies)
-			shitToCheck.push(mod);
+		inline function check(mod:String) {
+			var fileToCheck:String = contentDirectories.get(mod) + '/' + key;
+			if (exists(fileToCheck)) path = fileToCheck;
+		}
 
-		if (shitToCheck.length > 0) {
-			for (shit in shitToCheck){
-				var fileToCheck:String = contentDirectories.get(shit) + '/' + key;
-				if (exists(fileToCheck))
-					return fileToCheck;
-			}
+		if (Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0) {
+			check(Paths.currentModDirectory);
+			if (path != null) return path;
+		}
+
+		for (mod in dependencies) {
+			check(mod);
+			if (path != null) return path;
 		}
 
 		if (ignoreGlobal != true) {
 			for (mod in getGlobalContent()) {
-				var fileToCheck:String = contentDirectories.get(mod) + '/' + key;
-				if (exists(fileToCheck))
-					return fileToCheck;
+				check(mod);
+				if (path != null) return path;
 			}
 		}
 

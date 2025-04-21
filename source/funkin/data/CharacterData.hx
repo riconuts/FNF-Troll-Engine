@@ -219,7 +219,7 @@ class CharacterData {
 			"generatedBy": "TROLL ENGINE",
 			"version": "1.0.0",
 
-			"name": char.curCharacter,
+			"name": char.characterId,
 			"assetPath": char.imageFile,
 			"renderType": CharacterData.getImageFileType(char.imageFile),
 			"flipX": char.originalFlipX,
@@ -270,12 +270,9 @@ class CharacterData {
 			_characters.set(name, true);
 		}
 		
-		for (folderPath in Paths.getFolders("characters", true)){
+		for (folderPath in Paths.getFolders("characters", modsOnly))
+		{
 			Paths.iterateDirectory(folderPath, readFileNameAndPush);
-		}
-
-		if (!modsOnly){
-			Paths.iterateDirectory(Paths.getPreloadPath('characters/'), readFileNameAndPush);
 		}
 
 		for (name in _characters.keys())

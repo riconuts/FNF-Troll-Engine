@@ -1,5 +1,6 @@
 package funkin.objects.notestyles;
 
+import funkin.objects.notes.*;
 import funkin.objects.shaders.NoteColorSwap;
 import flixel.graphics.frames.FlxAtlasFrames;
 import funkin.scripts.FunkinHScript;

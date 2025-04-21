@@ -38,36 +38,37 @@ typedef StageFile =
 
 class Stage extends FlxTypedGroup<FlxBasic>
 {
-	public var curStage:String = "stage" #if tgt + "1" #end;
-	public var stageData:StageFile = {
-		directory: "",
-		defaultZoom: 0.8,
-		boyfriend: [500, 100],
-		girlfriend: [0, 100],
-		opponent: [-500, 100],
-		hide_girlfriend: false,
-		camera_boyfriend: [0, 0],
-		camera_opponent: [0, 0],
-		camera_girlfriend: [0, 0],
-		camera_speed: 1
-	};
+	public var stageId(default, null):String;
+	public var stageData(default, null):StageFile;
+	
 	public var foreground = new FlxTypedGroup<FlxBasic>();
 
 	public var stageScript:FunkinHScript;
 	public var spriteMap = new Map<String, FlxBasic>();
 
-	public function new(?stageName:String, ?runScript:Bool = true)
+	#if ALLOW_DEPRECATION
+	@:deprecated("curStage is deprecated. Use stageId instead.")
+	public var curStage(get, never):String;
+	inline function get_curStage() return stageId;
+	#end
+
+	public function new(stageId:String, runScript:Bool = true)
 	{
 		super();
 
-		if (stageName != null)
-			curStage = stageName;
-		
-		var stageData = StageData.getStageFile(curStage);
-		if (stageData != null)
-			this.stageData = stageData;
-		else
-			trace('Failed to load StageData file "$curStage"');
+		this.stageId = stageId;
+		this.stageData = StageData.getStageFile(stageId) ?? {
+			directory: "",
+			defaultZoom: 0.8,
+			boyfriend: [500, 100],
+			girlfriend: [0, 100],
+			opponent: [-500, 100],
+			hide_girlfriend: false,
+			camera_boyfriend: [0, 0],
+			camera_opponent: [0, 0],
+			camera_girlfriend: [0, 0],
+			camera_speed: 1
+		};
 
 		if (runScript)
 			startScript(false);
@@ -82,17 +83,21 @@ class Stage extends FlxTypedGroup<FlxBasic>
 			return;
 		}   
 
-		var file = Paths.getHScriptPath('stages/$curStage');
+		var file = Paths.getHScriptPath('stages/$stageId');
 		if (file != null){
 			stageScript = FunkinHScript.fromFile(file, file, additionalVars);
 
 			// define variables lolol
+			stageScript.set("this", this);
+			stageScript.set("foreground", foreground);
+
+			#if ALLOW_DEPRECATION
 			stageScript.set("stage", this); // for backwards compat lol
+			#end
+
 			stageScript.set("add", add);
 			stageScript.set("remove", remove);
 			stageScript.set("insert", insert);
-			stageScript.set("this", this);
-			stageScript.set("foreground", foreground);
 
 			if (buildStage) {
 				stageScript.call("onLoad", [this, foreground]);
@@ -106,7 +111,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		if (!stageBuilt){
 			// In case you want to hardcode your stages
 			/* 
-			switch (curStage)
+			switch (stageId)
 			{
 				case "example":
 					var ground = new FlxSprite(-2048, -100);
@@ -152,7 +157,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 	}
 
 	override function toString(){
-		return 'Stage: "$curStage"';
+		return 'Stage($stageId)';
 	}
 
 	/**
@@ -229,12 +234,9 @@ class Stage extends FlxTypedGroup<FlxBasic>
 			_stages.set(name, true);
 		}
 		
-		for (folderPath in Paths.getFolders("stages", true)){
+		for (folderPath in Paths.getFolders("stages", modsOnly))
+		{
 			Paths.iterateDirectory(folderPath, readFileNameAndPush);
-		}
-
-		if (!modsOnly){
-			Paths.iterateDirectory(Paths.getPreloadPath('stages/'), readFileNameAndPush);
 		}
 
 		for (name in _stages.keys())
@@ -242,24 +244,6 @@ class Stage extends FlxTypedGroup<FlxBasic>
 
 		return stages;
 	}
-
-	/*
-	//// stage -> modDirectory
-	public static function getStageMap():Map<String, String>
-	{
-		var directories:Array<String> = [
-			#if MODS_ALLOWED
-			Paths.mods(Paths.currentModDirectory + '/stages/'),
-			Paths.mods('stages/'),
-			#end
-			Paths.getPreloadPath('stages/')
-		];
-
-		var theMap:Map<String, String> = new Map();
-
-		return theMap;
-	}
-	*/
 }
 
 class StageData {
@@ -277,8 +261,8 @@ class StageData {
 		forceNextDirectory = stageFile == null ? '' : stageFile.directory;
 	}
 	
-	public static function getStageFile(stageName:String):Null<StageFile> 
+	public static function getStageFile(stageId:String):Null<StageFile> 
 	{
-		return Paths.json('stages/$stageName.json', false);
+		return Paths.json('stages/$stageId.json', false);
 	}
 }

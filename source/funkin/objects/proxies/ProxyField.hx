@@ -29,6 +29,10 @@ class ProxyField extends FieldBase {
 		proxiedField = field;
 	}
 
+	override public function getNotefield() {return proxiedField;}
+
+	override function preDraw(){} // hopefully no more crashes
+
 	override function draw()
 		drawQueue = proxiedField.drawQueue; // Just use the host field's queue
 	

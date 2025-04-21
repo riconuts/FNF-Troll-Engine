@@ -1,5 +1,5 @@
 import funkin.states.PlayState;
-import funkin.objects.Note;
-import funkin.objects.NoteObject;
-import funkin.objects.NoteSplash;
-import funkin.objects.StrumNote;
+import funkin.objects.notes.Note;
+import funkin.objects.notes.NoteObject;
+import funkin.objects.notes.NoteSplash;
+import funkin.objects.notes.StrumNote;

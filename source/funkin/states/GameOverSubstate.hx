@@ -169,12 +169,12 @@ class GameOverSubstate extends MusicBeatSubstate
 			return doGenericGameOver();
 		}
 
-		var deathName:String = (characterName != null) ? characterName : (char.deathName + "-dead");
+		var deathName:String = (characterName != null) ? characterName : (char.characterId + "-dead");
 		var charInfo = CharacterData.getCharacterFile(deathName);
 
 		if (charInfo == null){
 			warn('Could not get Character data for "$deathName".');
-			deathName = char.curCharacter;
+			deathName = char.characterId;
 			charInfo = CharacterData.getCharacterFile(deathName);
 		}
 

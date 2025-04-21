@@ -6,16 +6,96 @@ package funkin.states;
 #elseif (hxCodec == "2.6.0") import VideoHandler;
 #elseif (hxCodec) import vlc.MP4Handler as VideoHandler; 
 #elseif (hxvlc) import hxvlc.flixel.FlxVideo as VideoHandler;
+#else typedef VideoHandler = Dynamic;
 #end
-class VideoPlayerState extends MusicBeatState
+
+#if hxvlc
+import hxvlc.util.Location;
+#else
+typedef Location = String;
+#end
+
+#if !VIDEOS_ALLOWED
+class VideoPlayerState extends BaseVideoPlayerState
+{
+
+}
+#elseif hxvlc
+class VideoPlayerState extends BaseVideoPlayerState
+{
+	override function createVideo() {
+		if (!Paths.exists(videoPath)){
+			onComplete();
+			
+		}else{
+			trace('Loading video: $videoPath');
+
+			video = new VideoHandler();
+			video.onEndReached.add(endVideo);
+			FlxG.addChildBelowMouse(video);
+			
+			var loaded = video.load(videoPath);
+			if (loaded)
+				video.play();
+			else {
+				trace('Error loading video: $videoPath');
+				endVideo();
+			}
+		}
+	}
+
+	override function pauseVideo() {
+		video.pause();
+	}
+
+	override function destroyVideo() {
+		video.stop();
+		video.dispose();
+		FlxG.removeChild(video);
+	}
+}
+
+#elseif(hxCodec >= "3.0.0")
+class VideoPlayerState extends BaseVideoPlayerState
+{
+	override function createVideo() {
+		video = new VideoHandler();
+		video.onEndReached.add(endVideo);
+		video.play(videoPath);		
+	}
+	override function pauseVideo() {
+		video.pause();
+	}
+	override function destroyVideo() {
+		FlxG.game.removeChild(video);
+	}
+}
+
+#elseif(hxCodec)
+class VideoPlayerState extends BaseVideoPlayerState
+{
+	override function createVideo() {
+		video = new VideoHandler();
+		video.finishCallback = endVideo;
+		video.playVideo(videoPath);
+	}
+	override function pauseVideo() {
+		video.pause();
+	}
+}
+#end
+
+class BaseVideoPlayerState extends MusicBeatState
 {  
-	final videoPath:String;
-	final isSkippable:Bool;
-	final onComplete:Void -> Void;
+	var videoPath:Location;
+	var onComplete:Void -> Void;
+	var isSkippable:Bool;
 
+	public var ended:Bool = false;
 	public var autoDestroy:Bool = true;
+	public var video:VideoHandler;
 
-	public function new(videoPath:String, onComplete:Void -> Void, isSkippable:Bool = true)
+	public function new(videoPath:Location, onComplete:Void -> Void, isSkippable:Bool = true)
 	{
 		super();
 
@@ -24,64 +104,44 @@ class VideoPlayerState extends MusicBeatState
 		this.onComplete = onComplete;
 	}
 
-	#if VIDEOS_ALLOWED
-	var video:VideoHandler;
-	#end
-	override public function create(){
+	override public function create() {
 		FlxG.camera.bgColor = 0xFF000000;
-
 		super.create();
-
-		#if !VIDEOS_ALLOWED
-		onComplete();
-		trace("Video playback is unavailable");
-
-		#else
-		if (!Paths.exists(videoPath)){
-			onComplete();
-			trace('$videoPath does not exist');
-		}else{
-			#if (hxvlc) 
-			video = new VideoHandler();
-			video.onEndReached.add(function()
-			{
-				onComplete();
-			});
-			video.load(videoPath);
-			video.play();
-			#elseif(hxCodec >= "3.0.0")
-			video = new VideoHandler();
-			video.onEndReached.add(function(){
-				onComplete();
-			});
-			video.play(videoPath);
-			#else
-			video = new VideoHandler();
-			video.finishCallback = onComplete;
-			video.playVideo(videoPath);
-			#end
-		}
-		#end
+		createVideo();
 	}
 
-	#if VIDEOS_ALLOWED
+	private function createVideo() {
+		trace("Video playback is unavailable");
+		onComplete();
+	}
+
+	public function pauseVideo() {
+	
+	}
+
+	public function destroyVideo() {
+		
+	}
+
+	/**
+		Destroys the VideoHandler if `autoDestroy` is `true` and calls the `onComplete` callback
+	**/
+	private function endVideo() {
+		if (ended)
+			return;
+		
+		ended = true;
+		pauseVideo();
+		
+		if (autoDestroy) destroyVideo();
+		if (onComplete != null) onComplete();
+	}
+
 	override public function update(e) {
-		if (isSkippable && controls.ACCEPT)
-			onComplete();
+		if (isSkippable && FlxG.keys.justPressed.ENTER) {
+			endVideo();
+		}
 
 		super.update(e);
 	}
-
-	override public function destroy(){
-		#if hxvlc
-		video.stop();
-		video.dispose();
-		#elseif(hxCodec >= "3.0.0")
-		if (FlxG.game.contains(video))
-			FlxG.game.removeChild(video);
-		#end
-
-		super.destroy();
-	}
-	#end
 }

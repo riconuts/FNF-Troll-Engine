@@ -1,5 +1,6 @@
 package funkin.objects.hud;
 
+import math.CoolMath;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.util.FlxStringUtil;
 import flixel.ui.FlxBar;
@@ -38,8 +39,7 @@ class KadeHUD extends BaseHUD
 	var cbString = Paths.getString("cbplural");
 	var npsString = Paths.getString("nps");
 
-	var engineStringLong = 'Troll Engine ${Main.Version.displayedVersion}';
-	var engineStringShort = 'TE ${Main.Version.displayedVersion}';
+	var engineName = 'Troll Engine';
 
 	override function set_displayedHealth(value:Float)
 	{
@@ -83,6 +83,7 @@ class KadeHUD extends BaseHUD
 		originalX = scoreTxt.x;
 		scoreTxt.scrollFactor.set();
 		scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, 0xFFFFFFFF, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, 0xFF000000);
+		scoreTxt.pixelPerfectRender = true; // that blurry text is driving me insane
 		add(scoreTxt);
 
 		////
@@ -164,28 +165,18 @@ class KadeHUD extends BaseHUD
 		timeBar.exists = updateTime;
 		timeTxt.exists = updateTime;
 
-		if (ClientPrefs.timeBarType == "Song Name"){
+		if (ClientPrefs.timeBarType == "Song Name")
+		{
 			timeTxt.text = displayedSong;
-			watermark.text = engineStringLong;
+			watermark.text = engineName;
+		}
+		else
+		{
+			var diffId:String = PlayState.difficultyName;
+			var diffName:String = Paths.getString('difficultyName_$diffId', diffId);
 
-			if (watermark.x + watermark.width >= healthBarBG.x)
-				watermark.text = engineStringShort;
-		}else{
+			watermark.text = '$displayedSong - $diffName | $engineName';
 			timeTxt.text = "";
-			var id = PlayState.difficultyName;
-			if (id == '')
-				id = 'normal';
-
-			var _dStrId:String = 'difficultyName_${id.toLowerCase()}';
-
-			var diffName:String = Paths.getString(_dStrId, id);
-
-			var sognNaim = PlayState.SONG.song + " " + diffName; //
-
-			watermark.text = '$sognNaim | $engineStringLong';
-
-			if (watermark.x + watermark.width >= healthBarBG.x)
-				watermark.text = '$sognNaim | $engineStringShort';
 		}
 
 		timeTxt.x = timeBarBG.x + (timeBarBG.width / 2) - (timeTxt.text.length * 5);
@@ -243,7 +234,7 @@ class KadeHUD extends BaseHUD
 
 			text += '$scareText: $shownScore | ' +
 			'$cbString: $comboBreaks | ' +
-			'$ratingString: ${grade == '?' ? 0 : Highscore.floorDecimal(ratingPercent * 100, 2)}% | ';
+			'$ratingString: ${grade == '?' ? 0 : CoolMath.floorDecimal(ratingPercent * 100, 2)}% | ';
 			if(grade == '?')
 				text += "N/A";
 			else
