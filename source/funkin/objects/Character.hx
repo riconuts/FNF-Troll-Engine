@@ -3,6 +3,7 @@ package funkin.objects;
 import funkin.states.PlayState;
 import funkin.scripts.FunkinScript.ScriptType;
 import funkin.objects.playfields.PlayField;
+import funkin.objects.notes.Note;
 import funkin.data.CharacterData;
 import funkin.data.CharacterData.*;
 import funkin.scripts.*;
@@ -305,8 +306,8 @@ class Character extends FlxSprite
 
 	public function createPlaceholderAnims() {
 		for (animName in ["singLEFT", "singDOWN", "singUP", "singRIGHT"]) {
-			cloneAnimation(animName,		animName+'miss');
-			cloneAnimation(animName,		animName+'-alt');
+			cloneAnimation(animName, 		animName+'miss');
+			cloneAnimation(animName, 		animName+'-alt');
 			cloneAnimation(animName+'-alt',	animName+'-altmiss');
 		}
 	}

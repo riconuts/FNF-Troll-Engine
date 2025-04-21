@@ -3,8 +3,6 @@ package funkin.objects.hud;
 import flixel.text.FlxText;
 import flixel.ui.FlxBar;
 import flixel.util.FlxColor;
-import funkin.data.JudgmentManager.JudgmentData;
-import funkin.objects.playfields.*;
 
 import flixel.group.FlxSpriteGroup;
 

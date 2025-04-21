@@ -1,0 +1,1 @@
+import funkin.objects.notes.*;

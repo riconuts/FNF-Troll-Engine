@@ -10,6 +10,8 @@ import funkin.Conductor.BPMChangeEvent;
 import funkin.data.Section;
 import funkin.data.Song;
 
+import funkin.objects.notes.*;
+
 import flixel.*;
 import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;

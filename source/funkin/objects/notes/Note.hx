@@ -1,4 +1,4 @@
-package funkin.objects;
+package funkin.objects.notes;
 
 import math.Vector3;
 import flixel.math.FlxMath;

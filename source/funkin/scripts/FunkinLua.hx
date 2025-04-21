@@ -7,7 +7,7 @@ import funkin.scripts.Globals.*;
 import funkin.scripts.Util;
 import funkin.scripts.Util.*;
 import funkin.objects.*;
-import funkin.modchart.SubModifier;
+import funkin.objects.notes.Note;
 
 import flixel.*;
 import flixel.group.FlxGroup.FlxTypedGroup;

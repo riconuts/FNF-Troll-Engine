@@ -7,7 +7,7 @@ import flixel.tweens.FlxEase;
 import lime.app.Event;
 import funkin.modchart.ModManager;
 import funkin.data.JudgmentManager;
-import funkin.data.JudgmentManager.Wife3;
+import funkin.objects.notes.*;
 import funkin.states.PlayState;
 import funkin.states.MusicBeatState;
 

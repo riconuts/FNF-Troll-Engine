@@ -1,6 +1,6 @@
 package funkin.data;
 
-import funkin.objects.Note;
+import funkin.objects.notes.Note;
 
 /**
  * Defines how a judgment interacts w/ the combo count
