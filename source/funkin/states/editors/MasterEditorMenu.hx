@@ -19,8 +19,10 @@ class MasterEditorMenu extends MusicBeatState
 		//'Menu Character Editor',
 		'Character Editor',
 		'Chart Editor',
+		/*
 		'Stage Editor',
 		'Stage Builder',
+		*/
 		'Test Stage'
 	];
 	private var menu:AlphabetMenu;
@@ -48,9 +50,11 @@ class MasterEditorMenu extends MusicBeatState
 		menu.callbacks.onAccept = function(i, _){
 			switch(options[i]) {
 				case 'Character Editor': MusicBeatState.switchState(new CharacterEditorState(Character.DEFAULT_CHARACTER, false));
-				case 'Stage Editor': MusicBeatState.switchState(new StageEditorState());
 				case 'Chart Editor': LoadingState.loadAndSwitchState(new ChartingState(), false);
+				/*
+				case 'Stage Editor': MusicBeatState.switchState(new StageEditorState());
 				case 'Stage Builder': MusicBeatState.switchState(new StageBuilderState());
+				*/
 				case "Test Stage": MusicBeatState.switchState(new TestState());
 				default: return;
 			}
