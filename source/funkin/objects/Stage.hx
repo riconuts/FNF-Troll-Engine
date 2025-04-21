@@ -38,36 +38,31 @@ typedef StageFile =
 
 class Stage extends FlxTypedGroup<FlxBasic>
 {
-	public var curStage:String = "stage" #if tgt + "1" #end;
-	public var stageData:StageFile = {
-		directory: "",
-		defaultZoom: 0.8,
-		boyfriend: [500, 100],
-		girlfriend: [0, 100],
-		opponent: [-500, 100],
-		hide_girlfriend: false,
-		camera_boyfriend: [0, 0],
-		camera_opponent: [0, 0],
-		camera_girlfriend: [0, 0],
-		camera_speed: 1
-	};
+	public var curStage(default, null):String;
+	public var stageData(default, null):StageFile;
+	
 	public var foreground = new FlxTypedGroup<FlxBasic>();
 
 	public var stageScript:FunkinHScript;
 	public var spriteMap = new Map<String, FlxBasic>();
 
-	public function new(?stageName:String, ?runScript:Bool = true)
+	public function new(stageName:String, runScript:Bool = true)
 	{
 		super();
 
-		if (stageName != null)
-			curStage = stageName;
-		
-		var stageData = StageData.getStageFile(curStage);
-		if (stageData != null)
-			this.stageData = stageData;
-		else
-			trace('Failed to load StageData file "$curStage"');
+		this.curStage = stageName;
+		this.stageData = StageData.getStageFile(stageName) ?? {
+			directory: "",
+			defaultZoom: 0.8,
+			boyfriend: [500, 100],
+			girlfriend: [0, 100],
+			opponent: [-500, 100],
+			hide_girlfriend: false,
+			camera_boyfriend: [0, 0],
+			camera_opponent: [0, 0],
+			camera_girlfriend: [0, 0],
+			camera_speed: 1
+		};
 
 		if (runScript)
 			startScript(false);
