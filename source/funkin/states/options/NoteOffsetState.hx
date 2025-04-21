@@ -89,12 +89,14 @@ class NoteOffsetState extends MusicBeatState
 		var bfId:String = 'bf';
 
 		gf = new Character(stageData.girlfriend[0], stageData.girlfriend[1], gfId);
+		gf.setupCharacter();
 		gf.x += gf.positionArray[0];
 		gf.y += gf.positionArray[1];
 		gf.scrollFactor.set(0.95, 0.95);
 		add(gf);
 
 		boyfriend = new Character(stageData.boyfriend[0], stageData.boyfriend[1], bfId, true);
+		boyfriend.setupCharacter();
 		boyfriend.x += boyfriend.positionArray[0];
 		boyfriend.y += boyfriend.positionArray[1];
 		add(boyfriend);
