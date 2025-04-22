@@ -81,6 +81,8 @@ class TraditionalHUD extends CommonHUD
 
 	function clearJudgementDisplays()
 	{
+		if (judgeCounters == null)
+			return;
 		remove(judgeCounters);
 		judgeCounters.destroy();
 		judgeCounters = null;
