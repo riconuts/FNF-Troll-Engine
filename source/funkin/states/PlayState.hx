@@ -2302,6 +2302,7 @@ class PlayState extends MusicBeatState
 		super.onFocusLost();
 	}
 
+	////
 	public function newPlayfield()
 	{
 		var field = new PlayField(modManager);
@@ -2323,59 +2324,111 @@ class PlayState extends MusicBeatState
 		field.holdStepCallback = stepHold;
 		field.holdReleaseCallback = releaseHold;
 
-		field.noteRemoved.add((note:Note, field:PlayField) -> {
-			modchartObjects.remove('note${note.ID}');
-			allNotes.remove(note);
-			unspawnNotes.remove(note);
-			notes.remove(note);
-		});
-		field.noteMissed.add((daNote:Note, field:PlayField) -> {
-			if (field.isPlayer && !field.autoPlayed && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit))
-				noteMiss(daNote, field);
+		field.noteSpawned.add(field_noteSpawned);
+		field.noteRemoved.add(field_noteRemoved);
 
-		});
-
-		field.noteSpawned.add((dunceNote:Note, field:PlayField) -> {
-			callOnHScripts('onSpawnNote', [dunceNote]);
-			#if LUA_ALLOWED
-			callOnLuas('onSpawnNote', [
-				allNotes.indexOf(dunceNote),
-				dunceNote.column,
-				dunceNote.noteType,
-				dunceNote.isSustainNote,
-				dunceNote.strumTime
-			]);
-			#end
-
-			notes.add(dunceNote);
-			unspawnNotes.remove(dunceNote);
-
-			callOnHScripts('onSpawnNotePost', [dunceNote]);
-			if (dunceNote.noteScript != null)
-				callScript(dunceNote.noteScript, "postSpawnNote", [dunceNote]);
-		});
-
-
-		field.holdDropped.add((daNote:Note, field:PlayField) -> {
-			if (!field.isPlayer)return;
-			if (stats.accuracySystem == 'PBot') {
-				stats.totalPlayed += (PBot.holdScorePerSecond * (daNote.sustainLength * 0.001)) * 0.01;
-				stats.totalNotesHit += PBot.holdScorePerSecond * 0.01 * (daNote.holdingTime * 0.001);
-				RecalculateRating();
-			}
-		});
-
-		field.holdFinished.add((daNote:Note, field:PlayField) -> {
-			if (!field.isPlayer)return;
-			if (stats.accuracySystem == 'PBot') {
-				stats.totalPlayed += (PBot.holdScorePerSecond * (daNote.sustainLength * 0.001)) * 0.01;
-				stats.totalNotesHit += PBot.holdScorePerSecond * 0.01 * (daNote.sustainLength * 0.001);
-				RecalculateRating();
-			}
-		}); 
-
+		field.noteMissed.add(field_noteMissed);
+		field.holdDropped.add(field_holdDropped);
+		field.holdFinished.add(field_holdFinished);
 	}
 
+	function stepHold(note:Note, field:PlayField)
+	{
+		callOnHScripts("onHoldStep", [note, field]);
+		
+		if (note.noteScript != null)
+			callScript(note.noteScript, "onHoldStep", [note, field]);
+
+		if (note.genScript != null)
+			callScript(note.genScript, "onHoldStep", [note, field]);
+
+		if(field.isPlayer){
+			if (holdsGiveHP && note.hitResult.judgment != UNJUDGED){
+				var judgeData:JudgmentData = judgeManager.judgmentData.get(note.hitResult.judgment);
+				if(judgeData.health > 0)
+					health += judgeData.health * 0.02 * healthGain;
+			}
+		}
+	}
+
+	function pressHold(note:Note, field:PlayField)
+	{
+		callOnHScripts("onHoldPress", [note, field]);
+		
+		if (note.noteScript != null)
+			callScript(note.noteScript, "onHoldPress", [note, field]);
+
+		if (note.genScript != null)
+			callScript(note.genScript, "onHoldPress", [note, field]);
+
+		if (cpuControlled && note.isRoll && ClientPrefs.hitsoundBehav == 'Key Press') 
+			playShithound();
+		
+	}
+	
+	function releaseHold(note:Note, field:PlayField):Void
+	{
+		callOnHScripts("onHoldRelease", [note, field]);
+		
+		if (note.noteScript != null)
+			callScript(note.noteScript, "onHoldRelease", [note, field]);
+
+		if (note.genScript != null)
+			callScript(note.genScript, "onHoldRelease", [note, field]);	
+	}
+
+	function field_noteSpawned(dunceNote:Note, field:PlayField) {
+		callOnHScripts('onSpawnNote', [dunceNote]);
+		#if LUA_ALLOWED
+		callOnLuas('onSpawnNote', [
+			allNotes.indexOf(dunceNote),
+			dunceNote.column,
+			dunceNote.noteType,
+			dunceNote.isSustainNote,
+			dunceNote.strumTime
+		]);
+		#end
+
+		notes.add(dunceNote);
+		unspawnNotes.remove(dunceNote);
+
+		callOnHScripts('onSpawnNotePost', [dunceNote]);
+		if (dunceNote.noteScript != null)
+			callScript(dunceNote.noteScript, "postSpawnNote", [dunceNote]);
+	}
+
+	function field_noteRemoved(note:Note, field:PlayField) {
+		modchartObjects.remove('note${note.ID}');
+		allNotes.remove(note);
+		unspawnNotes.remove(note);
+		notes.remove(note);
+	}
+
+	function field_noteMissed(daNote:Note, field:PlayField) {
+		if (!field.isPlayer)return;
+		if (!field.autoPlayed && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit))
+			noteMiss(daNote, field);
+	}
+
+	function field_holdDropped(daNote:Note, field:PlayField) {
+		if (!field.isPlayer)return;
+		if (stats.accuracySystem == 'PBot') {
+			stats.totalPlayed += (PBot.holdScorePerSecond * (daNote.sustainLength * 0.001)) * 0.01;
+			stats.totalNotesHit += PBot.holdScorePerSecond * 0.01 * (daNote.holdingTime * 0.001);
+			RecalculateRating();
+		}
+	}
+	
+	function field_holdFinished(daNote:Note, field:PlayField) {
+		if (!field.isPlayer)return;
+		if (stats.accuracySystem == 'PBot') {
+			stats.totalPlayed += (PBot.holdScorePerSecond * (daNote.sustainLength * 0.001)) * 0.01;
+			stats.totalNotesHit += PBot.holdScorePerSecond * 0.01 * (daNote.sustainLength * 0.001);
+			RecalculateRating();
+		}
+	}
+
+	////
 	@:noCompletion
 	@:deprecated('resyncVocals is deprecated, use resyncTracks instead')
 	function resyncVocals():Void
@@ -3726,53 +3779,6 @@ class PlayState extends MusicBeatState
 		else if (note.isSustainNote)
 			if (note.parent.unhitTail.contains(note))
 				note.parent.unhitTail.remove(note);
-		
-	}
-
-
-	inline function stepHold(note:Note, field:PlayField)
-	{
-		callOnHScripts("onHoldStep", [note, field]);
-		
-		if (note.noteScript != null)
-			callScript(note.noteScript, "onHoldStep", [note, field]);
-
-		if (note.genScript != null)
-			callScript(note.genScript, "onHoldStep", [note, field]);
-
-		if(field.isPlayer){
-			if (holdsGiveHP && note.hitResult.judgment != UNJUDGED){
-				var judgeData:JudgmentData = judgeManager.judgmentData.get(note.hitResult.judgment);
-				if(judgeData.health > 0)
-					health += judgeData.health * 0.02 * healthGain;
-			}
-		}
-	}
-
-	inline function pressHold(note:Note, field:PlayField)
-	{
-		callOnHScripts("onHoldPress", [note, field]);
-		
-		if (note.noteScript != null)
-			callScript(note.noteScript, "onHoldPress", [note, field]);
-
-		if (note.genScript != null)
-			callScript(note.genScript, "onHoldPress", [note, field]);
-
-		if (cpuControlled && note.isRoll && ClientPrefs.hitsoundBehav == 'Key Press') 
-			playShithound();
-		
-	}
-	
-	inline function releaseHold(note:Note, field:PlayField): Void
-	{
-		callOnHScripts("onHoldRelease", [note, field]);
-		
-		if (note.noteScript != null)
-			callScript(note.noteScript, "onHoldRelease", [note, field]);
-
-		if (note.genScript != null)
-			callScript(note.genScript, "onHoldRelease", [note, field]);
 		
 	}
 
