@@ -294,7 +294,7 @@ class PlayState extends MusicBeatState
 	public var notes = new FlxTypedGroup<Note>();
 	public var unspawnNotes:Array<Note> = [];
 	public var allNotes:Array<Note> = []; // all notes
-	public var eventNotes:Array<EventNote> = [];
+	public var eventNotes:Array<PsychEvent> = [];
 
 	var speedChanges:Array<SpeedEvent> = [];
 	public var currentSV:SpeedEvent = {position: 0, startTime: 0, speed: 1 #if EASED_SVs , startSpeed: 1 #end};
@@ -1582,7 +1582,7 @@ class PlayState extends MusicBeatState
 		callOnScripts('onSongStart');
 	}
 
-	function shouldPush(event:EventNote){
+	function shouldPush(event:PsychEvent){
 		switch(event.event){
 			default:
 				if (eventScripts.exists(event.event)) {
@@ -1603,12 +1603,12 @@ class PlayState extends MusicBeatState
 		return true;
 	}
 
-	static function eventNoteSort(a:EventNote, b:EventNote)
+	static function eventNoteSort(a:PsychEvent, b:PsychEvent)
 		return Std.int(a.strumTime - b.strumTime);
 
-	function getSongEventNotes():Array<EventNote>
+	function getSongEventNotes():Array<PsychEvent>
 	{
-		var allEvents:Array<EventNote> = [];
+		var allEvents:Array<PsychEvent> = [];
 
 		var eventsJSON = Song.loadFromJson('events', songId, false);
 		if (eventsJSON != null) Song.getEventNotes(eventsJSON.events, allEvents);
@@ -1732,7 +1732,7 @@ class PlayState extends MusicBeatState
 		}
 
 		//// get event names to load
-		var daEvents:Array<EventNote> = getSongEventNotes();
+		var daEvents:Array<PsychEvent> = getSongEventNotes();
 		for (eventNote in daEvents) {
 			var name:String = eventNote.event;
 			if (eventPushedMap.exists(name))
@@ -1935,7 +1935,7 @@ class PlayState extends MusicBeatState
 	}
 
 	// everything returned here gets preloaded by the preloader up-top ^
-	function getEventNotePreload(event:EventNote):Array<AssetPreload>{
+	function getEventNotePreload(event:PsychEvent):Array<AssetPreload>{
 		var preload:Array<AssetPreload> = [];
 
 		switch(event.event){
@@ -2006,7 +2006,7 @@ class PlayState extends MusicBeatState
 		return event;
 	}
 
-	function eventNoteEarlyTrigger(event:EventNote):Float {
+	function eventNoteEarlyTrigger(event:PsychEvent):Float {
 		var ret:Dynamic = callOnAllScripts('eventEarlyTrigger', [event.event, event.value1, event.value2]);
 		if (ret != null && (ret is Int || ret is Float))
 			return ret;
@@ -2025,7 +2025,7 @@ class PlayState extends MusicBeatState
 	}
 	
 	// called for every event note
-	function eventPushed(event:EventNote) 
+	function eventPushed(event:PsychEvent) 
 	{
 		if (event.value1 == null) event.value1 = '';
 		if (event.value2 == null) event.value2 = '';

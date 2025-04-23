@@ -58,7 +58,7 @@ typedef SwagSong = {
 	var validScore:Bool;
 }
 
-typedef EventNote = {
+typedef PsychEvent = {
 	strumTime:Float,
 	event:String,
 	value1:String,
@@ -760,7 +760,7 @@ class Song extends BaseSong
 		return swagJson;
 	}
 
-	public static function getEventNotes(rawEventsData:Array<Array<Dynamic>>, ?resultArray:Array<EventNote>):Array<EventNote>
+	public static function getEventNotes(rawEventsData:Array<Array<Dynamic>>, ?resultArray:Array<PsychEvent>):Array<PsychEvent>
 	{
 		if (resultArray==null) resultArray = [];
 		
@@ -785,7 +785,7 @@ class Song extends BaseSong
 			var subEvents:Array<Array<Dynamic>> = event[1];
 
 			for (eventData in subEvents) {
-				var eventNote:EventNote = {
+				var eventNote:PsychEvent = {
 					strumTime: eventTime,
 					event: eventData[0],
 					value1: eventData[1],
