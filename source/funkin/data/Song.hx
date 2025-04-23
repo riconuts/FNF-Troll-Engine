@@ -175,14 +175,16 @@ class Song extends BaseSong
 		return path;
 	}
 
-	// idk perhaps moving ts to playstate would be more appropiate
-	public function play(?chartName:String = ''){
-		Song.playSong(this, chartName);
+	public function play(chartId:String = '') {
+		if (chartId == "")
+			chartId = charts.contains(DEFAULT_CHART_ID) ? DEFAULT_CHART_ID : charts[0];
+
+		Song.playSong(this, chartId);
 	}
 
 	/** get uncached metadata **/
-	private function _getMetadata(chart:String):Null<SongMetadata> {
-		var suffix = getDifficultyFileSuffix(chart);
+	private function _getMetadata(chartId:String):Null<SongMetadata> {
+		var suffix = getDifficultyFileSuffix(chartId);
 		var fileName:String = 'metadata' + suffix + '.json';
 		var path:String = getSongFile(fileName);
 		return Paths.getJson(path);
@@ -798,22 +800,16 @@ class Song extends BaseSong
 		return resultArray;
 	}
 
-	static public function loadSong(toPlay:Song, ?difficulty:String) {
+	// idk perhaps moving ts to playstate would be more appropiate
+	static public function loadSong(toPlay:Song, chartId:String) {
 		Paths.currentModDirectory = toPlay.folder;
 
-		if (difficulty == null || difficulty == "") {
-			if (toPlay.charts.contains(DEFAULT_CHART_ID))
-				difficulty = DEFAULT_CHART_ID;
-			else
-				difficulty = toPlay.charts[0];
-		}
-
 		if (Main.showDebugTraces)
-			trace('loadSong', toPlay, difficulty);
+			trace('loadSong', toPlay, chartId);
 
-		PlayState.SONG = toPlay.getSwagSong(difficulty);
-		PlayState.difficulty = toPlay.charts.indexOf(difficulty);
-		PlayState.difficultyName = difficulty;
+		PlayState.SONG = toPlay.getSwagSong(chartId);
+		PlayState.difficulty = toPlay.charts.indexOf(chartId);
+		PlayState.difficultyName = chartId;
 		PlayState.isStoryMode = false;
 
 		PlayState.songPlaylist = [toPlay];
@@ -825,7 +821,7 @@ class Song extends BaseSong
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.volume = 0;
 
-		LoadingState.loadAndSwitchState(new PlayState());	
+		LoadingState.loadAndSwitchState(new PlayState());
 	}
 
 	static public function playSong(song:Song, ?difficulty:String)
