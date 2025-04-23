@@ -94,11 +94,45 @@ typedef SongMetadata =
 }
 
 inline final DEFAULT_CHART_ID = "normal";
-class Song
+
+abstract class BaseSong
 {
 	public final songId:String;
 	public final folder:String = '';
 
+	public function new(songId:String, folder:String = '')
+	{
+		this.songId = songId;
+		this.folder = folder;
+	}
+
+	public function toString()
+		return '$folder:$songId';
+
+	/**
+	 * Returns metadata for the requested chartId. 
+	 * If it doesn't exist, metadata for the default chart is returned instead
+	 * 
+	 * @param chartId The song chart for which you want to request metadata
+	**/
+	abstract public function getMetadata(chartId:String = DEFAULT_CHART_ID):SongMetadata;
+
+	/**
+	 * Returns chart data for the requested chartId. 
+	 * If it doesn't exist, null is returned instead
+	 * 
+	 * @param chartId The song chart for which you want to request chart data
+	**/
+	abstract public function getSwagSong(chartId:String = DEFAULT_CHART_ID):Null<SwagSong>;
+
+	/**
+	 * Returns a path to a file of name fileName that belongs to this song
+	**/
+	abstract public function getSongFile(fileName:String):String;
+}
+
+class Song extends BaseSong
+{
 	public var songPath(get, default):String;
 	public var charts(get, null):Array<String>;
 	private var metadataCache = new Map<String, SongMetadata>();
@@ -115,8 +149,7 @@ class Song
 
 	public function new(songId:String, ?folder:String)
 	{
-		this.songId = songId;
-		this.folder = folder ?? '';
+		super(songId, folder);
 		#if !PE_MOD_COMPATIBILITY
 		this.songPath = Paths.getFolderPath(this.folder) + '/songs/$songId';
 		#else
@@ -146,9 +179,6 @@ class Song
 	public function play(?chartName:String = ''){
 		Song.playSong(this, chartName);
 	}
-
-	public function toString()
-		return '$folder:$songId';
 
 	/** get uncached metadata **/
 	private function _getMetadata(chart:String):Null<SongMetadata> {
