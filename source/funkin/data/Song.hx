@@ -19,21 +19,27 @@ using funkin.CoolerStringTools;
 using StringTools;
 
 typedef SwagSong = {
-	//// internal
-	@:optional var path:String;
-	var validScore:Bool;
+	////
+	var notes:Array<SwagSection>;
+	
+	var keyCount:Int;
+
+	/** Offsets the chart notes **/
+	var offset:Float;
+	
+	/** How spread apart the notes should be **/
+	var speed:Float;
 
 	////
 	var song:String;
-	var bpm:Float;
-	var tracks:SongTracks; // currently used
-	
-	var speed:Float;
-	var keyCount:Int;
-	var notes:Array<SwagSection>;
-	var events:Array<Array<Dynamic>>;
-	var offset:Float; // Offsets the chart
 
+	/** Starting BPM of the song **/
+	var bpm:Float;
+	
+	/** Song track data containing the file names of the song's tracks **/
+	var tracks:SongTracks;
+
+	////
 	var player1:Null<String>;
 	var player2:Null<String>;
 	var gfVersion:Null<String>;
@@ -42,9 +48,14 @@ typedef SwagSong = {
 
 	var arrowSkin:String;
 	var splashSkin:String;
-	
-	//// Used for song info showed on the pause menu
+
+	////
+	@:optional var events:Array<Array<Dynamic>>;
 	@:optional var metadata:SongMetadata;
+
+	//// internal
+	@:optional var path:String;
+	var validScore:Bool;
 }
 
 typedef EventNote = {
@@ -63,8 +74,6 @@ typedef JsonSong = {
 	@:optional var mania:Int; // vs shaggy
 	@:optional var keyCount:Int;
 	@:optional var offset:Float;
-
-	// @:optional var info:Array<String>; // old te
 }
 
 typedef SongTracks = {
@@ -75,11 +84,13 @@ typedef SongTracks = {
 
 typedef SongMetadata =
 {
-	?songName:String,
-	?artist:String,
-	?charter:String,
-	?modcharter:String,
-	?extraInfo:Array<String>,
+	/** The display name of this song **/
+	var ?songName:String;
+	
+	@:optional var artist:String;
+	@:optional var charter:String;
+	@:optional var modcharter:String;
+	@:optional var extraInfo:Array<String>;
 }
 
 inline final DEFAULT_CHART_ID = "normal";
@@ -115,6 +126,9 @@ class Song
 		#end
 	}
 
+	/**
+	 * Returns a path to a file of name fileName that belongs to this song
+	**/
 	public function getSongFile(fileName:String) {
 		var path = '$songPath/$fileName';
 
@@ -128,6 +142,7 @@ class Song
 		return path;
 	}
 
+	// idk perhaps moving ts to playstate would be more appropiate
 	public function play(?chartName:String = ''){
 		Song.playSong(this, chartName);
 	}
@@ -268,6 +283,7 @@ class Song
 
 	////
 
+	/** Return an array of strings related to the song's credits **/
 	public static function getMetadataInfo(metadata:SongMetadata):Array<String> {
 		var info:Array<String> = [];
 		
