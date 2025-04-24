@@ -430,22 +430,22 @@ class Paths
 	inline public static function bytes(key:String, ?ignoreMods:Bool = false):Null<Bytes>
 		return getBytes(getPath(key, ignoreMods));
 
-	private static final hideChars = ['.','!','?','%','"',",","'"];
-	private static final invalidChars = [' ','#','>','<',':',';','\\','~','&'];
-
 	inline static public function formatToSongPath(path:String) {
 		var finalPath = "";
 
 		for (idx in 0...path.length)
 		{
-			var char = path.charAt(idx);   
-
-			if (hideChars.contains(char))
-				continue;
-			else if (invalidChars.contains(char))
-				finalPath += "-";
-			else 
-				finalPath += char;
+			var char = path.charAt(idx);
+			switch(char) {
+				case '.' | '!' | '?' | '%' | '"' | "," | "'":
+					continue;
+				
+				case ' ' | '#' | '>' | '<' | ':' | ';' | '\\' | '~' | '&':
+					finalPath += "-";
+				
+				default:
+					finalPath += char;
+			}
 		}
 
 		return finalPath.toLowerCase();
