@@ -597,7 +597,7 @@ class ChartingState extends MusicBeatState
 		UI_songTitle = new FlxUIInputText(10, 10, 70, _song.song, 8);
 		blockPressWhileTypingOn.push(UI_songTitle);
 
-		var saveButton:FlxButton = new FlxButton(110, 8, "Save", saveLevel);
+		var saveButton:FlxButton = new FlxButton(110, 8, "Save Chart", saveLevel);
 
 		var reloadSong:FlxButton = new FlxButton(saveButton.x + 90, saveButton.y, "Reload Audio", function()
 		{
