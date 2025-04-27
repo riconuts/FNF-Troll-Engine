@@ -51,19 +51,33 @@ class FreeplayState extends MusicBeatState
 
 	public static function getFreeplaySongs():Array<Song> {
 		var list = [];
-		for (week in WeekData.reloadWeekFiles(true))
+		for (directory => metadata in Paths.getContentMetadata())
 		{
-			Paths.currentModDirectory = week.directory;
+			var songIdList:Array<String> = [];
 
-			if (week.songs == null)
-				continue;
+			inline function sowy(song:String) {
+				var songId:String = Paths.formatToSongPath(song);
+				if (!songIdList.contains(songId))
+					songIdList.push(songId);
+			}
 
-			for (songName in week.songs){
-				var song = new Song(
-					Paths.formatToSongPath(songName), 
-					week.directory
-				);
-				list.push(song);
+			// metadata file week songs
+			for (week in metadata.weeks) {
+				if (week.hideFreeplay != true && week.songs != null) {
+					for (song in week.songs)
+						sowy(song);
+				}
+			}
+
+			// metadata file freeplay songs
+			if (metadata.freeplaySongs != null) {
+				for (song in metadata.freeplaySongs)
+					sowy(song.name);
+			}
+
+			//
+			for (songId in songIdList) {
+				list.push(new Song(songId, directory));
 			}
 		}
 		return list;

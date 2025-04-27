@@ -66,7 +66,7 @@ class SongSelectState extends MusicBeatState
 		for (modDir in Paths.getModDirectories()){
 			var folder = Paths.mods('$modDir/songs/');
 			Paths.iterateDirectory(folder, function(name:String){
-				if (FileSystem.isDirectory(folder + name))
+				if (Paths.isDirectory(folder + name))
 					songMeta.push(new Song(name, modDir));
 			});
 		}
