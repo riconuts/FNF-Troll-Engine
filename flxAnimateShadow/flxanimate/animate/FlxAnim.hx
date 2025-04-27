@@ -11,7 +11,7 @@ import flixel.FlxG;
 import flixel.math.FlxMatrix;
 import flxanimate.data.AnimationData;
 #if FLX_SOUND_SYSTEM
-import flixel.system.FlxSound;
+import flixel.sound.FlxSound;
 #end
 
 
