@@ -58,11 +58,12 @@ class NoteColorSwapShader extends ColorSwapShader
 {
     @:glVertexSource('
         #pragma header
-
-		attribute float alpha;
+		'+#if (flixel <= "5.9.0")
+		'attribute float alpha;
 		attribute vec4 colorMultiplier;
 		attribute vec4 colorOffset;
 		uniform bool hasColorTransform;
+		'#else ''#end+'
 
 		attribute vec3 hsvShift;
 		attribute float daAlpha;
