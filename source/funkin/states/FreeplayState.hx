@@ -1,15 +1,14 @@
 package funkin.states;
 
-import funkin.data.Highscore;
-import flixel.math.FlxMath;
-import funkin.states.SongSelectState.SongChartSelec;
 import funkin.data.Song;
-import funkin.data.WeekData;
+import funkin.data.Highscore;
 
-import flixel.tweens.FlxTween;
-import flixel.tweens.FlxEase;
 import flixel.text.FlxText;
 import flixel.group.FlxGroup.FlxTypedGroup;
+import flixel.math.FlxMath;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+
 using StringTools;
 using funkin.CoolerStringTools;
 
