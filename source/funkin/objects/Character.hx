@@ -473,11 +473,12 @@ class Character extends FlxSprite
 	}
 
 	public inline function canResetDance(holdingKeys:Bool = false) {
-		return animation.name==null || (
-			holdTimer > Conductor.stepCrochet * 0.001 * singDuration
-			&& (!holdingKeys || idleWhenHold)
-			&& animation.name.startsWith('sing') 
-			&& !animation.name.endsWith('miss') // will go back to the idle once it finishes
+		var curAnim = animation.name;
+		return curAnim==null || (
+			(!holdingKeys || idleWhenHold)
+			&& holdTimer * 1000 > Conductor.stepCrochet * singDuration
+			&& curAnim.startsWith('sing') 
+			&& !curAnim.endsWith('miss') // will go back to the idle once it finishes
 		);
 	}
 	public function resetDance(){
