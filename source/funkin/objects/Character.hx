@@ -499,7 +499,7 @@ class Character extends FlxSprite
 
 	inline public static function getNoteMissAnimation(note:Note, field:PlayField):String
 	{
-		return note.characterMissAnimName ?? getFieldColumnSingAnimation(note.column, field) + note.characterMissAnimSuffix + 'miss';
+		return note.characterMissAnimName ?? getFieldColumnSingAnimation(note.column, field) + note.characterMissAnimSuffix;
 	}
 
 	public function playNote(note:Note, field:PlayField) {
@@ -531,7 +531,7 @@ class Character extends FlxSprite
 		if (animTimer > 0 || voicelining)
 			return;
 
-		var animToPlay:String = getNoteMissAnimation(note, field) + 'miss';
+		var animToPlay:String = getNoteMissAnimation(note, field);
 		playAnim(animToPlay, true);
 
 		if (!hasMissAnimations)

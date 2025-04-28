@@ -193,8 +193,8 @@ class Note extends NoteObject
 	
 	/** Suffix to be added to the **default** sing animation names (resulting name would be 'singLEFT'+'suffix') **/
 	public var characterHitAnimSuffix:String = "";
-	/** Suffix to be added to the **default** sing animation names (resulting name would be 'singLEFT'+'suffix'+'miss') **/
-	public var characterMissAnimSuffix:String = "";
+	/** Suffix to be added to the **default** sing animation names (resulting name would be 'singLEFT'+'suffix') **/
+	public var characterMissAnimSuffix:String = "miss";
 
 	////
 	/** If you need to tap the note to hit it, or just have the direction be held when it can be judged to hit.
@@ -370,7 +370,7 @@ class Note extends NoteObject
 				switch (value) {
 					case 'Alt Animation':
 						characterHitAnimSuffix = "-alt";
-						characterMissAnimSuffix = "-alt";
+						characterMissAnimSuffix = "-altmiss";
 
 					case 'Hey!':
 						characterHitAnimName = 'hey';
