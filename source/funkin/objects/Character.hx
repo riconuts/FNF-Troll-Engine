@@ -509,14 +509,15 @@ class Character extends FlxSprite
 		if (note.noAnimation || animTimer > 0.0 || voicelining)
 			return;
 
-		if (note.noteType == 'Hey!' && animOffsets.exists('hey')) {
-			playAnim('hey', true);
+		var animToPlay:String = getNoteHitAnimation(note, field);
+
+		if (note.noteType == 'Hey!' && animOffsets.exists(animToPlay)) {
+			playAnim(animToPlay, true);
 			specialAnim = true;
 			heyTimer = 0.6;
 			return;
 		}
 
-		var animToPlay:String = getNoteHitAnimation(note, field);
 		playAnim(animToPlay, true);
 
 		holdTimer = 0.0;

@@ -372,7 +372,8 @@ class Note extends NoteObject
 						characterHitAnimSuffix = "-alt";
 						characterMissAnimSuffix = "-alt";
 
-					case 'Hey!': 
+					case 'Hey!':
+						characterHitAnimName = 'hey';
 						// TODO
 
 					//case 'Hurt Note':
