@@ -486,13 +486,19 @@ class Character extends FlxSprite
 		if(callOnScripts("onResetDance") != Globals.Function_Stop) dance();
 	}
 
-	public static function getNoteAnimation(note:Note, field:PlayField):String {
-		var animToPlay:String = note.characterHitAnimName;
-		if (animToPlay == null) {
-			animToPlay = field.singAnimations[note.column % field.singAnimations.length];
-			animToPlay += note.characterHitAnimSuffix;
-		}
-		return animToPlay;
+	inline public static function getFieldColumnSingAnimation(column:Int, field:PlayField):String
+	{
+		return field.singAnimations[column % field.singAnimations.length];
+	}
+
+	inline public static function getNoteHitAnimation(note:Note, field:PlayField):String
+	{
+		return note.characterHitAnimName ?? getFieldColumnSingAnimation(note.column, field) + note.characterHitAnimSuffix;
+	}
+
+	inline public static function getNoteMissAnimation(note:Note, field:PlayField):String
+	{
+		return note.characterMissAnimName ?? getFieldColumnSingAnimation(note.column, field) + note.characterMissAnimSuffix + 'miss';
 	}
 
 	public function playNote(note:Note, field:PlayField) {
@@ -509,9 +515,9 @@ class Character extends FlxSprite
 			return;
 		}
 
-		var animToPlay:String = Character.getNoteAnimation(note, field);
-
+		var animToPlay:String = getNoteHitAnimation(note, field);
 		playAnim(animToPlay, true);
+
 		holdTimer = 0.0;
 		callOnScripts("playNoteAnim", [animToPlay, note]);
 	}
@@ -523,13 +529,8 @@ class Character extends FlxSprite
 		if (animTimer > 0 || voicelining)
 			return;
 
-		var animToPlay:String = note.characterMissAnimName;
-		if (animToPlay == null) {
-			animToPlay = field.singAnimations[note.column % field.singAnimations.length];
-			animToPlay += note.characterMissAnimSuffix;
-		}
-
-		playAnim(animToPlay + 'miss', true);
+		var animToPlay:String = getNoteMissAnimation(note, field) + 'miss';
+		playAnim(animToPlay, true);
 
 		if (!hasMissAnimations)
 			colorOverlay = missOverlayColor;	
@@ -539,8 +540,8 @@ class Character extends FlxSprite
 		if (animTimer > 0 || voicelining)
 			return;
 
-		var animToPlay:String = field.singAnimations[direction % field.singAnimations.length];
-		playAnim(animToPlay + 'miss', true);
+		var animToPlay:String = getFieldColumnSingAnimation(direction, field) + 'miss';
+		playAnim(animToPlay, true);
 		
 		if(!hasMissAnimations)
 			colorOverlay = missOverlayColor;	
