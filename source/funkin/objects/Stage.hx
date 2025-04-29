@@ -133,9 +133,11 @@ class Stage extends FlxTypedGroup<FlxBasic>
 			*/
 			
 			if (stageScript != null){
+				#if LUA_ALLOWED
 				if (stageScript is FunkinLua)
 					stageScript.call("onCreate", []);
 				else
+				#end
 					stageScript.call("onLoad", [this, foreground]);
 			}
 
