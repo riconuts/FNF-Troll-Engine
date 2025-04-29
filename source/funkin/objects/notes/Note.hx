@@ -174,19 +174,29 @@ class Note extends NoteObject
 	public var ratingDisabled:Bool = false; // hitting or missing this note shouldn't affect stats, this doesn't prevent sing/miss animations and sounds from playing! 
 	public var hitsoundDisabled:Bool = false; // hitting this does not cause a hitsound when user turns on hitsounds
 
-	public var gfNote:Bool = false; // gf sings this note (pushes gf into characters array when the note is hit)
-	public var noAnimation:Bool = false; // disables the animation for hitting this note
-	public var noMissAnimation:Bool = false; // disables the animation for missing this note
+	//// characters
 
-	/** If not null, then the characters will play these anims instead of the default ones when hitting this note. **/
+	/** Which characters sing this note, if it's blank then the playfield's characters are used **/
+	public var characters:Array<Character> = [];
+	/** Whether if gf should also sing this note **/
+	public var gfNote:Bool = false;
+	
+	/** If true, then characters won't play an animation upon hitting this note. **/
+	public var noAnimation:Bool = false;
+	/** If true, then characters won't play an animation upon missing this note. **/
+	public var noMissAnimation:Bool = false;
+
+	/** If not null, then characters will play this animation instead of the default ones upon hitting this note. **/
 	public var characterHitAnimName:Null<String> = null;
-	/** If not null, then the characters will play these anims instead of the default ones when missing this note. **/
+	/** If not null, then characters will play this animation instead of the default ones upon missing this note. **/
 	public var characterMissAnimName:Null<String> = null;
-	// suffix to be added to the base default anim names (for ex. the resulting anim name to be played would be 'singLEFT'+'suffix'+'miss')
-	// gets unused if the default anim names are overriden by the vars above
+	
+	/** Suffix to be added to the **default** sing animation names (resulting name would be 'singLEFT'+'suffix') **/
 	public var characterHitAnimSuffix:String = "";
-	public var characterMissAnimSuffix:String = "";
+	/** Suffix to be added to the **default** sing animation names (resulting name would be 'singLEFT'+'suffix') **/
+	public var characterMissAnimSuffix:String = "miss";
 
+	////
 	/** If you need to tap the note to hit it, or just have the direction be held when it can be judged to hit.
 	 * An example is Stepmania mines **/
 	public var requiresTap:Bool = true; 
@@ -197,9 +207,6 @@ class Note extends NoteObject
 	#if PE_MOD_COMPATIBILITY
 	public var lowPriority:Bool = false; // John Psych Engine's shitty workaround for really bad mine placement, yet still no *real* hitbox customization lol! Only used when PE Mod Compat is enabled in project.xml
 	#end
-
-	/** Which characters sing this note, if it's blank then the playfield's characters are used **/
-	public var characters:Array<Character> = []; 
 	
 	/**Used to denote which PlayField to be placed into.
 	 * 
@@ -363,9 +370,10 @@ class Note extends NoteObject
 				switch (value) {
 					case 'Alt Animation':
 						characterHitAnimSuffix = "-alt";
-						characterMissAnimSuffix = "-alt";
+						characterMissAnimSuffix = "-altmiss";
 
-					case 'Hey!': 
+					case 'Hey!':
+						characterHitAnimName = 'hey';
 						// TODO
 
 					//case 'Hurt Note':

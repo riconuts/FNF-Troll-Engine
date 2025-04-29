@@ -1742,7 +1742,7 @@ class PlayState extends MusicBeatState
 		}
 
 		// for psych compatibility reasons
-		var specialLuaScripts:Array<FunkinLua> = [];
+		var specialLuaScripts:Array<FunkinScript> = [];
 
 		// create note type scripts
 		final notetypeFolders = ["notetypes", #if PE_MOD_COMPATIBILITY "custom_notetypes" #end];
@@ -1854,7 +1854,7 @@ class PlayState extends MusicBeatState
 				////
 				if (section.altAnim) {
 					swagNote.characterHitAnimSuffix = '-alt';
-					swagNote.characterMissAnimSuffix = '-alt';
+					swagNote.characterMissAnimSuffix = '-altmiss';
 				}
 				swagNote.gfNote = section.gfSection && daNoteData < keyCount;
 				swagNote.noteType = daType;
@@ -4349,9 +4349,6 @@ class PlayState extends MusicBeatState
 
 		////
 		removeKeyboardEvents();
-
-		FunkinHScript.defaultVars.clear();
-		FunkinLua.defaultVars.clear();
 		
 		FlxG.timeScale = 1.0;
 		ClientPrefs.gameplaySettings.set('botplay', cpuControlled);

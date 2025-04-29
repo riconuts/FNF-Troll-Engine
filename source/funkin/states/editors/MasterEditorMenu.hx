@@ -1,5 +1,6 @@
 package funkin.states.editors;
 
+import flixel.addons.transition.FlxTransitionableState;
 #if DISCORD_ALLOWED
 import funkin.api.Discord.DiscordClient;
 #end
@@ -15,15 +16,18 @@ using StringTools;
 class MasterEditorMenu extends MusicBeatState
 {
 	var options:Array<String> = [
-		//'Week Editor',
-		//'Menu Character Editor',
+		'Song Select',
 		'Character Editor',
 		'Chart Editor',
+		'Test Stage',
 		/*
 		'Stage Editor',
 		'Stage Builder',
 		*/
-		'Test Stage'
+		/*
+		'Week Editor',
+		'Menu Character Editor',
+		*/
 	];
 	private var menu:AlphabetMenu;
 	private var directories:Array<String> = [null];
@@ -33,6 +37,9 @@ class MasterEditorMenu extends MusicBeatState
 
 	override function create()
 	{
+		super.create();
+		FlxG.mouse.visible = false;
+		FlxTransitionableState.skipNextTransOut = true;
 		FlxG.camera.bgColor = FlxColor.BLACK;
 
 		#if DISCORD_ALLOWED
@@ -49,6 +56,7 @@ class MasterEditorMenu extends MusicBeatState
 		menu.controls = controls;
 		menu.callbacks.onAccept = function(i, _){
 			switch(options[i]) {
+				case 'Song Select': MusicBeatState.switchState(new SongSelectState()); return;
 				case 'Character Editor': MusicBeatState.switchState(new CharacterEditorState(Character.DEFAULT_CHARACTER, false));
 				case 'Chart Editor': LoadingState.loadAndSwitchState(new ChartingState(), false);
 				/*
@@ -86,9 +94,6 @@ class MasterEditorMenu extends MusicBeatState
 		if(found > -1) curDirectory = found;
 		changeDirectory();
 		#end
-
-		FlxG.mouse.visible = false;
-		super.create();
 	}
 
 	override function update(elapsed:Float)

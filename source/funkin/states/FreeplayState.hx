@@ -1,15 +1,14 @@
 package funkin.states;
 
-import funkin.data.Highscore;
-import flixel.math.FlxMath;
-import funkin.states.SongSelectState.SongChartSelec;
 import funkin.data.Song;
-import funkin.data.WeekData;
+import funkin.data.Highscore;
 
-import flixel.tweens.FlxTween;
-import flixel.tweens.FlxEase;
 import flixel.text.FlxText;
 import flixel.group.FlxGroup.FlxTypedGroup;
+import flixel.math.FlxMath;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+
 using StringTools;
 using funkin.CoolerStringTools;
 
@@ -48,6 +47,40 @@ class FreeplayState extends MusicBeatState
 	var selectedSongCharts:Array<String>;
 	
 	var hintText:FlxText;
+
+	public static function getFreeplaySongs():Array<Song> {
+		var list = [];
+		for (directory => metadata in Paths.getContentMetadata())
+		{
+			var songIdList:Array<String> = [];
+
+			inline function sowy(song:String) {
+				var songId:String = Paths.formatToSongPath(song);
+				if (!songIdList.contains(songId))
+					songIdList.push(songId);
+			}
+
+			// metadata file week songs
+			for (week in metadata.weeks) {
+				if (week.hideFreeplay != true && week.songs != null) {
+					for (song in week.songs)
+						sowy(song);
+				}
+			}
+
+			// metadata file freeplay songs
+			if (metadata.freeplaySongs != null) {
+				for (song in metadata.freeplaySongs)
+					sowy(song.name);
+			}
+
+			//
+			for (songId in songIdList) {
+				list.push(new Song(songId, directory));
+			}
+		}
+		return list;
+	} 
 	
 	override public function create()
 	{
@@ -55,27 +88,9 @@ class FreeplayState extends MusicBeatState
 		funkin.api.Discord.DiscordClient.changePresence('In the menus');
 		#end
 
-		for (week in WeekData.reloadWeekFiles(true))
-		{
-			Paths.currentModDirectory = week.directory;
-
-			if (week.songs == null)
-				continue;
-
-			for (songName in week.songs){
-				var song = new Song(
-					Paths.formatToSongPath(songName), 
-					week.directory
-				);
-				
-				if (Main.showDebugTraces && song.charts.length == 0) {
-					trace('"$song" doesn\'t have any available charts!');
-					continue;
-				}
-				
-				menu.addTextOption(song.getMetadata().songName).ID = songData.length;
-				songData.push(song);
-			}
+		for (song in getFreeplaySongs()) {			
+			menu.addTextOption(song.getMetadata().songName).ID = songData.length;
+			songData.push(song);
 		}
 
 		////
