@@ -1742,7 +1742,7 @@ class PlayState extends MusicBeatState
 		}
 
 		// for psych compatibility reasons
-		var specialLuaScripts:Array<FunkinLua> = [];
+		var specialLuaScripts:Array<FunkinScript> = [];
 
 		// create note type scripts
 		final notetypeFolders = ["notetypes", #if PE_MOD_COMPATIBILITY "custom_notetypes" #end];
