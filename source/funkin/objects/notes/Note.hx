@@ -203,10 +203,6 @@ class Note extends NoteObject
 
 	/** The maximum amount of time you can release a hold before it counts as a miss**/
 	public var maxReleaseTime:Float = 0.25;
-
-	#if PE_MOD_COMPATIBILITY
-	public var lowPriority:Bool = false; // John Psych Engine's shitty workaround for really bad mine placement, yet still no *real* hitbox customization lol! Only used when PE Mod Compat is enabled in project.xml
-	#end
 	
 	/**Used to denote which PlayField to be placed into.
 	 * 
