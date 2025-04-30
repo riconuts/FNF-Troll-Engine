@@ -131,6 +131,22 @@ class KadeHUD extends BaseHUD
 			counters.get(id).text = '${displayNames[id]}: ${judgements[id]}';
 	}
 
+	override function changedCharacter(id:Int, char:Character){
+
+		switch(id){
+			case 0:
+				iconP1.changeIcon(char.healthIcon);
+			case 1:
+				iconP2.changeIcon(char.healthIcon);
+			case 2:
+				// gf icon
+			default:
+				// idk
+		}
+		
+		super.changedCharacter(id, char);
+	}
+
 	override function changedOptions(changed){
 		super.changedOptions(changed);
 
