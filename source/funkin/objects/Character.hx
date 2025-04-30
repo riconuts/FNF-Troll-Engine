@@ -473,11 +473,12 @@ class Character extends FlxSprite
 	}
 
 	public inline function canResetDance(holdingKeys:Bool = false) {
-		return animation.name==null || (
-			holdTimer > Conductor.stepCrochet * 0.001 * singDuration
-			&& (!holdingKeys || idleWhenHold)
-			&& animation.name.startsWith('sing') 
-			&& !animation.name.endsWith('miss') // will go back to the idle once it finishes
+		var curAnim = animation.name;
+		return curAnim==null || (
+			(!holdingKeys || idleWhenHold)
+			&& holdTimer * 1000 > Conductor.stepCrochet * singDuration
+			&& curAnim.startsWith('sing') 
+			&& !curAnim.endsWith('miss') // will go back to the idle once it finishes
 		);
 	}
 	public function resetDance(){
@@ -486,13 +487,19 @@ class Character extends FlxSprite
 		if(callOnScripts("onResetDance") != Globals.Function_Stop) dance();
 	}
 
-	public static function getNoteAnimation(note:Note, field:PlayField):String {
-		var animToPlay:String = note.characterHitAnimName;
-		if (animToPlay == null) {
-			animToPlay = field.singAnimations[note.column % field.singAnimations.length];
-			animToPlay += note.characterHitAnimSuffix;
-		}
-		return animToPlay;
+	inline public static function getFieldColumnSingAnimation(column:Int, field:PlayField):String
+	{
+		return field.singAnimations[column % field.singAnimations.length];
+	}
+
+	inline public static function getNoteHitAnimation(note:Note, field:PlayField):String
+	{
+		return note.characterHitAnimName ?? getFieldColumnSingAnimation(note.column, field) + note.characterHitAnimSuffix;
+	}
+
+	inline public static function getNoteMissAnimation(note:Note, field:PlayField):String
+	{
+		return note.characterMissAnimName ?? getFieldColumnSingAnimation(note.column, field) + note.characterMissAnimSuffix;
 	}
 
 	public function playNote(note:Note, field:PlayField) {
@@ -502,16 +509,17 @@ class Character extends FlxSprite
 		if (note.noAnimation || animTimer > 0.0 || voicelining)
 			return;
 
-		if (note.noteType == 'Hey!' && animOffsets.exists('hey')) {
-			playAnim('hey', true);
+		var animToPlay:String = getNoteHitAnimation(note, field);
+
+		if (note.noteType == 'Hey!' && animOffsets.exists(animToPlay)) {
+			playAnim(animToPlay, true);
 			specialAnim = true;
 			heyTimer = 0.6;
 			return;
 		}
 
-		var animToPlay:String = Character.getNoteAnimation(note, field);
-
 		playAnim(animToPlay, true);
+
 		holdTimer = 0.0;
 		callOnScripts("playNoteAnim", [animToPlay, note]);
 	}
@@ -523,13 +531,8 @@ class Character extends FlxSprite
 		if (animTimer > 0 || voicelining)
 			return;
 
-		var animToPlay:String = note.characterMissAnimName;
-		if (animToPlay == null) {
-			animToPlay = field.singAnimations[note.column % field.singAnimations.length];
-			animToPlay += note.characterMissAnimSuffix;
-		}
-
-		playAnim(animToPlay + 'miss', true);
+		var animToPlay:String = getNoteMissAnimation(note, field);
+		playAnim(animToPlay, true);
 
 		if (!hasMissAnimations)
 			colorOverlay = missOverlayColor;	
@@ -539,8 +542,8 @@ class Character extends FlxSprite
 		if (animTimer > 0 || voicelining)
 			return;
 
-		var animToPlay:String = field.singAnimations[direction % field.singAnimations.length];
-		playAnim(animToPlay + 'miss', true);
+		var animToPlay:String = getFieldColumnSingAnimation(direction, field) + 'miss';
+		playAnim(animToPlay, true);
 		
 		if(!hasMissAnimations)
 			colorOverlay = missOverlayColor;	
