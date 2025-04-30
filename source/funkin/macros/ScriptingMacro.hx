@@ -70,7 +70,8 @@ class ScriptingMacro
 
 		////
 		var localClass = Context.getLocalClass();
-		var fullName = localClass.toString();
+		var fullName:String = localClass.toString();
+		var folderName:String = localClass.toString().split(".").join("/");
 		var cl:ClassType = localClass.get();
 		var className:String = cl.name;
 		var classConstructor = cl.constructor == null ? null : cl.constructor.get();
@@ -610,9 +611,12 @@ class ScriptingMacro
 					body.unshift(macro $b{superInit});
 					
 					// inject code AFTER the existing class new() code
-					body.push(macro 
-						_startExtensionScript($v{folder}, $v{"extension/" + fullName})
-					);
+					body.push(macro {
+						// TODO: Trim the funkin.states if that exists
+						_startExtensionScript($v{folder}, $v{"extension/" + folderName});
+						if(_extensionScript != null)
+							_startExtensionScript($v{folder}, $v{"extension/" + fullName});
+					});
 
 					func.expr = macro $b{body};
 				default:

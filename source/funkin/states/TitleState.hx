@@ -31,40 +31,17 @@ class TitleState extends MusicBeatState
 	public static var initialized:Bool = false;
 	public static var closedState:Bool = false;
 
-	static function getIntroTextShit():Array<Array<String>>
+	public static function getIntroText():Array<Array<String>>
 	{
 		var swagGoodArray:Array<Array<String>> = [];
 
-		for (folder in Paths.getFolders("data")) {
-			var rawFile:Null<String> = Paths.getText('$folder/introText.txt');
-			if (rawFile != null) {
-				for (line in rawFile.rtrim().split('\n'))
-					swagGoodArray.push(line.split('--'));
-			}	
+		var rawFile:Null<String> = Paths.getText(Paths.getPath('data/introText.txt'));
+		if (rawFile != null) {
+			for (line in rawFile.rtrim().split('\n'))
+				swagGoodArray.push(line.split('--'));
 		}
 
 		return swagGoodArray;
-	}
-	
-	public static function getRandomStage()
-	{
-		// Set up a stage list
-		var stages:Array<Array<String>> = []; // [stage name, mod directory]
-
-		Paths.currentModDirectory = "";
-		for (stage in Stage.getTitleStages())
-			stages.push([stage, ""]);
-
-		#if MODS_ALLOWED
-		for (mod in Paths.getModDirectories())
-		{
-			Paths.currentModDirectory = mod;
-			for (stage in Stage.getTitleStages(true))
-				stages.push([stage, mod]);
-		}
-		#end
-
-		return FlxG.random.getObject(stages); // Get a random stage from the list
 	}
 
 	// for stage scripts
@@ -124,11 +101,10 @@ class TitleState extends MusicBeatState
 		super.create();
 
 		////
-		var randomStage = getRandomStage();
-		if (randomStage != null) {
-			trace(randomStage);
-			Paths.currentModDirectory = randomStage[1];
-			bg = new Stage(randomStage[0], true);
+		var stages = Stage.getTitleStages();
+		var stageId = FlxG.random.getObject(stages);
+		if (stageId != null) {
+			bg = new Stage(stageId, true);
 			
 			#if MULTICORE_LOADING
 			var shitToLoad = bg.stageData.preload;
@@ -222,7 +198,7 @@ class TitleState extends MusicBeatState
 		ngSpr.cameras = [camHUD];
 		intro.add(ngSpr);
 
-		var curWacky = FlxG.random.getObject(getIntroTextShit());
+		var curWacky = FlxG.random.getObject(getIntroText());
 
 		intro.queueOnBeat(0, intro.clearLines);
 		intro.queueOnBeat(0, playMusic.bind(null));
@@ -418,6 +394,10 @@ class TitleState extends MusicBeatState
 			bg.stageScript.call('onUpdate', [elapsed]);
 
 		super.update(elapsed);
+
+		if (bg != null && bg.stageScript != null)
+			bg.stageScript.call('onUpdatePost', [elapsed]);
+
 	}
 }
 

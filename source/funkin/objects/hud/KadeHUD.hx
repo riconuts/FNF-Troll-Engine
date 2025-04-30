@@ -1,5 +1,6 @@
 package funkin.objects.hud;
 
+import math.CoolMath;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.util.FlxStringUtil;
 import flixel.ui.FlxBar;
@@ -38,8 +39,7 @@ class KadeHUD extends BaseHUD
 	var cbString = Paths.getString("cbplural");
 	var npsString = Paths.getString("nps");
 
-	var engineStringLong = 'Troll Engine ${Main.Version.displayedVersion}';
-	var engineStringShort = 'TE ${Main.Version.displayedVersion}';
+	var engineName = 'Troll Engine';
 
 	override function set_displayedHealth(value:Float)
 	{
@@ -51,16 +51,16 @@ class KadeHUD extends BaseHUD
 	override function getHealthbar():FNFHealthBar 
 		return healthBar;
 
-	public function new(iP1:String, iP2:String, songName:String, stats:Stats)
+	public function new(songName:String, stats:Stats)
 	{
-		super(iP1, iP2, songName, stats);
+		super(songName, stats);
 
 		var songRecord = Highscore.getRecord(this.songName, PlayState.difficultyName);
 		songHighscore = songRecord.score;
 		songWifeHighscore = songRecord.accuracyScore;
 	
 		//// Health bar
-		healthBar = new ShittyBar(iP1, iP2);
+		healthBar = new ShittyBar('bf', 'dad');
 		healthBarBG = healthBar.healthBarBG;
 		iconP1 = healthBar.iconP1;
 		iconP2 = healthBar.iconP2;
@@ -83,6 +83,7 @@ class KadeHUD extends BaseHUD
 		originalX = scoreTxt.x;
 		scoreTxt.scrollFactor.set();
 		scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, 0xFFFFFFFF, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, 0xFF000000);
+		scoreTxt.pixelPerfectRender = true; // that blurry text is driving me insane
 		add(scoreTxt);
 
 		////
@@ -130,6 +131,22 @@ class KadeHUD extends BaseHUD
 			counters.get(id).text = '${displayNames[id]}: ${judgements[id]}';
 	}
 
+	override function changedCharacter(id:Int, char:Character){
+
+		switch(id){
+			case 0:
+				iconP1.changeIcon(char.healthIcon);
+			case 1:
+				iconP2.changeIcon(char.healthIcon);
+			case 2:
+				// gf icon
+			default:
+				// idk
+		}
+		
+		super.changedCharacter(id, char);
+	}
+
 	override function changedOptions(changed){
 		super.changedOptions(changed);
 
@@ -164,28 +181,18 @@ class KadeHUD extends BaseHUD
 		timeBar.exists = updateTime;
 		timeTxt.exists = updateTime;
 
-		if (ClientPrefs.timeBarType == "Song Name"){
-			timeTxt.text = songName;
-			watermark.text = engineStringLong;
+		if (ClientPrefs.timeBarType == "Song Name")
+		{
+			timeTxt.text = displayedSong;
+			watermark.text = engineName;
+		}
+		else
+		{
+			var diffId:String = PlayState.difficultyName;
+			var diffName:String = Paths.getString('difficultyName_$diffId', diffId);
 
-			if (watermark.x + watermark.width >= healthBarBG.x)
-				watermark.text = engineStringShort;
-		}else{
+			watermark.text = '$displayedSong - $diffName | $engineName';
 			timeTxt.text = "";
-			var id = PlayState.difficultyName;
-			if (id == '')
-				id = 'normal';
-
-			var _dStrId:String = 'difficultyName_${id.toLowerCase()}';
-
-			var diffName:String = Paths.getString(_dStrId, id);
-
-			var sognNaim = PlayState.SONG.song + " " + diffName; //
-
-			watermark.text = '$sognNaim | $engineStringLong';
-
-			if (watermark.x + watermark.width >= healthBarBG.x)
-				watermark.text = '$sognNaim | $engineStringShort';
 		}
 
 		timeTxt.x = timeBarBG.x + (timeBarBG.width / 2) - (timeTxt.text.length * 5);
@@ -243,7 +250,7 @@ class KadeHUD extends BaseHUD
 
 			text += '$scareText: $shownScore | ' +
 			'$cbString: $comboBreaks | ' +
-			'$ratingString: ${grade == '?' ? 0 : Highscore.floorDecimal(ratingPercent * 100, 2)}% | ';
+			'$ratingString: ${grade == '?' ? 0 : CoolMath.floorDecimal(ratingPercent * 100, 2)}% | ';
 			if(grade == '?')
 				text += "N/A";
 			else

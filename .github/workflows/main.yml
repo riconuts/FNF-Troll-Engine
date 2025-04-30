@@ -110,6 +110,7 @@ jobs:
         run: |
           sudo apt-get install libvlc-dev
           sudo apt-get install libvlccore-dev
+          sudo apt install libxrandr-dev
           haxelib setup ~/haxelib
           haxelib install hxcpp > /dev/null --quiet
           haxelib install hmm --quiet
@@ -130,7 +131,7 @@ jobs:
       fail-fast: false
       matrix:
         build: [release]
-        version: [12, 13]
+        version: [13]
     timeout-minutes: 45
     
     steps:

@@ -3,6 +3,7 @@ package funkin.objects;
 import funkin.states.PlayState;
 import funkin.scripts.FunkinScript.ScriptType;
 import funkin.objects.playfields.PlayField;
+import funkin.objects.notes.Note;
 import funkin.data.CharacterData;
 import funkin.data.CharacterData.*;
 import funkin.scripts.*;
@@ -19,104 +20,121 @@ using StringTools;
 
 class Character extends FlxSprite
 {
-	/**The next beat the character will dance on**/
-	public var nextDanceBeat:Float = -5;
+	/**Character to use if the requested one fails to load**/
+	public static final DEFAULT_CHARACTER:String = 'bf';
 
-	/**Whether to force the dance animation to play**/
-	public var shouldForceDance:Bool = false;
+	////
 
-	/**If true, the character will go back to it's idle even if the player is holding a gameplay key**/
-	public var idleWhenHold:Bool = false;
+	/**Id of the character**/
+	public var characterId:String = DEFAULT_CHARACTER;
 
-	/**In case a character is missing, it will use BF on its place**/
-	public static var DEFAULT_CHARACTER:String = 'bf'; 
-
-	/**Whether the player controls this character**/
-	public var controlled:Bool = false;
-
-	/**Whether the character is facing left or right. -1 means it's facing to the left, 1 means its facing to the right.**/
-	public var xFacing:Float = 1;
-
-	/**Name of the death character to be used. Can be used to share 1 game over character across multiple characters**/
-	public var deathName:String = DEFAULT_CHARACTER;
-
-	/**Name of the script to be ran. Can be used to share 1 script file across multiple characters**/
-	public var scriptName:String = DEFAULT_CHARACTER;
-
-	/**LEGACY. DO NOT USE.**/
-	public var characterScript(get, set):FunkinScript;
-	inline function get_characterScript()
-		return characterScripts[0];
-	function set_characterScript(script:FunkinScript){ // you REALLY shouldnt be setting characterScript, you should be using the removeScript and addScript functions though;
-		var oldScript = characterScripts.shift(); // removes the first script
-		stopScript(oldScript, true);
-		characterScripts.unshift(script); // and replaces it w/ the new one
-		startScript(script);
-		return script;
-	}
-		
-	/**Scripts running on the character. You should not modify this directly! Use pushScript/removeScript!
-	 * If you must modify it directly, atleast call character.startScript(script)/character.stopScript(script) after adding/removing it**/
-	public var characterScripts:Array<FunkinScript> = [];
-
-	/**for fleetway, mainly.
-		but whenever you need to play an anim that has to be manually interrupted, here you go.
-		
-	Stops note anims and idle from playing. Make sure to set this to false once the animation is done.**/
-	public var voicelining:Bool = false; 
-
-	/**The set of animations, in order, to be played for the character idling.**/
-	public var idleSequence:Array<String> = ['idle'];
-	/**How each animation offsets the character**/
-	public var animOffsets = new Map<String, Array<Dynamic>>();
-	/**How each animation offsets the camera**/
-	public var camOffsets:Map<String, Array<Float>> = [];
-	/**Used by the character editor. Disables most functions of the character besides animations**/
-	public var debugMode:Bool = false;
-	/**Camera horizontal offset from the animation**/
-	public var camOffX:Float = 0;
-	/**Camera vertical offset from the animation**/
-	public var camOffY:Float = 0;
-	/**Whether this character is playable. Not really used much anymore**/
-	public var isPlayer:Bool = false;
-	/**Name of the character**/
-	public var curCharacter:String = DEFAULT_CHARACTER;
-
-	/**BLAMMED LIGHTS!! idk not used anymore**/
-	public var colorTween:FlxTween;
-	/**How long in seconds the current sing animation has been held for**/
-	public var holdTimer:Float = 0;
-	/**How long in seconds to hold the hey/cheer anim**/
-	public var heyTimer:Float = 0;
-	/**Automatically resets the character to idle once this hits 0 after being set to any value above 0**/
-	public var animTimer:Float = 0;
-	/**Disables dancing while the hey/cheer animations are playing**/
-	public var specialAnim:Bool = false;
-	/**Disables the ability for characters to manually reset to idle**/
-	public var stunned:Bool = false;
-	
-	/**How many steps a character should hold their sing animation for**/
-	public var singDuration:Float = 4;
-
-	/**String to be appended to idle animation names. For example, if this is -alt, then the animation used for idling will be idle-alt or danceLeft-alt/danceRight-alt**/
-	public var idleSuffix:String = '';
-	/**Character uses "danceLeft" and "danceRight" instead of "idle"**/
-	public var danceIdle:Bool = false;
-	/**Stops the idle from playing**/
-	public var skipDance:Bool = false;
+	/**Id of the death character to be used. Can be used to share 1 game over character across multiple characters**/
+	public var deathId:String = DEFAULT_CHARACTER;
 
 	/**Name of the image to be used for the health icon**/
 	public var healthIcon:String = 'face';
 
+	/**Whether this character is playable. Not really used much anymore**/
+	public var isPlayer:Bool = false;
+
+	/**Whether the player controls this character**/
+	public var controlled:Bool = false;
+
+	/**Used by the character editor. Disables most functions of the character besides animations**/
+	public var debugMode:Bool = false;
+
+	/**How each animation offsets the character**/
+	public var animOffsets = new Map<String, Array<Dynamic>>();
+
+	/**How each animation offsets the camera**/
+	public var camOffsets:Map<String, Array<Float>> = [];
+
 	/**Offsets the character on the stage**/
 	public var positionArray:Array<Float> = [0, 0];
+
 	/**Offsets the camera when its focused on the character**/
 	public var cameraPosition:Array<Float> = [0, 0];
-	
+
+	/**Whether the character is facing left or right. -1 means it's facing to the left, 1 means its facing to the right.**/
+	public var xFacing:Float = 1;
+
+	/**The set of animations, in order, to be played for the character idling.**/
+	public var idleSequence:Array<String> = ['idle'];
+
+	/**String to be appended to idle animation names. For example, if this is -alt, then the animation used for idling will be idle-alt or danceLeft-alt/danceRight-alt**/
+	public var idleSuffix:String = '';
+
+	/**Character uses "danceLeft" and "danceRight" instead of "idle"**/
+	public var danceIdle:Bool = false;
+
+	/**How many steps a character should hold their sing animation for**/
+	public var singDuration:Float = 4;
+
+	/**If true, the character will go back to it's idle even if the player is holding a gameplay key**/
+	public var idleWhenHold:Bool = false;
+
 	/**Set to true if the character has miss animations. Optimization mainly**/
 	public var hasMissAnimations:Bool = false;
+
+	/**Allows the current dance animation to restart (if it hasn't finished)**/
+	public var shouldForceDance:Bool = false;
+
+	/**
+	 * Beats to be added to `nextDanceBeat`
+	 * How many beats should be waited before the character should dance again
+	**/
+	public var danceEveryNumBeats:Float = 2;
+
+	////
+
+	/**Whether this character is currently in use, Used by PlayState Character Change Events**/
+	public var used:Bool = false;
+
+	/**The next beat the character will dance on. Used by PlayState**/
+	public var nextDanceBeat:Float = -5;
+
+	/**Index of the next animation to play on the dance sequence**/
+	public var danceIndex:Int = 0;
+	
+	/**How long in seconds the current sing animation has been held for**/
+	public var holdTimer:Float = 0;
+
+	/**How long in seconds to hold the hey/cheer anim**/
+	public var heyTimer:Float = 0;
+
+	/**Automatically resets the character to idle once this hits 0 after being set to any value above 0**/
+	public var animTimer:Float = 0;
+
+	/**
+	 * Disables dancing if true.
+	 * Automatically gets set to false once the current animation finishes.
+	**/
+	public var specialAnim:Bool = false;
+
+	/**Disables the ability for characters to manually reset to idle**/
+	public var stunned:Bool = false;
+
+	/**Stops the idle from playing**/
+	public var skipDance:Bool = false;
+
+	/**
+	 * Stops note anims and idle from playing.
+	 * Make sure to set this to false once the animation is done.
+	**/
+	public var voicelining:Bool = false; // for fleetway, mainly
+	// but whenever you need to play an anim that has to be manually interrupted, here you go
+
+	/**Camera horizontal offset from the animation**/
+	public var camOffX:Float = 0;
+
+	/**Camera vertical offset from the animation**/
+	public var camOffY:Float = 0;
+
 	/**Overlay color used for characters that don't have miss animations.**/
 	public var missOverlayColor:FlxColor = 0xFFC6A6FF;
+
+	/**BLAMMED LIGHTS!! idk not used anymore**/
+	public var colorTween:FlxTween;
 	
 	//Used on Character Editor
 	public var animationsArray:Array<AnimArray> = [];
@@ -125,6 +143,36 @@ class Character extends FlxSprite
 	public var noAntialiasing:Bool = false;
 	public var originalFlipX:Bool = false;
 	public var healthColorArray:Array<Int> = [255, 0, 0];
+
+	#if ALLOW_DEPRECATION
+	@:deprecated
+	public var danced:Bool = false;
+
+	@:deprecated("curCharacter is deprecated. Use characterId instead.")
+	public var curCharacter(get, set):String;
+	inline function get_curCharacter() return characterId;
+	inline function set_curCharacter(v:String) return characterId = v;
+	
+	@:deprecated("deathName is deprecated. Use deathId instead.")
+	public var deathName(get, set):String;
+	inline function get_deathName() return deathId;
+	inline function set_deathName(v:String) return deathId = v;
+
+	/**LEGACY. DO NOT USE.**/
+	@:deprecated("characterScript is deprecated. Use pushScript and removeScript instead.")
+	public var characterScript(get, set):FunkinScript;
+	@:noCompletion
+	inline function get_characterScript()
+		return characterScripts[0];
+	@:noCompletion
+	function set_characterScript(script:FunkinScript){ // you REALLY shouldnt be setting characterScript, you should be using the removeScript and addScript functions though;
+		var oldScript = characterScripts.shift(); // removes the first script
+		stopScript(oldScript, true);
+		characterScripts.unshift(script); // and replaces it w/ the new one
+		startScript(script);
+		return script;
+	}
+	#end
 
 	override function destroy()
 	{
@@ -138,8 +186,7 @@ class Character extends FlxSprite
 	{
 		//// some troll engine stuff
 
-		deathName = json.death_name != null ? json.death_name : curCharacter;
-		scriptName = json.script_name != null ? json.script_name : curCharacter;
+		deathId = json.death_name != null ? json.death_name : characterId;
 		
 		if (json.x_facing != null)
 			xFacing *= json.x_facing;
@@ -210,24 +257,24 @@ class Character extends FlxSprite
 		}
 	}
 
-	public function new(x:Float, y:Float, ?characterName:String = 'bf', ?isPlayer:Bool = false, ?debugMode:Bool = false)
+	public function new(x:Float, y:Float, ?characterId:String, ?isPlayer:Bool = false, ?debugMode:Bool = false)
 	{
-		super(x, y);		
+		super(x, y);
 
-		curCharacter = (characterName == null) ? DEFAULT_CHARACTER : characterName;
+		this.characterId = characterId ?? DEFAULT_CHARACTER;
 		this.isPlayer = isPlayer;
 		this.debugMode = debugMode;
 
-		xFacing = isPlayer ? -1 : 1;
-		controlled = isPlayer;
+		this.xFacing = this.isPlayer ? -1 : 1;
+		this.controlled = this.isPlayer;
 	}
 
 	function _setupCharacter() {
-		var json = getCharacterFile(curCharacter);
+		var json = getCharacterFile(characterId);
 		if (json == null) {
-			trace('Character file: $curCharacter not found.');
+			trace('Character file: $characterId not found.');
 			json = getCharacterFile(DEFAULT_CHARACTER);
-			curCharacter = DEFAULT_CHARACTER;
+			characterId = DEFAULT_CHARACTER;
 		}
 
 		loadFromPsychData(json);
@@ -245,6 +292,7 @@ class Character extends FlxSprite
 
 	public function setupCharacter()
 	{
+		var characterScript = characterScripts[0];
 		if (characterScript != null && characterScript.scriptType == HSCRIPT) {
 			var characterScript:FunkinHScript = cast characterScript;
 			if (characterScript.exists('setupCharacter')) {
@@ -258,8 +306,8 @@ class Character extends FlxSprite
 
 	public function createPlaceholderAnims() {
 		for (animName in ["singLEFT", "singDOWN", "singUP", "singRIGHT"]) {
-			cloneAnimation(animName,		animName+'miss');
-			cloneAnimation(animName,		animName+'-alt');
+			cloneAnimation(animName, 		animName+'miss');
+			cloneAnimation(animName, 		animName+'-alt');
 			cloneAnimation(animName+'-alt',	animName+'-altmiss');
 		}
 	}
@@ -340,10 +388,10 @@ class Character extends FlxSprite
 	}
 
 	override function draw(){
-		if(callOnScripts("onDraw") == Globals.Function_Stop)
+		if (callOnScripts("onCharacterDraw") == Globals.Function_Stop)
 			return;
 		super.draw();
-		callOnScripts("onDrawPost");
+		callOnScripts("onCharacterDrawPost");
 	}
 
 	public var colorOverlay(default, set):FlxColor = FlxColor.WHITE;
@@ -402,24 +450,8 @@ class Character extends FlxSprite
 		}
 
 		////
-		if (curCharacter.startsWith('gf'))
-		{
-			if (AnimName == 'singLEFT')
-				danced = true;
-			
-			else if (AnimName == 'singRIGHT')
-				danced = false;
-			
-			else if (AnimName == 'singUP' || AnimName == 'singDOWN')
-				danced = !danced;
-		}
-
-		////
 		callOnScripts("onAnimPlayed", [AnimName, Force, Reversed, Frame]);
 	}
-
-	public var danced:Bool = false;
-	var danceIndex:Int = 0;	
 	
 	public function dance()
 	{
@@ -429,30 +461,24 @@ class Character extends FlxSprite
 		if (callOnScripts("onDance") == Globals.Function_Stop)
 			return;
 
-		if(idleSequence.length > 1){
-			danceIndex++;
-			if(danceIndex >= idleSequence.length)
-				danceIndex = 0;
-		}
 		playAnim(idleSequence[danceIndex] + idleSuffix, shouldForceDance);
 		
-/* 		if(danceIdle){
-			danced = !danced;
-			playAnim((danced ? 'danceRight' : 'danceLeft') + idleSuffix);
+		if (idleSequence.length > 1) {
+			danceIndex++;
+			if (danceIndex >= idleSequence.length)
+				danceIndex = 0;
 		}
-		else if(animation.getByName('idle' + idleSuffix) != null) {
-			playAnim('idle' + idleSuffix);
-		}
- */
+		
 		callOnScripts("onDancePost");
 	}
 
 	public inline function canResetDance(holdingKeys:Bool = false) {
-		return animation.name==null || (
-			holdTimer > Conductor.stepCrochet * 0.001 * singDuration
-			&& (!holdingKeys || idleWhenHold)
-			&& animation.name.startsWith('sing') 
-			&& !animation.name.endsWith('miss') // will go back to the idle once it finishes
+		var curAnim = animation.name;
+		return curAnim==null || (
+			(!holdingKeys || idleWhenHold)
+			&& holdTimer * 1000 > Conductor.stepCrochet * singDuration
+			&& curAnim.startsWith('sing') 
+			&& !curAnim.endsWith('miss') // will go back to the idle once it finishes
 		);
 	}
 	public function resetDance(){
@@ -461,13 +487,19 @@ class Character extends FlxSprite
 		if(callOnScripts("onResetDance") != Globals.Function_Stop) dance();
 	}
 
-	public static function getNoteAnimation(note:Note, field:PlayField):String {
-		var animToPlay:String = note.characterHitAnimName;
-		if (animToPlay == null) {
-			animToPlay = field.singAnimations[note.column % field.singAnimations.length];
-			animToPlay += note.characterHitAnimSuffix;
-		}
-		return animToPlay;
+	inline public static function getFieldColumnSingAnimation(column:Int, field:PlayField):String
+	{
+		return field.singAnimations[column % field.singAnimations.length];
+	}
+
+	inline public static function getNoteHitAnimation(note:Note, field:PlayField):String
+	{
+		return note.characterHitAnimName ?? getFieldColumnSingAnimation(note.column, field) + note.characterHitAnimSuffix;
+	}
+
+	inline public static function getNoteMissAnimation(note:Note, field:PlayField):String
+	{
+		return note.characterMissAnimName ?? getFieldColumnSingAnimation(note.column, field) + note.characterMissAnimSuffix;
 	}
 
 	public function playNote(note:Note, field:PlayField) {
@@ -477,16 +509,17 @@ class Character extends FlxSprite
 		if (note.noAnimation || animTimer > 0.0 || voicelining)
 			return;
 
-		if (note.noteType == 'Hey!' && animOffsets.exists('hey')) {
-			playAnim('hey', true);
+		var animToPlay:String = getNoteHitAnimation(note, field);
+
+		if (note.noteType == 'Hey!' && animOffsets.exists(animToPlay)) {
+			playAnim(animToPlay, true);
 			specialAnim = true;
 			heyTimer = 0.6;
 			return;
 		}
 
-		var animToPlay:String = Character.getNoteAnimation(note, field);
-
 		playAnim(animToPlay, true);
+
 		holdTimer = 0.0;
 		callOnScripts("playNoteAnim", [animToPlay, note]);
 	}
@@ -498,13 +531,8 @@ class Character extends FlxSprite
 		if (animTimer > 0 || voicelining)
 			return;
 
-		var animToPlay:String = note.characterMissAnimName;
-		if (animToPlay == null) {
-			animToPlay = field.singAnimations[note.column % field.singAnimations.length];
-			animToPlay += note.characterMissAnimSuffix;
-		}
-
-		playAnim(animToPlay + 'miss', true);
+		var animToPlay:String = getNoteMissAnimation(note, field);
+		playAnim(animToPlay, true);
 
 		if (!hasMissAnimations)
 			colorOverlay = missOverlayColor;	
@@ -514,14 +542,13 @@ class Character extends FlxSprite
 		if (animTimer > 0 || voicelining)
 			return;
 
-		var animToPlay:String = field.singAnimations[direction % field.singAnimations.length];
-		playAnim(animToPlay + 'miss', true);
+		var animToPlay:String = getFieldColumnSingAnimation(direction, field) + 'miss';
+		playAnim(animToPlay, true);
 		
 		if(!hasMissAnimations)
 			colorOverlay = missOverlayColor;	
 	}
 
-	public var danceEveryNumBeats:Float = 2;
 	private var settingCharacterUp:Bool = true;
 	public function recalculateDanceIdle() {
 		var lastDanceIdle:Bool = danceIdle;
@@ -538,6 +565,31 @@ class Character extends FlxSprite
 			var calc:Float = danceEveryNumBeats * (danceIdle ? 0.5 : 2.0);
 			danceEveryNumBeats = Math.round(Math.max(calc, 1));
 		}
+	}
+
+	/** To be called when this character is used, Used by PlayState Character Change Events **/
+	public function changedIn(prevCharacter:Null<Character>) {
+		inline function canResumeAnim(c:Character):Bool {
+			return c != null && animation.exists(c.animation.name) && (characterId.startsWith(c.characterId) || c.characterId.startsWith(characterId));
+		}
+		if (canResumeAnim(prevCharacter)) {
+			var anim = prevCharacter.animation.curAnim;
+			playAnim(anim.name, true, anim.reversed, anim.curFrame);
+		}else {
+			dance();
+		}
+		
+		used = true;
+		setOnScripts("used", true);
+		callOnScripts("changedIn", [prevCharacter]); // if you can come up w/ a better name for this callback then change it lol
+		// (this also gets called for the characters set by the chart's player1/player2)
+	}
+
+	/** To be called when this character is changed out for another, Used by PlayState Character Change Events **/
+	public function changedOut(newCharacter:Null<Character>) {
+		used = false;
+		setOnScripts("used", false);
+		callOnScripts("changedOut", [newCharacter]);
 	}
 
 	public function addOffset(name:String, x:Float = 0, y:Float = 0)
@@ -569,6 +621,15 @@ class Character extends FlxSprite
 	}
 
 	////
+	/**
+	 * Scripts running on the character. 
+	 *
+	 * You should not modify this directly! Use `pushScript`/`removeScript`!
+	 *
+	 * If you must modify it directly, remember to call `startScript`/`stopScript` after adding/removing it
+	**/
+	public var characterScripts:Array<FunkinScript> = [];
+
 	public var defaultVars:Map<String, Dynamic> = [];
 	public function setDefaultVar(i:String, v:Dynamic)
 		defaultVars.set(i, v);
@@ -611,7 +672,7 @@ class Character extends FlxSprite
 	{
 		setDefaultVar("this", this);
 
-		var key:String = 'characters/$curCharacter';
+		var key:String = 'characters/$characterId';
 
 		#if HSCRIPT_ALLOWED
 		var hscriptFile = Paths.getHScriptPath(key);

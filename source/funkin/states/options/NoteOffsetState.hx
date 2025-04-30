@@ -63,13 +63,9 @@ class NoteOffsetState extends MusicBeatState
 		FlxG.sound.pause();
 
 		//// Stage
-		var randomStage = TitleState.getRandomStage();
-		if (randomStage != null){
-			Paths.currentModDirectory = randomStage[1];
-			stage = new Stage(randomStage[0]);
-		}else{
-			stage = new Stage();
-		}
+		var stageId = 'stage' #if tgt + "1" #end;
+
+		stage = new Stage(stageId);
 		stage.buildStage();
 		stageScript = stage.stageScript;
 		add(stage);	
@@ -89,25 +85,18 @@ class NoteOffsetState extends MusicBeatState
 		add(stageOpacity);
 
 		//// Characters
-		var gfName:String = 'gf';
-		var bfName:String = 'bf';
+		var gfId:String = 'gf';
+		var bfId:String = 'bf';
 
-		// eugh
-		if (stage.curStage.startsWith("school")){
-			gfName += '-pixel';
-			bfName += '-pixel';
-		}else if (stage.curStage.startsWith("mall")){
-			gfName += '-christmas';
-			bfName += '-christmas';
-		}
-
-		gf = new Character(stageData.girlfriend[0], stageData.girlfriend[1], gfName);
+		gf = new Character(stageData.girlfriend[0], stageData.girlfriend[1], gfId);
+		gf.setupCharacter();
 		gf.x += gf.positionArray[0];
 		gf.y += gf.positionArray[1];
 		gf.scrollFactor.set(0.95, 0.95);
 		add(gf);
 
-		boyfriend = new Character(stageData.boyfriend[0], stageData.boyfriend[1], bfName, true);
+		boyfriend = new Character(stageData.boyfriend[0], stageData.boyfriend[1], bfId, true);
+		boyfriend.setupCharacter();
 		boyfriend.x += boyfriend.positionArray[0];
 		boyfriend.y += boyfriend.positionArray[1];
 		add(boyfriend);
@@ -162,7 +151,7 @@ class NoteOffsetState extends MusicBeatState
 
 		///////////////////////
 
-		var blackBox:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, 40, FlxColor.BLACK);
+		/*var blackBox:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, 40, FlxColor.BLACK);
 		blackBox.scrollFactor.set();
 		blackBox.alpha = 0.6;
 		blackBox.cameras = [camHUD];
@@ -172,7 +161,7 @@ class NoteOffsetState extends MusicBeatState
 		changeModeText.setFormat(Paths.font("calibri.ttf"), 32, FlxColor.WHITE, CENTER);
 		changeModeText.scrollFactor.set();
 		changeModeText.cameras = [camHUD];
-		add(changeModeText);
+		add(changeModeText);*/
 
 		Conductor.changeBPM(128.0);
 		FlxG.sound.playMusic(Paths.music('offsetSong'), 1 , true);
@@ -242,11 +231,11 @@ class NoteOffsetState extends MusicBeatState
 			}
 		}
 
-		if(controls.ACCEPT)
+		/*if(controls.ACCEPT)
 		{
 			onComboMenu = !onComboMenu;
 			updateMode();
-		}
+		}*/
 
 		if(controls.BACK)
 		{
@@ -332,20 +321,20 @@ class NoteOffsetState extends MusicBeatState
 
 	function updateMode()
 	{
-		timeBarBG.visible = !onComboMenu;
+		/*timeBarBG.visible = !onComboMenu;
 		timeBar.visible = !onComboMenu;
 		timeTxt.visible = !onComboMenu;
-		beatText.visible = !onComboMenu;
+		beatText.visible = !onComboMenu;*/
 
 		if (onComboMenu){
-			changeModeText.text = '< Combo Offset (Press Accept to Switch) >';
+			// changeModeText.text = '< Combo Offset (Press Accept to Switch) >';
 			openSubState(comboSubstate);
 		}else{
-			changeModeText.text = '< Note/Beat Delay (Press Accept to Switch) >';
+			// changeModeText.text = '< Note/Beat Delay (Press Accept to Switch) >';
 			comboSubstate.close();
 		}
 
-		changeModeText.text = changeModeText.text.toUpperCase();
+		// changeModeText.text = changeModeText.text.toUpperCase();
 		FlxG.mouse.visible = onComboMenu;
 	}
 
@@ -432,3 +421,9 @@ class NoteOffsetState extends MusicBeatState
 	
 	override public function transitionIn(?_):Void{} // so the super.create doesnt transition
 }
+
+/*
+	NOTE: THE CHANGES MADE TO THIS STATE ARE JUST DUCT TAPE SO IT WORKS IN GAMEPLAY!!
+	THIS SHIT SHOULD ABSOLUTELY BE MADE GOOD LATER!!
+	(also removing the note offset part completely might not be the best move, just because having a visual indicator for the timing might be better for some ppl)
+*/

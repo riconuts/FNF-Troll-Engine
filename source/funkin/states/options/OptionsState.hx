@@ -4,9 +4,6 @@ import flixel.addons.transition.FlxTransitionableState;
 
 class OptionsState extends MusicBeatState 
 {
-	var bg:FlxSprite;
-	var backdrop:flixel.addons.display.FlxBackdrop;
-
 	var daSubstate:OptionsSubstate;
 
 	var transCamera:FlxCamera; // JUST for the transition	
@@ -29,64 +26,23 @@ class OptionsState extends MusicBeatState
 
 		#if tgt
 		var bgGraphic = Paths.image('tgtmenus/optionsbg');
-		bg = new FlxSprite((FlxG.width - bgGraphic.width) * 0.5, (FlxG.height - bgGraphic.height) * 0.5, bgGraphic);
+		var bg = new FlxSprite((FlxG.width - bgGraphic.width) * 0.5, (FlxG.height - bgGraphic.height) * 0.5, bgGraphic);
+
+		if (FlxG.height < FlxG.width)
+			bg.scale.x = bg.scale.y = (FlxG.height * 1.05) / bg.frameHeight;
+		else
+			bg.scale.x = bg.scale.y = (FlxG.width * 1.05) / bg.frameWidth;
+		
 		add(bg);
 
-		backdrop = new flixel.addons.display.FlxBackdrop(Paths.image("grid"));
+		var backdrop = new flixel.addons.display.FlxBackdrop(Paths.image("grid"));
 		backdrop.velocity.set(30, 30);
+		backdrop.scrollFactor.set();
 		backdrop.alpha = 0.15;
 		add(backdrop);
 
 		#else
-		
-		var color = 0xff7186fd; //0xFFea71fd;
-		var bgGraphic = Paths.image('menuDesat');
-		var adjustColor = new funkin.objects.shaders.AdjustColor();
-		adjustColor.contrast = 1.0;
-		adjustColor.brightness = -0.125;
-
-		bg = new FlxSprite((FlxG.width - bgGraphic.width) * 0.5, (FlxG.height - bgGraphic.height) * 0.5, bgGraphic);
-		bg.shader = adjustColor.shader;
-		bg.blend = INVERT;
-		bg.color = color;
-		bg.alpha = 0.25;
-		bg.setColorTransform(-1, -1, -1, 1,
-			Std.int(255 + bg.color.red / 3), 
-			Std.int(255 + bg.color.green / 3), 
-			Std.int(255 + bg.color.blue / 3),
-			0
-		);
-
-		var bg2 = new FlxSprite(bg.x, bg.y).makeGraphic(bg.frameWidth, bg.frameHeight, 0x00000000, false, 'OptionsState_bg');
-		bg2.blend = MULTIPLY;
-		bg2.stamp(bg);
-		
-		bg.destroy();
-		bg = bg2;
-
-		var grid = new openfl.display.BitmapData(2, 2);
-		grid.setPixel32(0, 0, 0xFFC0C0C0);
-		grid.setPixel32(1, 1, 0xFFC0C0C0);
-
-		var grid = flixel.graphics.FlxGraphic.fromBitmapData(grid, false, 'OptionsState_grid');
-
-		backdrop = new flixel.addons.display.FlxBackdrop(grid);
-		backdrop.scale.x = backdrop.scale.y = FlxG.height / 3;
-		backdrop.updateHitbox();
-		backdrop.velocity.set(30, 30);
-		backdrop.antialiasing = true;
-		backdrop.color = color;
-		backdrop.alpha = 0.5;
-		backdrop.blend = ADD;
-
-		var gradient = flixel.util.FlxGradient.createGradientFlxSprite(FlxG.width, FlxG.height, [0xFFFFFFFF, 0xFF000000]);
-
-		add(gradient);
-		add(backdrop);
-
-		bg.setGraphicSize(0, FlxG.height);
-		bg.updateHitbox();
-		bg.screenCenter();
+		var bg = new funkin.objects.CoolMenuBG(Paths.image('menuDesat', null, false), 0xff7186fd);
 		add(bg);
 		#end
 	}

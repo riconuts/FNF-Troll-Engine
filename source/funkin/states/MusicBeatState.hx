@@ -1,5 +1,6 @@
 package funkin.states;
 
+import flixel.math.FlxMath;
 import funkin.input.Controls;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.addons.ui.FlxUIState;
@@ -15,7 +16,27 @@ import funkin.states.scripting.*;
 
 #if SCRIPTABLE_STATES
 import funkin.states.scripting.HScriptOverridenState;
+#end
 
+enum abstract SongSyncMode(String) to String {
+	var DIRECT = "Direct";
+	var LEGACY = "Legacy";
+	var PSYCH_1_0 = "Psych 1.0";
+	var LAST_MIX = "Last Mix";
+	var SYSTEM_TIME = "System Time";
+	
+	public static function fromString(str:String):SongSyncMode {
+		return switch (str) {
+			case "Direct": DIRECT;
+			case "Legacy": LEGACY;
+			case "Psych 1.0": PSYCH_1_0;
+			case "System Time": SYSTEM_TIME;
+			//case "Last Mix": LAST_MIX;
+			default: LAST_MIX;
+		}
+	} 
+}
+#if SCRIPTABLE_STATES
 @:autoBuild(funkin.macros.ScriptingMacro.addScriptingCallbacks([
 	"create",
 	"update",
@@ -49,6 +70,13 @@ class MusicBeatState extends FlxUIState
 	@:noCompletion inline function set_curDecBeat(v) return Conductor.curDecBeat=v;
 	#end
 
+	private var songSyncMode(default, set):SongSyncMode;
+	private function set_songSyncMode(v:SongSyncMode):SongSyncMode {
+		songSyncMode = v;
+		Conductor.useAccPosition = songSyncMode == SYSTEM_TIME;
+		return songSyncMode;
+	}
+
 	private var controls(get, never):Controls;
 
 	public var canBeScripted(get, default):Bool = false;
@@ -67,6 +95,7 @@ class MusicBeatState extends FlxUIState
 	public function new(canBeScripted:Bool = true) {
 		super();
 		this.canBeScripted = canBeScripted;
+		this.songSyncMode = LAST_MIX;
 	}
 
 	override public function destroy() 
@@ -97,6 +126,47 @@ class MusicBeatState extends FlxUIState
 	override public function onFocusLost():Void
 	{
 		super.onFocusLost();
+	}
+	
+	private var lastMixTimer:Float = 0;
+	private function updateSongPosition(elapsed:Float):Void {
+		var inst = Conductor.tracks[0];
+		switch (songSyncMode)
+		{
+			case DIRECT:
+				// Ludem Dare sync
+				// Jittery and retarded, but works maybe
+				Conductor.songPosition = inst.time;
+
+			case LEGACY:
+				// Resync Vocals
+				// FUCKING SUCKS DONT USE LMFAO! It's here just incase though
+				Conductor.songPosition += elapsed * 1000;
+				
+			case PSYCH_1_0:
+				// Psych 1.0 method
+				// Since this works better for Rico so might work better for some other machines too
+				Conductor.songPosition += elapsed * 1000;
+				Conductor.songPosition = FlxMath.lerp(inst.time, Conductor.songPosition, Math.exp(-elapsed * 5));
+				var timeDiff:Float = Math.abs(inst.time - Conductor.songPosition);
+				if (timeDiff > 1000)
+					Conductor.songPosition = Conductor.songPosition + 1000 * FlxMath.signOf(timeDiff);
+
+			case SYSTEM_TIME:
+				Conductor.songPosition = Conductor.getAccPosition();
+			
+			case LAST_MIX:
+				// Stepmania method
+				// Works for most people it seems??
+				if (Conductor.lastSongPos != inst.time) {
+					Conductor.lastSongPos = inst.time;
+					lastMixTimer = 0;
+				}else
+					lastMixTimer += elapsed * 1000;
+				
+				Conductor.songPosition = inst.time + lastMixTimer;
+
+		}
 	}
 
 	private function updateSteps() {
@@ -218,10 +288,27 @@ class MusicBeatState extends FlxUIState
 		return cast FlxG.state;
 	}
 
+	function resyncTracks() {
+		Conductor.resyncTracks();
+		Conductor.lastSongPos = Conductor.songPosition;
+	}
+
 	public function stepHit():Void
 	{
 		if (curStep % 4 == 0)
 			beatHit();
+
+		if (songSyncMode == LEGACY) {
+			var needsResync:Bool = false;
+			for (track in Conductor.tracks) {
+				if (Math.abs(track.time - Conductor.getAccPosition()) > 30){
+					needsResync = true;
+					break;
+				}
+			}
+			if (needsResync)
+				resyncTracks();
+		}
 	}
 
 	public function beatHit():Void

@@ -9,7 +9,7 @@ import math.Vector3;
 import flixel.tweens.FlxEase;
 import flixel.math.FlxPoint;
 import flixel.FlxG;
-
+using StringTools;
 // Weird amalgamation of Schmovin' modifier system, Andromeda modifier system and my own new shit -neb
 // NEW: Now also has some features of mirin (aliases, nodes)
 
@@ -19,7 +19,6 @@ import flixel.FlxG;
  * (for example you can have a screen bounce aux mod + node w/ that aux mod as an input, and then change transformX)
  */
 typedef Node = {
-	var lastIndex:Int; // to make sure it doesnt get hit multiple times per update
 	var in_mods:Array<String>; /// the modifiers that get input into this node
 	var out_mods:Array<String>; // the modifiers that get transformed by this node
 	var nodeFunc:(Array<Float>, Int)->Array<Float>; // takes an array of the input mods' values, and returns an array of transformed modifier values, if out_mods.length > 0
@@ -64,7 +63,6 @@ class ModManager {
 	var nodeArray:Array<Node> = [];
 
 	var touchedMods:Array<Array<String>> = [[], []];
-	var nodeIndex:Int = 0;
 
 	public function new(state:PlayState) {
 		this.state=state;
@@ -85,7 +83,7 @@ class ModManager {
 			ConfusionModifier, 
 			OpponentModifier, 
 			TransformModifier, 
-			InfinitePathModifier,
+			//InfinitePathModifier,
 			PathModifier,
 			AccelModifier,
 			PerspectiveModifier,
@@ -106,8 +104,11 @@ class ModManager {
 		registerAux("orient");
 		registerAux("lookAheadTime"); // used for holds and orient
 		
-		registerAux("centeredPath");
-		registerAlias("centered2", "centeredPath");
+		registerAux("movePath");
+		registerAlias("centered2", "movePath");
+		registerAlias("centeredPath", "movePath");
+
+		registerAux("transformPath");	
 
 		registerAux("noteSpawnTime");
 		registerAux("drawDistance");
@@ -190,7 +191,7 @@ class ModManager {
 		registerMod(mod.getName(), mod);
 
 	inline public function registerBlankMod(modName:String, defaultVal:Float = 0.0, player:Int = -1){
-		quickRegister(new SubModifier(modName, this));
+		registerAux(modName);
 		setValue(modName, defaultVal, player, true);
 	}
 
@@ -212,7 +213,6 @@ class ModManager {
 		if (outputs == null)
 			outputs=[];
 		registerNode({
-			lastIndex: -1,
 			in_mods: inputs,
 			out_mods: outputs,
 			nodeFunc: nodeFunc
@@ -229,7 +229,25 @@ class ModManager {
 	function getActualModName(m:String)
 		return aliases.exists(m) ? aliases.get(m) : m;
 
-	public function registerMod(modName:String, mod:Modifier, ?registerSubmods = true){
+	public function registerMod(modName:String, mod:Modifier, registerSubmods = true, ?forceReplace:Bool = false){
+		if(register.get(modName) != null){
+			if (forceReplace){
+				var oldMod = register.get(modName);
+				modArray.remove(oldMod);
+				switch (oldMod.getModType()) {
+					case NOTE_MOD:
+						notemodRegister.remove(modName);
+					case MISC_MOD:
+						miscmodRegister.remove(modName);
+				}
+				// TODO: Maybe kill all the submods?
+
+			}else{
+				trace('$modName already exists! You should register your modifier under a new name!');
+				return;
+			}
+		}
+		
 		register.set(modName, mod);
 		switch (mod.getModType()){
 			case NOTE_MOD:
@@ -244,13 +262,18 @@ class ModManager {
 		for(a => m in mod.getAliases())
 			registerAlias(a, m);
 		
-
 		if (registerSubmods){
 			for (name in mod.submods.keys())
 			{
 				var submod = mod.submods.get(name);
 				quickRegister(submod);
 			}
+		}
+
+		var defaultValues = mod.getDefaultValues();
+		if (defaultValues != null){
+			for (k => v in defaultValues)
+				setValue(k, v, -1);
 		}
 
 		setValue(modName, 0, -1, true); // so if it should execute it gets added Automagically
@@ -392,10 +415,11 @@ class ModManager {
 					// if they can execute then we shouldnt be discarding this mod since the parent mod executes the logic for submods
 
 					for(submod_name => submod in mod.submods){
-						if (submod.shouldExecute(player, submod.getValue(player)))
+						if (submod.shouldExecute(player, submod.getValue(player))){
 							can_discard = false; // we CANNOT discard since a submod can execute still
+							break;
+						}
 					}
-
 
 					if(can_discard)
 						discarded_mods.push(mod_name); // shit is inactive, remove it later (cant in this loop)
@@ -429,61 +453,56 @@ class ModManager {
 
 	function runNodes()
 	{
-		if (nodeArray.length > 0)
-		{
-			for (player => mods in touchedMods)
-			{
-				nodeIndex++; // used to prevent calling the same node over and over when it has multiple inputs
-				// could do a ran_nodes array but honestly this is probably better for optimization since its not having to store the entire node, just an index
-				
-				// I dont think this works ^^ TODO: fix
+		if(nodeArray.length > 0){
+			for(player => mods in touchedMods){
+				var runningNodes:Array<Node> = []; // Store all nodes that need to be run in this frame
 
-				for (mod in mods)
-				{
-					if (nodes.exists(mod))
-					{
-						var garbage = [];
-						for (node in nodes.get(mod))
-						{
-							if (node.lastIndex != nodeIndex)
-							{
-								var input_values:Array<Float> = [];
-
-								for (input_mod in node.in_mods)
-									input_values.push(getValue(input_mod, player));
-
-								var output_values:Array<Float> = node.nodeFunc(input_values, player);
-								
-								if (node.out_mods.length > 0)
-								{ // if theres outputs
-									if (output_values.length < node.out_mods.length)
-									{
-										for (i in node.out_mods.length...output_values.length)
-											output_values.push(0); // TODO: check the out_mod to see if i should add in 0 or mod.getValue(player) depending on if its in in_mods
-									}
-									for (idx in 0...node.out_mods.length)
-									{
-										var output_value:Float = output_values[idx];
-										var output_mod_name:String = node.out_mods[idx];
-										var output_mod:Modifier = get(output_mod_name);
-										if (output_mod == null){
-											trace(output_mod_name + " is not a valid output, look into fixing pl0x");
-											continue;
-										}
-										var current_value:Float = output_mod.getValue(player);
-										// if the output is also an input then set it directly, otherwise add it
-										if (node.in_mods.contains(output_mod_name))
-											output_mod.setCurrentValue(output_value, player);
-										else
-											output_mod.setCurrentValue(current_value + output_value, player);
-									}
-								}
-							}
-						}
-						for (node in garbage)
-							nodes.get(mod).remove(node);
+				for(mod in mods){
+					// Collect all of the nodes that need to be ran this frame, avoiding duplicate nodes. This is so nodes with multiple inputs don't run multiple times
+					var nodes:Array<Node> = nodes.get(mod);
+					if(nodes == null)continue;
+					for(node in nodes){
+						if(!runningNodes.contains(node))
+							runningNodes.push(node);	
 					}
 				}
+
+				// iterate through the running nodes and execute their code, applying to outputs if required
+				for(node in runningNodes){
+					var input:Array<Float> = [];
+					for(mod in node.in_mods)
+						input.push(getValue(mod, player));
+
+					var output:Array<Float> = node.nodeFunc(input, player); // Get output values from the node
+
+					// Ensure the output has the same length as the output mods.
+					if(node.out_mods.length > 0){
+						if (output.length < node.out_mods.length) {
+							for (i in (output.length - 1)...node.out_mods.length)
+								output.push(node.in_mods.contains(node.out_mods[i]) ? getValue(node.out_mods[i], player) : 0); // If input mods contains the output mod, use the current value, else use 0.
+						}
+					}
+
+					for(idx in 0...node.out_mods.length){
+						var outputValue:Float = output[idx];
+						var outputName:String = node.out_mods[idx];
+						var outputMod:Modifier = get(outputName);
+
+						if(outputMod == null){
+							trace('$outputName is not a valid output!');
+							continue;
+						}
+
+						var currentValue = outputMod.getValue(player);
+						
+						// If the output is also an input, set the value directly, otherwise just add to the current value.
+						if(node.in_mods.contains(outputName))
+							outputMod.setCurrentValue(outputValue, player);
+						else
+							outputMod.setCurrentValue(currentValue + outputValue, player);
+					}
+				}
+
 			}
 		}
 	}
@@ -569,7 +588,10 @@ class ModManager {
 		if (pos == null)
 			pos = new Vector3();
 
-		diff += getValue("centeredPath", player) * Note.swagWidth; // Each 100% moves the path by receptor size
+		diff += (
+			getValue("movePath", player) * 112) + 
+			getValue("transformPath", player
+		); 
 		
 		pos.setTo(
 			Note.halfWidth + field.field.getBaseX(data),
@@ -663,6 +685,64 @@ class ModManager {
 		}
 
 		return info;
+	}
+
+	
+	public function parseITGModstring(modStr:String, ?step:Float, ?player:Int = -1){
+		// modstring examples:
+
+		// drunk (100% drunk over 1 second)
+		// 1.5 drunk (150% drunk over 1.5 seconds)
+		// *2 200% drunk (200% drunk over 1 second)
+		// *0.1 1 drunk (100% drunk over 10 seconds)
+		// no drunk (disables drunk over 1 second)
+		// *0.5 c3.2 (3.2 cmod over 6.4 seconds)
+		// *-1 x3 (3 xmod instantly)
+
+		// a fully formatted modstring might look like this:
+		// *2 drunk, *0.25 50% tipsy, *-1 1 invert
+		
+		var bits = modStr.split(",");
+		for (bit in bits) {
+			bit = bit.trim();
+			var parts = bit.split(" ");
+			var level:Float = 1;
+			var speed:Float = 1;
+
+			for (part in parts) {
+				part = part.trim();
+				if (part.toLowerCase() == 'no')
+					level = 0;
+				else if (Std.parseInt(part.charAt(0)) != null || part.charAt(0) == '-') {
+					if (part.charAt(part.length - 1) == '%')
+						level = Std.parseFloat(part.substr(0, -1)) / 100;
+					else
+						level = Std.parseFloat(part);
+				} else if (part.charAt(0) == '*')
+					speed = Std.parseFloat(part.split("*")[1]);
+			}
+			bit = parts[parts.length - 1].trim();
+
+			var mod = new EReg("^(\\w)(\\d*\\.?\\d*)$", ""); // matches shit like x1 or c3.2
+			if (mod.match(bit)) {
+				var type = mod.matched(1);
+	
+				level = Std.parseFloat(mod.matched(2));
+				if (Math.isNaN(level))
+					level = 0;
+
+				bit = type + 'mod';
+			} 
+
+			if (speed <= 0){ // we gaming, just set it
+				if(step == null)
+					setValue(bit, level, player);
+				else
+					queueSet(step, bit, level, player);
+			}else 
+				queueEaseL(step == null ? Conductor.curDecStep : step, ((level / speed) * 1000) / Conductor.stepCrotchet, bit, level, 'linear', player);
+			
+		}
 	}
 
 	public function queueEase(step:Float, endStep:Float, modName:String, target:Float, style:Any, player:Int = -1, ?startVal:Float)

@@ -346,10 +346,10 @@ class FunkinHScript extends FunkinScript
 		set("BGSprite", funkin.objects.BGSprite);
 		set("RatingSprite", funkin.objects.RatingGroup.RatingSprite);
 
-		set("Note", funkin.objects.Note);
-		set("NoteObject", funkin.objects.NoteObject);
-		set("NoteSplash", funkin.objects.NoteSplash);
-		set("StrumNote", funkin.objects.StrumNote);
+		set("Note", funkin.objects.notes.Note);
+		set("NoteObject", funkin.objects.notes.NoteObject);
+		set("NoteSplash", funkin.objects.notes.NoteSplash);
+		set("StrumNote", funkin.objects.notes.StrumNote);
 		set("PlayField", funkin.objects.playfields.PlayField);
 		set("NoteField", funkin.objects.playfields.NoteField);
 

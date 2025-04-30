@@ -20,30 +20,21 @@ class ClassicHUD extends CommonHUD {
 		healthBar.iconP2.updateHitbox();
 	}
 
-	public function new(iP1:String, iP2:String, songName:String, stats:Stats)
+	public function new(songName:String, stats:Stats)
 	{
-		super(iP1, iP2, songName, stats);
+		super(songName, stats);
 		healthBar.destroy();
 		remove(healthBar);
 		
 		// Maybe this should use a modified one that looks like V-Slice's instead of Week <=7
 		// Idk lol
 
-		healthBar = new ShittyBar(iP1, iP2);
+		healthBar = new ShittyBar('bf', 'dad');
 		cast (healthBar, ShittyBar).vSlice = true;
 		healthBarBG = healthBar.healthBarBG;
 
 		iconP1 = healthBar.iconP1;
 		iconP2 = healthBar.iconP2;
-
-		#if (PE_MOD_COMPATIBILITY && false)
-		if (FlxG.state == PlayState.instance)
-		{
-			PlayState.instance.healthBar = healthBar;
-			PlayState.instance.iconP1 = iconP1;
-			PlayState.instance.iconP2 = iconP2;
-		}
-		#end
 
 		healthBar.healthBarBG.y = FlxG.height * (ClientPrefs.downScroll ? 0.1 : 0.9);
 		healthBar.y = healthBarBG.y + 5;

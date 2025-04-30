@@ -136,7 +136,7 @@ class KeyBindsSubstate extends MusicBeatSubstate  {
 				
 				var text = new FlxText(16, daY, 0, label, 16);
 				text.cameras = [scrollableCam];
-				text.setFormat(Paths.font("calibri.ttf"), 28, 0xFFFFFFFF, FlxTextAlign.LEFT);
+				text.setFormat(Paths.font("quantico.ttf"), 28, 0xFFFFFFFF, FlxTextAlign.LEFT);
 				text.updateHitbox();
 
 				var height = Math.min(45, text.height + 12);
@@ -177,7 +177,7 @@ class KeyBindsSubstate extends MusicBeatSubstate  {
 				// its just a label
 				var text = new FlxText(8, daY, 0, label, 16);
 				text.cameras = [scrollableCam];
-				text.setFormat(Paths.font("calibrib.ttf"), 32, 0xFFFFFFFF, FlxTextAlign.LEFT);
+				text.setFormat(Paths.font("quanticob.ttf"), 32, 0xFFFFFFFF, FlxTextAlign.LEFT);
 				group.add(text);
 				daY += text.height;
 			}
@@ -187,7 +187,7 @@ class KeyBindsSubstate extends MusicBeatSubstate  {
 		//////
 		var text = new FlxText(16, daY, 0, Paths.getString("control_default"), 16);
 		text.cameras = [scrollableCam];
-		text.setFormat(Paths.font("calibri.ttf"), 28, 0xFFFFFFFF, FlxTextAlign.LEFT);
+		text.setFormat(Paths.font("quantico.ttf"), 28, 0xFFFFFFFF, FlxTextAlign.LEFT);
 		text.updateHitbox();
 		
 		var height = text.height + 12;
@@ -223,15 +223,15 @@ class KeyBindsSubstate extends MusicBeatSubstate  {
 		popupDrop.screenCenter(XY);
 
 		popupTitle = new FlxText(popupDrop.x, popupDrop.y + 10, popupDrop.width, "Currently binding my penis", 16);
-		popupTitle.setFormat(Paths.font("calibrib.ttf"), 32, 0xFFFFFFFF, FlxTextAlign.CENTER);
+		popupTitle.setFormat(Paths.font("quanticob.ttf"), 32, 0xFFFFFFFF, FlxTextAlign.CENTER);
 		popupTitle.cameras = [overCam];
 		
 		popupText = new FlxText(popupDrop.x, popupDrop.y + popupTitle.height, popupDrop.width, "Press key to bind\npress to unbind", 16);
-		popupText.setFormat(Paths.font("calibri.ttf"), 32, 0xFFFFFFFF, FlxTextAlign.CENTER);
+		popupText.setFormat(Paths.font("quantico.ttf"), 32, 0xFFFFFFFF, FlxTextAlign.CENTER);
 		popupText.cameras = [overCam];
 		
 		unbindText = new FlxText(popupDrop.x, popupDrop.y + 180, popupDrop.width, "(Note that this action needs atleast one key bound)", 16);
-		unbindText.setFormat(Paths.font("calibri.ttf"), 32, 0xFFFFFFFF, FlxTextAlign.CENTER);
+		unbindText.setFormat(Paths.font("quantico.ttf"), 32, 0xFFFFFFFF, FlxTextAlign.CENTER);
 		unbindText.cameras = [overCam];
 
 		add(popupDrop);

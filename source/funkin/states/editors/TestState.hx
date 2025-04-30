@@ -30,6 +30,7 @@ class TestState extends MusicBeatState{
 		FlxG.mouse.visible = true;
 
 		// Set up cameras
+		camGame.bgColor = 0xFF999999;
 		camHUD.bgColor = 0x00000000;
 		camGame.follow(camFollowPos);
 
@@ -75,6 +76,7 @@ class TestState extends MusicBeatState{
 			switch (UI_box.selected_tab_id){
 				case "Alphabet":
 					curGroup = alphGroup;
+					camGame.bgColor = 0xFF999999;
 				case "Title Screen":
 					curGroup = titlGroup;
 			}
@@ -96,9 +98,13 @@ class TestState extends MusicBeatState{
 	function createAlphabetUI()
 	{
 		var group = new FlxTypedGroup<FlxBasic>();
-
-		camGame.bgColor = 0xFFFFFFFF;
 		group.add(UI_box);
+
+		var alphabetBG = new FlxSprite().makeGraphic(1, 1);
+		alphabetBG.color = 0xFFFF0000;
+		alphabetBG.alpha = 0.6;
+		alphabetBG.cameras = [camHUD];
+		group.add(alphabetBG);
 
 		var alphabetInstance = new Alphabet(0, 0, "sowy", true);
 		alphabetInstance.screenCenter();
@@ -111,10 +117,18 @@ class TestState extends MusicBeatState{
 		var boldCheckbox:FlxUICheckBox = new FlxUICheckBox(10, 70, null, null, "Bold", 100);
 		boldCheckbox.cameras = [camHUD];
 
-		function updateText(){			
-			alphabetInstance.isBold = boldCheckbox.checked;
-			alphabetInstance.changeText(inputText.text);
+		function updateText(){
+			alphabetInstance.bold = boldCheckbox.checked;
+			alphabetInstance.text = inputText.text;
 			alphabetInstance.screenCenter();
+
+			alphabetBG.scale.set(alphabetInstance.width, alphabetInstance.height);
+			alphabetBG.updateHitbox();
+			//alphabetBG.screenCenter();
+			
+			alphabetBG.x = alphabetInstance.x;
+			alphabetBG.y = alphabetInstance.y;
+			
 		}
 		updateText();
 		
@@ -205,7 +219,8 @@ class TestState extends MusicBeatState{
 
 			bg = new Stage(newStageName).buildStage();
 
-			camGame.bgColor = FlxColor.fromString(bg.stageData.bg_color);
+			var bg_color:Null<String> = bg.stageData.bg_color;
+			camGame.bgColor = (bg_color==null ? 0xFF999999 : FlxColor.fromString(bg_color)) ?? 0xFF999999;
 			camGame.zoom = bg.stageData.defaultZoom;
 
 			var camPos = bg.stageData.camera_stage;

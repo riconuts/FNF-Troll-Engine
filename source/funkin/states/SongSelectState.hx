@@ -1,5 +1,7 @@
 package funkin.states;
 
+import flixel.addons.transition.FlxTransitionableState;
+import funkin.data.Highscore;
 import flixel.text.FlxText;
 import funkin.data.Song;
 import funkin.states.options.OptionsState;
@@ -66,7 +68,7 @@ class SongSelectState extends MusicBeatState
 		for (modDir in Paths.getModDirectories()){
 			var folder = Paths.mods('$modDir/songs/');
 			Paths.iterateDirectory(folder, function(name:String){
-				if (FileSystem.isDirectory(folder + name))
+				if (Paths.isDirectory(folder + name))
 					songMeta.push(new Song(name, modDir));
 			});
 		}
@@ -77,7 +79,10 @@ class SongSelectState extends MusicBeatState
 
 	override public function create() 
 	{
-		StartupState.load();
+		FlxTransitionableState.skipNextTransIn = true;
+		FlxTransitionableState.skipNextTransOut = true;
+		this.persistentDraw = false;
+		super.create();
 
 		#if DISCORD_ALLOWED
 		DiscordClient.changePresence("In the Menus", null);
@@ -118,7 +123,7 @@ class SongSelectState extends MusicBeatState
 				hPadding + (Math.floor(id/verticalLimit) * width), 
 				vPadding + (ySpace*(id%verticalLimit)), 
 				width, 
-				songMeta[id].songName,
+				songMeta[id].songId,
 				textSize
 			);
 			text.wordWrap = false;
@@ -134,8 +139,6 @@ class SongSelectState extends MusicBeatState
 		versionTxt.alpha = 0.6;
 		versionTxt.antialiasing = false;
 		add(versionTxt);
-
-		super.create();
 	}
 
 	var xSecsHolding = 0.0;
@@ -187,20 +190,11 @@ class SongSelectState extends MusicBeatState
 		}
 
 		if (controls.ACCEPT){
-			var charts = Song.getCharts(songMeta[curSel]);
-
-			trace(charts);
-			
-			if (charts.length > 1)
-				MusicBeatState.switchState(new SongChartSelec(songMeta[curSel], charts));
-			else if (charts.length > 0) {
-				Song.loadSong(songMeta[curSel], charts[0], 0);
-				if (FlxG.keys.pressed.SHIFT)
-					LoadingState.loadAndSwitchState(new funkin.states.editors.ChartingState());
-				else
-					LoadingState.loadAndSwitchState(new PlayState());
-			}
-			else{
+			var charts = songMeta[curSel].charts;
+			if (charts.length > 0) {
+				trace(charts);
+				openSubState(new ChartSelectSubstate(songMeta[curSel]));
+			}else {
 				trace("no charts!");
 				songText[curSel].alpha = 0.6;
 			}
@@ -216,59 +210,62 @@ class SongSelectState extends MusicBeatState
 	}
 }
 
-class SongChartSelec extends MusicBeatState
+class ChartSelectSubstate extends MusicBeatSubstate
 {
-	var songMeta:Song;
-	var alts:Array<String>;
-
+	var song:Song;
 	var texts:Array<FlxText> = [];
+	var curSel:Int = 0;
 
-	var curSel = 0;
-
-	function changeSel(diff:Int = 0)
+	public function new(song:Song) 
 	{
-		texts[curSel].color = 0xFFFFFFFF;
-
-		curSel += diff;
-		
-		if (curSel < 0)
-			curSel += alts.length;
-		else if (curSel >= alts.length)
-			curSel -= alts.length;
-
-		texts[curSel].color = 0xFFFFFF00;
+		super();
+		this.song = song;
 	}
 
 	override function create()
 	{
-		add(new FlxText(0, 5, FlxG.width, songMeta.songName).setFormat(null, 20, 0xFFFFFFFF, CENTER));
+		var songTxt = new FlxText(0, 5, FlxG.width, song.songId);
+		songTxt.setFormat(null, 20, 0xFFFFFFFF, CENTER);
+		add(songTxt);
 
-		for (id in 0...alts.length){
-			var alt = alts[id];
-			var text = new FlxText(20, 20 + id * 20 , (FlxG.width-20) / 2, alt, 16);
+		var y = songTxt.y + songTxt.height + 20;
+		var spacing = 20;
+		
+		for (idx => chartId in song.charts) {
+			var y = y + idx * spacing;
+			var w2 = FlxG.width / 2;
 
-			// uhhh we don't save separate highscores for other chart difficulties oops
-			// var scoreTxt = new FlxText(text.x + text.width, text.y, text.fieldWidth, Highscore.getScore(songMeta.songName));
-
-			texts[id] = text;
-
+			var text = new FlxText(-10, y, w2, chartId, 16);
+			text.alignment = RIGHT;
+			texts[idx] = text;
 			add(text);
+
+			var scoreTxt = new FlxText(w2 + 10, text.y, w2, Std.string(Highscore.getScore(song.songId, chartId)), 16);
+			scoreTxt.alignment = LEFT;
+			add(scoreTxt);
 		}
 
 		changeSel();
 	}
 
-	override public function update(e){
-		if (controls.UI_DOWN_P)
-			changeSel(1);
-		if (controls.UI_UP_P)
-			changeSel(-1);
+	function changeSel(diff:Int = 0)
+	{
+		texts[curSel].color = 0xFFFFFFFF;
+		curSel = CoolUtil.updateIndex(curSel, diff, texts.length);
+		texts[curSel].color = 0xFFFFFF00;
+	}
 
-		if (controls.BACK)
-			MusicBeatState.switchState(new FreeplayState());
-		else if (controls.ACCEPT){
-			var daDiff = alts[curSel];
-			Song.loadSong(songMeta, (daDiff=="normal") ? null : daDiff, curSel);
+	override public function update(e){
+		if (FlxG.keys.justPressed.UP || FlxG.keys.justPressed.W)
+			changeSel(-1);
+		if (FlxG.keys.justPressed.DOWN || FlxG.keys.justPressed.S)
+			changeSel(1);
+
+		if (FlxG.keys.justPressed.BACKSPACE || FlxG.keys.justPressed.ESCAPE)
+			this.close();
+		else if (FlxG.keys.justPressed.ENTER) {
+			Song.loadSong(song, song.charts[curSel]);
+
 			if (FlxG.keys.pressed.SHIFT)
 				LoadingState.loadAndSwitchState(new funkin.states.editors.ChartingState());
 			else
@@ -277,12 +274,4 @@ class SongChartSelec extends MusicBeatState
 
 		super.update(e);
 	} 
-
-	public function new(WHO:Song, alts) 
-	{
-		super();
-		
-		songMeta = WHO;
-		this.alts = alts;
-	}
 }

@@ -1,6 +1,6 @@
 package funkin.data;
 
-import funkin.objects.Note;
+import funkin.objects.notes.Note;
 
 /**
  * Defines how a judgment interacts w/ the combo count
@@ -255,9 +255,19 @@ class JudgmentManager {
 					if (judge != null) return judge;
 				}
 
+				if (note.defaultJudgement != null) {
+					if (diff <= getWindow(note.defaultJudgement))
+						return note.defaultJudgement;
+
+					return UNJUDGED;
+				}
+
+
 				if (note.hitCausesMiss) {
 					if (diff <= getWindow(MISS_MINE))
 						return MISS_MINE;
+
+					return UNJUDGED;
 				}
 				
 				return judgeTimeDiff(diff);

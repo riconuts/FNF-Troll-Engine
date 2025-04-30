@@ -222,10 +222,8 @@ class PauseSubState extends MusicBeatSubstate
 		var cam:FlxCamera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
 		this.cameras = [cam];
 
-		bg = new FlxSprite(FlxG.width / 2 - 1, FlxG.height / 2 -1).makeGraphic(2, 2);
-		bg.scale.set(FlxG.width, FlxG.height);
+		bg = CoolUtil.blankSprite(FlxG.width, FlxG.height, 0xFF000000);
 		bg.scrollFactor.set();
-		bg.color = 0xFF000000;
 		bg.alpha = 0.0;
 		add(bg);
 

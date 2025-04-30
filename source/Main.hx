@@ -1,9 +1,11 @@
 package;
 
+import haxe.io.Path;
 import haxe.CallStack;
 import openfl.display.Sprite;
 import openfl.display.FPS;
 import lime.app.Application;
+import lime.graphics.Image;
 import flixel.FlxG;
 import flixel.FlxState;
 
@@ -55,6 +57,7 @@ class Main extends Sprite
 	public static var recentRelease:Release;
 
 	////
+	public static var game:FNFGame;
 	public static var fpsVar:FPS;
 	public static var bread:Bread;
 
@@ -65,6 +68,24 @@ class Main extends Sprite
 	#end
 
 	////
+
+	#if desktop
+	// stolen from psych engine lol
+	static function __init__(){
+		var configPath:String = Path.directory(Path.withoutExtension(#if hl Sys.getCwd() #else Sys.programPath() #end));
+
+		#if windows
+		configPath += "/alsoft.ini";
+		#elseif mac
+		configPath = Path.directory(configPath) + "/Resources/alsoft.conf";
+		#elseif linux
+		configPath += "/alsoft.conf";
+		#end
+
+		Sys.putEnv("ALSOFT_CONF", configPath);
+	}
+	#end
+
 	public function new() {
 		super();
 
@@ -129,14 +150,18 @@ class Main extends Sprite
 		////		
 		StartupState.nextState = nextState;
 
-		var game = new FNFGame(gameWidth, gameHeight, initialState, framerate, framerate, skipSplash, startFullscreen);
+		game = new FNFGame(gameWidth, gameHeight, initialState, framerate, framerate, skipSplash, startFullscreen);
 		addChild(game);
+
+		#if linux
+		FlxG.stage.window.setIcon(Image.fromFile("icon.png"));
+		#end
 
 		fpsVar = new FPS(10, 3, 0xFFFFFF);
 		fpsVar.visible = false;
 		addChild(fpsVar);
 
-		#if BREAD_ALLOWED
+		#if FUNNY_ALLOWED
 		bread = new Bread();
 		bread.visible = false;
 		addChild(bread);
