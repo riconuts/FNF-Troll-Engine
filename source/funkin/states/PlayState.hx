@@ -708,10 +708,6 @@ class PlayState extends MusicBeatState
 
 		// SONG SPECIFIC SCRIPTS
 		var foldersToCheck:Array<String> = Paths.getFolders('songs/$songId');
-		#if PE_MOD_COMPATIBILITY
-		for (dir in Paths.getFolders('data/$songId'))
-			foldersToCheck.push(dir);
-		#end
 
 		var filesPushed:Array<String> = [];
 		for (folder in foldersToCheck) {
@@ -1629,7 +1625,7 @@ class PlayState extends MusicBeatState
 		}
 
 		// create note type scripts
-		final notetypeFolders = ["notetypes", #if PE_MOD_COMPATIBILITY "custom_notetypes" #end];
+		final notetypeFolders = ["notetypes"];
 		for (notetype in noteTypeMap.keys()) {
 			var script = createFirstScriptFromFolders(notetype, notetypeFolders, true);
 			if (script != null) {
@@ -1639,7 +1635,7 @@ class PlayState extends MusicBeatState
 		}
 
 		// create event scripts
-		final eventFolders = ["events", #if PE_MOD_COMPATIBILITY "custom_events" #end];
+		final eventFolders = ["events"];
 		for (eventName in eventPushedMap.keys()) {
 			var script:FunkinScript = createFirstScriptFromFolders(eventName, eventFolders, true);
 			if (script != null) {

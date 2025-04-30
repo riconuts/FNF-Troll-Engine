@@ -2851,12 +2851,8 @@ class ChartingState extends MusicBeatState
 		if(notetype == '') return;
 		if(notetypeScripts.exists(notetype)) return;
 
-		#if PE_MOD_COMPATIBILITY
-		for (file in ["notetypes", "custom_notetypes"]) {
-			var baseScriptFile:String = '$file/$notetype';
-		#else
+		{
 			var baseScriptFile:String = 'notetypes/$notetype';
-		#end
 			var exts = Paths.HSCRIPT_EXTENSIONS; // TODO: maybe FunkinScript.extensions, FunkinScript.hscriptExtensions and FunkinScript.luaExtensions??
 			for (ext in exts)
 			{
@@ -2872,9 +2868,7 @@ class ChartingState extends MusicBeatState
 					}
 				}
 			}
-		#if PE_MOD_COMPATIBILITY
 		}
-		#end
 	}
 
 	function setupNoteData(i:Array<Dynamic>, isNextSection:Bool):Note
