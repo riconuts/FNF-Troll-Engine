@@ -14,16 +14,6 @@ using math.VectorHelpers;
 
 class FlxSprite3D extends FlxSprite {
 	public var z:Float = 0;
-	override function makeGraphic(width:Int, height:Int, color = FlxColor.WHITE, unique = false, ?key:String):FlxSprite3D{
-		super.makeGraphic(width, height, color, unique, key);
-		return this;
-	}
-
-	override function loadGraphic(graphic:FlxGraphicAsset, animated = false, frameWidth = 0, frameHeight = 0, unique = false, ?key:String):FlxSprite3D
-	{
-		super.loadGraphic(graphic, animated, frameWidth, frameHeight, unique, key);
-		return this;
-	}
 
 	public var yaw:Float = 0;
 	public var pitch:Float = 0;
@@ -203,5 +193,17 @@ class FlxSprite3D extends FlxSprite {
 		if (FlxG.debugger.drawDebug)
 			drawDebug();
 		#end
+	}
+
+	override function makeGraphic(width:Int, height:Int, color = FlxColor.WHITE, unique = false, ?key:String):FlxSprite3D
+	{
+		super.makeGraphic(width, height, color, unique, key);
+		return this;
+	}
+
+	override function loadGraphic(graphic:FlxGraphicAsset, animated = false, frameWidth = 0, frameHeight = 0, unique = false, ?key:String):FlxSprite3D
+	{
+		super.loadGraphic(graphic, animated, frameWidth, frameHeight, unique, key);
+		return this;
 	}
 }
