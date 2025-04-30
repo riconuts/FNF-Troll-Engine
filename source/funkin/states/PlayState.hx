@@ -2191,11 +2191,11 @@ class PlayState extends MusicBeatState
 		else
 			camStageUnderlay.bgColor = Math.floor(0xFF * ClientPrefs.stageOpacity) * 0x1000000;
 
-		var ret:Dynamic = callOnScripts('onStateDraw');
+		var ret:Dynamic = callOnScripts('onDraw');
 		if (ret != Globals.Function_Stop) 
 			super.draw();
 
-		callOnScripts('onStateDrawPost');
+		callOnScripts('onDrawPost');
 	}
 
 	function sortByZIndex(Obj1:{zIndex:Float}, Obj2:{zIndex:Float}):Int

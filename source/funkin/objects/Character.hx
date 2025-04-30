@@ -388,10 +388,10 @@ class Character extends FlxSprite
 	}
 
 	override function draw(){
-		if(callOnScripts("onDraw") == Globals.Function_Stop)
+		if (callOnScripts("onCharacterDraw") == Globals.Function_Stop)
 			return;
 		super.draw();
-		callOnScripts("onDrawPost");
+		callOnScripts("onCharacterDrawPost");
 	}
 
 	public var colorOverlay(default, set):FlxColor = FlxColor.WHITE;
