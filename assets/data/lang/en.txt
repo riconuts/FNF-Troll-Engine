@@ -53,6 +53,7 @@ highscore=Hi-Score
 rating=Rating
 accuracy=Accuracy ## For Kade HUD
 nps=NPS
+rank=Rank
 peak=Peak
 combo=Combo
 peakcombo=Peak Combo

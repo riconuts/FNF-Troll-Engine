@@ -24,12 +24,13 @@ class TraditionalHUD extends CommonHUD
 	// cached because dont wanna be doing that shit every update cycle lmao
 	// even though it probably doesnt matter since it caches it the first time
 	// i feel like this is probably faster than going through map.get each time
-	var scoreString = Paths.getString("score");
-	var hiscoreString = Paths.getString("highscore");
-	var ratingString = Paths.getString("rating");
-	var cbString = Paths.getString("cbplural");
-	var npsString = Paths.getString("nps");
-	var botplayString = Paths.getString("botplayMark");
+	var scoreString = Paths.getString("score", "Score");
+	var hiscoreString = Paths.getString("highscore", "Hi-Score");
+	var ratingString = Paths.getString("rating", "Rating");
+	var rankString = Paths.getString("rank", "Rank");
+	var cbString = Paths.getString("cbplural", "Combo Breaks");
+	var npsString = Paths.getString("nps", "NPS");
+	var botplayString = Paths.getString("botplayMark", "[BOTPLAY]");
 
 	var songHighscore:Int;
 	var songWifeHighscore:Float;
@@ -169,32 +170,61 @@ class TraditionalHUD extends CommonHUD
 		isHighscore = songWifeHighscore != 0 && totalNotesHit > songWifeHighscore;
 	}
 
-	inline function getScoreText(){	
-		var text:String = '${isHighscore ? hiscoreString : scoreString}: $shownScore';
-		if (!showJudgeCounter) text += separator + '$cbString: $comboBreaks';
-		text += separator + '$ratingString: ${getGradeText()}';
+	inline function getStatusText():String {
+		if (PlayState.instance.cpuControlled && useSubtleMark)
+			return botplayString;
 
+		var text:String = getScoreText();
+
+		if (!showJudgeCounter) 
+			text += separator + getComboBreaksText();
+		
 		if (ClientPrefs.npsDisplay)
-			text += separator + ('$npsString: $nps / $npsPeak');
+			text += separator + getNPSText();
+
+		if (grade != "?") {
+			text += separator + getRatingText();
+			text += separator + getClearTypeText();
+		}
+		
+		text += separator + getGradeText();
 
 		return text;
 	}
 
-	inline function getGradeText(){
-		if (grade == "?")
-			return grade;
+	inline function getScoreText():String
+		return '${isHighscore ? hiscoreString : scoreString}: $shownScore';
 
-		final ratFC = ratingFC;
-		final comboName = stats.accuracySystem == WIFE3 && ratFC == stats.gfc ? stats.fc : ratFC;
-		final ratPerc = CoolMath.floorDecimal(ratingPercent * 100, 2);
+	inline function getComboBreaksText():String
+		return '$cbString: $comboBreaks';
 
-		return '$ratPerc%'+separator+'$grade [$comboName]';
+	inline function getNPSText():String
+		return '$npsString: $nps / $npsPeak';
+
+	inline function getRatingText():String
+	{
+		final ratPerc:Float = CoolMath.floorDecimal(ratingPercent * 100, 2);
+		return '$ratingString: $ratPerc%';
+	}
+
+	inline function getClearTypeText():String
+	{
+		var clearType:String = ratingFC;
+
+		if (stats.accuracySystem == WIFE3 && clearType == stats.gfc)
+			clearType = stats.fc;
+		
+		return '[$clearType]';
+	}
+
+	inline function getGradeText() {
+		return '$rankString: $grade';
 	}
 
 	override function update(elapsed:Float)
 	{
 		if (isUpdating)
-			scoreTxt.text = PlayState.instance.cpuControlled && useSubtleMark ? botplayString : getScoreText();
+			scoreTxt.text = getStatusText();
 		
 		if (judgeCounters != null) {
 			for (k => v in judgements)
