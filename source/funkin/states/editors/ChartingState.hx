@@ -1151,14 +1151,11 @@ class ChartingState extends MusicBeatState
 			key++;
 		}
 
-		#if (sys && (hscript || LUA_ALLOWED))
+		#if (sys && (hscript))
 		var directories:Array<String> = Paths.getFolders('notetypes');
 		var allowedFormats = [
 			#if hscript
 			'.hscript',
-			#end
-			#if LUA_ALLOWED
-			'.lua'
 			#end
 		];
 		for (directory in directories)
@@ -1242,7 +1239,7 @@ class ChartingState extends MusicBeatState
 
 		descText = new FlxText(20, 200, 0, eventStuff[0][0]);
 		
-		#if (sys && (hscript || LUA_ALLOWED))
+		#if (sys && (hscript))
 		var eventsLoaded:Map<String, Bool> = new Map();
 		var directories:Array<String> = Paths.getFolders('events');
 		for (directory in directories)

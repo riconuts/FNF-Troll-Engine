@@ -31,12 +31,11 @@ class Paths
 	inline public static var VIDEO_EXT = "mp4";
 
 	public static final HSCRIPT_EXTENSIONS:Array<String> = ["hscript", "hxs", "hx"];
-	public static final LUA_EXTENSIONS:Array<String> = ["lua"];
 	public static final SCRIPT_EXTENSIONS:Array<String> = [
 		"hscript",
 		"hxs",
 		"hx",
-		#if LUA_ALLOWED "lua" #end]; // TODo: initialize this by combining the top 2 vars ^
+	];
 
 
 	public static function getFileWithExtensions(scriptPath:String, extensions:Array<String>) {
@@ -61,14 +60,6 @@ class Paths
 	{
 		#if HSCRIPT_ALLOWED
 		return getFileWithExtensions(scriptPath, Paths.HSCRIPT_EXTENSIONS);
-		#else
-		return null;
-		#end
-	}
-
-	public inline static function getLuaPath(scriptPath:String) {
-		#if LUA_ALLOWED
-		return getFileWithExtensions(scriptPath, Paths.LUA_EXTENSIONS);
 		#else
 		return null;
 		#end
@@ -264,16 +255,6 @@ class Paths
 	inline static public function inst(song:String):Null<Sound>
 	{
 		return track(song, "Inst");
-	}
-
-	inline static public function lua(key:String, ?library:String)
-	{
-		for (ext in Paths.LUA_EXTENSIONS) {
-			var r = getPreloadPath('$key.$ext');
-			if (Paths.exists(r))
-				return r;
-		}
-		return null;
 	}
 
 	inline static public function withoutEndingSlash(path:String)
