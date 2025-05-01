@@ -493,8 +493,10 @@ class StoryModeState extends MusicBeatState {
 			
 		}
 
-		if(controls.BACK)
+		if(controls.BACK) {
+			FlxG.sound.play(Paths.sound('cancelMenu'));
 			MusicBeatState.switchState(new funkin.states.MainMenuState());
+		}
 	}
 
 	function updateTexts(){
