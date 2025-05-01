@@ -1,7 +1,7 @@
 {
 	"name": "DADDY DEAREST",
 	"asset": "storymenu/titles/week1",
-	"songs": ["Bopeebo", "Fresh", "Dadbattle"],
+	"songs": ["bopeebo", "fresh", "dadbattle"],
 	"props": [
 		{
 			"characterId": 0,

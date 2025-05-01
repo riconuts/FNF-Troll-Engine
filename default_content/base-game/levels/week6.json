@@ -1,7 +1,7 @@
 	{
 	"name": "HATING SIMULATOR FT. MAOWLING",
 	"asset": "storymenu/titles/week6",
-	"songs": ["Senpai", "Roses", "Thorns"],
+	"songs": ["senpai", "roses", "thorns"],
 	"props": [
 		{
 			"characterId": 0,

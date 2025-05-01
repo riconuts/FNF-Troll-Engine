@@ -2,9 +2,9 @@
 	"name": "SPOOKY MONTH",
 	"asset": "storymenu/titles/week2",
 	"songs": [
-		"Spookeez",
-		"South",
-		"Monster"
+		"spookeez",
+		"south",
+		"monster"
 	],
 	"props": [
 		{

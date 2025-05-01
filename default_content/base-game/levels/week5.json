@@ -1,7 +1,7 @@
 	{
 	"name": "RED SNOW",
 	"asset": "storymenu/titles/week5",
-	"songs": ["Cocoa", "Eggnog", "Winter Horrorland"],
+	"songs": ["cocoa", "eggnog", "winter-horrorland"],
 	"props": [
 		{
 			"characterId": 0,

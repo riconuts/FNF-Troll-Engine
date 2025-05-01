@@ -1,6 +1,7 @@
-function getDisplayedSongs(difficulty){
+function getDisplayedSongs(difficulty:String):Array<String>
+{
 	var songs = ["Darnell", "Lit Up", "2hot"];
-	if(Highscore.weekCompleted.get("weekend1"))
+	if (Highscore.weekCompleted.get("weekend1"))
 		songs.push("Blazin'");
 
 	return songs;

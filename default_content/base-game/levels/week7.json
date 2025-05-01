@@ -1,7 +1,7 @@
 {
 	"name": "TANKMAN FT. JOHNNYUTAH",
 	"asset": "storymenu/titles/week7",
-	"songs": ["Ugh", "Guns", "Stress"],
+	"songs": ["ugh", "guns", "stress"],
 	"props": [
 		{
 			"characterId": 0,

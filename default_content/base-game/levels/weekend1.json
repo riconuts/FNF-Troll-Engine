@@ -2,7 +2,7 @@
 	"bgColor": "#9F56F3",
 	"name": "DUE DEBTS",
 	"asset": "storymenu/titles/weekend1",
-	"songs": ["Darnell", "Lit Up", "2hot", "Blazin"],
+	"songs": ["darnell", "lit-up", "2hot", "blazin"],
 	"props": [
 		{
 			"characterId": 0,

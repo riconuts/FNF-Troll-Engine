@@ -1,7 +1,7 @@
 {
 	"name": "PICO",
 	"asset": "storymenu/titles/week3",
-	"songs": ["Pico", "Philly Nice", "Blammed"],
+	"songs": ["pico", "philly-nice", "blammed"],
 	"props": [
 		{
 			"characterId": 0,

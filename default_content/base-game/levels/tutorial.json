@@ -2,7 +2,7 @@
 	"index": 0,
 	"name": "FUNKIN' VIRGIN",
 	"asset": "storymenu/titles/tutorial",
-	"songs": ["Tutorial"],
+	"songs": ["tutorial"],
 	"props": [
 		{
 			"template": "data/storyProps/bf"
