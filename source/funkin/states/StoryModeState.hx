@@ -163,24 +163,30 @@ class StoryModeState extends MusicBeatState {
 	var levelBGGroups:Array<FlxSpriteGroup> = []; // used for fading when going between levels
 	var levelProps:Array<FlxSpriteGroup> = [];
 
+	var selectedDifficultyIdx:Int = 1;
+	var selectedDifficultyName:String = 'normal';
+	var selectedLevelDifficulties:Array<String> = [];
+
 	// this will be moved to something else i'm currently working on :o
 	public static function scanContentLevels(folder:String):Array<Level>
 	{
-		var levelDir = Paths.getFolderPath(folder) + 'levels/';
+		var levelDir = Paths.getFolderPath(folder) + '/levels/';
 
-		var contentLevelNames:Array<String> = [];
+		var contentLevelPaths:Array<String> = [];
 		Paths.iterateDirectory(levelDir, function(file:String){
 			var name = Path.withoutExtension(levelDir + file);
-			if(!contentLevelNames.contains(name))
-				contentLevelNames.push(name);
+			if(!contentLevelPaths.contains(name))
+				contentLevelPaths.push(name);
 		});
 
 		var contentLevels:Array<Level> = [];
-		for(name in contentLevelNames)
-			contentLevels.push(Level.fromFile(name, contentLevelNames.indexOf(name)));
+		for (filePath in contentLevelPaths) {
+			var id:String = Path.withoutDirectory(filePath);
+			var index:Int = contentLevelPaths.indexOf(filePath);
+			contentLevels.push(Level.fromFile(filePath, id, folder, index));
+		}
 
 		contentLevels.sort((a,b)-> return a.getIndex() - b.getIndex());
-		
 		return contentLevels;
 	}
 
@@ -302,8 +308,14 @@ class StoryModeState extends MusicBeatState {
 		if (controls.UI_UP_P)
 			changeLevel(-1);
 
+		if (controls.UI_RIGHT_P)
+			changeDifficulty(1);
+
+		if (controls.UI_LEFT_P)
+			changeDifficulty(-1);
+
 		if(controls.ACCEPT){
-			
+			playLevel();
 		}
 
 		if(controls.BACK) {
@@ -315,7 +327,7 @@ class StoryModeState extends MusicBeatState {
 	function updateTexts(){
 		levelName.text = levels[selectedLevel].name;
 		trackList.text = "TRACKS\n\n";
-		trackList.text += levels[selectedLevel].getDisplayedSongs().join("\n");
+		trackList.text += levels[selectedLevel].getDisplayedSongs(selectedDifficultyIdx).join("\n");
 	}
 	
 	function changeLevel(selection:Int, abs:Bool = false, silent:Bool = false){
@@ -328,11 +340,53 @@ class StoryModeState extends MusicBeatState {
 		for (group in levelProps)
 			group.visible = group.ID == newLevel;
 
+		selectedLevelDifficulties = levels[newLevel].getDifficulties();
+		selectedDifficultyIdx = CoolUtil.updateDifficultyIndex(selectedDifficultyIdx, selectedDifficultyName, selectedLevelDifficulties);
+		selectedDifficultyName = selectedLevelDifficulties[selectedDifficultyIdx];
 		
 		if (!silent)
 			FlxG.sound.play(Paths.sound("scrollMenu"));
 
 		selectedLevel = newLevel;
 		updateTexts();
+	}
+
+	function changeDifficulty(selection:Int, abs:Bool = false){
+		var newDiff = abs ? selection : selectedDifficultyIdx + selection;
+		if (newDiff < 0)
+			newDiff = selectedLevelDifficulties.length - 1;
+		else if(newDiff >= selectedLevelDifficulties.length)
+			newDiff = 0;
+
+		selectedDifficultyName = selectedLevelDifficulties[newDiff];
+		selectedDifficultyIdx = newDiff;
+		updateTexts();
+
+		trace(selectedDifficultyIdx, selectedDifficultyName);
+	}
+
+	function playLevel() {
+		var level:Level = levels[selectedLevel];
+		if (level == null) return;
+
+		trace('sowy');
+		var playlist = level.getPlaylist();
+		if (playlist == null || playlist.length == 0) return;
+		trace('okay');
+
+		var toPlay = playlist[0];
+		var chartId = selectedDifficultyName;
+
+		trace(toPlay, chartId);
+
+		PlayState.SONG = toPlay.getSwagSong(chartId);
+		PlayState.difficulty = toPlay.charts.indexOf(chartId);
+		PlayState.difficultyName = chartId;
+		PlayState.isStoryMode = true;
+
+		PlayState.songPlaylist = playlist;
+		PlayState.songPlaylistIdx = 0;
+
+		MusicBeatState.switchState(new PlayState());
 	}
 }

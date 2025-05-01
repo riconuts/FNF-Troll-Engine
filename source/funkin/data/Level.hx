@@ -16,7 +16,7 @@ using StringTools;
 class Level {
 	var script:FunkinHScript;
 
-	public static function fromFile(fileName:String, ?index:Int = 0, ?id:String){
+	public static function fromFile(fileName:String, ?id:String, folder:String = "", index:Int = 0){
 		var json:Null<JSONLevelData> = Paths.exists(fileName + ".json") ? Json.parse(Paths.getContent(fileName + ".json")) : null;
 
 
@@ -30,7 +30,8 @@ class Level {
 		var level:Level = new Level();
 		level.bgColor = CoolUtil.colorFromString(json?.bgColor ?? "#F9CF51");
 		
-		level.id = id ?? json?.id ?? Path.withoutDirectory(fileName);
+		level.id = id ?? json?.id;
+		level.folder = folder;
 		level.index = json?.index ?? index;
 		level.name = json?.name ?? "NAME DOESNT EXIST IDIOT";
 		level.asset = json?.asset ?? "storymenu/titles/week1";
@@ -58,6 +59,7 @@ class Level {
 	public function new(){}
 
 	public var id:String = 'broken';
+	public var folder:String = '';
 	public var bgColor:FlxColor = 0xFFF9CF51;
 	public var index:Int = 0;
 	public var name:String = "PLACEHOLDER";
@@ -96,10 +98,10 @@ class Level {
 	}
 
 	/**
-	 * Returns an array of song IDs to be played during the level
+	 * Returns an array of songs to be played during the level
 	 */
-	public function getPlaylist(difficultyID:Int = 1):Array<String> 
-		return cast callScript("getPlaylist", [difficultyID]) ?? [for(song in songs)song.songName];
+	public function getPlaylist(difficultyID:Int = 1):Array<Song>
+		return cast callScript("getPlaylist", [difficultyID]) ?? [for (song in songs) new Song(song.songName, folder)];
 	
 
 	/**
