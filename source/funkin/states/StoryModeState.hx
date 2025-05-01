@@ -162,35 +162,49 @@ class StoryModeState extends MusicBeatState {
 	var levelTitles:FlxTypedSpriteGroup<LevelTitle>;
 	var levelBGGroups:Array<FlxSpriteGroup> = []; // used for fading when going between levels
 	var levelProps:Array<FlxSpriteGroup> = [];
+
+	// this will be moved to something else i'm currently working on :o
+	public static function scanContentLevels(folder:String):Array<Level>
+	{
+		var levelDir = Paths.getFolderPath(folder) + 'levels/';
+
+		var contentLevelNames:Array<String> = [];
+		Paths.iterateDirectory(levelDir, function(file:String){
+			var name = Path.withoutExtension(levelDir + file);
+			if(!contentLevelNames.contains(name))
+				contentLevelNames.push(name);
+		});
+
+		var contentLevels:Array<Level> = [];
+		for(name in contentLevelNames)
+			contentLevels.push(Level.fromFile(name, contentLevelNames.indexOf(name)));
+
+		contentLevels.sort((a,b)-> return a.getIndex() - b.getIndex());
+		
+		return contentLevels;
+	}
+
+	public static function getStoryModeLevels():Array<Level>
+	{
+		var levels:Array<Level> = [];
+		var shitToCheck = [''];
+		for (mod in Paths.getModDirectories())
+			shitToCheck.push(mod);
+
+		for (folder in shitToCheck) {
+			for (level in scanContentLevels(folder))
+				levels.push(level);
+		}
+
+		return levels;
+	}
 	
 	public override function create(){
 		if (FlxG.sound.music == null || !FlxG.sound.music.playing)
 			MusicBeatState.playMenuMusic();
 
 		// Get the levels
-		var shitToCheck = [
-			for (mod in Paths.getModDirectories())mod
-		];
-		shitToCheck.insert(0, 'assets');
-
-		for (folderPath in shitToCheck) {
-			var levelDir = folderPath == 'assets' ? Paths.getPreloadPath('levels/') : Paths.mods('$folderPath/levels/');
-
-			var contentLevelNames:Array<String> = [];
-			Paths.iterateDirectory(levelDir, function(file:String){
-				var name = Path.withoutExtension(levelDir + file);
-				if(!contentLevelNames.contains(name))
-					contentLevelNames.push(name);
-			});
-
-			var contentLevels:Array<Level> = []; // for sorting reasons
-			for(name in contentLevelNames)
-				contentLevels.push(Level.fromFile(name, contentLevelNames.indexOf(name)));
-
-			contentLevels.sort((a,b)-> return a.getIndex() - b.getIndex());
-			
-			for(level in contentLevels)levels.push(level);
-		}
+		levels = getStoryModeLevels();
 
 		levelBG = new FlxSprite(0, 56).makeGraphic(FlxG.width, 400, 0xFFFFFFFF);
 		levelBG.color = 0xFFF9CF51;
