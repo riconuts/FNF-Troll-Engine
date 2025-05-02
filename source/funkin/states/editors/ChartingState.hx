@@ -1873,8 +1873,12 @@ class ChartingState extends MusicBeatState
 		Conductor.pauseSong();
 
 	// set tracks to the conductor song position and play them
-	inline function resumeTracks()
+	inline function resumeTracks(){
 		Conductor.resumeSong();
+		for (track in soundTracksMap){
+			track.pitch = playbackSpeed;
+		}
+	}
 
 	var inputBlocked = false;
 	function checkInputBlocked():Bool {
