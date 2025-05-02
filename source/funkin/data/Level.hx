@@ -60,6 +60,9 @@ class Level {
 
 	public function new(){}
 
+	public function toString()
+		return '$folder:$id';
+
 	public var id:String = 'broken';
 	public var folder:String = '';
 	public var bgColor:FlxColor = 0xFFF9CF51;
