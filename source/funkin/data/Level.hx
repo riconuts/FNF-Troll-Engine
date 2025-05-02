@@ -14,8 +14,6 @@ using funkin.CoolerStringTools;
 using StringTools;
 
 class Level {
-	var script:FunkinHScript;
-
 	public static function fromFile(fileName:String, ?id:String, folder:String = "", index:Int = 0){
 		var json:Null<JSONLevelData> = Paths.exists(fileName + ".json") ? Json.parse(Paths.getContent(fileName + ".json")) : null;
 
@@ -27,34 +25,36 @@ class Level {
 			return this;
 		} */
 
-		var level:Level = new Level();
-		level.bgColor = CoolUtil.colorFromString(json?.bgColor ?? "#F9CF51");
-		
-		level.id = id ?? json?.id;
-		level.folder = folder;
-		level.index = json?.index ?? index;
-		level.name = json?.name ?? "NAME DOESNT EXIST IDIOT";
-		level.asset = json?.asset ?? "storymenu/titles/week1";
-		level.difficulties = json?.difficulties ?? level.difficulties;
-		level.props = json?.props ?? level.props;
-		level.songList = json?.songs ?? ["Test"];
-		level.songs = [for (songId in level.songList) new Song(songId, folder)];
+		var scriptedLevel:ScriptedLevel = null;
+		var scriptPath:Null<String> = null;
 
 		for (ext in Paths.HSCRIPT_EXTENSIONS) {
-			var scriptPath = '$fileName.$ext';
-			if (Paths.exists(scriptPath))
-				level.script = FunkinHScript.fromFile(scriptPath, level.name, ["this"=>level]);
+			var _scriptPath = '$fileName.$ext';
+			if (Paths.exists(_scriptPath)) {
+				scriptPath = _scriptPath;
+				scriptedLevel = new ScriptedLevel();
+				break;
+			}
+		}
+
+		var level = scriptedLevel ?? new Level();
+
+		level.id = id ?? json?.id;
+		level.folder = folder;
+		level.songList = json?.songs ?? ["Test"];
+		level.songs = [for (songId in level.songList) new Song(songId, folder)];
+		level.difficulties = json?.difficulties ?? level.difficulties;
+		level.name = json?.name ?? "NAME DOESNT EXIST IDIOT";
+		level.asset = json?.asset ?? "storymenu/titles/week1";
+		level.props = json?.props ?? level.props;
+		level.index = json?.index ?? index;
+		level.bgColor = CoolUtil.colorFromString(json?.bgColor ?? "#F9CF51");
+
+		if (scriptedLevel != null) {
+			scriptedLevel.script = FunkinHScript.fromFile(scriptPath, level.name, ["this" => level]);
 		}
 
 		return level;
-	}
-
-	function callScript(call:String, ?args:Array<Dynamic>):Null<Dynamic>
-	{
-		if(script != null && script.exists(call))
-			return script.call(call, args);
-
-		return null;
 	}
 
 	public function new(){}
@@ -72,60 +72,71 @@ class Level {
 
 	/**
 	 * Returns a file path to the title asset
-	 */
-	public function getAsset():String {
-		return callScript("getAsset") ?? asset;
+	**/
+	public function getAsset():String
+	{
+		return asset;
 	}
 
 	/**
 	 * Returns an integer to decide placement of the level
-	 */
-	public function getIndex():Int {
-		return callScript("getIndex") ?? index;
+	**/
+	public function getIndex():Int
+	{
+		return index;
 	}
 
 	/**
 	 * Returns an array of difficulties available to be played for the level
-	 */
+	**/
 	public function getDifficulties():Array<String>
 	{ 
-		return callScript("getDifficulties") ?? difficulties;
+		return difficulties;
 	}
 
 	/**
 	 * Returns an array of props to show in the story menu
-	 */
-	public function getProps():Array<LevelPropData> {
-		return callScript("getProps") ?? props;
+	**/
+	public function getProps():Array<LevelPropData>
+	{
+		return props;
 	}
 
 	/**
 	 * Returns an array of songs to be played during the level
-	 */
+	**/
 	public function getPlaylist(difficultyId:String = 'normal'):Array<Song>
-		return cast callScript("getPlaylist", [difficultyId]) ?? songs;
+	{
+		return songs;
+	}
 	
 
 	/**
 	 * Returns an array of song names to be displayed in the story menu
-	 */
+	**/
 	public function getDisplayedSongs(difficultyId:String = "normal"):Array<String>
-		return cast callScript("getDisplayedSongs", [difficultyId]) ?? [for (song in songs) song==null ? "UNKNOWN" : song.getMetadata(difficultyId).songName];
+	{
+		return [for (song in songs) song==null ? "UNKNOWN" : song.getMetadata(difficultyId).songName];
+	}
 	
 
 	/**
 	 * WIP (still gotta add to freeplay)
 	 * Returns an array of song data to be shown in freeplay. 
-	 */
-	public function getFreeplaySongs():Array<Song> 
-		return cast callScript("getFreeplaySongs") ?? songList;
+	**/
+	public function getFreeplaySongs():Array<Song>
+	{
+		return songs;
+	}
 	
 
 	/**
 	 * Returns a LevelTitle object for the story menu
-	 */
+	**/
 	public function createTitle()
-		return callScript("createTitle") ?? new LevelTitle(0, 0, getAsset());
+	{
+		return new LevelTitle(0, 0, getAsset());
+	}
 	
 
 	/**
@@ -134,13 +145,10 @@ class Level {
 	 * Sometimes includes a background in Psych Engine and similar engines
 	 * @param group The group to be populated by props.
 	 * @param bgGroup The background group to be populated by props. This group is automatically layered behind all props and fades when changing levels.
-	 */
-
-	public function populateGroup(group:FlxSpriteGroup, bgGroup:FlxSpriteGroup){
-		if (callScript("prePopulateGroup", [group, bgGroup]) == Globals.Function_Stop)
-			return;
-
-		for(propData in getProps()){
+	**/
+	public function populateGroup(group:FlxSpriteGroup, bgGroup:FlxSpriteGroup)
+	{
+		for (propData in getProps()) {
 			var prop = LevelStageProp.buildFromData(propData);
 			var layer = propData.layer.toLowerCase();
 
@@ -149,6 +157,102 @@ class Level {
 			else
 				group.add(prop);
 		}
+	}
+}
+
+class ScriptedLevel extends Level
+{
+	public var script:FunkinHScript;
+
+	function callScript(call:String, ?args:Array<Dynamic>):Null<Dynamic>
+	{
+		if (script != null && script.exists(call))
+			return script.call(call, args);
+
+		return null;
+	}
+
+	/**
+	 * Returns a file path to the title asset
+	**/
+	override public function getAsset():String
+	{
+		return callScript("getAsset") ?? super.getAsset();
+	}
+
+	/**
+	 * Returns an integer to decide placement of the level
+	**/
+	override public function getIndex():Int
+	{
+		return callScript("getIndex") ?? super.getIndex();
+	}
+
+	/**
+	 * Returns an array of difficulties available to be played for the level
+	**/
+	override public function getDifficulties():Array<String>
+	{ 
+		return callScript("getDifficulties") ?? super.getDifficulties();
+	}
+
+	/**
+	 * Returns an array of props to show in the story menu
+	**/
+	override public function getProps():Array<LevelPropData>
+	{
+		return callScript("getProps") ?? super.getProps();
+	}
+
+	/**
+	 * Returns an array of songs to be played during the level
+	**/
+	override public function getPlaylist(difficultyId:String = 'normal'):Array<Song>
+	{
+		return callScript("getPlaylist", [difficultyId]) ?? super.getPlaylist(difficultyId);
+	}
+	
+
+	/**
+	 * Returns an array of song names to be displayed in the story menu
+	**/
+	override public function getDisplayedSongs(difficultyId:String = "normal"):Array<String>
+	{
+		return callScript("getDisplayedSongs", [difficultyId]) ?? super.getDisplayedSongs(difficultyId);
+	}
+
+	/**
+	 * WIP (still gotta add to freeplay)
+	 * Returns an array of song data to be shown in freeplay. 
+	**/
+	override public function getFreeplaySongs():Array<Song>
+	{
+		return callScript("getFreeplaySongs") ?? super.getFreeplaySongs();
+	}
+	
+
+	/**
+	 * Returns a LevelTitle object for the story menu
+	**/
+	override public function createTitle()
+	{
+		return callScript("createTitle") ?? super.createTitle();
+	}
+	
+
+	/**
+	 * Creates the props for the visuals in the story menu.
+	 * This is usually the main characters of the level (BF, GF, and Opponent)
+	 * Sometimes includes a background in Psych Engine and similar engines
+	 * @param group The group to be populated by props.
+	 * @param bgGroup The background group to be populated by props. This group is automatically layered behind all props and fades when changing levels.
+	**/
+	override public function populateGroup(group:FlxSpriteGroup, bgGroup:FlxSpriteGroup)
+	{
+		if (callScript("prePopulateGroup", [group, bgGroup]) == Globals.Function_Stop)
+			return;
+
+		super.populateGroup(group, bgGroup);
 
 		callScript("postPopulateGroup", [group, bgGroup]);
 	}
