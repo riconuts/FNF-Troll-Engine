@@ -163,8 +163,8 @@ class StoryModeState extends MusicBeatState {
 	var levelBGGroups:Array<FlxSpriteGroup> = []; // used for fading when going between levels
 	var levelProps:Array<FlxSpriteGroup> = [];
 
-	var selectedDifficultyIdx:Int = 1;
-	var selectedDifficultyName:String = 'normal';
+	static var selectedDifficultyIdx:Int = 1;
+	static var selectedDifficultyName:String = 'normal';
 	var selectedLevelDifficulties:Array<String> = [];
 
 	// this will be moved to something else i'm currently working on :o
