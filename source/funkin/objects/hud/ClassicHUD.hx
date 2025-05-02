@@ -20,16 +20,16 @@ class ClassicHUD extends CommonHUD {
 		healthBar.iconP2.updateHitbox();
 	}
 
-	public function new(iP1:String, iP2:String, songName:String, stats:Stats)
+	public function new(songName:String, stats:Stats)
 	{
-		super(iP1, iP2, songName, stats);
+		super(songName, stats);
 		healthBar.destroy();
 		remove(healthBar);
 		
 		// Maybe this should use a modified one that looks like V-Slice's instead of Week <=7
 		// Idk lol
 
-		healthBar = new ShittyBar(iP1, iP2);
+		healthBar = new ShittyBar('bf', 'dad');
 		cast (healthBar, ShittyBar).vSlice = true;
 		healthBarBG = healthBar.healthBarBG;
 

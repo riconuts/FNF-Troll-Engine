@@ -88,7 +88,7 @@ class BaseHUD extends FlxSpriteGroup
 	public var npsPeak(get, null):Int = 0;
 	public var judgements(get, null):Map<String, Int>;
 
-	public function new(iP1:String, iP2:String, songName:String, stats:Stats)
+	public function new(songName:String, stats:Stats)
 	{
 		super();
 		this.songName = songName;

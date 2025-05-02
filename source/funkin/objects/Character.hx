@@ -388,10 +388,10 @@ class Character extends FlxSprite
 	}
 
 	override function draw(){
-		if(callOnScripts("onDraw") == Globals.Function_Stop)
+		if (callOnScripts("onCharacterDraw") == Globals.Function_Stop)
 			return;
 		super.draw();
-		callOnScripts("onDrawPost");
+		callOnScripts("onCharacterDrawPost");
 	}
 
 	public var colorOverlay(default, set):FlxColor = FlxColor.WHITE;
@@ -683,21 +683,12 @@ class Character extends FlxSprite
 		}
 		#end
 
-		#if LUA_ALLOWED
-		var luaFile = Paths.getLuaPath(key);
-		if (luaFile != null) {
-			var script = FunkinLua.fromFile(luaFile, luaFile, defaultVars);
-			pushScript(script);
-			return this;
-		}
-		#end
-
 		return this;
 	}
 
 	public function callOnScripts(event:String, ?args:Array<Dynamic>, ignoreStops:Bool = false, ?exclusions:Array<String>, ?scriptArray:Array<Dynamic>, ?vars:Map<String, Dynamic>, ?ignoreSpecialShit:Bool = true):Dynamic
 	{
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+		#if (HSCRIPT_ALLOWED)
 		if (args == null)
 			args = [];
 		if (exclusions == null)
@@ -745,7 +736,7 @@ class Character extends FlxSprite
 
 	public function callScript(script:Dynamic, event:String, ?args:Array<Dynamic>):Dynamic
 	{
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED) // no point in calling this code if you.. for whatever reason, disabled scripting.
+		#if (HSCRIPT_ALLOWED) // no point in calling this code if you.. for whatever reason, disabled scripting.
 		if ((script is FunkinScript))
 		{
 			return callOnScripts(event, args, true, [], [script], [], false);

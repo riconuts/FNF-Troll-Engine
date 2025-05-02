@@ -1151,14 +1151,11 @@ class ChartingState extends MusicBeatState
 			key++;
 		}
 
-		#if (sys && (hscript || LUA_ALLOWED))
+		#if (sys && (hscript))
 		var directories:Array<String> = Paths.getFolders('notetypes');
 		var allowedFormats = [
 			#if hscript
 			'.hscript',
-			#end
-			#if LUA_ALLOWED
-			'.lua'
 			#end
 		];
 		for (directory in directories)
@@ -1242,7 +1239,7 @@ class ChartingState extends MusicBeatState
 
 		descText = new FlxText(20, 200, 0, eventStuff[0][0]);
 		
-		#if (sys && (hscript || LUA_ALLOWED))
+		#if (sys && (hscript))
 		var eventsLoaded:Map<String, Bool> = new Map();
 		var directories:Array<String> = Paths.getFolders('events');
 		for (directory in directories)
@@ -2854,12 +2851,8 @@ class ChartingState extends MusicBeatState
 		if(notetype == '') return;
 		if(notetypeScripts.exists(notetype)) return;
 
-		#if PE_MOD_COMPATIBILITY
-		for (file in ["notetypes", "custom_notetypes"]) {
-			var baseScriptFile:String = '$file/$notetype';
-		#else
+		{
 			var baseScriptFile:String = 'notetypes/$notetype';
-		#end
 			var exts = Paths.HSCRIPT_EXTENSIONS; // TODO: maybe FunkinScript.extensions, FunkinScript.hscriptExtensions and FunkinScript.luaExtensions??
 			for (ext in exts)
 			{
@@ -2875,9 +2868,7 @@ class ChartingState extends MusicBeatState
 					}
 				}
 			}
-		#if PE_MOD_COMPATIBILITY
 		}
-		#end
 	}
 
 	function setupNoteData(i:Array<Dynamic>, isNextSection:Bool):Note
