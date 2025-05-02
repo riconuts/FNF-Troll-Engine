@@ -342,13 +342,13 @@ class Paths
 
 		return ret;
 	}
-	inline static public function getSparrowAtlas(key:String, ?folder:String = null):FlxAtlasFrames
+	inline static public function getSparrowAtlas(key:String, ?library:String):FlxAtlasFrames
 	{
-		inline function getXml() {
-			var xmlPath = _getPath('images/$key.xml', folder);
-			return (xmlPath == null) ? null : std.Xml.parse(Paths.getContent(xmlPath));
-		}
-		return FlxAtlasFrames.fromSparrow(image(key, folder), getXml());
+		var xmlPath = getPath('images/$key.xml');
+		return FlxAtlasFrames.fromSparrow(
+			image(key, library),
+			Paths.exists(xmlPath) ? Paths.getContent(xmlPath) : xmlPath
+		);
 	}
 
 	inline static public function getPackerAtlas(key:String, ?library:String):FlxAtlasFrames
