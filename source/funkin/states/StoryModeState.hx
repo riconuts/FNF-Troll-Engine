@@ -327,7 +327,7 @@ class StoryModeState extends MusicBeatState {
 	function updateTexts(){
 		levelName.text = levels[selectedLevel].name;
 		trackList.text = "TRACKS\n\n";
-		trackList.text += levels[selectedLevel].getDisplayedSongs(selectedDifficultyIdx).join("\n");
+		trackList.text += levels[selectedLevel].getDisplayedSongs(selectedDifficultyName).join("\n");
 	}
 	
 	function changeLevel(selection:Int, abs:Bool = false, silent:Bool = false){

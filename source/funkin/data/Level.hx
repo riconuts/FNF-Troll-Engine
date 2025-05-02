@@ -37,7 +37,8 @@ class Level {
 		level.asset = json?.asset ?? "storymenu/titles/week1";
 		level.difficulties = json?.difficulties ?? level.difficulties;
 		level.props = json?.props ?? level.props;
-		level.songs = json?.songs ?? ["Test"];
+		level.songList = json?.songs ?? ["Test"];
+		level.songs = [for (songId in level.songList) new Song(songId, folder)];
 
 		for (ext in Paths.HSCRIPT_EXTENSIONS) {
 			var scriptPath = '$fileName.$ext';
@@ -64,7 +65,8 @@ class Level {
 	public var index:Int = 0;
 	public var name:String = "PLACEHOLDER";
 	public var asset:String = "storymenu/titles/week1";
-	public var songs:Array<LevelSongData> = [];
+	public var songList:Array<String> = [];
+	public var songs:Array<Song> = [];
 	public var difficulties:Array<String> = ["easy", "normal", "hard"];
 	public var props:Array<LevelPropData> = [];
 
@@ -100,23 +102,23 @@ class Level {
 	/**
 	 * Returns an array of songs to be played during the level
 	 */
-	public function getPlaylist(difficultyID:Int = 1):Array<Song>
-		return cast callScript("getPlaylist", [difficultyID]) ?? [for (song in songs) new Song(song.songName, folder)];
+	public function getPlaylist(difficultyId:String = 'normal'):Array<Song>
+		return cast callScript("getPlaylist", [difficultyId]) ?? songs;
 	
 
 	/**
 	 * Returns an array of song names to be displayed in the story menu
 	 */
-	public function getDisplayedSongs(difficultyID:Int = 1):Array<String>
-		return cast callScript("getDisplayedSongs", [difficultyID]) ?? [for (song in songs) song.displayName ?? song.songName.capitalize()];
+	public function getDisplayedSongs(difficultyId:String = "normal"):Array<String>
+		return cast callScript("getDisplayedSongs", [difficultyId]) ?? [for (song in songs) song==null ? "UNKNOWN" : song.getMetadata(difficultyId).songName];
 	
 
 	/**
 	 * WIP (still gotta add to freeplay)
 	 * Returns an array of song data to be shown in freeplay. 
 	 */
-	public function getFreeplaySongs():Array<LevelSongData> 
-		return cast callScript("getFreeplaySongs") ??  songs;
+	public function getFreeplaySongs():Array<Song> 
+		return cast callScript("getFreeplaySongs") ?? songList;
 	
 
 	/**
@@ -158,22 +160,10 @@ typedef JSONLevelData = {
 	?index:Int,
 	name:String,
 	asset:String,
-	songs:Array<JSONSongData>,
+	songs:Array<String>,
 	?bgColor:String,
 	?difficulties:Array<String>,
 	?props:Array<LevelPropData>
-}
-
-@:structInit
-class LevelSongData {
-	public var displayName(get, default):String = '';
-	function get_displayName(){
-		if(displayName.trim() == '')
-			return songName.capitalize();
-
-		return displayName;
-	}
-	public var songName:String;
 }
 
 // i know its v-slice core but bleeehh :P
@@ -206,5 +196,3 @@ typedef LevelPropData = {
 	?danceSequence:Array<String>, // Cycles through this every dance
 	?danceBeat:Float, // What beat to dance on. 0 = disabled
 }
-
-typedef JSONSongData = OneOfTwo<LevelSongData, String>;
