@@ -766,7 +766,6 @@ class Song extends BaseSong
 		PlayState.SONG = toPlay.getSwagSong(chartId);
 		PlayState.difficulty = toPlay.charts.indexOf(chartId);
 		PlayState.difficultyName = chartId;
-		PlayState.isStoryMode = false;
 
 		PlayState.songPlaylist = [toPlay];
 		PlayState.songPlaylistIdx = 0;

@@ -168,6 +168,8 @@ class FreeplayState extends MusicBeatState
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.fadeOut(0.16);
 
+		PlayState.isStoryMode = false;
+
 		if (FlxG.keys.pressed.SHIFT)
 			LoadingState.loadAndSwitchState(new funkin.states.editors.ChartingState());
 		else

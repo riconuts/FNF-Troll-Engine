@@ -382,10 +382,11 @@ class StoryModeState extends MusicBeatState {
 		PlayState.SONG = toPlay.getSwagSong(chartId);
 		PlayState.difficulty = toPlay.charts.indexOf(chartId);
 		PlayState.difficultyName = chartId;
-		PlayState.isStoryMode = true;
 
 		PlayState.songPlaylist = playlist;
 		PlayState.songPlaylistIdx = 0;
+
+		PlayState.isStoryMode = true;
 
 		MusicBeatState.switchState(new PlayState());
 	}
