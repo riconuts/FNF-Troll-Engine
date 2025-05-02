@@ -2956,21 +2956,18 @@ class PlayState extends MusicBeatState
 
 		transitioning = true;
 
+		if (chartingMode) {
+			openChartEditor();
+			return;
+		}
+
 		// Save song score and rating.
 
 		if (saveScore && SONG.validScore && ratingFC != stats.fail)
 			Highscore.saveScoreRecord(songId, difficultyName, stats.getScoreRecord());
 
 		var gotoNextThing:Void -> Void = gotoMenus;
-		var nextSong:Song = null;
-
-		if (chartingMode) {
-			gotoNextThing = null;
-			openChartEditor();
-		}
-		else {
-			nextSong = songPlaylist[++songPlaylistIdx];
-		} 
+		var nextSong:Song = songPlaylist[++songPlaylistIdx];
 
 		if (isStoryMode) {
 			// TODO: add a modcharted variable which songs w/ modcharts should set to true, then make it so if modcharts are disabled the score wont get added
@@ -2978,13 +2975,6 @@ class PlayState extends MusicBeatState
 			if (ratingFC != 'Fail')
 				campaignScore += stats.score;
 			campaignMisses += songMisses;
-
-			if (nextSong == null && saveScore && WeekData.curWeek != null) {
-				// Week ended, save week score
-				if (!practiceMode && !cpuControlled && !playOpponent) {
-					Highscore.saveWeekScore(WeekData.curWeek.name, campaignScore);						
-				}
-			}
 		}
 
 		if (nextSong != null) {
@@ -2994,12 +2984,12 @@ class PlayState extends MusicBeatState
 			prevCamFollowPos = camFollowPos;
 
 			gotoNextThing = function gotoNextSong() {
-				if (FlxG.state is PlayState) {
-					FlxTransitionableState.skipNextTransIn = true;
-					FlxTransitionableState.skipNextTransOut = true;
-				}
+				FlxTransitionableState.skipNextTransIn = true;
+				FlxTransitionableState.skipNextTransOut = true;
 				nextSong.play(difficultyName);
 			}
+		}else {
+			onPlaylistEnd();
 		}
 
 		if (gotoNextThing != null) {
@@ -3013,6 +3003,15 @@ class PlayState extends MusicBeatState
 		}
 		
 		callOnScripts('onSongEnd');
+	}
+
+	function onPlaylistEnd() {
+		if (isStoryMode && saveScore && WeekData.curWeek != null) {
+			// Week ended, save week score
+			if (!practiceMode && !cpuControlled && !playOpponent) {
+				Highscore.saveWeekScore(WeekData.curWeek.name, campaignScore);						
+			}
+		}
 	}
 
 	public function KillNotes() {
