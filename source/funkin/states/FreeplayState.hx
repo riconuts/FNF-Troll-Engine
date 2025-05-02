@@ -1,6 +1,7 @@
 package funkin.states;
 
 import funkin.data.Song;
+import funkin.data.Level;
 import funkin.data.Highscore;
 
 import flixel.text.FlxText;
@@ -52,31 +53,25 @@ class FreeplayState extends MusicBeatState
 		var list = [];
 		for (directory => metadata in Paths.getContentMetadata())
 		{
-			var songIdList:Array<String> = [];
+			var songIdMap:Map<String, Bool> = [];
 
-			inline function sowy(song:String) {
-				var songId:String = Paths.formatToSongPath(song);
-				if (!songIdList.contains(songId))
-					songIdList.push(songId);
-			}
-
-			// metadata file week songs
-			for (week in metadata.weeks) {
-				if (week.hideFreeplay != true && week.songs != null) {
-					for (song in week.songs)
-						sowy(song);
+			//// level songs
+			for (level in StoryModeState.scanContentLevels(directory)) {
+				for (song in level.getFreeplaySongs()) {
+					songIdMap.set(song.songId, true);
+					list.push(song);
 				}
 			}
 
 			// metadata file freeplay songs
 			if (metadata.freeplaySongs != null) {
-				for (song in metadata.freeplaySongs)
-					sowy(song.name);
-			}
-
-			//
-			for (songId in songIdList) {
-				list.push(new Song(songId, directory));
+				for (song in metadata.freeplaySongs) {
+					var songId:String = Paths.formatToSongPath(song.name);
+					if (!songIdMap.exists(songId)) {
+						songIdMap.set(songId, true);
+						list.push(new Song(songId, directory));
+					}
+				}
 			}
 		}
 		return list;
