@@ -181,6 +181,7 @@ class FreeplayState extends MusicBeatState
 			Song.loadSong(selectedSongData, curDiffStr);
 			
 			if (PlayState.SONG != null){
+				Conductor.changeBPM(PlayState.SONG.bpm);
 				var instAsset = Paths.track(PlayState.SONG.song, PlayState.SONG.tracks.inst[0]);
 				FlxG.sound.playMusic(instAsset, 0.6);
 			}
