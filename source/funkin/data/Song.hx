@@ -764,7 +764,6 @@ class Song extends BaseSong
 			trace('loadSong', toPlay, chartId);
 
 		PlayState.SONG = toPlay.getSwagSong(chartId);
-		PlayState.difficulty = toPlay.charts.indexOf(chartId);
 		PlayState.difficultyName = chartId;
 		PlayState.isStoryMode = false;
 

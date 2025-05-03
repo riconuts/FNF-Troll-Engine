@@ -127,7 +127,6 @@ class PlayState extends MusicBeatState
 	private static var song(get, never):Song;
 	private static function get_song() return songPlaylist[songPlaylistIdx];
 
-	public static var difficulty:Int = 1; // for psych mod shit
 	public static var difficultyName:String = 'normal'; // should NOT be set to "" when playing normal diff!!!!!
 
 	public static var isStoryMode:Bool = false;
