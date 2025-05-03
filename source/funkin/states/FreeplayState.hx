@@ -1,6 +1,7 @@
 package funkin.states;
 
 import funkin.data.Song;
+import funkin.data.BaseSong;
 import funkin.data.Highscore;
 
 import flixel.text.FlxText;
@@ -24,7 +25,7 @@ class FreeplayState extends MusicBeatState
 	public static var comingFromPlayState:Bool = false;
 
 	var menu = new AlphabetMenu();
-	var songData:Array<Song> = [];
+	var songData:Array<BaseSong> = [];
 
 	var bgGrp = new FlxTypedGroup<FlxSprite>();
 	var bg:FlxSprite;
@@ -43,13 +44,13 @@ class FreeplayState extends MusicBeatState
 	static var curDiffStr:String = "normal";
 	static var curDiffIdx:Int = 1;
 
-	var selectedSongData:Song;
+	var selectedSongData:BaseSong;
 	var selectedSongCharts:Array<String>;
 	
 	var hintText:FlxText;
 
-	public static function getFreeplaySongs():Array<Song> {
-		var list = [];
+	public static function getFreeplaySongs():Array<BaseSong> {
+		var list:Array<BaseSong> = [];
 		for (directory => metadata in Paths.getContentMetadata())
 		{
 			var songIdList:Array<String> = [];
@@ -243,7 +244,7 @@ class FreeplayState extends MusicBeatState
 		super.update(elapsed);
 	}
 
-	function onSelectSong(data:Song)
+	function onSelectSong(data:BaseSong)
 	{	
 		Paths.currentModDirectory = data.folder;
 
