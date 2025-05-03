@@ -94,6 +94,7 @@ typedef SongMetadata =
 }
 
 inline final DEFAULT_CHART_ID = "normal";
+final defaultDifficultyOrdering:Array<String>  = ["easy", "normal", "hard", "erect", "nightmare"];
 
 abstract class BaseSong
 {
@@ -450,31 +451,6 @@ class Song extends BaseSong
 				for (fileName in crumb) processFileName(fileName);
 			}
 		}
-
-		////
-		var chartNames:Array<String> = [for (name in charts.keys()) name];
-
-		// stolen from v-slice lol!
-		var defaultDifficultyOrdering:Array<String>  = ["easy", "normal", "hard", "erect", "nightmare"];
-		chartNames.sort((a, b)->{
-			a = a.toLowerCase();
-			b = b.toLowerCase();
-			if(a==b)return 0;
-
-			var aHasDefault = defaultDifficultyOrdering.contains(a);
-			var bHasDefault = defaultDifficultyOrdering.contains(b);
-			if (aHasDefault && bHasDefault)
-				return defaultDifficultyOrdering.indexOf(a) - defaultDifficultyOrdering.indexOf(b);
-			else if(aHasDefault)
-				return 1;
-			else if(bHasDefault)
-				return -1;
-
-			return a > b ? -1 : 1;
-			
-		});
-
-		return chartNames;
 		#else
 		
 		function processFileName(unprocessedName:String)
@@ -490,15 +466,36 @@ class Song extends BaseSong
 
 		}
 
-		Paths.iterateDirectory(songPath, processFileName);
-		
-		return [for (name in charts.keys()) name];
+		Paths.iterateDirectory(songPath, processFileName);		
 		#end
+
+		var chartNames:Array<String> = [for (name in charts.keys()) name];
+		chartNames.sort(sortChartDifficulties);
+		return chartNames;
 	}
 
 	public inline static function getDifficultyFileSuffix(diff:String) {
 		diff = Paths.formatToSongPath(diff);
 		return (diff=="" || diff=="normal") ? "" : '-$diff';
+	}
+
+	public static function sortChartDifficulties(a:String, b:String) {
+		// stolen from v-slice lol!
+
+		a = a.toLowerCase();
+		b = b.toLowerCase();
+		if(a==b)return 0;
+
+		var aHasDefault = defaultDifficultyOrdering.contains(a);
+		var bHasDefault = defaultDifficultyOrdering.contains(b);
+		if (aHasDefault && bHasDefault)
+			return defaultDifficultyOrdering.indexOf(a) - defaultDifficultyOrdering.indexOf(b);
+		else if(aHasDefault)
+			return 1;
+		else if(bHasDefault)
+			return -1;
+
+		return a > b ? -1 : 1;
 	}
 
 	private static function _parseSongJson(filePath:String, isChartJson:Bool = true):SwagSong {
