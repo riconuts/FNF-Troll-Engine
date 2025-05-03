@@ -3,6 +3,7 @@ package funkin.states;
 import funkin.objects.playfields.PlayField.NoteCallback;
 import funkin.data.CharacterData;
 import funkin.data.Cache;
+import funkin.data.Level;
 import funkin.data.Song;
 import funkin.data.BaseSong;
 import funkin.data.Section;
@@ -139,6 +140,8 @@ class PlayState extends MusicBeatState
 	public static var songPlaylistIdx = 0;
 
 	public static var song:BaseSong;
+
+	public static var level:Level;
 
 	public static var difficultyName:String = 'normal'; // should NOT be set to "" when playing normal diff!!!!!
 
@@ -3021,11 +3024,12 @@ class PlayState extends MusicBeatState
 	}
 
 	function onPlaylistEnd() {
-		if (isStoryMode && saveScore && WeekData.curWeek != null) {
+		if (isStoryMode && level != null) {
 			// Week ended, save week score
-			if (!practiceMode && !cpuControlled && !playOpponent) {
-				Highscore.saveWeekScore(WeekData.curWeek.name, campaignScore);						
+			if (saveScore && !practiceMode && !cpuControlled && !playOpponent) {
+				Highscore.saveWeekScore(level.id, campaignScore);				
 			}
+			level = null;
 		}
 	}
 
