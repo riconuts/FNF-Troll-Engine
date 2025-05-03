@@ -1,5 +1,6 @@
 package funkin.states;
 
+import funkin.data.Highscore;
 import funkin.data.Song;
 import funkin.data.Level;
 import animateatlas.AtlasFrameMaker;
@@ -188,6 +189,7 @@ class StoryModeState extends MusicBeatState {
 	var levelBG:FlxSprite;
 	var levelName:FlxText;
 	var trackList:FlxText;
+	var scoreText:FlxText;
 
 	var difficultySpr:FlxSprite;
 	var difficultyLeft:FlxSprite;
@@ -254,6 +256,9 @@ class StoryModeState extends MusicBeatState {
 		levelName.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.fromRGB(180, 180, 180, 255), RIGHT);
 		add(levelBG);
 
+		scoreText = new FlxText(10, 10, 0, 'HIGH SCORE: 42069420');
+		scoreText.setFormat(Paths.font("vcr.ttf"), 32);
+
 		trackList = new FlxText(-100, 500, 600, "TRACKS:\n\npenis\nshit\nfuck", 32);
 		trackList.setFormat(Paths.font("vcr.ttf"), 32, 0xFFE55777, CENTER);
 		add(trackList);
@@ -318,6 +323,7 @@ class StoryModeState extends MusicBeatState {
 
 		add(infoBar);
 		add(levelName);
+		add(scoreText);
 		
 		changeLevel(selectedLevel, true, true);
 		updateDifficultyText(selectedDifficultyName);
@@ -330,6 +336,9 @@ class StoryModeState extends MusicBeatState {
 		super.update(elapsed);
 		var radius:Float = 60 + (levels.length * 15);
 		var lerpVal:Float = 1.0 - Math.exp(-elapsed * 16.0);
+
+		lerpHighscore = CoolUtil.coolLerp(lerpHighscore, targetHighscore, elapsed * 12);
+		scoreText.text = 'HIGH SCORE: ${Math.round(lerpHighscore)}';
 		
 		for(idx in 0...levelTitles.members.length){
 			var title:LevelTitle = levelTitles.members[idx];
@@ -433,6 +442,10 @@ class StoryModeState extends MusicBeatState {
 		selectedLevelDifficulties = levels[newLevel].getDifficulties();
 		var newIdx = CoolUtil.updateDifficultyIndex(selectedDifficultyIdx, selectedDifficultyName, selectedLevelDifficulties);
 		changeDifficulty(newIdx, true);
+
+		/* // TODO: level scoressss
+		targetHighscore = Highscore.getLevelScore(levels[newLevel].id, selectedDifficultyName);
+		*/
 
 		for (group in levelProps)
 			group.visible = group.ID == newLevel;
