@@ -1,5 +1,6 @@
 package funkin.states;
 
+import funkin.data.Song;
 import funkin.data.Level;
 import animateatlas.AtlasFrameMaker;
 import flixel.util.FlxSignal;
@@ -152,20 +153,23 @@ class LevelTitle extends flixel.group.FlxSpriteGroup {
 }
 
 class StoryModeState extends MusicBeatState {
+	static var selectedLevel:Int = 0;
+	static var selectedDifficultyName:String = 'normal';
+
+	var levels:Array<Level> = [];
+	var selectedDifficultyIdx:Int = 1;
+	var selectedLevelDifficulties:Array<String> = [];
+
+	var targetHighscore:Float = 0;
+	var lerpHighscore:Float = 0;
+
 	var levelBG:FlxSprite;
 	var levelName:FlxText;
 	var trackList:FlxText;
 	
-	var levels:Array<Level> = [];
-	
-	static var selectedLevel:Int = 0;
 	var levelTitles:FlxTypedSpriteGroup<LevelTitle>;
 	var levelBGGroups:Array<FlxSpriteGroup> = []; // used for fading when going between levels
 	var levelProps:Array<FlxSpriteGroup> = [];
-
-	static var selectedDifficultyIdx:Int = 1;
-	static var selectedDifficultyName:String = 'normal';
-	var selectedLevelDifficulties:Array<String> = [];
 
 	// this will be moved to something else i'm currently working on :o
 	public static function scanContentLevels(folder:String):Array<Level>
@@ -220,7 +224,7 @@ class StoryModeState extends MusicBeatState {
 
 		var infoBar:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, 56, FlxColor.BLACK);
 		
-		levelName = new FlxText(0, 10, FlxG.width, "DADDY DEAREST", 32);
+		levelName = new FlxText(0, 10, FlxG.width - 10, "DADDY DEAREST", 32);
 		levelName.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.fromRGB(180, 180, 180, 255), RIGHT);
 		add(levelBG);
 
@@ -315,7 +319,7 @@ class StoryModeState extends MusicBeatState {
 			changeDifficulty(-1);
 
 		if(controls.ACCEPT){
-			playLevel();
+			acceptLevel();
 		}
 
 		if(controls.BACK) {
@@ -337,12 +341,12 @@ class StoryModeState extends MusicBeatState {
 		else if(newLevel >= levels.length)
 			newLevel = 0;
 
+		selectedLevelDifficulties = levels[newLevel].getDifficulties();
+		var newIdx = CoolUtil.updateDifficultyIndex(selectedDifficultyIdx, selectedDifficultyName, selectedLevelDifficulties);
+		changeDifficulty(newIdx, true);
+
 		for (group in levelProps)
 			group.visible = group.ID == newLevel;
-
-		selectedLevelDifficulties = levels[newLevel].getDifficulties();
-		selectedDifficultyIdx = CoolUtil.updateDifficultyIndex(selectedDifficultyIdx, selectedDifficultyName, selectedLevelDifficulties);
-		selectedDifficultyName = selectedLevelDifficulties[selectedDifficultyIdx];
 		
 		if (!silent)
 			FlxG.sound.play(Paths.sound("scrollMenu"));
@@ -352,41 +356,36 @@ class StoryModeState extends MusicBeatState {
 	}
 
 	function changeDifficulty(selection:Int, abs:Bool = false){
-		var newDiff = abs ? selection : selectedDifficultyIdx + selection;
-		if (newDiff < 0)
-			newDiff = selectedLevelDifficulties.length - 1;
-		else if(newDiff >= selectedLevelDifficulties.length)
-			newDiff = 0;
+		var newIdx:Int = abs ? selection : selectedDifficultyIdx + selection;
+		if (newIdx < 0)
+			newIdx = selectedLevelDifficulties.length - 1;
+		else if(newIdx >= selectedLevelDifficulties.length)
+			newIdx = 0;
 
-		selectedDifficultyName = selectedLevelDifficulties[newDiff];
-		selectedDifficultyIdx = newDiff;
+		var prevDiff:String = selectedDifficultyName;
+		selectedDifficultyName = selectedLevelDifficulties[newIdx];
+		selectedDifficultyIdx = newIdx;
+
 		updateTexts();
 
 		trace(selectedDifficultyIdx, selectedDifficultyName);
 	}
 
-	function playLevel() {
-		var level:Level = levels[selectedLevel];
-		if (level == null) return;
+	function acceptLevel() {
+		FlxG.sound.play(Paths.sound('confirmMenu'));
 
-		trace('sowy');
-		var playlist = level.getPlaylist();
-		if (playlist == null || playlist.length == 0) return;
-		trace('okay');
+		// TODO: play the character anims and shit
 
-		var toPlay = playlist[0];
-		var chartId = selectedDifficultyName;
+		playLevel(levels[selectedLevel], selectedDifficultyName);
+	}
 
-		trace(toPlay, chartId);
-
-		PlayState.SONG = toPlay.getSwagSong(chartId);
-		PlayState.difficulty = toPlay.charts.indexOf(chartId);
-		PlayState.difficultyName = chartId;
-
-		PlayState.songPlaylist = playlist;
-		PlayState.songPlaylistIdx = 0;
+	static function playLevel(level:Level, chartId:String) {
+		PlayState.loadPlaylist(level.getPlaylist(), chartId);
 
 		PlayState.isStoryMode = true;
+		PlayState.level = level;
+
+		trace(PlayState.level.id, PlayState.difficultyName, PlayState.songPlaylist);
 
 		MusicBeatState.switchState(new PlayState());
 	}
