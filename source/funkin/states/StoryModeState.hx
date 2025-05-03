@@ -5,6 +5,7 @@ import funkin.data.Level;
 import animateatlas.AtlasFrameMaker;
 import flixel.util.FlxSignal;
 import flixel.system.FlxAssets.FlxGraphicAsset;
+import flixel.tweens.FlxTween;
 import flixel.group.FlxSpriteGroup;
 import flixel.util.FlxSort;
 import flixel.math.FlxMath;
@@ -187,6 +188,10 @@ class StoryModeState extends MusicBeatState {
 	var levelBG:FlxSprite;
 	var levelName:FlxText;
 	var trackList:FlxText;
+
+	var difficultySpr:FlxSprite;
+	var difficultyLeft:FlxSprite;
+	var difficultyRight:FlxSprite;
 	
 	var levelTitles:FlxTypedSpriteGroup<LevelTitle>;
 	var levelBGGroups:Array<FlxSpriteGroup> = []; // used for fading when going between levels
@@ -253,6 +258,33 @@ class StoryModeState extends MusicBeatState {
 		trackList.setFormat(Paths.font("vcr.ttf"), 32, 0xFFE55777, CENTER);
 		add(trackList);
 
+		difficultySpr = new FlxSprite(FlxG.width - 200, levelTitles.y);
+		add(difficultySpr);
+
+		difficultyLeft = new FlxSprite();
+		difficultyLeft.frames = Paths.getSparrowAtlas('storymenu/ui/arrows');
+		difficultyLeft.animation.addByPrefix("idle", "leftIdle", 24);
+		difficultyLeft.animation.addByPrefix("press", "leftConfirm", 24, false);
+		difficultyLeft.animation.play("idle");
+		difficultyLeft.updateHitbox();
+		difficultyLeft.animation.finishCallback = function(name:String){
+			difficultyLeft.animation.play("idle", true);
+			difficultyLeft.updateHitbox();
+		}
+		add(difficultyLeft);
+
+		difficultyRight = new FlxSprite();
+		difficultyRight.frames = Paths.getSparrowAtlas('storymenu/ui/arrows');
+		difficultyRight.animation.addByPrefix("idle", "rightIdle", 24);
+		difficultyRight.animation.addByPrefix("press", "rightConfirm", 24, false);
+		difficultyRight.animation.play("idle");
+		difficultyRight.updateHitbox();
+		difficultyRight.animation.finishCallback = function(name:String){
+			difficultyRight.animation.play("idle", true);
+			difficultyRight.updateHitbox();
+		}
+		add(difficultyRight);
+
 		for(idx in 0...levels.length){
 			var level:Level = levels[idx];
 			var title = level.createTitle();
@@ -288,6 +320,7 @@ class StoryModeState extends MusicBeatState {
 		add(levelName);
 		
 		changeLevel(selectedLevel, true, true);
+		updateDifficultyText(selectedDifficultyName);
 		
 		this.persistentUpdate = true;
 		super.create();
@@ -362,6 +395,33 @@ class StoryModeState extends MusicBeatState {
 		trackList.text = "TRACKS\n\n";
 		trackList.text += levels[selectedLevel].getDisplayedSongs(selectedDifficultyName).join("\n");
 	}
+
+	function updateDifficultyText(diffName:String)
+	{
+		difficultySpr.loadGraphic(Paths.image('storymenu/difficulties/$diffName'));
+		difficultySpr.updateHitbox();
+		difficultySpr.x = (FlxG.width - 200) - (difficultySpr.width / 2);
+		difficultySpr.y = levelTitles.y;
+
+		if (selectedLevelDifficulties.length > 1) {
+			difficultyLeft.visible = true;
+			difficultyLeft.x = difficultySpr.x - difficultyLeft.width - 10;
+			difficultyLeft.y = difficultySpr.y + difficultySpr.height / 2 - difficultyLeft.height / 2;
+			
+			difficultyRight.visible = true;
+			difficultyRight.x = difficultySpr.x + difficultySpr.width + 10;
+			difficultyRight.y = difficultySpr.y + difficultySpr.height / 2 - difficultyRight.height / 2;
+		}
+		else {
+			difficultyLeft.visible = false;
+
+			difficultyRight.visible = false;
+		}
+
+		difficultySpr.alpha = 0.0;
+		FlxTween.tween(difficultySpr, {y: difficultySpr.y, alpha: 1.0}, 0.07);
+		difficultySpr.y -= 25;
+	}
 	
 	function changeLevel(selection:Int, abs:Bool = false, silent:Bool = false){
 		var newLevel = abs ? selection : selectedLevel + selection;
@@ -391,9 +451,15 @@ class StoryModeState extends MusicBeatState {
 		else if(newIdx >= selectedLevelDifficulties.length)
 			newIdx = 0;
 
+		if (!abs && selection != 0) {
+			(selection < 0 ? difficultyLeft : difficultyRight).animation.play("press", true);
+		}
+
 		var prevDiff:String = selectedDifficultyName;
 		selectedDifficultyName = selectedLevelDifficulties[newIdx];
 		selectedDifficultyIdx = newIdx;
+		if (prevDiff != selectedDifficultyName)
+			updateDifficultyText(selectedDifficultyName);
 
 		updateTexts();
 
