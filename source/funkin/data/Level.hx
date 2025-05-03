@@ -1,5 +1,6 @@
 package funkin.data;
 
+import funkin.data.BaseSong;
 import funkin.data.Song;
 import funkin.states.StoryModeState;
 import funkin.scripts.FunkinHScript;
@@ -66,7 +67,7 @@ class Level {
 	public var name:String = "PLACEHOLDER";
 	public var asset:String = "storymenu/titles/week1";
 	public var songList:Array<String> = [];
-	public var songs:Array<Song> = [];
+	public var songs:Array<BaseSong> = [];
 	public var difficulties:Array<String> = ["easy", "normal", "hard"];
 	public var props:Array<LevelPropData> = [];
 
@@ -105,7 +106,7 @@ class Level {
 	/**
 	 * Returns an array of songs to be played during the level
 	**/
-	public function getPlaylist(difficultyId:String = 'normal'):Array<Song>
+	public function getPlaylist(difficultyId:String = 'normal'):Array<BaseSong>
 	{
 		return songs;
 	}
@@ -124,7 +125,7 @@ class Level {
 	 * WIP (still gotta add to freeplay)
 	 * Returns an array of song data to be shown in freeplay. 
 	**/
-	public function getFreeplaySongs():Array<Song>
+	public function getFreeplaySongs():Array<BaseSong>
 	{
 		return songs;
 	}
@@ -207,7 +208,7 @@ class ScriptedLevel extends Level
 	/**
 	 * Returns an array of songs to be played during the level
 	**/
-	override public function getPlaylist(difficultyId:String = 'normal'):Array<Song>
+	override public function getPlaylist(difficultyId:String = 'normal'):Array<BaseSong>
 	{
 		return callScript("getPlaylist", [difficultyId]) ?? super.getPlaylist(difficultyId);
 	}
@@ -225,7 +226,7 @@ class ScriptedLevel extends Level
 	 * WIP (still gotta add to freeplay)
 	 * Returns an array of song data to be shown in freeplay. 
 	**/
-	override public function getFreeplaySongs():Array<Song>
+	override public function getFreeplaySongs():Array<BaseSong>
 	{
 		return callScript("getFreeplaySongs") ?? super.getFreeplaySongs();
 	}
