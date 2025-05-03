@@ -243,9 +243,10 @@ class FreeplayState extends MusicBeatState
 
 	function onSelectSong(data:Song)
 	{	
-		selectedSongData = data;
-		selectedSongCharts = data.charts;
 		Paths.currentModDirectory = data.folder;
+
+		selectedSongData = data;
+		selectedSongCharts = data.getCharts();
 
 		changeDifficulty(CoolUtil.updateDifficultyIndex(curDiffIdx, curDiffStr, selectedSongCharts), true);
 

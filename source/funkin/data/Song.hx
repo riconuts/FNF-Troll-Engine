@@ -129,12 +129,18 @@ abstract class BaseSong
 	 * Returns a path to a file of name fileName that belongs to this song
 	**/
 	abstract public function getSongFile(fileName:String):String;
+
+	/**
+	 * Returns an array of charts available for this song
+	**/
+	abstract public function getCharts():Array<String>;
 }
 
 class Song extends BaseSong
 {
 	public var songPath(get, default):String;
-	public var charts(get, null):Array<String>;
+	
+	private var _charts:Array<String> = null;
 	private var metadataCache = new Map<String, SongMetadata>();
 
 	public function new(songId:String, ?folder:String)
@@ -151,8 +157,10 @@ class Song extends BaseSong
 	}
 
 	public function play(chartId:String = '') {
-		if (chartId == "")
+		if (chartId == "") {
+			var charts = getCharts();
 			chartId = charts.contains(DEFAULT_CHART_ID) ? DEFAULT_CHART_ID : charts[0];
+		}
 
 		Song.playSong(this, chartId);
 	}
@@ -281,10 +289,10 @@ class Song extends BaseSong
 		#end
 	}
 
-	//
-	function get_charts() 
-		return charts ?? (charts = Song.getCharts(this));
+	public function getCharts():Array<String>
+		return _charts ?? (_charts = _getCharts(this));
 
+	//
 	function get_songPath()
 		return songPath;
 
@@ -357,19 +365,19 @@ class Song extends BaseSong
 	}
 	#end
 
-	public static function getCharts(song:Song):Array<String>
-	{
-		Paths.currentModDirectory = song.folder;
-		
+	private static function _getCharts(song:Song):Array<String>
+	{		
 		final songId:String = song.songId;
+		final folder:String = song.folder;
+		final songPath = song.getSongFile("");
 		final charts:Map<String, Bool> = [];
 
-		#if USING_MOONCHART
-		var folder:String = '';
-		
+		Paths.currentModDirectory = folder;
+
+		#if USING_MOONCHART		
 		function processFileName(unprocessedName:String) {
 			var fileName:String = unprocessedName.toLowerCase();
-			var filePath:String = folder + unprocessedName;
+			var filePath:String = songPath + unprocessedName;
 
 			if (!isAMoonchartRecognizedFile(fileName))
 				return;
@@ -419,28 +427,22 @@ class Song extends BaseSong
 			}
 		}
 
-		if (song.folder == "") {
-			folder = Paths.getPreloadPath('songs/$songId/');
-			Paths.iterateDirectory(folder, processFileName);
-		}
-		#if MODS_ALLOWED
-		else {
-			////
+		////
+		{
 			var spoon:Array<String> = [];
 			var crumb:Array<String> = [];
 
-			folder = Paths.mods('${song.folder}/songs/$songId/');
-			Paths.iterateDirectory(folder, (fileName)->{
+			Paths.iterateDirectory(songPath, (fileName)->{
 				if (isAMoonchartRecognizedFile(fileName)){
-					spoon.push(folder+fileName);
+					spoon.push(songPath+fileName);
 					crumb.push(fileName);
 				}
 			});
 
 			var ALL_FILES_DETECTED_FORMAT = findFormat(spoon);
 			if (ALL_FILES_DETECTED_FORMAT == FNF_VSLICE) {
-				var chartsFilePath:String = folder + songId + '-chart.json';
-				var metadataPath:String = folder + songId + '-metadata.json';
+				var chartsFilePath:String = song.getSongFile('$songId-chart.json');
+				var metadataPath:String = song.getSongFile('$songId-metadata.json');
 				var chart = new moonchart.formats.fnf.FNFVSlice().fromFile(chartsFilePath, metadataPath);
 				for (diff in chart.diffs) charts.set(diff, true);
 				
@@ -448,14 +450,9 @@ class Song extends BaseSong
 				for (fileName in crumb) processFileName(fileName);
 			}
 		}
-		#end
 
-		var allCharts:Array<String> = [for (name in charts.keys()) name];
-		var chartNames:Array<String> = [];
-
-		for (name in allCharts)
-			chartNames.push(name);
-
+		////
+		var chartNames:Array<String> = [for (name in charts.keys()) name];
 
 		// stolen from v-slice lol!
 		var defaultDifficultyOrdering:Array<String>  = ["easy", "normal", "hard", "erect", "nightmare"];
@@ -493,8 +490,7 @@ class Song extends BaseSong
 
 		}
 
-		var contentPath = Paths.getFolderPath(song.folder);
-		Paths.iterateDirectory('$contentPath/songs/$songId/', processFileName);
+		Paths.iterateDirectory(songPath, processFileName);
 		
 		return [for (name in charts.keys()) name];
 		#end

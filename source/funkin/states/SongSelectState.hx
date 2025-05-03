@@ -190,10 +190,10 @@ class SongSelectState extends MusicBeatState
 		}
 
 		if (controls.ACCEPT){
-			var charts = songMeta[curSel].charts;
+			var charts = songMeta[curSel].getCharts();
 			if (charts.length > 0) {
 				trace(charts);
-				openSubState(new ChartSelectSubstate(songMeta[curSel]));
+				openSubState(new ChartSelectSubstate(songMeta[curSel], charts));
 			}else {
 				trace("no charts!");
 				songText[curSel].alpha = 0.6;
@@ -216,10 +216,13 @@ class ChartSelectSubstate extends MusicBeatSubstate
 	var texts:Array<FlxText> = [];
 	var curSel:Int = 0;
 
-	public function new(song:Song) 
+	var charts:Array<String>;
+
+	public function new(song:Song, ?charts:Array<String>) 
 	{
 		super();
 		this.song = song;
+		this.charts = charts ?? song.getCharts();
 	}
 
 	override function create()
@@ -231,7 +234,7 @@ class ChartSelectSubstate extends MusicBeatSubstate
 		var y = songTxt.y + songTxt.height + 20;
 		var spacing = 20;
 		
-		for (idx => chartId in song.charts) {
+		for (idx => chartId in charts) {
 			var y = y + idx * spacing;
 			var w2 = FlxG.width / 2;
 
@@ -264,7 +267,7 @@ class ChartSelectSubstate extends MusicBeatSubstate
 		if (FlxG.keys.justPressed.BACKSPACE || FlxG.keys.justPressed.ESCAPE)
 			this.close();
 		else if (FlxG.keys.justPressed.ENTER) {
-			Song.loadSong(song, song.charts[curSel]);
+			Song.loadSong(song, charts[curSel]);
 
 			if (FlxG.keys.pressed.SHIFT)
 				LoadingState.loadAndSwitchState(new funkin.states.editors.ChartingState());
