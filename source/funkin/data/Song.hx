@@ -707,21 +707,6 @@ class Song extends BaseSong
 		return resultArray;
 	}
 
-	// idk perhaps moving ts to playstate would be more appropiate
-	static public function loadSong(toPlay:Song, chartId:String) {
-		Paths.currentModDirectory = toPlay.folder;
-
-		if (Main.showDebugTraces)
-			trace('loadSong', toPlay, chartId);
-
-		PlayState.SONG = toPlay.getSwagSong(chartId);
-		PlayState.difficultyName = chartId;
-		PlayState.isStoryMode = false;
-
-		PlayState.songPlaylist = [toPlay];
-		PlayState.songPlaylistIdx = 0;
-	}
-
 	static public function switchToPlayState()
 	{
 		if (FlxG.sound.music != null)
@@ -732,7 +717,7 @@ class Song extends BaseSong
 
 	static public function playSong(song:Song, ?difficulty:String)
 	{
-		loadSong(song, difficulty);
+		PlayState.loadPlaylist([song], difficulty);
 		switchToPlayState();
 	} 
 }

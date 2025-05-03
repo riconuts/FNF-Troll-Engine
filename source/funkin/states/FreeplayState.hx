@@ -153,7 +153,7 @@ class FreeplayState extends MusicBeatState
 			proceed = songLoaded == selectedSong && PlayState.SONG != null;
 		
 			if (!proceed) {
-				Song.loadSong(selectedSongData, curDiffStr);
+				PlayState.loadPlaylist([selectedSongData], curDiffStr);
 				proceed = PlayState.SONG != null;
 			}
 		}
@@ -168,6 +168,8 @@ class FreeplayState extends MusicBeatState
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.fadeOut(0.16);
 
+		PlayState.isStoryMode = false;
+
 		if (FlxG.keys.pressed.SHIFT)
 			LoadingState.loadAndSwitchState(new funkin.states.editors.ChartingState());
 		else
@@ -178,7 +180,7 @@ class FreeplayState extends MusicBeatState
 		// load song json and play inst
 		if (songLoaded != selectedSong){
 			songLoaded = selectedSong;
-			Song.loadSong(selectedSongData, curDiffStr);
+			PlayState.loadPlaylist([selectedSongData], curDiffStr);
 			
 			if (PlayState.SONG != null){
 				Conductor.changeBPM(PlayState.SONG.bpm);
