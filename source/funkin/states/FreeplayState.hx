@@ -1,6 +1,7 @@
 package funkin.states;
 
 import funkin.data.Song;
+import funkin.data.BaseSong;
 import funkin.data.Level;
 import funkin.data.Highscore;
 
@@ -25,7 +26,7 @@ class FreeplayState extends MusicBeatState
 	public static var comingFromPlayState:Bool = false;
 
 	var menu = new AlphabetMenu();
-	var songData:Array<Song> = [];
+	var songData:Array<BaseSong> = [];
 
 	var bgGrp = new FlxTypedGroup<FlxSprite>();
 	var bg:FlxSprite;
@@ -44,13 +45,13 @@ class FreeplayState extends MusicBeatState
 	static var curDiffStr:String = "normal";
 	static var curDiffIdx:Int = 1;
 
-	var selectedSongData:Song;
+	var selectedSongData:BaseSong;
 	var selectedSongCharts:Array<String>;
 	
 	var hintText:FlxText;
 
-	public static function getFreeplaySongs():Array<Song> {
-		var list = [];
+	public static function getFreeplaySongs():Array<BaseSong> {
+		var list:Array<BaseSong> = [];
 		for (directory => metadata in Paths.getContentMetadata())
 		{
 			var songIdMap:Map<String, Bool> = [];
@@ -148,7 +149,7 @@ class FreeplayState extends MusicBeatState
 			proceed = songLoaded == selectedSong && PlayState.SONG != null;
 		
 			if (!proceed) {
-				Song.loadSong(selectedSongData, curDiffStr);
+				PlayState.loadPlaylist([selectedSongData], curDiffStr);
 				proceed = PlayState.SONG != null;
 			}
 		}
@@ -175,7 +176,7 @@ class FreeplayState extends MusicBeatState
 		// load song json and play inst
 		if (songLoaded != selectedSong){
 			songLoaded = selectedSong;
-			Song.loadSong(selectedSongData, curDiffStr);
+			PlayState.loadPlaylist([selectedSongData], curDiffStr);
 			
 			if (PlayState.SONG != null){
 				Conductor.changeBPM(PlayState.SONG.bpm);
@@ -238,11 +239,12 @@ class FreeplayState extends MusicBeatState
 		super.update(elapsed);
 	}
 
-	function onSelectSong(data:Song)
+	function onSelectSong(data:BaseSong)
 	{	
-		selectedSongData = data;
-		selectedSongCharts = data.charts;
 		Paths.currentModDirectory = data.folder;
+
+		selectedSongData = data;
+		selectedSongCharts = data.getCharts();
 
 		changeDifficulty(CoolUtil.updateDifficultyIndex(curDiffIdx, curDiffStr, selectedSongCharts), true);
 
