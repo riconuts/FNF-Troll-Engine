@@ -291,7 +291,7 @@ class Song extends BaseSong
 	}
 
 	public function getCharts():Array<String>
-		return _charts ?? (_charts = _getCharts(this));
+		return _charts ?? (_charts = _getCharts());
 
 	//
 	function get_songPath()
@@ -366,11 +366,9 @@ class Song extends BaseSong
 	}
 	#end
 
-	private static function _getCharts(song:Song):Array<String>
+	private function _getCharts():Array<String>
 	{		
-		final songId:String = song.songId;
-		final folder:String = song.folder;
-		final songPath = song.getSongFile("");
+		final songPath = getSongFile("");
 		final charts:Map<String, Bool> = [];
 
 		Paths.currentModDirectory = folder;
@@ -442,8 +440,8 @@ class Song extends BaseSong
 
 			var ALL_FILES_DETECTED_FORMAT = findFormat(spoon);
 			if (ALL_FILES_DETECTED_FORMAT == FNF_VSLICE) {
-				var chartsFilePath:String = song.getSongFile('$songId-chart.json');
-				var metadataPath:String = song.getSongFile('$songId-metadata.json');
+				var chartsFilePath:String = getSongFile('$songId-chart.json');
+				var metadataPath:String = getSongFile('$songId-metadata.json');
 				var chart = new moonchart.formats.fnf.FNFVSlice().fromFile(chartsFilePath, metadataPath);
 				for (diff in chart.diffs) charts.set(diff, true);
 				
