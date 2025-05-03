@@ -73,23 +73,26 @@ class PauseSubState extends MusicBeatSubstate
 		}
 
 		newOpt("Resume", ()->{
-			if (ClientPrefs.countUnpause) {
-				var gameCnt = PlayState.instance==null ? null : PlayState.instance.curCountdown;
-				if (gameCnt != null && !gameCnt.finished) // don't make a new countdown if there's already one in progress lol
-					return this.close();
-				
-				for (obj in members) 
-					obj.visible = false;
+			if (!ClientPrefs.countUnpause) {
+				this.close();
+				return;
+			}
 
-				menu.inputsActive = false;
+			var gameCnt = PlayState.instance==null ? null : PlayState.instance.curCountdown;
+			if (gameCnt != null && !gameCnt.finished) { // don't make a new countdown if there's already one in progress lol
+				this.close();
+				return;
+			}
+			
+			for (obj in members) 
+				obj.visible = false;
 
-				var c = new Countdown(this); // https://tenor.com/view/letter-c-darwin-tawog-the-amazing-world-of-gumball-dance-gif-17949158
-				c.onComplete = this.close;
-				c.start(0.5);
+			menu.inputsActive = false;
 
-			}else {
-				this.close(); // close immediately
-			} 
+			var c = new Countdown(this); // https://tenor.com/view/letter-c-darwin-tawog-the-amazing-world-of-gumball-dance-gif-17949158
+			c.onComplete = this.close;
+			c.start(0.5);
+
 		});
 
 		newOpt("Restart Song", ()->{
@@ -138,23 +141,6 @@ class PauseSubState extends MusicBeatSubstate
 
 		if (#if debug true #else PlayState.chartingMode #end) {
 			////
-			if (PlayState.chartingMode) {
-				newOpt("Leave charting mode", ()->{
-					var songName:String = PlayState.SONG.song;
-					var jsonName:String;
-		
-					if (PlayState.difficultyName == "")
-						jsonName = songName; 
-					else
-						jsonName = songName + '-' + PlayState.difficultyName;
-		
-					PlayState.SONG = funkin.data.Song.loadFromJson(jsonName, songName);
-					PlayState.chartingMode = false;
-					PlayState.instance.restartSong();
-				});	
-			}
-
-			////
 			if (PlayState.instance.startedOnTime > 0) {
 				newOpt('Restart on last start time', ()->{
 					close();
@@ -170,12 +156,6 @@ class PauseSubState extends MusicBeatSubstate
 				opt.displayName = Paths.getString('pauseoption_${opt.name}', name);
 				pushOption(opt);
 			}
-	
-			////
-			newOpt('End song', ()->{
-				close();
-				PlayState.instance.finishSong(true);
-			});
 	
 			////
 			inline function getBotplayTxt()
