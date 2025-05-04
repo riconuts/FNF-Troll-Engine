@@ -12,6 +12,7 @@ import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
+import flixel.util.FlxTimer;
 import haxe.io.Path;
 
 using funkin.CoolerStringTools;
@@ -150,6 +151,24 @@ class LevelTitle extends flixel.group.FlxSpriteGroup {
 		week.x -= week.width / 2;
 		week.y -= week.height / 2; 
 	}
+
+	public var isFlashing:Bool = false;
+
+	var flashTick:Float = 0;
+	final flashFramerate:Float = 20;
+
+	public override function update(elapsed:Float):Void
+	{
+		super.update(elapsed);
+
+		if (isFlashing) {
+			flashTick += elapsed;
+			if (flashTick >= 1 / flashFramerate) {
+				flashTick %= 1 / flashFramerate;
+				color = (color == FlxColor.WHITE) ? 0xFF33ffff : FlxColor.WHITE;
+			}
+		}
+	}
 }
 
 class StoryModeState extends MusicBeatState {
@@ -159,6 +178,8 @@ class StoryModeState extends MusicBeatState {
 	var levels:Array<Level> = [];
 	var selectedDifficultyIdx:Int = 1;
 	var selectedLevelDifficulties:Array<String> = [];
+
+	var inputsActive:Bool = true;
 
 	var targetHighscore:Float = 0;
 	var lerpHighscore:Float = 0;
@@ -306,6 +327,13 @@ class StoryModeState extends MusicBeatState {
 			return FlxSort.byValues(order, obj1.alpha, obj2.alpha);
 		});
 
+		updateInput(elapsed);
+	}
+
+	function updateInput(elapsed:Float) {
+		if (!inputsActive)
+			return;
+
 		if(controls.UI_DOWN_P)
 			changeLevel(1);
 
@@ -323,6 +351,7 @@ class StoryModeState extends MusicBeatState {
 		}
 
 		if(controls.BACK) {
+			inputsActive = false;
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			MusicBeatState.switchState(new funkin.states.MainMenuState());
 		}
@@ -374,9 +403,20 @@ class StoryModeState extends MusicBeatState {
 	function acceptLevel() {
 		FlxG.sound.play(Paths.sound('confirmMenu'));
 
-		// TODO: play the character anims and shit
+		inputsActive = false;
 
-		playLevel(levels[selectedLevel], selectedDifficultyName);
+		for (title in levelTitles.members) {
+			if (title.ID == selectedLevel) {
+				title.isFlashing = true;
+				break;
+			}
+		}
+
+		// TODO: play the character anims
+
+		new FlxTimer().start(1, function(tmr:FlxTimer) {
+			playLevel(levels[selectedLevel], selectedDifficultyName);
+		});
 	}
 
 	static function playLevel(level:Level, chartId:String) {
