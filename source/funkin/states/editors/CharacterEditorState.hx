@@ -1125,12 +1125,12 @@ class CharacterEditorState extends MusicBeatState
 				if(FlxG.keys.justPressed.ENTER) {
 					inputTexts[i].hasFocus = false;
 				}
-				StartupState.specialKeysEnabled = false;
+				FNFGame.specialKeysEnabled = false;
 				super.update(elapsed);
 				return;
 			}
 		}
-		StartupState.specialKeysEnabled = true;
+		FNFGame.specialKeysEnabled = true;
 
 		if (testMode) {
 			var alt = FlxG.keys.pressed.SHIFT ? "-alt" : '';

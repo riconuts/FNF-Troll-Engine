@@ -2016,7 +2016,7 @@ class ChartingState extends MusicBeatState
 
 		if (checkInputBlocked() != inputBlocked) {
 			inputBlocked = !inputBlocked;
-			StartupState.specialKeysEnabled = !inputBlocked;
+			FNFGame.specialKeysEnabled = !inputBlocked;
 		}
 
 		if (!inputBlocked) {
