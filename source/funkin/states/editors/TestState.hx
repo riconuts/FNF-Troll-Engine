@@ -134,11 +134,11 @@ class TestState extends MusicBeatState{
 		
 		////
 		inputText.focusGained = function(){
-			StartupState.specialKeysEnabled = false;
+			FNFGame.specialKeysEnabled = false;
 			updateFunction = function(){ if (FlxG.keys.justPressed.ENTER) inputText.focusLost();}
 		};
 		inputText.focusLost = function(){
-			StartupState.specialKeysEnabled = true;
+			FNFGame.specialKeysEnabled = true;
 
 			inputText.hasFocus = false;
 			updateFunction = null;

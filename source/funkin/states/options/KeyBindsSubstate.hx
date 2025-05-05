@@ -255,7 +255,7 @@ class KeyBindsSubstate extends MusicBeatSubstate  {
 	{
 		bindID = 0;
 		bindIndex = -1;
-		StartupState.specialKeysEnabled = true;
+		FNFGame.specialKeysEnabled = true;
 	}
 
 	function confirmBinding(key) {
@@ -473,7 +473,7 @@ class KeyBindsSubstate extends MusicBeatSubstate  {
 		bindID = id;
 		bindIndex = index;
 		cancelKey = (currentBinded == BACKSPACE) ? FlxKey.ESCAPE : FlxKey.BACKSPACE;
-		StartupState.specialKeysEnabled = false;
+		FNFGame.specialKeysEnabled = false;
 		
 		// 
 		unbindText.visible = forcedBind.contains(internal);

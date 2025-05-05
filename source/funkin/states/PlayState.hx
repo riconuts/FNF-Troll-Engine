@@ -4,6 +4,7 @@ import funkin.objects.playfields.PlayField.NoteCallback;
 import funkin.data.CharacterData;
 import funkin.data.Cache;
 import funkin.data.Song;
+import funkin.data.BaseSong;
 import funkin.data.Section;
 import funkin.objects.notes.Note;
 import funkin.objects.notes.NoteSplash;
@@ -111,6 +112,19 @@ typedef SpeedEvent =
 @:noScripting
 class PlayState extends MusicBeatState
 {
+	public static function loadPlaylist(playlist:Array<BaseSong>, chartId:String) {
+		PlayState.loadSong(playlist[0], chartId);
+		PlayState.songPlaylist = playlist;
+		PlayState.songPlaylistIdx = 0;	
+	}
+
+	private static function loadSong(song:BaseSong, chartId:String) {
+		Paths.currentModDirectory = song.folder;
+		PlayState.song = song;
+		PlayState.SONG = song.getSwagSong(chartId);
+		PlayState.difficultyName = chartId;
+	}
+
 	public var extraData:Map<String, Dynamic> = [];
 
 	var legacyOnCreatePost:Bool = true; // Can be set by scripts to make onCreatePost be called where it used to be (before the countdown and super.create)
@@ -121,13 +135,11 @@ class PlayState extends MusicBeatState
 	public static var instance:PlayState;
 
 	public static var SONG:SwagSong = null;
-	public static var songPlaylist:Array<Song> = [];
+	public static var songPlaylist:Array<BaseSong> = [];
 	public static var songPlaylistIdx = 0;
 
-	private static var song(get, never):Song;
-	private static function get_song() return songPlaylist[songPlaylistIdx];
+	public static var song:BaseSong;
 
-	public static var difficulty:Int = 1; // for psych mod shit
 	public static var difficultyName:String = 'normal'; // should NOT be set to "" when playing normal diff!!!!!
 
 	public static var isStoryMode:Bool = false;
@@ -610,18 +622,17 @@ class PlayState extends MusicBeatState
 
 		////
 		if (SONG == null){
-			trace("WARNING: null SONG");
-			SONG = Song.loadFromJson('tutorial', 'tutorial');
+			throw 'No chart data available';
 		}
+		
+		songId = (song?.songId) ?? Paths.formatToSongPath(SONG.song);
+		songHighscore = Highscore.getScore(songId, difficultyName);
 
 		offset = SONG.offset ?? 0.0;
 		Conductor.mapBPMChanges(SONG);
 		Conductor.changeBPM(SONG.bpm);
 		Conductor.songPosition = Conductor.crochet * -5;
 		Conductor.updateSteps();
-
-		songId = (song?.songId) ?? Paths.formatToSongPath(SONG.song);
-		songHighscore = Highscore.getScore(songId, difficultyName);
 
 		metadata = SONG.metadata ?? (song?.getMetadata(difficultyName));
 		if (showDebugTraces && metadata == null)
@@ -2956,21 +2967,18 @@ class PlayState extends MusicBeatState
 
 		transitioning = true;
 
+		if (chartingMode) {
+			openChartEditor();
+			return;
+		}
+
 		// Save song score and rating.
 
 		if (saveScore && SONG.validScore && ratingFC != stats.fail)
 			Highscore.saveScoreRecord(songId, difficultyName, stats.getScoreRecord());
 
 		var gotoNextThing:Void -> Void = gotoMenus;
-		var nextSong:Song = null;
-
-		if (chartingMode) {
-			gotoNextThing = null;
-			openChartEditor();
-		}
-		else {
-			nextSong = songPlaylist[++songPlaylistIdx];
-		} 
+		var nextSong:BaseSong = songPlaylist[songPlaylistIdx + 1];
 
 		if (isStoryMode) {
 			// TODO: add a modcharted variable which songs w/ modcharts should set to true, then make it so if modcharts are disabled the score wont get added
@@ -2978,28 +2986,24 @@ class PlayState extends MusicBeatState
 			if (ratingFC != 'Fail')
 				campaignScore += stats.score;
 			campaignMisses += songMisses;
-
-			if (nextSong == null && saveScore && WeekData.curWeek != null) {
-				// Week ended, save week score
-				if (!practiceMode && !cpuControlled && !playOpponent) {
-					Highscore.saveWeekScore(WeekData.curWeek.name, campaignScore);						
-				}
-			}
 		}
 
 		if (nextSong != null) {
-			trace('LOADING NEXT SONG: $nextSong');
-
 			prevCamFollow = camFollow;
 			prevCamFollowPos = camFollowPos;
 
 			gotoNextThing = function gotoNextSong() {
-				if (FlxG.state is PlayState) {
-					FlxTransitionableState.skipNextTransIn = true;
-					FlxTransitionableState.skipNextTransOut = true;
-				}
-				nextSong.play(difficultyName);
+				FlxTransitionableState.skipNextTransIn = true;
+				FlxTransitionableState.skipNextTransOut = true;
+
+				PlayState.songPlaylistIdx++;
+				trace('LOADING NEXT SONG: $nextSong, (${PlayState.songPlaylistIdx + 1} / ${PlayState.songPlaylist.length})');
+				PlayState.loadSong(nextSong, PlayState.difficultyName);
+				MusicBeatState.switchState(new PlayState());
 			}
+		}else {
+			trace('PLAYLIST END (${PlayState.songPlaylistIdx + 1} / ${PlayState.songPlaylist.length})');
+			onPlaylistEnd();
 		}
 
 		if (gotoNextThing != null) {
@@ -3013,6 +3017,15 @@ class PlayState extends MusicBeatState
 		}
 		
 		callOnScripts('onSongEnd');
+	}
+
+	function onPlaylistEnd() {
+		if (isStoryMode && saveScore && WeekData.curWeek != null) {
+			// Week ended, save week score
+			if (!practiceMode && !cpuControlled && !playOpponent) {
+				Highscore.saveWeekScore(WeekData.curWeek.name, campaignScore);						
+			}
+		}
 	}
 
 	public function KillNotes() {

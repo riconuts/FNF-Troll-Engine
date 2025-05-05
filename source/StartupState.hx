@@ -11,7 +11,6 @@ import flixel.FlxG;
 import flixel.FlxState;
 import flixel.tweens.*;
 import flixel.addons.transition.FlxTransitionableState;
-import flixel.input.keyboard.FlxKey;
 
 #if sys
 import Sys.time as getTime;
@@ -34,29 +33,6 @@ using StringTools;
 
 class StartupState extends FlxTransitionableState
 {
-	public static var muteKeys:Array<FlxKey> = [FlxKey.ZERO];
-	public static var volumeDownKeys:Array<FlxKey> = [FlxKey.NUMPADMINUS, FlxKey.MINUS];
-	public static var volumeUpKeys:Array<FlxKey> = [FlxKey.NUMPADPLUS, FlxKey.PLUS];
-	public static var fullscreenKeys:Array<FlxKey> = [FlxKey.F11];
-	public static var specialKeysEnabled(default, set):Bool;
-
-	@:noCompletion inline public static function set_specialKeysEnabled(val)
-	{
-		if (val) {
-			FlxG.sound.muteKeys = StartupState.muteKeys;
-			FlxG.sound.volumeDownKeys = StartupState.volumeDownKeys;
-			FlxG.sound.volumeUpKeys = StartupState.volumeUpKeys;
-		}
-		else {
-			final emptyArr = [];
-			FlxG.sound.muteKeys = emptyArr;
-			FlxG.sound.volumeDownKeys = emptyArr;
-			FlxG.sound.volumeUpKeys = emptyArr;
-		}
-
-		return specialKeysEnabled = val;
-	}
-
 	public function new()
 	{
 		super();
@@ -82,40 +58,9 @@ class StartupState extends FlxTransitionableState
 
 		Highscore.load();
 
-		FlxG.sound.onVolumeChange.add((vol:Float) -> {
-			ClientPrefs.masterVolume = vol;
-
-			@:privateAccess {
-				Reflect.setField(ClientPrefs.optionSave.data, "masterVolume", vol);
-				ClientPrefs.optionSave.flush();
-			}
-		});
-
-		specialKeysEnabled = true;
-		FlxG.fixedTimestep = false;
+		FNFGame.specialKeysEnabled = true;
 		FlxG.keys.preventDefaultKeys = [TAB];
-
-		#if (windows || linux) // No idea if this also applies to any other targets
-		FlxG.stage.addEventListener(
-			openfl.events.KeyboardEvent.KEY_DOWN, 
-			(e)->{
-				// Prevent Flixel from listening to key inputs when switching fullscreen mode
-				if (e.keyCode == FlxKey.ENTER && e.altKey)
-					e.stopImmediatePropagation();
-
-				// Also add F11 to switch fullscreen mode
-				if (specialKeysEnabled && fullscreenKeys.contains(e.keyCode))
-					FlxG.fullscreen = !FlxG.fullscreen;
-			}, 
-			false, 
-			100
-		);
-
-		FlxG.stage.addEventListener(
-			openfl.events.FullScreenEvent.FULL_SCREEN, 
-			(e) -> FlxG.save.data.fullscreen = e.fullScreen
-		);
-		#end
+		FlxG.fixedTimestep = false;
 
 		#if (DO_AUTO_UPDATE || display)
 		UpdaterState.getRecentGithubRelease();

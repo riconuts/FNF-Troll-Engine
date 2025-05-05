@@ -1,6 +1,10 @@
 package funkin.states;
 
+import flixel.util.FlxColor;
+import funkin.objects.hud.HealthIcon;
+
 import funkin.data.Song;
+import funkin.data.BaseSong;
 import funkin.data.Highscore;
 
 import flixel.text.FlxText;
@@ -23,8 +27,8 @@ class FreeplayState extends MusicBeatState
 {
 	public static var comingFromPlayState:Bool = false;
 
-	var menu = new AlphabetMenu();
-	var songData:Array<Song> = [];
+	var menu = new FreeplayMenu();
+	var songData:Array<BaseSong> = [];
 
 	var bgGrp = new FlxTypedGroup<FlxSprite>();
 	var bg:FlxSprite;
@@ -43,13 +47,13 @@ class FreeplayState extends MusicBeatState
 	static var curDiffStr:String = "normal";
 	static var curDiffIdx:Int = 1;
 
-	var selectedSongData:Song;
+	var selectedSongData:BaseSong;
 	var selectedSongCharts:Array<String>;
 	
 	var hintText:FlxText;
 
-	public static function getFreeplaySongs():Array<Song> {
-		var list = [];
+	public static function getFreeplaySongs():Array<BaseSong> {
+		var list:Array<BaseSong> = [];
 		for (directory => metadata in Paths.getContentMetadata())
 		{
 			var songIdList:Array<String> = [];
@@ -88,10 +92,9 @@ class FreeplayState extends MusicBeatState
 		funkin.api.Discord.DiscordClient.changePresence('In the menus');
 		#end
 
-		for (song in getFreeplaySongs()) {			
-			menu.addTextOption(song.getMetadata().songName).ID = songData.length;
-			songData.push(song);
-		}
+		songData = getFreeplaySongs();
+		for (song in songData)
+			menu.addSong(song);
 
 		////
 		add(bgGrp);
@@ -153,7 +156,7 @@ class FreeplayState extends MusicBeatState
 			proceed = songLoaded == selectedSong && PlayState.SONG != null;
 		
 			if (!proceed) {
-				Song.loadSong(selectedSongData, curDiffStr);
+				PlayState.loadPlaylist([selectedSongData], curDiffStr);
 				proceed = PlayState.SONG != null;
 			}
 		}
@@ -168,6 +171,8 @@ class FreeplayState extends MusicBeatState
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.fadeOut(0.16);
 
+		PlayState.isStoryMode = false;
+
 		if (FlxG.keys.pressed.SHIFT)
 			LoadingState.loadAndSwitchState(new funkin.states.editors.ChartingState());
 		else
@@ -178,7 +183,7 @@ class FreeplayState extends MusicBeatState
 		// load song json and play inst
 		if (songLoaded != selectedSong){
 			songLoaded = selectedSong;
-			Song.loadSong(selectedSongData, curDiffStr);
+			PlayState.loadPlaylist([selectedSongData], curDiffStr);
 			
 			if (PlayState.SONG != null){
 				Conductor.changeBPM(PlayState.SONG.bpm);
@@ -241,18 +246,29 @@ class FreeplayState extends MusicBeatState
 		super.update(elapsed);
 	}
 
-	function onSelectSong(data:Song)
+	function onSelectSong(data:BaseSong)
 	{	
-		selectedSongData = data;
-		selectedSongCharts = data.charts;
 		Paths.currentModDirectory = data.folder;
+
+		selectedSongData = data;
+		selectedSongCharts = data.getCharts();
 
 		changeDifficulty(CoolUtil.updateDifficultyIndex(curDiffIdx, curDiffStr, selectedSongCharts), true);
 
-		var modBgGraphic = Paths.image('menuBGBlue');
+		var metadata = data.getMetadata(curDiffStr);
+		var bgColor:FlxColor; 
+		var bgKey:String; 
+		
+		if (metadata.freeplayBgColor == null && metadata.freeplayBgGraphic == null) {
+			bgColor = 0xFFFFFFFF;
+			bgKey = 'menuBGBlue';
+		}else {
+			bgColor = (metadata.freeplayBgColor!=null) ? FlxColor.fromString(metadata.freeplayBgColor) : 0xFFFFFFFF;
+			bgKey = metadata.freeplayBgGraphic ?? 'menuDesat';
+		}
+
 		reloadFont();
-		if (bg == null || modBgGraphic != bg.graphic)
-			fadeToBg(modBgGraphic);
+		fadeToBg(Paths.image(bgKey), bgColor);
 	}
 
 	function refreshScore()
@@ -267,31 +283,44 @@ class FreeplayState extends MusicBeatState
 			targetHighscore = record.score;
 	}
 
-	function fadeToBg(graphic){
-		var prevBg = bg;
+	static function makeBgSprite(){
+		var spr = new FlxSprite();
+		spr.active = false;
+		spr.moves = false;
+		return spr;
+	}
 
-		if (bgGrp.length < 6){
-			bg = bgGrp.recycle(FlxSprite);
-		}else{ /// fixed size flxgroups are wack
-			bg =  bgGrp.members[0];
-			FlxTween.cancelTweensOf(bg);
-			bg.alpha = 1.0;
-			bg.revive();
-		};
-		bg.loadGraphic(graphic);
-		bg.screenCenter();
-		
-		if (prevBg == null)
+	function fadeToBg(graphic, color:FlxColor) {
+		if (bg != null && bg.graphic == graphic && bg.color == color)
 			return;
 
-		bg.alpha = 0.0;
-		FlxTween.tween(bg, {alpha: 1.0}, 0.4, {
-			ease: FlxEase.sineInOut,
-			onComplete: (_) -> prevBg.kill()
-		});
+		// HORRIBLE BUT COOL I HOPE
+
+		var prevBg = bg;
 		
-		bgGrp.remove(bg, true);
-		bgGrp.add(bg);
+		if (bgGrp.members.length > 4) {
+			bg = bgGrp.members[0];
+			bg.exists = true;
+			FlxTween.cancelTweensOf(bg);
+
+			var sowy = bgGrp.members[1];
+			sowy.alpha = 1.0;
+			FlxTween.cancelTweensOf(sowy);
+		}else {
+			bg = bgGrp.recycle(FlxSprite, makeBgSprite);
+		}
+		bgGrp.members.remove(bg);
+		bgGrp.members.push(bg);
+		
+		bg.loadGraphic(graphic);
+		bg.screenCenter();
+		bg.color = color;
+		bg.alpha = 1.0;
+
+		if (prevBg != null) {
+			bg.alpha = 0.0;
+			FlxTween.tween(bg, {alpha: 1.0}, 0.4, {ease: FlxEase.sineInOut});
+		}
 	}
 
 	function changeDifficulty(val:Int = 0, ?isAbs:Bool)
@@ -362,5 +391,74 @@ class FreeplayState extends MusicBeatState
 		lastSelected = menu.curSelected;
 		
 		super.destroy();
+	}
+}
+
+private class FreeplayMenu extends AlphabetMenu
+{
+	var iconGrp = new FlxTypedGroup<FreeplayIcon>();
+
+	public function addSong(song:BaseSong) {
+		var metadata = song.getMetadata();
+		var songName:String = metadata.songName;
+		var iconId:Null<String> = metadata.freeplayIcon;
+
+		var obj:Alphabet = this.addTextOption(songName);
+
+		if (iconId == null)
+			return;
+
+		#if shit_fuckign_worked // wtf why isn't alphabet doing this
+		var minX = obj.x;
+		var maxX = obj.x;
+		var minY = obj.y;
+		var maxY = obj.y;
+		for (obj in obj.members) {
+			minX = Math.min(minX, obj.x);
+			maxX = Math.max(maxX, obj.x + obj.width);
+			minY = Math.min(minY, obj.y);
+			maxY = Math.max(maxY, obj.y + obj.height);
+		}
+		var width = maxX - minX;
+		var height = maxY - minY;
+		#else
+		var width = obj.width;
+		var height = obj.height;
+		#end
+
+		////
+		var iconSpr = new FreeplayIcon(iconId);
+		iconSpr.ID = obj.ID;
+		iconSpr.tracking = obj;
+		iconSpr.offX = width + 15;
+		iconSpr.offY = height / 2 - iconSpr.height / 2;
+		iconGrp.add(iconSpr);
+	}
+
+	override function update(elapsed:Float) {
+		super.update(elapsed);
+		iconGrp.update(elapsed);
+	}
+
+	override function draw() {
+		super.draw();
+		iconGrp.draw();
+	}
+}
+
+private class FreeplayIcon extends HealthIcon
+{
+	public var tracking:FlxSprite = null;
+	public var offX:Float = 0;
+	public var offY:Float = 0;
+
+	override public function update(elapsed:Float)
+	{
+		if (tracking != null){
+			x = tracking.x + offX;
+			y = tracking.y + offY;
+			alpha = tracking.alpha;
+		}
+		super.update(elapsed);
 	}
 }

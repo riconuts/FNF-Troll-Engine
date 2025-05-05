@@ -284,7 +284,7 @@ class ButtonBindsSubstate extends MusicBeatSubstate
 	function exitBinding() {
 		bindID = 0;
 		bindIndex = -1;
-		StartupState.specialKeysEnabled = true;
+		FNFGame.specialKeysEnabled = true;
 	}
 
 	public function confirmBinding(key:FlxGamepadInputID) {
@@ -434,7 +434,7 @@ class ButtonBindsSubstate extends MusicBeatSubstate
 		bindID = id;
 		bindIndex = index;
 		
-		StartupState.specialKeysEnabled = false;
+		FNFGame.specialKeysEnabled = false;
 		
 		cancelKey = FlxGamepadInputID.NONE; // (currentBinded == BACKSPACE) ? FlxGamepadInputID.ESCAPE : FlxGamepadInputID.BACKSPACE;
 

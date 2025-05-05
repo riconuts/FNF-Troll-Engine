@@ -251,8 +251,7 @@ class ChartingState extends MusicBeatState
 
 	public var playbackSpeed(default, set):Float = 1.0;
 	@:noCompletion function set_playbackSpeed(val:Float){
-		for (track in soundTracksMap)
-			track.pitch = val;
+		Conductor.changePitch(val);
 		return playbackSpeed = val;
 	}
 
@@ -2017,7 +2016,7 @@ class ChartingState extends MusicBeatState
 
 		if (checkInputBlocked() != inputBlocked) {
 			inputBlocked = !inputBlocked;
-			StartupState.specialKeysEnabled = !inputBlocked;
+			FNFGame.specialKeysEnabled = !inputBlocked;
 		}
 
 		if (!inputBlocked) {
