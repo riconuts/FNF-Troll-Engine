@@ -1,5 +1,6 @@
 package funkin.states;
 
+import flixel.util.FlxColor;
 import funkin.objects.hud.HealthIcon;
 
 import funkin.data.Song;
@@ -254,10 +255,20 @@ class FreeplayState extends MusicBeatState
 
 		changeDifficulty(CoolUtil.updateDifficultyIndex(curDiffIdx, curDiffStr, selectedSongCharts), true);
 
-		var modBgGraphic = Paths.image('menuBGBlue');
+		var metadata = data.getMetadata(curDiffStr);
+		var bgColor:FlxColor; 
+		var bgKey:String; 
+		
+		if (metadata.freeplayBgColor == null && metadata.freeplayBgGraphic == null) {
+			bgColor = 0xFFFFFFFF;
+			bgKey = 'menuBGBlue';
+		}else {
+			bgColor = (metadata.freeplayBgColor!=null) ? FlxColor.fromString(metadata.freeplayBgColor) : 0xFFFFFFFF;
+			bgKey = metadata.freeplayBgGraphic ?? 'menuDesat';
+		}
+
 		reloadFont();
-		if (bg == null || modBgGraphic != bg.graphic)
-			fadeToBg(modBgGraphic);
+		fadeToBg(Paths.image(bgKey), bgColor);
 	}
 
 	function refreshScore()
@@ -272,31 +283,44 @@ class FreeplayState extends MusicBeatState
 			targetHighscore = record.score;
 	}
 
-	function fadeToBg(graphic){
-		var prevBg = bg;
+	static function makeBgSprite(){
+		var spr = new FlxSprite();
+		spr.active = false;
+		spr.moves = false;
+		return spr;
+	}
 
-		if (bgGrp.length < 6){
-			bg = bgGrp.recycle(FlxSprite);
-		}else{ /// fixed size flxgroups are wack
-			bg =  bgGrp.members[0];
-			FlxTween.cancelTweensOf(bg);
-			bg.alpha = 1.0;
-			bg.revive();
-		};
-		bg.loadGraphic(graphic);
-		bg.screenCenter();
-		
-		if (prevBg == null)
+	function fadeToBg(graphic, color:FlxColor) {
+		if (bg != null && bg.graphic == graphic && bg.color == color)
 			return;
 
-		bg.alpha = 0.0;
-		FlxTween.tween(bg, {alpha: 1.0}, 0.4, {
-			ease: FlxEase.sineInOut,
-			onComplete: (_) -> prevBg.kill()
-		});
+		// HORRIBLE BUT COOL I HOPE
+
+		var prevBg = bg;
 		
-		bgGrp.remove(bg, true);
-		bgGrp.add(bg);
+		if (bgGrp.members.length > 4) {
+			bg = bgGrp.members[0];
+			bg.exists = true;
+			FlxTween.cancelTweensOf(bg);
+
+			var sowy = bgGrp.members[1];
+			sowy.alpha = 1.0;
+			FlxTween.cancelTweensOf(sowy);
+		}else {
+			bg = bgGrp.recycle(FlxSprite, makeBgSprite);
+		}
+		bgGrp.members.remove(bg);
+		bgGrp.members.push(bg);
+		
+		bg.loadGraphic(graphic);
+		bg.screenCenter();
+		bg.color = color;
+		bg.alpha = 1.0;
+
+		if (prevBg != null) {
+			bg.alpha = 0.0;
+			FlxTween.tween(bg, {alpha: 1.0}, 0.4, {ease: FlxEase.sineInOut});
+		}
 	}
 
 	function changeDifficulty(val:Int = 0, ?isAbs:Bool)
