@@ -251,7 +251,7 @@ class ClientPrefs {
 				display: "Sync Mode",
 				desc: "The method used to sync the music to the game.\nOnly touch this if your game is going off-sync.",
 				type: Dropdown,
-				value: "Last Mix",
+				value: "System Time",
 				data: ["options" => ["System Time", "Last Mix", "Psych 1.0", "Direct", "Legacy"]]
 			},
 			// UI
