@@ -1,6 +1,7 @@
 package funkin.scripts;
 
 import haxe.CallStack;
+import funkin.scripts.Util.ModchartSprite;
 #if USING_FLXANIMATE
 import funkin.objects.FlxAnimateCompat; // vscode stfu
 #end
@@ -243,7 +244,11 @@ class FunkinHScript extends FunkinScript
 	private function setFlixelVars() 
 	{
 		set("FlxG", FlxG);
+		#if NMV_MOD_COMPATIBILITY
+		set("FlxSprite", ModchartSprite);
+		#else
 		set("FlxSprite", FlxSprite);
+		#end
 		set("FlxCamera", FlxCamera);
 		set("FlxSound", FlxSound);
 		set("FlxMath", flixel.math.FlxMath);

@@ -21,6 +21,32 @@ using StringTools;
 
 class Util
 {
+	inline public static function pussyPath(luaFile:String):Null<String>
+	{
+		var hasLuaExtension = false;
+		for(ext in Paths.LUA_EXTENSIONS){
+			if (luaFile.endsWith('.$ext')){
+				hasLuaExtension = true;
+				break;
+			}
+		}
+		return Paths._getPath(hasLuaExtension ? luaFile : '$luaFile.lua');
+	}
+
+	public static function getLuaInstance(scriptName:String):Null<FunkinLua>
+	{
+		for (luaInstance in PlayState.instance.luaArray) {
+			if (luaInstance.scriptName == scriptName)
+				return luaInstance;
+		}
+		return null;
+	}
+
+	inline public static function getLuaFileInstance(luaFile:String):Null<FunkinLua>
+	{
+		return getLuaInstance(pussyPath(luaFile));
+	}
+
 	public static function getProperty(variable:String) {
 		var killMe:Array<String> = variable.split('.');
 		if (killMe.length > 1)
