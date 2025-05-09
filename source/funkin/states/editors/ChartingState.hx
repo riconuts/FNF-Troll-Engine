@@ -3273,13 +3273,10 @@ class ChartingState extends MusicBeatState
 		}
 	}
 
+	/*
 	private function saveMetadata(){
-		var metadata = _song.metadata;
-		if(metadata==null){
-			metadata = {
-				artist: "Unspecified",
-				charter: "Unspecified"
-			}
+		var metadata = metadata ?? {
+			songName: "Unspecified",
 		}
 		var data:String = Json.stringify(metadata, "\t");
 
@@ -3292,6 +3289,7 @@ class ChartingState extends MusicBeatState
 			_file.save(data.trim(), "metadata.json");
 		}
 	}
+	*/
 
 	private function saveEvents()
 	{

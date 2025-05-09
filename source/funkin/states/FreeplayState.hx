@@ -136,6 +136,7 @@ class FreeplayState extends MusicBeatState
 		if (comingFromPlayState) playSelectedSongMusic();
 
 		super.create();
+		persistentUpdate = true;
 		comingFromPlayState = false;
 	}
 
@@ -193,19 +194,26 @@ class FreeplayState extends MusicBeatState
 		}
 	}
 
-	// disable menu class controls for one update cycle Dx 
-	var stunned:Bool = false;
+	var shouldRestoreControl:Bool = false;
 	inline function stun(){
-		stunned = true;
+		shouldRestoreControl = true;
 		menu.controls = null;
 	}
 
 	override public function update(elapsed:Float)
 	{
-		if (stunned){
-			stunned = false;
+		super.update(elapsed);
+		updateInput(elapsed);
+	}
+
+	function updateInput(elapsed:Float) {
+		if (shouldRestoreControl){
+			shouldRestoreControl = false;
 			menu.controls = controls;
 		}
+
+		if (menu.controls == null)
+			return;
 
 		if (controls.UI_LEFT_P){
 			changeDifficulty(-1);
@@ -224,26 +232,34 @@ class FreeplayState extends MusicBeatState
 			MusicBeatState.switchState(new funkin.states.MainMenuState());	
 			
 		}else if (controls.RESET){
-			var songName:String = selectedSongData.songId;
-			var _dStrId:String = 'difficultyName_$curDiffStr';
-			
-			var diffName:String = Paths.getString(_dStrId, curDiffStr);
-			var displayName:String = '$songName ($diffName)'; // maybe don't specify the difficulty if it's the only available one
+			var songName:String = selectedSongData.getMetadata(curDiffStr).songName;
+			var displayName:String = songName;
+
+			if (selectedSongCharts.length > 1) {
+				var diffName:String = Paths.getString('difficultyName_$curDiffStr', curDiffStr);
+				displayName += ' ($diffName)';
+			}
 
 			openSubState(new ResetScoreSubState(
-				songName, 
-				curDiffStr.toLowerCase() == 'normal' ? '' : curDiffStr, 
+				selectedSongData.songId, 
+				curDiffStr, 
 				false, 
 				displayName
 			));
-			this.subStateClosed.addOnce((_) -> refreshScore());
+			menu.controls = null;
+			this.subStateClosed.addOnce(function(_) {
+				refreshScore();
+				shouldRestoreControl = true;
+			});
 			
 		}else if (FlxG.keys.justPressed.CONTROL){
 			openSubState(new GameplayChangersSubstate());
-			this.subStateClosed.addOnce((_) -> refreshScore());
+			menu.controls = null;
+			this.subStateClosed.addOnce(function(_) {
+				refreshScore();
+				shouldRestoreControl = true;
+			});
 		}
-
-		super.update(elapsed);
 	}
 
 	function onSelectSong(data:BaseSong)
