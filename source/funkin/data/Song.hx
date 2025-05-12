@@ -185,7 +185,7 @@ class Song extends BaseSong
 
 		#if !USING_MOONCHART
 		var suffix = getDifficultyFileSuffix(chartId);
-		var path = getSongFile(songId + suffix);
+		var path = getSongFile(songId + suffix + ".json");
 		return parseSongJson(path);
 		#else
 		
