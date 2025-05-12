@@ -58,6 +58,10 @@ class StartupState extends FlxTransitionableState
 
 		Highscore.load();
 
+		#if USING_MOONCHART
+		funkin.data.Moonchart.init();
+		#end
+
 		FNFGame.specialKeysEnabled = true;
 		FlxG.keys.preventDefaultKeys = [TAB];
 		FlxG.fixedTimestep = false;
