@@ -40,8 +40,8 @@ final defaultDifficultyOrdering:Array<String>  = ["easy", "normal", "hard", "ere
 
 class Song extends BaseSong
 {
-	public var songPath(get, default):String;
-	
+	public var songPath:String;
+
 	private var _charts:Array<String> = null;
 	private var metadataCache = new Map<String, SongMetadata>();
 
@@ -191,12 +191,11 @@ class Song extends BaseSong
 		#end
 	}
 
+	/**
+	 * Returns an array of charts available for this song
+	**/
 	public function getCharts():Array<String>
 		return _charts ?? (_charts = _getCharts());
-
-	//
-	function get_songPath()
-		return songPath;
 
 	////
 
@@ -271,8 +270,6 @@ class Song extends BaseSong
 	{		
 		final songPath = getSongFile("");
 		final charts:Map<String, Bool> = [];
-
-		Paths.currentModDirectory = folder;
 
 		#if USING_MOONCHART		
 		function processFileName(unprocessedName:String) {
@@ -648,6 +645,18 @@ class Song extends BaseSong
 		return resultArray;
 	}
 
+	/** Loads a singular song to be played on PlayState **/
+	static public function loadSong(song:BaseSong, ?difficulty:String) {
+		PlayState.loadPlaylist([song], difficulty);
+	}
+
+	/** Loads a singular song to be played on PlayState, then switches to it **/
+	static public function playSong(song:BaseSong, ?difficulty:String)
+	{
+		loadSong(song, difficulty);
+		switchToPlayState();
+	}
+
 	static public function switchToPlayState()
 	{
 		if (FlxG.sound.music != null)
@@ -655,10 +664,4 @@ class Song extends BaseSong
 
 		LoadingState.loadAndSwitchState(new PlayState());
 	}
-
-	static public function playSong(song:Song, ?difficulty:String)
-	{
-		PlayState.loadPlaylist([song], difficulty);
-		switchToPlayState();
-	} 
 }
