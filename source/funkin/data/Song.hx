@@ -11,53 +11,12 @@ import moonchart.backend.FormatDetector;
 import funkin.states.LoadingState;
 import funkin.states.PlayState;
 import funkin.states.editors.ChartingState;
-import funkin.data.Section.SwagSection;
 import funkin.data.BaseSong;
 import haxe.io.Path;
 import haxe.Json;
 
 using funkin.CoolerStringTools;
 using StringTools;
-
-typedef SwagSong = {
-	////
-	var notes:Array<SwagSection>;
-	
-	var keyCount:Int;
-
-	/** Offsets the chart notes **/
-	var offset:Float;
-	
-	/** How spread apart the notes should be **/
-	var speed:Float;
-
-	////
-	var song:String;
-
-	/** Starting BPM of the song **/
-	var bpm:Float;
-	
-	/** Song track data containing the file names of the song's tracks **/
-	var tracks:SongTracks;
-
-	////
-	var player1:Null<String>;
-	var player2:Null<String>;
-	var gfVersion:Null<String>;
-	var stage:String;
-	var hudSkin:String;
-
-	var arrowSkin:String;
-	var splashSkin:String;
-
-	////
-	@:optional var events:Array<Array<Dynamic>>;
-	@:optional var metadata:SongMetadata;
-
-	//// internal
-	@:optional var path:String;
-	var validScore:Bool;
-}
 
 typedef PsychEvent = {
 	strumTime:Float,
@@ -77,28 +36,6 @@ typedef JsonSong = {
 	@:optional var offset:Float;
 }
 
-typedef SongTracks = {
-	var inst:Array<String>;
-	var ?player:Array<String>;
-	var ?opponent:Array<String>;
-} 
-
-typedef SongMetadata =
-{
-	/** The display name of this song **/
-	var ?songName:String;
-	
-	@:optional var artist:String;
-	@:optional var charter:String;
-	@:optional var modcharter:String;
-	@:optional var extraInfo:Array<String>;
-	
-	@:optional var freeplayIcon:String;
-	@:optional var freeplayBgGraphic:String;
-	@:optional var freeplayBgColor:String;
-}
-
-inline final DEFAULT_CHART_ID = "normal";
 final defaultDifficultyOrdering:Array<String>  = ["easy", "normal", "hard", "erect", "nightmare"];
 
 class Song extends BaseSong

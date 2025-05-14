@@ -7,7 +7,7 @@ import funkin.scripts.FunkinHScript;
 import funkin.scripts.FunkinScript;
 
 import funkin.Conductor.BPMChangeEvent;
-import funkin.data.Section;
+import funkin.data.BaseSong;
 import funkin.data.Song;
 
 import funkin.objects.notes.*;

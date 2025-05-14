@@ -2,6 +2,7 @@ package funkin.states;
 
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.text.FlxText;
+import funkin.data.Song;
 import funkin.data.BaseSong;
 import funkin.data.Highscore;
 import funkin.states.options.OptionsState;
