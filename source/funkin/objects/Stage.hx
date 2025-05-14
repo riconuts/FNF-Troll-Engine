@@ -244,6 +244,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 }
 
 class StageData {
+	/*
 	public static var forceNextDirectory:String = null;
 
 	public static function loadDirectory(SONG:SwagSong) {
@@ -257,6 +258,7 @@ class StageData {
 		// preventing crashes
 		forceNextDirectory = stageFile == null ? '' : stageFile.directory;
 	}
+	*/
 	
 	public static function getStageFile(stageId:String):Null<StageFile> 
 	{
