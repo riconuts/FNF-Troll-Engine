@@ -2,8 +2,7 @@ package funkin.data;
 
 #if USING_MOONCHART
 import funkin.data.FNFTroll as SupportedFormat;
-import moonchart.formats.BasicFormat;
-import moonchart.backend.FormatData;
+import moonchart.formats.fnf.FNFVSlice;
 import moonchart.backend.FormatData.Format;
 import moonchart.backend.FormatDetector;
 #end
@@ -132,7 +131,7 @@ class Song extends BaseSong
 		var metadataPath = getSongFile('$songId-metadata.json');
 
 		if (Paths.exists(chartsFilePath) && Paths.exists(metadataPath)) {
-			var chart = new moonchart.formats.fnf.FNFVSlice().fromFile(chartsFilePath, metadataPath);
+			var chart = new FNFVSlice().fromFile(chartsFilePath, metadataPath);
 			if (chart.diffs.contains(chartId)) {
 				trace("CONVERTING FROM VSLICE");
 				
@@ -170,11 +169,7 @@ class Song extends BaseSong
 					default:
 						trace('Converting from format $fileFormat!');
 
-						var formatInfo:Null<FormatData> = FormatDetector.getFormatData(fileFormat);
-						var chart:moonchart.formats.BasicFormat<{}, {}>;
-						chart = cast Type.createInstance(formatInfo.handler, []);
-						chart = chart.fromFile(filePath);
-
+						var chart = FormatDetector.createFormatInstance(fileFormat).fromFile(filePath);
 						if (chart.formatMeta.supportsDiffs && !chart.diffs.contains(chartId))
 							continue;
 
@@ -295,9 +290,8 @@ class Song extends BaseSong
 					}
 					
 				default:
-					var formatInfo:FormatData = FormatDetector.getFormatData(fileFormat);
-					var chart:moonchart.formats.BasicFormat<{}, {}>;
-					chart = cast Type.createInstance(formatInfo.handler, []).fromFile(filePath);
+					var chart = FormatDetector.createFormatInstance(fileFormat).fromFile(filePath);
+					chart = chart.fromFile(filePath);
 
 					if (chart.formatMeta.supportsDiffs || chart.diffs.length > 0){
 						for (diff in chart.diffs)
@@ -340,7 +334,7 @@ class Song extends BaseSong
 			if (ALL_FILES_DETECTED_FORMAT == FNF_VSLICE) {
 				var chartsFilePath:String = getSongFile('$songId-chart.json');
 				var metadataPath:String = getSongFile('$songId-metadata.json');
-				var chart = new moonchart.formats.fnf.FNFVSlice().fromFile(chartsFilePath, metadataPath);
+				var chart = new FNFVSlice().fromFile(chartsFilePath, metadataPath);
 				for (diff in chart.diffs) charts.set(diff, true);
 				
 			}else {
