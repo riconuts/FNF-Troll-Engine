@@ -506,7 +506,7 @@ class Song extends BaseSong
 	{
 		var path:String = Paths.formatToSongPath(folder) + '/' + Paths.formatToSongPath(jsonInput) + '.json';
 		var fullPath = Paths.getPath('songs/$path', false);
-		return parseSongJson(fullPath);
+		return parseSongJson(fullPath, isChartJson);
 	}
 
 	public static function onLoadEvents(songJson:SwagSong) {
