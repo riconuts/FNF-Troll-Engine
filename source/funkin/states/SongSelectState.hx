@@ -50,7 +50,7 @@ class SongSelectState extends MusicBeatState
 
 	public static function getEverySong():Array<BaseSong>
 	{
-		var songMeta = [];
+		var songMeta:Array<BaseSong> = [];
 
 		var folder = 'assets/songs/';
 		Paths.iterateDirectory(folder, function(name:String){
