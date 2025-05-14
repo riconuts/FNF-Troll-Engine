@@ -1,19 +1,15 @@
 package funkin.states;
 
 import flixel.addons.transition.FlxTransitionableState;
-import funkin.data.Highscore;
 import flixel.text.FlxText;
 import funkin.data.Song;
+import funkin.data.BaseSong;
+import funkin.data.Highscore;
 import funkin.states.options.OptionsState;
 import funkin.states.editors.MasterEditorMenu;
 
 #if DISCORD_ALLOWED
 import funkin.api.Discord.DiscordClient;
-#end
-
-#if sys
-import sys.io.File;
-import sys.FileSystem;
 #end
 
 using StringTools;
@@ -24,7 +20,7 @@ using StringTools;
 **/
 class SongSelectState extends MusicBeatState
 {	
-	var songMeta:Array<Song>;
+	var songMeta:Array<BaseSong>;
 	var songText:Array<FlxText> = [];
 	var curSel(default, set):Int;
 	function set_curSel(sowy){
@@ -53,9 +49,9 @@ class SongSelectState extends MusicBeatState
 
 	var verticalLimit:Int;
 
-	public static function getEverySong():Array<Song>
+	public static function getEverySong():Array<BaseSong>
 	{
-		var songMeta = [];
+		var songMeta:Array<BaseSong> = [];
 
 		var folder = 'assets/songs/';
 		Paths.iterateDirectory(folder, function(name:String){
@@ -212,7 +208,7 @@ class SongSelectState extends MusicBeatState
 
 class ChartSelectSubstate extends MusicBeatSubstate
 {
-	var song:Song;
+	var song:BaseSong;
 	var charts:Array<String>;
 
 	var curSel:Int = 0;
@@ -220,7 +216,7 @@ class ChartSelectSubstate extends MusicBeatSubstate
 	var chartTxts:Array<FlxText> = [];
 	var scoreTxts:Array<FlxText> = [];
 
-	public function new(song:Song, ?charts:Array<String>) 
+	public function new(song:BaseSong, ?charts:Array<String>) 
 	{
 		super();
 		this.song = song;
@@ -281,6 +277,7 @@ class ChartSelectSubstate extends MusicBeatSubstate
 			this.close();
 		else if (FlxG.keys.justPressed.ENTER) {
 			PlayState.loadPlaylist([song], charts[curSel]);
+			PlayState.isStoryMode = false;
 
 			if (FlxG.keys.pressed.SHIFT)
 				LoadingState.loadAndSwitchState(new funkin.states.editors.ChartingState());

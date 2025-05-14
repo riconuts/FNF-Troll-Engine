@@ -91,8 +91,6 @@ class CreditsState extends MusicBeatState
 		
 		Paths.clearStoredMemory();
 		
-		PlayState.isStoryMode = false;
-
 		FlxG.camera.follow(camFollowPos);
 		FlxG.camera.bgColor = FlxColor.BLACK;
 

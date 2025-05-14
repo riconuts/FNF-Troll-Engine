@@ -4,7 +4,9 @@ package funkin.data;
 import moonchart.formats.fnf.FNFGlobal.FNFLegacyNoteType;
 import moonchart.formats.fnf.FNFGlobal;
 #end
-import funkin.data.Song.SongTracks;
+
+import funkin.data.BaseSong;
+
 #if USING_MOONCHART
 import haxe.Json;
 import moonchart.backend.Util;
@@ -30,7 +32,7 @@ typedef TrollJSONFormat = FNFLegacyFormat & {
 	// Troll-specific
 	?hudSkin:String,
 	?info:Array<String>,
-	?metadata:Song.SongMetadata,
+	?metadata:SongMetadata,
 	?offset:Float,
 	?tracks: SongTracks,
 	?keyCount: Int,
