@@ -111,11 +111,14 @@ class KadeHUD extends BaseHUD
 		add(iconP1);
 		add(iconP2);
 
+		this.displayedJudges.remove("cb");
+
 		for(counterIdx => judge in displayedJudges){
 			var offset = -40+(counterIdx*20);
 
 			var txt = new FlxText(4, (FlxG.height/2)+offset, FlxG.width - 8, "", 20);
-			txt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
+			txt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
+			txt.borderSize = 2;
 			txt.scrollFactor.set();
 			add(txt);
 			counters.set(judge,txt);
@@ -181,16 +184,16 @@ class KadeHUD extends BaseHUD
 		timeBar.exists = updateTime;
 		timeTxt.exists = updateTime;
 
+		var diffId:String = PlayState.difficultyName;
+		var diffName:String = Paths.getString('difficultyName_$diffId', diffId);
+		
 		if (ClientPrefs.timeBarType == "Song Name")
 		{
 			timeTxt.text = displayedSong;
-			watermark.text = engineName;
+			watermark.text = '$diffName | $engineName';
 		}
 		else
 		{
-			var diffId:String = PlayState.difficultyName;
-			var diffName:String = Paths.getString('difficultyName_$diffId', diffId);
-
 			watermark.text = '$displayedSong - $diffName | $engineName';
 			timeTxt.text = "";
 		}
