@@ -2410,6 +2410,7 @@ class PlayState extends MusicBeatState
 		for (script in eventScripts)
 			script.call("update", [elapsed]);
 
+		// Only the worthy may see the fish.
 		fish.visible = stats.ratingPercent > 1;
 
 		callOnHScripts('update', [elapsed]);
