@@ -132,16 +132,16 @@ class NoteField extends FieldBase
 		var alwaysDraw:Bool;
 		var drawDist:Float;
 		
-		if ((getModValue("alwaysDraw") ?? 0) != 0) {
+		if ((getModValue("alwaysDraw") ?? 0.0) != 0.0) {
 			// Force notes to draw, no matter the draw distance
 			alwaysDraw = true;
 			drawDist = Math.POSITIVE_INFINITY;
 		}
 		else{
 			alwaysDraw = false;
-			drawDist = getModValue("drawDistance") ?? FlxG.height;
+			drawDist = getModValue("drawDistance") ?? cast FlxG.height;
 			var dddm = getModValue("disableDrawDistMult");
-			if (dddm == null || dddm == 0)
+			if (dddm == null || dddm == 0.0)
 				drawDist *= drawDistMod;
 		}		
 		
