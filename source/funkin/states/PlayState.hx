@@ -8,6 +8,7 @@ import funkin.data.BaseSong;
 import funkin.objects.notes.Note;
 import funkin.objects.notes.NoteSplash;
 import funkin.objects.notes.StrumNote;
+import funkin.objects.Fish;
 import funkin.objects.Stage;
 import funkin.objects.Character;
 import funkin.objects.RatingGroup;
@@ -503,6 +504,8 @@ class PlayState extends MusicBeatState
 	
 	public var offset:Float = 0;
 
+	public var fish:Fish;
+
 	override public function create()
 	{
 		print('\nCreating PlayState\n');
@@ -939,6 +942,11 @@ class PlayState extends MusicBeatState
 
 		luaDebugGroup.cameras = [camOther];
 		add(luaDebugGroup);
+
+		fish = new Fish();
+		fish.cameras = [camOther];
+		fish.screenCenter();
+		add(fish);
 
 		////
 		#if !tgt
@@ -2402,6 +2410,7 @@ class PlayState extends MusicBeatState
 		for (script in eventScripts)
 			script.call("update", [elapsed]);
 
+		fish.visible = stats.ratingPercent > 1;
 
 		callOnHScripts('update', [elapsed]);
 
