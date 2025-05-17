@@ -6,3 +6,14 @@ function getDisplayedSongs(difficulty:String):Array<String>
 
 	return songs;
 }
+
+function getFreeplaySongs()
+{
+	// lazzyyyyy
+	
+	var songs = this.songs;
+	if (!Highscore.weekCompleted.get("weekend1"))
+		return [songs[0], songs[1], songs[2]];
+
+	return songs;
+}

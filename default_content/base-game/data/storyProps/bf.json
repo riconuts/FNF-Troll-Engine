@@ -8,6 +8,11 @@
 		{
 			"name": "idle",
 			"prefix": "idle"
+		},
+		{
+			"name": "confirm",
+			"prefix": "confirm",
+			"haltsDancing": true
 		}
 	],
 	"danceBeat": 1

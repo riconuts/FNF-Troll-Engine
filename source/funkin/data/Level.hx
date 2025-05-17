@@ -228,6 +228,8 @@ class ScriptedLevel extends Level
 	/**
 	 * WIP (still gotta add to freeplay)
 	 * Returns an array of song data to be shown in freeplay. 
+	 * 
+	 * TODO: Do the V-Slice thing where diff difficulties can have diff freeplay lists??
 	**/
 	override public function getFreeplaySongs():Array<BaseSong>
 	{

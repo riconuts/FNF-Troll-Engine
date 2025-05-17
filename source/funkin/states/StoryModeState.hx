@@ -107,6 +107,7 @@ class LevelStageProp extends FlxSprite
 			prop.scale.set(propData.scale[0], propData.scale[1]);
 		prop.updateHitbox();
 
+		// TODO: allow FlxAnimate and multisparrow
 		if (propData.animations != null) {
 			for (animation in propData.animations) {
 				if (animation.indices != null)
@@ -119,6 +120,12 @@ class LevelStageProp extends FlxSprite
 
 				if (animation.haltsDancing == true)
 					prop.interruptDanceAnims.push(animation.name);
+
+				if(animation.name == 'confirm'){
+					prop.onConfirm.add(() -> {
+						prop.playAnim("confirm", true);
+					});
+				}
 
 				if (prop.animation.curAnim == null)
 					prop.playAnim(animation.name, true);
@@ -490,7 +497,15 @@ class StoryModeState extends MusicBeatState {
 				break;
 			}
 		}
-
+		for (group in levelProps){
+			if(group.visible)
+				for(prop in group.members)
+					if (prop is LevelStageProp)
+						cast(prop, LevelStageProp).onConfirm.dispatch();
+					
+				
+					
+		}
 		// TODO: play the character anims
 
 		new FlxTimer().start(1, function(tmr:FlxTimer) {
