@@ -2162,9 +2162,6 @@ class PlayState extends MusicBeatState
 		hud.alpha = ClientPrefs.hudOpacity;
 		hud.changedOptions(options);
 		
-		callOnScripts('optionsChanged', [options]);
-		if (hudSkinScript != null) callScript(hudSkinScript, "optionsChanged", [options]);
-		
 		for(field in playfields){
 /* 			field.noteField.optimizeHolds = ClientPrefs.optimizeHolds; */
 			field.noteField.drawDistMod = ClientPrefs.drawDistanceModifier;
@@ -2202,6 +2199,10 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
+
+		callOnScripts('optionsChanged', [options]);
+		if (hudSkinScript != null)
+			callScript(hudSkinScript, "optionsChanged", [options]);
 	}
 
 	override function draw(){
