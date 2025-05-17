@@ -946,6 +946,7 @@ class PlayState extends MusicBeatState
 		fish = new Fish();
 		fish.cameras = [camOther];
 		fish.screenCenter();
+		fish.alpha = 0;
 		add(fish);
 
 		////
@@ -2411,7 +2412,10 @@ class PlayState extends MusicBeatState
 			script.call("update", [elapsed]);
 
 		// Only the worthy may see the fish.
-		fish.visible = stats.ratingPercent > 1;
+		if (stats.ratingPercent >= 1)
+			fish.alpha += elapsed;
+		else
+			fish.alpha -= elapsed;
 
 		callOnHScripts('update', [elapsed]);
 
