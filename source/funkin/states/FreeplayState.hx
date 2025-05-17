@@ -1,5 +1,6 @@
 package funkin.states;
 
+import sys.FileSystem;
 import funkin.data.Song;
 import funkin.data.BaseSong;
 import funkin.data.Level;
@@ -74,6 +75,23 @@ class FreeplayState extends MusicBeatState
 					}
 				}
 			}
+			
+			// default category shit
+			// should prob just make a autoAddToFreeplay bool or sum shit idk lol
+			if (metadata.defaultCategory != null && metadata.defaultCategory.length > 0){
+				var dir = Paths.mods(directory + "/songs");
+
+				Paths.iterateDirectory(dir, function(file:String) {
+					if (FileSystem.isDirectory(haxe.io.Path.join([dir, file]))) {
+						if(!songIdMap.exists(file)){
+							songIdMap.set(file, true);
+							list.push(new Song(file, directory));
+						}
+					}
+					
+				});
+
+			}
 		}
 		return list;
 	} 
@@ -85,6 +103,7 @@ class FreeplayState extends MusicBeatState
 		#end
 
 		for (song in getFreeplaySongs()) {			
+			Paths.currentModDirectory = song.folder;
 			menu.addTextOption(song.getMetadata().songName).ID = songData.length;
 			songData.push(song);
 		}
