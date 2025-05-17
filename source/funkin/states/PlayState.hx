@@ -943,11 +943,14 @@ class PlayState extends MusicBeatState
 		luaDebugGroup.cameras = [camOther];
 		add(luaDebugGroup);
 
+		#if FUNNY_ALLOWED
 		fish = new Fish();
 		fish.cameras = [camOther];
 		fish.screenCenter();
 		fish.alpha = 0;
+		fish.exists = ClientPrefs.fish;
 		add(fish);
+		#end
 
 		////
 		#if !tgt
@@ -2012,6 +2015,11 @@ class PlayState extends MusicBeatState
 		if (options.length < 1)
 			return;
 
+		#if FUNNY_ALLOWED
+		if (!fish.exists) fish.alpha = 0;
+		fish.exists = ClientPrefs.fish;
+		#end
+
 		this.songSyncMode = SongSyncMode.fromString(ClientPrefs.songSyncMode);
 		
 		trace("changed " + options);
@@ -2411,11 +2419,13 @@ class PlayState extends MusicBeatState
 		for (script in eventScripts)
 			script.call("update", [elapsed]);
 
+		#if FUNNY_ALLOWED
 		// Only the worthy may see the fish.
 		if (stats.ratingPercent >= 1)
 			fish.alpha += elapsed;
 		else
 			fish.alpha -= elapsed;
+		#end
 
 		callOnHScripts('update', [elapsed]);
 
