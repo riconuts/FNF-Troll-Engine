@@ -1,5 +1,6 @@
 package funkin.objects.hud;
 
+import math.CoolMath;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.tweens.*;
@@ -116,9 +117,9 @@ class AdvancedHUD extends CommonHUD
 		
 	}
 
-	override public function new(iP1:String, iP2:String, songName:String, stats:Stats)
+	override public function new(songName:String, stats:Stats)
 	{
-		super(iP1, iP2, songName, stats);
+		super(songName, stats);
 
 		stats.changedEvent.add(statChanged);
 		
@@ -293,7 +294,7 @@ class AdvancedHUD extends CommonHUD
 	{
 		gradeTxt.text = cpuControlled && useSubtleMark ? botplayString : grade;
 		
-		ratingTxt.text = (grade=="?") ? "0%" : (Highscore.floorDecimal(ratingPercent * 100, 2) + "%");
+		ratingTxt.text = (grade=="?") ? "0%" : (CoolMath.floorDecimal(ratingPercent * 100, 2) + "%");
 		fcTxt.text = (ratingFC == stats.gfc && stats.accuracySystem == WIFE3) ? stats.fc : ratingFC;
 		
 		if (ClientPrefs.npsDisplay)

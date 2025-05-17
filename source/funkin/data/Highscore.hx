@@ -163,11 +163,10 @@ class Highscore {
 		return idArray.join("-"); 
 	}
 
-	inline public static function floorDecimal(value:Float, decimals:Int):Float
-		return CoolUtil.floorDecimal(value, decimals);
-
-	static inline function formatSong(path:String, chartName:String):String
-		return Paths.formatToSongPath(path) + ((chartName==null||chartName.length==0)?'':':$chartName');
+	static inline function formatSong(songId:String, chartId:String):String {
+		// if (chartId == null || chartId.length == 0) chartId = "normal";
+		return Paths.formatToSongPath(songId) + ':' + chartId;
+	}
 
 	public static inline function emptyRecord():ScoreRecord {
 		return {
@@ -194,11 +193,13 @@ class Highscore {
 		var formattedSong:String = formatSong(song, chartName);
 		//trace('get "$formattedSong"');
 		var record:Null<ScoreRecord> = currentSongData.get(formattedSong);
+		/*
 		if(chartName == 'normal' && record == null){
 			// look for one without a difficulty string
 			var noDiff:String = formatSong(song, '');
 			record = currentSongData.get(formattedSong);
 		}
+		*/
 		return record == null ? emptyRecord() : record;
 	}
 	public static function isValidScoreRecord(record:ScoreRecord){

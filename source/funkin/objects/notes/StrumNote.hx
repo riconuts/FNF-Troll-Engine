@@ -1,4 +1,4 @@
-package funkin.objects;
+package funkin.objects.notes;
 
 import funkin.states.PlayState;
 import funkin.objects.playfields.PlayField;

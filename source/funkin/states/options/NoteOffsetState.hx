@@ -63,8 +63,8 @@ class NoteOffsetState extends MusicBeatState
 		FlxG.sound.pause();
 
 		//// Stage
-		var stages = Stage.getTitleStages();
-		var stageId = FlxG.random.getObject(stages);
+		var stageId = 'stage' #if tgt + "1" #end;
+
 		stage = new Stage(stageId);
 		stage.buildStage();
 		stageScript = stage.stageScript;
@@ -85,25 +85,18 @@ class NoteOffsetState extends MusicBeatState
 		add(stageOpacity);
 
 		//// Characters
-		var gfName:String = 'gf';
-		var bfName:String = 'bf';
+		var gfId:String = 'gf';
+		var bfId:String = 'bf';
 
-		// eugh
-		if (stage.curStage.startsWith("school")){
-			gfName += '-pixel';
-			bfName += '-pixel';
-		}else if (stage.curStage.startsWith("mall")){
-			gfName += '-christmas';
-			bfName += '-christmas';
-		}
-
-		gf = new Character(stageData.girlfriend[0], stageData.girlfriend[1], gfName);
+		gf = new Character(stageData.girlfriend[0], stageData.girlfriend[1], gfId);
+		gf.setupCharacter();
 		gf.x += gf.positionArray[0];
 		gf.y += gf.positionArray[1];
 		gf.scrollFactor.set(0.95, 0.95);
 		add(gf);
 
-		boyfriend = new Character(stageData.boyfriend[0], stageData.boyfriend[1], bfName, true);
+		boyfriend = new Character(stageData.boyfriend[0], stageData.boyfriend[1], bfId, true);
+		boyfriend.setupCharacter();
 		boyfriend.x += boyfriend.positionArray[0];
 		boyfriend.y += boyfriend.positionArray[1];
 		add(boyfriend);

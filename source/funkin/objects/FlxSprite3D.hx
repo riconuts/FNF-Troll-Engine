@@ -1,5 +1,7 @@
 package funkin.objects;
 
+import flixel.util.FlxColor;
+import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.graphics.frames.FlxFrame.FlxFrameType;
 import flixel.math.FlxPoint;
@@ -34,7 +36,7 @@ class FlxSprite3D extends FlxSprite {
 	private var _triangleColorTransforms:Array<ColorTransform>;
 	private var _3DColor = new ColorTransform();
 
-	public function new(x, y, z, g) {
+	public function new(?x:Float, ?y:Float, ?z:Float, ?g:FlxGraphicAsset) {
 		super(x, y, g);
 		this.z = z;
 
@@ -191,5 +193,17 @@ class FlxSprite3D extends FlxSprite {
 		if (FlxG.debugger.drawDebug)
 			drawDebug();
 		#end
+	}
+
+	override function makeGraphic(width:Int, height:Int, color = FlxColor.WHITE, unique = false, ?key:String):FlxSprite3D
+	{
+		super.makeGraphic(width, height, color, unique, key);
+		return this;
+	}
+
+	override function loadGraphic(graphic:FlxGraphicAsset, animated = false, frameWidth = 0, frameHeight = 0, unique = false, ?key:String):FlxSprite3D
+	{
+		super.loadGraphic(graphic, animated, frameWidth, frameHeight, unique, key);
+		return this;
 	}
 }

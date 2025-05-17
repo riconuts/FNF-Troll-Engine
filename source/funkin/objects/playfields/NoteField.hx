@@ -124,14 +124,26 @@ class NoteField extends FieldBase
 		var nextNotePos:Map<Note, Vector3> = []; // for orient
 		var taps:Array<Note> = [];
 		var holds:Array<Note> = [];
-		var drawMod = modManager.get("drawDistance");
-		var drawDist = drawMod == null ? FlxG.height : drawMod.getValue(modNumber);
-		var multAllowed = modManager.get("disableDrawDistMult");
-		var alwaysDraw = modManager.get("alwaysDraw").getValue(modNumber) != 0; // Forces notes to draw, no matter the draw distance
 
-		if (multAllowed == null || multAllowed.getValue(modNumber) == 0)
-			drawDist *= drawDistMod;
-		var lookAheadTime = modManager.getValue("lookAheadTime", modNumber);
+		inline function getModValue(name:String):Null<Float>
+			return modManager.get(name)?.getValue(modNumber);
+
+		var lookAheadTime:Float = getModValue("lookAheadTime");
+		var alwaysDraw:Bool;
+		var drawDist:Float;
+		
+		if ((getModValue("alwaysDraw") ?? 0) != 0) {
+			// Force notes to draw, no matter the draw distance
+			alwaysDraw = true;
+			drawDist = Math.POSITIVE_INFINITY;
+		}
+		else{
+			alwaysDraw = false;
+			drawDist = getModValue("drawDistance") ?? FlxG.height;
+			var dddm = getModValue("disableDrawDistMult");
+			if (dddm == null || dddm == 0)
+				drawDist *= drawDistMod;
+		}		
 		
 		for (daNote in field.spawnedNotes)
 		{
@@ -140,10 +152,12 @@ class NoteField extends FieldBase
 
 			if (songSpeed != 0)
 			{
-				var speed = modManager.getNoteSpeed(daNote, modNumber, songSpeed);
-				var visPos = ((daNote.visualTime - Conductor.visualPosition) * speed);
-
-				if ((visPos > drawDist && !alwaysDraw) || (daNote.wasGoodHit && daNote.sustainLength > 0))
+				if (daNote.wasGoodHit && daNote.sustainLength > 0)
+					continue;
+				
+				var speed:Float = modManager.getNoteSpeed(daNote, modNumber, songSpeed);
+				var visPos:Float = (daNote.visualTime - Conductor.visualPosition) * speed;
+				if (visPos > drawDist)
 					continue; // don't draw
 
 				if (!daNote.copyX && !daNote.copyY) {
@@ -245,7 +259,7 @@ class NoteField extends FieldBase
 		// draw strumattachments
 		for (obj in field.strumAttachments.members)
 		{
-			if (obj == null || !obj.alive || !obj.visible)
+			if (!obj.alive || !obj.visible)
 				continue;
 			var pos = modManager.getPos(0, 0, curDecBeat, obj.column, modNumber, obj, this, perspectiveArrDontUse, obj.vec3Cache);
 			var object = drawNote(obj, pos);
@@ -265,13 +279,14 @@ class NoteField extends FieldBase
 		// No longer required since its done in the manager
 		//drawQueue.sort(drawQueueSort);
 
-		if(zoom != 1){
-			for(object in drawQueue){
+		if (zoom != 1) {
+			var centerX = FlxG.width * 0.5;
+			var centerY = FlxG.height * 0.5;
+
+			for (object in drawQueue) {
 				var vertices = object.vertices;
 				var currentVertexPosition:Int = 0;
 
-				var centerX = FlxG.width * 0.5;
-				var centerY = FlxG.height * 0.5;
 				while (currentVertexPosition < vertices.length)
 				{
 					vertices[currentVertexPosition] = (vertices[currentVertexPosition] - centerX) * zoom + centerX;
@@ -457,29 +472,36 @@ class NoteField extends FieldBase
 			var top = lastMe ?? getPoints(hold, topWidth, speed, (visualDiff + (strumOff * 0.45)), strumDiff + strumOff, useSpiralHolds, lookAheadTime);
 			var bot = getPoints(hold, botWidth, speed, (visualDiff + ((strumOff + strumSub) * 0.45)), strumDiff + strumOff + strumSub, useSpiralHolds, lookAheadTime);
 			if (!hold.copyY) {
+				var a:Float = (crotchet + 1) * 0.45 * speed;
+				
 				if (lastMe == null) {
-					top[0].y -= FlxMath.lerp(0, (crotchet + 1) * 0.45 * speed, prog);
-					top[1].y -= FlxMath.lerp(0, (crotchet + 1) * 0.45 * speed, prog);
+					var a:Float = FlxMath.lerp(0, a, prog);
+					top[0].y -= a;
+					top[1].y -= a;
 				}
-				bot[0].y -= FlxMath.lerp(0, (crotchet + 1) * 0.45 * speed, nextProg);
-				bot[1].y -= FlxMath.lerp(0, (crotchet + 1) * 0.45 * speed, nextProg);
+
+				var a:Float = FlxMath.lerp(0, a, nextProg);
+				bot[0].y -= a;
+				bot[1].y -= a;
 			}
 			lastMe = bot;
 
-			for (_ in 0...2) { // why was this keyCount lol??  
+			for (_ in 0...2) {
 				alphas.push(info.alpha);
 				glows.push(info.glow);
 			}
 
-			top[0].x += hold.offsetX + hold.typeOffsetX;
-			top[1].x += hold.offsetX + hold.typeOffsetX;
-			bot[0].x += hold.offsetX + hold.typeOffsetX;
-			bot[1].x += hold.offsetX + hold.typeOffsetX;
+			var ox = hold.offsetX + hold.typeOffsetX;
+			top[0].x += ox;
+			top[1].x += ox;
+			bot[0].x += ox;
+			bot[1].x += ox;
 
-			top[0].y += hold.offsetY + hold.typeOffsetY;
-			top[1].y += hold.offsetY + hold.typeOffsetY;
-			bot[0].y += hold.offsetY + hold.typeOffsetY;
-			bot[1].y += hold.offsetY + hold.typeOffsetY;
+			var oy = hold.offsetY + hold.typeOffsetY;
+			top[0].y += oy;
+			top[1].y += oy;
+			bot[0].y += oy;
+			bot[1].y += oy;
 
 
 			var subIndex = sub * 8;

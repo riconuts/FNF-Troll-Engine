@@ -3,6 +3,7 @@ package funkin.objects;
 import funkin.states.PlayState;
 import funkin.scripts.FunkinScript.ScriptType;
 import funkin.objects.playfields.PlayField;
+import funkin.objects.notes.Note;
 import funkin.data.CharacterData;
 import funkin.data.CharacterData.*;
 import funkin.scripts.*;
@@ -86,7 +87,10 @@ class Character extends FlxSprite
 
 	////
 
-	/**The next beat the character will dance on. Set by PlayState**/
+	/**Whether this character is currently in use, Used by PlayState Character Change Events**/
+	public var used:Bool = false;
+
+	/**The next beat the character will dance on. Used by PlayState**/
 	public var nextDanceBeat:Float = -5;
 
 	/**Index of the next animation to play on the dance sequence**/
@@ -302,8 +306,8 @@ class Character extends FlxSprite
 
 	public function createPlaceholderAnims() {
 		for (animName in ["singLEFT", "singDOWN", "singUP", "singRIGHT"]) {
-			cloneAnimation(animName,		animName+'miss');
-			cloneAnimation(animName,		animName+'-alt');
+			cloneAnimation(animName, 		animName+'miss');
+			cloneAnimation(animName, 		animName+'-alt');
 			cloneAnimation(animName+'-alt',	animName+'-altmiss');
 		}
 	}
@@ -384,10 +388,10 @@ class Character extends FlxSprite
 	}
 
 	override function draw(){
-		if(callOnScripts("onDraw") == Globals.Function_Stop)
+		if (callOnScripts("onCharacterDraw") == Globals.Function_Stop)
 			return;
 		super.draw();
-		callOnScripts("onDrawPost");
+		callOnScripts("onCharacterDrawPost");
 	}
 
 	public var colorOverlay(default, set):FlxColor = FlxColor.WHITE;
@@ -469,11 +473,12 @@ class Character extends FlxSprite
 	}
 
 	public inline function canResetDance(holdingKeys:Bool = false) {
-		return animation.name==null || (
-			holdTimer > Conductor.stepCrochet * 0.001 * singDuration
-			&& (!holdingKeys || idleWhenHold)
-			&& animation.name.startsWith('sing') 
-			&& !animation.name.endsWith('miss') // will go back to the idle once it finishes
+		var curAnim = animation.name;
+		return curAnim==null || (
+			(!holdingKeys || idleWhenHold)
+			&& holdTimer * 1000 > Conductor.stepCrochet * singDuration
+			&& curAnim.startsWith('sing') 
+			&& !curAnim.endsWith('miss') // will go back to the idle once it finishes
 		);
 	}
 	public function resetDance(){
@@ -482,13 +487,19 @@ class Character extends FlxSprite
 		if(callOnScripts("onResetDance") != Globals.Function_Stop) dance();
 	}
 
-	public static function getNoteAnimation(note:Note, field:PlayField):String {
-		var animToPlay:String = note.characterHitAnimName;
-		if (animToPlay == null) {
-			animToPlay = field.singAnimations[note.column % field.singAnimations.length];
-			animToPlay += note.characterHitAnimSuffix;
-		}
-		return animToPlay;
+	inline public static function getFieldColumnSingAnimation(column:Int, field:PlayField):String
+	{
+		return field.singAnimations[column % field.singAnimations.length];
+	}
+
+	inline public static function getNoteHitAnimation(note:Note, field:PlayField):String
+	{
+		return note.characterHitAnimName ?? getFieldColumnSingAnimation(note.column, field) + note.characterHitAnimSuffix;
+	}
+
+	inline public static function getNoteMissAnimation(note:Note, field:PlayField):String
+	{
+		return note.characterMissAnimName ?? getFieldColumnSingAnimation(note.column, field) + note.characterMissAnimSuffix;
 	}
 
 	public function playNote(note:Note, field:PlayField) {
@@ -498,16 +509,17 @@ class Character extends FlxSprite
 		if (note.noAnimation || animTimer > 0.0 || voicelining)
 			return;
 
-		if (note.noteType == 'Hey!' && animOffsets.exists('hey')) {
-			playAnim('hey', true);
+		var animToPlay:String = getNoteHitAnimation(note, field);
+
+		if (note.noteType == 'Hey!' && animOffsets.exists(animToPlay)) {
+			playAnim(animToPlay, true);
 			specialAnim = true;
 			heyTimer = 0.6;
 			return;
 		}
 
-		var animToPlay:String = Character.getNoteAnimation(note, field);
-
 		playAnim(animToPlay, true);
+
 		holdTimer = 0.0;
 		callOnScripts("playNoteAnim", [animToPlay, note]);
 	}
@@ -519,13 +531,8 @@ class Character extends FlxSprite
 		if (animTimer > 0 || voicelining)
 			return;
 
-		var animToPlay:String = note.characterMissAnimName;
-		if (animToPlay == null) {
-			animToPlay = field.singAnimations[note.column % field.singAnimations.length];
-			animToPlay += note.characterMissAnimSuffix;
-		}
-
-		playAnim(animToPlay + 'miss', true);
+		var animToPlay:String = getNoteMissAnimation(note, field);
+		playAnim(animToPlay, true);
 
 		if (!hasMissAnimations)
 			colorOverlay = missOverlayColor;	
@@ -535,8 +542,8 @@ class Character extends FlxSprite
 		if (animTimer > 0 || voicelining)
 			return;
 
-		var animToPlay:String = field.singAnimations[direction % field.singAnimations.length];
-		playAnim(animToPlay + 'miss', true);
+		var animToPlay:String = getFieldColumnSingAnimation(direction, field) + 'miss';
+		playAnim(animToPlay, true);
 		
 		if(!hasMissAnimations)
 			colorOverlay = missOverlayColor;	
@@ -558,6 +565,31 @@ class Character extends FlxSprite
 			var calc:Float = danceEveryNumBeats * (danceIdle ? 0.5 : 2.0);
 			danceEveryNumBeats = Math.round(Math.max(calc, 1));
 		}
+	}
+
+	/** To be called when this character is used, Used by PlayState Character Change Events **/
+	public function changedIn(prevCharacter:Null<Character>) {
+		inline function canResumeAnim(c:Character):Bool {
+			return c != null && animation.exists(c.animation.name) && (characterId.startsWith(c.characterId) || c.characterId.startsWith(characterId));
+		}
+		if (canResumeAnim(prevCharacter)) {
+			var anim = prevCharacter.animation.curAnim;
+			playAnim(anim.name, true, anim.reversed, anim.curFrame);
+		}else {
+			dance();
+		}
+		
+		used = true;
+		setOnScripts("used", true);
+		callOnScripts("changedIn", [prevCharacter]); // if you can come up w/ a better name for this callback then change it lol
+		// (this also gets called for the characters set by the chart's player1/player2)
+	}
+
+	/** To be called when this character is changed out for another, Used by PlayState Character Change Events **/
+	public function changedOut(newCharacter:Null<Character>) {
+		used = false;
+		setOnScripts("used", false);
+		callOnScripts("changedOut", [newCharacter]);
 	}
 
 	public function addOffset(name:String, x:Float = 0, y:Float = 0)
@@ -651,21 +683,12 @@ class Character extends FlxSprite
 		}
 		#end
 
-		#if LUA_ALLOWED
-		var luaFile = Paths.getLuaPath(key);
-		if (luaFile != null) {
-			var script = FunkinLua.fromFile(luaFile, luaFile, defaultVars);
-			pushScript(script);
-			return this;
-		}
-		#end
-
 		return this;
 	}
 
 	public function callOnScripts(event:String, ?args:Array<Dynamic>, ignoreStops:Bool = false, ?exclusions:Array<String>, ?scriptArray:Array<Dynamic>, ?vars:Map<String, Dynamic>, ?ignoreSpecialShit:Bool = true):Dynamic
 	{
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+		#if (HSCRIPT_ALLOWED)
 		if (args == null)
 			args = [];
 		if (exclusions == null)
@@ -713,7 +736,7 @@ class Character extends FlxSprite
 
 	public function callScript(script:Dynamic, event:String, ?args:Array<Dynamic>):Dynamic
 	{
-		#if (LUA_ALLOWED || HSCRIPT_ALLOWED) // no point in calling this code if you.. for whatever reason, disabled scripting.
+		#if (HSCRIPT_ALLOWED) // no point in calling this code if you.. for whatever reason, disabled scripting.
 		if ((script is FunkinScript))
 		{
 			return callOnScripts(event, args, true, [], [script], [], false);

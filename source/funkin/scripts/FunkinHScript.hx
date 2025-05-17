@@ -1,7 +1,6 @@
 package funkin.scripts;
 
 import haxe.CallStack;
-import funkin.scripts.Util.ModchartSprite;
 #if USING_FLXANIMATE
 import funkin.objects.FlxAnimateCompat; // vscode stfu
 #end
@@ -244,11 +243,7 @@ class FunkinHScript extends FunkinScript
 	private function setFlixelVars() 
 	{
 		set("FlxG", FlxG);
-		#if NMV_MOD_COMPATIBILITY
-		set("FlxSprite", ModchartSprite);
-		#else
 		set("FlxSprite", FlxSprite);
-		#end
 		set("FlxCamera", FlxCamera);
 		set("FlxSound", FlxSound);
 		set("FlxMath", flixel.math.FlxMath);
@@ -346,10 +341,10 @@ class FunkinHScript extends FunkinScript
 		set("BGSprite", funkin.objects.BGSprite);
 		set("RatingSprite", funkin.objects.RatingGroup.RatingSprite);
 
-		set("Note", funkin.objects.Note);
-		set("NoteObject", funkin.objects.NoteObject);
-		set("NoteSplash", funkin.objects.NoteSplash);
-		set("StrumNote", funkin.objects.StrumNote);
+		set("Note", funkin.objects.notes.Note);
+		set("NoteObject", funkin.objects.notes.NoteObject);
+		set("NoteSplash", funkin.objects.notes.NoteSplash);
+		set("StrumNote", funkin.objects.notes.StrumNote);
 		set("PlayField", funkin.objects.playfields.PlayField);
 		set("NoteField", funkin.objects.playfields.NoteField);
 

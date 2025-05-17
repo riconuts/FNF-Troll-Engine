@@ -16,6 +16,7 @@ import funkin.states.scripting.*;
 
 #if SCRIPTABLE_STATES
 import funkin.states.scripting.HScriptOverridenState;
+#end
 
 enum abstract SongSyncMode(String) to String {
 	var DIRECT = "Direct";
@@ -35,7 +36,7 @@ enum abstract SongSyncMode(String) to String {
 		}
 	} 
 }
-
+#if SCRIPTABLE_STATES
 @:autoBuild(funkin.macros.ScriptingMacro.addScriptingCallbacks([
 	"create",
 	"update",

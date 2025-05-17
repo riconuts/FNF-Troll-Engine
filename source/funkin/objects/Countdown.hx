@@ -157,9 +157,6 @@ class Countdown {
 			game.callOnHScripts('onCountdownTick', [curPos, timer]);
 			if (game.hudSkinScript != null)
 				game.hudSkinScript.call("onCountdownTick", [curPos, timer]);
-			#if LUA_ALLOWED
-			game.callOnLuas('onCountdownTick', [curPos]);
-			#end
 		}
 		if (onTick != null) onTick(curPos);
 	}

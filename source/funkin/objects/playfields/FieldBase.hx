@@ -1,6 +1,7 @@
 package funkin.objects.playfields;
 
-import funkin.objects.NoteObject.ObjectType;
+import funkin.objects.notes.StrumNote;
+import funkin.objects.notes.NoteObject.ObjectType;
 import haxe.exceptions.NotImplementedException;
 import flixel.graphics.FlxGraphic;
 import flixel.system.FlxAssets.FlxShader;

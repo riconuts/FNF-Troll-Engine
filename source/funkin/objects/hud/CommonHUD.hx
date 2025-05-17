@@ -37,11 +37,11 @@ class CommonHUD extends BaseHUD
 		return value;
 	}
 
-	public function new(iP1:String, iP2:String, songName:String, stats:Stats)
+	public function new(songName:String, stats:Stats)
 	{
-		super(iP1, iP2, songName, stats);
+		super(songName, stats);
 
-		healthBar = new FNFHealthBar(iP1, iP2);
+		healthBar = new FNFHealthBar('bf', 'dad');
 		iconP1 = healthBar.iconP1;
 		iconP2 = healthBar.iconP2;
 
