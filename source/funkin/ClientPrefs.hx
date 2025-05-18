@@ -80,6 +80,13 @@ class ClientPrefs {
 				value: false,
 				data: []
 			},
+			"fish" => {
+				display: "Giant Fucking Fish",
+				desc: "When toggled, a giant fucking fish appears that covers the game if you get 100% accuracy",
+				type: Toggle,
+				value: false,
+				data: []
+			},
 			"judgePreset" => {
 				display: "Judgement Preset",
 				desc: "Preset for the judgement windows.",
