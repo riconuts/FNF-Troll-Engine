@@ -1356,6 +1356,7 @@ class PlayState extends MusicBeatState
 			return;
 		}
 
+		seenCutscene = true;
 		inCutscene = false;
 
 		if (hudSkinScript != null) {
