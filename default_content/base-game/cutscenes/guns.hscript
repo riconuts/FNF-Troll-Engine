@@ -1,22 +1,9 @@
-var sounds: Array<FlxSound> = [];
-
 var tankmanimate: FlxAnimate;
-
-function onPause(){
-	FlxG.sound.pause();
-}
-
-function onResume(){
-	FlxG.sound.resume();
-}
 
 var camFollow = game.camFollow;
 var camFollowPos = game.camFollowPos;
 
 function onCutsceneEnd(){
-	for(snd in sounds)
-		snd.destroy();
-
 	game.remove(tankmanimate);
 	tankmanimate.destroy();
 
@@ -28,13 +15,9 @@ function onCutsceneEnd(){
 
 function onCreateCutscene(){
 	FlxTween.cancelTweensOf(game.camGame);
-	for(snd in sounds)
-		snd.destroy();
 
 	game.camHUD.visible = false;
-	game.dad.visible = false;
-
-	sounds = [];
+	game.dad.visible = true;
 	
 	FlxG.state.persistentDraw = FlxG.state.persistentUpdate = true;
 
@@ -50,39 +33,35 @@ function onCreateCutscene(){
 	tankmanimate.x += game.dad.positionArray[0];
 	tankmanimate.y += game.dad.positionArray[1];
 	tankmanimate.anim.addBySymbol('voice', 'TANK TALK 2',24, false, 417, 225);
+	tankmanimate.anim.play("voice", true);
+	tankmanimate.visible = false;
     tankmanimate.antialiasing = true;
 	game.addBehindDad(tankmanimate);
 
-	inline function playSound(path:String){
-		var snd = FlxG.sound.play(path);
-		snd.pitch = FlxG.timeScale;
-		return snd;
-	}
-	
-	timeline.once(0, () -> {
-		playSound(Paths.sound("tankSong2"));
-		tankmanimate.anim.play("voice", true);
+
+	timeline.once(0, (f)->{
+		tankmanimate.visible = true;
+		game.dad.visible = false;
 	});
+
+	this.playMusic(Paths.music("DISTORTO"), 1, 0.25, 0);
+	this.sound(0, "tankSong2");
+	timeline.playAnimation(0, tankmanimate, 'voice');
+
 	timeline.easeProperties(0, 80, game.camGame, {zoom: 1.2}, FlxEase.quartOut);
 	timeline.easeProperties(0, 60, camFollow, {y: camFollow.y + 100}, FlxEase.quadOut);
 
 	timeline.easeProperties(94, 102, game.camGame, {zoom: 1.4}, FlxEase.quadIn);
 	timeline.easeProperties(102, 174, game.camGame, {zoom: 1.2}, FlxEase.quartOut);
 
+	timeline.playAnimation(102, game.gf, 'sad');
 
-	timeline.once(102, (f: Float) -> {
-		game.gf.playAnim("sad", true);
-	});
-
+	timeline.easeProperties(260, 280, this.music, {volume: 0}, FlxEase.linear);
 	timeline.finish(280);
 }
 
 function onUpdate(elapsed:Float){
-	var lerpVal:Float = Math.exp(-elapsed * 2.4);
-	camFollowPos.x = FlxMath.lerp(camFollow.x, camFollowPos.x, lerpVal);
-	camFollowPos.y = FlxMath.lerp(camFollow.y, camFollowPos.y, lerpVal);
-
-	if(game.gf.animation.curAnim.name == 'sad' && game.gf.animation.curAnim.finished){
+	if(game.gf.animation.curAnim.name == 'sad' && game.gf.animation.curAnim.finished)
 		game.gf.playAnim("sad", true);
-	}
+	
 }

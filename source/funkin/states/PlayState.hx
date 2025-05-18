@@ -146,6 +146,8 @@ class CutsceneSequence {
 @:noScripting
 class PlayState extends MusicBeatState
 {
+	public var disableCameraMovement:Bool = false;
+
 	public static function loadPlaylist(playlist:Array<BaseSong>, chartId:String) {
 		PlayState.loadSong(playlist[0], chartId);
 		PlayState.songPlaylist = playlist;
@@ -2228,11 +2230,9 @@ class PlayState extends MusicBeatState
 
 	override public function onFocusLost():Void
 	{
-		if (ClientPrefs.autoPause && !paused && canPause) {
-			doPauseShit();
-		}
-
 		super.onFocusLost();
+		if (ClientPrefs.autoPause && !paused && canPause)
+			doPauseShit();
 	}
 
 	////
@@ -2433,7 +2433,7 @@ class PlayState extends MusicBeatState
 		if (hudSkinScript != null)
 			hudSkinScript.call("onUpdate", [elapsed]);
 
-		if (!inCutscene) {
+		if (!disableCameraMovement) {
 			var xOff:Float = 0;
 			var yOff:Float = 0;
 
@@ -2451,10 +2451,15 @@ class PlayState extends MusicBeatState
 				FlxMath.lerp(camFollow.x + xOff, camFollowPos.x, lerpVal),
 				FlxMath.lerp(camFollow.y + yOff, camFollowPos.y, lerpVal)
 			);
+		}
 
+		if(!inCutscene){
 			if (!startingSong && !endingSong){
-				if (health > healthDrain)
+				if (health > healthDrain){
 					health -= healthDrain * elapsed;
+					if(health < healthDrain)
+						health = healthDrain;
+				}
 			}
 		}
 

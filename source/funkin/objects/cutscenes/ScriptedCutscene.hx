@@ -14,14 +14,20 @@ class ScriptedCutscene extends Cutscene
 		return null;
 	}
 
-	override function pause()
+	override function pause(){
+		super.pause();
 		callScript("onPause", []);
+	}
 
-	override function resume()
+	override function resume(){
+		super.resume();
 		callScript("onResume", []);
+	}
 
-	override function restart() 
+	override function restart(){
+		super.restart();
 		callScript("onRestart", []);
+	}
 
 	override function createCutscene() // gets called by state or w/e
 		callScript("onCreateCutscene", []);

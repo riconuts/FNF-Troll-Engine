@@ -1,9 +1,12 @@
 package funkin.objects.cutscenes;
 
+import flixel.util.typeLimit.OneOfTwo;
+import flxanimate.FlxAnimate;
 import flixel.util.FlxSignal.FlxTypedSignal;
 import flixel.tweens.FlxEase;
 
 class TimelineAction {
+	public var parent:Timeline;
 	public var frame:Int = 0;
 	public var finished:Bool = false;
 
@@ -29,7 +32,20 @@ class PlayAnimationAction extends TimelineAction {
 
 	public override function execute(curFrame:Int, frameTime:Float){
 		// TODO: code to make sure it stays synced
-		sprite.animation.play(name, true);
+		#if USING_FLXANIMATE
+		if(sprite is FlxAnimate)
+			cast(sprite, FlxAnimate).anim.play(name, true);
+		else if(sprite is Character)
+		#else
+		if(sprite is Character)
+		#end
+		{
+			var ch:Character = cast sprite;
+			ch.voicelining = !ch.idleSequence.contains(name);
+			ch.playAnim(name, true);
+		}else
+			sprite.animation.play(name, true);
+
 		finished = true;
 	}
 }
@@ -135,16 +151,48 @@ class EaseCallbackAction extends TimelineAction {
 	}
 }
 
+class SoundAction extends TimelineAction {
+	var sound:FlxSound;
+
+	public function new(frame:Int, sound:OneOfTwo<FlxSound, String>, obeysBitch:Bool = true) {
+		super(frame);
+		var newSound:FlxSound;
+		if (sound is String){
+			newSound = new FlxSound().loadEmbedded(Paths.sound(sound));
+			newSound.exists = true;
+			if (obeysBitch)
+				newSound.pitch = FlxG.timeScale;
+
+			FlxG.sound.list.add(newSound);
+		}else
+			newSound = cast sound;
+		
+		this.sound = newSound ?? new FlxSound();
+	}
+
+	public override function execute(curFrame:Int, frameTime:Float) {
+		sound.play(true);
+		// TODo: take pitch into account
+		sound.time = (curFrame - frame) * parent.frameInterval;
+		finished = true;
+	}
+}
+
 class Timeline extends FlxBasic {
 	public var onFinish:FlxTypedSignal<Void->Void> = new FlxTypedSignal<Void->Void>();
 
 	public var frameRate(default, set):Float = 24;
 	public var curFrame:Int = 0;
 	public var actions: Array<TimelineAction> = [];
-	var frameInterval = 1 / 24;
+	public var frameInterval(default, set) = 1 / 24; // pls dont set this! set framerate!!
 	var frameTimer:Float = 0;
 	var totalTime:Float = 0;
 	var actionIndex:Int = 0;
+
+	public function set_frameInterval(_:Float){
+		trace("dont set frameInterval dummy! set frameRate!!");
+		return frameInterval;
+	}
 
 
 	public function new(?frameRate:Float = 24, ?frame:Int = 0)
@@ -163,14 +211,19 @@ class Timeline extends FlxBasic {
 	}
 
 	public function set_frameRate(f:Float){
+		@:bypassAccessor
 		frameInterval = 1 / f;
 		return frameRate = f;
 	}
 
 	public function addAction(action:TimelineAction){
 		actions.push(action);
+		action.parent = this;
 		actions.sort((a, b) -> Std.int(a.frame - b.frame));
 	}
+
+	public function playSound(frame:Int, sound:OneOfTwo<FlxSound, String>, obeysBitch:Bool = true)
+		addAction(new SoundAction(frame, sound, obeysBitch));
 
 	public function playAnimation(frame:Int, obj:FlxSprite, anim:String)
 		addAction(new PlayAnimationAction(frame, obj, anim));

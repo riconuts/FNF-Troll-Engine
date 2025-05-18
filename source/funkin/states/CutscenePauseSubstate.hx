@@ -19,6 +19,12 @@ class CutscenePauseSubstate extends MusicBeatSubstate {
 	var menu: AlphabetMenu;
 	var options: Array<PauseOpt> = [];
 	var associatedCutscene: Cutscene;
+	var prevTimeScale:Float;
+
+	override function close(){
+		FlxG.timeScale = prevTimeScale;
+		super.close();
+	}
 
 	public function new(cut: Cutscene){
 		super();
@@ -28,7 +34,9 @@ class CutscenePauseSubstate extends MusicBeatSubstate {
 	override function create(){
 		var cam:FlxCamera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
 		this.cameras = [cam];
-		
+		prevTimeScale = FlxG.timeScale;
+		FlxG.timeScale = 1;
+
 		var bg:FlxSprite = new FlxSprite();
 		bg.makeGraphic(1, 1, FlxColor.BLACK);
 		bg.scrollFactor.set(0, 0);

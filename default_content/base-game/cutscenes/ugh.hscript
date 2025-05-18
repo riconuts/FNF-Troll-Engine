@@ -1,23 +1,8 @@
-var sounds:Array<FlxSound> = [];
-
-function onPause(){
-	FlxG.sound.pause();
-}
-
-function onResume(){
-	FlxG.sound.resume();
-}
-
 var camFollow = game.camFollow;
 var camFollowPos = game.camFollowPos;
-
-var registeredEnd:Bool = false;
 var tankmanimate:FlxAnimate;
 
 function onCutsceneEnd(){
-	for(snd in sounds)
-		snd.destroy();
-
 	game.remove(tankmanimate);
 	tankmanimate.destroy();
 
@@ -28,14 +13,10 @@ function onCutsceneEnd(){
 
 function onCreateCutscene(){
 	FlxTween.cancelTweensOf(game.camGame);
-	for(snd in sounds)
-		snd.destroy();
 
 	game.camHUD.visible = false;
 	game.dad.visible = true;
 
-	sounds = [];
-	
 	FlxG.state.persistentDraw = FlxG.state.persistentUpdate = true;
 
 	game.camGame.zoom = 1.2;
@@ -60,16 +41,13 @@ function onCreateCutscene(){
 	
 	timeline.easeProperties(0, 8, camFollow, {y: camFollow.y + 75}, FlxEase.quadOut);
 
-	inline function playSound(path:String){
-		var snd = FlxG.sound.play(path);
-		snd.pitch = FlxG.timeScale;
-		return snd;
-	}
+	this.playMusic(Paths.music("DISTORTO"), 1, 0.25, 0);
+
+	this.sound(0, "wellWellWell");
+	timeline.playAnimation(0, tankmanimate, 'wellwellwell');
 
 	timeline.once(0, ()-> {
-		sounds.push(playSound(Paths.sound("wellWellWell")));
 		game.dad.visible = false;
-		tankmanimate.anim.play("wellwellwell");
 		tankmanimate.visible = true;
 	});
 
@@ -78,7 +56,6 @@ function onCreateCutscene(){
 			game.gf.dance();
 			game.boyfriend.dance();
 		}
-
 	});
 
 	timeline.once(72, () -> {
@@ -86,29 +63,18 @@ function onCreateCutscene(){
 		camFollow.y += 50;
 	});
 
-	timeline.once(92, () -> {
-		FlxG.sound.play(Paths.sound("bfBeep"));
-		game.boyfriend.voicelining = true;
-		game.boyfriend.playAnim("singUP", true);
-	});
+	this.sound(92, "bfBeep", false);
+	timeline.playAnimation(92, game.boyfriend, 'singUP');
+	
+	timeline.playAnimation(106, game.boyfriend, "idle");
 
-	timeline.once(106, () -> {
-		game.boyfriend.voicelining = false;
-		game.boyfriend.playAnim("idle", true);
-	});
-
+	this.sound(116, "killYou");
+	timeline.easeProperties(240, 260, this.music, {volume: 0}, FlxEase.linear);
+	timeline.playAnimation(116, tankmanimate, 'kill');
 	timeline.once(116, () -> {
 		camFollow.x -= 500;
 		camFollow.y -= 100;
-		sounds.push(playSound(Paths.sound("killYou")));
-		tankmanimate.anim.play("kill");
 	});
 
 	timeline.finish(260);
-}
-
-function onUpdate(elapsed:Float){
-	var lerpVal:Float = Math.exp(-elapsed * 2.4);
-	camFollowPos.x = FlxMath.lerp(camFollow.x, camFollowPos.x, lerpVal);
-	camFollowPos.y = FlxMath.lerp(camFollow.y, camFollowPos.y, lerpVal);
 }
