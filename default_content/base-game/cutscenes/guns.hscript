@@ -7,6 +7,8 @@ function onCutsceneEnd(){
 	game.remove(tankmanimate);
 	tankmanimate.destroy();
 
+	game.gf.voicelining = false;
+	game.gf.dance();
 	game.dad.visible = true;
 	game.camHUD.visible = true;
 	FlxTween.tween(game.camGame, {zoom: game.defaultCamZoom}, 2, {ease: FlxEase.quadOut});

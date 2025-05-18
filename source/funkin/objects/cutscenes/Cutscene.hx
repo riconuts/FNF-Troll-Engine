@@ -34,15 +34,16 @@ class Cutscene extends FlxTypedGroup<FlxBasic> {
 					oldMusic.destroy();
 				});
 				music = new FlxSound();
-				FlxG.sound.list.add(music);
-				sounds.push(music);
 			}
 		}else{
 			music = new FlxSound();
-			FlxG.sound.list.add(music);
-			sounds.push(music);
 		}
 
+		FlxG.sound.list.add(music);
+		if(!sounds.contains(music))
+			sounds.push(music);
+
+		music.stop();
 		music.context = MUSIC;
 		music.loadEmbedded(path, true);
 		music.volume = volume;
