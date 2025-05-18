@@ -28,6 +28,12 @@
 				{
 					"name": "idle",
 					"prefix": "idle"
+				},
+				{
+					"offset": [28, 1],
+					"name": "confirm",
+					"prefix": "confirm",
+					"haltsDancing": true
 				}
 			],
 			"danceBeat": 1
