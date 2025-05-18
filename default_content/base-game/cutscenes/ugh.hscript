@@ -47,7 +47,7 @@ function onCreateCutscene(){
 	camFollow.y = camFollowPos.y;
 
 	if(tankmanimate != null)
-		remove(tankmanimate);
+		game.remove(tankmanimate);
 
 	tankmanimate = new FlxAnimate(game.dadGroup.x, game.dadGroup.y, 'images/cutscenes/ugh/tankman');
 	tankmanimate.x += game.dad.positionArray[0];
@@ -55,7 +55,7 @@ function onCreateCutscene(){
 	tankmanimate.anim.addBySymbol('wellwellwell', 'TANK TALK 1 P1',24, false, 417, 225);
 	tankmanimate.anim.addBySymbol('kill', 'TANK TALK 1 P2',24, false, 417, 225);
     tankmanimate.antialiasing = true;
-	add(tankmanimate);
+	game.addBehindDad(tankmanimate);
 	tankmanimate.visible = false;
 	
 	timeline.easeProperties(0, 8, camFollow, {y: camFollow.y + 75}, FlxEase.quadOut);

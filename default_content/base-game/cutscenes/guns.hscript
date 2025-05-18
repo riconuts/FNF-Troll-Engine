@@ -43,13 +43,15 @@ function onCreateCutscene(){
 	camFollow.x = 440;
 	camFollow.y = 460;
 
+	if(tankmanimate != null)
+		game.remove(tankmanimate);
 
 	tankmanimate = new FlxAnimate(game.dadGroup.x, game.dadGroup.y, 'images/cutscenes/guns/tankman');
 	tankmanimate.x += game.dad.positionArray[0];
 	tankmanimate.y += game.dad.positionArray[1];
 	tankmanimate.anim.addBySymbol('voice', 'TANK TALK 2',24, false, 417, 225);
     tankmanimate.antialiasing = true;
-	add(tankmanimate);
+	game.addBehindDad(tankmanimate);
 
 	inline function playSound(path:String){
 		var snd = FlxG.sound.play(path);
