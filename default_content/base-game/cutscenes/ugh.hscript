@@ -1,0 +1,114 @@
+var sounds:Array<FlxSound> = [];
+
+function onPause(){
+	FlxG.sound.pause();
+}
+
+function onResume(){
+	FlxG.sound.resume();
+}
+
+var camFollow = game.camFollow;
+var camFollowPos = game.camFollowPos;
+
+var registeredEnd:Bool = false;
+var tankmanimate:FlxAnimate;
+
+function onCutsceneEnd(){
+	for(snd in sounds)
+		snd.destroy();
+
+	remove(tankmanimate);
+	tankmanimate.destroy();
+
+	game.dad.visible = true;
+	game.camHUD.visible = true;
+	FlxTween.tween(game.camGame, {zoom: game.defaultCamZoom}, 2, {ease: FlxEase.quadOut});
+}
+
+function onCreateCutscene(){
+	FlxTween.cancelTweensOf(game.camGame);
+	for(snd in sounds)
+		snd.destroy();
+
+	game.camHUD.visible = false;
+	game.dad.visible = true;
+
+	sounds = [];
+	
+	FlxG.state.persistentDraw = FlxG.state.persistentUpdate = true;
+
+	game.camGame.zoom = 1.2;
+
+	camFollowPos.x = 440;
+	camFollowPos.y = 460;
+
+	camFollow.x = camFollowPos.x;
+	camFollow.y = camFollowPos.y;
+
+	if(tankmanimate != null)
+		remove(tankmanimate);
+
+	tankmanimate = new FlxAnimate(game.dadGroup.x, game.dadGroup.y, 'images/cutscenes/ugh/tankman');
+	tankmanimate.x += game.dad.positionArray[0];
+	tankmanimate.y += game.dad.positionArray[1];
+	tankmanimate.anim.addBySymbol('wellwellwell', 'TANK TALK 1 P1',24, false, 417, 225);
+	tankmanimate.anim.addBySymbol('kill', 'TANK TALK 1 P2',24, false, 417, 225);
+    tankmanimate.antialiasing = true;
+	add(tankmanimate);
+	tankmanimate.visible = false;
+	
+	timeline.easeProperties(0, 8, camFollow, {y: camFollow.y + 75}, FlxEase.quadOut);
+
+	inline function playSound(path:String){
+		var snd = FlxG.sound.play(path);
+		snd.pitch = FlxG.timeScale;
+		return snd;
+	}
+
+	timeline.once(0, ()-> {
+		sounds.push(playSound(Paths.sound("wellWellWell")));
+		game.dad.visible = false;
+		tankmanimate.anim.play("wellwellwell");
+		tankmanimate.visible = true;
+	});
+
+	timeline.on(0, (f) -> {
+		if(f % 12 == 0){
+			game.gf.dance();
+			game.boyfriend.dance();
+		}
+
+	});
+
+	timeline.once(72, () -> {
+		camFollow.x += 500;
+		camFollow.y += 50;
+	});
+
+	timeline.once(92, () -> {
+		FlxG.sound.play(Paths.sound("bfBeep"));
+		game.boyfriend.voicelining = true;
+		game.boyfriend.playAnim("singUP", true);
+	});
+
+	timeline.once(106, () -> {
+		game.boyfriend.voicelining = false;
+		game.boyfriend.playAnim("idle", true);
+	});
+
+	timeline.once(116, () -> {
+		camFollow.x -= 500;
+		camFollow.y -= 100;
+		sounds.push(playSound(Paths.sound("killYou")));
+		tankmanimate.anim.play("kill");
+	});
+
+	timeline.finish(260);
+}
+
+function onUpdate(elapsed:Float){
+	var lerpVal:Float = Math.exp(-elapsed * 2.4);
+	camFollowPos.x = FlxMath.lerp(camFollow.x, camFollowPos.x, lerpVal);
+	camFollowPos.y = FlxMath.lerp(camFollow.y, camFollowPos.y, lerpVal);
+}

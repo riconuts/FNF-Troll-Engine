@@ -47,6 +47,7 @@ import haxe.Json;
 import lime.media.openal.AL;
 import lime.media.openal.ALFilter;
 import lime.media.openal.ALEffect;
+import funkin.objects.cutscenes.*;
 
 import openfl.events.KeyboardEvent;
 import openfl.filters.BitmapFilter;
@@ -109,6 +110,39 @@ typedef SpeedEvent =
 	speed:Float // speed mult after the change
 }
 
+
+class CutsceneSequence {
+	public var onNextSceneRan:FlxTypedSignal<Cutscene->Void> = new FlxTypedSignal<Cutscene->Void>();
+	public var onSceneFinished:FlxTypedSignal<Cutscene->Void> = new FlxTypedSignal<Cutscene->Void>();
+	public var onSequenceEnd:FlxTypedSignal<Void->Void> = new FlxTypedSignal<Void->Void>();
+	public var scenes:Array<Cutscene> = [];
+
+	public function push(scene:Cutscene)
+		scenes.push(scene);
+
+	public var currentScene: Cutscene;
+
+	public function runNextScene(): Null<Cutscene> 
+	{
+		currentScene = scenes.shift();
+		if(currentScene == null){
+			onSequenceEnd.dispatch();
+			return null;
+		}
+
+		currentScene.createCutscene();
+		onNextSceneRan.dispatch(currentScene);
+
+		currentScene.onEnd.add((_:Bool)->{
+			onSceneFinished.dispatch(currentScene);
+		});
+
+		return currentScene;
+	}
+
+	public function new(){}
+}
+
 @:noScripting
 class PlayState extends MusicBeatState
 {
@@ -124,6 +158,9 @@ class PlayState extends MusicBeatState
 		PlayState.SONG = song.getSwagSong(chartId);
 		PlayState.difficultyName = chartId;
 	}
+
+	public var startCutscenes:CutsceneSequence = new CutsceneSequence();
+	public var endCutscenes:CutsceneSequence = new CutsceneSequence();
 
 	public var extraData:Map<String, Dynamic> = [];
 
@@ -1013,7 +1050,32 @@ class PlayState extends MusicBeatState
 		super.create();
 
 		RecalculateRating();
-		startCountdown();
+		startCutscenes.onSequenceEnd.addOnce(startCountdown);
+		startCutscenes.onSceneFinished.add((scene: Cutscene) -> {
+			remove(scene);
+			
+
+			// vv idk if we need this default behaviour since scripts can just cutscene = new VideoCutscene() cutscene.onEnd.addOnce((_:Bool)->game.camOther.flash(FlxColor.BLACK, 2))
+			// While if a video doesnt need to fade in after ending, this'd make it fade ANYWAY
+			// Uncomment if you think this default behaviour is fine tho
+
+
+/* 			if(scene is VideoCutscene)
+				camOther.flash(FlxColor.BLACK, 2); // easy fade from black lol */
+			
+			songIntroCutscene();
+		});
+
+		endCutscenes.onSequenceEnd.addOnce(endSong);
+		endCutscenes.onSceneFinished.add((scene: Cutscene) -> {
+			remove(scene);
+/* 			if(scene is VideoCutscene && endCutscenes.scenes.length > 0)
+				camOther.flash(FlxColor.BLACK, 2); // easy fade from black lol
+			 */
+			endSongCutscenes();
+		});
+
+		songIntroCutscene();
 
 		if(!legacyOnCreatePost) // Just incase shit breaks???
 			callOnAllScripts('onCreatePost');
@@ -1275,23 +1337,16 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	/*
+	
 	function songIntroCutscene(){
-		if (isStoryMode && !seenCutscene)
-		{
-			switch (songName)
-			{
-				default:
-					startCountdown();
-			}
-			seenCutscene = true;
-		}
-		else
-		{
-			startCountdown();
-		}
+		inCutscene = true;
+		var cutscene: Cutscene = startCutscenes.runNextScene();
+		if(cutscene is VideoCutscene)
+			cutscene.cameras = [camOverlay];
+		
+		add(cutscene);
 	}
-	*/
+	
 
 	public function startCountdown():Void
 	{
@@ -2172,8 +2227,8 @@ class PlayState extends MusicBeatState
 
 	override public function onFocusLost():Void
 	{
-		if (ClientPrefs.autoPause && !paused && startedCountdown && canPause) {
-			openPauseMenu();
+		if (ClientPrefs.autoPause && !paused && canPause) {
+			doPauseShit();
 		}
 
 		super.onFocusLost();
@@ -2473,10 +2528,12 @@ class PlayState extends MusicBeatState
 			}else if (doDeathCheck()) {
 				// die lol
 
-			}else if (controls.PAUSE && startedCountdown && canPause) {
-				openPauseMenu();
 			}
 		}
+
+		if (controls.PAUSE && canPause) 
+			doPauseShit();
+		
 
 		if (startedCountdown && !paused) {
 
@@ -2877,9 +2934,18 @@ class PlayState extends MusicBeatState
 		}
 	}
 
+	public function endSongCutscenes(){
+		inCutscene = true;
+		var cutscene: Cutscene = endCutscenes.runNextScene();
+		if(cutscene is VideoCutscene)
+			cutscene.cameras = [camOverlay];
+		
+		add(cutscene);
+	}
+
 	public function finishSong(?ignoreNoteOffset:Bool = false):Void
 	{
-		var finishCallback:Void->Void = endSong; // In case you want to change it in a specific song.
+		var finishCallback:Void->Void = endSongCutscenes; // In case you want to change it in a specific song.
 
 		hud.updateTime = false;
 
@@ -4034,6 +4100,21 @@ class PlayState extends MusicBeatState
 	}
 
 	////
+
+	public function openCutscenePauseMenu(scene: Cutscene)
+	{
+		trace(scene);
+		if (callOnScripts('onPause') == Globals.Function_Stop) 
+			return;
+		
+		// 0 chance for Gitaroo Man easter egg
+		pause();
+		persistentUpdate = false;
+		persistentDraw = true;
+		scene.pause();
+		openSubState(new CutscenePauseSubstate(scene));
+	}
+
 	public function openPauseMenu()
 	{
 		if (callOnScripts('onPause') == Globals.Function_Stop) 
@@ -4044,6 +4125,16 @@ class PlayState extends MusicBeatState
 		persistentUpdate = false;
 		persistentDraw = true;
 		openSubState(new PauseSubState());
+	}
+
+	public function doPauseShit()
+	{
+		if (startCutscenes.currentScene == null && endCutscenes.currentScene == null){
+			if(startedCountdown)
+				openPauseMenu();
+		}else{
+			openCutscenePauseMenu(startedCountdown ? endCutscenes.currentScene : startCutscenes.currentScene);
+		}
 	}
 
 	public function pause(){
