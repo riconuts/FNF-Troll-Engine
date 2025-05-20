@@ -117,33 +117,33 @@ function onCreateCutscene()
 	timeline.playAnimation(0, tankmanimate, "godDamnIt");
 	this.sound(0, "stressCutscene");
 
-	timeline.playAnimation(361, gfTurninDemon, "turn");
-	timeline.once(361, (f)->{
+	timeline.playAnimation(364, gfTurninDemon, "turn");
+	timeline.once(364, (f)->{
 		speakimate.visible = false;
 		gfTurninDemon.visible = true;
 		game.disableCameraMovement = true;
 	});
-	timeline.easeProperties(361, 410, game.camGame, {zoom: 1.4}, FlxEase.quadInOut);
-	timeline.easeProperties(361, 396, camFollowPos, {x: game.gf.getCamera()[0] - 75, y: game.gf.getCamera()[1]}, FlxEase.quadOut);
+	timeline.easeProperties(364, 413, game.camGame, {zoom: 1.4}, FlxEase.quadInOut);
+	timeline.easeProperties(364, 399, camFollowPos, {x: game.gf.getCamera()[0] - 75, y: game.gf.getCamera()[1]}, FlxEase.quadOut);
 
-	timeline.easeProperties(414, 418, game.camGame, {zoom: 0.8}, FlxEase.quadIn);
-	timeline.easeProperties(418, 440, game.camGame, {zoom: game.defaultCamZoom}, FlxEase.quadOut);
+	timeline.easeProperties(417, 421, game.camGame, {zoom: 0.8}, FlxEase.quadIn);
+	timeline.easeProperties(421, 443, game.camGame, {zoom: game.defaultCamZoom}, FlxEase.quadOut);
 	
-	timeline.easeProperties(448, 450, game.camGame, {zoom: 1.0}, FlxEase.quadIn);
-	timeline.easeProperties(450, 464, game.camGame, {zoom: game.defaultCamZoom}, FlxEase.quadOut);
+	timeline.easeProperties(451, 453, game.camGame, {zoom: 1.0}, FlxEase.quadIn);
+	timeline.easeProperties(453, 467, game.camGame, {zoom: game.defaultCamZoom}, FlxEase.quadOut);
 
 	timeline.easeProperties(470, 520, camFollowPos, {x: game.dad.getCamera()[0] + 50, y: game.dad.getCamera()[1]}, FlxEase.quadOut);
 
-	timeline.playAnimation(415, speakimate, "picoDrop");
-	timeline.once(415, (f)->{
+	timeline.playAnimation(418, speakimate, "picoDrop");
+	timeline.once(418, (f)->{
 		speakimate.visible = true;
 		game.remove(gfTurninDemon);
 		gfTurninDemon.destroy();
 		gfTurninDemon = null;
 	});
-	timeline.playAnimation(417, boyfrimate, "catch");
+	timeline.playAnimation(420, boyfrimate, "catch");
 
-	timeline.playAnimation(441, boyfrimate, "bfgfIdle");
+	timeline.playAnimation(444, boyfrimate, "bfgfIdle");
 
 	timeline.playAnimation(498, speakimate, "picoIdle");
 	timeline.playAnimation(468, tankmanimate, "Pico");
