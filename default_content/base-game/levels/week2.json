@@ -1,0 +1,38 @@
+{
+	"name": "SPOOKY MONTH",
+	"asset": "storymenu/titles/week2",
+	"songs": [
+		"spookeez",
+		"south",
+		"monster"
+	],
+	"props": [
+		{
+			"characterId": 0,
+			"x": -40,
+			"y": 100,
+			"graphic": "storymenu/props/spooky",
+			"antialiasing": true,
+			"animations": [
+				{
+					"name": "danceLeft",
+					"prefix": "idle",
+					"indices": [0,1,2,3,4,5,6,7]
+				},
+				{
+					"name": "danceRight",
+					"prefix": "idle",
+					"indices": [8,9,10,11,12,13,14,15]
+				}
+			],
+			"danceSequence": ["danceLeft", "danceRight"],
+			"danceBeat": 0.5
+		},
+		{
+			"template": "data/storyProps/bf"
+		},
+		{
+			"template": "data/storyProps/gf"
+		}
+	]
+}

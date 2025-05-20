@@ -25,6 +25,7 @@ import hxvlc.util.OneOfThree;
 import hxvlc.flixel.FlxVideoSprite as VideoSprite;
 #end
 
+/*
 class IndependentVideoSprite extends VideoSprite {
 	public static final muted:String = ":no-audio";
 	public static final looping:String = ':input-repeat=65535';
@@ -149,4 +150,9 @@ class IndependentVideoSprite extends VideoSprite {
 	}
 	#end
 }
+#end */
+class IndependentVideoSprite {} // TODO: rewrite for hxvlc 2.1.0+
+// (or maybe we just leave it dead?? Doesn't have much of a use anymore w/ psych shit being dead so doesnt serve as a NMV compat thing as originally intended)
+// (and nobody's using hxCodec anymore so doesnt matter to have compat w/ hxCodec)
+// (idk lol!)
 #end

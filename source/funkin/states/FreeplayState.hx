@@ -3,8 +3,10 @@ package funkin.states;
 import flixel.util.FlxColor;
 import funkin.objects.hud.HealthIcon;
 
+import sys.FileSystem;
 import funkin.data.Song;
 import funkin.data.BaseSong;
+import funkin.data.Level;
 import funkin.data.Highscore;
 
 import flixel.text.FlxText;
@@ -56,31 +58,42 @@ class FreeplayState extends MusicBeatState
 		var list:Array<BaseSong> = [];
 		for (directory => metadata in Paths.getContentMetadata())
 		{
-			var songIdList:Array<String> = [];
+			var songIdMap:Map<String, Bool> = [];
 
-			inline function sowy(song:String) {
-				var songId:String = Paths.formatToSongPath(song);
-				if (!songIdList.contains(songId))
-					songIdList.push(songId);
-			}
-
-			// metadata file week songs
-			for (week in metadata.weeks) {
-				if (week.hideFreeplay != true && week.songs != null) {
-					for (song in week.songs)
-						sowy(song);
+			//// level songs
+			for (level in StoryModeState.scanContentLevels(directory)) {
+				for (song in level.getFreeplaySongs()) {
+					songIdMap.set(song.songId, true);
+					list.push(song);
 				}
 			}
 
 			// metadata file freeplay songs
 			if (metadata.freeplaySongs != null) {
-				for (song in metadata.freeplaySongs)
-					sowy(song.name);
+				for (song in metadata.freeplaySongs) {
+					var songId:String = Paths.formatToSongPath(song.name);
+					if (!songIdMap.exists(songId)) {
+						songIdMap.set(songId, true);
+						list.push(new Song(songId, directory));
+					}
+				}
 			}
+			
+			// default category shit
+			// should prob just make a autoAddToFreeplay bool or sum shit idk lol
+			if (metadata.defaultCategory != null && metadata.defaultCategory.length > 0){
+				var dir = Paths.mods(directory + "/songs");
 
-			//
-			for (songId in songIdList) {
-				list.push(new Song(songId, directory));
+				Paths.iterateDirectory(dir, function(file:String) {
+					if (FileSystem.isDirectory(haxe.io.Path.join([dir, file]))) {
+						if(!songIdMap.exists(file)){
+							songIdMap.set(file, true);
+							list.push(new Song(file, directory));
+						}
+					}
+					
+				});
+
 			}
 		}
 		return list;
@@ -95,6 +108,13 @@ class FreeplayState extends MusicBeatState
 		songData = getFreeplaySongs();
 		for (song in songData)
 			menu.addSong(song);
+
+		/*for (song in getFreeplaySongs()) {			
+			Paths.currentModDirectory = song.folder;
+			menu.addTextOption(song.getMetadata().songName).ID = songData.length;
+			songData.push(song);
+		}*/
+
 
 		////
 		add(bgGrp);
