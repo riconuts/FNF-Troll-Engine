@@ -146,8 +146,6 @@ class CutsceneSequence {
 @:noScripting
 class PlayState extends MusicBeatState
 {
-	var analyzer:Null<SpectralAnalyzer> = null;
-
 	public var disableCameraMovement:Bool = false;
 
 	public static function loadPlaylist(playlist:Array<BaseSong>, chartId:String) {
