@@ -207,7 +207,7 @@ class PauseSubState extends MusicBeatSubstate
 		bg.alpha = 0.0;
 		add(bg);
 
-		FlxTween.tween(bg, {alpha: 0.6}, 0.4, {ease: FlxEase.quartInOut});
+		FlxTween.tween(bg, {alpha: 0.6}, 0.3, {ease: FlxEase.quartInOut});
 
 		menu = new AlphabetMenu();
 		menu.callbacks.onSelect = onSelectedOption;
@@ -258,16 +258,16 @@ class PauseSubState extends MusicBeatSubstate
 	}
 
 	private function regenInfo() {
-		////
-		var songInfo:Array<String> = getInfo();
-
-		////
 		allTexts = [];
-		var fieldX:Float = 20;
-		var fieldWidth:Float = camera.width - 40;
+		
+		////
+		final fieldPadding:Float = 20;
+		final fieldWidth:Float = camera.width - fieldPadding * 2;
+		final fieldTweenDuration:Float = 3/9; // 0.333
+		final fieldTweenDelay:Float = 2/9; // 0.222
 
-		for (i => str in songInfo){
-			var obj = new FlxText(fieldX, 15+32*i, fieldWidth, str, 32);
+		for (i => str in getInfo()){
+			var obj = new FlxText(fieldPadding, 15+32*i, fieldWidth, str, 32);
 			obj.setFormat(Paths.font('vcr.ttf'), 32, 0xFFFFFFFF, RIGHT);
 			obj.scrollFactor.set();
 			obj.updateHitbox();
@@ -276,7 +276,7 @@ class PauseSubState extends MusicBeatSubstate
 			allTexts.push(obj);
 			add(obj);
 
-			FlxTween.tween(obj, {alpha: 1, y: obj.y + 5}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.3 * (i+1)});
+			FlxTween.tween(obj, {alpha: 1, y: obj.y + 5}, fieldTweenDuration, {ease: FlxEase.quartInOut, startDelay: fieldTweenDelay * i});
 		}
 
 		if (PlayState.chartingMode){
@@ -293,7 +293,7 @@ class PauseSubState extends MusicBeatSubstate
 			add(chartingText);
 
 			chartingText.alpha = 0;
-			FlxTween.tween(chartingText, {alpha: 1}, 0.4, {ease: FlxEase.quartInOut});
+			FlxTween.tween(chartingText, {alpha: 1}, 0.3, {ease: FlxEase.quartInOut});
 		}
 	}
 

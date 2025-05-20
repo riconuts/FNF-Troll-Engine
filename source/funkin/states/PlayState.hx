@@ -6,10 +6,10 @@ import funkin.data.Cache;
 import funkin.data.Level;
 import funkin.data.Song;
 import funkin.data.BaseSong;
-import funkin.data.Section;
 import funkin.objects.notes.Note;
 import funkin.objects.notes.NoteSplash;
 import funkin.objects.notes.StrumNote;
+import funkin.objects.Fish;
 import funkin.objects.Stage;
 import funkin.objects.Character;
 import funkin.objects.RatingGroup;
@@ -545,6 +545,8 @@ class PlayState extends MusicBeatState
 	
 	public var offset:Float = 0;
 
+	public var fish:Fish;
+
 	override public function create()
 	{
 		updateSongPos = false;
@@ -847,9 +849,7 @@ class PlayState extends MusicBeatState
 		grpNoteSplashes.add(splash);
 
 		////
-		var stringId:String = 'difficultyName_$difficultyName';
-		displayedDifficulty = Paths.getString(stringId, difficultyName.replace("-"," ").capitalize());
-		
+		displayedDifficulty = Paths._getString('difficultyName_$difficultyName') ?? difficultyName.replace("-"," ").capitalize();
 		displayedSong = metadata?.songName ?? songId.replace("-"," ").capitalize();
 
 		if (hud == null) {
@@ -984,6 +984,15 @@ class PlayState extends MusicBeatState
 
 		luaDebugGroup.cameras = [camOther];
 		add(luaDebugGroup);
+
+		#if FUNNY_ALLOWED
+		fish = new Fish();
+		fish.cameras = [camOther];
+		fish.screenCenter();
+		fish.alpha = 0;
+		fish.exists = ClientPrefs.fish;
+		add(fish);
+		#end
 
 		////
 		#if !tgt
@@ -2067,6 +2076,11 @@ class PlayState extends MusicBeatState
 		if (options.length < 1)
 			return;
 
+		#if FUNNY_ALLOWED
+		if (!fish.exists) fish.alpha = 0;
+		fish.exists = ClientPrefs.fish;
+		#end
+
 		this.songSyncMode = SongSyncMode.fromString(ClientPrefs.songSyncMode);
 		
 		trace("changed " + options);
@@ -2089,9 +2103,6 @@ class PlayState extends MusicBeatState
 
 		hud.alpha = ClientPrefs.hudOpacity;
 		hud.changedOptions(options);
-		
-		callOnScripts('optionsChanged', [options]);
-		if (hudSkinScript != null) callScript(hudSkinScript, "optionsChanged", [options]);
 		
 		for(field in playfields){
 /* 			field.noteField.optimizeHolds = ClientPrefs.optimizeHolds; */
@@ -2130,6 +2141,10 @@ class PlayState extends MusicBeatState
 				}
 			}
 		}
+
+		callOnScripts('optionsChanged', [options]);
+		if (hudSkinScript != null)
+			callScript(hudSkinScript, "optionsChanged", [options]);
 	}
 
 	override function draw(){
@@ -2470,6 +2485,13 @@ class PlayState extends MusicBeatState
 		for (script in eventScripts)
 			script.call("update", [elapsed]);
 
+		#if FUNNY_ALLOWED
+		// Only the worthy may see the fish.
+		if (stats.ratingPercent >= 1)
+			fish.alpha += elapsed;
+		else
+			fish.alpha -= elapsed;
+		#end
 
 		callOnHScripts('update', [elapsed]);
 

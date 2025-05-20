@@ -1,10 +1,10 @@
 package funkin;
 
-import Main.resetSpriteCache;
 import funkin.scripts.Globals;
 import funkin.states.MusicBeatState;
 
 import flixel.util.typeLimit.NextState;
+import flixel.input.keyboard.FlxKey;
 
 #if CRASH_HANDLER
 import haxe.CallStack;
@@ -30,6 +30,28 @@ import funkin.states.scripting.HScriptOverridenState;
 
 class FNFGame extends FlxGame
 {
+	public static var muteKeys:Array<FlxKey> = [FlxKey.ZERO];
+	public static var volumeDownKeys:Array<FlxKey> = [FlxKey.NUMPADMINUS, FlxKey.MINUS];
+	public static var volumeUpKeys:Array<FlxKey> = [FlxKey.NUMPADPLUS, FlxKey.PLUS];
+	public static var fullscreenKeys:Array<FlxKey> = [FlxKey.F11];
+	public static var specialKeysEnabled(default, set):Bool;
+
+	@:noCompletion inline public static function set_specialKeysEnabled(val)
+	{
+		if (val) {
+			FlxG.sound.muteKeys = muteKeys;
+			FlxG.sound.volumeDownKeys = volumeDownKeys;
+			FlxG.sound.volumeUpKeys = volumeUpKeys;
+		}
+		else {
+			FlxG.sound.muteKeys = [];
+			FlxG.sound.volumeDownKeys = [];
+			FlxG.sound.volumeUpKeys = [];
+		}
+
+		return specialKeysEnabled = val;
+	}
+
 	public function new(gameWidth = 0, gameHeight = 0, ?initialState:InitialState, updateFramerate = 60, drawFramerate = 60, skipSplash = false, ?startFullscreen:Bool)
 	{
 		@:privateAccess FlxG.initSave();
@@ -42,18 +64,34 @@ class FNFGame extends FlxGame
 		FlxG.mouse.useSystemCursor = true;
 		FlxG.mouse.visible = false;
 
-		// shader coords fix
-		function resetSpriteCaches() {
-			for (cam in FlxG.cameras.list) {
-				if (cam != null && cam.filters != null)
-					resetSpriteCache(cam.flashSprite);
-			}
-			resetSpriteCache(this);
-		}
+		////
+		FlxG.signals.gameResized.add((w, h) -> resetSpriteCache());
+		FlxG.signals.focusGained.add(resetSpriteCache);
 
-		FlxG.signals.gameResized.add((w, h) -> resetSpriteCaches());
-		FlxG.signals.focusGained.add(resetSpriteCaches);
+		////
+		#if (windows || linux) // No idea if this also applies to any other targets
+		FlxG.stage.addEventListener(
+			openfl.events.KeyboardEvent.KEY_DOWN, 
+			(e)->{
+				// Prevent Flixel from listening to key inputs when switching fullscreen mode
+				if (e.keyCode == FlxKey.ENTER && e.altKey)
+					e.stopImmediatePropagation();
 
+				// Also add F11 to switch fullscreen mode
+				if (specialKeysEnabled && fullscreenKeys.contains(e.keyCode))
+					FlxG.fullscreen = !FlxG.fullscreen;
+			}, 
+			false, 
+			100
+		);
+
+		FlxG.stage.addEventListener(
+			openfl.events.FullScreenEvent.FULL_SCREEN, 
+			(e) -> FlxG.save.data.fullscreen = e.fullScreen
+		);
+		#end
+
+		////
 		#if CRASH_HANDLER
 		openfl.Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(
 			UncaughtErrorEvent.UNCAUGHT_ERROR, 
@@ -179,6 +217,15 @@ class FNFGame extends FlxGame
 
 		Globals.variables.clear();
 		super.switchState();
+	}
+
+	// shader coords fix
+	private function resetSpriteCache() {
+		for (cam in FlxG.cameras.list) {
+			if (cam != null && cam.filters != null)
+				Main.resetSpriteCache(cam.flashSprite);
+		}
+		Main.resetSpriteCache(this);
 	}
 
 	#if CRASH_HANDLER

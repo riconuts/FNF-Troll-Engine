@@ -80,6 +80,13 @@ class ClientPrefs {
 				value: false,
 				data: []
 			},
+			"fish" => {
+				display: "Giant Fucking Fish",
+				desc: "When toggled, a giant fucking fish appears that covers the game if you get 100% accuracy",
+				type: Toggle,
+				value: false,
+				data: []
+			},
 			"judgePreset" => {
 				display: "Judgement Preset",
 				desc: "Preset for the judgement windows.",
@@ -251,7 +258,7 @@ class ClientPrefs {
 				display: "Sync Mode",
 				desc: "The method used to sync the music to the game.\nOnly touch this if your game is going off-sync.",
 				type: Dropdown,
-				value: "Last Mix",
+				value: "System Time",
 				data: ["options" => ["System Time", "Last Mix", "Psych 1.0", "Direct", "Legacy"]]
 			},
 			// UI
@@ -818,12 +825,24 @@ class ClientPrefs {
 	static var optionSave:FlxSave = new FlxSave();
 
 	public static function initialize() {
-		defaultOptionDefinitions.get("framerate")
-			.value = #if linux funkin.api.Linux.getMonitorRefreshRate() #else FlxG.stage.application.window.displayMode.refreshRate #end;
+		#if linux
+		defaultOptionDefinitions.get("framerate").value = funkin.api.Linux.getMonitorRefreshRate();
+		#else
+		defaultOptionDefinitions.get("framerate").value = FlxG.stage.application.window.displayMode.refreshRate;
+		#end
+		
 		// locale = openfl.system.Capabilities.language;
 
 		optionSave.bind("options_v2");
 		loadDefaultKeys();
+
+		FlxG.sound.onVolumeChange.add(onVolumeChange);
+	}
+
+	private static function onVolumeChange(volume:Float) {
+		ClientPrefs.masterVolume = volume;
+		Reflect.setField(ClientPrefs.optionSave.data, "masterVolume", volume);
+		ClientPrefs.optionSave.flush();
 	}
 
 	public static function save(?definitions:Map<String, OptionData>) {
@@ -923,10 +942,10 @@ class ClientPrefs {
 	public static function reloadControls() {
 		funkin.input.PlayerSettings.player1.controls.setKeyboardScheme(KeyboardScheme.Solo);
 
-		StartupState.muteKeys = copyKey(keyBinds.get('volume_mute'));
-		StartupState.volumeDownKeys = copyKey(keyBinds.get('volume_down'));
-		StartupState.volumeUpKeys = copyKey(keyBinds.get('volume_up'));
-		StartupState.fullscreenKeys = copyKey(keyBinds.get("fullscreen"));
+		FNFGame.muteKeys = copyKey(keyBinds.get('volume_mute'));
+		FNFGame.volumeDownKeys = copyKey(keyBinds.get('volume_down'));
+		FNFGame.volumeUpKeys = copyKey(keyBinds.get('volume_up'));
+		FNFGame.fullscreenKeys = copyKey(keyBinds.get("fullscreen"));
 	}
 
 	public static function copyKey(arrayToCopy:Array<Int>):Array<Int> {

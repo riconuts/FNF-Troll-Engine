@@ -1,19 +1,15 @@
 package funkin.states;
 
 import flixel.addons.transition.FlxTransitionableState;
-import funkin.data.Highscore;
 import flixel.text.FlxText;
 import funkin.data.Song;
+import funkin.data.BaseSong;
+import funkin.data.Highscore;
 import funkin.states.options.OptionsState;
 import funkin.states.editors.MasterEditorMenu;
 
 #if DISCORD_ALLOWED
 import funkin.api.Discord.DiscordClient;
-#end
-
-#if sys
-import sys.io.File;
-import sys.FileSystem;
 #end
 
 using StringTools;
@@ -24,7 +20,7 @@ using StringTools;
 **/
 class SongSelectState extends MusicBeatState
 {	
-	var songMeta:Array<Song>;
+	var songMeta:Array<BaseSong>;
 	var songText:Array<FlxText> = [];
 	var curSel(default, set):Int;
 	function set_curSel(sowy){
@@ -53,9 +49,9 @@ class SongSelectState extends MusicBeatState
 
 	var verticalLimit:Int;
 
-	public static function getEverySong():Array<Song>
+	public static function getEverySong():Array<BaseSong>
 	{
-		var songMeta = [];
+		var songMeta:Array<BaseSong> = [];
 
 		var folder = 'assets/songs/';
 		Paths.iterateDirectory(folder, function(name:String){
@@ -212,13 +208,15 @@ class SongSelectState extends MusicBeatState
 
 class ChartSelectSubstate extends MusicBeatSubstate
 {
-	var song:Song;
-	var texts:Array<FlxText> = [];
-	var curSel:Int = 0;
-
+	var song:BaseSong;
 	var charts:Array<String>;
 
-	public function new(song:Song, ?charts:Array<String>) 
+	var curSel:Int = 0;
+
+	var chartTxts:Array<FlxText> = [];
+	var scoreTxts:Array<FlxText> = [];
+
+	public function new(song:BaseSong, ?charts:Array<String>) 
 	{
 		super();
 		this.song = song;
@@ -240,11 +238,12 @@ class ChartSelectSubstate extends MusicBeatSubstate
 
 			var text = new FlxText(-10, y, w2, chartId, 16);
 			text.alignment = RIGHT;
-			texts[idx] = text;
+			chartTxts[idx] = text;
 			add(text);
 
 			var scoreTxt = new FlxText(w2 + 10, text.y, w2, Std.string(Highscore.getScore(song.songId, chartId)), 16);
 			scoreTxt.alignment = LEFT;
+			scoreTxts[idx] = scoreTxt;
 			add(scoreTxt);
 		}
 
@@ -253,9 +252,9 @@ class ChartSelectSubstate extends MusicBeatSubstate
 
 	function changeSel(diff:Int = 0)
 	{
-		texts[curSel].color = 0xFFFFFFFF;
-		curSel = CoolUtil.updateIndex(curSel, diff, texts.length);
-		texts[curSel].color = 0xFFFFFF00;
+		chartTxts[curSel].color = 0xFFFFFFFF;
+		curSel = CoolUtil.updateIndex(curSel, diff, chartTxts.length);
+		chartTxts[curSel].color = 0xFFFFFF00;
 	}
 
 	override public function update(e){
@@ -264,10 +263,21 @@ class ChartSelectSubstate extends MusicBeatSubstate
 		if (FlxG.keys.justPressed.DOWN || FlxG.keys.justPressed.S)
 			changeSel(1);
 
-		if (FlxG.keys.justPressed.BACKSPACE || FlxG.keys.justPressed.ESCAPE)
+		if (FlxG.keys.justPressed.R) {
+			openSubState(new ResetScoreSubState(
+				song.songId,
+				charts[curSel],
+				false
+			));
+			this.subStateClosed.addOnce((_) -> {
+				scoreTxts[curSel].text = Std.string(Highscore.getScore(song.songId, charts[curSel]));
+			});
+		}
+		else if (FlxG.keys.justPressed.BACKSPACE || FlxG.keys.justPressed.ESCAPE)
 			this.close();
 		else if (FlxG.keys.justPressed.ENTER) {
 			PlayState.loadPlaylist([song], charts[curSel]);
+			PlayState.isStoryMode = false;
 
 			PlayState.isStoryMode = false;
 

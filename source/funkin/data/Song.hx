@@ -2,8 +2,7 @@ package funkin.data;
 
 #if USING_MOONCHART
 import funkin.data.FNFTroll as SupportedFormat;
-import moonchart.formats.BasicFormat;
-import moonchart.backend.FormatData;
+import moonchart.formats.fnf.FNFVSlice;
 import moonchart.backend.FormatData.Format;
 import moonchart.backend.FormatDetector;
 #end
@@ -11,53 +10,12 @@ import moonchart.backend.FormatDetector;
 import funkin.states.LoadingState;
 import funkin.states.PlayState;
 import funkin.states.editors.ChartingState;
-import funkin.data.Section.SwagSection;
 import funkin.data.BaseSong;
 import haxe.io.Path;
 import haxe.Json;
 
 using funkin.CoolerStringTools;
 using StringTools;
-
-typedef SwagSong = {
-	////
-	var notes:Array<SwagSection>;
-	
-	var keyCount:Int;
-
-	/** Offsets the chart notes **/
-	var offset:Float;
-	
-	/** How spread apart the notes should be **/
-	var speed:Float;
-
-	////
-	var song:String;
-
-	/** Starting BPM of the song **/
-	var bpm:Float;
-	
-	/** Song track data containing the file names of the song's tracks **/
-	var tracks:SongTracks;
-
-	////
-	var player1:Null<String>;
-	var player2:Null<String>;
-	var gfVersion:Null<String>;
-	var stage:String;
-	var hudSkin:String;
-
-	var arrowSkin:String;
-	var splashSkin:String;
-
-	////
-	@:optional var events:Array<Array<Dynamic>>;
-	@:optional var metadata:SongMetadata;
-
-	//// internal
-	@:optional var path:String;
-	var validScore:Bool;
-}
 
 typedef PsychEvent = {
 	strumTime:Float,
@@ -77,30 +35,12 @@ typedef JsonSong = {
 	@:optional var offset:Float;
 }
 
-typedef SongTracks = {
-	var inst:Array<String>;
-	var ?player:Array<String>;
-	var ?opponent:Array<String>;
-} 
-
-typedef SongMetadata =
-{
-	/** The display name of this song **/
-	var ?songName:String;
-	
-	@:optional var artist:String;
-	@:optional var charter:String;
-	@:optional var modcharter:String;
-	@:optional var extraInfo:Array<String>;
-}
-
-inline final DEFAULT_CHART_ID = "normal";
 final defaultDifficultyOrdering:Array<String>  = ["easy", "normal", "hard", "erect", "nightmare"];
 
 class Song extends BaseSong
 {
-	public var songPath(get, default):String;
-	
+	public var songPath:String;
+
 	private var _charts:Array<String> = null;
 	private var metadataCache = new Map<String, SongMetadata>();
 
@@ -181,7 +121,7 @@ class Song extends BaseSong
 
 		#if !USING_MOONCHART
 		var suffix = getDifficultyFileSuffix(chartId);
-		var path = getSongFile(songId + suffix);
+		var path = getSongFile(songId + suffix + ".json");
 		return parseSongJson(path);
 		#else
 		
@@ -191,7 +131,7 @@ class Song extends BaseSong
 		var metadataPath = getSongFile('$songId-metadata.json');
 
 		if (Paths.exists(chartsFilePath) && Paths.exists(metadataPath)) {
-			var chart = new moonchart.formats.fnf.FNFVSlice().fromFile(chartsFilePath, metadataPath);
+			var chart = new FNFVSlice().fromFile(chartsFilePath, metadataPath);
 			if (chart.diffs.contains(chartId)) {
 				trace("CONVERTING FROM VSLICE");
 				
@@ -229,11 +169,7 @@ class Song extends BaseSong
 					default:
 						trace('Converting from format $fileFormat!');
 
-						var formatInfo:Null<FormatData> = FormatDetector.getFormatData(fileFormat);
-						var chart:moonchart.formats.BasicFormat<{}, {}>;
-						chart = cast Type.createInstance(formatInfo.handler, []);
-						chart = chart.fromFile(filePath);
-
+						var chart = FormatDetector.createFormatInstance(fileFormat).fromFile(filePath);
 						if (chart.formatMeta.supportsDiffs && !chart.diffs.contains(chartId))
 							continue;
 
@@ -250,12 +186,11 @@ class Song extends BaseSong
 		#end
 	}
 
+	/**
+	 * Returns an array of charts available for this song
+	**/
 	public function getCharts():Array<String>
 		return _charts ?? (_charts = _getCharts());
-
-	//
-	function get_songPath()
-		return songPath;
 
 	////
 
@@ -331,8 +266,6 @@ class Song extends BaseSong
 		final songPath = getSongFile("");
 		final charts:Map<String, Bool> = [];
 
-		Paths.currentModDirectory = folder;
-
 		#if USING_MOONCHART		
 		function processFileName(unprocessedName:String) {
 			var fileName:String = unprocessedName.toLowerCase();
@@ -357,9 +290,8 @@ class Song extends BaseSong
 					}
 					
 				default:
-					var formatInfo:FormatData = FormatDetector.getFormatData(fileFormat);
-					var chart:moonchart.formats.BasicFormat<{}, {}>;
-					chart = cast Type.createInstance(formatInfo.handler, []).fromFile(filePath);
+					var chart = FormatDetector.createFormatInstance(fileFormat).fromFile(filePath);
+					chart = chart.fromFile(filePath);
 
 					if (chart.formatMeta.supportsDiffs || chart.diffs.length > 0){
 						for (diff in chart.diffs)
@@ -402,7 +334,7 @@ class Song extends BaseSong
 			if (ALL_FILES_DETECTED_FORMAT == FNF_VSLICE) {
 				var chartsFilePath:String = getSongFile('$songId-chart.json');
 				var metadataPath:String = getSongFile('$songId-metadata.json');
-				var chart = new moonchart.formats.fnf.FNFVSlice().fromFile(chartsFilePath, metadataPath);
+				var chart = new FNFVSlice().fromFile(chartsFilePath, metadataPath);
 				for (diff in chart.diffs) charts.set(diff, true);
 				
 			}else {
@@ -502,7 +434,7 @@ class Song extends BaseSong
 	{
 		var path:String = Paths.formatToSongPath(folder) + '/' + Paths.formatToSongPath(jsonInput) + '.json';
 		var fullPath = Paths.getPath('songs/$path', false);
-		return parseSongJson(fullPath);
+		return parseSongJson(fullPath, isChartJson);
 	}
 
 	public static function onLoadEvents(songJson:SwagSong) {
@@ -707,6 +639,18 @@ class Song extends BaseSong
 		return resultArray;
 	}
 
+	/** Loads a singular song to be played on PlayState **/
+	static public function loadSong(song:BaseSong, ?difficulty:String) {
+		PlayState.loadPlaylist([song], difficulty);
+	}
+
+	/** Loads a singular song to be played on PlayState, then switches to it **/
+	static public function playSong(song:BaseSong, ?difficulty:String)
+	{
+		loadSong(song, difficulty);
+		switchToPlayState();
+	}
+
 	static public function switchToPlayState()
 	{
 		if (FlxG.sound.music != null)
@@ -714,10 +658,4 @@ class Song extends BaseSong
 
 		LoadingState.loadAndSwitchState(new PlayState());
 	}
-
-	static public function playSong(song:Song, ?difficulty:String)
-	{
-		PlayState.loadPlaylist([song], difficulty);
-		switchToPlayState();
-	} 
 }
