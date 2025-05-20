@@ -146,6 +146,8 @@ class CutsceneSequence {
 @:noScripting
 class PlayState extends MusicBeatState
 {
+	var analyzer:Null<SpectralAnalyzer> = null;
+
 	public var disableCameraMovement:Bool = false;
 
 	public static function loadPlaylist(playlist:Array<BaseSong>, chartId:String) {
@@ -1680,7 +1682,7 @@ class PlayState extends MusicBeatState
 			trace("song ended!?");
 			finishSong(false);
 		};
-		
+
 		//// NEW SHIT
 		var noteData:Array<SwagSection> = PlayState.SONG.notes;
 
@@ -1798,7 +1800,7 @@ class PlayState extends MusicBeatState
 				#if ALLOW_DEPRECATION
 				swagNote.realColumn = daNoteData;
 				#end
-				swagNote.sustainLength = songNotes[2] <= Conductor.stepCrotchet ? songNotes[2] : (susLength + 1) * Conductor.stepCrotchet; // +1 because hold end
+				swagNote.sustainLength = Math.max(0, songNotes[2] <= Conductor.stepCrotchet ? songNotes[2] : (susLength + 1) * Conductor.stepCrotchet); // +1 because hold end
 				swagNote.ID = notes.length;
 
 				modchartObjects.set('note${swagNote.ID}', swagNote);

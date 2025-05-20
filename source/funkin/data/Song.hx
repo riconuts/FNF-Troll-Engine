@@ -135,7 +135,18 @@ class Song extends BaseSong
 			if (chart.diffs.contains(chartId)) {
 				trace("CONVERTING FROM VSLICE");
 				
-				var converted = new SupportedFormat().fromFormat(chart, chartId);
+				var converted:SupportedFormat = new SupportedFormat().fromFormat(chart, chartId);
+
+				// holds are too long when from v-slice
+				var stepLength:Float = Conductor.calculateStepCrochet(converted.data.song.bpm);
+				for (section in converted.data.song.notes){
+					for(note in section.sectionNotes)
+						if(note.length > stepLength * 2)
+							note[2] -= stepLength * 2;
+					
+				}
+
+
 				var chart:JsonSong = cast converted.data.song;
 				chart.path = chartsFilePath;
 				chart.song = songId;
@@ -581,10 +592,14 @@ class Song extends BaseSong
 					return existsInFolder('$name.ogg') ? [name] : defaultVoices;
 				
 				var trackName = 'Voices-${swagJson.player1}';
-				playerTracks = existsInFolder('$trackName.ogg') ? [trackName] : voiceTrack("Voices-Player");
+				var variantless:String = 'Voices-${swagJson.player1.split("-")[0]}';
+
+				playerTracks = existsInFolder('$trackName.ogg') ? [trackName] : (existsInFolder('$variantless.ogg') ? [variantless] : voiceTrack("Voices-Player"));
 
 				var trackName = 'Voices-${swagJson.player2}';
-				opponentTracks =  existsInFolder('$trackName.ogg') ? [trackName] : voiceTrack("Voices-Opponent");
+				var variantless:String = 'Voices-${swagJson.player2.split("-")[0]}';
+
+				opponentTracks = existsInFolder('$trackName.ogg') ? [trackName] : (existsInFolder('$variantless.ogg') ? [variantless] : voiceTrack("Voices-Opponent"));
 
 				return false;
 			}

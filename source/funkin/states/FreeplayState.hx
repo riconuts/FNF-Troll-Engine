@@ -439,6 +439,8 @@ private class FreeplayMenu extends AlphabetMenu
 		var songName:String = metadata.songName;
 		var iconId:Null<String> = metadata.freeplayIcon;
 
+		Paths.currentModDirectory = song.folder;
+
 		var obj:Alphabet = this.addTextOption(songName);
 
 		if (iconId == null)

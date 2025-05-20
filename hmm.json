@@ -67,7 +67,21 @@
 		{
 			"name": "moonchart",
 			"type": "haxelib",
-			"version": "0.4.0"
+			"version": "0.5.0"
+		},
+		{
+			"name": "funkin.vis",
+			"type": "git",
+			"dir": null,
+			"ref": "main",
+			"url": "https://github.com/nebulazorua/trollVis.git"
+		},
+		{
+			"name": "grig.audio",
+			"type": "git",
+			"dir": "src",
+			"ref": "main",
+			"url": "https://gitlab.com/haxe-grig/grig.audio.git"
 		}
 	]
 }
