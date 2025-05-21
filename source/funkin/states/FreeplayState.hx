@@ -83,6 +83,15 @@ class FreeplayState extends MusicBeatState
 				list.push(new Song(songId, directory));
 			}
 		}
+
+		#if USING_MOONCHART
+		funkin.data.Moonchart.MoonchartContent.init();
+		funkin.data.Moonchart.MoonchartContent.scanSongs();
+		for (song in funkin.data.Moonchart.MoonchartContent.freeplaySongs) {
+			list.push(song);
+		}
+		#end
+
 		return list;
 	} 
 
