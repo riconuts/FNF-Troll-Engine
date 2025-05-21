@@ -142,7 +142,7 @@ class FlxUIDropDownMenu extends FlxUIGroup implements IFlxUIWidget implements IF
 		return params = p;
 	}
 
-	public var dropDirection(default, set):FlxUIDropDownMenuDropDirection = Automatic;
+	public var dropDirection(default, set):FlxUIDropDownMenuDropDirection = Down;
 
 	private function set_dropDirection(dropDirection):FlxUIDropDownMenuDropDirection
 	{
@@ -276,7 +276,18 @@ class FlxUIDropDownMenu extends FlxUIGroup implements IFlxUIWidget implements IF
 
 	private function dropsUp():Bool
 	{
-		return dropDirection == Up || (dropDirection == Automatic && exceedsHeight());
+		//return dropDirection == Up || (dropDirection == Automatic && exceedsHeight());
+		if (dropDirection == Automatic) {
+			/*
+			var panelHeight = getPanelHeight();
+			var downExcess = (y + panelHeight + header.background.height) - FlxG.height;
+			var upExcess = -(y - panelHeight);
+			return (upExcess < downExcess);
+			*/
+			return (y + header.background.height / 2) > FlxG.height / 2;
+		}
+
+		return dropDirection == Up;
 	}
 
 	private function exceedsHeight():Bool
