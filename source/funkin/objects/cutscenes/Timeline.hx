@@ -143,7 +143,7 @@ class SetPropertiesAction extends TimelineAction {
 }
 
 class EasePropertiesAction extends TimelineAction {
-	public var endFrame:Int = 0;
+	public var endFrame:Float = 0;
 	public var obj:Dynamic;
 	public var propertyInfo:Array<EaseInfo> = [];
 	public var updateInterval:Int = 1;
@@ -171,15 +171,15 @@ class EasePropertiesAction extends TimelineAction {
 		length = endFrame - frame;
 	}
 
-	public override function execute(curFrame:Int, frameTime:Float) {
+	public override function execute(curFrame:Float, frameTime:Float) {
+		// This'll break if you're changing the timeline framerate mid-animation
+		// but you shouldnt be doing that, so who care
+		if (updateEveryFrame)
+			curFrame = frameTime / parent.frameInterval;
+		
+
 		var passed:Float = curFrame - frame;
 		var range:Float = (endFrame - frame);
-
-		if (updateEveryFrame){
-			var frameSex:Float = frame * parent.frameInterval;
-			passed = frameTime - frameSex;
-			range = (endFrame * parent.frameInterval) - frameSex;
-		}
 
 		progress = Math.min(1, passed / range);
 
@@ -201,7 +201,7 @@ class EasePropertiesAction extends TimelineAction {
 }
 
 class EaseCallbackAction extends TimelineAction {
-	public var endFrame:Int = 0;
+	public var endFrame:Float = 0;
 	public var callback:(Float, Float)->Void;
 	public var style:EaseFunction = FlxEase.quadOut;
 
@@ -219,7 +219,9 @@ class EaseCallbackAction extends TimelineAction {
 		length = endFrame - frame;
 	}
 
-	public override function execute(curFrame:Int, frameTime:Float) {
+	public override function execute(curFrame:Float, frameTime:Float) {
+		if (updateEveryFrame)
+			curFrame = frameTime / parent.frameInterval;
 		var passed:Float = curFrame - frame;
 		progress = Math.min(1, passed / (endFrame - frame));
 
@@ -345,20 +347,14 @@ class Timeline extends FlxBasic {
 	public function secToFrame(s:Float):Int return Math.floor(s / frameInterval);
 	public function frameToSec(f:Int):Float return f * frameInterval;
 
-
-	public override function update(dt:Float){
-		#if FLX_DEBUG
-		FlxBasic.activeCount++;
-		#end
-
+	function updateTimeline(dt:Float){
 		frameTimer += dt;
 		totalTime += dt;
-		var garbage:Array<TimelineAction> = [];
-		while(frameTimer >= frameInterval){
+		while (frameTimer >= frameInterval) {
 			curFrame++;
 			// run the actions every timeline frame
-			for(i in 0...actions.length){
-				var action: TimelineAction = actions[i];
+			for (i in 0...actions.length) {
+				var action:TimelineAction = actions[i];
 				if (action.finished)
 					continue;
 
@@ -369,6 +365,24 @@ class Timeline extends FlxBasic {
 			}
 			frameTimer -= frameInterval;
 		}
+		for (i in 0...actions.length) {
+			var action:TimelineAction = actions[i];
+			if (action.finished || !action.updateEveryFrame)
+				continue;
+
+			if (action.frame <= curFrame)
+				action.execute(curFrame, totalTime);
+			else
+				break;
+		}
+	}
+
+	public override function update(dt:Float){
+		#if FLX_DEBUG
+		FlxBasic.activeCount++;
+		#end
+
+		updateTimeline(dt);
 	}
 }
 
@@ -391,39 +405,7 @@ class ConductorTimeline extends Timeline
 			dt = 0;
 		else
 			oldSP = Conductor.songPosition;
-
-		frameTimer += dt;
-		totalTime += dt;
-		var garbage:Array<TimelineAction> = [];
-		while (frameTimer >= frameInterval) {
-			curFrame++;
-			// run the actions every timeline frame
-			for (i in 0...actions.length) {
-				var action:TimelineAction = actions[i];
-				if (action.updateEveryFrame)
-					continue;
-				if (action.finished)
-					continue;
-
-				if (action.frame <= curFrame)
-					action.execute(curFrame, totalTime);
-				else
-					break;
-			}
-			frameTimer -= frameInterval;
-		}
-		for (i in 0...actions.length) {
-			var action:TimelineAction = actions[i];
-			if (!action.updateEveryFrame)
-				continue;
-			
-			if (action.finished)
-				continue;
-
-			if (action.frame <= curFrame)
-				action.execute(curFrame, totalTime);
-			else
-				break;
-		}
+		
+		updateTimeline(dt);
 	}
 }

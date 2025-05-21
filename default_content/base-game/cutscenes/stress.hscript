@@ -123,16 +123,15 @@ function onCreateCutscene()
 		gfTurninDemon.visible = true;
 		game.disableCameraMovement = true;
 	});
-	timeline.easeProperties(364, 413, game.camGame, {zoom: 1.4}, FlxEase.quadInOut);
-	timeline.easeProperties(364, 399, camFollowPos, {x: game.gf.getCamera()[0] - 75, y: game.gf.getCamera()[1]}, FlxEase.quadOut);
-
-	timeline.easeProperties(417, 421, game.camGame, {zoom: 0.8}, FlxEase.quadIn);
-	timeline.easeProperties(421, 443, game.camGame, {zoom: game.defaultCamZoom}, FlxEase.quadOut);
+	timeline.easeProperties(364, 413, game.camGame, {zoom: 1.4}, FlxEase.quadInOut).updateEveryFrame = true;
+	timeline.easeProperties(364, 399, camFollowPos, {x: game.gf.getCamera()[0] - 75, y: game.gf.getCamera()[1]}, FlxEase.quadOut).updateEveryFrame = true;
+	timeline.easeProperties(417, 421, game.camGame, {zoom: 0.8}, FlxEase.quadIn).updateEveryFrame = true;
+	timeline.easeProperties(421, 443, game.camGame, {zoom: game.defaultCamZoom}, FlxEase.quadOut).updateEveryFrame = true;
 	
-	timeline.easeProperties(451, 453, game.camGame, {zoom: 1.0}, FlxEase.quadIn);
-	timeline.easeProperties(453, 467, game.camGame, {zoom: game.defaultCamZoom}, FlxEase.quadOut);
+	timeline.easeProperties(451, 453, game.camGame, {zoom: 1.0}, FlxEase.quadIn).updateEveryFrame = true;
+	timeline.easeProperties(453, 467, game.camGame, {zoom: game.defaultCamZoom}, FlxEase.quadOut).updateEveryFrame = true;
 
-	timeline.easeProperties(470, 520, camFollowPos, {x: game.dad.getCamera()[0] + 50, y: game.dad.getCamera()[1]}, FlxEase.quadOut);
+	timeline.easeProperties(470, 520, camFollowPos, {x: game.dad.getCamera()[0] + 50, y: game.dad.getCamera()[1]}, FlxEase.quadOut).updateEveryFrame = true;
 
 	timeline.playAnimation(418, speakimate, "picoDrop", true);
 	timeline.once(418, (f)->{
@@ -161,7 +160,8 @@ function onCreateCutscene()
 		game.camGame.zoom = 1.2;
 	});
 
-	timeline.easeProperties(752, 764, game.camGame, {zoom: 1.3}, FlxEase.elasticOut);
+	timeline.easeProperties(752, 764, game.camGame, {zoom: 1.3}, FlxEase.elasticOut).updateEveryFrame = true;
+
 	timeline.once(774, () -> {
 		camFollow.x = game.dad.getCamera()[0] + 50;
 		camFollow.y = game.dad.getCamera()[1];
