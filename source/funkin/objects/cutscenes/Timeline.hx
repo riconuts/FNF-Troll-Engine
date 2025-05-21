@@ -70,6 +70,32 @@ typedef EaseInfo = {
 	?range: Float
 }
 
+class SetPropertiesAction extends TimelineAction {
+	var propertyInfo: Array<{name: String, value:Float}> = [];
+	var obj:Dynamic;
+	public function new(frame:Int, obj:Dynamic, properties:Dynamic) {
+		super(frame);
+		this.obj = obj;
+		this.propertyInfo = [
+			for (p in Reflect.fields(properties)) {
+				var v = Reflect.field(properties, p);
+				{
+					name: p,
+					value: v
+				}
+			}
+		];
+	}
+
+	public override function execute(curFrame:Int, frameTime:Float) {
+		for (data in propertyInfo) 
+			Reflect.setProperty(obj, data.name, data.value);
+		
+		finished = true;
+
+	}
+}
+
 class EasePropertiesAction extends TimelineAction {
 	public var endFrame:Int = 0;
 	public var obj:Dynamic;
@@ -203,10 +229,12 @@ class Timeline extends FlxBasic {
 	}
 
 	public function seek(frame: Int){ // Be careful when seeking
+		var oldFrame = curFrame;
 		curFrame = frame;
 
-		for(i in 0...actions.length)
-			actions[i].finished = false;
+		if (curFrame < oldFrame)
+			for(i in 0...actions.length)
+				actions[i].finished = false;
 
 	}
 
@@ -221,6 +249,9 @@ class Timeline extends FlxBasic {
 		action.parent = this;
 		actions.sort((a, b) -> Std.int(a.frame - b.frame));
 	}
+
+	public function setProperties(frame:Int, obj:Dynamic, properties:Array<Dynamic>)
+		addAction(new SetPropertiesAction(frame, obj, properties));
 
 	public function playSound(frame:Int, sound:OneOfTwo<FlxSound, String>, obeysBitch:Bool = true)
 		addAction(new SoundAction(frame, sound, obeysBitch));
