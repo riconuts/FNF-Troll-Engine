@@ -9,6 +9,7 @@ class TimelineAction {
 	public var parent:Timeline;
 	public var frame:Int = 0;
 	public var finished:Bool = false;
+	public var updateEveryFrame:Bool = false;
 
 	public function new(frame:Int){
 		this.frame = frame;
@@ -172,9 +173,17 @@ class EasePropertiesAction extends TimelineAction {
 
 	public override function execute(curFrame:Int, frameTime:Float) {
 		var passed:Float = curFrame - frame;
-		progress = Math.min(1, passed / (endFrame - frame));
+		var range:Float = (endFrame - frame);
 
-		if (curFrame % updateInterval == 0){
+		if (updateEveryFrame){
+			var frameSex:Float = frame * parent.frameInterval;
+			passed = frameTime - frameSex;
+			range = (endFrame * parent.frameInterval) - frameSex;
+		}
+
+		progress = Math.min(1, passed / range);
+
+		if (curFrame % updateInterval == 0 || updateEveryFrame){
 			for(data in propertyInfo){
 				if(data.range == null){
 					var sv: Float = Reflect.getProperty(obj, data.name);
@@ -293,43 +302,44 @@ class Timeline extends FlxBasic {
 		actions.push(action);
 		action.parent = this;
 		actions.sort((a, b) -> Std.int(a.frame - b.frame));
+		return action;
 	}
 
 	public function setProperties(frame:Int, obj:Dynamic, properties:Dynamic)
-		addAction(new SetPropertiesAction(frame, obj, properties));
+		return addAction(new SetPropertiesAction(frame, obj, properties));
 
 	public function playSound(frame:Int, sound:OneOfTwo<FlxSound, String>, obeysBitch:Bool = true)
-		addAction(new SoundAction(frame, sound, obeysBitch));
+		return addAction(new SoundAction(frame, sound, obeysBitch));
 
 	public function playAnimation(frame:Int, obj:FlxSprite, anim:String)
-		addAction(new PlayAnimationAction(frame, obj, anim));
+		return addAction(new PlayAnimationAction(frame, obj, anim));
 
 	public function on(frame:Int, callback:Int->Null<Bool>)
-		addAction(new CallbackAction(frame, callback));
+		return addAction(new CallbackAction(frame, callback));
 
 	public function finish(frame:Int)
-		addAction(new CallbackAction(frame, (f:Int) -> {
+		return addAction(new CallbackAction(frame, (f:Int) -> {
 			onFinish.dispatch();
 			return true;
 		}));
 
 	public function once(frame:Int, callback:Int->Void)
-		addAction(new CallbackAction(frame, (f:Int) -> {
+		return addAction(new CallbackAction(frame, (f:Int) -> {
 			callback(f);
 			return true;
 		}));
 
 	public function until(frame:Int, endFrame:Int, callback:Int->Void)
-		addAction(new CallbackAction(frame, (f:Int)->{
+		return addAction(new CallbackAction(frame, (f:Int)->{
 			callback(f);
 			return f >= endFrame;
 		}));
 	
 	public function easeCallback(frame:Int, endFrame:Int, callback:(Float, Float)->Void, ?style:EaseFunction)
-		addAction(new EaseCallbackAction(frame, endFrame, callback, style ?? FlxEase.linear));
+		return addAction(new EaseCallbackAction(frame, endFrame, callback, style ?? FlxEase.linear));
 
 	public function easeProperties(frame:Int, endFrame:Int, obj:Dynamic, properties:Dynamic, ?style:EaseFunction, ?interval:Int)
-		addAction(new EasePropertiesAction(frame, endFrame, obj, properties, style ?? FlxEase.linear, interval));
+		return addAction(new EasePropertiesAction(frame, endFrame, obj, properties, style ?? FlxEase.linear, interval));
 
 	// secs -> frames and vice versa
 	public function secToFrame(s:Float):Int return Math.floor(s / frameInterval);
@@ -390,6 +400,8 @@ class ConductorTimeline extends Timeline
 			// run the actions every timeline frame
 			for (i in 0...actions.length) {
 				var action:TimelineAction = actions[i];
+				if (action.updateEveryFrame)
+					continue;
 				if (action.finished)
 					continue;
 
@@ -399,6 +411,19 @@ class ConductorTimeline extends Timeline
 					break;
 			}
 			frameTimer -= frameInterval;
+		}
+		for (i in 0...actions.length) {
+			var action:TimelineAction = actions[i];
+			if (!action.updateEveryFrame)
+				continue;
+			
+			if (action.finished)
+				continue;
+
+			if (action.frame <= curFrame)
+				action.execute(curFrame, totalTime);
+			else
+				break;
 		}
 	}
 }
