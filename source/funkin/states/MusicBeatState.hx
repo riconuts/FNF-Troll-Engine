@@ -127,6 +127,8 @@ class MusicBeatState extends FlxUIState
 	}
 	
 	private var lastMixTimer:Float = 0;
+	private var lastMixPos:Float = 0;
+
 	private function updateSongPosition(elapsed:Float):Void {
 		var inst = Conductor.tracks[0];
 		switch (songSyncMode)
@@ -156,12 +158,12 @@ class MusicBeatState extends FlxUIState
 			case LAST_MIX:
 				// Stepmania method
 				// Works for most people it seems??
-				if (Conductor.lastSongPos != inst.time) {
-					Conductor.lastSongPos = inst.time;
+				if (lastMixPos < inst.time) {
+					lastMixPos = inst.time;
 					lastMixTimer = 0;
 				}else {
 					@:privateAccess
-					lastMixTimer += FlxG.game._elapsedMS * inst.pitch * 1000;
+					lastMixTimer += FlxG.game._elapsedMS * inst.pitch;
 				}
 				
 				Conductor.songPosition = inst.time + lastMixTimer;
@@ -284,7 +286,7 @@ class MusicBeatState extends FlxUIState
 
 	function resyncTracks() {
 		Conductor.resyncTracks();
-		Conductor.lastSongPos = Conductor.songPosition;
+		lastMixPos = Conductor.songPosition;
 	}
 
 	public function stepHit():Void

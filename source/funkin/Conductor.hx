@@ -27,7 +27,6 @@ class Conductor
 
 	public static var safeZoneOffset:Float = ClientPrefs.hitWindow;
 	public static var visualPosition:Float = 0;
-	public static var lastSongPos:Float;
 
 	/** Whether the song is currently playing. Use startSong and pauseSong to change this **/
 	public static var playing(default, null):Bool = false;
