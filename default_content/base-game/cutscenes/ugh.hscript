@@ -68,7 +68,7 @@ function onCreateCutscene(){
 	this.sound(116, "killYou");
 	timeline.easeProperties(240, 260, this.music, {volume: 0}, FlxEase.linear);
 	timeline.playAnimation(116, tankmanimate, 'kill');
-	timeline.setProperties(116, camFollow, {x: camFollow.x, y: camFollow.y - 50})
+	timeline.setProperties(116, camFollow, {x: camFollow.x, y: camFollow.y - 50});
 
 	timeline.finish(260);
 }
