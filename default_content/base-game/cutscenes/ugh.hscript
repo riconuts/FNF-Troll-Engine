@@ -58,7 +58,7 @@ function onCreateCutscene(){
 		}
 	});
 
-	timeline.setProperties(72, camFollow, {x: camFollow.x + 500, y: camFollow.y + 50})
+	timeline.setProperties(72, camFollow, {x: camFollow.x + 500, y: camFollow.y + 50});
 
 	this.sound(92, "bfBeep", false);
 	timeline.playAnimation(92, game.boyfriend, 'singUP');
