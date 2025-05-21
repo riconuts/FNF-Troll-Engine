@@ -159,8 +159,10 @@ class MusicBeatState extends FlxUIState
 				if (Conductor.lastSongPos != inst.time) {
 					Conductor.lastSongPos = inst.time;
 					lastMixTimer = 0;
-				}else
-					lastMixTimer += elapsed * 1000;
+				}else {
+					@:privateAccess
+					lastMixTimer += FlxG.game._elapsedMS * inst.pitch * 1000;
+				}
 				
 				Conductor.songPosition = inst.time + lastMixTimer;
 
