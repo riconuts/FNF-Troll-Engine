@@ -23,29 +23,74 @@ class TimelineAction {
 class PlayAnimationAction extends TimelineAction {
 	public var sprite: FlxSprite;
 	public var name: String;
+	public var syncToTimeline: Bool = false;
 
-	public function new(frame:Int, sprite: FlxSprite, name:String){
+	public function new(frame:Int, sprite:FlxSprite, name:String, syncToTimeline:Bool = false){
 		super(frame);
 		this.sprite = sprite;
 		this.name = name;
+		this.syncToTimeline = syncToTimeline;
 	}
 
+	var firstExecute:Bool = true;
 	public override function execute(curFrame:Int, frameTime:Float){
-		// TODO: code to make sure it stays synced
-		#if USING_FLXANIMATE
-		if(sprite is FlxAnimate)
-			cast(sprite, FlxAnimate).anim.play(name, true);
-		else if(sprite is Character)
-		#else
-		if(sprite is Character)
-		#end
-		{
-			var ch:Character = cast sprite;
-			ch.voicelining = !ch.idleSequence.contains(name);
-			ch.playAnim(name, true);
-		}else
-			sprite.animation.play(name, true);
+		var actionLocalSecs: Float = (curFrame - frame) * parent.frameInterval;
+		if (firstExecute){
+			#if USING_FLXANIMATE
+			if(sprite is FlxAnimate){
+				var animate: FlxAnimate = cast sprite;
+				animate.anim.play(name, true);
+				animate.anim.curFrame = Math.floor(actionLocalSecs * animate.anim.framerate);
+			}else if(sprite is Character)
+			#else
+			if(sprite is Character)
+			#end
+			{
+				var ch:Character = cast sprite;
+				ch.voicelining = !ch.idleSequence.contains(name);
+				ch.playAnim(name, true);
+			}else
+				sprite.animation.play(name, true);
 
+			#if USING_FLXANIMATE
+			if(!(sprite is FlxAnimate)){
+			#end
+			sprite.animation.curAnim.curFrame = Math.floor(actionLocalSecs * sprite.animation.curAnim.frameRate);
+			#if USING_FLXANIMATE
+			}
+			#end
+		}
+		firstExecute = false;
+		if(syncToTimeline){
+			#if USING_FLXANIMATE
+			if(sprite is FlxAnimate){
+				var animate: FlxAnimate = cast sprite;
+				if (animate != null && animate.anim != null && animate.anim.curInstance != null && animate.anim.curInstance.symbol != null && animate.anim.curInstance.symbol.name == name){
+					animate.anim.pause();
+					animate.anim.curFrame = Math.floor(actionLocalSecs * animate.anim.framerate);
+					finished = animate.anim.curFrame >= animate.anim.length;
+				}else{
+					finished = true;
+				}
+			}else
+			#end
+			{
+				// i love flixel 
+				if (sprite != null && sprite.animation != null && sprite.animation.curAnim != null && sprite.animation.curAnim.name == name){
+					sprite.animation.curAnim.paused = true;
+					sprite.animation.curAnim.curFrame = Math.floor(actionLocalSecs * sprite.animation.curAnim.frameRate);
+					// TODO: loop points
+					if(sprite.animation.curAnim.looped)
+						sprite.animation.curAnim.curFrame %= sprite.animation.curAnim.numFrames - 1;
+					
+					finished = sprite.animation.curAnim.finished;
+				}else{
+					finished = true;
+				}
+			}
+			return;
+		}
+			
 		finished = true;
 	}
 }
@@ -250,7 +295,7 @@ class Timeline extends FlxBasic {
 		actions.sort((a, b) -> Std.int(a.frame - b.frame));
 	}
 
-	public function setProperties(frame:Int, obj:Dynamic, properties:Array<Dynamic>)
+	public function setProperties(frame:Int, obj:Dynamic, properties:Dynamic)
 		addAction(new SetPropertiesAction(frame, obj, properties));
 
 	public function playSound(frame:Int, sound:OneOfTwo<FlxSound, String>, obeysBitch:Bool = true)

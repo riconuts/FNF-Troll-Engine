@@ -114,10 +114,10 @@ function onCreateCutscene()
 	game.addBehindGF(speakimate);
 	game.addBehindGF(gfTurninDemon);
 	
-	timeline.playAnimation(0, tankmanimate, "godDamnIt");
+	timeline.playAnimation(0, tankmanimate, "godDamnIt", true);
 	this.sound(0, "stressCutscene");
 
-	timeline.playAnimation(364, gfTurninDemon, "turn");
+	timeline.playAnimation(364, gfTurninDemon, "turn", true);
 	timeline.once(364, (f)->{
 		speakimate.visible = false;
 		gfTurninDemon.visible = true;
@@ -134,7 +134,7 @@ function onCreateCutscene()
 
 	timeline.easeProperties(470, 520, camFollowPos, {x: game.dad.getCamera()[0] + 50, y: game.dad.getCamera()[1]}, FlxEase.quadOut);
 
-	timeline.playAnimation(418, speakimate, "picoDrop");
+	timeline.playAnimation(418, speakimate, "picoDrop", true);
 	timeline.once(418, (f)->{
 		speakimate.visible = true;
 		game.remove(gfTurninDemon);
@@ -146,7 +146,7 @@ function onCreateCutscene()
 	timeline.playAnimation(444, boyfrimate, "bfgfIdle");
 
 	timeline.playAnimation(498, speakimate, "picoIdle");
-	timeline.playAnimation(468, tankmanimate, "Pico");
+	timeline.playAnimation(468, tankmanimate, "Pico", true);
 	
 	timeline.playAnimation(752, game.boyfriend, "singUPmiss");
 	

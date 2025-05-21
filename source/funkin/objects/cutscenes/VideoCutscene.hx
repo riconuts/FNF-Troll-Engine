@@ -38,8 +38,10 @@ class VideoCutscene extends Cutscene {
 	}
 
 	override public function pause(){
+		#if(hxvlc >= "2.1.0")
 		@:privateAccess
 		video.bitmap.resumeOnFocus = false;
+		#end
 		video.bitmap.pause();
 	}
 

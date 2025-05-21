@@ -48,7 +48,7 @@ function onCreateCutscene(){
 
 	this.playMusic(Paths.music("DISTORTO"), 1, 0.25, 0);
 	this.sound(0, "tankSong2");
-	timeline.playAnimation(0, tankmanimate, 'voice');
+	timeline.playAnimation(0, tankmanimate, 'voice', true);
 
 	timeline.easeProperties(0, 80, game.camGame, {zoom: 1.2}, FlxEase.quartOut);
 	timeline.easeProperties(0, 60, camFollow, {y: camFollow.y + 100}, FlxEase.quadOut);

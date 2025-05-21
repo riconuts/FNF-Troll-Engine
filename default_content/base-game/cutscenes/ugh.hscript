@@ -44,7 +44,7 @@ function onCreateCutscene(){
 	this.playMusic(Paths.music("DISTORTO"), 1, 0.25, 0);
 
 	this.sound(0, "wellWellWell");
-	timeline.playAnimation(0, tankmanimate, 'wellwellwell');
+	timeline.playAnimation(0, tankmanimate, 'wellwellwell', true);
 
 	timeline.once(0, ()-> {
 		game.dad.visible = false;
@@ -58,10 +58,7 @@ function onCreateCutscene(){
 		}
 	});
 
-	timeline.once(72, () -> {
-		camFollow.x += 500;
-		camFollow.y += 50;
-	});
+	timeline.setProperties(72, camFollow, {x: camFollow.x + 500, y: camFollow.y + 50})
 
 	this.sound(92, "bfBeep", false);
 	timeline.playAnimation(92, game.boyfriend, 'singUP');
@@ -71,10 +68,7 @@ function onCreateCutscene(){
 	this.sound(116, "killYou");
 	timeline.easeProperties(240, 260, this.music, {volume: 0}, FlxEase.linear);
 	timeline.playAnimation(116, tankmanimate, 'kill');
-	timeline.once(116, () -> {
-		camFollow.x -= 500;
-		camFollow.y -= 100;
-	});
+	timeline.setProperties(116, camFollow, {x: camFollow.x, y: camFollow.y - 50})
 
 	timeline.finish(260);
 }
