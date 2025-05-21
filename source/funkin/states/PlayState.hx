@@ -3303,6 +3303,10 @@ class PlayState extends MusicBeatState
 
 		stats.calculateAccuracy(judgeData, diff); // deals with accuracy calculations
 
+		if (perfectMode && stats.totalNotesHit < stats.totalPlayed) 
+			doDeathCheck(true);
+		
+
 		switch(judgeData.comboBehaviour){
 			default:
 				stats.cbCombo = 0;
