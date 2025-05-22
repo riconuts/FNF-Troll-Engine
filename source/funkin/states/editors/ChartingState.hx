@@ -3253,9 +3253,9 @@ class ChartingState extends MusicBeatState
 		var fileName:String;
 		var _song:SwagSong = Reflect.copy(_song);
 
-		if (Reflect.hasField(_song, "path")) {
-			fileName = haxe.io.Path.withoutDirectory(_song.path);
-			Reflect.deleteField(_song, "path");
+		if (Reflect.hasField(_song, "_path")) {
+			fileName = haxe.io.Path.withoutDirectory(Reflect.field(_song, "_path"));
+			Reflect.deleteField(_song, "_path");
 		}else {
 			fileName = Paths.formatToSongPath(_song.song) + ".json";
 		}
