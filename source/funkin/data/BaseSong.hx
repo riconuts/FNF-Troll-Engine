@@ -94,7 +94,6 @@ typedef SwagSong = {
 	@:optional var metadata:SongMetadata;
 
 	//// internal
-	@:optional var path:String;
 	var validScore:Bool;
 }
 
