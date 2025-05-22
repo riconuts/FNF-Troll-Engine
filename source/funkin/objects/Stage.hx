@@ -224,12 +224,16 @@ class Stage extends FlxTypedGroup<FlxBasic>
 	
 	public var foreground = new FlxTypedGroup<FlxBasic>();
 
-	public var props:Map<String, StageProp> = [];
+	public var props:Map<String, FlxBasic> = [];
 
 	public var stageScript:FunkinHScript;
-	public var spriteMap = new Map<String, FlxBasic>();
+	public var spriteMap(get, null):Map<String, FlxBasic>;
 
+	
 	#if ALLOW_DEPRECATION
+	@:deprecated("spriteMap is deprecated. Use props instead.")
+	function get_spriteMap()return props;
+	
 	@:deprecated("curStage is deprecated. Use stageId instead.")
 	public var curStage(get, never):String;
 	inline function get_curStage() return stageId;
