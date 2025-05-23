@@ -692,13 +692,15 @@ class Character extends FlxSprite
 		scriptNames.insert(0, characterId);
 
 		for(script in scriptNames){
-			var key:String = 'characters/$script';
-
-			var hscriptFile = Paths.getHScriptPath(key);
-			if (hscriptFile != null) {
-				var script = FunkinHScript.fromFile(hscriptFile, hscriptFile, defaultVars);
-				pushScript(script);
+			for (key in ['characters/$script', 'characters/scripts/$script']){
+				var hscriptFile = Paths.getHScriptPath(key);
+				if (hscriptFile != null) {
+					var script = FunkinHScript.fromFile(hscriptFile, hscriptFile, defaultVars);
+					pushScript(script);
+					break
+				}
 			}
+			
 		}
 		#end
 
