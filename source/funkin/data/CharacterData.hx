@@ -7,6 +7,7 @@ using StringTools;
 typedef CharacterFile = {
 	var animations:Array<AnimArray>;
 	var image:String;
+	@:optional var images: Array<String>;
 	var scale:Float;
 	var sing_duration:Float;
 	
@@ -32,6 +33,7 @@ typedef AnimArray = {
 	var loop:Bool;
 	var indices:Array<Int>;
 	var offsets:Array<Int>;
+	@:optional var image:String;
 	@:optional var cameraOffset:Array<Float>;
 }
 

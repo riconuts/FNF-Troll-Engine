@@ -3641,6 +3641,8 @@ class PlayState extends MusicBeatState
 			daNote.ratingDisabled = true;
 			daNote.noMissAnimation = true;
 		}
+
+		daNote.hitResult.hitDiff = Conductor.safeZoneOffset;
 		
 		if (!daNote.ratingDisabled) {
 			stats.judged.push({
@@ -3651,7 +3653,8 @@ class PlayState extends MusicBeatState
 			
 			if (!mine) {
 				songMisses++;
-				applyJudgment(daNote.hitResult.judgment, Conductor.safeZoneOffset);
+				applyNoteJudgment(daNote, false);
+				//applyJudgment(daNote.hitResult.judgment, Conductor.safeZoneOffset);
 			}else {
 				applyJudgment(MISS_MINE, Conductor.safeZoneOffset);
 				health -= daNote.missHealth * healthLoss;
@@ -3751,7 +3754,7 @@ class PlayState extends MusicBeatState
 		
 	}
 
-	inline function getNoteCharacters(note:Note, field:PlayField):Array<Character> {
+	function getNoteCharacters(note:Note, field:PlayField):Array<Character> {
 		var chars:Array<Character> = note.characters.copy();
 
 		if (note.gfNote)
@@ -3774,8 +3777,10 @@ class PlayState extends MusicBeatState
 			track.volume = 1;
 
 		// Sing animations
-		for (char in getNoteCharacters(note, field)) 
-			char.playNote(note, field);
+		var chars: Array<Character> = getNoteCharacters(note, field);
+		if (note.noteScript == null || callScript(note.noteScript, "playNoteAnim", [note, field, chars]) != Globals.Function_Stop)
+			for (char in chars) 
+				char.playNote(note, field);
 		
 		// Strum animations
 		if (field.autoPlayed) {

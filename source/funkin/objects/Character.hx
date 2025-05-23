@@ -1,5 +1,6 @@
 package funkin.objects;
 
+import flixel.graphics.frames.FlxAtlasFrames;
 import funkin.states.PlayState;
 import funkin.scripts.FunkinScript.ScriptType;
 import funkin.objects.playfields.PlayField;
@@ -196,12 +197,29 @@ class Character extends FlxSprite
 		////
 		imageFile = json.image;
 
-		switch (getImageFileType(imageFile))
+		var fileType: String = getImageFileType(imageFile);
+		var atlases:Array<String> = [json.image];
+		switch (fileType)
 		{
 			case "texture":	frames = AtlasFrameMaker.construct(imageFile);
 			case "packer":	frames = Paths.getPackerAtlas(imageFile);
-			case "sparrow":	frames = Paths.getSparrowAtlas(imageFile);
+			case "sparrow":	
+				var frames:FlxAtlasFrames = Paths.getSparrowAtlas(imageFile);
+				if(json.images != null && json.images.length > 0){
+					for(i in json.images){
+						if (!atlases.contains(i)) {
+							atlases.push(i);
+							var subAtlas:FlxAtlasFrames = Paths.getSparrowAtlas(i);
+							if (subAtlas==null)continue;
+							@:privateAccess
+							if (!frames.usedGraphics.contains(subAtlas.parent))
+								frames.addAtlas(subAtlas, true);
+						}
+					}
+				}
+				this.frames = frames;
 		}
+		
 
 		////
 		baseScale = Math.isNaN(json.scale) ? 1.0 : json.scale;
@@ -228,6 +246,20 @@ class Character extends FlxSprite
 
 		if (animationsArray != null && animationsArray.length > 0)
 		{
+			if(fileType == 'sparrow'){
+				for(anim in animationsArray){
+					if(anim.image == null)continue;
+					if(!atlases.contains(anim.image)){
+						atlases.push(anim.image);
+						var subAtlas:FlxAtlasFrames = Paths.getSparrowAtlas(anim.image);
+						var frames: FlxAtlasFrames = cast frames;
+						@:privateAccess
+						if (!frames.usedGraphics.contains(subAtlas.parent))
+							frames.addAtlas(subAtlas, true);
+					}
+				}
+			}
+			
 			for (anim in animationsArray)
 			{
 				var animAnim:String = '' + anim.anim;
@@ -678,6 +710,7 @@ class Character extends FlxSprite
 	public function startScripts()
 	{
 		setDefaultVar("this", this);
+		setDefaultVar("debugMode", debugMode);
 
 		#if HSCRIPT_ALLOWED
 		var json = getMyCharacterFile();

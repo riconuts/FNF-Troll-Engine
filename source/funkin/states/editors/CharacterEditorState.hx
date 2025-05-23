@@ -986,6 +986,7 @@ class CharacterEditorState extends MusicBeatState
 		}
 
 		char = new Character(0, 0, charName, isPlayer, true);
+		char.startScripts();
 		char.setupCharacter();
 		if (char.animationsArray[0] != null)
 			char.playAnim(char.animationsArray[0].anim, true);
