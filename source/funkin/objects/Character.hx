@@ -686,10 +686,11 @@ class Character extends FlxSprite
 			if (json.script_names != null)
 				scriptNames = json.script_names;
 
-			if (json.script_name != null)scriptNames.push(json.script_name);
+			if (json.script_name != null && !scriptNames.contains(json.script_name))scriptNames.push(json.script_name);
 		}
 
-		scriptNames.insert(0, characterId);
+		if(!scriptNames.contains(characterId))
+			scriptNames.insert(0, characterId);
 
 		for(script in scriptNames){
 			for (key in ['characters/$script', 'characters/scripts/$script']){
