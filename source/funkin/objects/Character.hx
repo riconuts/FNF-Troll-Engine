@@ -25,6 +25,8 @@ class Character extends FlxSprite
 
 	////
 
+	public var scriptNames:Array<String> = [];
+
 	/**Id of the character**/
 	public var characterId:String = DEFAULT_CHARACTER;
 
@@ -269,14 +271,19 @@ class Character extends FlxSprite
 		this.controlled = this.isPlayer;
 	}
 
+
+	function getMyCharacterFile(){
+		return getCharacterFile(characterId);
+	}
+
 	function _setupCharacter() {
-		var json = getCharacterFile(characterId);
+		var json = getMyCharacterFile();
 		if (json == null) {
 			trace('Character file: $characterId not found.');
 			json = getCharacterFile(DEFAULT_CHARACTER);
 			characterId = DEFAULT_CHARACTER;
 		}
-
+		
 		loadFromPsychData(json);
 		
 		hasMissAnimations = (animOffsets.exists('singLEFTmiss') && animOffsets.exists('singDOWNmiss') && animOffsets.exists('singUPmiss') && animOffsets.exists('singRIGHTmiss'));
@@ -672,14 +679,26 @@ class Character extends FlxSprite
 	{
 		setDefaultVar("this", this);
 
-		var key:String = 'characters/$characterId';
-
 		#if HSCRIPT_ALLOWED
-		var hscriptFile = Paths.getHScriptPath(key);
-		if (hscriptFile != null) {
-			var script = FunkinHScript.fromFile(hscriptFile, hscriptFile, defaultVars);
-			pushScript(script);
-			return this;
+		var json = getMyCharacterFile();
+		if(json != null){
+
+			if (json.script_names != null)
+				scriptNames = json.script_names;
+
+			if (json.script_name != null)scriptNames.push(json.script_name);
+		}
+
+		scriptNames.insert(0, characterId);
+
+		for(script in scriptNames){
+			var key:String = 'characters/$script';
+
+			var hscriptFile = Paths.getHScriptPath(key);
+			if (hscriptFile != null) {
+				var script = FunkinHScript.fromFile(hscriptFile, hscriptFile, defaultVars);
+				pushScript(script);
+			}
 		}
 		#end
 

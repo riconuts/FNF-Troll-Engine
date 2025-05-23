@@ -19,8 +19,10 @@ typedef CharacterFile = {
 	var healthbar_colors:Array<Int>;
 	var healthicon:String;
 
+	@:optional var centered_camera:Bool; // v-slice behaviour
 	@:optional var x_facing:Float;
 	@:optional var death_name:String;
+	@:optional var script_names:Array<String>;
 	@:optional var script_name:String;
 }
 
@@ -49,7 +51,7 @@ class CharacterData {
 			// case "troll.1": // base game better hurry the fuck up on fixing their shit or im making my own format
 		}
 
-		if(Reflect.field(json, "renderType") != null)
+		if(Reflect.field(json, "version") != null)
 			return fileFromVSlice(json);
 
 		var json:CharacterFile = json;
@@ -162,6 +164,7 @@ class CharacterData {
 		var data: VSliceCharJson = data;
 		// TODO: render type shit
 		return {
+			script_name: "vslice",
 			animations: [for(anim in data.animations)vsliceToPsychAnim(anim)],
 			image: data.assetPath,
 			scale: (data?.scale ?? 1) * ((data?.isPixel ?? false) ? 6 : 1),

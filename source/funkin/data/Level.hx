@@ -288,7 +288,9 @@ typedef LevelPropAnimation = {
 	?fps:Int,
 	?indices:Array<Int>,
 	?offset:Array<Float>,
-	?haltsDancing:Bool
+	?haltsDancing:Bool,
+	?flipX:Bool,
+	?flipY:Bool
 }
 
 typedef LevelPropData = {

@@ -142,7 +142,7 @@ class FlxUIDropDownMenu extends FlxUIGroup implements IFlxUIWidget implements IF
 		return params = p;
 	}
 
-	public var dropDirection(default, set):FlxUIDropDownMenuDropDirection = Automatic;
+	public var dropDirection(default, set):FlxUIDropDownMenuDropDirection = Down;
 
 	private function set_dropDirection(dropDirection):FlxUIDropDownMenuDropDirection
 	{

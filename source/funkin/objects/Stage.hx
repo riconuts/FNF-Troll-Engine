@@ -103,6 +103,9 @@ typedef StageFile =
 
 	@:optional var bg_color:Null<String>;
 
+	// v-slice positioning using the character's width and height to offset them
+	@:optional var alternate_char_pos:Bool;
+
 	// title screen vars
 	@:optional var camera_stage:Array<Float>; 
 	@:optional var title_zoom:Float;
@@ -178,9 +181,10 @@ class StageProp extends FlxSprite {
 		if (propData.animations != null) {
 			for (animation in propData.animations) {
 				if (animation.indices != null)
-					prop.animation.addByIndices(animation.name, animation.prefix, animation.indices, '', animation.fps ?? 24, animation.looped ?? false);
+					prop.animation.addByIndices(animation.name, animation.prefix, animation.indices, '', animation.fps ?? 24, animation.looped ?? false,
+						animation?.flipX ?? false, animation?.flipY ?? false);
 				else
-					prop.animation.addByPrefix(animation.name, animation.prefix, animation.fps ?? 24, animation.looped ?? false);
+					prop.animation.addByPrefix(animation.name, animation.prefix, animation.fps ?? 24, animation.looped ?? false, animation?.flipX ?? false, animation?.flipY ?? false);
 
 				if (animation.offset != null && animation.offset.length == 2)
 					prop.offsets.set(animation.name, animation.offset);
@@ -323,7 +327,6 @@ class Stage extends FlxTypedGroup<FlxBasic>
 			if(stageData.props != null){
 				for (propData in stageData.props) {
 					var prop:StageProp = StageProp.buildFromData(propData);
-					trace(prop);
 					if (propData.id != null)
 						props.set(propData.id, prop);
 
@@ -498,7 +501,9 @@ class StageData {
 							looped: a?.looped ?? false,
 							fps: a?.frameRate ?? 24,
 							indices: a.frameIndices,
-							offset: a.offsets == null ? [0, 0] : [Std.int(a.offsets[0]), Std.int(a.offsets[1])]
+							offset: a.offsets == null ? [0, 0] : [Std.int(a.offsets[0]), Std.int(a.offsets[1])],
+							flipX: a?.flipX,
+							flipY: a?.flipY
 						}
 					}
 				],
@@ -516,24 +521,30 @@ class StageData {
 
 	}
 
+	public static function convertVSlice(json: VSliceStageFile):StageFile 
+	{
+		return {
+			props: StageData.convertVSliceProps(json),
+			directory: "", // json.directory maybe idfk
+			defaultZoom: json.cameraZoom,
+			boyfriend: json.characters.bf.position,
+			girlfriend: json.characters.gf.position,
+			opponent: json.characters.dad.position,
+			hide_girlfriend: false,
+			camera_boyfriend: json.characters.bf.cameraOffsets == null ? [0, 0] : [json.characters.bf.cameraOffsets[0] * -1, json.characters.bf.cameraOffsets[1] * -1],
+			camera_opponent: json.characters.dad.cameraOffsets,
+			camera_girlfriend: json.characters.gf.cameraOffsets,
+			camera_speed: 1,
+			alternate_char_pos: true
+		}
+	}
+
 	public static function getStageFile(stageId:String):Null<StageFile> 
 	{
 		var json:Dynamic = Paths.json('stages/$stageId.json', false);
 		if(json != null && Reflect.field(json, "version") != null){
 			var json:VSliceStageFile = cast json;
-			return {
-				props: StageData.convertVSliceProps(json),
-				directory: "", // json.directory maybe idfk
-				defaultZoom: json.cameraZoom,
-				boyfriend: json.characters.bf.position,
-				girlfriend: json.characters.gf.position,
-				opponent: json.characters.dad.position,
-				hide_girlfriend: false,
-				camera_boyfriend: json.characters.bf.cameraOffsets,
-				camera_opponent: json.characters.gf.cameraOffsets,
-				camera_girlfriend: json.characters.dad.cameraOffsets,
-				camera_speed: 1
-			}
+			return StageData.convertVSlice(json);
 		}
 		return json;
 	}
