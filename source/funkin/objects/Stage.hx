@@ -233,7 +233,7 @@ class Stage extends FlxTypedGroup<FlxBasic>
 	#if ALLOW_DEPRECATION
 	@:deprecated("spriteMap is deprecated. Use props instead.")
 	function get_spriteMap()return props;
-	
+
 	@:deprecated("curStage is deprecated. Use stageId instead.")
 	public var curStage(get, never):String;
 	inline function get_curStage() return stageId;
@@ -320,18 +320,20 @@ class Stage extends FlxTypedGroup<FlxBasic>
 			}
 			*/
 			
-			trace(stageData.props);
-			for (propData in stageData.props) {
-				var prop:StageProp = StageProp.buildFromData(propData);
-				trace(prop);
-				if (propData.id != null)
-					props.set(propData.id, prop);
+			if(stageData.props != null){
+				for (propData in stageData.props) {
+					var prop:StageProp = StageProp.buildFromData(propData);
+					trace(prop);
+					if (propData.id != null)
+						props.set(propData.id, prop);
 
-				if (propData.foreground)
-					foreground.insert(propData?.index ?? foreground.members.length, prop);
-				else
-					insert(propData?.index ?? members.length, prop);
+					if (propData.foreground)
+						foreground.insert(propData?.index ?? foreground.members.length, prop);
+					else
+						insert(propData?.index ?? members.length, prop);
+				}
 			}
+
 
 
 			if (stageScript != null){
