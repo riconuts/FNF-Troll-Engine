@@ -19,7 +19,6 @@ typedef CharacterFile = {
 	var healthbar_colors:Array<Int>;
 	var healthicon:String;
 
-	@:optional var centered_camera:Bool; // v-slice behaviour
 	@:optional var x_facing:Float;
 	@:optional var death_name:String;
 	@:optional var script_names:Array<String>;
