@@ -698,7 +698,7 @@ class Character extends FlxSprite
 				if (hscriptFile != null) {
 					var script = FunkinHScript.fromFile(hscriptFile, hscriptFile, defaultVars);
 					pushScript(script);
-					break
+					break;
 				}
 			}
 			
