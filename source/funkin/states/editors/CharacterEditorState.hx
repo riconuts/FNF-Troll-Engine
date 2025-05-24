@@ -633,6 +633,7 @@ class CharacterEditorState extends MusicBeatState {
 			updateAnimation(char);
 			if(ghostMirrorsCharacter){
 				updateAnimation(ghostChar);
+				updateGhostAnimationsList();
 			}
 
 			reloadAnimationDropDown();
@@ -811,8 +812,13 @@ class CharacterEditorState extends MusicBeatState {
 	}
 
 	var ghostMirrorsCharacter:Bool = false;
+	var ghostCharName:String = "";
 
 	function reloadGhost(charName:String) {
+		if(ghostCharName == charName && ghostChar.characterId == charName){
+			return;
+		}
+		ghostCharName = charName;
 		ghostChar = new Character(0, 0, charName == "Current Character" ? char.characterId : charName, ghostPlayableCheckbox.checked, true);
 		ghostChar.setupCharacter();
 		ghostChar.alpha = 0.6;
