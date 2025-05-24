@@ -6,7 +6,6 @@ import funkin.states.StoryModeState;
 import funkin.scripts.FunkinHScript;
 import funkin.scripts.Globals;
 import flixel.group.FlxSpriteGroup;
-import flixel.util.typeLimit.OneOfTwo;
 import flixel.util.FlxColor;
 import haxe.io.Path;
 import haxe.Json;
@@ -120,7 +119,7 @@ class Level {
 	**/
 	public function getDisplayedSongs(difficultyId:String = "normal"):Array<String>
 	{
-		return [for (song in songs) song==null ? "UNKNOWN" : song.getMetadata(difficultyId).songName];
+		return [for (song in songs) song==null ? "Unknown" : song.getMetadata(difficultyId).songName];
 	}
 	
 

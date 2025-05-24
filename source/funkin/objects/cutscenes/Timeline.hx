@@ -42,24 +42,18 @@ class PlayAnimationAction extends TimelineAction {
 				var animate: FlxAnimate = cast sprite;
 				animate.anim.play(name, true);
 				animate.anim.curFrame = Math.floor(actionLocalSecs * animate.anim.framerate);
-			}else if(sprite is Character)
-			#else
-			if(sprite is Character)
+			}else
 			#end
 			{
-				var ch:Character = cast sprite;
-				ch.voicelining = !ch.idleSequence.contains(name);
-				ch.playAnim(name, true);
-			}else
-				sprite.animation.play(name, true);
-
-			#if USING_FLXANIMATE
-			if(!(sprite is FlxAnimate)){
-			#end
-			sprite.animation.curAnim.curFrame = Math.floor(actionLocalSecs * sprite.animation.curAnim.frameRate);
-			#if USING_FLXANIMATE
+				if(sprite is Character){
+					var ch:Character = cast sprite;
+					ch.voicelining = !ch.idleSequence.contains(name);
+					ch.playAnim(name, true);
+				}else
+					sprite.animation.play(name, true);
+				
+				sprite.animation.curAnim.curFrame = Math.floor(actionLocalSecs * sprite.animation.curAnim.frameRate);
 			}
-			#end
 		}
 		firstExecute = false;
 		if(syncToTimeline){
@@ -183,7 +177,7 @@ class EasePropertiesAction extends TimelineAction {
 
 		progress = Math.min(1, passed / range);
 
-		if (curFrame % updateInterval == 0 || updateEveryFrame){
+		if (updateEveryFrame || curFrame % updateInterval == 0){
 			for(data in propertyInfo){
 				if(data.range == null){
 					var sv: Float = Reflect.getProperty(obj, data.name);
