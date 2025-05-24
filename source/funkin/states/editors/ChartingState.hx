@@ -1911,15 +1911,6 @@ class ChartingState extends MusicBeatState
 		if (tracksCompleted){
 			tracksCompleted = false;
 			trace("track completed");
-			var pre:Float;
-			for (snd in tracks){
-				pre = snd.volume;
-				snd.volume = 0.0;
-				snd.play();
-				snd.pause();
-				snd.time = 0.0;
-				snd.volume = pre;
-			}
 			changeSection(0, true);
 		}
 
