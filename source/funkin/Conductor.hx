@@ -105,6 +105,7 @@ class Conductor
 
 		Conductor.songPosition = 0;
 		Conductor.playing = false;
+		Conductor.pitch = 1.0;
 		Conductor.bpmChangeMap = [];
 		Conductor.tracks = [];
 	}
