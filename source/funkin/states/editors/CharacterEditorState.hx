@@ -997,6 +997,7 @@ class CharacterEditorState extends MusicBeatState {
 			cameraFollowPointer.alpha = 0.85;
 
 			updateGhostPointerPos();
+			ghostCharDropDown.selectedLabel = "Current Character";
 		}
 	}
 
