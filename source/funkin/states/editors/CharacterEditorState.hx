@@ -369,28 +369,35 @@ class CharacterEditorState extends MusicBeatState {
 		var templateCharacter:FlxButton = new FlxButton(140, 50, "Load Template", function() {
 			var parsedJson:CharacterFile = cast Json.parse(TemplateCharacter);
 
-			char.animOffsets.clear();
-			char.animationsArray = parsedJson.animations;
-			for (anim in char.animationsArray) {
-				char.addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
+			inline function loadTemplate(char:Character){
+				char.animOffsets.clear();
+				char.animationsArray = parsedJson.animations;
+				for (anim in char.animationsArray) {
+					char.addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
+				}
+				if (char.animationsArray[0] != null) {
+					char.playAnim(char.animationsArray[0].anim, true);
+				}
+
+				char.singDuration = parsedJson.sing_duration;
+				char.positionArray = parsedJson.position;
+				char.cameraPosition = parsedJson.camera_position;
+
+				char.imageFile = parsedJson.image;
+				char.baseScale = parsedJson.scale;
+				char.noAntialiasing = parsedJson.no_antialiasing;
+				char.originalFlipX = parsedJson.flip_x;
+				char.healthIcon = parsedJson.healthicon;
+				char.healthColorArray = parsedJson.healthbar_colors;
+				char.setPosition(char.positionArray[0], char.positionArray[1]);
+
+				reloadCharacterImage(char);
 			}
-			if (char.animationsArray[0] != null) {
-				char.playAnim(char.animationsArray[0].anim, true);
+			loadTemplate(char);
+			if(ghostMirrorsCharacter){
+				loadTemplate(ghostChar);
+				updateGhostAnimationsList();
 			}
-
-			char.singDuration = parsedJson.sing_duration;
-			char.positionArray = parsedJson.position;
-			char.cameraPosition = parsedJson.camera_position;
-
-			char.imageFile = parsedJson.image;
-			char.baseScale = parsedJson.scale;
-			char.noAntialiasing = parsedJson.no_antialiasing;
-			char.originalFlipX = parsedJson.flip_x;
-			char.healthIcon = parsedJson.healthicon;
-			char.healthColorArray = parsedJson.healthbar_colors;
-			char.setPosition(char.positionArray[0], char.positionArray[1]);
-
-			reloadCharacterImage();
 			reloadCharacterDropDown();
 			reloadCharacterOptions();
 			resetHealthBarColor();
@@ -435,10 +442,18 @@ class CharacterEditorState extends MusicBeatState {
 
 		imageInputText = new FlxUIInputText(15, 30, 200, 'characters/BOYFRIEND', 8);
 		var reloadImage:FlxButton = new FlxButton(imageInputText.x + 210, imageInputText.y - 3, "Reload Image", function() {
-			char.imageFile = imageInputText.text;
-			reloadCharacterImage();
-			if (char.animation.curAnim != null) {
-				char.playAnim(char.animation.curAnim.name, true);
+
+			inline function _reloadImage(char:Character){
+				char.imageFile = imageInputText.text;
+				reloadCharacterImage(char);
+				if (char.animation.curAnim != null) {
+					char.playAnim(char.animation.curAnim.name, true);
+				}
+			}
+
+			_reloadImage(char);
+			if(ghostMirrorsCharacter){
+				_reloadImage(ghostChar);
 			}
 		});
 
@@ -557,60 +572,67 @@ class CharacterEditorState extends MusicBeatState {
 		});
 
 		var addUpdateButton:FlxButton = new FlxButton(70, animationIndicesInputText.y + 30, "Add/Update", function() {
-			var indicesInput = animationIndicesInputText.text.trim();
-			var indices:Array<Int> = indicesInput.length == 0 ? null : CharacterData.parseIndices(indicesInput.split(','));
+			inline function updateAnimation(char:Character){
+				var indicesInput = animationIndicesInputText.text.trim();
+				var indices:Array<Int> = indicesInput.length == 0 ? null : CharacterData.parseIndices(indicesInput.split(','));
 
-			var lastAnim:String = char.animationsArray[curAnim] != null ? char.animationsArray[curAnim].anim : '';
+				var lastAnim:String = char.animationsArray[curAnim] != null ? char.animationsArray[curAnim].anim : '';
 
-			var lastOffsets:Array<Int> = [0, 0];
-			for (anim in char.animationsArray) {
-				if (animationInputText.text == anim.anim) {
-					lastOffsets = anim.offsets;
-					if (char.animation.exists(animationInputText.text))
-						char.animation.remove(animationInputText.text);
+				var lastOffsets:Array<Int> = [0, 0];
+				for (anim in char.animationsArray) {
+					if (animationInputText.text == anim.anim) {
+						lastOffsets = anim.offsets;
+						if (char.animation.exists(animationInputText.text))
+							char.animation.remove(animationInputText.text);
 
-					char.animationsArray.remove(anim);
+						char.animationsArray.remove(anim);
+					}
 				}
-			}
 
-			var newAnim:AnimArray = {
-				anim: animationInputText.text,
-				name: animationNameInputText.text,
-				fps: Math.round(animationNameFramerate.value),
-				loop: animationLoopCheckBox.checked,
-				indices: indices,
-				offsets: lastOffsets,
-				cameraOffset: [animationXCam.value, animationYCam.value]
-			};
+				var newAnim:AnimArray = {
+					anim: animationInputText.text,
+					name: animationNameInputText.text,
+					fps: Math.round(animationNameFramerate.value),
+					loop: animationLoopCheckBox.checked,
+					indices: indices,
+					offsets: lastOffsets,
+					cameraOffset: [animationXCam.value, animationYCam.value]
+				};
 
-			if (indices != null && indices.length > 0) {
-				char.animation.addByIndices(newAnim.anim, newAnim.name, newAnim.indices, "", newAnim.fps, newAnim.loop);
-			} else {
-				char.animation.addByPrefix(newAnim.anim, newAnim.name, newAnim.fps, newAnim.loop);
-			}
-
-			if (!char.animOffsets.exists(newAnim.anim))
-				char.addOffset(newAnim.anim, 0, 0);
-
-			char.animationsArray.push(newAnim);
-			char.animationsArray.sort(animSortFunc);
-
-			if (lastAnim == animationInputText.text) {
-				var leAnim:FlxAnimation = char.animation.getByName(lastAnim);
-				if (leAnim != null && leAnim.frames.length > 0) {
-					char.playAnim(lastAnim, true);
+				if (indices != null && indices.length > 0) {
+					char.animation.addByIndices(newAnim.anim, newAnim.name, newAnim.indices, "", newAnim.fps, newAnim.loop);
 				} else {
-					for (i in 0...char.animationsArray.length) {
-						if (char.animationsArray[i] != null) {
-							leAnim = char.animation.getByName(char.animationsArray[i].anim);
-							if (leAnim != null && leAnim.frames.length > 0) {
-								char.playAnim(char.animationsArray[i].anim, true);
-								curAnim = i;
-								break;
+					char.animation.addByPrefix(newAnim.anim, newAnim.name, newAnim.fps, newAnim.loop);
+				}
+
+				if (!char.animOffsets.exists(newAnim.anim))
+					char.addOffset(newAnim.anim, 0, 0);
+
+				char.animationsArray.push(newAnim);
+				char.animationsArray.sort(animSortFunc);
+
+				if (lastAnim == animationInputText.text) {
+					var leAnim:FlxAnimation = char.animation.getByName(lastAnim);
+					if (leAnim != null && leAnim.frames.length > 0) {
+						char.playAnim(lastAnim, true);
+					} else {
+						for (i in 0...char.animationsArray.length) {
+							if (char.animationsArray[i] != null) {
+								leAnim = char.animation.getByName(char.animationsArray[i].anim);
+								if (leAnim != null && leAnim.frames.length > 0) {
+									char.playAnim(char.animationsArray[i].anim, true);
+									curAnim = i;
+									break;
+								}
 							}
 						}
 					}
 				}
+			}
+
+			updateAnimation(char);
+			if(ghostMirrorsCharacter){
+				updateAnimation(ghostChar);
 			}
 
 			reloadAnimationDropDown();
@@ -801,6 +823,16 @@ class CharacterEditorState extends MusicBeatState {
 		charLayer.insert(0, ghostChar);
 
 		////
+
+		updateGhostAnimationsList();
+
+		ghostMirrorsCharacter = (charName == "Current Character");
+	}
+
+	function updateGhostAnimationsList(){
+		if(ghostChar == null){
+			return;
+		}
 		var animList:Array<String> = [
 			for (anim in ghostChar.animationsArray)
 				anim.anim
@@ -817,10 +849,9 @@ class CharacterEditorState extends MusicBeatState {
 		var curAnimData = ghostChar.animationsArray[firstAnim];
 		var offsets = curAnimData.offsets;
 
-		ghostChar.playAnim(curAnimData.anim, true);
 		ghostAnimTxt.text = 'Offset [${offsets[0]}, ${offsets[1]}]';
 
-		ghostMirrorsCharacter = (charName == "Current Character");
+		ghostChar.playAnim(curAnimData.anim, true);
 	}
 
 	function updateGhostPointerPos() {
@@ -888,7 +919,7 @@ class CharacterEditorState extends MusicBeatState {
 		}
 	}
 
-	function reloadCharacterImage() {
+	function reloadCharacterImage(char:Character) {
 		var lastAnim:String = '';
 
 		if (char.animation.curAnim != null)
