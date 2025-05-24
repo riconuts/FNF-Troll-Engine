@@ -2506,7 +2506,7 @@ class PlayState extends MusicBeatState
 			}
 			else if (Conductor.songPosition >= 0) 
 			{
-				updateSongPosition(elapsed);
+				updateSongPosition();
 			}
 		}
 

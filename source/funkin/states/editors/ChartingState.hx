@@ -2037,7 +2037,7 @@ class ChartingState extends MusicBeatState
 		}
 
 		if (Conductor.playing) {
-			updateSongPosition(elapsed);
+			updateSongPosition();
 
 			if (Conductor.songPosition > inst.length)
 				changeSection(0, true);
