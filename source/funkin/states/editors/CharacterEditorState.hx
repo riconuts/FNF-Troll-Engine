@@ -397,6 +397,7 @@ class CharacterEditorState extends MusicBeatState {
 			if(ghostMirrorsCharacter){
 				loadTemplate(ghostChar);
 				updateGhostAnimationsList();
+				ghostCharName = "Current Character";
 			}
 			reloadCharacterDropDown();
 			reloadCharacterOptions();
@@ -713,6 +714,9 @@ class CharacterEditorState extends MusicBeatState {
 		ghostCharDropDown = new FlxUIDropDownMenu(15, 30, FlxUIDropDownMenu.makeStrIdLabelArray([''], true), function(pressed:String) {
 			var idx:Int = Std.parseInt(pressed);
 			var charName = ghostList[idx];
+			if(ghostCharName == charName){
+				return;
+			}
 
 			updateGhostCharList();
 			ghostCharDropDown.selectedLabel = charName;
@@ -815,7 +819,7 @@ class CharacterEditorState extends MusicBeatState {
 	var ghostCharName:String = "";
 
 	function reloadGhost(charName:String) {
-		if(ghostCharName == charName && ghostChar.characterId == charName){
+		if(ghostCharName == charName){
 			return;
 		}
 		ghostCharName = charName;
