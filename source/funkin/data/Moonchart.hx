@@ -6,6 +6,8 @@ import funkin.data.BaseSong;
 
 import moonchart.formats.fnf.legacy.FNFTroll as SupportedFormat;
 import moonchart.formats.fnf.legacy.FNFLegacy.FNFLegacyBasic;
+import moonchart.formats.StepMania.StepManiaBasic;
+import moonchart.formats.StepMania;
 import moonchart.formats.BasicFormat;
 import moonchart.backend.FormatDetector;
 import moonchart.backend.FormatData;
@@ -14,6 +16,8 @@ import moonchart.Moonchart;
 
 using StringTools;
 using funkin.CoolerStringTools;
+
+typedef StepManiaDynamic = moonchart.formats.StepMania.StepManiaBasic<moonchart.parsers.StepManiaParser.StepManiaFormat>;
 
 final SM_DIFFICULTIES = ["Beginner", "Easy", "Medium", "Hard", "Challenge"]; // idk I don't play Stepmania
 final FNF_DIFFICULTIES = ["easy", "normal", "hard", "erect", "nightmare"];
@@ -77,6 +81,23 @@ class MoonchartSong extends BaseSong
 			// Skip Moonchart Conversion
 			@:privateAccess
 			return Song.parseSongJson(diffData.chartPath);
+		}
+
+		if (ss.sowyFormat.basicFormat is StepManiaBasic) 
+		@:privateAccess
+		{
+			var basicFormat:StepManiaDynamic = cast ss.sowyFormat.basicFormat;
+			basicFormat.data = cast basicFormat.parser.parse(Paths.getContent(diffData.chartPath));
+			basicFormat.diffs = [chartId] ?? MoonchartUtil.mapKeyArray(basicFormat.data.NOTES);
+
+			var convertedData:JsonSong = cast new SupportedFormat().fromFormat(basicFormat, diffData.ID).data.song;
+			convertedData._path = diffData.chartPath;
+			convertedData.tracks = {inst: [FileNameUtil.withoutExtension(basicFormat.data.MUSIC)]};
+			convertedData.metadata ??= {};
+			convertedData.metadata.songName = basicFormat.data.TITLE;
+			
+			@:privateAccess
+			return Song.onLoadJson(convertedData);
 		}
 
 		var parsedData = ss.sowyFormat.basicFormat.fromFile(diffData.chartPath, diffData.metaPath, diffData.ID);
