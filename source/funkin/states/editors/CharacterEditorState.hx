@@ -118,23 +118,22 @@ final TemplateCharacter:String = '{
 	"scale": 1
 }';
 
-class CharacterEditorState extends MusicBeatState
-{
+class CharacterEditorState extends MusicBeatState {
 	static function getAnimOrder(name:String):Int {
 		var points = 0;
 
-		for (i => aaa in ['idle', 'singLEFT', 'singDOWN', 'singUP', 'singRIGHT']){
+		for (i => aaa in ['idle', 'singLEFT', 'singDOWN', 'singUP', 'singRIGHT']) {
 			if (name.startsWith(aaa))
-				points += (-272727) + i*10;
+				points += (-272727) + i * 10;
 		}
-		for (i => aaa in ['miss', 'alt', 'loop']){
+		for (i => aaa in ['miss', 'alt', 'loop']) {
 			if (name.endsWith(aaa))
 				points += (2727) + i;
 		}
 
 		return points;
 	}
-	
+
 	static function animSortFunc(a:AnimArray, b:AnimArray)
 		return getAnimOrder(a.anim) - getAnimOrder(b.anim);
 
@@ -147,7 +146,7 @@ class CharacterEditorState extends MusicBeatState
 	var bgLayer:FlxTypedGroup<FlxSprite>;
 	var charLayer:FlxTypedGroup<Character>;
 	var dumbTexts:FlxTypedGroup<FlxText>;
-	//var animList:Array<String> = [];
+	// var animList:Array<String> = [];
 	var curAnim:Int = 0;
 	var charName:String = 'pico';
 	var camFollow:FlxObject;
@@ -175,9 +174,8 @@ class CharacterEditorState extends MusicBeatState
 
 	var ghostCamPointer:FlxSprite;
 
-	override function create()
-	{
-		//FlxG.sound.playMusic(Paths.music('breakfast'), 0.5);
+	override function create() {
+		// FlxG.sound.playMusic(Paths.music('breakfast'), 0.5);
 
 		camEditor = new FlxCamera();
 		camHUD = new FlxCamera();
@@ -196,7 +194,7 @@ class CharacterEditorState extends MusicBeatState
 		add(charLayer);
 
 		var pointer:FlxGraphic = FlxGraphic.fromClass(GraphicCursorCross);
-	
+
 		ghostCamPointer = new FlxSprite().loadGraphic(pointer);
 		ghostCamPointer.setGraphicSize(40, 40);
 		ghostCamPointer.updateHitbox();
@@ -204,7 +202,7 @@ class CharacterEditorState extends MusicBeatState
 		ghostCamPointer.alpha = 0;
 		ghostCamPointer.visible = false;
 		add(ghostCamPointer);
-		
+
 		cameraFollowPointer = new FlxSprite().loadGraphic(pointer);
 		cameraFollowPointer.setGraphicSize(40, 40);
 		cameraFollowPointer.updateHitbox();
@@ -215,14 +213,12 @@ class CharacterEditorState extends MusicBeatState
 		originMarker.offset.set(originMarker.width / 2, originMarker.height / 2);
 		add(originMarker);
 
-		testModeButton = new FlxButton(FlxG.width - 360, 25, "Test: OFF", function()
-		{
+		testModeButton = new FlxButton(FlxG.width - 360, 25, "Test: OFF", function() {
 			testModeButton.text = (testMode = !testMode) ? "Test: ON" : "Test: OFF";
 		});
 		testModeButton.cameras = [camMenu];
 
-		changeBGbutton = new FlxButton(FlxG.width - 360, 55, "BG: BLACK", function()
-		{
+		changeBGbutton = new FlxButton(FlxG.width - 360, 55, "BG: BLACK", function() {
 			changeBGbutton.text = (onPixelBG = !onPixelBG) ? "BG: BLACK" : "BG: WHITE";
 			reloadBGs();
 		});
@@ -247,9 +243,9 @@ class CharacterEditorState extends MusicBeatState
 		leHealthIcon.cameras = [camHUD];
 
 		var height = FlxG.height;
-		var greenHill = new FlxSprite(-height* 0.5 + 220, -height + 718);
+		var greenHill = new FlxSprite(-height * 0.5 + 220, -height + 718);
 		greenHill.makeGraphic(height, height);
-		//bgLayer.add(greenHill);
+		// bgLayer.add(greenHill);
 
 		camFollow = new FlxObject(0, 0, 2, 2);
 		var mid = greenHill.getMidpoint();
@@ -269,8 +265,7 @@ class CharacterEditorState extends MusicBeatState
 		\nT - Reset Current Offset
 		\nHold Shift to Move 10x faster\n".split('\n');
 
-		for (i in 0...tipTextArray.length-1)
-		{
+		for (i in 0...tipTextArray.length - 1) {
 			var tipText:FlxText = new FlxText(FlxG.width - 320, FlxG.height - 15 - 16 * (tipTextArray.length - i), 300, tipTextArray[i], 12);
 			tipText.cameras = [camHUD];
 			tipText.setFormat(null, 12, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK);
@@ -280,7 +275,7 @@ class CharacterEditorState extends MusicBeatState
 		}
 
 		var tabs = [
-			//{name: 'Offsets', label: 'Offsets'},
+			// {name: 'Offsets', label: 'Offsets'},
 			{name: 'Settings', label: 'Settings'},
 		];
 
@@ -309,7 +304,7 @@ class CharacterEditorState extends MusicBeatState
 		add(testModeButton);
 		add(changeBGbutton);
 
-		//addOffsetsUI();
+		// addOffsetsUI();
 		addSettingsUI();
 
 		addCharacterUI();
@@ -331,16 +326,19 @@ class CharacterEditorState extends MusicBeatState
 		FlxG.camera.zoom = 1;
 	}
 
-	override function onFocus(){
+	override function onFocus() {
 		FlxG.mouse.visible = true;
 	}
+
 	var testMode:Bool = false;
 	var onPixelBG:Bool = false;
+
 	function reloadBGs() {
 		FlxG.camera.bgColor = onPixelBG ? FlxColor.BLACK : FlxColor.WHITE;
 	}
 
 	var charDropDown:FlxUIDropDownMenu;
+
 	function addSettingsUI() {
 		var tab_group = new FlxUI(null, UI_box);
 		tab_group.name = "Settings";
@@ -351,14 +349,13 @@ class CharacterEditorState extends MusicBeatState
 			char.isPlayer = !char.isPlayer;
 			char.flipX = !char.flipX;
 			char.xFacing = char.isPlayer ? -1 : 1;
-
 			updatePointerPos();
 			reloadBGs();
 		};
 
 		charDropDown = new FlxUIDropDownMenu(10, 30, FlxUIDropDownMenu.makeStrIdLabelArray([''], true), function(character:String) {
 			charName = characterList[Std.parseInt(character)];
-			
+
 			loadChar(check_player.checked);
 			updateDiscordPresence();
 			reloadCharacterDropDown();
@@ -372,28 +369,36 @@ class CharacterEditorState extends MusicBeatState
 		var templateCharacter:FlxButton = new FlxButton(140, 50, "Load Template", function() {
 			var parsedJson:CharacterFile = cast Json.parse(TemplateCharacter);
 
-			char.animOffsets.clear();
-			char.animationsArray = parsedJson.animations;
-			for (anim in char.animationsArray) {
-				char.addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
+			inline function loadTemplate(char:Character){
+				char.animOffsets.clear();
+				char.animationsArray = parsedJson.animations;
+				for (anim in char.animationsArray) {
+					char.addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
+				}
+				if (char.animationsArray[0] != null) {
+					char.playAnim(char.animationsArray[0].anim, true);
+				}
+
+				char.singDuration = parsedJson.sing_duration;
+				char.positionArray = parsedJson.position;
+				char.cameraPosition = parsedJson.camera_position;
+
+				char.imageFile = parsedJson.image;
+				char.baseScale = parsedJson.scale;
+				char.noAntialiasing = parsedJson.no_antialiasing;
+				char.originalFlipX = parsedJson.flip_x;
+				char.healthIcon = parsedJson.healthicon;
+				char.healthColorArray = parsedJson.healthbar_colors;
+				char.setPosition(char.positionArray[0], char.positionArray[1]);
+
+				reloadCharacterImage(char);
 			}
-			if (char.animationsArray[0] != null) {
-				char.playAnim(char.animationsArray[0].anim, true);
+			loadTemplate(char);
+			if(ghostMirrorsCharacter){
+				loadTemplate(ghostChar);
+				updateGhostAnimationsList();
+				ghostCharName = "Current Character";
 			}
-
-			char.singDuration = parsedJson.sing_duration;
-			char.positionArray = parsedJson.position;
-			char.cameraPosition = parsedJson.camera_position;
-
-			char.imageFile = parsedJson.image;
-			char.baseScale = parsedJson.scale;
-			char.noAntialiasing = parsedJson.no_antialiasing;
-			char.originalFlipX = parsedJson.flip_x;
-			char.healthIcon = parsedJson.healthicon;
-			char.healthColorArray = parsedJson.healthbar_colors;
-			char.setPosition(char.positionArray[0], char.positionArray[1]);
-
-			reloadCharacterImage();
 			reloadCharacterDropDown();
 			reloadCharacterOptions();
 			resetHealthBarColor();
@@ -437,25 +442,31 @@ class CharacterEditorState extends MusicBeatState
 		tab_group.name = "Character";
 
 		imageInputText = new FlxUIInputText(15, 30, 200, 'characters/BOYFRIEND', 8);
-		var reloadImage:FlxButton = new FlxButton(imageInputText.x + 210, imageInputText.y - 3, "Reload Image", function()
-		{
-			char.imageFile = imageInputText.text;
-			reloadCharacterImage();
-			if(char.animation.curAnim != null) {
-				char.playAnim(char.animation.curAnim.name, true);
+		var reloadImage:FlxButton = new FlxButton(imageInputText.x + 210, imageInputText.y - 3, "Reload Image", function() {
+
+			inline function _reloadImage(char:Character){
+				char.imageFile = imageInputText.text;
+				reloadCharacterImage(char);
+				if (char.animation.curAnim != null) {
+					char.playAnim(char.animation.curAnim.name, true);
+				}
+			}
+
+			_reloadImage(char);
+			if(ghostMirrorsCharacter){
+				_reloadImage(ghostChar);
 			}
 		});
 
-		var decideIconColor:FlxButton = new FlxButton(reloadImage.x, reloadImage.y + 30, "Get Icon Color", function()
-			{
-				var coolColor = FlxColor.fromInt(CoolUtil.dominantColor(leHealthIcon));
-				healthColorStepperR.value = coolColor.red;
-				healthColorStepperG.value = coolColor.green;
-				healthColorStepperB.value = coolColor.blue;
-				getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperR, null);
-				getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperG, null);
-				getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperB, null);
-			});
+		var decideIconColor:FlxButton = new FlxButton(reloadImage.x, reloadImage.y + 30, "Get Icon Color", function() {
+			var coolColor = FlxColor.fromInt(CoolUtil.dominantColor(leHealthIcon));
+			healthColorStepperR.value = coolColor.red;
+			healthColorStepperG.value = coolColor.green;
+			healthColorStepperB.value = coolColor.blue;
+			getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperR, null);
+			getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperG, null);
+			getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperB, null);
+		});
 
 		healthIconInputText = new FlxUIInputText(15, imageInputText.y + 35, 75, leHealthIcon.getCharacter(), 8);
 
@@ -465,11 +476,13 @@ class CharacterEditorState extends MusicBeatState
 
 		flipXCheckBox = new FlxUICheckBox(singDurationStepper.x + 80, singDurationStepper.y, null, null, "Flip X", 50);
 		flipXCheckBox.checked = char.flipX;
-		if(char.isPlayer) flipXCheckBox.checked = !flipXCheckBox.checked;
+		if (char.isPlayer)
+			flipXCheckBox.checked = !flipXCheckBox.checked;
 		flipXCheckBox.callback = function() {
 			char.originalFlipX = !char.originalFlipX;
 			char.flipX = char.originalFlipX;
-			if(char.isPlayer) char.flipX = !char.flipX;
+			if (char.isPlayer)
+				char.flipX = !char.flipX;
 		};
 
 		noAntialiasingCheckBox = new FlxUICheckBox(flipXCheckBox.x, flipXCheckBox.y + 40, null, null, "No Antialiasing", 80);
@@ -525,6 +538,7 @@ class CharacterEditorState extends MusicBeatState
 	var animationIndicesInputText:FlxUIInputText;
 	var animationNameFramerate:FlxUINumericStepper;
 	var animationLoopCheckBox:FlxUICheckBox;
+
 	function addAnimationsUI() {
 		var tab_group = new FlxUI(null, UI_box);
 		tab_group.name = "Animations";
@@ -549,8 +563,8 @@ class CharacterEditorState extends MusicBeatState
 			animationNameInputText.text = anim.name;
 			animationLoopCheckBox.checked = anim.loop;
 			animationNameFramerate.value = anim.fps;
-			
-			animationIndicesInputText.text = (anim.indices==null) ? '' : anim.indices.join(',');
+
+			animationIndicesInputText.text = (anim.indices == null) ? '' : anim.indices.join(',');
 
 			var cameraOffset:Array<Float> = anim.cameraOffset ?? CharacterData.getDefaultAnimCamOffset(anim.anim);
 			animationXCam.value = cameraOffset[0];
@@ -559,60 +573,68 @@ class CharacterEditorState extends MusicBeatState
 		});
 
 		var addUpdateButton:FlxButton = new FlxButton(70, animationIndicesInputText.y + 30, "Add/Update", function() {
-			var indicesInput = animationIndicesInputText.text.trim();
-			var indices:Array<Int> = indicesInput.length==0 ? null : CharacterData.parseIndices(indicesInput.split(','));
-			
-			var lastAnim:String = char.animationsArray[curAnim] != null ? char.animationsArray[curAnim].anim : '';
+			inline function updateAnimation(char:Character){
+				var indicesInput = animationIndicesInputText.text.trim();
+				var indices:Array<Int> = indicesInput.length == 0 ? null : CharacterData.parseIndices(indicesInput.split(','));
 
-			var lastOffsets:Array<Int> = [0, 0];
-			for (anim in char.animationsArray) {
-				if (animationInputText.text == anim.anim) {
-					lastOffsets = anim.offsets;
-					if (char.animation.exists(animationInputText.text))
-						char.animation.remove(animationInputText.text);
-					
-					char.animationsArray.remove(anim);
+				var lastAnim:String = char.animationsArray[curAnim] != null ? char.animationsArray[curAnim].anim : '';
+
+				var lastOffsets:Array<Int> = [0, 0];
+				for (anim in char.animationsArray) {
+					if (animationInputText.text == anim.anim) {
+						lastOffsets = anim.offsets;
+						if (char.animation.exists(animationInputText.text))
+							char.animation.remove(animationInputText.text);
+
+						char.animationsArray.remove(anim);
+					}
 				}
-			}
 
-			var newAnim:AnimArray = {
-				anim: animationInputText.text,
-				name: animationNameInputText.text,
-				fps: Math.round(animationNameFramerate.value),
-				loop: animationLoopCheckBox.checked,
-				indices: indices,
-				offsets: lastOffsets,
-				cameraOffset: [animationXCam.value, animationYCam.value]
-			};
+				var newAnim:AnimArray = {
+					anim: animationInputText.text,
+					name: animationNameInputText.text,
+					fps: Math.round(animationNameFramerate.value),
+					loop: animationLoopCheckBox.checked,
+					indices: indices,
+					offsets: lastOffsets,
+					cameraOffset: [animationXCam.value, animationYCam.value]
+				};
 
-			if (indices != null && indices.length > 0) {
-				char.animation.addByIndices(newAnim.anim, newAnim.name, newAnim.indices, "", newAnim.fps, newAnim.loop);
-			} else {
-				char.animation.addByPrefix(newAnim.anim, newAnim.name, newAnim.fps, newAnim.loop);
-			}
-
-			if (!char.animOffsets.exists(newAnim.anim))
-				char.addOffset(newAnim.anim, 0, 0);
-			
-			char.animationsArray.push(newAnim);
-			char.animationsArray.sort(animSortFunc);
-
-			if(lastAnim == animationInputText.text) {
-				var leAnim:FlxAnimation = char.animation.getByName(lastAnim);
-				if(leAnim != null && leAnim.frames.length > 0) {
-					char.playAnim(lastAnim, true);
+				if (indices != null && indices.length > 0) {
+					char.animation.addByIndices(newAnim.anim, newAnim.name, newAnim.indices, "", newAnim.fps, newAnim.loop);
 				} else {
-					for(i in 0...char.animationsArray.length) {
-						if(char.animationsArray[i] != null) {
-							leAnim = char.animation.getByName(char.animationsArray[i].anim);
-							if(leAnim != null && leAnim.frames.length > 0) {
-								char.playAnim(char.animationsArray[i].anim, true);
-								curAnim = i;
-								break;
+					char.animation.addByPrefix(newAnim.anim, newAnim.name, newAnim.fps, newAnim.loop);
+				}
+
+				if (!char.animOffsets.exists(newAnim.anim))
+					char.addOffset(newAnim.anim, 0, 0);
+
+				char.animationsArray.push(newAnim);
+				char.animationsArray.sort(animSortFunc);
+
+				if (lastAnim == animationInputText.text) {
+					var leAnim:FlxAnimation = char.animation.getByName(lastAnim);
+					if (leAnim != null && leAnim.frames.length > 0) {
+						char.playAnim(lastAnim, true);
+					} else {
+						for (i in 0...char.animationsArray.length) {
+							if (char.animationsArray[i] != null) {
+								leAnim = char.animation.getByName(char.animationsArray[i].anim);
+								if (leAnim != null && leAnim.frames.length > 0) {
+									char.playAnim(char.animationsArray[i].anim, true);
+									curAnim = i;
+									break;
+								}
 							}
 						}
 					}
 				}
+			}
+
+			updateAnimation(char);
+			if(ghostMirrorsCharacter){
+				updateAnimation(ghostChar);
+				updateGhostAnimationsList();
 			}
 
 			reloadAnimationDropDown();
@@ -621,34 +643,40 @@ class CharacterEditorState extends MusicBeatState
 		});
 
 		var removeButton:FlxButton = new FlxButton(180, animationIndicesInputText.y + 30, "Remove", function() {
-			for (anim in char.animationsArray) {
-				if (animationInputText.text == anim.anim) {
-					var resetAnim:Bool = (anim.anim == char.animation.name);
+			inline function removeAnim(char:Character){
+				for (anim in char.animationsArray) {
+					if (animationInputText.text == anim.anim) {
+						var resetAnim:Bool = (anim.anim == char.animation.name);
 
-					if (resetAnim)
-						char.animation.curAnim = null;
+						if (resetAnim)
+							char.animation.curAnim = null;
 
-					if (char.animation.exists(anim.anim)) 
-						char.animation.remove(anim.anim);
-					
-					if (char.animOffsets.exists(anim.anim))
-						char.animOffsets.remove(anim.anim);
-					
-					char.animationsArray.remove(anim);
+						if (char.animation.exists(anim.anim))
+							char.animation.remove(anim.anim);
 
-					if (resetAnim && char.animationsArray.length > 0)
-						char.playAnim(char.animationsArray[0].anim, true);
-					
-					reloadAnimationDropDown();
-					genBoyOffsets();
-					trace('Removed animation: ' + animationInputText.text);
-					break;
+						if (char.animOffsets.exists(anim.anim))
+							char.animOffsets.remove(anim.anim);
+
+						char.animationsArray.remove(anim);
+
+						if (resetAnim && char.animationsArray.length > 0)
+							char.playAnim(char.animationsArray[0].anim, true);
+
+						reloadAnimationDropDown();
+						genBoyOffsets();
+						trace('Removed animation: ' + animationInputText.text);
+						break;
+					}
 				}
+			}
+			removeAnim(char);
+			if(ghostMirrorsCharacter){
+				removeAnim(ghostChar);
 			}
 		});
 
 		tab_group.add(new FlxText(animationXCam.x, animationXCam.y - 18, 0, 'Camera X/Y Offset:'));
-		//tab_group.add(new FlxText(animationDropDown.x, animationDropDown.y - 18, 0, 'Animations:'));
+		// tab_group.add(new FlxText(animationDropDown.x, animationDropDown.y - 18, 0, 'Animations:'));
 		tab_group.add(new FlxText(animationInputText.x, animationInputText.y - 18, 0, 'Animation name:'));
 		tab_group.add(new FlxText(animationNameFramerate.x, animationNameFramerate.y - 18, 0, 'Framerate:'));
 		tab_group.add(new FlxText(animationNameInputText.x, animationNameInputText.y - 18, 0, 'Animation on .XML/.TXT file:'));
@@ -663,7 +691,7 @@ class CharacterEditorState extends MusicBeatState
 		tab_group.add(animationYCam);
 		tab_group.add(addUpdateButton);
 		tab_group.add(removeButton);
-		
+
 		tab_group.add(animationDropDown);
 
 		updatePointerPos();
@@ -676,25 +704,30 @@ class CharacterEditorState extends MusicBeatState
 	var ghostPlayableCheckbox:FlxUICheckBox;
 
 	var ghostList:Array<String>;
-	function updateGhostCharList(){
+
+	function updateGhostCharList() {
 		ghostList = CharacterData.getAllCharacters();
 		ghostList.sort(CoolUtil.alphabeticalSort);
 		ghostList.insert(0, "");
+		ghostList.insert(1, "Current Character");
 		ghostCharDropDown.setData(FlxUIDropDownMenu.makeStrIdLabelArray(ghostList, true));
 	}
 
-	function addGhostUI(){
+	function addGhostUI() {
 		var tab_group = new FlxUI(null, UI_box);
 		tab_group.name = "Ghost";
 
 		ghostCharDropDown = new FlxUIDropDownMenu(15, 30, FlxUIDropDownMenu.makeStrIdLabelArray([''], true), function(pressed:String) {
 			var idx:Int = Std.parseInt(pressed);
 			var charName = ghostList[idx];
+			if(ghostCharName == charName){
+				return;
+			}
 
 			updateGhostCharList();
 			ghostCharDropDown.selectedLabel = charName;
 
-			if (ghostChar != null){
+			if (ghostChar != null) {
 				charLayer.remove(ghostChar);
 				ghostChar.destroy();
 				ghostChar = null;
@@ -704,7 +737,7 @@ class CharacterEditorState extends MusicBeatState
 				reloadGhost(charName);
 				char.alpha = 0.85;
 				cameraFollowPointer.alpha = 0.85;
-			}else{
+			} else {
 				ghostAnimDropDown.setData(FlxUIDropDownMenu.makeStrIdLabelArray([''], true));
 				ghostAnimTxt.text = "";
 
@@ -717,17 +750,18 @@ class CharacterEditorState extends MusicBeatState
 		updateGhostCharList();
 
 		ghostAnimDropDown = new FlxUIDropDownMenu(15, ghostCharDropDown.y + 50, FlxUIDropDownMenu.makeStrIdLabelArray([''], true), function(pressed:String) {
-			if (ghostChar == null) return;
-			
+			if (ghostChar == null)
+				return;
+
 			var curAnimData = ghostChar.animationsArray[Std.parseInt(pressed)];
 			var offsets = curAnimData.offsets;
-			
+
 			ghostChar.playAnim(curAnimData.anim, true);
 			ghostAnimTxt.text = 'Offset [${offsets[0]}, ${offsets[1]}]';
 		});
 
 		ghostPlayableCheckbox = new FlxUICheckBox(15, ghostAnimDropDown.y + 50, null, null, "Playable Character", 100);
-		ghostPlayableCheckbox.callback = ()->{
+		ghostPlayableCheckbox.callback = () -> {
 			if (ghostChar != null) {
 				ghostChar.isPlayer = !ghostChar.isPlayer;
 				ghostChar.flipX = !ghostChar.flipX;
@@ -737,8 +771,9 @@ class CharacterEditorState extends MusicBeatState
 			updateGhostPointerPos();
 		}
 
-		var copyGhostCamera = new FlxButton(400 - 80 - 15, ghostCharDropDown.y, "Copy Camera", function(){
-			if (ghostChar == null) return;
+		var copyGhostCamera = new FlxButton(400 - 80 - 15, ghostCharDropDown.y, "Copy Camera", function() {
+			if (ghostChar == null)
+				return;
 
 			var diff = ghostCamPointer.x - cameraFollowPointer.x;
 			trace(diff);
@@ -748,13 +783,14 @@ class CharacterEditorState extends MusicBeatState
 			updatePointerPos();
 		});
 
-		var copyGhostOffsets = new FlxButton(400 - 80 - 15, ghostAnimDropDown.y, "Copy Offset", function(){
-			if (ghostChar == null) return;
+		var copyGhostOffsets = new FlxButton(400 - 80 - 15, ghostAnimDropDown.y, "Copy Offset", function() {
+			if (ghostChar == null)
+				return;
 
 			var curAnimData = char.animationsArray[curAnim];
 			var animName = curAnimData.anim;
 			var offsets = curAnimData.offsets;
-			
+
 			char.addOffset(animName, offsets[0], offsets[1]);
 			char.playAnim(animName, true);
 		});
@@ -765,7 +801,7 @@ class CharacterEditorState extends MusicBeatState
 
 		var ghostShowCamPointer = new FlxUICheckBox(ghostCharDropDown.x + 160, ghostCharDropDown.y, null, null, "Show Camera Pointer");
 		ghostShowCamPointer.checked = ghostCamPointer.visible;
-		ghostShowCamPointer.callback = ()->{
+		ghostShowCamPointer.callback = () -> {
 			ghostCamPointer.visible = ghostShowCamPointer.checked;
 		};
 
@@ -785,22 +821,40 @@ class CharacterEditorState extends MusicBeatState
 		UI_characterbox.addGroup(tab_group);
 	}
 
+	var ghostMirrorsCharacter:Bool = false;
+	var ghostCharName:String = "";
+
 	function reloadGhost(charName:String) {
-		ghostChar = new Character(0, 0, charName, ghostPlayableCheckbox.checked, true);
+		if(ghostCharName == charName){
+			return;
+		}
+		ghostCharName = charName;
+		ghostChar = new Character(0, 0, charName == "Current Character" ? char.characterId : charName, ghostPlayableCheckbox.checked, true);
 		ghostChar.setupCharacter();
 		ghostChar.alpha = 0.6;
 		ghostChar.color = 0xFF666688;
 
 		ghostChar.setPosition(ghostChar.positionArray[0], ghostChar.positionArray[1]);
-		
+
 		charLayer.insert(0, ghostChar);
 
 		////
+
+		updateGhostAnimationsList();
+
+		ghostMirrorsCharacter = (charName == "Current Character");
+	}
+
+	function updateGhostAnimationsList(){
+		if(ghostChar == null){
+			return;
+		}
 		var animList:Array<String> = [
 			for (anim in ghostChar.animationsArray)
 				anim.anim
 		];
-		if (animList.length < 1) animList.push('NO ANIMATIONS'); // Prevents crash
+		if (animList.length < 1)
+			animList.push('NO ANIMATIONS'); // Prevents crash
 
 		var firstAnim = animList.indexOf("idle");
 		firstAnim = firstAnim != -1 ? firstAnim : 0;
@@ -810,125 +864,103 @@ class CharacterEditorState extends MusicBeatState
 
 		var curAnimData = ghostChar.animationsArray[firstAnim];
 		var offsets = curAnimData.offsets;
-		
-		ghostChar.playAnim(curAnimData.anim, true);
+
 		ghostAnimTxt.text = 'Offset [${offsets[0]}, ${offsets[1]}]';
+
+		ghostChar.playAnim(curAnimData.anim, true);
 	}
 
 	function updateGhostPointerPos() {
-		if (ghostChar == null){
+		if (ghostChar == null) {
 			ghostCamPointer.alpha = 0;
 			return;
-		}else{
+		} else {
 			ghostCamPointer.alpha = 0.6;
 		}
 
 		var cam = ghostChar.getCamera();
 
-		ghostCamPointer.setPosition(
-			cam[0] - ghostCamPointer.width* 0.5,
-			cam[1] - ghostCamPointer.height* 0.5
-		);
+		ghostCamPointer.setPosition(cam[0] - ghostCamPointer.width * 0.5, cam[1] - ghostCamPointer.height * 0.5);
 	}
 
 	override function getEvent(id:String, sender:Dynamic, data:Dynamic, ?params:Array<Dynamic>) {
-		if(id == FlxUIInputText.CHANGE_EVENT && (sender is FlxUIInputText)) {
-			if(sender == healthIconInputText) {
+		if (id == FlxUIInputText.CHANGE_EVENT && (sender is FlxUIInputText)) {
+			if (sender == healthIconInputText) {
 				leHealthIcon.changeIcon(healthIconInputText.text);
 				char.healthIcon = healthIconInputText.text;
 				updateDiscordPresence();
-			}
-			else if(sender == imageInputText) {
+			} else if (sender == imageInputText) {
 				char.imageFile = imageInputText.text;
 			}
-		} else if(id == FlxUINumericStepper.CHANGE_EVENT && (sender is FlxUINumericStepper)) {
-			if (sender == scaleStepper)
-			{
+		} else if (id == FlxUINumericStepper.CHANGE_EVENT && (sender is FlxUINumericStepper)) {
+			if (sender == scaleStepper) {
 				char.baseScale = sender.value;
 				char.scale.set(sender.value, sender.value);
 
 				updatePointerPos();
 
-				if(char.animation.curAnim != null) {
+				if (char.animation.curAnim != null) {
 					char.playAnim(char.animation.curAnim.name, true);
-				}else{
+				} else {
 					char.updateHitbox();
 				}
-			}
-			else if(sender == positionXStepper)
-			{
+			} else if (sender == positionXStepper) {
 				char.positionArray[0] = positionXStepper.value;
 				char.x = char.positionArray[0];
 				updatePointerPos();
-			}
-			else if(sender == animationXCam || sender == animationYCam)
-			{
+			} else if (sender == animationXCam || sender == animationYCam) {
 				updatePointerPos();
-			}
-			else if(sender == singDurationStepper)
-			{
-				char.singDuration = singDurationStepper.value;//ermm you forgot this??
-			}
-			else if(sender == positionYStepper)
-			{
+			} else if (sender == singDurationStepper) {
+				char.singDuration = singDurationStepper.value; // ermm you forgot this??
+			} else if (sender == positionYStepper) {
 				char.positionArray[1] = positionYStepper.value;
 				char.y = char.positionArray[1];
 				updatePointerPos();
-			}
-			else if(sender == positionCameraXStepper)
-			{
+			} else if (sender == positionCameraXStepper) {
 				char.cameraPosition[0] = positionCameraXStepper.value;
 				updatePointerPos();
-			}
-			else if(sender == positionCameraYStepper)
-			{
+			} else if (sender == positionCameraYStepper) {
 				char.cameraPosition[1] = positionCameraYStepper.value;
 				updatePointerPos();
-			}
-			else if(sender == healthColorStepperR)
-			{
+			} else if (sender == healthColorStepperR) {
 				char.healthColorArray[0] = Math.round(healthColorStepperR.value);
 				healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
-			}
-			else if(sender == healthColorStepperG)
-			{
+			} else if (sender == healthColorStepperG) {
 				char.healthColorArray[1] = Math.round(healthColorStepperG.value);
 				healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
-			}
-			else if(sender == healthColorStepperB)
-			{
+			} else if (sender == healthColorStepperB) {
 				char.healthColorArray[2] = Math.round(healthColorStepperB.value);
 				healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
 			}
 		}
 	}
 
-	function reloadCharacterImage() {
+	function reloadCharacterImage(char:Character) {
 		var lastAnim:String = '';
 
-		if(char.animation.curAnim != null)
+		if (char.animation.curAnim != null)
 			lastAnim = char.animation.curAnim.name;
-		
-		//var anims:Array<AnimArray> = char.animationsArray.copy();
+
+		// var anims:Array<AnimArray> = char.animationsArray.copy();
 
 		Paths.removeBitmap(char.frames.parent.key); // is null SOMETIMES idk WHY
-		
+
 		if (Paths.fileExists('images/' + char.imageFile + '/Animation.json', TEXT)) {
 			char.frames = AtlasFrameMaker.construct(char.imageFile);
-		} else if(Paths.fileExists('images/' + char.imageFile + '.txt', TEXT)) {
+		} else if (Paths.fileExists('images/' + char.imageFile + '.txt', TEXT)) {
 			char.frames = Paths.getPackerAtlas(char.imageFile);
 		} else {
 			char.frames = Paths.getSparrowAtlas(char.imageFile);
 		}
 
-		if(char.animationsArray != null && char.animationsArray.length > 0) {
+		if (char.animationsArray != null && char.animationsArray.length > 0) {
 			for (anim in char.animationsArray) {
 				var animAnim:String = '' + anim.anim;
 				var animName:String = '' + anim.name;
 				var animFps:Int = anim.fps;
-				var animLoop:Bool = !!anim.loop; //Bruh
+				var animLoop:Bool = !!anim.loop; // Bruh
 				var animIndices:Array<Int> = anim.indices;
-				if(animIndices != null && animIndices.length > 0) {
+				if (animIndices != null && animIndices.length > 0) {
 					char.animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop);
 				} else {
 					char.animation.addByPrefix(animAnim, animName, animFps, animLoop);
@@ -938,7 +970,7 @@ class CharacterEditorState extends MusicBeatState
 			char.quickAnimAdd('idle', 'BF idle dance');
 		}
 
-		if(lastAnim != '') {
+		if (lastAnim != '') {
 			char.playAnim(lastAnim, true);
 		} else {
 			char.dance();
@@ -960,13 +992,13 @@ class CharacterEditorState extends MusicBeatState
 			dumbTexts.add(text);
 
 			return;
-		} 
+		}
 
 		char.animationsArray.sort(animSortFunc);
 		for (i => anim in char.animationsArray) {
 			var name = anim.anim;
 			var offsets = char.animOffsets.get(name);
-			var isSelected = i==curAnim;
+			var isSelected = i == curAnim;
 
 			var text:FlxText = dumbTexts.recycle(FlxText, () -> return new FlxText());
 			text.text = (isSelected ? '> ' : '') + '$name: $offsets';
@@ -989,7 +1021,7 @@ class CharacterEditorState extends MusicBeatState
 		char.setupCharacter();
 		if (char.animationsArray[0] != null)
 			char.playAnim(char.animationsArray[0].anim, true);
-		
+
 		char.setPosition(char.positionArray[0], char.positionArray[1]);
 		charLayer.add(char);
 
@@ -997,6 +1029,23 @@ class CharacterEditorState extends MusicBeatState
 		reloadCharacterOptions();
 		reloadBGs();
 		updatePointerPos();
+
+		if (ghostMirrorsCharacter) {
+			updateGhostCharList();
+
+			if (ghostChar != null) {
+				charLayer.remove(ghostChar);
+				ghostChar.destroy();
+				ghostChar = null;
+			}
+
+			reloadGhost("Current Character");
+			char.alpha = 0.85;
+			cameraFollowPointer.alpha = 0.85;
+
+			updateGhostPointerPos();
+			ghostCharDropDown.selectedLabel = "Current Character";
+		}
 	}
 
 	function updatePointerPos() {
@@ -1004,19 +1053,19 @@ class CharacterEditorState extends MusicBeatState
 		var x:Float = cam[0];
 		var y:Float = cam[1];
 
-		if(animationXCam!=null)
+		if (animationXCam != null)
 			x += animationXCam.value;
-		if(animationYCam!=null)
+		if (animationYCam != null)
 			y += animationYCam.value;
 
-		x -= cameraFollowPointer.width* 0.5;
-		y -= cameraFollowPointer.height* 0.5;
+		x -= cameraFollowPointer.width * 0.5;
+		y -= cameraFollowPointer.height * 0.5;
 		cameraFollowPointer.setPosition(x, y);
 	}
 
 	function findAnimationByName(name:String):AnimArray {
 		for (anim in char.animationsArray) {
-			if(anim.anim == name) {
+			if (anim.anim == name) {
 				return anim;
 			}
 		}
@@ -1024,7 +1073,7 @@ class CharacterEditorState extends MusicBeatState
 	}
 
 	function reloadCharacterOptions() {
-		if(UI_characterbox != null) {
+		if (UI_characterbox != null) {
 			imageInputText.text = char.imageFile;
 			healthIconInputText.text = char.healthIcon;
 			singDurationStepper.value = char.singDuration;
@@ -1048,9 +1097,9 @@ class CharacterEditorState extends MusicBeatState
 		char.animationsArray.sort(animSortFunc);
 		for (anim in char.animationsArray)
 			anims.push(anim.anim);
-		
-		if (anims.length < 1) 
-			anims.push('NO ANIMATIONS'); // Prevents crash		
+
+		if (anims.length < 1)
+			anims.push('NO ANIMATIONS'); // Prevents crash
 
 		animationDropDown.setData(FlxUIDropDownMenu.makeStrIdLabelArray(anims, true));
 	}
@@ -1070,19 +1119,26 @@ class CharacterEditorState extends MusicBeatState
 		healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
 	}
 
-	function changeCurOffset(x:Int, y:Int, isAbs:Bool=false) {
+	function changeCurOffset(x:Int, y:Int, isAbs:Bool = false) {
 		var curAnimData = char.animationsArray[curAnim];
 
 		if (isAbs) {
 			curAnimData.offsets[0] = x;
 			curAnimData.offsets[1] = y;
-		}else {
+		} else {
 			curAnimData.offsets[0] += x;
-			curAnimData.offsets[1] += y;	
+			curAnimData.offsets[1] += y;
 		}
 
 		char.addOffset(curAnimData.anim, curAnimData.offsets[0], curAnimData.offsets[1]);
 		char.playAnim(curAnimData.anim, true);
+
+		if (ghostMirrorsCharacter) {
+			ghostChar.addOffset(curAnimData.anim, curAnimData.offsets[0], curAnimData.offsets[1]);
+			if (ghostChar.animation.curAnim.name == char.animation.curAnim.name) {
+				ghostChar.playAnim(curAnimData.anim, true);
+			}
+		}
 
 		genBoyOffsets();
 	}
@@ -1098,7 +1154,7 @@ class CharacterEditorState extends MusicBeatState
 		var unscaleFactor = (1 / FlxG.camera.zoom);
 		originMarker.scale.set(unscaleFactor, unscaleFactor);
 		originMarker.centerOrigin();
-		
+
 		super.draw();
 	}
 
@@ -1112,17 +1168,22 @@ class CharacterEditorState extends MusicBeatState
 		FlxG.mouse.visible = false;
 	}
 
-	override function update(elapsed:Float)
-	{
-		var inputTexts:Array<FlxUIInputText> = [animationInputText, imageInputText, healthIconInputText, animationNameInputText, animationIndicesInputText];
+	override function update(elapsed:Float) {
+		var inputTexts:Array<FlxUIInputText> = [
+			animationInputText,
+			imageInputText,
+			healthIconInputText,
+			animationNameInputText,
+			animationIndicesInputText
+		];
 		for (i in 0...inputTexts.length) {
-			if(inputTexts[i].hasFocus) {
-				if(FlxG.keys.pressed.CONTROL && FlxG.keys.justPressed.V && Clipboard.text != null) { //Copy paste
+			if (inputTexts[i].hasFocus) {
+				if (FlxG.keys.pressed.CONTROL && FlxG.keys.justPressed.V && Clipboard.text != null) { // Copy paste
 					inputTexts[i].text = ClipboardAdd(inputTexts[i].text);
 					inputTexts[i].caretIndex = inputTexts[i].text.length;
 					getEvent(FlxUIInputText.CHANGE_EVENT, inputTexts[i], null, []);
 				}
-				if(FlxG.keys.justPressed.ENTER) {
+				if (FlxG.keys.justPressed.ENTER) {
 					inputTexts[i].hasFocus = false;
 				}
 				FNFGame.specialKeysEnabled = false;
@@ -1135,35 +1196,34 @@ class CharacterEditorState extends MusicBeatState
 		if (testMode) {
 			var alt = FlxG.keys.pressed.SHIFT ? "-alt" : '';
 			// who cares anymore
-			if (FlxG.keys.justPressed.SPACE){
+			if (FlxG.keys.justPressed.SPACE) {
 				char.playAnim("idle", true);
 			}
-			if (FlxG.keys.justPressed.D){
-				char.playAnim("singLEFT"+alt, true);
+			if (FlxG.keys.justPressed.D) {
+				char.playAnim("singLEFT" + alt, true);
 			}
-			if (FlxG.keys.justPressed.F){
-				char.playAnim("singDOWN"+alt, true);
+			if (FlxG.keys.justPressed.F) {
+				char.playAnim("singDOWN" + alt, true);
 			}
-			if (FlxG.keys.justPressed.J){
-				char.playAnim("singUP"+alt, true);
+			if (FlxG.keys.justPressed.J) {
+				char.playAnim("singUP" + alt, true);
 			}
-			if (FlxG.keys.justPressed.K){
-				char.playAnim("singRIGHT"+alt, true);
+			if (FlxG.keys.justPressed.K) {
+				char.playAnim("singRIGHT" + alt, true);
 			}
-			if (FlxG.keys.justPressed.E){
+			if (FlxG.keys.justPressed.E) {
 				char.playAnim("singLEFTmiss", true);
 			}
-			if (FlxG.keys.justPressed.R){
+			if (FlxG.keys.justPressed.R) {
 				char.playAnim("singDOWNmiss", true);
 			}
-			if (FlxG.keys.justPressed.U){
+			if (FlxG.keys.justPressed.U) {
 				char.playAnim("singUPmiss", true);
 			}
-			if (FlxG.keys.justPressed.I){
+			if (FlxG.keys.justPressed.I) {
 				char.playAnim("singRIGHTmiss", true);
 			}
-		}
-		else if(!charDropDown.dropPanel.visible) {
+		} else if (!charDropDown.dropPanel.visible) {
 			if (FlxG.keys.justPressed.ESCAPE) {
 				close();
 				return;
@@ -1175,15 +1235,16 @@ class CharacterEditorState extends MusicBeatState
 
 			if (FlxG.keys.pressed.E && FlxG.camera.zoom < 3) {
 				FlxG.camera.zoom += elapsed * FlxG.camera.zoom;
-				if(FlxG.camera.zoom > 3) FlxG.camera.zoom = 3;
+				if (FlxG.camera.zoom > 3)
+					FlxG.camera.zoom = 3;
 			}
 			if (FlxG.keys.pressed.Q && FlxG.camera.zoom > 0.1) {
 				FlxG.camera.zoom -= elapsed * FlxG.camera.zoom;
-				if(FlxG.camera.zoom < 0.1) FlxG.camera.zoom = 0.1;
+				if (FlxG.camera.zoom < 0.1)
+					FlxG.camera.zoom = 0.1;
 			}
 
-			if (FlxG.keys.pressed.I || FlxG.keys.pressed.J || FlxG.keys.pressed.K || FlxG.keys.pressed.L)
-			{
+			if (FlxG.keys.pressed.I || FlxG.keys.pressed.J || FlxG.keys.pressed.K || FlxG.keys.pressed.L) {
 				var addToCam:Float = 500 * elapsed;
 				if (FlxG.keys.pressed.SHIFT)
 					addToCam *= 4;
@@ -1247,8 +1308,7 @@ class CharacterEditorState extends MusicBeatState
 
 	var _file:FileReference;
 
-	function onSaveComplete(_):Void
-	{
+	function onSaveComplete(_):Void {
 		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
 		_file.removeEventListener(Event.CANCEL, onSaveCancel);
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
@@ -1257,10 +1317,9 @@ class CharacterEditorState extends MusicBeatState
 	}
 
 	/**
-		* Called when the save file dialog is cancelled.
-		*/
-	function onSaveCancel(_):Void
-	{
+	 * Called when the save file dialog is cancelled.
+	 */
+	function onSaveCancel(_):Void {
 		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
 		_file.removeEventListener(Event.CANCEL, onSaveCancel);
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
@@ -1268,10 +1327,9 @@ class CharacterEditorState extends MusicBeatState
 	}
 
 	/**
-		* Called if there is an error while saving the gameplay recording.
-		*/
-	function onSaveError(_):Void
-	{
+	 * Called if there is an error while saving the gameplay recording.
+	 */
+	function onSaveError(_):Void {
 		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
 		_file.removeEventListener(Event.CANCEL, onSaveCancel);
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
@@ -1287,7 +1345,7 @@ class CharacterEditorState extends MusicBeatState
 			"sing_duration": char.singDuration,
 			"healthicon": char.healthIcon,
 
-			"position":	char.positionArray,
+			"position": char.positionArray,
 			"camera_position": char.cameraPosition,
 
 			"flip_x": char.originalFlipX,
@@ -1297,8 +1355,7 @@ class CharacterEditorState extends MusicBeatState
 
 		var data:String = Json.stringify(json, "\t");
 
-		if (data.length > 0)
-		{
+		if (data.length > 0) {
 			_file = new FileReference();
 			_file.addEventListener(Event.COMPLETE, onSaveComplete);
 			_file.addEventListener(Event.CANCEL, onSaveCancel);
@@ -1308,9 +1365,9 @@ class CharacterEditorState extends MusicBeatState
 	}
 
 	function ClipboardAdd(prefix:String = ''):String {
-		if(prefix.toLowerCase().endsWith('v')) //probably copy paste attempt
+		if (prefix.toLowerCase().endsWith('v')) // probably copy paste attempt
 		{
-			prefix = prefix.substring(0, prefix.length-1);
+			prefix = prefix.substring(0, prefix.length - 1);
 		}
 
 		var text:String = prefix + Clipboard.text.replace('\n', '');
