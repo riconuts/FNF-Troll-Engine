@@ -71,6 +71,12 @@ function onLoad(s, fg){
 	scrollingSky.scale.set(0.65, 0.65);
 	s.insert(0, scrollingSky);
 
+	for (id in this.props.keys()) {
+		if (StringTools.endsWith(id, "_lightmap")) {
+			this.props.get(id).blend = 0; // ADD
+		}
+	}
+
 	switch(game.songId){
 		case 'darnell':
 			rainShaderStartIntensity = 0;
