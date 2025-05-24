@@ -318,7 +318,7 @@ class ChartingState extends MusicBeatState
 
 	override function create()
 	{
-		//updateSongPos = false;
+		updateSongPos = false;
 		
 		instance = this;
 		
