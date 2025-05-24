@@ -320,6 +320,8 @@ class ChartingState extends MusicBeatState
 	{
 		instance = this;
 		
+		FlxTransitionableState.skipNextTransOut = true;
+
 		persistentUpdate = true;
 		persistentDraw = true;
 
@@ -1692,7 +1694,13 @@ class ChartingState extends MusicBeatState
 		}
 
 		for (trackName in songTrackNames) {
-			var file:Sound = Paths.track(currentSongName, trackName);
+			var file:Sound = {
+				if (PlayState.song != null)
+					PlayState.song.getTrackSound(trackName);
+				else
+					Paths.track(currentSongName, trackName);
+			}
+
 			if (file == null || file.length <= 0) 
 				continue;
 
