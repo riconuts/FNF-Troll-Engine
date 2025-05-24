@@ -643,29 +643,35 @@ class CharacterEditorState extends MusicBeatState {
 		});
 
 		var removeButton:FlxButton = new FlxButton(180, animationIndicesInputText.y + 30, "Remove", function() {
-			for (anim in char.animationsArray) {
-				if (animationInputText.text == anim.anim) {
-					var resetAnim:Bool = (anim.anim == char.animation.name);
+			inline function removeAnim(char:Character){
+				for (anim in char.animationsArray) {
+					if (animationInputText.text == anim.anim) {
+						var resetAnim:Bool = (anim.anim == char.animation.name);
 
-					if (resetAnim)
-						char.animation.curAnim = null;
+						if (resetAnim)
+							char.animation.curAnim = null;
 
-					if (char.animation.exists(anim.anim))
-						char.animation.remove(anim.anim);
+						if (char.animation.exists(anim.anim))
+							char.animation.remove(anim.anim);
 
-					if (char.animOffsets.exists(anim.anim))
-						char.animOffsets.remove(anim.anim);
+						if (char.animOffsets.exists(anim.anim))
+							char.animOffsets.remove(anim.anim);
 
-					char.animationsArray.remove(anim);
+						char.animationsArray.remove(anim);
 
-					if (resetAnim && char.animationsArray.length > 0)
-						char.playAnim(char.animationsArray[0].anim, true);
+						if (resetAnim && char.animationsArray.length > 0)
+							char.playAnim(char.animationsArray[0].anim, true);
 
-					reloadAnimationDropDown();
-					genBoyOffsets();
-					trace('Removed animation: ' + animationInputText.text);
-					break;
+						reloadAnimationDropDown();
+						genBoyOffsets();
+						trace('Removed animation: ' + animationInputText.text);
+						break;
+					}
 				}
+			}
+			removeAnim(char);
+			if(ghostMirrorsCharacter){
+				removeAnim(ghostChar);
 			}
 		});
 
