@@ -41,6 +41,14 @@ abstract class BaseSong
 	 * Returns an array of charts available for this song
 	**/
 	abstract public function getCharts():Array<String>;
+
+	/**
+		Returns an FlxSoundAsset for the track of name trackName
+	**/
+	public function getTrackSound(trackName:String):flixel.system.FlxAssets.FlxSoundAsset
+	{
+		return Paths.returnSound(this.getSongFile(trackName + "." + Paths.SOUND_EXT));
+	}
 }
 
 typedef SongMetadata =
@@ -94,7 +102,6 @@ typedef SwagSong = {
 	@:optional var metadata:SongMetadata;
 
 	//// internal
-	@:optional var path:String;
 	var validScore:Bool;
 }
 

@@ -211,7 +211,7 @@ class TestState extends MusicBeatState{
 			// Stage Update 
 			var newStageName = stageNames[Std.int(bgStepper.value)];
 
-			if (bg != null && bg.curStage != newStageName){
+			if (bg != null && bg.stageId != newStageName){
 				bgGroup.remove(bg).destroy();
 				bg = null;
 			}else if (bg != null)

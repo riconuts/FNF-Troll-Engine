@@ -38,6 +38,7 @@ class MasterEditorMenu extends MusicBeatState
 
 	override function create()
 	{
+		this.persistentUpdate = true;
 		super.create();
 		FlxG.mouse.visible = false;
 		FlxTransitionableState.skipNextTransOut = true;

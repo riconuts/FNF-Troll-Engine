@@ -1648,7 +1648,7 @@ class PlayState extends MusicBeatState
 		for (trackName in songTrackNames) {
 			var sndAsset = {
 				if (song != null)
-					Paths.returnSound(song.getSongFile(trackName) + ".ogg");
+					song.getTrackSound(trackName);
 				else
 					Paths.track(songId, trackName);
 			}

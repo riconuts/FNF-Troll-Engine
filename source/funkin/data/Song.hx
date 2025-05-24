@@ -26,13 +26,14 @@ typedef PsychEvent = {
 
 typedef JsonSong = {
 	> SwagSong,
+	var _path:String; // for internal use
+	@:optional var offset:Float;
+	@:optional var keyCount:Int;
 
 	@:optional var player3:String; // old psych
 	@:optional var extraTracks:Array<String>; // old te
 	@:optional var needsVoices:Bool; // fnf
 	@:optional var mania:Int; // vs shaggy
-	@:optional var keyCount:Int;
-	@:optional var offset:Float;
 }
 
 final defaultDifficultyOrdering:Array<String>  = ["easy", "normal", "hard", "erect", "nightmare"];
@@ -148,7 +149,7 @@ class Song extends BaseSong
 
 
 				var chart:JsonSong = cast converted.data.song;
-				chart.path = chartsFilePath;
+				chart._path = chartsFilePath;
 				chart.song = songId;
 				chart.tracks = null;
 				return onLoadJson(chart);
@@ -186,7 +187,7 @@ class Song extends BaseSong
 
 						var converted = new SupportedFormat().fromFormat(chart, chartId);
 						var chart:JsonSong = cast converted.data.song;
-						chart.path = filePath;
+						chart._path = filePath;
 						chart.song = songId;
 						return onLoadJson(chart);
 				}
@@ -428,7 +429,7 @@ class Song extends BaseSong
 		}else
 			songJson = cast uncastedJson.song;
 
-		songJson.path = filePath;
+		songJson._path = filePath;
 		return isChartJson ? onLoadJson(songJson) : onLoadEvents(songJson);
 	}
 
@@ -475,6 +476,35 @@ class Song extends BaseSong
 		}	
 
 		return songJson;
+	}
+
+	private static function makeTrackData(songJson:JsonSong):SongTracks {
+		var instTracks:Array<String> = ["Inst"];
+		if (songJson.extraTracks != null) {
+			for (name in songJson.extraTracks)
+				instTracks.push(name);
+		}
+
+		if (songJson.needsVoices == false) {
+			// Song doesn't play vocals
+			return {inst: instTracks, player: [], opponent: []};
+		}
+		else if (songJson._path == null) {
+			// Default
+			return {inst: instTracks, player: ["Voices-Player"], opponent: ["Voices-Opponent"]};
+		}
+		else {
+			var folderPath:String = new Path(songJson._path).dir;
+			inline function check(name:String):Null<String> // returns name if it exists, and null if not
+				return Paths.exists(Path.join([folderPath, name + "." + Paths.SOUND_EXT])) ? name : null;
+
+			inline function getVariantless(str):String
+				return str.split('-')[0];
+
+			var playerTrack:String = check('Voices-' + songJson.player1) ?? check('Voices-' + getVariantless(songJson.player1)) ?? check("Voices-Player") ?? 'Voices';
+			var opponentTrack:String =  check('Voices-' + songJson.player2) ?? check('Voices-' + getVariantless(songJson.player2)) ?? check("Voices-Opponent") ?? 'Voices';			
+			return {inst: instTracks, player: [playerTrack], opponent: [opponentTrack]};
+		}
 	}
 
 	private static function onLoadJson(songJson:JsonSong):SwagSong
@@ -552,64 +582,7 @@ class Song extends BaseSong
 		
 		//// new tracks system
 		if (swagJson.tracks == null) {
-			var instTracks:Array<String> = ["Inst"];
-
-			if (songJson.extraTracks != null) {
-				for (name in songJson.extraTracks)
-					instTracks.push(name);
-			}
-
-			////
-			var playerTracks:Array<String> = null;
-			var opponentTracks:Array<String> = null;
-
-			/**
-			 * 2. If the chart folder couldn't be retrieved then "Voices-Player" and "Voices-Opponent" are used
-			 * 3. Define the first one existing in ['Voices-$player1', 'Voices-Player', 'Voices'] as a player track;
-			 * 4. Define the first one existing in ['Voices-$player2', 'Voices-Opponent', 'Voices'] as an opponent track;
-			 */
-			inline function sowy() {
-				//// 1
-				if (songJson.needsVoices == false) {
-					playerTracks = [];
-					opponentTracks = [];
-					return false;
-				}
-
-				//// 2
-				if (swagJson.path==null) return true;
-				var jsonPath:Path = new Path(swagJson.path);
-				var folderPath = jsonPath.dir;
-				if (folderPath == null) return true; // could mean that it's somehow on the same folder as the exe but fuck it
-
-				//// 3 and 4
-				inline function existsInFolder(name)
-					return Paths.exists(Path.join([folderPath, name]));
-
-				var defaultVoices = existsInFolder('Voices.ogg') ? ["Voices"] : [];
-
-				inline function voiceTrack(name)
-					return existsInFolder('$name.ogg') ? [name] : defaultVoices;
-				
-				var trackName = 'Voices-${swagJson.player1}';
-				var variantless:String = 'Voices-${swagJson.player1.split("-")[0]}';
-
-				playerTracks = existsInFolder('$trackName.ogg') ? [trackName] : (existsInFolder('$variantless.ogg') ? [variantless] : voiceTrack("Voices-Player"));
-
-				var trackName = 'Voices-${swagJson.player2}';
-				var variantless:String = 'Voices-${swagJson.player2.split("-")[0]}';
-
-				opponentTracks = existsInFolder('$trackName.ogg') ? [trackName] : (existsInFolder('$variantless.ogg') ? [variantless] : voiceTrack("Voices-Opponent"));
-
-				return false;
-			}
-			if (sowy()) {
-				playerTracks = ["Voices-Player"];
-				opponentTracks = ["Voices-Opponent"];
-			}
-
-			////
-			swagJson.tracks = {inst: instTracks, player: playerTracks, opponent: opponentTracks};
+			swagJson.tracks = makeTrackData(songJson);
 			trace(swagJson.tracks);
 		}
 

@@ -91,7 +91,7 @@ class IndependentVideoSprite extends VideoSprite {
 
 		// If we can pass args straight to the vlc thing then dont do this shit ^
 	}
-	#elseif(hxvlc)
+	#elseif(hxvlc <= "2.1.0")
 	override function load(location:OneOfThree<String, Int, Bytes>, ?options:Array<String>):Bool{
 		if((location is String)){
 			if(FileSystem.exists(Paths.getPath('videos/$location')))
