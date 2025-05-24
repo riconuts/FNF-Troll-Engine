@@ -160,7 +160,7 @@ class MusicBeatState extends FlxUIState
 			case LAST_MIX:
 				// Stepmania method
 				// Works for most people it seems??
-				if (lastMixPos < inst.time) {
+				if (lastMixPos != inst.time) {
 					lastMixPos = inst.time;
 					lastMixTimer = 0;
 				}else {
@@ -173,7 +173,7 @@ class MusicBeatState extends FlxUIState
 		}
 	}
 
-	private function updateSteps() {
+	private function updateSteps() {	
 		var oldStep:Int = Conductor.curStep;
 		Conductor.updateSteps();
 		var curStep:Int = Conductor.curStep;
