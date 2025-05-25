@@ -11,10 +11,6 @@ import flixel.util.FlxColor;
 #if DISCORD_ALLOWED
 import funkin.api.Discord.DiscordClient;
 #end
-#if sys
-import sys.io.File;
-import sys.FileSystem;
-#end
 
 using StringTools;
 
@@ -54,8 +50,12 @@ class CreditsState extends MusicBeatState
 	{
 		var options = [];
 
-		for (line in CoolUtil.listFromString(string))
+		for (line in CoolUtil.listFromString(string)) {
+			if (line.length == 0)
+				continue;
+			
 			options.push(optionFromString(line));
+		}
 
 		return options;
 	}
@@ -70,12 +70,10 @@ class CreditsState extends MusicBeatState
 		option.description = data[2] ?? '';
 		option.link = data[3] ?? '';
 
-		if (data.length == 1) {
-			// title
-			option.bold = true;
-			option.centered = true;
-			option.selectable = false;
-		}
+		var isTitle = data.length <= 1;
+		option.bold = isTitle;
+		option.centered = isTitle;
+		option.selectable = !isTitle;
 
 		return option;
 	}
@@ -150,14 +148,13 @@ class CreditsState extends MusicBeatState
 	public function changeSelection(val:Int, isAbs:Bool = false) {
 		curSelected = isAbs ? val : CoolUtil.updateIndex(curSelected, val, dataArray.length);
 
-		if (!isAbs) {
-			FlxG.sound.play(Paths.sound("scrollMenu"), 0.4);
-
-			if (dataArray[curSelected].selectable != true) {
-				changeSelection(val < 0 ? -1 : 1);
-				return;
-			}
+		if (!dataArray[curSelected].selectable) {
+			changeSelection((!isAbs && val < 0) ? -1 : 1);
+			return;
 		}
+
+		if (!isAbs)
+			FlxG.sound.play(Paths.sound("scrollMenu"), 0.4);
 
 		for (id in 0...titleArray.length)
 		{
@@ -192,9 +189,6 @@ class CreditsState extends MusicBeatState
 	var realLength:Int = 0;
 	var margin = 240;
 	public function createOption(data:CreditsOption) {
-		if (data.text.trim().length == 0)
-			return;
-
 		var id = realLength++;
 		var songTitle = new Alphabet(0, margin * id, data.text, data.bold);
 		songTitle.ID = id;
@@ -222,12 +216,6 @@ class CreditsState extends MusicBeatState
 		}
 
 		add(songTitle);
-	}
-
-	public function addSong(data:Array<String>, ?folder:String)
-	{
-		Paths.currentModDirectory = folder == null ? "" : folder;
-		createOption(optionFromString(data.join("::")));
 	}
 
 	var moveTween:FlxTween;
@@ -265,12 +253,15 @@ class CreditsState extends MusicBeatState
 	var controlLock:Bool = false;
 	override function update(elapsed:Float)
 	{
-		var targetVolume:Float =  0.7;
-		if (FlxG.sound.music != null && FlxG.sound.music.volume < targetVolume)
-			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
+		if (FlxG.sound.music != null) {
+			var targetVolume:Float =  0.7;
 
-		if (FlxG.sound.music.volume > targetVolume)
-			FlxG.sound.music.volume = targetVolume;
+			if (FlxG.sound.music.volume < targetVolume)
+				FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
+			
+			if (FlxG.sound.music.volume > targetVolume)
+				FlxG.sound.music.volume = targetVolume;
+		}
 
 		//// update camera
 		var farAwaySpeedup = 0.002 * Math.max(0, Math.abs(camFollowPos.y - camFollow.y) - 360);
