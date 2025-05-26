@@ -3771,6 +3771,12 @@ class PlayState extends MusicBeatState
 	function commonNoteHit(note:Note, field:PlayField){ // things done by all note hit functions
 		camZooming = true;
 
+		if (note.noteScript != null && callScript(note.noteScript, "onCommonNoteHitPre", [note, field]) == Globals.Function_Stop)
+			return;
+
+		if (callOnHScripts("onCommonNoteHitPre", [note, field]) == Globals.Function_Stop)
+			return;
+
 		note.wasGoodHit = true;
 
 		for (track in field.tracks)
@@ -3794,6 +3800,10 @@ class PlayState extends MusicBeatState
 			if (spr != null && (field.keysPressed[note.column] || note.isRoll))
 				spr.playAnim('confirm', true, note.isSustainNote ? note.parent : note);
 		}
+		if (note.noteScript != null)
+			callScript(note.noteScript, "onCommonNoteHit", [note, field]);
+
+		callOnHScripts("onCommonNoteHit", [note, field]);
 	}
 
 	inline function playShithound(){
