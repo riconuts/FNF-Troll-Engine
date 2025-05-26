@@ -3395,6 +3395,8 @@ class PlayState extends MusicBeatState
 		if (callOnScripts("onKeyPress", [column]) == Globals.Function_Stop)
 			return;
 
+		var hitTime:Float = Conductor.getAccPosition();
+
 		if(ClientPrefs.hitsoundBehav == 'Key Press' && !cpuControlled)
 			playShithound();
 		
@@ -3415,7 +3417,7 @@ class PlayState extends MusicBeatState
 				var ret:Dynamic = callOnHScripts("onFieldInput", [field, column, hitNotes]);
 				if (ret == Globals.Function_Stop) null;
 				else if (ret is Note) ret;
-				else field.input(column);
+				else field.input(column, hitTime);
 			}
 
 			if (note == null) {

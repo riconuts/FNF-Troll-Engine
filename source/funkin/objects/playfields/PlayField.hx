@@ -347,9 +347,11 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		return spawnedNotes.contains(note) || noteQueue[note.column]!=null && noteQueue[note.column].contains(note);
 	
 	// sends an input to the playfield
-	public function input(data:Int):Null<Note> {
+	public function input(data:Int, ?hitTime:Float):Null<Note> {
 		if (data < 0 || data > keyCount) 
 			return null;
+
+		hitTime ??= Conductor.getAccPosition();
 
 		var noteList = getTapNotes(data, (note:Note) -> !note.tooLate);
 		noteList.sort((a, b) -> Std.int(b.strumTime - a.strumTime)); // so lowPriority actually works (even though i hate it lol!)
@@ -368,7 +370,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 				var judge:Judgment = judgeManager.judgeNote(note);
 				if (judge != UNJUDGED){
 					note.hitResult.judgment = judge;
-					note.hitResult.hitDiff = note.strumTime - Conductor.getAccPosition();
+					note.hitResult.hitDiff = hitTime - note.strumTime;
 					noteHitCallback(note, this);
 					return note;
 				}
@@ -626,7 +628,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 						if (judge != UNJUDGED)
 						{
 							note.hitResult.judgment = judge;
-							note.hitResult.hitDiff = note.strumTime - Conductor.songPosition;
+							note.hitResult.hitDiff = Conductor.songPosition - note.strumTime;
 							noteHitCallback(note, this);
 						}
 						

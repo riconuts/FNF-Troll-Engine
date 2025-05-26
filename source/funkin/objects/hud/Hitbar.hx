@@ -203,7 +203,7 @@ class Hitbar extends FlxSpriteGroup
 		hitMark.color = FlxColor.RED;
 		hitMark.visible = visible;
 		hitMark.x = mainBar.x + ((mainBar.width - hitMark.width) / 2);
-		hitMark.x += ((hitbarPxPerMs / 2) * -time);
+		hitMark.x += ((hitbarPxPerMs / 2) * time);
 		hitMark.y = mainBar.y + ((mainBar.height - hitMark.height) / 2);
 	}
 }

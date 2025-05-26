@@ -236,10 +236,9 @@ class TraditionalHUD extends CommonHUD
 
 	override function noteJudged(judge:JudgmentData, ?note:Note, ?field:PlayField)
 	{
-		var hitTime = note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset;
-
+		var hitDiff = note.hitResult.hitDiff + ClientPrefs.ratingOffset;
 		if (ClientPrefs.hitbar)
-			hitbar.addHit(hitTime);
+			hitbar.addHit(hitDiff);
 		
 		if (ClientPrefs.scoreZoom)
 		{
