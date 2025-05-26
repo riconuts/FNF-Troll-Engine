@@ -159,28 +159,26 @@ class FPS extends TextField
 			currentFPS = FlxG.drawFramerate;
 
 		if (currentCount != cacheCount)
-		{
 			cacheCount = currentCount;
 
-			text = 'FPS: $currentFPS';
-			
-			if (showMemory)
-				text += ' • Memory: ' + FlxStringUtil.formatBytes(getTotalMemory());
+		text = 'FPS: $currentFPS';
+		
+		if (showMemory)
+			text += ' • MEM: ' + FlxStringUtil.formatBytes(getTotalMemory());
 
-			#if (debug && false)
-			text += '\nState: $currentState';
-			#end
+		#if (debug && false)
+		text += '\nState: $currentState';
+		#end
 
-			if (currentFPS <= FlxG.drawFramerate * 0.5)
-				textColor = 0xFFFF0000;
-			else
-				textColor = 0xFFFFFFFF;
+		if (currentFPS <= FlxG.drawFramerate * 0.5)
+			textColor = 0xFFFF0000;
+		else
+			textColor = 0xFFFFFFFF;
 
-			#if (gl_stats && !disable_cffi && (!html5 || !canvas))
-			text += "\ntotalDC: " + Context3DStats.totalDrawCalls();
-			text += "\nstageDC: " + Context3DStats.contextDrawCalls(DrawCallContext.STAGE);
-			text += "\nstage3DDC: " + Context3DStats.contextDrawCalls(DrawCallContext.STAGE3D);
-			#end
-		}
+		#if (gl_stats && !disable_cffi && (!html5 || !canvas))
+		text += "\ntotalDC: " + Context3DStats.totalDrawCalls();
+		text += "\nstageDC: " + Context3DStats.contextDrawCalls(DrawCallContext.STAGE);
+		text += "\nstage3DDC: " + Context3DStats.contextDrawCalls(DrawCallContext.STAGE3D);
+		#end
 	}
 }

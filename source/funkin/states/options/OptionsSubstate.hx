@@ -137,7 +137,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			]
 		],
 		"video" => [
-			["video", ["shaders", "showFPS"]],
+			["video", ["shaders", "showFPS", "showMemory"]],
 			["display", ["framerate", #if FUNNY_ALLOWED "bread", "fish" #end]],
 			[
 				"performance",
@@ -341,6 +341,9 @@ class OptionsSubstate extends MusicBeatSubstate
 			case 'showFPS':
 				if (Main.fpsVar != null)
 					Main.fpsVar.visible = val;
+			case 'showMemory':
+				if (Main.fpsVar != null)
+					Main.fpsVar.showMemory = val;
 			#if FUNNY_ALLOWED
 			case 'bread':
 				if (Main.bread != null)
