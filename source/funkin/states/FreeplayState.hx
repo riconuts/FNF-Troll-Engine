@@ -28,7 +28,7 @@ class FreeplayState extends MusicBeatState
 	public static var comingFromPlayState:Bool = false;
 
 	var menu = new FreeplayMenu();
-	var songData:Array<BaseSong> = [];
+	var songData:Array<BaseSong>;
 
 	var bgGrp = new FlxTypedGroup<FlxSprite>();
 	var bg:FlxSprite;
@@ -85,6 +85,11 @@ class FreeplayState extends MusicBeatState
 		}
 		return list;
 	} 
+
+	public function new(?songList:Array<BaseSong>) {
+		this.songData = songList;
+		super();
+	}
 	
 	override public function create()
 	{
@@ -92,7 +97,7 @@ class FreeplayState extends MusicBeatState
 		funkin.api.Discord.DiscordClient.changePresence('In the menus');
 		#end
 
-		songData = getFreeplaySongs();
+		songData ??= getFreeplaySongs();
 		for (song in songData)
 			menu.addSong(song);
 
