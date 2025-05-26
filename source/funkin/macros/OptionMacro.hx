@@ -25,8 +25,10 @@ class OptionMacro
 				// if (optionField.access.contains(AStatic))
 					continue;
 			}
-
 			optionNames.push(option);
+
+			var fieldDesc:String = key.display + '  \n' + key.desc;
+
 			switch(key.type){
 				case Toggle:
 					var defVal:Bool = key.value == null ? false : key.value;
@@ -34,7 +36,8 @@ class OptionMacro
 						name: option,
 						access: [APublic, AStatic],
 						kind: FVar(macro :Bool, macro $v{defVal}),
-						pos: pos
+						pos: pos,
+						doc: fieldDesc,
 					});
 				case Dropdown:
 					var defVal:String = key.value == null ? key.data.get("options")[0] : key.value;
@@ -42,7 +45,8 @@ class OptionMacro
 						name: option,
 						access: [APublic, AStatic],
 						kind: FVar(macro :String, macro $v{defVal}),
-						pos: pos
+						pos: pos,
+						doc: fieldDesc,
 					});
 				case Number:
 					var defVal:Float = key.value == null ? 0 : key.value;
@@ -50,7 +54,8 @@ class OptionMacro
 						name: option,
 						access: [APublic, AStatic],
 						kind: FVar(macro:Float, macro $v{defVal}),
-						pos: pos
+						pos: pos,
+						doc: fieldDesc,
 					});
 
 				default:
