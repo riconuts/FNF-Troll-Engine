@@ -367,7 +367,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 			else{
 				if (note.wasGoodHit)
 					continue;
-				var judge:Judgment = judgeManager.judgeNote(note);
+				var judge:Judgment = judgeManager.judgeNote(note, hitTime);
 				if (judge != UNJUDGED){
 					note.hitResult.judgment = judge;
 					note.hitResult.hitDiff = hitTime - note.strumTime;
@@ -624,7 +624,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 					while (noteList.length > 0)
 					{
 						var note:Note = noteList.pop();
-						var judge:Judgment = judgeManager.judgeNote(note);
+						var judge:Judgment = judgeManager.judgeNote(note, Conductor.songPosition);
 						if (judge != UNJUDGED)
 						{
 							note.hitResult.judgment = judge;

@@ -11,9 +11,10 @@ import funkin.data.JudgmentManager.Judgment;
 
 using StringTools;
 
-typedef HitResult = {
-	judgment: Judgment,
-	hitDiff: Float
+@:structInit
+class HitResult {
+	public var judgment:Judgment = UNJUDGED;
+	public var hitDiff:Float = 0.0;
 }
 
 enum abstract SplashBehaviour(Int) from Int to Int
@@ -271,7 +272,7 @@ class Note extends NoteObject
 	@:noCompletion inline function set_realNoteData(v:Int) return realColumn = v;
 	#end
 
-	@:noCompletion function get_canBeHit() return UNJUDGED != PlayState.instance.judgeManager.judgeNote(this);
+	@:noCompletion function get_canBeHit() return UNJUDGED != PlayState.instance.judgeManager.judgeNote(this, Conductor.songPosition);
 
 	@:noCompletion inline function get_noteSplashDisabled() return noteSplashBehaviour == DISABLED;
 	@:noCompletion inline function set_noteSplashDisabled(val:Bool) {

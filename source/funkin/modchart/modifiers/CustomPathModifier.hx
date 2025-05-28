@@ -1,10 +1,11 @@
 package funkin.modchart.modifiers;
 
-typedef PathInfo = {
-	var position:Vector3;
-	var dist:Float;
-	var start:Float;
-	var end:Float;
+@:structInit
+class PathInfo {
+	public final position:Vector3;
+	public final start:Float;
+	public var end:Float;
+	public var dist:Float;
 }
 
 class CustomPathModifier extends NoteModifier {
