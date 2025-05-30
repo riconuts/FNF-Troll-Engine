@@ -117,8 +117,7 @@ class KadeHUD extends BaseHUD
 			var offset = -40+(counterIdx*20);
 
 			var txt = new FlxText(4, (FlxG.height/2)+offset, FlxG.width - 8, "", 20);
-			txt.setFormat(Paths.font("vcr.ttf"), 20, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
-			txt.borderSize = 2;
+			txt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
 			txt.scrollFactor.set();
 			add(txt);
 			counters.set(judge,txt);
