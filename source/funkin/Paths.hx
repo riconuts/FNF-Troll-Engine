@@ -28,7 +28,6 @@ class Paths
 {
 	inline public static var IMAGE_EXT = "png";
 	inline public static var SOUND_EXT = "ogg";
-	inline public static var VIDEO_EXT = "mp4";
 
 	public static final HSCRIPT_EXTENSIONS:Array<String> = ["hscript", "hxs", "hx"];
 	public static final SCRIPT_EXTENSIONS:Array<String> = [
@@ -212,9 +211,9 @@ class Paths
 		return getPath('fonts/$key');
 	}
 
-	static public function video(key:String, ignoreMods:Bool = false):String
+	static public function video(key:String, ignoreMods:Bool = false, ext:String = "mp4"):String
 	{
-		return getPath('videos/$key.$VIDEO_EXT', ignoreMods);
+		return getPath('videos/$key.$ext', ignoreMods);
 	}
 
 	static public function getShaderFragment(name:String):Null<String>
