@@ -85,14 +85,8 @@ class FPS extends TextField
 
 		var textFormat = new TextFormat(null, 12, color);
 
-		#if tgt
-		embedFonts = true;
-		textFormat.size = 14;
-		textFormat.font = "Calibri";
-		#else
 		embedFonts = false;
 		textFormat.font = "_sans";
-		#end
 		defaultTextFormat = textFormat;
 
 		currentFPS = 0;

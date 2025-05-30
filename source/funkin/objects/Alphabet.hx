@@ -275,19 +275,6 @@ class AlphaCharacter extends FlxSprite
 		updateHitbox();
 		y = 60 - height;
 
-		#if tgt
-		switch (character)
-		{
-			case "g" | "j" | "p" | "q" | "y":
-				y += 13;
-			case "z" | "Z":
-				y--;
-			case "Q":
-				y += 8;
-			case "B" | "D" | "E" | "L":
-				y--;
-		}
-		#else
 		switch (character)
 		{
 			case "p" | "q" | "y":
@@ -298,7 +285,6 @@ class AlphaCharacter extends FlxSprite
 				//x -= 35 - (90 * (1.0 - scale.x));
 				y -= 16;
 		}
-		#end
 
 		return true;
 	}
