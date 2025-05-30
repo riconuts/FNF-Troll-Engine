@@ -109,7 +109,7 @@ class LevelStageProp extends FlxSprite
 
 		// TODO: allow FlxAnimate and multisparrow
 		if (propData.animations != null) {
-			for (animation in propData.animat`ions) {
+			for (animation in propData.animations) {
 				if (animation.indices != null)
 					prop.animation.addByIndices(animation.name, animation.prefix, animation.indices, '', animation.fps ?? 24, animation.looped ?? false);
 				else
@@ -503,11 +503,7 @@ class StoryModeState extends MusicBeatState {
 				for(prop in group.members)
 					if (prop is LevelStageProp)
 						cast(prop, LevelStageProp).onConfirm.dispatch();
-					
-				
-					
 		}
-		// TODO: play the character anims
 
 		new FlxTimer().start(1, function(tmr:FlxTimer) {
 			playLevel(levels[selectedLevel], selectedDifficultyName);
