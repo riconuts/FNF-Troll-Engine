@@ -3340,7 +3340,7 @@ class PlayState extends MusicBeatState
 			timingTxt.x += ClientPrefs.comboOffset[4];
 			timingTxt.y -= ClientPrefs.comboOffset[5];
 
-			timingTxt.color = hud.judgeColours.get(judgeData.internalName);
+			timingTxt.color = hud.judgeColours.get(judgeData.internalName) ?? 0xFF477947;
 
 			timingTxt.visible = true;
 			timingTxt.alpha = ClientPrefs.judgeOpacity;

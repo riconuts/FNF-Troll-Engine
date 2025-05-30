@@ -495,7 +495,7 @@ class ClientPrefs {
 				desc: "How to display the Botplay mark.",
 				type: Dropdown,
 				value: "Subtle",
-				data: ["options" => ["Hidden", "Subtle", "Psych"]],
+				data: ["options" => ["Hidden", "Subtle", "Obvious"]], // changed from Psych to Obvious because of stuff like KE Hud where it has its own obvious Botplay shit
 			},
 			"hudPosition" => {
 				display: "HUD Position",

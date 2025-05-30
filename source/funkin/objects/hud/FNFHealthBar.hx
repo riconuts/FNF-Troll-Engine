@@ -205,8 +205,52 @@ class FNFHealthBar extends FlxBar{
 
 // Old icon behaviour from pre-VSlice
 class ShittyBar extends FNFHealthBar {
-	public var vSlice:Bool = false; // Uses V-Slice lerping
+	var originalY:Float = 0;
+	public function new(p1:String = "face", p2:String = "face"){
+		super(p1, p2);
+		iconP1.y = y - (iconP1.height / 2);
+		iconP2.y = y - (iconP2.height / 2);
+		originalY = y;
+	}
 
+
+	override function updateIcons(elapsed:Float) {
+		iconP1.setGraphicSize(Std.int(FlxMath.lerp(150, iconP1.width, 0.5)));
+		iconP2.setGraphicSize(Std.int(FlxMath.lerp(150, iconP2.width, 0.5)));	
+		
+		iconP1.updateHitbox();
+		iconP2.updateHitbox();
+
+		var iconOffset:Int = 26;
+
+		var perc = percent;
+
+		var percent = flipX ? 100 - perc : perc;
+		
+		switch (fillDirection) {
+			case RIGHT_TO_LEFT:
+				iconP1.x = x + (width * (FlxMath.remapToRange(percent, 0, 100, 100, 0) * 0.01) - iconOffset);
+				iconP2.x = x + (width * (FlxMath.remapToRange(percent, 0, 100, 100, 0) * 0.01)) - (iconP2.width - iconOffset);
+
+			case LEFT_TO_RIGHT:
+				iconP1.x = x + (width * (percent * 0.01) - iconOffset);
+				iconP2.x = x + (width * (percent * 0.01)) - (iconP2.width - iconOffset);
+			default:
+			
+		}
+
+		iconP1.y += originalY - y;
+		iconP2.y += originalY - y;
+		originalY = y;
+		
+/* 		iconP1.y = y - iconP1.height / 2;
+		iconP2.y = y - iconP2.height / 2; */
+		
+	}
+}
+
+
+class VSliceBar extends ShittyBar {
 	public var currentValue(default, set):Float = 1; // For lerping w/ vslice
 
 	function set_currentValue(val:Float){
@@ -214,17 +258,9 @@ class ShittyBar extends FNFHealthBar {
 		updateBar();
 		return val;
 	}
-
-	public function new(p1:String = "face", p2:String = "face"){
-		super(p1, p2);
-		iconP1.y = y - (iconP1.height / 2);
-		iconP2.y = y - (iconP2.height / 2);
-	}
-
+	
 	override function updateFilledBar():Void {
-		var val = value;
-		if(vSlice)
-			val = currentValue;
+		var val = currentValue;
 
 		_filledBarRect.width = barWidth;
 		_filledBarRect.height = barHeight;
@@ -289,22 +325,15 @@ class ShittyBar extends FNFHealthBar {
 	}
 
 	override function update(elapsed:Float){
-		if(vSlice)
-			currentValue = FlxMath.lerp(currentValue, value, 0.15 * (elapsed * 60));
+		currentValue = FlxMath.lerp(currentValue, value, 0.15 * (elapsed * 60));
 		
-
 		super.update(elapsed);
 	}
 
 	override function updateIcons(elapsed:Float) {
-		if (vSlice){
-			var frameFix = elapsed * 60;
-			iconP1.setGraphicSize(Std.int(FlxMath.lerp(iconP1.width, 150, 0.15 * frameFix)));
-			iconP2.setGraphicSize(Std.int(FlxMath.lerp(iconP2.width, 150, 0.15 * frameFix)));
-		}else{
-			iconP1.setGraphicSize(Std.int(FlxMath.lerp(150, iconP1.width, 0.85)));
-			iconP2.setGraphicSize(Std.int(FlxMath.lerp(150, iconP2.width, 0.85)));	
-		}
+		var frameFix = elapsed * 60;
+		iconP1.setGraphicSize(Std.int(FlxMath.lerp(iconP1.width, 150, 0.15 * frameFix)));
+		iconP2.setGraphicSize(Std.int(FlxMath.lerp(iconP2.width, 150, 0.15 * frameFix)));
 
 		iconP1.updateHitbox();
 		iconP2.updateHitbox();
@@ -314,7 +343,7 @@ class ShittyBar extends FNFHealthBar {
 
 		var iconOffset:Int = 26;
 
-		var perc = vSlice ? (currentValue / 2) * 100 : percent;
+		var perc = (currentValue / 2) * 100;
 
 		var percent = flipX ? 100 - perc : perc;
 		
@@ -330,11 +359,9 @@ class ShittyBar extends FNFHealthBar {
 			
 		}
 
-		if(vSlice){
-			iconP1.y = y - iconP1.height / 2;
-			iconP2.y = y - iconP2.height / 2;
-		}else{
-
-		}
+		iconP1.y = y - iconP1.height / 2;
+		iconP2.y = y - iconP2.height / 2;
+		
 	}
+
 }
