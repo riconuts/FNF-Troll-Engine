@@ -170,7 +170,7 @@ class TraditionalHUD extends CommonHUD
 		isHighscore = songWifeHighscore != 0 && totalNotesHit > songWifeHighscore;
 	}
 
-	inline function getStatusText():String {
+	function getStatusText():String {
 		if (PlayState.instance.cpuControlled && useSubtleMark)
 			return botplayString;
 

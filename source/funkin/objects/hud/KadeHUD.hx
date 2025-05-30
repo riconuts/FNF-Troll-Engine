@@ -29,6 +29,7 @@ class KadeHUD extends BaseHUD
 
 
 	var watermark:FlxText;
+	var botplayLabel:FlxText;
 
 	var songHighscore:Int = 0;
 	var songWifeHighscore:Float = 0.0;
@@ -39,7 +40,7 @@ class KadeHUD extends BaseHUD
 	var cbString = Paths.getString("cbplural");
 	var npsString = Paths.getString("nps");
 
-	var engineName = 'Troll Engine';
+	var engineName = 'Troll Engine'; 
 
 	override function set_displayedHealth(value:Float)
 	{
@@ -54,6 +55,17 @@ class KadeHUD extends BaseHUD
 	public function new(songName:String, stats:Stats)
 	{
 		super(songName, stats);
+
+		engineName = 'TE ';
+		var ver: funkin.data.SemanticVersion = Main.Version.semanticVersion;
+		if(ver.patch == 0)
+			engineName += '${ver.major}.${ver.minor}';
+		else
+			engineName += '${ver.major}.${ver.minor}.${ver.patch}';
+
+		if (ver.prerelease_id != '')
+			engineName += '-${ver.prerelease_id}';
+
 
 		var songRecord = Highscore.getRecord(this.songName, PlayState.difficultyName);
 		songHighscore = songRecord.score;
@@ -110,7 +122,17 @@ class KadeHUD extends BaseHUD
 		add(healthBar);
 		add(iconP1);
 		add(iconP2);
+		
+		botplayLabel = new FlxText(healthBarBG.x + healthBarBG.width / 2 - 75, 0, 0,
+			"BOTPLAY", 20);
+		botplayLabel.setFormat(Paths.font("vcr.ttf"), 42, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		botplayLabel.scrollFactor.set();
+		botplayLabel.borderSize = 4;
+		botplayLabel.borderQuality = 2;
+		botplayLabel.visible = false;
+		add(botplayLabel);
 
+		
 		this.displayedJudges.remove("cb");
 
 		for(counterIdx => judge in displayedJudges){
@@ -162,12 +184,16 @@ class KadeHUD extends BaseHUD
 				obj.alignment = align;
 			}
 		}
-
+	
 		////
+		
 		healthBar.y = (ClientPrefs.downScroll) ? 50 : (FlxG.height * 0.9);
-		healthBar.iconP1.y = healthBar.y - 75;
-		healthBar.iconP2.y = healthBar.y - 75;
+		healthBar.y += 5;
 		healthBar.update(0);
+
+		trace(healthBar.y);
+
+		botplayLabel.y = healthBarBG.y + (ClientPrefs.downScroll ? 100 : -100);
 
 		scoreTxt.y = (healthBarBG.y + 50);
 
@@ -184,10 +210,11 @@ class KadeHUD extends BaseHUD
 		timeBar.exists = updateTime;
 		timeTxt.exists = updateTime;
 
+		// looks kinda weird tbh
 		var diffId:String = PlayState.difficultyName;
 		var diffName:String = Paths.getString('difficultyName_$diffId', diffId);
 		
-		if (ClientPrefs.timeBarType == "Song Name")
+/* 		if (ClientPrefs.timeBarType == "Song Name")
 		{
 			timeTxt.text = displayedSong;
 			watermark.text = '$diffName | $engineName';
@@ -196,7 +223,10 @@ class KadeHUD extends BaseHUD
 		{
 			watermark.text = '$displayedSong - $diffName | $engineName';
 			timeTxt.text = "";
-		}
+		} */
+ 
+		watermark.text = '$displayedSong - $diffName | $engineName';
+		timeTxt.text = displayedSong;
 
 		timeTxt.x = timeBarBG.x + (timeBarBG.width / 2) - (timeTxt.text.length * 5);
 
@@ -248,23 +278,36 @@ class KadeHUD extends BaseHUD
 			var scareText = isHighscore ? hiscoreString : scoreString;
 			
 			var text = '';
+			var isBotplay:Bool = PlayState.instance.cpuControlled;
+
+			botplayLabel.visible = isBotplay && ClientPrefs.botplayMarker == 'Obvious';
+
 			if (ClientPrefs.npsDisplay)
-				text = '$npsString: ${nps} (Max ${npsPeak}) | ';
+				text = '$npsString: ${nps} (Max ${npsPeak})';
 
-			text += '$scareText: $shownScore | ' +
-			'$cbString: $comboBreaks | ' +
-			'$ratingString: ${grade == '?' ? 0 : CoolMath.floorDecimal(ratingPercent * 100, 2)}% | ';
-			if(grade == '?')
-				text += "N/A";
-			else
-				text += '($ratingFC) $grade';
+			var acc:String = (isBotplay && ClientPrefs.botplayMarker != 'Hidden') ? 'N/A' : Std.string(grade == '?' ? 0 : CoolMath.floorDecimal(ratingPercent * 100,
+				2)) + " %";
+			
+			if (!isBotplay || ClientPrefs.botplayMarker != 'Obvious'){
+				if(ClientPrefs.npsDisplay)
+					text += " | ";
 
-			scoreTxt.text = text; // because i wanna be able to use multi line in code but not display it in the text lol!
+				text += '$scareText:$shownScore | ' +
+				'$cbString:$comboBreaks | ' +
+				'$ratingString:${acc} ';
+				if (!isBotplay || ClientPrefs.botplayMarker == 'Hidden'){
+					if (grade == '?')
+						text += "| N/A";
+					else
+						text += '| ($ratingFC) $grade';
+				}
+			}
+			
+
+			scoreTxt.visible = text != '';
+			scoreTxt.text = text;
 		}
 
-/* 		scoreTxt.x = originalX; */
-
-// what the fuck THIS IS ACTUALLY DONE IN KE 1.5.4???
 		var lengthInPx = scoreTxt.textField.length * scoreTxt.frameHeight; // bad way but does more or less a better job
 		scoreTxt.x = (originalX - (lengthInPx / 2)) + 335;
 
@@ -283,7 +326,7 @@ class KadeHUD extends BaseHUD
 			switch (ClientPrefs.timeBarType)
 			{
 				case "Percentage":
-					timeTxt.text = Math.floor(songPercent * 100) + "%";
+					timeTxt.text = '$displayedSong (${Math.floor(songPercent * 100) + "%"})';
 				case "Time Left":
 					timeCalc = (songLength - time);
 				case "Time Elapsed":
@@ -293,9 +336,9 @@ class KadeHUD extends BaseHUD
 			if (timeCalc != null)
 			{
 				if (timeCalc <= 0)
-					timeTxt.text = "0:00"
+					timeTxt.text = '$displayedSong (0:00)';
 				else
-					timeTxt.text = FlxStringUtil.formatTime(timeCalc / FlxG.timeScale / 1000, false);
+					timeTxt.text = '$displayedSong (${FlxStringUtil.formatTime(timeCalc / FlxG.timeScale / 1000, false)})';
 			}
 
 			timeBar.value = songPercent;

@@ -4,7 +4,7 @@ import flixel.math.FlxMath;
 import flixel.util.FlxColor;
 import flixel.text.FlxText;
 import flixel.ui.FlxBar;
-import funkin.objects.hud.FNFHealthBar.ShittyBar;
+import funkin.objects.hud.FNFHealthBar.VSliceBar;
 import flixel.util.FlxStringUtil;
 
 class ClassicHUD extends CommonHUD {
@@ -29,8 +29,7 @@ class ClassicHUD extends CommonHUD {
 		// Maybe this should use a modified one that looks like V-Slice's instead of Week <=7
 		// Idk lol
 
-		healthBar = new ShittyBar('bf', 'dad');
-		cast (healthBar, ShittyBar).vSlice = true;
+		healthBar = new VSliceBar('bf', 'dad');
 		healthBarBG = healthBar.healthBarBG;
 
 		iconP1 = healthBar.iconP1;
@@ -41,7 +40,7 @@ class ClassicHUD extends CommonHUD {
 		healthBar.iconP1.y = healthBar.y - 75;
 		healthBar.iconP2.y = healthBar.y - 75;
 
-		scoreTxt = new FlxText(healthBarBG.x + healthBarBG.width - 190, healthBarBG.y + (ClientPrefs.downScroll ? -30 : 30), 0, "", 20);
+		scoreTxt = new FlxText(healthBarBG.x + healthBarBG.width - 190, healthBarBG.y + 30, 0, "", 20);
 		scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, 'right', FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		scoreTxt.scrollFactor.set();
 
@@ -100,7 +99,7 @@ class ClassicHUD extends CommonHUD {
 		else
 			shownScore = stats.score;
 
-		if (ClientPrefs.botplayMarker != 'Off' && PlayState.instance.cpuControlled)
+		if (ClientPrefs.botplayMarker != 'Hidden' && PlayState.instance.cpuControlled)
 			scoreTxt.text = 'Botplay Enabled';
 		else
 			scoreTxt.text = '$scoreString: ${FlxStringUtil.formatMoney(shownScore, false, true)}';
@@ -122,7 +121,7 @@ class ClassicHUD extends CommonHUD {
 			healthBar.iconP1.y = healthBar.y - 75;
 			healthBar.iconP2.y = healthBar.y - 75;
 			scoreTxt.x = healthBarBG.x + healthBarBG.width - 190;
-			scoreTxt.y = healthBarBG.y + (ClientPrefs.downScroll ? -30 : 30);
+			scoreTxt.y = healthBarBG.y + 30;
 		}
 	}
 
