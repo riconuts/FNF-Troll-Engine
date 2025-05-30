@@ -109,7 +109,7 @@ class LevelStageProp extends FlxSprite
 
 		// TODO: allow FlxAnimate and multisparrow
 		if (propData.animations != null) {
-			for (animation in propData.animations) {
+			for (animation in propData.animat`ions) {
 				if (animation.indices != null)
 					prop.animation.addByIndices(animation.name, animation.prefix, animation.indices, '', animation.fps ?? 24, animation.looped ?? false);
 				else
@@ -248,6 +248,7 @@ class StoryModeState extends MusicBeatState {
 		if (FlxG.sound.music == null || !FlxG.sound.music.playing)
 			MusicBeatState.playMenuMusic();
 
+		FlxG.camera.bgColor = FlxColor.BLACK;
 		// Get the levels
 		levels = getStoryModeLevels();
 
