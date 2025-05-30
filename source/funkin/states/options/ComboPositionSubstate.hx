@@ -99,11 +99,7 @@ class ComboPositionSubstate extends MusicBeatSubstate
 
 		////
 		timing = new FlxText(0, 0, 0, "0 ms");
-		#if tgt
-		timing.setFormat(Paths.font("calibri.ttf"), 28, 0xFFFFFFFF, CENTER, FlxTextBorderStyle.OUTLINE, 0xFF000000);
-		#else
 		timing.setFormat(Paths.font("vcr.ttf"), 28, 0xFFFFFFFF, CENTER, FlxTextBorderStyle.OUTLINE, 0xFF000000);
-		#end
 		timing.color = judgeColor;
 		timing.scrollFactor.set();
 		timing.borderSize = 1.25;
@@ -121,13 +117,8 @@ class ComboPositionSubstate extends MusicBeatSubstate
 				24
 			);
 			text.scrollFactor.set();
-			#if tgt
-			text.setFormat(Paths.font("calibri.ttf"), 24, 0xFFFFFFFF, LEFT, FlxTextBorderStyle.OUTLINE, 0xFF000000);
-			text.borderSize = 1.5;
-			#else
 			text.setFormat(Paths.font("vcr.ttf"), 24, 0xFFFFFFFF, LEFT, FlxTextBorderStyle.OUTLINE, 0xFF000000);
 			text.borderSize = 2;
-			#end
 			text.cameras = cameras;
 			add(text);
 
