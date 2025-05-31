@@ -108,18 +108,23 @@ class Countdown {
 				sprite.screenCenter();
 			}
 
-			if (defaultTransition)
-			{
-				if (game == null) parent.insert(parent.members.length-1,sprite);
-				else game.insert(game.members.indexOf(game.notes),sprite); // how it was layered originally
-				tween = FlxTween.tween(sprite, {alpha: 0}, Conductor.crochet * 0.001, {
-					ease: FlxEase.cubeInOut,
-					onComplete: function(twn)
-					{
-						deleteSprite();
-						deleteTween();
-					}
-				});
+			try{
+				if (defaultTransition)
+				{
+					if (game == null) parent.insert(parent.members.length-1,sprite);
+					else game.insert(game.members.indexOf(game.notes),sprite); // how it was layered originally
+					tween = FlxTween.tween(sprite, {alpha: 0}, Conductor.crochet * 0.001, {
+						ease: FlxEase.cubeInOut,
+						onComplete: function(twn)
+						{
+							deleteSprite();
+							deleteTween();
+						}
+					});
+				}
+			}
+			catch(e){
+				
 			}
 
 			if (game != null) {
