@@ -40,7 +40,7 @@ class Alphabet extends FlxTypedSpriteGroup<AlphaCharacter>
 	#end
 
 	// public function new(x:Float, y:Float, fieldWidth = 0.0, text = "", textScale = 1.0)
-	public function new(x:Float = 0, y:Float = 0, text:String = "", bold:Bool = false, ?fuck:Dynamic, ?lol:Dynamic, textScale = 1.0)
+	public function new(x:Float = 0, y:Float = 0, text:String = "", bold:Bool = false, ?_:Dynamic, ?_:Dynamic, textScale:Float = 1.0)
 	{
 		super(x, y);
 
