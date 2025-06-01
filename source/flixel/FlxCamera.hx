@@ -1236,6 +1236,7 @@ class FlxCamera extends FlxBasic
 			target.getMidpoint(_point);
 			_point.addPoint(targetOffset);
 			focusOn(_point);
+			_scrollTarget.copyFrom(_scrollInternal);
 		}
 		else
 		{
