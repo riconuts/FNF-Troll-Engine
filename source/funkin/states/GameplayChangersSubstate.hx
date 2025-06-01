@@ -123,6 +123,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		add(bg);
 		
 		menu = new AlphabetMenu();
+		menu.textSize = 0.8;
 		menu.controls = controls;
 		menu.cameras = cameras;
 		menu.callbacks.onSelect = (idx, item) -> {
@@ -183,7 +184,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 
 		for (i => option in optionsArray)
 		{
-			var optionLabel = menu.addTextOption(option.name, null, 0.8);
+			var optionLabel = menu.addTextOption(option.name, null);
 			optionLabel.scrollFactor.set();
 			optionLabel.xAdd = 120;
 			optionLabel.x += 200;
