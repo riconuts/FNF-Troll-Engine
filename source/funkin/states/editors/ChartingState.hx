@@ -28,6 +28,7 @@ import flixel.ui.FlxButton;
 import flixel.ui.FlxSpriteButton;
 
 import haxe.Json;
+import haxe.io.Path;
 import haxe.format.JsonParser;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
@@ -315,6 +316,14 @@ class ChartingState extends MusicBeatState
 		UI_box.setPosition(ui_start, 25);
 	}
 
+	private function onLoadMetadata() {
+		_song.metadata ??= {};
+		_song.metadata.songName ??= _song.song ?? "Unknown";
+		_song.metadata.artist ??= "";
+		_song.metadata.charter ??= "";
+		_song.metadata.modcharter ??= "";
+	}
+
 	override function create()
 	{
 		instance = this;
@@ -353,20 +362,12 @@ class ChartingState extends MusicBeatState
 			notes: [],
 			events: [],
 		};
+		onLoadMetadata();
 
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("Chart Editor", _song.song);
 		#end
-		
-		/*
-		if(_song.metadata==null){
-			_song.metadata = {
-				artist: "Unspecified",
-				charter: "Unspecified"
-			}
-		}
-		*/
 
 		currentSongName = Paths.formatToSongPath(_song.song);
 		
@@ -505,6 +506,7 @@ class ChartingState extends MusicBeatState
 			{name: "Event", label: 'Event'},
 			{name: "Section", label: 'Section'},
 			{name: "Song", label: 'Song'},
+			{name: "Metadata", label: 'Metadata'},
 		];
 
 		UI_box = new CustomFlxUITabMenu(null, tabs, true);
@@ -514,6 +516,7 @@ class ChartingState extends MusicBeatState
 
 		adjustCamPos();
 
+		addMetadataUI();
 		addSongUI();
 		addSectionUI();
 		addNoteUI();
@@ -635,23 +638,6 @@ class ChartingState extends MusicBeatState
 		});
 
 		var saveEvents:FlxButton = new FlxButton(110, reloadSongJson.y, 'Save Events', saveEvents);
-
-		/*
-		var saveMetadata:FlxButton = new FlxButton(110, saveEvents.y + 30, 'Save Metadata', function(){
-
-		});
-
-		var loadMetadata:FlxButton = new FlxButton(110, saveMetadata.y + 30, 'Load Metadata', function(){
-			var songName:String = Paths.formatToSongPath(_song.song);
-			var jsonPath = Paths.getPath('songs/$songName/metadata.json');
-
-			if (Paths.exists(jsonPath)){
-				var metadata:Song.SongMetadata = Json.parse(Paths.getContent(jsonPath));
-				_song.metadata = metadata;
-			}
-			
-		});
-		*/
 
 		var clear_events:FlxButton = new FlxButton(loadAutosaveBtn.x, 300, 'Clear events', function()
 			{
@@ -803,9 +789,6 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(saveButton);
 		tab_group_song.add(saveEvents);
 
-		// TODO: per-song metadata 
-/* 		tab_group_song.add(saveMetadata);
-		tab_group_song.add(loadMetadata); */
 		tab_group_song.add(reloadSong);
 		tab_group_song.add(reloadSongJson);
 		tab_group_song.add(loadAutosaveBtn);
@@ -1514,6 +1497,90 @@ class ChartingState extends MusicBeatState
 		trackVolumeSlider.value = val;
 	}
 
+	function addMetadataUI() {
+		var tab_group = new FlxUI(null, UI_box);
+		tab_group.name = 'Metadata';
+
+		var songNameInputText = new FlxUIInputText(10, 30, 180, _song.metadata.songName);
+		songNameInputText.name = "metadata_songName";
+		tab_group.add(songNameInputText);
+		blockPressWhileTypingOn.push(songNameInputText);
+
+		var artistInputText = new FlxUIInputText(10, songNameInputText.y + 30, 180, _song.metadata.artist);
+		artistInputText.name = "metadata_artist";
+		tab_group.add(artistInputText);
+		blockPressWhileTypingOn.push(artistInputText);
+
+		var charterInputText = new FlxUIInputText(10, artistInputText.y + 30, 180, _song.metadata.charter);
+		charterInputText.name = "metadata_charter";
+		tab_group.add(charterInputText);
+		blockPressWhileTypingOn.push(charterInputText);
+
+		var modcharterInputText = new FlxUIInputText(10, charterInputText.y + 30, 180, _song.metadata.modcharter);
+		modcharterInputText.name = "metadata_modcharter";
+		tab_group.add(modcharterInputText);
+		blockPressWhileTypingOn.push(modcharterInputText);
+
+		////
+		// TODO: freeplay data shit idunno
+
+		////
+		function getMetadataPath():String {
+			var chartPath = Reflect.field(_song, "_path");
+			return (chartPath==null ? "" : Path.addTrailingSlash(Path.directory(chartPath))) + "metadata.json";
+		}
+
+		var fileDialog = new lime.ui.FileDialog();
+		fileDialog.onOpen.add(function(resource) {
+			var str:String = (resource:haxe.io.Bytes).toString();
+			if (str != null && str.length > 0) {
+				var data:Dynamic = Json.parse(str);
+				_song.metadata = data; // kinda dangerous
+				onLoadMetadata();
+
+				songNameInputText.text = data.songName;
+				artistInputText.text = data.artist;
+				charterInputText.text = data.charter;
+				modcharterInputText.text = data.modcharter;	
+			}
+		});
+
+		var loadButton = new FlxButton(10, modcharterInputText.y + 30, "Load Metadata", function()
+		{
+			fileDialog.open('json', getMetadataPath(), 'Load Metadata');
+		});
+
+		var saveButton = new FlxButton(10, loadButton.y + 30, "Save Metadata", function()
+		{
+			_song.metadata.songName = songNameInputText.text;
+			_song.metadata.artist = artistInputText.text;
+			_song.metadata.charter = charterInputText.text;
+			_song.metadata.modcharter = modcharterInputText.text;
+
+			var data:String = Json.stringify(_song.metadata, "\t");
+			if ((data != null) && (data.length > 0))
+			{
+				fileDialog.save(data.trim(), 'json', getMetadataPath(), 'Save Metadata');
+			}
+		});
+
+		////
+		tab_group.add(new FlxText(songNameInputText.x, songNameInputText.y - 15, 0, 'Song Name:'));
+		tab_group.add(new FlxText(artistInputText.x, artistInputText.y - 15, 0, 'Artist:'));
+		tab_group.add(new FlxText(charterInputText.x, charterInputText.y - 15, 0, 'Charter:'));
+		tab_group.add(new FlxText(modcharterInputText.x, modcharterInputText.y - 15, 0, 'Modcharter:'));
+		
+		tab_group.add(songNameInputText);
+		tab_group.add(artistInputText);
+		tab_group.add(charterInputText);
+		tab_group.add(modcharterInputText);
+
+		tab_group.add(loadButton);
+		tab_group.add(saveButton);
+
+		UI_box.addGroup(tab_group);
+	}
+
 	function addChartingUI() {
 		var tab_group_chart = new FlxUI(null, UI_box);
 		tab_group_chart.name = 'Editor';
@@ -1824,8 +1891,17 @@ class ChartingState extends MusicBeatState
 					curSelectedNote[0] = value;
 					updateGrid();
 				}
-				
 			}
+			switch (sender.name) {
+				case 'metadata_songName':
+					_song.metadata.songName = sender.text;
+				case 'metadata_artist':
+					_song.metadata.artist = sender.text;
+				case 'metadata_charter':
+					_song.metadata.charter = sender.text;
+				case 'metadata_modcharter':
+					_song.metadata.modcharter = sender.text;
+			}	
 		}
 		else if (id == FlxUISlider.CHANGE_EVENT && (sender is FlxUISlider))
 		{
@@ -3246,6 +3322,8 @@ class ChartingState extends MusicBeatState
 		var fileName:String;
 		var _song:SwagSong = Reflect.copy(_song);
 
+		Reflect.deleteField(_song, "metadata");
+
 		if (Reflect.hasField(_song, "_path")) {
 			fileName = haxe.io.Path.withoutDirectory(Reflect.field(_song, "_path"));
 			Reflect.deleteField(_song, "_path");
@@ -3265,24 +3343,6 @@ class ChartingState extends MusicBeatState
 			_file.save(data.trim(), fileName);
 		}
 	}
-
-	/*
-	private function saveMetadata(){
-		var metadata = metadata ?? {
-			songName: "Unspecified",
-		}
-		var data:String = Json.stringify(metadata, "\t");
-
-		if ((data != null) && (data.length > 0))
-		{
-			_file = new FileReference();
-			_file.addEventListener(Event.COMPLETE, onSaveComplete);
-			_file.addEventListener(Event.CANCEL, onSaveCancel);
-			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-			_file.save(data.trim(), "metadata.json");
-		}
-	}
-	*/
 
 	private function saveEvents()
 	{

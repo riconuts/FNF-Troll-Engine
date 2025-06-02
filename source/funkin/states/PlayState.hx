@@ -637,7 +637,7 @@ class PlayState extends MusicBeatState
 		Conductor.songPosition = Conductor.crochet * -5;
 		Conductor.updateSteps();
 
-		metadata = SONG.metadata ?? (song?.getMetadata(difficultyName));
+		metadata = SONG.metadata ??= (song?.getMetadata(difficultyName));
 		if (showDebugTraces && metadata == null)
 			trace('No metadata for $songId. Maybe add some?');
 
