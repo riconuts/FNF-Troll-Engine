@@ -1578,6 +1578,8 @@ class ChartingState extends MusicBeatState
 		tab_group.add(loadButton);
 		tab_group.add(saveButton);
 
+		tab_group.add(new FlxText(10, saveButton.y + 30, UI_box.width - 20, 'NOTE: Metadata is saved and loaded as a separate file, it is not included in the chart file!'));
+
 		UI_box.addGroup(tab_group);
 	}
 
