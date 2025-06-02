@@ -1996,18 +1996,22 @@ class ChartingState extends MusicBeatState
 
 			if (movedDummyY)
 			{
+				var doUpdate:Bool = false;
+
 				for (note in heldNotesClick){
 					if (note == null) continue;
 				
-					var zoomMult:Float = zoomList[curZoom];
-					var step:Float = Conductor.stepCrochet;
+					// how much time does a grid block occupy
+					var gridTime:Float = Conductor.stepCrochet / zoomList[curZoom];
+					// time at which the mouse is standing on the grid
+					var clickTime:Float = sectionStartTime() + curDummyY * gridTime;
+					
+					var len:Float = Math.max(0, clickTime - note[0]);
+					note[2] = FlxG.keys.pressed.SHIFT ? len : CoolUtil.snap(len, gridTime);
+					doUpdate = true;
+				}
 
-					var diff:Float = (curDummyY - startDummyY);
-					var notePos:Float = (diff < 0) ? curDummyY : startDummyY;
-
-					note[0] = sectionStartTime() + (notePos / zoomMult) * step;
-					note[2] = Math.abs((diff / zoomMult) * step);
-
+				if (doUpdate) {
 					updateNoteUI();
 					updateGrid();
 				}
@@ -2260,16 +2264,23 @@ class ChartingState extends MusicBeatState
 
 			if (heldNotesVortex.length > 0)
 			{
+				var doUpdate:Bool = false;
+
 				for(i in 0...holdArray.length){
 					if (holdArray[i]){
 						var note = heldNotesVortex[i];
 						if (note != null){
-							var len = CoolUtil.snap(Conductor.songPosition - note[0], Conductor.stepCrochet);
-							setNoteSustain(len, note);
+							note[2] = CoolUtil.snap(Conductor.songPosition - note[0], Conductor.stepCrochet);
+							doUpdate = true;
 						}
 					}else {
 						heldNotesVortex[i] = null;
 					}
+				}
+
+				if (doUpdate) {
+					updateNoteUI();
+					updateGrid();
 				}
 			}
 
