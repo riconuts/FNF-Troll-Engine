@@ -1,8 +1,9 @@
 package funkin.data;
 
 #if USING_MOONCHART
-import funkin.data.FNFTroll as SupportedFormat;
+import moonchart.formats.fnf.legacy.FNFTroll as SupportedFormat;
 import moonchart.formats.fnf.FNFVSlice;
+import moonchart.formats.StepMania;
 import moonchart.backend.FormatData.Format;
 import moonchart.backend.FormatDetector;
 #end
@@ -16,6 +17,10 @@ import haxe.Json;
 
 using funkin.CoolerStringTools;
 using StringTools;
+
+#if USING_MOONCHART
+typedef StepManiaDynamic = moonchart.formats.StepMania.StepManiaBasic<moonchart.parsers.StepManiaParser.StepManiaFormat>;
+#end
 
 typedef PsychEvent = {
 	strumTime:Float,
@@ -155,29 +160,39 @@ class Song extends BaseSong
 		if (diffSuffix != '') files.push(songId + diffSuffix);
 		files.push(songId);
 
-		for (ext in moonchartExtensions) {
-			for (input in files) {
+		for (input in files) {
+			for (ext in moonchartExtensions) {
 				var filePath:String = getSongFile('$input.$ext');
-				var fileFormat:Null<Format> = findFormat([filePath]);
+				if (!Paths.exists(filePath)) continue;
+
+				var fileFormat:Null<Format> = FormatDetector.findFormat([filePath]);
+				if (fileFormat == null) continue;
 
 				switch(fileFormat) {
-					case null:
-						continue;
-
-					case FNF_LEGACY_PSYCH | FNF_LEGACY | "FNF_TROLL":
+					case FNF_LEGACY_PSYCH | FNF_LEGACY | FNF_LEGACY_TROLL:
 						return parseSongJson(filePath);
 						
 					default:
 						trace('Converting from format $fileFormat!');
 
-						var chart = FormatDetector.createFormatInstance(fileFormat).fromFile(filePath);
-						if (chart.formatMeta.supportsDiffs && !chart.diffs.contains(chartId))
+						var instance = FormatDetector.createFormatInstance(fileFormat).fromFile(filePath);
+						if (instance.formatMeta.supportsDiffs && !instance.diffs.contains(chartId))
 							continue;
 
-						var converted = new SupportedFormat().fromFormat(chart, chartId);
-						var chart:JsonSong = cast converted.data.song;
+						var chart:JsonSong = cast (new SupportedFormat().fromFormat(instance, chartId)).data.song;
 						chart._path = filePath;
 						chart.song = songId;
+						chart.tracks = null;
+
+						if (instance is StepManiaBasic) @:privateAccess {
+							var instance:StepManiaDynamic = cast instance;
+							chart.tracks = {inst: [Path.withoutExtension(instance.data.MUSIC)]};
+							#if (moonchart <= "0.5.0")
+							chart.metadata ??= {};
+							chart.metadata.songName ??= instance.data.TITLE;
+							#end
+						}
+
 						return onLoadJson(chart);
 				}
 			}
@@ -224,25 +239,6 @@ class Song extends BaseSong
 	}
 
 	#if USING_MOONCHART
-	private static function findFormat(filePaths:Array<String>) {
-		var files:Array<String> = [];
-		for (path in filePaths) {
-			if (Paths.exists(path)) 
-				files.push(path);
-		}
-
-		if (files.length == 0)
-			return null;
-		
-		var data:Null<Format> = null;
-		try{
-			data = FormatDetector.findFormat(files);
-		}catch(e:Any){
-			data = null;
-		}
-		return data;
-	}
-
 	public static var moonchartExtensions(get, null):Array<String> = [];
 	static function get_moonchartExtensions(){
 		if (moonchartExtensions.length == 0){
@@ -267,71 +263,30 @@ class Song extends BaseSong
 		final songPath = getSongFile("");
 		final charts:Map<String, Bool> = [];
 
-		#if USING_MOONCHART		
-		function processFileName(unprocessedName:String) {
-			var fileName:String = unprocessedName.toLowerCase();
-			var filePath:String = songPath + unprocessedName;
-
-			if (!isAMoonchartRecognizedFile(fileName))
-				return;
-
-			var fileFormat:Format = findFormat([filePath]);
-			if (fileFormat == null) return;
-
-			switch (fileFormat) {
-				case FNF_LEGACY_PSYCH | FNF_LEGACY:
-					if (fileName == '$songId.json') {
-						charts.set("normal", true);
-						return;
-					} 
-					else if (fileName.startsWith('$songId-')) {
-						final extension_dot = songId.length + 1;
-						charts.set(fileName.substr(extension_dot, fileName.length - extension_dot - 5), true);
-						return;
-					}
-					
-				default:
-					var chart = FormatDetector.createFormatInstance(fileFormat).fromFile(filePath);
-					chart = chart.fromFile(filePath);
-
-					if (chart.formatMeta.supportsDiffs || chart.diffs.length > 0){
-						for (diff in chart.diffs)
-							charts.set(diff, true);
-						
-					}else{
-						var woExtension:String = Path.withoutExtension(filePath);
-						if (woExtension == songId){
-							charts.set("normal", true);
-							return;
-						}
-						if (woExtension.startsWith('$songId-')){
-							var split = woExtension.split("-");
-							split.shift();
-							var diff = split.join("-");
-							if(diff == 'DEFAULT_DIFF')
-								diff = 'Moonchart';
-							
-							charts.set(diff, true);
-							return;
-						}
-					}
-
+		function processFileName(fileName:String) {
+			var woExtension:String = Path.withoutExtension(fileName);
+			if (woExtension == songId) {
+				charts.set("normal", true);
+			}
+			else if (woExtension.startsWith('$songId-')){
+				var diff = woExtension.substr(songId.length + 1);
+				charts.set(diff, true);
 			}
 		}
 
-		////
+		#if USING_MOONCHART				
 		{
-			var spoon:Array<String> = [];
-			var crumb:Array<String> = [];
+			var filePaths:Array<String> = [];
+			var fileNames:Array<String> = [];
 
-			Paths.iterateDirectory(songPath, (fileName)->{
-				if (isAMoonchartRecognizedFile(fileName)){
-					spoon.push(songPath+fileName);
-					crumb.push(fileName);
+			Paths.iterateDirectory(songPath, (fileName:String)->{
+				if (fileName.startsWith(songId) && isAMoonchartRecognizedFile(fileName)){
+					filePaths.push(songPath+fileName);
+					fileNames.push(fileName);
 				}
 			});
 
-			var ALL_FILES_DETECTED_FORMAT = findFormat(spoon);
+			var ALL_FILES_DETECTED_FORMAT = FormatDetector.findFormat(filePaths);
 			if (ALL_FILES_DETECTED_FORMAT == FNF_VSLICE) {
 				var chartsFilePath:String = getSongFile('$songId-chart.json');
 				var metadataPath:String = getSongFile('$songId-metadata.json');
@@ -339,24 +294,25 @@ class Song extends BaseSong
 				for (diff in chart.diffs) charts.set(diff, true);
 				
 			}else {
-				for (fileName in crumb) processFileName(fileName);
+				for (i in 0...filePaths.length) {
+					var filePath:String = filePaths[i];
+					var fileFormat:Format = FormatDetector.findFormat(filePath);
+					//trace(filePath, fileFormat);
+					
+					var instance = FormatDetector.createFormatInstance(fileFormat);
+					if (instance.formatMeta.supportsDiffs) {
+						instance = instance.fromFile(filePath);
+						for (diff in instance.diffs)
+							charts.set(diff, true);
+						
+					}else{
+						var fileName:String = fileNames[i];
+						processFileName(fileName);
+					}
+				}
 			}
 		}
 		#else
-		
-		function processFileName(unprocessedName:String)
-		{		
-			var fileName:String = unprocessedName.toLowerCase();
-			if (fileName == '$songId.json'){
-				charts.set("normal", true);
-			}
-			else if (fileName.startsWith('$songId-') && fileName.endsWith('.json')) {
-				final extension_dot = songId.length + 1;
-				charts.set(fileName.substr(extension_dot, fileName.length - extension_dot - 5), true);
-			}
-
-		}
-
 		Paths.iterateDirectory(songPath, processFileName);		
 		#end
 
@@ -487,8 +443,11 @@ class Song extends BaseSong
 			inline function check(name:String):Null<String> // returns name if it exists, and null if not
 				return Paths.exists(Path.join([folderPath, name + "." + Paths.SOUND_EXT])) ? name : null;
 
-			var playerTrack:String = check('Voices-' + songJson.player1) ?? check("Voices-Player") ?? 'Voices';
-			var opponentTrack:String =  check('Voices-' + songJson.player2) ?? check("Voices-Opponent") ?? 'Voices';			
+			inline function getVariantless(str):String
+				return str.split('-')[0];
+
+			var playerTrack:String = check('Voices-' + songJson.player1) ?? check('Voices-' + getVariantless(songJson.player1)) ?? check("Voices-Player") ?? 'Voices';
+			var opponentTrack:String =  check('Voices-' + songJson.player2) ?? check('Voices-' + getVariantless(songJson.player2)) ?? check("Voices-Opponent") ?? 'Voices';			
 			return {inst: instTracks, player: [playerTrack], opponent: [opponentTrack]};
 		}
 	}
