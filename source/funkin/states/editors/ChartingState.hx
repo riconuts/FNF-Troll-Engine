@@ -1984,7 +1984,9 @@ class ChartingState extends MusicBeatState
 			}
 			else if (onGrid){
 				FlxG.log.add('added note');
-				addNote();
+				var noteTime:Float = sectionStartTime() + getStrumTime(dummyArrow.y * (getSectionBeats() / 4), false);
+				var column:Int = Math.floor((FlxG.mouse.x - GRID_SIZE) / GRID_SIZE);
+				addNote(noteTime, column);
 			}
 		}else if(FlxG.mouse.pressed){
 
@@ -2252,7 +2254,7 @@ class ChartingState extends MusicBeatState
 				FlxG.keys.pressed.FIVE, FlxG.keys.pressed.SIX, FlxG.keys.pressed.SEVEN, FlxG.keys.pressed.EIGHT
 			];
 
-			if (heldNotesVortex.length > 0 && holdArray.contains(true))
+			if (heldNotesVortex.length > 0)
 			{
 				for(i in 0...holdArray.length){
 					if (holdArray[i]){
@@ -2261,20 +2263,35 @@ class ChartingState extends MusicBeatState
 							var len = CoolUtil.snap(Conductor.songPosition - note[0], Conductor.stepCrochet);
 							setNoteSustain(len, note);
 						}
-					}else if(heldNotesVortex[i]!=null)
+					}else {
 						heldNotesVortex[i] = null;
-					
+					}
 				}
-			}else{
-				heldNotesVortex = [];
 			}
 
-			if (controlArray.contains(true))
+			for (i in 0...controlArray.length)
 			{
-				for (i in 0...controlArray.length)
-				{
-					if(controlArray[i])
-						doANoteThing(Conductor.songPosition, i, currentType);
+				if (controlArray[i]) {
+					var delnote = false;
+
+					if (strumLineNotes.members[i].overlaps(curRenderedNotes)) {
+						var c:Int =i%_song.keyCount;
+						var p = FlxPoint.get(strumLineNotes.members[i].x + 1, strumLine.y + 1);
+						for (note in curRenderedNotes) {
+							if (note != null && note.exists && note.alive) {
+								if (note.column == c && note.overlapsPoint(p)) {
+									//trace('tryin to delete note...');
+									deleteNote(note);
+									delnote = true;
+									break;
+								}
+							}
+						}
+						p.put();
+					}
+
+					if (!delnote)
+						addNote(Conductor.songPosition, i, currentType, false);
 				}
 			}
 		}	
@@ -2594,26 +2611,21 @@ class ChartingState extends MusicBeatState
 		if (note == null)
 			note = curSelectedNote;
 
-		if (note != null)
-		{
-			if (note[2] != null)
-			{
-				if(note[2] == value)
-					return;
-				note[2] = value;
-				note[2] = Math.max(note[2], 0);
-			}
-		}
+		if (note != null) {
+			note[2] = Math.max(value, 0);
 
-		updateNoteUI();
-		updateGrid();
+			updateNoteUI();
+			updateGrid();
+		}
 	}
 
 	function changeNoteSustain(value:Float, ?note:Array<Dynamic>):Void
 	{
 		if (note == null)
 			note = curSelectedNote;
-		setNoteSustain(note[2] + value, note);
+
+		if (note != null)
+			setNoteSustain(note[2] + value, note);
 	}
 
 	// Go to the current section's start time
@@ -3077,25 +3089,6 @@ class ChartingState extends MusicBeatState
 		updateGrid();
 	}
 
-	public function doANoteThing(cs, d, style){
-		var delnote = false;
-		if(strumLineNotes.members[d].overlaps(curRenderedNotes))
-		{
-			curRenderedNotes.forEachAlive(function(note:Note)
-			{
-				if (note.overlapsPoint(new FlxPoint(strumLineNotes.members[d].x + 1,strumLine.y+1)) && note.column == d%_song.keyCount)
-				{
-						//trace('tryin to delete note...');
-						if(!delnote) deleteNote(note);
-						delnote = true;
-				}
-			});
-		}
-
-		if (!delnote){
-			addNote(cs, d, style, false);
-		}
-	}
 	function clearSong():Void
 	{
 		for (daSection in 0..._song.notes.length)
@@ -3106,43 +3099,34 @@ class ChartingState extends MusicBeatState
 		updateGrid();
 	}
 
-	private function addNote(strum:Null<Float> = null, data:Null<Int> = null, type:Null<Int> = null, click:Bool=true):Void
+	private function addNote(noteStrum:Float, column:Int, type:Null<Int> = null, click:Bool=true):Void
 	{
-		var noteStrum:Float = strum!=null ? strum : getStrumTime(dummyArrow.y * (getSectionBeats() / 4), false) + sectionStartTime();
-		var column:Int = data!=null ? data : Math.floor((FlxG.mouse.x - GRID_SIZE) / GRID_SIZE);
-		var noteSus:Float = 0.0;
-		var daType:Int = type!=null ? type : currentType;
-		var isEvent:Bool = column < 0;
-
-		if (isEvent)
+		if (column < 0) // event note
 		{
 			var eventType:String = eventNameInput.text; //eventStuff[Std.parseInt(eventDropDown.selectedId)][0];
 			var text1:String = value1InputText.text;
 			var text2:String = value2InputText.text;
 
-			_song.events.push([noteStrum, [[eventType, text1, text2]]]);
-			curSelectedNote = _song.events[_song.events.length - 1];
+			curSelectedNote = [noteStrum, [[eventType, text1, text2]]];
+			_song.events.push(curSelectedNote);
 			curEventSelected = 0;
 			changeEventSelected();
 		}
 		else		
 		{
-			var noteTypeName:String = noteTypeIntMap.get(daType);
+			var noteSus:Float = 0.0;
+			var noteTypeName:String = noteTypeIntMap.get(type ?? currentType);
+			var heldNotes = (click ? heldNotesClick : heldNotesVortex);
 
-			_song.notes[curSec].sectionNotes.push([noteStrum, column, noteSus, noteTypeName]);
-			curSelectedNote = _song.notes[curSec].sectionNotes[_song.notes[curSec].sectionNotes.length - 1];
-			
-			if (click){
-				heldNotesClick[column] = curSelectedNote;
+			curSelectedNote = [noteStrum, column, noteSus, noteTypeName];
+			_song.notes[curSec].sectionNotes.push(curSelectedNote);
+			heldNotes[column] = curSelectedNote;
 
-				if (FlxG.keys.pressed.CONTROL){
-					var w = (column + _song.keyCount) % (_song.keyCount * 2);
-					var note:Array<Dynamic> = [noteStrum, w, noteSus, noteTypeName];
-					_song.notes[curSec].sectionNotes.push(note);
-					heldNotesClick[w] = note;
-				}
-			}else{
-				heldNotesVortex[column] = curSelectedNote;
+			if (FlxG.keys.pressed.CONTROL) {
+				var mirrorColumn = (column + _song.keyCount) % (_song.keyCount * 2);
+				var note:Array<Dynamic> = [noteStrum, mirrorColumn, noteSus, noteTypeName];
+				_song.notes[curSec].sectionNotes.push(note);
+				heldNotes[mirrorColumn] = note;
 			}
 		}
 
