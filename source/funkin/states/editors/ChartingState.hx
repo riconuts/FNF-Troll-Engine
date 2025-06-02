@@ -55,7 +55,6 @@ using Lambda;
 
 @:access(flixel.sound.FlxSound._sound)
 @:access(openfl.media.Sound.__buffer)
-
 class ChartingState extends MusicBeatState
 {
 	var oppHitsound:FlxSound;
@@ -501,14 +500,14 @@ class ChartingState extends MusicBeatState
 		*/
 
 		var tabs = [
-			{name: "Song", label: 'Song'},
-			{name: "Section", label: 'Section'},
+			{name: "Editor", label: 'Editor'},
 			{name: "Note", label: 'Note'},
-			{name: "Events", label: 'Events'},
-			{name: "Charting", label: 'Charting'},
+			{name: "Event", label: 'Event'},
+			{name: "Section", label: 'Section'},
+			{name: "Song", label: 'Song'},
 		];
 
-		UI_box = new FlxUITabMenu(null, tabs, true);
+		UI_box = new CustomFlxUITabMenu(null, tabs, true);
 		UI_box.resize(300, 400);
 		UI_box.scrollFactor.set();
 		add(UI_box);
@@ -1240,7 +1239,7 @@ class ChartingState extends MusicBeatState
 	function addEventsUI():Void
 	{
 		var tab_group_event = new FlxUI(null, UI_box);
-		tab_group_event.name = 'Events';
+		tab_group_event.name = 'Event';
 
 		descText = new FlxText(20, 200, 0, eventStuff[0][0]);
 		
@@ -1517,7 +1516,7 @@ class ChartingState extends MusicBeatState
 
 	function addChartingUI() {
 		var tab_group_chart = new FlxUI(null, UI_box);
-		tab_group_chart.name = 'Charting';
+		tab_group_chart.name = 'Editor';
 
 		////////
 		var trackNamesArray = ["None"];
@@ -1768,41 +1767,37 @@ class ChartingState extends MusicBeatState
 			var nums:FlxUINumericStepper = cast sender;
 			var wname = nums.name;
 			FlxG.log.add(wname);
-			if (wname == 'section_beats')
-			{
-				_song.notes[curSec].sectionBeats = nums.value;
-				reloadGridLayer();
-			}
-			else if (wname == 'song_keyCount')
-			{
-				_song.keyCount = Math.ceil(Math.max(1, nums.value));
-				reloadGridLayer();
-				adjustCamPos();
-			}
-			else if (wname == 'song_speed')
-			{
-				_song.speed = nums.value;
-			}
-			else if (wname == 'song_bpm')
-			{
-				_song.bpm = nums.value;
-				Conductor.mapBPMChanges(_song);
-				updateGrid();
-			}
-			else if (wname == 'note_susLength')
-			{
-				if(curSelectedNote != null && curSelectedNote[1] > -1) {
-					curSelectedNote[2] = nums.value;
+
+			switch(wname) {
+				case 'section_beats':
+					_song.notes[curSec].sectionBeats = nums.value;
+					reloadGridLayer();
+				
+				case 'song_keyCount':
+					_song.keyCount = Math.ceil(Math.max(1, nums.value));
+					reloadGridLayer();
+					adjustCamPos();
+				
+				case 'song_speed':
+					_song.speed = nums.value;
+				
+				case 'song_bpm':
+					_song.bpm = nums.value;
+					Conductor.mapBPMChanges(_song);
 					updateGrid();
-				} else {
-					sender.value = 0;
-				}
-			}
-			else if (wname == 'section_bpm')
-			{
-				_song.notes[curSec].bpm = nums.value;
-				Conductor.mapBPMChanges(_song);
-				updateGrid();
+				
+				case 'note_susLength':
+					if(curSelectedNote != null && curSelectedNote[1] > -1) {
+						curSelectedNote[2] = nums.value;
+						updateGrid();
+					} else {
+						sender.value = 0;
+					}
+
+				case 'section_bpm':
+					_song.notes[curSec].bpm = nums.value;
+					Conductor.mapBPMChanges(_song);
+					updateGrid();
 			}
 		}
 		else if(id == FlxUIInputText.CHANGE_EVENT && (sender is FlxUIInputText)) {
@@ -3351,4 +3346,10 @@ class ChartingState extends MusicBeatState
 		if(_song.notes[section] != null) val = _song.notes[section].sectionBeats;
 		return val != null ? val : 4;
 	}
+}
+
+/** dont sort my shit **/
+class CustomFlxUITabMenu extends FlxUITabMenu {
+	override function sortTabs(a, b):Int
+		return 0;
 }
