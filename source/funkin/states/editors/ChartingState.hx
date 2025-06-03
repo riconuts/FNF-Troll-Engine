@@ -173,7 +173,7 @@ class ChartingState extends MusicBeatState
 	var tracks:Array<FlxSound> = [];
 	var soundTracksMap:Map<String, FlxSound> = [];
 	
-	var currentSongName:String;
+	var songId:String;
 	var songLength:Float = 0.0;
 
 	var leftIcon:HealthIcon;
@@ -318,7 +318,7 @@ class ChartingState extends MusicBeatState
 
 	private function onLoadMetadata() {
 		_song.metadata ??= {};
-		_song.metadata.songName ??= _song.song ?? "Unknown";
+		_song.metadata.songName ??= _song.song ?? songId ?? "Untitled";
 		_song.metadata.artist ??= "";
 		_song.metadata.charter ??= "";
 		_song.metadata.modcharter ??= "";
@@ -362,21 +362,15 @@ class ChartingState extends MusicBeatState
 			notes: [],
 			events: [],
 		};
+		this.songId = (PlayState.song?.songId) ?? Paths.formatToSongPath(_song.song);
 		onLoadMetadata();
 
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("Chart Editor", _song.song);
 		#end
-
-		currentSongName = Paths.formatToSongPath(_song.song);
 		
 		MusicBeatState.stopMenuMusic();
-
-		Conductor.cleanup();
-		Conductor.changeBPM(_song.bpm);
-		Conductor.mapBPMChanges(_song);
-		Conductor.tracks = this.tracks;
 
 		if (_song.notes.length == 0){
 			pushSection();
@@ -385,6 +379,10 @@ class ChartingState extends MusicBeatState
 			curSec = _song.notes.length - 1;
 		}
 
+		Conductor.cleanup();
+		Conductor.changeBPM(_song.bpm);
+		Conductor.mapBPMChanges(_song);
+		Conductor.tracks = this.tracks;
 		loadTracks();
 /* 		fixEvents(); */
 
@@ -541,8 +539,8 @@ class ChartingState extends MusicBeatState
 		quantTxt.scrollFactor.set();
 		add(quantTxt);
 
-		if (lastSong != currentSongName) {
-			lastSong = currentSongName;
+		if (lastSong != songId) {
+			lastSong = songId;
 			curSec = 0;
 		}
 
@@ -603,7 +601,7 @@ class ChartingState extends MusicBeatState
 
 		var reloadSong:FlxButton = new FlxButton(saveButton.x + 90, saveButton.y, "Reload Audio", function()
 		{
-			currentSongName = Paths.formatToSongPath(UI_songTitle.text);
+			songId = Paths.formatToSongPath(UI_songTitle.text);
 			loadTracks();
 			updateWaveform();
 		});
@@ -1770,7 +1768,7 @@ class ChartingState extends MusicBeatState
 				if (PlayState.song != null)
 					PlayState.song.getTrackSound(trackName);
 				else
-					Paths.track(currentSongName, trackName);
+					Paths.track(songId, trackName);
 			}
 
 			if (file == null || file.length <= 0) 
