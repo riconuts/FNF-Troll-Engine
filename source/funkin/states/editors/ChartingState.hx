@@ -322,6 +322,15 @@ class ChartingState extends MusicBeatState
 		_song.metadata.artist ??= "";
 		_song.metadata.charter ??= "";
 		_song.metadata.modcharter ??= "";
+
+		updateDiscordRPC();
+	}
+
+	private function updateDiscordRPC() {
+		#if DISCORD_ALLOWED
+		// Updating Discord Rich Presence
+		DiscordClient.changePresence("Chart Editor", _song.metadata.songName);
+		#end
 	}
 
 	override function create()
@@ -364,11 +373,6 @@ class ChartingState extends MusicBeatState
 		};
 		this.songId = (PlayState.song?.songId) ?? Paths.formatToSongPath(_song.song);
 		onLoadMetadata();
-
-		#if DISCORD_ALLOWED
-		// Updating Discord Rich Presence
-		DiscordClient.changePresence("Chart Editor", _song.song);
-		#end
 		
 		MusicBeatState.stopMenuMusic();
 
@@ -1900,6 +1904,7 @@ class ChartingState extends MusicBeatState
 
 				case 'metadata_songName':
 					_song.metadata.songName = sender.text;
+					updateDiscordRPC();
 				case 'metadata_artist':
 					_song.metadata.artist = sender.text;
 				case 'metadata_charter':
