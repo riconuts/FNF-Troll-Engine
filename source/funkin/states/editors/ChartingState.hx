@@ -589,12 +589,10 @@ class ChartingState extends MusicBeatState
 		_song.events = eventsData;	
 	}
 
-	var UI_songTitle:FlxUIInputText;
-	var noteSkinInputText:FlxUIInputText;
-	var noteSplashesInputText:FlxUIInputText;
 	function addSongUI():Void
 	{
-		UI_songTitle = new FlxUIInputText(10, 10, 70, _song.song, 8);
+		var UI_songTitle = new FlxUIInputText(10, 10, 70, _song.song, 8);
+		UI_songTitle.name = 'song_title';
 		blockPressWhileTypingOn.push(UI_songTitle);
 
 		var saveButton:FlxButton = new FlxButton(110, 8, "Save Chart", saveLevel);
@@ -767,10 +765,11 @@ class ChartingState extends MusicBeatState
 		var splashSkin = PlayState.SONG.splashSkin;
 		if (splashSkin == null) splashSkin = '';
 
-		noteSkinInputText = new FlxUIInputText(player2DropDown.x, player2DropDown.y + 50, 150, arrowSkin, 8);
+		var noteSkinInputText = new FlxUIInputText(player2DropDown.x, player2DropDown.y + 50, 150, arrowSkin, 8);
 		blockPressWhileTypingOn.push(noteSkinInputText);
 
-		noteSplashesInputText = new FlxUIInputText(noteSkinInputText.x, noteSkinInputText.y + 35, 150, splashSkin, 8);
+		var noteSplashesInputText = new FlxUIInputText(noteSkinInputText.x, noteSkinInputText.y + 35, 150, splashSkin, 8);
+		noteSplashesInputText.name = 'song_noteSplashes';
 		blockPressWhileTypingOn.push(noteSplashesInputText);
 
 		var reloadNotesButton:FlxButton = new FlxButton(noteSplashesInputText.x + 5, noteSplashesInputText.y + 20, 'Change Notes', function() {
@@ -1124,6 +1123,7 @@ class ChartingState extends MusicBeatState
 		blockPressWhileTypingOnStepper.push(stepperSusLength);
 
 		strumTimeInputText = new FlxUIInputText(10, 65, 180, "0");
+		strumTimeInputText.name = 'note_strumTime';
 		tab_group_note.add(strumTimeInputText);
 		blockPressWhileTypingOn.push(strumTimeInputText);
 
@@ -1304,11 +1304,13 @@ class ChartingState extends MusicBeatState
 		var text:FlxText = new FlxText(20, 90, 0, "Value 1:");
 		tab_group_event.add(text);
 		value1InputText = new FlxUIInputText(20, 110, 100, "");
+		value1InputText.name = 'event_value1';
 		blockPressWhileTypingOn.push(value1InputText);
 
 		var text:FlxText = new FlxText(20, 130, 0, "Value 2:");
 		tab_group_event.add(text);
 		value2InputText = new FlxUIInputText(20, 150, 100, "");
+		value2InputText.name = 'event_value2';
 		blockPressWhileTypingOn.push(value2InputText);
 
 		// New event buttons
@@ -1829,11 +1831,10 @@ class ChartingState extends MusicBeatState
 					_song.notes[curSec].altAnim = check.checked;
 			}
 		}
-		else if (id == FlxUINumericStepper.CHANGE_EVENT && (sender is FlxUINumericStepper))
+		else if (id == FlxUINumericStepper.CHANGE_EVENT)
 		{
 			var nums:FlxUINumericStepper = cast sender;
 			var wname = nums.name;
-			FlxG.log.add(wname);
 
 			switch(wname) {
 				case 'section_beats':
@@ -1867,32 +1868,36 @@ class ChartingState extends MusicBeatState
 					updateGrid();
 			}
 		}
-		else if(id == FlxUIInputText.CHANGE_EVENT && (sender is FlxUIInputText)) {
-			if(sender == noteSplashesInputText) {
-				_song.splashSkin = noteSplashesInputText.text;
-			}
-			else if (sender == UI_songTitle){
-				_song.song = UI_songTitle.text;
-			}else if(curSelectedNote != null)
-			{
-				if(curSelectedNote[1][curEventSelected] != null){
-					if(sender == value1InputText) {
-						curSelectedNote[1][curEventSelected][1] = value1InputText.text;
-						updateGrid();
-					}
-					else if(sender == value2InputText) {
-						curSelectedNote[1][curEventSelected][2] = value2InputText.text;
-						updateGrid();
-					}
-				}
-				if(sender == strumTimeInputText) {
-					var value:Float = Std.parseFloat(strumTimeInputText.text);
-					if(Math.isNaN(value)) value = 0;
-					curSelectedNote[0] = value;
-					updateGrid();
-				}
-			}
+		else if(id == FlxUIInputText.CHANGE_EVENT) {
+			var sender:FlxUIInputText = cast sender;
+
 			switch (sender.name) {
+				case 'song_title':
+					_song.song = sender.text;
+
+				case 'song_noteSplashes':
+					_song.splashSkin = sender.text;
+
+				case 'note_strumTime':
+					if (curSelectedNote != null) {
+						var value:Float = Std.parseFloat(sender.text);
+						if(Math.isNaN(value)) value = 0;
+						curSelectedNote[0] = value;
+						updateGrid();
+					}
+
+				case 'event_value1':
+					if (curSelectedNote != null && curSelectedNote[1][curEventSelected] != null) {
+						curSelectedNote[1][curEventSelected][1] = sender.text;
+						updateGrid();
+					}
+
+				case 'event_value2':
+					if (curSelectedNote != null && curSelectedNote[1][curEventSelected] != null) {
+						curSelectedNote[1][curEventSelected][2] = sender.text;
+						updateGrid();
+					}
+
 				case 'metadata_songName':
 					_song.metadata.songName = sender.text;
 				case 'metadata_artist':
@@ -1903,7 +1908,7 @@ class ChartingState extends MusicBeatState
 					_song.metadata.modcharter = sender.text;
 			}	
 		}
-		else if (id == FlxUISlider.CHANGE_EVENT && (sender is FlxUISlider))
+		else if (id == FlxUISlider.CHANGE_EVENT)
 		{
 			var sender:FlxUISlider = cast sender;
 
