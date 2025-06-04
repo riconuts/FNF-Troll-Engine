@@ -1,4 +1,4 @@
-package funkin.objects.hud;
+package funkin.objects.huds;
 
 import math.CoolMath;
 import flixel.text.FlxText;

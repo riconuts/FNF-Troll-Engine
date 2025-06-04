@@ -11,8 +11,10 @@ import funkin.objects.notes.StrumNote;
 import funkin.objects.Fish;
 import funkin.objects.Stage;
 import funkin.objects.Character;
-import funkin.objects.RatingGroup;
+import funkin.objects.huds.*;
 import funkin.objects.hud.*;
+import funkin.objects.hud.RatingGroup;
+import funkin.objects.hud.Countdown;
 import funkin.objects.playfields.*;
 import funkin.data.Stats;
 import funkin.data.JudgmentManager;
@@ -1375,13 +1377,13 @@ class PlayState extends MusicBeatState
 			return;
 
 		// Do the countdown.
-		var countdown = new funkin.objects.Countdown(this);
+		var countdown = new Countdown(this);
 		resetCountdown(countdown);
 		countdown.start(Conductor.crochet * 0.001); // time is optional but here we are
 		curCountdown = countdown;
 	}
 
-	public function resetCountdown(countdown:funkin.objects.Countdown):Void {
+	public function resetCountdown(countdown:Countdown):Void {
 		if (countdown == null) return;
 		// I don't wanna break scripts so if you have a better way, do it
 		if (countdown.introAlts != introAlts) countdown.introAlts = introAlts;

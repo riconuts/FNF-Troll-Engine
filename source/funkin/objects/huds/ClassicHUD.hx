@@ -1,4 +1,4 @@
-package funkin.objects.hud;
+package funkin.objects.huds;
 
 import flixel.math.FlxMath;
 import flixel.util.FlxColor;

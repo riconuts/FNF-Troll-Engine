@@ -1,4 +1,4 @@
-package funkin.objects.hud;
+package funkin.objects.huds;
 
 import math.CoolMath;
 import flixel.group.FlxGroup.FlxTypedGroup;
@@ -12,7 +12,7 @@ using StringTools;
 using funkin.CoolerStringTools;
 
 /**
-	Joke. Taken from Kade Engine 1.6
+	Kade Engine 1.6 HUD
 **/
 class KadeHUD extends BaseHUD
 {

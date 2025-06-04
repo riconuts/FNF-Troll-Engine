@@ -1,8 +1,7 @@
 package funkin.states.options;
 
-import funkin.objects.hud.BaseHUD;
-import funkin.objects.RatingGroup;
-import funkin.objects.RatingGroup.RatingSprite;
+import funkin.objects.huds.BaseHUD;
+import funkin.objects.hud.RatingGroup;
 
 import flixel.util.FlxColor;
 import flixel.text.FlxText;
