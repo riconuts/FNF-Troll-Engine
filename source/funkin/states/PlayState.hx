@@ -3186,7 +3186,20 @@ class PlayState extends MusicBeatState
 				numSpr.moves = false;
 
 				numSpr.scale.copyFrom(ratingGroup.comboTemplate.scale);
-				numSpr.tween = FlxTween.tween(numSpr.scale, {x: numSpr.scale.x, y: numSpr.scale.y}, 0.2, {ease: FlxEase.circOut});
+				numSpr.tween = FlxTween.tween(numSpr.scale, {x: numSpr.scale.x, y: numSpr.scale.y}, 0.2, {
+					ease: FlxEase.circOut,
+					onComplete: function(tween:FlxTween) {
+						if (!numSpr.alive)
+							return;
+	
+						var stepDur = (Conductor.stepCrochet * 0.001);
+						numSpr.tween = FlxTween.tween(numSpr, {alpha: 0.0}, stepDur, {
+							startDelay: Math.min((stepDur * 8) - 0.1, 0.0),
+							ease: FlxEase.quadIn,
+							onComplete: (tween:FlxTween) -> numSpr.kill()
+						});
+					}
+				});
 
 				numSpr.scale.x *= 1.25;
 				numSpr.updateHitbox();

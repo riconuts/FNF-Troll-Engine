@@ -21,6 +21,8 @@ using funkin.data.FlxTextFormatData;
 import funkin.api.Discord;
 #end
 
+// TODO: Make this easier to theme for mods
+
 typedef Widget = {
 	type:OptionType,
 	optionData:OptionData,
@@ -106,6 +108,16 @@ class OptionsSubstate extends MusicBeatSubstate
 				]
 			],
 			[
+				"info_displays",
+				[
+					"hitbar", 
+					"showMS", 
+					"judgeCounter",
+					"botplayMarker",
+					"npsDisplay"
+				]
+			],
+			[
 				"hud",
 				[
 					"timeBarType", 
@@ -115,15 +127,9 @@ class OptionsSubstate extends MusicBeatSubstate
 					"judgeOpacity",
 					"stageOpacity", 
 					"scoreZoom", 
-					"npsDisplay", 
-					"hitbar", 
-					"showMS", 
 					"coloredCombos",
-					'worldCombos',
 					"simpleJudge",
-					"judgeCounter",
 					'hudPosition', 
-					"botplayMarker", 
 					"customizeHUD",
 				]
 			],
@@ -745,8 +751,6 @@ class OptionsSubstate extends MusicBeatSubstate
 		{
 			case Toggle:
 				var checkbox = new Checkbox();
-				checkbox.setGraphicSize(36, 36);
-				checkbox.updateHitbox();
 				var text = new FlxText(0, 0, 0, "off", 16);
 				text.applyFormat(TextFormats.OPT_VALUE_TEXT);
 				checkbox.toggled = data.value != null ? cast data.value : false;
@@ -770,7 +774,6 @@ class OptionsSubstate extends MusicBeatSubstate
 					dV = options[0];
 
 				var arrow:FlxSprite = new FlxSprite(Paths.image("optionsMenu/arrow"));
-				arrow.scale.set(0.7, 0.7);
 				arrow.updateHitbox();
 				objects.add(arrow);
 
@@ -805,10 +808,11 @@ class OptionsSubstate extends MusicBeatSubstate
 				objects.add(text);
 
 				var leftAdjust = new WidgetButton();
-				leftAdjust.loadGraphic(Paths.image("optionsMenu/adjusters"), true, 27, 25);
+				var adjusters: FlxGraphic = Paths.image("optionsMenu/adjusters");
+
+				leftAdjust.loadGraphic(adjusters, true, Math.floor(adjusters.width / 2), adjusters.height);
 				leftAdjust.animation.add("idle", [0], 0, true);
 				leftAdjust.animation.play("idle", true);
-				leftAdjust.scale.set(0.8, 0.8);
 				leftAdjust.updateHitbox();
 				leftAdjust.canRepeat = true;
 				leftAdjust.repeatTime = 0.05;
@@ -816,10 +820,9 @@ class OptionsSubstate extends MusicBeatSubstate
 				leftAdjust.trackOffset.x = -leftAdjust.width - 5;
 
 				var rightAdjust = new WidgetButton();
-				rightAdjust.loadGraphic(Paths.image("optionsMenu/adjusters"), true, 27, 25);
+				rightAdjust.loadGraphic(adjusters, true, Math.floor(adjusters.width / 2), adjusters.height);
 				rightAdjust.animation.add("idle", [1], 0, true);
 				rightAdjust.animation.play("idle", true);
-				rightAdjust.scale.set(0.8, 0.8);
 				rightAdjust.updateHitbox();
 				rightAdjust.canRepeat = true;
 				rightAdjust.repeatTime = 0.05;
@@ -1843,6 +1846,7 @@ class Checkbox extends WidgetSprite
 	function set_toggled(val:Bool)
 	{
 		animation.play(val ? "toggled" : "idle", true);
+		offset.set(val ? 2.25 : 0, val ? 4.35 : 0);
 		return toggled = val;
 	}
 
