@@ -5,49 +5,49 @@
 			"category": "main",
 			"freeplayCategory": "basefnf",
 			"unlockCondition": true,
-			"songs": ["Tutorial"]
+			"songs": ["tutorial"]
 		},
 		{
 			"name": "Week 1",
 			"category": "main",
 			"freeplayCategory": "basefnf",
 			"unlockCondition": true,
-			"songs": ["Bopeebo","Fresh","DadBattle"]
+			"songs": ["bopeebo","fresh","dadbattle"]
 		},
 		{
 			"name": "Week 2",
 			"category": "main",
 			"freeplayCategory": "basefnf",
 			"unlockCondition": true,
-			"songs": ["Spookeez", "South", "Monster"]
+			"songs": ["spookeez", "south", "monster"]
 		},
 		{
 			"name": "Week 3",
 			"category": "main",
 			"freeplayCategory": "basefnf",
 			"unlockCondition": true,
-			"songs": ["Pico", "Philly Nice", "Blammed"]
+			"songs": ["pico", "philly-nice", "blammed"]
 		},
 		{
 			"name": "Week 4",
 			"category": "main",
 			"freeplayCategory": "basefnf",
 			"unlockCondition": true,
-			"songs": ["Satin Panties", "High", "MILF"]
+			"songs": ["satin-panties", "high", "milf"]
 		},
 		{
 			"name": "Week 5",
 			"category": "main",
 			"freeplayCategory": "basefnf",
 			"unlockCondition": true,
-			"songs": ["Cocoa", "Eggnog", "Winter Horrorland"]
+			"songs": ["cocoa", "eggnog", "winter-horrorland"]
 		},
 		{
 			"name": "Week 6",
 			"category": "main",
 			"freeplayCategory": "basefnf",
 			"unlockCondition": true,
-			"songs": ["Senpai", "Roses", "Thorns"]
+			"songs": ["senpai", "roses", "thorns"]
 		},
 		{
 			"name": "Week 7",
@@ -55,9 +55,9 @@
 			"freeplayCategory": "basefnf",
 			"unlockCondition": true,
 			"songs": [
-				"Ugh",
-				"Guns",
-				"Stress"
+				"ugh",
+				"guns",
+				"stress"
 			]
 		}
 	],

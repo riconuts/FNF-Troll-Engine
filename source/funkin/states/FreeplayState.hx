@@ -58,8 +58,7 @@ class FreeplayState extends MusicBeatState
 		{
 			var songIdList:Array<String> = [];
 
-			inline function sowy(song:String) {
-				var songId:String = Paths.formatToSongPath(song);
+			inline function sowy(songId:String) {
 				if (!songIdList.contains(songId))
 					songIdList.push(songId);
 			}
@@ -74,8 +73,8 @@ class FreeplayState extends MusicBeatState
 
 			// metadata file freeplay songs
 			if (metadata.freeplaySongs != null) {
-				for (song in metadata.freeplaySongs)
-					sowy(song.name);
+				for (songId in metadata.freeplaySongs)
+					sowy(songId);
 			}
 
 			//
