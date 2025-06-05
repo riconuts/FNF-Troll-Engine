@@ -138,11 +138,14 @@ class CoolUtil {
 	////
 	public static function listFromString(string:String):Array<String>
 	{
-		var daList:Array<String> = [
-			for (i in string.trim().split('\n'))
-				i.trim()
-		];
+		string = string.trim();
+		if (string.length == 0)
+			return [];
 
+		var daList:Array<String> = string.split('\n');
+		for (i in 0...daList.length)
+			daList[i] = daList[i].trim();
+		
 		return daList;
 	}
 	public static function coolTextFile(path:String):Array<String>
