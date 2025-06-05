@@ -594,14 +594,25 @@ class Paths
 
 		return globalContent;
 	}
+
+	static public function _modPath(key:String, mod:String):String {
+		return contentDirectories.get(mod) + '/' + key;
+	}
+
+	static public function modPath(key:String, mod:String):Null<String> {
+		if (contentDirectories.exists(mod)) {
+			var path:String = _modPath(key, mod);
+			if (exists(path)) return path;
+		}
+		return null;
+	}
 	
 	static public function modFolders(key:String, ignoreGlobal:Bool = false)
 	{
 		var path:Null<String> = null;
 
 		inline function check(mod:String) {
-			var fileToCheck:String = contentDirectories.get(mod) + '/' + key;
-			if (exists(fileToCheck)) path = fileToCheck;
+			path = modPath(key, mod);
 		}
 
 		if (Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0) {
