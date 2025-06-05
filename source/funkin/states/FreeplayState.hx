@@ -56,7 +56,7 @@ class FreeplayState extends MusicBeatState
 
 	public static function getFreeplaySongs():Array<BaseSong> {
 		var list:Array<BaseSong> = [];
-		for (directory => metadata in Paths.getContentMetadata())
+		for (contentId => metadata in Paths.getContentMetadata())
 		{
 			var songIdList:Array<String> = [];
 
@@ -79,9 +79,16 @@ class FreeplayState extends MusicBeatState
 					sowy(songId);
 			}
 
+			// freeplaySonglist.txt
+			var rawList:Null<String> = Paths.getContent(Paths._modPath('data/freeplaySonglist.txt', contentId));
+			if (rawList != null) {
+				for (songId in CoolUtil.listFromString(rawList))
+					sowy(songId);
+			}
+
 			//
 			for (songId in songIdList) {
-				list.push(new Song(songId, directory));
+				list.push(new Song(songId, contentId));
 			}
 		}
 		return list;
