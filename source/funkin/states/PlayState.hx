@@ -2375,8 +2375,10 @@ class PlayState extends MusicBeatState
 		}
 
 		////
-		for (idx in 0...playfields.members.length)
-			playfields.members[idx].noteField.songSpeed = songSpeed;
+		for (idx in 0...playfields.members.length) {
+			var field = playfields.members[idx];
+			field.noteField.songSpeed = songSpeed;
+		}
 		
 		/*
 		for (script in notetypeScripts)
@@ -3475,13 +3477,9 @@ class PlayState extends MusicBeatState
 
 			field.keysPressed[column] = false;
 			
-			if (!field.isHolding[column]) {
-				var spr:StrumNote = field.strumNotes[column];
-				if (spr != null){
-					spr.playAnim('static');
-					spr.resetAnim = 0;
-				}
-			}
+			var spr:StrumNote = field.strumNotes[column];
+			if (spr?.animation.name == 'pressed')
+				spr.playAnim('static');
 		}
 
 		callOnScripts('onKeyRelease', [column]);
@@ -3717,17 +3715,8 @@ class PlayState extends MusicBeatState
 			char.playNote(note, field);
 		
 		// Strum animations
-		if (field.autoPlayed) {
-			var time:Float = 0.15;
-			if (note.isSustainNote && !note.isSustainEnd)
-				time += 0.15;
-
-			StrumPlayAnim(field, note.column % field.keyCount, time, note);
-		} else {
-			var spr = field.strumNotes[note.column];
-			if (spr != null && (field.keysPressed[note.column] || note.isRoll))
-				spr.playAnim('confirm', true, note.isSustainNote ? note.parent : note);
-		}
+		StrumPlayAnim(field, note.column, -1, note.isSustainNote ? note.parent : note);
+		
 		if (note.noteScript != null)
 			callScript(note.noteScript, "onCommonNoteHit", [note, field]);
 
