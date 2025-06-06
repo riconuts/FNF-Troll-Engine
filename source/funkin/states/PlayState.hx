@@ -3716,8 +3716,13 @@ class PlayState extends MusicBeatState
 			char.playNote(note, field);
 		
 		// Strum animations
-		StrumPlayAnim(field, note.column, field.autoPlayed ? -1 : 0, note.isSustainNote ? note.parent : note);
+		var spr:StrumNote = field.strumNotes[note.column];
+		if (spr != null) {
+			spr.playAnim('confirm', true, note.isSustainNote ? note.parent : note);
+			spr.resetAnim = field.autoPlayed ? -1 : 0;
+		}
 		
+		////
 		if (note.noteScript != null)
 			callScript(note.noteScript, "onCommonNoteHit", [note, field]);
 
@@ -4041,15 +4046,6 @@ class PlayState extends MusicBeatState
 	inline public function callOnHScripts(event:String, ?args:Array<Dynamic>, ?vars:Map<String, Dynamic>, ignoreStops = false, ?exclusions:Array<String>):Dynamic
 		return Globals.Function_Continue;
 	#end
-
-	function StrumPlayAnim(field:PlayField, id:Int, time:Float, ?note:Note) {
-		var spr:StrumNote = field.strumNotes[id];
-
-		if (spr != null) {
-			spr.playAnim('confirm', true, note);
-			spr.resetAnim = time;
-		}
-	}
 
 	public function RecalculateRating() {
 		setOnScripts('score', stats.score);
