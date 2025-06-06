@@ -3478,8 +3478,9 @@ class PlayState extends MusicBeatState
 			field.keysPressed[column] = false;
 			
 			var spr:StrumNote = field.strumNotes[column];
-			if (spr?.animation.name == 'pressed')
-				spr.playAnim('static');
+			switch(spr?.animation.name) {
+				case 'pressed' | 'confirm': spr.resetAnim = -1;
+			}
 		}
 
 		callOnScripts('onKeyRelease', [column]);
@@ -3715,7 +3716,7 @@ class PlayState extends MusicBeatState
 			char.playNote(note, field);
 		
 		// Strum animations
-		StrumPlayAnim(field, note.column, -1, note.isSustainNote ? note.parent : note);
+		StrumPlayAnim(field, note.column, field.autoPlayed ? -1 : 0, note.isSustainNote ? note.parent : note);
 		
 		if (note.noteScript != null)
 			callScript(note.noteScript, "onCommonNoteHit", [note, field]);
