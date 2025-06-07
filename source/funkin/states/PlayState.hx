@@ -12,8 +12,10 @@ import funkin.objects.notes.StrumNote;
 import funkin.objects.Fish;
 import funkin.objects.Stage;
 import funkin.objects.Character;
-import funkin.objects.RatingGroup;
+import funkin.objects.huds.*;
 import funkin.objects.hud.*;
+import funkin.objects.hud.RatingGroup;
+import funkin.objects.hud.Countdown;
 import funkin.objects.playfields.*;
 import funkin.data.Stats;
 import funkin.data.JudgmentManager;
@@ -98,16 +100,50 @@ all notes will also store their visualPos in a variable when creation and then w
 
 EDIT: not EXACTLY how it works but its a good enough summary
 */
-typedef SpeedEvent =
+@:structInit
+class SpeedEvent
 {
-	position:Float, // the y position where the change happens (modManager.getVisPos(songTime))
-	startTime:Float, // the song position (conductor.songTime) where the change starts
+	public var position:Float; // the y position where the change happens (modManager.getVisPos(songTime))
+	public var startTime:Float; // the song position (conductor.songTime) where the change starts
 	#if EASED_SVs
-	startSpeed:Float, // the previous event's speed
-	?endTime:Float, // the song position (conductor.songTime) when the change ends
-	?easeFunc:EaseFunction,
+	public var startSpeed:Float; // the previous event's speed
+	public var endTime:Null<Float> = null; // the song position (conductor.songTime) when the change ends
+	public var easeFunc:EaseFunction = FlxEase.linear;
 	#end
-	speed:Float // speed mult after the change
+	public var speed:Float; // speed mult after the change
+}
+
+
+class CutsceneSequence {
+	public var onNextSceneRan:FlxTypedSignal<Cutscene->Void> = new FlxTypedSignal<Cutscene->Void>();
+	public var onSceneFinished:FlxTypedSignal<Cutscene->Void> = new FlxTypedSignal<Cutscene->Void>();
+	public var onSequenceEnd:FlxTypedSignal<Void->Void> = new FlxTypedSignal<Void->Void>();
+	public var scenes:Array<Cutscene> = [];
+
+	public function push(scene:Cutscene)
+		scenes.push(scene);
+
+	public var currentScene: Cutscene;
+
+	public function runNextScene(): Null<Cutscene> 
+	{
+		currentScene = scenes.shift();
+		if(currentScene == null){
+			onSequenceEnd.dispatch();
+			return null;
+		}
+
+		currentScene.createCutscene();
+		onNextSceneRan.dispatch(currentScene);
+
+		currentScene.onEnd.add((_:Bool)->{
+			onSceneFinished.dispatch(currentScene);
+		});
+
+		return currentScene;
+	}
+
+	public function new(){}
 }
 
 
@@ -677,7 +713,7 @@ class PlayState extends MusicBeatState
 		Conductor.songPosition = Conductor.crochet * -5;
 		Conductor.updateSteps();
 
-		metadata = SONG.metadata ?? (song?.getMetadata(difficultyName));
+		metadata = SONG.metadata ??= (song?.getMetadata(difficultyName));
 		if (showDebugTraces && metadata == null)
 			trace('No metadata for $songId. Maybe add some?');
 
@@ -1439,13 +1475,13 @@ class PlayState extends MusicBeatState
 			return;
 
 		// Do the countdown.
-		var countdown = new funkin.objects.Countdown(this);
+		var countdown = new Countdown(this);
 		resetCountdown(countdown);
 		countdown.start(Conductor.crochet * 0.001); // time is optional but here we are
 		curCountdown = countdown;
 	}
 
-	public function resetCountdown(countdown:funkin.objects.Countdown):Void {
+	public function resetCountdown(countdown:Countdown):Void {
 		if (countdown == null) return;
 		// I don't wanna break scripts so if you have a better way, do it
 		if (countdown.introAlts != introAlts) countdown.introAlts = introAlts;
@@ -1919,7 +1955,7 @@ class PlayState extends MusicBeatState
 
 	public function getTimeFromSV(time:Float, event:SpeedEvent):Float {
 		#if EASED_SVs
-		var func:EaseFunction = event.easeFunc == null ? FlxEase.linear : event.easeFunc;
+		var func:EaseFunction = event.easeFunc;
 		if (event.endTime != null) {
 			var timeElapsed:Float = FlxMath.remapToRange(time, event.startTime, event.endTime, 0, 1);
 			if(timeElapsed > 1)timeElapsed = 1;
@@ -1997,7 +2033,7 @@ class PlayState extends MusicBeatState
 				}
 				#if EASED_SVs
 				var endTime:Null<Float> = null;
-				var easeFunc:Null<EaseFunction> = null;
+				var easeFunc:EaseFunction = FlxEase.linear;
 
 				var tweenOptions = event.value2.split("/");
 				if(tweenOptions.length >= 1){
@@ -2426,8 +2462,10 @@ class PlayState extends MusicBeatState
 		}
 
 		////
-		for (idx in 0...playfields.members.length)
-			playfields.members[idx].noteField.songSpeed = songSpeed;
+		for (idx in 0...playfields.members.length) {
+			var field = playfields.members[idx];
+			field.noteField.songSpeed = songSpeed;
+		}
 		
 		/*
 		for (script in notetypeScripts)
@@ -2569,7 +2607,7 @@ class PlayState extends MusicBeatState
 			}
 			else if (Conductor.songPosition >= 0) 
 			{
-				updateSongPosition(elapsed);
+				updateSongPosition();
 			}
 		}
 
@@ -3258,7 +3296,20 @@ class PlayState extends MusicBeatState
 				numSpr.moves = false;
 
 				numSpr.scale.copyFrom(ratingGroup.comboTemplate.scale);
-				numSpr.tween = FlxTween.tween(numSpr.scale, {x: numSpr.scale.x, y: numSpr.scale.y}, 0.2, {ease: FlxEase.circOut});
+				numSpr.tween = FlxTween.tween(numSpr.scale, {x: numSpr.scale.x, y: numSpr.scale.y}, 0.2, {
+					ease: FlxEase.circOut,
+					onComplete: function(tween:FlxTween) {
+						if (!numSpr.alive)
+							return;
+	
+						var stepDur = (Conductor.stepCrochet * 0.001);
+						numSpr.tween = FlxTween.tween(numSpr, {alpha: 0.0}, stepDur, {
+							startDelay: Math.min((stepDur * 8) - 0.1, 0.0),
+							ease: FlxEase.quadIn,
+							onComplete: (tween:FlxTween) -> numSpr.kill()
+						});
+					}
+				});
 
 				numSpr.scale.x *= 1.25;
 				numSpr.updateHitbox();
@@ -3472,6 +3523,8 @@ class PlayState extends MusicBeatState
 		if (callOnScripts("onKeyPress", [column]) == Globals.Function_Stop)
 			return;
 
+		var hitTime:Float = Conductor.getAccPosition();
+
 		if(ClientPrefs.hitsoundBehav == 'Key Press' && !cpuControlled)
 			playShithound();
 		
@@ -3492,7 +3545,7 @@ class PlayState extends MusicBeatState
 				var ret:Dynamic = callOnHScripts("onFieldInput", [field, column, hitNotes]);
 				if (ret == Globals.Function_Stop) null;
 				else if (ret is Note) ret;
-				else field.input(column);
+				else field.input(column, hitTime);
 			}
 
 			if (note == null) {
@@ -3530,12 +3583,9 @@ class PlayState extends MusicBeatState
 
 			field.keysPressed[column] = false;
 			
-			if (!field.isHolding[column]) {
-				var spr:StrumNote = field.strumNotes[column];
-				if (spr != null){
-					spr.playAnim('static');
-					spr.resetAnim = 0;
-				}
+			var spr:StrumNote = field.strumNotes[column];
+			switch(spr?.animation.name) {
+				case 'pressed' | 'confirm': spr.resetAnim = -1;
 			}
 		}
 
@@ -3777,17 +3827,13 @@ class PlayState extends MusicBeatState
 				char.playNote(note, field);
 		
 		// Strum animations
-		if (field.autoPlayed) {
-			var time:Float = 0.15;
-			if (note.isSustainNote && !note.isSustainEnd)
-				time += 0.15;
-
-			StrumPlayAnim(field, note.column % field.keyCount, time, note);
-		} else {
-			var spr = field.strumNotes[note.column];
-			if (spr != null && (field.keysPressed[note.column] || note.isRoll))
-				spr.playAnim('confirm', true, note.isSustainNote ? note.parent : note);
+		var spr:StrumNote = field.strumNotes[note.column];
+		if (spr != null) {
+			spr.playAnim('confirm', true, note.isSustainNote ? note.parent : note);
+			spr.resetAnim = field.autoPlayed ? -1 : 0;
 		}
+		
+		////
 		if (note.noteScript != null)
 			callScript(note.noteScript, "onCommonNoteHit", [note, field]);
 
@@ -4111,15 +4157,6 @@ class PlayState extends MusicBeatState
 	inline public function callOnHScripts(event:String, ?args:Array<Dynamic>, ?vars:Map<String, Dynamic>, ignoreStops = false, ?exclusions:Array<String>):Dynamic
 		return Globals.Function_Continue;
 	#end
-
-	function StrumPlayAnim(field:PlayField, id:Int, time:Float, ?note:Note) {
-		var spr:StrumNote = field.strumNotes[id];
-
-		if (spr != null) {
-			spr.playAnim('confirm', true, note);
-			spr.resetAnim = time;
-		}
-	}
 
 	public function RecalculateRating() {
 		setOnScripts('score', stats.score);

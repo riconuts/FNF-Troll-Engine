@@ -340,7 +340,7 @@ class FunkinHScript extends FunkinScript
 		set("GameOverSubstate", funkin.states.GameOverSubstate);
 		set("Song", funkin.data.Song);
 		set("BGSprite", funkin.objects.BGSprite);
-		set("RatingSprite", funkin.objects.RatingGroup.RatingSprite);
+		set("RatingSprite", funkin.objects.hud.RatingGroup.RatingSprite);
 
 		set("Note", funkin.objects.notes.Note);
 		set("NoteObject", funkin.objects.notes.NoteObject);
@@ -377,7 +377,7 @@ class FunkinHScript extends FunkinScript
 		set("EaseEvent", funkin.modchart.events.EaseEvent);
 		set("SetEvent", funkin.modchart.events.SetEvent);
 
-		set("HScriptedHUD", funkin.objects.hud.HScriptedHUD);
+		set("HScriptedHUD", funkin.objects.huds.HScriptedHUD);
 		set("HScriptModifier", funkin.modchart.HScriptModifier);
 
 		set("HScriptedState", funkin.states.scripting.HScriptedState);

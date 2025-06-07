@@ -30,7 +30,7 @@ class FreeplayState extends MusicBeatState
 	public static var comingFromPlayState:Bool = false;
 
 	var menu = new FreeplayMenu();
-	var songData:Array<BaseSong> = [];
+	var songList:Array<BaseSong>;
 
 	var bgGrp = new FlxTypedGroup<FlxSprite>();
 	var bg:FlxSprite;
@@ -45,9 +45,11 @@ class FreeplayState extends MusicBeatState
 	var scoreText:FlxText;
 	var diffText:FlxText;
 
-	static var lastSelected:Int = 0;
-	static var curDiffStr:String = "normal";
-	static var curDiffIdx:Int = 1;
+	static var lastSelectedIdx:Int = 0;
+	static var lastSelectedChart:String = "normal";
+
+	var curChartId:String = "";
+	var curChartIdx:Int = -1;
 
 	var selectedSongData:BaseSong;
 	var selectedSongCharts:Array<String>;
@@ -56,30 +58,37 @@ class FreeplayState extends MusicBeatState
 
 	public static function getFreeplaySongs():Array<BaseSong> {
 		var list:Array<BaseSong> = [];
-		for (directory => metadata in Paths.getContentMetadata())
+		for (contentId => metadata in Paths.getContentMetadata())
 		{
 			var songIdMap:Map<String, Bool> = [];
+
+			inline function sowy(songId:String) {
+				if (!songIdMap.exists(songId)) {
+					songIdMap.set(songId, true);
+					list.push(new Song(songId, directory));
+				}
+			}
 
 			//// level songs
 			for (level in StoryModeState.scanContentLevels(directory)) {
 				if (level.getLocked())
 					continue;
 				
-				for (song in level.getFreeplaySongs()) {
-					songIdMap.set(song.songId, true);
-					list.push(song);
-				}
+				for (songId in level.getFreeplaySongs())
+					sowy(songId);
 			}
 
 			// metadata file freeplay songs
 			if (metadata.freeplaySongs != null) {
-				for (song in metadata.freeplaySongs) {
-					var songId:String = Paths.formatToSongPath(song.name);
-					if (!songIdMap.exists(songId)) {
-						songIdMap.set(songId, true);
-						list.push(new Song(songId, directory));
-					}
-				}
+				for (songId in metadata.freeplaySongs)
+					sowy(songId);
+			}
+
+			// freeplaySonglist.txt
+			var rawList:Null<String> = Paths.getContent(Paths._modPath('data/freeplaySonglist.txt', contentId));
+			if (rawList != null) {
+				for (songId in CoolUtil.listFromString(rawList))
+					sowy(songId);
 			}
 			
 			// default category shit
@@ -89,10 +98,7 @@ class FreeplayState extends MusicBeatState
 
 				Paths.iterateDirectory(dir, function(file:String) {
 					if (FileSystem.isDirectory(haxe.io.Path.join([dir, file]))) {
-						if(!songIdMap.exists(file)){
-							songIdMap.set(file, true);
-							list.push(new Song(file, directory));
-						}
+						sowy(file);
 					}
 					
 				});
@@ -101,6 +107,11 @@ class FreeplayState extends MusicBeatState
 		}
 		return list;
 	} 
+
+	public function new(?songList:Array<BaseSong>) {
+		this.songList = songList;
+		super();
+	}
 	
 	override public function create()
 	{
@@ -108,23 +119,15 @@ class FreeplayState extends MusicBeatState
 		funkin.api.Discord.DiscordClient.changePresence('In the menus');
 		#end
 
-		songData = getFreeplaySongs();
-		for (song in songData)
-			menu.addSong(song);
-
-		/*for (song in getFreeplaySongs()) {			
-			Paths.currentModDirectory = song.folder;
-			menu.addTextOption(song.getMetadata().songName).ID = songData.length;
-			songData.push(song);
-		}*/
-
+		songList ??= getFreeplaySongs();
+		menu.setSongList(songList);
 
 		////
 		add(bgGrp);
 
 		add(menu);
 		menu.controls = controls;
-		menu.callbacks.onSelect = (selectedIdx, _) -> onSelectSong(songData[selectedIdx]);
+		menu.callbacks.onSelect = (selectedIdx, _) -> onSelectSong(menu.songList[selectedIdx]);
 		menu.callbacks.onAccept = (_, _) -> onAccept();
 
 		////
@@ -155,7 +158,8 @@ class FreeplayState extends MusicBeatState
 		add(scoreText);
 
 		////
-		menu.curSelected = lastSelected;
+		curChartId = FreeplayState.lastSelectedChart;
+		menu.curSelected = FreeplayState.lastSelectedIdx;
 		if (comingFromPlayState) playSelectedSongMusic();
 
 		super.create();
@@ -180,7 +184,7 @@ class FreeplayState extends MusicBeatState
 			proceed = songLoaded == selectedSong && PlayState.SONG != null;
 		
 			if (!proceed) {
-				PlayState.loadPlaylist([selectedSongData], curDiffStr);
+				PlayState.loadPlaylist([selectedSongData], curChartId);
 				proceed = PlayState.SONG != null;
 			}
 		}
@@ -207,7 +211,7 @@ class FreeplayState extends MusicBeatState
 		// load song json and play inst
 		if (songLoaded != selectedSong){
 			songLoaded = selectedSong;
-			PlayState.loadPlaylist([selectedSongData], curDiffStr);
+			PlayState.loadPlaylist([selectedSongData], curChartId);
 			
 			if (PlayState.SONG != null){
 				Conductor.changeBPM(PlayState.SONG.bpm);
@@ -255,17 +259,17 @@ class FreeplayState extends MusicBeatState
 			MusicBeatState.switchState(new funkin.states.MainMenuState());	
 			
 		}else if (controls.RESET){
-			var songName:String = selectedSongData.getMetadata(curDiffStr).songName;
+			var songName:String = selectedSongData.getMetadata(curChartId).songName;
 			var displayName:String = songName;
 
 			if (selectedSongCharts.length > 1) {
-				var diffName:String = Paths.getString('difficultyName_$curDiffStr', curDiffStr);
+				var diffName:String = Paths.getString('difficultyName_$curChartId', curChartId);
 				displayName += ' ($diffName)';
 			}
 
 			openSubState(new ResetScoreSubState(
 				selectedSongData.songId, 
-				curDiffStr, 
+				curChartId, 
 				false, 
 				displayName
 			));
@@ -292,9 +296,9 @@ class FreeplayState extends MusicBeatState
 		selectedSongData = data;
 		selectedSongCharts = data.getCharts();
 
-		changeDifficulty(CoolUtil.updateDifficultyIndex(curDiffIdx, curDiffStr, selectedSongCharts), true);
+		changeDifficulty(CoolUtil.updateDifficultyIndex(curChartIdx, curChartId, selectedSongCharts), true);
 
-		var metadata = data.getMetadata(curDiffStr);
+		var metadata = data.getMetadata(curChartId);
 		var bgColor:FlxColor; 
 		var bgKey:String; 
 		
@@ -313,7 +317,7 @@ class FreeplayState extends MusicBeatState
 	function refreshScore()
 	{
 		var data = selectedSongData;
-		var record = Highscore.getRecord(data.songId, curDiffStr);
+		var record = Highscore.getRecord(data.songId, curChartId);
 
 		targetRating = Highscore.getRatingRecord(record) * 100;
 		if(ClientPrefs.showWifeScore)
@@ -371,16 +375,16 @@ class FreeplayState extends MusicBeatState
 				diffText.text = "NO CHARTS AVAILABLE"; // fuck it
 
 			case 1:
-				curDiffStr = charts[0];
-				diffText.text = curDiffStr.toUpperCase();
+				curChartId = charts[0];
+				diffText.text = Paths.getString('difficultyName_$curChartId', curChartId).toUpperCase();
 
 			default:
-				curDiffIdx = isAbs ? val : FlxMath.wrap(curDiffIdx + val, 0, charts.length - 1);
-				curDiffStr = charts[curDiffIdx];
-				diffText.text = "< " + curDiffStr.toUpperCase() + " >";
+				curChartIdx = isAbs ? val : FlxMath.wrap(curChartIdx + val, 0, charts.length - 1);
+				curChartId = charts[curChartIdx];
+				diffText.text = "< " + Paths.getString('difficultyName_$curChartId', curChartId).toUpperCase() + " >";
 		}
 
-		selectedSong = '$selectedSongData-$curDiffStr';
+		selectedSong = '$selectedSongData-$curChartId';
 		refreshScore();
 	}
 
@@ -427,7 +431,8 @@ class FreeplayState extends MusicBeatState
 
 	override public function destroy()
 	{
-		lastSelected = menu.curSelected;
+		lastSelectedIdx = menu.curSelected;
+		lastSelectedChart = curChartId;
 		
 		super.destroy();
 	}
@@ -435,7 +440,22 @@ class FreeplayState extends MusicBeatState
 
 private class FreeplayMenu extends AlphabetMenu
 {
-	var iconGrp = new FlxTypedGroup<FreeplayIcon>();
+	public var songList(default, null):Array<BaseSong> = [];
+
+	private var iconGrp = new FlxTypedGroup<FreeplayIcon>();
+
+	public function setSongList(songs:Array<BaseSong>) {
+		var curSong = songList[curSelected];	
+
+		this.curSelected = null;
+		this.clear();
+		this.songList = songs;
+		for (song in songList)
+			addSong(song);
+
+		var newIndex = songList.indexOf(curSong);
+		this.curSelected = newIndex < 0 ? 0 : newIndex;
+	}
 
 	public function addSong(song:BaseSong) {
 		var metadata = song.getMetadata();
@@ -468,12 +488,36 @@ private class FreeplayMenu extends AlphabetMenu
 		#end
 
 		////
-		var iconSpr = new FreeplayIcon(iconId);
+		var iconSpr = iconGrp.getFirstAvailable(FreeplayIcon, true) ?? {
+			var obj = new FreeplayIcon(iconId);
+			obj.exists = true;
+			iconGrp.add(obj);
+		};
+		
+		if (!iconSpr.exists) {
+			iconSpr.changeIcon(iconId);
+			iconSpr.revive();
+		}
+		
 		iconSpr.ID = obj.ID;
 		iconSpr.tracking = obj;
 		iconSpr.offX = width + 15;
 		iconSpr.offY = height / 2 - iconSpr.height / 2;
-		iconGrp.add(iconSpr);
+	}
+
+	override function onAdded(item:Alphabet) {
+		updateItemPos(item, item.ID);
+		item.setPosition(item.targetX, item.targetY);
+		item.alpha = 0.6;
+	}
+
+	override function onSelect(item:Alphabet) {
+		super.onSelect(item);
+	}
+
+	override public function clear() {
+		iconGrp.killMembers();
+		super.clear();
 	}
 
 	override function update(elapsed:Float) {

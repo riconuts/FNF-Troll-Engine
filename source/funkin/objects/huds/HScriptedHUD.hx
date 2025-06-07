@@ -1,4 +1,4 @@
-package funkin.objects.hud;
+package funkin.objects.huds;
 
 import flixel.util.FlxColor;
 import funkin.objects.playfields.PlayField;
@@ -18,7 +18,7 @@ class HScriptedHUD extends BaseHUD {
 		stats.changedEvent.add(statChanged);
 
 		super(songName, stats);
-		script.call("createHUD", ['bf', 'dad', songName, stats]);
+		script.call("createHUD", [songName, stats]);
 	}
 
 	override function set_displayedHealth(nV:Float):Float 
@@ -103,12 +103,12 @@ class HScriptedHUD extends BaseHUD {
 
 	// easier constructors
 
-	public static function fromString(iP1:String, iP2:String, songName:String, stats:Stats, scriptSource:String):HScriptedHUD
+	public static function fromString(songName:String, stats:Stats, scriptSource:String):HScriptedHUD
 	{
 		return new HScriptedHUD(songName, stats, FunkinHScript.fromString(scriptSource, "HScriptedHUD"));
 	}
 
-	public static function fromFile(iP1:String, iP2:String, songName:String, stats:Stats, fileName:String):Null<HScriptedHUD>
+	public static function fromFile(songName:String, stats:Stats, fileName:String):Null<HScriptedHUD>
 	{
 		var file = Paths.getHScriptPath('$fileName');
 		if (file != null)
@@ -119,7 +119,7 @@ class HScriptedHUD extends BaseHUD {
 		return null;
 	}
 
-	public static function fromName(iP1:String, iP2:String, songName:String, stats:Stats, scriptName:String):Null<HScriptedHUD>
+	public static function fromName(songName:String, stats:Stats, scriptName:String):Null<HScriptedHUD>
 	{
 		var file = Paths.getHScriptPath('huds/$scriptName');
 		if (file != null)

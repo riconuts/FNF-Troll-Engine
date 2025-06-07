@@ -105,6 +105,7 @@ class Conductor
 
 		Conductor.songPosition = 0;
 		Conductor.playing = false;
+		Conductor.pitch = 1.0;
 		Conductor.bpmChangeMap = [];
 		Conductor.tracks = [];
 	}
@@ -242,13 +243,13 @@ class Conductor
 	public inline static function getBeatRounded(time:Float):Int
 		return Math.floor(getBeat(time));
 
-	public static function stepToSeconds(step:Float):Float {
+	public static function stepToMs(step:Float):Float {
 		var lastChange = getBPMFromStep(step);
-		return lastChange.songTime + ((step - lastChange.stepTime) / (lastChange.bpm / 60) / 4);
+		return lastChange.songTime + ((step - lastChange.stepTime) * lastChange.stepCrochet);
 	}
 
-	public inline static function stepToMs(step:Float):Float {
-		return stepToSeconds(step) * 1000;
+	public inline static function stepToSeconds(step:Float):Float {
+		return stepToMs(step) / 1000;
 	}
 
 	public static function getBeatSinceChange(time:Float):Float {

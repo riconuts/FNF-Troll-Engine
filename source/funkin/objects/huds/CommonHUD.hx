@@ -1,4 +1,4 @@
-package funkin.objects.hud;
+package funkin.objects.huds;
 
 import funkin.objects.playfields.*;
 import funkin.objects.hud.FNFHealthBar;

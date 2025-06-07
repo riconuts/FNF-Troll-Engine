@@ -1,4 +1,4 @@
-package funkin.objects.hud;
+package funkin.objects.huds;
 
 import flixel.text.FlxText;
 import flixel.ui.FlxBar;

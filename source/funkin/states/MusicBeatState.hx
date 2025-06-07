@@ -131,8 +131,13 @@ class MusicBeatState extends FlxUIState
 	private var lastMixTimer:Float = 0;
 	private var lastMixPos:Float = 0;
 
-	private function updateSongPosition(elapsed:Float):Void {
-		var inst = Conductor.tracks[0];
+	private function updateSongPosition(?inst:FlxSound):Void {
+		inst ??= Conductor.tracks[0];
+		if (inst == null) return;
+
+		@:privateAccess
+		var elapsedMS:Float = FlxG.game._elapsedMS * inst.pitch;
+
 		switch (songSyncMode)
 		{
 			case DIRECT:
@@ -143,13 +148,13 @@ class MusicBeatState extends FlxUIState
 			case LEGACY:
 				// Resync Vocals
 				// FUCKING SUCKS DONT USE LMFAO! It's here just incase though
-				Conductor.songPosition += elapsed * 1000;
+				Conductor.songPosition += elapsedMS;
 				
 			case PSYCH_1_0:
 				// Psych 1.0 method
 				// Since this works better for Rico so might work better for some other machines too
-				Conductor.songPosition += elapsed * 1000;
-				Conductor.songPosition = FlxMath.lerp(inst.time, Conductor.songPosition, Math.exp(-elapsed * 5));
+				Conductor.songPosition += elapsedMS;
+				Conductor.songPosition = FlxMath.lerp(inst.time, Conductor.songPosition, Math.exp(-elapsedMS * 0.005));
 				var timeDiff:Float = Math.abs(inst.time - Conductor.songPosition);
 				if (timeDiff > 1000)
 					Conductor.songPosition = Conductor.songPosition + 1000 * FlxMath.signOf(timeDiff);
@@ -164,11 +169,10 @@ class MusicBeatState extends FlxUIState
 					lastMixPos = inst.time;
 					lastMixTimer = 0;
 				}else {
-					@:privateAccess
-					lastMixTimer += FlxG.game._elapsedMS * inst.pitch;
+					lastMixTimer += elapsedMS;
 				}
 				
-				Conductor.songPosition = inst.time + lastMixTimer;
+				Conductor.songPosition = lastMixPos + lastMixTimer;
 
 		}
 	}
@@ -302,17 +306,15 @@ class MusicBeatState extends FlxUIState
 		if (curStep % 4 == 0)
 			beatHit();
 
-		if (songSyncMode == LEGACY) {
-			var needsResync:Bool = false;
+		if (Conductor.playing) {
 			for (track in Conductor.tracks) {
-				if (Math.abs(track.time - Conductor.getAccPosition()) > 30){
-					needsResync = true;
+				if (Math.abs(track.time - Conductor.getAccPosition()) > 30) {
+					trace('sus track resync');
+					resyncTracks();
 					break;
 				}
-			}
-			if (needsResync)
-				resyncTracks();
-		}
+			}	
+		}		
 	}
 
 	public function beatHit():Void

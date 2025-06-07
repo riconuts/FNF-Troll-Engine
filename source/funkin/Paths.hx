@@ -27,7 +27,6 @@ class Paths
 {
 	inline public static var IMAGE_EXT = "png";
 	inline public static var SOUND_EXT = "ogg";
-	inline public static var VIDEO_EXT = "mp4";
 
 	public static final HSCRIPT_EXTENSIONS:Array<String> = ["hscript", "hxs", "hx"];
 	public static final SCRIPT_EXTENSIONS:Array<String> = [
@@ -211,9 +210,9 @@ class Paths
 		return getPath('fonts/$key');
 	}
 
-	static public function video(key:String, ignoreMods:Bool = false):String
+	static public function video(key:String, ignoreMods:Bool = false, ext:String = "mp4"):String
 	{
-		return getPath('videos/$key.$VIDEO_EXT', ignoreMods);
+		return getPath('videos/$key.$ext', ignoreMods);
 	}
 
 	static public function getShaderFragment(name:String):Null<String>
@@ -594,14 +593,25 @@ class Paths
 
 		return globalContent;
 	}
+
+	static public function _modPath(key:String, mod:String):String {
+		return contentDirectories.get(mod) + '/' + key;
+	}
+
+	static public function modPath(key:String, mod:String):Null<String> {
+		if (contentDirectories.exists(mod)) {
+			var path:String = _modPath(key, mod);
+			if (exists(path)) return path;
+		}
+		return null;
+	}
 	
 	static public function modFolders(key:String, ignoreGlobal:Bool = false)
 	{
 		var path:Null<String> = null;
 
 		inline function check(mod:String) {
-			var fileToCheck:String = contentDirectories.get(mod) + '/' + key;
-			if (exists(fileToCheck)) path = fileToCheck;
+			path = modPath(key, mod);
 		}
 
 		if (Paths.currentModDirectory != null && Paths.currentModDirectory.length > 0) {
@@ -645,7 +655,11 @@ class Paths
 				var rawJson:Null<String> = Paths.getContent('$folderPath/metadata.json');
 				if (rawJson != null && rawJson.length > 0) {
 					var data:Dynamic = Json.parse(rawJson);
+					#if ALLOW_DEPRECATION
 					contentMetadata.set(folderName, updateContentMetadataStructure(data));
+					#else
+					contentMetadata.set(folderName, data);
+					#end
 					return;
 				}
 			}
@@ -654,12 +668,40 @@ class Paths
 	
 	inline static function updateContentMetadataStructure(data:Dynamic):ContentMetadata
 	{
-		if (Reflect.field(data, "weeks") != null)
-			return data; // You are valid :)
+		inline function getFreeplaySongs():Array<String> {
+			var list:Array<String> = [];
+			
+			var fs:Dynamic = Reflect.field(data, "freeplaySongs");
+			if (fs is Array) {
+				var fs:Array<Dynamic> = cast fs;
+				
+				if (fs.length == 0) {
+					// none
+				}else if (fs[0] is String) {
+					for (s in fs) list.push(Std.string(s));
+				}
+				else if (Reflect.isObject(fs[0])) {
+					for (s in fs) {
+						var v = Reflect.field(s, "name");
+						if (v != null) list.push(Std.string(v));
+					}
+				}
+			}
+			
+			return list;
+		}
 
-		var chapters:Dynamic = Reflect.field(data, "chapters");
-		if (chapters != null) { // TGT
-			Reflect.setField(data, "weeks", chapters);
+		if (Reflect.hasField(data, "freeplaySongs"))
+			Reflect.setField(data, "freeplaySongs", getFreeplaySongs());
+		else
+			Reflect.setField(data, "freeplaySongs", []);
+
+		////
+		if (Reflect.field(data, "weeks") != null)
+			return data; // valid ig
+
+		if (Reflect.hasField(data, "chapters")) { // TGT
+			Reflect.setField(data, "weeks", Reflect.field(data, "chapters"));
 			Reflect.deleteField(data, "chapters");
 			return data;
 		}else {
@@ -837,24 +879,6 @@ class HTML5Paths {
 	#end
 }
 
-typedef FreeplaySongMetadata = {
-	/**
-		Name of the song to be played
-	**/
-	var name:String;
-
-	/**
-		Category ID for the song to be placed into (main, side, remix)
-	**/
-	var category:String;
-
-	/**
-		Displayed name of the song.
-		Does not have to be the same as name.
-	**/
-	@:optional var displayName:String;
-}
-
 typedef FreeplayCategoryMetadata = {
 	/**
 		Displayed Name of the category
@@ -884,7 +908,7 @@ typedef ContentMetadata = {
 	/**
 		Songs to be placed into the freeplay menu
 	**/
-	@:optional var freeplaySongs:Array<FreeplaySongMetadata>;
+	@:optional var freeplaySongs:Array<String>;
 
 	/**
 		Categories to be placed into the freeplay menu

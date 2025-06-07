@@ -604,7 +604,14 @@ class ClientPrefs {
 				display: "Show FPS",
 				desc: "When toggled, an FPS counter is showed in the top left.",
 				type: Toggle,
-				value: true,
+				value: false,
+				data: []
+			},
+			"showMemory" => {
+				display: "Show Memory",
+				desc: "When toggled, a memory counter is showed in the top left.",
+				type: Toggle,
+				value: false,
 				data: []
 			},
 			"framerate" => {
@@ -910,8 +917,10 @@ class ClientPrefs {
 
 		Paths.locale = ClientPrefs.locale;
 
-		if (Main.fpsVar != null)
+		if (Main.fpsVar != null) {
 			Main.fpsVar.visible = ClientPrefs.showFPS;
+			Main.fpsVar.showMemory = ClientPrefs.showMemory;
+		}
 
 		#if FUNNY_ALLOWED
 		if (Main.bread != null)

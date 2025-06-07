@@ -29,26 +29,23 @@ class AlphabetMenu extends FlxTypedGroup<Alphabet>
 	public var controls:Null<Controls>;
 	public var inputsActive:Bool = true;
 
+	public var textSize:Float = 1.0;
+
 	private final itemCallbacks:Map<Alphabet, OptionCallbacks> = [];
 	
 	private var holdTimer:Float = 0.0;
 
-	public function addTextOption(text:String, ?callbacks:OptionCallbacks, ?textSize:Float)
+	public function addTextOption(text:String, ?callbacks:OptionCallbacks):Alphabet
 	{
 		var index = members.length;
 
 		var item = new Alphabet(0, 70 * index + 30, text, true, false, null, textSize);
-		updateItemPos(item, index);
 		item.ID = index;
 		add(item);
 
 		itemCallbacks.set(item, callbacks);
 
-		if (curSelected == null)
-			curSelected = index;
-		else
-			item.alpha = 0.6;
-
+		onAdded(item);
 		return item;
 	}
 
@@ -84,6 +81,15 @@ class AlphabetMenu extends FlxTypedGroup<Alphabet>
 			FlxG.sound.play(Paths.sound("scrollMenu"), 0.4);
 
 		return curSelected = value;
+	}
+
+	private function onAdded(item:Alphabet) {
+		updateItemPos(item, item.ID);
+		item.setPosition(item.targetX, item.targetY);
+		item.alpha = 0.6;
+
+		if (curSelected == null)
+			curSelected = item.ID;
 	}
 
 	private function unSelect(item:Alphabet) {

@@ -1,6 +1,6 @@
 //// all of this for what
 
-package funkin.objects;
+package funkin.objects.hud;
 
 import flixel.graphics.FlxGraphic;
 import flixel.tweens.FlxTween;

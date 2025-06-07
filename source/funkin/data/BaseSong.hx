@@ -99,9 +99,9 @@ typedef SwagSong = {
 
 	////
 	@:optional var events:Array<Array<Dynamic>>;
-	@:optional var metadata:SongMetadata;
-
+	
 	//// internal
+	@:optional var metadata:SongMetadata;
 	var validScore:Bool;
 }
 

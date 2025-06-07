@@ -3,6 +3,7 @@ package funkin.states;
 import funkin.data.Song;
 import funkin.data.PauseMenuOption;
 import funkin.input.Controls;
+import funkin.objects.hud.Countdown;
 import funkin.states.options.OptionsSubstate;
 import flixel.FlxG;
 import flixel.FlxSprite;
