@@ -29,6 +29,7 @@ import flixel.ui.FlxSpriteButton;
 
 import haxe.Json;
 import haxe.io.Path;
+import haxe.io.Bytes;
 import haxe.format.JsonParser;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
@@ -37,7 +38,7 @@ import openfl.utils.ByteArray;
 import openfl.utils.Assets as OpenFlAssets;
 import openfl.media.Sound;
 import lime.media.AudioBuffer;
-import haxe.io.Bytes;
+import lime.ui.FileDialog;
 import openfl.geom.Rectangle;
 import flixel.util.FlxSort;
 
@@ -625,18 +626,37 @@ class ChartingState extends MusicBeatState
 			}
 		});
 
-		var loadEventJson:FlxButton = new FlxButton(loadAutosaveBtn.x, loadAutosaveBtn.y + 30, 'Load Events', function()
-		{
-			var songName:String = Paths.formatToSongPath(_song.song);
-			var events:SwagSong = Song.loadFromJson('events', songName, false);
-			if (events != null) {
-				clearEvents();
-				_song.events = events.events;
-				changeSection(curSec);
-			}
+		////
+		final eventsFileDialog = new FileDialog();
+		eventsFileDialog.onOpen.add(function(resource) {
+			var data:Dynamic = Json.parse((resource:Bytes).toString());
+
+			var song:SwagSong = Reflect.field(data, "song"); 
+			if (song == null)
+				return;
+		
+			var events = Song.onLoadEvents(data.song).events;
+			if (events == null)
+				return;
+
+			clearEvents();
+			_song.events = events;
+			changeSection(curSec);
 		});
 
-		var saveEvents:FlxButton = new FlxButton(110, reloadSongJson.y, 'Save Events', saveEvents);
+		var loadEventJson:FlxButton = new FlxButton(loadAutosaveBtn.x, loadAutosaveBtn.y + 30, 'Load Events', function() {
+			final openEvents:Void->Void = eventsFileDialog.open.bind('json', getSongPath('events.json'), 'Load Events');
+			openSubState(new Prompt('This action will clear the current events.\n\nProceed?', 0, openEvents, null, ignoreWarnings));
+		});
+
+		var saveEventJson:FlxButton = new FlxButton(110, reloadSongJson.y, 'Save Events', function() {
+			if (_song.events != null && _song.events.length > 1)
+				_song.events.sort(sortByTime);
+
+			var json = {"song": {"events": _song.events}}
+			var data:String = Json.stringify(json, "\t");
+			eventsFileDialog.save(data, 'json', getSongPath('events.json'), 'Save Events');
+		});
 
 		var clear_events:FlxButton = new FlxButton(loadAutosaveBtn.x, 300, 'Clear events', function()
 			{
@@ -787,7 +807,7 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(clear_events);
 		tab_group_song.add(clear_notes);
 		tab_group_song.add(saveButton);
-		tab_group_song.add(saveEvents);
+		tab_group_song.add(saveEventJson);
 
 		tab_group_song.add(reloadSong);
 		tab_group_song.add(reloadSongJson);
@@ -1500,6 +1520,11 @@ class ChartingState extends MusicBeatState
 		trackVolumeSlider.value = val;
 	}
 
+	function getSongPath(file:String = "") {
+		var chartPath = Reflect.field(_song, "_path");
+		return (chartPath==null ? "" : Path.addTrailingSlash(Path.directory(chartPath))) + file;
+	}
+
 	function addMetadataUI() {
 		var tab_group = new FlxUI(null, UI_box);
 		tab_group.name = 'Metadata';
@@ -1528,14 +1553,9 @@ class ChartingState extends MusicBeatState
 		// TODO: freeplay data shit idunno
 
 		////
-		function getMetadataPath():String {
-			var chartPath = Reflect.field(_song, "_path");
-			return (chartPath==null ? "" : Path.addTrailingSlash(Path.directory(chartPath))) + "metadata.json";
-		}
-
-		var fileDialog = new lime.ui.FileDialog();
+		final fileDialog = new FileDialog();
 		fileDialog.onOpen.add(function(resource) {
-			var str:String = (resource:haxe.io.Bytes).toString();
+			var str:String = (resource:Bytes).toString();
 			if (str != null && str.length > 0) {
 				var data:Dynamic = Json.parse(str);
 				_song.metadata = data; // kinda dangerous
@@ -1548,11 +1568,11 @@ class ChartingState extends MusicBeatState
 			}
 		});
 
-		var loadButton = new FlxButton(10, modcharterInputText.y + 30, "Load Metadata", function()
-		{
-			fileDialog.open('json', getMetadataPath(), 'Load Metadata');
+		var loadButton = new FlxButton(10, modcharterInputText.y + 30, "Load Metadata", function() {			
+			fileDialog.open('json', getSongPath("metadata.json"), 'Load Metadata');
 		});
 
+		////
 		var saveButton = new FlxButton(10, loadButton.y + 30, "Save Metadata", function()
 		{
 			_song.metadata.songName = songNameInputText.text;
@@ -1561,10 +1581,7 @@ class ChartingState extends MusicBeatState
 			_song.metadata.modcharter = modcharterInputText.text;
 
 			var data:String = Json.stringify(_song.metadata, "\t");
-			if ((data != null) && (data.length > 0))
-			{
-				fileDialog.save(data.trim(), 'json', getMetadataPath(), 'Save Metadata');
-			}
+			fileDialog.save(data, 'json', getSongPath("metadata.json"), 'Save Metadata');
 		});
 
 		////
@@ -3350,28 +3367,6 @@ class ChartingState extends MusicBeatState
 			_file.addEventListener(Event.CANCEL, onSaveCancel);
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 			_file.save(data.trim(), fileName);
-		}
-	}
-
-	private function saveEvents()
-	{
-		if(_song.events != null && _song.events.length > 1) _song.events.sort(sortByTime);
-		var eventsSong:Dynamic = {
-			events: _song.events
-		};
-		var json = {
-			"song": eventsSong
-		}
-
-		var data:String = Json.stringify(json, "\t");
-
-		if ((data != null) && (data.length > 0))
-		{
-			_file = new FileReference();
-			_file.addEventListener(Event.COMPLETE, onSaveComplete);
-			_file.addEventListener(Event.CANCEL, onSaveCancel);
-			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-			_file.save(data.trim(), "events.json");
 		}
 	}
 
