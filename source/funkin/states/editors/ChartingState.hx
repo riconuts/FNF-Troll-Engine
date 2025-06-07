@@ -339,7 +339,6 @@ class ChartingState extends MusicBeatState
 		
 		FlxTransitionableState.skipNextTransOut = true;
 
-		persistentUpdate = true;
 		persistentDraw = true;
 
 		PlayState.chartingMode = true;
