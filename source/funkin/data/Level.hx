@@ -119,12 +119,11 @@ class Level {
 	**/
 	public function getDisplayedSongs(difficultyId:String = "normal"):Array<String>
 	{
-		return [for (song in songs) song==null ? "Unknown" : song.getMetadata(difficultyId).songName];
+		return getLocked() ? [] : [for (song in songs) song==null ? "Unknown" : song.getMetadata(difficultyId).songName];
 	}
 	
 
 	/**
-	 * WIP (still gotta add to freeplay)
 	 * Returns an array of song data to be shown in freeplay. 
 	**/
 	public function getFreeplaySongs():Array<BaseSong>
@@ -132,6 +131,16 @@ class Level {
 		return songs;
 	}
 	
+
+	/**
+		Returns true if the level is locked.  
+		A locked level won't be playable through the story mode menu, and it's songs won't be added to freeplay.
+	**/
+	public function getLocked():Bool
+	{
+		return false;
+	}
+
 
 	/**
 	 * Returns a LevelTitle object for the story menu
@@ -235,6 +244,16 @@ class ScriptedLevel extends Level
 		return callScript("getFreeplaySongs") ?? super.getFreeplaySongs();
 	}
 	
+
+	/**
+		Returns true if the level is locked.  
+		A locked level won't be playable through the story mode menu, and it's songs won't be added to freeplay.
+	**/
+	public function getLocked():Bool
+	{
+		return callScript("getLocked") ?? super.getLocked();
+	}
+
 
 	/**
 	 * Returns a LevelTitle object for the story menu

@@ -62,6 +62,9 @@ class FreeplayState extends MusicBeatState
 
 			//// level songs
 			for (level in StoryModeState.scanContentLevels(directory)) {
+				if (level.getLocked())
+					continue;
+				
 				for (song in level.getFreeplaySongs()) {
 					songIdMap.set(song.songId, true);
 					list.push(song);
