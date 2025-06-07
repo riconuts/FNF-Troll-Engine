@@ -6,7 +6,9 @@
     </files>
 
     <target id="haxe">
-        <lib name="-lX11" />
-        <lib name="-lXrandr" />
+        <section if="linux">
+            <lib name="-lX11" />
+            <lib name="-lXrandr" />
+        </section>
     </target>
 </xml>
