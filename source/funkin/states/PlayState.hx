@@ -238,8 +238,8 @@ class PlayState extends MusicBeatState
 	
 	public var hitsound:FlxSound;
 
-	var sndFilter:ALFilter = AL.createFilter();
-	var sndEffect:ALEffect = AL.createEffect();
+	public var sndFilter:ALFilter = AL.createFilter();
+	public var sndEffect:ALEffect = AL.createEffect();
 
 	////
 	public var camGame:FlxCamera;
@@ -1377,10 +1377,12 @@ class PlayState extends MusicBeatState
 			return;
 
 		// Do the countdown.
-		var countdown = new Countdown(this);
-		resetCountdown(countdown);
-		countdown.start(Conductor.crochet * 0.001); // time is optional but here we are
-		curCountdown = countdown;
+		curCountdown = new Countdown(this);
+		resetCountdown(curCountdown);
+		curCountdown.start(Conductor.crochet * 0.001); // time is optional but here we are
+
+		var i = this.members.indexOf(this.notes);
+		(i==-1) ? this.add(curCountdown) : this.insert(i, curCountdown);
 	}
 
 	public function resetCountdown(countdown:Countdown):Void {
@@ -1465,8 +1467,10 @@ class PlayState extends MusicBeatState
 	{
 		if(time < 0) time = 0;
 
-		if (curCountdown != null && !curCountdown.finished)
+		if (curCountdown != null && !curCountdown.finished) {
 			curCountdown.destroy();
+			remove(curCountdown);
+		}
 
 		Conductor.startSong(time);
 	}
@@ -4087,8 +4091,6 @@ class PlayState extends MusicBeatState
 
 		Conductor.pauseSong();
 
-		if (curCountdown != null && !curCountdown.finished)
-			curCountdown.timer.active = false;
 		if (finishTimer != null && !finishTimer.finished)
 			finishTimer.active = false;
 		if (songSpeedTween != null)
@@ -4126,8 +4128,6 @@ class PlayState extends MusicBeatState
 			Conductor.resumeSong();
 		}
 
-		if (curCountdown != null && !curCountdown.finished)
-			curCountdown.timer.active = true;
 		if (finishTimer != null && !finishTimer.finished)
 			finishTimer.active = true;
 		if (songSpeedTween != null)

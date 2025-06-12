@@ -79,8 +79,8 @@ class PauseSubState extends MusicBeatSubstate
 				return;
 			}
 
-			var gameCnt = PlayState.instance==null ? null : PlayState.instance.curCountdown;
-			if (gameCnt != null && !gameCnt.finished) { // don't make a new countdown if there's already one in progress lol
+			var game = PlayState.instance;
+			if (game?.curCountdown?.finished != true) { // don't make a new countdown if there's already one in progress lol
 				this.close();
 				return;
 			}
@@ -90,10 +90,12 @@ class PauseSubState extends MusicBeatSubstate
 
 			menu.inputsActive = false;
 
-			var c = new Countdown(this); // https://tenor.com/view/letter-c-darwin-tawog-the-amazing-world-of-gumball-dance-gif-17949158
+			var c = new Countdown(game); // https://tenor.com/view/letter-c-darwin-tawog-the-amazing-world-of-gumball-dance-gif-17949158
+			if (game != null) game.resetCountdown(c);
 			c.onComplete = this.close;
+			c.cameras = this.cameras;
 			c.start(0.5);
-
+			add(c);
 		});
 
 		newOpt("Restart Song", ()->{

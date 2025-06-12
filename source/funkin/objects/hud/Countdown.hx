@@ -7,8 +7,6 @@ import flixel.group.FlxGroup;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 
-import flixel.util.FlxTimer;
-
 import funkin.states.PlayState;
 import funkin.scripts.Globals;
 
@@ -16,10 +14,9 @@ import funkin.scripts.Globals;
  * @author crowplexus
  * Handles Gameplay countdown, also optionally used in the Pause Menu if `ClientPrefs.countUnpause` is set to true.
 **/
-class Countdown {
+class Countdown extends FlxBasic {
 	public var sprite:Null<FlxSprite>;
 	public var sound:Null<FlxSound>;
-	public var timer:FlxTimer;
 	public var tween:FlxTween;
 
 	public var introAlts:Array<Null<String>> = ["onyourmarks", 'ready', 'set', 'go'];
@@ -29,45 +26,37 @@ class Countdown {
 	public var onTick:(counter:Int)->Void;
 	public var onComplete:()->Void;
 
+	/** How many times this countdown has ticked (index) **/
 	public var position:Int = 0; // originally swagCounter
 
-	public var active(get, never):Bool;
-	public var finished(get, never):Bool;
+	/** Time between ticks in seconds **/
+	public var tickDuration:Float = 0.5;
 
-	@:noCompletion function get_active() return timer!=null && timer.active;
-	@:noCompletion function get_finished() return timer==null || timer.finished;
+	/** Whether the countdown has reached completion **/
+	public var finished:Bool = false;
 
-	private var parent:FlxGroup;
+	/** Time elapsed since the last tick **/
+	private var time:Float = 0.0;
+
 	private var game:PlayState;
 
-	public function new(parent:FlxGroup = null):Void {
-		if (parent == null) parent = FlxG.state;
-		if (parent is PlayState) game = cast(parent, PlayState);
-		this.parent = parent;
+	public function new(?game:PlayState):Void {
+		super();
+		this.active = false;
+		this.game = game;
+		if (game != null)
+			this.cameras = [game.camHUD];
 	}
 
-	public function destroy():Void {
-		deleteTween();
-		deleteTimer();
-		sprite = null;
-		sound = null;
-		position = 0;
-		parent = null;
-		game = null;
-	}
+	public function start(?tickDuration:Float = -1):Countdown {
+		if (this._cameras == null)
+			this._cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 
-	public function start(?time:Float = -1):Countdown {
-		if (time == -1) time = Conductor.crochet * 0.001;
-		timer = new FlxTimer();
-		timer.start(time, (_)->{
-			tick(position);
-			if (timer.loopsLeft == 0 && onComplete != null) {
-				onComplete();
-				// not sure how much this helps the GC, if this causes issues remove it!!!
-				this.destroy();
-			}
-			position++;
-		}, 5);
+		this.tickDuration = (tickDuration == -1) ? Conductor.crochet * 0.001 : tickDuration;
+		this.position = 0;
+		this.finished = false;
+		this.active = true;
+
 		return this;
 	}
 
@@ -76,42 +65,32 @@ class Countdown {
 		var sprImage:Null<flixel.graphics.FlxGraphic> = Paths.image(introAlts[curPos]);
 		if (sprImage != null)
 		{
-			var defaultTransition:Bool = true;
-			if (tween != null)
-				tween.cancel();
-
+			if (tween != null) deleteTween();
 			if (sprite != null) deleteSprite();
 
 			// ↓ I had no idea how to make script calls not weird, so I just did this
 			// you might wanna replace it with something else and stuff @crowplexus
 			var ret:Dynamic = Globals.Function_Continue;
 			if (game != null && game.hudSkinScript != null)
-				ret = game.callScript(game.hudSkinScript, "makeCountdownSprite", [sprImage, curPos, timer]);
+				ret = game.callScript(game.hudSkinScript, "makeCountdownSprite", [sprImage, curPos]);
 
-			if (ret != Globals.Function_Continue)
-			{
-				if ((ret is FlxSprite))
-				{
-					sprite = cast ret; // returned a sprite, so use it as the countdown sprite (use default transition etc)
-				}
-				else
-					defaultTransition = false; // didnt return a sprite and didnt return Function_Continue, so dont do any code related to sprite
-			}
-			else
+			if (ret == Globals.Function_Continue)
 			{
 				// default behaviour, create sprite w/ the specified sprImage
 				sprite = new FlxSprite(0, 0, sprImage);
 				sprite.scrollFactor.set();
+				sprite.cameras = this._cameras;
 				sprite.updateHitbox();
-				if (game != null) sprite.cameras = [game.camHUD];
-				else sprite.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 				sprite.screenCenter();
 			}
-
-			if (defaultTransition)
+			else if (ret is FlxSprite)
 			{
-				if (game == null) parent.insert(parent.members.length-1,sprite);
-				else game.insert(game.members.indexOf(game.notes),sprite); // how it was layered originally
+				// returned a sprite, so use it as the countdown sprite (use default transition etc)
+				sprite = cast ret;
+			}
+
+			if (sprite != null)
+			{
 				tween = FlxTween.tween(sprite, {alpha: 0}, Conductor.crochet * 0.001, {
 					ease: FlxEase.cubeInOut,
 					onComplete: function(twn)
@@ -123,9 +102,9 @@ class Countdown {
 			}
 
 			if (game != null) {
-				game.callOnHScripts('onCountdownSpritePost', [sprite, curPos, timer]);
+				game.callOnHScripts('onCountdownSpritePost', [sprite, curPos]);
 				if (game.hudSkinScript != null)
-					game.hudSkinScript.call("onCountdownSpritePost", [sprite, curPos, timer]);
+					game.hudSkinScript.call("onCountdownSpritePost", [sprite, curPos]);
 			}
 		}
 
@@ -134,7 +113,7 @@ class Countdown {
 		{
 			var ret:Dynamic = Globals.Function_Continue;
 			if (game != null && game.hudSkinScript != null)
-				ret = game.callScript(game.hudSkinScript, "playCountdownSound", [soundName, introSoundsSuffix, curPos, timer]);
+				ret = game.callScript(game.hudSkinScript, "playCountdownSound", [soundName, introSoundsSuffix, curPos]);
 
 			if (ret == Globals.Function_Continue)
 			{
@@ -145,35 +124,65 @@ class Countdown {
 					if (sound == snd)
 						sound = null;
 				});
-				#if tgt
-				if (game != null && game.sndEffect != null && ClientPrefs.ruin)
+
+				if (game != null && game.sndEffect != null)
 					snd.effect = game.sndEffect;
-				#end
+
 				sound = snd;
 			}
 		}
 
 		if (game != null) {
-			game.callOnHScripts('onCountdownTick', [curPos, timer]);
+			game.callOnHScripts('onCountdownTick', [curPos]);
 			if (game.hudSkinScript != null)
-				game.hudSkinScript.call("onCountdownTick", [curPos, timer]);
+				game.hudSkinScript.call("onCountdownTick", [curPos]);
 		}
 		if (onTick != null) onTick(curPos);
 	}
 
-	function deleteTimer():Void {
-		if (timer != null){
-			timer.cancel();
-			timer.destroy();
-			timer = null;
+	public function complete() {
+		this.finished = true;
+		this.active = false;
+		this.position = 0;
+
+		if (onComplete != null) onComplete();
+	}
+
+	override public function update(elapsed:Float):Void {
+		time += elapsed;
+
+		if (!finished && time >= tickDuration) {
+			time -= tickDuration;
+			tick(position++);
+			
+			if (position >= 5)
+				complete();
 		}
+
+		if (sprite != null) sprite.update(elapsed);
+		super.update(elapsed);
+	}
+
+	override public function draw():Void {
+		if (sprite != null) sprite.draw();
+		super.draw();
+	}
+
+	override public function destroy():Void {
+		deleteTween();
+		deleteSprite();
+		sound = null;
+		position = 0;
+		game = null;
+
+		super.destroy();
 	}
 
 	function deleteSprite():Void {
-		final papa = (game!=null ? game : parent);
-		sprite.destroy();
-		papa.remove(sprite);
-		sprite = null;
+		if (sprite != null) {
+			sprite.destroy();
+			sprite = null;
+		}
 	}
 
 	function deleteTween():Void {

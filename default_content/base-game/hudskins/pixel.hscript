@@ -123,11 +123,9 @@ function onCountdownTick(tick)
 		case 4:
 			updateTimerTxt();
 
-			timerSpecial.alpha = 0.0;
 			FlxTween.tween(timerSpecial, {alpha: 1}, Conductor.crochet / 1000);
 			
 			for (spr in timerNums){
-				spr.alpha = 0.0;
 				FlxTween.tween(spr, {alpha: 1}, Conductor.crochet / 1000);
 			}
 	}
@@ -144,7 +142,7 @@ function onUpdate(elapsed){
 		updateTimerTxt();
 }
 
-function makeCountdownSprite(sprImage, swagCounter, tmr){
+function makeCountdownSprite(sprImage, swagCounter){
 	var countdownSpr = new FlxSprite(0, 0, sprImage);
 	countdownSpr.scrollFactor.set();
 	countdownSpr.scale.set(6, 6);
