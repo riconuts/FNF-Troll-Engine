@@ -27,7 +27,7 @@ class FreeplayState extends MusicBeatState
 {
 	public static var comingFromPlayState:Bool = false;
 
-	var menu = new FreeplayMenu();
+	var menu:FreeplayMenu;
 	var songList:Array<BaseSong>;
 
 	var bgGrp = new FlxTypedGroup<FlxSprite>();
@@ -106,15 +106,15 @@ class FreeplayState extends MusicBeatState
 		#end
 
 		songList ??= getFreeplaySongs();
-		menu.setSongList(songList);
 
 		////
 		add(bgGrp);
 
-		add(menu);
+		menu = new FreeplayMenu();
 		menu.controls = controls;
 		menu.callbacks.onSelect = (selectedIdx, _) -> onSelectSong(menu.songList[selectedIdx]);
 		menu.callbacks.onAccept = (_, _) -> onAccept();
+		add(menu);
 
 		////
 		var hintBG = CoolUtil.blankSprite(FlxG.width, 26, 0xFF999999);
@@ -144,6 +144,7 @@ class FreeplayState extends MusicBeatState
 		add(scoreText);
 
 		////
+		menu.setSongList(songList);
 		curChartId = FreeplayState.lastSelectedChart;
 		menu.curSelected = FreeplayState.lastSelectedIdx;
 		if (comingFromPlayState) playSelectedSongMusic();
@@ -431,16 +432,11 @@ private class FreeplayMenu extends AlphabetMenu
 	private var iconGrp = new FlxTypedGroup<FreeplayIcon>();
 
 	public function setSongList(songs:Array<BaseSong>) {
-		var curSong = songList[curSelected];	
-
-		this.curSelected = null;
 		this.clear();
 		this.songList = songs;
 		for (song in songList)
 			addSong(song);
-
-		var newIndex = songList.indexOf(curSong);
-		this.curSelected = newIndex < 0 ? 0 : newIndex;
+		this.curSelected = 0;
 	}
 
 	public function addSong(song:BaseSong) {
