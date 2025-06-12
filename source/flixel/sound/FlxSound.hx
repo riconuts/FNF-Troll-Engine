@@ -2,11 +2,14 @@ package flixel.sound;
 
 import funkin.ClientPrefs;
 
+#if lime_openal
 import lime.system.CFFIPointer;
 import lime.media.openal.ALEffect;
+import lime.media.openal.ALSource;
 import lime.media.openal.ALAuxiliaryEffectSlot;
 import lime.media.openal.ALFilter;
 import lime.media.openal.AL;
+#end
 
 import flixel.FlxBasic;
 import flixel.FlxG;
@@ -666,50 +669,46 @@ class FlxSound extends FlxBasic
 	{
 		@:privateAccess
 		#if (openfl < "9.3.2")
-		return _channel.__source;
+		return _channel?.__source;
 		#else
-		return _channel.__audioSource;
+		return _channel?.__audioSource;
 		#end
+	}
+
+	inline function get_handle():ALSource
+	{
+		@:privateAccess
+		return get_audioSource()?.__backend.handle;
 	}
 
 	function updateFilter()
 	{
-		#if !(flash || js || html5)
-		@:privateAccess
-		if (_channel != null)
-		{
-			var source = get_audioSource();
-			if (source == null)
-				return;
+		#if lime_openal
+		var handle = get_handle();
+		if (handle == null)
+			return;
 
-			var handle = source.__backend.handle;
-			if (filter != null)
-				AL.sourcei(handle, AL.DIRECT_FILTER, filter);
-			else
-				AL.removeDirectFilter(handle);
-		}
+		if (filter != null)
+			AL.sourcei(handle, AL.DIRECT_FILTER, filter);
+		else
+			AL.removeDirectFilter(handle);
 		#end
 	}
 
 	function updateEffect()
 	{
-		#if !(flash || js || html5)
-		@:privateAccess
-		if (_channel != null)
-		{
-			var source = get_audioSource();
-			if (source == null)
-				return;
+		#if lime_openal
+		var handle = get_handle();
+		if (handle == null)
+			return;
 
-			var handle = source.__backend.handle;
-
-			if (effect != null)
-			{
-				var cffi:CFFIPointer = cast filter;
-				AL.auxi(effectAux, AL.EFFECTSLOT_EFFECT, effect);
-				AL.source3i(handle, AL.AUXILIARY_SEND_FILTER, effectAux, 0, filter == null ? AL.FILTER_NULL : Std.int(cffi.get()));
-			}else
-				AL.source3i(handle, AL.AUXILIARY_SEND_FILTER, AL.FILTER_NULL, 0, AL.FILTER_NULL);
+		if (effect != null) {
+			var filter:Int = (filter == null) ? AL.FILTER_NULL : Std.int((filter:CFFIPointer).get());
+			AL.auxi(effectAux, AL.EFFECTSLOT_EFFECT, effect);
+			AL.source3i(handle, AL.AUXILIARY_SEND_FILTER, effectAux, 0, filter);
+		}
+		else {
+			AL.source3i(handle, AL.AUXILIARY_SEND_FILTER, AL.FILTER_NULL, 0, AL.FILTER_NULL);
 		}
 		#end
 	}
@@ -863,13 +862,9 @@ class FlxSound extends FlxBasic
 
 	function set_pitch(v:Float):Float
 	{
-		@:privateAccess
-		if (_channel != null)
-		{
-			var source = get_audioSource();
-			if (source != null)
-				source.pitch = v;
-		}
+		var source = get_audioSource();
+		if (source != null)
+			source.pitch = v;
 
 		return _pitch = v;
 	}
