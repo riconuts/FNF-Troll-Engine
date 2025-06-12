@@ -16,6 +16,8 @@ import flixel.tweens.FlxEase;
 using StringTools;
 using funkin.CoolerStringTools;
 
+private typedef CatData = {id:String, songs:Array<BaseSong>};
+
 @:injectMoreFunctions([
 	"onSelectSong",
 	"onAccept",
@@ -29,6 +31,11 @@ class FreeplayState extends MusicBeatState
 
 	var menu:FreeplayMenu;
 	var songList:Array<BaseSong>;
+
+	var catMap = new Map<String, CatData>();
+	var catList = new Array<CatData>();
+
+	var curCat:Int = 0;
 
 	var bgGrp = new FlxTypedGroup<FlxSprite>();
 	var bg:FlxSprite;
@@ -106,6 +113,28 @@ class FreeplayState extends MusicBeatState
 		#end
 
 		songList ??= getFreeplaySongs();
+		
+		//// Category shit
+		inline function makeCategory(id):CatData {
+			var cat:CatData = {id: id, songs: []}; 
+			catMap.set(id, cat);
+			catList.push(cat);
+			return cat; 
+		}
+
+		var defaultCategory = makeCategory("default_category");
+
+		for (song in songList) {
+			var meta:SongMetadata = song.getMetadata();
+			var cats:Array<String> = meta.freeplayCategories;
+
+			defaultCategory.songs.push(song);
+
+			if (cats != null && cats.length != 0) {				
+				for (catId in cats)
+					(catMap.exists(catId) ? catMap.get(catId) : makeCategory(catId)).songs.push(song);
+			}
+		}
 
 		////
 		add(bgGrp);
@@ -233,6 +262,19 @@ class FreeplayState extends MusicBeatState
 
 		if (menu.controls == null)
 			return;
+
+		var cc = 0;
+		if (FlxG.keys.justPressed.Q)
+			cc--;
+
+		if (FlxG.keys.justPressed.E)
+			cc++;
+		
+		if (cc!=0) {
+			curCat = CoolUtil.updateIndex(curCat, cc, catList.length);
+			var catSongs = catList[curCat].songs;
+			menu.setSongList(catSongs);
+		}
 
 		if (controls.UI_LEFT_P){
 			changeDifficulty(-1);

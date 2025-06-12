@@ -60,7 +60,8 @@ typedef SongMetadata =
 	@:optional var charter:String;
 	@:optional var modcharter:String;
 	@:optional var extraInfo:Array<String>;
-	
+
+	@:optional var freeplayCategories:Array<String>;
 	@:optional var freeplayIcon:String;
 	@:optional var freeplayBgGraphic:String;
 	@:optional var freeplayBgColor:String;
