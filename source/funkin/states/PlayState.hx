@@ -3812,8 +3812,7 @@ class PlayState extends MusicBeatState
 		
 		if (note.isSustainNote) {
 			if (note.parent != null)
-				if (note.parent.unhitTail.contains(note))
-					note.parent.unhitTail.remove(note);
+				note.parent.unhitTail.remove(note);
 		}
 		else if (note.sustainLength == 0)
 			field.removeNote(note);
