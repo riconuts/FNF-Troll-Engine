@@ -122,7 +122,12 @@ class FreeplayState extends MusicBeatState
 		hintBG.blend = MULTIPLY;
 		add(hintBG);
 
-		hintText = new FlxText(hintBG.x, hintBG.y + 4, FlxG.width, Paths.getString("freeplayhint"));
+		var hintStr = "";
+		hintStr += Paths.getString("actionhint_gameplayModsMenu").replace('{key}', 'CTRL');
+		hintStr += ' | ';
+		hintStr += Paths.getString("actionhint_resetScore").replace('{key}', 'R');
+
+		hintText = new FlxText(hintBG.x, hintBG.y + 4, FlxG.width, hintStr);
 		hintText.setFormat(Paths.font("vcr.ttf"), 16, 0xFFFFFFFF, RIGHT);
 		hintText.scrollFactor.set();
 		add(hintText);
