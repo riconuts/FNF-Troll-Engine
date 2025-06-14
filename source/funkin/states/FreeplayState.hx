@@ -436,7 +436,6 @@ private class FreeplayMenu extends AlphabetMenu
 		this.songList = songs;
 		for (song in songList)
 			addSong(song);
-		this.curSelected = 0;
 	}
 
 	public function addSong(song:BaseSong) {
@@ -483,12 +482,6 @@ private class FreeplayMenu extends AlphabetMenu
 		iconSpr.tracking = obj;
 		iconSpr.offX = width + 15;
 		iconSpr.offY = height / 2 - iconSpr.height / 2;
-	}
-
-	override function onAdded(item:Alphabet) {
-		updateItemPos(item, item.ID);
-		item.setPosition(item.targetX, item.targetY);
-		item.alpha = 0.6;
 	}
 
 	override function onSelect(item:Alphabet) {
