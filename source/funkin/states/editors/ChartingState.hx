@@ -58,6 +58,7 @@ using Lambda;
 typedef ChartingStateOptions = {
 	var ?autosave:String;
 	var ignoreWarnings:Bool;
+	var hideHelp:Bool;
 	var vortex:Bool;
 	var mouseScrollingQuant:Bool;
 	var noAutoScroll:Bool;
@@ -75,6 +76,7 @@ class ChartingState extends MusicBeatState
 	public static function getDefaultOptions():ChartingStateOptions return {
 		autosave: null,
 		ignoreWarnings: false,
+		hideHelp: false,
 		vortex: false,
 		mouseScrollingQuant: false,
 		noAutoScroll: false,
@@ -104,7 +106,7 @@ class ChartingState extends MusicBeatState
 
 	public var options:ChartingStateOptions = getSavedOptions();
 
-	var hintTextGrp:FlxTypedGroup<FlxText>;
+	var helpTextGrp:FlxTypedGroup<FlxText>;
 
 	var oppHitsound:FlxSound;
 	var plrHitsound:FlxSound;
@@ -529,11 +531,14 @@ class ChartingState extends MusicBeatState
 		\n
 		\nEnter - Play your chart
 		\nQ/E - Decrease/Increase Note Sustain Length
-		\nSpace - Stop/Resume song";
+		\nSpace - Stop/Resume song
+		\n
+		\nF1 - Hide/Show help
+		";
 		
-		hintTextGrp = new FlxTypedGroup<FlxText>();
-		hintTextGrp.exists = false;
-		add(hintTextGrp);
+		helpTextGrp = new FlxTypedGroup<FlxText>();
+		helpTextGrp.exists = !options.hideHelp;
+		add(helpTextGrp);
 
 		var tipTextY = FlxG.height/2 + GRID_SIZE;
 		var tipTextArray:Array<String> = text.split('\n');
@@ -543,7 +548,7 @@ class ChartingState extends MusicBeatState
 			tipText.antialiasing = false;
 			tipText.borderSize = 1.25;
 			tipText.scrollFactor.set();
-			hintTextGrp.add(tipText);
+			helpTextGrp.add(tipText);
 		}
 
 		var tabs = [
@@ -2459,7 +2464,8 @@ class ChartingState extends MusicBeatState
 		}
 
 		if (FlxG.keys.justPressed.F1) {
-			hintTextGrp.exists = !hintTextGrp.exists;
+			helpTextGrp.exists = !helpTextGrp.exists;
+			options.hideHelp = !helpTextGrp.exists;
 		}
 
 		if (FlxG.keys.justPressed.ENTER) {
