@@ -282,7 +282,7 @@ class Note extends NoteObject
 
 	////
 	private function set_texture(value:String):String {
-		if (tex != value) reloadNote(texPrefix, value, texSuffix);
+		if (tex != value) reloadNote(value, texSuffix);
 		return tex;
 	}
 
@@ -324,9 +324,6 @@ class Note extends NoteObject
 			genScript.executeFunc("setupNoteTexture", [this]);
 
 		}else {
-			if (genScript.exists("texturePrefix"))
-				texPrefix = genScript.get("texturePrefix");
-
 			if (genScript.exists("textureSuffix"))
 				texSuffix = genScript.get("textureSuffix");
 
@@ -470,36 +467,33 @@ class Note extends NoteObject
 			this.noteMod = noteMod;
 	}
 
-	public var texPrefix:String = '';
 	public var tex:String;
 	public var texSuffix:String = '';
-	public function reloadNote(?prefix:String, ?texture:String, ?suffix:String, ?folder:String, hInd:Int = 0, vInd:Int = 0) {
-		if(prefix == null) prefix = '';
+	public function reloadNote(?texture:String, ?suffix:String, ?folder:String, hInd:Int = 0, vInd:Int = 0) {
 		if(texture == null) texture = '';
 		if(suffix == null) suffix = '';
 		if(folder == null) folder = '';
 
-		texPrefix = prefix;
 		tex = texture;
 		texSuffix = suffix;
 
 		if (genScript != null)
-			genScript.executeFunc("onReloadNote", [this, prefix, texture, suffix], this);
+			genScript.executeFunc("onReloadNote", [this, texture, suffix], this);
 		
 		if (noteScript != null)
-			noteScript.executeFunc("onReloadNote", [this, prefix, texture, suffix], this);
+			noteScript.executeFunc("onReloadNote", [this, texture, suffix], this);
 
-		if (genScript != null && genScript.executeFunc("preReloadNote", [this, prefix, texture, suffix], this) == Globals.Function_Stop)
+		if (genScript != null && genScript.executeFunc("preReloadNote", [this, texture, suffix], this) == Globals.Function_Stop)
 			return;
 
 		////
 
 		/** Should join and check for shit in the following order:
 		 * 
-		 * folder + "/" + "QUANT" + prefix + name + suffix (if quants are enabled)
-		 * folder + "/" + prefix + name + suffix
-		 * "QUANT"+ prefix + name + suffix (if quants are enabled)
-		 * prefix + name + suffix
+		 * folder + "/" + "QUANT" + name + suffix (if quants are enabled)
+		 * folder + "/" + name + suffix
+		 * "QUANT"+ name + suffix (if quants are enabled)
+		 * name + suffix
 		 *
 		 * Sets isQuant to true if a quant texture is to be returned
 		 */
@@ -509,7 +503,7 @@ class Note extends NoteObject
 			var skin:String = (texture.length>0) ? texture : PlayState.arrowSkin;
 			var split:Array<String> = skin.split('/');
 
-			var fileName:String = prefix + split.pop() + suffix;
+			var fileName:String = split.pop() + suffix;
 			var folderPath:String = (folder == '' ? '' : folder + '/') + split.join('/');
 			
 			var foldersToCheck:Array<String> = [];
@@ -562,10 +556,10 @@ class Note extends NoteObject
 		
 		////	
 		if (genScript != null)
-			genScript.executeFunc("postReloadNote", [this, prefix, texture, suffix], this);
+			genScript.executeFunc("postReloadNote", [this, texture, suffix], this);
 
 		if (noteScript != null)
-			noteScript.executeFunc("postReloadNote", [this, prefix, texture, suffix], this);
+			noteScript.executeFunc("postReloadNote", [this, texture, suffix], this);
 	}
 
 	public function loadIndNoteAnims()
