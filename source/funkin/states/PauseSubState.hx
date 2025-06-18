@@ -80,7 +80,7 @@ class PauseSubState extends MusicBeatSubstate
 			}
 
 			var game = PlayState.instance;
-			if (game?.curCountdown?.finished != true) { // don't make a new countdown if there's already one in progress lol
+			if (game?.curCountdown?.finished == false) { // don't make a new countdown if there's already one in progress lol
 				this.close();
 				return;
 			}
