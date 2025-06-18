@@ -59,6 +59,8 @@ using Lambda;
 @:access(openfl.media.Sound.__buffer)
 class ChartingState extends MusicBeatState
 {
+	var hintTextGrp:FlxTypedGroup<FlxText>;
+
 	var oppHitsound:FlxSound;
 	var plrHitsound:FlxSound;
 	var hitsound:FlxSound;
@@ -478,11 +480,10 @@ class ChartingState extends MusicBeatState
 		dummyArrow = CoolUtil.blankSprite(GRID_SIZE, GRID_SIZE);
 		add(dummyArrow);
 
-		/*
 		var text =
-		"W/S or Mouse Wheel - Change Conductor's strum time
+		"W/S or Mouse Wheel - Change strum time
 		\nA/D - Go to the previous/next section
-		\nUp/Down - Change Conductor's Strum Time with Snapping
+		\nUp/Down - Change strum Time with snapping
 		\nLeft/Right - Change Snap
 		\nHold Shift to move 4x faster
 		\nHold Control and click on an arrow to select it
@@ -492,15 +493,20 @@ class ChartingState extends MusicBeatState
 		\nQ/E - Decrease/Increase Note Sustain Length
 		\nSpace - Stop/Resume song";
 		
+		hintTextGrp = new FlxTypedGroup<FlxText>();
+		hintTextGrp.exists = false;
+		add(hintTextGrp);
+
+		var tipTextY = FlxG.height/2 + GRID_SIZE;
 		var tipTextArray:Array<String> = text.split('\n');
 		for (i in 0...tipTextArray.length) {
-			var tipText:FlxText = new FlxText(12, FlxG.height/2 + GRID_SIZE + i * 12, 0, tipTextArray[i], 14);
-			tipText.setFormat(null, 10, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK);
+			var tipText:FlxText = new FlxText(12, tipTextY + i * 12, 0, tipTextArray[i], 14);
+			tipText.setFormat(null, 14, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK);
+			tipText.antialiasing = false;
 			tipText.borderSize = 1.25;
 			tipText.scrollFactor.set();
-			add(tipText);
+			hintTextGrp.add(tipText);
 		}
-		*/
 
 		var tabs = [
 			{name: "Editor", label: 'Editor'},
@@ -2435,6 +2441,10 @@ class ChartingState extends MusicBeatState
 		if (FlxG.keys.justPressed.D) {
 			var nextSection:Int = (curSec + shiftThing) % _song.notes.length;
 			changeSection(nextSection);
+		}
+
+		if (FlxG.keys.justPressed.F1) {
+			hintTextGrp.exists = !hintTextGrp.exists;
 		}
 
 		if (FlxG.keys.justPressed.ENTER) {
