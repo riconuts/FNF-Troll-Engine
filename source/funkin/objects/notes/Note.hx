@@ -510,11 +510,11 @@ class Note extends NoteObject
 			var split:Array<String> = skin.split('/');
 
 			var fileName:String = prefix + split.pop() + suffix;
-			var folderPath:String = folder + split.join('/') + "/";
+			var folderPath:String = (folder == '' ? '' : folder + '/') + split.join('/');
 			
 			var foldersToCheck:Array<String> = [];
 			if (folderPath != '')
-				foldersToCheck.push(folderPath);
+				foldersToCheck.push(folderPath + '/');
 			foldersToCheck.push('');
 			
 			var key:String = null;
