@@ -493,37 +493,28 @@ class Note extends NoteObject
 		 * Sets `isQuant` to `true` if a quant texture is to be returned
 		 */
 		inline function getTextureKey() { // made it a function just cause i think it's easier to read it like this
-			var loadQuants:Bool = this.canQuant && ClientPrefs.noteSkin=='Quants';
-
 			var skin:String = (texture.length>0) ? texture : PlayState.arrowSkin;
 			var split:Array<String> = skin.split('/');
 
 			var fileName:String = split.pop() + suffix;
 			var folderPath:String = (folder == '' ? '' : folder + '/') + split.join('/');
 			
-			var foldersToCheck:Array<String> = [];
-			if (folderPath != '')
-				foldersToCheck.push(folderPath + '/');
-			foldersToCheck.push('');
-			
-			var key:String = null;
-			for (dir in foldersToCheck) {
-				key = dir + fileName;
-	
-				if (loadQuants) {
-					var quantKey:Null<String> = getQuantTexture(dir, fileName, key);
-					if (quantKey != null) {
-						key = quantKey;
-						isQuant = true;
-						break;
-					}
-				}
-				
-				if (Paths.imageExists(key)) {
-					isQuant = false;
-					break;
-				}
+			var key:Null<String> = null;
+			var loadQuants:Bool = this.canQuant && ClientPrefs.noteSkin=='Quants';
+			this.isQuant = false;
+
+			inline function checkFolder(dir:String) {
+				final normalKey:String = dir + fileName;
+				var quantKey:Null<String> = null;
+				this.isQuant = loadQuants && (null != (quantKey = Note.getQuantTexture(dir, fileName, normalKey)));
+				key = (!this.isQuant && Paths.imageExists(normalKey)) ? normalKey : quantKey;
 			}
+
+			if (folderPath != '')
+				checkFolder(folderPath + '/');
+			
+			if (key == null)
+				checkFolder('');
 			
 			return key; 
 		}
