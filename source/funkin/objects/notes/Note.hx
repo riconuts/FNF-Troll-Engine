@@ -76,8 +76,7 @@ class Note extends NoteObject
 
 	public static final quantShitCache = new Map<String, Null<String>>();
 
-	// should move this to Paths maybe
-	public static function getQuantTexture(dir:String, fileName:String, textureKey:String) {
+	public static function getQuantTexture(dir:String, fileName:String, textureKey:String):Null<String> {
 		
 		if (quantShitCache.exists(textureKey))
 			return quantShitCache.get(textureKey);
@@ -469,11 +468,7 @@ class Note extends NoteObject
 
 	public var tex:String;
 	public var texSuffix:String = '';
-	public function reloadNote(?texture:String, ?suffix:String, ?folder:String, hInd:Int = 0, vInd:Int = 0) {
-		if(texture == null) texture = '';
-		if(suffix == null) suffix = '';
-		if(folder == null) folder = '';
-
+	public function reloadNote(texture:String = '', suffix:String = '', folder:String = '', hInd:Int = 0, vInd:Int = 0) {
 		tex = texture;
 		texSuffix = suffix;
 
@@ -490,12 +485,12 @@ class Note extends NoteObject
 
 		/** Should join and check for shit in the following order:
 		 * 
-		 * folder + "/" + "QUANT" + name + suffix (if quants are enabled)
-		 * folder + "/" + name + suffix
-		 * "QUANT"+ name + suffix (if quants are enabled)
-		 * name + suffix
+		 * `folder + "/" + "QUANT" + name + suffix` (If quants are enabled)  
+		 * `folder + "/" + name + suffix`  
+		 * `"QUANT" + name + suffix` (If quants are enabled)  
+		 * `name + suffix`  
 		 *
-		 * Sets isQuant to true if a quant texture is to be returned
+		 * Sets `isQuant` to `true` if a quant texture is to be returned
 		 */
 		inline function getTextureKey() { // made it a function just cause i think it's easier to read it like this
 			var loadQuants:Bool = this.canQuant && ClientPrefs.noteSkin=='Quants';
@@ -532,6 +527,7 @@ class Note extends NoteObject
 			
 			return key; 
 		}
+		/****/
 
 		////
 		var wasQuant:Bool = isQuant;
@@ -554,7 +550,7 @@ class Note extends NoteObject
 		defScale.copyFrom(scale);
 		updateHitbox();
 		
-		////	
+		////
 		if (genScript != null)
 			genScript.executeFunc("postReloadNote", [this, texture, suffix], this);
 
