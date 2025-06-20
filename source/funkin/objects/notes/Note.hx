@@ -355,7 +355,7 @@ class Note extends NoteObject
 			noteScript = (instance == null) ? null : instance.notetypeScripts.get(value);
 
 			if (noteScript != null) {
-				noteScript.executeFunc("setupNote", [this], this, ["this" => this]);
+				noteScript.executeFunc("setupNote", [this], this);
 			
 			}else { // default notes. these values won't get set if you make a script for them!
 				switch (value) {
@@ -400,10 +400,10 @@ class Note extends NoteObject
 		////
 
 		if (noteScript != null)
-			noteScript.executeFunc("postSetupNote", [this], this, ["this" => this]);
+			noteScript.executeFunc("postSetupNote", [this], this);
 
 		if (genScript != null)
-			genScript.executeFunc("postSetupNoteType", [this], this, ["this" => this]);
+			genScript.executeFunc("postSetupNoteType", [this], this);
 
 		////
 		if (isQuant && Paths.imageExists('QUANT' + noteSplashTexture))
@@ -566,18 +566,14 @@ class Note extends NoteObject
 	{
 		var changed = false;
 
-		if (noteScript != null) {
-			if (noteScript.exists("loadIndNoteAnims") && Reflect.isFunction(noteScript.get("loadIndNoteAnims"))) {
-				noteScript.executeFunc("loadIndNoteAnims", [this], this, ["super" => _loadIndNoteAnims]);
-				changed = true;
-			}
+		if (noteScript != null && noteScript.exists("loadIndNoteAnims")) {
+			noteScript.executeFunc("loadIndNoteAnims", [this], this, ["super" => _loadIndNoteAnims]);
+			changed = true;
 		}
 
-		if (genScript != null) {
-			if (genScript.exists("loadIndNoteAnims") && Reflect.isFunction(genScript.get("loadIndNoteAnims"))) {
-				genScript.executeFunc("loadIndNoteAnims", [this], this, ["super" => _loadIndNoteAnims, "noteTypeLoaded" => changed]);
-				changed = true;
-			}
+		if (genScript != null && genScript.exists("loadIndNoteAnims")) {
+			genScript.executeFunc("loadIndNoteAnims", [this], this, ["super" => _loadIndNoteAnims, "noteTypeLoaded" => changed]);
+			changed = true;
 		}
 
 		if (!changed)
@@ -600,18 +596,14 @@ class Note extends NoteObject
 	public function loadNoteAnims() {
 		var changed = false;
 
-		if (noteScript != null) {
-			if (noteScript.exists("loadNoteAnims") && Reflect.isFunction(noteScript.get("loadNoteAnims"))) {
-				noteScript.executeFunc("loadNoteAnims", [this], this, ["super" => _loadNoteAnims]);
-				changed = true;
-			}
+		if (noteScript != null && noteScript.exists("loadNoteAnims")) {
+			noteScript.executeFunc("loadNoteAnims", [this], this, ["super" => _loadNoteAnims]);
+			changed = true;
 		}
 
-		if (genScript != null) {
-			if (genScript.exists("loadNoteAnims") && Reflect.isFunction(genScript.get("loadNoteAnims"))) {
-				genScript.executeFunc("loadNoteAnims", [this], this, ["super" => _loadNoteAnims, "noteTypeLoaded" => changed]);
-				changed = true;
-			}
+		if (genScript != null && genScript.exists("loadNoteAnims")) {
+			genScript.executeFunc("loadNoteAnims", [this], this, ["super" => _loadNoteAnims, "noteTypeLoaded" => changed]);
+			changed = true;
 		}
 
 		if (!changed)
