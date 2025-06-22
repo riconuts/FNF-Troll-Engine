@@ -46,9 +46,11 @@ import flixel.ui.FlxBar;
 
 import haxe.Json;
 
+#if lime_openal
 import lime.media.openal.AL;
 import lime.media.openal.ALFilter;
 import lime.media.openal.ALEffect;
+#end
 
 import openfl.events.KeyboardEvent;
 import openfl.filters.BitmapFilter;
@@ -238,8 +240,10 @@ class PlayState extends MusicBeatState
 	
 	public var hitsound:FlxSound;
 
+	#if lime_openal
 	public var sndFilter:ALFilter = AL.createFilter();
 	public var sndEffect:ALEffect = AL.createEffect();
+	#end
 
 	////
 	public var camGame:FlxCamera;
@@ -1573,6 +1577,7 @@ class PlayState extends MusicBeatState
 		}
 
 		////
+		#if lime_openal
 		#if tgt if(ClientPrefs.ruin){
 			AL.effecti(sndEffect, AL.EFFECT_TYPE, AL.EFFECT_REVERB);
 			AL.effectf(sndEffect, AL.REVERB_DECAY_TIME, 5);
@@ -1582,6 +1587,7 @@ class PlayState extends MusicBeatState
 			AL.effecti(sndEffect, AL.EFFECT_TYPE, AL.EFFECT_NULL);
 			AL.filteri(sndFilter, AL.FILTER_TYPE, AL.FILTER_NULL);
 		}
+		#end
 
 		////
 		for (trackName in songTrackNames) {
