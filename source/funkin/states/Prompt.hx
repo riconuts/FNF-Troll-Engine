@@ -21,23 +21,15 @@ class Prompt extends funkin.states.MusicBeatSubstate
 	var buttonAccept:FlxButton;
 	var buttonNo:FlxButton;
 	var cornerSize:Int = 10;
-	public function new(promptText:String='', defaultSelected:Int = 0, okCallback:Void->Void, cancelCallback:Void->Void,acceptOnDefault:Bool=false,option1:String=null,option2:String=null) 
+	public function new(promptText:String = '', defaultSelected:Int = 0, okCallback:Void->Void = null, cancelCallback:Void->Void = null, acceptOnDefault:Bool = false, option1:String = 'OK', option2:String = 'CANCEL') 
 	{
 		selected = defaultSelected;
 		okc = okCallback;
 		cancelc = cancelCallback;
 		theText = promptText;
 		goAnyway = acceptOnDefault;
-		
-		var op1 = 'OK';
-		var op2 = 'CANCEL';
-		
-		if (option1 != null) op1 = option1;
-		if (option2 != null) op2 = option2;
-		buttonAccept = new FlxButton(473.3, 450, op1, function(){if(okc != null)okc();
-		close();} );
-		buttonNo = new FlxButton(633.3,450,op2,function(){if(cancelc != null)cancelc();
-		close();});
+		buttonAccept = new FlxButton(473.3, 450, option1, ()->{if(okc != null) okc(); close();} );
+		buttonNo = new FlxButton(633.3, 450, option2, ()->{if(cancelc != null) cancelc(); close();});
 		super();	
 	}
 	
