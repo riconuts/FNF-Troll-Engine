@@ -67,8 +67,11 @@ class DefaultFlxSoundTray extends FlxSoundTray
 		_text.gridFitType = GridFitType.PIXEL;
 		#end
 
-
+		#if tgt
+		var dtf:TextFormat = new TextFormat(funkin.Paths.font("calibrib.ttf"), 10, 0xffffff);
+		#else
 		var dtf:TextFormat = new TextFormat(FlxAssets.FONT_DEFAULT, 8, 0xffffff);
+		#end
 		dtf.align = TextFormatAlign.CENTER;
 		_text.defaultTextFormat = dtf;
 

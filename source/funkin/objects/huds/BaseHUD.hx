@@ -12,6 +12,15 @@ class BaseHUD extends FlxSpriteGroup
 {
 	public static final _displayedJudges = ["epic", "sick", "good", "bad", "shit", "miss", "cb"];
 	public static final _judgeColours:Map<String, FlxColor> = [
+		#if tgt
+		"epic" 	=> 0xFFE367E5,
+		"sick" 	=> 0xFF00A2E8,
+		"good" 	=> 0xFFB5E61D,
+		"bad" 	=> 0xFFC3C3C3,
+		"shit" 	=> 0xFF7F7F7F,
+		"miss" 	=> 0xFF880015,
+		"cb" 	=> 0xFF7F265A
+		#else
 		"epic"	=> 0xFFBA78FF,
 		"sick"	=> 0xFF97FFFF,
 		"good"	=> 0xFF97FF9F,
@@ -19,6 +28,7 @@ class BaseHUD extends FlxSpriteGroup
 		"shit"	=> 0xFF828282, 
 		"miss"	=> 0xFFCC3D3D,
 		"cb"	=> 0xFF7F265A
+		#end
 	];
 
 	// just some ref vars

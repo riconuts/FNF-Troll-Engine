@@ -73,6 +73,7 @@ class OptionsSubstate extends MusicBeatSubstate
 					"missVolume",
 					"hitsoundVolume", 
 					"hitsoundBehav",
+					#if tgt "ruin", #end
 				]
 			],
 			[

@@ -659,6 +659,9 @@ class PlayState extends MusicBeatState
 			noDropPenalty = ClientPrefs.getGameplaySetting('noDropPenalty', false);
 			centerNotefield = ClientPrefs.centerNotefield;
 
+			#if tgt
+			playbackRate *= (ClientPrefs.ruin ? 0.8 : 1);
+			#end
 
 			healthDrain = 0.0;
 			opponentHPDrain = 0.0;
@@ -1667,6 +1670,15 @@ class PlayState extends MusicBeatState
 		}
 
 		////
+		#if tgt if(ClientPrefs.ruin){
+			AL.effecti(sndEffect, AL.EFFECT_TYPE, AL.EFFECT_REVERB);
+			AL.effectf(sndEffect, AL.REVERB_DECAY_TIME, 5);
+			AL.effectf(sndEffect, AL.REVERB_GAIN, 0.75);
+			AL.effectf(sndEffect, AL.REVERB_DIFFUSION, 0.5);
+		}else #end {
+			AL.effecti(sndEffect, AL.EFFECT_TYPE, AL.EFFECT_NULL);
+			AL.filteri(sndFilter, AL.FILTER_TYPE, AL.FILTER_NULL);
+		}
 
 		////
 		for (trackName in songTrackNames) {

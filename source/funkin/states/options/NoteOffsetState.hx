@@ -63,7 +63,7 @@ class NoteOffsetState extends MusicBeatState
 		FlxG.sound.pause();
 
 		//// Stage
-		var stageId = 'stage';
+		var stageId = 'stage' #if tgt + "1" #end;
 
 		stage = new Stage(stageId);
 		stage.buildStage();

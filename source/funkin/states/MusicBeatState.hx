@@ -365,6 +365,9 @@ class MusicBeatState extends FlxUIState
 			return;
 
 		MusicBeatState.stopMenuMusic();
+		#if tgt
+		funkin.tgt.gallery.JukeboxState.playIdx = 0;
+		#end
 
 		#if MODS_ALLOWED
 		// i NEED to rewrite the paths shit for real 
@@ -412,7 +415,11 @@ class MusicBeatState extends FlxUIState
 		#end
 		
 		//// TODO: find a way to soft code this!!! (psych engine already has one so maybe we could just use that and add custom intro text to it :-)
+		#if tgt
+		Conductor.changeBPM(180);
+		#else
 		Conductor.changeBPM(102);
+		#end
 		Conductor.songPosition = 0;
 	}
 	

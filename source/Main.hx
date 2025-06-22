@@ -102,6 +102,11 @@ class Main extends Sprite
 				case "traceSowy":
 					trace("sowy");
 
+				case "troll":
+					#if tgt
+					initialState = funkin.tgt.SinnerState;
+					#end
+
 				case "songselect":
 					nextState = funkin.states.SongSelectState;
 

@@ -145,6 +145,10 @@ class Countdown {
 					if (sound == snd)
 						sound = null;
 				});
+				#if tgt
+				if (game != null && game.sndEffect != null && ClientPrefs.ruin)
+					snd.effect = game.sndEffect;
+				#end
 				sound = snd;
 			}
 		}

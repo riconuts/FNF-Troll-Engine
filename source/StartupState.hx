@@ -81,9 +81,22 @@ class StartupState extends FlxTransitionableState
 		this.transIn = null;
 		this.transOut = null;
 
+		#if tgt
+		this.transIn = FadeTransitionSubstate;
+
+		warning = new FlxSprite(0, 0, Paths.image("warning"));
+		warning.scale.set(0.65, 0.65);
+		warning.updateHitbox();
+		warning.screenCenter();
+		add(warning);
+		#end
+
 		super.create();
 	}
 
+	#if tgt
+	private var warning:FlxSprite;
+	#end
 
 	private var step:Int = 0;
 	private var loadingTime:Float = getTime();
@@ -134,7 +147,34 @@ class StartupState extends FlxTransitionableState
 				step = 50;
 			#end
 			
+			#if tgt
+			case 10:
+				trace('loading lasted $loadingTime');
+				#if debug
+				final waitTime:Float = 0.0;
+				#else
+				final waitTime:Float = (nextState == funkin.states.PlayState || nextState == funkin.states.editors.ChartingState) ? 0.0 : Math.max(0.0, 1.6 - loadingTime);
+				#end
 
+				step = 30;
+
+				fadeTwn = FlxTween.tween(warning, {alpha: 0}, 1.0, {
+					ease: FlxEase.expoIn,
+					startDelay: waitTime,
+					onStart: (twn)->{step = 40;},
+					onComplete: (twn)->{step = 50;}
+				});
+				
+			case 30:
+				if (FlxG.keys.justPressed.ANY || FlxG.mouse.justPressed){
+					fadeTwn.startDelay = 0;
+					step = 40;
+				}
+			case 40:
+				if (FlxG.keys.justPressed.ANY || FlxG.mouse.justPressed){
+					fadeTwn.percent = (1.0 + fadeTwn.percent) * 0.5;
+				}
+			#end
 
 			case 50:
 				#if(DO_AUTO_UPDATE || display)

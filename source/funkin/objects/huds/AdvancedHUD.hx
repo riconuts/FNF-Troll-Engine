@@ -37,18 +37,30 @@ class AdvancedHUD extends CommonHUD
 
 	// Maybe we should move this into CommonHUD??
 	var counterOptions:JudgeCounterSettings = {
+		#if tgt
+		textBorderSpacing: 6,
+		textLineSpacing: 25,
+		textSize: 24,
+		textBorderSize: 1.25,
+		nameFont: "calibrib.ttf",
+		numbFont: "calibri.ttf"
+		#else
 		textBorderSpacing: 6,
 		textLineSpacing: 24,
 		textSize: 22,
 		textBorderSize: 1.25,
 		nameFont: "quanticob.ttf",
 		numbFont: "quantico.ttf"
+		#end
 	}
 	var judgeCounters:JudgementCounters;
 
 	var textStyle:FlxTextFormatData = {
+		#if tgt
+		font: "calibri.ttf",
+		#else
 		font: "quantico.ttf",
-
+		#end
 		borderStyle: FlxTextBorderStyle.OUTLINE,
 		borderColor: FlxColor.BLACK,
 		borderSize: 1.25,
@@ -122,6 +134,15 @@ class AdvancedHUD extends CommonHUD
 		songHighRating = songRecord.rating;
 
 		////
+		#if tgt
+		var tWidth = 200;
+		var scoreSize = 40;
+		var ratingSize = 32;
+		var fcSize = 32;
+		var gradeSize = 46;
+		var npsSize = 26;
+		var pcSize = 26; 
+		#else
 		var tWidth = 200;
 		var scoreSize = 32;
 		var ratingSize = 28;
@@ -129,6 +150,7 @@ class AdvancedHUD extends CommonHUD
 		var gradeSize = 38;
 		var npsSize = 20;
 		var pcSize = 20;
+		#end
 
 		scoreTxt = new FlxText(0, 0, tWidth, "0", scoreSize);
 		scoreTxt.applyFormat(textStyle);
