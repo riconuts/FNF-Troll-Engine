@@ -32,10 +32,11 @@ import funkin.scripts.Util as ScriptingUtil;
 import funkin.scripts.FunkinScript.ScriptType;
 import flixel.*;
 import flixel.util.*;
-import flixel.util.FlxSignal.FlxTypedSignal;
+import flixel.util.FlxSignal;
 import flixel.math.*;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
+import flixel.system.FlxAssets.FlxSoundAsset;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;
@@ -923,6 +924,7 @@ class PlayState extends MusicBeatState
 
 		// EVENT AND NOTE SCRIPTS WILL GET LOADED HERE
 		generateSong();
+		checkEventNote();
 
 		#if DISCORD_ALLOWED
 		// Discord RPC texts
@@ -1559,12 +1561,30 @@ class PlayState extends MusicBeatState
 		return playbackRate = pitch;
 	}
 
+	private function addTrack(trackName:String, ?sndAsset:FlxSoundAsset) {
+		if (sndAsset == null) sndAsset = {
+			if (song != null)
+				song.getTrackSound(trackName);
+			else
+				Paths.track(songId, trackName);
+		}
+		var newTrack = new FlxSound().loadEmbedded(sndAsset);
+		//newTrack.volume = 0.0;
+		newTrack.pitch = playbackRate;
+		newTrack.filter = sndFilter;
+		newTrack.effect = sndEffect;
+		newTrack.context = MUSIC;
+		newTrack.exists = true; // So it doesn't get recycled
+		FlxG.sound.list.add(newTrack);
+		
+		trackMap.set(trackName, newTrack);
+		tracks.push(newTrack);
+
+		return newTrack;
+	}
+
 	private function generateSong():Void
 	{
-		Conductor.changeBPM(PlayState.SONG.bpm);
-		Conductor.tracks = this.tracks;
-		Conductor.pitch = this.playbackRate;
-
 		////
 		songSpeedType = ClientPrefs.getGameplaySetting('scrolltype', songSpeedType);
 
@@ -1590,32 +1610,16 @@ class PlayState extends MusicBeatState
 		#end
 
 		////
-		for (trackName in songTrackNames) {
-			var sndAsset = {
-				if (song != null)
-					song.getTrackSound(trackName);
-				else
-					Paths.track(songId, trackName);
-			}
-			var newTrack = new FlxSound().loadEmbedded(sndAsset);
-			//newTrack.volume = 0.0;
-			newTrack.pitch = playbackRate;
-			newTrack.filter = sndFilter;
-			newTrack.effect = sndEffect;
-			newTrack.context = MUSIC;
-			newTrack.exists = true; // So it doesn't get recycled
-			FlxG.sound.list.add(newTrack);
-			
-			trackMap.set(trackName, newTrack);
-			tracks.push(newTrack);
-		}
+		Conductor.changeBPM(PlayState.SONG.bpm);
+		Conductor.tracks = this.tracks;
+		Conductor.pitch = this.playbackRate;
 
-		inline function getTrackInstances(nameArray:Null<Array<String>>)
-			return nameArray==null ? [] : [for (name in nameArray) trackMap.get(name)];
+		inline function makeTrackInstances(nameArray:Array<String>):Array<FlxSound>
+			return nameArray==null ? [] : [for (name in nameArray) addTrack(name)];
 
-		instTracks = getTrackInstances(SONG.tracks.inst);
-		playerTracks = getTrackInstances(SONG.tracks.player);
-		opponentTracks = getTrackInstances(SONG.tracks.opponent);
+		instTracks = makeTrackInstances(SONG.tracks.inst);
+		playerTracks = makeTrackInstances(SONG.tracks.player);
+		opponentTracks = makeTrackInstances(SONG.tracks.opponent);
 
 		hitsound = new FlxSound().loadEmbedded(Paths.sound("hitsound"));
 		hitsound.exists = true;
@@ -1633,11 +1637,8 @@ class PlayState extends MusicBeatState
 			finishSong(false);
 		};
 		
-		//// NEW SHIT
-		var noteData:Array<SwagSection> = PlayState.SONG.notes;
-
-		// get note types to load
-		for (section in noteData) {
+		//// get note types to load
+		for (section in PlayState.SONG.notes) {
 			for (songNotes in section.sectionNotes) {
 				var type:String = songNotes[3];
 				if (noteTypeMap.exists(type))
@@ -1708,9 +1709,7 @@ class PlayState extends MusicBeatState
 			eventNotes.sort(sortByTime);
 
 		////
-		var prevTime = Sys.time();
-		generateNotes(noteData); // generates the chart
-		print('generateNotes() took ${Sys.time() - prevTime} seconds');
+		generateNotes(SONG.notes, true, true, SONG.keyCount); // generates the chart
 
 		allNotes.sort(sortByNotes);
 
@@ -1720,7 +1719,6 @@ class PlayState extends MusicBeatState
 		for (field in playfields.members)
 			field.clearStackedNotes();
 
-		checkEventNote();
 		generatedMusic = true;
 	}
 
