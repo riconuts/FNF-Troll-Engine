@@ -53,13 +53,9 @@ class TraditionalHUD extends CommonHUD
 		scoreTxt.antialiasing = true;
 		scoreTxt.scrollFactor.set();
 
-		#if tgt
-		scoreTxt.setFormat(Paths.font("calibri.ttf"), 20, FlxColor.WHITE, CENTER);
-		scoreTxt.setBorderStyle(OUTLINE, FlxColor.BLACK, 1.25);
-		#else
+
 		scoreTxt.setFormat(Paths.font('vcr.ttf'), 18, FlxColor.WHITE, CENTER);
 		scoreTxt.setBorderStyle(OUTLINE, FlxColor.BLACK, 1.5);
-		#end
 		
 		////
 		hitbar = new Hitbar();
@@ -91,21 +87,12 @@ class TraditionalHUD extends CommonHUD
 
 	// Maybe we should move this into CommonHUD??
 	var counterOptions:JudgeCounterSettings = {
-		#if tgt
-		textBorderSpacing: 6,
-		textLineSpacing: 25,
-		textSize: 24,
-		textBorderSize: 1.25,
-		nameFont: "calibrib.ttf",
-		numbFont: "calibri.ttf"
-		#else
 		textBorderSpacing: 6,
 		textLineSpacing: 22,
 		textSize: 20,
 		textBorderSize: 1.5,
 		nameFont: "vcr.ttf",
 		numbFont: "vcr.ttf"
-		#end
 	}
 	var judgeCounters:JudgementCounters;
 

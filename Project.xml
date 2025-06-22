@@ -40,37 +40,20 @@
     <window if="switch" orientation="landscape" fullscreen="true" width="0" height="0"
         resizable="true" />
 
-	<!-- _____________________________ Path Settings ____________________________ -->
+	<!-- _______________________ TROLL ENGINE CUSTOMIZATION ______________________ -->
 
-    <set name="BUILD_DIR" value="export/release" />
-    <set name="BUILD_DIR" value="export/debug" if="debug" />
-    <set name="BUILD_DIR" value="export/32bit" if="32bits" />
-
-    <classpath path="source" />
-
-	<section if="desktop">
-		<assets path="alsoft.txt" rename="alsoft.ini" if="windows" />
-		<assets path="alsoft.txt" rename="alsoft.conf" unless="windows" />
-	</section>
-
-	<assets path="art/iconOG.png" rename="icon.png" if="linux" />
-
-    <assets path="assets" />
-    <assets path='default_content' rename='content' embed='false' exclude="*.mp3" />
-
-	<!-- TROLL ENGINE CUSTOMIZATION -->
-    <define name="USE_EPIC_JUDGEMENT" />
-    <define name="HSCRIPT_ALLOWED" />
-    <define name="VIDEOS_ALLOWED" if="cpp" />
-    <define name="MODS_ALLOWED" if="desktop" />
-    <define name="DISCORD_ALLOWED" if="desktop cpp" unless="display" />
-    <!--<define name="MULTICORE_LOADING" if="native" />-->
+	<define name="USE_EPIC_JUDGEMENT" />
+	<define name="HSCRIPT_ALLOWED" />
+	<define name="VIDEOS_ALLOWED" if="cpp" />
+	<define name="MODS_ALLOWED" if="desktop" />
+	<define name="DISCORD_ALLOWED" if="desktop cpp" unless="display" />
+	<!--<define name="MULTICORE_LOADING" if="native" />-->
 	<!--I don't recommend turning on MULTICORE_LOADING until we rewrite it to be less crashy -Neb-->
-    <define name="CRASH_HANDLER" />
-    <define name="FUNNY_ALLOWED" /> <!--Allows funny shit like Ruin the Mod and Garlic Bread-->
+	<define name="CRASH_HANDLER" />
+	<define name="FUNNY_ALLOWED" /> <!--Allows funny shit like Ruin the Mod and Garlic Bread-->
 
 	<!--Remove if you dont want states to be modified with scripts. This only disables extension/overrides and not the HScriptedState class-->
-    <define name="SCRIPTABLE_STATES" if="HSCRIPT_ALLOWED" />
+	<define name="SCRIPTABLE_STATES" if="HSCRIPT_ALLOWED" />
 	<!--Remove if you don't want NightmareVision mod compatibility-->
 	<define name="NMV_MOD_COMPATIBILITY" if="PE_MOD_COMPATIBILITY MODS_ALLOWED HSCRIPT_ALLOWED"/>
 
@@ -83,11 +66,11 @@
 	<!-- <define name="USING_NEW_MOONCHART" />--> <!--If you're using git, set this, because Haxe sucks fuck and cant detect if youre on git or 0.4.0 for some fucking reason welcome to haxe ladies and gentlemen-->
 
 	<!--Remove if you dont want the engine to autoupdate -->
-    <define name="DO_AUTO_UPDATE" if="native desktop OFFICIAL_BUILD" unless="debug" />
+	<define name="DO_AUTO_UPDATE" if="native desktop OFFICIAL_BUILD" unless="debug" />
 
 	<!--Remove if you don't want to allow deprecated engine features.-->
 	<!--Anything marked as deprecated should be removed after a major or minor version but not after patches. (major.minor.patch)-->
-    <define name="ALLOW_DEPRECATION" unless="final"/>
+	<define name="ALLOW_DEPRECATION" unless="final"/>
 
 	<!--Remove if you don't want options for the game to continue running after a crash -->
 	<define name="WINDOWS_CRASH_HANDLER" if="windows cpp" />
@@ -96,10 +79,28 @@
 
 	<haxedef name="traceShaderLineNumbers"/>
 
-    <icon path="art/iconOG.png" />
-    <icon path="art/icon64.png" size='64' />
-    <icon path="art/icon32.png" size='32' />
-    <icon path="art/icon16.png" size='16' />
+	<!-- _____________________________ Path Settings ____________________________ -->
+
+	<classpath path="source" />
+
+	<set name="BUILD_DIR" value="export/release" />
+	<set name="BUILD_DIR" value="export/debug" if="debug" />
+	<set name="BUILD_DIR" value="export/32bit" if="32bits" />
+
+	<assets path="assets" />
+	<assets path='default_content' rename='content' embed='false' exclude="*.mp3" />
+
+	<section if="desktop">
+		<assets path="alsoft.txt" rename="alsoft.ini" if="windows" />
+		<assets path="alsoft.txt" rename="alsoft.conf" unless="windows" />
+	</section>
+
+	<assets path="art/iconOG.png" rename="icon.png" if="linux" />
+
+	<icon path="art/iconOG.png" />
+	<icon path="art/icon64.png" size='64' />
+	<icon path="art/icon32.png" size='32' />
+	<icon path="art/icon16.png" size='16' />
 
 	<!-- _______________________________ Libraries ______________________________ -->
 

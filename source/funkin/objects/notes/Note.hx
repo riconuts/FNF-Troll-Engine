@@ -76,8 +76,7 @@ class Note extends NoteObject
 
 	public static final quantShitCache = new Map<String, Null<String>>();
 
-	// should move this to Paths maybe
-	public static function getQuantTexture(dir:String, fileName:String, textureKey:String) {
+	public static function getQuantTexture(dir:String, fileName:String, textureKey:String):Null<String> {
 		
 		if (quantShitCache.exists(textureKey))
 			return quantShitCache.get(textureKey);
@@ -282,7 +281,7 @@ class Note extends NoteObject
 
 	////
 	private function set_texture(value:String):String {
-		if (tex != value) reloadNote(texPrefix, value, texSuffix);
+		if (tex != value) reloadNote(value, texSuffix);
 		return tex;
 	}
 
@@ -324,9 +323,6 @@ class Note extends NoteObject
 			genScript.executeFunc("setupNoteTexture", [this]);
 
 		}else {
-			if (genScript.exists("texturePrefix"))
-				texPrefix = genScript.get("texturePrefix");
-
 			if (genScript.exists("textureSuffix"))
 				texSuffix = genScript.get("textureSuffix");
 
@@ -358,7 +354,7 @@ class Note extends NoteObject
 			noteScript = (instance == null) ? null : instance.notetypeScripts.get(value);
 
 			if (noteScript != null) {
-				noteScript.executeFunc("setupNote", [this], this, ["this" => this]);
+				noteScript.executeFunc("setupNote", [this], this);
 			
 			}else { // default notes. these values won't get set if you make a script for them!
 				switch (value) {
@@ -403,10 +399,10 @@ class Note extends NoteObject
 		////
 
 		if (noteScript != null)
-			noteScript.executeFunc("postSetupNote", [this], this, ["this" => this]);
+			noteScript.executeFunc("postSetupNote", [this], this);
 
 		if (genScript != null)
-			genScript.executeFunc("postSetupNoteType", [this], this, ["this" => this]);
+			genScript.executeFunc("postSetupNoteType", [this], this);
 
 		////
 		if (isQuant && Paths.imageExists('QUANT' + noteSplashTexture))
@@ -470,74 +466,59 @@ class Note extends NoteObject
 			this.noteMod = noteMod;
 	}
 
-	public var texPrefix:String = '';
 	public var tex:String;
 	public var texSuffix:String = '';
-	public function reloadNote(?prefix:String, ?texture:String, ?suffix:String, ?folder:String, hInd:Int = 0, vInd:Int = 0) {
-		if(prefix == null) prefix = '';
-		if(texture == null) texture = '';
-		if(suffix == null) suffix = '';
-		if(folder == null) folder = '';
-
-		texPrefix = prefix;
+	public function reloadNote(texture:String = '', suffix:String = '', folder:String = '', hInd:Int = 0, vInd:Int = 0) {
 		tex = texture;
 		texSuffix = suffix;
 
 		if (genScript != null)
-			genScript.executeFunc("onReloadNote", [this, prefix, texture, suffix], this);
+			genScript.executeFunc("onReloadNote", [this, texture, suffix], this);
 		
 		if (noteScript != null)
-			noteScript.executeFunc("onReloadNote", [this, prefix, texture, suffix], this);
+			noteScript.executeFunc("onReloadNote", [this, texture, suffix], this);
 
-		if (genScript != null && genScript.executeFunc("preReloadNote", [this, prefix, texture, suffix], this) == Globals.Function_Stop)
+		if (genScript != null && genScript.executeFunc("preReloadNote", [this, texture, suffix], this) == Globals.Function_Stop)
 			return;
 
 		////
 
 		/** Should join and check for shit in the following order:
 		 * 
-		 * folder + "/" + "QUANT" + prefix + name + suffix (if quants are enabled)
-		 * folder + "/" + prefix + name + suffix
-		 * "QUANT"+ prefix + name + suffix (if quants are enabled)
-		 * prefix + name + suffix
+		 * `folder + "/" + "QUANT" + name + suffix` (If quants are enabled)  
+		 * `folder + "/" + name + suffix`  
+		 * `"QUANT" + name + suffix` (If quants are enabled)  
+		 * `name + suffix`  
 		 *
-		 * Sets isQuant to true if a quant texture is to be returned
+		 * Sets `isQuant` to `true` if a quant texture is to be returned
 		 */
 		inline function getTextureKey() { // made it a function just cause i think it's easier to read it like this
-			var loadQuants:Bool = this.canQuant && ClientPrefs.noteSkin=='Quants';
-
 			var skin:String = (texture.length>0) ? texture : PlayState.arrowSkin;
 			var split:Array<String> = skin.split('/');
 
-			var fileName:String = prefix + split.pop() + suffix;
-			var folderPath:String = folder + split.join('/') + "/";
+			var fileName:String = split.pop() + suffix;
+			var folderPath:String = (folder == '' ? '' : folder + '/') + split.join('/');
 			
-			var foldersToCheck:Array<String> = [];
-			if (folderPath != '')
-				foldersToCheck.push(folderPath);
-			foldersToCheck.push('');
-			
-			var key:String = null;
-			for (dir in foldersToCheck) {
-				key = dir + fileName;
-	
-				if (loadQuants) {
-					var quantKey:Null<String> = getQuantTexture(dir, fileName, key);
-					if (quantKey != null) {
-						key = quantKey;
-						isQuant = true;
-						break;
-					}
-				}
-				
-				if (Paths.imageExists(key)) {
-					isQuant = false;
-					break;
-				}
+			var key:Null<String> = null;
+			var loadQuants:Bool = this.canQuant && ClientPrefs.noteSkin=='Quants';
+			this.isQuant = false;
+
+			inline function checkFolder(dir:String) {
+				final normalKey:String = dir + fileName;
+				var quantKey:Null<String> = null;
+				this.isQuant = loadQuants && (null != (quantKey = Note.getQuantTexture(dir, fileName, normalKey)));
+				key = (!this.isQuant && Paths.imageExists(normalKey)) ? normalKey : quantKey;
 			}
+
+			if (folderPath != '')
+				checkFolder(folderPath + '/');
+			
+			if (key == null)
+				checkFolder('');
 			
 			return key; 
 		}
+		/****/
 
 		////
 		var wasQuant:Bool = isQuant;
@@ -560,30 +541,26 @@ class Note extends NoteObject
 		defScale.copyFrom(scale);
 		updateHitbox();
 		
-		////	
+		////
 		if (genScript != null)
-			genScript.executeFunc("postReloadNote", [this, prefix, texture, suffix], this);
+			genScript.executeFunc("postReloadNote", [this, texture, suffix], this);
 
 		if (noteScript != null)
-			noteScript.executeFunc("postReloadNote", [this, prefix, texture, suffix], this);
+			noteScript.executeFunc("postReloadNote", [this, texture, suffix], this);
 	}
 
 	public function loadIndNoteAnims()
 	{
 		var changed = false;
 
-		if (noteScript != null) {
-			if (noteScript.exists("loadIndNoteAnims") && Reflect.isFunction(noteScript.get("loadIndNoteAnims"))) {
-				noteScript.executeFunc("loadIndNoteAnims", [this], this, ["super" => _loadIndNoteAnims]);
-				changed = true;
-			}
+		if (noteScript != null && noteScript.exists("loadIndNoteAnims")) {
+			noteScript.executeFunc("loadIndNoteAnims", [this], this, ["super" => _loadIndNoteAnims]);
+			changed = true;
 		}
 
-		if (genScript != null) {
-			if (genScript.exists("loadIndNoteAnims") && Reflect.isFunction(genScript.get("loadIndNoteAnims"))) {
-				genScript.executeFunc("loadIndNoteAnims", [this], this, ["super" => _loadIndNoteAnims, "noteTypeLoaded" => changed]);
-				changed = true;
-			}
+		if (genScript != null && genScript.exists("loadIndNoteAnims")) {
+			genScript.executeFunc("loadIndNoteAnims", [this], this, ["super" => _loadIndNoteAnims, "noteTypeLoaded" => changed]);
+			changed = true;
 		}
 
 		if (!changed)
@@ -606,18 +583,14 @@ class Note extends NoteObject
 	public function loadNoteAnims() {
 		var changed = false;
 
-		if (noteScript != null) {
-			if (noteScript.exists("loadNoteAnims") && Reflect.isFunction(noteScript.get("loadNoteAnims"))) {
-				noteScript.executeFunc("loadNoteAnims", [this], this, ["super" => _loadNoteAnims]);
-				changed = true;
-			}
+		if (noteScript != null && noteScript.exists("loadNoteAnims")) {
+			noteScript.executeFunc("loadNoteAnims", [this], this, ["super" => _loadNoteAnims]);
+			changed = true;
 		}
 
-		if (genScript != null) {
-			if (genScript.exists("loadNoteAnims") && Reflect.isFunction(genScript.get("loadNoteAnims"))) {
-				genScript.executeFunc("loadNoteAnims", [this], this, ["super" => _loadNoteAnims, "noteTypeLoaded" => changed]);
-				changed = true;
-			}
+		if (genScript != null && genScript.exists("loadNoteAnims")) {
+			genScript.executeFunc("loadNoteAnims", [this], this, ["super" => _loadNoteAnims, "noteTypeLoaded" => changed]);
+			changed = true;
 		}
 
 		if (!changed)

@@ -8,8 +8,6 @@ This engine is a ****WORK IN PROGRESS****!!!
 
 Expect bugs, breaking changes and no documentation!!!
 
-Compatibility with Psych Engine mods is limited and will be removed in the future.
-
 ## Features:
 
  - Quant note skins

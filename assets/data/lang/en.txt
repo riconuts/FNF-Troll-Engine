@@ -58,7 +58,8 @@ peak=Peak
 combo=Combo
 peakcombo=Peak Combo
 botplayMark=[BOTPLAY]
-freeplayhint=Press CTRL to open the Gameplay Modifiers menu | Press R to reset a song's score.
+actionhint_gameplayModsMenu=Press {key} to open the Gameplay Modifiers menu
+actionhint_resetScore=Press {key} to reset a song's score
 ## Options stuff
 opt_display_noteOffset=Offset
 opt_display_ratingOffset=Judgement Offset

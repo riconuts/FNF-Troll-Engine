@@ -123,11 +123,9 @@ function onCountdownTick(tick)
 		case 4:
 			updateTimerTxt();
 
-			timerSpecial.alpha = 0.0;
 			FlxTween.tween(timerSpecial, {alpha: 1}, Conductor.crochet / 1000);
 			
 			for (spr in timerNums){
-				spr.alpha = 0.0;
 				FlxTween.tween(spr, {alpha: 1}, Conductor.crochet / 1000);
 			}
 	}
@@ -144,7 +142,7 @@ function onUpdate(elapsed){
 		updateTimerTxt();
 }
 
-function makeCountdownSprite(sprImage, swagCounter, tmr){
+function makeCountdownSprite(sprImage, swagCounter){
 	var countdownSpr = new FlxSprite(0, 0, sprImage);
 	countdownSpr.scrollFactor.set();
 	countdownSpr.scale.set(6, 6);
@@ -157,9 +155,9 @@ function makeCountdownSprite(sprImage, swagCounter, tmr){
 
 function setupNoteTexture(note:Note){
 	if(note.isSustainNote)
-		note.reloadNote(note.texPrefix, 'NOTE_assets', note.texSuffix + 'ENDS', 'pixelUI', 4, 2);
+		note.reloadNote('NOTE_assets', note.texSuffix + 'ENDS', 'pixelUI', 4, 2);
 	else
-		note.reloadNote(note.texPrefix, 'NOTE_assets', note.texSuffix, 'pixelUI', 4, 5);
+		note.reloadNote('NOTE_assets', note.texSuffix, 'pixelUI', 4, 5);
 
 	note.scale.set(6, 6);
 	note.antialiasing = false;

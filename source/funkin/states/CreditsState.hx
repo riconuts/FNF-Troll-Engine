@@ -96,30 +96,8 @@ class CreditsState extends MusicBeatState
 		camFollowPos.setPosition(camFollow.x, camFollow.y);
 
 		////
-		#if tgt
-		var bg = new FlxSprite(Paths.image("tgtmenus/creditsbg"));
-		bg.scrollFactor.set();
-		bg.screenCenter();
-
-		if (FlxG.height < FlxG.width)
-			bg.scale.x = bg.scale.y = (FlxG.height * 1.05) / bg.frameHeight;
-		else
-			bg.scale.x = bg.scale.y = (FlxG.width * 1.05) / bg.frameWidth;
-		
-		add(bg);
-
-		var backdrop = new flixel.addons.display.FlxBackdrop(Paths.image('grid'));
-		backdrop.velocity.set(30, -30);
-		backdrop.scrollFactor.set();
-		backdrop.blend = MULTIPLY;
-		backdrop.alpha = 0.25;
-		backdrop.x -= 10;
-		add(backdrop);
-
-		#else
 		var bg = new funkin.objects.CoolMenuBG(Paths.image('menuDesat', null, false), 0xFFea71fd);
 		add(bg);
-		#end
 
 		////
 		for (option in dataArray)
@@ -314,22 +292,6 @@ class CreditsState extends MusicBeatState
 				CoolUtil.browserLoad(link);
 		}
 
-		#if tgt
-		if (FlxG.keys.justPressed.NINE)
-		{
-			for (item in titleArray)
-			{
-				if (item != null && !item.isBold)
-					item.x += 50;
-			}
-
-			for (icon in iconArray)
-			{
-				if (icon != null)
-					icon.loadGraphic(Paths.image('credits/peak'));
-			}
-		}
-		#end
 		}
 		
 		super.update(elapsed);

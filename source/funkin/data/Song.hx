@@ -476,15 +476,8 @@ class Song extends BaseSong
 		songJson.gfVersion ??= songJson.player3 ?? "gf";
 		*/
 
-		/**
-			`null` gfVersion means no girlfriend character will be created, 
-			but if gfVersion isn't defined in the json then gfVersion will default to `gf`
-			This is done so that old base game charts still show a girlfriend character
-		**/
-		if (songJson.gfVersion==null && songJson.player3 != null)
-			songJson.gfVersion = songJson.player3;
-		else if (!Reflect.hasField(songJson, 'gfVersion'))
-			songJson.gfVersion = 'gf';
+		// If gfVersion isn't set on the json file, use player3 or default to gf
+		songJson.gfVersion = !Reflect.hasField(songJson, 'gfVersion') ? (songJson.player3 ?? "gf") : songJson.gfVersion;
 		
 		if (swagJson.arrowSkin == null || swagJson.arrowSkin.trim().length == 0)
 			swagJson.arrowSkin = "NOTE_assets";

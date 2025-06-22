@@ -29,7 +29,7 @@ class FreeplayState extends MusicBeatState
 {
 	public static var comingFromPlayState:Bool = false;
 
-	var menu = new FreeplayMenu();
+	var menu:FreeplayMenu;
 	var songList:Array<BaseSong>;
 
 	var bgGrp = new FlxTypedGroup<FlxSprite>();
@@ -120,15 +120,15 @@ class FreeplayState extends MusicBeatState
 		#end
 
 		songList ??= getFreeplaySongs();
-		menu.setSongList(songList);
 
 		////
 		add(bgGrp);
 
-		add(menu);
+		menu = new FreeplayMenu();
 		menu.controls = controls;
 		menu.callbacks.onSelect = (selectedIdx, _) -> onSelectSong(menu.songList[selectedIdx]);
 		menu.callbacks.onAccept = (_, _) -> onAccept();
+		add(menu);
 
 		////
 		var hintBG = CoolUtil.blankSprite(FlxG.width, 26, 0xFF999999);
@@ -136,7 +136,12 @@ class FreeplayState extends MusicBeatState
 		hintBG.blend = MULTIPLY;
 		add(hintBG);
 
-		hintText = new FlxText(hintBG.x, hintBG.y + 4, FlxG.width, Paths.getString("freeplayhint"));
+		var hintStr = "";
+		hintStr += Paths.getString("actionhint_gameplayModsMenu").replace('{key}', 'CTRL');
+		hintStr += ' | ';
+		hintStr += Paths.getString("actionhint_resetScore").replace('{key}', 'R');
+
+		hintText = new FlxText(hintBG.x, hintBG.y + 4, FlxG.width, hintStr);
 		hintText.setFormat(Paths.font("vcr.ttf"), 16, 0xFFFFFFFF, RIGHT);
 		hintText.scrollFactor.set();
 		add(hintText);
@@ -158,6 +163,7 @@ class FreeplayState extends MusicBeatState
 		add(scoreText);
 
 		////
+		menu.setSongList(songList);
 		curChartId = FreeplayState.lastSelectedChart;
 		menu.curSelected = FreeplayState.lastSelectedIdx;
 		if (comingFromPlayState) playSelectedSongMusic();
@@ -445,16 +451,10 @@ private class FreeplayMenu extends AlphabetMenu
 	private var iconGrp = new FlxTypedGroup<FreeplayIcon>();
 
 	public function setSongList(songs:Array<BaseSong>) {
-		var curSong = songList[curSelected];	
-
-		this.curSelected = null;
 		this.clear();
 		this.songList = songs;
 		for (song in songList)
 			addSong(song);
-
-		var newIndex = songList.indexOf(curSong);
-		this.curSelected = newIndex < 0 ? 0 : newIndex;
 	}
 
 	public function addSong(song:BaseSong) {
@@ -503,12 +503,6 @@ private class FreeplayMenu extends AlphabetMenu
 		iconSpr.tracking = obj;
 		iconSpr.offX = width + 15;
 		iconSpr.offY = height / 2 - iconSpr.height / 2;
-	}
-
-	override function onAdded(item:Alphabet) {
-		updateItemPos(item, item.ID);
-		item.setPosition(item.targetX, item.targetY);
-		item.alpha = 0.6;
 	}
 
 	override function onSelect(item:Alphabet) {

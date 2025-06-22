@@ -614,6 +614,13 @@ class ClientPrefs {
 				value: false,
 				data: []
 			},
+			"fpsBG" => {
+				display: "FPS Background",
+				desc: "When toggled, the FPS counter has a background.",
+				type: Toggle,
+				value: true,
+				data: []
+			},
 			"framerate" => {
 				display:"Max Framerate",
 				desc:"The highest framerate the game can hit.",
@@ -920,6 +927,7 @@ class ClientPrefs {
 		if (Main.fpsVar != null) {
 			Main.fpsVar.visible = ClientPrefs.showFPS;
 			Main.fpsVar.showMemory = ClientPrefs.showMemory;
+			Main.fpsVar.background = ClientPrefs.fpsBG;
 		}
 
 		#if FUNNY_ALLOWED

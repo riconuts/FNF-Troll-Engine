@@ -1,5 +1,5 @@
 function setupNote(note:Note){
-    note.reloadNote('', 'mine', '', '', 1, 1);
+    note.reloadNote('mine', '', '', 1, 1);
     note.ignoreNote = true;
     note.hitCausesMiss = true;
     note.noAnimation = true;
