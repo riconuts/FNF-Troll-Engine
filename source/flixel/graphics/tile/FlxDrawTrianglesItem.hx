@@ -129,27 +129,27 @@ class FlxDrawTrianglesItem extends FlxDrawBaseItem<FlxDrawTrianglesItem>
 		uvtData.length = 0;
 		colors.length = 0;
 		#else
-		vertices.splice(0, vertices.length);
-		indices.splice(0, indices.length);
-		uvtData.splice(0, uvtData.length);
-		colors.splice(0, colors.length);
+		vertices.resize(0);
+		indices.resize(0);
+		uvtData.resize(0);
+		colors.resize(0);
 		#end
 
 		verticesPosition = 0;
 		indicesPosition = 0;
 		colorsPosition = 0;
 		#if !flash
-		alphas.splice(0, alphas.length);
+		alphas.resize(0);
 
-		hsvShifts.splice(0, hsvShifts.length);
-		daAlphas.splice(0, daAlphas.length);
-		flashes.splice(0, flashes.length);
-		flashColors.splice(0, flashColors.length);
+		hsvShifts.resize(0);
+		daAlphas.resize(0);
+		flashes.resize(0);
+		flashColors.resize(0);
 
 		if (colorMultipliers != null)
-			colorMultipliers.splice(0, colorMultipliers.length);
+			colorMultipliers.resize(0);
 		if (colorOffsets != null)
-			colorOffsets.splice(0, colorOffsets.length);
+			colorOffsets.resize(0);
 		#end
 	}
 
