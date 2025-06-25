@@ -1386,7 +1386,7 @@ class PlayState extends MusicBeatState
 		// Do the countdown.
 		curCountdown = new Countdown(this);
 		resetCountdown(curCountdown);
-		curCountdown.start(Conductor.crochet * 0.001); // time is optional but here we are
+		curCountdown.start(Conductor.beatLength); // time is optional but here we are
 
 		var i = this.members.indexOf(this.notes);
 		(i==-1) ? this.add(curCountdown) : this.insert(i, curCountdown);
@@ -3115,7 +3115,7 @@ class PlayState extends MusicBeatState
 					if (!spr.alive)
 						return;
 
-					var stepDur = (Conductor.stepCrochet * 0.001);
+					var stepDur = (Conductor.stepLength);
 					spr.tween = FlxTween.tween(spr.scale, {x: 0, y: 0}, stepDur, {
 						startDelay: stepDur * 8,
 						ease: FlxEase.quadIn,
@@ -3138,7 +3138,7 @@ class PlayState extends MusicBeatState
 				ease: FlxEase.backOut, 
 				onComplete: function(twn) {
 					spr.tween = FlxTween.tween(spr, {alpha: 0.0}, 0.2, {
-						startDelay: Conductor.crochet * 0.001,
+						startDelay: Conductor.beatLength,
 						onComplete: (_) -> spr.kill()
 					});
 				}
@@ -3205,7 +3205,7 @@ class PlayState extends MusicBeatState
 						if (!numSpr.alive)
 							return;
 	
-						var stepDur = (Conductor.stepCrochet * 0.001);
+						var stepDur = (Conductor.stepLength);
 						numSpr.tween = FlxTween.tween(numSpr, {alpha: 0.0}, stepDur, {
 							startDelay: Math.min((stepDur * 8) - 0.1, 0.0),
 							ease: FlxEase.quadIn,
@@ -3360,7 +3360,7 @@ class PlayState extends MusicBeatState
 			timingTxt.y -= 8;
 			timingTxt.scale.set(1, 1);
 			
-			var time = (Conductor.stepCrochet * 0.001);
+			var time = (Conductor.stepLength);
 			FlxTween.tween(timingTxt, 
 				{y: timingTxt.y + 8}, 
 				0.1,
