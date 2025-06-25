@@ -171,7 +171,7 @@ class Conductor
 
 			var deltaSteps:Int = Math.round(sectionSteps(section));
 			totalSteps += deltaSteps;
-			totalPos += (15000 * deltaSteps) / curBPM; // calculateStepCrochet(curBPM) * deltaSteps;
+			totalPos += calculateStepCrochet(curBPM) * deltaSteps;
 		}
 		
 		print('new BPM map BUDDY [');
@@ -289,7 +289,7 @@ class Conductor
 
 	/** Step duration in milliseconds */
 	public inline static function calculateStepCrochet(bpm:Float):Float {
-		return calculateStepLength(bpm) / 4;
+		return calculateStepLength(bpm) * 1000;
 	}
 
 	public inline static function sectionBeats(section:SwagSection):Float {
