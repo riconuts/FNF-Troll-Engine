@@ -487,7 +487,7 @@ class Song extends BaseSong
 		if (swagJson.notes == null || swagJson.notes.length == 0) {		
 			//// must have at least one section
 			swagJson.notes = [{
-				sectionNotes: [],
+				notes: [],
 				typeOfSection: 0,
 				mustHitSection: true,
 				gfSection: false,
@@ -518,6 +518,8 @@ class Song extends BaseSong
 					note[3] = type;
 				}
 			}
+
+			funkin.data.ChartData.updateChart(swagJson);
 		}		
 		
 		//// new tracks system

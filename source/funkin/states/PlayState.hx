@@ -1640,8 +1640,8 @@ class PlayState extends MusicBeatState
 		
 		//// get note types to load
 		for (section in PlayState.SONG.notes) {
-			for (songNotes in section.sectionNotes) {
-				var type:String = songNotes[3];
+			for (noteData in section.notes) {
+				var type:String = noteData.type;
 				if (noteTypeMap.exists(type))
 					continue;
 
@@ -1735,21 +1735,20 @@ class PlayState extends MusicBeatState
 			keyCount = PlayState.keyCount;
 		
 		for (section in noteData) {
-			for (songNotes in section.sectionNotes) {
-				var daStrumTime:Float = songNotes[0];
-				var daNoteData:Int = Std.int(songNotes[1]);
-				var mustPress:Bool = section.mustHitSection ? (daNoteData < keyCount) : (daNoteData >= keyCount);
-				var fieldIndex:Int = mustPress ? 0 : 1;
-
-				var daColumn:Int = daNoteData % keyCount;
-				var susLength = Math.round(songNotes[2] / Conductor.stepCrochet) - 1;
+			for (noteData in section.notes) {
+				var daStrumTime:Float = noteData.time;
+				var daColumn:Int = noteData.column;
+				var fieldIndex:Int = noteData.fieldIndex;
+				var daLength:Float = noteData.length;
+				var daType:String = noteData.type;
+				
 				var prevNote:Note = (notes.length > 0) ? notes[notes.length - 1] : null;
-				var daType:String = songNotes[3];
+				var susLength:Int = Math.round(daLength / Conductor.stepCrochet) - 1;
+				var mustPress:Bool = fieldIndex==0;
 
-				var swagNote:Note = new Note(daStrumTime, daColumn, prevNote, fieldIndex, songNotes[2] > 0 ? HEAD : TAP, false, hudSkin);
-				swagNote.realColumn = daNoteData;
+				var swagNote:Note = new Note(daStrumTime, daColumn, prevNote, fieldIndex, daLength > 0 ? HEAD : TAP, false, hudSkin);
 				swagNote.mustPress = mustPress;
-				swagNote.sustainLength = songNotes[2] <= Conductor.stepCrotchet ? songNotes[2] : (susLength + 1) * Conductor.stepCrotchet; // +1 because hold end
+				swagNote.sustainLength = daLength <= Conductor.stepCrotchet ? daLength : (susLength + 1) * Conductor.stepCrotchet; // +1 because hold end
 				swagNote.ID = notes.length;
 
 				modchartObjects.set('note${swagNote.ID}', swagNote);
@@ -1759,7 +1758,7 @@ class PlayState extends MusicBeatState
 					swagNote.characterHitAnimSuffix = '-alt';
 					swagNote.characterMissAnimSuffix = '-altmiss';
 				}
-				swagNote.gfNote = section.gfSection && daNoteData < keyCount;
+				swagNote.gfNote = section.gfSection && !mustPress; // ughhhh
 				swagNote.noteType = daType;
 
 				////
@@ -1790,7 +1789,6 @@ class PlayState extends MusicBeatState
 				
 				inline function makeSustain(susNote:Int, susPart:SustainPart) {
 					var sustainNote:Note = new Note(daStrumTime + Conductor.stepCrochet * (susNote + 1), daColumn, prevNote, fieldIndex, susPart, false, hudSkin);
-					sustainNote.realColumn = daNoteData;
 					swagNote.mustPress = mustPress;
 					sustainNote.ID = notes.length;
 					modchartObjects.set('note${sustainNote.ID}', sustainNote);

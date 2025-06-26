@@ -107,7 +107,9 @@ typedef SwagSong = {
 
 typedef SwagSection =
 {
-	var sectionNotes:Array<Array<Dynamic>>;
+	var notes:Array<NoteData>;
+	
+	@:optional var sectionNotes:Array<Array<Dynamic>>;
 	//var lengthInSteps:Int;
 	var typeOfSection:Int;
 	var mustHitSection:Bool;
@@ -116,6 +118,14 @@ typedef SwagSection =
 	var changeBPM:Bool;
 	var altAnim:Bool;
 	var sectionBeats:Float;
+}
+
+typedef NoteData = {
+	var time:Float;
+	var column:Int;
+	var fieldIndex:Int;
+	var length:Float;
+	var type:String;
 }
 
 typedef SongTracks = {
