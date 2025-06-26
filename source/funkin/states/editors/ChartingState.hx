@@ -3022,7 +3022,9 @@ class ChartingState extends MusicBeatState
 		note.mustPress = noteSection.mustHitSection ? (daField==0) : (daField!=0);
 		note.realColumn = daColumn;
 
-		if (daSus != null) { //Common note
+		var isEvent:Bool = daSus == null;
+
+		if (!isEvent) { //Common note
 			if (!Std.isOfType(i[3], String)) //Convert old note type to new note type format
 				i[3] = noteTypeIntMap.get(i[3]);
 			
@@ -3049,10 +3051,10 @@ class ChartingState extends MusicBeatState
 		note.setGraphicSize(GRID_SIZE, GRID_SIZE);
 		note.updateHitbox();
 		note.x = Math.floor(daColumn * GRID_SIZE) + GRID_SIZE;
-		if(isNextSection && curSection.mustHitSection != nextSection.mustHitSection) {
+		if (!isEvent && isNextSection && curSection.mustHitSection != nextSection.mustHitSection) {
 			if(daColumn >= _song.keyCount) {
 				note.x -= GRID_SIZE * _song.keyCount;
-			} else if(daSus != null) {
+			} else {
 				note.x += GRID_SIZE * _song.keyCount;
 			}
 		}
