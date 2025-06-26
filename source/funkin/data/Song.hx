@@ -512,6 +512,8 @@ class Song extends BaseSong
 						type = "Alt Animation";
 					else if (Std.isOfType(type, Int) && type > 0)
 						type = ChartingState.noteTypeList[type];
+					else
+						type = '';
 						
 					note[3] = type;
 				}
