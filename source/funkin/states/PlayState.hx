@@ -1571,7 +1571,10 @@ class PlayState extends MusicBeatState
 		return playbackRate = pitch;
 	}
 
-	private function addTrack(trackName:String, ?sndAsset:FlxSoundAsset) {
+	private function addTrack(trackName:String, ?sndAsset:FlxSoundAsset):FlxSound {
+		if (trackMap.get(trackName) != null)
+			return trackMap.get(trackName);
+
 		if (sndAsset == null) sndAsset = {
 			if (song != null)
 				song.getTrackSound(trackName);
