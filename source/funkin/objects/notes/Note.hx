@@ -129,14 +129,14 @@ class Note extends NoteObject
 	public var holdType:SustainPart = TAP;
 	public var isSustainNote:Bool = false;
 	public var isSustainEnd:Bool = false;
+	public var sustainLength:Float = 0;
 	public var isRoll:Bool = false;
 	public var isHeld:Bool = false;
 	public var parent:Note;
-	public var sustainLength:Float = 0;
-	public var holdingTime:Float = 0;
-	public var tripProgress:Float = 1;
 	public var tail:Array<Note> = []; 
 	public var unhitTail:Array<Note> = [];
+	public var holdingTime:Float = 0;
+	public var tripProgress:Float = 1;
 
 	// quant shit
 	public var row:Int = 0;
