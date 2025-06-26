@@ -503,13 +503,15 @@ class Song extends BaseSong
 				for (note in section.sectionNotes) {
 					var type:Dynamic = note[3];
 					
-					if (Std.isOfType(type, String)) {
+					if (Std.isOfType(type, String))
+					{
 						if (type == 'Hurt Note')
 							type = 'Mine';
-					}else if (type == true)
-						type = "Alt Animation";
+					}
 					else if (Std.isOfType(type, Int) && type > 0)
 						type = ChartingState.noteTypeList[type];
+					else if (type == true)
+						type = "Alt Animation";
 					else
 						type = '';
 						
