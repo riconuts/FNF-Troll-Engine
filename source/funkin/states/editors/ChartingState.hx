@@ -218,6 +218,8 @@ class ChartingState extends MusicBeatState
 	/** HELD NOTES FROM VORTEX **/
 	private var heldNotesVortex:Array<Array<Dynamic>> = []; 
 
+	var playedSound:Array<Bool> = []; //Prevents ouchy GF sex sounds
+
 	var inst:FlxSound = null;
 	var tracks:Array<FlxSound> = [];
 	var soundTracksMap:Map<String, FlxSound> = [];
@@ -2189,16 +2191,13 @@ class ChartingState extends MusicBeatState
 		"\nBeat: " + math.CoolMath.floorDecimal(curDecBeat, 2) +
 		"\nStep: " + curStep;
 
-		var playedSound:Array<Bool> = []; //Prevents ouchy GF sex sounds
+		playedSound.resize(0);
 		var updateSelectedNote = curSelectedNote != null;
 
 		curRenderedNotes.forEachAlive(function(note:Note) {
 			if (updateSelectedNote) 
 			{
-				var columnToCheck:Int = note.column;
-				if(columnToCheck > -1 && note.mustPress != _song.notes[curSec].mustHitSection) columnToCheck += _song.keyCount;
-
-				if (curSelectedNote[0] == note.strumTime && (curSelectedNote[2]==null ? columnToCheck<0 : curSelectedNote[1]==columnToCheck))
+				if (curSelectedNote[0] == note.strumTime && (curSelectedNote[2]==null ? note.realColumn<0 : curSelectedNote[1]==note.realColumn))
 				{
 					colorSine += elapsed;
 
@@ -2225,27 +2224,14 @@ class ChartingState extends MusicBeatState
 						// This is a note.
 
 						if (!note.ignoreNote)
-						{
-							var data:Int = note.column;
-							var columnToCheck:Int = data;
-							if (columnToCheck > -1 && note.mustPress != _song.notes[curSec].mustHitSection) 
-								columnToCheck += _song.keyCount;
-
-							var strum:StrumNote = strumLineNotes.members[columnToCheck];
+						{					
+							var strum:StrumNote = strumLineNotes.members[note.realColumn];
 							strum.playAnim('confirm', true, note);
 							strum.resetAnim = (note.sustainLength / 1000) + 0.15;
-						
-							if (!note.hitsoundDisabled && playedSound[data] != true && (note.mustPress ? options.playSoundBf : options.playSoundDad))
-							{
-								if (options.panHitSounds) {
-									if(note.mustPress)
-										plrHitsound.play(true);
-									else
-										oppHitsound.play(true);
-								}else
-									hitsound.play(true);
 
-								playedSound[data] = true;
+							if (!note.hitsoundDisabled && (note.mustPress ? options.playSoundBf : options.playSoundDad) && playedSound[note.realColumn] != true) {
+								(options.panHitSounds ? (note.mustPress ? plrHitsound : oppHitsound) : hitsound).play(true);
+								playedSound[note.realColumn] = true;
 							}
 							
 						}
@@ -2931,8 +2917,7 @@ class ChartingState extends MusicBeatState
 
 			if(i[3] != null && note.noteType != null && note.noteType.length > 0) {
 				var typeInt:Null<Int> = noteTypeMap.get(i[3]);
-				var theType:String = '' + typeInt;
-				if(typeInt == null) theType = '?';
+				var theType:String = (typeInt == null) ? '?' : '$typeInt';
 
 				var daText:AttachedFlxText = new AttachedFlxText(0, 0, 100, theType, 24);
 				daText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -2942,8 +2927,6 @@ class ChartingState extends MusicBeatState
 				curRenderedNoteType.add(daText);
 				daText.sprTracker = note;
 			}
-			note.mustPress = _song.notes[curSec].mustHitSection;
-			if(i[1] >= _song.keyCount) note.mustPress = !note.mustPress;
 		}
 		// CURRENT EVENTS
 		var startThing:Float = fuckFloatingPoints(sectionStartTime());
@@ -3026,24 +3009,31 @@ class ChartingState extends MusicBeatState
 
 	function setupNoteData(i:Array<Dynamic>, isNextSection:Bool):Note
 	{
+		var curSection = _song.notes[curSec];
+		var nextSection = _song.notes[curSec+1];
+		var noteSection = isNextSection ? nextSection : curSection;
+
 		var daColumn = i[1];
 		var daStrumTime = i[0];
 		var daSus:Dynamic = i[2];
+		var daField:Int = Math.floor(i[1] / _song.keyCount);
 
-		var note:Note = new Note(daStrumTime, daColumn % _song.keyCount, null, false, daSus <= 0 ? TAP : HEAD, true);
-		if(daSus != null) { //Common note
-			if(!Std.isOfType(i[3], String)) //Convert old note type to new note type format
-			{
+		var note:Note = new Note(daStrumTime, daColumn % _song.keyCount, null, daField, (daSus <= 0 ? TAP : HEAD), true);
+		note.mustPress = noteSection.mustHitSection ? (daField==0) : (daField!=0);
+		note.realColumn = daColumn;
+
+		if (daSus != null) { //Common note
+			if (!Std.isOfType(i[3], String)) //Convert old note type to new note type format
 				i[3] = noteTypeIntMap.get(i[3]);
-			}
-			if(i.length > 3 && (i[3] == null || i[3].length < 1))
-			{
+			
+			if (i.length > 3 && (i[3] == null || i[3].length < 1))
 				i.remove(i[3]);
-			}
+			
 			note.sustainLength = daSus;
 			initNoteType(i[3]);
 			note.noteType = i[3];
-		} else { //Event note
+		} 
+		else { //Event note
 			note.loadGraphic(Paths.image('eventArrow'));
 			note.eventName = getEventName(i[1]);
 			note.eventLength = i[1].length;
@@ -3059,7 +3049,7 @@ class ChartingState extends MusicBeatState
 		note.setGraphicSize(GRID_SIZE, GRID_SIZE);
 		note.updateHitbox();
 		note.x = Math.floor(daColumn * GRID_SIZE) + GRID_SIZE;
-		if(isNextSection && _song.notes[curSec].mustHitSection != _song.notes[curSec+1].mustHitSection) {
+		if(isNextSection && curSection.mustHitSection != nextSection.mustHitSection) {
 			if(daColumn >= _song.keyCount) {
 				note.x -= GRID_SIZE * _song.keyCount;
 			} else if(daSus != null) {
@@ -3155,27 +3145,17 @@ class ChartingState extends MusicBeatState
 	}
 
 	function selectNote(note:Note):Void
-	{
-		var columnToCheck:Int = note.column;
-
-		if(columnToCheck > -1)
-		{
-			if(note.mustPress != _song.notes[curSec].mustHitSection) columnToCheck += _song.keyCount;
-			for (i in _song.notes[curSec].sectionNotes)
-			{
-				if (i != curSelectedNote && i.length > 2 && i[0] == note.strumTime && i[1] == columnToCheck)
-				{
+	{		
+		if (note.column > -1) {
+			for (i in _song.notes[curSec].sectionNotes) {
+				if (i != curSelectedNote && i.length > 2 && i[0] == note.strumTime && i[1] == note.realColumn) {
 					curSelectedNote = i;
 					break;
 				}
 			}
-		}
-		else
-		{
-			for (i in _song.events)
-			{
-				if(i != curSelectedNote && i[0] == note.strumTime)
-				{
+		}else {
+			for (i in _song.events) {
+				if (i != curSelectedNote && i[0] == note.strumTime) {
 					curSelectedNote = i;
 					curEventSelected = Std.int(curSelectedNote[1].length) - 1;
 					changeEventSelected();
@@ -3190,35 +3170,25 @@ class ChartingState extends MusicBeatState
 
 	function deleteNote(note:Note):Void
 	{
-		var columnToCheck:Int = note.column;
-		if (columnToCheck > -1 && note.mustPress != _song.notes[curSec].mustHitSection) 
-			columnToCheck += _song.keyCount;
-
-		if(note.column > -1) //Normal Notes
-		{
-			for (i in _song.notes[curSec].sectionNotes)
-			{
-				if (i[0] == note.strumTime && i[1] == columnToCheck)
-				{
-					if(i == curSelectedNote) curSelectedNote = null;
-					//FlxG.log.add('FOUND EVIL NOTE');
+		if (note.column > -1) {
+			//Normal Notes
+			for (i in _song.notes[curSec].sectionNotes) {
+				if (i[0] == note.strumTime && i[1] == note.realColumn) {
+					// trace('FOUND EVIL NOTE');
+					if (i == curSelectedNote) curSelectedNote = null;
 					_song.notes[curSec].sectionNotes.remove(i);
 					break;
 				}
 			}
-		}
-		else //Events
-		{
-			for (i in _song.events)
-			{
-				if(i[0] == note.strumTime)
-				{
-					if(i == curSelectedNote)
-					{
+		}else {
+			//Events
+			for (i in _song.events) {
+				if (i[0] == note.strumTime) {
+					// trace('FOUND EVIL EVENT');
+					if (i == curSelectedNote) {
 						curSelectedNote = null;
 						changeEventSelected();
 					}
-					//FlxG.log.add('FOUND EVIL EVENT');
 					_song.events.remove(i);
 					break;
 				}

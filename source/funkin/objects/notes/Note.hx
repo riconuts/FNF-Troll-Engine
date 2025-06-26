@@ -121,7 +121,6 @@ class Note extends NoteObject
 	public var strumTime:Float = 0;
 
 	public var visualTime:Float = 0;
-	public var mustPress:Bool = false;
 	public var ignoreNote:Bool = false;
 	public var prevNote:Note;
 	public var nextNote:Note;
@@ -205,10 +204,7 @@ class Note extends NoteObject
 	public var maxReleaseTime:Float = 0.25;
 	
 	/**Used to denote which PlayField to be placed into.
-	 * 
-	 * If it's -1 then it gets placed on bf's or dad's field depending on the mustPress value.
-	 * 
-	 * Note that holds automatically have this set to their parent's fieldIndex
+	 * Holds automatically have this set to their parent's fieldIndex
 	 */
 	public var fieldIndex:Int = -1;
 	public var field:PlayField; // same as fieldIndex but lets you set the field directly incase you wanna do that i  guess
@@ -227,8 +223,10 @@ class Note extends NoteObject
 	public var eventVal2:String = '';
 	public var eventLength:Int = 0;
 
-	// etc
+	// editor stuff
 	public var inEditor:Bool = false;
+	public var mustPress:Bool = true; // perhaps make this a getter for field.isPlayer
+	public var realColumn:Int; 
 
 	// mod manager
 	public var garbage:Bool = false; // if this is true, the note will be removed in the next update cycle
@@ -265,7 +263,6 @@ class Note extends NoteObject
 	@:noCompletion inline function get_multAlpha()return alphaMod;
 	@:noCompletion inline function set_multAlpha(v:Float)return alphaMod = v;
 	
-	public var realColumn:Int; 
 	//// backwards compat
 	@:noCompletion public var realNoteData(get, set):Int; 
 	@:noCompletion inline function get_realNoteData() return realColumn;
@@ -422,7 +419,7 @@ class Note extends NoteObject
 		return '(column: $column | noteType: $noteType | strumTime: $strumTime | visible: $visible)';
 	}
 
-	public function new(strumTime:Float, column:Int, ?prevNote:Note, gottaHitNote:Bool = false, susPart:SustainPart = TAP, ?inEditor:Bool = false, ?noteMod:String = 'default')
+	public function new(strumTime:Float, column:Int, ?prevNote:Note, fieldIndex:Int = -1, susPart:SustainPart = TAP, ?inEditor:Bool = false, ?noteMod:String = 'default')
 	{
 		super();
 		this.objType = NOTE;
@@ -430,7 +427,7 @@ class Note extends NoteObject
 		this.strumTime = strumTime;
 		this.column = column;
 		this.prevNote = prevNote;
-		this.mustPress = gottaHitNote;
+		this.fieldIndex = fieldIndex;
 		this.holdType = susPart;
 		this.isSustainNote = susPart != HEAD && susPart != TAP; // susPart > HEAD
 		this.isSustainEnd = susPart == END;
