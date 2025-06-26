@@ -429,7 +429,7 @@ class Note extends NoteObject
 
 		this.strumTime = strumTime;
 		this.column = column;
-		this.prevNote = (prevNote==null) ? this : prevNote;
+		this.prevNote = prevNote;
 		this.mustPress = gottaHitNote;
 		this.holdType = susPart;
 		this.isSustainNote = susPart != HEAD && susPart != TAP; // susPart > HEAD
