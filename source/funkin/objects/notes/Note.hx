@@ -229,7 +229,6 @@ class Note extends NoteObject
 
 	// etc
 	public var inEditor:Bool = false;
-	public var desiredZIndex:Float = 0;
 
 	// mod manager
 	public var garbage:Bool = false; // if this is true, the note will be removed in the next update cycle
@@ -255,6 +254,8 @@ class Note extends NoteObject
 	public var copyVerts:Bool = true;
 
 	#if ALLOW_DEPRECATION
+	public var desiredZIndex:Float = 0; // unused (?)
+
 	// Angle is controlled by verts in the modchart system
 	@:noCompletion public var copyAngle(get, set):Bool;
 	@:noCompletion inline function get_copyAngle() return copyVerts;
