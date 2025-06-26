@@ -2226,8 +2226,10 @@ class ChartingState extends MusicBeatState
 						if (!note.ignoreNote)
 						{					
 							var strum:StrumNote = strumLineNotes.members[note.realColumn];
-							strum.playAnim('confirm', true, note);
-							strum.resetAnim = (note.sustainLength / 1000) + 0.15;
+							if (strum != null) {
+								strum.playAnim('confirm', true, note);
+								strum.resetAnim = (note.sustainLength / 1000) + 0.15;
+							}
 
 							if (!note.hitsoundDisabled && (note.mustPress ? options.playSoundBf : options.playSoundDad) && playedSound[note.realColumn] != true) {
 								(options.panHitSounds ? (note.mustPress ? plrHitsound : oppHitsound) : hitsound).play(true);
