@@ -5,6 +5,7 @@ import funkin.data.CharacterData;
 import funkin.data.Cache;
 import funkin.data.Song;
 import funkin.data.BaseSong;
+import funkin.data.ChartData;
 import funkin.objects.notes.Note;
 import funkin.objects.notes.NoteSplash;
 import funkin.objects.notes.StrumNote;
@@ -1535,14 +1536,14 @@ class PlayState extends MusicBeatState
 		var allEvents:Array<PsychEvent> = [];
 
 		if (song != null) {
-			var eventsJSON:SwagSong = Song.parseSongJson(song.getSongFile('events.json'), false);
-			if (eventsJSON != null) Song.getEventNotes(eventsJSON.events, allEvents);
+			var eventsJSON:SwagSong = ChartData.parseSongJson(song.getSongFile('events.json'), false);
+			if (eventsJSON != null) ChartData.getEventNotes(eventsJSON.events, allEvents);
 		}else {
-			var eventsJSON:SwagSong = Song.loadFromJson('events', songId, false);
-			if (eventsJSON != null) Song.getEventNotes(eventsJSON.events, allEvents);
+			var eventsJSON:SwagSong = ChartData.loadFromJson('events', songId, false);
+			if (eventsJSON != null) ChartData.getEventNotes(eventsJSON.events, allEvents);
 		}
 
-		Song.getEventNotes(SONG.events, allEvents);
+		ChartData.getEventNotes(SONG.events, allEvents);
 
 		return allEvents;
 	}

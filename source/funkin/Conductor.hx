@@ -1,7 +1,7 @@
 // conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem
 package funkin;
 
-import funkin.data.BaseSong;
+import funkin.data.ChartData;
 
 typedef BPMChangeEvent =
 {

@@ -7,6 +7,8 @@ import funkin.scripts.FunkinHScript;
 import funkin.scripts.FunkinScript;
 
 import funkin.Conductor.BPMChangeEvent;
+import funkin.data.ChartData.defaultNoteTypeList as noteTypeList;
+import funkin.data.ChartData;
 import funkin.data.BaseSong;
 import funkin.data.Song;
 
@@ -116,15 +118,6 @@ class ChartingState extends MusicBeatState
 	
 	public var offset:Float = 0;
 	public var notetypeScripts:Map<String, FunkinHScript> = [];
-	public static var noteTypeList:Array<String> = //Used for backwards compatibility with 0.1 - 0.3.2 charts, though, you should add your hardcoded custom note types here too.
-	[
-		'',
-		'Alt Animation',
-		'Hey!',
-		'Hurt Note', // We should replace this w/ Mine
-		'GF Sing',
-		'No Animation'
-	];
 
 	var hudList:Array<String> = [
 		'Default'
@@ -686,7 +679,7 @@ class ChartingState extends MusicBeatState
 			if (song == null)
 				return;
 		
-			var events = Song.onLoadEvents(data.song).events;
+			var events = ChartData.onLoadEvents(data.song).events;
 			if (events == null)
 				return;
 
@@ -3311,7 +3304,7 @@ class ChartingState extends MusicBeatState
 
 	function loadJson(song:String):Void
 	{
-		var daJson:SwagSong = Song.loadFromJson(song.toLowerCase(), song.toLowerCase());
+		var daJson:SwagSong = ChartData.loadFromJson(song.toLowerCase(), song.toLowerCase());
 
 		if (daJson == null){
 			openSubState(new Prompt('An error ocurred while loading the JSON file', 0, null, null, false, "OK", "OK"));
