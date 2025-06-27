@@ -376,7 +376,7 @@ class Song extends BaseSong
 		return isChartJson ? onLoadJson(songJson) : onLoadEvents(songJson);
 	}
 
-	private static function parseSongJson(filePath:String, isChartJson:Bool = true):Null<SwagSong> {
+	public static function parseSongJson(filePath:String, isChartJson:Bool = true):Null<SwagSong> {
 		try {
 			return _parseSongJson(filePath, isChartJson);
 		}catch(e) {

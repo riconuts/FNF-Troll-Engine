@@ -1534,17 +1534,13 @@ class PlayState extends MusicBeatState
 	{
 		var allEvents:Array<PsychEvent> = [];
 
-		#if false // needt o make some changes to the chart editor :l
 		if (song != null) {
-			var eventsPath:String = song.getSongFile('events.json');
-			var eventsJSON:Dynamic = Paths.getJson(eventsPath);
-			var events:Array<Array<Dynamic>> = Reflect.field(eventsJSON, 'events');
-			if (events != null) Song.getEventNotes(events, allEvents);
+			var eventsJSON:SwagSong = Song.parseSongJson(song.getSongFile('events.json'), false);
+			if (eventsJSON != null) Song.getEventNotes(eventsJSON.events, allEvents);
+		}else {
+			var eventsJSON:SwagSong = Song.loadFromJson('events', songId, false);
+			if (eventsJSON != null) Song.getEventNotes(eventsJSON.events, allEvents);
 		}
-		#else
-		var eventsJSON = Song.loadFromJson('events', songId, false);
-		if (eventsJSON != null) Song.getEventNotes(eventsJSON.events, allEvents);
-		#end
 
 		Song.getEventNotes(SONG.events, allEvents);
 
