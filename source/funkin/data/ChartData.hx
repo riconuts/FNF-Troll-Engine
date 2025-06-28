@@ -51,7 +51,7 @@ typedef SwagSong = {
 	var splashSkin:String;
 
 	////
-	@:optional var events:Array<Array<Dynamic>>;
+	@:optional var events:Array<PsychEventNote>;
 	
 	//// internal
 	@:optional var metadata:SongMetadata;
@@ -71,7 +71,7 @@ typedef JsonSong = {
 }
 
 typedef SwagSection = {
-	var sectionNotes:Array<Array<Dynamic>>;
+	var sectionNotes:Array<NoteData>;
 	//var lengthInSteps:Int;
 	var typeOfSection:Int;
 	var mustHitSection:Bool;
@@ -145,6 +145,7 @@ class ChartData
 
 			for (section in songJson.notes){
 				for (note in section.sectionNotes){
+					var note:Array<Dynamic> = cast note;
 					note[1] = section.mustHitSection ? note[1] : (note[1] + 4) % 8;
 					note[2] -= stepCrotchet;
 					note[2] = note[2] > 0 ? note[2] : 0;
@@ -208,21 +209,8 @@ class ChartData
 			////
 			for (section in swagJson.notes) {
 				for (note in section.sectionNotes) {
-					var type:Dynamic = note[3];
-					
-					if (Std.isOfType(type, String))
-					{
-						if (type == 'Hurt Note')
-							type = 'Mine';
-					}
-					else if (Std.isOfType(type, Int) && type > 0)
-						type = defaultNoteTypeList[type];
-					else if (type == true)
-						type = "Alt Animation";
-					else
-						type = '';
-						
-					note[3] = type;
+					var note:Array<Dynamic> = cast note;
+					note[3] = NoteData.resolveNoteType(note[3]);
 				}
 			}
 		}		
@@ -253,7 +241,7 @@ class ChartData
 					var note:Array<Dynamic> = notes[i];
 					if (note[1] < 0)
 					{
-						songJson.events.push([note[0], [[note[2], note[3], note[4]]]]);
+						songJson.events.push(PsychEventNote.fromValues(note[0], [[note[2], note[3], note[4]]]));
 						notes.remove(note);
 						len = notes.length;
 					}
@@ -265,11 +253,11 @@ class ChartData
 		return songJson;
 	}
 
-	public static function getEventNotes(rawEventsData:Array<Array<Dynamic>>, ?resultArray:Array<PsychEvent>):Array<PsychEvent>
+	public static function getEventNotes(rawEventsData:Array<PsychEventNote>, ?resultArray:Array<PsychEvent>):Array<PsychEvent>
 	{
 		if (resultArray==null) resultArray = [];
 		
-		var eventsData:Array<Array<Dynamic>> = [];
+		var eventsData:Array<PsychEventNote> = [];
 		
 		for (event in rawEventsData) {
 			// TODO: Probably just add a button in the chart editor to consolidate events, instead of automatically doing it
@@ -286,17 +274,9 @@ class ChartData
 
 		for (event in eventsData) //Event Notes
 		{
-			var eventTime:Float = event[0] + ClientPrefs.noteOffset;
-			var subEvents:Array<Array<Dynamic>> = event[1];
-
-			for (eventData in subEvents) {
-				var eventNote:PsychEvent = {
-					strumTime: eventTime,
-					event: eventData[0],
-					value1: eventData[1],
-					value2: eventData[2]
-				};
-				resultArray.push(eventNote);
+			for (event in event.getEvents()) {
+				event.strumTime += ClientPrefs.noteOffset;
+				resultArray.push(event);
 			}
 		}
 
@@ -331,4 +311,120 @@ class ChartData
 			return {inst: instTracks, player: [playerTrack], opponent: [opponentTrack]};
 		}
 	}
+}
+
+abstract NoteData(Array<Dynamic>)// from Array<Dynamic> to Array<Dynamic>
+{
+	public var strumTime(get, set):Float;
+	public var column(get, set):Int;
+	public var sustainLength(get, set):Float;
+	public var noteType(get, set):String;
+
+	inline function get_strumTime() return this[0];
+	inline function set_strumTime(value:Float) return this[0] = value;
+
+	inline function get_column() return this[1];
+	inline function set_column(value:Int) return this[1] = value;
+
+	inline function get_sustainLength() return this[2];
+	inline function set_sustainLength(value:Float) return this[2] = value;
+
+	inline function get_noteType() return this[3];
+	inline function set_noteType(value:String) return this[3] = value;
+
+	private function new(data:Array<Dynamic>)
+		this = data;
+
+	public function clone():NoteData
+		return fromValues(strumTime, column, sustainLength, noteType);
+
+	public static function fromValues(strumTime:Float, column:Int, sustainLength:Float, noteType:String):NoteData {
+		var data:Array<Dynamic> = [strumTime, column, sustainLength, noteType];
+		return new NoteData(data);
+	}
+
+	public static function fromData(data:Array<Dynamic>):NoteData		
+		return isNoteData(data) ? new NoteData(data) : null;
+
+	public static function resolveNoteType(value:Any):String {
+		var noteType:String = {
+			if (Std.isOfType(value, String))
+				value
+			else if (Std.isOfType(value, Int) && (value:Int) > 0)
+				defaultNoteTypeList[(value:Int)]
+			else if (value == true)
+				"Alt Animation"
+			else
+				'';
+		};
+		return noteType;
+	}
+
+	public static function isNoteData(data:Array<Dynamic>):Bool
+		return data != null && Std.isOfType(data[0], Float) && Std.isOfType(data[1], Int) && data[1] > 0;
+}
+
+abstract PsychEventNote(Array<Dynamic>)// from Array<Dynamic> to Array<Dynamic>
+{
+	public var strumTime(get, set):Float;
+	public var subEventsData(get, set):Array<PsychSubEventData>;
+
+	inline function get_strumTime() return this[0];
+	inline function set_strumTime(value:Float) return this[0] = value;
+
+	inline function get_subEventsData() return this[1];
+	inline function set_subEventsData(value:Array<PsychSubEventData>) return this[1] = value;
+
+	public function clone():PsychEventNote
+		return fromValues(strumTime, subEventsData.map(function(subEvent) return subEvent.clone()));
+
+	public function getEvents():Array<PsychEvent> {
+		var events:Array<PsychEvent> = [];
+		for (subEvent in subEventsData) {
+			var event:PsychEvent = {
+				strumTime: strumTime,
+				event: subEvent.eventName,
+				value1: subEvent.value1,
+				value2: subEvent.value2
+			};
+			events.push(event);
+		}
+		return events;
+	}
+
+	private function new(data:Array<Dynamic>)
+		this = data;
+
+	public static function fromValues(strumTime:Float, subEventsData:Array<PsychSubEventData>):PsychEventNote {
+		var data:Array<Dynamic> = [strumTime, subEventsData];
+		return new PsychEventNote(data);
+	}
+
+	public static function fromData(data:Array<Dynamic>):PsychEventNote
+		return isPsychEventNote(data) ? new PsychEventNote(data) : null;
+
+	public static function isPsychEventNote(data:Array<Dynamic>)
+		return data != null && Std.isOfType(data[0], Float) && Std.isOfType(data[1], Array);
+}
+
+abstract PsychSubEventData(Array<String>) from Array<String> to Array<String>
+{
+	private function new(data:Array<String>)
+		this = data;
+
+	public var eventName(get, set):String;
+	public var value1(get, set):String;
+	public var value2(get, set):String;
+
+	inline function get_eventName() return this[0];
+	inline function set_eventName(value:String) return this[0] = value;
+
+	inline function get_value1() return this[1];
+	inline function set_value1(value:String) return this[1] = value;
+
+	inline function get_value2() return this[2];
+	inline function set_value2(value:String) return this[2] = value;
+
+	public function clone():PsychSubEventData
+		return new PsychSubEventData([eventName, value1, value2]);	
 }

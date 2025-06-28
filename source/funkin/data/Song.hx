@@ -329,7 +329,7 @@ class Song extends BaseSong
 	inline public static function onLoadEvents(songJson:SwagSong)
 		return ChartData.onLoadEvents(songJson);
 
-	inline public static function getEventNotes(rawEventsData:Array<Array<Dynamic>>, ?resultArray:Array<PsychEvent>):Array<PsychEvent>
+	inline public static function getEventNotes(rawEventsData:Array<PsychEventNote>, ?resultArray:Array<PsychEvent>):Array<PsychEvent>
 		return ChartData.getEventNotes(rawEventsData, resultArray);
 
 	/** Loads a singular song to be played on PlayState **/

@@ -225,6 +225,7 @@ class Note extends NoteObject
 
 	// editor stuff
 	public var inEditor:Bool = false;
+	public var chartData:Dynamic = null;
 	public var mustPress:Bool = true; // perhaps make this a getter for field.isPlayer
 	public var realColumn:Int; 
 

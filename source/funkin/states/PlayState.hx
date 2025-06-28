@@ -1650,7 +1650,7 @@ class PlayState extends MusicBeatState
 		//// get note types to load
 		for (section in PlayState.SONG.notes) {
 			for (songNotes in section.sectionNotes) {
-				var type:String = songNotes[3];
+				var type:String = songNotes.noteType;
 				if (noteTypeMap.exists(type))
 					continue;
 
@@ -1745,20 +1745,20 @@ class PlayState extends MusicBeatState
 		
 		for (section in noteData) {
 			for (songNotes in section.sectionNotes) {
-				var daStrumTime:Float = songNotes[0];
-				var daNoteData:Int = Std.int(songNotes[1]);
+				var daStrumTime:Float = songNotes.strumTime;
+				var daNoteData:Int = songNotes.column;
 				var mustPress:Bool = section.mustHitSection ? (daNoteData < keyCount) : (daNoteData >= keyCount);
 				var fieldIndex:Int = mustPress ? 0 : 1;
 
 				var daColumn:Int = daNoteData % keyCount;
-				var susLength = Math.round(songNotes[2] / Conductor.stepCrochet) - 1;
+				var susLength = Math.round(songNotes.sustainLength / Conductor.stepCrochet) - 1;
 				var prevNote:Note = (notes.length > 0) ? notes[notes.length - 1] : null;
-				var daType:String = songNotes[3];
+				var daType:String = songNotes.noteType;
 
-				var swagNote:Note = new Note(daStrumTime, daColumn, prevNote, fieldIndex, songNotes[2] > 0 ? HEAD : TAP, false, hudSkin);
+				var swagNote:Note = new Note(daStrumTime, daColumn, prevNote, fieldIndex, songNotes.sustainLength > 0 ? HEAD : TAP, false, hudSkin);
 				swagNote.realColumn = daNoteData;
 				swagNote.mustPress = mustPress;
-				swagNote.sustainLength = songNotes[2] <= Conductor.stepCrotchet ? songNotes[2] : (susLength + 1) * Conductor.stepCrotchet; // +1 because hold end
+				swagNote.sustainLength = songNotes.sustainLength <= Conductor.stepCrotchet ? songNotes.sustainLength : (susLength + 1) * Conductor.stepCrotchet; // +1 because hold end
 				swagNote.ID = notes.length;
 
 				modchartObjects.set('note${swagNote.ID}', swagNote);
