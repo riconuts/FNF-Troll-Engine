@@ -1758,7 +1758,7 @@ class PlayState extends MusicBeatState
 				var swagNote:Note = new Note(daStrumTime, daColumn, prevNote, fieldIndex, songNotes.sustainLength > 0 ? HEAD : TAP, false, hudSkin);
 				swagNote.realColumn = daNoteData;
 				swagNote.mustPress = mustPress;
-				swagNote.sustainLength = songNotes.sustainLength <= Conductor.stepCrotchet ? songNotes.sustainLength : (susLength + 1) * Conductor.stepCrotchet; // +1 because hold end
+				swagNote.sustainLength = Math.max(0, songNotes.sustainLength <= Conductor.stepCrotchet ? songNotes.sustainLength : (susLength + 1) * Conductor.stepCrotchet); // +1 because hold end	
 				swagNote.ID = notes.length;
 
 				modchartObjects.set('note${swagNote.ID}', swagNote);
