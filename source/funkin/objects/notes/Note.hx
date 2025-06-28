@@ -345,9 +345,6 @@ class Note extends NoteObject
 		var sat = colorSwap.saturation;
 		var brt = colorSwap.brightness;
 
-		if (value == 'Hurt Note')
-			value = 'Mine';
-
 		if (column > -1 && noteType != value) {
 			var instance:NoteScriptState = inEditor ? ChartingState.instance : PlayState.instance;
 			noteScript = (instance == null) ? null : instance.notetypeScripts.get(value);

@@ -100,7 +100,7 @@ final defaultNoteTypeList:Array<String> = [
 	'',
 	'Alt Animation',
 	'Hey!',
-	'Hurt Note', // We should replace this w/ Mine
+	'Mine',
 	'GF Sing',
 	'No Animation'
 ];
@@ -357,7 +357,7 @@ abstract NoteData(Array<Dynamic>)// from Array<Dynamic> to Array<Dynamic>
 	public static function resolveNoteType(value:Any):String {
 		var noteType:String = {
 			if (Std.isOfType(value, String))
-				value
+				(value == 'Hurt Note' ? 'Mine' : value)
 			else if (Std.isOfType(value, Int) && (value:Int) > 0)
 				defaultNoteTypeList[(value:Int)]
 			else if (value == true)
