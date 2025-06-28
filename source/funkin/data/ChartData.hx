@@ -164,6 +164,14 @@ class ChartData
 
 		swagJson.validScore = true;
 
+		////
+		if (Reflect.hasField(songJson, 'trollEngine')) {
+			return swagJson;
+		}
+		
+		Reflect.setField(songJson, 'trollEngine', 'l.0.0');
+
+		////
 		songJson.stage ??= 'stage';
 		/*
 		songJson.player1 ??= "bf";
