@@ -7,6 +7,7 @@ import funkin.data.Cache;
 import funkin.data.Level;
 import funkin.data.Song;
 import funkin.data.BaseSong;
+import funkin.data.ChartData;
 import funkin.objects.notes.Note;
 import funkin.objects.notes.NoteSplash;
 import funkin.objects.notes.StrumNote;
@@ -25,8 +26,9 @@ import funkin.states.GameOverSubstate;
 import funkin.states.PauseSubState;
 import funkin.modchart.Modifier;
 import funkin.modchart.ModManager;
-import funkin.states.editors.*;
-import funkin.states.options.*;
+import funkin.states.editors.CharacterEditorState;
+import funkin.states.editors.ChartingState;
+import funkin.states.options.OptionsSubstate;
 import funkin.scripts.*;
 import funkin.scripts.Util;
 import funkin.scripts.Util as ScriptingUtil;
@@ -1486,7 +1488,7 @@ class PlayState extends MusicBeatState
 		// Do the countdown.
 		curCountdown = new Countdown(this);
 		resetCountdown(curCountdown);
-		curCountdown.start(Conductor.crochet * 0.001); // time is optional but here we are
+		curCountdown.start(Conductor.beatLength); // time is optional but here we are
 
 		var i = this.members.indexOf(this.notes);
 		(i==-1) ? this.add(curCountdown) : this.insert(i, curCountdown);
@@ -1634,10 +1636,15 @@ class PlayState extends MusicBeatState
 	{
 		var allEvents:Array<PsychEvent> = [];
 
-		var eventsJSON = Song.loadFromJson('events', songId, false);
-		if (eventsJSON != null) Song.getEventNotes(eventsJSON.events, allEvents);
+		if (song != null) {
+			var eventsJSON:SwagSong = ChartData.parseSongJson(song.getSongFile('events.json'), false);
+			if (eventsJSON != null) ChartData.getEventNotes(eventsJSON.events, allEvents);
+		}else {
+			var eventsJSON:SwagSong = ChartData.loadFromJson('events', songId, false);
+			if (eventsJSON != null) ChartData.getEventNotes(eventsJSON.events, allEvents);
+		}
 
-		Song.getEventNotes(SONG.events, allEvents);
+		ChartData.getEventNotes(SONG.events, allEvents);
 
 		return allEvents;
 	}
@@ -1662,7 +1669,10 @@ class PlayState extends MusicBeatState
 		return playbackRate = pitch;
 	}
 
-	private function addTrack(trackName:String, ?sndAsset:FlxSoundAsset) {
+	private function addTrack(trackName:String, ?sndAsset:FlxSoundAsset):FlxSound {
+		if (trackMap.get(trackName) != null)
+			return trackMap.get(trackName);
+
 		if (sndAsset == null) sndAsset = {
 			if (song != null)
 				song.getTrackSound(trackName);
@@ -1741,7 +1751,7 @@ class PlayState extends MusicBeatState
 		//// get note types to load
 		for (section in PlayState.SONG.notes) {
 			for (songNotes in section.sectionNotes) {
-				var type:String = songNotes[3];
+				var type:String = songNotes.noteType;
 				if (noteTypeMap.exists(type))
 					continue;
 
@@ -1836,20 +1846,20 @@ class PlayState extends MusicBeatState
 		
 		for (section in noteData) {
 			for (songNotes in section.sectionNotes) {
-				var daStrumTime:Float = songNotes[0];
-				var daNoteData:Int = Std.int(songNotes[1]);
-				var gottaHitNote:Bool = section.mustHitSection ? (daNoteData < keyCount) : (daNoteData >= keyCount);
+				var daStrumTime:Float = songNotes.strumTime;
+				var daNoteData:Int = songNotes.column;
+				var mustPress:Bool = section.mustHitSection ? (daNoteData < keyCount) : (daNoteData >= keyCount);
+				var fieldIndex:Int = mustPress ? 0 : 1;
 
 				var daColumn:Int = daNoteData % keyCount;
-				var susLength = Math.round(songNotes[2] / Conductor.stepCrochet) - 1;
+				var susLength = Math.round(songNotes.sustainLength / Conductor.stepCrochet) - 1;
 				var prevNote:Note = (notes.length > 0) ? notes[notes.length - 1] : null;
-				var daType:String = songNotes[3];
+				var daType:String = songNotes.noteType;
 
-				var swagNote:Note = new Note(daStrumTime, daColumn, prevNote, gottaHitNote, songNotes[2] > 0 ? HEAD : TAP, false, hudSkin);
-				#if ALLOW_DEPRECATION
+				var swagNote:Note = new Note(daStrumTime, daColumn, prevNote, fieldIndex, songNotes.sustainLength > 0 ? HEAD : TAP, false, hudSkin);
 				swagNote.realColumn = daNoteData;
-				#end
-				swagNote.sustainLength = Math.max(0, songNotes[2] <= Conductor.stepCrotchet ? songNotes[2] : (susLength + 1) * Conductor.stepCrotchet); // +1 because hold end
+				swagNote.mustPress = mustPress;
+				swagNote.sustainLength = Math.max(0, songNotes.sustainLength <= Conductor.stepCrotchet ? songNotes.sustainLength : (susLength + 1) * Conductor.stepCrotchet); // +1 because hold end	
 				swagNote.ID = notes.length;
 
 				modchartObjects.set('note${swagNote.ID}', swagNote);
@@ -1866,9 +1876,6 @@ class PlayState extends MusicBeatState
 				var playfield:PlayField = swagNote.field;
 
 				if (playfield == null && playfields.length > 0) {
-					if (swagNote.fieldIndex == -1)
-						swagNote.fieldIndex = swagNote.mustPress ? 0 : 1;
-
 					if (playfields[swagNote.fieldIndex] != null) {
 						playfield = playfields[swagNote.fieldIndex];
 						swagNote.field = playfield;
@@ -1892,10 +1899,9 @@ class PlayState extends MusicBeatState
 				prevNote = swagNote;
 				
 				inline function makeSustain(susNote:Int, susPart:SustainPart) {
-					var sustainNote:Note = new Note(daStrumTime + Conductor.stepCrochet * (susNote + 1), daColumn, prevNote, gottaHitNote, susPart, false, hudSkin);
-					#if ALLOW_DEPRECATION
+					var sustainNote:Note = new Note(daStrumTime + Conductor.stepCrochet * (susNote + 1), daColumn, prevNote, fieldIndex, susPart, false, hudSkin);
 					sustainNote.realColumn = daNoteData;
-					#end
+					swagNote.mustPress = mustPress;
 					sustainNote.ID = notes.length;
 					modchartObjects.set('note${sustainNote.ID}', sustainNote);
 
@@ -3232,7 +3238,7 @@ class PlayState extends MusicBeatState
 					if (!spr.alive)
 						return;
 
-					var stepDur = (Conductor.stepCrochet * 0.001);
+					var stepDur = (Conductor.stepLength);
 					spr.tween = FlxTween.tween(spr.scale, {x: 0, y: 0}, stepDur, {
 						startDelay: stepDur * 8,
 						ease: FlxEase.quadIn,
@@ -3255,7 +3261,7 @@ class PlayState extends MusicBeatState
 				ease: FlxEase.backOut, 
 				onComplete: function(twn) {
 					spr.tween = FlxTween.tween(spr, {alpha: 0.0}, 0.2, {
-						startDelay: Conductor.crochet * 0.001,
+						startDelay: Conductor.beatLength,
 						onComplete: (_) -> spr.kill()
 					});
 				}
@@ -3322,7 +3328,7 @@ class PlayState extends MusicBeatState
 						if (!numSpr.alive)
 							return;
 	
-						var stepDur = (Conductor.stepCrochet * 0.001);
+						var stepDur = (Conductor.stepLength);
 						numSpr.tween = FlxTween.tween(numSpr, {alpha: 0.0}, stepDur, {
 							startDelay: Math.min((stepDur * 8) - 0.1, 0.0),
 							ease: FlxEase.quadIn,
@@ -3477,7 +3483,7 @@ class PlayState extends MusicBeatState
 			timingTxt.y -= 8;
 			timingTxt.scale.set(1, 1);
 			
-			var time = (Conductor.stepCrochet * 0.001);
+			var time = (Conductor.stepLength);
 			FlxTween.tween(timingTxt, 
 				{y: timingTxt.y + 8}, 
 				0.1,

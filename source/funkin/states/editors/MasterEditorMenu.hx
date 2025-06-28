@@ -1,6 +1,7 @@
 package funkin.states.editors;
 
 import flixel.addons.transition.FlxTransitionableState;
+
 #if DISCORD_ALLOWED
 import funkin.api.Discord.DiscordClient;
 #end
@@ -29,6 +30,9 @@ class MasterEditorMenu extends MusicBeatState
 		'Week Editor',
 		'Menu Character Editor',
 		*/
+		#if USING_MOONCHART
+		'Chart Converter',
+		#end
 	];
 	private var menu:AlphabetMenu;
 	private var directories:Array<String> = [null];
@@ -67,6 +71,9 @@ class MasterEditorMenu extends MusicBeatState
 				case 'Stage Builder': MusicBeatState.switchState(new StageBuilderState());
 				*/
 				case "Test Stage": MusicBeatState.switchState(new TestState());
+				#if USING_MOONCHART
+				case 'Chart Converter': MusicBeatState.switchState(new ChartConverterState());
+				#end
 				default: return;
 			}
 			

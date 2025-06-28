@@ -20,8 +20,7 @@ class Hitmark extends FlxSprite
 	{
 		decayTime += FlxG.elapsed;
 
-		var s = Conductor.crochet * 0.001;
-		var decayScale = 1 - (decayTime / (s * 8)); // 8 beats to decay
+		var decayScale = 1 - (decayTime / (Conductor.beatLength * 8)); // 8 beats to decay
 		
 		scale.y = decayScale;
 		alpha = baseAlpha * decayScale;

@@ -114,11 +114,15 @@ class FNFGame extends FlxGame
 	{
 		super.update();
 
-		if (FlxG.keys.justPressed.F5)
-			if(FlxG.keys.pressed.SHIFT)
+		if (FlxG.keys.justPressed.F5) {
+			if (FlxG.keys.pressed.SHIFT) {
+				funkin.Paths.clearStoredMemory();
+				funkin.Paths.clearUnusedMemory();
 				FlxG.switchState(new funkin.states.MainMenuState());
-			else
+			}else {
 				MusicBeatState.resetState();
+			}
+		}
 	}
 
 	/*

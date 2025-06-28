@@ -265,34 +265,42 @@ class FreeplayState extends MusicBeatState
 			MusicBeatState.switchState(new funkin.states.MainMenuState());	
 			
 		}else if (controls.RESET){
-			var songName:String = selectedSongData.getMetadata(curChartId).songName;
-			var displayName:String = songName;
-
-			if (selectedSongCharts.length > 1) {
-				var diffName:String = Paths.getString('difficultyName_$curChartId', curChartId);
-				displayName += ' ($diffName)';
-			}
-
-			openSubState(new ResetScoreSubState(
-				selectedSongData.songId, 
-				curChartId, 
-				false, 
-				displayName
-			));
-			menu.controls = null;
-			this.subStateClosed.addOnce(function(_) {
-				refreshScore();
-				shouldRestoreControl = true;
-			});
+			openResetScorePrompt();
 			
 		}else if (FlxG.keys.justPressed.CONTROL){
-			openSubState(new GameplayChangersSubstate());
-			menu.controls = null;
-			this.subStateClosed.addOnce(function(_) {
-				refreshScore();
-				shouldRestoreControl = true;
-			});
+			openGameplayChangersMenu();
 		}
+	}
+
+	function openResetScorePrompt() {
+		var songName:String = selectedSongData.getMetadata(curChartId).songName;
+		var displayName:String = songName;
+
+		if (selectedSongCharts.length > 1) {
+			var diffName:String = Paths.getString('difficultyName_$curChartId', curChartId);
+			displayName += ' ($diffName)';
+		}
+
+		openSubState(new ResetScoreSubState(
+			selectedSongData.songId, 
+			curChartId, 
+			false, 
+			displayName
+		));
+		menu.controls = null;
+		this.subStateClosed.addOnce(function(_) {
+			refreshScore();
+			shouldRestoreControl = true;
+		});
+	}
+
+	function openGameplayChangersMenu() {
+		openSubState(new GameplayChangersSubstate());
+		menu.controls = null;
+		this.subStateClosed.addOnce(function(_) {
+			refreshScore();
+			shouldRestoreControl = true;
+		});
 	}
 
 	function onSelectSong(data:BaseSong)
@@ -399,8 +407,8 @@ class FreeplayState extends MusicBeatState
 		lerpHighscore = CoolUtil.coolLerp(lerpHighscore, targetHighscore, FlxG.elapsed * 12);
 		lerpRating = CoolUtil.coolLerp(lerpRating, targetRating, FlxG.elapsed * 8);
 
-		var score = Math.round(lerpHighscore);
-		var rating = formatRating(lerpRating);
+		final score = Math.round(lerpHighscore);
+		final rating = formatRating(lerpRating);
 
 		scoreText.text = 'PERSONAL BEST: $score ($rating%)';
 		positionHighscore();

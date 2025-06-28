@@ -48,17 +48,17 @@ class FlxDrawQuadsItem extends FlxDrawBaseItem<FlxDrawQuadsItem>
 		super.reset();
 		rects.length = 0;
 		transforms.length = 0;
-		alphas.splice(0, alphas.length);
+		alphas.resize(0);
 
-		hsvShifts.splice(0, hsvShifts.length);
-		daAlphas.splice(0, daAlphas.length);
-		flashes.splice(0, flashes.length);
-		flashColors.splice(0, flashColors.length);
+		hsvShifts.resize(0);
+		daAlphas.resize(0);
+		flashes.resize(0);
+		flashColors.resize(0);
 
 		if (colorMultipliers != null)
-			colorMultipliers.splice(0, colorMultipliers.length);
+			colorMultipliers.resize(0);
 		if (colorOffsets != null)
-			colorOffsets.splice(0, colorOffsets.length);
+			colorOffsets.resize(0);
 	}
 
 	override public function dispose():Void

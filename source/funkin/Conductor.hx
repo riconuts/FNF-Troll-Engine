@@ -1,7 +1,7 @@
 // conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem conductor we have a problem
 package funkin;
 
-import funkin.data.BaseSong;
+import funkin.data.ChartData;
 
 typedef BPMChangeEvent =
 {
@@ -111,8 +111,15 @@ class Conductor
 	}
 
 	////
-	public static var crochet:Float = (60 / bpm) * 1000; // beat length in milliseconds
-	public static var stepCrochet:Float = crochet / 4; // step length in milliseconds
+	/** beat length in seconds **/
+	public static var beatLength:Float = (60 / bpm);
+	/** step length in seconds **/
+	public static var stepLength:Float = crochet / 4;
+
+	/** beat length in milliseconds **/
+	public static var crochet:Float = beatLength * 1000;
+	/** step length in milliseconds **/
+	public static var stepCrochet:Float = stepLength * 1000;
 
 	public static var curDecStep:Float = 0;
 	public static var curDecBeat:Float = 0;
@@ -164,7 +171,7 @@ class Conductor
 
 			var deltaSteps:Int = Math.round(sectionSteps(section));
 			totalSteps += deltaSteps;
-			totalPos += (15000 * deltaSteps) / curBPM; // calculateStepCrochet(curBPM) * deltaSteps;
+			totalPos += calculateStepCrochet(curBPM) * deltaSteps;
 		}
 		
 		print('new BPM map BUDDY [');
@@ -177,8 +184,10 @@ class Conductor
 	{
 		Conductor.jackLimit = -1;
 		Conductor.bpm = newBpm;
-		Conductor.crochet = Conductor.calculateCrochet(newBpm);
-		Conductor.stepCrochet = Conductor.calculateStepCrochet(newBpm);
+		Conductor.beatLength = Conductor.calculateBeatLength(newBpm);
+		Conductor.stepLength = Conductor.beatLength / 4;
+		Conductor.crochet = Conductor.beatLength * 1000;
+		Conductor.stepCrochet = Conductor.stepLength * 1000;
 	}
 
 	/** From MILLISECONDS actually **/ 
@@ -263,14 +272,24 @@ class Conductor
 	}
 
 	////
+	/** Beat duration in seconds */
+	public inline static function calculateBeatLength(bpm:Float):Float {
+		return 60 / bpm;
+	}
+
+	/** Step duration in seconds */
+	public inline static function calculateStepLength(bpm:Float):Float {
+		return calculateBeatLength(bpm) / 4;
+	}
+
 	/** Beat duration in milliseconds */
 	public inline static function calculateCrochet(bpm:Float):Float {
-		return 60000 / bpm; // (60/bpm) * 1000;
+		return calculateBeatLength(bpm) * 1000;
 	}
 
 	/** Step duration in milliseconds */
 	public inline static function calculateStepCrochet(bpm:Float):Float {
-		return 15000 / bpm; // calculateCrochet(bpm) / 4;
+		return calculateStepLength(bpm) * 1000;
 	}
 
 	public inline static function sectionBeats(section:SwagSection):Float {
