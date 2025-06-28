@@ -71,7 +71,7 @@ class FreeplayState extends MusicBeatState
 
 			//// level songs
 			for (level in StoryModeState.scanContentLevels(contentId)) {
-				if (level.getLocked())
+				if (!level.isUnlocked())
 					continue;
 				
 				for (song in level.getFreeplaySongs()) {

@@ -119,7 +119,7 @@ class Level {
 	**/
 	public function getDisplayedSongs(difficultyId:String = "normal"):Array<String>
 	{
-		return getLocked() ? [] : [for (song in songs) song==null ? "Unknown" : song.getMetadata(difficultyId).songName];
+		return isUnlocked() ? [for (song in songs) song==null ? "Unknown" : song.getMetadata(difficultyId).songName] : [];
 	}
 	
 
@@ -133,12 +133,22 @@ class Level {
 	
 
 	/**
-		Returns true if the level is locked.  
-		A locked level won't be playable through the story mode menu, and it's songs won't be added to freeplay.
+		Whether this level is unlocked.  
+		A locked level will be shown with a lock on the story mode menu, and its songs won't be added to freeplay.
 	**/
-	public function getLocked():Bool
+	public function isUnlocked():Bool
 	{
-		return false;
+		return true;
+	}
+
+
+	/**
+		Returns true if the level should be shown on the story menu.  
+		Does not hide the level's songs from freeplay.
+	**/
+	public function isVisible():Bool
+	{
+		return true;
 	}
 
 
@@ -246,12 +256,22 @@ class ScriptedLevel extends Level
 	
 
 	/**
-		Returns true if the level is locked.  
-		A locked level won't be playable through the story mode menu, and it's songs won't be added to freeplay.
+		Whether this level is unlocked.  
+		A locked level will be shown with a lock on the story mode menu, and its songs won't be added to freeplay.
 	**/
-	override public function getLocked():Bool
+	override public function isUnlocked():Bool
 	{
-		return callScript("getLocked") ?? super.getLocked();
+		return callScript("isUnlocked") ?? super.isUnlocked();
+	}
+
+
+	/**
+		Returns true if the level should be shown on the story menu.  
+		Does not hide the level's songs from freeplay.
+	**/
+	override public function isVisible():Bool
+	{
+		return callScript("isVisible") ?? super.isVisible();
 	}
 
 

@@ -251,6 +251,7 @@ class StoryModeState extends MusicBeatState {
 		FlxG.camera.bgColor = FlxColor.BLACK;
 		// Get the levels
 		levels = getStoryModeLevels();
+		levels.filter((l) -> l.isVisible());
 
 		levelBG = new FlxSprite(0, 56).makeGraphic(FlxG.width, 400, 0xFFFFFFFF);
 		levelBG.color = 0xFFF9CF51;
