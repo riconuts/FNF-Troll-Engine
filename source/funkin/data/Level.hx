@@ -249,7 +249,7 @@ class ScriptedLevel extends Level
 		Returns true if the level is locked.  
 		A locked level won't be playable through the story mode menu, and it's songs won't be added to freeplay.
 	**/
-	public function getLocked():Bool
+	override public function getLocked():Bool
 	{
 		return callScript("getLocked") ?? super.getLocked();
 	}

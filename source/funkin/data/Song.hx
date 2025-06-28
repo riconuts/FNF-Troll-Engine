@@ -121,7 +121,7 @@ class Song extends BaseSong
 			if (chart.diffs.contains(chartId)) {
 				trace("CONVERTING FROM VSLICE");
 				
-				var converted:SupportedFormat = new SupportedFormat().fromFormat(chart, chartId);
+				var converted = new SupportedFormat().fromFormat(chart, chartId);
 
 				// holds are too long when from v-slice
 				var stepLength:Float = Conductor.calculateStepCrochet(converted.data.song.bpm);

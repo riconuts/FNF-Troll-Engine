@@ -21,7 +21,7 @@ class MasterEditorMenu extends MusicBeatState
 		'Character Editor',
 		'Chart Editor',
 		'Test Stage',
-		'VSlice Converter'
+		'VSlice Converter',
 		/*
 		'Stage Editor',
 		'Stage Builder',

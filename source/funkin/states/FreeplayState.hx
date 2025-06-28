@@ -65,17 +65,19 @@ class FreeplayState extends MusicBeatState
 			inline function sowy(songId:String) {
 				if (!songIdMap.exists(songId)) {
 					songIdMap.set(songId, true);
-					list.push(new Song(songId, directory));
+					list.push(new Song(songId, contentId));
 				}
 			}
 
 			//// level songs
-			for (level in StoryModeState.scanContentLevels(directory)) {
+			for (level in StoryModeState.scanContentLevels(contentId)) {
 				if (level.getLocked())
 					continue;
 				
-				for (songId in level.getFreeplaySongs())
-					sowy(songId);
+				for (song in level.getFreeplaySongs()) {
+					songIdMap.set(song.songId, true);
+					list.push(song);
+				}
 			}
 
 			// metadata file freeplay songs
@@ -94,7 +96,7 @@ class FreeplayState extends MusicBeatState
 			// default category shit
 			// should prob just make a autoAddToFreeplay bool or sum shit idk lol
 			if (metadata.defaultCategory != null && metadata.defaultCategory.length > 0){
-				var dir = Paths.mods(directory + "/songs");
+				var dir = Paths.mods(contentId + "/songs");
 
 				Paths.iterateDirectory(dir, function(file:String) {
 					if (FileSystem.isDirectory(haxe.io.Path.join([dir, file]))) {

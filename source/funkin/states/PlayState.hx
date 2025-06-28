@@ -118,40 +118,6 @@ class SpeedEvent
 	public var speed:Float; // speed mult after the change
 }
 
-
-class CutsceneSequence {
-	public var onNextSceneRan:FlxTypedSignal<Cutscene->Void> = new FlxTypedSignal<Cutscene->Void>();
-	public var onSceneFinished:FlxTypedSignal<Cutscene->Void> = new FlxTypedSignal<Cutscene->Void>();
-	public var onSequenceEnd:FlxTypedSignal<Void->Void> = new FlxTypedSignal<Void->Void>();
-	public var scenes:Array<Cutscene> = [];
-
-	public function push(scene:Cutscene)
-		scenes.push(scene);
-
-	public var currentScene: Cutscene;
-
-	public function runNextScene(): Null<Cutscene> 
-	{
-		currentScene = scenes.shift();
-		if(currentScene == null){
-			onSequenceEnd.dispatch();
-			return null;
-		}
-
-		currentScene.createCutscene();
-		onNextSceneRan.dispatch(currentScene);
-
-		currentScene.onEnd.add((_:Bool)->{
-			onSceneFinished.dispatch(currentScene);
-		});
-
-		return currentScene;
-	}
-
-	public function new(){}
-}
-
-
 class CutsceneSequence {
 	public var onNextSceneRan:FlxTypedSignal<Cutscene->Void> = new FlxTypedSignal<Cutscene->Void>();
 	public var onSceneFinished:FlxTypedSignal<Cutscene->Void> = new FlxTypedSignal<Cutscene->Void>();
