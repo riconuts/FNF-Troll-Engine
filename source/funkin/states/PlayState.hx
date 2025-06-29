@@ -1380,7 +1380,7 @@ class PlayState extends MusicBeatState
 		if (!skipCountdown) {
 			// Do the countdown.
 			curCountdown = new Countdown(this);
-			resetCountdown(curCountdown);
+			initCountdown(curCountdown);
 			curCountdown.start(Conductor.beatLength); // time is optional but here we are
 
 			var i = this.members.indexOf(this.notes);
@@ -1394,7 +1394,7 @@ class PlayState extends MusicBeatState
 			hudSkinScript.call("onCountdownStarted");
 	}
 
-	public function resetCountdown(countdown:Countdown):Void {
+	public function initCountdown(countdown:Countdown):Void {
 		if (countdown == null) return;
 		// I don't wanna break scripts so if you have a better way, do it
 		if (countdown.introAlts != introAlts) countdown.introAlts = introAlts;

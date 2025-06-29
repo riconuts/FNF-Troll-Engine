@@ -91,7 +91,7 @@ class PauseSubState extends MusicBeatSubstate
 			menu.inputsActive = false;
 
 			var c = new Countdown(game); // https://tenor.com/view/letter-c-darwin-tawog-the-amazing-world-of-gumball-dance-gif-17949158
-			if (game != null) game.resetCountdown(c);
+			if (game != null) game.initCountdown(c);
 			c.onComplete = this.close;
 			c.cameras = this.cameras;
 			c.start(0.5);
