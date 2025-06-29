@@ -1366,31 +1366,32 @@ class PlayState extends MusicBeatState
 		callOnScripts('onModifierRegisterPost');
 		signals.onModifierRegisterPost.dispatch();
 
-		startedCountdown = true;
-		setOnScripts('startedCountdown', true);
-		callOnScripts('onCountdownStarted');
-		if (hudSkinScript != null)
-			hudSkinScript.call("onCountdownStarted");
-
 		callOnScripts("generateModchart"); // this is where scripts should generate modcharts from here on out lol
+
+		var skipCountdown:Bool = skipCountdown;
 
 		if (PlayState.startOnTime >= 500) {
 			trace('starting on time: $startOnTime');
 			startSong(PlayState.startOnTime, -500);
 			PlayState.startOnTime = 0;
-			return;
+			skipCountdown = true;
 		}
 		
-		if (skipCountdown)
-			return;
+		if (!skipCountdown) {
+			// Do the countdown.
+			curCountdown = new Countdown(this);
+			resetCountdown(curCountdown);
+			curCountdown.start(Conductor.beatLength); // time is optional but here we are
 
-		// Do the countdown.
-		curCountdown = new Countdown(this);
-		resetCountdown(curCountdown);
-		curCountdown.start(Conductor.beatLength); // time is optional but here we are
+			var i = this.members.indexOf(this.notes);
+			(i==-1) ? this.add(curCountdown) : this.insert(i, curCountdown);
+		}
 
-		var i = this.members.indexOf(this.notes);
-		(i==-1) ? this.add(curCountdown) : this.insert(i, curCountdown);
+		startedCountdown = true;
+		setOnScripts('startedCountdown', true);
+		callOnScripts('onCountdownStarted');
+		if (hudSkinScript != null)
+			hudSkinScript.call("onCountdownStarted");
 	}
 
 	public function resetCountdown(countdown:Countdown):Void {
