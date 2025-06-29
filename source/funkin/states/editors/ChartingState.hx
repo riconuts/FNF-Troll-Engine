@@ -3251,6 +3251,7 @@ class ChartingState extends MusicBeatState
 		if (daJson == null){
 			openSubState(new Prompt('An error ocurred while loading the JSON file', 0, null, null, false, "OK", "OK"));
 		}else{
+			PlayState.song = null;
 			PlayState.SONG = daJson;
 			MusicBeatState.resetState();
 		}
