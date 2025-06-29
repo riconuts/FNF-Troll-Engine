@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-Created with Funkin Packer v0.1.3 https://neeeoo.github.io/funkin-packer/
--->
-<TextureAtlas imagePath="NOTE_assets.png" width="2048" height="1024">
+<!-- Created with Funkin Packer v0.1.3 https://neeeoo.github.io/funkin-packer/ -->
+<TextureAtlas imagePath="NOTE_assets.png">
 	<SubTexture name="arrowDOWN0000" x="854" y="395" width="157" height="154" frameX="-0" frameY="-0" frameWidth="157" frameHeight="154"/>
 	<SubTexture name="arrowLEFT0000" x="688" y="448" width="154" height="157" frameX="-0" frameY="-0" frameWidth="154" frameHeight="157"/>
 	<SubTexture name="arrowRIGHT0000" x="692" y="226" width="154" height="157" frameX="-0" frameY="-0" frameWidth="154" frameHeight="157"/>
@@ -10,10 +8,10 @@ Created with Funkin Packer v0.1.3 https://neeeoo.github.io/funkin-packer/
 	<SubTexture name="blue0000" x="1023" y="0" width="157" height="154" frameX="-0" frameY="-0" frameWidth="157" frameHeight="154"/>
 	<SubTexture name="blue hold end0000" x="248" y="946" width="50" height="64" frameX="-0" frameY="-0" frameWidth="50" frameHeight="64"/>
 	<SubTexture name="blue hold piece0000" x="0" y="956" width="50" height="44" frameX="-0" frameY="-0" frameWidth="50" frameHeight="44"/>
-	<SubTexture name="down confirm0000" x="0" y="0" width="229" height="228" frameX="-2" frameY="-1" frameWidth="238" frameHeight="235"/>
-	<SubTexture name="down confirm0001" x="0" y="240" width="229" height="228" frameX="-2" frameY="-1" frameWidth="238" frameHeight="235"/>
-	<SubTexture name="down confirm0002" x="470" y="226" width="210" height="210" frameX="-8" frameY="-13" frameWidth="238" frameHeight="235"/>
-	<SubTexture name="down confirm0003" x="470" y="226" width="210" height="210" frameX="-8" frameY="-13" frameWidth="238" frameHeight="235"/>
+	<SubTexture name="down confirm0000" x="0" y="0" width="229" height="228" frameX="-4" frameY="-1" frameWidth="238" frameHeight="235"/>
+	<SubTexture name="down confirm0001" x="0" y="240" width="229" height="228" frameX="-4" frameY="-1" frameWidth="238" frameHeight="235"/>
+	<SubTexture name="down confirm0002" x="470" y="226" width="210" height="210" frameX="-12" frameY="-13" frameWidth="238" frameHeight="235"/>
+	<SubTexture name="down confirm0003" x="470" y="226" width="210" height="210" frameX="-12" frameY="-13" frameWidth="238" frameHeight="235"/>
 	<SubTexture name="down press0000" x="1018" y="724" width="142" height="139" frameX="-4" frameY="-3" frameWidth="149" frameHeight="146"/>
 	<SubTexture name="down press0001" x="1018" y="724" width="142" height="139" frameX="-4" frameY="-3" frameWidth="149" frameHeight="146"/>
 	<SubTexture name="down press0002" x="860" y="0" width="149" height="146" frameX="-0" frameY="-0" frameWidth="149" frameHeight="146"/>
