@@ -1058,26 +1058,23 @@ class ChartingState extends MusicBeatState
 
 		var duetButton:FlxButton = new FlxButton(10, copyLastButton.y + 45, "Duet Notes", function()
 		{
-			var duetNotes:Array<NoteData> = [];
-			for (note in _song.notes[curSec].sectionNotes)
-			{
-				var copiedNote = note.clone();
+			var copiedNotes:Array<NoteData> = [for (note in _song.notes[curSec].sectionNotes) note.clone()];
 
-				if (note.column >= _song.keyCount)
+			for (note in copiedNotes) {
+				if (Math.floor(note.column / _song.keyCount) % 2 == 1)
 					note.column -= _song.keyCount;
 				else
 					note.column += _song.keyCount;
 
-				duetNotes.push(copiedNote);
+				_song.notes[curSec].sectionNotes.push(note);
 			}
-
-			for (i in duetNotes){
-			_song.notes[curSec].sectionNotes.push(i);
-
-			}
+			
+			copiedNotes.resize(0);
+			copiedNotes = null;
 
 			updateGrid();
 		});
+
 		var mirrorButton:FlxButton = new FlxButton(duetButton.x + 100, duetButton.y, "Mirror Notes", function()
 		{
 			for (note in _song.notes[curSec].sectionNotes)
