@@ -383,8 +383,10 @@ abstract PsychEventNote(Array<Dynamic>)// from Array<Dynamic> to Array<Dynamic>
 	inline function get_subEventsData() return this[1];
 	inline function set_subEventsData(value:Array<PsychSubEventData>) return this[1] = value;
 
-	public function clone():PsychEventNote
-		return fromValues(strumTime, subEventsData.map(function(subEvent) return subEvent.clone()));
+	public function clone():PsychEventNote {
+		var clonedSubEvents = [for (subEvent in subEventsData) subEvent.clone()];
+		return fromValues(strumTime, clonedSubEvents);
+	}
 
 	public function getEvents():Array<PsychEvent> {
 		var events:Array<PsychEvent> = [];
@@ -403,7 +405,7 @@ abstract PsychEventNote(Array<Dynamic>)// from Array<Dynamic> to Array<Dynamic>
 	private function new(data:Array<Dynamic>)
 		this = data;
 
-	public static function fromValues(strumTime:Float, subEventsData:Array<PsychSubEventData>):PsychEventNote {
+	public static function fromValues(strumTime:Float, subEventsData:Array<Array<String>>):PsychEventNote {
 		var data:Array<Dynamic> = [strumTime, subEventsData];
 		return new PsychEventNote(data);
 	}
@@ -417,7 +419,7 @@ abstract PsychEventNote(Array<Dynamic>)// from Array<Dynamic> to Array<Dynamic>
 
 abstract PsychSubEventData(Array<String>) from Array<String> to Array<String>
 {
-	private function new(data:Array<String>)
+	inline function new(data:Array<String>)
 		this = data;
 
 	public var eventName(get, set):String;
@@ -433,6 +435,6 @@ abstract PsychSubEventData(Array<String>) from Array<String> to Array<String>
 	inline function get_value2() return this[2];
 	inline function set_value2(value:String) return this[2] = value;
 
-	public function clone():PsychSubEventData
-		return new PsychSubEventData([eventName, value1, value2]);	
+	inline public function clone():PsychSubEventData
+		return this.copy();
 }
