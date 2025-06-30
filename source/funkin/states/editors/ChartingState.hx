@@ -1023,26 +1023,32 @@ class ChartingState extends MusicBeatState
 			var value:Int = Std.int(stepperCopy.value);
 			if(value == 0) return;
 
-			var daSec = FlxMath.maxInt(curSec, value);
+			var secToCopy:Int = curSec - value;
+			if (secToCopy < 0) return;
+
+			var startThing:Float = getSectionStartTime(secToCopy);
+			var sectionsTimeDiff:Float = getSectionStartTime(curSec) - startThing;
 
 			if(check_notesSec.checked){
-				for (note in _song.notes[daSec - value].sectionNotes)
+				var notesToCopy = _song.notes[secToCopy].sectionNotes;
+				var sectionNotes = _song.notes[curSec].sectionNotes;
+				for (i in 0...notesToCopy.length)
 				{
-					var copiedNote:NoteData = note.clone();
-					copiedNote.strumTime += Conductor.stepCrochet * (getSectionBeats(daSec) * 4 * value);
-					_song.notes[daSec].sectionNotes.push(copiedNote);
+					var copiedNote:NoteData = notesToCopy[i].clone();
+					copiedNote.strumTime += sectionsTimeDiff;
+					sectionNotes.push(copiedNote);
 				}
 			}
 
-			var startThing:Float = sectionStartTime(-value);
-			var endThing:Float = sectionStartTime(-value + 1);
 			if(check_eventsSec.checked){
+				var endThing:Float = getSectionStartTime(secToCopy + 1);
 				for (event in _song.events)
 				{					
-					if(endThing > event.strumTime && event.strumTime >= startThing)
+					var eventStrumTime:Float = fuckFloatingPoints(event.strumTime);
+					if (startThing <= eventStrumTime && eventStrumTime < endThing)
 					{
 						var copiedEvent = event.clone();
-						event.strumTime = fuckFloatingPoints(event.strumTime) + Conductor.stepCrochet * (getSectionBeats(daSec) * 4 * value);
+						copiedEvent.strumTime = eventStrumTime + sectionsTimeDiff;
 						_song.events.push(copiedEvent);
 					}
 				}
