@@ -2924,23 +2924,10 @@ class ChartingState extends MusicBeatState
 		if(notetype == '') return;
 		if(notetypeScripts.exists(notetype)) return;
 
-		{
-			var baseScriptFile:String = 'notetypes/$notetype';
-			var exts = Paths.HSCRIPT_EXTENSIONS; // TODO: maybe FunkinScript.extensions, FunkinScript.hscriptExtensions and FunkinScript.luaExtensions??
-			for (ext in exts)
-			{
-				var baseFile = '$baseScriptFile.$ext';
-				var file = Paths.getPath(baseFile);
-				if (Paths.exists(file))
-				{
-					if (ext == 'hscript')
-					{
-						var script = FunkinHScript.fromFile(file);
-						notetypeScripts.set(notetype, script);
-						break;
-					}
-				}
-			}
+		var file:Null<String> = Paths.getHScriptPath('notetypes/$notetype');
+		if (file != null) {
+			var script = FunkinHScript.fromFile(file);
+			notetypeScripts.set(notetype, script);
 		}
 	}
 
@@ -2982,18 +2969,15 @@ class ChartingState extends MusicBeatState
 
 		var beats:Float = getSectionBeats(isNextSection ? 1 : 0);
 		note.y = getYfromStrumNotes(note.strumTime - sectionStartTime(), beats);
-		//if(isNextSection) note.y += gridBG.height;
 		if(note.y < -150) note.y = -150;
 		return note;
 	}
 
 	function setupEventData(i:PsychEventNote, isNextSection:Bool) {
-		var curSection = _song.notes[curSec];
-		var nextSection = _song.notes[curSec+1];
-
 		var note:Note = new Note(i.strumTime, -1, null, -1, 0, true);
 		note.realColumn -1;
 		note.chartData = i;
+		note.usesDefaultColours = false;
 
 		note.loadGraphic(Paths.image('eventArrow'));
 		note.eventName = getEventName(i.subEventsData);
@@ -3013,7 +2997,6 @@ class ChartingState extends MusicBeatState
 
 		var beats:Float = getSectionBeats(isNextSection ? 1 : 0);
 		note.y = getYfromStrumNotes(note.strumTime - sectionStartTime(), beats);
-		//if(isNextSection) note.y += gridBG.height;
 		if(note.y < -150) note.y = -150;
 		return note;
 	}
