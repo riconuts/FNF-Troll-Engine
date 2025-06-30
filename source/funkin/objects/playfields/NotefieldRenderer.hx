@@ -70,7 +70,7 @@ class NotefieldRenderer extends FlxBasic {
 
 		// Get all the drawing stuff from the fields
 		for(field in members){
-			if (!field.active || !field.exists || !field.visible)
+			if (!field.exists || !field.visible)
 				continue; // Ignore it
 
 			field.preDraw(); // Collects all the drawing information
@@ -82,7 +82,7 @@ class NotefieldRenderer extends FlxBasic {
 		for (field in members){
 			field.draw(); // Just incase they want to do something before gathering happens (i.e ProxyFields grabbing their host's draw queue) 
 
-			if(!field.visible || !field.active || !field.exists)
+			if (!field.exists || !field.visible)
 				continue;
 			
 			var realField:NoteField = field.getNotefield();
