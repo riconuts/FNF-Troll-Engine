@@ -1118,7 +1118,7 @@ class ChartingState extends MusicBeatState
 	}
 
 	var stepperSusLength:FlxUINumericStepper;
-	var strumTimeInputText:FlxUIInputText; //I wanted to use a stepper but we can't scale these as far as i know :(
+	var stepperStrumTime:FlxUINumericStepper;
 	var noteTypeDropDown:FlxUIDropDownMenu;
 	var currentType:Int = 0;
 
@@ -1127,15 +1127,15 @@ class ChartingState extends MusicBeatState
 		var tab_group_note = new FlxUI(null, UI_box);
 		tab_group_note.name = 'Note';
 
-		stepperSusLength = new FlxUINumericStepper(10, 25, Conductor.stepCrochet* 0.5, 0, 0, Conductor.stepCrochet * 64);
-		stepperSusLength.value = 0;
+		final DECIMALS:Int = 4;
+
+		stepperSusLength = new FlxUINumericStepper(10, 25, 1, 0, 0, Math.POSITIVE_INFINITY, DECIMALS, 1, new FlxUIInputText(0, 0, 120));
 		stepperSusLength.name = 'note_susLength';
 		blockPressWhileTypingOnStepper.push(stepperSusLength);
 
-		strumTimeInputText = new FlxUIInputText(10, 65, 180, "0");
-		strumTimeInputText.name = 'note_strumTime';
-		tab_group_note.add(strumTimeInputText);
-		blockPressWhileTypingOn.push(strumTimeInputText);
+		stepperStrumTime = new FlxUINumericStepper(10, 65, 1, 0, 0, Math.POSITIVE_INFINITY, DECIMALS, 1, new FlxUIInputText(0, 0, 120));
+		stepperStrumTime.name = 'note_strumTime';
+		blockPressWhileTypingOnStepper.push(stepperStrumTime);
 
 		var key:Int = 0;
 		var displayNameList:Array<String> = [];
@@ -1200,12 +1200,11 @@ class ChartingState extends MusicBeatState
 		});
 		blockPressWhileScrolling.push(noteTypeDropDown);
 
-		tab_group_note.add(new FlxText(10, 10, 0, 'Sustain length:'));
-		tab_group_note.add(new FlxText(10, 50, 0, 'Strum time (in miliseconds):'));
-		tab_group_note.add(new FlxText(10, 90, 0, 'Note type:'));
-
+		tab_group_note.add(new FlxText(10, 10, 0, 'Sustain length:'));		
 		tab_group_note.add(stepperSusLength);
-		tab_group_note.add(strumTimeInputText);
+		tab_group_note.add(new FlxText(10, 50, 0, 'Strum time (in miliseconds):'));
+		tab_group_note.add(stepperStrumTime);
+		tab_group_note.add(new FlxText(10, 90, 0, 'Note type:'));
 		tab_group_note.add(noteTypeDropDown);
 
 		UI_box.addGroup(tab_group_note);
@@ -1837,6 +1836,14 @@ class ChartingState extends MusicBeatState
 					_song.bpm = nums.value;
 					Conductor.mapBPMChanges(_song);
 					updateGrid();
+
+				case 'note_strumTime':
+					if (curSelectedNote != null) {
+						curSelectedNote.strumTime = nums.value;
+						updateGrid();
+					} else {
+						sender.value = 0;
+					}
 				
 				case 'note_susLength':
 					if(curSelectedNote != null) {
@@ -1861,14 +1868,6 @@ class ChartingState extends MusicBeatState
 
 				case 'song_noteSplashes':
 					_song.splashSkin = sender.text;
-
-				case 'note_strumTime':
-					if (curSelectedNote != null) {
-						var value:Float = Std.parseFloat(sender.text);
-						if(Math.isNaN(value)) value = 0;
-						curSelectedNote.strumTime = value;
-						updateGrid();
-					}
 
 				case 'event_value1':
 					if (curSelectedEvent != null) {
@@ -2728,6 +2727,8 @@ class ChartingState extends MusicBeatState
 			
 			updateSectionUI();
 		}
+		stepperStrumTime.stepSize = Conductor.stepCrochet;
+		stepperSusLength.stepSize = Conductor.stepCrochet;
 	}
 
 	function updateSectionUI():Void
@@ -2774,12 +2775,11 @@ class ChartingState extends MusicBeatState
 	function updateNoteUI():Void
 	{
 		if (curSelectedNote != null) {
+			stepperStrumTime.value = curSelectedNote.strumTime;
 			stepperSusLength.value = curSelectedNote.sustainLength;
 
 			currentType = noteTypeMap.get(curSelectedNote.noteType);
-			noteTypeDropDown.selectedLabel = (currentType <= 0) ? '' : currentType + '. ' + curSelectedNote.noteType;
-		
-			strumTimeInputText.text = '' + curSelectedNote.strumTime;
+			noteTypeDropDown.selectedLabel = (currentType <= 0) ? '' : currentType + '. ' + curSelectedNote.noteType;		
 		}
 
 		if (curSelectedEvent != null) {
@@ -3171,7 +3171,6 @@ class ChartingState extends MusicBeatState
 		}
 
 		//trace(noteData + ', ' + noteStrum + ', ' + curSec);
-		strumTimeInputText.text = '' + curSelectedNote.strumTime;
 
 		updateGrid();
 		updateNoteUI();
