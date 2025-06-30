@@ -2297,6 +2297,11 @@ class ChartingState extends MusicBeatState
 			updateQuantization();
 		}
 		
+		if (FlxG.keys.pressed.CONTROL && FlxG.keys.justPressed.Q) {
+			useQuantNotes = !useQuantNotes;
+			updateGrid();
+		}
+
 		//ARROW VORTEX SHIT NO DEADASS
 		if(options.vortex){
 			var controlArray:Array<Bool> = [
@@ -2939,6 +2944,8 @@ class ChartingState extends MusicBeatState
 		}
 	}
 
+	var useQuantNotes:Bool = ClientPrefs.noteSkin == 'Quants';
+
 	function setupNoteData(i:NoteData, isNextSection:Bool):Note
 	{
 		var curSection = _song.notes[curSec];
@@ -2952,6 +2959,8 @@ class ChartingState extends MusicBeatState
 		note.realColumn = i.column;
 		note.mustPress = noteSection.mustHitSection ? (daField==0) : (daField!=0);
 		note.sustainLength = i.sustainLength;
+		note.canQuant = useQuantNotes;
+		note.reloadNote();
 		initNoteType(i.noteType);
 		note.noteType = i.noteType;
 
