@@ -939,7 +939,7 @@ class ChartingState extends MusicBeatState
 		var check_eventsSec:FlxUICheckBox = null;
 		var check_notesSec:FlxUICheckBox = null;
 
-		var copyButton:FlxButton = new FlxButton(10, 180, "Copy Section", function()
+		var copyButton:FlxButton = new FlxButton(10, 140, "Copy Section", function()
 		{
 			sectionToCopy = curSec;
 		});
@@ -984,7 +984,7 @@ class ChartingState extends MusicBeatState
 			updateGrid();
 		});
 
-		var clearSectionButton:FlxButton = new FlxButton(pasteButton.x + 100, pasteButton.y, "Clear", function()
+		var clearSectionButton:FlxButton = new FlxButton(pasteButton.x + 100, pasteButton.y, "Clear current", function()
 		{
 			if (check_notesSec.checked)
 				_song.notes[curSec].sectionNotes.resize(0);
@@ -1008,17 +1008,8 @@ class ChartingState extends MusicBeatState
 		check_eventsSec.checked = true;
 
 		////
-		var swapSection:FlxButton = new FlxButton(10, check_notesSec.y + 50, "Swap sides", function()
-		{
-			for (note in _song.notes[curSec].sectionNotes)
-			{
-				note.column = (note.column + _song.keyCount) % (_song.keyCount * 2);
-			}
-			updateGrid();
-		});
-
 		var stepperCopy:FlxUINumericStepper = null;
-		var copyLastButton:FlxButton = new FlxButton(10, swapSection.y + 30, "Copy last section", function()
+		var copyLastButton:FlxButton = new FlxButton(10, 220, "Copy last section", function()
 		{
 			var value:Int = Std.int(stepperCopy.value);
 			if(value == 0) return;
@@ -1062,7 +1053,17 @@ class ChartingState extends MusicBeatState
 		stepperCopy = new FlxUINumericStepper(copyLastButton.x + 100, copyLastButton.y, 1, 1, -999, 999, 0);
 		blockPressWhileTypingOnStepper.push(stepperCopy);
 
-		var duetButton:FlxButton = new FlxButton(10, copyLastButton.y + 45, "Duet Notes", function()
+		var swapSection:FlxButton = new FlxButton(10, copyLastButton.y + 80, "Swap sides", function()
+		{
+			for (note in _song.notes[curSec].sectionNotes)
+			{
+				note.column = (note.column + _song.keyCount) % (_song.keyCount * 2);
+			}
+
+			updateGrid();
+		});
+
+		var duetButton:FlxButton = new FlxButton(swapSection.x + 100, swapSection.y, "Duet Notes", function()
 		{
 			var copiedNotes:Array<NoteData> = [for (note in _song.notes[curSec].sectionNotes) note.clone()];
 
