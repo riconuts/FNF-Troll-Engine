@@ -1995,7 +1995,7 @@ class ChartingState extends MusicBeatState
 
 		var movedDummyY:Bool = false;
 		var onGrid:Bool =	FlxG.mouse.x >= gridBG.x
-						&&	FlxG.mouse.x <= gridBG.x + gridBG.width
+						&&	FlxG.mouse.x <	gridBG.x + gridBG.width
 						&&	FlxG.mouse.y >= gridBG.y
 						&&	FlxG.mouse.y <	gridBG.y + gridBG.height;
 
