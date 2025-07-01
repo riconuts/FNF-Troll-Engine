@@ -1117,6 +1117,8 @@ class ChartingState extends MusicBeatState
 		UI_box.addGroup(tab_group_section);
 	}
 
+	var labelSusLength:FlxText;
+	var labelStrumTime:FlxText;
 	var stepperSusLength:FlxUINumericStepper;
 	var stepperStrumTime:FlxUINumericStepper;
 	var noteTypeDropDown:FlxUIDropDownMenu;
@@ -1200,9 +1202,9 @@ class ChartingState extends MusicBeatState
 		});
 		blockPressWhileScrolling.push(noteTypeDropDown);
 
-		tab_group_note.add(new FlxText(10, 10, 0, 'Sustain length:'));		
+		tab_group_note.add(labelSusLength = new FlxText(10, 10, 0, 'Sustain length:'));
 		tab_group_note.add(stepperSusLength);
-		tab_group_note.add(new FlxText(10, 50, 0, 'Strum time (in miliseconds):'));
+		tab_group_note.add(labelStrumTime = new FlxText(10, 50, 0, 'Strum time:'));
 		tab_group_note.add(stepperStrumTime);
 		tab_group_note.add(new FlxText(10, 90, 0, 'Note type:'));
 		tab_group_note.add(noteTypeDropDown);
@@ -1823,6 +1825,7 @@ class ChartingState extends MusicBeatState
 				case 'section_beats':
 					_song.notes[curSec].sectionBeats = nums.value;
 					reloadGridLayer();
+					updateNoteSteps();
 				
 				case 'song_keyCount':
 					_song.keyCount = Math.ceil(Math.max(1, nums.value));
@@ -1836,11 +1839,13 @@ class ChartingState extends MusicBeatState
 					_song.bpm = nums.value;
 					Conductor.mapBPMChanges(_song);
 					updateGrid();
+					updateNoteSteps();
 
 				case 'note_strumTime':
 					if (curSelectedNote != null) {
 						curSelectedNote.strumTime = nums.value;
 						updateGrid();
+						updateNoteSteps();
 					} else {
 						sender.value = 0;
 					}
@@ -1849,6 +1854,7 @@ class ChartingState extends MusicBeatState
 					if(curSelectedNote != null) {
 						curSelectedNote.sustainLength = nums.value;
 						updateGrid();
+						updateNoteSteps();
 					} else {
 						sender.value = 0;
 					}
@@ -1857,6 +1863,7 @@ class ChartingState extends MusicBeatState
 					_song.notes[curSec].bpm = nums.value;
 					Conductor.mapBPMChanges(_song);
 					updateGrid();
+					updateNoteSteps();
 			}
 		}
 		else if(id == FlxUIInputText.CHANGE_EVENT) {
@@ -2777,9 +2784,20 @@ class ChartingState extends MusicBeatState
 		rightIcon.setPosition(GRID_SIZE * _song.keyCount * 1.5 - rightIcon.width * 0.5, 5);
 	}
 
+	function updateNoteSteps():Void
+	{
+		var strumStep:Float = Conductor.getStep(curSelectedNote.strumTime);
+		var endStep:Float = Conductor.getStep(curSelectedNote.strumTime + curSelectedNote.sustainLength);
+
+		labelSusLength.text = 'Sustain Length: (${endStep - strumStep} Steps)';
+		labelStrumTime.text = 'Strum Time: (Step ${strumStep})';
+	}
+
 	function updateNoteUI():Void
 	{
 		if (curSelectedNote != null) {
+			updateNoteSteps();
+
 			stepperStrumTime.value = curSelectedNote.strumTime;
 			stepperSusLength.value = curSelectedNote.sustainLength;
 
