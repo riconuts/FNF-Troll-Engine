@@ -1,6 +1,8 @@
 package openfl.display;
 
+#if cpp
 import funkin.api.Memory;
+#end
 
 import flixel.util.FlxStringUtil;
 import flixel.FlxG;
@@ -116,6 +118,15 @@ class FPS extends TextField
 		#end
 	}
 
+	private static inline function get_memoryUsageString():String
+	{
+		#if cpp
+		return FlxStringUtil.formatBytes(Memory.getCurrentRSS()) + " / " + FlxStringUtil.formatBytes(Memory.getPeakRSS());
+		#else
+		return Std.string(openfl.system.System.totalMemoryNumber);
+		#end
+	}
+
 	// Event Handlers
 	@:noCompletion
 	private override function __enterFrame(deltaTime:Float):Void
@@ -139,7 +150,7 @@ class FPS extends TextField
 		text = 'FPS: $currentFPS';
 		
 		if (showMemory)
-			text += ' • MEM: ' + FlxStringUtil.formatBytes(Memory.getCurrentRSS()) + " / " + FlxStringUtil.formatBytes(Memory.getPeakRSS());
+			text += ' • MEM: ' + get_memoryUsageString();
 
 		#if (debug && false)
 		text += '\nState: $currentState';
