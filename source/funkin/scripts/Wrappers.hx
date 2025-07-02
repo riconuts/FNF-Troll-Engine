@@ -15,7 +15,12 @@ class BlendMode{}
 @:build(funkin.macros.ScriptingMacro.createEnumWrapper(flixel.util.FlxAxes))
 class FlxAxes {}
 
+#if (flixel < "6.0.0")
 typedef FlxTweenType = flixel.tweens.FlxTween; // lol
+#else
+@:build(funkin.macros.ScriptingMacro.createEnumWrapper(flixel.tweens.FlxTween.FlxTweenType))
+class FlxTweenType {}
+#end
 
 // stupidity
 class SowyColor
@@ -38,6 +43,14 @@ class SowyColor
 		resultArray[2] = color.blueFloat;
 		resultArray[3] = color.alphaFloat;
 		return resultArray;
+	}
+
+	public static function fromRGBArray(ray:Array<Int>) {
+		return FlxColor.fromRGB(ray[0], ray[1], ray[2], ray.length > 3 ? ray[3] : 255);
+	}
+
+	public static function fromFloatArray(ray:Array<Float>) {
+		return FlxColor.fromRGBFloat(ray[0], ray[1], ray[2], ray.length > 3 ? ray[3] : 1.0);
 	}
 
 	// FlxColor.interpolate exists but im keeping this anyways
