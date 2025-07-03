@@ -315,13 +315,10 @@ class Note extends NoteObject
 			genScript = PlayState.instance.getHudSkinScript(value);
 
 		////
-		if (genScript == null){
-			texture = "";
-
-		}else if (genScript.exists("setupNoteTexture")) {
+		if (genScript != null && genScript.exists("setupNoteTexture")) {
 			genScript.executeFunc("setupNoteTexture", [this]);
 
-		}else {
+		}else if (genScript != null) {
 			if (genScript.exists("textureSuffix"))
 				texSuffix = genScript.get("textureSuffix");
 
