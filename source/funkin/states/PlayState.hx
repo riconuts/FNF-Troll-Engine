@@ -3091,6 +3091,44 @@ class PlayState extends MusicBeatState
 		eventNotes = [];
 	}
 
+	private function displayTiming(hitDiff:Float, judgeData:JudgmentData) {		
+		FlxTween.cancelTweensOf(timingTxt);
+		FlxTween.cancelTweensOf(timingTxt.scale);
+		
+		timingTxt.text = '${FlxMath.roundDecimal(hitDiff, 2)}ms';
+		timingTxt.screenCenter();
+		timingTxt.x += ClientPrefs.comboOffset[4];
+		timingTxt.y -= ClientPrefs.comboOffset[5];
+
+		timingTxt.color = hud.judgeColours.get(judgeData.internalName) ?? 0xFF477947;
+
+		timingTxt.visible = true;
+		timingTxt.alpha = ClientPrefs.judgeOpacity;
+		timingTxt.y -= 8;
+		timingTxt.scale.set(1, 1);
+		
+		var time = (Conductor.stepLength);
+		FlxTween.tween(timingTxt, 
+			{y: timingTxt.y + 8}, 
+			0.1,
+			{onComplete: function(_){
+				if (ClientPrefs.simpleJudge){
+					FlxTween.tween(timingTxt.scale, {x: 0, y: 0}, time, {
+						ease: FlxEase.quadIn,
+						onComplete: (_) -> timingTxt.visible = false,
+						startDelay: time * 8
+					});
+				}else{
+					FlxTween.tween(timingTxt, {alpha: 0}, time, {
+						// ease: FlxEase.circOut,
+						onComplete: (_) -> timingTxt.visible = false,
+						startDelay: time * 8
+					});
+				}
+			}}
+		);
+	}
+
 	private function displayJudgment(image:String){
 		var r:Bool = false;
 		if(hudSkinScript!=null && callScript(hudSkinScript, "onDisplayJudgment", [image]) == Globals.Function_Stop)
@@ -3351,41 +3389,7 @@ class PlayState extends MusicBeatState
 
 		if (ClientPrefs.showMS && (field==null || !field.autoPlayed))
 		{
-			FlxTween.cancelTweensOf(timingTxt);
-			FlxTween.cancelTweensOf(timingTxt.scale);
-			
-			timingTxt.text = '${FlxMath.roundDecimal(hitDiff, 2)}ms';
-			timingTxt.screenCenter();
-			timingTxt.x += ClientPrefs.comboOffset[4];
-			timingTxt.y -= ClientPrefs.comboOffset[5];
-
-			timingTxt.color = hud.judgeColours.get(judgeData.internalName) ?? 0xFF477947;
-
-			timingTxt.visible = true;
-			timingTxt.alpha = ClientPrefs.judgeOpacity;
-			timingTxt.y -= 8;
-			timingTxt.scale.set(1, 1);
-			
-			var time = (Conductor.stepLength);
-			FlxTween.tween(timingTxt, 
-				{y: timingTxt.y + 8}, 
-				0.1,
-				{onComplete: function(_){
-					if (ClientPrefs.simpleJudge){
-						FlxTween.tween(timingTxt.scale, {x: 0, y: 0}, time, {
-							ease: FlxEase.quadIn,
-							onComplete: function(_){timingTxt.visible = false;},
-							startDelay: time * 8
-						});
-					}else{
-						FlxTween.tween(timingTxt, {alpha: 0}, time, {
-							// ease: FlxEase.circOut,
-							onComplete: function(_){timingTxt.visible = false;},
-							startDelay: time * 8
-						});
-					}
-				}}
-			);
+			displayTiming(hitDiff, judgeData);
 		}
 
 		hud.noteJudged(judgeData, note, field);
