@@ -100,7 +100,7 @@ class BaseHUD extends FlxSpriteGroup
 	public function reloadHealthBarColors(dadColor:FlxColor, bfColor:FlxColor){}
 	public function beatHit(beat:Int){}
 	public function stepHit(step:Int){}
-	public function noteJudged(judge:JudgmentData, ?note:Note, ?field:PlayField){}
+	public function noteJudged(judge:JudgmentData, ?note:Note, ?field:PlayField) return true;
 	public function recalculateRating(){}
 	public function songEnding(){}
 

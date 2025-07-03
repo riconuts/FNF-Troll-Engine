@@ -95,10 +95,8 @@ class HScriptedHUD extends BaseHUD {
 		return combo = value;
 	}
 
-	override public function noteJudged(judge:JudgmentData, ?note:Note, ?field:PlayField)
-	{
-		super.noteJudged(judge, note, field);
-		script.call("noteJudged", [judge, note, field]);
+	override public function noteJudged(judge:JudgmentData, ?note:Note, ?field:PlayField){
+		return true == script.call("noteJudged", [judge, note, field]);
 	}
 
 	// easier constructors
