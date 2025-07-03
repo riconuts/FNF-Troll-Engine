@@ -1,12 +1,11 @@
+#include "memory.hpp"
+
 /*
  * Author:  David Robert Nadeau
  * Site:    http://NadeauSoftware.com/
  * License: Creative Commons Attribution 3.0 Unported License
  *          http://creativecommons.org/licenses/by/3.0/deed.en_US
  */
-
-#ifndef MEMCOUNTER_H
-#define MEMCOUNTER_H
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -115,4 +114,3 @@ size_t getCurrentRSS()
     return (size_t)0L; /* Unsupported. */
 #endif
 }
-#endif

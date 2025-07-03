@@ -1,14 +1,30 @@
 <xml>
+    <pragma once="true" />
     <set name="PROJECT_DIR" value="${this_dir}" />
 
     <files id='haxe'>
         <compilervalue name="-I" value="${PROJECT_DIR}/include/" />
     </files>
 
+    <files id='__main__'>
+        <compilervalue name="-I" value="${PROJECT_DIR}/include/" />
+    </files>
+
+    <files id='trollengine_externs'>
+        <compilervalue name="-I" value="${PROJECT_DIR}/include/" />
+        <file name="${PROJECT_DIR}/src/memory.cpp" />
+        <file name="${PROJECT_DIR}/src/darkmode.cpp" if="windows" />
+        <file name="${PROJECT_DIR}/src/refreshrate.cpp" if="linux" />
+    </files>
+
     <target id="haxe">
+        <files id="trollengine_externs" />
         <section if="linux">
             <lib name="-lX11" />
             <lib name="-lXrandr" />
+        </section>
+        <section if="windows">
+            <lib name="dwmapi.lib" />
         </section>
     </target>
 </xml>
