@@ -161,6 +161,10 @@ class Main extends Sprite
 		bread.visible = false;
 		addChild(bread);
 		#end
+
+		#if (windows && cpp)
+		Darkfriend.setDarkMode(true);
+		#end
 	}
 
 	public static function getTime():Float {
@@ -246,3 +250,35 @@ class Main extends Sprite
 	}
 	#end
 }
+
+#if (windows && cpp)
+@:buildXml('
+<target id="haxe">
+    <lib name="dwmapi.lib" if="windows" />
+</target>
+')
+@:cppFileCode('
+#include <Windows.h>
+#include <cstdio>
+#include <iostream>
+#include <tchar.h>
+#include <dwmapi.h>
+#include <winuser.h>
+')
+private class Darkfriend {
+	/**
+		@see https://github.com/TBar09/hxWindowColorMode-main/
+	**/ 
+	public static function setDarkMode(isDark:Bool):Void {
+		final isDark:Int = isDark ? 1 : 0;
+		untyped __cpp__("
+			int darkMode = isDark;
+			HWND window = GetActiveWindow();
+			if (S_OK != DwmSetWindowAttribute(window, 19, &darkMode, sizeof(darkMode))) {
+				DwmSetWindowAttribute(window, 20, &darkMode, sizeof(darkMode));
+			}
+			UpdateWindow(window);
+		");
+	}
+}
+#end
