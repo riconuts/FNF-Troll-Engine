@@ -327,6 +327,8 @@ class Note extends NoteObject
 
 			if (genScript.exists("noteTexture"))
 				texture = genScript.get("noteTexture");
+		}else {
+			texture = "";
 		}
 
 		return noteMod = value;
