@@ -83,6 +83,7 @@
 
 	<classpath path="source" />
 
+	<setenv name="HAXEPATH" value="./" />
 	<set name="BUILD_DIR" value="export/release" />
 	<set name="BUILD_DIR" value="export/debug" if="debug" />
 	<set name="BUILD_DIR" value="export/32bit" if="32bits" />
@@ -133,7 +134,7 @@
 
 	<haxelib name="faxe" if='switch'/>
 	<haxelib name="hxcpp-debug-server" if="debug" unless="telemetry"/>
-		
+
 	<!-- ______________________________ Haxedefines _____________________________ -->
 
 	<section if="CRASH_HANDLER">
@@ -142,7 +143,7 @@
 		<haxedef name="HXCPP_STACK_LINE" />
 		<haxedef name="openfl-enable-handle-error" />
 	</section>
-		
+
 	<define name="NO_PRECOMPILED_HEADERS" if="linux" />
 
 	<!-- <haxedef name="no_traces" if="final"/> -->
