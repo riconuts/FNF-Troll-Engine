@@ -2440,44 +2440,55 @@ class ChartingState extends MusicBeatState
 		wipeGroup(gridLayer);
 		
 		////
-		var leBeats = getSectionBeats();
-		var leHeight:Int = Std.int(leBeats * 4 * GRID_SIZE * zoomList[curZoom]);
-		var leWidth:Int = GRID_SIZE * (1 + _song.keyCount * 2);
+		final gridColor1:FlxColor = 0xffe7e6e6;
+		final gridColor2:FlxColor = 0xffd9d5d5;
 		
-		var nextStartTime:Float = sectionStartTime(1); 
-		var nextBeats = getSectionBeats(curSec + 1);
-		if (nextBeats == null) nextBeats = 0;
+		var leBeats:Float = getSectionBeats();
+		var nextBeats:Float = getSectionBeats(curSec + 1) ?? 0;
+		var totalBeats:Float = leBeats + nextBeats;
 		
-		gridBG = FlxGridOverlay.create(GRID_SIZE, GRID_SIZE, leWidth, leHeight);
+		var gridWidth:Int = 1 + _song.keyCount * 2;
+		var gridHeight:Int = Math.floor(leBeats * 4 * zoomList[curZoom]); 
 
-		if (nextStartTime <= inst.length && nextBeats > 0)
-		{
-			var nextHeight:Int = Std.int(nextBeats * 4 * GRID_SIZE * zoomList[curZoom]);
-
-			nextGridBG = FlxGridOverlay.create(GRID_SIZE, GRID_SIZE, leWidth, nextHeight);
-			nextGridBG.y = gridBG.height;
-			gridLayer.add(nextGridBG);
-			
-			var gridDark:FlxSprite = new FlxSprite(0, gridBG.height).makeGraphic(leWidth, nextHeight, FlxColor.BLACK);
-			gridDark.alpha = 0.4;
-			gridLayer.add(gridDark);
-
-			leHeight += nextHeight;
-		}
-		
+		gridBG = FlxGridOverlay.create(1, 1, gridWidth, gridHeight, gridColor1, gridColor2);
+		gridBG.antialiasing = false;
+		gridBG.scale.set(GRID_SIZE, GRID_SIZE);
+		gridBG.updateHitbox();
 		gridLayer.add(gridBG);
+		
+		var totalHeight:Float = gridBG.height;
 
-		for (i in 1...Std.int((leBeats + nextBeats) / 2)) {
-			var beatsep1:FlxSprite = new FlxSprite(gridBG.x, (GRID_SIZE * (4 * curZoom)) * i).makeGraphic(Std.int(gridBG.width), 1, 0x44FF0000);
+		// next section grid
+		var nextStartTime:Float = sectionStartTime(1); 
+		if (nextStartTime <= inst.length && nextBeats > 0) {
+			var gridHeight:Int = Math.floor(nextBeats * 4 * zoomList[curZoom]); 
+			nextGridBG = FlxGridOverlay.create(1, 1, gridWidth, gridHeight, gridColor1, gridColor2);
+			nextGridBG.color = 0xFF999999; // next section darkness
+			nextGridBG.antialiasing = false;
+			nextGridBG.setPosition(gridBG.x, gridBG.y + gridBG.height);
+			nextGridBG.scale.set(GRID_SIZE, GRID_SIZE);
+			nextGridBG.updateHitbox();
+			gridLayer.add(nextGridBG);
+
+			totalHeight += nextGridBG.height;
+		}
+
+		// beat separators
+		for (i in 1...Math.floor(totalBeats / 2)) {
+			var beatsep1:FlxSprite = CoolUtil.blankSprite(gridBG.width, 1, 0xFFFF0000);
+			beatsep1.setPosition(gridBG.x, (GRID_SIZE * (4 * curZoom)) * i);
+			beatsep1.alpha = 0.25;
 			gridLayer.add(beatsep1);
 		}
 		
 		// player - opponent separator
-		var gridBlackLine:FlxSprite = new FlxSprite(gridBG.x + gridBG.width - (GRID_SIZE * _song.keyCount)).makeGraphic(2, leHeight, FlxColor.BLACK);
+		var gridBlackLine:FlxSprite = CoolUtil.blankSprite(2, totalHeight, FlxColor.BLACK);
+		gridBlackLine.x = gridBG.x + gridBG.width - (GRID_SIZE * _song.keyCount);
 		gridLayer.add(gridBlackLine);
 
 		// event separator
-		var gridBlackLine:FlxSprite = new FlxSprite(gridBG.x + GRID_SIZE).makeGraphic(2, leHeight, FlxColor.BLACK);
+		var gridBlackLine:FlxSprite = CoolUtil.blankSprite(2, totalHeight, FlxColor.BLACK);
+		gridBlackLine.x = gridBG.x + GRID_SIZE;
 		gridLayer.add(gridBlackLine);
 
 		updateWaveform();
