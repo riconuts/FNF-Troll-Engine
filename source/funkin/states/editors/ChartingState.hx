@@ -2797,9 +2797,14 @@ class ChartingState extends MusicBeatState
 	function updateNoteSteps():Void
 	{
 		var strumStep:Float = Conductor.getStep(curSelectedNote.strumTime);
-		var endStep:Float = Conductor.getStep(curSelectedNote.strumTime + curSelectedNote.sustainLength);
+		var sustainSteps:Float = 0;
 
-		labelSusLength.text = 'Sustain Length: (${endStep - strumStep} Steps)';
+		if (curSelectedNote.sustainLength > 0) {
+			var endStep:Float = Conductor.getStep(curSelectedNote.strumTime + curSelectedNote.sustainLength);
+			sustainSteps = endStep - strumStep;
+		}
+
+		labelSusLength.text = 'Sustain Length: (${sustainSteps} Steps)';
 		labelStrumTime.text = 'Strum Time: (Step ${strumStep})';
 	}
 
