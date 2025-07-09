@@ -1131,7 +1131,7 @@ class ChartingState extends MusicBeatState
 	var stepperSusLength:FlxUINumericStepper;
 	var stepperStrumTime:FlxUINumericStepper;
 	var noteTypeDropDown:FlxUIDropDownMenu;
-	var currentType:Int = 0;
+	var currentNoteType:String = '';
 
 	function addNoteUI():Void
 	{
@@ -1203,9 +1203,10 @@ class ChartingState extends MusicBeatState
 
 		noteTypeDropDown = new FlxUIDropDownMenu(10, 105, FlxUIDropDownMenu.makeStrIdLabelArray(displayNameList, true), function(character:String)
 		{
-			currentType = Std.parseInt(character);
+			var typeIdx = Std.parseInt(character);
+			currentNoteType = noteTypeIntMap.get(typeIdx);
 			if (curSelectedNote != null) {
-				curSelectedNote.noteType = noteTypeIntMap.get(currentType);
+				curSelectedNote.noteType = currentNoteType;
 				updateGrid();
 			}
 		});
@@ -2045,7 +2046,7 @@ class ChartingState extends MusicBeatState
 						else if (FlxG.keys.pressed.ALT)
 						{
 							selectNote(note);
-							curSelectedNote.noteType = noteTypeIntMap.get(currentType);
+							curSelectedNote.noteType = currentNoteType;
 							updateGrid();
 						}
 						else
@@ -2060,7 +2061,7 @@ class ChartingState extends MusicBeatState
 				FlxG.log.add('added note');
 				var noteTime:Float = sectionStartTime() + getStrumTime(dummyArrow.y * (getSectionBeats() / 4), false);
 				var column:Int = Math.floor(FlxG.mouse.x / GRID_SIZE) - 1;
-				(column < 0) ? addEvent(noteTime) : addNote(noteTime, column);
+				(column < 0) ? addEvent(noteTime) : addNote(noteTime, column, null, true);
 			}
 		}else if(FlxG.mouse.pressed){
 
@@ -2367,7 +2368,7 @@ class ChartingState extends MusicBeatState
 					}
 
 					if (!delnote)
-						addNote(Conductor.songPosition, i, currentType, false);
+						addNote(Conductor.songPosition, i, currentNoteType, false);
 				}
 			}
 		}	
@@ -2823,8 +2824,8 @@ class ChartingState extends MusicBeatState
 			stepperStrumTime.value = curSelectedNote.strumTime;
 			stepperSusLength.value = curSelectedNote.sustainLength;
 
-			currentType = noteTypeMap.get(curSelectedNote.noteType);
-			noteTypeDropDown.selectedLabel = (currentType <= 0) ? '' : currentType + '. ' + curSelectedNote.noteType;		
+			var typeIdx = noteTypeMap.get(curSelectedNote.noteType);
+			noteTypeDropDown.selectedLabel = (typeIdx > 0) ? typeIdx + '. ' + curSelectedNote.noteType : '';		
 		}
 	}
 
@@ -3186,27 +3187,34 @@ class ChartingState extends MusicBeatState
 		updateGrid();
 	}
 
-	private function addNote(noteStrum:Float, column:Int, type:Null<Int> = null, click:Bool=true):Void
+	private function addNote(strumTime:Float, column:Int, ?noteType:String, ?click:Bool):Void
 	{
-		var noteSus:Float = 0.0;
-		var noteTypeName:String = noteTypeIntMap.get(type ?? currentType);
-		var heldNotes = (click ? heldNotesClick : heldNotesVortex);
-
-		curSelectedNote = NoteData.fromValues(noteStrum, column, noteSus, noteTypeName);
-		_song.notes[curSec].sectionNotes.push(curSelectedNote);
-		heldNotes[column] = curSelectedNote;
-
-		if (FlxG.keys.pressed.CONTROL) {
-			var mirrorColumn = (column + _song.keyCount) % (_song.keyCount * 2);
-			var note = NoteData.fromValues(noteStrum, mirrorColumn, noteSus, noteTypeName);
-			_song.notes[curSec].sectionNotes.push(note);
-			heldNotes[mirrorColumn] = note;
+		noteType ??= currentNoteType;
+		var heldNotes:Array<NoteData> = switch(click) {
+			case true: heldNotesClick;
+			case false: heldNotesVortex;
+			default: null;
 		}
 
-		//trace(noteData + ', ' + noteStrum + ', ' + curSec);
+		curSelectedNote = _addNote(curSec, strumTime, column, noteType);
+		if (heldNotes != null) heldNotes[column] = curSelectedNote;
+
+		if (FlxG.keys.pressed.CONTROL) {
+			var mirrorColumn:Int = (column + _song.keyCount) % (_song.keyCount * 2);
+			var note:NoteData = _addNote(curSec, strumTime, mirrorColumn, noteType);
+			if (heldNotes != null) heldNotes[mirrorColumn] = note;
+		}
+
+		//trace(noteData + ', ' + strumTime + ', ' + curSec);
 
 		updateGrid();
 		updateNoteUI();
+	}
+
+	private function _addNote(sectionNumber:Int, strumTime:Float, column:Int, noteType:String) {
+		var note = NoteData.fromValues(strumTime, column, 0.0, noteType);
+		_song.notes[sectionNumber].sectionNotes.push(note);
+		return note;
 	}
 
 	private function addEvent(noteStrum:Float) {
