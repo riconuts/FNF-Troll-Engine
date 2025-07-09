@@ -2432,8 +2432,11 @@ class ChartingState extends MusicBeatState
 		reloadGridLayer();
 	} 
 
+	// Section beat lengths to avoid calling reloadGridLayer when passing a section
 	var lastSecBeats:Float = 0;
 	var lastSecBeatsNext:Float = 0;
+
+	/** Creates the currently visible sections grid background and their objects (notes, events, waveform) **/
 	function reloadGridLayer() 
 	{
 		wipeGroup(gridLayer);
@@ -2852,6 +2855,7 @@ class ChartingState extends MusicBeatState
 		group.clear();	
 	}
 
+	/** Creates the notes and event sprites from the currently visible sections **/
 	function updateGrid():Void
 	{
 		wipeGroup(curRenderedNotes);
