@@ -2,10 +2,10 @@ package funkin;
 
 #if !macro
 import Main.Version;
-import funkin.input.Controls.KeyboardScheme;
-import flixel.util.FlxSave;
+import funkin.input.Controls;
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;
+import flixel.util.FlxSave;
 #if DISCORD_ALLOWED
 import funkin.api.Discord.DiscordClient;
 #end
@@ -813,20 +813,19 @@ class ClientPrefs {
 		'note_down' => [A, DPAD_DOWN],
 		'note_up' => [Y, DPAD_UP],
 		'note_right' => [B, DPAD_RIGHT],
-		/*
-			'dodge' => [],
+		
+		'dodge' => [],
 
-			'pause' => [],
-			'reset' => [],
+		'pause' => [START],
+		'reset' => [],
 
-			'ui_left' => [DPAD_LEFT],
-			'ui_down' => [DPAD_DOWN],
-			'ui_up' => [DPAD_UP],
-			'ui_right' => [DPAD_RIGHT],
+		'ui_left' => [DPAD_LEFT],
+		'ui_down' => [DPAD_DOWN],
+		'ui_up' => [DPAD_UP],
+		'ui_right' => [DPAD_RIGHT],
 
-			'accept' => [A],
-			'back' => [B],
-		 */
+		'accept' => [A],
+		'back' => [B],
 	];
 	public static var defaultKeys:Map<String, Array<FlxKey>> = null;
 	public static var defaultButtons:Map<String, Array<FlxGamepadInputID>> = null;
@@ -893,7 +892,7 @@ class ClientPrefs {
 		if (save != null && save.data.customControls != null) {
 			var loadedControls:Map<String, Array<FlxKey>> = save.data.customControls;
 			for (control => keys in loadedControls)
-				keyBinds.set(control, keys);
+				keyBinds.set(control, keys.filter((key) -> key != NONE));
 
 			reloadControls();
 		}
@@ -957,7 +956,8 @@ class ClientPrefs {
 	}
 
 	public static function reloadControls() {
-		funkin.input.PlayerSettings.player1.controls.setKeyboardScheme(KeyboardScheme.Solo);
+		Controls.firstActive.keyBinds = keyBinds;
+		Controls.firstActive.buttonBinds = buttonBinds;
 
 		FNFGame.muteKeys = copyKey(keyBinds.get('volume_mute'));
 		FNFGame.volumeDownKeys = copyKey(keyBinds.get('volume_down'));

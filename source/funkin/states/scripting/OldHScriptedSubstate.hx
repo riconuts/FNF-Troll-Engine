@@ -1,6 +1,6 @@
 package funkin.states.scripting;
 
-import funkin.input.PlayerSettings;
+import funkin.input.Controls;
 import funkin.scripts.Globals;
 import funkin.scripts.FunkinHScript;
 
@@ -31,8 +31,8 @@ class OldHScriptedSubstate extends MusicBeatSubstate
 
 		// TODO: use a macro to auto-generate code to variables.set all variables/methods of MusicBeatState
 
-		stateScript.set("get_controls", () -> return PlayerSettings.player1.controls);
-		stateScript.set("controls", PlayerSettings.player1.controls);
+		stateScript.set("get_controls", () -> return Controls.firstActive);
+		stateScript.set("controls", Controls.firstActive);
 
 		if (doCreateCall != false)
 			stateScript.call("onLoad");

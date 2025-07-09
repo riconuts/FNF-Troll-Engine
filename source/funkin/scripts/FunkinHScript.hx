@@ -13,7 +13,7 @@ import funkin.states.PlayState;
 import funkin.states.MusicBeatState;
 import funkin.states.MusicBeatSubstate;
 
-import funkin.input.PlayerSettings;
+import funkin.input.Controls;
 import funkin.api.Windows;
 
 import flixel.FlxG;
@@ -323,8 +323,8 @@ class FunkinHScript extends FunkinScript
 
 	private function setFNFVars() {
 		// FNF-specific things
-		set("controls", PlayerSettings.player1.controls);
-		set("get_controls", () -> return PlayerSettings.player1.controls);
+		set("controls", Controls.firstActive);
+		set("get_controls", () -> return Controls.firstActive);
 		
 		set("Paths", funkin.Paths);
 		set("Conductor", funkin.Conductor);
