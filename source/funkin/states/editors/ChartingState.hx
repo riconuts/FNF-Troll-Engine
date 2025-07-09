@@ -1630,7 +1630,6 @@ class ChartingState extends MusicBeatState
 		check_vortex.callback = function()
 		{
 			options.vortex = check_vortex.checked;
-			reloadGridLayer();
 		};
 		check_vortex.checked = options.vortex == true;
 
@@ -2474,9 +2473,9 @@ class ChartingState extends MusicBeatState
 		}
 
 		// beat separators
-		for (i in 1...Math.floor(totalBeats / 2)) {
+		for (i in 1...Math.floor(totalBeats)) {
 			var beatsep1:FlxSprite = CoolUtil.blankSprite(gridBG.width, 1, 0xFFFF0000);
-			beatsep1.setPosition(gridBG.x, (GRID_SIZE * (4 * curZoom)) * i);
+			beatsep1.setPosition(gridBG.x, (i * GRID_SIZE * 4) * zoomList[curZoom]);
 			beatsep1.alpha = 0.25;
 			gridLayer.add(beatsep1);
 		}
