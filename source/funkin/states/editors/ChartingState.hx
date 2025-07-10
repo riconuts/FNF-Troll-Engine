@@ -2147,15 +2147,8 @@ class ChartingState extends MusicBeatState
 			else
 				note.color = 0xFFFFFFFF;
 			
-			if(!inst.playing)
-				note.editorHitBeat = 0;
-
-			if (note.beat <= Conductor.curDecBeat) 
-			{
-				note.editorHitBeat = note.beat;
-				if (!note.wasGoodHit && inst.playing) 
-				{
-					note.wasGoodHit = true;
+			if (note.beat <= Conductor.curDecBeat) {
+				if (inst.playing && !note.wasGoodHit) {
 					if (note.column > -1)
 					{
 						// This is a note.
@@ -2182,8 +2175,9 @@ class ChartingState extends MusicBeatState
 					}
 				}
 
+				note.wasGoodHit = true;
 				note.alpha = 0.4;
-			}else if(note.editorHitBeat < Conductor.curDecBeat){
+			}else {
 				note.wasGoodHit = false;
 				note.alpha = 1;
 			}
@@ -3003,8 +2997,7 @@ class ChartingState extends MusicBeatState
 			}
 		}
 
-		note.editorHitBeat = note.beat;
-		note.wasGoodHit = note.beat <= Conductor.curBeat;
+		//note.wasGoodHit = note.beat <= Conductor.curDecBeat;
 
 		var beats:Float = getSectionBeats(isNextSection ? 1 : 0);
 		note.y = getYfromStrumNotes(note.strumTime - sectionStartTime(), beats);
@@ -3031,7 +3024,6 @@ class ChartingState extends MusicBeatState
 		note.updateHitbox();
 		note.x = Math.floor(-1 * GRID_SIZE) + GRID_SIZE;
 
-		note.editorHitBeat = note.beat;
 		note.wasGoodHit = note.beat <= Conductor.curBeat;
 
 		var beats:Float = getSectionBeats(isNextSection ? 1 : 0);
