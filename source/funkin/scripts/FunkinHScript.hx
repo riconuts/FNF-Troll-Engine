@@ -95,7 +95,7 @@ class FunkinHScript extends FunkinScript
 		}
 		catch(e:haxe.Exception) {
 			var msg = "Error parsing hscript! " + e.message;
-			trace(msg);
+			print(e.message);
 
 			#if desktop
 			var title = "Error on haxe script!";
