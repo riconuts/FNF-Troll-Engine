@@ -1983,6 +1983,11 @@ class ChartingState extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
+		colorSine += elapsed;
+		var sineColor:Float = 0.7 + 0.3 * FlxMath.fastSin(Math.PI * colorSine);
+		var sineColor:Int = Math.round(sineColor * 255);
+		var sineColor = FlxColor.fromRGB(sineColor, sineColor, sineColor, 255);
+
 		if (tracksCompleted){
 			tracksCompleted = false;
 			trace("track completed");
@@ -2089,7 +2094,7 @@ class ChartingState extends MusicBeatState
 			}
 
 		}else {
-			if (!heldNotesClick.empty()) heldNotesClick = [];
+			heldNotesClick.resize(0);
 			startDummyY = null;
 			curDummyY = null;
 		}
@@ -2138,23 +2143,11 @@ class ChartingState extends MusicBeatState
 		"\nStep: " + curStep;
 
 		playedSound.resize(0);
-		//var updateSelectedNote = curSelectedNote != null;
-
 		curRenderedNotes.forEachAlive(function(note:Note) {
-			//if (updateSelectedNote) 
-			{
-				if (note.chartData == curSelectedNote || note.chartData == curSelectedEvent)
-				{
-					colorSine += elapsed;
-
-					var colorVal:Float = 0.7 + 0.3 * FlxMath.fastSin(Math.PI * colorSine);
-					var colorVal:Int = Math.round(colorVal * 255);
-
-					note.color = FlxColor.fromRGB(colorVal, colorVal, colorVal, 255);
-
-					//updateSelectedNote = false;
-				}
-			}
+			if (note.chartData == curSelectedNote || note.chartData == curSelectedEvent)
+				note.color = sineColor;
+			else
+				note.color = 0xFFFFFFFF;
 			
 			if(!inst.playing)
 				note.editorHitBeat = 0;
