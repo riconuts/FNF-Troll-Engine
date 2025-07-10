@@ -3129,25 +3129,13 @@ class ChartingState extends MusicBeatState
 	function selectNote(note:Note):Void
 	{		
 		if (note.column > -1) {
-			for (i in _song.notes[curSec].sectionNotes) {
-				if (i != curSelectedNote && i == note.chartData) {
-					curSelectedNote = i;
-					break;
-				}
-			}
+			curSelectedNote = note.chartData;
+			updateNoteUI();
 		}else {
-			for (i in _song.events) {
-				if (i != curSelectedEvent && i.strumTime == note.strumTime) {
-					curSelectedEvent = i;
-					subEventIdx = Std.int(curSelectedEvent.subEventsData.length) - 1;
-					changeEventSelected();
-					break;
-				}
-			}
+			curSelectedEvent = note.chartData;
+			subEventIdx = Std.int(curSelectedEvent.subEventsData.length) - 1;
+			changeEventSelected();
 		}
-
-		updateGrid();
-		updateNoteUI();
 	}
 
 	function deleteNote(note:Note):Void
