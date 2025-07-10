@@ -4251,11 +4251,11 @@ class PlayStateSignals /*extends MusicBeatSignals*/
 	public var onBeatHit = new FlxTypedSignal<Int -> Void>();
 	public var onStepHit = new FlxTypedSignal<Int -> Void>();
 
-	public var goodNoteHit = new FlxTypedSignal<(Note, NoteField) -> Void>();
-	public var opponentNoteHit = new FlxTypedSignal<(Note, NoteField) -> Void>();
+	public var goodNoteHit = new FlxTypedSignal<(Note, PlayField) -> Void>();
+	public var opponentNoteHit = new FlxTypedSignal<(Note, PlayField) -> Void>();
 	
-	public var noteMiss = new FlxTypedSignal<(Note, NoteField) -> Void>();
-	public var noteMissPress = new FlxTypedSignal<(Note, NoteField) -> Void>();
+	public var noteMiss = new FlxTypedSignal<(Note, PlayField) -> Void>();
+	public var noteMissPress = new FlxTypedSignal<(Note, PlayField) -> Void>();
 
 	public var onPause = new FlxTypedSignal<Void -> Void>();
 	public var onResume = new FlxTypedSignal<Void -> Void>();
