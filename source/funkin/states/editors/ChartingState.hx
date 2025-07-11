@@ -73,6 +73,7 @@ typedef ChartingStateOptions = {
 
 @:access(flixel.sound.FlxSound._sound)
 @:access(openfl.media.Sound.__buffer)
+@:allow(funkin.states.editors.ChartingState)
 class ChartingState extends MusicBeatState
 {
 	public static function getDefaultOptions():ChartingStateOptions return {
@@ -125,8 +126,6 @@ class ChartingState extends MusicBeatState
 
 	private var noteTypeIntMap:Map<Int, String> = new Map<Int, String>();
 	private var noteTypeMap:Map<String, Null<Int>> = new Map<String, Null<Int>>();
-	var undos = [];
-	var redos = [];
 	var eventStuff:Array<Dynamic> =
 	[
 		// Name, Description
@@ -200,8 +199,6 @@ class ChartingState extends MusicBeatState
 	var nextGridBG:FlxSprite;
 
 	var subEventIdx:Int = 0;
-	var curUndoIndex = 0;
-	var curRedoIndex = 0;
 	var _song:SwagSong;
 	/* WILL BE THE CURRENT / LAST PLACED NOTE */
 	var curSelectedNote:NoteData = null;
@@ -1867,9 +1864,7 @@ class ChartingState extends MusicBeatState
 				
 				case 'note_susLength':
 					if(curSelectedNote != null) {
-						curSelectedNote.sustainLength = nums.value;
-						updateGrid();
-						updateNoteSteps();
+						setNoteSustain(nums.value, curSelectedNote);
 					} else {
 						sender.value = 0;
 					}
@@ -2241,8 +2236,13 @@ class ChartingState extends MusicBeatState
 				changeNoteSustain(-Conductor.stepCrochet);
 		}
 
-		if (FlxG.keys.justPressed.Z && FlxG.keys.pressed.CONTROL) {
-			undo();
+		if (FlxG.keys.pressed.CONTROL) {
+			if (FlxG.keys.justPressed.Z) {
+				undo();
+			}
+			if (FlxG.keys.justPressed.Y) {
+				redo();
+			}
 		}
 
 		if(FlxG.keys.justPressed.Z && curZoom > 0 && !FlxG.keys.pressed.CONTROL) {
@@ -2713,10 +2713,7 @@ class ChartingState extends MusicBeatState
 			note = curSelectedNote;
 
 		if (note != null) {
-			note.sustainLength = Math.max(value, 0);
-
-			updateNoteUI();
-			updateGrid();
+			new ChangeSustainAction(note, value, true);
 		}
 	}
 
@@ -2726,7 +2723,7 @@ class ChartingState extends MusicBeatState
 			note = curSelectedNote;
 
 		if (note != null)
-			setNoteSustain(note.sustainLength + value, note);
+			new ChangeSustainAction(note, value, false);
 	}
 
 	function changeSection(sec:Int = 0, ?updateMusic:Bool = true):Void
@@ -3129,19 +3126,14 @@ class ChartingState extends MusicBeatState
 			var currentSection = _song.notes[curSec];
 			for (i in currentSection.sectionNotes) {
 				if (i != note.chartData) continue;
-				if (i == curSelectedNote) curSelectedNote = null;
-				currentSection.sectionNotes.remove(i);
+				new RemoveNoteAction(curSec, i);
 				break;
 			}
 		}else {
 			//Events
 			for (i in _song.events) {
 				if (i != note.chartData) continue;
-				if (i == curSelectedEvent) {
-					curSelectedEvent = null;
-					changeEventSelected();
-				}
-				_song.events.remove(i);
+				new RemoveEventAction(i);
 				break;
 			}
 		}
@@ -3168,24 +3160,21 @@ class ChartingState extends MusicBeatState
 			default: null;
 		}
 
-		curSelectedNote = _addNote(curSec, strumTime, column, noteType);
-		if (heldNotes != null) heldNotes[column] = curSelectedNote;
+		var noteData = _addNote(curSec, strumTime, column, noteType);
+		if (heldNotes != null) heldNotes[column] = noteData;
 
 		if (FlxG.keys.pressed.CONTROL) {
 			var mirrorColumn:Int = (column + _song.keyCount) % (_song.keyCount * 2);
-			var note:NoteData = _addNote(curSec, strumTime, mirrorColumn, noteType);
-			if (heldNotes != null) heldNotes[mirrorColumn] = note;
+			var noteData = _addNote(curSec, strumTime, mirrorColumn, noteType);
+			if (heldNotes != null) heldNotes[mirrorColumn] = noteData;
 		}
 
 		//trace(noteData + ', ' + strumTime + ', ' + curSec);
-
-		updateGrid();
-		updateNoteUI();
 	}
 
 	private function _addNote(sectionNumber:Int, strumTime:Float, column:Int, noteType:String) {
 		var note = NoteData.fromValues(strumTime, column, 0.0, noteType);
-		_song.notes[sectionNumber].sectionNotes.push(note);
+		new AddNoteAction(curSec, note);
 		return note;
 	}
 
@@ -3194,28 +3183,44 @@ class ChartingState extends MusicBeatState
 		var text1:String = value1InputText.text;
 		var text2:String = value2InputText.text;
 
-		curSelectedEvent = PsychEventNote.fromValues(noteStrum, [[eventType, text1, text2]]);
-		_song.events.push(curSelectedEvent);
-		subEventIdx = 0;
-		changeEventSelected();
-		updateGrid();
+		var e = PsychEventNote.fromValues(noteStrum, [[eventType, text1, text2]]);
+		new AddEventAction(e);
 	}
 
-	// will figure this out l8r
+	////
+	@:noCompletion var utRay = new Array<ChartingAction>();
+	@:noCompletion var utIdx:Int = -1;
+
+	@:noCompletion function pushAction(action:ChartingAction) {
+		action.redo(); // doing this first so that in the case it throws an exception it'll basically just not happen
+		trace(action);
+
+		utIdx += 1;
+		utRay.resize(utIdx);
+		utRay.push(action);
+	}
+
 	function redo()
 	{
-		//_song = redos[curRedoIndex];
+		var nidx = utIdx + 1;
+		var action = utRay[nidx]; 
+		if (action == null) return;
+		action.redo();
+		trace('REDO: $action');
+		utIdx = nidx;
 	}
 
 	function undo()
 	{
-		//redos.push(_song);
-		undos.pop();
-		//_song.notes = undos[undos.length - 1];
-		///trace(_song.notes);
-		//updateGrid();
+		if (utIdx < 0) return;
+		var action = utRay[utIdx];
+		if (action == null) return;
+		action.undo();
+		trace('UNDO: $action');
+		utIdx -= 1;
 	}
 
+	////
 	function getStrumTime(yPos:Float, doZoomCalc:Bool = true):Float
 	{
 		var leZoom:Float = zoomList[curZoom];
@@ -3371,4 +3376,191 @@ class ChartingState extends MusicBeatState
 class CustomFlxUITabMenu extends FlxUITabMenu {
 	override function sortTabs(a, b):Int
 		return 0;
+}
+
+private class ChangeSustainAction extends NoteAction {
+	public var change:Float;
+
+	public function new(noteData:NoteData, value:Float, isAbs:Bool = false) {
+		this.noteData = noteData;
+		this.change = isAbs ? value - noteData.sustainLength : value;
+		if (this.change < 0)
+			this.change = Math.max(change, -noteData.sustainLength);
+
+		super();
+	}
+
+	public function redo() {
+		noteData.sustainLength += change;
+		instance.updateGrid();
+		instance.updateNoteUI();
+	}
+
+	public function undo() {
+		noteData.sustainLength -= change;	
+		instance.updateGrid();
+		instance.updateNoteUI();
+	}
+
+	public function toString() {
+		return 'Change Sustain (${Math.floor(change)})';
+	}
+}
+
+private class RemoveEventAction extends ChartingAction {
+	var eventData:PsychEventNote;
+
+	public function new(eventData:PsychEventNote) {
+		this.eventData = eventData;
+		super();
+	}
+
+	public function redo() {
+		_song.events.remove(eventData);
+		instance.updateGrid();
+
+		if (instance.curSelectedEvent == eventData) {
+			instance.subEventIdx = 0;
+			instance.curSelectedEvent = null;
+			instance.changeEventSelected();
+		}
+	}
+	
+	public function undo() {
+		_song.events.push(eventData);
+		instance.updateGrid();
+
+		instance.subEventIdx = 0;
+		instance.curSelectedEvent = eventData;
+		instance.changeEventSelected();
+	}
+
+	public function toString() {
+		return 'Remove Event (${Math.floor(eventData.strumTime)})';
+	}
+}
+
+private class AddEventAction extends ChartingAction {
+	var eventData:PsychEventNote;
+
+	public function new(eventData:PsychEventNote) {
+		this.eventData = eventData;
+		super();
+	}
+
+	public function redo() {
+		_song.events.push(eventData);
+		instance.updateGrid();
+
+		instance.subEventIdx = 0;
+		instance.curSelectedEvent = eventData;
+		instance.changeEventSelected();
+	}
+
+	public function undo() {
+		_song.events.remove(eventData);
+		instance.updateGrid();
+
+		if (instance.curSelectedEvent == eventData) {
+			instance.subEventIdx = 0;
+			instance.curSelectedEvent = null;
+			instance.changeEventSelected();
+		}
+	}
+
+	public function toString() {
+		return 'Remove Event (${Math.floor(eventData.strumTime)})';
+	}
+}
+
+private class RemoveNoteAction extends NoteAction {
+	public var sectionNumber:Int;
+
+	public function new(sectionNumber:Int, noteData:NoteData) {
+		this.sectionNumber = sectionNumber;
+		this.noteData = noteData;
+		super();
+	}
+		
+	public function redo() {
+		getSection(sectionNumber).sectionNotes.remove(noteData);
+		if (instance.curSelectedNote == noteData) {
+			instance.curSelectedNote = null;
+			instance.updateNoteUI();
+		}
+		instance.updateGrid();
+	}
+
+	public function undo() {
+		getSection(sectionNumber).sectionNotes.push(noteData);
+		instance.curSelectedNote = noteData;
+		instance.updateNoteUI();
+		instance.updateGrid();
+	}
+
+	public function toString() {
+		return 'Remove Note (${noteData.column}, ${Math.floor(noteData.strumTime)})';
+	}
+}
+
+private class AddNoteAction extends NoteAction {
+	public var sectionNumber:Int;
+
+	public function new(sectionNumber:Int, noteData:NoteData)
+	{
+		this.noteData = noteData;
+		this.sectionNumber = sectionNumber;
+		super();
+	}
+	
+	public function redo() {
+		getSection(sectionNumber).sectionNotes.push(noteData);
+		instance.curSelectedNote = noteData;
+		instance.updateNoteUI();
+		instance.updateGrid();
+	}
+
+	public function undo() {
+		getSection(sectionNumber).sectionNotes.remove(noteData);
+		if (instance.curSelectedNote == noteData) {
+			instance.curSelectedNote = null;
+			instance.updateNoteUI();
+		}
+		instance.updateGrid();
+	}
+
+	public function toString() {
+		return 'Add Note (${noteData.column}, ${Math.floor(noteData.strumTime)})';
+	}
+}
+
+private abstract class NoteAction extends ChartingAction {
+	var noteData:NoteData;
+}
+
+private abstract class ChartingAction
+{
+	/** Whether undoing this action should also undo the action previous to it **/
+	public var stealth:Bool = false;
+
+	/** Apply the effects of this action **/
+	abstract public function redo():Void;
+
+	/** Revert the effects of this action **/
+	abstract public function undo():Void;
+
+	public function new()
+		instance.pushAction(this);
+
+	////
+	public var instance(get, never):ChartingState; 
+	@:noCompletion inline function get_instance():ChartingState
+		return ChartingState.instance;
+
+	public var _song(get, never):SwagSong; 
+	@:noCompletion inline function get__song():SwagSong
+		return instance._song;
+
+	inline function getSection(idx:Int):SwagSection
+		return _song.notes[idx];
 }
