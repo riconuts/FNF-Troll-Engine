@@ -2038,32 +2038,30 @@ class ChartingState extends MusicBeatState
 
 		if (FlxG.mouse.justPressed)
 		{
-			if (FlxG.mouse.overlaps(curRenderedNotes))
+			var clickedNote = false;
+			for (note in curRenderedNotes)
 			{
-				curRenderedNotes.forEachAlive(function(note:Note)
+				if (FlxG.mouse.overlaps(note))
 				{
-					if (FlxG.mouse.overlaps(note))
+					clickedNote = true;
+					if (FlxG.keys.pressed.CONTROL) 
 					{
-						if (FlxG.keys.pressed.CONTROL)
-						{
-							selectNote(note);
-						}
-						else if (FlxG.keys.pressed.ALT)
-						{
-							selectNote(note);
-							curSelectedNote.noteType = currentNoteType;
-							updateGrid();
-						}
-						else
-						{
-							//trace('tryin to delete note...');
-							deleteNote(note);
-						}
+						selectNote(note);
 					}
-				});
+					else if (FlxG.keys.pressed.ALT)
+					{
+						selectNote(note);
+						curSelectedNote.noteType = currentNoteType;
+						updateGrid();
+					}
+					else
+					{
+						deleteNote(note);
+					}
+					break;
+				}
 			}
-			else if (onGrid){
-				FlxG.log.add('added note');
+			if (!clickedNote && onGrid) {
 				var noteTime:Float = sectionStartTime() + getStrumTime(dummyArrow.y * (getSectionBeats() / 4), false);
 				var column:Int = Math.floor(FlxG.mouse.x / GRID_SIZE) - 1;
 				(column < 0) ? addEvent(noteTime) : addNote(noteTime, column, null, true);
