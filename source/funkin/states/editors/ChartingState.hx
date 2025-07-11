@@ -301,20 +301,29 @@ class ChartingState extends MusicBeatState
 	}
 
 	// move notes to their corresponding sections
-	// ok not adding it yet because it doesn't change the note column to accomodate mustHitSection changes
-	function fixNotes() {
+	function fixOOBNotes() {
 		var allSections:Array<SwagSection> = _song.notes;
 		var allNotes:Array<NoteData> = [];
 		var sectionStarts:Array<Float> = [];
 		
+		var bimp = Conductor.bpm;
 		var beat:Float = 0;
 		for (i => section in allSections) {			
-			while (section.sectionNotes.length > 0)
-				allNotes.push(section.sectionNotes.pop());
+			if (section.changeBPM)
+				Conductor.changeBPM(section.bpm);
+
+			while (section.sectionNotes.length > 0) {
+				var note = section.sectionNotes.pop();
+				note.strumTime = fuckFloatingPoints(note.strumTime);
+				if (!section.mustHitSection)
+					note.column = (note.column + _song.keyCount) % (_song.keyCount * 2);
+				allNotes.push(note);
+			}
 			
-			sectionStarts[i] = (Conductor.stepToMs(beat * 4));
+			sectionStarts[i] = fuckFloatingPoints(Conductor.stepToMs(beat * 4));
 			beat += getSectionBeats(i);
 		}
+		Conductor.changeBPM(bimp);
 		
 		allNotes.sort((a, b) -> return Std.int(b.strumTime - a.strumTime)); // descending order
 
@@ -322,14 +331,21 @@ class ChartingState extends MusicBeatState
 		while (allNotes.length > 0) {
 			var note:NoteData = allNotes.pop();
 
-			for (i => sectionStart in sectionStarts) {
-				if (note.strumTime >= sectionStart) {
-					curSection = i;		
-				}
+			for (i in curSection...sectionStarts.length) {
+				if (note.strumTime >= sectionStarts[i])
+					curSection = i;
+				else
+					break;
 			}
 
-			allSections[curSection].sectionNotes.push(note); 
+			var section = allSections[curSection];
+			if (!section.mustHitSection)
+				note.column = (note.column + _song.keyCount) % (_song.keyCount * 2);
+
+			section.sectionNotes.push(note); 
 		}
+
+		updateGrid();
 	}
 
 	function adjustCamPos() {
@@ -701,6 +717,13 @@ class ChartingState extends MusicBeatState
 			eventsFileDialog.save(data, 'json', getSongPath('events.json'), 'Save Events');
 		});
 
+		var fix_oob_notes:FlxButton = new FlxButton(loadAutosaveBtn.x, 300 - 40, 'Fix Notes', function()
+		{
+			openSubState(new Prompt('This action will fix notes that are outside of their corresponding section.\n\nProceed?', 0, fixOOBNotes, null, options.ignoreWarnings));
+		});
+		fix_oob_notes.color = FlxColor.PINK;
+		fix_oob_notes.label.color = FlxColor.WHITE;
+
 		var clear_events:FlxButton = new FlxButton(loadAutosaveBtn.x, 300, 'Clear events', function()
 			{
 				openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, clearEvents, null, options.ignoreWarnings));
@@ -847,6 +870,7 @@ class ChartingState extends MusicBeatState
 		tab_group_song.name = "Song";
 		tab_group_song.add(UI_songTitle);
 
+		tab_group_song.add(fix_oob_notes);
 		tab_group_song.add(clear_events);
 		tab_group_song.add(clear_notes);
 		tab_group_song.add(saveButton);
