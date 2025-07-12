@@ -68,6 +68,9 @@ class SowyColor
 	public static function get_blue(color:FlxColor)
 		return color.blue;
 
+	public static function get_alpha(color:FlxColor)
+		return color.alpha;
+
 	public static function set_red(color:FlxColor, val:Int)
 	{
 		color.red = val;
@@ -86,6 +89,12 @@ class SowyColor
 		return color;
 	}
 
+	public static function set_alpha(color:FlxColor, val:Int)
+	{
+		color.alpha = val;
+		return color;
+	}
+
 	public static function get_rgb(color:FlxColor)
 		return color.rgb;
 
@@ -97,6 +106,9 @@ class SowyColor
 
 	public static function get_blueFloat(color:FlxColor)
 		return color.blueFloat;
+
+	public static function get_alphaFloat(color:FlxColor)
+		return color.alphaFloat;
 
 	public static function set_redFloat(color:FlxColor, val:Float)
 	{
@@ -113,6 +125,12 @@ class SowyColor
 	public static function set_blueFloat(color:FlxColor, val:Float)
 	{
 		color.blueFloat = val;
+		return color;
+	}
+
+	public static function set_alphaFloat(color:FlxColor, val:Float)
+	{
+		color.alphaFloat = val;
 		return color;
 	}
 
