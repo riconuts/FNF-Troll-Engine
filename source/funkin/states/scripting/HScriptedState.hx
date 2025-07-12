@@ -6,6 +6,7 @@ import funkin.scripts.FunkinHScript;
 @:build(funkin.macros.ScriptingMacro.addScriptingCallbacks([
 	"create",
 	"update",
+	"draw",
 	"destroy",
 	"openSubState",
 	"closeSubState",

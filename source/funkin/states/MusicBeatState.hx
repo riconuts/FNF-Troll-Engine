@@ -40,6 +40,7 @@ enum abstract SongSyncMode(String) to String {
 @:autoBuild(funkin.macros.ScriptingMacro.addScriptingCallbacks([
 	"create",
 	"update",
+	"draw",
 	"destroy",
 	"openSubState",
 	"closeSubState",
