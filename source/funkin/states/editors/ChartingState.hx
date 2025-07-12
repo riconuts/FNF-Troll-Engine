@@ -1854,7 +1854,7 @@ class ChartingState extends MusicBeatState
 				
 				case 'note_susLength':
 					if(curSelectedNote != null) {
-						setNoteSustain(nums.value, curSelectedNote);
+						new ChangeSustainAction(curSelectedNote, nums.value, true);
 					} else {
 						sender.value = 0;
 					}
@@ -2221,9 +2221,9 @@ class ChartingState extends MusicBeatState
 
 		if (curSelectedNote != null) {
 			if (FlxG.keys.justPressed.E)
-				changeNoteSustain(Conductor.stepCrochet);
+				new ChangeSustainAction(curSelectedNote, Conductor.stepCrochet, false);
 			if (FlxG.keys.justPressed.Q)
-				changeNoteSustain(-Conductor.stepCrochet);
+				new ChangeSustainAction(curSelectedNote, -Conductor.stepCrochet, false);
 		}
 
 		if (FlxG.keys.pressed.CONTROL) {
@@ -2695,25 +2695,6 @@ class ChartingState extends MusicBeatState
 		#else
 		return [[[0], [0]], [[0], [0]]];
 		#end
-	}
-
-	function setNoteSustain(value:Float, ?note:NoteData):Void
-	{
-		if (note == null)
-			note = curSelectedNote;
-
-		if (note != null) {
-			new ChangeSustainAction(note, value, true);
-		}
-	}
-
-	function changeNoteSustain(value:Float, ?note:NoteData):Void
-	{
-		if (note == null)
-			note = curSelectedNote;
-
-		if (note != null)
-			new ChangeSustainAction(note, value, false);
 	}
 
 	function changeSection(sec:Int = 0, ?updateMusic:Bool = true):Void
@@ -3530,9 +3511,6 @@ private abstract class NoteAction extends ChartingAction {
 
 private abstract class ChartingAction
 {
-	/** Whether undoing this action should also undo the action previous to it **/
-	public var stealth:Bool = false;
-
 	/** Apply the effects of this action **/
 	abstract public function redo():Void;
 
