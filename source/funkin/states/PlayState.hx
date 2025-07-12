@@ -673,7 +673,7 @@ class PlayState extends MusicBeatState
 		Note.defaultNoteAnimNames = ['purple0', 'blue0', 'green0', 'red0'];
 		Note.defaultHoldAnimNames = ['purple hold piece', 'blue hold piece', 'green hold piece', 'red hold piece'];
 		Note.defaultTailAnimNames = ['purple hold end', 'blue hold end', 'green hold end', 'red hold end'];
-		Note.spriteScale = (4 / keyCount) * 0.7;
+		Note.spriteScale = (4 / (keyCount < 4 ? 4 : keyCount)) * 0.7;
 		Note.swagWidth = Note.spriteScale * 160;
 		/**
 		 * Note texture asset names

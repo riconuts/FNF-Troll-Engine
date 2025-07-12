@@ -750,12 +750,10 @@ class ChartingState extends MusicBeatState
 		stepperBPM.name = 'song_bpm';
 		blockPressWhileTypingOnStepper.push(stepperBPM);
 
-		#if CHART_EDITOR_KEY_COUNT_STEPPER
 		var stepperKeyCount:FlxUINumericStepper = new FlxUINumericStepper(10, stepperBPM.y + 35, 1, 4, 1, 10, 0);
 		stepperKeyCount.value = _song.keyCount;
 		stepperKeyCount.name = 'song_keyCount';
 		blockPressWhileTypingOnStepper.push(stepperKeyCount);
-		#end
 
 		////
 		var skins:Array<String> = ['default'];
@@ -783,11 +781,7 @@ class ChartingState extends MusicBeatState
 		var characters:Array<String> = CharacterData.getAllCharacters();
 		characters.sort(CoolUtil.alphabeticalSort);
 
-		#if CHART_EDITOR_KEY_COUNT_STEPPER
 		var daY = stepperKeyCount.y;
-		#else
-		var daY = stepperBPM.y;
-		#end
 
 		var player1DropDown = new FlxUIDropDownMenu(10, daY + 45, FlxUIDropDownMenu.makeStrIdLabelArray(characters, true), function(character:String)
 		{
@@ -879,18 +873,14 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(loadEventJson);
 		tab_group_song.add(stepperSpeed);
 		tab_group_song.add(stepperBPM);
-		#if CHART_EDITOR_KEY_COUNT_STEPPER
 		tab_group_song.add(stepperKeyCount);
-		#end
 		tab_group_song.add(reloadNotesButton);
 		tab_group_song.add(noteSkinInputText);
 		tab_group_song.add(noteSplashesInputText);
 
 		tab_group_song.add(new FlxText(stepperSpeed.x, stepperSpeed.y - 15, 0, 'Song Speed:'));
 		tab_group_song.add(new FlxText(stepperBPM.x, stepperBPM.y - 15, 0, 'Song BPM:'));
-		#if CHART_EDITOR_KEY_COUNT_STEPPER
 		tab_group_song.add(new FlxText(stepperKeyCount.x, stepperKeyCount.y - 15, 0, 'Key Count:'));
-		#end
 
 		tab_group_song.add(new FlxText(skinDropdown.x, skinDropdown.y - 15, 0, 'HUD Skin:'));
 		tab_group_song.add(new FlxText(player2DropDown.x, player2DropDown.y - 15, 0, 'Opponent:'));
