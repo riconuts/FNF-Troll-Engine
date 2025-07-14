@@ -567,7 +567,7 @@ class ChartingState extends MusicBeatState
 		";
 		
 		helpTextGrp = new FlxTypedGroup<FlxText>();
-		helpTextGrp.exists = !options.hideHelp;
+		helpTextGrp.exists = false;
 		add(helpTextGrp);
 
 		var tipTextY = FlxG.height/2 + GRID_SIZE;
@@ -629,6 +629,8 @@ class ChartingState extends MusicBeatState
 		else
 			waveformTrackDropDown.selectedId = "None";
 
+		var lol = new TimelineDisplay();
+		this.add(lol);
 		super.create();
 		FlxG.mouse.visible = true;
 	}
@@ -2408,7 +2410,7 @@ class ChartingState extends MusicBeatState
 		}
 
 		if (FlxG.keys.justPressed.F1) {
-			helpTextGrp.exists = !helpTextGrp.exists;
+			helpTextGrp.exists = false;
 			options.hideHelp = !helpTextGrp.exists;
 		}
 
@@ -3425,6 +3427,102 @@ private class CustomFlxUISlider extends flixel.addons.ui.FlxUISlider {
 		}
 
 		super.update(elapsed);
+	}
+}
+
+private class TimelineDisplay extends FlxBasic {
+	public var uaWidth = 250;
+	public var uaHeight = 16;
+
+	public var curIdx:Int = -1;
+	public var scrollIdx:Int = 0;
+
+	public var bgs:Array<FlxSprite> = [];
+	public var txts:Array<FlxText> = [];
+
+	public function new(displayLength:Int = 10) {
+		super();
+
+		var width = uaWidth;
+		var height = uaHeight * displayLength;
+
+		var x = 5;
+		var y = FlxG.height - height - 5;
+
+		var text_hPadding = 5;
+
+		for (i in 0...displayLength) {
+			var bg = CoolUtil.blankSprite(uaWidth, uaHeight, 0xFF262626);
+			bg.scrollFactor.set();
+			bg.setPosition(x, y + i * uaHeight);
+			bgs[i] = bg;
+
+			var txt = new FlxText(
+				(bg.x + text_hPadding), 
+				(bg.y), 
+				(uaWidth - text_hPadding - text_hPadding),
+				"", 
+				8
+			);
+
+			txt.y += (uaHeight - txt.height) / 2;
+			txt.scrollFactor.set();
+			txt.wordWrap = false;
+			txts[i] = txt;
+		}
+	}
+
+	public function updateDisplay() {
+		final utRay = ChartingState.instance.utRay;
+		var half = Math.floor(txts.length / 2);
+		var offi = (utRay.length - curIdx);
+		var offi2 = FlxMath.maxInt(0, offi - half);
+		var scrollIdx = scrollIdx + offi2;
+
+		for (i in 1...txts.length + 1) {
+			var actionIdx = utRay.length - i - scrollIdx;
+			var action = (actionIdx < 0) ? null : utRay[actionIdx];
+
+			var txtIdx = txts.length - i;
+			var txt = (txtIdx < 0) ? null : txts[txtIdx];
+			if (txt == null) continue;
+
+			var bg = bgs[txtIdx];
+			var action_reverted = actionIdx > curIdx;
+
+			if (action == null) bg.color = 0xFF262626; // none
+			else if (actionIdx == curIdx) bg.color = 0xFF195BA0; // is current
+			else if (action_reverted) bg.color = 0xFF8C8C8C; // was reverted
+			else bg.color = 0xFF262626; // is past
+
+			txt.color = action_reverted ? 0xFF000000 : 0xFFFFFFFF;
+			txt.text = (action == null) ? "" : Std.string(action);
+		}
+	}
+
+	override function update(elapsed:Float) {
+		if (FlxG.keys.justPressed.V) {
+			scrollIdx--;
+			updateDisplay();
+		}
+		if (FlxG.keys.justPressed.N) {
+			scrollIdx++;
+			updateDisplay();	
+		}
+
+		if (curIdx != ChartingState.instance.utIdx) {
+			curIdx = ChartingState.instance.utIdx;
+			scrollIdx = 0;
+			updateDisplay();
+		}
+
+		for (obj in bgs) obj.update(elapsed);
+		for (obj in txts) obj.update(elapsed);
+	}
+
+	override function draw() {
+		for (obj in bgs) obj.draw();
+		for (obj in txts) obj.draw();
 	}
 }
 
