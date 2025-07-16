@@ -28,7 +28,7 @@ import openfl.display._internal.stats.DrawCallContext;
 class FPS extends TextField
 {
 	/** The current frame rate, expressed using frames-per-second **/
-	public var currentFPS(default, null):Float = 0.0;
+	public var currentFPS(default, null):Int = 0;
 	/** The current state class name **/
 	public var currentState(default, null):String = "";
 	/** Whether to show a memory usage counter or not **/
@@ -57,9 +57,9 @@ class FPS extends TextField
 	function onGameResized(windowWidth, ?windowHeight)
 		align = align;
 
-	@:noCompletion private var cacheCount:Int;
-	@:noCompletion private var currentTime:Float;
-	@:noCompletion private var times:Array<Float>;
+	@:noCompletion private var cacheCount:Int = 0;
+	@:noCompletion private var currentTime:Float = 0;
+	@:noCompletion private var times:Array<Float> = [];
 	@:noCompletion private var lastTime:Float = 0;
 
 	public function new(x:Float = 10, y:Float = 10, color:Int = 0xFFFFFF)
@@ -69,26 +69,15 @@ class FPS extends TextField
 		this.x = x;
 		this.y = y;
 
-		this.background = true;
-		this.backgroundColor = 0x000000;
-
-		var textFormat = new TextFormat(null, 12, color);
-
-		embedFonts = false;
-		textFormat.font = "_sans";
-		defaultTextFormat = textFormat;
-
-		currentFPS = 0;
-		selectable = false;
 		mouseEnabled = false;
+		selectable = false;
+
+		background = true;
+		backgroundColor = 0x000000;
 
 		multiline = true;
-		text = "FPS: ";
-
-		////
-		cacheCount = 0;
-		currentTime = 0;
-		times = [];
+		embedFonts = false;
+		defaultTextFormat = new TextFormat("_sans", 12, color);
 
 		////
 		addEventListener(Event.ADDED_TO_STAGE, (e:Event)->{
@@ -143,7 +132,7 @@ class FPS extends TextField
 		}
 
 		var currentCount = times.length;
-		currentFPS = Math.ffloor((currentCount + cacheCount) * 0.5);
+		currentFPS = Math.floor((currentCount + cacheCount) * 0.5);
 
 		if (currentCount != cacheCount)
 			cacheCount = currentCount;
