@@ -3865,7 +3865,7 @@ class PlayState extends MusicBeatState
 	public function createHScript(path:String, ?scriptName:String, ?ignoreCreateCall:Bool = false):FunkinHScript
 	{
 		var split = path.split("/");
-		var modName:String = split[0] == "content" ? split[1] : 'assets';
+		var modName:String = split[0] == Paths.contentFolderName ? split[1] : 'assets';
 		var script = FunkinHScript.fromFile(path, scriptName, [
 			"modName" => modName
 		], ignoreCreateCall != true);
