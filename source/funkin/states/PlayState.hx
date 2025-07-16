@@ -3175,7 +3175,7 @@ class PlayState extends MusicBeatState
 		else {
 			spr.moves = true;
 			spr.acceleration.y = 550;
-			spr.velocity.set(FlxG.random.int(-10, 10), -FlxG.random.int(140, 175));
+			spr.velocity.y = -FlxG.random.int(140, 175);
 
 			spr.scale.copyFrom(ratingGroup.judgeTemplate.scale);
 			spr.tween = FlxTween.tween(spr.scale, {x: spr.scale.x, y: spr.scale.y}, 0.1, {
@@ -3266,7 +3266,7 @@ class PlayState extends MusicBeatState
 			{
 				numSpr.moves = true;
 				numSpr.acceleration.y = FlxG.random.int(200, 300);
-				numSpr.velocity.set(FlxG.random.float(-5, 5), -FlxG.random.int(140, 160));
+				numSpr.velocity.y = -FlxG.random.int(140, 160);
 
 				numSpr.scale.copyFrom(ratingGroup.comboTemplate.scale);
 				numSpr.updateHitbox();
