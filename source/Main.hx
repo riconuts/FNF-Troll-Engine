@@ -89,6 +89,14 @@ class Main extends Sprite
 	public function new() {
 		super();
 
+		#if (windows && cpp)
+		funkin.api.Darkfriend.setDarkMode(!funkin.api.Darkfriend.isLightTheme());
+		#end
+
+		#if linux
+		stage.window.setIcon(Image.fromFile("icon.png"));
+		#end
+
 		////
 		#if sys
 		var args = Sys.args();
@@ -120,12 +128,12 @@ class Main extends Sprite
 		}
 		#end
 
-		final screenWidth = Application.current.window.width;
-		final screenHeight = Application.current.window.height;
+		final screenWidth:Int = stage.window.width;
+		final screenHeight:Int = stage.window.height;
 
 		if (adjustGameSize) {
 			//// Readjust the game size for smaller screens
-			if (!(screenWidth > gameWidth || screenHeight > gameWidth)) {
+			if (screenWidth < gameWidth && screenHeight < gameWidth) {
 				var ratioX:Float = screenWidth / gameWidth;
 				var ratioY:Float = screenHeight / gameHeight;
 				
@@ -135,7 +143,7 @@ class Main extends Sprite
 			}
 		}
 
-		//// Adjust window size for larger screens
+		//// Scale window size for larger screens
 		var scaleModifier:Int = Math.floor((screenWidth > screenHeight) ? (screenHeight / gameHeight) : (screenWidth / gameWidth));
 		if (scaleModifier < 1) scaleModifier = 1;
 
@@ -148,10 +156,6 @@ class Main extends Sprite
 		game = new FNFGame(gameWidth, gameHeight, initialState, framerate, framerate, skipSplash, startFullscreen);
 		addChild(game);
 
-		#if linux
-		FlxG.stage.window.setIcon(Image.fromFile("icon.png"));
-		#end
-
 		fpsVar = new FPS(10, 3, 0xFFFFFF);
 		fpsVar.visible = false;
 		addChild(fpsVar);
@@ -160,10 +164,6 @@ class Main extends Sprite
 		bread = new Bread();
 		bread.visible = false;
 		addChild(bread);
-		#end
-
-		#if (windows && cpp)
-		funkin.api.Darkfriend.setDarkMode(!funkin.api.Darkfriend.isLightTheme());
 		#end
 	}
 
