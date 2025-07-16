@@ -60,6 +60,7 @@ class FPS extends TextField
 	@:noCompletion private var cacheCount:Int;
 	@:noCompletion private var currentTime:Float;
 	@:noCompletion private var times:Array<Float>;
+	@:noCompletion private var lastTime:Float = 0;
 
 	public function new(x:Float = 10, y:Float = 10, color:Int = 0xFFFFFF)
 	{
@@ -124,7 +125,6 @@ class FPS extends TextField
 		return Std.string(openfl.system.System.totalMemoryNumber);
 		#end
 	}
-	var lastTime:Float = 0;
 
 	// Event Handlers
 	@:noCompletion
@@ -148,7 +148,7 @@ class FPS extends TextField
 		if (currentCount != cacheCount)
 			cacheCount = currentCount;
 
-		text = 'FPS: $currentFPS';
+		var text:String = 'FPS: $currentFPS';
 		
 		if (showMemory)
 			text += ' • MEM: ' + get_memoryUsageString();
@@ -167,5 +167,7 @@ class FPS extends TextField
 		text += "\nstageDC: " + Context3DStats.contextDrawCalls(DrawCallContext.STAGE);
 		text += "\nstage3DDC: " + Context3DStats.contextDrawCalls(DrawCallContext.STAGE3D);
 		#end
+
+		this.text = text;
 	}
 }
