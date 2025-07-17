@@ -2571,8 +2571,7 @@ class PlayState extends MusicBeatState
 		persistentUpdate = false;
 		pause();
 
-		var state = new ChartingState(SONG, FlxG.keys.pressed.SHIFT ? curSection : 0);
-		MusicBeatState.switchState(state);
+		MusicBeatState.switchState(new ChartingState(SONG, FlxG.keys.pressed.SHIFT ? curSection : -1));
 	}
 
 	public var isDead:Bool = false;
