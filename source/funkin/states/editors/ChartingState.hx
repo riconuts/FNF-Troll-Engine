@@ -168,9 +168,8 @@ class ChartingState extends MusicBeatState
 
 	var UI_box:FlxUITabMenu;
 
-	public static var curSec:Int = 0;
+	public static var lastSong:String = '';
 	public static var lastSection:Int = 0;
-	private static var lastSong:String = '';
 
 	var bpmTxt:FlxText;
 
@@ -179,6 +178,7 @@ class ChartingState extends MusicBeatState
 	var quant:AttachedSprite;
 	var strumLineNotes:FlxTypedGroup<StrumNote>;
 	var curSong:String = 'Test';
+	var curSec:Int = 0;
 	var amountSteps:Int = 0;
 
 	var highlight:FlxSprite;
@@ -385,6 +385,12 @@ class ChartingState extends MusicBeatState
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("Chart Editor", _song.metadata.songName);
 		#end
+	}
+
+	public function new(data:SwagSong = null, section:Int = -1) {
+		super();
+		this._song = data;
+		this.curSec = (section >= 0) ? section : (lastSong == songId ? lastSection : 0);
 	}
 
 	override function create()
@@ -599,11 +605,6 @@ class ChartingState extends MusicBeatState
 		quantTxt.borderSize = 2;
 		quantTxt.scrollFactor.set();
 		add(quantTxt);
-
-		if (lastSong != songId) {
-			lastSong = songId;
-			curSec = 0;
-		}
 
 		changeSection(curSec);
 
@@ -3354,6 +3355,12 @@ class ChartingState extends MusicBeatState
 		
 		if(_song.notes[section] != null) val = _song.notes[section].sectionBeats;
 		return val != null ? val : 4;
+	}
+
+	override function destroy() {
+		ChartingState.lastSong = songId;
+		ChartingState.lastSection = curSec;
+		super.destroy();
 	}
 }
 
