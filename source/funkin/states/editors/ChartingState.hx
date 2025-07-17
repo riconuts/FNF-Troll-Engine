@@ -1786,9 +1786,16 @@ class ChartingState extends MusicBeatState
 
 		//// get last accessible section within the song's length
 		songLengthSections = 0;
-		while (sectionStartTime(songLengthSections) < songLength)
-			songLengthSections++;
-		songLengthSections++;
+		while (true) {
+			var ss = sectionStartTime(songLengthSections);
+			if (ss < songLength) {
+				songLengthSections++;
+			}else {
+				trace(ss);
+				songLengthSections++;
+				break;
+			}
+		}
 		trace(songLengthSections);
 	}
 
@@ -2758,6 +2765,12 @@ class ChartingState extends MusicBeatState
 
 	function updateNoteSteps():Void
 	{
+		if (curSelectedNote == null) {
+			labelSusLength.text = '';
+			labelStrumTime.text = '';
+			return;
+		}
+
 		var strumStep:Float = Conductor.getStep(curSelectedNote.strumTime);
 		var sustainSteps:Float = 0;
 
@@ -3082,6 +3095,7 @@ class ChartingState extends MusicBeatState
 	{		
 		if (note.column > -1) {
 			curSelectedNote = note.chartData;
+			currentNoteType = note.noteType;
 			updateNoteUI();
 		}else {
 			curSelectedEvent = note.chartData;
