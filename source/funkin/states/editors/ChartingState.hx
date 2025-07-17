@@ -2241,6 +2241,9 @@ class ChartingState extends MusicBeatState
 			if (FlxG.keys.justPressed.Y) {
 				redo();
 			}
+			if (FlxG.keys.justPressed.S) {
+				saveLevel();
+			}
 		}
 
 		if(FlxG.keys.justPressed.Z && curZoom > 0 && !FlxG.keys.pressed.CONTROL) {
