@@ -1786,18 +1786,10 @@ class ChartingState extends MusicBeatState
 		inst.volume = 0.6;
 
 		//// get last accessible section within the song's length
-		songLengthSections = 0;
-		while (true) {
-			var ss = sectionStartTime(songLengthSections);
-			if (ss < songLength) {
-				songLengthSections++;
-			}else {
-				trace(ss);
-				songLengthSections++;
-				break;
-			}
-		}
-		trace(songLengthSections);
+		songLengthSections = 1;
+		while (getSectionStartTime(songLengthSections) < songLength)
+			songLengthSections++;
+		// Sometimes doesn't work ????????????????????????????????
 	}
 
 	override function getEvent(id:String, sender:Dynamic, data:Dynamic, ?params:Array<Dynamic>)
