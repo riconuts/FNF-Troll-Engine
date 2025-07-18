@@ -243,7 +243,6 @@ class TraditionalHUD extends CommonHUD
 				}
 			});
 		}
-		return false;
 	}
 
 	function statChanged(stat:String, val:Dynamic)

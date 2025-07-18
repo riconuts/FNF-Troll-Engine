@@ -398,8 +398,6 @@ class AdvancedHUD extends CommonHUD
 		}
 
 		refreshFCColour();
-		
-		return false;
 	}
 
 	override public function beatHit(beat:Int)

@@ -3281,12 +3281,12 @@ class PlayState extends MusicBeatState
 		callOnScripts("onDisplayComboPost", [combo]);
 	}
 
-	private function applyJudgmentData(judgeData:JudgmentData, diff:Float, ?bot:Bool = false){
+	private function applyJudgmentData(judgeData:JudgmentData, diff:Float, ?bot:Bool = false, ?show:Bool = true){
 		if(judgeData==null){
 			trace("You didnt give a valid JudgmentData to applyJudgmentData!");
 			return;
 		}
-		if(callOnScripts("onApplyJudgmentData", [judgeData, diff, bot]) == Globals.Function_Stop)
+		if(callOnScripts("onApplyJudgmentData", [judgeData, diff, bot, show]) == Globals.Function_Stop)
 			return;
 
 		stats.score += Math.floor(judgeData.score * playbackRate);
@@ -3315,37 +3315,27 @@ class PlayState extends MusicBeatState
 		
 		RecalculateRating();
 
-		if(hudSkinScript!=null)callScript(hudSkinScript, "onApplyJudgmentDataPost", [judgeData, diff, bot]);
-		callOnScripts("onApplyJudgmentDataPost", [judgeData, diff, bot]);
-	}
+		if (ClientPrefs.coloredCombos)
+		{
+			if (stats.judgements.get("bad") > 0 || stats.judgements.get("shit") > 0 || stats.comboBreaks > 0)
+				comboColor = 0xFFFFFFFF;
+			else if (stats.judgements.get("good") > 0)
+				comboColor = hud.judgeColours.get("good");
+			else if (stats.judgements.get("sick") > 0)
+				comboColor = hud.judgeColours.get("sick");
+			else if (stats.judgements.get("epic") > 0)
+				comboColor = hud.judgeColours.get("epic");
+		}
 
-	private function updateComboColor()
-		comboColor = ClientPrefs.coloredCombos ? getComboColor() : 0xFFFFFFFF;
+		if(hudSkinScript!=null)callScript(hudSkinScript, "onApplyJudgmentDataPost", [judgeData, diff, bot, show]);
+		callOnScripts("onApplyJudgmentDataPost", [judgeData, diff, bot, show]);
 
-	private function getComboColor() {
-		if (stats.judgements.get("bad") > 0 || stats.judgements.get("shit") > 0 || stats.comboBreaks > 0)
-			return 0xFFFFFFFF;
-		else if (stats.judgements.get("good") > 0)
-			return hud.judgeColours.get("good");
-		else if (stats.judgements.get("sick") > 0)
-			return hud.judgeColours.get("sick");
-		else if (stats.judgements.get("epic") > 0)
-			return hud.judgeColours.get("epic");
-		else
-			return 0xFFFFFFFF;
-	}
-
-	private function _noteJudged(judgeData:JudgmentData, note:Note, field:PlayField) {
-		updateComboColor();
-
-		if (ClientPrefs.showMS && !field.autoPlayed)
-			displayTiming(note.hitResult.hitDiff + ClientPrefs.ratingOffset, judgeData);
-
-		if (judgeData.hideJudge!=true)
-			displayJudgment(judgeData.internalName);
-		
-		if (judgeData.comboBehaviour != IGNORE)
-			displayCombo(judgeData.comboBehaviour == BREAK ? (stats.cbCombo > 1 ? -stats.cbCombo : 0) : stats.combo);
+		if(show){
+			if(judgeData.hideJudge!=true)
+				displayJudgment(judgeData.internalName);
+			if(judgeData.comboBehaviour != IGNORE)
+				displayCombo(judgeData.comboBehaviour == BREAK ? (stats.cbCombo > 1 ? -stats.cbCombo : 0) : stats.combo);
+		}
 	}
 
 	private function applyNoteJudgment(note:Note, bot:Bool = false):Null<JudgmentData>
@@ -3367,14 +3357,14 @@ class PlayState extends MusicBeatState
 		if (ret != null && ret != Globals.Function_Continue)
 			mutatedJudgeData = cast ret; // so you can return your own custom judgements or w/e
 
-		applyJudgmentData(mutatedJudgeData, note.hitResult.hitDiff);
+		applyJudgmentData(mutatedJudgeData, note.hitResult.hitDiff, bot, true);
 
 		callOnHScripts("onApplyNoteJudgmentPost", [note, mutatedJudgeData, bot]);
 		
 		return mutatedJudgeData;
 	}
 
-	private function applyJudgment(judge:Judgment, ?diff:Float = 0)
+	private function applyJudgment(judge:Judgment, ?diff:Float = 0, ?show:Bool = true)
 		applyJudgmentData(judgeManager.judgmentData.get(judge), diff);
 
 	private function judge(note:Note, field:PlayField=null) {
@@ -3389,14 +3379,19 @@ class PlayState extends MusicBeatState
 		if (note.noteSplashBehaviour == FORCED || judgeData.noteSplash && !note.noteSplashDisabled)
 			spawnNoteSplashOnNote(note, field);
 
+		var hitDiff = note.hitResult.hitDiff + ClientPrefs.ratingOffset;
 		stats.judged.push({
 			strumTime: note.strumTime, 
 			judgment: note.hitResult.judgment, 
-			hitDiff: note.hitResult.hitDiff + ClientPrefs.ratingOffset,
+			hitDiff: hitDiff
 		});
 
-		if (!hud.noteJudged(judgeData, note, field))
-			_noteJudged(judgeData, note, field);
+		if (ClientPrefs.showMS && (field==null || !field.autoPlayed))
+		{
+			displayTiming(hitDiff, judgeData);
+		}
+
+		hud.noteJudged(judgeData, note, field);
 	}
 
 	public var strumsBlocked:Array<Bool> = [];
