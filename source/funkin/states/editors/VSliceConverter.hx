@@ -1,9 +1,9 @@
 package funkin.states.editors;
 
+import funkin.data.StageData;
 import funkin.data.CharacterData;
 import haxe.Json;
 import haxe.io.Path;
-import funkin.objects.Stage.StageData;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
 import openfl.net.FileReference;
