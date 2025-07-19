@@ -16,20 +16,20 @@ function onCreateCutscene() {
 	game.add(blackScreen);
 
 	////
-	timeline.frameRate = 100; // fuck
+	timeline.frameRate = 10;
 	
-	timeline.once(110, function() {
+	timeline.once(11, function() {
 		game.remove(blackScreen);
 		blackScreen.destroy();
 		
 		FlxG.sound.play(Paths.sound('Lights_Turn_On'));
 	});
 	
-	timeline.once(180, function() {
+	timeline.once(18, function() {
 		game.camHUD.visible = true;
 	});
 	
-	timeline.easeProperties(180, 420, game.camGame, {zoom: game.defaultCamZoom}, FlxEase.quadInOut);
+	timeline.easeProperties(18, 42, game.camGame, {zoom: game.defaultCamZoom}, FlxEase.quadInOut).updateEveryFrame = true;
 	
-	timeline.finish(460);
+	timeline.finish(46);
 }
