@@ -20,7 +20,6 @@ import sys.FileSystem;
 import sys.io.Process;
 import haxe.io.BytesOutput;
 #end
-import hxvlc.util.Handle;
 
 using StringTools;
 
@@ -90,8 +89,10 @@ class Main extends Sprite
 	public function new() {
 		super();
 
-		Handle.init(["--no-audio-time-stretch"]); // Makes it so videos when slowed/sped up have their audio pitch up/down
+		#if hxvlc
+		hxvlc.util.Handle.init(["--no-audio-time-stretch"]); // Makes it so videos when slowed/sped up have their audio pitch up/down
 		// imo better than with time stretch but remove if thats what u prefer lol
+		#end
 				
 		////
 		#if sys
