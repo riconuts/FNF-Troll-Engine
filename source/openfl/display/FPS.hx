@@ -1,6 +1,8 @@
 package openfl.display;
 
+#if cpp
 import funkin.api.Memory;
+#end
 
 import flixel.util.FlxStringUtil;
 import flixel.FlxG;
@@ -14,9 +16,6 @@ import openfl.events.Event;
 import openfl.display._internal.stats.Context3DStats;
 import openfl.display._internal.stats.DrawCallContext;
 #end
-#if flash
-import openfl.Lib;
-#end
 
 /**
 	The FPS class provides an easy-to-use monitor to display
@@ -28,10 +27,8 @@ import openfl.Lib;
 #end
 class FPS extends TextField
 {
-	/**Allows the FPS counter to lie about your framerate because Lime sucks and framerates goes above whats desired**/
-	public var canLie:Bool = true;
 	/** The current frame rate, expressed using frames-per-second **/
-	public var currentFPS(default, null):Float = 0.0;
+	public var currentFPS(default, null):Int = 0;
 	/** The current state class name **/
 	public var currentState(default, null):String = "";
 	/** Whether to show a memory usage counter or not **/
@@ -60,9 +57,10 @@ class FPS extends TextField
 	function onGameResized(windowWidth, ?windowHeight)
 		align = align;
 
-	@:noCompletion private var cacheCount:Int;
-	@:noCompletion private var currentTime:Float;
-	@:noCompletion private var times:Array<Float>;
+	@:noCompletion private var cacheCount:Int = 0;
+	@:noCompletion private var currentTime:Float = 0;
+	@:noCompletion private var times:Array<Float> = [];
+	@:noCompletion private var lastTime:Float = 0;
 
 	public function new(x:Float = 10, y:Float = 10, color:Int = 0xFFFFFF)
 	{
@@ -71,26 +69,15 @@ class FPS extends TextField
 		this.x = x;
 		this.y = y;
 
-		this.background = true;
-		this.backgroundColor = 0x000000;
-
-		var textFormat = new TextFormat(null, 12, color);
-
-		embedFonts = false;
-		textFormat.font = "_sans";
-		defaultTextFormat = textFormat;
-
-		currentFPS = 0;
-		selectable = false;
 		mouseEnabled = false;
+		selectable = false;
+
+		background = true;
+		backgroundColor = 0x000000;
 
 		multiline = true;
-		text = "FPS: ";
-
-		////
-		cacheCount = 0;
-		currentTime = 0;
-		times = [];
+		embedFonts = false;
+		defaultTextFormat = new TextFormat("_sans", 12, color);
 
 		////
 		addEventListener(Event.ADDED_TO_STAGE, (e:Event)->{
@@ -110,13 +97,6 @@ class FPS extends TextField
 		});
 		*/
 
-		#if flash
-		addEventListener(Event.ENTER_FRAME, function(e){
-			var time = Lib.getTimer();
-			__enterFrame(time - currentTime);
-		});
-		#end
-
 		FlxG.signals.gameResized.add(onGameResized);
 
 		#if (debug && false)
@@ -126,10 +106,23 @@ class FPS extends TextField
 		#end
 	}
 
+	private static inline function get_memoryUsageString():String
+	{
+		#if cpp
+		return FlxStringUtil.formatBytes(Memory.getCurrentRSS()) + " / " + FlxStringUtil.formatBytes(Memory.getPeakRSS());
+		#else
+		return Std.string(openfl.system.System.totalMemoryNumber);
+		#end
+	}
+
 	// Event Handlers
 	@:noCompletion
-	private #if !flash override #end function __enterFrame(deltaTime:Float):Void
+	private override function __enterFrame(deltaTime:Float):Void
 	{
+		var nowTime = Main.getTime();
+		deltaTime = nowTime - lastTime;
+		lastTime = nowTime;
+
 		currentTime += deltaTime;
 		times.push(currentTime);
 
@@ -139,17 +132,15 @@ class FPS extends TextField
 		}
 
 		var currentCount = times.length;
-		currentFPS = Math.ffloor((currentCount + cacheCount) * 0.5);
-		if (currentFPS > FlxG.drawFramerate && canLie)
-			currentFPS = FlxG.drawFramerate;
+		currentFPS = Math.floor((currentCount + cacheCount) * 0.5);
 
 		if (currentCount != cacheCount)
 			cacheCount = currentCount;
 
-		text = 'FPS: $currentFPS';
+		var text:String = 'FPS: $currentFPS';
 		
 		if (showMemory)
-			text += ' • MEM: ' + FlxStringUtil.formatBytes(Memory.getCurrentRSS()) + " / " + FlxStringUtil.formatBytes(Memory.getPeakRSS());
+			text += ' • MEM: ' + get_memoryUsageString();
 
 		#if (debug && false)
 		text += '\nState: $currentState';
@@ -165,5 +156,7 @@ class FPS extends TextField
 		text += "\nstageDC: " + Context3DStats.contextDrawCalls(DrawCallContext.STAGE);
 		text += "\nstage3DDC: " + Context3DStats.contextDrawCalls(DrawCallContext.STAGE3D);
 		#end
+
+		this.text = text;
 	}
 }

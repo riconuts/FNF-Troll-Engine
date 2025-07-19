@@ -5,7 +5,6 @@ import funkin.modchart.Modifier;
 import flixel.math.FlxMath;
 import flixel.math.FlxAngle;
 import flixel.math.FlxPoint;
-import flixel.math.FlxMatrix;
 import flixel.util.FlxSort;
 import flixel.util.FlxDestroyUtil;
 import flixel.graphics.FlxGraphic;
@@ -108,12 +107,14 @@ class NoteField extends FieldBase
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.zIndex, Obj2.zIndex);
 	}
 
+	var lookupMap = new haxe.ds.ObjectMap<Dynamic, RenderObject>();
+
 	// does all the drawing logic, best not to touch unless you know what youre doing
 	override function preDraw()
 	{
 		drawQueue = [];
 		if (field == null) return;
-		if (!active || !exists) return;
+		if (!exists || !visible) return;
 		
 		curDecStep = Conductor.curDecStep;
 		curDecBeat = Conductor.curDecBeat;
@@ -147,7 +148,7 @@ class NoteField extends FieldBase
 		
 		for (daNote in field.spawnedNotes)
 		{
-			if (!daNote.alive || !daNote.visible)
+			if (!daNote.exists || !daNote.visible)
 				continue;
 
 			if (songSpeed != 0)
@@ -197,12 +198,10 @@ class NoteField extends FieldBase
 			}
 		}
 
-		var lookupMap = new haxe.ds.ObjectMap<Dynamic, RenderObject>();
-
 		// draw the receptors
 		for (obj in field.strumNotes)
 		{
-			if (!obj.alive || !obj.visible)
+			if (!obj.exists || !obj.visible)
 				continue;
 			// maybe add copyX and copyT to strums too???????
 
@@ -244,7 +243,7 @@ class NoteField extends FieldBase
 		// draw notesplashes
 		for (obj in field.grpNoteSplashes.members)
 		{
-			if (!obj.alive || !obj.visible)
+			if (!obj.exists || !obj.visible)
 				continue;
 
 			var pos = modManager.getPos(0, 0, curDecBeat, obj.column, modNumber, obj, this, perspectiveArrDontUse, obj.vec3Cache);
@@ -259,7 +258,7 @@ class NoteField extends FieldBase
 		// draw strumattachments
 		for (obj in field.strumAttachments.members)
 		{
-			if (!obj.alive || !obj.visible)
+			if (!obj.exists || !obj.visible)
 				continue;
 			var pos = modManager.getPos(0, 0, curDecBeat, obj.column, modNumber, obj, this, perspectiveArrDontUse, obj.vec3Cache);
 			var object = drawNote(obj, pos);
@@ -275,6 +274,8 @@ class NoteField extends FieldBase
 				["drawQueue" => drawQueue, "lookupMap" => lookupMap]); // lets you do custom rendering in scripts, if needed
 		// one example would be reimplementing Die Batsards' original bullet mechanic
 		// if you need an example on how this all works just look at the tap note drawing portion
+
+		lookupMap.clear();
 
 		// No longer required since its done in the manager
 		//drawQueue.sort(drawQueueSort);
@@ -299,8 +300,6 @@ class NoteField extends FieldBase
 		}
 
 	}
-
-	var matrix:FlxMatrix = new FlxMatrix();
 	
 	override function draw(){
 		// Drawing is handled by NotefieldManager now (maybe rename to NotefieldRenderer?)
@@ -597,7 +596,7 @@ class NoteField extends FieldBase
 	private var quad3 = new Vector3(); // bottom right
 	function drawNote(sprite:NoteObject, pos:Vector3, ?nextPos:Vector3):Null<RenderObject>
 	{
-		if (!sprite.visible || !sprite.alive)
+		if (!sprite.exists || !sprite.visible)
 			return null;
 
 		if (sprite.frame == null)

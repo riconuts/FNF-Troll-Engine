@@ -15,7 +15,12 @@ class BlendMode{}
 @:build(funkin.macros.ScriptingMacro.createEnumWrapper(flixel.util.FlxAxes))
 class FlxAxes {}
 
+#if (flixel < "6.0.0")
 typedef FlxTweenType = flixel.tweens.FlxTween; // lol
+#else
+@:build(funkin.macros.ScriptingMacro.createEnumWrapper(flixel.tweens.FlxTween.FlxTweenType))
+class FlxTweenType {}
+#end
 
 // stupidity
 class SowyColor
@@ -40,6 +45,14 @@ class SowyColor
 		return resultArray;
 	}
 
+	public static function fromRGBArray(ray:Array<Int>) {
+		return FlxColor.fromRGB(ray[0], ray[1], ray[2], ray.length > 3 ? ray[3] : 255);
+	}
+
+	public static function fromFloatArray(ray:Array<Float>) {
+		return FlxColor.fromRGBFloat(ray[0], ray[1], ray[2], ray.length > 3 ? ray[3] : 1.0);
+	}
+
 	// FlxColor.interpolate exists but im keeping this anyways
 	public static function lerp(from:FlxColor, to:FlxColor, ratio:Float)
 		return FlxColor.fromRGBFloat(FlxMath.lerp(from.redFloat, to.redFloat, ratio), FlxMath.lerp(from.greenFloat, to.greenFloat, ratio),
@@ -54,6 +67,9 @@ class SowyColor
 
 	public static function get_blue(color:FlxColor)
 		return color.blue;
+
+	public static function get_alpha(color:FlxColor)
+		return color.alpha;
 
 	public static function set_red(color:FlxColor, val:Int)
 	{
@@ -73,6 +89,12 @@ class SowyColor
 		return color;
 	}
 
+	public static function set_alpha(color:FlxColor, val:Int)
+	{
+		color.alpha = val;
+		return color;
+	}
+
 	public static function get_rgb(color:FlxColor)
 		return color.rgb;
 
@@ -84,6 +106,9 @@ class SowyColor
 
 	public static function get_blueFloat(color:FlxColor)
 		return color.blueFloat;
+
+	public static function get_alphaFloat(color:FlxColor)
+		return color.alphaFloat;
 
 	public static function set_redFloat(color:FlxColor, val:Float)
 	{
@@ -100,6 +125,12 @@ class SowyColor
 	public static function set_blueFloat(color:FlxColor, val:Float)
 	{
 		color.blueFloat = val;
+		return color;
+	}
+
+	public static function set_alphaFloat(color:FlxColor, val:Float)
+	{
+		color.alphaFloat = val;
 		return color;
 	}
 

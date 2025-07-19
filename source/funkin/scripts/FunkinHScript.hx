@@ -13,7 +13,7 @@ import funkin.states.PlayState;
 import funkin.states.MusicBeatState;
 import funkin.states.MusicBeatSubstate;
 
-import funkin.input.PlayerSettings;
+import funkin.input.Controls;
 import funkin.api.Windows;
 
 import flixel.FlxG;
@@ -48,13 +48,13 @@ class FunkinHScript extends FunkinScript
 		
 	}
 
-	inline public static function parseString(script:String, ?name:String = "Script")
+	inline public static function parseString(script:String, ?name:String = "Script"):Null<Expr>
 	{
 		parser.line = 1;
 		return parser.parseString(script, name);
 	}
 
-	inline public static function parseFile(file:String, ?name:String)
+	inline public static function parseFile(file:String, ?name:String):Null<Expr>
 		return parseString(Paths.getContent(file), (name == null ? file : name));
 
 	public static function blankScript(?name, ?additionalVars)
@@ -95,7 +95,7 @@ class FunkinHScript extends FunkinScript
 		}
 		catch(e:haxe.Exception) {
 			var msg = "Error parsing hscript! " + e.message;
-			trace(msg);
+			print(e.message);
 
 			#if desktop
 			var title = "Error on haxe script!";
@@ -324,8 +324,8 @@ class FunkinHScript extends FunkinScript
 
 	private function setFNFVars() {
 		// FNF-specific things
-		set("controls", PlayerSettings.player1.controls);
-		set("get_controls", () -> return PlayerSettings.player1.controls);
+		set("controls", Controls.firstActive);
+		set("get_controls", () -> return Controls.firstActive);
 		
 		set("Paths", funkin.Paths);
 		set("Conductor", funkin.Conductor);

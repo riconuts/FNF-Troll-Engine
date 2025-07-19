@@ -716,7 +716,7 @@ class PlayState extends MusicBeatState
 		Note.defaultNoteAnimNames = ['purple0', 'blue0', 'green0', 'red0'];
 		Note.defaultHoldAnimNames = ['purple hold piece', 'blue hold piece', 'green hold piece', 'red hold piece'];
 		Note.defaultTailAnimNames = ['purple hold end', 'blue hold end', 'green hold end', 'red hold end'];
-		Note.spriteScale = (4 / keyCount) * 0.7;
+		Note.spriteScale = (4 / (keyCount < 4 ? 4 : keyCount)) * 0.7;
 		Note.swagWidth = Note.spriteScale * 160;
 		/**
 		 * Note texture asset names
@@ -1433,34 +1433,35 @@ class PlayState extends MusicBeatState
 		callOnScripts('onModifierRegisterPost');
 		signals.onModifierRegisterPost.dispatch();
 
-		startedCountdown = true;
-		setOnScripts('startedCountdown', true);
-		callOnScripts('onCountdownStarted');
-		if (hudSkinScript != null)
-			hudSkinScript.call("onCountdownStarted");
-
 		callOnScripts("generateModchart"); // this is where scripts should generate modcharts from here on out lol
+
+		var skipCountdown:Bool = skipCountdown;
 
 		if (PlayState.startOnTime >= 500) {
 			trace('starting on time: $startOnTime');
 			startSong(PlayState.startOnTime, -500);
 			PlayState.startOnTime = 0;
-			return;
+			skipCountdown = true;
 		}
 		
-		if (skipCountdown)
-			return;
+		if (!skipCountdown) {
+			// Do the countdown.
+			curCountdown = new Countdown(this);
+			initCountdown(curCountdown);
+			curCountdown.start(Conductor.beatLength); // time is optional but here we are
 
-		// Do the countdown.
-		curCountdown = new Countdown(this);
-		resetCountdown(curCountdown);
-		curCountdown.start(Conductor.beatLength); // time is optional but here we are
+			var i = this.members.indexOf(this.notes);
+			(i==-1) ? this.add(curCountdown) : this.insert(i, curCountdown);
+		}
 
-		var i = this.members.indexOf(this.notes);
-		(i==-1) ? this.add(curCountdown) : this.insert(i, curCountdown);
+		startedCountdown = true;
+		setOnScripts('startedCountdown', true);
+		callOnScripts('onCountdownStarted');
+		if (hudSkinScript != null)
+			hudSkinScript.call("onCountdownStarted");
 	}
 
-	public function resetCountdown(countdown:Countdown):Void {
+	public function initCountdown(countdown:Countdown):Void {
 		if (countdown == null) return;
 		// I don't wanna break scripts so if you have a better way, do it
 		if (countdown.introAlts != introAlts) countdown.introAlts = introAlts;
@@ -2644,8 +2645,7 @@ class PlayState extends MusicBeatState
 		persistentUpdate = false;
 		pause();
 
-		if (FlxG.keys.pressed.SHIFT) ChartingState.curSec = curSection;
-		MusicBeatState.switchState(new ChartingState());
+		MusicBeatState.switchState(new ChartingState(SONG, FlxG.keys.pressed.SHIFT ? curSection : -1));
 	}
 
 	public var isDead:Bool = false;
@@ -3174,6 +3174,44 @@ class PlayState extends MusicBeatState
 		eventNotes = [];
 	}
 
+	private function displayTiming(hitDiff:Float, judgeData:JudgmentData) {		
+		FlxTween.cancelTweensOf(timingTxt);
+		FlxTween.cancelTweensOf(timingTxt.scale);
+		
+		timingTxt.text = '${FlxMath.roundDecimal(hitDiff, 2)}ms';
+		timingTxt.screenCenter();
+		timingTxt.x += ClientPrefs.comboOffset[4];
+		timingTxt.y -= ClientPrefs.comboOffset[5];
+
+		timingTxt.color = hud.judgeColours.get(judgeData.internalName) ?? 0xFF477947;
+
+		timingTxt.visible = true;
+		timingTxt.alpha = ClientPrefs.judgeOpacity;
+		timingTxt.y -= 8;
+		timingTxt.scale.set(1, 1);
+		
+		var time = (Conductor.stepLength);
+		FlxTween.tween(timingTxt, 
+			{y: timingTxt.y + 8}, 
+			0.1,
+			{onComplete: function(_){
+				if (ClientPrefs.simpleJudge){
+					FlxTween.tween(timingTxt.scale, {x: 0, y: 0}, time, {
+						ease: FlxEase.quadIn,
+						onComplete: (_) -> timingTxt.visible = false,
+						startDelay: time * 8
+					});
+				}else{
+					FlxTween.tween(timingTxt, {alpha: 0}, time, {
+						// ease: FlxEase.circOut,
+						onComplete: (_) -> timingTxt.visible = false,
+						startDelay: time * 8
+					});
+				}
+			}}
+		);
+	}
+
 	private function displayJudgment(image:String){
 		var r:Bool = false;
 		if(hudSkinScript!=null && callScript(hudSkinScript, "onDisplayJudgment", [image]) == Globals.Function_Stop)
@@ -3220,7 +3258,7 @@ class PlayState extends MusicBeatState
 		else {
 			spr.moves = true;
 			spr.acceleration.y = 550;
-			spr.velocity.set(FlxG.random.int(-10, 10), -FlxG.random.int(140, 175));
+			spr.velocity.y = -FlxG.random.int(140, 175);
 
 			spr.scale.copyFrom(ratingGroup.judgeTemplate.scale);
 			spr.tween = FlxTween.tween(spr.scale, {x: spr.scale.x, y: spr.scale.y}, 0.1, {
@@ -3311,7 +3349,7 @@ class PlayState extends MusicBeatState
 			{
 				numSpr.moves = true;
 				numSpr.acceleration.y = FlxG.random.int(200, 300);
-				numSpr.velocity.set(FlxG.random.float(-5, 5), -FlxG.random.int(140, 160));
+				numSpr.velocity.y = -FlxG.random.int(140, 160);
 
 				numSpr.scale.copyFrom(ratingGroup.comboTemplate.scale);
 				numSpr.updateHitbox();
@@ -3434,41 +3472,7 @@ class PlayState extends MusicBeatState
 
 		if (ClientPrefs.showMS && (field==null || !field.autoPlayed))
 		{
-			FlxTween.cancelTweensOf(timingTxt);
-			FlxTween.cancelTweensOf(timingTxt.scale);
-			
-			timingTxt.text = '${FlxMath.roundDecimal(hitDiff, 2)}ms';
-			timingTxt.screenCenter();
-			timingTxt.x += ClientPrefs.comboOffset[4];
-			timingTxt.y -= ClientPrefs.comboOffset[5];
-
-			timingTxt.color = hud.judgeColours.get(judgeData.internalName) ?? 0xFF477947;
-
-			timingTxt.visible = true;
-			timingTxt.alpha = ClientPrefs.judgeOpacity;
-			timingTxt.y -= 8;
-			timingTxt.scale.set(1, 1);
-			
-			var time = (Conductor.stepLength);
-			FlxTween.tween(timingTxt, 
-				{y: timingTxt.y + 8}, 
-				0.1,
-				{onComplete: function(_){
-					if (ClientPrefs.simpleJudge){
-						FlxTween.tween(timingTxt.scale, {x: 0, y: 0}, time, {
-							ease: FlxEase.quadIn,
-							onComplete: function(_){timingTxt.visible = false;},
-							startDelay: time * 8
-						});
-					}else{
-						FlxTween.tween(timingTxt, {alpha: 0}, time, {
-							// ease: FlxEase.circOut,
-							onComplete: function(_){timingTxt.visible = false;},
-							startDelay: time * 8
-						});
-					}
-				}}
-			);
+			displayTiming(hitDiff, judgeData);
 		}
 
 		hud.noteJudged(judgeData, note, field);
@@ -3944,7 +3948,7 @@ class PlayState extends MusicBeatState
 	public function createHScript(path:String, ?scriptName:String, ?ignoreCreateCall:Bool = false):FunkinHScript
 	{
 		var split = path.split("/");
-		var modName:String = split[0] == "content" ? split[1] : 'assets';
+		var modName:String = split[0] == Paths.contentFolderName ? split[1] : 'assets';
 		var script = FunkinHScript.fromFile(path, scriptName, [
 			"modName" => modName
 		], ignoreCreateCall != true);
@@ -4355,11 +4359,11 @@ class PlayStateSignals /*extends MusicBeatSignals*/
 	public var onBeatHit = new FlxTypedSignal<Int -> Void>();
 	public var onStepHit = new FlxTypedSignal<Int -> Void>();
 
-	public var goodNoteHit = new FlxTypedSignal<(Note, NoteField) -> Void>();
-	public var opponentNoteHit = new FlxTypedSignal<(Note, NoteField) -> Void>();
+	public var goodNoteHit = new FlxTypedSignal<(Note, PlayField) -> Void>();
+	public var opponentNoteHit = new FlxTypedSignal<(Note, PlayField) -> Void>();
 	
-	public var noteMiss = new FlxTypedSignal<(Note, NoteField) -> Void>();
-	public var noteMissPress = new FlxTypedSignal<(Note, NoteField) -> Void>();
+	public var noteMiss = new FlxTypedSignal<(Note, PlayField) -> Void>();
+	public var noteMissPress = new FlxTypedSignal<(Note, PlayField) -> Void>();
 
 	public var onPause = new FlxTypedSignal<Void -> Void>();
 	public var onResume = new FlxTypedSignal<Void -> Void>();

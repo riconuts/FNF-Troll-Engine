@@ -40,6 +40,7 @@ enum abstract SongSyncMode(String) to String {
 @:autoBuild(funkin.macros.ScriptingMacro.addScriptingCallbacks([
 	"create",
 	"update",
+	"draw",
 	"destroy",
 	"openSubState",
 	"closeSubState",
@@ -109,7 +110,7 @@ class MusicBeatState extends FlxUIState
 	}
 
 	inline function get_controls():Controls
-		return funkin.input.PlayerSettings.player1.controls;
+		return funkin.input.Controls.firstActive;
 
 	override function create() 
 	{

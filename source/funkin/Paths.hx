@@ -71,9 +71,9 @@ class Paths
 		'assets/music/freakyIntro.$SOUND_EXT',
 		'assets/music/freakyMenu.$SOUND_EXT',
 		'assets/music/breakfast.$SOUND_EXT',
-		'content/global/music/freakyIntro.$SOUND_EXT',
-		'content/global/music/freakyMenu.$SOUND_EXT',
-		'content/global/music/breakfast.$SOUND_EXT',
+		'$contentFolderName/global/music/freakyIntro.$SOUND_EXT',
+		'$contentFolderName/global/music/freakyMenu.$SOUND_EXT',
+		'$contentFolderName/global/music/breakfast.$SOUND_EXT',
 		'assets/images/Garlic-Bread-PNG-Images.$IMAGE_EXT'
 	];
 
@@ -575,8 +575,10 @@ class Paths
 	public static var contentMetadata:Map<String, ContentMetadata> = [];
 
 	#if MODS_ALLOWED
+	public static final contentFolderName:String = 'content';
+
 	inline static public function mods(key:String = '')
-		return 'content/$key';
+		return '$contentFolderName/$key';
 
 	inline static public function getGlobalContent(){
 		return globalContent;
@@ -642,10 +644,10 @@ class Paths
 		contentMetadata.clear();
 
 		contentDirectories.clear();
-		contentDirectories.set('', 'content');
+		contentDirectories.set('', contentFolderName);
 
-		iterateDirectory('content', (folderName) -> {
-			var folderPath = 'content/$folderName';
+		iterateDirectory(contentFolderName, (folderName) -> {
+			var folderPath = '$contentFolderName/$folderName';
 
 			if (isDirectory(folderPath) && !list.contains(folderName))
 			{

@@ -1,5 +1,6 @@
 package funkin.states;
 
+import flixel.util.FlxColor;
 import funkin.data.Song;
 import funkin.data.PauseMenuOption;
 import funkin.input.Controls;
@@ -91,7 +92,7 @@ class PauseSubState extends MusicBeatSubstate
 			menu.inputsActive = false;
 
 			var c = new Countdown(game); // https://tenor.com/view/letter-c-darwin-tawog-the-amazing-world-of-gumball-dance-gif-17949158
-			if (game != null) game.resetCountdown(c);
+			if (game != null) game.initCountdown(c);
 			c.onComplete = this.close;
 			c.cameras = this.cameras;
 			c.start(0.5);
@@ -107,6 +108,52 @@ class PauseSubState extends MusicBeatSubstate
 		});
 
 		if (!PlayState.isStoryMode) {
+			var songDifficulties = PlayState.song?.getCharts();
+			if (songDifficulties != null && songDifficulties.length > 1) {
+				newOpt("Change Difficulty", function(){
+					function playChart(chartId:String){
+						trace(chartId);
+						PlayState.difficultyName = chartId;
+						PlayState.SONG = PlayState.song.getSwagSong(chartId);
+						MusicBeatState.switchState(new PlayState());
+					}
+					
+					// lol not making a class for it
+					var ss = new FlxSubState(FlxColor.fromRGBFloat(0.0, 0.0, 0.0, 0.6));
+
+					var menu = new AlphabetMenu();
+					menu.controls = controls;
+					menu.cameras = cameras;
+					ss.add(menu);
+
+					for (chartId in songDifficulties) 
+						menu.addTextOption(chartId, {onAccept: playChart.bind(chartId)});
+
+					ss.add(new FlxSignalHolder(
+						FlxG.signals.postUpdate, 
+						function() {
+							if (controls.BACK) {
+								FlxG.sound.play(Paths.sound("cancelMenu"), 0.4);
+								ss.close();
+								return;
+							}
+						}
+					));
+
+					this.persistentUpdate = this.persistentDraw = false;
+					this.openSubState(ss);
+
+					//// ffffffffuuuuuuuuuuuuu
+					@:privateAccess
+					ss._bgSprite.cameras = cameras;
+
+					menu.inputsActive = false;
+					FlxG.signals.postUpdate.addOnce(()->{
+						menu.inputsActive = true;
+					});
+				});
+			}
+
 			newOpt("Change Modifiers", ()->{
 				this.persistentDraw = false;
 				this.openSubState(new GameplayChangersSubstate());

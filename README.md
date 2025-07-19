@@ -6,7 +6,9 @@
 
 This engine is a ****WORK IN PROGRESS****!!! 
 
-Expect bugs, breaking changes and no documentation!!!
+Expect bugs, breaking changes and little documentation!!! (You can look at the `example_content` folder or the [wiki](https://github.com/riconuts/FNF-Troll-Engine/wiki) for some hints)
+
+Also, despite starting out as a Psych fork, Troll and Psych are more different than alike nowadays
 
 ## Features:
 

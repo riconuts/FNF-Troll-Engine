@@ -315,19 +315,30 @@ class Note extends NoteObject
 			genScript = PlayState.instance.getHudSkinScript(value);
 
 		////
-		if (genScript == null){
-			texture = "";
+		var loaded:Bool;
+
+		if (genScript == null) {
+			loaded = false;
 
 		}else if (genScript.exists("setupNoteTexture")) {
 			genScript.executeFunc("setupNoteTexture", [this]);
+			loaded = true;
 
 		}else {
-			if (genScript.exists("textureSuffix"))
+			if (genScript.exists("textureSuffix")) {
 				texSuffix = genScript.get("textureSuffix");
-
-			if (genScript.exists("noteTexture"))
+			}
+			
+			if (genScript.exists("noteTexture")) {
 				texture = genScript.get("noteTexture");
+				loaded =  true;
+			}else {
+				loaded = false;
+			}
 		}
+		
+		if (!loaded)
+			texture = "";
 
 		return noteMod = value;
 	}
@@ -434,15 +445,14 @@ class Note extends NoteObject
 		this.beat = Conductor.getBeat(strumTime);
 		this.hitsoundDisabled = isSustainNote;
 
-		if (canQuant && ClientPrefs.noteSkin == 'Quants') {
-			if (isSustainNote && prevNote != null)
-				quant = prevNote.quant;
-			else
-				quant = getQuant(Conductor.getBeatSinceChange(strumTime));
-		}
+		this.canQuant = ClientPrefs.noteSkin == 'Quants';
 
-		baseAlpha = isSustainNote ? 0.6 : 1;
-		
+		if (this.isSustainNote && prevNote != null)
+			this.quant = prevNote.quant;
+		else
+			this.quant = getQuant(Conductor.getBeatSinceChange(this.strumTime));
+
+		this.baseAlpha = this.isSustainNote ? 0.6 : 1;
 
 		if ((FlxG.state is PlayState))
 			this.strumTime -= (cast FlxG.state).offset;
@@ -496,13 +506,12 @@ class Note extends NoteObject
 			var folderPath:String = (folder == '' ? '' : folder + '/') + split.join('/');
 			
 			var key:Null<String> = null;
-			var loadQuants:Bool = this.canQuant && ClientPrefs.noteSkin=='Quants';
 			this.isQuant = false;
 
 			inline function checkFolder(dir:String) {
 				final normalKey:String = dir + fileName;
 				var quantKey:Null<String> = null;
-				this.isQuant = loadQuants && (null != (quantKey = Note.getQuantTexture(dir, fileName, normalKey)));
+				this.isQuant = this.canQuant && (null != (quantKey = Note.getQuantTexture(dir, fileName, normalKey)));
 				key = (!this.isQuant && Paths.imageExists(normalKey)) ? normalKey : quantKey;
 			}
 

@@ -659,16 +659,16 @@ class FlxText extends FlxSprite
 		return LetterSpacing;
 	}
 
-	override function set_color(Color:FlxColor):Int
+	override function set_color(value:FlxColor):Int
 	{
-		if (_defaultFormat.color == Color.to24Bit())
+		if (_defaultFormat.color == value.rgb)
 		{
-			return Color;
+			return value;
 		}
-		_defaultFormat.color = Color.to24Bit();
-		color = Color;
+		_defaultFormat.color = value.rgb;
+		color = value;
 		updateDefaultFormat();
-		return Color;
+		return value;
 	}
 
 	inline function get_font():String
@@ -1125,7 +1125,7 @@ class FlxText extends FlxSprite
 	{
 		// Apply the default format
 		copyTextFormat(_defaultFormat, FormatAdjusted, false);
-		FormatAdjusted.color = UseBorderColor ? borderColor.to24Bit() : _defaultFormat.color;
+		FormatAdjusted.color = UseBorderColor ? borderColor.rgb : _defaultFormat.color;
 		textField.setTextFormat(FormatAdjusted);
 
 		// Apply other formats
@@ -1140,7 +1140,7 @@ class FlxText extends FlxSprite
 			{
 				var textFormat:TextFormat = formatRange.format.format;
 				copyTextFormat(textFormat, FormatAdjusted, false);
-				FormatAdjusted.color = UseBorderColor ? formatRange.format.borderColor.to24Bit() : textFormat.color;
+				FormatAdjusted.color = UseBorderColor ? formatRange.format.borderColor.rgb : textFormat.color;
 			}
 
 			textField.setTextFormat(FormatAdjusted, formatRange.range.start, Std.int(Math.min(formatRange.range.end, textField.text.length)));
@@ -1285,6 +1285,10 @@ enum abstract FlxTextAlign(String) from String
 	{
 		return switch (align)
 		{
+			// This `null` check is needed for HashLink, otherwise it will cast
+			// a `null` alignment to 0 which results in returning `CENTER`
+			// instead of the default `LEFT`.
+			case null: LEFT;
 			case TextFormatAlign.LEFT: LEFT;
 			case TextFormatAlign.CENTER: CENTER;
 			case TextFormatAlign.RIGHT: RIGHT;

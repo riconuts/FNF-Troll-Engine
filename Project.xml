@@ -83,6 +83,7 @@
 
 	<classpath path="source" />
 
+	<setenv name="HAXEPATH" value="./" />
 	<set name="BUILD_DIR" value="export/release" />
 	<set name="BUILD_DIR" value="export/debug" if="debug" />
 	<set name="BUILD_DIR" value="export/32bit" if="32bits" />
@@ -144,7 +145,7 @@
 		<haxedef name="openfl-enable-handle-error" />
 	</section>
 		
-	<define name="NO_PRECOMPILED_HEADERS" if="LUA_ALLOWED linux" />
+	<define name="NO_PRECOMPILED_HEADERS" if="linux" />
 
 	<!-- <haxedef name="no_traces" if="final"/> -->
 

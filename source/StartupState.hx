@@ -5,7 +5,7 @@ import funkin.states.MusicBeatState;
 import funkin.states.FadeTransitionSubstate;
 
 import funkin.data.Highscore;
-import funkin.input.PlayerSettings;
+import funkin.input.Controls;
 
 import flixel.FlxG;
 import flixel.FlxState;
@@ -51,7 +51,7 @@ class StartupState extends FlxTransitionableState
 		loaded = true;
 
 		Paths.init();
-		PlayerSettings.init();
+		Controls.init();
 		
 		ClientPrefs.initialize();
 		ClientPrefs.load();
