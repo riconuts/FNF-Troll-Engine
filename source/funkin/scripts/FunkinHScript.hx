@@ -48,13 +48,13 @@ class FunkinHScript extends FunkinScript
 		
 	}
 
-	inline public static function parseString(script:String, ?name:String = "Script")
+	inline public static function parseString(script:String, ?name:String = "Script"):Null<Expr>
 	{
 		parser.line = 1;
 		return parser.parseString(script, name);
 	}
 
-	inline public static function parseFile(file:String, ?name:String)
+	inline public static function parseFile(file:String, ?name:String):Null<Expr>
 		return parseString(Paths.getContent(file), (name == null ? file : name));
 
 	public static function blankScript(?name, ?additionalVars)
