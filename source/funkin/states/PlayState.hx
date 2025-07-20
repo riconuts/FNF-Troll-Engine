@@ -637,7 +637,13 @@ class PlayState extends MusicBeatState
 			throw 'No chart data available';
 		}
 		
-		songId = (song?.songId) ?? Paths.formatToSongPath(SONG.song);
+		if (song != null) {
+			songId = song.songId;
+			SONG.song = songId;
+		}else {
+			songId = Paths.formatToSongPath(SONG.song);
+			SONG.song = songId;
+		}
 		songHighscore = Highscore.getScore(songId, difficultyName);
 
 		offset = SONG.offset ?? 0.0;

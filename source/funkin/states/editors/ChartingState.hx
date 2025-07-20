@@ -430,7 +430,7 @@ class ChartingState extends MusicBeatState
 			notes: [],
 			events: [],
 		};
-		this.songId = (PlayState.song?.songId) ?? Paths.formatToSongPath(_song.song);
+		this.songId = Paths.formatToSongPath(_song.song);
 		onLoadMetadata();
 		
 		MusicBeatState.stopMenuMusic();
@@ -668,7 +668,7 @@ class ChartingState extends MusicBeatState
 
 		var reloadSongJson:FlxButton = new FlxButton(reloadSong.x, saveButton.y + 30, "Reload JSON", function()
 		{
-			openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, function(){loadJson(_song.song.toLowerCase()); }, null, options.ignoreWarnings));
+			openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, function(){loadJson(Paths.formatToSongPath(_song.song)); }, null, options.ignoreWarnings));
 		});
 
 		var loadAutosaveBtn:FlxButton = new FlxButton(reloadSongJson.x, reloadSongJson.y + 30, 'Load Autosave', function()
@@ -3246,14 +3246,15 @@ class ChartingState extends MusicBeatState
 		FlxG.save.flush();
 	}
 
-	function loadJson(song:String):Void
+	function loadJson(songId:String):Void
 	{
-		var daJson:SwagSong = ChartData.loadFromJson(song.toLowerCase(), song.toLowerCase());
+		var song = new Song(songId, Paths.currentModDirectory);
+		var daJson:SwagSong = song.getSwagSong();
 
 		if (daJson == null){
 			openSubState(new Prompt('An error ocurred while loading the JSON file', 0, null, null, false, "OK", "OK"));
 		}else{
-			PlayState.song = null;
+			PlayState.song = song;
 			PlayState.SONG = daJson;
 			MusicBeatState.resetState();
 		}
