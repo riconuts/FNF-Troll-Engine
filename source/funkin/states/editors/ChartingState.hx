@@ -2049,9 +2049,12 @@ class ChartingState extends MusicBeatState
 					}
 					else if (FlxG.keys.pressed.ALT)
 					{
-						selectNote(note);
-						curSelectedNote.noteType = currentNoteType;
-						updateGrid();
+						if (note.column > -1) {
+							curSelectedNote = note.chartData;
+							curSelectedNote.noteType = currentNoteType;
+							updateNoteUI();
+							updateGrid();
+						}
 					}
 					else
 					{
