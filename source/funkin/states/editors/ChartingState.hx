@@ -2868,10 +2868,10 @@ class ChartingState extends MusicBeatState
 				var theType:String = (typeInt == null) ? '?' : '$typeInt';
 
 				var daText:AttachedFlxText = new AttachedFlxText(0, 0, 100, theType, 24);
-				daText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				daText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, CENTER);
+				daText.setBorderStyle(FlxTextBorderStyle.OUTLINE, FlxColor.BLACK, 1);
 				daText.xAdd = -32;
 				daText.yAdd = 6;
-				daText.borderSize = 1;
 				curRenderedNoteType.add(daText);
 				daText.sprTracker = note;
 			}
@@ -2891,10 +2891,10 @@ class ChartingState extends MusicBeatState
 				if(note.eventLength > 1) text = note.eventLength + ' Events:\n' + note.eventName;
 
 				var daText:AttachedFlxText = new AttachedFlxText(0, 0, 400, text, 12);
-				daText.setFormat(Paths.font("vcr.ttf"), 12, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK);
+				daText.setFormat(Paths.font("vcr.ttf"), 12, FlxColor.WHITE, RIGHT);
+				daText.setBorderStyle(FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK, 1);
 				daText.xAdd = -410;
-				daText.borderSize = 1;
-				if(note.eventLength > 1) daText.yAdd += 8;
+				if (note.eventLength > 1) daText.yAdd = 8;
 				curRenderedNoteType.add(daText);
 				daText.sprTracker = note;
 
