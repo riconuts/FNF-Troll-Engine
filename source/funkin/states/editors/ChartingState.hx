@@ -389,21 +389,8 @@ class ChartingState extends MusicBeatState
 
 	public function new(data:SwagSong = null, section:Int = -1) {
 		super();
-		this._song = data;
-		this.curSec = (section >= 0) ? section : (lastSong == songId ? lastSection : 0);
-	}
 
-	override function create()
-	{
-		instance = this;
-		
-		FlxTransitionableState.skipNextTransOut = true;
-
-		persistentDraw = true;
-
-		PlayState.chartingMode = true;
-
-		this._song = PlayState.SONG ??= {
+		this._song = data ?? PlayState.SONG ?? {
 			song: 'Test',
 			bpm: 150.0,
 			speed: 1,
@@ -431,6 +418,26 @@ class ChartingState extends MusicBeatState
 			events: [],
 		};
 		this.songId = Paths.formatToSongPath(_song.song);
+
+		if (section < 0) {
+			this.curSec = (lastSong == songId) ? lastSection : 0;
+		}else {
+			this.curSec = section;
+		}
+	}
+
+	override function create()
+	{
+		updateSongPos = false;
+		
+		instance = this;
+		
+		FlxTransitionableState.skipNextTransOut = true;
+
+		persistentDraw = true;
+
+		PlayState.chartingMode = true;
+
 		onLoadMetadata();
 		
 		MusicBeatState.stopMenuMusic();
