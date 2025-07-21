@@ -343,10 +343,10 @@ class Paths
 	}
 	inline static public function getSparrowAtlas(key:String, ?library:String):FlxAtlasFrames
 	{
-		var xmlPath = getPath('images/$key.xml');
+		var rawXml = Paths.getContent(getPath('images/$key.xml'));
 		return FlxAtlasFrames.fromSparrow(
 			image(key, library),
-			Paths.exists(xmlPath) ? Paths.getContent(xmlPath) : xmlPath
+			rawXml != null ? Xml.parse(rawXml) : null
 		);
 	}
 
@@ -363,12 +363,9 @@ class Paths
 	public static function getShader(fragFile:String = null, vertFile:String = null, version:Int = 120):FlxRuntimeShader
 	{
 		try{
-			var fragPath:Null<String> = fragFile==null ? null : getShaderFragment(fragFile);
-			var vertPath:Null<String> = vertFile==null ? null : getShaderVertex(vertFile);
-
 			return new FlxRuntimeShader(
-				fragFile==null ? null : Paths.getContent(fragPath), 
-				vertFile==null ? null : Paths.getContent(vertPath),
+				fragFile==null ? null : Paths.getContent(getShaderFragment(fragFile)), 
+				vertFile==null ? null : Paths.getContent(getShaderVertex(vertFile)),
 				//version
 			);
 		}catch(e:Dynamic){
