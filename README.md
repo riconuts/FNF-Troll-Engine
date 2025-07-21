@@ -8,8 +8,6 @@ This engine is a ****WORK IN PROGRESS****!!!
 
 Expect bugs, breaking changes and little documentation!!! (You can look at the `example_content` folder or the [wiki](https://github.com/riconuts/FNF-Troll-Engine/wiki) for some hints)
 
-Also, despite starting out as a Psych fork, Troll and Psych are more different than alike nowadays
-
 ## Features:
 
  - Quant note skins
@@ -29,15 +27,15 @@ Also, despite starting out as a Psych fork, Troll and Psych are more different t
 
 ## Engine Credits / Special Thanks
 - [Nebula the Zorua](https://x.com/Nebula_Zorua) - Most engine stuff
-- [crowplexus](https://x.com/crowplexus) - Countdown class and hxdiscord_rpc implementation
+- [crowplexus](https://github.com/crowplexus) - Countdown class and hxdiscord_rpc implementation
 - [4mbr0s3_2](https://www.youtube.com/@4mbr0s3-2) - Modifier system inspiration
 - [SrtHero278](https://github.com/SrtHero278) - Notefield optimizations
 - [moxie-coder](https://github.com/moxie-coder) - Mac building and workflow help
 - [Vortex](https://github.com/Vortex2Oblivion) - Bunch of Linux and other little improvements
-- [Lat](https://x.com/latzephr) - Made the original Week 6 health bar and timer assets
+- [Lat](https://x.com/latzephr/status/1771139155881234576) - Original Week 6 Health bar and timer assets
 - [swordcube](https://bsky.app/profile/swordcube.bsky.social) - Pixel note splashes
 - [Gab](https://github.com/michisock) - We like him
-- [AllyTS](https://x.com/NewTioSans) - Made the Mine note texture
+- [AllyTS](https://x.com/NewTioSans) - Mine Note texture
 - [Psych Engine](https://github.com/ShadowMario/FNF-PsychEngine) - Dad Engine
 
 ## Original Funkin' team
