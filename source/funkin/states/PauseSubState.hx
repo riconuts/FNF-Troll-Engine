@@ -1,17 +1,18 @@
 package funkin.states;
 
-import flixel.util.FlxColor;
 import funkin.data.Song;
 import funkin.data.PauseMenuOption;
 import funkin.input.Controls;
 import funkin.objects.hud.Countdown;
 import funkin.states.options.OptionsSubstate;
+import funkin.states.PlayState.instance as game;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxCamera;
 import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
+import flixel.util.FlxColor;
 import flixel.util.FlxStringUtil;
 
 class PauseSubState extends MusicBeatSubstate
@@ -80,7 +81,6 @@ class PauseSubState extends MusicBeatSubstate
 				return;
 			}
 
-			var game = PlayState.instance;
 			if (game?.curCountdown?.finished == false) { // don't make a new countdown if there's already one in progress lol
 				this.close();
 				return;
@@ -104,7 +104,7 @@ class PauseSubState extends MusicBeatSubstate
 				Paths.clearStoredMemory();
 				Paths.clearUnusedMemory();
 			}
-			PlayState.instance.restartSong();
+			game.restartSong();
 		});
 
 		if (!PlayState.isStoryMode) {
@@ -135,7 +135,6 @@ class PauseSubState extends MusicBeatSubstate
 							if (controls.BACK) {
 								FlxG.sound.play(Paths.sound("cancelMenu"), 0.4);
 								ss.close();
-								return;
 							}
 						}
 					));
@@ -173,7 +172,7 @@ class PauseSubState extends MusicBeatSubstate
 					}
 				}
 
-				PlayState.instance.optionsChanged(changedOptions);
+				game.optionsChanged(changedOptions);
 				FlxG.mouse.visible = false;
 
 				closeSubState();
@@ -191,10 +190,10 @@ class PauseSubState extends MusicBeatSubstate
 
 		if (#if debug true #else PlayState.chartingMode #end) {
 			////
-			if (PlayState.instance.startedOnTime > 0) {
+			if (game.startedOnTime > 0) {
 				newOpt('Restart on last start time', ()->{
 					close();
-					PlayState.instance.skipToTime(PlayState.instance.startedOnTime);
+					game.skipToTime(game.startedOnTime);
 				});
 			}
 
@@ -209,12 +208,12 @@ class PauseSubState extends MusicBeatSubstate
 	
 			////
 			inline function getBotplayTxt()
-				return 'Botplay ${PlayState.instance.cpuControlled ? "ON" : "OFF"}';
+				return 'Botplay ${game.cpuControlled ? "ON" : "OFF"}';
 			
 			var opt = newOpt('Toggle botplay'); 
 			opt.displayName = getBotplayTxt();
 			opt.onAccept = ()->{
-				PlayState.instance.cpuControlled = !PlayState.instance.cpuControlled;
+				game.cpuControlled = !game.cpuControlled;
 				opt.text.set_text(getBotplayTxt());
 			};
 		}
@@ -224,7 +223,6 @@ class PauseSubState extends MusicBeatSubstate
 
 	private function getInfo():Array<String> {
 		var songInfo:Array<String> = [];
-		var game = PlayState.instance;
 
 		songInfo.push(game.displayedSong);
 
@@ -390,7 +388,7 @@ class PauseSubState extends MusicBeatSubstate
 class SkipTimeOption extends PauseMenuOption
 {
 	public var curTime:Float = Math.max(0, Conductor.songPosition);
-	public var songLength:Float = PlayState.instance.songLength;
+	public var songLength:Float = game.songLength;
 
 	private var controls:Controls;
 	private var holdTime:Float = 0.0;
@@ -402,14 +400,14 @@ class SkipTimeOption extends PauseMenuOption
 	override function select() {
 		@:privateAccess
 		this.controls = PauseSubState.instance.controls;
-		this.songLength = PlayState.instance.songLength;
+		this.songLength = game.songLength;
 
 		updateSkipTimeText();
 	}
 
 	override function accept() {
 		PauseSubState.instance.close();
-		PlayState.instance.skipToTime(curTime);
+		game.skipToTime(curTime);
 	}
 
 	override function unselect() {
