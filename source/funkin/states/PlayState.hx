@@ -3658,6 +3658,7 @@ class PlayState extends MusicBeatState
 		if(!endingSong) songMisses++;
 
 		breakCombo();
+		displayCombo(-stats.cbCombo);
 		
 		// i dont think this should reduce acc lol
 		//totalPlayed++;
