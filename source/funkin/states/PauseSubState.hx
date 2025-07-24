@@ -229,9 +229,12 @@ class PauseSubState extends MusicBeatSubstate
 		for (info in Song.getMetadataInfo(game.metadata))
 			songInfo.push(info);
 
-		songInfo.push("Difficulty: " + game.displayedDifficulty.toUpperCase());		
-		songInfo.push("Failed: " + PlayState.deathCounter); // i'd say blueballed but not every character blueballs + you straight up die in die batsards
-		// removed the practice clause cus its just nice to have the counter lol
+		songInfo.push("Difficulty: " + game.displayedDifficulty);
+		
+		if (game.practiceMode)
+			songInfo.push("PRACTICE MODE");
+		else
+			songInfo.push("Failed: " + PlayState.deathCounter); // i'd say blueballed but not every character blueballs + you straight up die in die batsards
 
 		return songInfo;
 	}
