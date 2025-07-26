@@ -431,8 +431,10 @@ class FreeplayState extends MusicBeatState
 
 	override public function destroy()
 	{
-		lastSelectedIdx = menu.curSelected;
-		lastSelectedChart = curChartId;
+		if (menu != null) {
+			lastSelectedIdx = menu.curSelected;
+			lastSelectedChart = curChartId;
+		}
 		
 		super.destroy();
 	}
