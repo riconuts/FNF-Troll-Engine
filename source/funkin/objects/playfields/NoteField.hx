@@ -214,18 +214,7 @@ class NoteField extends FieldBase
 			lookupMap.set(obj, object);
 			drawQueue.push(object);
 		}
-
-		// draw tap notes
-		for (note in taps)
-		{
-			var pos = notePos.get(note);
-			var object = drawNote(note, pos, nextNotePos.get(note));
-			if (object == null)
-				continue;
-			lookupMap.set(note, object);
-			drawQueue.push(object);
-		}
-
+		
 		// draw hold notes (credit to 4mbr0s3 2)
 		for (note in holds)
 		{
@@ -239,6 +228,17 @@ class NoteField extends FieldBase
 			lookupMap.set(note, object);
 			drawQueue.push(object);
 		}
+
+		// draw tap notes
+		for (note in taps) {
+			var pos = notePos.get(note);
+			var object = drawNote(note, pos, nextNotePos.get(note));
+			if (object == null)
+				continue;
+			lookupMap.set(note, object);
+			drawQueue.push(object);
+		}
+
 
 		// draw notesplashes
 		for (obj in field.grpNoteSplashes.members)
