@@ -188,6 +188,7 @@ class TitleState extends MusicBeatState
 	var titleTimer:Float = 0;
 
 	function generateSequence() {
+		Conductor.changeBPM(102);
 		// this could prob be replaced with a json, yaml or even a whole "TitleSequence" script?? :shrug:
 
 		var ngSpr = new FlxSprite(0, FlxG.height * 0.52, Paths.image('newgrounds_logo'));
