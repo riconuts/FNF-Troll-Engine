@@ -1,5 +1,6 @@
 package funkin.states;
 
+import funkin.data.MusicData;
 import flixel.math.FlxMath;
 import funkin.input.Controls;
 import flixel.addons.transition.FlxTransitionableState;
@@ -349,6 +350,24 @@ class MusicBeatState extends FlxUIState
 			MusicBeatState.menuVox.stop();
 			MusicBeatState.menuVox.destroy();
 			MusicBeatState.menuVox = null;
+		}
+	}
+
+	public static function playMusic(key:String, volume:Float = 1, looped:Bool = true) {
+		MusicBeatState.stopMenuMusic();
+		
+		var md = MusicData.fromName(key);
+		if (md != null) {
+			FlxG.sound.music = {
+				var snd = md.makeFlxSound();
+				snd.volume = volume;
+				snd.looped = looped;
+				snd.play();
+			}
+			Conductor.changeBPM(md.bpm);
+			Conductor.songPosition = FlxG.sound.music.time;
+		}else {
+			FlxG.sound.playMusic(Paths.music(key), volume, looped);
 		}
 	}
 

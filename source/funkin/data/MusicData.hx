@@ -11,11 +11,10 @@ class MusicData
 	/** At which point to stop playing the sound, in milliseconds. If not set / null, the sound completes normally. **/
 	public var endTime:Null<Float>;
 
-	public function new(path:String, ?looped:Bool, ?loopTime:Float, ?endTime:Float) {
+	public var bpm:Float;
+
+	public function new(path:String) {
 		this.path = path;
-		this.looped = looped==true;
-		this.loopTime = loopTime;
-		this.endTime = endTime;
 	}
 
 	public function makeFlxSound():FlxSound {
@@ -29,13 +28,7 @@ class MusicData
 	}
 
 	////
-	public static function fromPath(filePath:String):Null<MusicData> 
-	{
-		var jsonPath:String = '$filePath.json';
-		if (!Paths.exists(jsonPath))
-			return null;
-		
-		var soundPath:String = '$filePath.${Paths.SOUND_EXT}';
+	public static function fromFilePaths(soundPath:String, jsonPath:String):Null<MusicData> {
 		if (!Paths.exists(soundPath))
 			return null;
 
@@ -43,14 +36,24 @@ class MusicData
 		if (jsonData == null)
 			return null;
 		
-		return new MusicData(soundPath, jsonData.looped, jsonData.loopTime, jsonData.endTime);
+		var md = new MusicData(soundPath);
+		md.looped = jsonData.looped!=false;
+		md.loopTime = jsonData.loopTime;
+		md.endTime = jsonData.endTime;
+		md.bpm = jsonData.bpm ?? 100;
+		return md;
 	}
 
 	public static function fromName(name:String):Null<MusicData>
 	{
-		var bp:String = 'music/$name';
-		var jsonPath = Paths.getPath('$bp.json');
-		return Paths.exists(jsonPath) ? fromPath(jsonPath.substr(0, jsonPath.length - 5)) : null;
+		var soundPath:String = Paths.getPath('music/$name.${Paths.SOUND_EXT}');
+		var jsonPath:String = {
+			var p = new haxe.io.Path(soundPath);
+			p.ext = 'json';
+			p.toString();
+		}
+
+		return fromFilePaths(soundPath, jsonPath);
 	}
 }
 

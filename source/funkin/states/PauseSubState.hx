@@ -1,5 +1,6 @@
 package funkin.states;
 
+import funkin.data.MusicData;
 import funkin.data.Song;
 import funkin.data.PauseMenuOption;
 import funkin.input.Controls;
@@ -350,29 +351,43 @@ class PauseSubState extends MusicBeatSubstate
 
 	private var pauseMusic:FlxSound;
 	private function playMusic(){
-		////
-		pauseMusic = new FlxSound();
-		pauseMusic.context = MUSIC;
-
-		var songName:String = songName ?? 'Breakfast';
-		if (songName != 'None') {
-			songName = Paths.formatToSongPath(songName);
-			pauseMusic.loadEmbedded(Paths.music(songName), true, true);
-			
-			var loopTimePath = new haxe.io.Path(Paths.soundPath("music", songName));
-			loopTimePath.file += "-loopTime";
-			loopTimePath.ext = "txt";
-
-			var loopTime:Float = Std.parseFloat(Paths.getContent(loopTimePath.toString()));
-			if (!Math.isNaN(loopTime))
-				pauseMusic.loopTime = loopTime;
-		}
+		pauseMusic = null;
 		
-		pauseMusic.volume = 0;
-		pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length* 0.5)));
-		pauseMusic.fadeIn(50, 0, 0.5);
+		var songName:String = songName ?? 'Breakfast';
+		if (songName == 'None') return;
 
-		FlxG.sound.list.add(pauseMusic);
+		songName = Paths.formatToSongPath(songName);
+
+		var md = MusicData.fromName(songName);
+		if (md != null) {
+			pauseMusic = md.makeFlxSound();
+		}else {
+			var sndPath = Paths.soundPath("music", songName);
+			if (Paths.exists(sndPath)) {
+				var loopTimePath = new haxe.io.Path(sndPath);
+				loopTimePath.file += "-loopTime";
+				loopTimePath.ext = "txt";
+
+				var loopTime:Null<String> = Paths.getContent(loopTimePath.toString());
+				var loopTime:Float = (loopTime == null) ? 0 : Std.parseFloat(loopTime);
+				if (Math.isNaN(loopTime)) loopTime = 0;
+				
+				pauseMusic = new FlxSound();
+				pauseMusic.context = MUSIC;
+				pauseMusic.loadEmbedded(Paths.returnSound(sndPath));
+				pauseMusic.loopTime = loopTime;
+				pauseMusic.looped = true;
+				FlxG.sound.list.add(pauseMusic);
+			}
+		}
+
+		if (pauseMusic != null) {
+			pauseMusic.volume = 0;
+			pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length * 0.5)));
+			pauseMusic.fadeIn(50, 0, 0.5);
+		}else {
+			trace('Pause music not found: $songName');
+		}
 	}
 
 	var prevTimeScale:Float;
