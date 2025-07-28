@@ -2114,7 +2114,7 @@ class ChartingState extends MusicBeatState
 
 		if (!options.noAutoScroll) {
 			if (Conductor.songPosition >= songLength) {
-				trace('SONG OVERFLOW: ${Conductor.songPosition} / $songLength');
+				//trace('Went past song duration: (${Conductor.songPosition} / $songLength), going back to first section');
 				changeSection(0, true);
 			}
 			else if (Conductor.songPosition < 0) {
