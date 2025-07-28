@@ -47,6 +47,7 @@ class Level {
 		level.name = json?.name ?? "NAME DOESNT EXIST IDIOT";
 		level.asset = json?.asset ?? "storymenu/titles/week1";
 		level.props = json?.props ?? level.props;
+		level.appearsInStory = json?.appearsInStory ?? true;
 		level.index = json?.index ?? index;
 		level.bgColor = CoolUtil.colorFromString(json?.bgColor ?? "#F9CF51");
 
@@ -72,6 +73,7 @@ class Level {
 	public var songs:Array<BaseSong> = [];
 	public var difficulties:Array<String> = ["easy", "normal", "hard"];
 	public var props:Array<LevelPropData> = [];
+	public var appearsInStory:Bool = true;
 
 	/**
 	 * Returns a file path to the title asset
@@ -148,7 +150,7 @@ class Level {
 	**/
 	public function isVisible():Bool
 	{
-		return true;
+		return appearsInStory;
 	}
 
 
