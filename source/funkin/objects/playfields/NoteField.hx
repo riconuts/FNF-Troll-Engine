@@ -114,7 +114,7 @@ class NoteField extends FieldBase
 	{
 		drawQueue = [];
 		if (field == null) return;
-		if (!exists || !visible) return;
+		if ((!exists || !visible) && !forcePreDraw) return;
 		
 		curDecStep = Conductor.curDecStep;
 		curDecBeat = Conductor.curDecBeat;
@@ -301,10 +301,8 @@ class NoteField extends FieldBase
 
 	}
 	
-	override function draw(){
-		// Drawing is handled by NotefieldManager now (maybe rename to NotefieldRenderer?)
-		return;
-	}
+	override function draw()return;
+	
 
 	function getPoints(hold:Note, ?wid:Float, speed:Float, vDiff:Float, diff:Float, spiralHolds:Bool = false, ?lookAhead:Float = 1):Array<Vector3>
 	{ // stolen from schmovin'

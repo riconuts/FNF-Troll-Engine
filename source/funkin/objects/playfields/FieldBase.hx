@@ -26,6 +26,8 @@ class RenderObject {
 class FieldBase extends FlxObject {
 	public function preDraw()throw new NotImplementedException();
 
+	public var forcePreDraw:Bool = false;
+	
 	public var tryForceHoldsBehind:Bool = true; // Field tries to push holds behind receptors
 
 	public var isProxy:Bool = false; // dumb and hardcoded but oh well

@@ -70,7 +70,7 @@ class NotefieldRenderer extends FlxBasic {
 
 		// Get all the drawing stuff from the fields
 		for(field in members){
-			if (!field.exists || !field.visible)
+			if ((!field.exists || !field.visible) && !field.forcePreDraw) // maybe rename forcePreDraw to something that makes more sense (i.e forceDrawQueuing or some shit)
 				continue; // Ignore it
 
 			field.preDraw(); // Collects all the drawing information
