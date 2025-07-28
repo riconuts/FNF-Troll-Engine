@@ -114,7 +114,7 @@ class NoteField extends FieldBase
 	{
 		drawQueue = [];
 		if (field == null) return;
-		if (!exists || !visible) return;
+		if ((!exists || !visible) && !forcePreDraw) return;
 		
 		curDecStep = Conductor.curDecStep;
 		curDecBeat = Conductor.curDecBeat;
@@ -214,18 +214,7 @@ class NoteField extends FieldBase
 			lookupMap.set(obj, object);
 			drawQueue.push(object);
 		}
-
-		// draw tap notes
-		for (note in taps)
-		{
-			var pos = notePos.get(note);
-			var object = drawNote(note, pos, nextNotePos.get(note));
-			if (object == null)
-				continue;
-			lookupMap.set(note, object);
-			drawQueue.push(object);
-		}
-
+		
 		// draw hold notes (credit to 4mbr0s3 2)
 		for (note in holds)
 		{
@@ -239,6 +228,17 @@ class NoteField extends FieldBase
 			lookupMap.set(note, object);
 			drawQueue.push(object);
 		}
+
+		// draw tap notes
+		for (note in taps) {
+			var pos = notePos.get(note);
+			var object = drawNote(note, pos, nextNotePos.get(note));
+			if (object == null)
+				continue;
+			lookupMap.set(note, object);
+			drawQueue.push(object);
+		}
+
 
 		// draw notesplashes
 		for (obj in field.grpNoteSplashes.members)
@@ -301,10 +301,8 @@ class NoteField extends FieldBase
 
 	}
 	
-	override function draw(){
-		// Drawing is handled by NotefieldManager now (maybe rename to NotefieldRenderer?)
-		return;
-	}
+	override function draw()return;
+	
 
 	function getPoints(hold:Note, ?wid:Float, speed:Float, vDiff:Float, diff:Float, spiralHolds:Bool = false, ?lookAhead:Float = 1):Array<Vector3>
 	{ // stolen from schmovin'
