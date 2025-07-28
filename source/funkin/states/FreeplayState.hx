@@ -63,6 +63,11 @@ class FreeplayState extends MusicBeatState
 			var songIdMap:Map<String, Bool> = [];
 
 			inline function sowy(songId:String) {
+				// weird old tgt shit
+				var splitted:Array<String> = songId.split(":");
+				if (splitted.length > 1)
+					songId = splitted[0];
+				
 				if (!songIdMap.exists(songId)) {
 					songIdMap.set(songId, true);
 					list.push(new Song(songId, contentId));
@@ -447,8 +452,10 @@ class FreeplayState extends MusicBeatState
 
 	override public function destroy()
 	{
-		lastSelectedIdx = menu.curSelected;
-		lastSelectedChart = curChartId;
+		if (menu != null) {
+			lastSelectedIdx = menu.curSelected;
+			lastSelectedChart = curChartId;
+		}
 		
 		super.destroy();
 	}

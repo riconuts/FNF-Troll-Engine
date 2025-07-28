@@ -389,23 +389,8 @@ class ChartingState extends MusicBeatState
 
 	public function new(data:SwagSong = null, section:Int = -1) {
 		super();
-		this._song = data;
-		this.curSec = (section >= 0) ? section : (lastSong == songId ? lastSection : 0);
-	}
 
-	override function create()
-	{
-		updateSongPos = false;
-		
-		instance = this;
-		
-		FlxTransitionableState.skipNextTransOut = true;
-
-		persistentDraw = true;
-
-		PlayState.chartingMode = true;
-
-		this._song = PlayState.SONG ??= {
+		this._song = data ?? PlayState.SONG ?? {
 			song: 'Test',
 			bpm: 150.0,
 			speed: 1,
@@ -432,7 +417,23 @@ class ChartingState extends MusicBeatState
 			notes: [],
 			events: [],
 		};
-		this.songId = (PlayState.song?.songId) ?? Paths.formatToSongPath(_song.song);
+		this.songId = Paths.formatToSongPath(_song.song);
+
+		if (section < 0) {
+			this.curSec = (lastSong == songId) ? lastSection : 0;
+		}else {
+			this.curSec = section;
+		}
+	}
+
+	override function create()
+	{
+		instance = this;
+		
+		FlxTransitionableState.skipNextTransOut = true;
+
+		persistentDraw = true;
+
 		onLoadMetadata();
 		
 		MusicBeatState.stopMenuMusic();
@@ -670,7 +671,7 @@ class ChartingState extends MusicBeatState
 
 		var reloadSongJson:FlxButton = new FlxButton(reloadSong.x, saveButton.y + 30, "Reload JSON", function()
 		{
-			openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, function(){loadJson(_song.song.toLowerCase()); }, null, options.ignoreWarnings));
+			openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, function(){loadJson(Paths.formatToSongPath(_song.song)); }, null, options.ignoreWarnings));
 		});
 
 		var loadAutosaveBtn:FlxButton = new FlxButton(reloadSongJson.x, reloadSongJson.y + 30, 'Load Autosave', function()
@@ -2044,9 +2045,12 @@ class ChartingState extends MusicBeatState
 					}
 					else if (FlxG.keys.pressed.ALT)
 					{
-						selectNote(note);
-						curSelectedNote.noteType = currentNoteType;
-						updateGrid();
+						if (note.column > -1) {
+							curSelectedNote = note.chartData;
+							curSelectedNote.noteType = currentNoteType;
+							updateNoteUI();
+							updateGrid();
+						}
 					}
 					else
 					{
@@ -2870,10 +2874,10 @@ class ChartingState extends MusicBeatState
 				var theType:String = (typeInt == null) ? '?' : '$typeInt';
 
 				var daText:AttachedFlxText = new AttachedFlxText(0, 0, 100, theType, 24);
-				daText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+				daText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, CENTER);
+				daText.setBorderStyle(FlxTextBorderStyle.OUTLINE, FlxColor.BLACK, 1);
 				daText.xAdd = -32;
 				daText.yAdd = 6;
-				daText.borderSize = 1;
 				curRenderedNoteType.add(daText);
 				daText.sprTracker = note;
 			}
@@ -2893,10 +2897,10 @@ class ChartingState extends MusicBeatState
 				if(note.eventLength > 1) text = note.eventLength + ' Events:\n' + note.eventName;
 
 				var daText:AttachedFlxText = new AttachedFlxText(0, 0, 400, text, 12);
-				daText.setFormat(Paths.font("vcr.ttf"), 12, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK);
+				daText.setFormat(Paths.font("vcr.ttf"), 12, FlxColor.WHITE, RIGHT);
+				daText.setBorderStyle(FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK, 1);
 				daText.xAdd = -410;
-				daText.borderSize = 1;
-				if(note.eventLength > 1) daText.yAdd += 8;
+				if (note.eventLength > 1) daText.yAdd = 8;
 				curRenderedNoteType.add(daText);
 				daText.sprTracker = note;
 
@@ -3248,14 +3252,15 @@ class ChartingState extends MusicBeatState
 		FlxG.save.flush();
 	}
 
-	function loadJson(song:String):Void
+	function loadJson(songId:String):Void
 	{
-		var daJson:SwagSong = ChartData.loadFromJson(song.toLowerCase(), song.toLowerCase());
+		var song = new Song(songId, Paths.currentModDirectory);
+		var daJson:SwagSong = song.getSwagSong();
 
 		if (daJson == null){
 			openSubState(new Prompt('An error ocurred while loading the JSON file', 0, null, null, false, "OK", "OK"));
 		}else{
-			PlayState.song = null;
+			PlayState.song = song;
 			PlayState.SONG = daJson;
 			MusicBeatState.resetState();
 		}

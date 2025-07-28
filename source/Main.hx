@@ -133,8 +133,8 @@ class Main extends Sprite
 		}
 		#end
 
-		final screenWidth:Int = stage.window.width;
-		final screenHeight:Int = stage.window.height;
+		final screenWidth = stage.window.display.bounds.width;
+		final screenHeight = stage.window.display.bounds.height;
 
 		if (adjustGameSize) {
 			//// Readjust the game size for smaller screens

@@ -680,7 +680,13 @@ class PlayState extends MusicBeatState
 			throw 'No chart data available';
 		}
 		
-		songId = (song?.songId) ?? Paths.formatToSongPath(SONG.song);
+		if (song != null) {
+			songId = song.songId;
+			SONG.song = songId;
+		}else {
+			songId = Paths.formatToSongPath(SONG.song);
+			SONG.song = songId;
+		}
 		songHighscore = Highscore.getScore(songId, difficultyName);
 
 		offset = SONG.offset ?? 0.0;
@@ -3334,7 +3340,7 @@ class PlayState extends MusicBeatState
 	
 						var stepDur = (Conductor.stepLength);
 						numSpr.tween = FlxTween.tween(numSpr, {alpha: 0.0}, stepDur, {
-							startDelay: Math.min((stepDur * 8) - 0.1, 0.0),
+							startDelay: Math.max((stepDur * 8) - 0.1, 0.0),
 							ease: FlxEase.quadIn,
 							onComplete: (tween:FlxTween) -> numSpr.kill()
 						});
@@ -3585,7 +3591,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		callOnScripts('onKeyRelease', [column]);
+		callOnScripts('onKeyRelease', [column, player]);
 	}
 
 	private function getColumnFromKey(key:FlxKey):Int {
@@ -3739,6 +3745,7 @@ class PlayState extends MusicBeatState
 		if(!endingSong) songMisses++;
 
 		breakCombo();
+		displayCombo(-stats.cbCombo);
 		
 		// i dont think this should reduce acc lol
 		//totalPlayed++;

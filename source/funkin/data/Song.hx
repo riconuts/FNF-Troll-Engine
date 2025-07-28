@@ -247,6 +247,12 @@ class Song extends BaseSong
 				}
 			});
 
+			if (filePaths.length == 0){
+				trace('$songPath has no charts! WHAT THE FUCK??');
+				trace('Make sure $songId is formatted correctly lol');
+				return [];
+			}
+
 			var ALL_FILES_DETECTED_FORMAT = FormatDetector.findFormat(filePaths);
 			if (ALL_FILES_DETECTED_FORMAT == FNF_VSLICE) {
 				var chartsFilePath:String = getSongFile('$songId-chart.json');
@@ -258,7 +264,7 @@ class Song extends BaseSong
 				for (i in 0...filePaths.length) {
 					var filePath:String = filePaths[i];
 					var fileFormat:Format = FormatDetector.findFormat(filePath);
-					//trace(filePath, fileFormat);
+					trace(filePath, fileFormat);
 					
 					var instance = FormatDetector.createFormatInstance(fileFormat);
 					if (instance.formatMeta.supportsDiffs) {
