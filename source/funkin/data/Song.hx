@@ -253,7 +253,16 @@ class Song extends BaseSong
 				return [];
 			}
 
-			var ALL_FILES_DETECTED_FORMAT = FormatDetector.findFormat(filePaths);
+			// Should probably return a Format.UNKNOWN or some shit instead of ERRORING
+			// but o well
+			var ALL_FILES_DETECTED_FORMAT = Format.FNF_LEGACY;
+			try {
+				ALL_FILES_DETECTED_FORMAT = FormatDetector.findFormat(filePaths);
+			}
+			catch(e:Dynamic){
+				return [];
+			}
+
 			if (ALL_FILES_DETECTED_FORMAT == FNF_VSLICE) {
 				var chartsFilePath:String = getSongFile('$songId-chart.json');
 				var metadataPath:String = getSongFile('$songId-metadata.json');
