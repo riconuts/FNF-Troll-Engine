@@ -3256,7 +3256,7 @@ class PlayState extends MusicBeatState
 	
 						var stepDur = (Conductor.stepLength);
 						numSpr.tween = FlxTween.tween(numSpr, {alpha: 0.0}, stepDur, {
-							startDelay: Math.min((stepDur * 8) - 0.1, 0.0),
+							startDelay: Math.max((stepDur * 8) - 0.1, 0.0),
 							ease: FlxEase.quadIn,
 							onComplete: (tween:FlxTween) -> numSpr.kill()
 						});
@@ -3507,7 +3507,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		callOnScripts('onKeyRelease', [column]);
+		callOnScripts('onKeyRelease', [column, player]);
 	}
 
 	private function getColumnFromKey(key:FlxKey):Int {
