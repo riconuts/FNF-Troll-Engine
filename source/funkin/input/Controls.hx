@@ -144,6 +144,9 @@ class Controls {
 	public function checkKey(id:String, state:FlxInputState):Bool {
 		if (keyboard != null && keyBinds.exists(id)) {
 			for (keyCode in keyBinds.get(id)) {
+				if(keyCode == NONE)
+					continue;
+
 				if (keyboard.checkStatus(keyCode, state)) {
 					return true;
 				}
@@ -155,6 +158,9 @@ class Controls {
 	public function checkButton(id:String, state:FlxInputState):Bool {
 		if (gamepad != null && gamepad.connected && buttonBinds.exists(id)) {
 			for (buttonCode in buttonBinds.get(id)) {
+				if (buttonCode == NONE)
+					continue;
+				
 				if (gamepad.checkStatus(buttonCode, state)) {
 					return true;
 				}
