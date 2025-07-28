@@ -252,8 +252,13 @@ class Song extends BaseSong
 			}else {
 				for (i in 0...filePaths.length) {
 					var filePath:String = filePaths[i];
-					var fileFormat:Format = FormatDetector.findFormat(filePath);
-					trace(filePath, fileFormat);
+					var fileFormat: Format = Format.FNF_LEGACY;
+					try {
+						fileFormat = FormatDetector.findFormat(filePath);
+					} catch(e: Dynamic){
+						trace("Couldn't find format probably?? Defaulting to FNF Legacy");
+						trace(e);
+					}
 					
 					var instance = FormatDetector.createFormatInstance(fileFormat);
 					if (instance.formatMeta.supportsDiffs) {
