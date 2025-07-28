@@ -313,6 +313,7 @@ typedef JSONLevelData = {
 	songs:Array<String>,
 	?bgColor:String,
 	?difficulties:Array<String>,
+	?appearsInStory:Bool,
 	?props:Array<LevelPropData>
 }
 
