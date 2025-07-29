@@ -353,61 +353,31 @@ class MusicBeatState extends FlxUIState
 	}
 
 	// TODO: check the jukebox selection n shit and play THAT instead? idk lol
-	public static function playMenuMusic(?volume:Float=1, ?force:Bool = false){				
-		if (FlxG.sound.music != null && FlxG.sound.music.playing && force != true)
+	public static function playMenuMusic(volume:Float=1, force:Bool = false){				
+		if (force != true && FlxG.sound.music != null && FlxG.sound.music.playing)
 			return;
 
 		MusicBeatState.stopMenuMusic();
 
-		#if MODS_ALLOWED
-		// i NEED to rewrite the paths shit for real 
-		function returnSound(path:String, key:String, ?library:String){
-			var filePath = Path.join([path, key]);
-
-			if (!Paths.currentTrackedSounds.exists(filePath))
-				Paths.currentTrackedSounds.set(filePath, openfl.media.Sound.fromFile(filePath));
-			
-			Paths.localTrackedAssets.push(key);
-
-			return Paths.currentTrackedSounds.get(filePath);
+		var musicPath:String = Paths.getPath("music/freakyMenu." + Paths.SOUND_EXT);
+		var introPath:String = {
+			var p = new Path(musicPath);
+			p.file = "freakyIntro";
+			p.toString();
 		}
 
-		var fuck = [Paths.mods(Paths.currentModDirectory), Paths.mods("global"), "assets"];
-		#if MODS_ALLOWED
-		for (mod in Paths.getGlobalContent())
-			fuck.insert(0, Paths.mods(mod));
-		for (mod in Paths.preLoadContent)
-			fuck.push(Paths.mods(mod));
-		for (mod in Paths.postLoadContent)
-			fuck.insert(0, Paths.mods(mod));
-		#end
-		for (folder in fuck){
-			var daPath = Path.join([folder, "music"]);
-			
-			var menuFilePath = daPath+"/freakyMenu.ogg";
-			if (Paths.exists(menuFilePath)){
-				if (Paths.exists(daPath+"/freakyIntro.ogg")){
-					menuMusic = returnSound(daPath, "freakyMenu.ogg");
+		if (Paths.exists(introPath)) {
+			menuMusic = Paths.returnSound(musicPath);
 
-					FlxG.sound.playMusic(returnSound(daPath, "freakyIntro.ogg"), volume, false);
-					FlxG.sound.music.onComplete = menuLoopFunc;
-				}else{
-					FlxG.sound.playMusic(returnSound(daPath, "freakyMenu.ogg"), volume, true);
-				}	
-
-				break;
-			}
+			FlxG.sound.playMusic(Paths.returnSound(introPath), volume, false);
+			FlxG.sound.music.onComplete = menuLoopFunc;
 		}
-		#else
-		menuMusic = Paths.music('freakyMenu');
-		FlxG.sound.playMusic(Paths.music('freakyIntro'), volume, false);
-		FlxG.sound.music.onComplete = menuLoopFunc;
-		#end
+		else if (Paths.exists(musicPath)) {
+			FlxG.sound.playMusic(Paths.returnSound(musicPath), volume, true);
+		}
 		
 		//// TODO: find a way to soft code this!!! (psych engine already has one so maybe we could just use that and add custom intro text to it :-)
 		Conductor.changeBPM(102);
 		Conductor.songPosition = 0;
-	}
-	
-	//
+	}	
 }
