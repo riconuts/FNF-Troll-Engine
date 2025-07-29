@@ -406,7 +406,7 @@ class PlayState extends MusicBeatState
 	@:isVar public var ratingFC(get, set):String;
 	
 	@:noCompletion public inline function get_songScore()
-		return ClientPrefs.showWifeScore ? Math.floor(stats.totalNotesHit * 200) : stats.score; // Alot of the time, songScore is used in HUDs
+		return stats.score;
 	@:noCompletion public inline function get_totalPlayed()return stats.totalPlayed;
 	@:noCompletion public inline function get_totalNotesHit()return stats.totalNotesHit;
 	@:noCompletion public inline function get_combo()return stats.combo;
