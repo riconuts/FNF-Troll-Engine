@@ -327,16 +327,7 @@ class MusicBeatState extends FlxUIState
 		return section==null ? 4 : Conductor.sectionBeats(section);
 	}
 
-	public static var menuMusic:Sound; // main menu loop
 	public static var menuVox:FlxSound; // jukebox
-
-	public static var menuLoopFunc = function(){
-		trace("menu song ended, looping");
-
-		FlxG.sound.playMusic(menuMusic != null ? menuMusic : Paths.music('freakyMenu'), FlxG.sound.music.volume, true);
-
-		Conductor.changeBPM(180);
-	}; 
 
 	public static function stopMenuMusic(){
 		if (FlxG.sound.music != null){
@@ -377,26 +368,6 @@ class MusicBeatState extends FlxUIState
 			return;
 
 		MusicBeatState.stopMenuMusic();
-
-		var musicPath:String = Paths.getPath("music/freakyMenu." + Paths.SOUND_EXT);
-		var introPath:String = {
-			var p = new Path(musicPath);
-			p.file = "freakyIntro";
-			p.toString();
-		}
-
-		if (Paths.exists(introPath)) {
-			menuMusic = Paths.returnSound(musicPath);
-
-			FlxG.sound.playMusic(Paths.returnSound(introPath), volume, false);
-			FlxG.sound.music.onComplete = menuLoopFunc;
-		}
-		else if (Paths.exists(musicPath)) {
-			FlxG.sound.playMusic(Paths.returnSound(musicPath), volume, true);
-		}
-		
-		//// TODO: find a way to soft code this!!! (psych engine already has one so maybe we could just use that and add custom intro text to it :-)
-		Conductor.changeBPM(102);
-		Conductor.songPosition = 0;
+		MusicBeatState.playMusic('freakyMenu', volume, force);
 	}	
 }
