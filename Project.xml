@@ -114,8 +114,11 @@
 		<classpath path="flxAnimateShadow"/> <!--Remove if FlxAnimate updates and lets you write your own code to determine how filesystem shit is gotten-->
 	</section>
 
-	<haxelib name="moonchart" version="0.5.0" if="USING_MOONCHART" unless="USING_NEW_MOONCHART"/>
-	<haxelib name="moonchart" version="git" if="USING_NEW_MOONCHART"/>
+	<section if="USING_MOONCHART">
+		<haxelib name="moonchart" version="0.5.0" unless="USING_NEW_MOONCHART"/>
+		<haxelib name="moonchart" version="git" if="USING_NEW_MOONCHART"/>
+		<classpath path="haxelibMoonchartShadow" unless="USING_NEW_MOONCHART"/>
+	</section>
 
 	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
 	<haxelib name="hxvlc" if="VIDEOS_ALLOWED"/> <!--You can replace with hxcodec if you're stubborn and dont wanna use newer and better libs-->

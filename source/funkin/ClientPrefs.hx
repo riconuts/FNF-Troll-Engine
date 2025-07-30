@@ -387,7 +387,7 @@ class ClientPrefs {
 			#if FUNNY_ALLOWED
 			"middleScroll" => {
 				display: "Middlescroll",
-				desc: "When toggled, notes will move towards the center of the screens.",
+				desc: "When toggled, notes will move towards the center of the screen.",
 				type: Toggle,
 				value: false,
 				data: []

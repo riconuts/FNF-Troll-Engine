@@ -406,7 +406,7 @@ class PlayState extends MusicBeatState
 	@:isVar public var ratingFC(get, set):String;
 	
 	@:noCompletion public inline function get_songScore()
-		return ClientPrefs.showWifeScore ? Math.floor(stats.totalNotesHit * 200) : stats.score; // Alot of the time, songScore is used in HUDs
+		return stats.score;
 	@:noCompletion public inline function get_totalPlayed()return stats.totalPlayed;
 	@:noCompletion public inline function get_totalNotesHit()return stats.totalNotesHit;
 	@:noCompletion public inline function get_combo()return stats.combo;
@@ -3256,7 +3256,7 @@ class PlayState extends MusicBeatState
 	
 						var stepDur = (Conductor.stepLength);
 						numSpr.tween = FlxTween.tween(numSpr, {alpha: 0.0}, stepDur, {
-							startDelay: Math.min((stepDur * 8) - 0.1, 0.0),
+							startDelay: Math.max((stepDur * 8) - 0.1, 0.0),
 							ease: FlxEase.quadIn,
 							onComplete: (tween:FlxTween) -> numSpr.kill()
 						});
@@ -3507,7 +3507,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		callOnScripts('onKeyRelease', [column]);
+		callOnScripts('onKeyRelease', [column, player]);
 	}
 
 	private function getColumnFromKey(key:FlxKey):Int {

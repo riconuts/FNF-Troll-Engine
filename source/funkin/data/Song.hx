@@ -236,7 +236,22 @@ class Song extends BaseSong
 				}
 			});
 
-			var ALL_FILES_DETECTED_FORMAT = FormatDetector.findFormat(filePaths);
+			if (filePaths.length == 0){
+				trace('$songPath has no charts! WHAT THE FUCK??');
+				trace('Make sure $songId is formatted correctly lol');
+				return [];
+			}
+
+			// Should probably return a Format.UNKNOWN or some shit instead of ERRORING
+			// but o well
+			var ALL_FILES_DETECTED_FORMAT = Format.FNF_LEGACY;
+			try {
+				ALL_FILES_DETECTED_FORMAT = FormatDetector.findFormat(filePaths);
+			}
+			catch(e:Dynamic){
+				return [];
+			}
+
 			if (ALL_FILES_DETECTED_FORMAT == FNF_VSLICE) {
 				var chartsFilePath:String = getSongFile('$songId-chart.json');
 				var metadataPath:String = getSongFile('$songId-metadata.json');
@@ -246,8 +261,13 @@ class Song extends BaseSong
 			}else {
 				for (i in 0...filePaths.length) {
 					var filePath:String = filePaths[i];
-					var fileFormat:Format = FormatDetector.findFormat(filePath);
-					//trace(filePath, fileFormat);
+					var fileFormat: Format = Format.FNF_LEGACY;
+					try {
+						fileFormat = FormatDetector.findFormat(filePath);
+					} catch(e: Dynamic){
+						trace("Couldn't find format probably?? Defaulting to FNF Legacy");
+						trace(e);
+					}
 					
 					var instance = FormatDetector.createFormatInstance(fileFormat);
 					if (instance.formatMeta.supportsDiffs) {

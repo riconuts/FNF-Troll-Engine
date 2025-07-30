@@ -123,7 +123,11 @@ class ModManager {
 			registerAux("xmod" + i);
 			registerAux("cmod" + i);
 			registerAux("noteSpawnTime" + i);
+			registerAux('flash${i}R');
+			registerAux('flash${i}G');
+			registerAux('flash${i}B');
 		}
+		
 
 		var toAlternate:Array<String> = ["transformX", "transformY", "transformZ"];
 		for(i in 0...PlayState.keyCount){
@@ -160,6 +164,7 @@ class ModManager {
 		setValue("scale", 1, mN);
 		setValue("scaleX", 1, mN);
 		setValue("scaleY", 1, mN);
+		setValue("darkSplashes", 1);
 
 		setValue("lookAheadTime", 2, mN);
 
@@ -179,6 +184,9 @@ class ModManager {
 			setValue('scale${i}', 1, mN);
 			setValue('scale${i}X', 1, mN);
 			setValue('scale${i}Y', 1, mN);
+			setValue('flash${i}R', 1, mN);
+			setValue('flash${i}G', 1, mN);
+			setValue('flash${i}B', 1, mN);
 		}
 
 		for (mod => data in defaultValues){

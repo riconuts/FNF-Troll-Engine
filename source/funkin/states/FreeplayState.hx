@@ -61,6 +61,11 @@ class FreeplayState extends MusicBeatState
 			var songIdList:Array<String> = [];
 
 			inline function sowy(songId:String) {
+				// weird old tgt shit
+				var splitted:Array<String> = songId.split(":");
+				if (splitted.length > 1)
+					songId = splitted[0];
+				
 				if (!songIdList.contains(songId))
 					songIdList.push(songId);
 			}

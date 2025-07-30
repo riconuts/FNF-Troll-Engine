@@ -4,6 +4,7 @@ import funkin.objects.notes.StrumNote;
 import funkin.objects.notes.NoteObject.ObjectType;
 import haxe.exceptions.NotImplementedException;
 import flixel.graphics.FlxGraphic;
+import flixel.util.FlxColor;
 import flixel.system.FlxAssets.FlxShader;
 import funkin.objects.shaders.NoteColorSwap;
 import haxe.ds.Vector as FastVector;
@@ -12,6 +13,7 @@ import openfl.Vector;
 class RenderObject {
 	public var graphic:FlxGraphic;
 	public var shader:FlxShader;
+	public var column:Int;
 	public var alphas:Array<Float>;
 	public var glows:Array<Float>;
 	public var uvData:Vector<Float>;
@@ -24,8 +26,13 @@ class RenderObject {
 }
 
 class FieldBase extends FlxObject {
+	public var color:FlxColor = FlxColor.WHITE;
+	public var glowColor:FlxColor = FlxColor.WHITE;
+
 	public function preDraw()throw new NotImplementedException();
 
+	public var forcePreDraw:Bool = false;
+	
 	public var tryForceHoldsBehind:Bool = true; // Field tries to push holds behind receptors
 
 	public var isProxy:Bool = false; // dumb and hardcoded but oh well
