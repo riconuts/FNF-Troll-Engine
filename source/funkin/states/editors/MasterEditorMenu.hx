@@ -75,7 +75,7 @@ class MasterEditorMenu extends MusicBeatState
 				default: return;
 			}
 			
-			FlxG.sound.music.volume = 0;
+			MusicBeatState.stopMenuMusic();
 			menu.controls = null;
 		}
 		for (name in options) menu.addTextOption(name);
