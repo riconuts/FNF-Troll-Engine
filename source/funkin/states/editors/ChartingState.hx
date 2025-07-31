@@ -682,8 +682,8 @@ class ChartingState extends MusicBeatState
 			}else if (!Std.isOfType(autosaved, String)) {
 				openSubState(new Prompt("Invalid autosaved data", 0, null, null, false, "OK", "OK"));
 			}else{
-				PlayState.SONG = cast Json.parse(autosaved);
-				MusicBeatState.resetState();
+				var _song = Json.parse(autosaved);
+				MusicBeatState.switchState(new ChartingState(_song));
 			}
 		});
 
@@ -843,10 +843,10 @@ class ChartingState extends MusicBeatState
 		skinDropdown.selectedLabel = _song.hudSkin;
 		blockPressWhileScrolling.push(skinDropdown);
 
-		var arrowSkin = PlayState.SONG.arrowSkin;
+		var arrowSkin = _song.arrowSkin;
 		if (arrowSkin == null) arrowSkin = '';
 		
-		var splashSkin = PlayState.SONG.splashSkin;
+		var splashSkin = _song.splashSkin;
 		if (splashSkin == null) splashSkin = '';
 
 		var noteSkinInputText = new FlxUIInputText(player2DropDown.x, player2DropDown.y + 50, 150, arrowSkin, 8);
