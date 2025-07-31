@@ -1731,7 +1731,6 @@ class ChartingState extends MusicBeatState
 		UI_box.addGroup(tab_group_chart);
 	}
 
-	var songLengthSections:Int = 0;
 	var tracksCompleted:Bool = false;
 
 	function loadTracks():Void
@@ -1787,12 +1786,6 @@ class ChartingState extends MusicBeatState
 		if (inst == null)
 			inst = createMusicTrack();
 		inst.volume = 0.6;
-
-		//// get last accessible section within the song's length
-		songLengthSections = 1;
-		while (getSectionStartTime(songLengthSections) < songLength)
-			songLengthSections++;
-		// Sometimes doesn't work ????????????????????????????????
 	}
 
 	override function getEvent(id:String, sender:Dynamic, data:Dynamic, ?params:Array<Dynamic>)
@@ -2119,7 +2112,7 @@ class ChartingState extends MusicBeatState
 			}
 			else if (Conductor.songPosition < 0) {
 				Conductor.songPosition += songLength;
-				changeSection(FlxMath.minInt(songLengthSections, _song.notes.length) - 1, false);
+				changeSection(_song.notes.length - 1);
 			}
 			else if (Conductor.songPosition >= currentSectionEnd) {
 				var nextSection:Int = curSec + 1;
@@ -2397,11 +2390,11 @@ class ChartingState extends MusicBeatState
 
 		if (FlxG.keys.justPressed.A) {
 			var nextSection:Int = curSec - shiftThing;
-			if (nextSection < 0) nextSection += FlxMath.minInt(songLengthSections, _song.notes.length) - 1;
+			if (nextSection < 0) nextSection += _song.notes.length;
 			changeSection(nextSection);
 		}
 		if (FlxG.keys.justPressed.D) {
-			var nextSection:Int = (curSec + shiftThing) % FlxMath.minInt(_song.notes.length, songLengthSections);
+			var nextSection:Int = (curSec + shiftThing) % _song.notes.length;
 			changeSection(nextSection);
 		}
 
