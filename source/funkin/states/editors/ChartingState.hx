@@ -2781,7 +2781,7 @@ class ChartingState extends MusicBeatState
 			sustainSteps = endStep - strumStep;
 		}
 
-		labelSusLength.text = 'Sustain Length: (${sustainSteps} Steps)';
+		labelSusLength.text = 'Sustain Length: (${Math.round(sustainSteps)} Steps)';
 		labelStrumTime.text = 'Strum Time: (Step ${strumStep})';
 	}
 
