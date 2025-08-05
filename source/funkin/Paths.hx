@@ -365,8 +365,7 @@ class Paths
 		try{
 			return new FlxRuntimeShader(
 				fragFile==null ? null : Paths.getContent(getShaderFragment(fragFile)), 
-				vertFile==null ? null : Paths.getContent(getShaderVertex(vertFile)),
-				version
+				vertFile==null ? null : Paths.getContent(getShaderVertex(vertFile))
 			);
 		}catch(e:Dynamic){
 			trace("Shader compilation error:" + e.message);
