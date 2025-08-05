@@ -1,17 +1,15 @@
 package funkin.states;
 
-#if !VIDEOS_ALLOWED
-#elseif (hxCodec >= "3.0.0") import hxcodec.flixel.FlxVideo as VideoHandler;
-#elseif (hxCodec >= "2.6.1") import hxcodec.VideoHandler as VideoHandler;
-#elseif (hxCodec == "2.6.0") import VideoHandler;
-#elseif (hxCodec) import vlc.MP4Handler as VideoHandler; 
-#elseif (hxvlc) import hxvlc.flixel.FlxVideo as VideoHandler;
+#if !VIDEOS_ALLOWED typedef VideoHandler = Dynamic;
+#elseif (hxCodec >= "3.0.0") typedef VideoHandler = hxcodec.flixel.FlxVideo;
+#elseif (hxCodec >= "2.6.1") typedef VideoHandler = hxcodec.VideoHandler;
+#elseif (hxCodec == "2.6.0") typedef VideoHandler = VideoHandler;
+#elseif (hxCodec) typedef VideoHandler = vlc.MP4Handler; 
+#elseif (hxvlc) typedef VideoHandler = hxvlc.flixel.FlxVideo; typedef Location = hxvlc.util.Location;
 #else typedef VideoHandler = Dynamic;
 #end
 
-#if hxvlc
-import hxvlc.util.Location;
-#else
+#if !hxvlc
 typedef Location = String;
 #end
 
