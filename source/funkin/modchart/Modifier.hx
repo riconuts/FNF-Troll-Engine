@@ -217,7 +217,9 @@ class Modifier {
 	public function getFieldZoom(zoom:Float, beat:Float, songPos:Float, player:Int, field:NoteField) {
 		return zoom;
 	}
-
+	
+	public function getAliases():Map<String,String>{return [];}
+	
 	// Note-based overrides (only use if getModType() == NOTE_MOD)
 	// time is the note/receptor strumtime
 	// diff is the 'visual difference' aka the strumTime - currentTime w/ math for scrollspeed, etc
@@ -232,5 +234,4 @@ class Modifier {
 	public function modifyVert(beat:Float, vert:Vector3, idx:Int, obj:NoteObject, pos:Vector3, player:Int, column:Int, field:NoteField):Vector3{return vert;}
 	public function getExtraInfo(diff:Float, tDiff:Float, beat:Float, info:RenderInfo, obj:NoteObject, player:Int, column:Int):RenderInfo{return info;}
 	public function isRenderMod():Bool{return false;} // Override and return true if your modifier uses modifyVert or getExtraInfo
-	public function getAliases():Map<String,String>{return [];}
 }

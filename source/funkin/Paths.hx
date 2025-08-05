@@ -360,13 +360,13 @@ class Paths
 	}
 
 	/** returns a FlxRuntimeShader but with file names lol **/ 
-	public static function getShader(fragFile:String = null, vertFile:String = null, version:Int = 120):FlxRuntimeShader
+	public static function getShader(fragFile:String = null, vertFile:String = null, version:Int = null):FlxRuntimeShader
 	{
 		try{
 			return new FlxRuntimeShader(
 				fragFile==null ? null : Paths.getContent(getShaderFragment(fragFile)), 
 				vertFile==null ? null : Paths.getContent(getShaderVertex(vertFile)),
-				//version
+				version
 			);
 		}catch(e:Dynamic){
 			trace("Shader compilation error:" + e.message);
