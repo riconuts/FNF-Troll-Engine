@@ -952,10 +952,10 @@ class PlayState extends MusicBeatState
 			callOnAllScripts('onCreatePost');
 
 		add(ratingGroup);
-		add(timingTxt);
 		add(playfields);
 		add(notefields);
 		add(grpNoteSplashes);
+		add(timingTxt);
 
 		luaDebugGroup.cameras = [camOther];
 		add(luaDebugGroup);
