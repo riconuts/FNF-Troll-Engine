@@ -227,7 +227,7 @@ class FunkinHScript extends FunkinScript
 		if (currentState is PlayState){
 			var currentState:PlayState = cast currentState;
 			var debugPrint:Function = Reflect.makeVarArgs(function(toPrint) {
-				currentState.addTextToDebug('$scriptName: ${toPrint.join(', ')}');
+				currentState.addTextToDebug(toPrint.join(', '));
 			});
 
 			set("getInstance", getInstance);
