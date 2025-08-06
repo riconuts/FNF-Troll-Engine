@@ -30,37 +30,29 @@ class PauseSubState extends MusicBeatSubstate
 
 	private var allTexts:Array<FlxText>;
 
-	public function newOption(name:String, ?onAccept:Void->Void) {
-		var opt = new PauseMenuOption();
-		opt.name = Paths.formatToSongPath(name);
-		opt.displayName = Paths.getString('pauseoption_${opt.name}', name);
-		opt.onAccept = onAccept;
-		return opt;
-	}
-
 	public function pushOption(opt) {
-		optionsMap.set(opt.name, opt);
+		optionsMap.set(opt.id, opt);
 		menuOptions.push(opt);
 		return opt;
 	}
+
+	public function newOption(id:String, ?onAccept:Void->Void)
+		return this.pushOption(new PauseMenuOption(id, onAccept));
 	
 	public function insertOption(idx:Int, opt) {
-		optionsMap.set(opt.name, opt);
+		optionsMap.set(opt.id, opt);
 		menuOptions.insert(idx, opt);
 		return opt;
 	}
 
-	public function indexOfOption(name:String):Int {
-		name = Paths.formatToSongPath(name);
-		return menuOptions.indexOf(optionsMap.get(name));
+	public function indexOfOption(id:String):Int {
+		return menuOptions.indexOf(optionsMap.get(id));
 	}
 
-	public function removeOption(name:String):Bool {
-		name = Paths.formatToSongPath(name);
-
-		if (optionsMap.exists(name)) {
-			menuOptions.remove(optionsMap.get(name));
-			optionsMap.remove(name);
+	public function removeOption(id:String):Bool {
+		if (optionsMap.exists(id)) {
+			menuOptions.remove(optionsMap.get(id));
+			optionsMap.remove(id);
 			return true;
 		}
 
@@ -71,155 +63,38 @@ class PauseSubState extends MusicBeatSubstate
 		menuOptions = [];
 		optionsMap = [];
 
-		inline function newOpt(name:String , ?onAccept) {
-			var opt = this.newOption(name, onAccept);
-			return this.pushOption(opt);
-		}
+		newOption("resume-song", resumeSong);
+		newOption("restart-song", restartSong);
 
-		newOpt("Resume", ()->{
-			if (!ClientPrefs.countUnpause) {
-				this.close();
-				return;
-			}
+		if (canChangeDifficulty())
+			newOption("change-difficulty", openDifficulties);
+		
+		if (!PlayState.isStoryMode)
+			newOption("change-modifiers", openModifiers);
 
-			if (game?.curCountdown?.finished == false) { // don't make a new countdown if there's already one in progress lol
-				this.close();
-				return;
-			}
-			
-			for (obj in members) 
-				obj.visible = false;
-
-			menu.inputsActive = false;
-
-			var c = new Countdown(game); // https://tenor.com/view/letter-c-darwin-tawog-the-amazing-world-of-gumball-dance-gif-17949158
-			if (game != null) game.initCountdown(c);
-			c.onComplete = this.close;
-			c.cameras = this.cameras;
-			c.start(0.5);
-			add(c);
-		});
-
-		newOpt("Restart Song", ()->{
-			if (FlxG.keys.pressed.SHIFT) {
-				Paths.clearStoredMemory();
-				Paths.clearUnusedMemory();
-			}
-			game.restartSong();
-		});
-
-		if (!PlayState.isStoryMode) {
-			var songDifficulties = PlayState.song?.getCharts();
-			if (songDifficulties != null && songDifficulties.length > 1) {
-				newOpt("Change Difficulty", function(){
-					function playChart(chartId:String){
-						trace(chartId);
-						PlayState.difficultyName = chartId;
-						PlayState.SONG = PlayState.song.getSwagSong(chartId);
-						MusicBeatState.switchState(new PlayState());
-					}
-					
-					// lol not making a class for it
-					var ss = new FlxSubState(FlxColor.fromRGBFloat(0.0, 0.0, 0.0, 0.6));
-
-					var menu = new AlphabetMenu();
-					menu.controls = controls;
-					menu.cameras = cameras;
-					ss.add(menu);
-
-					for (chartId in songDifficulties) 
-						menu.addTextOption(chartId, {onAccept: playChart.bind(chartId)});
-
-					ss.add(new FlxSignalHolder(
-						FlxG.signals.postUpdate, 
-						function() {
-							if (controls.BACK) {
-								FlxG.sound.play(Paths.sound("cancelMenu"), 0.4);
-								ss.close();
-							}
-						}
-					));
-
-					this.persistentUpdate = this.persistentDraw = false;
-					this.openSubState(ss);
-
-					//// ffffffffuuuuuuuuuuuuu
-					@:privateAccess
-					ss._bgSprite.cameras = cameras;
-
-					menu.inputsActive = false;
-					FlxG.signals.postUpdate.addOnce(()->{
-						menu.inputsActive = true;
-					});
-				});
-			}
-
-			newOpt("Change Modifiers", ()->{
-				this.persistentDraw = false;
-				this.openSubState(new GameplayChangersSubstate());
-			});
-		}
-
-		newOpt("Options", ()->{
-			this.persistentDraw = false;
-			var daSubstate = new OptionsSubstate();
-			daSubstate.goBack = function(changedOptions:Array<String>) {
-				var canResume:Bool = true;
-
-				for (opt in changedOptions) {
-					if (OptionsSubstate.requiresRestart.exists(opt)) {
-						canResume = false;
-						break;
-					}
-				}
-
-				game.optionsChanged(changedOptions);
-				FlxG.mouse.visible = false;
-
-				closeSubState();
-				if (!canResume && changedOptions.length > 0){
-					removeOption("Resume");
-					removeOption("Skip To");
-					regenMenu();
-				}
-
-				for (camera in daSubstate.camerasToRemove)
-					FlxG.cameras.remove(camera);
-			};
-			openSubState(daSubstate);
-		});
+		newOption("change-options", openOptions);
 
 		if (#if debug true #else PlayState.chartingMode #end) {
 			////
-			if (game.startedOnTime > 0) {
-				newOpt('Restart on last start time', ()->{
-					close();
-					game.skipToTime(game.startedOnTime);
-				});
-			}
+			if (game.startedOnTime > 0)
+				newOption('restart-from-last-time', restartFromLastTime);
 
 			////
-			{
-				var name = 'Skip to';
-				var opt = new SkipTimeOption();
-				opt.name = Paths.formatToSongPath(name);
-				opt.displayName = Paths.getString('pauseoption_${opt.name}', name);
-				pushOption(opt);
-			}
+			pushOption(new SkipTimeOption());
 	
 			////
 			inline function getBotplayTxt()
 				return 'Botplay ${game.cpuControlled ? "ON" : "OFF"}';
 			
-			var opt = newOpt('Toggle botplay'); 
+			var opt = newOption('toggle-botplay'); 
 			opt.displayName = getBotplayTxt();
 			opt.onAccept = ()->{
 				game.cpuControlled = !game.cpuControlled;
-				opt.text.set_text(getBotplayTxt());
+				opt.obj.set_text(getBotplayTxt());
 			};
 		}
 
-		newOpt('Exit to menu', PlayState.gotoMenus);
+		newOption('exit-to-menu', PlayState.gotoMenus);
 	}
 
 	private function getInfo():Array<String> {
@@ -287,18 +162,18 @@ class PauseSubState extends MusicBeatSubstate
 
 	public function onSelectedOption(id:Int, obj:Alphabet) {
 		curOption = menuOptions[id];
-		curOption.text = obj;
+		curOption.obj = obj;
 		curOption.select();
 	}
 
 	public function unSelectedOption(id:Int, obj:Alphabet) {
 		if (menuOptions[id] == curOption) curOption = null;
-		menuOptions[id].text = obj;
+		menuOptions[id].obj = obj;
 		menuOptions[id].unselect();
 	}
 
 	public function onAcceptedOption(id:Int, obj:Alphabet) {
-		menuOptions[id].text = obj;
+		menuOptions[id].obj = obj;
 		menuOptions[id].accept();
 	}
 
@@ -401,6 +276,129 @@ class PauseSubState extends MusicBeatSubstate
 		pauseMusic.destroy();
 		super.destroy();
 	}
+
+	//// Option functions
+	function resumeSong() {
+		if (!ClientPrefs.countUnpause) {
+			this.close();
+			return;
+		}
+
+		if (game?.curCountdown?.finished == false) { // don't make a new countdown if there's already one in progress lol
+			this.close();
+			return;
+		}
+		
+		for (obj in members) 
+			obj.visible = false;
+
+		menu.inputsActive = false;
+
+		var c = new Countdown(game); // https://tenor.com/view/letter-c-darwin-tawog-the-amazing-world-of-gumball-dance-gif-17949158
+		if (game != null) game.initCountdown(c);
+		c.onComplete = this.close;
+		c.cameras = this.cameras;
+		c.start(0.5);
+		add(c);
+	}
+
+	function restartSong() {
+		if (FlxG.keys.pressed.SHIFT) {
+			Paths.clearStoredMemory();
+			Paths.clearUnusedMemory();
+		}
+		game.restartSong();
+	}
+
+	function canChangeDifficulty():Bool {
+		if (PlayState.isStoryMode) return false;
+		var songDifficulties = PlayState.song?.getCharts();
+		return songDifficulties != null && songDifficulties.length > 1;
+	}
+
+	function playChart(chartId:String) {
+		PlayState.difficultyName = chartId;
+		PlayState.SONG = PlayState.song.getSwagSong(chartId);
+		MusicBeatState.switchState(new PlayState());
+	}
+
+	function openDifficulties() {	
+		var charts = PlayState.song.getCharts();
+		if (charts == null || charts.length == 0) {
+			FlxG.sound.play(Paths.sound("cancelMenu"), 0.4);
+			return;
+		}
+
+		// lol not making a class for it
+		var ss = new FlxSubState(FlxColor.fromRGBFloat(0.0, 0.0, 0.0, 0.6));
+
+		var menu = new AlphabetMenu();
+		menu.controls = controls;
+		menu.cameras = cameras;
+		ss.add(menu);
+
+		for (chartId in charts)
+			menu.addTextOption(chartId, {onAccept: playChart.bind(chartId)});
+
+		ss.add(new FlxSignalHolder(
+			FlxG.signals.postUpdate, 
+			function() {
+				if (controls.BACK) {
+					FlxG.sound.play(Paths.sound("cancelMenu"), 0.4);
+					ss.close();
+				}
+			}
+		));
+
+		this.persistentUpdate = this.persistentDraw = false;
+		this.openSubState(ss);
+
+		//// ffffffffuuuuuuuuuuuuu
+		@:privateAccess
+		ss._bgSprite.cameras = cameras;
+
+		menu.inputsActive = false;
+		FlxG.signals.postUpdate.addOnce(() -> menu.inputsActive = true);
+	}
+
+	function openModifiers() {
+		this.persistentDraw = false;
+		this.openSubState(new GameplayChangersSubstate());
+	}
+
+	function openOptions() {
+		this.persistentDraw = false;
+		var daSubstate = new OptionsSubstate();
+		daSubstate.goBack = function(changedOptions:Array<String>) {
+			var canResume:Bool = true;
+
+			for (opt in changedOptions) {
+				if (OptionsSubstate.requiresRestart.exists(opt)) {
+					canResume = false;
+					break;
+				}
+			}
+
+			game.optionsChanged(changedOptions);
+			FlxG.mouse.visible = false;
+
+			closeSubState();
+			if (!canResume && changedOptions.length > 0){
+				removeOption("resume");
+				removeOption("skip-to");
+				regenMenu();
+			}
+
+			for (camera in daSubstate.camerasToRemove)
+				FlxG.cameras.remove(camera);
+		};
+		openSubState(daSubstate);
+	}
+
+	function restartFromLastTime() {
+		close();
+		game.skipToTime(game.startedOnTime);
+	}
 }
 
 class SkipTimeOption extends PauseMenuOption
@@ -412,7 +410,7 @@ class SkipTimeOption extends PauseMenuOption
 	private var holdTime:Float = 0.0;
 
 	public function new() {
-		super();
+		super('skip-to');
 	}
 
 	override function select() {
@@ -429,7 +427,7 @@ class SkipTimeOption extends PauseMenuOption
 	}
 
 	override function unselect() {
-		text.set_text(this.displayName);
+		obj.set_text(this.displayName);
 	}
 
 	override function update(elapsed:Float){
@@ -466,7 +464,7 @@ class SkipTimeOption extends PauseMenuOption
 
 	function updateSkipTimeText() {
 		var str = this.displayName + ': ' + formatTime(curTime) + ' / ' + formatTime(songLength);
-		text.set_text(str);
+		obj.set_text(str);
 	}
 
 	static inline function formatTime(msTime:Float, showMS:Bool = false)
