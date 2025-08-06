@@ -10,27 +10,31 @@ class AlphaModifier extends NoteModifier
 
 	public static var fadeDistY = 120;
 
-	public function getHiddenSudden(player:Int=-1){
-		return getSubmodValue("hidden",player) * getSubmodValue("sudden",player);
+	public function getHiddenSudden(player:Int=-1, column:Int){
+		return getWithColumnVariant("hidden", player, column) * getWithColumnVariant("sudden", player, column);
 	}
 
-	public function getHiddenEnd(player:Int=-1){
-		return (FlxG.height* 0.5) + fadeDistY * CoolUtil.scale(getHiddenSudden(player),0,1,-1,-1.25) + (FlxG.height* 0.5) * getSubmodValue("hiddenOffset",player);
+	public function getHiddenEnd(player:Int = -1, column:Int){
+		return (FlxG.height* 0.5) + fadeDistY * CoolUtil.scale(getHiddenSudden(player, column),0, 1, -1, -1.25) + (FlxG.height* 0.5) * getWithColumnVariant("hiddenOffset", player, column);
 	}
 
-	public function getHiddenStart(player:Int=-1){
-		return (FlxG.height* 0.5) + fadeDistY * CoolUtil.scale(getHiddenSudden(player),0,1,0,-0.25) + (FlxG.height* 0.5) * getSubmodValue("hiddenOffset",player);
+	public function getHiddenStart(player:Int = -1, column:Int){
+		return (FlxG.height* 0.5) + fadeDistY * CoolUtil.scale(getHiddenSudden(player, column), 0, 1, 0, -0.25) + (FlxG.height* 0.5) * getWithColumnVariant("hiddenOffset", player, column);
 	}
 
-	public function getSuddenEnd(player:Int=-1){
-		return (FlxG.height* 0.5) + fadeDistY * CoolUtil.scale(getHiddenSudden(player),0,1,1,1.25) + (FlxG.height* 0.5) * getSubmodValue("suddenOffset",player);
+	public function getSuddenEnd(player:Int = -1, column:Int){
+		return (FlxG.height* 0.5) + fadeDistY * CoolUtil.scale(getHiddenSudden(player, column),0, 1, 1, 1.25) + (FlxG.height* 0.5) * getWithColumnVariant("suddenOffset", player, column);
 	}
 
-	public function getSuddenStart(player:Int=-1){
-		return (FlxG.height* 0.5) + fadeDistY * CoolUtil.scale(getHiddenSudden(player),0,1,0,0.25) + (FlxG.height* 0.5) * getSubmodValue("suddenOffset",player);
+	public function getSuddenStart(player:Int = -1, column:Int){
+		return (FlxG.height* 0.5) + fadeDistY * CoolUtil.scale(getHiddenSudden(player, column),0, 1, 0, 0.25) + (FlxG.height* 0.5) * getWithColumnVariant("suddenOffset", player, column);
 	}
 
-	function getVisibility(yPos:Float,player:Int):Float{
+	inline function getWithColumnVariant(mod:String, player:Int, column:Int){
+		return getSubmodValue(mod, player) + getSubmodValue('$mod$column', player);
+	}
+
+	function getVisibility(yPos:Float, player:Int, column: Int):Float{
 		var distFromCenter = yPos - (FlxG.height * 0.5);
 		var alpha:Float = 0;
 
@@ -40,19 +44,23 @@ class AlphaModifier extends NoteModifier
 
 		var time = Conductor.songPosition/1000;
 
-		if(getSubmodValue("hidden",player)!=0){
-			var hiddenAdjust = CoolUtil.clamp(CoolUtil.scale(yPos,getHiddenStart(player),getHiddenEnd(player),0,-1),-1,0);
-			alpha += getSubmodValue("hidden",player)*hiddenAdjust;
+		var hiddenValue = getWithColumnVariant("hidden", player, column);
+		if(hiddenValue != 0){
+			var hiddenAdjust = CoolUtil.clamp(CoolUtil.scale(yPos, getHiddenStart(player, column), getHiddenEnd(player, column), 0, -1), -1, 0);
+			alpha += hiddenValue * hiddenAdjust;
 		}
 
-		if(getSubmodValue("sudden",player)!=0){
-			var suddenAdjust = CoolUtil.clamp(CoolUtil.scale(yPos,getSuddenStart(player),getSuddenEnd(player),0,-1),-1,0);
-			alpha += getSubmodValue("sudden",player)*suddenAdjust;
+		var suddenValue = getWithColumnVariant("sudden", player, column);
+		if (suddenValue != 0){
+			var suddenAdjust = CoolUtil.clamp(CoolUtil.scale(yPos, getSuddenStart(player, column), getSuddenEnd(player, column), 0, -1), -1, 0);
+			alpha += suddenValue * suddenAdjust;
 		}
 
 		if(getValue(player)!=0)
 			alpha -= getValue(player);
 
+		if (getSubmodValue('stealth$column', player) != 0)
+			alpha -= getSubmodValue('stealth$column', player);
 
 		if(getSubmodValue("blink",player)!=0){
 			var f = CoolUtil.quantizeAlpha(FlxMath.fastSin(time*10),0.3333);
@@ -87,8 +95,8 @@ class AlphaModifier extends NoteModifier
 			var yPos:Float = 50 + diff;
 
 			var alphaMod = 
-			(1 - getSubmodValue("alpha",player)) * (1 - getSubmodValue('alpha${obj.column}',player)) * (1 - getSubmodValue("noteAlpha", player))* (1 - getSubmodValue('noteAlpha${obj.column}', player));
-			var vis = getVisibility(yPos, player);
+			(1 - getSubmodValue("alpha",player)) * (1 - getSubmodValue('alpha${data}',player)) * (1 - getSubmodValue("noteAlpha", player))* (1 - getSubmodValue('noteAlpha${data}', player));
+			var vis = getVisibility(yPos, player, data);
 
 			if (getSubmodValue("hideStealthGlow", player) == 0)
 			{
@@ -100,16 +108,18 @@ class AlphaModifier extends NoteModifier
 
 			alpha *= alphaMod;	
 		}else{
-			alpha *= (1 - getSubmodValue("alpha", player)) * (1 - getSubmodValue('alpha${obj.column}', player));
-			if (obj.objType == STRUM || getSubmodValue("darkSplashes", player) != 0){
-				if (getSubmodValue("dark", player) != 0 || getSubmodValue('dark${obj.column}', player) != 0) {
-					var vis = (1 - getSubmodValue("dark", player)) * (1 - getSubmodValue('dark${obj.column}', player));
+			alpha *= (1 - getSubmodValue("alpha",
+				player)) * (1 - getSubmodValue('alpha${data}',
+					player)) * (1 - getSubmodValue('receptorAlpha', player)) * (1 - getSubmodValue('receptorAlpha${data}', player));
 
+			if (obj.objType == STRUM || getSubmodValue("darkSplashes", player) != 0){
+				var darkness = (1 - getSubmodValue("dark", player)) * (1 - getSubmodValue('dark${data}', player));
+				if (darkness != 1) {
 					if (getSubmodValue("hideDarkGlow", player) == 0) {
-						alpha *= getRealAlpha(vis);
-						info.glow = getGlow(vis);
+						alpha *= getRealAlpha(darkness);
+						info.glow = getGlow(darkness);
 					} else
-						alpha *= vis;
+						alpha *= darkness;
 				}
 			}
 		}
@@ -121,11 +131,36 @@ class AlphaModifier extends NoteModifier
 	}
 
 	override function getSubmods(){
-		var subMods:Array<String> = ["darkSplashes", "noteAlpha", "alpha", "hidden", "hiddenOffset", "sudden", "suddenOffset", "blink", "vanish", "dark", "hideDarkGlow", "hideStealthGlow", "stealthPastReceptors"];
+		var subMods:Array<String> = [
+			"darkSplashes",
+			"noteAlpha",
+			"alpha",
+			"hidden",
+			"hiddenOffset",
+			"sudden",
+			"suddenOffset",
+			"blink",
+			"vanish",
+			"dark",
+			"receptorAlpha", 
+			"hideDarkGlow", 
+			"hideStealthGlow", 
+			"stealthPastReceptors"
+		];
+
 		for(i in 0...PlayState.keyCount){
 			subMods.push('noteAlpha$i');
+			subMods.push('receptorAlpha$i');
 			subMods.push('alpha$i');
+
 			subMods.push('dark$i');
+			subMods.push('stealth$i');
+
+			subMods.push('sudden$i');
+			subMods.push('hidden$i');
+
+			subMods.push('suddenOffset$i');
+			subMods.push('hiddenOffset$i');
 		}
 
 		return subMods;

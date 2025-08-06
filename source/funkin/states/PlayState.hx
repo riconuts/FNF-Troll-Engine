@@ -67,13 +67,7 @@ using funkin.CoolerStringTools;
 import funkin.api.Discord.DiscordClient;
 #end
 
-#if (!VIDEOS_ALLOWED) typedef VideoHandler = Dynamic;
-#elseif (hxCodec >= "3.0.0") import hxcodec.flixel.FlxVideo as VideoHandler;
-#elseif (hxCodec >= "2.6.1") import hxcodec.VideoHandler as VideoHandler;
-#elseif (hxCodec == "2.6.0") import VideoHandler;
-#elseif (hxCodec) import vlc.MP4Handler as VideoHandler; 
-#elseif (hxvlc) import hxvlc.flixel.FlxVideo as VideoHandler;
-#end
+import funkin.states.VideoPlayerState.VideoHandler;
 
 enum abstract CharacterType(Int) from Int to Int {
 	var BF = 0;
@@ -446,7 +440,7 @@ class PlayState extends MusicBeatState
 	@:isVar public var ratingFC(get, set):String;
 	
 	@:noCompletion public inline function get_songScore()
-		return ClientPrefs.showWifeScore ? Math.floor(stats.totalNotesHit * 200) : stats.score; // Alot of the time, songScore is used in HUDs
+		return stats.score;
 	@:noCompletion public inline function get_totalPlayed()return stats.totalPlayed;
 	@:noCompletion public inline function get_totalNotesHit()return stats.totalNotesHit;
 	@:noCompletion public inline function get_combo()return stats.combo;
@@ -865,7 +859,7 @@ class PlayState extends MusicBeatState
 		grpNoteSplashes.add(splash);
 
 		////
-		displayedDifficulty = Paths._getString('difficultyName_$difficultyName') ?? difficultyName.replace("-"," ").capitalize();
+		displayedDifficulty = Paths.getString('difficultyName_$difficultyName') ?? difficultyName.replace("-"," ").capitalize();
 		displayedSong = metadata?.songName ?? songId.replace("-"," ").capitalize();
 
 		if (hud == null) {
@@ -980,7 +974,7 @@ class PlayState extends MusicBeatState
 		// Discord RPC texts
 		stateText = '${displayedSong} [$displayedDifficulty]';
 		
-		detailsText = isStoryMode ? "Story Mode" : "Freeplay";
+		detailsText = chartingMode ? "Charting Mode" : isStoryMode ? "Story Mode" : "Freeplay";
 		detailsPausedText = "Paused - " + detailsText;
 
 		updateSongDiscordPresence();
@@ -994,10 +988,10 @@ class PlayState extends MusicBeatState
 			callOnAllScripts('onCreatePost');
 
 		add(ratingGroup);
-		add(timingTxt);
 		add(playfields);
 		add(notefields);
 		add(grpNoteSplashes);
+		add(timingTxt);
 
 		luaDebugGroup.cameras = [camOther];
 		add(luaDebugGroup);

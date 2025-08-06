@@ -523,6 +523,7 @@ class NoteField extends FieldBase
 		return {
 			graphic: graphic,
 			shader: shader,
+			column: hold.column,
 			alphas: alphas,
 			glows: glows,
 			uvData: uvData,
@@ -756,6 +757,7 @@ class NoteField extends FieldBase
 		return {
 			graphic: graphic,
 			shader: shader,
+			column: sprite.column,
 			alphas: cast alphas,
 			glows: cast glows,
 			uvData: uvData,

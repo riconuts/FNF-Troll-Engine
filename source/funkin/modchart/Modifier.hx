@@ -69,10 +69,10 @@ class Modifier {
 		return '';
 	}
 
-	inline public function getValue(player:Int):Float
+	public function getValue(player:Int):Float
 		return percents[player];
 
-	inline public function setCurrentValue(value:Float, player:Int = -1) // only set for like a frame
+	public function setCurrentValue(value:Float, player:Int = -1) // only set for like a frame
 	{
 		if (player == -1)
 			for (idx in 0...percents.length){
@@ -86,7 +86,7 @@ class Modifier {
 		
 	}
 
-	inline public function getTargetValue(player:Int):Float // because most the time when you getValue you wanna get the CURRENT value, not the target
+	public function getTargetValue(player:Int):Float // because most the time when you getValue you wanna get the CURRENT value, not the target
 		return target_percents[player];
 
 	inline public function getTargetPercent(player:Int):Float
@@ -95,7 +95,7 @@ class Modifier {
 	inline public function getPercent(player:Int):Float
 		return getValue(player) * 100;
 	
-	inline public function setValue(value:Float, player:Int = -1) // because most the time when you setValue you wanna set the TARGET value, not the current
+	public function setValue(value:Float, player:Int = -1) // because most the time when you setValue you wanna set the TARGET value, not the current
 	{
 		setCurrentValue(value, player);
 		if (player == -1)
@@ -217,7 +217,9 @@ class Modifier {
 	public function getFieldZoom(zoom:Float, beat:Float, songPos:Float, player:Int, field:NoteField) {
 		return zoom;
 	}
-
+	
+	public function getAliases():Map<String,String>{return [];}
+	
 	// Note-based overrides (only use if getModType() == NOTE_MOD)
 	// time is the note/receptor strumtime
 	// diff is the 'visual difference' aka the strumTime - currentTime w/ math for scrollspeed, etc
@@ -232,5 +234,4 @@ class Modifier {
 	public function modifyVert(beat:Float, vert:Vector3, idx:Int, obj:NoteObject, pos:Vector3, player:Int, column:Int, field:NoteField):Vector3{return vert;}
 	public function getExtraInfo(diff:Float, tDiff:Float, beat:Float, info:RenderInfo, obj:NoteObject, player:Int, column:Int):RenderInfo{return info;}
 	public function isRenderMod():Bool{return false;} // Override and return true if your modifier uses modifyVert or getExtraInfo
-	public function getAliases():Map<String,String>{return [];}
 }

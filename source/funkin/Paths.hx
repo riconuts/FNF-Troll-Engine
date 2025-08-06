@@ -359,13 +359,12 @@ class Paths
 	}
 
 	/** returns a FlxRuntimeShader but with file names lol **/ 
-	public static function getShader(fragFile:String = null, vertFile:String = null, version:Int = 120):FlxRuntimeShader
+	public static function getShader(fragFile:String = null, vertFile:String = null, version:Int = null):FlxRuntimeShader
 	{
 		try{
 			return new FlxRuntimeShader(
 				fragFile==null ? null : Paths.getContent(getShaderFragment(fragFile)), 
-				vertFile==null ? null : Paths.getContent(getShaderVertex(vertFile)),
-				//version
+				vertFile==null ? null : Paths.getContent(getShaderVertex(vertFile))
 			);
 		}catch(e:Dynamic){
 			trace("Shader compilation error:" + e.message);
@@ -784,11 +783,8 @@ class Paths
 	public static inline function hasString(key:String):Bool
 		return currentStrings.exists(key);
 
-	public static inline function _getString(key:String):Null<String>
+	public static inline function getString(key:String):Null<String>
 		return currentStrings.get(key);
-
-	public static inline function getString(key:String, ?defaultValue:String):String
-		return hasString(key) ? _getString(key) : (defaultValue==null ? key : defaultValue);
 }
 
 class HTML5Paths {

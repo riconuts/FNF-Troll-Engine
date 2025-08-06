@@ -284,7 +284,7 @@ class FreeplayState extends MusicBeatState
 		var displayName:String = songName;
 
 		if (selectedSongCharts.length > 1) {
-			var diffName:String = Paths.getString('difficultyName_$curChartId', curChartId);
+			var diffName:String = Paths.getString('difficultyName_$curChartId') ?? curChartId;
 			displayName += ' ($diffName)';
 		}
 
@@ -397,12 +397,12 @@ class FreeplayState extends MusicBeatState
 
 			case 1:
 				curChartId = charts[0];
-				diffText.text = Paths.getString('difficultyName_$curChartId', curChartId).toUpperCase();
+				diffText.text = (Paths.getString('difficultyName_$curChartId') ?? curChartId).toUpperCase();
 
 			default:
 				curChartIdx = isAbs ? val : FlxMath.wrap(curChartIdx + val, 0, charts.length - 1);
 				curChartId = charts[curChartIdx];
-				diffText.text = "< " + Paths.getString('difficultyName_$curChartId', curChartId).toUpperCase() + " >";
+				diffText.text = "< " + (Paths.getString('difficultyName_$curChartId') ?? curChartId).toUpperCase() + " >";
 		}
 
 		selectedSong = '$selectedSongData-$curChartId';

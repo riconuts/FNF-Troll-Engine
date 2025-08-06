@@ -211,7 +211,7 @@ class KadeHUD extends BaseHUD
 
 		// looks kinda weird tbh
 		var diffId:String = PlayState.difficultyName;
-		var diffName:String = Paths.getString('difficultyName_$diffId', diffId);
+		var diffName:String = Paths.getString('difficultyName_$diffId') ?? diffId;
 		
 /* 		if (ClientPrefs.timeBarType == "Song Name")
 		{

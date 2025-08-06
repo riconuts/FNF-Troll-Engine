@@ -610,7 +610,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		var tabX:Float = optionMenu.x;
 		inline function newTabButton(tabName:String)
 		{
-			var text = new FlxText(0, 0, 0, Paths.getString('opt_tabName_$tabName', tabName).toUpperCase());
+			var text = new FlxText(0, 0, 0, (Paths.getString('opt_tabName_$tabName') ?? tabName).toUpperCase());
 			text.applyFormat(TextFormats.TAB_NAME);
 			text.fieldWidth = Math.max(86, text.width) + 8;
 			@:privateAccess text.regenGraphic();
@@ -659,8 +659,8 @@ class OptionsSubstate extends MusicBeatSubstate
 						recommendsRestart.set(opt, true);
 
 					data.data.set("optionName", opt);
-					data.display = Paths.getString('opt_display_$opt', data.display);
-					data.desc = Paths.getString('opt_desc_$opt', data.desc);
+					data.display = Paths.getString('opt_display_$opt') ?? data.display;
+					data.desc = Paths.getString('opt_desc_$opt') ?? data.desc;
 
 					var text = new FlxText(16, daY, 0, data.display);
 					text.applyFormat(TextFormats.OPT_NAME);
