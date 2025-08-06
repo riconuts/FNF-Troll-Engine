@@ -1,6 +1,7 @@
 package funkin.modchart;
 // @author Nebula_Zorua
 
+import flixel.math.FlxMath;
 import funkin.objects.playfields.NoteField;
 import funkin.modchart.Modifier;
 import funkin.modchart.modifiers.*;
@@ -104,6 +105,8 @@ class ModManager {
 		registerAux("orient");
 		registerAux("lookAheadTime"); // used for holds and orient
 		
+		registerAux("movePathType"); 
+		registerAlias("centeredPathType", "movePathType");
 		registerAux("movePath");
 		registerAlias("centered2", "movePath");
 		registerAlias("centeredPath", "movePath");
@@ -597,7 +600,7 @@ class ModManager {
 			pos = new Vector3();
 
 		diff += (
-			getValue("movePath", player) * 112) + 
+			(FlxMath.lerp(Note.swagWidth, Conductor.crotchet * 0.45 * (obj.objType == NOTE ? getNoteSpeed(cast obj, player, field.songSpeed) : getCMod(data, player, field.songSpeed) * getXMod(data, player)), getValue("movePathType", player))) * getValue("movePath", player)) + 
 			getValue("transformPath", player
 		); 
 		
@@ -797,17 +800,17 @@ class ModManager {
 		
 	}
 
-	inline public function queueEaseL(step:Float, length:Float, modName:String, value:Float, style:Dynamic = 'linear', player = -1, ?startVal:Float)
+	public function queueEaseL(step:Float, length:Float, modName:String, value:Float, style:Dynamic = 'linear', player = -1, ?startVal:Float)
 		queueEase(step, step + length, modName, value, style, player, startVal);
 	
-	inline public function queueEaseLB(beat:Float, length:Float, modName:String, value:Float, style:Dynamic = 'linear', player = -1, ?startVal:Float)
+	public function queueEaseLB(beat:Float, length:Float, modName:String, value:Float, style:Dynamic = 'linear', player = -1, ?startVal:Float)
 		queueEase(beat * 4, (beat + length) * 4, modName, value, style, player, startVal);
 
 
-	inline public function queueEaseB(beat:Float, endBeat:Float, modName:String, value:Float, style:Dynamic = 'linear', player = -1, ?startVal:Float)
+	public function queueEaseB(beat:Float, endBeat:Float, modName:String, value:Float, style:Dynamic = 'linear', player = -1, ?startVal:Float)
 		queueEase(beat * 4, endBeat * 4, modName, value, style, player, startVal);
 
-	inline public function queueSetB(beat:Float, modName:String, value:Float, player = -1)
+	public function queueSetB(beat:Float, modName:String, value:Float, player = -1)
 		queueSet(beat * 4, modName, value, player);
 
 	public function queueEaseP(step:Float, endStep:Float, modName:String, percent:Float, style:Dynamic = 'linear', player:Int = -1, ?startVal:Float)

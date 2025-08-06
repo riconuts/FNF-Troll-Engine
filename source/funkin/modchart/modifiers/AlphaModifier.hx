@@ -114,8 +114,7 @@ class AlphaModifier extends NoteModifier
 
 			if (obj.objType == STRUM || getSubmodValue("darkSplashes", player) != 0){
 				var darkness = (1 - getSubmodValue("dark", player)) * (1 - getSubmodValue('dark${data}', player));
-				if (darkness > 0) {
-
+				if (darkness != 1) {
 					if (getSubmodValue("hideDarkGlow", player) == 0) {
 						alpha *= getRealAlpha(darkness);
 						info.glow = getGlow(darkness);
