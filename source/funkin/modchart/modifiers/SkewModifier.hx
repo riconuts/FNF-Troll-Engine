@@ -20,6 +20,8 @@ class SkewModifier extends NoteModifier {
 	{
 		final centerX:Float = getFieldCenterX(field);
 
+		vert.x += pos.x;
+
 		vert.x -= centerX;
 		vert.y -= FlxG.height * 0.5;
 
@@ -28,6 +30,8 @@ class SkewModifier extends NoteModifier {
 
 		vert.x += centerX;
 		vert.y += FlxG.height * 0.5;
+
+		vert.x -= pos.x;
 
 		final width: Float = obj.frameWidth * obj.scale.x;
 		final height:Float = obj.frameHeight * obj.scale.y;
