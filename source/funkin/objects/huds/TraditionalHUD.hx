@@ -24,13 +24,13 @@ class TraditionalHUD extends CommonHUD
 	// cached because dont wanna be doing that shit every update cycle lmao
 	// even though it probably doesnt matter since it caches it the first time
 	// i feel like this is probably faster than going through map.get each time
-	var scoreString = Paths.getString("score", "Score");
-	var hiscoreString = Paths.getString("highscore", "Hi-Score");
-	var ratingString = Paths.getString("rating", "Rating");
-	var rankString = Paths.getString("rank", "Rank");
-	var cbString = Paths.getString("cbplural", "Combo Breaks");
-	var npsString = Paths.getString("nps", "NPS");
-	var botplayString = Paths.getString("botplayMark", "[BOTPLAY]");
+	var scoreString = Paths.getString("score") ?? "Score";
+	var hiscoreString = Paths.getString("highscore") ?? "Hi-Score";
+	var ratingString = Paths.getString("rating") ?? "Rating";
+	var rankString = Paths.getString("rank") ?? "Rank";
+	var cbString = Paths.getString("cbplural") ?? "Combo Breaks";
+	var npsString = Paths.getString("nps") ?? "NPS";
+	var botplayString = Paths.getString("botplayMark") ?? "[BOTPLAY]";
 
 	var songHighscore:Int;
 	var songWifeHighscore:Float;

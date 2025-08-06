@@ -817,7 +817,7 @@ class PlayState extends MusicBeatState
 		grpNoteSplashes.add(splash);
 
 		////
-		displayedDifficulty = Paths._getString('difficultyName_$difficultyName') ?? difficultyName.replace("-"," ").capitalize();
+		displayedDifficulty = Paths.getString('difficultyName_$difficultyName') ?? difficultyName.replace("-"," ").capitalize();
 		displayedSong = metadata?.songName ?? songId.replace("-"," ").capitalize();
 
 		if (hud == null) {

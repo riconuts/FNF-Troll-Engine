@@ -20,7 +20,7 @@ class PauseMenuOption
 
 	public function new(id:String, ?onAccept:Void->Void = null) {
 		this.id = id;
-		this.displayName = Paths.getString('pauseoption_$id', id);
+		this.displayName = Paths.getString('pauseoption_$id') ?? id;
 		this.onAccept = onAccept;
 	}
 
