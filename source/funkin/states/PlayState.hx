@@ -114,6 +114,8 @@ class SpeedEvent
 @:noScripting
 class PlayState extends MusicBeatState
 {
+	public var disableCameraMovement:Bool = false;
+
 	public static function loadPlaylist(playlist:Array<BaseSong>, chartId:String) {
 		PlayState.loadSong(playlist[0], chartId);
 		PlayState.songPlaylist = playlist;
@@ -535,6 +537,8 @@ class PlayState extends MusicBeatState
 		Wife3.timeScale = Wife3.judgeScales.get(ClientPrefs.judgeDiff);
 		PBot.missThreshold = Math.max(160, ClientPrefs.hitWindow);
 
+		Paths.getAllStrings();
+		
 		ratingStuff = Highscore.grades.get(ClientPrefs.gradeSet);
 		stats = new Stats(ClientPrefs.accuracyCalc, ratingStuff);
 		stats.useFlags = ClientPrefs.gradeSet == 'Etterna';
@@ -817,7 +821,6 @@ class PlayState extends MusicBeatState
 			});
 		}
 
-		Paths.getAllStrings();
 		Cache.loadWithList(shitToLoad);
 		shitToLoad = [];
 
@@ -1368,6 +1371,7 @@ class PlayState extends MusicBeatState
 			return;
 		}
 
+		seenCutscene = true;
 		inCutscene = false;
 
 		if (hudSkinScript != null) {
@@ -2195,11 +2199,10 @@ class PlayState extends MusicBeatState
 
 	override public function onFocusLost():Void
 	{
-		if (ClientPrefs.autoPause && !paused && startedCountdown && canPause) {
-			openPauseMenu();
-		}
-
 		super.onFocusLost();
+
+		if (ClientPrefs.autoPause && !paused && canPause)
+			openPauseMenu();
 	}
 
 	////
@@ -2397,7 +2400,7 @@ class PlayState extends MusicBeatState
 		if (hudSkinScript != null)
 			hudSkinScript.call("onUpdate", [elapsed]);
 
-		if (!inCutscene) {
+		if (!disableCameraMovement) {
 			var xOff:Float = 0;
 			var yOff:Float = 0;
 
@@ -2406,19 +2409,26 @@ class PlayState extends MusicBeatState
 				yOff = focusedChar.camOffY;
 			}
 
-			var currentCameraPoint = cameraPoints[cameraPoints.length-1];
-			if (currentCameraPoint != null)
-				camFollow.copyFrom(currentCameraPoint);
+			if(!inCutscene){
+				var currentCameraPoint = cameraPoints[cameraPoints.length-1];
+				if (currentCameraPoint != null)
+					camFollow.copyFrom(currentCameraPoint);
+			}
 
 			var lerpVal:Float = Math.exp(-elapsed * 2.4 * cameraSpeed);
 			camFollowPos.setPosition(
 				FlxMath.lerp(camFollow.x + xOff, camFollowPos.x, lerpVal),
 				FlxMath.lerp(camFollow.y + yOff, camFollowPos.y, lerpVal)
 			);
+		}
 
+		if(!inCutscene){
 			if (startedSong && !endingSong){
-				if (health > healthDrain)
+				if (health > healthDrain){
 					health -= healthDrain * elapsed;
+					if(health < healthDrain)
+						health = healthDrain;
+				}
 			}
 		}
 
@@ -3584,6 +3594,8 @@ class PlayState extends MusicBeatState
 			daNote.ratingDisabled = true;
 			daNote.noMissAnimation = true;
 		}
+
+		daNote.hitResult.hitDiff = Conductor.safeZoneOffset;
 		
 		if (!daNote.ratingDisabled) {
 			stats.judged.push({
@@ -3594,7 +3606,8 @@ class PlayState extends MusicBeatState
 			
 			if (!mine) {
 				songMisses++;
-				applyJudgment(daNote.hitResult.judgment, Conductor.safeZoneOffset);
+				applyNoteJudgment(daNote, false);
+				//applyJudgment(daNote.hitResult.judgment, Conductor.safeZoneOffset);
 			}else {
 				applyJudgment(MISS_MINE, Conductor.safeZoneOffset);
 				health -= daNote.missHealth * healthLoss;
@@ -3695,7 +3708,7 @@ class PlayState extends MusicBeatState
 		
 	}
 
-	inline function getNoteCharacters(note:Note, field:PlayField):Array<Character> {
+	function getNoteCharacters(note:Note, field:PlayField):Array<Character> {
 		var chars:Array<Character> = note.characters.copy();
 
 		if (note.gfNote)
@@ -3724,8 +3737,10 @@ class PlayState extends MusicBeatState
 			track.volume = 1;
 
 		// Sing animations
-		for (char in getNoteCharacters(note, field)) 
-			char.playNote(note, field);
+		var chars: Array<Character> = getNoteCharacters(note, field);
+		if (note.noteScript == null || callScript(note.noteScript, "playNoteAnim", [note, field, chars]) != Globals.Function_Stop)
+			for (char in chars) 
+				char.playNote(note, field);
 		
 		// Strum animations
 		var spr:StrumNote = field.strumNotes[note.column];
