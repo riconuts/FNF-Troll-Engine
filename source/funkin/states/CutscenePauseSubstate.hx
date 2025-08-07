@@ -90,8 +90,7 @@ class CutscenePauseSubstate extends MusicBeatSubstate {
 		];
 		for (opt in options)
 			if (opt.filter == null || opt.filter())
-				opt.button = menu.addTextOption(opt.localizationKey == null ? opt.text ?? "UNKNOWN" : Paths.getString("pauseoption_" + opt.localizationKey,
-					opt.text ?? "UNKNOWN"));
+				opt.button = menu.addTextOption((opt.localizationKey != null ? Paths.getString("pauseoption_" + opt.localizationKey) : null) ?? opt.text ?? "UNKNOWN");
 
 	}
 
