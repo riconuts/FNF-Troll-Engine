@@ -301,6 +301,13 @@ class PlayState extends MusicBeatState
 	public var camZoomingMult:Float = 1.0;
 	public var camZoomingDecay:Float = 1.0;
 
+	/**
+		Every how many beats should the camera bump.  
+		Setting this to -1 will make it zoom on section hit.
+	**/
+	public var zoomEveryBeat:Int = -1;
+	public var beatToZoom:Int = 0;
+
 	public var cameraSpeed:Float = 1.0;
 	public var defaultCamZoom:Float = 1.0;
 	public var defaultHudZoom:Float = 1.0;
@@ -372,6 +379,8 @@ class PlayState extends MusicBeatState
 	
 	public var ratingGroup:RatingGroup;
 	public var timingTxt:FlxText;
+	
+	public var fish:Fish;
 
 	/** debugPrint text container **/
 	#if(HSCRIPT_ALLOWED)
@@ -392,10 +401,16 @@ class PlayState extends MusicBeatState
 	#end
 
 	////
-	private var generatedMusic:Bool = false;
-	public var startingSong:Bool = false;
+	public var generatedMusic:Bool = false;
+	public var startedSong:Bool = false;
+	public var startedCountdown:Bool = false;
 	public var inCutscene:Bool = false;
+	public var isDead:Bool = false;
+	public var paused:Bool = false;
 	public var endingSong:Bool = false;
+
+	public var canReset:Bool = true;
+	public var canPause:Bool = true;
 
 	public var songHits:Int = 0;
 	public var songMisses:Int = 0;
@@ -550,8 +565,6 @@ class PlayState extends MusicBeatState
 	var finishedCreating = false;
 	
 	public var offset:Float = 0;
-
-	public var fish:Fish;
 
 	override public function create()
 	{
@@ -966,8 +979,6 @@ class PlayState extends MusicBeatState
 		// init shit
 		health = 1.0;
 		reloadHealthBarColors();
-
-		startingSong = true;
 
 		// EVENT AND NOTE SCRIPTS WILL GET LOADED HERE
 		generateSong();
@@ -1556,7 +1567,7 @@ class PlayState extends MusicBeatState
 
 	function startSong(startOnTime:Float=0, offset:Float = 0):Void
 	{
-		startingSong = false;
+		startedSong = true;
 
 		var realStartTime = startOnTime + offset;
 		if (realStartTime > 0) {
@@ -2413,12 +2424,6 @@ class PlayState extends MusicBeatState
 		updateSongDiscordPresence();
 	}
 
-	public var paused:Bool = false;
-	public var canReset:Bool = true;
-	var startedCountdown:Bool = false;
-	var canPause:Bool = true;
-	var prevNoteCount:Int = 0;
-
 	private var svIndex:Int =0;
 	private inline function updateVisualPosition() {
 		var event:SpeedEvent = null;
@@ -2500,7 +2505,7 @@ class PlayState extends MusicBeatState
 		}
 
 		if(!inCutscene){
-			if (!startingSong && !endingSong){
+			if (startedSong && !endingSong){
 				if (health > healthDrain){
 					health -= healthDrain * elapsed;
 					if(health < healthDrain)
@@ -2557,7 +2562,7 @@ class PlayState extends MusicBeatState
 		////
 		if (!endingSong){
 			//// time travel
-			if (!startingSong #if !debug && chartingMode #end){
+			if (startedSong #if !debug && chartingMode #end){
 				if (FlxG.keys.justPressed.ONE) {
 					KillNotes();
 					inst.onComplete();
@@ -2596,7 +2601,7 @@ class PlayState extends MusicBeatState
 
 		if (startedCountdown && !paused) {
 
-			if (startingSong) {
+			if (!startedSong) {
 				Conductor.songPosition += elapsed * 1000;
 				if (Conductor.songPosition >= 0)
 					startSong(0);
@@ -2651,7 +2656,6 @@ class PlayState extends MusicBeatState
 		MusicBeatState.switchState(new ChartingState(SONG, FlxG.keys.pressed.SHIFT ? curSection : -1));
 	}
 
-	public var isDead:Bool = false;
 	function doDeathCheck(?skipHealthCheck:Bool = false) {
 		if (isDead || practiceMode)
 			return false;
@@ -3062,7 +3066,7 @@ class PlayState extends MusicBeatState
 	public function endSong():Void
 	{
 	// Should kill you if you tried to cheat
-		if (!startingSong) {
+		if (startedSong) {
 			for (field in playfields.members) {
 				if(field.isPlayer) {
 					for(daNote in field.spawnedNotes) {
@@ -3994,11 +3998,6 @@ class PlayState extends MusicBeatState
 			camGame.zoom += camZoom * zoomMult;
 		camHUD.zoom += hudZoom * zoomMult;
 	}
-
-	// -1 = zoom every section
-	// 0 = dont zoom
-	public var zoomEveryBeat:Int = -1;
-	public var beatToZoom:Int = 0;
 		
 	override function beatHit()
 	{
@@ -4254,7 +4253,7 @@ class PlayState extends MusicBeatState
 		paused = false;
 		active = true;
 
-		if (!startingSong)
+		if (startedSong)
 		{
 			Conductor.resumeSong();
 		}
