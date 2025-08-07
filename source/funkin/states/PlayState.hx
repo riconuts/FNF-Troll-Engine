@@ -2585,9 +2585,11 @@ class PlayState extends MusicBeatState
 
 		if (!paused) {
 			if (!startedCountdown) {
-				// wait a little for lag spikes to pass lol
-				if (elapsed < 0.3) goodTicks++; else goodTicks = 0;		
-				if (goodTicks > 6) startCountdown();
+				if (!inCutscene) {
+					// wait a little for lag spikes to pass lol
+					if (elapsed < 0.3) goodTicks++; else goodTicks = 0;		
+					if (goodTicks > 6) startCountdown();
+				}
 			}
 			else if (!startedSong) {
 				Conductor.songPosition += elapsed * 1000;
