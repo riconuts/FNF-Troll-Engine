@@ -1,6 +1,9 @@
 package funkin.states;
 
-import funkin.objects.cutscenes.*;
+import funkin.objects.cutscenes.Cutscene;
+#if VIDEOS_ALLOWED
+import funkin.objects.cutscenes.VideoCutscene;
+#end
 import funkin.objects.playfields.PlayField.NoteCallback;
 import funkin.data.CharacterData;
 import funkin.data.Cache;

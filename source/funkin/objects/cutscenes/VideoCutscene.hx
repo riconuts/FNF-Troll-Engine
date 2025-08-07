@@ -1,11 +1,9 @@
 package funkin.objects.cutscenes;
 
 // idc to do hxcodec etc lmao!
-import flixel.util.FlxTimer;
+#if hxvlc
 import hxvlc.flixel.FlxVideoSprite;
-import lime.media.openal.AL;
-import lime.media.openal.ALBuffer;
-import lime.media.openal.ALSource;
+#end
 
 class VideoCutscene extends Cutscene {
 	var video: FlxVideoSprite;
@@ -23,18 +21,28 @@ class VideoCutscene extends Cutscene {
 			video.screenCenter(XY);
 		});
 		
-		onEnd.addOnce((wasSkipped:Bool) -> {
-			video.stop();
-			video.bitmap.dispose();
-			remove(video);
-			video.destroy();
-		});
+		onEnd.addOnce(onEndCutscene);
 		
 		video.load(Paths.video(videoId));
 		video.play();
 
 		video.bitmap.rate = Math.min(4, FlxG.timeScale); // above 4x the audio cuts out so just cap it at 4x
 		add(video);
+	}
+
+	/** This function exists so you can do `onEnd.remove(onEndCutscene)` if necessary **/
+	public function onEndCutscene(wasSkipped:Bool) {
+		destroyVideo();
+	}
+
+	public function destroyVideo() {
+		if (video != null) {
+			video.stop();
+			video.bitmap.dispose();
+			video.destroy();
+			remove(video);
+			video = null;
+		}
 	}
 
 	override public function pause(){
