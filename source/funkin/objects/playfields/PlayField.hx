@@ -207,27 +207,6 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 		////
 		noteField = new NoteField(this, modMgr);
-		//add(noteField);
-
-		// idk what haxeflixel does to regenerate the frames
-		// SO! this will be how we do it
-		// lil guy will sit here and regenerate the frames automatically
-		// idk why this seems to work but it does	
-		// TODO: figure out WHY this works
-		var retard:StrumNote = new StrumNote(400, 400, 0);
-		retard.playAnim("static");
-		retard.alpha = 1;
-		retard.visible = true;
-		retard.color = 0xFF000000; // just to make it a bit harder to see
-		retard.alpha = 0.9; // just to make it a bit harder to see
-		retard.scale.set(0.002, 0.002);
-		retard.handleRendering = true;
-		retard.updateHitbox();
-		retard.x = 400;
-		retard.y = 400;
-		@:privateAccess
-		retard.draw();
-		add(retard);
 	}
 
 	// queues a note to be spawned
