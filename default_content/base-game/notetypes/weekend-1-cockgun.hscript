@@ -1,0 +1,29 @@
+var cock:FlxSound = new FlxSound().loadEmbedded(Paths.sound("gunSounds/Gun_Prep"));
+function onLoad(){
+	game.extraData.set("cockedGuns", []);
+	cock.exists = true;
+	cock.context = 'SFX';
+	FlxG.sound.list.add(cock);
+}
+
+function setupNote(n){
+	n.noMissAnimation = true;
+	n.ratingDisabled = true;
+}
+
+function missNote(n, f){
+	if(game.cockedGuns.contains(field))
+		game.cockedGuns.remove(field);
+}
+
+function playNoteAnim(note, field, chars){
+	if(!game.cockedGuns.contains(field))
+		game.cockedGuns.push(field);
+
+	for(ch in chars){
+		ch.playAnim("prepAttack", true);
+		ch.voicelining = true;
+	}
+	cock.play();
+	return Function_Stop;
+}

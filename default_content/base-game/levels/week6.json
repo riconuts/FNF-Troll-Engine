@@ -1,0 +1,28 @@
+	{
+	"name": "HATING SIMULATOR FT. MOAWLING",
+	"asset": "storymenu/titles/week6",
+	"songs": ["senpai", "roses", "thorns"],
+	"props": [
+		{
+			"characterId": 0,
+			"y": 120,
+			"x": -70,
+			"scale": [0.75, 0.75],
+			"graphic": "storymenu/props/senpai",
+			"antialiasing": false,
+			"animations": [
+				{
+					"name": "idle",
+					"prefix": "idle"
+				}
+			],
+			"danceBeat": 1
+		},
+		{
+			"template": "data/storyProps/bf"
+		},
+		{
+			"template": "data/storyProps/gf"
+		}
+	]
+}

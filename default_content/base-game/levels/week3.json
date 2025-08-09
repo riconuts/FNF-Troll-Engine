@@ -1,0 +1,27 @@
+{
+	"name": "PICO",
+	"asset": "storymenu/titles/week3",
+	"songs": ["pico", "philly-nice", "blammed"],
+	"props": [
+		{
+			"characterId": 0,
+			"x": -20,
+			"y": 130,
+			"graphic": "storymenu/props/pico",
+			"antialiasing": true,
+			"animations": [
+				{
+					"name": "idle",
+					"prefix": "idle"
+				}
+			],
+			"danceBeat": 1
+		},
+		{
+			"template": "data/storyProps/bf"
+		},
+		{
+			"template": "data/storyProps/gf"
+		}
+	]
+}

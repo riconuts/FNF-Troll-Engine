@@ -1,5 +1,6 @@
 package funkin.objects;
 
+import flixel.graphics.frames.FlxAtlasFrames;
 import funkin.states.PlayState;
 import funkin.scripts.FunkinScript.ScriptType;
 import funkin.objects.playfields.PlayField;
@@ -24,6 +25,8 @@ class Character extends FlxSprite
 	public static final DEFAULT_CHARACTER:String = 'bf';
 
 	////
+
+	public var scriptNames:Array<String> = [];
 
 	/**Id of the character**/
 	public var characterId:String = DEFAULT_CHARACTER;
@@ -194,12 +197,29 @@ class Character extends FlxSprite
 		////
 		imageFile = json.image;
 
-		switch (getImageFileType(imageFile))
+		var fileType: String = getImageFileType(imageFile);
+		var atlases:Array<String> = [json.image];
+		switch (fileType)
 		{
 			case "texture":	frames = AtlasFrameMaker.construct(imageFile);
 			case "packer":	frames = Paths.getPackerAtlas(imageFile);
-			case "sparrow":	frames = Paths.getSparrowAtlas(imageFile);
+			case "sparrow":	
+				var frames:FlxAtlasFrames = Paths.getSparrowAtlas(imageFile);
+				if(json.images != null && json.images.length > 0){
+					for(i in json.images){
+						if (!atlases.contains(i)) {
+							atlases.push(i);
+							var subAtlas:FlxAtlasFrames = Paths.getSparrowAtlas(i);
+							if (subAtlas==null)continue;
+							@:privateAccess
+							if (!frames.usedGraphics.contains(subAtlas.parent))
+								frames.addAtlas(subAtlas, true);
+						}
+					}
+				}
+				this.frames = frames;
 		}
+		
 
 		////
 		baseScale = Math.isNaN(json.scale) ? 1.0 : json.scale;
@@ -226,6 +246,20 @@ class Character extends FlxSprite
 
 		if (animationsArray != null && animationsArray.length > 0)
 		{
+			if(fileType == 'sparrow'){
+				for(anim in animationsArray){
+					if(anim.image == null)continue;
+					if(!atlases.contains(anim.image)){
+						atlases.push(anim.image);
+						var subAtlas:FlxAtlasFrames = Paths.getSparrowAtlas(anim.image);
+						var frames: FlxAtlasFrames = cast frames;
+						@:privateAccess
+						if (!frames.usedGraphics.contains(subAtlas.parent))
+							frames.addAtlas(subAtlas, true);
+					}
+				}
+			}
+			
 			for (anim in animationsArray)
 			{
 				var animAnim:String = '' + anim.anim;
@@ -269,14 +303,19 @@ class Character extends FlxSprite
 		this.controlled = this.isPlayer;
 	}
 
+
+	function getMyCharacterFile(){
+		return getCharacterFile(characterId);
+	}
+
 	function _setupCharacter() {
-		var json = getCharacterFile(characterId);
+		var json = getMyCharacterFile();
 		if (json == null) {
 			trace('Character file: $characterId not found.');
 			json = getCharacterFile(DEFAULT_CHARACTER);
 			characterId = DEFAULT_CHARACTER;
 		}
-
+		
 		loadFromPsychData(json);
 		
 		hasMissAnimations = (animOffsets.exists('singLEFTmiss') && animOffsets.exists('singDOWNmiss') && animOffsets.exists('singUPmiss') && animOffsets.exists('singRIGHTmiss'));
@@ -671,15 +710,31 @@ class Character extends FlxSprite
 	public function startScripts()
 	{
 		setDefaultVar("this", this);
-
-		var key:String = 'characters/$characterId';
+		setDefaultVar("debugMode", debugMode);
 
 		#if HSCRIPT_ALLOWED
-		var hscriptFile = Paths.getHScriptPath(key);
-		if (hscriptFile != null) {
-			var script = FunkinHScript.fromFile(hscriptFile, hscriptFile, defaultVars);
-			pushScript(script);
-			return this;
+		var json = getMyCharacterFile();
+		if(json != null){
+
+			if (json.script_names != null)
+				scriptNames = json.script_names;
+
+			if (json.script_name != null && !scriptNames.contains(json.script_name))scriptNames.push(json.script_name);
+		}
+
+		if(!scriptNames.contains(characterId))
+			scriptNames.insert(0, characterId);
+
+		for(script in scriptNames){
+			for (key in ['characters/$script', 'characters/scripts/$script']){
+				var hscriptFile = Paths.getHScriptPath(key);
+				if (hscriptFile != null) {
+					var script = FunkinHScript.fromFile(hscriptFile, hscriptFile, defaultVars);
+					pushScript(script);
+					break;
+				}
+			}
+			
 		}
 		#end
 

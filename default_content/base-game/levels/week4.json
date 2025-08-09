@@ -1,0 +1,27 @@
+{
+	"name": "MOMMY MUST MURDER",
+	"asset": "storymenu/titles/week4",
+	"songs": ["satin-panties", "high", "milf"],
+	"props": [
+		{
+			"characterId": 0,
+			"y": -30,
+			"x": 10,
+			"graphic": "storymenu/props/mom",
+			"antialiasing": true,
+			"animations": [
+				{
+					"name": "idle",
+					"prefix": "idle"
+				}
+			],
+			"danceBeat": 1
+		},
+		{
+			"template": "data/storyProps/bf"
+		},
+		{
+			"template": "data/storyProps/gf"
+		}
+	]
+}

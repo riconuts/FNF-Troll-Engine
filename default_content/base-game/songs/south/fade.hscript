@@ -1,4 +1,4 @@
-if (!game.isStoryMode)
+if (!PlayState.isStoryMode)
 	return;
 
 var black:FlxSprite;

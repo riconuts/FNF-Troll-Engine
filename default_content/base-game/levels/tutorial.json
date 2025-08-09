@@ -1,0 +1,16 @@
+{
+	"index": 0,
+	"name": "FUNKIN' VIRGIN",
+	"asset": "storymenu/titles/tutorial",
+	"songs": ["tutorial"],
+	"props": [
+		{
+			"template": "data/storyProps/bf"
+		},
+		{
+			"characterId": 0,
+			"x": -100,
+			"template": "data/storyProps/gf"
+		}
+	]
+}

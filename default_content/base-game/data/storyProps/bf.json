@@ -1,0 +1,19 @@
+{
+	"characterId": 1,
+	"x": -20,
+	"y": 50,
+	"graphic": "storymenu/props/bf",
+	"antialiasing": true,
+	"animations": [
+		{
+			"name": "idle",
+			"prefix": "idle"
+		},
+		{
+			"name": "confirm",
+			"prefix": "confirm",
+			"haltsDancing": true
+		}
+	],
+	"danceBeat": 1
+}

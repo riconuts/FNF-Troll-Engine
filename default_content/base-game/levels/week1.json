@@ -1,0 +1,26 @@
+{
+	"name": "DADDY DEAREST",
+	"asset": "storymenu/titles/week1",
+	"songs": ["bopeebo", "fresh", "dadbattle"],
+	"props": [
+		{
+			"characterId": 0,
+			"y": -4,
+			"graphic": "storymenu/props/dad",
+			"antialiasing": true,
+			"animations": [
+				{
+					"name": "idle",
+					"prefix": "idle"
+				}
+			],
+			"danceBeat": 1
+		},
+		{
+			"template": "data/storyProps/bf"
+		},
+		{
+			"template": "data/storyProps/gf"
+		}
+	]
+}

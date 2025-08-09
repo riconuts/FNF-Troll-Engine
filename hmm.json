@@ -45,7 +45,7 @@
 		{
 			"name": "hxvlc",
 			"type": "haxelib",
-			"version": "2.0.1"
+			"version": "2.1.4"
 		},
 		{
 			"name": "flxanimate",
@@ -68,6 +68,20 @@
 			"name": "moonchart",
 			"type": "haxelib",
 			"version": "0.5.0"
+		},
+		{
+			"name": "funkin.vis",
+			"type": "git",
+			"dir": null,
+			"ref": "main",
+			"url": "https://github.com/nebulazorua/trollVis.git"
+		},
+		{
+			"name": "grig.audio",
+			"type": "git",
+			"dir": "src",
+			"ref": "main",
+			"url": "https://gitlab.com/haxe-grig/grig.audio.git"
 		}
 	]
 }

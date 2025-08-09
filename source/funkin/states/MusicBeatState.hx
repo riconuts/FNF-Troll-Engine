@@ -52,6 +52,8 @@ enum abstract SongSyncMode(String) to String {
 #end
 class MusicBeatState extends FlxUIState
 {
+	public var updateSongPos:Bool = true;
+	
 	private var curSection:Int = 0;
 	private var stepsToDo:Int = 0;
 
@@ -177,7 +179,7 @@ class MusicBeatState extends FlxUIState
 		}
 	}
 
-	private function updateSteps() {
+	private function updateSteps() {	
 		var oldStep:Int = Conductor.curStep;
 		Conductor.updateSteps();
 		var curStep:Int = Conductor.curStep;
@@ -199,7 +201,13 @@ class MusicBeatState extends FlxUIState
 	override function update(elapsed:Float)
 	{
 		updateSteps();
+		if(updateSongPos){
+			if (FlxG.sound.music != null)
+				Conductor.songPosition = FlxG.sound.music.time;
+			else
+				Conductor.songPosition += elapsed;
 
+		}
 		super.update(elapsed);
 	}
 

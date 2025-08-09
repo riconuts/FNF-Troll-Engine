@@ -1,0 +1,63 @@
+{
+	"bgColor": "#9F56F3",
+	"name": "DUE DEBTS",
+	"asset": "storymenu/titles/weekend1",
+	"songs": ["darnell", "lit-up", "2hot", "blazin"],
+	"props": [
+		{
+			"characterId": 0,
+			"x": 0,
+			"y": 120,
+			"graphic": "storymenu/props/darnell",
+			"antialiasing": false,
+			"animations": [
+				{
+					"name": "idle",
+					"prefix": "idle"
+				}
+			],
+			"danceBeat": 1
+		},
+		{
+			"characterId": 1,
+			"y": 15,
+			"x": -20,
+			"graphic": "storymenu/props/pico-player",
+			"antialiasing": false,
+			"animations": [
+				{
+					"name": "idle",
+					"prefix": "idle"
+				},
+				{
+					"offset": [28, 1],
+					"name": "confirm",
+					"prefix": "confirm",
+					"haltsDancing": true
+				}
+			],
+			"danceBeat": 1
+		},
+		{
+			"characterId": 2,
+			"x": -25,
+			"y": 50,
+			"graphic": "storymenu/props/nene",
+			"antialiasing": true,
+			"animations": [
+				{
+					"name": "danceLeft",
+					"prefix": "idle",
+					"indices": [30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+				},
+				{
+					"name": "danceRight",
+					"prefix": "idle",
+					"indices": [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
+				}
+			],
+			"danceSequence": ["danceLeft", "danceRight"],
+			"danceBeat": 1
+		}
+	]
+}
