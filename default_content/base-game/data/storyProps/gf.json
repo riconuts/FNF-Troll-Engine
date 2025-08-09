@@ -1,0 +1,20 @@
+{
+	"characterId": 2,
+	"y": 50,
+	"graphic": "storymenu/props/gf",
+	"antialiasing": true,
+	"animations": [
+		{
+			"name": "danceLeft",
+			"prefix": "idle",
+			"indices": [30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+		},
+		{
+			"name": "danceRight",
+			"prefix": "idle",
+			"indices": [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
+		}
+	],
+	"danceSequence": ["danceLeft", "danceRight"],
+	"danceBeat": 1
+}

@@ -330,11 +330,6 @@ class TitleState extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
-		if (FlxG.sound.music != null)
-			Conductor.songPosition = FlxG.sound.music.time;
-		else
-			Conductor.songPosition += elapsed;
-
 		if (bg != null && bg.stageScript != null) {
 			bg.stageScript.set("curDecBeat", curDecBeat);
 			bg.stageScript.set("curDecStep", curDecStep);

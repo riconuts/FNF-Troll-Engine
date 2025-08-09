@@ -97,6 +97,11 @@ class Main extends Sprite
 		stage.window.setIcon(Image.fromFile("icon.png"));
 		#end
 
+		#if hxvlc
+		hxvlc.util.Handle.init(["--no-audio-time-stretch"]); // Makes it so videos when slowed/sped up have their audio pitch up/down
+		// imo better than with time stretch but remove if thats what u prefer lol
+		#end
+				
 		////
 		#if sys
 		var args = Sys.args();

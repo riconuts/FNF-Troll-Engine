@@ -1,0 +1,7 @@
+import funkin.objects.cutscenes.TimelineCutscene;
+import funkin.objects.cutscenes.VideoCutscene;
+
+function onCreate(){
+	if(PlayState.isStoryMode && !PlayState.seenCutscene)
+		game.startCutscenes.push(new TimelineCutscene('guns'));
+}

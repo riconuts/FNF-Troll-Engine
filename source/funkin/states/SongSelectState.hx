@@ -288,6 +288,8 @@ class ChartSelectSubstate extends MusicBeatSubstate
 			PlayState.loadPlaylist([song], charts[curSel]);
 			PlayState.isStoryMode = false;
 
+			PlayState.isStoryMode = false;
+
 			if (FlxG.keys.pressed.SHIFT)
 				LoadingState.loadAndSwitchState(new funkin.states.editors.ChartingState());
 			else

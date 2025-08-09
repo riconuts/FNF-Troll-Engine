@@ -246,6 +246,7 @@ class FunkinHScript extends FunkinScript
 		set("FlxSprite", FlxSprite);
 		set("FlxCamera", FlxCamera);
 		set("FlxSound", FlxSound);
+		set("FlxTiledSprite", flixel.addons.display.FlxTiledSprite);
 		set("FlxMath", flixel.math.FlxMath);
 		set("FlxTimer", flixel.util.FlxTimer);
 		set("FlxTween", flixel.tweens.FlxTween);
@@ -381,6 +382,8 @@ class FunkinHScript extends FunkinScript
 
 		set("HScriptedState", funkin.states.scripting.HScriptedState);
 		set("HScriptedSubstate", funkin.states.scripting.HScriptedSubstate);
+
+		set("Highscore", funkin.data.Highscore); // Useful for stuff like levels showing diff songs before and after finishing (i.e Weekend 1)
 	} 
 
 	function importClass(className:String)

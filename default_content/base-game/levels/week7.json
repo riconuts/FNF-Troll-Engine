@@ -1,0 +1,27 @@
+{
+	"name": "TANKMAN FT. JOHNNYUTAH",
+	"asset": "storymenu/titles/week7",
+	"songs": ["ugh", "guns", "stress"],
+	"props": [
+		{
+			"characterId": 0,
+			"y": 70,
+			"x": -17.5,
+			"graphic": "storymenu/props/tankman",
+			"antialiasing": false,
+			"animations": [
+				{
+					"name": "idle",
+					"prefix": "idle"
+				}
+			],
+			"danceBeat": 1
+		},
+		{
+			"template": "data/storyProps/bf"
+		},
+		{
+			"template": "data/storyProps/gf"
+		}
+	]
+}

@@ -4,7 +4,6 @@ import haxe.io.Bytes;
 import openfl.utils.ByteArray;
 import haxe.ds.StringMap;
 import funkin.data.LocalizationMap;
-import funkin.data.WeekData;
 import flixel.addons.display.FlxRuntimeShader;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.graphics.FlxGraphic;
@@ -703,8 +702,8 @@ class Paths
 			Reflect.setField(data, "weeks", Reflect.field(data, "chapters"));
 			Reflect.deleteField(data, "chapters");
 			return data;
-		}else { // Lets assume it's an old TGT metadata
-			return {weeks: [data]};
+		}else {
+			return {};
 		}
 	}
 
@@ -891,11 +890,6 @@ typedef FreeplayCategoryMetadata = {
 }
 
 typedef ContentMetadata = {
-	/**
-		Weeks to be added to the story mode
-	**/
-	var weeks:Array<funkin.data.WeekData.WeekMetadata>;
-	
 	/**
 		Content that will load before this content.
 	**/

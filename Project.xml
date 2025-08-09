@@ -110,7 +110,8 @@
 	<haxelib name="flixel" version="5.6.2" /> <!--You can use up to Flixel 6.0.0 but some stuff might be a bit brokey-->
 	<haxelib name="flixel-ui" version="2.6.1" />
 	<haxelib name="flixel-addons" version="3.2.3" />
-
+	<haxelib name="funkin.vis"/>
+	<haxelib name="grig.audio"/>
 	<section if="USING_FLXANIMATE">
 		<haxelib name="flxanimate" version="3.0.4"/>
 		<classpath path="flxAnimateShadow"/> <!--Remove if FlxAnimate updates and lets you write your own code to determine how filesystem shit is gotten-->
