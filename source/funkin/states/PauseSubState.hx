@@ -371,20 +371,19 @@ class PauseSubState extends MusicBeatSubstate
 		var daSubstate = new OptionsSubstate();
 		daSubstate.goBack = function(changedOptions:Array<String>) {
 			var canResume:Bool = true;
-
 			for (opt in changedOptions) {
-				if (OptionsSubstate.requiresRestart.exists(opt)) {
+				if (OptionsSubstate.requiresRestart.get(opt) == true) {
 					canResume = false;
 					break;
 				}
 			}
 
 			game.optionsChanged(changedOptions);
-			FlxG.mouse.visible = false;
-
 			closeSubState();
-			if (!canResume && changedOptions.length > 0){
-				removeOption("resume");
+			
+			FlxG.mouse.visible = false;
+			if (!canResume) {
+				removeOption("resume-song");
 				removeOption("skip-to");
 				regenMenu();
 			}
