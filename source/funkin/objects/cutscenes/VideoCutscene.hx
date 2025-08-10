@@ -3,6 +3,7 @@ package funkin.objects.cutscenes;
 // idc to do hxcodec etc lmao!
 #if hxvlc
 import hxvlc.flixel.FlxVideoSprite;
+import hxvlc.util.Location;
 #end
 
 class VideoCutscene extends Cutscene {
@@ -22,12 +23,17 @@ class VideoCutscene extends Cutscene {
 		});
 		
 		onEnd.addOnce(onEndCutscene);
-		
-		video.load(Paths.video(videoId));
-		video.play();
-
-		video.bitmap.rate = Math.min(4, FlxG.timeScale); // above 4x the audio cuts out so just cap it at 4x
 		add(video);
+
+		var videoLocation:Location = Paths.video(videoId);
+		var videoLoaded:Bool = video.load(videoLocation);
+		if (videoLoaded) {
+			video.play();
+			video.bitmap.rate = Math.min(4, FlxG.timeScale); // above 4x the audio cuts out so just cap it at 4x
+		}else {
+			trace('Failed to load video: $videoLocation');
+			FlxG.signals.postUpdate.addOnce(onEnd.dispatch.bind(true)); // onSceneFinished signal hasn't been added yet :l
+		}
 	}
 
 	/** This function exists so you can do `onEnd.remove(onEndCutscene)` if necessary **/
