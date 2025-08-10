@@ -16,13 +16,19 @@ class OptionsState extends MusicBeatState
 
 		daSubstate = new OptionsSubstate(true);
 		daSubstate.goBack = (changedOptions:Array<String>)->{
-			FadeTransitionSubstate.nextCamera = daSubstate.transCamera;
+			FadeTransitionSubstate.nextCamera = transCamera;
 			MusicBeatState.switchState(new MainMenuState());
 		};
-
 		openSubState(daSubstate);
 
 		super.create();
+
+		subStateOpened.addOnce((_) -> {
+			transCamera = new FlxCamera();
+			transCamera.bgColor = 0;
+			FlxG.cameras.add(transCamera, false);
+		});
+
 		var bg = new funkin.objects.CoolMenuBG(Paths.image('menuDesat', null, false), 0xff7186fd);
 		add(bg);
 	}
@@ -31,7 +37,6 @@ class OptionsState extends MusicBeatState
 		super.resetSubState();
 		if (!transitioned){
 			transitioned = true;
-			transCamera = daSubstate.transCamera;
 			doDaInTrans();
 		}
 	}
@@ -83,8 +88,6 @@ class OptionsState extends MusicBeatState
 		_exiting = true;
 		doDaOutTrans(function()
 		{
-			for (cam in daSubstate.camerasToRemove)
-				FlxG.cameras.remove(cam);
 			FlxG.switchState(nextState);
 		});
 

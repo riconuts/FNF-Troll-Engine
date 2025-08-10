@@ -388,9 +388,6 @@ class PauseSubState extends MusicBeatSubstate
 				removeOption("skip-to");
 				regenMenu();
 			}
-
-			for (camera in daSubstate.camerasToRemove)
-				FlxG.cameras.remove(camera);
 		};
 		openSubState(daSubstate);
 	}
