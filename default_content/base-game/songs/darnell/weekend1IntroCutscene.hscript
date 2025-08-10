@@ -1,0 +1,26 @@
+import funkin.objects.cutscenes.VideoCutscene;
+
+var black:FlxSprite;
+
+function onCreate() {
+	if (!PlayState.isStoryMode || PlayState.seenCutscene) {
+		script.stop();
+		return;
+	}	
+	
+	black = CoolUtil.blankSprite(FlxG.width, FlxG.height, 0xFF000000);
+	black.camera = game.camOther;
+	game.add(black);
+	
+	game.startCutscenes.push(new VideoCutscene('darnellCutscene'));
+}
+
+function onCountdownStarted() {
+	FlxTween.tween(black, {alpha: 0.0}, 0.6, {onComplete: function(twn) {
+		game.remove(black);
+		black.destroy();
+		twn.destroy();
+		script.stop();
+		return;
+	}});
+}
