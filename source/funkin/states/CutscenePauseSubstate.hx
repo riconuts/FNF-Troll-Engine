@@ -1,5 +1,6 @@
 package funkin.states;
 
+import funkin.states.PlayState;
 import funkin.objects.cutscenes.Cutscene;
 import flixel.tweens.FlxEase;
 import flixel.util.FlxColor;
@@ -84,7 +85,7 @@ class CutscenePauseSubstate extends MusicBeatSubstate {
 			{
 				localizationKey: "exit-to-menu",
 				onAccept: () -> {
-					MusicBeatState.switchState(new funkin.states.MainMenuState());
+					PlayState.instance != null ? PlayState.gotoMenus() : MusicBeatState.switchState(new funkin.states.MainMenuState());
 				}
 			}
 		];
