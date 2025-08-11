@@ -599,7 +599,7 @@ class PlayState extends MusicBeatState
 		#end
 
 		//// Reset to default
-		PauseSubState.songName = null;
+		PauseSubState.songName = 'breakfast';
 		GameOverSubstate.resetVariables();
 
 		////

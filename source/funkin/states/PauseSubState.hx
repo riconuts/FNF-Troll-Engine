@@ -29,6 +29,8 @@ class PauseSubState extends MusicBeatSubstate
 
 	private var allTexts:Array<FlxText>;
 
+	private var pauseMusic:Null<FlxSound>;
+
 	public function new(bgColor:Int = 0xFF000000) {
 		super(bgColor);
 	}
@@ -225,19 +227,18 @@ class PauseSubState extends MusicBeatSubstate
 		}
 	}
 
-	private var pauseMusic:FlxSound;
 	private function playMusic(){
-		pauseMusic = null;
-		
-		var songName:String = songName ?? 'Breakfast';
-		if (songName == 'None') return;
-
-		songName = Paths.formatToSongPath(songName);
+		if (songName == null) {
+			pauseMusic = null;
+			return;
+		}
 
 		var md = MusicData.fromName(songName);
 		if (md != null) {
 			pauseMusic = md.makeFlxSound();
-		}else {
+		}
+		#if (true || ALLOW_DEPRECATION)
+		else {
 			var sndPath = Paths.soundPath("music", songName);
 			if (Paths.exists(sndPath)) {
 				var loopTimePath = new haxe.io.Path(sndPath);
@@ -256,6 +257,7 @@ class PauseSubState extends MusicBeatSubstate
 				FlxG.sound.list.add(pauseMusic);
 			}
 		}
+		#end
 
 		if (pauseMusic != null) {
 			pauseMusic.volume = 0;
@@ -274,7 +276,7 @@ class PauseSubState extends MusicBeatSubstate
 
 	override function destroy() {
 		if (instance == this) instance = null;
-		pauseMusic.destroy();
+		if (pauseMusic != null )pauseMusic.destroy();
 		super.destroy();
 	}
 
