@@ -260,7 +260,7 @@ class PauseSubState extends MusicBeatSubstate
 		if (pauseMusic != null) {
 			pauseMusic.volume = 0;
 			pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length * 0.5)));
-			pauseMusic.fadeIn(50, 0, 0.5);
+			pauseMusic.fadeIn(5, 0, 0.75);
 		}else {
 			trace('Pause music not found: $songName');
 		}
