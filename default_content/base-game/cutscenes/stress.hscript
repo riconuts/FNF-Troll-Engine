@@ -140,9 +140,16 @@ function onCreateCutscene()
 		gfTurninDemon.destroy();
 		gfTurninDemon = null;
 	});
+	timeline.once(420, (f)->{
+		game.camGame.shake(0.01, 2/24);
+	});
 	timeline.playAnimation(420, boyfrimate, "catch");
 
 	timeline.playAnimation(444, boyfrimate, "bfgfIdle");
+	
+	timeline.once(451, (f)->{
+		game.camGame.shake(0.01, 3/24);
+	});
 
 	timeline.playAnimation(498, speakimate, "picoIdle");
 	timeline.playAnimation(468, tankmanimate, "Pico", true);

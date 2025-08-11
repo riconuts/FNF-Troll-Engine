@@ -39,7 +39,7 @@ function onCreateCutscene(){
 	game.addBehindDad(tankmanimate);
 	tankmanimate.visible = false;
 	
-	timeline.easeProperties(0, 8, camFollow, {y: camFollow.y + 75}, FlxEase.quadOut);
+	timeline.easeProperties(0, 8, camFollow, {y: camFollow.y + 75}, FlxEase.quadOut).updateEveryFrame = true;
 
 	this.playMusic(Paths.music("DISTORTO"), 1, 0.25, 0);
 

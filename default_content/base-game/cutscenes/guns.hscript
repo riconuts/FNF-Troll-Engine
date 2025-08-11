@@ -50,11 +50,11 @@ function onCreateCutscene(){
 	this.sound(0, "tankSong2");
 	timeline.playAnimation(0, tankmanimate, 'voice', true);
 
-	timeline.easeProperties(0, 80, game.camGame, {zoom: 1.2}, FlxEase.quartOut);
-	timeline.easeProperties(0, 60, camFollow, {y: camFollow.y + 100}, FlxEase.quadOut);
+	timeline.easeProperties(0, 80, game.camGame, {zoom: 1.2}, FlxEase.quartOut).updateEveryFrame = true;
+	timeline.easeProperties(0, 60, camFollow, {y: camFollow.y + 100}, FlxEase.quadOut).updateEveryFrame = true;
 
-	timeline.easeProperties(94, 102, game.camGame, {zoom: 1.4}, FlxEase.quadIn);
-	timeline.easeProperties(102, 174, game.camGame, {zoom: 1.2}, FlxEase.quartOut);
+	timeline.easeProperties(94, 102, game.camGame, {zoom: 1.4}, FlxEase.quadIn).updateEveryFrame = true;
+	timeline.easeProperties(102, 174, game.camGame, {zoom: 1.2}, FlxEase.quartOut).updateEveryFrame = true;
 
 	timeline.playAnimation(102, game.gf, 'sad');
 
