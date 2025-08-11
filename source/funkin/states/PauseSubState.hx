@@ -21,7 +21,6 @@ class PauseSubState extends MusicBeatSubstate
 	public static var instance:PauseSubState = null;
 	public static var songName:Null<String> = null;
 
-	public var bg:FlxSprite;
 	public var menu:AlphabetMenu;
 
 	private var menuOptions:Array<PauseMenuOption>;
@@ -29,6 +28,10 @@ class PauseSubState extends MusicBeatSubstate
 	private var curOption:PauseMenuOption = null; 
 
 	private var allTexts:Array<FlxText>;
+
+	public function new(bgColor:Int = 0xFF000000) {
+		super(bgColor);
+	}
 
 	public function pushOption(opt) {
 		optionsMap.set(opt.id, opt);
@@ -129,12 +132,10 @@ class PauseSubState extends MusicBeatSubstate
 		var cam:FlxCamera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
 		this.cameras = [cam];
 
-		bg = CoolUtil.blankSprite(FlxG.width, FlxG.height, 0xFF000000);
-		bg.scrollFactor.set();
-		bg.alpha = 0.0;
-		add(bg);
-
-		FlxTween.tween(bg, {alpha: 0.6}, 0.3, {ease: FlxEase.quartInOut});
+		@:privateAccess
+		_bgSprite._cameras = this._cameras;
+		_bgSprite.alpha = 0.0;
+		FlxTween.tween(_bgSprite, {alpha: 0.6}, 0.3, {ease: FlxEase.quartInOut});
 
 		menu = new AlphabetMenu();
 		menu.callbacks.onSelect = onSelectedOption;
@@ -384,7 +385,7 @@ class PauseSubState extends MusicBeatSubstate
 			FlxG.mouse.visible = false;
 			if (!canResume) {
 				removeOption("resume-song");
-				removeOption("skip-to");
+				removeOption("skip-to-time");
 				regenMenu();
 			}
 		};
@@ -406,7 +407,7 @@ class SkipTimeOption extends PauseMenuOption
 	private var holdTime:Float = 0.0;
 
 	public function new() {
-		super('skip-to');
+		super('skip-to-time');
 	}
 
 	override function select() {

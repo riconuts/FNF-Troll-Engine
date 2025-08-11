@@ -9,8 +9,7 @@ import funkin.data.PauseMenuOption;
 import haxe.Constraints.Function;
 
 typedef PauseOpt = {
-	?text: String,
-	?localizationKey: String,
+	id: String,
 	?button: Alphabet,
 	?filter: Void->Bool,
 	onAccept:Function
@@ -28,7 +27,7 @@ class CutscenePauseSubstate extends MusicBeatSubstate {
 	}
 
 	public function new(cut: Cutscene){
-		super();
+		super(0xFF000000);
 		this.associatedCutscene = cut;	
 	}
 
@@ -38,14 +37,10 @@ class CutscenePauseSubstate extends MusicBeatSubstate {
 		prevTimeScale = FlxG.timeScale;
 		FlxG.timeScale = 1;
 
-		var bg:FlxSprite = new FlxSprite();
-		bg.makeGraphic(1, 1, FlxColor.BLACK);
-		bg.scrollFactor.set(0, 0);
-		bg.scale.set(1280, 720);
-		bg.updateHitbox();
-		bg.alpha = 0;
-		FlxTween.tween(bg, {alpha: 0.4}, 1, {ease: FlxEase.quadInOut});
-		add(bg);
+		@:privateAccess
+		this._bgSprite._cameras = this._cameras;
+		_bgSprite.alpha = 0;
+		FlxTween.tween(_bgSprite, {alpha: 0.4}, 1, {ease: FlxEase.quadInOut});
 
 		menu = new AlphabetMenu();
 		menu.callbacks.onSelect = onSelectedOption;
@@ -62,28 +57,28 @@ class CutscenePauseSubstate extends MusicBeatSubstate {
 
 		options = [
 			{
-				localizationKey: "resume",
+				id: "resume-cutscene",
 				onAccept: () -> {
 					close();
 					associatedCutscene.resume();
 				}
 			},
 			{
-				text: "Skip Cutscene",
+				id: "skip-cutscene",
 				onAccept: () -> {
 					close();
 					associatedCutscene.onEnd.dispatch(true);
 				}
 			},
 			{
-				text: "Restart Cutscene",
+				id: "restart-cutscene",
 				onAccept: () -> {
 					close();
 					associatedCutscene.restart();
 				}
 			},
 			{
-				localizationKey: "exit-to-menu",
+				id: "exit-to-menu",
 				onAccept: () -> {
 					PlayState.instance != null ? PlayState.gotoMenus() : MusicBeatState.switchState(new funkin.states.MainMenuState());
 				}
@@ -91,7 +86,7 @@ class CutscenePauseSubstate extends MusicBeatSubstate {
 		];
 		for (opt in options)
 			if (opt.filter == null || opt.filter())
-				opt.button = menu.addTextOption((opt.localizationKey != null ? Paths.getString("pauseoption_" + opt.localizationKey) : null) ?? opt.text ?? "UNKNOWN");
+				opt.button = menu.addTextOption(Paths.getString("pauseoption_" + opt.id) ?? opt.id);
 
 	}
 
