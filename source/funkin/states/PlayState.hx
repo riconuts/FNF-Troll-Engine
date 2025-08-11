@@ -4174,7 +4174,6 @@ class PlayState extends MusicBeatState
 
 	public function openCutscenePauseMenu(scene: Cutscene)
 	{
-		trace(scene);
 		if (callOnScripts('onPause') == Globals.Function_Stop) 
 			return;
 		
