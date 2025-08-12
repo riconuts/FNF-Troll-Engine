@@ -47,7 +47,8 @@ function onHoldPress(note, field){
 
     // allow the character to go back to their idle animation when the roll is either finished or dropped
 	var onHoldEnd;
-	onHoldEnd = function() {
+	onHoldEnd = function(note2) {
+		if (note2 != note) return;
 		for (char in chars) {
 			char.skipDance = false;
 			char.holdTimer = 0.0;
