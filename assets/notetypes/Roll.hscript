@@ -35,24 +35,26 @@ function onHoldPress(note, field){
     note.tripProgress = 1;
 
     var chars = game.getNoteCharacters(note, field);
-    var animToPlay = field.singAnimations[note.column] + note.characterHitAnimSuffix;
 
     // play the intended singing animation when the player presses the roll, and prevent the character from going back to idle
+    note.noAnimation = false;
 	for (char in chars) 
     {
-		char.playAnim(animToPlay, true);
+        char.playNote(note, field);
         char.skipDance = true;
     }
+    note.noAnimation = true;
 
     // allow the character to go back to their idle animation when the roll is either finished or dropped
-    for(func in [field.holdFinished, field.holdDropped]) {
-        func.add(() ->
-        {
-            for (char in chars) 
-            {
-                char.skipDance = false;
-                char.holdTimer = 0.0;
-            }
-        });
-    }
+	var onHoldEnd;
+	onHoldEnd = function() {
+		for (char in chars) {
+			char.skipDance = false;
+			char.holdTimer = 0.0;
+		}
+		field.holdFinished.remove(onHoldEnd);
+		field.holdDropped.remove(onHoldEnd);
+	}
+	field.holdFinished.add(onHoldEnd);
+	field.holdDropped.add(onHoldEnd);
 }
