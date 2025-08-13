@@ -1629,7 +1629,7 @@ class ChartingState extends MusicBeatState
 		blockPressWhileScrolling.push(waveformTrackDropDown);
 
 		//
-		trackVolumeSlider = new FlxUISlider(
+		trackVolumeSlider = new CustomFlxUISlider(
 			this, 
 			'_curTrackVolume', 
 			waveformTrackDropDown.x + 150 - 10, 
@@ -1708,11 +1708,11 @@ class ChartingState extends MusicBeatState
 		disableAutoScrolling.callback = () -> {options.noAutoScroll = disableAutoScrolling.checked;}
 		disableAutoScrolling.checked = options.noAutoScroll == true;
 
-		var sliderHitVol = new FlxUISlider(this, 'hitsoundVolume', 10, startY + 90, 0, 1, 125, null, 5, FlxColor.WHITE, FlxColor.BLACK);
+		var sliderHitVol = new CustomFlxUISlider(this, 'hitsoundVolume', 10, startY + 90, 0, 1, 125, null, 5, FlxColor.WHITE, FlxColor.BLACK);
 		sliderHitVol.nameLabel.text = 'Hitsound Volume';
 		sliderHitVol.value = hitsoundVolume;
 
-		var sliderRate = new FlxUISlider(this, 'playbackSpeed', 68, 325, 0.5, 3, 150, null, 5, FlxColor.WHITE, FlxColor.BLACK);
+		var sliderRate = new CustomFlxUISlider(this, 'playbackSpeed', 68, 325, 0.5, 3, 150, null, 5, FlxColor.WHITE, FlxColor.BLACK);
 		sliderRate.nameLabel.text = 'Playback Rate';
 		sliderRate.value = playbackSpeed;
 
@@ -1910,7 +1910,7 @@ class ChartingState extends MusicBeatState
 		}
 		else if (id == FlxUISlider.CHANGE_EVENT)
 		{
-			var sender:FlxUISlider = cast sender;
+			var sender:CustomFlxUISlider = cast sender;
 
 			
 		}
@@ -3369,6 +3369,38 @@ class ChartingState extends MusicBeatState
 class CustomFlxUITabMenu extends FlxUITabMenu {
 	override function sortTabs(a, b):Int
 		return 0;
+}
+
+/** 
+	shit fix for sliders only updating while your mouse is over them 
+**/
+private class CustomFlxUISlider extends flixel.addons.ui.FlxUISlider {
+	var _holding = false;
+
+	override function get_relativePos() {
+		var v = super.get_relativePos();
+		return v < 0 ? 0 : v;
+	}
+
+	override function update(elapsed) {
+		#if (flixel >= "5.7.0")
+		final camera = getCameras()[0];// else use this.camera
+		#end
+		final mouse = FlxG.mouse.getScreenPosition(camera);
+		final hoveringOver = FlxMath.pointInFlxRect(mouse.x, mouse.y, _bounds);
+
+		if (!FlxG.mouse.pressed)
+			_holding = false;
+		else if (FlxG.mouse.justPressed && hoveringOver)
+			_holding = true;
+
+		if (_holding && !hoveringOver) {
+			handle.x = mouse.x;
+			updateValue();
+		}
+
+		super.update(elapsed);
+	}
 }
 
 private class ChangeMustHitSectionAction extends ChartingAction {
