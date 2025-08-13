@@ -18,6 +18,7 @@ import flixel.*;
 import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;
 import flixel.input.keyboard.FlxKey;
+import flixel.util.FlxGradient;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.addons.ui.*;
 import flixel.addons.transition.FlxTransitionableState;
@@ -218,6 +219,7 @@ class ChartingState extends MusicBeatState
 	var songId:String;
 	var songLength:Float = 0.0;
 
+	var iconBG:FlxSprite;
 	var leftIcon:HealthIcon;
 	var rightIcon:HealthIcon;
 
@@ -523,6 +525,12 @@ class ChartingState extends MusicBeatState
 		add(dummyArrow);
 
 		////
+		iconBG = FlxGradient.createGradientFlxSprite(1, 45 + 5 * 2, [0xFF535353, 0x00535353]);
+		iconBG.scale.x = FlxG.width;
+		iconBG.updateHitbox();
+		iconBG.scrollFactor.set(0, 0);
+		add(iconBG);
+
 		var eventIcon:FlxSprite = new FlxSprite(GRID_SIZE * 0.5 - 30 * 0.5, (55 - 30) * 0.5, Paths.image('eventArrow'));
 		eventIcon.scrollFactor.set(1, 0);
 		eventIcon.setGraphicSize(30, 30);
@@ -2002,10 +2010,18 @@ class ChartingState extends MusicBeatState
 		FlxG.mouse.visible = true; //cause reasons. trust me
 
 		var movedDummyY:Bool = false;
-		var onGrid:Bool =	FlxG.mouse.x >= gridBG.x
+		var onIcons:Bool = FlxG.mouse.overlaps(iconBG);
+		var onGrid:Bool = !onIcons
+						&&	FlxG.mouse.x >= gridBG.x
 						&&	FlxG.mouse.x <	gridBG.x + gridBG.width
 						&&	FlxG.mouse.y >= gridBG.y
 						&&	FlxG.mouse.y <	gridBG.y + gridBG.height;
+
+		if (onIcons && FlxG.mouse.justPressed) {
+			if (FlxG.mouse.overlaps(rightIcon)) {
+				new ChangeMustHitSectionAction(curSec, true);
+			}
+		}
 
 		if (onGrid){
 			dummyArrow.visible = true;
