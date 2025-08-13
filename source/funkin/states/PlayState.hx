@@ -1699,6 +1699,11 @@ class PlayState extends MusicBeatState
 		playerTracks = makeTrackInstances(SONG.tracks.player);
 		opponentTracks = makeTrackInstances(SONG.tracks.opponent);
 
+		for (trackId in songTrackNames) {
+			if (trackMap.get(trackId) == null)
+				instTracks.push(addTrack(trackId));
+		}
+
 		hitsound = new FlxSound().loadEmbedded(Paths.sound("hitsound"));
 		hitsound.exists = true;
 		FlxG.sound.list.add(hitsound);
