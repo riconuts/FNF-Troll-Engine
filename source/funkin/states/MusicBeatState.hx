@@ -205,7 +205,7 @@ class MusicBeatState extends FlxUIState
 			if (FlxG.sound.music != null)
 				Conductor.songPosition = FlxG.sound.music.time;
 			else
-				Conductor.songPosition += elapsed;
+				Conductor.songPosition += elapsed * 1000;
 
 		}
 		super.update(elapsed);
