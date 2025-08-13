@@ -479,21 +479,6 @@ class ChartingState extends MusicBeatState
 		waveformSprite = new FlxSprite(GRID_SIZE, 0).makeGraphic(FlxG.width, FlxG.height, 0x00FFFFFF);
 		add(waveformSprite);
 
-		var eventIcon:FlxSprite = new FlxSprite(-GRID_SIZE - 5, 15, Paths.image('eventArrow'));
-		leftIcon = new HealthIcon('bf');
-		rightIcon = new HealthIcon('dad');
-		eventIcon.scrollFactor.set(1, 0);
-		leftIcon.scrollFactor.set(1, 0);
-		rightIcon.scrollFactor.set(1, 0);
-
-		eventIcon.setGraphicSize(30, 30);
-		leftIcon.setGraphicSize(0, 45);
-		rightIcon.setGraphicSize(0, 45);
-
-		add(eventIcon);
-		add(leftIcon);
-		add(rightIcon);
-
 		curRenderedSustains = new FlxTypedGroup<FlxSprite>();
 		curRenderedNotes = new FlxTypedGroup<Note>();
 		curRenderedNoteType = new FlxTypedGroup<FlxText>();
@@ -537,6 +522,26 @@ class ChartingState extends MusicBeatState
 		dummyArrow = CoolUtil.blankSprite(GRID_SIZE, GRID_SIZE);
 		add(dummyArrow);
 
+		////
+		var eventIcon:FlxSprite = new FlxSprite(GRID_SIZE * 0.5 - 30 * 0.5, (55 - 30) * 0.5, Paths.image('eventArrow'));
+		eventIcon.scrollFactor.set(1, 0);
+		eventIcon.setGraphicSize(30, 30);
+		eventIcon.updateHitbox();
+		add(eventIcon);
+		
+		leftIcon = new HealthIcon('bf');
+		leftIcon.scrollFactor.set(1, 0);
+		leftIcon.setGraphicSize(0, 45);
+		leftIcon.updateHitbox();
+		add(leftIcon);
+		
+		rightIcon = new HealthIcon('dad');
+		rightIcon.scrollFactor.set(1, 0);
+		rightIcon.setGraphicSize(0, 45);
+		rightIcon.updateHitbox();
+		add(rightIcon);
+
+		////
 		var text =
 		"W/S or Mouse Wheel - Change strum time
 		\nA/D - Go to the previous/next section
@@ -2754,8 +2759,8 @@ class ChartingState extends MusicBeatState
 		rightIcon.setGraphicSize(0, 45);
 		rightIcon.updateHitbox();
 
-		leftIcon.setPosition(GRID_SIZE * _song.keyCount * 0.5 - leftIcon.width * 0.5, 5);
-		rightIcon.setPosition(GRID_SIZE * _song.keyCount * 1.5 - rightIcon.width * 0.5, 5);
+		leftIcon.setPosition(GRID_SIZE * (1 + _song.keyCount * 0.5) - leftIcon.width * 0.5, 5);
+		rightIcon.setPosition(GRID_SIZE * (1 + _song.keyCount * 1.5) - rightIcon.width * 0.5, 5);
 	}
 
 	function updateNoteSteps():Void

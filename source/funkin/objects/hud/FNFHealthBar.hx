@@ -161,16 +161,11 @@ class FNFHealthBar extends FlxBar{
 	}
 
 	public function updateIcons(elapsed:Float){
-		if (iconScale != 1) {
-			iconScale = FlxMath.lerp(1, iconScale, Math.exp(-elapsed * 9));
-
-			var scaleOff = 75 * iconScale;
-			leftIcon.x = iconPosX - scaleOff - iconOffset * 2;
-			rightIcon.x = iconPosX + scaleOff - 75 - iconOffset;
-		} else {
-			leftIcon.x = iconPosX - 75 - iconOffset * 2;
-			rightIcon.x = iconPosX - iconOffset;
-		}
+		iconScale = FlxMath.lerp(1, iconScale, Math.exp(-elapsed * 9));
+		leftIcon.x = iconPosX - leftIcon.width + iconOffset;
+		rightIcon.x = iconPosX - iconOffset;
+		leftIcon.y = iconPosY - leftIcon.height * 0.5;
+		rightIcon.y = iconPosY - rightIcon.height * 0.5;
 	}
 
 	override function updateBar() {
