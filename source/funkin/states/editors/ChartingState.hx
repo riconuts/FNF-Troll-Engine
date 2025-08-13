@@ -1802,7 +1802,7 @@ class ChartingState extends MusicBeatState
 			switch (label)
 			{
 				case 'Must hit section':
-					_song.notes[curSec].mustHitSection = check.checked;
+					new ChangeMustHitSectionAction(curSec, !FlxG.keys.pressed.CONTROL);
 
 					updateGrid();
 					updateHeads();
@@ -2205,22 +2205,7 @@ class ChartingState extends MusicBeatState
 
 	function updateKeys(elapsed:Float) {
 		if (FlxG.keys.justPressed.M) {
-			// Change mustHitSection value
-			var mustHit = !_song.notes[curSec].mustHitSection;
-			_song.notes[curSec].mustHitSection = mustHit;
-			check_mustHitSection.checked = mustHit;
-
-			if (!FlxG.keys.pressed.CONTROL) {
-				// Move notes to accomodate for the change
-				for (i in 0..._song.notes[curSec].sectionNotes.length) {
-					var note:NoteData = _song.notes[curSec].sectionNotes[i];
-					note.column = (note.column + _song.keyCount) % (_song.keyCount * 2);
-					_song.notes[curSec].sectionNotes[i] = note;
-				}
-			}
-
-			updateGrid();
-			updateHeads();	
+			new ChangeMustHitSectionAction(curSec, !FlxG.keys.pressed.CONTROL);
 		}	
 
 		if (curSelectedNote != null) {
@@ -3368,6 +3353,35 @@ class ChartingState extends MusicBeatState
 class CustomFlxUITabMenu extends FlxUITabMenu {
 	override function sortTabs(a, b):Int
 		return 0;
+}
+
+private class ChangeMustHitSectionAction extends ChartingAction {
+	public var sectionNumber:Int;
+	public var adjustNotes:Bool;
+	
+	public function new(sectionNumber:Int, adjustNotes:Bool = true) {
+		this.sectionNumber = sectionNumber;
+		this.adjustNotes = adjustNotes;
+		super();
+	}
+
+	public function redo() {
+		var section = getSection(sectionNumber);
+		section.mustHitSection = !section.mustHitSection;
+
+		if (adjustNotes) {
+			for (note in section.sectionNotes)
+				note.column = (note.column + _song.keyCount) % (_song.keyCount * 2);
+		}
+
+		instance.check_mustHitSection.checked = section.mustHitSection;
+		instance.updateGrid();
+		instance.updateHeads();
+	}
+
+	public function undo() {
+		redo();
+	}
 }
 
 private class ChangeSustainAction extends NoteAction {
