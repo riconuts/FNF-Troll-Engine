@@ -567,7 +567,7 @@ class ChartingState extends MusicBeatState
 		";
 		
 		helpTextGrp = new FlxTypedGroup<FlxText>();
-		helpTextGrp.exists = false;
+		helpTextGrp.exists = !options.hideHelp;
 		add(helpTextGrp);
 
 		var tipTextY = FlxG.height/2 + GRID_SIZE;
@@ -629,8 +629,13 @@ class ChartingState extends MusicBeatState
 		else
 			waveformTrackDropDown.selectedId = "None";
 
-		var lol = new TimelineDisplay();
+		////
+		/*
+		var lol = new TimelineDisplay(UI_box.x + UI_box.width - 250, FlxG.height - 5 - 16 * 10, 10);
 		this.add(lol);
+		*/
+
+		////
 		super.create();
 		FlxG.mouse.visible = true;
 	}
@@ -2410,7 +2415,7 @@ class ChartingState extends MusicBeatState
 		}
 
 		if (FlxG.keys.justPressed.F1) {
-			helpTextGrp.exists = false;
+			helpTextGrp.exists = !helpTextGrp.exists;
 			options.hideHelp = !helpTextGrp.exists;
 		}
 
@@ -3440,14 +3445,8 @@ private class TimelineDisplay extends FlxBasic {
 	public var bgs:Array<FlxSprite> = [];
 	public var txts:Array<FlxText> = [];
 
-	public function new(displayLength:Int = 10) {
+	public function new(x:Float = 0, y:Float = 0, displayLength:Int = 10) {
 		super();
-
-		var width = uaWidth;
-		var height = uaHeight * displayLength;
-
-		var x = 5;
-		var y = FlxG.height - height - 5;
 
 		var text_hPadding = 5;
 
