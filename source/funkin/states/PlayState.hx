@@ -2650,7 +2650,12 @@ class PlayState extends MusicBeatState
 		persistentUpdate = false;
 		pause();
 
-		MusicBeatState.switchState(new ChartingState(SONG, FlxG.keys.pressed.SHIFT ? curSection : -1));
+		if (FlxG.keys.pressed.SHIFT) {
+			var _chartEditor:ChartingStateSession = (SONG:Dynamic)._chartEditor ??= ChartingState.makeSession();
+			_chartEditor.curSec = curSection;
+			_chartEditor.songPosition = Conductor.songPosition;
+		}
+		MusicBeatState.switchState(new ChartingState(SONG));
 	}
 
 	function doDeathCheck(?skipHealthCheck:Bool = false) {

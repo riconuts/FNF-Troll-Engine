@@ -72,11 +72,29 @@ typedef ChartingStateOptions = {
 	var metronome:Bool;
 }
 
+typedef ChartingStateSession = {
+	var curSec:Int;
+	var songPosition:Float;
+	var selectedTrack:String;
+	var trackVolumes:Map<String, Float>;
+}
+
 @:access(flixel.sound.FlxSound._sound)
 @:access(openfl.media.Sound.__buffer)
 @:allow(funkin.states.editors.ChartingState)
 class ChartingState extends MusicBeatState
 {
+	public static function makeSession():ChartingStateSession return {
+		selectedTrack: "None",
+		trackVolumes: ["Inst" => 0.6],
+		songPosition: 0.0,
+		curSec: 0,
+	}
+
+	var _session(get, set):ChartingStateSession;
+	function set__session(s:ChartingStateSession) return (_song:Dynamic)._chartEditor = s;
+	function get__session() return (_song:Dynamic)._chartEditor;
+
 	public static function getDefaultOptions():ChartingStateOptions return {
 		autosave: null,
 		ignoreWarnings: false,
@@ -168,9 +186,6 @@ class ChartingState extends MusicBeatState
 	var _file:FileReference;
 
 	var UI_box:FlxUITabMenu;
-
-	public static var lastSong:String = '';
-	public static var lastSection:Int = 0;
 
 	var bpmTxt:FlxText;
 
@@ -389,10 +404,11 @@ class ChartingState extends MusicBeatState
 		#end
 	}
 
-	public function new(data:SwagSong = null, section:Int = -1) {
+	public function new(data:SwagSong = null) {
 		super();
 
-		this._song = data ?? PlayState.SONG ?? {
+		data ??= PlayState.SONG;
+		this._song = data ?? {
 			song: 'Test',
 			bpm: 150.0,
 			speed: 1,
@@ -420,32 +436,22 @@ class ChartingState extends MusicBeatState
 			events: [],
 		};
 		this.songId = Paths.formatToSongPath(_song.song);
-
-		if (section < 0) {
-			this.curSec = (lastSong == songId) ? lastSection : 0;
-		}else {
-			this.curSec = section;
-		}
 	}
 
 	override function create()
 	{
 		instance = this;
+		updateSongPos = false;
 		
 		FlxTransitionableState.skipNextTransOut = true;
-
-		updateSongPos = false;
-
-		onLoadMetadata();
-		
 		MusicBeatState.stopMenuMusic();
+		
+		onLoadMetadata();
 
-		if (_song.notes.length == 0){
+		if (_song.notes.length == 0)
 			pushSection();
-			curSec = 0;
-		}else if (curSec >= _song.notes.length) {
-			curSec = _song.notes.length - 1;
-		}
+
+		_session ??= makeSession();
 
 		Conductor.cleanup();
 		Conductor.changeBPM(_song.bpm);
@@ -622,8 +628,22 @@ class ChartingState extends MusicBeatState
 		quantTxt.scrollFactor.set();
 		add(quantTxt);
 
-		changeSection(curSec);
+		////
+		curSec = _session.curSec;
+		Conductor.songPosition = _session.songPosition;
+		
+		if (curSec >= _song.notes.length)
+			curSec = _song.notes.length - 1;
+		changeSection(curSec, false);
 
+		//
+		for (id => volume in _session.trackVolumes) {
+			var snd = soundTracksMap.get(id);
+			if (snd != null) snd.volume = volume;
+		}
+
+		//
+		var lastSelectedTrack = _session.selectedTrack;
 		if (soundTracksMap.exists(lastSelectedTrack))
 			selectTrack(lastSelectedTrack);
 		else
@@ -1504,7 +1524,6 @@ class ChartingState extends MusicBeatState
 	var metronomeStepper:FlxUINumericStepper;
 	var metronomeOffsetStepper:FlxUINumericStepper;
 
-	static var lastSelectedTrack = "Voices";
 	var waveformTrackDropDown:FlxUIDropDownMenu;
 	var waveformTrack:Null<FlxSound> = null;
 	var trackVolumeSlider:FlxUISlider;
@@ -1522,7 +1541,7 @@ class ChartingState extends MusicBeatState
 		}
 		
 		updateWaveform();
-		lastSelectedTrack = trackName;
+		_session.selectedTrack = trackName;
 	}
 
 	function changeSelectedTrackVolume(val:Float)
@@ -3374,8 +3393,6 @@ class ChartingState extends MusicBeatState
 	}
 
 	override function destroy() {
-		ChartingState.lastSong = songId;
-		ChartingState.lastSection = curSec;
 		super.destroy();
 	}
 }
