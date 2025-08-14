@@ -2000,13 +2000,18 @@ class ChartingState extends MusicBeatState
 		}
 
 		for (dropDownMenu in blockPressWhileScrolling) {
-			if (dropDownMenu.header.button.status == FlxButton.HIGHLIGHT)
-				return true;
-
 			if (dropDownMenu.dropPanel.visible)
 				return true;
 		}
 
+		return false;
+	}
+
+	function checkOverDropdown():Bool {
+		for (dropDownMenu in blockPressWhileScrolling) {
+			if (dropDownMenu.header.button.status == FlxButton.HIGHLIGHT)
+				return true;
+		}
 		return false;
 	}
 
@@ -2278,7 +2283,7 @@ class ChartingState extends MusicBeatState
 		if (FlxG.keys.justPressed.R)
 			changeSection(FlxG.keys.pressed.SHIFT ? 0 : curSec, true);
 
-		if (FlxG.mouse.wheel != 0) {
+		if (!checkOverDropdown() && FlxG.mouse.wheel != 0) {
 			if (!options.mouseScrollingQuant)
 				Conductor.songPosition -= (FlxG.mouse.wheel * Conductor.stepCrochet);
 			else{
