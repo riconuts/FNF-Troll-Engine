@@ -868,11 +868,9 @@ class ChartingState extends MusicBeatState
 
 		////
 		var stages = Stage.getAllStages();
-
-		if (stages.length == 0) 
-			stages.push("stage");
-		else
-			stages.sort(CoolUtil.alphabeticalSort);
+		stages.sort(CoolUtil.alphabeticalSort);
+		stages.remove("empty");
+		stages.insert(0, "empty");
 		
 		var stageDropDown = new CustomFlxUIDropDownMenu(
 			player1DropDown.x + 140, 
