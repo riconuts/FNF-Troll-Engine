@@ -2173,6 +2173,18 @@ class ChartingState extends MusicBeatState
 			}
 		}
 
+		if (!checkOverDropdown() && FlxG.mouse.wheel != 0) {
+			if (!options.mouseScrollingQuant)
+				Conductor.songPosition -= (FlxG.mouse.wheel * Conductor.stepCrochet);
+			else{
+				var snap = Conductor.stepCrochet / quantizationMult;
+				Conductor.songPosition = CoolUtil.snap(Conductor.songPosition, snap) - (snap * FlxG.mouse.wheel);
+			}
+
+			pauseTracks();
+		}
+
+		////
 		if (Conductor.playing)
 			updateSongPosition();
 
@@ -2317,17 +2329,6 @@ class ChartingState extends MusicBeatState
 
 		if (FlxG.keys.justPressed.R)
 			changeSection(FlxG.keys.pressed.SHIFT ? 0 : curSec, true);
-
-		if (!checkOverDropdown() && FlxG.mouse.wheel != 0) {
-			if (!options.mouseScrollingQuant)
-				Conductor.songPosition -= (FlxG.mouse.wheel * Conductor.stepCrochet);
-			else{
-				var snap = Conductor.stepCrochet / quantizationMult;
-				Conductor.songPosition = CoolUtil.snap(Conductor.songPosition, snap) - (snap * FlxG.mouse.wheel);
-			}
-
-			pauseTracks();
-		}
 
 		if (FlxG.keys.pressed.W || FlxG.keys.pressed.S)
 		{
