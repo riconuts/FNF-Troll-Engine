@@ -266,6 +266,7 @@ class ChartingState extends MusicBeatState
 	private var blockPressWhileTypingOn:Array<FlxUIInputText> = [];
 	private var blockPressWhileTypingOnStepper:Array<FlxUINumericStepper> = [];
 	private var blockPressWhileScrolling:Array<FlxUIDropDownMenu> = [];
+	private var blockScrollWhileHovering:Array<FlxUISlider> = [];
 
 	var waveformSprite:FlxSprite;
 	var gridLayer:FlxTypedGroup<FlxBasic>;
@@ -1687,6 +1688,7 @@ class ChartingState extends MusicBeatState
 		trackVolumeSlider.nameLabel.text = 'Track Volume';
 		trackVolumeSlider.setVariable = false;
 		trackVolumeSlider.callback = changeSelectedTrackVolume;
+		blockScrollWhileHovering.push(trackVolumeSlider);
 
 		////////
 
@@ -1753,10 +1755,12 @@ class ChartingState extends MusicBeatState
 		var sliderHitVol = new CustomFlxUISlider(this, 'hitsoundVolume', 10, startY + 90, 0, 1, 125, null, 5, FlxColor.WHITE, FlxColor.BLACK);
 		sliderHitVol.nameLabel.text = 'Hitsound Volume';
 		sliderHitVol.value = hitsoundVolume;
+		blockScrollWhileHovering.push(sliderHitVol);
 
 		var sliderRate = new CustomFlxUISlider(this, 'playbackSpeed', 68, 325, 0.5, 3, 150, null, 5, FlxColor.WHITE, FlxColor.BLACK);
 		sliderRate.nameLabel.text = 'Playback Rate';
 		sliderRate.value = playbackSpeed;
+		blockScrollWhileHovering.push(sliderRate);
 
 		tab_group_chart.add(sliderHitVol);
 		tab_group_chart.add(sliderRate);
@@ -2042,12 +2046,19 @@ class ChartingState extends MusicBeatState
 		return false;
 	}
 
-	function checkOverDropdown():Bool {
+	function checkCanMouseScroll():Bool {
 		for (dropDownMenu in blockPressWhileScrolling) {
 			if (dropDownMenu.header.button.status == FlxButton.HIGHLIGHT)
-				return true;
+				return false;
 		}
-		return false;
+
+		for (slider in blockScrollWhileHovering) {
+			@:privateAccess
+			if (slider._justHovered)
+				return false;
+		}
+
+		return true;
 	}
 
 	override function update(elapsed:Float)
@@ -2173,7 +2184,7 @@ class ChartingState extends MusicBeatState
 			}
 		}
 
-		if (!checkOverDropdown() && FlxG.mouse.wheel != 0) {
+		if (checkCanMouseScroll() && FlxG.mouse.wheel != 0) {
 			if (!options.mouseScrollingQuant)
 				Conductor.songPosition -= (FlxG.mouse.wheel * Conductor.stepCrochet);
 			else{
@@ -3475,7 +3486,7 @@ class CustomFlxUITabMenu extends FlxUITabMenu {
 }
 
 /**
-	i don't like having to find stuff on a 20+ long list
+	Allow quick mouse wheel option scrolling without having to open the dropdown
 **/
 private class CustomFlxUIDropDownMenu extends flixel.addons.ui.FlxUIDropDownMenu.FlxUIDropDownMenu {
 	override function checkClickOff() {
@@ -3497,9 +3508,33 @@ private class CustomFlxUIDropDownMenu extends flixel.addons.ui.FlxUIDropDownMenu
 }
 
 /** 
+	Allow mouse wheel to slide the handle
 **/
 private class CustomFlxUISlider extends flixel.addons.ui.FlxUISlider {
+	public var scrollStep:Float = 0.1;
+
 	override function update(elapsed) {
+		if (_justHovered && !dragging && scrollStep != 0.0 && FlxG.mouse.wheel != 0)
+		{
+			var relativePos:Float = relativePos + FlxG.mouse.wheel * scrollStep;
+
+			value = minValue + (maxValue - minValue) * relativePos;
+			if (value < minValue) value = minValue;
+			else if (value > maxValue) value = maxValue; 
+
+			if ((setVariable) && (varString != null))
+			{
+				Reflect.setProperty(_object, varString, value);
+			}
+
+			_lastPos = relativePos;
+
+			if (callback != null)
+				callback(relativePos);
+
+			handle.x = expectedPos;
+		}
+
 		super.update(elapsed);
 	}
 }
