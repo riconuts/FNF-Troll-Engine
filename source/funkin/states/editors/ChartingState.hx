@@ -3379,6 +3379,7 @@ class ChartingState extends MusicBeatState
 		var fileName:String;
 		var _song:SwagSong = Reflect.copy(_song);
 
+		Reflect.deleteField(_song, "_chartEditor");
 		Reflect.deleteField(_song, "metadata");
 
 		if (Reflect.hasField(_song, "_path")) {
