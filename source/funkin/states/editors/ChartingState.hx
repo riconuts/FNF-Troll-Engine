@@ -3393,6 +3393,8 @@ class ChartingState extends MusicBeatState
 	}
 
 	override function destroy() {
+		_session.curSec = curSec;
+		_session.songPosition = Conductor.songPosition;
 		super.destroy();
 	}
 }
