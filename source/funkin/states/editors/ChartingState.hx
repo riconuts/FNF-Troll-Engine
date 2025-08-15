@@ -204,6 +204,9 @@ class ChartingState extends MusicBeatState
 
 	var dummyArrow:FlxSprite;
 
+	var prevRenderedSustains:FlxTypedGroup<FlxSprite>;
+	var prevRenderedNotes:FlxTypedGroup<Note>;
+
 	var curRenderedSustains:FlxTypedGroup<FlxSprite>;
 	var curRenderedNotes:FlxTypedGroup<Note>;
 	var curRenderedNoteType:FlxTypedGroup<FlxText>;
@@ -211,6 +214,7 @@ class ChartingState extends MusicBeatState
 	var nextRenderedSustains:FlxTypedGroup<FlxSprite>;
 	var nextRenderedNotes:FlxTypedGroup<Note>;
 
+	var prevGridBG:FlxSprite;
 	var gridBG:FlxSprite;
 	var nextGridBG:FlxSprite;
 
@@ -487,6 +491,9 @@ class ChartingState extends MusicBeatState
 		waveformSprite = new FlxSprite(GRID_SIZE, 0).makeGraphic(FlxG.width, FlxG.height, 0x00FFFFFF);
 		add(waveformSprite);
 
+		prevRenderedSustains = new FlxTypedGroup<FlxSprite>();
+		prevRenderedNotes = new FlxTypedGroup<Note>();
+
 		curRenderedSustains = new FlxTypedGroup<FlxSprite>();
 		curRenderedNotes = new FlxTypedGroup<Note>();
 		curRenderedNoteType = new FlxTypedGroup<FlxText>();
@@ -610,6 +617,8 @@ class ChartingState extends MusicBeatState
 		addEventsUI();
 		addChartingUI();
 
+		add(prevRenderedSustains);
+		add(prevRenderedNotes);
 		add(curRenderedSustains);
 		add(curRenderedNotes);
 		add(curRenderedNoteType);
@@ -2474,7 +2483,6 @@ class ChartingState extends MusicBeatState
 	} 
 
 	var currentSectionBeats:Float = 0;
-	var nextSectionBeats:Float = 0;
 
 	var currentSectionStart:Float = 0;
 	var currentSectionEnd:Float = 0;
@@ -2487,26 +2495,49 @@ class ChartingState extends MusicBeatState
 		////
 		final gridColor1:FlxColor = 0xffe7e6e6;
 		final gridColor2:FlxColor = 0xffd9d5d5;
+
+		var gridWidth:Int = 1 + _song.keyCount * 2;
+		var totalHeight:Float = 0.0;
+		var gridY:Float = 1; // i say right foot creep oo
 		
 		currentSectionStart = sectionStartTime(0);
 		currentSectionEnd = sectionStartTime(1); 
 
+		// previous section grid
+		var previousSectionBeats = curSec > 0 ? getSectionBeats(curSec - 1) : 0;
+		if (previousSectionBeats > 0) {
+			var gridHeight:Int = Math.floor(previousSectionBeats * 4 * zoomList[curZoom]); 
+			
+			prevGridBG = FlxGridOverlay.create(1, 1, gridWidth, gridHeight, gridColor1, gridColor2);
+			prevGridBG.color = 0xFF999999; // prev section darkness
+			prevGridBG.antialiasing = false;
+			prevGridBG.scale.set(GRID_SIZE, GRID_SIZE);
+			prevGridBG.updateHitbox();
+			prevGridBG.y = -prevGridBG.height;
+			gridLayer.add(prevGridBG);
+
+			gridY = prevGridBG.y;
+			totalHeight += prevGridBG.height;
+		}
+
+		// current section grid
 		currentSectionBeats = getSectionBeats();
-		nextSectionBeats = (currentSectionEnd > inst.length) ? 0 : (getSectionBeats(curSec + 1) ?? 0);
-		var totalBeats:Float = currentSectionBeats + nextSectionBeats;
-		
-		var gridWidth:Int = 1 + _song.keyCount * 2;
-		var gridHeight:Int = Math.floor(currentSectionBeats * 4 * zoomList[curZoom]); 
+		{
+			var gridHeight:Int = Math.floor(currentSectionBeats * 4 * zoomList[curZoom]); 
+			
+			gridBG = FlxGridOverlay.create(1, 1, gridWidth, gridHeight, gridColor1, gridColor2);
+			gridBG.antialiasing = false;
+			gridBG.scale.set(GRID_SIZE, GRID_SIZE);
+			gridBG.updateHitbox();
+			gridLayer.add(gridBG);
 
-		gridBG = FlxGridOverlay.create(1, 1, gridWidth, gridHeight, gridColor1, gridColor2);
-		gridBG.antialiasing = false;
-		gridBG.scale.set(GRID_SIZE, GRID_SIZE);
-		gridBG.updateHitbox();
-		gridLayer.add(gridBG);
-		
-		var totalHeight:Float = gridBG.height;
+			if (gridY > 0) gridY = 0;
 
+			totalHeight += gridBG.height;
+		}
+		
 		// next section grid
+		var nextSectionBeats = (currentSectionEnd > inst.length) ? 0 : (getSectionBeats(curSec + 1) ?? 0);
 		if (nextSectionBeats > 0 && currentSectionEnd <= inst.length) {
 			var gridHeight:Int = Math.floor(nextSectionBeats * 4 * zoomList[curZoom]); 
 			nextGridBG = FlxGridOverlay.create(1, 1, gridWidth, gridHeight, gridColor1, gridColor2);
@@ -2521,9 +2552,10 @@ class ChartingState extends MusicBeatState
 		}
 
 		// beat separators
+		var totalBeats:Float = currentSectionBeats + nextSectionBeats;
 		for (i in 1...Math.floor(totalBeats)) {
 			var beatsep1:FlxSprite = CoolUtil.blankSprite(gridBG.width, 1, 0xFFFF0000);
-			beatsep1.setPosition(gridBG.x, (i * GRID_SIZE * 4) * zoomList[curZoom]);
+			beatsep1.setPosition(gridBG.x, gridY + (i * GRID_SIZE * 4) * zoomList[curZoom]);
 			beatsep1.alpha = 0.25;
 			gridLayer.add(beatsep1);
 		}
@@ -2531,11 +2563,13 @@ class ChartingState extends MusicBeatState
 		// player - opponent separator
 		var gridBlackLine:FlxSprite = CoolUtil.blankSprite(2, totalHeight, FlxColor.BLACK);
 		gridBlackLine.x = gridBG.x + gridBG.width - (GRID_SIZE * _song.keyCount);
+		gridBlackLine.y = gridY;
 		gridLayer.add(gridBlackLine);
 
 		// event separator
 		var gridBlackLine:FlxSprite = CoolUtil.blankSprite(2, totalHeight, FlxColor.BLACK);
 		gridBlackLine.x = gridBG.x + GRID_SIZE;
+		gridBlackLine.y = gridY;
 		gridLayer.add(gridBlackLine);
 
 		updateWaveform();
@@ -2876,6 +2910,8 @@ class ChartingState extends MusicBeatState
 		wipeGroup(curRenderedNoteType);
 		wipeGroup(nextRenderedNotes);
 		wipeGroup(nextRenderedSustains);
+		wipeGroup(prevRenderedNotes);
+		wipeGroup(prevRenderedSustains);
 
 		if (_song.notes[curSec].changeBPM && _song.notes[curSec].bpm > 0)
 		{
@@ -2892,10 +2928,25 @@ class ChartingState extends MusicBeatState
 			Conductor.changeBPM(daBPM);
 		}
 
+		// PREV SECTION
+		if(curSec > 0) {
+			var prevSection = curSec-1;
+			for (i in _song.notes[prevSection].sectionNotes)
+			{
+				var note:Note = setupNoteData(i, prevSection);
+				note.alpha = 0.6;
+				nextRenderedNotes.add(note);
+				if (note.sustainLength > 0)
+				{
+					nextRenderedSustains.add(setupSusNote(note));
+				}
+			}
+		}
+
 		// CURRENT SECTION
 		for (i in _song.notes[curSec].sectionNotes)
 		{
-			var note:Note = setupNoteData(i, false);
+			var note:Note = setupNoteData(i, curSec);
 			curRenderedNotes.add(note);
 			if (note.sustainLength > 0)
 			{
@@ -2943,9 +2994,10 @@ class ChartingState extends MusicBeatState
 
 		// NEXT SECTION
 		if(curSec < _song.notes.length-1) {
-			for (i in _song.notes[curSec+1].sectionNotes)
+			var nextSection = curSec+1;
+			for (i in _song.notes[nextSection].sectionNotes)
 			{
-				var note:Note = setupNoteData(i, true);
+				var note:Note = setupNoteData(i, nextSection);
 				note.alpha = 0.6;
 				nextRenderedNotes.add(note);
 				if (note.sustainLength > 0)
@@ -2983,11 +3035,10 @@ class ChartingState extends MusicBeatState
 
 	var useQuantNotes:Bool = ClientPrefs.noteSkin == 'Quants';
 
-	function setupNoteData(i:NoteData, isNextSection:Bool):Note
+	function setupNoteData(i:NoteData, sectionNumber:Int):Note
 	{
 		var curSection = _song.notes[curSec];
-		var nextSection = _song.notes[curSec+1];
-		var noteSection = isNextSection ? nextSection : curSection;
+		var noteSection = _song.notes[sectionNumber];
 
 		var daField:Int = Math.floor(i.column / _song.keyCount);
 
@@ -3006,7 +3057,7 @@ class ChartingState extends MusicBeatState
 		note.updateHitbox();
 		note.x = Math.floor(i.column * GRID_SIZE) + GRID_SIZE;
 
-		if (isNextSection && curSection.mustHitSection != nextSection.mustHitSection) {
+		if (curSection.mustHitSection != noteSection.mustHitSection) {
 			if(i.column >= _song.keyCount) {
 				note.x -= GRID_SIZE * _song.keyCount;
 			} else {
@@ -3016,9 +3067,8 @@ class ChartingState extends MusicBeatState
 
 		//note.wasGoodHit = note.beat <= Conductor.curDecBeat;
 
-		var beats:Float = getSectionBeats(isNextSection ? 1 : 0);
+		var beats:Float = getSectionBeats(sectionNumber);
 		note.y = getYfromStrumNotes(note.strumTime - sectionStartTime(), beats);
-		if(note.y < -150) note.y = -150;
 		return note;
 	}
 
