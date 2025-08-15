@@ -3461,6 +3461,8 @@ class ChartingState extends MusicBeatState
 	override function destroy() {
 		_session.curSec = curSec;
 		_session.songPosition = Conductor.songPosition;
+		for (id => snd in soundTracksMap)
+			_session.trackVolumes.set(id, snd.volume);
 		super.destroy();
 	}
 }
