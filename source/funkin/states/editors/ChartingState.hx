@@ -268,7 +268,9 @@ class ChartingState extends MusicBeatState
 	private var blockPressWhileScrolling:Array<FlxUIDropDownMenu> = [];
 
 	var waveformSprite:FlxSprite;
-	var gridLayer:FlxTypedGroup<FlxSprite>;
+	var gridLayer:FlxTypedGroup<FlxBasic>;
+	var beatSeparators:FlxTypedGroup<FlxSprite>;
+	var fieldSeparators:FlxTypedGroup<FlxSprite>;
 
 	public static var quantization:Int = 16;
 	public var quantizationMult:Float = (quantization / 16);
@@ -485,8 +487,11 @@ class ChartingState extends MusicBeatState
 		bg.screenCenter();
 		add(bg);
 
-		gridLayer = new FlxTypedGroup<FlxSprite>();
+		gridLayer = new FlxTypedGroup<FlxBasic>();
 		add(gridLayer);
+
+		beatSeparators = new FlxTypedGroup<FlxSprite>();
+		fieldSeparators = new FlxTypedGroup<FlxSprite>();
 
 		waveformSprite = new FlxSprite(GRID_SIZE, 0).makeGraphic(FlxG.width, FlxG.height, 0x00FFFFFF);
 		add(waveformSprite);
@@ -2490,6 +2495,10 @@ class ChartingState extends MusicBeatState
 	/** Creates the currently visible sections grid background and their objects (notes, events, waveform) **/
 	function reloadGridLayer() 
 	{
+		beatSeparators.killMembers();
+		fieldSeparators.killMembers();
+		gridLayer.remove(beatSeparators);
+		gridLayer.remove(fieldSeparators);
 		wipeGroup(gridLayer);
 		
 		////
@@ -2552,25 +2561,29 @@ class ChartingState extends MusicBeatState
 		}
 
 		// beat separators
-		var totalBeats:Float = currentSectionBeats + nextSectionBeats;
+		var totalBeats:Float = previousSectionBeats + currentSectionBeats + nextSectionBeats;
 		for (i in 1...Math.floor(totalBeats)) {
-			var beatsep1:FlxSprite = CoolUtil.blankSprite(gridBG.width, 1, 0xFFFF0000);
+			var beatsep1:FlxSprite = beatSeparators.recycle();
+			if (beatsep1 == null) {
+				beatsep1 = CoolUtil.blankSprite(gridBG.width, 1, 0xFFFF0000);
+				beatsep1.alpha = 0.25;
+				beatSeparators.add(beatsep1);
+			}
 			beatsep1.setPosition(gridBG.x, gridY + (i * GRID_SIZE * 4) * zoomList[curZoom]);
-			beatsep1.alpha = 0.25;
-			gridLayer.add(beatsep1);
 		}
+		gridLayer.add(beatSeparators);
 		
-		// player - opponent separator
-		var gridBlackLine:FlxSprite = CoolUtil.blankSprite(2, totalHeight, FlxColor.BLACK);
-		gridBlackLine.x = gridBG.x + gridBG.width - (GRID_SIZE * _song.keyCount);
-		gridBlackLine.y = gridY;
-		gridLayer.add(gridBlackLine);
-
-		// event separator
-		var gridBlackLine:FlxSprite = CoolUtil.blankSprite(2, totalHeight, FlxColor.BLACK);
-		gridBlackLine.x = gridBG.x + GRID_SIZE;
-		gridBlackLine.y = gridY;
-		gridLayer.add(gridBlackLine);
+		// field separators
+		var fields:Int = 2;
+		for (i in 0...fields) {
+			var gridBlackLine = fieldSeparators.recycle() ?? CoolUtil.blankSprite(2, totalHeight, FlxColor.BLACK);
+			gridBlackLine.x = -1 + gridBG.x + GRID_SIZE + (GRID_SIZE * _song.keyCount * i);
+			gridBlackLine.y = gridY;
+			gridBlackLine.scale.y = totalHeight;
+			gridBlackLine.updateHitbox();
+			fieldSeparators.add(gridBlackLine);
+		}
+		gridLayer.add(fieldSeparators);
 
 		updateWaveform();
 		updateGrid();
