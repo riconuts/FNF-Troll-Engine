@@ -3497,33 +3497,9 @@ private class CustomFlxUIDropDownMenu extends flixel.addons.ui.FlxUIDropDownMenu
 }
 
 /** 
-	shit fix for sliders only updating while your mouse is over them 
 **/
 private class CustomFlxUISlider extends flixel.addons.ui.FlxUISlider {
-	var _holding = false;
-
-	override function get_relativePos() {
-		var v = super.get_relativePos();
-		return v < 0 ? 0 : v;
-	}
-
 	override function update(elapsed) {
-		#if (flixel >= "5.7.0")
-		final camera = getCameras()[0];// else use this.camera
-		#end
-		final mouse = FlxG.mouse.getScreenPosition(camera);
-		final hoveringOver = FlxMath.pointInFlxRect(mouse.x, mouse.y, _bounds);
-
-		if (!FlxG.mouse.pressed)
-			_holding = false;
-		else if (FlxG.mouse.justPressed && hoveringOver)
-			_holding = true;
-
-		if (_holding && !hoveringOver) {
-			handle.x = mouse.x;
-			updateValue();
-		}
-
 		super.update(elapsed);
 	}
 }
