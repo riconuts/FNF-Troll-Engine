@@ -33,7 +33,7 @@ class Song extends BaseSong
 	public function new(songId:String, ?folder:String)
 	{
 		super(songId, folder);
-		this.songPath = Paths.getFolderPath(this.folder) + '/songs/$songId';
+		this.songPath = Paths.getFolderPath(this.folder) + 'songs/$songId';
 	}
 
 	/**

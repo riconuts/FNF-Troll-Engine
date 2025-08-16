@@ -209,7 +209,7 @@ class StoryModeState extends MusicBeatState {
 	// this will be moved to something else i'm currently working on :o
 	public static function scanContentLevels(folder:String):Array<Level>
 	{
-		var levelDir = Paths.getFolderPath(folder) + '/levels/';
+		var levelDir = Paths.getFolderPath(folder) + 'levels/';
 
 		var contentLevelPaths:Array<String> = [];
 		Paths.iterateDirectory(levelDir, function(file:String){
