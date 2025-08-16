@@ -2653,6 +2653,9 @@ class ChartingState extends MusicBeatState
 				beatsep1 = CoolUtil.blankSprite(gridBG.width, 1, 0xFFFF0000);
 				beatsep1.alpha = 0.25;
 				beatSeparators.add(beatsep1);
+			}else {
+				beatsep1.scale.x = gridBG.width;
+				beatsep1.updateHitbox();
 			}
 			beatsep1.setPosition(gridBG.x, gridY + (i * GRID_SIZE * 4) * zoomList[curZoom]);
 		}
@@ -2661,11 +2664,15 @@ class ChartingState extends MusicBeatState
 		// field separators
 		var fields:Int = 2;
 		for (i in 0...fields) {
-			var gridBlackLine = fieldSeparators.recycle() ?? CoolUtil.blankSprite(2, totalHeight, FlxColor.BLACK);
+			var gridBlackLine = fieldSeparators.recycle(); 
+			if (gridBlackLine == null) {
+				gridBlackLine = CoolUtil.blankSprite(2, totalHeight, FlxColor.BLACK);
+			}else {
+				gridBlackLine.scale.y = totalHeight;
+				gridBlackLine.updateHitbox();
+			}
 			gridBlackLine.x = -1 + gridBG.x + GRID_SIZE + (GRID_SIZE * _song.keyCount * i);
 			gridBlackLine.y = gridY;
-			gridBlackLine.scale.y = totalHeight;
-			gridBlackLine.updateHitbox();
 			fieldSeparators.add(gridBlackLine);
 		}
 		gridLayer.add(fieldSeparators);
