@@ -545,55 +545,6 @@ class ChartingState extends MusicBeatState
 
 		dummyArrow = CoolUtil.blankSprite(GRID_SIZE, GRID_SIZE);
 		add(dummyArrow);
-		
-		////
-		progressBG = FlxGradient.createGradientFlxSprite(1, GRID_SIZE, [0xFF535353, 0xFF414040]);
-		progressBG.scale.x = FlxG.width;
-		progressBG.updateHitbox();
-		progressBG.scrollFactor.set(0, 0);
-		progressBG.y = FlxG.height - progressBG.height;
-		add(progressBG);
-
-		var w = Math.floor(progressBG.width / 3);
-		progressBar = new CustomFlxUISlider(
-			Conductor, 
-			'songPosition', 
-			progressBG.x + (progressBG.width - w) / 2,
-			progressBG.y,
-			0.0, 
-			songLength, 
-			w, 
-			null, 
-			5, 
-			FlxColor.WHITE, 
-			FlxColor.BLACK	
-		);
-		progressBar.setVariable = false;
-		progressBar.scrollStep = 0.0;
-		progressBar.callback = function(perc) {
-			if (!progressBar.dragging) return;
-			var playing;
-			if (playing = Conductor.playing) Conductor.pauseSong();
-			Conductor.songPosition = Math.ffloor(perc * songLength);
-			if (playing) Conductor.resumeSong();
-		}
-
-		progressBar.nameLabel.exists = false;
-		progressBar.valueLabel.exists = false;
-
-		progressBar.minLabel.text = "0:00";
-		progressBar.minLabel.x -= 30;
-		progressBar.minLabel.y = progressBar.body.y;
-
-		var mins = '' + Math.floor(songLength / 60000);
-		var secs = '' + Math.floor((songLength % 60000) / 1000);
-		progressBar.maxLabel.text = '$mins:${secs.length < 2 ? secs + '0' : secs}';
-		progressBar.maxLabel.x += 30;
-		progressBar.maxLabel.y = progressBar.body.y;
-
-		progressBar.y += (progressBG.height - progressBar.height) / 2;
-		add(progressBar);
-		progressBar.scrollFactor.set();
 
 		////
 		iconBG = FlxGradient.createGradientFlxSprite(1, 45 + 5 * 2, [0xFF535353, 0x00535353]);
@@ -694,6 +645,55 @@ class ChartingState extends MusicBeatState
 		quantTxt.borderSize = 2;
 		quantTxt.scrollFactor.set();
 		add(quantTxt);
+
+		////
+		progressBG = FlxGradient.createGradientFlxSprite(1, GRID_SIZE, [0xFF535353, 0xFF414040]);
+		progressBG.scale.x = FlxG.width;
+		progressBG.updateHitbox();
+		progressBG.scrollFactor.set(0, 0);
+		progressBG.y = FlxG.height - progressBG.height;
+		add(progressBG);
+
+		var w = Math.floor(progressBG.width / 3);
+		progressBar = new CustomFlxUISlider(
+			Conductor, 
+			'songPosition', 
+			progressBG.x + (progressBG.width - w) / 2,
+			progressBG.y,
+			0.0, 
+			songLength, 
+			w, 
+			null, 
+			5, 
+			FlxColor.WHITE, 
+			FlxColor.BLACK	
+		);
+		progressBar.setVariable = false;
+		progressBar.scrollStep = 0.0;
+		progressBar.callback = function(perc) {
+			if (!progressBar.dragging) return;
+			var playing;
+			if (playing = Conductor.playing) Conductor.pauseSong();
+			Conductor.songPosition = Math.ffloor(perc * songLength);
+			if (playing) Conductor.resumeSong();
+		}
+
+		progressBar.nameLabel.exists = false;
+		progressBar.valueLabel.exists = false;
+
+		progressBar.minLabel.text = "0:00";
+		progressBar.minLabel.x -= 30;
+		progressBar.minLabel.y = progressBar.body.y;
+
+		var mins = '' + Math.floor(songLength / 60000);
+		var secs = '' + Math.floor((songLength % 60000) / 1000);
+		progressBar.maxLabel.text = '$mins:${secs.length < 2 ? secs + '0' : secs}';
+		progressBar.maxLabel.x += 30;
+		progressBar.maxLabel.y = progressBar.body.y;
+
+		progressBar.y += (progressBG.height - progressBar.height) / 2;
+		add(progressBar);
+		progressBar.scrollFactor.set();
 
 		////
 		curSec = _session.curSec;
