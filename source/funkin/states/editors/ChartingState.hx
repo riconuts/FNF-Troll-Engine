@@ -3436,13 +3436,23 @@ class ChartingState extends MusicBeatState
 	function loadJson(songId:String):Void
 	{
 		var song = new Song(songId, Paths.currentModDirectory);
-		var daJson:SwagSong = song.getSwagSong();
+		var charts:Array<String> = song.getCharts();
+
+		if (charts.length == 0) {
+			openSubState(new Prompt('No charts found for $song', 0, null, null, false, "OK", "OK"));
+			return;
+		}
+
+		var chartId = charts[CoolUtil.updateDifficultyIndex(-1, PlayState.difficultyName, charts)];
+		var daJson:SwagSong = song.getSwagSong(chartId);
+		trace(song, chartId);
 
 		if (daJson == null){
 			openSubState(new Prompt('An error ocurred while loading the JSON file', 0, null, null, false, "OK", "OK"));
 		}else{
 			PlayState.song = song;
 			PlayState.SONG = daJson;
+			PlayState.difficultyName = chartId;
 			MusicBeatState.resetState();
 		}
 	}
