@@ -2314,7 +2314,7 @@ class ChartingState extends MusicBeatState
 			else
 				note.color = 0xFFFFFFFF;
 			
-			if (note.beat <= Conductor.curDecBeat) {
+			if (note.strumTime <= Conductor.songPosition) {
 				if (inst.playing && !note.wasGoodHit) {
 					if (note.column > -1)
 					{
