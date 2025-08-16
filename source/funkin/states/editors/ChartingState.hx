@@ -2266,13 +2266,27 @@ class ChartingState extends MusicBeatState
 				changeSection(_song.notes.length - 1);
 			}
 			else if (Conductor.songPosition >= currentSectionEnd) {
-				var nextSection:Int = curSec + 1;
-				if (_song.notes[nextSection] == null)
-					pushSection();
-				changeSection(nextSection, false);
+				while (Conductor.songPosition >= currentSectionEnd) {
+					var nextSection:Int = curSec + 1;
+					if (_song.notes[nextSection] == null)
+						pushSection();
+					curSec = nextSection;
+					currentSectionEnd = sectionStartTime(1);
+				}
+				reloadGridLayer();
+				updateSectionUI();
+				stepperStrumTime.stepSize = Conductor.stepCrochet;
+				stepperSusLength.stepSize = Conductor.stepCrochet;
 			}
 			else if (Conductor.songPosition < currentSectionStart) {
-				changeSection(curSec - 1, false);
+				while (Conductor.songPosition < currentSectionStart) {
+					curSec = curSec - 1;
+					currentSectionStart = sectionStartTime();
+				}
+				reloadGridLayer();
+				updateSectionUI();
+				stepperStrumTime.stepSize = Conductor.stepCrochet;
+				stepperSusLength.stepSize = Conductor.stepCrochet;
 			}
 		}
 
