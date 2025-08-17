@@ -119,6 +119,7 @@ class ChartData
 		try {
 			return _parseSongJson(filePath, isChartJson);
 		}catch(e) {
+			print(Main.callstackToString(haxe.CallStack.exceptionStack(true)));
 			trace('ERROR parsing song JSON: $filePath', e.message);
 			return null;
 		}
