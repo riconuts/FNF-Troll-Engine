@@ -37,7 +37,7 @@ class HealthIcon extends FlxSprite
 	public var sprTracker:FlxObject;
 	private var isOldIcon:Bool = false;
 	private var isPlayer:Bool = false;
-	private var char:String = '';
+	public var char:String = '';
 
 	public var relativePercent(default, set):Float = 0;
 
