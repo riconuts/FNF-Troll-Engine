@@ -600,6 +600,7 @@ class ChartingState extends MusicBeatState
 			tipText.antialiasing = false;
 			tipText.borderSize = 1.25;
 			tipText.scrollFactor.set();
+			tipText.antialiasing = ClientPrefs.globalAntialiasing;
 			helpTextGrp.add(tipText);
 		}
 

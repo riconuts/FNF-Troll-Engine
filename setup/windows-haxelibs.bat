@@ -16,6 +16,8 @@ haxelib --always --quiet install hxdiscord_rpc 1.1.1
 haxelib --always --quiet git linc_luajit https://github.com/riconuts/linc_luajit
 haxelib --always --quiet install moonchart 0.5.0
 haxelib --always --quiet install flxanimate 3.0.4
+haxelib --always --quiet git funkin.vis https://github.com/FunkinCrew/funkVis
+haxelib --always --quiet git grig.audio https://github.com/FunkinCrew/grig.audio refactor/fft-cam-version
 @echo off
 echo ---------
 echo Finished!
