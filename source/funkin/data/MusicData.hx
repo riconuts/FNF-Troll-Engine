@@ -18,13 +18,18 @@ class MusicData
 	}
 
 	public function makeFlxSound():FlxSound {
-		var snd = Paths.returnSound(path);
-		var snd = FlxG.sound.load(snd, 1.0, looped);
-		snd.loopTime = loopTime;
-		snd.endTime = endTime; 
+		var snd:FlxSound = loadFlxSound();
 		snd.context = MUSIC;
+		FlxG.sound.defaultMusicGroup.add(snd);
+		return snd;
+	}
 
-		return FlxG.sound.list.add(snd);
+	public function loadFlxSound(?snd:FlxSound):FlxSound {
+		snd ??= new FlxSound();
+		snd.loadEmbedded(Paths.returnSound(path), looped);
+		snd.loopTime = loopTime;
+		snd.endTime = endTime;
+		return snd;
 	}
 
 	////
