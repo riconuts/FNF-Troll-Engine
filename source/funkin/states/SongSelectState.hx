@@ -1,5 +1,6 @@
 package funkin.states;
 
+import funkin.states.options.OptionsSubstate;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.text.FlxText;
 import funkin.data.Song;
@@ -78,6 +79,7 @@ class SongSelectState extends MusicBeatState
 		FlxTransitionableState.skipNextTransIn = true;
 		FlxTransitionableState.skipNextTransOut = true;
 		this.persistentDraw = false;
+		this.persistentUpdate = false;
 		super.create();
 
 		#if DISCORD_ALLOWED
@@ -185,7 +187,15 @@ class SongSelectState extends MusicBeatState
 			openSubState(new GameplayChangersSubstate());
 		}
 
-		if (controls.ACCEPT){
+		if (FlxG.keys.justPressed.SIX)
+		{
+			var ss = new OptionsSubstate();
+			ss.goBack = (_) -> ss.close();
+			openSubState(ss);
+		}
+
+		if (controls.ACCEPT) 
+		{
 			var charts = songMeta[curSel].getCharts();
 			if (charts.length > 0) {
 				trace(charts);
@@ -195,12 +205,11 @@ class SongSelectState extends MusicBeatState
 				songText[curSel].alpha = 0.6;
 			}
 		}
-		else if (controls.BACK)
-			MusicBeatState.switchState(new MainMenuState());
-		else if (FlxG.keys.justPressed.SEVEN)
+
+		if (controls.BACK) 
+		{
 			MusicBeatState.switchState(new MasterEditorMenu());
-		else if (FlxG.keys.justPressed.SIX)
-			MusicBeatState.switchState(new OptionsState());
+		}
 
 		super.update(e);
 	}
@@ -277,6 +286,8 @@ class ChartSelectSubstate extends MusicBeatSubstate
 			this.close();
 		else if (FlxG.keys.justPressed.ENTER) {
 			PlayState.loadPlaylist([song], charts[curSel]);
+			PlayState.isStoryMode = false;
+
 			PlayState.isStoryMode = false;
 
 			if (FlxG.keys.pressed.SHIFT)

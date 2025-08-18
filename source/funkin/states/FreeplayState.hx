@@ -3,8 +3,10 @@ package funkin.states;
 import flixel.util.FlxColor;
 import funkin.objects.hud.HealthIcon;
 
+import sys.FileSystem;
 import funkin.data.Song;
 import funkin.data.BaseSong;
+import funkin.data.Level;
 import funkin.data.Highscore;
 
 import flixel.text.FlxText;
@@ -58,7 +60,7 @@ class FreeplayState extends MusicBeatState
 		var list:Array<BaseSong> = [];
 		for (contentId => metadata in Paths.getContentMetadata())
 		{
-			var songIdList:Array<String> = [];
+			var songIdMap:Map<String, Bool> = [];
 
 			inline function sowy(songId:String) {
 				// weird old tgt shit
@@ -66,15 +68,20 @@ class FreeplayState extends MusicBeatState
 				if (splitted.length > 1)
 					songId = splitted[0];
 				
-				if (!songIdList.contains(songId))
-					songIdList.push(songId);
+				if (!songIdMap.exists(songId)) {
+					songIdMap.set(songId, true);
+					list.push(new Song(songId, contentId));
+				}
 			}
 
-			// metadata file week songs
-			for (week in metadata.weeks) {
-				if (week.hideFreeplay != true && week.songs != null) {
-					for (song in week.songs)
-						sowy(song);
+			//// level songs
+			for (level in StoryModeState.scanContentLevels(contentId)) {
+				if (!level.isUnlocked())
+					continue;
+				
+				for (song in level.getFreeplaySongs()) {
+					songIdMap.set(song.songId, true);
+					list.push(song);
 				}
 			}
 
@@ -90,10 +97,19 @@ class FreeplayState extends MusicBeatState
 				for (songId in CoolUtil.listFromString(rawList))
 					sowy(songId);
 			}
+			
+			// default category shit
+			// should prob just make a autoAddToFreeplay bool or sum shit idk lol
+			if (metadata.defaultCategory != null && metadata.defaultCategory.length > 0){
+				var dir = Paths.mods(contentId + "/songs");
 
-			//
-			for (songId in songIdList) {
-				list.push(new Song(songId, contentId));
+				Paths.iterateDirectory(dir, function(file:String) {
+					if (FileSystem.isDirectory(haxe.io.Path.join([dir, file]))) {
+						sowy(file);
+					}
+					
+				});
+
 			}
 		}
 		return list;
@@ -268,7 +284,7 @@ class FreeplayState extends MusicBeatState
 		var displayName:String = songName;
 
 		if (selectedSongCharts.length > 1) {
-			var diffName:String = Paths.getString('difficultyName_$curChartId', curChartId);
+			var diffName:String = Paths.getString('difficultyName_$curChartId') ?? curChartId;
 			displayName += ' ($diffName)';
 		}
 
@@ -381,12 +397,12 @@ class FreeplayState extends MusicBeatState
 
 			case 1:
 				curChartId = charts[0];
-				diffText.text = Paths.getString('difficultyName_$curChartId', curChartId).toUpperCase();
+				diffText.text = (Paths.getString('difficultyName_$curChartId') ?? curChartId).toUpperCase();
 
 			default:
 				curChartIdx = isAbs ? val : FlxMath.wrap(curChartIdx + val, 0, charts.length - 1);
 				curChartId = charts[curChartIdx];
-				diffText.text = "< " + Paths.getString('difficultyName_$curChartId', curChartId).toUpperCase() + " >";
+				diffText.text = "< " + (Paths.getString('difficultyName_$curChartId') ?? curChartId).toUpperCase() + " >";
 		}
 
 		selectedSong = '$selectedSongData-$curChartId';
@@ -462,6 +478,8 @@ private class FreeplayMenu extends AlphabetMenu
 		var metadata = song.getMetadata();
 		var songName:String = metadata.songName;
 		var iconId:Null<String> = metadata.freeplayIcon;
+
+		Paths.currentModDirectory = song.folder;
 
 		var obj:Alphabet = this.addTextOption(songName);
 

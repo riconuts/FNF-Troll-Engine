@@ -1,0 +1,64 @@
+var gunSounds: Array<FlxSound> = [];
+
+function onLoad(){
+	game.extraData.set("cockedGuns", []);
+	for(i in 1...5){
+		var snd:FlxSound = new FlxSound().loadEmbedded(Paths.sound("gunSounds/shot" + Std.string(i)));
+		snd.exists = true;
+		snd.volume = 0.5;
+		snd.context = 'SFX';
+		FlxG.sound.list.add(snd);
+		gunSounds.push(snd);
+	}
+}
+
+function setupNote(n){
+	n.noMissAnimation = true;
+}
+
+function mutateJudgeData(n, data){
+	if(data.internalName == 'miss'){
+		data.health = -25;
+		return data;
+	}
+}
+
+function playNoteAnim(note, field, chars){
+	for(ch in chars){
+		ch.playAnim("attack", true);
+		ch.voicelining = false;
+		ch.specialAnim = true;
+	}
+	return Function_Stop;
+}
+
+function noteMiss(n, f){
+	if(game.cockedGuns.contains(f))
+		game.cockedGuns.remove(f);
+	
+
+	for(ch in game.getNoteCharacters(n, f)){
+		ch.playAnim("hit", true);
+		ch.voicelining = false;
+		ch.specialAnim = true;
+	}
+}
+
+function onNoteHit(n, f){
+	var canShoot = false;
+	if(game.cockedGuns.contains(f)){
+		game.cockedGuns.remove(f);
+		canShoot = true;
+	}
+
+	if(!canShoot)
+		return Function_Stop;
+
+	for(snd in gunSounds)snd.stop();
+
+	gunSounds[FlxG.random.int(1, gunSounds.length - 1)].play();
+
+}
+
+preOpponentNoteHit = onNoteHit;
+preGoodNoteHit = onNoteHit;

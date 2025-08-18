@@ -511,7 +511,6 @@ class OptionsSubstate extends MusicBeatSubstate
 
 	public var camerasToRemove:Array<FlxCamera> = [];
 
-	public var transCamera:FlxCamera = new FlxCamera();
 	public var optState:Bool = false;
 	public function new(state:Bool=false){
 		optState=state;
@@ -548,12 +547,10 @@ class OptionsSubstate extends MusicBeatSubstate
 		overlayCamera = new FlxCamera();
 		overlayCamera.bgColor.alpha = 0;
 		
-		transCamera.bgColor.alpha = 0;
 		if(optState){
 			FlxG.cameras.reset(mainCamera);
 			FlxG.cameras.add(optionCamera, false);
 			FlxG.cameras.add(overlayCamera, false);
-			FlxG.cameras.add(transCamera, false);
 			//FlxG.cameras.setDefaultDrawTarget(mainCamera, true);
 			camerasToRemove.push(mainCamera);
 
@@ -569,12 +566,10 @@ class OptionsSubstate extends MusicBeatSubstate
 			FlxG.cameras.add(mainCamera, false);
 			FlxG.cameras.add(optionCamera, false);
 			FlxG.cameras.add(overlayCamera, false);
-			FlxG.cameras.add(transCamera, false);
 		}
 
 		camerasToRemove.push(optionCamera);
 		camerasToRemove.push(overlayCamera);
-		camerasToRemove.push(transCamera);
 
 		cameras = [mainCamera];
 
@@ -610,7 +605,7 @@ class OptionsSubstate extends MusicBeatSubstate
 		var tabX:Float = optionMenu.x;
 		inline function newTabButton(tabName:String)
 		{
-			var text = new FlxText(0, 0, 0, Paths.getString('opt_tabName_$tabName', tabName).toUpperCase());
+			var text = new FlxText(0, 0, 0, (Paths.getString('opt_tabName_$tabName') ?? tabName).toUpperCase());
 			text.applyFormat(TextFormats.TAB_NAME);
 			text.fieldWidth = Math.max(86, text.width) + 8;
 			@:privateAccess text.regenGraphic();
@@ -659,8 +654,8 @@ class OptionsSubstate extends MusicBeatSubstate
 						recommendsRestart.set(opt, true);
 
 					data.data.set("optionName", opt);
-					data.display = Paths.getString('opt_display_$opt', data.display);
-					data.desc = Paths.getString('opt_desc_$opt', data.desc);
+					data.display = Paths.getString('opt_display_$opt') ?? data.display;
+					data.desc = Paths.getString('opt_desc_$opt') ?? data.desc;
 
 					var text = new FlxText(16, daY, 0, data.display);
 					text.applyFormat(TextFormats.OPT_NAME);
@@ -1508,6 +1503,13 @@ class OptionsSubstate extends MusicBeatSubstate
 					goBack(changed);
 			}
 		} 
+	}
+
+	override function close() {
+		for (camera in camerasToRemove)
+			FlxG.cameras.remove(camera);
+
+		super.close();
 	}
 
 	override function destroy()

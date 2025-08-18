@@ -1,0 +1,74 @@
+var camFollow = game.camFollow;
+var camFollowPos = game.camFollowPos;
+var tankmanimate:FlxAnimate;
+
+function onCutsceneEnd(){
+	game.remove(tankmanimate);
+	tankmanimate.destroy();
+
+	game.dad.visible = true;
+	game.camHUD.visible = true;
+	FlxTween.tween(game.camGame, {zoom: game.defaultCamZoom}, 2, {ease: FlxEase.quadOut});
+}
+
+function onCreateCutscene(){
+	FlxTween.cancelTweensOf(game.camGame);
+
+	game.camHUD.visible = false;
+	game.dad.visible = true;
+
+	FlxG.state.persistentDraw = FlxG.state.persistentUpdate = true;
+
+	game.camGame.zoom = 1.2;
+
+	camFollowPos.x = 440;
+	camFollowPos.y = 460;
+
+	camFollow.x = camFollowPos.x;
+	camFollow.y = camFollowPos.y;
+
+	if(tankmanimate != null)
+		game.remove(tankmanimate);
+
+	tankmanimate = new FlxAnimate(game.dadGroup.x, game.dadGroup.y, 'images/cutscenes/ugh/tankman');
+	tankmanimate.x += game.dad.positionArray[0];
+	tankmanimate.y += game.dad.positionArray[1];
+	tankmanimate.anim.addBySymbol('wellwellwell', 'TANK TALK 1 P1',24, false, 417, 225);
+	tankmanimate.anim.addBySymbol('kill', 'TANK TALK 1 P2',24, false, 417, 225);
+    tankmanimate.antialiasing = true;
+	game.addBehindDad(tankmanimate);
+	tankmanimate.visible = false;
+	
+	timeline.easeProperties(0, 8, camFollow, {y: camFollow.y + 75}, FlxEase.quadOut).updateEveryFrame = true;
+
+	this.playMusic(Paths.music("DISTORTO"), 1, 0.25, 0);
+
+	this.sound(0, "wellWellWell");
+	timeline.playAnimation(0, tankmanimate, 'wellwellwell', true);
+
+	timeline.once(0, ()-> {
+		game.dad.visible = false;
+		tankmanimate.visible = true;
+	});
+
+	timeline.on(0, (f) -> {
+		if(f % 12 == 0){
+			game.gf.dance();
+			game.boyfriend.dance();
+		}
+	});
+
+	timeline.setProperties(72, camFollow, {x: camFollow.x + 500, y: camFollow.y + 50});
+
+	this.sound(92, "bfBeep", false);
+	timeline.playAnimation(92, game.boyfriend, 'singUP');
+	
+	timeline.playAnimation(106, game.boyfriend, "idle");
+
+	this.sound(116, "killYou");
+	timeline.easeProperties(240, 260, this.music, {volume: 0}, FlxEase.linear);
+	timeline.playAnimation(116, tankmanimate, 'kill');
+	timeline.setProperties(116, camFollow, {x: camFollow.x, y: camFollow.y - 50});
+
+	timeline.finish(260);
+}

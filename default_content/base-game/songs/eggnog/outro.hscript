@@ -18,8 +18,8 @@ function onEndSong(){
 		1,
 		false,
 		null,
-		true,
-		()->{ daSound.destroy(true); }
+		true
 	);
+	daSound.onComplete = daSound.destroy;
 	daSound.persist = true;
 }

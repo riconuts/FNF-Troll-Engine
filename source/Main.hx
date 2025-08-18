@@ -97,6 +97,11 @@ class Main extends Sprite
 		stage.window.setIcon(Image.fromFile("icon.png"));
 		#end
 
+		#if hxvlc
+		hxvlc.util.Handle.init(["--no-audio-time-stretch"]); // Makes it so videos when slowed/sped up have their audio pitch up/down
+		// imo better than with time stretch but remove if thats what u prefer lol
+		#end
+				
 		////
 		#if sys
 		var args = Sys.args();
@@ -144,10 +149,13 @@ class Main extends Sprite
 		}
 
 		//// Scale window size for larger screens
-		var scaleModifier:Int = Math.floor((screenWidth > screenHeight) ? (screenHeight / gameHeight) : (screenWidth / gameWidth));
-		if (scaleModifier < 1) scaleModifier = 1;
+		var scaleModifier:Float = (screenWidth > screenHeight) ? ((screenHeight - 96) / gameHeight) : (screenWidth / gameWidth);
+		if (scaleModifier > 1) {
+			var scaleModifier = Math.floor(scaleModifier);
+			resizeWindow(gameWidth * scaleModifier, gameHeight * scaleModifier);
+		}else 
+			scaleWindow(scaleModifier);
 
-		resizeWindow(gameWidth * scaleModifier, gameHeight * scaleModifier);
 		centerWindow();
 
 		////		
@@ -191,6 +199,13 @@ class Main extends Sprite
 		Application.current.window.move(
 			Std.int((Application.current.window.display.bounds.width - Application.current.window.width) / 2),
 			Std.int((Application.current.window.display.bounds.height - Application.current.window.height) / 2)
+		);
+	}
+
+	public static function scaleWindow(scale:Float) {
+		Application.current.window.resize(
+			Math.floor(Application.current.window.display.bounds.width * scale), 
+			Math.floor(Application.current.window.display.bounds.height * scale)
 		);
 	}
 

@@ -1,5 +1,6 @@
 package funkin.states;
 
+import funkin.data.MusicData;
 import flixel.math.FlxMath;
 import funkin.input.Controls;
 import flixel.addons.transition.FlxTransitionableState;
@@ -51,6 +52,8 @@ enum abstract SongSyncMode(String) to String {
 #end
 class MusicBeatState extends FlxUIState
 {
+	public var updateSongPos:Bool = true;
+	
 	private var curSection:Int = 0;
 	private var stepsToDo:Int = 0;
 
@@ -176,7 +179,7 @@ class MusicBeatState extends FlxUIState
 		}
 	}
 
-	private function updateSteps() {
+	private function updateSteps() {	
 		var oldStep:Int = Conductor.curStep;
 		Conductor.updateSteps();
 		var curStep:Int = Conductor.curStep;
@@ -198,7 +201,13 @@ class MusicBeatState extends FlxUIState
 	override function update(elapsed:Float)
 	{
 		updateSteps();
+		if(updateSongPos){
+			if (FlxG.sound.music != null)
+				Conductor.songPosition = FlxG.sound.music.time;
+			else
+				Conductor.songPosition += elapsed * 1000;
 
+		}
 		super.update(elapsed);
 	}
 
@@ -326,16 +335,7 @@ class MusicBeatState extends FlxUIState
 		return section==null ? 4 : Conductor.sectionBeats(section);
 	}
 
-	public static var menuMusic:Sound; // main menu loop
 	public static var menuVox:FlxSound; // jukebox
-
-	public static var menuLoopFunc = function(){
-		trace("menu song ended, looping");
-
-		FlxG.sound.playMusic(menuMusic != null ? menuMusic : Paths.music('freakyMenu'), FlxG.sound.music.volume, true);
-
-		Conductor.changeBPM(180);
-	}; 
 
 	public static function stopMenuMusic(){
 		if (FlxG.sound.music != null){
@@ -352,62 +352,30 @@ class MusicBeatState extends FlxUIState
 		}
 	}
 
+	public static function playMusic(key:String, volume:Float = 1, looped:Bool = true) {
+		MusicBeatState.stopMenuMusic();
+		
+		var md = MusicData.fromName(key);
+		if (md != null) {
+			FlxG.sound.music = {
+				var snd = md.makeFlxSound();
+				snd.volume = volume;
+				snd.looped = looped;
+				snd.play();
+			}
+			Conductor.changeBPM(md.bpm);
+			Conductor.songPosition = FlxG.sound.music.time;
+		}else {
+			FlxG.sound.playMusic(Paths.music(key), volume, looped);
+		}
+	}
+
 	// TODO: check the jukebox selection n shit and play THAT instead? idk lol
-	public static function playMenuMusic(?volume:Float=1, ?force:Bool = false){				
-		if (FlxG.sound.music != null && FlxG.sound.music.playing && force != true)
+	public static function playMenuMusic(volume:Float=1, force:Bool = false){				
+		if (force != true && FlxG.sound.music != null && FlxG.sound.music.playing)
 			return;
 
 		MusicBeatState.stopMenuMusic();
-
-		#if MODS_ALLOWED
-		// i NEED to rewrite the paths shit for real 
-		function returnSound(path:String, key:String, ?library:String){
-			var filePath = Path.join([path, key]);
-
-			if (!Paths.currentTrackedSounds.exists(filePath))
-				Paths.currentTrackedSounds.set(filePath, openfl.media.Sound.fromFile(filePath));
-			
-			Paths.localTrackedAssets.push(key);
-
-			return Paths.currentTrackedSounds.get(filePath);
-		}
-
-		var fuck = [Paths.mods(Paths.currentModDirectory), Paths.mods("global"), "assets"];
-		#if MODS_ALLOWED
-		for (mod in Paths.getGlobalContent())
-			fuck.insert(0, Paths.mods(mod));
-		for (mod in Paths.preLoadContent)
-			fuck.push(Paths.mods(mod));
-		for (mod in Paths.postLoadContent)
-			fuck.insert(0, Paths.mods(mod));
-		#end
-		for (folder in fuck){
-			var daPath = Path.join([folder, "music"]);
-			
-			var menuFilePath = daPath+"/freakyMenu.ogg";
-			if (Paths.exists(menuFilePath)){
-				if (Paths.exists(daPath+"/freakyIntro.ogg")){
-					menuMusic = returnSound(daPath, "freakyMenu.ogg");
-
-					FlxG.sound.playMusic(returnSound(daPath, "freakyIntro.ogg"), volume, false);
-					FlxG.sound.music.onComplete = menuLoopFunc;
-				}else{
-					FlxG.sound.playMusic(returnSound(daPath, "freakyMenu.ogg"), volume, true);
-				}	
-
-				break;
-			}
-		}
-		#else
-		menuMusic = Paths.music('freakyMenu');
-		FlxG.sound.playMusic(Paths.music('freakyIntro'), volume, false);
-		FlxG.sound.music.onComplete = menuLoopFunc;
-		#end
-		
-		//// TODO: find a way to soft code this!!! (psych engine already has one so maybe we could just use that and add custom intro text to it :-)
-		Conductor.changeBPM(102);
-		Conductor.songPosition = 0;
-	}
-	
-	//
+		MusicBeatState.playMusic('freakyMenu', volume, force);
+	}	
 }

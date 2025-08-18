@@ -7,6 +7,7 @@ using StringTools;
 typedef CharacterFile = {
 	var animations:Array<AnimArray>;
 	var image:String;
+	@:optional var images: Array<String>;
 	var scale:Float;
 	var sing_duration:Float;
 	
@@ -21,6 +22,7 @@ typedef CharacterFile = {
 
 	@:optional var x_facing:Float;
 	@:optional var death_name:String;
+	@:optional var script_names:Array<String>;
 	@:optional var script_name:String;
 }
 
@@ -31,6 +33,7 @@ typedef AnimArray = {
 	var loop:Bool;
 	var indices:Array<Int>;
 	var offsets:Array<Int>;
+	@:optional var image:String;
 	@:optional var cameraOffset:Array<Float>;
 }
 
@@ -47,7 +50,10 @@ class CharacterData {
 		switch (Reflect.field(json, "format")){
 			case "andromeda": return fileFromAndromeda(json);
 			// case "troll.1": // base game better hurry the fuck up on fixing their shit or im making my own format
-		}			
+		}
+
+		if(Reflect.field(json, "version") != null)
+			return fileFromVSlice(json);
 
 		var json:CharacterFile = json;
 		
@@ -155,6 +161,39 @@ class CharacterData {
 			[0.0, 0.0];
 	}
 	
+	private static function fileFromVSlice(data:Dynamic): CharacterFile {
+		var data: VSliceCharJson = data;
+		// TODO: render type shit
+		return {
+			script_name: "vslice",
+			animations: [for(anim in data.animations)vsliceToPsychAnim(anim)],
+			image: data.assetPath,
+			scale: (data?.scale ?? 1) * ((data?.isPixel ?? false) ? 6 : 1),
+			sing_duration: data?.singTime ?? 4,
+			
+			position: data?.offsets ?? [0, 0],
+			camera_position: data?.cameraOffsets ?? [0, 0],
+
+			flip_x: data?.flipX ?? false,
+			no_antialiasing: data?.isPixel ?? false,
+
+			healthicon: data?.healthIcon?.id ?? 'bf',
+			healthbar_colors: [255, 0, 0]
+		}
+	}
+
+	private static function vsliceToPsychAnim(anim: VSliceAnimData): AnimArray {
+		var offsets:Array<Float> = anim?.offsets ?? [0, 0];
+		return {
+			anim: anim.name,
+			name: anim.prefix,
+			fps: anim?.frameRate ?? 24,
+			indices: anim.frameIndices,
+			loop: anim?.looped ?? false,
+			offsets: [Std.int(offsets[0]), Std.int(offsets[1])]
+		}
+	}
+
 	private static function fileFromAndromeda(data:Dynamic):CharacterFile {
 		var data:AndromedaCharJson = data;
 		var conv:CharacterFile = {
@@ -280,6 +319,49 @@ class CharacterData {
 
 		return characters;
 	}
+}
+
+////
+typedef VSliceDeathData = {
+	?cameraOffsets:Array<Float>,
+	?cameraZoom:Float,
+	?preTransitionDelay:Float
+}
+typedef VSliceHealthIconData = {
+	id: Null<String>,
+	scale: Null<Float>,
+	flipX: Null<Bool>,
+	isPixel: Null<Bool>,
+	offsets: Null<Array<Float>>
+}
+typedef VSliceAnimData = {
+	name:String,
+	?prefix:String,
+	?assetPath:String,
+	?offsets:Array<Float>,
+	?looped:Bool,
+	?flipX:Bool,
+	?flipY:Bool,
+	?frameRate:Int,
+	?frameIndices:Array<Int>
+};	
+
+typedef VSliceCharJson = {
+	var version: String;
+	var name: String;
+	var renderType: String;
+	var assetPath: String;
+	var scale: Null<Float>;
+	var healthIcon: Null<VSliceHealthIconData>;
+	var death: Null<VSliceDeathData>;
+	var offsets: Null<Array<Float>>;
+	var cameraOffsets: Array<Float>;
+	var isPixel: Null<Bool>;
+	var danceEvery: Null<Float>;
+	var singTime: Null<Float>;
+	var animations: Array<VSliceAnimData>;
+	var startingAnimation: Null<String>; // ???? WHAT IS THE POINT OF THIS
+	var flipX: Null<Bool>;
 }
 
 ////

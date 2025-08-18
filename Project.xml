@@ -47,8 +47,8 @@
 	<define name="VIDEOS_ALLOWED" if="cpp" />
 	<define name="MODS_ALLOWED" if="desktop" />
 	<define name="DISCORD_ALLOWED" if="desktop cpp" unless="display" />
-	<!--<define name="MULTICORE_LOADING" if="native" />-->
 	<!--I don't recommend turning on MULTICORE_LOADING until we rewrite it to be less crashy -Neb-->
+	<!-- <define name="MULTICORE_LOADING" if="native" /> -->
 	<define name="CRASH_HANDLER" />
 	<define name="FUNNY_ALLOWED" /> <!--Allows funny shit like Ruin the Mod and Garlic Bread-->
 
@@ -63,7 +63,8 @@
 	<!--Remove if you don't want to use Moonchart, which allows usage of chart formats from other rhythm games and fnf engines-->
 	<define name="USING_MOONCHART" if="native" />
 
-	<!-- <define name="USING_NEW_MOONCHART" />--> <!--If you're using git, set this, because Haxe sucks fuck and cant detect if youre on git or 0.4.0 for some fucking reason welcome to haxe ladies and gentlemen-->
+	<!--If you're using git, set this, because Haxe sucks fuck and cant detect if youre on git or 0.4.0 for some fucking reason welcome to haxe ladies and gentlemen-->
+	<!-- <define name="USING_NEW_MOONCHART" /> -->
 
 	<!--Remove if you dont want the engine to autoupdate -->
 	<define name="DO_AUTO_UPDATE" if="native desktop OFFICIAL_BUILD" unless="debug" />
@@ -77,6 +78,7 @@
 	<!--Remove if you don't want crash logs to be saved-->
 	<define name="SAVE_CRASH_LOGS" if="CRASH_HANDLER native" />
 
+	<!-- Custom shader error printing :D -->
 	<haxedef name="traceShaderLineNumbers"/>
 
 	<!-- _____________________________ Path Settings ____________________________ -->
@@ -108,7 +110,8 @@
 	<haxelib name="flixel" version="5.6.2" /> <!--You can use up to Flixel 6.0.0 but some stuff might be a bit brokey-->
 	<haxelib name="flixel-ui" version="2.6.1" />
 	<haxelib name="flixel-addons" version="3.2.3" />
-
+	<haxelib name="funkin.vis"/>
+	<haxelib name="grig.audio"/>
 	<section if="USING_FLXANIMATE">
 		<haxelib name="flxanimate" version="3.0.4"/>
 		<classpath path="flxAnimateShadow"/> <!--Remove if FlxAnimate updates and lets you write your own code to determine how filesystem shit is gotten-->

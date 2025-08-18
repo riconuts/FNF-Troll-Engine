@@ -4,7 +4,6 @@ import haxe.io.Bytes;
 import openfl.utils.ByteArray;
 import haxe.ds.StringMap;
 import funkin.data.LocalizationMap;
-import funkin.data.WeekData;
 import flixel.addons.display.FlxRuntimeShader;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.graphics.FlxGraphic;
@@ -360,13 +359,12 @@ class Paths
 	}
 
 	/** returns a FlxRuntimeShader but with file names lol **/ 
-	public static function getShader(fragFile:String = null, vertFile:String = null, version:Int = 120):FlxRuntimeShader
+	public static function getShader(fragFile:String = null, vertFile:String = null, version:Int = null):FlxRuntimeShader
 	{
 		try{
 			return new FlxRuntimeShader(
 				fragFile==null ? null : Paths.getContent(getShaderFragment(fragFile)), 
-				vertFile==null ? null : Paths.getContent(getShaderVertex(vertFile)),
-				//version
+				vertFile==null ? null : Paths.getContent(getShaderVertex(vertFile))
 			);
 		}catch(e:Dynamic){
 			trace("Shader compilation error:" + e.message);
@@ -539,7 +537,7 @@ class Paths
 	}
 
 	public static inline function getFolderPath(folder:String = ""):String
-		return (folder == "") ? getPreloadPath() : mods(folder);
+		return (folder == "") ? getPreloadPath() : mods(folder) + "/";
 
 	////	
 	public static var currentModDirectory(default, set):String = '';
@@ -704,8 +702,8 @@ class Paths
 			Reflect.setField(data, "weeks", Reflect.field(data, "chapters"));
 			Reflect.deleteField(data, "chapters");
 			return data;
-		}else { // Lets assume it's an old TGT metadata
-			return {weeks: [data]};
+		}else {
+			return {};
 		}
 	}
 
@@ -785,11 +783,8 @@ class Paths
 	public static inline function hasString(key:String):Bool
 		return currentStrings.exists(key);
 
-	public static inline function _getString(key:String):Null<String>
+	public static inline function getString(key:String):Null<String>
 		return currentStrings.get(key);
-
-	public static inline function getString(key:String, ?defaultValue:String):String
-		return hasString(key) ? _getString(key) : (defaultValue==null ? key : defaultValue);
 }
 
 class HTML5Paths {
@@ -895,11 +890,6 @@ typedef FreeplayCategoryMetadata = {
 }
 
 typedef ContentMetadata = {
-	/**
-		Weeks to be added to the story mode
-	**/
-	var weeks:Array<funkin.data.WeekData.WeekMetadata>;
-	
 	/**
 		Content that will load before this content.
 	**/

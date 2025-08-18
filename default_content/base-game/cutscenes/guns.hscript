@@ -1,0 +1,69 @@
+var tankmanimate: FlxAnimate;
+
+var camFollow = game.camFollow;
+var camFollowPos = game.camFollowPos;
+
+function onCutsceneEnd(){
+	game.remove(tankmanimate);
+	tankmanimate.destroy();
+
+	game.gf.voicelining = false;
+	game.gf.dance();
+	game.dad.visible = true;
+	game.camHUD.visible = true;
+	FlxTween.tween(game.camGame, {zoom: game.defaultCamZoom}, 2, {ease: FlxEase.quadOut});
+}
+
+
+function onCreateCutscene(){
+	FlxTween.cancelTweensOf(game.camGame);
+
+	game.camHUD.visible = false;
+	game.dad.visible = true;
+	
+	FlxG.state.persistentDraw = FlxG.state.persistentUpdate = true;
+
+	game.camGame.zoom = game.defaultCamZoom;
+	
+	camFollow.x = 440;
+	camFollow.y = 460;
+
+	if(tankmanimate != null)
+		game.remove(tankmanimate);
+
+	tankmanimate = new FlxAnimate(game.dadGroup.x, game.dadGroup.y, 'images/cutscenes/guns/tankman');
+	tankmanimate.x += game.dad.positionArray[0];
+	tankmanimate.y += game.dad.positionArray[1];
+	tankmanimate.anim.addBySymbol('voice', 'TANK TALK 2',24, false, 417, 225);
+	tankmanimate.anim.play("voice", true);
+	tankmanimate.visible = false;
+    tankmanimate.antialiasing = true;
+	game.addBehindDad(tankmanimate);
+
+
+	timeline.once(0, (f)->{
+		tankmanimate.visible = true;
+		game.dad.visible = false;
+	});
+
+	this.playMusic(Paths.music("DISTORTO"), 1, 0.25, 0);
+	this.sound(0, "tankSong2");
+	timeline.playAnimation(0, tankmanimate, 'voice', true);
+
+	timeline.easeProperties(0, 80, game.camGame, {zoom: 1.2}, FlxEase.quartOut).updateEveryFrame = true;
+	timeline.easeProperties(0, 60, camFollow, {y: camFollow.y + 100}, FlxEase.quadOut).updateEveryFrame = true;
+
+	timeline.easeProperties(94, 102, game.camGame, {zoom: 1.4}, FlxEase.quadIn).updateEveryFrame = true;
+	timeline.easeProperties(102, 174, game.camGame, {zoom: 1.2}, FlxEase.quartOut).updateEveryFrame = true;
+
+	timeline.playAnimation(102, game.gf, 'sad');
+
+	timeline.easeProperties(260, 280, this.music, {volume: 0}, FlxEase.linear);
+	timeline.finish(280);
+}
+
+function onUpdate(elapsed:Float){
+	if(game.gf.animation.curAnim.name == 'sad' && game.gf.animation.curAnim.finished)
+		game.gf.playAnim("sad", true);
+	
+}

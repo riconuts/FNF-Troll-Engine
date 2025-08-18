@@ -264,12 +264,21 @@ gameplay_modifier_practice=Practice Mode
 gameplay_modifier_scrollspeed=Scroll Speed
 gameplay_modifier_scrolltype=Scroll Type
 gameplay_modifier_songspeed=Playback Rate
-pauseoption_change-modifiers=Change Modifiers
-pauseoption_end-song=End song
-pauseoption_exit-to-menu=Exit to menu
-pauseoption_leave-charting-mode=Leave charting mode
-pauseoption_options=Options
+##
+pauseoption_resume-song=Resume
 pauseoption_restart-song=Restart Song
-pauseoption_resume=Resume
-pauseoption_skip-to=Skip to
+pauseoption_restart-week=Restart Week
+pauseoption_change-difficulty=Change Difficulty
+pauseoption_change-modifiers=Change Modifiers
+pauseoption_change-options=Options
+pauseoption_exit-to-menu=Exit to menu
+## Debug / Charting mode
+pauseoption_restart-from-last-time=Restart from last time
+pauseoption_skip-to-time=Skip to
+pauseoption_end-song=End song
+pauseoption_leave-charting-mode=Leave charting mode
 pauseoption_toggle-botplay=Toggle botplay
+## Cutscene pause menu
+pauseoption_resume-cutscene=Resume
+pauseoption_skip-cutscene=Skip cutscene
+pauseoption_restart-cutscene=Restart cutscene

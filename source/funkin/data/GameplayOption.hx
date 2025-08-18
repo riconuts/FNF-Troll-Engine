@@ -111,7 +111,7 @@ class GameplayOption
 	public var displayFormat:String = '%v';
 
 	public function new(name:String, variable:String, type:OptionType, defaultValue:Dynamic) {
-		this.name = Paths.getString('gameplay_modifier_$variable', name);
+		this.name = Paths.getString('gameplay_modifier_$variable') ?? name;
 		this.variable = variable;
 		this.type = type;
 		this.defaultValue = defaultValue;

@@ -1,0 +1,187 @@
+var camFollowPos = game.camFollowPos;
+var camFollow = game.camFollow;
+
+var tankmanimate:FlxAnimate;
+var speakimate:FlxAnimate;
+var boyfrimate:FlxAnimate;
+
+var gfTurninDemon:FlxSprite;
+
+
+function onCutsceneEnd(){
+	game.remove(tankmanimate);
+	game.remove(speakimate);
+	game.remove(boyfrimate);
+	if(gfTurninDemon != null)
+		game.remove(gfTurninDemon);
+	
+	game.dad.visible = true;
+	game.boyfriend.visible = true;
+	game.gf.visible = true;
+	game.camHUD.visible = true;
+	game.disableCameraMovement = false;
+	
+	FlxTween.tween(game.camGame, {zoom: game.defaultCamZoom}, 2, {ease: FlxEase.quadOut});
+}
+
+
+
+var bX = 0;
+var bY = 0;
+function onCreateCutscene()
+{
+	if(tankmanimate != null)
+		game.remove(tankmanimate);
+
+	if(speakimate != null)
+		game.remove(speakimate);
+
+	if(gfTurninDemon != null)
+		game.remove(gfTurninDemon);
+
+	if(boyfrimate != null)
+		game.remove(boyfrimate);
+
+
+	game.camHUD.visible = false;
+
+	game.boyfriend.visible = false;
+	game.dad.visible = false;
+	game.gf.visible = false;
+	game.disableCameraMovement = false;
+
+	camFollow.x = game.dad.getCamera()[0];
+	camFollow.y = game.dad.getCamera()[1];
+
+	camFollowPos.x = camFollow.x + 100;
+	camFollowPos.y = camFollow.y;
+
+	game.camGame.zoom = 1.2;
+	
+	tankmanimate = new FlxAnimate(game.dadGroup.x, game.dadGroup.y, 'images/cutscenes/stress/tankman');
+	tankmanimate.x += game.dad.positionArray[0];
+	tankmanimate.y += game.dad.positionArray[1];
+	tankmanimate.x += 417;
+	tankmanimate.y += 225;
+
+	tankmanimate.anim.addBySymbol('godDamnIt', 'TANK TALK 3 P1 UNCUT',24, false, 0, 0);
+	tankmanimate.anim.addBySymbol('Pico', 'TANK TALK 3 P2 UNCUT',24, false, 0, 0);
+    tankmanimate.antialiasing = true;
+	tankmanimate.anim.play("godDamnIt", true);
+	tankmanimate.anim.pause();
+	game.addBehindDad(tankmanimate);
+
+	boyfrimate = new FlxAnimate(game.boyfriendGroup.x, game.boyfriendGroup.y, 'images/cutscenes/stress/boyfriend');
+	boyfrimate.x += game.boyfriend.positionArray[0];
+	boyfrimate.y += game.boyfriend.positionArray[1];
+	boyfrimate.x -= 291;
+	boyfrimate.y += 217;
+
+	boyfrimate.anim.addBySymbol('idle', 'BF idle dance',24, true, 0, 0);
+	boyfrimate.anim.addBySymbol('catch', 'BF catches GF',24, false, 0, 0);
+	boyfrimate.anim.addBySymbol('bfgfIdle', 'BF idle dance w gf',24, true, 0, 0);
+	boyfrimate.anim.addBySymbol('react', 'BF NOTE UP MISS',24, false, 0, 0); // unused cus of filter shit
+	// BetterAnimate could not come faster
+    boyfrimate.antialiasing = true;
+	boyfrimate.anim.play("idle", true);
+	game.addBehindDad(boyfrimate);
+
+	speakimate = new FlxAnimate(game.gfGroup.x, game.gfGroup.y, 'images/cutscenes/stress/gfpico');
+	speakimate.x += game.gf.positionArray[0];
+	speakimate.y += game.gf.positionArray[1];
+	speakimate.scrollFactor.set(game.gf.scrollFactor.x, game.gf.scrollFactor.y);
+	speakimate.x += 150;
+	speakimate.y += 454;
+
+	gfTurninDemon = new FlxSprite(speakimate.x, speakimate.y);
+	gfTurninDemon.frames = Paths.getSparrowAtlas("cutscenes/stress/gfTurnsDemon");
+	gfTurninDemon.animation.addByPrefix("turn", "GF Turnin Demon W Effect instance 1", 24, false);
+	gfTurninDemon.visible = false;
+	gfTurninDemon.scrollFactor.set(speakimate.scrollFactor.x, speakimate.scrollFactor.y);
+	gfTurninDemon.antialiasing = true;
+
+	gfTurninDemon.x -= 479;
+	gfTurninDemon.y -= 773;
+
+	bX = boyfrimate.x;
+	bY = boyfrimate.y;
+
+	speakimate.anim.addBySymbol('idle', 'GF Dancing at Gunpoint',24, true, 0, 0);
+	speakimate.anim.addBySymbol('picoDrop', 'Pico Saves them sequence',24, false, 0, 0);
+	speakimate.anim.addBySymbol('picoIdle', 'Pico Dual Wield on Speaker idle',24, true, 0, 0);
+    speakimate.antialiasing = true;
+	speakimate.anim.play("idle", true);
+	game.addBehindGF(speakimate);
+	game.addBehindGF(gfTurninDemon);
+	
+	timeline.playAnimation(0, tankmanimate, "godDamnIt", true);
+	this.sound(0, "stressCutscene");
+
+	timeline.playAnimation(364, gfTurninDemon, "turn", true);
+	timeline.once(364, (f)->{
+		speakimate.visible = false;
+		gfTurninDemon.visible = true;
+		game.disableCameraMovement = true;
+	});
+	timeline.easeProperties(364, 413, game.camGame, {zoom: 1.4}, FlxEase.quadInOut).updateEveryFrame = true;
+	timeline.easeProperties(364, 399, camFollowPos, {x: game.gf.getCamera()[0] - 75, y: game.gf.getCamera()[1]}, FlxEase.quadOut).updateEveryFrame = true;
+	timeline.easeProperties(417, 421, game.camGame, {zoom: 0.8}, FlxEase.quadIn).updateEveryFrame = true;
+	timeline.easeProperties(421, 443, game.camGame, {zoom: game.defaultCamZoom}, FlxEase.quadOut).updateEveryFrame = true;
+	
+	timeline.easeProperties(451, 453, game.camGame, {zoom: 1.0}, FlxEase.quadIn).updateEveryFrame = true;
+	timeline.easeProperties(453, 467, game.camGame, {zoom: game.defaultCamZoom}, FlxEase.quadOut).updateEveryFrame = true;
+
+	timeline.easeProperties(470, 520, camFollowPos, {x: game.dad.getCamera()[0] + 50, y: game.dad.getCamera()[1]}, FlxEase.quadOut).updateEveryFrame = true;
+
+	timeline.playAnimation(418, speakimate, "picoDrop", true);
+	timeline.once(418, (f)->{
+		speakimate.visible = true;
+		game.remove(gfTurninDemon);
+		gfTurninDemon.destroy();
+		gfTurninDemon = null;
+	});
+	timeline.once(420, (f)->{
+		game.camGame.shake(0.01, 2/24);
+	});
+	timeline.playAnimation(420, boyfrimate, "catch");
+
+	timeline.playAnimation(444, boyfrimate, "bfgfIdle");
+	
+	timeline.once(451, (f)->{
+		game.camGame.shake(0.01, 3/24);
+	});
+
+	timeline.playAnimation(498, speakimate, "picoIdle");
+	timeline.playAnimation(468, tankmanimate, "Pico", true);
+	
+	timeline.playAnimation(752, game.boyfriend, "singUPmiss");
+	
+	timeline.once(752, ()->{
+		game.boyfriend.visible = true;
+		boyfrimate.visible = false;
+		camFollow.x = game.boyfriend.getCamera()[0] + 100;
+		camFollow.y = game.boyfriend.getCamera()[1] + 50;
+	
+		camFollowPos.x = camFollow.x;
+		camFollowPos.y = camFollow.y;
+		game.camGame.zoom = 1.2;
+	});
+
+	timeline.easeProperties(752, 764, game.camGame, {zoom: 1.3}, FlxEase.elasticOut).updateEveryFrame = true;
+
+	timeline.once(774, () -> {
+		camFollow.x = game.dad.getCamera()[0] + 50;
+		camFollow.y = game.dad.getCamera()[1];
+
+		camFollowPos.x = camFollow.x;
+		camFollowPos.y = camFollow.y;
+
+		game.camGame.zoom = 1.1;
+	});
+	
+	
+	timeline.playAnimation(776, game.boyfriend, 'idle');
+
+	timeline.easeProperties(829, 836, this.sounds[0], {volume: 0});
+	timeline.finish(836);
+}

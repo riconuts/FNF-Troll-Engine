@@ -3,6 +3,7 @@ function setupNote(note:Note){
     note.isRoll = true;
     if(note.isSustainNote){
         note.texture = 'ROLL_assets';
+        note.noAnimation = true;
     }
 }
 
@@ -32,4 +33,29 @@ function loadNoteAnims(note){
 
 function onHoldPress(note, field){
     note.tripProgress = 1;
+
+    var chars = game.getNoteCharacters(note, field);
+
+    // play the intended singing animation when the player presses the roll, and prevent the character from going back to idle
+    note.noAnimation = false;
+	for (char in chars) 
+    {
+        char.playNote(note, field);
+        char.skipDance = true;
+    }
+    note.noAnimation = true;
+
+    // allow the character to go back to their idle animation when the roll is either finished or dropped
+	var onHoldEnd;
+	onHoldEnd = function(note2) {
+		if (note2 != note) return;
+		for (char in chars) {
+			char.skipDance = false;
+			char.holdTimer = 0.0;
+		}
+		field.holdFinished.remove(onHoldEnd);
+		field.holdDropped.remove(onHoldEnd);
+	}
+	field.holdFinished.add(onHoldEnd);
+	field.holdDropped.add(onHoldEnd);
 }

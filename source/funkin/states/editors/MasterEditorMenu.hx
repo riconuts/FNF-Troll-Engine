@@ -21,6 +21,7 @@ class MasterEditorMenu extends MusicBeatState
 		'Character Editor',
 		'Chart Editor',
 		'Test Stage',
+		'VSlice Converter',
 		/*
 		'Stage Editor',
 		'Stage Builder',
@@ -64,6 +65,7 @@ class MasterEditorMenu extends MusicBeatState
 				case 'Song Select': MusicBeatState.switchState(new SongSelectState()); return;
 				case 'Character Editor': MusicBeatState.switchState(new CharacterEditorState(Character.DEFAULT_CHARACTER, false));
 				case 'Chart Editor': LoadingState.loadAndSwitchState(new ChartingState(), false);
+				case 'VSlice Converter': MusicBeatState.switchState(new funkin.states.editors.VSliceConverter());
 				/*
 				case 'Stage Editor': MusicBeatState.switchState(new StageEditorState());
 				case 'Stage Builder': MusicBeatState.switchState(new StageBuilderState());
@@ -75,7 +77,7 @@ class MasterEditorMenu extends MusicBeatState
 				default: return;
 			}
 			
-			FlxG.sound.music.volume = 0;
+			MusicBeatState.stopMenuMusic();
 			menu.controls = null;
 		}
 		for (name in options) menu.addTextOption(name);

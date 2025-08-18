@@ -207,27 +207,6 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 
 		////
 		noteField = new NoteField(this, modMgr);
-		//add(noteField);
-
-		// idk what haxeflixel does to regenerate the frames
-		// SO! this will be how we do it
-		// lil guy will sit here and regenerate the frames automatically
-		// idk why this seems to work but it does	
-		// TODO: figure out WHY this works
-		var retard:StrumNote = new StrumNote(400, 400, 0);
-		retard.playAnim("static");
-		retard.alpha = 1;
-		retard.visible = true;
-		retard.color = 0xFF000000; // just to make it a bit harder to see
-		retard.alpha = 0.9; // just to make it a bit harder to see
-		retard.scale.set(0.002, 0.002);
-		retard.handleRendering = true;
-		retard.updateHitbox();
-		retard.x = 400;
-		retard.y = 400;
-		@:privateAccess
-		retard.draw();
-		add(retard);
 	}
 
 	// queues a note to be spawned
@@ -236,7 +215,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 			noteQueue[note.column] = [note];
 		else{
 			noteQueue[note.column].push(note);
-			noteQueue[note.column].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
+			noteQueue[note.column].sort(sortNotesAscend);
 		}
 	}
 
@@ -246,7 +225,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		if (noteQueue[note.column] == null)
 			noteQueue[note.column] = [];
 		noteQueue[note.column].remove(note);
-		noteQueue[note.column].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
+		noteQueue[note.column].sort(sortNotesAscend);
 	}
 
 	// destroys a note
@@ -283,7 +262,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 			daNote.parent.unhitTail.remove(daNote); 
 
 		if (noteQueue[daNote.column] != null)
-			noteQueue[daNote.column].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
+			noteQueue[daNote.column].sort(sortNotesAscend);
 		remove(daNote);
 		daNote.destroy();
 	}
@@ -295,7 +274,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		
 		if (noteQueue[note.column]!=null){
 			noteQueue[note.column].remove(note);
-			noteQueue[note.column].sort((a, b) -> Std.int(a.strumTime - b.strumTime));
+			noteQueue[note.column].sort(sortNotesAscend);
 		}
 
 		if (spawnedByData[note.column] != null)
@@ -354,7 +333,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 		hitTime ??= Conductor.getAccPosition();
 
 		var noteList = getTapNotes(data, (note:Note) -> !note.tooLate);
-		noteList.sort((a, b) -> Std.int(b.strumTime - a.strumTime)); // so lowPriority actually works (even though i hate it lol!)
+		noteList.sort(sortNotesDescend); // so lowPriority actually works (even though i hate it lol!)
 
 		var recentHold:Null<Note> = null;
 
@@ -419,6 +398,12 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	{
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.zIndex, Obj2.zIndex);
 	}
+
+	private static function sortNotesAscend(a:Note, b:Note):Int
+		return Std.int(a.strumTime - b.strumTime);
+
+	private static function sortNotesDescend(a:Note, b:Note):Int
+		return Std.int(b.strumTime - a.strumTime);
 
 	// spawns a notesplash w/ specified skin. optional note to derive the skin and colours from.
 
@@ -619,7 +604,7 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 				if (keysPressed[data]){
 					var noteList = getTapNotesWithEnd(data, Conductor.songPosition + ClientPrefs.hitWindow, (note:Note) -> !note.isSustainNote, false);
 					
-					noteList.sort((a, b) -> Std.int(b.strumTime - a.strumTime));
+					noteList.sort(sortNotesDescend);
 					
 					while (noteList.length > 0)
 					{

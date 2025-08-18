@@ -1,0 +1,35 @@
+function onCreateCutscene() {
+	game.camHUD.visible = false;
+	
+	game.camFollowPos.x = 450;
+	game.camFollowPos.y = -2050;
+	
+	game.camFollow.x = game.camFollowPos.x;
+	game.camFollow.y = game.camFollowPos.y;
+	
+	game.camGame.zoom = 1.5;
+	
+	var blackScreen:FlxSprite = new FlxSprite(0, 0).makeGraphic(1, 1, FlxColor.BLACK);
+	blackScreen.scale.set(FlxG.width * 2, FlxG.height * 2);
+	blackScreen.scrollFactor.set();
+	blackScreen.screenCenter();
+	game.add(blackScreen);
+
+	////
+	timeline.frameRate = 10;
+	
+	timeline.once(11, function() {
+		game.remove(blackScreen);
+		blackScreen.destroy();
+		
+		FlxG.sound.play(Paths.sound('Lights_Turn_On'));
+	});
+	
+	timeline.once(18, function() {
+		game.camHUD.visible = true;
+	});
+	
+	timeline.easeProperties(18, 42, game.camGame, {zoom: game.defaultCamZoom}, FlxEase.quadInOut).updateEveryFrame = true;
+	
+	timeline.finish(46);
+}
