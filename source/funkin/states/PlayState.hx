@@ -1604,10 +1604,7 @@ class PlayState extends MusicBeatState
 		var allEvents:Array<PsychEvent> = [];
 
 		if (song != null) {
-			var eventsJSON:SwagSong = ChartData.parseSongJson(song.getSongFile('events.json'), false);
-			if (eventsJSON != null) ChartData.getEventNotes(eventsJSON.events, allEvents);
-		}else {
-			var eventsJSON:SwagSong = ChartData.loadFromJson('events', songId, false);
+			var eventsJSON:JsonEvents = ChartData.parseEventsJson(song.getSongFile('events.json'));
 			if (eventsJSON != null) ChartData.getEventNotes(eventsJSON.events, allEvents);
 		}
 

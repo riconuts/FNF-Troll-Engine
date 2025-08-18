@@ -58,6 +58,10 @@ typedef SwagSong = {
 	var validScore:Bool;
 }
 
+typedef JsonEvents = {
+	@:optional var events:Array<PsychEventNote>;
+}
+
 typedef JsonSong = {
 	> SwagSong,
 	var _path:String; // for internal use
@@ -107,17 +111,21 @@ final defaultNoteTypeList:Array<String> = [
 
 class ChartData
 {
-	//@:deprecated('loadFromJson is deprecated! Use BaseSong.getSwagSong instead!')
-	public static function loadFromJson(jsonInput:String, folder:String, isChartJson:Bool = true):Null<SwagSong>
-	{
-		var path:String = Paths.formatToSongPath(folder) + '/' + Paths.formatToSongPath(jsonInput) + '.json';
-		var fullPath = Paths.getPath('songs/$path', false);
-		return parseSongJson(fullPath, isChartJson);
+	public static function _parseJson(filePath:String):Null<Dynamic> {
+		var rawJson:Null<String> = Paths.getContent(filePath);
+		if (rawJson == null) throw 'File not found';
+
+		// LOL GOING THROUGH THE BULLSHIT TO CLEAN IDK WHATS STRANGE
+		rawJson = rawJson.trim();
+		while (!rawJson.endsWith("}"))
+			rawJson = rawJson.substr(0, rawJson.length - 1);
+
+		return Json.parse(rawJson);
 	}
 
-	public static function parseSongJson(filePath:String, isChartJson:Bool = true):Null<SwagSong> {
+	public static function parseSongJson(filePath:String):Null<SwagSong> {
 		try {
-			return _parseSongJson(filePath, isChartJson);
+			return _parseSongJson(filePath);
 		}catch(e) {
 			print(Main.callstackToString(haxe.CallStack.exceptionStack(true)));
 			trace('ERROR parsing song JSON: $filePath', e.message);
@@ -125,22 +133,13 @@ class ChartData
 		}
 	}
 
-	public static function _parseSongJson(filePath:String, isChartJson:Bool = true):SwagSong {
-		var rawJson:Null<String> = Paths.getContent(filePath);
-		if (rawJson == null)
-			throw 'song JSON file NOT FOUND: $filePath';
-
-		// LOL GOING THROUGH THE BULLSHIT TO CLEAN IDK WHATS STRANGE
-		rawJson = rawJson.trim();
-		while (!rawJson.endsWith("}"))
-			rawJson = rawJson.substr(0, rawJson.length - 1);
-
-		var uncastedJson:Dynamic = Json.parse(rawJson);
+	public static function _parseSongJson(filePath:String):SwagSong {
+		var uncastedJson:Dynamic = _parseJson(filePath);
 		var songJson:JsonSong;
-		if (isChartJson && uncastedJson.song is String){
-			// PSYCH 1.0 FUCKING DUMBSHIT FIX IT RETARD
-			// why did shadowmario make such a useless format change oh my god :sob:
-			
+		
+		// why did shadowmario make such a useless format change oh my god :sob:
+		if (uncastedJson.format is String && (uncastedJson.format:String).startsWith("psych_v1"))
+		{		
 			songJson = cast uncastedJson;
 			var stepCrotchet = Conductor.calculateStepCrochet(songJson.bpm);
 
@@ -156,7 +155,29 @@ class ChartData
 			songJson = cast uncastedJson.song;
 
 		songJson._path = filePath;
-		return isChartJson ? onLoadJson(songJson) : onLoadEvents(songJson);
+		return onLoadJson(songJson);
+	}
+
+	public static function parseEventsJson(filePath:String):Null<JsonEvents> {
+		try {
+			return _parseEventsJson(filePath);
+		}catch(e) {
+			print(Main.callstackToString(haxe.CallStack.exceptionStack(true)));
+			trace('ERROR parsing events JSON: $filePath', e.message);
+			return null;
+		}
+	}
+
+	public static function _parseEventsJson(filePath:String):JsonEvents {
+		var uncastedJson:Dynamic = _parseJson(filePath);
+		var eventsJson:JsonEvents;
+
+		if (uncastedJson.format is String && (uncastedJson.format:String).startsWith("psych_v1"))		
+			eventsJson = cast uncastedJson;
+		else
+			eventsJson = cast uncastedJson.song;
+		
+		return onLoadEvents(eventsJson);
 	}
 
 	public static function onLoadJson(songJson:JsonSong):SwagSong
@@ -233,15 +254,14 @@ class ChartData
 		return swagJson;
 	}
 
-	public static function onLoadEvents(songJson:SwagSong) {
+	public static function onLoadEvents(songJson:JsonEvents, checkPsych:Bool = true) {
 		if (songJson.events == null){
 			songJson.events = [];
 		}
 
 		//// convert ancient psych event notes
-		if (songJson.notes != null) {
-			for (secNum in 0...songJson.notes.length) {
-				var sec:SwagSection = songJson.notes[secNum];
+		if (checkPsych && (cast songJson:JsonSong).notes != null) {
+			for (sec in (cast songJson:JsonSong).notes) {
 				var notes:Array<Dynamic> = sec.sectionNotes;
 				var len:Int = notes.length;
 				var i:Int = 0;

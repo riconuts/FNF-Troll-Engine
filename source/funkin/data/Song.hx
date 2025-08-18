@@ -354,15 +354,6 @@ class Song extends BaseSong
 		return info;
 	}
 
-	inline public static function loadFromJson(jsonInput:String, folder:String, isChartJson:Bool = true):Null<SwagSong>
-		return ChartData.loadFromJson(jsonInput, folder, isChartJson);
-
-	inline public static function onLoadEvents(songJson:SwagSong)
-		return ChartData.onLoadEvents(songJson);
-
-	inline public static function getEventNotes(rawEventsData:Array<PsychEventNote>, ?resultArray:Array<PsychEvent>):Array<PsychEvent>
-		return ChartData.getEventNotes(rawEventsData, resultArray);
-
 	/** Loads a singular song to be played on PlayState **/
 	static public function loadSong(song:BaseSong, ?difficulty:String) {
 		PlayState.loadPlaylist([song], difficulty);
