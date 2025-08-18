@@ -2651,7 +2651,7 @@ class ChartingState extends MusicBeatState
 		for (i in 1...Math.floor(totalBeats)) {
 			var beatsep1:FlxSprite = beatSeparators.recycle();
 			if (beatsep1 == null) {
-				beatsep1 = CoolUtil.blankSprite(gridBG.width, 1, 0xFFFF0000);
+				beatsep1 = CoolUtil.blankSprite(gridBG.width, 4, 0xFFFF0000);
 				beatsep1.alpha = 0.25;
 				beatSeparators.add(beatsep1);
 			}else {
