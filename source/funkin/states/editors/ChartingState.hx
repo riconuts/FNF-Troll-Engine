@@ -455,6 +455,8 @@ class ChartingState extends MusicBeatState
 		
 		FlxTransitionableState.skipNextTransOut = true;
 		MusicBeatState.stopMenuMusic();
+
+		loadEventStuff();
 		
 		onLoadMetadata();
 
@@ -726,6 +728,30 @@ class ChartingState extends MusicBeatState
 		////
 		super.create();
 		FlxG.mouse.visible = true;
+	}
+
+	function loadEventStuff() {
+		#if (sys && (hscript))
+		var eventsLoaded:Map<String, Bool> = new Map();
+		for (directory in Paths.getFolders('events'))
+		{
+			if (!FileSystem.exists(directory))
+				continue;
+
+			for (file in FileSystem.readDirectory(directory))
+			{
+				if (!file.endsWith('.txt'))
+					continue;
+
+				var eventToCheck:String = file.substr(0, file.length - 4);
+				if (eventsLoaded.exists(eventToCheck))
+					continue;
+
+				eventsLoaded.set(eventToCheck, true);
+				eventStuff.push([eventToCheck, File.getContent(haxe.io.Path.join([directory, file]))]);
+			}
+		}
+		#end
 	}
 
 	override function startOutro(fuck){
@@ -1367,30 +1393,6 @@ class ChartingState extends MusicBeatState
 		tab_group_event.name = 'Event';
 
 		descText = new FlxText(20, 200, 0, eventStuff[0][0]);
-		
-		#if (sys && (hscript))
-		var eventsLoaded:Map<String, Bool> = new Map();
-		var directories:Array<String> = Paths.getFolders('events');
-		for (directory in directories)
-		{
-			if (!FileSystem.exists(directory))
-				continue;
-
-			for (file in FileSystem.readDirectory(directory))
-			{
-				var path = haxe.io.Path.join([directory, file]);
-				if (FileSystem.isDirectory(path) || !file.endsWith('.txt'))
-					continue;
-
-				var eventToCheck:String = file.substr(0, file.length - 4);
-				if (eventsLoaded.exists(eventToCheck))
-					continue;
-
-				eventsLoaded.set(eventToCheck, true);
-				eventStuff.push([eventToCheck, File.getContent(path)]);
-			}
-		}
-		#end
 
 		var leEvents:Array<String> = [];
 		for (i in 0...eventStuff.length)
@@ -1902,36 +1904,38 @@ class ChartingState extends MusicBeatState
 
 	override function getEvent(id:String, sender:Dynamic, data:Dynamic, ?params:Array<Dynamic>)
 	{
+		var name:Null<String> = sender.name;
+
 		if (id == FlxUICheckBox.CLICK_EVENT)
 		{
 			var check:FlxUICheckBox = cast sender;
-			var label = check.getLabel().text;
-			switch (label)
+			switch (name)
 			{
-				case 'Must hit section':
+				case 'check_mustHit':
 					new ChangeMustHitSectionAction(curSec, !FlxG.keys.pressed.CONTROL);
 
 					updateGrid();
 					updateHeads();
-				case 'GF section':
+				case 'check_gf':
 					_song.notes[curSec].gfSection = check.checked;
 
 					updateGrid();
 					updateHeads();
-				case 'Change BPM':
-
+				case 'check_changeBPM':
 					_song.notes[curSec].changeBPM = check.checked;
-					FlxG.log.add('changed bpm shit');
-				case "Alt Animation":
+					
+					Conductor.mapBPMChanges(_song);
+					updateGrid();
+					updateNoteSteps();
+
+				case "check_altAnim":
 					_song.notes[curSec].altAnim = check.checked;
 			}
 		}
 		else if (id == FlxUINumericStepper.CHANGE_EVENT)
 		{
 			var nums:FlxUINumericStepper = cast sender;
-			var wname = nums.name;
-
-			switch(wname) {
+			switch(name) {
 				case 'section_beats':
 					_song.notes[curSec].sectionBeats = nums.value;
 					reloadGridLayer();
@@ -1976,8 +1980,7 @@ class ChartingState extends MusicBeatState
 		}
 		else if(id == FlxUIInputText.CHANGE_EVENT) {
 			var sender:FlxUIInputText = cast sender;
-
-			switch (sender.name) {
+			switch (name) {
 				case 'song_title':
 					_song.song = sender.text;
 
