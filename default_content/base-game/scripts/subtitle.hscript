@@ -31,7 +31,7 @@ var positionData = [];
 var icon:HealthIcon;
 
 function onCreate(){
-	var jsonSubs = Paths.json('songs/' + Paths.formatToSongPath(PlayState.SONG.song) + '/lyrics.json');
+	var jsonSubs = Paths.getJson(PlayState.song.getSongFile('lyrics.json'));
 	if(jsonSubs != null)
 		lyricData = jsonSubs.lyrics;	
 }
