@@ -1447,14 +1447,10 @@ class ChartingState extends MusicBeatState
 			eventNameInput.callback(eventNameInput.text, "enter");}
 		blockPressWhileTypingOn.push(eventNameInput);
 
-		var text:FlxText = new FlxText(20, 90, 0, "Value 1:");
-		tab_group_event.add(text);
 		value1InputText = new FlxUIInputText(20, 110, 100, "");
 		value1InputText.name = 'event_value1';
 		blockPressWhileTypingOn.push(value1InputText);
 
-		var text:FlxText = new FlxText(20, 130, 0, "Value 2:");
-		tab_group_event.add(text);
 		value2InputText = new FlxUIInputText(20, 150, 100, "");
 		value2InputText.name = 'event_value2';
 		blockPressWhileTypingOn.push(value2InputText);
@@ -1565,7 +1561,9 @@ class ChartingState extends MusicBeatState
 		tab_group_event.add(selectedEventText);
 
 		tab_group_event.add(descText);
+		tab_group_event.add(new FlxText(20, 90, 0, "Value 1:"));		
 		tab_group_event.add(value1InputText);
+		tab_group_event.add(new FlxText(20, 130, 0, "Value 2:"));
 		tab_group_event.add(value2InputText);
 		tab_group_event.add(eventDropDown);
 		tab_group_event.add(eventNameInput);
