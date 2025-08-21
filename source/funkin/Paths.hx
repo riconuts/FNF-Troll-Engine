@@ -28,11 +28,10 @@ class Paths
 	inline public static var IMAGE_EXT = "png";
 	inline public static var SOUND_EXT = "ogg";
 
-	public static final HSCRIPT_EXTENSIONS:Array<String> = ["hscript", "hxs", "hx"];
+	public static final HSCRIPT_EXTENSIONS:Array<String> = ["hscript", "hxs",];
 	public static final SCRIPT_EXTENSIONS:Array<String> = [
 		"hscript",
 		"hxs",
-		"hx",
 	];
 
 
