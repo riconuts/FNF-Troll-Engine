@@ -2259,7 +2259,7 @@ class ChartingState extends MusicBeatState
 			updateSongPosition();
 
 		if (!options.noAutoScroll) {
-			if (Conductor.songPosition >= songLength) {
+			if (Conductor.songPosition > songLength) {
 				//trace('Went past song duration: (${Conductor.songPosition} / $songLength), going back to first section');
 				changeSection(0, true);
 			}
