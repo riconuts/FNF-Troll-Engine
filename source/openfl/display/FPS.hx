@@ -106,10 +106,26 @@ class FPS extends TextField
 		#end
 	}
 
+	inline static function formatMemory(Bytes:Float):String
+	{
+		var units:Int = 0;
+		while (Bytes >= 1024) {
+			Bytes /= 1024;
+			units++;
+		}
+
+		return Math.round(Bytes * 100) / 100 + switch(units) {
+			case 0: "Bytes";
+			case 1: "kB";
+			case 2: "MB";
+			default: "GB";
+		};
+	}
+
 	private static inline function get_memoryUsageString():String
 	{
 		#if cpp
-		return FlxStringUtil.formatBytes(Memory.getCurrentRSS()) + " / " + FlxStringUtil.formatBytes(Memory.getPeakRSS());
+		return formatMemory(Memory.getCurrentRSS()) + " / " + formatMemory(Memory.getPeakRSS());
 		#else
 		return Std.string(openfl.system.System.totalMemoryNumber);
 		#end
