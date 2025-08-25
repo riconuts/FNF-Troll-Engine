@@ -71,15 +71,8 @@ class PauseSubState extends MusicBeatSubstate
 		newOption("resume-song", resumeSong);
 		newOption("restart-song", restartSong);
 
-		if (canChangeDifficulty())
-			newOption("change-difficulty", openDifficulties);
-		
-		if (!PlayState.isStoryMode)
-			newOption("change-modifiers", openModifiers);
-
-		newOption("change-options", openOptions);
-
-		if (#if debug true #else PlayState.chartingMode #end) {
+		final debug = #if debug true #else PlayState.chartingMode #end;
+		if (debug) {
 			////
 			if (game.startedOnTime > 0)
 				newOption('restart-from-last-time', restartFromLastTime);
@@ -98,6 +91,14 @@ class PauseSubState extends MusicBeatSubstate
 				opt.obj.set_text(getBotplayTxt());
 			};
 		}
+
+		if (canChangeDifficulty())
+			newOption("change-difficulty", openDifficulties);
+		
+		if (!PlayState.isStoryMode)
+			newOption("change-modifiers", openModifiers);
+
+		newOption("change-options", openOptions);
 
 		newOption('exit-to-menu', PlayState.gotoMenus);
 	}
