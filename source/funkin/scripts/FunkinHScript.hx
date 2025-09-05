@@ -222,7 +222,7 @@ class FunkinHScript extends FunkinScript
 		var currentState = flixel.FlxG.state;
 		
 		set("state", currentState);
-		set("game", currentState);
+		set("game", PlayState.instance);
 		
 		if (currentState is PlayState){
 			var currentState:PlayState = cast currentState;
