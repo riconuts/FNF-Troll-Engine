@@ -17,14 +17,6 @@ using StringTools;
 import funkin.api.Discord.DiscordClient;
 #end
 
-// used so stages dont break too much
-class FakeCharacter
-{
-	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void{}
-
-	public function new(){}
-}
-
 @:injectMoreFunctions(["generateSequence"])
 class TitleState extends MusicBeatState
 {
@@ -43,12 +35,6 @@ class TitleState extends MusicBeatState
 
 		return swagGoodArray;
 	}
-
-	// for stage scripts
-	public var gf:FakeCharacter = new FakeCharacter();
-	public var dad:FakeCharacter = new FakeCharacter();
-	public var boyfriend:FakeCharacter = new FakeCharacter();
-	public var inCutscene:Bool = false;
 
 	var intro:IntroSequenceGroup;
 
