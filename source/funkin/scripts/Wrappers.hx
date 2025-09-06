@@ -22,6 +22,13 @@ typedef FlxTweenType = flixel.tweens.FlxTween; // lol
 class FlxTweenType {}
 #end
 
+class FlxPoint extends flixel.math.FlxPoint.FlxBasePoint {
+	public static function get()
+		return flixel.math.FlxPoint.get();
+	public static function weak()
+		return flixel.math.FlxPoint.weak();
+}
+
 // stupidity
 class SowyColor
 {
