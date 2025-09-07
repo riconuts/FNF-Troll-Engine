@@ -31,6 +31,8 @@ class CreditsState extends MusicBeatState
 
 	var curSelected:Int = 0;
 
+	public var gotoMenus = () -> MusicBeatState.switchState(new MainMenuState());
+
 	override function startOutro(onOutroFinished:()->Void){
 		persistentUpdate = false;
 		return onOutroFinished();
@@ -280,10 +282,10 @@ class CreditsState extends MusicBeatState
 		if (change != 0)
 			changeSelection(change);
 
-		if (controls.BACK){
+		if (controls.BACK && gotoMenus != null) {
 			controlLock = true;
 			FlxG.sound.play(Paths.sound('cancelMenu'));
-			MusicBeatState.switchState(new MainMenuState());
+			gotoMenus();
 		}
 
 		if (controls.ACCEPT){
