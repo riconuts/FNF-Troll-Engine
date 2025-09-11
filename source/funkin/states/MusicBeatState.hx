@@ -375,6 +375,6 @@ class MusicBeatState extends FlxUIState
 			return;
 
 		MusicBeatState.stopMenuMusic();
-		MusicBeatState.playMusic('freakyMenu', volume, force);
+		MusicBeatState.playMusic('freakyMenu', volume, true);
 	}	
 }
