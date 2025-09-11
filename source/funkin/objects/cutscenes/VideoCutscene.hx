@@ -4,12 +4,15 @@ package funkin.objects.cutscenes;
 #if hxvlc
 import hxvlc.flixel.FlxVideoSprite;
 import hxvlc.util.Location;
+#else
+typedef FlxVideoSprite = Dynamic;
 #end
 
 class VideoCutscene extends Cutscene {
 	var video: FlxVideoSprite;
 	var videoId:String = '';
 
+	#if VIDEOS_ALLOWED
 	public override function createCutscene() {
 		video = new FlxVideoSprite(0, 0);
 		video.bitmap.onEndReached.add(() -> {
@@ -72,10 +75,15 @@ class VideoCutscene extends Cutscene {
 		video.bitmap.time = 0;
 		video.play();
 	}
+	#end
 
 	public function new(videoId:String = ''){
 		super();
 		this.videoId = videoId;
+		
+		#if !VIDEOS_ALLOWED
+		throw "Videos are not allowed on this platform!";
+		#end
 	}
 
 }

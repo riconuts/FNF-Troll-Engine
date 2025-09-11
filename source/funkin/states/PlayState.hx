@@ -1385,9 +1385,12 @@ class PlayState extends MusicBeatState
 	function songIntroCutscene(){
 		inCutscene = true;
 		var cutscene: Cutscene = startCutscenes.runNextScene();
-		if(cutscene is VideoCutscene)
+
+		#if VIDEOS_ALLOWED
+		if (cutscene is VideoCutscene)
 			cutscene.cameras = [camOverlay];
-		
+		#end
+
 		add(cutscene);
 	}
 	
@@ -2999,9 +3002,12 @@ class PlayState extends MusicBeatState
 	public function endSongCutscenes(){
 		inCutscene = true;
 		var cutscene: Cutscene = endCutscenes.runNextScene();
+
+		#if VIDEOS_ALLOWED
 		if(cutscene is VideoCutscene)
 			cutscene.cameras = [camOverlay];
-		
+		#end
+
 		add(cutscene);
 	}
 
