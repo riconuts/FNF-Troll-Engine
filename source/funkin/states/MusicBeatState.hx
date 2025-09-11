@@ -357,12 +357,11 @@ class MusicBeatState extends FlxUIState
 		
 		var md = MusicData.fromName(key);
 		if (md != null) {
-			FlxG.sound.music = {
-				var snd = md.makeFlxSound();
-				snd.volume = volume;
-				snd.looped = looped;
-				snd.play();
-			}
+			FlxG.sound.music = md.loadFlxSound(FlxG.sound.music);
+			FlxG.sound.music.volume = volume;
+			FlxG.sound.music.looped = looped;
+			FlxG.sound.music.persist = true;
+			FlxG.sound.music.play();
 			Conductor.changeBPM(md.bpm);
 			Conductor.songPosition = FlxG.sound.music.time;
 		}else {

@@ -2,8 +2,8 @@ var animationNotes:Array<Dynamic> = [];
 
 function onLoad() 
 {	
-    var noteData:Array<SwagSection> = Song.loadFromJson('picospeaker', Paths.formatToSongPath(PlayState.SONG.song)).notes;
-    for (section in noteData) {
+	var json = Paths.getJson(PlayState.song.getSongFile('picospeaker.json'));
+	for (section in json.song.notes) {
         for (songNotes in section.sectionNotes) {
             animationNotes.push(songNotes);
         }

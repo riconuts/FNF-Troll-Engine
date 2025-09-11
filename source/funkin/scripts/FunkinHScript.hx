@@ -17,7 +17,6 @@ import funkin.input.Controls;
 import funkin.api.Windows;
 
 import flixel.FlxG;
-import flixel.math.FlxPoint;
 
 import lime.app.Application;
 import haxe.Constraints.Function;
@@ -222,7 +221,7 @@ class FunkinHScript extends FunkinScript
 		var currentState = flixel.FlxG.state;
 		
 		set("state", currentState);
-		set("game", currentState);
+		set("game", PlayState.instance);
 		
 		if (currentState is PlayState){
 			var currentState:PlayState = cast currentState;
@@ -246,40 +245,41 @@ class FunkinHScript extends FunkinScript
 		set("FlxSprite", FlxSprite);
 		set("FlxCamera", FlxCamera);
 		set("FlxSound", FlxSound);
-		set("FlxTiledSprite", flixel.addons.display.FlxTiledSprite);
+		set("FlxText", flixel.text.FlxText);
 		set("FlxMath", flixel.math.FlxMath);
-		set("FlxTimer", flixel.util.FlxTimer);
+		set("FlxGroup", flixel.group.FlxGroup);
 		set("FlxTween", flixel.tweens.FlxTween);
 		set("FlxEase", flixel.tweens.FlxEase);
-		set("FlxGroup", flixel.group.FlxGroup);
+		set("FlxTimer", flixel.util.FlxTimer);
 		set("FlxSave", flixel.util.FlxSave); // should probably give it 1 save instead of giving it FlxSave
 		set("FlxBar", flixel.ui.FlxBar);
 
-		set("FlxAxes", Wrappers.FlxAxes);
-		set("FlxBarFillDirection", flixel.ui.FlxBar.FlxBarFillDirection);
-		set("FlxText", flixel.text.FlxText);
-		set("FlxTextBorderStyle", flixel.text.FlxText.FlxTextBorderStyle);
-		set("FlxCameraFollowStyle", flixel.FlxCamera.FlxCameraFollowStyle);
-
-		set("FlxRuntimeShader", flixel.addons.display.FlxRuntimeShader);
-
 		set("FlxParticle", flixel.effects.particles.FlxParticle);
 		set("FlxTypedEmitter", flixel.effects.particles.FlxEmitter.FlxTypedEmitter);
+
+		#if flixel_addons
+		set("FlxBackdrop", flixel.addons.display.FlxBackdrop);
 		set("FlxSkewedSprite", flixel.addons.effects.FlxSkewedSprite);
-
-		// Abstracts
-		set("BlendMode", Wrappers.BlendMode);
-
-		set("FlxColor", Wrappers.SowyColor);
-		set("FlxPoint", {
-			get: FlxPoint.get,
-			weak: FlxPoint.weak
-		});
-		set("FlxTextAlign", Wrappers.FlxTextAlign);
-		set("FlxTweenType", Wrappers.FlxTweenType); 
+		set("FlxTiledSprite", flixel.addons.display.FlxTiledSprite);
+		set("FlxRuntimeShader", flixel.addons.display.FlxRuntimeShader);
+		#end
+		
 		#if USING_FLXANIMATE
 		set("FlxAnimate", FlxAnimateCompat);
 		#end
+
+		// Enums
+		set("FlxBarFillDirection", flixel.ui.FlxBar.FlxBarFillDirection);
+		set("FlxTextBorderStyle", flixel.text.FlxText.FlxTextBorderStyle);
+		set("FlxCameraFollowStyle", flixel.FlxCamera.FlxCameraFollowStyle);
+
+		// Abstracts
+		set("BlendMode", Wrappers.BlendMode);
+		set("FlxTextAlign", Wrappers.FlxTextAlign);
+		set("FlxTweenType", Wrappers.FlxTweenType);
+		set("FlxAxes", Wrappers.FlxAxes);
+		set("FlxColor", Wrappers.SowyColor);
+		set("FlxPoint", Wrappers.FlxPoint);
 	}
 
 	private function setVideoVars() {

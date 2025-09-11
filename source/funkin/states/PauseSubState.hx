@@ -71,15 +71,8 @@ class PauseSubState extends MusicBeatSubstate
 		newOption("resume-song", resumeSong);
 		newOption("restart-song", restartSong);
 
-		if (canChangeDifficulty())
-			newOption("change-difficulty", openDifficulties);
-		
-		if (!PlayState.isStoryMode)
-			newOption("change-modifiers", openModifiers);
-
-		newOption("change-options", openOptions);
-
-		if (#if debug true #else PlayState.chartingMode #end) {
+		final debug = #if debug true #else PlayState.chartingMode #end;
+		if (debug) {
 			////
 			if (game.startedOnTime > 0)
 				newOption('restart-from-last-time', restartFromLastTime);
@@ -98,6 +91,17 @@ class PauseSubState extends MusicBeatSubstate
 				opt.obj.set_text(getBotplayTxt());
 			};
 		}
+
+		if (canChangeDifficulty())
+			newOption("change-difficulty", openDifficulties);
+		
+		if (!PlayState.isStoryMode)
+			newOption("change-modifiers", openModifiers);
+
+		newOption("change-options", openOptions);
+
+		if (debug)
+			newOption('leave-charting-mode', leaveChartingModePrompt);
 
 		newOption('exit-to-menu', PlayState.gotoMenus);
 	}
@@ -397,6 +401,24 @@ class PauseSubState extends MusicBeatSubstate
 	function restartFromLastTime() {
 		close();
 		game.skipToTime(game.startedOnTime);
+	}
+
+	function leaveChartingModePrompt() {
+		var ss = new AlphabetPromptSubstate(
+			"WARNING!\nAll unsaved charting progress will be lost", 
+			leaveChartingMode
+		);
+		ss.acceptStr = Paths.getString("accept");
+		ss.cancelStr = Paths.getString("cancel");
+		ss.cameras = this.cameras;
+		this.persistentUpdate = this.persistentDraw = false;
+		this.openSubState(ss);
+	}
+
+	function leaveChartingMode() {
+		PlayState.chartingMode = false;
+		PlayState.SONG = PlayState.song.getSwagSong(PlayState.difficultyName);
+		MusicBeatState.switchState(new PlayState());
 	}
 }
 

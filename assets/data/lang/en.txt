@@ -3,6 +3,40 @@
 ## Alternatively, you can do a pull request! You can also do a pull request if you want to add other languages, too!
 ## Comments are defined with ## or //
 
+## Generic prompt/dialog response strings
+yes=Yes
+no=No
+accept=Accept
+deny=Deny
+ok=Ok
+cancel=Cancel
+close=Close
+skip=Skip
+retry=Retry
+tryAgain=Try again
+stop=Stop
+continue=Continue
+proceed=Proceed
+go=Go
+back=Back
+ignore=Ignore
+allow=Allow
+deny=Deny
+enable=Enable
+disable=Disable
+
+status_on=On
+status_off=Off
+status_disabled=Disabled
+status_enabled=Enabled
+
+playback_start=Start
+playback_pause=Pause
+playback_resume=Resume
+playback_stop=Stop
+playback_mute=Mute
+playback_unmute=Unmute
+
 ## Difficulty Names
 difficultyName_normal=Normal
 difficultyName_hard=Hard

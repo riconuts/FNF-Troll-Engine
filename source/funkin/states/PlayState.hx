@@ -5,12 +5,13 @@ import funkin.objects.cutscenes.Cutscene;
 import funkin.objects.cutscenes.VideoCutscene;
 #end
 import funkin.objects.playfields.PlayField.NoteCallback;
-import funkin.data.CharacterData;
 import funkin.data.Cache;
 import funkin.data.Level;
 import funkin.data.Song;
 import funkin.data.BaseSong;
 import funkin.data.ChartData;
+import funkin.data.StageData;
+import funkin.data.CharacterData;
 import funkin.objects.notes.Note;
 import funkin.objects.notes.NoteSplash;
 import funkin.objects.notes.StrumNote;

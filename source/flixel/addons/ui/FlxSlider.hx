@@ -315,14 +315,13 @@ class FlxSlider extends #if (flixel < version("5.7.0")) FlxSpriteGroup #else Flx
 			_justHovered = false;
 		}
 
-		if (!FlxG.mouse.pressed)
+		if (dragging)
 		{
-			dragging = false;
-			updateValue();
-		}
-		else if (dragging)
-		{
-			handle.x = mousePosition.x;
+			if (FlxG.mouse.pressed)
+				handle.x = mousePosition.x;
+			else
+				dragging = false;
+			
 			updateValue();
 		}
 
@@ -354,9 +353,11 @@ class FlxSlider extends #if (flixel < version("5.7.0")) FlxSpriteGroup #else Flx
 	{
 		if (_lastPos != relativePos)
 		{
+			value = (relativePos * (maxValue - minValue)) + minValue;
+
 			if ((setVariable) && (varString != null))
 			{
-				Reflect.setProperty(_object, varString, (relativePos * (maxValue - minValue)) + minValue);
+				Reflect.setProperty(_object, varString, value);
 			}
 
 			_lastPos = relativePos;
