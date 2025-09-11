@@ -2608,6 +2608,10 @@ class PlayState extends MusicBeatState
 			{
 				updateSongPosition();
 			}
+			
+			if (Conductor.songPosition >= songLength) {
+				finishSong(false);
+			}
 		}
 
 		////
