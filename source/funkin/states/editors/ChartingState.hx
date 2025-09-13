@@ -448,6 +448,12 @@ class ChartingState extends MusicBeatState
 		this.songId = Paths.formatToSongPath(_song.song);
 	}
 
+	inline function formatTime(ms:Float) {
+		var mins = '' + Math.floor(ms / 60000);
+		var secs = '' + Math.floor((ms % 60000) / 1000);
+		return '$mins:${secs.length < 2 ? '0' + secs : secs}';
+	}
+
 	override function create()
 	{
 		instance = this;
@@ -688,9 +694,7 @@ class ChartingState extends MusicBeatState
 		progressBar.minLabel.x -= 30;
 		progressBar.minLabel.y = progressBar.body.y;
 
-		var mins = '' + Math.floor(songLength / 60000);
-		var secs = '' + Math.floor((songLength % 60000) / 1000);
-		progressBar.maxLabel.text = '$mins:${secs.length < 2 ? secs + '0' : secs}';
+		progressBar.maxLabel.text = formatTime(songLength);
 		progressBar.maxLabel.x += 30;
 		progressBar.maxLabel.y = progressBar.body.y;
 
@@ -2308,6 +2312,8 @@ class ChartingState extends MusicBeatState
 		"\n\nSection: " + curSec +
 		"\nBeat: " + math.CoolMath.floorDecimal(curDecBeat, 2) +
 		"\nStep: " + curStep;
+
+		progressBar.minLabel.text = formatTime(Conductor.songPosition);
 
 		playedSound.resize(0);
 		curRenderedNotes.forEachAlive(function(note:Note) {
