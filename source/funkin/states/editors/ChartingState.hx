@@ -92,8 +92,8 @@ class ChartingState extends MusicBeatState
 	}
 
 	var _session(get, set):ChartingStateSession;
-	function set__session(s:ChartingStateSession) return (_song:Dynamic)._chartEditor = s;
-	function get__session() return (_song:Dynamic)._chartEditor;
+	function set__session(s:ChartingStateSession) {Reflect.setField(_song, "_chartEditor", s); return s;}
+	function get__session() return Reflect.field(_song, "_chartEditor");
 
 	public static function getDefaultOptions():ChartingStateOptions return {
 		autosave: null,
@@ -462,6 +462,8 @@ class ChartingState extends MusicBeatState
 		FlxTransitionableState.skipNextTransOut = true;
 		MusicBeatState.stopMenuMusic();
 
+		PlayState.SONG = _song;
+
 		loadEventStuff();
 		
 		onLoadMetadata();
@@ -813,7 +815,13 @@ class ChartingState extends MusicBeatState
 			}else if (!Std.isOfType(autosaved, String)) {
 				openSubState(new Prompt("Invalid autosaved data", 0, null, null, false, "OK", "OK"));
 			}else{
-				var _song = Json.parse(autosaved);
+				var _song:Dynamic = Json.parse(autosaved);
+				
+				// Ugh
+				var _session:ChartingStateSession = Reflect.field(_song, "_chartEditor");
+				if (_session.trackVolumes != null && !Std.isOfType(_session.trackVolumes, haxe.ds.StringMap) && Reflect.isObject(_session.trackVolumes))
+					_session.trackVolumes = cast CoolUtil.structureToMap(_session.trackVolumes);
+
 				MusicBeatState.switchState(new ChartingState(_song));
 			}
 		});
