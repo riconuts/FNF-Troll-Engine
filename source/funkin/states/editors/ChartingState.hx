@@ -1064,7 +1064,7 @@ class ChartingState extends MusicBeatState
 		check_altAnim.name = 'check_altAnim';
 
 		stepperBeats = new CustomFlxUINumericStepper(150, 25, 1, 1, 1, 9000, 3);
-		stepperBeats.value = getSectionBeats();
+		stepperBeats.value = getSectionBeats(curSec);
 		stepperBeats.name = 'section_beats';
 		blockPressWhileTypingOnStepper.push(stepperBeats);
 
@@ -1097,7 +1097,7 @@ class ChartingState extends MusicBeatState
 				return;
 			*/
 
-			var addToTime:Float = Conductor.stepCrochet * (getSectionBeats() * 4 * (curSec - sectionToCopy));
+			var addToTime:Float = Conductor.stepCrochet * (getSectionBeats(curSec) * 4 * (curSec - sectionToCopy));
 			//trace('Time to add: ' + addToTime);
 
 			////
@@ -2190,7 +2190,7 @@ class ChartingState extends MusicBeatState
 				}
 			}
 			if (!clickedNote && onGrid) {
-				var noteTime:Float = sectionStartTime() + getStrumTime(dummyArrow.y * (getSectionBeats() / 4), false);
+				var noteTime:Float = sectionStartTime() + getStrumTime(dummyArrow.y * (getSectionBeats(curSec) / 4), false);
 				var column:Int = Math.floor(FlxG.mouse.x / GRID_SIZE) - 1;
 				(column < 0) ? addEvent(noteTime) : addNote(noteTime, column, null, true);
 			}
@@ -2615,7 +2615,7 @@ class ChartingState extends MusicBeatState
 		}
 
 		// current section grid
-		currentSectionBeats = getSectionBeats();
+		currentSectionBeats = getSectionBeats(curSec);
 		{
 			var gridHeight:Int = Math.floor(currentSectionBeats * 4 * zoomList[curZoom]); 
 			
@@ -2900,7 +2900,7 @@ class ChartingState extends MusicBeatState
 	{
 		var sec = _song.notes[curSec];
 
-		stepperBeats.value = getSectionBeats();
+		stepperBeats.value = getSectionBeats(curSec);
 		check_mustHitSection.checked = sec.mustHitSection;
 		check_gfSection.checked = sec.gfSection;
 		check_altAnim.checked = sec.altAnim;
@@ -3520,14 +3520,8 @@ class ChartingState extends MusicBeatState
 		FlxG.log.error("Problem saving Level data");
 	}
 
-	function getSectionBeats(?section:Null<Int> = null)
-	{
-		if (section == null) section = curSec;
-		var val:Null<Float> = null;
-		
-		if(_song.notes[section] != null) val = _song.notes[section].sectionBeats;
-		return val != null ? val : 4;
-	}
+	inline function getSectionBeats(section:Int):Null<Float>
+		return _song.notes[section]?.sectionBeats;
 
 	override function destroy() {
 		_session.curSec = curSec;
