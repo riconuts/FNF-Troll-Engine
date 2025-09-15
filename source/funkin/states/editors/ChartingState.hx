@@ -183,7 +183,7 @@ class ChartingState extends MusicBeatState
 		]
 	];
 
-	var _file:FileReference;
+	var _file = new FileDialog();
 
 	var UI_box:FlxUITabMenu;
 
@@ -3434,22 +3434,6 @@ class ChartingState extends MusicBeatState
 			MusicBeatState.resetState();
 		}
 	}
-	
-	function browseJson():Void
-	{
-		_file = new FileReference();
-		_file.addEventListener(Event.SELECT, onJsonSelected);
-		_file.addEventListener(Event.CANCEL, onSaveCancel);
-		_file.browse([new openfl.net.FileFilter("JSON file", "*.json", "JSON")]);
-	}
-	
-	function onJsonSelected(e){
-		trace(_file.data.toString());
-
-		_file.removeEventListener(Event.SELECT, onJsonSelected);
-		_file.removeEventListener(Event.CANCEL, onSaveCancel);
-		_file = null;
-	}
 
 	function sortNotesByTime(Obj1:NoteData, Obj2:NoteData):Int
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.strumTime, Obj2.strumTime);
@@ -3480,44 +3464,8 @@ class ChartingState extends MusicBeatState
 
 		if ((data != null) && (data.length > 0))
 		{
-			_file = new FileReference();
-			_file.addEventListener(Event.COMPLETE, onSaveComplete);
-			_file.addEventListener(Event.CANCEL, onSaveCancel);
-			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-			_file.save(data.trim(), fileName);
+			_file.save(data.trim(), 'json', getSongPath(fileName), 'Save Chart');
 		}
-	}
-
-	function onSaveComplete(_):Void
-	{
-		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
-		_file.removeEventListener(Event.CANCEL, onSaveCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-		_file = null;
-		FlxG.log.notice("Successfully saved LEVEL DATA.");
-	}
-
-	/**
-	 * Called when the save file dialog is cancelled.
-	 */
-	function onSaveCancel(_):Void
-	{
-		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
-		_file.removeEventListener(Event.CANCEL, onSaveCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-		_file = null;
-	}
-
-	/**
-	 * Called if there is an error while saving the gameplay recording.
-	 */
-	function onSaveError(_):Void
-	{
-		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
-		_file.removeEventListener(Event.CANCEL, onSaveCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-		_file = null;
-		FlxG.log.error("Problem saving Level data");
 	}
 
 	inline function getSectionBeats(section:Int):Null<Float>
