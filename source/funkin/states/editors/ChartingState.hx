@@ -856,29 +856,21 @@ class ChartingState extends MusicBeatState
 			eventsFileDialog.save(data, 'json', getSongPath('events.json'), 'Save Events');
 		});
 
-		var fix_oob_notes:FlxButton = new FlxButton(loadAutosaveBtn.x, 300 - 40, 'Fix Notes', function()
-		{
+		var fix_oob_notes:FlxButton = new FlxButton(loadAutosaveBtn.x, 300 - 40, 'Fix Notes', function() {
 			openSubState(new Prompt('This action will fix notes that are outside of their corresponding section.\n\nProceed?', 0, fixOOBNotes, null, options.ignoreWarnings));
 		});
 		fix_oob_notes.color = FlxColor.PINK;
 		fix_oob_notes.label.color = FlxColor.WHITE;
 
-		var clear_events:FlxButton = new FlxButton(loadAutosaveBtn.x, 300, 'Clear events', function()
-			{
-				openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, clearEvents, null, options.ignoreWarnings));
-			});
+		var clear_events:FlxButton = new FlxButton(loadAutosaveBtn.x, 300, 'Clear events', function() {
+			openSubState(new Prompt('Clear notes?\n\nThis action cannot be undone.', 0, clearEvents, null, options.ignoreWarnings));
+		});
 		clear_events.color = FlxColor.RED;
 		clear_events.label.color = FlxColor.WHITE;
 
-		var clear_notes:FlxButton = new FlxButton(clear_events.x, clear_events.y + 30, 'Clear notes', function()
-			{
-				openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, function(){for (sec in 0..._song.notes.length) {
-					_song.notes[sec].sectionNotes = [];
-				}
-				updateGrid();
-			}, null, options.ignoreWarnings));
-
-			});
+		var clear_notes:FlxButton = new FlxButton(clear_events.x, clear_events.y + 30, 'Clear notes', function() {
+			openSubState(new Prompt('Clear events?\n\nThis action cannot be undone.', 0, clearNotes, null, options.ignoreWarnings));
+		});
 		clear_notes.color = FlxColor.RED;
 		clear_notes.label.color = FlxColor.WHITE;
 
@@ -3087,7 +3079,7 @@ class ChartingState extends MusicBeatState
 			var t = fuckFloatingPoints(i.strumTime);
 			if (startThing <= t && t < endThing)
 			{
-				var note:Note = setupEventData(i, false);
+				var note:Note = setupEventData(i, curSec);
 				curRenderedNotes.add(note);
 
 				var text:String = 'Event: ' + note.eventName + ' (' + Math.floor(note.strumTime) + ' ms)' + '\nValue 1: ' + note.eventVal1 + '\nValue 2: ' + note.eventVal2;
@@ -3106,8 +3098,8 @@ class ChartingState extends MusicBeatState
 		}
 
 		// NEXT SECTION
-		if(curSec < _song.notes.length-1) {
-			var nextSection = curSec+1;
+		var nextSection = curSec+1;
+		if (curSec < _song.notes.length-1) {
 			for (i in _song.notes[nextSection].sectionNotes)
 			{
 				var note:Note = setupNoteData(i, nextSection);
@@ -3128,7 +3120,7 @@ class ChartingState extends MusicBeatState
 			var t:Float = fuckFloatingPoints(i.strumTime);
 			if(t >= startThing && t < endThing)
 			{
-				var note:Note = setupEventData(i, true);
+				var note:Note = setupEventData(i, nextSection);
 				note.alpha = 0.6;
 				nextRenderedNotes.add(note);
 			}
@@ -3148,44 +3140,38 @@ class ChartingState extends MusicBeatState
 
 	var useQuantNotes:Bool = ClientPrefs.noteSkin == 'Quants';
 
-	function setupNoteData(i:NoteData, sectionNumber:Int):Note
-	{
-		var curSection = _song.notes[curSec];
-		var noteSection = _song.notes[sectionNumber];
-
+	function setupNoteData(i:NoteData, sectionNumber:Int):Note {
 		var daField:Int = Math.floor(i.column / _song.keyCount);
-
 		var note:Note = new Note(i.strumTime, i.column % _song.keyCount, null, daField, (i.sustainLength <= 0 ? TAP : HEAD), true);
 		note.chartData = i;
 		note.realColumn = i.column;
-		note.mustPress = noteSection.mustHitSection ? (daField==0) : (daField!=0);
 		note.sustainLength = i.sustainLength;
 		note.canQuant = useQuantNotes;
 		note.reloadNote();
 		initNoteType(i.noteType);
 		note.noteType = i.noteType;
 
-		////
-		note.setGraphicSize(GRID_SIZE, GRID_SIZE);
-		note.updateHitbox();
-		note.x = Math.floor(i.column * GRID_SIZE) + GRID_SIZE;
-
-		if (curSection.mustHitSection != noteSection.mustHitSection) {
-			if(i.column >= _song.keyCount) {
-				note.x -= GRID_SIZE * _song.keyCount;
-			} else {
-				note.x += GRID_SIZE * _song.keyCount;
-			}
-		}
-
 		//note.wasGoodHit = note.beat <= Conductor.curDecBeat;
 
-		var beats:Float = getSectionBeats(sectionNumber);
-		note.y = getYfromStrumNotes(note.strumTime - sectionStartTime(), beats);
-		return note;
+		note.setGraphicSize(GRID_SIZE, GRID_SIZE);
+		note.updateHitbox();
+
+		note.x = getNoteX(note.realColumn, sectionNumber);
+		note.y = getNoteY(note.strumTime, sectionNumber);
+
+		return note;	
 	}
 
-	function setupEventData(i:PsychEventNote, isNextSection:Bool) {
+	inline function getNoteX(column:Int, sectionNumber:Int):Float {
+		if (_song.notes[curSec].mustHitSection != _song.notes[sectionNumber].mustHitSection)
+			(column < _song.keyCount) ? (column += _song.keyCount) : (column -= _song.keyCount);
+		return (1 + column) * GRID_SIZE;
+	}
+
+	inline function getNoteY(strumTime:Float, sectionNumber:Int):Float
+		return getYfromStrumNotes(strumTime - getSectionStartTime(curSec), getSectionBeats(sectionNumber));
+
+	function setupEventData(i:PsychEventNote, sectionNumber:Int) {
 		var note:Note = new Note(i.strumTime, -1, null, -1, 0, true);
 		note.realColumn -1;
 		note.chartData = i;
@@ -3200,15 +3186,13 @@ class ChartingState extends MusicBeatState
 			note.eventVal2 = i.subEventsData[0].value2;
 		}
 
+		//note.wasGoodHit = note.beat <= Conductor.curBeat;
+
 		note.setGraphicSize(GRID_SIZE, GRID_SIZE);
 		note.updateHitbox();
-		note.x = Math.floor(-1 * GRID_SIZE) + GRID_SIZE;
-
-		note.wasGoodHit = note.beat <= Conductor.curBeat;
-
-		var beats:Float = getSectionBeats(isNextSection ? 1 : 0);
-		note.y = getYfromStrumNotes(note.strumTime - sectionStartTime(), beats);
-		if(note.y < -150) note.y = -150;
+				
+		note.x = 0; // getNoteX(note.realColumn, sectionNumber);
+		note.y = getNoteY(note.strumTime, sectionNumber);
 		return note;
 	}
 
@@ -3324,16 +3308,6 @@ class ChartingState extends MusicBeatState
 		updateGrid();
 	}
 
-	function clearSong():Void
-	{
-		for (daSection in 0..._song.notes.length)
-		{
-			_song.notes[daSection].sectionNotes = [];
-		}
-
-		updateGrid();
-	}
-
 	private function addNote(strumTime:Float, column:Int, ?noteType:String, ?click:Bool):Void
 	{
 		noteType ??= currentNoteType;
@@ -3406,38 +3380,27 @@ class ChartingState extends MusicBeatState
 	////
 	function getStrumTime(yPos:Float, doZoomCalc:Bool = true):Float
 	{
-		var leZoom:Float = zoomList[curZoom];
-		if(!doZoomCalc) leZoom = 1;
-		return FlxMath.remapToRange(yPos, gridBG.y, gridBG.y + gridBG.height * leZoom, 0, 16 * Conductor.stepCrochet);
+		var leZoom:Float = doZoomCalc ? zoomList[curZoom] : 1;
+		return FlxMath.remapToRange(yPos, gridBG.y, (gridBG.y + gridBG.height * leZoom), 0, 16 * Conductor.stepCrochet);
 	}
 
 	function getYfromStrum(strumTime:Float, doZoomCalc:Bool = true):Float
 	{
-		var leZoom:Float = zoomList[curZoom];
-		if(!doZoomCalc) leZoom = 1;
-		return FlxMath.remapToRange(strumTime, 0, 16 * Conductor.stepCrochet, gridBG.y, gridBG.y + gridBG.height * leZoom);
+		var leZoom:Float = doZoomCalc ? zoomList[curZoom] : 1;
+		return FlxMath.remapToRange(strumTime, 0, 16 * Conductor.stepCrochet, gridBG.y, (gridBG.y + gridBG.height * leZoom));
 	}
 	
-	function getYfromStrumNotes(strumTime:Float, beats:Float):Float
-	{
-		var value:Float = strumTime / (beats * 4 * Conductor.stepCrochet);
-		return GRID_SIZE * beats * 4 * zoomList[curZoom] * value + gridBG.y;
-	}
+	inline function getYfromStrumNotes(strumTime:Float, beats:Float):Float
+		return gridBG.y + (strumTime / Conductor.stepCrochet) * GRID_SIZE * zoomList[curZoom];
 
-	function getNotes():Array<Dynamic>
-	{
-		var noteData:Array<Dynamic> = [];
-
-		for (i in _song.notes)
-		{
-			noteData.push(i.sectionNotes);
-		}
-
-		return noteData;
+	function clearNotes() {
+		for (sec in 0..._song.notes.length)
+			_song.notes[sec].sectionNotes.resize(0);
+		updateGrid();
 	}
 
 	function clearEvents() {
-		_song.events = [];
+		_song.events.resize(0);
 		updateGrid();
 	}
 
