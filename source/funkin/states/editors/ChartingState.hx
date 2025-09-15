@@ -445,7 +445,7 @@ class ChartingState extends MusicBeatState
 			notes: [],
 			events: [],
 		};
-		this.songId = Paths.formatToSongPath(_song.song);
+		this.songId = _song.song;
 	}
 
 	inline function formatTime(ms:Float) {
@@ -802,14 +802,14 @@ class ChartingState extends MusicBeatState
 
 		var reloadSong:FlxButton = new FlxButton(saveButton.x + 90, saveButton.y, "Reload Audio", function()
 		{
-			songId = Paths.formatToSongPath(UI_songTitle.text);
+			songId = UI_songTitle.text;
 			loadTracks();
 			updateWaveform();
 		});
 
 		var reloadSongJson:FlxButton = new FlxButton(reloadSong.x, saveButton.y + 30, "Reload JSON", function()
 		{
-			openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, function(){loadJson(Paths.formatToSongPath(_song.song)); }, null, options.ignoreWarnings));
+			openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, loadJson.bind(_song.song), null, options.ignoreWarnings));
 		});
 
 		var loadAutosaveBtn:FlxButton = new FlxButton(reloadSongJson.x, reloadSongJson.y + 30, 'Load Autosave', function()
@@ -3456,7 +3456,7 @@ class ChartingState extends MusicBeatState
 			fileName = haxe.io.Path.withoutDirectory(Reflect.field(_song, "_path"));
 			Reflect.deleteField(_song, "_path");
 		}else {
-			fileName = Paths.formatToSongPath(_song.song) + ".json";
+			fileName = _song.song + ".json";
 		}
 
 		var json = {"song": _song};
