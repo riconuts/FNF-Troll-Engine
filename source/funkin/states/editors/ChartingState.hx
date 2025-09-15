@@ -2555,7 +2555,7 @@ class ChartingState extends MusicBeatState
 
 			LoadingState.loadAndSwitchState(new PlayState());
 		}
-		else if (FlxG.keys.justPressed.BACKSPACE) {
+		else if (FlxG.keys.justPressed.ESCAPE) {
 			PlayState.chartingMode = false;
 			MusicBeatState.switchState(new funkin.states.editors.MasterEditorMenu());
 			MusicBeatState.playMenuMusic(true);
