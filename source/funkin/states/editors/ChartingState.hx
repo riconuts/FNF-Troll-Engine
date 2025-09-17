@@ -34,9 +34,6 @@ import haxe.Json;
 import haxe.io.Path;
 import haxe.io.Bytes;
 import haxe.format.JsonParser;
-import openfl.events.Event;
-import openfl.events.IOErrorEvent;
-import openfl.net.FileReference;
 import openfl.utils.ByteArray;
 import openfl.utils.Assets as OpenFlAssets;
 import openfl.media.Sound;
@@ -182,8 +179,6 @@ class ChartingState extends MusicBeatState
 			#end
 		]
 	];
-
-	var _file = new FileDialog();
 
 	var UI_box:FlxUITabMenu;
 
@@ -3464,8 +3459,21 @@ class ChartingState extends MusicBeatState
 
 		if ((data != null) && (data.length > 0))
 		{
-			_file.save(data.trim(), 'json', getSongPath(fileName), 'Save Chart');
+			CoolUtil.showSaveDialog(data.trim(), "Save Chart", Path.join([Sys.getCwd(), getSongPath(fileName)]), ["*.json"], onSaveComplete, onSaveCancel);
 		}
+	}
+
+	function onSaveComplete(_):Void
+	{
+		FlxG.log.notice("Successfully saved LEVEL DATA.");
+	}
+
+	/**
+	 * Called when the save file dialog is cancelled.
+	 */
+	function onSaveCancel():Void
+	{
+		FlxG.log.notice("Save file dialog cancelled.");
 	}
 
 	inline function getSectionBeats(section:Int):Null<Float>
