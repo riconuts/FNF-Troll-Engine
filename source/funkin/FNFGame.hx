@@ -21,7 +21,9 @@ import lime.system.System;
 #if (windows && cpp)
 import funkin.api.Windows;
 #end
-
+#if linc_filedialogs
+import filedialogs.FileDialogs;
+#end
 #end
 
 #if SCRIPTABLE_STATES
@@ -265,7 +267,28 @@ class FNFGame extends FlxGame
 				// Close the game
 		}
 		#else
-		lime.app.Application.current.window.alert(callstack, errorName);
+		
+		#if (UNIX_CRASH_HANDLER && linc_filedialogs)
+		// class name is a bit misleading for the function used
+		// but it does also handle file dialogs, soooo
+		boxMessage += "\nWould you like to goto the main menu?";
+		final btn:Button = FileDialogs.message(
+			errorName, boxMessage,
+			Choice.Yes_No_Cancel, Icon.Error
+		);
+		switch(btn) {
+			case Yes: 
+				toMainMenu();
+				return;
+			case Cancel:
+				// Continue with a possibly unstable state
+				return;
+			default:
+				// Close the game
+		}
+		#else
+		lime.app.Application.current.window.alert(callstack, errorName); // this shit barely works on linux!
+		#end
 		#end
 
 		#if sys 

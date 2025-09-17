@@ -29,9 +29,6 @@ import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import haxe.Json;
 import lime.system.Clipboard;
-import openfl.events.Event;
-import openfl.events.IOErrorEvent;
-import openfl.net.FileReference;
 
 using StringTools;
 
@@ -1307,35 +1304,15 @@ class CharacterEditorState extends MusicBeatState {
 		super.update(elapsed);
 	}
 
-	var _file:FileReference;
-
 	function onSaveComplete(_):Void {
-		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
-		_file.removeEventListener(Event.CANCEL, onSaveCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-		_file = null;
 		FlxG.log.notice("Successfully saved file.");
 	}
 
 	/**
 	 * Called when the save file dialog is cancelled.
 	 */
-	function onSaveCancel(_):Void {
-		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
-		_file.removeEventListener(Event.CANCEL, onSaveCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-		_file = null;
-	}
-
-	/**
-	 * Called if there is an error while saving the gameplay recording.
-	 */
-	function onSaveError(_):Void {
-		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
-		_file.removeEventListener(Event.CANCEL, onSaveCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-		_file = null;
-		FlxG.log.error("Problem saving file");
+	function onSaveCancel():Void {
+		FlxG.log.notice("Save file dialog cancelled.");
 	}
 
 	function saveCharacter() {
@@ -1357,11 +1334,7 @@ class CharacterEditorState extends MusicBeatState {
 		var data:String = Json.stringify(json, "\t");
 
 		if (data.length > 0) {
-			_file = new FileReference();
-			_file.addEventListener(Event.COMPLETE, onSaveComplete);
-			_file.addEventListener(Event.CANCEL, onSaveCancel);
-			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-			_file.save(data, charName + ".json");
+			CoolUtil.showSaveDialog(data, "Save Character", charName + ".json", null, ["*.json"], onSaveComplete, onSaveCancel);
 		}
 	}
 

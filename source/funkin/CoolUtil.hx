@@ -1,9 +1,30 @@
 package funkin;
 
+import haxe.io.Bytes;
+import haxe.io.Path;
+
 import math.CoolMath;
+
 import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import flixel.tweens.FlxEase;
+import flixel.util.typeLimit.OneOfTwo;
+
+#if sys
+import sys.io.File;
+import sys.FileSystem;
+#end
+#if linc_filedialogs
+import filedialogs.FileDialogs;
+#else
+import lime.ui.FileDialog;
+
+import openfl.events.Event;
+import openfl.events.IOErrorEvent;
+
+import openfl.net.FileFilter;
+import openfl.net.FileReference;
+#end
 
 using StringTools;
 
@@ -263,6 +284,138 @@ class CoolUtil {
 		Sys.command('/usr/bin/xdg-open', [site]);
 		#else
 		flixel.FlxG.openURL(site);
+		#end
+	}
+
+    public static function createMissingDirectories(path:String):String {
+		#if sys
+		var folders:Array<String> = path.split("/");
+		var currentPath:String = "";
+
+		for (folder in folders) {
+			currentPath += folder + "/";
+			if (!FileSystem.exists(currentPath))
+				FileSystem.createDirectory(currentPath);
+		}
+		#end
+		return path;
+	}
+
+    public static function safeSaveFile(path:String, content:OneOfTwo<String, Bytes>) {
+		#if sys
+		try {
+			createMissingDirectories(Path.directory(path));
+			if(content is Bytes)
+                File.saveBytes(path, content);
+			else
+                File.saveContent(path, content);
+		}
+        catch(e) {
+            final errMsg:String = 'Error while trying to save the file: ${Std.string(e).replace('\n', ' ')}';
+			trace(errMsg);
+		}
+		#end
+	}
+
+	// NOTE: linc_filedialogs doesn't have default file names, atleast i don't think it does
+	// trying to use a default filename in place of initialPath doesn't work correctly
+	
+	// also returns the raw paths to the files
+	// only returns 1 file in an array if multi-select is left off
+	public static function showOpenDialog(?title:String, ?defaultFileName:String, ?initialPath:String, ?filters:Array<String>, ?multiSelect:Bool = false, ?onSelect:(files:Array<String>)->Void, ?onCancel:Void->Void):Array<String> {
+		#if linc_filedialogs
+		var option:Option = Option.None;
+		if(multiSelect)
+			option = Option.Multiselect;
+
+		filters ??= [];
+		final goodFilters:Array<String> = [];
+		for(type in filters)
+			goodFilters.push(StringTools.replace(StringTools.replace(type, "*.", ""), ";", ","));
+
+		final t:String = title ?? (multiSelect ? "Open Files" : "Open File"); // hxcpp is gonna make me kms someday i swear -swordcube
+		final files:Array<String> = FileDialogs.open_file(t, cast initialPath, cast goodFilters, cast option);
+		return files;
+		#else
+		var files:Array<String> = [];
+		filters ??= [];
+		
+		final fileFilters:Array<FileFilter> = [];
+		for(f in filters)
+			fileFilters.push(new FileFilter(f, f));
+
+		final filters:Array<String> = [];
+		for(type in fileFilters)
+			filters.push(StringTools.replace(StringTools.replace(type.extension, "*.", ""), ";", ","));
+		
+		final filter:String = filters.join(";");
+		if(multiSelect) {
+			final dialog:FileDialog = new FileDialog();
+			dialog.onCancel.add(() -> {
+				if(onCancel != null)
+					onCancel();
+			});
+			dialog.onSelectMultiple.add((f) -> {
+				if(onSelect != null)
+					onSelect(f);
+
+				files = f;
+			});
+			dialog.browse(OPEN_MULTIPLE, filter, defaultFileName, title);
+		} else {
+			final dialog:FileDialog = new FileDialog();
+			dialog.onCancel.add(() -> {
+				if(onCancel != null)
+					onCancel();
+			});
+			dialog.onSelect.add((f) -> {
+				files = [f];
+				if(onSelect != null)
+					onSelect(files);
+			});
+			dialog.browse(OPEN, filter, defaultFileName, title);
+		}
+		Sys.sleep(0.5); // sleep to prevent dialogs sometimes not opening if opened in quick succession
+		return files;
+		#end
+	}
+
+	// also immediately saves the file to disk when OK is pressed
+	public static function showSaveDialog(content:OneOfTwo<String, Bytes>, ?title:String, ?defaultFileName:String, ?initialPath:String, ?filters:Array<String>, ?onSelect:(file:String)->Void, ?onCancel:Void->Void):Void {
+		#if linc_filedialogs
+		final goodFilters:Array<String> = [];
+		
+		filters ??= [];
+		for(type in filters)
+			goodFilters.push(StringTools.replace(StringTools.replace(type, "*.", ""), ";", ","));
+
+		final t:String = title ?? "Save File"; // hxcpp is gonna make me kms someday i swear -swordcube
+		final filePath:String = FileDialogs.save_file(t, cast initialPath, cast goodFilters);
+		safeSaveFile(filePath, content);
+		#else
+		filters ??= [];
+		
+		final fileFilters:Array<FileFilter> = [];
+		for(f in filters)
+			fileFilters.push(new FileFilter(f, f));
+
+		final filters:Array<String> = [];
+		for(type in fileFilters)
+			filters.push(StringTools.replace(StringTools.replace(type.extension, "*.", ""), ";", ","));
+		
+		final filter:String = filters.join(";");
+		final dialog:FileDialog = new FileDialog();
+		dialog.onCancel.add(() -> {
+			if(onCancel != null)
+				onCancel();
+		});
+		dialog.onSelect.add((f) -> {
+			safeSaveFile(f, content);
+			if(onSelect != null)
+				onSelect(f);
+		});
+		dialog.browse(SAVE, filter, defaultFileName, title);
+		Sys.sleep(0.5); // sleep to prevent dialogs sometimes not opening if opened in quick succession
 		#end
 	}
 

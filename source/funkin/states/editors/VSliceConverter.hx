@@ -4,17 +4,12 @@ import funkin.data.StageData;
 import funkin.data.CharacterData;
 import haxe.Json;
 import haxe.io.Path;
-import openfl.events.Event;
-import openfl.events.IOErrorEvent;
-import openfl.net.FileReference;
 
 using StringTools;
 
 class VSliceConverter extends MusicBeatState
 {
 	private var menu:AlphabetMenu;
-
-	var _file:FileReference;
 
 	override function create() {
 		FlxG.mouse.visible = false;
@@ -38,11 +33,7 @@ class VSliceConverter extends MusicBeatState
 					if(Reflect.field(data, "version") != null){
 						menu.addTextOption(Path.withoutDirectory(Path.withoutExtension(file)), {
 							onAccept: (i:Int, a:Alphabet) -> {
-								_file = new FileReference();
-								_file.addEventListener(Event.COMPLETE, onSaveComplete);
-								_file.addEventListener(Event.CANCEL, onSaveCancel);
-								_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-								_file.save(Json.stringify(StageData.convertVSlice(cast data), "\t"), file);
+								CoolUtil.showSaveDialog(Json.stringify(StageData.convertVSlice(cast data), "\t"), "Save Stage Data", file, null, ["*.json"], onSaveComplete, onSaveCancel);
 							}
 						});
 					}
@@ -65,12 +56,7 @@ class VSliceConverter extends MusicBeatState
 							onAccept: (i:Int, a:Alphabet) -> {
 								var charFile:CharacterFile = CharacterData.getCharacterFile(id);
 								trace(charFile);
-
-								_file = new FileReference();
-								_file.addEventListener(Event.COMPLETE, onCharSaveComplete);
-								_file.addEventListener(Event.CANCEL, onSaveCancel);
-								_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-								_file.save(Json.stringify(charFile, "\t"),  file);
+								CoolUtil.showSaveDialog(Json.stringify(charFile, "\t"), "Save Character Data", file, null, ["*.json"], onCharSaveComplete, onSaveCancel);
 							}
 						});
 					}
@@ -103,20 +89,9 @@ class VSliceConverter extends MusicBeatState
 
 	}
 
-	function onCharSaveComplete(e): Void {
-		var name: String = _file.name;
-
-		trace(name);
-		_file.removeEventListener(Event.COMPLETE, onCharSaveComplete);
-		_file.removeEventListener(Event.CANCEL, onSaveCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-		_file = null;
-
-		_file = new FileReference();
-		_file.addEventListener(Event.COMPLETE, onSaveComplete);
-		_file.addEventListener(Event.CANCEL, onSaveCancel);
-		_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-		_file.save("
+	function onCharSaveComplete(f:String): Void {
+		trace(f);
+		CoolUtil.showSaveDialog("
 		function setupCharacter(){
 			super();
 			this.positionArray[0] -= this.width / 2;
@@ -130,42 +105,17 @@ class VSliceConverter extends MusicBeatState
 			];
 		}
 			
-		", Path.withoutExtension(name)
-			+ ".hscript"
-		);
-
+		", "Save Character Script", Path.withoutExtension(f) + ".hscript", null, null, onSaveComplete, onSaveCancel);
 	}
 
 	function onSaveComplete(e):Void {
-		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
-		_file.removeEventListener(Event.CANCEL, onSaveCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-		_file = null;
 		FlxG.log.notice("Successfully saved LEVEL DATA.");
 	}
 
 	/**
 	 * Called when the save file dialog is cancelled.
 	 */
-	function onSaveCancel(_):Void {
-		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
-		_file.removeEventListener(Event.COMPLETE, onCharSaveComplete);
-		_file.removeEventListener(Event.CANCEL, onSaveCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-		_file = null;
+	function onSaveCancel():Void {
+		FlxG.log.notice("Save file dialog cancelled.");
 	}
-
-	/**
-	 * Called if there is an error while saving the gameplay recording.
-	 */
-	function onSaveError(_):Void {
-		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
-		_file.removeEventListener(Event.COMPLETE, onCharSaveComplete);
-		_file.removeEventListener(Event.CANCEL, onSaveCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-		_file = null;
-		FlxG.log.error("Problem saving Level data");
-	}
-
-	
 }
