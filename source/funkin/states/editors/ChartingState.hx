@@ -3459,7 +3459,7 @@ class ChartingState extends MusicBeatState
 
 		if ((data != null) && (data.length > 0))
 		{
-			CoolUtil.showSaveDialog(data.trim(), "Save Chart", getSongPath(fileName), null, ["*.json"], onSaveComplete, onSaveCancel);
+			CoolUtil.showSaveDialog(data.trim(), "Save Chart", Path.join([Sys.getCwd(), getSongPath(fileName)]), ["*.json"], onSaveComplete, onSaveCancel);
 		}
 	}
 

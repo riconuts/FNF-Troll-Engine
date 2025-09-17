@@ -319,10 +319,14 @@ class CoolUtil {
 
 	// NOTE: linc_filedialogs doesn't have default file names, atleast i don't think it does
 	// trying to use a default filename in place of initialPath doesn't work correctly
+
+	// UNNOTE: linc_filedialogs DOES have default file names but they work slightly differently
+	// to how lime does it, you have to append the cwd to the file name
+	// Path.join([Sys.getCwd(), "example.json"])
 	
 	// also returns the raw paths to the files
 	// only returns 1 file in an array if multi-select is left off
-	public static function showOpenDialog(?title:String, ?defaultFileName:String, ?initialPath:String, ?filters:Array<String>, ?multiSelect:Bool = false, ?onSelect:(files:Array<String>)->Void, ?onCancel:Void->Void):Array<String> {
+	public static function showOpenDialog(?title:String, ?defaultFileName:String, ?filters:Array<String>, ?multiSelect:Bool = false, ?onSelect:(files:Array<String>)->Void, ?onCancel:Void->Void):Array<String> {
 		#if linc_filedialogs
 		var option:Option = Option.None;
 		if(multiSelect)
@@ -334,7 +338,7 @@ class CoolUtil {
 			goodFilters.push(StringTools.replace(StringTools.replace(type, "*.", ""), ";", ","));
 
 		final t:String = title ?? (multiSelect ? "Open Files" : "Open File"); // hxcpp is gonna make me kms someday i swear -swordcube
-		final files:Array<String> = FileDialogs.open_file(t, cast initialPath, cast goodFilters, cast option);
+		final files:Array<String> = FileDialogs.open_file(t, cast defaultFileName, cast goodFilters, cast option);
 		return files;
 		#else
 		var files:Array<String> = [];
@@ -381,7 +385,7 @@ class CoolUtil {
 	}
 
 	// also immediately saves the file to disk when OK is pressed
-	public static function showSaveDialog(content:OneOfTwo<String, Bytes>, ?title:String, ?defaultFileName:String, ?initialPath:String, ?filters:Array<String>, ?onSelect:(file:String)->Void, ?onCancel:Void->Void):Void {
+	public static function showSaveDialog(content:OneOfTwo<String, Bytes>, ?title:String, ?defaultFileName:String, ?filters:Array<String>, ?onSelect:(file:String)->Void, ?onCancel:Void->Void):Void {
 		#if linc_filedialogs
 		final goodFilters:Array<String> = [];
 		
@@ -390,7 +394,7 @@ class CoolUtil {
 			goodFilters.push(StringTools.replace(StringTools.replace(type, "*.", ""), ";", ","));
 
 		final t:String = title ?? "Save File"; // hxcpp is gonna make me kms someday i swear -swordcube
-		final filePath:String = FileDialogs.save_file(t, cast initialPath, cast goodFilters);
+		final filePath:String = FileDialogs.save_file(t, cast defaultFileName, cast goodFilters);
 		safeSaveFile(filePath, content);
 		#else
 		filters ??= [];

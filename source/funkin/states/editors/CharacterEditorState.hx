@@ -1,5 +1,6 @@
 package funkin.states.editors;
 
+import haxe.io.Path;
 import funkin.objects.hud.HealthIcon;
 import funkin.objects.Character;
 import funkin.data.CharacterData;
@@ -1334,7 +1335,7 @@ class CharacterEditorState extends MusicBeatState {
 		var data:String = Json.stringify(json, "\t");
 
 		if (data.length > 0) {
-			CoolUtil.showSaveDialog(data, "Save Character", charName + ".json", null, ["*.json"], onSaveComplete, onSaveCancel);
+			CoolUtil.showSaveDialog(data, "Save Character", Path.join([Sys.getCwd(), charName + ".json"]), ["*.json"], onSaveComplete, onSaveCancel);
 		}
 	}
 
