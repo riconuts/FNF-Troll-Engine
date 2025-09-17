@@ -188,6 +188,7 @@ class ChartData
 
 		////
 		if (Reflect.hasField(songJson, 'trollEngine')) {
+			trace("Loaded Troll Engine chart");
 			return swagJson;
 		}
 		
@@ -238,6 +239,9 @@ class ChartData
 
 			////
 			for (section in swagJson.notes) {
+				if (null == Reflect.field(section, "sectionBeats"))
+					section.sectionBeats = 4;
+				
 				for (note in section.sectionNotes) {
 					var note:Array<Dynamic> = cast note;
 					note[3] = NoteData.resolveNoteType(note[3]);

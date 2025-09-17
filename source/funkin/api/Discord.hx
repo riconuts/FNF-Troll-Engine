@@ -31,6 +31,8 @@ private final defaultRPCInfo:DiscordRPCInfo = {
 // this is kinda fucked up i think
 class DiscordClient
 {
+	public static var hideDetails:Bool = true;
+	
 	private static var lastPresence:DiscordRichPresence;
 
 	private static final mutex = new Mutex();
@@ -151,10 +153,18 @@ class DiscordClient
 	}
 
 	////
-	public static function changePresence(details:String, ?state:String, ?largeImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float)
+	public static function changePresence(?details:String, ?state:String, ?largeImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float)
 	{
 		if (!isActive())
 			return;
+
+		if (hideDetails) {
+			details = null;
+			state = null;
+			largeImageKey = null;
+			hasStartTimestamp = false;
+			endTimestamp = null;
+		}
 
 		////
 		var startTimestamp:Float = hasStartTimestamp ? Date.now().getTime() : 0;

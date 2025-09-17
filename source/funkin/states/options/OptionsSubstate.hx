@@ -180,7 +180,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				]
 			],
 			#if DISCORD_ALLOWED
-			["discord", ["discordRPC"]],
+			["discord", ["discordRPC", "discordRPC_hideDetails"]],
 			#end
 			#if DO_AUTO_UPDATE
 			[
@@ -373,6 +373,9 @@ class OptionsSubstate extends MusicBeatSubstate
 			#if DISCORD_ALLOWED
 			case 'discordRPC':
 				val ? DiscordClient.start(true) : DiscordClient.shutdown(true);
+			case 'discordRPC_hideDetails':
+				DiscordClient.hideDetails = val;
+				if (val) DiscordClient.changePresence();
 			#end
 			case 'autoPause':
 				FlxG.autoPause = val;
