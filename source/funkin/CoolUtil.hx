@@ -14,7 +14,7 @@ import flixel.util.typeLimit.OneOfTwo;
 import sys.io.File;
 import sys.FileSystem;
 #end
-#if linc_filedialogs
+#if (linc_filedialogs && !windows)
 import filedialogs.FileDialogs;
 #else
 import lime.ui.FileDialog;
@@ -327,7 +327,7 @@ class CoolUtil {
 	// also returns the raw paths to the files
 	// only returns 1 file in an array if multi-select is left off
 	public static function showOpenDialog(?title:String, ?defaultFileName:String, ?filters:Array<String>, ?multiSelect:Bool = false, ?onSelect:(files:Array<String>)->Void, ?onCancel:Void->Void):Array<String> {
-		#if linc_filedialogs
+		#if (linc_filedialogs && !windows) // forcing lime FileDialog on windows because i can't figure out why this shit isn't working
 		var option:Option = Option.None;
 		if(multiSelect)
 			option = Option.Multiselect;
@@ -386,7 +386,7 @@ class CoolUtil {
 
 	// also immediately saves the file to disk when OK is pressed
 	public static function showSaveDialog(content:OneOfTwo<String, Bytes>, ?title:String, ?defaultFileName:String, ?filters:Array<String>, ?onSelect:(file:String)->Void, ?onCancel:Void->Void):Void {
-		#if linc_filedialogs
+		#if (linc_filedialogs && !windows) // forcing lime FileDialog on windows because i can't figure out why this shit isn't working
 		final goodFilters:Array<String> = [];
 		
 		filters ??= [];
