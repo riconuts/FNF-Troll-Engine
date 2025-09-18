@@ -1335,7 +1335,7 @@ class CharacterEditorState extends MusicBeatState {
 		var data:String = Json.stringify(json, "\t");
 
 		if (data.length > 0) {
-			CoolUtil.showSaveDialog(data, "Save Character", Path.join([Sys.getCwd(), charName + ".json"]), ["*.json"], onSaveComplete, onSaveCancel);
+			CoolUtil.showSaveDialog(data, "Save Character", '$charName.json', ["JSON file", "*.json"], onSaveComplete, onSaveCancel);
 		}
 	}
 

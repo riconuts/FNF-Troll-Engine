@@ -33,7 +33,7 @@ class VSliceConverter extends MusicBeatState
 					if(Reflect.field(data, "version") != null){
 						menu.addTextOption(Path.withoutDirectory(Path.withoutExtension(file)), {
 							onAccept: (i:Int, a:Alphabet) -> {
-								CoolUtil.showSaveDialog(Json.stringify(StageData.convertVSlice(cast data), "\t"), "Save Stage Data", Path.join([Sys.getCwd(), file]), ["*.json"], onSaveComplete, onSaveCancel);
+								CoolUtil.showSaveDialog(Json.stringify(StageData.convertVSlice(cast data), "\t"), "Save Stage Data", file, ["JSON file", "*.json"], onSaveComplete, onSaveCancel);
 							}
 						});
 					}
@@ -56,7 +56,7 @@ class VSliceConverter extends MusicBeatState
 							onAccept: (i:Int, a:Alphabet) -> {
 								var charFile:CharacterFile = CharacterData.getCharacterFile(id);
 								trace(charFile);
-								CoolUtil.showSaveDialog(Json.stringify(charFile, "\t"), "Save Character Data", Path.join([Sys.getCwd(), file]), ["*.json"], onCharSaveComplete, onSaveCancel);
+								CoolUtil.showSaveDialog(Json.stringify(charFile, "\t"), "Save Character Data", file, ["JSON file", "*.json"], onCharSaveComplete, onSaveCancel);
 							}
 						});
 					}
@@ -105,7 +105,7 @@ class VSliceConverter extends MusicBeatState
 			];
 		}
 			
-		", "Save Character Script", Path.join([Sys.getCwd(), Path.withoutExtension(f) + ".hscript"]), null, onSaveComplete, onSaveCancel);
+		", "Save Character Script", Path.withoutExtension(f) + ".hscript", ["HScript File", "*.hscript", "*.hxs"], onSaveComplete, onSaveCancel);
 	}
 
 	function onSaveComplete(e):Void {

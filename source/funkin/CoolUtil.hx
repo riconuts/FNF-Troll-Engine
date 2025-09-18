@@ -14,16 +14,11 @@ import flixel.util.typeLimit.OneOfTwo;
 import sys.io.File;
 import sys.FileSystem;
 #end
-#if (linc_filedialogs && !windows)
+#if linc_filedialogs
 import filedialogs.FileDialogs;
 #else
 import lime.ui.FileDialog;
-
-import openfl.events.Event;
-import openfl.events.IOErrorEvent;
-
 import openfl.net.FileFilter;
-import openfl.net.FileReference;
 #end
 
 using StringTools;
@@ -317,108 +312,108 @@ class CoolUtil {
 		#end
 	}
 
-	// NOTE: linc_filedialogs doesn't have default file names, atleast i don't think it does
-	// trying to use a default filename in place of initialPath doesn't work correctly
+	public static function getFileBytes(absolutePath:String) {
+		var cwd = Sys.getCwd();
+		Sys.setCwd('');
+		var b = Paths.getBytes(absolutePath);
+		Sys.setCwd(cwd);
+		return b;
+	}
 
-	// UNNOTE: linc_filedialogs DOES have default file names but they work slightly differently
-	// to how lime does it, you have to append the cwd to the file name
-	// Path.join([Sys.getCwd(), "example.json"])
-	
-	// also returns the raw paths to the files
-	// only returns 1 file in an array if multi-select is left off
-	public static function showOpenDialog(?title:String, ?defaultFileName:String, ?filters:Array<String>, ?multiSelect:Bool = false, ?onSelect:(files:Array<String>)->Void, ?onCancel:Void->Void):Array<String> {
-		#if (linc_filedialogs && !windows) // forcing lime FileDialog on windows because i can't figure out why this shit isn't working
-		var option:Option = Option.None;
-		if(multiSelect)
-			option = Option.Multiselect;
-
-		filters ??= [];
+	@:noCompletion
+	private static inline function _filefilters(?filters:Array<String>) {
+		#if linc_filedialogs
+		return filters ?? [];
+		#else		
 		final goodFilters:Array<String> = [];
-		for(type in filters)
-			goodFilters.push(StringTools.replace(StringTools.replace(type, "*.", ""), ";", ","));
-
-		final t:String = title ?? (multiSelect ? "Open Files" : "Open File"); // hxcpp is gonna make me kms someday i swear -swordcube
-		final files:Array<String> = FileDialogs.open_file(t, cast defaultFileName, cast goodFilters, cast option);
-		return files;
-		#else
-		var files:Array<String> = [];
-		filters ??= [];
-		
-		final fileFilters:Array<FileFilter> = [];
-		for(f in filters)
-			fileFilters.push(new FileFilter(f, f));
-
-		final filters:Array<String> = [];
-		for(type in fileFilters)
-			filters.push(StringTools.replace(StringTools.replace(type.extension, "*.", ""), ";", ","));
-		
-		final filter:String = filters.join(";");
-		if(multiSelect) {
-			final dialog:FileDialog = new FileDialog();
-			dialog.onCancel.add(() -> {
-				if(onCancel != null)
-					onCancel();
-			});
-			dialog.onSelectMultiple.add((f) -> {
-				if(onSelect != null)
-					onSelect(f);
-
-				files = f;
-			});
-			dialog.browse(OPEN_MULTIPLE, filter, defaultFileName, title);
-		} else {
-			final dialog:FileDialog = new FileDialog();
-			dialog.onCancel.add(() -> {
-				if(onCancel != null)
-					onCancel();
-			});
-			dialog.onSelect.add((f) -> {
-				files = [f];
-				if(onSelect != null)
-					onSelect(files);
-			});
-			dialog.browse(OPEN, filter, defaultFileName, title);
+		if (filters != null) {
+			for (f in filters) {
+				var type = new FileFilter(f, f);
+				goodFilters.push(StringTools.replace(StringTools.replace(type.extension, "*.", ""), ";", ","));
+			}
 		}
-		Sys.sleep(0.5); // sleep to prevent dialogs sometimes not opening if opened in quick succession
-		return files;
+		return goodFilters.join(";");
 		#end
 	}
 
-	// also immediately saves the file to disk when OK is pressed
-	public static function showSaveDialog(content:OneOfTwo<String, Bytes>, ?title:String, ?defaultFileName:String, ?filters:Array<String>, ?onSelect:(file:String)->Void, ?onCancel:Void->Void):Void {
-		#if (linc_filedialogs && !windows) // forcing lime FileDialog on windows because i can't figure out why this shit isn't working
-		final goodFilters:Array<String> = [];
+	@:noCompletion
+	private static inline function fileDialogPath(?path:String):String {
+		#if sys
+		if (path == null || path.length == 0)
+			return Sys.getCwd();
+		if (!Path.isAbsolute(path))
+			path = Path.join([Sys.getCwd(), path]);
 		
-		filters ??= [];
-		for(type in filters)
-			goodFilters.push(StringTools.replace(StringTools.replace(type, "*.", ""), ";", ","));
+		if (!FileSystem.exists(Path.directory(path)))
+			path = Sys.getCwd();
+		#if windows else
+			path = path.replace('/', '\\');
+		#end
 
-		final t:String = title ?? "Save File"; // hxcpp is gonna make me kms someday i swear -swordcube
-		final filePath:String = FileDialogs.save_file(t, cast defaultFileName, cast goodFilters);
-		safeSaveFile(filePath, content);
+		return path;
 		#else
-		filters ??= [];
-		
-		final fileFilters:Array<FileFilter> = [];
-		for(f in filters)
-			fileFilters.push(new FileFilter(f, f));
+		return "";
+		#end
+	}
 
-		final filters:Array<String> = [];
-		for(type in fileFilters)
-			filters.push(StringTools.replace(StringTools.replace(type.extension, "*.", ""), ";", ","));
-		
-		final filter:String = filters.join(";");
+	public static function showOpenMultipleDialog(title:String = "Open Files", ?defaultPath:String, ?filters:Array<String>, ?onSelect:(paths:Array<String>)->Void, ?onCancel:Void->Void):Void {
+		final filters = _filefilters(filters);
+		final defaultPath = fileDialogPath(defaultPath);
+		#if linc_filedialogs
+		final files:Array<String> = FileDialogs.open_file(title, cast defaultPath, cast filters, Option.Multiselect);
+		if (files.length == 0) {
+			if (onCancel != null) onCancel();
+		}else {
+			if (onSelect != null) onSelect(files);
+		}
+		#else
 		final dialog:FileDialog = new FileDialog();
-		dialog.onCancel.add(() -> {
-			if(onCancel != null)
+		if (onCancel != null) dialog.onCancel.add(onCancel);
+		if (onSelect != null) dialog.onSelectMultiple.add(onSelect);
+		dialog.browse(OPEN_MULTIPLE, filter, defaultPath, title);
+		Sys.sleep(0.5); // sleep to prevent dialogs sometimes not opening if opened in quick succession
+		#end
+	}
+	
+	public static function showOpenDialog(title:String = "Open File", ?defaultPath:String, ?filters:Array<String>, ?onOpen:(bytes:Bytes)->Void, ?onSelect:(path:String)->Void, ?onCancel:Void->Void):Void {
+		final filters = _filefilters(filters);
+		final defaultPath = fileDialogPath(defaultPath);
+		#if linc_filedialogs
+		final files:Array<String> = FileDialogs.open_file(title, cast defaultPath, cast filters, Option.None);
+		if (onSelect != null) onSelect(files[0]);
+		if (files.length == 0) {
+			if (onCancel != null) onCancel();
+		}else {
+			if (onOpen != null) onOpen(getFileBytes(files[0]));
+		}
+		#else
+		final dialog:FileDialog = new FileDialog();
+		if (onOpen != null) dialog.onOpen.add(onOpen);
+		if (onCancel != null) dialog.onCancel.add(onCancel);
+		if (onSelect != null) dialog.onSelect.add(onSelect);
+		dialog.browse(OPEN, filter, defaultPath, title);
+		Sys.sleep(0.5); // sleep to prevent dialogs sometimes not opening if opened in quick succession
+		#end
+	}
+
+	public static function showSaveDialog(content:OneOfTwo<String, Bytes>, title:String = "Save File", ?defaultPath:String, ?filters:Array<String>, ?onSave:(path:String)->Void, ?onCancel:Void->Void):Void {
+		final filters = _filefilters(filters);
+		final defaultPath = fileDialogPath(defaultPath);
+		#if linc_filedialogs
+		final savePath:String = FileDialogs.save_file(title, cast defaultPath, cast filters);
+		if (savePath.length == 0) {
+			if (onCancel != null)
 				onCancel();
-		});
-		dialog.onSelect.add((f) -> {
-			safeSaveFile(f, content);
-			if(onSelect != null)
-				onSelect(f);
-		});
-		dialog.browse(SAVE, filter, defaultFileName, title);
+		}else {
+			safeSaveFile(savePath, content);
+			onSave(savePath);
+		}
+		#else
+		final dialog:FileDialog = new FileDialog();
+		dialog.onSelect.add((f) -> safeSaveFile(f, content));
+		if (onCancel != null) dialog.onCancel.add(onCancel);
+		if (onSelect != null) dialog.onCancel.add(onSelect);
+		dialog.browse(SAVE, filter, defaultPath, title);
 		Sys.sleep(0.5); // sleep to prevent dialogs sometimes not opening if opened in quick succession
 		#end
 	}
