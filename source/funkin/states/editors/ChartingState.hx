@@ -822,8 +822,7 @@ class ChartingState extends MusicBeatState
 		});
 
 		////
-		final eventsFileDialog = new FileDialog();
-		eventsFileDialog.onOpen.add(function(resource) {
+		function onOpenEvents(resource) {
 			var data:Dynamic = Json.parse((resource:Bytes).toString());
 
 			var song:SwagSong = Reflect.field(data, "song"); 
@@ -836,10 +835,10 @@ class ChartingState extends MusicBeatState
 
 			_song.events = events;
 			updateGrid();
-		});
+		}
 
-		var loadEventJson:FlxButton = new FlxButton(loadAutosaveBtn.x, loadAutosaveBtn.y + 30, 'Load Events', function() {
-			final openEvents:Void->Void = eventsFileDialog.open.bind('json', getSongPath('events.json'), 'Load Events');
+		var loadEventJson:FlxButton = new FlxButton(loadAutosaveBtn.x, loadAutosaveBtn.y + 30, 'Open Events', function() {
+			final openEvents:Void->Void = CoolUtil.showOpenDialog.bind('Open Events', getSongPath('events.json'), ['*.json'], onOpenEvents);
 			openSubState(new Prompt('This action will clear the current events.\n\nProceed?', 0, openEvents, null, options.ignoreWarnings));
 		});
 
@@ -849,7 +848,7 @@ class ChartingState extends MusicBeatState
 
 			var json = {"song": {"events": _song.events}}
 			var data:String = Json.stringify(json, "\t");
-			eventsFileDialog.save(data, 'json', getSongPath('events.json'), 'Save Events');
+			CoolUtil.showSaveDialog(data, 'Save Events', getSongPath('events.json'), ["JSON file", '*.json']);
 		});
 
 		var fix_oob_notes:FlxButton = new FlxButton(loadAutosaveBtn.x, 300 - 40, 'Fix Notes', function() {
@@ -1616,8 +1615,10 @@ class ChartingState extends MusicBeatState
 	}
 
 	function getSongPath(file:String = "") {
-		var chartPath = Reflect.field(_song, "_path");
-		return (chartPath==null ? "" : Path.addTrailingSlash(Path.directory(chartPath))) + file;
+		var path = Reflect.field(_song, "_path");
+		path = path==null ? file : Path.addTrailingSlash(Path.directory(path)) + file;
+		trace(path);
+		return path;
 	}
 
 	function addMetadataUI() {
@@ -3459,7 +3460,7 @@ class ChartingState extends MusicBeatState
 
 		if ((data != null) && (data.length > 0))
 		{
-			CoolUtil.showSaveDialog(data.trim(), "Save Chart", Path.join([Sys.getCwd(), getSongPath(fileName)]), ["*.json"], onSaveComplete, onSaveCancel);
+			CoolUtil.showSaveDialog(data.trim(), "Save Chart", getSongPath(fileName), ["JSON file", "*.json"], onSaveComplete, onSaveCancel);
 		}
 	}
 
