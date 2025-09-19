@@ -1645,23 +1645,23 @@ class ChartingState extends MusicBeatState
 
 		var songNameInputText = new FlxUIInputText(10, 30, 180, _song.metadata.songName);
 		songNameInputText.name = "metadata_songName";
-		tab_group.add(songNameInputText);
 		blockPressWhileTypingOn.push(songNameInputText);
 
 		var artistInputText = new FlxUIInputText(10, songNameInputText.y + 30, 180, _song.metadata.artist);
 		artistInputText.name = "metadata_artist";
-		tab_group.add(artistInputText);
 		blockPressWhileTypingOn.push(artistInputText);
 
 		var charterInputText = new FlxUIInputText(10, artistInputText.y + 30, 180, _song.metadata.charter);
 		charterInputText.name = "metadata_charter";
-		tab_group.add(charterInputText);
 		blockPressWhileTypingOn.push(charterInputText);
 
 		var modcharterInputText = new FlxUIInputText(10, charterInputText.y + 30, 180, _song.metadata.modcharter);
 		modcharterInputText.name = "metadata_modcharter";
-		tab_group.add(modcharterInputText);
 		blockPressWhileTypingOn.push(modcharterInputText);
+
+		var extraInfoInputText = new FlxUIInputText(10, modcharterInputText.y + 30, 180, (_song.metadata.extraInfo?.join(',') ?? ""));
+		extraInfoInputText.name = "metadata_extraInfo";
+		blockPressWhileTypingOn.push(extraInfoInputText);
 
 		////
 		// TODO: freeplay data shit idunno
@@ -1679,10 +1679,11 @@ class ChartingState extends MusicBeatState
 				artistInputText.text = data.artist;
 				charterInputText.text = data.charter;
 				modcharterInputText.text = data.modcharter;	
+				extraInfoInputText.text = (data.extraInfo?.join(',') ?? "");
 			}
 		});
 
-		var loadButton = new FlxButton(10, modcharterInputText.y + 30, "Load Metadata", function() {			
+		var loadButton = new FlxButton(10, extraInfoInputText.y + 30, "Load Metadata", function() {			
 			fileDialog.open('json', getSongPath("metadata.json"), 'Load Metadata');
 		});
 
@@ -1693,6 +1694,7 @@ class ChartingState extends MusicBeatState
 			_song.metadata.artist = artistInputText.text;
 			_song.metadata.charter = charterInputText.text;
 			_song.metadata.modcharter = modcharterInputText.text;
+			_song.metadata.extraInfo = extraInfoInputText.text.split(',');
 
 			var data:String = Json.stringify(_song.metadata, "\t");
 			fileDialog.save(data, 'json', getSongPath("metadata.json"), 'Save Metadata');
@@ -1703,11 +1705,13 @@ class ChartingState extends MusicBeatState
 		tab_group.add(new FlxText(artistInputText.x, artistInputText.y - 15, 0, 'Artist:'));
 		tab_group.add(new FlxText(charterInputText.x, charterInputText.y - 15, 0, 'Charter:'));
 		tab_group.add(new FlxText(modcharterInputText.x, modcharterInputText.y - 15, 0, 'Modcharter:'));
+		tab_group.add(new FlxText(extraInfoInputText.x, extraInfoInputText.y - 15, 0, 'Extra Info:'));
 		
 		tab_group.add(songNameInputText);
 		tab_group.add(artistInputText);
 		tab_group.add(charterInputText);
 		tab_group.add(modcharterInputText);
+		tab_group.add(extraInfoInputText);
 
 		tab_group.add(loadButton);
 		tab_group.add(saveButton);
@@ -2056,6 +2060,8 @@ class ChartingState extends MusicBeatState
 					_song.metadata.charter = sender.text;
 				case 'metadata_modcharter':
 					_song.metadata.modcharter = sender.text;
+				case 'metadata_extraInfo':
+					_song.metadata.extraInfo = sender.text.split(',');
 				
 				case 'tracks_inst':
 					_song.tracks.inst = sender.text.split(',');
