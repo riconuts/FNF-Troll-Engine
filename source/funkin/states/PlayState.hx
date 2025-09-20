@@ -1821,7 +1821,7 @@ class PlayState extends MusicBeatState
 			for (songNotes in section.sectionNotes) {
 				var daStrumTime:Float = songNotes.strumTime;
 				var daNoteData:Int = songNotes.column;
-				var mustPress:Bool = section.mustHitSection ? (daNoteData < keyCount) : (daNoteData >= keyCount);
+				var mustPress:Bool = daNoteData < keyCount;
 				var fieldIndex:Int = mustPress ? 0 : 1;
 
 				var daColumn:Int = daNoteData % keyCount;
@@ -1842,7 +1842,7 @@ class PlayState extends MusicBeatState
 					swagNote.characterHitAnimSuffix = '-alt';
 					swagNote.characterMissAnimSuffix = '-altmiss';
 				}
-				swagNote.gfNote = section.gfSection && daNoteData < keyCount;
+				swagNote.gfNote = section.gfSection && (section.mustHitSection ? (daNoteData < keyCount) : (daNoteData >= keyCount));
 				swagNote.noteType = daType;
 
 				////

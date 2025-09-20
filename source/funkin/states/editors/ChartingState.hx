@@ -239,6 +239,7 @@ class ChartingState extends MusicBeatState
 	var iconBG:FlxSprite;
 	var leftIcon:HealthIcon;
 	var rightIcon:HealthIcon;
+	var focusArrow:FlxSprite;
 
 	var value1InputText:FlxUIInputText;
 	var value2InputText:FlxUIInputText;
@@ -334,8 +335,6 @@ class ChartingState extends MusicBeatState
 			while (section.sectionNotes.length > 0) {
 				var note = section.sectionNotes.pop();
 				note.strumTime = fuckFloatingPoints(note.strumTime);
-				if (!section.mustHitSection)
-					note.column = (note.column + _song.keyCount) % (_song.keyCount * 2);
 				allNotes.push(note);
 			}
 			
@@ -358,8 +357,6 @@ class ChartingState extends MusicBeatState
 			}
 
 			var section = allSections[curSection];
-			if (!section.mustHitSection)
-				note.column = (note.column + _song.keyCount) % (_song.keyCount * 2);
 
 			section.sectionNotes.push(note); 
 		}
@@ -576,6 +573,13 @@ class ChartingState extends MusicBeatState
 		rightIcon.setGraphicSize(0, 45);
 		rightIcon.updateHitbox();
 		add(rightIcon);
+
+		focusArrow = new FlxSprite(Paths.image('optionsMenu/arrow'));
+		focusArrow.scrollFactor.set(1, 0);
+		focusArrow.scale.set(.6, .6);
+		focusArrow.updateHitbox();
+		focusArrow.flipY = true;
+		add(focusArrow);
 
 		////
 		var text =
@@ -2201,9 +2205,9 @@ class ChartingState extends MusicBeatState
 						&&	FlxG.mouse.y <	gridBG.y + gridBG.height;
 
 		if (onIcons && FlxG.mouse.justPressed) {
-			if (FlxG.mouse.overlaps(rightIcon)) {
+			var mhs = _song.notes[curSec].mustHitSection;
+			if (FlxG.mouse.overlaps(mhs ? rightIcon : leftIcon))
 				new ChangeMustHitSectionAction(curSec, true);
-			}
 		}
 
 		if (onGrid){
@@ -2984,18 +2988,11 @@ class ChartingState extends MusicBeatState
 		var healthIconP1:String ="bf";
 		var healthIconP2:String = "dad";
 
-		if (_song.notes[curSec].mustHitSection)
-		{
-			leftIcon.changeIcon(healthIconP1);
-			rightIcon.changeIcon(healthIconP2);
-			if (_song.notes[curSec].gfSection) leftIcon.changeIcon('gf');
-		}
-		else
-		{
-			leftIcon.changeIcon(healthIconP2);
-			rightIcon.changeIcon(healthIconP1);
-			if (_song.notes[curSec].gfSection) leftIcon.changeIcon('gf');
-		}
+		var focusIcon = (_song.notes[curSec].mustHitSection ? leftIcon : rightIcon);
+
+		leftIcon.changeIcon(healthIconP1);
+		rightIcon.changeIcon(healthIconP2);
+		if (_song.notes[curSec].gfSection) focusIcon.changeIcon('gf');
 
 		leftIcon.setGraphicSize(0, 45);
 		leftIcon.updateHitbox();
@@ -3004,6 +3001,9 @@ class ChartingState extends MusicBeatState
 
 		leftIcon.setPosition(GRID_SIZE * (1 + _song.keyCount * 0.5) - leftIcon.width * 0.5, 5);
 		rightIcon.setPosition(GRID_SIZE * (1 + _song.keyCount * 1.5) - rightIcon.width * 0.5, 5);
+
+		SpriteTools.objectCenter(focusArrow, focusIcon, X);
+		focusArrow.y = focusIcon.y + focusIcon.height;
 	}
 
 	function updateNoteSteps():Void
@@ -3232,8 +3232,6 @@ class ChartingState extends MusicBeatState
 	}
 
 	inline function getNoteX(column:Int, sectionNumber:Int):Float {
-		if (_song.notes[curSec].mustHitSection != _song.notes[sectionNumber].mustHitSection)
-			(column < _song.keyCount) ? (column += _song.keyCount) : (column -= _song.keyCount);
 		return (1 + column) * GRID_SIZE;
 	}
 
@@ -3527,6 +3525,8 @@ class ChartingState extends MusicBeatState
 		}else {
 			fileName = _song.song + ".json";
 		}
+
+		Reflect.setField(_song, "trollEngine", funkin.data.ChartData.ChartVersion.CURRENT);
 
 		var json = {"song": _song};
 		var data:String = Json.stringify(json, "\t");
