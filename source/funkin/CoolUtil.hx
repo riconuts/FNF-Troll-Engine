@@ -190,7 +190,7 @@ class CoolUtil {
 		var maxCount = 0;
 		var maxKey:Int = 0;//after the loop this will store the max color
 		
-		countByColor[flixel.util.FlxColor.BLACK] = 0;
+		countByColor[0xFF000000] = 0;
 		for (key in countByColor.keys()) {
 			if (countByColor[key] >= maxCount) {
 				maxCount = countByColor[key];
@@ -203,13 +203,12 @@ class CoolUtil {
 	////
 	public static function colorFromString(color:String):FlxColor
 	{
-		var hideChars = ~/[\t\n\r]/;
-		var color:String = hideChars.split(color).join('').trim();
-		if (color.startsWith('0x')) color = color.substring(color.length - 6);
-
-		var colorNum:Null<FlxColor> = FlxColor.fromString(color);
-		if (colorNum == null) colorNum = FlxColor.fromString('#$color');
-		return colorNum != null ? colorNum : FlxColor.WHITE;
+		return FlxColor.fromRGB(
+			Std.parseInt("0x"+color.substr(-6, 2)),
+			Std.parseInt("0x"+color.substr(-4, 2)),
+			Std.parseInt("0x"+color.substr(-2, 2)),
+			Std.parseInt("0x"+color.substr(-8, 2))
+		);
 	}
 
 	// could probably use a macro
@@ -402,11 +401,10 @@ class CoolUtil {
 		#if linc_filedialogs
 		final savePath:String = FileDialogs.save_file(title, cast defaultPath, cast filters);
 		if (savePath.length == 0) {
-			if (onCancel != null)
-				onCancel();
+			if (onCancel != null) onCancel();
 		}else {
 			safeSaveFile(savePath, content);
-			onSave(savePath);
+			if (onSave != null) onSave(savePath);
 		}
 		#else
 		final dialog:FileDialog = new FileDialog();
