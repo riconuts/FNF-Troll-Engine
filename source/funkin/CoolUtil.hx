@@ -295,20 +295,23 @@ class CoolUtil {
 		return path;
 	}
 
-    public static function safeSaveFile(path:String, content:OneOfTwo<String, Bytes>) {
+	public static function safeSaveFile(path:String, content:OneOfTwo<String, Bytes>):Bool {
 		#if sys
 		try {
 			createMissingDirectories(Path.directory(path));
-			if(content is Bytes)
-                File.saveBytes(path, content);
+			if (content is Bytes)
+				File.saveBytes(path, content);
 			else
-                File.saveContent(path, content);
+				File.saveContent(path, content);
+			return true;
 		}
-        catch(e) {
-            final errMsg:String = 'Error while trying to save the file: ${Std.string(e).replace('\n', ' ')}';
+		catch(e) {
+			final errMsg:String = 'Error while trying to save the file: ${Std.string(e).replace('\n', ' ')}';
 			trace(errMsg);
 		}
 		#end
+
+		return false;
 	}
 
 	public static function getFileBytes(absolutePath:String) {
@@ -403,8 +406,8 @@ class CoolUtil {
 		if (savePath.length == 0) {
 			if (onCancel != null) onCancel();
 		}else {
-			safeSaveFile(savePath, content);
-			if (onSave != null) onSave(savePath);
+			var success:Bool = safeSaveFile(savePath, content);
+			if (success && onSave != null) onSave(savePath);
 		}
 		#else
 		final dialog:FileDialog = new FileDialog();
