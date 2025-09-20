@@ -439,15 +439,6 @@ class PlayState extends MusicBeatState
 	private var keysArray:Array<Array<FlxKey>>;
 	private var buttonsArray:Array<Array<FlxGamepadInputID>>;
 
-	// nightmarevision compatibility shit !
-	#if NMV_MOD_COMPATIBILITY
-	public var whosTurn:String = 'dad';
-	public var defaultCamZoomAdd:Float = 0;
-	@:isVar public var beatsPerZoom(get, set):Int = 4;
-	@:noCompletion function get_beatsPerZoom()return zoomEveryBeat;
-	@:noCompletion function set_beatsPerZoom(val:Int)return zoomEveryBeat = val;
-	#end
-
 	////
 	@:isVar public var songScore(get, set):Int = 0;
 	@:isVar public var totalPlayed(get, set):Float = 0;
@@ -2523,7 +2514,7 @@ class PlayState extends MusicBeatState
 		var lerpVal = Math.exp(-elapsed * 3.125 * camZoomingDecay);
 
 		camGame.zoom = FlxMath.lerp(
-			defaultCamZoom #if NMV_MOD_COMPATIBILITY + defaultCamZoomAdd #end,
+			defaultCamZoom,
 			camGame.zoom,
 			lerpVal
 		);
@@ -2800,23 +2791,14 @@ class PlayState extends MusicBeatState
 				switch(value1.toLowerCase().trim()){
 					case 'dad' | 'opponent':
 						if (callOnScripts('onMoveCamera', ["dad"]) != Globals.Function_Stop){
-							#if NMV_MOD_COMPATIBILITY
-							whosTurn = 'dad';
-							#end
 							moveCamera(dad);
 						}
 					case 'gf' | 'girlfriend':
 						if (callOnScripts('onMoveCamera', ["gf"]) != Globals.Function_Stop){
-							#if NMV_MOD_COMPATIBILITY
-							whosTurn = 'gf';
-							#end
 							moveCamera(gf);
 						}
 					default:
 						if (callOnScripts('onMoveCamera', ["bf"]) != Globals.Function_Stop){
-							#if NMV_MOD_COMPATIBILITY
-							whosTurn = 'bf';
-							#end
 							moveCamera(boyfriend);
 						}
 				}

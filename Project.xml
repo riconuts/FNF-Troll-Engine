@@ -54,8 +54,6 @@
 
 	<!--Remove if you dont want states to be modified with scripts. This only disables extension/overrides and not the HScriptedState class-->
 	<define name="SCRIPTABLE_STATES" if="HSCRIPT_ALLOWED" />
-	<!--Remove if you don't want NightmareVision mod compatibility-->
-	<define name="NMV_MOD_COMPATIBILITY" if="PE_MOD_COMPATIBILITY MODS_ALLOWED HSCRIPT_ALLOWED"/>
 
 	<!--Remove if you don't want to use FlxAnimate-->
 	<define name="USING_FLXANIMATE" />
