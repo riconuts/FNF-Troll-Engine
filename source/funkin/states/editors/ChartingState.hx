@@ -188,7 +188,7 @@ class ChartingState extends MusicBeatState
 	var strumLine:FlxSprite;
 	var quant:AttachedSprite;
 	var strumLineNotes:FlxTypedGroup<StrumNote>;
-	var curSong:String = 'Test';
+	var curSong:String = 'test';
 	var curSec:Int = 0;
 	var amountSteps:Int = 0;
 
@@ -415,7 +415,7 @@ class ChartingState extends MusicBeatState
 
 		data ??= PlayState.SONG;
 		this._song = data ?? {
-			song: 'Test',
+			song: 'test',
 			bpm: 150.0,
 			speed: 1,
 			offset: 0,
