@@ -530,7 +530,7 @@ class ChartingState extends MusicBeatState
 
 		FlxG.camera.follow(camPos);
 
-		quant = new AttachedSprite('chart_quant','chart_quant');
+		quant = new AttachedSprite('charteditor/chart_quant','charteditor/chart_quant');
 		quant.animation.addByPrefix('q','chart_quant',0,false);
 		quant.animation.play('q', true, false, 0);
 		quant.sprTracker = strumLine;
@@ -559,7 +559,7 @@ class ChartingState extends MusicBeatState
 		iconBG.scrollFactor.set(0, 0);
 		add(iconBG);
 
-		var eventIcon:FlxSprite = new FlxSprite(GRID_SIZE * 0.5 - 30 * 0.5, (55 - 30) * 0.5, Paths.image('eventArrow'));
+		var eventIcon:FlxSprite = new FlxSprite(GRID_SIZE * 0.5 - 30 * 0.5, (55 - 30) * 0.5, Paths.image('charteditor/eventArrow'));
 		eventIcon.scrollFactor.set(1, 0);
 		eventIcon.setGraphicSize(30, 30);
 		eventIcon.updateHitbox();
@@ -3246,7 +3246,7 @@ class ChartingState extends MusicBeatState
 		note.chartData = i;
 		note.usesDefaultColours = false;
 
-		note.loadGraphic(Paths.image('eventArrow'));
+		note.loadGraphic(Paths.image('charteditor/eventArrow'));
 		note.eventName = getEventName(i.subEventsData);
 		note.eventLength = i.subEventsData.length;
 		if (i.subEventsData.length < 2)
