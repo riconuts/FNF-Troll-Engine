@@ -454,54 +454,6 @@ class ModchartSprite extends FlxSprite
 		super(x, y, Graphic);
 		//antialiasing = ClientPrefs.globalAntialiasing;
 	}
-
-	// NightmareVision backwards compat
-	#if NMV_MOD_COMPATIBILITY
-	@:noCompletion
-	public function loadImage(Graphic:String, Animated:Bool = false, FrameWidth:Int = 0, FrameHeight:Int = 0, Unique:Bool = false, ?Key:String)
-		return loadGraphic(Graphic, Animated, FrameWidth, FrameHeight, Unique, Key);
-
-	@:noCompletion
-	public function loadFrames(Frames:String) {
-		this.frames = funkin.Paths.getSparrowAtlas(Frames);
-		return this;
-	}
-
-	@:noCompletion
-	public function setScale(ScaleX:Float, ?ScaleY:Float) {
-		scale.set(ScaleX, ScaleY == null ? ScaleX : ScaleY);
-		updateHitbox();
-		return this;
-	}
-
-	@:noCompletion
-	public function centerOnSprite(spr:FlxSprite, axes:flixel.util.FlxAxes = XY)
-		return this.objectCenter(spr, axes);
-
-	@:noCompletion
-	public function addAndPlay(name:String, prefix:String, fps:Float = 24, looped:Bool = true){
-		animation.addByPrefix(name, prefix, fps, looped);
-		animation.play(name);
-		return this;
-	}
-
-	@:noCompletion
-	public function makeScaledGraphic(w:Float = 0, h:Float = 0, color:Int = FlxColor.WHITE, unique:Bool = false, ?key:String = null) {
-		makeGraphic(1, 1, color, unique, key);
-		scale.set(w, h);
-		updateHitbox();
-		return this;
-	}
-	
-	@:noCompletion
-	public function updateGraphicSize(?a:Float, ?b:Float, _:Bool){
-		setGraphicSize(a, b);
-		updateHitbox();
-		return this;
-	}
-	
-	#end
-
 }
 
 class ModchartText extends FlxText
