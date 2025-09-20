@@ -994,16 +994,12 @@ class ChartingState extends MusicBeatState
 		if (splashSkin == null) splashSkin = '';
 
 		var noteSkinInputText = new FlxUIInputText(player2DropDown.x, player2DropDown.y + 40, 150, arrowSkin, 8);
+		noteSkinInputText.name = 'song_arrowSkin';
 		blockPressWhileTypingOn.push(noteSkinInputText);
 
 		var noteSplashesInputText = new FlxUIInputText(noteSkinInputText.x, noteSkinInputText.y + 35, 150, splashSkin, 8);
 		noteSplashesInputText.name = 'song_noteSplashes';
 		blockPressWhileTypingOn.push(noteSplashesInputText);
-
-		var reloadNotesButton:FlxButton = new FlxButton(noteSplashesInputText.x + 5, noteSplashesInputText.y + 20, 'Change Notes', function() {
-			_song.arrowSkin = noteSkinInputText.text;
-			updateGrid();
-		});
 		
 		var tab_group_song = new FlxUI(null, UI_box);
 		tab_group_song.name = "Song";
@@ -1022,7 +1018,6 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(stepperSpeed);
 		tab_group_song.add(stepperBPM);
 		tab_group_song.add(stepperKeyCount);
-		tab_group_song.add(reloadNotesButton);
 		tab_group_song.add(noteSkinInputText);
 		tab_group_song.add(noteSplashesInputText);
 
@@ -2037,6 +2032,9 @@ class ChartingState extends MusicBeatState
 			switch (name) {
 				case 'song_songId':
 					_song.song = sender.text;
+
+				case 'song_arrowSkin':
+					_song.arrowSkin = sender.text;
 
 				case 'song_noteSplashes':
 					_song.splashSkin = sender.text;
