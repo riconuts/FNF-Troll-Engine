@@ -1,9 +1,25 @@
 package funkin;
 
+import haxe.io.Bytes;
+import haxe.io.Path;
+
 import math.CoolMath;
+
 import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import flixel.tweens.FlxEase;
+import flixel.util.typeLimit.OneOfTwo;
+
+#if sys
+import sys.io.File;
+import sys.FileSystem;
+#end
+#if linc_filedialogs
+import filedialogs.FileDialogs;
+#else
+import lime.ui.FileDialog;
+import openfl.net.FileFilter;
+#end
 
 using StringTools;
 
@@ -263,6 +279,142 @@ class CoolUtil {
 		Sys.command('/usr/bin/xdg-open', [site]);
 		#else
 		flixel.FlxG.openURL(site);
+		#end
+	}
+
+    public static function createMissingDirectories(path:String):String {
+		#if sys
+		var folders:Array<String> = path.split("/");
+		var currentPath:String = "";
+
+		for (folder in folders) {
+			currentPath += folder + "/";
+			if (!FileSystem.exists(currentPath))
+				FileSystem.createDirectory(currentPath);
+		}
+		#end
+		return path;
+	}
+
+    public static function safeSaveFile(path:String, content:OneOfTwo<String, Bytes>) {
+		#if sys
+		try {
+			createMissingDirectories(Path.directory(path));
+			if(content is Bytes)
+                File.saveBytes(path, content);
+			else
+                File.saveContent(path, content);
+		}
+        catch(e) {
+            final errMsg:String = 'Error while trying to save the file: ${Std.string(e).replace('\n', ' ')}';
+			trace(errMsg);
+		}
+		#end
+	}
+
+	public static function getFileBytes(absolutePath:String) {
+		var cwd = Sys.getCwd();
+		Sys.setCwd('');
+		var b = Paths.getBytes(absolutePath);
+		Sys.setCwd(cwd);
+		return b;
+	}
+
+	@:noCompletion
+	private static inline function _filefilters(?filters:Array<String>) {
+		#if linc_filedialogs
+		return filters ?? [];
+		#else		
+		final goodFilters:Array<String> = [];
+		if (filters != null) {
+			for (f in filters) {
+				var type = new FileFilter(f, f);
+				goodFilters.push(StringTools.replace(StringTools.replace(type.extension, "*.", ""), ";", ","));
+			}
+		}
+		return goodFilters.join(";");
+		#end
+	}
+
+	@:noCompletion
+	private static inline function fileDialogPath(?path:String):String {
+		#if sys
+		if (path == null || path.length == 0)
+			return Sys.getCwd();
+		if (!Path.isAbsolute(path))
+			path = Path.join([Sys.getCwd(), path]);
+		
+		if (!FileSystem.exists(Path.directory(path)))
+			path = Sys.getCwd();
+		#if windows else
+			path = path.replace('/', '\\');
+		#end
+
+		return path;
+		#else
+		return "";
+		#end
+	}
+
+	public static function showOpenMultipleDialog(title:String = "Open Files", ?defaultPath:String, ?filters:Array<String>, ?onSelect:(paths:Array<String>)->Void, ?onCancel:Void->Void):Void {
+		final filters = _filefilters(filters);
+		final defaultPath = fileDialogPath(defaultPath);
+		#if linc_filedialogs
+		final files:Array<String> = FileDialogs.open_file(title, cast defaultPath, cast filters, Option.Multiselect);
+		if (files.length == 0) {
+			if (onCancel != null) onCancel();
+		}else {
+			if (onSelect != null) onSelect(files);
+		}
+		#else
+		final dialog:FileDialog = new FileDialog();
+		if (onCancel != null) dialog.onCancel.add(onCancel);
+		if (onSelect != null) dialog.onSelectMultiple.add(onSelect);
+		dialog.browse(OPEN_MULTIPLE, filter, defaultPath, title);
+		Sys.sleep(0.5); // sleep to prevent dialogs sometimes not opening if opened in quick succession
+		#end
+	}
+	
+	public static function showOpenDialog(title:String = "Open File", ?defaultPath:String, ?filters:Array<String>, ?onOpen:(bytes:Bytes)->Void, ?onSelect:(path:String)->Void, ?onCancel:Void->Void):Void {
+		final filters = _filefilters(filters);
+		final defaultPath = fileDialogPath(defaultPath);
+		#if linc_filedialogs
+		final files:Array<String> = FileDialogs.open_file(title, cast defaultPath, cast filters, Option.None);
+		if (onSelect != null) onSelect(files[0]);
+		if (files.length == 0) {
+			if (onCancel != null) onCancel();
+		}else {
+			if (onOpen != null) onOpen(getFileBytes(files[0]));
+		}
+		#else
+		final dialog:FileDialog = new FileDialog();
+		if (onOpen != null) dialog.onOpen.add(onOpen);
+		if (onCancel != null) dialog.onCancel.add(onCancel);
+		if (onSelect != null) dialog.onSelect.add(onSelect);
+		dialog.browse(OPEN, filter, defaultPath, title);
+		Sys.sleep(0.5); // sleep to prevent dialogs sometimes not opening if opened in quick succession
+		#end
+	}
+
+	public static function showSaveDialog(content:OneOfTwo<String, Bytes>, title:String = "Save File", ?defaultPath:String, ?filters:Array<String>, ?onSave:(path:String)->Void, ?onCancel:Void->Void):Void {
+		final filters = _filefilters(filters);
+		final defaultPath = fileDialogPath(defaultPath);
+		#if linc_filedialogs
+		final savePath:String = FileDialogs.save_file(title, cast defaultPath, cast filters);
+		if (savePath.length == 0) {
+			if (onCancel != null)
+				onCancel();
+		}else {
+			safeSaveFile(savePath, content);
+			onSave(savePath);
+		}
+		#else
+		final dialog:FileDialog = new FileDialog();
+		dialog.onSelect.add((f) -> safeSaveFile(f, content));
+		if (onCancel != null) dialog.onCancel.add(onCancel);
+		if (onSelect != null) dialog.onCancel.add(onSelect);
+		dialog.browse(SAVE, filter, defaultPath, title);
+		Sys.sleep(0.5); // sleep to prevent dialogs sometimes not opening if opened in quick succession
 		#end
 	}
 

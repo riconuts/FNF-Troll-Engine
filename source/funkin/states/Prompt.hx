@@ -30,7 +30,7 @@ class Prompt extends funkin.states.MusicBeatSubstate
 		goAnyway = acceptOnDefault;
 		buttonAccept = new FlxButton(473.3, 450, option1, ()->{if(okc != null) okc(); close();} );
 		buttonNo = new FlxButton(633.3, 450, option2, ()->{if(cancelc != null) cancelc(); close();});
-		super();	
+		super(FlxColor.fromRGBFloat(.0,.0,.0,.4));
 	}
 	
 	override public function create():Void 

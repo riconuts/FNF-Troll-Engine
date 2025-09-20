@@ -82,6 +82,13 @@
 			"dir": "src",
 			"ref": "main",
 			"url": "https://gitlab.com/haxe-grig/grig.audio.git"
+		},
+		{
+			"name": "linc_filedialogs",
+			"type": "git",
+			"dir": null,
+			"ref": "main",
+			"url": "https://github.com/swordcube/linc_filedialogs"
 		}
 	]
 }

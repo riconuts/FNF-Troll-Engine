@@ -80,14 +80,11 @@ class NotesSubState extends MusicBeatSubstate
 		}
 	}
 
-	override public function create() {
-		valuesFileDialog.onOpen.add(
-			function(res:lime.utils.Resource) {
-				var str:String = (res:haxe.io.Bytes).toString();
-				loadFromString(str);
-			}
-		);
+	function onOpenValuesFile(bytes:haxe.io.Bytes) {
+		loadFromString(bytes.toString());
+	}
 
+	override public function create() {
 		var camPos = new FlxObject(0,0, 1280, 720);
 		add(camPos);
 
@@ -188,24 +185,14 @@ class NotesSubState extends MusicBeatSubstate
 		return txt.rtrim();
 	}
 
-	var valuesFileDialog = new lime.ui.FileDialog();
-
 	function openValuesFile() {
-		valuesFileDialog.open(
-			null,
-			'user_hsb/'
-		);	
+		sys.FileSystem.createDirectory('user_hsb');
+		CoolUtil.showOpenDialog("Open File", "user_hsb", onOpenValuesFile);
 	}
 
 	function saveValuesFile() {
 		sys.FileSystem.createDirectory('user_hsb');
-
-		var str = saveToString();
-		valuesFileDialog.save(
-			lime.utils.Bytes.ofString(str),
-			null,
-			'user_hsb/',
-		);
+		CoolUtil.showSaveDialog(saveToString(), "Save File", 'user_hsb');
 	}
 
 	function menuUpdate(elapsed:Float) {

@@ -109,6 +109,12 @@ final defaultNoteTypeList:Array<String> = [
 	'No Animation'
 ];
 
+enum abstract ChartVersion(String) from String to String {
+	var LEGACY_FNF = "l.0.0"; // legacy fnf format!
+	var LEGACY_V1 = "l.1.0"; // legacy fnf format, but mustHitSection doesn't swap note behaviour!
+	var CURRENT = LEGACY_V1;
+}
+
 class ChartData
 {
 	public static function _parseJson(filePath:String):Null<Dynamic> {
@@ -142,15 +148,17 @@ class ChartData
 		{		
 			songJson = cast uncastedJson;
 			var stepCrotchet = Conductor.calculateStepCrochet(songJson.bpm);
-
 			for (section in songJson.notes){
+				if (section.changeBPM)
+					stepCrotchet = Conductor.calculateStepCrochet(section.bpm);
+
 				for (note in section.sectionNotes){
 					var note:Array<Dynamic> = cast note;
-					note[1] = section.mustHitSection ? note[1] : (note[1] + 4) % 8;
 					note[2] -= stepCrotchet;
 					note[2] = note[2] > 0 ? note[2] : 0;
 				}
 			}
+			uncastedJson.trollEngine = ChartVersion.LEGACY_V1;
 		}else
 			songJson = cast uncastedJson.song;
 
@@ -182,16 +190,27 @@ class ChartData
 
 	public static function onLoadJson(songJson:JsonSong):SwagSong
 	{
-		var swagJson:SwagSong = songJson;
-
-		swagJson.validScore = true;
-
 		////
-		if (Reflect.hasField(songJson, 'trollEngine')) {
-			return swagJson;
+		var swagSong:SwagSong;
+		var version:Null<ChartVersion> = Reflect.field(songJson, 'trollEngine');
+		trace('Loading chart version $version');
+		switch(version) {
+			case null | LEGACY_FNF:
+				trace("Converting from LEGACY_FNF");
+				swagSong = onLoadLegacyJson(songJson);
+			case CURRENT:
+				swagSong = songJson;
+			default:
+				swagSong = null;
+				throw 'Unknown chart version: $version';
 		}
 		
-		Reflect.setField(songJson, 'trollEngine', 'l.0.0');
+		swagSong.validScore = true;
+		return swagSong;
+	}
+		
+	public static function onLoadLegacyJson(songJson:JsonSong):SwagSong {
+		var swagJson:SwagSong = songJson;
 
 		////
 		songJson.stage ??= 'stage';
@@ -235,11 +254,16 @@ class ChartData
 			
 		}else {
 			onLoadEvents(swagJson);
-
-			////
-			for (section in swagJson.notes) {
-				for (note in section.sectionNotes) {
+	
+		////
+		var keyCount:Int = songJson.keyCount ?? 4;
+		for (section in swagJson.notes) {
+			if (null == Reflect.field(section, "sectionBeats"))
+				section.sectionBeats = 4;
+			
+			for (note in section.sectionNotes) {
 					var note:Array<Dynamic> = cast note;
+					note[1] = section.mustHitSection ? note[1] : (note[1] + keyCount) % (keyCount * 2);
 					note[3] = NoteData.resolveNoteType(note[3]);
 				}
 			}
@@ -250,6 +274,8 @@ class ChartData
 			swagJson.tracks = makeTrackData(songJson);
 			trace(swagJson.tracks);
 		}
+
+		Reflect.setField(swagJson, "trollEngine", ChartVersion.CURRENT);
 
 		return swagJson;
 	}

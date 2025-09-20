@@ -73,8 +73,12 @@
 	<!--Anything marked as deprecated should be removed after a major or minor version but not after patches. (major.minor.patch)-->
 	<define name="ALLOW_DEPRECATION" unless="final"/>
 
-	<!--Remove if you don't want options for the game to continue running after a crash -->
+	<!--Remove if you don't want options for the game to continue running after a crash (Windows) -->
 	<define name="WINDOWS_CRASH_HANDLER" if="windows cpp" />
+	
+	<!--Remove if you don't want options for the game to continue running after a crash (macOS & Linux) -->
+	<define name="UNIX_CRASH_HANDLER" if="desktop cpp" unless="windows" />
+
 	<!--Remove if you don't want crash logs to be saved-->
 	<define name="SAVE_CRASH_LOGS" if="CRASH_HANDLER native" />
 
@@ -140,6 +144,13 @@
 
 	<haxelib name="faxe" if='switch'/>
 	<haxelib name="hxcpp-debug-server" if="debug" unless="telemetry"/>
+
+	<!--
+		native file dialog library
+		used as a replacement for lime's file dialog shit because it fucking SUCKS
+		especially on linux where it just freezes the entire app <3 -swordcube
+	-->
+	<haxelib name="linc_filedialogs" if="desktop cpp" />
 		
 	<!-- ______________________________ Haxedefines _____________________________ -->
 
@@ -150,6 +161,9 @@
 		<haxedef name="openfl-enable-handle-error" />
 	</section>
 		
+	<haxedef name="HXCPP_CPP11" if="desktop cpp" />
+	<define name="HXCPP_CPP11" if="desktop cpp" />
+	
 	<define name="NO_PRECOMPILED_HEADERS" if="linux" />
 
 	<!-- <haxedef name="no_traces" if="final"/> -->
