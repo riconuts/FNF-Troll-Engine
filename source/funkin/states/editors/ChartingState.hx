@@ -808,11 +808,11 @@ class ChartingState extends MusicBeatState
 
 	function addSongUI():Void
 	{
-		var UI_songTitle = new FlxUIInputText(10, 10, 70, _song.song, 8);
-		UI_songTitle.name = 'song_title';
+		var UI_songTitle = new FlxUIInputText(10, 20, 70, _song.song, 8);
+		UI_songTitle.name = 'song_songId';
 		blockPressWhileTypingOn.push(UI_songTitle);
 
-		var saveButton:FlxButton = new FlxButton(110, 8, "Save Chart", saveLevel);
+		var saveButton:FlxButton = new FlxButton(110, 20, "Save Chart", saveLevel);
 
 		var reloadSongJson:FlxButton = new FlxButton(saveButton.x + 90, saveButton.y, "Reload JSON", function()
 		{
@@ -931,9 +931,9 @@ class ChartingState extends MusicBeatState
 		ddCharacters[0].label = "<null>";
 		characters[0] = null;
 
-		var daY = stepperKeyCount.y;
+		var daY = stepperKeyCount.y + 35;
 
-		var player1DropDown = new CustomFlxUIDropDownMenu(10, daY + 45, ddCharacters, function(character:String)
+		var player1DropDown = new CustomFlxUIDropDownMenu(10, daY, ddCharacters, function(character:String)
 		{
 			_song.player1 = characters[Std.parseInt(character)];
 			updateHeads();
@@ -993,7 +993,7 @@ class ChartingState extends MusicBeatState
 		var splashSkin = _song.splashSkin;
 		if (splashSkin == null) splashSkin = '';
 
-		var noteSkinInputText = new FlxUIInputText(player2DropDown.x, player2DropDown.y + 50, 150, arrowSkin, 8);
+		var noteSkinInputText = new FlxUIInputText(player2DropDown.x, player2DropDown.y + 40, 150, arrowSkin, 8);
 		blockPressWhileTypingOn.push(noteSkinInputText);
 
 		var noteSplashesInputText = new FlxUIInputText(noteSkinInputText.x, noteSkinInputText.y + 35, 150, splashSkin, 8);
@@ -1026,7 +1026,9 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(noteSkinInputText);
 		tab_group_song.add(noteSplashesInputText);
 
-		tab_group_song.add(new FlxText(stepperSpeed.x, stepperSpeed.y - 15, 0, 'Song Speed:'));
+		tab_group_song.add(new FlxText(UI_songTitle.x, UI_songTitle.y - 15, 0, 'Song ID:'));
+
+		tab_group_song.add(new FlxText(stepperSpeed.x, stepperSpeed.y - 15, 0, 'Note Speed:'));
 		tab_group_song.add(new FlxText(stepperBPM.x, stepperBPM.y - 15, 0, 'Song BPM:'));
 		tab_group_song.add(new FlxText(stepperKeyCount.x, stepperKeyCount.y - 15, 0, 'Key Count:'));
 
@@ -2033,7 +2035,7 @@ class ChartingState extends MusicBeatState
 		else if(id == FlxUIInputText.CHANGE_EVENT) {
 			var sender:FlxUIInputText = cast sender;
 			switch (name) {
-				case 'song_title':
+				case 'song_songId':
 					_song.song = sender.text;
 
 				case 'song_noteSplashes':
