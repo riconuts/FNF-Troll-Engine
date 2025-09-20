@@ -560,6 +560,8 @@ class PlayState extends MusicBeatState
 
 	override public function create()
 	{
+		instance = this;
+
 		updateSongPos = false;
 		print('\nCreating PlayState\n');
 		Highscore.loadData();
@@ -737,7 +739,6 @@ class PlayState extends MusicBeatState
 		curStage = SONG.stage;
 
 		////
-		instance = this;
 		setDefaultHScripts("modManager", modManager);
 		setDefaultHScripts("judgeManager", judgeManager);
 		setDefaultHScripts("newPlayField", newPlayfield);
