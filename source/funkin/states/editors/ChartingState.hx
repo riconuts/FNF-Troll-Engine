@@ -827,6 +827,21 @@ class ChartingState extends MusicBeatState
 			CoolUtil.showSaveDialog(data, 'Save Events', getSongPath('events.json'), ["JSON file", '*.json']);
 		});
 
+		var saveZipButton = new FlxButton(110, saveEventJson.y + 30, 'Save as ZIP', function() {
+			var zip = new funkin.data.FuckingZip();
+			zip.addString(encodeChartJson(), getChartFileName());
+			zip.addString(Json.stringify(_song.metadata), 'metadata.json');
+
+			for (name in soundTracksMap.keys()) {
+				name += "." + Paths.SOUND_EXT;
+				var p = getSongPath(name);
+				var b = Paths.getBytes(p);
+				if (b != null) zip.addBytes(b, name);
+			}
+
+			CoolUtil.showSaveDialog(zip.finalize(), "Save File", getSongPath(_song.song + ".zip"), ["ZIP File", "*.zip"]);
+		});
+
 		///
 		var reloadSongJson:FlxButton = new FlxButton(saveButton.x + 90, saveButton.y, "Reload JSON", function()
 		{
@@ -1015,6 +1030,7 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(clear_notes);
 		tab_group_song.add(saveButton);
 		tab_group_song.add(saveEventJson);
+		tab_group_song.add(saveZipButton);
 		tab_group_song.add(editTracksButton);
 
 		tab_group_song.add(reloadSongJson);
