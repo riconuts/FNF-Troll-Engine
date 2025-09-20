@@ -818,6 +818,16 @@ class ChartingState extends MusicBeatState
 
 		var saveButton:FlxButton = new FlxButton(110, 20, "Save Chart", saveLevel);
 
+		var saveEventJson:FlxButton = new FlxButton(110, saveButton.y + 30, 'Save Events', function() {
+			if (_song.events != null && _song.events.length > 1)
+				_song.events.sort(sortEventsByTime);
+
+			var json = {"song": {"events": _song.events}}
+			var data:String = Json.stringify(json, "\t");
+			CoolUtil.showSaveDialog(data, 'Save Events', getSongPath('events.json'), ["JSON file", '*.json']);
+		});
+
+		///
 		var reloadSongJson:FlxButton = new FlxButton(saveButton.x + 90, saveButton.y, "Reload JSON", function()
 		{
 			showWarning('This action will clear current progress.\n\nProceed?', loadJson.bind(_song.song));
@@ -861,15 +871,6 @@ class ChartingState extends MusicBeatState
 		var loadEventJson:FlxButton = new FlxButton(loadAutosaveBtn.x, loadAutosaveBtn.y + 30, 'Open Events', function() {
 			final openEvents:Void->Void = CoolUtil.showOpenDialog.bind('Open Events', getSongPath('events.json'), ['*.json'], onOpenEvents);
 			showWarning('This action will clear the current events.\n\nProceed?', openEvents);
-		});
-
-		var saveEventJson:FlxButton = new FlxButton(110, saveButton.y + 30, 'Save Events', function() {
-			if (_song.events != null && _song.events.length > 1)
-				_song.events.sort(sortEventsByTime);
-
-			var json = {"song": {"events": _song.events}}
-			var data:String = Json.stringify(json, "\t");
-			CoolUtil.showSaveDialog(data, 'Save Events', getSongPath('events.json'), ["JSON file", '*.json']);
 		});
 
 		////
@@ -3214,6 +3215,7 @@ class ChartingState extends MusicBeatState
 		var note:Note = new Note(i.strumTime, i.column % _song.keyCount, null, daField, (i.sustainLength <= 0 ? TAP : HEAD), true);
 		note.chartData = i;
 		note.realColumn = i.column;
+		note.mustPress = i.column < _song.keyCount;
 		note.sustainLength = i.sustainLength;
 		note.canQuant = useQuantNotes;
 		note.reloadNote();
@@ -3508,31 +3510,31 @@ class ChartingState extends MusicBeatState
 	function sortEventsByTime(Obj1:PsychEventNote, Obj2:PsychEventNote):Int
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1.strumTime, Obj2.strumTime);
 
-	private function saveLevel()
-	{
+
+	private function encodeChartJson():String {
 		if (_song.events != null && _song.events.length > 1) 
 			_song.events.sort(sortEventsByTime);
 		
-		var fileName:String;
 		var _song:SwagSong = Reflect.copy(_song);
-
 		Reflect.deleteField(_song, "_chartEditor");
 		Reflect.deleteField(_song, "metadata");
-
-		if (Reflect.hasField(_song, "_path")) {
-			fileName = haxe.io.Path.withoutDirectory(Reflect.field(_song, "_path"));
-			Reflect.deleteField(_song, "_path");
-		}else {
-			fileName = _song.song + ".json";
-		}
-
+		Reflect.deleteField(_song, "_path");
 		Reflect.setField(_song, "trollEngine", funkin.data.ChartData.ChartVersion.CURRENT);
+		return Json.stringify({"song": _song}, "\t");
+	}
 
-		var json = {"song": _song};
-		var data:String = Json.stringify(json, "\t");
+	private function getChartFileName():String {
+		if (Reflect.hasField(_song, "_path"))
+			return Path.withoutDirectory(Reflect.field(_song, "_path"));
+		else
+			return _song.song + ".json";
+	}
 
-		if ((data != null) && (data.length > 0))
-		{
+	private function saveLevel()
+	{		
+		var fileName:String = getChartFileName();
+		var data:String = encodeChartJson();
+		if (data != null && data.length > 0) {
 			CoolUtil.showSaveDialog(data.trim(), "Save Chart", getSongPath(fileName), ["JSON file", "*.json"], onSaveComplete, onSaveCancel);
 		}
 	}
