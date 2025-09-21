@@ -338,8 +338,11 @@ class CoolUtil {
 		#end
 	}
 
-	@:noCompletion
-	private static inline function fileDialogPath(?path:String):String {
+	/**
+		@param path A path relative to the current working directory
+		@returns An absolute path to be used in system functions.
+	**/
+	public static inline function getSystemPath(?path:String):String {
 		#if sys
 		if (path == null || path.length == 0)
 			return Sys.getCwd();
@@ -360,7 +363,7 @@ class CoolUtil {
 
 	public static function showOpenMultipleDialog(title:String = "Open Files", ?defaultPath:String, ?filters:Array<String>, ?onSelect:(paths:Array<String>)->Void, ?onCancel:Void->Void):Void {
 		final filters = _filefilters(filters);
-		final defaultPath = fileDialogPath(defaultPath);
+		final defaultPath = getSystemPath(defaultPath);
 		#if linc_filedialogs
 		final files:Array<String> = FileDialogs.open_file(title, cast defaultPath, cast filters, Option.Multiselect);
 		if (files.length == 0) {
@@ -379,7 +382,7 @@ class CoolUtil {
 	
 	public static function showOpenDialog(title:String = "Open File", ?defaultPath:String, ?filters:Array<String>, ?onOpen:(bytes:Bytes)->Void, ?onSelect:(path:String)->Void, ?onCancel:Void->Void):Void {
 		final filters = _filefilters(filters);
-		final defaultPath = fileDialogPath(defaultPath);
+		final defaultPath = getSystemPath(defaultPath);
 		#if linc_filedialogs
 		final files:Array<String> = FileDialogs.open_file(title, cast defaultPath, cast filters, Option.None);
 		if (onSelect != null) onSelect(files[0]);
@@ -400,7 +403,7 @@ class CoolUtil {
 
 	public static function showSaveDialog(content:OneOfTwo<String, Bytes>, title:String = "Save File", ?defaultPath:String, ?filters:Array<String>, ?onSave:(path:String)->Void, ?onCancel:Void->Void):Void {
 		final filters = _filefilters(filters);
-		final defaultPath = fileDialogPath(defaultPath);
+		final defaultPath = getSystemPath(defaultPath);
 		#if linc_filedialogs
 		final savePath:String = FileDialogs.save_file(title, cast defaultPath, cast filters);
 		if (savePath.length == 0) {
