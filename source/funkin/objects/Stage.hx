@@ -127,16 +127,6 @@ class Stage extends FlxTypedGroup<FlxBasic>
 	public var props:Map<String, FlxBasic> = [];
 
 	public var stageScript:FunkinHScript;
-	
-	#if ALLOW_DEPRECATION
-	@:deprecated("spriteMap is deprecated. Use props instead.")
-	public var spriteMap(get, null):Map<String, FlxBasic>;
-	function get_spriteMap()return props;
-
-	@:deprecated("curStage is deprecated. Use stageId instead.")
-	public var curStage(get, never):String;
-	inline function get_curStage() return stageId;
-	#end
 
 	public function new(stageId:String, runScript:Bool = true)
 	{
@@ -232,8 +222,6 @@ class Stage extends FlxTypedGroup<FlxBasic>
 				}
 			}
 
-
-
 			if (stageScript != null){
 				stageScript.call("onLoad", [this, foreground]);
 			}
@@ -259,11 +247,21 @@ class Stage extends FlxTypedGroup<FlxBasic>
 		return 'Stage($stageId)';
 	}
 
-	@:deprecated
+	#if ALLOW_DEPRECATION
+	@:deprecated("spriteMap is deprecated. Use props instead.")
+	public var spriteMap(get, null):Map<String, FlxBasic>;
+	function get_spriteMap()return props;
+
+	@:deprecated("curStage is deprecated. Use stageId instead.")
+	public var curStage(get, never):String;
+	inline function get_curStage() return stageId;
+	
+	@:deprecated("Stage.getTitleStages is deprecated. Use StageData.getTitleStages instead.")
 	inline public static function getTitleStages(modsOnly = false):Array<String>
 		return StageData.getTitleStages(modsOnly);
 
-	@:deprecated
+	@:deprecated("Stage.getAllStages is deprecated. Use StageData.getAllStages instead.")
 	inline public static function getAllStages(modsOnly = false):Array<String>
 		return StageData.getAllStages(modsOnly);
+	#end
 }

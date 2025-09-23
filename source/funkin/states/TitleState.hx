@@ -1,5 +1,6 @@
 package funkin.states;
 
+import funkin.data.StageData;
 import funkin.Conductor;
 import openfl.filters.BlurFilter;
 import flixel.addons.transition.FlxTransitionableState;
@@ -87,7 +88,7 @@ class TitleState extends MusicBeatState
 		super.create();
 
 		////
-		var stages = Stage.getTitleStages();
+		var stages = StageData.getTitleStages();
 		var stageId = FlxG.random.getObject(stages);
 		if (stageId != null) {
 			bg = new Stage(stageId, true);
