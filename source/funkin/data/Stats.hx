@@ -38,6 +38,9 @@ class Stats {
 	public var totalNotesHit(default, set):Float = 0;
 	public var clearType(default, set):String = '';
 	public var grade(default, set):String = '?';
+	public var combo(default, set):Int = 0;
+	public var cbCombo(default, set):Int = 0;
+	public var ratingPercent(default, set):Float = 0;
 
 	public var noteDiffs:Array<Float> = [];
 	public var judged:Array<NoteHitInfo> = [];
@@ -51,9 +54,10 @@ class Stats {
 		"miss" => 0,
 		"cb" => 0
 	];
-	public var combo(default, set):Int = 0;
-	public var cbCombo(default, set):Int = 0;
-	public var ratingPercent(default, set):Float = 0;
+	/** Shortcut for `judgements["cb"]` **/
+	public var comboBreaks(get, set):Int;
+	/** Shortcut for `judgements["miss"]` **/
+	public var misses(get, set):Int;
 
 	public function new(accuracySystem:AccuracySystem = SIMPLE, ?gradeSet:Array<Array<Dynamic>>) {
 		this.accuracySystem = accuracySystem;
@@ -143,7 +147,7 @@ class Stats {
 	public function getScoreRecord():ScoreRecord {
 		return {
 			score: score,
-			comboBreaks: judgements.get("cb"), // since we cant detect the combo breaks from here
+			comboBreaks: comboBreaks,
 			accuracyScore: totalNotesHit,
 			maxAccuracyScore: totalPlayed,
 			judges: judgements,
@@ -199,6 +203,22 @@ class Stats {
 	}
 
 	////
+	function get_comboBreaks():Int
+		return judgements.get("cb");
+
+	function get_misses():Int
+		return judgements.get("miss");
+	
+	function set_comboBreaks(val:Int):Int {
+		judgements.set("cb", val); 
+		return val;
+	}
+	
+	function set_misses(val:Int):Int {
+		judgements.set("miss", val);
+		return val;
+	}
+
 	function set_score(val:Int) {
 		if (score != val) {
 			changedCallback("score", val);
@@ -267,23 +287,6 @@ class Stats {
 			changedCallback("ratingPercent", val);
 			return ratingPercent = val;
 		}
-		return val;
-	}
-
-	@:isVar
-	public var comboBreaks(get, set):Int = 0;
-	function get_comboBreaks():Int return judgements.get("cb");
-	function set_comboBreaks(val:Int):Int {
-		comboBreaks = val;
-		judgements.set("cb", val); 
-		return val;
-	}
-	@:isVar
-	public var misses(get, set):Int = 0;
-	function get_misses():Int return judgements.get("miss");
-	function set_misses(val:Int):Int {
-		misses = val;
-		judgements.set("miss", val);
 		return val;
 	}
 }
