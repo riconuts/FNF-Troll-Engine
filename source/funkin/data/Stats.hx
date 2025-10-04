@@ -54,93 +54,6 @@ class Stats {
 	public var combo(default, set):Int = 0;
 	public var cbCombo(default, set):Int = 0;
 	public var ratingPercent(default, set):Float = 0;
-	function set_score(val:Int) {
-		if (score != val) {
-			changedCallback("score", val);
-			return score = val;
-		}
-		return val;
-	}
-	function set_nps(val:Int) {
-		if (nps != val) {
-			changedCallback("nps", val);
-			return nps = val;
-		}
-		return val;
-	}
-	function set_npsPeak(val:Int) {
-		if (npsPeak != val) {
-			changedCallback("npsPeak", val);
-			return npsPeak = val;
-		}
-		return val;
-	}
-	function set_totalPlayed(val:Float) {
-		if (totalPlayed != val) {
-			changedCallback("totalPlayed", val);
-			return totalPlayed = val;
-		}
-		return val;
-	}
-	function set_totalNotesHit(val:Float) {
-		if (totalNotesHit != val) {
-			changedCallback("totalNotesHit", val);
-			return totalNotesHit = val;
-		}
-		return val;
-	}
-	function set_clearType(val:String) {
-		if (clearType != val) {
-			changedCallback("clearType", val);
-			return clearType = val;
-		}
-		return val;
-	}
-	function set_grade(val:String) {
-		if (grade != val) {
-			changedCallback("grade", val);
-			return grade = val;
-		}
-		return val;
-	}
-	function set_combo(val:Int) {
-		if (combo != val) {
-			changedCallback("combo", val);
-			return combo = val;
-		}
-		return val;
-	}
-	function set_cbCombo(val:Int) {
-		if (cbCombo != val) {
-			changedCallback("cbCombo", val);
-			return cbCombo = val;
-		}
-		return val;
-	}
-	function set_ratingPercent(val:Float) {
-		if (ratingPercent != val) {
-			changedCallback("ratingPercent", val);
-			return ratingPercent = val;
-		}
-		return val;
-	}
-
-	@:isVar
-	public var comboBreaks(get, set):Int = 0;
-	function get_comboBreaks():Int return judgements.get("cb");
-	function set_comboBreaks(val:Int):Int {
-		comboBreaks = val;
-		judgements.set("cb", val); 
-		return val;
-	}
-	@:isVar
-	public var misses(get, set):Int = 0;
-	function get_misses():Int return judgements.get("miss");
-	function set_misses(val:Int):Int {
-		misses = val;
-		judgements.set("miss", val);
-		return val;
-	}
 
 	public function new(accuracySystem:AccuracySystem = SIMPLE, ?gradeSet:Array<Array<Dynamic>>) {
 		this.accuracySystem = accuracySystem;
@@ -283,5 +196,94 @@ class Stats {
 				if (data.countAsHit != false)
 					totalPlayed++;
 		}
+	}
+
+	////
+	function set_score(val:Int) {
+		if (score != val) {
+			changedCallback("score", val);
+			return score = val;
+		}
+		return val;
+	}
+	function set_nps(val:Int) {
+		if (nps != val) {
+			changedCallback("nps", val);
+			return nps = val;
+		}
+		return val;
+	}
+	function set_npsPeak(val:Int) {
+		if (npsPeak != val) {
+			changedCallback("npsPeak", val);
+			return npsPeak = val;
+		}
+		return val;
+	}
+	function set_totalPlayed(val:Float) {
+		if (totalPlayed != val) {
+			changedCallback("totalPlayed", val);
+			return totalPlayed = val;
+		}
+		return val;
+	}
+	function set_totalNotesHit(val:Float) {
+		if (totalNotesHit != val) {
+			changedCallback("totalNotesHit", val);
+			return totalNotesHit = val;
+		}
+		return val;
+	}
+	function set_clearType(val:String) {
+		if (clearType != val) {
+			changedCallback("clearType", val);
+			return clearType = val;
+		}
+		return val;
+	}
+	function set_grade(val:String) {
+		if (grade != val) {
+			changedCallback("grade", val);
+			return grade = val;
+		}
+		return val;
+	}
+	function set_combo(val:Int) {
+		if (combo != val) {
+			changedCallback("combo", val);
+			return combo = val;
+		}
+		return val;
+	}
+	function set_cbCombo(val:Int) {
+		if (cbCombo != val) {
+			changedCallback("cbCombo", val);
+			return cbCombo = val;
+		}
+		return val;
+	}
+	function set_ratingPercent(val:Float) {
+		if (ratingPercent != val) {
+			changedCallback("ratingPercent", val);
+			return ratingPercent = val;
+		}
+		return val;
+	}
+
+	@:isVar
+	public var comboBreaks(get, set):Int = 0;
+	function get_comboBreaks():Int return judgements.get("cb");
+	function set_comboBreaks(val:Int):Int {
+		comboBreaks = val;
+		judgements.set("cb", val); 
+		return val;
+	}
+	@:isVar
+	public var misses(get, set):Int = 0;
+	function get_misses():Int return judgements.get("miss");
+	function set_misses(val:Int):Int {
+		misses = val;
+		judgements.set("miss", val);
+		return val;
 	}
 }
