@@ -9,9 +9,13 @@ import lime.app.Event;
 
 enum abstract AccuracySystem(String) from String to String
 {
+	/** Simple accuracy system, averaging hits (100%) and combo breaks (-100%) **/
 	var SIMPLE = "Simple";
+	/** Judgement based accuracy **/
 	var JUDGEMENT = "Judgement";
+	/** Millisecond-based accuracy using Etterna's Wife3 algorithm **/
 	var WIFE3 = "Wife3";
+	/** Millisecond-based accuracy using V-Slice's PBOT1 algorithm**/
 	var PBOT = "PBot";
 }
 
@@ -22,28 +26,59 @@ typedef NoteHitInfo = {
 }
 
 class Stats {
-	public var changedEvent = new Event<(String, Dynamic) -> Void>();
-	inline function changedCallback(n:String, v:Dynamic)
-		changedEvent.dispatch(n, v);
-	
 	public final accuracySystem:AccuracySystem;
 
-	public var gradeSet:Array<Array<Dynamic>> = [["?", Math.NEGATIVE_INFINITY]];
+	/** 
+		Grade set to be used in grade calculation.  
+		Format: Array of Arrays, each inner array is `[gradeName:String, minPercent:Float]`  
+		Example: `[["A", 0.9], ["B", 0.8], ["C", 0.7], ["D", 0.6], ["F", 0.0]] ` 
+	**/
+	public var gradeSet:Array<Array<Dynamic>>;
+
+	/** Whether to use flags (black, white, miss) in clear type calculation **/
 	public var useFlags:Bool = false;
+
+	////
 	
+	/** Total score **/
 	public var score(default, set):Int = 0;
+
+	/** Current note hits per second **/
 	public var nps(default, set):Int = 0;
+
+	/** Maximum note hits per second **/
 	public var npsPeak(default, set):Int = 0;
-	public var totalPlayed(default, set):Float = 0;
-	public var totalNotesHit(default, set):Float = 0;
-	public var clearType(default, set):String = '';
-	public var grade(default, set):String = '?';
+
+	/** Current amount of consecutive note hits **/
 	public var combo(default, set):Int = 0;
+
+	/** Maximum note hit combo achieved **/
 	public var maxCombo(default, set):Int = 0;
+
+	/** Current amount of consecutive combo breaks **/
 	public var cbCombo(default, set):Int = 0;
+
+	/** Calculated rating **/
 	public var ratingPercent(default, set):Float = 0;
 
+	/** Clear type based on your judgements **/
+	public var clearType(default, set):String = '';
+
+	/** Grade based on your rating percent **/
+	public var grade(default, set):String = '?';
+
+	public var totalPlayed(default, set):Float = 0;
+	public var totalNotesHit(default, set):Float = 0;
+
+	/** 
+		Event that's dispatched when a stat changes  
+		This event is not called for judgement changes (i.e sicks, misses, combo breaks, etc)
+	**/
+	public var changedEvent = new Event<(String, Dynamic) -> Void>();
+
+	/** Array of note hit differences in milliseconds **/
 	public var noteDiffs:Array<Float> = [];
+	/** Array of note hit results (hit time, judgement, hit difference), in order **/
 	public var judged:Array<NoteHitInfo> = [];
 
 	public var judgements:Map<String, Int> = [
@@ -60,42 +95,22 @@ class Stats {
 	/** Shortcut for `judgements["miss"]` **/
 	public var misses(get, set):Int;
 
-	public function new(accuracySystem:AccuracySystem = SIMPLE, ?gradeSet:Array<Array<Dynamic>>) {
+	public function new(accuracySystem:AccuracySystem = SIMPLE, gradeSet:Array<Array<Dynamic>>) {
 		this.accuracySystem = accuracySystem;
-		if (gradeSet != null) this.gradeSet = gradeSet;
+		this.gradeSet = gradeSet ?? [["?", Math.NEGATIVE_INFINITY]];
 		updateVariables();
 	}
 
 	public function getGrade():String
 	{
-		if (totalPlayed < 1)
-			return '?';
-		
-		for (grade in gradeSet) {
-			if (ratingPercent >= grade[1])
-				return grade[0];	
+		if (totalPlayed >= 1) {			
+			for (grade in gradeSet) {
+				if (ratingPercent >= grade[1])
+					return grade[0];
+			}
 		}
-		
 		return '?';
 	}
-
-	//// Clear Strings
-	public var sdg = Paths.getString("sdt3"); // Single Digit Goods
-	public var sds = Paths.getString("sdt4"); // Single Digit Sicks
-
-	public var gfc = Paths.getString("t3fc"); // Good Full Combo
-	public var sfc = Paths.getString("t4fc"); // Sick Full Combo
-	public var efc = Paths.getString("t5fc"); // Epic Full Combo
-	public var fc = Paths.getString("fc"); // Full Combo
-
-	public var bf = Paths.getString("blackflag"); // Black Flag (SFC missed by 1 good)
-	public var wf = Paths.getString("whiteflag"); // White Flag (EFC missed by 1 sick)
-	public var mf = Paths.getString("missflag"); // Miss Flag (Any FC missed by 1 CB)
-
-	public var sdcb = Paths.getString("sdcb"); // Single Digit Combo Breaks
-	public var fail = Paths.getString("fail");
-	public var clear = Paths.getString("clear");
-	public var noplay = Paths.getString("noplay");
 
 	public function getClearType():String
 	{
@@ -195,7 +210,7 @@ class Stats {
 				if (data.countAsHit != false)
 					totalPlayed += 5;
 
-			default: // accuracy depends on the judgement
+			case JUDGEMENT: // Judgment based accuracy
 				totalNotesHit += data.accuracy * 0.01;
 
 				if (data.countAsHit != false)
@@ -203,7 +218,37 @@ class Stats {
 		}
 	}
 
+	//// Clear Strings
+	/** Single Digit Goods **/
+	public var sdg = Paths.getString("sdt3"); 
+	/** Single Digit Sicks **/
+	public var sds = Paths.getString("sdt4"); 
+	/** Good Full Combo **/
+	public var gfc = Paths.getString("t3fc"); 
+	/** Sick Full Combo **/
+	public var sfc = Paths.getString("t4fc"); 
+	/** Epic Full Combo **/
+	public var efc = Paths.getString("t5fc");
+	/** Full Combo **/
+	public var fc = Paths.getString("fc"); 
+
+	/** Black Flag (SFC missed by 1 good) **/
+	public var bf = Paths.getString("blackflag");
+	/** White Flag (EFC missed by 1 sick) **/
+	public var wf = Paths.getString("whiteflag");
+	/** Miss Flag (Any FC missed by 1 CB) **/
+	public var mf = Paths.getString("missflag");
+
+	/** Single Digit Combo Breaks **/
+	public var sdcb = Paths.getString("sdcb");
+	public var fail = Paths.getString("fail");
+	public var clear = Paths.getString("clear");
+	public var noplay = Paths.getString("noplay");
+
 	////
+	inline function changedCallback(n:String, v:Dynamic)
+		changedEvent.dispatch(n, v);
+
 	function get_comboBreaks():Int
 		return judgements.get("cb");
 

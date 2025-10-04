@@ -2108,10 +2108,9 @@ class PlayState extends MusicBeatState
 		trace("changed " + options);
 				
 		if (options.contains("gradeSet")) {
-			ratingStuff = Highscore.grades.get(ClientPrefs.gradeSet);
-			stats.useFlags = ClientPrefs.gradeSet == 'Etterna';
 			// stats.accuracySystem = ClientPrefs.accuracyCalc;
-			stats.gradeSet = ratingStuff;
+			stats.gradeSet = ratingStuff = Highscore.grades.get(ClientPrefs.gradeSet);
+			stats.useFlags = ClientPrefs.gradeSet == 'Etterna';
 			stats.updateVariables();
 		}
 

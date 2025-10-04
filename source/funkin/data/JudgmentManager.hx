@@ -7,11 +7,11 @@ import funkin.objects.notes.Note;
  */
 enum abstract ComboBehaviour(Int) from Int to Int
 {
-	/** doesnt increment or break your combo */
+	/** Doesnt increment or break your combo */
 	var IGNORE = 0;
-	/** increments your combo by 1 */
+	/** Increments your combo by 1 */
 	var INCREMENT = 1;
-	/** breaks your combo */
+	/** Breaks your combo */
 	var BREAK = -1;
 }
 
@@ -19,21 +19,36 @@ enum abstract ComboBehaviour(Int) from Int to Int
  * Defines how a judgment behaves (hit window, score, etc)
  */
 typedef JudgmentData = {
-	internalName:String, // internal name of the judge
-	displayName:String, // how this judge is displayed in UI, etc
-	window:Float, // hit window to hit this judge
-	score:Int, // score you gain when hitting this judge
-	accuracy:Float, // how much accuracy is added by this judge. unused by wife3
-	health:Float, // % of health to add/remove
-	noteSplash:Bool, // whether this judge should cause a note splash
-	// var frame:Int; // where in the judgment sheet this judgment lies
+	/** Internal name of the judge **/
+	var internalName:String;
+	/** How this judge is displayed in UI, etc **/
+	var displayName:String;
+	/** Hit window in milliseconds to hit this judge **/
+	var window:Float;
+	/** Score to gain when hitting this judge **/
+	var score:Int;
+	/** Percentage of health to add or remove **/
+	var health:Float;
+	/** Whether this judge should cause a note splash **/
+	var noteSplash:Bool;
+	/** Where in the judgment sheet this judgment lies **/
+	//var frame:Int;
 
-	?wifePoints:Float, // if this isn't null, then Wife3 wont do any calculations and will instead just add these to the wife score/accuracy
-	?pbotPoints:Float, // if this isn't null, then PBOT wont do any calculations and will instead just add these to the pbot score/accuracy
-	?hideJudge:Bool, // if this is true then this judge wont show a judgment image
-	?comboBehaviour:ComboBehaviour, // how this judge affects your combo (IGNORE, INCREMENT or BREAK). Defaults to INCREMENT
-	?badJudgment:Bool, // used for mines, etc. makes it so the window isnt scaled by the judge difficulty. defaults to false
-	?countAsHit:Bool // False for stuff like hold drops
+	/** How much accuracy is added by this judge. Used by Judgment accuracy sytem **/
+	var accuracy:Float;
+	/** if this isn't null, then Wife3 wont do any calculations and will instead just add these to the wife score/accuracy **/
+	var ?wifePoints:Float;
+	/** if this isn't null, then PBOT wont do any calculations and will instead just add these to the pbot score/accuracy**/
+	var ?pbotPoints:Float;
+	
+	/** If this is true then this judge wont show a judgment image **/
+	var ?hideJudge:Bool;
+	/** How this judge affects your combo (IGNORE, INCREMENT or BREAK). Default behaviour is INCREMENT **/
+	var ?comboBehaviour:ComboBehaviour;
+	/** Used for mines, etc. makes it so the window isnt scaled by the judge difficulty. Defaults behaviour is false **/
+	var ?badJudgment:Bool;
+	/** False for stuff like hold drops **/
+	var ?countAsHit:Bool;
 
 }
 
@@ -42,18 +57,30 @@ typedef JudgmentData = {
  */
 enum abstract Judgment(String) from String to String // this just makes it easier
 {
-	var UNJUDGED = 'unjudged'; // yet to be hit
-	var TIER1 = 'tier1'; // shit
-	var TIER2 = 'tier2'; // bad
-	var TIER3 = 'tier3'; // good
-	var TIER4 = 'tier4'; // sick
-	var TIER5 = 'tier5'; // epic
-	var MISS = 'miss'; // miss
-	var DROPPED_HOLD = 'holdDrop'; // miss but when a hold is attached
-	var DAMAGELESS_MISS = 'customMiss'; // miss but this doesnt cause damage
-	var HIT_MINE = 'mine'; // mine
-	var MISS_MINE = 'missMine'; // hitCausesMiss mine. a mine but with health being derived from the note's .missHealth
-	var CUSTOM_MINE = 'customMine'; // mine, but with no health loss
+	/** yet to be hit **/
+	var UNJUDGED = 'unjudged';
+	/** shit **/
+	var TIER1 = 'tier1';
+	/** bad **/
+	var TIER2 = 'tier2';
+	/** good **/
+	var TIER3 = 'tier3';
+	/** sick **/
+	var TIER4 = 'tier4';
+	/** epic **/
+	var TIER5 = 'tier5';
+	/** miss **/
+	var MISS = 'miss';
+	/** miss but when a hold is attached **/
+	var DROPPED_HOLD = 'holdDrop';
+	/** miss but this doesnt cause damage **/
+	var DAMAGELESS_MISS = 'customMiss';
+	/** mine **/
+	var HIT_MINE = 'mine';
+	/** hitCausesMiss mine. a mine but with health being derived from the note's .missHealth **/
+	var MISS_MINE = 'missMine';
+	/** mine, but with no health loss**/
+	var CUSTOM_MINE = 'customMine';
 }
 
 /**
@@ -191,9 +218,14 @@ class JudgmentManager {
 			hideJudge: true
 		}
 	];
-	// these are judgments that you can *actually* hit and arent caused by special notes (i.e Mines) // should be from highest to lowest
-	public var hittableJudgments:Array<Judgment>; 
-	public var judgeTimescale:Float = 1; // scales hit windows
+
+	/**
+		Judgments that you can *actually* hit and arent caused by special notes (i.e Mines)  
+		Should be ordered from highest to lowest
+	**/
+	public var hittableJudgments:Array<Judgment>;
+	/** scales hit windows **/
+	public var judgeTimescale:Float = 1;
 	public var useEpics:Bool;
 
 	public function new(?useEpics:Bool)
@@ -223,6 +255,7 @@ class JudgmentManager {
 	
 	/**
 	 * Returns a judgment for a time difference.
+	 * @param diff The absolute time difference in milliseconds to judge
 	 */
 	public function judgeTimeDiff(diff:Float):Judgment {
 		for (judge in hittableJudgments) {
