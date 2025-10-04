@@ -90,6 +90,17 @@ class Stats {
 		"miss" => 0,
 		"cb" => 0
 	];
+
+	/** Shortcut for `judgements["epic"]` **/
+	public var epics(get, set):Int;
+	/** Shortcut for `judgements["sick"]` **/
+	public var sicks(get, set):Int;
+	/** Shortcut for `judgements["good"]` **/
+	public var goods(get, set):Int;
+	/** Shortcut for `judgements["bads"]` **/
+	public var bads(get, set):Int;
+	/** Shortcut for `judgements["shit"]` **/
+	public var shits(get, set):Int;
 	/** Shortcut for `judgements["cb"]` **/
 	public var comboBreaks(get, set):Int;
 	/** Shortcut for `judgements["miss"]` **/
@@ -125,11 +136,6 @@ class Stats {
 				type = fail; // Fail
 		}
 		else if (totalPlayed > 0) {
-			var bads = judgements.get("bad");
-			var goods = judgements.get("good");
-			var sicks = judgements.get("sick");
-			var epics = judgements.get("epic");
-			
 			if (bads > 0) {
 				type = fc; // Bads don't cause a combo break if epics arent enabled so
 			}
@@ -249,21 +255,21 @@ class Stats {
 	inline function changedCallback(n:String, v:Dynamic)
 		changedEvent.dispatch(n, v);
 
-	function get_comboBreaks():Int
-		return judgements.get("cb");
-
-	function get_misses():Int
-		return judgements.get("miss");
+	function get_epics():Int return judgements.get("epic");
+	function get_sicks():Int return judgements.get("sicks");
+	function get_goods():Int return judgements.get("good");
+	function get_bads():Int return judgements.get("bad");
+	function get_shits():Int return judgements.get("shit");
+	function get_comboBreaks():Int return judgements.get("cb");
+	function get_misses():Int return judgements.get("miss");
 	
-	function set_comboBreaks(val:Int):Int {
-		judgements.set("cb", val); 
-		return val;
-	}
-	
-	function set_misses(val:Int):Int {
-		judgements.set("miss", val);
-		return val;
-	}
+	function set_epics(val:Int):Int {judgements.set("epic", val); return val;}
+	function set_sicks(val:Int):Int {judgements.set("sick", val);  return val;}
+	function set_goods(val:Int):Int {judgements.set("good", val); return val;}
+	function set_bads(val:Int):Int {judgements.set("bad", val); return val;}
+	function set_shits(val:Int):Int {judgements.set("shit", val); return val;}
+	function set_comboBreaks(val:Int):Int {judgements.set("cb", val); return val;}
+	function set_misses(val:Int):Int {judgements.set("miss", val); return val;}
 
 	function set_score(val:Int) {
 		if (score != val) {
