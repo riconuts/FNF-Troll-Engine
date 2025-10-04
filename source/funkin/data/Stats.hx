@@ -39,6 +39,7 @@ class Stats {
 	public var clearType(default, set):String = '';
 	public var grade(default, set):String = '?';
 	public var combo(default, set):Int = 0;
+	public var maxCombo(default, set):Int = 0;
 	public var cbCombo(default, set):Int = 0;
 	public var ratingPercent(default, set):Float = 0;
 
@@ -271,7 +272,16 @@ class Stats {
 	function set_combo(val:Int) {
 		if (combo != val) {
 			changedCallback("combo", val);
-			return combo = val;
+			combo = val;
+			if (val > maxCombo) maxCombo = val;
+			return val;
+		}
+		return val;
+	}
+	function set_maxCombo(val:Int) {
+		if (maxCombo != val) {
+			changedCallback("maxCombo", val);
+			return maxCombo = val;
 		}
 		return val;
 	}
