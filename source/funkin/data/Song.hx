@@ -43,15 +43,6 @@ class Song extends BaseSong
 		return '$songPath/$fileName';
 	}
 
-	public function play(chartId:String = '') {
-		if (chartId == "") {
-			var charts = getCharts();
-			chartId = charts.contains(DEFAULT_CHART_ID) ? DEFAULT_CHART_ID : charts[0];
-		}
-
-		Song.playSong(this, chartId);
-	}
-
 	/** get uncached metadata **/
 	private function _getMetadata(chartId:String):Null<SongMetadata> {
 		var suffix = getDifficultyFileSuffix(chartId);
@@ -198,6 +189,10 @@ class Song extends BaseSong
 	**/
 	public function getCharts():Array<String>
 		return _charts ?? (_charts = _getCharts());
+
+	@:deprecated
+	public function play(chartId:String = '')
+		Song.playSong(this, getChartId(chartId));
 
 	#if USING_MOONCHART
 	public static var moonchartExtensions(get, null):Array<String> = [];

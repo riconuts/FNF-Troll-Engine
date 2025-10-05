@@ -45,6 +45,14 @@ abstract class BaseSong
 	 * Returns an array of charts available for this song
 	**/
 	abstract public function getCharts():Array<String>;
+	
+	public function getChartId(id:String = ""):String
+	{
+		return id.length > 0 ? id : {
+			var charts = getCharts();
+			charts.contains(DEFAULT_CHART_ID) ? DEFAULT_CHART_ID : charts[0];
+		}
+	}
 
 	/**
 		Returns an FlxSoundAsset for the track of name trackName
