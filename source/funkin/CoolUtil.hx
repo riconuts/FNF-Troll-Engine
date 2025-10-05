@@ -375,7 +375,7 @@ class CoolUtil {
 		final dialog:FileDialog = new FileDialog();
 		if (onCancel != null) dialog.onCancel.add(onCancel);
 		if (onSelect != null) dialog.onSelectMultiple.add(onSelect);
-		dialog.browse(OPEN_MULTIPLE, filter, defaultPath, title);
+		dialog.browse(OPEN_MULTIPLE, filters, defaultPath, title);
 		Sys.sleep(0.5); // sleep to prevent dialogs sometimes not opening if opened in quick succession
 		#end
 	}
@@ -396,7 +396,7 @@ class CoolUtil {
 		if (onOpen != null) dialog.onOpen.add(onOpen);
 		if (onCancel != null) dialog.onCancel.add(onCancel);
 		if (onSelect != null) dialog.onSelect.add(onSelect);
-		dialog.browse(OPEN, filter, defaultPath, title);
+		dialog.browse(OPEN, filters, defaultPath, title);
 		Sys.sleep(0.5); // sleep to prevent dialogs sometimes not opening if opened in quick succession
 		#end
 	}
@@ -416,8 +416,8 @@ class CoolUtil {
 		final dialog:FileDialog = new FileDialog();
 		dialog.onSelect.add((f) -> safeSaveFile(f, content));
 		if (onCancel != null) dialog.onCancel.add(onCancel);
-		if (onSelect != null) dialog.onCancel.add(onSelect);
-		dialog.browse(SAVE, filter, defaultPath, title);
+		if (onSave != null) dialog.onSelect.add(onSave);
+		dialog.browse(SAVE, filters, defaultPath, title);
 		Sys.sleep(0.5); // sleep to prevent dialogs sometimes not opening if opened in quick succession
 		#end
 	}
