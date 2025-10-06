@@ -314,14 +314,6 @@ class CoolUtil {
 		return false;
 	}
 
-	public static function getFileBytes(absolutePath:String) {
-		var cwd = Sys.getCwd();
-		Sys.setCwd('');
-		var b = Paths.getBytes(absolutePath);
-		Sys.setCwd(cwd);
-		return b;
-	}
-
 	@:noCompletion
 	private static inline function _filefilters(?filters:Array<String>) {
 		#if linc_filedialogs
@@ -389,7 +381,7 @@ class CoolUtil {
 		if (files.length == 0) {
 			if (onCancel != null) onCancel();
 		}else {
-			if (onOpen != null) onOpen(getFileBytes(files[0]));
+			if (onOpen != null) onOpen(File.getBytes(files[0]));
 		}
 		#else
 		final dialog:FileDialog = new FileDialog();
