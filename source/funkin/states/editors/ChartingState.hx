@@ -1883,9 +1883,11 @@ class ChartingState extends MusicBeatState
 		var instInput = new FlxUIInputText(10, 30, 200, _song.tracks.inst.join(','));
 		instInput.name = "tracks_inst";
 
+		_song.tracks.player ??= [];
 		var playInput = new FlxUIInputText(10, 60, 200, _song.tracks.player.join(','));
 		playInput.name = "tracks_player";
-		
+
+		_song.tracks.opponent ??= [];
 		var oppInput = new FlxUIInputText(10, 90, 200, _song.tracks.opponent.join(','));
 		oppInput.name = "tracks_opponent";
 
