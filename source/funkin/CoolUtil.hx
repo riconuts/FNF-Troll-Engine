@@ -281,24 +281,10 @@ class CoolUtil {
 		#end
 	}
 
-    public static function createMissingDirectories(path:String):String {
-		#if sys
-		var folders:Array<String> = path.split("/");
-		var currentPath:String = "";
-
-		for (folder in folders) {
-			currentPath += folder + "/";
-			if (!FileSystem.exists(currentPath))
-				FileSystem.createDirectory(currentPath);
-		}
-		#end
-		return path;
-	}
-
 	public static function safeSaveFile(path:String, content:OneOfTwo<String, Bytes>):Bool {
 		#if sys
 		try {
-			createMissingDirectories(Path.directory(path));
+			FileSystem.createDirectory(Path.directory(path));
 			if (content is Bytes)
 				File.saveBytes(path, content);
 			else
