@@ -310,7 +310,7 @@ class MusicBeatState extends FlxUIState
 
 		if (Conductor.playing) {
 			for (track in Conductor.tracks) {
-				if (Math.abs(track.time - Conductor.getAccPosition()) > 30) {
+				if (track.playing && Math.abs(track.time - Conductor.getAccPosition()) > 30) {
 					trace('sus track resync');
 					resyncTracks();
 					break;

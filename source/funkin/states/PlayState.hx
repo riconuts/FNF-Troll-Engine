@@ -1639,6 +1639,10 @@ class PlayState extends MusicBeatState
 			else
 				Paths.track(songId, trackName);
 		}
+
+		if (sndAsset == null)
+			trace('WARNING: Failed to load track $trackName');
+
 		var newTrack = new FlxSound().loadEmbedded(sndAsset);
 		//newTrack.volume = 0.0;
 		newTrack.pitch = playbackRate;
