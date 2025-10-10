@@ -2,6 +2,7 @@ package;
 
 import haxe.io.Path;
 import haxe.CallStack;
+import openfl.display.Bitmap;
 import openfl.display.Sprite;
 import openfl.display.FPS;
 import lime.app.Application;
@@ -13,7 +14,6 @@ import funkin.*;
 import funkin.api.Github;
 import funkin.macros.Sowy;
 import funkin.data.SemanticVersion;
-import funkin.objects.Bread;
 
 #if sys
 import sys.FileSystem;
@@ -59,7 +59,7 @@ class Main extends Sprite
 	////
 	public static var game:FNFGame;
 	public static var fpsVar:FPS;
-	public static var bread:Bread;
+	public static var bread:Bitmap;
 
 	#if ALLOW_DEPRECATION
 	@:noCompletion @:deprecated("volumeChangedEvent is deprecated, use FlxG.sound.onVolumeChange, instead") 
@@ -169,7 +169,7 @@ class Main extends Sprite
 		addChild(fpsVar);
 
 		#if FUNNY_ALLOWED
-		bread = new Bread();
+		bread = new Bitmap();
 		bread.visible = false;
 		addChild(bread);
 		#end
