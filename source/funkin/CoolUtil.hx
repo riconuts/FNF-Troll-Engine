@@ -317,15 +317,21 @@ class CoolUtil {
 	}
 
 	/**
-		@param path A path relative to the current working directory
-		@returns An absolute path to be used in system functions.
+		Normalize a path to be used by the the file system.
+
+		On Windows, slashes `/` are replaced by backslashes `\`
+		
+		If `path` is `null`, or if the resulting path doesn't exist, the current working directory is returned.
+
+		@param path File path, can be relative or absolute.
+		@return An absolute path to be used in system functions.
 	**/
 	public static inline function getSystemPath(?path:String):String {
 		#if sys
 		if (path == null || path.length == 0)
 			return Sys.getCwd();
 		if (!Path.isAbsolute(path))
-			path = Path.join([Sys.getCwd(), path]);
+			path = Path.normalize(Path.addTrailingSlash(Sys.getCwd()) + path);
 		
 		if (!FileSystem.exists(Path.directory(path)))
 			path = Sys.getCwd();
