@@ -47,6 +47,12 @@ enum abstract MessageBoxReturnValue(Int) from Int to Int {
 
 @:cppFileCode('#include <windows.h>')
 class Windows {
+	/**
+		Creates and displays a message box window.
+
+		Example:   
+		`Windows.msgBox("Hello world!", "Window Title", MessageBoxIcon.INFORMATION | MessageBoxOptions.OK);`
+	**/
 	public static function msgBox(message:String = "", title:String = "", sowyType:Int = 0):MessageBoxReturnValue
 		return untyped MessageBox(NULL, message, title, sowyType | 0x00010000);
 }
