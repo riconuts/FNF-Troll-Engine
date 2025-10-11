@@ -1,3 +1,6 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+# Use Haxe syntax highlighting on HScript files
 *.hscript linguist-language=Haxe
+*.hxs linguist-language=Haxe
+*.hxc linguist-language=Haxe
