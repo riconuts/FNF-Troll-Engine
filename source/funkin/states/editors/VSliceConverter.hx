@@ -29,7 +29,7 @@ class VSliceConverter extends MusicBeatState
 
 				added.push(file);
 				if(file.endsWith("json")){
-					var data: Dynamic = Paths.json('stages/$file', false);
+					var data: Dynamic = Paths.json('stages/$file');
 					if(Reflect.field(data, "version") != null){
 						menu.addTextOption(Path.withoutDirectory(Path.withoutExtension(file)), {
 							onAccept: (i:Int, a:Alphabet) -> {
@@ -49,7 +49,7 @@ class VSliceConverter extends MusicBeatState
 					return;
 				added.push(file);
 				if (file.endsWith("json")) {
-					var data:Dynamic = Paths.json('characters/$file', false);
+					var data:Dynamic = Paths.json('characters/$file');
 					if (Reflect.field(data, "version") != null) {
 						var id:String = Path.withoutDirectory(Path.withoutExtension(file));
 						menu.addTextOption(id, {

@@ -161,23 +161,22 @@ class Paths
 		localTrackedAssets.resize(0);
 	}
 
-	public static function getPath(key:String, ignoreMods:Bool = false):String
+	public static function getPath(key:String):Null<String>
 	{
+		var path:String;
+
 		#if MODS_ALLOWED
-		if (ignoreMods != true) {
-			var modPath:String = Paths.modFolders(key);
-			if (Paths.exists(modPath)) return modPath;
-		}
+		path = Paths.modFolders(key);
+		if (Paths.exists(path)) return path;
 		#end
 
-		return Paths.getPreloadPath(key);	
-	}
-
-	public static function _getPath(key:String, ignoreMods:Bool = false):Null<String>
-	{
-		var path:String = getPath(key, ignoreMods);
+		path = Paths.getPreloadPath(key);
 		return Paths.exists(path) ? path : null;
 	}
+
+	@:deprecated("_getPath is deprecated, use getPath instead.")
+	inline public static function _getPath(key:String):Null<String>
+		return getPath(key);
 
 	inline public static function getPreloadPath(file:String = '')
 	{
@@ -209,19 +208,19 @@ class Paths
 		return getPath('fonts/$key');
 	}
 
-	static public function video(key:String, ignoreMods:Bool = false, ext:String = "mp4"):String
+	static public function video(key:String, ext:String = "mp4"):String
 	{
-		return getPath('videos/$key.$ext', ignoreMods);
+		return getPath('videos/$key.$ext');
 	}
 
 	static public function getShaderFragment(name:String):Null<String>
 	{
-		return _getPath('shaders/$name.frag');
+		return getPath('shaders/$name.frag');
 	}
 	
 	static public function getShaderVertex(name:String):Null<String>
 	{
-		return _getPath('shaders/$name.vert');
+		return getPath('shaders/$name.vert');
 	}
 
 	inline static public function sound(key:String, ?library:String):Null<Sound>
@@ -392,17 +391,17 @@ class Paths
 		#end
 	}
 
-	inline static public function fileExists(key:String, ?type:AssetType, ?ignoreMods:Bool = false, ?library:String)
+	inline static public function fileExists(key:String, ?type:AssetType, ?library:String)
 	{
-		return Paths.exists(getPath(key, ignoreMods));
+		return Paths.exists(getPath(key));
 	}
 
 	/** Returns the contents of a file as a string. **/
-	inline public static function text(key:String, ?ignoreMods:Bool = false):Null<String>
-		return getContent(getPath(key, ignoreMods));
+	inline public static function text(key:String):Null<String>
+		return getContent(getPath(key));
 
-	inline public static function bytes(key:String, ?ignoreMods:Bool = false):Null<Bytes>
-		return getBytes(getPath(key, ignoreMods));
+	inline public static function bytes(key:String):Null<Bytes>
+		return getBytes(getPath(key));
 
 	inline static public function formatToSongPath(path:String) {
 		var finalPath = "";
@@ -479,7 +478,7 @@ class Paths
 	{
 		var path:String = imagePath(key, folder);
 
-		var graphic = getGraphic(path, true, allowGPU);
+		var graphic = (path==null) ? null : getGraphic(path, true, allowGPU);
 		if (graphic==null && Main.showDebugTraces)
 			trace('bitmap "$key" => "$path" returned null.');
 
@@ -520,9 +519,9 @@ class Paths
 	}
 
 	/** Return the contents of a file, parsed as a JSON. **/
-	static public function json(key:String, ?ignoreMods:Bool = false):Null<Dynamic>
+	static public function json(key:String):Null<Dynamic>
 	{
-		var rawJSON:Null<String> = text(key, ignoreMods);
+		var rawJSON:Null<String> = text(key);
 		if (rawJSON == null) 
 			return null;
 		

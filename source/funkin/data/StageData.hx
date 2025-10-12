@@ -109,7 +109,7 @@ typedef StageFile =
 class StageData {
 	public static function getStageFile(stageId:String):Null<StageFile> 
 	{
-		var json:Dynamic = Paths.json('stages/$stageId.json', false);
+		var json:Dynamic = Paths.json('stages/$stageId.json');
 		if (json != null && Reflect.hasField(json, "version")){
 			var json:VSliceStageFile = cast json;
 			return StageData.convertVSlice(json);
@@ -134,7 +134,7 @@ class StageData {
 			}
 
 		}else{
-			var modsList = Paths.text('data/stageList.txt', false);
+			var modsList = Paths.text('data/stageList.txt');
 			if (modsList != null && modsList.trim().length > 0)
 				for (shit in modsList.split("\n"))
 					daList.push(shit.trim().replace("\n", ""));
