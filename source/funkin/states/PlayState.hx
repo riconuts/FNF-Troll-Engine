@@ -980,7 +980,12 @@ class PlayState extends MusicBeatState
 
 		#if DISCORD_ALLOWED
 		// Discord RPC texts
-		stateText = '${displayedSong} [$displayedDifficulty]';
+		stateText = displayedSong;
+		var charts = (song==null) ? null : song.getCharts(); 
+		if (charts != null && charts.length > 1)
+			stateText += ' [$displayedDifficulty]';
+		else if (metadata?.artist != null && metadata.artist.length > 0)
+			stateText += ' - ${metadata.artist}';
 		
 		detailsText = chartingMode ? "Charting Mode" : isStoryMode ? "Story Mode" : "Freeplay";
 		detailsPausedText = "Paused - " + detailsText;
