@@ -57,6 +57,7 @@ class Main extends Sprite
 	public static var recentRelease:Release;
 
 	////
+	public static var instance:Main;
 	public static var game:FNFGame;
 	public static var fpsVar:FPS;
 	public static var bread:Bitmap;
@@ -88,6 +89,7 @@ class Main extends Sprite
 
 	public function new() {
 		super();
+		instance = this;
 
 		#if (windows && cpp)
 		funkin.api.Darkfriend.setDarkMode(!funkin.api.Darkfriend.isLightTheme());
