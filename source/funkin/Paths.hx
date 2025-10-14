@@ -75,6 +75,7 @@ class Paths
 		'$contentFolderName/global/music/breakfast.$SOUND_EXT',
 		'assets/images/Garlic-Bread-PNG-Images.$IMAGE_EXT'
 	];
+	public static var graphicDumpExclusions:Array<FlxGraphic> = [];
 
 	public static function excludeAsset(key:String)
 	{
@@ -105,7 +106,7 @@ class Paths
 				// get rid of it
 				var obj = currentTrackedAssets.get(key);
 				@:privateAccess
-				if (obj != null)
+				if (obj != null && !graphicDumpExclusions.contains(obj))
 				{
 					destroyGraphic(obj);
 					currentTrackedAssets.remove(key);
@@ -143,7 +144,7 @@ class Paths
 		// clear anything not in the tracked assets list
 		@:privateAccess
 		for (key => obj in FlxG.bitmap._cache) {
-			if (obj != null && !currentTrackedAssets.exists(key)) {
+			if (obj != null && !currentTrackedAssets.exists(key) && !graphicDumpExclusions.contains(obj)) {
 				// trace('cleared $key');
 				destroyGraphic(obj);
 			}
