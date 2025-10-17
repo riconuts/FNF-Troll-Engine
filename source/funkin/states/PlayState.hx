@@ -265,7 +265,6 @@ class PlayState extends MusicBeatState
 	public var metadata:SongMetadata; // metadata for the songs (artist, etc)
 
 	public var stats:Stats;
-	public var ratingStuff:Array<Array<Dynamic>>;
 	public var noteHits:Array<Float> = [];
 	public var nps:Int = 0;
 	
@@ -440,33 +439,35 @@ class PlayState extends MusicBeatState
 	private var buttonsArray:Array<Array<FlxGamepadInputID>>;
 
 	////
-	@:isVar public var songScore(get, set):Int = 0;
-	@:isVar public var totalPlayed(get, set):Float = 0;
-	@:isVar public var totalNotesHit(get, set):Float = 0.0;
-	@:isVar public var combo(get, set):Int = 0;
-	@:isVar public var cbCombo(get, set):Int = 0;
-	@:isVar public var ratingName(get, set):String = '?';
-	@:isVar public var ratingPercent(get, set):Float;
-	@:isVar public var ratingFC(get, set):String;
+	public var songScore(get, set):Int;
+	public var totalPlayed(get, set):Float;
+	public var totalNotesHit(get, set):Float;
+	public var combo(get, set):Int;
+	public var cbCombo(get, set):Int;
+	public var ratingName(get, set):String;
+	public var ratingPercent(get, set):Float;
+	public var ratingFC(get, set):String;
+	public var ratingStuff(get, set):Array<Array<Dynamic>>;
 	
-	@:noCompletion public inline function get_songScore()
-		return stats.score;
-	@:noCompletion public inline function get_totalPlayed()return stats.totalPlayed;
-	@:noCompletion public inline function get_totalNotesHit()return stats.totalNotesHit;
-	@:noCompletion public inline function get_combo()return stats.combo;
-	@:noCompletion public inline function get_cbCombo()return stats.cbCombo;
-	@:noCompletion public inline function get_ratingName()return stats.grade;
-	@:noCompletion public inline function get_ratingPercent()return stats.ratingPercent;
-	@:noCompletion public inline function get_ratingFC()return stats.clearType;
+	@:noCompletion inline function get_songScore() return stats.score;
+	@:noCompletion inline function get_totalPlayed()return stats.totalPlayed;
+	@:noCompletion inline function get_totalNotesHit()return stats.totalNotesHit;
+	@:noCompletion inline function get_combo()return stats.combo;
+	@:noCompletion inline function get_cbCombo()return stats.cbCombo;
+	@:noCompletion inline function get_ratingName()return stats.grade;
+	@:noCompletion inline function get_ratingPercent()return stats.ratingPercent;
+	@:noCompletion inline function get_ratingFC()return stats.clearType;
+	@:noCompletion inline function get_ratingStuff() return stats.gradeSet;
 
-	@:noCompletion public inline function set_songScore(val:Int)return stats.score = val;
-	@:noCompletion public inline function set_totalPlayed(val:Float)return stats.totalPlayed = val;
-	@:noCompletion public inline function set_totalNotesHit(val:Float)return stats.totalNotesHit = val;
-	@:noCompletion public inline function set_combo(val:Int)return stats.combo = val;
-	@:noCompletion public inline function set_cbCombo(val:Int)return stats.cbCombo = val;
-	@:noCompletion public inline function set_ratingName(val:String)return stats.grade = val;
-	@:noCompletion public inline function set_ratingPercent(val:Float)return stats.ratingPercent = val;
-	@:noCompletion public inline function set_ratingFC(val:String)return stats.clearType = val;
+	@:noCompletion inline function set_songScore(val:Int)return stats.score = val;
+	@:noCompletion inline function set_totalPlayed(val:Float)return stats.totalPlayed = val;
+	@:noCompletion inline function set_totalNotesHit(val:Float)return stats.totalNotesHit = val;
+	@:noCompletion inline function set_combo(val:Int)return stats.combo = val;
+	@:noCompletion inline function set_cbCombo(val:Int)return stats.cbCombo = val;
+	@:noCompletion inline function set_ratingName(val:String)return stats.grade = val;
+	@:noCompletion inline function set_ratingPercent(val:Float)return stats.ratingPercent = val;
+	@:noCompletion inline function set_ratingFC(val:String)return stats.clearType = val;
+	@:noCompletion inline function set_ratingStuff(val) return stats.gradeSet = val;
 
 	#if DISCORD_ALLOWED
 	// Discord RPC variables
@@ -575,8 +576,7 @@ class PlayState extends MusicBeatState
 
 		Paths.getAllStrings();
 		
-		ratingStuff = Highscore.grades.get(ClientPrefs.gradeSet);
-		stats = new Stats(ClientPrefs.accuracyCalc, ratingStuff);
+		stats = new Stats(ClientPrefs.accuracyCalc, Highscore.grades.get(ClientPrefs.gradeSet));
 		stats.useFlags = ClientPrefs.gradeSet == 'Etterna';
 
 		judgeManager = new JudgmentManager();
@@ -2118,7 +2118,7 @@ class PlayState extends MusicBeatState
 				
 		if (options.contains("gradeSet")) {
 			// stats.accuracySystem = ClientPrefs.accuracyCalc;
-			stats.gradeSet = ratingStuff = Highscore.grades.get(ClientPrefs.gradeSet);
+			stats.gradeSet = Highscore.grades.get(ClientPrefs.gradeSet);
 			stats.useFlags = ClientPrefs.gradeSet == 'Etterna';
 			stats.updateVariables();
 		}
