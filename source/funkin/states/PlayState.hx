@@ -266,7 +266,6 @@ class PlayState extends MusicBeatState
 
 	public var stats:Stats;
 	public var noteHits:Array<Float> = [];
-	public var nps:Int = 0;
 	
 	public var trackMap = new Map<String, FlxSound>();
 	public var tracks:Array<FlxSound> = [];
@@ -448,6 +447,7 @@ class PlayState extends MusicBeatState
 	public var ratingPercent(get, set):Float;
 	public var ratingFC(get, set):String;
 	public var ratingStuff(get, set):Array<Array<Dynamic>>;
+	public var nps(get, set):Int;
 	
 	@:noCompletion inline function get_songScore() return stats.score;
 	@:noCompletion inline function get_totalPlayed()return stats.totalPlayed;
@@ -458,6 +458,7 @@ class PlayState extends MusicBeatState
 	@:noCompletion inline function get_ratingPercent()return stats.ratingPercent;
 	@:noCompletion inline function get_ratingFC()return stats.clearType;
 	@:noCompletion inline function get_ratingStuff() return stats.gradeSet;
+	@:noCompletion inline function get_nps()return stats.nps;
 
 	@:noCompletion inline function set_songScore(val:Int)return stats.score = val;
 	@:noCompletion inline function set_totalPlayed(val:Float)return stats.totalPlayed = val;
@@ -468,6 +469,7 @@ class PlayState extends MusicBeatState
 	@:noCompletion inline function set_ratingPercent(val:Float)return stats.ratingPercent = val;
 	@:noCompletion inline function set_ratingFC(val:String)return stats.clearType = val;
 	@:noCompletion inline function set_ratingStuff(val) return stats.gradeSet = val;
+	@:noCompletion inline function set_nps(val:Int)return stats.nps = val;
 
 	#if DISCORD_ALLOWED
 	// Discord RPC variables
@@ -2538,7 +2540,7 @@ class PlayState extends MusicBeatState
 				noteHits.shift();
 		}
 
-		stats.nps = nps = Math.floor(noteHits.length / 2);
+		nps = Math.floor(noteHits.length / 2);
 		FlxG.watch.addQuick("notes per second", nps);
 		if (stats.npsPeak < nps)
 			stats.npsPeak = nps;
