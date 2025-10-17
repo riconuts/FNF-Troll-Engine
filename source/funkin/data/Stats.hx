@@ -256,7 +256,7 @@ class Stats {
 		changedEvent.dispatch(n, v);
 
 	function get_epics():Int return judgements.get("epic");
-	function get_sicks():Int return judgements.get("sicks");
+	function get_sicks():Int return judgements.get("sick");
 	function get_goods():Int return judgements.get("good");
 	function get_bads():Int return judgements.get("bad");
 	function get_shits():Int return judgements.get("shit");
