@@ -168,7 +168,7 @@ class MainMenuState extends MusicBeatState
 
 		////
 		var bgScale = bg.scale.x;
-		var bgTargetScale = (FlxG.height / bg.frameHeight);
+		var bgTargetScale = Math.max(FlxG.width / bg.frameWidth, FlxG.height / bg.frameHeight);
 		var bgScroll = bg.scrollFactor.y;
 		FlxTween.num(0.0, 1.0, 0.25, {ease: FlxEase.backOut}, (progress:Float) ->
 		{
