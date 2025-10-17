@@ -127,7 +127,7 @@ class FPS extends TextField
 		#if cpp
 		return formatMemory(Memory.getCurrentRSS()) + " / " + formatMemory(Memory.getPeakRSS());
 		#else
-		return Std.string(openfl.system.System.totalMemoryNumber);
+		return formatMemory(openfl.system.System.totalMemoryNumber);
 		#end
 	}
 
