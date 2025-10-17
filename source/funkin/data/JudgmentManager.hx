@@ -89,7 +89,6 @@ enum abstract Judgment(String) from String to String // this just makes it easie
  */
 class JudgmentManager {
 	public var judgmentData:Map<Judgment, JudgmentData> = [
-		#if USE_EPIC_JUDGEMENT
 		TIER5 => {
 			internalName: "epic",
 			displayName: "Epic",
@@ -99,7 +98,6 @@ class JudgmentManager {
 			health: 1.15, // maybe change to 1, to match V-Slice?
 			noteSplash: true,
 		},
-		#end
 		TIER4 => {
 			internalName: "sick",
 			displayName: "Sick",
@@ -230,18 +228,16 @@ class JudgmentManager {
 
 	public function new(?useEpics:Bool)
 	{
-		#if USE_EPIC_JUDGEMENT
-		if (ClientPrefs.useEpics || useEpics==true){
-			this.useEpics = true;
+		useEpics ??= ClientPrefs.useEpics;
+		
+		if (this.useEpics = useEpics){
 			hittableJudgments = [TIER5, TIER4, TIER3, TIER2, TIER1];
-			return;
+		}else {
+			hittableJudgments = [TIER4, TIER3, TIER2, TIER1];
+			judgmentData.remove(TIER5);
+			judgmentData.get(TIER4).accuracy = 100;
+			judgmentData.get(TIER2).comboBehaviour = INCREMENT;
 		}
-		#end
-
-		this.useEpics = false;
-		hittableJudgments = [TIER4, TIER3, TIER2, TIER1];
-		judgmentData.get(TIER4).accuracy = 100;
-		judgmentData.get(TIER2).comboBehaviour = INCREMENT;
 	}
 
 	/**

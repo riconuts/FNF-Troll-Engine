@@ -579,7 +579,7 @@ class PlayState extends MusicBeatState
 		stats = new Stats(ClientPrefs.accuracyCalc, Highscore.grades.get(ClientPrefs.gradeSet));
 		stats.useFlags = ClientPrefs.gradeSet == 'Etterna';
 
-		judgeManager = new JudgmentManager();
+		judgeManager = new JudgmentManager(ClientPrefs.useEpics);
 		judgeManager.judgeTimescale = Wife3.timeScale;
 		
 		modManager = new ModManager(this);
