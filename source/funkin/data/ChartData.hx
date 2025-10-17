@@ -158,7 +158,7 @@ class ChartData
 					note[2] = note[2] > 0 ? note[2] : 0;
 				}
 			}
-			uncastedJson.trollEngine = ChartVersion.LEGACY_V1;
+			onLoadLegacyJson(songJson);
 		}else
 			songJson = cast uncastedJson.song;
 
