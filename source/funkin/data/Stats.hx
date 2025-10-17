@@ -255,72 +255,72 @@ class Stats {
 	inline function changedCallback(n:String, v:Dynamic)
 		changedEvent.dispatch(n, v);
 
-	function get_epics():Int return judgements.get("epic");
-	function get_sicks():Int return judgements.get("sick");
-	function get_goods():Int return judgements.get("good");
-	function get_bads():Int return judgements.get("bad");
-	function get_shits():Int return judgements.get("shit");
-	function get_comboBreaks():Int return judgements.get("cb");
-	function get_misses():Int return judgements.get("miss");
-	
-	function set_epics(val:Int):Int {judgements.set("epic", val); return val;}
-	function set_sicks(val:Int):Int {judgements.set("sick", val);  return val;}
-	function set_goods(val:Int):Int {judgements.set("good", val); return val;}
-	function set_bads(val:Int):Int {judgements.set("bad", val); return val;}
-	function set_shits(val:Int):Int {judgements.set("shit", val); return val;}
-	function set_comboBreaks(val:Int):Int {judgements.set("cb", val); return val;}
-	function set_misses(val:Int):Int {judgements.set("miss", val); return val;}
+	@:noCompletion inline function get_epics():Int return judgements["epic"];
+	@:noCompletion inline function get_sicks():Int return judgements["sick"];
+	@:noCompletion inline function get_goods():Int return judgements["good"];
+	@:noCompletion inline function get_bads():Int return judgements["bad"];
+	@:noCompletion inline function get_shits():Int return judgements["shit"];
+	@:noCompletion inline function get_comboBreaks():Int return judgements["cb"];
+	@:noCompletion inline function get_misses():Int return judgements["miss"];
 
-	function set_score(val:Int) {
+	@:noCompletion inline function set_epics(val:Int):Int return judgements["epic"] = val;
+	@:noCompletion inline function set_sicks(val:Int):Int return judgements["sick"] = val;
+	@:noCompletion inline function set_goods(val:Int):Int return judgements["good"] = val;
+	@:noCompletion inline function set_bads(val:Int):Int return judgements["bad"] = val;
+	@:noCompletion inline function set_shits(val:Int):Int return judgements["shit"] = val;
+	@:noCompletion inline function set_comboBreaks(val:Int):Int return judgements["cb"] = val;
+	@:noCompletion inline function set_misses(val:Int):Int return judgements["miss"] = val;
+
+	@:noCompletion function set_score(val:Int) {
 		if (score != val) {
 			changedCallback("score", val);
 			return score = val;
 		}
 		return val;
 	}
-	function set_nps(val:Int) {
+	@:noCompletion function set_nps(val:Int) {
 		if (nps != val) {
 			changedCallback("nps", val);
 			return nps = val;
 		}
 		return val;
 	}
-	function set_npsPeak(val:Int) {
+	@:noCompletion function set_npsPeak(val:Int) {
 		if (npsPeak != val) {
 			changedCallback("npsPeak", val);
 			return npsPeak = val;
 		}
 		return val;
 	}
-	function set_totalPlayed(val:Float) {
+	@:noCompletion function set_totalPlayed(val:Float) {
 		if (totalPlayed != val) {
 			changedCallback("totalPlayed", val);
 			return totalPlayed = val;
 		}
 		return val;
 	}
-	function set_totalNotesHit(val:Float) {
+	@:noCompletion function set_totalNotesHit(val:Float) {
 		if (totalNotesHit != val) {
 			changedCallback("totalNotesHit", val);
 			return totalNotesHit = val;
 		}
 		return val;
 	}
-	function set_clearType(val:String) {
+	@:noCompletion function set_clearType(val:String) {
 		if (clearType != val) {
 			changedCallback("clearType", val);
 			return clearType = val;
 		}
 		return val;
 	}
-	function set_grade(val:String) {
+	@:noCompletion function set_grade(val:String) {
 		if (grade != val) {
 			changedCallback("grade", val);
 			return grade = val;
 		}
 		return val;
 	}
-	function set_combo(val:Int) {
+	@:noCompletion function set_combo(val:Int) {
 		if (combo != val) {
 			changedCallback("combo", val);
 			combo = val;
@@ -329,21 +329,21 @@ class Stats {
 		}
 		return val;
 	}
-	function set_maxCombo(val:Int) {
+	@:noCompletion function set_maxCombo(val:Int) {
 		if (maxCombo != val) {
 			changedCallback("maxCombo", val);
 			return maxCombo = val;
 		}
 		return val;
 	}
-	function set_cbCombo(val:Int) {
+	@:noCompletion function set_cbCombo(val:Int) {
 		if (cbCombo != val) {
 			changedCallback("cbCombo", val);
 			return cbCombo = val;
 		}
 		return val;
 	}
-	function set_ratingPercent(val:Float) {
+	@:noCompletion function set_ratingPercent(val:Float) {
 		if (ratingPercent != val) {
 			changedCallback("ratingPercent", val);
 			return ratingPercent = val;
