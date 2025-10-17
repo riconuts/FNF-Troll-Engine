@@ -106,9 +106,14 @@ class Stats {
 	/** Shortcut for `judgements["miss"]` **/
 	public var misses(get, set):Int;
 
-	public function new(accuracySystem:AccuracySystem = SIMPLE, gradeSet:Array<Array<Dynamic>>) {
+	public function new(accuracySystem:AccuracySystem = SIMPLE, gradeSet:String) {
 		this.accuracySystem = accuracySystem;
-		this.gradeSet = gradeSet ?? [["?", Math.NEGATIVE_INFINITY]];
+		setGradeSet(gradeSet);
+	}
+
+	public function setGradeSet(name:String) {
+		gradeSet = Highscore.grades.get(name) ?? [["?", Math.NEGATIVE_INFINITY]];
+		useFlags = name == 'Etterna';
 		updateVariables();
 	}
 

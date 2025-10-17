@@ -576,8 +576,7 @@ class PlayState extends MusicBeatState
 
 		Paths.getAllStrings();
 		
-		stats = new Stats(ClientPrefs.accuracyCalc, Highscore.grades.get(ClientPrefs.gradeSet));
-		stats.useFlags = ClientPrefs.gradeSet == 'Etterna';
+		stats = new Stats(ClientPrefs.accuracyCalc, ClientPrefs.gradeSet);
 
 		judgeManager = new JudgmentManager(ClientPrefs.useEpics);
 		judgeManager.judgeTimescale = Wife3.timeScale;
@@ -2117,10 +2116,7 @@ class PlayState extends MusicBeatState
 		trace("changed " + options);
 				
 		if (options.contains("gradeSet")) {
-			// stats.accuracySystem = ClientPrefs.accuracyCalc;
-			stats.gradeSet = Highscore.grades.get(ClientPrefs.gradeSet);
-			stats.useFlags = ClientPrefs.gradeSet == 'Etterna';
-			stats.updateVariables();
+			stats.setGradeSet(ClientPrefs.gradeSet);
 		}
 
 		if (!ClientPrefs.coloredCombos)
