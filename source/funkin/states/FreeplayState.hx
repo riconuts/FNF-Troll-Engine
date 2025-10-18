@@ -40,6 +40,7 @@ class FreeplayState extends MusicBeatState
 
 	var targetRating:Float = 0.0;
 	var lerpRating:Float = 0.0;
+	var fcDisplay:String = '';
 
 	var scoreBG:FlxSprite;
 	var scoreText:FlxText;
@@ -154,15 +155,15 @@ class FreeplayState extends MusicBeatState
 		add(hintText);
 
 		////
-		scoreText = new FlxText(FlxG.width * 0.7, 5, 0, 'PERSONAL BEST: 0', 32);
-		scoreText.setFormat(Paths.font("vcr.ttf"), 32, 0xFFFFFFFF, RIGHT);
+		scoreText = new FlxText(FlxG.width * 0.7, 5, 0);
+		scoreText.setFormat(Paths.font("vcr.ttf"), 28, 0xFFFFFFFF, RIGHT);
 
 		scoreBG = CoolUtil.blankSprite(FlxG.width * 0.3, 66, 0xFF999999);
 		scoreBG.setPosition(scoreText.x - 6, 0);
 		scoreBG.blend = MULTIPLY;
 		add(scoreBG);
 
-		diffText = new FlxText(scoreText.x, scoreText.y + 36, 100, "", 24);
+		diffText = new FlxText(scoreText.x, scoreText.y + 36, 100, "", 22);
 		diffText.alignment = CENTER;
 		diffText.font = scoreText.font;
 		add(diffText);
@@ -345,6 +346,15 @@ class FreeplayState extends MusicBeatState
 			targetHighscore = record.accuracyScore * 100;
 		else
 			targetHighscore = record.score;
+
+		fcDisplay = switch(record.fcMedal) {
+			case TIER4: 't5fc';
+			case TIER3: 't4fc';
+			case TIER2: 't3fc';
+			case TIER1: 'fc';
+			default: '';
+		}
+		fcDisplay = fcDisplay.length==0 ? fcDisplay : '${Paths.getString(fcDisplay) ?? fcDisplay}';
 	}
 
 	static function makeBgSprite(){
@@ -416,8 +426,9 @@ class FreeplayState extends MusicBeatState
 
 		final score = Math.round(lerpHighscore);
 		final rating = formatRating(lerpRating);
+		final fcDisplay = (fcDisplay.length==0 ? fcDisplay : ' • [$fcDisplay]');
 
-		scoreText.text = 'PERSONAL BEST: $score ($rating%)';
+		scoreText.text = 'PERSONAL BEST • $score • ($rating%)' + fcDisplay;
 		positionHighscore();
 
 		super.draw();
