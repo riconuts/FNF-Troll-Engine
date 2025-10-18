@@ -2170,6 +2170,8 @@ class PlayState extends MusicBeatState
 			}
 		}
 
+		signals.optionsChanged.dispatch(options);
+
 		callOnScripts('optionsChanged', [options]);
 		if (hudSkinScript != null)
 			callScript(hudSkinScript, "optionsChanged", [options]);
@@ -4362,6 +4364,8 @@ class PlayStateSignals /*extends MusicBeatSignals*/
 	
 	public var noteMiss = new FlxTypedSignal<(Note, PlayField) -> Void>();
 	public var noteMissPress = new FlxTypedSignal<(Note, PlayField) -> Void>();
+
+	public var optionsChanged = new FlxTypedSignal<Array<String> -> Void>();
 
 	public var onPause = new FlxTypedSignal<Void -> Void>();
 	public var onResume = new FlxTypedSignal<Void -> Void>();
