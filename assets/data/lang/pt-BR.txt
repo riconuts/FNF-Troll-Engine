@@ -55,7 +55,8 @@ peak=Máximo
 combo=Combo
 peakcombo=Combo Máximo
 botplayMark=[AUTOMÁTICO]
-freeplayhint=Pressione CTRL para abrir o Menu de Modificadores | Pressione R para limpar seu recorde na música.
+action_openGameplayChangers=Menu de Modificadores
+action_resetScore=Limpar recorde
 ## Options stuff
 opt_display_noteOffset=Offset
 opt_display_ratingOffset=Offset do Judgement
