@@ -109,8 +109,10 @@ class Character extends FlxSprite
 	public var animTimer:Float = 0;
 
 	/**
-	 * Disables dancing if true.
-	 * Automatically gets set to false once the current animation finishes.
+	 * If `true`, disables dancing.  
+	 * Automatically gets set to `false` if the current animation finishes.  
+	 *
+	 * Set this to `true` after calling `playAnim`, as this sets it to `false`.
 	**/
 	public var specialAnim:Bool = false;
 
@@ -121,8 +123,8 @@ class Character extends FlxSprite
 	public var skipDance:Bool = false;
 
 	/**
-	 * Stops note anims and idle from playing.
-	 * Make sure to set this to false once the animation is done.
+	 * If `true`, it stops dance and note animations from playing.  
+	 * This doesn't get set back to `false` after the animation finishes.
 	**/
 	public var voicelining:Bool = false; // for fleetway, mainly
 	// but whenever you need to play an anim that has to be manually interrupted, here you go
