@@ -5,7 +5,7 @@ import haxe.CallStack;
 import openfl.display.Bitmap;
 import openfl.display.Sprite;
 import openfl.display.FPS;
-import lime.app.Application;
+import lime.app.Application.current as application;
 import lime.graphics.Image;
 import flixel.FlxG;
 import flixel.FlxState;
@@ -195,19 +195,19 @@ class Main extends Sprite
 	}
 
 	public static function resizeWindow(width:Int, height:Int)
-		Application.current.window.resize(width, height);
+		application.window.resize(width, height);
 
 	public static function centerWindow() {
-		Application.current.window.move(
-			Std.int((Application.current.window.display.bounds.width - Application.current.window.width) / 2),
-			Std.int((Application.current.window.display.bounds.height - Application.current.window.height) / 2)
+		application.window.move(
+			Std.int((application.window.display.bounds.width - application.window.width) / 2),
+			Std.int((application.window.display.bounds.height - application.window.height) / 2)
 		);
 	}
 
 	public static function scaleWindow(scale:Float) {
-		Application.current.window.resize(
-			Math.floor(Application.current.window.display.bounds.width * scale), 
-			Math.floor(Application.current.window.display.bounds.height * scale)
+		application.window.resize(
+			Math.floor(application.window.display.bounds.width * scale), 
+			Math.floor(application.window.display.bounds.height * scale)
 		);
 	}
 
