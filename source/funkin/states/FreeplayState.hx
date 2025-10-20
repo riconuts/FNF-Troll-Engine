@@ -147,7 +147,7 @@ class FreeplayState extends MusicBeatState
 		hintStr += '\n';
 		hintStr += '[CTRL] ${Paths.getString('action_openGameplayChangers') ?? 'action_openGameplayChangers'}';
 		hintStr += '\n';
-		hintStr += '[SPACE] Play Song Music';
+		hintStr += '[SPACE] ${Paths.getString('action_listenToSong') ?? 'action_listenToSong'}';
 
 		hintText = new FlxText(16, 16, 0, hintStr);
 		hintText.setFormat(Paths.font("vcr.ttf"), 16, 0xFFFFFFFF, LEFT);
@@ -253,8 +253,8 @@ class FreeplayState extends MusicBeatState
 
 	override public function update(elapsed:Float)
 	{
-		super.update(elapsed);
 		updateInput(elapsed);
+		super.update(elapsed);
 	}
 
 	function updateInput(elapsed:Float) {
