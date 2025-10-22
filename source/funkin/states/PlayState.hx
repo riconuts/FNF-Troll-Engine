@@ -68,7 +68,7 @@ using StringTools;
 using funkin.CoolerStringTools;
 
 #if DISCORD_ALLOWED
-import funkin.api.Discord.DiscordClient;
+import funkin.api.Discord;
 #end
 
 import funkin.states.VideoPlayerState.VideoHandler;
@@ -474,9 +474,9 @@ class PlayState extends MusicBeatState
 	#if DISCORD_ALLOWED
 	// Discord RPC variables
 	var updateDiscordRPC:Bool = true;
+	var discordRPCParams:DiscordClientPresenceParams = {};
 	var detailsText:String = "";
 	var detailsPausedText:String = "";
-	var stateText:String = "";
 	#end
 
 	//// Script shit
@@ -981,7 +981,7 @@ class PlayState extends MusicBeatState
 
 		#if DISCORD_ALLOWED
 		// Discord RPC texts
-		stateText = displayedSong;
+		var stateText = displayedSong;
 		var charts = (song==null) ? null : song.getCharts(); 
 		if (charts != null && charts.length > 1)
 			stateText += ' [$displayedDifficulty]';
@@ -990,6 +990,13 @@ class PlayState extends MusicBeatState
 		
 		detailsText = chartingMode ? "Charting Mode" : isStoryMode ? "Story Mode" : "Freeplay";
 		detailsPausedText = "Paused - " + detailsText;
+
+		discordRPCParams.state = stateText;
+		#if tgt
+		discordRPCParams.largeImageKey = songId;
+		#else
+		discordRPCParams.smallImageKey = dad?.healthIcon;
+		#end
 
 		updateSongDiscordPresence();
 		#end
@@ -2233,13 +2240,15 @@ class PlayState extends MusicBeatState
 		final detailsText:String = (detailsText!=null) ? detailsText : this.detailsText;
 
 		if (isDead)
-			DiscordClient.changePresence({details: 'Game Over - $detailsText', state: stateText, largeImageKey: songId});
+			discordRPCParams.details = 'Game Over - $detailsText';
 		else if (paused)
-			DiscordClient.changePresence({details: detailsPausedText, state: stateText, largeImageKey: songId});
+			discordRPCParams.details = detailsPausedText;
 		else if (timeLeft > 0.0)
-			DiscordClient.changePresence({details: detailsText, state: stateText, largeImageKey: songId});
+			discordRPCParams.details = detailsText;
 		else
-			DiscordClient.changePresence({details: detailsText, state: stateText, largeImageKey: songId});
+			discordRPCParams.details = detailsText;
+
+		DiscordClient.changePresence(discordRPCParams);
 	}
 	#else
 	// Saves me from having to write #if DISCORD_ALLOWED and blahblah
