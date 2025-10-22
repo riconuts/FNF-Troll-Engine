@@ -11,21 +11,19 @@ import Sys.sleep;
 typedef DiscordRPCInfo = {
 	var applicationId:String;
 	var allowedImageKeys:Array<String>;
-
-	@:optional var defaultLargeImageText:String;
-
-	@:optional var defaultLargeImageKey:String;
-	@:optional var defaultSmallImageKey:String;
+	var defaultPresence:DiscordClientPresenceParams;
 }
 
 private final defaultRPCInfo:DiscordRPCInfo = {
 	applicationId: '814588678700924999',
 	allowedImageKeys: ["icon"],
 
-	defaultLargeImageText: 'Troll Engine ' + Main.Version.displayedVersion,
-
-	defaultLargeImageKey: 'icon',
-	defaultSmallImageKey: 'none'
+	defaultPresence: {
+		largeImageText: 'Troll Engine ' + Main.Version.displayedVersion,	
+		largeImageKey: 'icon',
+		smallImageKey: 'none',
+		details: 'Presence Unknown',
+	}
 };
 
 // this is kinda fucked up i think
@@ -89,9 +87,7 @@ class DiscordClient
 
 	private static function onReady(request:cpp.RawConstPointer<DiscordUser>)
 	{
-		var presence = #if (hxdiscord_rpc >=  "1.3.0") new DiscordRichPresence() #else DiscordRichPresence.create() #end;
-		presence.details = "Presence Unknown";
-		DiscordRpc.UpdatePresence(cpp.RawConstPointer.addressOf(lastPresence));
+		changePresence(null);
 	}
 
 	private static function onError(_code:Int, _message:cpp.ConstCharStar)
@@ -153,31 +149,31 @@ class DiscordClient
 	}
 
 	////
-	public static function changePresence(?details:String, ?state:String, ?largeImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float)
+	public static function changePresence(data:DiscordClientPresenceParams, mergeDefault:Bool = true)
 	{
 		if (!isActive())
 			return;
 
 		if (hideDetails) {
-			details = null;
-			state = null;
-			largeImageKey = null;
-			hasStartTimestamp = false;
-			endTimestamp = null;
+			data = currentInfo.defaultPresence;
+		}else if (mergeDefault) {
+			data = merge(data, currentInfo.defaultPresence);
 		}
 
 		////
-		var startTimestamp:Float = hasStartTimestamp ? Date.now().getTime() : 0;
+		var details = data.details;
+		var state = data.state;
+		var largeImageKey = data.largeImageKey;
+		var largeImageText = data.largeImageText;
+		var smallImageKey = data.smallImageKey;
+		// does discord even use these anymore i havent seen them working in a huge while
+		//var startTimestamp = data.startTimestamp;
+		//var endTimestamp = data.endTimestamp;
 
-		if (endTimestamp > 0)
-			endTimestamp = startTimestamp + endTimestamp;
-		
-		if (largeImageKey==null || !currentInfo.allowedImageKeys.contains(largeImageKey))
-			largeImageKey = currentInfo.defaultLargeImageKey;
+		if (!currentInfo.allowedImageKeys.contains(largeImageKey))
+			largeImageKey = currentInfo.defaultPresence.largeImageKey;
 
-		var largeImageKey:String = largeImageKey;
-		var largeImageText:String = currentInfo.defaultLargeImageText;
-
+		////
 		mutex.acquire();
 
 		lastPresence = #if (hxdiscord_rpc >=  "1.3.0") new DiscordRichPresence() #else DiscordRichPresence.create() #end;
@@ -185,16 +181,33 @@ class DiscordClient
 		lastPresence.state = state;
 		lastPresence.largeImageKey = largeImageKey;
 		lastPresence.largeImageText = largeImageText;
-
-		// Obtained times are in milliseconds so they are divided so Discord can use it
-		lastPresence.startTimestamp = Std.int(startTimestamp / 1000);
-		lastPresence.endTimestamp = Std.int(endTimestamp / 1000);
+		lastPresence.smallImageKey = smallImageKey;
+		/*
+		lastPresence.startTimestamp = startTimestamp;
+		lastPresence.endTimestamp = endTimestamp;
+		*/
 
 		DiscordRpc.UpdatePresence(cpp.RawConstPointer.addressOf(lastPresence));
 
 		mutex.release();
-		
-		// trace('Discord RPC Updated. Arguments: $details, $state, $largeImageKey, $hasStartTimestamp, $endTimestamp');
+	}
+
+	private static function merge(data:Dynamic, defaultData:Dynamic) {
+		if (data == null)
+			return defaultData;
+
+		data = Reflect.copy(data);
+
+		if (defaultData != null) {
+			var dataFields = Reflect.fields(data);
+			for (fieldName in Reflect.fields(defaultData)) {
+				if (!dataFields.contains(fieldName)) {
+					Reflect.setField(data, fieldName, Reflect.field(defaultData, fieldName));
+				}
+			}		
+		}
+
+		return data;
 	}
 }
 
@@ -205,3 +218,32 @@ class DiscordClient {
 	public inline static function changePresence(details:String, ?state:String, largeImageKey:String = "app-logo", ?hasStartTimestamp:Bool, ?endTimestamp:Float) {}
 }
 #end
+
+// copied from Funkin zzzzzzzzzzzzz
+typedef DiscordClientPresenceParams =
+{
+	/** 
+		The first row of text below the game title.  
+	**/
+	var ?state:String;
+
+	/** 
+		The second row of text below the game title.  
+	**/
+	var ?details:Null<String>;
+
+	/** 
+		A large, 4-row high image to the left of the content.  
+	**/
+	var ?largeImageKey:String;
+
+	/** 
+		A small, inset image to the bottom right of `largeImageKey`.  
+	**/
+	var ?smallImageKey:String;
+
+	/**
+		Text that is displayed when hovering over `largeImageKey`.  
+	**/
+	var ?largeImageText:String;
+}

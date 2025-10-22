@@ -126,7 +126,7 @@ class FreeplayState extends MusicBeatState
 	override public function create()
 	{
 		#if DISCORD_ALLOWED
-		funkin.api.Discord.DiscordClient.changePresence('In the menus');
+		funkin.api.Discord.DiscordClient.changePresence({details: "In the Menus"});
 		#end
 
 		songList ??= getFreeplaySongs();

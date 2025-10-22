@@ -83,7 +83,7 @@ class SongSelectState extends MusicBeatState
 		super.create();
 
 		#if DISCORD_ALLOWED
-		DiscordClient.changePresence("In the Menus", null);
+		DiscordClient.changePresence({details: "In the Menus"});
 		#end
 		FlxG.camera.bgColor = 0xFF000000;
 		////

@@ -375,7 +375,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				val ? DiscordClient.start(true) : DiscordClient.shutdown(true);
 			case 'discordRPC_hideDetails':
 				DiscordClient.hideDetails = val;
-				if (val) DiscordClient.changePresence();
+				if (val) DiscordClient.changePresence(null);
 			#end
 			case 'autoPause':
 				FlxG.autoPause = val;

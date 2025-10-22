@@ -404,7 +404,7 @@ class ChartingState extends MusicBeatState
 	private function updateDiscordRPC() {
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
-		DiscordClient.changePresence("Chart Editor", _song.metadata.songName);
+		DiscordClient.changePresence({details: "Chart Editor", state: _song.metadata.songName});
 		#end
 	}
 

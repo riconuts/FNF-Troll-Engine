@@ -50,7 +50,7 @@ class MasterEditorMenu extends MusicBeatState
 
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
-		DiscordClient.changePresence("Editors Menu", null);
+		DiscordClient.changePresence({details: "Editors Menu"});
 		#end
 
 		var bg:FlxSprite = new FlxSprite(0, 0, Paths.image('menuDesat'));

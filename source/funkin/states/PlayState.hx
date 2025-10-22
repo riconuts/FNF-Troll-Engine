@@ -2233,13 +2233,13 @@ class PlayState extends MusicBeatState
 		final detailsText:String = (detailsText!=null) ? detailsText : this.detailsText;
 
 		if (isDead)
-			DiscordClient.changePresence("Game Over - " + detailsText, stateText, songId);
+			DiscordClient.changePresence({details: 'Game Over - $detailsText', state: stateText, largeImageKey: songId});
 		else if (paused)
-			DiscordClient.changePresence(detailsPausedText, stateText, songId);
+			DiscordClient.changePresence({details: detailsPausedText, state: stateText, largeImageKey: songId});
 		else if (timeLeft > 0.0)
-			DiscordClient.changePresence(detailsText, stateText, songId, true, timeLeft);
+			DiscordClient.changePresence({details: detailsText, state: stateText, largeImageKey: songId});
 		else
-			DiscordClient.changePresence(detailsText, stateText, songId);
+			DiscordClient.changePresence({details: detailsText, state: stateText, largeImageKey: songId});
 	}
 	#else
 	// Saves me from having to write #if DISCORD_ALLOWED and blahblah
