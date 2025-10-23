@@ -262,13 +262,8 @@ class MusicBeatState extends FlxUIState
 			FlxTransitionableState.skipNextTransOut = true;
 		}
 
-		#if HSCRIPT_ALLOWED
-		if (FlxG.state is OldHScriptedState){
-			var state:OldHScriptedState = cast FlxG.state;
-			FlxG.switchState(OldHScriptedState.fromPath(state.scriptPath));
-		}
 		#if SCRIPTABLE_STATES
-		else if (FlxG.state is HScriptOverridenState) {
+		if (FlxG.state is HScriptOverridenState) {
 			var state:HScriptOverridenState = cast FlxG.state;
 			var overriden = HScriptOverridenState.fromAnother(state);
 
@@ -278,20 +273,8 @@ class MusicBeatState extends FlxUIState
 				trace("State override script file is gone!", "Switching to", state.parentClass);
 				FlxG.switchState(Type.createInstance(state.parentClass, []));
 			}
-		}
+		} else
 		#end
-		else if (FlxG.state is HScriptedState) {
-			var state:HScriptedState = cast FlxG.state;
-
-			if (Paths.exists(state.scriptPath))
-				FlxG.switchState(new HScriptedState(state.scriptPath));
-			else{
-				trace("State script file is gone!", "Switching to", MainMenuState);
-				FlxG.switchState(new MainMenuState());
-			}
-		}
-		#end
-		else
 			FlxG.resetState();
 	}
 
