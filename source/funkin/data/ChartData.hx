@@ -145,20 +145,25 @@ class ChartData
 		
 		// why did shadowmario make such a useless format change oh my god :sob:
 		if (uncastedJson.format is String && (uncastedJson.format:String).startsWith("psych_v1"))
-		{		
+		{
+			trace('Loading Psych Engine v1.0.0 Chart');
+
 			songJson = cast uncastedJson;
-			var stepCrotchet = Conductor.calculateStepCrochet(songJson.bpm);
+			var stepCrotchet:Float = Conductor.calculateStepCrochet(songJson.bpm);
+			var keyCount:Int = songJson.keyCount ?? 4;
 			for (section in songJson.notes){
 				if (section.changeBPM)
 					stepCrotchet = Conductor.calculateStepCrochet(section.bpm);
 
 				for (note in section.sectionNotes){
 					var note:Array<Dynamic> = cast note;
+					note[1] = (section.mustHitSection ? note[1] : (note[1] + keyCount)) % (keyCount * 2);
 					note[2] -= stepCrotchet;
 					note[2] = note[2] > 0 ? note[2] : 0;
 				}
 			}
-			onLoadLegacyJson(songJson);
+			songJson._path = filePath;
+			return onLoadLegacyJson(songJson);
 		}else
 			songJson = cast uncastedJson.song;
 
@@ -263,7 +268,7 @@ class ChartData
 			
 			for (note in section.sectionNotes) {
 					var note:Array<Dynamic> = cast note;
-					note[1] = section.mustHitSection ? note[1] : (note[1] + keyCount) % (keyCount * 2);
+					note[1] = (section.mustHitSection ? note[1] : (note[1] + keyCount)) % (keyCount * 2);
 					note[3] = NoteData.resolveNoteType(note[3]);
 				}
 			}
