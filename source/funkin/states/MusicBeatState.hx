@@ -10,6 +10,8 @@ import openfl.ui.MouseCursor;
 import openfl.ui.Mouse;
 import haxe.io.Path;
 
+import flixel.util.typeLimit.NextState;
+
 #if HSCRIPT_ALLOWED
 import funkin.scripts.FunkinHScript;
 import funkin.states.scripting.*;
@@ -245,7 +247,7 @@ class MusicBeatState extends FlxUIState
 		if(curSection > lastSection) sectionHit();
 	}
 
-	public static function switchState(nextState:FlxState)
+	public static function switchState(nextState:NextState)
 	{
 		FlxG.autoPause = false;
 		FlxG.mouse.visible = false;
