@@ -59,14 +59,16 @@ class RatingGroup extends FlxTypedGroup<RatingSprite>
 		var graphic = Paths.image("comboNums");
 		var spr = new RatingSprite();
 
-		spr.loadGraphic(graphic, true, Math.floor(graphic.width / 12), graphic.height);
-		for (n in 0...10) spr.animation.add(Std.string(n), [n], 0, false);
-		
-		spr.animation.add("-", [10], 0, false);
-		spr.animation.add(".", [11], 0, false);
-		
-		spr.scale.set(.5, .5);
-		spr.updateHitbox();
+		if (graphic != null) {
+			spr.loadGraphic(graphic, true, Math.floor(graphic.width / 12), graphic.height);
+			for (n in 0...10) spr.animation.add(Std.string(n), [n], 0, false);
+			
+			spr.animation.add("-", [10], 0, false);
+			spr.animation.add(".", [11], 0, false);
+			
+			spr.scale.set(.5, .5);
+			spr.updateHitbox();
+		}
 		spr;
 	}
 
