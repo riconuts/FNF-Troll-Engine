@@ -1,4 +1,4 @@
-package funkin.states;
+package funkin.states.base;
 
 import funkin.data.MusicData;
 import flixel.math.FlxMath;

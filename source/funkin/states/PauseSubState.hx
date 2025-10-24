@@ -404,7 +404,7 @@ class PauseSubState extends MusicBeatSubstate
 	}
 
 	function leaveChartingModePrompt() {
-		var ss = new AlphabetPromptSubstate(
+		var ss = new funkin.states.base.AlphabetPromptSubstate(
 			"WARNING!\nAll unsaved charting progress will be lost", 
 			leaveChartingMode
 		);

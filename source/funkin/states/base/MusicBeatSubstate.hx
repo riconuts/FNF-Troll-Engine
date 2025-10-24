@@ -1,4 +1,4 @@
-package funkin.states;
+package funkin.states.base;
 
 import funkin.scripts.FunkinHScript;
 import funkin.input.Controls;

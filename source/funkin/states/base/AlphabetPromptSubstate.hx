@@ -1,4 +1,4 @@
-package funkin.states;
+package funkin.states.base;
 
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;

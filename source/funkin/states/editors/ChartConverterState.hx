@@ -1,6 +1,8 @@
 package funkin.states.editors;
 
 #if USING_MOONCHART
+import funkin.states.base.Prompt;
+
 import lime.ui.FileDialog;
 import lime.utils.Resource;
 import lime.system.System;

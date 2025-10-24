@@ -8,7 +8,7 @@ import flixel.util.FlxColor;
 using StringTools;
 
 @:noScripting
-class ResetScoreSubState extends AlphabetPromptSubstate
+class ResetScoreSubState extends funkin.states.base.AlphabetPromptSubstate
 {
 	var id:String;
 	var chartId:String;

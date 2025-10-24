@@ -1,5 +1,7 @@
 package funkin.states.editors;
 
+import funkin.states.base.Prompt;
+
 import funkin.data.StageData;
 import funkin.data.CharacterData;
 import funkin.objects.AttachedFlxText;

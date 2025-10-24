@@ -1,4 +1,4 @@
-package funkin.states;
+package funkin.states.base;
 
 #if !VIDEOS_ALLOWED typedef VideoHandler = Dynamic;
 #elseif (hxCodec >= "3.0.0") typedef VideoHandler = hxcodec.flixel.FlxVideo;

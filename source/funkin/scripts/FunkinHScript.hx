@@ -10,8 +10,8 @@ import funkin.scripts.*;
 import funkin.scripts.Globals.*;
 
 import funkin.states.PlayState;
-import funkin.states.MusicBeatState;
-import funkin.states.MusicBeatSubstate;
+import funkin.states.base.MusicBeatState;
+import funkin.states.base.MusicBeatSubstate;
 
 import funkin.input.Controls;
 import funkin.api.Windows;

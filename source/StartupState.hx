@@ -1,7 +1,7 @@
 package;
 
 import funkin.*;
-import funkin.states.MusicBeatState;
+import funkin.states.base.MusicBeatState;
 import funkin.states.FadeTransitionSubstate;
 
 import funkin.data.Highscore;

@@ -2,7 +2,7 @@ package funkin.objects.cutscenes;
 
 import funkin.states.CutscenePauseSubstate;
 import flixel.tweens.FlxEase;
-import funkin.states.MusicBeatState;
+import funkin.states.base.MusicBeatState;
 
 class CutsceneTestState extends MusicBeatState
 {

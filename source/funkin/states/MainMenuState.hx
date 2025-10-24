@@ -16,7 +16,7 @@ import flixel.util.FlxColor;
 import lime.app.Application;
 import funkin.states.editors.MasterEditorMenu;
 import flixel.input.keyboard.FlxKey;
-import funkin.states.MusicBeatState.switchState;
+import funkin.states.base.MusicBeatState.switchState;
 
 using StringTools;
 

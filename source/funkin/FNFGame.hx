@@ -1,7 +1,7 @@
 package funkin;
 
 import funkin.scripts.Globals;
-import funkin.states.MusicBeatState;
+import funkin.states.base.MusicBeatState;
 
 import flixel.util.typeLimit.NextState;
 import flixel.input.keyboard.FlxKey;

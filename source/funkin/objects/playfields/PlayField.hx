@@ -9,7 +9,6 @@ import funkin.modchart.ModManager;
 import funkin.data.JudgmentManager;
 import funkin.objects.notes.*;
 import funkin.states.PlayState;
-import funkin.states.MusicBeatState;
 
 using StringTools;
 

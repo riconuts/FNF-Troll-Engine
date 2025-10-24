@@ -18,7 +18,6 @@ import funkin.modchart.ModManager;
 import funkin.modchart.Modifier.RenderInfo;
 import funkin.objects.shaders.NoteColorSwap;
 import funkin.states.PlayState;
-import funkin.states.MusicBeatState;
 import haxe.ds.Vector as FastVector;
 import funkin.objects.playfields.FieldBase;
 

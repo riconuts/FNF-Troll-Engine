@@ -71,7 +71,7 @@ using funkin.CoolerStringTools;
 import funkin.api.Discord;
 #end
 
-import funkin.states.VideoPlayerState.VideoHandler;
+import funkin.states.base.VideoPlayerState;
 
 enum abstract CharacterType(Int) from Int to Int {
 	var BF = 0;

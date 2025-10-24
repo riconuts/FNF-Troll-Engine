@@ -1,4 +1,4 @@
-package funkin.states;
+package funkin.states.base;
 
 import flixel.*;
 import flixel.addons.ui.FlxUIPopup;
@@ -7,7 +7,7 @@ import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import openfl.geom.Rectangle;
 
-class Prompt extends funkin.states.MusicBeatSubstate
+class Prompt extends MusicBeatSubstate
 {
 	var selected = 0;
 	public var okc:Void->Void;
