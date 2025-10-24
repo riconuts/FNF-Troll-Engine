@@ -152,7 +152,7 @@ class MainMenuState extends MusicBeatState
 	function onSelected() {		
 		var shitToDo:Void -> Void = switch (optionShit[curSelected])
 		{
-			case 'story_mode':
+			case 'storymode':
 				switchState.bind(new StoryModeState());
 			case 'freeplay':
 				switchState.bind(new FreeplayState());
@@ -161,7 +161,7 @@ class MainMenuState extends MusicBeatState
 			case 'credits':
 				switchState.bind(new CreditsState());
 			case 'options':
-				LoadingState.loadAndSwitchState.bind(new funkin.states.options.OptionsState());
+				switchState.bind(new funkin.states.options.OptionsState());
 			default:
 				MusicBeatState.resetState.bind();
 		}
