@@ -4008,43 +4008,35 @@ class PlayState extends MusicBeatState
 
 	var lastSection:Int = -1;
 	override function sectionHit(){
-		var sectionNumber = curSection;
-		var curSection = SONG.notes[sectionNumber];
-
-		if (curSection == null)
+		var sectionData = SONG.notes[curSection];
+		if (sectionData == null)
 			return;
 
 		if (camZooming && zoomEveryBeat < 0) 
-		{
 			cameraBump();
-		}
 
-		if (curSection.changeBPM)
-		{
-			Conductor.changeBPM(curSection.bpm);
+		if (sectionData.changeBPM) {
+			Conductor.changeBPM(sectionData.bpm);
 			
 			setOnScripts('curBpm', Conductor.bpm);
 			setOnScripts('crochet', Conductor.crochet);
 			setOnScripts('stepCrochet', Conductor.stepCrochet);
 		}
 		
-		setOnHScripts("curSection", curSection);
-		setOnScripts('sectionNumber', sectionNumber);
+		setOnScripts("curSection", curSection);
+		setOnScripts('sectionData', sectionData);
 
-		setOnScripts('mustHitSection', curSection.mustHitSection == true);
-		setOnScripts('altAnim', curSection.altAnim == true);
-		setOnScripts('gfSection', curSection.gfSection  == true);
+		setOnScripts('mustHitSection', sectionData.mustHitSection == true);
+		setOnScripts('altAnim', sectionData.altAnim == true);
+		setOnScripts('gfSection', sectionData.gfSection  == true);
 
-		if (lastSection != sectionNumber)
-		{
+		if (lastSection != curSection) {
 			callOnScripts("onSectionHit");
-			lastSection = sectionNumber;
+			lastSection = curSection;
 		}
 
 		if (generatedMusic && !endingSong)
-		{
-			moveCameraSection(curSection);
-		}
+			moveCameraSection(sectionData);
 	}
 
 	inline public function callOnAllScripts(event:String, ?args:Array<Dynamic>, ignoreStops:Bool = false, ?exclusions:Array<String>, ?scriptArray:Array<Dynamic>,

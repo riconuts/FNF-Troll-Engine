@@ -127,8 +127,8 @@ abstract class FunkinScript
 			set('altAnim', false);
 			set('gfSection', false);
 
-			set("curSection", null);
-			set("sectionNumber", 0);
+			set("curSection", -1);
+			set("sectionData", null);
 
 			set('songLength', null);
 			set('startedCountdown', false);
