@@ -98,7 +98,9 @@ class Controls {
 		firstActive.buttonBinds = default_buttonBinds;
 		instances[0] = firstActive;
 
-		trace("STARTED WITH CONTROLLER", firstActive.gamepad?.name);
+		if (firstActive.gamepad != null)
+			trace('Started with controller ${firstActive.gamepad.name}');
+
 		FlxG.gamepads.deviceConnected.add(onGamepadConnected);
 		FlxG.gamepads.deviceDisconnected.add(onGamepadDisconnected);
 	}
