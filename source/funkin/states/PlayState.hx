@@ -537,8 +537,6 @@ class PlayState extends MusicBeatState
 	@:noCompletion function set_cpuControlled(value:Bool):Bool {
 		cpuControlled = value;
 
-		setOnScripts('botPlay', value);
-
 		/// oughhh
 		for (playfield in playfields.members){
 			if (playfield.isPlayer)
@@ -1466,7 +1464,6 @@ class PlayState extends MusicBeatState
 			var i = this.members.indexOf(this.notes);
 			(i==-1) ? this.add(curCountdown) : this.insert(i, curCountdown);
 
-			setOnScripts('startedCountdown', true);
 			callOnScripts('onCountdownStarted');
 			if (hudSkinScript != null)
 				hudSkinScript.call("onCountdownStarted");
@@ -1577,7 +1574,6 @@ class PlayState extends MusicBeatState
 		hud.songLength = songLength;
 		hud.songStarted();
 
-		setOnScripts('songLength', songLength);
 		callOnScripts('onSongStart');
 	}
 
@@ -2631,9 +2627,6 @@ class PlayState extends MusicBeatState
 			}
 		}
 		
-		setOnScripts('cameraX', camFollowPos.x);
-		setOnScripts('cameraY', camFollowPos.y);
-		
 		callOnScripts('onUpdatePost', [elapsed]);
 		if (hudSkinScript != null)
 			hudSkinScript.call("onUpdatePost", [elapsed]);
@@ -2713,23 +2706,19 @@ class PlayState extends MusicBeatState
 	{
 		var oldChar:Character;
 		var charMap:Map<String, Character>;
-		var varName:String;
 
 		switch(charType) {
 			case BF:
 				oldChar = boyfriend;
 				charMap = boyfriendMap;
-				varName = 'boyfriendName';
 
 			case DAD:
 				oldChar = dad;
 				charMap = dadMap;
-				varName = 'dadName';
 
 			case GF:
 				oldChar = gf;
 				charMap = gfMap;
-				varName = "gfName";
 
 			default: return;
 		}
@@ -2750,8 +2739,6 @@ class PlayState extends MusicBeatState
 			case DAD: dad = newChar;
 			case GF: gf = newChar;
 		}
-
-		setOnScripts(varName, name);
 
 		if (oldChar != null) {
 			newChar.alpha = oldChar.alpha;
@@ -4026,10 +4013,6 @@ class PlayState extends MusicBeatState
 		setOnScripts("curSection", curSection);
 		setOnScripts('sectionData', sectionData);
 
-		setOnScripts('mustHitSection', sectionData.mustHitSection == true);
-		setOnScripts('altAnim', sectionData.altAnim == true);
-		setOnScripts('gfSection', sectionData.gfSection  == true);
-
 		if (lastSection != curSection) {
 			callOnScripts("onSectionHit");
 			lastSection = curSection;
@@ -4140,11 +4123,6 @@ class PlayState extends MusicBeatState
 	#end
 
 	public function RecalculateRating() {
-		setOnScripts('score', stats.score);
-		setOnScripts('misses', songMisses);
-		setOnScripts('comboBreaks', stats.comboBreaks);
-		setOnScripts('hits', songHits);
-
 		callOnScripts('onRecalculateRating');
 
 		stats.updateVariables();
@@ -4155,10 +4133,6 @@ class PlayState extends MusicBeatState
 		#end
 
 		callOnScripts('onRecalculateRatingPost');
-
-		setOnScripts('rating', ratingPercent);
-		setOnScripts('ratingName', ratingName);
-		setOnScripts('ratingFC', ratingFC);
 	}
 
 	////

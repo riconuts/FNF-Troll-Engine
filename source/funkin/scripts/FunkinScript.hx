@@ -72,19 +72,6 @@ abstract class FunkinScript
 		set('buildTarget', 'unknown');
 		#end
 		
-		set('downscroll', ClientPrefs.downScroll);
-		set('middlescroll', ClientPrefs.centerNotefield);
-		set('framerate', ClientPrefs.framerate);
-		set('ghostTapping', ClientPrefs.ghostTapping);
-		set('hideHud', ClientPrefs.hudOpacity > 0.0);
-		set('timeBarType', ClientPrefs.timeBarType);
-		set('scoreZoom', ClientPrefs.scoreZoom);
-		set('cameraZoomOnBeat', ClientPrefs.camZoomP > 0.0);
-		set('flashingLights', ClientPrefs.flashing);
-		set('noteOffset', ClientPrefs.noteOffset);
-		set('healthBarAlpha', ClientPrefs.hpOpacity);
-		set('lowQuality', ClientPrefs.lowQuality);
-		
 		set('curBpm', Conductor.bpm);
 		set('crochet', Conductor.crochet);
 		set('stepCrochet', Conductor.stepCrochet);
@@ -103,35 +90,8 @@ abstract class FunkinScript
 		if (currentState is PlayState && currentState == PlayState.instance) {
 			set("inPlaystate", true);
 			
-			set('bpm', PlayState.SONG.bpm);
-			set('scrollSpeed', PlayState.SONG.speed);
-			set('songName', PlayState.SONG.song);
-			set('isStoryMode', PlayState.isStoryMode);
-			set('seenCutscene', PlayState.seenCutscene);
-			// set('week', WeekData.weeksList[PlayState.storyWeek]);
-			// set('weekRaw', PlayState.storyWeek);
-
-			set("difficultyName", PlayState.difficultyName);
-			
-			set('healthGainMult', PlayState.instance.healthGain);
-			set('healthLossMult', PlayState.instance.healthLoss);
-			set('instakillOnMiss', PlayState.instance.instakillOnMiss);
-			set('botPlay', PlayState.instance.cpuControlled);
-			set('disableModcharts', PlayState.instance.disableModcharts);
-			set('noDropPenalty', PlayState.instance.noDropPenalty);
-			set('practice', PlayState.instance.practiceMode);
-			set('opponentPlay', PlayState.instance.playOpponent);
-			set("showDebugTraces", PlayState.instance.showDebugTraces);
-
-			set('mustHitSection', false);
-			set('altAnim', false);
-			set('gfSection', false);
-
 			set("curSection", -1);
 			set("sectionData", null);
-
-			set('songLength', null);
-			set('startedCountdown', false);
 		}else{
 			set("inPlaystate", false);
 			set("showDebugTraces", Main.showDebugTraces);
