@@ -127,7 +127,7 @@ class ScriptingMacro
 					}else {
 						field = {
 							name: "get_canBeScripted",
-							access: [AInline],
+							access: [],
 							kind: func,
 							pos: Context.currentPos()
 						};
