@@ -11,12 +11,12 @@ import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import flixel.util.FlxStringUtil;
 import funkin.scripts.FunkinHScript;
-import flixel.addons.transition.FlxTransitionableState;
+import funkin.states.base.SubstateState;
 import funkin.states.options.ComboPositionSubstate;
 
 using StringTools;
 
-class NoteOffsetState extends MusicBeatState
+class NoteOffsetState extends SubstateState
 {
 	var stage:Stage;
 	var stageScript:Null<FunkinHScript> = null;
@@ -173,7 +173,7 @@ class NoteOffsetState extends MusicBeatState
 		
 		camGame.follow(camFollowPos);
 
-		super.create();
+		_create(comboSubstate);
 
 		updateMode();
 	}
@@ -352,74 +352,6 @@ class NoteOffsetState extends MusicBeatState
 		
 		return this;
 	}
-
-	var transitioned = false;
-	override public function resetSubState(){
-		super.resetSubState();
-
-		if (!transitioned){
-			transitioned = true;
-			doDaInTrans();
-		}
-	}
-	
-	override function finishTransIn()
-		getLowestState().closeSubState();
-	
-	
-	function doDaInTrans(){
-		if (transIn != null)
-		{
-			if (FlxTransitionableState.skipNextTransIn)
-			{
-				FlxTransitionableState.skipNextTransIn = false;
-				if (finishTransIn != null)
-					finishTransIn();
-				
-				return;
-			}
-
-			var trans = Type.createInstance(transIn, []);
-			getLowestState().openSubState(trans);
-
-			trans.finishCallback = finishTransIn;
-			FadeTransitionSubstate.nextCamera = camOther;
-			trans.start(OUT);
-		}
-	}
-
-	function doDaOutTrans(?OnExit:Void->Void){
-		_onExit = OnExit;
-		if (hasTransOut)
-		{
-			var trans = Type.createInstance(transOut, []);
-			getLowestState().openSubState(trans);
-
-			trans.finishCallback = finishTransOut;
-			trans.start(IN);
-		}
-		else
-		{
-			_onExit();
-		}
-	}
-
-	override function transitionToState(nextState:FlxState):Void
-	{
-		// play the exit transition, and when it's done call FlxG.switchState
-		_exiting = true;
-		doDaOutTrans(MusicBeatState.switchState.bind(nextState));
-
-		if (FlxTransitionableState.skipNextTransOut){
-			FlxTransitionableState.skipNextTransOut = false;
-			finishTransOut();
-		}
-	}
-
-
-	override public function transitionOut(?_):Void{} // same as transitionin
-	
-	override public function transitionIn(?_):Void{} // so the super.create doesnt transition
 }
 
 /*
@@ -427,3 +359,4 @@ class NoteOffsetState extends MusicBeatState
 	THIS SHIT SHOULD ABSOLUTELY BE MADE GOOD LATER!!
 	(also removing the note offset part completely might not be the best move, just because having a visual indicator for the timing might be better for some ppl)
 */
+// i don't remember what this was about lmao
