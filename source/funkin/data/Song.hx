@@ -1,13 +1,5 @@
 package funkin.data;
 
-#if USING_MOONCHART
-import moonchart.formats.fnf.legacy.FNFTroll as SupportedFormat;
-import moonchart.formats.fnf.FNFVSlice;
-import moonchart.formats.StepMania;
-import moonchart.backend.FormatData.Format;
-import moonchart.backend.FormatDetector;
-#end
-
 import funkin.states.LoadingState;
 import funkin.states.PlayState;
 import funkin.data.ChartData;
@@ -16,10 +8,6 @@ import haxe.io.Path;
 
 using funkin.CoolerStringTools;
 using StringTools;
-
-#if USING_MOONCHART
-typedef StepManiaDynamic = moonchart.formats.StepMania.StepManiaBasic<moonchart.parsers.StepManiaParser.StepManiaFormat>;
-#end
 
 final defaultDifficultyOrdering:Array<String>  = ["easy", "normal", "hard", "erect", "nightmare"];
 
@@ -96,92 +84,9 @@ class Song extends BaseSong
 		if (chartId == '')
 			chartId = DEFAULT_CHART_ID;
 
-		#if !USING_MOONCHART
 		var suffix = getDifficultyFileSuffix(chartId);
 		var path = getSongFile(songId + suffix + ".json");
 		return ChartData.parseSongJson(path);
-		#else
-		
-		// less strict v-slice format detection
-		// cause it won't detect it if you place the audio files in the same folder
-		var chartsFilePath = getSongFile('$songId-chart.json');
-		var metadataPath = getSongFile('$songId-metadata.json');
-
-		if (Paths.exists(chartsFilePath) && Paths.exists(metadataPath)) {
-			var chart = new FNFVSlice().fromFile(chartsFilePath, metadataPath);
-			if (chart.diffs.contains(chartId)) {
-				trace("CONVERTING FROM VSLICE");
-				
-				var converted = new SupportedFormat().fromFormat(chart, chartId);
-
-				// holds are too long when from v-slice
-				var stepLength:Float = Conductor.calculateStepCrochet(converted.data.song.bpm);
-				for (section in converted.data.song.notes){
-					for(note in section.sectionNotes)
-						if(note.length > stepLength * 2)
-							note[2] -= stepLength * 2;
-					
-				}
-
-
-				var chart:JsonSong = cast converted.data.song;
-				chart._path = chartsFilePath;
-				chart.song = songId;
-				chart.tracks = null;
-				return ChartData.onLoadJson(chart);
-			}else{
-				trace('VSLICE FILES DO NOT CONTAIN DIFFICULTY CHART: $chartId');
-			}
-		}
-	
-		// TODO: scan through the song folder and look for the first thing that has a supported extension (if json then check if it has diffSuffix cus FNF formats!!)
-		// Or dont since this current method lets you do a dumb thing AKA have 2 diff chart formats in a folder LOL
-
-		var files:Array<String> = [];
-		var diffSuffix:String = getDifficultyFileSuffix(chartId);
-		if (diffSuffix != '') files.push(songId + diffSuffix);
-		files.push(songId);
-
-		for (input in files) {
-			for (ext in moonchartExtensions) {
-				var filePath:String = getSongFile('$input.$ext');
-				if (!Paths.exists(filePath)) continue;
-
-				var fileFormat:Null<Format> = FormatDetector.findFormat([filePath]);
-				if (fileFormat == null) continue;
-
-				switch(fileFormat) {
-					case FNF_LEGACY_PSYCH | FNF_LEGACY | FNF_LEGACY_TROLL:
-						return ChartData.parseSongJson(filePath);
-						
-					default:
-						trace('Converting from format $fileFormat!');
-
-						var instance = FormatDetector.createFormatInstance(fileFormat).fromFile(filePath);
-						if (instance.formatMeta.supportsDiffs && !instance.diffs.contains(chartId))
-							continue;
-
-						var chart:JsonSong = cast (new SupportedFormat().fromFormat(instance, chartId)).data.song;
-						chart._path = filePath;
-						chart.song = songId;
-						chart.tracks = null;
-
-						if (instance is StepManiaBasic) @:privateAccess {
-							var instance:StepManiaDynamic = cast instance;
-							chart.tracks = {inst: [Path.withoutExtension(instance.data.MUSIC)]};
-							#if (moonchart <= "0.5.0")
-							chart.metadata ??= {};
-							chart.metadata.songName ??= instance.data.TITLE;
-							#end
-						}
-
-						return ChartData.onLoadJson(chart);
-				}
-			}
-		}
-
-		return null;
-		#end
 	}
 
 	/**
@@ -194,25 +99,6 @@ class Song extends BaseSong
 	public function play(chartId:String = '')
 		Song.playSong(this, getChartId(chartId));
 
-	#if USING_MOONCHART
-	public static var moonchartExtensions(get, null):Array<String> = [];
-	static function get_moonchartExtensions(){
-		if (moonchartExtensions.length == 0){
-			for (key => data in FormatDetector.formatMap)
-				if (!moonchartExtensions.contains(data.extension))
-					moonchartExtensions.push(data.extension);
-		}
-		return moonchartExtensions;
-	}
-
-	static function isAMoonchartRecognizedFile(fileName:String) {
-		for (ext in moonchartExtensions)
-			if (fileName.endsWith('.$ext'))
-				return true;
-		
-		return false;
-	}
-	#end
 
 	private function _getCharts():Array<String>
 	{		
@@ -230,67 +116,7 @@ class Song extends BaseSong
 			}
 		}
 
-		#if USING_MOONCHART				
-		{
-			var filePaths:Array<String> = [];
-			var fileNames:Array<String> = [];
-
-			Paths.iterateDirectory(songPath, (fileName:String)->{
-				if (fileName.startsWith(songId) && isAMoonchartRecognizedFile(fileName)){
-					filePaths.push(songPath+fileName);
-					fileNames.push(fileName);
-				}
-			});
-
-			if (filePaths.length == 0){
-				trace('$songPath has no charts! WHAT THE FUCK??');
-				trace('Make sure $songId is formatted correctly lol');
-				return [];
-			}
-
-			// Should probably return a Format.UNKNOWN or some shit instead of ERRORING
-			// but o well
-			var ALL_FILES_DETECTED_FORMAT = Format.FNF_LEGACY;
-			try {
-				ALL_FILES_DETECTED_FORMAT = FormatDetector.findFormat(filePaths);
-			}
-			catch(e:Dynamic){
-				return [];
-			}
-
-			if (ALL_FILES_DETECTED_FORMAT == FNF_VSLICE) {
-				var chartsFilePath:String = getSongFile('$songId-chart.json');
-				var metadataPath:String = getSongFile('$songId-metadata.json');
-				var chart = new FNFVSlice().fromFile(chartsFilePath, metadataPath);
-				for (diff in chart.diffs) charts.set(diff, true);
-				
-			}else {
-				for (i in 0...filePaths.length) {
-					var filePath:String = filePaths[i];
-					var fileFormat: Format = Format.FNF_LEGACY;
-					try {
-						fileFormat = FormatDetector.findFormat(filePath);
-					} catch(e: Dynamic){
-						trace("Couldn't find format probably?? Defaulting to FNF Legacy");
-						trace(e);
-					}
-					
-					var instance = FormatDetector.createFormatInstance(fileFormat);
-					if (instance.formatMeta.supportsDiffs) {
-						instance = instance.fromFile(filePath);
-						for (diff in instance.diffs)
-							charts.set(diff, true);
-						
-					}else{
-						var fileName:String = fileNames[i];
-						processFileName(fileName);
-					}
-				}
-			}
-		}
-		#else
 		Paths.iterateDirectory(songPath, processFileName);		
-		#end
 
 		var chartNames:Array<String> = [for (name in charts.keys()) name];
 		chartNames.sort(sortChartDifficulties);
