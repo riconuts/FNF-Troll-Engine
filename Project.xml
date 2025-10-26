@@ -59,7 +59,7 @@
 	<define name="USING_FLXANIMATE" />
 
 	<!--Remove if you don't want to use Moonchart, which allows usage of chart formats from other rhythm games and fnf engines-->
-	<define name="USING_MOONCHART" if="native" />
+	<define name="USING_MOONCHART" if="native MODS_ALLOWED" />
 
 	<!--If you're using git, set this, because Haxe sucks fuck and cant detect if youre on git or 0.4.0 for some fucking reason welcome to haxe ladies and gentlemen-->
 	<!-- <define name="USING_NEW_MOONCHART" /> -->
@@ -93,7 +93,7 @@
 	<set name="BUILD_DIR" value="export/32bit" if="32bits" />
 
 	<assets path="assets" />
-	<assets path='default_content' rename='content' embed='false' exclude="*.mp3" />
+	<assets path='default_content' rename='content' if='OFFICIAL_BUILD' embed='false' exclude="*.mp3" />
 
 	<section if="desktop">
 		<assets path="alsoft.txt" rename="alsoft.ini" if="windows" />
