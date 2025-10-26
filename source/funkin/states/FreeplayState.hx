@@ -295,6 +295,7 @@ class FreeplayState extends MusicBeatState
 	function openResetScorePrompt() {
 		var songName:String = selectedSongData.getMetadata(curChartId).songName;
 		var displayName:String = songName;
+		persistentUpdate = false;
 
 		if (selectedSongCharts.length > 1) {
 			var diffName:String = Paths.getString('difficultyName_$curChartId') ?? curChartId;
@@ -315,6 +316,7 @@ class FreeplayState extends MusicBeatState
 	}
 
 	function openGameplayChangersMenu() {
+		persistentUpdate = false;
 		openSubState(new GameplayChangersSubstate());
 		menu.controls = null;
 		this.subStateClosed.addOnce(function(_) {
