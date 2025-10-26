@@ -142,7 +142,7 @@ class MoonchartContent
 		supportedFormats.push(FNF_VSLICE);
 
 		////
-		var moonchartPath:String = 'content/moonchart/moonchart';
+		var moonchartPath:String = Paths.mods('moonchart/moonchart');
 
 		for (formatId in supportedFormats) {
 			var folderPath:String = MoonchartUtil.extendPath(moonchartPath, formatId);
