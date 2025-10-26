@@ -33,6 +33,9 @@ class FreeplayState extends MusicBeatState
 	var menu:FreeplayMenu;
 	var songList:Array<BaseSong>;
 
+	var categoryList:Array<FreeplayCategory> = [new FreeplayCategory('main', 'All'), new AlphabeticFreeplayCategory('b')];
+	var categoryIdx:Int = 0;
+
 	var bgGrp = new FlxTypedGroup<FlxSprite>();
 	var bg:FlxSprite;
 
@@ -154,6 +157,8 @@ class FreeplayState extends MusicBeatState
 
 		////
 		var hintStr = "";
+		hintStr += '[TAB] Switch Category';
+		hintStr += '\n';
 		hintStr += '[R] ${Paths.getString('action_resetScore') ?? 'action_resetScore'}';
 		//InputFormatter.getKeyName(controls.getFirstBind('reset'));
 		hintStr += '\n';
@@ -193,7 +198,10 @@ class FreeplayState extends MusicBeatState
 		add(scoreText);
 
 		////
-		menu.setSongList(songList);
+		for (category in categoryList)
+			category.addSongs(songList);
+
+		menu.setSongList(categoryList[categoryIdx].songs);
 		curChartId = FreeplayState.lastSelectedChart;
 		menu.curSelected = FreeplayState.lastSelectedIdx;
 		if (comingFromPlayState) playSelectedSongMusic();
@@ -301,6 +309,12 @@ class FreeplayState extends MusicBeatState
 			
 		}else if (FlxG.keys.justPressed.CONTROL){
 			openGameplayChangersMenu();
+		}
+
+		if (FlxG.keys.justPressed.TAB) {
+			categoryIdx = CoolUtil.updateIndex(categoryIdx, 1, categoryList.length);
+			trace(categoryList[categoryIdx].id);
+			menu.setSongList(categoryList[categoryIdx].songs);
 		}
 	}
 
@@ -593,5 +607,39 @@ private class FreeplayIcon extends HealthIcon
 			alpha = tracking.alpha;
 		}
 		super.update(elapsed);
+	}
+}
+
+private class AlphabeticFreeplayCategory extends FreeplayCategory {
+	public final letter:String;
+	private final songFilter:BaseSong -> Bool;
+	
+	public function new(letter:String) {
+		this.letter = letter;
+		this.songFilter = s -> StringTools.startsWith(s.songId, letter);
+		super('AlphabeticFreeplayCategory_$letter', letter.toUpperCase());
+	}
+
+	override function addSongs(songList:Array<BaseSong>) {
+		this.songs = songList.filter(songFilter);
+	}
+}
+
+private class FreeplayCategory {
+	public var id:String;
+	public var displayName:String;
+
+	public var songs:Array<BaseSong> = null;
+
+	public function new(id:String, ?displayName:String) {
+		this.id = id;
+		this.displayName = displayName ?? id;
+	}
+
+	/** 
+		Filters and sets an Array of Songs to this FreeplayCategory.  
+	**/
+	public function addSongs(songList:Array<BaseSong>) {
+		this.songs = songList.copy();
 	}
 }
