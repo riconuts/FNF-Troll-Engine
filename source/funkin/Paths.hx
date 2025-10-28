@@ -35,7 +35,7 @@ class Paths
 	];
 
 
-	public static function getFileWithExtensions(scriptPath:String, extensions:Array<String>) {
+	public static function getFileWithExtensions(scriptPath:String, extensions:Array<String>):Null<String> {
 		for (fileExt in extensions) {
 			var baseFile:String = '$scriptPath.$fileExt';
 			var file:String = getPath(baseFile);
@@ -53,7 +53,7 @@ class Paths
 		
 		return false;
 	}
-	public inline static function getHScriptPath(scriptPath:String)
+	public inline static function getHScriptPath(scriptPath:String):Null<String>
 	{
 		#if HSCRIPT_ALLOWED
 		return getFileWithExtensions(scriptPath, Paths.HSCRIPT_EXTENSIONS);
