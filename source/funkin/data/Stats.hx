@@ -22,7 +22,7 @@ enum abstract AccuracySystem(String) from String to String
 typedef NoteHitInfo = {
 	var strumTime:Float;
 	var judgment:Judgment;
-	@:optional var hitDiff:Float;
+	var hitDiff:Float;
 }
 
 class Stats {
