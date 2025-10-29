@@ -269,7 +269,7 @@ class NoteField extends FieldBase
 		}
 
 		if ((FlxG.state is PlayState))
-			PlayState.instance.callOnHScripts("notefieldPreDraw", [this],
+			PlayState.instance.callOnScripts("notefieldPreDraw", [this],
 				["drawQueue" => drawQueue, "lookupMap" => lookupMap]); // lets you do custom rendering in scripts, if needed
 		// one example would be reimplementing Die Batsards' original bullet mechanic
 		// if you need an example on how this all works just look at the tap note drawing portion

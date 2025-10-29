@@ -479,7 +479,6 @@ class PlayState extends MusicBeatState
 
 	//// Script shit
 	public var funkyScripts:Array<FunkinScript> = [];
-	public var hscriptArray:Array<FunkinHScript> = [];
 
 	public var scriptsToClose:Array<FunkinScript> = [];
 
@@ -772,7 +771,6 @@ class PlayState extends MusicBeatState
 		stageData = stage.stageData;
 
 		if (stage.stageScript != null){
-			hscriptArray.push(stage.stageScript);
 			funkyScripts.push(stage.stageScript);
 		}
 
@@ -902,7 +900,7 @@ class PlayState extends MusicBeatState
 		// RICO CAN WE STOP USING SLURS IN THE CODE
 		// we???
 		// fine, can YOU stop using slurs in the code >:(
-		if (Globals.Function_Stop != callOnHScripts("onAddSpriteGroups"))
+		if (Globals.Function_Stop != callOnScripts("onAddSpriteGroups"))
 		{
 			add(stage);
 
@@ -1223,7 +1221,7 @@ class PlayState extends MusicBeatState
 		var dadColor:FlxColor = (dadArray==null) ? 0xFFFF0000 : FlxColor.fromRGB(dadArray[0], dadArray[1], dadArray[2]);
 		var bfColor:FlxColor = (bfArray==null) ? 0xFF00FF00 : FlxColor.fromRGB(bfArray[0], bfArray[1], bfArray[2]);
 		
-		if(callOnHScripts('reloadHealthBarColors', [hud, dadColor, bfColor]) == Globals.Function_Stop)
+		if(callOnScripts('reloadHealthBarColors', [hud, dadColor, bfColor]) == Globals.Function_Stop)
 			return;
 
 		hud.reloadHealthBarColors(dadColor, bfColor);
@@ -1293,8 +1291,6 @@ class PlayState extends MusicBeatState
 		char.setupCharacter();
 
 		for (script in char.characterScripts) {
-			hscriptArray.push(cast script);
-
 			funkyScripts.push(script);
 		}
 
@@ -2079,7 +2075,7 @@ class PlayState extends MusicBeatState
 				}
 		}
 
-		callOnHScripts("eventPushed", [event]);
+		callOnScripts("eventPushed", [event]);
 	}
 
 	// called only once for each different event
@@ -2087,7 +2083,7 @@ class PlayState extends MusicBeatState
 		if (eventScripts.exists(eventName))
 			eventScripts.get(eventName).call("onLoad");
 
-		callOnHScripts("firstEventPush", [eventName]);
+		callOnScripts("firstEventPush", [eventName]);
 	}
 
 	function firstNotePush(type:String) {
@@ -2308,7 +2304,7 @@ class PlayState extends MusicBeatState
 
 	function stepHold(note:Note, field:PlayField)
 	{
-		callOnHScripts("onHoldStep", [note, field]);
+		callOnScripts("onHoldStep", [note, field]);
 		
 		if (note.noteScript != null)
 			callScript(note.noteScript, "onHoldStep", [note, field]);
@@ -2327,7 +2323,7 @@ class PlayState extends MusicBeatState
 
 	function pressHold(note:Note, field:PlayField)
 	{
-		callOnHScripts("onHoldPress", [note, field]);
+		callOnScripts("onHoldPress", [note, field]);
 		
 		if (note.noteScript != null)
 			callScript(note.noteScript, "onHoldPress", [note, field]);
@@ -2342,7 +2338,7 @@ class PlayState extends MusicBeatState
 	
 	function releaseHold(note:Note, field:PlayField):Void
 	{
-		callOnHScripts("onHoldRelease", [note, field]);
+		callOnScripts("onHoldRelease", [note, field]);
 		
 		if (note.noteScript != null)
 			callScript(note.noteScript, "onHoldRelease", [note, field]);
@@ -2352,12 +2348,12 @@ class PlayState extends MusicBeatState
 	}
 
 	function field_noteSpawned(dunceNote:Note, field:PlayField) {
-		callOnHScripts('onSpawnNote', [dunceNote]);
+		callOnScripts('onSpawnNote', [dunceNote]);
 
 		notes.add(dunceNote);
 		unspawnNotes.remove(dunceNote);
 
-		callOnHScripts('onSpawnNotePost', [dunceNote]);
+		callOnScripts('onSpawnNotePost', [dunceNote]);
 		if (dunceNote.noteScript != null)
 			callScript(dunceNote.noteScript, "postSpawnNote", [dunceNote]);
 	}
@@ -2508,7 +2504,7 @@ class PlayState extends MusicBeatState
 		for (script in eventScripts)
 			script.call("update", [elapsed]);
 
-		callOnHScripts('update', [elapsed]);
+		callOnScripts('update', [elapsed]);
 
 		var lerpVal = Math.exp(-elapsed * 3.125 * camZoomingDecay);
 
@@ -3408,7 +3404,7 @@ class PlayState extends MusicBeatState
 		var judgeData:JudgmentData = judgeManager.judgmentData.get(note.hitResult.judgment);
 		if(judgeData==null)return null;
 
-		if (callOnHScripts("onApplyNoteJudgment", [note, judgeData, bot]) == Globals.Function_Stop)
+		if (callOnScripts("onApplyNoteJudgment", [note, judgeData, bot]) == Globals.Function_Stop)
 			return null;
 
 		var mutatedJudgeData:JudgmentData = Reflect.copy(judgeData);
@@ -3417,13 +3413,13 @@ class PlayState extends MusicBeatState
 			if (ret != null && ret != Globals.Function_Continue)
 				mutatedJudgeData = cast ret;
 		}
-		var ret:Dynamic = callOnHScripts("mutateJudgeData", [note, mutatedJudgeData]);
+		var ret:Dynamic = callOnScripts("mutateJudgeData", [note, mutatedJudgeData]);
 		if (ret != null && ret != Globals.Function_Continue)
 			mutatedJudgeData = cast ret; // so you can return your own custom judgements or w/e
 
 		applyJudgmentData(mutatedJudgeData, note.hitResult.hitDiff, bot, true);
 
-		callOnHScripts("onApplyNoteJudgmentPost", [note, mutatedJudgeData, bot]);
+		callOnScripts("onApplyNoteJudgmentPost", [note, mutatedJudgeData, bot]);
 		
 		return mutatedJudgeData;
 	}
@@ -3518,7 +3514,7 @@ class PlayState extends MusicBeatState
 				continue;
 
 			var note:Note = {
-				var ret:Dynamic = callOnHScripts("onFieldInput", [field, column, hitNotes]);
+				var ret:Dynamic = callOnScripts("onFieldInput", [field, column, hitNotes]);
 				if (ret == Globals.Function_Stop) null;
 				else if (ret is Note) ret;
 				else field.input(column, hitTime);
@@ -3635,7 +3631,7 @@ class PlayState extends MusicBeatState
 		}else
 			daNote.hitResult.judgment = MISS;
 
-		if(callOnHScripts("preNoteMiss", [daNote, field]) == Globals.Function_Stop)
+		if(callOnScripts("preNoteMiss", [daNote, field]) == Globals.Function_Stop)
 			return;
 		if (daNote.noteScript != null && callScript(daNote.noteScript, "preNoteMiss", [daNote, field]) == Globals.Function_Stop)
 			return;
@@ -3691,7 +3687,7 @@ class PlayState extends MusicBeatState
 		}
 		
 		////
-		callOnHScripts("noteMiss", [daNote, field]);
+		callOnScripts("noteMiss", [daNote, field]);
 		if (daNote.noteScript != null)
 			callScript(daNote.noteScript, "noteMiss", [daNote, field]);
 		if (daNote.genScript != null)
@@ -3743,12 +3739,12 @@ class PlayState extends MusicBeatState
 	{
 		if (note.noteScript != null && callScript(note.noteScript, "preOpponentNoteHit", [note, field]) == Globals.Function_Stop)
 			return;
-		if (callOnHScripts("preOpponentNoteHit", [note, field]) == Globals.Function_Stop)
+		if (callOnScripts("preOpponentNoteHit", [note, field]) == Globals.Function_Stop)
 			return;
 		commonNoteHit(note, field);
 
 		// Script shit
-		callOnHScripts("opponentNoteHit", [note, field]);
+		callOnScripts("opponentNoteHit", [note, field]);
 		if (note.noteScript != null)
 			callScript(note.noteScript, "opponentNoteHit", [note, field]);	
 
@@ -3789,7 +3785,7 @@ class PlayState extends MusicBeatState
 		if (note.noteScript != null && callScript(note.noteScript, "onCommonNoteHitPre", [note, field]) == Globals.Function_Stop)
 			return;
 
-		if (callOnHScripts("onCommonNoteHitPre", [note, field]) == Globals.Function_Stop)
+		if (callOnScripts("onCommonNoteHitPre", [note, field]) == Globals.Function_Stop)
 			return;
 
 		note.wasGoodHit = true;
@@ -3814,7 +3810,7 @@ class PlayState extends MusicBeatState
 		if (note.noteScript != null)
 			callScript(note.noteScript, "onCommonNoteHit", [note, field]);
 
-		callOnHScripts("onCommonNoteHit", [note, field]);
+		callOnScripts("onCommonNoteHit", [note, field]);
 	}
 
 	inline function playShithound(){
@@ -3831,7 +3827,7 @@ class PlayState extends MusicBeatState
 
 		if (note.noteScript != null && callScript(note.noteScript, "preGoodNoteHit", [note, field]) == Globals.Function_Stop)
 			return;
-		if (callOnHScripts("preGoodNoteHit", [note, field]) == Globals.Function_Stop)
+		if (callOnScripts("preGoodNoteHit", [note, field]) == Globals.Function_Stop)
 			return;
 
 		if (!note.isSustainNote) {
@@ -3887,7 +3883,7 @@ class PlayState extends MusicBeatState
 
 		commonNoteHit(note, field);
 		// Script shit
-		callOnHScripts("goodNoteHit", [note, field]);
+		callOnScripts("goodNoteHit", [note, field]);
 		if (note.noteScript != null)
 			callScript(note.noteScript, "goodNoteHit", [note, field]);
 
@@ -3933,14 +3929,12 @@ class PlayState extends MusicBeatState
 		var script = FunkinHScript.fromFile(path, scriptName, [
 			"modName" => modName
 		], ignoreCreateCall != true);
-		hscriptArray.push(script);
 		funkyScripts.push(script);
 		return script;
 	}
 
 	public function removeHScript(script:FunkinHScript):Void {
 		funkyScripts.remove(script);
-		hscriptArray.remove(script);
 	}
 
 	public function getHudSkinScript(name:String):Null<FunkinHScript> {
@@ -4031,9 +4025,6 @@ class PlayState extends MusicBeatState
 		while (scriptsToClose.length > 0){
 			var script = scriptsToClose.pop();
 
-			if (script.scriptType == HSCRIPT)
-				hscriptArray.remove(cast script);
-
 			trace('Closed ${script.scriptName}');
 			funkyScripts.remove(script);
 			script.stop();
@@ -4101,20 +4092,11 @@ class PlayState extends MusicBeatState
 		return Globals.Function_Continue;
 	}
 
-	#if HSCRIPT_ALLOWED
-	public function callOnHScripts(event:String, ?args:Array<Dynamic>, ?vars:Map<String, Dynamic>, ignoreStops = false, ?exclusions:Array<String>):Dynamic
-		return callOnScripts(event, args, ignoreStops, exclusions, hscriptArray, vars);
-	
-	public function setOnHScripts(variable:String, arg:Dynamic)
-		return setOnScripts(variable, arg, hscriptArray);
-
+	#if HSCRIPT_ALLOWED	
 	public function setDefaultHScripts(variable:String, arg:Dynamic){
 		FunkinHScript.defaultVars.set(variable, arg);
-		return setOnScripts(variable, arg, hscriptArray);
+		return setOnScripts(variable, arg, funkyScripts);
 	}
-	#else
-	inline public function callOnHScripts(event:String, ?args:Array<Dynamic>, ?vars:Map<String, Dynamic>, ignoreStops = false, ?exclusions:Array<String>):Dynamic
-		return Globals.Function_Continue;
 	#end
 
 	public function RecalculateRating() {
@@ -4269,9 +4251,6 @@ class PlayState extends MusicBeatState
 			script.call("onDestroy");
 			script.stop();
 		}
-		
-		if (hscriptArray != null)
-			hscriptArray.resize(0);
 
 		sectionCamera.put();
 		customCamera.put();

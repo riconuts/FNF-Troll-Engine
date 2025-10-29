@@ -102,7 +102,7 @@ class Countdown extends FlxBasic {
 			}
 
 			if (game != null) {
-				game.callOnHScripts('onCountdownSpritePost', [sprite, curPos]);
+				game.callOnScripts('onCountdownSpritePost', [sprite, curPos]);
 				if (game.hudSkinScript != null)
 					game.hudSkinScript.call("onCountdownSpritePost", [sprite, curPos]);
 			}
@@ -133,7 +133,7 @@ class Countdown extends FlxBasic {
 		}
 
 		if (game != null) {
-			game.callOnHScripts('onCountdownTick', [curPos]);
+			game.callOnScripts('onCountdownTick', [curPos]);
 			if (game.hudSkinScript != null)
 				game.hudSkinScript.call("onCountdownTick", [curPos]);
 		}

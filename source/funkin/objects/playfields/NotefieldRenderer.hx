@@ -1,7 +1,7 @@
 package funkin.objects.playfields;
 /* 
 			if ((FlxG.state is PlayState))
-				PlayState.instance.callOnHScripts("notefieldDraw", [this], ["drawQueue" => drawQueue]); // lets you do custom rendering in scripts, if needed
+				PlayState.instance.callOnScripts("notefieldDraw", [this], ["drawQueue" => drawQueue]); // lets you do custom rendering in scripts, if needed
 
 			var glowR = modManager.getValue("flashR", modNumber);
 			var glowG = modManager.getValue("flashG", modNumber);

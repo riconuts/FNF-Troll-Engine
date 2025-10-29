@@ -23,7 +23,7 @@ class NoteSplash extends NoteObject
 
 	function callOnHScripts(event:String, ?args:Array<Dynamic>, ?vars:Map<String, Dynamic>, ignoreStops = false, ?exclusions:Array<String>):Dynamic{
 		if(FlxG.state == PlayState.instance)
-			return PlayState.instance.callOnScripts(event, args, ignoreStops, exclusions, PlayState.instance.hscriptArray, vars);
+			return PlayState.instance.callOnScripts(event, args, ignoreStops, exclusions, null, vars);
 		else
 			return Globals.Function_Continue;
 
