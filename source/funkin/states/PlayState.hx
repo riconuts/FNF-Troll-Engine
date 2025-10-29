@@ -2696,12 +2696,6 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	public function getControl(key:String) { // psych lua uses this
-		var pressed:Bool = Reflect.getProperty(controls, key);
-		//trace('Control result: ' + pressed);
-		return pressed;
-	}
-
 	public function changeCharacter(name:String, charType:CharacterType)
 	{
 		var oldChar:Character;
