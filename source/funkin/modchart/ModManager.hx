@@ -600,10 +600,17 @@ class ModManager {
 		if (pos == null)
 			pos = new Vector3();
 
-		diff += (
-			(FlxMath.lerp(Note.swagWidth, Conductor.crotchet * 0.45 * (obj.objType == NOTE ? getNoteSpeed(cast obj, player, field.songSpeed) : getCMod(data, player, field.songSpeed) * getXMod(data, player)), getValue("movePathType", player))) * getValue("movePath", player)) + 
-			getValue("transformPath", player
-		); 
+		var speed:Float = if (obj.objType == NOTE)
+			getNoteSpeed(cast obj, player, field.songSpeed);
+		else
+			getCMod(data, player, field.songSpeed) * getXMod(data, player);
+
+		diff += getValue("transformPath", player);
+		diff += getValue("movePath", player) * FlxMath.lerp(
+			Note.swagWidth,
+			Conductor.crotchet * 0.45 * speed,
+			getValue("movePathType", player)
+		);
 		
 		pos.setTo(
 			Note.halfWidth + field.field.getBaseX(data),
