@@ -284,17 +284,16 @@ class Note extends NoteObject
 		return tex;
 	}
 
-	public function updateColours(ignore:Bool=false){		
-		if (!ignore && !usesDefaultColours) return;
+	/**
+		@param force If `true`, forces the colours to update even if `usesDefaultColours` is `false`
+	**/
+	public function updateColours(force:Bool = false){
+		if (!force && !usesDefaultColours) return;
 		if (colorSwap==null) return;
 		if (column == -1) return; // FUCKING PSYCH EVENT NOTES!!!
 		
 		var hsb = isQuant ? ClientPrefs.quantHSV[quants.indexOf(quant)] : ClientPrefs.arrowHSV[column % 4];
-		(hsb == null) ? colorSwap.setHSB() : colorSwap.setHSB(
-			hsb[0] / 360, 
-			hsb[1] / 100, 
-			hsb[2] / 100
-		);
+		colorSwap.setHSBIntArray(hsb);
 
 		if (noteScript != null)
 			noteScript.executeFunc("onUpdateColours", [this], this);
