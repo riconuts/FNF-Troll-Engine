@@ -17,7 +17,7 @@ enum abstract ObjectType(#if cpp cpp.UInt8 #else Int #end)
 class NoteObject extends FlxSprite {
 	public var extraData:Map<String, Dynamic> = [];
 
-	public var objType:ObjectType = UNKNOWN;
+	public var objType:ObjectType;
 	public var zIndex:Float = 0;
 	public var column:Int = 0;
 
@@ -33,9 +33,10 @@ class NoteObject extends FlxSprite {
 	inline function get_noteData() return column;
 	inline function set_noteData(v) return column = v;
 	
-	public function new(?x:Float, ?y:Float)
+	public function new(objType:ObjectType = UNKNOWN)
 	{
-		super(x, y);
+		this.objType = objType;
+		super();
 	}
 	
 	override function toString()

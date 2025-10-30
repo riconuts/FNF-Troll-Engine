@@ -11,8 +11,7 @@ class NoteSplash extends NoteObject
 	private var textureLoaded:String = null;
 
 	public function new(x:Float = 0, y:Float = 0, ?note:Int = 0) {
-		super(x, y);
-		objType = SPLASH;
+		super(SPLASH);
 		
 		colorSwap = new NoteColorSwap();
 		shader = NoteColorSwap.shader;

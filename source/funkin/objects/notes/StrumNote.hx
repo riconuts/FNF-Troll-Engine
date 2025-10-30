@@ -35,11 +35,10 @@ class StrumNote extends NoteObject
 	private var field:PlayField;
 
 	public function new(x:Float, y:Float, leColumn:Int, ?playField:PlayField, ?hudSkin:String = 'default') {
-		super(x, y);
+		super(STRUM);
 		colorSwap = new NoteColorSwap();
 		shader = NoteColorSwap.shader;
 
-		objType = STRUM;
 		column = leColumn;
 		field = playField;
 		noteMod = hudSkin;

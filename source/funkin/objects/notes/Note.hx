@@ -429,8 +429,7 @@ class Note extends NoteObject
 
 	public function new(strumTime:Float, column:Int, ?prevNote:Note, fieldIndex:Int = -1, susPart:SustainPart = TAP, ?inEditor:Bool = false, ?noteMod:String = 'default')
 	{
-		super();
-		this.objType = NOTE;
+		super(NOTE);
 
 		this.strumTime = strumTime;
 		this.column = column;
