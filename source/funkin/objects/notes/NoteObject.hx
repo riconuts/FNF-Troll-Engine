@@ -29,9 +29,12 @@ class NoteObject extends FlxSprite {
 	public var handleRendering:Bool = true;
 	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
 
+	#if ALLOW_DEPRECATION
+	@:deprecated("noteData is deprecated! Use `column` instead.")
 	public var noteData(get, set):Int; // backwards compat
 	inline function get_noteData() return column;
 	inline function set_noteData(v) return column = v;
+	#end
 	
 	public function new(objType:ObjectType = UNKNOWN)
 	{
