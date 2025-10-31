@@ -36,6 +36,7 @@ class StrumNote extends NoteObject
 
 	public function new(x:Float, y:Float, leColumn:Int, ?playField:PlayField, ?hudSkin:String = 'default') {
 		super(STRUM);
+		setPosition(x, y);
 		colorSwap = new NoteColorSwap();
 		shader = NoteColorSwap.shader;
 
