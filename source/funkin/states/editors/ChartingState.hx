@@ -3870,7 +3870,7 @@ private class AddEventAction extends ChartingAction {
 	}
 
 	public function toString() {
-		return 'Remove Event (${Math.floor(eventData.strumTime)})';
+		return 'Add Event (${Math.floor(eventData.strumTime)})';
 	}
 }
 
