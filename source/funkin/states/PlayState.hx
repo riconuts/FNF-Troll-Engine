@@ -155,8 +155,8 @@ class PlayState extends MusicBeatState
 
 	public static function loadPlaylist(playlist:Array<BaseSong>, chartId:String) {
 		PlayState.loadSong(playlist[0], chartId);
-		PlayState.songPlaylist = playlist;
-		PlayState.songPlaylistIdx = 0;	
+		PlayState.playlistSongs = playlist;
+		PlayState.playlistIndex = 0;	
 	}
 
 	public static function loadSong(song:BaseSong, chartId:String) {
@@ -178,21 +178,19 @@ class PlayState extends MusicBeatState
 
 	public static var instance:PlayState;
 
-	public static var SONG:SwagSong = null;
-	public static var songPlaylist:Array<BaseSong> = [];
-	public static var songPlaylistIdx = 0;
-
-	public static var song:BaseSong;
-
-	public static var level:Level;
-
+	public static var playlistSongs:Array<BaseSong> = [];
+	public static var playlistIndex:Int = 0;
 	public static var difficultyName:String = 'normal'; // should NOT be set to "" when playing normal diff!!!!!
 
 	public static var isStoryMode:Bool = false;
-	// public static var storyWeek:Int = 0;
 	public static var campaignScore:Int = 0;
 	public static var campaignMisses:Int = 0;
 	public static var deathCounter:Int = 0;
+
+	public static var song:BaseSong;
+	public static var level:Level;
+
+	public static var SONG:SwagSong = null;
 	
 	public static var chartingMode:Bool = false;
 	public static var startOnTime:Float = 0;
@@ -704,7 +702,7 @@ class PlayState extends MusicBeatState
 
 		if (isStoryMode) {
 			postSongVideo = Paths.formatToSongPath('$songId-end');
-			skipArrowStartTween = (songPlaylistIdx > 0);
+			skipArrowStartTween = (playlistIndex > 0);
 		}
 
 		for (groupName in Reflect.fields(SONG.tracks)) {
@@ -3084,7 +3082,7 @@ class PlayState extends MusicBeatState
 			Highscore.saveScoreRecord(songId, difficultyName, stats.getScoreRecord());
 
 		var gotoNextThing:Void -> Void = gotoMenus;
-		var nextSong:BaseSong = songPlaylist[songPlaylistIdx + 1];
+		var nextSong:BaseSong = playlistSongs[playlistIndex + 1];
 
 		if (isStoryMode) {
 			// TODO: add a modcharted variable which songs w/ modcharts should set to true, then make it so if modcharts are disabled the score wont get added
@@ -3102,13 +3100,13 @@ class PlayState extends MusicBeatState
 				FlxTransitionableState.skipNextTransIn = true;
 				FlxTransitionableState.skipNextTransOut = true;
 
-				PlayState.songPlaylistIdx++;
-				trace('LOADING NEXT SONG: $nextSong, (${PlayState.songPlaylistIdx + 1} / ${PlayState.songPlaylist.length})');
+				PlayState.playlistIndex++;
+				trace('LOADING NEXT SONG: $nextSong, (${PlayState.playlistIndex + 1} / ${PlayState.playlistSongs.length})');
 				PlayState.loadSong(nextSong, PlayState.difficultyName);
 				MusicBeatState.switchState(new PlayState());
 			}
 		}else {
-			trace('PLAYLIST END (${PlayState.songPlaylistIdx + 1} / ${PlayState.songPlaylist.length})');
+			trace('PLAYLIST END (${PlayState.playlistIndex + 1} / ${PlayState.playlistSongs.length})');
 			onPlaylistEnd();
 		}
 

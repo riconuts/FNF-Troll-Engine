@@ -517,7 +517,7 @@ class StoryModeState extends MusicBeatState {
 		PlayState.isStoryMode = true;
 		PlayState.level = level;
 
-		trace(PlayState.level.id, PlayState.difficultyName, PlayState.songPlaylist);
+		trace(PlayState.level.id, PlayState.difficultyName, PlayState.playlistSongs);
 
 		MusicBeatState.switchState(new PlayState());
 	}
