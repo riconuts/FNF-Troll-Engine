@@ -1711,8 +1711,10 @@ class PlayState extends MusicBeatState
 		hitsound.exists = true;
 		FlxG.sound.list.add(hitsound);
 
-		playerField.tracks = playerTracks;
-		dadField.tracks = opponentTracks;
+		if (playerField != null)
+			playerField.tracks = playerTracks;
+		if (dadField != null)
+			dadField.tracks = opponentTracks;
 
 		inst = instTracks[0];
 		vocals = playerTracks[0];
@@ -1860,13 +1862,14 @@ class PlayState extends MusicBeatState
 				if (callScripts)
 					callOnScripts("onGeneratedNote", [swagNote, section]);
 				
-				playfield = swagNote.field;
-				swagNote.fieldIndex = playfield.modNumber;
-				
 				notes.push(swagNote); // just for the sake of convenience
-
-				if (addToFields && playfield != null)
-					playfield.queue(swagNote); // queues the note to be spawned
+				
+				playfield = swagNote.field;
+				if (playfield != null) {
+					swagNote.fieldIndex = playfield.modNumber;
+					if (addToFields)
+						playfield.queue(swagNote); // queues the note to be spawned
+				}
 
 				if (callScripts)
 					callOnScripts("onGeneratedNotePost", [swagNote, section]);
