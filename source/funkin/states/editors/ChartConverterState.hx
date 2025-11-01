@@ -287,7 +287,15 @@ class ChartConverterState extends MusicBeatState
 				}
 			}
 		}
-		openSubState(new Prompt('Save success'));
+		openSubState(new Prompt(
+			'Files have been saved to the "moonchartConverted/" folder', 
+			0,
+			lime.system.System.openFile.bind(CoolUtil.getSystemPath("moonchartConverted/")),
+			null,
+			false,
+			'Open Folder',
+			'OK'
+		));
 	}
 
 	override function update(elapsed:Float) {
