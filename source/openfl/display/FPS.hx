@@ -57,7 +57,7 @@ class FPS extends TextField
 	function onGameResized(windowWidth, ?windowHeight)
 		align = align;
 
-	@:noCompletion private var lastTime:Float = 0;
+	@:noCompletion private var sowyTmr:Float = 0.0;
 	@:noCompletion private var framesCounted:Int = 0;
 
 	public function new(x:Float = 10, y:Float = 10, color:Int = 0xFFFFFF)
@@ -133,14 +133,15 @@ class FPS extends TextField
 	@:noCompletion
 	private override function __enterFrame(deltaTime:Float):Void
 	{
-		var nowTime = Main.getTime();
-		if (nowTime - lastTime > 1000) {
+		sowyTmr += deltaTime;
+		if (sowyTmr > 1000) {
 			currentFPS = framesCounted;
 			framesCounted = 0;
-			lastTime = nowTime;
+			sowyTmr = 0;
+		}else {
+			framesCounted++;
+			return;
 		}
-
-		framesCounted++;
 
 		var text:String = 'FPS: $currentFPS';
 		
