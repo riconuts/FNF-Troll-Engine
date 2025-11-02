@@ -66,17 +66,13 @@ class StrumNote extends NoteObject
 			genScript.executeFunc("setupReceptorTexture", [this]);
 		
 		}else {
-			var skin:String = PlayState.arrowSkin;
+			var newTex:String = PlayState.arrowSkin;
 
-			var newTex = (genScript != null && genScript.exists("texture")) ? genScript.get("texture") : skin;
-			if (genScript != null)
-			{
-				if (genScript.exists("texturePrefix"))
-					newTex = genScript.get("texturePrefix") + texture;
+			if (genScript.exists("texture"))
+				newTex = genScript.get("texture");
 
-				if (genScript.exists("textureSuffix"))
-					newTex += genScript.get("textureSuffix");
-			}
+			if (genScript.exists("textureSuffix"))
+				newTex += genScript.get("textureSuffix");
 
 			texture = newTex; // Load texture and anims
 		}

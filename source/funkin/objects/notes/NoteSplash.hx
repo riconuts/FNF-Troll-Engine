@@ -63,10 +63,9 @@ class NoteSplash extends NoteObject
 		this.column = column;
 		if (texture == null) texture = PlayState.splashSkin;
 
-		if(note != null && note.genScript != null){
-			if (note.genScript.exists("texturePrefix")) texture = note.genScript.get("texturePrefix") + texture;
-
-			if (note.genScript.exists("textureSuffix")) texture += note.genScript.get("textureSuffix");
+		if (note?.genScript != null) {
+			if (note.genScript.exists("textureSuffix")) 
+				texture += note.genScript.get("textureSuffix");
 		}
 
 		if (textureLoaded != texture) {
