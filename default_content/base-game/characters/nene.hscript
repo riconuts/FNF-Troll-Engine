@@ -119,10 +119,13 @@ function setupCharacter() {
 	
 
 	pupil = new FlxAnimate(0, 0);
-	pupil.frames = FlxAnimateFrames.fromAnimate(Paths.animateAtlasPath('characters/abot/systemEyes'));
+	pupil.frames = Paths.getTextureAtlas('characters/abot/systemEyes');
+	pupil.anim.addByTimeline("", pupil.library.timeline);
+	pupil.anim.play("");
 
 	abot = new FlxAnimate(0, 0);
-	abot.frames = FlxAnimateFrames.fromAnimate(Paths.animateAtlasPath('characters/abot/abotSystem'));
+	abot.frames = Paths.getTextureAtlas('characters/abot/abotSystem');
+	abot.anim.addByTimeline("", abot.library.timeline);
 	// abotViz = new ABotVis(FlxG.sound.music, false);
 	var visFrms:FlxAtlasFrames = Paths.getSparrowAtlas('characters/abot/aBotViz');
 	var posX = [0, 59, 56, 66, 54, 52, 51];
@@ -214,7 +217,7 @@ function copyTransforms() {
 	eyeWhites.alpha = lastA;
 	eyeWhites.visible = lastV;
 
-	pupil.setPosition(abotX - 507, abotY - 492);
+	pupil.setPosition(abotX + 50, abotY + 241);
 	pupil.alpha = lastA;
 	pupil.visible = lastV;
 
@@ -234,8 +237,7 @@ function copyTransforms() {
 var lastTarget:String = 'bf';
 function onMoveCamera(target) {
 	if(target != lastTarget){
-		pupil.anim.play('');
-		pupil.anim.curFrame = (target == "bf") ? 17 : 0;
+		pupil.anim.play('', true, false, (target == "bf") ? 17 : 0);
 		pupilState = (target == "bf") ? PUPIL_STATE_NORMAL : PUPIL_STATE_LEFT;
 	}
 	lastTarget = target;
@@ -270,10 +272,10 @@ function onCharacterUpdate(e) {
 		}
 	} */
 
-	if (pupil != null && pupil.anim != null && pupil.anim.isPlaying) {
+	if (pupil != null && !pupil.animation.paused && !pupil.animation.finished) {
 		var checkFrame = (pupilState == PUPIL_STATE_LEFT) ? 17 : 30;
-		if (pupil.anim.curFrame >= checkFrame)
-			pupil.anim.pause();
+		if (pupil.animation.curAnim.curFrame >= checkFrame)
+			pupil.animation.pause();
 	}
 
 	var anim = this.animation.name;
@@ -311,8 +313,7 @@ function onCharacterUpdate(e) {
 
 function onDance() {
 	if (abot != null) {
-		abot.anim.play("");
-		abot.anim.curFrame = 1; // we start on this frame, since from Flash the symbol has a non-bumpin frame on frame 0
+		abot.anim.play("", true, false, 1); // we start on this frame, since from Flash the symbol has a non-bumpin frame on frame 0
 	}
 
 	visOffsetSpeed = 25;
