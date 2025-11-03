@@ -5,7 +5,8 @@ import flixel.util.FlxSignal.FlxTypedSignal;
 import flixel.tweens.FlxEase;
 
 #if USING_FLXANIMATE
-import flxanimate.FlxAnimate;
+import animate.FlxAnimate;
+import animate.FlxAnimateFrames;
 #end
 
 class TimelineAction {
@@ -44,7 +45,7 @@ class PlayAnimationAction extends TimelineAction {
 			if(sprite is FlxAnimate){
 				var animate: FlxAnimate = cast sprite;
 				animate.anim.play(name, true);
-				animate.anim.curFrame = Math.floor(actionLocalSecs * animate.anim.framerate);
+				animate.anim.curAnim.curFrame = Math.floor(actionLocalSecs * animate.anim.curAnim.frameRate);
 			}else
 			#end
 			{
@@ -63,10 +64,10 @@ class PlayAnimationAction extends TimelineAction {
 			#if USING_FLXANIMATE
 			if(sprite is FlxAnimate){
 				var animate: FlxAnimate = cast sprite;
-				if (animate != null && animate.anim != null && animate.anim.curInstance != null && animate.anim.curInstance.symbol != null && animate.anim.curInstance.symbol.name == name){
+				if (animate != null && animate.anim != null && animate.anim.curAnim != null && animate.anim.curAnim.name == name){
 					animate.anim.pause();
-					animate.anim.curFrame = Math.floor(actionLocalSecs * animate.anim.framerate);
-					finished = animate.anim.curFrame >= animate.anim.length;
+					animate.anim.curAnim.curFrame = Math.floor(actionLocalSecs * animate.anim.curAnim.frameRate);
+					finished = animate.anim.curAnim.finished;
 				}else{
 					finished = true;
 				}

@@ -7,7 +7,8 @@ import funkin.Paths;
 import funkin.data.StageData;
 import funkin.scripts.*;
 import flixel.system.FlxAssets.FlxGraphicAsset;
-import animateatlas.AtlasFrameMaker;
+import animate.FlxAnimate;
+import animate.FlxAnimateFrames;
 
 using StringTools;
 
@@ -61,7 +62,7 @@ class StageProp extends FlxSprite {
 		var prop:StageProp = new StageProp(propData.x ?? 0.0, propData.y ?? 0.0);
 
 		if (Paths.fileExists('images/${propData.graphic}/Animation.json', TEXT))
-			prop.frames = AtlasFrameMaker.construct(propData.graphic);
+			prop.frames = FlxAnimateFrames.fromAnimate(Paths.animateAtlasPath(propData.graphic));
 		else if (Paths.fileExists('images/${propData.graphic}.txt', TEXT))
 			prop.frames = Paths.getPackerAtlas(propData.graphic);
 		else if (Paths.fileExists('images/${propData.graphic}.xml', TEXT))

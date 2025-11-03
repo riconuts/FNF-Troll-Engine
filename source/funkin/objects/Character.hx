@@ -8,18 +8,19 @@ import funkin.objects.notes.Note;
 import funkin.data.CharacterData;
 import funkin.data.CharacterData.*;
 import funkin.scripts.*;
-import animateatlas.AtlasFrameMaker;
-import flixel.animation.FlxAnimation;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.math.FlxPoint;
 import flixel.FlxSprite;
 import openfl.geom.ColorTransform;
+import animate.FlxAnimate;
+import animate.FlxAnimateFrames;
+import flixel.animation.FlxAnimation;
 
 using flixel.util.FlxColorTransformUtil;
 using StringTools;
 
-class Character extends FlxSprite
+class Character extends FlxAnimate
 {
 	/**Character to use if the requested one fails to load**/
 	public static final DEFAULT_CHARACTER:String = 'bf';
@@ -141,6 +142,9 @@ class Character extends FlxSprite
 	/**BLAMMED LIGHTS!! idk not used anymore**/
 	public var colorTween:FlxTween;
 	
+	/** Whether the Character is using texture Atlas or not*/
+	public var isAtlas:Bool = false;
+
 	//Used on Character Editor
 	public var animationsArray:Array<AnimArray> = [];
 	public var imageFile:String = '';
@@ -186,10 +190,10 @@ class Character extends FlxSprite
 		
 		return super.destroy();
 	}
-
 	function loadFromPsychData(json:CharacterFile)
 	{
 		//// some troll engine stuff
+		anim = new animate.FlxAnimateController(this);
 
 		deathId = json.death_name != null ? json.death_name : characterId;
 		
@@ -203,7 +207,9 @@ class Character extends FlxSprite
 		var atlases:Array<String> = [json.image];
 		switch (fileType)
 		{
-			case "texture":	frames = AtlasFrameMaker.construct(imageFile);
+			case "texture":	
+				frames = FlxAnimateFrames.fromAnimate(Paths.animateAtlasPath(imageFile));
+				isAtlas = true;
 			case "packer":	frames = Paths.getPackerAtlas(imageFile);
 			case "sparrow":	
 				var frames:FlxAtlasFrames = Paths.getSparrowAtlas(imageFile);
@@ -262,29 +268,38 @@ class Character extends FlxSprite
 				}
 			}
 			
-			for (anim in animationsArray)
+			for (curAnimation in animationsArray)
 			{
-				var animAnim:String = '' + anim.anim;
-				var animName:String = '' + anim.name;
-				var animFps:Int = anim.fps;
-				var animLoop:Bool = anim.loop==true;
-				var animIndices:Array<Int> = anim.indices;
-				var camOffset:Null<Array<Float>> = anim.cameraOffset;
+				var animAnim:String = '' + curAnimation.anim;
+				var animName:String = '' + curAnimation.name;
+				var animFps:Int = curAnimation.fps;
+				var animLoop:Bool = curAnimation.loop==true;
+				var animIndices:Array<Int> = curAnimation.indices;
+				var camOffset:Null<Array<Float>> = curAnimation.cameraOffset;
 
 				if (!debugMode)
 				{
-					camOffsets[anim.anim] = (camOffset != null) ? [camOffset[0], camOffset[1]] : CharacterData.getDefaultAnimCamOffset(animAnim);
+					camOffsets[curAnimation.anim] = (camOffset != null) ? [camOffset[0], camOffset[1]] : CharacterData.getDefaultAnimCamOffset(animAnim);
 				}
 
 				////
-				if (animIndices != null && animIndices.length > 0)
-					animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop);
+				if(!isAtlas)
+				{
+					if (animIndices != null && animIndices.length > 0)
+						anim.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop);
+					else
+						anim.addByPrefix(animAnim, animName, animFps, animLoop);
+				}
 				else
-					animation.addByPrefix(animAnim, animName, animFps, animLoop);
-
+				{
+					if (animIndices != null && animIndices.length > 0)
+						anim.addBySymbolIndices(animAnim, animName, animIndices, animFps, animLoop);
+					else
+						anim.addBySymbol(animAnim, animName, animFps, animLoop);
+				}
 				////
-				if (anim.offsets != null && anim.offsets.length > 1)
-					addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
+				if (curAnimation.offsets != null && curAnimation.offsets.length > 1)
+					addOffset(curAnimation.anim, curAnimation.offsets[0], curAnimation.offsets[1]);
 			}
 		}
 		else
@@ -296,6 +311,7 @@ class Character extends FlxSprite
 	public function new(x:Float, y:Float, ?characterId:String, ?isPlayer:Bool = false, ?debugMode:Bool = false)
 	{
 		super(x, y);
+
 
 		this.characterId = characterId ?? DEFAULT_CHARACTER;
 		this.isPlayer = isPlayer;
@@ -326,7 +342,7 @@ class Character extends FlxSprite
 
 		recalculateDanceIdle();
 		dance();
-		animation.finish();
+		anim.finish();
 
 		flipX = isPlayer ? !originalFlipX : originalFlipX;
 	}
@@ -372,7 +388,7 @@ class Character extends FlxSprite
 		if (callOnScripts("onCharacterUpdate", [elapsed]) == Globals.Function_Stop)
 			return;
 		
-		if (!debugMode && animation.curAnim != null)
+		if (!debugMode && anim.curAnim != null)
 		{
 			if (animTimer > 0) {
 				animTimer -= elapsed;
@@ -387,18 +403,18 @@ class Character extends FlxSprite
 
 				if (heyTimer <= 0) {
 					heyTimer = 0;
-					if (specialAnim && (animation.curAnim.name == 'hey' || animation.curAnim.name == 'cheer'))
-						animation.curAnim.finish();
+					if (specialAnim && (anim.curAnim.name == 'hey' || anim.curAnim.name == 'cheer'))
+						anim.curAnim.finish();
 				}
 			} 
 
-			if (animation.name.startsWith('sing'))
+			if (anim.name.startsWith('sing'))
 				holdTimer += elapsed;
 			else
 				holdTimer = 0;
 
-			if (animation.finished) {
-				var name:String = animation.curAnim.name;
+			if (anim.finished) {
+				var name:String = anim.curAnim.name;
 
 				if (specialAnim) {
 					specialAnim = false;
@@ -409,12 +425,12 @@ class Character extends FlxSprite
 				else if (name.endsWith('miss')) {
 					dance();
 				}
-				else if (animation.exists(name + '-loop')) {
+				else if (anim.exists(name + '-loop')) {
 					playAnim(name + '-loop');
 				}
 				else if (name.startsWith("hold") && name.endsWith("Start")) {
 					var newName = name.substring(0, name.length-5);
-					if (animation.exists(newName)) {
+					if (anim.exists(newName)) {
 						playAnim(newName,true);
 					}else {
 						var singName = "sing" + name.substring(3, name.length-5);
@@ -468,7 +484,7 @@ class Character extends FlxSprite
 			colorOverlay = FlxColor.WHITE;
 
 		specialAnim = false;
-		animation.play(AnimName, Force, Reversed, Frame);
+		anim.play(AnimName, Force, Reversed, Frame);
 
 		var daOffset = animOffsets.get(AnimName);
 		if (daOffset != null)
@@ -514,7 +530,7 @@ class Character extends FlxSprite
 	}
 
 	public inline function canResetDance(holdingKeys:Bool = false) {
-		var curAnim = animation.name;
+		var curAnim = anim.name;
 		return curAnim==null || (
 			(!holdingKeys || idleWhenHold)
 			&& holdTimer * 1000 > Conductor.stepCrochet * singDuration
@@ -593,7 +609,7 @@ class Character extends FlxSprite
 	private var settingCharacterUp:Bool = true;
 	public function recalculateDanceIdle() {
 		var lastDanceIdle:Bool = danceIdle;
-		danceIdle = animation.exists('danceLeft' + idleSuffix) && animation.exists('danceRight' + idleSuffix);
+		danceIdle = anim.exists('danceLeft' + idleSuffix) && anim.exists('danceRight' + idleSuffix);
 
 		if (danceIdle)
 			idleSequence = ["danceLeft" + idleSuffix, "danceRight" + idleSuffix];
@@ -611,10 +627,10 @@ class Character extends FlxSprite
 	/** To be called when this character is used, Used by PlayState Character Change Events **/
 	public function changedIn(prevCharacter:Null<Character>) {
 		inline function canResumeAnim(c:Character):Bool {
-			return c != null && animation.exists(c.animation.name) && (characterId.startsWith(c.characterId) || c.characterId.startsWith(characterId));
+			return c != null && anim.exists(c.anim.name) && (characterId.startsWith(c.characterId) || c.characterId.startsWith(characterId));
 		}
 		if (canResumeAnim(prevCharacter)) {
-			var anim = prevCharacter.animation.curAnim;
+			var anim = prevCharacter.anim.curAnim;
 			playAnim(anim.name, true, anim.reversed, anim.curFrame);
 		}else {
 			dance();
@@ -638,9 +654,10 @@ class Character extends FlxSprite
 		animOffsets[name] = [x, y];
 	}
 
-	public function quickAnimAdd(name:String, anim:String)
+	public function quickAnimAdd(name:String, animToAdd:String)
 	{
-		animation.addByPrefix(name, anim, 24, false);
+		if(!isAtlas)anim.addByPrefix(name, animToAdd, 24, false);
+		else anim.addBySymbol(name, animToAdd, 24, false);
 	}
 
 	/**
@@ -649,16 +666,17 @@ class Character extends FlxSprite
 	 * @param force Whether to override the resulting animation, if it exists.
 	 */
 	function cloneAnimation(ogName:String, cloneName:String, ?force:Bool)
-	{
-		var daAnim:FlxAnimation = animation.getByName(ogName);
+	{		
+		var daAnim:FlxAnimation = anim.getByName(ogName);
 
-		if (daAnim!=null && (force==true || !animation.exists(cloneName)))
+		if (daAnim!=null && (force==true || !anim.exists(cloneName)))
 		{
-			animation.add(cloneName, daAnim.frames, daAnim.frameRate, daAnim.looped, daAnim.flipX, daAnim.flipY);
+			anim.add(cloneName, daAnim.frames, daAnim.frameRate, daAnim.looped, daAnim.flipX, daAnim.flipY);
 
 			camOffsets[cloneName] = camOffsets[ogName];
 			animOffsets[cloneName] = animOffsets[ogName];
 		}
+			
 	}
 
 	////

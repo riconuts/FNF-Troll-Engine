@@ -3,7 +3,6 @@ package funkin.states;
 import funkin.data.Highscore;
 import funkin.data.Song;
 import funkin.data.Level;
-import animateatlas.AtlasFrameMaker;
 import flixel.util.FlxSignal;
 import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.tweens.FlxTween;
@@ -16,6 +15,8 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import haxe.io.Path;
+import animate.FlxAnimate;
+import animate.FlxAnimateFrames;
 
 using funkin.CoolerStringTools;
 using StringTools;
@@ -95,7 +96,7 @@ class LevelStageProp extends FlxSprite
 			prop.x = (100 + (50 * (propData.characterId + 1)) + FlxG.width * 0.25 * propData.characterId) + (propData.x ?? 0.0); // not doing .x += because of templates. if you  set charsacterId on smth it should override lol!
 
 		if (Paths.fileExists('images/${propData.graphic}/Animation.json', TEXT))
-			prop.frames = AtlasFrameMaker.construct(propData.graphic);
+			prop.frames = FlxAnimateFrames.fromAnimate(Paths.animateAtlasPath(propData.graphic));
 		else if (Paths.fileExists('images/${propData.graphic}.txt', TEXT))
 			prop.frames = Paths.getPackerAtlas(propData.graphic);
 		else if (Paths.fileExists('images/${propData.graphic}.xml', TEXT))

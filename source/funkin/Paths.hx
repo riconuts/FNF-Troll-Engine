@@ -491,6 +491,11 @@ class Paths
 		return getPath('$path/$key.$SOUND_EXT');
 	}
 
+	inline public static function animateAtlasPath(key:String, ?library:String):String
+	{
+		return getPath('images/$key');
+	}
+	
 	inline public static function returnFolderSound(path:String, key:String, ?library:String)
 		return returnSound(soundPath(path, key, library), library);
 
