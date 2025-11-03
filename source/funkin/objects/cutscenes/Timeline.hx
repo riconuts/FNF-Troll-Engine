@@ -41,51 +41,29 @@ class PlayAnimationAction extends TimelineAction {
 	public override function execute(curFrame:Int, frameTime:Float){
 		var actionLocalSecs: Float = (curFrame - frame) * parent.frameInterval;
 		if (firstExecute){
-			#if USING_FLXANIMATE
-			if(sprite is FlxAnimate){
-				var animate: FlxAnimate = cast sprite;
-				animate.anim.play(name, true);
-				animate.anim.curAnim.curFrame = Math.floor(actionLocalSecs * animate.anim.curAnim.frameRate);
-			}else
-			#end
-			{
-				if(sprite is Character){
-					var ch:Character = cast sprite;
-					ch.voicelining = !ch.idleSequence.contains(name);
-					ch.playAnim(name, true);
-				}else
-					sprite.animation.play(name, true);
-				
-				sprite.animation.curAnim.curFrame = Math.floor(actionLocalSecs * sprite.animation.curAnim.frameRate);
+			if (sprite is Character) {
+				var ch:Character = cast sprite;
+				ch.voicelining = !ch.idleSequence.contains(name);
+				ch.playAnim(name, true);
+			}else {
+				sprite.animation.play(name, true);
 			}
+
+			if (sprite.animation.curAnim != null)
+				sprite.animation.curAnim.curFrame = Math.floor(actionLocalSecs * sprite.animation.curAnim.frameRate);
 		}
 		firstExecute = false;
-		if(syncToTimeline){
-			#if USING_FLXANIMATE
-			if(sprite is FlxAnimate){
-				var animate: FlxAnimate = cast sprite;
-				if (animate != null && animate.anim != null && animate.anim.curAnim != null && animate.anim.curAnim.name == name){
-					animate.anim.pause();
-					animate.anim.curAnim.curFrame = Math.floor(actionLocalSecs * animate.anim.curAnim.frameRate);
-					finished = animate.anim.curAnim.finished;
-				}else{
-					finished = true;
-				}
-			}else
-			#end
-			{
-				// i love flixel 
-				if (sprite != null && sprite.animation != null && sprite.animation.curAnim != null && sprite.animation.curAnim.name == name){
-					sprite.animation.curAnim.paused = true;
-					sprite.animation.curAnim.curFrame = Math.floor(actionLocalSecs * sprite.animation.curAnim.frameRate);
-					// TODO: loop points
-					if(sprite.animation.curAnim.looped)
-						sprite.animation.curAnim.curFrame %= sprite.animation.curAnim.numFrames - 1;
-					
-					finished = sprite.animation.curAnim.finished;
-				}else{
-					finished = true;
-				}
+		if (syncToTimeline) {
+			if (sprite?.animation.curAnim?.name == name){
+				sprite.animation.curAnim.paused = true;
+				sprite.animation.curAnim.curFrame = Math.floor(actionLocalSecs * sprite.animation.curAnim.frameRate);
+				// TODO: loop points
+				if(sprite.animation.curAnim.looped)
+					sprite.animation.curAnim.curFrame %= sprite.animation.curAnim.numFrames - 1;
+				
+				finished = sprite.animation.curAnim.finished;
+			}else {
+				finished = true;
 			}
 			return;
 		}
