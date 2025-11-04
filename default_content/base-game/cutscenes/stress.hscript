@@ -50,6 +50,8 @@ function onCreateCutscene()
 	game.gf.visible = false;
 	game.disableCameraMovement = false;
 
+	////
+
 	camFollow.x = game.dad.getCamera()[0];
 	camFollow.y = game.dad.getCamera()[1];
 
@@ -58,35 +60,41 @@ function onCreateCutscene()
 
 	game.camGame.zoom = 1.2;
 	
-	tankmanimate = new FlxAnimate(game.dadGroup.x, game.dadGroup.y, 'images/cutscenes/stress/tankman');
+	tankmanimate = new FlxAnimate(game.dadGroup.x, game.dadGroup.y);
+	tankmanimate.frames = Paths.getTextureAtlas('cutscenes/stress/tankman');
+	tankmanimate.applyStageMatrix = true;
 	tankmanimate.x += game.dad.positionArray[0];
 	tankmanimate.y += game.dad.positionArray[1];
 	tankmanimate.x += 417;
 	tankmanimate.y += 225;
 
-	tankmanimate.anim.addBySymbol('godDamnIt', 'TANK TALK 3 P1 UNCUT',24, false, 0, 0);
-	tankmanimate.anim.addBySymbol('Pico', 'TANK TALK 3 P2 UNCUT',24, false, 0, 0);
+	tankmanimate.anim.addBySymbol('godDamnIt', 'TANK TALK 3 P1 UNCUT',24, false);
+	tankmanimate.anim.addBySymbol('Pico', 'TANK TALK 3 P2 UNCUT',24, false);
     tankmanimate.antialiasing = true;
 	tankmanimate.anim.play("godDamnIt", true);
 	tankmanimate.anim.pause();
 	game.addBehindDad(tankmanimate);
 
-	boyfrimate = new FlxAnimate(game.boyfriendGroup.x, game.boyfriendGroup.y, 'images/cutscenes/stress/boyfriend');
+	boyfrimate = new FlxAnimate(game.boyfriendGroup.x, game.boyfriendGroup.y);
+	boyfrimate.frames = Paths.getTextureAtlas('cutscenes/stress/boyfriend');
+	boyfrimate.applyStageMatrix = true;
 	boyfrimate.x += game.boyfriend.positionArray[0];
 	boyfrimate.y += game.boyfriend.positionArray[1];
-	boyfrimate.x -= 291;
-	boyfrimate.y += 217;
+	boyfrimate.x -= 293;
+	boyfrimate.y += 220;
 
-	boyfrimate.anim.addBySymbol('idle', 'BF idle dance',24, true, 0, 0);
-	boyfrimate.anim.addBySymbol('catch', 'BF catches GF',24, false, 0, 0);
-	boyfrimate.anim.addBySymbol('bfgfIdle', 'BF idle dance w gf',24, true, 0, 0);
-	boyfrimate.anim.addBySymbol('react', 'BF NOTE UP MISS',24, false, 0, 0); // unused cus of filter shit
+	boyfrimate.anim.addBySymbol('idle', 'BF idle dance',24, true);
+	boyfrimate.anim.addBySymbol('catch', 'BF catches GF',24, false);
+	boyfrimate.anim.addBySymbol('bfgfIdle', 'BF idle dance w gf',24, true);
+	boyfrimate.anim.addBySymbol('react', 'BF NOTE UP MISS',24, false); // unused cus of filter shit
 	// BetterAnimate could not come faster
     boyfrimate.antialiasing = true;
 	boyfrimate.anim.play("idle", true);
 	game.addBehindDad(boyfrimate);
 
-	speakimate = new FlxAnimate(game.gfGroup.x, game.gfGroup.y, 'images/cutscenes/stress/gfpico');
+	speakimate = new FlxAnimate(game.gfGroup.x, game.gfGroup.y);
+	speakimate.frames = Paths.getTextureAtlas('cutscenes/stress/gfpico');
+	speakimate.applyStageMatrix = true;
 	speakimate.x += game.gf.positionArray[0];
 	speakimate.y += game.gf.positionArray[1];
 	speakimate.scrollFactor.set(game.gf.scrollFactor.x, game.gf.scrollFactor.y);
@@ -106,9 +114,9 @@ function onCreateCutscene()
 	bX = boyfrimate.x;
 	bY = boyfrimate.y;
 
-	speakimate.anim.addBySymbol('idle', 'GF Dancing at Gunpoint',24, true, 0, 0);
-	speakimate.anim.addBySymbol('picoDrop', 'Pico Saves them sequence',24, false, 0, 0);
-	speakimate.anim.addBySymbol('picoIdle', 'Pico Dual Wield on Speaker idle',24, true, 0, 0);
+	speakimate.anim.addBySymbol('idle', 'GF Dancing at Gunpoint',24, true);
+	speakimate.anim.addBySymbol('picoDrop', 'Pico Saves them sequence',24, false);
+	speakimate.anim.addBySymbol('picoIdle', 'Pico Dual Wield on Speaker idle',24, true);
     speakimate.antialiasing = true;
 	speakimate.anim.play("idle", true);
 	game.addBehindGF(speakimate);
