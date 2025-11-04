@@ -4,7 +4,6 @@ import haxe.io.Path;
 import funkin.objects.hud.HealthIcon;
 import funkin.objects.Character;
 import funkin.data.CharacterData;
-import animateatlas.AtlasFrameMaker;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxObject;
@@ -944,7 +943,7 @@ class CharacterEditorState extends MusicBeatState {
 		Paths.removeBitmap(char.frames.parent.key); // is null SOMETIMES idk WHY
 
 		if (Paths.fileExists('images/' + char.imageFile + '/Animation.json', TEXT)) {
-			char.frames = AtlasFrameMaker.construct(char.imageFile);
+			char.frames = Paths.getTextureAtlas(char.imageFile);
 		} else if (Paths.fileExists('images/' + char.imageFile + '.txt', TEXT)) {
 			char.frames = Paths.getPackerAtlas(char.imageFile);
 		} else {

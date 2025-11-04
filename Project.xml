@@ -115,8 +115,7 @@
 	<haxelib name="funkin.vis"/>
 	<haxelib name="grig.audio"/>
 	<section if="USING_FLXANIMATE">
-		<haxelib name="flxanimate" version="3.0.4"/>
-		<classpath path="flxAnimateShadow"/> <!--Remove if FlxAnimate updates and lets you write your own code to determine how filesystem shit is gotten-->
+		<haxelib name="flixel-animate" version="1.3.1"/>
 	</section>
 
 	<section if="USING_MOONCHART">

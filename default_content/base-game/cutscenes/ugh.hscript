@@ -30,11 +30,12 @@ function onCreateCutscene(){
 	if(tankmanimate != null)
 		game.remove(tankmanimate);
 
-	tankmanimate = new FlxAnimate(game.dadGroup.x, game.dadGroup.y, 'images/cutscenes/ugh/tankman');
+	tankmanimate = new FlxAnimate(game.dadGroup.x, game.dadGroup.y);
+	tankmanimate.frames = Paths.getTextureAtlas('cutscenes/ugh/tankman');
 	tankmanimate.x += game.dad.positionArray[0];
 	tankmanimate.y += game.dad.positionArray[1];
-	tankmanimate.anim.addBySymbol('wellwellwell', 'TANK TALK 1 P1',24, false, 417, 225);
-	tankmanimate.anim.addBySymbol('kill', 'TANK TALK 1 P2',24, false, 417, 225);
+	tankmanimate.anim.addBySymbol('wellwellwell', 'TANK TALK 1 P1',24, false, false, false);
+	tankmanimate.anim.addBySymbol('kill', 'TANK TALK 1 P2',24, false, false, false);
     tankmanimate.antialiasing = true;
 	game.addBehindDad(tankmanimate);
 	tankmanimate.visible = false;
@@ -49,6 +50,8 @@ function onCreateCutscene(){
 	timeline.once(0, ()-> {
 		game.dad.visible = false;
 		tankmanimate.visible = true;
+		tankmanimate.offset.x = 8;
+		tankmanimate.offset.y = 8;
 	});
 
 	timeline.on(0, (f) -> {
@@ -68,7 +71,11 @@ function onCreateCutscene(){
 	this.sound(116, "killYou");
 	timeline.easeProperties(240, 260, this.music, {volume: 0}, FlxEase.linear);
 	timeline.playAnimation(116, tankmanimate, 'kill');
-	timeline.setProperties(116, camFollow, {x: camFollow.x, y: camFollow.y - 50});
+	timeline.once(116, ()-> {
+		tankmanimate.offset.x = 44;
+		tankmanimate.offset.y = 34;
+	});
+	timeline.setProperties(116, camFollow, {x: camFollow.x, y: camFollow.y - 50*-2});
 
 	timeline.finish(260);
 }

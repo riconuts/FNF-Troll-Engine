@@ -48,9 +48,9 @@
 			"version": "2.1.4"
 		},
 		{
-			"name": "flxanimate",
+			"name": "flixel-animate",
 			"type": "haxelib",
-			"version": "3.0.4"
+			"version": "1.3.1"
 		},
 		{
 			"name": "hxdiscord_rpc",
