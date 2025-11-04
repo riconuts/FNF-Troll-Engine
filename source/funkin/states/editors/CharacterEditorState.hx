@@ -19,6 +19,7 @@ import flixel.addons.ui.FlxUIInputText;
 import flixel.addons.ui.FlxUINumericStepper;
 import flixel.addons.ui.FlxUITabMenu;
 import flixel.addons.ui.FlxUITooltip.FlxUITooltipStyle;
+import flixel.animation.FlxAnimation;
 import flixel.graphics.FlxGraphic;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.input.keyboard.FlxKey;
@@ -28,9 +29,6 @@ import flixel.ui.FlxButton;
 import flixel.util.FlxColor;
 import haxe.Json;
 import lime.system.Clipboard;
-import animate.FlxAnimate;
-import animate.FlxAnimateFrames;
-import flixel.animation.FlxAnimation;
 
 using StringTools;
 
@@ -446,8 +444,8 @@ class CharacterEditorState extends MusicBeatState {
 			inline function _reloadImage(char:Character){
 				char.imageFile = imageInputText.text;
 				reloadCharacterImage(char);
-				if (char.anim.curAnim != null) {
-					char.playAnim(char.anim.curAnim.name, true);
+				if (char.animation.curAnim != null) {
+					char.playAnim(char.animation.curAnim.name, true);
 				}
 			}
 
@@ -612,14 +610,13 @@ class CharacterEditorState extends MusicBeatState {
 				char.animationsArray.sort(animSortFunc);
 
 				if (lastAnim == animationInputText.text) {
-					
-					var leAnim:FlxAnimation = char.anim.getByName(lastAnim);
+					var leAnim:FlxAnimation = char.animation.getByName(lastAnim);
 					if (leAnim != null && leAnim.frames.length > 0) {
 						char.playAnim(lastAnim, true);
 					} else {
 						for (i in 0...char.animationsArray.length) {
 							if (char.animationsArray[i] != null) {
-								leAnim = char.anim.getByName(char.animationsArray[i].anim);
+								leAnim = char.animation.getByName(char.animationsArray[i].anim);
 								if (leAnim != null && leAnim.frames.length > 0) {
 									char.playAnim(char.animationsArray[i].anim, true);
 									curAnim = i;
@@ -628,7 +625,6 @@ class CharacterEditorState extends MusicBeatState {
 							}
 						}
 					}
-
 				}
 			}
 
@@ -947,7 +943,7 @@ class CharacterEditorState extends MusicBeatState {
 		Paths.removeBitmap(char.frames.parent.key); // is null SOMETIMES idk WHY
 
 		if (Paths.fileExists('images/' + char.imageFile + '/Animation.json', TEXT)) {
-			char.frames = FlxAnimateFrames.fromAnimate(Paths.animateAtlasPath(char.imageFile));
+			char.frames = Paths.getTextureAtlas(char.imageFile);
 		} else if (Paths.fileExists('images/' + char.imageFile + '.txt', TEXT)) {
 			char.frames = Paths.getPackerAtlas(char.imageFile);
 		} else {
