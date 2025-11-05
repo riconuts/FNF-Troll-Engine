@@ -175,7 +175,6 @@ class TitleState extends MusicBeatState
 	var titleTimer:Float = 0;
 
 	function generateSequence() {
-		Conductor.changeBPM(102);
 		// this could prob be replaced with a json, yaml or even a whole "TitleSequence" script?? :shrug:
 
 		var ngSpr = new FlxSprite(0, FlxG.height * 0.52, Paths.image('newgrounds_logo'));
@@ -188,8 +187,9 @@ class TitleState extends MusicBeatState
 
 		var curWacky = FlxG.random.getObject(getIntroText());
 
+		playMusic(); // hmmm
+
 		intro.queueOnBeat(0, intro.clearLines);
-		intro.queueOnBeat(0, playMusic.bind(null));
 		intro.queueNewLineOnBeat(0, 'troll engine by', -15);
 		intro.queueNewLineOnBeat(0, 'riconuts', -8);
 		intro.queueNewLineOnBeat(0, 'nebula_zorua', -8);
@@ -217,10 +217,9 @@ class TitleState extends MusicBeatState
 	}
 
 	public function playMusic(?key:String) {
-		var soundAsset = key==null ? null : Paths.music(key);
-		if (soundAsset != null) 
-			FlxG.sound.playMusic(soundAsset);
-		else
+		if (key != null) 
+			MusicBeatState.playMusic(key);
+		if (FlxG.sound.music?.playing != true)
 			MusicBeatState.playMenuMusic(1, true);
 	}
 
