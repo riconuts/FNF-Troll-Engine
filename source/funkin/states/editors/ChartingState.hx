@@ -1989,7 +1989,7 @@ class ChartingState extends MusicBeatState
 			switch (name)
 			{
 				case 'check_mustHit':
-					new ChangeMustHitSectionAction(curSec, !FlxG.keys.pressed.CONTROL);
+					new ChangeMustHitSectionAction(curSec, FlxG.keys.pressed.CONTROL);
 
 					updateGrid();
 					updateHeads();
@@ -2231,7 +2231,7 @@ class ChartingState extends MusicBeatState
 		if (onIcons && FlxG.mouse.justPressed) {
 			var mhs = _song.notes[curSec].mustHitSection;
 			if (FlxG.mouse.overlaps(mhs ? rightIcon : leftIcon))
-				new ChangeMustHitSectionAction(curSec, true);
+				new ChangeMustHitSectionAction(curSec, FlxG.keys.pressed.CONTROL);
 		}
 
 		if (onGrid){
@@ -2460,7 +2460,7 @@ class ChartingState extends MusicBeatState
 
 	function updateKeys(elapsed:Float) {
 		if (FlxG.keys.justPressed.M) {
-			new ChangeMustHitSectionAction(curSec, !FlxG.keys.pressed.CONTROL);
+			new ChangeMustHitSectionAction(curSec, FlxG.keys.pressed.CONTROL);
 		}	
 
 		if (curSelectedNote != null) {
