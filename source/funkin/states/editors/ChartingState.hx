@@ -649,13 +649,13 @@ class ChartingState extends MusicBeatState
 		add(nextRenderedSustains);
 		add(nextRenderedNotes);
 
-		zoomTxt = new FlxText(10, 180, 0, "Zoom: 1 / 1", 16);
+		zoomTxt = new FlxText(10, 220, 0, "Zoom: 1 / 1", 16);
 		zoomTxt.setFormat(null, 18, 0xFFFFFFFF, LEFT, FlxTextBorderStyle.OUTLINE, 0xFF000000);
 		zoomTxt.borderSize = 2;
 		zoomTxt.scrollFactor.set();
 		add(zoomTxt);
 
-		quantTxt = new FlxText(10, 200, 0, "Beat Snap: " + quantNames[curQuant] , 16);
+		quantTxt = new FlxText(10, 240, 0, "Beat Snap: " + quantNames[curQuant] , 16);
 		quantTxt.setFormat(null, 18, 0xFFFFFFFF, LEFT, FlxTextBorderStyle.OUTLINE, 0xFF000000);
 		quantTxt.borderSize = 2;
 		quantTxt.scrollFactor.set();
@@ -2399,7 +2399,8 @@ class ChartingState extends MusicBeatState
 
 		bpmTxt.text =
 		"Time: " + FlxMath.roundDecimal(Conductor.songPosition / 1000, 2) + " / " + FlxMath.roundDecimal(songLength / 1000, 2) +
-		"\n\nSection: " + curSec +
+		'\n\nBPM: ${Conductor.bpm}' + (Conductor.bpmChangeMap.length <= 1 ? '' : ' ($curBPMChangeIndex / ${Conductor.bpmChangeMap.length - 1})') +
+		"\nSection: " + curSec +
 		"\nBeat: " + math.CoolMath.floorDecimal(curDecBeat, 2) +
 		"\nStep: " + curStep;
 
@@ -3103,6 +3104,8 @@ class ChartingState extends MusicBeatState
 		group.clear();	
 	}
 
+	var curBPMChangeIndex:Int = 0;
+
 	/** Creates the notes and event sprites from the currently visible sections **/
 	function updateGrid():Void
 	{
@@ -3114,20 +3117,18 @@ class ChartingState extends MusicBeatState
 		wipeGroup(prevRenderedNotes);
 		wipeGroup(prevRenderedSustains);
 
-		if (_song.notes[curSec].changeBPM && _song.notes[curSec].bpm > 0)
-		{
-			Conductor.changeBPM(_song.notes[curSec].bpm);
-			//trace('BPM of this section:');
+		// get last bpm
+		var daBPM:Float = _song.bpm;
+		curBPMChangeIndex = 0;
+		for (i in 0...curSec + 1) {
+			if (_song.notes[i].changeBPM) {
+				daBPM = _song.notes[i].bpm;
+				curBPMChangeIndex++;
+			}
 		}
-		else
-		{
-			// get last bpm
-			var daBPM:Float = _song.bpm;
-			for (i in 0...curSec)
-				if (_song.notes[i].changeBPM)
-					daBPM = _song.notes[i].bpm;
+
+		if (Conductor.bpm != daBPM)
 			Conductor.changeBPM(daBPM);
-		}
 
 		// PREV SECTION
 		if(curSec > 0) {
