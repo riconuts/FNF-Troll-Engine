@@ -449,22 +449,19 @@ class StoryModeState extends MusicBeatState {
 		else if(newLevel >= levels.length)
 			newLevel = 0;
 
-		selectedLevelDifficulties = levels[newLevel].getDifficulties();
-		var newIdx = CoolUtil.updateDifficultyIndex(selectedDifficultyIdx, selectedDifficultyName, selectedLevelDifficulties);
-		changeDifficulty(newIdx, true);
+		selectedLevel = newLevel;
 
-		/* // TODO: level scoressss
-		targetHighscore = Highscore.getLevelScore(levels[newLevel].id, selectedDifficultyName);
-		*/
-
-		for (group in levelProps)
-			group.visible = group.ID == newLevel;
-		
 		if (!silent)
 			FlxG.sound.play(Paths.sound("scrollMenu"));
 
-		selectedLevel = newLevel;
-		updateTexts();
+		for (group in levelProps)
+			group.visible = group.ID == selectedLevel;
+
+		selectedLevelDifficulties = levels[selectedLevel].getDifficulties();
+		var newIdx = CoolUtil.updateDifficultyIndex(selectedDifficultyIdx, selectedDifficultyName, selectedLevelDifficulties);
+		changeDifficulty(newIdx, true);
+
+		//updateTexts();
 	}
 
 	function changeDifficulty(selection:Int, abs:Bool = false){
@@ -486,7 +483,7 @@ class StoryModeState extends MusicBeatState {
 
 		updateTexts();
 
-		trace(selectedDifficultyIdx, selectedDifficultyName);
+		targetHighscore = Highscore.getLevelScore(levels[selectedLevel].id, selectedDifficultyName);
 	}
 
 	function acceptLevel() {

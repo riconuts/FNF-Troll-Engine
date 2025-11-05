@@ -121,7 +121,7 @@ class Highscore {
 	#if !macro
 	static var save:FlxSave = new FlxSave(); // high-score save file
 	static var currentSongData:Map<String, ScoreRecord> = []; // all song score records
-	static var currentWeekData:Map<String, Int> = []; // all week scores (might eventually change to its own WeekScoreRecord idk lol prob not tho)
+	static var currentLevelData:Map<String, Int> = []; // all level scores (might eventually change to its own WeekScoreRecord idk lol prob not tho)
 	static var currentLoadedID:String = '';
 
 	public static var accSystem:String = '';
@@ -130,7 +130,7 @@ class Highscore {
 	public static var version:Float = systemVersions.get("");
 
 
-	public static var weekCompleted:Map<String, Bool> = new Map<String, Bool>(); // maybe move this to WeekData oops
+	public static var levelCompleted:Map<String, Bool> = new Map<String, Bool>();
 
 	public static function getID()
 	{
@@ -164,8 +164,11 @@ class Highscore {
 	}
 
 	static inline function formatSong(songId:String, chartId:String):String {
-		// if (chartId == null || chartId.length == 0) chartId = "normal";
 		return Paths.formatToSongPath(songId) + ':' + chartId;
+	}
+
+	static inline function formatLevel(levelId:String, diffId:String):String {
+		return 'level:' + levelId + ':' + diffId;
 	}
 
 	public static inline function emptyRecord():ScoreRecord {
@@ -230,24 +233,9 @@ class Highscore {
 	public inline static function getNotesHit(song:String, chart:String):Float
 		return getRecord(song, chart).accuracyScore;
 
-	public static function getWeekScore(week:String):Int
-		return currentWeekData.exists(week) ? currentWeekData.get(week) : 0;
-
-	@:deprecated("You should use saveScoreRecord in place of saveScore!")
-	public static function saveScore(song:String, score:Int = 0, ?rating:Float = -1, ?notesHit:Float = 0):Void
-	{
-		var tNH:Float = notesHit / rating; // total notes hit
-		return saveScoreRecord(song, '', {
-			scoreSystemV: version,
-			score: score,
-			comboBreaks: 0, // since we cant detect the combo breaks from here
-			accuracyScore: notesHit,
-			maxAccuracyScore: tNH,
-			judges: ["epic" => 0, "sick" => 0, "good" => 0, "bad" => 0, "shit" => 0, "miss" => 0],
-			noteDiffs: [],
-			npsPeak: 0,
-			fcMedal: rating == 1 ? TIER4 : NONE
-		});
+	public static function getLevelScore(levelId:String, diffId:String):Int {
+		var scoreId:String = formatLevel(levelId, diffId);
+		return currentLevelData.exists(scoreId) ? currentLevelData.get(scoreId) : 0;
 	}
 
 	public static function saveScoreRecord(song:String, chartName:String, scoreRecord:ScoreRecord, ?force:Bool = false)
@@ -281,21 +269,22 @@ class Highscore {
 		}
 	}
 
-	public static function saveWeekScore(week:String, score:Int = 0, ?force:Bool=false){
-		if (force || currentWeekData.get(week) < score){
-			weekCompleted.set(week, true);
-			save.data.weekCompleted = weekCompleted;
+	public static function saveLevelScore(level:String, diff:String, score:Int = 0, ?force:Bool=false){
+		if (force || getLevelScore(level, diff) < score){
+			var scoreId:String = formatLevel(level, diff);
+			levelCompleted.set(level, true);
+			save.data.levelCompleted = levelCompleted;
 
-			currentWeekData.set(week, score);
- 			save.data.weekSaveData.set(currentLoadedID, currentWeekData);
-			
-			save.flush(); 
+			currentLevelData.set(scoreId, score);
+ 			flushLevelData();
+		}else {
+			trace('Not saving level score for ($level:$diff) since existing score is higher or equal');
 		}
 	}
-	public static function resetWeek(week:String){
-		currentWeekData.set(week, 0);
-		save.data.weekSaveData.set(currentLoadedID, currentWeekData);
-		save.flush(); 
+	public static function resetLevel(level:String, diff:String){
+		var scoreId:String = formatLevel(level, diff);
+		currentLevelData.set(scoreId, 0);
+		flushLevelData();
 	}
 	public static function resetSong(song:String, chartName:String){
 		var formattedSong:String = formatSong(song, chartName);
@@ -304,6 +293,11 @@ class Highscore {
 		currentSongData.remove(formattedSong);
 		save.data.saveData.set(currentLoadedID, currentSongData);
 		save.flush();
+	}
+
+	public static function flushLevelData() {
+		save.data.levelSaveData.set(currentLoadedID, currentLevelData);
+		save.flush(); 
 	}
 
 	public static function loadData(?ID:String, ?shouldMigrate:Bool=true)
@@ -330,10 +324,10 @@ class Highscore {
 
 		currentLoadedID = ID;
 		currentSongData = [];
-		currentWeekData = [];
+		currentLevelData = [];
 
 		var songSaveData:Map<String, Map<String, ScoreRecord>> = [];
-		var weekSaveData:Map<String, Map<String, Int>> = [];
+		var levelSaveData:Map<String, Map<String, Int>> = [];
 		var saveNeedsFlushing:Bool = false;
 
 		if (save.data.saveData == null)
@@ -343,12 +337,12 @@ class Highscore {
 		}else
 			songSaveData = save.data.saveData;
 
-		if(save.data.weekSaveData == null)
+		if(save.data.levelSaveData == null)
 		{
-			save.data.weekSaveData = weekSaveData;
+			save.data.levelSaveData = levelSaveData;
 			saveNeedsFlushing = true;
 		}else
-			weekSaveData = save.data.weekSaveData;
+			levelSaveData = save.data.levelSaveData;
 		
 		if (songSaveData.exists(ID + "songs")){
 			songSaveData.set(ID, songSaveData.get(ID + "songs"));
@@ -362,13 +356,13 @@ class Highscore {
 		}else
 			currentSongData = songSaveData.get(ID);
 
-		if (!weekSaveData.exists(ID))
+		if (!levelSaveData.exists(ID))
 		{
-			weekSaveData.set(ID, []);
-			save.data.weekSaveData = weekSaveData;
+			levelSaveData.set(ID, []);
+			save.data.levelSaveData = levelSaveData;
 			saveNeedsFlushing = true;
 		}else
-			currentWeekData = weekSaveData.get(ID); 
+			currentLevelData = levelSaveData.get(ID); 
 		
 
 		if (shouldMigrate)
@@ -420,15 +414,15 @@ class Highscore {
 		trace("migrating " + id);
 		var wifeScores:Map<String, Float> = [];
 		var songRatings:Map<String, Float> = [];
-		var weekScores:Map<String, Int> = [];
+		var levelScores:Map<String, Int> = [];
 
 		if (migrationSave.data.songWifeScore != null)
 			wifeScores = migrationSave.data.songWifeScore;
 		if (migrationSave.data.songRating != null)
 			songRatings = migrationSave.data.songRating;
 
-		if (migrationSave.data.weekScores != null)
-			weekScores = migrationSave.data.weekScores;
+		if (migrationSave.data.levelScores != null)
+			levelScores = migrationSave.data.levelScores;
 
 /* 		var idData = id.split("-");
 		var wife3 = idData[1] == 'w3'; */
@@ -491,13 +485,13 @@ class Highscore {
 		migrationSave.data.songScores = scores;
 		
 		trace('successfully migrated $successfulMigrations/$count saved scores');
-		if (weekScores!=null){
-			for (week => score in weekScores){
-				currentWeekData.set(week, score);
-				weekScores.remove(week);
+		if (levelScores!=null){
+			for (level => score in levelScores){
+				currentLevelData.set(level, score);
+				levelScores.remove(level);
 			}
-			migrationSave.data.weekScores = weekScores;
-			save.data.weekSaveData.set(id, currentWeekData);
+			migrationSave.data.levelScores = levelScores;
+			save.data.levelSaveData.set(id, currentLevelData);
 			needsFlush = true;
 		}
 
@@ -524,8 +518,8 @@ class Highscore {
 		save.bind("highscores2");
 		loadData();
 
-		if (FlxG.save.data.weekCompleted != null)
-			Highscore.weekCompleted = FlxG.save.data.weekCompleted;
+		if (FlxG.save.data.levelCompleted != null)
+			Highscore.levelCompleted = FlxG.save.data.levelCompleted;
 	}
 	#end
 }

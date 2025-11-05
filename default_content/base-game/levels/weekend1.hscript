@@ -1,7 +1,7 @@
 function getDisplayedSongs(difficulty:String):Array<String>
 {
 	var songs = ["Darnell", "Lit Up", "2hot"];
-	if (Highscore.weekCompleted.get("weekend1"))
+	if (Highscore.levelCompleted.get("weekend1"))
 		songs.push("Blazin'");
 
 	return songs;
@@ -12,7 +12,7 @@ function getFreeplaySongs()
 	// lazzyyyyy
 	
 	var songs = this.songs;
-	if (!Highscore.weekCompleted.get("weekend1"))
+	if (!Highscore.levelCompleted.get("weekend1"))
 		return [songs[0], songs[1], songs[2]];
 
 	return songs;

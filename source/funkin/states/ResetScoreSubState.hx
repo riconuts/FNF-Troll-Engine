@@ -38,7 +38,7 @@ class ResetScoreSubState extends funkin.states.base.AlphabetPromptSubstate
 
 	function resetScore() {
 		if(isStoryMode)
-			Highscore.resetWeek(id);
+			Highscore.resetLevel(id, chartId);
 		else
 			Highscore.resetSong(id, chartId);
 	}

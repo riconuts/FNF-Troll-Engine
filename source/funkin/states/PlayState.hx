@@ -3123,7 +3123,7 @@ class PlayState extends MusicBeatState
 		if (isStoryMode && level != null) {
 			// Week ended, save week score
 			if (saveScore && !practiceMode && !cpuControlled && !playOpponent) {
-				Highscore.saveWeekScore(level.id, campaignScore);				
+				Highscore.saveLevelScore(level.id, difficultyName, campaignScore);				
 			}
 			level = null;
 		}
