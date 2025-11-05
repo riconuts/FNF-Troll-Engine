@@ -2132,6 +2132,12 @@ class ChartingState extends MusicBeatState
 	inline function sectionStartTime(add:Int = 0):Float
 		return getSectionStartTime(curSec + add);
 
+	function getSnappedTime(snap:Float) {
+		var time = Conductor.songPosition;
+		var bmpEventTime = Conductor.getBPMFromSeconds(time).songTime;
+		return CoolUtil.snap(time - bmpEventTime, snap) + bmpEventTime;
+	}
+
 	function updateQuantization(){
 		quantization = quantizations[curQuant];
 		quantizationMult = (quantization / 16);
@@ -2335,12 +2341,9 @@ class ChartingState extends MusicBeatState
 		}
 
 		if (checkCanMouseScroll() && FlxG.mouse.wheel != 0) {
-			if (!options.mouseScrollingQuant)
-				Conductor.songPosition -= (FlxG.mouse.wheel * Conductor.stepCrochet);
-			else{
-				var snap = Conductor.stepCrochet / quantizationMult;
-				Conductor.songPosition = CoolUtil.snap(Conductor.songPosition, snap) - (snap * FlxG.mouse.wheel);
-			}
+			var snap = Conductor.stepCrochet;
+			if (options.mouseScrollingQuant) snap /= quantizationMult; 
+			Conductor.songPosition = getSnappedTime(snap) - (snap * FlxG.mouse.wheel);
 
 			pauseTracks();
 		}
@@ -2606,7 +2609,7 @@ class ChartingState extends MusicBeatState
 			pauseTracks();
 
 			var snap:Float = Conductor.stepCrochet / quantizationMult;
-			var feces:Float = CoolUtil.snap(Conductor.songPosition, snap) + (FlxG.keys.justPressed.UP ? -snap : snap);
+			var feces:Float = getSnappedTime(snap) + (FlxG.keys.justPressed.UP ? -snap : snap);
 
 			FlxTween.tween(Conductor, {songPosition: feces}, 0.1, {ease: FlxEase.circOut});
 		}
