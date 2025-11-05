@@ -230,7 +230,7 @@ class ChartingState extends MusicBeatState
 	var playedSound:Array<Bool> = []; //Prevents ouchy GF sex sounds
 
 	var inst:FlxSound = null;
-	var tracks:Array<FlxSound> = [];
+	var tracks:Array<FlxSound>;
 	var soundTracksMap:Map<String, FlxSound> = [];
 	
 	var songId:String;
@@ -472,7 +472,7 @@ class ChartingState extends MusicBeatState
 		Conductor.cleanup();
 		Conductor.changeBPM(_song.bpm);
 		Conductor.mapBPMChanges(_song);
-		Conductor.tracks = this.tracks;
+		this.tracks = Conductor.tracks;
 		loadTracks();
 /* 		fixEvents(); */
 
@@ -1921,13 +1921,15 @@ class ChartingState extends MusicBeatState
 
 	function loadTracks():Void
 	{
+		Conductor.pauseSong();
 		Conductor.songPosition = sectionStartTime();
 
 		var songTrackNames:Array<String> = [];
 		var jsonTracks = _song.tracks;
 
 		soundTracksMap.clear();
-		tracks.resize(0);
+		while (tracks.length > 0)
+			tracks.pop().destroy();
 
 		for (groupName in Reflect.fields(jsonTracks)) {
 			var trackGroup:Array<String> = Reflect.field(jsonTracks, groupName);
