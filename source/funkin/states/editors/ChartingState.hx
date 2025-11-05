@@ -24,6 +24,7 @@ import flixel.input.keyboard.FlxKey;
 import flixel.util.FlxGradient;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.addons.ui.*;
+import flixel.addons.ui.FlxInputText;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
@@ -3600,8 +3601,24 @@ class CustomFlxUITabMenu extends FlxUITabMenu {
 		return 0;
 }
 
-private class CustomFlxUINumericStepper extends flixel.addons.ui.FlxUINumericStepper {
+/**
+	Allow mouse wheel to change its value.  
+	Prevent value from updating until you press Enter or click out of it.
+**/
+private class CustomFlxUINumericStepper extends FlxUINumericStepper {
 	public var hoveringText:Bool = false;
+
+	public function new(X:Float = 0, Y:Float = 0, StepSize:Float = 1, DefaultValue:Float = 0, Min:Float = -999, Max:Float = 999, Decimals:Int = 0,
+			Stack:Int = FlxUINumericStepper.STACK_HORIZONTAL, ?TextField:FlxText, ?ButtonPlus:FlxUITypedButton<FlxSprite>, ?ButtonMinus:FlxUITypedButton<FlxSprite>,
+			IsPercent:Bool = false) {
+		super(X, Y, StepSize, DefaultValue, Min, Max, Decimals, Stack, TextField, ButtonPlus, ButtonMinus, IsPercent);
+
+		if ((text_field is FlxUIInputText))
+		{
+			var fuit:FlxUIInputText = cast text_field;
+			fuit.focusLost = _onInputTextLostFocus.bind(fuit);
+		}
+	}
 
 	override function update(elapsed:Float) {
 		if (hoveringText = FlxG.mouse.overlaps(text_field, text_field.camera)) {
@@ -3609,6 +3626,19 @@ private class CustomFlxUINumericStepper extends flixel.addons.ui.FlxUINumericSte
 			else if (FlxG.mouse.wheel < 0) _onMinus();
 		}
 		super.update(elapsed);
+	}
+
+	override function _onInputTextEvent(text:String, action:String):Void {
+		if (action != FlxInputText.ENTER_ACTION)
+			return;
+		
+		super._onInputTextEvent(text, action);
+	}
+
+	function _onInputTextLostFocus(fuit:FlxUIInputText):Void {
+		value = Std.parseFloat(fuit.text);
+		_doCallback(FlxUINumericStepper.EDIT_EVENT);
+		_doCallback(FlxUINumericStepper.CHANGE_EVENT);
 	}
 }
 
