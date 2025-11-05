@@ -431,7 +431,7 @@ class Note extends NoteObject
 	{
 		super(NOTE);
 
-		this.strumTime = strumTime;
+		this.strumTime = this.visualTime = strumTime;
 		this.column = column;
 		this.prevNote = prevNote;
 		this.fieldIndex = fieldIndex;
@@ -451,14 +451,6 @@ class Note extends NoteObject
 			this.quant = getQuant(Conductor.getBeatSinceChange(this.strumTime));
 
 		this.baseAlpha = this.isSustainNote ? 0.6 : 1;
-
-		if ((FlxG.state is PlayState))
-			this.strumTime -= (cast FlxG.state).offset;
-
-		if (!inEditor) {
-			this.strumTime += ClientPrefs.noteOffset;			
-			visualTime = PlayState.instance.getNoteInitialTime(this.strumTime);
-		}
 
 		if (prevNote != null) 
 			prevNote.nextNote = this;

@@ -1815,6 +1815,7 @@ class PlayState extends MusicBeatState
 		if(keyCount == null)
 			keyCount = PlayState.keyCount;
 		
+		var offset:Float = ClientPrefs.noteOffset - offset;
 		for (section in noteData) {
 			for (songNotes in section.sectionNotes) {
 				var daStrumTime:Float = songNotes.strumTime;
@@ -1828,6 +1829,8 @@ class PlayState extends MusicBeatState
 				var daType:String = songNotes.noteType;
 
 				var swagNote:Note = new Note(daStrumTime, daColumn, prevNote, fieldIndex, songNotes.sustainLength > 0 ? HEAD : TAP, false, hudSkin);
+				swagNote.strumTime += offset;
+				swagNote.visualTime = getNoteInitialTime(swagNote.strumTime);
 				swagNote.realColumn = daNoteData;
 				swagNote.mustPress = mustPress;
 				swagNote.sustainLength = Math.max(0, songNotes.sustainLength <= Conductor.stepCrotchet ? songNotes.sustainLength : (susLength + 1) * Conductor.stepCrotchet); // +1 because hold end	
@@ -1872,6 +1875,8 @@ class PlayState extends MusicBeatState
 				
 				inline function makeSustain(susNote:Int, susPart:SustainPart) {
 					var sustainNote:Note = new Note(daStrumTime + Conductor.stepCrochet * (susNote + 1), daColumn, prevNote, fieldIndex, susPart, false, hudSkin);
+					sustainNote.strumTime += offset;
+					sustainNote.visualTime = getNoteInitialTime(sustainNote.strumTime);
 					sustainNote.realColumn = daNoteData;
 					swagNote.mustPress = mustPress;
 					sustainNote.ID = notes.length;
