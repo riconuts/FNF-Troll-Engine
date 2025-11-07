@@ -191,7 +191,7 @@ class Character extends FlxSprite
 	#end
 
 	#if !USING_FLXANIMATE
-	public var anim(get, never):FlxAnimationController;
+	public var anim(get, never):flixel.animation.FlxAnimationController;
 	@:noCompletion function get_anim() return this.animation;
 	#end
 

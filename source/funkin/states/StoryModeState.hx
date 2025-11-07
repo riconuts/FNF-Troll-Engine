@@ -15,8 +15,10 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import haxe.io.Path;
+#if USING_FLXANIMATE
 import animate.FlxAnimate;
 import animate.FlxAnimateFrames;
+#end
 
 using funkin.CoolerStringTools;
 using StringTools;
@@ -95,9 +97,12 @@ class LevelStageProp extends FlxSprite
 		if (propData.characterId != null)
 			prop.x = (100 + (50 * (propData.characterId + 1)) + FlxG.width * 0.25 * propData.characterId) + (propData.x ?? 0.0); // not doing .x += because of templates. if you  set charsacterId on smth it should override lol!
 
+		#if USING_FLXANIMATE
 		if (Paths.fileExists('images/${propData.graphic}/Animation.json', TEXT))
 			prop.frames = FlxAnimateFrames.fromAnimate(Paths.animateAtlasPath(propData.graphic));
-		else if (Paths.fileExists('images/${propData.graphic}.txt', TEXT))
+		else 
+		#end
+		if (Paths.fileExists('images/${propData.graphic}.txt', TEXT))
 			prop.frames = Paths.getPackerAtlas(propData.graphic);
 		else if (Paths.fileExists('images/${propData.graphic}.xml', TEXT))
 			prop.frames = Paths.getSparrowAtlas(propData.graphic);
