@@ -826,7 +826,8 @@ class CharacterEditorState extends MusicBeatState {
 			return;
 		}
 		ghostCharName = charName;
-		ghostChar = new Character(0, 0, charName == "Current Character" ? char.characterId : charName, ghostPlayableCheckbox.checked, true);
+		ghostChar = new Character(0, 0, charName == "Current Character" ? char.characterId : charName, ghostPlayableCheckbox.checked);
+		ghostChar.debugMode = true;
 		ghostChar.setupCharacter();
 		ghostChar.alpha = 0.6;
 		ghostChar.color = 0xFF666688;
@@ -1014,7 +1015,8 @@ class CharacterEditorState extends MusicBeatState {
 			char.destroy();
 		}
 
-		char = new Character(0, 0, charName, isPlayer, true);
+		char = new Character(0, 0, charName, isPlayer);
+		char.debugMode = true;
 		char.startScripts();
 		char.setupCharacter();
 		if (char.animationsArray[0] != null)

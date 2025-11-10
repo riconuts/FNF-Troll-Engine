@@ -320,13 +320,12 @@ class Character extends FlxSprite
 		}
 	}
 
-	public function new(x:Float, y:Float, ?characterId:String, ?isPlayer:Bool = false, ?debugMode:Bool = false)
+	public function new(x:Float = 0.0, y:Float = 0.0, ?characterId:String, isPlayer:Bool = false)
 	{
 		super(x, y);
 
 		this.characterId = characterId ?? DEFAULT_CHARACTER;
 		this.isPlayer = isPlayer;
-		this.debugMode = debugMode;
 
 		this.xFacing = this.isPlayer ? -1 : 1;
 		this.controlled = this.isPlayer;
