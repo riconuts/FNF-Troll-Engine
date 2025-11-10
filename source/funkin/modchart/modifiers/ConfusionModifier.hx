@@ -4,10 +4,11 @@ class ConfusionModifier extends NoteModifier {
 	override function getName()return 'confusion';
 	override function isRenderMod()return true;
 
-	function getConfusion(?suffix:String = '', beat:Float, column:Int, player:Int, onlyOffset:Bool=false){
+	function getConfusion(suffix:String = '', beat:Float, column:Int, player:Int, onlyOffset:Bool=false){
 		var mainAngle:Float = 0;
 		if (!onlyOffset){
-			var main = (suffix == '' ? getValue(player) : getSubmodValue('confusion$suffix', player)) + getSubmodValue('confusion${suffix}${column}', player);
+			var main = (suffix.length == 0) ? getValue(player) : getSubmodValue('confusion$suffix', player);
+			main += getSubmodValue('confusion${suffix}${column}', player);
 			mainAngle = -((beat * main) % 360);
 		}
 		var constAngle:Float = getSubmodValue('confusion${suffix}Offset', player) + getSubmodValue('confusion${suffix}Offset${column}', player);
@@ -20,35 +21,38 @@ class ConfusionModifier extends NoteModifier {
 		var angleY:Float = getConfusion("Y", beat, data, player);
 		var angleZ:Float = getConfusion(beat, data, player);
 
-		if((obj.objType == NOTE)){
-			var note:Note = cast obj;
-			var speed = modMgr.getNoteSpeed(note, player);
-			var yPos:Float = ((Conductor.visualPosition - note.visualTime)) * speed;
+		switch(obj.objType) {
+			case NOTE:
+				var note:Note = cast obj;
+				var speed = modMgr.getNoteSpeed(note, player);
+				var yPos:Float = ((Conductor.visualPosition - note.visualTime)) * speed;
+		
+				angleX += getSubmodValue("roll", player) * yPos * 0.5;
+				angleY += getSubmodValue("twirl", player) * yPos * 0.5;
+				angleX += getSubmodValue("noteAngleX", player) + getSubmodValue("note" + data + "AngleX", player);
+				angleY += getSubmodValue("noteAngleY", player) + getSubmodValue("note" + data + "AngleY", player);
+		
+				if(note.isSustainNote)
+					angleZ = 0;	
+				else{
+					var noteBeat = note.beat - beat;
+					
+					angleZ += (noteBeat * getSubmodValue("dizzy", player) % 360) * (180 / Math.PI);
+					angleZ += getSubmodValue("noteAngle", player) + getSubmodValue("note" + data + "Angle", player);
+				}
+		
+				angleZ += note.typeOffsetAngle;
 
-			angleX += getSubmodValue("roll", player) * yPos * 0.5;
-			angleY += getSubmodValue("twirl", player) * yPos * 0.5;
-			angleX += getSubmodValue("noteAngleX", player) + getSubmodValue("note" + data + "AngleX", player);
-			angleY += getSubmodValue("noteAngleY", player) + getSubmodValue("note" + data + "AngleY", player);
-
-			if(note.isSustainNote)
-				angleZ = 0;	
-			else{
-				var noteBeat = note.beat - beat;
-				
-				angleZ += (noteBeat * getSubmodValue("dizzy", player) % 360) * (180 / Math.PI);
-				angleZ += getSubmodValue("noteAngle", player) + getSubmodValue("note" + data + "Angle", player);
-			}
-
-			angleZ += note.typeOffsetAngle;
-		}else if((obj.objType == STRUM)){
-			angleX += getSubmodValue("receptorAngleX", player) + getSubmodValue("receptor" + data + "AngleX", player);
-			angleY += getSubmodValue("receptorAngleY", player) + getSubmodValue("receptor" + data + "AngleY", player);
-			angleZ += getSubmodValue("receptorAngle", player) + getSubmodValue("receptor" + data + "Angle", player);
-		}else{
-			// probably a splash or smth
-			angleX = 0;
-			angleY = 0;
-			angleZ = 0;
+			case STRUM:
+				angleX += getSubmodValue("receptorAngleX", player) + getSubmodValue("receptor" + data + "AngleX", player);
+				angleY += getSubmodValue("receptorAngleY", player) + getSubmodValue("receptor" + data + "AngleY", player);
+				angleZ += getSubmodValue("receptorAngle", player) + getSubmodValue("receptor" + data + "Angle", player);
+			
+			default:
+				// probably a splash or smth
+				angleX = 0;
+				angleY = 0;
+				angleZ = 0;
 		}
 		
 		var radians = FlxAngle.TO_RAD;
