@@ -347,10 +347,6 @@ class PlayState extends MusicBeatState
 	public var opponentCameraOffset:Array<Float> = null;
 	public var girlfriendCameraOffset:Array<Float> = null;
 
-	// Default sing animations. You should be using playfield.singAnimations instead!!
-	#if ALLOW_DEPRECATION
-	public var singAnimations:Array<String> = ["singLEFT", "singDOWN", "singUP", "singRIGHT"];
-	#end
 	public var focusedChar:Character;
 	public var gfSpeed:Int = 1;
 
@@ -360,7 +356,7 @@ class PlayState extends MusicBeatState
 	public var eventNotes:Array<PsychEvent> = [];
 
 	var speedChanges:Array<SpeedEvent> = [];
-	public var currentSV:SpeedEvent = {position: 0, startTime: 0, speed: 1 #if EASED_SVs , startSpeed: 1 #end};
+	public var currentSV:SpeedEvent = {position: 0, startTime: 0, speed: 1, #if EASED_SVs startSpeed: 1, #end};
 	public var judgeManager:JudgmentManager;
 
 	public var modManager:ModManager;
@@ -1162,43 +1158,21 @@ class PlayState extends MusicBeatState
 		if(stageData.camera_speed != null)
 			cameraSpeed = stageData.camera_speed;
 
-		boyfriendCameraOffset = stageData.camera_boyfriend;
-		if(boyfriendCameraOffset == null){ //Fucks sake should have done it since the start :rolling_eyes:
-			boyfriendCameraOffset = [0, 0];
-			stageData.camera_boyfriend = [0, 0];
-		}
+		boyfriendCameraOffset = stageData.camera_boyfriend ??= [0, 0];
+		opponentCameraOffset = stageData.camera_opponent ??= [0, 0];
+		girlfriendCameraOffset = stageData.camera_girlfriend ??= [0, 0];
 
-		opponentCameraOffset = stageData.camera_opponent;
-		if(opponentCameraOffset == null){
-			opponentCameraOffset = [0, 0];
-			stageData.camera_opponent = [0, 0];
-		}
+		boyfriendGroup ??= new FlxSpriteGroup(BF_X, BF_Y);
+		boyfriendGroup.x = BF_X;
+		boyfriendGroup.y = BF_Y;
 
-		girlfriendCameraOffset = stageData.camera_girlfriend;
-		if(girlfriendCameraOffset == null){
-			girlfriendCameraOffset = [0, 0];
-			stageData.camera_girlfriend = [0, 0];
-		}
+		dadGroup ??= new FlxSpriteGroup(DAD_X, DAD_Y);
+		dadGroup.x = DAD_X;
+		dadGroup.y = DAD_Y;
 
-		if(boyfriendGroup==null)
-			boyfriendGroup = new FlxSpriteGroup(BF_X, BF_Y);
-		else{
-			boyfriendGroup.x = BF_X;
-			boyfriendGroup.y = BF_Y;
-		}
-		if(dadGroup==null)
-			dadGroup = new FlxSpriteGroup(DAD_X, DAD_Y);
-		else{
-			dadGroup.x = DAD_X;
-			dadGroup.y = DAD_Y;
-		}
-
-		if(gfGroup==null)
-			gfGroup = new FlxSpriteGroup(GF_X, GF_Y);
-		else{
-			gfGroup.x = GF_X;
-			gfGroup.y = GF_Y;
-		}
+		gfGroup ??= new FlxSpriteGroup(GF_X, GF_Y);
+		gfGroup.x = GF_X;
+		gfGroup.y = GF_Y;
 	}
 
 	public function addTextToDebug(text:String, ?color:FlxColor = FlxColor.WHITE) {
