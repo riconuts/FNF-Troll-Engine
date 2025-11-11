@@ -563,7 +563,6 @@ class PlayState extends MusicBeatState
 		this.songSyncMode = SongSyncMode.fromString(ClientPrefs.songSyncMode);
 
 		Conductor.cleanup();
-		Conductor.safeZoneOffset = ClientPrefs.hitWindow;
 		Wife3.timeScale = Wife3.judgeScales.get(ClientPrefs.judgeDiff);
 		PBot.missThreshold = Math.max(160, ClientPrefs.hitWindow);
 
@@ -3018,7 +3017,7 @@ class PlayState extends MusicBeatState
 			for (field in playfields.members) {
 				if(field.isPlayer) {
 					for(daNote in field.spawnedNotes) {
-						if (daNote.strumTime < songLength - Conductor.safeZoneOffset) {
+						if (daNote.strumTime < songLength - ClientPrefs.hitWindow) {
 							health -= 0.05 * healthLoss;
 						}
 					}
@@ -3631,7 +3630,7 @@ class PlayState extends MusicBeatState
 			daNote.noMissAnimation = true;
 		}
 
-		daNote.hitResult.hitDiff = Conductor.safeZoneOffset;
+		daNote.hitResult.hitDiff = ClientPrefs.hitWindow;
 		
 		if (!daNote.ratingDisabled) {
 			stats.judged.push({
@@ -3643,9 +3642,9 @@ class PlayState extends MusicBeatState
 			if (!mine) {
 				songMisses++;
 				applyNoteJudgment(daNote, false);
-				//applyJudgment(daNote.hitResult.judgment, Conductor.safeZoneOffset);
+				//applyJudgment(daNote.hitResult.judgment, ClientPrefs.hitWindow);
 			}else {
-				applyJudgment(MISS_MINE, Conductor.safeZoneOffset);
+				applyJudgment(MISS_MINE, ClientPrefs.hitWindow);
 				health -= daNote.missHealth * healthLoss;
 			}
 	

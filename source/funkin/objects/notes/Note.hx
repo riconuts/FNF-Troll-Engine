@@ -641,7 +641,7 @@ class Note extends NoteObject
 			wasGoodHit = true;
 
 		var diff = (strumTime - Conductor.songPosition);
-		if (diff < -Conductor.safeZoneOffset && !wasGoodHit)
+		if (diff < -ClientPrefs.hitWindow && !wasGoodHit)
 			tooLate = true;
 	}
 }
