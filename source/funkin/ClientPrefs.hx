@@ -18,11 +18,11 @@ enum OptionType {
 }
 
 typedef OptionData = {
-	display:String,
-	desc:String,
-	type:OptionType,
-	?value:Dynamic,
-	data:Map<String, Dynamic>,
+	var display:String;
+	var desc:String;
+	var type:OptionType;
+	var ?value:Dynamic;
+	var data:Map<String, Dynamic>;
 }
 
 #if !macro

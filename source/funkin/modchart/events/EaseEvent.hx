@@ -5,12 +5,17 @@ import flixel.tweens.FlxEase.EaseFunction;
 
 class EaseEvent extends BaseEvent
 {
+	public var endStep:Float;
 	public var easeFunc:EaseFunction;
 	public var callback:(EaseEvent, Float, Float) -> Void;
-	public var endStep:Float = 0;
+
+	/** Ease length in steps **/
+	public var length:Float;
+
+	/** Ease progress percentage [0.0, 1.0] **/
 	public var progress:Float = 0;
+
 	public var value:Float = 0;
-	public var length:Float = 0;
 
 	public function new(step:Float, endStep:Float, easeFunc:EaseFunction, callback:(EaseEvent, Float, Float) -> Void, modMgr:ModManager)
 	{
@@ -26,10 +31,8 @@ class EaseEvent extends BaseEvent
 	{
 		if (curStep <= endStep)
 		{
-			var passed = curStep - executionStep;
-			progress = passed / (endStep - executionStep);
-				
-			value = easeFunc(passed / length);
+			progress = (curStep - executionStep) / length;
+			value = easeFunc(progress);
 			callback(this, value, curStep);
 		}
 		else{

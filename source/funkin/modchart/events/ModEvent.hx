@@ -3,9 +3,9 @@ package funkin.modchart.events;
 
 
 class ModEvent extends BaseEvent {
-	public var modName:String = '';
-	public var endVal:Float = 0;
-	public var player:Int = -1;
+	public var modName:String;
+	public var endVal:Float;
+	public var player:Int;
 
 	private var mod:Modifier;
 
@@ -17,6 +17,6 @@ class ModEvent extends BaseEvent {
 		endVal = target;
 	}
 
-	override function addedToTimeline()this.mod = manager.get(modName);
-	
+	override function addedToTimeline()
+		this.mod = manager.get(modName);
 }

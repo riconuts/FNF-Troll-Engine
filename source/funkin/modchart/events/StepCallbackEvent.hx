@@ -3,7 +3,7 @@ package funkin.modchart.events;
 
 
 class StepCallbackEvent extends CallbackEvent {
-	public var endStep:Float = 0;
+	public var endStep:Float;
 	public var progress:Float = 0;
 	public function new(step:Float, endStep:Float, callback:(CallbackEvent, Float) -> Void, modMgr:ModManager)
 	{

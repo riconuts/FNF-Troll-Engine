@@ -556,11 +556,11 @@ class PlayState extends MusicBeatState
 	{
 		instance = this;
 
-		updateSongPos = false;
 		print('\nCreating PlayState\n');
 		Highscore.loadData();
 		
-		this.songSyncMode = SongSyncMode.fromString(ClientPrefs.songSyncMode);
+		updateSongPos = false;
+		songSyncMode = SongSyncMode.fromString(ClientPrefs.songSyncMode);
 
 		Conductor.cleanup();
 		Wife3.timeScale = Wife3.judgeScales.get(ClientPrefs.judgeDiff);
@@ -772,10 +772,8 @@ class PlayState extends MusicBeatState
 		setStageData(stageData);
 
 		// SONG SPECIFIC SCRIPTS
-		var foldersToCheck:Array<String> = Paths.getFolders('songs/$songId');
-
 		var filesPushed:Array<String> = [];
-		for (folder in foldersToCheck) {
+		for (folder in Paths.getFolders('songs/$songId')) {
 			Paths.iterateDirectory(folder, (file:String) -> {
 				if (Paths.isHScript(file) && !filesPushed.contains(file)) {
 					createHScript(folder + file);
@@ -1694,74 +1692,55 @@ class PlayState extends MusicBeatState
 		
 		//// get note types to load
 		for (section in PlayState.SONG.notes) {
-			for (songNotes in section.sectionNotes) {
-				var type:String = songNotes.noteType;
-				if (noteTypeMap.exists(type))
-					continue;
-
-				noteTypeMap.set(type, true);
-			}
+			for (noteData in section.sectionNotes)
+				noteTypeMap.set(noteData.noteType, true);
 		}
 
 		//// get event names to load
-		var daEvents:Array<PsychEvent> = getSongEventNotes();
-		for (eventNote in daEvents) {
-			var name:String = eventNote.event;
-			if (eventPushedMap.exists(name))
-				continue;
-
-			eventPushedMap.set(name, true);
-		}
+		var daEvents = getSongEventNotes();
+		for (eventNote in daEvents)
+			eventPushedMap.set(eventNote.event, true);
 
 		// create note type scripts
 		final notetypeFolders = ["notetypes"];
 		for (notetype in noteTypeMap.keys()) {
 			var script = createFirstScriptFromFolders(notetype, notetypeFolders, true);
-			if (script != null) {
-				notetypeScripts.set(notetype, cast script);			
-				firstNotePush(notetype);
-			}
+			if (script != null) notetypeScripts.set(notetype, cast script);
+			firstNotePush(notetype);
 		}
 
 		// create event scripts
 		final eventFolders = ["events"];
 		for (eventName in eventPushedMap.keys()) {
 			var script:FunkinScript = createFirstScriptFromFolders(eventName, eventFolders, true);
-			if (script != null) {
-				eventScripts.set(eventName, cast script);
-				firstEventPush(eventName);
-			}
+			if (script != null) eventScripts.set(eventName, cast script);
+			firstEventPush(eventName);
 		}
 
 		// apply event time offsets
 		for (eventNote in daEvents)
 			eventNote.strumTime -= eventNoteEarlyTrigger(eventNote);
 		
-		if(daEvents.length > 1)
-			daEvents.sort(sortByTime);
+		daEvents.sort(sortByTime);
 
 		// push events
 		for (eventNote in daEvents) {
-			var sp = shouldPush(eventNote);
+			if (!shouldPush(eventNote))
+				continue;
 			
-			if (sp) {
-				eventNotes.push(eventNote);
+			eventNotes.push(eventNote);
 
-				for(shit in getEventNotePreload(eventNote))
-					shitToLoad.push(shit);
-				
-				eventPushed(eventNote);
-			}/*else{
-				trace("not pushing", eventNote.event, eventNote);
-			}*/
+			for(shit in getEventNotePreload(eventNote))
+				shitToLoad.push(shit);
+			
+			eventPushed(eventNote);
 		}
+		eventNotes.sort(sortByTime);
 
 		speedChanges.sort(svSort);
 		#if EASED_SVs
 		resetSVDeltas();
 		#end
-		if (eventNotes.length > 1)
-			eventNotes.sort(sortByTime);
 
 		////
 		generateNotes(SONG.notes, true, true, SONG.keyCount); // generates the chart
@@ -1790,23 +1769,23 @@ class PlayState extends MusicBeatState
 		
 		var offset:Float = ClientPrefs.noteOffset - offset;
 		for (section in noteData) {
-			for (songNotes in section.sectionNotes) {
-				var daStrumTime:Float = songNotes.strumTime;
-				var daNoteData:Int = songNotes.column;
-				var mustPress:Bool = daNoteData < keyCount;
-				var fieldIndex:Int = mustPress ? 0 : 1;
+			for (noteData in section.sectionNotes) {
+				var daStrumTime:Float = noteData.strumTime;
+				var realColumn:Int = noteData.column;
+				var mustPress:Bool = realColumn < keyCount;
+				var fieldIndex:Int = Math.floor(realColumn / keyCount);
 
-				var daColumn:Int = daNoteData % keyCount;
-				var susLength = Math.round(songNotes.sustainLength / Conductor.stepCrochet) - 1;
+				var daColumn:Int = realColumn % keyCount;
+				var susSegments:Int = Math.round(noteData.sustainLength / Conductor.stepCrochet) - 1;
 				var prevNote:Note = (notes.length > 0) ? notes[notes.length - 1] : null;
-				var daType:String = songNotes.noteType;
+				var daType:String = noteData.noteType;
 
-				var swagNote:Note = new Note(daStrumTime, daColumn, prevNote, fieldIndex, songNotes.sustainLength > 0 ? HEAD : TAP, false, hudSkin);
+				var swagNote:Note = new Note(daStrumTime, daColumn, prevNote, fieldIndex, noteData.sustainLength > 0 ? HEAD : TAP, false, hudSkin);
 				swagNote.strumTime += offset;
 				swagNote.visualTime = getNoteInitialTime(swagNote.strumTime);
-				swagNote.realColumn = daNoteData;
+				swagNote.realColumn = realColumn;
 				swagNote.mustPress = mustPress;
-				swagNote.sustainLength = Math.max(0, songNotes.sustainLength <= Conductor.stepCrotchet ? songNotes.sustainLength : (susLength + 1) * Conductor.stepCrotchet); // +1 because hold end	
+				swagNote.sustainLength = Math.max(0, noteData.sustainLength <= Conductor.stepCrotchet ? noteData.sustainLength : (susSegments + 1) * Conductor.stepCrotchet); // +1 because hold end	
 				swagNote.ID = notes.length;
 
 				modchartObjects.set('note${swagNote.ID}', swagNote);
@@ -1816,25 +1795,16 @@ class PlayState extends MusicBeatState
 					swagNote.characterHitAnimSuffix = '-alt';
 					swagNote.characterMissAnimSuffix = '-altmiss';
 				}
-				swagNote.gfNote = section.gfSection && (section.mustHitSection ? (daNoteData < keyCount) : (daNoteData >= keyCount));
+				swagNote.gfNote = section.gfSection && (section.mustHitSection ? (realColumn < keyCount) : (realColumn >= keyCount));
 				swagNote.noteType = daType;
-
-				////
-				var playfield:PlayField = swagNote.field;
-
-				if (playfield == null && playfields.length > 0) {
-					if (playfields[swagNote.fieldIndex] != null) {
-						playfield = playfields[swagNote.fieldIndex];
-						swagNote.field = playfield;
-					}
-				}
+				swagNote.field ??= (swagNote.fieldIndex >= 0) ? playfields[swagNote.fieldIndex] : null;
 
 				if (callScripts)
 					callOnScripts("onGeneratedNote", [swagNote, section]);
 				
 				notes.push(swagNote); // just for the sake of convenience
 				
-				playfield = swagNote.field;
+				var playfield = swagNote.field;
 				if (playfield != null) {
 					swagNote.fieldIndex = playfield.modNumber;
 					if (addToFields)
@@ -1846,11 +1816,11 @@ class PlayState extends MusicBeatState
 				
 				prevNote = swagNote;
 				
-				inline function makeSustain(susNote:Int, susPart:SustainPart) {
-					var sustainNote:Note = new Note(daStrumTime + Conductor.stepCrochet * (susNote + 1), daColumn, prevNote, fieldIndex, susPart, false, hudSkin);
+				inline function makeSustain(segment:Int, susPart:SustainPart) {
+					var sustainNote:Note = new Note(daStrumTime + Conductor.stepCrochet * (segment + 1), daColumn, prevNote, fieldIndex, susPart, false, hudSkin);
 					sustainNote.strumTime += offset;
 					sustainNote.visualTime = getNoteInitialTime(sustainNote.strumTime);
-					sustainNote.realColumn = daNoteData;
+					sustainNote.realColumn = realColumn;
 					swagNote.mustPress = mustPress;
 					sustainNote.ID = notes.length;
 					modchartObjects.set('note${sustainNote.ID}', sustainNote);
@@ -1880,10 +1850,10 @@ class PlayState extends MusicBeatState
 					prevNote = sustainNote;
 				}
 				
-				if (susLength > 0){
-					for (susNote in 0...susLength)
-						makeSustain(susNote, PART);
-					makeSustain(susLength, END);
+				if (susSegments > 0){
+					for (segment in 0...susSegments)
+						makeSustain(segment, PART);
+					makeSustain(susSegments, END);
 				}
 			}
 		}
