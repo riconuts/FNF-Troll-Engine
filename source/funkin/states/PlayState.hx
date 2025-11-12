@@ -479,10 +479,6 @@ class PlayState extends MusicBeatState
 	public var scriptsToClose:Array<FunkinScript> = [];
 
 	public var signals = new PlayStateSignals();
-
-	////
-	var noteTypeMap:Map<String, Bool> = [];
-	var eventPushedMap:Map<String, Bool> = [];
 	
 	// used by lua scripts
 	public var modchartTweens:Map<String, FlxTween> = new Map();
@@ -1109,11 +1105,6 @@ class PlayState extends MusicBeatState
 
 		finishedCreating = true;
 
-		noteTypeMap.clear();
-		noteTypeMap = null;
-		eventPushedMap.clear();
-		eventPushedMap = null;
-
 		Paths.clearUnusedMemory();
 	}
 
@@ -1691,6 +1682,7 @@ class PlayState extends MusicBeatState
 		};
 		
 		//// get note types to load
+		var noteTypeMap:Map<String, Bool> = [];
 		for (section in PlayState.SONG.notes) {
 			for (noteData in section.sectionNotes)
 				noteTypeMap.set(noteData.noteType, true);
@@ -1698,6 +1690,7 @@ class PlayState extends MusicBeatState
 
 		//// get event names to load
 		var daEvents = getSongEventNotes();
+		var eventPushedMap:Map<String, Bool> = [];
 		for (eventNote in daEvents)
 			eventPushedMap.set(eventNote.event, true);
 
