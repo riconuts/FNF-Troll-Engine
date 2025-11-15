@@ -1750,28 +1750,28 @@ class ChartingState extends MusicBeatState
 		var tab_group_chart = new FlxUI(null, UI_box);
 		tab_group_chart.name = 'Editor';
 
+		var col1X = 10;
+		var col2X = 10 + 150;
+
 		////////
 		var trackNamesArray = ["None"];
 		for (trackName in soundTracksMap.keys())
 			trackNamesArray.push(trackName);
 
-		//
 		waveformTrackDropDown = new CustomFlxUIDropDownMenu(
-			10, 100, 
+			col1X, 80, 
 			FlxUIDropDownMenu.makeStrIdLabelArray(trackNamesArray, false), 
 			selectTrack
 		);
 		blockPressWhileScrolling.push(waveformTrackDropDown);
 
-		//
 		trackVolumeSlider = new CustomFlxUISlider(
 			this, 
 			'_curTrackVolume', 
-			waveformTrackDropDown.x + 150 - 10, 
+			col2X, 
 			waveformTrackDropDown.y - 15, 
-			0.0, 
-			1.0, 
-			Math.floor(waveformTrackDropDown.width), 
+			0.0, 1.0, 
+			115, 
 			null, 
 			5, 
 			FlxColor.WHITE, 
@@ -1784,7 +1784,7 @@ class ChartingState extends MusicBeatState
 
 		////////
 
-		var startY = 165;
+		var startY = 140;
 
 		var check_warnings = new FlxUICheckBox(10, startY, null, null, "Ignore Progress Warnings", 100);
 		check_warnings.callback = function()
@@ -1809,50 +1809,48 @@ class ChartingState extends MusicBeatState
 		};
 		mouseScrollingQuant.checked = options.mouseScrollingQuant == true;
 
-		////////
-		var xPos = 10 + 150;
-
-		var playSoundBf = new FlxUICheckBox(xPos, startY, null, null, 'Play Hit Sound (Boyfriend notes)', 100);
-		playSoundBf.callback = () -> options.playSoundBf = playSoundBf.checked;
-		playSoundBf.checked = options.playSoundBf == true;
-
-
-		var playSoundDad = new FlxUICheckBox(xPos, startY + 30, null, null, 'Play Hit Sound (Opponent notes)', 100);
-		playSoundDad.callback = () -> options.playSoundDad = playSoundDad.checked;
-		playSoundDad.checked = options.playSoundDad == true;
-
-		
-		var playSoundEvents = new FlxUICheckBox(xPos, startY + 60, null, null, 'Play Hit Sound (Event notes)', 100);
-		playSoundEvents.callback = () -> options.playSoundEvents = playSoundEvents.checked;
-		playSoundEvents.checked = options.playSoundEvents == true;
-
-		var panHitSounds = new FlxUICheckBox(xPos, startY + 90, null, null, 'Pan Hit Sounds', 100);
-		panHitSounds.callback = () -> options.panHitSounds = panHitSounds.checked;
-		panHitSounds.checked = options.panHitSounds == true;
-
-		////////
-		var metronome = new FlxUICheckBox(10, 15, null, null, "Metronome Enabled", 100);
-		metronome.callback = () -> {options.metronome = metronome.checked;}
-		metronome.checked = options.metronome == true;
-
-		metronomeStepper = new CustomFlxUINumericStepper(15, 55, 5, _song.bpm, 1, 9000, 3);
-		metronomeOffsetStepper = new CustomFlxUINumericStepper(metronomeStepper.x + 146, metronomeStepper.y, 25, 0, 0, 1000, 1);
-		blockPressWhileTypingOnStepper.push(metronomeStepper);
-		blockPressWhileTypingOnStepper.push(metronomeOffsetStepper);
-
-		var disableAutoScrolling = new FlxUICheckBox(metronome.x + 150, metronome.y, null, null, "Disable Section Autoscroll", 120);
+		var disableAutoScrolling = new FlxUICheckBox(10, startY + 90, null, null, "Disable Section Autoscroll", 120);
 		disableAutoScrolling.callback = () -> {options.noAutoScroll = disableAutoScrolling.checked;}
 		disableAutoScrolling.checked = options.noAutoScroll == true;
 
-		var sliderHitVol = new CustomFlxUISlider(this, 'hitsoundVolume', 10, startY + 90, 0, 1, 125, null, 5, FlxColor.WHITE, FlxColor.BLACK);
+		var sliderRate = new CustomFlxUISlider(this, 'playbackSpeed', 10, startY + 120 + 15, 0.5, 3, 115, null, 5, FlxColor.WHITE, FlxColor.BLACK);
+		sliderRate.nameLabel.text = 'Playback Rate';
+		sliderRate.value = playbackSpeed;
+		blockScrollWhileHovering.push(sliderRate);
+
+		////////
+		var xPos = col2X;
+
+		var playSoundBf = new FlxUICheckBox(xPos, startY, null, null, 'Play Hitsound (Boyfriend notes)', 100);
+		playSoundBf.callback = () -> options.playSoundBf = playSoundBf.checked;
+		playSoundBf.checked = options.playSoundBf == true;
+
+		var playSoundDad = new FlxUICheckBox(xPos, startY + 30, null, null, 'Play Hitsound (Opponent notes)', 100);
+		playSoundDad.callback = () -> options.playSoundDad = playSoundDad.checked;
+		playSoundDad.checked = options.playSoundDad == true;
+	
+		var playSoundEvents = new FlxUICheckBox(xPos, startY + 60, null, null, 'Play Hitsound (Event notes)', 100);
+		playSoundEvents.callback = () -> options.playSoundEvents = playSoundEvents.checked;
+		playSoundEvents.checked = options.playSoundEvents == true;
+
+		var panHitSounds = new FlxUICheckBox(xPos, startY + 90, null, null, 'Pan Hitsounds', 100);
+		panHitSounds.callback = () -> options.panHitSounds = panHitSounds.checked;
+		panHitSounds.checked = options.panHitSounds == true;
+
+		var sliderHitVol = new CustomFlxUISlider(this, 'hitsoundVolume', xPos, startY + 120 + 15, 0, 1, 115, null, 5, FlxColor.WHITE, FlxColor.BLACK);
 		sliderHitVol.nameLabel.text = 'Hitsound Volume';
 		sliderHitVol.value = hitsoundVolume;
 		blockScrollWhileHovering.push(sliderHitVol);
 
-		var sliderRate = new CustomFlxUISlider(this, 'playbackSpeed', 68, 325, 0.5, 3, 150, null, 5, FlxColor.WHITE, FlxColor.BLACK);
-		sliderRate.nameLabel.text = 'Playback Rate';
-		sliderRate.value = playbackSpeed;
-		blockScrollWhileHovering.push(sliderRate);
+		////////
+		var metronome = new FlxUICheckBox(10, 24, null, null, "Enabled", 100);
+		metronome.callback = () -> {options.metronome = metronome.checked;}
+		metronome.checked = options.metronome == true;
+
+		metronomeStepper = new CustomFlxUINumericStepper(metronome.x + 100, metronome.y, 5, _song.bpm, 1, 9000, 3);
+		metronomeOffsetStepper = new CustomFlxUINumericStepper(metronomeStepper.x + 100, metronomeStepper.y, 25, 0, 0, 1000, 1);
+		blockPressWhileTypingOnStepper.push(metronomeStepper);
+		blockPressWhileTypingOnStepper.push(metronomeOffsetStepper);
 
 		tab_group_chart.add(sliderHitVol);
 		tab_group_chart.add(sliderRate);
@@ -1872,8 +1870,9 @@ class ChartingState extends MusicBeatState
 		tab_group_chart.add(metronome);
 		tab_group_chart.add(disableAutoScrolling);
 
-		tab_group_chart.add(new FlxText(metronomeStepper.x, metronomeStepper.y - 15, 0, 'Metronome BPM:'));
-		tab_group_chart.add(new FlxText(metronomeOffsetStepper.x, metronomeOffsetStepper.y - 15, 0, 'Metronome Offset (ms):'));
+		tab_group_chart.add(new FlxText(metronome.x, metronome.y - 15, 0, 'Metronome'));
+		tab_group_chart.add(new FlxText(metronomeStepper.x, metronomeStepper.y - 15, 0, 'M. BPM'));
+		tab_group_chart.add(new FlxText(metronomeOffsetStepper.x, metronomeOffsetStepper.y - 15, 0, 'M. Offset (ms)'));
 
 		tab_group_chart.add(new FlxText(waveformTrackDropDown.x, waveformTrackDropDown.y - 15, 0, "Track"));
 		tab_group_chart.add(waveformTrackDropDown);
