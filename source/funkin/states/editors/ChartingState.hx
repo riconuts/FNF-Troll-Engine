@@ -2481,16 +2481,24 @@ class ChartingState extends MusicBeatState
 		if (FlxG.keys.pressed.CONTROL) {
 			if (FlxG.keys.justPressed.Z) {
 				undo();
+				return;
 			}
 			if (FlxG.keys.justPressed.Y) {
 				redo();
+				return;
 			}
 			if (FlxG.keys.justPressed.S) {
 				saveLevel();
+				return;
+			}
+			if (FlxG.keys.justPressed.Q) {
+				useQuantNotes = !useQuantNotes;
+				updateGrid();
+				return;
 			}
 		}
 
-		if(FlxG.keys.justPressed.Z && curZoom > 0 && !FlxG.keys.pressed.CONTROL) {
+		if(FlxG.keys.justPressed.Z && curZoom > 0) {
 			--curZoom;
 			updateZoom();
 		}
@@ -2543,11 +2551,6 @@ class ChartingState extends MusicBeatState
 				curQuant = quantizations.length-1;
 
 			updateQuantization();
-		}
-		
-		if (FlxG.keys.pressed.CONTROL && FlxG.keys.justPressed.Q) {
-			useQuantNotes = !useQuantNotes;
-			updateGrid();
 		}
 
 		//ARROW VORTEX SHIT NO DEADASS
