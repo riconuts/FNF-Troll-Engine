@@ -473,8 +473,10 @@ class ChartingState extends MusicBeatState
 		_session ??= makeSession();
 
 		Conductor.cleanup();
-		Conductor.changeBPM(_song.bpm);
 		Conductor.mapBPMChanges(_song);
+		Conductor.changeBPM(_song.bpm);
+		metroInterval = (60 / _song.bpm) * 1000;
+
 		this.tracks = Conductor.tracks;
 		loadTracks();
 /* 		fixEvents(); */
@@ -1847,7 +1849,8 @@ class ChartingState extends MusicBeatState
 		metronome.callback = () -> {options.metronome = metronome.checked;}
 		metronome.checked = options.metronome == true;
 
-		metronomeStepper = new CustomFlxUINumericStepper(metronome.x + 100, metronome.y, 5, _song.bpm, 1, 9000, 3);
+		metronomeStepper = new CustomFlxUINumericStepper(metronome.x + 100, metronome.y, 5, Conductor.bpm, 1, 9000, 3);
+		metronomeStepper.name = "metronome_BPM";
 		metronomeOffsetStepper = new CustomFlxUINumericStepper(metronomeStepper.x + 100, metronomeStepper.y, 25, 0, 0, 1000, 1);
 		blockPressWhileTypingOnStepper.push(metronomeStepper);
 		blockPressWhileTypingOnStepper.push(metronomeOffsetStepper);
@@ -2016,6 +2019,9 @@ class ChartingState extends MusicBeatState
 		{
 			var nums:FlxUINumericStepper = cast sender;
 			switch(name) {
+				case 'metronome_BPM':
+					metroInterval = (60 / nums.value) * 1000;
+
 				case 'section_beats':
 					_song.notes[curSec].sectionBeats = nums.value;
 					reloadGridLayer();
@@ -2149,7 +2155,9 @@ class ChartingState extends MusicBeatState
 		quant.animation.play('q', true, false, curQuant);
 	}
 
-	var lastConductorPos:Float = -1;
+	var lastMetroBeat:Int = -1;
+	var metroInterval:Float = 0;
+
 	var colorSine:Float = 0;
 	//// sustain note dragging 
 	var startDummyY:Null<Float> = null;
@@ -2453,13 +2461,14 @@ class ChartingState extends MusicBeatState
 			}
 		});
 
-		if (options.metronome && lastConductorPos != Conductor.songPosition) {
-			var metroInterval:Float = 60 / metronomeStepper.value;
-			var metroStep:Int = Math.floor(((Conductor.songPosition + metronomeOffsetStepper.value) / metroInterval) / 1000);
-			var lastMetroStep:Int = Math.floor(((lastConductorPos + metronomeOffsetStepper.value) / metroInterval) / 1000);
-			if (metroStep != lastMetroStep) {
+		if (options.metronome && Conductor.playing) {
+			var bpm = Conductor.bpmChangeMap[curBPMChangeIndex];
+			var curTime:Float = metronomeOffsetStepper.value + Conductor.songPosition - bpm.songTime;
+			var metroBeat:Int = bpm.stepTime * 4 + Math.floor(curTime / metroInterval);
+
+			if (metroBeat != lastMetroBeat) {
 				FlxG.sound.play(Paths.sound('Metronome_Tick'));
-				lastConductorPos = Conductor.songPosition;
+				lastMetroBeat = metroBeat;
 			}
 		}
 
@@ -3134,8 +3143,11 @@ class ChartingState extends MusicBeatState
 			}
 		}
 
-		if (Conductor.bpm != daBPM)
+		if (Conductor.bpm != daBPM) {
 			Conductor.changeBPM(daBPM);
+			metronomeStepper.value = daBPM;
+			metroInterval = (60 / daBPM) * 1000;
+		}
 
 		// PREV SECTION
 		if(curSec > 0) {
