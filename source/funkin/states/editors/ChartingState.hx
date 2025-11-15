@@ -17,6 +17,8 @@ import funkin.data.Song;
 
 import funkin.objects.notes.*;
 
+import math.CoolMath.floorDecimal;
+
 import flixel.*;
 import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;
@@ -495,6 +497,7 @@ class ChartingState extends MusicBeatState
 		var bg:FlxSprite = new FlxSprite(0, 0, Paths.image('menuDesat'));
 		bg.color = FlxColor.fromHSB(Std.random(64) * 5.625, 0.15, 0.15);
 		bg.scrollFactor.set();
+		bg.setGraphicSize(0, FlxG.height);
 		bg.screenCenter();
 		add(bg);
 
@@ -2400,10 +2403,11 @@ class ChartingState extends MusicBeatState
 
 		bpmTxt.text =
 		"Time: " + FlxMath.roundDecimal(Conductor.songPosition / 1000, 2) + " / " + FlxMath.roundDecimal(songLength / 1000, 2) +
-		'\n\nBPM: ${Conductor.bpm}' + (Conductor.bpmChangeMap.length <= 1 ? '' : ' ($curBPMChangeIndex / ${Conductor.bpmChangeMap.length - 1})') +
-		"\nSection: " + curSec +
-		"\nBeat: " + math.CoolMath.floorDecimal(curDecBeat, 2) +
-		"\nStep: " + curStep;
+		"\n" +
+		'\nBPM: ${Conductor.bpm}' + (Conductor.bpmChangeMap.length <= 1 ? '' : ' ($curBPMChangeIndex / ${Conductor.bpmChangeMap.length - 1})') +
+		'\nSection: $curSec' +
+		"\nBeat: " + floorDecimal(curDecBeat, 2) +
+		'\nStep: $curStep';
 
 		progressBar.minLabel.text = formatTime(Conductor.songPosition);
 
