@@ -43,6 +43,7 @@ import haxe.format.JsonParser;
 import openfl.utils.ByteArray;
 import openfl.utils.Assets as OpenFlAssets;
 import openfl.media.Sound;
+import flixel.system.FlxAssets.FlxSoundAsset;
 import lime.media.AudioBuffer;
 import lime.ui.FileDialog;
 import openfl.geom.Rectangle;
@@ -720,13 +721,7 @@ class ChartingState extends MusicBeatState
 		
 		if (curSec >= _song.notes.length)
 			curSec = _song.notes.length - 1;
-		changeSection(curSec, false);
-
-		//
-		for (id => volume in _session.trackVolumes) {
-			var snd = soundTracksMap.get(id);
-			if (snd != null) snd.volume = volume;
-		}
+		changeSection(curSec, false);		
 
 		//
 		var lastSelectedTrack = _session.selectedTrack;
@@ -1930,15 +1925,16 @@ class ChartingState extends MusicBeatState
 		Conductor.pauseSong();
 		Conductor.songPosition = sectionStartTime();
 
-		var songTrackNames:Array<String> = [];
-		var jsonTracks = _song.tracks;
-
 		soundTracksMap.clear();
 		while (tracks.length > 0)
 			tracks.pop().destroy();
 
-		for (groupName in Reflect.fields(jsonTracks)) {
-			var trackGroup:Array<String> = Reflect.field(jsonTracks, groupName);
+		songLength = 0.0;
+
+		var songTrackNames:Array<String> = [];
+
+		for (groupName in Reflect.fields(_song.tracks)) {
+			var trackGroup:Array<String> = Reflect.field(_song.tracks, groupName);
 			for (trackName in trackGroup) {
 				if (soundTracksMap.exists(trackName))
 					continue;
@@ -1947,8 +1943,6 @@ class ChartingState extends MusicBeatState
 				songTrackNames.push(trackName);
 			}
 		}
-
-		songLength = 0.0;
 
 		inline function createMusicTrack() {
 			var newTrack = new FlxSound();
@@ -1959,14 +1953,14 @@ class ChartingState extends MusicBeatState
 		}
 
 		for (trackName in songTrackNames) {
-			var file:Sound = {
+			var file:FlxSoundAsset = {
 				if (PlayState.song != null)
 					PlayState.song.getTrackSound(trackName);
 				else
 					Paths.track(songId, trackName);
 			}
 
-			if (file == null || file.length <= 0) 
+			if (file == null || (file is Sound && (file:Sound).length <= 0)) 
 				continue;
 
 			var newTrack = createMusicTrack();
@@ -1979,10 +1973,18 @@ class ChartingState extends MusicBeatState
 			tracks.push(newTrack);
 		}
 		
-		inst = soundTracksMap.get(jsonTracks.inst[0]);
+		inst = soundTracksMap.get(_song.tracks.inst[0]);
 		if (inst == null)
 			inst = createMusicTrack();
-		inst.volume = 0.6;
+		else
+			inst.volume = (tracks.length == 1) ? 1.0 : 0.6;
+		
+		for (id => track in soundTracksMap) {
+			if (_session.trackVolumes.exists(id))
+				track.volume = _session.trackVolumes[id];
+			else
+				_session.trackVolumes[id] = track.volume;
+		}
 	}
 
 	override function getEvent(id:String, sender:Dynamic, data:Dynamic, ?params:Array<Dynamic>)
