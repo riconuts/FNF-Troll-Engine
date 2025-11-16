@@ -8,6 +8,8 @@ import flixel.input.keyboard.FlxKey;
 
 import lime.app.Application.current as application;
 
+import openfl.events.KeyboardEvent;
+
 #if CRASH_HANDLER
 import haxe.CallStack;
 import openfl.events.UncaughtErrorEvent;
@@ -59,18 +61,9 @@ class FNFGame extends FlxGame
 		FlxG.signals.focusGained.add(resetSpriteCache);
 
 		////
-		#if (windows || linux) // No idea if this also applies to any other targets
 		FlxG.stage.addEventListener(
-			openfl.events.KeyboardEvent.KEY_DOWN, 
-			(e)->{
-				// Prevent Flixel from listening to key inputs when pressing Alt+Enter
-				if (e.altKey && e.keyCode == FlxKey.ENTER)
-					e.stopImmediatePropagation();
-
-				// Also add F11 to switch fullscreen mode
-				if (specialKeysEnabled && fullscreenKeys.contains(e.keyCode))
-					FlxG.fullscreen = !FlxG.fullscreen;
-			}, 
+			KeyboardEvent.KEY_DOWN, 
+			_onKeyPress, 
 			false, 
 			100
 		);
@@ -79,7 +72,6 @@ class FNFGame extends FlxGame
 			openfl.events.FullScreenEvent.FULL_SCREEN, 
 			(e) -> FlxG.save.data.fullscreen = e.fullScreen
 		);
-		#end
 
 		////
 		#if CRASH_HANDLER
@@ -98,6 +90,18 @@ class FNFGame extends FlxGame
 		untyped __global__.__hxcpp_set_critical_error_handler(onCrash);
 		#end
 		#end
+	}
+
+	private function _onKeyPress(e:KeyboardEvent) {
+		#if (windows || linux) // No idea if this also applies to any other targets
+		// Prevent Flixel from listening to key inputs when pressing Alt+Enter
+		if (e.altKey && e.keyCode == FlxKey.ENTER)
+			e.stopImmediatePropagation();
+		#end
+
+		// Also add F11 to switch fullscreen mode
+		if (specialKeysEnabled && fullscreenKeys.contains(e.keyCode))
+			FlxG.fullscreen = !FlxG.fullscreen;
 	}
 
 	override function update():Void
