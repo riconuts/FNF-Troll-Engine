@@ -102,6 +102,11 @@ class FNFGame extends FlxGame
 		// Also add F11 to switch fullscreen mode
 		if (specialKeysEnabled && fullscreenKeys.contains(e.keyCode))
 			FlxG.fullscreen = !FlxG.fullscreen;
+
+		if (e.keyCode == FlxKey.F3) {
+			Main.fpsVar.visible = !Main.fpsVar.visible;
+			ClientPrefs.showFPS = Main.fpsVar.visible;
+		}
 	}
 
 	override function update():Void
