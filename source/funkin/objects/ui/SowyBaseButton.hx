@@ -1,4 +1,4 @@
-package funkin.objects;
+package funkin.objects.ui;
 
 import openfl.ui.Mouse;
 import openfl.ui.MouseCursor;
