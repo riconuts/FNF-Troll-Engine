@@ -1404,7 +1404,7 @@ class ChartingState extends MusicBeatState
 
 	var eventDropDown:FlxUIDropDownMenu;
 	var eventNameInput:FlxUIInputText;
-	var descText:FlxText;
+	var eventDescText:FlxText;
 	var selectedEventText:FlxText;
 
 	function setSelectedEventType(typeName:String)
@@ -1422,7 +1422,7 @@ class ChartingState extends MusicBeatState
 		var tab_group_event = new FlxUI(null, UI_box);
 		tab_group_event.name = 'Event';
 
-		descText = new FlxText(20, 200, 0, eventStuff[0][0]);
+		eventDescText = new FlxText(20, 200, 0, eventStuff[0][0]);
 
 		var leEvents:Array<String> = [];
 		for (i in 0...eventStuff.length)
@@ -1442,7 +1442,7 @@ class ChartingState extends MusicBeatState
 					if (data != null){
 						setSelectedEventType(data[0]);
 						eventNameInput.text = data[0];
-						descText.text = data[1];
+						eventDescText.text = data[1];
 					}
 				}else{
 					eventNameInput.text = "";
@@ -1462,20 +1462,19 @@ class ChartingState extends MusicBeatState
 		);
 		eventNameInput.resize(100, eventDropDown.header.background.height - 2);
 		eventNameInput.exists = false;
-		eventNameInput.callback = function(inputStr:String, actionName:String){
-			if (actionName == "enter"){
-				setSelectedEventType(inputStr);
-				
-				eventDropDown.header.text.text = inputStr;
-				descText.text = "";
-
-				eventNameInput.exists = false;
-			}
-		}
-		eventNameInput.focusLost = () ->
-		{
-			eventNameInput.callback(eventNameInput.text, "enter");}
 		blockPressWhileTypingOn.push(eventNameInput);
+
+		function onEnterEventName(eventName:String) {
+			setSelectedEventType(eventName);
+			eventDropDown.header.text.text = eventName;
+			eventDescText.text = "";
+			eventNameInput.exists = false;
+		}
+		eventNameInput.callback = (input:String, action:String) -> {
+			if (action == FlxInputText.ENTER_ACTION)
+				onEnterEventName(input);
+		}
+		eventNameInput.focusLost = () -> onEnterEventName(eventNameInput.text);
 
 		value1InputText = new FlxUIInputText(20, 110, 100, "");
 		value1InputText.name = 'event_value1';
@@ -1590,7 +1589,7 @@ class ChartingState extends MusicBeatState
 		selectedEventText.alignment = CENTER;
 		tab_group_event.add(selectedEventText);
 
-		tab_group_event.add(descText);
+		tab_group_event.add(eventDescText);
 		tab_group_event.add(new FlxText(20, 90, 0, "Value 1:"));		
 		tab_group_event.add(value1InputText);
 		tab_group_event.add(new FlxText(20, 130, 0, "Value 2:"));
@@ -2119,8 +2118,6 @@ class ChartingState extends MusicBeatState
 
 		// FlxG.log.add(id + " WEED " + sender + " WEED " + data + " WEED " + params);
 	}
-
-	var updatedSection:Bool = false;
 
 	function getSectionStartTime(sec:Int):Float
 	{
@@ -3107,7 +3104,7 @@ class ChartingState extends MusicBeatState
 			eventDropDown.selectedId = Std.string(selectedIdx);
 			eventDropDown.header.text.text = eventData.eventName;
 			
-			descText.text = eventStuff[selectedIdx][1];
+			eventDescText.text = eventStuff[selectedIdx][1];
 		}else {
 			selectedEventText.text = 'Selected Event: None';
 		}
