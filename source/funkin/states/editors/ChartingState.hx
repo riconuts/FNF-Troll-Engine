@@ -815,9 +815,7 @@ class ChartingState extends MusicBeatState
 
 	function addSongUI():Void
 	{
-		var UI_songTitle = new FlxUIInputText(10, 20, 70, _song.song, 8);
-		UI_songTitle.name = 'song_songId';
-		blockPressWhileTypingOn.push(UI_songTitle);
+		var selectSongButton = new FlxButton(10, 20, "Select Song", openSongSelect);
 
 		var saveButton:FlxButton = new FlxButton(110, 20, "Save Chart", saveLevel);
 
@@ -909,7 +907,7 @@ class ChartingState extends MusicBeatState
 		clear_notes.color = FlxColor.RED;
 		clear_notes.label.color = FlxColor.WHITE;
 
-		var stepperSpeed = new CustomFlxUINumericStepper(10, UI_songTitle.y + 35, 0.1, 1, 0.1, 10, 1);
+		var stepperSpeed = new CustomFlxUINumericStepper(10, selectSongButton.y + 35, 0.1, 1, 0.1, 10, 1);
 		stepperSpeed.value = _song.speed;
 		stepperSpeed.name = 'song_speed';
 		blockPressWhileTypingOnStepper.push(stepperSpeed);
@@ -1026,7 +1024,7 @@ class ChartingState extends MusicBeatState
 		
 		var tab_group_song = new FlxUI(null, UI_box);
 		tab_group_song.name = "Song";
-		tab_group_song.add(UI_songTitle);
+		tab_group_song.add(selectSongButton);
 
 		tab_group_song.add(fix_oob_notes);
 		tab_group_song.add(clear_events);
@@ -1045,7 +1043,7 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(noteSkinInputText);
 		tab_group_song.add(noteSplashesInputText);
 
-		tab_group_song.add(new FlxText(UI_songTitle.x, UI_songTitle.y - 15, 0, 'Song ID:'));
+		tab_group_song.add(new FlxText(selectSongButton.x, selectSongButton.y - 15, 0, Std.string(PlayState.song)));
 
 		tab_group_song.add(new FlxText(stepperSpeed.x, stepperSpeed.y - 15, 0, 'Note Speed:'));
 		tab_group_song.add(new FlxText(stepperBPM.x, stepperBPM.y - 15, 0, 'Song BPM:'));
@@ -2503,6 +2501,10 @@ class ChartingState extends MusicBeatState
 				updateGrid();
 				return;
 			}
+			if (FlxG.keys.justPressed.O) {
+				openSongSelect();
+				return;
+			}
 		}
 
 		if(FlxG.keys.justPressed.Z && curZoom > 0) {
@@ -2677,6 +2679,30 @@ class ChartingState extends MusicBeatState
 				FlxG.mouse.visible = false;
 			}, null, options.ignoreWarnings));
 		}
+	}
+
+	function openSongSelect() {
+		var ss = new SongSelectState(FlxColor.fromRGB(0,0,0,240));
+		ss.songs = SongSelectState.getEverySong();
+		/* TODO: Make a map of song instances
+		ss.curSelected = ss.songs.indexOf(PlayState.song);
+		*/
+		ss.curSelected = {
+			var idx = 0;
+			var curSong = PlayState.song;
+			for (i => song in ss.songs) {
+				if (song.songId == curSong.songId && song.folder == curSong.folder) {
+					idx = i;
+					break;
+				}
+			}
+			idx;
+		}
+		ss.onSelectChart = function(song:BaseSong, chartId:String) {
+			Song.loadSong(song, chartId);
+			MusicBeatState.resetState();
+		}
+		openSubState(ss);
 	}
 
 	function updateZoom() {
