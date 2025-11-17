@@ -499,7 +499,7 @@ class ChartingState extends MusicBeatState
 		var bg:FlxSprite = new FlxSprite(0, 0, Paths.image('menuDesat'));
 		bg.color = FlxColor.fromHSB(Std.random(64) * 5.625, 0.15, 0.15);
 		bg.scrollFactor.set();
-		bg.setGraphicSize(0, FlxG.height);
+		bg.scale.x = bg.scale.y = SpriteTools.getFillScale(bg);
 		bg.screenCenter();
 		add(bg);
 
