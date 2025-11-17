@@ -19,36 +19,15 @@ using StringTools;
 	Barebones menu that shows a list of every available song and chart
 	Not meant to be a Freeplay menu!!! Just here as a placeholder and song select menu for quick testing
 **/
-class SongSelectState extends MusicBeatState
+class SongSelectState extends MusicBeatSubstate
 {	
-	var songMeta:Array<BaseSong>;
-	var songText:Array<FlxText> = [];
-	var curSel(default, set):Int;
-	function set_curSel(sowy){
-		if (songMeta.length == 0)
-			return curSel = 0;
-
-		if (sowy < 0 || sowy >= songMeta.length)
-			sowy = sowy % songMeta.length;
-		if (sowy < 0)
-			sowy = songMeta.length + sowy;
-		
-		////
-		var prevText = songText[curSel];
-		if (prevText != null)
-			prevText.color = 0xFFFFFFFF;
-
-		var selText = songText[sowy];
-		if (selText != null)
-			selText.color = 0xFFFFFF00;
-
-		////
-		curSel = sowy;
-		return curSel;
-	}
+	public var songs:Array<BaseSong> = null;
 	
+	var songTexts:Array<FlxText> = [];
+	var folderTexts:Array<FlxText> = [];
 
-	var verticalLimit:Int;
+	public var curSelected(default, set):Int = 0;
+	var curTextIdx:Int = -1;
 
 	public static function getEverySong():Array<BaseSong>
 	{
@@ -74,6 +53,8 @@ class SongSelectState extends MusicBeatState
 		return songMeta;
 	}
 
+	var cam:FlxCamera = null;
+
 	override public function create() 
 	{
 		FlxTransitionableState.skipNextTransIn = true;
@@ -85,7 +66,6 @@ class SongSelectState extends MusicBeatState
 		#if DISCORD_ALLOWED
 		DiscordClient.changePresence({details: "In the Menus"});
 		#end
-		FlxG.camera.bgColor = 0xFF000000;
 		////
 		
 		/*
@@ -97,40 +77,62 @@ class SongSelectState extends MusicBeatState
 		*/
 
 		////
-		if (FlxG.sound.music == null){
-			MusicBeatState.playMenuMusic(1);
-		}else{
-			FlxG.sound.music.fadeIn(1.0, FlxG.sound.music.volume);
+		if (_parentState == null) {
+			if (FlxG.sound.music == null){
+				MusicBeatState.playMenuMusic(1);
+			}else{
+				FlxG.sound.music.fadeIn(1.0, FlxG.sound.music.volume);
+			}
+		}else {
+			cam = new FlxCamera();
+			cam.bgColor = 0;
+			FlxG.cameras.add(cam, false);
+			this.camera = cam;
+			if (this._bgSprite != null)
+				this._bgSprite._cameras = this._cameras;
 		}
 
-		songMeta = getEverySong();
+		songs ??= getEverySong();
 
-		var hPadding = 14;
-		var vPadding = 24;
-		var spacing = 3;
+		var hPadding = 64;
+		var vPadding = 64;
+		var spacing = 4; // space between texts
+		var width = (FlxG.width - hPadding - hPadding);
+		var height = (FlxG.height - vPadding - vPadding);
 		var textSize = 16;
-		var width = 16*textSize;
 
 		var ySpace = (textSize+spacing);
+		var width = Math.ceil(width / 2);
+		var txts = Math.floor(height / ySpace);
 
-		verticalLimit = Math.floor((FlxG.height - vPadding*2)/ySpace);
-
-		for (id in 0...songMeta.length)
+		for (i in 0...txts)
 		{
 			var text = new FlxText(
-				hPadding + (Math.floor(id/verticalLimit) * width), 
-				vPadding + (ySpace*(id%verticalLimit)), 
+				hPadding, 
+				vPadding + (ySpace * i), 
 				width, 
-				songMeta[id].songId,
+				"" + i,
 				textSize
 			);
 			text.wordWrap = false;
 			text.antialiasing = false;
-			songText.push(text);
+			songTexts.push(text);
+			add(text);
+
+			var text = new FlxText(
+				hPadding + width, 
+				vPadding + (ySpace * i), 
+				width, 
+				"" + i,
+				textSize
+			);
+			text.wordWrap = false;
+			text.antialiasing = false;
+			folderTexts.push(text);
 			add(text);
 		}
 
-		curSel = 0;
+		curSelected = curSelected;
 
 		var versionTxt = new FlxText(0, 0, 0, Main.Version.displayedVersion, 12);
 		versionTxt.setPosition(FlxG.width - 2 - versionTxt.width, FlxG.height - 2 - versionTxt.height);
@@ -148,11 +150,11 @@ class SongSelectState extends MusicBeatState
 
 		if (controls.UI_UP || controls.UI_DOWN){
 			if (controls.UI_DOWN_P){
-				curSel += speed;
+				curSelected += speed;
 				ySecsHolding = 0;
 			}
 			if (controls.UI_UP_P){
-				curSel -= speed;
+				curSelected -= speed;
 				ySecsHolding = 0;
 			}
 
@@ -161,25 +163,7 @@ class SongSelectState extends MusicBeatState
 			var checkNewHold:Int = Math.floor((ySecsHolding - 0.5) * 10);
 
 			if(ySecsHolding > 0.35 && checkNewHold - checkLastHold > 0)
-				curSel += (checkNewHold - checkLastHold) * (controls.UI_UP ? -1 : 1) * speed;
-		}
-
-		if (controls.UI_LEFT || controls.UI_RIGHT){
-			if (controls.UI_RIGHT_P){
-				curSel += verticalLimit;
-				ySecsHolding = 0;
-			}
-			if (controls.UI_LEFT_P){
-				curSel -= verticalLimit;
-				ySecsHolding = 0;
-			}
-
-			var checkLastHold:Int = Math.floor((ySecsHolding - 0.5) * 10);
-			ySecsHolding += e;
-			var checkNewHold:Int = Math.floor((ySecsHolding - 0.5) * 10);
-
-			if(ySecsHolding > 0.35 && checkNewHold - checkLastHold > 0)
-				curSel += (checkNewHold - checkLastHold) * (controls.UI_LEFT_P ? -1 : 1) * verticalLimit;
+				curSelected += (checkNewHold - checkLastHold) * (controls.UI_UP ? -1 : 1) * speed;
 		}
 
 		if (FlxG.keys.pressed.CONTROL)
@@ -196,22 +180,82 @@ class SongSelectState extends MusicBeatState
 
 		if (controls.ACCEPT) 
 		{
-			var charts = songMeta[curSel].getCharts();
+			var charts = songs[curSelected].getCharts();
 			if (charts.length > 0) {
 				trace(charts);
-				openSubState(new ChartSelectSubstate(songMeta[curSel], charts));
+				var ss = new ChartSelectSubstate(songs[curSelected], charts, onSelectChart);
+				ss.cameras = cameras;
+				openSubState(ss);
 			}else {
 				trace("no charts!");
-				songText[curSel].alpha = 0.6;
+				songTexts[curTextIdx].color = 0xFFFF0000;
 			}
 		}
 
 		if (controls.BACK) 
 		{
-			MusicBeatState.switchState(new MasterEditorMenu());
+			goBack();
 		}
 
 		super.update(e);
+	}
+
+	function set_curSelected(newIdx:Int){
+		if (songs.length == 0)
+			return curSelected = 0;
+
+		if (newIdx < 0 || newIdx >= songs.length)
+			newIdx = newIdx % songs.length;
+		if (newIdx < 0)
+			newIdx = songs.length + newIdx;
+
+		////
+		var listEndIdx = Math.round(newIdx + songTexts.length / 2);
+		if (listEndIdx > songs.length) listEndIdx = songs.length;
+		
+		var listStartIdx = listEndIdx - songTexts.length;
+		if (listStartIdx < 0) listStartIdx = 0;
+
+		//trace(listStartIdx, newIdx, listEndIdx, songTexts.length);
+
+		for (i in 0...songTexts.length) {
+			var songIdx = listStartIdx + i;
+			var song = songs[songIdx];
+			var songText = songTexts[i];
+			var folderText = folderTexts[i];
+			
+			songText.text = song.songId;
+			folderText.text = song.folder;
+			songText.color = folderText.color = (songIdx == newIdx) ? 0xFFFFFF00 : 0xFFFFFFFF;
+			if (songIdx == newIdx) curTextIdx = i;
+		}
+
+		////
+		curSelected = newIdx;
+		return curSelected;
+	}
+	
+	dynamic public function onSelectChart(song:BaseSong, chart:String) {
+		PlayState.loadPlaylist([song], chart);
+		PlayState.isStoryMode = false;
+
+		if (FlxG.keys.pressed.SHIFT)
+			LoadingState.loadAndSwitchState(new funkin.states.editors.ChartingState());
+		else
+			LoadingState.loadAndSwitchState(new PlayState());
+	}
+
+	dynamic public function goBack() {
+		if (_parentState == null)
+			MusicBeatState.switchState(new MasterEditorMenu());
+		else
+			close();
+	}
+
+	override function destroy() {
+		super.destroy();
+		if (cam != null)
+			FlxG.cameras.remove(cam);
 	}
 }
 
@@ -220,16 +264,19 @@ class ChartSelectSubstate extends MusicBeatSubstate
 	var song:BaseSong;
 	var charts:Array<String>;
 
-	var curSel:Int = 0;
+	var curSelected:Int = 0;
 
 	var chartTxts:Array<FlxText> = [];
 	var scoreTxts:Array<FlxText> = [];
 
-	public function new(song:BaseSong, ?charts:Array<String>) 
+	public var onSelect:(BaseSong, String) -> Void;
+
+	public function new(song:BaseSong, ?charts:Array<String>, ?onSelect:(BaseSong, String) -> Void)
 	{
 		super();
 		this.song = song;
 		this.charts = charts ?? song.getCharts();
+		this.onSelect = onSelect ?? (_, _) -> close();
 	}
 
 	override function create()
@@ -261,9 +308,9 @@ class ChartSelectSubstate extends MusicBeatSubstate
 
 	function changeSel(diff:Int = 0)
 	{
-		chartTxts[curSel].color = 0xFFFFFFFF;
-		curSel = CoolUtil.updateIndex(curSel, diff, chartTxts.length);
-		chartTxts[curSel].color = 0xFFFFFF00;
+		chartTxts[curSelected].color = 0xFFFFFFFF;
+		curSelected = CoolUtil.updateIndex(curSelected, diff, chartTxts.length);
+		chartTxts[curSelected].color = 0xFFFFFF00;
 	}
 
 	override public function update(e){
@@ -275,25 +322,17 @@ class ChartSelectSubstate extends MusicBeatSubstate
 		if (FlxG.keys.justPressed.R) {
 			openSubState(new ResetScoreSubState(
 				song.songId,
-				charts[curSel],
+				charts[curSelected],
 				false
 			));
 			this.subStateClosed.addOnce((_) -> {
-				scoreTxts[curSel].text = Std.string(Highscore.getScore(song.songId, charts[curSel]));
+				scoreTxts[curSelected].text = Std.string(Highscore.getScore(song.songId, charts[curSelected]));
 			});
 		}
 		else if (FlxG.keys.justPressed.BACKSPACE || FlxG.keys.justPressed.ESCAPE)
 			this.close();
 		else if (FlxG.keys.justPressed.ENTER) {
-			PlayState.loadPlaylist([song], charts[curSel]);
-			PlayState.isStoryMode = false;
-
-			PlayState.isStoryMode = false;
-
-			if (FlxG.keys.pressed.SHIFT)
-				LoadingState.loadAndSwitchState(new funkin.states.editors.ChartingState());
-			else
-				LoadingState.loadAndSwitchState(new PlayState());
+			onSelect(song, charts[curSelected]);
 		}
 
 		super.update(e);
