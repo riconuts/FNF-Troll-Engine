@@ -853,4 +853,16 @@ class ModManager {
 
 	public function queueEaseFuncLB(beat:Float, length:Float, func:EaseFunction, callback:(EaseEvent, Float, Float) -> Void)
 		addEvent(new EaseEvent(beat * 4, (beat + length) * 4, func, callback, this));
+
+	public function queueEaseProps(step:Float, endStep:Float, object:Dynamic, values:Dynamic, ?options:EasePropertiesEvent.TweenOptions)
+		addEvent(new EasePropertiesEvent(step, endStep - step, object, values, options, this));
+
+	public function queueEasePropsL(step:Float, length:Float, object:Dynamic, values:Dynamic, ?options:EasePropertiesEvent.TweenOptions)
+		addEvent(new EasePropertiesEvent(step, length, object, values, options, this));
+
+	public function queueEasePropsB(beat:Float, endBeat:Float, object:Dynamic, values:Dynamic, ?options:EasePropertiesEvent.TweenOptions)
+		addEvent(new EasePropertiesEvent(beat * 4, (endBeat - beat) * 4, object, values, options, this));
+
+	public function queueEasePropsLB(beat:Float, length:Float, object:Dynamic, values:Dynamic, ?options:EasePropertiesEvent.TweenOptions)
+		addEvent(new EasePropertiesEvent(beat * 4, length * 4, object, values, options, this));
 }
