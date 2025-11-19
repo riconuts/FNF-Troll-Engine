@@ -550,7 +550,7 @@ class ModManager {
 	public function getBaseX(direction:Int, player:Float, receptorAmount:Int = 4):Float
 	{
 		if (playerOOBIsCentered && (player >= playerAmount || player < 0))
-			player = 0.5; // replicating old behaviour for upcoming modcharts
+			player = (playerAmount - 1) * 0.5; // replicating old behaviour for upcoming modcharts
 		
 		var spaceWidth = FlxG.width / playerAmount;
 		var spaceX = spaceWidth * (playerAmount-1-player);
