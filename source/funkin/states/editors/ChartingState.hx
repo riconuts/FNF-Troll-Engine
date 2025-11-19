@@ -192,7 +192,7 @@ class ChartingState extends MusicBeatState
 
 	var camPos:FlxObject;
 	var strumLine:FlxSprite;
-	var quant:AttachedSprite;
+	var quantArrow:AttachedSprite;
 	var strumLineNotes:FlxTypedGroup<StrumNote>;
 	var curSong:String = 'test';
 	var curSec:Int = 0;
@@ -536,13 +536,14 @@ class ChartingState extends MusicBeatState
 
 		FlxG.camera.follow(camPos);
 
-		quant = new AttachedSprite('charteditor/chart_quant','charteditor/chart_quant');
-		quant.animation.addByPrefix('q','chart_quant',0,false);
-		quant.animation.play('q', true, false, 0);
-		quant.sprTracker = strumLine;
-		quant.xAdd = -32;
-		quant.yAdd = 8;
-		add(quant);
+		quantArrow = new AttachedSprite('charteditor/chart_quant','charteditor/chart_quant');
+		quantArrow.animation.addByPrefix('q','chart_quant',0,false);
+		quantArrow.animation.play('q', true, false, 0);
+		quantArrow.sprTracker = strumLine;
+		quantArrow.xAdd = -32;
+		quantArrow.yAdd = 8;
+		quantArrow.visible = false;
+		add(quantArrow);
 
 		strumLineNotes = new FlxTypedGroup<StrumNote>();
 		for (i in 0..._song.keyCount * 2){
@@ -2148,7 +2149,7 @@ class ChartingState extends MusicBeatState
 		quantizationMult = (quantization / 16);
 		
 		quantTxt.text = "Beat Snap: " + quantNames[curQuant];
-		quant.animation.play('q', true, false, curQuant);
+		quantArrow.animation.play('q', true, false, curQuant);
 	}
 
 	var lastMetroBeat:Int = -1;
@@ -2396,7 +2397,7 @@ class ChartingState extends MusicBeatState
 		Conductor.updateSteps();
 		strumLineUpdateY();
 
-		if (strumLineNotes.visible = quant.visible = options.vortex) {
+		if (strumLineNotes.visible = quantArrow.visible = options.vortex) {
 			var alpha = Conductor.playing ? 1 : 0.35;
 			for (receptor in strumLineNotes){
 				receptor.y = strumLine.y;
@@ -2534,31 +2535,23 @@ class ChartingState extends MusicBeatState
 
 		if (FlxG.keys.pressed.W || FlxG.keys.pressed.S)
 		{
-			var mult:Float = 1;
-			if (FlxG.keys.pressed.CONTROL) mult = 0.25;
-			else if (FlxG.keys.pressed.SHIFT) mult = 4;
-
-			var daTime:Float = 720 * elapsed * mult;
-
-			if (FlxG.keys.pressed.S)
-				Conductor.songPosition += daTime;
-			else
-				Conductor.songPosition -= daTime;
+			var mult:Float = (FlxG.keys.pressed.S) ? -1.0 : 1.0;
+			if (FlxG.keys.pressed.CONTROL) mult *= 0.25;
+			else if (FlxG.keys.pressed.SHIFT) mult *= 4;
 
 			pauseTracks();
+			Conductor.songPosition += 720 * elapsed * mult;
 		}
 
-		//AWW YOU MADE IT SEXY <3333 THX SHADMAR
-
+		//
 		if(FlxG.keys.justPressed.RIGHT){
 			if (++curQuant > quantizations.length-1)
 				curQuant = 0;
-
 			updateQuantization();
-		}else if(FlxG.keys.justPressed.LEFT){
+		}
+		else if(FlxG.keys.justPressed.LEFT){
 			if (--curQuant < 0)
 				curQuant = quantizations.length-1;
-
 			updateQuantization();
 		}
 
