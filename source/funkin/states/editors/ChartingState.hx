@@ -1,5 +1,6 @@
 package funkin.states.editors;
 
+import funkin.objects.shaders.ColorSwap;
 import funkin.states.base.Prompt;
 
 import funkin.data.StageData;
@@ -193,6 +194,7 @@ class ChartingState extends MusicBeatState
 	var camPos:FlxObject;
 	var strumLine:FlxSprite;
 	var quantArrow:AttachedSprite;
+	var quantArrowColorSwap:ColorSwap;
 	var strumLineNotes:FlxTypedGroup<StrumNote>;
 	var curSong:String = 'test';
 	var curSec:Int = 0;
@@ -509,9 +511,10 @@ class ChartingState extends MusicBeatState
 		strumLine = CoolUtil.blankSprite(0, 4);
 		add(strumLine);
 
-		quantArrow = new AttachedSprite('charteditor/chart_quant','charteditor/chart_quant');
-		quantArrow.animation.addByPrefix('q','chart_quant',0,false);
-		quantArrow.animation.play('q', true, false, 0);
+		quantArrowColorSwap = new ColorSwap();
+
+		quantArrow = new AttachedSprite('charteditor/chart_quant');
+		quantArrow.shader = quantArrowColorSwap.shader;
 		quantArrow.sprTracker = strumLine;
 		quantArrow.xAdd = -32;
 		quantArrow.yAdd = 8;
@@ -2207,7 +2210,7 @@ class ChartingState extends MusicBeatState
 		quantizationMult = (quantization / 16);
 		
 		quantTxt.text = "Beat Snap: " + quantNames[curQuant];
-		quantArrow.animation.play('q', true, false, curQuant);
+		quantArrowColorSwap.setHSBIntArray(ClientPrefs.quantHSV[curQuant]);
 	}
 
 	var lastMetroBeat:Int = -1;
