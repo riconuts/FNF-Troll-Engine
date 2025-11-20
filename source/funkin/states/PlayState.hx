@@ -1695,17 +1695,15 @@ class PlayState extends MusicBeatState
 			eventPushedMap.set(eventNote.event, true);
 
 		// create note type scripts
-		final notetypeFolders = ["notetypes"];
 		for (notetype in noteTypeMap.keys()) {
-			var script = createFirstScriptFromFolders(notetype, notetypeFolders, true);
+			var script:FunkinScript = createHScript('notetypes/$notetype', notetype, true);
 			if (script != null) notetypeScripts.set(notetype, cast script);
 			firstNotePush(notetype);
 		}
 
 		// create event scripts
-		final eventFolders = ["events"];
 		for (eventName in eventPushedMap.keys()) {
-			var script:FunkinScript = createFirstScriptFromFolders(eventName, eventFolders, true);
+			var script:FunkinScript = createHScript('events/$eventName', eventName, true);
 			if (script != null) eventScripts.set(eventName, cast script);
 			firstEventPush(eventName);
 		}
