@@ -1201,7 +1201,7 @@ class FlxText extends FlxSprite
 
 		_regen = true;
 
-		return antialiasing = value;
+		return super.set_antialiasing(value);
 	}
 }
 
