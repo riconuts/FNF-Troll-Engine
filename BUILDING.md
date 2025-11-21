@@ -1,7 +1,5 @@
 # Troll Engine Build Instructions
 
-This document was based on [Psych Engine](https://github.com/ShadowMario/FNF-PsychEngine)'s build guide.
-
 * [Dependencies](#dependencies)
 * [Building](#building)
 
@@ -71,15 +69,13 @@ For building the game, in every system, you're going to execute `haxelib setup`.
 
 In Mac and Linux, you need to create a folder to put your Haxe libraries in, do `mkdir ~/haxelib && haxelib setup ~/haxelib`.
 
-Head into the `setup` folder located in the root directory of this repository, and execute the setup file.
+Head into the `setup` folder located in the root directory of this repository, and execute the setup file:
 
-### "Which setup file?"
-
-It depends on your operating system. For Windows, run `windows-haxelibs.bat`, for anything else, run `unix-haxelibs.sh`.
+For Windows, run `windows-haxelibs.bat`, for anything else, run `unix-haxelibs.sh`.
 
 Sit back, relax, and wait for haxelib to do its magic.
 
-Once that's done, to build the game, run `lime test cpp`.
+Once that's done, run `haxelib run lime setup`, then to build the game, run `lime test cpp`.
 
 ---
 
@@ -98,3 +94,5 @@ e.g: Fedora is `gcc-c++`, Gentoo is `sys-devel/gcc`, and so on.
 Run `lime test cpp -clean` again, or delete the export folder and compile again.
 
 ---
+
+##### This document was based on [Psych Engine](https://github.com/ShadowMario/FNF-PsychEngine)'s build guide :P
