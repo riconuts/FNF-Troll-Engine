@@ -1,5 +1,7 @@
 package funkin.objects.hud;
 
+import flixel.math.FlxMath.fastSin as sin;
+import flixel.math.FlxAngle.TO_RAD;
 import flixel.text.FlxText;
 
 class BotplayText extends FlxText
@@ -14,17 +16,17 @@ class BotplayText extends FlxText
 		this.active = false;
 	}
 
-	function optionsChanged() {
-		this.y = (ClientPrefs.downScroll ? (FlxG.height-107) : 89);
+	override function update(elapsed:Float) {
+		if (PlayState.instance.cpuControlled)
+			botplaySine += 180 * elapsed;
+		else
+			botplaySine = 0.0;
+		
+		super.update(elapsed);
 	}
 
 	override function draw(){
-		if (PlayState.instance.cpuControlled){
-			botplaySine += 180 * FlxG.elapsed;
-			alpha = 1.0 - flixel.math.FlxMath.fastSin((Math.PI * botplaySine) / 180.0);
-			super.draw();
-		}else{
-			botplaySine = 0.0;
-		}
+		alpha = 1.0 - sin(botplaySine * TO_RAD);
+		super.draw();
 	}
 }

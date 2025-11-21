@@ -69,10 +69,11 @@ class CommonHUD extends BaseHUD
 		add(timeBarBG);
 		add(timeBar);
 		add(timeTxt);
-		useSubtleMark = ClientPrefs.botplayMarker == 'Subtle';
-
-		botplayText.active = botplayText.visible = ClientPrefs.botplayMarker == 'Obvious';
 		add(botplayText);
+
+		botplayText.y = (ClientPrefs.downScroll ? (FlxG.height-107) : 89);
+		botplayText.active = botplayText.visible = ClientPrefs.botplayMarker == 'Obvious';
+		useSubtleMark = ClientPrefs.botplayMarker == 'Subtle';
 	}
 
 	override function reloadHealthBarColors(dadColor:FlxColor, bfColor:FlxColor)
@@ -195,6 +196,7 @@ class CommonHUD extends BaseHUD
 		healthBar.iconP2.y = healthBar.y + (healthBar.height - healthBar.iconP2.height) / 2;
 		healthBar.real_alpha = healthBar.real_alpha;
 
+		botplayText.y = (ClientPrefs.downScroll ? (FlxG.height-107) : 89);
 		botplayText.active = botplayText.visible = ClientPrefs.botplayMarker == 'Obvious';
 		useSubtleMark = ClientPrefs.botplayMarker == 'Subtle';
 
