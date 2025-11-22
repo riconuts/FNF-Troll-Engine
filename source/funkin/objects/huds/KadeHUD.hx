@@ -325,7 +325,10 @@ class KadeHUD extends BaseHUD
 			switch (ClientPrefs.timeBarType)
 			{
 				case "Percentage":
-					timeTxt.text = '$displayedSong (${Math.floor(songPercent * 100) + "%"})';
+					if (Math.isNaN(songPercent))
+						timeTxt.text = displayedSong;
+					else
+						timeTxt.text = '$displayedSong (${Math.floor(songPercent * 100) + "%"})';
 				case "Time Left":
 					timeCalc = (songLength - time);
 				case "Time Elapsed":
@@ -335,7 +338,7 @@ class KadeHUD extends BaseHUD
 			if (timeCalc != null)
 			{
 				if (timeCalc <= 0)
-					timeTxt.text = '$displayedSong (0:00)';
+					timeTxt.text = '$displayedSong';
 				else
 					timeTxt.text = '$displayedSong (${FlxStringUtil.formatTime(timeCalc / FlxG.timeScale / 1000, false)})';
 			}
