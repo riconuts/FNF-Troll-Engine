@@ -31,26 +31,26 @@ class SongSelectState extends MusicBeatSubstate
 
 	public static function getEverySong():Array<BaseSong>
 	{
-		var songMeta:Array<BaseSong> = [];
+		var songList:Array<BaseSong> = [];
+
+		function pushSong(modDir:Null<String>, folderPath:String, folderName:String) {
+			if (Paths.isDirectory(folderPath + folderName)) {
+				// trace(songList.length, folderName);
+				songList.push(new Song(folderName, modDir));
+			}
+		}
 
 		var folder = 'assets/songs/';
-		Paths.iterateDirectory(folder, function(name:String){
-			trace(name);
-			if (Paths.isDirectory(folder + name))
-				songMeta.push(new Song(name));
-		});
+		Paths.iterateDirectory(folder, pushSong.bind(null, folder));
 
 		#if MODS_ALLOWED
 		for (modDir in Paths.getModDirectories()){
 			var folder = Paths.mods('$modDir/songs/');
-			Paths.iterateDirectory(folder, function(name:String){
-				if (Paths.isDirectory(folder + name))
-					songMeta.push(new Song(name, modDir));
-			});
+			Paths.iterateDirectory(folder, pushSong.bind(modDir, folder));
 		}
 		#end
 
-		return songMeta;
+		return songList;
 	}
 
 	var cam:FlxCamera = null;
@@ -224,6 +224,14 @@ class SongSelectState extends MusicBeatSubstate
 			var songText = songTexts[i];
 			var folderText = folderTexts[i];
 			
+			if (song == null) {
+				songText.exists = false;
+				folderText.exists = false;
+				continue;
+			}
+
+			songText.exists = true;
+			folderText.exists = true;
 			songText.text = song.songId;
 			folderText.text = song.folder;
 			songText.color = folderText.color = (songIdx == newIdx) ? 0xFFFFFF00 : 0xFFFFFFFF;
