@@ -2601,7 +2601,7 @@ class ChartingState extends MusicBeatState
 
 		if (FlxG.keys.pressed.W || FlxG.keys.pressed.S)
 		{
-			var mult:Float = (FlxG.keys.pressed.S) ? -1.0 : 1.0;
+			var mult:Float = (FlxG.keys.pressed.S) ? 1.0 : -1.0;
 			if (FlxG.keys.pressed.CONTROL) mult *= 0.25;
 			else if (FlxG.keys.pressed.SHIFT) mult *= 4;
 
