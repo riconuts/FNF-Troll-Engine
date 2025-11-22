@@ -838,6 +838,27 @@ class ClientPrefs {
 	public static var defaultButtons:Map<String, Array<FlxGamepadInputID>> = null;
 
 	public static function loadDefaultKeys() {
+		var directions:Array<Array<FlxKey>> = [
+			[SPACE],
+			[F, K],
+			[F, SPACE, J],
+			[A, S, W, D],
+			[D, F, SPACE, J, K],
+			[S, D, F, J, K, L],
+			[S, D, F, SPACE, J, K, L],
+			[A, S, D, F, H, J, K, L],
+			[A, S, D, F, SPACE, H, J, K, L]
+		];
+
+		for (i in 0...9) {
+			for (j in 0...i + 1) {
+				keyBinds.set('${i + 1}_key_$j', [directions[i][j]]);
+			}
+		}
+
+		//trace(keyBinds);
+
+
 		defaultKeys = keyBinds.copy();
 		defaultButtons = buttonBinds.copy();
 	}
