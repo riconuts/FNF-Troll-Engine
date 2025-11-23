@@ -62,6 +62,8 @@ class TitleState extends MusicBeatState
 	////
 	var section:Int = -100;
 	var titleTimer:Float = 0;
+	var cheatProgress:Int = 0;
+	var cheatCode:Array<FlxKey> = [UP, DOWN, LEFT, RIGHT];
 	var skippedIntro:Bool = false;
 	var transitioning:Bool = false;
 	var leavingState:Bool = false;
@@ -320,6 +322,23 @@ class TitleState extends MusicBeatState
 		return false;
 	}
 
+	private function handleCheatCode() {
+		var keyPressed:FlxKey = FlxG.keys.firstJustPressed();
+		if (keyPressed != -1 && cheatProgress < cheatCode.length) {
+			if (keyPressed == cheatCode[cheatProgress]) {
+				cheatProgress++;
+				//trace(cheatProgress);
+			}else {
+				cheatProgress = 0;
+				//trace("RESET");
+			}
+
+			if (cheatProgress == cheatCode.length) {
+				FlxG.sound.play(Paths.sound('mineExplode'));
+			}
+		}
+	}
+
 	override function update(elapsed:Float)
 	{
 		if (bg != null && bg.stageScript != null) {
@@ -355,6 +374,14 @@ class TitleState extends MusicBeatState
 			}
 			else if (getPressedEnter())
 			{
+				if (FlxG.keys.pressed.SHIFT && cheatProgress == cheatCode.length) {
+					var ss = new funkin.states.SongSelectState(FlxColor.fromRGB(0,0,0,240));
+					ss.goBack = () -> {};//MusicBeatState.switchState(new funkin.states.editors.MasterEditorMenu());
+					this.persistentUpdate = false;
+					this.openSubState(ss);
+					return;
+				}
+
 				titleText.color = FlxColor.WHITE;
 				titleText.alpha = 1;
 				titleText.animation.play('press');
@@ -373,6 +400,8 @@ class TitleState extends MusicBeatState
 				});
 			}
 			else {
+				handleCheatCode();
+
 				var timer:Float = titleTimer;
 				if (timer >= 1)
 					timer = 2 - timer;
