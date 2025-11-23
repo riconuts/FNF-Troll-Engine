@@ -236,6 +236,19 @@ class MainMenuState extends MusicBeatState
 			}
 			#end
 		}
+		else if (controls.ACCEPT) {
+			if (transTwn?.finished == false) {
+				transTwn.onComplete(transTwn);
+				transTwn.cancel();
+				transTwn.destroy();
+				transTwn = null;
+				if (magTwn != null) {
+					magTwn.cancel();
+					magTwn.destroy();
+					magTwn = null;
+				}
+			}
+		}
 
 		super.update(elapsed);
 	}
