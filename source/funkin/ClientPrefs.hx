@@ -847,10 +847,11 @@ class ClientPrefs {
 			[S, D, F, J, K, L],
 			[S, D, F, SPACE, J, K, L],
 			[A, S, D, F, H, J, K, L],
-			[A, S, D, F, SPACE, H, J, K, L]
+			[A, S, D, F, SPACE, H, J, K, L],
+			[Q, W, E, R, V, N, U, I, O, P],
 		];
 
-		for (i in 0...9) {
+		for (i in 0...10) {
 			for (j in 0...i + 1) {
 				keyBinds.set('${i + 1}_key_$j', [directions[i][j]]);
 			}

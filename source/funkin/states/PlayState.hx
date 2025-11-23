@@ -705,9 +705,9 @@ class PlayState extends MusicBeatState
 		}
 		
 		PlayState.keyCount = SONG.keyCount;
-		StrumNote.defaultStaticAnimNames = ['arrowLEFT', 'arrowDOWN', 'arrowUP', 'arrowRIGHT']; 
-		StrumNote.defaultPressAnimNames = ["left press", "down press", "up press", "right press"];
-		StrumNote.defaultConfirmAnimNames = ["left confirm", "down confirm", "up confirm", "right confirm"];
+		StrumNote.currentStaticAnimNames = StrumNote.defaultStaticAnimNames[keyCount - 1]; 
+		StrumNote.currentPressAnimNames = StrumNote.defaultPressAnimNames[keyCount - 1];
+		StrumNote.currentConfirmAnimNames = StrumNote.defaultConfirmAnimNames[keyCount - 1];
 		Note.currentNoteAnimNames = Note.defaultNoteAnimNames[keyCount - 1];
 		Note.currentHoldAnimNames = Note.defaultHoldAnimNames[keyCount - 1];
 		Note.currentTailAnimNames = Note.defaultTailAnimNames[keyCount - 1];

@@ -15,9 +15,49 @@ using StringTools;
 
 class StrumNote extends NoteObject
 {
-	public static var defaultStaticAnimNames:Array<String> = ['arrowLEFT', 'arrowDOWN',  'arrowUP', 'arrowRIGHT'];
-	public static var defaultPressAnimNames:Array<String> = ["left press", "down press", "up press", "right press"];
-	public static var defaultConfirmAnimNames:Array<String> = ["left confirm", "down confirm", "up confirm", "right confirm"];
+
+	public static var defaultStaticAnimNames:Array<Array<String>> = [
+		['arrowUP'],
+		['arrowLEFT', 'arrowRIGHT'],
+		['arrowLEFT', 'arrowUP', 'arrowRIGHT'],
+		['arrowLEFT', 'arrowDOWN', 'arrowUP', 'arrowRIGHT'],
+		['arrowLEFT', 'arrowDOWN', 'arrowUP', 'arrowUP', 'arrowRIGHT'],
+		['arrowLEFT', 'arrowUP', 'arrowRIGHT', 'arrowLEFT', 'arrowDOWN', 'arrowRIGHT'],
+		['arrowLEFT', 'arrowUP', 'arrowRIGHT', 'arrowUP', 'arrowLEFT', 'arrowDOWN', 'arrowRIGHT'],
+		['arrowLEFT', 'arrowDOWN', 'arrowUP', 'arrowRIGHT', 'arrowLEFT', 'arrowDOWN',  'arrowUP', 'arrowRIGHT'],
+		['arrowLEFT', 'arrowDOWN',  'arrowUP', 'arrowRIGHT', 'arrowUP', 'arrowLEFT', 'arrowDOWN',  'arrowUP', 'arrowRIGHT'],
+		['arrowLEFT', 'arrowDOWN',  'arrowUP', 'arrowRIGHT', 'arrowDOWN', 'arrowUP', 'arrowLEFT', 'arrowDOWN',  'arrowUP', 'arrowRIGHT'],
+	];
+	
+	public static var defaultPressAnimNames:Array<Array<String>> = [
+		['up press'],
+		['left press', 'right press'],
+		['left press', 'up press', 'right press'],
+		['left press', 'down press', 'up press', 'right press'],
+		['left press', 'down press', 'up press', 'up press', 'right press'],
+		['left press', 'up press', 'right press', 'left press', 'down press', 'right press'],
+		['left press', 'up press', 'right press', 'up press', 'left press', 'down press', 'right press'],
+		['left press', 'down press', 'up press', 'right press', 'left press', 'down press',  'up press', 'right press'],
+		['left press', 'down press',  'up press', 'right press', 'up press', 'left press', 'down press',  'up press', 'right press'],
+		['left press', 'down press',  'up press', 'right press', 'down press', 'up press', 'left press', 'down press',  'up press', 'right press'],
+	];
+
+	public static var defaultConfirmAnimNames:Array<Array<String>> = [
+		['up confirm'],
+		['left confirm', 'right confirm'],
+		['left confirm', 'up confirm', 'right confirm'],
+		['left confirm', 'down confirm', 'up confirm', 'right confirm'],
+		['left confirm', 'down confirm', 'up confirm', 'up confirm', 'right confirm'],
+		['left confirm', 'up confirm', 'right confirm', 'left confirm', 'down confirm', 'right confirm'],
+		['left confirm', 'up confirm', 'right confirm', 'up confirm', 'left confirm', 'down confirm', 'right confirm'],
+		['left confirm', 'down confirm', 'up confirm', 'right confirm', 'left confirm', 'down confirm',  'up confirm', 'right confirm'],
+		['left confirm', 'down confirm',  'up confirm', 'right confirm', 'up confirm', 'left confirm', 'down confirm',  'up confirm', 'right confirm'],
+		['left confirm', 'down confirm',  'up confirm', 'right confirm', 'down confirm', 'up confirm', 'left confirm', 'down confirm',  'up confirm', 'right confirm'],
+	];
+
+	public static var currentStaticAnimNames:Array<String> = ['arrowLEFT', 'arrowDOWN',  'arrowUP', 'arrowRIGHT'];
+	public static var currentPressAnimNames:Array<String> = ["left press", "down press", "up press", "right press"];
+	public static var currentConfirmAnimNames:Array<String> = ["left confirm", "down confirm", "up confirm", "right confirm"];
 
 	////
 	public var texture(default, set):String = null;
@@ -103,9 +143,9 @@ class StrumNote extends NoteObject
 
 		frames = Paths.getSparrowAtlas(textureKey);
 
-		animation.addByPrefix('static', defaultStaticAnimNames[column % 4], 24, false);
-		animation.addByPrefix('pressed', defaultPressAnimNames[column % 4], 24, false);
-		animation.addByPrefix('confirm', defaultConfirmAnimNames[column % 4], 24, false);
+		animation.addByPrefix('static', currentStaticAnimNames[column % currentStaticAnimNames.length], 24, false);
+		animation.addByPrefix('pressed', currentPressAnimNames[column % currentPressAnimNames.length], 24, false);
+		animation.addByPrefix('confirm', currentConfirmAnimNames[column % currentConfirmAnimNames.length], 24, false);
 
 		playAnim(lastAnim, true);
 
