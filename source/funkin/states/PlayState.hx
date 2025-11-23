@@ -1120,7 +1120,7 @@ class PlayState extends MusicBeatState
 			}
 		];
 
-		trace(keysArray);
+		// trace(keysArray);
 		
 
 		buttonsArray = [

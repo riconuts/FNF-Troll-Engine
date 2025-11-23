@@ -555,8 +555,15 @@ class ModManager {
 		var spaceWidth = FlxG.width / playerAmount;
 		var spaceX = spaceWidth * (playerAmount-1-player);
 
+		var correctionOffset = switch(receptorAmount){
+			case 9:
+				0.9;
+			default:
+				0;
+		}
+
 		var baseX:Float = spaceX + (spaceWidth - Note.swagWidth * receptorAmount) * 0.5;
-		var x:Float = baseX + Note.swagWidth * direction;
+		var x:Float = baseX + Note.swagWidth * (direction * correctionOffset);
 
 		return x;
 	}
