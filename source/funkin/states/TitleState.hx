@@ -5,11 +5,13 @@ import funkin.Conductor;
 import openfl.filters.BlurFilter;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.group.FlxGroup;
+import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepad;
 import flixel.math.*;
 import flixel.tweens.*;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
+import flixel.graphics.FlxGraphic;
 import funkin.objects.shaders.ColorSwap;
 
 using StringTools;
@@ -22,7 +24,6 @@ import funkin.api.Discord.DiscordClient;
 class TitleState extends MusicBeatState
 {
 	public static var initialized:Bool = false;
-	public static var closedState:Bool = false;
 
 	public static function getIntroText():Array<Array<String>>
 	{
@@ -57,6 +58,13 @@ class TitleState extends MusicBeatState
 	public var camFollowPos:FlxObject;
 
 	var blurFilter:BlurFilter;
+
+	////
+	var section:Int = -100;
+	var titleTimer:Float = 0;
+	var skippedIntro:Bool = false;
+	var transitioning:Bool = false;
+	var leavingState:Bool = false;
 
 	override public function create():Void
 	{
@@ -171,9 +179,6 @@ class TitleState extends MusicBeatState
 		}
 	}
 
-	var transitioning:Bool = false;
-	var titleTimer:Float = 0;
-
 	function generateSequence() {
 		// this could prob be replaced with a json, yaml or even a whole "TitleSequence" script?? :shrug:
 
@@ -223,7 +228,6 @@ class TitleState extends MusicBeatState
 			MusicBeatState.playMenuMusic(1, true);
 	}
 
-	var skippedIntro:Bool = false;
 	function skipIntro():Void
 	{
 		if (skippedIntro) 
@@ -255,7 +259,7 @@ class TitleState extends MusicBeatState
 		if (logoBl != null)
 			logoBl.time = 0;
 	}
-	var section:Int = -100;
+
 	override function stepHit()
 	{
 		super.stepHit();
@@ -299,6 +303,7 @@ class TitleState extends MusicBeatState
 		}
 		#end
 
+		#if FLX_GAMEPAD
 		var gamepad:FlxGamepad = FlxG.gamepads.lastActive;
 		if (gamepad != null)
 		{
@@ -310,6 +315,7 @@ class TitleState extends MusicBeatState
 				return true;
 			#end
 		}
+		#end
 
 		return false;
 	}
@@ -342,9 +348,9 @@ class TitleState extends MusicBeatState
 		}
 		else {
 			if (transitioning) {
-				if (getPressedEnter()) {
+				if (!leavingState && getPressedEnter()) {
 					MusicBeatState.switchState(new MainMenuState());
-					closedState = true;
+					leavingState = true;
 				}
 			}
 			else if (getPressedEnter())
@@ -359,10 +365,11 @@ class TitleState extends MusicBeatState
 
 				transitioning = true;
 
-				new FlxTimer().start(0.9, function(tmr:FlxTimer)
-				{
-					MusicBeatState.switchState(new MainMenuState());
-					closedState = true;
+				new FlxTimer().start(0.9, function(tmr:FlxTimer) {
+					if (!leavingState) {
+						MusicBeatState.switchState(new MainMenuState());
+						leavingState = true;
+					}
 				});
 			}
 			else {
@@ -390,17 +397,27 @@ class TitleState extends MusicBeatState
 
 class TitleLogo extends FlxSprite
 {
-	public var titleName:String;
+	public var logoName:Null<String>;
 
-	public function new(?X:Float, ?Y:Float, ?Name:String)
+	public function new(x:Float = 0.0, y:Float = 0.0, ?logoName:String)
 	{
-		var titleGraphic = Paths.image('logo');
+		var graphic:FlxGraphic = null;
 
-		if (titleGraphic == null || Name != null){
-			titleGraphic = Paths.image('titles/${Name != null ? Name : FlxG.random.getObject(getTitlesList())}');
+		if (logoName != null)
+			graphic = Paths.image('titles/$logoName');
+		
+		if (graphic == null) {
+			logoName = FlxG.random.getObject(getTitlesList()); 
+			graphic = Paths.image('titles/$logoName');
 		}
 
-		super(X, Y, titleGraphic);
+		if (graphic == null) {
+			logoName = null;
+			graphic = Paths.image('logo');
+		}
+
+		this.logoName = logoName;
+		super(x, y, graphic);
 		antialiasing = true;
 	}
 

@@ -196,7 +196,7 @@ class TestState extends MusicBeatState{
 		function updateShit(){
 			// Logo Update 
 			var newLogoName = titleNames[Std.int(titleStepper.value)];
-			if (logoBl != null && logoBl.titleName != newLogoName){
+			if (logoBl != null && logoBl.logoName != newLogoName){
 				group.remove(logoBl).destroy();
 				logoBl = null;
 			}
