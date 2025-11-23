@@ -1699,14 +1699,16 @@ class PlayState extends MusicBeatState
 
 		// create note type scripts
 		for (notetype in noteTypeMap.keys()) {
-			var script:FunkinScript = createHScript('notetypes/$notetype', notetype, true);
+			var path = Paths.getHScriptPath('notetypes/$notetype');
+			var script:FunkinScript = (path == null) ? null : createHScript(path, notetype, true);
 			if (script != null) notetypeScripts.set(notetype, cast script);
 			firstNotePush(notetype);
 		}
 
 		// create event scripts
 		for (eventName in eventPushedMap.keys()) {
-			var script:FunkinScript = createHScript('events/$eventName', eventName, true);
+			var path = Paths.getHScriptPath('events/$eventName');
+			var script:FunkinScript = (path == null) ? null : createHScript(path, eventName, true);
 			if (script != null) eventScripts.set(eventName, cast script);
 			firstEventPush(eventName);
 		}
@@ -3864,6 +3866,13 @@ class PlayState extends MusicBeatState
 	}
 
 	#if HSCRIPT_ALLOWED
+	/** 
+		Run a song haxe script from a file path. 
+		@param path Path of the script, this path should include the file extension!
+		@param scriptName Optional name to give to this script.
+		@param ignoreCreateCall Whether to call `onCreate` on this script
+		@returns A `FunkinHScript` instance
+	**/
 	public function createHScript(path:String, ?scriptName:String, ?ignoreCreateCall:Bool = false):FunkinHScript
 	{
 		var split = path.split("/");

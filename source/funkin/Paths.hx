@@ -37,10 +37,9 @@ class Paths
 
 	public static function getFileWithExtensions(scriptPath:String, extensions:Array<String>):Null<String> {
 		for (fileExt in extensions) {
-			var baseFile:String = '$scriptPath.$fileExt';
-			var file:String = getPath(baseFile);
-			if (Paths.exists(file))
-				return file;
+			var fullPath = getPath('$scriptPath.$fileExt');
+			if (fullPath != null)
+				return fullPath;
 		}
 
 		return null;

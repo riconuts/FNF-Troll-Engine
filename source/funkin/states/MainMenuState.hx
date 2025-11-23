@@ -130,22 +130,23 @@ class MainMenuState extends MusicBeatState
 	}
 
 	var magTwn:FlxTween = null;
-	function magentaFlicker(?tmr){
-		if (magTwn != null) magTwn.cancel();
-		
-		magenta.alpha = 1.0;
-		magTwn = FlxTween.tween(magenta, {alpha: 0}, 0.12, {ease: FlxEase.circIn});
-	}
-	
+	var transTwn:FlxTween = null;
+
 	function bgFlicker() {
 		magenta.visible = true;
 		
 		if (ClientPrefs.flashing){
-			magentaFlicker();
-			new FlxTimer().start(0.24, magentaFlicker, Math.floor(1 / 0.24));
+			var loops = Math.floor(1 / 0.24);
+			magenta.alpha = 1.0;
+			magTwn = FlxTween.tween(magenta, {alpha: 0.0}, 0.12, {
+				ease: FlxEase.circIn, 
+				type: LOOPING,
+				loopDelay: 0.12, 
+				onComplete: (twn) -> if (--loops == 0) twn.cancel(),
+			});
 		}else{
 			magenta.alpha = 0.0;
-			FlxTween.tween(magenta, {alpha: 1.0}, 0.96, {ease: FlxEase.quintOut});
+			magTwn = FlxTween.tween(magenta, {alpha: 1.0}, 0.96, {ease: FlxEase.quintOut});
 		}
 	}
 
@@ -194,8 +195,9 @@ class MainMenuState extends MusicBeatState
 		menuItems.forEach((spr:FlxSprite)->{
 			if (curSelected != spr.ID)
 				FlxTween.tween(spr, {alpha: 0.0}, 0.25, {ease: FlxEase.quadOut, onComplete: _->spr.kill()});
-			else
-				FlxFlicker.flicker(spr, 1, 0.06, false, false, _->shitToDo());
+			else {
+				transTwn = FlxTween.flicker(spr, 1, 0.12, {endVisibility: false, onComplete: _ -> shitToDo()});
+			}
 		});
 	}
 
@@ -233,6 +235,19 @@ class MainMenuState extends MusicBeatState
 				switchState(new MasterEditorMenu());
 			}
 			#end
+		}
+		else if (controls.ACCEPT) {
+			if (transTwn?.finished == false) {
+				transTwn.onComplete(transTwn);
+				transTwn.cancel();
+				transTwn.destroy();
+				transTwn = null;
+				if (magTwn != null) {
+					magTwn.cancel();
+					magTwn.destroy();
+					magTwn = null;
+				}
+			}
 		}
 
 		super.update(elapsed);
