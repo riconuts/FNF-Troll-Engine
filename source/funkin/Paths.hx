@@ -796,8 +796,9 @@ class Paths
 	public static inline function hasString(key:String):Bool
 		return currentStrings.exists(key);
 
-	public static inline function getString(key:String):Null<String>
-		return currentStrings.get(key);
+	public static inline function getString(key:String):Null<String>{
+		return hasString(key) ? currentStrings.get(key) : key;
+	}
 }
 
 class HTML5Paths {

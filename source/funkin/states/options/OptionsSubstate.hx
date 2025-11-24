@@ -1,5 +1,9 @@
 package funkin.states.options;
 
+import funkin.states.options.IBindsMenu;
+import flixel.input.gamepad.FlxGamepadInputID;
+import flixel.input.keyboard.FlxKey;
+import haxe.extern.EitherType;
 import funkin.CoolUtil.overlapsMouse as overlaps;
 import funkin.states.options.*;
 import funkin.ClientPrefs;
@@ -407,7 +411,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				});
 
 			case 'customizeKeybinds':
-				var substate:Dynamic = ClientPrefs.controllerMode ? new ButtonBindsSubstate() : new KeyBindsSubstate();
+				var substate:IBindsMenu<Key_T> = ClientPrefs.controllerMode ? new ButtonBindsSubstate() : new KeyBindsSubstate();
 				var bindsMap:Map<String, Array<Int>> = ClientPrefs.controllerMode ? ClientPrefs.buttonBinds : ClientPrefs.keyBinds;
 				
 				var currentBinds:Map<String, Array<Int>> = [];
@@ -425,7 +429,7 @@ class OptionsSubstate extends MusicBeatSubstate
 						changed.push(daId);
 				}
 
-				openSubState(substate);
+				openSubState(cast substate);
 			default:
 				// nothing
 		}

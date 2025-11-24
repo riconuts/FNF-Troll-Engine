@@ -23,7 +23,7 @@ inline function getButtonName(id:Int)
 inline function getJustPressed():Int
 	return FlxG.gamepads.firstActive==null ? -1 : FlxG.gamepads.firstActive.firstJustPressedID();
 
-class ButtonBindsSubstate extends MusicBeatSubstate  
+class ButtonBindsSubstate extends MusicBeatSubstate  implements IBindsMenu<FlxGamepadInputID>
 {
 	// if an option is in this list, then atleast ONE key will have to be bound.
 	var forcedBind:Array<String> = ["ui_up", "ui_down", "ui_left", "ui_right", "accept", "back",];
