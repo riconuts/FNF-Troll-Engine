@@ -2270,6 +2270,8 @@ class ChartingState extends MusicBeatState
 		for (dropDownMenu in blockPressWhileScrolling) {
 			if (dropDownMenu.header.button.status == FlxButton.HIGHLIGHT)
 				return false;
+			if (FlxG.mouse.overlaps(dropDownMenu.dropPanel))
+				return false;
 		}
 
 		for (slider in blockScrollWhileHovering) {
