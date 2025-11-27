@@ -797,7 +797,7 @@ class Paths
 		return currentStrings.exists(key);
 
 	public static inline function getString(key:String):Null<String>{
-		return hasString(key) ? currentStrings.get(key) : key;
+		return currentStrings.get(key);
 	}
 }
 
