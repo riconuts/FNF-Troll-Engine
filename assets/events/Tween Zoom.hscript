@@ -53,7 +53,7 @@ function getOffset(eventNote):Float
 {
 	var dur = Std.parseFloat(eventNote.value2);
 
-	return (dur < 0) ? (dur * 1000) : 0; 
+	return (dur < 0) ? (dur * -1000) : 0; 
 }
 
 

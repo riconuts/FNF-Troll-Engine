@@ -16,7 +16,7 @@ import haxe.Json;
 
 using StringTools;
 
-#if sys
+#if FILESYSTEM_ALLOWED
 import sys.FileSystem;
 import sys.io.File;
 #end
@@ -84,7 +84,7 @@ class Paths
 
 	public static function init() {
 		#if html5
-		HTML5Paths.initPaths();
+		AltFilePaths.initPaths();
 		#end
 
 		#if MODS_ALLOWED
@@ -257,43 +257,43 @@ class Paths
 		return path.endsWith("/") ? path.substr(0, -1) : path;
 
 	inline static public function exists(path:String, ?type:AssetType):Bool {
-		#if sys 
+		#if FILESYSTEM_ALLOWED 
 		return FileSystem.exists(path);
 		#else
 		return Assets.exists(path, type);
 		#end
 	}
 	inline static public function getContent(path:String):Null<String> {
-		#if sys
+		#if FILESYSTEM_ALLOWED
 		return FileSystem.exists(path) ? File.getContent(path) : null;
 		#else
 		return Assets.exists(path) ? Assets.getText(path) : null;
 		#end
 	}
 	inline static public function getBytes(path:String):Null<haxe.io.Bytes> {
-		#if sys
+		#if FILESYSTEM_ALLOWED
 		return FileSystem.exists(path) ? File.getBytes(path) : null;
 		#else
 		return Assets.exists(path) ? Assets.getBytes(path) : null;
 		#end
 	}
 	inline static public function isDirectory(path:String):Bool {
-		#if sys
+		#if FILESYSTEM_ALLOWED
 		return FileSystem.exists(path) && FileSystem.isDirectory(path);
 		#else
-		return HTML5Paths.isDirectory(path);
+		return AltFilePaths.isDirectory(path);
 		#end
 	}
 	inline static public function getDirectoryFileList(path:String):Array<String> {
-		#if sys
+		#if FILESYSTEM_ALLOWED
 		return !isDirectory(path) ? [] : FileSystem.readDirectory(path);
 		#else
-		return HTML5Paths.getDirectoryFileList(path);
+		return AltFilePaths.getDirectoryFileList(path);
 		#end
 	}
 
 	inline public static function getText(path:String):Null<String> {
-		#if sys
+		#if FILESYSTEM_ALLOWED
 		if (FileSystem.exists(path))
 			return File.getContent(path);
 		#end
@@ -304,7 +304,7 @@ class Paths
 		return null;
 	}
 	inline public static function getBitmapData(path:String):Null<BitmapData> {
-		#if sys
+		#if FILESYSTEM_ALLOWED
 		if (FileSystem.exists(path))
 			return BitmapData.fromFile(path);
 		#end
@@ -315,7 +315,7 @@ class Paths
 		return null;
 	}
 	inline public static function getSound(path:String):Null<Sound> {
-		#if sys
+		#if FILESYSTEM_ALLOWED
 		if (FileSystem.exists(path))
 			return Sound.fromFile(path);
 		#end
@@ -387,7 +387,7 @@ class Paths
 	**/
 	inline static public function iterateDirectory(path:String, func:haxe.Constraints.Function):Bool
 	{
-		#if sys
+		#if FILESYSTEM_ALLOWED
 		if (!FileSystem.exists(path) || !FileSystem.isDirectory(path))
 			return false;
 		
@@ -397,7 +397,7 @@ class Paths
 		return true;
 		
 		#else
-		return HTML5Paths.iterateDirectory(path, func);
+		return AltFilePaths.iterateDirectory(path, func);
 		#end
 	}
 
@@ -801,8 +801,8 @@ class Paths
 	}
 }
 
-class HTML5Paths {
-	#if !sys 
+private class AltFilePaths {
+	#if !FILESYSTEM_ALLOWED 
 	// Directory => Array with file/sub-directory names
 	static var dirMap = new Map<String, Array<String>>();
 
