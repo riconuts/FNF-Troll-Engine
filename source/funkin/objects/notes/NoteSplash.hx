@@ -32,7 +32,8 @@ class NoteSplash extends NoteObject
 		setPosition(x, y);
 		animationAmount = 2;
 		alpha = 0.6;
-		scale.set(0.8, 0.8);
+		var realScale:Float = 0.8 * (Note.spriteScales[PlayState.keyCount - 1] / 0.7);
+		scale.set(realScale, realScale);
 		updateHitbox();
 
 		this.column = column;

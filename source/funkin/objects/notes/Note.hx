@@ -197,10 +197,19 @@ class Note extends NoteObject {
 	public static var currentHoldAnimNames:Array<String> = defaultHoldAnimNames[3];
 	public static var currentTailAnimNames:Array<String> = defaultTailAnimNames[3];
 
-	public static var quants:Array<Int> = [4, // quarter note
+	public static var quants:Array<Int> = [
+		4, // quarter note
 		8, // eight
 		12, // etc
-		16, 20, 24, 32, 48, 64, 96, 192];
+		16,
+		20,
+		24,
+		32,
+		48, 
+		64, 
+		96, 
+		192
+	];
 
 	public static var defaultNotes = ['No Animation', 'GF Sing', ''];
 
