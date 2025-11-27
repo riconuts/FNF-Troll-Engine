@@ -195,4 +195,10 @@ class StrumNote extends NoteObject
 			colorSwap.setHSB();
 		}
 	}
+
+	public static function refreshKeyAnimations(count:Int = 4){
+		StrumNote.currentStaticAnimNames = StrumNote.defaultStaticAnimNames[count - 1]; 
+		StrumNote.currentPressAnimNames = StrumNote.defaultPressAnimNames[count - 1];
+		StrumNote.currentConfirmAnimNames = StrumNote.defaultConfirmAnimNames[count - 1];
+	}
 }

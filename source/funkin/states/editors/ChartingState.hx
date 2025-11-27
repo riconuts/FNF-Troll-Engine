@@ -2088,6 +2088,9 @@ class ChartingState extends MusicBeatState
 				
 				case 'song_keyCount':
 					_song.keyCount = Math.ceil(Math.max(1, nums.value));
+					StrumNote.refreshKeyAnimations(_song.keyCount);
+					Note.refreshKeyAnimations(_song.keyCount);
+					trace(_song.keyCount);
 					reloadGridLayer();
 					updateStrumline();
 					adjustCamPos();

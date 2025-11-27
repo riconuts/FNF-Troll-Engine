@@ -819,4 +819,12 @@ class Note extends NoteObject {
 		if (diff < -ClientPrefs.hitWindow && !wasGoodHit)
 			tooLate = true;
 	}
+
+	public static function refreshKeyAnimations(count:Int = 4){
+		Note.currentNoteAnimNames = Note.defaultNoteAnimNames[count - 1];
+		Note.currentHoldAnimNames = Note.defaultHoldAnimNames[count - 1];
+		Note.currentTailAnimNames = Note.defaultTailAnimNames[count - 1];
+		Note.spriteScale = Note.spriteScales[count - 1];
+		Note.swagWidth = Note.spriteScale * 160;
+	}
 }
