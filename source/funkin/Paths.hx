@@ -61,6 +61,14 @@ class Paths
 		#end
 	}
 
+	public inline static function hscript(key:String):Null<String> {
+		#if HSCRIPT_ALLOWED
+		return getFileWithExtensions(key, Paths.HSCRIPT_EXTENSIONS);
+		#else
+		return null;
+		#end
+	}
+
 	public static var localTrackedAssets:Array<String> = [];
 	public static var currentTrackedAssets:Map<String, FlxGraphic> = [];
 	public static var currentTrackedSounds:Map<String, Sound> = [];

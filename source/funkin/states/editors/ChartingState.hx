@@ -1,5 +1,6 @@
 package funkin.states.editors;
 
+import funkin.data.SongEventData;
 import funkin.objects.shaders.ColorSwap;
 import funkin.states.base.Prompt;
 
@@ -149,43 +150,7 @@ class ChartingState extends MusicBeatState
 
 	private var noteTypeIntMap:Map<Int, String> = new Map<Int, String>();
 	private var noteTypeMap:Map<String, Null<Int>> = new Map<String, Null<Int>>();
-	var eventStuff:Array<Dynamic> =
-	[
-		// Name, Description
-		['', ''], // This is used to input custom events.
-		['Hey!', "Plays the \"Hey!\" animation from Bopeebo,\nValue 1: BF = Only Boyfriend, GF = Only Girlfriend,\nSomething else = Both.\nValue 2: Custom animation duration,\nleave it blank for 0.6s"],
-		['Set GF Speed', "Sets GF head bopping speed,\nValue 1: 1 = Normal speed,\n2 = 1/2 speed, 4 = 1/4 speed etc.\nUsed on Fresh during the beatbox parts.\n\nWarning: Value must be integer!"],
-		['Add Camera Zoom', "Used on MILF on that one \"hard\" part\nValue 1: Camera zoom add (Default: 0.015)\nValue 2: UI zoom add (Default: 0.03)\nLeave the values blank if you want to use Default."],
-		['Play Animation', "Plays an animation on a Character,\nonce the animation is completed,\nthe animation changes to Idle\n\nValue 1: Animation to play.\nValue 2: Character (Dad, BF, GF)"],
-		['Camera Follow Pos', "Value 1: X\nValue 2: Y\n\nThe camera won't change the follow point\nafter using this, for getting it back\nto normal, leave both values blank."],
-		["Change Focus", "Sets who the camera is focusing on.\nNote that the must hit changing on a section will reset\nthe focus.\nValue 1: Who to focus on (dad, bf)"],
-		
-		['Stage Event', 'Event whose behaviour defined by the stage.'],
-		['Song Event', 'Event whose behaviour defined by the song.'],
-		['Set Property', "Value 1: Variable name\nValue 2: New value"],
-		
-		['Alt Idle Animation', "Sets a specified suffix after the idle animation name.\nYou can use this to trigger 'idle-alt' if you set\nValue 2 to -alt\n\nValue 1: Character to set (Dad, BF or GF)\nValue 2: New suffix (Leave it blank to disable)"],
-		['Screen Shake', "Value 1: Camera shake\nValue 2: HUD shake\n\nEvery value works as the following example: \"1, 0.05\".\nThe first number (1) is the duration.\nThe second number (0.05) is the intensity."],
-		['Change Character', "Value 1: Character to change (dad, bf, gf)\nValue 2: New character's name"],
-		
-		['Game Flash', "Value 1: Hexadecimal Color (0xFFFFFFFF is default)\nValue 2: Duration in seconds (0.5 is default)"],
-
-		['Change Scroll Speed', "Value 1: Scroll Speed Multiplier (1 is default)\nValue 2: Time it takes to change fully in seconds."],
-		[
-			"Constant SV", 
-			"Speed changes which don't affect note positions.\n(For example, a speed of 0 stops notes\ninstead of making them go onto the receptors.)\nValue 1: New Speed. Defaults to 1"
-			#if EASED_SVs
-			+ "\nValue 2: Tween settings\n(Duration and EaseFunc seperated by a / (ex. 1/quadOut))"
-			#end
-		],
-		[
-			"Mult SV", 
-			"Speed changes which don't affect note positions.\n(For example, a speed of 0 stops notes\ninstead of making them go onto the receptors.)\nValue 1: Speed Multiplier. Defaults to 1"
-			#if EASED_SVs
-			+ "\nValue 2: Tween settings\n(Duration and EaseFunc seperated by a /(ex. 1/quadOut))"
-			#end
-		]
-	];
+	var eventStuff:Array<Array<String>>;
 
 	var UI_box:FlxUITabMenu;
 
@@ -803,27 +768,7 @@ class ChartingState extends MusicBeatState
 	}
 
 	function loadEventStuff() {
-		#if (sys && (hscript))
-		var eventsLoaded:Map<String, Bool> = new Map();
-		for (directory in Paths.getFolders('events'))
-		{
-			if (!FileSystem.exists(directory))
-				continue;
-
-			for (file in FileSystem.readDirectory(directory))
-			{
-				if (!file.endsWith('.txt'))
-					continue;
-
-				var eventToCheck:String = file.substr(0, file.length - 4);
-				if (eventsLoaded.exists(eventToCheck))
-					continue;
-
-				eventsLoaded.set(eventToCheck, true);
-				eventStuff.push([eventToCheck, File.getContent(haxe.io.Path.join([directory, file]))]);
-			}
-		}
-		#end
+		eventStuff = SongEventData.getEventStuff();
 	}
 
 	override function startOutro(fuck){
@@ -1481,9 +1426,9 @@ class ChartingState extends MusicBeatState
 		var tab_group_event = new FlxUI(null, UI_box);
 		tab_group_event.name = 'Event';
 
-		eventDescText = new FlxText(20, 200, 0, eventStuff[0][0]);
+		eventDescText = new FlxText(20, 200, 0, "");
 
-		var leEvents:Array<String> = [];
+		var leEvents:Array<String> = [""];
 		for (i in 0...eventStuff.length)
 			leEvents.push(eventStuff[i][0]);
 
@@ -1497,13 +1442,14 @@ class ChartingState extends MusicBeatState
 				var idx:Int = Std.parseInt(pressed);
 				
 				if (idx > 0){
-					var data = eventStuff[idx];
+					var data = eventStuff[idx-1];
 					if (data != null){
 						setSelectedEventType(data[0]);
 						eventNameInput.text = data[0];
 						eventDescText.text = data[1];
 					}
 				}else{
+					eventDescText.text = "Type a custom event!";
 					eventNameInput.text = "";
 					eventNameInput.exists = true;
 					eventNameInput.hasFocus = true;
@@ -2273,6 +2219,8 @@ class ChartingState extends MusicBeatState
 	function checkCanMouseScroll():Bool {
 		for (dropDownMenu in blockPressWhileScrolling) {
 			if (dropDownMenu.header.button.status == FlxButton.HIGHLIGHT)
+				return false;
+			if (FlxG.mouse.overlaps(dropDownMenu.dropPanel))
 				return false;
 		}
 
@@ -3183,7 +3131,7 @@ class ChartingState extends MusicBeatState
 			value1InputText.text = eventData.value1;
 			value2InputText.text = eventData.value2;
 
-			var selectedIdx:Int = 0;
+			var selectedIdx:Int = -1;
 			for (i in 0...eventStuff.length){
 				if (eventStuff[i][0] == eventData.eventName){
 					selectedIdx = i;
@@ -3191,10 +3139,11 @@ class ChartingState extends MusicBeatState
 				}
 			}
 
-			eventDropDown.selectedId = Std.string(selectedIdx);
-			eventDropDown.header.text.text = eventData.eventName;
-			
-			eventDescText.text = eventStuff[selectedIdx][1];
+			if (selectedIdx >= 0) {
+				eventDropDown.selectedId = Std.string(selectedIdx);
+				eventDropDown.header.text.text = eventData.eventName;	
+				eventDescText.text = eventStuff[selectedIdx][1];
+			}
 		}else {
 			selectedEventText.text = 'Selected Event: None';
 		}

@@ -490,8 +490,8 @@ class PlayState extends MusicBeatState
 	public var modchartObjects:Map<String, FlxSprite> = new Map();
 
 	public var notetypeScripts:Map<String, FunkinHScript> = []; // custom notetypes for scriptVer '1'
-	public var eventScripts:Map<String, FunkinHScript> = []; // custom events for scriptVer '1'
 	public var hudSkinScripts:Map<String, FunkinHScript> = []; // Doing this so you can do shit like i.e having it swap between pixel and normal HUD
+	public var eventHandler = new funkin.data.SongEvent.SongEventHandler();
 
 	public var hudSkin(default, set):String;
 	public var hudSkinScript:FunkinHScript; // this is the HUD skin used for countdown, judgements, etc
@@ -1531,24 +1531,7 @@ class PlayState extends MusicBeatState
 	}
 
 	function shouldPush(event:PsychEvent){
-		switch(event.event){
-			default:
-				if (eventScripts.exists(event.event)) {
-					var script = eventScripts.get(event.event);
-					var returnVal:Dynamic = script.call('shouldPush', [event]);
-					
-					//trace(event.event, "shouldPush", returnVal);
-					
-					if (returnVal == true)
-						return true;
-					if (returnVal == false)
-						return false;
-					if (returnVal == Globals.Function_Stop)
-						return false;					
-				}
-		}
-
-		return true;
+		return eventHandler.get(event.event)?.shouldPush(event) ?? true;
 	}
 
 	static function eventNoteSort(a:PsychEvent, b:PsychEvent)
@@ -1701,9 +1684,7 @@ class PlayState extends MusicBeatState
 
 		// create event scripts
 		for (eventName in eventPushedMap.keys()) {
-			var path = Paths.getHScriptPath('events/$eventName');
-			var script:FunkinScript = (path == null) ? null : createHScript(path, eventName, true);
-			if (script != null) eventScripts.set(eventName, cast script);
+			eventHandler.get(eventName);
 			firstEventPush(eventName);
 		}
 
@@ -1720,8 +1701,10 @@ class PlayState extends MusicBeatState
 			
 			eventNotes.push(eventNote);
 
+			/*
 			for(shit in getEventNotePreload(eventNote))
 				shitToLoad.push(shit);
+			*/
 			
 			eventPushed(eventNote);
 		}
@@ -1853,18 +1836,6 @@ class PlayState extends MusicBeatState
 		return notes;
 	}
 
-	// everything returned here gets preloaded by the preloader up-top ^
-	function getEventNotePreload(event:PsychEvent):Array<AssetPreload>{
-		var preload:Array<AssetPreload> = [];
-
-		switch(event.event){
-			case "Change Character":
-				return CharacterData.returnCharacterPreload(event.value2);
-		}
-
-		return preload;
-	}
-
 	public function getNoteInitialTime(time:Float)
 	{
 		var event:SpeedEvent = getSV(time);
@@ -1930,17 +1901,7 @@ class PlayState extends MusicBeatState
 		if (ret != null && (ret is Int || ret is Float))
 			return ret;
 		
-		if (eventScripts.exists(event.event)){
-			var ret:Dynamic = callScript(eventScripts.get(event.event), "getOffset", [event]);
-			if (ret != null && (ret is Int || ret is Float))
-				return ret;
-		}
-
-		switch(event.event) {
-			case 'Kill Henchmen': //Better timing so that the kill sound matches the beat intended
-				return 280; //Plays 280ms before the actual position
-		}
-		return 0;
+		return (eventHandler.get(event.event)?.getOffset(event)) ?? 0.0;
 	}
 	
 	// called for every event note
@@ -1948,79 +1909,14 @@ class PlayState extends MusicBeatState
 	{
 		if (event.value1 == null) event.value1 = '';
 		if (event.value2 == null) event.value2 = '';
-
-		switch(event.event)
-		{
-			case 'Change Scroll Speed': // Negative duration means using the event time as the tween finish time
-				var duration = Std.parseFloat(event.value2);
-				if (!Math.isNaN(duration) && duration < 0.0){
-					event.strumTime -= duration * 1000;
-					event.value2 = Std.string(-duration);
-				}
-
-			case 'Mult SV' | 'Constant SV':
-				var speed:Float = 1;
-				if(event.event == 'Constant SV'){
-					var b = Std.parseFloat(event.value1);
-					speed = Math.isNaN(b) ? 1 : (b / songSpeed);
-				}else{
-					speed = Std.parseFloat(event.value1);
-					if (Math.isNaN(speed)) speed = 1;
-				}
-				#if EASED_SVs
-				var endTime:Null<Float> = null;
-				var easeFunc:EaseFunction = FlxEase.linear;
-
-				var tweenOptions = event.value2.split("/");
-				if(tweenOptions.length >= 1){
-					easeFunc = FlxEase.linear;
-					var parsed:Float = Std.parseFloat(tweenOptions[0]);
-					if(!Math.isNaN(parsed))
-						endTime = event.strumTime + (parsed * 1000);
-
-					if(tweenOptions.length > 1){
-						var f:EaseFunction = ScriptingUtil.getFlxEaseByString(tweenOptions[1]);
-						if(f != null)
-							easeFunc = f;
-					}
-				}
-
-				var lastChange:SpeedEvent = speedChanges[speedChanges.length - 1];
-				speedChanges.push({
-					position: getTimeFromSV(event.strumTime, lastChange),
-					startTime: event.strumTime,
-					endTime: endTime,
-					easeFunc: easeFunc,
-					startSpeed: lastChange.startSpeed,
-					speed: speed
-				});
-				#else
-				var lastChange:SpeedEvent = speedChanges[speedChanges.length - 1];
-				speedChanges.push({
-					position: getTimeFromSV(event.strumTime, lastChange),
-					startTime: event.strumTime,
-					speed: speed
-				});
-				#end
-				
-			case 'Change Character':
-				var charType = getCharacterTypeFromString(event.value1);
-				if (charType != -1) addCharacterToList(event.value2, charType);
-
-			default:
-				if (eventScripts.exists(event.event)) {
-					eventScripts.get(event.event).call("onPush", [event]);
-				}
-		}
-
+		
+		eventHandler.get(event.event)?.onPush(event);
 		callOnScripts("eventPushed", [event]);
 	}
 
 	// called only once for each different event
 	function firstEventPush(eventName:String) {
-		if (eventScripts.exists(eventName))
-			eventScripts.get(eventName).call("onLoad");
-
+		eventHandler.get(eventName)?.onLoad();
 		callOnScripts("firstEventPush", [eventName]);
 	}
 
@@ -2439,8 +2335,7 @@ class PlayState extends MusicBeatState
 
 		for (script in notetypeScripts)
 			script.call("update", [elapsed]);
-		for (script in eventScripts)
-			script.call("update", [elapsed]);
+		eventHandler.update(elapsed);
 
 		callOnScripts('update', [elapsed]);
 
@@ -2626,7 +2521,7 @@ class PlayState extends MusicBeatState
 			if(Conductor.songPosition < daEvent.strumTime)
 				break;
 
-			triggerEventNote(daEvent.event, daEvent.value1, daEvent.value2, daEvent.strumTime);
+			triggerEvent(daEvent, daEvent.strumTime);
 			eventNotes.shift();
 		}
 	}
@@ -2703,162 +2598,13 @@ class PlayState extends MusicBeatState
 
 		if(showDebugTraces)
 			trace('Event: ' + eventName + ', Value 1: ' + value1 + ', Value 2: ' + value2 + ', at Time: ' + time);
-
-		switch(eventName) {
-			case 'Change Focus':
-				switch(value1.toLowerCase().trim()){
-					case 'dad' | 'opponent':
-						if (callOnScripts('onMoveCamera', ["dad"]) != Globals.Function_Stop){
-							moveCamera(dad);
-						}
-					case 'gf' | 'girlfriend':
-						if (callOnScripts('onMoveCamera', ["gf"]) != Globals.Function_Stop){
-							moveCamera(gf);
-						}
-					default:
-						if (callOnScripts('onMoveCamera', ["bf"]) != Globals.Function_Stop){
-							moveCamera(boyfriend);
-						}
-				}
-
-			case 'Game Flash':
-				var dur:Float = Std.parseFloat(value2);
-				if(Math.isNaN(dur)) dur = 0.5;
-
-				var col:Null<FlxColor> = FlxColor.fromString(value1);
-				if (col == null) col = 0xFFFFFFFF;
-
-				camGame.flash(col, dur, null, true);
-
-			case 'Hey!':
-				var value:Int = switch (value1.toLowerCase().trim()) {
-					case 'bf' | 'boyfriend' | '0': 0;
-					case 'gf' | 'girlfriend' | '1': 1;
-					default: 2;
-				}
-
-				var time:Float = Std.parseFloat(value2);
-				if(Math.isNaN(time) || time <= 0) time = 0.6;
-
-				if (value != 0 && gf != null) {
-					gf.playAnim('cheer', true);
-					gf.specialAnim = true;
-					gf.heyTimer = time;
-				}
-				if (value != 1 && boyfriend != null) {
-					boyfriend.playAnim('hey', true);
-					boyfriend.specialAnim = true;
-					boyfriend.heyTimer = time;
-				}
-
-			case 'Set GF Speed':
-				var value:Null<Int> = Std.parseInt(value1);
-				if (value == null || value < 1) value = 1;
-				gfSpeed = value;
-
-			case 'Add Camera Zoom':
-				if (ClientPrefs.camZoomP > 0) {
-					var camZoom:Float = Std.parseFloat(value1);
-					var hudZoom:Float = Std.parseFloat(value2);
-					if(Math.isNaN(camZoom)) camZoom = 0.015;
-					if(Math.isNaN(hudZoom)) hudZoom = 0.03;
-
-					cameraBump(camZoom, hudZoom);
-				}
-				
-			case 'Play Animation':
-				var char:Character = getCharacterFromString(value2);
-				if (char != null) {
-					char.playAnim(value1, true);
-					char.specialAnim = true;
-				}
-
-			case 'Camera Follow Pos':
-				var val1:Float = Std.parseFloat(value1);
-				var val2:Float = Std.parseFloat(value2);
-
-				var isNan1 = Math.isNaN(val1);
-				var isNan2 = Math.isNaN(val2);
-
-				if (isNan1 && isNan2) 
-					cameraPoints.remove(customCamera);
-				else{
-					if (!isNan1) customCamera.x = val1;
-					if (!isNan2) customCamera.y = val2;
-					addCameraPoint(customCamera);
-				}
-
-			case 'Alt Idle Animation':
-				var char:Character = getCharacterFromString(value1);
-				if (char != null) {
-					char.idleSuffix = value2;
-					char.recalculateDanceIdle();
-				}
-
-			case 'Screen Shake':
-				var valuesArray:Array<String> = [value1, value2];
-				var targetsArray:Array<FlxCamera> = [camGame, camHUD];
-				for (i in 0...targetsArray.length) {
-					var split:Array<String> = valuesArray[i].split(',');
-					var duration:Float = 0;
-					var intensity:Float = 0;
-					if(split[0] != null) duration = Std.parseFloat(split[0].trim());
-					if(split[1] != null) intensity = Std.parseFloat(split[1].trim());
-					if(Math.isNaN(duration)) duration = 0;
-					if(Math.isNaN(intensity)) intensity = 0;
-
-					if(duration > 0 && intensity != 0) {
-						targetsArray[i].shake(intensity, duration);
-					}
-				}
-
-			case 'Change Character':
-				var charType:CharacterType = getCharacterTypeFromString(value1);
-				if (charType != -1) changeCharacter(value2, charType);
-
-			case 'Change Scroll Speed':
-				if (songSpeedType == "constant")
-					return;
-
-				var val1:Float = Std.parseFloat(value1);
-				var val2:Float = Std.parseFloat(value2);
-				if(Math.isNaN(val1)) val1 = 1.0;
-				if(Math.isNaN(val2)) val2 = 0.0;
-
-				var newValue:Float = SONG.speed * ClientPrefs.getGameplaySetting('scrollspeed', 1.0) * val1;
-				if (songSpeedTween != null)
-					songSpeedTween.cancel();
-
-				// value should never be negative as that should be handled and changed prior to this
-				if (val2 == 0.0)
-					songSpeed = newValue;
-				else{
-					songSpeedTween = FlxTween.num(
-						this.songSpeed, newValue, val2, 
-						{
-							ease: FlxEase.linear, 
-							onComplete: (twn:FlxTween) -> songSpeedTween = null	
-						},
-						this.set_songSpeed
-					);
-				}
-
-			case 'Set Property':
-				var value2:Dynamic = switch(value2){
-					case "true": true;
-					case "false": false;
-					default: value2;
-				}
-
-				try{
-					ScriptingUtil.setProperty(value1, value2);					
-				}catch (e:haxe.Exception){
-					trace('Set Property event error: $value1 | $value2');
-				}
-		}
+		
 		callOnScripts('onEvent', [eventName, value1, value2, time]);
-		if(eventScripts.exists(eventName))
-			callScript(eventScripts.get(eventName), "onTrigger", [value1, value2, time]);
+	}
+
+	public function triggerEvent(data:PsychEvent, ?time:Float) {
+		triggerEventNote(data.event, data.value1, data.value2, time);
+		eventHandler.get(data.event)?.onTrigger(data, time);
 	}
 
 	//// Kinda rewrote the camera shit so that its 'easier' to mod
@@ -3961,7 +3707,7 @@ class PlayState extends MusicBeatState
 			return callOnScripts(event, args, ignoreStops, exclusions, scriptArray, vars, false);
 
 	inline public function isSpecialScript(script:FunkinScript)
-		return notetypeScripts.exists(script.scriptName) || eventScripts.exists(script.scriptName) || hudSkinScripts.exists(script.scriptName);
+		return notetypeScripts.exists(script.scriptName) || hudSkinScripts.exists(script.scriptName);
 
 	public function callOnScripts(event:String, ?args:Array<Dynamic>, ignoreStops:Bool = false, ?exclusions:Array<String>, ?scriptArray:Array<Dynamic>,
 			?vars:Map<String, Dynamic>, ?ignoreSpecialShit:Bool = true):Dynamic
@@ -4210,7 +3956,7 @@ class PlayState extends MusicBeatState
 
 		notetypeScripts.clear();
 		hudSkinScripts.clear();		
-		eventScripts.clear();
+		eventHandler.destroy();
 
 		Conductor.cleanup();
 		instance = null;
