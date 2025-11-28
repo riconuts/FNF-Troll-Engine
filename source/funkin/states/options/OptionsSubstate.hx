@@ -411,7 +411,7 @@ class OptionsSubstate extends MusicBeatSubstate
 				});
 
 			case 'customizeKeybinds':
-				var substate:IBindsMenu<Key_T> = ClientPrefs.controllerMode ? new ButtonBindsSubstate() : new KeyBindsSubstate();
+				var substate:IBindsMenu<Keybind> = ClientPrefs.controllerMode ? new ButtonBindsSubstate() : new KeyBindsSubstate();
 				var bindsMap:Map<String, Array<Int>> = ClientPrefs.controllerMode ? ClientPrefs.buttonBinds : ClientPrefs.keyBinds;
 				
 				var currentBinds:Map<String, Array<Int>> = [];
