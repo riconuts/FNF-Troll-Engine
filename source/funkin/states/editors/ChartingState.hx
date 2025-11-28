@@ -770,6 +770,7 @@ class ChartingState extends MusicBeatState
 	}
 
 	function updateStrumline() {
+		strumLineNotes.clear();
 		var fieldAmount:Int = 2;
 
 		strumLine.setGraphicSize(GRID_SIZE * (1 + _song.keyCount * fieldAmount), 4);
@@ -2090,7 +2091,7 @@ class ChartingState extends MusicBeatState
 					_song.keyCount = Math.ceil(Math.max(1, nums.value));
 					StrumNote.refreshKeyAnimations(_song.keyCount);
 					Note.refreshKeyAnimations(_song.keyCount);
-					trace(_song.keyCount);
+
 					reloadGridLayer();
 					updateStrumline();
 					adjustCamPos();

@@ -101,7 +101,7 @@ class BindButton<T:Keybind> extends FlxUI9SliceSprite
 	}
 
 	override function update(elapsed:Float){
-		if(textObject.fieldWidth != width){
+		if(textObject.fieldWidth != width){ // FUCK FLXTEXT. ALL MY HOMIES HATE FLXTEXT
 			textObject.fieldWidth = width;
 		}
 		super.update(elapsed);
