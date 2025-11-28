@@ -36,7 +36,7 @@ class KeyBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxKey> {
 	var overCam:FlxCamera = new FlxCamera();
 	var scrollableCam:FlxCamera = new FlxCamera();
 
-	var camFollow = new FlxPoint(0, 0);
+	var camFollow = FlxPoint.get(0, 0);
 	var camFollowPos = new FlxObject(0, 0);
 
 	var bindIndex:Int = -1;
@@ -63,12 +63,23 @@ class KeyBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxKey> {
 
 		var noteBinds:Array<Array<String>> = [[Paths.getString('controls_gameplay')],];
 
-		var directions:Array<String> = ['left', 'down', 'up', 'right'];
+		var directions:Array<Array<String>> = [
+			['Center'],
+			['Left', 'Right'],
+			['Left', 'Center', 'Right'],
+			['Left', 'Down', 'Up', 'Right'],
+			['Left', 'Down', 'Center', 'Up', 'Right'],
+			['Left', 'Down', 'Right', 'Left 2', 'Up', 'Right 2'],
+			['Left', 'Down', 'Right', 'Center', 'Left 2', 'Up', 'Right 2'],
+			['Left', 'Down', 'Up', 'Right', 'Left 2', 'Down 2', 'Up 2', 'Right 2'],
+			['Left', 'Down', 'Up', 'Right', 'Center', 'Left 2', 'Down 2', 'Up 2', 'Right 2'],
+			['Left', 'Down', 'Up', 'Right', 'Center', 'Center 2', 'Left 2', 'Down 2', 'Up 2', 'Right 2'],
+		];
 
 		for (i in 0...10) {
-			noteBinds.push(['${i + 1}_key']);
+			noteBinds.push(['${i + 1} Key']);
 			for (j in 0...i + 1) {
-				noteBinds.push(['control_note_${directions[j % 4]}', '${i + 1}_key_$j']);
+				noteBinds.push(['${directions[i][j]}', '${i + 1}_key_$j']);
 			}
 		}
 
@@ -256,6 +267,8 @@ class KeyBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxKey> {
 		FlxG.cameras.remove(cam);
 		FlxG.cameras.remove(scrollableCam);
 		FlxG.cameras.remove(overCam);
+
+		camFollow.put();
 
 		return super.destroy();
 	}
