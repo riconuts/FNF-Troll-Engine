@@ -20,9 +20,20 @@ using StringTools;
  * (for example you can have a screen bounce aux mod + node w/ that aux mod as an input, and then change transformX)
  */
 typedef Node = {
-	var in_mods:Array<String>; /// the modifiers that get input into this node
-	var out_mods:Array<String>; // the modifiers that get transformed by this node
-	var nodeFunc:(Array<Float>, Int)->Array<Float>; // takes an array of the input mods' values, and returns an array of transformed modifier values, if out_mods.length > 0
+	/**
+		Modifiers that get input into this node
+	**/
+	var in_mods:Array<String>;
+	
+	/**
+		Modifiers that get transformed by this node
+	**/
+	var out_mods:Array<String>;
+
+	/**
+		Takes an array of the input mods' values, and returns an array of transformed modifier values, if out_mods.length > 0
+	**/
+	var nodeFunc:(values:Array<Float>, player:Int) -> Array<Float>; 
 }
 
 class ModManager {
