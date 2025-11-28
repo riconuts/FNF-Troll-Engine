@@ -451,7 +451,7 @@ class FreeplayState extends MusicBeatState
 		lerpRating = CoolUtil.coolLerp(lerpRating, targetRating, FlxG.elapsed * 8);
 
 		final score = Math.round(lerpHighscore);
-		final rating = formatRating(lerpRating);
+		final rating = formatRating(Math.fround(lerpRating * 100.0) / 100.0);
 		final fcDisplay = (fcDisplay.length==0 ? fcDisplay : ' • [$fcDisplay]');
 
 		scoreText.text = 'PERSONAL BEST • $score • ($rating%)' + fcDisplay;
@@ -462,7 +462,7 @@ class FreeplayState extends MusicBeatState
 
 	private static function formatRating(val:Float):String
 	{
-		var str = Std.string(Math.floor(val * 100.0) / 100.0);
+		var str = Std.string(Math.ffloor(val * 100.0) / 100.0);
 		var dot = str.indexOf('.');
 
 		if (dot == -1)
