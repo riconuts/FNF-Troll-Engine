@@ -102,7 +102,9 @@ class BindButton<T:Int> extends FlxUI9SliceSprite
 	}
 
 	override function update(elapsed:Float){
-		textObject.fieldWidth = width;
+		if(textObject.fieldWidth != width){
+			textObject.fieldWidth = width;
+		}
 		super.update(elapsed);
 		textObject.update(elapsed);
 	}
