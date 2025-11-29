@@ -1455,16 +1455,21 @@ class ChartingState extends MusicBeatState
 				}
 			}
 		);
-		//eventDropDown.getBtnByIndex(0).getLabel().text = "Custom";
 		blockPressWhileScrolling.push(eventDropDown);
 
 		eventNameInput = new FlxUIInputText(
-			eventDropDown.x + 1, eventDropDown.y + 1, 
-			100, 
-			eventDropDown.selectedLabel,
-			8
+			eventDropDown.header.text.x, eventDropDown.header.text.y, 
+			Math.floor(eventDropDown.header.text.fieldWidth), 
+			eventDropDown.header.text.text,
+			eventDropDown.header.text.size,
+			FlxColor.BLACK,
+			FlxColor.TRANSPARENT,
 		);
-		eventNameInput.resize(100, eventDropDown.header.background.height - 2);
+
+		eventNameInput.x -= eventDropDown.x;
+		eventNameInput.y -= eventDropDown.y;
+		eventDropDown.add(eventNameInput);
+
 		eventNameInput.exists = false;
 		blockPressWhileTypingOn.push(eventNameInput);
 
@@ -1480,39 +1485,36 @@ class ChartingState extends MusicBeatState
 		}
 		eventNameInput.focusLost = () -> onEnterEventName(eventNameInput.text);
 
-		value1InputText = new FlxUIInputText(20, 110, 100, "");
+		value1InputText = new FlxUIInputText(20, 110, 116, "");
 		value1InputText.name = 'event_value1';
 		blockPressWhileTypingOn.push(value1InputText);
 
-		value2InputText = new FlxUIInputText(20, 150, 100, "");
+		value2InputText = new FlxUIInputText(20, 150, 116, "");
 		value2InputText.name = 'event_value2';
 		blockPressWhileTypingOn.push(value2InputText);
 
 		// New event buttons
 		var removeButton:FlxButton = new FlxButton(eventDropDown.x + eventDropDown.width + 10, eventDropDown.y, '-', function()
 		{
-			if(curSelectedEvent != null) //Is event note
-			{
-				if(curSelectedEvent.subEventsData.length < 2)
-				{
-					_song.events.remove(curSelectedEvent);
-					curSelectedEvent = null;
-				}
-				else
-				{
-					curSelectedEvent.subEventsData.remove(curSelectedEvent.subEventsData[subEventIdx]);
-				}
+			if(curSelectedEvent == null)
+				return;
 
-				var eventsGroup:Array<PsychSubEventData>;
-				--subEventIdx;
+			curSelectedEvent.subEventsData.remove(curSelectedEvent.subEventsData[subEventIdx]);
+			--subEventIdx;
+
+			if (curSelectedEvent.subEventsData.length <= 0) {
+				_song.events.remove(curSelectedEvent);
+				curSelectedEvent = null;
+				subEventIdx = 0;
+			}else {
 				if (subEventIdx < 0) 
 					subEventIdx = 0;
-				else if(curSelectedEvent != null && subEventIdx >= (eventsGroup = curSelectedEvent.subEventsData).length) 
-					subEventIdx = eventsGroup.length - 1;
-
-				changeEventSelected();
-				updateGrid();
+				else if (subEventIdx >= curSelectedEvent.subEventsData.length) 
+					subEventIdx = curSelectedEvent.subEventsData.length - 1;
 			}
+
+			changeEventSelected();
+			updateGrid();
 		});
 		removeButton.setGraphicSize(Std.int(removeButton.height), Std.int(removeButton.height));
 		removeButton.updateHitbox();
@@ -1589,17 +1591,17 @@ class ChartingState extends MusicBeatState
 		setAllLabelsOffset(moveRightButton, -30, 0);
 		tab_group_event.add(moveRightButton);
 
-		selectedEventText = new FlxText(addButton.x - 100, addButton.y + addButton.height + 6, (moveRightButton.x - addButton.x) + 186, 'Selected Event: None');
+		selectedEventText = new FlxText(addButton.x - 100, addButton.y - 6, (moveRightButton.x - addButton.x) + 186, 'Selected Event: None');
+		selectedEventText.y -= selectedEventText.height;
 		selectedEventText.alignment = CENTER;
 		tab_group_event.add(selectedEventText);
 
 		tab_group_event.add(eventDescText);
-		tab_group_event.add(new FlxText(20, 90, 0, "Value 1:"));		
+		tab_group_event.add(new FlxText(value1InputText.x, value1InputText.y - 20, 0, "Value 1:"));		
 		tab_group_event.add(value1InputText);
-		tab_group_event.add(new FlxText(20, 130, 0, "Value 2:"));
+		tab_group_event.add(new FlxText(value2InputText.x, value2InputText.y - 20, 0, "Value 2:"));
 		tab_group_event.add(value2InputText);
 		tab_group_event.add(eventDropDown);
-		tab_group_event.add(eventNameInput);
 
 		UI_box.addGroup(tab_group_event);
 	}
