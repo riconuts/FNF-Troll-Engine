@@ -3362,7 +3362,18 @@ class ChartingState extends MusicBeatState
 		return retStr;
 	}
 
-	var noteColors:Array<FlxColor> = [0xFFC24B99, 0xFF00FFFF, 0xFF12FA05, 0xFFF9393F];
+	var noteColors:Array<Array<FlxColor>> = [
+		[0xFF12FA05],
+		[0xFFC24B99, 0xFFF9393F],
+		[0xFFC24B99, 0xFF12FA05, 0xFFF9393F],
+		[0xFFC24B99, 0xFF00FFFF, 0xFF12FA05, 0xFFF9393F],
+		[0xFFC24B99, 0xFF00FFFF, 0xFF12FA05, 0xFF12FA05, 0xFFF9393F],
+		[0xFFC24B99, 0xFF12FA05, 0xFFF9393F, 0xFFC24B99, 0xFF00FFFF, 0xFFF9393F],
+		[0xFFC24B99, 0xFF12FA05, 0xFFF9393F, 0xFF12FA05, 0xFFC24B99, 0xFF00FFFF, 0xFFF9393F],
+		[0xFFC24B99, 0xFF00FFFF, 0xFF12FA05, 0xFFF9393F, 0xFFC24B99, 0xFF00FFFF, 0xFF12FA05, 0xFFF9393F],
+		[0xFFC24B99, 0xFF00FFFF, 0xFF12FA05, 0xFFF9393F, 0xFF12FA05, 0xFFC24B99, 0xFF00FFFF, 0xFF12FA05, 0xFFF9393F],
+		[0xFFC24B99, 0xFF00FFFF, 0xFF12FA05, 0xFFF9393F, 0xFF00FFFF, 0xFF12FA05, 0xFFC24B99, 0xFF00FFFF, 0xFF12FA05, 0xFFF9393F],
+	];
 	var susWidth:Float = 8;
 	var showSusTail:Bool = true; // to visualise the head/cap/end of the tail
 	// because they looked WAY too short
@@ -3380,7 +3391,10 @@ class ChartingState extends MusicBeatState
 			note.x + (GRID_SIZE - susWidth) * 0.5, 
 			note.y + GRID_HALF
 		);
-		var color:FlxColor = note.isQuant ? 0xFFFF0000 : noteColors[note.column % noteColors.length];
+
+		var colors:Array<FlxColor> = noteColors[_song.keyCount - 1];
+
+		var color:FlxColor = note.isQuant ? 0xFFFF0000 : colors[note.column % colors.length];
 		color.setHSB(
 			((color.hue + note.colorSwap.hue * 360) % 360 + 360) % 360,
 			CoolUtil.boundTo(color.saturation * 0.01 * (1.0 + note.colorSwap.saturation), 0.0, 1.0) * 100.0,
