@@ -12,7 +12,7 @@ import funkin.scripts.FunkinHScript;
 import funkin.scripts.FunkinScript;
 
 import funkin.Conductor.BPMChangeEvent;
-import funkin.data.ChartData.defaultNoteTypeList as noteTypeList;
+import funkin.data.ChartData.defaultNoteTypeList;
 import funkin.data.ChartData;
 import funkin.data.BaseSong;
 import funkin.data.Song;
@@ -148,8 +148,7 @@ class ChartingState extends MusicBeatState
 		'Default'
 	];
 
-	private var noteTypeIntMap:Map<Int, String> = new Map<Int, String>();
-	private var noteTypeMap:Map<String, Null<Int>> = new Map<String, Null<Int>>();
+	var noteTypeList:Array<String>;
 	var eventStuff:Array<Array<String>>;
 
 	var UI_box:FlxUITabMenu;
@@ -641,6 +640,7 @@ class ChartingState extends MusicBeatState
 		super.create();
 
 		loadEventStuff();
+		loadNoteStuff();
 		onChartLoaded();
 	}
 
@@ -768,6 +768,43 @@ class ChartingState extends MusicBeatState
 
 	function loadEventStuff() {
 		eventStuff = SongEventData.getEventStuff();
+	}
+
+	function loadNoteStuff() {
+		noteTypeList = [];
+		
+		for (noteType in defaultNoteTypeList)
+			noteTypeList.push(noteType);
+
+		#if MODS_ALLOWED
+		var extensions:Array<String> = [
+			#if HSCRIPT_ALLOWED
+			'.hscript'
+			#end
+		];
+
+		for (folderPath in Paths.getFolders('notetypes')) {
+			Paths.iterateDirectory(folderPath, function(fileName:String) {
+				var fileExtension:Null<String> = null;
+
+				for (ext in extensions) {
+					if (fileName.endsWith(ext)) {
+						fileExtension = ext;
+						break;
+					}
+				}
+
+				if (fileExtension == null)
+					return;
+
+				var name:String = fileName.substr(0, fileName.length - fileExtension.length); // get file name
+				if (noteTypeList.contains(name)) // if it already is on the list
+					return;
+
+				noteTypeList.push(name);
+			});
+		}
+		#end
 	}
 
 	override function startOutro(fuck){
@@ -1331,63 +1368,17 @@ class ChartingState extends MusicBeatState
 		stepperStrumTime.name = 'note_strumTime';
 		blockPressWhileTypingOnStepper.push(stepperStrumTime);
 
-		var key:Int = 0;
-		var displayNameList:Array<String> = [];
-		while (key < noteTypeList.length) {
-			displayNameList.push(noteTypeList[key]);
-			noteTypeMap.set(noteTypeList[key], key);
-			noteTypeIntMap.set(key, noteTypeList[key]);
-			key++;
+		var strLabelArray = FlxUIDropDownMenu.makeStrIdLabelArray(noteTypeList, true);
+
+		for (i in 1...strLabelArray.length) {
+			var label = strLabelArray[i];
+			label.label = '$i. ${label.label}';
 		}
 
-		#if (sys && (hscript))
-		var directories:Array<String> = Paths.getFolders('notetypes');
-		var allowedFormats = [
-			#if hscript
-			'.hscript',
-			#end
-		];
-		for (directory in directories)
-		{
-			if (!FileSystem.exists(directory))
-				continue;
-
-			for (file in FileSystem.readDirectory(directory))
-			{
-				var path = haxe.io.Path.join([directory, file]);
-				if (FileSystem.isDirectory(path))
-					continue;
-
-				var fileFormat:Null<String> = null;
-				for (format in allowedFormats){ // check file format
-					if (path.endsWith(format)){ // if its a supported format
-						fileFormat = format;
-						break;
-					}
-				}
-				if (fileFormat == null) // if its not supported
-					continue;
-
-				var fileToCheck:String = file.substr(0, file.length - fileFormat.length); // get file name
-				if (noteTypeMap.exists(fileToCheck)) // if it already is on the list
-					continue;
-
-				displayNameList.push(fileToCheck);
-				noteTypeMap.set(fileToCheck, key);
-				noteTypeIntMap.set(key, fileToCheck);
-				key++;	
-			}
-		}
-		#end
-
-		for (i in 1...displayNameList.length) {
-			displayNameList[i] = i + '. ' + displayNameList[i];
-		}
-
-		noteTypeDropDown = new CustomFlxUIDropDownMenu(10, 105, FlxUIDropDownMenu.makeStrIdLabelArray(displayNameList, true), function(character:String)
+		noteTypeDropDown = new CustomFlxUIDropDownMenu(10, 105, strLabelArray, function(character:String)
 		{
 			var typeIdx = Std.parseInt(character);
-			currentNoteType = noteTypeIntMap.get(typeIdx);
+			currentNoteType = noteTypeList[typeIdx];
 			if (curSelectedNote != null) {
 				curSelectedNote.noteType = currentNoteType;
 				updateGrid();
@@ -3113,8 +3104,8 @@ class ChartingState extends MusicBeatState
 			stepperStrumTime.value = curSelectedNote.strumTime;
 			stepperSusLength.value = curSelectedNote.sustainLength;
 
-			var typeIdx = noteTypeMap.get(curSelectedNote.noteType);
-			noteTypeDropDown.selectedLabel = (typeIdx > 0) ? typeIdx + '. ' + curSelectedNote.noteType : '';		
+			var typeIdx = noteTypeList.indexOf(curSelectedNote.noteType);
+			noteTypeDropDown.selectedId = Std.string(typeIdx > 0 ? typeIdx : 0);
 		}
 	}
 
@@ -3211,8 +3202,8 @@ class ChartingState extends MusicBeatState
 			}
 
 			if (note.noteType.length > 0) {
-				var typeInt:Null<Int> = noteTypeMap.get(note.noteType);
-				var theType:String = (typeInt == null) ? '?' : '$typeInt';
+				var typeIdx:Int = noteTypeList.indexOf(note.noteType);
+				var theType:String = (typeIdx > 0) ? Std.string(typeIdx) : '?';
 
 				var daText:AttachedFlxText = new AttachedFlxText(0, 0, 100, theType, 24);
 				daText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, CENTER);
