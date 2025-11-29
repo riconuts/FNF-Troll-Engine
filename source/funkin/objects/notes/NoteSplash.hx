@@ -32,7 +32,8 @@ class NoteSplash extends NoteObject
 		setPosition(x, y);
 		animationAmount = 2;
 		alpha = 0.6;
-		scale.set(0.8, 0.8);
+		var realScale:Float = 0.8 * (Note.spriteScales[PlayState.keyCount - 1] / 0.7);
+		scale.set(realScale, realScale);
 		updateHitbox();
 
 		this.column = column;
@@ -66,10 +67,9 @@ class NoteSplash extends NoteObject
 		frames = Paths.getSparrowAtlas(skin);
 		for (i in 1...animationAmount+1)
 		{
-			animation.addByPrefix("note0-" + i, "note splash purple " + i, 24, false);
-			animation.addByPrefix("note1-" + i, "note splash blue " + i, 24, false);
-			animation.addByPrefix("note2-" + i, "note splash green " + i, 24, false);
-			animation.addByPrefix("note3-" + i, "note splash red " + i, 24, false);
+			for(j in 0...PlayState.keyCount){
+				animation.addByPrefix('note$j-$i', 'note splash ${Note.currentNoteAnimNames[j]} $i', 24, false);
+			}
 		}
 	}
 

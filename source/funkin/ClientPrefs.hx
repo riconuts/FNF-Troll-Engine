@@ -838,6 +838,48 @@ class ClientPrefs {
 	public static var defaultButtons:Map<String, Array<FlxGamepadInputID>> = null;
 
 	public static function loadDefaultKeys() {
+		var keyDirections:Array<Array<FlxKey>> = [
+			[SPACE],
+			[F, K],
+			[F, SPACE, J],
+			[A, S, W, D],
+			[D, F, SPACE, J, K],
+			[S, D, F, J, K, L],
+			[S, D, F, SPACE, J, K, L],
+			[A, S, D, F, H, J, K, L],
+			[A, S, D, F, SPACE, H, J, K, L],
+			[Q, W, E, R, V, N, U, I, O, P],
+		];
+
+		for (i in 0...10) {
+			for (j in 0...i + 1) {
+				keyBinds.set('${i + 1}_key_$j', [keyDirections[i][j]]);
+			}
+		}
+
+		var buttonDirections:Array<Array<FlxGamepadInputID>> = [
+			[DPAD_UP],
+			[DPAD_LEFT, DPAD_RIGHT],
+			[DPAD_LEFT, DPAD_UP, DPAD_RIGHT],
+			[DPAD_LEFT, DPAD_DOWN, DPAD_UP, DPAD_RIGHT],
+			[DPAD_LEFT, DPAD_DOWN, RIGHT_SHOULDER, DPAD_UP, DPAD_RIGHT],
+			[DPAD_LEFT, DPAD_DOWN, DPAD_RIGHT, X, A, B],
+			[DPAD_LEFT, DPAD_DOWN, DPAD_RIGHT, RIGHT_SHOULDER, X, A, B],
+			[DPAD_LEFT, DPAD_DOWN, DPAD_UP, DPAD_RIGHT, X, A, Y, B],
+			[DPAD_LEFT, DPAD_DOWN, DPAD_UP, DPAD_RIGHT, RIGHT_SHOULDER, X, A, Y, B],
+			[DPAD_LEFT, DPAD_DOWN, DPAD_UP, DPAD_RIGHT, LEFT_SHOULDER, RIGHT_SHOULDER, X, A, Y, B]
+		];
+
+		for (i in 0...10) {
+			for (j in 0...i + 1) {
+				buttonBinds.set('${i + 1}_key_$j', [buttonDirections[i][j]]);
+			}
+		}
+
+		flixel.addons.ui.U.clearArraySoft(keyDirections);
+		flixel.addons.ui.U.clearArraySoft(buttonDirections);
+
+
 		defaultKeys = keyBinds.copy();
 		defaultButtons = buttonBinds.copy();
 	}
