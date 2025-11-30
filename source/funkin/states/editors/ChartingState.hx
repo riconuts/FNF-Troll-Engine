@@ -12,7 +12,7 @@ import funkin.scripts.FunkinHScript;
 import funkin.scripts.FunkinScript;
 
 import funkin.Conductor.BPMChangeEvent;
-import funkin.data.ChartData.defaultNoteTypeList as noteTypeList;
+import funkin.data.ChartData.defaultNoteTypeList;
 import funkin.data.ChartData;
 import funkin.data.BaseSong;
 import funkin.data.Song;
@@ -148,8 +148,8 @@ class ChartingState extends MusicBeatState
 		'Default'
 	];
 
-	private var noteTypeIntMap:Map<Int, String> = new Map<Int, String>();
-	private var noteTypeMap:Map<String, Null<Int>> = new Map<String, Null<Int>>();
+	var noteTypeList:Array<String>;
+	var songNoteTypeList:Array<String> = [];
 	var eventStuff:Array<Array<String>>;
 
 	var UI_box:FlxUITabMenu;
@@ -641,6 +641,7 @@ class ChartingState extends MusicBeatState
 		super.create();
 
 		loadEventStuff();
+		loadNoteStuff();
 		onChartLoaded();
 	}
 
@@ -670,6 +671,8 @@ class ChartingState extends MusicBeatState
 
 		//fixEvents();		
 		onLoadMetadata();
+
+		getSongNoteTypes();
 
 		_session ??= makeSession();
 
@@ -769,6 +772,53 @@ class ChartingState extends MusicBeatState
 
 	function loadEventStuff() {
 		eventStuff = SongEventData.getEventStuff();
+	}
+
+	function loadNoteStuff() {
+		noteTypeList = [];
+		
+		for (noteType in defaultNoteTypeList)
+			noteTypeList.push(noteType);
+
+		#if MODS_ALLOWED
+		var extensions:Array<String> = [
+			#if HSCRIPT_ALLOWED
+			'.hscript'
+			#end
+		];
+
+		for (folderPath in Paths.getFolders('notetypes')) {
+			Paths.iterateDirectory(folderPath, function(fileName:String) {
+				var fileExtension:Null<String> = null;
+
+				for (ext in extensions) {
+					if (fileName.endsWith(ext)) {
+						fileExtension = ext;
+						break;
+					}
+				}
+
+				if (fileExtension == null)
+					return;
+
+				var name:String = fileName.substr(0, fileName.length - fileExtension.length); // get file name
+				if (noteTypeList.contains(name)) // if it already is on the list
+					return;
+
+				noteTypeList.push(name);
+			});
+		}
+		#end
+	}
+
+	function getSongNoteTypes(wipe:Bool = true) {
+		if (wipe) songNoteTypeList.resize(0);
+		for (section in _song.notes) {
+			for (note in section.sectionNotes) {
+				if (!songNoteTypeList.contains(note.noteType) && !noteTypeList.contains(note.noteType))
+					songNoteTypeList.push(note.noteType);
+			}
+		}
 	}
 
 	override function startOutro(fuck){
@@ -1315,6 +1365,7 @@ class ChartingState extends MusicBeatState
 	var stepperSusLength:CustomFlxUINumericStepper;
 	var stepperStrumTime:CustomFlxUINumericStepper;
 	var noteTypeDropDown:FlxUIDropDownMenu;
+	var noteTypeInput:FlxUIInputText;
 	var currentNoteType:String = '';
 
 	function addNoteUI():Void
@@ -1332,69 +1383,74 @@ class ChartingState extends MusicBeatState
 		stepperStrumTime.name = 'note_strumTime';
 		blockPressWhileTypingOnStepper.push(stepperStrumTime);
 
-		var key:Int = 0;
-		var displayNameList:Array<String> = [];
-		while (key < noteTypeList.length) {
-			displayNameList.push(noteTypeList[key]);
-			noteTypeMap.set(noteTypeList[key], key);
-			noteTypeIntMap.set(key, noteTypeList[key]);
-			key++;
+		var noteTypeSnlArray = FlxUIDropDownMenu.makeStrIdLabelArray(noteTypeList, true);
+
+		for (i in 1...noteTypeSnlArray.length) {
+			var snl = noteTypeSnlArray[i];
+			snl.label = '$i. ${snl.label}';
 		}
 
-		#if (sys && (hscript))
-		var directories:Array<String> = Paths.getFolders('notetypes');
-		var allowedFormats = [
-			#if hscript
-			'.hscript',
-			#end
-		];
-		for (directory in directories)
-		{
-			if (!FileSystem.exists(directory))
-				continue;
-
-			for (file in FileSystem.readDirectory(directory))
-			{
-				var path = haxe.io.Path.join([directory, file]);
-				if (FileSystem.isDirectory(path))
-					continue;
-
-				var fileFormat:Null<String> = null;
-				for (format in allowedFormats){ // check file format
-					if (path.endsWith(format)){ // if its a supported format
-						fileFormat = format;
-						break;
-					}
-				}
-				if (fileFormat == null) // if its not supported
-					continue;
-
-				var fileToCheck:String = file.substr(0, file.length - fileFormat.length); // get file name
-				if (noteTypeMap.exists(fileToCheck)) // if it already is on the list
-					continue;
-
-				displayNameList.push(fileToCheck);
-				noteTypeMap.set(fileToCheck, key);
-				noteTypeIntMap.set(key, fileToCheck);
-				key++;	
-			}
-		}
-		#end
-
-		for (i in 1...displayNameList.length) {
-			displayNameList[i] = i + '. ' + displayNameList[i];
+		for (noteType in songNoteTypeList) {
+			var snl = new StrNameLabel(noteType, noteType);
+			noteTypeSnlArray.push(snl); 
 		}
 
-		noteTypeDropDown = new CustomFlxUIDropDownMenu(10, 105, FlxUIDropDownMenu.makeStrIdLabelArray(displayNameList, true), function(character:String)
+		noteTypeDropDown = new CustomFlxUIDropDownMenu(10, 105, noteTypeSnlArray, function(character:String)
 		{
 			var typeIdx = Std.parseInt(character);
-			currentNoteType = noteTypeIntMap.get(typeIdx);
+			currentNoteType = noteTypeList[typeIdx];
 			if (curSelectedNote != null) {
 				curSelectedNote.noteType = currentNoteType;
 				updateGrid();
 			}
+			if (typeIdx == 0) {
+				noteTypeInput.text = '';
+				noteTypeInput.exists = true;
+				noteTypeInput.hasFocus = true;
+			}
 		});
 		blockPressWhileScrolling.push(noteTypeDropDown);
+
+		noteTypeInput = new FlxUIInputText(
+			noteTypeDropDown.header.text.x, noteTypeDropDown.header.text.y, 
+			Math.floor(noteTypeDropDown.header.text.fieldWidth), 
+			noteTypeDropDown.header.text.text,
+			noteTypeDropDown.header.text.size,
+			FlxColor.BLACK,
+			FlxColor.TRANSPARENT,
+		);
+
+		noteTypeInput.x -= noteTypeDropDown.x;
+		noteTypeInput.y -= noteTypeDropDown.y;
+		noteTypeDropDown.add(noteTypeInput);
+
+		noteTypeInput.exists = false;
+		blockPressWhileTypingOn.push(noteTypeInput);
+
+		function onEnterNoteType(noteType:String) {
+			noteTypeDropDown.header.text.text = noteType;
+			noteTypeInput.exists = false;
+
+			if (!noteTypeList.contains(noteType) && !songNoteTypeList.contains(noteType)) {
+				songNoteTypeList.push(noteType);
+
+				var snl = new StrNameLabel(noteType, noteType);
+				noteTypeSnlArray.push(snl);
+
+				noteTypeDropDown.setData(noteTypeSnlArray);
+			}
+
+			currentNoteType = noteType;
+			if (curSelectedNote != null) {
+				curSelectedNote.noteType = currentNoteType;
+				updateGrid();
+			}
+		}
+		noteTypeInput.callback = (input:String, action:String) -> {
+			if (action == FlxInputText.ENTER_ACTION)
+				onEnterNoteType(input);
+		}
+		noteTypeInput.focusLost = () -> onEnterNoteType(noteTypeInput.text);
 
 		tab_group_note.add(labelSusLength = new FlxText(10, 10, 0, 'Sustain length:'));
 		tab_group_note.add(stepperSusLength);
@@ -1456,16 +1512,21 @@ class ChartingState extends MusicBeatState
 				}
 			}
 		);
-		//eventDropDown.getBtnByIndex(0).getLabel().text = "Custom";
 		blockPressWhileScrolling.push(eventDropDown);
 
 		eventNameInput = new FlxUIInputText(
-			eventDropDown.x + 1, eventDropDown.y + 1, 
-			100, 
-			eventDropDown.selectedLabel,
-			8
+			eventDropDown.header.text.x, eventDropDown.header.text.y, 
+			Math.floor(eventDropDown.header.text.fieldWidth), 
+			eventDropDown.header.text.text,
+			eventDropDown.header.text.size,
+			FlxColor.BLACK,
+			FlxColor.TRANSPARENT,
 		);
-		eventNameInput.resize(100, eventDropDown.header.background.height - 2);
+
+		eventNameInput.x -= eventDropDown.x;
+		eventNameInput.y -= eventDropDown.y;
+		eventDropDown.add(eventNameInput);
+
 		eventNameInput.exists = false;
 		blockPressWhileTypingOn.push(eventNameInput);
 
@@ -1481,39 +1542,36 @@ class ChartingState extends MusicBeatState
 		}
 		eventNameInput.focusLost = () -> onEnterEventName(eventNameInput.text);
 
-		value1InputText = new FlxUIInputText(20, 110, 100, "");
+		value1InputText = new FlxUIInputText(20, 110, 116, "");
 		value1InputText.name = 'event_value1';
 		blockPressWhileTypingOn.push(value1InputText);
 
-		value2InputText = new FlxUIInputText(20, 150, 100, "");
+		value2InputText = new FlxUIInputText(20, 150, 116, "");
 		value2InputText.name = 'event_value2';
 		blockPressWhileTypingOn.push(value2InputText);
 
 		// New event buttons
 		var removeButton:FlxButton = new FlxButton(eventDropDown.x + eventDropDown.width + 10, eventDropDown.y, '-', function()
 		{
-			if(curSelectedEvent != null) //Is event note
-			{
-				if(curSelectedEvent.subEventsData.length < 2)
-				{
-					_song.events.remove(curSelectedEvent);
-					curSelectedEvent = null;
-				}
-				else
-				{
-					curSelectedEvent.subEventsData.remove(curSelectedEvent.subEventsData[subEventIdx]);
-				}
+			if(curSelectedEvent == null)
+				return;
 
-				var eventsGroup:Array<PsychSubEventData>;
-				--subEventIdx;
+			curSelectedEvent.subEventsData.remove(curSelectedEvent.subEventsData[subEventIdx]);
+			--subEventIdx;
+
+			if (curSelectedEvent.subEventsData.length <= 0) {
+				_song.events.remove(curSelectedEvent);
+				curSelectedEvent = null;
+				subEventIdx = 0;
+			}else {
 				if (subEventIdx < 0) 
 					subEventIdx = 0;
-				else if(curSelectedEvent != null && subEventIdx >= (eventsGroup = curSelectedEvent.subEventsData).length) 
-					subEventIdx = eventsGroup.length - 1;
-
-				changeEventSelected();
-				updateGrid();
+				else if (subEventIdx >= curSelectedEvent.subEventsData.length) 
+					subEventIdx = curSelectedEvent.subEventsData.length - 1;
 			}
+
+			changeEventSelected();
+			updateGrid();
 		});
 		removeButton.setGraphicSize(Std.int(removeButton.height), Std.int(removeButton.height));
 		removeButton.updateHitbox();
@@ -1590,17 +1648,17 @@ class ChartingState extends MusicBeatState
 		setAllLabelsOffset(moveRightButton, -30, 0);
 		tab_group_event.add(moveRightButton);
 
-		selectedEventText = new FlxText(addButton.x - 100, addButton.y + addButton.height + 6, (moveRightButton.x - addButton.x) + 186, 'Selected Event: None');
+		selectedEventText = new FlxText(addButton.x - 100, addButton.y - 6, (moveRightButton.x - addButton.x) + 186, 'Selected Event: None');
+		selectedEventText.y -= selectedEventText.height;
 		selectedEventText.alignment = CENTER;
 		tab_group_event.add(selectedEventText);
 
 		tab_group_event.add(eventDescText);
-		tab_group_event.add(new FlxText(20, 90, 0, "Value 1:"));		
+		tab_group_event.add(new FlxText(value1InputText.x, value1InputText.y - 20, 0, "Value 1:"));		
 		tab_group_event.add(value1InputText);
-		tab_group_event.add(new FlxText(20, 130, 0, "Value 2:"));
+		tab_group_event.add(new FlxText(value2InputText.x, value2InputText.y - 20, 0, "Value 2:"));
 		tab_group_event.add(value2InputText);
 		tab_group_event.add(eventDropDown);
-		tab_group_event.add(eventNameInput);
 
 		UI_box.addGroup(tab_group_event);
 	}
@@ -3115,8 +3173,14 @@ class ChartingState extends MusicBeatState
 			stepperStrumTime.value = curSelectedNote.strumTime;
 			stepperSusLength.value = curSelectedNote.sustainLength;
 
-			var typeIdx = noteTypeMap.get(curSelectedNote.noteType);
-			noteTypeDropDown.selectedLabel = (typeIdx > 0) ? typeIdx + '. ' + curSelectedNote.noteType : '';		
+			var typeIdx = noteTypeList.indexOf(curSelectedNote.noteType);
+			if (typeIdx < 0) @:privateAccess {
+				noteTypeDropDown._selectedId = "";
+				noteTypeDropDown._selectedLabel = "";
+				noteTypeDropDown.header.text.text = curSelectedNote.noteType;
+			}else {
+				noteTypeDropDown.selectedId = Std.string(typeIdx);
+			}
 		}
 	}
 
@@ -3213,14 +3277,19 @@ class ChartingState extends MusicBeatState
 			}
 
 			if (note.noteType.length > 0) {
-				var typeInt:Null<Int> = noteTypeMap.get(note.noteType);
-				var theType:String = (typeInt == null) ? '?' : '$typeInt';
+				var typeIdx:Int = noteTypeList.indexOf(note.noteType);
+				var displayString:String = (typeIdx > 0) ? Std.string(typeIdx) : note.noteType;
+				var size = (typeIdx > 0) ? 24 : 16;
 
-				var daText:AttachedFlxText = new AttachedFlxText(0, 0, 100, theType, 24);
-				daText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, CENTER);
+				var daText:AttachedFlxText = new AttachedFlxText(0, 0, GRID_SIZE + GRID_HALF, displayString, 24);
+				daText.setFormat(Paths.font("vcr.ttf"), size, FlxColor.WHITE, CENTER);
 				daText.setBorderStyle(FlxTextBorderStyle.OUTLINE, FlxColor.BLACK, 1);
-				daText.xAdd = -32;
-				daText.yAdd = 6;
+				if (daText.height > daText.fieldWidth) {
+					daText.setGraphicSize(daText.width, daText.fieldWidth);
+					daText.updateHitbox();
+				}
+				daText.xAdd = (GRID_SIZE - daText.width) / 2;
+				daText.yAdd = (GRID_SIZE - daText.height) / 2;
 				curRenderedNoteType.add(daText);
 				daText.sprTracker = note;
 			}

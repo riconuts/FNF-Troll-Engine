@@ -72,7 +72,7 @@ class CommonHUD extends BaseHUD
 		add(botplayText);
 
 		botplayText.y = (ClientPrefs.downScroll ? (FlxG.height-107) : 89);
-		botplayText.active = botplayText.visible = ClientPrefs.botplayMarker == 'Obvious';
+		botplayText.exists = ClientPrefs.botplayMarker == 'Obvious';
 		useSubtleMark = ClientPrefs.botplayMarker == 'Subtle';
 	}
 
@@ -197,7 +197,7 @@ class CommonHUD extends BaseHUD
 		healthBar.real_alpha = healthBar.real_alpha;
 
 		botplayText.y = (ClientPrefs.downScroll ? (FlxG.height-107) : 89);
-		botplayText.active = botplayText.visible = ClientPrefs.botplayMarker == 'Obvious';
+		botplayText.exists = ClientPrefs.botplayMarker == 'Obvious';
 		useSubtleMark = ClientPrefs.botplayMarker == 'Subtle';
 
 		updateTimeBarType();
