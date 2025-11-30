@@ -149,6 +149,7 @@ class ChartingState extends MusicBeatState
 	];
 
 	var noteTypeList:Array<String>;
+	var songNoteTypeList:Array<String> = [];
 	var eventStuff:Array<Array<String>>;
 
 	var UI_box:FlxUITabMenu;
@@ -671,6 +672,8 @@ class ChartingState extends MusicBeatState
 		//fixEvents();		
 		onLoadMetadata();
 
+		getSongNoteTypes();
+
 		_session ??= makeSession();
 
 		Conductor.cleanup();
@@ -805,6 +808,16 @@ class ChartingState extends MusicBeatState
 			});
 		}
 		#end
+	}
+
+	function getSongNoteTypes(wipe:Bool = true) {
+		if (wipe) songNoteTypeList.resize(0);
+		for (section in _song.notes) {
+			for (note in section.sectionNotes) {
+				if (!songNoteTypeList.contains(note.noteType) && !noteTypeList.contains(note.noteType))
+					songNoteTypeList.push(note.noteType);
+			}
+		}
 	}
 
 	override function startOutro(fuck){
@@ -1351,6 +1364,7 @@ class ChartingState extends MusicBeatState
 	var stepperSusLength:CustomFlxUINumericStepper;
 	var stepperStrumTime:CustomFlxUINumericStepper;
 	var noteTypeDropDown:FlxUIDropDownMenu;
+	var noteTypeInput:FlxUIInputText;
 	var currentNoteType:String = '';
 
 	function addNoteUI():Void
@@ -1368,14 +1382,19 @@ class ChartingState extends MusicBeatState
 		stepperStrumTime.name = 'note_strumTime';
 		blockPressWhileTypingOnStepper.push(stepperStrumTime);
 
-		var strLabelArray = FlxUIDropDownMenu.makeStrIdLabelArray(noteTypeList, true);
+		var noteTypeSnlArray = FlxUIDropDownMenu.makeStrIdLabelArray(noteTypeList, true);
 
-		for (i in 1...strLabelArray.length) {
-			var label = strLabelArray[i];
-			label.label = '$i. ${label.label}';
+		for (i in 1...noteTypeSnlArray.length) {
+			var snl = noteTypeSnlArray[i];
+			snl.label = '$i. ${snl.label}';
 		}
 
-		noteTypeDropDown = new CustomFlxUIDropDownMenu(10, 105, strLabelArray, function(character:String)
+		for (noteType in songNoteTypeList) {
+			var snl = new StrNameLabel(noteType, noteType);
+			noteTypeSnlArray.push(snl); 
+		}
+
+		noteTypeDropDown = new CustomFlxUIDropDownMenu(10, 105, noteTypeSnlArray, function(character:String)
 		{
 			var typeIdx = Std.parseInt(character);
 			currentNoteType = noteTypeList[typeIdx];
@@ -1383,8 +1402,54 @@ class ChartingState extends MusicBeatState
 				curSelectedNote.noteType = currentNoteType;
 				updateGrid();
 			}
+			if (typeIdx == 0) {
+				noteTypeInput.text = '';
+				noteTypeInput.exists = true;
+				noteTypeInput.hasFocus = true;
+			}
 		});
 		blockPressWhileScrolling.push(noteTypeDropDown);
+
+		noteTypeInput = new FlxUIInputText(
+			noteTypeDropDown.header.text.x, noteTypeDropDown.header.text.y, 
+			Math.floor(noteTypeDropDown.header.text.fieldWidth), 
+			noteTypeDropDown.header.text.text,
+			noteTypeDropDown.header.text.size,
+			FlxColor.BLACK,
+			FlxColor.TRANSPARENT,
+		);
+
+		noteTypeInput.x -= noteTypeDropDown.x;
+		noteTypeInput.y -= noteTypeDropDown.y;
+		noteTypeDropDown.add(noteTypeInput);
+
+		noteTypeInput.exists = false;
+		blockPressWhileTypingOn.push(noteTypeInput);
+
+		function onEnterNoteType(noteType:String) {
+			noteTypeDropDown.header.text.text = noteType;
+			noteTypeInput.exists = false;
+
+			if (!noteTypeList.contains(noteType) && !songNoteTypeList.contains(noteType)) {
+				songNoteTypeList.push(noteType);
+
+				var snl = new StrNameLabel(noteType, noteType);
+				noteTypeSnlArray.push(snl);
+
+				noteTypeDropDown.setData(noteTypeSnlArray);
+			}
+
+			currentNoteType = noteType;
+			if (curSelectedNote != null) {
+				curSelectedNote.noteType = currentNoteType;
+				updateGrid();
+			}
+		}
+		noteTypeInput.callback = (input:String, action:String) -> {
+			if (action == FlxInputText.ENTER_ACTION)
+				onEnterNoteType(input);
+		}
+		noteTypeInput.focusLost = () -> onEnterNoteType(noteTypeInput.text);
 
 		tab_group_note.add(labelSusLength = new FlxText(10, 10, 0, 'Sustain length:'));
 		tab_group_note.add(stepperSusLength);
@@ -3105,7 +3170,13 @@ class ChartingState extends MusicBeatState
 			stepperSusLength.value = curSelectedNote.sustainLength;
 
 			var typeIdx = noteTypeList.indexOf(curSelectedNote.noteType);
-			noteTypeDropDown.selectedId = Std.string(typeIdx > 0 ? typeIdx : 0);
+			if (typeIdx < 0) @:privateAccess {
+				noteTypeDropDown._selectedId = "";
+				noteTypeDropDown._selectedLabel = "";
+				noteTypeDropDown.header.text.text = curSelectedNote.noteType;
+			}else {
+				noteTypeDropDown.selectedId = Std.string(typeIdx);
+			}
 		}
 	}
 
@@ -3203,13 +3274,18 @@ class ChartingState extends MusicBeatState
 
 			if (note.noteType.length > 0) {
 				var typeIdx:Int = noteTypeList.indexOf(note.noteType);
-				var theType:String = (typeIdx > 0) ? Std.string(typeIdx) : '?';
+				var displayString:String = (typeIdx > 0) ? Std.string(typeIdx) : note.noteType;
+				var size = (typeIdx > 0) ? 24 : 16;
 
-				var daText:AttachedFlxText = new AttachedFlxText(0, 0, 100, theType, 24);
-				daText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, CENTER);
+				var daText:AttachedFlxText = new AttachedFlxText(0, 0, GRID_SIZE + GRID_HALF, displayString, 24);
+				daText.setFormat(Paths.font("vcr.ttf"), size, FlxColor.WHITE, CENTER);
 				daText.setBorderStyle(FlxTextBorderStyle.OUTLINE, FlxColor.BLACK, 1);
-				daText.xAdd = -32;
-				daText.yAdd = 6;
+				if (daText.height > daText.fieldWidth) {
+					daText.setGraphicSize(daText.width, daText.fieldWidth);
+					daText.updateHitbox();
+				}
+				daText.xAdd = (GRID_SIZE - daText.width) / 2;
+				daText.yAdd = (GRID_SIZE - daText.height) / 2;
 				curRenderedNoteType.add(daText);
 				daText.sprTracker = note;
 			}
