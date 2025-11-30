@@ -1,26 +1,32 @@
-function onLoad(stage, foreground)
+function buildStage()
 {
-	var bg:BGSprite = new BGSprite('stageback', -600, -200, 0.9, 0.9);
+	var bg = new FlxSprite(-600, -200, 'stageback');
+	bg.scrollFactor.set(0.9, 0.9);
+	bg.scale.set(2.0, 2.0);
 	add(bg);
 
-	var stageFront:BGSprite = new BGSprite('stagefront', -650, 600, 0.9, 0.9);
+	var stageFront = new FlxSprite(-650, 600, 'stagefront');
+	stageFront.scrollFactor.set(0.9, 0.9);
 	stageFront.scale.set(1.1, 1.1);
 	stageFront.updateHitbox();
 	add(stageFront);
 	
-	if(!ClientPrefs.lowQuality) {
-		var stageLight:BGSprite = new BGSprite('stage_light', -125, -100, 0.9, 0.9);
+	if (!ClientPrefs.lowQuality) {
+		var stageLight = new FlxSprite(-125, -100, 'stage_light');
+		stageLight.scrollFactor.set(0.9, 0.9);
 		stageLight.scale.set(1.1, 1.1);
 		stageLight.updateHitbox();
 		add(stageLight);
 		
-		var stageLight:BGSprite = new BGSprite('stage_light', 1225, -100, 0.9, 0.9);
+		var stageLight = new FlxSprite(1225, -100, 'stage_light');
+		stageLight.scrollFactor.set(0.9, 0.9);
 		stageLight.scale.set(1.1, 1.1);
 		stageLight.updateHitbox();
 		stageLight.flipX = true;
 		add(stageLight);
 
-		var stageCurtains:BGSprite = new BGSprite('stagecurtains', -500, -300, 1.3, 1.3);
+		var stageCurtains = new FlxSprite(-500, -300, 'stagecurtains');
+		stageCurtains.scrollFactor.set(1.3, 1.3);
 		stageCurtains.scale.set(0.9, 0.9);
 		stageCurtains.updateHitbox();
 		add(stageCurtains);
