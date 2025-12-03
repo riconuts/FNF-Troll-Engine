@@ -3,6 +3,7 @@ function buildStage()
 	var bg = new FlxSprite(-600, -200, 'stageback');
 	bg.scrollFactor.set(0.9, 0.9);
 	bg.scale.set(2.0, 2.0);
+	bg.updateHitbox();
 	add(bg);
 
 	var stageFront = new FlxSprite(-650, 600, 'stagefront');

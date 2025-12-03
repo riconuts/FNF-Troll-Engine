@@ -215,11 +215,11 @@ class DiscordClient
 class DiscordClient {
 	public inline static function start(wait:Bool) {}
 	public inline static function shutdown(wait:Bool) {}
-	public inline static function changePresence(details:String, ?state:String, largeImageKey:String = "app-logo", ?hasStartTimestamp:Bool, ?endTimestamp:Float) {}
+	public static function changePresence(data:DiscordClientPresenceParams, mergeDefault:Bool = true)
 }
 #end
 
-// copied from Funkin zzzzzzzzzzzzz
+// copied from Funkin zzzzz not typing all that :yawnn:
 typedef DiscordClientPresenceParams =
 {
 	/** 
