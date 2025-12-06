@@ -360,7 +360,7 @@ class OptionsSubstate extends MusicBeatSubstate
 			#end
 			case 'globalAntialiasing':
 				FlxSprite.defaultAntialiasing = val;
-				FlxG.stage.quality = val ? BEST : LOW; // does nothing!!!!
+				FlxG.stage.quality = val ? BEST : LOW; // This affects ShaderFilter quality :o
 				
 			#if(DO_AUTO_UPDATE || display)
 			case 'downloadBetas' | 'checkForUpdates':
