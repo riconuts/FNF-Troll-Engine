@@ -3,6 +3,7 @@ package funkin;
 import funkin.scripts.Globals;
 import funkin.states.base.MusicBeatState;
 
+import flixel.addons.transition.FlxTransitionableState;
 import flixel.util.typeLimit.NextState;
 import flixel.input.keyboard.FlxKey;
 
@@ -117,7 +118,10 @@ class FNFGame extends FlxGame
 			if (FlxG.keys.pressed.SHIFT) {
 				funkin.Paths.clearStoredMemory();
 				funkin.Paths.clearUnusedMemory();
-				FlxG.switchState(new funkin.states.MainMenuState());
+				FlxTransitionableState.skipNextTransIn = true;
+				FlxTransitionableState.skipNextTransOut = true;
+				if (_state != null) _state.visible = false;
+				MusicBeatState.switchState(new funkin.states.MainMenuState());
 			}else {
 				MusicBeatState.resetState();
 			}
