@@ -271,7 +271,7 @@ class FlxSlider extends #if (flixel < version("5.7.0")) FlxSpriteGroup #else Flx
 	override public function update(elapsed:Float):Void
 	{
 		// Clicking and sound logic
-		#if (flixel >= "5.7.0")
+		#if (flixel >= "5.9.0")
 		final mousePosition = FlxG.mouse.getViewPosition(getDefaultCamera());
 		#else
 		final mousePosition = FlxG.mouse.getScreenPosition(this.camera);
