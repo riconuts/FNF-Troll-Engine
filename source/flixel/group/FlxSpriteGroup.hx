@@ -217,7 +217,20 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 
 	override public function draw():Void
 	{
+		// Bit jank, but should preserve alpha alot better than the default flixel way
+		if (!directAlpha){
+			for(obj in _sprites)
+				if(obj != null && obj.colorTransform != null)
+					obj.colorTransform.alphaMultiplier = obj.alpha * alpha; // set alpha to object alpha mult by group alpha
+		}
+
 		group.draw();
+
+		if (!directAlpha)
+			for (obj in _sprites)
+				if(obj != null && obj.colorTransform != null)
+					obj.updateColorTransform(); // reset back to default
+		
 
 		#if FLX_DEBUG
 		if (FlxG.debugger.drawDebug)
@@ -732,10 +745,7 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 
 		if (exists && alpha != Value)
 		{
-			var factor:Float = (alpha > 0) ? Value / alpha : 0;
-			if (!directAlpha && alpha != 0)
-				transformChildren(alphaTransform, factor);
-			else
+			if (directAlpha)
 				transformChildren(directAlphaTransform, Value);
 		}
 		return alpha = Value;
@@ -1000,13 +1010,13 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 	inline function angleTransform(Sprite:FlxSprite, Angle:Float)
 		Sprite.angle += Angle; // addition
 
-	inline function alphaTransform(Sprite:FlxSprite, Alpha:Float)
+/* 	inline function alphaTransform(Sprite:FlxSprite, Alpha:Float)
 	{
 		if (Sprite.alpha != 0 || Alpha == 0)
 			Sprite.alpha *= Alpha; // multiplication
 		else
 			Sprite.alpha = 1 / Alpha; // direct set to avoid stuck sprites
-	}
+	} */
 
 	inline function directAlphaTransform(Sprite:FlxSprite, Alpha:Float)
 		Sprite.alpha = Alpha; // direct set
