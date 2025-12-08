@@ -60,9 +60,7 @@ class Note extends NoteObject {
 		['purple', 'green', 'red', 'green', 'purple', 'blue', 'red'],
 		['purple', 'blue', 'green', 'red', 'purple', 'blue', 'green', 'red'],
 		['purple', 'blue', 'green', 'red', 'green', 'purple', 'blue', 'green', 'red'],
-		[
-			'purple', 'blue', 'green', 'red', 'blue', 'green', 'purple', 'blue', 'green', 'red'
-		]
+		['purple', 'blue', 'green', 'red', 'blue', 'green', 'purple', 'blue', 'green', 'red']
 	];
 
 	public static var defaultHoldAnimNames:Array<Array<String>> = [
@@ -721,12 +719,13 @@ class Note extends NoteObject {
 			_loadIndNoteAnims();
 	}
 
+
 	function _loadIndNoteAnims() {
 		final animName:String = 'default';
 		final animFrames:Array<Int> = switch (holdType) {
-			default: [column + 4];
-			case PART: [column];
-			case END: [column + 4];
+			default: [NoteObject.getAnimsInd(column, Note.currentNoteAnimNames, Note.defaultNoteAnimNames[3]) + 4];
+			case PART: [NoteObject.getAnimsInd(column, Note.currentHoldAnimNames, Note.defaultHoldAnimNames[3])];
+			case END: [NoteObject.getAnimsInd(column, Note.currentTailAnimNames, Note.defaultTailAnimNames[3]) + 4];
 		}
 		animation.add(animName, animFrames);
 		animation.play(animName, true);

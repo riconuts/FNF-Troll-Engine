@@ -64,4 +64,27 @@ class NoteObject extends FlxSprite {
 		defScale = FlxDestroyUtil.put(defScale);
 		super.destroy();
 	}
+
+	public static function getAnimsInd(data:Int, anims:Array<String>, ?targetArray:Array<String>):Int {
+		for(i in 0...4){
+			if(anims[data % anims.length] == targetArray[i]){
+				return i;
+			}
+		}
+		return 0;
+		/*
+		var down:String = targetArray[1];
+		var up:String = targetArray[2];
+		var right:String = targetArray[3];
+		switch(anims[data % anims.length]){
+			default:
+				return 0;
+			case down:
+				return 1;
+			case up:
+				return 2;
+			case right:
+				return 3;
+		}*/
+	}
 }
