@@ -215,7 +215,7 @@ class DiscordClient
 class DiscordClient {
 	public inline static function start(wait:Bool) {}
 	public inline static function shutdown(wait:Bool) {}
-	public static function changePresence(data:DiscordClientPresenceParams, mergeDefault:Bool = true)
+	public static function changePresence(data:DiscordClientPresenceParams, mergeDefault:Bool = true) {}
 }
 #end
 

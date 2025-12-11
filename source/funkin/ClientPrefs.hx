@@ -987,7 +987,7 @@ class ClientPrefs {
 		FlxG.autoPause = ClientPrefs.autoPause;
 
 		FlxSprite.defaultAntialiasing = ClientPrefs.globalAntialiasing;
-		FlxG.stage.quality = ClientPrefs.globalAntialiasing ? BEST : LOW; // does nothing!!!!
+		FlxG.stage.quality = ClientPrefs.globalAntialiasing ? BEST : LOW; // This affects ShaderFilter quality :o
 
 		#if DISCORD_ALLOWED
 		DiscordClient.hideDetails = discordRPC_hideDetails;

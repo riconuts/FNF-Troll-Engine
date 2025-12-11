@@ -13,7 +13,8 @@ import openfl.geom.ColorTransform;
 using math.VectorHelpers;
 
 class FlxSprite3D extends FlxSprite {
-	public var z:Float = 0;
+	public var z(default, set):Float = 0;
+	function set_z(val:Float) return z = val;
 
 	public var yaw:Float = 0;
 	public var pitch:Float = 0;
@@ -89,14 +90,13 @@ class FlxSprite3D extends FlxSprite {
 			_sprPos.setTo(_point.x, _point.y, z - camera.scrollZ);
 			*/
 
-			_sprPos.setTo(this.x - this.offset.x, this.y - this.offset.y, this.z - camera.scrollZ);
-			_point.set(_sprPos.x, _sprPos.y);
+			_sprPos.setTo(this.x - this.offset.x, this.y - this.offset.y, this.z);
 
 			var cameraMaxSize = Math.max(camera.width, camera.height);
 			_camPos.setTo( // scrollfactor in 3D is kinda dumb
 				camera.scroll.x * this.scrollFactor.x, 
 				camera.scroll.y * this.scrollFactor.y, 
-				cameraMaxSize
+				camera.scrollZ + cameraMaxSize 
 			);
 			_camOrigin.setTo(camera.width / 2, camera.height / 2, 0);
 			
