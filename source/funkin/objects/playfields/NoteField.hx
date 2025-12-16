@@ -144,6 +144,8 @@ class NoteField extends FieldBase
 			if (dddm == null || dddm == 0.0)
 				drawDist *= drawDistMod;
 		}		
+
+		var nearDist: Float = getModValue("nearCull");
 		
 		for (daNote in field.spawnedNotes)
 		{
@@ -159,6 +161,9 @@ class NoteField extends FieldBase
 				var visPos:Float = (daNote.visualTime - Conductor.visualPosition) * speed;
 				if (visPos > drawDist)
 					continue; // don't draw
+
+				if(visPos < nearDist)
+					continue; // ALSO dont draw
 
 				if (!daNote.copyX && !daNote.copyY) {
 					daNote.vec3Cache.setTo(
