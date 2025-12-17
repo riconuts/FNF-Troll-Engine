@@ -232,7 +232,7 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 	{
 		// Bit jank, but should preserve alpha alot better than the default flixel way
 		if (!directAlpha){
-			for(obj in _sprites)
+			for(obj in group.members)
 				if(obj != null && obj.colorTransform != null)
 					obj.colorTransform.alphaMultiplier = obj.alpha * alpha; // set alpha to object alpha mult by group alpha
 		}
@@ -240,7 +240,7 @@ class FlxTypedSpriteGroup<T:FlxSprite> extends FlxSprite
 		group.draw();
 
 		if (!directAlpha)
-			for (obj in _sprites)
+			for (obj in group.members)
 				if(obj != null && obj.colorTransform != null)
 					obj.updateColorTransform(); // reset back to default
 		
