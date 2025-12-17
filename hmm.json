@@ -3,12 +3,12 @@
 		{
 			"name": "openfl",
 			"type": "haxelib",
-			"version": "9.2.2"
+			"version": "9.4.2"
 		},
 		{
 			"name": "lime",
 			"type": "haxelib",
-			"version": "8.1.2"
+			"version": "8.2.3"
 		},
 		{
 			"name": "flixel",
@@ -26,9 +26,11 @@
 			"version": "3.2.3"
 		},
 		{
-			"name": "hxcpp",
-			"type": "haxelib",
-			"version": null
+		  "name": "hxcpp",
+		  "type": "git",
+		  "dir": null,
+		  "ref": "funkin",
+		  "url": "https://github.com/FunkinCrew/hxcpp"
 		},
 		{
 			"name": "hxcpp-debug-server",

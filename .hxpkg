@@ -8,7 +8,7 @@
 			},
 			{
 				"name": "lime",
-				"version": "8.1.3"
+				"version": "8.2.3"
 			},
 			{
 				"name": "flixel",
@@ -37,8 +37,8 @@
 				"version": "2.1.4"
 			},
 			{
-				"name": "flxanimate",
-				"version": "3.0.4"
+				"name": "flixel-animate",
+				"version": "1.3.1"
 			},
 			{
 				"name": "hxdiscord_rpc",
