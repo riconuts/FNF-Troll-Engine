@@ -49,7 +49,7 @@ jobs:
         run: echo "${{github.run_id}}" > VERSION
       - name: Compile hxcpp
         run: |
-          cd C:/haxelib/hxcpp/git/tools/run
+          cd C:/haxelib/hxcpp/git/tools
           haxe compile.hxml
           cd ..
           cd ./hxcpp
@@ -127,7 +127,7 @@ jobs:
         run: echo "${{github.run_id}}" > VERSION
       - name: Compile hxcpp
         run: |
-          cd ~/haxelib/hxcpp/git/tools/run
+          cd ~/haxelib/hxcpp/git/tools
           haxe compile.hxml
           cd ..
           cd ./hxcpp
@@ -168,7 +168,7 @@ jobs:
         run: echo "${{github.run_id}}" > VERSION
       - name: Compile hxcpp
         run: |
-          cd ~/haxelib/hxcpp/git/tools/run
+          cd ~/haxelib/hxcpp/git/tools
           haxe compile.hxml
           cd ..
           cd ./hxcpp
