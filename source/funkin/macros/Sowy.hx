@@ -1,26 +1,16 @@
 package funkin.macros;
 
 import haxe.macro.Expr.Field;
-using StringTools;
 
 // what DOES sowy mean
 class Sowy
 {
+	/**
+		Returns the build date as a String
+	**/
 	public static macro function getBuildDate()
 	{
-		var daDate = Date.now();
-		
-		var monthsPassed = Std.string((daDate.getUTCFullYear() - 2023) * 12 + (daDate.getUTCMonth() + 1));
-		if (monthsPassed.length == 1)
-			monthsPassed = "0"+monthsPassed;
-
-		var theDays = Std.string(daDate.getDate());
-		if (theDays.length == 1)
-			theDays = "0"+theDays;
-
-		var daString = '$monthsPassed-$theDays';
-
-		return macro $v{daString};
+		return macro $v{Date.now().toString()};
 	}
 
 	/**
@@ -28,7 +18,7 @@ class Sowy
 	 */
 	public static macro function getDefines() 
 	{
-		return macro $v{haxe.macro.Context.getDefines()};	
+		return macro $v{haxe.macro.Context.getDefines()};
 	}
 
 	public static function findByName(fields:Array<Field>, name:String):Null<Field>{
