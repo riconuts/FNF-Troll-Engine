@@ -594,7 +594,7 @@ class ChartingState extends MusicBeatState
 			0.0, 
 			songLength, 
 			w, 
-			null, 
+			15, 
 			5, 
 			FlxColor.WHITE, 
 			FlxColor.BLACK	
@@ -1830,7 +1830,7 @@ class ChartingState extends MusicBeatState
 			waveformTrackDropDown.y - 15, 
 			0.0, 1.0, 
 			115, 
-			null, 
+			15, 
 			5, 
 			FlxColor.WHITE, 
 			FlxColor.BLACK
@@ -1871,7 +1871,7 @@ class ChartingState extends MusicBeatState
 		disableAutoScrolling.callback = () -> {options.noAutoScroll = disableAutoScrolling.checked;}
 		disableAutoScrolling.checked = options.noAutoScroll == true;
 
-		var sliderRate = new CustomFlxUISlider(this, 'playbackSpeed', 10, startY + 120 + 15, 0.5, 3, 115, null, 5, FlxColor.WHITE, FlxColor.BLACK);
+		var sliderRate = new CustomFlxUISlider(this, 'playbackSpeed', 10, startY + 120 + 15, 0.5, 3, 115, 15, 5, FlxColor.WHITE, FlxColor.BLACK);
 		sliderRate.nameLabel.text = 'Playback Rate';
 		sliderRate.value = playbackSpeed;
 		blockScrollWhileHovering.push(sliderRate);
@@ -1895,7 +1895,7 @@ class ChartingState extends MusicBeatState
 		panHitSounds.callback = () -> options.panHitSounds = panHitSounds.checked;
 		panHitSounds.checked = options.panHitSounds == true;
 
-		var sliderHitVol = new CustomFlxUISlider(this, 'hitsoundVolume', xPos, startY + 120 + 15, 0, 1, 115, null, 5, FlxColor.WHITE, FlxColor.BLACK);
+		var sliderHitVol = new CustomFlxUISlider(this, 'hitsoundVolume', xPos, startY + 120 + 15, 0, 1, 115, 15, 5, FlxColor.WHITE, FlxColor.BLACK);
 		sliderHitVol.nameLabel.text = 'Hitsound Volume';
 		sliderHitVol.value = hitsoundVolume;
 		blockScrollWhileHovering.push(sliderHitVol);

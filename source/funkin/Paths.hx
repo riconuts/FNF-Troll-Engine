@@ -91,7 +91,7 @@ class Paths
 	}
 
 	public static function init() {
-		#if html5
+		#if !FILESYSTEM_ALLOWED
 		AltFilePaths.initPaths();
 		#end
 
