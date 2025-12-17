@@ -29,8 +29,8 @@
 		  "name": "hxcpp",
 		  "type": "git",
 		  "dir": null,
-		  "ref": "funkin",
-		  "url": "https://github.com/FunkinCrew/hxcpp"
+		  "ref": "troll-engine",
+		  "url": "https://github.com/moxie-coder/hxcpp-funkin"
 		},
 		{
 			"name": "hxcpp-debug-server",

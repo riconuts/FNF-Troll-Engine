@@ -47,14 +47,6 @@ jobs:
         shell: cmd
       - name: Create Version Tag
         run: echo "${{github.run_id}}" > VERSION
-      - name: Compile hxcpp
-        run: |
-          cd C:/haxelib/hxcpp/git/tools
-          haxe compile.hxml
-          cd ..
-          cd ./hxcpp
-          haxe compile.hxml
-          cd ../..
       - name: Compile
         run: haxelib run lime build windows -Dartifact
       - name: Publish Artifact
@@ -125,14 +117,6 @@ jobs:
           haxelib run hmm install
       - name: Create Version Tag
         run: echo "${{github.run_id}}" > VERSION
-      - name: Compile hxcpp
-        run: |
-          cd ~/haxelib/hxcpp/git/tools
-          haxe compile.hxml
-          cd ..
-          cd ./hxcpp
-          haxe compile.hxml
-          cd ../..
       - name: Compile
         run: haxelib run lime build Project.xml linux -Dartifact --app-version="4.0.0-${{ github.run_id}}"
       - name: Publish Artifact
@@ -166,14 +150,6 @@ jobs:
           haxelib run hmm install
       - name: Create Version Tag
         run: echo "${{github.run_id}}" > VERSION
-      - name: Compile hxcpp
-        run: |
-          cd ~/haxelib/hxcpp/git/tools
-          haxe compile.hxml
-          cd ..
-          cd ./hxcpp
-          haxe compile.hxml
-          cd ../..
       - name: Compile
         run: haxelib run lime build mac -Dartifact --app-version="4.0.0-${{ github.run_id}}"
       - name: Publish Artifact

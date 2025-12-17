@@ -24,8 +24,8 @@
 			},
 			{
 				"name": "hxcpp",
-				"link": "https://github.com/FunkinCrew/hxcpp",
-				"branch": "funkin"
+				"link": "https://github.com/moxie-coder/hxcpp-funkin",
+				"branch": "troll-engine"
 			},
 			{
 				"name": "hscript",
