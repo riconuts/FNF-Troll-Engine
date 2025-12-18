@@ -90,8 +90,10 @@ class RatingGroup extends FlxTypedGroup<RatingSprite>
 		super.destroy();
 	}
 
+	#if !hl
 	override function recycle(?objectClass:Class<RatingSprite>, ?objectFactory:Void->RatingSprite, force = false, revive = true):RatingSprite
 		return null;
+	#end
 
 	private inline function getComboSpr(char:String):RatingSprite {
 		var spr = getSprite(comboSprs, comboTemplate);

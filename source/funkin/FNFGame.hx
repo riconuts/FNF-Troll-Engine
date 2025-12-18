@@ -235,6 +235,21 @@ class FNFGame extends FlxGame
 		Main.resetSpriteCache(this);
 	}
 
+	public function set_antialiasing(v:Bool) {
+		FlxG.stage.quality = v ? BEST : LOW; // This affects ShaderFilter quality :o
+		FlxSprite.defaultAntialiasing = v;
+	}
+
+	public function set_framerate(v:Float) {
+		if (v > FlxG.drawFramerate) {
+			FlxG.updateFramerate = Math.ceil(v);
+			FlxG.drawFramerate = Math.ceil(v);
+		} else {
+			FlxG.drawFramerate = Math.ceil(v);
+			FlxG.updateFramerate = Math.ceil(v);
+		}
+	}
+
 	#if CRASH_HANDLER
 	private function onCrash(errorName:String):Void {
 		print("\nCall stack starts below");

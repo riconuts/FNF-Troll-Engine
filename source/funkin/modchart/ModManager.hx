@@ -126,6 +126,7 @@ class ModManager {
 		registerAux("transformPath");	
 
 		registerAux("noteSpawnTime");
+		registerAux("nearCull");// this should get a new name
 		registerAux("drawDistance");
 		registerAux("disableDrawDistMult");
 		registerAux("flashR");

@@ -45,7 +45,7 @@
 	<define name="USE_EPIC_JUDGEMENT" />
 	<define name="HSCRIPT_ALLOWED" />
 	<define name="VIDEOS_ALLOWED" if="cpp" />
-	<define name="FILESYSTEM_ALLOWED" if="native desktop"/>
+	<define name="FILESYSTEM_ALLOWED" if="native || desktop"/>
 	<define name="MODS_ALLOWED" if="desktop FILESYSTEM_ALLOWED" />
 	<define name="DISCORD_ALLOWED" if="desktop cpp" unless="display" />
 	<!--I don't recommend turning on MULTICORE_LOADING until we rewrite it to be less crashy -Neb-->

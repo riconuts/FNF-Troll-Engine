@@ -29,7 +29,7 @@ final class Version
 	public static final betaVersion:String = 'rc.1'; // beta version, set it to 0 if not on a beta version, otherwise do it based on semantic versioning (alpha.1, beta.1, rc.1, etc)
 	public static final isBeta:Bool = betaVersion != '0';
 
-	public static final buildCode:String = Sowy.getBuildDate();
+	public static final buildDate:String = Sowy.getBuildDate();
 	public static final githubRepo:RepoInfo = Github.getCompiledRepoInfo();
 	
 	public static final semanticVersion:SemanticVersion = isBeta ? '$engineVersion-$betaVersion' : engineVersion;
