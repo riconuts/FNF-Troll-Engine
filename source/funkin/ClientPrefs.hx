@@ -944,21 +944,13 @@ class ClientPrefs {
 		FlxG.sound.volume = ClientPrefs.masterVolume;
 		FlxG.autoPause = ClientPrefs.autoPause;
 
-		FlxSprite.defaultAntialiasing = ClientPrefs.globalAntialiasing;
-		FlxG.stage.quality = ClientPrefs.globalAntialiasing ? BEST : LOW; // This affects ShaderFilter quality :o
+		Main.game.set_antialiasing(globalAntialiasing);
+		Main.game.set_framerate(framerate);
 
 		#if DISCORD_ALLOWED
 		DiscordClient.hideDetails = discordRPC_hideDetails;
 		discordRPC ? DiscordClient.start() : DiscordClient.shutdown();
 		#end
-
-		if (framerate > FlxG.drawFramerate) {
-			FlxG.updateFramerate = Math.floor(framerate);
-			FlxG.drawFramerate = Math.floor(framerate);
-		} else {
-			FlxG.drawFramerate = Math.floor(framerate);
-			FlxG.updateFramerate = Math.floor(framerate);
-		}
 
 		Main.downloadBetas = Version.isBeta || ClientPrefs.downloadBetas;
 	}

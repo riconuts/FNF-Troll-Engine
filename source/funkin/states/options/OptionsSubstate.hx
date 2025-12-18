@@ -359,8 +359,7 @@ class OptionsSubstate extends MusicBeatSubstate
 					Main.bread.visible = val;
 			#end
 			case 'globalAntialiasing':
-				FlxSprite.defaultAntialiasing = val;
-				FlxG.stage.quality = val ? BEST : LOW; // This affects ShaderFilter quality :o
+				Main.game.set_antialiasing(val);
 				
 			#if(DO_AUTO_UPDATE || display)
 			case 'downloadBetas' | 'checkForUpdates':
@@ -444,13 +443,8 @@ class OptionsSubstate extends MusicBeatSubstate
 		switch (option)
 		{
 			case 'framerate':
-				if (newVal > FlxG.drawFramerate){
-					FlxG.updateFramerate = Math.floor(newVal);
-					FlxG.drawFramerate = Math.floor(newVal);
-				}else{
-					FlxG.drawFramerate = Math.floor(newVal);
-					FlxG.updateFramerate = Math.floor(newVal);
-				}
+				Main.game.set_framerate(newVal);
+
 			case 'epicWindow' | 'sickWindow' | 'goodWindow' | 'badWindow' | 'hitWindow':
 				checkWindows();
 
