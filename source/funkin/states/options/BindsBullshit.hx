@@ -19,7 +19,7 @@ class KeyboardNavHelper<BindButton> {
 	}
 }
 
-class BindButton<T:Int> extends FlxUI9SliceSprite
+class BindButton<T:Keybind> extends FlxUI9SliceSprite
 {
 	public var textObject:FlxText;
 	public var bind(default, set):T;
@@ -30,8 +30,7 @@ class BindButton<T:Int> extends FlxUI9SliceSprite
 	public function new(?x:Float, ?y:Float, ?rect:Rectangle, ?bind:T){
 		super(x, y, Paths.image("optionsMenu/backdrop"), rect, [22, 22, 89, 89]);
 
-		if (bind == null)
-			bind = cast -1; // FUCK YOU
+		bind ??= cast -1; // FUCK YOU
 
 		textObject = new FlxText(x, y, 0, _getBindedName(bind), 16);
 		textObject.setFormat(Paths.font("quantico.ttf"), 24, 0xFFFFFFFF, CENTER);
@@ -102,7 +101,9 @@ class BindButton<T:Int> extends FlxUI9SliceSprite
 	}
 
 	override function update(elapsed:Float){
-		textObject.fieldWidth = width;
+		if(textObject.fieldWidth != width){ // FUCK FLXTEXT. ALL MY HOMIES HATE FLXTEXT
+			textObject.fieldWidth = width;
+		}
 		super.update(elapsed);
 		textObject.update(elapsed);
 	}

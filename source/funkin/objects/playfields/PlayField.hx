@@ -82,7 +82,50 @@ class PlayField extends FlxTypedGroup<FlxBasic>
 	
 	public var strumNotes:Array<StrumNote> = []; // receptors
 	public var characters:Array<Character> = []; // characters that sing when field is hit
-	public var singAnimations:Array<String> = ["singLEFT", "singDOWN", "singUP", "singRIGHT"]; // default character animations to play for each column
+
+	// default character animations to play for each column
+	public var singAnimations:Array<Array<String>> = [
+		["singUP"],
+		["singLEFT", "singRIGHT"],
+		["singLEFT", "singUP", "singRIGHT"],
+		["singLEFT", "singDOWN", "singUP", "singRIGHT"],
+		["singLEFT", "singDOWN", "singUP", "singUP", "singRIGHT"],
+		["singLEFT", "singUP", "singRIGHT", "singLEFT", "singDOWN", "singRIGHT"],
+		["singLEFT", "singUP", "singRIGHT", "singUP", "singLEFT", "singDOWN", "singRIGHT"],
+		[
+			"singLEFT",
+			"singDOWN",
+			"singUP",
+			"singRIGHT",
+			"singLEFT",
+			"singDOWN",
+			"singUP",
+			"singRIGHT"
+		],
+		[
+			"singLEFT",
+			"singDOWN",
+			"singUP",
+			"singRIGHT",
+			"singUP",
+			"singLEFT",
+			"singDOWN",
+			"singUP",
+			"singRIGHT"
+		],
+		[
+			"singLEFT",
+			"singDOWN",
+			"singUP",
+			"singRIGHT",
+			"singDOWN",
+			"singUP",
+			"singLEFT",
+			"singDOWN",
+			"singUP",
+			"singRIGHT"
+		]
+	];
 	
 	public var noteField:NoteField; // renderer
 	public var judgeManager(get, default):JudgmentManager; // for deriving judgements for input reasons

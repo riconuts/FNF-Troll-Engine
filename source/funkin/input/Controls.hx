@@ -175,7 +175,7 @@ class Controls {
 		return false;
 	}
 
-	public function get(id:String, state:FlxInputState):Bool {
+	public inline function get(id:String, state:FlxInputState):Bool {
 		return checkKey(id, state) || checkButton(id, state);
 	}
 }
