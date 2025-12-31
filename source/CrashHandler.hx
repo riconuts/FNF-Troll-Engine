@@ -4,14 +4,6 @@ import flixel.FlxG;
 
 using StringTools;
 
-#if SAVE_CRASH_LOGS
-import sys.io.File;
-#end
-
-#if sys
-import lime.system.System;
-#end
-
 #if (windows && cpp)
 import funkin.api.Windows;
 #end
@@ -22,25 +14,30 @@ import funkin.api.Windows;
 import filedialogs.FileDialogs;
 #end
 
+private enum abstract HandlerChoice(Int) {
+	var NO;
+	var YES;
+	var CANCEL;
+}
+
 class CrashHandler {
 	public static function init() {
-		openfl.Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(
-			UncaughtErrorEvent.UNCAUGHT_ERROR, 
-			function(event:UncaughtErrorEvent) {
-				// one of these oughta do it
-				event.stopImmediatePropagation();
-				event.stopPropagation();
-				event.preventDefault();
-				onCrash(event.error);
-			}
-		);
+		openfl.Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onFlashCrash);
 
 		#if cpp
 		untyped __global__.__hxcpp_set_critical_error_handler(onCrash);
 		#end
 	}
 
-	private static function getLogFileName():String {
+	private static function onFlashCrash(event:UncaughtErrorEvent) {
+		// one of these oughta do it
+		event.stopImmediatePropagation();
+		event.stopPropagation();
+		event.preventDefault();
+		onCrash(event.error);
+	}
+
+	inline private static function getLogFilePath():String {
 		return "crash.txt";
 	}
 
@@ -54,47 +51,47 @@ class CrashHandler {
 		var boxMessage:String = '$callstack\n$errorName';
 
 		#if SAVE_CRASH_LOGS
-		final fileName:String = getLogFileName();
-		boxMessage += '\nCall stack was saved as $fileName';
-		File.saveContent(fileName, callstack);
+		final path:String = getLogFilePath();
+		boxMessage += '\nCall stack was saved on $path';
+		sys.io.File.saveContent(path, callstack);
 		#end
 
+		switch(showCrashBox(boxMessage)) {
+			// Go back to the main menu
+			case YES: return toMainMenu();
+					
+			// Continue with a possibly unstable state
+			case CANCEL: return;
+				
+			// Close the game
+			case NO:
+		}
+
+		#if sys
+		lime.system.System.exit(1);
+		#end
+	}
+
+	inline private static function showCrashBox(boxMessage:String):HandlerChoice {
 		#if WINDOWS_CRASH_HANDLER
-		boxMessage += "\nWould you like to goto the main menu?";
-		var ret = Windows.msgBox(boxMessage, errorName, ERROR | MessageBoxOptions.YESNOCANCEL | MessageBoxDefaultButton.BUTTON3);
-		
-		switch(ret) {
-			case YES: 
-				toMainMenu();
-				return;
-			case CANCEL: 
-				// Continue with a possibly unstable state
-				return;
-			default:
-				// Close the game
+		boxMessage += "\nWould you like to go to the main menu?";
+		final ret:MessageBoxReturnValue = Windows.msgBox(boxMessage, errorName, MessageBoxIcon.ERROR | MessageBoxOptions.YESNOCANCEL | MessageBoxDefaultButton.BUTTON3);
+		return switch(ret) {
+			case YES: YES;
+			case CANCEL: CANCEL;
+			default: NO;
 		}
 		#elseif (UNIX_CRASH_HANDLER && linc_filedialogs)
-		boxMessage += "\nWould you like to goto the main menu?";
-		final btn:Button = FileDialogs.message(
-			errorName, boxMessage,
-			Choice.Yes_No_Cancel, Icon.Error
-		);
-		switch(btn) {
-			case Yes: 
-				toMainMenu();
-				return;
-			case Cancel:
-				// Continue with a possibly unstable state
-				return;
-			default:
-				// Close the game
+		boxMessage += "\nWould you like to go to the main menu?";
+		final btn:Button = FileDialogs.message(errorName, boxMessage, Choice.Yes_No_Cancel, Icon.Error);
+		return switch(btn) {
+			case Yes: YES;
+			case Cancel: CANCEL;
+			default: NO;
 		}
 		#else
 		application.window.alert(callstack, errorName); // this shit barely works on linux!
-		#end
-
-		#if sys 
-		System.exit(1);
+		return NO;
 		#end
 	}
 
