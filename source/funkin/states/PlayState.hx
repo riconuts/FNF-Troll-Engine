@@ -3386,7 +3386,7 @@ class PlayState extends MusicBeatState
 					char.missPress(direction, field);
 			}
 
-			callOnScripts('noteMissPress', [direction]);
+			callOnScripts('noteMissPress', [direction, field]);
 			return;
 		}
 
@@ -3416,7 +3416,7 @@ class PlayState extends MusicBeatState
 				char.missPress(direction, field);	
 		}
 
-		callOnScripts('noteMissPress', [direction]);
+		callOnScripts('noteMissPress', [direction, field]);
 	}
 
 	function opponentNoteHit(note:Note, field:PlayField):Void

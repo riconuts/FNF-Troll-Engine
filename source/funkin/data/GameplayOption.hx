@@ -19,23 +19,23 @@ enum abstract NumericOptionType(OptionType) to OptionType
 	var INT = OptionType.INT;
 }
 
-class StringGameplayOption extends GameplayOption
+class StringGameplayOption extends GameplayOption<String>
 {
 	public var options:Array<String>;
 	public var curOption:Int; // menu
 
-	public function new(name:String, variable:String, options:Array<String>, ?defaultValue:String) {		
-		super(name, variable, STRING, defaultValue ?? options[0]);
+	public function new(id:String, options:Array<String>, ?defaultValue:String) {		
+		super(id, STRING, defaultValue ?? options[0]);
 		
 		this.options = options;
 		this.curOption = options.indexOf(getValue());
 		if (curOption < 0) curOption = 0;
 		
-		this.name += " ";
+		this.displayName += " ";
 	}
 }
 
-class NumericGameplayOption extends GameplayOption 
+class NumericGameplayOption extends GameplayOption<Float>
 {
 	public var minValue:Float = 1.0; 
 	public var maxValue:Float = 0.0; 
@@ -47,7 +47,7 @@ class NumericGameplayOption extends GameplayOption
 
 	// private var isPercent:Bool = false;
 
-	public function new(name:String, variable:String, numberType:NumericOptionType, ?defaultValue:Dynamic) {
+	public function new(id:String, numberType:NumericOptionType, ?defaultValue:Dynamic) {
 		var type:OptionType = numberType;
 
 		switch(numberType) {
@@ -74,7 +74,7 @@ class NumericGameplayOption extends GameplayOption
 			*/
 		}
 
-		super(name, variable, type, defaultValue);
+		super(id, type, defaultValue);
 	}
 
 	override function setValue(val:Dynamic)
@@ -93,26 +93,39 @@ class NumericGameplayOption extends GameplayOption
 	*/
 }
 
-class GameplayOption
+class BoolGameplayOption extends GameplayOption<Bool> {
+	public var checkbox:CheckboxThingie;
+
+	public function new(id:String, defaultValue:Bool) {
+		super(id, BOOL, defaultValue);
+	}
+
+	override function updateDisplay() {
+		super.updateDisplay();
+		if (checkbox != null)
+			checkbox.daValue = getValue();
+	}
+}
+
+class GameplayOption<T:Dynamic>
 {
 	/** value key from ClientPrefs.gameplaySettings */
-	private var variable:String = null;
+	public var id:String;
+
+	/** Display name of this option */
+	public var displayName:String;
 
 	/** bool, int, float, string */
 	public var type:OptionType;
 
-	// 
-	public var defaultValue:Dynamic = null;	
-
-	/** Display name of this option */
-	public var name:String = 'Unknown';
+	public var defaultValue:T;
 
 	/** How String/Float/Int values are shown, %v = Current value, %d = Default value */
 	public var displayFormat:String = '%v';
 
-	public function new(name:String, variable:String, type:OptionType, defaultValue:Dynamic) {
-		this.name = Paths.getString('gameplay_modifier_$variable') ?? name;
-		this.variable = variable;
+	public function new(id:String, type:OptionType, defaultValue:T) {
+		this.id = id;
+		this.displayName = Paths.getString('gameplay_modifier_$id') ?? id;
 		this.type = type;
 		this.defaultValue = defaultValue;
 
@@ -120,14 +133,14 @@ class GameplayOption
 			setValue(this.defaultValue);
 	}
 
-	public function getValue():Dynamic {
-		return ClientPrefs.gameplaySettings.get(variable);
+	public function getValue():T {
+		return ClientPrefs.gameplaySettings.get(id);
 	}
-	public function setValue(value:Dynamic) {
-		ClientPrefs.gameplaySettings.set(variable, value);
+	public function setValue(value:T) {
+		ClientPrefs.gameplaySettings.set(id, value);
 	}
 	public function getDisplayValue():String {
-		return displayFormat.replace('%v', getValue()).replace('%d', defaultValue);
+		return displayFormat.replace('%v', '${getValue()}').replace('%d', '${defaultValue}');
 	}
 
 	//// menu
@@ -141,7 +154,6 @@ class GameplayOption
 		}
 	}
 
-	public var checkbox:CheckboxThingie; // Used for bools
 	public var text(get, set):String; // Everything else will use a text
 	private var child:Alphabet;
 
@@ -158,4 +170,7 @@ class GameplayOption
 	
 		return newValue;
 	}
+
+	public function updateDisplay()
+		text = getDisplayValue();
 }

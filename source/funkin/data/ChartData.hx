@@ -133,7 +133,7 @@ class ChartData
 		try {
 			return _parseSongJson(filePath);
 		}catch(e) {
-			print(Main.callstackToString(haxe.CallStack.exceptionStack(true)));
+			print(CrashHandler.callstackToString(haxe.CallStack.exceptionStack(true)));
 			trace('ERROR parsing song JSON: $filePath', e.message);
 			return null;
 		}
@@ -175,7 +175,7 @@ class ChartData
 		try {
 			return _parseEventsJson(filePath);
 		}catch(e) {
-			print(Main.callstackToString(haxe.CallStack.exceptionStack(true)));
+			print(CrashHandler.callstackToString(haxe.CallStack.exceptionStack(true)));
 			trace('ERROR parsing events JSON: $filePath', e.message);
 			return null;
 		}

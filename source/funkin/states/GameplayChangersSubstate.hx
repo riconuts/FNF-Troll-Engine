@@ -15,8 +15,8 @@ import flixel.util.FlxColor;
 
 class GameplayChangersSubstate extends MusicBeatSubstate
 {
-	private var optionsArray:Array<GameplayOption> = [];
-	private var curOption:GameplayOption = null;
+	private var optionsArray:Array<GameplayOption<Any>> = [];
+	private var curOption:GameplayOption<Any> = null;
 
 	private var menu:AlphabetMenu;
 	private var checkboxGroup:FlxTypedGroup<CheckboxThingie>;
@@ -45,23 +45,23 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		if (speedoption.getValue() > speedoption.maxValue) 
 			speedoption.setValue(speedoption.maxValue);
 
-		updateTextFrom(speedoption);	
+		speedoption.updateDisplay();	
 	}
 
 	public function new() {
 		super();
 		
-		stypeoption = new StringGameplayOption('Scroll Type', 'scrolltype', ["multiplicative", "constant"], 'multiplicative');
+		stypeoption = new StringGameplayOption('scrolltype', ["multiplicative", "constant"], 'multiplicative');
 		stypeoption.onChange = onChangeScrollType;
 		optionsArray.push(stypeoption);
 
-		speedoption = new NumericGameplayOption('Scroll Speed', 'scrollspeed', FLOAT, 1);
+		speedoption = new NumericGameplayOption('scrollspeed', FLOAT, 1);
 		speedoption.minValue = 0.5;
 		speedoption.decimals = 2;
 		optionsArray.push(speedoption);
 		
 		////
-		var option = new NumericGameplayOption('Playback Rate', 'songspeed', FLOAT, 1);
+		var option = new NumericGameplayOption('songspeed', FLOAT, 1);
 		option.minValue = 0.5;
 		option.maxValue = 5;
 		option.changeValue = 0.05;
@@ -69,45 +69,45 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		option.displayFormat = '%vX';
 		optionsArray.push(option);
 
-		var option = new NumericGameplayOption('Health Gain Multiplier', 'healthgain', FLOAT, 1);
+		var option = new NumericGameplayOption('healthgain', FLOAT, 1);
 		option.minValue = 0;
 		option.maxValue = 5;
 		option.changeValue = 0.1;
 		option.displayFormat = '%vX';
 		optionsArray.push(option);
 
-		var option = new NumericGameplayOption('Health Loss Multiplier', 'healthloss', FLOAT, 1);
+		var option = new NumericGameplayOption('healthloss', FLOAT, 1);
 		option.minValue = 0.5;
 		option.maxValue = 5;
 		option.changeValue = 0.1;
 		option.displayFormat = '%vX';
 		optionsArray.push(option);
 
-		var option = new GameplayOption('Holds Give Health', 'holdsgivehp', BOOL, false);
+		var option = new BoolGameplayOption('instakill', false);
 		optionsArray.push(option);
 
-		var option = new GameplayOption('Instakill on Miss', 'instakill', BOOL, false);
+		var option = new BoolGameplayOption('practice', false);
 		optionsArray.push(option);
 
-		var option = new GameplayOption('Practice Mode', 'practice', BOOL, false);
+		var option = new BoolGameplayOption('perfect', false);
 		optionsArray.push(option);
 
-		var option = new GameplayOption('Perfect Mode', 'perfect', BOOL, false);
+		var option = new BoolGameplayOption('instaRespawn', false);
 		optionsArray.push(option);
 
-		var option = new GameplayOption('Instant Respawn', 'instaRespawn', BOOL, false);
+		var option = new BoolGameplayOption('botplay', false);
 		optionsArray.push(option);
 
-		var option = new GameplayOption('Botplay', 'botplay', BOOL, false);
+		var option = new BoolGameplayOption('opponentPlay', false);
 		optionsArray.push(option);
 
-		var option = new GameplayOption('Opponent Mode', 'opponentPlay', BOOL, false);
+		var option = new BoolGameplayOption('disableModcharts', false);
 		optionsArray.push(option);
 
-		var option = new GameplayOption('Disable Modcharts', 'disableModcharts', BOOL, false);
+		var option = new BoolGameplayOption('holdsgivehp', false);
 		optionsArray.push(option);
 
-		var option = new GameplayOption('Hold Drop Doesn\'t Miss', 'noDropPenalty', BOOL, false);
+		var option = new BoolGameplayOption('noDropPenalty', false);
 		optionsArray.push(option);
 	}
 
@@ -135,9 +135,9 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 				return;
 
 			FlxG.sound.play(Paths.sound('scrollMenu'));
-			curOption.setValue((curOption.getValue() == true) ? false : true);
-			curOption.change();
-			updateCheckboxFrom(curOption);
+			
+			var curOption:BoolGameplayOption = cast curOption;
+			setOptionValue(curOption, !curOption.getValue());
 		}
 		add(menu);
 
@@ -184,7 +184,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 
 		for (i => option in optionsArray)
 		{
-			var optionLabel = menu.addTextOption(option.name, null);
+			var optionLabel = menu.addTextOption(option.displayName, null);
 			optionLabel.scrollFactor.set();
 			optionLabel.xAdd = 120;
 			optionLabel.x += 200;
@@ -195,7 +195,9 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 				case BOOL:
 					optionLabel.xAdd += 80;
 
-					var checkbox:CheckboxThingie = new CheckboxThingie(optionLabel.x - 105, optionLabel.y, option.getValue() == true);
+					var option:BoolGameplayOption = cast option;
+
+					var checkbox:CheckboxThingie = new CheckboxThingie(optionLabel.x - 105, optionLabel.y, option.getValue());
 					checkbox.ID = i;
 					checkbox.scrollFactor.set();
 					checkbox.sprTracker = optionLabel;
@@ -204,7 +206,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 					checkboxGroup.add(checkbox);
 
 					option.checkbox = checkbox;
-					updateCheckboxFrom(option);
+					option.updateDisplay();
 
 				default:
 					var valueText:AttachedText = new AttachedText('' + option.getValue(), optionLabel.width + 80, true, 0.8);
@@ -216,7 +218,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 					grpTexts.add(valueText);
 
 					option.setChild(valueText);
-					updateTextFrom(option);
+					option.updateDisplay();
 			}
 		}
 
@@ -249,23 +251,10 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		super.update(elapsed);
 	}
 
-	function setOptionValue(leOption:GameplayOption, value:Dynamic) {
-		curOption.setValue(value);
-
-		switch(leOption.type) {
-			case BOOL: 
-				updateCheckboxFrom(leOption);
-
-			case STRING:
-				var leOption:StringGameplayOption = cast leOption;
-				leOption.curOption = leOption.options.indexOf(leOption.getValue());
-				updateTextFrom(leOption);
-
-			case INT | FLOAT:
-				updateTextFrom(leOption);
-		}
-
+	function setOptionValue<T>(leOption:GameplayOption<T>, value:T) {
+		leOption.setValue(value);
 		leOption.change();
+		leOption.updateDisplay();
 	}
 
 	var holdTime:Float = 0;
@@ -287,9 +276,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		}
 		else return;
 		
-		strOption.setValue(strOption.options[strOption.curOption]);
-		strOption.change();
-		updateTextFrom(strOption);
+		setOptionValue(strOption, strOption.options[strOption.curOption]);
 	}
 
 	function updateNumericLR(elapsed:Float) {
@@ -307,9 +294,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 			if (holdValue < numOption.minValue) holdValue = numOption.minValue;
 			else if (holdValue > numOption.maxValue) holdValue = numOption.maxValue;
 
-			numOption.setValue(FlxMath.roundDecimal(holdValue, numOption.decimals));
-			numOption.change();
-			updateTextFrom(numOption);
+			setOptionValue(numOption, FlxMath.roundDecimal(holdValue, numOption.decimals));
 		}
 		
 		if (holdTime == 0.0) {
@@ -337,14 +322,5 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		}
 		holdTime = 0;
 		holdingTimer = 0;
-	}
-
-	function updateTextFrom(option:GameplayOption) {
-		option.text = option.getDisplayValue();
-	}
-
-	function updateCheckboxFrom(option:GameplayOption) {
-		if (option.checkbox != null) 
-			option.checkbox.daValue = option.getValue()==true;
 	}
 }
