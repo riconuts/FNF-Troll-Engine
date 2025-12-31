@@ -218,18 +218,6 @@ class Main extends Sprite
 		}
 	}
 
-	public static function callstackToString(callstack:Array<StackItem>):String {
-		var str:String = "";
-		for (stackItem in callstack) {
-			switch (stackItem) {
-				case FilePos(s, file, line, column):
-					str += '$file:$line\n';
-				default:
-			}
-		}
-		return str;
-	}
-
 	#if sys
 	// https://github.com/openfl/hxp/blob/master/src/hxp/System.hx
 	public static function runProcess(command:String, ?args:Array<String>):Null<String> {
