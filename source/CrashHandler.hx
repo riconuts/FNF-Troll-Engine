@@ -56,7 +56,7 @@ class CrashHandler {
 		sys.io.File.saveContent(path, callstack);
 		#end
 
-		switch(showCrashBox(boxMessage)) {
+		switch(showCrashBox(errorName, boxMessage)) {
 			// Go back to the main menu
 			case YES: return toMainMenu();
 					
@@ -72,7 +72,7 @@ class CrashHandler {
 		#end
 	}
 
-	inline private static function showCrashBox(boxMessage:String):HandlerChoice {
+	inline private static function showCrashBox(errorName:String, boxMessage:String):HandlerChoice {
 		#if WINDOWS_CRASH_HANDLER
 		boxMessage += "\nWould you like to go to the main menu?";
 		final ret:MessageBoxReturnValue = Windows.msgBox(boxMessage, errorName, MessageBoxIcon.ERROR | MessageBoxOptions.YESNOCANCEL | MessageBoxDefaultButton.BUTTON3);
