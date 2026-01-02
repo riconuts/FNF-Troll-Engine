@@ -1,5 +1,6 @@
 package funkin.data;
 
+import funkin.scripts.ScriptedClassShit.InstanceInterp;
 import funkin.data.BaseSong;
 import funkin.data.Song;
 import funkin.states.StoryModeState;
@@ -52,7 +53,7 @@ class Level {
 		level.bgColor = CoolUtil.colorFromString(json?.bgColor ?? "#F9CF51");
 
 		if (scriptedLevel != null) {
-			scriptedLevel.script = FunkinHScript.fromFile(scriptPath, level.name, ["this" => level]);
+			scriptedLevel.script = FunkinHScript.fromFile(scriptPath, 'level/'+level.id, null, false, new InstanceInterp(level));
 		}
 
 		return level;
@@ -184,123 +185,18 @@ class Level {
 	}
 }
 
-class ScriptedLevel extends Level
+class ScriptedLevel extends Level implements funkin.scripts.ScriptedClassShit.IScriptedClass
 {
 	public var script:FunkinHScript;
 
-	function callScript(call:String, ?args:Array<Dynamic>):Null<Dynamic>
+	public function callOnScript(call:String, ?args:Array<Dynamic>):Dynamic
 	{
-		if (script != null && script.exists(call))
-			return script.call(call, args);
-
-		return null;
+		return script.call(call, args);
 	}
 
-	/**
-	 * Returns a file path to the title asset
-	**/
-	override public function getAsset():String
+	public function existsOnScript(call:String):Bool
 	{
-		return callScript("getAsset") ?? super.getAsset();
-	}
-
-	/**
-	 * Returns an integer to decide placement of the level
-	**/
-	override public function getIndex():Int
-	{
-		return callScript("getIndex") ?? super.getIndex();
-	}
-
-	/**
-	 * Returns an array of difficulties available to be played for the level
-	**/
-	override public function getDifficulties():Array<String>
-	{ 
-		return callScript("getDifficulties") ?? super.getDifficulties();
-	}
-
-	/**
-	 * Returns an array of props to show in the story menu
-	**/
-	override public function getProps():Array<LevelPropData>
-	{
-		return callScript("getProps") ?? super.getProps();
-	}
-
-	/**
-	 * Returns an array of songs to be played during the level
-	**/
-	override public function getPlaylist(difficultyId:String = 'normal'):Array<BaseSong>
-	{
-		return callScript("getPlaylist", [difficultyId]) ?? super.getPlaylist(difficultyId);
-	}
-	
-
-	/**
-	 * Returns an array of song names to be displayed in the story menu
-	**/
-	override public function getDisplayedSongs(difficultyId:String = "normal"):Array<String>
-	{
-		return callScript("getDisplayedSongs", [difficultyId]) ?? super.getDisplayedSongs(difficultyId);
-	}
-
-	/**
-	 * WIP (still gotta add to freeplay)
-	 * Returns an array of song data to be shown in freeplay. 
-	 * 
-	 * TODO: Do the V-Slice thing where diff difficulties can have diff freeplay lists??
-	**/
-	override public function getFreeplaySongs():Array<BaseSong>
-	{
-		return callScript("getFreeplaySongs") ?? super.getFreeplaySongs();
-	}
-	
-
-	/**
-		Whether this level is unlocked.  
-		A locked level will be shown with a lock on the story mode menu, and its songs won't be added to freeplay.
-	**/
-	override public function isUnlocked():Bool
-	{
-		return callScript("isUnlocked") ?? super.isUnlocked();
-	}
-
-
-	/**
-		Returns true if the level should be shown on the story menu.  
-		Does not hide the level's songs from freeplay.
-	**/
-	override public function isVisible():Bool
-	{
-		return callScript("isVisible") ?? super.isVisible();
-	}
-
-
-	/**
-	 * Returns a LevelTitle object for the story menu
-	**/
-	override public function createTitle()
-	{
-		return callScript("createTitle") ?? super.createTitle();
-	}
-	
-
-	/**
-	 * Creates the props for the visuals in the story menu.
-	 * This is usually the main characters of the level (BF, GF, and Opponent)
-	 * Sometimes includes a background in Psych Engine and similar engines
-	 * @param group The group to be populated by props.
-	 * @param bgGroup The background group to be populated by props. This group is automatically layered behind all props and fades when changing levels.
-	**/
-	override public function populateGroup(group:FlxSpriteGroup, bgGroup:FlxSpriteGroup)
-	{
-		if (callScript("prePopulateGroup", [group, bgGroup]) == Globals.Function_Stop)
-			return;
-
-		super.populateGroup(group, bgGroup);
-
-		callScript("postPopulateGroup", [group, bgGroup]);
+		return script != null && script.exists(call);
 	}
 }
 

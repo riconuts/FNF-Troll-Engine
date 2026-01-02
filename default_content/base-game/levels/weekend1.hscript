@@ -9,9 +9,7 @@ function getDisplayedSongs(difficulty:String):Array<String>
 
 function getFreeplaySongs()
 {
-	// lazzyyyyy
-	
-	var songs = this.songs;
+	// lazzyyyyy	
 	if (!Highscore.levelCompleted.get("weekend1"))
 		return [songs[0], songs[1], songs[2]];
 
