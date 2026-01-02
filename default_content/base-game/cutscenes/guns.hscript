@@ -47,8 +47,8 @@ function onCreateCutscene(){
 		game.dad.visible = false;
 	});
 
-	this.playMusic(Paths.music("DISTORTO"), 1, 0.25, 0);
-	this.sound(0, "tankSong2");
+	playMusic(Paths.music("DISTORTO"), 1, 0.25, 0);
+	sound(0, "tankSong2");
 	timeline.playAnimation(0, tankmanimate, 'voice', true);
 
 	timeline.easeProperties(0, 80, game.camGame, {zoom: 1.2}, FlxEase.quartOut).updateEveryFrame = true;
@@ -59,7 +59,7 @@ function onCreateCutscene(){
 
 	timeline.playAnimation(102, game.gf, 'sad');
 
-	timeline.easeProperties(260, 280, this.music, {volume: 0}, FlxEase.linear);
+	timeline.easeProperties(260, 280, music, {volume: 0}, FlxEase.linear);
 	timeline.finish(280);
 }
 

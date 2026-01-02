@@ -123,7 +123,7 @@ function onCreateCutscene()
 	game.addBehindGF(gfTurninDemon);
 	
 	timeline.playAnimation(0, tankmanimate, "godDamnIt", true);
-	this.sound(0, "stressCutscene");
+	sound(0, "stressCutscene");
 
 	timeline.playAnimation(364, gfTurninDemon, "turn", true);
 	timeline.once(364, (f)->{
@@ -190,6 +190,6 @@ function onCreateCutscene()
 	
 	timeline.playAnimation(776, game.boyfriend, 'idle');
 
-	timeline.easeProperties(829, 836, this.sounds[0], {volume: 0});
+	timeline.easeProperties(829, 836, sounds[0], {volume: 0});
 	timeline.finish(836);
 }

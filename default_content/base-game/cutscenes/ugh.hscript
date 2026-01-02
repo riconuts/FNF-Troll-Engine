@@ -7,6 +7,7 @@ function onCutsceneEnd(){
 	tankmanimate.destroy();
 
 	game.dad.visible = true;
+	game.dad.dance();
 	game.camHUD.visible = true;
 	FlxTween.tween(game.camGame, {zoom: game.defaultCamZoom}, 2, {ease: FlxEase.quadOut});
 }
@@ -17,7 +18,8 @@ function onCreateCutscene(){
 	game.camHUD.visible = false;
 	game.dad.visible = true;
 
-	FlxG.state.persistentDraw = FlxG.state.persistentUpdate = true;
+	game.persistentDraw = true;
+	game.persistentUpdate = true;
 
 	game.camGame.zoom = 1.2;
 
@@ -42,9 +44,9 @@ function onCreateCutscene(){
 	
 	timeline.easeProperties(0, 8, camFollow, {y: camFollow.y + 75}, FlxEase.quadOut).updateEveryFrame = true;
 
-	this.playMusic(Paths.music("DISTORTO"), 1, 0.25, 0);
+	playMusic(Paths.music("DISTORTO"), 1, 0.25, 0);
 
-	this.sound(0, "wellWellWell");
+	sound(0, "wellWellWell");
 	timeline.playAnimation(0, tankmanimate, 'wellwellwell', true);
 
 	timeline.once(0, ()-> {
@@ -63,13 +65,13 @@ function onCreateCutscene(){
 
 	timeline.setProperties(72, camFollow, {x: camFollow.x + 500, y: camFollow.y + 50});
 
-	this.sound(92, "bfBeep", false);
+	sound(92, "bfBeep", false);
 	timeline.playAnimation(92, game.boyfriend, 'singUP');
 	
 	timeline.playAnimation(106, game.boyfriend, "idle");
 
-	this.sound(116, "killYou");
-	timeline.easeProperties(240, 260, this.music, {volume: 0}, FlxEase.linear);
+	sound(116, "killYou");
+	timeline.easeProperties(240, 260, music, {volume: 0}, FlxEase.linear);
 	timeline.playAnimation(116, tankmanimate, 'kill');
 	timeline.once(116, ()-> {
 		tankmanimate.offset.x = 44;

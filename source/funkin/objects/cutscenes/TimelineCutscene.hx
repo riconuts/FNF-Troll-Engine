@@ -9,16 +9,10 @@ import funkin.objects.cutscenes.Timeline.SoundAction;
 
 
 class TimelineCutscene extends ScriptedCutscene {
-	public var timeline: Timeline;
-
-	public function sound(frame:Int, path:String, obeysPitch:Bool=true) // for convenience, mainly
-		timeline.addAction(new SoundAction(frame, newSound(path, obeysPitch)));
-	
+	public var timeline:Timeline;	
 
 	public override function createCutscene() {
 		timeline = new Timeline();
-		if (script != null)
-			script.set("timeline", this.timeline);
 		timeline.onFinish.addOnce(onEnd.dispatch.bind(false));
 		add(timeline);
 
@@ -31,6 +25,9 @@ class TimelineCutscene extends ScriptedCutscene {
 		callScript("onCreateCutscene", []);
 	}
 
+	public function sound(frame:Int, path:String, obeysPitch:Bool=true) // for convenience, mainly
+		timeline.addAction(new SoundAction(frame, newSound(path, obeysPitch)));
+
 	override public function pause() {
 		timeline.active = false;
 		super.pause();
@@ -42,18 +39,13 @@ class TimelineCutscene extends ScriptedCutscene {
 	}
 
 	override public function restart() {
-		for(m in members){
-			remove(m);
+		for (m in members)
 			m.destroy();
-		}
 		
 		members.resize(0);
 		
-		
-		
 		super.restart();
 		createCutscene();
-
 	}
 
 }
