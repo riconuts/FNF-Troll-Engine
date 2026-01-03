@@ -126,21 +126,11 @@ class Util
 		return coverMeInPiss;
 	}
 
-	inline public static function getLuaObject(tag:String, ?checkForTextsToo:Bool):Null<FlxSprite>
-		return PlayState.instance.getLuaObject(tag, checkForTextsToo);
-
 	inline public static function getObjectDirectly(tag:String):Null<Dynamic>
-		return getLuaObject(tag, true) ?? getVarInArray(getInstance(), tag);
+		return getVarInArray(getInstance(), tag);
 
 	public static function getObjectSimple(tag:String):Null<Dynamic>
-		return getLuaObject(tag, true) ?? Reflect.getProperty(getInstance(), tag);
-
-	public static function getTextObject(name:String):Null<FlxText> {
-		if (PlayState.instance.modchartTexts.exists(name))
-			return PlayState.instance.modchartTexts.get(name);
-		var obj = Reflect.getProperty(PlayState.instance, name);
-		return (obj is FlxText) ? obj : null;
-	}
+		return Reflect.getProperty(getInstance(), tag);
 
 	public static function getObject(tag:String):Null<Dynamic> {
 		var killMe:Array<String> = tag.split('.');
@@ -221,52 +211,6 @@ class Util
 		Reflect.setProperty(leArray, variable, value);
 	}
 
-	public static function loadFrames(spr:FlxSprite, image:String, spriteType:String)
-	{
-		switch(spriteType.toLowerCase().trim())
-		{
-			#if USING_FLXANIMATE
-			case "texture" | "textureatlas" | "tex":
-				spr.frames = FlxAnimateFrames.fromAnimate(image);
-
-			case "texture_noaa" | "textureatlas_noaa" | "tex_noaa":
-				spr.frames = FlxAnimateFrames.fromAnimate(image, null, true);
-
-			#end
-			case "packer" | "packeratlas" | "pac":
-				spr.frames = Paths.getPackerAtlas(image);
-
-			default:
-				spr.frames = Paths.getSparrowAtlas(image);
-		}
-	}
-
-	public static function resetTextTag(tag:String) {
-		if(!PlayState.instance.modchartTexts.exists(tag))
-			return;
-
-		var pee:ModchartText = PlayState.instance.modchartTexts.get(tag);
-		pee.kill();
-		if(pee.wasAdded)
-			PlayState.instance.remove(pee, true);
-		
-		pee.destroy();
-		PlayState.instance.modchartTexts.remove(tag);
-	}
-
-	public static function resetSpriteTag(tag:String) {
-		if(!PlayState.instance.modchartSprites.exists(tag))
-			return;
-
-		var pee:ModchartSprite = PlayState.instance.modchartSprites.get(tag);
-		pee.kill();
-		if(pee.wasAdded)
-			PlayState.instance.remove(pee, true);
-		
-		pee.destroy();
-		PlayState.instance.modchartSprites.remove(tag);
-	}
-
 	public static function cancelTween(tag:String) {
 		if (PlayState.instance.modchartTweens.exists(tag)) {
 			var twn = PlayState.instance.modchartTweens.get(tag);
@@ -282,105 +226,6 @@ class Util
 			tmr.cancel();
 			tmr.destroy();
 			PlayState.instance.modchartTimers.remove(tag);
-		}
-	}
-
-	public static function getMouseClicked(button:String) {
-		return switch(button){
-			case 'middle': FlxG.mouse.justPressedMiddle;
-			case 'right': FlxG.mouse.justPressedRight;
-			default: FlxG.mouse.justPressed;
-		};
-	}
-	public static function getMousePressed(button:String) {
-		return switch(button){
-			case 'middle': FlxG.mouse.pressedMiddle;
-			case 'right': FlxG.mouse.pressedRight;
-			default: FlxG.mouse.pressed;
-		};
-	}
-	public static function getMouseReleased(button:String) {
-		return switch(button){
-			case 'middle': FlxG.mouse.justReleasedMiddle;
-			case 'right': FlxG.mouse.justReleasedRight;
-			default: FlxG.mouse.justReleased;
-		}
-	}
-	
-	public static function getFlxEaseByString(?ease:String):Float->Float
-	{
-		return (ease==null) ? FlxEase.linear : switch(ease.toLowerCase()) 
-		{
-			case 'backin': FlxEase.backIn;
-			case 'backinout': FlxEase.backInOut;
-			case 'backout': FlxEase.backOut;
-			case 'bouncein': FlxEase.bounceIn;
-			case 'bounceinout': FlxEase.bounceInOut;
-			case 'bounceout': FlxEase.bounceOut;
-			case 'circin': FlxEase.circIn;
-			case 'circinout': FlxEase.circInOut;
-			case 'circout': FlxEase.circOut;
-			case 'cubein': FlxEase.cubeIn;
-			case 'cubeinout': FlxEase.cubeInOut;
-			case 'cubeout': FlxEase.cubeOut;
-			case 'elasticin': FlxEase.elasticIn;
-			case 'elasticinout': FlxEase.elasticInOut;
-			case 'elasticout': FlxEase.elasticOut;
-			case 'expoin': FlxEase.expoIn;
-			case 'expoinout': FlxEase.expoInOut;
-			case 'expoout': FlxEase.expoOut;
-			case 'quadin': FlxEase.quadIn;
-			case 'quadinout': FlxEase.quadInOut;
-			case 'quadout': FlxEase.quadOut;
-			case 'quartin': FlxEase.quartIn;
-			case 'quartinout': FlxEase.quartInOut;
-			case 'quartout': FlxEase.quartOut;
-			case 'quintin': FlxEase.quintIn;
-			case 'quintinout': FlxEase.quintInOut;
-			case 'quintout': FlxEase.quintOut;
-			case 'sinein': FlxEase.sineIn;
-			case 'sineinout': FlxEase.sineInOut;
-			case 'sineout': FlxEase.sineOut;
-			case 'smoothstepin': FlxEase.smoothStepIn;
-			case 'smoothstepinout': FlxEase.smoothStepInOut;
-			case 'smoothstepout': FlxEase.smoothStepInOut;
-			case 'smootherstepin': FlxEase.smootherStepIn;
-			case 'smootherstepinout': FlxEase.smootherStepInOut;
-			case 'smootherstepout': FlxEase.smootherStepOut;
-			default: FlxEase.linear;
-		};
-	}
-
-	public static function blendModeFromString(blend:String):BlendMode
-	{
-		return switch(blend.toLowerCase()) 
-		{
-			case 'add': ADD;
-			case 'alpha': ALPHA;
-			case 'darken': DARKEN;
-			case 'difference': DIFFERENCE;
-			case 'erase': ERASE;
-			case 'hardlight': HARDLIGHT;
-			case 'invert': INVERT;
-			case 'layer': LAYER;
-			case 'lighten': LIGHTEN;
-			case 'multiply': MULTIPLY;
-			case 'overlay': OVERLAY;
-			case 'screen': SCREEN;
-			case 'shader': SHADER;
-			case 'subtract': SUBTRACT;
-			default: NORMAL;
-		};
-	}
-
-	public static function cameraFromString(cam:String):FlxCamera {
-		return switch(cam.toLowerCase()) {
-			case 'camhud' | 'hud': 
-				PlayState.instance.camHUD;
-			case 'camother' | 'other': 
-				PlayState.instance.camOther;
-			default: 
-				PlayState.instance.camGame;
 		}
 	}
 
@@ -443,33 +288,5 @@ class DebugText extends FlxText
 			destroy();
 		}
 		else if(disableTime < 1) alpha = disableTime;
-	}
-
-}
-
-
-class ModchartSprite extends FlxSprite
-{
-	public var wasAdded:Bool = false;
-	//public var isInFront:Bool = false;
-	public var animOffsets:Map<String, Array<Float>> = new Map<String, Array<Float>>();
-
-	public function new(?x:Float = 0, ?y:Float = 0, ?Graphic:FlxGraphicAsset)
-	{
-		super(x, y, Graphic);
-		//antialiasing = ClientPrefs.globalAntialiasing;
-	}
-}
-
-class ModchartText extends FlxText
-{
-	public var wasAdded:Bool = false;
-	public function new(x:Float, y:Float, text:String, width:Float)
-	{
-		super(x, y, width, text, 16);
-		setFormat(Paths.font("vcr.ttf"), 16, 0xFFFFFFFF, CENTER, FlxTextBorderStyle.OUTLINE, 0xFF000000);
-		cameras = [PlayState.instance.camHUD];
-		scrollFactor.set();
-		borderSize = 2;
 	}
 }

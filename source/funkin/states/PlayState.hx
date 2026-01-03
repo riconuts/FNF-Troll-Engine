@@ -482,12 +482,8 @@ class PlayState extends MusicBeatState
 	
 	// used by lua scripts
 	public var modchartTweens:Map<String, FlxTween> = new Map();
-	public var modchartSprites:Map<String, ModchartSprite> = new Map();
 	public var modchartTimers:Map<String, FlxTimer> = new Map();
 	public var modchartSounds:Map<String, FlxSound> = new Map();
-	public var modchartTexts:Map<String, ModchartText> = new Map();
-	public var modchartSaves:Map<String, FlxSave> = new Map();
-	public var modchartObjects:Map<String, FlxSprite> = new Map();
 
 	public var notetypeScripts:Map<String, FunkinHScript> = []; // custom notetypes for scriptVer '1'
 	public var hudSkinScripts:Map<String, FunkinHScript> = []; // Doing this so you can do shit like i.e having it swap between pixel and normal HUD
@@ -1248,13 +1244,6 @@ class PlayState extends MusicBeatState
 		startCharacterPos(char, gfCheck);
 	}
 
-	public function getLuaObject(tag:String, ?checkForTextsToo:Bool){
-		if (modchartObjects.exists(tag)) return modchartObjects.get(tag);
-		if (modchartSprites.exists(tag)) return modchartSprites.get(tag);
-		if (checkForTextsToo==true && modchartTexts.exists(tag)) return modchartTexts.get(tag);
-		return null;
-	}
-
 	function startCharacterPos(char:Character, ?gfCheck:Bool = false, ?startBopBeat:Float) {
 		if (startBopBeat != null) char.nextDanceBeat = startBopBeat;
 
@@ -1485,7 +1474,6 @@ class PlayState extends MusicBeatState
 			if(daNote.strumTime < time)
 			{
 				daNote.ignoreNote = true;
-				modchartObjects.remove('note${daNote.ID}');
 				for (field in playfields)
 					field.removeNote(daNote);
 
@@ -1755,8 +1743,6 @@ class PlayState extends MusicBeatState
 				swagNote.sustainLength = Math.max(0, noteData.sustainLength <= Conductor.stepCrotchet ? noteData.sustainLength : (susSegments + 1) * Conductor.stepCrotchet); // +1 because hold end	
 				swagNote.ID = notes.length;
 
-				modchartObjects.set('note${swagNote.ID}', swagNote);
-
 				////
 				if (section.altAnim) {
 					swagNote.characterHitAnimSuffix = '-alt';
@@ -1790,7 +1776,6 @@ class PlayState extends MusicBeatState
 					sustainNote.realColumn = realColumn;
 					swagNote.mustPress = mustPress;
 					sustainNote.ID = notes.length;
-					modchartObjects.set('note${sustainNote.ID}', sustainNote);
 
 					sustainNote.characterHitAnimSuffix = swagNote.characterHitAnimSuffix;
 					sustainNote.characterMissAnimSuffix = swagNote.characterMissAnimSuffix;
@@ -2187,7 +2172,6 @@ class PlayState extends MusicBeatState
 	}
 
 	function field_noteRemoved(note:Note, field:PlayField) {
-		modchartObjects.remove('note${note.ID}');
 		allNotes.remove(note);
 		unspawnNotes.remove(note);
 		notes.remove(note);
