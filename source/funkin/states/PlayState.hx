@@ -482,12 +482,8 @@ class PlayState extends MusicBeatState
 	
 	// used by lua scripts
 	public var modchartTweens:Map<String, FlxTween> = new Map();
-	public var modchartSprites:Map<String, ModchartSprite> = new Map();
 	public var modchartTimers:Map<String, FlxTimer> = new Map();
 	public var modchartSounds:Map<String, FlxSound> = new Map();
-	public var modchartTexts:Map<String, ModchartText> = new Map();
-	public var modchartSaves:Map<String, FlxSave> = new Map();
-	public var modchartObjects:Map<String, FlxSprite> = new Map();
 
 	public var notetypeScripts:Map<String, FunkinHScript> = []; // custom notetypes for scriptVer '1'
 	public var hudSkinScripts:Map<String, FunkinHScript> = []; // Doing this so you can do shit like i.e having it swap between pixel and normal HUD
@@ -554,34 +550,34 @@ class PlayState extends MusicBeatState
 
 		print('\nCreating PlayState\n');
 		Highscore.loadData();
-		
-		updateSongPos = false;
-		songSyncMode = SongSyncMode.fromString(ClientPrefs.songSyncMode);
 
-		Conductor.cleanup();
-		Wife3.timeScale = Wife3.judgeScales.get(ClientPrefs.judgeDiff);
-		PBot.missThreshold = Math.max(160, ClientPrefs.hitWindow);
+		PauseSubState.resetVariables();
+		GameOverSubstate.resetVariables();
 
-		Paths.getAllStrings();
-		
-		stats = new Stats(ClientPrefs.accuracyCalc, ClientPrefs.gradeSet);
-
-		judgeManager = new JudgmentManager(ClientPrefs.useEpics);
-		judgeManager.judgeTimescale = Wife3.timeScale;
-		
-		modManager = new ModManager(this);
-
-		OptionsSubstate.resetRestartRecomendations();
-		Paths.clearStoredMemory();
 		#if MODS_ALLOWED
 		Paths.preLoadContent = [];
 		Paths.postLoadContent = [];
 		Paths.pushGlobalContent();
 		#end
 
-		//// Reset to default
-		PauseSubState.songName = 'breakfast';
-		GameOverSubstate.resetVariables();
+		OptionsSubstate.resetRestartRecomendations();
+		Paths.getAllStrings();
+		Paths.clearStoredMemory();
+
+		Conductor.cleanup();
+		
+		updateSongPos = false;
+		songSyncMode = SongSyncMode.fromString(ClientPrefs.songSyncMode);
+
+		Wife3.timeScale = Wife3.judgeScales.get(ClientPrefs.judgeDiff);
+		PBot.missThreshold = Math.max(160, ClientPrefs.hitWindow);
+
+		judgeManager = new JudgmentManager(ClientPrefs.useEpics);
+		judgeManager.judgeTimescale = Wife3.timeScale;
+
+		stats = new Stats(ClientPrefs.accuracyCalc, ClientPrefs.gradeSet);
+		
+		modManager = new ModManager(this);
 
 		////
 		FlxG.fixedTimestep = false;
@@ -617,8 +613,8 @@ class PlayState extends MusicBeatState
 			perfectMode = ClientPrefs.getGameplaySetting('perfect', perfectMode);
 			instaRespawn = ClientPrefs.getGameplaySetting('instaRespawn', instaRespawn);
 			cpuControlled = ClientPrefs.getGameplaySetting('botplay', cpuControlled);
-			disableModcharts = ClientPrefs.getGameplaySetting('disableModcharts', false);
-			noDropPenalty = ClientPrefs.getGameplaySetting('noDropPenalty', false);
+			disableModcharts = ClientPrefs.getGameplaySetting('disableModcharts', disableModcharts);
+			noDropPenalty = ClientPrefs.getGameplaySetting('noDropPenalty', noDropPenalty);
 			centerNotefield = ClientPrefs.centerNotefield;
 
 			#if tgt
@@ -628,14 +624,12 @@ class PlayState extends MusicBeatState
 			healthDrain = 0.0;
 			opponentHPDrain = 0.0;
 		}
-
-		FlxG.timeScale = playbackRate;
 		
 		if (perfectMode){
 			practiceMode = false;
 			instakillOnMiss = true;
 		}
-		saveScore = true; //!cpuControlled;
+		//saveScore = !cpuControlled;
 
 		//// Camera shit
 		camGame = new FlxCamera();
@@ -657,8 +651,8 @@ class PlayState extends MusicBeatState
 
 		FlxG.cameras.setDefaultDrawTarget(camGame, true);
 
-		camFollow = prevCamFollow != null ? prevCamFollow : new FlxPoint();
-		camFollowPos = prevCamFollowPos != null ? prevCamFollowPos : new FlxObject();
+		camFollow = prevCamFollow ?? new FlxPoint();
+		camFollowPos = prevCamFollowPos ?? new FlxObject();
 
 		camGame.follow(camFollowPos, LOCKON, 1);
 		camGame.focusOn(camFollow);
@@ -689,20 +683,11 @@ class PlayState extends MusicBeatState
 			trace('No metadata for $songId. Maybe add some?');
 
 		if (isStoryMode) {
-			postSongVideo = Paths.formatToSongPath('$songId-end');
+			postSongVideo = '$songId-end';
 			skipArrowStartTween = (playlistIndex > 0);
 		}
 
-		for (groupName in Reflect.fields(SONG.tracks)) {
-			var trackGroup:Array<String> = Reflect.field(SONG.tracks, groupName);
-			for (trackName in trackGroup) {
-				if (trackMap.exists(trackName))
-					continue;
-
-				trackMap.set(trackName, null);
-				songTrackNames.push(trackName);
-			}
-		}
+		songTrackNames = getChartTrackNames();
 		
 		PlayState.keyCount = SONG.keyCount;
 		StrumNote.refreshKeyAnimations(keyCount);
@@ -1256,13 +1241,6 @@ class PlayState extends MusicBeatState
 		startCharacterPos(char, gfCheck);
 	}
 
-	public function getLuaObject(tag:String, ?checkForTextsToo:Bool){
-		if (modchartObjects.exists(tag)) return modchartObjects.get(tag);
-		if (modchartSprites.exists(tag)) return modchartSprites.get(tag);
-		if (checkForTextsToo==true && modchartTexts.exists(tag)) return modchartTexts.get(tag);
-		return null;
-	}
-
 	function startCharacterPos(char:Character, ?gfCheck:Bool = false, ?startBopBeat:Float) {
 		if (startBopBeat != null) char.nextDanceBeat = startBopBeat;
 
@@ -1493,7 +1471,6 @@ class PlayState extends MusicBeatState
 			if(daNote.strumTime < time)
 			{
 				daNote.ignoreNote = true;
-				modchartObjects.remove('note${daNote.ID}');
 				for (field in playfields)
 					field.removeNote(daNote);
 
@@ -1575,30 +1552,38 @@ class PlayState extends MusicBeatState
 		if (trackMap.get(trackName) != null)
 			return trackMap.get(trackName);
 
-		if (sndAsset == null) sndAsset = {
-			if (song != null)
-				song.getTrackSound(trackName);
-			else
-				Paths.track(songId, trackName);
-		}
+		sndAsset ??= (song != null) ? song.getTrackSound(trackName) : Paths.track(songId, trackName);
 
 		if (sndAsset == null)
 			trace('WARNING: Failed to load track $trackName');
 
-		var newTrack = new FlxSound().loadEmbedded(sndAsset);
+		var newTrack = FlxG.sound.load(sndAsset);
 		//newTrack.volume = 0.0;
 		newTrack.pitch = playbackRate;
 		newTrack.filter = sndFilter;
 		newTrack.effect = sndEffect;
 		newTrack.context = MUSIC;
-		newTrack.exists = true; // So it doesn't get recycled
-		FlxG.sound.list.add(newTrack);
 		
 		trackMap.set(trackName, newTrack);
 		tracks.push(newTrack);
 
 		return newTrack;
 	}
+
+	private function getChartTrackNames():Array<String> {
+		var list = [];
+		for (groupName in Reflect.fields(SONG.tracks)) {
+			var trackGroup:Array<String> = Reflect.field(SONG.tracks, groupName);
+			for (trackName in trackGroup) {
+				if (!list.contains(trackName))
+					list.push(trackName);
+			}
+		}
+		return list;
+	}
+
+	inline function makeTrackInstances(nameArray:Array<String>):Array<FlxSound>
+		return nameArray==null ? [] : [for (name in nameArray) addTrack(name)];
 
 	private function generateSong():Void
 	{
@@ -1631,35 +1616,29 @@ class PlayState extends MusicBeatState
 		Conductor.tracks = this.tracks;
 		Conductor.pitch = this.playbackRate;
 
-		inline function makeTrackInstances(nameArray:Array<String>):Array<FlxSound>
-			return nameArray==null ? [] : [for (name in nameArray) addTrack(name)];
-
 		instTracks = makeTrackInstances(SONG.tracks.inst);
 		playerTracks = makeTrackInstances(SONG.tracks.player);
 		opponentTracks = makeTrackInstances(SONG.tracks.opponent);
-
-		for (trackId in songTrackNames) {
-			if (trackMap.get(trackId) == null)
-				instTracks.push(addTrack(trackId));
-		}
-
-		hitsound = new FlxSound().loadEmbedded(Paths.sound("hitsound"));
-		hitsound.exists = true;
-		FlxG.sound.list.add(hitsound);
 
 		if (playerField != null)
 			playerField.tracks = playerTracks;
 		if (dadField != null)
 			dadField.tracks = opponentTracks;
 
+		for (trackId in songTrackNames) {
+			if (trackMap.get(trackId) == null)
+				instTracks.push(addTrack(trackId));
+		}
+
 		inst = instTracks[0];
 		vocals = playerTracks[0];
 
-		songLength = inst.length;
-		inst.onComplete = function() {
-			trace("song ended!?");
-			finishSong(false);
-		};
+		songLength = 0;
+		for (track in trackMap)
+			songLength = Math.max(songLength, track.length); 
+
+		hitsound = FlxG.sound.load(Paths.sound("hitsound"));
+		hitsound.exists = true;
 		
 		//// get note types to load
 		var noteTypeMap:Map<String, Bool> = [];
@@ -1761,8 +1740,6 @@ class PlayState extends MusicBeatState
 				swagNote.sustainLength = Math.max(0, noteData.sustainLength <= Conductor.stepCrotchet ? noteData.sustainLength : (susSegments + 1) * Conductor.stepCrotchet); // +1 because hold end	
 				swagNote.ID = notes.length;
 
-				modchartObjects.set('note${swagNote.ID}', swagNote);
-
 				////
 				if (section.altAnim) {
 					swagNote.characterHitAnimSuffix = '-alt';
@@ -1796,7 +1773,6 @@ class PlayState extends MusicBeatState
 					sustainNote.realColumn = realColumn;
 					swagNote.mustPress = mustPress;
 					sustainNote.ID = notes.length;
-					modchartObjects.set('note${sustainNote.ID}', sustainNote);
 
 					sustainNote.characterHitAnimSuffix = swagNote.characterHitAnimSuffix;
 					sustainNote.characterMissAnimSuffix = swagNote.characterMissAnimSuffix;
@@ -2193,7 +2169,6 @@ class PlayState extends MusicBeatState
 	}
 
 	function field_noteRemoved(note:Note, field:PlayField) {
-		modchartObjects.remove('note${note.ID}');
 		allNotes.remove(note);
 		unspawnNotes.remove(note);
 		notes.remove(note);

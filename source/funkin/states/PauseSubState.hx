@@ -19,7 +19,16 @@ import flixel.util.FlxStringUtil;
 class PauseSubState extends MusicBeatSubstate
 {
 	public static var instance:PauseSubState = null;
+
+	/** 
+		Song to play on the pause menu. 
+		If `null` then no music will be played.
+	**/
 	public static var songName:Null<String> = null;
+
+	public static function resetVariables() {
+		songName = 'breakfast';
+	}
 
 	public var menu:AlphabetMenu;
 
