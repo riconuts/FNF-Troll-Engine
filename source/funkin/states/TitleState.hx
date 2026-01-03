@@ -38,7 +38,7 @@ class TitleState extends MusicBeatState
 		return swagGoodArray;
 	}
 
-	var intro:IntroSequenceGroup;
+	var intro:IntroSequence;
 
 	var logoBl:TitleLogo;
 	var titleText:FlxSprite;
@@ -173,7 +173,7 @@ class TitleState extends MusicBeatState
 		}else{
 			initialized = true;
 
-			intro = new IntroSequenceGroup();
+			intro = new IntroSequence();
 			intro.camera = camHUD;
 			add(intro);
 			
@@ -497,7 +497,7 @@ class TitleLogo extends FlxSprite
 	}
 }
 
-class IntroSequenceGroup extends FlxTypedGroup<FlxBasic> {
+class IntroSequence extends FlxTypedGroup<FlxBasic> {
 	var bg:FlxSprite;
 	var textGroup:FlxTypedGroup<Alphabet>;
 
@@ -566,13 +566,13 @@ class IntroSequenceGroup extends FlxTypedGroup<FlxBasic> {
 
 	////
 	var introEvents:Array<Array<Dynamic>> = [];
-	public function queueOnTime(time:Float, func:() -> Void)
+	public function queueOnTime(time:Float, func:Void -> Void)
 		introEvents.push([time, func]);
 
-	public function queueOnStep(step:Float, func:() -> Void)
+	public function queueOnStep(step:Float, func:Void -> Void)
 		queueOnTime(Conductor.stepToMs(step), func);
 
-	public function queueOnBeat(beat:Float, func:() -> Void)
+	public function queueOnBeat(beat:Float, func:Void -> Void)
 		queueOnStep(beat * 4, func);
 
 	public function queueNewLineOnBeat(beat:Float, text:String, offset:Float = 0)
