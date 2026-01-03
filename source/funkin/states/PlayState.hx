@@ -588,8 +588,6 @@ class PlayState extends MusicBeatState
 
 		MusicBeatState.stopMenuMusic();
 
-		updateKeybinds();
-
 		speedChanges.push({
 			position: -6000 * 0.45,
 			startTime: -6000,
@@ -692,14 +690,11 @@ class PlayState extends MusicBeatState
 		songTrackNames = getChartTrackNames();
 		
 		PlayState.keyCount = SONG.keyCount;
-		StrumNote.defaultStaticAnimNames = ['arrowLEFT', 'arrowDOWN', 'arrowUP', 'arrowRIGHT']; 
-		StrumNote.defaultPressAnimNames = ["left press", "down press", "up press", "right press"];
-		StrumNote.defaultConfirmAnimNames = ["left confirm", "down confirm", "up confirm", "right confirm"];
-		Note.defaultNoteAnimNames = ['purple0', 'blue0', 'green0', 'red0'];
-		Note.defaultHoldAnimNames = ['purple hold piece', 'blue hold piece', 'green hold piece', 'red hold piece'];
-		Note.defaultTailAnimNames = ['purple hold end', 'blue hold end', 'green hold end', 'red hold end'];
-		Note.spriteScale = (4 / (keyCount < 4 ? 4 : keyCount)) * 0.7;
-		Note.swagWidth = Note.spriteScale * 160;
+		StrumNote.refreshKeyAnimations(keyCount);
+		Note.refreshKeyAnimations(keyCount);
+
+		updateKeybinds();
+
 		/**
 		 * Note texture asset names
 		 * The quant prefix gets handled by the Note class
@@ -1099,11 +1094,13 @@ class PlayState extends MusicBeatState
 		debugKeysBotplay = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('botplay'));
 
 		keysArray = [
-			ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_left')),
-			ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_down')),
-			ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_up')),
-			ClientPrefs.copyKey(ClientPrefs.keyBinds.get('note_right'))
+			for (i in 0...keyCount) {
+				ClientPrefs.copyKey(ClientPrefs.keyBinds.get('${keyCount}_key_${i}'));
+			}
 		];
+
+		// trace(keysArray);
+		
 
 		buttonsArray = [
 			ClientPrefs.copyKey(ClientPrefs.buttonBinds.get('note_left')),

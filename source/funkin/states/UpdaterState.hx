@@ -13,6 +13,7 @@ import openfl.net.URLLoader;
 import flixel.ui.FlxBar;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
+import Main;
 
 import funkin.api.Github;
 

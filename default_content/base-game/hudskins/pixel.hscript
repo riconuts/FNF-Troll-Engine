@@ -14,6 +14,8 @@ var curClockTxt = null;
 
 var isSetup = false;
 
+var noteScale = (Note.spriteScales[PlayState.keyCount - 1] / 0.7);
+
 ///// hud skin script functions /////
 
 introSnds = ["intro3-pixel","intro2-pixel","intro1-pixel","introGo-pixel"];
@@ -159,8 +161,20 @@ function setupNoteTexture(note:Note){
 	else
 		note.reloadNote('NOTE_assets', note.texSuffix, 'pixelUI', 4, 5);
 
-	note.scale.set(6, 6);
+	note.scale.set(noteScale * 6.0, noteScale * 6.0);
 	note.antialiasing = false;
+}
+
+function getStaticAnimationFrames(data:Int){
+	return NoteObject.getAnimsInd(data, StrumNote.currentStaticAnimNames, StrumNote.defaultStaticAnimNames[3]);
+}
+
+function getPressedAnimationFrames(data:Int){
+	return NoteObject.getAnimsInd(data, StrumNote.currentPressAnimNames,  StrumNote.defaultPressAnimNames[3]);
+}
+
+function getConfirmedAnimationFrames(data:Int){
+	return NoteObject.getAnimsInd(data, StrumNote.currentConfirmAnimNames, StrumNote.defaultConfirmAnimNames[3]);
 }
 
 function setupReceptorTexture(strum:StrumNote){
@@ -187,13 +201,13 @@ function setupReceptorTexture(strum:StrumNote){
 
 	var graphic = Paths.image("pixelUI/" + br);
 	strum.loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
-	strum.animation.add('static', [strum.noteData]);
-	strum.animation.add('pressed', [strum.noteData + 4, strum.noteData + 8], 12, false);
-	strum.animation.add('confirm', [strum.noteData + 12, strum.noteData + 16], 16, false);
+	strum.animation.add('static', [getStaticAnimationFrames(strum.noteData)]);
+	strum.animation.add('pressed', [getPressedAnimationFrames(strum.noteData) + 4, getPressedAnimationFrames(strum.noteData) + 8], 12, false);
+	strum.animation.add('confirm', [getConfirmedAnimationFrames(strum.noteData) + 12, getConfirmedAnimationFrames(strum.noteData) + 16], 16, false);
 	strum.playAnim("static", true);
 	strum.antialiasing = false;
 
-	strum.scale.set(6, 6);    
+	strum.scale.set(noteScale * 6.0, noteScale * 6.0);    
 	strum.updateHitbox();
 
 	strum.defScale.x = strum.scale.x;
@@ -221,8 +235,8 @@ function preSetupNoteSplash(x, y, column, texture, hueColor, satColor, brtColor,
 
 function loadSplashAnims(texture){
 	this.frames = Paths.getSparrowAtlas('pixelUI/' + texture);
-	this.animation.addByPrefix("splash", "note splash " + suffixes[column % 4] + " " + FlxG.random.int(1, 2), 24, false);
-	this.scale.set(5, 5);
+	this.animation.addByPrefix("splash", "note splash " + suffixes[NoteObject.getAnimsInd(column, Note.currentNoteAnimNames, Note.defaultNoteAnimNames[3])] + " " + FlxG.random.int(1, 2), 24, false);
+	this.scale.set(noteScale * 5.0, noteScale * 5.0);
 	this.antialiasing = false;
 	this.updateHitbox();
 	return Function_Stop;

@@ -1,11 +1,9 @@
 package funkin.states.options;
-// too lazy to finish merging this w the keyboard version rn
 
+// too lazy to finish merging this w the keyboard version rn
 import funkin.states.options.BindsBullshit.KeyboardNavHelper;
 import funkin.states.options.BindsBullshit.BindButton;
-
 import funkin.CoolUtil.overlapsMouse as overlaps;
-
 import flixel.input.gamepad.FlxGamepadInputID;
 import flixel.math.FlxMath;
 import flixel.addons.ui.FlxUI9SliceSprite;
@@ -21,28 +19,13 @@ inline function getButtonName(id:Int)
 	return FlxGamepadInputID.toStringMap.exists(id) ? FlxGamepadInputID.toStringMap.get(id) : "Unknown";
 
 inline function getJustPressed():Int
-	return FlxG.gamepads.firstActive==null ? -1 : FlxG.gamepads.firstActive.firstJustPressedID();
+	return FlxG.gamepads.firstActive == null ? -1 : FlxG.gamepads.firstActive.firstJustPressedID();
 
-class ButtonBindsSubstate extends MusicBeatSubstate  
-{
+class ButtonBindsSubstate extends MusicBeatSubstate implements IBindsMenu<FlxGamepadInputID> {
 	// if an option is in this list, then atleast ONE key will have to be bound.
 	var forcedBind:Array<String> = ["ui_up", "ui_down", "ui_left", "ui_right", "accept", "back",];
 
-	var binds:Array<Array<String>> = [
-		[Paths.getString('controls_gameplay')],
-		[Paths.getString('control_note_left'), 'note_left'],
-		[Paths.getString('control_note_down'), 'note_down'],
-		[Paths.getString('control_note_up'), 'note_up'],
-		[Paths.getString('control_note_right'), 'note_right'],
-		/*
-		[Paths.getString('control_pause'), 'pause'],
-		[Paths.getString('control_reset'), 'reset'],
-
-		[Paths.getString('controls_ui')],
-		[Paths.getString('control_accept'), 'accept'],
-		[Paths.getString('control_back'), 'back'],
-		*/
-	];
+	var binds:Array<Array<String>> = [];
 
 	public var changedBind:(String, Int, FlxGamepadInputID) -> Void;
 
@@ -54,7 +37,7 @@ class ButtonBindsSubstate extends MusicBeatSubstate
 	var overCam:FlxCamera = new FlxCamera();
 	var scrollableCam:FlxCamera = new FlxCamera();
 
-	var camFollow = new FlxPoint(0, 0);
+	var camFollow = FlxPoint.get(0, 0);
 	var camFollowPos = new FlxObject(0, 0);
 
 	var bindIndex:Int = -1;
@@ -76,22 +59,73 @@ class ButtonBindsSubstate extends MusicBeatSubstate
 	var popupText:FlxText;
 	var unbindText:FlxText;
 
-	override public function create()
-	{
+	override public function new() {
+		super();
+		var buttonBinds:Array<Array<String>> = [[Paths.getString('controls_gameplay')],];
+
+		var directions:Array<Array<String>> = [
+			['Center'],
+			['Left', 'Right'],
+			['Left', 'Center', 'Right'],
+			['Left', 'Down', 'Up', 'Right'],
+			['Left', 'Down', 'Center', 'Up', 'Right'],
+			['Left', 'Down', 'Right', 'Left 2', 'Up', 'Right 2'],
+			['Left', 'Down', 'Right', 'Center', 'Left 2', 'Up', 'Right 2'],
+			['Left', 'Down', 'Up', 'Right', 'Left 2', 'Down 2', 'Up 2', 'Right 2'],
+			['Left', 'Down', 'Up', 'Right', 'Center', 'Left 2', 'Down 2', 'Up 2', 'Right 2'],
+			[
+				'Left',
+				'Down',
+				'Up',
+				'Right',
+				'Center',
+				'Center 2',
+				'Left 2',
+				'Down 2',
+				'Up 2',
+				'Right 2'
+			],
+		];
+
+		for (i in 0...10) {
+			buttonBinds.push(['${i + 1} Key']);
+			for (j in 0...i + 1) {
+				buttonBinds.push(['${directions[i][j]}', '${i + 1}_key_$j']);
+			}
+		}
+
+		flixel.addons.ui.U.clearArray(directions);
+
+		var otherBinds:Array<Array<String>> = [
+			[Paths.getString('control_pause'), 'pause'],
+			[Paths.getString('control_reset'), 'reset'],
+
+			[Paths.getString('controls_ui')],
+			[Paths.getString('control_accept'), 'accept'],
+			[Paths.getString('control_back'), 'back'],
+		];
+
+		binds = buttonBinds.concat(otherBinds);
+
+		flixel.addons.ui.U.clearArraySoft(buttonBinds);
+		flixel.addons.ui.U.clearArraySoft(otherBinds);
+	}
+
+	override public function create() {
 		super.create();
 
 		this.persistentUpdate = false;
 		this.destroySubStates = false;
-		
+
 		FlxG.cameras.add(cam, false);
 		FlxG.cameras.add(scrollableCam, false);
 		FlxG.cameras.add(overCam, false);
-		
+
 		cam.bgColor = 0;
 		scrollableCam.bgColor = 0;
-		overCam.bgColor = FlxColor.fromRGBFloat(0,0,0,.5);
+		overCam.bgColor = FlxColor.fromRGBFloat(0, 0, 0, .5);
 		overCam.alpha = 0;
-		
+
 		var backdropGraphic = Paths.image("optionsMenu/backdrop");
 		var backdropSlice = [22, 22, 89, 89];
 
@@ -100,7 +134,6 @@ class ButtonBindsSubstate extends MusicBeatSubstate
 		optionMenu.cameras = [cam];
 		optionMenu.screenCenter(XY);
 		add(optionMenu);
-
 
 		scrollableCam.width = Std.int(optionMenu.width);
 		scrollableCam.height = Std.int(optionMenu.height);
@@ -112,8 +145,7 @@ class ButtonBindsSubstate extends MusicBeatSubstate
 
 		scrollableCam.follow(camFollowPos);
 		var group = new FlxTypedGroup<FlxObject>();
-		
-		
+
 		var daY:Float = 0;
 		var idx:Int = 0;
 		for (data in binds) {
@@ -129,23 +161,22 @@ class ButtonBindsSubstate extends MusicBeatSubstate
 				text.setFormat(Paths.font("quanticob.ttf"), 32, 0xFFFFFFFF, FlxTextAlign.LEFT);
 				group.add(text);
 				daY += text.height;
-
-			}else {
+			} else {
 				// its a bind
 				var buttArray:Array<BindButtonC> = [];
 				var internal:String = data[1];
 				internals.push(data[1]);
-				
+
 				var text = new FlxText(16, daY, 0, label, 16);
 				text.setFormat(Paths.font("quantico.ttf"), 28, 0xFFFFFFFF, FlxTextAlign.LEFT);
 				text.cameras = [scrollableCam];
 				text.updateHitbox();
 
 				var height = Math.min(45, text.height + 12);
-				var drop:FlxUI9SliceSprite = new FlxUI9SliceSprite(text.x - 12, text.y, backdropGraphic, new Rectangle(0, 0, optionMenu.width - text.x - 8, height), backdropSlice);
+				var drop:FlxUI9SliceSprite = new FlxUI9SliceSprite(text.x - 12, text.y, backdropGraphic,
+					new Rectangle(0, 0, optionMenu.width - text.x - 8, height), backdropSlice);
 				drop.cameras = [scrollableCam];
 				text.y += (height - text.height) / 2;
-
 
 				var rect = new Rectangle(0, 0, 200, height - 10);
 				var binded = clientBinded.get(internal);
@@ -178,15 +209,16 @@ class ButtonBindsSubstate extends MusicBeatSubstate
 
 			idx++;
 		}
-		
+
 		//////
 		var text = new FlxText(16, daY, 0, Paths.getString("control_default"), 16);
 		text.cameras = [scrollableCam];
 		text.setFormat(Paths.font("quantico.ttf"), 28, 0xFFFFFFFF, FlxTextAlign.LEFT);
 		text.updateHitbox();
-		
+
 		var height = text.height + 12;
-		if (height < 45) height = 45;
+		if (height < 45)
+			height = 45;
 
 		resetBinds = new FlxUI9SliceSprite(text.x - 12, text.y, backdropGraphic, new Rectangle(0, 0, optionMenu.width - text.x - 8, height), backdropSlice);
 		resetBinds.cameras = [scrollableCam];
@@ -219,11 +251,11 @@ class ButtonBindsSubstate extends MusicBeatSubstate
 		popupTitle = new FlxText(popupDrop.x, popupDrop.y + 10, popupDrop.width, "Currently binding my penis", 16);
 		popupTitle.setFormat(Paths.font("quanticob.ttf"), 32, 0xFFFFFFFF, FlxTextAlign.CENTER);
 		popupTitle.cameras = [overCam];
-		
+
 		popupText = new FlxText(popupDrop.x, popupDrop.y + popupTitle.height, popupDrop.width, "Press key to bind\npress to unbind", 16);
 		popupText.setFormat(Paths.font("quantico.ttf"), 32, 0xFFFFFFFF, FlxTextAlign.CENTER);
 		popupText.cameras = [overCam];
-		
+
 		unbindText = new FlxText(popupDrop.x, popupDrop.y + 180, popupDrop.width, "(Note that this action needs atleast one key bound)", 16);
 		unbindText.setFormat(Paths.font("quantico.ttf"), 32, 0xFFFFFFFF, FlxTextAlign.CENTER);
 		unbindText.cameras = [overCam];
@@ -234,16 +266,17 @@ class ButtonBindsSubstate extends MusicBeatSubstate
 		add(unbindText);
 	}
 
-	override function destroy()
-	{
+	override function destroy() {
 		FlxG.cameras.remove(cam);
 		FlxG.cameras.remove(scrollableCam);
 		FlxG.cameras.remove(overCam);
 
+		camFollow.put();
+
 		return super.destroy();
 	}
 
-	function bind(bindIndex:Int, bindID:Int, key:FlxGamepadInputID){
+	function bind(bindIndex:Int, bindID:Int, key:FlxGamepadInputID) {
 		var opp = bindID == 0 ? 1 : 0;
 		var internal = internals[bindIndex];
 
@@ -252,18 +285,15 @@ class ButtonBindsSubstate extends MusicBeatSubstate
 		var binds:Array<FlxGamepadInputID> = clientBinded.get(internal);
 		if (binds[bindID] == key)
 			key = NONE;
-		else if (binds[opp] == key)
-		{
+		else if (binds[opp] == key) {
 			if (changedBind != null)
 				changedBind(internal, opp, NONE);
 			binds[opp] = NONE;
 			bindButtons[bindIndex][opp].bind = NONE;
 		}
 
-		if (forcedBind.contains(internal))
-		{
-			if (key == NONE && binds[opp] == NONE)
-			{
+		if (forcedBind.contains(internal)) {
+			if (key == NONE && binds[opp] == NONE) {
 				var defaults = clientDefaults.get(internal);
 				// atleast ONE needs to be bound, so use a default
 				if (defaults[bindID] == NONE)
@@ -289,7 +319,7 @@ class ButtonBindsSubstate extends MusicBeatSubstate
 
 	public function confirmBinding(key:FlxGamepadInputID) {
 		FlxG.sound.play(Paths.sound('confirmMenu'));
-				
+
 		bind(bindIndex, bindID, key);
 		ClientPrefs.saveBinds();
 		ClientPrefs.reloadControls();
@@ -304,7 +334,7 @@ class ButtonBindsSubstate extends MusicBeatSubstate
 
 	////
 
-	override function update(elapsed:Float){
+	override function update(elapsed:Float) {
 		cam.bgColor = FlxColor.interpolate(0x80000000, cam.bgColor, Math.exp(-elapsed * 6));
 
 		if (bindIndex == -1)
@@ -331,12 +361,12 @@ class ButtonBindsSubstate extends MusicBeatSubstate
 			updateKeyboard = true;
 			keyboardY--;
 		}
-		
+
 		if (controller.justPressed.DPAD_DOWN) {
 			updateKeyboard = true;
 			keyboardY++;
 		}
-		
+
 		if (controller.justPressed.DPAD_LEFT) {
 			updateKeyboard = true;
 			keyboardX--;
@@ -352,65 +382,56 @@ class ButtonBindsSubstate extends MusicBeatSubstate
 			FlxG.mouse.visible = false;
 
 			var prevSel = keyboardNavigation[prevY];
-			if (prevSel != null && prevSel.text != null){
+			if (prevSel != null && prevSel.text != null) {
 				prevSel.text.color = 0xFFFFFFFF;
 			}
 
-			keyboardY = FlxMath.wrap(keyboardY, 0, keyboardNavigation.length-1);
+			keyboardY = FlxMath.wrap(keyboardY, 0, keyboardNavigation.length - 1);
 			var curSel = keyboardNavigation[keyboardY];
 			curSel.text.color = 0xFFFFFF00;
 
 			selectionArrow.visible = true;
 
-			if (curSel.bindButtons != null){
-				keyboardX = FlxMath.wrap(keyboardX, 0, curSel.bindButtons.length-1);
-				
+			if (curSel.bindButtons != null) {
+				keyboardX = FlxMath.wrap(keyboardX, 0, curSel.bindButtons.length - 1);
+
 				////
 				var curButt = curSel.bindButtons[keyboardX];
 
 				selectionArrow.alpha = 1;
 				selectionArrow.angle = -90; // face right idk
-				selectionArrow.setPosition(
-					curButt.x - selectionArrow.width - 2,
-					curButt.y + (curButt.height - selectionArrow.height) / 2
-				);
-			}else{
+				selectionArrow.setPosition(curButt.x - selectionArrow.width - 2, curButt.y + (curButt.height - selectionArrow.height) / 2);
+			} else {
 				selectionArrow.alpha = 0;
 				selectionArrow.angle = 90; // face left idk
-				selectionArrow.setPosition(
-					curSel.text.x + curSel.text.width + 2,
-					curSel.text.y + (curSel.text.height - selectionArrow.height) / 2
-				);
+				selectionArrow.setPosition(curSel.text.x + curSel.text.width + 2, curSel.text.y + (curSel.text.height - selectionArrow.height) / 2);
 			}
 
 			camFollow.y = curSel.bg.y + curSel.bg.height / 2 - scrollableCam.height / 2;
 
-			//trace(keyboardY, keyboardX);
+			// trace(keyboardY, keyboardX);
 		}
 
 		if (controller.justPressed.Y)
 			resetSelectedBind();
 
-		if (controller.justPressed.A){
+		if (controller.justPressed.A) {
 			var curSel = keyboardNavigation[keyboardY];
 			var bindButton = curSel.bindButtons != null ? curSel.bindButtons[keyboardX] : null;
-			
+
 			if (bindButton != null)
 				startRebind(keyboardY, keyboardX, bindButton);
 			else if (curSel.onTextPress != null)
 				curSel.onTextPress();
 		}
-		
+
 		////////
 		var lerpVal = Math.exp(-elapsed * 12.0);
 		overCam.alpha = FlxMath.lerp(0, overCam.alpha, lerpVal);
-		
+
 		camFollow.y = FlxMath.bound(camFollow.y, 0, height);
 
-		camFollowPos.setPosition(
-			FlxMath.lerp(camFollow.x, camFollowPos.x, lerpVal), 
-			FlxMath.lerp(camFollow.y, camFollowPos.y, lerpVal)
-		);
+		camFollowPos.setPosition(FlxMath.lerp(camFollow.x, camFollowPos.x, lerpVal), FlxMath.lerp(camFollow.y, camFollowPos.y, lerpVal));
 		camFollowPos.y = FlxMath.bound(camFollowPos.y, 0, height);
 	}
 
@@ -426,25 +447,25 @@ class ButtonBindsSubstate extends MusicBeatSubstate
 		}
 	}
 
-	function startRebind(index:Int, id:Int, butt:BindButtonC){
+	function startRebind(index:Int, id:Int, butt:BindButtonC) {
 		var internal = internals[index];
 		var actionToBindTo:String = binds[butt.ID][0];
 		var currentBinded:FlxGamepadInputID = clientBinded.get(internal)[id];
 
 		bindID = id;
 		bindIndex = index;
-		
+
 		FNFGame.specialKeysEnabled = false;
-		
+
 		cancelKey = FlxGamepadInputID.NONE; // (currentBinded == BACKSPACE) ? FlxGamepadInputID.ESCAPE : FlxGamepadInputID.BACKSPACE;
 
 		// "CURRENTLY BINDING " + actionToBindTo.toUpperCase();
 		popupTitle.text = Paths.getString("control_binding")
 			.replace("{controlNameUpper}", actionToBindTo.toUpperCase())
-			.replace("{controlName}", actionToBindTo); 
+			.replace("{controlName}", actionToBindTo);
 
 		// 'Press any key to bind, or press [BACKSPACE] to cancel.';
-		popupText.text = Paths.getString("control_rebind").replace("{cancelKey}", '[${getButtonName(cancelKey)}]'); 
+		popupText.text = Paths.getString("control_rebind").replace("{cancelKey}", '[${getButtonName(cancelKey)}]');
 
 		// '\nPress [${InputFormatter.getButtonName(currentBinded)}] to unbind.';
 		if (currentBinded != NONE)
@@ -455,30 +476,30 @@ class ButtonBindsSubstate extends MusicBeatSubstate
 
 	function resetSelectedBind() {
 		var actionName:Null<String> = internals[keyboardY];
-		if (actionName != null){
+		if (actionName != null) {
 			var defaultBindKeys:Null<Array<FlxGamepadInputID>> = clientDefaults.get(actionName);
-			if (defaultBindKeys != null){
+			if (defaultBindKeys != null) {
 				var defaultKey:FlxGamepadInputID = defaultBindKeys[keyboardX];
 				var binded = bind(keyboardY, keyboardX, defaultKey);
-				FlxG.sound.play(Paths.sound(binded[keyboardX] == defaultKey ? 'confirmMenu' : 'cancelMenu') );
+				FlxG.sound.play(Paths.sound(binded[keyboardX] == defaultKey ? 'confirmMenu' : 'cancelMenu'));
 			}
 		}
 	}
 
-	function resetAllBinds(){
+	function resetAllBinds() {
 		// i hate haxeflixel lmao
-		for (key => val in clientDefaults){
+		for (key => val in clientDefaults) {
 			clientBinded.set(key, []);
-			for(i => v in val) {
+			for (i => v in val) {
 				if (changedBind != null)
 					changedBind(key, i, v);
 				clientBinded.get(key)[i] = v;
 			}
 		}
-		
-		for(index => fuck in bindButtons){
+
+		for (index => fuck in bindButtons) {
 			var internal = internals[index];
-			for(id => butt in fuck){
+			for (id => butt in fuck) {
 				butt.bind = clientBinded.get(internal)[id];
 			}
 		}

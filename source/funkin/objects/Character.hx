@@ -556,7 +556,7 @@ class Character extends FlxSprite
 
 	inline public static function getFieldColumnSingAnimation(column:Int, field:PlayField):String
 	{
-		return field.singAnimations[column % field.singAnimations.length];
+		return field.singAnimations[field.keyCount - 1][column % field.singAnimations.length];
 	}
 
 	inline public static function getNoteHitAnimation(note:Note, field:PlayField):String
